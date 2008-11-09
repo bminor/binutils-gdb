@@ -270,9 +270,10 @@ bsd_uthread_solib_unloaded (struct so_list *so)
 }
 
 static void
-bsd_uthread_mourn_inferior (void)
+bsd_uthread_mourn_inferior (struct target_ops *ops)
 {
-  find_target_beneath (bsd_uthread_ops_hack)->to_mourn_inferior ();
+  struct target_ops *beneath = find_target_beneath (bsd_uthread_ops_hack);
+  beneath->to_mourn_inferior (beneath);
   bsd_uthread_deactivate ();
 }
 

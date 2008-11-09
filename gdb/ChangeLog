@@ -1,5 +1,68 @@
 2008-11-09  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Kill pthread_ops_hack
+
+	* target.h (struct target_ops): Make to_attach, to_detach,
+	to_create_inferior and to_mourn_inferior accept a pointer
+    	to struct target_ops.
+	(target_attach, target_create_inferior, target_create_inferior):
+	Convert from macros to function.  Find the right target to
+	invoke a method of.
+	(find_default_attach, find_default_create_inferior): New parameter
+	ops.
+	* corefile.c (core_file_command): Pass target to to_detach.
+	* corelow.c (core_detach): Add 'ops' parameter.
+	* fork-child.c (fork_inferior): Return the pid.  Allow
+	init_trace_fun to be NULL.
+	* inf-ptrace (ptrace_ops_hack): Remove.
+	(inf_ptrace_him): Remove, moving all logic into....
+	(inf_ptrace_create_inferior): ... here.  Push the target
+	passed as parameter.
+	(inf_ptrace_mourn_inferior, inf_ptrace_attach, inf_ptrace_detach):
+	Push/pop target passed as parameter, no ptrace_ops_hack.
+	(inf_ptrace_target): Don't remember result.
+	* inferior.h (fork_inferior): Adjust prototype.
+	* linux-nat.c (linux_nat_create_inferior, linux_nat_attach)
+	(linux_nat_detach, linux_nat_mourn_inferior): New parameter ops.
+	Pass it to linux_ops target.
+	* linux-thread-db.c (thread_db_detach, thread_db_mourn_inferior):
+	New parameter ops. Pass it to the target beneath.
+	* remote.c (remote_mourn, extended_remote_mourn, remote_detach)
+	(extended_remote_create_inferior): New parameter ops. Pass it
+	further.
+	* target.c (debug_to_attach, debug_to_detach)
+	(debug_to_mourn_inferior): New parameter ops.
+	(target_create_inferior): New.
+	(update_current_target): Do not inherit to_attach, to_detach,
+	to_create_inferiour, to_mourn_inferior.  Do not default
+	to_detach and to_mourn_inferior.
+	(target_detach): Find the right target to use.
+	(target_mourn_inferior): New.
+	(find_default_attach, find_default_create_inferior): New parameter
+	ops.  Pass the found target when calling its method.
+	(init_dummy_target): Provide fallback definition of to_detach.
+	(target_attach): New.
+	(debug_to_attach, debug_to_detach, debug_to_create_inferior)
+	(debug_to_mourn_inferiour): New parameter ops.
+        * aix-thread.c: Adjust.
+        * bsd-uthread.c: Adjust.
+        * gnu-nat.c: Adjust.
+        * go32-nat.c: Adjust.
+        * hpux-thread.c: Adjust.
+        * inf-ttrace.c: Ajust.
+        * monitor.c: Adjust.
+        * nto-procfs.c: Adjust.
+        * procfs.c: Adjust.
+        * remote-m32r-sdi.c: Adjust.
+        * remote-mips.c: Adjust.
+        * remote-sim.c: Adjust.
+        * rs6000-nat.c: Adjust.
+        * sol-thread.c: Adjust.
+        * win32-nat.c: Adjust.
+	* dec-thread.c: Adjust.
+
+2008-11-09  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* thread.c (print_thread_info): Eliminate now useless checks
 	for exited threads.
 

@@ -118,7 +118,7 @@ escape_bang_in_quoted_argument (const char *shell_file)
 /* This function is NOT reentrant.  Some of the variables have been
    made static to ensure that they survive the vfork call.  */
 
-void
+int
 fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	       void (*traceme_fun) (void), void (*init_trace_fun) (int),
 	       void (*pre_trace_fun) (void), char *shell_file_arg)
@@ -408,11 +408,13 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   /* Now that we have a child process, make it our target, and
      initialize anything target-vector-specific that needs
      initializing.  */
-  (*init_trace_fun) (pid);
+  if (init_trace_fun)
+    (*init_trace_fun) (pid);
 
   /* We are now in the child process of interest, having exec'd the
      correct program, and are poised at the first instruction of the
      new program.  */
+  return pid;
 }
 
 /* Accept NTRAPS traps from the inferior.  */

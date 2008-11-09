@@ -662,8 +662,8 @@ inf_ttrace_him (int pid)
 }
 
 static void
-inf_ttrace_create_inferior (char *exec_file, char *allargs, char **env,
-			    int from_tty)
+inf_ttrace_create_inferior (struct target_ops *ops, char *exec_file, 
+			    char *allargs, char **env, int from_tty)
 {
   gdb_assert (inf_ttrace_num_lwps == 0);
   gdb_assert (inf_ttrace_num_lwps_in_syscall == 0);
@@ -676,7 +676,7 @@ inf_ttrace_create_inferior (char *exec_file, char *allargs, char **env,
 }
 
 static void
-inf_ttrace_mourn_inferior (void)
+inf_ttrace_mourn_inferior (struct target_ops *ops)
 {
   const int num_buckets = ARRAY_SIZE (inf_ttrace_page_dict.buckets);
   int bucket;
@@ -704,7 +704,7 @@ inf_ttrace_mourn_inferior (void)
 }
 
 static void
-inf_ttrace_attach (char *args, int from_tty)
+inf_ttrace_attach (struct target_ops *ops, char *args, int from_tty)
 {
   char *exec_file;
   pid_t pid;
@@ -769,7 +769,7 @@ inf_ttrace_attach (char *args, int from_tty)
 }
 
 static void
-inf_ttrace_detach (char *args, int from_tty)
+inf_ttrace_detach (struct target_ops *ops, char *args, int from_tty)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   int sig = 0;

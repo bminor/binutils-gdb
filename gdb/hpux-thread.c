@@ -144,9 +144,9 @@ hpux_thread_open (char *arg, int from_tty)
    and wait for the trace-trap that results from attaching.  */
 
 static void
-hpux_thread_attach (char *args, int from_tty)
+hpux_thread_attach (struct target_ops *ops, char *args, int from_tty)
 {
-  deprecated_child_ops.to_attach (args, from_tty);
+  deprecated_child_ops.to_attach (&deprecated_child_ops, args, from_tty);
 
   /* XXX - might want to iterate over all the threads and register them. */
 }
@@ -160,9 +160,9 @@ hpux_thread_attach (char *args, int from_tty)
    started via the normal ptrace (PTRACE_TRACEME).  */
 
 static void
-hpux_thread_detach (char *args, int from_tty)
+hpux_thread_detach (struct target_ops *ops, char *args, int from_tty)
 {
-  deprecated_child_ops.to_detach (args, from_tty);
+  deprecated_child_ops.to_detach (&deprecated_child_ops, args, from_tty);
 }
 
 /* Resume execution of process PID.  If STEP is nozero, then
@@ -431,10 +431,11 @@ hpux_thread_notice_signals (ptid_t ptid)
 /* Fork an inferior process, and start debugging it with /proc.  */
 
 static void
-hpux_thread_create_inferior (char *exec_file, char *allargs, char **env,
-			     int from_tty)
+hpux_thread_create_inferior (struct target_ops *ops, char *exec_file,
+			     char *allargs, char **env, int from_tty)
 {
-  deprecated_child_ops.to_create_inferior (exec_file, allargs, env, from_tty);
+  deprecated_child_ops.to_create_inferior (&deprecated_child_ops, 
+					   exec_file, allargs, env, from_tty);
 
   if (hpux_thread_active)
     {
@@ -487,7 +488,7 @@ hpux_thread_new_objfile (struct objfile *objfile)
 static void
 hpux_thread_mourn_inferior (void)
 {
-  deprecated_child_ops.to_mourn_inferior ();
+  deprecated_child_ops.to_mourn_inferior (&deprecated_child_ops);
 }
 
 /* Mark our target-struct as eligible for stray "run" and "attach" commands.  */

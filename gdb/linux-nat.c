@@ -1317,7 +1317,8 @@ lin_lwp_attach_lwp (ptid_t ptid)
 }
 
 static void
-linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
+linux_nat_create_inferior (struct target_ops *ops, 
+			   char *exec_file, char *allargs, char **env,
 			   int from_tty)
 {
   int saved_async = 0;
@@ -1364,7 +1365,7 @@ linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
     }
 #endif /* HAVE_PERSONALITY */
 
-  linux_ops->to_create_inferior (exec_file, allargs, env, from_tty);
+  linux_ops->to_create_inferior (ops, exec_file, allargs, env, from_tty);
 
 #ifdef HAVE_PERSONALITY
   if (personality_set)
@@ -1382,7 +1383,7 @@ linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
 }
 
 static void
-linux_nat_attach (char *args, int from_tty)
+linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
 {
   struct lwp_info *lp;
   int status;
@@ -1390,7 +1391,7 @@ linux_nat_attach (char *args, int from_tty)
 
   /* FIXME: We should probably accept a list of process id's, and
      attach all of them.  */
-  linux_ops->to_attach (args, from_tty);
+  linux_ops->to_attach (ops, args, from_tty);
 
   if (!target_can_async_p ())
     {
@@ -1571,7 +1572,7 @@ detach_callback (struct lwp_info *lp, void *data)
 }
 
 static void
-linux_nat_detach (char *args, int from_tty)
+linux_nat_detach (struct target_ops *ops, char *args, int from_tty)
 {
   int pid;
   int status;
@@ -1612,7 +1613,7 @@ linux_nat_detach (char *args, int from_tty)
 
   pid = GET_PID (inferior_ptid);
   inferior_ptid = pid_to_ptid (pid);
-  linux_ops->to_detach (args, from_tty);
+  linux_ops->to_detach (ops, args, from_tty);
 
   if (target_can_async_p ())
     drain_queued_events (pid);
@@ -3176,7 +3177,7 @@ linux_nat_kill (void)
 }
 
 static void
-linux_nat_mourn_inferior (void)
+linux_nat_mourn_inferior (struct target_ops *ops)
 {
   /* Destroy LWP info; it's no longer valid.  */
   init_lwp_list ();
@@ -3186,7 +3187,7 @@ linux_nat_mourn_inferior (void)
       /* Normal case, no other forks available.  */
       if (target_can_async_p ())
 	linux_nat_async (NULL, 0);
-      linux_ops->to_mourn_inferior ();
+      linux_ops->to_mourn_inferior (ops);
     }
   else
     /* Multi-fork case.  The current inferior_ptid has exited, but

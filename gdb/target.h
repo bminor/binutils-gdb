@@ -327,9 +327,9 @@ struct target_ops
        to xfree everything (including the "struct target_ops").  */
     void (*to_xclose) (struct target_ops *targ, int quitting);
     void (*to_close) (int);
-    void (*to_attach) (char *, int);
+    void (*to_attach) (struct target_ops *ops, char *, int);
     void (*to_post_attach) (int);
-    void (*to_detach) (char *, int);
+    void (*to_detach) (struct target_ops *ops, char *, int);
     void (*to_disconnect) (struct target_ops *, char *, int);
     void (*to_resume) (ptid_t, int, enum target_signal);
     ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
@@ -387,7 +387,8 @@ struct target_ops
     void (*to_kill) (void);
     void (*to_load) (char *, int);
     int (*to_lookup_symbol) (char *, CORE_ADDR *);
-    void (*to_create_inferior) (char *, char *, char **, int);
+    void (*to_create_inferior) (struct target_ops *, 
+				char *, char *, char **, int);
     void (*to_post_startup_inferior) (ptid_t);
     void (*to_acknowledge_created_inferior) (int);
     void (*to_insert_fork_catchpoint) (int);
@@ -398,7 +399,7 @@ struct target_ops
     void (*to_insert_exec_catchpoint) (int);
     int (*to_remove_exec_catchpoint) (int);
     int (*to_has_exited) (int, int, int *);
-    void (*to_mourn_inferior) (void);
+    void (*to_mourn_inferior) (struct target_ops *);
     int (*to_can_run) (void);
     void (*to_notice_signals) (ptid_t ptid);
     int (*to_thread_alive) (ptid_t ptid);
@@ -580,8 +581,7 @@ void target_close (struct target_ops *targ, int quitting);
    should be ready to deliver the status of the process immediately
    (without waiting) to an upcoming target_wait call.  */
 
-#define	target_attach(args, from_tty)	\
-     (*current_target.to_attach) (args, from_tty)
+void target_attach (char *, int);
 
 /* Some targets don't generate traps when attaching to the inferior,
    or their target_attach implementation takes care of the waiting.
@@ -831,9 +831,8 @@ extern void target_load (char *arg, int from_tty);
    ENV is the environment vector to pass.  Errors reported with error().
    On VxWorks and various standalone systems, we ignore exec_file.  */
 
-#define	target_create_inferior(exec_file, args, env, FROM_TTY)	\
-     (*current_target.to_create_inferior) (exec_file, args, env, (FROM_TTY))
-
+void target_create_inferior (char *exec_file, char *args,
+			     char **env, int from_tty);
 
 /* Some targets (such as ttrace-based HPUX) don't allow us to request
    notification of inferior events such as fork and vork immediately
@@ -903,8 +902,7 @@ int target_follow_fork (int follow_child);
 
 /* The inferior process has died.  Do what is right.  */
 
-#define	target_mourn_inferior()	\
-     (*current_target.to_mourn_inferior) ()
+void target_mourn_inferior (void);
 
 /* Does target have enough data to do a run or attach command? */
 
@@ -1269,9 +1267,10 @@ extern void noprocess (void);
 
 extern void target_require_runnable (void);
 
-extern void find_default_attach (char *, int);
+extern void find_default_attach (struct target_ops *, char *, int);
 
-extern void find_default_create_inferior (char *, char *, char **, int);
+extern void find_default_create_inferior (struct target_ops *,
+					  char *, char *, char **, int);
 
 extern struct target_ops *find_run_target (void);
 

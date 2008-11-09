@@ -429,7 +429,7 @@ dec_thread_detach (char *args, int from_tty)
   debug ("dec_thread_detach");
 
   disable_dec_thread ();
-  base_target.to_detach (args, from_tty);
+  base_target.to_detach (&base_target, args, from_tty);
 }
 
 /* Return the ptid of the thread that is currently active.  */
@@ -605,7 +605,7 @@ dec_thread_mourn_inferior (void)
   debug ("dec_thread_mourn_inferior");
 
   disable_dec_thread ();
-  base_target.to_mourn_inferior ();
+  base_target.to_mourn_inferior (&base_target);
 }
 
 /* The "to_thread_alive" method of the dec_thread_ops.  */

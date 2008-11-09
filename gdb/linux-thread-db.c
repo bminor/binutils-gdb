@@ -780,11 +780,11 @@ detach_thread (ptid_t ptid)
 }
 
 static void
-thread_db_detach (char *args, int from_tty)
+thread_db_detach (struct target_ops *ops, char *args, int from_tty)
 {
   disable_thread_event_reporting ();
 
-  target_beneath->to_detach (args, from_tty);
+  target_beneath->to_detach (target_beneath, args, from_tty);
 
   /* Should this be done by detach_command?  */
   target_mourn_inferior ();
@@ -927,20 +927,20 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 }
 
 static void
-thread_db_mourn_inferior (void)
+thread_db_mourn_inferior (struct target_ops *ops)
 {
   /* Forget about the child's process ID.  We shouldn't need it
      anymore.  */
   proc_handle.pid = 0;
 
-  target_beneath->to_mourn_inferior ();
+  target_beneath->to_mourn_inferior (target_beneath);
 
   /* Delete the old thread event breakpoints.  Do this after mourning
      the inferior, so that we don't try to uninsert them.  */
   remove_thread_event_breakpoints ();
 
   /* Detach thread_db target ops.  */
-  unpush_target (&thread_db_ops);
+  unpush_target (ops);
   using_thread_db = 0;
 }
 

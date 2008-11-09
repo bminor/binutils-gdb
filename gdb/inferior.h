@@ -197,9 +197,9 @@ extern ptid_t procfs_first_available (void);
 
 /* From fork-child.c */
 
-extern void fork_inferior (char *, char *, char **,
-			   void (*)(void),
-			   void (*)(int), void (*)(void), char *);
+extern int fork_inferior (char *, char *, char **,
+			  void (*)(void),
+			  void (*)(int), void (*)(void), char *);
 
 
 extern void startup_inferior (int);

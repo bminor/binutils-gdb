@@ -105,11 +105,11 @@ static void remote_close (int quitting);
 
 static void remote_store_registers (struct regcache *regcache, int regno);
 
-static void remote_mourn (void);
+static void remote_mourn (struct target_ops *ops);
 
 static void extended_remote_restart (void);
 
-static void extended_remote_mourn (void);
+static void extended_remote_mourn (struct target_ops *);
 
 static void remote_mourn_1 (struct target_ops *);
 
@@ -133,7 +133,7 @@ static void remote_async (void (*callback) (enum inferior_event_type event_type,
 
 static int remote_async_mask (int new_mask);
 
-static void remote_detach (char *args, int from_tty);
+static void remote_detach (struct target_ops *ops, char *args, int from_tty);
 
 static void remote_interrupt (int signo);
 
@@ -3306,13 +3306,13 @@ remote_detach_1 (char *args, int from_tty, int extended)
 }
 
 static void
-remote_detach (char *args, int from_tty)
+remote_detach (struct target_ops *ops, char *args, int from_tty)
 {
   remote_detach_1 (args, from_tty, 0);
 }
 
 static void
-extended_remote_detach (char *args, int from_tty)
+extended_remote_detach (struct target_ops *ops, char *args, int from_tty)
 {
   remote_detach_1 (args, from_tty, 1);
 }
@@ -3435,9 +3435,9 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
 }
 
 static void
-extended_remote_attach (char *args, int from_tty)
+extended_remote_attach (struct target_ops *ops, char *args, int from_tty)
 {
-  extended_remote_attach_1 (&extended_remote_ops, args, from_tty);
+  extended_remote_attach_1 (ops, args, from_tty);
 }
 
 /* Convert hex digit A to a number.  */
@@ -6452,9 +6452,9 @@ extended_remote_kill (void)
 }
 
 static void
-remote_mourn (void)
+remote_mourn (struct target_ops *ops)
 {
-  remote_mourn_1 (&remote_ops);
+  remote_mourn_1 (ops);
 }
 
 /* Worker function for remote_mourn.  */
@@ -6537,9 +6537,9 @@ extended_remote_mourn_1 (struct target_ops *target)
 }
 
 static void
-extended_remote_mourn (void)
+extended_remote_mourn (struct target_ops *ops)
 {
-  extended_remote_mourn_1 (&extended_remote_ops);
+  extended_remote_mourn_1 (ops);
 }
 
 static int
@@ -6655,7 +6655,8 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
 }
 
 static void
-extended_remote_create_inferior (char *exec_file, char *args,
+extended_remote_create_inferior (struct target_ops *ops, 
+				 char *exec_file, char *args,
 				 char **env, int from_tty)
 {
   extended_remote_create_inferior_1 (exec_file, args, env, from_tty);

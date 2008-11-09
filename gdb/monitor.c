@@ -853,7 +853,7 @@ monitor_close (int quitting)
    when you want to detach and do something else with your gdb.  */
 
 static void
-monitor_detach (char *args, int from_tty)
+monitor_detach (struct target_ops *ops, char *args, int from_tty)
 {
   pop_target ();		/* calls monitor_close to do the real work */
   if (from_tty)
@@ -1995,8 +1995,8 @@ monitor_kill (void)
 /* All we actually do is set the PC to the start address of exec_bfd.  */
 
 static void
-monitor_create_inferior (char *exec_file, char *args, char **env,
-			 int from_tty)
+monitor_create_inferior (struct target_ops *ops, char *exec_file,
+			 char *args, char **env, int from_tty)
 {
   if (args && (*args != '\000'))
     error (_("Args are not supported by the monitor."));
@@ -2012,7 +2012,7 @@ monitor_create_inferior (char *exec_file, char *args, char **env,
    instructions.  */
 
 static void
-monitor_mourn_inferior (void)
+monitor_mourn_inferior (struct target_ops *ops)
 {
   unpush_target (targ_ops);
   generic_mourn_inferior ();	/* Do all the proper things now */

@@ -518,7 +518,7 @@ procfs_can_run (void)
 
 /* Attach to process PID, then initialize for debugging it.  */
 static void
-procfs_attach (char *args, int from_tty)
+procfs_attach (struct target_ops *ops, char *args, int from_tty)
 {
   char *exec_file;
   int pid;
@@ -781,7 +781,7 @@ procfs_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int dowrite,
    on signals, etc.  We'd better not have left any breakpoints
    in the program or it'll die when it hits one.  */
 static void
-procfs_detach (char *args, int from_tty)
+procfs_detach (struct target_ops *ops, char *args, int from_tty)
 {
   int siggnal = 0;
   int pid;
@@ -914,7 +914,7 @@ procfs_resume (ptid_t ptid, int step, enum target_signal signo)
 }
 
 static void
-procfs_mourn_inferior (void)
+procfs_mourn_inferior (struct target_ops *ops)
 {
   if (!ptid_equal (inferior_ptid, null_ptid))
     {
@@ -988,8 +988,8 @@ breakup_args (char *scratch, char **argv)
 }
 
 static void
-procfs_create_inferior (char *exec_file, char *allargs, char **env,
-			int from_tty)
+procfs_create_inferior (struct target_ops *ops, char *exec_file,
+			char *allargs, char **env, int from_tty)
 {
   struct inheritance inherit;
   pid_t pid;

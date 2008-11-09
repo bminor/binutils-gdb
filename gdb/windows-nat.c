@@ -1684,7 +1684,7 @@ out:
 
 /* Attach to process PID, then initialize for debugging it.  */
 static void
-win32_attach (char *args, int from_tty)
+win32_attach (struct target_ops *ops, char *args, int from_tty)
 {
   BOOL ok;
   DWORD pid;
@@ -1740,7 +1740,7 @@ win32_attach (char *args, int from_tty)
 }
 
 static void
-win32_detach (char *args, int from_tty)
+win32_detach (struct target_ops *ops, char *args, int from_tty)
 {
   int detached = 1;
 
@@ -1823,8 +1823,8 @@ win32_open (char *arg, int from_tty)
    ENV is the environment vector to pass.  Errors reported with error().  */
 
 static void
-win32_create_inferior (char *exec_file, char *allargs, char **in_env,
-		       int from_tty)
+win32_create_inferior (struct target_ops *ops, char *exec_file,
+		       char *allargs, char **in_env, int from_tty)
 {
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
@@ -1951,7 +1951,7 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
 }
 
 static void
-win32_mourn_inferior (void)
+win32_mourn_inferior (struct target_ops *ops)
 {
   (void) win32_continue (DBG_CONTINUE, -1);
   i386_cleanup_dregs();

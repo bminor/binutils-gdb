@@ -316,7 +316,8 @@ check_mmu_status (void)
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 static void
-m32r_create_inferior (char *execfile, char *args, char **env, int from_tty)
+m32r_create_inferior (struct target_ops *ops, char *execfile,
+		      char *args, char **env, int from_tty)
 {
   CORE_ADDR entry_pt;
 
@@ -872,7 +873,7 @@ m32r_wait (ptid_t ptid, struct target_waitstatus *status)
    Use this when you want to detach and do something else
    with your gdb.  */
 static void
-m32r_detach (char *args, int from_tty)
+m32r_detach (struct target_ops *ops, char *args, int from_tty)
 {
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_detach(%d)\n", from_tty);
@@ -1147,7 +1148,7 @@ m32r_kill (void)
    instructions.  */
 
 static void
-m32r_mourn_inferior (void)
+m32r_mourn_inferior (struct target_ops *ops)
 {
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_mourn_inferior()\n");

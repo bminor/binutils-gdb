@@ -84,7 +84,7 @@ static void lsi_open (char *name, int from_tty);
 
 static void mips_close (int quitting);
 
-static void mips_detach (char *args, int from_tty);
+static void mips_detach (struct target_ops *ops, char *args, int from_tty);
 
 static void mips_resume (ptid_t ptid, int step,
                          enum target_signal siggnal);
@@ -1652,7 +1652,7 @@ mips_close (int quitting)
 /* Detach from the remote board.  */
 
 static void
-mips_detach (char *args, int from_tty)
+mips_detach (struct target_ops *ops, char *args, int from_tty)
 {
   if (args)
     error ("Argument given to \"detach\" when remotely debugging.");

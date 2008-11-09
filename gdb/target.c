@@ -99,9 +99,9 @@ static void debug_to_open (char *, int);
 
 static void debug_to_close (int);
 
-static void debug_to_attach (char *, int);
+static void debug_to_attach (struct target_ops *ops, char *, int);
 
-static void debug_to_detach (char *, int);
+static void debug_to_detach (struct target_ops *ops, char *, int);
 
 static void debug_to_resume (ptid_t, int, enum target_signal);
 
@@ -156,7 +156,7 @@ static void debug_to_load (char *, int);
 
 static int debug_to_lookup_symbol (char *, CORE_ADDR *);
 
-static void debug_to_mourn_inferior (void);
+static void debug_to_mourn_inferior (struct target_ops *);
 
 static int debug_to_can_run (void);
 
@@ -281,6 +281,24 @@ target_load (char *arg, int from_tty)
   (*current_target.to_load) (arg, from_tty);
 }
 
+void target_create_inferior (char *exec_file, char *args,
+			     char **env, int from_tty)
+{
+  struct target_ops *t;
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_create_inferior != NULL)	
+	{
+	  t->to_create_inferior (t, exec_file, args, env, from_tty);
+	  return;
+	}
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "could not find a target to create inferior");
+}
+
+
 static int
 nomemory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	  struct target_ops *t)
@@ -394,10 +412,10 @@ update_current_target (void)
       INHERIT (to_doc, t);
       /* Do not inherit to_open.  */
       /* Do not inherit to_close.  */
-      INHERIT (to_attach, t);
+      /* Do not inherit to_attach.  */
       INHERIT (to_post_attach, t);
       INHERIT (to_attach_no_wait, t);
-      INHERIT (to_detach, t);
+      /* Do not inherit to_detach.  */
       /* Do not inherit to_disconnect.  */
       INHERIT (to_resume, t);
       INHERIT (to_wait, t);
@@ -428,7 +446,7 @@ update_current_target (void)
       INHERIT (to_kill, t);
       INHERIT (to_load, t);
       INHERIT (to_lookup_symbol, t);
-      INHERIT (to_create_inferior, t);
+      /* Do no inherit to_create_inferior.  */
       INHERIT (to_post_startup_inferior, t);
       INHERIT (to_acknowledge_created_inferior, t);
       INHERIT (to_insert_fork_catchpoint, t);
@@ -439,7 +457,7 @@ update_current_target (void)
       INHERIT (to_insert_exec_catchpoint, t);
       INHERIT (to_remove_exec_catchpoint, t);
       INHERIT (to_has_exited, t);
-      INHERIT (to_mourn_inferior, t);
+      /* Do no inherit to_mourn_inferiour.  */
       INHERIT (to_can_run, t);
       INHERIT (to_notice_signals, t);
       INHERIT (to_thread_alive, t);
@@ -495,9 +513,6 @@ update_current_target (void)
 	    target_ignore);
   de_fault (to_post_attach,
 	    (void (*) (int))
-	    target_ignore);
-  de_fault (to_detach,
-	    (void (*) (char *, int))
 	    target_ignore);
   de_fault (to_resume,
 	    (void (*) (ptid_t, int, enum target_signal))
@@ -602,9 +617,6 @@ update_current_target (void)
   de_fault (to_has_exited,
 	    (int (*) (int, int, int *))
 	    return_zero);
-  de_fault (to_mourn_inferior,
-	    (void (*) (void))
-	    noprocess);
   de_fault (to_can_run,
 	    return_zero);
   de_fault (to_notice_signals,
@@ -1797,6 +1809,8 @@ target_preopen (int from_tty)
 void
 target_detach (char *args, int from_tty)
 {
+  struct target_ops* t;
+  
   if (gdbarch_has_global_solist (target_gdbarch))
     /* Don't remove global breakpoints here.  They're removed on
        disconnection from the target.  */
@@ -1806,7 +1820,16 @@ target_detach (char *args, int from_tty)
        them before detaching.  */
     remove_breakpoints ();
 
-  (current_target.to_detach) (args, from_tty);
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_detach != NULL)
+	{
+	  t->to_detach (t, args, from_tty);
+	  return;
+	}
+    }
+
+  internal_error (__FILE__, __LINE__, "could not find a target to detach");
 }
 
 void
@@ -1863,6 +1886,23 @@ target_follow_fork (int follow_child)
   /* Some target returned a fork event, but did not know how to follow it.  */
   internal_error (__FILE__, __LINE__,
 		  "could not find a target to follow fork");
+}
+
+void
+target_mourn_inferior (void)
+{
+  struct target_ops *t;
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_mourn_inferior != NULL)	
+	{
+	  t->to_mourn_inferior (t);
+	  return;
+	}
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "could not find a target to follow mourn inferiour");
 }
 
 /* Look for a target which can describe architectural features, starting
@@ -2110,23 +2150,24 @@ find_default_run_target (char *do_mesg)
 }
 
 void
-find_default_attach (char *args, int from_tty)
+find_default_attach (struct target_ops *ops, char *args, int from_tty)
 {
   struct target_ops *t;
 
   t = find_default_run_target ("attach");
-  (t->to_attach) (args, from_tty);
+  (t->to_attach) (t, args, from_tty);
   return;
 }
 
 void
-find_default_create_inferior (char *exec_file, char *allargs, char **env,
+find_default_create_inferior (struct target_ops *ops,
+			      char *exec_file, char *allargs, char **env,
 			      int from_tty)
 {
   struct target_ops *t;
 
   t = find_default_run_target ("run");
-  (t->to_create_inferior) (exec_file, allargs, env, from_tty);
+  (t->to_create_inferior) (t, exec_file, allargs, env, from_tty);
   return;
 }
 
@@ -2454,6 +2495,8 @@ init_dummy_target (void)
   dummy_target.to_longname = "None";
   dummy_target.to_doc = "";
   dummy_target.to_attach = find_default_attach;
+  dummy_target.to_detach = 
+    (void (*)(struct target_ops *, char *, int))target_ignore;
   dummy_target.to_create_inferior = find_default_create_inferior;
   dummy_target.to_can_async_p = find_default_can_async_p;
   dummy_target.to_is_async_p = find_default_is_async_p;
@@ -2490,10 +2533,28 @@ target_close (struct target_ops *targ, int quitting)
     targ->to_close (quitting);
 }
 
-static void
-debug_to_attach (char *args, int from_tty)
+void
+target_attach (char *args, int from_tty)
 {
-  debug_target.to_attach (args, from_tty);
+  struct target_ops *t;
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_attach != NULL)	
+	{
+	  t->to_attach (t, args, from_tty);
+	  return;
+	}
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "could not find a target to attach");
+}
+
+
+static void
+debug_to_attach (struct target_ops *ops, char *args, int from_tty)
+{
+  debug_target.to_attach (&debug_target, args, from_tty);
 
   fprintf_unfiltered (gdb_stdlog, "target_attach (%s, %d)\n", args, from_tty);
 }
@@ -2508,9 +2569,9 @@ debug_to_post_attach (int pid)
 }
 
 static void
-debug_to_detach (char *args, int from_tty)
+debug_to_detach (struct target_ops *ops, char *args, int from_tty)
 {
-  debug_target.to_detach (args, from_tty);
+  debug_target.to_detach (&debug_target, args, from_tty);
 
   fprintf_unfiltered (gdb_stdlog, "target_detach (%s, %d)\n", args, from_tty);
 }
@@ -2913,10 +2974,11 @@ debug_to_lookup_symbol (char *name, CORE_ADDR *addrp)
 }
 
 static void
-debug_to_create_inferior (char *exec_file, char *args, char **env,
+debug_to_create_inferior (struct target_ops *ops,
+			  char *exec_file, char *args, char **env,
 			  int from_tty)
 {
-  debug_target.to_create_inferior (exec_file, args, env, from_tty);
+  debug_target.to_create_inferior (ops, exec_file, args, env, from_tty);
 
   fprintf_unfiltered (gdb_stdlog, "target_create_inferior (%s, %s, xxx, %d)\n",
 		      exec_file, args, from_tty);
@@ -3020,9 +3082,9 @@ debug_to_has_exited (int pid, int wait_status, int *exit_status)
 }
 
 static void
-debug_to_mourn_inferior (void)
+debug_to_mourn_inferior (struct target_ops *ops)
 {
-  debug_target.to_mourn_inferior ();
+  debug_target.to_mourn_inferior (&debug_target);
 
   fprintf_unfiltered (gdb_stdlog, "target_mourn_inferior ()\n");
 }

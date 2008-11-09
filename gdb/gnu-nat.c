@@ -2042,7 +2042,7 @@ gnu_kill_inferior (void)
 
 /* Clean up after the inferior dies.  */
 static void
-gnu_mourn_inferior (void)
+gnu_mourn_inferior (struct target_ops *ops)
 {
   inf_debug (gnu_current_inf, "rip");
   inf_detach (gnu_current_inf);
@@ -2074,7 +2074,8 @@ cur_inf (void)
 }
 
 static void
-gnu_create_inferior (char *exec_file, char *allargs, char **env,
+gnu_create_inferior (struct target_ops *ops, 
+		     char *exec_file, char *allargs, char **env,
 		     int from_tty)
 {
   struct inf *inf = cur_inf ();
@@ -2139,7 +2140,7 @@ gnu_can_run (void)
 /* Attach to process PID, then initialize for debugging it
    and wait for the trace-trap that results from attaching.  */
 static void
-gnu_attach (char *args, int from_tty)
+gnu_attach (struct target_ops *ops, char *args, int from_tty)
 {
   int pid;
   char *exec_file;
@@ -2205,7 +2206,7 @@ gnu_attach (char *args, int from_tty)
    previously attached.  It *might* work if the program was
    started via fork.  */
 static void
-gnu_detach (char *args, int from_tty)
+gnu_detach (struct target_ops *ops, char *args, int from_tty)
 {
   int pid;
 

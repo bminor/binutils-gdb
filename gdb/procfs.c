@@ -112,8 +112,8 @@
  */
 
 static void procfs_open (char *, int);
-static void procfs_attach (char *, int);
-static void procfs_detach (char *, int);
+static void procfs_attach (struct target_ops *, char *, int);
+static void procfs_detach (struct target_ops *, char *, int);
 static void procfs_resume (ptid_t, int, enum target_signal);
 static int procfs_can_run (void);
 static void procfs_stop (ptid_t);
@@ -123,8 +123,9 @@ static void procfs_store_registers (struct regcache *, int);
 static void procfs_notice_signals (ptid_t);
 static void procfs_prepare_to_store (struct regcache *);
 static void procfs_kill_inferior (void);
-static void procfs_mourn_inferior (void);
-static void procfs_create_inferior (char *, char *, char **, int);
+static void procfs_mourn_inferior (struct target_ops *ops);
+static void procfs_create_inferior (struct target_ops *, char *, 
+				    char *, char **, int);
 static ptid_t procfs_wait (ptid_t, struct target_waitstatus *);
 static int procfs_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			       struct mem_attrib *attrib,
@@ -3602,7 +3603,7 @@ procfs_debug_inferior (procinfo *pi)
 }
 
 static void
-procfs_attach (char *args, int from_tty)
+procfs_attach (struct target_ops *ops, char *args, int from_tty)
 {
   char *exec_file;
   int   pid;
@@ -3632,7 +3633,7 @@ procfs_attach (char *args, int from_tty)
 }
 
 static void
-procfs_detach (char *args, int from_tty)
+procfs_detach (struct target_ops *ops, char *args, int from_tty)
 {
   int sig = 0;
   int pid = PIDGET (inferior_ptid);
@@ -4842,7 +4843,7 @@ procfs_kill_inferior (void)
  */
 
 static void
-procfs_mourn_inferior (void)
+procfs_mourn_inferior (struct target_ops *ops)
 {
   procinfo *pi;
 
@@ -5111,8 +5112,8 @@ procfs_set_exec_trap (void)
  */
 
 static void
-procfs_create_inferior (char *exec_file, char *allargs, char **env,
-			int from_tty)
+procfs_create_inferior (struct target_ops *ops, char *exec_file,
+			char *allargs, char **env, int from_tty)
 {
   char *shell_file = getenv ("SHELL");
   char *tryname;
