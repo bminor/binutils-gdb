@@ -1372,19 +1372,18 @@ disassemble_bytes (struct disassemble_info * info,
   if (! prefix_addresses)
     {
       char buf[30];
-      char *s;
 
-      bfd_sprintf_vma
-	(aux->abfd, buf,
-	 (section->vma
-	  + bfd_section_size (section->owner, section) / opb));
-      s = buf;
-      while (s[0] == '0' && s[1] == '0' && s[2] == '0' && s[3] == '0'
-	     && s[4] == '0')
-	{
-	  skip_addr_chars += 4;
-	  s += 4;
-	}
+      bfd_sprintf_vma (aux->abfd, buf, section->vma + section->size / opb);
+
+      while (buf[skip_addr_chars] == '0')
+	++skip_addr_chars;
+
+      /* Don't discard zeros on overflow.  */
+      if (buf[skip_addr_chars] == '\0' && section->vma != 0)
+	skip_addr_chars = 0;
+
+      if (skip_addr_chars != 0)
+	skip_addr_chars = (skip_addr_chars - 1) & -4;
     }
 
   info->insn_info_valid = 0;

@@ -1,3 +1,9 @@
+2008-11-10  Tristan Gingold  <gingold@adacore.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (disassemble_bytes): Don't skip leading zeros when
+	end of section calculation overflows.
+
 2008-11-07  Prafulla Thakare  <prafulla.thakare@kpitcummins.com>
 
 	* MAINTAINERS: Take over from Anil Paranjpe as H8300 maintainer.
