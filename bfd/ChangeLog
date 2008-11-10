@@ -1,3 +1,10 @@
+2008-11-11  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 7012
+	* dwarf2.c (find_line): Don't keep stale pointers into realloc'd
+	memory.  Return on errors.  Fix memory leak.
+	(_bfd_dwarf2_cleanup_debug_info): Free dwarf_str_buffer.
+
 2008-11-10  Andreas Schwab  <schwab@suse.de>
 
 	PR 7011
