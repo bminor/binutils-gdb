@@ -1,3 +1,9 @@
+2008-11-10  Andreas Schwab  <schwab@suse.de>
+
+	PR 7011
+	* elf.c (assign_file_positions_for_non_load_sections): Handle
+	PT_GNU_RELRO specially.
+
 2008-11-06  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* config.bfd: Add m32c-*-rtems* and m32r-*-rtems*.

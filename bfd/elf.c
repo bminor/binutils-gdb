@@ -4631,74 +4631,14 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
        m != NULL;
        m = m->next, p++)
     {
-      if (m->count != 0)
+      if (p->p_type == PT_GNU_RELRO)
 	{
-	  if (p->p_type != PT_LOAD
-	      && (p->p_type != PT_NOTE
-		  || bfd_get_format (abfd) != bfd_core))
-	    {
-	      Elf_Internal_Shdr *hdr;
-	      asection *sect;
+	  BFD_ASSERT (!m->includes_filehdr && !m->includes_phdrs);
 
-	      BFD_ASSERT (!m->includes_filehdr && !m->includes_phdrs);
-
-	      sect = m->sections[m->count - 1];
-	      hdr = &elf_section_data (sect)->this_hdr;
-	      p->p_filesz = sect->filepos - m->sections[0]->filepos;
-	      if (hdr->sh_type != SHT_NOBITS)
-		p->p_filesz += hdr->sh_size;
-
-	      if (p->p_type == PT_GNU_RELRO)
-		{
-		  /* When we get here, we are copying executable
-		     or shared library. But we need to use the same
-		     linker logic.  */
-		  Elf_Internal_Phdr *lp;
-
-		  for (lp = phdrs; lp < phdrs + count; ++lp)
-		    {
-		      if (lp->p_type == PT_LOAD
-			  && lp->p_paddr == p->p_paddr)
-			break;
-		    }
-	  
-		  if (lp < phdrs + count)
-		    {
-		      /* We should use p_size if it is valid since it
-			 may contain the first few bytes of the next
-			 SEC_ALLOC section.  */
-		      if (m->p_size_valid)
-			p->p_filesz = m->p_size;
-		      else
-			abort ();
-		      p->p_vaddr = lp->p_vaddr;
-		      p->p_offset = lp->p_offset;
-		      p->p_memsz = p->p_filesz;
-		      p->p_align = 1;
-		    }
-		  else
-		    abort ();
-		}
-	      else
-		p->p_offset = m->sections[0]->filepos;
-	    }
-	}
-      else
-	{
-	  if (m->includes_filehdr)
+	  if (link_info != NULL)
 	    {
-	      p->p_vaddr = filehdr_vaddr;
-	      if (! m->p_paddr_valid)
-		p->p_paddr = filehdr_paddr;
-	    }
-	  else if (m->includes_phdrs)
-	    {
-	      p->p_vaddr = phdrs_vaddr;
-	      if (! m->p_paddr_valid)
-		p->p_paddr = phdrs_paddr;
-	    }
-	  else if (p->p_type == PT_GNU_RELRO)
-	    {
+	      /* During linking the range of the RELRO segment is passed
+		 in link_info.  */
 	      Elf_Internal_Phdr *lp;
 
 	      for (lp = phdrs; lp < phdrs + count; ++lp)
@@ -4728,6 +4668,67 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		  p->p_type = PT_NULL;
 		}
 	    }
+	  else
+	    {
+	      /* Otherwise we are copying an executable or shared
+		 library. But we need to use the same linker logic.  */
+	      Elf_Internal_Phdr *lp;
+
+	      for (lp = phdrs; lp < phdrs + count; ++lp)
+		{
+		  if (lp->p_type == PT_LOAD
+		      && lp->p_paddr == p->p_paddr)
+		    break;
+		}
+	  
+	      if (lp < phdrs + count)
+		{
+		  /* We should use p_size if it is valid since it
+		     may contain the first few bytes of the next
+		     SEC_ALLOC section.  */
+		  if (m->p_size_valid)
+		    p->p_filesz = m->p_size;
+		  else
+		    abort ();
+		  p->p_vaddr = lp->p_vaddr;
+		  p->p_offset = lp->p_offset;
+		  p->p_memsz = p->p_filesz;
+		  p->p_align = 1;
+		}
+	      else
+		abort ();
+	    }
+	}
+      else if (m->count != 0)
+	{
+	  if (p->p_type != PT_LOAD
+	      && (p->p_type != PT_NOTE
+		  || bfd_get_format (abfd) != bfd_core))
+	    {
+	      Elf_Internal_Shdr *hdr;
+	      asection *sect;
+
+	      BFD_ASSERT (!m->includes_filehdr && !m->includes_phdrs);
+
+	      sect = m->sections[m->count - 1];
+	      hdr = &elf_section_data (sect)->this_hdr;
+	      p->p_filesz = sect->filepos - m->sections[0]->filepos;
+	      if (hdr->sh_type != SHT_NOBITS)
+		p->p_filesz += hdr->sh_size;
+	      p->p_offset = m->sections[0]->filepos;
+	    }
+	}
+      else if (m->includes_filehdr)
+	{
+	  p->p_vaddr = filehdr_vaddr;
+	  if (! m->p_paddr_valid)
+	    p->p_paddr = filehdr_paddr;
+	}
+      else if (m->includes_phdrs)
+	{
+	  p->p_vaddr = phdrs_vaddr;
+	  if (! m->p_paddr_valid)
+	    p->p_paddr = phdrs_paddr;
 	}
     }
 
