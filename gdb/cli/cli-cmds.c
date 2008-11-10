@@ -450,6 +450,7 @@ source_script (char *file, int from_tty)
      files.  Put the full location in 'full_pathname'.  */
   fd = openp (source_path, OPF_TRY_CWD_FIRST,
 	      file, O_RDONLY, 0, &full_pathname);
+  make_cleanup (xfree, full_pathname);
 
   /* Use the full path name, if it is found.  */
   if (full_pathname != NULL && fd != -1)
@@ -462,7 +463,10 @@ source_script (char *file, int from_tty)
       if (from_tty)
 	perror_with_name (file);
       else
-	return;
+	{
+	  do_cleanups (old_cleanups);
+	  return;
+	}
     }
 
   stream = fdopen (fd, FOPEN_RT);
