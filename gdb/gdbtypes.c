@@ -2977,6 +2977,7 @@ copy_type_recursive (struct objfile *objfile,
 
       nfields = TYPE_NFIELDS (type);
       TYPE_FIELDS (new_type) = xmalloc (sizeof (struct field) * nfields);
+      memset (TYPE_FIELDS (new_type), 0, sizeof (struct field) * nfields);
       for (i = 0; i < nfields; i++)
 	{
 	  TYPE_FIELD_ARTIFICIAL (new_type, i) = 
