@@ -1,3 +1,7 @@
+2008-11-11  Joel Sherrill <joel.sherrilL@oarcorp.com>
+
+	* MAINTAINERS: Add myself for write after approval privileges.
+
 2008-11-10  Tom Tromey  <tromey@redhat.com>
 
 	* gdbtypes.c (copy_type_recursive): Clear new fields.
