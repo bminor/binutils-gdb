@@ -24,6 +24,7 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <string.h>
 #include <termios.h>
 #include <sys/fcntl.h>
 #include <sys/file.h>
@@ -1659,7 +1660,7 @@ memory_read(asi, addr, data, sz, ws)
 	errmec = 0;
 	return(1);
     }
-#endif;
+#endif
 
     if ((addr >= mem_ramstart) && (addr < (mem_ramstart + mem_ramsz))) {
 	fetch_bytes (asi, &ramb[addr & mem_rammask], data, sz);
@@ -1736,7 +1737,7 @@ memory_write(asi, addr, data, sz, ws)
 	errmec = 0;
 	return(1);
     }
-#endif;
+#endif
 
     if ((addr >= mem_ramstart) && (addr < (mem_ramstart + mem_ramsz))) {
 	if (mem_accprot) {
