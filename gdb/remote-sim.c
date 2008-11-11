@@ -94,7 +94,7 @@ static void gdbsim_prepare_to_store (struct regcache *regcache);
 
 static void gdbsim_files_info (struct target_ops *target);
 
-static void gdbsim_mourn_inferior (void);
+static void gdbsim_mourn_inferior (struct target_ops *target);
 
 static void gdbsim_stop (ptid_t ptid);
 
@@ -445,7 +445,8 @@ gdbsim_load (char *args, int fromtty)
    user types "run" after having attached.  */
 
 static void
-gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
+gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
+			char **env, int from_tty)
 {
   int len;
   char *arg_buf, **argv;
@@ -822,7 +823,7 @@ gdbsim_files_info (struct target_ops *target)
 /* Clear the simulator's notion of what the break points are.  */
 
 static void
-gdbsim_mourn_inferior (void)
+gdbsim_mourn_inferior (struct target_ops *target)
 {
   if (remote_debug)
     printf_filtered ("gdbsim_mourn_inferior:\n");
