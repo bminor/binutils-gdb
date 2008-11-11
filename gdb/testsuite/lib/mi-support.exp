@@ -39,7 +39,7 @@ proc mi_gdb_exit {} {
 
 proc mi_uncatched_gdb_exit {} {
     global GDB
-    global GDBFLAGS
+    global INTERNAL_GDBFLAGS GDBFLAGS
     global verbose
     global gdb_spawn_id;
     global gdb_prompt
@@ -56,7 +56,7 @@ proc mi_uncatched_gdb_exit {} {
 	return;
     }
 
-    verbose "Quitting $GDB $GDBFLAGS $MIFLAGS"
+    verbose "Quitting $GDB $INTERNAL_GDBFLAGS $GDBFLAGS $MIFLAGS"
 
     if { [is_remote host] && [board_info host exists fileid] } {
 	send_gdb "999-gdb-exit\n";
@@ -94,7 +94,7 @@ proc mi_uncatched_gdb_exit {} {
 proc default_mi_gdb_start { args } {
     global verbose
     global GDB
-    global GDBFLAGS
+    global INTERNAL_GDBFLAGS GDBFLAGS
     global gdb_prompt
     global mi_gdb_prompt
     global timeout
@@ -116,7 +116,7 @@ proc default_mi_gdb_start { args } {
 	sid_start
     }
 
-    verbose "Spawning $GDB -nw $GDBFLAGS $MIFLAGS"
+    verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS $MIFLAGS"
 
     if [info exists gdb_spawn_id] {
 	return 0;
@@ -138,7 +138,7 @@ proc default_mi_gdb_start { args } {
 	set mi_inferior_tty_name $spawn_out(slave,name)
     }
 
-    set res [remote_spawn host "$GDB -nw $GDBFLAGS $MIFLAGS [host_info gdb_opts]"];
+    set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS $MIFLAGS [host_info gdb_opts]"];
     if { $res < 0 || $res == "" } {
 	perror "Spawning $GDB failed."
 	return 1;

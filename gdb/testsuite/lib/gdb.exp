@@ -42,11 +42,19 @@ if ![info exists GDB] {
 }
 verbose "using GDB = $GDB" 2
 
+# GDBFLAGS is available for the user to set on the command line.
+# E.g. make check RUNTESTFLAGS=GDBFLAGS=mumble
+# Testcases may use it to add additional flags, but they must:
+# - append new flags, not overwrite
+# - restore the original value when done
 global GDBFLAGS
 if ![info exists GDBFLAGS] {
-    set GDBFLAGS "-nx"
+    set GDBFLAGS ""
 }
 verbose "using GDBFLAGS = $GDBFLAGS" 2
+
+# INTERNAL_GDBFLAGS contains flags that the testsuite requires.
+set INTERNAL_GDBFLAGS "-nw -nx"
 
 # The variable gdb_prompt is a regexp which matches the gdb prompt.
 # Set it if it is not already set.
@@ -94,22 +102,22 @@ set octal "\[0-7\]+"
 #
 proc default_gdb_version {} {
     global GDB
-    global GDBFLAGS
+    global INTERNAL_GDBFLAGS GDBFLAGS
     global gdb_prompt
     set fileid [open "gdb_cmd" w];
     puts $fileid "q";
     close $fileid;
     set cmdfile [remote_download host "gdb_cmd"];
-    set output [remote_exec host "$GDB -nw --command $cmdfile"]
+    set output [remote_exec host "$GDB $INTERNAL_GDBFLAGS --command $cmdfile"]
     remote_file build delete "gdb_cmd";
     remote_file host delete "$cmdfile";
     set tmp [lindex $output 1];
     set version ""
     regexp " \[0-9\]\[^ \t\n\r\]+" "$tmp" version
     if ![is_remote host] {
-	clone_output "[which $GDB] version $version $GDBFLAGS\n"
+	clone_output "[which $GDB] version $version $INTERNAL_GDBFLAGS $GDBFLAGS\n"
     } else {
-	clone_output "$GDB on remote host version $version $GDBFLAGS\n"
+	clone_output "$GDB on remote host version $version $INTERNAL_GDBFLAGS $GDBFLAGS\n"
     }
 }
 
@@ -1010,7 +1018,7 @@ proc gdb_reinitialize_dir { subdir } {
 #
 proc default_gdb_exit {} {
     global GDB
-    global GDBFLAGS
+    global INTERNAL_GDBFLAGS GDBFLAGS
     global verbose
     global gdb_spawn_id;
 
@@ -1020,7 +1028,7 @@ proc default_gdb_exit {} {
 	return;
     }
 
-    verbose "Quitting $GDB $GDBFLAGS"
+    verbose "Quitting $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 
     if { [is_remote host] && [board_info host exists fileid] } {
 	send_gdb "quit\n";
@@ -1150,14 +1158,14 @@ proc gdb_file_cmd { arg } {
 proc default_gdb_start { } {
     global verbose
     global GDB
-    global GDBFLAGS
+    global INTERNAL_GDBFLAGS GDBFLAGS
     global gdb_prompt
     global timeout
     global gdb_spawn_id;
 
     gdb_stop_suppressing_tests;
 
-    verbose "Spawning $GDB -nw $GDBFLAGS"
+    verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 
     if [info exists gdb_spawn_id] {
 	return 0;
@@ -1169,7 +1177,7 @@ proc default_gdb_start { } {
 	    exit 1
 	}
     }
-    set res [remote_spawn host "$GDB -nw $GDBFLAGS [host_info gdb_opts]"];
+    set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS [host_info gdb_opts]"];
     if { $res < 0 || $res == "" } {
 	perror "Spawning $GDB failed."
 	return 1;

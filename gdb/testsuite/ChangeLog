@@ -1,3 +1,16 @@
+2008-11-10  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (GDBFLAGS): Move -nx ...
+	(INTERNAL_GDBFLAGS): ... to here.  Move -nw to here as well.
+	(default_gdb_version): Add $INTERNAL_GDBFLAGS to gdb invocations.
+	(default_gdb_start,default_gdb_exit): Ditto.
+	* lib/mi-support.exp (default_mi_gdb_start): Ditto.
+	(mi_uncatched_gdb_exit): Add $INTERNAL_GDBFLAGS to log message.
+	* gdb.base/corefile.exp: Add $INTERNAL_GDBFLAGS to gdb invocations.
+	* gdb.base/dbx.exp (dbx_gdb_start): Ditto.
+	* gdb.base/args.exp (GDBFLAGS): Don't overwrite, append.
+	* gdb.base/remotetimeout.exp (GDBFLAGS): Ditto.
+
 2008-11-03  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.base/hashline2.exp: Fix typo.
