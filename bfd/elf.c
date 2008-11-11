@@ -4633,71 +4633,57 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
     {
       if (p->p_type == PT_GNU_RELRO)
 	{
+	  const Elf_Internal_Phdr *lp;
+
 	  BFD_ASSERT (!m->includes_filehdr && !m->includes_phdrs);
 
 	  if (link_info != NULL)
 	    {
 	      /* During linking the range of the RELRO segment is passed
 		 in link_info.  */
-	      Elf_Internal_Phdr *lp;
-
 	      for (lp = phdrs; lp < phdrs + count; ++lp)
 		{
 		  if (lp->p_type == PT_LOAD
-		      && lp->p_vaddr <= link_info->relro_end
 		      && lp->p_vaddr >= link_info->relro_start
-		      && (lp->p_vaddr + lp->p_filesz
-			  >= link_info->relro_end))
+		      && lp->p_vaddr < link_info->relro_end
+		      && lp->p_vaddr + lp->p_filesz >= link_info->relro_end)
 		    break;
-		}
-
-	      if (lp < phdrs + count
-		  && link_info->relro_end > lp->p_vaddr)
-		{
-		  p->p_vaddr = lp->p_vaddr;
-		  p->p_paddr = lp->p_paddr;
-		  p->p_offset = lp->p_offset;
-		  p->p_filesz = link_info->relro_end - lp->p_vaddr;
-		  p->p_memsz = p->p_filesz;
-		  p->p_align = 1;
-		  p->p_flags = (lp->p_flags & ~PF_W);
-		}
-	      else
-		{
-		  memset (p, 0, sizeof *p);
-		  p->p_type = PT_NULL;
 		}
 	    }
 	  else
 	    {
 	      /* Otherwise we are copying an executable or shared
-		 library. But we need to use the same linker logic.  */
-	      Elf_Internal_Phdr *lp;
-
+		 library, but we need to use the same linker logic.  */
 	      for (lp = phdrs; lp < phdrs + count; ++lp)
 		{
 		  if (lp->p_type == PT_LOAD
 		      && lp->p_paddr == p->p_paddr)
 		    break;
 		}
-	  
-	      if (lp < phdrs + count)
-		{
-		  /* We should use p_size if it is valid since it
-		     may contain the first few bytes of the next
-		     SEC_ALLOC section.  */
-		  if (m->p_size_valid)
-		    p->p_filesz = m->p_size;
-		  else
-		    abort ();
-		  p->p_vaddr = lp->p_vaddr;
-		  p->p_offset = lp->p_offset;
-		  p->p_memsz = p->p_filesz;
-		  p->p_align = 1;
-		}
+	    }
+
+	  if (lp < phdrs + count)
+	    {
+	      p->p_vaddr = lp->p_vaddr;
+	      p->p_paddr = lp->p_paddr;
+	      p->p_offset = lp->p_offset;
+	      if (link_info != NULL)
+		p->p_filesz = link_info->relro_end - lp->p_vaddr;
+	      else if (m->p_size_valid)
+		p->p_filesz = m->p_size;
 	      else
 		abort ();
+	      p->p_memsz = p->p_filesz;
+	      p->p_align = 1;
+	      p->p_flags = (lp->p_flags & ~PF_W);
 	    }
+	  else if (link_info != NULL)
+	    {
+	      memset (p, 0, sizeof *p);
+	      p->p_type = PT_NULL;
+	    }
+	  else
+	    abort ();
 	}
       else if (m->count != 0)
 	{
