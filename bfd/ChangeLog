@@ -1,3 +1,7 @@
+2008-11-12  Tristan Gingold  <gingold@adacore.com>
+
+	* bfd.c (bfd_get_sign_extend_vma): Return 0 for mach-o.
+
 2008-11-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (assign_file_positions_for_non_load_sections): Consolidate

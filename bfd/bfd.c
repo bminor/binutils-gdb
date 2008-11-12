@@ -1001,6 +1001,9 @@ bfd_get_sign_extend_vma (bfd *abfd)
       || strcmp (name, "pei-arm-wince-little") == 0)
     return 1;
 
+  if (CONST_STRNEQ (name, "mach-o"))
+    return 0;
+
   bfd_set_error (bfd_error_wrong_format);
   return -1;
 }
