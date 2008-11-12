@@ -534,6 +534,7 @@ cris_relax_frag (segT seg ATTRIBUTE_UNUSED, fragS *fragP,
      because of the different reasons that they aren't relaxable.  */
   switch (fragP->fr_subtype)
     {
+    case ENCODE_RELAX (STATE_COND_BRANCH_PIC, STATE_DWORD):
     case ENCODE_RELAX (STATE_COND_BRANCH, STATE_DWORD):
     case ENCODE_RELAX (STATE_COND_BRANCH_V32, STATE_DWORD):
     case ENCODE_RELAX (STATE_COND_BRANCH_COMMON, STATE_DWORD):
