@@ -1,3 +1,8 @@
+2008-11-13  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 7023
+	* elf.c (bfd_section_from_shdr <SHT_SYMTAB>): Fail on invalid sh_info.
+
 2008-11-12  Tristan Gingold  <gingold@adacore.com>
 
 	* bfd.c (bfd_get_sign_extend_vma): Return 0 for mach-o.
