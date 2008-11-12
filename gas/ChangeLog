@@ -1,5 +1,9 @@
 2008-11-12  Hans-Peter Nilsson  <hp@axis.com>
 
+	* config/tc-cris.c (cris_number_to_imm): Except for
+	BFD_RELOC_NONE, always set contents.  Where previously this was
+	skipped, set contents to 0.
+
 	PR gas/7025
 	* input-scrub.c (input_scrub_include_sb): Make the position
 	after the input have defined contents, a 0 character.

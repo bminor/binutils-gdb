@@ -3613,10 +3613,12 @@ cris_number_to_imm (char *bufp, long val, int n, fixS *fixP, segT seg)
 	;
       }
 
-  /* Only do this for old-arch binaries.  */
+  /* Only use the computed value for old-arch binaries.  For all
+     others, where we're going to output a relocation, put 0 in the
+     code.  */
   if (cris_arch != arch_cris_any_v0_v10
       && (fixP->fx_addsy != NULL || fixP->fx_pcrel))
-    return;
+    val = 0;
 
   switch (fixP->fx_r_type)
     {
@@ -3643,13 +3645,14 @@ cris_number_to_imm (char *bufp, long val, int n, fixS *fixP, segT seg)
     case BFD_RELOC_CRIS_16_TPREL:
       /* We don't want to put in any kind of non-zero bits in the data
 	 being relocated for these.  */
+      md_number_to_chars (bufp, 0, n);
       break;
 
     case BFD_RELOC_32_PCREL:
-      /* If this one isn't fully resolved, we don't want to put anything
+      /* If this one isn't fully resolved, we don't want to put non-zero
 	 in the object.  */
       if (fixP->fx_addsy != NULL || fixP->fx_pcrel)
-	break;
+	val = 0;
 
       /* Fall through.  */
     case BFD_RELOC_32:
@@ -3671,38 +3674,30 @@ cris_number_to_imm (char *bufp, long val, int n, fixS *fixP, segT seg)
       if (val > 0xffff || val < -32768)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value not in 16 bit range: %ld"), val);
-      if (! fixP->fx_addsy)
-	{
-	  bufp[1] = (val >> 8) & 0xFF;
-	  bufp[0] = val & 0xFF;
-	}
+      bufp[1] = (val >> 8) & 0xFF;
+      bufp[0] = val & 0xFF;
       break;
 
     case BFD_RELOC_CRIS_SIGNED_16:
       if (val > 32767 || val < -32768)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value not in 16 bit signed range: %ld"), val);
-      if (! fixP->fx_addsy)
-	{
-	  bufp[1] = (val >> 8) & 0xFF;
-	  bufp[0] = val & 0xFF;
-	}
+      bufp[1] = (val >> 8) & 0xFF;
+      bufp[0] = val & 0xFF;
       break;
 
     case BFD_RELOC_8:
     case BFD_RELOC_8_PCREL:
       if (val > 255 || val < -128)
 	as_bad_where (fixP->fx_file, fixP->fx_line, _("Value not in 8 bit range: %ld"), val);
-      if (! fixP->fx_addsy)
-	bufp[0] = val & 0xFF;
+      bufp[0] = val & 0xFF;
       break;
 
     case BFD_RELOC_CRIS_SIGNED_8:
       if (val > 127 || val < -128)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value not in 8 bit signed range: %ld"), val);
-      if (! fixP->fx_addsy)
-	bufp[0] = val & 0xFF;
+      bufp[0] = val & 0xFF;
       break;
 
     case BFD_RELOC_CRIS_LAPCQ_OFFSET:
@@ -3712,37 +3707,32 @@ cris_number_to_imm (char *bufp, long val, int n, fixS *fixP, segT seg)
       if (val > 15 || val < 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value not in 4 bit unsigned range: %ld"), val);
-      if (! fixP->fx_addsy)
-	bufp[0] |= val & 0x0F;
+      bufp[0] |= val & 0x0F;
       break;
 
     case BFD_RELOC_CRIS_UNSIGNED_5:
       if (val > 31 || val < 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value not in 5 bit unsigned range: %ld"), val);
-      if (! fixP->fx_addsy)
-	bufp[0] |= val & 0x1F;
+      bufp[0] |= val & 0x1F;
       break;
 
     case BFD_RELOC_CRIS_SIGNED_6:
       if (val > 31 || val < -32)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value not in 6 bit range: %ld"), val);
-      if (! fixP->fx_addsy)
-	bufp[0] |= val & 0x3F;
+      bufp[0] |= val & 0x3F;
       break;
 
     case BFD_RELOC_CRIS_UNSIGNED_6:
       if (val > 63 || val < 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value not in 6 bit unsigned range: %ld"), val);
-      if (! fixP->fx_addsy)
-	bufp[0] |= val & 0x3F;
+      bufp[0] |= val & 0x3F;
       break;
 
     case BFD_RELOC_CRIS_BDISP8:
-      if (! fixP->fx_addsy)
-	bufp[0] = branch_disp (val);
+      bufp[0] = branch_disp (val);
       break;
 
     case BFD_RELOC_NONE:
