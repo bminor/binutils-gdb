@@ -283,6 +283,12 @@ input_scrub_include_sb (sb *from, char *position, int is_expansion)
       sb_add_char (&from_sb, '\n');
     }
   sb_scrub_and_add_sb (&from_sb, from);
+
+  /* Make sure the parser looks at defined contents when it scans for
+     e.g. end-of-line at the end of a macro.  */
+  sb_add_char (&from_sb, 0);
+  from_sb.len--;
+
   sb_index = 1;
 
   /* These variables are reset by input_scrub_push.  Restore them

@@ -1,5 +1,9 @@
 2008-11-12  Hans-Peter Nilsson  <hp@axis.com>
 
+	PR gas/7025
+	* input-scrub.c (input_scrub_include_sb): Make the position
+	after the input have defined contents, a 0 character.
+
 	* config/tc-cris.c (cris_relax_frag): Add missing case for
 	ENCODE_RELAX (STATE_COND_BRANCH_PIC, STATE_DWORD).
 
