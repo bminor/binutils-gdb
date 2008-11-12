@@ -1,3 +1,9 @@
+2008-11-12  Hans-Peter Nilsson  <hp@axis.com>
+
+	* read.c (read_a_source_file): Rearrange evaluation order when
+	looking for '=' to avoid conditional on undefined contents of
+	input_line_pointer[1].
+
 2008-11-06  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* config/tc-mips.c (COP_INSN): Change logic to always return false

@@ -791,10 +791,10 @@ read_a_source_file (char *name)
 		  /* Input_line_pointer->after ':'.  */
 		  SKIP_WHITESPACE ();
 		}
-              else if (input_line_pointer[1] == '='
-		       && (c == '='
-			   || ((c == ' ' || c == '\t')
-			       && input_line_pointer[2] == '=')))
+              else if ((c == '=' && input_line_pointer[1] == '=')
+		       || ((c == ' ' || c == '\t')
+			   && input_line_pointer[1] == '='
+			   && input_line_pointer[2] == '='))
 		{
 		  equals (s, -1);
 		  demand_empty_rest_of_line ();
