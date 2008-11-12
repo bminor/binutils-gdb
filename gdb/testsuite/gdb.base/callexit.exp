@@ -1,0 +1,90 @@
+# Copyright 2008 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+if $tracelevel then {
+	strace $tracelevel
+}
+
+set prms_id 0
+set bug_id 0
+
+set testfile "callexit"
+set srcfile ${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+     untested callexit.exp
+     return -1
+}
+
+# Some targets can't do function calls, so don't even bother with this
+# test.
+if [target_info exists gdb,cannot_call_functions] {
+    setup_xfail "*-*-*" 2416
+    fail "This target can not call functions"
+    continue
+}
+
+# Set the current language to C.  This counts as a test.  If it
+# fails, then we skip the other tests.
+
+proc set_lang_c {} {
+    global gdb_prompt
+
+    send_gdb "set language c\n"
+    gdb_expect {
+	-re ".*$gdb_prompt $" {}
+	timeout { fail "set language c (timeout)" ; return 0; }
+    }
+
+    send_gdb "show language\n"
+    gdb_expect {
+	-re ".* source language is \"c\".*$gdb_prompt $" {
+	    pass "set language to \"c\""
+	    return 1
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "setting language to \"c\""
+	    return 0
+	}
+	timeout {
+	    fail "can't show language (timeout)"
+	    return 0
+	}
+    }
+}
+
+# Start with a fresh gdb.
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+if { ![set_lang_c] } {
+    gdb_suppress_tests;
+} else {
+    if { ![runto_main] } {
+	gdb_suppress_tests;
+    }
+}
+
+# Call function (causing the program to exit), and see if gdb handles
+# it properly.
+gdb_test "call callexit()" \
+	"The program being debugged exited.*" \
+	"inferior function call terminated program"
+
+return 0

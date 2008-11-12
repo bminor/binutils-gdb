@@ -699,6 +699,16 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     discard_cleanups (old_cleanups);
   }
 
+  if (! target_has_execution)
+    {
+      /* If we try to restore the inferior status (via the cleanup),
+	 we'll crash as the inferior is no longer running.  */
+      discard_cleanups (inf_status_cleanup);
+      discard_inferior_status (inf_status);
+      error (_("\
+The program being debugged exited while in a function called from GDB."));
+    }
+
   if (stopped_by_random_signal || !stop_stack_dummy)
     {
       /* Find the name of the function we're about to complain about.  */

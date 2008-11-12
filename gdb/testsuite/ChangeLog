@@ -1,3 +1,8 @@
+2008-11-11  Doug Evans  <dje@google.com>
+
+	* gdb.base/callexit.exp: New file.
+	* gdb.base/callexit.c: New file.
+
 2008-11-10  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (GDBFLAGS): Move -nx ...

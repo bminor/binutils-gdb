@@ -1,3 +1,7 @@
+2008-11-11  Doug Evans  <dje@google.com>
+
+	* infcall.c (call_function_by_hand): Handle inferior exit.
+
 2008-11-11  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* remote-sim.c (gdbsim_create_inferior, gdbsim_mourn_inferior): Add
