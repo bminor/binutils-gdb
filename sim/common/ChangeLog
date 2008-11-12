@@ -1,3 +1,7 @@
+2008-11-12  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* aclocal.m4:  Fix underquoting of function names.
+
 2008-10-21  Julian Brown  <julian@codesourcery.com>
 
 	* Make-common.in (run$(EXEEXT)): Add LDFLAGS.
