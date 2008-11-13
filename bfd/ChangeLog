@@ -1,3 +1,10 @@
+2008-11-13  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/7028
+	* elf.c (assign_file_positions_for_load_sections): Allocate phrds
+	with bfd_zalloc2 instead of bfd_alloc2.  For the amount, use
+	the possibly-preset header-size, not the computed one.
+
 2008-11-13  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 7023
