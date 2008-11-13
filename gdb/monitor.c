@@ -2026,7 +2026,6 @@ monitor_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   int i;
-  const unsigned char *bp;
   int bplen;
 
   monitor_debug ("MON inst bkpt %s\n", paddr (addr));
@@ -2037,7 +2036,7 @@ monitor_insert_breakpoint (struct bp_target_info *bp_tgt)
     addr = gdbarch_addr_bits_remove (current_gdbarch, addr);
 
   /* Determine appropriate breakpoint size for this address.  */
-  bp = gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &bplen);
+  gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &bplen);
   bp_tgt->placed_address = addr;
   bp_tgt->placed_size = bplen;
 
