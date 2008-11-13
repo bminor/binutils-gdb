@@ -1,3 +1,7 @@
+2008-11-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* printcmd.c: define PRINTF_HAS_LONG_LONG only if not yet defined.
+
 2008-11-13  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* auxv.c (fprint_target_auxv): Handle AT_BASE_PLATFORM and

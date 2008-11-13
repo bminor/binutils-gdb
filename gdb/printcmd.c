@@ -48,7 +48,7 @@
 #include "tui/tui.h"		/* For tui_active et.al.   */
 #endif
 
-#if defined(__MINGW32__)
+#if defined(__MINGW32__) && !defined(PRINTF_HAS_LONG_LONG)
 # define USE_PRINTF_I64 1
 # define PRINTF_HAS_LONG_LONG
 #else
