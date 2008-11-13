@@ -1,3 +1,9 @@
+2008-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+	From Joel Sherrill  <joel.sherrill@oarcorp.com>
+	* remote-sim.c (gdbsim_mourn_inferior): Use "target" parameter
+	instead of the "gdbsim_ops" global.
+
 2008-11-11  Doug Evans  <dje@google.com>
 
 	* infcall.c (call_function_by_hand): Handle inferior exit.

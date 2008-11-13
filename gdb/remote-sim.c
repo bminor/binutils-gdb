@@ -829,7 +829,7 @@ gdbsim_mourn_inferior (struct target_ops *target)
     printf_filtered ("gdbsim_mourn_inferior:\n");
 
   remove_breakpoints ();
-  target_mark_exited (&gdbsim_ops);
+  target_mark_exited (target);
   generic_mourn_inferior ();
   delete_thread_silent (remote_sim_ptid);
 }
