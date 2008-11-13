@@ -1,3 +1,8 @@
+2008-11-13  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* auxv.c (fprint_target_auxv): Handle AT_BASE_PLATFORM and
+	AT_EXECFN.  Re-sort AT_SECURE.
+
 2008-11-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* monitor.c (monitor_insert_breakpoint): Remove unused variable `bp'.
