@@ -449,7 +449,8 @@ filter_symbols (bfd *abfd, bfd_boolean dynamic, void *minisyms,
 
       if (keep)
 	{
-	  memcpy (to, from, size);
+	  if (to != from)
+	    memcpy (to, from, size);
 	  to += size;
 	}
     }
