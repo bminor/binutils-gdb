@@ -22,6 +22,21 @@ AC_DISABLE_SHARED
 AC_PROG_CC
 AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
+
+case "${target}" in
+  sparc-*-solaris*)
+    # On native 32bit sparc-solaris, large-file and procfs support are
+    # mutually exclusive; and without procfs support, the elf module
+    # cannot provide certain routines such as elfcore_write_prpsinfo
+    # or elfcore_write_prstatus.  So unless the user explicitly requested
+    # large-file support through the --enable-largefile switch, disable
+    # large-file support in favor of procfs support.
+    if test "${target}" = "${host}" -a "$enable_largefile" != 'yes'; then
+      enable_largefile="no"
+    fi
+    ;;
+esac
+
 AC_SYS_LARGEFILE
 
 LT_INIT
