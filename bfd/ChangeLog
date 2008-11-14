@@ -1,3 +1,10 @@
+2008-11-14  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Use header_size
+	to avoid moving the load address of file headers.
+	(assign_file_positions_for_load_sections): Set header_size for
+	segments containing the file header.
+
 2008-11-14  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.com: Handle bfd_default_target_size, BFD_HOST_LONG_LONG, 
