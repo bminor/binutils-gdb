@@ -3934,6 +3934,9 @@ emit_expr (expressionS *exp, unsigned int nbytes)
   if (need_pass_2)
     return;
 
+  /* Grow the current frag now so that dot_value does not get invalidated
+     if the frag were to fill up in the frag_more() call below.  */
+  frag_grow (nbytes);
   dot_value = frag_now_fix ();
 
 #ifndef NO_LISTING
