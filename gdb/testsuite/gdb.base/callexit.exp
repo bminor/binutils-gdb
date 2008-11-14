@@ -37,35 +37,6 @@ if [target_info exists gdb,cannot_call_functions] {
     continue
 }
 
-# Set the current language to C.  This counts as a test.  If it
-# fails, then we skip the other tests.
-
-proc set_lang_c {} {
-    global gdb_prompt
-
-    send_gdb "set language c\n"
-    gdb_expect {
-	-re ".*$gdb_prompt $" {}
-	timeout { fail "set language c (timeout)" ; return 0; }
-    }
-
-    send_gdb "show language\n"
-    gdb_expect {
-	-re ".* source language is \"c\".*$gdb_prompt $" {
-	    pass "set language to \"c\""
-	    return 1
-	}
-	-re ".*$gdb_prompt $" {
-	    fail "setting language to \"c\""
-	    return 0
-	}
-	timeout {
-	    fail "can't show language (timeout)"
-	    return 0
-	}
-    }
-}
-
 # Start with a fresh gdb.
 
 gdb_exit
@@ -73,12 +44,9 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-if { ![set_lang_c] } {
-    gdb_suppress_tests;
-} else {
-    if { ![runto_main] } {
-	gdb_suppress_tests;
-    }
+if { ![runto_main] } {
+    fail "Can't run to main"
+    return 0
 }
 
 # Call function (causing the program to exit), and see if gdb handles
