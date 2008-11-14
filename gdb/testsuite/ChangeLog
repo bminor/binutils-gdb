@@ -1,3 +1,7 @@
+2008-11-14  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/gdb2549.exp: New file.
+
 2008-11-11  Doug Evans  <dje@google.com>
 
 	* gdb.base/callexit.exp: New file.

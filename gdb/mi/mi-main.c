@@ -501,7 +501,7 @@ get_register (int regnum, int format)
   else
     {
       struct value_print_options opts;
-      get_user_print_options (&opts);
+      get_formatted_print_options (&opts, format);
       opts.deref_ref = 1;
       val_print (register_type (current_gdbarch, regnum), buffer, 0, 0,
 		 stb->stream, 0, &opts, current_language);
