@@ -2082,19 +2082,7 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
     return 0;
   section_is_compressed = section->name == section->compressed_name;
 
-  /* Compute a bias to be added to offsets found within the DWARF debug
-     information.  These offsets are meant to be relative to the start of
-     the dwarf section, and hence the bias should be 0.  For MACH-O however
-     a dwarf section is really just a region of a much larger section and so
-     the bias is the address of the start of that area within the larger
-     section.  This test is important for PE and COFF based targets which
-     use DWARF debug information, since unlike ELF, they do not allow the
-     dwarf sections to be placed at address 0.  */
-  if (bfd_get_flavour (abfd) == bfd_target_mach_o_flavour)
-    section->address = bfd_get_section_vma (abfd, sec);
-  else
-    section->address = 0;
-    
+  section->address = 0;
   section->size = bfd_get_section_size (sec);
   section->start = xmalloc (section->size);
 
@@ -2177,86 +2165,6 @@ dump_dwarf_section (bfd *abfd, asection *section,
       }
 }
 
-static const char *mach_o_uncompressed_dwarf_sections [] = {
-  "LC_SEGMENT.__DWARFA.__debug_abbrev",		/* .debug_abbrev */
-  "LC_SEGMENT.__DWARFA.__debug_aranges",	/* .debug_aranges */
-  "LC_SEGMENT.__DWARFA.__debug_frame",		/* .debug_frame */
-  "LC_SEGMENT.__DWARFA.__debug_info",		/* .debug_info */
-  "LC_SEGMENT.__DWARFA.__debug_line",		/* .debug_line */
-  "LC_SEGMENT.__DWARFA.__debug_pubnames",	/* .debug_pubnames */
-  ".eh_frame",					/* .eh_frame */
-  "LC_SEGMENT.__DWARFA.__debug_macinfo",	/* .debug_macinfo */
-  "LC_SEGMENT.__DWARFA.__debug_str",		/* .debug_str */
-  "LC_SEGMENT.__DWARFA.__debug_loc",		/* .debug_loc */
-  "LC_SEGMENT.__DWARFA.__debug_pubtypes",	/* .debug_pubtypes */
-  "LC_SEGMENT.__DWARFA.__debug_ranges",		/* .debug_ranges */
-  "LC_SEGMENT.__DWARFA.__debug_static_func",	/* .debug_static_func */
-  "LC_SEGMENT.__DWARFA.__debug_static_vars",	/* .debug_static_vars */
-  "LC_SEGMENT.__DWARFA.__debug_types",		/* .debug_types */
-  "LC_SEGMENT.__DWARFA.__debug_weaknames"	/* .debug_weaknames */
-};
-
-static const char *mach_o_compressed_dwarf_sections [] = {
-  "LC_SEGMENT.__DWARFA.__zdebug_abbrev",	/* .zdebug_abbrev */
-  "LC_SEGMENT.__DWARFA.__zdebug_aranges",	/* .zdebug_aranges */
-  "LC_SEGMENT.__DWARFA.__zdebug_frame",		/* .zdebug_frame */
-  "LC_SEGMENT.__DWARFA.__zdebug_info",		/* .zdebug_info */
-  "LC_SEGMENT.__DWARFA.__zdebug_line",		/* .zdebug_line */
-  "LC_SEGMENT.__DWARFA.__zdebug_pubnames",	/* .zdebug_pubnames */
-  ".eh_frame",					/* .eh_frame */
-  "LC_SEGMENT.__DWARFA.__zdebug_macinfo",	/* .zdebug_macinfo */
-  "LC_SEGMENT.__DWARFA.__zdebug_str",		/* .zdebug_str */
-  "LC_SEGMENT.__DWARFA.__zdebug_loc",		/* .zdebug_loc */
-  "LC_SEGMENT.__DWARFA.__zdebug_pubtypes",	/* .zdebug_pubtypes */
-  "LC_SEGMENT.__DWARFA.__zdebug_ranges",	/* .zdebug_ranges */
-  "LC_SEGMENT.__DWARFA.__zdebug_static_func",	/* .zdebug_static_func */
-  "LC_SEGMENT.__DWARFA.__zdebug_static_vars",	/* .zdebug_static_vars */
-  "LC_SEGMENT.__DWARFA.__zdebug_types",		/* .zdebug_types */
-  "LC_SEGMENT.__DWARFA.__zdebug_weaknames"	/* .zdebug_weaknames */
-};
-
-static const char *generic_uncompressed_dwarf_sections [max];
-static const char *generic_compressed_dwarf_sections [max];
-
-static void
-check_mach_o_dwarf (bfd *abfd)
-{
-  static enum bfd_flavour old_flavour = bfd_target_unknown_flavour;
-  enum bfd_flavour current_flavour = bfd_get_flavour (abfd);
-  enum dwarf_section_display_enum i;
-
-  if (generic_uncompressed_dwarf_sections [0] == NULL)
-    for (i = 0; i < max; i++)
-      {
-        generic_uncompressed_dwarf_sections [i]
-            = debug_displays[i].section.uncompressed_name;
-        generic_compressed_dwarf_sections [i]
-            = debug_displays[i].section.compressed_name;
-      }
-
-  if (old_flavour != current_flavour)
-    {
-      if (current_flavour == bfd_target_mach_o_flavour)
-	for (i = 0; i < max; i++)
-          {
-            debug_displays[i].section.uncompressed_name
-                = mach_o_uncompressed_dwarf_sections [i];
-            debug_displays[i].section.compressed_name
-                = mach_o_compressed_dwarf_sections [i];
-          }
-      else if (old_flavour == bfd_target_mach_o_flavour)
-	for (i = 0; i < max; i++)
-          {
-            debug_displays[i].section.uncompressed_name
-                = generic_uncompressed_dwarf_sections [i];
-            debug_displays[i].section.compressed_name
-                = generic_compressed_dwarf_sections [i];
-          }
-
-      old_flavour = current_flavour;
-    }
-}
-
 /* Dump the dwarf debugging information.  */
 
 static void
@@ -2274,8 +2182,6 @@ dump_dwarf (bfd *abfd)
     byte_get = byte_get_little_endian;
   else
     abort ();
-
-  check_mach_o_dwarf (abfd);
 
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {

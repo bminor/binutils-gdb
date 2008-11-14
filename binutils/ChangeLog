@@ -1,5 +1,16 @@
 2008-11-14  Tristan Gingold  <gingold@adacore.com>
 
+	Remove outdated mach-o specific tests.
+	* objdump.c (load_debug_section): Remove mach-o specific test.
+	(mach_o_uncompressed_dwarf_sections): Removed.
+	(mach_o_compressed_dwarf_sections): Removed.
+	(generic_uncompressed_dwarf_sections): Removed.
+	(generic_compressed_dwarf_sections): Removed.
+	(check_mach_o_dwarf): Removed.
+	(dump_dwarf): Remove call to check_mach_o_dwarf.
+
+2008-11-14  Tristan Gingold  <gingold@adacore.com>
+
 	* configure.com: Get version from configure.in of bfd.
 	* makefile.vms-in (DEBUG_OBJS): Add dwarf.obj.
 	(CFLAGS): Update flags.
