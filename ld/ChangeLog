@@ -1,3 +1,8 @@
+2008-11-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (spu_ovl.o_c): Add missing line continuations.
+	* Makefile.in: Regenerate.
+
 2008-11-06  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* configure.tgt: Add m32c-*-rtems* and m32r-*-rtems*.
