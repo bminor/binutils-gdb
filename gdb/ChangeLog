@@ -1,3 +1,8 @@
+2008-11-14  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* configure.tgt (sparc64-*-linux*): Added gdbserver support.
+	* regformats/reg-sparc64.dat: New file.
+
 2008-11-14  Tom Tromey  <tromey@redhat.com>
 
 	PR mi/2549:

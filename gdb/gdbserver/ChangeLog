@@ -1,3 +1,13 @@
+2008-11-14  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* Makefile.in (SFILES, clean): Added sparc64 files.
+	(reg-sparc64.o, reg-sparc64.c): New.
+	* configure.srv (sparc*-*-linux*): New configuration.
+	* linux-low.c (regsets_fetch_inferior_registers): Swap ptrace
+	syscall arguments for SPARC.
+	(regsets_store_inferior_registers): Likewise.
+	* linux-sparc-low.c: New file.
+
 2008-10-21  Doug Evans  <dje@google.com>
 
 	* Makefile.in (BFD_DIR,BFD,BFD_SRC,BFD_CFLAGS): Delete.

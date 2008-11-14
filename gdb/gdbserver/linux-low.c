@@ -1523,7 +1523,11 @@ regsets_fetch_inferior_registers ()
 	}
 
       buf = malloc (regset->size);
+#ifndef __sparc__
       res = ptrace (regset->get_request, inferior_pid, 0, buf);
+#else
+      res = ptrace (regset->get_request, inferior_pid, buf, 0);
+#endif
       if (res < 0)
 	{
 	  if (errno == EIO)
@@ -1576,7 +1580,11 @@ regsets_store_inferior_registers ()
       /* First fill the buffer with the current register set contents,
 	 in case there are any items in the kernel's regset that are
 	 not in gdbserver's regcache.  */
+#ifndef __sparc__
       res = ptrace (regset->get_request, inferior_pid, 0, buf);
+#else
+      res = ptrace (regset->get_request, inferior_pid, buf, 0);
+#endif
 
       if (res == 0)
 	{
@@ -1584,7 +1592,11 @@ regsets_store_inferior_registers ()
 	  regset->fill_function (buf);
 
 	  /* Only now do we write the register set.  */
-	  res = ptrace (regset->set_request, inferior_pid, 0, buf);
+#ifndef __sparc__
+          res = ptrace (regset->set_request, inferior_pid, 0, buf);
+#else
+          res = ptrace (regset->set_request, inferior_pid, buf, 0);
+#endif
 	}
 
       if (res < 0)

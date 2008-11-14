@@ -139,6 +139,11 @@ case "${target}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
+  sparc*-*-linux*)	srv_regobj=reg-sparc64.o
+			srv_tgtobj="linux-low.o linux-sparc-low.o"
+			srv_linux_regsets=yes
+			srv_linux_thread_db=yes
+			;;
   spu*-*-*)		srv_regobj=reg-spu.o
 			srv_tgtobj="spu-low.o"
 			;;
