@@ -124,7 +124,7 @@ gld_${EMULATION_NAME}_before_parse (void)
   config.dynamic_link = TRUE;
   config.has_shared = 1;
   link_info.pei386_auto_import = -1;
-  link_info.pei386_runtime_pseudo_reloc = -1;
+  link_info.pei386_runtime_pseudo_reloc = 2; /* Use by default version 2.  */
 
 #if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
   lang_default_entry ("_WinMainCRTStartup");
@@ -173,7 +173,9 @@ enum options
   OPTION_ENABLE_EXTRA_PE_DEBUG,
   OPTION_EXCLUDE_LIBS,
   OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC,
-  OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC
+  OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC,
+  OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1,
+  OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2
 };
 
 static void
@@ -230,6 +232,8 @@ gld${EMULATION_NAME}_add_options
     {"enable-extra-pep-debug", no_argument, NULL, OPTION_ENABLE_EXTRA_PE_DEBUG},
     {"enable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC},
     {"disable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC},
+    {"enable-runtime-pseudo-reloc-v1", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1},
+    {"enable-runtime-pseudo-reloc-v2", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2},
 #endif
     {NULL, no_argument, NULL, 0}
   };
@@ -600,10 +604,16 @@ gld${EMULATION_NAME}_handle_option (int optc)
       link_info.pei386_auto_import = 0;
       break;
     case OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC:
-      link_info.pei386_runtime_pseudo_reloc = 1;
+      link_info.pei386_runtime_pseudo_reloc = 2;
       break;
     case OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC:
       link_info.pei386_runtime_pseudo_reloc = 0;
+      break;
+    case OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1:
+      link_info.pei386_runtime_pseudo_reloc = 1;
+      break;
+    case OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2:
+      link_info.pei386_runtime_pseudo_reloc = 2;
       break;
     case OPTION_ENABLE_EXTRA_PE_DEBUG:
       pep_dll_extra_pe_debug = 1;
@@ -840,17 +850,55 @@ static int
 make_import_fixup (arelent *rel, asection *s)
 {
   struct bfd_symbol *sym = *rel->sym_ptr_ptr;
-  char addend[4];
+  char addend[8];
+  bfd_vma _addend = 0;
+  int suc = 0;
 
   if (pep_dll_extra_pe_debug)
     printf ("arelent: %s@%#lx: add=%li\n", sym->name,
 	    (unsigned long) rel->address, (long) rel->addend);
 
-  if (! bfd_get_section_contents (s->owner, s, addend, rel->address, sizeof (addend)))
+  memset (addend, 0, sizeof (addend));
+  switch ((rel->howto->bitsize))
+    {
+      case 8:
+        suc = bfd_get_section_contents (s->owner, s, addend, rel->address, 1);
+        if (suc && rel->howto->pc_relative)
+          _addend = (bfd_vma) ((bfd_signed_vma) ((char) bfd_get_8 (s->owner, addend)));
+        else if (suc)
+          _addend = ((bfd_vma) bfd_get_8 (s->owner, addend)) & 0xff;
+        break;
+      case 16:
+        suc = bfd_get_section_contents (s->owner, s, addend, rel->address, 2);
+        if (suc && rel->howto->pc_relative)
+          _addend = (bfd_vma) ((bfd_signed_vma) ((short) bfd_get_16 (s->owner, addend)));
+        else if (suc)
+          _addend = ((bfd_vma) bfd_get_16 (s->owner, addend)) & 0xffff;
+        break;
+      case 32:
+        suc = bfd_get_section_contents (s->owner, s, addend, rel->address, 4);
+        if (suc && rel->howto->pc_relative)
+          _addend = (bfd_vma) ((bfd_signed_vma) ((int) bfd_get_32 (s->owner, addend)));
+        else if (suc)
+          _addend = ((bfd_vma) bfd_get_32 (s->owner, addend)) & 0xffffffff;
+        break;
+      case 64:
+        suc = bfd_get_section_contents (s->owner, s, addend, rel->address, 8);
+        if (suc)
+          _addend = ((bfd_vma) bfd_get_64 (s->owner, addend));
+        break;
+    }
+  if (! suc)
     einfo (_("%C: Cannot get section contents - auto-import exception\n"),
 	   s->owner, s, rel->address);
 
-  pep_create_import_fixup (rel, s, bfd_get_32 (s->owner, addend));
+  if (pep_dll_extra_pe_debug)
+    {
+      printf ("import of 0x%lx(0x%lx) sec_addr=0x%lx", (long) _addend, (long) rel->addend, (long) rel->address);
+      if (rel->howto->pc_relative) printf (" pcrel");
+      printf (" %d bit rel.\n",(int) rel->howto->bitsize);
+  }
+  pep_create_import_fixup (rel, s, _addend);
 
   return 1;
 }

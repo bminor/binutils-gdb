@@ -1,5 +1,11 @@
 -*- text -*-
 
+* Add to the PE/PE+ targets the support of two different kinds of
+  pseudo-relocations.  They can be selected by the switches
+  --enable-runtime-pseudo-reloc-v1 and --enable-runtime-pseudo-reloc-v2.
+  For the switch --enable-runtime-pseudo-reloc it uses for 32-bit
+  runtime pseudo relocation version one, for 64-bit the version two.
+
 Changes in 2.19:
 
 * Linker scripts support a new INSERT command that makes it easier to

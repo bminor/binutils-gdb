@@ -1,3 +1,25 @@
+2008-11-14  Kai Tietz  <kai.tietz@onevision.com>
+
+	* emultempl/pep.em (..._before_parse): initialize
+	pei386_runtime_pseudo_reloc by version 2.
+	(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1): New option.
+	(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2): New option.
+	(make_import_fixup): Use relocation size to read addend.
+	* emultempl/pe.em (..._before_parse): initialize 
+	pei386_runtime_pseudo_reloc by version 1.
+	(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1): New option.
+	(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2): New option.
+	* pe-dll.c (pe-dll.h): Remove useless include.
+	(make_runtime_pseudo_reloc): Change addend to use bfd_vma.
+	Handle the two variants of pseudo-relocation.
+	(pe_create_import_fixup): Change addend to type bfd_vma.
+	Modify for the two pseudo_relocation variants.
+	(runtime_pseudp_reloc_v2_init): New static variable.
+	* pe-dll.h (pe_create_import_fixup): Change addend argument type 
+	to bfd_vma.
+	* pep-dll.h (pep_create_import_fixup): Likewise.
+	* NEWS: Add comment.
+
 2008-11-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (spu_ovl.o_c): Add missing line continuations.

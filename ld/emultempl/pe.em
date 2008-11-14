@@ -146,7 +146,7 @@ gld_${EMULATION_NAME}_before_parse (void)
   config.dynamic_link = TRUE;
   config.has_shared = 1;
   link_info.pei386_auto_import = -1;
-  link_info.pei386_runtime_pseudo_reloc = -1;
+  link_info.pei386_runtime_pseudo_reloc = 1; /* Use by default version 1.  */
 
 #if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
 #if defined TARGET_IS_mipspe || defined TARGET_IS_armpe || defined TARGET_IS_arm_wince_pe
@@ -203,6 +203,10 @@ gld_${EMULATION_NAME}_before_parse (void)
 					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC + 1)
 #define OPTION_LARGE_ADDRESS_AWARE \
 					(OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC + 1)
+#define OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1	\
+					(OPTION_LARGE_ADDRESS_AWARE + 1)
+#define OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2	\
+					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1 + 1)
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -255,6 +259,8 @@ gld${EMULATION_NAME}_add_options
     {"enable-extra-pe-debug", no_argument, NULL, OPTION_ENABLE_EXTRA_PE_DEBUG},
     {"enable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC},
     {"disable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC},
+    {"enable-runtime-pseudo-reloc-v1", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1},
+    {"enable-runtime-pseudo-reloc-v2", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2},
 #endif
     {"large-address-aware", no_argument, NULL, OPTION_LARGE_ADDRESS_AWARE},
     {NULL, no_argument, NULL, 0}
@@ -638,6 +644,12 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
     case OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC:
       link_info.pei386_runtime_pseudo_reloc = 1;
+      break;
+    case OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1:
+      link_info.pei386_runtime_pseudo_reloc = 1;
+      break;
+    case OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2:
+      link_info.pei386_runtime_pseudo_reloc = 2;
       break;
     case OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC:
       link_info.pei386_runtime_pseudo_reloc = 0;

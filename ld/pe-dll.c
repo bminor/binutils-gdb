@@ -40,7 +40,6 @@
 #include "coff/internal.h"
 #include "../bfd/libcoff.h"
 #include "deffile.h"
-#include "pe-dll.h"
 
 #ifdef pe_use_x86_64
 
@@ -165,6 +164,7 @@ static struct bfd_section *edata_s, *reloc_s;
 static unsigned char *edata_d, *reloc_d;
 static size_t edata_sz, reloc_sz;
 static int runtime_pseudo_relocs_created = 0;
+static int runtime_pseudp_reloc_v2_init = 0;
 
 typedef struct
 {
@@ -2264,14 +2264,14 @@ make_import_fixup_entry (const char *name,
 static bfd *
 make_runtime_pseudo_reloc (const char *name ATTRIBUTE_UNUSED,
 			   const char *fixup_name,
-			   int addend,
+			   bfd_vma addend ATTRIBUTE_UNUSED,
+			   bfd_vma bitsize,
 			   bfd *parent)
 {
   asection *rt_rel;
   unsigned char *rt_rel_d;
   char *oname;
   bfd *abfd;
-
   oname = xmalloc (20);
   sprintf (oname, "rtr%06d.o", tmp_seq);
   tmp_seq++;
@@ -2290,19 +2290,47 @@ make_runtime_pseudo_reloc (const char *name ATTRIBUTE_UNUSED,
 
   quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
 
-  bfd_set_section_size (abfd, rt_rel, 8);
-  rt_rel_d = xmalloc (8);
-  rt_rel->contents = rt_rel_d;
-  memset (rt_rel_d, 0, 8);
-  bfd_put_32 (abfd, addend, rt_rel_d);
+  if (link_info.pei386_runtime_pseudo_reloc == 2)
+    {
+	  size_t size = 12;
+	  if (! runtime_pseudp_reloc_v2_init)
+	    {
+		  size += 12;
+		  runtime_pseudp_reloc_v2_init = 1;
+	    }
+      quick_symbol (abfd, U ("_imp_"), name, "", UNDSEC, BSF_GLOBAL, 0);
 
-  quick_reloc (abfd, 4, BFD_RELOC_RVA, 1);
-  save_relocs (rt_rel);
+      bfd_set_section_size (abfd, rt_rel, size);
+      rt_rel_d = xmalloc (size);
+      rt_rel->contents = rt_rel_d;
+      memset (rt_rel_d, 0, size);
+	  quick_reloc (abfd, size - 8, BFD_RELOC_RVA, 1);
+	  quick_reloc (abfd, size - 12, BFD_RELOC_RVA, 2);
+	  bfd_put_32 (abfd, bitsize, rt_rel_d + (size - 4));
+	  if (size != 12)
+	    bfd_put_32 (abfd, 1, rt_rel_d + 8);
+      save_relocs (rt_rel);
 
-  bfd_set_symtab (abfd, symtab, symptr);
+      bfd_set_symtab (abfd, symtab, symptr);
 
-  bfd_set_section_contents (abfd, rt_rel, rt_rel_d, 0, 8);
+      bfd_set_section_contents (abfd, rt_rel, rt_rel_d, 0, size);
+   }
+  else
+   {
+      bfd_set_section_size (abfd, rt_rel, 8);
+      rt_rel_d = xmalloc (8);
+      rt_rel->contents = rt_rel_d;
+      memset (rt_rel_d, 0, 8);
 
+      bfd_put_32 (abfd, addend, rt_rel_d);
+      quick_reloc (abfd, 4, BFD_RELOC_RVA, 1);
+
+      save_relocs (rt_rel);
+
+      bfd_set_symtab (abfd, symtab, symptr);
+
+      bfd_set_section_contents (abfd, rt_rel, rt_rel_d, 0, 8);
+   }
   bfd_make_readable (abfd);
   return abfd;
 }
@@ -2352,7 +2380,7 @@ pe_create_runtime_relocator_reference (bfd *parent)
 }
 
 void
-pe_create_import_fixup (arelent *rel, asection *s, int addend)
+pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend)
 {
   char buf[300];
   struct bfd_symbol *sym = *rel->sym_ptr_ptr;
@@ -2385,31 +2413,30 @@ pe_create_import_fixup (arelent *rel, asection *s, int addend)
       add_bfd_to_link (b, b->filename, &link_info);
     }
 
-  if (addend != 0)
-    {
-      if (link_info.pei386_runtime_pseudo_reloc)
-	{
-	  if (pe_dll_extra_pe_debug)
-	    printf ("creating runtime pseudo-reloc entry for %s (addend=%d)\n",
-		   fixup_name, addend);
-	  b = make_runtime_pseudo_reloc (name, fixup_name, addend,
-					 link_info.output_bfd);
-	  add_bfd_to_link (b, b->filename, &link_info);
+    if ((link_info.pei386_runtime_pseudo_reloc != 0 && addend != 0)
+        || link_info.pei386_runtime_pseudo_reloc == 2)
+      {
+	if (pe_dll_extra_pe_debug)
+	  printf ("creating runtime pseudo-reloc entry for %s (addend=%d)\n",
+	          fixup_name, (int) addend);
 
-	  if (runtime_pseudo_relocs_created == 0)
-	    {
-	      b = pe_create_runtime_relocator_reference (link_info.output_bfd);
-	      add_bfd_to_link (b, b->filename, &link_info);
-	    }
-	  runtime_pseudo_relocs_created++;
-	}
-      else
-	{
-	  einfo (_("%C: variable '%T' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"),
-		 s->owner, s, rel->address, sym->name);
-	  einfo ("%X");
-	}
-    }
+	b = make_runtime_pseudo_reloc (name, fixup_name, addend, rel->howto->bitsize,
+				       link_info.output_bfd);
+	add_bfd_to_link (b, b->filename, &link_info);
+
+	if (runtime_pseudo_relocs_created == 0)
+	  {
+	    b = pe_create_runtime_relocator_reference (link_info.output_bfd);
+	    add_bfd_to_link (b, b->filename, &link_info);
+	  }
+	runtime_pseudo_relocs_created++;
+      }
+    else if (addend != 0)
+      {
+	einfo (_("%C: variable '%T' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"),
+	       s->owner, s, rel->address, sym->name);
+	einfo ("%X");
+      }
 }
 
 

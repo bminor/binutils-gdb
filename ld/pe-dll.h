@@ -59,7 +59,7 @@ extern void pe_exe_fill_sections
 extern void pe_walk_relocs_of_symbol
   (struct bfd_link_info *, const char *, int (*) (arelent *, asection *));
 extern void pe_create_import_fixup
-  (arelent * rel, asection *, int);
+  (arelent * rel, asection *, bfd_vma);
 extern bfd_boolean pe_bfd_is_dll
   (bfd *);
 
