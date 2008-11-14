@@ -1,3 +1,9 @@
+2008-11-14  Peter Jansen  <pwjansen@yahoo.com>
+
+	PR 7026
+	* config/tc-arm.c: Ensure that all uses of as_bad have a
+	formatting string.
+
 2008-11-12  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c (cris_number_to_imm): Except for
