@@ -1,3 +1,10 @@
+2008-11-14  Bob Wilson  <bob.wilson@acm.org>
+
+	* xtensa-modules.c (xtensa_state_id): New enum, replacing STATE macros.
+	(xtensa_field_id, xtensa_regfile_id, xtensa_operand_id)
+	(xtensa_iclass_id, xtensa_opcode_id): New enums.
+	Replace hardcoded constants throughout this file with enum values.
+
 2008-11-14  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf.c (assign_file_positions_for_load_sections): Use header_size
