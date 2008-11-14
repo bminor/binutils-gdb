@@ -212,8 +212,7 @@ _bfd_vms_write_hdr (bfd *abfd, int objtype)
       char *fname, *fout, *fptr;
 
       fptr = bfd_get_filename (abfd);
-      fname = alloca (strlen (fptr) + 1);
-      strcpy (fname, fptr);
+      fname = strdup (fptr);
       fout = strrchr (fname, ']');
       if (fout == 0)
 	fout = strchr (fname, ':');
@@ -238,6 +237,7 @@ _bfd_vms_write_hdr (bfd *abfd, int objtype)
 	    *fptr = 0;
 	}
       _bfd_vms_output_counted (abfd, fout);
+      free (fname);
     }
   else
     _bfd_vms_output_counted (abfd, "NONAME");

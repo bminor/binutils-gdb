@@ -1,3 +1,16 @@
+2008-11-14  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.com: Handle bfd_default_target_size, BFD_HOST_LONG_LONG, 
+	BFD_HOST_64BIT_LONG_LONG, BFD_HOSTPTR_T, bfd_file_ptr.
+	Generate bfdver.h.
+	* vms-hdr.c (_bfd_vms_write_hdr): Use strdup/free instead of alloca.
+	* hosts/alphavms.h: Defines macros to bypass i18n.
+	* makefile.vms (OBJS): Update file list.
+	(DEFS): Remove VMS_DEBUG, const, add DEBUGDIR.
+	(CFLAGS): Update flags.
+	* bfdio.c (real_fopen): Add code specific to VMS: extract attributes
+	from modes.
+
 2008-11-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.in: Deactivate large-file support on native 32bit
@@ -15,10 +28,6 @@
 
 	PR 7023
 	* elf.c (bfd_section_from_shdr <SHT_SYMTAB>): Fail on invalid sh_info.
-
-2008-11-12  Tristan Gingold  <gingold@adacore.com>
-
-	* bfd.c (bfd_get_sign_extend_vma): Return 0 for mach-o.
 
 2008-11-11  Alan Modra  <amodra@bigpond.net.au>
 

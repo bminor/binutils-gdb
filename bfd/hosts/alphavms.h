@@ -34,6 +34,7 @@
 #include <time.h>
 
 #include "bfd.h"
+#include "filenames.h"
 
 #ifndef BFD_HOST_64_BIT
 /* Make the basic types 64-bit quantities on the host.
@@ -67,3 +68,12 @@ typedef BFD_HOST_64_BIT int64_type;
 #endif
 
 extern int getpagesize PARAMS ((void));
+
+/* No intl.  */
+#define gettext(Msgid) (Msgid)
+#define dgettext(Domainname, Msgid) (Msgid)
+#define dcgettext(Domainname, Msgid, Category) (Msgid)
+#define textdomain(Domainname) while (0) /* nothing */
+#define bindtextdomain(Domainname, Dirname) while (0) /* nothing */
+#define _(String) (String)
+#define N_(String) (String)

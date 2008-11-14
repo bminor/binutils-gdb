@@ -53,9 +53,9 @@ $DECK
 !
 ! Get VERSION from configure.in
 !
-   mfile := CREATE_BUFFER("mfile", "CONFIGURE.IN");
+   mfile := CREATE_BUFFER("mfile", "[-.bfd]CONFIGURE.IN");
    rang := CREATE_RANGE(BEGINNING_OF(mfile), END_OF(mfile));
-   match_pos := SEARCH_QUIETLY('AM_INIT_AUTOMAKE(binutils, ', FORWARD, EXACT, rang);
+   match_pos := SEARCH_QUIETLY('AM_INIT_AUTOMAKE(bfd, ', FORWARD, EXACT, rang);
    IF match_pos <> 0 THEN;
      POSITION(BEGINNING_OF(match_pos));
      ERASE(match_pos);
