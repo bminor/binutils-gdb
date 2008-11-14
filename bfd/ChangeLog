@@ -1,3 +1,9 @@
+2008-11-14  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	PR 7022
+	* elf32-avr.c (bfd_elf_avr_final_write_processing):
+	Add missing break statements.
+
 2008-11-14  Bob Wilson  <bob.wilson@acm.org>
 
 	* xtensa-modules.c (xtensa_state_id): New enum, replacing STATE macros.
