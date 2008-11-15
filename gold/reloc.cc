@@ -274,7 +274,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       sr.sh_type = sh_type;
       sr.reloc_count = reloc_count;
       sr.output_section = os;
-      sr.needs_special_offset_handling = out_offsets[shndx] == -1U;
+      sr.needs_special_offset_handling = out_offsets[shndx] == invalid_address;
       sr.is_data_section_allocated = is_section_allocated;
     }
 

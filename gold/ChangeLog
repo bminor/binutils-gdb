@@ -1,3 +1,8 @@
+2008-11-14  Cary Coutant  <ccoutant@google.com>
+
+	* reloc.cc (Sized_relobj::do_read_relocs): Use constant invalid_address
+	instead of -1U.
+
 2008-11-05  Craig Silverstein  <csilvers@google.com>
 
 	* options.cc (General_options::parse_dynamic_list): New function.
