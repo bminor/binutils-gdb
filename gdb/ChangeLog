@@ -1,5 +1,13 @@
 2008-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	From  Jerome Guitton  <guitton@adacore.com>
+	* dwarf2read.c (dwarf2_debug_line_missing_end_sequence_complaint):
+	New function.
+	(dwarf_decode_lines): Detect null file numbers. Detect the end of
+	the line program sequence when no end sequence is emitted.
+
+2008-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp): Improve handling of integer
 	type dereferencing.
 

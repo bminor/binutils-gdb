@@ -700,6 +700,13 @@ dwarf2_debug_line_missing_file_complaint (void)
 }
 
 static void
+dwarf2_debug_line_missing_end_sequence_complaint (void)
+{
+  complaint (&symfile_complaints,
+	     _(".debug_line section has line program sequence without an end"));
+}
+
+static void
 dwarf2_complex_location_expr_complaint (void)
 {
   complaint (&symfile_complaints, _("location expression too complex"));
@@ -7092,6 +7099,11 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	{
 	  op_code = read_1_byte (abfd, line_ptr);
 	  line_ptr += 1;
+          if (line_ptr > line_end)
+            {
+              dwarf2_debug_line_missing_end_sequence_complaint ();
+              break;
+            }
 
 	  if (op_code >= lh->opcode_base)
 	    {		
@@ -7100,7 +7112,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      address += (adj_opcode / lh->line_range)
 		* lh->minimum_instruction_length;
 	      line += lh->line_base + (adj_opcode % lh->line_range);
-	      if (lh->num_file_names < file)
+	      if (lh->num_file_names < file || file == 0)
 		dwarf2_debug_line_missing_file_complaint ();
 	      else
 		{
@@ -7132,15 +7144,6 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		{
 		case DW_LNE_end_sequence:
 		  end_sequence = 1;
-
-		  if (lh->num_file_names < file)
-		    dwarf2_debug_line_missing_file_complaint ();
-		  else
-		    {
-		      lh->file_names[file - 1].included_p = 1;
-		      if (!decode_for_pst_p)
-			record_line (current_subfile, 0, address);
-		    }
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (abfd, line_ptr, cu, &bytes_read);
@@ -7182,7 +7185,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		}
 	      break;
 	    case DW_LNS_copy:
-	      if (lh->num_file_names < file)
+	      if (lh->num_file_names < file || file == 0)
 		dwarf2_debug_line_missing_file_complaint ();
 	      else
 		{
@@ -7220,7 +7223,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 
                 file = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
                 line_ptr += bytes_read;
-                if (lh->num_file_names < file)
+                if (lh->num_file_names < file || file == 0)
                   dwarf2_debug_line_missing_file_complaint ();
                 else
                   {
@@ -7271,6 +7274,14 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      }
 	    }
 	}
+      if (lh->num_file_names < file || file == 0)
+        dwarf2_debug_line_missing_file_complaint ();
+      else
+        {
+          lh->file_names[file - 1].included_p = 1;
+          if (!decode_for_pst_p)
+            record_line (current_subfile, 0, address);
+        }
     }
 
   if (decode_for_pst_p)
