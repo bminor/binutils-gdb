@@ -352,6 +352,8 @@ static int no_idata4;
 static int no_idata5;
 static char *exp_name;
 static char *imp_name;
+static char *identify_imp_name;
+static char *identify_dll_name;
 static char *head_label;
 static char *imp_name_lab;
 static char *dll_name;
@@ -724,6 +726,11 @@ static bfd *make_one_lib_file (export_type *, int);
 static bfd *make_head (void);
 static bfd *make_tail (void);
 static void gen_lib_file (void);
+static void identify_dll_for_implib (void);
+static void identify_search_archive (bfd*);
+static void identify_search_member (bfd*, bfd*);
+static bfd_boolean identify_process_section_p (asection *);
+static void identify_search_section (bfd *, asection *, void *);
 static int pfunc (const void *, const void *);
 static int nfunc (const void *, const void *);
 static void remove_null_names (export_type **);
@@ -2918,6 +2925,193 @@ gen_lib_file (void)
   inform (_("Created lib file"));
 }
 
+/* identify_dll_for_implib
+
+   This is the main implementation for the --identify option.
+   Given the name of an import library in identify_imp_name,
+   search all archive members for an .idata$7 section
+   (.idata$6 on PPC). This section will consist of a single
+   char* constant, indicating the name of the DLL represented
+   by the import library.
+
+   It is possible to construct an import library that has
+   two members with a non-empty .idata$7 section, but these
+   are not often seen in normal operation.  In this case,
+   an error is flagged.
+*/   
+static void 
+identify_dll_for_implib (void)
+{
+  bfd* abfd = NULL;
+
+  bfd_init ();
+
+  abfd = bfd_openr (identify_imp_name, 0);
+  if (abfd == NULL)
+    {
+      bfd_fatal (identify_imp_name);
+    }
+  if (!bfd_check_format (abfd, bfd_archive))
+    {
+      if (!bfd_close (abfd))
+        bfd_fatal (identify_imp_name);
+
+      fatal ("%s is not a library", identify_imp_name);
+    }
+
+  identify_search_archive (abfd);
+
+  if (!bfd_close (abfd))
+    bfd_fatal (identify_imp_name);
+
+  if (identify_dll_name && *identify_dll_name)
+    {
+      printf ("%s\n",identify_dll_name);
+      free (identify_dll_name);
+      identify_dll_name = NULL;
+    }
+  else
+    {
+      fatal ("Unable to determine dll name for %s (not an import library?)", identify_imp_name);
+    }
+}
+
+/* identify_search_archive
+
+   Loop over all members of the archive, inspecting 
+   each for the presence of an .idata$7 (.idata$6 on PPC)
+   section with non-empty contents.
+*/   
+static void
+identify_search_archive (bfd* abfd)
+{
+  bfd *arfile = NULL;
+  bfd *last_arfile = NULL;
+  char **matching;
+
+  while (1)
+    {
+      arfile = bfd_openr_next_archived_file (abfd, arfile);
+
+      if (arfile == NULL)
+        {
+          if (bfd_get_error () != bfd_error_no_more_archived_files)
+            bfd_fatal (bfd_get_filename (abfd));
+          break;
+        }
+      if (bfd_check_format_matches (arfile, bfd_object, &matching))
+        {
+          identify_search_member (arfile, abfd);
+        }
+      else
+        {
+          bfd_nonfatal (bfd_get_filename (arfile));
+          free (matching);
+        }
+      if (last_arfile != NULL)
+        {
+          bfd_close (last_arfile);
+        }
+      last_arfile = arfile;
+    }
+
+  if (last_arfile != NULL)
+    {
+      bfd_close (last_arfile);
+    }
+}
+
+/* identify_search_member
+
+   Search all sections of an archive member for the 
+   one with section name of .idata$7 (.idata$6 on PPC)
+   and non-empty contents.
+*/   
+static void
+identify_search_member (bfd* abfd, bfd* archive_bfd ATTRIBUTE_UNUSED)
+{
+  bfd_map_over_sections (abfd, identify_search_section, NULL);
+}
+
+/* identify_process_section_p
+
+   This predicate returns true if section->name
+   is .idata$7 (.idata$6 on PPC).
+*/   
+static bfd_boolean
+identify_process_section_p (asection * section)
+{
+  static const char * SECTION_NAME =
+#ifdef DLLTOOL_PPC
+  /* dllname is stored in idata$6 on PPC */
+  ".idata$6";
+#else
+  ".idata$7";
+#endif
+
+  if (strcmp (SECTION_NAME, section->name) == 0)
+    return TRUE;
+  return FALSE;
+}
+
+/* identify_search_section
+
+   If *section has contents and its name is .idata$7
+   (.data$6 on PPC) then store the contents in 
+   identify_dll_name as an xmalloc'ed array.
+
+   However, if identify_dll_name already has
+   a value, flag an error. We don't know how to handle
+   import libraries that directly reference more than
+   one DLL. (This is different than forwarded symbols.
+   Such import libraries are not seen in normal operation,
+   and must be specifically constructed.)
+*/   
+static void
+identify_search_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
+{
+  bfd_byte *data = 0;
+  bfd_size_type datasize;
+
+  if ((section->flags & SEC_HAS_CONTENTS) == 0)
+    return;
+
+  if (! identify_process_section_p (section))
+    return;
+
+  if ((datasize = bfd_section_size (abfd, section)) == 0)
+    return;
+
+  data = (bfd_byte*) xmalloc (datasize + 1);
+  data[0] = '\0';
+
+  bfd_get_section_contents (abfd, section, data, 0, datasize);
+  data[datasize] = '\0';
+
+  if (data[0] != '\0')
+    {
+      if (identify_dll_name != NULL)
+        {
+          if (*identify_dll_name != '\0')
+            {
+              /* The import library specifies two different DLLs.
+                 Treat this as an error. */
+              fatal ("Import library `%s' specifies two or more dlls: `%s' and `%s'",
+                     identify_imp_name, identify_dll_name, data);
+            }
+          else
+            {
+              /* For some reason memory was allocated, but the
+                 contents were empty. Free the memory and continue. */
+              free (identify_dll_name);
+            }
+        }
+      identify_dll_name = (char*) xstrdup (data);
+    }
+
+  free (data);
+}
+
 /* Run through the information gathered from the .o files and the
    .def file and work out the best stuff.  */
 
@@ -3171,6 +3365,7 @@ usage (FILE *file, int status)
   fprintf (file, _("   -C --compat-implib        Create backward compatible import library.\n"));
   fprintf (file, _("   -n --no-delete            Keep temp files (repeat for extra preservation).\n"));
   fprintf (file, _("   -t --temp-prefix <prefix> Use <prefix> to construct temp file names.\n"));
+  fprintf (file, _("   -I --identify <implib>    Report the name of the DLL associated with <implib>.\n"));
   fprintf (file, _("   -v --verbose              Be verbose.\n"));
   fprintf (file, _("   -V --version              Display the program version.\n"));
   fprintf (file, _("   -h --help                 Display this information.\n"));
@@ -3211,6 +3406,7 @@ static const struct option long_options[] =
   {"kill-at", no_argument, NULL, 'k'},
   {"add-stdcall-alias", no_argument, NULL, 'A'},
   {"ext-prefix-alias", required_argument, NULL, 'p'},
+  {"identify", required_argument, NULL, 'I'},
   {"verbose", no_argument, NULL, 'v'},
   {"version", no_argument, NULL, 'V'},
   {"help", no_argument, NULL, 'h'},
@@ -3249,9 +3445,9 @@ main (int ac, char **av)
 
   while ((c = getopt_long (ac, av,
 #ifdef DLLTOOL_MCORE_ELF
-			   "m:e:l:aD:d:z:b:xp:cCuUkAS:f:nvVHhM:L:F:",
+			   "m:e:l:aD:d:z:b:xp:cCuUkAS:f:nI:vVHhM:L:F:",
 #else
-			   "m:e:l:aD:d:z:b:xp:cCuUkAS:f:nvVHh",
+			   "m:e:l:aD:d:z:b:xp:cCuUkAS:f:nI:vVHh",
 #endif
 			   long_options, 0))
 	 != EOF)
@@ -3316,6 +3512,9 @@ main (int ac, char **av)
 	  break;
 	case 'm':
 	  mname = optarg;
+	  break;
+	case 'I':
+	  identify_imp_name = optarg;
 	  break;
 	case 'v':
 	  verbose = 1;
@@ -3439,6 +3638,11 @@ main (int ac, char **av)
 
   if (output_def)
     gen_def_file ();
+
+  if (identify_imp_name)
+    {
+      identify_dll_for_implib ();
+    }
 
 #ifdef DLLTOOL_MCORE_ELF
   if (mcore_elf_out_file)
