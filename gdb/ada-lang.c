@@ -9204,12 +9204,18 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg1 = ada_coerce_ref (arg1);     /* FIXME: What is this for?? */
       type = ada_check_typedef (value_type (arg1));
 
-      if (TYPE_CODE (type) == TYPE_CODE_INT && expect_type != NULL)
-	  /* GDB allows dereferencing an int.  We give it the expected
-	     type (which will be set in the case of a coercion or
-	     qualification). */
-	return ada_value_ind (value_cast (lookup_pointer_type (expect_type),
-					  arg1));
+      if (TYPE_CODE (type) == TYPE_CODE_INT)
+          /* GDB allows dereferencing an int.  If we were given
+             the expect_type, then use that as the target type.
+             Otherwise, assume that the target type is an int.  */
+        {
+          if (expect_type != NULL)
+	    return ada_value_ind (value_cast (lookup_pointer_type (expect_type),
+					      arg1));
+	  else
+	    return value_at_lazy (builtin_type (exp->gdbarch)->builtin_int,
+				  (CORE_ADDR) value_as_address (arg1));
+        }
 
       if (ada_is_array_descriptor_type (type))
         /* GDB allows dereferencing GNAT array descriptors.  */

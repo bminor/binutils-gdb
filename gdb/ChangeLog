@@ -1,3 +1,8 @@
+2008-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp): Improve handling of integer
+	type dereferencing.
+
 2008-11-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention sparc64-linux-gnu gdbserver support.
