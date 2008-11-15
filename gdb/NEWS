@@ -85,6 +85,9 @@ are treated as the standard definitions, regardless of context.
   - gdbserver uses the new noack protocol mode for TCP connections to
   reduce communications latency, if also supported and enabled in GDB.
 
+  - Support for the sparc64-linux-gnu target is now included in
+  gdbserver.
+
 * Python scripting
 
   GDB now has support for scripting using Python.  Whether this is

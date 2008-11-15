@@ -1,3 +1,7 @@
+2008-11-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* NEWS: Mention sparc64-linux-gnu gdbserver support.
+
 2008-11-14  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* configure.tgt (sparc64-*-linux*): Added gdbserver support.
