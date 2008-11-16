@@ -3106,7 +3106,7 @@ identify_search_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNU
               free (identify_dll_name);
             }
         }
-      identify_dll_name = (char*) xstrdup (data);
+      identify_dll_name = xstrdup ((char*) data);
     }
 
   free (data);
