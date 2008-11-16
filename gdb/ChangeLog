@@ -1,5 +1,13 @@
 2008-11-16  Joel Brobecker  <brobecker@adacore.com>
 
+	Remove some unused macros related to the old load/unload catchpoints.
+
+	* breakpoint.c (SOLIB_LOADED_LIBRARY_PATHNAME)
+	(SOLIB_UNLOADED_LIBRARY_PATHNAME, SOLIB_CREATE_CATCH_LOAD_HOOK)
+	(SOLIB_CREATE_CATCH_UNLOAD_HOOK): Delete. No longer used.
+
+2008-11-16  Joel Brobecker  <brobecker@adacore.com>
+
 	Remove support for catch load and catch unload commands.
 
 	* breakpoint.h (enum bptype): Remove bp_catch_load and bp_catch_unload.

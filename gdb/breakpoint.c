@@ -325,59 +325,6 @@ VEC(bp_location_p) *moribund_locations = NULL;
 
 int breakpoint_count;
 
-/* This function returns a pointer to the string representation of the
-   pathname of the dynamically-linked library that has just been
-   loaded.
-
-   This function must be used only when SOLIB_HAVE_LOAD_EVENT is TRUE,
-   or undefined results are guaranteed.
-
-   This string's contents are only valid immediately after the
-   inferior has stopped in the dynamic linker hook, and becomes
-   invalid as soon as the inferior is continued.  Clients should make
-   a copy of this string if they wish to continue the inferior and
-   then access the string.  */
-
-#ifndef SOLIB_LOADED_LIBRARY_PATHNAME
-#define SOLIB_LOADED_LIBRARY_PATHNAME(pid) ""
-#endif
-
-/* This function returns a pointer to the string representation of the
-   pathname of the dynamically-linked library that has just been
-   unloaded.
-
-   This function must be used only when SOLIB_HAVE_UNLOAD_EVENT is
-   TRUE, or undefined results are guaranteed.
-
-   This string's contents are only valid immediately after the
-   inferior has stopped in the dynamic linker hook, and becomes
-   invalid as soon as the inferior is continued.  Clients should make
-   a copy of this string if they wish to continue the inferior and
-   then access the string.  */
-
-#ifndef SOLIB_UNLOADED_LIBRARY_PATHNAME
-#define SOLIB_UNLOADED_LIBRARY_PATHNAME(pid) ""
-#endif
-
-/* This function is called by the "catch load" command.  It allows the
-   debugger to be notified by the dynamic linker when a specified
-   library file (or any library file, if filename is NULL) is loaded.  */
-
-#ifndef SOLIB_CREATE_CATCH_LOAD_HOOK
-#define SOLIB_CREATE_CATCH_LOAD_HOOK(pid,tempflag,filename,cond_string) \
-   error (_("catch of library loads not yet implemented on this platform"))
-#endif
-
-/* This function is called by the "catch unload" command.  It allows
-   the debugger to be notified by the dynamic linker when a specified
-   library file (or any library file, if filename is NULL) is
-   unloaded.  */
-
-#ifndef SOLIB_CREATE_CATCH_UNLOAD_HOOK
-#define SOLIB_CREATE_CATCH_UNLOAD_HOOK(pid, tempflag, filename, cond_string) \
-   error (_("catch of library unloads not yet implemented on this platform"))
-#endif
-
 /* Return whether a breakpoint is an active enabled breakpoint.  */
 static int
 breakpoint_enabled (struct breakpoint *b)
