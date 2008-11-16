@@ -1937,19 +1937,7 @@ breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
 int
 ep_is_catchpoint (struct breakpoint *ep)
 {
-  return (ep->type == bp_catchpoint)
-    || (ep->type == bp_catch_load)
-    || (ep->type == bp_catch_unload);
-
-  /* ??rehrauer: Add more kinds here, as are implemented... */
-}
-
-int
-ep_is_shlib_catchpoint (struct breakpoint *ep)
-{
-  return
-    (ep->type == bp_catch_load)
-    || (ep->type == bp_catch_unload);
+  return (ep->type == bp_catchpoint);
 }
 
 void 
@@ -2319,22 +2307,6 @@ print_it_typical (bpstat bs)
       /* By analogy with the thread event, GDB should not stop for these. */
       printf_filtered (_("Overlay Event Breakpoint: gdb should not stop!\n"));
       return PRINT_NOTHING;
-      break;
-
-    case bp_catch_load:
-      annotate_catchpoint (b->number);
-      printf_filtered (_("\nCatchpoint %d (loaded %s), "),
-		       b->number,
-		       b->triggered_dll_pathname);
-      return PRINT_SRC_AND_LOC;
-      break;
-
-    case bp_catch_unload:
-      annotate_catchpoint (b->number);
-      printf_filtered (_("\nCatchpoint %d (unloaded %s), "),
-		       b->number,
-		       b->triggered_dll_pathname);
-      return PRINT_SRC_AND_LOC;
       break;
 
     case bp_watchpoint:
@@ -2787,33 +2759,6 @@ bpstat_check_location (const struct bp_location *bl, CORE_ADDR bp_addr)
 	  && !section_is_mapped (bl->section))
 	return 0;
     }
-
-  /* Is this a catchpoint of a load or unload?  If so, did we
-     get a load or unload of the specified library?  If not,
-     ignore it. */
-  if ((b->type == bp_catch_load)
-#if defined(SOLIB_HAVE_LOAD_EVENT)
-      && (!SOLIB_HAVE_LOAD_EVENT (PIDGET (inferior_ptid))
-	  || ((b->dll_pathname != NULL)
-	      && (strcmp (b->dll_pathname, 
-			  SOLIB_LOADED_LIBRARY_PATHNAME (
-			    PIDGET (inferior_ptid)))
-		  != 0)))
-#endif
-      )
-    return 0;
-  
-  if ((b->type == bp_catch_unload)
-#if defined(SOLIB_HAVE_UNLOAD_EVENT)
-      && (!SOLIB_HAVE_UNLOAD_EVENT (PIDGET (inferior_ptid))
-	  || ((b->dll_pathname != NULL)
-	      && (strcmp (b->dll_pathname, 
-			  SOLIB_UNLOADED_LIBRARY_PATHNAME (
-			    PIDGET (inferior_ptid)))
-		  != 0)))
-#endif
-      )
-    return 0;
 
   if (b->type == bp_catchpoint)
     {
@@ -3336,16 +3281,6 @@ bpstat_what (bpstat bs)
 	case bp_overlay_event:
 	  bs_class = bp_nostop;
 	  break;
-	case bp_catch_load:
-	case bp_catch_unload:
-	  /* Only if this catchpoint triggered should we cause the
-	     step-out-of-dld behaviour.  Otherwise, we ignore this
-	     catchpoint.  */
-	  if (bs->stop)
-	    bs_class = catch_shlib_event;
-	  else
-	    bs_class = no_effect;
-	  break;
 	case bp_catchpoint:
 	  if (bs->stop)
 	    {
@@ -3387,67 +3322,6 @@ bpstat_should_step (void)
 }
 
 
-
-/* Given a bpstat that records zero or more triggered eventpoints, this
-   function returns another bpstat which contains only the catchpoints
-   on that first list, if any. */
-void
-bpstat_get_triggered_catchpoints (bpstat ep_list, bpstat *cp_list)
-{
-  struct bpstats root_bs[1];
-  bpstat bs = root_bs;
-  struct breakpoint *ep;
-  char *dll_pathname;
-
-  bpstat_clear (cp_list);
-  root_bs->next = NULL;
-
-  for (; ep_list != NULL; ep_list = ep_list->next)
-    {
-      /* Is this eventpoint a catchpoint?  If not, ignore it. */
-      ep = ep_list->breakpoint_at->owner;
-      if (ep == NULL)
-	break;
-      if ((ep->type != bp_catch_load) &&
-	  (ep->type != bp_catch_unload))
-	/* pai: (temp) ADD fork/vfork here!!  */
-	continue;
-
-      /* Yes; add it to the list. */
-      bs = bpstat_alloc (ep_list->breakpoint_at, bs);
-      *bs = *ep_list;
-      bs->next = NULL;
-      bs = root_bs->next;
-
-#if defined(SOLIB_ADD)
-      /* Also, for each triggered catchpoint, tag it with the name of
-         the library that caused this trigger.  (We copy the name now,
-         because it's only guaranteed to be available NOW, when the
-         catchpoint triggers.  Clients who may wish to know the name
-         later must get it from the catchpoint itself.) */
-      if (ep->triggered_dll_pathname != NULL)
-	xfree (ep->triggered_dll_pathname);
-      if (ep->type == bp_catch_load)
-	dll_pathname = SOLIB_LOADED_LIBRARY_PATHNAME (
-	                 PIDGET (inferior_ptid));
-      else
-	dll_pathname = SOLIB_UNLOADED_LIBRARY_PATHNAME (
-	                 PIDGET (inferior_ptid));
-#else
-      dll_pathname = NULL;
-#endif
-      if (dll_pathname)
-	{
-	  ep->triggered_dll_pathname = (char *) 
-	    xmalloc (strlen (dll_pathname) + 1);
-	  strcpy (ep->triggered_dll_pathname, dll_pathname);
-	}
-      else
-	ep->triggered_dll_pathname = NULL;
-    }
-
-  *cp_list = bs;
-}
 
 static void print_breakpoint_location (struct breakpoint *b,
 				       struct bp_location *loc,
@@ -3525,8 +3399,6 @@ print_one_breakpoint_location (struct breakpoint *b,
     {bp_thread_event, "thread events"},
     {bp_overlay_event, "overlay events"},
     {bp_catchpoint, "catchpoint"},
-    {bp_catch_load, "catch load"},
-    {bp_catch_unload, "catch unload"}
   };
   
   static char bpenables[] = "nynny";
@@ -3640,27 +3512,6 @@ print_one_breakpoint_location (struct breakpoint *b,
 	annotate_field (5);
 	print_expression (b->exp, stb->stream);
 	ui_out_field_stream (uiout, "what", stb);
-	break;
-
-      case bp_catch_load:
-      case bp_catch_unload:
-	/* Field 4, the address, is omitted (which makes the columns
-	   not line up too nicely with the headers, but the effect
-	   is relatively readable).  */
-	if (opts.addressprint)
-	  ui_out_field_skip (uiout, "addr");
-	annotate_field (5);
-	if (b->dll_pathname == NULL)
-	  {
-	    ui_out_field_string (uiout, "what", "<any library>");
-	    ui_out_spaces (uiout, 1);
-	  }
-	else
-	  {
-	    ui_out_text (uiout, "library \"");
-	    ui_out_field_string (uiout, "what", b->dll_pathname);
-	    ui_out_text (uiout, "\" ");
-	  }
 	break;
 
       case bp_breakpoint:
@@ -3860,8 +3711,6 @@ user_settable_breakpoint (const struct breakpoint *b)
 {
   return (b->type == bp_breakpoint
 	  || b->type == bp_catchpoint
-	  || b->type == bp_catch_load
-	  || b->type == bp_catch_unload
 	  || b->type == bp_hardware_breakpoint
 	  || b->type == bp_watchpoint
 	  || b->type == bp_read_watchpoint
@@ -4250,8 +4099,6 @@ allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
     case bp_shlib_event:
     case bp_thread_event:
     case bp_overlay_event:
-    case bp_catch_load:
-    case bp_catch_unload:
       loc->loc_type = bp_loc_software_breakpoint;
       break;
     case bp_hardware_breakpoint:
@@ -4305,8 +4152,6 @@ set_raw_breakpoint_without_location (enum bptype bptype)
   b->ignore_count = 0;
   b->commands = NULL;
   b->frame_id = null_frame_id;
-  b->dll_pathname = NULL;
-  b->triggered_dll_pathname = NULL;
   b->forked_inferior_pid = null_ptid;
   b->exec_pathname = NULL;
   b->ops = NULL;
@@ -5144,14 +4989,6 @@ mention (struct breakpoint *b)
 	  }
 	printf_filtered (_("Hardware assisted breakpoint %d"), b->number);
 	say_where = 1;
-	break;
-      case bp_catch_load:
-      case bp_catch_unload:
-	printf_filtered (_("Catchpoint %d (%s %s)"),
-			 b->number,
-			 (b->type == bp_catch_load) ? "load" : "unload",
-			 (b->dll_pathname != NULL) ? 
-			 b->dll_pathname : "<any library>");
 	break;
 
       case bp_until:
@@ -6610,101 +6447,6 @@ catch_exec_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
   create_catchpoint (tempflag, cond_string, &catch_exec_breakpoint_ops);
 }
 
-static void
-catch_load_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
-{
-  int tempflag;
-  char *dll_pathname = NULL;
-  char *cond_string = NULL;
-
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
-
-  if (!arg)
-    arg = "";
-  ep_skip_leading_whitespace (&arg);
-
-  /* The allowed syntax is:
-     catch load
-     catch load if <cond>
-     catch load <filename>
-     catch load <filename> if <cond>
-
-     The user is not allowed to specify the <filename> after an
-     if clause.
-
-     We'll ignore the pathological case of a file named "if".
-
-     First, check if there's an if clause.  If so, then there
-     cannot be a filename. */
-  cond_string = ep_parse_optional_if_clause (&arg);
-
-  /* If there was an if clause, then there cannot be a filename.
-     Else, there might be a filename and an if clause. */
-  if (cond_string == NULL)
-    {
-      dll_pathname = ep_parse_optional_filename (&arg);
-      ep_skip_leading_whitespace (&arg);
-      cond_string = ep_parse_optional_if_clause (&arg);
-    }
-
-  if ((*arg != '\0') && !isspace (*arg))
-    error (_("Junk at end of arguments."));
-
-  /* Create a load breakpoint that only triggers when a load of
-     the specified dll (or any dll, if no pathname was specified)
-     occurs. */
-  SOLIB_CREATE_CATCH_LOAD_HOOK (PIDGET (inferior_ptid), tempflag, 
-				dll_pathname, cond_string);
-}
-
-static void
-catch_unload_command_1 (char *arg, int from_tty,
-			struct cmd_list_element *command)
-{
-  int tempflag;
-  char *dll_pathname = NULL;
-  char *cond_string = NULL;
-
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
-
-  if (!arg)
-    arg = "";
-  ep_skip_leading_whitespace (&arg);
-
-  /* The allowed syntax is:
-     catch unload
-     catch unload if <cond>
-     catch unload <filename>
-     catch unload <filename> if <cond>
-
-     The user is not allowed to specify the <filename> after an
-     if clause.
-
-     We'll ignore the pathological case of a file named "if".
-
-     First, check if there's an if clause.  If so, then there
-     cannot be a filename. */
-  cond_string = ep_parse_optional_if_clause (&arg);
-
-  /* If there was an if clause, then there cannot be a filename.
-     Else, there might be a filename and an if clause. */
-  if (cond_string == NULL)
-    {
-      dll_pathname = ep_parse_optional_filename (&arg);
-      ep_skip_leading_whitespace (&arg);
-      cond_string = ep_parse_optional_if_clause (&arg);
-    }
-
-  if ((*arg != '\0') && !isspace (*arg))
-    error (_("Junk at end of arguments."));
-
-  /* Create an unload breakpoint that only triggers when an unload of
-     the specified dll (or any dll, if no pathname was specified)
-     occurs. */
-  SOLIB_CREATE_CATCH_UNLOAD_HOOK (PIDGET (inferior_ptid), tempflag, 
-				  dll_pathname, cond_string);
-}
-
 static enum print_stop_action
 print_exception_catchpoint (struct breakpoint *b)
 {
@@ -7372,10 +7114,6 @@ delete_breakpoint (struct breakpoint *bpt)
     value_free (bpt->val);
   if (bpt->source_file != NULL)
     xfree (bpt->source_file);
-  if (bpt->dll_pathname != NULL)
-    xfree (bpt->dll_pathname);
-  if (bpt->triggered_dll_pathname != NULL)
-    xfree (bpt->triggered_dll_pathname);
   if (bpt->exec_pathname != NULL)
     xfree (bpt->exec_pathname);
 
@@ -7645,8 +7383,6 @@ breakpoint_re_set_one (void *bint)
       return 0;
     case bp_breakpoint:
     case bp_hardware_breakpoint:
-    case bp_catch_load:
-    case bp_catch_unload:
       if (b->addr_string == NULL)
 	{
 	  /* Anything without a string can't be re-set. */
@@ -8013,8 +7749,6 @@ disable_command (char *args, int from_tty)
 	continue;
       case bp_breakpoint:
       case bp_catchpoint:
-      case bp_catch_load:
-      case bp_catch_unload:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
       case bp_hardware_watchpoint:
@@ -8145,8 +7879,6 @@ enable_command (char *args, int from_tty)
 	continue;
       case bp_breakpoint:
       case bp_catchpoint:
-      case bp_catch_load:
-      case bp_catch_unload:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
       case bp_hardware_watchpoint:
@@ -8667,18 +8399,6 @@ With an argument, catch only exceptions with the given name."),
 		     (void *) (uintptr_t) catch_vfork_temporary);
   add_catch_command ("exec", _("Catch calls to exec."),
 		     catch_exec_command_1,
-		     CATCH_PERMANENT,
-		     CATCH_TEMPORARY);
-  add_catch_command ("load", _("\
-Catch library loads.\n\
-With an argument, catch only loads of that library."),
-		     catch_load_command_1,
-		     CATCH_PERMANENT,
-		     CATCH_TEMPORARY);
-  add_catch_command ("unload", _("\
-Catch library unloads.\n\
-With an argument, catch only unloads of that library."),
-		     catch_unload_command_1,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
   add_catch_command ("exception", _("\

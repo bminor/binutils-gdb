@@ -111,14 +111,6 @@ enum bptype
     bp_overlay_event, 
 
     bp_catchpoint,
-
-    /* These breakpoints are used to implement the "catch load" command
-       on platforms whose dynamic linkers support such functionality.  */
-    bp_catch_load,
-
-    /* These breakpoints are used to implement the "catch unload" command
-       on platforms whose dynamic linkers support such functionality.  */
-    bp_catch_unload,
   };
 
 /* States of enablement of breakpoint. */
@@ -440,16 +432,6 @@ struct breakpoint
        aborting, so you can back up to just before the abort.  */
     int hit_count;
 
-    /* Filename of a dynamically-linked library (dll), used for
-       bp_catch_load and bp_catch_unload (malloc'd), or NULL if any
-       library is significant.  */
-    char *dll_pathname;
-
-    /* Filename of a dll whose state change (e.g., load or unload)
-       triggered this catchpoint.  This field is only valid immediately
-       after this catchpoint has triggered.  */
-    char *triggered_dll_pathname;
-
     /* Process id of a child process whose forking triggered this
        catchpoint.  This field is only valid immediately after this
        catchpoint has triggered.  */
@@ -617,12 +599,6 @@ extern void bpstat_do_actions (void);
 
 /* Modify BS so that the actions will not be performed.  */
 extern void bpstat_clear_actions (bpstat);
-
-/* Given a bpstat that records zero or more triggered eventpoints, this
-   function returns another bpstat which contains only the catchpoints
-   on that first list, if any.
- */
-extern void bpstat_get_triggered_catchpoints (bpstat, bpstat *);
 
 /* Implementation:  */
 
@@ -848,11 +824,6 @@ extern void disable_breakpoints_in_shlibs (void);
 
 /* This function returns TRUE if ep is a catchpoint. */
 extern int ep_is_catchpoint (struct breakpoint *);
-
-/* This function returns TRUE if ep is a catchpoint of a
-   shared library (aka dynamically-linked library) event,
-   such as a library load or unload. */
-extern int ep_is_shlib_catchpoint (struct breakpoint *);
 
 /* Enable breakpoints and delete when hit.  Called with ARG == NULL
    deletes all breakpoints. */

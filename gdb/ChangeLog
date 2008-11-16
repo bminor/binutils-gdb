@@ -1,3 +1,25 @@
+2008-11-16  Joel Brobecker  <brobecker@adacore.com>
+
+	Remove support for catch load and catch unload commands.
+
+	* breakpoint.h (enum bptype): Remove bp_catch_load and bp_catch_unload.
+	(struct breakpoint): Remove fields dll_pathname and
+	triggered_dll_pathname.
+	(bpstat_get_triggered_catchpoints, ep_is_shlib_catchpoint): Delete.
+	* breakpoint.c (ep_is_catchpoint): Remove handling of
+	bp_catch_load and bp_catch_unload.
+	(print_it_typical, bpstat_check_location, bpstat_what)
+	(print_one_breakpoint_location, print_one_breakpoint_location)
+	(user_settable_breakpoint, allocate_bp_location)
+	(set_raw_breakpoint_without_location, mention, delete_breakpoint,
+	(breakpoint_re_set_one, disable_command, enable_command): Likewise.
+	(ep_is_shlib_catchpoint, bpstat_get_triggered_catchpoints)
+	(catch_load_command_1, catch_unload_command_1): Delete.
+	(_initialize_breakpoint): Remove the "catch load" and "catch unload"
+	command creation.
+	* infrun.c (handle_inferior_event): Remove the handling of
+	load/unload catchpoint events.
+
 2008-11-15  Joel Brobecker  <brobecker@adacore.com>
 
 	From  Jerome Guitton  <guitton@adacore.com>

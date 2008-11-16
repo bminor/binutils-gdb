@@ -3162,43 +3162,6 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	      stop_stepping (ecs);
 	      return;
 	    }
-
-	  /* If we stopped due to an explicit catchpoint, then the
-	     (see above) call to SOLIB_ADD pulled in any symbols
-	     from a newly-loaded library, if appropriate.
-
-	     We do want the inferior to stop, but not where it is
-	     now, which is in the dynamic linker callback.  Rather,
-	     we would like it stop in the user's program, just after
-	     the call that caused this catchpoint to trigger.  That
-	     gives the user a more useful vantage from which to
-	     examine their program's state. */
-	  else if (what.main_action
-		   == BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK)
-	    {
-	      /* ??rehrauer: If I could figure out how to get the
-	         right return PC from here, we could just set a temp
-	         breakpoint and resume.  I'm not sure we can without
-	         cracking open the dld's shared libraries and sniffing
-	         their unwind tables and text/data ranges, and that's
-	         not a terribly portable notion.
-
-	         Until that time, we must step the inferior out of the
-	         dld callback, and also out of the dld itself (and any
-	         code or stubs in libdld.sl, such as "shl_load" and
-	         friends) until we reach non-dld code.  At that point,
-	         we can stop stepping. */
-	      bpstat_get_triggered_catchpoints (ecs->event_thread->stop_bpstat,
-						&ecs->
-						event_thread->
-						stepping_through_solib_catchpoints);
-	      ecs->event_thread->stepping_through_solib_after_catch = 1;
-
-	      /* Be sure to lift all breakpoints, so the inferior does
-	         actually step past this point... */
-	      ecs->event_thread->stepping_over_breakpoint = 1;
-	      break;
-	    }
 	  else
 	    {
 	      /* We want to step over this breakpoint, then keep going.  */
