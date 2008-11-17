@@ -162,6 +162,23 @@ mi_cmd_exec_return (char *command, char **argv, int argc)
   print_stack_frame (get_selected_frame (NULL), 1, LOC_AND_ADDRESS);
 }
 
+static int
+proceed_thread_callback (struct thread_info *thread, void *arg)
+{
+  int pid = *(int *)arg;
+
+  if (!is_stopped (thread->ptid))
+    return 0;
+
+  if (PIDGET (thread->ptid) != pid)
+    return 0;
+
+  switch_to_thread (thread->ptid);
+  clear_proceed_status ();
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+  return 0;
+}
+
 void
 mi_cmd_exec_continue (char *command, char **argv, int argc)
 {
@@ -169,8 +186,37 @@ mi_cmd_exec_continue (char *command, char **argv, int argc)
     continue_1 (0);
   else if (argc == 1 && strcmp (argv[0], "--all") == 0)
     continue_1 (1);
+  else if (argc == 2 && strcmp (argv[0], "--thread-group") == 0)
+    {
+      struct cleanup *old_chain;
+      int pid;
+      if (argv[1] == NULL || argv[1] == '\0')
+	error ("Thread group id not specified");
+      pid = atoi (argv[1] + 1);
+      if (!in_inferior_list (pid))
+	error ("Invalid thread group id '%s'", argv[1]);
+
+      old_chain = make_cleanup_restore_current_thread ();
+      iterate_over_threads (proceed_thread_callback, &pid);
+      do_cleanups (old_chain);            
+    }
   else
-    error ("Usage: -exec-continue [--all]");
+    error ("Usage: -exec-continue [--all|--thread-group id]");
+}
+
+static int
+interrupt_thread_callback (struct thread_info *thread, void *arg)
+{
+  int pid = *(int *)arg;
+
+  if (!is_running (thread->ptid))
+    return 0;
+
+  if (PIDGET (thread->ptid) != pid)
+    return 0;
+
+  target_stop (thread->ptid);
+  return 0;
 }
 
 /* Interrupt the execution of the target.  Note how we must play around
@@ -192,11 +238,25 @@ mi_cmd_exec_interrupt (char *command, char **argv, int argc)
     {
       if (!any_running ())
 	error ("Inferior not running.");
-
+      
       interrupt_target_1 (1);
     }
+  else if (argc == 2 && strcmp (argv[0], "--thread-group") == 0)
+    {
+      struct cleanup *old_chain;
+      int pid;
+      if (argv[1] == NULL || argv[1] == '\0')
+	error ("Thread group id not specified");
+      pid = atoi (argv[1] + 1);
+      if (!in_inferior_list (pid))
+	error ("Invalid thread group id '%s'", argv[1]);
+
+      old_chain = make_cleanup_restore_current_thread ();
+      iterate_over_threads (interrupt_thread_callback, &pid);
+      do_cleanups (old_chain);
+    }
   else
-    error ("Usage: -exec-interrupt [--all]");
+    error ("Usage: -exec-interrupt [--all|--thread-group id]");
 }
 
 static int

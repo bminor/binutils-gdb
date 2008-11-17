@@ -1,5 +1,16 @@
 2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Implement continue/interrupt of thread groups.
+
+        * mi/mi-main.c (proceed_thread_callback): New.
+        (mi_cmd_exec_continue): If --thread-group is specified, resume all
+        threads in that group.
+        (interrupt_thread_callback): New.
+        (mi_cmd_exec_interrupt): If --thread-group is specified, interrupt
+        all threads in that group.
+
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Implement '-target-detach pid'.
 
         * infcmd.c (detach_command): Make nonstatic.
