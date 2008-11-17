@@ -75,6 +75,8 @@ static void set_schedlock_func (char *args, int from_tty,
 
 static int currently_stepping (struct thread_info *tp);
 
+static int currently_stepping_callback (struct thread_info *tp, void *data);
+
 static void xdb_handle_command (char *args, int from_tty);
 
 static int prepare_to_proceed (int);
@@ -1161,31 +1163,59 @@ a command like `return' or `jump' to continue execution."));
 /* Clear out all variables saying what to do when inferior is continued.
    First do this, then set the ones you want, then call `proceed'.  */
 
+static void
+clear_proceed_status_thread (struct thread_info *tp)
+{
+  if (debug_infrun)
+    fprintf_unfiltered (gdb_stdlog,
+			"infrun: clear_proceed_status_thread (%s)\n",
+			target_pid_to_str (tp->ptid));
+
+  tp->trap_expected = 0;
+  tp->step_range_start = 0;
+  tp->step_range_end = 0;
+  tp->step_frame_id = null_frame_id;
+  tp->step_over_calls = STEP_OVER_UNDEBUGGABLE;
+  tp->stop_requested = 0;
+
+  tp->stop_step = 0;
+
+  tp->proceed_to_finish = 0;
+
+  /* Discard any remaining commands or status from previous stop.  */
+  bpstat_clear (&tp->stop_bpstat);
+}
+
+static int
+clear_proceed_status_callback (struct thread_info *tp, void *data)
+{
+  if (is_exited (tp->ptid))
+    return 0;
+
+  clear_proceed_status_thread (tp);
+  return 0;
+}
+
 void
 clear_proceed_status (void)
 {
   if (!ptid_equal (inferior_ptid, null_ptid))
     {
-      struct thread_info *tp;
       struct inferior *inferior;
 
-      tp = inferior_thread ();
-
-      tp->trap_expected = 0;
-      tp->step_range_start = 0;
-      tp->step_range_end = 0;
-      tp->step_frame_id = null_frame_id;
-      tp->step_over_calls = STEP_OVER_UNDEBUGGABLE;
-      tp->stop_requested = 0;
-
-      tp->stop_step = 0;
-
-      tp->proceed_to_finish = 0;
-
-      /* Discard any remaining commands or status from previous
-	 stop.  */
-      bpstat_clear (&tp->stop_bpstat);
-
+      if (non_stop)
+	{
+	  /* If in non-stop mode, only delete the per-thread status
+	     of the current thread.  */
+	  clear_proceed_status_thread (inferior_thread ());
+	}
+      else
+	{
+	  /* In all-stop mode, delete the per-thread status of
+	     *all* threads.  */
+	  iterate_over_threads (clear_proceed_status_callback, NULL);
+	}
+  
       inferior = current_inferior ();
       inferior->stop_soon = NO_STOP_QUIETLY;
     }
@@ -3185,6 +3215,43 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
      test for stepping.  But, if not stepping,
      do not stop.  */
 
+  /* In all-stop mode, if we're currently stepping but have stopped in
+     some other thread, we need to switch back to the stepped thread.  */
+  if (!non_stop)
+    {
+      struct thread_info *tp;
+      tp = iterate_over_threads (currently_stepping_callback,
+				 ecs->event_thread);
+      if (tp)
+	{
+	  /* However, if the current thread is blocked on some internal
+	     breakpoint, and we simply need to step over that breakpoint
+	     to get it going again, do that first.  */
+	  if ((ecs->event_thread->trap_expected
+	       && ecs->event_thread->stop_signal != TARGET_SIGNAL_TRAP)
+	      || ecs->event_thread->stepping_over_breakpoint)
+	    {
+	      keep_going (ecs);
+	      return;
+	    }
+
+	  /* Otherwise, we no longer expect a trap in the current thread.
+	     Clear the trap_expected flag before switching back -- this is
+	     what keep_going would do as well, if we called it.  */
+	  ecs->event_thread->trap_expected = 0;
+
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: switching back to stepped thread\n");
+
+	  ecs->event_thread = tp;
+	  ecs->ptid = tp->ptid;
+	  context_switch (ecs->ptid);
+	  keep_going (ecs);
+	  return;
+	}
+    }
+
   /* Are we stepping to get the inferior out of the dynamic linker's
      hook (and possibly the dld itself) after catching a shlib
      event?  */
@@ -3604,12 +3671,25 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 /* Are we in the middle of stepping?  */
 
 static int
+currently_stepping_thread (struct thread_info *tp)
+{
+  return (tp->step_range_end && tp->step_resume_breakpoint == NULL)
+	 || tp->trap_expected
+	 || tp->stepping_through_solib_after_catch;
+}
+
+static int
+currently_stepping_callback (struct thread_info *tp, void *data)
+{
+  /* Return true if any thread *but* the one passed in "data" is
+     in the middle of stepping.  */
+  return tp != data && currently_stepping_thread (tp);
+}
+
+static int
 currently_stepping (struct thread_info *tp)
 {
-  return (((tp->step_range_end && tp->step_resume_breakpoint == NULL)
-	   || tp->trap_expected)
-	  || tp->stepping_through_solib_after_catch
-	  || bpstat_should_step ());
+  return currently_stepping_thread (tp) || bpstat_should_step ();
 }
 
 /* Inferior has stepped into a subroutine call with source code that

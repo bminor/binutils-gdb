@@ -1,3 +1,19 @@
+2008-11-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	PR gdb/2250
+	* infrun.c (clear_proceed_status_thread): New function.
+	(clear_proceed_status_callback): New function.
+	(clear_proceed_status): In all-stop mode, clear per-thread
+	proceed status of *all* threads, not only the current.
+	(handle_inferior_event): In all-stop mode, if we're stepping
+	one thread, but got some inferior event in another thread
+	that does not cause GDB to break to the user interface,
+	ensure the interrupted stepping operation continues in the
+	original thread.
+	(currently_stepping): Move thread-related tests to ...
+	(currently_stepping_thread): ... this new function.
+	(currently_stepping_callback): New function.
+
 2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Implement =thread-selected notification.
