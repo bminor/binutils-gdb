@@ -44,6 +44,7 @@
 #include "gdb.h"
 #include "frame.h"
 #include "mi-main.h"
+#include "mi-common.h"
 #include "language.h"
 #include "valprint.h"
 #include "inferior.h"
@@ -1203,6 +1204,7 @@ mi_execute_command (char *cmd, int from_tty)
   if (command != NULL)
     {
       struct gdb_exception result;
+      ptid_t previous_ptid = inferior_ptid;
 
       if (do_timings)
 	{
@@ -1225,6 +1227,41 @@ mi_execute_command (char *cmd, int from_tty)
 	    fputstr_unfiltered (result.message, '"', raw_stdout);
 	  fputs_unfiltered ("\"\n", raw_stdout);
 	  mi_out_rewind (uiout);
+	}
+
+      if (/* The notifications are only output when the top-level
+	     interpreter (specified on the command line) is MI.  */      
+	  ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ()))
+	  /* Don't try report anything if there are no threads -- 
+	     the program is dead.  */
+	  && thread_count () != 0
+	  /* -thread-select explicitly changes thread. If frontend uses that
+	     internally, we don't want to emit =thread-selected, since
+	     =thread-selected is supposed to indicate user's intentions.  */
+	  && strcmp (command->command, "thread-select") != 0)
+	{
+	  struct mi_interp *mi = top_level_interpreter_data ();
+	  struct thread_info *ti = inferior_thread ();
+	  int report_change;
+
+	  if (command->thread == -1)
+	    {
+	      report_change = !ptid_equal (previous_ptid, null_ptid)
+		&& !ptid_equal (inferior_ptid, previous_ptid);
+	    }
+	  else
+	    {
+	      report_change = (ti->num != command->thread);
+	    }
+
+	  if (report_change)
+	    {     
+	      target_terminal_ours ();
+	      fprintf_unfiltered (mi->event_channel, 
+				  "thread-selected,id=\"%d\"",
+				  ti->num);
+	      gdb_flush (mi->event_channel);
+	    }
 	}
 
       mi_parse_free (command);

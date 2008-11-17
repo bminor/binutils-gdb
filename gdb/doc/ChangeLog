@@ -1,5 +1,10 @@
 2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* gdb.texinfo (GDB/MI Async Records): Document
+        =thread-selected.
+	
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
         * observer.texi (new_inferior, inferior_exit): New observers.
 
 2008-10-27  Pedro Alves  <pedro@codesourcery.com>

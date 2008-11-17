@@ -30,6 +30,8 @@ global mi_inferior_tty_name
 
 set MIFLAGS "-i=mi"
 
+set thread_selected_re "=thread-selected,id=\"\[0-9+\]\"\r\n"
+
 #
 # mi_gdb_exit -- exit the GDB, killing the target program if necessary
 #
@@ -775,6 +777,7 @@ proc mi_run_cmd {args} {
 	return -1
     }
     global mi_gdb_prompt
+    global thread_selected_re
 
     if [target_info exists gdb_init_command] {
 	send_gdb "[target_info gdb_init_command]\n";
@@ -816,7 +819,7 @@ proc mi_run_cmd {args} {
 
     send_gdb "220-exec-run $args\n"
     gdb_expect {
-	-re "220\\^running\r\n(\\*running,thread-id=\"\[^\"\]+\"\r\n|=thread-created,id=\"1\",group-id=\"\[0-9\]+\"\r\n)*${mi_gdb_prompt}" {
+	-re "220\\^running\r\n(\\*running,thread-id=\"\[^\"\]+\"\r\n|=thread-created,id=\"1\",group-id=\"\[0-9\]+\"\r\n)*(${thread_selected_re})?${mi_gdb_prompt}" {
 	}
 	timeout {
 	    perror "Unable to start target"
@@ -954,6 +957,7 @@ proc mi_expect_stop { reason func args file line extra test } {
     global decimal
     global fullname_syntax
     global async
+    global thread_selected_re
 
     set after_stopped ""
     set after_reason ""
@@ -1014,9 +1018,9 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set any "\[^\n\]*"
 
-    verbose -log "mi_expect_stop: expecting: \\*stopped,${r}${a}${bn}thread-id=\"$decimal\",stopped-threads=$any,frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}\r\n$after_stopped$prompt_re"
+    verbose -log "mi_expect_stop: expecting: \\*stopped,${r}${a}${bn}thread-id=\"$decimal\",stopped-threads=$any,frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$after_stopped\r\n($thread_selected_re)?$prompt_re"
     gdb_expect {
-	-re "\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",stopped-threads=$any,frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped\r\n$prompt_re" {
+	-re "\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",stopped-threads=$any,frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped\r\n($thread_selected_re)?$prompt_re" {
 	    pass "$test"
             return $expect_out(2,string)
 	}
@@ -1430,10 +1434,11 @@ proc mi_tbreak {location} {
 proc mi_send_resuming_command_raw {command test} {
 
     global mi_gdb_prompt
+    global thread_selected_re
 
     send_gdb "$command\n"
     gdb_expect {
-        -re "\\^running\r\n\\*running,thread-id=\"\[^\"\]+\"\r\n${mi_gdb_prompt}" {
+        -re "\\^running\r\n\\*running,thread-id=\"\[^\"\]+\"\r\n($thread_selected_re)?${mi_gdb_prompt}" {
             # Note that lack of 'pass' call here -- this works around limitation
             # in DejaGNU xfail mechanism. mi-until.exp has this:
             #

@@ -31,23 +31,9 @@
 #include "mi-cmds.h"
 #include "mi-out.h"
 #include "mi-console.h"
+#include "mi-common.h"
 #include "observer.h"
 #include "gdbthread.h"
-
-struct mi_interp
-{
-  /* MI's output channels */
-  struct ui_file *out;
-  struct ui_file *err;
-  struct ui_file *log;
-  struct ui_file *targ;
-  struct ui_file *event_channel;
-
-  /* This is the interpreter for the mi... */
-  struct interp *mi2_interp;
-  struct interp *mi1_interp;
-  struct interp *mi_interp;
-};
 
 /* These are the interpreter setup, etc. functions for the MI interpreter */
 static void mi_execute_command_wrapper (char *cmd);

@@ -1,5 +1,14 @@
 2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Implement =thread-selected notification.
+
+        * mi/mi-common.h (struct mi_interp): New, moved from ...
+        * mi/mi-interp.c: ...here.
+        * mi/mi-main.c (mi_execute_command): If the thread changed
+        as result of command, report that.
+
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Implement continue/interrupt of thread groups.
 
         * mi/mi-main.c (proceed_thread_callback): New.

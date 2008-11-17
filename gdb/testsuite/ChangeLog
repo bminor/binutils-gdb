@@ -1,5 +1,13 @@
 2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* gdb.mi/mi-pthreads.exp (check_mi_thread_command_set): Make sure
+        "thread N" results in =thread-selected.
+        * lib/mi-support (mi_run_cmd, mi_expect_stop)
+        (mi_send_resuming_command_raw): Be prepared for
+        =thread-selected.
+	
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
         * gdb.mi/mi-nonstop.exp: Expect 'group-id' field.
         * lib/mi-support.exp: Likewise.
 

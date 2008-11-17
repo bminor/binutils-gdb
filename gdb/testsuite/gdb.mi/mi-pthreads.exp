@@ -55,6 +55,12 @@ proc check_mi_thread_command_set {} {
       "\\^done,new-thread-id=\"$thread\",frame={.*}(,line=\"(-)?\[0-9\]+\",file=\".*\")?" \
       "check_mi_thread_command_set: -thread-select $thread"
   }
+
+  foreach thread $thread_list {
+      mi_gdb_test "-interpreter-exec console \"thread $thread\"" \
+          ".*\\^done\r\n=thread-selected,id=\"$thread\"" \
+          "check =thread-selected: thread $thread"
+  }
 }
 
 #

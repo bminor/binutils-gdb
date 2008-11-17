@@ -19273,6 +19273,19 @@ A signal was received by the inferior.
 @itemx =thread-exited,id="@var{id}"
 A thread either was created, or has exited.  The @var{id} field
 contains the @value{GDBN} identifier of the thread.
+
+@item =thread-selected,id="@var{id}"
+Informs that the selected thread was changed as result of the last
+command.  This notification is not emitted as result of @code{-thread-select}
+command but is emitted whenever an MI command that is not documented
+to change the selected thread actually changes it.  In particular,
+invoking, directly or indirectly (via user-defined command), the CLI
+@code{thread} command, will generate this notification.
+
+We suggest that in response to this notification, front ends
+highlight the selected thread and cause subsequent commands to apply to
+that thread.
+
 @end table
 
 
