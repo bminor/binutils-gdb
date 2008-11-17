@@ -90,6 +90,7 @@ struct mi_cmd mi_cmds[] =
   { "interpreter-exec", { NULL, 0 }, mi_cmd_interpreter_exec},
   { "list-features", { NULL, 0 }, mi_cmd_list_features},
   { "list-target-features", { NULL, 0 }, mi_cmd_list_target_features},
+  { "list-thread-groups", { NULL, 0 }, mi_cmd_list_thread_groups },  
   { "overlay-auto", { NULL, 0 }, NULL },
   { "overlay-list-mapping-state", { NULL, 0 }, NULL },
   { "overlay-list-overlays", { NULL, 0 }, NULL },

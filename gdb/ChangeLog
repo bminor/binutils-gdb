@@ -1,3 +1,15 @@
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement -list-thread-groups.
+
+        * thread.c (print_thread_info): New parameter pid, to print
+        threads of specific process.
+        * gdbthread.h (print_thread_info): New parameter pid.
+        * mi/mi-cmds.c (mi_cmds): Register -list-thread-groups.
+        * mi/mi-cmds.h (mi_cmd_list_thread_groups): New.
+        * mi/mi-main.c (mi_cmd_thread_info): Adjust.
+        (print_one_process, mi_cmd_list_thread_groups): New.
+
 2008-11-16  Joel Brobecker  <brobecker@adacore.com>
 
 	Remove some unused macros related to the old load/unload catchpoints.

@@ -46,6 +46,7 @@
 #include "mi-main.h"
 #include "language.h"
 #include "valprint.h"
+#include "inferior.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -245,7 +246,55 @@ mi_cmd_thread_info (char *command, char **argv, int argc)
   if (argc == 1)
     thread = atoi (argv[0]);
 
-  print_thread_info (uiout, thread);
+  print_thread_info (uiout, thread, -1);
+}
+
+static int
+print_one_inferior (struct inferior *inferior, void *arg)
+{
+  struct cleanup *back_to = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+
+  ui_out_field_fmt (uiout, "id", "%d", inferior->pid);
+  ui_out_field_string (uiout, "type", "process");
+  ui_out_field_int (uiout, "pid", inferior->pid);
+  
+  do_cleanups (back_to);
+  return 0;
+}
+
+void
+mi_cmd_list_thread_groups (char *command, char **argv, int argc)
+{
+  struct cleanup *back_to;
+  int available = 0;
+  char *id = NULL;
+
+  if (argc > 0 && strcmp (argv[0], "--available") == 0)
+    {
+      ++argv;
+      --argc;
+      available = 1;
+    }
+
+  if (argc > 0)
+    id = argv[0];
+
+  back_to = make_cleanup (&null_cleanup, NULL);
+
+  if (id)
+    {
+      int pid = atoi (id);
+      if (!in_inferior_list (pid))
+	error ("Invalid thread group id '%s'", id);
+      print_thread_info (uiout, -1, pid);    
+    }
+  else
+    {
+      make_cleanup_ui_out_list_begin_end (uiout, "groups");
+      iterate_over_inferiors (print_one_inferior, NULL);
+    }
+  
+  do_cleanups (back_to);
 }
 
 void

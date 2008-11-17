@@ -636,9 +636,14 @@ set_stop_requested (ptid_t ptid, int stop)
    use from MI.  
    If REQUESTED_THREAD is not -1, it's the GDB id of the thread
    that should be printed.  Otherwise, all threads are
-   printed.  */
+   printed.  
+   If PID is not -1, only print threads from the process PID.
+   Otherwise, threads from all attached PIDs are printed.   
+   If both REQUESTED_THREAD and PID are not -1, then the thread
+   is printed if it belongs to the specified process.  Otherwise,
+   an error is raised.  */
 void
-print_thread_info (struct ui_out *uiout, int requested_thread)
+print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
 {
   struct thread_info *tp;
   ptid_t current_ptid;
@@ -660,6 +665,13 @@ print_thread_info (struct ui_out *uiout, int requested_thread)
 
       if (requested_thread != -1 && tp->num != requested_thread)
 	continue;
+
+      if (pid != -1 && PIDGET (tp->ptid) != pid)
+	{
+	  if (requested_thread != -1)
+	    error (_("Requested thread not found in requested process"));
+	  continue;
+	}
 
       if (ptid_equal (tp->ptid, current_ptid))
 	current_thread = tp->num;
@@ -715,7 +727,7 @@ print_thread_info (struct ui_out *uiout, int requested_thread)
      the "info threads" command.  */
   do_cleanups (old_chain);
 
-  if (requested_thread == -1)
+  if (pid == -1 && requested_thread == -1 )
     {
       gdb_assert (current_thread != -1
 		  || !thread_list);
@@ -740,7 +752,7 @@ The current thread <Thread ID %d> has terminated.  See `help thread'.\n",
 static void
 info_threads_command (char *arg, int from_tty)
 {
-  print_thread_info (uiout, -1);
+  print_thread_info (uiout, -1, -1);
 }
 
 /* Switch from one thread to another. */
