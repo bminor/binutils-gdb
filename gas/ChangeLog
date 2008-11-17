@@ -1,3 +1,7 @@
+2008-11-17  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (parse_args): Update copyright year.
+
 2008-11-14  Mat Hostetter  <mat@lcs.mit.edu>
 
 	* read.c (emit_expr): Grow frag before filling it so that

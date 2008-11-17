@@ -1,3 +1,7 @@
+2008-11-17  Nick Clifton  <nickc@redhat.com>
+
+	* ldver.c: Update copyright year.
+
 2008-11-14  Kai Tietz  <kai.tietz@onevision.com>
 
 	* emultempl/pep.em (..._before_parse): initialize

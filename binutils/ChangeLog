@@ -1,3 +1,7 @@
+2008-11-17  Nick Clifton  <nickc@redhat.com>
+
+	* version.c (print_version): Update copyright year.
+
 2008-11-16  Danny Smith  <dannysmith@usesr.sourceforge.net>
 
 	* dlltool.c (identify_search_section): Cast argument, not return
