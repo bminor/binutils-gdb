@@ -1,5 +1,12 @@
 2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Include group-id in thread-created notification.
+
+        * mi/mi-interp.c (mi_new_thread, mi_thread_exit): Include
+        group id in the output.
+
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Notification for attach/detach.
 
         * inferior.c: Call the process observers.

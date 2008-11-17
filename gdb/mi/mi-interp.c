@@ -293,7 +293,9 @@ mi_new_thread (struct thread_info *t)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
 
-  fprintf_unfiltered (mi->event_channel, "thread-created,id=\"%d\"", t->num);
+  fprintf_unfiltered (mi->event_channel, 
+		      "thread-created,id=\"%d\",group-id=\"%d\"", 
+		      t->num, t->ptid.pid);
   gdb_flush (mi->event_channel);
 }
 
@@ -302,7 +304,9 @@ mi_thread_exit (struct thread_info *t)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
   target_terminal_ours ();
-  fprintf_unfiltered (mi->event_channel, "thread-exited,id=\"%d\"", t->num);
+  fprintf_unfiltered (mi->event_channel, 
+		      "thread-exited,id=\"%d\",group-id=\"%d\"", 
+		      t->num,t->ptid.pid);
   gdb_flush (mi->event_channel);
 }
 

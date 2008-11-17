@@ -1,3 +1,8 @@
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * gdb.mi/mi-nonstop.exp: Expect 'group-id' field.
+        * lib/mi-support.exp: Likewise.
+
 2008-11-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/help.exp: Remove the "catch load" and "catch unload"
