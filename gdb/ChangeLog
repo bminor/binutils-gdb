@@ -1,5 +1,13 @@
 2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Notification for attach/detach.
+
+        * inferior.c: Call the process observers.
+        * mi/mi-interp.c (mi_new_inferior, mi_inferior_exit): New.
+        (mi_interpreter_init): Register the above.
+
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Implement -list-thread-groups.
 
         * thread.c (print_thread_info): New parameter pid, to print

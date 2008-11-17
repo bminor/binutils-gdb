@@ -24,6 +24,7 @@
 #include "gdbcmd.h"
 #include "gdbthread.h"
 #include "ui-out.h"
+#include "observer.h"
 
 void _initialize_inferiors (void);
 
@@ -91,6 +92,8 @@ add_inferior (int pid)
 {
   struct inferior *inf = add_inferior_silent (pid);
 
+  observer_notify_new_inferior (pid);
+
   if (print_inferior_events)
     printf_unfiltered (_("[New inferior %d]\n"), pid);
 
@@ -147,6 +150,8 @@ delete_inferior_1 (int pid, int silent)
   arg.silent = silent;
 
   iterate_over_threads (delete_thread_of_inferior, &arg);
+
+  observer_notify_inferior_exit (pid);
 }
 
 void

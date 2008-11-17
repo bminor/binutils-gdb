@@ -187,3 +187,13 @@ a pointer to the new architecture.
 The thread's ptid has changed.  The @var{old_ptid} parameter specifies
 the old value, and @var{new_ptid} specifies the new value.
 @end deftypefun
+
+@deftypefun void new_inferior (int @var{pid})
+@value{GDBN} has attached to a new inferior identified by @var{pid}.
+@end deftypefun
+
+@deftypefun void inferior_exit (int @var{pid})
+Either @value{GDBN} detached from the inferior, or the inferior
+exited.  The argument @var{pid} identifies the inferior.
+@end deftypefun
+
