@@ -1298,6 +1298,7 @@ bfd_elf_avr_final_write_processing (bfd *abfd,
 
     case bfd_mach_avr25:
       val = E_AVR_MACH_AVR25;
+      break;
 
     case bfd_mach_avr3:
       val = E_AVR_MACH_AVR3;
@@ -1305,9 +1306,11 @@ bfd_elf_avr_final_write_processing (bfd *abfd,
 
     case bfd_mach_avr31:
       val = E_AVR_MACH_AVR31;
+      break;
 
     case bfd_mach_avr35:
       val = E_AVR_MACH_AVR35;
+      break;
 
     case bfd_mach_avr4:
       val = E_AVR_MACH_AVR4;

@@ -1,3 +1,9 @@
+2008-11-17  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	PR 7022
+	* elf32-avr.c (bfd_elf_avr_final_write_processing):
+	Add missing break statements.
+
 2008-10-28  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in: Bump version to 2.19.0
