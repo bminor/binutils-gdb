@@ -75,6 +75,7 @@ extern mi_cmd_argv_ftype mi_cmd_stack_list_frames;
 extern mi_cmd_argv_ftype mi_cmd_stack_list_locals;
 extern mi_cmd_argv_ftype mi_cmd_stack_select_frame;
 extern mi_cmd_argv_ftype mi_cmd_symbol_list_lines;
+extern mi_cmd_argv_ftype mi_cmd_target_detach;
 extern mi_cmd_argv_ftype mi_cmd_target_file_get;
 extern mi_cmd_argv_ftype mi_cmd_target_file_put;
 extern mi_cmd_argv_ftype mi_cmd_target_file_delete;

@@ -86,8 +86,6 @@ static void unset_command (char *, int);
 
 static void float_info (char *, int);
 
-static void detach_command (char *, int);
-
 static void disconnect_command (char *, int);
 
 static void unset_environment_command (char *, int);
@@ -2344,7 +2342,7 @@ attach_command (char *args, int from_tty)
  * started via the normal ptrace (PTRACE_TRACEME).
  */
 
-static void
+void
 detach_command (char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart.  */

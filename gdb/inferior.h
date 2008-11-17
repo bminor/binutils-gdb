@@ -269,6 +269,8 @@ extern void interrupt_target_command (char *args, int from_tty);
 
 extern void interrupt_target_1 (int all_threads);
 
+extern void detach_command (char *, int);
+
 /* Address at which inferior stopped.  */
 
 extern CORE_ADDR stop_pc;

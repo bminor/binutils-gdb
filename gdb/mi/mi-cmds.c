@@ -121,7 +121,7 @@ struct mi_cmd mi_cmds[] =
   { "symbol-type", { NULL, 0 }, NULL },
   { "target-attach", { "attach", 1 }, NULL },
   { "target-compare-sections", { NULL, 0 }, NULL },
-  { "target-detach", { "detach", 0 }, 0 },
+  { "target-detach", { NULL, 0 }, mi_cmd_target_detach },
   { "target-disconnect", { "disconnect", 0 }, 0 },
   { "target-download", { "load", 1 }, NULL},
   { "target-exec-status", { NULL, 0 }, NULL },

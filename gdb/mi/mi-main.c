@@ -199,6 +199,42 @@ mi_cmd_exec_interrupt (char *command, char **argv, int argc)
     error ("Usage: -exec-interrupt [--all]");
 }
 
+static int
+find_thread_of_process (struct thread_info *ti, void *p)
+{
+  int pid = *(int *)p;
+  if (PIDGET (ti->ptid) == pid && !is_exited (ti->ptid))
+    return 1;
+
+  return 0;
+}
+
+void
+mi_cmd_target_detach (char *command, char **argv, int argc)
+{
+  if (argc != 0 && argc != 1)
+    error ("Usage: -target-detach [thread-group]");
+
+  if (argc == 1)
+    {
+      struct thread_info *tp;
+      char *end = argv[0];
+      int pid = strtol (argv[0], &end, 10);
+      if (*end != '\0')
+	error (_("Cannot parse thread group id '%s'"), argv[0]);
+
+      /* Pick any thread in the desired process.  Current
+	 target_detach deteches from the parent of inferior_ptid.  */
+      tp = iterate_over_threads (find_thread_of_process, &pid);
+      if (!tp)
+	error (_("Thread group is empty"));
+
+      switch_to_thread (tp->ptid);
+    }
+
+  detach_command (NULL, 0);
+}
+
 void
 mi_cmd_thread_select (char *command, char **argv, int argc)
 {
