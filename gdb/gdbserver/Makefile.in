@@ -215,7 +215,11 @@ clean:
 	rm -f arm-with-iwmmxt.c mips-linux.c mips64-linux.c
 	rm -f powerpc-32l.c powerpc-64l.c powerpc-e500l.c
 	rm -f powerpc-altivec32l.c powerpc-vsx32l.c powerpc-altivec64l.c
-	rm -f powerpc-vsx64l.c xml-builtin.c stamp-xml
+	rm -f powerpc-vsx64l.c
+	rm -f powerpc-isa205-32l.c powerpc-isa205-64l.c
+	rm -f powerpc-isa205-altivec32l.c powerpc-isa205-vsx32l.c powerpc-isa205-altivec64l.c
+	rm -f powerpc-isa205-vsx64l.c
+	rm -f xml-builtin.c stamp-xml
 
 maintainer-clean realclean distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
@@ -362,6 +366,15 @@ powerpc-altivec32l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec32l.dat $(r
 powerpc-vsx32l.o : powerpc-vsx32l.c $(regdef_h)
 powerpc-vsx32l.c : $(srcdir)/../regformats/rs6000/powerpc-vsx32l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-vsx32l.dat powerpc-vsx32l.c
+powerpc-isa205-32l.o : powerpc-isa205-32l.c $(regdef_h)
+powerpc-isa205-32l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-32l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-32l.dat powerpc-isa205-32l.c
+powerpc-isa205-altivec32l.o : powerpc-isa205-altivec32l.c $(regdef_h)
+powerpc-isa205-altivec32l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec32l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec32l.dat powerpc-isa205-altivec32l.c
+powerpc-isa205-vsx32l.o : powerpc-isa205-vsx32l.c $(regdef_h)
+powerpc-isa205-vsx32l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx32l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx32l.dat powerpc-isa205-vsx32l.c
 powerpc-e500l.o : powerpc-e500l.c $(regdef_h)
 powerpc-e500l.c : $(srcdir)/../regformats/rs6000/powerpc-e500l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-e500l.dat powerpc-e500l.c
@@ -374,6 +387,15 @@ powerpc-altivec64l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec64l.dat $(r
 powerpc-vsx64l.o : powerpc-vsx64l.c $(regdef_h)
 powerpc-vsx64l.c : $(srcdir)/../regformats/rs6000/powerpc-vsx64l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-vsx64l.dat powerpc-vsx64l.c
+powerpc-isa205-64l.o : powerpc-isa205-64l.c $(regdef_h)
+powerpc-isa205-64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-64l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-64l.dat powerpc-isa205-64l.c
+powerpc-isa205-altivec64l.o : powerpc-isa205-altivec64l.c $(regdef_h)
+powerpc-isa205-altivec64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec64l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-altivec64l.dat powerpc-isa205-altivec64l.c
+powerpc-isa205-vsx64l.o : powerpc-isa205-vsx64l.c $(regdef_h)
+powerpc-isa205-vsx64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx64l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx64l.dat powerpc-isa205-vsx64l.c
 reg-s390.o : reg-s390.c $(regdef_h)
 reg-s390.c : $(srcdir)/../regformats/reg-s390.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-s390.dat reg-s390.c

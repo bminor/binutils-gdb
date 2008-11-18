@@ -1,3 +1,18 @@
+2008-11-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* Makefile.in (powerpc-isa205-32l.o, powerpc-isa205-32l.c,
+	powerpc-isa205-altivec32l.o, powerpc-isa205-altivec32l.c,
+	powerpc-isa205-vsx32l.o, powerpc-isa205-vsx32l.c,
+	powerpc-isa205-64l.o, powerpc-isa205-64l.c,
+	powerpc-isa205-altivec64l.o, powerpc-isa205-altivec64l.c,
+	powerpc-isa205-vsx64l.o, powerpc-isa205-vsx64l.c): New targets.
+	* configure.srv (powerpc*-*-linux*): Add ISA 2.05 object files and
+	XML target descriptions.
+	* linux-ppc-low.c (ppc_arch_setup): Init registers with 64-bit FPSCR
+	when inferior is running on an ISA 2.05 or later processor.  Add
+	special case to return offset for full 64-bit slot of FPSCR when
+	in 32-bits.
+
 2008-11-14  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* Makefile.in (SFILES, clean): Added sparc64 files.

@@ -43,10 +43,16 @@ mips64-linux-expedite = r29,pc
 rs6000/powerpc-32l-expedite = r1,pc
 rs6000/powerpc-altivec32l-expedite = r1,pc
 rs6000/powerpc-vsx32l-expedite = r1,pc
+rs6000/powerpc-isa205-32l-expedite = r1,pc
+rs6000/powerpc-isa205-altivec32l-expedite = r1,pc
+rs6000/powerpc-isa205-vsx32l-expedite = r1,pc
 rs6000/powerpc-e500l-expedite = r1,pc
 rs6000/powerpc-64l-expedite = r1,pc
 rs6000/powerpc-altivec64l-expedite = r1,pc
 rs6000/powerpc-vsx64l-expedite = r1,pc
+rs6000/powerpc-isa205-64l-expedite = r1,pc
+rs6000/powerpc-isa205-altivec64l-expedite = r1,pc
+rs6000/powerpc-isa205-vsx64l-expedite = r1,pc
 
 
 XSLTPROC = xsltproc

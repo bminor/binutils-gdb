@@ -1,5 +1,19 @@
 2008-11-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
+	* features/Makefile (rs6000/powerpc-isa205-32l-expedite,
+	rs6000/powerpc-isa205-altivec32l-expedite,
+	powerpc-isa205-vsx32l-expedite, rs6000/powerpc-isa205-64l-expedite,
+	rs6000/powerpc-isa205-altivec64l-expedite,
+	powerpc-isa205-vsx64l-expedite): New variables.
+	* regformats/rs6000/powerpc-isa205-32l.dat: Generate.
+	* regformats/rs6000/powerpc-isa205-altivec32l.dat: Generate.
+	* regformats/rs6000/powerpc-isa205-vsx32l.dat: Generate.
+	* regformats/rs6000/powerpc-isa205-64l.dat: Generate.
+	* regformats/rs6000/powerpc-isa205-altivec64l.dat: Generate.
+	* regformats/rs6000/powerpc-isa205-vsx64l.dat: Generate.
+
+2008-11-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
 	* ppc-linux-nat.c (ppc_register_u_addr): Add special case to return
 	offset for full 64-bit slot of FPSCR when in 32-bits.
 	(ppc_linux_read_description): Return target description with 64-bit
