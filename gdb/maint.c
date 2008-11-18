@@ -473,7 +473,7 @@ maintenance_translate_address (char *arg, int from_tty)
 	  break;
       }
 
-      if (!sect)
+      if (!objfile)
 	error (_("Unknown section %s."), arg);
     }
 

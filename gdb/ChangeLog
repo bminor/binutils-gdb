@@ -1,3 +1,7 @@
+2008-11-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* maint.c (maintenance_translate_address): Fix a buglet.
+	
 2008-11-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* features/Makefile (rs6000/powerpc-isa205-32l-expedite,
