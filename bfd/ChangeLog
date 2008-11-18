@@ -1,3 +1,14 @@
+2008-11-18  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2.c (read_section): Fix formatting.
+	(read_n_bytes): Remove unhelpful comment.
+	(read_indirect_string): Pass symbol table to read_section in case
+	the .debug_str section needs relocating.
+
+	PR 7037
+	* elf32-cr16.c (cr16_elf_howto_table): Zero the src_mask field of
+	the reloc descriptions.
+
 2008-11-14  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	PR 7022

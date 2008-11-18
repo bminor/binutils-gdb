@@ -93,7 +93,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_NUM8",            /* name */
          FALSE,                    /* partial_inplace */
-         0xff,                     /* src_mask */
+         0x0,                      /* src_mask */
          0xff,                     /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -107,7 +107,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_NUM16",           /* name */
          FALSE,                    /* partial_inplace */
-         0xffff,                   /* src_mask */
+         0x0,                      /* src_mask */
          0xffff,                   /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -121,7 +121,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_NUM32",           /* name */
          FALSE,                    /* partial_inplace */
-         0xffffffff,               /* src_mask */
+         0x0,                      /* src_mask */
          0xffffffff,               /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -135,7 +135,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_NUM32a",          /* name */
          FALSE,                    /* partial_inplace */
-         0xffffffff,               /* src_mask */
+         0x0,                      /* src_mask */
          0xffffffff,               /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -149,7 +149,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_REGREL4",         /* name */
          FALSE,                    /* partial_inplace */
-         0xf,                      /* src_mask */
+         0x0,                      /* src_mask */
          0xf,                      /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -163,7 +163,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_REGREL4a",        /* name */
          FALSE,                    /* partial_inplace */
-         0xf,                      /* src_mask */
+         0x0,                      /* src_mask */
          0xf,                      /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -177,7 +177,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_REGREL14",        /* name */
          FALSE,                    /* partial_inplace */
-         0x3fff,                   /* src_mask */
+         0x0,                      /* src_mask */
          0x3fff,                   /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -191,7 +191,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_REGREL14a",       /* name */
          FALSE,                    /* partial_inplace */
-         0x3fff,                   /* src_mask */
+         0x0,                      /* src_mask */
          0x3fff,                   /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -205,7 +205,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_REGREL16",        /* name */
          FALSE,                    /* partial_inplace */
-         0xffff,                   /* src_mask */
+         0x0,                      /* src_mask */
          0xffff,                   /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -219,7 +219,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_REGREL20",        /* name */
          FALSE,                    /* partial_inplace */
-         0xfffff,                  /* src_mask */
+         0x0,                      /* src_mask */
          0xfffff,                  /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -233,7 +233,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_REGREL20a",       /* name */
          FALSE,                    /* partial_inplace */
-         0xfffff,                  /* src_mask */
+         0x0,                      /* src_mask */
          0xfffff,                  /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -247,7 +247,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_ABS20",           /* name */
          FALSE,                    /* partial_inplace */
-         0xfffff,                  /* src_mask */
+         0x0,                      /* src_mask */
          0xfffff,                  /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -261,7 +261,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_ABS24",           /* name */
          FALSE,                    /* partial_inplace */
-         0xffffff,                 /* src_mask */
+         0x0,                      /* src_mask */
          0xffffff,                 /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -275,7 +275,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_IMM4",            /* name */
          FALSE,                    /* partial_inplace */
-         0xf,                      /* src_mask */
+         0x0,                      /* src_mask */
          0xf,                      /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -289,7 +289,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_IMM8",            /* name */
          FALSE,                    /* partial_inplace */
-         0xff,                     /* src_mask */
+         0x0,                      /* src_mask */
          0xff,                     /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -303,7 +303,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_IMM16",           /* name */
          FALSE,                    /* partial_inplace */
-         0xffff,                   /* src_mask */
+         0x0,                      /* src_mask */
          0xffff,                   /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -317,7 +317,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_IMM20",           /* name */
          FALSE,                    /* partial_inplace */
-         0xfffff,                  /* src_mask */
+         0x0,                      /* src_mask */
          0xfffff,                  /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -331,7 +331,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_IMM24",           /* name */
          FALSE,                    /* partial_inplace */
-         0xffffff,                 /* src_mask */
+         0x0,                      /* src_mask */
          0xffffff,                 /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -345,7 +345,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_IMM32",           /* name */
          FALSE,                    /* partial_inplace */
-         0xffffffff,               /* src_mask */
+         0x0,                      /* src_mask */
          0xffffffff,               /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -359,7 +359,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_IMM32a",          /* name */
          FALSE,                    /* partial_inplace */
-         0xffffffff,               /* src_mask */
+         0x0,                      /* src_mask */
          0xffffffff,               /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -373,7 +373,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_DISP4",           /* name */
          FALSE,                    /* partial_inplace */
-         0xf,                      /* src_mask */
+         0x0,                      /* src_mask */
          0xf,                      /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -387,7 +387,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_DISP8",           /* name */
          FALSE,                    /* partial_inplace */
-         0x1ff,                    /* src_mask */
+         0x0,                      /* src_mask */
          0x1ff,                    /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -401,7 +401,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_DISP16",          /* name */
          FALSE,                    /* partial_inplace */
-         0x1ffff,                  /* src_mask */
+         0x0,                      /* src_mask */
          0x1ffff,                  /* dst_mask */
          FALSE),                   /* pcrel_offset */
   /* REVISIT: DISP24 should be left-shift by 2 as per ISA doc
@@ -416,7 +416,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_DISP24",          /* name */
          FALSE,                    /* partial_inplace */
-         0x1ffffff,                /* src_mask */
+         0x0,                      /* src_mask */
          0x1ffffff,                /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -430,7 +430,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_DISP24a",         /* name */
          FALSE,                    /* partial_inplace */
-         0xffffff,                 /* src_mask */
+         0x0,                      /* src_mask */
          0xffffff,                 /* dst_mask */
          FALSE),                   /* pcrel_offset */
 
@@ -447,7 +447,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_SWITCH8",         /* name */
          FALSE,                    /* partial_inplace */
-         0xff,                     /* src_mask */
+         0x0,                      /* src_mask */
          0xff,                     /* dst_mask */
          TRUE),                    /* pcrel_offset */
 
@@ -464,7 +464,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_SWITCH16",        /* name */
          FALSE,                    /* partial_inplace */
-         0xffff,                   /* src_mask */
+         0x0,                      /* src_mask */
          0xffff,                   /* dst_mask */
          TRUE),                    /* pcrel_offset */
 
@@ -481,7 +481,7 @@ static reloc_howto_type cr16_elf_howto_table[] =
          bfd_elf_generic_reloc,    /* special_function */
          "R_CR16_SWITCH32",        /* name */
          FALSE,                    /* partial_inplace */
-         0xffffffff,               /* src_mask */
+         0x0,                      /* src_mask */
          0xffffffff,               /* dst_mask */
          TRUE)                     /* pcrel_offset */
 };
@@ -945,7 +945,7 @@ elf32_cr16_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
                      (info, (h ? &h->root : NULL), name, howto->name,
                       (bfd_vma) 0, input_bfd, input_section,
                       rel->r_offset)))
-                 return FALSE;
+		 return FALSE;
                break;
 
              case bfd_reloc_undefined:

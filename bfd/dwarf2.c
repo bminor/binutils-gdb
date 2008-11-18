@@ -399,15 +399,19 @@ lookup_info_hash_table (struct info_hash_table *hash_table, const char *key)
 }
 
 /* Read a section into its appropriate place in the dwarf2_debug
-   struct (indicated by SECTION_BUFFER and SECTION_SIZE).  If syms is
+   struct (indicated by SECTION_BUFFER and SECTION_SIZE).  If SYMS is
    not NULL, use bfd_simple_get_relocated_section_contents to read the
-   section contents, otherwise use bfd_get_section_contents.  */
+   section contents, otherwise use bfd_get_section_contents.  Fail if
+   the located section does not contain at least OFFSET bytes.  */
 
 static bfd_boolean
-read_section (bfd *abfd,
-	      const char* section_name, const char* compressed_section_name,
-	      asymbol** syms, bfd_uint64_t offset,
-	      bfd_byte **section_buffer, bfd_size_type *section_size)
+read_section (bfd *           abfd,
+	      const char *    section_name,
+	      const char *    compressed_section_name,
+	      asymbol **      syms,
+	      bfd_uint64_t    offset,
+	      bfd_byte **     section_buffer,
+	      bfd_size_type * section_size)
 {
   asection *msec;
   bfd_boolean section_is_compressed = FALSE;
@@ -459,11 +463,11 @@ read_section (bfd *abfd,
     }
 
   /* It is possible to get a bad value for the offset into the section
-   * that the client wants.  Validate it here to avoid trouble later.  */
+     that the client wants.  Validate it here to avoid trouble later.  */
   if (offset != 0 && offset >= *section_size)
     {
       (*_bfd_error_handler) (_("Dwarf Error: Offset (%lu) greater than or equal to %s size (%lu)."),
-			     offset, section_name, *section_size);
+			     (long) offset, section_name, *section_size);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -512,9 +516,6 @@ read_n_bytes (bfd *abfd ATTRIBUTE_UNUSED,
 	      bfd_byte *buf,
 	      unsigned int size ATTRIBUTE_UNUSED)
 {
-  /* If the size of a host char is 8 bits, we can return a pointer
-     to the buffer, otherwise we have to copy the data to a buffer
-     allocated on the temporary obstack.  */
   return buf;
 }
 
@@ -525,6 +526,7 @@ read_string (bfd *abfd ATTRIBUTE_UNUSED,
 {
   /* Return a pointer to the embedded string.  */
   char *str = (char *) buf;
+
   if (*str == '\0')
     {
       *bytes_read_ptr = 1;
@@ -535,10 +537,12 @@ read_string (bfd *abfd ATTRIBUTE_UNUSED,
   return str;
 }
 
+/* END VERBATIM */
+
 static char *
-read_indirect_string (struct comp_unit* unit,
-		      bfd_byte *buf,
-		      unsigned int *bytes_read_ptr)
+read_indirect_string (struct comp_unit * unit,
+		      bfd_byte *         buf,
+		      unsigned int *     bytes_read_ptr)
 {
   bfd_uint64_t offset;
   struct dwarf2_debug *stash = unit->stash;
@@ -548,20 +552,19 @@ read_indirect_string (struct comp_unit* unit,
     offset = read_4_bytes (unit->abfd, buf);
   else
     offset = read_8_bytes (unit->abfd, buf);
+
   *bytes_read_ptr = unit->offset_size;
 
   if (! read_section (unit->abfd, ".debug_str", ".zdebug_str",
-		      0, offset,
+		      stash->syms, offset,
 		      &stash->dwarf_str_buffer, &stash->dwarf_str_size))
-    return 0;
+    return NULL;
 
   str = (char *) stash->dwarf_str_buffer + offset;
   if (*str == '\0')
     return NULL;
   return str;
 }
-
-/* END VERBATIM */
 
 static bfd_uint64_t
 read_address (struct comp_unit *unit, bfd_byte *buf)
