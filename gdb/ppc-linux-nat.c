@@ -56,8 +56,15 @@
 #define PT_TRAP 40
 #endif
 
+/* The PPC_FEATURE_* defines should be provided by <asm/cputable.h>.
+   If they aren't, we can provide them ourselves (their values are fixed
+   because they are part of the kernel ABI).  They are used in the AT_HWCAP
+   entry of the AUXV.  */
 #ifndef PPC_FEATURE_BOOKE
 #define PPC_FEATURE_BOOKE 0x00008000
+#endif
+#ifndef PPC_FEATURE_ARCH_2_05
+#define PPC_FEATURE_ARCH_2_05	0x00001000 /* ISA 2.05 */
 #endif
 
 /* Glibc's headers don't define PTRACE_GETVRREGS so we cannot use a
@@ -274,11 +281,17 @@ ppc_register_u_addr (struct gdbarch *gdbarch, int regno)
 	 kernel headers incorrectly contained the 32-bit definition of
 	 PT_FPSCR.  For the 32-bit definition, floating-point
 	 registers occupy two 32-bit "slots", and the FPSCR lives in
-	 the secondhalf of such a slot-pair (hence +1).  For 64-bit,
+	 the second half of such a slot-pair (hence +1).  For 64-bit,
 	 the FPSCR instead occupies the full 64-bit 2-word-slot and
 	 hence no adjustment is necessary.  Hack around this.  */
       if (wordsize == 8 && PT_FPSCR == (48 + 32 + 1))
 	u_addr = (48 + 32) * wordsize;
+      /* If the FPSCR is 64-bit wide, we need to fetch the whole 64-bit
+	 slot and not just its second word.  The PT_FPSCR supplied when
+	 GDB is compiled as a 32-bit app doesn't reflect this.  */
+      else if (wordsize == 4 && register_size (gdbarch, regno) == 8
+	       && PT_FPSCR == (48 + 2*32 + 1))
+	u_addr = (48 + 2*32) * wordsize;
       else
 	u_addr = PT_FPSCR * wordsize;
     }
@@ -1230,6 +1243,7 @@ ppc_linux_read_description (struct target_ops *ops)
 {
   int altivec = 0;
   int vsx = 0;
+  int isa205 = 0;
 
   int tid = TIDGET (inferior_ptid);
   if (tid == 0)
@@ -1274,6 +1288,9 @@ ppc_linux_read_description (struct target_ops *ops)
 	perror_with_name (_("Unable to fetch AltiVec registers"));
     }
 
+  if (ppc_linux_get_hwcap () & PPC_FEATURE_ARCH_2_05)
+    isa205 = 1;
+
   /* Check for 64-bit inferior process.  This is the case when the host is
      64-bit, and in addition the top bit of the MSR register is set.  */
 #ifdef __powerpc64__
@@ -1284,21 +1301,21 @@ ppc_linux_read_description (struct target_ops *ops)
     if (errno == 0 && msr < 0)
       {
 	if (vsx)
-	  return tdesc_powerpc_vsx64l;
+	  return isa205? tdesc_powerpc_isa205_vsx64l : tdesc_powerpc_vsx64l;
 	else if (altivec)
-	  return tdesc_powerpc_altivec64l;
+	  return isa205? tdesc_powerpc_isa205_altivec64l : tdesc_powerpc_altivec64l;
 
-	return tdesc_powerpc_64l;
+	return isa205? tdesc_powerpc_isa205_64l : tdesc_powerpc_64l;
       }
   }
 #endif
 
   if (vsx)
-    return tdesc_powerpc_vsx32l;
+    return isa205? tdesc_powerpc_isa205_vsx32l : tdesc_powerpc_vsx32l;
   else if (altivec)
-    return tdesc_powerpc_altivec32l;
+    return isa205? tdesc_powerpc_isa205_altivec32l : tdesc_powerpc_altivec32l;
 
-  return tdesc_powerpc_32l;
+  return isa205? tdesc_powerpc_isa205_32l : tdesc_powerpc_32l;
 }
 
 void _initialize_ppc_linux_nat (void);

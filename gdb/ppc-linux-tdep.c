@@ -42,9 +42,15 @@
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
 #include "features/rs6000/powerpc-vsx32l.c"
+#include "features/rs6000/powerpc-isa205-32l.c"
+#include "features/rs6000/powerpc-isa205-altivec32l.c"
+#include "features/rs6000/powerpc-isa205-vsx32l.c"
 #include "features/rs6000/powerpc-64l.c"
 #include "features/rs6000/powerpc-altivec64l.c"
 #include "features/rs6000/powerpc-vsx64l.c"
+#include "features/rs6000/powerpc-isa205-64l.c"
+#include "features/rs6000/powerpc-isa205-altivec64l.c"
+#include "features/rs6000/powerpc-isa205-vsx64l.c"
 #include "features/rs6000/powerpc-e500l.c"
 
 
@@ -1170,8 +1176,14 @@ _initialize_ppc_linux_tdep (void)
   initialize_tdesc_powerpc_32l ();
   initialize_tdesc_powerpc_altivec32l ();
   initialize_tdesc_powerpc_vsx32l ();
+  initialize_tdesc_powerpc_isa205_32l ();
+  initialize_tdesc_powerpc_isa205_altivec32l ();
+  initialize_tdesc_powerpc_isa205_vsx32l ();
   initialize_tdesc_powerpc_64l ();
   initialize_tdesc_powerpc_altivec64l ();
   initialize_tdesc_powerpc_vsx64l ();
+  initialize_tdesc_powerpc_isa205_64l ();
+  initialize_tdesc_powerpc_isa205_altivec64l ();
+  initialize_tdesc_powerpc_isa205_vsx64l ();
   initialize_tdesc_powerpc_e500l ();
 }

@@ -1,3 +1,34 @@
+2008-11-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* ppc-linux-nat.c (ppc_register_u_addr): Add special case to return
+	offset for full 64-bit slot of FPSCR when in 32-bits.
+	(ppc_linux_read_description): Return target description with 64-bit
+	FPSCR when inferior is running on an ISA 2.05 or later processor.
+	* ppc-linux-tdep.c (_initialize_ppc_linux_tdep): Call
+	initialize_tdec_powerpc_isa205_32l,
+	initialize_tdec_powerpc_isa205_altivec32l,
+	initialize_tdec_powerpc_isa205_vsx32l,
+	initialize_tdec_powerpc_isa205_64l,
+	initialize_tdec_powerpc_isa205_altivec64l and
+	initialize_tdec_powerpc_isa205_vsx64l.
+	* ppc-linux-tdep.h: Add external declaration for
+	tdesc_powerpc_isa205_32l, tdesc_powerpc_isa205_altivec32l,
+	tdesc_powerpc_isa205_vsx32l, tdesc_powerpc_isa205_64l,
+	tdesc_powerpc_isa205_altivec64l and tdesc_powerpc_isa205_vsx64l.
+	* features/rs600/powerpc-fpu-isa205.xml: New file.
+	* features/rs600/powerpc-isa205-32l.xml: New file.
+	* features/rs600/powerpc-isa205-64l.xml: New file.
+	* features/rs600/powerpc-isa205-altivec32l.xml: New file.
+	* features/rs600/powerpc-isa205-altivec64l.xml: New file.
+	* features/rs600/powerpc-isa205-vsx32l.xml: New file.
+	* features/rs600/powerpc-isa205-vsx64l.xml: New file.
+	* features/rs600/powerpc-isa205-32l.c: Generate.
+	* features/rs600/powerpc-isa205-64l.c: Generate.
+	* features/rs600/powerpc-isa205-altivec32l.c: Generate.
+	* features/rs600/powerpc-isa205-altivec64l.c: Generate.
+	* features/rs600/powerpc-isa205-vsx32l.c: Generate.
+	* features/rs600/powerpc-isa205-vsx64l.c: Generate.
+
 2008-11-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* objfiles.h: New MULTI_OBJFILE_P macro.

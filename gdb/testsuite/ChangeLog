@@ -1,3 +1,8 @@
+2008-11-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.arch/ppc-dfp.exp: New file.
+	* gdb.arch/ppc-dfp.c: New file.
+
 2008-11-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.base/sepsymtab.exp: Update for new 'info sym' format.
