@@ -1,3 +1,8 @@
+2008-11-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Set Catchpoints): Remove the documentation of
+	commands "catch load" and "catch unload".
+
 2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Async Records): Document

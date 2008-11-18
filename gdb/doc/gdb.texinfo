@@ -3643,16 +3643,6 @@ and @sc{gnu}/Linux.
 A call to @code{vfork}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.
 
-@item load
-@itemx load @var{libname}
-@cindex break on load/unload of shared library
-The dynamic loading of any shared library, or the loading of the library
-@var{libname}.  This is currently only available for HP-UX.
-
-@item unload
-@itemx unload @var{libname}
-The unloading of any dynamically loaded shared library, or the unloading
-of the library @var{libname}.  This is currently only available for HP-UX.
 @end table
 
 @item tcatch @var{event}
