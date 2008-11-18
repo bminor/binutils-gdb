@@ -843,6 +843,8 @@ hw_opic.o: hw_opic.c $(DEVICE_TABLE_H)
 hw_pal.o: hw_pal.c $(DEVICE_TABLE_H) $(CPU_H)
 hw_phb.o: hw_phb.c $(DEVICE_TABLE_H) $(HW_PHB_H) $(COREFILE_H)
 hw_register.o: hw_register.c $(DEVICE_TABLE_H) $(PSIM_H)
+hw_sem.o: hw_sem.c $(DEVICE_TABLE_H) $(PSIM_H)
+hw_shm.o: hw_shm.c $(DEVICE_TABLE_H) $(PSIM_H)
 hw_trace.o: hw_trace.c $(DEVICE_TABLE_H)
 hw_vm.o: hw_vm.c $(DEVICE_TABLE_H) $(CPU_H)
 # ignore this line, it stops make from getting confused

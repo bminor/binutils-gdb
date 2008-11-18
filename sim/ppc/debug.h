@@ -51,6 +51,8 @@ typedef enum {
   trace_pal_device,
   trace_pass_device,
   trace_phb_device,
+  trace_sem_device,
+  trace_shm_device,
   trace_stack_device,
   trace_register_device,
   trace_vm_device,
