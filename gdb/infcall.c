@@ -339,7 +339,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   gdbarch = get_frame_arch (frame);
 
   if (!gdbarch_push_dummy_call_p (gdbarch))
-    error (_("This target does not support function calls"));
+    error (_("This target does not support function calls."));
 
   /* Create a cleanup chain that contains the retbuf (buffer
      containing the register values).  This chain is create BEFORE the
@@ -529,7 +529,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     }
 
   if (nargs < TYPE_NFIELDS (ftype))
-    error (_("too few arguments in function call"));
+    error (_("Too few arguments in function call."));
 
   {
     int i;
@@ -754,7 +754,7 @@ The program being debugged exited while in a function called from GDB."));
 	      error (_("\
 The program being debugged was signaled while in a function called from GDB.\n\
 GDB has restored the context to what it was before the call.\n\
-To change this behavior use \"set unwindonsignal off\"\n\
+To change this behavior use \"set unwindonsignal off\".\n\
 Evaluation of the expression containing the function (%s) will be abandoned."),
 		     name);
 	    }
@@ -774,7 +774,7 @@ Evaluation of the expression containing the function (%s) will be abandoned."),
 	      error (_("\
 The program being debugged was signaled while in a function called from GDB.\n\
 GDB remains in the frame where the signal was received.\n\
-To change this behavior use \"set unwindonsignal on\"\n\
+To change this behavior use \"set unwindonsignal on\".\n\
 Evaluation of the expression containing the function (%s) will be abandoned."),
 		     name);
 	    }
