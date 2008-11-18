@@ -264,6 +264,9 @@ static const struct opcode32 coprocessor_opcodes[] =
   {FPU_NEON_EXT_V1, 0x0e100b30, 0x0f500f30, "vmov%c.%23?us16\t%12-15r, %16-19,7D[%6,21d]"},
   {FPU_NEON_EXT_V1, 0x0e400b10, 0x0fd00f10, "vmov%c.8\t%16-19,7D[%5,6,21d], %12-15r"},
   {FPU_NEON_EXT_V1, 0x0e500b10, 0x0f500f10, "vmov%c.%23?us8\t%12-15r, %16-19,7D[%5,6,21d]"},
+  /* Half-precision conversion instructions.  */
+  {FPU_NEON_FP16,   0x0eb20a40, 0x0fbf0f50, "vcvt%7?tb%c.f32.f16\t%y1, %y0"},
+  {FPU_NEON_FP16,   0x0eb30a40, 0x0fbf0f50, "vcvt%7?tb%c.f16.f32\t%y1, %y0"},
 
   /* Floating point coprocessor (VFP) instructions */
   {FPU_VFP_EXT_V1xD, 0x0ef1fa10, 0x0fffffff, "fmstat%c"},
@@ -504,6 +507,10 @@ static const struct opcode32 neon_opcodes[] =
   {FPU_NEON_EXT_V1, 0xf3b00800, 0xffb00c50, "vtbl%c.8\t%12-15,22D, %F, %0-3,5D"},
   {FPU_NEON_EXT_V1, 0xf3b00840, 0xffb00c50, "vtbx%c.8\t%12-15,22D, %F, %0-3,5D"},
   
+  /* Half-precision conversions.  */
+  {FPU_NEON_FP16,   0xf3b60600, 0xffbf0fd0, "vcvt%c.f16.f32\t%12-15,22D, %0-3,5Q"},
+  {FPU_NEON_FP16,   0xf3b60700, 0xffbf0fd0, "vcvt%c.f32.f16\t%12-15,22Q, %0-3,5D"},
+
   /* Two registers, miscellaneous */
   {FPU_NEON_EXT_V1, 0xf2880a10, 0xfebf0fd0, "vmovl%c.%24?us8\t%12-15,22Q, %0-3,5D"},
   {FPU_NEON_EXT_V1, 0xf2900a10, 0xfebf0fd0, "vmovl%c.%24?us16\t%12-15,22Q, %0-3,5D"},

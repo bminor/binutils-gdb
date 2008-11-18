@@ -1,3 +1,14 @@
+2008-11-18  Catherine Moore  <clm@cm00re.com>
+
+	* config/tc-arm.c (neon_type_mask): Renumber.
+	(type_chk_of_el_type): Handle F_F16.
+	(neon_cvt_flavour): Recognize half-precision conversions.
+	(do_neon_cvt): New shapes NS_QD and
+	NS_DQ.  Encode half-precision conversions.
+	(do_neon_cvtt): Encode the T bit.
+	(asm_opcode_insns): vcvt, vcvtt support.
+	(arm_option_cpu_value): Add neon-fp16 support.
+
 2008-11-17  Nick Clifton  <nickc@redhat.com>
 
 	* as.c (parse_args): Update copyright year.

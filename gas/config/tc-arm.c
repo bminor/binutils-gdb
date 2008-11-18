@@ -226,6 +226,7 @@ static const arm_feature_set fpu_vfp_ext_d32 =
 static const arm_feature_set fpu_neon_ext_v1 = ARM_FEATURE (0, FPU_NEON_EXT_V1);
 static const arm_feature_set fpu_vfp_v3_or_neon_ext =
   ARM_FEATURE (0, FPU_NEON_EXT_V1 | FPU_VFP_EXT_V3);
+static const arm_feature_set fpu_neon_fp16 = ARM_FEATURE (0, FPU_NEON_FP16);
 
 static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
@@ -10682,36 +10683,37 @@ static struct neon_shape_info neon_shape_tab[] =
 
 enum neon_type_mask
 {
-  N_S8   = 0x000001,
-  N_S16  = 0x000002,
-  N_S32  = 0x000004,
-  N_S64  = 0x000008,
-  N_U8   = 0x000010,
-  N_U16  = 0x000020,
-  N_U32  = 0x000040,
-  N_U64  = 0x000080,
-  N_I8   = 0x000100,
-  N_I16  = 0x000200,
-  N_I32  = 0x000400,
-  N_I64  = 0x000800,
-  N_8    = 0x001000,
-  N_16   = 0x002000,
-  N_32   = 0x004000,
-  N_64   = 0x008000,
-  N_P8   = 0x010000,
-  N_P16  = 0x020000,
-  N_F32  = 0x040000,
-  N_F64  = 0x080000,
-  N_KEY  = 0x100000, /* key element (main type specifier).  */
-  N_EQK  = 0x200000, /* given operand has the same type & size as the key.  */
-  N_VFP  = 0x400000, /* VFP mode: operand size must match register width.  */
-  N_DBL  = 0x000001, /* if N_EQK, this operand is twice the size.  */
-  N_HLF  = 0x000002, /* if N_EQK, this operand is half the size.  */
-  N_SGN  = 0x000004, /* if N_EQK, this operand is forced to be signed.  */
-  N_UNS  = 0x000008, /* if N_EQK, this operand is forced to be unsigned.  */
-  N_INT  = 0x000010, /* if N_EQK, this operand is forced to be integer.  */
-  N_FLT  = 0x000020, /* if N_EQK, this operand is forced to be float.  */
-  N_SIZ  = 0x000040, /* if N_EQK, this operand is forced to be size-only.  */
+  N_S8   = 0x0000001,
+  N_S16  = 0x0000002,
+  N_S32  = 0x0000004,
+  N_S64  = 0x0000008,
+  N_U8   = 0x0000010,
+  N_U16  = 0x0000020,
+  N_U32  = 0x0000040,
+  N_U64  = 0x0000080,
+  N_I8   = 0x0000100,
+  N_I16  = 0x0000200,
+  N_I32  = 0x0000400,
+  N_I64  = 0x0000800,
+  N_8    = 0x0001000,
+  N_16   = 0x0002000,
+  N_32   = 0x0004000,
+  N_64   = 0x0008000,
+  N_P8   = 0x0010000,
+  N_P16  = 0x0020000,
+  N_F16  = 0x0040000,
+  N_F32  = 0x0080000,
+  N_F64  = 0x0100000,
+  N_KEY  = 0x1000000, /* key element (main type specifier).  */
+  N_EQK  = 0x2000000, /* given operand has the same type & size as the key.  */
+  N_VFP  = 0x4000000, /* VFP mode: operand size must match register width.  */
+  N_DBL  = 0x0000001, /* if N_EQK, this operand is twice the size.  */
+  N_HLF  = 0x0000002, /* if N_EQK, this operand is half the size.  */
+  N_SGN  = 0x0000004, /* if N_EQK, this operand is forced to be signed.  */
+  N_UNS  = 0x0000008, /* if N_EQK, this operand is forced to be unsigned.  */
+  N_INT  = 0x0000010, /* if N_EQK, this operand is forced to be integer.  */
+  N_FLT  = 0x0000020, /* if N_EQK, this operand is forced to be float.  */
+  N_SIZ  = 0x0000040, /* if N_EQK, this operand is forced to be size-only.  */
   N_UTYP = 0,
   N_MAX_NONSPECIAL = N_F64
 };
@@ -10905,6 +10907,7 @@ type_chk_of_el_type (enum neon_el_type type, unsigned size)
     case NT_float:
       switch (size)
         {
+	case 16: return N_F16;
         case 32: return N_F32;
         case 64: return N_F64;
         default: ;
@@ -12598,25 +12601,28 @@ neon_cvt_flavour (enum neon_shape rs)
   CVT_VAR (1, N_U32, N_F32);
   CVT_VAR (2, N_F32, N_S32);
   CVT_VAR (3, N_F32, N_U32);
+  /* Half-precision conversions.  */
+  CVT_VAR (4, N_F32, N_F16);
+  CVT_VAR (5, N_F16, N_F32);
 
   whole_reg = N_VFP;
 
   /* VFP instructions.  */
-  CVT_VAR (4, N_F32, N_F64);
-  CVT_VAR (5, N_F64, N_F32);
-  CVT_VAR (6, N_S32, N_F64 | key);
-  CVT_VAR (7, N_U32, N_F64 | key);
-  CVT_VAR (8, N_F64 | key, N_S32);
-  CVT_VAR (9, N_F64 | key, N_U32);
+  CVT_VAR (6, N_F32, N_F64);
+  CVT_VAR (7, N_F64, N_F32);
+  CVT_VAR (8, N_S32, N_F64 | key);
+  CVT_VAR (9, N_U32, N_F64 | key);
+  CVT_VAR (10, N_F64 | key, N_S32);
+  CVT_VAR (11, N_F64 | key, N_U32);
   /* VFP instructions with bitshift.  */
-  CVT_VAR (10, N_F32 | key, N_S16);
-  CVT_VAR (11, N_F32 | key, N_U16);
-  CVT_VAR (12, N_F64 | key, N_S16);
-  CVT_VAR (13, N_F64 | key, N_U16);
-  CVT_VAR (14, N_S16, N_F32 | key);
-  CVT_VAR (15, N_U16, N_F32 | key);
-  CVT_VAR (16, N_S16, N_F64 | key);
-  CVT_VAR (17, N_U16, N_F64 | key);
+  CVT_VAR (12, N_F32 | key, N_S16);
+  CVT_VAR (13, N_F32 | key, N_U16);
+  CVT_VAR (14, N_F64 | key, N_S16);
+  CVT_VAR (15, N_F64 | key, N_U16);
+  CVT_VAR (16, N_S16, N_F32 | key);
+  CVT_VAR (17, N_U16, N_F32 | key);
+  CVT_VAR (18, N_S16, N_F64 | key);
+  CVT_VAR (19, N_U16, N_F64 | key);
 
   return -1;
 #undef CVT_VAR
@@ -12640,6 +12646,8 @@ do_vfp_nsyn_cvt (enum neon_shape rs, int flavour)
           "fultos",
           NULL,
           NULL,
+	  NULL,
+	  NULL,
           "ftosld",
           "ftould",
           "fsltod",
@@ -12672,6 +12680,8 @@ do_vfp_nsyn_cvt (enum neon_shape rs, int flavour)
           "ftouis",
           "fsitos",
           "fuitos",
+	  "NULL",
+	  "NULL",
           "fcvtsd",
           "fcvtds",
           "ftosid",
@@ -12701,6 +12711,8 @@ do_vfp_nsyn_cvtz (void)
       NULL,
       NULL,
       NULL,
+      NULL,
+      NULL,
       "ftosizd",
       "ftouizd"
     };
@@ -12708,16 +12720,15 @@ do_vfp_nsyn_cvtz (void)
   if (flavour >= 0 && flavour < (int) ARRAY_SIZE (enc) && enc[flavour])
     do_vfp_nsyn_opcode (enc[flavour]);
 }
-
 static void
 do_neon_cvt (void)
 {
   enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_FFI, NS_DD, NS_QQ,
-    NS_FD, NS_DF, NS_FF, NS_NULL);
+    NS_FD, NS_DF, NS_FF, NS_QD, NS_DQ, NS_NULL);
   int flavour = neon_cvt_flavour (rs);
 
   /* VFP rather than Neon conversions.  */
-  if (flavour >= 4)
+  if (flavour >= 6)
     {
       do_vfp_nsyn_cvt (rs, flavour);
       return;
@@ -12779,10 +12790,68 @@ do_neon_cvt (void)
       }
     break;
 
+    /* Half-precision conversions for Advanced SIMD -- neon.  */
+    case NS_QD:
+    case NS_DQ:
+
+      if ((rs == NS_DQ)
+	  && (inst.vectype.el[0].size != 16 || inst.vectype.el[1].size != 32))
+	  {
+	    as_bad (_("operand size must match register width"));
+	    break;
+	  }
+
+      if ((rs == NS_QD)
+	  && ((inst.vectype.el[0].size != 32 || inst.vectype.el[1].size != 16)))
+	  {
+	    as_bad (_("operand size must match register width"));
+	    break;
+	  }
+
+      if (rs == NS_DQ)
+        inst.instruction = 0x3b60600;
+      else
+	inst.instruction = 0x3b60700;
+
+      inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+      inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+      inst.instruction |= LOW4 (inst.operands[1].reg);
+      inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+      inst.instruction = neon_dp_fixup (inst.instruction);
+      break;
+
     default:
       /* Some VFP conversions go here (s32 <-> f32, u32 <-> f32).  */
       do_vfp_nsyn_cvt (rs, flavour);
     }
+}
+
+static void
+do_neon_cvtb (void)
+{
+  inst.instruction = 0xeb20a40;
+
+  /* The sizes are attached to the mnemonic.  */
+  if (inst.vectype.el[0].type != NT_invtype
+      && inst.vectype.el[0].size == 16)
+    inst.instruction |= 0x00010000;
+
+  /* Programmer's syntax: the sizes are attached to the operands.  */
+  else if (inst.operands[0].vectype.type != NT_invtype
+	   && inst.operands[0].vectype.size == 16)
+    inst.instruction |= 0x00010000;
+
+  encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Sd);
+  encode_arm_vfp_reg (inst.operands[1].reg, VFP_REG_Sm);
+  do_vfp_cond_or_thumb ();
+}
+
+
+static void
+do_neon_cvtt (void)
+{
+  do_neon_cvtb ();
+  inst.instruction |= 0x80;
 }
 
 static void
@@ -15950,6 +16019,9 @@ static const struct asm_opcode insns[] =
  NCE(vstr,      d000b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
 
  nCEF(vcvt,     vcvt,    3, (RNSDQ, RNSDQ, oI32b), neon_cvt),
+ nCEF(vcvtb,	vcvt,	 2, (RVS, RVS), neon_cvtb),
+ nCEF(vcvtt,	vcvt,	 2, (RVS, RVS), neon_cvtt),
+ 
 
   /* NOTE: All VMOV encoding is special-cased!  */
  NCE(vmov,      0,       1, (VMOV), neon_mov),
@@ -20258,6 +20330,7 @@ static const struct arm_option_cpu_value_table arm_fpus[] =
   {"arm1136jf-s",	FPU_ARCH_VFP_V2},
   {"maverick",		FPU_ARCH_MAVERICK},
   {"neon",              FPU_ARCH_VFP_V3_PLUS_NEON_V1},
+  {"neon-fp16",		FPU_ARCH_NEON_FP16},
   {NULL,		ARM_ARCH_NONE}
 };
 
@@ -20731,9 +20804,11 @@ aeabi_set_public_attributes (void)
       || ARM_CPU_HAS_FEATURE (arm_arch_used, arm_cext_iwmmxt))
     bfd_elf_add_proc_attr_int (stdoutput, 11, 1);
   /* Tag_NEON_arch.  */
-  if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_neon_ext_v1)
-      || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_neon_ext_v1))
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_v1))
     bfd_elf_add_proc_attr_int (stdoutput, 12, 1);
+  /* Tag_NEON_FP16_arch.  */
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_fp16))
+    bfd_elf_add_proc_attr_int (stdoutput, 36, 1);
 }
 
 /* Add the default contents for the .ARM.attributes section.  */

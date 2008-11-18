@@ -8784,6 +8784,10 @@ static const char *arm_attr_tag_ABI_optimization_goals[] =
 static const char *arm_attr_tag_ABI_FP_optimization_goals[] =
   {"None", "Prefer Speed", "Aggressive Speed", "Prefer Size",
     "Aggressive Size", "Prefer Accuracy", "Aggressive Accuracy"};
+static const char *arm_attr_tag_VFP_HP_extension[] =
+  {"Not Allowed", "Allowed"};
+static const char *arm_attr_tag_ABI_FP_16bit_format[] =
+  {"None", "IEEE 754", "Alternative Format"};
 
 #define LOOKUP(id, name) \
   {id, #name, 0x80 | ARRAY_SIZE(arm_attr_tag_##name), arm_attr_tag_##name}
@@ -8817,7 +8821,9 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   LOOKUP(29, ABI_WMMX_args),
   LOOKUP(30, ABI_optimization_goals),
   LOOKUP(31, ABI_FP_optimization_goals),
-  {32, "compatibility", 0, NULL}
+  {32, "compatibility", 0, NULL},
+  LOOKUP(36, VFP_HP_extension),
+  LOOKUP(38, ABI_FP_16bit_format),
 };
 #undef LOOKUP
 

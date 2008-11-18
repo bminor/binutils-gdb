@@ -1,3 +1,11 @@
+2008-11-18  Catherine Moore  <clm@codesourcery.com>
+
+	* arm-dis.c (coprocessor_opcodes): Add half-precision vcvt
+	instructions.
+	(neon_opcodes): Likewise.
+	(print_insn_coprocessor): Print 't' or 'b' for vcvt
+	instructions.
+
 2008-11-14  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms (OBJS): Update list of objects.
