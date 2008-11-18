@@ -11856,6 +11856,16 @@ _initialize_vx + 396 in section .text
 This is the opposite of the @code{info address} command.  You can use
 it to find out the name of a variable or a function given its address.
 
+For dynamically linked executables, the name of executable or shared
+library containing the symbol is also printed:
+
+@smallexample
+(@value{GDBP}) info symbol 0x400225
+_start + 5 in section .text of /tmp/a.out
+(@value{GDBP}) info symbol 0x2aaaac2811cf
+__read_nocancel + 6 in section .text of /usr/lib64/libc.so.6
+@end smallexample
+
 @kindex whatis
 @item whatis [@var{arg}]
 Print the data type of @var{arg}, which can be either an expression or
@@ -24610,6 +24620,10 @@ Find the symbol stored at the location specified by the address
 the symbol's location to the specified address.  This is similar to
 the @code{info address} command (@pxref{Symbols}), except that this
 command also allows to find symbols in other sections.
+
+If section was not specified, the section in which the symbol was found
+is also printed.  For dynamically linked executables, the name of
+executable or shared library containing the symbol is printed as well.
 
 @end table
 

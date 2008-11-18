@@ -583,4 +583,8 @@ extern void *objfile_data (struct objfile *objfile,
    uninitialized section index. */
 #define SECT_OFF_BSS(objfile) (objfile)->sect_index_bss
 
+/* Answer whether there is more than one object file loaded.  */
+
+#define MULTI_OBJFILE_P() (object_files && object_files->next)
+
 #endif /* !defined (OBJFILES_H) */

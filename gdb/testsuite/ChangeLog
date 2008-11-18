@@ -1,3 +1,7 @@
+2008-11-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.base/sepsymtab.exp: Update for new 'info sym' format.
+	
 2008-11-17  Doug Evans  <dje@google.com>
 
 	* gdb.mi/mi-syn-frame.exp: Update expected output.

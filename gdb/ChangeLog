@@ -1,3 +1,9 @@
+2008-11-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* objfiles.h: New MULTI_OBJFILE_P macro.
+	* printcmd.c (sym_info): Print object name.
+	* maint.c (maintenance_translate_address): Likewise.
+	
 2008-11-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Document the removal of "catch load" and "catch unload".

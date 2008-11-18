@@ -1012,21 +1012,51 @@ sym_info (char *arg, int from_tty)
 	&& sect_addr < obj_section_endaddr (osect)
 	&& (msymbol = lookup_minimal_symbol_by_pc_section (sect_addr, osect)))
       {
+	const char *obj_name, *mapped, *sec_name, *msym_name;
+
 	matches = 1;
 	offset = sect_addr - SYMBOL_VALUE_ADDRESS (msymbol);
-	if (offset)
-	  printf_filtered ("%s + %u in ",
-			   SYMBOL_PRINT_NAME (msymbol), offset);
+	mapped = section_is_mapped (osect) ? _("mapped") : _("unmapped");
+	sec_name = osect->the_bfd_section->name;
+	msym_name = SYMBOL_PRINT_NAME (msymbol);
+
+	gdb_assert (osect->objfile && osect->objfile->name);
+	obj_name = osect->objfile->name;
+
+	if (MULTI_OBJFILE_P ())
+	  if (pc_in_unmapped_range (addr, osect))
+	    if (section_is_overlay (osect))
+	      printf_filtered (_("%s + %u in load address range of "
+				 "%s overlay section %s of %s\n"),
+			       msym_name, offset,
+			       mapped, sec_name, obj_name);
+	    else
+	      printf_filtered (_("%s + %u in load address range of "
+				 "section %s of %s\n"),
+			       msym_name, offset, sec_name, obj_name);
+	  else
+	    if (section_is_overlay (osect))
+	      printf_filtered (_("%s + %u in %s overlay section %s of %s\n"),
+			       msym_name, offset, mapped, sec_name, obj_name);
+	    else
+	      printf_filtered (_("%s + %u in section %s of %s\n"),
+			       msym_name, offset, sec_name, obj_name);
 	else
-	  printf_filtered ("%s in ",
-			   SYMBOL_PRINT_NAME (msymbol));
-	if (pc_in_unmapped_range (addr, osect))
-	  printf_filtered (_("load address range of "));
-	if (section_is_overlay (osect))
-	  printf_filtered (_("%s overlay "),
-			   section_is_mapped (osect) ? "mapped" : "unmapped");
-	printf_filtered (_("section %s"), osect->the_bfd_section->name);
-	printf_filtered ("\n");
+	  if (pc_in_unmapped_range (addr, osect))
+	    if (section_is_overlay (osect))
+	      printf_filtered (_("%s + %u in load address range of %s overlay "
+				 "section %s\n"),
+			       msym_name, offset, mapped, sec_name);
+	    else
+	      printf_filtered (_("%s + %u in load address range of section %s\n"),
+			       msym_name, offset, sec_name);
+	  else
+	    if (section_is_overlay (osect))
+	      printf_filtered (_("%s + %u in %s overlay section %s\n"),
+			       msym_name, offset, mapped, sec_name);
+	    else
+	      printf_filtered (_("%s + %u in section %s\n"),
+			       msym_name, offset, sec_name);
       }
   }
   if (matches == 0)

@@ -35,6 +35,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "value.h"
+#include "gdb_assert.h"
 
 #include "cli/cli-decode.h"
 
@@ -484,9 +485,32 @@ maintenance_translate_address (char *arg, int from_tty)
     sym = lookup_minimal_symbol_by_pc (address);
 
   if (sym)
-    printf_filtered ("%s+%s\n",
-		     SYMBOL_PRINT_NAME (sym),
-		     pulongest (address - SYMBOL_VALUE_ADDRESS (sym)));
+    {
+      const char *symbol_name = SYMBOL_PRINT_NAME (sym);
+      const char *symbol_offset = pulongest (address - SYMBOL_VALUE_ADDRESS (sym));
+
+      sect = SYMBOL_OBJ_SECTION(sym);
+      if (sect != NULL)
+	{
+	  const char *section_name;
+	  const char *obj_name;
+
+	  gdb_assert (sect->the_bfd_section && sect->the_bfd_section->name);
+	  section_name = sect->the_bfd_section->name;
+
+	  gdb_assert (sect->objfile && sect->objfile->name);
+	  obj_name = sect->objfile->name;
+
+	  if (MULTI_OBJFILE_P ())
+	    printf_filtered (_("%s + %s in section %s of %s\n"),
+			     symbol_name, symbol_offset, section_name, obj_name);
+	  else
+	    printf_filtered (_("%s + %s in section %s\n"),
+			     symbol_name, symbol_offset, section_name);
+	}
+      else
+	printf_filtered (_("%s + %s\n"), symbol_name, symbol_offset);
+    }
   else if (sect)
     printf_filtered (_("no symbol at %s:0x%s\n"),
 		     sect->the_bfd_section->name, paddr (address));
