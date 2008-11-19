@@ -2286,13 +2286,22 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
     {
       struct timeval tm;
       char *timestamp;
+      int len, need_nl;
 
       gettimeofday (&tm, NULL);
-      timestamp = xstrprintf ("%ld:%ld ", (long) tm.tv_sec, (long) tm.tv_usec);
+
+      len = strlen (linebuffer);
+      need_nl = (len > 0 && linebuffer[len - 1] != '\n');
+
+      timestamp = xstrprintf ("%ld:%ld %s%s",
+			      (long) tm.tv_sec, (long) tm.tv_usec,
+			      linebuffer,
+			      need_nl ? "\n": "");
       make_cleanup (xfree, timestamp);
       fputs_unfiltered (timestamp, stream);
     }
-  fputs_unfiltered (linebuffer, stream);
+  else
+    fputs_unfiltered (linebuffer, stream);
   do_cleanups (old_cleanups);
 }
 

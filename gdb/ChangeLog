@@ -1,3 +1,12 @@
+2008-11-19  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (escape_buffer): New.
+	(putpkt_binary, read_frame, getpkt_or_notif_sane_1): Use it.  Make
+	sure debug output printing a packet buffer goes through a single
+	fprintf_unfiltered call.
+	* utils.c (vfprintf_unfiltered): If outputting timestamps, end
+	output with a newline if it wasn't going to already.
+
 2008-11-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* maint.c (maintenance_translate_address): Fix a buglet.

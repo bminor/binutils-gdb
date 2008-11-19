@@ -5847,6 +5847,28 @@ remote_send (char **buf,
     error (_("Remote failure reply: %s"), *buf);
 }
 
+/* Return a pointer to an xmalloc'ed string representing an escaped
+   version of BUF, of len N.  E.g. \n is converted to \\n, \t to \\t,
+   etc.  The caller is responsible for releasing the returned
+   memory.  */
+
+static char *
+escape_buffer (const char *buf, int n)
+{
+  struct cleanup *old_chain;
+  struct ui_file *stb;
+  char *str;
+  long length;
+
+  stb = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (stb);
+
+  fputstrn_unfiltered (buf, n, 0, stb);
+  str = ui_file_xstrdup (stb, &length);
+  do_cleanups (old_chain);
+  return str;
+}
+
 /* Display a null-terminated packet on stdout, for debugging, using C
    string notation.  */
 
@@ -5919,11 +5941,15 @@ putpkt_binary (char *buf, int cnt)
 
       if (remote_debug)
 	{
+	  struct cleanup *old_chain;
+	  char *str;
+
 	  *p = '\0';
-	  fprintf_unfiltered (gdb_stdlog, "Sending packet: ");
-	  fputstrn_unfiltered (buf2, p - buf2, 0, gdb_stdlog);
-	  fprintf_unfiltered (gdb_stdlog, "...");
+	  str = escape_buffer (buf2, p - buf2);
+	  old_chain = make_cleanup (xfree, str);
+	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s...", str);
 	  gdb_flush (gdb_stdlog);
+	  do_cleanups (old_chain);
 	}
       if (serial_write (remote_desc, buf2, p - buf2))
 	perror_with_name (_("putpkt: write failed"));
@@ -5997,9 +6023,15 @@ putpkt_binary (char *buf, int cnt)
 		  {
 		    if (remote_debug)
 		      {
-			fprintf_unfiltered (gdb_stdlog, "  Notification received: ");
-			fputstrn_unfiltered (rs->buf, val, 0, gdb_stdlog);
-			fprintf_unfiltered (gdb_stdlog, "\n");
+			struct cleanup *old_chain;
+			char *str;
+
+			str = escape_buffer (rs->buf, val);
+			old_chain = make_cleanup (xfree, str);
+			fprintf_unfiltered (gdb_stdlog,
+					    "  Notification received: %s\n",
+					    str);
+			do_cleanups (old_chain);
 		      }
 		    handle_notification (rs->buf, val);
 		    /* We're in sync now, rewait for the ack.  */
@@ -6163,11 +6195,16 @@ read_frame (char **buf_p,
 
 	    if (remote_debug)
 	      {
-		fprintf_filtered (gdb_stdlog,
-			      "Bad checksum, sentsum=0x%x, csum=0x%x, buf=",
-				  pktcsum, csum);
-		fputstrn_filtered (buf, bc, 0, gdb_stdlog);
-		fputs_filtered ("\n", gdb_stdlog);
+		struct cleanup *old_chain;
+		char *str;
+
+		str = escape_buffer (buf, bc);
+		old_chain = make_cleanup (xfree, str);
+		fprintf_unfiltered (gdb_stdlog,
+				    "\
+Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
+				    pktcsum, csum, str);
+		do_cleanups (old_chain);
 	      }
 	    /* Number of characters in buffer ignoring trailing
                NULL.  */
@@ -6340,9 +6377,13 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 	{
 	  if (remote_debug)
 	    {
-	      fprintf_unfiltered (gdb_stdlog, "Packet received: ");
-	      fputstrn_unfiltered (*buf, val, 0, gdb_stdlog);
-	      fprintf_unfiltered (gdb_stdlog, "\n");
+	     struct cleanup *old_chain;
+	     char *str;
+
+	     str = escape_buffer (*buf, val);
+	     old_chain = make_cleanup (xfree, str);
+	     fprintf_unfiltered (gdb_stdlog, "Packet received: %s\n", str);
+	     do_cleanups (old_chain);
 	    }
 
 	  /* Skip the ack char if we're in no-ack mode.  */
@@ -6359,9 +6400,15 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 
 	  if (remote_debug)
 	    {
-	      fprintf_unfiltered (gdb_stdlog, "  Notification received: ");
-	      fputstrn_unfiltered (*buf, val, 0, gdb_stdlog);
-	      fprintf_unfiltered (gdb_stdlog, "\n");
+	      struct cleanup *old_chain;
+	      char *str;
+
+	      str = escape_buffer (*buf, val);
+	      old_chain = make_cleanup (xfree, str);
+	      fprintf_unfiltered (gdb_stdlog,
+				  "  Notification received: %s\n",
+				  str);
+	      do_cleanups (old_chain);
 	    }
 
 	  handle_notification (*buf, val);
