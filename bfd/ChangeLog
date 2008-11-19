@@ -1,3 +1,68 @@
+2008-11-19  Bob Wilson  <bob.wilson@acm.org>
+	
+	* xtensa-modules.c (sysregs): Add MMID, VECBASE, EPC5, EPC6, EPC7,
+	EXCSAVE5, EXCSAVE6, EXCSAVE7, EPS5, EPS6, EPS7, CPENABLE,
+	SCOMPARE1, and THREADPTR registers.
+	(NUM_SYSREGS, MAX_USER_REG): Update.
+	(states): Change width of INTERRUPT, WindowBase, WindowStart, and
+	INTENABLE.  Add VECBASE, EPC5, EPC6, EPC7, EXCSAVE5, EXCSAVE6,
+	EXCSAVE7, EPS6, EPS6, EPS7, THREADPTR, CPENABLE, and SCOMPARE1 states.
+	(NUM_STATES): Update.
+	(enum xtensa_state_id): Add entries for new states.
+	(enum xtensa_field_id): Add entries for xt_wbr15_imm and xt_wbr18_imm
+	fields, along with functions to extract and set them.
+	(regfiles): Change number of AR registers to 32.
+	(Operand_ar0_encode, Operand_ar4_encode, Operand_ar8_encode,
+	Operand_ar12_encode, Operand_ars_entry_encode): Update register mask.
+	(operands): Add entries for tp7, xt_wbr15_label, xt_wbr18_label,
+	xt_wbr15_imm, and xt_wbr18_imm operands, along with functions to
+	encode and decode them.
+	(enum xtensa_operand_id): Add entries for new operands.
+	(Iclass_xt_iclass_rfi_stateArgs): Add EPC5, EPC6, EPC7, EPS5, EPS6, and
+	EPC7 states.
+	(Iclass_xt_iclass_rfdo_stateArgs): Replace EPC4 and EPS4 by EPC6 and
+	EPS6, respectively.
+	(iclasses): Add entries for rur_threadptr, wur_threadptr,
+	xt_iclass_wsr_176, xt_iclass_rsr_epc5, xt_iclass_wsr_epc5,
+	xt_iclass_xsr_epc5, xt_iclass_rsr_excsave5, xt_iclass_wsr_excsave5,
+	xt_iclass_xsr_excsave5, xt_iclass_rsr_epc6, xt_iclass_wsr_epc6,
+	xt_iclass_xsr_epc6, xt_iclass_rsr_excsave6, xt_iclass_wsr_excsave6,
+	xt_iclass_xsr_excsave6, xt_iclass_rsr_epc7, xt_iclass_wsr_epc7,
+	xt_iclass_xsr_epc7, xt_iclass_rsr_excsave7, xt_iclass_wsr_excsave7,
+	xt_iclass_xsr_excsave7, xt_iclass_rsr_eps5, xt_iclass_wsr_eps5,
+	xt_iclass_xsr_eps5, xt_iclass_rsr_eps6, xt_iclass_wsr_eps6,
+	xt_iclass_xsr_eps6, xt_iclass_rsr_eps7, xt_iclass_wsr_eps7,
+	xt_iclass_xsr_eps7, xt_iclass_rsr_vecbase, xt_iclass_wsr_vecbase,
+	xt_iclass_xsr_vecbase, xt_iclass_mul16, xt_iclass_wsr_mmid,
+	xt_iclass_icache_lock, xt_iclass_dcache_lock, xt_iclass_rsr_cpenable,
+	xt_iclass_wsr_cpenable, xt_iclass_xsr_cpenable, xt_iclass_clamp,
+	xt_iclass_minmax, xt_iclass_sx, xt_iclass_l32ai, xt_iclass_s32ri,
+	xt_iclass_s32c1i, xt_iclass_rsr_scompare1, xt_iclass_wsr_scompare1,
+	xt_iclass_xsr_scompare1, xt_iclass_div, and xt_iclass_mul32, along
+	with corresponding argument and state argument arrays.  Change
+	number of state arguments for xt_iclass_rfi.  Add arguments for
+	xt_iclass_rfdo.
+	(enum xtensa_iclass_id): Add entries for new iclasses.
+	(opcodes): Add entries for RUR_THREADPTR, WUR_THREADPTR, WSR_176,
+	RSR_EPC5, WSR_EPC5, XSR_EPC5, RSR_EXCSAVE5, WSR_EXCSAVE5, XSR_EXCSAVE5,
+	RSR_EPC6, WSR_EPC6, XSR_EPC6, RSR_EXCSAVE6, WSR_EXCSAVE6, XSR_EXCSAVE6,
+	RSR_EPC7, WSR_EPC7, XSR_EPC7, RSR_EXCSAVE7, WSR_EXCSAVE7, XSR_EXCSAVE7,
+	RSR_EPS5, WSR_EPS5, XSR_EPS5, RSR_EPS6, WSR_EPS6, XSR_EPS6, RSR_EPS7,
+	WSR_EPS7, XSR_EPS7, RSR_VECBASE, WSR_VECBASE, XSR_VECBASE, MUL16U,
+	MUL16S, WSR_MMID, IPFL, IHU, IIU, DPFL, DHU, DIU, RSR_CPENABLE,
+	WSR_CPENABLE, XSR_CPENABLE, CLAMPS, MIN, MAX, MINU, MAXU, SEXT, L32AI,
+	S32RI, S32C1I, RSR_SCOMPARE1, WSR_SCOMPARE1, XSR_SCOMPARE1, QUOU, QUOS,
+	REMU, REMS, and MULL opcodes, along with the corresponding functions
+	to encode them.
+	(enum xtensa_opcode_id): Add entries for new opcodes.
+	(Slot_inst_decode): Handle new opcodes.
+	(Slot_inst_get_field_fns, Slot_inst_set_field_fns): Add entries for
+	xt_wbr15_imm and xt_wbr18_imm fields.
+	(Slot_inst16a_get_field_fns, Slot_inst16a_set_field_fns): Likewise.
+	(Slot_inst16b_get_field_fns, Slot_inst16b_set_field_fns): Likewise.
+	(xtensa_modules): Update number of fields, operands, iclasses and
+	opcodes.
+	
 2008-11-19  Nix  <nix@esperi.org.uk>
 
 	* elf.c (swap_out_syms) [USE_STT_COMMON]: Fix syntax error.
