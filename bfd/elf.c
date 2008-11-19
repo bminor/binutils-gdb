@@ -6460,9 +6460,8 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 	  if (type == STT_OBJECT)
 	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_COMMON);
 	  else
-#else
-	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 #endif
+	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 	}
       else if (bfd_is_und_section (syms[idx]->section))
 	sym.st_info = ELF_ST_INFO (((flags & BSF_WEAK)

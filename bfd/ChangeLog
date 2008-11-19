@@ -1,3 +1,7 @@
+2008-11-19  Nix  <nix@esperi.org.uk>
+
+	* elf.c (swap_out_syms) [USE_STT_COMMON]: Fix syntax error.
+
 2008-11-19  Nick Clifton  <nickc@redhat.com>
 
 	PR 7027
