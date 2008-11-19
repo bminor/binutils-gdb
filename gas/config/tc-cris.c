@@ -3627,13 +3627,6 @@ cris_number_to_imm (char *bufp, long val, int n, fixS *fixP, segT seg)
 	 regression tests on the object file contents.	FIXME:	Seems
 	 uninteresting now that we have a test suite.  */
 
-    case BFD_RELOC_CRIS_16_GOT:
-    case BFD_RELOC_CRIS_32_GOT:
-    case BFD_RELOC_CRIS_32_GOTREL:
-    case BFD_RELOC_CRIS_16_GOTPLT:
-    case BFD_RELOC_CRIS_32_GOTPLT:
-    case BFD_RELOC_CRIS_32_PLT_GOTREL:
-    case BFD_RELOC_CRIS_32_PLT_PCREL:
     case BFD_RELOC_CRIS_32_GOT_GD:
     case BFD_RELOC_CRIS_16_GOT_GD:
     case BFD_RELOC_CRIS_32_GD:
@@ -3643,6 +3636,19 @@ cris_number_to_imm (char *bufp, long val, int n, fixS *fixP, segT seg)
     case BFD_RELOC_CRIS_16_GOT_TPREL:
     case BFD_RELOC_CRIS_32_TPREL:
     case BFD_RELOC_CRIS_16_TPREL:
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+      if (IS_ELF && fixP->fx_addsy != NULL)
+	S_SET_THREAD_LOCAL (fixP->fx_addsy);
+#endif
+      /* Fall through.  */
+
+    case BFD_RELOC_CRIS_16_GOT:
+    case BFD_RELOC_CRIS_32_GOT:
+    case BFD_RELOC_CRIS_32_GOTREL:
+    case BFD_RELOC_CRIS_16_GOTPLT:
+    case BFD_RELOC_CRIS_32_GOTPLT:
+    case BFD_RELOC_CRIS_32_PLT_GOTREL:
+    case BFD_RELOC_CRIS_32_PLT_PCREL:
       /* We don't want to put in any kind of non-zero bits in the data
 	 being relocated for these.  */
       md_number_to_chars (bufp, 0, n);
