@@ -1,6 +1,6 @@
 \input texinfo @c                               -*-Texinfo-*-
 @c  Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c  2001, 2002, 2003, 2004, 2005, 2006, 2007
+@c  2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
 @c  Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
@@ -101,10 +101,10 @@ This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002,
-2006, 2007 Free Software Foundation, Inc.
+2006, 2007, 2008 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1
+under the terms of the GNU Free Documentation License, Version 1.3
 or any later version published by the Free Software Foundation;
 with no Invariant Sections, with no Front-Cover Texts, and with no
 Back-Cover Texts.  A copy of the license is included in the
@@ -151,10 +151,10 @@ done.
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002,
-2006, 2007 Free Software Foundation, Inc.
+2006, 2007, 2008 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
-      under the terms of the GNU Free Documentation License, Version 1.1
+      under the terms of the GNU Free Documentation License, Version 1.3
       or any later version published by the Free Software Foundation;
       with no Invariant Sections, with no Front-Cover Texts, and with no
       Back-Cover Texts.  A copy of the license is included in the
@@ -7213,6 +7213,8 @@ you have contributed significant work and are not mentioned on this list, and
 want to be, let us know.  Some of the history has been lost; we are not
 intentionally leaving anyone out.
 
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
 @include fdl.texi
 
 @node AS Index

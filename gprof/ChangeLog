@@ -1,3 +1,8 @@
+2008-11-19  Nick Clifton  <nickc@redhat.com>
+
+	* fdl.texi: New file.
+	* gprof.texi: Change license to v1.3.
+
 2008-09-29  Peter O'Gorman  <pogma@thewrittenword.com>
 	    Steve Ellcey  <sje@cup.hp.com>
 

@@ -1,3 +1,8 @@
+2008-11-19  Nick Clifton  <nickc@redhat.com>
+
+	* fdl.texi: Update to v1.3
+	* ld.texinfo: Change license to v1.3.
+
 2008-11-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.tgt [spu-*-elf*]: Set NATIVE_LIB_DIRS to '/lib'.

@@ -1,3 +1,8 @@
+2008-11-19  Nick Clifton  <nickc@redhat.com>
+
+	* doc/fdl.texi: Update to v1.3
+	* doc/as.texinfo: Change license to v1.3.
+
 2008-11-18  Catherine Moore  <clm@cm00re.com>
 
 	* config/tc-arm.c (neon_type_mask): Renumber.
