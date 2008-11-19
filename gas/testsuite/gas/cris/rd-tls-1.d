@@ -8,7 +8,7 @@ Disassembly of section \.text:
 
 0+ <start>:
 [ 	]+0:[ 	]+af1e 0000 0000[ 	]+sub\.d 0 <start>,\$?r1
-[ 	]+2:[ 	]+R_CRIS_32_GD	\.text
+[ 	]+2:[ 	]+R_CRIS_32_GD	x
 [ 	]+6:[ 	]+2f9e 0000 0000[ 	]+add\.d 0 <start>,\$?r9
 [ 	]+8:[ 	]+R_CRIS_32_GD	extsym2
 [ 	]+c:[ 	]+6f3d 0000 0000 6aaa[ 	]+move\.d \[\$?r3\+0 <start>\],\$?r10

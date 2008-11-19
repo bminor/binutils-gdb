@@ -1,3 +1,8 @@
+2008-11-19  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-tls-1.d, gas/cris/rd-tls-1.s: Use a local thread
+	variable instead of .text location for :GD decoration test.
+
 2008-11-18  Catherine Moore  <clm@codesourcery.com>
 
 	* gas/arm/half-prec-neon.d: New.
