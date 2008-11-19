@@ -1329,6 +1329,9 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    goto r_sparc_plt32;
 		  break;
 		}
+	      /* PR 7027: We need similar behaviour for 64-bit binaries.  */
+	      else if (r_type == R_SPARC_WPLT30)
+		break;
 
 	      /* It does not make sense to have a procedure linkage
                  table entry for a local symbol.  */
@@ -2760,6 +2763,9 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	      if (h == NULL)
 		break;
 	    }
+	  /* PR 7027: We need similar behaviour for 64-bit binaries.  */ 
+	  else if (r_type == R_SPARC_WPLT30 && h == NULL)
+	    break;
 	  else
 	    {
 	      BFD_ASSERT (h != NULL);

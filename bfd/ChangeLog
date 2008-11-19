@@ -1,3 +1,11 @@
+2008-11-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 7027
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): Treat WPLT30 relocs
+	against local symbols in 64-bit binaries as if they were WDISP30
+	relocs.
+	(_bfd_sparc_elf_relocate_section): Likewise.
+
 2008-11-18  Catherine Moore  <clm@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Merge
