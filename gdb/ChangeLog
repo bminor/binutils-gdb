@@ -1,3 +1,18 @@
+2008-11-19  Bob Wilson  <bob.wilson@acm.org>
+	
+	* xtensa-config.c (rmap): Remove entries for ar32 through ar63.  Add
+	threadptr, scompare1, mmid, epc5, epc6, epc7, eps5, eps6, eps7,
+	excsave5, excsave6, excsave7, cpenable, and vecbase registers.
+	(xtensa_submask0, xtensa_submask1, xtensa_submask2)
+	(xtensa_submask3, xtensa_submask4, xtensa_submask5, xtensa_submask6)
+	(xtensa_submask7, xtensa_submask8, xtensa_submask9, xtensa_submask10)
+	(xtensa_submask11, xtensa_submask12, xtensa_submask13, xtensa_submask14)
+	(xtensa_submask15): Adjust register numbers.
+	* xtensa-xtregs.c (XTENSA_ELF_XTREG_SIZE): Change to 4.
+	(xtensa_regmap_table): Add entry for scompare1.
+	* regformats/reg-xtensa.dat: Remove ar32 through ar63.  Add threadptr
+	and scompare1.
+	
 2008-11-19  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (escape_buffer): New.
