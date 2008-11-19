@@ -124,6 +124,9 @@ fetch_loadmap (CORE_ADDR ldmaddr)
   nsegs = extract_unsigned_integer (ext_ldmbuf_partial.nsegs,
                                     sizeof ext_ldmbuf_partial.nsegs);
 
+  if (nsegs <= 0)
+    return NULL;
+
   /* Allocate space for the complete (external) loadmap.  */
   ext_ldmbuf_size = sizeof (struct ext_elf32_fdpic_loadmap)
                + (nsegs - 1) * sizeof (struct ext_elf32_fdpic_loadseg);
@@ -860,16 +863,17 @@ static void
 frv_relocate_main_executable (void)
 {
   int status;
-  CORE_ADDR exec_addr;
+  CORE_ADDR exec_addr, interp_addr;
   struct int_elf32_fdpic_loadmap *ldm;
   struct cleanup *old_chain;
   struct section_offsets *new_offsets;
   int changed;
   struct obj_section *osect;
 
-  status = frv_fdpic_loadmap_addresses (target_gdbarch, 0, &exec_addr);
+  status = frv_fdpic_loadmap_addresses (target_gdbarch,
+                                        &interp_addr, &exec_addr);
 
-  if (status < 0)
+  if (status < 0 || (exec_addr == 0 && interp_addr == 0))
     {
       /* Not using FDPIC ABI, so do nothing.  */
       return;

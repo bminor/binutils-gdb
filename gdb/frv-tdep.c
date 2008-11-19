@@ -999,6 +999,85 @@ frv_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 }
 
 
+/* Examine the instruction pointed to by PC.  If it corresponds to
+   a call to __main, return the address of the next instruction.
+   Otherwise, return PC.  */
+
+static CORE_ADDR
+frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_byte buf[4];
+  unsigned long op;
+  CORE_ADDR orig_pc = pc;
+
+  if (target_read_memory (pc, buf, 4))
+    return pc;
+  op = extract_unsigned_integer (buf, 4);
+
+  /* In PIC code, GR15 may be loaded from some offset off of FP prior
+     to the call instruction.
+     
+     Skip over this instruction if present.  It won't be present in
+     non-PIC code, and even in PIC code, it might not be present. 
+     (This is due to the fact that GR15, the FDPIC register, already
+     contains the correct value.)
+
+     The general form of the LDI is given first, followed by the
+     specific instruction with the GRi and GRk filled in as FP and
+     GR15.
+
+     ldi @(GRi, d12), GRk
+     P KKKKKK 0110010 IIIIII SSSSSSSSSSSS = 0x00c80000
+     0 000000 1111111 000000 000000000000 = 0x01fc0000
+	 .    .   .    .   .    .   .   .
+     ldi @(FP, d12), GR15
+     P KKKKKK 0110010 IIIIII SSSSSSSSSSSS = 0x1ec82000
+     0 001111 1111111 000010 000000000000 = 0x7ffff000
+	 .    .   .    .   .    .   .   .               */
+
+  if ((op & 0x7ffff000) == 0x1ec82000)
+    {
+      pc += 4;
+      if (target_read_memory (pc, buf, 4))
+	return orig_pc;
+      op = extract_unsigned_integer (buf, 4);
+    }
+
+  /* The format of an FRV CALL instruction is as follows:
+
+     call label24
+     P HHHHHH 0001111 LLLLLLLLLLLLLLLLLL = 0x003c0000
+     0 000000 1111111 000000000000000000 = 0x01fc0000
+         .    .   .    .   .   .   .   .
+
+     where label24 is constructed by concatenating the H bits with the
+     L bits.  The call target is PC + (4 * sign_ext(label24)).  */
+
+  if ((op & 0x01fc0000) == 0x003c0000)
+    {
+      LONGEST displ;
+      CORE_ADDR call_dest;
+      struct minimal_symbol *s;
+
+      displ = ((op & 0xfe000000) >> 7) | (op & 0x0003ffff);
+      if ((displ & 0x00800000) != 0)
+	displ |= ~((LONGEST) 0x00ffffff);
+
+      call_dest = pc + 4 * displ;
+      s = lookup_minimal_symbol_by_pc (call_dest);
+
+      if (s != NULL
+          && SYMBOL_LINKAGE_NAME (s) != NULL
+	  && strcmp (SYMBOL_LINKAGE_NAME (s), "__main") == 0)
+	{
+	  pc += 4;
+	  return pc;
+	}
+    }
+  return orig_pc;
+}
+
+
 static struct frv_unwind_cache *
 frv_frame_unwind_cache (struct frame_info *this_frame,
 			 void **this_prologue_cache)
@@ -1501,6 +1580,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_write (gdbarch, frv_pseudo_register_write);
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
+  set_gdbarch_skip_main_prologue (gdbarch, frv_skip_main_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);
   set_gdbarch_adjust_breakpoint_address
     (gdbarch, frv_adjust_breakpoint_address);

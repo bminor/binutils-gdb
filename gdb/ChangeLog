@@ -1,3 +1,12 @@
+2008-11-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (frv_skip_main_prologue): New function.
+	(frv_gdbarch_init): Register frv_skip_main_prologue.
+	* solib-frv.c (fetch_loadmap): Return early when no segments are
+	found.
+	(frv_relocate_main_executable): Return early when both interpreter
+	and executable loadmap addresses are zero.
+
 2008-11-19  Bob Wilson  <bob.wilson@acm.org>
 	
 	* xtensa-config.c (rmap): Remove entries for ar32 through ar63.  Add
