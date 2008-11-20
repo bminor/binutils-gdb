@@ -1,3 +1,8 @@
+2008-11-19  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c (cris_number_to_imm): Apply S_SET_THREAD_LOCAL
+	on symbols in TLS relocs.
+
 2008-11-19  Nick Clifton  <nickc@redhat.com>
 
 	* doc/fdl.texi: Update to v1.3
