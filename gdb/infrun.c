@@ -965,10 +965,13 @@ resume (int step, enum target_signal sig)
 {
   int should_resume = 1;
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
+
+  /* Note that these must be reset if we follow a fork below.  */
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct thread_info *tp = inferior_thread ();
   CORE_ADDR pc = regcache_read_pc (regcache);
+
   QUIT;
 
   if (debug_infrun)
@@ -1057,6 +1060,9 @@ a command like `return' or `jump' to continue execution."));
       /* Following a child fork will change our notion of current
 	 thread.  */
       tp = inferior_thread ();
+      regcache = get_current_regcache ();
+      gdbarch = get_regcache_arch (regcache);
+      pc = regcache_read_pc (regcache);
       break;
 
     case TARGET_WAITKIND_EXECD:
