@@ -1,5 +1,9 @@
 2008-11-20  Tristan Gingold  <gingold@adacore.com>
 
+	* bfdwin.c: Fix comment.
+
+2008-11-20  Tristan Gingold  <gingold@adacore.com>
+
 	* bfd.c (is32bit): Use architecture information for non-ELF
 	targets.
 

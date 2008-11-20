@@ -25,10 +25,8 @@
 #include "bfd.h"
 #include "libbfd.h"
 
-/* Currently, if USE_MMAP is undefined, none if the window stuff is
-   used.  Okay, so it's mis-named.  At least the command-line option
-   "--without-mmap" is more obvious than "--without-windows" or some
-   such.  */
+/* Currently, if USE_MMAP is undefined, none of the window stuff is
+   used.  Enabled by --with-mmap.  */
 
 #ifdef USE_MMAP
 
