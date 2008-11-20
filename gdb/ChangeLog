@@ -1,3 +1,7 @@
+2008-11-20  Doug Evans  <dje@google.com>
+
+	* printcmd.c (sym_info): Don't print the offset if it's zero.
+
 2008-11-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (resume): If following a fork, reread the current

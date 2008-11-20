@@ -1,3 +1,7 @@
+2008-11-20  Doug Evans  <dje@google.com>
+
+	* gdb.base/sepsymtab.exp: Update, old "info sym" format restored.
+
 2008-11-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.arch/ppc-dfp.exp: New file.
