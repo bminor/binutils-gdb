@@ -1,3 +1,8 @@
+2008-11-20  Doug Evans  <dje@google.com>
+
+	* frame.c (frame_debug_got_null_frame): Remove file arg.
+	All callers updated.
+
 2008-11-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (resume): If following a fork, also reset regcache,
