@@ -1053,6 +1053,10 @@ a command like `return' or `jump' to continue execution."));
       pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
       if (follow_fork ())
 	should_resume = 0;
+
+      /* Following a child fork will change our notion of current
+	 thread.  */
+      tp = inferior_thread ();
       break;
 
     case TARGET_WAITKIND_EXECD:
@@ -1148,11 +1152,11 @@ a command like `return' or `jump' to continue execution."));
           displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
         }
 
-      target_resume (resume_ptid, step, sig);
-
       /* Avoid confusing the next resume, if the next stop/resume
 	 happens to apply to another thread.  */
       tp->stop_signal = TARGET_SIGNAL_0;
+
+      target_resume (resume_ptid, step, sig);
     }
 
   discard_cleanups (old_cleanups);

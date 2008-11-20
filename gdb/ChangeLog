@@ -1,3 +1,8 @@
+2008-11-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (resume): If following a fork, reread the current
+	thread.  Avoid dereferencing a possibly dangling pointer.
+
 2008-11-19  Doug Evans  <dje@google.com>
 
 	* inferior.h (proceed_to_finish): Delete, unused.
