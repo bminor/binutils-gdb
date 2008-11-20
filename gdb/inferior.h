@@ -342,13 +342,8 @@ enum exec_direction_kind
 
 extern enum exec_direction_kind execution_direction;
 
-/* Nonzero if proceed is being used for a "finish" command or a similar
-   situation when stop_registers should be saved.  */
-
-extern int proceed_to_finish;
-
-/* Save register contents here when about to pop a stack dummy frame,
-   if-and-only-if proceed_to_finish is set.
+/* Save register contents here when executing a "finish" command or are
+   about to pop a stack dummy frame, if-and-only-if proceed_to_finish is set.
    Thus this contains the return value from the called function (assuming
    values are returned in a register).  */
 

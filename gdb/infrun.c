@@ -232,8 +232,8 @@ show_stop_on_solib_events (struct ui_file *file, int from_tty,
 
 int stop_after_trap;
 
-/* Save register contents here when about to pop a stack dummy frame,
-   if-and-only-if proceed_to_finish is set.
+/* Save register contents here when executing a "finish" command or are
+   about to pop a stack dummy frame, if-and-only-if proceed_to_finish is set.
    Thus this contains the return value from the called function (assuming
    values are returned in a register).  */
 

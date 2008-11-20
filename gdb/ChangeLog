@@ -1,3 +1,9 @@
+2008-11-19  Doug Evans  <dje@google.com>
+
+	* inferior.h (proceed_to_finish): Delete, unused.
+	(stop_registers): Tweak comment.
+	* infrun.c (stop_registers): Tweak comment.
+
 2008-11-19  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (frv_skip_main_prologue): New function.
