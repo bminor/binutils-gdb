@@ -1,3 +1,10 @@
+2008-11-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (allocate_dynrelocs): Always use tlsld_got for
+	TLS_LD even when symbol is used with other TLS reloc types.
+	(ppc_elf_relocate_section): Bypass symbol checks when using tlsld_got.
+	Leave addend zero on LD DTPMOD dynamic reloc.
+
 2008-11-19  Bob Wilson  <bob.wilson@acm.org>
 	
 	* xtensa-modules.c (sysregs): Add MMID, VECBASE, EPC5, EPC6, EPC7,
