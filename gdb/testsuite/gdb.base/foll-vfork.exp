@@ -264,7 +264,7 @@ proc tcatch_vfork_then_parent_follow {} {
 # HP-UX 10.20 seems to stop you in "vfork", while more recent HP-UXs
 # stop you in "_vfork".
    gdb_expect {
-      -re "0x\[0-9a-fA-F\]*.*vfork.*$gdb_prompt "\
+      -re "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*$gdb_prompt "\
                       {pass "vfork parent follow, tcatch vfork"}
       -re "vfork \\(\\) at.*$gdb_prompt "\
                       {pass "vfork parent follow, tcatch vfork"}
@@ -275,6 +275,10 @@ proc tcatch_vfork_then_parent_follow {} {
    gdb_expect {
       -re "Run till exit from.*vfork.*0x\[0-9a-fA-F\]* in main .* at .*${srcfile}:12.*$gdb_prompt "\
                       {pass "vfork parent follow, finish after tcatch vfork"}
+      -re "Run till exit from.*__kernel_v?syscall.*0x\[0-9a-fA-F\]* in vfork .*$gdb_prompt " {
+	  send_gdb "finish\n"
+	  exp_continue
+      }
       -re "$gdb_prompt $" {fail "vfork parent follow, finish after tcatch vfork"}
       timeout         {fail "(timeout) vfork parent follow, finish after tcatch vfork" }
    }
@@ -308,9 +312,7 @@ proc tcatch_vfork_then_child_follow {} {
    gdb_expect {
       -re "vfork \\(\\) at .*$gdb_prompt $"\
                       {pass "vfork child follow, tcatch vfork"}
-      -re "0x\[0-9a-fA-F\]*.*vfork.*$gdb_prompt "\
-                      {pass "vfork child follow, tcatch vfork"}
-      -re "0x\[0-9a-fA-F\]*.*_vfork.*$gdb_prompt "\
+      -re "0x\[0-9a-fA-F\]*.*(vfork|__kernel_v?syscall).*$gdb_prompt "\
                       {pass "vfork child follow, tcatch vfork"}
       -re "$gdb_prompt $" {fail "vfork child follow, tcatch vfork"}
       timeout         {fail "(timeout) vfork child follow, tcatch vfork"}
@@ -319,6 +321,10 @@ proc tcatch_vfork_then_child_follow {} {
    gdb_expect {
       -re "Run till exit from.*vfork.*${srcfile}:12.*$gdb_prompt "\
                       {pass "vfork child follow, finish after tcatch vfork"}
+      -re "Run till exit from.*__kernel_v?syscall.*0x\[0-9a-fA-F\]* in vfork .*$gdb_prompt " {
+	  send_gdb "finish\n"
+	  exp_continue
+      }
       -re "Run till exit from.*vfork.*${srcfile2}:9.*$gdb_prompt "\
                       {pass "vfork child follow, finish after tcatch vfork (followed exec)"}
       -re "$gdb_prompt $" {fail "vfork child follow, finish after tcatch vfork"}
