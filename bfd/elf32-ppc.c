@@ -4997,6 +4997,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   eh = (struct ppc_elf_link_hash_entry *) h;
   if (eh->elf.got.refcount > 0)
     {
+      bfd_boolean dyn;
+      unsigned int need;
+
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (eh->elf.dynindx == -1
 	  && !eh->elf.forced_local
@@ -5006,30 +5009,32 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    return FALSE;
 	}
 
-      if (eh->tls_mask == (TLS_TLS | TLS_LD)
-	  && !eh->elf.def_dynamic)
+      need = 0;
+      if ((eh->tls_mask & TLS_TLS) != 0)
 	{
-	  /* If just an LD reloc, we'll just use htab->tlsld_got.offset.  */
-	  htab->tlsld_got.refcount += 1;
-	  eh->elf.got.offset = (bfd_vma) -1;
+	  if ((eh->tls_mask & TLS_LD) != 0)
+	    {
+	      if (!eh->elf.def_dynamic)
+		/* We'll just use htab->tlsld_got.offset.  This should
+		   always be the case.  It's a little odd if we have
+		   a local dynamic reloc against a non-local symbol.  */
+		htab->tlsld_got.refcount += 1;
+	      else
+		need += 8;
+	    }
+	  if ((eh->tls_mask & TLS_GD) != 0)
+	    need += 8;
+	  if ((eh->tls_mask & (TLS_TPREL | TLS_TPRELGD)) != 0)
+	    need += 4;
+	  if ((eh->tls_mask & TLS_DTPREL) != 0)
+	    need += 4;
 	}
       else
+	need += 4;
+      if (need == 0)
+	eh->elf.got.offset = (bfd_vma) -1;
+      else
 	{
-	  bfd_boolean dyn;
-	  unsigned int need = 0;
-	  if ((eh->tls_mask & TLS_TLS) != 0)
-	    {
-	      if ((eh->tls_mask & TLS_LD) != 0)
-		need += 8;
-	      if ((eh->tls_mask & TLS_GD) != 0)
-		need += 8;
-	      if ((eh->tls_mask & (TLS_TPREL | TLS_TPRELGD)) != 0)
-		need += 4;
-	      if ((eh->tls_mask & TLS_DTPREL) != 0)
-		need += 4;
-	    }
-	  else
-	    need += 4;
 	  eh->elf.got.offset = allocate_got (htab, need);
 	  dyn = htab->elf.dynamic_sections_created;
 	  if ((info->shared
@@ -5039,7 +5044,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    {
 	      /* All the entries we allocated need relocs.
 		 Except LD only needs one.  */
-	      if ((eh->tls_mask & TLS_LD) != 0)
+	      if ((eh->tls_mask & TLS_LD) != 0
+		  && eh->elf.def_dynamic)
 		need -= 4;
 	      htab->relgot->size += need * (sizeof (Elf32_External_Rela) / 4);
 	    }
@@ -5275,27 +5281,24 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       for (; local_got < end_local_got; ++local_got, ++lgot_masks)
 	if (*local_got > 0)
 	  {
-	    if (*lgot_masks == (TLS_TLS | TLS_LD))
+	    unsigned int need = 0;
+	    if ((*lgot_masks & TLS_TLS) != 0)
 	      {
-		/* If just an LD reloc, we'll just use
-		   htab->tlsld_got.offset.  */
-		htab->tlsld_got.refcount += 1;
-		*local_got = (bfd_vma) -1;
+		if ((*lgot_masks & TLS_GD) != 0)
+		  need += 8;
+		if ((*lgot_masks & TLS_LD) != 0)
+		  htab->tlsld_got.refcount += 1;
+		if ((*lgot_masks & (TLS_TPREL | TLS_TPRELGD)) != 0)
+		  need += 4;
+		if ((*lgot_masks & TLS_DTPREL) != 0)
+		  need += 4;
 	      }
 	    else
+	      need += 4;
+	    if (need == 0)
+	      *local_got = (bfd_vma) -1;
+	    else
 	      {
-		unsigned int need = 0;
-		if ((*lgot_masks & TLS_TLS) != 0)
-		  {
-		    if ((*lgot_masks & TLS_GD) != 0)
-		      need += 8;
-		    if ((*lgot_masks & (TLS_TPREL | TLS_TPRELGD)) != 0)
-		      need += 4;
-		    if ((*lgot_masks & TLS_DTPREL) != 0)
-		      need += 4;
-		  }
-		else
-		  need += 4;
 		*local_got = allocate_got (htab, need);
 		if (info->shared)
 		  htab->relgot->size += (need
@@ -6560,7 +6563,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 		    /* Generate relocs for the dynamic linker.  */
 		    if ((info->shared || indx != 0)
-			&& (h == NULL
+			&& (offp == &htab->tlsld_got.offset
+			    || h == NULL
 			    || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 			    || h->root.type != bfd_link_hash_undefweak))
 		      {
@@ -6591,7 +6595,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			  outrel.r_info = ELF32_R_INFO (indx, R_PPC_RELATIVE);
 			else
 			  outrel.r_info = ELF32_R_INFO (indx, R_PPC_GLOB_DAT);
-			if (indx == 0)
+			if (indx == 0 && tls_ty != (TLS_TLS | TLS_LD))
 			  {
 			    outrel.r_addend += relocation;
 			    if (tls_ty & (TLS_GD | TLS_DTPREL | TLS_TPREL))
