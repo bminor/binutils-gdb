@@ -36,6 +36,9 @@
 #include "block.h"
 #include "dfp.h"
 #include "objfiles.h"
+#include "valprint.h"
+
+#include "python/python.h"
 
 /* Prototypes for exported functions. */
 
@@ -130,8 +133,8 @@ struct value
 
   /* Values are stored in a chain, so that they can be deleted easily
      over calls to the inferior.  Values assigned to internal
-     variables or put into the value history are taken off this
-     list.  */
+     variables, put into the value history or exposed to Python are
+     taken off this list.  */
   struct value *next;
 
   /* Register number if the value is from a register.  */
@@ -255,6 +258,31 @@ allocate_repeat_value (struct type *type, int count)
      done with it.  */
   return allocate_value (create_array_type ((struct type *) NULL,
 					    type, range_type));
+}
+
+/* Needed if another module needs to maintain its on list of values.  */
+void
+value_prepend_to_list (struct value **head, struct value *val)
+{
+  val->next = *head;
+  *head = val;
+}
+
+/* Needed if another module needs to maintain its on list of values.  */
+void
+value_remove_from_list (struct value **head, struct value *val)
+{
+  struct value *prev;
+
+  if (*head == val)
+    *head = (*head)->next;
+  else
+    for (prev = *head; prev->next; prev = prev->next)
+      if (prev->next == val)
+      {
+	prev->next = val->next;
+	break;
+      }
 }
 
 /* Accessor methods.  */
@@ -681,9 +709,11 @@ show_values (char *num_exp, int from_tty)
 
   for (i = num; i < num + 10 && i <= value_history_count; i++)
     {
+      struct value_print_options opts;
       val = access_value_history (i);
       printf_filtered (("$%d = "), i);
-      value_print (val, gdb_stdout, 0, Val_pretty_default);
+      get_user_print_options (&opts);
+      value_print (val, gdb_stdout, &opts);
       printf_filtered (("\n"));
     }
 
@@ -916,6 +946,7 @@ preserve_values (struct objfile *objfile)
   htab_t copied_types;
   struct value_history_chunk *cur;
   struct internalvar *var;
+  struct value *val;
   int i;
 
   /* Create the hash table.  We allocate on the objfile's obstack, since
@@ -930,6 +961,9 @@ preserve_values (struct objfile *objfile)
   for (var = internalvars; var; var = var->next)
     preserve_one_value (var->value, objfile, copied_types);
 
+  for (val = values_in_python; val; val = val->next)
+    preserve_one_value (val, objfile, copied_types);
+
   htab_delete (copied_types);
 }
 
@@ -938,7 +972,9 @@ show_convenience (char *ignore, int from_tty)
 {
   struct internalvar *var;
   int varseen = 0;
+  struct value_print_options opts;
 
+  get_user_print_options (&opts);
   for (var = internalvars; var; var = var->next)
     {
       if (!varseen)
@@ -947,7 +983,7 @@ show_convenience (char *ignore, int from_tty)
 	}
       printf_filtered (("$%s = "), var->name);
       value_print (value_of_internalvar (var), gdb_stdout,
-		   0, Val_pretty_default);
+		   &opts);
       printf_filtered (("\n"));
     }
   if (!varseen)
@@ -1236,7 +1272,7 @@ value_static_field (struct type *type, int fieldno)
 {
   struct value *retval;
 
-  if (TYPE_FIELD_STATIC_HAS_ADDR (type, fieldno))
+  if (TYPE_FIELD_LOC_KIND (type, fieldno) == FIELD_LOC_KIND_PHYSADDR)
     {
       retval = value_at (TYPE_FIELD_TYPE (type, fieldno),
 			 TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
@@ -1692,12 +1728,21 @@ coerce_ref (struct value *arg)
 struct value *
 coerce_array (struct value *arg)
 {
+  struct type *type;
+
   arg = coerce_ref (arg);
-  if (current_language->c_style_arrays
-      && TYPE_CODE (value_type (arg)) == TYPE_CODE_ARRAY)
-    arg = value_coerce_array (arg);
-  if (TYPE_CODE (value_type (arg)) == TYPE_CODE_FUNC)
-    arg = value_coerce_function (arg);
+  type = check_typedef (value_type (arg));
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_ARRAY:
+      if (current_language->c_style_arrays)
+	arg = value_coerce_array (arg);
+      break;
+    case TYPE_CODE_FUNC:
+      arg = value_coerce_function (arg);
+      break;
+    }
   return arg;
 }
 

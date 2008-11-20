@@ -141,6 +141,9 @@ typedef struct statement_prologue
   }
 _STATEMENT_PROLOGUE;
 
+/* When non-zero, dump DIEs after they are read in.  */
+static int dwarf2_die_debug = 0;
+
 /* When set, the file that we're processing is known to have debugging
    info for C++ namespaces.  GCC 3.3.x did not produce this information,
    but later versions do.  */
@@ -231,7 +234,7 @@ asection *dwarf_eh_frame_section;
    translation, looks like this.  */
 struct comp_unit_head
 {
-  unsigned long length;
+  unsigned int length;
   short version;
   unsigned char addr_size;
   unsigned char signed_addr_p;
@@ -296,7 +299,7 @@ struct dwarf2_cu
   htab_t partial_dies;
 
   /* `.debug_ranges' offset for this `DW_TAG_compile_unit' DIE.  */
-  unsigned long ranges_offset;
+  unsigned int ranges_offset;
 
   /* Storage for things with the same lifetime as this read-in compilation
      unit, including partial DIEs.  */
@@ -360,13 +363,15 @@ struct dwarf2_per_cu_data
 {
   /* The start offset and length of this compilation unit.  2**30-1
      bytes should suffice to store the length of any compilation unit
-     - if it doesn't, GDB will fall over anyway.  */
-  unsigned long offset;
-  unsigned long length : 30;
+     - if it doesn't, GDB will fall over anyway.
+     NOTE: Unlike comp_unit_head.length, this length includes
+     initial_length_size.  */
+  unsigned int offset;
+  unsigned int length : 30;
 
   /* Flag indicating this compilation unit will be read in before
      any of the current compilation units are processed.  */
-  unsigned long queued : 1;
+  unsigned int queued : 1;
 
   /* This flag will be set if we need to load absolutely all DIEs
      for this compilation unit, instead of just the ones we think
@@ -695,6 +700,13 @@ dwarf2_debug_line_missing_file_complaint (void)
 }
 
 static void
+dwarf2_debug_line_missing_end_sequence_complaint (void)
+{
+  complaint (&symfile_complaints,
+	     _(".debug_line section has line program sequence without an end"));
+}
+
+static void
 dwarf2_complex_location_expr_complaint (void)
 {
   complaint (&symfile_complaints, _("location expression too complex"));
@@ -796,7 +808,7 @@ static gdb_byte *read_partial_die (struct partial_die_info *,
                                    struct abbrev_info *abbrev, unsigned int,
                                    bfd *, gdb_byte *, struct dwarf2_cu *);
 
-static struct partial_die_info *find_partial_die (unsigned long,
+static struct partial_die_info *find_partial_die (unsigned int,
 						  struct dwarf2_cu *);
 
 static void fixup_partial_die (struct partial_die_info *,
@@ -824,11 +836,16 @@ static unsigned long read_8_bytes (bfd *, gdb_byte *);
 static CORE_ADDR read_address (bfd *, gdb_byte *ptr, struct dwarf2_cu *,
 			       unsigned int *);
 
-static LONGEST read_initial_length (bfd *, gdb_byte *,
-                                    struct comp_unit_head *, unsigned int *);
+static LONGEST read_initial_length (bfd *, gdb_byte *, unsigned int *);
+
+static LONGEST read_checked_initial_length_and_offset
+  (bfd *, gdb_byte *, const struct comp_unit_head *,
+   unsigned int *, unsigned int *);
 
 static LONGEST read_offset (bfd *, gdb_byte *, const struct comp_unit_head *,
-                            unsigned int *);
+			    unsigned int *);
+
+static LONGEST read_offset_1 (bfd *, gdb_byte *, unsigned int);
 
 static gdb_byte *read_n_bytes (bfd *, gdb_byte *, unsigned int);
 
@@ -950,6 +967,11 @@ static enum dwarf_array_dim_ordering read_array_order (struct die_info *,
 
 static struct die_info *read_comp_unit (gdb_byte *, bfd *, struct dwarf2_cu *);
 
+static struct die_info *read_die_and_children_1 (gdb_byte *info_ptr, bfd *abfd,
+						 struct dwarf2_cu *,
+						 gdb_byte **new_info_ptr,
+						 struct die_info *parent);
+
 static struct die_info *read_die_and_children (gdb_byte *info_ptr, bfd *abfd,
 					       struct dwarf2_cu *,
 					       gdb_byte **new_info_ptr,
@@ -987,15 +1009,19 @@ static char *dwarf_cfi_name (unsigned int);
 
 static struct die_info *sibling_die (struct die_info *);
 
-static void dump_die (struct die_info *);
+static void dump_die_shallow (struct ui_file *, int indent, struct die_info *);
 
-static void dump_die_list (struct die_info *);
+static void dump_die_for_error (struct die_info *);
+
+static void dump_die_1 (struct ui_file *, int level, int max_level,
+			struct die_info *);
+
+/*static*/ void dump_die (struct die_info *, int max_level);
 
 static void store_in_ref_table (struct die_info *,
 				struct dwarf2_cu *);
 
-static unsigned int dwarf2_get_ref_die_offset (struct attribute *,
-					       struct dwarf2_cu *);
+static unsigned int dwarf2_get_ref_die_offset (struct attribute *);
 
 static int dwarf2_get_attr_constant_value (struct attribute *, int);
 
@@ -1039,10 +1065,10 @@ static hashval_t partial_die_hash (const void *item);
 static int partial_die_eq (const void *item_lhs, const void *item_rhs);
 
 static struct dwarf2_per_cu_data *dwarf2_find_containing_comp_unit
-  (unsigned long offset, struct objfile *objfile);
+  (unsigned int offset, struct objfile *objfile);
 
 static struct dwarf2_per_cu_data *dwarf2_find_comp_unit
-  (unsigned long offset, struct objfile *objfile);
+  (unsigned int offset, struct objfile *objfile);
 
 static void free_one_comp_unit (void *);
 
@@ -1294,11 +1320,9 @@ dwarf2_build_psymtabs_easy (struct objfile *objfile, int mainline)
   pubnames_ptr = pubnames_buffer;
   while ((pubnames_ptr - pubnames_buffer) < dwarf2_per_objfile->pubnames_size)
     {
-      struct comp_unit_head cu_header;
       unsigned int bytes_read;
 
-      entry_length = read_initial_length (abfd, pubnames_ptr, &cu_header,
-                                          &bytes_read);
+      entry_length = read_initial_length (abfd, pubnames_ptr, &bytes_read);
       pubnames_ptr += bytes_read;
       version = read_1_byte (abfd, pubnames_ptr);
       pubnames_ptr += 1;
@@ -1314,6 +1338,18 @@ dwarf2_build_psymtabs_easy (struct objfile *objfile, int mainline)
 }
 #endif
 
+/* Return TRUE if OFFSET is within CU_HEADER.  */
+
+static inline int
+offset_in_cu_p (const struct comp_unit_head *cu_header, unsigned int offset)
+{
+  unsigned int bottom = cu_header->offset;
+  unsigned int top = (cu_header->offset
+		      + cu_header->length
+		      + cu_header->initial_length_size);
+  return (offset >= bottom && offset < top);
+}
+
 /* Read in the comp unit header information from the debug_info at
    info_ptr.  */
 
@@ -1323,13 +1359,15 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
 {
   int signed_addr;
   unsigned int bytes_read;
-  cu_header->length = read_initial_length (abfd, info_ptr, cu_header,
-                                           &bytes_read);
+
+  cu_header->length = read_initial_length (abfd, info_ptr, &bytes_read);
+  cu_header->initial_length_size = bytes_read;
+  cu_header->offset_size = (bytes_read == 4) ? 4 : 8;
   info_ptr += bytes_read;
   cu_header->version = read_2_bytes (abfd, info_ptr);
   info_ptr += 2;
   cu_header->abbrev_offset = read_offset (abfd, info_ptr, cu_header,
-                                          &bytes_read);
+					  &bytes_read);
   info_ptr += bytes_read;
   cu_header->addr_size = read_1_byte (abfd, info_ptr);
   info_ptr += 1;
@@ -1338,6 +1376,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
     internal_error (__FILE__, __LINE__,
 		    _("read_comp_unit_head: dwarf from non elf file"));
   cu_header->signed_addr_p = signed_addr;
+
   return info_ptr;
 }
 
@@ -1708,26 +1747,24 @@ create_all_comp_units (struct objfile *objfile)
   
   while (info_ptr < dwarf2_per_objfile->info_buffer + dwarf2_per_objfile->info_size)
     {
-      struct comp_unit_head cu_header;
+      unsigned int length, initial_length_size;
       gdb_byte *beg_of_comp_unit;
       struct dwarf2_per_cu_data *this_cu;
-      unsigned long offset;
-      unsigned int bytes_read;
+      unsigned int offset;
 
       offset = info_ptr - dwarf2_per_objfile->info_buffer;
 
       /* Read just enough information to find out where the next
 	 compilation unit is.  */
-      cu_header.initial_length_size = 0;
-      cu_header.length = read_initial_length (objfile->obfd, info_ptr,
-					      &cu_header, &bytes_read);
+      length = read_initial_length (objfile->obfd, info_ptr,
+				    &initial_length_size);
 
       /* Save the compilation unit for later lookup.  */
       this_cu = obstack_alloc (&objfile->objfile_obstack,
 			       sizeof (struct dwarf2_per_cu_data));
       memset (this_cu, 0, sizeof (*this_cu));
       this_cu->offset = offset;
-      this_cu->length = cu_header.length + cu_header.initial_length_size;
+      this_cu->length = length + initial_length_size;
 
       if (n_comp_units == n_allocated)
 	{
@@ -2331,7 +2368,7 @@ skip_one_die (gdb_byte *info_ptr, struct abbrev_info *abbrev,
 	    complaint (&symfile_complaints, _("ignoring absolute DW_AT_sibling"));
 	  else
 	    return dwarf2_per_objfile->info_buffer
-	      + dwarf2_get_ref_die_offset (&attr, cu);
+	      + dwarf2_get_ref_die_offset (&attr);
 	}
 
       /* If it isn't DW_AT_sibling, skip this attribute.  */
@@ -2594,7 +2631,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu, struct objfile *objfile)
 {
   bfd *abfd = objfile->obfd;
   struct dwarf2_cu *cu;
-  unsigned long offset;
+  unsigned int offset;
   gdb_byte *info_ptr;
   struct cleanup *back_to, *free_cu_cleanup;
   struct attribute *attr;
@@ -3561,7 +3598,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* Get type of field.  */
       fp->type = die_type (die, cu);
 
-      FIELD_STATIC_KIND (*fp) = 0;
+      SET_FIELD_BITPOS (*fp, 0);
 
       /* Get bit size of field (zero if none).  */
       attr = dwarf2_attr (die, DW_AT_bit_size, cu);
@@ -3590,10 +3627,8 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
           else
             byte_offset = decode_locdesc (DW_BLOCK (attr), cu);
 
-          FIELD_BITPOS (*fp) = byte_offset * bits_per_byte;
+          SET_FIELD_BITPOS (*fp, byte_offset * bits_per_byte);
 	}
-      else
-	FIELD_BITPOS (*fp) = 0;
       attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
       if (attr)
 	{
@@ -3685,10 +3720,9 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* C++ base class field.  */
       attr = dwarf2_attr (die, DW_AT_data_member_location, cu);
       if (attr)
-	FIELD_BITPOS (*fp) = (decode_locdesc (DW_BLOCK (attr), cu)
-			      * bits_per_byte);
+	SET_FIELD_BITPOS (*fp, decode_locdesc (DW_BLOCK (attr), cu)
+			       * bits_per_byte);
       FIELD_BITSIZE (*fp) = 0;
-      FIELD_STATIC_KIND (*fp) = 0;
       FIELD_TYPE (*fp) = die_type (die, cu);
       FIELD_NAME (*fp) = type_name_no_tag (fp->type);
       fip->nbaseclasses++;
@@ -4406,9 +4440,8 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 
 		  FIELD_NAME (fields[num_fields]) = SYMBOL_LINKAGE_NAME (sym);
 		  FIELD_TYPE (fields[num_fields]) = NULL;
-		  FIELD_BITPOS (fields[num_fields]) = SYMBOL_VALUE (sym);
+		  SET_FIELD_BITPOS (fields[num_fields], SYMBOL_VALUE (sym));
 		  FIELD_BITSIZE (fields[num_fields]) = 0;
-		  FIELD_STATIC_KIND (fields[num_fields]) = 0;
 
 		  num_fields++;
 		}
@@ -5193,6 +5226,27 @@ read_comp_unit (gdb_byte *info_ptr, bfd *abfd, struct dwarf2_cu *cu)
   return read_die_and_children (info_ptr, abfd, cu, &info_ptr, NULL);
 }
 
+/* Main entry point for reading a DIE and all children.
+   Read the DIE and dump it if requested.  */
+
+static struct die_info *
+read_die_and_children (gdb_byte *info_ptr, bfd *abfd,
+		       struct dwarf2_cu *cu,
+		       gdb_byte **new_info_ptr,
+		       struct die_info *parent)
+{
+  struct die_info *result = read_die_and_children_1 (info_ptr, abfd, cu,
+						     new_info_ptr, parent);
+
+  if (dwarf2_die_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "Read die from .debug_info:\n");
+      dump_die (result, dwarf2_die_debug);
+    }
+
+  return result;
+}
+
 /* Read a single die and all its descendents.  Set the die's sibling
    field to NULL; set other fields in the die correctly, and set all
    of the descendents' fields correctly.  Set *NEW_INFO_PTR to the
@@ -5200,10 +5254,10 @@ read_comp_unit (gdb_byte *info_ptr, bfd *abfd, struct dwarf2_cu *cu)
    is the parent of the die in question.  */
 
 static struct die_info *
-read_die_and_children (gdb_byte *info_ptr, bfd *abfd,
-		       struct dwarf2_cu *cu,
-		       gdb_byte **new_info_ptr,
-		       struct die_info *parent)
+read_die_and_children_1 (gdb_byte *info_ptr, bfd *abfd,
+			 struct dwarf2_cu *cu,
+			 gdb_byte **new_info_ptr,
+			 struct die_info *parent)
 {
   struct die_info *die;
   gdb_byte *cur_ptr;
@@ -5252,7 +5306,7 @@ read_die_and_siblings (gdb_byte *info_ptr, bfd *abfd,
   while (1)
     {
       struct die_info *die
-	= read_die_and_children (cur_ptr, abfd, cu, &cur_ptr, parent);
+	= read_die_and_children_1 (cur_ptr, abfd, cu, &cur_ptr, parent);
 
       if (die == NULL)
 	{
@@ -5902,7 +5956,7 @@ read_partial_die (struct partial_die_info *part_die,
 	case DW_AT_specification:
 	case DW_AT_extension:
 	  part_die->has_specification = 1;
-	  part_die->spec_offset = dwarf2_get_ref_die_offset (&attr, cu);
+	  part_die->spec_offset = dwarf2_get_ref_die_offset (&attr);
 	  break;
 	case DW_AT_sibling:
 	  /* Ignore absolute siblings, they might point outside of
@@ -5911,7 +5965,7 @@ read_partial_die (struct partial_die_info *part_die,
 	    complaint (&symfile_complaints, _("ignoring absolute DW_AT_sibling"));
 	  else
 	    part_die->sibling = dwarf2_per_objfile->info_buffer
-	      + dwarf2_get_ref_die_offset (&attr, cu);
+	      + dwarf2_get_ref_die_offset (&attr);
 	  break;
         case DW_AT_stmt_list:
           part_die->has_stmt_list = 1;
@@ -5971,7 +6025,7 @@ read_partial_die (struct partial_die_info *part_die,
 /* Find a cached partial DIE at OFFSET in CU.  */
 
 static struct partial_die_info *
-find_partial_die_in_comp_unit (unsigned long offset, struct dwarf2_cu *cu)
+find_partial_die_in_comp_unit (unsigned int offset, struct dwarf2_cu *cu)
 {
   struct partial_die_info *lookup_die = NULL;
   struct partial_die_info part_die;
@@ -5985,13 +6039,12 @@ find_partial_die_in_comp_unit (unsigned long offset, struct dwarf2_cu *cu)
 /* Find a partial DIE at OFFSET, which may or may not be in CU.  */
 
 static struct partial_die_info *
-find_partial_die (unsigned long offset, struct dwarf2_cu *cu)
+find_partial_die (unsigned int offset, struct dwarf2_cu *cu)
 {
   struct dwarf2_per_cu_data *per_cu = NULL;
   struct partial_die_info *pd = NULL;
 
-  if (offset >= cu->header.offset
-      && offset < cu->header.offset + cu->header.length)
+  if (offset_in_cu_p (&cu->header, offset))
     {
       pd = find_partial_die_in_comp_unit (offset, cu);
       if (pd != NULL)
@@ -6043,7 +6096,7 @@ find_partial_die (unsigned long offset, struct dwarf2_cu *cu)
 
   if (pd == NULL)
     internal_error (__FILE__, __LINE__,
-		    _("could not find partial DIE 0x%lx in cache [from module %s]\n"),
+		    _("could not find partial DIE 0x%x in cache [from module %s]\n"),
 		    offset, bfd_get_filename (cu->objfile->obfd));
   return pd;
 }
@@ -6401,12 +6454,7 @@ read_address (bfd *abfd, gdb_byte *buf, struct dwarf2_cu *cu,
 
    The value returned via bytes_read should be used to increment the
    relevant pointer after calling read_initial_length().
-   
-   As a side effect, this function sets the fields initial_length_size
-   and offset_size in cu_header to the values appropriate for the
-   length field.  (The format of the initial length field determines
-   the width of file offsets to be fetched later with read_offset().)
-   
+
    [ Note:  read_initial_length() and read_offset() are based on the
      document entitled "DWARF Debugging Information Format", revision
      3, draft 8, dated November 19, 2001.  This document was obtained
@@ -6424,8 +6472,7 @@ read_address (bfd *abfd, gdb_byte *buf, struct dwarf2_cu *cu,
    ] */
 
 static LONGEST
-read_initial_length (bfd *abfd, gdb_byte *buf, struct comp_unit_head *cu_header,
-                     unsigned int *bytes_read)
+read_initial_length (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read)
 {
   LONGEST length = bfd_get_32 (abfd, buf);
 
@@ -6445,22 +6492,34 @@ read_initial_length (bfd *abfd, gdb_byte *buf, struct comp_unit_head *cu_header,
       *bytes_read = 4;
     }
 
-  if (cu_header)
-    {
-      gdb_assert (cu_header->initial_length_size == 0
-		  || cu_header->initial_length_size == 4
-		  || cu_header->initial_length_size == 8
-		  || cu_header->initial_length_size == 12);
+  return length;
+}
 
-      if (cu_header->initial_length_size != 0
-	  && cu_header->initial_length_size != *bytes_read)
-	complaint (&symfile_complaints,
-		   _("intermixed 32-bit and 64-bit DWARF sections"));
+/* Cover function for read_initial_length.
+   Returns the length of the object at BUF, and stores the size of the
+   initial length in *BYTES_READ and stores the size that offsets will be in
+   *OFFSET_SIZE.
+   If the initial length size is not equivalent to that specified in
+   CU_HEADER then issue a complaint.
+   This is useful when reading non-comp-unit headers.  */
 
-      cu_header->initial_length_size = *bytes_read;
-      cu_header->offset_size = (*bytes_read == 4) ? 4 : 8;
-    }
+static LONGEST
+read_checked_initial_length_and_offset (bfd *abfd, gdb_byte *buf,
+					const struct comp_unit_head *cu_header,
+					unsigned int *bytes_read,
+					unsigned int *offset_size)
+{
+  LONGEST length = read_initial_length (abfd, buf, bytes_read);
 
+  gdb_assert (cu_header->initial_length_size == 4
+	      || cu_header->initial_length_size == 8
+	      || cu_header->initial_length_size == 12);
+
+  if (cu_header->initial_length_size != *bytes_read)
+    complaint (&symfile_complaints,
+	       _("intermixed 32-bit and 64-bit DWARF sections"));
+
+  *offset_size = (*bytes_read == 4) ? 4 : 8;
   return length;
 }
 
@@ -6471,21 +6530,29 @@ static LONGEST
 read_offset (bfd *abfd, gdb_byte *buf, const struct comp_unit_head *cu_header,
              unsigned int *bytes_read)
 {
+  LONGEST offset = read_offset_1 (abfd, buf, cu_header->offset_size);
+  *bytes_read = cu_header->offset_size;
+  return offset;
+}
+
+/* Read an offset from the data stream.  */
+
+static LONGEST
+read_offset_1 (bfd *abfd, gdb_byte *buf, unsigned int offset_size)
+{
   LONGEST retval = 0;
 
-  switch (cu_header->offset_size)
+  switch (offset_size)
     {
     case 4:
       retval = bfd_get_32 (abfd, buf);
-      *bytes_read = 4;
       break;
     case 8:
       retval = bfd_get_64 (abfd, buf);
-      *bytes_read = 8;
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      _("read_offset: bad switch [in module %s]"),
+		      _("read_offset_1: bad switch [in module %s]"),
 		      bfd_get_filename (abfd));
     }
 
@@ -6523,8 +6590,7 @@ read_indirect_string (bfd *abfd, gdb_byte *buf,
 		      const struct comp_unit_head *cu_header,
 		      unsigned int *bytes_read_ptr)
 {
-  LONGEST str_offset = read_offset (abfd, buf, cu_header,
-				    bytes_read_ptr);
+  LONGEST str_offset = read_offset (abfd, buf, cu_header, bytes_read_ptr);
 
   if (dwarf2_per_objfile->str_buffer == NULL)
     {
@@ -6823,7 +6889,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
   struct cleanup *back_to;
   struct line_header *lh;
   gdb_byte *line_ptr;
-  unsigned int bytes_read;
+  unsigned int bytes_read, offset_size;
   int i;
   char *cur_dir, *cur_file;
 
@@ -6850,7 +6916,8 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
 
   /* Read in the header.  */
   lh->total_length = 
-    read_initial_length (abfd, line_ptr, &cu->header, &bytes_read);
+    read_checked_initial_length_and_offset (abfd, line_ptr, &cu->header,
+					    &bytes_read, &offset_size);
   line_ptr += bytes_read;
   if (line_ptr + lh->total_length > (dwarf2_per_objfile->line_buffer
 				     + dwarf2_per_objfile->line_size))
@@ -6861,8 +6928,8 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
   lh->statement_program_end = line_ptr + lh->total_length;
   lh->version = read_2_bytes (abfd, line_ptr);
   line_ptr += 2;
-  lh->header_length = read_offset (abfd, line_ptr, &cu->header, &bytes_read);
-  line_ptr += bytes_read;
+  lh->header_length = read_offset_1 (abfd, line_ptr, offset_size);
+  line_ptr += offset_size;
   lh->minimum_instruction_length = read_1_byte (abfd, line_ptr);
   line_ptr += 1;
   lh->default_is_stmt = read_1_byte (abfd, line_ptr);
@@ -7032,6 +7099,11 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	{
 	  op_code = read_1_byte (abfd, line_ptr);
 	  line_ptr += 1;
+          if (line_ptr > line_end)
+            {
+              dwarf2_debug_line_missing_end_sequence_complaint ();
+              break;
+            }
 
 	  if (op_code >= lh->opcode_base)
 	    {		
@@ -7040,7 +7112,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      address += (adj_opcode / lh->line_range)
 		* lh->minimum_instruction_length;
 	      line += lh->line_base + (adj_opcode % lh->line_range);
-	      if (lh->num_file_names < file)
+	      if (lh->num_file_names < file || file == 0)
 		dwarf2_debug_line_missing_file_complaint ();
 	      else
 		{
@@ -7072,15 +7144,6 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		{
 		case DW_LNE_end_sequence:
 		  end_sequence = 1;
-
-		  if (lh->num_file_names < file)
-		    dwarf2_debug_line_missing_file_complaint ();
-		  else
-		    {
-		      lh->file_names[file - 1].included_p = 1;
-		      if (!decode_for_pst_p)
-			record_line (current_subfile, 0, address);
-		    }
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (abfd, line_ptr, cu, &bytes_read);
@@ -7122,7 +7185,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		}
 	      break;
 	    case DW_LNS_copy:
-	      if (lh->num_file_names < file)
+	      if (lh->num_file_names < file || file == 0)
 		dwarf2_debug_line_missing_file_complaint ();
 	      else
 		{
@@ -7160,7 +7223,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 
                 file = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
                 line_ptr += bytes_read;
-                if (lh->num_file_names < file)
+                if (lh->num_file_names < file || file == 0)
                   dwarf2_debug_line_missing_file_complaint ();
                 else
                   {
@@ -7211,6 +7274,14 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      }
 	    }
 	}
+      if (lh->num_file_names < file || file == 0)
+        dwarf2_debug_line_missing_file_complaint ();
+      else
+        {
+          lh->file_names[file - 1].included_p = 1;
+          if (!decode_for_pst_p)
+            record_line (current_subfile, 0, address);
+        }
     }
 
   if (decode_for_pst_p)
@@ -7798,7 +7869,7 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
   type = tag_type_to_type (type_die, cu);
   if (!type)
     {
-      dump_die (type_die);
+      dump_die_for_error (type_die);
       error (_("Dwarf Error: Problem turning type die at offset into gdb type [in module %s]"),
 		      cu->objfile->name);
     }
@@ -7824,7 +7895,7 @@ die_containing_type (struct die_info *die, struct dwarf2_cu *cu)
   if (!type)
     {
       if (type_die)
-	dump_die (type_die);
+	dump_die_for_error (type_die);
       error (_("Dwarf Error: Problem turning containing type into gdb type [in module %s]"), 
 		      cu->objfile->name);
     }
@@ -7839,7 +7910,7 @@ tag_type_to_type (struct die_info *die, struct dwarf2_cu *cu)
   this_type = read_type_die (die, cu);
   if (!this_type)
     {
-      dump_die (die);
+      dump_die_for_error (die);
       error (_("Dwarf Error: Cannot find type of die [in module %s]"), 
 	     cu->objfile->name);
     }
@@ -8021,19 +8092,17 @@ typename_concat (struct obstack *obs, const char *prefix, const char *suffix,
   else
     sep = "::";
 
+  if (prefix == NULL)
+    prefix = "";
+  if (suffix == NULL)
+    suffix = "";
+
   if (obs == NULL)
     {
       char *retval = xmalloc (strlen (prefix) + MAX_SEP_LEN + strlen (suffix) + 1);
-      retval[0] = '\0';
-      
-      if (prefix)
-	{
-	  strcpy (retval, prefix);
-	  strcat (retval, sep);
-	}
-      if (suffix)
-	strcat (retval, suffix);
-      
+      strcpy (retval, prefix);
+      strcat (retval, sep);
+      strcat (retval, suffix);
       return retval;
     }
   else
@@ -8434,10 +8503,11 @@ dwarf_attr_name (unsigned attr)
       return "DW_AT_pure";
     case DW_AT_recursive:
       return "DW_AT_recursive";
-#ifdef MIPS
     /* SGI/MIPS extensions.  */
+#ifdef MIPS /* collides with DW_AT_HP_block_index */
     case DW_AT_MIPS_fde:
       return "DW_AT_MIPS_fde";
+#endif
     case DW_AT_MIPS_loop_begin:
       return "DW_AT_MIPS_loop_begin";
     case DW_AT_MIPS_tail_loop_begin:
@@ -8458,10 +8528,11 @@ dwarf_attr_name (unsigned attr)
       return "DW_AT_MIPS_clone_origin";
     case DW_AT_MIPS_has_inlines:
       return "DW_AT_MIPS_has_inlines";
-#endif
     /* HP extensions.  */
+#ifndef MIPS /* collides with DW_AT_MIPS_fde */
     case DW_AT_HP_block_index:
       return "DW_AT_HP_block_index";
+#endif
     case DW_AT_HP_unmodifiable:
       return "DW_AT_HP_unmodifiable";
     case DW_AT_HP_actuals_stmt_list:
@@ -9057,38 +9128,52 @@ dwarf_cfi_name (unsigned cfi_opc)
 #endif
 
 static void
-dump_die (struct die_info *die)
+dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 {
   unsigned int i;
 
-  fprintf_unfiltered (gdb_stderr, "Die: %s (abbrev = %d, offset = %d)\n",
+  print_spaces (indent, f);
+  fprintf_unfiltered (f, "Die: %s (abbrev %d, offset 0x%x)\n",
 	   dwarf_tag_name (die->tag), die->abbrev, die->offset);
-  fprintf_unfiltered (gdb_stderr, "\thas children: %s\n",
+
+  if (die->parent != NULL)
+    {
+      print_spaces (indent, f);
+      fprintf_unfiltered (f, "  parent at offset: 0x%x\n",
+			  die->parent->offset);
+    }
+
+  print_spaces (indent, f);
+  fprintf_unfiltered (f, "  has children: %s\n",
 	   dwarf_bool_name (die->child != NULL));
 
-  fprintf_unfiltered (gdb_stderr, "\tattributes:\n");
+  print_spaces (indent, f);
+  fprintf_unfiltered (f, "  attributes:\n");
+
   for (i = 0; i < die->num_attrs; ++i)
     {
-      fprintf_unfiltered (gdb_stderr, "\t\t%s (%s) ",
+      print_spaces (indent, f);
+      fprintf_unfiltered (f, "    %s (%s) ",
 	       dwarf_attr_name (die->attrs[i].name),
 	       dwarf_form_name (die->attrs[i].form));
+
       switch (die->attrs[i].form)
 	{
 	case DW_FORM_ref_addr:
 	case DW_FORM_addr:
-	  fprintf_unfiltered (gdb_stderr, "address: ");
-	  fputs_filtered (paddress (DW_ADDR (&die->attrs[i])), gdb_stderr);
+	  fprintf_unfiltered (f, "address: ");
+	  fputs_filtered (paddress (DW_ADDR (&die->attrs[i])), f);
 	  break;
 	case DW_FORM_block2:
 	case DW_FORM_block4:
 	case DW_FORM_block:
 	case DW_FORM_block1:
-	  fprintf_unfiltered (gdb_stderr, "block: size %d", DW_BLOCK (&die->attrs[i])->size);
+	  fprintf_unfiltered (f, "block: size %d", DW_BLOCK (&die->attrs[i])->size);
 	  break;
 	case DW_FORM_ref1:
 	case DW_FORM_ref2:
 	case DW_FORM_ref4:
-	  fprintf_unfiltered (gdb_stderr, "constant ref: %ld (adjusted)",
+	  fprintf_unfiltered (f, "constant ref: 0x%lx (adjusted)",
 			      (long) (DW_ADDR (&die->attrs[i])));
 	  break;
 	case DW_FORM_data1:
@@ -9097,44 +9182,80 @@ dump_die (struct die_info *die)
 	case DW_FORM_data8:
 	case DW_FORM_udata:
 	case DW_FORM_sdata:
-	  fprintf_unfiltered (gdb_stderr, "constant: %ld", DW_UNSND (&die->attrs[i]));
+	  fprintf_unfiltered (f, "constant: %ld", DW_UNSND (&die->attrs[i]));
 	  break;
 	case DW_FORM_string:
 	case DW_FORM_strp:
-	  fprintf_unfiltered (gdb_stderr, "string: \"%s\"",
+	  fprintf_unfiltered (f, "string: \"%s\"",
 		   DW_STRING (&die->attrs[i])
 		   ? DW_STRING (&die->attrs[i]) : "");
 	  break;
 	case DW_FORM_flag:
 	  if (DW_UNSND (&die->attrs[i]))
-	    fprintf_unfiltered (gdb_stderr, "flag: TRUE");
+	    fprintf_unfiltered (f, "flag: TRUE");
 	  else
-	    fprintf_unfiltered (gdb_stderr, "flag: FALSE");
+	    fprintf_unfiltered (f, "flag: FALSE");
 	  break;
 	case DW_FORM_indirect:
 	  /* the reader will have reduced the indirect form to
 	     the "base form" so this form should not occur */
-	  fprintf_unfiltered (gdb_stderr, "unexpected attribute form: DW_FORM_indirect");
+	  fprintf_unfiltered (f, "unexpected attribute form: DW_FORM_indirect");
 	  break;
 	default:
-	  fprintf_unfiltered (gdb_stderr, "unsupported attribute form: %d.",
+	  fprintf_unfiltered (f, "unsupported attribute form: %d.",
 		   die->attrs[i].form);
+	  break;
 	}
-      fprintf_unfiltered (gdb_stderr, "\n");
+      fprintf_unfiltered (f, "\n");
     }
 }
 
 static void
-dump_die_list (struct die_info *die)
+dump_die_for_error (struct die_info *die)
 {
-  while (die)
+  dump_die_shallow (gdb_stderr, 0, die);
+}
+
+static void
+dump_die_1 (struct ui_file *f, int level, int max_level, struct die_info *die)
+{
+  int indent = level * 4;
+
+  gdb_assert (die != NULL);
+
+  if (level >= max_level)
+    return;
+
+  dump_die_shallow (f, indent, die);
+
+  if (die->child != NULL)
     {
-      dump_die (die);
-      if (die->child != NULL)
-	dump_die_list (die->child);
-      if (die->sibling != NULL)
-	dump_die_list (die->sibling);
+      print_spaces (indent, f);
+      fprintf_unfiltered (f, "  Children:");
+      if (level + 1 < max_level)
+	{
+	  fprintf_unfiltered (f, "\n");
+	  dump_die_1 (f, level + 1, max_level, die->child);
+	}
+      else
+	{
+	  fprintf_unfiltered (f, " [not printed, max nesting level reached]\n");
+	}
     }
+
+  if (die->sibling != NULL && level > 0)
+    {
+      dump_die_1 (f, level, max_level, die->sibling);
+    }
+}
+
+/* This is called from the pdie macro in gdbinit.in.
+   It's not static so gcc will keep a copy callable from gdb.  */
+
+void
+dump_die (struct die_info *die, int max_level)
+{
+  dump_die_1 (gdb_stdlog, 0, max_level, die);
 }
 
 static void
@@ -9148,7 +9269,7 @@ store_in_ref_table (struct die_info *die, struct dwarf2_cu *cu)
 }
 
 static unsigned int
-dwarf2_get_ref_die_offset (struct attribute *attr, struct dwarf2_cu *cu)
+dwarf2_get_ref_die_offset (struct attribute *attr)
 {
   unsigned int result = 0;
 
@@ -9228,14 +9349,12 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
   struct die_info temp_die;
   struct dwarf2_cu *target_cu, *cu = *ref_cu;
 
-  offset = dwarf2_get_ref_die_offset (attr, cu);
+  offset = dwarf2_get_ref_die_offset (attr);
 
-  if (DW_ADDR (attr) < cu->header.offset
-      || DW_ADDR (attr) >= cu->header.offset + cu->header.length)
+  if (! offset_in_cu_p (&cu->header, offset))
     {
       struct dwarf2_per_cu_data *per_cu;
-      per_cu = dwarf2_find_containing_comp_unit (DW_ADDR (attr),
-						 cu->objfile);
+      per_cu = dwarf2_find_containing_comp_unit (offset, cu->objfile);
 
       /* If necessary, add it to the queue and load its DIEs.  */
       maybe_queue_comp_unit (cu, per_cu);
@@ -10071,7 +10190,7 @@ dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *per_cu)
    DIE at OFFSET.  Raises an error on failure.  */
 
 static struct dwarf2_per_cu_data *
-dwarf2_find_containing_comp_unit (unsigned long offset,
+dwarf2_find_containing_comp_unit (unsigned int offset,
 				  struct objfile *objfile)
 {
   struct dwarf2_per_cu_data *this_cu;
@@ -10103,7 +10222,7 @@ dwarf2_find_containing_comp_unit (unsigned long offset,
       this_cu = dwarf2_per_objfile->all_comp_units[low];
       if (low == dwarf2_per_objfile->n_comp_units - 1
 	  && offset >= this_cu->offset + this_cu->length)
-	error (_("invalid dwarf2 offset %ld"), offset);
+	error (_("invalid dwarf2 offset %u"), offset);
       gdb_assert (offset < this_cu->offset + this_cu->length);
       return this_cu;
     }
@@ -10113,12 +10232,12 @@ dwarf2_find_containing_comp_unit (unsigned long offset,
    OFFSET.  Raises an error on failure.  */
 
 static struct dwarf2_per_cu_data *
-dwarf2_find_comp_unit (unsigned long offset, struct objfile *objfile)
+dwarf2_find_comp_unit (unsigned int offset, struct objfile *objfile)
 {
   struct dwarf2_per_cu_data *this_cu;
   this_cu = dwarf2_find_containing_comp_unit (offset, objfile);
   if (this_cu->offset != offset)
-    error (_("no compilation unit with offset %ld."), offset);
+    error (_("no compilation unit with offset %u."), offset);
   return this_cu;
 }
 
@@ -10480,4 +10599,13 @@ caching, which can slow down startup."),
 			    show_dwarf2_max_cache_age,
 			    &set_dwarf2_cmdlist,
 			    &show_dwarf2_cmdlist);
+
+  add_setshow_zinteger_cmd ("dwarf2-die", no_class, &dwarf2_die_debug, _("\
+Set debugging of the dwarf2 DIE reader."), _("\
+Show debugging of the dwarf2 DIE reader."), _("\
+When enabled (non-zero), DIEs are dumped after they are read in.\n\
+The value is the maximum depth to print."),
+			    NULL,
+			    NULL,
+			    &setdebuglist, &showdebuglist);
 }

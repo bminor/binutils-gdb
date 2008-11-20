@@ -6,8 +6,8 @@
 # Created by Klaus K"ampf, kkaempf@progis.de
 #
 #
-ifeq ($(ARCH),alpha)
-OBJS=alpha-dis.obj,alpha-opc.obj,dis-buf.obj,disassemble.obj
+ifeq ($(ARCH),ALPHA)
+OBJS=alpha-dis.obj,alpha-opc.obj,dis-init.obj,dis-buf.obj,disassemble.obj
 FORMAT=OBJ_EVAX
 ARCHDEF="ARCH_alpha"
 else
@@ -20,9 +20,9 @@ ifeq ($(CC),gcc)
 DEFS=/define=($(FORMAT))
 CFLAGS=/include=([],[-.include],[-.bfd])$(DEFS)
 else
-DEFS=/define=($(FORMAT),"const=")
+DEFS=/define=($(FORMAT))
 CFLAGS=/noopt/debug/include=([],[-.include],[-.bfd])$(DEFS)\
-/warnings=disable=(missingreturn,implicitfunc,longextern)
+/name=(as_is,shortened)/warnings=disable=(missingreturn,longextern)
 endif
 
 libopcodes.olb: sysdep.h $(OBJS)

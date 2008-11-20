@@ -4192,6 +4192,19 @@ This is the 5 bits of a value.  */
 /* 32-bit offset to symbol with PLT entry, relative to this relocation.  */
   BFD_RELOC_CRIS_32_PLT_PCREL,
 
+/* Relocs used in TLS code for CRIS.  */
+  BFD_RELOC_CRIS_32_GOT_GD,
+  BFD_RELOC_CRIS_16_GOT_GD,
+  BFD_RELOC_CRIS_32_GD,
+  BFD_RELOC_CRIS_DTP,
+  BFD_RELOC_CRIS_32_DTPREL,
+  BFD_RELOC_CRIS_16_DTPREL,
+  BFD_RELOC_CRIS_32_GOT_TPREL,
+  BFD_RELOC_CRIS_16_GOT_TPREL,
+  BFD_RELOC_CRIS_32_TPREL,
+  BFD_RELOC_CRIS_16_TPREL,
+  BFD_RELOC_CRIS_DTPMOD,
+
 /* Intel i860 Relocations.  */
   BFD_RELOC_860_COPY,
   BFD_RELOC_860_GLOB_DAT,

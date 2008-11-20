@@ -196,46 +196,37 @@ enum ada_renaming_category
 
 /* Ada task structures.  */
 
-/* Ada task control block, as defined in the GNAT runt-time library.  */
-
-struct task_control_block
+struct ada_task_info
 {
-  char state;
-  CORE_ADDR parent;
-  int priority;
-  char image [32];
-  int image_len;    /* This field is not always present in the ATCB.  */
-  CORE_ADDR call;
-  CORE_ADDR thread;
-  CORE_ADDR lwp;    /* This field is not always present in the ATCB.  */
+  /* The PTID of the thread that this task runs on.  This ptid is computed
+     in a target-dependent way from the associated Task Control Block.  */
+  ptid_t ptid;
 
-  /* If the task is waiting on a task entry, this field contains the
-   task_id of the other task.  */
-  CORE_ADDR called_task;
-};
-
-struct task_ptid
-{
-  int pid;                      /* The Process id */
-  long lwp;                     /* The Light Weight Process id */
-  long tid;                     /* The Thread id */
-};
-typedef struct task_ptid task_ptid_t;
-
-struct task_entry
-{
+  /* The ID of the task.  */
   CORE_ADDR task_id;
-  struct task_control_block atcb;
-  int task_num;
-  int known_tasks_index;
-  struct task_entry *next_task;
-  task_ptid_t task_ptid;
-  int stack_per;
+
+  /* The name of the task.  */
+  char name[257];
+
+  /* The current state of the task.  */
+  int state;
+
+  /* The priority associated to the task.  */
+  int priority;
+
+  /* If non-zero, the task ID of the parent task.  */
+  CORE_ADDR parent;
+
+  /* If the task is waiting on a task entry, this field contains
+     the ID of the other task.  Zero otherwise.  */
+  CORE_ADDR called_task;
+
+  /* If the task is accepting a rendezvous with another task, this field
+     contains the ID of the calling task.  Zero otherwise.  */
+  CORE_ADDR caller_task;
 };
 
-/* task entry list.  */
-extern struct task_entry *task_list;
-
+int ada_task_is_alive (struct ada_task_info *task);
 
 /* Assuming V points to an array of S objects,  make sure that it contains at
    least M objects, updating V and S as necessary. */
@@ -258,11 +249,11 @@ extern void ada_print_type (struct type *, char *, struct ui_file *, int,
                             int);
 
 extern int ada_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
-                          struct ui_file *, int, int, int,
-                          enum val_prettyprint);
+                          struct ui_file *, int,
+			  const struct value_print_options *);
 
-extern int ada_value_print (struct value *, struct ui_file *, int,
-                            enum val_prettyprint);
+extern int ada_value_print (struct value *, struct ui_file *,
+			    const struct value_print_options *);
 
                                 /* Defined in ada-lang.c */
 
@@ -275,7 +266,8 @@ extern void ada_emit_char (int, struct ui_file *, int, int);
 extern void ada_printchar (int, struct ui_file *);
 
 extern void ada_printstr (struct ui_file *, const gdb_byte *,
-			  unsigned int, int, int);
+			  unsigned int, int, int,
+			  const struct value_print_options *);
 
 struct value *ada_convert_actual (struct value *actual,
                                   struct type *formal_type0,
@@ -465,6 +457,8 @@ extern enum ada_renaming_category ada_parse_renaming (struct symbol *,
 						      const char **,
 						      int *, const char **);
 
+extern void ada_find_printable_frame (struct frame_info *fi);
+
 extern char *ada_breakpoint_rewrite (char *, int *);
 
 extern char *ada_main_name (void);
@@ -473,9 +467,9 @@ extern char *ada_main_name (void);
 
 extern int valid_task_id (int);
 
-extern void init_task_list (void);
-
-extern int ada_is_exception_breakpoint (bpstat bs);
+typedef void (ada_task_list_iterator_ftype) (struct ada_task_info *task);
+extern void iterate_over_live_ada_tasks
+  (ada_task_list_iterator_ftype *iterator);
 
 extern void ada_adjust_exception_stop (bpstat bs);
 
@@ -491,7 +485,7 @@ extern void ada_print_exception_breakpoint_task (struct breakpoint *);
 
 extern void ada_reset_thread_registers (void);
 
-extern int ada_build_task_list (void);
+extern int ada_build_task_list (int warn_if_null);
 
 extern int ada_exception_catchpoint_p (struct breakpoint *b);
   

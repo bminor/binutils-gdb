@@ -410,7 +410,7 @@ write_exp_msymbol (struct minimal_symbol *msymbol)
 
   CORE_ADDR addr = SYMBOL_VALUE_ADDRESS (msymbol);
   struct obj_section *section = SYMBOL_OBJ_SECTION (msymbol);
-  enum minimal_symbol_type type = msymbol->type;
+  enum minimal_symbol_type type = MSYMBOL_TYPE (msymbol);
   CORE_ADDR pc;
 
   /* The minimal symbol might point to a function descriptor;
@@ -1268,8 +1268,7 @@ follow_types (struct type *follow_type)
 	  create_array_type ((struct type *) NULL,
 			     follow_type, range_type);
 	if (array_size < 0)
-	  TYPE_ARRAY_UPPER_BOUND_TYPE (follow_type)
-	    = BOUND_CANNOT_BE_DETERMINED;
+	  TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (follow_type) = 1;
 	break;
       case tp_function:
 	/* FIXME-type-allocation: need a way to free this type when we are

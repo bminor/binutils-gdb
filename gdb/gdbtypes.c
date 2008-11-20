@@ -1324,7 +1324,7 @@ get_vptr_fieldno (struct type *type, struct type **basetypep)
 	    {
 	      /* If the type comes from a different objfile we can't cache
 		 it, it may have a different lifetime. PR 2384 */
-	      if (TYPE_OBJFILE (type) == TYPE_OBJFILE (baseclass))
+	      if (TYPE_OBJFILE (type) == TYPE_OBJFILE (basetype))
 		{
 		  TYPE_VPTR_FIELDNO (type) = fieldno;
 		  TYPE_VPTR_BASETYPE (type) = basetype;
@@ -2434,6 +2434,20 @@ print_arg_types (struct field *args, int nargs, int spaces)
     }
 }
 
+int
+field_is_static (struct field *f)
+{
+  /* "static" fields are the fields whose location is not relative
+     to the address of the enclosing struct.  It would be nice to
+     have a dedicated flag that would be set for static fields when
+     the type is being created.  But in practice, checking the field
+     loc_kind should give us an accurate answer (at least as long as
+     we assume that DWARF block locations are not going to be used
+     for static fields).  FIXME?  */
+  return (FIELD_LOC_KIND (*f) == FIELD_LOC_KIND_PHYSNAME
+	  || FIELD_LOC_KIND (*f) == FIELD_LOC_KIND_PHYSADDR);
+}
+
 static void
 dump_fn_fieldlists (struct type *type, int spaces)
 {
@@ -2553,35 +2567,6 @@ print_cplus_stuff (struct type *type, int spaces)
   if (TYPE_NFN_FIELDS (type) > 0)
     {
       dump_fn_fieldlists (type, spaces);
-    }
-}
-
-static void
-print_bound_type (int bt)
-{
-  switch (bt)
-    {
-    case BOUND_CANNOT_BE_DETERMINED:
-      printf_filtered ("(BOUND_CANNOT_BE_DETERMINED)");
-      break;
-    case BOUND_BY_REF_ON_STACK:
-      printf_filtered ("(BOUND_BY_REF_ON_STACK)");
-      break;
-    case BOUND_BY_VALUE_ON_STACK:
-      printf_filtered ("(BOUND_BY_VALUE_ON_STACK)");
-      break;
-    case BOUND_BY_REF_IN_REG:
-      printf_filtered ("(BOUND_BY_REF_IN_REG)");
-      break;
-    case BOUND_BY_VALUE_IN_REG:
-      printf_filtered ("(BOUND_BY_VALUE_IN_REG)");
-      break;
-    case BOUND_SIMPLE:
-      printf_filtered ("(BOUND_SIMPLE)");
-      break;
-    default:
-      printf_filtered (_("(unknown bound type)"));
-      break;
     }
 }
 
@@ -2719,14 +2704,6 @@ recursive_dump_type (struct type *type, int spaces)
     }
   puts_filtered ("\n");
   printfi_filtered (spaces, "length %d\n", TYPE_LENGTH (type));
-  printfi_filtered (spaces, "upper_bound_type 0x%x ",
-		    TYPE_ARRAY_UPPER_BOUND_TYPE (type));
-  print_bound_type (TYPE_ARRAY_UPPER_BOUND_TYPE (type));
-  puts_filtered ("\n");
-  printfi_filtered (spaces, "lower_bound_type 0x%x ",
-		    TYPE_ARRAY_LOWER_BOUND_TYPE (type));
-  print_bound_type (TYPE_ARRAY_LOWER_BOUND_TYPE (type));
-  puts_filtered ("\n");
   printfi_filtered (spaces, "objfile ");
   gdb_print_host_address (TYPE_OBJFILE (type), gdb_stdout);
   printf_filtered ("\n");
@@ -3000,6 +2977,7 @@ copy_type_recursive (struct objfile *objfile,
 
       nfields = TYPE_NFIELDS (type);
       TYPE_FIELDS (new_type) = xmalloc (sizeof (struct field) * nfields);
+      memset (TYPE_FIELDS (new_type), 0, sizeof (struct field) * nfields);
       for (i = 0; i < nfields; i++)
 	{
 	  TYPE_FIELD_ARTIFICIAL (new_type, i) = 
@@ -3012,18 +2990,25 @@ copy_type_recursive (struct objfile *objfile,
 	  if (TYPE_FIELD_NAME (type, i))
 	    TYPE_FIELD_NAME (new_type, i) = 
 	      xstrdup (TYPE_FIELD_NAME (type, i));
-	  if (TYPE_FIELD_STATIC_HAS_ADDR (type, i))
-	    SET_FIELD_PHYSADDR (TYPE_FIELD (new_type, i),
-				TYPE_FIELD_STATIC_PHYSADDR (type, i));
-	  else if (TYPE_FIELD_STATIC (type, i))
-	    SET_FIELD_PHYSNAME (TYPE_FIELD (new_type, i),
-				xstrdup (TYPE_FIELD_STATIC_PHYSNAME (type, 
-								     i)));
-	  else
+	  switch (TYPE_FIELD_LOC_KIND (type, i))
 	    {
-	      TYPE_FIELD_BITPOS (new_type, i) = 
-		TYPE_FIELD_BITPOS (type, i);
-	      TYPE_FIELD_STATIC_KIND (new_type, i) = 0;
+	    case FIELD_LOC_KIND_BITPOS:
+	      SET_FIELD_BITPOS (TYPE_FIELD (new_type, i),
+				TYPE_FIELD_BITPOS (type, i));
+	      break;
+	    case FIELD_LOC_KIND_PHYSADDR:
+	      SET_FIELD_PHYSADDR (TYPE_FIELD (new_type, i),
+				  TYPE_FIELD_STATIC_PHYSADDR (type, i));
+	      break;
+	    case FIELD_LOC_KIND_PHYSNAME:
+	      SET_FIELD_PHYSNAME (TYPE_FIELD (new_type, i),
+				  xstrdup (TYPE_FIELD_STATIC_PHYSNAME (type,
+								       i)));
+	      break;
+	    default:
+	      internal_error (__FILE__, __LINE__,
+			      _("Unexpected type field location kind: %d"),
+			      TYPE_FIELD_LOC_KIND (type, i));
 	    }
 	}
     }
@@ -3052,6 +3037,28 @@ copy_type_recursive (struct objfile *objfile,
 	   || TYPE_CODE (type) == TYPE_CODE_TEMPLATE
 	   || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
     INIT_CPLUS_SPECIFIC (new_type);
+
+  return new_type;
+}
+
+/* Make a copy of the given TYPE, except that the pointer & reference
+   types are not preserved.
+   
+   This function assumes that the given type has an associated objfile.
+   This objfile is used to allocate the new type.  */
+
+struct type *
+copy_type (const struct type *type)
+{
+  struct type *new_type;
+
+  gdb_assert (TYPE_OBJFILE (type) != NULL);
+
+  new_type = alloc_type (TYPE_OBJFILE (type));
+  TYPE_INSTANCE_FLAGS (new_type) = TYPE_INSTANCE_FLAGS (type);
+  TYPE_LENGTH (new_type) = TYPE_LENGTH (type);
+  memcpy (TYPE_MAIN_TYPE (new_type), TYPE_MAIN_TYPE (type),
+	  sizeof (struct main_type));
 
   return new_type;
 }

@@ -55,7 +55,7 @@ AR_FLAGS = rc
 
 CC = @CC@
 CFLAGS = @CFLAGS@
-LIBCFLAGS = $(CFLAGS)
+CPPFLAGS = @CPPFLAGS@
 RANLIB = @RANLIB@
 MAKEINFO = @MAKEINFO@
 PERL = @PERL@
@@ -79,8 +79,8 @@ FLAGS_TO_PASS = \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
+	"CPPFLAGS=$(CPPFLAGS)" \
 	"DESTDIR=$(DESTDIR)" \
-	"LIBCFLAGS=$(LIBCFLAGS)" \
 	"EXTRA_OFILES=$(EXTRA_OFILES)" \
 	"HDEFINES=$(HDEFINES)" \
 	"INSTALL=$(INSTALL)" \
@@ -111,7 +111,7 @@ installcheck: installcheck-subdir
 
 INCDIR=$(srcdir)/$(MULTISRCTOP)../include
 
-COMPILE.c = $(CC) -c @DEFS@ $(LIBCFLAGS) -I. -I$(INCDIR) $(HDEFINES) @ac_libiberty_warn_cflags@
+COMPILE.c = $(CC) -c @DEFS@ $(CFLAGS) $(CPPFLAGS) -I. -I$(INCDIR) $(HDEFINES) @ac_libiberty_warn_cflags@
 
 # Just to make sure we don't use a built-in rule with VPATH
 .c.o:
@@ -350,9 +350,9 @@ install: install_to_$(INSTALL_DEST) install-subdir
 
 # This is tricky.  Even though CC in the Makefile contains
 # multilib-specific flags, it's overridden by FLAGS_TO_PASS from the
-# default multilib, so we have to take LIBCFLAGS into account as well,
+# default multilib, so we have to take CFLAGS into account as well,
 # since it will be passed the multilib flags.
-MULTIOSDIR = `$(CC) $(LIBCFLAGS) -print-multi-os-directory`
+MULTIOSDIR = `$(CC) $(CFLAGS) -print-multi-os-directory`
 install_to_libdir: all
 	${mkinstalldirs} $(DESTDIR)$(libdir)/$(MULTIOSDIR)
 	$(INSTALL_DATA) $(TARGETLIB) $(DESTDIR)$(libdir)/$(MULTIOSDIR)/$(TARGETLIB)n

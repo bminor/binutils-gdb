@@ -28,6 +28,9 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 
 int ppc_trace[nr_trace_options];
 
@@ -70,6 +73,8 @@ static trace_option_descriptor trace_description[] = {
   { trace_pass_device, "pass-device" },
   { trace_phb_device, "phb-device" },
   { trace_register_device, "register-device", "Device initializing registers" },
+  { trace_sem_device, "sem-device" },
+  { trace_shm_device, "shm-device" },
   { trace_stack_device, "stack-device" },
   { trace_vm_device, "vm-device" },
   /* packages */

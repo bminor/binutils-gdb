@@ -33,11 +33,8 @@
 #include "cp-abi.h"
 #include "typeprint.h"
 #include "gdb_string.h"
+#include "valprint.h"
 #include <errno.h>
-
-/* For real-type printing in whatis_exp() */
-extern int objectprint;		/* Controls looking up an object's derived type
-				   using what we find in its vtables.  */
 
 extern void _initialize_typeprint (void);
 
@@ -95,6 +92,7 @@ whatis_exp (char *exp, int show)
   int full = 0;
   int top = -1;
   int using_enc = 0;
+  struct value_print_options opts;
 
   if (exp)
     {
@@ -107,7 +105,8 @@ whatis_exp (char *exp, int show)
 
   type = value_type (val);
 
-  if (objectprint)
+  get_user_print_options (&opts);
+  if (opts.objectprint)
     {
       if (((TYPE_CODE (type) == TYPE_CODE_PTR)
 	   || (TYPE_CODE (type) == TYPE_CODE_REF))

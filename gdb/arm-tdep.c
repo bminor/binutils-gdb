@@ -63,11 +63,10 @@ static int arm_debug;
    MSYMBOL_IS_SPECIAL   Tests the "special" bit in a minimal symbol.  */
 
 #define MSYMBOL_SET_SPECIAL(msym)					\
-	MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym))	\
-					| 0x80000000)
+	MSYMBOL_TARGET_FLAG_1 (msym) = 1
 
 #define MSYMBOL_IS_SPECIAL(msym)				\
-	(((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
+	MSYMBOL_TARGET_FLAG_1 (msym)
 
 /* Macros for swapping shorts and ints. In the unlikely case that anybody else needs these,
    move to a general header. (A better solution might be to define memory read routines that

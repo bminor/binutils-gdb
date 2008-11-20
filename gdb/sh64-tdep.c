@@ -40,6 +40,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "osabi.h"
+#include "valprint.h"
 
 #include "elf-bfd.h"
 
@@ -211,7 +212,7 @@ sh64_register_name (struct gdbarch *gdbarch, int reg_nr)
    MSYMBOL_IS_SPECIAL   tests the "special" bit in a minimal symbol  */
 
 #define MSYMBOL_IS_SPECIAL(msym) \
-  (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
+  MSYMBOL_TARGET_FLAG_1 (msym)
 
 static void
 sh64_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
@@ -221,7 +222,7 @@ sh64_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
 
   if (((elf_symbol_type *)(sym))->internal_elf_sym.st_other == STO_SH5_ISA32)
     {
-      MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym)) | 0x80000000);
+      MSYMBOL_TARGET_FLAG_1 (msym) = 1;
       SYMBOL_VALUE_ADDRESS (msym) |= 1;
     }
 }
@@ -2092,6 +2093,7 @@ sh64_do_register (struct gdbarch *gdbarch, struct ui_file *file,
 		  struct frame_info *frame, int regnum)
 {
   unsigned char raw_buffer[MAX_REGISTER_SIZE];
+  struct value_print_options opts;
 
   fputs_filtered (gdbarch_register_name (gdbarch, regnum), file);
   print_spaces_filtered (15 - strlen (gdbarch_register_name
@@ -2100,12 +2102,16 @@ sh64_do_register (struct gdbarch *gdbarch, struct ui_file *file,
   /* Get the data in raw format.  */
   if (!frame_register_read (frame, regnum, raw_buffer))
     fprintf_filtered (file, "*value not available*\n");
-      
+
+  get_formatted_print_options (&opts, 'x');
+  opts.deref_ref = 1;
   val_print (register_type (gdbarch, regnum), raw_buffer, 0, 0,
-	     file, 'x', 1, 0, Val_pretty_default, current_language);
+	     file, 0, &opts, current_language);
   fprintf_filtered (file, "\t");
+  get_formatted_print_options (&opts, 0);
+  opts.deref_ref = 1;
   val_print (register_type (gdbarch, regnum), raw_buffer, 0, 0,
-	     file, 0, 1, 0, Val_pretty_default, current_language);
+	     file, 0, &opts, current_language);
   fprintf_filtered (file, "\n");
 }
 

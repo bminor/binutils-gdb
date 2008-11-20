@@ -25,6 +25,7 @@
 #include "wrapper.h"
 #include "gdbcmd.h"
 #include "block.h"
+#include "valprint.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -1791,6 +1792,7 @@ value_get_print_value (struct value *value, enum varobj_display_formats format)
   struct ui_file *stb;
   struct cleanup *old_chain;
   char *thevalue;
+  struct value_print_options opts;
 
   if (value == NULL)
     return NULL;
@@ -1798,8 +1800,9 @@ value_get_print_value (struct value *value, enum varobj_display_formats format)
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
-  common_val_print (value, stb, format_code[(int) format], 1, 0, 0,
-		    current_language);
+  get_formatted_print_options (&opts, format_code[(int) format]);
+  opts.deref_ref = 0;
+  common_val_print (value, stb, 0, &opts, current_language);
   thevalue = ui_file_xstrdup (stb, &dummy);
 
   do_cleanups (old_chain);
@@ -1951,7 +1954,7 @@ c_number_of_children (struct varobj *var)
     {
     case TYPE_CODE_ARRAY:
       if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (target) > 0
-	  && TYPE_ARRAY_UPPER_BOUND_TYPE (type) != BOUND_CANNOT_BE_DETERMINED)
+	  && !TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
 	children = TYPE_LENGTH (type) / TYPE_LENGTH (target);
       else
 	/* If we don't know how many elements there are, don't display
@@ -2013,7 +2016,7 @@ value_struct_element_index (struct value *value, int type_index)
 
   TRY_CATCH (e, RETURN_MASK_ERROR)
     {
-      if (TYPE_FIELD_STATIC (type, type_index))
+      if (field_is_static (&TYPE_FIELD (type, type_index)))
 	result = value_static_field (type, type_index);
       else
 	result = value_primitive_field (value, 0, type_index, type);

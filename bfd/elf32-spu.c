@@ -3895,16 +3895,27 @@ spu_elf_final_link (bfd *output_bfd, struct bfd_link_info *info)
    that need to be emitted.  */
 
 static unsigned int
-spu_elf_count_relocs (asection *sec, Elf_Internal_Rela *relocs)
+spu_elf_count_relocs (struct bfd_link_info *info, asection *sec)
 {
+  Elf_Internal_Rela *relocs;
   unsigned int count = 0;
-  Elf_Internal_Rela *relend = relocs + sec->reloc_count;
 
-  for (; relocs < relend; relocs++)
+  relocs = _bfd_elf_link_read_relocs (sec->owner, sec, NULL, NULL,
+				      info->keep_memory);
+  if (relocs != NULL)
     {
-      int r_type = ELF32_R_TYPE (relocs->r_info);
-      if (r_type == R_SPU_PPU32 || r_type == R_SPU_PPU64)
-	++count;
+      Elf_Internal_Rela *rel;
+      Elf_Internal_Rela *relend = relocs + sec->reloc_count;
+
+      for (rel = relocs; rel < relend; rel++)
+	{
+	  int r_type = ELF32_R_TYPE (rel->r_info);
+	  if (r_type == R_SPU_PPU32 || r_type == R_SPU_PPU64)
+	    ++count;
+	}
+
+      if (elf_section_data (sec)->relocs != relocs)
+	free (relocs);
     }
 
   return count;

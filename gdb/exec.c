@@ -217,8 +217,11 @@ exec_file_attach (char *filename, int from_tty)
 			    scratch_chan);
 
       if (!exec_bfd)
-	error (_("\"%s\": could not open as an executable file: %s"),
-	       scratch_pathname, bfd_errmsg (bfd_get_error ()));
+	{
+	  close (scratch_chan);
+	  error (_("\"%s\": could not open as an executable file: %s"),
+		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
+	}
 
       /* At this point, scratch_pathname and exec_bfd->name both point to the
          same malloc'd string.  However exec_close() will attempt to free it
@@ -302,10 +305,7 @@ exec_file_command (char *args, int from_tty)
       /* Scan through the args and pick up the first non option arg
          as the filename.  */
 
-      argv = buildargv (args);
-      if (argv == NULL)
-        nomem (0);
-
+      argv = gdb_buildargv (args);
       make_cleanup_freeargv (argv);
 
       for (; (*argv != NULL) && (**argv == '-'); argv++)

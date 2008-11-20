@@ -56,6 +56,7 @@
 #include "ada-lang.h"
 #include "top.h"
 #include "wrapper.h"
+#include "valprint.h"
 
 #include "mi/mi-common.h"
 
@@ -158,10 +159,6 @@ static void rwatch_command (char *, int);
 static void awatch_command (char *, int);
 
 static void do_enable_breakpoint (struct breakpoint *, enum bpdisp);
-
-static void create_fork_vfork_event_catchpoint (int tempflag,
-						char *cond_string,
-						enum bptype bp_kind);
 
 static void stop_command (char *arg, int from_tty);
 
@@ -287,8 +284,6 @@ breakpoints_always_inserted_mode (void)
 
 void _initialize_breakpoint (void);
 
-extern int addressprint;	/* Print machine addresses? */
-
 /* Are we executing breakpoint commands?  */
 static int executing_breakpoint_commands;
 
@@ -315,10 +310,6 @@ static int overlay_events_enabled;
 	     B ? (TMP=B->global_next, 1): 0;	\
 	     B = TMP)
 
-/* True if breakpoint hit counts should be displayed in breakpoint info.  */
-
-int show_breakpoint_hit_counts = 1;
-
 /* Chains of all breakpoints defined.  */
 
 struct breakpoint *breakpoint_chain;
@@ -333,59 +324,6 @@ VEC(bp_location_p) *moribund_locations = NULL;
 /* Number of last breakpoint made.  */
 
 int breakpoint_count;
-
-/* This function returns a pointer to the string representation of the
-   pathname of the dynamically-linked library that has just been
-   loaded.
-
-   This function must be used only when SOLIB_HAVE_LOAD_EVENT is TRUE,
-   or undefined results are guaranteed.
-
-   This string's contents are only valid immediately after the
-   inferior has stopped in the dynamic linker hook, and becomes
-   invalid as soon as the inferior is continued.  Clients should make
-   a copy of this string if they wish to continue the inferior and
-   then access the string.  */
-
-#ifndef SOLIB_LOADED_LIBRARY_PATHNAME
-#define SOLIB_LOADED_LIBRARY_PATHNAME(pid) ""
-#endif
-
-/* This function returns a pointer to the string representation of the
-   pathname of the dynamically-linked library that has just been
-   unloaded.
-
-   This function must be used only when SOLIB_HAVE_UNLOAD_EVENT is
-   TRUE, or undefined results are guaranteed.
-
-   This string's contents are only valid immediately after the
-   inferior has stopped in the dynamic linker hook, and becomes
-   invalid as soon as the inferior is continued.  Clients should make
-   a copy of this string if they wish to continue the inferior and
-   then access the string.  */
-
-#ifndef SOLIB_UNLOADED_LIBRARY_PATHNAME
-#define SOLIB_UNLOADED_LIBRARY_PATHNAME(pid) ""
-#endif
-
-/* This function is called by the "catch load" command.  It allows the
-   debugger to be notified by the dynamic linker when a specified
-   library file (or any library file, if filename is NULL) is loaded.  */
-
-#ifndef SOLIB_CREATE_CATCH_LOAD_HOOK
-#define SOLIB_CREATE_CATCH_LOAD_HOOK(pid,tempflag,filename,cond_string) \
-   error (_("catch of library loads not yet implemented on this platform"))
-#endif
-
-/* This function is called by the "catch unload" command.  It allows
-   the debugger to be notified by the dynamic linker when a specified
-   library file (or any library file, if filename is NULL) is
-   unloaded.  */
-
-#ifndef SOLIB_CREATE_CATCH_UNLOAD_HOOK
-#define SOLIB_CREATE_CATCH_UNLOAD_HOOK(pid, tempflag, filename, cond_string) \
-   error (_("catch of library unloads not yet implemented on this platform"))
-#endif
 
 /* Return whether a breakpoint is an active enabled breakpoint.  */
 static int
@@ -799,21 +737,10 @@ insert_catchpoint (struct ui_out *uo, void *args)
   struct breakpoint *b = (struct breakpoint *) args;
   int val = -1;
 
-  switch (b->type)
-    {
-    case bp_catch_fork:
-      target_insert_fork_catchpoint (PIDGET (inferior_ptid));
-      break;
-    case bp_catch_vfork:
-      target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
-      break;
-    case bp_catch_exec:
-      target_insert_exec_catchpoint (PIDGET (inferior_ptid));
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, _("unknown breakpoint type"));
-      break;
-    }
+  gdb_assert (b->type == bp_catchpoint);
+  gdb_assert (b->ops != NULL && b->ops->insert != NULL);
+
+  b->ops->insert (b);
 }
 
 static int
@@ -1248,9 +1175,7 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
       bpt->inserted = (val != -1);
     }
 
-  else if (bpt->owner->type == bp_catch_fork
-	   || bpt->owner->type == bp_catch_vfork
-	   || bpt->owner->type == bp_catch_exec)
+  else if (bpt->owner->type == bp_catchpoint)
     {
       struct gdb_exception e = catch_exception (uiout, insert_catchpoint,
 						bpt->owner, RETURN_MASK_ERROR);
@@ -1285,7 +1210,10 @@ insert_breakpoints (void)
 
   update_global_location_list (1);
 
-  if (!breakpoints_always_inserted_mode () && target_has_execution)
+  if (!breakpoints_always_inserted_mode ()
+      && (target_has_execution
+ 	  || (gdbarch_has_global_solist (target_gdbarch)
+	      && target_supports_multi_process ())))
     /* update_global_location_list does not insert breakpoints
        when always_inserted_mode is not enabled.  Explicitly
        insert them now.  */
@@ -1505,19 +1433,13 @@ update_breakpoints_after_exec (void)
 	continue;
       }
 
-    /* Don't delete an exec catchpoint, because else the inferior
-       won't stop when it ought!
-
-       Similarly, we probably ought to keep vfork catchpoints, 'cause
-       on this target, we may not be able to stop when the vfork is
-       seen, but only when the subsequent exec is seen.  (And because
-       deleting fork catchpoints here but not vfork catchpoints will
-       seem mysterious to users, keep those too.)  */
-    if ((b->type == bp_catch_exec) ||
-	(b->type == bp_catch_vfork) ||
-	(b->type == bp_catch_fork))
+    if (b->type == bp_catchpoint)
       {
-	continue;
+        /* For now, none of the bp_catchpoint breakpoints need to
+           do anything at this point.  In the future, if some of
+           the catchpoints need to something, we will need to add
+           a new method, and call this method from here.  */
+        continue;
       }
 
     /* bp_finish is a special case.  The only way we ought to be able
@@ -1690,28 +1612,13 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 	warning (_("Could not remove hardware watchpoint %d."),
 		 b->owner->number);
     }
-  else if ((b->owner->type == bp_catch_fork ||
-	    b->owner->type == bp_catch_vfork ||
-	    b->owner->type == bp_catch_exec)
-	   && breakpoint_enabled (b->owner)
-	   && !b->duplicate)
+  else if (b->owner->type == bp_catchpoint
+           && breakpoint_enabled (b->owner)
+           && !b->duplicate)
     {
-      val = -1;
-      switch (b->owner->type)
-	{
-	case bp_catch_fork:
-	  val = target_remove_fork_catchpoint (PIDGET (inferior_ptid));
-	  break;
-	case bp_catch_vfork:
-	  val = target_remove_vfork_catchpoint (PIDGET (inferior_ptid));
-	  break;
-	case bp_catch_exec:
-	  val = target_remove_exec_catchpoint (PIDGET (inferior_ptid));
-	  break;
-	default:
-	  warning (_("Internal error, %s line %d."), __FILE__, __LINE__);
-	  break;
-	}
+      gdb_assert (b->owner->ops != NULL && b->owner->ops->remove != NULL);
+
+      val = b->owner->ops->remove (b->owner);
       if (val)
 	return val;
       b->inserted = (is == mark_inserted);
@@ -1748,6 +1655,12 @@ breakpoint_init_inferior (enum inf_context context)
 {
   struct breakpoint *b, *temp;
   struct bp_location *bpt;
+  int ix;
+
+  /* If breakpoint locations are shared across processes, then there's
+     nothing to do.  */
+  if (gdbarch_has_global_solist (target_gdbarch))
+    return;
 
   ALL_BP_LOCATIONS (bpt)
     if (bpt->owner->enable_state != bp_permanent)
@@ -1790,6 +1703,11 @@ breakpoint_init_inferior (enum inf_context context)
 	break;
       }
   }
+
+  /* Get rid of the moribund locations.  */
+  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, bpt); ++ix)
+    free_bp_location (bpt);
+  VEC_free (bp_location_p, moribund_locations);
 }
 
 /* breakpoint_here_p (PC) returns non-zero if an enabled breakpoint
@@ -1832,6 +1750,20 @@ breakpoint_here_p (CORE_ADDR pc)
   return any_breakpoint_here ? ordinary_breakpoint_here : 0;
 }
 
+/* Return true if there's a moribund breakpoint at PC.  */
+
+int
+moribund_breakpoint_here_p (CORE_ADDR pc)
+{
+  struct bp_location *loc;
+  int ix;
+
+  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
+    if (loc->address == pc)
+      return 1;
+
+  return 0;
+}
 
 /* Returns non-zero if there's a breakpoint inserted at PC, which is
    inserted using regular breakpoint_chain/bp_location_chain mechanism.
@@ -1952,22 +1884,7 @@ breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
 int
 ep_is_catchpoint (struct breakpoint *ep)
 {
-  return
-    (ep->type == bp_catch_load)
-    || (ep->type == bp_catch_unload)
-    || (ep->type == bp_catch_fork)
-    || (ep->type == bp_catch_vfork)
-    || (ep->type == bp_catch_exec);
-
-  /* ??rehrauer: Add more kinds here, as are implemented... */
-}
-
-int
-ep_is_shlib_catchpoint (struct breakpoint *ep)
-{
-  return
-    (ep->type == bp_catch_load)
-    || (ep->type == bp_catch_unload);
+  return (ep->type == bp_catchpoint);
 }
 
 void 
@@ -2248,7 +2165,11 @@ watchpoint_value_print (struct value *val, struct ui_file *stream)
   if (val == NULL)
     fprintf_unfiltered (stream, _("<unreadable>"));
   else
-    value_print (val, stream, 0, Val_pretty_default);
+    {
+      struct value_print_options opts;
+      get_user_print_options (&opts);
+      value_print (val, stream, &opts);
+    }
 }
 
 /* This is the normal print function for a bpstat.  In the future,
@@ -2333,46 +2254,6 @@ print_it_typical (bpstat bs)
       /* By analogy with the thread event, GDB should not stop for these. */
       printf_filtered (_("Overlay Event Breakpoint: gdb should not stop!\n"));
       return PRINT_NOTHING;
-      break;
-
-    case bp_catch_load:
-      annotate_catchpoint (b->number);
-      printf_filtered (_("\nCatchpoint %d (loaded %s), "),
-		       b->number,
-		       b->triggered_dll_pathname);
-      return PRINT_SRC_AND_LOC;
-      break;
-
-    case bp_catch_unload:
-      annotate_catchpoint (b->number);
-      printf_filtered (_("\nCatchpoint %d (unloaded %s), "),
-		       b->number,
-		       b->triggered_dll_pathname);
-      return PRINT_SRC_AND_LOC;
-      break;
-
-    case bp_catch_fork:
-      annotate_catchpoint (b->number);
-      printf_filtered (_("\nCatchpoint %d (forked process %d), "),
-		       b->number, 
-		       ptid_get_pid (b->forked_inferior_pid));
-      return PRINT_SRC_AND_LOC;
-      break;
-
-    case bp_catch_vfork:
-      annotate_catchpoint (b->number);
-      printf_filtered (_("\nCatchpoint %d (vforked process %d), "),
-		       b->number, 
-		       ptid_get_pid (b->forked_inferior_pid));
-      return PRINT_SRC_AND_LOC;
-      break;
-
-    case bp_catch_exec:
-      annotate_catchpoint (b->number);
-      printf_filtered (_("\nCatchpoint %d (exec'd %s), "),
-		       b->number,
-		       b->exec_pathname);
-      return PRINT_SRC_AND_LOC;
       break;
 
     case bp_watchpoint:
@@ -2793,9 +2674,7 @@ bpstat_check_location (const struct bp_location *bl, CORE_ADDR bp_addr)
       && b->type != bp_read_watchpoint
       && b->type != bp_access_watchpoint
       && b->type != bp_hardware_breakpoint
-      && b->type != bp_catch_fork
-      && b->type != bp_catch_vfork
-      && b->type != bp_catch_exec)	/* a non-watchpoint bp */
+      && b->type != bp_catchpoint)	/* a non-watchpoint bp */
     {
       if (bl->address != bp_addr) 	/* address doesn't match */
 	return 0;
@@ -2827,48 +2706,14 @@ bpstat_check_location (const struct bp_location *bl, CORE_ADDR bp_addr)
 	  && !section_is_mapped (bl->section))
 	return 0;
     }
-  
-  /* Is this a catchpoint of a load or unload?  If so, did we
-     get a load or unload of the specified library?  If not,
-     ignore it. */
-  if ((b->type == bp_catch_load)
-#if defined(SOLIB_HAVE_LOAD_EVENT)
-      && (!SOLIB_HAVE_LOAD_EVENT (PIDGET (inferior_ptid))
-	  || ((b->dll_pathname != NULL)
-	      && (strcmp (b->dll_pathname, 
-			  SOLIB_LOADED_LIBRARY_PATHNAME (
-			    PIDGET (inferior_ptid)))
-		  != 0)))
-#endif
-      )
-    return 0;
-  
-  if ((b->type == bp_catch_unload)
-#if defined(SOLIB_HAVE_UNLOAD_EVENT)
-      && (!SOLIB_HAVE_UNLOAD_EVENT (PIDGET (inferior_ptid))
-	  || ((b->dll_pathname != NULL)
-	      && (strcmp (b->dll_pathname, 
-			  SOLIB_UNLOADED_LIBRARY_PATHNAME (
-			    PIDGET (inferior_ptid)))
-		  != 0)))
-#endif
-      )
-    return 0;
 
-  if ((b->type == bp_catch_fork)
-      && !inferior_has_forked (inferior_ptid,
-			       &b->forked_inferior_pid))
-    return 0;
-  
-  if ((b->type == bp_catch_vfork)
-      && !inferior_has_vforked (inferior_ptid,
-				&b->forked_inferior_pid))
-    return 0;
-  
-  if ((b->type == bp_catch_exec)
-      && !inferior_has_execd (inferior_ptid, &b->exec_pathname))
-    return 0;
-
+  if (b->type == bp_catchpoint)
+    {
+      gdb_assert (b->ops != NULL && b->ops->breakpoint_hit != NULL);
+      if (!b->ops->breakpoint_hit (b))
+        return 0;
+    }
+     
   return 1;
 }
 
@@ -3383,19 +3228,7 @@ bpstat_what (bpstat bs)
 	case bp_overlay_event:
 	  bs_class = bp_nostop;
 	  break;
-	case bp_catch_load:
-	case bp_catch_unload:
-	  /* Only if this catchpoint triggered should we cause the
-	     step-out-of-dld behaviour.  Otherwise, we ignore this
-	     catchpoint.  */
-	  if (bs->stop)
-	    bs_class = catch_shlib_event;
-	  else
-	    bs_class = no_effect;
-	  break;
-	case bp_catch_fork:
-	case bp_catch_vfork:
-	case bp_catch_exec:
+	case bp_catchpoint:
 	  if (bs->stop)
 	    {
 	      if (bs->print)
@@ -3436,67 +3269,6 @@ bpstat_should_step (void)
 }
 
 
-
-/* Given a bpstat that records zero or more triggered eventpoints, this
-   function returns another bpstat which contains only the catchpoints
-   on that first list, if any. */
-void
-bpstat_get_triggered_catchpoints (bpstat ep_list, bpstat *cp_list)
-{
-  struct bpstats root_bs[1];
-  bpstat bs = root_bs;
-  struct breakpoint *ep;
-  char *dll_pathname;
-
-  bpstat_clear (cp_list);
-  root_bs->next = NULL;
-
-  for (; ep_list != NULL; ep_list = ep_list->next)
-    {
-      /* Is this eventpoint a catchpoint?  If not, ignore it. */
-      ep = ep_list->breakpoint_at->owner;
-      if (ep == NULL)
-	break;
-      if ((ep->type != bp_catch_load) &&
-	  (ep->type != bp_catch_unload))
-	/* pai: (temp) ADD fork/vfork here!!  */
-	continue;
-
-      /* Yes; add it to the list. */
-      bs = bpstat_alloc (ep_list->breakpoint_at, bs);
-      *bs = *ep_list;
-      bs->next = NULL;
-      bs = root_bs->next;
-
-#if defined(SOLIB_ADD)
-      /* Also, for each triggered catchpoint, tag it with the name of
-         the library that caused this trigger.  (We copy the name now,
-         because it's only guaranteed to be available NOW, when the
-         catchpoint triggers.  Clients who may wish to know the name
-         later must get it from the catchpoint itself.) */
-      if (ep->triggered_dll_pathname != NULL)
-	xfree (ep->triggered_dll_pathname);
-      if (ep->type == bp_catch_load)
-	dll_pathname = SOLIB_LOADED_LIBRARY_PATHNAME (
-	                 PIDGET (inferior_ptid));
-      else
-	dll_pathname = SOLIB_UNLOADED_LIBRARY_PATHNAME (
-	                 PIDGET (inferior_ptid));
-#else
-      dll_pathname = NULL;
-#endif
-      if (dll_pathname)
-	{
-	  ep->triggered_dll_pathname = (char *) 
-	    xmalloc (strlen (dll_pathname) + 1);
-	  strcpy (ep->triggered_dll_pathname, dll_pathname);
-	}
-      else
-	ep->triggered_dll_pathname = NULL;
-    }
-
-  *cp_list = bs;
-}
 
 static void print_breakpoint_location (struct breakpoint *b,
 				       struct bp_location *loc,
@@ -3573,11 +3345,7 @@ print_one_breakpoint_location (struct breakpoint *b,
     {bp_shlib_event, "shlib events"},
     {bp_thread_event, "thread events"},
     {bp_overlay_event, "overlay events"},
-    {bp_catch_load, "catch load"},
-    {bp_catch_unload, "catch unload"},
-    {bp_catch_fork, "catch fork"},
-    {bp_catch_vfork, "catch vfork"},
-    {bp_catch_exec, "catch exec"}
+    {bp_catchpoint, "catchpoint"},
   };
   
   static char bpenables[] = "nynny";
@@ -3588,6 +3356,9 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   int header_of_multiple = 0;
   int part_of_multiple = (loc != NULL);
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
 
   gdb_assert (!loc || loc_number != 0);
   /* See comment in print_one_breakpoint concerning
@@ -3651,7 +3422,7 @@ print_one_breakpoint_location (struct breakpoint *b,
   
   /* 5 and 6 */
   strcpy (wrap_indent, "                           ");
-  if (addressprint)
+  if (opts.addressprint)
     {
       if (gdbarch_addr_bit (current_gdbarch) <= 32)
 	strcat (wrap_indent, "           ");
@@ -3683,64 +3454,11 @@ print_one_breakpoint_location (struct breakpoint *b,
 	/* Field 4, the address, is omitted (which makes the columns
 	   not line up too nicely with the headers, but the effect
 	   is relatively readable).  */
-	if (addressprint)
+	if (opts.addressprint)
 	  ui_out_field_skip (uiout, "addr");
 	annotate_field (5);
 	print_expression (b->exp, stb->stream);
 	ui_out_field_stream (uiout, "what", stb);
-	break;
-
-      case bp_catch_load:
-      case bp_catch_unload:
-	/* Field 4, the address, is omitted (which makes the columns
-	   not line up too nicely with the headers, but the effect
-	   is relatively readable).  */
-	if (addressprint)
-	  ui_out_field_skip (uiout, "addr");
-	annotate_field (5);
-	if (b->dll_pathname == NULL)
-	  {
-	    ui_out_field_string (uiout, "what", "<any library>");
-	    ui_out_spaces (uiout, 1);
-	  }
-	else
-	  {
-	    ui_out_text (uiout, "library \"");
-	    ui_out_field_string (uiout, "what", b->dll_pathname);
-	    ui_out_text (uiout, "\" ");
-	  }
-	break;
-
-      case bp_catch_fork:
-      case bp_catch_vfork:
-	/* Field 4, the address, is omitted (which makes the columns
-	   not line up too nicely with the headers, but the effect
-	   is relatively readable).  */
-	if (addressprint)
-	  ui_out_field_skip (uiout, "addr");
-	annotate_field (5);
-	if (!ptid_equal (b->forked_inferior_pid, null_ptid))
-	  {
-	    ui_out_text (uiout, "process ");
-	    ui_out_field_int (uiout, "what",
-			      ptid_get_pid (b->forked_inferior_pid));
-	    ui_out_spaces (uiout, 1);
-	  }
-	break;
-
-      case bp_catch_exec:
-	/* Field 4, the address, is omitted (which makes the columns
-	   not line up too nicely with the headers, but the effect
-	   is relatively readable).  */
-	if (addressprint)
-	  ui_out_field_skip (uiout, "addr");
-	annotate_field (5);
-	if (b->exec_pathname != NULL)
-	  {
-	    ui_out_text (uiout, "program \"");
-	    ui_out_field_string (uiout, "what", b->exec_pathname);
-	    ui_out_text (uiout, "\" ");
-	  }
 	break;
 
       case bp_breakpoint:
@@ -3755,7 +3473,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       case bp_shlib_event:
       case bp_thread_event:
       case bp_overlay_event:
-	if (addressprint)
+	if (opts.addressprint)
 	  {
 	    annotate_field (4);
 	    if (header_of_multiple)
@@ -3812,7 +3530,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       ui_out_text (uiout, "\n");
     }
   
-  if (!part_of_multiple && show_breakpoint_hit_counts && b->hit_count)
+  if (!part_of_multiple && b->hit_count)
     {
       /* FIXME should make an annotation for this */
       if (ep_is_catchpoint (b))
@@ -3830,7 +3548,7 @@ print_one_breakpoint_location (struct breakpoint *b,
   /* Output the count also if it is zero, but only if this is
      mi. FIXME: Should have a better test for this. */
   if (ui_out_is_mi_like_p (uiout))
-    if (!part_of_multiple && show_breakpoint_hit_counts && b->hit_count == 0)
+    if (!part_of_multiple && b->hit_count == 0)
       ui_out_field_int (uiout, "times", b->hit_count);
 
   if (!part_of_multiple && b->ignore_count)
@@ -3939,11 +3657,7 @@ static int
 user_settable_breakpoint (const struct breakpoint *b)
 {
   return (b->type == bp_breakpoint
-	  || b->type == bp_catch_load
-	  || b->type == bp_catch_unload
-	  || b->type == bp_catch_fork
-	  || b->type == bp_catch_vfork
-	  || b->type == bp_catch_exec
+	  || b->type == bp_catchpoint
 	  || b->type == bp_hardware_breakpoint
 	  || b->type == bp_watchpoint
 	  || b->type == bp_read_watchpoint
@@ -3962,7 +3676,10 @@ breakpoint_1 (int bnum, int allflag)
   CORE_ADDR last_addr = (CORE_ADDR) -1;
   int nr_printable_breakpoints;
   struct cleanup *bkpttbl_chain;
+  struct value_print_options opts;
   
+  get_user_print_options (&opts);
+
   /* Compute the number of rows in the table. */
   nr_printable_breakpoints = 0;
   ALL_BREAKPOINTS (b)
@@ -3973,7 +3690,7 @@ breakpoint_1 (int bnum, int allflag)
 	  nr_printable_breakpoints++;
       }
 
-  if (addressprint)
+  if (opts.addressprint)
     bkpttbl_chain 
       = make_cleanup_ui_out_table_begin_end (uiout, 6, nr_printable_breakpoints,
                                              "BreakpointTable");
@@ -3996,7 +3713,7 @@ breakpoint_1 (int bnum, int allflag)
   if (nr_printable_breakpoints > 0)
     annotate_field (3);
   ui_out_table_header (uiout, 3, ui_left, "enabled", "Enb");	/* 4 */
-  if (addressprint)
+  if (opts.addressprint)
 	{
 	  if (nr_printable_breakpoints > 0)
 	    annotate_field (4);
@@ -4150,9 +3867,7 @@ set_default_breakpoint (int valid, CORE_ADDR addr, struct symtab *symtab,
       bp_hardware_watchpoint
       bp_read_watchpoint
       bp_access_watchpoint
-      bp_catch_exec
-      bp_catch_fork
-      bp_catch_vork */
+      bp_catchpoint */
 
 static int
 breakpoint_address_is_meaningful (struct breakpoint *bpt)
@@ -4163,9 +3878,7 @@ breakpoint_address_is_meaningful (struct breakpoint *bpt)
 	  && type != bp_hardware_watchpoint
 	  && type != bp_read_watchpoint
 	  && type != bp_access_watchpoint
-	  && type != bp_catch_exec
-	  && type != bp_catch_fork
-	  && type != bp_catch_vfork);
+	  && type != bp_catchpoint);
 }
 
 /* Rescan breakpoints at the same address and section as BPT,
@@ -4280,9 +3993,7 @@ adjust_breakpoint_address (CORE_ADDR bpaddr, enum bptype bptype)
            || bptype == bp_hardware_watchpoint
            || bptype == bp_read_watchpoint
            || bptype == bp_access_watchpoint
-           || bptype == bp_catch_fork
-           || bptype == bp_catch_vfork
-           || bptype == bp_catch_exec)
+           || bptype == bp_catchpoint)
     {
       /* Watchpoints and the various bp_catch_* eventpoints should not
          have their addresses modified.  */
@@ -4335,8 +4046,6 @@ allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
     case bp_shlib_event:
     case bp_thread_event:
     case bp_overlay_event:
-    case bp_catch_load:
-    case bp_catch_unload:
       loc->loc_type = bp_loc_software_breakpoint;
       break;
     case bp_hardware_breakpoint:
@@ -4348,9 +4057,7 @@ allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
       loc->loc_type = bp_loc_hardware_watchpoint;
       break;
     case bp_watchpoint:
-    case bp_catch_fork:
-    case bp_catch_vfork:
-    case bp_catch_exec:
+    case bp_catchpoint:
       loc->loc_type = bp_loc_other;
       break;
     default:
@@ -4392,8 +4099,6 @@ set_raw_breakpoint_without_location (enum bptype bptype)
   b->ignore_count = 0;
   b->commands = NULL;
   b->frame_id = null_frame_id;
-  b->dll_pathname = NULL;
-  b->triggered_dll_pathname = NULL;
   b->forked_inferior_pid = null_ptid;
   b->exec_pathname = NULL;
   b->ops = NULL;
@@ -4750,72 +4455,285 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
   }
 }
 
+/* FORK & VFORK catchpoints.  */
+
+/* Implement the "insert" breakpoint_ops method for fork catchpoints.  */
+
 static void
-create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
-				    enum bptype bp_kind)
+insert_catch_fork (struct breakpoint *b)
+{
+  target_insert_fork_catchpoint (PIDGET (inferior_ptid));
+}
+
+/* Implement the "remove" breakpoint_ops method for fork catchpoints.  */
+
+static int
+remove_catch_fork (struct breakpoint *b)
+{
+  return target_remove_fork_catchpoint (PIDGET (inferior_ptid));
+}
+
+/* Implement the "breakpoint_hit" breakpoint_ops method for fork
+   catchpoints.  */
+
+static int
+breakpoint_hit_catch_fork (struct breakpoint *b)
+{
+  return inferior_has_forked (inferior_ptid, &b->forked_inferior_pid);
+}
+
+/* Implement the "print_it" breakpoint_ops method for fork catchpoints.  */
+
+static enum print_stop_action
+print_it_catch_fork (struct breakpoint *b)
+{
+  annotate_catchpoint (b->number);
+  printf_filtered (_("\nCatchpoint %d (forked process %d), "),
+		   b->number, ptid_get_pid (b->forked_inferior_pid));
+  return PRINT_SRC_AND_LOC;
+}
+
+/* Implement the "print_one" breakpoint_ops method for fork catchpoints.  */
+
+static void
+print_one_catch_fork (struct breakpoint *b, CORE_ADDR *last_addr)
+{
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
+
+  /* Field 4, the address, is omitted (which makes the columns
+     not line up too nicely with the headers, but the effect
+     is relatively readable).  */
+  if (opts.addressprint)
+    ui_out_field_skip (uiout, "addr");
+  annotate_field (5);
+  ui_out_text (uiout, "fork");
+  if (!ptid_equal (b->forked_inferior_pid, null_ptid))
+    {
+      ui_out_text (uiout, ", process ");
+      ui_out_field_int (uiout, "what",
+                        ptid_get_pid (b->forked_inferior_pid));
+      ui_out_spaces (uiout, 1);
+    }
+}
+
+/* Implement the "print_mention" breakpoint_ops method for fork
+   catchpoints.  */
+
+static void
+print_mention_catch_fork (struct breakpoint *b)
+{
+  printf_filtered (_("Catchpoint %d (fork)"), b->number);
+}
+
+/* The breakpoint_ops structure to be used in fork catchpoints.  */
+
+static struct breakpoint_ops catch_fork_breakpoint_ops =
+{
+  insert_catch_fork,
+  remove_catch_fork,
+  breakpoint_hit_catch_fork,
+  print_it_catch_fork,
+  print_one_catch_fork,
+  print_mention_catch_fork
+};
+
+/* Implement the "insert" breakpoint_ops method for vfork catchpoints.  */
+
+static void
+insert_catch_vfork (struct breakpoint *b)
+{
+  target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
+}
+
+/* Implement the "remove" breakpoint_ops method for vfork catchpoints.  */
+
+static int
+remove_catch_vfork (struct breakpoint *b)
+{
+  return target_remove_vfork_catchpoint (PIDGET (inferior_ptid));
+}
+
+/* Implement the "breakpoint_hit" breakpoint_ops method for vfork
+   catchpoints.  */
+
+static int
+breakpoint_hit_catch_vfork (struct breakpoint *b)
+{
+  return inferior_has_vforked (inferior_ptid, &b->forked_inferior_pid);
+}
+
+/* Implement the "print_it" breakpoint_ops method for vfork catchpoints.  */
+
+static enum print_stop_action
+print_it_catch_vfork (struct breakpoint *b)
+{
+  annotate_catchpoint (b->number);
+  printf_filtered (_("\nCatchpoint %d (vforked process %d), "),
+		   b->number, ptid_get_pid (b->forked_inferior_pid));
+  return PRINT_SRC_AND_LOC;
+}
+
+/* Implement the "print_one" breakpoint_ops method for vfork catchpoints.  */
+
+static void
+print_one_catch_vfork (struct breakpoint *b, CORE_ADDR *last_addr)
+{
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
+  /* Field 4, the address, is omitted (which makes the columns
+     not line up too nicely with the headers, but the effect
+     is relatively readable).  */
+  if (opts.addressprint)
+    ui_out_field_skip (uiout, "addr");
+  annotate_field (5);
+  ui_out_text (uiout, "vfork");
+  if (!ptid_equal (b->forked_inferior_pid, null_ptid))
+    {
+      ui_out_text (uiout, ", process ");
+      ui_out_field_int (uiout, "what",
+                        ptid_get_pid (b->forked_inferior_pid));
+      ui_out_spaces (uiout, 1);
+    }
+}
+
+/* Implement the "print_mention" breakpoint_ops method for vfork
+   catchpoints.  */
+
+static void
+print_mention_catch_vfork (struct breakpoint *b)
+{
+  printf_filtered (_("Catchpoint %d (vfork)"), b->number);
+}
+
+/* The breakpoint_ops structure to be used in vfork catchpoints.  */
+
+static struct breakpoint_ops catch_vfork_breakpoint_ops =
+{
+  insert_catch_vfork,
+  remove_catch_vfork,
+  breakpoint_hit_catch_vfork,
+  print_it_catch_vfork,
+  print_one_catch_vfork,
+  print_mention_catch_vfork
+};
+
+/* Create a new breakpoint of the bp_catchpoint kind and return it.
+ 
+   If TEMPFLAG is non-zero, then make the breakpoint temporary.
+   If COND_STRING is not NULL, then store it in the breakpoint.
+   OPS, if not NULL, is the breakpoint_ops structure associated
+   to the catchpoint.  */
+
+static struct breakpoint *
+create_catchpoint (int tempflag, char *cond_string,
+                   struct breakpoint_ops *ops)
 {
   struct symtab_and_line sal;
   struct breakpoint *b;
-  int thread = -1;		/* All threads. */
 
   init_sal (&sal);
   sal.pc = 0;
   sal.symtab = NULL;
   sal.line = 0;
 
-  b = set_raw_breakpoint (sal, bp_kind);
+  b = set_raw_breakpoint (sal, bp_catchpoint);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
+
   b->cond_string = (cond_string == NULL) ? 
     NULL : savestring (cond_string, strlen (cond_string));
-  b->thread = thread;
+  b->thread = -1;
   b->addr_string = NULL;
   b->enable_state = bp_enabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
+  b->ops = ops;
+
+  mention (b);
+  update_global_location_list (1);
+
+  return b;
+}
+
+static void
+create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
+                                    struct breakpoint_ops *ops)
+{
+  struct breakpoint *b = create_catchpoint (tempflag, cond_string, ops);
+
+  /* FIXME: We should put this information in a breakpoint private data
+     area.  */
   b->forked_inferior_pid = null_ptid;
-  update_global_location_list (1);
+}
 
+/* Exec catchpoints.  */
 
-  mention (b);
+static void
+insert_catch_exec (struct breakpoint *b)
+{
+  target_insert_exec_catchpoint (PIDGET (inferior_ptid));
+}
+
+static int
+remove_catch_exec (struct breakpoint *b)
+{
+  return target_remove_exec_catchpoint (PIDGET (inferior_ptid));
+}
+
+static int
+breakpoint_hit_catch_exec (struct breakpoint *b)
+{
+  return inferior_has_execd (inferior_ptid, &b->exec_pathname);
+}
+
+static enum print_stop_action
+print_it_catch_exec (struct breakpoint *b)
+{
+  annotate_catchpoint (b->number);
+  printf_filtered (_("\nCatchpoint %d (exec'd %s), "), b->number,
+		   b->exec_pathname);
+  return PRINT_SRC_AND_LOC;
 }
 
 static void
-create_fork_event_catchpoint (int tempflag, char *cond_string)
+print_one_catch_exec (struct breakpoint *b, CORE_ADDR *last_addr)
 {
-  create_fork_vfork_event_catchpoint (tempflag, cond_string, bp_catch_fork);
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
+
+  /* Field 4, the address, is omitted (which makes the columns
+     not line up too nicely with the headers, but the effect
+     is relatively readable).  */
+  if (opts.addressprint)
+    ui_out_field_skip (uiout, "addr");
+  annotate_field (5);
+  ui_out_text (uiout, "exec");
+  if (b->exec_pathname != NULL)
+    {
+      ui_out_text (uiout, ", program \"");
+      ui_out_field_string (uiout, "what", b->exec_pathname);
+      ui_out_text (uiout, "\" ");
+    }
 }
 
 static void
-create_vfork_event_catchpoint (int tempflag, char *cond_string)
+print_mention_catch_exec (struct breakpoint *b)
 {
-  create_fork_vfork_event_catchpoint (tempflag, cond_string, bp_catch_vfork);
+  printf_filtered (_("Catchpoint %d (exec)"), b->number);
 }
 
-static void
-create_exec_event_catchpoint (int tempflag, char *cond_string)
+static struct breakpoint_ops catch_exec_breakpoint_ops =
 {
-  struct symtab_and_line sal;
-  struct breakpoint *b;
-  int thread = -1;		/* All threads. */
-
-  init_sal (&sal);
-  sal.pc = 0;
-  sal.symtab = NULL;
-  sal.line = 0;
-
-  b = set_raw_breakpoint (sal, bp_catch_exec);
-  set_breakpoint_count (breakpoint_count + 1);
-  b->number = breakpoint_count;
-  b->cond_string = (cond_string == NULL) ?
-    NULL : savestring (cond_string, strlen (cond_string));
-  b->thread = thread;
-  b->addr_string = NULL;
-  b->enable_state = bp_enabled;
-  b->disposition = tempflag ? disp_del : disp_donttouch;
-  update_global_location_list (1);
-
-  mention (b);
-}
+  insert_catch_exec,
+  remove_catch_exec,
+  breakpoint_hit_catch_exec,
+  print_it_catch_exec,
+  print_one_catch_exec,
+  print_mention_catch_exec
+};
 
 static int
 hw_breakpoint_used_count (void)
@@ -4940,6 +4858,9 @@ mention (struct breakpoint *b)
   int say_where = 0;
   struct cleanup *old_chain, *ui_out_chain;
   struct ui_stream *stb;
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -5016,24 +4937,6 @@ mention (struct breakpoint *b)
 	printf_filtered (_("Hardware assisted breakpoint %d"), b->number);
 	say_where = 1;
 	break;
-      case bp_catch_load:
-      case bp_catch_unload:
-	printf_filtered (_("Catchpoint %d (%s %s)"),
-			 b->number,
-			 (b->type == bp_catch_load) ? "load" : "unload",
-			 (b->dll_pathname != NULL) ? 
-			 b->dll_pathname : "<any library>");
-	break;
-      case bp_catch_fork:
-      case bp_catch_vfork:
-	printf_filtered (_("Catchpoint %d (%s)"),
-			 b->number,
-			 (b->type == bp_catch_fork) ? "fork" : "vfork");
-	break;
-      case bp_catch_exec:
-	printf_filtered (_("Catchpoint %d (exec)"),
-			 b->number);
-	break;
 
       case bp_until:
       case bp_finish:
@@ -5058,7 +4961,7 @@ mention (struct breakpoint *b)
 	}
       else
 	{
-	  if (addressprint || b->source_file == NULL)
+	  if (opts.addressprint || b->source_file == NULL)
 	    {
 	      printf_filtered (" at ");
 	      fputs_filtered (paddress (b->loc->address), gdb_stdout);
@@ -6450,11 +6353,13 @@ catch_fork_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
     {
     case catch_fork_temporary:
     case catch_fork_permanent:
-      create_fork_event_catchpoint (tempflag, cond_string);
+      create_fork_vfork_event_catchpoint (tempflag, cond_string,
+                                          &catch_fork_breakpoint_ops);
       break;
     case catch_vfork_temporary:
     case catch_vfork_permanent:
-      create_vfork_event_catchpoint (tempflag, cond_string);
+      create_fork_vfork_event_catchpoint (tempflag, cond_string,
+                                          &catch_vfork_breakpoint_ops);
       break;
     default:
       error (_("unsupported or unknown fork kind; cannot catch it"));
@@ -6486,102 +6391,7 @@ catch_exec_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
 
   /* If this target supports it, create an exec catchpoint
      and enable reporting of such events. */
-  create_exec_event_catchpoint (tempflag, cond_string);
-}
-
-static void
-catch_load_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
-{
-  int tempflag;
-  char *dll_pathname = NULL;
-  char *cond_string = NULL;
-
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
-
-  if (!arg)
-    arg = "";
-  ep_skip_leading_whitespace (&arg);
-
-  /* The allowed syntax is:
-     catch load
-     catch load if <cond>
-     catch load <filename>
-     catch load <filename> if <cond>
-
-     The user is not allowed to specify the <filename> after an
-     if clause.
-
-     We'll ignore the pathological case of a file named "if".
-
-     First, check if there's an if clause.  If so, then there
-     cannot be a filename. */
-  cond_string = ep_parse_optional_if_clause (&arg);
-
-  /* If there was an if clause, then there cannot be a filename.
-     Else, there might be a filename and an if clause. */
-  if (cond_string == NULL)
-    {
-      dll_pathname = ep_parse_optional_filename (&arg);
-      ep_skip_leading_whitespace (&arg);
-      cond_string = ep_parse_optional_if_clause (&arg);
-    }
-
-  if ((*arg != '\0') && !isspace (*arg))
-    error (_("Junk at end of arguments."));
-
-  /* Create a load breakpoint that only triggers when a load of
-     the specified dll (or any dll, if no pathname was specified)
-     occurs. */
-  SOLIB_CREATE_CATCH_LOAD_HOOK (PIDGET (inferior_ptid), tempflag, 
-				dll_pathname, cond_string);
-}
-
-static void
-catch_unload_command_1 (char *arg, int from_tty,
-			struct cmd_list_element *command)
-{
-  int tempflag;
-  char *dll_pathname = NULL;
-  char *cond_string = NULL;
-
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
-
-  if (!arg)
-    arg = "";
-  ep_skip_leading_whitespace (&arg);
-
-  /* The allowed syntax is:
-     catch unload
-     catch unload if <cond>
-     catch unload <filename>
-     catch unload <filename> if <cond>
-
-     The user is not allowed to specify the <filename> after an
-     if clause.
-
-     We'll ignore the pathological case of a file named "if".
-
-     First, check if there's an if clause.  If so, then there
-     cannot be a filename. */
-  cond_string = ep_parse_optional_if_clause (&arg);
-
-  /* If there was an if clause, then there cannot be a filename.
-     Else, there might be a filename and an if clause. */
-  if (cond_string == NULL)
-    {
-      dll_pathname = ep_parse_optional_filename (&arg);
-      ep_skip_leading_whitespace (&arg);
-      cond_string = ep_parse_optional_if_clause (&arg);
-    }
-
-  if ((*arg != '\0') && !isspace (*arg))
-    error (_("Junk at end of arguments."));
-
-  /* Create an unload breakpoint that only triggers when an unload of
-     the specified dll (or any dll, if no pathname was specified)
-     occurs. */
-  SOLIB_CREATE_CATCH_UNLOAD_HOOK (PIDGET (inferior_ptid), tempflag, 
-				  dll_pathname, cond_string);
+  create_catchpoint (tempflag, cond_string, &catch_exec_breakpoint_ops);
 }
 
 static enum print_stop_action
@@ -6618,7 +6428,9 @@ print_exception_catchpoint (struct breakpoint *b)
 static void
 print_one_exception_catchpoint (struct breakpoint *b, CORE_ADDR *last_addr)
 {
-  if (addressprint)
+  struct value_print_options opts;
+  get_user_print_options (&opts);
+  if (opts.addressprint)
     {
       annotate_field (4);
       if (b->loc == NULL || b->loc->shlib_disabled)
@@ -6651,6 +6463,9 @@ print_mention_exception_catchpoint (struct breakpoint *b)
 }
 
 static struct breakpoint_ops gnu_v3_exception_catchpoint_ops = {
+  NULL, /* insert */
+  NULL, /* remove */
+  NULL, /* breakpoint_hit */
   print_exception_catchpoint,
   print_one_exception_catchpoint,
   print_mention_exception_catchpoint
@@ -7111,8 +6926,8 @@ update_global_location_list (int should_insert)
 	}
 
       if (!found_object)
-	{	      
-	  if (removed)
+	{
+	  if (removed && non_stop)
 	    {
 	      /* This location was removed from the targets.  In non-stop mode,
 		 a race condition is possible where we've removed a breakpoint,
@@ -7120,28 +6935,31 @@ update_global_location_list (int should_insert)
 		 arrive later.  To suppress spurious SIGTRAPs reported to user,
 		 we keep this breakpoint location for a bit, and will retire it
 		 after we see 3 * thread_count events.
-		 The theory here is that reporting of events should, 
+		 The theory here is that reporting of events should,
 		 "on the average", be fair, so after that many event we'll see
 		 events from all threads that have anything of interest, and no
-		 longer need to keep this breakpoint.  This is just a 
+		 longer need to keep this breakpoint.  This is just a
 		 heuristic, but if it's wrong, we'll report unexpected SIGTRAP,
-		 which is usability issue, but not a correctness problem.  */	  
+		 which is usability issue, but not a correctness problem.  */
 	      loc->events_till_retirement = 3 * (thread_count () + 1);
 	      loc->owner = NULL;
-	    }
 
-	  free_bp_location (loc);
+	      VEC_safe_push (bp_location_p, moribund_locations, loc);
+	    }
+	  else
+	    free_bp_location (loc);
 	}
     }
-    
+
   ALL_BREAKPOINTS (b)
     {
       check_duplicates (b);
     }
 
-  if (breakpoints_always_inserted_mode ()
-      && should_insert
-      && target_has_execution)
+  if (breakpoints_always_inserted_mode () && should_insert
+      && (target_has_execution
+	  || (gdbarch_has_global_solist (target_gdbarch)
+	      && target_supports_multi_process ())))
     insert_breakpoint_locations ();
 }
 
@@ -7243,10 +7061,6 @@ delete_breakpoint (struct breakpoint *bpt)
     value_free (bpt->val);
   if (bpt->source_file != NULL)
     xfree (bpt->source_file);
-  if (bpt->dll_pathname != NULL)
-    xfree (bpt->dll_pathname);
-  if (bpt->triggered_dll_pathname != NULL)
-    xfree (bpt->triggered_dll_pathname);
   if (bpt->exec_pathname != NULL)
     xfree (bpt->exec_pathname);
 
@@ -7516,8 +7330,6 @@ breakpoint_re_set_one (void *bint)
       return 0;
     case bp_breakpoint:
     case bp_hardware_breakpoint:
-    case bp_catch_load:
-    case bp_catch_unload:
       if (b->addr_string == NULL)
 	{
 	  /* Anything without a string can't be re-set. */
@@ -7617,9 +7429,7 @@ breakpoint_re_set_one (void *bint)
       /* We needn't really do anything to reset these, since the mask
          that requests them is unaffected by e.g., new libraries being
          loaded. */
-    case bp_catch_fork:
-    case bp_catch_vfork:
-    case bp_catch_exec:
+    case bp_catchpoint:
       break;
 
     default:
@@ -7731,14 +7541,11 @@ set_ignore_count (int bptnum, int count, int from_tty)
   error (_("No breakpoint number %d."), bptnum);
 }
 
-/* Clear the ignore counts of all breakpoints.  */
 void
-breakpoint_clear_ignore_counts (void)
+make_breakpoint_silent (struct breakpoint *b)
 {
-  struct breakpoint *b;
-
-  ALL_BREAKPOINTS (b)
-    b->ignore_count = 0;
+  /* Silence the breakpoint.  */
+  b->silent = 1;
 }
 
 /* Command to set ignore-count of breakpoint N to COUNT.  */
@@ -7888,11 +7695,7 @@ disable_command (char *args, int from_tty)
 		 bpt->number);
 	continue;
       case bp_breakpoint:
-      case bp_catch_load:
-      case bp_catch_unload:
-      case bp_catch_fork:
-      case bp_catch_vfork:
-      case bp_catch_exec:
+      case bp_catchpoint:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
       case bp_hardware_watchpoint:
@@ -8022,11 +7825,7 @@ enable_command (char *args, int from_tty)
 		 bpt->number);
 	continue;
       case bp_breakpoint:
-      case bp_catch_load:
-      case bp_catch_unload:
-      case bp_catch_fork:
-      case bp_catch_vfork:
-      case bp_catch_exec:
+      case bp_catchpoint:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
       case bp_hardware_watchpoint:
@@ -8547,18 +8346,6 @@ With an argument, catch only exceptions with the given name."),
 		     (void *) (uintptr_t) catch_vfork_temporary);
   add_catch_command ("exec", _("Catch calls to exec."),
 		     catch_exec_command_1,
-		     CATCH_PERMANENT,
-		     CATCH_TEMPORARY);
-  add_catch_command ("load", _("\
-Catch library loads.\n\
-With an argument, catch only loads of that library."),
-		     catch_load_command_1,
-		     CATCH_PERMANENT,
-		     CATCH_TEMPORARY);
-  add_catch_command ("unload", _("\
-Catch library unloads.\n\
-With an argument, catch only unloads of that library."),
-		     catch_unload_command_1,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
   add_catch_command ("exception", _("\

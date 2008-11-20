@@ -25,7 +25,7 @@
 
 struct inf;
 
-extern struct inf *current_inferior;
+extern struct inf *gnu_current_inf;
 
 /* Converts a GDB pid to a struct proc.  */
 struct proc *inf_tid_to_thread (struct inf *inf, int tid);

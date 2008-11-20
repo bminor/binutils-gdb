@@ -31,23 +31,9 @@
 #include "mi-cmds.h"
 #include "mi-out.h"
 #include "mi-console.h"
+#include "mi-common.h"
 #include "observer.h"
 #include "gdbthread.h"
-
-struct mi_interp
-{
-  /* MI's output channels */
-  struct ui_file *out;
-  struct ui_file *err;
-  struct ui_file *log;
-  struct ui_file *targ;
-  struct ui_file *event_channel;
-
-  /* This is the interpreter for the mi... */
-  struct interp *mi2_interp;
-  struct interp *mi1_interp;
-  struct interp *mi_interp;
-};
 
 /* These are the interpreter setup, etc. functions for the MI interpreter */
 static void mi_execute_command_wrapper (char *cmd);
@@ -69,6 +55,8 @@ static void mi_on_normal_stop (struct bpstats *bs);
 
 static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t);
+static void mi_new_inferior (int pid);
+static void mi_inferior_exit (int pid);
 static void mi_on_resume (ptid_t ptid);
 
 static void *
@@ -94,6 +82,8 @@ mi_interpreter_init (int top_level)
     {
       observer_attach_new_thread (mi_new_thread);
       observer_attach_thread_exit (mi_thread_exit);
+      observer_attach_new_inferior (mi_new_inferior);
+      observer_attach_inferior_exit (mi_inferior_exit);
       observer_attach_normal_stop (mi_on_normal_stop);
       observer_attach_target_resumed (mi_on_resume);
     }
@@ -289,7 +279,9 @@ mi_new_thread (struct thread_info *t)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
 
-  fprintf_unfiltered (mi->event_channel, "thread-created,id=\"%d\"", t->num);
+  fprintf_unfiltered (mi->event_channel, 
+		      "thread-created,id=\"%d\",group-id=\"%d\"", 
+		      t->num, t->ptid.pid);
   gdb_flush (mi->event_channel);
 }
 
@@ -298,8 +290,30 @@ mi_thread_exit (struct thread_info *t)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
   target_terminal_ours ();
-  fprintf_unfiltered (mi->event_channel, "thread-exited,id=\"%d\"", t->num);
+  fprintf_unfiltered (mi->event_channel, 
+		      "thread-exited,id=\"%d\",group-id=\"%d\"", 
+		      t->num,t->ptid.pid);
   gdb_flush (mi->event_channel);
+}
+
+static void
+mi_new_inferior (int pid)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+  target_terminal_ours ();
+  fprintf_unfiltered (mi->event_channel, "thread-group-created,id=\"%d\"", 
+		      pid);
+  gdb_flush (mi->event_channel);
+}
+
+static void
+mi_inferior_exit (int pid)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+  target_terminal_ours ();
+  fprintf_unfiltered (mi->event_channel, "thread-group-exited,id=\"%d\"", 
+		      pid);
+  gdb_flush (mi->event_channel);  
 }
 
 static void
@@ -362,6 +376,7 @@ mi_on_resume (ptid_t ptid)
       if (!target_is_async_p ())
 	fputs_unfiltered ("(gdb) \n", raw_stdout);
     }
+  gdb_flush (raw_stdout);
 }
 
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */

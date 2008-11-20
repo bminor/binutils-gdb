@@ -99,9 +99,9 @@ static void debug_to_open (char *, int);
 
 static void debug_to_close (int);
 
-static void debug_to_attach (char *, int);
+static void debug_to_attach (struct target_ops *ops, char *, int);
 
-static void debug_to_detach (char *, int);
+static void debug_to_detach (struct target_ops *ops, char *, int);
 
 static void debug_to_resume (ptid_t, int, enum target_signal);
 
@@ -156,7 +156,7 @@ static void debug_to_load (char *, int);
 
 static int debug_to_lookup_symbol (char *, CORE_ADDR *);
 
-static void debug_to_mourn_inferior (void);
+static void debug_to_mourn_inferior (struct target_ops *);
 
 static int debug_to_can_run (void);
 
@@ -281,6 +281,24 @@ target_load (char *arg, int from_tty)
   (*current_target.to_load) (arg, from_tty);
 }
 
+void target_create_inferior (char *exec_file, char *args,
+			     char **env, int from_tty)
+{
+  struct target_ops *t;
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_create_inferior != NULL)	
+	{
+	  t->to_create_inferior (t, exec_file, args, env, from_tty);
+	  return;
+	}
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "could not find a target to create inferior");
+}
+
+
 static int
 nomemory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	  struct target_ops *t)
@@ -351,6 +369,18 @@ kill_or_be_killed (int from_tty)
   tcomplain ();
 }
 
+/* A default implementation for the to_get_ada_task_ptid target method.
+
+   This function builds the PTID by using both LWP and TID as part of
+   the PTID lwp and tid elements.  The pid used is the pid of the
+   inferior_ptid.  */
+
+ptid_t
+default_get_ada_task_ptid (long lwp, long tid)
+{
+  return ptid_build (ptid_get_pid (inferior_ptid), lwp, tid);
+}
+
 /* Go through the target stack from top to bottom, copying over zero
    entries in current_target, then filling in still empty entries.  In
    effect, we are doing class inheritance through the pushed target
@@ -382,10 +412,10 @@ update_current_target (void)
       INHERIT (to_doc, t);
       /* Do not inherit to_open.  */
       /* Do not inherit to_close.  */
-      INHERIT (to_attach, t);
+      /* Do not inherit to_attach.  */
       INHERIT (to_post_attach, t);
       INHERIT (to_attach_no_wait, t);
-      INHERIT (to_detach, t);
+      /* Do not inherit to_detach.  */
       /* Do not inherit to_disconnect.  */
       INHERIT (to_resume, t);
       INHERIT (to_wait, t);
@@ -416,7 +446,7 @@ update_current_target (void)
       INHERIT (to_kill, t);
       INHERIT (to_load, t);
       INHERIT (to_lookup_symbol, t);
-      INHERIT (to_create_inferior, t);
+      /* Do no inherit to_create_inferior.  */
       INHERIT (to_post_startup_inferior, t);
       INHERIT (to_acknowledge_created_inferior, t);
       INHERIT (to_insert_fork_catchpoint, t);
@@ -427,7 +457,7 @@ update_current_target (void)
       INHERIT (to_insert_exec_catchpoint, t);
       INHERIT (to_remove_exec_catchpoint, t);
       INHERIT (to_has_exited, t);
-      INHERIT (to_mourn_inferior, t);
+      /* Do no inherit to_mourn_inferiour.  */
       INHERIT (to_can_run, t);
       INHERIT (to_notice_signals, t);
       INHERIT (to_thread_alive, t);
@@ -455,8 +485,11 @@ update_current_target (void)
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_thread_local_address, t);
+      INHERIT (to_can_execute_reverse, t);
       /* Do not inherit to_read_description.  */
+      INHERIT (to_get_ada_task_ptid, t);
       /* Do not inherit to_search_memory.  */
+      INHERIT (to_supports_multi_process, t);
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
@@ -480,9 +513,6 @@ update_current_target (void)
 	    target_ignore);
   de_fault (to_post_attach,
 	    (void (*) (int))
-	    target_ignore);
-  de_fault (to_detach,
-	    (void (*) (char *, int))
 	    target_ignore);
   de_fault (to_resume,
 	    (void (*) (ptid_t, int, enum target_signal))
@@ -587,9 +617,6 @@ update_current_target (void)
   de_fault (to_has_exited,
 	    (int (*) (int, int, int *))
 	    return_zero);
-  de_fault (to_mourn_inferior,
-	    (void (*) (void))
-	    noprocess);
   de_fault (to_can_run,
 	    return_zero);
   de_fault (to_notice_signals,
@@ -621,6 +648,12 @@ update_current_target (void)
 	    (int (*) (int))
 	    return_one);
   current_target.to_read_description = NULL;
+  de_fault (to_get_ada_task_ptid,
+            (ptid_t (*) (long, long))
+            default_get_ada_task_ptid);
+  de_fault (to_supports_multi_process,
+	    (int (*) (void))
+	    return_zero);
 #undef de_fault
 
   /* Finally, position the target-stack beneath the squashed
@@ -745,6 +778,10 @@ unpush_target (struct target_ops *t)
 {
   struct target_ops **cur;
   struct target_ops *tmp;
+
+  if (t->to_stratum == dummy_stratum)
+    internal_error (__FILE__, __LINE__,
+		    "Attempt to unpush the dummy target");
 
   /* Look for the specified target.  Note that we assume that a target
      can only occur once in the target stack. */
@@ -1727,11 +1764,18 @@ target_pre_inferior (int from_tty)
      (gdb) attach 4712
      Cannot access memory at address 0xdeadbeef
   */
-  no_shared_libraries (NULL, from_tty);
 
-  invalidate_target_mem_regions ();
+  /* In some OSs, the shared library list is the same/global/shared
+     across inferiors.  If code is shared between processes, so are
+     memory regions and features.  */
+  if (!gdbarch_has_global_solist (target_gdbarch))
+    {
+      no_shared_libraries (NULL, from_tty);
 
-  target_clear_description ();
+      invalidate_target_mem_regions ();
+
+      target_clear_description ();
+    }
 }
 
 /* This is to be called by the open routine before it does
@@ -1765,11 +1809,27 @@ target_preopen (int from_tty)
 void
 target_detach (char *args, int from_tty)
 {
-  /* If we're in breakpoints-always-inserted mode, have to
-     remove them before detaching.  */
-  remove_breakpoints ();
+  struct target_ops* t;
+  
+  if (gdbarch_has_global_solist (target_gdbarch))
+    /* Don't remove global breakpoints here.  They're removed on
+       disconnection from the target.  */
+    ;
+  else
+    /* If we're in breakpoints-always-inserted mode, have to remove
+       them before detaching.  */
+    remove_breakpoints ();
 
-  (current_target.to_detach) (args, from_tty);
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_detach != NULL)
+	{
+	  t->to_detach (t, args, from_tty);
+	  return;
+	}
+    }
+
+  internal_error (__FILE__, __LINE__, "could not find a target to detach");
 }
 
 void
@@ -1777,8 +1837,9 @@ target_disconnect (char *args, int from_tty)
 {
   struct target_ops *t;
 
-  /* If we're in breakpoints-always-inserted mode, have to
-     remove them before disconnecting.  */  
+  /* If we're in breakpoints-always-inserted mode or if breakpoints
+     are global across processes, we have to remove them before
+     disconnecting.  */
   remove_breakpoints ();
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
@@ -1825,6 +1886,23 @@ target_follow_fork (int follow_child)
   /* Some target returned a fork event, but did not know how to follow it.  */
   internal_error (__FILE__, __LINE__,
 		  "could not find a target to follow fork");
+}
+
+void
+target_mourn_inferior (void)
+{
+  struct target_ops *t;
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_mourn_inferior != NULL)	
+	{
+	  t->to_mourn_inferior (t);
+	  return;
+	}
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "could not find a target to follow mourn inferiour");
 }
 
 /* Look for a target which can describe architectural features, starting
@@ -2072,23 +2150,24 @@ find_default_run_target (char *do_mesg)
 }
 
 void
-find_default_attach (char *args, int from_tty)
+find_default_attach (struct target_ops *ops, char *args, int from_tty)
 {
   struct target_ops *t;
 
   t = find_default_run_target ("attach");
-  (t->to_attach) (args, from_tty);
+  (t->to_attach) (t, args, from_tty);
   return;
 }
 
 void
-find_default_create_inferior (char *exec_file, char *allargs, char **env,
+find_default_create_inferior (struct target_ops *ops,
+			      char *exec_file, char *allargs, char **env,
 			      int from_tty)
 {
   struct target_ops *t;
 
   t = find_default_run_target ("run");
-  (t->to_create_inferior) (exec_file, allargs, env, from_tty);
+  (t->to_create_inferior) (t, exec_file, allargs, env, from_tty);
   return;
 }
 
@@ -2332,7 +2411,6 @@ find_target_beneath (struct target_ops *t)
 void
 generic_mourn_inferior (void)
 {
-  extern int show_breakpoint_hit_counts;
   ptid_t ptid;
 
   ptid = inferior_ptid;
@@ -2349,13 +2427,6 @@ generic_mourn_inferior (void)
 
   reopen_exec_file ();
   reinit_frame_cache ();
-
-  /* It is confusing to the user for ignore counts to stick around
-     from previous runs of the inferior.  So clear them.  */
-  /* However, it is more confusing for the ignore counts to disappear when
-     using hit counts.  So don't clear them if we're counting hits.  */
-  if (!show_breakpoint_hit_counts)
-    breakpoint_clear_ignore_counts ();
 
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
@@ -2424,6 +2495,8 @@ init_dummy_target (void)
   dummy_target.to_longname = "None";
   dummy_target.to_doc = "";
   dummy_target.to_attach = find_default_attach;
+  dummy_target.to_detach = 
+    (void (*)(struct target_ops *, char *, int))target_ignore;
   dummy_target.to_create_inferior = find_default_create_inferior;
   dummy_target.to_can_async_p = find_default_can_async_p;
   dummy_target.to_is_async_p = find_default_is_async_p;
@@ -2460,10 +2533,28 @@ target_close (struct target_ops *targ, int quitting)
     targ->to_close (quitting);
 }
 
-static void
-debug_to_attach (char *args, int from_tty)
+void
+target_attach (char *args, int from_tty)
 {
-  debug_target.to_attach (args, from_tty);
+  struct target_ops *t;
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_attach != NULL)	
+	{
+	  t->to_attach (t, args, from_tty);
+	  return;
+	}
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "could not find a target to attach");
+}
+
+
+static void
+debug_to_attach (struct target_ops *ops, char *args, int from_tty)
+{
+  debug_target.to_attach (&debug_target, args, from_tty);
 
   fprintf_unfiltered (gdb_stdlog, "target_attach (%s, %d)\n", args, from_tty);
 }
@@ -2478,9 +2569,9 @@ debug_to_post_attach (int pid)
 }
 
 static void
-debug_to_detach (char *args, int from_tty)
+debug_to_detach (struct target_ops *ops, char *args, int from_tty)
 {
-  debug_target.to_detach (args, from_tty);
+  debug_target.to_detach (&debug_target, args, from_tty);
 
   fprintf_unfiltered (gdb_stdlog, "target_detach (%s, %d)\n", args, from_tty);
 }
@@ -2883,10 +2974,11 @@ debug_to_lookup_symbol (char *name, CORE_ADDR *addrp)
 }
 
 static void
-debug_to_create_inferior (char *exec_file, char *args, char **env,
+debug_to_create_inferior (struct target_ops *ops,
+			  char *exec_file, char *args, char **env,
 			  int from_tty)
 {
-  debug_target.to_create_inferior (exec_file, args, env, from_tty);
+  debug_target.to_create_inferior (ops, exec_file, args, env, from_tty);
 
   fprintf_unfiltered (gdb_stdlog, "target_create_inferior (%s, %s, xxx, %d)\n",
 		      exec_file, args, from_tty);
@@ -2990,9 +3082,9 @@ debug_to_has_exited (int pid, int wait_status, int *exit_status)
 }
 
 static void
-debug_to_mourn_inferior (void)
+debug_to_mourn_inferior (struct target_ops *ops)
 {
-  debug_target.to_mourn_inferior ();
+  debug_target.to_mourn_inferior (&debug_target);
 
   fprintf_unfiltered (gdb_stdlog, "target_mourn_inferior ()\n");
 }

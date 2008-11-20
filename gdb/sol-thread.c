@@ -348,10 +348,10 @@ sol_thread_open (char *arg, int from_tty)
    for the trace-trap that results from attaching.  */
 
 static void
-sol_thread_attach (char *args, int from_tty)
+sol_thread_attach (struct target_ops *ops, char *args, int from_tty)
 {
   sol_thread_active = 0;
-  procfs_ops.to_attach (args, from_tty);
+  procfs_ops.to_attach (&procfs_ops, args, from_tty);
 
   /* Must get symbols from shared libraries before libthread_db can run!  */
   solib_add (NULL, from_tty, (struct target_ops *) 0, auto_solib_add);
@@ -379,12 +379,12 @@ sol_thread_attach (char *args, int from_tty)
    program was started via the normal ptrace (PTRACE_TRACEME).  */
 
 static void
-sol_thread_detach (char *args, int from_tty)
+sol_thread_detach (struct target_ops *ops, char *args, int from_tty)
 {
   sol_thread_active = 0;
   inferior_ptid = pid_to_ptid (PIDGET (main_ph.ptid));
   unpush_target (&sol_thread_ops);
-  procfs_ops.to_detach (args, from_tty);
+  procfs_ops.to_detach (&procfs_ops, args, from_tty);
 }
 
 /* Resume execution of process PTID.  If STEP is nozero, then just
@@ -753,11 +753,11 @@ sol_thread_notice_signals (ptid_t ptid)
 /* Fork an inferior process, and start debugging it with /proc.  */
 
 static void
-sol_thread_create_inferior (char *exec_file, char *allargs, char **env,
-			    int from_tty)
+sol_thread_create_inferior (struct target_ops *ops, char *exec_file,
+			    char *allargs, char **env, int from_tty)
 {
   sol_thread_active = 0;
-  procfs_ops.to_create_inferior (exec_file, allargs, env, from_tty);
+  procfs_ops.to_create_inferior (&procfs_ops, exec_file, allargs, env, from_tty);
 
   if (sol_thread_active && !ptid_equal (inferior_ptid, null_ptid))
     {
@@ -822,11 +822,11 @@ sol_thread_new_objfile (struct objfile *objfile)
 /* Clean up after the inferior dies.  */
 
 static void
-sol_thread_mourn_inferior (void)
+sol_thread_mourn_inferior (struct target_ops *ops)
 {
   sol_thread_active = 0;
   unpush_target (&sol_thread_ops);
-  procfs_ops.to_mourn_inferior ();
+  procfs_ops.to_mourn_inferior (&procfs_ops);
 }
 
 /* Mark our target-struct as eligible for stray "run" and "attach"
@@ -1411,10 +1411,10 @@ sol_core_close (int quitting)
 }
 
 static void
-sol_core_detach (char *args, int from_tty)
+sol_core_detach (struct target_ops *ops, char *args, int from_tty)
 {
   unpush_target (&core_ops);
-  orig_core_ops.to_detach (args, from_tty);
+  orig_core_ops.to_detach (&orig_core_ops, args, from_tty);
 }
 
 static void

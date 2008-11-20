@@ -560,7 +560,7 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 
       fprintf_filtered (stream, "[");
       if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
-	&& TYPE_ARRAY_UPPER_BOUND_TYPE (type) != BOUND_CANNOT_BE_DETERMINED)
+	&& !TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
 	fprintf_filtered (stream, "%d",
 			  (TYPE_LENGTH (type)
 			   / TYPE_LENGTH (TYPE_TARGET_TYPE (type))));
@@ -890,14 +890,12 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		}
 
 	      print_spaces_filtered (level + 4, stream);
-	      if (TYPE_FIELD_STATIC (type, i))
-		{
-		  fprintf_filtered (stream, "static ");
-		}
+	      if (field_is_static (&TYPE_FIELD (type, i)))
+		fprintf_filtered (stream, "static ");
 	      c_print_type (TYPE_FIELD_TYPE (type, i),
 			    TYPE_FIELD_NAME (type, i),
 			    stream, show - 1, level + 4);
-	      if (!TYPE_FIELD_STATIC (type, i)
+	      if (!field_is_static (&TYPE_FIELD (type, i))
 		  && TYPE_FIELD_PACKED (type, i))
 		{
 		  /* It is a bitfield.  This code does not attempt

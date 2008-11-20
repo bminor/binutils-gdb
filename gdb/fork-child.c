@@ -118,7 +118,7 @@ escape_bang_in_quoted_argument (const char *shell_file)
 /* This function is NOT reentrant.  Some of the variables have been
    made static to ensure that they survive the vfork call.  */
 
-void
+int
 fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	       void (*traceme_fun) (void), void (*init_trace_fun) (int),
 	       void (*pre_trace_fun) (void), char *shell_file_arg)
@@ -408,11 +408,13 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   /* Now that we have a child process, make it our target, and
      initialize anything target-vector-specific that needs
      initializing.  */
-  (*init_trace_fun) (pid);
+  if (init_trace_fun)
+    (*init_trace_fun) (pid);
 
   /* We are now in the child process of interest, having exec'd the
      correct program, and are poised at the first instruction of the
      new program.  */
+  return pid;
 }
 
 /* Accept NTRAPS traps from the inferior.  */
@@ -434,21 +436,18 @@ startup_inferior (int ntraps)
     {
       int resume_signal = TARGET_SIGNAL_0;
       ptid_t resume_ptid;
+      ptid_t event_ptid;
 
       struct target_waitstatus ws;
       memset (&ws, 0, sizeof (ws));
-      resume_ptid = target_wait (pid_to_ptid (-1), &ws);
+      event_ptid = target_wait (pid_to_ptid (-1), &ws);
 
-      /* Mark all threads non-executing.  */
-      set_executing (pid_to_ptid (-1), 0);
-
-      /* In all-stop mode, resume all threads.  */
-      if (!non_stop)
-	resume_ptid = pid_to_ptid (-1);
+      if (ws.kind == TARGET_WAITKIND_IGNORE)
+	/* The inferior didn't really stop, keep waiting.  */
+	continue;
 
       switch (ws.kind)
 	{
-	  case TARGET_WAITKIND_IGNORE:
 	  case TARGET_WAITKIND_SPURIOUS:
 	  case TARGET_WAITKIND_LOADED:
 	  case TARGET_WAITKIND_FORKED:
@@ -456,6 +455,7 @@ startup_inferior (int ntraps)
 	  case TARGET_WAITKIND_SYSCALL_ENTRY:
 	  case TARGET_WAITKIND_SYSCALL_RETURN:
 	    /* Ignore gracefully during startup of the inferior.  */
+	    switch_to_thread (event_ptid);
 	    break;
 
 	  case TARGET_WAITKIND_SIGNALLED:
@@ -480,12 +480,20 @@ startup_inferior (int ntraps)
 	    /* Handle EXEC signals as if they were SIGTRAP signals.  */
 	    xfree (ws.value.execd_pathname);
 	    resume_signal = TARGET_SIGNAL_TRAP;
+	    switch_to_thread (event_ptid);
 	    break;
 
 	  case TARGET_WAITKIND_STOPPED:
 	    resume_signal = ws.value.sig;
+	    switch_to_thread (event_ptid);
 	    break;
 	}
+
+      /* In all-stop mode, resume all threads.  */
+      if (!non_stop)
+	resume_ptid = pid_to_ptid (-1);
+      else
+	resume_ptid = event_ptid;
 
       if (resume_signal != TARGET_SIGNAL_TRAP)
 	{
@@ -519,6 +527,11 @@ startup_inferior (int ntraps)
 	  target_resume (resume_ptid, 0, TARGET_SIGNAL_0);
 	}
     }
+
+  /* Mark all threads non-executing.  */
+  set_executing (pid_to_ptid (-1), 0);
+
+  stop_pc = read_pc ();
 }
 
 /* Implement the "unset exec-wrapper" command.  */

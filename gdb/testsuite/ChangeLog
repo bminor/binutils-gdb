@@ -1,3 +1,165 @@
+2008-11-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.arch/ppc-dfp.exp: New file.
+	* gdb.arch/ppc-dfp.c: New file.
+
+2008-11-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.base/sepsymtab.exp: Update for new 'info sym' format.
+	
+2008-11-17  Doug Evans  <dje@google.com>
+
+	* gdb.mi/mi-syn-frame.exp: Update expected output.
+	* gdb.mi/mi2-syn-frame.exp: Update expected output.
+
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-pthreads.exp (check_mi_thread_command_set): Make sure
+        "thread N" results in =thread-selected.
+        * lib/mi-support (mi_run_cmd, mi_expect_stop)
+        (mi_send_resuming_command_raw): Be prepared for
+        =thread-selected.
+	
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * gdb.mi/mi-nonstop.exp: Expect 'group-id' field.
+        * lib/mi-support.exp: Likewise.
+
+2008-11-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/help.exp: Remove the "catch load" and "catch unload"
+	commands from the expected output for "help catch".
+
+2008-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/int_deref.exp: New testcase.
+
+2008-11-14  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/gdb2549.exp: New file.
+
+2008-11-11  Doug Evans  <dje@google.com>
+
+	* gdb.base/callexit.exp: New file.
+	* gdb.base/callexit.c: New file.
+
+2008-11-10  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (GDBFLAGS): Move -nx ...
+	(INTERNAL_GDBFLAGS): ... to here.  Move -nw to here as well.
+	(default_gdb_version): Add $INTERNAL_GDBFLAGS to gdb invocations.
+	(default_gdb_start,default_gdb_exit): Ditto.
+	* lib/mi-support.exp (default_mi_gdb_start): Ditto.
+	(mi_uncatched_gdb_exit): Add $INTERNAL_GDBFLAGS to log message.
+	* gdb.base/corefile.exp: Add $INTERNAL_GDBFLAGS to gdb invocations.
+	* gdb.base/dbx.exp (dbx_gdb_start): Ditto.
+	* gdb.base/args.exp (GDBFLAGS): Don't overwrite, append.
+	* gdb.base/remotetimeout.exp (GDBFLAGS): Ditto.
+
+2008-11-03  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.base/hashline2.exp: Fix typo.
+	* gdb.base/hashline3.exp: Likewise.
+
+2008-10-30  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/pointers.exp: Add test.
+	* gdb.base/pointers.c (k, S): New typedefs.
+	(instance): New global.
+
+2008-10-30  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.base/args.exp: Add tests for newlines.
+
+2008-10-30  Joel Brobecker  <brobecker@adacore.com>
+
+	gdb.base/foll-exec.exp: Update the expected output of a couple
+	of "info breakpoints" tests.
+
+2008-10-28  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/exprs.exp (test_expr): Add enum formatting tests.
+
+2008-10-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.python/python-value.exp (test_value_in_inferior): Don't use
+	gdb_start_cmd.
+	Use runto_main before any test that requires execution.
+
+2008-10-23  Pedro Alves  <pedro@codesourcery.com>
+
+	* lib/mi-support.exp (mi_expect_interrupt): Expect signal 0
+	instead of SIGINT.
+
+2008-10-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/completion.exp: Update expected output following
+	the addition of the "info tasks" command.
+
+2008-10-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/exprs.exp (test_expr): Add test for string
+	concatenation.
+
+2008-10-19  Pedro Alves  <pedro@codesourcery.com>
+
+	* configure.ac: Output gdb.python/Makefile.
+	* configure: Regenerate.
+	* gdb.python/Makefile.in: New.
+
+2008-10-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/foll-fork.exp: Adjust the expected output to match
+	the new description for fork/vfork catchpoints in the "info
+	breakpoints" output.
+
+2008-10-16  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* Makefile.in: Add gdb.python to ALL_SUBDIRS.
+
+2008-10-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.python/python-value.c: New file.
+	* gdb.python/python-value.exp: New file.
+
+2008-10-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.mi/mi-nsmoribund.exp, gdb.mi/nsmoribund.c: New test.
+
+2008-10-15  Denis Pilat  <denis.pilat@st.com>
+
+	* gdb.cp/mb-ctor.exp: Fix a typo.
+
+2008-10-09  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/macscp.exp: Use 'vafunc' and 'fixedarg' rather than
+	'fprintf' and 'stderr'.
+
+2008-10-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/ref_tick_size.exp: New testcase.
+
+2008-10-06  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw2-cu-size.exp: New file.
+	* gdb.dwarf2/dw2-cu-size.S: New file.
+
+	* gdb.dwarf2/dw2-intercu.S (.Ltype_int_in_cu2): Renamed from
+	.Ltype_int for clarity.
+
+2008-10-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/2384:
+	* gdb.cp/gdb2384.exp: Extended to test more cases.
+	* gdb.cp/gdb2384.cc: Likewise.
+	* gdb.cp/gdb2384-base.h: Likewise.
+	* gdb.cp/gdb2384-base.cc: Likewise.
+	
+2008-10-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/maint.exp (maint print type): Remove printing
+	UPPER_BOUND_TYPE and LOWER_BOUND_TYPE.
+
 2008-09-30  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/macscp.exp: Add completion tests.

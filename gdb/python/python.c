@@ -52,6 +52,8 @@ static PyObject *gdbpy_flush (PyObject *, PyObject *);
 
 static PyMethodDef GdbMethods[] =
 {
+  { "get_value_from_history", gdbpy_get_value_from_history, METH_VARARGS,
+    "Get a value from history" },
   { "execute", execute_gdb_command, METH_VARARGS,
     "Execute a gdb command" },
   { "get_parameter", get_parameter, METH_VARARGS,
@@ -397,6 +399,8 @@ Enables or disables printing of Python stack traces."),
   PyModule_AddStringConstant (gdb_module, "VERSION", (char*) version);
   PyModule_AddStringConstant (gdb_module, "HOST_CONFIG", (char*) host_name);
   PyModule_AddStringConstant (gdb_module, "TARGET_CONFIG", (char*) target_name);
+
+  gdbpy_initialize_values ();
 
   PyRun_SimpleString ("import gdb");
 

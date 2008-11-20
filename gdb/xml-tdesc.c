@@ -421,14 +421,6 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
 #endif /* HAVE_LIBEXPAT */
 
 
-/* Close FILE.  */
-
-static void
-do_cleanup_fclose (void *file)
-{
-  fclose (file);
-}
-
 /* Open FILENAME, read all its text into memory, close it, and return
    the text.  If something goes wrong, return NULL and warn.  */
 
@@ -455,7 +447,7 @@ fetch_xml_from_file (const char *filename, void *baton)
   if (file == NULL)
     return NULL;
 
-  back_to = make_cleanup (do_cleanup_fclose, file);
+  back_to = make_cleanup_fclose (file);
 
   /* Read in the whole file, one chunk at a time.  */
   len = 4096;

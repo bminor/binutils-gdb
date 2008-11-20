@@ -34,7 +34,7 @@ if [target_info exists noargs] {
 # Test that -l is processed correctly.
 #
 set old_gdbflags $GDBFLAGS
-set GDBFLAGS "-l 42"
+set GDBFLAGS "$GDBFLAGS -l 42"
 gdb_exit
 gdb_start
 gdb_test "show remotetimeout" \

@@ -68,7 +68,7 @@ gdb_test "help continue" "Continue program being debugged.*" "help continue"
 # test help call
 gdb_test "help call" "Call a function.*" "help call"
 # test help catch
-gdb_test "help catch" "Set catchpoints to catch events.*List of catch subcommands:.*catch assert -- Catch failed Ada assertions.*catch catch -- Catch an exception.*catch exception -- Catch Ada exceptions.*catch exec -- Catch calls to exec.*catch fork -- Catch calls to fork.*catch load -- Catch library loads.*catch throw -- Catch an exception.*catch unload -- Catch library unloads.*catch vfork -- Catch calls to vfork.*Type .help catch. followed by catch subcommand name for full documentation.*Type .apropos word. to search for commands related to .word..*Command name abbreviations are allowed if unambiguous.*" "help catch"
+gdb_test "help catch" "Set catchpoints to catch events.*List of catch subcommands:.*catch assert -- Catch failed Ada assertions.*catch catch -- Catch an exception.*catch exception -- Catch Ada exceptions.*catch exec -- Catch calls to exec.*catch fork -- Catch calls to fork.*catch vfork -- Catch calls to vfork.*Type .help catch. followed by catch subcommand name for full documentation.*Type .apropos word. to search for commands related to .word..*Command name abbreviations are allowed if unambiguous.*" "help catch"
 # test help cd
 gdb_test "help cd" "Set working directory to DIR for debugger and program being debugged\.\[\r\n\]+The change does not take effect for the program being debugged\[\r\n\]+until the next time it is started\." "help cd"
 # test help clear

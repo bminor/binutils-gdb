@@ -316,7 +316,7 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class class[2])
 	  enum amd64_reg_class subclass[2];
 
 	  /* Ignore static fields.  */
-	  if (TYPE_FIELD_STATIC (type, i))
+	  if (field_is_static (&TYPE_FIELD (type, i)))
 	    continue;
 
 	  gdb_assert (pos == 0 || pos == 1);

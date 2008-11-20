@@ -22,6 +22,21 @@ AC_DISABLE_SHARED
 AC_PROG_CC
 AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
+
+case "${target}" in
+  sparc-*-solaris*)
+    # On native 32bit sparc-solaris, large-file and procfs support are
+    # mutually exclusive; and without procfs support, the elf module
+    # cannot provide certain routines such as elfcore_write_prpsinfo
+    # or elfcore_write_prstatus.  So unless the user explicitly requested
+    # large-file support through the --enable-largefile switch, disable
+    # large-file support in favor of procfs support.
+    if test "${target}" = "${host}" -a "$enable_largefile" != 'yes'; then
+      enable_largefile="no"
+    fi
+    ;;
+esac
+
 AC_SYS_LARGEFILE
 
 LT_INIT
@@ -120,7 +135,7 @@ bfd_default_target_size=32
 
 # host stuff:
 
-ALL_LINGUAS="fr tr ja es sv da zh_CN ro rw vi fi"
+ALL_LINGUAS="fr tr ja es sv da zh_CN ro rw vi fi id"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 
@@ -179,7 +194,7 @@ GCC_HEADER_STDINT(bfd_stdint.h)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
 ACX_HEADER_STRING
-AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid)
+AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid fileno)
 AC_CHECK_FUNCS(strtoull)
 
 AC_CHECK_DECLS(basename)

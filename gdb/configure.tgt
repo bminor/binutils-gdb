@@ -297,7 +297,7 @@ mips*-sgi-irix6*)
 	;;
 mips*-*-linux*)
 	# Target: Linux/MIPS
-	gdb_target_obs="mips-tdep.o mips-linux-tdep.o \
+	gdb_target_obs="mips-tdep.o mips-linux-tdep.o glibc-tdep.o \
 			corelow.o solib.o solib-svr4.o symfile-mem.o"
 	gdb_sim=../sim/mips/libsim.a
 	build_gdbserver=yes
@@ -411,6 +411,7 @@ sparc64-*-linux*)
 	gdb_target_obs="sparc64-tdep.o sparc64-sol2-tdep.o sol2-tdep.o \
 			sparc64-linux-tdep.o sparc-tdep.o sparc-sol2-tdep.o \
 			sparc-linux-tdep.o solib.o solib-svr4.o"
+	build_gdbserver=yes
 	;;
 sparc*-*-freebsd* | sparc*-*-kfreebsd*-gnu)
 	# Target: FreeBSD/sparc64

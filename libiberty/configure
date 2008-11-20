@@ -3346,7 +3346,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 ac_c_preproc_warn_flag=yes
 
-
 ac_libiberty_warn_cflags=
 save_CFLAGS="$CFLAGS"
 for option in -W -Wall -Wwrite-strings -Wc++-compat \

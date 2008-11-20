@@ -58,7 +58,7 @@ func_cu1:
 	.byte		1			/* DW_AT_decl_file */
 	.byte		2			/* DW_AT_decl_line */
 	.ascii		"func_cu1\0"		/* DW_AT_name */
-	.4byte		.Ltype_int		/* DW_AT_type */
+	.4byte		.Ltype_int_in_cu2	/* DW_AT_type */
 	.4byte		.Lbegin_func_cu1	/* DW_AT_low_pc */
 	.4byte		.Lend_func_cu1		/* DW_AT_high_pc */
 	.byte		1			/* DW_AT_frame_base: length */
@@ -83,7 +83,7 @@ func_cu1:
 	.ascii	"GNU C 3.3.3\0"			/* DW_AT_producer */
 	.byte	1				/* DW_AT_language (C) */
 
-.Ltype_int:
+.Ltype_int_in_cu2:
 	.uleb128	2			/* Abbrev: DW_TAG_base_type */
 	.ascii		"int\0"			/* DW_AT_name */
 	.byte		4			/* DW_AT_byte_size */

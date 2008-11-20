@@ -217,14 +217,11 @@ proc do_exec_tests {} {
    # Verify that the catchpoint is mentioned in an "info breakpoints",
    # and further that the catchpoint mentions no program name.
    #
-   send_gdb "info breakpoints\n"
-   gdb_expect {
-     -re ".*catch exec.*keep y.*$gdb_prompt $"\
-                     {pass "info shows catchpoint without exec pathname"}
-     -re ".*catch exec.*program \"\".*$gdb_prompt $"\
-                     {fail "info shows catchpoint without exec pathname"}
-     -re "$gdb_prompt $" {fail "info shows catchpoint without exec pathname"}
-     timeout         {fail "(timeout) info shows catchpoint without exec pathname"}
+   set msg "info shows catchpoint without exec pathname"
+   gdb_test_multiple "info breakpoints" $msg {
+       -re ".*catchpoint.*keep y.*exec\[\n\r\]+$gdb_prompt $" {
+           pass $msg
+       }
    }
 
    # DTS CLLbs16760
@@ -248,12 +245,11 @@ proc do_exec_tests {} {
    # and further that the catchpoint managed to capture the exec'd
    # program's name.
    #
-   send_gdb "info breakpoints\n"
-   gdb_expect {
-     -re ".*catch exec .*program \".*${testfile2}\".*$gdb_prompt $"\
-                     {pass "info shows catchpoint exec pathname"}
-     -re "$gdb_prompt $" {fail "info shows catchpoint exec pathname"}
-     timeout         {fail "(timeout) info shows catchpoint exec pathname"}
+   set msg "info shows catchpoint exec pathname"
+   gdb_test_multiple "info breakpoints" $msg {
+       -re ".*catchpoint.*keep y.*exec, program \".*${testfile2}\".*$gdb_prompt $" {
+           pass $msg
+       }
    }
 
    # Verify that we can continue from the catchpoint, and land in the

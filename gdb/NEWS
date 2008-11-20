@@ -57,6 +57,8 @@ with the --compress-debug-sections=zlib flag.
 
 * 64-bit core files are now supported on AIX.
 
+* Thread switching is now supported on Tru64.
+
 * Watchpoints can now be set on unreadable memory locations, e.g. addresses
 which will be allocated using malloc later in program execution.
 
@@ -83,10 +85,27 @@ are treated as the standard definitions, regardless of context.
   - gdbserver uses the new noack protocol mode for TCP connections to
   reduce communications latency, if also supported and enabled in GDB.
 
+  - Support for the sparc64-linux-gnu target is now included in
+  gdbserver.
+
 * Python scripting
 
   GDB now has support for scripting using Python.  Whether this is
   available is determined at configure time.
+
+* Ada tasking support
+
+  Ada tasks can now be inspected in GDB. The following commands have
+  been introduced:
+
+    info tasks
+      Print the list of Ada tasks.
+    info task N
+      Print detailed information about task number N.
+    task
+      Print the task number of the current task.
+    task N
+      Switch the context of debugging to task number N.
 
 * New commands
 
@@ -156,6 +175,12 @@ macro undef
 * New targets
 
 x86 DICOS			i[34567]86-*-dicos*
+
+* Removed commands
+
+catch load
+catch unload
+  These commands were actually not implemented on any target.
 
 *** Changes in GDB 6.8
 

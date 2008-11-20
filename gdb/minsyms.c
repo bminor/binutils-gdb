@@ -531,7 +531,7 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 		     triggered by a special mst_abs_or_lib or some
 		     such.  */
 
-		  if (msymbol[hi].type == mst_abs)
+		  if (MSYMBOL_TYPE (&msymbol[hi]) == mst_abs)
 		    {
 		      hi--;
 		      continue;
@@ -725,7 +725,7 @@ prim_record_minimal_symbol (const char *name, CORE_ADDR address,
     }
 
   prim_record_minimal_symbol_and_info (name, address, ms_type,
-				       NULL, section, NULL, objfile);
+				       section, NULL, objfile);
 }
 
 /* Record a minimal symbol in the msym bunches.  Returns the symbol
@@ -734,7 +734,7 @@ prim_record_minimal_symbol (const char *name, CORE_ADDR address,
 struct minimal_symbol *
 prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
 				     enum minimal_symbol_type ms_type,
-				     char *info, int section,
+				     int section,
 				     asection *bfd_section,
 				     struct objfile *objfile)
 {
@@ -788,8 +788,8 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
       }
 
   MSYMBOL_TYPE (msymbol) = ms_type;
-  /* FIXME:  This info, if it remains, needs its own field.  */
-  MSYMBOL_INFO (msymbol) = info;	/* FIXME! */
+  MSYMBOL_TARGET_FLAG_1 (msymbol) = 0;
+  MSYMBOL_TARGET_FLAG_2 (msymbol) = 0;
   MSYMBOL_SIZE (msymbol) = 0;
 
   /* The hash pointers must be cleared! If they're not,
@@ -1061,7 +1061,8 @@ install_minimal_symbols (struct objfile *objfile)
 
       SYMBOL_LINKAGE_NAME (&msymbols[mcount]) = NULL;
       SYMBOL_VALUE_ADDRESS (&msymbols[mcount]) = 0;
-      MSYMBOL_INFO (&msymbols[mcount]) = NULL;
+      MSYMBOL_TARGET_FLAG_1 (&msymbols[mcount]) = 0;
+      MSYMBOL_TARGET_FLAG_2 (&msymbols[mcount]) = 0;
       MSYMBOL_SIZE (&msymbols[mcount]) = 0;
       MSYMBOL_TYPE (&msymbols[mcount]) = mst_unknown;
       SYMBOL_INIT_LANGUAGE_SPECIFIC (&msymbols[mcount], language_unknown);

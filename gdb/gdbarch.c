@@ -240,6 +240,7 @@ struct gdbarch
   gdbarch_target_signal_from_host_ftype *target_signal_from_host;
   gdbarch_target_signal_to_host_ftype *target_signal_to_host;
   gdbarch_record_special_symbol_ftype *record_special_symbol;
+  int has_global_solist;
 };
 
 
@@ -371,6 +372,7 @@ struct gdbarch startup_gdbarch =
   default_target_signal_from_host,  /* target_signal_from_host */
   default_target_signal_to_host,  /* target_signal_to_host */
   0,  /* record_special_symbol */
+  0,  /* has_global_solist */
   /* startup_gdbarch() */
 };
 
@@ -623,6 +625,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of target_signal_from_host, invalid_p == 0 */
   /* Skip verify of target_signal_to_host, invalid_p == 0 */
   /* Skip verify of record_special_symbol, has predicate */
+  /* Skip verify of has_global_solist, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -831,6 +834,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: get_longjmp_target = <0x%lx>\n",
                       (long) gdbarch->get_longjmp_target);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: has_global_solist = %s\n",
+                      plongest (gdbarch->has_global_solist));
   fprintf_unfiltered (file,
                       "gdbarch_dump: have_nonsteppable_watchpoint = %s\n",
                       plongest (gdbarch->have_nonsteppable_watchpoint));
@@ -3235,6 +3241,23 @@ set_gdbarch_record_special_symbol (struct gdbarch *gdbarch,
                                    gdbarch_record_special_symbol_ftype record_special_symbol)
 {
   gdbarch->record_special_symbol = record_special_symbol;
+}
+
+int
+gdbarch_has_global_solist (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of has_global_solist, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_has_global_solist called\n");
+  return gdbarch->has_global_solist;
+}
+
+void
+set_gdbarch_has_global_solist (struct gdbarch *gdbarch,
+                               int has_global_solist)
+{
+  gdbarch->has_global_solist = has_global_solist;
 }
 
 

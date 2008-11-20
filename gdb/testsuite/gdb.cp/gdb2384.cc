@@ -18,14 +18,25 @@
 
 #include "gdb2384-base.h"
 
-class derived : public base
+class derived1 : public base
 {
  public:
-  derived (int);
+  derived1 (int);
 };
 
-derived::derived (int _x)
+derived1::derived1 (int _x)
   : base (_x)
+{
+}
+
+class derived2 : public derived
+{
+ public:
+  derived2 (int);
+};
+
+derived2::derived2 (int _x)
+  : derived (_x)
 {
 }
 
@@ -34,7 +45,9 @@ int g;
 int
 main ()
 {
-  derived d (42);
-  g = d.meth (); // set breakpoint here
+  derived1 d1 (42);
+  derived2 d2 (24);
+  g = d1.meth (); // set breakpoint here
+  g = d2.meth (); // set breakpoint here (second)
   return 0;
 }

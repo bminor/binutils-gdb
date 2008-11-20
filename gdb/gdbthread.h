@@ -168,6 +168,9 @@ struct thread_info
      at.  */
   bpstat stop_bpstat;
 
+  /* True if this thread has been explicitly requested to stop.  */
+  int stop_requested;
+
   /* Private data used by the target vector implementation.  */
   struct private_thread_info *private;
 };
@@ -239,6 +242,13 @@ extern void switch_to_thread (ptid_t ptid);
    If PIDGET (PTID) is -1, marks all threads.  */
 extern void set_running (ptid_t ptid, int running);
 
+/* Marks or clears thread(s) PTID as having been requested to stop.
+   If PTID is MINUS_ONE_PTID, applies to all threads.  If
+   ptid_is_pid(PTID) is true, applies to all threads of the process
+   pointed at by PTID.  If STOP, then the THREAD_STOP_REQUESTED
+   observer is called with PTID as argument.  */
+extern void set_stop_requested (ptid_t ptid, int stop);
+
 /* NOTE: Since the thread state is not a boolean, most times, you do
    not want to check it with negation.  If you really want to check if
    the thread is stopped,
@@ -285,7 +295,8 @@ extern struct cmd_list_element *thread_cmd_list;
    `set print thread-events'.  */
 extern int print_thread_events;
 
-extern void print_thread_info (struct ui_out *uiout, int thread);
+extern void print_thread_info (struct ui_out *uiout, int thread,
+			       int pid);
 
 extern struct cleanup *make_cleanup_restore_current_thread (void);
 

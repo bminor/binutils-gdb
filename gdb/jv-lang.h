@@ -41,11 +41,11 @@ extern struct type *java_double_type;
 extern struct type *java_void_type;
 
 extern int java_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
-			   struct ui_file *, int, int, int,
-			   enum val_prettyprint);
+			   struct ui_file *, int,
+			   const struct value_print_options *);
 
-extern int java_value_print (struct value *, struct ui_file *, int,
-			     enum val_prettyprint);
+extern int java_value_print (struct value *, struct ui_file *,
+			     const struct value_print_options *);
 
 extern struct value *java_class_from_object (struct value *);
 

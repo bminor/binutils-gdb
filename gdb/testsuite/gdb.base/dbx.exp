@@ -48,11 +48,11 @@ if  { [gdb_compile "${binfile1}.o ${binfile2}.o" ${binfile} executable {debug}] 
 proc dbx_gdb_start { } {
     global verbose
     global GDB
-    global GDBFLAGS
+    global INTERNAL_GDBFLAGS GDBFLAGS
     global prompt
     global spawn_id
     global timeout
-    verbose "Spawning $GDB -nw $GDBFLAGS"
+    verbose "Spawning $GDB -dbx $INTERNAL_GDBFLAGS $GDBFLAGS"
 
     if { [which $GDB] == 0 } then {
         perror "$GDB does not exist."
@@ -61,7 +61,7 @@ proc dbx_gdb_start { } {
 
     set oldtimeout $timeout
     set timeout [expr "$timeout + 60"]
-    eval "spawn $GDB -nw -dbx $GDBFLAGS"
+    eval "spawn $GDB -dbx $INTERNAL_GDBFLAGS $GDBFLAGS"
     gdb_expect {
         -re ".*\r\n$gdb_prompt $" {
             verbose "GDB initialized."

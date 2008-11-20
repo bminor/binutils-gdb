@@ -58,10 +58,6 @@ extern struct cleanup *make_cleanup_restore_inferior_status (struct inferior_sta
 
 extern void discard_inferior_status (struct inferior_status *);
 
-extern void write_inferior_status_register (struct inferior_status
-					    *inf_status, int regno,
-					    LONGEST val);
-
 /* The -1 ptid, often used to indicate either an error condition
    or a "don't care" condition, i.e, "run all threads."  */
 extern ptid_t minus_one_ptid;
@@ -88,6 +84,9 @@ long ptid_get_tid (ptid_t ptid);
 
 /* Compare two ptids to see if they are equal */
 extern int ptid_equal (ptid_t p1, ptid_t p2);
+
+/* Return true if PTID represents a process id.  */
+extern int ptid_is_pid (ptid_t ptid);
 
 /* Save value of inferior_ptid so that it may be restored by
    a later call to do_cleanups().  Returns the struct cleanup
@@ -116,14 +115,6 @@ extern ptid_t inferior_ptid;
    to implement the 'run', 'continue' etc commands, which will not
    redisplay the prompt until the execution is actually over. */
 extern int sync_execution;
-
-/* Some targets (stupidly) report more than one exec event per actual
-   call to an event() system call.  If only the last such exec event
-   need actually be noticed and responded to by the debugger (i.e.,
-   be reported to the user), then this is the number of "leading"
-   exec events which should be ignored.
- */
-extern int inferior_ignoring_leading_exec_events;
 
 /* Inferior environment. */
 
@@ -206,9 +197,9 @@ extern ptid_t procfs_first_available (void);
 
 /* From fork-child.c */
 
-extern void fork_inferior (char *, char *, char **,
-			   void (*)(void),
-			   void (*)(int), void (*)(void), char *);
+extern int fork_inferior (char *, char *, char **,
+			  void (*)(void),
+			  void (*)(int), void (*)(void), char *);
 
 
 extern void startup_inferior (int);
@@ -278,6 +269,8 @@ extern void interrupt_target_command (char *args, int from_tty);
 
 extern void interrupt_target_1 (int all_threads);
 
+extern void detach_command (char *, int);
+
 /* Address at which inferior stopped.  */
 
 extern CORE_ADDR stop_pc;
@@ -339,13 +332,18 @@ enum stop_kind
     STOP_QUIETLY_NO_SIGSTOP
   };
 
-/* Nonzero if proceed is being used for a "finish" command or a similar
-   situation when stop_registers should be saved.  */
+/* Reverse execution.  */
+enum exec_direction_kind
+  {
+    EXEC_FORWARD,
+    EXEC_REVERSE,
+    EXEC_ERROR
+  };
 
-extern int proceed_to_finish;
+extern enum exec_direction_kind execution_direction;
 
-/* Save register contents here when about to pop a stack dummy frame,
-   if-and-only-if proceed_to_finish is set.
+/* Save register contents here when executing a "finish" command or are
+   about to pop a stack dummy frame, if-and-only-if proceed_to_finish is set.
    Thus this contains the return value from the called function (assuming
    values are returned in a register).  */
 
@@ -422,6 +420,11 @@ struct inferior
   /* Nonzero if this child process was attached rather than
      forked.  */
   int attach_flag;
+
+  /* What is left to do for an execution command after any thread of
+     this inferior stops.  For continuations associated with a
+     specific thread, see `struct thread_info'.  */
+  struct continuation *continuations;
 
   /* Private data used by the target vector implementation.  */
   struct private_inferior *private;

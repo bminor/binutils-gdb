@@ -84,7 +84,7 @@ static void gdbsim_open (char *args, int from_tty);
 
 static void gdbsim_close (int quitting);
 
-static void gdbsim_detach (char *args, int from_tty);
+static void gdbsim_detach (struct target_ops *ops, char *args, int from_tty);
 
 static void gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal);
 
@@ -94,7 +94,7 @@ static void gdbsim_prepare_to_store (struct regcache *regcache);
 
 static void gdbsim_files_info (struct target_ops *target);
 
-static void gdbsim_mourn_inferior (void);
+static void gdbsim_mourn_inferior (struct target_ops *target);
 
 static void gdbsim_stop (ptid_t ptid);
 
@@ -406,12 +406,13 @@ gdbsim_kill (void)
 static void
 gdbsim_load (char *args, int fromtty)
 {
-  char **argv = buildargv (args);
+  char **argv;
   char *prog;
 
-  if (argv == NULL)
-    nomem (0);
+  if (args == NULL)
+      error_no_arg (_("program to load"));
 
+  argv = gdb_buildargv (args);
   make_cleanup_freeargv (argv);
 
   prog = tilde_expand (argv[0]);
@@ -444,7 +445,8 @@ gdbsim_load (char *args, int fromtty)
    user types "run" after having attached.  */
 
 static void
-gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
+gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
+			char **env, int from_tty)
 {
   int len;
   char *arg_buf, **argv;
@@ -472,7 +474,7 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
       strcat (arg_buf, exec_file);
       strcat (arg_buf, " ");
       strcat (arg_buf, args);
-      argv = buildargv (arg_buf);
+      argv = gdb_buildargv (arg_buf);
       make_cleanup_freeargv (argv);
     }
   else
@@ -546,9 +548,7 @@ gdbsim_open (char *args, int from_tty)
       strcat (arg_buf, " ");	/* 1 */
       strcat (arg_buf, args);
     }
-  argv = buildargv (arg_buf);
-  if (argv == NULL)
-    error (_("Insufficient memory available to allocate simulator arg list."));
+  argv = gdb_buildargv (arg_buf);
   make_cleanup_freeargv (argv);
 
   init_callbacks ();
@@ -605,7 +605,7 @@ gdbsim_close (int quitting)
    Use this when you want to detach and do something else with your gdb.  */
 
 static void
-gdbsim_detach (char *args, int from_tty)
+gdbsim_detach (struct target_ops *ops, char *args, int from_tty)
 {
   if (remote_debug)
     printf_filtered ("gdbsim_detach: args \"%s\"\n", args);
@@ -823,13 +823,13 @@ gdbsim_files_info (struct target_ops *target)
 /* Clear the simulator's notion of what the break points are.  */
 
 static void
-gdbsim_mourn_inferior (void)
+gdbsim_mourn_inferior (struct target_ops *target)
 {
   if (remote_debug)
     printf_filtered ("gdbsim_mourn_inferior:\n");
 
   remove_breakpoints ();
-  target_mark_exited (&gdbsim_ops);
+  target_mark_exited (target);
   generic_mourn_inferior ();
   delete_thread_silent (remote_sim_ptid);
 }

@@ -2,4 +2,5 @@
 NAT_FILE= nm-osf3.h
 NATDEPFILES= corelow.o alpha-nat.o fork-child.o \
 	solib-osf.o solib.o procfs.o proc-api.o proc-events.o proc-flags.o \
-	proc-why.o
+	proc-why.o dec-thread.o
+NAT_CLIBS= -lpthreaddebug

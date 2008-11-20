@@ -172,7 +172,7 @@ mi_gdb_test "-thread-select 2" "\\^done.*" "select first worker thread"
 # Since thread 2 is running, we need to set variable via another thread.
 mi_gdb_test "-gdb-set --thread 3 variable exit_first_thread=1" ".*\\^done" "ask the second thread to exit"
 gdb_expect {
-    -re ".*=thread-exited,id=\"2\"\r\n$" {
+    -re ".*=thread-exited,id=\"2\",group-id=\"\[0-9\]+\"\r\n$" {
         pass "wait for thread exit"
     }
     timeout {

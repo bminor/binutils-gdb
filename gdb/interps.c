@@ -371,20 +371,15 @@ interpreter_exec_cmd (char *args, int from_tty)
   unsigned int i;
   int old_quiet, use_quiet;
 
-  prules = buildargv (args);
-  if (prules == NULL)
-    {
-      error (_("unable to parse arguments"));
-    }
+  if (args == NULL)
+    error_no_arg (_("interpreter-exec command"));
+
+  prules = gdb_buildargv (args);
+  make_cleanup_freeargv (prules);
 
   nrules = 0;
-  if (prules != NULL)
-    {
-      for (trule = prules; *trule != NULL; trule++)
-	{
-	  nrules++;
-	}
-    }
+  for (trule = prules; *trule != NULL; trule++)
+    nrules++;
 
   if (nrules < 2)
     error (_("usage: interpreter-exec <interpreter> [ <command> ... ]"));

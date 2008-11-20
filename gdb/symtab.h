@@ -319,21 +319,6 @@ struct minimal_symbol
 
   struct general_symbol_info ginfo;
 
-  /* The info field is available for caching machine-specific
-     information so it doesn't have to rederive the info constantly
-     (over a serial line).  It is initialized to zero and stays that
-     way until target-dependent code sets it.  Storage for any data
-     pointed to by this field should be allocated on the
-     objfile_obstack for the associated objfile.  The type would be
-     "void *" except for reasons of compatibility with older
-     compilers.  This field is optional.
-
-     Currently, the AMD 29000 tdep.c uses it to remember things it has decoded
-     from the instructions in the function header, and the MIPS-16 code uses
-     it to identify 16-bit procedures.  */
-
-  char *info;
-
   /* Size of this symbol.  end_psymtab in dbxread.c uses this
      information to calculate the end of the partial symtab based on the
      address of the last symbol plus the size of the last symbol.  */
@@ -347,6 +332,10 @@ struct minimal_symbol
 
   ENUM_BITFIELD(minimal_symbol_type) type : 8;
 
+  /* Two flag bits provided for the use of the target.  */
+  unsigned int target_flag_1 : 1;
+  unsigned int target_flag_2 : 1;
+
   /* Minimal symbols with the same hash key are kept on a linked
      list.  This is the link.  */
 
@@ -358,7 +347,8 @@ struct minimal_symbol
   struct minimal_symbol *demangled_hash_next;
 };
 
-#define MSYMBOL_INFO(msymbol)		(msymbol)->info
+#define MSYMBOL_TARGET_FLAG_1(msymbol)  (msymbol)->target_flag_1
+#define MSYMBOL_TARGET_FLAG_2(msymbol)  (msymbol)->target_flag_2
 #define MSYMBOL_SIZE(msymbol)		(msymbol)->size
 #define MSYMBOL_TYPE(msymbol)		(msymbol)->type
 
@@ -396,18 +386,15 @@ typedef enum domain_enum_tag
   /* Searching domains. These overlap with VAR_DOMAIN, providing
      some granularity with the search_symbols function. */
 
-  /* Everything in VAR_DOMAIN minus FUNCTIONS_-, TYPES_-, and
-     METHODS_DOMAIN */
+  /* Everything in VAR_DOMAIN minus FUNCTIONS_DOMAIN and
+     TYPES_DOMAIN.  */
   VARIABLES_DOMAIN,
 
   /* All functions -- for some reason not methods, though. */
   FUNCTIONS_DOMAIN,
 
   /* All defined types */
-  TYPES_DOMAIN,
-
-  /* All class methods -- why is this separated out? */
-  METHODS_DOMAIN
+  TYPES_DOMAIN
 }
 domain_enum;
 
@@ -1100,7 +1087,7 @@ extern void prim_record_minimal_symbol (const char *, CORE_ADDR,
 extern struct minimal_symbol *prim_record_minimal_symbol_and_info
   (const char *, CORE_ADDR,
    enum minimal_symbol_type,
-   char *info, int section, asection * bfd_section, struct objfile *);
+   int section, asection * bfd_section, struct objfile *);
 
 extern unsigned int msymbol_hash_iw (const char *);
 

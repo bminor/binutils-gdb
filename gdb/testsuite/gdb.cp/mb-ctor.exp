@@ -52,7 +52,7 @@ gdb_test "break 'Derived::Derived(int)'" \
 
 gdb_test "break 'Derived::~Derived()'" \
     "Breakpoint.*at.* file .*$srcfile, line.*\\(2 locations\\).*" \
-    "set-breakpoint at ctor"
+    "set-breakpoint at dtor"
 
 gdb_run_cmd
 gdb_expect {

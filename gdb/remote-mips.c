@@ -84,7 +84,7 @@ static void lsi_open (char *name, int from_tty);
 
 static void mips_close (int quitting);
 
-static void mips_detach (char *args, int from_tty);
+static void mips_detach (struct target_ops *ops, char *args, int from_tty);
 
 static void mips_resume (ptid_t ptid, int step,
                          enum target_signal siggnal);
@@ -1490,8 +1490,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
 
   /* Parse the serial port name, the optional TFTP name, and the
      optional local TFTP name.  */
-  if ((argv = buildargv (name)) == NULL)
-    nomem (0);
+  argv = gdb_buildargv (name);
   make_cleanup_freeargv (argv);
 
   serial_port_name = xstrdup (argv[0]);
@@ -1653,7 +1652,7 @@ mips_close (int quitting)
 /* Detach from the remote board.  */
 
 static void
-mips_detach (char *args, int from_tty)
+mips_detach (struct target_ops *ops, char *args, int from_tty)
 {
   if (args)
     error ("Argument given to \"detach\" when remotely debugging.");

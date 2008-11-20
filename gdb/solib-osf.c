@@ -55,6 +55,7 @@
 #include "inferior.h"
 #include "gdbthread.h"
 #include "solist.h"
+#include "solib.h"
 
 #ifdef USE_LDR_ROUTINES
 # include <loader.h>

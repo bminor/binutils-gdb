@@ -35,8 +35,6 @@
 #include "inf-child.h"
 #include "gdbthread.h"
 
-/* HACK: Save the ptrace ops returned by inf_ptrace_target.  */
-static struct target_ops *ptrace_ops_hack;
 
 
 #ifdef PT_GET_PROCESS_STATE
@@ -132,12 +130,22 @@ inf_ptrace_me (void)
   ptrace (PT_TRACE_ME, 0, (PTRACE_TYPE_ARG3)0, 0);
 }
 
-/* Start tracing PID.  */
+/* Start a new inferior Unix child process.  EXEC_FILE is the file to
+   run, ALLARGS is a string containing the arguments to the program.
+   ENV is the environment vector to pass.  If FROM_TTY is non-zero, be
+   chatty about it.  */
 
 static void
-inf_ptrace_him (int pid)
+inf_ptrace_create_inferior (struct target_ops *ops,
+			    char *exec_file, char *allargs, char **env,
+			    int from_tty)
 {
-  push_target (ptrace_ops_hack);
+  int pid;
+
+  pid = fork_inferior (exec_file, allargs, env, inf_ptrace_me, NULL,
+		       NULL, NULL);
+
+  push_target (ops);
 
   /* On some targets, there must be some explicit synchronization
      between the parent and child processes after the debugger
@@ -154,19 +162,6 @@ inf_ptrace_him (int pid)
   /* On some targets, there must be some explicit actions taken after
      the inferior has been started up.  */
   target_post_startup_inferior (pid_to_ptid (pid));
-}
-
-/* Start a new inferior Unix child process.  EXEC_FILE is the file to
-   run, ALLARGS is a string containing the arguments to the program.
-   ENV is the environment vector to pass.  If FROM_TTY is non-zero, be
-   chatty about it.  */
-
-static void
-inf_ptrace_create_inferior (char *exec_file, char *allargs, char **env,
-			    int from_tty)
-{
-  fork_inferior (exec_file, allargs, env, inf_ptrace_me, inf_ptrace_him,
-		 NULL, NULL);
 }
 
 #ifdef PT_GET_PROCESS_STATE
@@ -189,7 +184,7 @@ inf_ptrace_post_startup_inferior (ptid_t pid)
 /* Clean up a rotting corpse of an inferior after it died.  */
 
 static void
-inf_ptrace_mourn_inferior (void)
+inf_ptrace_mourn_inferior (struct target_ops *ops)
 {
   int status;
 
@@ -199,7 +194,7 @@ inf_ptrace_mourn_inferior (void)
      only report its exit status to its original parent.  */
   waitpid (ptid_get_pid (inferior_ptid), &status, 0);
 
-  unpush_target (ptrace_ops_hack);
+  unpush_target (ops);
   generic_mourn_inferior ();
 }
 
@@ -207,7 +202,7 @@ inf_ptrace_mourn_inferior (void)
    be chatty about it.  */
 
 static void
-inf_ptrace_attach (char *args, int from_tty)
+inf_ptrace_attach (struct target_ops *ops, char *args, int from_tty)
 {
   char *exec_file;
   pid_t pid;
@@ -258,7 +253,7 @@ inf_ptrace_attach (char *args, int from_tty)
      target, it should decorate the ptid later with more info.  */
   add_thread_silent (inferior_ptid);
 
-  push_target (ptrace_ops_hack);
+  push_target(ops);
 }
 
 #ifdef PT_GET_PROCESS_STATE
@@ -282,7 +277,7 @@ inf_ptrace_post_attach (int pid)
    specified by ARGS.  If FROM_TTY is non-zero, be chatty about it.  */
 
 static void
-inf_ptrace_detach (char *args, int from_tty)
+inf_ptrace_detach (struct target_ops *ops, char *args, int from_tty)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   int sig = 0;
@@ -314,7 +309,7 @@ inf_ptrace_detach (char *args, int from_tty)
 
   inferior_ptid = null_ptid;
   detach_inferior (pid);
-  unpush_target (ptrace_ops_hack);
+  unpush_target (ops);
 }
 
 /* Kill the inferior.  */
@@ -644,7 +639,6 @@ inf_ptrace_target (void)
   t->to_stop = inf_ptrace_stop;
   t->to_xfer_partial = inf_ptrace_xfer_partial;
 
-  ptrace_ops_hack = t;
   return t;
 }
 

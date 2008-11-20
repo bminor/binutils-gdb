@@ -8163,6 +8163,33 @@ elf32_arm_obj_attrs_arg_type (int tag)
     return (tag & 1) != 0 ? 2 : 1;
 }
 
+static void
+elf32_arm_copy_one_eabi_other_attribute (bfd *ibfd, bfd *obfd, obj_attribute_list *in_list)
+{
+  switch (in_list->tag)
+    {
+    case Tag_VFP_HP_extension:
+    case Tag_ABI_FP_16bit_format:
+      bfd_elf_add_obj_attr_int (obfd, OBJ_ATTR_PROC, in_list->tag, in_list->attr.i);
+      break;
+
+    default:
+      if ((in_list->tag & 127) < 64)
+	{
+	  _bfd_error_handler
+	      (_("Warning: %B: Unknown EABI object attribute %d"), ibfd, in_list->tag);
+	  break;
+	}
+    }
+}
+
+static void 
+elf32_arm_copy_eabi_other_attribute_list (bfd *ibfd, bfd *obfd, obj_attribute_list *in_list)
+{
+  for (; in_list; in_list = in_list->next )
+    elf32_arm_copy_one_eabi_other_attribute (ibfd, obfd, in_list);
+}
+
 /* Merge EABI object attributes from IBFD into OBFD.  Raise an error if there
    are conflicting attributes.  */
 
@@ -8172,6 +8199,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   obj_attribute *in_attr;
   obj_attribute *out_attr;
   obj_attribute_list *in_list;
+  obj_attribute_list *out_list;
   /* Some tags have 0 = don't care, 1 = strong requirement,
      2 = weak requirement.  */
   static const int order_312[3] = {3, 1, 2};
@@ -8196,7 +8224,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   /* This needs to happen before Tag_ABI_FP_number_model is merged.  */
   if (in_attr[Tag_ABI_VFP_args].i != out_attr[Tag_ABI_VFP_args].i)
     {
-      /* Ignore mismatches if teh object doesn't use floating point.  */
+      /* Ignore mismatches if the object doesn't use floating point.  */
       if (out_attr[Tag_ABI_FP_number_model].i == 0)
 	out_attr[Tag_ABI_VFP_args].i = in_attr[Tag_ABI_VFP_args].i;
       else if (in_attr[Tag_ABI_FP_number_model].i != 0)
@@ -8362,6 +8390,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	      return FALSE;
 	    }
 	  break;
+
 	default: /* All known attributes should be explicitly covered.   */
 	  abort ();
 	}
@@ -8392,15 +8421,67 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   while (in_list && in_list->tag == Tag_compatibility)
     in_list = in_list->next;
 
-  for (; in_list; in_list = in_list->next)
+  out_list = elf_other_obj_attributes_proc (obfd);
+  while (out_list && out_list->tag == Tag_compatibility)
+    out_list = out_list->next;
+
+  for (; in_list != NULL; )
     {
-      if ((in_list->tag & 128) < 64)
+      if (out_list == NULL)
 	{
-	  _bfd_error_handler
-	    (_("Warning: %B: Unknown EABI object attribute %d"),
-	     ibfd, in_list->tag);
-	  break;
+	  elf32_arm_copy_eabi_other_attribute_list (ibfd, obfd, in_list);
+	  return TRUE;
 	}
+
+      /* The tags for each list are in numerical order.  */
+      /* If the tags are equal, then merge.  */
+      if (in_list->tag == out_list->tag)
+        {
+	  switch (in_list->tag)
+	    {
+	    case Tag_VFP_HP_extension:
+	      if (out_list->attr.i == 0)
+	    	out_list->attr.i = in_list->attr.i;
+	      break;
+
+	    case Tag_ABI_FP_16bit_format:
+	      if (in_list->attr.i != 0 && out_list->attr.i != 0)
+		{
+	          if (in_list->attr.i != out_list->attr.i)
+	            {
+		      _bfd_error_handler
+		        (_("ERROR: fp16 format mismatch between %B and %B"),
+		         ibfd, obfd);
+		      return FALSE;
+	            }
+		}
+	      if (in_list->attr.i != 0)
+		out_list->attr.i = in_list->attr.i;
+	      break;
+
+	    default:
+	      if ((in_list->tag & 127) < 64)
+	        {
+	          _bfd_error_handler
+		    (_("Warning: %B: Unknown EABI object attribute %d"), ibfd, in_list->tag);
+	          break;
+	        }
+	    }
+	}
+      else if (in_list->tag < out_list->tag)
+	{
+	  /* This attribute is in ibfd, but not obfd.  Copy to obfd and advance to
+            next input attribute.  */
+	  elf32_arm_copy_one_eabi_other_attribute (ibfd, obfd, in_list);
+	}
+      if (in_list->tag <= out_list->tag)
+	{
+	  in_list = in_list->next;
+	  if (in_list == NULL)
+	    continue;
+	}
+      while (out_list && out_list->tag < in_list->tag)
+        out_list = out_list->next;
     }
   return TRUE;
 }

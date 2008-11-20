@@ -49,7 +49,25 @@ $DECK
       ERASE(match_pos);
       COPY_TEXT('64');
    ENDIF;
+   match_pos := SEARCH_QUIETLY('@bfd_default_target_size@', FORWARD, EXACT, rang);
+   IF match_pos <> 0 THEN;
+      POSITION(BEGINNING_OF(match_pos));
+      ERASE(match_pos);
+      COPY_TEXT('64');
+   ENDIF;
    match_pos := SEARCH_QUIETLY('@BFD_HOST_64BIT_LONG@', FORWARD, EXACT, rang);
+   IF match_pos <> 0 THEN;
+      POSITION(BEGINNING_OF(match_pos));
+      ERASE(match_pos);
+      COPY_TEXT('0');
+   ENDIF;
+   match_pos := SEARCH_QUIETLY('@BFD_HOST_LONG_LONG@', FORWARD, EXACT, rang);
+   IF match_pos <> 0 THEN;
+      POSITION(BEGINNING_OF(match_pos));
+      ERASE(match_pos);
+      COPY_TEXT('0');
+   ENDIF;
+   match_pos := SEARCH_QUIETLY('@BFD_HOST_64BIT_LONG_LONG@', FORWARD, EXACT, rang);
    IF match_pos <> 0 THEN;
       POSITION(BEGINNING_OF(match_pos));
       ERASE(match_pos);
@@ -74,6 +92,24 @@ $DECK
       POSITION(BEGINNING_OF(match_pos));
       ERASE(match_pos);
       COPY_TEXT('uint64');
+   ENDIF;
+   match_pos := SEARCH_QUIETLY('@BFD_HOSTPTR_T@', FORWARD, EXACT, rang);
+   IF match_pos <> 0 THEN;
+      POSITION(BEGINNING_OF(match_pos));
+      ERASE(match_pos);
+      COPY_TEXT('uint64');
+   ENDIF;
+   match_pos := SEARCH_QUIETLY('@bfd_file_ptr@', FORWARD, EXACT, rang);
+   IF match_pos <> 0 THEN;
+      POSITION(BEGINNING_OF(match_pos));
+      ERASE(match_pos);
+      COPY_TEXT('bfd_signed_vma');
+   ENDIF;
+   match_pos := SEARCH_QUIETLY('unsigned @bfd_file_ptr@ ufile_ptr', FORWARD, EXACT, rang);
+   IF match_pos <> 0 THEN;
+      POSITION(BEGINNING_OF(match_pos));
+      ERASE(match_pos);
+      COPY_TEXT('bfd_vma ufile_ptr');
    ENDIF;
    WRITE_FILE(file, GET_INFO(COMMAND_LINE, "output_file"));
    QUIT
@@ -152,6 +188,61 @@ $endif
 $
 $ write sys$output "Generated `bfd.h' from `bfd-in2.h'."
 $!
+$! create bfdver.h
+$!
+$ edit/tpu/nojournal/nosection/nodisplay/command=sys$input -
+        []version.h /output=[]bfdver.h
+$DECK
+!
+!  Copy file, changing lines with macros (@@)
+!
+!
+   vfile := CREATE_BUFFER("vfile", "configure.in");
+   rang := CREATE_RANGE(BEGINNING_OF(vfile), END_OF(vfile));
+   match_pos := SEARCH_QUIETLY('AM_INIT_AUTOMAKE(bfd, ', FORWARD, EXACT, rang);
+   IF match_pos <> 0 THEN;
+     POSITION(BEGINNING_OF(match_pos));
+     ERASE(match_pos);
+     vers := CURRENT_LINE-")";
+   ELSE;
+     vers := "unknown";
+   ENDIF;
+   versnum := vers - "." - ".";
+
+   file := CREATE_BUFFER("file", GET_INFO(COMMAND_LINE, "file_name"));
+   rang := CREATE_RANGE(BEGINNING_OF(file), END_OF(file));
+
+   match_pos := SEARCH_QUIETLY('@bfd_version@', FORWARD, EXACT, rang);
+   IF match_pos <> 0 THEN;
+      POSITION(BEGINNING_OF(match_pos));
+      ERASE(match_pos);
+      COPY_TEXT(versnum);
+   ENDIF;
+   match_pos := SEARCH_QUIETLY('@bfd_version_string@', FORWARD, EXACT, rang);
+   IF match_pos <> 0 THEN;
+      POSITION(BEGINNING_OF(match_pos));
+      ERASE(match_pos);
+      COPY_TEXT('"');
+      COPY_TEXT(vers);
+      COPY_TEXT('"');
+   ENDIF;
+   match_pos := SEARCH_QUIETLY('@bfd_version_package@', FORWARD, EXACT, rang);
+   IF match_pos <> 0 THEN;
+      POSITION(BEGINNING_OF(match_pos));
+      ERASE(match_pos);
+      COPY_TEXT('"(GNU Binutils) "');
+   ENDIF;
+   match_pos := SEARCH_QUIETLY('@report_bugs_to@', FORWARD, EXACT, rang);
+   IF match_pos <> 0 THEN;
+      POSITION(BEGINNING_OF(match_pos));
+      ERASE(match_pos);
+      COPY_TEXT('"<http://www.sourceware.org/bugzilla/>"');
+   ENDIF;
+   WRITE_FILE(file, GET_INFO(COMMAND_LINE, "output_file"));
+   QUIT
+$  EOD
+$ write sys$output "Generated `bfdver.h' from 'version.h' and `configure.in'."
+$!
 $!
 $! create targmatch.h
 $!
@@ -210,6 +301,8 @@ $ create []config.h
 #define HAVE_TIME_H 1
 /* Define if you have the <unistd.h> header file.  */
 #define HAVE_UNISTD_H 1
+/* Disable NLS  */
+#undef ENABLE_NLS
 $!
 $ write sys$output "Generated `config.h'"
 

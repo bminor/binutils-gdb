@@ -1,3 +1,45 @@
+2008-11-19  Bob Wilson  <bob.wilson@acm.org>
+	
+	* xtensa-xtregs.c (XTENSA_ELF_XTREG_SIZE): Change to 4.
+	(xtensa_regmap_table): Add entry for scompare1.
+	
+2008-11-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* Makefile.in (powerpc-isa205-32l.o, powerpc-isa205-32l.c,
+	powerpc-isa205-altivec32l.o, powerpc-isa205-altivec32l.c,
+	powerpc-isa205-vsx32l.o, powerpc-isa205-vsx32l.c,
+	powerpc-isa205-64l.o, powerpc-isa205-64l.c,
+	powerpc-isa205-altivec64l.o, powerpc-isa205-altivec64l.c,
+	powerpc-isa205-vsx64l.o, powerpc-isa205-vsx64l.c): New targets.
+	* configure.srv (powerpc*-*-linux*): Add ISA 2.05 object files and
+	XML target descriptions.
+	* linux-ppc-low.c (ppc_arch_setup): Init registers with 64-bit FPSCR
+	when inferior is running on an ISA 2.05 or later processor.  Add
+	special case to return offset for full 64-bit slot of FPSCR when
+	in 32-bits.
+
+2008-11-14  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* Makefile.in (SFILES, clean): Added sparc64 files.
+	(reg-sparc64.o, reg-sparc64.c): New.
+	* configure.srv (sparc*-*-linux*): New configuration.
+	* linux-low.c (regsets_fetch_inferior_registers): Swap ptrace
+	syscall arguments for SPARC.
+	(regsets_store_inferior_registers): Likewise.
+	* linux-sparc-low.c: New file.
+
+2008-10-21  Doug Evans  <dje@google.com>
+
+	* Makefile.in (BFD_DIR,BFD,BFD_SRC,BFD_CFLAGS): Delete.
+	(READLINE_DIR,READLINE_DEP): Delete.
+	(INTERNAL_CFLAGS): Update.
+	(LINTFLAGS): Update.
+
+2008-10-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (handle_v_run): If GDB didn't specify an argv, use the
+	whole argv from the last run, not just argv[0].
+
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
 	* regcache.c (new_register_cache): Return NULL if the register

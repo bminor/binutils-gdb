@@ -421,7 +421,7 @@ record_minimal_symbol (struct coff_symbol *cs, CORE_ADDR address,
 
   bfd_section = cs_to_bfd_section (cs, objfile);
   return prim_record_minimal_symbol_and_info (cs->c_name, address, type,
-    NULL, section, bfd_section, objfile);
+					      section, bfd_section, objfile);
 }
 
 /* coff_symfile_init ()
@@ -1081,7 +1081,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
   if ((nsyms == 0) && (pe_file))
     {
-      /* We've got no debugging symbols, but it's is a portable
+      /* We've got no debugging symbols, but it's a portable
 	 executable, so try to read the export table */
       read_pe_exported_syms (objfile);
     }
@@ -1943,9 +1943,8 @@ coff_read_struct_type (int index, int length, int lastsym,
 	    obsavestring (name, strlen (name), &objfile->objfile_obstack);
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux,
 						  objfile);
-	  FIELD_BITPOS (list->field) = 8 * ms->c_value;
+	  SET_FIELD_BITPOS (list->field, 8 * ms->c_value);
 	  FIELD_BITSIZE (list->field) = 0;
-	  FIELD_STATIC_KIND (list->field) = 0;
 	  nfields++;
 	  break;
 
@@ -1961,9 +1960,8 @@ coff_read_struct_type (int index, int length, int lastsym,
 	    obsavestring (name, strlen (name), &objfile->objfile_obstack);
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux,
 						  objfile);
-	  FIELD_BITPOS (list->field) = ms->c_value;
+	  SET_FIELD_BITPOS (list->field, ms->c_value);
 	  FIELD_BITSIZE (list->field) = sub_aux.x_sym.x_misc.x_lnsz.x_size;
-	  FIELD_STATIC_KIND (list->field) = 0;
 	  nfields++;
 	  break;
 
@@ -2080,11 +2078,10 @@ coff_read_enum_type (int index, int length, int lastsym,
 	  struct symbol *xsym = syms->symbol[j];
 	  SYMBOL_TYPE (xsym) = type;
 	  TYPE_FIELD_NAME (type, n) = SYMBOL_LINKAGE_NAME (xsym);
-	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (xsym);
+	  SET_FIELD_BITPOS (TYPE_FIELD (type, n), SYMBOL_VALUE (xsym));
 	  if (SYMBOL_VALUE (xsym) < 0)
 	    unsigned_enum = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
-	  TYPE_FIELD_STATIC_KIND (type, n) = 0;
 	}
       if (syms == osyms)
 	break;

@@ -1,3 +1,8 @@
+2008-10-01  DJ Delorie  <dj@redhat.com>
+
+	* int.c (trigger_peripheral_interrupt): Clear interrupt pending
+	bit when peripheral interrupts are serviced.
+
 2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure: Regenerate to track ../common/common.m4 changes.

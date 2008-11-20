@@ -222,7 +222,7 @@ static void m2_array (struct type *type, struct ui_file *stream,
 {
   fprintf_filtered (stream, "ARRAY [");
   if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
-      && TYPE_ARRAY_UPPER_BOUND_TYPE (type) != BOUND_CANNOT_BE_DETERMINED)
+      && !TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
     {
       if (TYPE_INDEX_TYPE (type) != 0)
 	{

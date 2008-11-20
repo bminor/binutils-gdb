@@ -143,6 +143,7 @@ software in general.  We will miss him.
 * Commands::                    @value{GDBN} commands
 * Running::                     Running programs under @value{GDBN}
 * Stopping::                    Stopping and continuing
+* Reverse Execution::           Running programs backward
 * Stack::                       Examining the stack
 * Source::                      Examining source files
 * Data::                        Examining data
@@ -3614,6 +3615,15 @@ at the end of the command (eg @code{catch exception Program_Error}),
 the debugger will stop only when this specific exception is raised.
 Otherwise, the debugger stops execution when any Ada exception is raised.
 
+When inserting an exception catchpoint on a user-defined exception whose
+name is identical to one of the exceptions defined by the language, the
+fully qualified name must be used as the exception name.  Otherwise,
+@value{GDBN} will assume that it should stop on the pre-defined exception
+rather than the user-defined one.  For instance, assuming an exception
+called @code{Constraint_Error} is defined in package @code{Pck}, then
+the command to use to catch such exceptions is @kbd{catch exception
+Pck.Constraint_Error}.
+
 @item exception unhandled
 An exception that was raised but is not handled by the program.
 
@@ -3633,16 +3643,6 @@ and @sc{gnu}/Linux.
 A call to @code{vfork}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.
 
-@item load
-@itemx load @var{libname}
-@cindex break on load/unload of shared library
-The dynamic loading of any shared library, or the loading of the library
-@var{libname}.  This is currently only available for HP-UX.
-
-@item unload
-@itemx unload @var{libname}
-The unloading of any dynamically loaded shared library, or the unloading
-of the library @var{libname}.  This is currently only available for HP-UX.
 @end table
 
 @item tcatch @var{event}
@@ -4840,6 +4840,126 @@ monitor certain events such as thread creation and thread destruction.
 When such an event happens, a system call in another thread may return
 prematurely, even though your program does not appear to stop.
 
+
+@node Reverse Execution
+@chapter Running programs backward
+@cindex reverse execution
+@cindex running programs backward
+
+When you are debugging a program, it is not unusual to realize that
+you have gone too far, and some event of interest has already happened.
+If the target environment supports it, @value{GDBN} can allow you to
+``rewind'' the program by running it backward.
+
+A target environment that supports reverse execution should be able
+to ``undo'' the changes in machine state that have taken place as the
+program was executing normally.  Variables, registers etc.@: should
+revert to their previous values.  Obviously this requires a great
+deal of sophistication on the part of the target environment; not
+all target environments can support reverse execution.
+
+When a program is executed in reverse, the instructions that
+have most recently been executed are ``un-executed'', in reverse
+order.  The program counter runs backward, following the previous
+thread of execution in reverse.  As each instruction is ``un-executed'',
+the values of memory and/or registers that were changed by that
+instruction are reverted to their previous states.  After executing
+a piece of source code in reverse, all side effects of that code
+should be ``undone'', and all variables should be returned to their
+prior values@footnote{
+Note that some side effects are easier to undo than others.  For instance,
+memory and registers are relatively easy, but device I/O is hard.  Some
+targets may be able undo things like device I/O, and some may not.
+
+The contract between @value{GDBN} and the reverse executing target
+requires only that the target do something reasonable when
+@value{GDBN} tells it to execute backwards, and then report the 
+results back to @value{GDBN}.  Whatever the target reports back to
+@value{GDBN}, @value{GDBN} will report back to the user.  @value{GDBN}
+assumes that the memory and registers that the target reports are in a
+consistant state, but @value{GDBN} accepts whatever it is given.
+}.
+
+If you are debugging in a target environment that supports
+reverse execution, @value{GDBN} provides the following commands.
+
+@table @code
+@kindex reverse-continue
+@kindex rc @r{(@code{reverse-continue})}
+@item reverse-continue @r{[}@var{ignore-count}@r{]}
+@itemx rc @r{[}@var{ignore-count}@r{]}
+Beginning at the point where your program last stopped, start executing
+in reverse.  Reverse execution will stop for breakpoints and synchronous
+exceptions (signals), just like normal execution.  Behavior of
+asynchronous signals depends on the target environment.
+
+@kindex reverse-step
+@kindex rs @r{(@code{step})}
+@item reverse-step @r{[}@var{count}@r{]}
+Run the program backward until control reaches the start of a
+different source line; then stop it, and return control to @value{GDBN}.
+
+Like the @code{step} command, @code{reverse-step} will only stop
+at the beginning of a source line.  It ``un-executes'' the previously
+executed source line.  If the previous source line included calls to
+debuggable functions, @code{reverse-step} will step (backward) into
+the called function, stopping at the beginning of the @emph{last}
+statement in the called function (typically a return statement).
+
+Also, as with the @code{step} command, if non-debuggable functions are
+called, @code{reverse-step} will run thru them backward without stopping.
+
+@kindex reverse-stepi
+@kindex rsi @r{(@code{reverse-stepi})}
+@item reverse-stepi @r{[}@var{count}@r{]}
+Reverse-execute one machine instruction.  Note that the instruction
+to be reverse-executed is @emph{not} the one pointed to by the program
+counter, but the instruction executed prior to that one.  For instance,
+if the last instruction was a jump, @code{reverse-stepi} will take you
+back from the destination of the jump to the jump instruction itself.
+
+@kindex reverse-next
+@kindex rn @r{(@code{reverse-next})}
+@item reverse-next @r{[}@var{count}@r{]}
+Run backward to the beginning of the previous line executed in
+the current (innermost) stack frame.  If the line contains function
+calls, they will be ``un-executed'' without stopping.  Starting from
+the first line of a function, @code{reverse-next} will take you back
+to the caller of that function, @emph{before} the function was called,
+just as the normal @code{next} command would take you from the last 
+line of a function back to its return to its caller
+@footnote{Unles the code is too heavily optimized.}.
+
+@kindex reverse-nexti
+@kindex rni @r{(@code{reverse-nexti})}
+@item reverse-nexti @r{[}@var{count}@r{]}
+Like @code{nexti}, @code{reverse-nexti} executes a single instruction
+in reverse, except that called functions are ``un-executed'' atomically.
+That is, if the previously executed instruction was a return from
+another instruction, @code{reverse-nexti} will continue to execute
+in reverse until the call to that function (from the current stack
+frame) is reached.
+
+@kindex reverse-finish
+@item reverse-finish
+Just as the @code{finish} command takes you to the point where the
+current function returns, @code{reverse-finish} takes you to the point
+where it was called.  Instead of ending up at the end of the current
+function invocation, you end up at the beginning.
+
+@kindex set exec-direction
+@item set exec-direction
+Set the direction of target execution.
+@itemx set exec-direction reverse
+@cindex execute forward or backward in time
+@value{GDBN} will perform all execution commands in reverse, until the
+exec-direction mode is changed to ``forward''.  Affected commands include
+@code{step, stepi, next, nexti, continue, and finish}.  The @code{return}
+command cannot be used in reverse mode.
+@item set exec-direction forward
+@value{GDBN} will perform all execution commands in the normal fashion.
+This is the default.
+@end table
 
 
 @node Stack
@@ -11085,6 +11205,8 @@ to be difficult.
 * Omissions from Ada::          Restrictions on the Ada expression syntax.
 * Additions to Ada::            Extensions of the Ada expression syntax.
 * Stopping Before Main Program:: Debugging the program during elaboration.
+* Ada Tasks::                   Listing and setting breakpoints in tasks.
+* Ada Tasks and Core Files::    Tasking Support when Debugging Core Files
 * Ada Glitches::                Known peculiarities of Ada mode.
 @end menu
 
@@ -11405,6 +11527,187 @@ Manual, the elaboration code is invoked from a procedure called
 elaboration, simply use the following two commands:
 @code{tbreak adainit} and @code{run}.
 
+@node Ada Tasks
+@subsubsection Extensions for Ada Tasks
+@cindex Ada, tasking
+
+Support for Ada tasks is analogous to that for threads (@pxref{Threads}).
+@value{GDBN} provides the following task-related commands:
+
+@table @code
+@kindex info tasks
+@item info tasks
+This command shows a list of current Ada tasks, as in the following example:
+
+
+@smallexample
+@iftex
+@leftskip=0.5cm
+@end iftex
+(@value{GDBP}) info tasks
+  ID       TID P-ID Pri State                 Name
+   1   8088000   0   15 Child Activation Wait main_task
+   2   80a4000   1   15 Accept Statement      b
+   3   809a800   1   15 Child Activation Wait a
+*  4   80ae800   3   15 Running               c
+
+@end smallexample
+
+@noindent
+In this listing, the asterisk before the last task indicates it to be the
+task currently being inspected.
+
+@table @asis
+@item ID
+Represents @value{GDBN}'s internal task number.
+
+@item TID
+The Ada task ID.
+
+@item P-ID
+The parent's task ID (@value{GDBN}'s internal task number).
+
+@item Pri
+The base priority of the task.
+
+@item State
+Current state of the task.
+
+@table @code
+@item Unactivated
+The task has been created but has not been activated.  It cannot be
+executing.
+
+@item Running
+The task currently running.
+
+@item Runnable
+The task is not blocked for any reason known to Ada.  (It may be waiting
+for a mutex, though.) It is conceptually "executing" in normal mode.
+
+@item Terminated
+The task is terminated, in the sense of ARM 9.3 (5).  Any dependents
+that were waiting on terminate alternatives have been awakened and have
+terminated themselves.
+
+@item Child Activation Wait
+The task is waiting for created tasks to complete activation.
+
+@item Accept Statement
+The task is waiting on an accept or selective wait statement.
+
+@item Waiting on entry call
+The task is waiting on an entry call.
+
+@item Async Select Wait
+The task is waiting to start the abortable part of an asynchronous
+select statement.
+
+@item Delay Sleep
+The task is waiting on a select statement with only a delay
+alternative open.
+
+@item Child Termination Wait
+The task is sleeping having completed a master within itself, and is
+waiting for the tasks dependent on that master to become terminated or
+waiting on a terminate Phase.
+
+@item Wait Child in Term Alt
+The task is sleeping waiting for tasks on terminate alternatives to
+finish terminating.
+
+@item Accepting RV with @var{taskno}
+The task is accepting a rendez-vous with the task @var{taskno}.
+@end table
+
+@item Name
+Name of the task in the program.
+
+@end table
+
+@kindex info task @var{taskno}
+@item info task @var{taskno}
+This command shows detailled informations on the specified task, as in
+the following example:
+@smallexample
+@iftex
+@leftskip=0.5cm
+@end iftex
+(@value{GDBP}) info tasks
+  ID       TID P-ID Pri State                  Name
+   1   8077880    0  15 Child Activation Wait  main_task
+*  2   807c468    1  15 Running                task_1
+(@value{GDBP}) info task 2
+Ada Task: 0x807c468
+Name: task_1
+Thread: 0x807f378
+Parent: 1 (main_task)
+Base Priority: 15
+State: Runnable
+@end smallexample
+
+@item task
+@kindex task@r{ (Ada)}
+@cindex current Ada task ID
+This command prints the ID of the current task.
+
+@smallexample
+@iftex
+@leftskip=0.5cm
+@end iftex
+(@value{GDBP}) info tasks
+  ID       TID P-ID Pri State                  Name
+   1   8077870    0  15 Child Activation Wait  main_task
+*  2   807c458    1  15 Running                t
+(@value{GDBP}) task
+[Current task is 2]
+@end smallexample
+
+@item task @var{taskno}
+@cindex Ada task switching
+This command is like the @code{thread @var{threadno}}
+command (@pxref{Threads}).  It switches the context of debugging
+from the current task to the given task.
+
+@smallexample
+@iftex
+@leftskip=0.5cm
+@end iftex
+(@value{GDBP}) info tasks
+  ID       TID P-ID Pri State                  Name
+   1   8077870    0  15 Child Activation Wait  main_task
+*  2   807c458    1  15 Running                t
+(@value{GDBP}) task 1
+[Switching to task 1]
+#0  0x8067726 in pthread_cond_wait ()
+(@value{GDBP}) bt
+#0  0x8067726 in pthread_cond_wait ()
+#1  0x8056714 in system.os_interface.pthread_cond_wait ()
+#2  0x805cb63 in system.task_primitives.operations.sleep ()
+#3  0x806153e in system.tasking.stages.activate_tasks ()
+#4  0x804aacc in un () at un.adb:5
+@end smallexample
+
+@end table
+
+@node Ada Tasks and Core Files
+@subsubsection Tasking Support when Debugging Core Files
+@cindex Ada tasking and core file debugging
+
+When inspecting a core file, as opposed to debugging a live program,
+tasking support may be limited or even unavailable, depending on
+the platform being used.
+For instance, on x86-linux, the list of tasks is available, but task
+switching is not supported.  On Tru64, however, task switching will work
+as usual.
+
+On certain platforms, including Tru64, the debugger needs to perform some
+memory writes in order to provide Ada tasking support.  When inspecting
+a core file, this means that the core file must be opened with read-write
+privileges, using the command @samp{"set write on"} (@pxref{Patching}).
+Under these circumstances, you should make a backup copy of the core
+file before inspecting it with @value{GDBN}.
+
 @node Ada Glitches
 @subsubsection Known Peculiarities of Ada Mode
 @cindex Ada, problems
@@ -11552,6 +11855,16 @@ _initialize_vx + 396 in section .text
 @noindent
 This is the opposite of the @code{info address} command.  You can use
 it to find out the name of a variable or a function given its address.
+
+For dynamically linked executables, the name of executable or shared
+library containing the symbol is also printed:
+
+@smallexample
+(@value{GDBP}) info symbol 0x400225
+_start + 5 in section .text of /tmp/a.out
+(@value{GDBP}) info symbol 0x2aaaac2811cf
+__read_nocancel + 6 in section .text of /usr/lib64/libc.so.6
+@end smallexample
 
 @kindex whatis
 @item whatis [@var{arg}]
@@ -12209,7 +12522,7 @@ repairs.
 @item set write on
 @itemx set write off
 If you specify @samp{set write on}, @value{GDBN} opens executable and
-core files for both reading and writing; if you specify @samp{set write
+core files for both reading and writing; if you specify @kbd{set write
 off} (the default), @value{GDBN} opens them read-only.
 
 If you have already loaded a file, you must load it again (using the
@@ -17010,6 +17323,13 @@ Display debugging messages about inner workings of the AIX thread
 module.
 @item show debug aix-thread
 Show the current state of AIX thread debugging info display.
+@item set debug dwarf2-die
+@cindex DWARF2 DIEs
+Dump DWARF2 DIEs after they are read in.
+The value is the number of nesting levels to print.
+A value of zero turns off the display.
+@item show debug dwarf2-die
+Show the current state of DWARF2 DIE debugging.
 @item set debug displaced
 @cindex displaced stepping debugging info
 Turns on or off display of @value{GDBN} debugging info for the
@@ -17674,6 +17994,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 @menu
 * Basic Python::                Basic Python Functions.
 * Exception Handling::
+* Values From Inferior::
 @end menu
 
 @node Basic Python
@@ -17751,6 +18072,64 @@ exception handler will see @code{RuntimeError} or
 message as its value, and the Python call stack backtrace at the
 Python statement closest to where the @value{GDBN} error occured as the
 traceback.
+
+@node Values From Inferior
+@subsubsection Values From Inferior
+@cindex values from inferior, with Python
+@cindex python, working with values from inferior
+
+@cindex @code{gdb.Value}
+@value{GDBN} provides values it obtains from the inferior program in
+an object of type @code{gdb.Value}.  @value{GDBN} uses this object
+for its internal bookkeeping of the inferior's values, and for
+fetching values when necessary.
+
+Inferior values that are simple scalars can be used directly in
+Python expressions that are valid for the value's data type.  Here's
+an example for an integer or floating-point value @code{some_val}:
+
+@smallexample
+bar = some_val + 2
+@end smallexample
+
+@noindent
+As result of this, @code{bar} will also be a @code{gdb.Value} object
+whose values are of the same type as those of @code{some_val}.
+
+Inferior values that are structures or instances of some class can
+be accessed using the Python @dfn{dictionary syntax}.  For example, if
+@code{some_val} is a @code{gdb.Value} instance holding a structure, you
+can access its @code{foo} element with:
+
+@smallexample
+bar = some_val['foo']
+@end smallexample
+
+Again, @code{bar} will also be a @code{gdb.Value} object.
+
+For pointer data types, @code{gdb.Value} provides a method for
+dereferencing the pointer to obtain the object it points to.
+
+@defmethod Value dereference
+This method returns a new @code{gdb.Value} object whose contents is
+the object pointed to by the pointer.  For example, if @code{foo} is
+a C pointer to an @code{int}, declared in your C program as
+
+@smallexample
+int *foo;
+@end smallexample
+
+@noindent
+then you can use the corresponding @code{gdb.Value} to access what
+@code{foo} points to like this:
+
+@smallexample
+bar = foo.dereference ()
+@end smallexample
+
+The result @code{bar} will be a @code{gdb.Value} object holding the
+value pointed to by @code{foo}.
+@end defmethod
 
 @node Interpreters
 @chapter Command Interpreters
@@ -18894,6 +19273,19 @@ A signal was received by the inferior.
 @itemx =thread-exited,id="@var{id}"
 A thread either was created, or has exited.  The @var{id} field
 contains the @value{GDBN} identifier of the thread.
+
+@item =thread-selected,id="@var{id}"
+Informs that the selected thread was changed as result of the last
+command.  This notification is not emitted as result of @code{-thread-select}
+command but is emitted whenever an MI command that is not documented
+to change the selected thread actually changes it.  In particular,
+invoking, directly or indirectly (via user-defined command), the CLI
+@code{thread} command, will generate this notification.
+
+We suggest that in response to this notification, front ends
+highlight the selected thread and cause subsequent commands to apply to
+that thread.
+
 @end table
 
 
@@ -23917,18 +24309,33 @@ Shared library events.
 
 @end table
 
-@kindex maint set can-use-displaced-stepping
-@kindex maint show can-use-displaced-stepping
+@kindex set displaced-stepping
+@kindex show displaced-stepping
 @cindex displaced stepping support
 @cindex out-of-line single-stepping
-@item maint set can-use-displaced-stepping
-@itemx maint show can-use-displaced-stepping
+@item set displaced-stepping
+@itemx show displaced-stepping
 Control whether or not @value{GDBN} will do @dfn{displaced stepping}
-if the target supports it.  The default is on.  Displaced stepping is
-a way to single-step over breakpoints without removing them from the
-inferior, by executing an out-of-line copy of the instruction that was
-originally at the breakpoint location.  It is also known as
-out-of-line single-stepping.
+if the target supports it.  Displaced stepping is a way to single-step
+over breakpoints without removing them from the inferior, by executing
+an out-of-line copy of the instruction that was originally at the
+breakpoint location.  It is also known as out-of-line single-stepping.
+
+@table @code
+@item set displaced-stepping on
+If the target architecture supports it, @value{GDBN} will use
+displaced stepping to step over breakpoints.
+
+@item set displaced-stepping off
+@value{GDBN} will not use displaced stepping to step over breakpoints,
+even if such is supported by the target architecture.
+
+@cindex non-stop mode, and @samp{set displaced-stepping}
+@item set displaced-stepping auto
+This is the default mode.  @value{GDBN} will use displaced stepping
+only if non-stop mode is active (@pxref{Non-Stop Mode}) and the target
+architecture supports displaced stepping.
+@end table
 
 @kindex maint check-symtabs
 @item maint check-symtabs
@@ -24214,6 +24621,10 @@ the symbol's location to the specified address.  This is similar to
 the @code{info address} command (@pxref{Symbols}), except that this
 command also allows to find symbols in other sections.
 
+If section was not specified, the section in which the symbol was found
+is also printed.  For dynamically linked executables, the name of
+executable or shared library containing the symbol is printed as well.
+
 @end table
 
 The following command is useful for non-interactive invocations of
@@ -24244,6 +24655,8 @@ Show the current setting of the target wait timeout.
 * Tracepoint Packets::
 * Host I/O Packets::
 * Interrupts::
+* Notification Packets::
+* Remote Non-Stop::
 * Packet Acknowledgment::
 * Examples::
 * File-I/O Remote Protocol Extension::
@@ -24265,8 +24678,9 @@ transmitted and received data, respectively.
 @cindex protocol, @value{GDBN} remote serial
 @cindex serial protocol, @value{GDBN} remote
 @cindex remote serial protocol
-All @value{GDBN} commands and responses (other than acknowledgments) are
-sent as a @var{packet}.  A @var{packet} is introduced with the character
+All @value{GDBN} commands and responses (other than acknowledgments
+and notifications, see @ref{Notification Packets}) are sent as a
+@var{packet}.  A @var{packet} is introduced with the character
 @samp{$}, the actual @var{packet-data}, and the terminating character
 @samp{#} followed by a two-digit @var{checksum}:
 
@@ -24312,7 +24726,10 @@ once a connection is established.
 The host (@value{GDBN}) sends @var{command}s, and the target (the
 debugging stub incorporated in your program) sends a @var{response}.  In
 the case of step and continue @var{command}s, the response is only sent
-when the operation has completed (the target has again stopped).
+when the operation has completed, and the target has again stopped all
+threads in all attached processes.  This is the default all-stop mode
+behavior, but the remote protocol also supports @value{GDBN}'s non-stop 
+execution mode; see @ref{Remote Non-Stop}, for details.
 
 @var{packet-data} consists of a sequence of characters with the
 exception of @samp{#} and @samp{$} (see @samp{X} packet for additional
@@ -24448,7 +24865,8 @@ The remote target both supports and has enabled extended mode.
 @item ?
 @cindex @samp{?} packet
 Indicate the reason the target halted.  The reply is the same as for
-step and continue.
+step and continue.  This packet has a special interpretation when the
+target is in non-stop mode; see @ref{Remote Non-Stop}.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
@@ -24489,6 +24907,22 @@ breakpoint at @var{addr}.
 
 Don't use this packet.  Use the @samp{Z} and @samp{z} packets instead
 (@pxref{insert breakpoint or watchpoint packet}).
+
+@item bc
+@cindex @samp{bc} packet
+Backward continue.  Execute the target system in reverse.  No parameter.
+@xref{Reverse Execution}, for more information.
+
+Reply:
+@xref{Stop Reply Packets}, for the reply specifications.
+
+@item bs
+@cindex @samp{bs} packet
+Backward single step.  Execute one instruction in reverse.  No parameter.
+@xref{Reverse Execution}, for more information.
+
+Reply:
+@xref{Stop Reply Packets}, for the reply specifications.
 
 @item c @r{[}@var{addr}@r{]}
 @cindex @samp{c} packet
@@ -24752,9 +25186,20 @@ up to the first @samp{;} or @samp{?} (or the end of the packet).
 
 @item vAttach;@var{pid}
 @cindex @samp{vAttach} packet
-Attach to a new process with the specified process ID.  @var{pid} is a
-hexadecimal integer identifying the process.  The attached process is
-stopped.
+Attach to a new process with the specified process ID @var{pid}.
+The process ID is a
+hexadecimal integer identifying the process.  In all-stop mode, all
+threads in the attached process are stopped; in non-stop mode, it may be
+attached without being stopped if that is supported by the target.
+
+@c In non-stop mode, on a successful vAttach, the stub should set the
+@c current thread to a thread of the newly-attached process.  After
+@c attaching, GDB queries for the attached process's thread ID with qC.
+@c Also note that, from a user perspective, whether or not the 
+@c target is stopped on attach in non-stop mode depends on whether you 
+@c use the foreground or background version of the attach command, not 
+@c on what vAttach does; GDB does the right thing with respect to either 
+@c stopping or restarting threads.
 
 This packet is only available in extended mode (@pxref{extended mode}).
 
@@ -24763,7 +25208,9 @@ Reply:
 @item E @var{nn}
 for an error
 @item @r{Any stop packet}
-for success (@pxref{Stop Reply Packets})
+for success in all-stop mode (@pxref{Stop Reply Packets})
+@item OK
+for success in non-stop mode (@pxref{Remote Non-Stop})
 @end table
 
 @item vCont@r{[};@var{action}@r{[}:@var{thread-id}@r{]]}@dots{}
@@ -24771,7 +25218,9 @@ for success (@pxref{Stop Reply Packets})
 Resume the inferior, specifying different actions for each thread.
 If an action is specified with no @var{thread-id}, then it is applied to any
 threads that don't have a specific action specified; if no default action is
-specified then other threads should remain stopped.  Specifying multiple
+specified then other threads should remain stopped in all-stop mode and
+in their current state in non-stop mode.
+Specifying multiple
 default actions is an error; specifying no actions is also an error.
 Thread IDs are specified using the syntax described in @ref{thread-id syntax}.
 
@@ -24781,15 +25230,28 @@ Currently supported actions are:
 @item c
 Continue.
 @item C @var{sig}
-Continue with signal @var{sig}.  @var{sig} should be two hex digits.
+Continue with signal @var{sig}.  The signal @var{sig} should be two hex digits.
 @item s
 Step.
 @item S @var{sig}
-Step with signal @var{sig}.  @var{sig} should be two hex digits.
+Step with signal @var{sig}.  The signal @var{sig} should be two hex digits.
+@item t
+Stop.
+@item T @var{sig}
+Stop with signal @var{sig}.  The signal @var{sig} should be two hex digits.
 @end table
 
-The optional @var{addr} argument normally associated with these packets is
+The optional argument @var{addr} normally associated with the 
+@samp{c}, @samp{C}, @samp{s}, and @samp{S} packets is
 not supported in @samp{vCont}.
+
+The @samp{t} and @samp{T} actions are only relevant in non-stop mode
+(@pxref{Remote Non-Stop}) and may be ignored by the stub otherwise.  
+A stop reply should be generated for any affected thread not already stopped.
+When a thread is stopped by means of a @samp{t} action,
+the corresponding stop reply should indicate that the thread has stopped with
+signal @samp{0}, regardless of whether the target uses some other signal
+as an implementation detail.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
@@ -24893,6 +25355,8 @@ command line.  The file and arguments are hex-encoded strings.  If
 (e.g.@: the last program run).  The program is created in the stopped
 state.
 
+@c FIXME:  What about non-stop mode?
+
 This packet is only available in extended mode (@pxref{extended mode}).
 
 Reply:
@@ -24901,6 +25365,21 @@ Reply:
 for an error
 @item @r{Any stop packet}
 for success (@pxref{Stop Reply Packets})
+@end table
+
+@item vStopped
+@anchor{vStopped packet}
+@cindex @samp{vStopped} packet
+
+In non-stop mode (@pxref{Remote Non-Stop}), acknowledge a previous stop
+reply and prompt for the stub to report another one.
+
+Reply:
+@table @samp
+@item @r{Any stop packet}
+if there is another unreported stop event (@pxref{Stop Reply Packets})
+@item OK
+if there are no unreported stop events
 @end table
 
 @item X @var{addr},@var{length}:@var{XX@dots{}}
@@ -25042,9 +25521,10 @@ for an error
 @section Stop Reply Packets
 @cindex stop reply packets
 
-The @samp{C}, @samp{c}, @samp{S}, @samp{s} and @samp{?} packets can
-receive any of the below as a reply.  In the case of the @samp{C},
-@samp{c}, @samp{S} and @samp{s} packets, that reply is only returned
+The @samp{C}, @samp{c}, @samp{S}, @samp{s}, @samp{vCont},
+@samp{vAttach}, @samp{vRun}, @samp{vStopped}, and @samp{?} packets can
+receive any of the below as a reply.  Except for @samp{?}
+and @samp{vStopped}, that reply is only returned
 when the target halts.  In the below the exact meaning of @dfn{signal
 number} is defined by the header @file{include/gdb/signals.h} in the
 @value{GDBN} source code.
@@ -25107,6 +25587,16 @@ hex.
 The packet indicates that the loaded libraries have changed.
 @value{GDBN} should use @samp{qXfer:libraries:read} to fetch a new
 list of loaded libraries.  @var{r} is ignored.
+
+@cindex replay log events, remote reply
+@item replaylog
+The packet indicates that the target cannot continue replaying 
+logged execution events, because it has reached the end (or the
+beginning when executing backward) of the log.  The value of @var{r}
+will be either @samp{begin} or @samp{end}.  @xref{Reverse Execution}, 
+for more information.
+
+
 @end table
 
 @item W @var{AA}
@@ -25132,7 +25622,7 @@ extensions}.  The @var{pid} is formatted as a big-endian hex string.
 @samp{@var{XX}@dots{}} is hex encoding of @sc{ascii} data, to be
 written as the program's console output.  This can happen at any time
 while the program is running and the debugger should continue to wait
-for @samp{W}, @samp{T}, etc.
+for @samp{W}, @samp{T}, etc.  This reply is not permitted in non-stop mode.
 
 @item F @var{call-id},@var{parameter}@dots{}
 @var{call-id} is the identifier which says which host system call should
@@ -25356,6 +25846,32 @@ Don't use this packet; use the @samp{qThreadExtraInfo} query instead
 (see below).
 
 Reply: see @code{remote.c:remote_unpack_thread_info_response()}.
+
+@item QNonStop:1
+@item QNonStop:0
+@cindex non-stop mode, remote request
+@cindex @samp{QNonStop} packet
+@anchor{QNonStop}
+Enter non-stop (@samp{QNonStop:1}) or all-stop (@samp{QNonStop:0}) mode.
+@xref{Remote Non-Stop}, for more information.
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+
+@item E @var{nn}
+An error occurred.  @var{nn} are hex digits.
+
+@item
+An empty reply indicates that @samp{QNonStop} is not supported by
+the stub.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+Use of this packet is controlled by the @code{set non-stop} command; 
+@pxref{Non-Stop Mode}.
 
 @item QPassSignals: @var{signal} @r{[};@var{signal}@r{]}@dots{}
 @cindex pass signals to inferior, remote request
@@ -25599,6 +26115,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{QNonStop}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{QPassSignals}
 @tab No
 @tab @samp{-}
@@ -25653,6 +26174,10 @@ The remote stub understands the @samp{qXfer:spu:read} packet
 @item qXfer:spu:write
 The remote stub understands the @samp{qXfer:spu:write} packet
 (@pxref{qXfer spu write}).
+
+@item QNonStop
+The remote stub understands the @samp{QNonStop} packet
+(@pxref{QNonStop}).
 
 @item QPassSignals
 The remote stub understands the @samp{QPassSignals} packet
@@ -26215,11 +26740,148 @@ and does @emph{not} represent an interrupt.  E.g., an @samp{X} packet
 
 Stubs are not required to recognize these interrupt mechanisms and the
 precise meaning associated with receipt of the interrupt is
-implementation defined.  If the stub is successful at interrupting the
-running program, it is expected that it will send one of the Stop
-Reply Packets (@pxref{Stop Reply Packets}) to @value{GDBN} as a result
-of successfully stopping the program.  Interrupts received while the
-program is stopped will be discarded.
+implementation defined.  If the target supports debugging of multiple
+threads and/or processes, it should attempt to interrupt all 
+currently-executing threads and processes.
+If the stub is successful at interrupting the
+running program, it should send one of the stop
+reply packets (@pxref{Stop Reply Packets}) to @value{GDBN} as a result
+of successfully stopping the program in all-stop mode, and a stop reply
+for each stopped thread in non-stop mode.
+Interrupts received while the
+program is stopped are discarded.
+
+@node Notification Packets
+@section Notification Packets
+@cindex notification packets
+@cindex packets, notification
+
+The @value{GDBN} remote serial protocol includes @dfn{notifications},
+packets that require no acknowledgment.  Both the GDB and the stub
+may send notifications (although the only notifications defined at
+present are sent by the stub).  Notifications carry information
+without incurring the round-trip latency of an acknowledgment, and so
+are useful for low-impact communications where occasional packet loss
+is not a problem.
+
+A notification packet has the form @samp{% @var{data} #
+@var{checksum}}, where @var{data} is the content of the notification,
+and @var{checksum} is a checksum of @var{data}, computed and formatted
+as for ordinary @value{GDBN} packets.  A notification's @var{data}
+never contains @samp{$}, @samp{%} or @samp{#} characters.  Upon
+receiving a notification, the recipient sends no @samp{+} or @samp{-}
+to acknowledge the notification's receipt or to report its corruption.
+
+Every notification's @var{data} begins with a name, which contains no
+colon characters, followed by a colon character.
+
+Recipients should silently ignore corrupted notifications and
+notifications they do not understand.  Recipients should restart
+timeout periods on receipt of a well-formed notification, whether or
+not they understand it.
+
+Senders should only send the notifications described here when this
+protocol description specifies that they are permitted.  In the
+future, we may extend the protocol to permit existing notifications in
+new contexts; this rule helps older senders avoid confusing newer
+recipients.
+
+(Older versions of @value{GDBN} ignore bytes received until they see
+the @samp{$} byte that begins an ordinary packet, so new stubs may
+transmit notifications without fear of confusing older clients.  There
+are no notifications defined for @value{GDBN} to send at the moment, but we
+assume that most older stubs would ignore them, as well.)
+
+The following notification packets from the stub to @value{GDBN} are
+defined:
+
+@table @samp
+@item Stop: @var{reply}
+Report an asynchronous stop event in non-stop mode.  
+The @var{reply} has the form of a stop reply, as
+described in @ref{Stop Reply Packets}.  Refer to @ref{Remote Non-Stop},
+for information on how these notifications are acknowledged by 
+@value{GDBN}.
+@end table
+
+@node Remote Non-Stop
+@section Remote Protocol Support for Non-Stop Mode
+
+@value{GDBN}'s remote protocol supports non-stop debugging of
+multi-threaded programs, as described in @ref{Non-Stop Mode}.  If the stub
+supports non-stop mode, it should report that to @value{GDBN} by including
+@samp{QNonStop+} in its @samp{qSupported} response (@pxref{qSupported}).
+
+@value{GDBN} typically sends a @samp{QNonStop} packet only when
+establishing a new connection with the stub.  Entering non-stop mode
+does not alter the state of any currently-running threads, but targets
+must stop all threads in any already-attached processes when entering
+all-stop mode.  @value{GDBN} uses the @samp{?} packet as necessary to
+probe the target state after a mode change.
+
+In non-stop mode, when an attached process encounters an event that
+would otherwise be reported with a stop reply, it uses the
+asynchronous notification mechanism (@pxref{Notification Packets}) to
+inform @value{GDBN}.  In contrast to all-stop mode, where all threads
+in all processes are stopped when a stop reply is sent, in non-stop
+mode only the thread reporting the stop event is stopped.  That is,
+when reporting a @samp{S} or @samp{T} response to indicate completion
+of a step operation, hitting a breakpoint, or a fault, only the
+affected thread is stopped; any other still-running threads continue
+to run.  When reporting a @samp{W} or @samp{X} response, all running
+threads belonging to other attached processes continue to run.
+
+Only one stop reply notification at a time may be pending; if
+additional stop events occur before @value{GDBN} has acknowledged the
+previous notification, they must be queued by the stub for later
+synchronous transmission in response to @samp{vStopped} packets from
+@value{GDBN}.  Because the notification mechanism is unreliable, 
+the stub is permitted to resend a stop reply notification
+if it believes @value{GDBN} may not have received it.  @value{GDBN}
+ignores additional stop reply notifications received before it has
+finished processing a previous notification and the stub has completed
+sending any queued stop events.
+
+Otherwise, @value{GDBN} must be prepared to receive a stop reply
+notification at any time.  Specifically, they may appear when
+@value{GDBN} is not otherwise reading input from the stub, or when
+@value{GDBN} is expecting to read a normal synchronous response or a
+@samp{+}/@samp{-} acknowledgment to a packet it has sent.
+Notification packets are distinct from any other communication from
+the stub so there is no ambiguity.
+
+After receiving a stop reply notification, @value{GDBN} shall
+acknowledge it by sending a @samp{vStopped} packet (@pxref{vStopped packet})
+as a regular, synchronous request to the stub.  Such acknowledgment
+is not required to happen immediately, as @value{GDBN} is permitted to
+send other, unrelated packets to the stub first, which the stub should
+process normally.
+
+Upon receiving a @samp{vStopped} packet, if the stub has other queued
+stop events to report to @value{GDBN}, it shall respond by sending a
+normal stop reply response.  @value{GDBN} shall then send another
+@samp{vStopped} packet to solicit further responses; again, it is
+permitted to send other, unrelated packets as well which the stub
+should process normally.
+
+If the stub receives a @samp{vStopped} packet and there are no
+additional stop events to report, the stub shall return an @samp{OK}
+response.  At this point, if further stop events occur, the stub shall
+send a new stop reply notification, @value{GDBN} shall accept the
+notification, and the process shall be repeated.
+
+In non-stop mode, the target shall respond to the @samp{?} packet as
+follows.  First, any incomplete stop reply notification/@samp{vStopped} 
+sequence in progress is abandoned.  The target must begin a new
+sequence reporting stop events for all stopped threads, whether or not
+it has previously reported those events to @value{GDBN}.  The first
+stop reply is sent as a synchronous reply to the @samp{?} packet, and
+subsequent stop replies are sent as responses to @samp{vStopped} packets
+using the mechanism described above.  The target must not send
+asynchronous stop reply notifications until the sequence is complete.
+If all threads are running when the target receives the @samp{?} packet,
+or if the target is not attached to any process, it shall respond
+@samp{OK}.
 
 @node Packet Acknowledgment
 @section Packet Acknowledgment
@@ -26263,7 +26925,6 @@ Since @samp{+}/@samp{-} acknowledgments are enabled by default when a
 new connection is established,
 there is also no protocol request to re-enable the acknowledgments
 for the current connection, once disabled.
-
 
 @node Examples
 @section Examples
@@ -26358,6 +27019,8 @@ The protocol only supports I/O on the console and to regular files on
 the host file system.  Character or block special devices, pipes,
 named pipes, sockets or any other communication method on the host
 system are not supported by this protocol.
+
+File I/O is not supported in non-stop mode.
 
 @node Protocol Basics
 @subsection Protocol Basics

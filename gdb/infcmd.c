@@ -51,6 +51,7 @@
 #include "exceptions.h"
 #include "cli/cli-decode.h"
 #include "gdbthread.h"
+#include "valprint.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -85,8 +86,6 @@ static void unset_command (char *, int);
 
 static void float_info (char *, int);
 
-static void detach_command (char *, int);
-
 static void disconnect_command (char *, int);
 
 static void unset_environment_command (char *, int);
@@ -119,8 +118,6 @@ static void go_command (char *line_no, int from_tty);
 static int strip_bg_char (char **);
 
 void _initialize_infcmd (void);
-
-#define GO_USAGE   "Usage: go <location>\n"
 
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error (_("The program is not being run."));
@@ -271,7 +268,7 @@ construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
 
       /* We over-compute the size.  It shouldn't matter.  */
       for (i = 0; i < argc; ++i)
-	length += 2 * strlen (argv[i]) + 1 + 2 * (argv[i][0] == '\0');
+	length += 3 * strlen (argv[i]) + 1 + 2 * (argv[i][0] == '\0');
 
       result = (char *) xmalloc (length);
       out = result;
@@ -291,9 +288,21 @@ construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
 	    {
 	      for (cp = argv[i]; *cp; ++cp)
 		{
-		  if (strchr (special, *cp) != NULL)
-		    *out++ = '\\';
-		  *out++ = *cp;
+		  if (*cp == '\n')
+		    {
+		      /* A newline cannot be quoted with a backslash (it
+			 just disappears), only by putting it inside
+			 quotes.  */
+		      *out++ = '\'';
+		      *out++ = '\n';
+		      *out++ = '\'';
+		    }
+		  else
+		    {
+		      if (strchr (special, *cp) != NULL)
+			*out++ = '\\';
+		      *out++ = *cp;
+		    }
 		}
 	    }
 	}
@@ -387,7 +396,9 @@ post_create_inferior (struct target_ops *target, int from_tty)
      don't need to.  */
   target_find_description ();
 
-  if (exec_bfd)
+  /* If the solist is global across processes, there's no need to
+     refetch it here.  */
+  if (exec_bfd && !gdbarch_has_global_solist (target_gdbarch))
     {
       /* Sometimes the platform-specific hook loads initial shared
 	 libraries, and sometimes it doesn't.  Try to do so first, so
@@ -399,7 +410,10 @@ post_create_inferior (struct target_ops *target, int from_tty)
 #else
       solib_add (NULL, from_tty, target, auto_solib_add);
 #endif
+    }
 
+  if (exec_bfd)
+    {
       /* Create the hooks to handle shared library load and unload
 	 events.  */
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
@@ -572,6 +586,15 @@ start_command (char *args, int from_tty)
 static int
 proceed_thread_callback (struct thread_info *thread, void *arg)
 {
+  /* We go through all threads individually instead of compressing
+     into a single target `resume_all' request, because some threads
+     may be stopped in internal breakpoints/events, or stopped waiting
+     for its turn in the displaced stepping queue (that is, they are
+     running && !executing).  The target side has no idea about why
+     the thread is stopped, so a `resume_all' command would resume too
+     much.  If/when GDB gains a way to tell the target `hold this
+     thread stopped until I say otherwise', then we can optimize
+     this.  */
   if (!is_stopped (thread->ptid))
     return 0;
 
@@ -1055,7 +1078,7 @@ static void
 go_command (char *line_no, int from_tty)
 {
   if (line_no == (char *) NULL || !*line_no)
-    printf_filtered (GO_USAGE);
+    printf_filtered (_("Usage: go <location>\n"));
   else
     {
       tbreak_command (line_no, from_tty);
@@ -1284,6 +1307,8 @@ print_return_value (struct type *func_type, struct type *value_type)
 
   if (value)
     {
+      struct value_print_options opts;
+
       /* Print it.  */
       stb = ui_out_stream_new (uiout);
       old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -1291,7 +1316,8 @@ print_return_value (struct type *func_type, struct type *value_type)
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
 			record_latest_value (value));
       ui_out_text (uiout, " = ");
-      value_print (value, stb->stream, 0, Val_no_prettyprint);
+      get_raw_print_options (&opts);
+      value_print (value, stb->stream, &opts);
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");
       do_cleanups (old_chain);
@@ -1366,19 +1392,109 @@ finish_command_continuation_free_arg (void *arg)
   xfree (arg);
 }
 
+/* finish_backward -- helper function for finish_command.  */
+
+static void
+finish_backward (struct symbol *function)
+{
+  struct symtab_and_line sal;
+  struct thread_info *tp = inferior_thread ();
+  struct breakpoint *breakpoint;
+  struct cleanup *old_chain;
+  CORE_ADDR func_addr;
+  int back_up;
+
+  if (find_pc_partial_function (get_frame_pc (get_current_frame ()),
+				NULL, &func_addr, NULL) == 0)
+    internal_error (__FILE__, __LINE__,
+		    _("Finish: couldn't find function."));
+
+  sal = find_pc_line (func_addr, 0);
+
+  /* We don't need a return value.  */
+  tp->proceed_to_finish = 0;
+  /* Special case: if we're sitting at the function entry point,
+     then all we need to do is take a reverse singlestep.  We
+     don't need to set a breakpoint, and indeed it would do us
+     no good to do so.
+
+     Note that this can only happen at frame #0, since there's
+     no way that a function up the stack can have a return address
+     that's equal to its entry point.  */
+
+  if (sal.pc != read_pc ())
+    {
+      /* Set breakpoint and continue.  */
+      breakpoint =
+	set_momentary_breakpoint (sal,
+				  get_frame_id (get_selected_frame (NULL)),
+				  bp_breakpoint);
+      /* Tell the breakpoint to keep quiet.  We won't be done
+         until we've done another reverse single-step.  */
+      make_breakpoint_silent (breakpoint);
+      old_chain = make_cleanup_delete_breakpoint (breakpoint);
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+      /* We will be stopped when proceed returns.  */
+      back_up = bpstat_find_breakpoint (tp->stop_bpstat, breakpoint) != NULL;
+      do_cleanups (old_chain);
+    }
+  else
+    back_up = 1;
+  if (back_up)
+    {
+      /* If in fact we hit the step-resume breakpoint (and not
+	 some other breakpoint), then we're almost there --
+	 we just need to back up by one more single-step.  */
+      tp->step_range_start = tp->step_range_end = 1;
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
+    }
+  return;
+}
+
+/* finish_forward -- helper function for finish_command.  */
+
+static void
+finish_forward (struct symbol *function, struct frame_info *frame)
+{
+  struct symtab_and_line sal;
+  struct thread_info *tp = inferior_thread ();
+  struct breakpoint *breakpoint;
+  struct cleanup *old_chain;
+  struct finish_command_continuation_args *cargs;
+
+  sal = find_pc_line (get_frame_pc (frame), 0);
+  sal.pc = get_frame_pc (frame);
+
+  breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame),
+                                         bp_finish);
+
+  old_chain = make_cleanup_delete_breakpoint (breakpoint);
+
+  tp->proceed_to_finish = 1;    /* We want stop_registers, please...  */
+  make_cleanup_restore_integer (&suppress_stop_observer);
+  suppress_stop_observer = 1;
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+
+  cargs = xmalloc (sizeof (*cargs));
+
+  cargs->breakpoint = breakpoint;
+  cargs->function = function;
+  add_continuation (tp, finish_command_continuation, cargs,
+                    finish_command_continuation_free_arg);
+
+  discard_cleanups (old_chain);
+  if (!target_can_async_p ())
+    do_all_continuations ();
+}
+
 /* "finish": Set a temporary breakpoint at the place the selected
    frame will return to, then continue.  */
 
 static void
 finish_command (char *arg, int from_tty)
 {
-  struct symtab_and_line sal;
   struct frame_info *frame;
   struct symbol *function;
-  struct breakpoint *breakpoint;
-  struct cleanup *old_chain;
-  struct finish_command_continuation_args *cargs;
-  struct thread_info *tp;
 
   int async_exec = 0;
 
@@ -1390,6 +1506,10 @@ finish_command (char *arg, int from_tty)
      error out.  */
   if (async_exec && !target_can_async_p ())
     error (_("Asynchronous execution not supported on this target."));
+
+  /* Don't try to async in reverse.  */
+  if (async_exec && execution_direction == EXEC_REVERSE)
+    error (_("Asynchronous 'finish' not supported in reverse."));
 
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously.  */
@@ -1408,16 +1528,7 @@ finish_command (char *arg, int from_tty)
   if (frame == 0)
     error (_("\"finish\" not meaningful in the outermost frame."));
 
-  tp = inferior_thread ();
-
   clear_proceed_status ();
-
-  sal = find_pc_line (get_frame_pc (frame), 0);
-  sal.pc = get_frame_pc (frame);
-
-  breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame), bp_finish);
-
-  old_chain = make_cleanup_delete_breakpoint (breakpoint);
 
   /* Find the function we will return from.  */
 
@@ -1427,25 +1538,18 @@ finish_command (char *arg, int from_tty)
      source.  */
   if (from_tty)
     {
-      printf_filtered (_("Run till exit from "));
+      if (execution_direction == EXEC_REVERSE)
+	printf_filtered (_("Run back to call of "));
+      else
+	printf_filtered (_("Run till exit from "));
+
       print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
     }
 
-  tp->proceed_to_finish = 1;	/* We want stop_registers, please...  */
-  make_cleanup_restore_integer (&suppress_stop_observer);
-  suppress_stop_observer = 1;
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
-
-  cargs = xmalloc (sizeof (*cargs));
-
-  cargs->breakpoint = breakpoint;
-  cargs->function = function;
-  add_continuation (tp, finish_command_continuation, cargs,
-		    finish_command_continuation_free_arg);
-
-  discard_cleanups (old_chain);
-  if (!target_can_async_p ())
-    do_all_continuations ();
+  if (execution_direction == EXEC_REVERSE)
+    finish_backward (function);
+  else
+    finish_forward (function, frame);
 }
 
 
@@ -1727,9 +1831,12 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	  || TYPE_CODE (register_type (gdbarch, i)) == TYPE_CODE_DECFLOAT)
 	{
 	  int j;
+	  struct value_print_options opts;
 
+	  get_user_print_options (&opts);
+	  opts.deref_ref = 1;
 	  val_print (register_type (gdbarch, i), buffer, 0, 0,
-		     file, 0, 1, 0, Val_pretty_default, current_language);
+		     file, 0, &opts, current_language);
 
 	  fprintf_filtered (file, "\t(raw 0x");
 	  for (j = 0; j < register_size (gdbarch, i); j++)
@@ -1745,16 +1852,23 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	}
       else
 	{
+	  struct value_print_options opts;
+
 	  /* Print the register in hex.  */
+	  get_formatted_print_options (&opts, 'x');
+	  opts.deref_ref = 1;
 	  val_print (register_type (gdbarch, i), buffer, 0, 0,
-		     file, 'x', 1, 0, Val_pretty_default, current_language);
+		     file, 0, &opts,
+		     current_language);
           /* If not a vector register, print it also according to its
              natural format.  */
 	  if (TYPE_VECTOR (register_type (gdbarch, i)) == 0)
 	    {
+	      get_user_print_options (&opts);
+	      opts.deref_ref = 1;
 	      fprintf_filtered (file, "\t");
 	      val_print (register_type (gdbarch, i), buffer, 0, 0,
-			 file, 0, 1, 0, Val_pretty_default, current_language);
+			 file, 0, &opts, current_language);
 	    }
 	}
 
@@ -1820,12 +1934,14 @@ registers_info (char *addr_exp, int fpregs)
 	    if (regnum >= gdbarch_num_regs (gdbarch)
 			  + gdbarch_num_pseudo_regs (gdbarch))
 	      {
+		struct value_print_options opts;
 		struct value *val = value_of_user_reg (regnum, frame);
 
 		printf_filtered ("%s: ", start);
+		get_formatted_print_options (&opts, 'x');
 		print_scalar_formatted (value_contents (val),
 					check_typedef (value_type (val)),
-					'x', 0, gdb_stdout);
+					&opts, 0, gdb_stdout);
 		printf_filtered ("\n");
 	      }
 	    else
@@ -1935,6 +2051,48 @@ vector_info (char *args, int from_tty)
 }
 
 
+/* Used in `attach&' command.  ARG is a point to an integer
+   representing a process id.  Proceed threads of this process iff
+   they stopped due to debugger request, and when they did, they
+   reported a clean stop (TARGET_SIGNAL_0).  Do not proceed threads
+   that have been explicitly been told to stop.  */
+
+static int
+proceed_after_attach_callback (struct thread_info *thread,
+			       void *arg)
+{
+  int pid = * (int *) arg;
+
+  if (ptid_get_pid (thread->ptid) == pid
+      && !is_exited (thread->ptid)
+      && !is_executing (thread->ptid)
+      && !thread->stop_requested
+      && thread->stop_signal == TARGET_SIGNAL_0)
+    {
+      switch_to_thread (thread->ptid);
+      clear_proceed_status ();
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+    }
+
+  return 0;
+}
+
+static void
+proceed_after_attach (int pid)
+{
+  /* Don't error out if the current thread is running, because
+     there may be other stopped threads.  */
+  struct cleanup *old_chain;
+
+  /* Backup current thread and selected frame.  */
+  old_chain = make_cleanup_restore_current_thread ();
+
+  iterate_over_threads (proceed_after_attach_callback, &pid);
+
+  /* Restore selected ptid.  */
+  do_cleanups (old_chain);
+}
+
 /*
  * TODO:
  * Should save/restore the tty state since it might be that the
@@ -1999,11 +2157,44 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
   target_terminal_inferior ();
 
   if (async_exec)
-    proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
+    {
+      /* The user requested an `attach&', so be sure to leave threads
+	 that didn't get a signal running.  */
+
+      /* Immediatelly resume all suspended threads of this inferior,
+	 and this inferior only.  This should have no effect on
+	 already running threads.  If a thread has been stopped with a
+	 signal, leave it be.  */
+      if (non_stop)
+	proceed_after_attach (inferior->pid);
+      else
+	{
+	  if (inferior_thread ()->stop_signal == TARGET_SIGNAL_0)
+	    {
+	      clear_proceed_status ();
+	      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+	    }
+	}
+    }
   else
     {
+      /* The user requested a plain `attach', so be sure to leave
+	 the inferior stopped.  */
+
       if (target_can_async_p ())
 	async_enable_stdin ();
+
+      /* At least the current thread is already stopped.  */
+
+      /* In all-stop, by definition, all threads have to be already
+	 stopped at this point.  In non-stop, however, although the
+	 selected thread is stopped, others may still be executing.
+	 Be sure to explicitly stop all threads of the process.  This
+	 should have no effect on already stopped threads.  */
+      if (non_stop)
+	target_stop (pid_to_ptid (inferior->pid));
+
+      /* Tell the user/frontend where we're stopped.  */
       normal_stop ();
       if (deprecated_attach_hook)
 	deprecated_attach_hook ();
@@ -2038,10 +2229,14 @@ attach_command (char *args, int from_tty)
   char *exec_file;
   char *full_exec_path = NULL;
   int async_exec = 0;
+  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
   dont_repeat ();		/* Not for the faint of heart */
 
-  if (target_has_execution)
+  if (target_supports_multi_process ())
+    /* Don't complain if we can be attached to multiple processes.  */
+    ;
+  else if (target_has_execution)
     {
       if (query ("A program is being debugged already.  Kill it? "))
 	target_kill ();
@@ -2072,6 +2267,7 @@ attach_command (char *args, int from_tty)
     {
       /* Simulate synchronous execution */
       async_disable_stdin ();
+      make_cleanup ((make_cleanup_ftype *)async_enable_stdin, NULL);
     }
 
   target_attach (args, from_tty);
@@ -2084,6 +2280,21 @@ attach_command (char *args, int from_tty)
      wait_for_inferior as soon as the target reports a stop.  */
   init_wait_for_inferior ();
   clear_proceed_status ();
+
+  if (non_stop)
+    {
+      /* If we find that the current thread isn't stopped, explicitly
+	 do so now, because we're going to install breakpoints and
+	 poke at memory.  */
+
+      if (async_exec)
+	/* The user requested an `attach&'; stop just one thread.  */
+	target_stop (inferior_ptid);
+      else
+	/* The user requested an `attach', so stop all threads of this
+	   inferior.  */
+	target_stop (pid_to_ptid (ptid_get_pid (inferior_ptid)));
+    }
 
   /* Some system don't generate traps when attaching to inferior.
      E.g. Mach 3 or GNU hurd.  */
@@ -2107,9 +2318,9 @@ attach_command (char *args, int from_tty)
 	  a->args = xstrdup (args);
 	  a->from_tty = from_tty;
 	  a->async_exec = async_exec;
-	  add_continuation (inferior_thread (),
-			    attach_command_continuation, a,
-			    attach_command_continuation_free_args);
+	  add_inferior_continuation (attach_command_continuation, a,
+				     attach_command_continuation_free_args);
+	  discard_cleanups (back_to);
 	  return;
 	}
 
@@ -2117,6 +2328,7 @@ attach_command (char *args, int from_tty)
     }
 
   attach_command_post_wait (args, from_tty, async_exec);
+  discard_cleanups (back_to);
 }
 
 /*
@@ -2130,13 +2342,22 @@ attach_command (char *args, int from_tty)
  * started via the normal ptrace (PTRACE_TRACEME).
  */
 
-static void
+void
 detach_command (char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart.  */
   target_detach (args, from_tty);
-  no_shared_libraries (NULL, from_tty);
-  init_thread_list ();
+
+  /* If the solist is global across inferiors, don't clear it when we
+     detach from a single inferior.  */
+  if (!gdbarch_has_global_solist (target_gdbarch))
+    no_shared_libraries (NULL, from_tty);
+
+  /* If the current target interface claims there's still execution,
+     then don't mess with threads of other processes.  */
+  if (!target_has_execution)
+    init_thread_list ();
+
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
 }
@@ -2169,6 +2390,15 @@ interrupt_target_1 (int all_threads)
   else
     ptid = inferior_ptid;
   target_stop (ptid);
+
+  /* Tag the thread as having been explicitly requested to stop, so
+     other parts of gdb know not to resume this thread automatically,
+     if it was stopped due to an internal event.  Limit this to
+     non-stop mode, as when debugging a multi-threaded application in
+     all-stop mode, we will only get one stop event --- it's undefined
+     which thread will report the event.  */
+  if (non_stop)
+    set_stop_requested (ptid, 1);
 }
 
 /* Stop the execution of the target while running in async mode, in

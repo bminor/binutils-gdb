@@ -28,6 +28,7 @@
 #define PPC_FEATURE_HAS_VSX		0x00000080
 #define PPC_FEATURE_HAS_ALTIVEC         0x10000000
 #define PPC_FEATURE_HAS_SPE             0x00800000
+#define PPC_FEATURE_ARCH_2_05           0x00001000
 
 static unsigned long ppc_hwcap;
 
@@ -38,6 +39,12 @@ void init_registers_powerpc_32l (void);
 void init_registers_powerpc_altivec32l (void);
 /* Defined in auto-generated file powerpc-vsx32l.c.  */
 void init_registers_powerpc_vsx32l (void);
+/* Defined in auto-generated file powerpc-isa205-32l.c.  */
+void init_registers_powerpc_isa205_32l (void);
+/* Defined in auto-generated file powerpc-isa205-altivec32l.c.  */
+void init_registers_powerpc_isa205_altivec32l (void);
+/* Defined in auto-generated file powerpc-isa205-vsx32l.c.  */
+void init_registers_powerpc_isa205_vsx32l (void);
 /* Defined in auto-generated file powerpc-e500l.c.  */
 void init_registers_powerpc_e500l (void);
 /* Defined in auto-generated file powerpc-64l.c.  */
@@ -46,6 +53,12 @@ void init_registers_powerpc_64l (void);
 void init_registers_powerpc_altivec64l (void);
 /* Defined in auto-generated file powerpc-vsx64l.c.  */
 void init_registers_powerpc_vsx64l (void);
+/* Defined in auto-generated file powerpc-isa205-64l.c.  */
+void init_registers_powerpc_isa205_64l (void);
+/* Defined in auto-generated file powerpc-isa205-altivec64l.c.  */
+void init_registers_powerpc_isa205_altivec64l (void);
+/* Defined in auto-generated file powerpc-isa205-vsx64l.c.  */
+void init_registers_powerpc_isa205_vsx64l (void);
 
 #define ppc_num_regs 73
 
@@ -260,9 +273,20 @@ ppc_arch_setup (void)
     {
       ppc_get_hwcap (&ppc_hwcap);
       if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
-	init_registers_powerpc_vsx64l ();
+	{
+	  if (ppc_hwcap & PPC_FEATURE_ARCH_2_05)
+	    init_registers_powerpc_isa205_vsx64l ();
+	  else
+	    init_registers_powerpc_vsx64l ();
+	}
       else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
-	init_registers_powerpc_altivec64l ();
+	{
+	  if (ppc_hwcap & PPC_FEATURE_ARCH_2_05)
+	    init_registers_powerpc_isa205_altivec64l ();
+	  else
+	    init_registers_powerpc_altivec64l ();
+	}
+
       return;
     }
 #endif
@@ -272,10 +296,19 @@ ppc_arch_setup (void)
 
   ppc_get_hwcap (&ppc_hwcap);
   if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
-    init_registers_powerpc_vsx32l ();
+    {
+      if (ppc_hwcap & PPC_FEATURE_ARCH_2_05)
+	init_registers_powerpc_isa205_vsx32l ();
+      else
+	init_registers_powerpc_vsx32l ();
+    }
   else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
-    init_registers_powerpc_altivec32l ();
-
+    {
+      if (ppc_hwcap & PPC_FEATURE_ARCH_2_05)
+	init_registers_powerpc_isa205_altivec32l ();
+      else
+	init_registers_powerpc_altivec32l ();
+    }
 
   /* On 32-bit machines, check for SPE registers.
      Set the low target's regmap field as appropriately.  */
@@ -286,6 +319,12 @@ ppc_arch_setup (void)
       init_registers_powerpc_e500l ();
       the_low_target.regmap = ppc_regmap_e500;
    }
+
+  /* If the FPSCR is 64-bit wide, we need to fetch the whole 64-bit
+     slot and not just its second word.  The PT_FPSCR supplied in a
+     32-bit GDB compilation doesn't reflect this.  */
+  if (register_size (70) == 8)
+    ppc_regmap[70] = (48 + 2*32) * sizeof (long);
 #endif
 }
 

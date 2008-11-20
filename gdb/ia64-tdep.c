@@ -547,9 +547,6 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
    pattern was used by the simulator that I was using.)  So I ended up
    using the pattern seen below. */
 
-#if 0
-#define IA64_BREAKPOINT 0x00002000040LL
-#endif
 #define IA64_BREAKPOINT 0x00003333300LL
 
 static int

@@ -821,8 +821,7 @@ defining @code{I386_USE_GENERIC_WATCHPOINTS}.
 
 @item
 Add @file{i386-nat.o} to the value of the Make variable
-@code{NATDEPFILES} (@pxref{Native Debugging, NATDEPFILES}) or
-@code{TDEPFILES} (@pxref{Target Architecture Definition, TDEPFILES}).
+@code{NATDEPFILES} (@pxref{Native Debugging, NATDEPFILES}).
 
 @item
 Provide implementations for the @code{I386_DR_LOW_*} macros described
@@ -4106,15 +4105,7 @@ Defaults to @code{1}.
 The following files add a target to @value{GDBN}:
 
 @table @file
-@vindex TDEPFILES
-@item gdb/config/@var{arch}/@var{ttt}.mt
-Contains a Makefile fragment specific to this target.  Specifies what
-object files are needed for target @var{ttt}, by defining
-@samp{TDEPFILES=@dots{}} and @samp{TDEPLIBS=@dots{}}.
-
-You can also define @samp{TM_CLIBS} and @samp{TM_CDEPS}, but these are
-now deprecated, replaced by autoconf, and may go away in future
-versions of @value{GDBN}.
+@cindex target dependent files
 
 @item gdb/@var{ttt}-tdep.c
 Contains any miscellaneous code required for this target machine.  On

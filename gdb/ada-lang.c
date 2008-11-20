@@ -202,8 +202,6 @@ static int equiv_types (struct type *, struct type *);
 
 static int is_name_suffix (const char *);
 
-static int is_digits_suffix (const char *str);
-
 static int wild_match (const char *, int, const char *);
 
 static struct value *ada_coerce_ref (struct value *);
@@ -355,9 +353,9 @@ ada_get_gdb_completer_word_break_characters (void)
 
 static void
 ada_print_array_index (struct value *index_value, struct ui_file *stream,
-                       int format, enum val_prettyprint pretty)
+                       const struct value_print_options *options)
 {
-  LA_VALUE_PRINT (index_value, stream, format, pretty);
+  LA_VALUE_PRINT (index_value, stream, options);
   fprintf_filtered (stream, " => ");
 }
 
@@ -5022,17 +5020,6 @@ is_name_suffix (const char *str)
   return 0;
 }
 
-/* Return nonzero if the given string contains only digits.
-   The empty string also matches.  */
-
-static int
-is_digits_suffix (const char *str)
-{
-  while (isdigit (str[0]))
-    str++;
-  return (str[0] == '\0');
-}
-
 /* Return non-zero if the string starting at NAME and ending before
    NAME_END contains no capital letters.  */
 
@@ -7370,6 +7357,46 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
             if (real_type != NULL)
               return to_fixed_record_type (real_type, valaddr, address, NULL);
           }
+
+        /* Check to see if there is a parallel ___XVZ variable.
+           If there is, then it provides the actual size of our type.  */
+        else if (ada_type_name (fixed_record_type) != NULL)
+          {
+            char *name = ada_type_name (fixed_record_type);
+            char *xvz_name = alloca (strlen (name) + 7 /* "___XVZ\0" */);
+            int xvz_found = 0;
+            LONGEST size;
+
+            sprintf (xvz_name, "%s___XVZ", name);
+            size = get_int_var_value (xvz_name, &xvz_found);
+            if (xvz_found && TYPE_LENGTH (fixed_record_type) != size)
+              {
+                fixed_record_type = copy_type (fixed_record_type);
+                TYPE_LENGTH (fixed_record_type) = size;
+
+                /* The FIXED_RECORD_TYPE may have be a stub.  We have
+                   observed this when the debugging info is STABS, and
+                   apparently it is something that is hard to fix.
+
+                   In practice, we don't need the actual type definition
+                   at all, because the presence of the XVZ variable allows us
+                   to assume that there must be a XVS type as well, which we
+                   should be able to use later, when we need the actual type
+                   definition.
+
+                   In the meantime, pretend that the "fixed" type we are
+                   returning is NOT a stub, because this can cause trouble
+                   when using this type to create new types targeting it.
+                   Indeed, the associated creation routines often check
+                   whether the target type is a stub and will try to replace
+                   it, thus using a type with the wrong size. This, in turn,
+                   might cause the new type to have the wrong size too.
+                   Consider the case of an array, for instance, where the size
+                   of the array is computed from the number of elements in
+                   our array multiplied by the size of its element.  */
+                TYPE_STUB (fixed_record_type) = 0;
+              }
+          }
         return fixed_record_type;
       }
     case TYPE_CODE_ARRAY:
@@ -9069,14 +9096,21 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case OP_ATR_SIZE:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      type = value_type (arg1);
+
+      /* If the argument is a reference, then dereference its type, since
+         the user is really asking for the size of the actual object,
+         not the size of the pointer.  */
+      if (TYPE_CODE (type) == TYPE_CODE_REF)
+        type = TYPE_TARGET_TYPE (type);
+
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
         return value_zero (builtin_type_int32, not_lval);
       else
         return value_from_longest (builtin_type_int32,
-                                   TARGET_CHAR_BIT
-                                   * TYPE_LENGTH (value_type (arg1)));
+                                   TARGET_CHAR_BIT * TYPE_LENGTH (type));
 
     case OP_ATR_VAL:
       evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
@@ -9170,12 +9204,18 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg1 = ada_coerce_ref (arg1);     /* FIXME: What is this for?? */
       type = ada_check_typedef (value_type (arg1));
 
-      if (TYPE_CODE (type) == TYPE_CODE_INT && expect_type != NULL)
-	  /* GDB allows dereferencing an int.  We give it the expected
-	     type (which will be set in the case of a coercion or
-	     qualification). */
-	return ada_value_ind (value_cast (lookup_pointer_type (expect_type),
-					  arg1));
+      if (TYPE_CODE (type) == TYPE_CODE_INT)
+          /* GDB allows dereferencing an int.  If we were given
+             the expect_type, then use that as the target type.
+             Otherwise, assume that the target type is an int.  */
+        {
+          if (expect_type != NULL)
+	    return ada_value_ind (value_cast (lookup_pointer_type (expect_type),
+					      arg1));
+	  else
+	    return value_at_lazy (builtin_type (exp->gdbarch)->builtin_int,
+				  (CORE_ADDR) value_as_address (arg1));
+        }
 
       if (ada_is_array_descriptor_type (type))
         /* GDB allows dereferencing GNAT array descriptors.  */
@@ -9894,7 +9934,7 @@ is_known_support_routine (struct frame_info *frame)
 /* Find the first frame that contains debugging information and that is not
    part of the Ada run-time, starting from FI and moving upward.  */
 
-static void
+void
 ada_find_printable_frame (struct frame_info *fi)
 {
   for (; fi != NULL; fi = get_prev_frame (fi))
@@ -10066,7 +10106,10 @@ static void
 print_one_exception (enum exception_catchpoint_kind ex,
                      struct breakpoint *b, CORE_ADDR *last_addr)
 { 
-  if (addressprint)
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
+  if (opts.addressprint)
     {
       annotate_field (4);
       ui_out_field_core_addr (uiout, "addr", b->loc->address);
@@ -10158,6 +10201,9 @@ print_mention_catch_exception (struct breakpoint *b)
 
 static struct breakpoint_ops catch_exception_breakpoint_ops =
 {
+  NULL, /* insert */
+  NULL, /* remove */
+  NULL, /* breakpoint_hit */
   print_it_catch_exception,
   print_one_catch_exception,
   print_mention_catch_exception
@@ -10184,6 +10230,9 @@ print_mention_catch_exception_unhandled (struct breakpoint *b)
 }
 
 static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops = {
+  NULL, /* insert */
+  NULL, /* remove */
+  NULL, /* breakpoint_hit */
   print_it_catch_exception_unhandled,
   print_one_catch_exception_unhandled,
   print_mention_catch_exception_unhandled
@@ -10210,6 +10259,9 @@ print_mention_catch_assert (struct breakpoint *b)
 }
 
 static struct breakpoint_ops catch_assert_breakpoint_ops = {
+  NULL, /* insert */
+  NULL, /* remove */
+  NULL, /* breakpoint_hit */
   print_it_catch_assert,
   print_one_catch_assert,
   print_mention_catch_assert

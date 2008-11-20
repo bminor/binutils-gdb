@@ -1054,11 +1054,10 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		if (tsym.st != stMember)
 		  break;
 
-		FIELD_BITPOS (*f) = tsym.value;
+		SET_FIELD_BITPOS (*f, tsym.value);
 		FIELD_TYPE (*f) = t;
 		FIELD_NAME (*f) = debug_info->ss + cur_fdr->issBase + tsym.iss;
 		FIELD_BITSIZE (*f) = 0;
-		FIELD_STATIC_KIND (*f) = 0;
 
 		enum_sym = ((struct symbol *)
 			    obstack_alloc (&current_objfile->objfile_obstack,
@@ -1241,11 +1240,10 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
     case stMember:		/* member of struct or union */
       f = &TYPE_FIELDS (top_stack->cur_type)[top_stack->cur_field++];
       FIELD_NAME (*f) = name;
-      FIELD_BITPOS (*f) = sh->value;
+      SET_FIELD_BITPOS (*f, sh->value);
       bitsize = 0;
       FIELD_TYPE (*f) = parse_type (cur_fd, ax, sh->index, &bitsize, bigend, name);
       FIELD_BITSIZE (*f) = bitsize;
-      FIELD_STATIC_KIND (*f) = 0;
       break;
 
     case stIndirect:		/* forward declaration on Irix5 */
@@ -1777,12 +1775,9 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
          ignore the erroneous bitsize from the auxiliary entry safely.
          dbx seems to ignore it too.  */
 
-      /* TYPE_FLAG_TARGET_STUB now takes care of the zero TYPE_LENGTH
-         problem.  */
+      /* TYPE_TARGET_STUB now takes care of the zero TYPE_LENGTH problem.  */
       if (TYPE_LENGTH (*tpp) == 0)
-	{
-	  TYPE_TARGET_STUB (t) = 1;
-	}
+	TYPE_TARGET_STUB (t) = 1;
 
       *tpp = t;
       return 4 + off;
@@ -2211,7 +2206,7 @@ record_minimal_symbol (const char *name, const CORE_ADDR address,
         bfd_section = NULL;
     }
 
-  prim_record_minimal_symbol_and_info (name, address, ms_type, NULL,
+  prim_record_minimal_symbol_and_info (name, address, ms_type,
                                        section, bfd_section, objfile);
 }
 
@@ -3340,7 +3335,7 @@ parse_partial_symbols (struct objfile *objfile)
 
 		case stStaticProc:
 		  prim_record_minimal_symbol_and_info (name, sh.value,
-						       mst_file_text, NULL,
+						       mst_file_text,
 						       SECT_OFF_TEXT (objfile), NULL,
 						       objfile);
 
@@ -3426,13 +3421,13 @@ parse_partial_symbols (struct objfile *objfile)
 		case stStatic:	/* Variable */
 		  if (SC_IS_DATA (sh.sc))
 		    prim_record_minimal_symbol_and_info (name, sh.value,
-							 mst_file_data, NULL,
+							 mst_file_data,
 							 SECT_OFF_DATA (objfile),
 							 NULL,
 							 objfile);
 		  else
 		    prim_record_minimal_symbol_and_info (name, sh.value,
-							 mst_file_bss, NULL,
+							 mst_file_bss,
 							 SECT_OFF_BSS (objfile),
 							 NULL,
 							 objfile);

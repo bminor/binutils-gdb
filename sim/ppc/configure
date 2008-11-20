@@ -2715,10 +2715,263 @@ esac
 
 fi;
 
+echo "$as_me:$LINENO: checking if union semun defined" >&5
+echo $ECHO_N "checking if union semun defined... $ECHO_C" >&6
+if test "${ac_cv_HAS_UNION_SEMUN+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+int
+main ()
+{
+union semun arg ;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_has_union_semun="yes"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_has_union_semun="no"
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_cv_has_union_semun" >&5
+echo "${ECHO_T}$ac_cv_has_union_semun" >&6
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_HAS_UNION_SEMUN" >&5
+echo "${ECHO_T}$ac_cv_HAS_UNION_SEMUN" >&6
+
+
+if test "$ac_cv_has_union_semun" = "yes"; then
+  echo "$as_me:$LINENO: checking whether System V semaphores are supported" >&5
+echo $ECHO_N "checking whether System V semaphores are supported... $ECHO_C" >&6
+if test "${ac_cv_sysv_sem+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+  if test "$cross_compiling" = yes; then
+  :
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+  #include <sys/types.h>
+  #include <sys/ipc.h>
+  #include <sys/sem.h>
+  int main () {
+    union semun arg ;
+
+    int id=semget(IPC_PRIVATE,1,IPC_CREAT|0400);
+    if (id == -1)
+      exit(1);
+    arg.val = 0; /* avoid implicit type cast to union */
+    if (semctl(id, 0, IPC_RMID, arg) == -1)
+      exit(1);
+    exit(0);
+  }
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_sysv_sem="yes"
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+( exit $ac_status )
+ac_cv_sysv_sem="no"
+fi
+rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_sysv_sem" >&5
+echo "${ECHO_T}$ac_cv_sysv_sem" >&6
+else  # semun is not defined
+  echo "$as_me:$LINENO: checking whether System V semaphores are supported" >&5
+echo $ECHO_N "checking whether System V semaphores are supported... $ECHO_C" >&6
+if test "${ac_cv_sysv_sem+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+  if test "$cross_compiling" = yes; then
+  :
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+  #include <sys/types.h>
+  #include <sys/ipc.h>
+  #include <sys/sem.h>
+  union semun {
+    int val;
+    struct semid_ds *buf;
+    ushort *array;
+  };
+  int main () {
+    union semun arg ;
+
+    int id=semget(IPC_PRIVATE,1,IPC_CREAT|0400);
+    if (id == -1)
+      exit(1);
+    arg.val = 0; /* avoid implicit type cast to union */
+    if (semctl(id, 0, IPC_RMID, arg) == -1)
+      exit(1);
+    exit(0);
+  }
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_sysv_sem="yes"
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+( exit $ac_status )
+ac_cv_sysv_sem="no"
+fi
+rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_sysv_sem" >&5
+echo "${ECHO_T}$ac_cv_sysv_sem" >&6
+fi
+
+echo "$as_me:$LINENO: checking whether System V shared memory is supported" >&5
+echo $ECHO_N "checking whether System V shared memory is supported... $ECHO_C" >&6
+if test "${ac_cv_sysv_shm+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+if test "$cross_compiling" = yes; then
+  :
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+int main () {
+  int id=shmget(IPC_PRIVATE,1,IPC_CREAT|0400);
+  if (id == -1)
+    exit(1);
+  if (shmctl(id, IPC_RMID, 0) == -1)
+    exit(1);
+  exit(0);
+}
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_sysv_shm="yes"
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+( exit $ac_status )
+ac_cv_sysv_shm="no"
+fi
+rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_sysv_shm" >&5
+echo "${ECHO_T}$ac_cv_sysv_shm" >&6
+
+if test x"$ac_cv_sysv_shm" = x"yes" -a x"$ac_cv_sysv_sem" = x"yes" ; then
+  sim_sysv_ipc_hw=",sem,shm";
+else
+  sim_sysv_ipc_hw="";
+fi
+
+if test x"$ac_cv_has_union_semun" = x"yes" -a x"$ac_cv_sysv_sem" = x"yes" ; then
+  sim_hwflags="-DHAS_UNION_SEMUN";
+fi
+
+
 # Check whether --enable-sim-hardware or --disable-sim-hardware was given.
 if test "${enable_sim_hardware+set}" = set; then
   enableval="$enable_sim_hardware"
-  hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide"
+  hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide${sim_sysv_ipc_hw}"
 case "${enableval}" in
   yes)	;;
   no)	{ { echo "$as_me:$LINENO: error: \"List of hardware must be specified for --enable-sim-hardware\"" >&5
@@ -2734,14 +2987,13 @@ if test x"$silent" != x"yes" && test x"$hardware" != x""; then
   echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
 fi
 else
-  hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide"
+  hardware="cpu,memory,nvram,iobus,htab,disk,trace,register,vm,init,core,pal,com,eeprom,opic,glue,phb,ide${sim_sysv_ipc_hw}"
 sim_hw_src=`echo $hardware | sed -e 's/,/.c hw_/g' -e 's/^/hw_/' -e s'/$/.c/'`
 sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
 if test x"$silent" != x"yes"; then
   echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
 fi
 fi;
-
 # Check whether --enable-sim-hostbitsize or --disable-sim-hostbitsize was given.
 if test "${enable_sim_hostbitsize+set}" = set; then
   enableval="$enable_sim_hostbitsize"
@@ -2757,7 +3009,6 @@ fi
 else
   sim_hostbitsize=""
 fi;
-
 
 # Check whether --enable-sim-hostendian or --disable-sim-hostendian was given.
 if test "${enable_sim_hostendian+set}" = set; then

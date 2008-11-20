@@ -30,6 +30,7 @@
 #include "dictionary.h"
 #include "gdb_string.h"
 #include "language.h"
+#include "valprint.h"
 
 static void list_args_or_locals (int locals, int values, struct frame_info *fi);
 
@@ -280,21 +281,29 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 		      && TYPE_CODE (type) != TYPE_CODE_STRUCT
 		      && TYPE_CODE (type) != TYPE_CODE_UNION)
 		    {
+		      struct value_print_options opts;
 		      val = read_var_value (sym2, fi);
+		      get_raw_print_options (&opts);
+		      opts.deref_ref = 1;
 		      common_val_print
-			(val, stb->stream, 0, 1, 0, Val_no_prettyprint,
+			(val, stb->stream, 0, &opts,
 			 language_def (SYMBOL_LANGUAGE (sym2)));
 		      ui_out_field_stream (uiout, "value", stb);
 		    }
 		  do_cleanups (cleanup_tuple);
 		  break;
 		case PRINT_ALL_VALUES:
-		  val = read_var_value (sym2, fi);
-		  common_val_print
-		    (val, stb->stream, 0, 1, 0, Val_no_prettyprint,
-		     language_def (SYMBOL_LANGUAGE (sym2)));
-		  ui_out_field_stream (uiout, "value", stb);
-		  do_cleanups (cleanup_tuple);
+		  {
+		    struct value_print_options opts;
+		    val = read_var_value (sym2, fi);
+		    get_raw_print_options (&opts);
+		    opts.deref_ref = 1;
+		    common_val_print
+		      (val, stb->stream, 0, &opts,
+		       language_def (SYMBOL_LANGUAGE (sym2)));
+		    ui_out_field_stream (uiout, "value", stb);
+		    do_cleanups (cleanup_tuple);
+		  }
 		  break;
 		}
 	    }

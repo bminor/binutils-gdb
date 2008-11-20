@@ -38,6 +38,10 @@
 #define S_IXOTH 0001    /* Execute by others.  */
 #endif
 
+#ifndef FD_CLOEXEC
+#define FD_CLOEXEC 1
+#endif
+
 file_ptr
 real_ftell (FILE *file)
 {
@@ -62,14 +66,57 @@ real_fseek (FILE *file, file_ptr offset, int whence)
 #endif
 }
 
+/* Mark FILE as close-on-exec.  Return FILE.  FILE may be NULL, in
+   which case nothing is done.  */
+static FILE *
+close_on_exec (FILE *file)
+{
+#if defined (HAVE_FILENO) && defined (F_GETFD)
+  if (file)
+    {
+      int fd = fileno (file);
+      int old = fcntl (fd, F_GETFD, 0);
+      if (old >= 0)
+	fcntl (fd, F_SETFD, old | FD_CLOEXEC);
+    }
+#endif
+  return file;
+}
+
 FILE *
 real_fopen (const char *filename, const char *modes)
 {
+#ifdef VMS
+  char vms_modes[4];
+  char *vms_attr;
+
+  /* On VMS, fopen allows file attributes as optionnal arguments.
+     We need to use them but we'd better to use the common prototype.
+     In fopen-vms.h, they are separated from the mode with a comma.
+     Split here.  */
+  vms_attr = strchr (modes, ',');
+  if (vms_attr == NULL)
+    {
+      /* No attributes.  */
+      return close_on_exec (fopen (filename, modes));
+    }
+  else
+    {
+      /* Attribute found - rebuild modes.  */
+      size_t modes_len = vms_attr - modes;
+
+      BFD_ASSERT (modes_len < sizeof (vms_modes));
+      memcpy (vms_modes, modes, modes_len);
+      vms_modes[modes_len] = 0;
+      return close_on_exec (fopen (filename, vms_modes, vms_attr + 1));
+    }
+#else /* !VMS */
 #if defined (HAVE_FOPEN64)
-  return fopen64 (filename, modes);
+  return close_on_exec (fopen64 (filename, modes));
 #else
-  return fopen (filename, modes);
+  return close_on_exec (fopen (filename, modes));
 #endif
+#endif /* !VMS */
 }
 
 /*

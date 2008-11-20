@@ -428,11 +428,8 @@ add_path (char *dirname, char **which_path, int parse_separators)
       /* This will properly parse the space and tab separators
 	 and any quotes that may exist. DIRNAME_SEPARATOR will
 	 be dealt with later.  */
-      argv = buildargv (dirname);
+      argv = gdb_buildargv (dirname);
       make_cleanup_freeargv (argv);
-
-      if (argv == NULL)
-	nomem (0);
 
       arg = argv[0];
     }
@@ -1067,7 +1064,7 @@ symtab_to_fullname (struct symtab *s)
   r = find_and_open_source (s->objfile, s->filename, s->dirname,
 			    &s->fullname);
 
-  if (r)
+  if (r >= 0)
     {
       close (r);
       return s->fullname;
@@ -1096,7 +1093,7 @@ psymtab_to_fullname (struct partial_symtab *ps)
   r = find_and_open_source (ps->objfile, ps->filename, ps->dirname,
 			    &ps->fullname);
 
-  if (r) 
+  if (r >= 0)
     {
       close (r);
       return ps->fullname;
@@ -1254,6 +1251,7 @@ static int
 get_filename_and_charpos (struct symtab *s, char **fullname)
 {
   int desc, linenums_changed = 0;
+  struct cleanup *cleanups;
 
   desc = open_source_file (s);
   if (desc < 0)
@@ -1262,13 +1260,14 @@ get_filename_and_charpos (struct symtab *s, char **fullname)
 	*fullname = NULL;
       return 0;
     }
+  cleanups = make_cleanup_close (desc);
   if (fullname)
     *fullname = s->fullname;
   if (s->line_charpos == 0)
     linenums_changed = 1;
   if (linenums_changed)
     find_source_lines (s, desc);
-  close (desc);
+  do_cleanups (cleanups);
   return linenums_changed;
 }
 
@@ -1315,6 +1314,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
   int desc;
   FILE *stream;
   int nlines = stopline - line;
+  struct cleanup *cleanup;
 
   /* Regardless of whether we can open the file, set current_source_symtab. */
   current_source_symtab = s;
@@ -1381,6 +1381,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 
   stream = fdopen (desc, FDOPEN_MODE);
   clearerr (stream);
+  cleanup = make_cleanup_fclose (stream);
 
   while (nlines-- > 0)
     {
@@ -1420,7 +1421,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
       while (c != '\n' && (c = fgetc (stream)) >= 0);
     }
 
-  fclose (stream);
+  do_cleanups (cleanup);
 }
 
 /* Show source lines from the file of symtab S, starting with line
@@ -1541,6 +1542,7 @@ forward_search_command (char *regex, int from_tty)
   FILE *stream;
   int line;
   char *msg;
+  struct cleanup *cleanups;
 
   line = last_line_listed + 1;
 
@@ -1554,24 +1556,21 @@ forward_search_command (char *regex, int from_tty)
   desc = open_source_file (current_source_symtab);
   if (desc < 0)
     perror_with_name (current_source_symtab->filename);
+  cleanups = make_cleanup_close (desc);
 
   if (current_source_symtab->line_charpos == 0)
     find_source_lines (current_source_symtab, desc);
 
   if (line < 1 || line > current_source_symtab->nlines)
-    {
-      close (desc);
-      error (_("Expression not found"));
-    }
+    error (_("Expression not found"));
 
   if (lseek (desc, current_source_symtab->line_charpos[line - 1], 0) < 0)
-    {
-      close (desc);
-      perror_with_name (current_source_symtab->filename);
-    }
+    perror_with_name (current_source_symtab->filename);
 
+  discard_cleanups (cleanups);
   stream = fdopen (desc, FDOPEN_MODE);
   clearerr (stream);
+  cleanups = make_cleanup_fclose (stream);
   while (1)
     {
       static char *buf = NULL;
@@ -1623,7 +1622,7 @@ forward_search_command (char *regex, int from_tty)
     }
 
   printf_filtered (_("Expression not found\n"));
-  fclose (stream);
+  do_cleanups (cleanups);
 }
 
 static void
@@ -1634,6 +1633,7 @@ reverse_search_command (char *regex, int from_tty)
   FILE *stream;
   int line;
   char *msg;
+  struct cleanup *cleanups;
 
   line = last_line_listed - 1;
 
@@ -1647,24 +1647,21 @@ reverse_search_command (char *regex, int from_tty)
   desc = open_source_file (current_source_symtab);
   if (desc < 0)
     perror_with_name (current_source_symtab->filename);
+  cleanups = make_cleanup_close (desc);
 
   if (current_source_symtab->line_charpos == 0)
     find_source_lines (current_source_symtab, desc);
 
   if (line < 1 || line > current_source_symtab->nlines)
-    {
-      close (desc);
-      error (_("Expression not found"));
-    }
+    error (_("Expression not found"));
 
   if (lseek (desc, current_source_symtab->line_charpos[line - 1], 0) < 0)
-    {
-      close (desc);
-      perror_with_name (current_source_symtab->filename);
-    }
+    perror_with_name (current_source_symtab->filename);
 
+  discard_cleanups (cleanups);
   stream = fdopen (desc, FDOPEN_MODE);
   clearerr (stream);
+  cleanups = make_cleanup_fclose (stream);
   while (line > 1)
     {
 /* FIXME!!!  We walk right off the end of buf if we get a long line!!! */
@@ -1710,7 +1707,7 @@ reverse_search_command (char *regex, int from_tty)
     }
 
   printf_filtered (_("Expression not found\n"));
-  fclose (stream);
+  do_cleanups (cleanups);
   return;
 }
 
@@ -1813,7 +1810,7 @@ show_substitute_path_command (char *args, int from_tty)
   char **argv;
   char *from = NULL;
   
-  argv = buildargv (args);
+  argv = gdb_buildargv (args);
   make_cleanup_freeargv (argv);
 
   /* We expect zero or one argument.  */
@@ -1846,7 +1843,7 @@ static void
 unset_substitute_path_command (char *args, int from_tty)
 {
   struct substitute_path_rule *rule = substitute_path_rules;
-  char **argv = buildargv (args);
+  char **argv = gdb_buildargv (args);
   char *from = NULL;
   int rule_found = 0;
 
@@ -1899,7 +1896,7 @@ set_substitute_path_command (char *args, int from_tty)
   char **argv;
   struct substitute_path_rule *rule;
   
-  argv = buildargv (args);
+  argv = gdb_buildargv (args);
   make_cleanup_freeargv (argv);
 
   if (argv == NULL || argv[0] == NULL || argv [1] == NULL)

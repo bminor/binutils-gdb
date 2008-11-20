@@ -1608,6 +1608,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
       if (hdr->sh_entsize != bed->s->sizeof_sym)
 	return FALSE;
+      if (hdr->sh_info * hdr->sh_entsize > hdr->sh_size)
+	return FALSE;
       BFD_ASSERT (elf_onesymtab (abfd) == 0);
       elf_onesymtab (abfd) = shindex;
       elf_tdata (abfd)->symtab_hdr = *hdr;
@@ -2681,13 +2683,15 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
     *failedptr = TRUE;
 }
 
-/* Fill in the contents of a SHT_GROUP section.  */
+/* Fill in the contents of a SHT_GROUP section.  Called from
+   _bfd_elf_compute_section_file_positions for gas, objcopy, and
+   when ELF targets use the generic linker, ld.  Called for ld -r
+   from bfd_elf_final_link.  */
 
 void
 bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 {
   bfd_boolean *failedptr = failedptrarg;
-  unsigned long symindx;
   asection *elt, *first;
   unsigned char *loc;
   bfd_boolean gas;
@@ -2698,20 +2702,49 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
       || *failedptr)
     return;
 
-  symindx = 0;
-  if (elf_group_id (sec) != NULL)
-    symindx = elf_group_id (sec)->udata.i;
-
-  if (symindx == 0)
+  if (elf_section_data (sec)->this_hdr.sh_info == 0)
     {
-      /* If called from the assembler, swap_out_syms will have set up
-	 elf_section_syms;  If called for "ld -r", use target_index.  */
-      if (elf_section_syms (abfd) != NULL)
-	symindx = elf_section_syms (abfd)[sec->index]->udata.i;
-      else
-	symindx = sec->target_index;
+      unsigned long symindx = 0;
+
+      /* elf_group_id will have been set up by objcopy and the
+	 generic linker.  */
+      if (elf_group_id (sec) != NULL)
+	symindx = elf_group_id (sec)->udata.i;
+
+      if (symindx == 0)
+	{
+	  /* If called from the assembler, swap_out_syms will have set up
+	     elf_section_syms.  */
+	  BFD_ASSERT (elf_section_syms (abfd) != NULL);
+	  symindx = elf_section_syms (abfd)[sec->index]->udata.i;
+	}
+      elf_section_data (sec)->this_hdr.sh_info = symindx;
     }
-  elf_section_data (sec)->this_hdr.sh_info = symindx;
+  else if (elf_section_data (sec)->this_hdr.sh_info == (unsigned int) -2)
+    {
+      /* The ELF backend linker sets sh_info to -2 when the group
+	 signature symbol is global, and thus the index can't be
+	 set until all local symbols are output.  */
+      asection *igroup = elf_sec_group (elf_next_in_group (sec));
+      struct bfd_elf_section_data *sec_data = elf_section_data (igroup);
+      unsigned long symndx = sec_data->this_hdr.sh_info;
+      unsigned long extsymoff = 0;
+      struct elf_link_hash_entry *h;
+
+      if (!elf_bad_symtab (igroup->owner))
+	{
+	  Elf_Internal_Shdr *symtab_hdr;
+
+	  symtab_hdr = &elf_tdata (igroup->owner)->symtab_hdr;
+	  extsymoff = symtab_hdr->sh_info;
+	}
+      h = elf_sym_hashes (igroup->owner)[symndx - extsymoff];
+      while (h->root.type == bfd_link_hash_indirect
+	     || h->root.type == bfd_link_hash_warning)
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+      elf_section_data (sec)->this_hdr.sh_info = h->indx;
+    }
 
   /* The contents won't be allocated for "ld -r" or objcopy.  */
   gas = TRUE;
@@ -4125,6 +4158,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   bfd_size_type maxpagesize;
   unsigned int alloc;
   unsigned int i, j;
+  bfd_vma header_pad = 0;
 
   if (link_info == NULL
       && !_bfd_elf_map_sections_to_segments (abfd, link_info))
@@ -4132,7 +4166,11 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
   alloc = 0;
   for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
-    ++alloc;
+    {
+      ++alloc;
+      if (m->header_size)
+	header_pad = m->header_size;
+    }
 
   elf_elfheader (abfd)->e_phoff = bed->s->sizeof_ehdr;
   elf_elfheader (abfd)->e_phentsize = bed->s->sizeof_phdr;
@@ -4150,7 +4188,21 @@ assign_file_positions_for_load_sections (bfd *abfd,
       return TRUE;
     }
 
-  phdrs = bfd_alloc2 (abfd, alloc, sizeof (Elf_Internal_Phdr));
+  /* We're writing the size in elf_tdata (abfd)->program_header_size,
+     see assign_file_positions_except_relocs, so make sure we have
+     that amount allocated, with trailing space cleared.
+     The variable alloc contains the computed need, while elf_tdata
+     (abfd)->program_header_size contains the size used for the
+     layout.
+     See ld/emultempl/elf-generic.em:gld${EMULATION_NAME}_map_segments
+     where the layout is forced to according to a larger size in the
+     last iterations for the testcase ld-elf/header.  */
+  BFD_ASSERT (elf_tdata (abfd)->program_header_size % bed->s->sizeof_phdr
+	      == 0);
+  phdrs = bfd_zalloc2 (abfd,
+		       (elf_tdata (abfd)->program_header_size
+			/ bed->s->sizeof_phdr),
+		       sizeof (Elf_Internal_Phdr));
   elf_tdata (abfd)->phdr = phdrs;
   if (phdrs == NULL)
     return FALSE;
@@ -4161,6 +4213,11 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
   off = bed->s->sizeof_ehdr;
   off += alloc * bed->s->sizeof_phdr;
+  if (header_pad < (bfd_vma) off)
+    header_pad = 0;
+  else
+    header_pad -= off;
+  off += header_pad;
 
   for (m = elf_tdata (abfd)->segment_map, p = phdrs, j = 0;
        m != NULL;
@@ -4257,21 +4314,14 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	      elf_section_type (m->sections[i]) = SHT_NOBITS;
 
 	  /* Find out whether this segment contains any loadable
-	     sections.  If the first section isn't loadable, the same
-	     holds for any other sections.  */
-	  i = 0;
-	  while (elf_section_type (m->sections[i]) == SHT_NOBITS)
-	    {
-	      /* If a segment starts with .tbss, we need to look
-		 at the next section to decide whether the segment
-		 has any loadable sections.  */
-	      if ((elf_section_flags (m->sections[i]) & SHF_TLS) == 0
-		  || ++i >= m->count)
-		{
-		  no_contents = TRUE;
-		  break;
-		}
-	    }
+	     sections.  */
+	  no_contents = TRUE;
+	  for (i = 0; i < m->count; i++)
+	    if (elf_section_type (m->sections[i]) != SHT_NOBITS)
+	      {
+		no_contents = FALSE;
+		break;
+	      }
 
 	  off_adjust = vma_page_aligned_bias (m->sections[0]->vma, off, align);
 	  off += off_adjust;
@@ -4355,6 +4405,11 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
 	  p->p_filesz += alloc * bed->s->sizeof_phdr;
 	  p->p_memsz += alloc * bed->s->sizeof_phdr;
+	  if (m->count)
+	    {
+	      p->p_filesz += header_pad;
+	      p->p_memsz += header_pad;
+	    }
 	}
 
       if (p->p_type == PT_LOAD
@@ -4607,7 +4662,61 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
        m != NULL;
        m = m->next, p++)
     {
-      if (m->count != 0)
+      if (p->p_type == PT_GNU_RELRO)
+	{
+	  const Elf_Internal_Phdr *lp;
+
+	  BFD_ASSERT (!m->includes_filehdr && !m->includes_phdrs);
+
+	  if (link_info != NULL)
+	    {
+	      /* During linking the range of the RELRO segment is passed
+		 in link_info.  */
+	      for (lp = phdrs; lp < phdrs + count; ++lp)
+		{
+		  if (lp->p_type == PT_LOAD
+		      && lp->p_vaddr >= link_info->relro_start
+		      && lp->p_vaddr < link_info->relro_end
+		      && lp->p_vaddr + lp->p_filesz >= link_info->relro_end)
+		    break;
+		}
+	    }
+	  else
+	    {
+	      /* Otherwise we are copying an executable or shared
+		 library, but we need to use the same linker logic.  */
+	      for (lp = phdrs; lp < phdrs + count; ++lp)
+		{
+		  if (lp->p_type == PT_LOAD
+		      && lp->p_paddr == p->p_paddr)
+		    break;
+		}
+	    }
+
+	  if (lp < phdrs + count)
+	    {
+	      p->p_vaddr = lp->p_vaddr;
+	      p->p_paddr = lp->p_paddr;
+	      p->p_offset = lp->p_offset;
+	      if (link_info != NULL)
+		p->p_filesz = link_info->relro_end - lp->p_vaddr;
+	      else if (m->p_size_valid)
+		p->p_filesz = m->p_size;
+	      else
+		abort ();
+	      p->p_memsz = p->p_filesz;
+	      p->p_align = 1;
+	      p->p_flags = (lp->p_flags & ~PF_W);
+	    }
+	  else if (link_info != NULL)
+	    {
+	      memset (p, 0, sizeof *p);
+	      p->p_type = PT_NULL;
+	    }
+	  else
+	    abort ();
+	}
+      else if (m->count != 0)
 	{
 	  if (p->p_type != PT_LOAD
 	      && (p->p_type != PT_NOTE
@@ -4623,87 +4732,20 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	      p->p_filesz = sect->filepos - m->sections[0]->filepos;
 	      if (hdr->sh_type != SHT_NOBITS)
 		p->p_filesz += hdr->sh_size;
-
-	      if (p->p_type == PT_GNU_RELRO)
-		{
-		  /* When we get here, we are copying executable
-		     or shared library. But we need to use the same
-		     linker logic.  */
-		  Elf_Internal_Phdr *lp;
-
-		  for (lp = phdrs; lp < phdrs + count; ++lp)
-		    {
-		      if (lp->p_type == PT_LOAD
-			  && lp->p_paddr == p->p_paddr)
-			break;
-		    }
-	  
-		  if (lp < phdrs + count)
-		    {
-		      /* We should use p_size if it is valid since it
-			 may contain the first few bytes of the next
-			 SEC_ALLOC section.  */
-		      if (m->p_size_valid)
-			p->p_filesz = m->p_size;
-		      else
-			abort ();
-		      p->p_vaddr = lp->p_vaddr;
-		      p->p_offset = lp->p_offset;
-		      p->p_memsz = p->p_filesz;
-		      p->p_align = 1;
-		    }
-		  else
-		    abort ();
-		}
-	      else
-		p->p_offset = m->sections[0]->filepos;
+	      p->p_offset = m->sections[0]->filepos;
 	    }
 	}
-      else
+      else if (m->includes_filehdr)
 	{
-	  if (m->includes_filehdr)
-	    {
-	      p->p_vaddr = filehdr_vaddr;
-	      if (! m->p_paddr_valid)
-		p->p_paddr = filehdr_paddr;
-	    }
-	  else if (m->includes_phdrs)
-	    {
-	      p->p_vaddr = phdrs_vaddr;
-	      if (! m->p_paddr_valid)
-		p->p_paddr = phdrs_paddr;
-	    }
-	  else if (p->p_type == PT_GNU_RELRO)
-	    {
-	      Elf_Internal_Phdr *lp;
-
-	      for (lp = phdrs; lp < phdrs + count; ++lp)
-		{
-		  if (lp->p_type == PT_LOAD
-		      && lp->p_vaddr <= link_info->relro_end
-		      && lp->p_vaddr >= link_info->relro_start
-		      && (lp->p_vaddr + lp->p_filesz
-			  >= link_info->relro_end))
-		    break;
-		}
-
-	      if (lp < phdrs + count
-		  && link_info->relro_end > lp->p_vaddr)
-		{
-		  p->p_vaddr = lp->p_vaddr;
-		  p->p_paddr = lp->p_paddr;
-		  p->p_offset = lp->p_offset;
-		  p->p_filesz = link_info->relro_end - lp->p_vaddr;
-		  p->p_memsz = p->p_filesz;
-		  p->p_align = 1;
-		  p->p_flags = (lp->p_flags & ~PF_W);
-		}
-	      else
-		{
-		  memset (p, 0, sizeof *p);
-		  p->p_type = PT_NULL;
-		}
-	    }
+	  p->p_vaddr = filehdr_vaddr;
+	  if (! m->p_paddr_valid)
+	    p->p_paddr = filehdr_paddr;
+	}
+      else if (m->includes_phdrs)
+	{
+	  p->p_vaddr = phdrs_vaddr;
+	  if (! m->p_paddr_valid)
+	    p->p_paddr = phdrs_paddr;
 	}
     }
 
@@ -5850,6 +5892,10 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	    phdr_included = TRUE;
 	}
 
+      if (map->includes_filehdr && first_section)
+	/* We need to keep the space used by the headers fixed.  */
+	map->header_size = first_section->vma - segment->p_vaddr;
+      
       if (!map->includes_phdrs
 	  && !map->includes_filehdr
 	  && map->p_paddr_valid)
@@ -6414,9 +6460,8 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 	  if (type == STT_OBJECT)
 	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_COMMON);
 	  else
-#else
-	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 #endif
+	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 	}
       else if (bfd_is_und_section (syms[idx]->section))
 	sym.st_info = ELF_ST_INFO (((flags & BSF_WEAK)

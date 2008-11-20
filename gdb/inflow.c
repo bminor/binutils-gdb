@@ -601,14 +601,19 @@ kill_command (char *arg, int from_tty)
     error (_("Not confirmed."));
   target_kill ();
 
-  init_thread_list ();		/* Destroy thread info */
-
-  /* Killing off the inferior can leave us with a core file.  If so,
-     print the state we are left in.  */
-  if (target_has_stack)
+  /* If the current target interface claims there's still execution,
+     then don't mess with threads of other processes.  */
+  if (!target_has_execution)
     {
-      printf_filtered (_("In %s,\n"), target_longname);
-      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+      init_thread_list ();		/* Destroy thread info */
+
+      /* Killing off the inferior can leave us with a core file.  If
+	 so, print the state we are left in.  */
+      if (target_has_stack)
+	{
+	  printf_filtered (_("In %s,\n"), target_longname);
+	  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+	}
     }
   bfd_cache_close_all ();
 }

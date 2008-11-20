@@ -510,7 +510,7 @@ update_solib_list (int from_tty, struct target_ops *target)
 
   /* We can reach here due to changing solib-search-path or the
      sysroot, before having any inferior.  */
-  if (target_has_execution)
+  if (target_has_execution && !ptid_equal (inferior_ptid, null_ptid))
     {
       struct inferior *inf = current_inferior ();
 

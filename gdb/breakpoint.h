@@ -110,23 +110,7 @@ enum bptype
 
     bp_overlay_event, 
 
-    /* These breakpoints are used to implement the "catch load" command
-       on platforms whose dynamic linkers support such functionality.  */
-    bp_catch_load,
-
-    /* These breakpoints are used to implement the "catch unload" command
-       on platforms whose dynamic linkers support such functionality.  */
-    bp_catch_unload,
-
-    /* These are not really breakpoints, but are catchpoints that
-       implement the "catch fork", "catch vfork" and "catch exec" commands
-       on platforms whose kernel support such functionality.  (I.e.,
-       kernels which can raise an event when a fork or exec occurs, as
-       opposed to the debugger setting breakpoints on functions named
-       "fork" or "exec".) */
-    bp_catch_fork,
-    bp_catch_vfork,
-    bp_catch_exec,
+    bp_catchpoint,
   };
 
 /* States of enablement of breakpoint. */
@@ -315,6 +299,19 @@ struct bp_location
 
 struct breakpoint_ops 
 {
+  /* Insert the breakpoint or activate the catchpoint.  Should raise
+     an exception if the operation failed.  */
+  void (*insert) (struct breakpoint *);
+
+  /* Remove the breakpoint/catchpoint that was previously inserted
+     with the "insert" method above.  Return non-zero if the operation
+     succeeded.  */
+  int (*remove) (struct breakpoint *);
+
+  /* Return non-zero if the debugger should tell the user that this
+     breakpoint was hit.  */
+  int (*breakpoint_hit) (struct breakpoint *);
+
   /* The normal print routine for this breakpoint, called when we
      hit it.  */
   enum print_stop_action (*print_it) (struct breakpoint *);
@@ -434,16 +431,6 @@ struct breakpoint
        seeing how many times you hit a break prior to the program
        aborting, so you can back up to just before the abort.  */
     int hit_count;
-
-    /* Filename of a dynamically-linked library (dll), used for
-       bp_catch_load and bp_catch_unload (malloc'd), or NULL if any
-       library is significant.  */
-    char *dll_pathname;
-
-    /* Filename of a dll whose state change (e.g., load or unload)
-       triggered this catchpoint.  This field is only valid immediately
-       after this catchpoint has triggered.  */
-    char *triggered_dll_pathname;
 
     /* Process id of a child process whose forking triggered this
        catchpoint.  This field is only valid immediately after this
@@ -613,12 +600,6 @@ extern void bpstat_do_actions (void);
 /* Modify BS so that the actions will not be performed.  */
 extern void bpstat_clear_actions (bpstat);
 
-/* Given a bpstat that records zero or more triggered eventpoints, this
-   function returns another bpstat which contains only the catchpoints
-   on that first list, if any.
- */
-extern void bpstat_get_triggered_catchpoints (bpstat, bpstat *);
-
 /* Implementation:  */
 
 /* Values used to tell the printing routine how to behave for this bpstat. */
@@ -681,6 +662,8 @@ enum breakpoint_here
 
 extern enum breakpoint_here breakpoint_here_p (CORE_ADDR);
 
+extern int moribund_breakpoint_here_p (CORE_ADDR);
+
 extern int breakpoint_inserted_here_p (CORE_ADDR);
 
 extern int regular_breakpoint_inserted_here_p (CORE_ADDR);
@@ -712,8 +695,6 @@ extern struct cleanup *make_cleanup_delete_breakpoint (struct breakpoint *);
 extern void delete_breakpoint (struct breakpoint *);
 
 extern void breakpoint_auto_delete (bpstat);
-
-extern void breakpoint_clear_ignore_counts (void);
 
 extern void break_command (char *, int);
 
@@ -844,11 +825,6 @@ extern void disable_breakpoints_in_shlibs (void);
 /* This function returns TRUE if ep is a catchpoint. */
 extern int ep_is_catchpoint (struct breakpoint *);
 
-/* This function returns TRUE if ep is a catchpoint of a
-   shared library (aka dynamically-linked library) event,
-   such as a library load or unload. */
-extern int ep_is_shlib_catchpoint (struct breakpoint *);
-
 /* Enable breakpoints and delete when hit.  Called with ARG == NULL
    deletes all breakpoints. */
 extern void delete_command (char *arg, int from_tty);
@@ -883,5 +859,8 @@ extern int breakpoints_always_inserted_mode (void);
    Retires previously deleted breakpoint locations that
    in our opinion won't ever trigger.  */
 extern void breakpoint_retire_moribund (void);
+
+/* Tell a breakpoint to be quiet.  */
+extern void make_breakpoint_silent (struct breakpoint *);
 
 #endif /* !defined (BREAKPOINT_H) */

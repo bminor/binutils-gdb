@@ -234,11 +234,13 @@ maintenance_print_reggroups (char *args, int from_tty)
     reggroups_dump (current_gdbarch, gdb_stdout);
   else
     {
+      struct cleanup *cleanups;
       struct ui_file *file = gdb_fopen (args, "w");
       if (file == NULL)
 	perror_with_name (_("maintenance print reggroups"));
+      cleanups = make_cleanup_ui_file_delete (file);
       reggroups_dump (current_gdbarch, file);    
-      ui_file_delete (file);
+      do_cleanups (cleanups);
     }
 }
 

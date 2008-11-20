@@ -32,6 +32,7 @@ struct symbol;
 struct type;
 struct ui_file;
 struct language_defn;
+struct value_print_options;
 
 /* The structure which defines the type of a value.  It should never
    be possible for a program lval value to survive over a call to the
@@ -40,9 +41,15 @@ struct language_defn;
 
 struct value;
 
+/* Needed if another module needs to maintain its own list of values.  */
+
+void value_prepend_to_list (struct value **head, struct value *val);
+void value_remove_from_list (struct value **head, struct value *val);
+
 /* Values are stored in a chain, so that they can be deleted easily
-   over calls to the inferior.  Values assigned to internal variables
-   or put into the value history are taken off this list.  */
+   over calls to the inferior.  Values assigned to internal variables,
+   put into the value history or exposed to Python are taken off this
+   list.  */
 
 struct value *value_next (struct value *);
 
@@ -520,8 +527,8 @@ extern void print_floating (const gdb_byte *valaddr, struct type *type,
 extern void print_decimal_floating (const gdb_byte *valaddr, struct type *type,
 				    struct ui_file *stream);
 
-extern int value_print (struct value *val, struct ui_file *stream, int format,
-			enum val_prettyprint pretty);
+extern int value_print (struct value *val, struct ui_file *stream,
+			const struct value_print_options *options);
 
 extern void value_print_array_elements (struct value *val,
 					struct ui_file *stream, int format,
@@ -531,19 +538,18 @@ extern struct value *value_release_to_mark (struct value *mark);
 
 extern int val_print (struct type *type, const gdb_byte *valaddr,
 		      int embedded_offset, CORE_ADDR address,
-		      struct ui_file *stream, int format,
-		      int deref_ref, int recurse,
-		      enum val_prettyprint pretty,
+		      struct ui_file *stream, int recurse,
+		      const struct value_print_options *options,
 		      const struct language_defn *language);
 
 extern int common_val_print (struct value *val,
-			     struct ui_file *stream, int format,
-			     int deref_ref, int recurse,
-			     enum val_prettyprint pretty,
+			     struct ui_file *stream, int recurse,
+			     const struct value_print_options *options,
 			     const struct language_defn *language);
 
 extern int val_print_string (CORE_ADDR addr, int len, int width,
-			     struct ui_file *stream);
+			     struct ui_file *stream,
+			     const struct value_print_options *options);
 
 extern void print_variable_value (struct symbol *var,
 				  struct frame_info *frame,

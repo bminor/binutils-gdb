@@ -72,7 +72,8 @@ static void unk_lang_printchar (int c, struct ui_file *stream);
 static void unk_lang_print_type (struct type *, char *, struct ui_file *,
 				 int, int);
 
-static int unk_lang_value_print (struct value *, struct ui_file *, int, enum val_prettyprint);
+static int unk_lang_value_print (struct value *, struct ui_file *,
+				 const struct value_print_options *);
 
 static CORE_ADDR unk_lang_trampoline (struct frame_info *, CORE_ADDR pc);
 
@@ -1035,10 +1036,10 @@ default_word_break_characters (void)
 
 void
 default_print_array_index (struct value *index_value, struct ui_file *stream,
-                           int format, enum val_prettyprint pretty)
+			   const struct value_print_options *options)
 {
   fprintf_filtered (stream, "[");
-  LA_VALUE_PRINT (index_value, stream, format, pretty);
+  LA_VALUE_PRINT (index_value, stream, options);
   fprintf_filtered (stream, "] = ");
 }
 
@@ -1070,7 +1071,8 @@ unk_lang_printchar (int c, struct ui_file *stream)
 
 static void
 unk_lang_printstr (struct ui_file *stream, const gdb_byte *string,
-		   unsigned int length, int width, int force_ellipses)
+		   unsigned int length, int width, int force_ellipses,
+		   const struct value_print_options *options)
 {
   error (_("internal error - unimplemented function unk_lang_printstr called."));
 }
@@ -1085,15 +1087,15 @@ unk_lang_print_type (struct type *type, char *varstring, struct ui_file *stream,
 static int
 unk_lang_val_print (struct type *type, const gdb_byte *valaddr,
 		    int embedded_offset, CORE_ADDR address,
-		    struct ui_file *stream, int format,
-		    int deref_ref, int recurse, enum val_prettyprint pretty)
+		    struct ui_file *stream, int recurse,
+		    const struct value_print_options *options)
 {
   error (_("internal error - unimplemented function unk_lang_val_print called."));
 }
 
 static int
-unk_lang_value_print (struct value *val, struct ui_file *stream, int format,
-		      enum val_prettyprint pretty)
+unk_lang_value_print (struct value *val, struct ui_file *stream,
+		      const struct value_print_options *options)
 {
   error (_("internal error - unimplemented function unk_lang_value_print called."));
 }

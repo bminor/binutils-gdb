@@ -1,3 +1,80 @@
+2008-11-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.texinfo (Symbols): Mention printing containing
+	image name in "info symbol".
+	(Maint translate-address): Likewise.
+	
+2008-11-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Set Catchpoints): Remove the documentation of
+	commands "catch load" and "catch unload".
+
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Async Records): Document
+        =thread-selected.
+	
+2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * observer.texi (new_inferior, inferior_exit): New observers.
+
+2008-10-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbint.texinfo (Adding a New Target): Don't mention TDEPFILES,
+	.mt files, TM_CLIBS or TM_CDEPS.
+	(x86 Watchpoints): Don't mention TDEPFILES.
+
+2008-10-24  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.texinfo (Remote Protocol): Add new nodes to menu.
+	(Overview): Mention notifications and non-stop mode behavior.
+	(Packets): Update documentation of ?, vAttach, vCont, and vRun
+	with non-stop mode behavior.  Add vStopped description.
+	(Stop Reply Packets):  Update list of packets that return
+	stop replies.  Mention non-stop behavior.
+	(General Query Packets): Document QNonStop packet and associated
+	qSupported query response.
+	(Interrupts): Clarify multi-threaded behavior.  Mention non-stop
+	behavior.
+	(Notification Packets): New section.
+	(Remote Non-Stop): New section.
+	(File-I/O Overview): Mention non-stop behavior.
+
+2008-10-24  Hui Zhu  <teawater@gmail.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (displaced-stepping): Describe the auto mode
+	setting, and say it's the default.  This is now a mainstream
+	setting instead of a maintenance setting.
+
+2008-10-23  Pedro Alves  <pedro@codesourcery.com>
+
+	* observer.texi (thread_stop_requested): New.
+
+2008-10-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Ada Tasks, Ada Tasks and Core Files): New nodes.
+	(Patching): Replace incorrect usage of @samp by @kbd.
+
+2008-10-17  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.texinfo: Add documentation for reverse execution.
+
+2008-10-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo. (Values From Inferior): New subsubsection.
+
+2008-10-06  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (set debug dwarf2-die): Document it.
+
+2008-10-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (catch) [exception]: Document how to insert
+	a breakpoint on user-defined exceptions when the exception
+	name is identical to one of the language-defined ones.
+
 2008-09-27  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Macros): Remove text about stringification,

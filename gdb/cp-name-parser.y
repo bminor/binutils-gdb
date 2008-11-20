@@ -31,7 +31,7 @@ Boston, MA 02110-1301, USA.  */
 
 %{
 
-#include "config.h"
+#include "defs.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1462,7 +1462,7 @@ c_parse_backslash (int host_char, int *target_char)
    after the zeros.  A value of 0 does not mean end of string.  */
 
 static int
-parse_escape (const char **string_ptr)
+cp_parse_escape (const char **string_ptr)
 {
   int target_char;
   int c = *(*string_ptr)++;
@@ -1483,7 +1483,7 @@ parse_escape (const char **string_ptr)
 	  if (c == '?')
 	    return 0177;
 	  else if (c == '\\')
-	    target_char = parse_escape (string_ptr);
+	    target_char = cp_parse_escape (string_ptr);
 	  else
 	    target_char = c;
 
@@ -1581,7 +1581,7 @@ yylex (void)
       lexptr++;
       c = *lexptr++;
       if (c == '\\')
-	c = parse_escape (&lexptr);
+	c = cp_parse_escape (&lexptr);
       else if (c == '\'')
 	{
 	  yyerror ("empty character constant");
@@ -2082,6 +2082,16 @@ trim_chars (char *lexptr, char **extra_chars)
     }
 
   return c;
+}
+
+/* When this file is built as a standalone program, xmalloc comes from
+   libiberty --- in which case we have to provide xfree ourselves.  */
+
+void
+xfree (void *ptr)
+{
+  if (ptr != NULL)
+    free (ptr);
 }
 
 int

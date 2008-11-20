@@ -49,11 +49,19 @@ i386_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
 
+  /* Every process, although has its own address space, sees the same
+     list of shared libraries.  */
+  set_gdbarch_has_global_solist (gdbarch, 1);
+
   /* There's no (standard definition of) entry point or a guaranteed
      text location we could find with a symbol where to place the call
      dummy, so we put it on the stack.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_push_dummy_code (gdbarch, i386_dicos_push_dummy_code);
+
+  /* DICOS rewinds itself.  Need to override the i386 default which is
+     to decrement the PC.  */
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
 }
 
 /* Look in the elf symbol table of ABFD for a symbol named WANTED.

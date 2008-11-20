@@ -75,7 +75,7 @@ static int gdb_check_format (bfd *);
 
 static void core_open (char *, int);
 
-static void core_detach (char *, int);
+static void core_detach (struct target_ops *ops, char *, int);
 
 static void core_close (int);
 
@@ -413,11 +413,11 @@ core_open (char *filename, int from_tty)
 }
 
 static void
-core_detach (char *args, int from_tty)
+core_detach (struct target_ops *ops, char *args, int from_tty)
 {
   if (args)
     error (_("Too many arguments"));
-  unpush_target (&core_ops);
+  unpush_target (ops);
   reinit_frame_cache ();
   if (from_tty)
     printf_filtered (_("No core file now.\n"));

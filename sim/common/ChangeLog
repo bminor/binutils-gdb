@@ -1,3 +1,11 @@
+2008-11-12  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* aclocal.m4:  Fix underquoting of function names.
+
+2008-10-21  Julian Brown  <julian@codesourcery.com>
+
+	* Make-common.in (run$(EXEEXT)): Add LDFLAGS.
+
 2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* common.m4: Add test for libz and zlib.h.

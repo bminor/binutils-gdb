@@ -41,4 +41,19 @@ enum async_reply_reason
 
 const char *async_reason_lookup (enum async_reply_reason reason);
 
+struct mi_interp
+{
+  /* MI's output channels */
+  struct ui_file *out;
+  struct ui_file *err;
+  struct ui_file *log;
+  struct ui_file *targ;
+  struct ui_file *event_channel;
+
+  /* This is the interpreter for the mi... */
+  struct interp *mi2_interp;
+  struct interp *mi1_interp;
+  struct interp *mi_interp;
+};
+
 #endif

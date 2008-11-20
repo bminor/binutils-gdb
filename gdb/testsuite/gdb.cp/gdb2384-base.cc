@@ -28,3 +28,8 @@ base::meth ()
 {
   return x;
 }
+
+derived::derived (int _x)
+  : base (_x)
+{
+}

@@ -316,7 +316,6 @@ static void linux_nat_async (void (*callback)
 static int linux_nat_async_mask (int mask);
 static int kill_lwp (int lwpid, int signo);
 
-static int send_sigint_callback (struct lwp_info *lp, void *data);
 static int stop_callback (struct lwp_info *lp, void *data);
 
 /* Captures the result of a successful waitpid call, along with the
@@ -333,8 +332,12 @@ struct waitpid_result
    in the async SIGCHLD handler.  */
 static struct waitpid_result *waitpid_queue = NULL;
 
+/* Similarly to `waitpid', but check the local event queue instead of
+   querying the kernel queue.  If PEEK, don't remove the event found
+   from the queue.  */
+
 static int
-queued_waitpid (int pid, int *status, int flags)
+queued_waitpid_1 (int pid, int *status, int flags, int peek)
 {
   struct waitpid_result *msg = waitpid_queue, *prev = NULL;
 
@@ -370,12 +373,6 @@ QWPID: linux_nat_async_events_state(%d), linux_nat_num_queued_events(%d)\n",
     {
       int pid;
 
-      if (prev)
-	prev->next = msg->next;
-      else
-	waitpid_queue = msg->next;
-
-      msg->next = NULL;
       if (status)
 	*status = msg->status;
       pid = msg->pid;
@@ -383,7 +380,17 @@ QWPID: linux_nat_async_events_state(%d), linux_nat_num_queued_events(%d)\n",
       if (debug_linux_nat_async)
 	fprintf_unfiltered (gdb_stdlog, "QWPID: pid(%d), status(%x)\n",
 			    pid, msg->status);
-      xfree (msg);
+
+      if (!peek)
+	{
+	  if (prev)
+	    prev->next = msg->next;
+	  else
+	    waitpid_queue = msg->next;
+
+	  msg->next = NULL;
+	  xfree (msg);
+	}
 
       return pid;
     }
@@ -394,6 +401,14 @@ QWPID: linux_nat_async_events_state(%d), linux_nat_num_queued_events(%d)\n",
   if (status)
     *status = 0;
   return -1;
+}
+
+/* Similarly to `waitpid', but check the local event queue.  */
+
+static int
+queued_waitpid (int pid, int *status, int flags)
+{
+  return queued_waitpid_1 (pid, status, flags, 0);
 }
 
 static void
@@ -1302,7 +1317,8 @@ lin_lwp_attach_lwp (ptid_t ptid)
 }
 
 static void
-linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
+linux_nat_create_inferior (struct target_ops *ops, 
+			   char *exec_file, char *allargs, char **env,
 			   int from_tty)
 {
   int saved_async = 0;
@@ -1349,7 +1365,7 @@ linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
     }
 #endif /* HAVE_PERSONALITY */
 
-  linux_ops->to_create_inferior (exec_file, allargs, env, from_tty);
+  linux_ops->to_create_inferior (ops, exec_file, allargs, env, from_tty);
 
 #ifdef HAVE_PERSONALITY
   if (personality_set)
@@ -1367,7 +1383,7 @@ linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
 }
 
 static void
-linux_nat_attach (char *args, int from_tty)
+linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
 {
   struct lwp_info *lp;
   int status;
@@ -1375,7 +1391,7 @@ linux_nat_attach (char *args, int from_tty)
 
   /* FIXME: We should probably accept a list of process id's, and
      attach all of them.  */
-  linux_ops->to_attach (args, from_tty);
+  linux_ops->to_attach (ops, args, from_tty);
 
   if (!target_can_async_p ())
     {
@@ -1556,7 +1572,7 @@ detach_callback (struct lwp_info *lp, void *data)
 }
 
 static void
-linux_nat_detach (char *args, int from_tty)
+linux_nat_detach (struct target_ops *ops, char *args, int from_tty)
 {
   int pid;
   int status;
@@ -1597,7 +1613,7 @@ linux_nat_detach (char *args, int from_tty)
 
   pid = GET_PID (inferior_ptid);
   inferior_ptid = pid_to_ptid (pid);
-  linux_ops->to_detach (args, from_tty);
+  linux_ops->to_detach (ops, args, from_tty);
 
   if (target_can_async_p ())
     drain_queued_events (pid);
@@ -2200,11 +2216,11 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 		      /* There was no gdb breakpoint set at pc.  Put
 			 the event back in the queue.  */
 		      if (debug_linux_nat)
-			fprintf_unfiltered (gdb_stdlog,
-					    "SWC: kill %s, %s\n",
-					    target_pid_to_str (lp->ptid),
-					    status_to_str ((int) status));
-		      kill_lwp (GET_LWP (lp->ptid), WSTOPSIG (status));
+			fprintf_unfiltered (gdb_stdlog, "\
+SWC: leaving SIGTRAP in local queue of %s\n", target_pid_to_str (lp->ptid));
+		      push_waitpid (GET_LWP (lp->ptid),
+				    W_STOPCODE (SIGTRAP),
+				    lp->cloned ? __WCLONE : 0);
 		    }
 		}
 	      else
@@ -3161,7 +3177,7 @@ linux_nat_kill (void)
 }
 
 static void
-linux_nat_mourn_inferior (void)
+linux_nat_mourn_inferior (struct target_ops *ops)
 {
   /* Destroy LWP info; it's no longer valid.  */
   init_lwp_list ();
@@ -3171,7 +3187,7 @@ linux_nat_mourn_inferior (void)
       /* Normal case, no other forks available.  */
       if (target_can_async_p ())
 	linux_nat_async (NULL, 0);
-      linux_ops->to_mourn_inferior ();
+      linux_ops->to_mourn_inferior (ops);
     }
   else
     /* Multi-fork case.  The current inferior_ptid has exited, but
@@ -3319,11 +3335,13 @@ linux_nat_find_memory_regions (int (*func) (CORE_ADDR,
   char permissions[8], device[8], filename[MAXPATHLEN];
   int read, write, exec;
   int ret;
+  struct cleanup *cleanup;
 
   /* Compose the filename for the /proc memory map, and open it.  */
   sprintf (mapsfilename, "/proc/%lld/maps", pid);
   if ((mapsfile = fopen (mapsfilename, "r")) == NULL)
     error (_("Could not open %s."), mapsfilename);
+  cleanup = make_cleanup_fclose (mapsfile);
 
   if (info_verbose)
     fprintf_filtered (gdb_stdout,
@@ -3356,7 +3374,7 @@ linux_nat_find_memory_regions (int (*func) (CORE_ADDR,
 	 segment.  */
       func (addr, size, read, write, exec, obfd);
     }
-  fclose (mapsfile);
+  do_cleanups (cleanup);
   return 0;
 }
 
@@ -3591,10 +3609,8 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
   if (args)
     {
       /* Break up 'args' into an argv array.  */
-      if ((argv = buildargv (args)) == NULL)
-	nomem (0);
-      else
-	make_cleanup_freeargv (argv);
+      argv = gdb_buildargv (args);
+      make_cleanup_freeargv (argv);
     }
   while (argv != NULL && *argv != NULL)
     {
@@ -3649,9 +3665,10 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       sprintf (fname1, "/proc/%lld/cmdline", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
 	{
+	  struct cleanup *cleanup = make_cleanup_fclose (procfile);
 	  fgets (buffer, sizeof (buffer), procfile);
 	  printf_filtered ("cmdline = '%s'\n", buffer);
-	  fclose (procfile);
+	  do_cleanups (cleanup);
 	}
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
@@ -3681,7 +3698,9 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	{
 	  long long addr, endaddr, size, offset, inode;
 	  char permissions[8], device[8], filename[MAXPATHLEN];
+	  struct cleanup *cleanup;
 
+	  cleanup = make_cleanup_fclose (procfile);
 	  printf_filtered (_("Mapped address spaces:\n\n"));
 	  if (gdbarch_addr_bit (current_gdbarch) == 32)
 	    {
@@ -3729,7 +3748,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	        }
 	    }
 
-	  fclose (procfile);
+	  do_cleanups (cleanup);
 	}
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
@@ -3739,9 +3758,10 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       sprintf (fname1, "/proc/%lld/status", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
 	{
+	  struct cleanup *cleanup = make_cleanup_fclose (procfile);
 	  while (fgets (buffer, sizeof (buffer), procfile) != NULL)
 	    puts_filtered (buffer);
-	  fclose (procfile);
+	  do_cleanups (cleanup);
 	}
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
@@ -3754,6 +3774,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	  int itmp;
 	  char ctmp;
 	  long ltmp;
+	  struct cleanup *cleanup = make_cleanup_fclose (procfile);
 
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
 	    printf_filtered (_("Process: %d\n"), itmp);
@@ -3837,7 +3858,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	  if (fscanf (procfile, "%lu ", &ltmp) > 0)	/* FIXME arch? */
 	    printf_filtered (_("wchan (system call): 0x%lx\n"), ltmp);
 #endif
-	  fclose (procfile);
+	  do_cleanups (cleanup);
 	}
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
@@ -3939,6 +3960,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigse
   FILE *procfile;
   char buffer[MAXPATHLEN], fname[MAXPATHLEN];
   int signum;
+  struct cleanup *cleanup;
 
   sigemptyset (pending);
   sigemptyset (blocked);
@@ -3947,6 +3969,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigse
   procfile = fopen (fname, "r");
   if (procfile == NULL)
     error (_("Could not open %s"), fname);
+  cleanup = make_cleanup_fclose (procfile);
 
   while (fgets (buffer, MAXPATHLEN, procfile) != NULL)
     {
@@ -3968,7 +3991,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigse
 	add_line_to_sigset (buffer + 8, ignored);
     }
 
-  fclose (procfile);
+  do_cleanups (cleanup);
 }
 
 static LONGEST
@@ -4370,15 +4393,76 @@ linux_nat_async (void (*callback) (enum inferior_event_type event_type,
   return;
 }
 
+/* Stop an LWP, and push a TARGET_SIGNAL_0 stop status if no other
+   event came out.  */
+
 static int
-send_sigint_callback (struct lwp_info *lp, void *data)
+linux_nat_stop_lwp (struct lwp_info *lwp, void *data)
 {
-  /* Use is_running instead of !lp->stopped, because the lwp may be
-     stopped due to an internal event, and we want to interrupt it in
-     that case too.  What we want is to check if the thread is stopped
-     from the point of view of the user.  */
-  if (is_running (lp->ptid))
-    kill_lwp (GET_LWP (lp->ptid), SIGINT);
+  ptid_t ptid = * (ptid_t *) data;
+
+  if (ptid_equal (lwp->ptid, ptid)
+      || ptid_equal (minus_one_ptid, ptid)
+      || (ptid_is_pid (ptid)
+	  && ptid_get_pid (ptid) == ptid_get_pid (lwp->ptid)))
+    {
+      if (!lwp->stopped)
+	{
+	  int pid, status;
+
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"LNSL: running -> suspending %s\n",
+				target_pid_to_str (lwp->ptid));
+
+	  /* Peek once, to check if we've already waited for this
+	     LWP.  */
+	  pid = queued_waitpid_1 (ptid_get_lwp (lwp->ptid), &status,
+				  lwp->cloned ? __WCLONE : 0,  1 /* peek */);
+
+	  if (pid == -1)
+	    {
+	      ptid_t ptid = lwp->ptid;
+
+	      stop_callback (lwp, NULL);
+	      stop_wait_callback (lwp, NULL);
+
+	      /* If the lwp exits while we try to stop it, there's
+		 nothing else to do.  */
+	      lwp = find_lwp_pid (ptid);
+	      if (lwp == NULL)
+		return 0;
+
+	      pid = queued_waitpid_1 (ptid_get_lwp (lwp->ptid), &status,
+				      lwp->cloned ? __WCLONE : 0,
+				      1 /* peek */);
+	    }
+
+	  /* If we didn't collect any signal other than SIGSTOP while
+	     stopping the LWP, push a SIGNAL_0 event.  In either case,
+	     the event-loop will end up calling target_wait which will
+	     collect these.  */
+	  if (pid == -1)
+	    push_waitpid (ptid_get_lwp (lwp->ptid), W_STOPCODE (0),
+			  lwp->cloned ? __WCLONE : 0);
+	}
+      else
+	{
+	  /* Already known to be stopped; do nothing.  */
+
+	  if (debug_linux_nat)
+	    {
+	      if (find_thread_pid (lwp->ptid)->stop_requested)
+		fprintf_unfiltered (gdb_stdlog, "\
+LNSL: already stopped/stop_requested %s\n",
+				    target_pid_to_str (lwp->ptid));
+	      else
+		fprintf_unfiltered (gdb_stdlog, "\
+LNSL: already stopped/no stop_requested yet %s\n",
+				    target_pid_to_str (lwp->ptid));
+	    }
+	}
+    }
   return 0;
 }
 
@@ -4387,13 +4471,9 @@ linux_nat_stop (ptid_t ptid)
 {
   if (non_stop)
     {
-      if (ptid_equal (ptid, minus_one_ptid))
-	iterate_over_lwps (send_sigint_callback, &ptid);
-      else
-	{
-	  struct lwp_info *lp = find_lwp_pid (ptid);
-	  send_sigint_callback (lp, NULL);
-	}
+      linux_nat_async_events (sigchld_sync);
+      iterate_over_lwps (linux_nat_stop_lwp, &ptid);
+      target_async (inferior_event_handler, 0);
     }
   else
     linux_ops->to_stop (ptid);

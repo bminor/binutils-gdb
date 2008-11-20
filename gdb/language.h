@@ -30,6 +30,7 @@ struct objfile;
 struct frame_info;
 struct expression;
 struct ui_file;
+struct value_print_options;
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims */
 
@@ -189,7 +190,8 @@ struct language_defn
 
     void (*la_printstr) (struct ui_file * stream, const gdb_byte *string,
 			 unsigned int length, int width,
-			 int force_ellipses);
+			 int force_ellipses,
+			 const struct value_print_options *);
 
     void (*la_emitchar) (int ch, struct ui_file * stream, int quoter);
 
@@ -208,13 +210,13 @@ struct language_defn
     /* Print a value using syntax appropriate for this language. */
 
     int (*la_val_print) (struct type *, const gdb_byte *, int, CORE_ADDR,
-			 struct ui_file *, int, int, int,
-			 enum val_prettyprint);
+			 struct ui_file *, int,
+			 const struct value_print_options *);
 
     /* Print a top-level value using syntax appropriate for this language. */
 
     int (*la_value_print) (struct value *, struct ui_file *,
-			   int, enum val_prettyprint);
+			   const struct value_print_options *);
 
     /* PC is possibly an unknown languages trampoline.
        If that PC falls in a trampoline belonging to this language,
@@ -274,8 +276,7 @@ struct language_defn
     /* Print the index of an element of an array.  */
     void (*la_print_array_index) (struct value *index_value,
                                   struct ui_file *stream,
-                                  int format,
-                                  enum val_prettyprint pretty);
+                                  const struct value_print_options *options);
 
     /* Return non-zero if TYPE should be passed (and returned) by
        reference at the language level.  */
@@ -366,21 +367,22 @@ extern enum language set_language (enum language);
 #define LA_PRINT_TYPEDEF(type,new_symbol,stream) \
   (current_language->la_print_typedef(type,new_symbol,stream))
 
-#define LA_VAL_PRINT(type,valaddr,offset,addr,stream,fmt,deref,recurse,pretty) \
-  (current_language->la_val_print(type,valaddr,offset,addr,stream,fmt,deref, \
-				  recurse,pretty))
-#define LA_VALUE_PRINT(val,stream,fmt,pretty) \
-  (current_language->la_value_print(val,stream,fmt,pretty))
+#define LA_VAL_PRINT(type,valaddr,offset,addr,stream,recurse,options) \
+  (current_language->la_val_print(type,valaddr,offset,addr,stream, \
+				  recurse,options))
+#define LA_VALUE_PRINT(val,stream,options) \
+  (current_language->la_value_print(val,stream,options))
 
 #define LA_PRINT_CHAR(ch, stream) \
   (current_language->la_printchar(ch, stream))
-#define LA_PRINT_STRING(stream, string, length, width, force_ellipses) \
-  (current_language->la_printstr(stream, string, length, width, force_ellipses))
+#define LA_PRINT_STRING(stream, string, length, width, force_ellipses,options) \
+  (current_language->la_printstr(stream, string, length, width, \
+				 force_ellipses,options))
 #define LA_EMIT_CHAR(ch, stream, quoter) \
   (current_language->la_emitchar(ch, stream, quoter))
 
-#define LA_PRINT_ARRAY_INDEX(index_value, stream, format, pretty) \
-  (current_language->la_print_array_index(index_value, stream, format, pretty))
+#define LA_PRINT_ARRAY_INDEX(index_value, stream, optins) \
+  (current_language->la_print_array_index(index_value, stream, options))
 
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,
@@ -472,8 +474,7 @@ extern char *default_word_break_characters (void);
 /* Print the index of an array element using the C99 syntax.  */
 extern void default_print_array_index (struct value *index_value,
                                        struct ui_file *stream,
-                                       int format,
-                                       enum val_prettyprint pretty);
+				       const struct value_print_options *options);
 
 /* Return non-zero if TYPE should be passed (and returned) by
    reference at the language level.  */

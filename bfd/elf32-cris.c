@@ -409,7 +409,31 @@ static reloc_howto_type cris_elf_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 TRUE)			/* pcrel_offset */
+	 TRUE),			/* pcrel_offset */
+
+  /* We don't handle these in any special manner and cross-format
+     linking is not supported; just recognize them enough to pass them
+     around.  FIXME: do the same for most PIC relocs and add sanity
+     tests to actually refuse gracefully to handle these and PIC
+     relocs for cross-format linking.  */
+#define TLSHOWTO32(name) \
+ HOWTO (name, 0, 2, 32, FALSE, 0, complain_overflow_bitfield, \
+        bfd_elf_generic_reloc, #name, FALSE, 0, 0xffffffff, FALSE)
+#define TLSHOWTO16(name) \
+ HOWTO (name, 0, 1, 16, FALSE, 0, complain_overflow_bitfield, \
+        bfd_elf_generic_reloc, #name, FALSE, 0, 0xffff, FALSE)
+
+  TLSHOWTO32 (R_CRIS_32_GOT_GD),
+  TLSHOWTO16 (R_CRIS_16_GOT_GD),
+  TLSHOWTO32 (R_CRIS_32_GD),
+  TLSHOWTO32 (R_CRIS_DTP),
+  TLSHOWTO32 (R_CRIS_32_DTPREL),
+  TLSHOWTO16 (R_CRIS_16_DTPREL),
+  TLSHOWTO32 (R_CRIS_32_GOT_TPREL),
+  TLSHOWTO16 (R_CRIS_16_GOT_TPREL),
+  TLSHOWTO32 (R_CRIS_32_TPREL),
+  TLSHOWTO16 (R_CRIS_16_TPREL),
+  TLSHOWTO32 (R_CRIS_DTPMOD)
 };
 
 /* Map BFD reloc types to CRIS ELF reloc types.  */
@@ -441,7 +465,18 @@ static const struct cris_reloc_map cris_reloc_map [] =
   { BFD_RELOC_CRIS_32_GOTPLT,	R_CRIS_32_GOTPLT },
   { BFD_RELOC_CRIS_32_GOTREL,	R_CRIS_32_GOTREL },
   { BFD_RELOC_CRIS_32_PLT_GOTREL, R_CRIS_32_PLT_GOTREL },
-  { BFD_RELOC_CRIS_32_PLT_PCREL, R_CRIS_32_PLT_PCREL }
+  { BFD_RELOC_CRIS_32_PLT_PCREL, R_CRIS_32_PLT_PCREL },
+  { BFD_RELOC_CRIS_32_GOT_GD,	R_CRIS_32_GOT_GD },
+  { BFD_RELOC_CRIS_16_GOT_GD,	R_CRIS_16_GOT_GD },
+  { BFD_RELOC_CRIS_32_GD,	R_CRIS_32_GD },
+  { BFD_RELOC_CRIS_DTP,	R_CRIS_DTP },
+  { BFD_RELOC_CRIS_32_DTPREL,	R_CRIS_32_DTPREL },
+  { BFD_RELOC_CRIS_16_DTPREL,	R_CRIS_16_DTPREL },
+  { BFD_RELOC_CRIS_32_GOT_TPREL, R_CRIS_32_GOT_TPREL },
+  { BFD_RELOC_CRIS_16_GOT_TPREL, R_CRIS_16_GOT_TPREL },
+  { BFD_RELOC_CRIS_32_TPREL,	R_CRIS_32_TPREL },
+  { BFD_RELOC_CRIS_16_TPREL,	R_CRIS_16_TPREL },
+  { BFD_RELOC_CRIS_DTPMOD,	R_CRIS_DTPMOD }
 };
 
 static reloc_howto_type *

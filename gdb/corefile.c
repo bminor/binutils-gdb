@@ -74,7 +74,7 @@ core_file_command (char *filename, int from_tty)
     error (_("GDB can't read core files on this machine."));
 
   if (!filename)
-    (t->to_detach) (filename, from_tty);
+    (t->to_detach) (t, filename, from_tty);
   else
     (t->to_open) (filename, from_tty);
 }

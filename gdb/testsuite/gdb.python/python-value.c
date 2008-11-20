@@ -1,5 +1,6 @@
-/* Header file for GDB CLI utility library.
-   Copyright (c) 2001, 2007, 2008 Free Software Foundation, Inc.
+/* This testcase is part of GDB, the GNU debugger.
+
+   Copyright 2008 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -14,7 +15,27 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (CLI_UTILS_H)
-# define CLI_UTILS_H 1
+struct s
+{
+  int a;
+  int b;
+};
 
-#endif /* !defined (CLI_UTILS_H) */
+union u
+{
+  int a;
+  float b;
+};
+
+int
+main (int argc, char *argv[])
+{
+  struct s s;
+  union u u;
+
+  s.a = 3;
+  s.b = 5;
+  u.a = 7;
+
+  return 0;      /* break to inspect struct and union */
+}

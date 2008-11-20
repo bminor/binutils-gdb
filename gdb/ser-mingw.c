@@ -32,6 +32,8 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 
+#include "command.h"
+
 void _initialize_ser_windows (void);
 
 struct ser_windows_state
@@ -817,12 +819,17 @@ pipe_windows_open (struct serial *scb, const char *name)
 {
   struct pipe_state *ps;
   FILE *pex_stderr;
+  char **argv;
+  struct cleanup *back_to;
 
-  char **argv = buildargv (name);
-  struct cleanup *back_to = make_cleanup_freeargv (argv);
+  if (name == NULL)
+    error_no_arg (_("child command"));
+
+  argv = gdb_buildargv (name);
+  back_to = make_cleanup_freeargv (argv);
+
   if (! argv[0] || argv[0][0] == '\0')
     error ("missing child command");
-
 
   ps = make_pipe_state ();
   make_cleanup (cleanup_pipe_state, ps);

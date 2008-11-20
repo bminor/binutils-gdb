@@ -966,17 +966,18 @@ vmap_exec (void)
 /* Set the current architecture from the host running GDB.  Called when
    starting a child process. */
 
-static void (*super_create_inferior) (char *exec_file, char *allargs,
-				      char **env, int from_tty);
+static void (*super_create_inferior) (struct target_ops *,char *exec_file, 
+				      char *allargs, char **env, int from_tty);
 static void
-rs6000_create_inferior (char *exec_file, char *allargs, char **env, int from_tty)
+rs6000_create_inferior (struct target_ops * ops, char *exec_file,
+			char *allargs, char **env, int from_tty)
 {
   enum bfd_architecture arch;
   unsigned long mach;
   bfd abfd;
   struct gdbarch_info info;
 
-  super_create_inferior (exec_file, allargs, env, from_tty);
+  super_create_inferior (ops, exec_file, allargs, env, from_tty);
 
   if (__power_rs ())
     {

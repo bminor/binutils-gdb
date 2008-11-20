@@ -853,7 +853,7 @@ monitor_close (int quitting)
    when you want to detach and do something else with your gdb.  */
 
 static void
-monitor_detach (char *args, int from_tty)
+monitor_detach (struct target_ops *ops, char *args, int from_tty)
 {
   pop_target ();		/* calls monitor_close to do the real work */
   if (from_tty)
@@ -1995,8 +1995,8 @@ monitor_kill (void)
 /* All we actually do is set the PC to the start address of exec_bfd.  */
 
 static void
-monitor_create_inferior (char *exec_file, char *args, char **env,
-			 int from_tty)
+monitor_create_inferior (struct target_ops *ops, char *exec_file,
+			 char *args, char **env, int from_tty)
 {
   if (args && (*args != '\000'))
     error (_("Args are not supported by the monitor."));
@@ -2012,7 +2012,7 @@ monitor_create_inferior (char *exec_file, char *args, char **env,
    instructions.  */
 
 static void
-monitor_mourn_inferior (void)
+monitor_mourn_inferior (struct target_ops *ops)
 {
   unpush_target (targ_ops);
   generic_mourn_inferior ();	/* Do all the proper things now */
@@ -2026,7 +2026,6 @@ monitor_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   int i;
-  const unsigned char *bp;
   int bplen;
 
   monitor_debug ("MON inst bkpt %s\n", paddr (addr));
@@ -2037,7 +2036,7 @@ monitor_insert_breakpoint (struct bp_target_info *bp_tgt)
     addr = gdbarch_addr_bits_remove (current_gdbarch, addr);
 
   /* Determine appropriate breakpoint size for this address.  */
-  bp = gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &bplen);
+  gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &bplen);
   bp_tgt->placed_address = addr;
   bp_tgt->placed_size = bplen;
 

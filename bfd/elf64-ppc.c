@@ -92,7 +92,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections
 #define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
 #define elf_backend_add_symbol_hook	      ppc64_elf_add_symbol_hook
-#define elf_backend_check_directives	      ppc64_elf_check_directives
+#define elf_backend_check_directives	      ppc64_elf_process_dot_syms
 #define elf_backend_as_needed_cleanup	      ppc64_elf_as_needed_cleanup
 #define elf_backend_archive_symbol_lookup     ppc64_elf_archive_symbol_lookup
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
@@ -3005,8 +3005,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	}
 
       /* Get start of .glink stubs from DT_PPC64_GLINK.  */
-      dynamic = bfd_get_section_by_name (abfd, ".dynamic");
-      if (dynamic != NULL)
+      if (dyn_count != 0
+	  && (dynamic = bfd_get_section_by_name (abfd, ".dynamic")) != NULL)
 	{
 	  bfd_byte *dynbuf, *extdyn, *extdynend;
 	  size_t extdynsize;
@@ -3061,21 +3061,21 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
 	  if (resolv_vma)
 	    size += sizeof (asymbol) + sizeof ("__glink_PLTresolve");
-	}
 
-      relplt = bfd_get_section_by_name (abfd, ".rela.plt");
-      if (glink != NULL && relplt != NULL)
-	{
-	  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
-	  if (! (*slurp_relocs) (abfd, relplt, dyn_syms, TRUE))
-	    goto free_contents_and_exit;
+	  relplt = bfd_get_section_by_name (abfd, ".rela.plt");
+	  if (relplt != NULL)
+	    {
+	      slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
+	      if (! (*slurp_relocs) (abfd, relplt, dyn_syms, TRUE))
+		goto free_contents_and_exit;
 	
-	  plt_count = relplt->size / sizeof (Elf64_External_Rela);
-	  size += plt_count * sizeof (asymbol);
+	      plt_count = relplt->size / sizeof (Elf64_External_Rela);
+	      size += plt_count * sizeof (asymbol);
 
-	  p = relplt->relocation;
-	  for (i = 0; i < plt_count; i++, p++)
-	    size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+	      p = relplt->relocation;
+	      for (i = 0; i < plt_count; i++, p++)
+		size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+	    }
 	}
 
       s = *ret = bfd_malloc (size);
@@ -3620,7 +3620,7 @@ struct ppc_link_hash_table
   /* Set on error.  */
   unsigned int stub_error:1;
 
-  /* Temp used by ppc64_elf_check_directives.  */
+  /* Temp used by ppc64_elf_process_dot_syms.  */
   unsigned int twiddled_syms:1;
 
   /* Incremented every time we size stubs.  */
@@ -4438,7 +4438,7 @@ add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
 /* Process list of dot-symbols we made in link_hash_newfunc.  */
 
 static bfd_boolean
-ppc64_elf_check_directives (bfd *ibfd, struct bfd_link_info *info)
+ppc64_elf_process_dot_syms (bfd *ibfd, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
   struct ppc_link_hash_entry **p, *eh;

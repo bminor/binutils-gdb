@@ -1104,6 +1104,7 @@ print_insn_args (const char *d,
 	  break;
 
 	case '<':
+	case '1':
 	  (*info->fprintf_func) (info->stream, "0x%lx",
 				 (l >> OP_SH_SHAMT) & OP_MASK_SHAMT);
 	  break;

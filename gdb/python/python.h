@@ -22,6 +22,8 @@
 
 #include "value.h"
 
+extern struct value *values_in_python;
+
 void eval_python_from_control_command (struct command_line *);
 
 #endif /* GDB_PYTHON_H */

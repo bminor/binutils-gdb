@@ -987,7 +987,7 @@ write_object_renaming (struct block *orig_left_context,
 	  if (end == NULL)
 	    end = renaming_expr + strlen (renaming_expr);
 	  field_name.length = end - renaming_expr;
-	  field_name.ptr = xmalloc (end - renaming_expr + 1);
+	  field_name.ptr = malloc (end - renaming_expr + 1);
 	  strncpy (field_name.ptr, renaming_expr, end - renaming_expr);
 	  field_name.ptr[end - renaming_expr] = '\000';
 	  renaming_expr = end;

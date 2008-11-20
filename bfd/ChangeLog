@@ -1,3 +1,317 @@
+2008-11-19  Bob Wilson  <bob.wilson@acm.org>
+	
+	* xtensa-modules.c (sysregs): Add MMID, VECBASE, EPC5, EPC6, EPC7,
+	EXCSAVE5, EXCSAVE6, EXCSAVE7, EPS5, EPS6, EPS7, CPENABLE,
+	SCOMPARE1, and THREADPTR registers.
+	(NUM_SYSREGS, MAX_USER_REG): Update.
+	(states): Change width of INTERRUPT, WindowBase, WindowStart, and
+	INTENABLE.  Add VECBASE, EPC5, EPC6, EPC7, EXCSAVE5, EXCSAVE6,
+	EXCSAVE7, EPS6, EPS6, EPS7, THREADPTR, CPENABLE, and SCOMPARE1 states.
+	(NUM_STATES): Update.
+	(enum xtensa_state_id): Add entries for new states.
+	(enum xtensa_field_id): Add entries for xt_wbr15_imm and xt_wbr18_imm
+	fields, along with functions to extract and set them.
+	(regfiles): Change number of AR registers to 32.
+	(Operand_ar0_encode, Operand_ar4_encode, Operand_ar8_encode,
+	Operand_ar12_encode, Operand_ars_entry_encode): Update register mask.
+	(operands): Add entries for tp7, xt_wbr15_label, xt_wbr18_label,
+	xt_wbr15_imm, and xt_wbr18_imm operands, along with functions to
+	encode and decode them.
+	(enum xtensa_operand_id): Add entries for new operands.
+	(Iclass_xt_iclass_rfi_stateArgs): Add EPC5, EPC6, EPC7, EPS5, EPS6, and
+	EPC7 states.
+	(Iclass_xt_iclass_rfdo_stateArgs): Replace EPC4 and EPS4 by EPC6 and
+	EPS6, respectively.
+	(iclasses): Add entries for rur_threadptr, wur_threadptr,
+	xt_iclass_wsr_176, xt_iclass_rsr_epc5, xt_iclass_wsr_epc5,
+	xt_iclass_xsr_epc5, xt_iclass_rsr_excsave5, xt_iclass_wsr_excsave5,
+	xt_iclass_xsr_excsave5, xt_iclass_rsr_epc6, xt_iclass_wsr_epc6,
+	xt_iclass_xsr_epc6, xt_iclass_rsr_excsave6, xt_iclass_wsr_excsave6,
+	xt_iclass_xsr_excsave6, xt_iclass_rsr_epc7, xt_iclass_wsr_epc7,
+	xt_iclass_xsr_epc7, xt_iclass_rsr_excsave7, xt_iclass_wsr_excsave7,
+	xt_iclass_xsr_excsave7, xt_iclass_rsr_eps5, xt_iclass_wsr_eps5,
+	xt_iclass_xsr_eps5, xt_iclass_rsr_eps6, xt_iclass_wsr_eps6,
+	xt_iclass_xsr_eps6, xt_iclass_rsr_eps7, xt_iclass_wsr_eps7,
+	xt_iclass_xsr_eps7, xt_iclass_rsr_vecbase, xt_iclass_wsr_vecbase,
+	xt_iclass_xsr_vecbase, xt_iclass_mul16, xt_iclass_wsr_mmid,
+	xt_iclass_icache_lock, xt_iclass_dcache_lock, xt_iclass_rsr_cpenable,
+	xt_iclass_wsr_cpenable, xt_iclass_xsr_cpenable, xt_iclass_clamp,
+	xt_iclass_minmax, xt_iclass_sx, xt_iclass_l32ai, xt_iclass_s32ri,
+	xt_iclass_s32c1i, xt_iclass_rsr_scompare1, xt_iclass_wsr_scompare1,
+	xt_iclass_xsr_scompare1, xt_iclass_div, and xt_iclass_mul32, along
+	with corresponding argument and state argument arrays.  Change
+	number of state arguments for xt_iclass_rfi.  Add arguments for
+	xt_iclass_rfdo.
+	(enum xtensa_iclass_id): Add entries for new iclasses.
+	(opcodes): Add entries for RUR_THREADPTR, WUR_THREADPTR, WSR_176,
+	RSR_EPC5, WSR_EPC5, XSR_EPC5, RSR_EXCSAVE5, WSR_EXCSAVE5, XSR_EXCSAVE5,
+	RSR_EPC6, WSR_EPC6, XSR_EPC6, RSR_EXCSAVE6, WSR_EXCSAVE6, XSR_EXCSAVE6,
+	RSR_EPC7, WSR_EPC7, XSR_EPC7, RSR_EXCSAVE7, WSR_EXCSAVE7, XSR_EXCSAVE7,
+	RSR_EPS5, WSR_EPS5, XSR_EPS5, RSR_EPS6, WSR_EPS6, XSR_EPS6, RSR_EPS7,
+	WSR_EPS7, XSR_EPS7, RSR_VECBASE, WSR_VECBASE, XSR_VECBASE, MUL16U,
+	MUL16S, WSR_MMID, IPFL, IHU, IIU, DPFL, DHU, DIU, RSR_CPENABLE,
+	WSR_CPENABLE, XSR_CPENABLE, CLAMPS, MIN, MAX, MINU, MAXU, SEXT, L32AI,
+	S32RI, S32C1I, RSR_SCOMPARE1, WSR_SCOMPARE1, XSR_SCOMPARE1, QUOU, QUOS,
+	REMU, REMS, and MULL opcodes, along with the corresponding functions
+	to encode them.
+	(enum xtensa_opcode_id): Add entries for new opcodes.
+	(Slot_inst_decode): Handle new opcodes.
+	(Slot_inst_get_field_fns, Slot_inst_set_field_fns): Add entries for
+	xt_wbr15_imm and xt_wbr18_imm fields.
+	(Slot_inst16a_get_field_fns, Slot_inst16a_set_field_fns): Likewise.
+	(Slot_inst16b_get_field_fns, Slot_inst16b_set_field_fns): Likewise.
+	(xtensa_modules): Update number of fields, operands, iclasses and
+	opcodes.
+	
+2008-11-19  Nix  <nix@esperi.org.uk>
+
+	* elf.c (swap_out_syms) [USE_STT_COMMON]: Fix syntax error.
+
+2008-11-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 7027
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): Treat WPLT30 relocs
+	against local symbols in 64-bit binaries as if they were WDISP30
+	relocs.
+	(_bfd_sparc_elf_relocate_section): Likewise.
+
+2008-11-18  Catherine Moore  <clm@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Merge
+	half-precision attributes.
+	(elf32_arm_copy_one_eabi_other_attribute): New.
+	(elf32_arm_copy_other_attribute_list): New. 
+
+2008-11-18  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2.c (read_section): Fix formatting.
+	(read_n_bytes): Remove unhelpful comment.
+	(read_indirect_string): Pass symbol table to read_section in case
+	the .debug_str section needs relocating.
+
+	PR 7037
+	* elf32-cr16.c (cr16_elf_howto_table): Zero the src_mask field of
+	the reloc descriptions.
+
+2008-11-14  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	PR 7022
+	* elf32-avr.c (bfd_elf_avr_final_write_processing):
+	Add missing break statements.
+
+2008-11-14  Bob Wilson  <bob.wilson@acm.org>
+
+	* xtensa-modules.c (xtensa_state_id): New enum, replacing STATE macros.
+	(xtensa_field_id, xtensa_regfile_id, xtensa_operand_id)
+	(xtensa_iclass_id, xtensa_opcode_id): New enums.
+	Replace hardcoded constants throughout this file with enum values.
+
+2008-11-14  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Use header_size
+	to avoid moving the load address of file headers.
+	(assign_file_positions_for_load_sections): Set header_size for
+	segments containing the file header.
+
+2008-11-14  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.com: Handle bfd_default_target_size, BFD_HOST_LONG_LONG, 
+	BFD_HOST_64BIT_LONG_LONG, BFD_HOSTPTR_T, bfd_file_ptr.
+	Generate bfdver.h.
+	* vms-hdr.c (_bfd_vms_write_hdr): Use strdup/free instead of alloca.
+	* hosts/alphavms.h: Defines macros to bypass i18n.
+	* makefile.vms (OBJS): Update file list.
+	(DEFS): Remove VMS_DEBUG, const, add DEBUGDIR.
+	(CFLAGS): Update flags.
+	* bfdio.c (real_fopen): Add code specific to VMS: extract attributes
+	from modes.
+
+2008-11-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.in: Deactivate large-file support on native 32bit
+	sparc-solaris unless the user explicitly requested it.
+	* configure: Regenerate.
+
+2008-11-13  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/7028
+	* elf.c (assign_file_positions_for_load_sections): Allocate phrds
+	with bfd_zalloc2 instead of bfd_alloc2.  For the amount, use
+	the possibly-preset header-size, not the computed one.
+
+2008-11-13  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 7023
+	* elf.c (bfd_section_from_shdr <SHT_SYMTAB>): Fail on invalid sh_info.
+
+2008-11-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_for_non_load_sections): Consolidate
+	PT_GNU_RELRO handling.
+
+2008-11-11  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 7012
+	* dwarf2.c (find_line): Don't keep stale pointers into realloc'd
+	memory.  Return on errors.  Fix memory leak.
+	(_bfd_dwarf2_cleanup_debug_info): Free dwarf_str_buffer.
+
+2008-11-10  Andreas Schwab  <schwab@suse.de>
+
+	PR 7011
+	* elf.c (assign_file_positions_for_non_load_sections): Handle
+	PT_GNU_RELRO specially.
+
+2008-11-06  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* config.bfd: Add m32c-*-rtems* and m32r-*-rtems*.
+
+2008-11-06  Tom Tromey  <tromey@redhat.com>
+
+	* configure, config.in: Rebuild.
+	* configure.in: Check for fileno.
+	* bfdio.c (close_on_exec): New function.
+	(real_fopen): Use it.
+	(FD_CLOEXEC): New define.
+
+2008-11-06  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h (BFD_MACH_O_NO_SECT): Add; reorders the macros.
+	(BFD_MACH_O_SYM_NTYPE, BFD_MACH_O_SYM_NSECT,
+	BFD_MACH_O_SYM_NDESC): New macros.
+	(bfd_mach_o_i386_thread_flavour): Define according to the latest
+	definition from system header.
+	(bfd_mach_o_load_command_type): Add BFD_MACH_O_LC_RPATH,
+	BFD_MACH_O_LC_CODE_SIGNATURE.
+	(BFD_MACH_O_SECTION_TYPE_MASK, BFD_MACH_O_SECTION_ATTRIBUTES_MASK,
+	BFD_MACH_O_SECTION_ATTRIBUTES_SYS, BFD_MACH_O_SECTION_ATTRIBUTES_USR,
+	BFD_MACH_O_S_ATTR_LOC_RELOC, BFD_MACH_O_S_ATTR_EXT_RELOC,
+	BFD_MACH_O_S_ATTR_SOME_INSTRUCTIONS, BFD_MACH_O_S_ATTR_DEBUG,
+	BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS): Add.
+	(bfd_mach_o_segment_command): Add room for a nul terminator in
+	segname field.
+	(BFD_MACH_O_PROT_READ, BFD_MACH_O_PROT_WRITE,
+	BFD_MACH_O_PROT_EXECUTE): Add.
+	(INDIRECT_SYMBOL_LOCAL): Renames to BFD_MACH_O_INDIRECT_SYMBOL_LOCAL.
+	(INDIRECT_SYMBOL_ABS): Renames to BFD_MACH_O_INDIRECT_SYMBOL_ABS.
+	(bfd_mach_o_uuid_command): Add the structure.
+	(bfd_mach_o_load_command): Add uuid field.
+	(bfd_get_mach_o_data): New macro.
+	* mach-o.c (bfd_mach_o_bfd_print_private_bfd_data): New function which
+	replaces the macro.
+	(SECTION_TYPE, SECTION_ATTRIBUTES, SECTION_ATTRIBUTES_USR,
+	S_ATTR_PURE_INSTRUCTIONS, SECTION_ATTRIBUTES_SYS,
+	S_ATTR_SOME_INSTRUCTIONS, S_ATTR_EXT_RELOC, S_ATTR_LOC_RELOC): Renamed
+	and moved to mach-o.h.
+	(N_STAB, N_TYPE, N_EXT, N_UNDF, N_ABS, N_TEXT, N_DATA, N_BSS,
+	N_SECT, N_INDR): Removed as they duplicated macros in mach-o.h.
+	(bfd_mach_o_print_symbol): Print much more details.
+	(bfd_mach_o_make_bfd_section): Add prot argument, use canonical
+	dwarf name for dwarf sections.  Precisely set section flags.
+	(bfd_mach_o_scan_read_section_32): Add prot argument.
+	(bfd_mach_o_scan_read_section_64): Ditto.
+	(bfd_mach_o_scan_read_section): Ditto.
+	(bfd_mach_o_scan_read_symtab_symbol): Set section for debugging
+	stabs, set BSF_GLOBAL and LOCAL flags correctly.  Fix section
+	for N_SECT symbols.
+	(bfd_mach_o_i386_flavour_string): Reindent and adjust for new
+	names.
+	(bfd_mach_o_scan_read_symtab): Set HAS_SYMS flags on bfd if there
+	are symbols.
+	(bfd_mach_o_scan_read_uuid): New function.
+	(bfd_mach_o_scan_read_segment): Add a trailing nul.  Segments
+	flags are now simply HAS_CONTENTS.  Pass protection to
+	bfd_mach_o_scan_read_section.
+	(bfd_mach_o_scan_read_command): Decode UUID command.
+	(bfd_mach_o_flatten_sections): Add comments.  Fix flavour names.
+	(bfd_mach_o_scan): Set flags according to file type.
+	(mach_o_fat_archentry): Remove abfd field.
+	(bfd_mach_o_archive_p): Remove initialization of abfd field.
+	(bfd_mach_o_openr_next_archived_file): Find previous archive
+	by position and not by bfd (as former bfds may have been freed).
+	Give architecture name to archived file.
+	* mach-o-target.c (TARGET_NAME): Use generic archive for non fat
+	targets.
+
+2008-10-30  Jay Krell  <jay.krell@cornell.edu>
+
+	* cache.c (cache_bread): Cast void * pointer before performing
+	arithmetic on it.
+
+2008-10-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_process_dot_syms): Renamed from
+	ppc64_elf_check_directives.
+	* elf32-sh-symbian.c (sh_symbian_process_directives): Combine..
+	(sh_symbian_check_directives): ..this
+	(bfd_elf32_sh_symbian_process_directives) ..and this function.
+
+2008-10-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (bfd_elf_final_link): Move code reading relocs to..
+	* elf32-spu.c (spu_elf_count_relocs): ..here.  Adjust params.
+	* elf-bfd.h (struct elf_backend_data): Update elf_backend_count_relocs
+	params.
+
+2008-10-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (bfd_elf_final_link): Use d_ptr rather than d_val
+	where Elf_Internal_Dyn holds an address.
+
+2008-10-10  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* elf32-ppc.c (ppc_elf_merge_obj_attributes): Merge
+	Tag_GNU_Power_ABI_Struct_Return.
+
+2008-10-09  Kai Tietz  <kai.tietz@onevision.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Dump bfd_vma
+	sized addresses instead of long sized.
+
+2008-10-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Don't attempt to
+	read plt relocs if no dynamic syms.
+
+2008-10-08  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add "id".
+	* configure: Regenerate.
+	* po/id.po: New Indonesian translation.
+
+2008-10-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_for_load_sections): When checking
+	a segment for contents, don't assume that a non-TLS nobits section
+	must only be followed by nobits sections.
+
+2008-10-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (TLSHOWTO32, TLSHOWTO16): New macros.
+	(cris_elf_howto_table): Add entries for R_CRIS_32_GOT_GD,
+	R_CRIS_16_GOT_GD, R_CRIS_32_GD, R_CRIS_DTP, R_CRIS_32_DTPREL,
+	R_CRIS_16_DTPREL, R_CRIS_DTPMOD, R_CRIS_32_GOT_TPREL,
+	R_CRIS_16_GOT_TPREL,  R_CRIS_32_TPREL,  R_CRIS_16_TPREL.
+	(cris_reloc_map): Similarly.
+	* reloc.c (bfd_reloc_code_type): Add entries for
+	BFD_RELOC_CRIS_32_GOT_GD, BFD_RELOC_CRIS_16_GOT_GD,
+	BFD_RELOC_CRIS_32_GD, BFD_RELOC_CRIS_DTP,
+	BFD_RELOC_CRIS_32_DTPREL, BFD_RELOC_CRIS_16_DTPREL,
+	BFD_RELOC_CRIS_DTPMOD, BFD_RELOC_CRIS_32_GOT_TPREL,
+	BFD_RELOC_CRIS_16_GOT_TPREL, BFD_RELOC_CRIS_32_TPREL,
+	BFD_RELOC_CRIS_16_TPREL.
+	* libbfd.h, bfd-in2.h: Regenerate.
+
+2008-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6931
+	* elf.c (bfd_elf_set_group_contents): Assign sh_info for ld -r when
+	the signature symbol is global.
+	* elflink.c (elf_link_input_bfd): Ensure group signature symbol
+	is output when ld -r.  Set group sh_info when local.
+	* linker.c (default_indirect_link_order): Handle group sections
+	specially.
+
 2008-09-30  Wesley W. Terpstra  <wesley@terpstra.ca>
 	    Nick Clifton  <nickc@redhat.com>
 
@@ -133,7 +447,7 @@
 	BFD_MACH_O_x86_EXCEPTION_STATE.
 	(bfd_mach_o_load_command_type): Add
 	BFD_MACH_O_LC_SEGMENT_64, BFD_MACH_O_LC_ROUTINES_64,
-	BFD_MACH_O_LC_UUID.	
+	BFD_MACH_O_LC_UUID.
 	(BFD_MACH_O_CPU_IS64BIT): Added.
 	(bfd_mach_o_cpu_type): Add BFD_MACH_O_CPU_TYPE_POWERPC_64,
 	BFD_MACH_O_CPU_TYPE_X86_64.
@@ -165,7 +479,7 @@
 	(bfd_mach_o_scan_start_address): Ditto.
 	(bfd_mach_o_scan): Ditto.
 	(bfd_mach_o_lookup_section): Ditto.
-	
+
 2008-08-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf-hppa.h (elf_hppa_reloc_final_type): Handle R_PARISC_GPREL64,
