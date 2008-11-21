@@ -317,16 +317,14 @@ AC_ARG_WITH(libunwind,
   no)   enable_libunwind=no ;;
   *)    AC_MSG_ERROR(bad value ${withval} for GDB with-libunwind option) ;;
 esac],[
-  AC_CHECK_HEADERS(libunwind.h)
-  AC_CHECK_HEADERS(libunwind-ia64.h)
+  AC_CHECK_HEADERS(libunwind.h libunwind-ia64.h)
   if test x"$ac_cv_header_libunwind_h" = xyes -a x"$ac_cv_header_libunwind_ia64_h" = xyes; then
     enable_libunwind=yes;
   fi
 ])
    
 if test x"$enable_libunwind" = xyes; then
-  AC_CHECK_HEADERS(libunwind.h)
-  AC_CHECK_HEADERS(libunwind-ia64.h)
+  AC_CHECK_HEADERS(libunwind.h libunwind-ia64.h)
   AC_DEFINE(HAVE_LIBUNWIND, 1, [Define if libunwind library is being used.])
   CONFIG_OBS="$CONFIG_OBS libunwind-frame.o"
   CONFIG_DEPS="$CONFIG_DEPS libunwind-frame.o"
@@ -688,7 +686,17 @@ AC_SUBST(PYTHON_CFLAGS)
 AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_STDC
-AC_CHECK_HEADERS(nlist.h)
+# elf_hp.h is for HP/UX 64-bit shared library support.
+# FIXME: kettenis/20030102: In most cases we include these (ctype.h, time.h)
+# unconditionally, so what's the point in checking these?
+AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
+                  thread_db.h gnu/libc-version.h signal.h stddef.h \
+		  stdlib.h string.h memory.h strings.h sys/fault.h \
+		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
+		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
+		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
+		  sys/types.h sys/wait.h wait.h termios.h termio.h \
+		  sgtty.h unistd.h elf_hp.h ctype.h time.h])
 AC_CHECK_HEADERS(link.h, [], [],
 [#if HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -697,38 +705,16 @@ AC_CHECK_HEADERS(link.h, [], [],
 # include <nlist.h>
 #endif
 ])
-AC_CHECK_HEADERS(machine/reg.h)
-AC_CHECK_HEADERS(poll.h sys/poll.h)
-AC_CHECK_HEADERS(proc_service.h thread_db.h gnu/libc-version.h)
-AC_CHECK_HEADERS(signal.h)
-AC_CHECK_HEADERS(stddef.h)
-AC_CHECK_HEADERS(stdlib.h)
-AC_CHECK_HEADERS(string.h memory.h strings.h)
-AC_CHECK_HEADERS(sys/fault.h)
-AC_CHECK_HEADERS(sys/file.h)
-AC_CHECK_HEADERS(sys/filio.h)
-AC_CHECK_HEADERS(sys/ioctl.h)
-AC_CHECK_HEADERS(sys/param.h)
-AC_CHECK_HEADERS(sys/resource.h)
 AC_CHECK_HEADERS(sys/proc.h, [], [],
 [#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
 ])
-AC_CHECK_HEADERS(sys/procfs.h)
-AC_CHECK_HEADERS(sys/ptrace.h ptrace.h)
-AC_CHECK_HEADERS(sys/reg.h sys/debugreg.h)
-AC_CHECK_HEADERS(sys/select.h)
-AC_CHECK_HEADERS(sys/syscall.h)
-AC_CHECK_HEADERS(sys/types.h)
 AC_CHECK_HEADERS(sys/user.h, [], [],
 [#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
 ])
-AC_CHECK_HEADERS(sys/wait.h wait.h)
-AC_CHECK_HEADERS(termios.h termio.h sgtty.h)
-AC_CHECK_HEADERS(unistd.h)
 
 # On Solaris 2.[789], we need to define _MSE_INT_H to avoid a clash
 # between <widec.h> and <wchar.h> that would cause AC_CHECK_HEADERS to
@@ -741,35 +727,25 @@ case $host_os in
    Solaris 2.[789] when using GCC. ])
     fi ;;
 esac
-AC_CHECK_HEADERS(curses.h cursesX.h ncurses.h ncurses/ncurses.h)
-AC_CHECK_HEADERS(ncurses/term.h)
+AC_CHECK_HEADERS(curses.h cursesX.h ncurses.h ncurses/ncurses.h ncurses/term.h)
 AC_CHECK_HEADERS(term.h, [], [],
 [#if HAVE_CURSES_H
 # include <curses.h>
 #endif
 ])
 
-# Check for HP/UX 64-bit shared library support
-AC_CHECK_HEADERS(elf_hp.h)
-
-# FIXME: kettenis/20030102: In most cases we include these
-# unconditionally, so what's the point in checking these?
-AC_CHECK_HEADERS(ctype.h time.h)
-
 # ------------------------- #
 # Checks for declarations.  #
 # ------------------------- #
 
-AC_CHECK_DECLS([free, malloc, realloc])
-AC_CHECK_DECLS([strerror, strstr])
-AC_CHECK_DECLS([getopt, snprintf, vsnprintf])
+AC_CHECK_DECLS([free, malloc, realloc, strerror, strstr, getopt,
+                snprintf, vsnprintf])
 
 # ----------------------- #
 # Checks for structures.  #
 # ----------------------- #
 
-AC_CHECK_MEMBERS([struct stat.st_blocks])
-AC_CHECK_MEMBERS([struct stat.st_blksize])
+AC_CHECK_MEMBERS([struct stat.st_blocks, struct stat.st_blksize])
 
 # ------------------ #
 # Checks for types.  #
@@ -796,18 +772,10 @@ AC_C_BIGENDIAN
 AC_FUNC_ALLOCA
 AC_FUNC_MMAP
 AC_FUNC_VFORK
-AC_CHECK_FUNCS(canonicalize_file_name realpath)
-AC_CHECK_FUNCS(getrusage)
-AC_CHECK_FUNCS(getuid getgid)
-AC_CHECK_FUNCS(poll)
-AC_CHECK_FUNCS(pread64)
-AC_CHECK_FUNCS(sbrk)
-AC_CHECK_FUNCS(setpgid setpgrp setsid)
-AC_CHECK_FUNCS(sigaction sigprocmask sigsetmask)
-AC_CHECK_FUNCS(socketpair)
-AC_CHECK_FUNCS(syscall)
-AC_CHECK_FUNCS(ttrace)
-AC_CHECK_FUNCS(wborder)
+AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid \
+                getgid poll pread64 sbrk setpgid setpgrp setsid \
+		sigaction sigprocmask sigsetmask socketpair syscall \
+		ttrace wborder])
 
 # Check the return and argument types of ptrace.  No canned test for
 # this, so roll our own.

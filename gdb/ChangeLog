@@ -1,5 +1,11 @@
 2008-11-21  Tom Tromey  <tromey@redhat.com>
 
+	* configure: Rebuild.
+	* configure.ac: Merge calls to AC_CHECK_FUNCS, AC_CHECK_HEADERS,
+	AC_CHECK_DECLS, and AC_CHECK_MEMBERS.
+
+2008-11-21  Tom Tromey  <tromey@redhat.com>
+
 	* python/python-internal.h (PyGILState_Ensure): New define.
 	(PyGILState_Release): Likewise.
 	(PyEval_InitThreads): Likewise.
