@@ -6539,7 +6539,7 @@ check_t1_t2_reads_and_writes (TInsn *t1, TInsn *t2)
 	{
 	  xtensa_state t1_so = xtensa_stateOperand_state (isa, t1->opcode, i);
 	  t1_inout = xtensa_stateOperand_inout (isa, t1->opcode, i);
-	  if (t1_so != t2_so)
+	  if (t1_so != t2_so || xtensa_state_is_shared_or (isa, t1_so) == 1)
 	    continue;
 
 	  if (t2_inout == 'i' && (t1_inout == 'm' || t1_inout == 'o'))

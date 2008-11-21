@@ -1,3 +1,7 @@
+2008-11-21  Sterling Augustine  <sterling@tensilica.com>
+
+	* xtensa-isa.c (xtensa_state_is_shared_or): New function.
+
 2008-11-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf-bfd.h (struct elf_backend_data): New member got_elt_size.

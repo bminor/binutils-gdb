@@ -1,3 +1,9 @@
+2008-11-21  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (check_t1_t2_reads_and_writes): Call
+	xtensa_state_is_shared_or to allow multiple opcodes within a
+	single FLIX bundle to write to these special states.
+
 2008-11-19  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c (cris_number_to_imm): Apply S_SET_THREAD_LOCAL
