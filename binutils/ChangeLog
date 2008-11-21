@@ -1,3 +1,7 @@
+2008-11-21 Sterling Augustine <sterling@tensilica.com>
+
+	* MAINTAINERS: Take over from Bob Wilson as Xtensa maintainer.
+
 2008-11-19  Nick Clifton  <nickc@redhat.com>
 
 	* doc/fdl.texi: Update to v1.3
