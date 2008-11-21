@@ -1,3 +1,10 @@
+2008-11-21  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms (OBJS): Update objects list.
+	(CFLAGS): Update.
+	(libiberty.olb): Remove alloca-conf.h dependency.
+	* config.h-vms: Use new macro sets, use builtin alloca.
+	
 2008-10-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (CPPFLAGS): Define.

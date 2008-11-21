@@ -1,13 +1,8 @@
-#ifndef NEED_strerror
-#define NEED_strerror
-#endif
-#ifndef NEED_basename
-#define NEED_basename
-#endif
-#ifndef NEED_psignal
-#define NEED_psignal
-#endif
-#ifndef NEED_on_exit
-#define NEED_on_exit
-#endif
-
+#define HAVE_SYS_STAT_H 1
+#define HAVE_STDLIB_H 1
+#define HAVE_STRING_H 1
+#define HAVE_LIMITS_H 1
+#define HAVE_UNISTD_H 1
+#define HAVE_TIMES 1
+#include <builtins.h>
+#define C_alloca __ALLOCA
