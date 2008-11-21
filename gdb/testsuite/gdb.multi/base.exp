@@ -1,0 +1,149 @@
+# Copyright 2008 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test multi-exec / multi-process features that work for all configurations,
+# even ones that cannot run multiple processes simultaneously.
+
+set testfile "base"
+
+set exec1 "hello"
+set srcfile1 ${exec1}.c
+set binfile1 ${objdir}/${subdir}/${exec1}
+
+set exec2 "hangout"
+set srcfile2 ${exec2}.c
+set binfile2 ${objdir}/${subdir}/${exec2}
+
+set exec3 "goodbye"
+set srcfile3 ${exec3}.c
+set binfile3 ${objdir}/${subdir}/${exec3}
+
+if { [prepare_for_testing ${testfile}.exp ${exec1} "${srcfile1}" {debug nowarnings}] } {
+    return -1
+}
+
+if { [prepare_for_testing ${testfile}.exp ${exec2} "${srcfile2}" {debug nowarnings}] } {
+    return -1
+}
+
+if { [prepare_for_testing ${testfile}.exp ${exec3} "${srcfile3}" {debug nowarnings}] } {
+    return -1
+}
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile1}
+
+send_gdb "add-file ${binfile2}\n"
+gdb_expect {
+    -re ".*A program is being debugged already.*Are you sure you want to add another executable file. .y or n. $" {
+	send_gdb "y\n"
+	gdb_expect {
+	    -re ".*Load new symbol table from.* .y or n. $" {
+		send_gdb "y\n"
+		gdb_expect {
+		    -re "Reading symbols from.*$gdb_prompt $" {}
+		    timeout { fail "loading symbols (timeout)"; return }
+		}
+	    }
+	    -re ".*gdb_prompt $" {}
+	    timeout { fail "loading symbols (timeout)"; return }
+	}
+    }
+    -re "$gdb_prompt $"	{ fail "add-file" }
+    timeout		{ fail "(timeout) add-file" }
+}
+
+send_gdb "add-file ${binfile3}\n"
+gdb_expect {
+    -re ".*Load new symbol table from.* .y or n. $" {
+	send_gdb "y\n"
+	gdb_expect {
+	    -re "Reading symbols from.*$gdb_prompt $" {}
+	    timeout { fail "loading symbols (timeout)"; return }
+	}
+    }
+    -re "$gdb_prompt $"	{ fail "add-file" }
+    timeout		{ fail "(timeout) add-file" }
+}
+
+# Test that we have multiple executables.
+
+gdb_test "info files" \
+    "Symbols from .*Local exec file.*${exec1}.*${exec2}.*${exec3}.*"
+
+# Test that we have multiple symbol tables.
+
+gdb_test "info functions commonfun" "All functions.*${srcfile1}.*${srcfile3}.*"
+
+# Test the focus command.
+
+gdb_test "focus" "No focus has been set.*" "focus (initial default)"
+
+gdb_test "focus ${exec1}" "Current exec is .*${exec1}.*"
+
+gdb_test "focus ${exec2}" "Current exec is .*${exec2}.*"
+
+gdb_test "focus" "Focus is .${exec2}..*(current exec is .*${exec2}).*" \
+  "focus (after setting focus)"
+
+gdb_test "focus ${exec2}" "Current exec is .*${exec2}.*" "focus ${exec2} (again)"
+
+gdb_test "focus ${exec1}" "Current exec is .*${exec1}.*" "focus ${exec1} (again)"
+
+gdb_test "set listsize 1" ""
+
+gdb_test "list commonfun" "5\[ \t\]+int commonfun\[(\]\[)\] \{ bar\[(\]\[)\]; \}"
+
+gdb_test "print hglob" "1"
+
+gdb_test "print glob" "92" "print glob (${exec1})"
+
+gdb_test "focus ${exec3}" "Current exec is .*${exec3}.*"
+
+gdb_test "print gglob" "2"
+
+gdb_test "print glob" "45" "print glob (${exec3})"
+
+gdb_test "list commonfun" "41\[ \t\]+void commonfun\[(\]\[)\] \{ mailand\[(\]\[)\]; \}"
+
+# Test the #-syntax.
+
+gdb_test "list #${exec1}#commonfun" \
+  "5\[ \t\]+int commonfun\[(\]\[)\] \{ bar\[(\]\[)\]; \}"
+
+gdb_test "list #${exec3}#commonfun" \
+  "41\[ \t\]+void commonfun\[(\]\[)\] \{ mailand\[(\]\[)\]; \}"
+
+# Test execution.
+
+gdb_test "focus ${exec1}" "Current exec is .*${exec1}.*" "focus ${exec1} (yet again)"
+
+if { ![runto_main] } then {
+    gdb_suppress_tests
+}
+
+gdb_test "break hello" ""
+
+gdb_test "continue" "Breakpoint \[0-9\].*, hello.*"
+
+gdb_test "break #hello#26" ""
+
+gdb_test "break #goodbye#commonfun" ""
+
+# Observe that breakpoints are per-executable.
+
+gdb_test "continue" "Breakpoint \[0-9\], main.*26\[\t \]*glob = tmpx;.*"
