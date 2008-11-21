@@ -11786,7 +11786,7 @@ bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
 
 struct alloc_got_off_arg {
   bfd_vma gotoff;
-  unsigned int got_elt_size;
+  struct bfd_link_info *info;
 };
 
 /* We need a special top-level link routine to convert got reference counts
@@ -11796,6 +11796,8 @@ static bfd_boolean
 elf_gc_allocate_got_offsets (struct elf_link_hash_entry *h, void *arg)
 {
   struct alloc_got_off_arg *gofarg = arg;
+  bfd *obfd = gofarg->info->output_bfd;
+  const struct elf_backend_data *bed = get_elf_backend_data (obfd);
 
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
@@ -11803,7 +11805,7 @@ elf_gc_allocate_got_offsets (struct elf_link_hash_entry *h, void *arg)
   if (h->got.refcount > 0)
     {
       h->got.offset = gofarg->gotoff;
-      gofarg->gotoff += gofarg->got_elt_size;
+      gofarg->gotoff += bed->got_elt_size (obfd, gofarg->info, h, NULL, 0);
     }
   else
     h->got.offset = (bfd_vma) -1;
@@ -11821,8 +11823,9 @@ bfd_elf_gc_common_finalize_got_offsets (bfd *abfd,
   bfd *i;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_vma gotoff;
-  unsigned int got_elt_size = bed->s->arch_size / 8;
   struct alloc_got_off_arg gofarg;
+
+  BFD_ASSERT (abfd == info->output_bfd);
 
   if (! is_elf_hash_table (info->hash))
     return FALSE;
@@ -11859,7 +11862,7 @@ bfd_elf_gc_common_finalize_got_offsets (bfd *abfd,
 	  if (local_got[j] > 0)
 	    {
 	      local_got[j] = gotoff;
-	      gotoff += got_elt_size;
+	      gotoff += bed->got_elt_size (abfd, info, NULL, i, j);
 	    }
 	  else
 	    local_got[j] = (bfd_vma) -1;
@@ -11869,7 +11872,7 @@ bfd_elf_gc_common_finalize_got_offsets (bfd *abfd,
   /* Then the global .got entries.  .plt refcounts are handled by
      adjust_dynamic_symbol  */
   gofarg.gotoff = gotoff;
-  gofarg.got_elt_size = got_elt_size;
+  gofarg.info = info;
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_gc_allocate_got_offsets,
 			  &gofarg);
@@ -12254,4 +12257,15 @@ asection *
 _bfd_elf_common_section (asection *sec ATTRIBUTE_UNUSED)
 {
   return bfd_com_section_ptr;
+}
+
+bfd_vma
+_bfd_elf_default_got_elt_size (bfd *abfd,
+			       struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			       struct elf_link_hash_entry *h ATTRIBUTE_UNUSED,
+			       bfd *ibfd ATTRIBUTE_UNUSED,
+			       unsigned long symndx ATTRIBUTE_UNUSED)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  return bed->s->arch_size / 8;
 }

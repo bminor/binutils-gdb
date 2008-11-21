@@ -1147,6 +1147,12 @@ struct elf_backend_data
      so-called reserved entries on some systems.  */
   bfd_vma got_header_size;
 
+  /* The size of the GOT entry for the symbol pointed to by H if non-NULL,
+     otherwise by the local symbol with index SYMNDX in IBFD.  */
+  bfd_vma (*got_elt_size) (bfd *, struct bfd_link_info *,
+			   struct elf_link_hash_entry *h,
+			   bfd *ibfd, unsigned long symndx);
+
   /* The vendor name to use for a processor-standard attributes section.  */
   const char *obj_attrs_vendor;
 
@@ -2069,6 +2075,10 @@ extern asection *_bfd_elf_common_section
 
 extern void _bfd_dwarf2_cleanup_debug_info
   (bfd *);
+
+extern bfd_vma _bfd_elf_default_got_elt_size
+(bfd *, struct bfd_link_info *, struct elf_link_hash_entry *, bfd *,
+ unsigned long);
 
 extern bfd_reloc_status_type _bfd_elf_rel_vtable_reloc_fn
   (bfd *, arelent *, struct bfd_symbol *, void *,

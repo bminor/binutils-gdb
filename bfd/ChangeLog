@@ -1,3 +1,16 @@
+2008-11-21  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf-bfd.h (struct elf_backend_data): New member got_elt_size.
+	(_bfd_elf_default_got_elt_size): Declare.
+	* elflink.c (struct alloc_got_off_arg): Replace member got_elt_size
+	by new member info.
+	(elf_gc_allocate_got_offsets): Adjust for calling bed->got_elt_size
+	to get the element size instead of using a gofarg entry.
+	(bfd_elf_gc_common_finalize_got_offsets): Similar.
+	(_bfd_elf_default_got_elt_size): New function.
+	* elfxx-target.h: New macro elf_backend_got_elt_size.
+	(elfNN_bed): Use it.
+
 2008-11-20  Tristan Gingold  <gingold@adacore.com>
 
 	* bfdwin.c: Fix comment.
