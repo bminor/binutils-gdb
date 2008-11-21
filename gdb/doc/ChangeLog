@@ -1,3 +1,7 @@
+2008-11-21  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Running): Add "Inferiors" to menu.
+
 2008-11-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.texinfo (Symbols): Mention printing containing

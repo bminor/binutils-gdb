@@ -1811,6 +1811,7 @@ kill a child process.
 * Attach::                      Debugging an already-running process
 * Kill Process::                Killing the child process
 
+* Inferiors::                   Debugging multiple inferiors
 * Multiple Programs::           Debugging multiple programs
 * Threads::                     Debugging programs with multiple threads
 * Forks::                       Debugging forks
