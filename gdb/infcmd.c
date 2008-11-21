@@ -33,6 +33,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "language.h"
+#include "exec.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "completer.h"
@@ -52,6 +53,8 @@
 #include "cli/cli-decode.h"
 #include "gdbthread.h"
 #include "valprint.h"
+
+struct inferior *current_inf;
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -171,7 +174,78 @@ struct gdb_environ *inferior_environ;
 int suppress_resume_observer = 0;
 /* When set, normal_stop will not call the normal_stop observer.  */
 int suppress_stop_observer = 0;
-
+
+struct itset *current_itset = NULL;
+
+void
+set_current_exec (struct exec *exec)
+{
+  current_exec = exec;
+  /* As a transitional step, copy exec properties into old crufty globals.  */
+  exec_bfd = current_exec->ebfd;
+  exec_ops.to_sections = current_exec->sections;
+  exec_ops.to_sections_end = current_exec->sections_end;
+  symfile_objfile = current_exec->objfile;
+  clear_symtab_users ();
+}
+
+void
+focus_command (char *spec, int from_tty)
+{
+  struct itset *itset;
+  struct itset_entry *entry;
+  struct inferior *inf;
+  int ix;
+
+  if (!spec)
+    {
+      if (current_itset)
+	printf_filtered ("Focus is [%s]", current_itset->spec);
+      else
+	printf_filtered ("No focus has been set.");
+      if (current_exec)
+	printf_filtered (" (current exec is %s)", current_exec->name);
+      else
+	printf_filtered (" (no current exec)");
+      printf_filtered ("\n");
+      return;
+    }
+
+  itset = make_itset_from_spec (spec);
+
+  if (itset_is_empty (itset))
+    {
+      error ("Cannot focus on an empty set, focus is unchanged");
+      return;
+    }
+
+  current_itset = itset;
+
+  /* For now, set a current exec from the first element of the focus
+     set.  */
+  entry = VEC_index (itset_entry, itset->inferiors, 0);
+  inf = entry->inferior;
+  if (VEC_length (itset_entry, itset->inferiors) > 1)
+    warning ("%d inferiors in the current i/t set, using inf %d to get current exec",
+	     VEC_length (itset_entry, itset->inferiors), inf->num);
+  if (inf->exec)
+    set_current_exec (inf->exec);
+  /* (find first live thread?) */
+  if (VEC_length (thread_p, entry->threads) > 1)
+    warning ("%d threads for inferior %d in the current i/t set, switching to first",
+	     VEC_length (thread_p, entry->threads), inf->num);
+  if (VEC_length (thread_p, entry->threads) > 0)
+    switch_to_thread ((VEC_index (thread_p, entry->threads, 0))->ptid);
+
+  /* Confirm the choice of focus.  */
+  printf_filtered ("New focus: ");
+  dump_itset (current_itset);
+  if (current_exec)
+    printf_filtered ("Current exec is %s.\n", current_exec->name);
+  else
+    printf_filtered ("No current exec.\n");
+}
+
 /* Accessor routines. */
 
 void 
@@ -195,6 +269,16 @@ get_inferior_io_terminal (void)
 char *
 get_inferior_args (void)
 {
+  struct inferior *inf;
+
+  inf = first_inferior_in_set (current_itset);
+  if (inf)
+    {
+      inferior_args = inf->args;
+      inferior_argc = inf->argc;
+      inferior_argv = inf->argv;
+    }
+
   if (inferior_argc != 0)
     {
       char *n, *old;
@@ -215,10 +299,19 @@ char *
 set_inferior_args (char *newargs)
 {
   char *saved_args = inferior_args;
+  struct inferior *inf;
 
   inferior_args = newargs;
   inferior_argc = 0;
   inferior_argv = 0;
+
+  inf = first_inferior_in_set (current_itset);
+  if (inf)
+    {
+      inf->args = newargs;
+      inf->argc = 0;
+      inf->argv = 0;
+    }
 
   return saved_args;
 }
@@ -226,16 +319,36 @@ set_inferior_args (char *newargs)
 void
 set_inferior_args_vector (int argc, char **argv)
 {
+  struct inferior *inf;
+
   inferior_argc = argc;
   inferior_argv = argv;
+
+  inf = first_inferior_in_set (current_itset);
+  if (inf)
+    {
+      inf->argc = argc;
+      inf->argv = argv;
+    }
+
 }
 
 /* Notice when `set args' is run.  */
 static void
 notice_args_set (char *args, int from_tty, struct cmd_list_element *c)
 {
+  struct inferior *inf;
+
   inferior_argc = 0;
   inferior_argv = 0;
+
+  inf = first_inferior_in_set (current_itset);
+  if (inf)
+    {
+      inf->args = xstrdup (inferior_args);
+      inf->argc = 0;
+      inf->argv = 0;
+    }
 }
 
 /* Notice when `show args' is run.  */
@@ -2115,6 +2228,7 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
   char *exec_file;
   char *full_exec_path = NULL;
   struct inferior *inferior;
+  struct exec *exec;
 
   inferior = current_inferior ();
   inferior->stop_soon = NO_STOP_QUIETLY;
@@ -2238,7 +2352,10 @@ attach_command (char *args, int from_tty)
     ;
   else if (target_has_execution)
     {
-      if (query ("A program is being debugged already.  Kill it? "))
+      if ((number_of_execs () > 1)
+	  ? query ("%d programs are being debugged already.  Kill them? ",
+		   number_of_execs ())
+	  : query ("A program is being debugged already.  Kill it? "))
 	target_kill ();
       else
 	error (_("Not killed."));
@@ -2328,6 +2445,19 @@ attach_command (char *args, int from_tty)
     }
 
   attach_command_post_wait (args, from_tty, async_exec);
+
+  /* As a heuristic, if there is no exec assigned to the attached
+     inferior, but only one exec known to GDB, guess that it is the
+     exec for the the process just attached. (If GDB has guessed
+     wrong, it will be up to the user to use set-exec to fix
+     matters.)  */
+  {
+    struct inferior *inferior = current_inferior ();
+
+    if (!inferior->exec && number_of_execs () == 1)
+      set_inferior_exec (inferior, first_exec);
+  }
+
   discard_cleanups (back_to);
 }
 
@@ -2477,6 +2607,9 @@ void
 _initialize_infcmd (void)
 {
   struct cmd_list_element *c = NULL;
+
+  add_com ("focus", no_class, focus_command, _("\
+Change the set of current inferiors/threads."));
 
   /* add the filename of the terminal connected to inferior I/O */
   add_setshow_filename_cmd ("inferior-tty", class_run,

@@ -51,6 +51,7 @@
 #include "charset.h"
 #include "annotate.h"
 #include "filenames.h"
+#include "exec.h"
 #include "symfile.h"
 #include "gdb_obstack.h"
 #include "gdbcore.h"
@@ -3044,8 +3045,8 @@ string_to_core_addr (const char *my_string)
          be determined by the target architecture, not by the object
          file.  */
       if (i - 2 == addr_bit / 4
-	  && exec_bfd
-	  && bfd_get_sign_extend_vma (exec_bfd))
+	  && first_exec
+	  && bfd_get_sign_extend_vma (first_exec->ebfd))
 	addr = (addr ^ ((CORE_ADDR) 1 << (addr_bit - 1)))
 	       - ((CORE_ADDR) 1 << (addr_bit - 1));
     }

@@ -1714,7 +1714,7 @@ yylex ()
       return (STRING);
     }
 
-  if (!(c == '_' || c == '$'
+  if (!(c == '_' || c == '$' || c == '#'
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
     /* We must have come across a bad character (e.g. ';').  */
     error ("Invalid character '%c' in expression.", c);
@@ -1722,7 +1722,7 @@ yylex ()
   /* It's a name.  See how long it is.  */
   namelen = 0;
   for (c = tokstart[namelen];
-       (c == '_' || c == '$' || (c >= '0' && c <= '9')
+       (c == '_' || c == '$' || c == '#' || (c >= '0' && c <= '9')
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '<');)
     {
       /* Template parameter lists are part of the name.

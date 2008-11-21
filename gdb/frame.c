@@ -67,6 +67,8 @@ struct frame_info
      moment leave this as speculation.  */
   int level;
 
+  struct inferior *inferior;
+
   /* The frame's low-level unwinder and corresponding cache.  The
      low-level unwinder is responsible for unwinding register values
      for the previous frame.  The low-level unwind methods are
@@ -173,6 +175,7 @@ fprint_frame_id (struct ui_file *file, struct frame_id id)
   fprint_field (file, "code", id.code_addr_p, id.code_addr);
   fprintf_unfiltered (file, ",");
   fprint_field (file, "special", id.special_addr_p, id.special_addr);
+  fprintf_unfiltered (file, ",inf=%d", id.inferior_num);
   fprintf_unfiltered (file, "}");
 }
 
@@ -259,6 +262,8 @@ get_frame_id (struct frame_info *fi)
 	fi->unwind = frame_unwind_find_by_frame (fi, &fi->prologue_cache);
       /* Find THIS frame's ID.  */
       fi->unwind->this_id (fi, &fi->prologue_cache, &fi->this_id.value);
+      if (fi->inferior)
+	fi->this_id.value.inferior_num = fi->inferior->num;
       fi->this_id.p = 1;
       if (frame_debug)
 	{
@@ -354,6 +359,9 @@ frame_id_eq (struct frame_id l, struct frame_id r)
   else if (l.special_addr == r.special_addr)
     /* Frames are equal.  */
     eq = 1;
+  else if (l.inferior_num != r.inferior_num)
+    /* If the inferiors are different, the frames are different.  */
+    eq = 0;
   else
     /* No luck.  */
     eq = 0;
@@ -900,6 +908,9 @@ create_sentinel_frame (struct regcache *regcache)
 {
   struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
   frame->level = -1;
+  /* Frame inferiors will all inherit from the sentinel's inferior.
+     In future we may want to set this from a parameter.  */
+  frame->inferior = current_inferior ();
   /* Explicitly initialize the sentinel frame's cache.  Provide it
      with the underlying regcache.  In the future additional
      information, such as the frame's thread will be added.  */
@@ -1102,6 +1113,8 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
   fi->next = create_sentinel_frame (get_current_regcache ());
+
+  fi->inferior = fi->next->inferior;
 
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
@@ -1355,6 +1368,8 @@ get_prev_frame_1 (struct frame_info *this_frame)
      allocation calls.  */
   prev_frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
   prev_frame->level = this_frame->level + 1;
+
+  prev_frame->inferior = this_frame->inferior;
 
   /* Don't yet compute ->unwind (and hence ->type).  It is computed
      on-demand in get_frame_type, frame_register_unwind, and
@@ -1648,7 +1663,7 @@ pc_notcurrent (struct frame_info *frame)
 void
 find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 {
-  (*sal) = find_pc_line (get_frame_pc (frame), pc_notcurrent (frame));
+  (*sal) = find_pc_inf_line (get_frame_pc (frame), get_frame_inferior (frame), pc_notcurrent (frame));
 }
 
 /* Per "frame.h", return the ``address'' of the frame.  Code should
@@ -1759,6 +1774,12 @@ deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
 			frame->level, paddr_nz (base));
   /* See comment in "frame.h".  */
   frame->this_id.value.stack_addr = base;
+}
+
+struct inferior *
+get_frame_inferior (struct frame_info *frame)
+{
+  return frame->inferior;
 }
 
 /* Memory access methods.  */

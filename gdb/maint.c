@@ -32,6 +32,7 @@
 #include "gdbcore.h"
 #include "expression.h"		/* For language.h */
 #include "language.h"
+#include "exec.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "value.h"
@@ -359,36 +360,44 @@ print_objfile_section_info (bfd *abfd,
 static void
 maintenance_info_sections (char *arg, int from_tty)
 {
-  if (exec_bfd)
+  int allobj;
+  struct exec *exec;
+  int ix;
+
+  allobj = (arg && *arg && match_substring (arg, "ALLOBJ"));
+
+  for (ix = 0; VEC_iterate (exec_p, execs, ix, exec); ++ix)
     {
       printf_filtered (_("Exec file:\n"));
-      printf_filtered ("    `%s', ", bfd_get_filename (exec_bfd));
+      printf_filtered ("    `%s', ", exec->name);
       wrap_here ("        ");
-      printf_filtered (_("file type %s.\n"), bfd_get_target (exec_bfd));
-      if (arg && *arg && match_substring (arg, "ALLOBJ"))
-	{
-	  struct objfile *ofile;
-	  struct obj_section *osect;
+      printf_filtered (_("file type %s.\n"), bfd_get_target (exec->ebfd));
+      if (!allobj)
+	bfd_map_over_sections (exec->ebfd, print_bfd_section_info, arg);
+    }
 
-	  /* Only this function cares about the 'ALLOBJ' argument; 
-	     if 'ALLOBJ' is the only argument, discard it rather than
-	     passing it down to print_objfile_section_info (which 
-	     wouldn't know how to handle it).  */
-	  if (strcmp (arg, "ALLOBJ") == 0)
-	    arg = NULL;
+  if (allobj)
+    {
+      struct objfile *ofile;
+      struct obj_section *osect;
 
-	  ALL_OBJFILES (ofile)
+      /* Only this function cares about the 'ALLOBJ' argument; 
+	 if 'ALLOBJ' is the only argument, discard it rather than
+	 passing it down to print_objfile_section_info (which 
+	 wouldn't know how to handle it).  */
+
+      if (strcmp (arg, "ALLOBJ") == 0)
+	arg = NULL;
+
+      ALL_OBJFILES (ofile)
+        {
+	  printf_filtered (_("  Object file: %s\n"), 
+			   bfd_get_filename (ofile->obfd));
+	  ALL_OBJFILE_OSECTIONS (ofile, osect)
 	    {
-	      printf_filtered (_("  Object file: %s\n"), 
-			       bfd_get_filename (ofile->obfd));
-	      ALL_OBJFILE_OSECTIONS (ofile, osect)
-		{
-		  print_objfile_section_info (ofile->obfd, osect, arg);
-		}
+	      print_objfile_section_info (ofile->obfd, osect, arg);
 	    }
 	}
-      else 
-	bfd_map_over_sections (exec_bfd, print_bfd_section_info, arg);
     }
 
   if (core_bfd)
@@ -841,6 +850,10 @@ If a SOURCE file is specified, dump only that file's partial symbols."),
 
   add_cmd ("objfiles", class_maintenance, maintenance_print_objfiles,
 	   _("Print dump of current object file definitions."),
+	   &maintenanceprintlist);
+
+  add_cmd ("execs", class_maintenance, maintenance_print_execs,
+	   _("Print dump of current executable file definitions."),
 	   &maintenanceprintlist);
 
   add_cmd ("symtabs", class_maintenance, maintenance_info_symtabs, _("\

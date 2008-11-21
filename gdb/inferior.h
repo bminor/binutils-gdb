@@ -30,6 +30,7 @@ struct type;
 struct gdbarch;
 struct regcache;
 struct ui_out;
+struct gdb_environ;
 
 /* For bpstat.  */
 #include "breakpoint.h"
@@ -39,6 +40,8 @@ struct ui_out;
 
 /* For struct frame_id.  */
 #include "frame.h"
+
+struct exec;
 
 /* Structure in which to save the status of the inferior.  Create/Save
    through "save_inferior_status", restore through
@@ -414,6 +417,21 @@ struct inferior
      the ptid_t.pid member of threads of this inferior.  */
   int pid;
 
+  char *name;
+
+  /* Nonzero if this inferior can be removed by the user.  */
+  int removable;
+
+  struct exec *exec;
+
+  char *args;
+  int argc;
+  char **argv;
+
+  struct gdb_environ *inf_environ;
+
+  char *io_terminal;
+
   /* See the definition of stop_kind above.  */
   enum stop_kind stop_soon;
 
@@ -428,6 +446,67 @@ struct inferior
 
   /* Private data used by the target vector implementation.  */
   struct private_inferior *private;
+};
+
+typedef struct inferior *inferior_p;
+DEF_VEC_P(inferior_p);
+
+/* Scratchpad used to smuggle an inferior down to targets.  */
+extern struct inferior *tmp_inf;
+
+typedef struct thread_info *thread_p;
+DEF_VEC_P(thread_p);
+
+/* This struct is one entry in the i/t set's vectors of inferiors and
+   their associated threads.  */
+
+struct itset_entry
+{
+  /* The inferior for this entry.  */
+  struct inferior *inferior;
+
+  /* The vector of threads belonging to this inferior.  */
+  VEC(thread_p) *threads;
+};
+
+typedef struct itset_entry itset_entry;
+DEF_VEC_O(itset_entry);
+
+/* An inferior/thread set, or itset for short, is a collection of
+   inferiors (running or not) and threads associated with those
+   inferiors.  Itsets are used for various things, including to
+   restrict the effects of commands to only particular programs,
+   processes, or threads, and to set context and defaults for the
+   user. The syntax for itsets includes wildcards, range matching, and
+   lists, so that users can more easily choose the membership of a
+   set. For instance, "[4.*,5.6:5.9]" specifies all threads of process
+   4, and any threads with a number between 6 and 9, inclusive, in
+   process 5.  */
+
+struct itset
+{
+  /* A user-assigned name for the set. This will be NULL for unnamed
+     sets.  */
+  char *name;
+
+  /* True if the set is to be constructed on-the-fly.  */
+  int dynamic;
+
+  /* Instructions for construction of an itset.  */
+  char *spec;
+
+  /* The vector of inferiors belonging to this set.  */
+  VEC(itset_entry) *inferiors;
+
+  /* Pointer to the location of the next char in the spec string
+     during parsing.  */
+  char *parse_head;
+
+  /* Set to 1 when the spec has been parsed.  */
+  int parsed;
+
+  /* Any parse failures set this to 1.  */
+  int parse_errors;
 };
 
 /* Create an empty inferior list, or empty the existing one.  */
@@ -497,8 +576,44 @@ extern void print_inferior (struct ui_out *uiout, int requested_inferior);
 /* Returns true if the inferior list is not empty.  */
 extern int have_inferiors (void);
 
+extern int have_real_inferiors (void);
+
+extern int number_of_inferiors (void);
+
+extern int number_of_inferiors (void);
+
 /* Return a pointer to the current inferior.  It is an error to call
    this if there is no current inferior.  */
 extern struct inferior *current_inferior (void);
+
+extern void set_inferior_name (struct inferior *inf, char *name);
+
+extern void set_inferior_exec (struct inferior *inf, struct exec *exec);
+
+extern void set_inferior_exec (struct inferior *inf, struct exec *exec);
+
+/* Itset definitions.  */
+
+extern struct itset *current_itset;
+
+extern struct itset *new_itset (char *spec);
+
+extern struct itset *make_itset_from_spec (char *spec);
+
+extern void update_itset (struct itset *itset);
+
+extern int itset_is_empty (struct itset *itset);
+
+extern int itset_member (struct itset *itset, struct inferior *inf, int thread_id);
+
+extern struct inferior *first_inferior_in_set (struct itset *itset);
+
+extern struct inferior *first_inferior_in_set (struct itset *itset);
+
+extern void dump_itset (struct itset *itset);
+
+extern struct inferior *inferior_list;
+
+extern struct inferior *inferior_list;
 
 #endif /* !defined (INFERIOR_H) */

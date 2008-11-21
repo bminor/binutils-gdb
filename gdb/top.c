@@ -439,6 +439,10 @@ Cannot execute this command without a live selected thread.  See `help thread'."
 	  *(p + 1) = '\0';
 	}
 
+      /* Make sure the current i/t set is actually current and
+	 accurate.  */
+      update_itset (current_itset);
+
       /* If this command has been pre-hooked, run the hook first. */
       execute_cmd_pre_hook (c);
 

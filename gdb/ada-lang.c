@@ -4871,6 +4871,7 @@ static struct symbol *
 ada_lookup_symbol_nonlocal (const char *name,
                             const char *linkage_name,
                             const struct block *block,
+			    const struct exec *exec,
                             const domain_enum domain)
 {
   if (linkage_name == NULL)

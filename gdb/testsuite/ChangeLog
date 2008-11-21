@@ -1,3 +1,23 @@
+2008-11-20  Stan Shebs  <stan@codesourcery.com>
+
+	2008-09-14  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.gdb/selftest.exp: Update to reflect current sources.
+	* Makefile.in (ALL_SUBDIRS): Add gdb.multi.
+	* configure.ac (AC_OUTPUT): Add gdb.multi/Makefile.
+	* configure: Regenerate.
+
+	* gdb.multi/Makefile.in: New.
+	* gdb.multi/hello.c, hangout.c, goodbye.c: New source files.
+	* gdb.multi/base.exp: New file, basic multiprocess tests.
+
+	2008-08-25  Stan Shebs  <stan@codesourcery.com>
+
+	* config/monitor.exp: Match on rephrased message.
+	* gdb.base/attach.exp: Ditto.
+	* gdb.base/default.exp: Ditto.
+	* lib/gdb.exp: Ditto.
+
 2008-11-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.arch/ppc-dfp.exp: New file.

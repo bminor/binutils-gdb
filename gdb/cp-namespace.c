@@ -297,6 +297,7 @@ struct symbol *
 cp_lookup_symbol_nonlocal (const char *name,
 			   const char *linkage_name,
 			   const struct block *block,
+			   const struct exec *exec,
 			   const domain_enum domain)
 {
   return lookup_namespace_scope (name, linkage_name, block, domain,
@@ -429,7 +430,7 @@ lookup_symbol_file (const char *name,
 {
   struct symbol *sym = NULL;
 
-  sym = lookup_symbol_static (name, linkage_name, block, domain);
+  sym = lookup_symbol_static (name, linkage_name, block, NULL, domain);
   if (sym != NULL)
     return sym;
 
@@ -447,7 +448,7 @@ lookup_symbol_file (const char *name,
     }
   else
     {
-      sym = lookup_symbol_global (name, linkage_name, block, domain);
+      sym = lookup_symbol_global (name, linkage_name, block, NULL, domain);
     }
 
   if (sym != NULL)

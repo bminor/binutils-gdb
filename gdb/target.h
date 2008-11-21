@@ -24,6 +24,7 @@
 #if !defined (TARGET_H)
 #define TARGET_H
 
+struct exec;
 struct objfile;
 struct ui_file;
 struct mem_attrib;
@@ -733,7 +734,7 @@ extern int inferior_has_execd (ptid_t pid, char **execd_pathname);
 
 /* From exec.c */
 
-extern void print_section_info (struct target_ops *, bfd *);
+extern void print_section_info (struct target_ops *, bfd *, struct exec *);
 
 /* Print a line about the current target.  */
 

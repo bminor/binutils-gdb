@@ -27,5 +27,3 @@ extern int  forks_exist_p (void);
 
 struct fork_info *fork_list;
 
-extern int detach_fork;
-

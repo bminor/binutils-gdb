@@ -1,3 +1,374 @@
+2008-11-20  Stan Shebs  <stan@codesourcery.com>
+
+	Multi-process (primarily multi-exec) support.
+
+	2008-10-14  Stan Shebs  <stan@codesourcery.com>
+
+	* blockframe.c (get_frame_block): Get inferior from frame.
+	* block.c (block_for_pc_inf): New function.
+	* block.h (block_for_pc_inf): Declare.
+	* symfile.c (find_pc_inf_sect): New function.
+	* symfile.h (find_pc_inf_sect): Declare.
+	* symtab.c (find_pc_inf_line): New function.
+	* symtab.h (find_pc_inf_line): Declare.
+	* frame.c (struct frame_info) New field inferior.
+	(fprint_frame_id): Display inferior.
+	(get_frame_id): Set inferior_num from inferior.
+	(frame_id_eq): Compare inferiors.
+	(create_sentinel_frame): Set inferior.
+	(create_new_frame): Copy inferior from sentinel.
+	(get_prev_frame_raw): Copy inferior from next frame.
+	(find_frame_sal): Use find_pc_inf_line.
+	(get_frame_inferior): New function.
+	* frame.h (struct frame_id): New field inferior_num.
+
+	* breakpoint.c (expand_sals_by_inferiors): Copy section from input
+	sal to expanded sals.
+	* symtab.c (expand_line_sal): Ditto.
+
+	2008-10-10  Stan Shebs  <stan@codesourcery.com>
+
+	* remote.c (discard_pending_stop_replies): Initialize prev.
+	* infrun.c (infrun_thread_stop_requested): Ditto.
+
+	2008-10-08  Stan Shebs  <stan@codesourcery.com>
+
+	* inferior.h (struct inferior): Rename environ field to inf_environ.
+	* inferior.c (print_inferior): Ditto.
+
+	2008-10-01  Stan Shebs  <stan@codesourcery.com>
+
+	* inferior.h (detach_fork): Declare here...
+	* linux-fork.h (detach_fork): ...instead of here.
+	* linux-fork.c (detach_fork): Move to...
+	* infrun.c (detach_fork): ...here.
+	* remote.c (detach_fork): Remove decl.
+
+	2008-09-30  Stan Shebs  <stan@codesourcery.com>
+
+	* linespec.c (decode_line_1): Better default for one-exec case.
+	* remote (remote_start_remote): Use the exec in the one-exec case.
+
+	2008-09-29  Stan Shebs  <stan@codesourcery.com>
+
+	* infcmd.c (attach_command): If only one exec, assume it is the
+	attached inferior's exec.
+	(attach_command_post_wait): Set inferior's exec from
+	the one that was found.
+	* inf-ptrace.c (inf_ptrace_attach): Only report exec file if
+	if there is just one present.
+	(inf_ptrace_detach): Use inferior to get correct exec name.
+
+	2008-09-29  Stan Shebs  <stan@codesourcery.com>
+
+	* inferior.c (print_inferior): Use exec short names, and drop
+	unused address space display.
+
+	2008-09-26  Stan Shebs  <stan@codesourcery.com>
+
+	* breakpoint.c (should_be_inserted): Test for no inferior.
+	(clone_breakpoint_location): New function, broken out from...
+	(update_breakpoint_inferiors): ...here, also tweak conditions
+	for adding a location.
+	(insert_breakpoint_location): Don't count non-running inferiors.
+	(remove_breakpoint): Set tmp_inf.
+	(print_one_breakpoint_location): Add allflag arg, use to always
+	show inf.
+	(print_one_breakpoint): Add allflag arg.
+	(do_captured_breakpoint_query): Fix caller.
+	(breakpoint_1): Ditto.
+	* exec.c (create_exec): Save full pathname as exec name.
+	(find_exec_by_name): Use find_exec_by_substr.
+	* fork-child.c (fork_inferior): Warn if exec not found for new
+	inferior.
+
+	2008-09-25  Stan Shebs  <stan@codesourcery.com>
+
+	* breakpoint.c (should_be_inserted): Don't insert in inferiors
+	that are not running.
+	(update_breakpoint_inferiors): New function.
+	(insert_breakpoints): Call it.
+	(insert_breakpoint_locations): Don't insert in inferiors that are
+	not running.
+	(set_raw_breakpoint_without_location): Set trigger set from
+	current itset here...
+	(set_raw_breakpoint): Instead of here. Also add default fillins
+	for the location's inferior.
+	(add_location_to_breakpoint): Similarly.
+	(expand_sals_by_inferiors): New function.
+	(breakpoint_re_set_one): Call it.
+	(resolve_sal_pc): Don't set sal inferior.
+	* breakpoint.h (struct breakpoint): Remove exec field, never used.
+	* inferior.h (inferior_list): Declare.
+	* inferior.c (inferior_list): Make public.
+	(add_inferior_to_itset): Auto-add inferiors after exec's inferior.
+	(first_inferior_in_set): Check for zero-length vector.
+	* exec.c (xfer_memory): Use tmp_inf as inferior if set.
+	* infcmd.c (focus_command): Improve user feedback.
+	* linespec.c (build_canonical_line_spec): Record exec name as part
+	of canonical spec.
+	(symbol_found): Canonicalize specs more.
+	(decode_indirect): Revert rewrite from 2008-09-14.
+	(decode_sharp): Use find_exec_by_substr, better error messages.
+	* minsyms.c (lookup_minimal_symbol_in_exec): New function.
+	(lookup_minimal_symbol_in_exec_1): New function, body of
+	lookup_minimal_symbol.
+	* symtab.h (lookup_minimal_symbol_in_exec): Declare.
+	* symtab.c (find_function_start_sal): Set inferior to use.
+	(append_expanded_sal): Return pointer to the new sal.
+	* remote.c (remote_xfer_memory): Better parms to ptid_build, remove
+	debug print.
+	(remote_xfer_partial): Ditto.
+	
+	2008-09-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferior.c (itset_member): Fix typo.
+
+	2008-09-22  Stan Shebs  <stan@codesourcery.com>
+
+	* inferior.h (current_inf): Remove declaration.
+	(tmp_inf): Declare.
+	* inferior.c (current_inf): Remove.
+	(tmp_inf): New global, hack to bypass passing inferior throughout
+	target stack.
+	(print_inferior): Don't report current_inf.
+	(add_inferior_command): Don't use current_inf.
+	(name_inferior_command): Use first inferior of current_itset.
+	(update_itset): Handle NULL case.
+	(add_inferior_itset): Recursively add all inferiors derived from
+	an exec if the exec's own inferior is present.
+	(first_inferior_in_set): New function.
+	(free_inferior): Comment out until references cleared reliably.
+	* infcmd.c (focus_command): Don't set current_inf.
+	(get_inferior_args): Use first_inferior_in_set instead of
+	current_inf.
+	(set_inferior_args): Ditto.
+	(set_inferior_args_vector): Ditto.
+	(notice_args_set): Ditto.
+	* breakpoint.c (insert_breakpoint_locations): Remove insertion test
+	using current_inf, set tmp_inf.
+	(reattach_breakpoints): Set tmp_inf.
+	(bpstat_check_breakpoint_conditions): Test trigger set here...
+	(bpstat_stop_status): ... instead of here.
+	(bpstat_check_trigger_set): Add special case for exec's own
+	inferior.
+	(print_one_breakpoint_location): Also test for multiple inferiors
+	before displaying location's inferior, flag trigger set with "i/t"
+	instead of "focus".
+	(check_duplicates): Pass location's inferior to...
+	(check_duplicates_for): Add inferior arg and use.
+	(set_raw_breakpoint): Override sal inferior with one from the
+	trigger set.
+	(add_location_to_breakpoint): Ditto.
+	* remote.c (remote_xfer_memory): Switch inferiors if tmp_inf is
+	set to something different from inferior_ptid.
+	(remote_xfer_partial): Ditto.
+	* top.c (execute_command): Always update the current itset.
+
+	2008-09-19  Stan Shebs  <stan@codesourcery.com>
+
+	* inferior.c (set_inferior_exec): New function.
+	(set_inferior_exec_command): New command.
+	* inferior.h: Declare set_inferior_exec.
+	* fork-child.c (fork_inferior): Set the inferior's exec.
+	* remote.c (extended_remote_create_inferior_1): Ditto.
+	gdb/doc/
+	* gdb.texinfo (Debugging Multiple Programs): Describe set-exec.
+
+	2008-09-18  Stan Shebs  <stan@codesourcery.com>
+
+	* target.c (target_resize_to_sections): Adjust execs' section
+	tables too.
+	
+	2008-09-17  Stan Shebs  <stan@codesourcery.com>
+
+	gdb/doc/
+	* gdb.texinfo (Invoking GDB): Describe multiple program args.
+	(File Options): Describe multi-program effects.
+	(Multiple Programs): New section, multi-program debugging.
+	(Forks): Rename section from "Processes".
+	(Specify Location): Describe the #-syntax.
+	(Variables): Describe the #-syntax.
+	(Files): Describe add-file and add-exec-file.
+	(Maintenance Commands): Describe maint print execs.
+
+	2008-09-15  Stan Shebs  <stan@codesourcery.com>
+
+	* exec.c (addr_space_info_command): Don't try to display host address.
+
+	2008-09-14  Stan Shebs  <stan@codesourcery.com>
+
+	* c-exp.y: (yylex): Accept '#' in identifiers.
+	* linespec.c (decode_sharp): New function.
+	(decode_line_1): Use it for #-syntax.
+	(decode_indirect): Rewrite to accept exec arg and iterate over
+	inferiors.
+	(struct d_i_data): New struct for inferior iteration.
+	(decode_indirect_callback): New function.
+	(decode_variable): Pass in exec, use in symbol lookup.
+
+	2008-09-14  Stan Shebs  <stan@codesourcery.com>
+
+	* breakpoint.h (struct bp_location): Add inferior field instead
+	of address space field.
+	* breakpoint.c (insert_breakpoint_locations): Only insert in
+	appropriate inferior.
+	(bpstat_check_trigger_set): New function.
+	(bpstat_stop_status): Call it, check location's inferior also.
+	(print_one_breakpoint_location): Report location's inferior.
+	(set_raw_breakpoint): Set location inferior, clear an experiment.
+	(add_location_to_breakpoint): Ditto.
+	(expand_line_sal_maybe): Check for non-NULL original function.
+	(resolve_sal_pc): Set sal inferior.
+	(clear_command): Be careful to not clear anything twice.
+	* symtab.h: Update declarations of symbol lookups.
+	(struct symtab_and_line): Change address space to inferior field.
+	* symtab.c (init_sal): Clear inferior field.
+	(append_expanded_sal): Set inferior.
+	(lookup_symbol_in_language_1): New function.
+	(lookup_symbol_in_language): Call it.
+	(lookup_symbol_in_exec_in_language): New function.
+	(lookup_symbol): Detect #-syntax and find exec to use.
+	(lookup_symbol_aux): Add exec argument and use it.
+	(lookup_symbol_aux_symtabs): Ditto.
+	(lookup_symbol_aux_psymtabs): Ditto.
+	(basic_lookup_symbol_nonlocal): Ditto.
+	(lookup_symbol_static): Ditto.
+	(lookup_symbol_global): Ditto.
+	* ada-lang.c (cp_lookup_symbol_nonlocal): Ditto.
+	* cp-support.h (cp_lookup_symbol_nonlocal): Ditto.
+	* cp-namespace.c (cp_lookup_symbol_nonlocal): Ditto.
+	* language.h (struct language_defn): Ditto.
+	* scm-valprint.c (scm_inferior_print): Add exec arg to
+	lookup_symbol_global.
+	* source.c (select_source_symtab): Use current_exec.
+	* addrspace.h (struct addr_space): New field num.
+	* exec.h (struct exec): New fields sections and sections_end.
+	* exec.c (exec_file_attach_1): Set them from exec_ops, set
+	inferior's address space name from exec.
+	(find_exec_by_substr): New function.
+	(build_section_table): Don't free old table.
+	(print_section_info): Use exec's section table.
+	(next_address_space_num): New global, numbering for address spaces.
+	(new_address_space): Use it.
+	(addr_space_info_command): Display it.
+	* infcmd.c (set_current_exec): Set exec_ops section table.
+	* inferior.h (update_itset): Declare.
+	* inferior.c (add_inferior_silent): Set address space.
+	(print_inferior): Display it.
+	(number_of_inferiors): New function.
+	(itset_member): New function.
+
+	2008-09-04  Stan Shebs  <stan@codesourcery.com>
+
+	* corefile.c (close_exec_file): Remove #if 0 block.
+	(validate_files): Use first_exec instead of exec_bfd.
+	(get_exec_file): Ditto.
+	* corelow.c (core_open): Ditto.
+	* utils.c (string_to_core_addr): Ditto.
+	* arch-utils.c (gdbarch_update_p): Ditto.
+	* linux-thread-db.c (enable_thread_event): Ditto.
+	(thread_db_get_thread_local_address ): Ditto.
+	* exec.c (find_exec_by_name): Test short name also.
+	(file_command): Set current exec.
+
+	2008-09-03  Stan Shebs  <stan@codesourcery.com>
+
+	* inferior.c (add_threads_to_itset): Default to including all
+	of an inferior's threads.
+
+	2008-08-31  Stan Shebs  <stan@codesourcery.com>
+
+	Parsing for i/t sets.
+	* inferior.h (struct itset_entry): New struct.
+	(struct itset): Make thread lists be per-inferior, add parse state
+	variables.
+	* inferior.c: (add_inferior_command): Add error checking and
+	confirmation.
+	(remove_inferior_command): Update for itset restructuring.
+	(new_itset): Don't pass in dynamic-ness, call parse_itset_spec.
+	(update_itset): Similarly.
+	(parse_itset_spec): New, parsing of itset spec.
+	(parse_itset_list, parse_itset_range, etc): New.
+	(make_itset_from_spec): Rewrite.
+	(dump_itset): Rewrite to reflect itset structure.
+	* infcmd.c (focus_command): Similarly.
+
+	2008-08-25  Stan Shebs  <stan@codesourcery.com>
+
+	First part of multiprocess support.
+	* Makefile.in (COMMON_OBS): Add inferior.o.
+	* addrspace.h: New file.
+	* breakpoints.h (struct bp_location): Add address space field.
+	(struct breakpoint): Add trigger set and exec fields.
+	* breakpoints.c (print_one_breakpoint_location): Display trigger
+	set.
+	(set_raw_breakpoint): Set trigger set from current itset.
+	* corefile.c (reopen_exec_file): Rewrite for multiple execs.
+	(get_exec_file): Add case for current_exec.
+	* corelow.c (is_core_file): New function.
+	(core_files_info): Pass additional arg to print_section_info.
+	* exec.h (struct exec): New struct.
+	* exec.c (execs): New global.
+	(exec_bfd_mtime): Remove.
+	(last_exec_created, current_exec, first_exec): New globals.
+	(exec_close): Clear all exec objects.
+	(exec_file_clear): Tweak user message.
+	(exec_file_add): New function.
+	(exec_file_attach_1): New function, body of exec_file_attach,
+	plus new code to handle multiple execs.
+	(exec_file_attach): Call it.
+	(exec_file_update): New function.
+	(create_exec, find_exec_by_name, number_of_execs): New functions.
+	(exec_file_command): Rephrase query, set current exec.
+	(add_exec_file_command): New command.
+	(add_file_command): New command.
+	(print_section_info): Add exec argument.
+	(exec_files_info): Rewrite for multiple execs.
+	(maintenance_print_execs): New function.
+	(new_address_space): New function.
+	(addr_space_info_command): New command.
+	* gdbcore.h (exec_bfd_mtime): Remove decl.
+	(exec_file_add): Declare.
+	* infcmd.c: Include exec.h.
+	(current_itset): New global.
+	(set_current_exec): New function.
+	(focus_command): New command.
+	(get_inferior_args): Maybe get from the current inferior.
+	(set_inferior_args): Also set in current inferior.
+	(set_inferior_args_vector): Similarly.
+	(notice_args_set): Similarly.
+	(attach_command): Rephrase query.
+	* inferior.h (struct inferior): New struct.
+	(struct itset): New struct.
+	* inferior.c: New file, management of multiple inferiors.
+	* main.c (captured_main): Rewrite to allow multiple executables,
+	pids, and corefiles on the command line.
+	* maint.c (maintenance_info_sections): Rewrite for multiple execs.
+	* objfiles.h (struct objfile): New field for exec.
+	(ALL_OBJFILES_FOR_EXEC, ALL_PRIMARY_SYMTABS_FOR_EXEC,
+	ALL_PSYMTABS_FOR_EXEC): New macros.
+	* objfiles.c (allocate_objfile): Clear exec field.
+	* solib.c (clear_solib): Use first_exec instead of exec_bfd.
+	* source.c (select_source_symtab): Use ALL_OBJFILES_FOR_EXEC.
+	(find_source_lines): Use mtime from exec.
+	* symfile.c (syms_from_objfile): Don't clear objfile if multiple
+	execs.
+	(new_symfile_objfile): Get objfile's exec from last_exec_created.
+	(symbol_file_clear): Rephrase messages.
+	(reread_symbols): Update objfile's exec if necessary.
+	* symmisc.c (dump_objfile): Dump objfile's exec also.
+	(maintenance_print_objfiles): Report symfile_objfile.
+	* symtab.h (struct symtab_and_line): Add address space field.
+	* symtab.c (find_pc_sect_psymtab): Look for a plausible exec, and
+	then use it.
+	(lookup_symbol_aux_symtabs): Use current exec.
+	(lookup_symbol_aux_symtabs): Ditto.
+	(basic_lookup_transparent_type): Ditto.
+	(find_pc_sect_symtab): Ditto.
+	* target.h (print_section_info): Add arg to decl.
+	* tui/tui-win.c: Rename "focus" command to "ffocus".
+
 2008-11-19  Doug Evans  <dje@google.com>
 
 	* inferior.h (proceed_to_finish): Delete, unused.

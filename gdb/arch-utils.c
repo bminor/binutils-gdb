@@ -23,6 +23,7 @@
 #include "arch-utils.h"
 #include "buildsym.h"
 #include "gdbcmd.h"
+#include "exec.h"
 #include "inferior.h"		/* enum CALL_DUMMY_LOCATION et.al. */
 #include "gdb_string.h"
 #include "regcache.h"
@@ -469,8 +470,8 @@ gdbarch_update_p (struct gdbarch_info info)
   struct gdbarch *new_gdbarch;
 
   /* Check for the current file.  */
-  if (info.abfd == NULL)
-    info.abfd = exec_bfd;
+  if (info.abfd == NULL && first_exec && first_exec->ebfd)
+    info.abfd = first_exec->ebfd;
   if (info.abfd == NULL)
     info.abfd = core_bfd;
 

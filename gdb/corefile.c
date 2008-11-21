@@ -29,6 +29,7 @@
 #include "gdbcmd.h"
 #include "bfd.h"
 #include "target.h"
+#include "exec.h"
 #include "gdbcore.h"
 #include "dis-asm.h"
 #include "gdb_stat.h"
@@ -135,41 +136,35 @@ specify_exec_file_hook (void (*hook) (char *))
 void
 close_exec_file (void)
 {
-#if 0				/* FIXME */
-  if (exec_bfd)
-    bfd_tempclose (exec_bfd);
-#endif
 }
 
 void
 reopen_exec_file (void)
 {
-#if 0				/* FIXME */
-  if (exec_bfd)
-    bfd_reopen (exec_bfd);
-#else
   char *filename;
   int res;
   struct stat st;
-  long mtime;
+  int ix;
+  struct exec *exec;
 
-  /* Don't do anything if there isn't an exec file. */
-  if (exec_bfd == NULL)
+  if (!execs)
     return;
 
-  /* If the timestamp of the exec file has changed, reopen it. */
-  filename = xstrdup (bfd_get_filename (exec_bfd));
-  make_cleanup (xfree, filename);
-  res = stat (filename, &st);
+  for (ix = 0; VEC_iterate (exec_p, execs, ix, exec); ++ix)
+    {
+      /* If the timestamp of the exec file has changed, reopen it.  */
+      filename = xstrdup (exec->name);
+      make_cleanup (xfree, filename);
+      res = stat (filename, &st);
 
-  if (exec_bfd_mtime && exec_bfd_mtime != st.st_mtime)
-    exec_file_attach (filename, 0);
-  else
-    /* If we accessed the file since last opening it, close it now;
-       this stops GDB from holding the executable open after it
-       exits.  */
-    bfd_cache_close_all ();
-#endif
+      if (exec->ebfd_mtime && exec->ebfd_mtime != st.st_mtime)
+	exec_file_update (exec);
+      else
+	/* If we accessed the file since last opening it, close it now;
+	   this stops GDB from holding the executable open after it
+	   exits.  */
+	bfd_cache_close_all ();
+    }
 }
 
 /* If we have both a core file and an exec file,
@@ -178,11 +173,11 @@ reopen_exec_file (void)
 void
 validate_files (void)
 {
-  if (exec_bfd && core_bfd)
+  if (first_exec && first_exec->ebfd && core_bfd)
     {
-      if (!core_file_matches_executable_p (core_bfd, exec_bfd))
+      if (!core_file_matches_executable_p (core_bfd, first_exec->ebfd))
 	warning (_("core file may not match specified executable file."));
-      else if (bfd_get_mtime (exec_bfd) > bfd_get_mtime (core_bfd))
+      else if (bfd_get_mtime (first_exec->ebfd) > bfd_get_mtime (core_bfd))
 	warning (_("exec file is newer than core file."));
     }
 }
@@ -194,8 +189,13 @@ validate_files (void)
 char *
 get_exec_file (int err)
 {
-  if (exec_bfd)
-    return bfd_get_filename (exec_bfd);
+  /* This function needs to go away, or return a list of execs, but in
+     the meantime, returning the filename from the current exec is a
+     minimal approximation.  */
+  if (current_exec)
+    return bfd_get_filename (current_exec->ebfd);
+  if (first_exec && first_exec->ebfd)
+    return bfd_get_filename (first_exec->ebfd);
   if (!err)
     return NULL;
 

@@ -23,11 +23,13 @@
 
 #include "gdb_obstack.h"	/* For obstack internals.  */
 #include "symfile.h"		/* For struct psymbol_allocation_list */
+#include "vec.h"
 
 struct bcache;
 struct htab;
 struct symtab;
 struct objfile_data;
+struct exec;
 
 /* This structure maintains information on a per-objfile basis about the
    "entry point" of the objfile, and the scope within which the entry point
@@ -199,6 +201,10 @@ struct objfile
     /* Some flag bits for this objfile. */
 
     unsigned short flags;
+
+    /* The executable associated with this objfile, if known.  */
+
+    struct exec *exec;
 
     /* Each objfile points to a linked list of symtabs derived from this file,
        one symtab structure for each compilation unit (source file).  Each link
@@ -419,6 +425,9 @@ struct objfile
 
 extern struct objfile *symfile_objfile;
 
+typedef struct objfile *objfile_p;
+DEF_VEC_P(objfile_p);
+
 /* The object file that contains the runtime common minimal symbols
    for SunOS4. Note that this objfile has no associated BFD.  */
 
@@ -515,6 +524,10 @@ extern void *objfile_data (struct objfile *objfile,
        (obj) != NULL? ((nxt)=(obj)->next,1) :0;	\
        (obj) = (nxt))
 
+#define	ALL_OBJFILES_FOR_EXEC(obj,ex)					\
+  for ((obj) = object_files; (obj) != NULL; (obj) = (obj)->next)	\
+    if ((ex) == NULL || (obj)->exec == NULL || (obj)->exec == (ex))
+
 /* Traverse all symtabs in one objfile.  */
 
 #define	ALL_OBJFILE_SYMTABS(objfile, s) \
@@ -544,10 +557,19 @@ extern void *objfile_data (struct objfile *objfile,
     ALL_OBJFILE_SYMTABS (objfile, s)	\
       if ((s)->primary)
 
+#define ALL_PRIMARY_SYMTABS_FOR_EXEC(objfile, ex, s)	\
+  ALL_OBJFILES_FOR_EXEC (objfile, ex)			\
+    ALL_OBJFILE_SYMTABS (objfile, s)	\
+      if ((s)->primary)
+
 /* Traverse all psymtabs in all objfiles.  */
 
 #define	ALL_PSYMTABS(objfile, p) \
   ALL_OBJFILES (objfile)	 \
+    ALL_OBJFILE_PSYMTABS (objfile, p)
+
+#define	ALL_PSYMTABS_FOR_EXEC(objfile, ex, p)	\
+  ALL_OBJFILES_FOR_EXEC (objfile, ex)		\
     ALL_OBJFILE_PSYMTABS (objfile, p)
 
 /* Traverse all minimal symbols in all objfiles.  */

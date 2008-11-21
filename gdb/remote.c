@@ -25,6 +25,7 @@
 #include "gdb_string.h"
 #include <ctype.h>
 #include <fcntl.h>
+#include "exec.h"
 #include "inferior.h"
 #include "bfd.h"
 #include "symfile.h"
@@ -2505,6 +2506,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
   struct start_remote_args *args = opaque;
   struct remote_state *rs = get_remote_state ();
   struct packet_config *noack_config;
+  struct inferior *inf;
   char *wait_status = NULL;
 
   immediate_quit++;		/* Allow user to interrupt it.  */
@@ -5680,7 +5682,14 @@ remote_xfer_memory (CORE_ADDR mem_addr, gdb_byte *buffer, int mem_len,
 {
   int res;
 
-  set_general_thread (inferior_ptid);
+  if (tmp_inf && tmp_inf->pid != ptid_get_pid (inferior_ptid))
+    {
+      ptid_t tmp_ptid;
+      tmp_ptid = ptid_build (tmp_inf->pid, 0, 0);
+      set_general_thread (tmp_ptid);
+    }
+  else
+    set_general_thread (inferior_ptid);
 
   if (should_write)
     res = remote_write_bytes (mem_addr, buffer, mem_len);
@@ -6661,6 +6670,8 @@ static void
 extended_remote_create_inferior_1 (char *exec_file, char *args,
 				   char **env, int from_tty)
 {
+  struct inferior *inf;
+
   /* If running asynchronously, register the target file descriptor
      with the event loop.  */
   if (target_can_async_p ())
@@ -6692,7 +6703,10 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
   /* Now, if we have thread information, update inferior_ptid.  */
   inferior_ptid = remote_current_thread (inferior_ptid);
 
-  add_inferior (ptid_get_pid (inferior_ptid));
+  inf = add_inferior (ptid_get_pid (inferior_ptid));
+
+  set_inferior_exec (inf, find_exec_by_name (exec_file));
+
   add_thread_silent (inferior_ptid);
 
   target_mark_running (&extended_remote_ops);
@@ -7249,7 +7263,15 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   char *p2;
   char query_type;
 
-  set_general_thread (inferior_ptid);
+  
+  if (tmp_inf && tmp_inf->pid != ptid_get_pid (inferior_ptid))
+    {
+      ptid_t tmp_ptid;
+      tmp_ptid = ptid_build (tmp_inf->pid, 0, 0);
+      set_general_thread (tmp_ptid);
+    }
+  else
+    set_general_thread (inferior_ptid);
 
   rs = get_remote_state ();
 

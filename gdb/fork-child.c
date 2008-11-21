@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "gdb_string.h"
 #include "frame.h"		/* required by inferior.h */
+#include "exec.h"
 #include "inferior.h"
 #include "target.h"
 #include "gdb_wait.h"
@@ -33,6 +34,8 @@
 #include "command.h" /* for dont_repeat () */
 #include "gdbcmd.h"
 #include "solib.h"
+
+extern int detach_fork;
 
 #include <signal.h>
 
@@ -138,6 +141,8 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   int shell = 0;
   static char **argv;
   const char *inferior_io_terminal = get_inferior_io_terminal ();
+  struct inferior *inf;
+  struct exec *exec;
 
   /* If no exec file handed to us, get it from the exec-file command
      -- with a good, common error message if none is specified.  */
@@ -394,7 +399,15 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 
   init_thread_list ();
 
-  add_inferior (pid);
+  inf = add_inferior (pid);
+
+  exec = find_exec_by_name (exec_file_arg);
+
+  if (exec)
+    set_inferior_exec (inf, exec);
+  else
+    warning (_("Could not find exec for \"%s\", breakpoints will not work"),
+	     exec_file_arg);
 
   /* Needed for wait_for_inferior stuff below.  */
   inferior_ptid = pid_to_ptid (pid);

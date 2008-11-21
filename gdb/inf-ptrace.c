@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "command.h"
+#include "exec.h"
 #include "inferior.h"
 #include "inflow.h"
 #include "gdbcore.h"
@@ -225,7 +226,7 @@ inf_ptrace_attach (struct target_ops *ops, char *args, int from_tty)
     {
       exec_file = get_exec_file (0);
 
-      if (exec_file)
+      if (exec_file && number_of_execs () == 1)
 	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
 			   target_pid_to_str (pid_to_ptid (pid)));
       else
@@ -284,11 +285,14 @@ inf_ptrace_detach (struct target_ops *ops, char *args, int from_tty)
 
   if (from_tty)
     {
-      char *exec_file = get_exec_file (0);
-      if (exec_file == 0)
-	exec_file = "";
-      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
-			 target_pid_to_str (pid_to_ptid (pid)));
+      struct inferior *inf = find_inferior_pid (pid);
+      if (inf && inf->exec)
+	printf_unfiltered (_("Detaching from program: %s, %s\n"),
+			   inf->exec->name,
+			   target_pid_to_str (pid_to_ptid (pid)));
+      else
+	printf_unfiltered (_("Detaching from %s\n"),
+			   target_pid_to_str (pid_to_ptid (pid)));
       gdb_flush (gdb_stdout);
     }
   if (args)

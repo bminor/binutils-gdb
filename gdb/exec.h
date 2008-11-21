@@ -21,12 +21,55 @@
 #define EXEC_H
 
 #include "target.h"
+#include "vec.h"
 
 struct section_table;
 struct target_ops;
 struct bfd;
+struct objfile;
+struct inferior;
 
 extern struct target_ops exec_ops;
+
+/* This object represents an executable program. GDB can handle
+   arbitrarily many, although the traditional debugging scenario just
+   involves one. An executable always has a BFD managing the file
+   itself, but may or may not have an associated symbol table.  */
+
+struct exec
+  {
+    /* The full name of the executable.  */
+    char *name;
+
+    /* An abbreviated name, typically formed by pruning the directory
+       from the full name.  */
+    char *shortname;
+
+    /* The BFD for this executable.  */
+    bfd *ebfd;
+
+    /* The main objfile for this executable.  */
+    struct objfile *objfile;
+
+    /* The last-modified time, from when the exec was brought in.  */
+    long ebfd_mtime;
+
+    /* The "proto-inferior" that we use when setting things up.  */
+    struct inferior *inferior;
+
+    /* Pointers to section table for this executable.  */
+    struct section_table *sections;
+    struct section_table *sections_end;
+  };
+
+typedef struct exec *exec_p;
+DEF_VEC_P(exec_p);
+
+extern VEC(exec_p) *execs;
+
+extern struct exec *current_exec;
+
+extern struct exec *first_exec;
 
 /* Builds a section table, given args BFD, SECTABLE_PTR, SECEND_PTR.
    Returns 0 if OK, 1 on error.  */
@@ -36,5 +79,23 @@ extern int build_section_table (struct bfd *, struct section_table **,
 
 /* Set the loaded address of a section.  */
 extern void exec_set_section_address (const char *, int, CORE_ADDR);
+
+/* Return the first exec whose name matches the given string.  */
+extern struct exec *find_exec_by_name (char *name);
+
+/* Return the first exec whose name matches the chars between the
+   given bounds.  */
+extern struct exec *find_exec_by_substr (char *name, char *name_end);
+
+/* Return the number of executables present.  */
+extern int number_of_execs ();
+
+extern void exec_file_update (struct exec *exec);
+
+extern struct exec *create_exec (char *filename, bfd *abfd, long mtime);
+
+extern void set_current_exec (struct exec *exec);
+
+extern void maintenance_print_execs (char *, int);
 
 #endif

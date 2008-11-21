@@ -38,6 +38,7 @@
 #include "gdb_string.h"
 #include "demangle.h"
 #include "annotate.h"
+#include "exec.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "source.h"
@@ -59,6 +60,10 @@
 #include "valprint.h"
 
 #include "mi/mi-common.h"
+
+static int
+bpstat_check_trigger_set (const struct bp_location *bl, struct inferior *inf,
+			  int thread_id);
 
 /* Arguments to pass as context to some catch command handlers.  */
 #define CATCH_PERMANENT ((void *) (uintptr_t) 0)
@@ -823,6 +828,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
   struct frame_id saved_frame_id;
   struct bp_location *loc;
   bpstat bs;
+  struct inferior *inf;
 
   /* We don't free locations.  They are stored in
      bp_location_chain and update_global_locations will
@@ -851,6 +857,8 @@ update_watchpoint (struct breakpoint *b, int reparse)
       if (within_current_scope)
 	select_frame (fi);
     }
+
+  inf = get_frame_inferior (get_selected_frame (NULL));
 
   if (within_current_scope && reparse)
     {
@@ -928,6 +936,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
 		  for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
 		    ;
 		  *tmp = loc;
+		  loc->inferior = inf;
 		  loc->address = addr;
 		  loc->length = len;
 		  loc->watchpoint_type = type;
@@ -977,6 +986,9 @@ should_be_inserted (struct bp_location *bpt)
     return 0;
 
   if (!bpt->enabled || bpt->shlib_disabled || bpt->duplicate)
+    return 0;
+
+  if (!bpt->inferior || (bpt->inferior && bpt->inferior->pid == 0))
     return 0;
 
   return 1;
@@ -1195,6 +1207,83 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
   return 0;
 }
 
+/* Given a location, create and add another location differing only in
+   the inferior.  */
+
+void
+clone_breakpoint_location (struct breakpoint *b, struct bp_location *loc,
+			   struct inferior *inf)
+{
+  struct bp_location *new_loc, **tmp;
+  struct gdb_exception e;
+
+  new_loc = allocate_bp_location (b, b->type);
+  for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
+    ;
+  *tmp = new_loc;
+  new_loc->requested_address = loc->requested_address;
+  new_loc->address = loc->address;
+  new_loc->length = loc->length;
+  new_loc->inferior = inf;
+  if (b->cond_string)
+    {
+      char *s = b->cond_string;
+      TRY_CATCH (e, RETURN_MASK_ERROR)
+	{
+	  new_loc->cond = parse_exp_1 (&s, block_for_pc_inf (new_loc->address,
+							     inf), 0);
+	}
+      if (e.reason < 0)
+	{
+	}
+    }
+  /* Permanent breakpoints will be inserted in every inferior created
+     from the same exec.  */
+  if (b->enable_state == bp_permanent)
+    new_loc->inserted = loc->inserted;
+}
+
+/* For the given breakpoint, look for any inferiors that might have
+   appeared and need a breakpoint location to be inserted.  */
+
+void
+update_breakpoint_inferiors (struct breakpoint *b)
+{
+  struct bp_location *loc, *loc2;
+  struct inferior *inf;
+
+  update_itset (b->trigger_set);
+
+  for (loc = b->loc; loc; loc = loc->next)
+    {
+      if (loc->inferior == NULL
+	  || (loc->inferior
+	      && loc->inferior->exec
+	      && loc->inferior->exec->inferior == loc->inferior))
+	{
+	  for (inf = inferior_list; inf; inf = inf->next)
+	    {
+	      if ((loc->inferior == NULL
+		   || inf->exec == loc->inferior->exec)
+		  && inf->pid != 0)
+		{
+		  int found = 0;
+		  for (loc2 = b->loc; loc2; loc2 = loc2->next)
+		    {
+		      if (inf == loc2->inferior)
+			{
+			  found = 1;
+			  break;
+			}
+		    }
+		  if (!found)
+		    clone_breakpoint_location (b, loc, inf);
+		}
+	    }
+	}
+    }
+}
+
 /* Make sure all breakpoints are inserted in inferior.
    Throws exception on any error.
    A breakpoint that is already inserted won't be inserted
@@ -1205,8 +1294,12 @@ insert_breakpoints (void)
   struct breakpoint *bpt;
 
   ALL_BREAKPOINTS (bpt)
+  {
+    update_breakpoint_inferiors (bpt);
+
     if (is_hardware_watchpoint (bpt))
       update_watchpoint (bpt, 0 /* don't reparse. */);
+  }
 
   update_global_location_list (1);
 
@@ -1254,9 +1347,17 @@ insert_breakpoint_locations (void)
 	  && !valid_thread_id (b->owner->thread))
 	continue;
 
+      /* Only insert into running inferiors.  */
+      if (!b->inferior || b->inferior->pid == 0)
+	continue;
+
+      /* Nasty hack to smuggle the location's inferior down to target bits.  */
+      tmp_inf = b->inferior;
       val = insert_bp_location (b, tmp_error_stream,
 				    &disabled_breaks, &process_warning,
 				    &hw_breakpoint_error);
+      tmp_inf = NULL;
+
       if (val)
 	error = val;
     }
@@ -1278,7 +1379,9 @@ insert_breakpoint_locations (void)
 	continue;
       
       for (loc = bpt->loc; loc; loc = loc->next)
-	if (!loc->inserted)
+	if (!loc->inserted
+	    && !(loc->inferior == NULL
+		 || (loc->inferior && loc->inferior->pid == 0)))
 	  {
 	    some_failed = 1;
 	    break;
@@ -1370,8 +1473,12 @@ reattach_breakpoints (int pid)
     if (b->inserted)
       {
 	b->inserted = 0;
+	/* Nasty hack to smuggle the location's inferior down to
+	   target bits.  */
+	tmp_inf = b->inferior;
 	val = insert_bp_location (b, tmp_error_stream,
 				  &dummy1, &dummy2, &dummy3);
+	tmp_inf = NULL;
 	if (val != 0)
 	  {
 	    do_cleanups (old_chain);
@@ -1527,6 +1634,9 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
      This should not ever happen.  */
   gdb_assert (b->owner->type != bp_none);
 
+  /* Nasty hack to smuggle the location's inferior down to target.  */
+  tmp_inf = b->inferior;
+
   if (b->loc_type == bp_loc_software_breakpoint
       || b->loc_type == bp_loc_hardware_breakpoint)
     {
@@ -1624,6 +1734,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
       b->inserted = (is == mark_inserted);
     }
 
+  tmp_inf = NULL;
   return 0;
 }
 
@@ -2814,9 +2925,9 @@ bpstat_check_watchpoint (bpstat bs)
 }
 
 
-/* Check conditions (condition proper, frame, thread and ignore count)
-   of breakpoint referred to by BS.  If we should not stop for this
-   breakpoint, set BS->stop to 0.  */
+/* Check conditions (condition proper, frame, thread, ignore count,
+   and trigger set) of breakpoint referred to by BS.  If we should not
+   stop for this breakpoint, set BS->stop to 0.  */
 static void
 bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 {
@@ -2858,6 +2969,13 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 	{
 	  bs->stop = 0;
 	}
+      else if (b->trigger_set
+	       && !bpstat_check_trigger_set (bl, 
+					     find_inferior_pid (ptid_get_pid (ptid)),
+					     pid_to_thread_id (ptid)))
+	{
+	  bs->stop = 0;
+	}
       else if (b->ignore_count > 0)
 	{
 	  b->ignore_count--;
@@ -2870,6 +2988,33 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
     }
 }
 
+/* Test whether this stopping inferior and thread are in the i/t set
+   for this breakpoint.  */
+
+static int
+bpstat_check_trigger_set (const struct bp_location *bl, struct inferior *inf,
+			  int thread_id)
+{
+  struct breakpoint *b = bl->owner;
+
+  if (!b->trigger_set)
+    return 1;
+
+  update_itset (b->trigger_set);
+
+  if (itset_member (b->trigger_set, inf, thread_id))
+    return 1;
+
+  /* Stop if the location points to the exec's own inferior, and the inferior
+     here was launched from that exec.  */
+  if (bl->inferior
+      && bl->inferior->exec
+      && bl->inferior->exec->inferior == bl->inferior
+      && inf->exec == bl->inferior->exec)
+    return 1;
+
+  return 0;
+}
 
 /* Get a bpstat associated with having just stopped at address
    BP_ADDR in thread PTID.
@@ -2906,6 +3051,11 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
     b = bl->owner;
     gdb_assert (b);
     if (!breakpoint_enabled (b) && b->enable_state != bp_permanent)
+      continue;
+
+    /* Any location that is somehow not connected with a running
+       inferior cannot possibly cause a stop.  */
+    if (!bl->inferior || bl->inferior->pid == 0)
       continue;
 
     /* For hardware watchpoints, we look only at the first location.
@@ -3317,7 +3467,7 @@ static void
 print_one_breakpoint_location (struct breakpoint *b,
 			       struct bp_location *loc,
 			       int loc_number,
-			       CORE_ADDR *last_addr)
+			       CORE_ADDR *last_addr, int allflag)
 {
   struct command_line *l;
   struct symbol *sym;
@@ -3432,11 +3582,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   if (b->ops != NULL && b->ops->print_one != NULL)
     {
-      /* Although the print_one can possibly print
-	 all locations,  calling it here is not likely
-	 to get any nice result.  So, make sure there's
-	 just one location.  */
-      gdb_assert (b->loc == NULL || b->loc->next == NULL);
+      /* FIXME make this work right for multiple inferiors etc */
       b->ops->print_one (b, last_addr);
     }
   else
@@ -3491,12 +3637,28 @@ print_one_breakpoint_location (struct breakpoint *b,
 	break;
       }
 
+  /* For backward compatibility, don't display inferiors unless there
+     are several.  */
+  if (number_of_execs () > 1 || number_of_inferiors () > 2 || allflag)
+    {
+      ui_out_text (uiout, " inf ");
+      ui_out_field_int (uiout, "inf",
+			((loc && loc->inferior) ? loc->inferior->num : 0));
+    }
+  
   if (!part_of_multiple && b->thread != -1)
     {
       /* FIXME: This seems to be redundant and lost here; see the
 	 "stop only in" line a little further down. */
       ui_out_text (uiout, " thread ");
       ui_out_field_int (uiout, "thread", b->thread);
+    }
+  
+  if (!part_of_multiple && b->trigger_set)
+    {
+      ui_out_text (uiout, " i/t [");
+      ui_out_field_string (uiout, "i/t", b->trigger_set->spec);
+      ui_out_text (uiout, "]");
     }
   
   ui_out_text (uiout, "\n");
@@ -3583,9 +3745,9 @@ print_one_breakpoint_location (struct breakpoint *b,
 
 static void
 print_one_breakpoint (struct breakpoint *b,
-		      CORE_ADDR *last_addr)
+		      CORE_ADDR *last_addr, int allflag)
 {
-  print_one_breakpoint_location (b, NULL, 0, last_addr);
+  print_one_breakpoint_location (b, NULL, 0, last_addr, allflag);
 
   /* If this breakpoint has custom print function,
      it's already printed.  Otherwise, print individual
@@ -3608,7 +3770,7 @@ print_one_breakpoint (struct breakpoint *b,
 	  struct bp_location *loc;
 	  int n = 1;
 	  for (loc = b->loc; loc; loc = loc->next, ++n)
-	    print_one_breakpoint_location (b, loc, n, last_addr);
+	    print_one_breakpoint_location (b, loc, n, last_addr, allflag);
 	}
     }
 }
@@ -3629,7 +3791,7 @@ do_captured_breakpoint_query (struct ui_out *uiout, void *data)
     {
       if (args->bnum == b->number)
 	{
-	  print_one_breakpoint (b, &dummy_addr);
+	  print_one_breakpoint (b, &dummy_addr, 0);
 	  return GDB_RC_OK;
 	}
     }
@@ -3736,7 +3898,7 @@ breakpoint_1 (int bnum, int allflag)
 	/* We only print out user settable breakpoints unless the
 	   allflag is set. */
 	if (allflag || user_settable_breakpoint (b))
-	  print_one_breakpoint (b, &last_addr);
+	  print_one_breakpoint (b, &last_addr, allflag);
       }
   
   do_cleanups (bkpttbl_chain);
@@ -3888,7 +4050,7 @@ breakpoint_address_is_meaningful (struct breakpoint *bpt)
    that one the official one, and the rest as duplicates.  */
 
 static void
-check_duplicates_for (CORE_ADDR address, struct obj_section *section)
+check_duplicates_for (CORE_ADDR address, struct inferior *inf, struct obj_section *section)
 {
   struct bp_location *b;
   int count = 0;
@@ -3900,6 +4062,7 @@ check_duplicates_for (CORE_ADDR address, struct obj_section *section)
 	&& b->enabled
 	&& !b->shlib_disabled
 	&& b->address == address	/* address / overlay match */
+	&& b->inferior == inf
 	&& (!overlay_debugging || b->section == section)
 	&& breakpoint_address_is_meaningful (b->owner))
     {
@@ -3934,6 +4097,7 @@ check_duplicates_for (CORE_ADDR address, struct obj_section *section)
 		&& b->owner->enable_state != bp_call_disabled
 		&& b->enabled && !b->shlib_disabled		
 		&& b->address == address	/* address / overlay match */
+		&& b->inferior == inf
 		&& (!overlay_debugging || b->section == section)
 		&& breakpoint_address_is_meaningful (b->owner))
 	      {
@@ -3957,7 +4121,7 @@ check_duplicates (struct breakpoint *bpt)
     return;
 
   for (; bl; bl = bl->next)
-    check_duplicates_for (bl->address, bl->section);    
+    check_duplicates_for (bl->address, bl->inferior, bl->section);    
 }
 
 static void
@@ -4093,6 +4257,7 @@ set_raw_breakpoint_without_location (enum bptype bptype)
   b->language = current_language->la_language;
   b->input_radix = input_radix;
   b->thread = -1;
+  b->trigger_set = current_itset;
   b->enable_state = bp_enabled;
   b->next = 0;
   b->silent = 0;
@@ -4154,6 +4319,7 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
 {
   struct breakpoint *b = set_raw_breakpoint_without_location (bptype);
   CORE_ADDR adjusted_address;
+  struct inferior *inf;
 
   /* Adjust the breakpoint's address prior to allocating a location.
      Once we call allocate_bp_location(), that mostly uninitialized
@@ -4166,6 +4332,18 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
   b->loc = allocate_bp_location (b, bptype);
   b->loc->requested_address = sal.pc;
   b->loc->address = adjusted_address;
+  b->loc->inferior = sal.inferior;
+
+  /* Find an inferior in the trigger set.  */
+  if (!b->loc->inferior)
+    b->loc->inferior = first_inferior_in_set (b->trigger_set);
+
+  /* Find an inferior from the sal's symtab.  */
+  if (!b->loc->inferior
+      && sal.symtab
+      && sal.symtab->objfile
+      && sal.symtab->objfile->exec)
+    b->loc->inferior = sal.symtab->objfile->exec->inferior;
 
   if (sal.symtab == NULL)
     b->source_file = NULL;
@@ -4993,6 +5171,7 @@ add_location_to_breakpoint (struct breakpoint *b, enum bptype bptype,
 			    const struct symtab_and_line *sal)
 {
   struct bp_location *loc, **tmp;
+  struct inferior *inf;
 
   loc = allocate_bp_location (b, bptype);
   for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
@@ -5001,6 +5180,19 @@ add_location_to_breakpoint (struct breakpoint *b, enum bptype bptype,
   loc->requested_address = sal->pc;
   loc->address = adjust_breakpoint_address (loc->requested_address,
 					    bptype);
+  loc->inferior = sal->inferior;
+
+  /* Find an inferior in the trigger set.  */
+  if (!loc->inferior)
+    loc->inferior = first_inferior_in_set (b->trigger_set);
+
+  /* Find an inferior from the sal's symtab.  */
+  if (!loc->inferior
+      && sal->symtab
+      && sal->symtab->objfile
+      && sal->symtab->objfile->exec)
+    loc->inferior = sal->symtab->objfile->exec->inferior;
+
   loc->section = sal->section;
 
   set_breakpoint_location_function (loc);
@@ -5183,8 +5375,9 @@ expand_line_sal_maybe (struct symtab_and_line sal)
 	  if (find_pc_partial_function (pc, &this_function, 
 					&func_addr, &func_end))
 	    {
-	      if (this_function && 
-		  strcmp (this_function, original_function) != 0)
+	      if (this_function
+		  && original_function
+		  && strcmp (this_function, original_function) != 0)
 		{
 		  remove_sal (&expanded, i);
 		  --i;
@@ -5228,6 +5421,50 @@ expand_line_sal_maybe (struct symtab_and_line sal)
 	    break;
 	  }
       gdb_assert (found);
+    }
+
+  return expanded;
+}
+
+extern /*static*/ struct symtab_and_line *
+append_expanded_sal (struct symtabs_and_lines *sal,
+		     struct symtab *symtab,
+		     int lineno, CORE_ADDR pc);
+
+struct symtabs_and_lines
+expand_sals_by_inferiors (struct symtabs_and_lines sals)
+{
+  struct symtabs_and_lines expanded;
+  struct symtab_and_line sal, *new_sal;
+  struct inferior *sal_inf, *inf;
+  int i;
+
+  expanded.nelts = 0;
+  expanded.sals = NULL;
+
+  for (i = 0; i < sals.nelts; ++i)
+    {
+      sal = sals.sals[i];
+      append_expanded_sal (&expanded, sal.symtab, sal.line, sal.pc);
+      expanded.sals[expanded.nelts-1].section = sal.section;
+      sal_inf = sal.inferior;
+      if (!sal_inf
+	  && sal.symtab
+	  && sal.symtab->objfile
+	  && sal.symtab->objfile->exec)
+	sal_inf = sal.symtab->objfile->exec->inferior;
+      if (sal_inf)
+	{
+	  for (inf = inferior_list; inf; inf = inf->next)
+	    {
+	      if (inf->exec == sal_inf->exec && inf->pid != 0)
+		{
+		  new_sal = append_expanded_sal (&expanded, sal.symtab, sal.line, sal.pc);
+		  new_sal->section = sal.section;
+		  new_sal->inferior = inf;
+		}
+	    }
+	}
     }
 
   return expanded;
@@ -6750,7 +6987,20 @@ clear_command (char *arg, int from_tty)
 	    }
 
 	  if (match)
-	    VEC_safe_push(breakpoint_p, found, b);
+	    {
+	      struct breakpoint *b2;
+	      int already_there = 0;
+	      for (ix = 0; VEC_iterate(breakpoint_p, found, ix, b2); ix++)
+		{
+		  if (b2 == b)
+		    {
+		      already_there = 1;
+		      break;
+		    }
+		}
+	      if (!already_there)
+		VEC_safe_push(breakpoint_p, found, b);
+	    }
 	}
     }
   /* Now go thru the 'found' chain and delete them.  */
@@ -7390,6 +7640,7 @@ breakpoint_re_set_one (void *bint)
 	  b->condition_not_parsed = 0;
 	}
       expanded = expand_line_sal_maybe (sals.sals[0]);
+      expanded = expand_sals_by_inferiors (expanded);
       update_breakpoint_locations (b, expanded);
 
       xfree (sals.sals);

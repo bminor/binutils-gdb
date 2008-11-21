@@ -209,7 +209,7 @@ gdb_test "enable" "" "enable"
 #test exec-file
 send_gdb "exec-file\n"
 gdb_expect {
-    -re "No executable file now..*$gdb_prompt $" {
+    -re "No executable files now..*$gdb_prompt $" {
 	pass "exec-file"
     }
     -re "exec-file.*A program is being debugged already.  Kill it. .y or n.*$" {
@@ -234,7 +234,7 @@ gdb_test "fg" "The program is not being run." "fg"
 #test file
 send_gdb "file\n"
 gdb_expect {
-    -re "No executable file now..*$gdb_prompt $"\
+    -re "No executable files now..*$gdb_prompt $"\
 	    { pass "file" }
     -re ".*A program is being debugged already.  Kill it. .y or n.*$" {
 	send_gdb "n\n"
@@ -712,7 +712,7 @@ gdb_expect {
 #test target exec
 send_gdb "target exec\n"
 gdb_expect {
-	-re "No executable file now..*$gdb_prompt $"\
+	-re "No executable files now..*$gdb_prompt $"\
 			{ pass "target exec" }
 	-re ".*A program is being debugged already.  Kill it. .y or n.*$" {
 	    send_gdb "n\n"

@@ -23,9 +23,11 @@
 #include "top.h"
 #include "target.h"
 #include "inferior.h"
+#include "exec.h"
+extern struct exec *last_exec_created;
 #include "symfile.h"
 #include "gdbcore.h"
-
+extern int is_core_file (char *filename);
 #include "exceptions.h"
 #include "getopt.h"
 
@@ -128,9 +130,10 @@ captured_main (void *data)
   char *execarg = NULL;
   char *pidarg = NULL;
   char *corearg = NULL;
-  char *pid_or_core_arg = NULL;
   char *cdarg = NULL;
   char *ttyarg = NULL;
+  char **miscargs = NULL;
+  int nmisc = 0;
 
   /* These are static so that we can take their address in an initializer.  */
   static int print_help;
@@ -182,6 +185,8 @@ captured_main (void *data)
   dirsize = 1;
   dirarg = (char **) xmalloc (dirsize * sizeof (*dirarg));
   ndir = 0;
+  miscargs = (char **) xmalloc (argc * sizeof (char *));
+  nmisc = 0;
 
   quit_flag = 0;
   line = (char *) xmalloc (linesize);
@@ -566,34 +571,13 @@ extern int gdbtk_test (char *);
       }
     else
       {
-	/* OK, that's all the options.  */
-
-	/* The first argument, if specified, is the name of the
-	   executable.  */
-	if (optind < argc)
+	/* OK, that's all the options. The remaining arguments will be
+	   a mix of execnames, pids, and corefiles.  */
+	while (optind < argc)
 	  {
-	    symarg = argv[optind];
-	    execarg = argv[optind];
+	    miscargs[nmisc++] = argv[optind];
 	    optind++;
 	  }
-
-	/* If the user hasn't already specified a PID or the name of a
-	   core file, then a second optional argument is allowed.  If
-	   present, this argument should be interpreted as either a
-	   PID or a core file, whichever works.  */
-	if (pidarg == NULL && corearg == NULL && optind < argc)
-	  {
-	    pid_or_core_arg = argv[optind];
-	    optind++;
-	  }
-
-	/* Any argument left on the command line is unexpected and
-	   will be ignored.  Inform the user.  */
-	if (optind < argc)
-	  fprintf_unfiltered (gdb_stderr, _("\
-Excess command line arguments ignored. (%s%s)\n"),
-			      argv[optind],
-			      (optind == argc - 1) ? "" : " ...");
       }
     if (batch)
       quiet = 1;
@@ -735,6 +719,8 @@ Excess command line arguments ignored. (%s%s)\n"),
 	catch_command_errors (symbol_file_add_main, symarg, 0, RETURN_MASK_ALL);
     }
 
+  last_exec_created = NULL;
+
   if (corearg && pidarg)
     error (_("\
 Can't attach to process and specify a core file at the same time."));
@@ -745,23 +731,48 @@ Can't attach to process and specify a core file at the same time."));
   else if (pidarg != NULL)
     catch_command_errors (attach_command, pidarg,
 			  !batch, RETURN_MASK_ALL);
-  else if (pid_or_core_arg)
-    {
-      /* The user specified 'gdb program pid' or gdb program core'.
-	 If pid_or_core_arg's first character is a digit, try attach
-	 first and then corefile.  Otherwise try just corefile.  */
 
-      if (isdigit (pid_or_core_arg[0]))
-	{
-	  if (catch_command_errors (attach_command, pid_or_core_arg,
-				    !batch, RETURN_MASK_ALL) == 0)
-	    catch_command_errors (core_file_command, pid_or_core_arg,
-				  !batch, RETURN_MASK_ALL);
-	}
-      else /* Can't be a pid, better be a corefile.  */
-	catch_command_errors (core_file_command, pid_or_core_arg,
-			      !batch, RETURN_MASK_ALL);
-    }
+  /* Handle random mixes of executables, corefiles, and pids.  */
+  {
+    int require_exec = 1;
+    for (i = 0; i < nmisc; ++i)
+      {
+	if (!require_exec)
+	  {
+	    /* Digits might indicate a pid to attach to, so try that.  */
+	    if (pidarg == NULL
+		&& isdigit (*(miscargs[i]))
+		&& (catch_command_errors (attach_command, miscargs[i],
+					  !batch, RETURN_MASK_ALL)))
+	      {
+		require_exec = 1;
+		continue;
+	      }
+	    /* OK, then maybe it's a corefile.  */
+	    else if (corearg == NULL
+		     && is_core_file (miscargs[i])
+		     && catch_command_errors (core_file_command, miscargs[i],
+					      0, RETURN_MASK_ALL))
+	      {
+		require_exec = 1;
+		continue;
+	      }
+	    /* Presumably it's yet another executable, drop through.  */
+	    else
+	      require_exec = 1;
+	  }
+	if (require_exec)
+	  {
+	    if (catch_command_errors (exec_file_add, miscargs[i], !batch,
+				      RETURN_MASK_ALL))
+	      catch_command_errors (symbol_file_add_main, miscargs[i], 0,
+				    RETURN_MASK_ALL);
+	    last_exec_created = NULL;
+	    /* The executable may be followed by anything.  */
+	    require_exec = 0;
+	  }
+      }
+  }
 
   if (ttyarg != NULL)
     catch_command_errors (tty_command, ttyarg, !batch, RETURN_MASK_ALL);

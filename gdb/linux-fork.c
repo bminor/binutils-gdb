@@ -34,14 +34,13 @@
 #include "gdb_dirent.h"
 #include <ctype.h>
 
+extern int detach_fork;
+
 struct fork_info *fork_list;
 static int highest_fork_num;
 
 /* Prevent warning from -Wmissing-prototypes.  */
 extern void _initialize_linux_fork (void);
-
-int detach_fork = 1;		/* Default behavior is to detach
-				   newly forked processes (legacy).  */
 
 /* Fork list data structure:  */
 struct fork_info

@@ -104,9 +104,6 @@ extern void specify_exec_file_hook (void (*hook) (char *filename));
 extern bfd *core_bfd;
 extern bfd *exec_bfd;
 
-/* The mtime when we last opened exec_bfd.  */
-extern long exec_bfd_mtime;
-
 /* Whether to open exec and core files read-only or read-write.  */
 
 extern int write_files;
@@ -114,6 +111,8 @@ extern int write_files;
 extern void core_file_command (char *filename, int from_tty);
 
 extern void exec_file_attach (char *filename, int from_tty);
+
+extern void exec_file_add (char *filename, int from_tty);
 
 extern void exec_file_clear (int from_tty);
 

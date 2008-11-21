@@ -23,9 +23,11 @@
 #include "symtab.h"
 #include "frame.h"
 #include "command.h"
+#include "exec.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "source.h"
+#include "inferior.h"
 #include "demangle.h"
 #include "value.h"
 #include "completer.h"
@@ -50,6 +52,8 @@ static void initialize_defaults (struct symtab **default_symtab,
 				 int *default_line);
 
 static void set_flags (char *arg, int *is_quoted, char **paren_pointer);
+
+extern struct exec *decode_sharp (char **argptr);
 
 static struct symtabs_and_lines decode_indirect (char **argptr);
 
@@ -129,6 +133,7 @@ static struct symtabs_and_lines decode_variable (char *copy,
 						 int funfirstline,
 						 char ***canonical,
 						 struct symtab *file_symtab,
+						 struct exec *exec,
 						 int *not_found_ptr);
 
 static struct
@@ -393,6 +398,9 @@ build_canonical_line_spec (struct symtab_and_line *sal, char *symname,
   char **canonical_arr;
   char *canonical_name;
   char *filename;
+  char *exec_name;
+  int exec_space;
+
   struct symtab *s = sal->symtab;
 
   if (s == (struct symtab *) NULL
@@ -403,16 +411,31 @@ build_canonical_line_spec (struct symtab_and_line *sal, char *symname,
   canonical_arr = (char **) xmalloc (sizeof (char *));
   *canonical = canonical_arr;
 
+  /* Maybe add the exec's name to the front of the canonical name.  */
+  exec_name = NULL;
+  exec_space = 0;
+  if (number_of_execs () > 1
+      && s->objfile
+      && s->objfile->exec)
+    {
+      exec_name = s->objfile->exec->shortname;
+      exec_space = strlen (exec_name) + 2;
+    }
+
   filename = s->filename;
   if (symname != NULL)
     {
-      canonical_name = xmalloc (strlen (filename) + strlen (symname) + 2);
-      sprintf (canonical_name, "%s:%s", filename, symname);
+      canonical_name = xmalloc (exec_space + strlen (filename) + strlen (symname) + 2);
+      if (exec_name)
+	sprintf (canonical_name, "#%s#", exec_name);
+      sprintf (canonical_name + exec_space, "%s:%s", filename, symname);
     }
   else
     {
-      canonical_name = xmalloc (strlen (filename) + 30);
-      sprintf (canonical_name, "%s:%d", filename, sal->line);
+      canonical_name = xmalloc (exec_space + strlen (filename) + 30);
+      if (exec_name)
+	sprintf (canonical_name, "#%s#", exec_name);
+      sprintf (canonical_name + exec_space, "%s:%d", filename, sal->line);
     }
   canonical_arr[0] = canonical_name;
 }
@@ -688,7 +711,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   char *q;
   /* If a file name is specified, this is its symtab.  */
   struct symtab *file_symtab = NULL;
-
+  struct exec *exec;
   char *copy;
   /* This is NULL if there are no parens in *ARGPTR, or a pointer to
      the closing parenthesis if there are parens.  */
@@ -707,7 +730,13 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* Defaults have defaults.  */
 
   initialize_defaults (&default_symtab, &default_line);
-  
+
+  /* Start with a plausible default for the executable.  */
+  exec = (number_of_execs () > 1 ? current_exec : NULL);
+
+  if (**argptr == '#')
+    exec = decode_sharp (argptr);
+
   /* See if arg is *PC.  */
 
   if (**argptr == '*')
@@ -876,7 +905,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
      If file specified, use that file's per-file block to start with.  */
 
   return decode_variable (copy, funfirstline, canonical,
-			  file_symtab, not_found_ptr);
+			  file_symtab, exec, not_found_ptr);
 }
 
 
@@ -964,6 +993,30 @@ set_flags (char *arg, int *is_quoted, char **paren_pointer)
 
 
 
+/* The #-sign introduces a specification of an executable.  */
+
+struct exec *
+decode_sharp (char **argptr)
+{
+  char *exec_spec, *spec_end;
+  struct exec *exec = NULL;
+
+  /* Skip over the '#'.  */
+  (*argptr)++;
+  exec_spec = *argptr;
+  spec_end = strchr (exec_spec, '#');
+  if (!spec_end)
+    error (_("Unmatched '#'."));
+  exec = find_exec_by_substr (exec_spec, spec_end);
+  if (!exec)
+    {
+      char *name = savestring (exec_spec, spec_end - exec_spec);
+      error (_("No exec named `%s'"), name);
+    }
+  *argptr = spec_end + 1;
+  return exec;
+}
+
 /* Decode arg of the form *PC.  */
 
 static struct symtabs_and_lines
@@ -971,7 +1024,7 @@ decode_indirect (char **argptr)
 {
   struct symtabs_and_lines values;
   CORE_ADDR pc;
-  
+
   (*argptr)++;
   pc = parse_and_eval_address_1 (argptr);
 
@@ -1740,23 +1793,24 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 
 static struct symtabs_and_lines
 decode_variable (char *copy, int funfirstline, char ***canonical,
-		 struct symtab *file_symtab, int *not_found_ptr)
+		 struct symtab *file_symtab, struct exec *exec, int *not_found_ptr)
 {
   struct symbol *sym;
 
   struct minimal_symbol *msymbol;
 
-  sym = lookup_symbol (copy,
+  sym = lookup_symbol_in_exec (copy,
 		       (file_symtab
 			? BLOCKVECTOR_BLOCK (BLOCKVECTOR (file_symtab),
 					     STATIC_BLOCK)
 			: get_selected_block (0)),
+		       exec,
 		       VAR_DOMAIN, 0);
 
   if (sym != NULL)
     return symbol_found (funfirstline, canonical, copy, sym, file_symtab);
 
-  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
+  msymbol = lookup_minimal_symbol_in_exec (copy, NULL, exec);
 
   if (msymbol != NULL)
     return minsym_found (funfirstline, msymbol);
@@ -1805,9 +1859,14 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
 	{
 	  struct blockvector *bv = BLOCKVECTOR (SYMBOL_SYMTAB (sym));
 	  struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	  if (lookup_block_symbol (b, copy, NULL, VAR_DOMAIN) != NULL)
-	    build_canonical_line_spec (values.sals, copy, canonical);
+	  if (lookup_block_symbol (b, copy, NULL, VAR_DOMAIN) != NULL
+	      || number_of_execs () > 1)
+	    {
+	      build_canonical_line_spec (values.sals, copy, canonical);
+	    }
 	}
+      else if (number_of_execs () > 1)
+	build_canonical_line_spec (values.sals, copy, canonical);
       return values;
     }
   else
@@ -1823,6 +1882,8 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
 	  memset (&values.sals[0], 0, sizeof (values.sals[0]));
 	  values.sals[0].symtab = SYMBOL_SYMTAB (sym);
 	  values.sals[0].line = SYMBOL_LINE (sym);
+	  if (number_of_execs () > 1)
+	    build_canonical_line_spec (values.sals, copy, canonical);
 	  return values;
 	}
       else

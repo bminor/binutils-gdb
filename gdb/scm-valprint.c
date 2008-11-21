@@ -63,9 +63,9 @@ scm_inferior_print (LONGEST value, struct ui_file *stream,
     {
       /* XXX: Should we cache these symbols?  */
       gdb_output_sym =
-	lookup_symbol_global ("gdb_output", NULL, NULL, VAR_DOMAIN);
+	lookup_symbol_global ("gdb_output", NULL, NULL, NULL, VAR_DOMAIN);
       gdb_output_len_sym =
-	lookup_symbol_global ("gdb_output_length", NULL, NULL, VAR_DOMAIN);
+	lookup_symbol_global ("gdb_output_length", NULL, NULL, NULL, VAR_DOMAIN);
 
       if ((gdb_output_sym == NULL) || (gdb_output_len_sym == NULL))
 	ret = -1;

@@ -272,6 +272,9 @@ static struct
 }
 pending_follow;
 
+int detach_fork = 1;		/* Default behavior is to detach
+				   newly forked processes (legacy).  */
+
 static const char follow_fork_mode_child[] = "child";
 static const char follow_fork_mode_parent[] = "parent";
 

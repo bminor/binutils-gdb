@@ -174,9 +174,28 @@ msymbol_objfile (struct minimal_symbol *sym)
    Obviously, there must be distinct mangled names for each of these,
    but the demangled names are all the same: S::S or S::~S.  */
 
+extern struct minimal_symbol *lookup_minimal_symbol_in_exec_1 (const char *name,
+							       const char *sfile,
+							       struct objfile *objf,
+							       struct exec *exec);
+
 struct minimal_symbol *
 lookup_minimal_symbol (const char *name, const char *sfile,
 		       struct objfile *objf)
+{
+  return lookup_minimal_symbol_in_exec_1 (name, sfile, objf, NULL);
+}
+
+struct minimal_symbol *
+lookup_minimal_symbol_in_exec (const char *name, const char *sfile,
+			       struct exec *exec)
+{
+  return lookup_minimal_symbol_in_exec_1 (name, sfile, NULL, exec);
+}
+
+struct minimal_symbol *
+lookup_minimal_symbol_in_exec_1 (const char *name, const char *sfile,
+				 struct objfile *objf, struct exec *exec)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
@@ -198,6 +217,10 @@ lookup_minimal_symbol (const char *name, const char *sfile,
        objfile != NULL && found_symbol == NULL;
        objfile = objfile->next)
     {
+      /* If an exec is specified, limit to objfiles associated with it.  */
+      if (exec != NULL && exec != objfile->exec)
+	continue;
+
       if (objf == NULL || objf == objfile
 	  || objf->separate_debug_objfile == objfile)
 	{

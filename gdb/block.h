@@ -29,6 +29,7 @@ struct using_direct;
 struct obstack;
 struct dictionary;
 struct addrmap;
+struct inferior;
 
 /* All of the name-scope contours of the program
    are represented by `struct block' objects.
@@ -146,6 +147,8 @@ extern struct blockvector *blockvector_for_pc_sect (CORE_ADDR,
 extern struct block *block_for_pc (CORE_ADDR);
 
 extern struct block *block_for_pc_sect (CORE_ADDR, struct obj_section *);
+
+extern struct block *block_for_pc_inf (CORE_ADDR, struct inferior *);
 
 extern const char *block_scope (const struct block *block);
 

@@ -28,6 +28,7 @@
 #include "bfd.h"
 #include "exceptions.h"
 #include "gdbthread.h"
+#include "exec.h"
 #include "inferior.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -474,11 +475,11 @@ enable_thread_event (td_thragent_t *thread_agent, int event, CORE_ADDR *bp)
     return err;
 
   /* Set up the breakpoint.  */
-  gdb_assert (exec_bfd);
+  gdb_assert (first_exec && first_exec->ebfd);
   (*bp) = (gdbarch_convert_from_func_ptr_addr
 	   (current_gdbarch,
 	    /* Do proper sign extension for the target.  */
-	    (bfd_get_sign_extend_vma (exec_bfd) > 0
+	    (bfd_get_sign_extend_vma (first_exec->ebfd) > 0
 	     ? (CORE_ADDR) (intptr_t) notify.u.bptaddr
 	     : (CORE_ADDR) (uintptr_t) notify.u.bptaddr),
 	    &current_target));
@@ -1130,8 +1131,8 @@ thread_db_get_thread_local_address (ptid_t ptid,
 
       /* Cast assuming host == target.  Joy.  */
       /* Do proper sign extension for the target.  */
-      gdb_assert (exec_bfd);
-      return (bfd_get_sign_extend_vma (exec_bfd) > 0
+      gdb_assert (first_exec && first_exec->ebfd);
+      return (bfd_get_sign_extend_vma (first_exec->ebfd) > 0
 	      ? (CORE_ADDR) (intptr_t) address
 	      : (CORE_ADDR) (uintptr_t) address);
     }

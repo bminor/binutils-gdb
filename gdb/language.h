@@ -31,6 +31,7 @@ struct frame_info;
 struct expression;
 struct ui_file;
 struct value_print_options;
+struct exec;
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims */
 
@@ -238,6 +239,7 @@ struct language_defn
     struct symbol *(*la_lookup_symbol_nonlocal) (const char *,
 						 const char *,
 						 const struct block *,
+						 const struct exec *,
 						 const domain_enum);
 
     /* Find the definition of the type with the given name.  */

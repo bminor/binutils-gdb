@@ -32,6 +32,7 @@
 #include "exec.h"
 #include "observer.h"
 #include "arch-utils.h"
+#include "vec.h"
 
 #include <fcntl.h>
 #include "readline/readline.h"
@@ -52,7 +53,11 @@ void (*deprecated_file_changed_hook) (char *);
 
 static void exec_close (int);
 
+static void exec_file_command (char *, int);
+
 static void file_command (char *, int);
+
+static void add_file_command (char *, int);
 
 static void set_section_command (char *, int);
 
@@ -66,10 +71,19 @@ void _initialize_exec (void);
 
 struct target_ops exec_ops;
 
+/* The vector of all executables in use.  */
+
+VEC(exec_p) *execs = NULL;
+
 /* The Binary File Descriptor handle for the executable file.  */
 
 bfd *exec_bfd = NULL;
-long exec_bfd_mtime = 0;
+
+struct exec *last_exec_created;
+
+struct exec *current_exec;
+
+struct exec *first_exec;
 
 /* Whether to open exec and core files read-only or read-write.  */
 
@@ -97,6 +111,8 @@ exec_close (int quitting)
 {
   int need_symtab_cleanup = 0;
   struct vmap *vp, *nxt;
+  int ix;
+  struct exec *ex;
 
   for (nxt = vmap; nxt != NULL;)
     {
@@ -128,6 +144,23 @@ exec_close (int quitting)
 
   vmap = NULL;
 
+  /* Clear all the exec objects.  */
+  if (execs)
+    {
+      for (ix = 0; VEC_iterate (exec_p, execs, ix, ex); ++ix)
+	{
+	  /* We don't free objfiles because other code does it.  */
+	  if (ex->inferior)
+	    delete_inferior (ex->inferior->pid);
+	}
+#if 0
+      VEC_block_remove (exec_p, execs, 0, VEC_length (exec_p, execs));
+#endif
+      execs = NULL;
+      first_exec = NULL;
+      current_exec = NULL;
+    }
+
   if (exec_bfd)
     {
       char *name = bfd_get_filename (exec_bfd);
@@ -137,7 +170,6 @@ exec_close (int quitting)
 		 name, bfd_errmsg (bfd_get_error ()));
       xfree (name);
       exec_bfd = NULL;
-      exec_bfd_mtime = 0;
     }
 
   if (exec_ops.to_sections)
@@ -155,10 +187,10 @@ exec_file_clear (int from_tty)
   unpush_target (&exec_ops);
 
   if (from_tty)
-    printf_unfiltered (_("No executable file now.\n"));
+    printf_unfiltered (_("No executable files now.\n"));
 }
 
-/*  Process the first arg in ARGS as the new exec file.
+/* Process the first arg in ARGS as a new exec file.
 
    This function is intended to be behave essentially the same
    as exec_file_command, except that the latter will detect when
@@ -177,18 +209,44 @@ exec_file_clear (int from_tty)
    
    ARGS is assumed to be the filename. */
 
+void exec_file_attach_1 (char *filename, int from_tty);
+
 void
 exec_file_attach (char *filename, int from_tty)
 {
-  /* Remove any previous exec file.  */
+  /* (should clear all existing execs?) */
   unpush_target (&exec_ops);
+
+  exec_file_attach_1 (filename, from_tty);
+}
+
+void
+exec_file_add (char *filename, int from_tty)
+{
+  struct exec *exec;
+
+  /* We don't want more than one of each executable.  */
+  exec = find_exec_by_name (filename);
+  if (exec)
+    {
+      printf_unfiltered (_("Exec '%s' is already present.\n"), filename);
+      return;
+    }
+
+  exec_file_attach_1 (filename, from_tty);
+}
+
+void
+exec_file_attach_1 (char *filename, int from_tty)
+{
+  struct exec *exec = NULL;
 
   /* Now open and digest the file the user requested, if any.  */
 
   if (!filename)
     {
       if (from_tty)
-        printf_unfiltered (_("No executable file now.\n"));
+        printf_unfiltered (_("No executable files now.\n"));
 
       set_gdbarch_from_file (NULL);
     }
@@ -265,13 +323,46 @@ exec_file_attach (char *filename, int from_tty)
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 
-      exec_bfd_mtime = bfd_get_mtime (exec_bfd);
-
       validate_files ();
 
       set_gdbarch_from_file (exec_bfd);
 
-      push_target (&exec_ops);
+      /* If this is the first exec, then we need to set up the target
+	 vector. We don't need to do it for subsequent execs
+	 however.  */
+      if (execs == NULL)
+	push_target (&exec_ops);
+
+      exec = create_exec (filename, exec_bfd, bfd_get_mtime (exec_bfd));
+
+      exec->sections = exec_ops.to_sections;
+      exec->sections_end = exec_ops.to_sections_end;
+
+      if (number_of_execs () == 1)
+	{
+	  first_exec = exec;
+
+	  if (symfile_objfile
+	      && symfile_objfile->exec == NULL)
+	    {
+	      symfile_objfile->exec = exec;
+	      exec->objfile = symfile_objfile;
+	    }
+	  else
+	    {
+	      struct objfile *ofile;
+
+	      ALL_OBJFILES (ofile)
+	        {
+		  if (ofile->name
+		      && strcmp (ofile->name, exec->name) == 0)
+		    {
+		      ofile->exec = exec;
+		      exec->objfile = ofile;
+		    }
+		}
+	    }
+	}
 
       /* Tell display code (if any) about the changed file name.  */
       if (deprecated_exec_file_display_hook)
@@ -279,6 +370,169 @@ exec_file_attach (char *filename, int from_tty)
     }
   bfd_cache_close_all ();
   observer_notify_executable_changed ();
+}
+
+void
+exec_file_update (struct exec *exec)
+{
+  char *filename;
+
+  filename = exec->name;
+
+  {
+    char *scratch_pathname;
+    int scratch_chan;
+
+    scratch_chan = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, filename,
+			  write_files ? O_RDWR | O_BINARY : O_RDONLY | O_BINARY, 0,
+			  &scratch_pathname);
+#if defined(__GO32__) || defined(_WIN32) || defined(__CYGWIN__)
+    if (scratch_chan < 0)
+      {
+	char *exename = alloca (strlen (filename) + 5);
+	strcat (strcpy (exename, filename), ".exe");
+	scratch_chan = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, exename,
+			      write_files ? O_RDWR | O_BINARY : O_RDONLY | O_BINARY, 0,
+			      &scratch_pathname);
+      }
+#endif
+    if (scratch_chan < 0)
+      perror_with_name (filename);
+    exec->ebfd = bfd_fopen (scratch_pathname, gnutarget,
+			  write_files ? FOPEN_RUB : FOPEN_RB,
+			  scratch_chan);
+
+    if (!exec->ebfd)
+      error (_("\"%s\": could not open as an executable file: %s"),
+	     scratch_pathname, bfd_errmsg (bfd_get_error ()));
+
+      /* At this point, scratch_pathname and exec->ebfd->name both point to the
+         same malloc'd string.  However exec_close() will attempt to free it
+         via the exec->ebfd->name pointer, so we need to make another copy and
+         leave exec->ebfd as the new owner of the original copy. */
+      scratch_pathname = xstrdup (scratch_pathname);
+      make_cleanup (xfree, scratch_pathname);
+
+      if (!bfd_check_format (exec->ebfd, bfd_object))
+	{
+	  /* Make sure to close exec->ebfd, or else "run" might try to use
+	     it.  */
+	  exec_close (0);
+	  error (_("\"%s\": not in executable format: %s"),
+		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
+	}
+
+      /* FIXME - This should only be run for RS6000, but the ifdef is a poor
+         way to accomplish.  */
+#ifdef DEPRECATED_IBM6000_TARGET
+      /* Setup initial vmap. */
+
+      map_vmap (exec->ebfd, 0);
+      if (vmap == NULL)
+	{
+	  /* Make sure to close exec->ebfd, or else "run" might try to use
+	     it.  */
+	  exec_close (0);
+	  error (_("\"%s\": can't find the file sections: %s"),
+		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
+	}
+#endif /* DEPRECATED_IBM6000_TARGET */
+
+      if (build_section_table (exec->ebfd, &(exec->sections),
+			       &(exec->sections_end)))
+	{
+	  /* Make sure to close exec->ebfd, or else "run" might try to use
+	     it.  */
+	  exec_close (0);
+	  error (_("\"%s\": can't find the file sections: %s"),
+		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
+	}
+
+      exec->ebfd_mtime = bfd_get_mtime (exec_bfd);
+
+      validate_files ();
+
+      set_gdbarch_from_file (exec->ebfd);
+
+      /* Tell display code (if any) about the changed file name.  */
+      if (deprecated_exec_file_display_hook)
+	(*deprecated_exec_file_display_hook) (filename);
+    }
+
+  observer_notify_executable_changed ();
+}
+
+/* Create an exec object representing the given executable.  */
+
+struct exec *
+create_exec (char *filename, bfd *abfd, long mtime)
+{
+  struct exec *exec;
+  struct inferior *inf;
+
+  exec = (struct exec *) xmalloc (sizeof (struct exec));
+
+  /* Save the full pathname in the exec object.  This may be
+     user-unfriendly at times, since the short name may be
+     ambiguous. Alternatively, when searching for a matching exec,
+     allow any partial path supplied by the user.  */
+  filename = bfd_get_filename (abfd);
+
+  exec->name = savestring (filename, strlen (filename));
+  exec->shortname = (char *) lbasename (exec->name);
+  exec->ebfd = abfd;
+  exec->ebfd_mtime = mtime;
+  exec->objfile = NULL;
+
+  /* Add it to the vector of execs.  */
+  VEC_safe_push (exec_p, execs, exec);
+
+  inf = add_inferior_silent (0);
+  inf->exec = exec;
+  /* Need to ensure unique name? */
+  inf->name = exec->shortname;
+  exec->inferior = inf;
+
+  last_exec_created = exec;
+
+  return exec;
+}
+
+struct exec *
+find_exec_by_name (char *name)
+{
+  return find_exec_by_substr (name, name + strlen (name));
+}
+
+struct exec *
+find_exec_by_substr (char *name, char *name_end)
+{
+  int len, ix;
+  struct exec *exec;
+
+  if (!execs)
+    return NULL;
+
+  len = name_end - name;
+  for (ix = 0; VEC_iterate (exec_p, execs, ix, exec); ++ix)
+    {
+      if (strncmp (exec->name, name, len) == 0 && strlen (exec->name) == len)
+	return exec;
+    }
+
+  for (ix = 0; VEC_iterate (exec_p, execs, ix, exec); ++ix)
+    {
+      if (strncmp (exec->shortname, name, len) == 0 && strlen (exec->shortname) == len)
+	return exec;
+    }
+
+  return NULL;
+}
+
+int
+number_of_execs ()
+{
+  return VEC_length (exec_p, execs);
 }
 
 /*  Process the first arg in ARGS as the new exec file.
@@ -296,9 +550,13 @@ exec_file_command (char *args, int from_tty)
   char *filename;
 
   if (from_tty && target_has_execution
-      && !query (_("A program is being debugged already.\n"
-		   "Are you sure you want to change the file? ")))
-    error (_("File not changed."));
+      && !((number_of_execs () > 1)
+	   ? query (_("%d programs are being debugged already.\n"
+		      "Are you sure you want to change the file? "),
+		    number_of_execs ())
+	   : query (_("A program is being debugged already.\n"
+		      "Are you sure you want to change the file? "))))
+    error (_("File(s) not changed."));
 
   if (args)
     {
@@ -320,6 +578,49 @@ exec_file_command (char *args, int from_tty)
     }
   else
     exec_file_attach (NULL, from_tty);
+
+  if (number_of_execs () == 1)
+    set_current_exec (first_exec);
+}
+
+static void
+add_exec_file_command (char *args, int from_tty)
+{
+  char **argv;
+  char *filename;
+
+  if (args)
+    {
+      /* Scan through the args and pick up the first non option arg
+         as the filename.  */
+
+      argv = buildargv (args);
+      if (argv == NULL)
+        nomem (0);
+
+      make_cleanup_freeargv (argv);
+
+      for (; (*argv != NULL) && (**argv == '-'); argv++)
+        {;
+        }
+      if (*argv == NULL)
+        error (_("No executable file name was specified"));
+
+      filename = tilde_expand (*argv);
+      make_cleanup (xfree, filename);
+
+      /* Warn even before starting execution, most users only want to
+	 debug a single program at a time.  */
+      if (from_tty
+	  && number_of_execs () == 1
+	  && !query (_("A program is being debugged already.\n"
+		       "Are you sure you want to add another executable file? ")))
+	error (_("File not added."));
+
+      exec_file_add (filename, from_tty);
+    }
+  else
+    error (_("No executable file name was specified"));
 }
 
 /* Set both the exec file and the symbol file, in one command.  
@@ -332,6 +633,22 @@ file_command (char *arg, int from_tty)
   /* FIXME, if we lose on reading the symbol file, we should revert
      the exec file, but that's rough.  */
   exec_file_command (arg, from_tty);
+  symbol_file_command (arg, from_tty);
+  if (number_of_execs () == 1)
+    set_current_exec (first_exec);
+  if (deprecated_file_changed_hook)
+    deprecated_file_changed_hook (arg);
+}
+
+/* Add the given file as both exec and symbol file.  */
+
+static void
+add_file_command (char *arg, int from_tty)
+{
+  /* FIXME, if we lose on reading the symbol file, we should revert
+     the exec file, but that's rough.  */
+  add_exec_file_command (arg, from_tty);
+  /* Note that symbol_file_command is intrinsically additive.  */
   symbol_file_command (arg, from_tty);
   if (deprecated_file_changed_hook)
     deprecated_file_changed_hook (arg);
@@ -375,8 +692,13 @@ build_section_table (struct bfd *some_bfd, struct section_table **start,
   unsigned count;
 
   count = bfd_count_sections (some_bfd);
+  /* This function is reused in ways that make it hard to tell when
+     the old one should be discarded, allow this leak until callers
+     are cleaned up.  */
+#if 0
   if (*start)
     xfree (* start);
+#endif
   *start = (struct section_table *) xmalloc (count * sizeof (**start));
   *end = *start;
   bfd_map_over_sections (some_bfd, add_to_section_table, (char *) end);
@@ -464,12 +786,20 @@ xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 	     struct mem_attrib *attrib, struct target_ops *target)
 {
   int res;
-  struct section_table *p;
+  struct section_table *p, *sections, *sections_end;
   CORE_ADDR nextsectaddr, memend;
   struct obj_section *section = NULL;
 
   if (len <= 0)
     internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+
+  sections = target->to_sections;
+  sections_end = target->to_sections_end;
+  if (tmp_inf && current_exec && tmp_inf->exec != current_exec)
+    {
+      sections = tmp_inf->exec->sections;
+      sections_end = tmp_inf->exec->sections_end;
+    }
 
   if (overlay_debugging)
     {
@@ -481,7 +811,7 @@ xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
   memend = memaddr + len;
   nextsectaddr = memend;
 
-  for (p = target->to_sections; p < target->to_sections_end; p++)
+  for (p = sections; p < sections_end; p++)
     {
       if (overlay_debugging && section
 	  && strcmp (section->the_bfd_section->name,
@@ -534,19 +864,30 @@ xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 
 
 void
-print_section_info (struct target_ops *t, bfd *abfd)
+print_section_info (struct target_ops *t, bfd *abfd, struct exec *exec)
 {
-  struct section_table *p;
+  struct section_table *sections, *sections_end, *p;
   /* FIXME: 16 is not wide enough when gdbarch_addr_bit > 64.  */
   int wid = gdbarch_addr_bit (gdbarch_from_bfd (abfd)) <= 32 ? 8 : 16;
+
+  if (exec)
+    {
+      sections = exec->sections;
+      sections_end = exec->sections_end;
+    }
+  else
+    {
+      sections = t->to_sections;
+      sections_end = t->to_sections_end;
+    }
 
   printf_filtered ("\t`%s', ", bfd_get_filename (abfd));
   wrap_here ("        ");
   printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
-  if (abfd == exec_bfd)
+  if (exec && abfd == exec->ebfd)
     printf_filtered (_("\tEntry point: %s\n"),
                      paddress (bfd_get_start_address (abfd)));
-  for (p = t->to_sections; p < t->to_sections_end; p++)
+  for (p = sections; p < sections_end; p++)
     {
       printf_filtered ("\t%s", hex_string_custom (p->addr, wid));
       printf_filtered (" - %s", hex_string_custom (p->endaddr, wid));
@@ -570,7 +911,23 @@ print_section_info (struct target_ops *t, bfd *abfd)
 static void
 exec_files_info (struct target_ops *t)
 {
-  print_section_info (t, exec_bfd);
+  struct exec *exec;
+  int ix;
+
+  /* Quick summary of the execs present. Only do in the multiprogram
+     case, for compatibility and simplicity.  */
+  if (number_of_execs () > 1)
+    {
+      printf_filtered (_("  Executables:\n"));
+      for (ix = 0; VEC_iterate (exec_p, execs, ix, exec); ++ix)
+	printf_filtered (_("   %s `%s'\n"),
+			 (exec == current_exec ? "*" : " "), exec->name);
+      printf_filtered (_("  Sections:\n"));
+    }
+
+  /* Now dump all the section info.  */
+  for (ix = 0; VEC_iterate (exec_p, execs, ix, exec); ++ix)
+    print_section_info (t, exec->ebfd, exec);
 
   if (vmap)
     {
@@ -596,6 +953,39 @@ exec_files_info (struct target_ops *t)
 			   *vp->member ? ")" : "");
     }
 }
+
+/* The maintenance command for execs displays more detail data, such
+   as host addresses for objects.  */
+
+void
+maintenance_print_execs (char *ignore, int from_tty)
+{
+  struct exec *exec;
+  int ix;
+
+  for (ix = 0; VEC_iterate (exec_p, execs, ix, exec); ++ix)
+    {
+      printf_filtered ("Executable %s: exec at ", exec->name);
+      gdb_print_host_address (exec, gdb_stdout);
+      printf_filtered (", objfile at ");
+      gdb_print_host_address (exec->objfile, gdb_stdout);
+      printf_filtered (", bfd at ");
+      gdb_print_host_address (exec->ebfd, gdb_stdout);
+      printf_filtered (", inf %d at ",
+		       (exec->inferior ? exec->inferior->num : -1));
+      gdb_print_host_address (exec->inferior, gdb_stdout);
+      printf_filtered ("\n");
+    }
+  printf_filtered ("Current exec is %s, at ",
+		   (current_exec ? current_exec->name : "(null)"));
+  gdb_print_host_address (current_exec, gdb_stdout);
+  printf_filtered ("\n");
+  printf_filtered ("First exec is %s, at ",
+		   (first_exec ? first_exec->name : "(null)"));
+  gdb_print_host_address (first_exec, gdb_stdout);
+  printf_filtered ("\n");
+}
+
 
 static void
 set_section_command (char *args, int from_tty)
@@ -721,6 +1111,13 @@ If FILE cannot be found as specified, your execution directory path\n\
 ($PATH) is searched for a command of that name.\n\
 No arg means to have no executable file and no symbols."), &cmdlist);
       set_cmd_completer (c, filename_completer);
+      c = add_cmd ("add-file", class_files, add_file_command, _("\
+Add FILE to the programs being debugged.\n\
+It is read for its symbols, for getting the contents of pure memory,\n\
+and it is the program executed when you use the `run' command.\n\
+If FILE cannot be found as specified, your execution directory path\n\
+($PATH) is searched for a command of that name."), &cmdlist);
+      set_cmd_completer (c, filename_completer);
     }
 
   c = add_cmd ("exec-file", class_files, exec_file_command, _("\
@@ -728,6 +1125,12 @@ Use FILE as program for getting contents of pure memory.\n\
 If FILE cannot be found as specified, your execution directory path\n\
 is searched for a command of that name.\n\
 No arg means have no executable file."), &cmdlist);
+  set_cmd_completer (c, filename_completer);
+
+  c = add_cmd ("add-exec-file", class_files, add_exec_file_command, _("\
+Use FILE as program for getting contents of pure memory.\n\
+If FILE cannot be found as specified, your execution directory path\n\
+is searched for a command of that name."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   add_com ("section", class_files, set_section_command, _("\

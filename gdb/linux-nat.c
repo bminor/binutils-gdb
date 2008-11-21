@@ -50,6 +50,8 @@
 #include "event-loop.h"
 #include "event-top.h"
 
+extern int detach_fork;
+
 #ifdef HAVE_PERSONALITY
 # include <sys/personality.h>
 # if !HAVE_DECL_ADDR_NO_RANDOMIZE
@@ -688,6 +690,8 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
   struct target_waitstatus last_status;
   int has_vforked;
   int parent_pid, child_pid;
+  struct inferior *child_inf, *parent_inf;
+  struct exec *parent_exec = NULL;
 
   if (target_can_async_p ())
     target_async (NULL, 0);
@@ -698,6 +702,10 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
   if (parent_pid == 0)
     parent_pid = ptid_get_pid (last_ptid);
   child_pid = PIDGET (last_status.value.related_pid);
+
+  parent_inf = find_inferior_pid (parent_pid);
+  if (parent_inf)
+    parent_exec = parent_inf->exec;
 
   if (! follow_child)
     {
@@ -728,7 +736,9 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 	  struct fork_info *fp;
 
 	  /* Add process to GDB's tables.  */
-	  add_inferior (child_pid);
+	  child_inf = add_inferior (child_pid);
+
+	  set_inferior_exec (child_inf, parent_exec);
 
 	  /* Retain child fork in ptrace (stopped) state.  */
 	  fp = find_fork_pid (child_pid);
@@ -858,7 +868,9 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 	target_detach (NULL, 0);
 
       inferior_ptid = ptid_build (child_pid, child_pid, 0);
-      add_inferior (child_pid);
+      child_inf = add_inferior (child_pid);
+
+      set_inferior_exec (child_inf, parent_exec);
 
       /* Reinstall ourselves, since we might have been removed in
 	 target_detach (which does other necessary cleanup).  */

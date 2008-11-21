@@ -384,7 +384,7 @@ regs : the register display\n"));
   add_com_alias ("wh", "winheight", class_tui, 0);
   add_info ("win", tui_all_windows_info,
 	    _("List of all displayed windows.\n"));
-  add_com ("focus", class_tui, tui_set_focus_command, _("\
+  add_com ("ffocus", class_tui, tui_set_focus_command, _("\
 Set focus to named window or next/prev window.\n\
 Usage: focus {<win> | next | prev}\n\
 Valid Window names are:\n\

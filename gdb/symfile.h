@@ -309,6 +309,8 @@ extern bfd *symfile_bfd_open (char *);
 
 extern int get_section_index (struct objfile *, char *);
 
+extern struct obj_section *find_pc_inf_sect (CORE_ADDR, struct inferior *);
+
 /* Utility functions for overlay sections: */
 extern enum overlay_debugging_state
 {

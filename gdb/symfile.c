@@ -49,6 +49,7 @@
 #include "block.h"
 #include "observer.h"
 #include "exec.h"
+extern struct exec *last_exec_created;
 #include "parser-defs.h"
 #include "varobj.h"
 #include "elf-bfd.h"
@@ -790,8 +791,8 @@ syms_from_objfile (struct objfile *objfile,
       make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
 
       /* Since no error yet, throw away the old symbol table.  */
-
-      if (symfile_objfile != NULL)
+      /* (But not in the multiprocess case.)  */
+      if (symfile_objfile != NULL && number_of_execs () <= 1)
 	{
 	  free_objfile (symfile_objfile);
 	  symfile_objfile = NULL;
@@ -916,6 +917,16 @@ new_symfile_objfile (struct objfile *objfile, int mainline, int verbo)
     {
       /* OK, make it the "real" symbol file.  */
       symfile_objfile = objfile;
+
+      /* Use the exec object smuggled through this global (a
+	 workaround due to the inability of command processing in
+	 main.c to pass additional arguments).  */
+      if (last_exec_created)
+	{
+	  last_exec_created->objfile = objfile;
+	  objfile->exec = last_exec_created;
+	  last_exec_created = NULL;
+	}
 
       clear_symtab_users ();
     }
@@ -1149,10 +1160,7 @@ symbol_file_clear (int from_tty)
 {
   if ((have_full_symbols () || have_partial_symbols ())
       && from_tty
-      && (symfile_objfile
-	  ? !query (_("Discard symbol table from `%s'? "),
-		    symfile_objfile->name)
-	  : !query (_("Discard symbol table? "))))
+      && !query (_("Discard all symbol tables? ")))
     error (_("Not confirmed."));
     free_all_objfiles ();
 
@@ -1164,7 +1172,7 @@ symbol_file_clear (int from_tty)
 
     symfile_objfile = NULL;
     if (from_tty)
-      printf_unfiltered (_("No symbol file now.\n"));
+      printf_unfiltered (_("No symbol files now.\n"));
 }
 
 struct build_id
@@ -2303,13 +2311,11 @@ reread_symbols (void)
 	      /* We need to do this whenever any symbols go away.  */
 	      make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
 
-	      if (exec_bfd != NULL && strcmp (bfd_get_filename (objfile->obfd),
-					      bfd_get_filename (exec_bfd)) == 0)
-		{
-		  /* Reload EXEC_BFD without asking anything.  */
-
-		  exec_file_attach (bfd_get_filename (objfile->obfd), 0);
-		}
+	      /* If this objfile is also one of our executables,
+		 update that.  */
+	      if (objfile->exec
+		  && objfile->exec->objfile == objfile)
+		exec_file_update (objfile->exec);
 
 	      /* Clean up any state BFD has sitting around.  We don't need
 	         to close the descriptor but BFD lacks a way of closing the
@@ -3194,6 +3200,32 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
 	xmalloc ((objfile->static_psymbols.size
 		  * sizeof (struct partial_symbol *)));
     }
+}
+
+/* Given a pc and inferior, return a section.  */
+
+struct obj_section *
+find_pc_inf_sect (CORE_ADDR pc, struct inferior *inf)
+{
+  struct objfile *objfile;
+  struct obj_section *osect;
+  asection *section;
+  int size;
+
+  ALL_OBJSECTIONS (objfile, osect)
+    {
+      if (!inf || objfile->exec == inf->exec)
+	{
+	  section = osect->the_bfd_section;
+	  if (section)
+	    {
+	      size = bfd_get_section_size (section);
+	      if (section->vma <= pc && pc < section->vma + size)
+		return osect;
+	    }
+	}
+    }
+  return NULL;
 }
 
 /* OVERLAYS:

@@ -23,6 +23,7 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "bfd.h"
+#include "exec.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "breakpoint.h"
@@ -213,8 +214,13 @@ dump_objfile (struct objfile *objfile)
   gdb_print_host_address (objfile, gdb_stdout);
   printf_filtered (", bfd at ");
   gdb_print_host_address (objfile->obfd, gdb_stdout);
-  printf_filtered (", %d minsyms\n\n",
+  printf_filtered (", %d minsyms\n",
 		   objfile->minimal_symbol_count);
+  if (objfile->exec)
+    printf_filtered ("  Exec file %s", objfile->exec->name);
+  else
+    printf_filtered ("  (No exec file)");
+  printf_filtered ("\n\n");
 
   if (objfile->psymtabs)
     {
@@ -916,6 +922,10 @@ maintenance_print_objfiles (char *ignore, int from_tty)
   immediate_quit++;
   ALL_OBJFILES (objfile)
     dump_objfile (objfile);
+  printf_filtered ("Symfile_objfile is %s, at ",
+		   (symfile_objfile ? symfile_objfile->name : "(null)"));
+  gdb_print_host_address (symfile_objfile, gdb_stdout);
+  printf_filtered ("\n");
   immediate_quit--;
 }
 

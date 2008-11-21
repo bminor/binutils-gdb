@@ -205,8 +205,8 @@ proc do_attach_tests {} {
     set timeout 15 
     set test "attach1, purging symbols after detach"
     gdb_test_multiple "file" "$test" {
-	-re "No executable file now.*Discard symbol table.*y or n. $" {
-	    gdb_test "y" "No symbol file now." "$test"
+	-re "No executable files now.*Discard all symbol tables.*y or n. $" {
+	    gdb_test "y" "No symbol files now." "$test"
 	}
     }
     set timeout $old_timeout
@@ -297,16 +297,16 @@ proc do_attach_tests {} {
 
     set test "before attach3, flush symbols"
     gdb_test_multiple "symbol" "$test" {
-	-re "Discard symbol table from.*y or n. $" {
-	    gdb_test "y" "No symbol file now." \
+	-re "Discard all symbol tables.*y or n. $" {
+	    gdb_test "y" "No symbol files now." \
 		"$test"
 	}
-	-re "No symbol file now.*$gdb_prompt $" {
+	-re "No symbol files now.*$gdb_prompt $" {
 	    pass "$test"
 	}
     }
 
-    gdb_test "exec" "No executable file now." \
+    gdb_test "exec" "No executable files now." \
 	"before attach3, flush exec"
 
     gdb_test "attach $testpid" \

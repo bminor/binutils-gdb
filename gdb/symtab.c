@@ -28,6 +28,7 @@
 #include "value.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "exec.h"
 #include "gdbcmd.h"
 #include "call-cmds.h"
 #include "gdb_regex.h"
@@ -86,6 +87,7 @@ char *operator_chars (char *p, char **end);
 static struct symbol *lookup_symbol_aux (const char *name,
 					 const char *linkage_name,
 					 const struct block *block,
+					 const struct exec *exec,
 					 const domain_enum domain,
 					 enum language language,
 					 int *is_a_field_of_this);
@@ -100,12 +102,14 @@ static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
 					  const char *name,
 					  const char *linkage_name,
+					  const struct exec *exec,
 					  const domain_enum domain);
 
 static
 struct symbol *lookup_symbol_aux_psymtabs (int block_index,
 					   const char *name,
 					   const char *linkage_name,
+					   const struct exec *exec,
 					   const domain_enum domain);
 
 static int file_matches (char *, char **, int);
@@ -697,6 +701,7 @@ init_sal (struct symtab_and_line *sal)
   sal->line = 0;
   sal->pc = 0;
   sal->end = 0;
+  sal->inferior = NULL;
   sal->explicit_pc = 0;
   sal->explicit_line = 0;
 }
@@ -852,6 +857,7 @@ struct partial_symtab *
 find_pc_sect_psymtab (CORE_ADDR pc, struct obj_section *section)
 {
   struct objfile *objfile;
+  struct exec *exec;
   struct minimal_symbol *msymbol;
 
   /* If we know that this is not a text address, return failure.  This is
@@ -868,8 +874,22 @@ find_pc_sect_psymtab (CORE_ADDR pc, struct obj_section *section)
 
   /* Try just the PSYMTABS_ADDRMAP mapping first as it has better granularity
      than the later used TEXTLOW/TEXTHIGH one.  */
+  exec = NULL;
+#if 0
+  if (section)
+    {
+      int ix;
+      struct exec *ex;
+      for (ix = 0; VEC_iterate(exec_p, execs, ix, ex); ++ix)
+	if (strcmp (section->owner->filename, ex->ebfd->filename) == 0)
+	  {
+	    exec = ex;
+	    break;
+	  }
+    }
+#endif
 
-  ALL_OBJFILES (objfile)
+  ALL_OBJFILES_FOR_EXEC (objfile, exec)
     if (objfile->psymtabs_addrmap != NULL)
       {
 	struct partial_symtab *pst;
@@ -909,7 +929,7 @@ find_pc_sect_psymtab (CORE_ADDR pc, struct obj_section *section)
      present for non-DWARF2 debug infos not supporting PSYMTABS_ADDRMAP in GDB
      so far.  */
 
-  ALL_OBJFILES (objfile)
+  ALL_OBJFILES_FOR_EXEC (objfile, exec)
     {
       struct partial_symtab *pst;
 
@@ -1189,10 +1209,36 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
    variable and thus can probably assume it will never hit the C++
    code).  */
 
+extern struct symbol *
+lookup_symbol_in_language_1 (const char *name, const struct block *block,
+			     const struct exec *exec,
+			     const domain_enum domain, enum language lang,
+			     int *is_a_field_of_this);
+
 struct symbol *
 lookup_symbol_in_language (const char *name, const struct block *block,
 			   const domain_enum domain, enum language lang,
 			   int *is_a_field_of_this)
+{
+  return lookup_symbol_in_language_1 (name, block, current_exec, domain, lang,
+				      is_a_field_of_this);
+}
+
+struct symbol *
+lookup_symbol_in_exec_in_language (const char *name, const struct block *block,
+				   const struct exec *exec,
+				   const domain_enum domain, enum language lang,
+				   int *is_a_field_of_this)
+{
+  return lookup_symbol_in_language_1 (name, block, exec, domain, lang,
+				      is_a_field_of_this);
+}
+
+struct symbol *
+lookup_symbol_in_language_1 (const char *name, const struct block *block,
+			     const struct exec *exec,
+			     const domain_enum domain, enum language lang,
+			     int *is_a_field_of_this)
 {
   char *demangled_name = NULL;
   const char *modified_name = NULL;
@@ -1239,7 +1285,7 @@ lookup_symbol_in_language (const char *name, const struct block *block,
       modified_name = copy;
     }
 
-  returnval = lookup_symbol_aux (modified_name, mangled_name, block,
+  returnval = lookup_symbol_aux (modified_name, mangled_name, block, exec,
 				 domain, lang, is_a_field_of_this);
   if (needtofreename)
     xfree (demangled_name);
@@ -1254,9 +1300,33 @@ struct symbol *
 lookup_symbol (const char *name, const struct block *block,
 	       domain_enum domain, int *is_a_field_of_this)
 {
+  if (*name == '#')
+    {
+      char *name2 = strchr (name + 1, '#');
+      struct exec *exec = current_exec;
+
+      if (name2)
+	{
+	  exec = find_exec_by_substr (((char *) name) + 1, name2);
+	  return lookup_symbol_in_exec_in_language (name2 + 1, block, exec, domain,
+						    current_language->la_language,
+						    is_a_field_of_this);
+	}
+    }
+
   return lookup_symbol_in_language (name, block, domain,
 				    current_language->la_language,
 				    is_a_field_of_this);
+}
+
+struct symbol *
+lookup_symbol_in_exec (const char *name, const struct block *block,
+		       const struct exec *exec,
+		       domain_enum domain, int *is_a_field_of_this)
+{
+  return lookup_symbol_in_exec_in_language (name, block, exec, domain,
+					    current_language->la_language,
+					    is_a_field_of_this);
 }
 
 /* Behave like lookup_symbol except that NAME is the natural name
@@ -1266,7 +1336,8 @@ lookup_symbol (const char *name, const struct block *block,
 
 static struct symbol *
 lookup_symbol_aux (const char *name, const char *linkage_name,
-		   const struct block *block, const domain_enum domain,
+		   const struct block *block, const struct exec *exec,
+		   const domain_enum domain,
 		   enum language language, int *is_a_field_of_this)
 {
   struct symbol *sym;
@@ -1331,7 +1402,7 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
   /* Now do whatever is appropriate for LANGUAGE to look
      up static and global variables.  */
 
-  sym = langdef->la_lookup_symbol_nonlocal (name, linkage_name, block, domain);
+  sym = langdef->la_lookup_symbol_nonlocal (name, linkage_name, block, exec, domain);
   if (sym != NULL)
     return sym;
 
@@ -1341,11 +1412,11 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
      desired name as a file-level static, then do psymtab-to-symtab
      conversion on the fly and return the found symbol. */
 
-  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, linkage_name, domain);
+  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, linkage_name, exec, domain);
   if (sym != NULL)
     return sym;
   
-  sym = lookup_symbol_aux_psymtabs (STATIC_BLOCK, name, linkage_name, domain);
+  sym = lookup_symbol_aux_psymtabs (STATIC_BLOCK, name, linkage_name, exec, domain);
   if (sym != NULL)
     return sym;
 
@@ -1479,6 +1550,7 @@ lookup_global_symbol_from_objfile (const struct objfile *objfile,
 static struct symbol *
 lookup_symbol_aux_symtabs (int block_index,
 			   const char *name, const char *linkage_name,
+			   const struct exec *exec,			   
 			   const domain_enum domain)
 {
   struct symbol *sym;
@@ -1487,7 +1559,7 @@ lookup_symbol_aux_symtabs (int block_index,
   const struct block *block;
   struct symtab *s;
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS_FOR_EXEC (objfile, exec, s)
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, block_index);
@@ -1510,6 +1582,7 @@ lookup_symbol_aux_symtabs (int block_index,
 static struct symbol *
 lookup_symbol_aux_psymtabs (int block_index, const char *name,
 			    const char *linkage_name,
+			    const struct exec *exec,
 			    const domain_enum domain)
 {
   struct symbol *sym;
@@ -1520,7 +1593,7 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
   struct symtab *s;
   const int psymtab_index = (block_index == GLOBAL_BLOCK ? 1 : 0);
 
-  ALL_PSYMTABS (objfile, ps)
+  ALL_PSYMTABS_FOR_EXEC (objfile, exec, ps)
   {
     if (!ps->readin
 	&& lookup_partial_symbol (ps, name, linkage_name,
@@ -1567,6 +1640,7 @@ struct symbol *
 basic_lookup_symbol_nonlocal (const char *name,
 			      const char *linkage_name,
 			      const struct block *block,
+			      const struct exec *exec,
 			      const domain_enum domain)
 {
   struct symbol *sym;
@@ -1599,11 +1673,11 @@ basic_lookup_symbol_nonlocal (const char *name,
      than that one, so I don't think we should worry about that for
      now.  */
 
-  sym = lookup_symbol_static (name, linkage_name, block, domain);
+  sym = lookup_symbol_static (name, linkage_name, block, exec, domain);
   if (sym != NULL)
     return sym;
 
-  return lookup_symbol_global (name, linkage_name, block, domain);
+  return lookup_symbol_global (name, linkage_name, block, exec, domain);
 }
 
 /* Lookup a symbol in the static block associated to BLOCK, if there
@@ -1613,6 +1687,7 @@ struct symbol *
 lookup_symbol_static (const char *name,
 		      const char *linkage_name,
 		      const struct block *block,
+		      const struct exec *exec,
 		      const domain_enum domain)
 {
   const struct block *static_block = block_static_block (block);
@@ -1630,6 +1705,7 @@ struct symbol *
 lookup_symbol_global (const char *name,
 		      const char *linkage_name,
 		      const struct block *block,
+		      const struct exec *exec,
 		      const domain_enum domain)
 {
   struct symbol *sym = NULL;
@@ -1642,11 +1718,11 @@ lookup_symbol_global (const char *name,
   if (sym != NULL)
     return sym;
 
-  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, linkage_name, domain);
+  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, linkage_name, exec, domain);
   if (sym != NULL)
     return sym;
 
-  return lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, linkage_name, domain);
+  return lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, linkage_name, exec, domain);
 }
 
 int
@@ -1794,7 +1870,7 @@ basic_lookup_transparent_type (const char *name)
      of the desired name as a global, then do psymtab-to-symtab
      conversion on the fly and return the found symbol.  */
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS_FOR_EXEC (objfile, current_exec, s)
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
@@ -1842,7 +1918,7 @@ basic_lookup_transparent_type (const char *name)
      conversion on the fly and return the found symbol.
    */
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  ALL_PRIMARY_SYMTABS_FOR_EXEC (objfile, current_exec, s)
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
@@ -1983,6 +2059,7 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
   struct symtab *best_s = NULL;
   struct partial_symtab *ps;
   struct objfile *objfile;
+  struct exec *exec;
   CORE_ADDR distance = 0;
   struct minimal_symbol *msymbol;
 
@@ -2015,7 +2092,22 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
      It also happens for objfiles that have their functions reordered.
      For these, the symtab we are looking for is not necessarily read in.  */
 
-  ALL_PRIMARY_SYMTABS (objfile, s)
+  exec = NULL;
+#if 0
+  if (section)
+    {
+      int ix;
+      struct exec *ex;
+      for (ix = 0; VEC_iterate(exec_p, execs, ix, ex); ++ix)
+	if (strcmp (section->owner->filename, ex->ebfd->filename) == 0)
+	  {
+	    exec = ex;
+	    break;
+	  }
+    }
+#endif
+
+  ALL_PRIMARY_SYMTABS_FOR_EXEC (objfile, exec, s)
   {
     bv = BLOCKVECTOR (s);
     b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
@@ -2335,6 +2427,38 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   return val;
 }
 
+struct symtab_and_line
+find_pc_inf_line (CORE_ADDR pc, struct inferior *inf, int notcurrent)
+{
+  struct objfile *objfile;
+  struct obj_section *osect;
+  asection *section;
+  int size;
+  struct symtab_and_line sal;
+
+  if (!inf || number_of_execs () <= 1)
+    return find_pc_line (pc, notcurrent);
+
+  ALL_OBJSECTIONS (objfile, osect)
+    {
+      if (objfile->exec == inf->exec)
+	{
+	  section = osect->the_bfd_section;
+	  if (section)
+	    {
+	      size = bfd_get_section_size (section);
+	      if (section->vma <= pc && pc < section->vma + size)
+		{
+		  sal = find_pc_sect_line (pc, osect, notcurrent);
+		  sal.inferior = inf;
+		  return sal;
+		}
+	    }
+	}
+    }
+  return find_pc_line (pc, notcurrent);
+}
+
 /* Backward compatibility (no section) */
 
 struct symtab_and_line
@@ -2607,8 +2731,10 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
   fixup_symbol_section (sym, objfile);
   if (funfirstline)
     {
+      tmp_inf = ((objfile && objfile->exec) ? objfile->exec->inferior : NULL);
       /* Skip "first line" of function (which is actually its prologue).  */
       pc = find_function_start_pc (gdbarch, pc, SYMBOL_OBJ_SECTION (sym));
+      tmp_inf = NULL;
     }
   sal = find_pc_sect_line (pc, SYMBOL_OBJ_SECTION (sym), 0);
 
@@ -4420,23 +4546,25 @@ symtab_observer_executable_changed (void)
 
 /* Helper to expand_line_sal below.  Appends new sal to SAL,
    initializing it from SYMTAB, LINENO and PC.  */
-static void
+/*static*/ struct symtab_and_line *
 append_expanded_sal (struct symtabs_and_lines *sal,
 		     struct symtab *symtab,
 		     int lineno, CORE_ADDR pc)
 {
-  CORE_ADDR func_addr, func_end;
+  struct symtab_and_line *new_sal;
   
   sal->sals = xrealloc (sal->sals, 
 			sizeof (sal->sals[0]) 
 			* (sal->nelts + 1));
-  init_sal (sal->sals + sal->nelts);
-  sal->sals[sal->nelts].symtab = symtab;
-  sal->sals[sal->nelts].section = NULL;
-  sal->sals[sal->nelts].end = 0;
-  sal->sals[sal->nelts].line = lineno;  
-  sal->sals[sal->nelts].pc = pc;
+  new_sal = sal->sals + sal->nelts;
+  init_sal (new_sal);
+  new_sal->symtab = symtab;
+  new_sal->section = NULL;
+  new_sal->end = 0;
+  new_sal->line = lineno;  
+  new_sal->pc = pc;
   ++sal->nelts;      
+  return new_sal;
 }
 
 /* Compute a set of all sals in
@@ -4519,6 +4647,7 @@ expand_line_sal (struct symtab_and_line sal)
 		    {
 		      exact = 1;
 		      append_expanded_sal (&ret, symtab, lineno, item->pc);
+		      ret.sals[ret.nelts-1].section = sal.section;
 		    }      
 		  else if (!exact && item->line > lineno
 			   && (best_item == NULL || item->line < best_item->line))
@@ -4548,7 +4677,7 @@ expand_line_sal (struct symtab_and_line sal)
   for (i = 0; i < ret.nelts; ++i)
     {
       filter[i] = 1;
-      blocks[i] = block_for_pc (ret.sals[i].pc);
+      blocks[i] = block_for_pc_sect (ret.sals[i].pc, ret.sals[i].section);
     }
 
   for (i = 0; i < ret.nelts; ++i)

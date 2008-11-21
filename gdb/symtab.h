@@ -32,6 +32,8 @@ struct block;
 struct blockvector;
 struct axs_value;
 struct agent_expr;
+struct exec;
+struct inferior;
 
 /* Some of the structures in this file are space critical.
    The space-critical structures are:
@@ -945,11 +947,22 @@ extern struct symbol *lookup_symbol_in_language (const char *,
 						 enum language,
 						 int *);
 
+extern struct symbol *lookup_symbol_in_exec_in_language (const char *,
+							 const struct block *,
+							 const struct exec *,
+							 const domain_enum,
+							 enum language,
+							 int *);
+
 /* lookup a symbol by name (optional block, optional symtab)
    in the current language */
 
 extern struct symbol *lookup_symbol (const char *, const struct block *,
 				     const domain_enum, int *);
+
+extern struct symbol *lookup_symbol_in_exec (const char *, const struct block *,
+					     const struct exec *,
+					     const domain_enum, int *);
 
 /* A default version of lookup_symbol_nonlocal for use by languages
    that can't think of anything better to do.  */
@@ -957,6 +970,7 @@ extern struct symbol *lookup_symbol (const char *, const struct block *,
 extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
 						    const char *,
 						    const struct block *,
+						    const struct exec *,
 						    const domain_enum);
 
 /* Some helper functions for languages that need to write their own
@@ -968,6 +982,7 @@ extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
 extern struct symbol *lookup_symbol_static (const char *name,
 					    const char *linkage_name,
 					    const struct block *block,
+					    const struct exec *exec,
 					    const domain_enum domain);
 
 /* Lookup a symbol in all files' global blocks (searching psymtabs if
@@ -976,6 +991,7 @@ extern struct symbol *lookup_symbol_static (const char *name,
 extern struct symbol *lookup_symbol_global (const char *name,
 					    const char *linkage_name,
 					    const struct block *block,
+					    const struct exec *exec,
 					    const domain_enum domain);
 
 /* Lookup a symbol within the block BLOCK.  This, unlike
@@ -1103,6 +1119,10 @@ extern struct minimal_symbol *lookup_minimal_symbol (const char *,
 						     const char *,
 						     struct objfile *);
 
+extern struct minimal_symbol *lookup_minimal_symbol_in_exec (const char *,
+							     const char *,
+							     struct exec *);
+
 extern struct minimal_symbol *lookup_minimal_symbol_text (const char *,
 							  struct objfile *);
 
@@ -1144,6 +1164,7 @@ struct symtab_and_line
 
   CORE_ADDR pc;
   CORE_ADDR end;
+  struct inferior *inferior;
   int explicit_pc;
   int explicit_line;
 };
@@ -1181,6 +1202,8 @@ extern struct symtab_and_line find_pc_line (CORE_ADDR, int);
 
 extern struct symtab_and_line find_pc_sect_line (CORE_ADDR,
 						 struct obj_section *, int);
+
+extern struct symtab_and_line find_pc_inf_line (CORE_ADDR, struct inferior *, int);
 
 /* Given a symtab and line number, return the pc there.  */
 

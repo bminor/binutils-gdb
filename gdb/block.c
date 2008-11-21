@@ -149,6 +149,22 @@ blockvector_for_pc (CORE_ADDR pc, struct block **pblock)
 				  pblock, NULL);
 }
 
+/* Given a pc and an inferior, find the block.  */
+
+struct block *
+block_for_pc_inf (CORE_ADDR pc, struct inferior *inf)
+{
+  struct blockvector *bl;
+  struct block *b;
+  struct obj_section *section;
+
+  section = find_pc_inf_sect (pc, inf);
+  bl = blockvector_for_pc_sect (pc, section, &b, NULL);
+  if (bl)
+    return b;
+  return 0;
+}
+
 /* Return the innermost lexical block containing the specified pc value
    in the specified section, or 0 if there is none.  */
 

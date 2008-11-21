@@ -35,6 +35,7 @@ struct block;
 struct objfile;
 struct type;
 struct demangle_component;
+struct exec;
 
 /* This struct is designed to store data from using directives.  It
    says that names from namespace INNER should be visible within
@@ -96,6 +97,7 @@ extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol);
 extern struct symbol *cp_lookup_symbol_nonlocal (const char *name,
 						 const char *linkage_name,
 						 const struct block *block,
+						 const struct exec *exec,
 						 const domain_enum domain);
 
 extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,

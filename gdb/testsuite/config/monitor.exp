@@ -123,7 +123,7 @@ proc gdb_target_monitor { exec_file } {
 }
 
 proc gdb_target_exec { } {
-    gdb_test "target exec" "No executable file now." "" ".*Kill it.*y or n.*" "y"
+    gdb_test "target exec" "No executable files now." "" ".*Kill it.*y or n.*" "y"
     
 }
 #

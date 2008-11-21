@@ -83,16 +83,20 @@ proc do_steps_and_nexts {} {
 		set description "step over corearg initialization"
 		set command "step"
 	    }
-	    -re ".*pid_or_core_arg = NULL.*$gdb_prompt $" {
-		set description "step over pid_or_core_arg initialization"
-		set command "step"
-	    }
 	    -re ".*cdarg = NULL.*$gdb_prompt $" {
 		set description "step over cdarg initialization"
 		set command "step"
 	    }
 	    -re ".*ttyarg = NULL.*$gdb_prompt $" {
 		set description "step over ttyarg initialization"
+		set command "step"
+	    }
+	    -re ".*miscargs = NULL.*$gdb_prompt $" {
+		set description "step over miscargs initialization"
+		set command "step"
+	    }
+	    -re ".*nmisc = 0.*$gdb_prompt $" {
+		set description "step over nmisc initialization"
 		set command "step"
 	    }
 	    -re ".*time_at_startup = get_run_time.*$gdb_prompt $" {

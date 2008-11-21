@@ -30,6 +30,7 @@
 #include "inferior.h"
 #include "bfd.h"
 #include "symfile.h"
+#include "exec.h"
 #include "objfiles.h"
 #include "gdb_wait.h"
 #include "dcache.h"
@@ -2268,6 +2269,8 @@ target_resize_to_sections (struct target_ops *target, int num_added)
   struct target_ops **t;
   struct section_table *old_value;
   int old_count;
+  struct exec *exec;
+  int ix;
 
   old_value = target->to_sections;
 
@@ -2306,6 +2309,15 @@ target_resize_to_sections (struct target_ops *target, int num_added)
 	{
 	  current_target.to_sections = target->to_sections;
 	  current_target.to_sections_end = target->to_sections_end;
+	}
+      
+      for (ix = 0; VEC_iterate (exec_p, execs, ix, exec); ++ix)
+	{
+	  if (exec->sections == old_value)
+	    {
+	      exec->sections = target->to_sections;
+	      exec->sections_end = target->to_sections_end;
+	    }
 	}
     }
 

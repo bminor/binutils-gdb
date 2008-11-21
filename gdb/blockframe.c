@@ -60,12 +60,13 @@ void _initialize_blockframe (void);
 struct block *
 get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
+  struct inferior *inf = get_frame_inferior (frame);
   const CORE_ADDR pc = get_frame_address_in_block (frame);
 
   if (addr_in_block)
     *addr_in_block = pc;
 
-  return block_for_pc (pc);
+  return block_for_pc_inf (pc, inf);
 }
 
 CORE_ADDR

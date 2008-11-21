@@ -35,6 +35,7 @@
 #include <fcntl.h>
 #include "gdbcore.h"
 #include "gdb_regex.h"
+#include "exec.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "annotate.h"
@@ -239,7 +240,7 @@ select_source_symtab (struct symtab *s)
 
   /* Make the default place to list be the function `main'
      if one exists.  */
-  if (lookup_symbol (main_name (), 0, VAR_DOMAIN, 0))
+  if (lookup_symbol_in_exec (main_name (), 0, current_exec, VAR_DOMAIN, 0))
     {
       sals = decode_line_spec (main_name (), 1);
       sal = sals.sals[0];
@@ -255,7 +256,7 @@ select_source_symtab (struct symtab *s)
 
   current_source_line = 1;
 
-  for (ofp = object_files; ofp != NULL; ofp = ofp->next)
+  ALL_OBJFILES_FOR_EXEC (ofp, current_exec)
     {
       for (s = ofp->symtabs; s; s = s->next)
 	{
@@ -271,7 +272,7 @@ select_source_symtab (struct symtab *s)
 
   /* How about the partial symbol tables?  */
 
-  for (ofp = object_files; ofp != NULL; ofp = ofp->next)
+  ALL_OBJFILES_FOR_EXEC (ofp, current_exec)
     {
       for (ps = ofp->psymtabs; ps != NULL; ps = ps->next)
 	{
@@ -1125,8 +1126,8 @@ find_source_lines (struct symtab *s, int desc)
 
   if (s->objfile && s->objfile->obfd)
     mtime = s->objfile->mtime;
-  else if (exec_bfd)
-    mtime = exec_bfd_mtime;
+  else if (s->objfile && s->objfile->exec)
+    mtime = s->objfile->exec->ebfd_mtime;
 
   if (mtime && mtime < st.st_mtime)
     warning (_("Source file is more recent than executable."));

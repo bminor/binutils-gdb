@@ -122,6 +122,11 @@ struct frame_id
   unsigned int stack_addr_p : 1;
   unsigned int code_addr_p : 1;
   unsigned int special_addr_p : 1;
+
+  /* The frame's inferior. This field is always valid, but since no
+     inferiors have an ID of zero, a zero value here indicates that
+     the frame is not associated with any inferior.  */
+  int inferior_num;
 };
 
 /* Methods for constructing and comparing Frame IDs.  */
@@ -368,6 +373,8 @@ extern int frame_relative_level (struct frame_info *fi);
 /* Return the frame's type.  */
 
 extern enum frame_type get_frame_type (struct frame_info *);
+
+extern struct inferior *get_frame_inferior (struct frame_info *);
 
 /* For frames where we can not unwind further, describe why.  */
 

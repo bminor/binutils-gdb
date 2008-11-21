@@ -26,6 +26,8 @@
 
 struct value;
 struct block;
+struct exec;
+struct itset;
 
 /* This is the maximum number of bytes a breakpoint instruction can take.
    Feel free to increase it.  It's just used in a few places to size
@@ -220,6 +222,9 @@ struct bp_location
      breakpoint.  This and the DUPLICATE flag are more straightforward
      than reference counting.  */
   struct breakpoint *owner;
+
+  /* The inferior (process etc) of this location.  */
+  struct inferior *inferior;
 
   /* Conditional.  Break only if this expression's value is nonzero.  
      Unlike string form of condition, which is associated with breakpoint,
@@ -425,6 +430,9 @@ struct breakpoint
 
     /* Thread number for thread-specific breakpoint, or -1 if don't care */
     int thread;
+
+    /* Inferior/thread set controlling where this breakpoint will stop.  */
+    struct itset *trigger_set;
 
     /* Count of the number of times this breakpoint was taken, dumped
        with the info, but not used for anything else.  Useful for

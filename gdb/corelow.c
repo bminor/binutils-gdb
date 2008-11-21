@@ -108,6 +108,60 @@ deprecated_add_core_fns (struct core_fns *cf)
   core_file_fns = cf;
 }
 
+int
+is_core_file (char *filename)
+{
+  const char *p;
+  int siggy;
+  struct cleanup *old_chain;
+  char *temp;
+  bfd *temp_bfd;
+  int scratch_chan;
+  int flags;
+
+  if (!filename)
+    return 0;
+
+  filename = tilde_expand (filename);
+  if (!IS_ABSOLUTE_PATH(filename))
+    {
+      temp = concat (current_directory, "/", filename, (char *)NULL);
+      xfree (filename);
+      filename = temp;
+    }
+
+  old_chain = make_cleanup (xfree, filename);
+
+  flags = O_BINARY | O_LARGEFILE;
+  if (write_files)
+    flags |= O_RDWR;
+  else
+    flags |= O_RDONLY;
+  scratch_chan = open (filename, flags, 0);
+  if (scratch_chan < 0)
+    perror_with_name (filename);
+
+  temp_bfd = bfd_fopen (filename, gnutarget, 
+			write_files ? FOPEN_RUB : FOPEN_RB,
+			scratch_chan);
+  if (temp_bfd == NULL)
+    perror_with_name (filename);
+
+  if (!bfd_check_format (temp_bfd, bfd_core) &&
+      !gdb_check_format (temp_bfd))
+    {
+      /* Do it after the err msg */
+      /* FIXME: should be checking for errors from bfd_close (for one thing,
+         on error it does not free all the storage associated with the
+         bfd).  */
+      make_cleanup_bfd_close (temp_bfd);
+      return 0;
+    }
+
+  make_cleanup_bfd_close (temp_bfd);
+  return 1;
+}
+
 /* The default function that core file handlers can use to examine a
    core file BFD and decide whether or not to accept the job of
    reading the core file. */
@@ -352,7 +406,7 @@ core_open (char *filename, int from_tty)
      core file.  We don't do this unconditionally since an exec file
      typically contains more information that helps us determine the
      architecture than a core file.  */
-  if (!exec_bfd)
+  if (!(first_exec && first_exec->ebfd))
     set_gdbarch_from_file (core_bfd);
 
   push_target (&core_ops);
@@ -539,7 +593,7 @@ get_core_registers (struct regcache *regcache, int regno)
 static void
 core_files_info (struct target_ops *t)
 {
-  print_section_info (t, core_bfd);
+  print_section_info (t, core_bfd, NULL);
 }
 
 static LONGEST

@@ -864,6 +864,25 @@ option processing.
 This will cause @code{@value{GDBP}} to debug @code{gcc}, and to set
 @code{gcc}'s command-line arguments (@pxref{Arguments}) to @samp{-O2 -c foo.c}.
 
+To debug several programs at the same time, you can supply several
+program names on the command line:
+
+@smallexample
+@value{GDBP} @var{program1} @var{program2} @var{program3}
+@end smallexample
+
+You can supply pids and corefiles as well; @value{GDBN} assumes each
+such argument applies to the program immediately preceding.  So in this
+example:
+
+@smallexample
+@value{GDBP} @var{program1} @var{pid1} @var{program2} @var{program3} @var{pid3}
+@end smallexample
+
+@noindent
+attaches to processes with @var{pid1} and @var{pid3}, and also
+prepares to debug @var{program2}.
+
 You can run @code{@value{GDBP}} without printing the front material, which describes
 @value{GDBN}'s non-warranty, by specifying @code{-silent}:
 
@@ -900,9 +919,10 @@ in sequential order.  The order makes a difference when the
 @node File Options
 @subsection Choosing Files
 
+@c reword the following to explain the multiprocess argument case better.
 When @value{GDBN} starts, it reads any arguments other than options as
-specifying an executable file and core file (or process ID).  This is
-the same as if the arguments were specified by the @samp{-se} and
+specifying executable files, core files, or process IDs.  This is
+similar to if the arguments were specified by the @samp{-se} and
 @samp{-c} (or @samp{-p}) options respectively.  (@value{GDBN} reads the
 first argument that does not have an associated option flag as
 equivalent to the @samp{-se} option followed by that argument; and the
@@ -933,19 +953,24 @@ than @samp{-}, though we illustrate the more usual convention.)
 @itemx -s @var{file}
 @cindex @code{--symbols}
 @cindex @code{-s}
-Read symbol table from file @var{file}.
+Read symbol table from file @var{file}.  This option overrides
+multiple files on the command line, replacing them with just this one
+file.
 
 @item -exec @var{file}
 @itemx -e @var{file}
 @cindex @code{--exec}
 @cindex @code{-e}
-Use file @var{file} as the executable file to execute when appropriate,
-and for examining pure data in conjunction with a core dump.
+Use file @var{file} as the executable file to execute when
+appropriate, and for examining pure data in conjunction with a core
+dump.  This option overrides multiple files on the command line,
+replacing them with just this one file.
 
 @item -se @var{file}
 @cindex @code{--se}
 Read symbol table from file @var{file} and use it as the executable
-file.
+file.  This open overrides multiple files on the command line,
+replacing them with just the one file.
 
 @item -core @var{file}
 @itemx -c @var{file}
@@ -1786,9 +1811,9 @@ kill a child process.
 * Attach::                      Debugging an already-running process
 * Kill Process::                Killing the child process
 
-* Inferiors::                   Debugging multiple inferiors
+* Multiple Programs::           Debugging multiple programs
 * Threads::                     Debugging programs with multiple threads
-* Processes::                   Debugging programs with multiple processes
+* Forks::                       Debugging forks
 * Checkpoint/Restart::          Setting a @emph{bookmark} to return to later
 @end menu
 
@@ -2312,6 +2337,8 @@ can step and continue; you can modify storage.  If you would rather the
 process continue running, you may use the @code{continue} command after
 attaching @value{GDBN} to the process.
 
+@c how does attach know to add vs replace?
+
 @table @code
 @kindex detach
 @item detach
@@ -2330,6 +2357,9 @@ By default, @value{GDBN} asks for confirmation if you try to do either of these
 things; you can control whether or not you need to confirm by using the
 @code{set confirm} command (@pxref{Messages/Warnings, ,Optional Warnings and
 Messages}).
+
+In the multi-process case, @code{detach} detaches from all inferiors
+in the current i/t set.
 
 @node Kill Process
 @section Killing the Child Process
@@ -2400,6 +2430,226 @@ detached.  By default, these messages will not be printed.
 @item show print inferior-events
 Show whether messages will be printed when @value{GDBN} detects that
 inferiors have started, exited or have been detached.
+@end table
+
+In the multi-process case, @code{kill} kills all inferiors in the
+current i/t set.
+
+@node Multiple Programs
+@section Debugging Multiple Programs
+
+@value{GDBN} lets you run and debug multiple programs in a single
+session.  In addition, @value{GDBN} on some systems may let you run
+several programs simultaneously (otherwise you have to exit from one
+before starting another).  In the most general case, you can have
+multiple threads of execution in each of multiple processes, launched
+from multiple executables.
+
+You can get multiple executables into a debugging session by either
+supplying them as several arguments on @value{GDBN}'s command line, or
+via the @code{add-file} command.
+
+Many commands will work the same with multiple programs as with a
+single program: @code{print myglobal} will simply display the value of
+@code{myglobal}.  However, if several of the programs have variables
+named @var{myglobal}, things can get very confusing, and it gets worse
+if multiple running processes have been launched from the same
+executable.
+
+@cindex inferior
+To keep everything straight, @value{GDBN} represents the state of each
+program execution with an object called an @dfn{inferior}.  An inferior
+typically corresponds to a process, but is more general and applies
+also to targets that don't have processes.  Inferiors may be created
+before a process runs, and may (in future) be retained after a process
+exits.  Each run of an executable creates a new inferior, as does each
+attachment to an existing process.  Inferiors have unique identifiers
+that are different from process ids, and may optionally be named as
+well.  Usually each inferior will also have its own distinct address
+space, although some embedded targets may have several inferiors
+running in different parts of a single space.
+
+Each inferior may in turn have multiple threads running in it.
+
+@cindex inferior/thread set
+@cindex i/t set
+@cindex itset
+Since there may be very many inferiors, we introduce the
+@dfn{inferior/thread set}, also written as @dfn{i/t set} or
+@dfn{itset} for short.  An i/t set consists of a set of inferiors, and
+for each inferior, a set of threads.  Inferior/thread sets have a specification
+defining the members, normally delimited by square brackets (although
+the brackets may omitted in some contexts).  The basic syntax takes the
+form @code{[@var{inf}.@var{thr}]}, where both @var{inf} and @var{thr}
+may be wildcarded with @code{*}, indicating that the set is to include
+all inferiors or all threads.  In addition, the syntax includes
+provisions for ranges and unions, and special keywords for
+commonly-used sets.
+
+@cindex focus
+@cindex current i/t set
+One of the most important uses for i/t sets is to set the @dfn{focus},
+which is the i/t set to which commands apply by default:
+
+@table @code
+@kindex focus
+@item focus @var{i/t-set}
+Set the current focus to @var{i/t-set}.  Subsequent commands will take
+this set as the collection of inferiors and/or threads on which to
+operate.
+@end table
+
+For instance, @code{focus hello} sets the focus to be on the program
+@code{hello}, while @code{focus 6} sets commands to use inferior 6 by
+default.
+
+Another way to refer to symbols or sources of a particular executable
+is to prefix them with the name of the executable, delimited with
+@code{#}-signs.  For instance @code{#myprog#myglobal} is the version of
+the symbol @code{myglobal} in the executable @code{myprog}, and
+@code{#server#main.c:101} is line 101 of @file{main.c} in the program
+named @code{server}.
+
+@cindex create inferiors
+In many cases it will suffice to simply say @code{run} for each
+executable.  But you may wish to prepare to run several inferiors all
+launched from the same executable.  The commands @code{add-inferior}
+and @code{remove-inferior} let you manage the list of inferiors to be
+run.
+
+@table @code
+@kindex add-inferior
+@item add-inferior @var{exec} [ -copies @var{n} ] [ -name @var{basename} ]
+Adds @var{n} inferiors to be run using @var{exec} as the
+executable.  @var{n} defaults to 1.  The inferiors will be unnamed; to
+give them names, specify @var{basename}, which will be suffixed with
+consecutive numbers.
+
+@kindex remove-inferior
+@item remove-inferior @var{i/t-set}
+Removes any inferior belonging to @var{i/t-set}.  The inferiors
+corresponding to executables will not be removed.
+
+@kindex name-inferior
+@item name-inferior @var{old-name-or-id} @var{new-name}
+Sets the name of the inferior found as @var{old-name-or-id} to @var{new-name}.
+
+@kindex set-exec
+@item set-exec @var{i/t-set} @var{exec}
+Sets the executable of every inferior in @var{i/t-set} to the one
+named by @var{exec}.  @value{GDBN} is usually able to determine the
+executable used to start up an inferior, but in some situations (such
+as attaching to a process) there is no way to know for sure; use this
+command to set the executable correctly. The executable must have
+already been supplied to @value{GDBN}.
+
+@kindex info inferiors
+@item info inferiors
+Print a list of all inferiors currently being managed by @value{GDBN}.
+
+@end table
+
+One of the uses of explicit inferiors is to set different arguments
+for each of them before running.  Commands such as @code{set args}
+apply to every inferior in the current i/t set, so one can do setups
+like this:
+
+@smallexample
+(@value{GDBP}) add-inferior myprog -copies 4 -name instance
+(@value{GDBP}) focus instance1
+(@value{GDBP}) set args a b c
+(@value{GDBP}) focus instance2
+(@value{GDBP}) set args d e f
+(@value{GDBP}) focus all
+(@value{GDBP}) run
+@end smallexample
+
+@noindent
+which will results in four inferiors running, with two of them getting
+the argument lists @code{a b c} and @code{d e f}, and the other two
+having been started without any arguments being passed.
+
+To be informed of inferior creation during running, set the
+@code{inferior-events} variable:
+
+@table @code
+@kindex set print inferior-events
+@cindex print messages on inferior start and exit
+@item set print inferior-events
+@itemx set print inferior-events on
+@itemx set print inferior-events off
+The @code{set print inferior-events} command allows you to enable or
+disable printing of messages when @value{GDBN} notices that new
+inferiors have started or that inferiors have exited or have been
+detached.  By default, these messages will not be printed.
+
+@kindex show print inferior-events
+@item show print inferior-events
+Show whether messages will be printed when @value{GDBN} detects that
+inferiors have started, exited or have been detached.
+@end table
+
+@subsection Inferior/Thread Sets
+
+The inferior/thread set is a compact way to refer to groups of
+inferiors and threads.  Its syntax is as follows:
+
+@table @code
+@item @var{itset-spec} @expansion{}
+@code{"[" @var{raw-itset-spec} "]"}
+
+@item @var{raw-itset-spec} @expansion{}
+@code{[ "!" ] @var{itset-list}}
+
+@item @var{itset-list} @expansion{}
+@code{@var{itset-range} ( "," @var{itset-list} )* }
+
+@item @var{itset-range} @expansion{}
+@code{@var{itset-pair} [ ":" @var{itset-pair} ] }
+
+@item @var{itset-pair} @expansion{}
+@code{[ @var{inferior-spec} ] [ "." @var{thread-spec} ] }
+
+@item @var{inferior-spec} @expansion{}
+@code{@var{number} | @var{name} | "*" | "all" }
+
+@item @var{thread-spec} @expansion{}
+@code{@var{number} | "*" }
+
+@end table
+
+@code{!} preceding a spec indicates a ``static'' i/t set, in which the
+membership is decided when the i/t set is first mentioned, and does
+not change thereafter.  (Note that a static set may become empty
+without warning, if all of its inferiors or threads exit.)  A dynamic
+set updates its membership so as to be current whenever it is used.
+
+The range specification @code{:} calls for the inclusion of every
+inferior and/or thread whose id falls in a numeric range.  For
+instance, @code{[3.4:5.6]} includes inferiors 3, 4, and 5, but only
+the threads numbered 4, 5, or 6 in those inferiors.
+
+The basic @code{@var{inferior}.@var{thread}} syntax allows for
+wildcards and missing components, so both @code{[45.*]} and
+@code{[45]} refer to every thread of inferior 45, while @code{[*.*]}
+and @code{[*]} include every thread of every inferior.
+
+Some examples:
+
+@table @code
+@item [myinf.4:myinf.10]
+Threads 4 through 6 of inferior @code{myinf}.
+
+@item [1]
+The first inferior.
+
+@item [!1:5]
+A static set of the first five inferiors.
+
+@item [myinf,4.7,5.6:5.99]
+A set of three inferiors (@code{myinf}, 4, and 6), plus thread 7 of
+inferior 4, and threads 5 through 99 of inferior 6.
+
 @end table
 
 @node Threads
@@ -2646,12 +2896,12 @@ programs with multiple threads.
 @xref{Set Watchpoints,,Setting Watchpoints}, for information about
 watchpoints in programs with multiple threads.
 
-@node Processes
-@section Debugging Programs with Multiple Processes
+@node Forks
+@section Debugging Forks
 
-@cindex fork, debugging programs which call
 @cindex multiple processes
 @cindex processes, multiple
+@cindex fork, debugging programs which call
 On most systems, @value{GDBN} has no special support for debugging
 programs which create additional processes using the @code{fork}
 function.  When a program forks, @value{GDBN} will continue to debug the
@@ -5504,6 +5754,10 @@ Print lines just before the lines last printed.
 As described in the preceding table.
 @end table
 
+In the case of multiple executables, if the location is ambiguous
+between the several programs, the sources to use will be gotten from
+the first executable in the current i/t set.
+
 @node Specify Location
 @section Specifying a Location
 @cindex specifying location
@@ -5584,6 +5838,14 @@ functions with identical names in different source files.
 
 @end table
 
+Any of these forms may be prefixed with @code{#@var{exec}#}, where
+@var{exec} is the name of any executable that has been given to
+@value{GDBN}.  So if @value{GDBN} was started with @code{gdb prog1
+prog2}, then @code{list #prog2#main.c:10} will list the source code
+around line 10 of @file{main.c} in @code{prog2}.  The name of the
+executable may be either the file name proper, or a pathname with
+which the executable was specified to @value{GDBN}; the latter may be
+useful if there are several executables with the same file name.
 
 @node Edit
 @section Editing Source Files
@@ -6117,6 +6379,10 @@ to programming languages:
 @samp{::} allows you to specify a variable in terms of the file or
 function where it is defined.  @xref{Variables, ,Program Variables}.
 
+@item #
+@samp{#} allows you to specify a variable in terms of the program
+where it is defined.  @xref{Variables, ,Program Variables}.
+
 @cindex @{@var{type}@}
 @cindex type casting memory
 @cindex memory, viewing as typed object
@@ -6289,6 +6555,28 @@ use of the same notation in C@t{++}.  @value{GDBN} also supports use of the C@t{
 scope resolution operator in @value{GDBN} expressions.
 @c FIXME: Um, so what happens in one of those rare cases where it's in
 @c conflict??  --mew
+
+@cindex sharp, context for variables/functions
+@cindex @code{#}, context for variables/functions
+Similarly, when working with multiple programs in a session, you may
+find symbols that have definitions in several different programs.  You
+can specify a particular executable by prefixing the symbol with the
+executable's name, delimited by @samp{#}:
+
+@smallexample
+#@var{exec}#@var{variable}
+@end smallexample
+
+@var{exec} may be either just the file name, or the pathname by which
+the executable was supplied to @value{GDBN} originally.
+
+The value of the #-qualified symbol is a normal value, available for other
+operations, for instance arithmetic:
+
+@smallexample
+(@value{GDBP}) print #client#sent_size - #server#rcvd_size
+$45 = 16
+@end smallexample
 
 @cindex wrong values
 @cindex variable values, wrong
@@ -12567,6 +12855,15 @@ via @code{gdbserver} (@pxref{Server, file, Using the @code{gdbserver}
 Program}).  In these situations the @value{GDBN} commands to specify
 new files are useful.
 
+@value{GDBN} is capable of working with multiple programs at once, so
+you have the option of adding executables instead of replacing them,
+using commands such as @code{add-file}.  While this can be useful, for
+instance to debug both client and server programs from the same
+@value{GDBN}, it can also be confusing to have several functions named
+@code{main}, several globals with the same name but different values,
+and so forth.  You may wish to try using @value{GDBN} each way before
+deciding which is the better approach.
+
 @table @code
 @cindex executable file
 @kindex file
@@ -12595,12 +12892,24 @@ the wrong place.  But this feature is still handy from time to time.
 @code{file} with no argument makes @value{GDBN} discard any information it
 has on both executable file and the symbol table.
 
+@item add-file @var{filename}
+Add @var{filename} to the set of programs being debugged.  As with
+@code{file}, the given file is both used as an executable and as a
+source of symbols.  Each distinct file is added only once (as decided
+by pathname; @value{GDBN} considers files with different full paths to
+be different, even if they are byte-wise identical.)
+
 @kindex exec-file
 @item exec-file @r{[} @var{filename} @r{]}
 Specify that the program to be run (but not the symbol table) is found
-in @var{filename}.  @value{GDBN} searches the environment variable @code{PATH}
-if necessary to locate your program.  Omitting @var{filename} means to
-discard information on the executable file.
+in @var{filename}.  @value{GDBN} searches the environment variable
+@code{PATH} if necessary to locate your program.  Omitting
+@var{filename} means to discard information on the executable file.
+With or without an argument, if there are multiple executables, all
+will be discarded.
+
+@item add-exec-file @var{filename}
+Add @var{filename} to the set of executables that may be run.
 
 @kindex symbol-file
 @item symbol-file @r{[} @var{filename} @r{]}
@@ -12779,12 +13088,12 @@ their addresses.
 @kindex info target
 @item info files
 @itemx info target
-@code{info files} and @code{info target} are synonymous; both print the
-current target (@pxref{Targets, ,Specifying a Debugging Target}),
-including the names of the executable and core dump files currently in
-use by @value{GDBN}, and the files from which symbols were loaded.  The
-command @code{help target} lists all possible targets rather than
-current ones.
+@code{info files} and @code{info target} are synonymous; both print
+the current target (@pxref{Targets, ,Specifying a Debugging Target}),
+including the names of all the executables and core dump files
+currently in use by @value{GDBN}, and the files from which symbols
+were loaded.  The command @code{help target} lists all possible
+targets rather than current ones.
 
 @kindex maint info sections
 @item maint info sections
@@ -24480,6 +24789,11 @@ The register groups info looks like this:
 @kindex flushregs
 @item flushregs
 This command forces @value{GDBN} to flush its internal register cache.
+
+@kindex maint print execs
+@cindex info for known executables
+@item maint print execs
+Print a dump of all known executables.
 
 @kindex maint print objfiles
 @cindex info for known object files
