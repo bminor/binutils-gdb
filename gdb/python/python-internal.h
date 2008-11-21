@@ -43,6 +43,17 @@ typedef Py_intptr_t Py_ssize_t;
 #error "Unable to find usable Python.h"
 #endif
 
+/* If Python.h does not define WITH_THREAD, then the various
+   GIL-related functions will not be defined.  However,
+   PyGILState_STATE will be.  */
+#ifndef WITH_THREAD
+#define PyGILState_Ensure() ((PyGILState_STATE) 0)
+#define PyGILState_Release(ARG) (ARG)
+#define PyEval_InitThreads() 0
+#define PyThreadState_Swap(ARG) (ARG)
+#define PyEval_InitThreads() 0
+#endif
+
 struct value;
 
 extern PyObject *gdb_module;
@@ -57,6 +68,7 @@ struct value *convert_value_from_python (PyObject *obj);
 void gdbpy_initialize_values (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
+struct cleanup *make_cleanup_py_restore_gil (PyGILState_STATE *state);
 
 /* Use this after a TRY_EXCEPT to throw the appropriate Python
    exception.  */

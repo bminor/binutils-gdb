@@ -1,3 +1,19 @@
+2008-11-21  Tom Tromey  <tromey@redhat.com>
+
+	* python/python-internal.h (PyGILState_Ensure): New define.
+	(PyGILState_Release): Likewise.
+	(PyEval_InitThreads): Likewise.
+	(PyThreadState_Swap): Likewise.
+	(PyEval_InitThreads): Likewise.
+	* python/python.c (_initialize_python): Initialize threads.
+	Release GIL.
+	(eval_python_from_control_command): Acquire GIL.
+	(python_command): Likewise.
+	* python/python-internal.h (make_cleanup_py_restore_gil):
+	Declare.
+	* python/python-utils.c (py_gil_restore): New function.
+	(make_cleanup_py_restore_gil): Likewise.
+
 2008-11-20  Doug Evans  <dje@google.com>
 
 	* frame.c (frame_debug_got_null_frame): Remove file arg.
