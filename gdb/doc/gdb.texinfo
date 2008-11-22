@@ -28695,7 +28695,7 @@ Linux kernel to control restartable syscalls.
 @itemx @samp{org.gnu.gdb.coldfire.core}
 @itemx @samp{org.gnu.gdb.fido.core}
 One of those features must be always present. 
-The feature that is present determines which flavor of m86k is
+The feature that is present determines which flavor of m68k is
 used.  The feature that is present should contain registers
 @samp{d0} through @samp{d7}, @samp{a0} through @samp{a5}, @samp{fp},
 @samp{sp}, @samp{ps} and @samp{pc}.

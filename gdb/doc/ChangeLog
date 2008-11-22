@@ -1,3 +1,7 @@
+2008-11-22  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (M68K Features): Fix typo.
+
 2008-11-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.texinfo (Symbols): Mention printing containing
