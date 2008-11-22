@@ -1,3 +1,15 @@
+2008-11-21  Joel Brobecker  <brobecker@adacore.com>
+
+	Remove the unused BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK.
+
+	* breakpoint.h (enum bpstat_what_main_action): Remove
+	BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK.
+	* breakpoint.c (bpstat_what): Delete catch_shlib_event from enum class.
+	Remove the BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK column from
+	variable table.
+	* infrun.c (wait_for_inferior): Remove handling of
+	BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK.
+
 2008-11-21  Tom Tromey  <tromey@redhat.com>
 
 	* configure: Rebuild.

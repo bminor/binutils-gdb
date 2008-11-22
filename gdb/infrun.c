@@ -3161,7 +3161,6 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	break;
 
       case BPSTAT_WHAT_CHECK_SHLIBS:
-      case BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK:
 	{
           if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_CHECK_SHLIBS\n");

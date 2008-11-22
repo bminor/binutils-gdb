@@ -519,10 +519,6 @@ enum bpstat_what_main_action
        keep checking.  */
     BPSTAT_WHAT_CHECK_SHLIBS,
 
-    /* Check the dynamic linker's data structures for new libraries, then
-       resume out of the dynamic linker's callback, stop and print.  */
-    BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK,
-
     /* This is just used to keep track of how many enums there are.  */
     BPSTAT_WHAT_LAST
   };

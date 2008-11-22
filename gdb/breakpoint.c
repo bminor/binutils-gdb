@@ -3054,9 +3054,6 @@ bpstat_what (bpstat bs)
       /* We hit the shared library event breakpoint.  */
       shlib_event,
 
-      /* We caught a shared library event.  */
-      catch_shlib_event,
-
       /* This is just used to count how many enums there are.  */
       class_last
     };
@@ -3072,7 +3069,6 @@ bpstat_what (bpstat bs)
 #define clr BPSTAT_WHAT_CLEAR_LONGJMP_RESUME
 #define sr BPSTAT_WHAT_STEP_RESUME
 #define shl BPSTAT_WHAT_CHECK_SHLIBS
-#define shlr BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK
 
 /* "Can't happen."  Might want to print an error message.
    abort() is not out of the question, but chances are GDB is just
@@ -3093,14 +3089,13 @@ bpstat_what (bpstat bs)
      back and decide something of a lower priority is better.  The
      ordering is:
 
-     kc   < clr sgl shl shlr slr sn sr ss
-     sgl  < shl shlr slr sn sr ss
-     slr  < err shl shlr sn sr ss
-     clr  < err shl shlr sn sr ss
-     ss   < shl shlr sn sr
-     sn   < shl shlr sr
-     shl  < shlr sr
-     shlr < sr
+     kc   < clr sgl shl slr sn sr ss
+     sgl  < shl slr sn sr ss
+     slr  < err shl sn sr ss
+     clr  < err shl sn sr ss
+     ss   < shl sn sr
+     sn   < shl sr
+     shl  < sr
      sr   <
 
      What I think this means is that we don't need a damned table
@@ -3117,30 +3112,28 @@ bpstat_what (bpstat bs)
     table[(int) class_last][(int) BPSTAT_WHAT_LAST] =
   {
   /*                              old action */
-  /*       kc    ss    sn    sgl    slr   clr   sr   shl   shlr
+  /*       kc    ss    sn    sgl    slr   clr   sr   shl
    */
 /*no_effect */
-    {kc, ss, sn, sgl, slr, clr, sr, shl, shlr},
+    {kc, ss, sn, sgl, slr, clr, sr, shl},
 /*wp_silent */
-    {ss, ss, sn, ss, ss, ss, sr, shl, shlr},
+    {ss, ss, sn, ss, ss, ss, sr, shl},
 /*wp_noisy */
-    {sn, sn, sn, sn, sn, sn, sr, shl, shlr},
+    {sn, sn, sn, sn, sn, sn, sr, shl},
 /*bp_nostop */
-    {sgl, ss, sn, sgl, slr, slr, sr, shl, shlr},
+    {sgl, ss, sn, sgl, slr, slr, sr, shl},
 /*bp_silent */
-    {ss, ss, sn, ss, ss, ss, sr, shl, shlr},
+    {ss, ss, sn, ss, ss, ss, sr, shl},
 /*bp_noisy */
-    {sn, sn, sn, sn, sn, sn, sr, shl, shlr},
+    {sn, sn, sn, sn, sn, sn, sr, shl},
 /*long_jump */
-    {slr, ss, sn, slr, slr, err, sr, shl, shlr},
+    {slr, ss, sn, slr, slr, err, sr, shl},
 /*long_resume */
-    {clr, ss, sn, err, err, err, sr, shl, shlr},
+    {clr, ss, sn, err, err, err, sr, shl},
 /*step_resume */
-    {sr, sr, sr, sr, sr, sr, sr, sr, sr},
+    {sr, sr, sr, sr, sr, sr, sr, sr},
 /*shlib */
-    {shl, shl, shl, shl, shl, shl, sr, shl, shlr},
-/*catch_shlib */
-    {shlr, shlr, shlr, shlr, shlr, shlr, sr, shlr, shlr}
+    {shl, shl, shl, shl, shl, shl, sr, shl}
   };
 
 #undef kc
@@ -3153,7 +3146,6 @@ bpstat_what (bpstat bs)
 #undef sr
 #undef ts
 #undef shl
-#undef shlr
   enum bpstat_what_main_action current_action = BPSTAT_WHAT_KEEP_CHECKING;
   struct bpstat_what retval;
 
