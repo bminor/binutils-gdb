@@ -1,3 +1,7 @@
+2008-11-23  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/badgotr1.d: Robustify regexp.
+
 2008-10-29  Nick Clifton  <nickc@redhat.com>
 
 	* ld-gc/gc.c (dummy_func): New function - present so that
