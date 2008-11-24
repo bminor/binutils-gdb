@@ -1,3 +1,7 @@
+2008-11-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_record_phdrs): Don't add orphans to PT_INTERP header.
+
 2008-11-19  Nick Clifton  <nickc@redhat.com>
 
 	* fdl.texi: Update to v1.3

@@ -6669,6 +6669,10 @@ lang_record_phdrs (void)
 		  || (os->bfd_section->flags & SEC_ALLOC) == 0)
 		continue;
 
+	      /* Don't add orphans to PT_INTERP header.  */
+	      if (l->type == 3)
+		continue;
+
 	      if (last == NULL)
 		{
 		  lang_output_section_statement_type * tmp_os;
