@@ -1,3 +1,7 @@
+2008-11-24  Doug Evans  <dje@google.com>
+
+	* Makefile.in (VERSION,DIST,LINT,LINTFLAGS): Delete, unused.
+
 2008-11-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* server.c (handle_v_run): Always use the supplied argument list.
