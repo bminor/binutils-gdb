@@ -193,7 +193,7 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *this_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct alpha_mdebug_unwind_cache);
   *this_prologue_cache = info;
-  pc = get_frame_pc (this_frame);
+  pc = get_frame_address_in_block (this_frame);
 
   /* ??? We don't seem to be able to cache the lookup of the PDR
      from alpha_mdebug_frame_p.  It'd be nice if we could change

@@ -1,3 +1,9 @@
+2008-11-24  Jerome Guitton  <guitton@adacore.com>
+
+	* alpha-mdebug-tdep.c (alpha_mdebug_frame_unwind_cache): Use
+        the frame address in block instead of the return address to
+        locate the mdebug PDR of the frame.
+
 2008-11-21  Joel Brobecker  <brobecker@adacore.com>
 
 	Remove the unused BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK.
