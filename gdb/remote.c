@@ -234,6 +234,8 @@ static void remote_async_get_pending_events_handler (gdb_client_data);
 
 static void remote_terminal_ours (void);
 
+static int remote_read_description_p (struct target_ops *target);
+
 /* The non-stop remote protocol provisions for one pending stop reply.
    This is where we keep it until it is acknowledged.  */
 
@@ -2549,14 +2551,14 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       getpkt (&rs->buf, &rs->buf_size, 0);
     }
 
+  /* Next, if the target can specify a description, read it.  We do
+     this before anything involving memory or registers.  */
+  target_find_description ();
+
   /* On OSs where the list of libraries is global to all
      processes, we fetch them early.  */
   if (gdbarch_has_global_solist (target_gdbarch))
     solib_add (NULL, args->from_tty, args->target, auto_solib_add);
-
-  /* Next, if the target can specify a description, read it.  We do
-     this before anything involving memory or registers.  */
-  target_find_description ();
 
   if (non_stop)
     {
@@ -2642,6 +2644,17 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       add_thread_silent (inferior_ptid);
 
       get_offsets ();		/* Get text, data & bss offsets.  */
+
+      /* If we could not find a description using qXfer, and we know
+	 how to do it some other way, try again.  This is not
+	 supported for non-stop; it could be, but it is tricky if
+	 there are no stopped threads when we connect.  */
+      if (remote_read_description_p (args->target)
+	  && gdbarch_target_desc (target_gdbarch) == NULL)
+	{
+	  target_clear_description ();
+	  target_find_description ();
+	}
 
       /* Use the previously fetched status.  */
       gdb_assert (wait_status != NULL);
@@ -3163,8 +3176,9 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
     }
   push_target (target);		/* Switch to using remote target now.  */
 
-  /* Assume that the target is running, unless we learn otherwise.  */
-  target_mark_running (target);
+  /* Assume that the target is not running, until we learn otherwise.  */
+  if (extended_p)
+    target_mark_exited (target);
 
   /* Register extra event sources in the event loop.  */
   remote_async_inferior_event_token
@@ -7852,11 +7866,31 @@ register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
   VEC_safe_push (remote_g_packet_guess_s, data->guesses, &new_guess);
 }
 
+/* Return 1 if remote_read_description would do anything on this target
+   and architecture, 0 otherwise.  */
+
+static int
+remote_read_description_p (struct target_ops *target)
+{
+  struct remote_g_packet_data *data
+    = gdbarch_data (target_gdbarch, remote_g_packet_data_handle);
+
+  if (!VEC_empty (remote_g_packet_guess_s, data->guesses))
+    return 1;
+
+  return 0;
+}
+
 static const struct target_desc *
 remote_read_description (struct target_ops *target)
 {
   struct remote_g_packet_data *data
     = gdbarch_data (target_gdbarch, remote_g_packet_data_handle);
+
+  /* Do not try this during initial connection, when we do not know
+     whether there is a running but stopped thread.  */
+  if (!target_has_execution || ptid_equal (inferior_ptid, null_ptid))
+    return NULL;
 
   if (!VEC_empty (remote_g_packet_guess_s, data->guesses))
     {

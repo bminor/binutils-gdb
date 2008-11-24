@@ -1,3 +1,13 @@
+2008-11-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/2474
+	* remote.c (remote_read_description_p): New function.
+	(remote_start_remote): Try to fetch the target description
+	before adding shared libraries.  Try again later if the
+	target is running but stopped.
+	(remote_open_1): Mark extended targets as exited by default.
+	(remote_read_description): Check target_has_execution.
+
 2008-11-24  Jerome Guitton  <guitton@adacore.com>
 
 	* alpha-mdebug-tdep.c (alpha_mdebug_frame_unwind_cache): Use
