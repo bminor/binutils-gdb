@@ -1,3 +1,11 @@
+2008-11-24  Tom Tromey  <tromey@redhat.com>
+
+	* ada-lang.c (value_from_contents_and_address): Move...
+	* value.c: ... here.
+	* ada-lang.h (value_from_contents_and_address): Move
+	declaration...
+	* value.h: ... here.
+
 2008-11-24  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* valprint.c (val_print_array_elements): Pass correct

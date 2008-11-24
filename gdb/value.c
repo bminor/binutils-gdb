@@ -1686,6 +1686,26 @@ value_from_string (char *ptr)
   return val;
 }
 
+/* Create a value of type TYPE whose contents come from VALADDR, if it
+   is non-null, and whose memory address (in the inferior) is
+   ADDRESS.  */
+
+struct value *
+value_from_contents_and_address (struct type *type,
+				 const gdb_byte *valaddr,
+				 CORE_ADDR address)
+{
+  struct value *v = allocate_value (type);
+  if (valaddr == NULL)
+    set_value_lazy (v, 1);
+  else
+    memcpy (value_contents_raw (v), valaddr, TYPE_LENGTH (type));
+  VALUE_ADDRESS (v) = address;
+  if (address != 0)
+    VALUE_LVAL (v) = lval_memory;
+  return v;
+}
+
 struct value *
 value_from_double (struct type *type, DOUBLEST num)
 {

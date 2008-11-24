@@ -257,10 +257,6 @@ extern int ada_value_print (struct value *, struct ui_file *,
 
                                 /* Defined in ada-lang.c */
 
-extern struct value *value_from_contents_and_address (struct type *,
-						      const gdb_byte *,
-                                                      CORE_ADDR);
-
 extern void ada_emit_char (int, struct ui_file *, int, int);
 
 extern void ada_printchar (int, struct ui_file *);
