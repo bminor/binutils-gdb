@@ -1071,7 +1071,7 @@ handle_v_run (char *own_buf, char *status, int *signal)
       new_argc++;
     }
 
-  new_argv = malloc ((new_argc + 2) * sizeof (char *));
+  new_argv = calloc (new_argc + 2, sizeof (char *));
   i = 0;
   for (p = own_buf + strlen ("vRun;"); *p; p = next_p)
     {
@@ -1096,10 +1096,8 @@ handle_v_run (char *own_buf, char *status, int *signal)
 
   if (new_argv[0] == NULL)
     {
-      /* GDB didn't specify a program to run.  Try to use the argv
-	 from the last run: either from the last vRun with a non-empty
-	 argv, or from what the user specified if gdbserver was
-	 started as: `gdbserver :1234 PROG ARGS'.  */
+      /* GDB didn't specify a program to run.  Use the program from the
+	 last run with the new argument list.  */
 
       if (program_argv == NULL)
 	{
@@ -1107,20 +1105,17 @@ handle_v_run (char *own_buf, char *status, int *signal)
 	  return 0;
 	}
 
-      /* We can reuse the old args.  We don't need this then.  */
-      free (new_argv);
+      new_argv[0] = strdup (program_argv[0]);
     }
-  else
+
+  /* Free the old argv.  */
+  if (program_argv)
     {
-      /* Free the old argv.  */
-      if (program_argv)
-	{
-	  for (pp = program_argv; *pp != NULL; pp++)
-	    free (*pp);
-	  free (program_argv);
-	}
-      program_argv = new_argv;
+      for (pp = program_argv; *pp != NULL; pp++)
+	free (*pp);
+      free (program_argv);
     }
+  program_argv = new_argv;
 
   *signal = start_inferior (program_argv, status);
   if (*status == 'T')
