@@ -1112,8 +1112,8 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
 
       if (reps > options->repeat_count_threshold)
 	{
-	  val_print (elttype, valaddr + i * eltlen, 0, 0, stream,
-		     recurse + 1, options, current_language);
+	  val_print (elttype, valaddr + i * eltlen, 0, address + i * eltlen,
+		     stream, recurse + 1, options, current_language);
 	  annotate_elt_rep (reps);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  annotate_elt_rep_end ();
@@ -1123,8 +1123,8 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
 	}
       else
 	{
-	  val_print (elttype, valaddr + i * eltlen, 0, 0, stream,
-		     recurse + 1, options, current_language);
+	  val_print (elttype, valaddr + i * eltlen, 0, address + i * eltlen,
+		     stream, recurse + 1, options, current_language);
 	  annotate_elt ();
 	  things_printed++;
 	}

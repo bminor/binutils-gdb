@@ -1,3 +1,8 @@
+2008-11-24  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* valprint.c (val_print_array_elements): Pass correct
+	element address to val_print.
+	
 2008-11-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix access of an already freed memory.
