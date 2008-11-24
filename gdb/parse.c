@@ -1090,7 +1090,8 @@ parse_expression (char *string)
 /* Parse STRING as an expression.  If parsing ends in the middle of a
    field reference, return the type of the left-hand-side of the
    reference; furthermore, if the parsing ends in the field name,
-   return the field name in *NAME.  In all other cases, return NULL.  */
+   return the field name in *NAME.  In all other cases, return NULL.
+   Returned non-NULL *NAME must be freed by the caller.  */
 
 struct type *
 parse_field_expression (char *string, char **name)
@@ -1120,6 +1121,9 @@ parse_field_expression (char *string, char **name)
       xfree (exp);
       return NULL;
     }
+  /* (*NAME) is a part of the EXP memory block freed below.  */
+  *name = xstrdup (*name);
+
   val = evaluate_subexpression_type (exp, subexp);
   xfree (exp);
 

@@ -1,3 +1,9 @@
+2008-11-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix access of an already freed memory.
+	* parse.c (parse_field_expression): Call xstrdup on `*name'.
+	* completer.c (expression_completer): Free fieldname.
+
 2008-11-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/2474

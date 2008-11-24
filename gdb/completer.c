@@ -414,9 +414,11 @@ expression_completer (char *text, char *word)
 
 	  add_struct_fields (type, &out, result, fieldname, flen);
 	  result[out] = NULL;
+	  xfree (fieldname);
 	  return result;
 	}
     }
+  xfree (fieldname);
 
   /* Commands which complete on locations want to see the entire
      argument.  */
