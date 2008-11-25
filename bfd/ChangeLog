@@ -1,3 +1,9 @@
+2008-11-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.in: Deactivate large-file support on native x86-solaris
+	as well unless the user explicitly requested it.
+	* configure: Regenerate.
+
 2008-11-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Do not turn
