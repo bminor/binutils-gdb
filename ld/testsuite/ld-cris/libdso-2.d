@@ -53,6 +53,6 @@ Symbol table '\.symtab' contains 18 entries:
     12: 0+2..[046c]     0 NOTYPE  LOCAL  DEFAULT  ABS _edata
     13: 0+2..[046c]     0 OBJECT  LOCAL  HIDDEN  ABS _GLOBAL_OFFSET_TABLE_
     14: 0+2..[046c]     0 NOTYPE  LOCAL  DEFAULT  ABS _end
-    15: 0+150     0 FUNC    LOCAL  DEFAULT    7 dsofn
+    15: 0+150     2 FUNC    LOCAL  DEFAULT    7 dsofn
     16: 0+     0 OBJECT  GLOBAL DEFAULT  ABS TST1
     17: 0+154     0 FUNC    GLOBAL DEFAULT    7 export_1

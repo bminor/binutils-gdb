@@ -1,3 +1,11 @@
+2008-11-25  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/start1.s: Prepend register name with $.
+
+	* ld-cris/dso-1.s, ld-cris/libdso-1.d, ld-cris/libdso-11.d,
+	ld-cris/libdso-2.d, ld-cris/pv32.s, ld-cris/undef1.d: Correct
+	.size expressions and adjust expected output accordingly.
+
 2008-11-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/badgotr1.d: Robustify regexp.
