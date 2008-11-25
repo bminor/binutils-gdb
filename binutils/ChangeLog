@@ -1,3 +1,11 @@
+2008-11-25  Nick Clifton  <nickc@redhat.com>
+
+	PR7044
+	* dlltool.c (run): Use formatting string to avoid compile time
+	warning.
+	(gen_exp_file): Check return value from fread.
+	* windmc.c (main): Check return value from fread.
+
 2008-11-21 Sterling Augustine <sterling@tensilica.com>
 
 	* MAINTAINERS: Take over from Bob Wilson as Xtensa maintainer.
