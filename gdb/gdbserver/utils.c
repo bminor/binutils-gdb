@@ -96,3 +96,25 @@ warning (const char *string,...)
   fprintf (stderr, "\n");
   va_end (args);
 }
+
+ATTR_NORETURN static void
+internal_verror (const char *file, int line, const char *fmt, va_list ap)
+{
+  fprintf (stderr, "\
+%s:%d: \n\
+A problem internal to gdbserver has been detected,\n\
+further debugging may prove unreliable.", file, line);
+  vfprintf (stderr, fmt, ap);
+  fprintf (stderr, "aborting.\n");
+
+  abort (); /* NOTE: gdbserver has only one call to abort().  */
+}
+
+void
+internal_error_file_line (const char *file, int line, const char *string, ...)
+{
+  va_list ap;
+  va_start (ap, string);
+  internal_verror (file, line, string, ap);
+  va_end (ap);
+}

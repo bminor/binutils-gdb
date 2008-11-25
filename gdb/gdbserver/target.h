@@ -22,24 +22,94 @@
 #ifndef TARGET_H
 #define TARGET_H
 
-/* This structure describes how to resume a particular thread (or
-   all threads) based on the client's request.  If thread is -1, then
-   this entry applies to all threads.  These are generally passed around
-   as an array, and terminated by a thread == -1 entry.  */
+/* This structure describes how to resume a particular thread (or all
+   threads) based on the client's request.  If thread is
+   minus_one_ptid, then this entry applies to all threads.  If the
+   thread points to a whole process, the this entry applies to all
+   threads of that process.  These are generally passed around as an
+   array, and terminated by a thread == minus_one_ptid entry.  */
+
+enum resume_kind
+{
+  /* Thread should be stopped.  */
+  rk_stop,
+
+  /* Thread should continue.  */
+  rk_continue,
+
+  /* Thread should single-step.  */
+  rk_step
+};
 
 struct thread_resume
 {
-  unsigned long thread;
+  ptid_t thread;
 
-  /* If non-zero, leave this thread stopped.  */
-  int leave_stopped;
+  enum resume_kind kind;
 
-  /* If non-zero, we want to single-step.  */
-  int step;
-
-  /* If non-zero, send this signal when we resume.  */
+  /* If non-zero, send this signal when we resume, or to stop the
+     thread.  If stopping a thread, and this is 0, the target should
+     stop the thread however it needs.  */
   int sig;
 };
+
+/* Generally, what has the program done?  */
+enum target_waitkind
+  {
+    /* The program has exited.  The exit status is in value.integer.  */
+    TARGET_WAITKIND_EXITED,
+
+    /* The program has stopped with a signal.  Which signal is in
+       value.sig.  */
+    TARGET_WAITKIND_STOPPED,
+
+    /* The program has terminated with a signal.  Which signal is in
+       value.sig.  */
+    TARGET_WAITKIND_SIGNALLED,
+
+    /* The program is letting us know that it dynamically loaded something
+       (e.g. it called load(2) on AIX).  */
+    TARGET_WAITKIND_LOADED,
+
+    /* The program has forked.  A "related" process' PTID is in
+       value.related_pid.  I.e., if the child forks, value.related_pid
+       is the parent's ID.  */
+
+    TARGET_WAITKIND_FORKED,
+
+    /* The program has vforked.  A "related" process's PTID is in
+       value.related_pid.  */
+
+    TARGET_WAITKIND_VFORKED,
+
+    /* The program has exec'ed a new executable file.  The new file's
+       pathname is pointed to by value.execd_pathname.  */
+
+    TARGET_WAITKIND_EXECD,
+
+    /* An event has occured, but we should wait again.  In this case,
+       we want to go back to the event loop and wait there for another
+       event from the inferior.  */
+    TARGET_WAITKIND_IGNORE
+  };
+
+struct target_waitstatus
+  {
+    enum target_waitkind kind;
+
+    /* Forked child pid, execd pathname, exit status or signal number.  */
+    union
+      {
+	int integer;
+	enum target_signal sig;
+	ptid_t related_pid;
+	char *execd_pathname;
+      }
+    value;
+  };
+
+/* Options that can be passed to target_ops->wait.  */
+#define TARGET_WNOHANG 1
 
 struct target_ops
 {
@@ -64,36 +134,36 @@ struct target_ops
 
   int (*attach) (unsigned long pid);
 
-  /* Kill all inferiors.  */
+  /* Kill inferior PID.  Return -1 on failure, and 0 on success.  */
 
-  void (*kill) (void);
+  int (*kill) (int pid);
 
-  /* Detach from all inferiors.
-     Return -1 on failure, and 0 on success.  */
+  /* Detach from inferior PID. Return -1 on failure, and 0 on
+     success.  */
 
-  int (*detach) (void);
+  int (*detach) (int pid);
 
-  /* Wait for inferiors to end.  */
+  /* GDBServer is exiting, and may need to wait for inferior PID to
+     end.  */
 
-  void (*join) (void);
+  void (*join) (int pid);
 
   /* Return 1 iff the thread with process ID PID is alive.  */
 
-  int (*thread_alive) (unsigned long pid);
+  int (*thread_alive) (ptid_t pid);
 
   /* Resume the inferior process.  */
 
-  void (*resume) (struct thread_resume *resume_info);
+  void (*resume) (struct thread_resume *resume_info, size_t n);
 
-  /* Wait for the inferior process to change state.
+  /* Wait for the inferior process or thread to change state.
 
-     STATUS will be filled in with a response code to send to GDB.
-
-     Returns the signal which caused the process to stop, in the
-     remote protocol numbering (e.g. TARGET_SIGNAL_STOP), or the
-     exit code as an integer if *STATUS is 'W'.  */
-
-  unsigned char (*wait) (char *status);
+     PTID = -1 to wait for any pid to do something PTID(pid,0,0) to
+     wait for any thread of process pid to do something.  Return ptid
+     of child, or -1 in case of error; store status through argument
+     pointer STATUS.  OPTIONS is a bit set of options defined was
+     TARGET_W* above.  */
+  ptid_t (*wait) (ptid_t ptid, struct target_waitstatus *status, int options);
 
   /* Fetch registers from the inferior process.
 
@@ -188,6 +258,25 @@ struct target_ops
   /* Fill BUF with an hostio error packet representing the last hostio
      error.  */
   void (*hostio_last_error) (char *buf);
+
+  /* Attempts to find the pathname of the executable file
+     that was run to create a specified process.
+
+     If the executable file cannot be determined, NULL is returned.
+
+     Else, a pointer to a character string containing the pathname is
+     returned.  This string should be copied into a buffer by the
+     client if the string will not be immediately used, or if it must
+     persist.  */
+  char* (*pid_to_exec_file) (int pid);
+
+  /* Enables async target events.  Returns the previous enable
+     state.  */
+  int (*async) (int enable);
+
+  /* Switch to non-stop (1) or all-stop (0) mode.  Return 0 on
+     success, -1 otherwise.  */
+  int (*start_non_stop) (int);
 };
 
 extern struct target_ops *the_target;
@@ -200,11 +289,11 @@ void set_target_ops (struct target_ops *);
 #define myattach(pid) \
   (*the_target->attach) (pid)
 
-#define kill_inferior() \
-  (*the_target->kill) ()
+#define kill_inferior(pid) \
+  (*the_target->kill) (pid)
 
-#define detach_inferior() \
-  (*the_target->detach) ()
+#define detach_inferior(pid) \
+  (*the_target->detach) (pid)
 
 #define mythread_alive(pid) \
   (*the_target->thread_alive) (pid)
@@ -215,10 +304,18 @@ void set_target_ops (struct target_ops *);
 #define store_inferior_registers(regno) \
   (*the_target->store_registers) (regno)
 
-#define join_inferior() \
-  (*the_target->join) ()
+#define join_inferior(pid) \
+  (*the_target->join) (pid)
 
-unsigned char mywait (char *statusp, int connected_wait);
+#define target_async(enable) \
+  (the_target->async ? (*the_target->async) (enable) : 0)
+
+/* Start non-stop mode, returns 0 on success, -1 on failure.   */
+
+int start_non_stop (int nonstop);
+
+ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
+	       int connected_wait);
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 
@@ -226,5 +323,7 @@ int write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 			   int len);
 
 void set_desired_inferior (int id);
+
+char *target_pid_to_str (ptid_t);
 
 #endif /* TARGET_H */

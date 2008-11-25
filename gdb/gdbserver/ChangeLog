@@ -1,3 +1,515 @@
+2008-11-25  Pedro Alves  <pedro@codesourcery.com>
+
+	2008-10-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (discard_pending_stop_replies): Initialize prev.
+
+	2008-10-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_wait_1): Cancel breakpoint hits in threads
+	we're not reporting.
+	(cancel_breakpoints_callback): New.
+
+	2008-10-12  Pedro Alves  <pedro@codesourcery.com>
+	
+	* server.c (queue_stop_reply_callback, handle_status): Pass
+	TARGET_SIGNAL_TRAP, not TARGET_SIGNAL_0.
+
+	* linux-low.c (ptid_is_pid): Delete.
+	(linux_wait_for_event): In non-stop, don't set the current
+	inferior arbitrarily.
+	(linux_wait): Flush the event pipe before polling for an event.
+	(wait_for_sigstop): In non-stop, don't set the current
+	inferior arbitrarily.
+	(linux_resume_one_lwp): Small cleanup.
+	(cancel_breakpoint): New.
+	(linux_resume_one_thread): Use it.  Still report SIGTRAPs.
+	(regsets_store_inferior_registers): Plug leak.
+	(sigchld_handler): Don't use fprintf here.
+
+	* mem-break.c (breakpoint_at): New.
+	* inferiors.c (ptid_is_pid): New.
+	* mem-break.h (breakpoint_at): Declare.
+	* server.c (discard_queued_stop_replies): Add `pid' argument.
+	Handle it.
+	(send_next_stop_reply): Cleanup.
+	(attach_inferior): Don't wait here in non-stop mode.
+	(handle_v_attach): Don't queue stop replies here.
+	(handle_v_kill): Discard queued stop replies of the inferior we
+	just killed.
+	(queue_stop_reply_callback): Add `arg' argument.  Handle it.
+	(handle_status): Adjust.
+	(kill_inferior_callback): Discard queued stop replies of the
+	inferior we just killed.
+	(detach_or_kill_inferior_callback): Discard queued stop replies of
+	the inferior we just killed or detached from.
+	(process_serial_event): Cleanup.  Discard queued stop replies of
+	the inferior we just detached.  Don't write 0 bytes to the inferior.
+	(handle_serial_event): Debug output.
+	* server.h (ptid_is_pid): Declare.
+
+	* remote-utils.c (prepare_resume_reply): Avoid reading registers
+	and memory from a thread that is gone.
+
+	2008-09-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.h (struct sym_cache, struct process_info_private):
+	Forward declare.
+	(struct process_info): Add symbol_cache, all_symbols_looked_up and
+	private fields.
+	(current_process): Declare.
+	* remote-utils.c (struct sym_cache) <name>: Remove constness.
+	(symbol_cache): Delete.
+	(free_sym_cache, clear_symbol_cache): New.
+	(look_up_one_symbol): Adjust, to per-process symbol cache.
+	* inferiors.c (current_process): New.
+
+	* linux-low.h: Include "gdb_proc_service.h".
+	(struct process_info_private): Define.
+	* linux-low.c (thread_db_active): Delete.
+	(linux_add_process): New.
+	(handle_extended_wait, linux_create_inferior, linux_attach): Use
+	it.
+	(linux_wait_for_event, linux_look_up_symbols): Adjust.
+	(initialize_low): Don't clear the global thread_db_active.
+	* thread-db.c (proc_handle, thread_agent): Delete.
+	(fixup_proc_handle): New.
+	(thread_db_err_str, thread_db_enable_reporting): Use it.  Adjust.
+	(thread_db_find_new_threads): Look for the current inferior
+	thread, not the first thread in the list.  Use fixup_proc_handle.
+	Adjust.
+	(thread_db_get_tls_address): Use fixup_proc_handle.
+	(thread_db_init): Likewise.  Adjust.
+
+	2008-09-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* mem-break.c (get_breakpoint_list): Add `create' argument.  Only
+	create the list if create is set.
+	(remove_breakpoint_list): New.
+	(set_breakpoint_at, find_breakpoint_at, check_mem_read)
+	(check_mem_write, delete_all_breakpoints): Adjust.
+
+	2008-09-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (gdbserver_usage): Describe --remote-debug option.
+	(main): Handle --remote-debug switch.
+
+	2008-09-19  Pedro Alves  <pedro@codesourcery.com>
+
+	Non-stop mode support.
+
+	* linux-low.c (linux_event_pipe): New int array for pipe.
+	(target_is_async_p): New.
+	(handle_extended_wait): Use my_waitpid.
+	(linux_kill_one_lwp): Stop the LWP if it is not stopped already.
+	Use my_waitpid, not linux_wait_for_event.  Remove the lwp and the
+	corresponding thread from the lists.
+	(linux_kill_one_process, linux_kill): Delete.
+	(linux_kill_1): Rename back to ...
+	(linux_kill) ... this.  Stop the LWP if it is not stopped already.
+	Use my_waitpid, not linux_wait_for_event.  Remove the lwp and the
+	corresponding thread from the lists.
+	(linux_detach_one_lwp): Make sure the LWP is stopped.  Adjust to
+	new linux_wait_for_event interface.
+	(linux_detach_one_process, linux_detach): Delete.
+	(linux_detach_1): Rename back to ...
+	(linux_detach): This.
+	(linux_join): Add PID argument.  Use my_waitpid instead of
+	waitpid.
+	(status_pending_p): Ignore suspended threads.
+	(my_waitpid): Emulate __WALL.
+	(linux_wait_for_lwp): Add 'options' argument.  Handle it.  Use
+	my_wait.  If requesting an event from a specific process, leave
+	events in other processes pending.
+	(resume_stopped_lwps): New.
+	(linux_wait_for_event): Delete.
+	(linux_wait_for_event_1): Rename back to ...
+	(linux_wait_for_event): ... this.  Change interface: add wstat and
+	options arguments, return -1 on error, 0 otherwise.  Adjust.  In
+	all-stop, resume stopped lwps if there was no pending status.
+	Don't return immediatelly if a pending status was found ---
+	continue handling it instead.  Don't loop, only handle one event.
+	(linux_wait): Rename to ...
+	(linux_wait_1): ... this.  Add target_options argument.  Handle
+	it.  Don't loop --- only handle one event.  Ignore the continue
+	thread in non_stop mode.  Adjust to new resume_kind interface.
+	Only stop all threads in all-stop mode.
+	(async_file_flush, async_file_mark): New.
+	(linux_wait): New.
+	(wait_for_sigstop): Set stopping_threads here.  Use
+	linux_wait_for_lwp instead of linux_wait_for_event.  Adjust.
+	(stop_all_lwps): Don't set stopping_threads here.
+	(resume_ptr): Delete.
+	(struct resume_info): New.
+	(linux_set_resume_request): Add arg argument.  Adjust to take a
+	struct remove_info instead of the global resume_ptr.  Accept
+	pid,-1 to apply to all threads.
+	(linux_continue_one_thread, linux_queue_one_thread): Merge both
+	and create ...
+	(linux_resume_one_thread): ... this.  New.  Handle rk_stop.
+	(resume_status_pending_p): Assume no resume info to mean do
+	nothing.  Ignore suspended LWPs.
+	(linux_resume): Add n argument.  Adjust.  In non-stop mode, don't
+	look for a pending status over all threads.
+	(linux_read_offsets): Minor cleanup.
+	(sigchld_handler, linux_async, linux_start_non_stop): New.
+	(linux_target_ops): Register linux_async and linux_start_non_stop.
+	(initialize_low): Register sigchld_handler as SIGCHLD handler.
+
+	* utils.c (internal_verror, internal_error_file_line): New.
+
+	* Makefile.in (SFILES): Add event-loop.c.
+	(OBS): Add event-loop.o.
+	(event-loop.o): New rule.
+
+	* linux-low.h (struct lwp_info) <suspended>: New flag.
+
+	* thread-db.c (thread_db_create_event): Make sure thread_db reads
+	from the current inferior.
+	(thread_db_get_tls_address): Comment.
+
+	* server.c (thread_from_wait, old_thread_from_wait, attached):
+	Delete.
+	(non_stop): New global.
+	(own_buf, mem_buf): New globals.
+	(struct vstop_notif): New.
+	(notif_queue): New.
+	(queue_stop_reply, push_event, discard_queued_stop_replies)
+	(send_next_stop_reply): New.
+	(start_inferior): Adjust to new thread_resume interface.  Adjust
+	to new mywait interface.
+	(attach_inferior): Adjust.
+	(handle_general_set): Handle QNonStop.
+	(handle_query): Pass 'QNonStop+'.
+	(handle_v_cont): Handle vCont;t.  Don't enable/disable async io in
+	non-stop mode.  In non-stop return OK, and don't wait for the
+	target.
+	(handle_v_attach): In non-stop, return OK, and queue events for
+	all threads.
+	(handle_v_run): In non-stop, set the general thread here.
+	(handle_v_stopped): New.
+	(handle_v_requests): Report support for 't'.  Handle 'vStopped'.
+	(proceed): Add comment.  Adjust.  In non-stop, don't
+	enable/disable async io; write 'OK', and don't wait for the
+	target.
+	(queue_stop_reply_callback, handle_status): New.
+	(kill_inferior_callback, detach_or_kill_inferior_callback)
+	(join_inferiors_callback): New.
+	(main): In --debug mode, also enable remote debug.  Don't pass -1
+	to kill_inferior or detach_inferior; instead, iterate over all
+	processes killing or detaching them.  Adjust to use the even-loop.
+	(process_serial_event): New, factored out of main.  If the
+	connection closed, remove all sources from the event loop.
+	Iterate over all inferiors joining them.  Use handle_status.
+	Don't print inferior exit notices here.  In non-stop, defer
+	exiting until GDB read all queued events.
+	(handle_serial_event, handle_target_event): New.
+
+	* server.h (FOR_EACH_INFERIOR): New.
+	(thread_from_wait, old_thread_from_wait): Remove.
+	(non_stop): Declare.
+	(gdb_client_data, handler_func): New typedefs.
+	(delete_file_handler, add_file_handler, start_event_loop)
+	(handle_serial_event, handle_target_event, push_event)
+	(putpkt_notif, internal_error_file_line): Declare.
+	(internal_error): Define.
+
+	* target.c (mywait): Add `options' argument.  Print inferior exit
+	notices here.
+	(start_non_stop): New.
+
+	* event-loop.c: New.
+
+	* remote-utils.c (remote_open): Register remote_desc in the event
+	loop, with handle_serial_event as callback.
+	(remote_close): Remove remote_desc from the event loop.
+	(hex_or_minus_one): New.
+	(read_ptid, read_ptid): Use it.
+	(putpkt_binary): Rename to ...
+	(putpkt_binary_1): ... this.  Add `notif' argument.  Handle
+	pushing a remote protocol notification.
+	(putpkt_binary): New as wrapper around putpkt_binary_1.
+	(putpkt_notif): New.
+	(getpkt): Debug output.
+	(prepare_resume_reply): Remove dead code.  In non-stop, don't set
+	the general thread here.
+
+	* target.h (enum resume_kind): New.
+	(struct thread_resume) <leave_stopped, step>: Delete.
+	(struct thread_resume) <kind>: New field.
+	(TARGET_WNOHANG): Define.
+	(struct target_ops) <kill, detach>: Adjust comments.
+	(struct target_ops) <join>: Add `pid' argument.
+	(struct target_ops) <resume>: Add `n' argument.
+	(struct target_ops) <wait>: Add `options' argument.
+	(struct target_ops) <async, start_non_stop>: New fields.
+	(join_inferior): Add `pid' argument.
+	(target_async): New.
+	(start_non_stop): Declare.
+	(mywait): Add options argument.
+
+	2008-09-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (new_inferior): Mention in the comment that all
+	inferiors should have the same architecture for now.
+	(linux_create_inferior, linux_attach): Only set new_inferior if
+	this is the first process.
+	
+	2008-08-29  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (ptid_is_pid): Move higher.
+	(linux_wait_for_lwp): Remove dead code.
+	(linux_wait_for_event): Rename to ...
+	(linux_wait_for_event_1): ... this.
+	(linux_wait_for_event): New.
+	(ptid_same_pid): Delete.
+	(linux_set_resume_request): Clearify.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (handle_extended_wait, linux_attach_lwp)
+	(linux_attach): Minor cleanups.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_thread_alive): Return false for a listed
+	thread known to be dead.
+	(linux_wait_for_event): Don't set the dead flag here.
+	(wait_for_sigstop): Store ptid before waiting for the event.
+	Minor cleanup.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferiors.c (find_inferior): Allow deleting the current iterated
+	inferior.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_pid_to_exec_file): Move higher.
+	(linux_enable_event_reporting): Enable PTRACE_O_TRACEEXEC.
+	(handle_extended_wait): Handle PTRACE_EVENT_EXEC.
+
+	* remote-utils.c (prepare_resume_reply): Set the general thread to
+	the last thread that had an event in TARGET_WAITKIND_FORKED and
+	TARGET_WAITKIND_VFORKED.  Handle TARGET_WAITKIND_EXECD.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (handle_query): Pass "QExecFile:PID;" back in the reply.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_supports_tracefork_flag): Move higher.
+	(linux_enable_event_reporting): New.
+	(handle_extended_wait): Change return type to int.  Handle
+	PTRACE_EVENT_FORK and PTRACE_EVENT_VFORK.
+	(add_lwp): Set waitstatus.kind to TARGET_WAITKIND_IGNORE.
+	(linux_attach_lwp): Use linux_enable_event_reporting.
+	(linux_wait_for_event): Don't keep waiting if the extended wait
+	status should be reported to gdb.
+	(linux_wait): Use linux_enable_event_reporting.  If waitstatus
+	holds a processed event, return it instead.
+	* remote-utils.c (prepare_resume_reply): Handle
+	TARGET_WAITKIND_FORKED and TARGET_WAITKIND_VFORKED.
+	* linux-low.h (struct lwp_info) <waitstatus>: New member.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.h (struct target_ops) <pid_to_exec_file>: New member.
+	* server.c (handle_query): Handle qExecFile.
+	* linux-low.c (linux_pid_to_exec_file): New.
+	(linux_target_ops): Register it.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (is_lwpid): New.
+	(linux_kill_one_lwp, linux_kill_1, linux_detach_one_lwp): Adjust.
+	(status_pending_p): Check if we're interested in this lwp.
+	(linux_wait_for_lwp): Change signature: return an lwp_info*, and
+	take a ptid instead of an lwp_info**.
+	(linux_wait_for_event): Take a ptid instead of a thread_info
+	pointer.  Adjust.
+	(wait_for_sigstop): Adjust.  If a whole process died, keep the
+	exit status pending.
+	(ptid_is_pid, ptid_same_pid): New.
+	(linux_set_resume_request): Allow resuming all threads of a process.
+	(resume_status_pending_p): Check for dead lwps.
+
+	* linux-low.h (struct lwp_info) <dead>: New field.
+
+	* server.c (start_inferior): Only resume and wait for events from
+	the inferior we're creating.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	Decouple target code from remote protocol.
+
+	* linux-low.c (linux_wait): Change prototype.  Adjust.
+	* server.c (last_status, last_ptid): New.
+	(start_inferior): Remove "statusptr" argument.  Adjust.
+	(attach_inferior, handle_v_cont, handle_v_attach, handle_v_run)
+	(handle_v_kill, handle_v_requests): Remove "status" and "signal"
+	parameters.  Adjust.
+	(myresume): Rename to ...
+	(proceed): ... this.  Remove "statusp" parameter.  Adjust.
+	(main): Remove "status" local.  Adjust.
+	* target.c (mywait): Change prototype.  Adjust.
+	* target.h (enum target_waitkind): New.
+	(struct target_waitstatus): New.
+	(struct target_ops) <wait>: Change prototype.
+	(mywait): Adjust.
+	* remote-utils.c: Include "target.h".
+	(prepare_resume_reply): Change prototype to take a ptid and a
+	target_waitstatus.  Adjust.
+	* server.h (prepare_resume_reply): Adjust prototype.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferiors.c (all_processes): New.
+	(add_process): New.
+	
+	* linux-low.c (linux_create_inferior): Add process.
+	(linux_attach_lwp): Add "initial" parameter, and use it instead of
+	relying on having only one thread in the global list.
+	(linux_attach): Add process.
+	(struct counter): New.
+	(check_if_last_thread_of_pid, is_last_thread_of_process): New.
+	(linux_kill_one_lwp): Add ARGS parameter.  Change return type to
+	int.  Check if we're interested in this lwp.  Use
+	is_last_thread_of_process.
+	(linux_kill): Rename to ...
+	(linux_kill_1): ... this.  Kill lwps of the requested only.
+	(linux_kill_one_process): New.
+	(linux_kill): New.
+	(linux_detach_one_lwp): Add ARGS parameter.  Change return type to
+	int.  Check if we're interested in this lwp.  Remove the lwp from
+	both the lwp list and the thread list.
+	(any_thread_of, linux_detach_1, linux_detach_one_process): New.
+	(linux_detach): Reimplement.
+	(linux_wait_for_event): Use is_last_thread_of_process.
+	(linux_wait): Likewise.  On process exit, don't clear all inferiors.
+	Implement multi-process extensions.
+
+	* mem-break.c (breakpoints): Delete.
+	(struct breakpoint_list): New.
+	(all_breakpoints): New.
+	(get_breakpoint_list): New.
+	(set_breakpoint_at, delete_breakpoint, find_breakpoint_at)
+	(check_mem_read, check_mem_write, delete_all_breakpoints): Use it.
+
+	* server.h (struct process_info): New.
+	(all_processes): Declare.
+	(add_process): Declare.
+
+	* linux-low.h (linux_attach_lwp): Add "initial" parameter.
+
+	* thread-db.c (maybe_attach_thread): Adjust.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c, linux-low.h, proc-service.c, thread-db.c: Rename
+	`struct process_info' to `struct lwp_info', and adjust throughout.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	Implement remote protocol multi-process extensions.
+
+	* inferiors.c (null_ptid, minus_one_ptid): New.
+	(ptid_build, pid_to_ptid, ptid_get_pid, ptid_get_lwp)
+	(ptid_get_tid, ptid_equal): New functions.
+	(add_thread): Drop gdb_id argument.  Retype thread_id argument to
+	ptid_t.  Adjust.
+	(thread_id_to_gdb_id): Adjust.
+	(thread_to_gdb_id): Change return type to ptid_t.  Adjust.
+	(gdb_id_to_thread): Rename to ...
+	(find_thread_pid): ... this.  Adjust.
+	(gdb_id_to_thread_id): Change return type to ptid_t.  Adjust.
+	(find_inferior_id): Change id argument type to ptid_t.  Adjust.
+	(loaded_dll, add_pid_to_list, pull_pid_from_list): Adjust.
+	(initialize_inferiors): New.
+
+	* remote-utils.c (hexchars): New.
+	(ishex, unpack_varlen_hex, write_ptid, read_ptid): New.
+	(prepare_resume_reply): Adjust.
+
+	* server.c (cont_thread, general_thread, step_thread)
+	(thread_from_wait, old_thread_from_wait): Change type to ptid_t.
+	(multi_process): New.
+	(start_inferior): Adjust.
+	(handle_query): Adjust.  Report multiprocess extensions support.
+	(handle_v_cont): Adjust.
+	(handle_v_kill): New.
+	(handle_v_requests): Handle vKill.
+	(myresume): Adjust.
+	(first_thread_of): New.
+	(main): Call initialize_inferiors.  If bailing out, kill all
+	inferiors.  Handle multi-process detach.  Handle multi-process H
+	and T.
+
+	* server.h (ULONGEST): New typedef.
+	(struct ptid): New struct.
+	(ptid_t): New typedef.
+	(minus_one_ptid, null_ptid): New.
+	(ptid_t ptid_build, pid_to_ptid, ptid_get_pid, ptid_get_lwp)
+	(ptid_get_tid, ptid_equal): New.
+	(struct inferior_list_entry) <id>: Change type to ptid_t.
+	(add_thread, thread_id_to_gdb_id, thread_to_gdb_id)
+	(gdb_id_to_thread_id): Adjust prototypes.
+	(find_thread_pid): Declare.
+	(find_inferior_id): Adjust prototype.
+	(cont_thread, general_thread, step_thread, thread_from_wait)
+	(old_thread_from_wait): Adjust type to ptid_t.
+	(multi_process): Declare.
+	(read_ptid, write_ptid): Declare.
+
+	* linux-low.c (pid_of): Adjust.
+	(lwpid_of): New.
+	(inferior_lwpid): New.
+	(handle_extended_wait): Adjust.
+	(add_process): Change pid argument to a ptid.  Adjust.
+	(linux_create_inferior): Adjust.
+	(linux_attach_lwp): Adjust.  Clear new_inferior on error.  If
+	creating a new inferior, don't rely on inferior_pid, instead use
+	the lwpid as pid.
+	(linux_attach): Set new_inferior earlier.  Adjust.
+	(linux_kill): Change return type to int.  Adjust.
+	(linux_detach): Add pid parameter.
+	(linux_thread_alive): Change lwpid paremeter type to ptid.
+	Adjust.
+	(same_lwp, find_lwp_pid): New.
+	(linux_wait_for_process): Adjust.
+	(linux_wait_for_process, linux_wait_for_event, send_sigstop)
+	(wait_for_sigstop, linux_resume_one_process,
+	(linux_resume_one_process, linux_set_resume_request)
+	(linux_continue_one_thread, linux_queue_one_thread)
+	(fetch_register, usr_store_inferior_registers)
+	(regsets_fetch_inferior_registers)
+	(regsets_store_inferior_registers, linux_read_memory)
+	(linux_write_memory, linux_request_interrupt, linux_read_auxv):
+	Adjust.
+
+	* linux-low.h (get_process_thread): Adjust.
+	(struct process_info) <lwpid>: Remove.
+	(find_lwp_pid): Declare.
+
+	* target.c (set_desired_inferior): Adjust.
+	(target_pid_to_str): New.
+
+	* target.h (struct thread_resume) <thread>: Change type to ptid_t.
+	(struct target_ops) <kill>: Change return type to int, and take an
+	int as parameter.
+	(struct target_ops) <detach>: Take an int as parameter.
+	(struct target_ops) <thread_alive>: Change pid argument type to
+	ptid_t.
+	(kill_inferior, detach_inferior): Add PID argument.
+
+	* thread-db.c (thread_db_create_event): Adjust.
+	(find_one_thread): Change argument to a ptid.  Adjust.
+	(maybe_attach_thread, thread_db_get_tls_address, thread_db_init):
+	Adjust.
+
+	* proc-service.c (ps_lgetregs): Adjust.
+
 2008-11-19  Bob Wilson  <bob.wilson@acm.org>
 	
 	* xtensa-xtregs.c (XTENSA_ELF_XTREG_SIZE): Change to 4.

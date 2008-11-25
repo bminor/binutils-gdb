@@ -20,6 +20,8 @@
 #include <thread_db.h>
 #endif
 
+#include "gdb_proc_service.h"
+
 #ifdef HAVE_LINUX_REGSETS
 typedef void (*regset_fill_func) (void *);
 typedef void (*regset_store_func) (const void *);
@@ -39,6 +41,19 @@ struct regset_info
 };
 extern struct regset_info target_regsets[];
 #endif
+
+struct process_info_private
+{
+  /* True if this process has loaded thread_db, and it is active.  */
+  int thread_db_active;
+
+  /* Structure that identifies the child process for the
+     <proc_service.h> interface.  */
+  struct ps_prochandle proc_handle;
+
+  /* Connection to the libthread_db library.  */
+  td_thragent_t *thread_agent;
+};
 
 struct linux_target_ops
 {
@@ -77,30 +92,37 @@ struct linux_target_ops
 
 extern struct linux_target_ops the_low_target;
 
-#define get_process(inf) ((struct process_info *)(inf))
-#define get_thread_process(thr) (get_process (inferior_target_data (thr)))
-#define get_process_thread(proc) ((struct thread_info *) \
+#define get_lwp(inf) ((struct lwp_info *)(inf))
+#define get_thread_lwp(thr) (get_lwp (inferior_target_data (thr)))
+#define get_lwp_thread(proc) ((struct thread_info *) \
 				  find_inferior_id (&all_threads, \
-				  get_process (proc)->lwpid))
+				  get_lwp (proc)->head.id))
 
-struct process_info
+struct lwp_info
 {
   struct inferior_list_entry head;
-  unsigned long lwpid;
 
   /* If this flag is set, the next SIGSTOP will be ignored (the
-     process will be immediately resumed).  This means that either we
+     lwp will be immediately resumed).  This means that either we
      sent the SIGSTOP to it ourselves and got some other pending event
      (so the SIGSTOP is still pending), or that we stopped the
      inferior implicitly via PTRACE_ATTACH and have not waited for it
      yet.  */
   int stop_expected;
 
-  /* If this flag is set, the process is known to be stopped right now (stop
+  /* True if this thread was suspended (with vCont;t).  */
+  int suspended;
+
+  /* If this flag is set, the lwp is known to be stopped right now (stop
      event already received in a wait()).  */
   int stopped;
 
-  /* When stopped is set, the last wait status recorded for this process.  */
+  /* If this flag is set, the lwp is known to be dead already (exit
+     event already received in a wait(), and is cached in
+     status_pending).  */
+  int dead;
+
+  /* When stopped is set, the last wait status recorded for this lwp.  */
   int last_status;
 
   /* If this flag is set, STATUS_PENDING is a waitstatus that has not yet
@@ -116,12 +138,12 @@ struct process_info
      stop (SIGTRAP stops only).  */
   CORE_ADDR bp_reinsert;
 
-  /* If this flag is set, the last continue operation on this process
+  /* If this flag is set, the last continue operation on this lwp
      was a single-step.  */
   int stepping;
 
   /* If this is non-zero, it points to a chain of signals which need to
-     be delivered to this process.  */
+     be delivered to this lwp.  */
   struct pending_signals *pending_signals;
 
   /* A link used when resuming.  It is initialized from the resume request,
@@ -136,12 +158,19 @@ struct process_info
      THREAD_KNOWN is set.  */
   td_thrhandle_t th;
 #endif
+
+  /* If WAITSTATUS->KIND is not TARGET_WAITKIND_IGNORE, the waitstatus
+     for this LWP's last event.  This may correspond to STATUS above,
+     or to an extended event (e.g., PTRACE_EVENT_FORK).  */
+  struct target_waitstatus waitstatus;
 };
 
-extern struct inferior_list all_processes;
+extern struct inferior_list all_lwps;
 
-void linux_attach_lwp (unsigned long pid);
+void linux_attach_lwp (unsigned long pid, int initial);
 
 int thread_db_init (int use_events);
 int thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 			       CORE_ADDR load_module, CORE_ADDR *address);
+
+struct lwp_info *find_lwp_pid (ptid_t ptid);

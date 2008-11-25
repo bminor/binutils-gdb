@@ -45,15 +45,55 @@ struct breakpoint
   int (*handler) (CORE_ADDR);
 };
 
-struct breakpoint *breakpoints;
+struct breakpoint_list
+{
+  struct inferior_list_entry head;
+
+  struct breakpoint *breakpoints;
+};
+
+/* ``all_breakpoints'' is keyed by process ID.  */
+
+struct inferior_list all_breakpoints;
+
+static struct breakpoint_list *
+get_breakpoint_list (int create)
+{
+  ptid_t ptid;
+  int pid;
+  struct inferior_list_entry *list;
+
+  ptid = ((struct inferior_list_entry *)current_inferior)->id;
+  pid = ptid_get_pid (ptid);
+
+  list = find_inferior_id (&all_breakpoints, pid_to_ptid (pid));
+
+  if (list == NULL && create)
+    {
+      list = calloc (1, sizeof (struct breakpoint_list));
+      list->id = pid_to_ptid (pid);
+      add_inferior_to_list (&all_breakpoints, list);
+    }
+
+  return (struct breakpoint_list *) list;
+}
+
+static void
+remove_breakpoint_list (struct breakpoint_list *list)
+{
+  remove_inferior (&all_breakpoints, &list->head);
+}
 
 void
 set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
 {
+  struct breakpoint_list *list;
   struct breakpoint *bp;
 
   if (breakpoint_data == NULL)
     error ("Target does not support breakpoints.");
+
+  list = get_breakpoint_list (1);
 
   bp = malloc (sizeof (struct breakpoint));
   memset (bp, 0, sizeof (struct breakpoint));
@@ -66,24 +106,30 @@ set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
   bp->pc = where;
   bp->handler = handler;
 
-  bp->next = breakpoints;
-  breakpoints = bp;
+  bp->next = list->breakpoints;
+  list->breakpoints = bp;
 }
 
 static void
 delete_breakpoint (struct breakpoint *bp)
 {
+  struct breakpoint_list *list;
   struct breakpoint *cur;
 
-  if (breakpoints == bp)
+  list = get_breakpoint_list (0);
+
+  if (list == NULL)
+    goto out;
+
+  if (list->breakpoints == bp)
     {
-      breakpoints = bp->next;
+      list->breakpoints = bp->next;
       (*the_target->write_memory) (bp->pc, bp->old_data,
 				   breakpoint_len);
       free (bp);
       return;
     }
-  cur = breakpoints;
+  cur = list->breakpoints;
   while (cur->next)
     {
       if (cur->next == bp)
@@ -95,13 +141,23 @@ delete_breakpoint (struct breakpoint *bp)
 	  return;
 	}
     }
+
+ out:
   warning ("Could not find breakpoint in list.");
 }
 
 static struct breakpoint *
 find_breakpoint_at (CORE_ADDR where)
 {
-  struct breakpoint *bp = breakpoints;
+  struct breakpoint_list *list;
+  struct breakpoint *bp;
+
+  list = get_breakpoint_list (0);
+
+  if (list == NULL)
+    return NULL;
+
+  bp = list->breakpoints;
 
   while (bp != NULL)
     {
@@ -214,6 +270,14 @@ check_breakpoints (CORE_ADDR stop_pc)
     return 1;
 }
 
+int
+breakpoint_at (CORE_ADDR stop_pc)
+{
+  struct breakpoint *bp;
+  bp = find_breakpoint_at (stop_pc);
+  return (bp != NULL);
+}
+
 void
 set_breakpoint_data (const unsigned char *bp_data, int bp_len)
 {
@@ -224,8 +288,17 @@ set_breakpoint_data (const unsigned char *bp_data, int bp_len)
 void
 check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 {
-  struct breakpoint *bp = breakpoints;
-  CORE_ADDR mem_end = mem_addr + mem_len;
+  struct breakpoint_list *list;
+  struct breakpoint *bp;
+  CORE_ADDR mem_end;
+
+  list = get_breakpoint_list (0);
+
+  if (list == NULL)
+    return;
+
+  bp = list->breakpoints;
+  mem_end = mem_addr + mem_len;
 
   for (; bp != NULL; bp = bp->next)
     {
@@ -257,8 +330,17 @@ check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 void
 check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 {
-  struct breakpoint *bp = breakpoints;
-  CORE_ADDR mem_end = mem_addr + mem_len;
+  struct breakpoint_list *list;
+  struct breakpoint *bp;
+  CORE_ADDR mem_end;
+
+  list = get_breakpoint_list (0);
+
+  if (list == NULL)
+    return;
+
+  bp = list->breakpoints;
+  mem_end = mem_addr + mem_len;
 
   for (; bp != NULL; bp = bp->next)
     {
@@ -294,6 +376,15 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 void
 delete_all_breakpoints (void)
 {
-  while (breakpoints)
-    delete_breakpoint (breakpoints);
+  struct breakpoint_list *list;
+
+  list = get_breakpoint_list (0);
+
+  if (list == NULL)
+    return;
+
+  while (list->breakpoints)
+    delete_breakpoint (list->breakpoints);
+
+  remove_breakpoint_list (list);
 }

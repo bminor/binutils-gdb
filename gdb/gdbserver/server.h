@@ -77,6 +77,70 @@ typedef unsigned char gdb_byte;
    least the size of a (void *).  */
 typedef long long CORE_ADDR;
 
+typedef unsigned long long ULONGEST;
+
+/* The ptid struct is a collection of the various "ids" necessary
+   for identifying the inferior.  This consists of the process id
+   (pid), thread id (tid), and other fields necessary for uniquely
+   identifying the inferior process/thread being debugged.  When
+   manipulating ptids, the constructors, accessors, and predicate
+   declared in server.h should be used.  These are as follows:
+
+      ptid_build	- Make a new ptid from a pid, lwp, and tid.
+      pid_to_ptid	- Make a new ptid from just a pid.
+      ptid_get_pid	- Fetch the pid component of a ptid.
+      ptid_get_lwp	- Fetch the lwp component of a ptid.
+      ptid_get_tid	- Fetch the tid component of a ptid.
+      ptid_equal	- Test to see if two ptids are equal.
+
+   Please do NOT access the struct ptid members directly (except, of
+   course, in the implementation of the above ptid manipulation
+   functions).  */
+
+struct ptid
+  {
+    /* Process id */
+    int pid;
+
+    /* Lightweight process id */
+    long lwp;
+
+    /* Thread id */
+    long tid;
+  };
+
+typedef struct ptid ptid_t;
+
+/* The -1 ptid, often used to indicate either an error condition or a
+   "don't care" condition, i.e, "run all threads".  */
+extern ptid_t minus_one_ptid;
+
+/* The null or zero ptid, often used to indicate no process.  */
+extern ptid_t null_ptid;
+
+/* Attempt to find and return an existing ptid with the given PID,
+   LWP, and TID components.  If none exists, create a new one and
+   return that.  */
+ptid_t ptid_build (int pid, long lwp, long tid);
+
+/* Create a ptid from just a pid.  */
+ptid_t pid_to_ptid (int pid);
+
+/* Fetch the pid (process id) component from a ptid.  */
+int ptid_get_pid (ptid_t ptid);
+
+/* Fetch the lwp (lightweight process) component from a ptid.  */
+long ptid_get_lwp (ptid_t ptid);
+
+/* Fetch the tid (thread id) component from a ptid.  */
+long ptid_get_tid (ptid_t ptid);
+
+/* Compare two ptids to see if they are equal.  */
+extern int ptid_equal (ptid_t p1, ptid_t p2);
+
+/* Return true if this ptid represents a process id.  */
+extern int ptid_is_pid (ptid_t ptid);
+
 /* Generic information for tracking a list of ``inferiors'' - threads,
    processes, etc.  */
 struct inferior_list
@@ -86,7 +150,7 @@ struct inferior_list
 };
 struct inferior_list_entry
 {
-  unsigned long id;
+  ptid_t id;
   struct inferior_list_entry *next;
 };
 
@@ -100,6 +164,32 @@ struct dll_info
   CORE_ADDR base_addr;
 };
 
+struct sym_cache;
+struct process_info_private;
+
+struct process_info
+{
+  struct inferior_list_entry head;
+
+  int attached;
+
+  /* The symbol cache.  */
+  struct sym_cache *symbol_cache;
+
+  /* If this flag has been set, assume symbol cache misses are
+     failures.  */
+  int all_symbols_looked_up;
+
+  /* Private target data.  */
+  struct process_info_private *private;
+};
+
+/* Return a pointer to the process that corresponds to the current
+   thread (current_inferior).  It is an error to call this if there is
+   no current thread selected.  */
+
+extern struct process_info *current_process (void);
+
 #include "regcache.h"
 #include "gdb/signals.h"
 
@@ -112,22 +202,36 @@ void initialize_low ();
 
 /* From inferiors.c.  */
 
+extern struct inferior_list all_processes;
 extern struct inferior_list all_threads;
 extern struct inferior_list all_dlls;
 extern int dlls_changed;
+
+void initialize_inferiors (void);
 
 void add_inferior_to_list (struct inferior_list *list,
 			   struct inferior_list_entry *new_inferior);
 void for_each_inferior (struct inferior_list *list,
 			void (*action) (struct inferior_list_entry *));
+
+#define FOR_EACH_INFERIOR(TYPE, INF_LIST, INF)			\
+  for (INF = (TYPE *)(INF_LIST)->head;				\
+       INF != NULL;						\
+       INF = (TYPE *)((struct inferior_list_entry *)INF)->next)	\
+
 extern struct thread_info *current_inferior;
 void remove_inferior (struct inferior_list *list,
 		      struct inferior_list_entry *entry);
 void remove_thread (struct thread_info *thread);
-void add_thread (unsigned long thread_id, void *target_data, unsigned int);
-unsigned int thread_id_to_gdb_id (unsigned long);
-unsigned int thread_to_gdb_id (struct thread_info *);
-unsigned long gdb_id_to_thread_id (unsigned int);
+void add_thread (ptid_t ptid, void *target_data);
+
+struct process_info *add_process (int pid, int attached);
+
+struct thread_info *find_thread_pid (ptid_t ptid);
+
+ptid_t thread_id_to_gdb_id (ptid_t);
+ptid_t thread_to_gdb_id (struct thread_info *);
+ptid_t gdb_id_to_thread_id (ptid_t);
 struct thread_info *gdb_id_to_thread (unsigned int);
 void clear_inferiors (void);
 struct inferior_list_entry *find_inferior
@@ -136,7 +240,7 @@ struct inferior_list_entry *find_inferior
 		   void *),
       void *arg);
 struct inferior_list_entry *find_inferior_id (struct inferior_list *list,
-					      unsigned long id);
+					      ptid_t id);
 void *inferior_target_data (struct thread_info *);
 void set_inferior_target_data (struct thread_info *, void *);
 void *inferior_regcache_data (struct thread_info *);
@@ -149,11 +253,10 @@ void unloaded_dll (const char *name, CORE_ADDR base_addr);
 
 /* Public variables in server.c */
 
-extern unsigned long cont_thread;
-extern unsigned long general_thread;
-extern unsigned long step_thread;
-extern unsigned long thread_from_wait;
-extern unsigned long old_thread_from_wait;
+extern ptid_t cont_thread;
+extern ptid_t general_thread;
+extern ptid_t step_thread;
+
 extern int server_waiting;
 extern int debug_threads;
 extern int pass_signals[];
@@ -164,6 +267,26 @@ extern int disable_packet_vCont;
 extern int disable_packet_Tthread;
 extern int disable_packet_qC;
 extern int disable_packet_qfThreadInfo;
+
+extern int multi_process;
+extern int non_stop;
+
+/* Functions from event-loop.c.  */
+typedef void *gdb_client_data;
+typedef void (handler_func) (int, gdb_client_data);
+
+extern void delete_file_handler (int fd);
+extern void add_file_handler (int fd, handler_func *proc,
+			      gdb_client_data client_data);
+
+extern void start_event_loop (void);
+
+/* Functions from server.c.  */
+
+extern void handle_serial_event (int err, gdb_client_data client_data);
+extern void handle_target_event (int err, gdb_client_data client_data);
+
+extern void push_event (ptid_t ptid, struct target_waitstatus *status);
 
 /* Functions from hostio.c.  */
 extern int handle_vFile (char *, int, int *);
@@ -178,8 +301,12 @@ extern int all_symbols_looked_up;
 extern int noack_mode;
 extern int transport_is_reliable;
 
+ptid_t read_ptid (char *buf, char **obuf);
+char *write_ptid (char *buf, ptid_t ptid);
+
 int putpkt (char *buf);
 int putpkt_binary (char *buf, int len);
+int putpkt_notif (char *buf);
 int getpkt (char *buf);
 void remote_open (char *name);
 void remote_close (void);
@@ -193,7 +320,8 @@ void convert_ascii_to_int (char *from, unsigned char *to, int n);
 void convert_int_to_ascii (unsigned char *from, char *to, int n);
 void new_thread_notify (int id);
 void dead_thread_notify (int id);
-void prepare_resume_reply (char *buf, char status, unsigned char sig);
+void prepare_resume_reply (char *buf, ptid_t ptid,
+			   struct target_waitstatus *status);
 
 const char *decode_address_to_semicolon (CORE_ADDR *addrp, const char *start);
 void decode_address (CORE_ADDR *addrp, const char *start, int len);
@@ -235,6 +363,13 @@ void perror_with_name (char *string);
 void error (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void fatal (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void warning (const char *string,...) ATTR_FORMAT (printf, 1, 2);
+
+void internal_error_file_line (const char *file, int line,
+			       const char *string, ...)
+	ATTR_NORETURN ATTR_FORMAT (printf, 3, 4);
+
+#define internal_error(FMT, ...) \
+  internal_error_file_line (__FILE__, __LINE__, FMT, ##__VA_ARGS__)
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */

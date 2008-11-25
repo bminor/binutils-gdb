@@ -32,17 +32,18 @@
 #include <malloc.h>
 #endif
 
-unsigned long cont_thread;
-unsigned long general_thread;
-unsigned long step_thread;
-unsigned long thread_from_wait;
-unsigned long old_thread_from_wait;
+ptid_t cont_thread;
+ptid_t general_thread;
+ptid_t step_thread;
+
 int server_waiting;
 
 static int extended_protocol;
-static int attached;
 static int response_needed;
 static int exit_requested;
+
+int multi_process;
+int non_stop;
 
 static char **program_argv, **wrapper_argv;
 
@@ -87,6 +88,123 @@ int disable_packet_Tthread;
 int disable_packet_qC;
 int disable_packet_qfThreadInfo;
 
+/* Last status reported to GDB.  */
+static struct target_waitstatus last_status;
+static ptid_t last_ptid;
+
+static char *own_buf;
+static unsigned char *mem_buf;
+
+/* Structure holding information relative to a single stop reply.  We
+   keep a queue of these (realy a singly-linked list) to push to GDB
+   in non-stop mode.  */
+struct vstop_notif
+{
+  /* Pointer to next in list.  */
+  struct vstop_notif *next;
+
+  /* Thread or process that got the event.  */
+  ptid_t ptid;
+
+  /* Event info.  */
+  struct target_waitstatus status;
+};
+
+/* The pending stop replies list head.  */
+static struct vstop_notif *notif_queue = NULL;
+
+/* Put a stop reply to the stop reply queue.  */
+static void
+queue_stop_reply (ptid_t ptid, struct target_waitstatus *status)
+{
+  struct vstop_notif *new_notif;
+
+  new_notif = malloc (sizeof (*new_notif));
+  new_notif->next = NULL;
+  new_notif->ptid = ptid;
+  new_notif->status = *status;
+
+  if (notif_queue)
+    {
+      struct vstop_notif *tail;
+      for (tail = notif_queue;
+	   tail && tail->next;
+	   tail = tail->next)
+	;
+      tail->next = new_notif;
+    }
+  else
+    notif_queue = new_notif;
+
+  if (remote_debug)
+    {
+      int i = 0;
+      struct vstop_notif *tail;
+
+      for (tail = notif_queue; tail; tail = tail->next)
+	i++;
+
+      fprintf (stderr, "pending stop replies: %d\n", i);
+    }
+}
+
+/* Place an an event in the stop reply queue, and push a notification
+   if we aren't sending one yet.  */
+void
+push_event (ptid_t ptid, struct target_waitstatus *status)
+{
+  queue_stop_reply (ptid, status);
+
+  /* If this is the first stop reply in the queue, then inform GDB
+     about it, by sending a Stop notification.  */
+  if (notif_queue->next == NULL)
+    {
+      char *p = own_buf;
+      strcpy (p, "Stop:");
+      p += strlen (p);
+      prepare_resume_reply (p,
+			    notif_queue->ptid, &notif_queue->status);
+      putpkt_notif (own_buf);
+    }
+}
+
+/* Get rid of the currently pending stop replies.  */
+static void
+discard_queued_stop_replies (int pid)
+{
+  struct vstop_notif *prev = NULL, *reply, *next;
+
+  for (reply = notif_queue; reply; reply = next)
+    {
+      next = reply->next;
+
+      if (pid == -1
+	  || ptid_get_pid (reply->ptid) == pid)
+	{
+	  if (reply == notif_queue)
+	    notif_queue = next;
+	  else
+	    prev->next = reply->next;
+
+	  free (reply);
+	}
+      else
+	prev = reply;
+    }
+}
+
+/* If there are more stop replies to push, push one now.  */
+static void
+send_next_stop_reply (char *own_buf)
+{
+  if (notif_queue)
+    prepare_resume_reply (own_buf,
+			  notif_queue->ptid,
+			  &notif_queue->status);
+  else
+    write_ok (own_buf);
+}
+
 static int
 target_running (void)
 {
@@ -94,10 +212,9 @@ target_running (void)
 }
 
 static int
-start_inferior (char **argv, char *statusptr)
+start_inferior (char **argv)
 {
   char **new_argv = argv;
-  attached = 0;
 
   if (wrapper_argv != NULL)
     {
@@ -141,45 +258,45 @@ start_inferior (char **argv, char *statusptr)
   if (wrapper_argv != NULL)
     {
       struct thread_resume resume_info;
-      int sig;
+      ptid_t ptid;
 
-      resume_info.thread = -1;
-      resume_info.step = 0;
+      resume_info.thread = pid_to_ptid (signal_pid);
+      resume_info.kind = rk_continue;
       resume_info.sig = 0;
-      resume_info.leave_stopped = 0;
 
-      sig = mywait (statusptr, 0);
-      if (*statusptr != 'T')
-	return sig;
+      ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
+
+      if (last_status.kind != TARGET_WAITKIND_STOPPED)
+	return signal_pid;
 
       do
 	{
-	  (*the_target->resume) (&resume_info);
+	  (*the_target->resume) (&resume_info, 1);
 
-	  sig = mywait (statusptr, 0);
-	  if (*statusptr != 'T')
-	    return sig;
+ 	  mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
+	  if (last_status.kind != TARGET_WAITKIND_STOPPED)
+	    return signal_pid;
 	}
-      while (sig != TARGET_SIGNAL_TRAP);
+      while (last_status.value.sig != TARGET_SIGNAL_TRAP);
 
-      return sig;
+      return signal_pid;
     }
 
-  /* Wait till we are at 1st instruction in program, return signal
-     number (assuming success).  */
-  return mywait (statusptr, 0);
+  /* Wait till we are at 1st instruction in program, return new pid
+     (assuming success).  */
+  last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
+
+  return signal_pid;
 }
 
 static int
-attach_inferior (int pid, char *statusptr, int *sigptr)
+attach_inferior (int pid)
 {
   /* myattach should return -1 if attaching is unsupported,
      0 if it succeeded, and call error() otherwise.  */
 
   if (myattach (pid) != 0)
     return -1;
-
-  attached = 1;
 
   fprintf (stderr, "Attached; pid = %d\n", pid);
   fflush (stderr);
@@ -189,13 +306,17 @@ attach_inferior (int pid, char *statusptr, int *sigptr)
      whichever we were told to attach to.  */
   signal_pid = pid;
 
-  *sigptr = mywait (statusptr, 0);
+  if (!non_stop)
+    {
+      last_ptid = mywait (pid_to_ptid (pid), &last_status, 0, 0);
 
-  /* GDB knows to ignore the first SIGSTOP after attaching to a running
-     process using the "attach" command, but this is different; it's
-     just using "target remote".  Pretend it's just starting up.  */
-  if (*statusptr == 'T' && *sigptr == TARGET_SIGNAL_STOP)
-    *sigptr = TARGET_SIGNAL_TRAP;
+      /* GDB knows to ignore the first SIGSTOP after attaching to a running
+	 process using the "attach" command, but this is different; it's
+	 just using "target remote".  Pretend it's just starting up.  */
+      if (last_status.kind == TARGET_WAITKIND_STOPPED
+	  && last_status.value.sig == TARGET_SIGNAL_STOP)
+	last_status.value.sig = TARGET_SIGNAL_TRAP;
+    }
 
   return 0;
 }
@@ -279,6 +400,43 @@ handle_general_set (char *own_buf)
 	}
 
       noack_mode = 1;
+      write_ok (own_buf);
+      return;
+    }
+
+  if (strncmp (own_buf, "QNonStop:", 9) == 0)
+    {
+      char *mode = own_buf + 9;
+      int req = -1;
+      char *req_str;
+
+      if (strcmp (mode, "0") == 0)
+	req = 0;
+      else if (strcmp (mode, "1") == 0)
+	req = 1;
+      else
+	{
+	  /* We don't know what this mode is, so complain to
+	     GDB.  */
+	  fprintf (stderr, "Unknown non-stop mode requested: %s\n",
+		   own_buf);
+	  write_enn (own_buf);
+	  return;
+	}
+
+      req_str = req ? "non-stop" : "all-stop";
+      if (start_non_stop (req) != 0)
+	{
+	  fprintf (stderr, "Setting %s mode failed\n", req_str);
+	  write_enn (own_buf);
+	  return;
+	}
+
+      non_stop = req;
+
+      if (remote_debug)
+	fprintf (stderr, "[%s mode enabled]\n", req_str);
+
       write_ok (own_buf);
       return;
     }
@@ -501,10 +659,20 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   /* Reply the current thread id.  */
   if (strcmp ("qC", own_buf) == 0 && !disable_packet_qC)
     {
+      ptid_t gdb_id;
       require_running (own_buf);
-      thread_ptr = all_threads.head;
-      sprintf (own_buf, "QC%x",
-	       thread_to_gdb_id ((struct thread_info *)thread_ptr));
+
+      if (!ptid_equal (general_thread, minus_one_ptid))
+	gdb_id = general_thread;
+      else
+	{
+	  thread_ptr = all_threads.head;
+	  gdb_id = thread_to_gdb_id ((struct thread_info *)thread_ptr);
+	}
+
+      sprintf (own_buf, "QC");
+      own_buf += 2;
+      own_buf = write_ptid (own_buf, gdb_id);
       return;
     }
 
@@ -521,19 +689,28 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
     {
       if (strcmp ("qfThreadInfo", own_buf) == 0)
 	{
+	  ptid_t gdb_id;
+
 	  require_running (own_buf);
 	  thread_ptr = all_threads.head;
-	  sprintf (own_buf, "m%x", thread_to_gdb_id ((struct thread_info *)thread_ptr));
+
+	  *own_buf++ = 'm';
+	  gdb_id = thread_to_gdb_id ((struct thread_info *)thread_ptr);
+	  write_ptid (own_buf, gdb_id);
 	  thread_ptr = thread_ptr->next;
 	  return;
 	}
 
       if (strcmp ("qsThreadInfo", own_buf) == 0)
 	{
+	  ptid_t gdb_id;
+
 	  require_running (own_buf);
 	  if (thread_ptr != NULL)
 	    {
-	      sprintf (own_buf, "m%x", thread_to_gdb_id ((struct thread_info *)thread_ptr));
+	      *own_buf++ = 'm';
+	      gdb_id = thread_to_gdb_id ((struct thread_info *)thread_ptr);
+	      write_ptid (own_buf, gdb_id);
 	      thread_ptr = thread_ptr->next;
 	      return;
 	    }
@@ -772,6 +949,21 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   if (strncmp ("qSupported", own_buf, 10) == 0
       && (own_buf[10] == ':' || own_buf[10] == '\0'))
     {
+      char *p = &own_buf[10];
+
+      /* Process each feature being provided by GDB.  The first
+	 feature will follow a ':', and latter features will follow
+	 ';'.  */
+      if (*p == ':')
+	for (p = strtok (p + 1, ";");
+	     p != NULL;
+	     p = strtok (NULL, ";"))
+	  {
+	    /* Record if GDB knows about multiprocess support.  */
+	    if (strcmp (p, "multiprocess+") == 0)
+	      multi_process = 1;
+	  }
+
       sprintf (own_buf, "PacketSize=%x;QPassSignals+", PBUFSIZ - 1);
 
       /* We do not have any hook to indicate whether the target backend
@@ -792,6 +984,11 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (transport_is_reliable)
 	strcat (own_buf, ";QStartNoAckMode+");
+
+      strcat (own_buf, ";multiprocess+");
+
+      strcat (own_buf, ";QNonStop+");
+
       return;
     }
 
@@ -800,8 +997,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       && strncmp ("qGetTLSAddr:", own_buf, 12) == 0)
     {
       char *p = own_buf + 12;
-      CORE_ADDR parts[3], address = 0;
+      CORE_ADDR parts[2], address = 0;
       int i, err;
+      ptid_t ptid;
 
       require_running (own_buf);
 
@@ -825,7 +1023,10 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	      p2 = NULL;
 	    }
 
-	  decode_address (&parts[i], p, len);
+	  if (i == 0)
+	    ptid = read_ptid (p, NULL);
+	  else
+	    decode_address (&parts[i - 1], p, len);
 	  p = p2;
 	}
 
@@ -833,12 +1034,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	err = 1;
       else
 	{
-	  struct thread_info *thread = gdb_id_to_thread (parts[0]);
+	  struct thread_info *thread = find_thread_pid (ptid);
 
 	  if (thread == NULL)
 	    err = 2;
 	  else
-	    err = the_target->get_tls_address (thread, parts[1], parts[2],
+	    err = the_target->get_tls_address (thread, parts[0], parts[1],
 					       &address);
 	}
 
@@ -914,6 +1115,40 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       return;
     }
 
+  if (the_target->pid_to_exec_file != NULL
+      && strncmp ("qExecFile:", own_buf, 10) == 0)
+    {
+      char *p = own_buf + 10;
+      int pid;
+      char *path;
+      size_t len;
+
+      pid = strtol (p, NULL, 16);
+
+      path = (*the_target->pid_to_exec_file) (pid);
+
+      if (!path)
+	{
+	  write_enn (own_buf);
+	  return;
+	}
+
+      len = strlen (path);
+
+      if (len * 2 >= PBUFSIZ - strlen (own_buf) - 2)
+	{
+	  /* File name too long for packet.  */
+	  write_enn (own_buf);
+	  return;
+	}
+
+      own_buf[0] = 'Q';
+      p = own_buf + strlen (own_buf);
+      *p++ = ';';
+      hexify (p, path, len);
+      return;
+    }
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;
@@ -921,11 +1156,11 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
 /* Parse vCont packets.  */
 void
-handle_v_cont (char *own_buf, char *status, int *signal)
+handle_v_cont (char *own_buf)
 {
   char *p, *q;
   int n = 0, i = 0;
-  struct thread_resume *resume_info, default_action;
+  struct thread_resume *resume_info;
 
   /* Count the number of semicolons in the packet.  There should be one
      for every action.  */
@@ -936,28 +1171,20 @@ handle_v_cont (char *own_buf, char *status, int *signal)
       p++;
       p = strchr (p, ';');
     }
-  /* Allocate room for one extra action, for the default remain-stopped
-     behavior; if no default action is in the list, we'll need the extra
-     slot.  */
-  resume_info = malloc ((n + 1) * sizeof (resume_info[0]));
 
-  default_action.thread = -1;
-  default_action.leave_stopped = 1;
-  default_action.step = 0;
-  default_action.sig = 0;
+  resume_info = malloc (n * sizeof (resume_info[0]));
 
   p = &own_buf[5];
-  i = 0;
   while (*p)
     {
       p++;
 
-      resume_info[i].leave_stopped = 0;
-
       if (p[0] == 's' || p[0] == 'S')
-	resume_info[i].step = 1;
+	resume_info[i].kind = rk_step;
       else if (p[0] == 'c' || p[0] == 'C')
-	resume_info[i].step = 0;
+	resume_info[i].kind = rk_continue;
+      else if (p[0] == 't')
+	resume_info[i].kind = rk_stop;
       else
 	goto err;
 
@@ -980,17 +1207,10 @@ handle_v_cont (char *own_buf, char *status, int *signal)
 	}
 
       if (p[0] == 0)
-	{
-	  resume_info[i].thread = -1;
-	  default_action = resume_info[i];
-
-	  /* Note: we don't increment i here, we'll overwrite this entry
-	     the next time through.  */
-	}
+	resume_info[i].thread = minus_one_ptid;
       else if (p[0] == ':')
 	{
-	  unsigned int gdb_id = strtoul (p + 1, &q, 16);
-	  unsigned long thread_id;
+	  ptid_t ptid = read_ptid (p + 1, &q);
 
 	  if (p == q)
 	    goto err;
@@ -998,33 +1218,36 @@ handle_v_cont (char *own_buf, char *status, int *signal)
 	  if (p[0] != ';' && p[0] != 0)
 	    goto err;
 
-	  thread_id = gdb_id_to_thread_id (gdb_id);
-	  if (thread_id)
-	    resume_info[i].thread = thread_id;
-	  else
-	    goto err;
-
-	  i++;
+	  resume_info[i].thread = ptid;
 	}
+
+      i++;
     }
 
-  resume_info[i] = default_action;
-
   /* Still used in occasional places in the backend.  */
-  if (n == 1 && resume_info[0].thread != -1)
+  if (n == 1
+      && !ptid_equal (resume_info[0].thread, minus_one_ptid)
+      && resume_info[0].kind != rk_stop)
     cont_thread = resume_info[0].thread;
   else
-    cont_thread = -1;
+    cont_thread = minus_one_ptid;
   set_desired_inferior (0);
 
-  enable_async_io ();
-  (*the_target->resume) (resume_info);
+  if (!non_stop)
+    enable_async_io ();
+
+  (*the_target->resume) (resume_info, n);
 
   free (resume_info);
 
-  *signal = mywait (status, 1);
-  prepare_resume_reply (own_buf, *status, *signal);
-  disable_async_io ();
+  if (non_stop)
+    write_ok (own_buf);
+  else
+    {
+      last_ptid = mywait (minus_one_ptid, &last_status, 0, 1);
+      prepare_resume_reply (own_buf, last_ptid, &last_status);
+      disable_async_io ();
+    }
   return;
 
 err:
@@ -1035,19 +1258,32 @@ err:
 
 /* Attach to a new program.  Return 1 if successful, 0 if failure.  */
 int
-handle_v_attach (char *own_buf, char *status, int *signal)
+handle_v_attach (char *own_buf)
 {
   int pid;
 
   pid = strtol (own_buf + 8, NULL, 16);
-  if (pid != 0 && attach_inferior (pid, status, signal) == 0)
+  if (pid != 0 && attach_inferior (pid) == 0)
     {
       /* Don't report shared library events after attaching, even if
 	 some libraries are preloaded.  GDB will always poll the
 	 library list.  Avoids the "stopped by shared library event"
 	 notice on the GDB side.  */
       dlls_changed = 0;
-      prepare_resume_reply (own_buf, *status, *signal);
+
+      if (non_stop)
+	{
+	  /* In non-stop, we don't send a resume reply.  GDB will
+	     query for the current thread, so set it.  */
+	  general_thread = last_ptid;
+
+	  /* Stop events will follow up using the normal notification
+	     mechanism.  */
+	  write_ok (own_buf);
+	}
+      else
+	prepare_resume_reply (own_buf, last_ptid, &last_status);
+
       return 1;
     }
   else
@@ -1059,7 +1295,7 @@ handle_v_attach (char *own_buf, char *status, int *signal)
 
 /* Run a new program.  Return 1 if successful, 0 if failure.  */
 static int
-handle_v_run (char *own_buf, char *status, int *signal)
+handle_v_run (char *own_buf)
 {
   char *p, **pp, *next_p, **new_argv;
   int i, new_argc;
@@ -1096,36 +1332,35 @@ handle_v_run (char *own_buf, char *status, int *signal)
 
   if (new_argv[0] == NULL)
     {
-      /* GDB didn't specify a program to run.  Try to use the argv
-	 from the last run: either from the last vRun with a non-empty
-	 argv, or from what the user specified if gdbserver was
-	 started as: `gdbserver :1234 PROG ARGS'.  */
-
       if (program_argv == NULL)
 	{
 	  write_enn (own_buf);
 	  return 0;
 	}
 
-      /* We can reuse the old args.  We don't need this then.  */
-      free (new_argv);
-    }
-  else
-    {
-      /* Free the old argv.  */
-      if (program_argv)
-	{
-	  for (pp = program_argv; *pp != NULL; pp++)
-	    free (*pp);
-	  free (program_argv);
-	}
-      program_argv = new_argv;
+      new_argv[0] = strdup (program_argv[0]);
     }
 
-  *signal = start_inferior (program_argv, status);
-  if (*status == 'T')
+  /* Free the old argv.  */
+  if (program_argv)
     {
-      prepare_resume_reply (own_buf, *status, *signal);
+      for (pp = program_argv; *pp != NULL; pp++)
+	free (*pp);
+      free (program_argv);
+    }
+  program_argv = new_argv;
+
+  start_inferior (program_argv);
+  if (last_status.kind == TARGET_WAITKIND_STOPPED)
+    {
+      prepare_resume_reply (own_buf, last_ptid, &last_status);
+
+      /* In non-stop, sending a resume reply doesn't set the general
+	 thread, but GDB assumes a vRun sets it (this is so GDB can
+	 query which is the main thread of the new inferior.  */
+      if (non_stop)
+	general_thread = last_ptid;
+
       return 1;
     }
   else
@@ -1135,23 +1370,68 @@ handle_v_run (char *own_buf, char *status, int *signal)
     }
 }
 
+/* Attach to a new program.  Return 1 if successful, 0 if failure.  */
+int
+handle_v_kill (char *own_buf)
+{
+  int pid;
+  char *p = &own_buf[6];
+
+  pid = strtol (p, NULL, 16);
+  if (pid != 0 && kill_inferior (pid) == 0)
+    {
+      last_status.kind = TARGET_WAITKIND_SIGNALLED;
+      last_status.value.sig = TARGET_SIGNAL_KILL;
+      discard_queued_stop_replies (pid);
+      write_ok (own_buf);
+      return 1;
+    }
+  else
+    {
+      write_enn (own_buf);
+      return 0;
+    }
+}
+
+/* Handle a 'vStopped' packet.  */
+static void
+handle_v_stopped (char *own_buf)
+{
+  /* If we're waiting for GDB to acknowledge a pending stop reply,
+     consider that done.  */
+  if (notif_queue)
+    {
+      struct vstop_notif *head;
+
+      if (remote_debug)
+	fprintf (stderr, "vStopped: acking %s\n",
+		 target_pid_to_str (notif_queue->ptid));
+
+      head = notif_queue;
+      notif_queue = notif_queue->next;
+      free (head);
+    }
+
+  /* Push another, or if there are no more left, and OK.  */
+  send_next_stop_reply (own_buf);
+}
+
 /* Handle all of the extended 'v' packets.  */
 void
-handle_v_requests (char *own_buf, char *status, int *signal,
-		   int packet_len, int *new_packet_len)
+handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 {
   if (!disable_packet_vCont)
     {
       if (strncmp (own_buf, "vCont;", 6) == 0)
 	{
 	  require_running (own_buf);
-	  handle_v_cont (own_buf, status, signal);
+	  handle_v_cont (own_buf);
 	  return;
 	}
 
       if (strncmp (own_buf, "vCont?", 6) == 0)
 	{
-	  strcpy (own_buf, "vCont;c;C;s;S");
+	  strcpy (own_buf, "vCont;c;C;s;S;t");
 	  return;
 	}
     }
@@ -1162,25 +1442,43 @@ handle_v_requests (char *own_buf, char *status, int *signal,
 
   if (strncmp (own_buf, "vAttach;", 8) == 0)
     {
-      if (target_running ())
+      if (!multi_process && target_running ())
 	{
 	  fprintf (stderr, "Already debugging a process\n");
 	  write_enn (own_buf);
 	  return;
 	}
-      handle_v_attach (own_buf, status, signal);
+      handle_v_attach (own_buf);
       return;
     }
 
   if (strncmp (own_buf, "vRun;", 5) == 0)
     {
-      if (target_running ())
+      if (!multi_process && target_running ())
 	{
 	  fprintf (stderr, "Already debugging a process\n");
 	  write_enn (own_buf);
 	  return;
 	}
-      handle_v_run (own_buf, status, signal);
+      handle_v_run (own_buf);
+      return;
+    }
+
+  if (strncmp (own_buf, "vKill;", 6) == 0)
+    {
+      if (!target_running ())
+	{
+	  fprintf (stderr, "No process to kill\n");
+	  write_enn (own_buf);
+	  return;
+	}
+      handle_v_kill (own_buf);
+      return;
+    }
+
+  if (strncmp (own_buf, "vStopped", 8) == 0)
+    {
+      handle_v_stopped (own_buf);
       return;
     }
 
@@ -1190,34 +1488,109 @@ handle_v_requests (char *own_buf, char *status, int *signal,
   return;
 }
 
+/* Resume inferior and wait for another event.  In non-stop mode,
+   don't really wait here, but return immediatelly to the event
+   loop.  */
 void
-myresume (char *own_buf, int step, int *signalp, char *statusp)
+proceed (char *own_buf, int step, int siggnal)
 {
   struct thread_resume resume_info[2];
   int n = 0;
-  int sig = *signalp;
+  int valid_cont_thread;
 
   set_desired_inferior (0);
 
-  if (step || sig || (cont_thread != 0 && cont_thread != -1))
+  valid_cont_thread = (!ptid_equal (cont_thread, null_ptid)
+			 && !ptid_equal (cont_thread, minus_one_ptid));
+
+  if (step || siggnal || valid_cont_thread)
     {
       resume_info[0].thread
 	= ((struct inferior_list_entry *) current_inferior)->id;
-      resume_info[0].step = step;
-      resume_info[0].sig = sig;
-      resume_info[0].leave_stopped = 0;
+      if (step)
+	resume_info[0].kind = rk_step;
+      else
+	resume_info[0].kind = rk_continue;
+      resume_info[0].sig = siggnal;
       n++;
     }
-  resume_info[n].thread = -1;
-  resume_info[n].step = 0;
-  resume_info[n].sig = 0;
-  resume_info[n].leave_stopped = (cont_thread != 0 && cont_thread != -1);
 
-  enable_async_io ();
-  (*the_target->resume) (resume_info);
-  *signalp = mywait (statusp, 1);
-  prepare_resume_reply (own_buf, *statusp, *signalp);
-  disable_async_io ();
+  if (!valid_cont_thread)
+    {
+      resume_info[n].thread = minus_one_ptid;
+      resume_info[n].kind = rk_continue;
+      resume_info[n].sig = 0;
+    }
+
+  if (!non_stop)
+    enable_async_io ();
+
+  (*the_target->resume) (resume_info, n);
+
+  if (non_stop)
+    write_ok (own_buf);
+  else
+    {
+      last_ptid = mywait (minus_one_ptid, &last_status, 0, 1);
+      prepare_resume_reply (own_buf, last_ptid, &last_status);
+      disable_async_io ();
+    }
+}
+
+/* Callback for for_each_inferior.  Make a new stop reply for each
+   stopped thread.  */
+static int
+queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
+{
+  int pid = * (int *) arg;
+
+  if (pid == -1
+      || ptid_get_pid (entry->id) == pid)
+    {
+      struct target_waitstatus status;
+
+      status.kind = TARGET_WAITKIND_STOPPED;
+      status.value.sig = TARGET_SIGNAL_TRAP;
+
+      /* Pass the last stop reply back to GDB, but don't notify.  */
+      queue_stop_reply (entry->id, &status);
+    }
+
+  return 0;
+}
+
+/* Status handler for the '?' packet.  */
+
+static void
+handle_status (char *own_buf)
+{
+  struct target_waitstatus status;
+  status.kind = TARGET_WAITKIND_STOPPED;
+  status.value.sig = TARGET_SIGNAL_TRAP;
+
+  /* In non-stop mode, we must send a stop reply for each stopped
+     thread.  In all-stop mode, just send one for the first stopped
+     thread we find.  */
+
+  if (non_stop)
+    {
+      int pid = -1;
+      discard_queued_stop_replies (pid);
+      find_inferior (&all_threads, queue_stop_reply_callback, &pid);
+
+      /* The first is sent immediatly.  OK is sent if there is no
+	 stopped thread, which is the same handling of the vStopped
+	 packet (by design).  */
+      send_next_stop_reply (own_buf);
+    }
+  else
+    {
+      if (all_threads.head)
+	prepare_resume_reply (own_buf,
+			      all_threads.head->id, &status);
+      else
+	strcpy (own_buf, "W00");
+    }
 }
 
 static void
@@ -1241,7 +1614,8 @@ gdbserver_usage (FILE *stream)
 	   "HOST:PORT to listen for a TCP connection.\n"
 	   "\n"
 	   "Options:\n"
-	   "  --debug\t\tEnable debugging output.\n"
+	   "  --debug\t\tEnable general debugging output.\n"
+	   "  --remote-debug\tEnable remote protocol debugging output.\n"
 	   "  --version\t\tDisplay version information and exit.\n"
 	   "  --wrapper WRAPPER --\tRun WRAPPER to start new programs.\n");
   if (REPORT_BUGS_TO[0] && stream == stdout)
@@ -1268,15 +1642,51 @@ gdbserver_show_disableable (FILE *stream)
       break;					\
     }
 
+static int
+first_thread_of (struct inferior_list_entry *entry, void *args)
+{
+  int pid = * (int *) args;
+
+  if (ptid_get_pid (entry->id) == pid)
+    return 1;
+
+  return 0;
+}
+
+static void
+kill_inferior_callback (struct inferior_list_entry *entry)
+{
+  struct process_info *process = (struct process_info *) entry;
+  int pid = ptid_get_pid (process->head.id);
+
+  kill_inferior (pid);
+  discard_queued_stop_replies (pid);
+}
+
+static void
+detach_or_kill_inferior_callback (struct inferior_list_entry *entry)
+{
+  struct process_info *process = (struct process_info *) entry;
+  int pid = ptid_get_pid (process->head.id);
+
+  if (process->attached)
+    detach_inferior (pid);
+  else
+    kill_inferior (pid);
+
+  discard_queued_stop_replies (pid);
+}
+
+static void
+join_inferiors_callback (struct inferior_list_entry *entry)
+{
+  struct process_info *process = (struct process_info *) entry;
+  join_inferior (ptid_get_pid (process->head.id));
+}
+
 int
 main (int argc, char *argv[])
 {
-  char ch, status, *own_buf;
-  unsigned char *mem_buf;
-  int i = 0;
-  int signal;
-  unsigned int len;
-  CORE_ADDR mem_addr;
   int bad_attach;
   int pid;
   char *arg_end, *port;
@@ -1320,6 +1730,8 @@ main (int argc, char *argv[])
 	}
       else if (strcmp (*next_arg, "--debug") == 0)
 	debug_threads = 1;
+      else if (strcmp (*next_arg, "--remote-debug") == 0)
+	remote_debug = 1;
       else if (strcmp (*next_arg, "--disable-packet") == 0)
 	{
 	  gdbserver_show_disableable (stdout);
@@ -1409,6 +1821,7 @@ main (int argc, char *argv[])
       exit (1);
     }
 
+  initialize_inferiors ();
   initialize_async_io ();
   initialize_low ();
 
@@ -1426,7 +1839,7 @@ main (int argc, char *argv[])
       program_argv[i] = NULL;
 
       /* Wait till we are at first instruction in program.  */
-      signal = start_inferior (program_argv, &status);
+      start_inferior (program_argv);
 
       /* We are now (hopefully) stopped at the first instruction of
 	 the target process.  This assumes that the target process was
@@ -1434,15 +1847,16 @@ main (int argc, char *argv[])
     }
   else if (pid != 0)
     {
-      if (attach_inferior (pid, &status, &signal) == -1)
+      if (attach_inferior (pid) == -1)
 	error ("Attaching not supported on this target");
 
       /* Otherwise succeeded.  */
     }
   else
     {
-      status = 'W';
-      signal = 0;
+      last_status.kind = TARGET_WAITKIND_EXITED;
+      last_status.value.integer = 0;
+      last_ptid = minus_one_ptid;
     }
 
   /* Don't report shared library events on the initial connection,
@@ -1452,12 +1866,14 @@ main (int argc, char *argv[])
 
   if (setjmp (toplevel))
     {
-      fprintf (stderr, "Killing inferior\n");
-      kill_inferior ();
+      fprintf (stderr, "Killing all inferiors\n");
+      for_each_inferior (&all_processes,
+			 kill_inferior_callback);
       exit (1);
     }
 
-  if (status == 'W' || status == 'X')
+  if (last_status.kind == TARGET_WAITKIND_EXITED
+      || last_status.kind == TARGET_WAITKIND_SIGNALLED)
     was_running = 0;
   else
     was_running = 1;
@@ -1471,9 +1887,11 @@ main (int argc, char *argv[])
   while (1)
     {
       noack_mode = 0;
+      multi_process = 0;
+      non_stop = 0;
+
       remote_open (port);
 
-    restart:
       if (setjmp (toplevel) != 0)
 	{
 	  /* An error occurred.  */
@@ -1484,8 +1902,49 @@ main (int argc, char *argv[])
 	    }
 	}
 
+      /* Wait for events.  This will return when all event sources are
+	 removed from the event loop. */
+      start_event_loop ();
+
+      /* If an exit was requested (using the "monitor exit" command),
+	 terminate now.  The only other way to get here is for
+	 getpkt to fail; close the connection and reopen it at the
+	 top of the loop.  */
+
+      if (exit_requested)
+	{
+	  for_each_inferior (&all_processes,
+			     detach_or_kill_inferior_callback);
+	  exit (0);
+	}
+      else
+	fprintf (stderr, "Remote side has terminated connection.  "
+		 "GDBserver will reopen the connection.\n");
+    }
+}
+
+/* Event loop callback that handles a serial event.  The first byte in
+   the serial buffer gets us here.  We expect characters to arrive at
+   a brisk pace, so we read the rest of the packet with a blocking
+   getpkt call.  */
+static void
+process_serial_event (void)
+{
+  char ch;
+  int i = 0;
+  int signal;
+  unsigned int len;
+  CORE_ADDR mem_addr;
+  int pid;
+
+  /* Used to decide when gdbserver should exit in
+     multi-mode/remote.  */
+  static int have_ran = 0;
+
+  if (!have_ran)
+    have_ran = target_running ();
+
       disable_async_io ();
-      while (!exit_requested)
 	{
 	  unsigned char sig;
 	  int packet_len;
@@ -1494,7 +1953,11 @@ main (int argc, char *argv[])
 	  response_needed = 0;
 	  packet_len = getpkt (own_buf);
 	  if (packet_len <= 0)
-	    break;
+	    {
+	      target_async (0);
+	      remote_close ();
+	      return;
+	    }
 	  response_needed = 1;
 
 	  i = 0;
@@ -1509,29 +1972,46 @@ main (int argc, char *argv[])
 	      break;
 	    case 'D':
 	      require_running (own_buf);
-	      fprintf (stderr, "Detaching from inferior\n");
-	      if (detach_inferior () != 0)
+
+	      if (multi_process)
+		{
+		  i++; /* skip ';' */
+		  pid = strtol (&own_buf[i], NULL, 16);
+		}
+	      else
+		pid = ptid_get_pid (((struct inferior_list_entry *)current_inferior)->id);
+
+	      fprintf (stderr, "Detaching from process %d\n", pid);
+	      if (detach_inferior (pid) != 0)
 		write_enn (own_buf);
 	      else
 		{
+		  discard_queued_stop_replies (pid);
 		  write_ok (own_buf);
 
 		  if (extended_protocol)
 		    {
 		      /* Treat this like a normal program exit.  */
-		      signal = 0;
-		      status = 'W';
+		      last_status.kind = TARGET_WAITKIND_EXITED;
+		      last_status.value.integer = 0;
+		      last_ptid = pid_to_ptid (pid);
+
+		      current_inferior = NULL;
 		    }
 		  else
 		    {
 		      putpkt (own_buf);
 		      remote_close ();
 
-		      /* If we are attached, then we can exit.  Otherwise, we
-			 need to hang around doing nothing, until the child
-			 is gone.  */
-		      if (!attached)
-			join_inferior ();
+		      /* Usually, if we are attached, then we can
+			 exit.  Otherwise, we need to hang around
+			 doing nothing, until the child is gone.  The
+			 decision to join or not is left to the
+			 target, as some targets may have to join even
+			 if attached (e.g., Windows versions without
+			 DebugSetProcessKillOnExit).  */
+		      for_each_inferior (&all_processes,
+					 join_inferiors_callback);
 
 		      exit (0);
 		    }
@@ -1542,21 +2022,43 @@ main (int argc, char *argv[])
 	      write_ok (own_buf);
 	      break;
 	    case '?':
-	      prepare_resume_reply (own_buf, status, signal);
+	      handle_status (own_buf);
 	      break;
 	    case 'H':
 	      if (own_buf[1] == 'c' || own_buf[1] == 'g' || own_buf[1] == 's')
 		{
-		  unsigned long gdb_id, thread_id;
+		  ptid_t gdb_id, thread_id;
+		  int pid;
 
 		  require_running (own_buf);
-		  gdb_id = strtoul (&own_buf[2], NULL, 16);
-		  if (gdb_id == 0 || gdb_id == -1)
-		    thread_id = gdb_id;
+
+		  gdb_id = read_ptid (&own_buf[2], NULL);
+
+		  pid = ptid_get_pid (gdb_id);
+
+		  if (ptid_equal (gdb_id, null_ptid)
+		      || ptid_equal (gdb_id, minus_one_ptid))
+		    thread_id = null_ptid;
+		  else if (pid != 0
+			   && ptid_equal (pid_to_ptid (pid),
+					  gdb_id))
+		    {
+		      struct thread_info *thread =
+			(struct thread_info *) find_inferior (&all_threads,
+							      first_thread_of,
+							      &pid);
+		      if (!thread)
+			{
+			  write_enn (own_buf);
+			  break;
+			}
+
+		      thread_id = ((struct inferior_list_entry *)thread)->id;
+		    }
 		  else
 		    {
 		      thread_id = gdb_id_to_thread_id (gdb_id);
-		      if (thread_id == 0)
+		      if (ptid_equal (thread_id, null_ptid))
 			{
 			  write_enn (own_buf);
 			  break;
@@ -1565,6 +2067,19 @@ main (int argc, char *argv[])
 
 		  if (own_buf[1] == 'g')
 		    {
+		      if (ptid_equal (thread_id, null_ptid))
+			{
+			  /* GDB is telling us to choose any thread.
+			     Check if the currently selected thread is
+			     still valid. If it is not, select the
+			     first available.  */
+			  struct thread_info *thread =
+			    (struct thread_info *) find_inferior_id (&all_threads,
+								     general_thread);
+			  if (thread == NULL)
+			    thread_id = all_threads.head->id;
+			}
+
 		      general_thread = thread_id;
 		      set_desired_inferior (1);
 		    }
@@ -1611,9 +2126,11 @@ main (int argc, char *argv[])
 	      break;
 	    case 'X':
 	      require_running (own_buf);
+
+	      /* If len == 0, GDB is probing for packet support.  */
 	      if (decode_X_packet (&own_buf[1], packet_len - 1,
 				   &mem_addr, &len, mem_buf) < 0
-		  || write_inferior_memory (mem_addr, mem_buf, len) != 0)
+		  || (len > 0 && write_inferior_memory (mem_addr, mem_buf, len) != 0))
 		write_enn (own_buf);
 	      else
 		write_ok (own_buf);
@@ -1625,7 +2142,7 @@ main (int argc, char *argv[])
 		signal = target_signal_to_host (sig);
 	      else
 		signal = 0;
-	      myresume (own_buf, 0, &signal, &status);
+	      proceed (own_buf, 0, signal);
 	      break;
 	    case 'S':
 	      require_running (own_buf);
@@ -1634,17 +2151,17 @@ main (int argc, char *argv[])
 		signal = target_signal_to_host (sig);
 	      else
 		signal = 0;
-	      myresume (own_buf, 1, &signal, &status);
+	      proceed (own_buf, 1, signal);
 	      break;
 	    case 'c':
 	      require_running (own_buf);
 	      signal = 0;
-	      myresume (own_buf, 0, &signal, &status);
+	      proceed (own_buf, 0, signal);
 	      break;
 	    case 's':
 	      require_running (own_buf);
 	      signal = 0;
-	      myresume (own_buf, 1, &signal, &status);
+	      proceed (own_buf, 1, signal);
 	      break;
 	    case 'Z':
 	      {
@@ -1713,20 +2230,19 @@ main (int argc, char *argv[])
 	      if (!target_running ())
 		/* The packet we received doesn't make sense - but we
 		   can't reply to it, either.  */
-		goto restart;
+		return;
 
-	      fprintf (stderr, "Killing inferior\n");
-	      kill_inferior ();
+	      fprintf (stderr, "Killing all inferiors\n");
+	      for_each_inferior (&all_processes, kill_inferior_callback);
 
 	      /* When using the extended protocol, we wait with no
 		 program running.  The traditional protocol will exit
 		 instead.  */
 	      if (extended_protocol)
 		{
-		  status = 'X';
-		  signal = TARGET_SIGNAL_KILL;
-		  was_running = 0;
-		  goto restart;
+		  last_status.kind = TARGET_WAITKIND_EXITED;
+		  last_status.value.sig = TARGET_SIGNAL_KILL;
+		  return;
 		}
 	      else
 		{
@@ -1735,12 +2251,13 @@ main (int argc, char *argv[])
 		}
 	    case 'T':
 	      {
-		unsigned long gdb_id, thread_id;
+		ptid_t gdb_id, thread_id;
 
 		require_running (own_buf);
-		gdb_id = strtoul (&own_buf[1], NULL, 16);
+
+		gdb_id = read_ptid (&own_buf[1], NULL);
 		thread_id = gdb_id_to_thread_id (gdb_id);
-		if (thread_id == 0)
+		if (ptid_equal (thread_id, null_ptid))
 		  {
 		    write_enn (own_buf);
 		    break;
@@ -1760,18 +2277,19 @@ main (int argc, char *argv[])
 	      if (extended_protocol)
 		{
 		  if (target_running ())
-		    kill_inferior ();
+		    for_each_inferior (&all_processes,
+				       kill_inferior_callback);
 		  fprintf (stderr, "GDBserver restarting\n");
 
 		  /* Wait till we are at 1st instruction in prog.  */
 		  if (program_argv != NULL)
-		    signal = start_inferior (program_argv, &status);
+		    start_inferior (program_argv);
 		  else
 		    {
-		      status = 'X';
-		      signal = TARGET_SIGNAL_KILL;
+		      last_status.kind = TARGET_WAITKIND_EXITED;
+		      last_status.value.sig = TARGET_SIGNAL_KILL;
 		    }
-		  goto restart;
+		  return;
 		}
 	      else
 		{
@@ -1783,8 +2301,7 @@ main (int argc, char *argv[])
 		}
 	    case 'v':
 	      /* Extended (long) request.  */
-	      handle_v_requests (own_buf, &status, &signal,
-				 packet_len, &new_packet_len);
+	      handle_v_requests (own_buf, packet_len, &new_packet_len);
 	      break;
 
 	    default:
@@ -1802,50 +2319,52 @@ main (int argc, char *argv[])
 
 	  response_needed = 0;
 
-	  if (was_running && (status == 'W' || status == 'X'))
+	  if (!extended_protocol && have_ran && !target_running ())
 	    {
-	      was_running = 0;
-
-	      if (status == 'W')
-		fprintf (stderr,
-			 "\nChild exited with status %d\n", signal);
-	      if (status == 'X')
-		fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
-			 target_signal_to_host (signal),
-			 target_signal_to_name (signal));
-
-	      if (extended_protocol)
-		goto restart;
-	      else
+	      /* In non-stop, defer exiting until GDB had a chance to
+		 query the whole vStopped list (until it gets an
+		 OK).  */
+	      if (!notif_queue)
 		{
 		  fprintf (stderr, "GDBserver exiting\n");
 		  exit (0);
 		}
 	    }
-
-	  if (status != 'W' && status != 'X')
-	    was_running = 1;
 	}
+}
 
-      /* If an exit was requested (using the "monitor exit" command),
-	 terminate now.  The only other way to get here is for
-	 getpkt to fail; close the connection and reopen it at the
-	 top of the loop.  */
+/* Event-loop callback for serial events.  */
+void
+handle_serial_event (int err, gdb_client_data client_data)
+{
+  if (debug_threads)
+    fprintf (stderr, "handling possible serial event\n");
 
-      if (exit_requested)
-	{
-	  remote_close ();
-	  if (attached && target_running ())
-	    detach_inferior ();
-	  else if (target_running ())
-	    kill_inferior ();
-	  exit (0);
-	}
-      else
-	{
-	  fprintf (stderr, "Remote side has terminated connection.  "
-			   "GDBserver will reopen the connection.\n");
-	  remote_close ();
-	}
-    }
+  /* Really handle it.  */
+  process_serial_event ();
+
+  /* Be sure to not change the selected inferior behind GDB's back.
+     Important in the non-stop mode asynchronous protocol.  */
+  set_desired_inferior (1);
+}
+
+/* Event-loop callback for the target events.  */
+void
+handle_target_event (int err, gdb_client_data client_data)
+{
+  if (debug_threads)
+    fprintf (stderr, "handling possible target event\n");
+
+  last_ptid = mywait (minus_one_ptid, &last_status,
+		      TARGET_WNOHANG, 1);
+
+  if (last_status.kind == TARGET_WAITKIND_IGNORE)
+    return; /* Nothing interesting found.  */
+
+  /* Something interesting.  Tell GDB about it.  */
+  push_event (last_ptid, &last_status);
+
+  /* Be sure to not change the selected inferior behind GDB's back.
+     Important in the non-stop mode asynchronous protocol.  */
+  set_desired_inferior (1);
 }

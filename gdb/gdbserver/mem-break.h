@@ -54,6 +54,10 @@ void uninsert_breakpoint (CORE_ADDR where);
 
 int check_breakpoints (CORE_ADDR stop_pc);
 
+/* See if any breakpoint claims ownership of STOP_PC.  */
+
+int breakpoint_at (CORE_ADDR stop_pc);
+
 /* See if any breakpoints shadow the target memory area from MEM_ADDR
    to MEM_ADDR + MEM_LEN.  Update the data already read from the target
    (in BUF) if necessary.  */
