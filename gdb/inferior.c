@@ -94,6 +94,8 @@ add_inferior_silent (int pid)
   memset (inf, 0, sizeof (*inf));
   inf->pid = pid;
 
+  inf->stop_soon = NO_STOP_QUIETLY;
+
   inf->num = ++highest_inferior_num;
   inf->next = inferior_list;
   inferior_list = inf;
@@ -138,16 +140,17 @@ delete_thread_of_inferior (struct thread_info *tp, void *data)
 
 /* If SILENT then be quiet -- don't announce a inferior death, or the
    exit of its threads.  */
-static void
-delete_inferior_1 (int pid, int silent)
+
+void
+delete_inferior_struct (struct inferior *inftodel, int silent)
 {
   struct inferior *inf, *infprev;
-  struct delete_thread_of_inferior_arg arg = { pid, silent };
+  struct delete_thread_of_inferior_arg arg;
 
   infprev = NULL;
 
   for (inf = inferior_list; inf; infprev = inf, inf = inf->next)
-    if (inf->pid == pid)
+    if (inf == inftodel)
       break;
 
   if (!inf)
@@ -158,38 +161,42 @@ delete_inferior_1 (int pid, int silent)
   else
     inferior_list = inf->next;
 
+  if (inf->pid != 0)
+    {
+      arg.pid = inf->pid;
+      arg.silent = silent;
+      iterate_over_threads (delete_thread_of_inferior, &arg);
+    }
+
+  observer_notify_inferior_exit (inf->pid);
   free_inferior (inf);
+}
 
-  arg.pid = pid;
-  arg.silent = silent;
-
-  iterate_over_threads (delete_thread_of_inferior, &arg);
-
-  observer_notify_inferior_exit (pid);
+void
+delete_inferior_id (int num)
+{
+  struct inferior *inf = find_inferior_id (num);
+  delete_inferior_struct (inf, 0);
 }
 
 void
 delete_inferior (int pid)
 {
-  delete_inferior_1 (pid, 0);
-
-  if (print_inferior_events)
-    printf_unfiltered (_("[Inferior %d exited]\n"), pid);
+  struct inferior *inf = find_inferior_pid (pid);
+  if (inf)
+    {
+      delete_inferior_struct (inf, 0);
+      if (print_inferior_events)
+	printf_unfiltered (_("[Inferior %d exited]\n"), pid);
+    }
 }
 
 void
 delete_inferior_silent (int pid)
 {
-  delete_inferior_1 (pid, 1);
-}
-
-void
-detach_inferior (int pid)
-{
-  delete_inferior_1 (pid, 1);
-
-  if (print_inferior_events)
-    printf_unfiltered (_("[Inferior %d detached]\n"), pid);
+  struct inferior *inf = find_inferior_pid (pid);
+  if (inf)
+    delete_inferior_struct (inf, 1);
 }
 
 void
@@ -200,7 +207,20 @@ discard_all_inferiors (void)
   for (inf = inferior_list; inf; inf = infnext)
     {
       infnext = inf->next;
-      delete_inferior_silent (inf->pid);
+      if (inf->pid != 0)
+	delete_inferior_struct (inf, 1);
+    }
+}
+
+void
+detach_inferior (int pid)
+{
+  struct inferior *inf = find_inferior_pid (pid);
+  if (inf)
+    {
+      delete_inferior_struct (inf, 1);
+      if (print_inferior_events)
+	printf_unfiltered (_("[Inferior %d detached]\n"), pid);
     }
 }
 
@@ -309,6 +329,18 @@ have_inferiors (void)
   return inferior_list != NULL;
 }
 
+/* Returns true if there are any non-proto inferiors.  */
+int
+have_real_inferiors (void)
+{
+  struct inferior *inf;
+
+  for (inf = inferior_list; inf; inf = inf->next)
+    if (inf->pid != 0)
+      return 1;
+  return 0;
+}
+
 int
 number_of_inferiors (void)
 {
@@ -383,15 +415,21 @@ print_inferior (struct ui_out *uiout, int requested_inferior)
 	      ui_out_field_string (uiout, "io_terminal", "term=Y");
 	    }
 	}
+
 #if 0
-      extra_info = target_extra_inferior_info (inf);
-      if (extra_info)
+      /* Only query the target about real inferiors.  */
+      if (inf->pid != 0)
 	{
-	  ui_out_text (uiout, " (");
-	  ui_out_field_string (uiout, "details", extra_info);
-	  ui_out_text (uiout, ")");
+	  extra_info = target_extra_inferior_info (inf);
+	  if (extra_info)
+	    {
+	      ui_out_text (uiout, " (");
+	      ui_out_field_string (uiout, "details", extra_info);
+	      ui_out_text (uiout, ")");
+	    }
 	}
 #endif
+
       ui_out_text (uiout, "\n");
       do_cleanups (chain2);
     }
@@ -491,11 +529,9 @@ remove_inferior_command (char *args, int from_tty)
 
   for (ix = 0; VEC_iterate (itset_entry, itset->inferiors, ix, entry); ++ix)
     {
-#if 0
       if (entry->inferior->removable)
-	delete_inferior (entry->inferior);
+	delete_inferior_struct (entry->inferior, 0);
       /* (should remove threads?) */
-#endif
     }
 }
 

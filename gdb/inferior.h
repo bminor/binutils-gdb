@@ -274,6 +274,8 @@ extern void interrupt_target_1 (int all_threads);
 
 extern void detach_command (char *, int);
 
+extern void notice_new_inferior (ptid_t, int, int);
+
 /* Address at which inferior stopped.  */
 
 extern CORE_ADDR stop_pc;
@@ -365,6 +367,8 @@ extern int suppress_stop_observer;
 
 /* When set, no calls to target_resumed observer will be made.  */
 extern int suppress_resume_observer;
+
+extern int detach_fork;
 
 
 /* Possible values for gdbarch_call_dummy_location.  */
@@ -532,6 +536,9 @@ extern void delete_inferior_silent (int pid);
 /* Delete an existing inferior list entry, due to inferior detaching.  */
 extern void detach_inferior (int pid);
 
+/* Delete inferior with GDB inferior id NUM.  */
+extern void delete_inferior_id (int num);
+
 /* Get rid of all inferiors.  */
 extern void discard_all_inferiors (void);
 
@@ -550,8 +557,11 @@ extern int in_inferior_list (int pid);
    not the system's).  */
 extern int valid_inferior_id (int num);
 
-/* Search function to lookup a inferior by target 'pid'.  */
+/* Search function to lookup an inferior by target 'pid'.  */
 extern struct inferior *find_inferior_pid (int pid);
+
+/* Search function to lookup an inferior by GDB 'num'.  */
+extern struct inferior *find_inferior_id (int num);
 
 /* Inferior iterator function.
 

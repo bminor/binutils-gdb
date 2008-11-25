@@ -151,7 +151,7 @@ exec_close (int quitting)
 	{
 	  /* We don't free objfiles because other code does it.  */
 	  if (ex->inferior)
-	    delete_inferior (ex->inferior->pid);
+	    delete_inferior_id (ex->inferior->num);
 	}
 #if 0
       VEC_block_remove (exec_p, execs, 0, VEC_length (exec_p, execs));

@@ -982,6 +982,8 @@ get_current_frame (void)
     error (_("No stack."));
   if (!target_has_memory)
     error (_("No memory."));
+  if (ptid_equal (inferior_ptid, null_ptid))
+    error (_("No current inferior."));
   if (is_executing (inferior_ptid))
     error (_("Target is executing."));
 
@@ -1009,6 +1011,9 @@ static int
 has_stack_frames (void)
 {
   if (!target_has_registers || !target_has_stack || !target_has_memory)
+    return 0;
+
+  if (ptid_equal (inferior_ptid, null_ptid))
     return 0;
 
   /* If the current thread is executing, don't try to read from

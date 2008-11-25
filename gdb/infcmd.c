@@ -553,11 +553,14 @@ kill_if_already_running (int from_tty)
 	 restart it.  */
       target_require_runnable ();
 
-      if (from_tty
-	  && !query ("The program being debugged has been started already.\n\
+      if (!target_supports_multi_process ())
+	{
+	  if (from_tty
+	      && !query ("The program being debugged has been started already.\n\
 Start it from the beginning? "))
-	error (_("Program not restarted."));
-      target_kill ();
+	    error (_("Program not restarted."));
+	  target_kill ();
+	}
     }
 }
 
@@ -574,6 +577,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   kill_if_already_running (from_tty);
 
+  /* This is bad.  */
   init_wait_for_inferior ();
   clear_breakpoint_hit_counts ();
 
@@ -2206,6 +2210,23 @@ proceed_after_attach (int pid)
   do_cleanups (old_chain);
 }
 
+struct exec_file_attach_wrapper_args
+{
+  char *path;
+  int from_tty;
+};
+
+static int
+exec_file_attach_wrapper (struct ui_out *ui_out, void *args)
+{
+  struct exec_file_attach_wrapper_args *a = args;
+
+  exec_file_attach (a->path, a->from_tty);
+  symbol_file_add_main (a->path, a->from_tty);
+
+  return 0;
+}
+
 /*
  * TODO:
  * Should save/restore the tty state since it might be that the
@@ -2241,19 +2262,47 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
       exec_file = target_pid_to_exec_file (PIDGET (inferior_ptid));
       if (exec_file)
 	{
-	  /* It's possible we don't have a full path, but rather just a
-	     filename.  Some targets, such as HP-UX, don't provide the
-	     full path, sigh.
+	  struct exec_file_attach_wrapper_args args;
 
-	     Attempt to qualify the filename against the source path.
-	     (If that fails, we'll just fall back on the original
-	     filename.  Not much more we can do...)
-	   */
-	  if (!source_full_path_of (exec_file, &full_exec_path))
-	    full_exec_path = savestring (exec_file, strlen (exec_file));
+	  if (gdb_sysroot && *gdb_sysroot)
+	    {
+	      char *name = xmalloc (strlen (gdb_sysroot)
+				   + strlen (exec_file)
+				   + 1);
+	      strcpy (name, gdb_sysroot);
+	      strcat (name, exec_file);
+	      full_exec_path = name;
+	    }
+	  else
+	    {
+	      /* It's possible we don't have a full path, but rather just a
+		 filename.  Some targets, such as HP-UX, don't provide the
+		 full path, sigh.
 
-	  exec_file_attach (full_exec_path, from_tty);
-	  symbol_file_add_main (full_exec_path, from_tty);
+		 Attempt to qualify the filename against the source path.
+		 (If that fails, we'll just fall back on the original
+		 filename.  Not much more we can do...)
+	      */
+	      if (!source_full_path_of (exec_file, &full_exec_path))
+		full_exec_path = savestring (exec_file, strlen (exec_file));
+	    }
+
+	  args.path = full_exec_path;
+	  args.from_tty = from_tty;
+
+	  /* Don't let failing to find symbols prevent trying to
+	     finish the attach.  */
+	  catch_exceptions (uiout, exec_file_attach_wrapper, &args,
+			    RETURN_MASK_ERROR);
+
+	  /* Try to use the exec we (hopefully) just pulled in as the
+	     inferior's exec.  */
+	  if (!inferior->exec)
+	    {
+	      exec = find_exec_by_name (full_exec_path);
+	      if (exec)
+		set_inferior_exec (inferior, exec);
+	    }
 	}
     }
   else
@@ -2261,6 +2310,14 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
       reopen_exec_file ();
       reread_symbols ();
     }
+
+  /* As a heuristic, if there is no exec assigned to the attached
+     inferior, but only one exec known to GDB, guess that it is the
+     exec for the the process just attached. (If GDB has guessed
+     wrong, it will be up to the user to use set-exec to fix
+     matters.)  */
+  if (!inferior->exec && number_of_execs () == 1)
+    set_inferior_exec (inferior, first_exec);
 
   /* Take any necessary post-attaching actions for this platform.  */
   target_post_attach (PIDGET (inferior_ptid));
@@ -2275,7 +2332,7 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
       /* The user requested an `attach&', so be sure to leave threads
 	 that didn't get a signal running.  */
 
-      /* Immediatelly resume all suspended threads of this inferior,
+      /* Immediately resume all suspended threads of this inferior,
 	 and this inferior only.  This should have no effect on
 	 already running threads.  If a thread has been stopped with a
 	 signal, leave it be.  */
@@ -2395,6 +2452,8 @@ attach_command (char *args, int from_tty)
 
   /* Set up execution context to know that we should return from
      wait_for_inferior as soon as the target reports a stop.  */
+
+  /* NOTE, NOTE, this is wrong in multi-process... */
   init_wait_for_inferior ();
   clear_proceed_status ();
 
@@ -2446,19 +2505,64 @@ attach_command (char *args, int from_tty)
 
   attach_command_post_wait (args, from_tty, async_exec);
 
-  /* As a heuristic, if there is no exec assigned to the attached
-     inferior, but only one exec known to GDB, guess that it is the
-     exec for the the process just attached. (If GDB has guessed
-     wrong, it will be up to the user to use set-exec to fix
-     matters.)  */
-  {
-    struct inferior *inferior = current_inferior ();
+}
 
-    if (!inferior->exec && number_of_execs () == 1)
-      set_inferior_exec (inferior, first_exec);
-  }
+/* We had just found out that the target was already attached to an
+   inferior.  PTID points at a thread of this new inferior, that is
+   the most likelly to be stopped right now, but not necessarily so.
+   The new inferior has already been added to the inferior list at
+   this point.  */
 
-  discard_cleanups (back_to);
+void
+notice_new_inferior (ptid_t ptid, int stopping, int from_tty)
+{
+  struct cleanup* old_chain;
+  struct inferior *inferior;
+  int async_exec;
+
+  old_chain = make_cleanup (null_cleanup, NULL);
+
+  /* If in non-stop, leave threads as running as they were.  If
+     they're stopped for some reason other than us telling it to, it
+     should report a signal != TARGET_SIGNAL_0.  */
+  async_exec = non_stop;
+
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    make_cleanup_restore_current_thread ();
+
+  switch_to_thread (ptid);
+
+  inferior = current_inferior ();
+
+  if (is_executing (inferior_ptid))
+    {
+      target_stop (inferior_ptid);
+
+      if (!non_stop)
+	inferior->stop_soon = STOP_QUIETLY_REMOTE;
+
+      if (target_can_async_p ())
+	{
+	  /* sync_execution mode.  Wait for stop.  */
+	  struct attach_command_continuation_args *a;
+
+	  a = xmalloc (sizeof (*a));
+	  a->args = xstrdup ("");
+	  a->from_tty = from_tty;
+	  a->async_exec = async_exec;
+	  add_inferior_continuation (attach_command_continuation, a,
+				     attach_command_continuation_free_args);
+
+	  do_cleanups (old_chain);
+	  return;
+	}
+      else
+	wait_for_inferior (0);
+    }
+
+  attach_command_post_wait ("" /* args */, from_tty, !stopping);
+
+  do_cleanups (old_chain);
 }
 
 /*

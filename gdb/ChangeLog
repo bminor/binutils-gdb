@@ -1,5 +1,119 @@
 2008-11-25  Pedro Alves  <pedro@codesourcery.com>
 
+	2008-11-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-fork.c (detach_fork): Delete declaration.
+	(_initialize_linux_fork): Move "set detach-on-fork"
+	command to ...
+	* infrun.c (_initialize_infrun): ... here.
+	* inferior.h (detach_fork): Declare.
+
+	2008-11-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (read_ptid): If we don't know about any inferior yet,
+	use the pid of magic_null_ptid.
+	(remote_start_remote): Don't set inferior_ptid to magic_null_ptid
+	here.
+
+	2008-10-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_start_remote): Mask async mode while collecting
+	the initial event, use notice_new_inferior.
+
+	2008-10-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (attach_command_post_wait): Set the inferior exec here.
+	(attach_command): Don't set the inferior exec here.
+	(notice_new_inferior): New.
+	* inferior.h (notice_new_inferior): Declare.
+	* remote.c (notice_new_inferiors): Add `stopping' argument.  Add
+	the inferior before adding the threads.  Call notice_new_inferior.
+	(record_currthread): Adjust.
+	(remote_threads_info): Add the inferior before adding the thread.
+	Call notice_new_inferior.
+
+	2008-10-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (notice_new_inferiors): If there's only one exec, set
+	it in the new inferior.
+	(set_thread): If setting the thread failed, assume the thread has
+	terminated.
+
+	2008-09-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferior.c (delete_inferior_1): Free the inferior after freeing
+	its threads.
+
+	2008-09-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferior.h (discard_all_inferiors): Declare.
+	* inferior.c (delete_inferior): Rename to...
+	(delete_inferior_1): ...this.  Add 'silent' argument.  If this
+	inferior is has pid not zero, delete its threads.
+	(delete_inferior): New, as wrapper around delete_inferior_1.
+	(delete_inferior_by_pid_1): Reimplement.
+	(discard_all_inferiors): New.
+
+	2008-09-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (extended_remote_attach_1): Don't set target_attach_no_wait.
+
+	2008-09-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* frame.c (get_current_frame, has_stack_frames): Check for
+	null_ptid.
+	* top.c (execute_command): Likewise.
+
+	2008-08-29  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferior.c (have_real_inferiors): New.
+	* inferior.h (have_real_inferiors): Declare.
+	* remote.c (extended_remote_mourn_1): Use it.
+	* top.c (quit_target): Use it.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (parse_stop_reply): Handle Y;exec.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (struct exec_file_attach_wrapper_args): New.
+	(exec_file_attach_wrapper): New.
+	(attach_command_post_wait): If there's a sysroot, prepend it to
+	the target reported exec file path.  Continue attaching to the
+	inferior event if attaching to the exec file fails.
+
+	* remote.c (remote_pid_to_exec_file): Rebustify.  Expect
+	"QExecFile:PID;" in the reply.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (record_currthread): If setting the current thread to
+	minus_one_ptid, don't pass that to the stub.
+	(remote_parse_stop_reply): Handle 'Y' stop reply.
+	(remote_wait_as): Likewise.  If remote process exited, invalidate
+	the current thread.
+	(remote_detach_pid): New.
+	(remote_follow_fork): New.
+	(init_remote_ops): Register it.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_pid_to_exec_file): New.
+	(init_remote_ops): Register it.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (kill_if_already_running): If target supports
+	multi-process, allow multi-runs.
+
+	2008-08-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (extended_remote_create_inferior_1): Don't clear the
+	thread list.
+
+2008-11-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* inferior.c (itset_member): Fix typo again.
 
 2008-11-24  Tom Tromey  <tromey@redhat.com>

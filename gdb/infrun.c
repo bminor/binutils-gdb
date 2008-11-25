@@ -5307,6 +5307,12 @@ By default, the debugger will follow the parent process."),
 			show_follow_fork_mode_string,
 			&setlist, &showlist);
 
+  add_setshow_boolean_cmd ("detach-on-fork", class_run, &detach_fork, _("\
+Set whether gdb will detach the child of a fork."), _("\
+Show whether gdb will detach the child of a fork."), _("\
+Tells gdb whether to detach the child of a fork."),
+			   NULL, NULL, &setlist, &showlist);
+
   add_setshow_enum_cmd ("scheduler-locking", class_run, 
 			scheduler_enums, &scheduler_mode, _("\
 Set mode for locking scheduler during execution."), _("\

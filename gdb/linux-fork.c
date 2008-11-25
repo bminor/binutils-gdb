@@ -34,8 +34,6 @@
 #include "gdb_dirent.h"
 #include <ctype.h>
 
-extern int detach_fork;
-
 struct fork_info *fork_list;
 static int highest_fork_num;
 
@@ -669,14 +667,6 @@ void
 _initialize_linux_fork (void)
 {
   init_fork_list ();
-
-  /* Set/show detach-on-fork: user-settable mode.  */
-
-  add_setshow_boolean_cmd ("detach-on-fork", class_obscure, &detach_fork, _("\
-Set whether gdb will detach the child of a fork."), _("\
-Show whether gdb will detach the child of a fork."), _("\
-Tells gdb whether to detach the child of a fork."), 
-			   NULL, NULL, &setlist, &showlist);
 
   /* Set/show restart-auto-finish: user-settable count.  Causes the
      first "restart" of a fork to do some number of "finish" commands

@@ -1126,53 +1126,87 @@ static ptid_t general_thread;
 static ptid_t continue_thread;
 
 static void
-notice_new_inferiors (ptid_t currthread)
+notice_new_inferiors (ptid_t currthread, int running)
 {
+  struct remote_state *rs = get_remote_state ();
+  struct inferior *inf = NULL;
+
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
 
   if (in_thread_list (currthread) && is_exited (currthread))
     {
+      int pid = ptid_get_pid (currthread);
+      if (!in_inferior_list (pid))
+	{
+	  inf = add_inferior (pid);
+
+	  /* This may be the first inferior we hear about.  */
+	  if (!target_has_execution)
+	    {
+	      if (rs->extended)
+		target_mark_running (&extended_remote_ops);
+	      else
+		target_mark_running (&remote_ops);
+	    }
+	}
+
       /* We're seeing an event on a thread id we knew had exited.
 	 This has to be a new thread reusing the old id.  Add it.  */
       add_thread (currthread);
-      return;
-    }
 
-  if (!in_thread_list (currthread))
+      set_executing (currthread, running);
+      set_running (currthread, running);
+    }
+  else if (!in_thread_list (currthread))
     {
       if (ptid_equal (pid_to_ptid (ptid_get_pid (currthread)), inferior_ptid))
 	{
 	  /* inferior_ptid has no thread member yet.  This can happen
 	     with the vAttach -> remote_wait,"TAAthread:" path if the
 	     stub doesn't support qC.  This is the first stop reported
-	     after an attach, so this is the main thread.  Update the
-	     ptid in the thread list.  */
-  	  thread_change_ptid (inferior_ptid, currthread);
- 	  return;
+	     after an attach, so this is the main thread.  */
+	  thread_change_ptid (inferior_ptid, currthread);
 	}
-
-      if (ptid_equal (magic_null_ptid, inferior_ptid))
+      else if (ptid_equal (magic_null_ptid, inferior_ptid))
 	{
 	  /* inferior_ptid is not set yet.  This can happen with the
 	     vRun -> remote_wait,"TAAthread:" path if the stub
 	     doesn't support qC.  This is the first stop reported
 	     after an attach, so this is the main thread.  Update the
 	     ptid in the thread list.  */
-  	  thread_change_ptid (inferior_ptid, currthread);
-	  return;
+	  thread_change_ptid (inferior_ptid, currthread);
 	}
+      else
+	{
+	  /* When connecting to a target remote, or to a target
+	     extended-remote which already was debugging an inferior, we
+	     may not know about it yet.  Add it before adding its child
+	     thread, so notifications are emitted in a sensible order.  */
+	  if (!in_inferior_list (ptid_get_pid (currthread)))
+	    {
+	      inf = add_inferior (ptid_get_pid (currthread));
 
-      /* When connecting to a target remote, or to a target
-	 extended-remote which already was debugging an inferior, we
-	 may not know about it yet.  Add it before adding its child
-	 thread, so notifications are emitted in a sensible order.  */
-      if (!in_inferior_list (ptid_get_pid (currthread)))
-	add_inferior (ptid_get_pid (currthread));
+	      /* This may be the first inferior we hear about.  */
+	      if (!target_has_execution)
+		{
+		  if (rs->extended)
+	        target_mark_running (&extended_remote_ops);
+		  else
+		    target_mark_running (&remote_ops);
+		}
+	    }
 
-      /* This is really a new thread.  Add it.  */
-      add_thread (currthread);
+	  /* This is really a new thread.  Add it.  */
+	  add_thread (currthread);
+	  set_executing (currthread, running);
+	  set_running (currthread, running);
+	}
     }
+
+  if (inf)
+    /* Do whatever is needed to do with a new inferior.  */
+    notice_new_inferior (currthread, !running, 0);
 }
 
 /* Call this function as a result of
@@ -1190,7 +1224,7 @@ record_currthread (ptid_t currthread)
     /* We're just invalidating the local thread mirror.  */
     return;
 
-  notice_new_inferiors (currthread);
+  notice_new_inferiors (currthread, 0);
 }
 
 static char *last_pass_packet;
@@ -1279,6 +1313,23 @@ set_thread (struct ptid ptid, int gen)
     write_ptid (buf, endbuf, ptid);
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (rs->buf[0]
+      && strcmp (rs->buf, "OK") != 0)
+    {
+      /* If we get an error setting a thread, it's because it is no
+	 longer valid.  */
+      if (!ptid_equal (minus_one_ptid, ptid)
+	  && !ptid_equal (null_ptid, ptid)
+	  && !ptid_equal (any_thread_ptid, ptid)
+	  && !ptid_is_pid (ptid))
+	{
+	  int num = pid_to_thread_id (ptid);
+	  delete_thread (ptid);
+	  error (_("Thread ID %d has terminated."), num);
+	}
+    }
+
   if (gen)
     general_thread = ptid;
   else
@@ -1525,8 +1576,13 @@ read_ptid (char *buf, char **obuf)
   pp = unpack_varlen_hex (p, &tid);
 
   /* Since the stub is not sending a process id, then default to
-     what's in inferior_ptid.  */
-  pid = ptid_get_pid (inferior_ptid);
+     what's in inferior_ptid, unless it's null at this point.  If so,
+     then since there's no way to know the pid of the reported
+     threads, use the magic number.  */
+  if (ptid_equal (inferior_ptid, null_ptid))
+    pid = ptid_get_pid (magic_null_ptid);
+  else
+    pid = ptid_get_pid (inferior_ptid);
 
   if (obuf)
     *obuf = pp;
@@ -2148,27 +2204,15 @@ remote_threads_info (void)
 	      do
 		{
 		  new_thread = read_ptid (bufp, &bufp);
-		  if (!ptid_equal (new_thread, null_ptid)
-		      && (!in_thread_list (new_thread)
-			  || is_exited (new_thread)))
+		  if (!ptid_equal (new_thread, null_ptid))
 		    {
-		      /* When connected to a multi-process aware stub,
-			 "info threads" may show up threads of
-			 inferiors we didn't know about yet.  Add them
-			 now, and before adding any of its child
-			 threads, so notifications are emitted in a
-			 sensible order.  */
-		      if (!in_inferior_list (ptid_get_pid (new_thread)))
-			add_inferior (ptid_get_pid (new_thread));
-
-		      add_thread (new_thread);
-
 		      /* In non-stop mode, we assume new found threads
-			 are running until we proven otherwise with a
+			 are running until proven otherwise with a
 			 stop reply.  In all-stop, we can only get
 			 here if all threads are stopped.  */
-		      set_executing (new_thread, non_stop ? 1 : 0);
-		      set_running (new_thread, non_stop ? 1 : 0);
+		      int running = non_stop ? 1 : 0;
+
+		      notice_new_inferiors (new_thread, running);
 		    }
 		}
 	      while (*bufp++ == ',');	/* comma-separated list */
@@ -2576,12 +2620,6 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 	 The '?' query below will then tell us about which threads are
 	 stopped.  */
 
-      /* If we're not using the multi-process extensions, there's no
-	 way to know the pid of the reported threads; use the magic
-	 number.  */
-      if (!remote_multi_process_p (rs))
-	inferior_ptid = magic_null_ptid;
-
       remote_threads_info ();
     }
   else if (rs->non_stop_aware)
@@ -2601,6 +2639,8 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 
   if (!non_stop)
     {
+      int saved_async = 0;
+
       if (rs->buf[0] == 'W' || rs->buf[0] == 'X')
 	{
 	  if (args->extended_p)
@@ -2638,11 +2678,12 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       /* Now, if we have thread information, update inferior_ptid.  */
       inferior_ptid = remote_current_thread (inferior_ptid);
 
-      add_inferior (ptid_get_pid (inferior_ptid));
+      inf = add_inferior (ptid_get_pid (inferior_ptid));
 
       /* Always add the main thread.  */
       add_thread_silent (inferior_ptid);
 
+      /* TODO: This should be done in notice_new_inferiors.  */
       get_offsets ();		/* Get text, data & bss offsets.  */
 
       /* Use the previously fetched status.  */
@@ -2651,7 +2692,37 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       rs->cached_wait_status = 1;
 
       immediate_quit--;
-      start_remote (args->from_tty); /* Initialize gdb process mechanisms.  */
+      init_wait_for_inferior ();
+
+      /* We know the inferior is stopped already, as we have a pending
+	 wait status.  We need to force this event through
+	 handle_inferior_event.  Pretend the inferior is running, so
+	 notice_new_inferior will force a target_stop and a
+	 target_wait, to collect the event.  remote_stop_as
+	 (target_stop) will notice we have a cached wait status and
+	 will not pass the request to the remote.  */
+      {
+	struct cleanup *old_chain;
+	old_chain = make_cleanup_restore_integer (&suppress_resume_observer);
+
+	/* Don't output '*running'.  */
+	suppress_resume_observer = 1;
+
+	set_executing (inferior_ptid, 1);
+	set_running (inferior_ptid, 1);
+
+	suppress_resume_observer = 0;
+      }
+
+      /* Collect the pending event synchronously, instead of going
+	 through the event loop.  */
+      if (target_can_async_p ())
+	saved_async = target_async_mask (0);
+
+      notice_new_inferior (inferior_ptid, 1, args->from_tty);
+
+      if (saved_async)
+	target_async_mask (saved_async);
     }
   else
     {
@@ -2710,10 +2781,13 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       if (ptid_equal (inferior_ptid, minus_one_ptid))
 	error (_("remote didn't report the current thread in non-stop mode"));
 
+      /* TODO: This should be done whenever we notice a new
+	 inferior.  */
       get_offsets ();		/* Get text, data & bss offsets.  */
 
       /* In non-stop mode, any cached wait status will be stored in
-	 the stop reply queue.  */
+	 the stop reply queue.  Also, we can only reach here if
+	 threads were found.  */
       gdb_assert (wait_status == NULL);
     }
 
@@ -4384,7 +4458,65 @@ Packet: '%s'\n"),
 	else
 	  error (_("unknown stop reply packet: %s"), buf);
 	event->ptid = pid_to_ptid (pid);
+	break;
       }
+    case 'Y':
+      {
+	char *p = buf + 1;
+	if (*p != ';')
+	  error (_("unknown stop reply packet: %s"), buf);
+
+	p++;
+	if (strncmp (p, "fork;", 5) == 0)
+	  {
+	    p += 5;
+	    event->ws.kind = TARGET_WAITKIND_FORKED;
+	  }
+	else if (strncmp (p, "vfork;", 6) == 0)
+	  {
+	    p += 6;
+	    event->ws.kind = TARGET_WAITKIND_VFORKED;
+	  }
+	else if (strncmp (p, "exec;", 5) == 0)
+	  {
+	    p += 5;
+	    event->ws.kind = TARGET_WAITKIND_EXECD;
+	  }
+	else
+	  error (_("unknown stop reply packet: %s"), buf);
+
+	event->ptid = read_ptid (p, &p);
+
+	if (*p != ';')
+	  error (_("unknown stop reply packet: %s"), buf);
+	p++;
+
+	if (event->ws.kind == TARGET_WAITKIND_EXECD)
+	  {
+	    struct cleanup *old_chain;
+	    int result;
+	    char *buf;
+
+	    buf = xmalloc (strlen (p) + 1);
+	    result = hex2bin (p, (gdb_byte *) buf, strlen (p));
+	    buf [result] = '\0';
+	    event->ws.value.execd_pathname = buf;
+
+	    /* At this point, all inserted breakpoints are gone.
+	       Doing this as soon as we detect an exec prevents the
+	       badness of deleting a breakpoint writing the current
+	       "shadow contents" to lift the bp.  That shadow is NOT
+	       valid after an exec.  */
+
+	    old_chain = save_inferior_ptid ();
+	    inferior_ptid = event->ptid;
+	    mark_breakpoints_out ();
+	    do_cleanups (old_chain);
+	  }
+	else
+	  event->ws.value.related_pid = read_ptid (p, &p);
+      }
+
       break;
     }
 
@@ -4504,7 +4636,7 @@ process_stop_reply (struct stop_reply *stop_reply,
       delete_inferior (pid);
     }
   else
-    notice_new_inferiors (ptid);
+    notice_new_inferiors (ptid, 0);
 
   /* Expedited registers.  */
   if (stop_reply->regcache)
@@ -4655,7 +4787,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status)
     case 'F':		/* File-I/O request.  */
       remote_fileio_request (buf);
       break;
-    case 'T': case 'S': case 'X': case 'W':
+    case 'T': case 'S': case 'X': case 'W': case 'Y':
       {
 	struct stop_reply *stop_reply;
 	struct cleanup *old_chain;
@@ -4681,7 +4813,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status)
 	     remote system doesn't support it.  */
 	  target_terminal_ours_for_output ();
 	  printf_filtered
-	    ("Can't send signals to this remote system.  %s not sent.\n",
+	    ("Can't send signals to this remote system.	 %s not sent.\n",
 	     target_signal_to_name (last_sent_signal));
 	  last_sent_signal = TARGET_SIGNAL_0;
 	  target_terminal_inferior ();
@@ -6550,7 +6682,7 @@ extended_remote_mourn_1 (struct target_ops *target)
   /* Unlike "target remote", we do not want to unpush the target; then
      the next time the user says "run", we won't be connected.  */
 
-  if (have_inferiors ())
+  if (have_real_inferiors ())
     {
       extern void nullify_last_target_wait_ptid ();
       /* Multi-process case.  The current process has exited, but
@@ -6691,11 +6823,15 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
       extended_remote_restart ();
     }
 
+#if 0
+  /* FIXME: How does this look with itsets?  */
+
   /* Clean up from the last time we ran, before we mark the target
      running again.  This will mark breakpoints uninserted, and
      get_offsets may insert breakpoints.  */
   init_thread_list ();
   init_wait_for_inferior ();
+#endif
 
   /* Now mark the inferior as running before we do anything else.  */
   inferior_ptid = magic_null_ptid;
@@ -6716,7 +6852,7 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
 }
 
 static void
-extended_remote_create_inferior (struct target_ops *ops, 
+extended_remote_create_inferior (struct target_ops *ops,
 				 char *exec_file, char *args,
 				 char **env, int from_tty)
 {
@@ -7263,7 +7399,6 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   char *p2;
   char query_type;
 
-  
   if (tmp_inf && tmp_inf->pid != ptid_get_pid (inferior_ptid))
     {
       ptid_t tmp_ptid;
@@ -8635,6 +8770,217 @@ remote_supports_multi_process (void)
   return remote_multi_process_p (rs);
 }
 
+char *
+remote_pid_to_exec_file (int pid)
+{
+  struct remote_state *rs;
+
+  rs = get_remote_state ();
+
+  sprintf (rs->buf, "qExecFile:%x", pid);
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+  if (*rs->buf == '\0')
+    /* Not supported */ ;
+  else if (strncmp (rs->buf, "QExecFile:", 10) == 0)
+    {
+      static char *buf = NULL;
+      int n, result;
+      char *p;
+
+      p = strchr (rs->buf + 10, ';');
+
+      if (p == NULL)
+	{
+	  warning (_("Invalid qExecFile reply: %s"), rs->buf);
+	  return NULL;
+	}
+
+      p++;
+
+      if (buf == NULL)
+	make_final_cleanup (xfree, buf);
+      else
+	xfree (buf);
+
+      buf = xmalloc (strlen (p) + 1);
+      result = hex2bin (p, (gdb_byte *) buf, strlen (p));
+      buf [result] = '\0';
+
+      return buf;
+    }
+  else if (*rs->buf == 'E')
+    ;
+  else
+    warning (_("Invalid qExecFile reply: %s"), rs->buf);
+
+  return NULL;
+}
+
+static void
+remote_detach_pid (int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  /* Tell the remote target to detach.  */
+  sprintf (rs->buf, "D;%x", pid);
+
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (strcmp (rs->buf, "OK") == 0)
+    ;
+  else if (rs->buf[0] == '\0')
+    error (_("Remote doesn't know how to detach"));
+  else
+    error (_("Can't detach process."));
+}
+
+static int
+remote_follow_fork (struct target_ops *ops, int follow_child)
+{
+  ptid_t last_ptid;
+  struct target_waitstatus last_status;
+  int has_vforked;
+  int parent_pid, child_pid;
+
+  get_last_target_status (&last_ptid, &last_status);
+  has_vforked = (last_status.kind == TARGET_WAITKIND_VFORKED);
+  parent_pid = ptid_get_tid (last_ptid);
+  if (parent_pid == 0)
+    parent_pid = ptid_get_pid (last_ptid);
+  child_pid = PIDGET (last_status.value.related_pid);
+
+  if (! follow_child)
+    {
+      /* We're already attached to the parent, by default.  */
+
+      /* Before detaching from the child, remove all breakpoints from
+         it.  (This won't actually modify the breakpoint list, but
+         will physically remove the breakpoints from the child.)  */
+      /* If we vforked this will remove the breakpoints from the
+	 parent also, but they'll be reinserted below.  */
+      set_general_thread (last_status.value.related_pid);
+      detach_breakpoints (child_pid);
+
+      /* Detach new forked process?  */
+      if (detach_fork)
+	{
+	  if (info_verbose || remote_debug)
+	    {
+	      target_terminal_ours ();
+	      fprintf_filtered (gdb_stdlog,
+				"Detaching after fork from child process %d.\n",
+				child_pid);
+	    }
+
+	  /* Tell the remote target to detach.  */
+	  remote_detach_pid (child_pid);
+	}
+      else
+	{
+	  /* Add process to GDB's tables.  */
+	  add_inferior (child_pid);
+	}
+
+      set_general_thread (last_ptid);
+
+      if (has_vforked)
+	{
+	  /* TODO here: Wait for linux's VFORK_DONE, or HPUX's
+	     TTEVT_VFORK, or equivalent.  */
+
+	  /* Since we vforked, breakpoints were removed in the parent
+	     too.  Put them back.  */
+	  reattach_breakpoints (parent_pid);
+	}
+    }
+  else
+    {
+      struct thread_info *last_tp = find_thread_pid (last_ptid);
+      struct thread_info *tp;
+
+      /* Copy user stepping state to the new inferior thread.  */
+      struct breakpoint *step_resume_breakpoint = last_tp->step_resume_breakpoint;
+      CORE_ADDR step_range_start = last_tp->step_range_start;
+      CORE_ADDR step_range_end = last_tp->step_range_end;
+      struct frame_id step_frame_id = last_tp->step_frame_id;
+
+      last_tp->step_range_start = 0;
+      last_tp->step_range_end = last_tp->step_range_end  = 0;
+      last_tp->step_frame_id = null_frame_id;
+
+      /* Otherwise, deleting the parent would get rid of this
+	 breakpoint.  */
+      last_tp->step_resume_breakpoint = NULL;
+
+      /* Needed to keep the breakpoint lists in sync.  */
+      if (! has_vforked)
+	{
+	  set_general_thread (last_status.value.related_pid);
+	  detach_breakpoints (child_pid);
+	}
+
+      /* Before detaching from the parent, remove all breakpoints from it. */
+      set_general_thread (last_ptid);
+      remove_breakpoints ();
+
+      if (info_verbose || remote_debug)
+	{
+	  target_terminal_ours ();
+	  fprintf_filtered (gdb_stdlog,
+			    "Attaching after fork to child process %d.\n",
+			    child_pid);
+	}
+
+      /* If we're vforking, we may want to hold on to the parent until
+	 the child exits or execs.  At exec time we can remove the old
+	 breakpoints from the parent and detach it; at exit time we
+	 could do the same (or even, sneakily, resume debugging it - the
+	 child's exec has failed, or something similar).
+
+	 The holding part is very easy if we have VFORKDONE events;
+	 but keeping track of both processes is beyond GDB at the
+	 moment.  So we don't expose the parent to the rest of GDB.
+	 Instead we quietly hold onto it until such time as we can
+	 safely resume it.  */
+
+      if (has_vforked)
+	{
+	  /* TODO: handle this correctly.
+
+	  remote_fork_parent_pid = parent_pid;
+
+	  */
+	  detach_inferior (parent_pid);
+	}
+      else if (detach_fork)
+	{
+	  remote_detach_pid (parent_pid);
+	  detach_inferior (parent_pid);
+	}
+
+      add_inferior (child_pid);
+
+      inferior_ptid = ptid_build (child_pid, 0, 0);
+      set_general_thread (inferior_ptid);
+      inferior_ptid = remote_current_thread (inferior_ptid);
+      set_general_thread (inferior_ptid);
+
+      tp = add_thread (inferior_ptid);
+
+      tp->step_resume_breakpoint = step_resume_breakpoint;
+      tp->step_range_start = step_range_start;
+      tp->step_range_end = step_range_end;
+      tp->step_frame_id = step_frame_id;
+
+      /* Reset breakpoints in the child as appropriate.  */
+      follow_inferior_reset_breakpoints ();
+    }
+
+  return 0;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -8698,6 +9044,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_terminal_ours = remote_terminal_ours;
   remote_ops.to_supports_non_stop = remote_supports_non_stop;
   remote_ops.to_supports_multi_process = remote_supports_multi_process;
+  remote_ops.to_pid_to_exec_file = remote_pid_to_exec_file;
+  remote_ops.to_follow_fork = remote_follow_fork;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
