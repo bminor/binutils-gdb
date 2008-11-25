@@ -1,3 +1,7 @@
+2008-11-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferior.c (itset_member): Fix typo again.
+
 2008-11-24  Tom Tromey  <tromey@redhat.com>
 
 	* inferior.h (number_of_inferiors, first_inferior_in_set,

@@ -1028,7 +1028,7 @@ itset_member (struct itset *itset, struct inferior *inf, int thread_id)
   for (ix = 0; VEC_iterate (itset_entry, itset->inferiors, ix, entry); ++ix)
     if (inf == entry->inferior)
       {
-	for (iy = 0; VEC_iterate (thread_p, entry->threads, iy, thr); ++ix)
+	for (iy = 0; VEC_iterate (thread_p, entry->threads, iy, thr); ++iy)
 	  if (thread_id == thr->num)
 	    return 1;
       }
