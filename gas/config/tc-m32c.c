@@ -866,22 +866,22 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 
     case -M32C_MACRO_ADJNZ_2:
       rl_addend = 0x31;
-      op[2] = addend;
+      op[2] = addend - 2;
       operand = M32C_OPERAND_LAB_16_8;
       break;
     case -M32C_MACRO_ADJNZ_3:
       rl_addend = 0x41;
-      op[3] = addend;
+      op[3] = addend - 2;
       operand = M32C_OPERAND_LAB_24_8;
       break;
     case -M32C_MACRO_ADJNZ_4:
       rl_addend = 0x51;
-      op[4] = addend;
+      op[4] = addend - 2;
       operand = M32C_OPERAND_LAB_32_8;
       break;
     case -M32C_MACRO_ADJNZ_5:
       rl_addend = 0x61;
-      op[5] = addend;
+      op[5] = addend - 2;
       operand = M32C_OPERAND_LAB_40_8;
       break;
 
