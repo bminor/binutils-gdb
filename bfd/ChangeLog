@@ -1,3 +1,55 @@
+2008-11-23  Hans-Peter Nilsson  <hp@axis.com>
+
+	Implement TLS for CRIS.
+	* elf32-cris.c: Include limits.h.
+	(TLSHOWTO16): Redefine in terms of and move contents to...
+	(TLSHOWTO16X): New macro.
+	(TLSHOWTO16S, LGOT_REG_NDX, LGOT_DTP_NDX, LGOT_ALLOC_NELTS_FOR)
+	(elf_cris_hash_entry): New macros.
+	(cris_elf_howto_table): Make R_CRIS_16_DTPREL,
+	R_CRIS_16_GOT_TPREL, R_CRIS_16_TPREL check overflow for signed,
+	not unsigned values.
+	(cris_info_to_howto_rela): Make r_type a enum elf_cris_reloc_type,
+	not unsigned int.
+	(struct elf_cris_link_hash_entry): New members reg_got_refcount,
+	tprel_refcount, and dtp_refcount.
+	(struct elf_cris_link_hash_table): New member dtpmod_refcount.
+	(elf_cris_link_hash_newfunc): Initialize new members.
+	(elf_cris_link_hash_table_create): Similar.
+	(cris_final_link_relocate, elf_cris_reloc_type_class): Use a
+	temporary variable when testing the relocation type.
+	(cris_elf_gc_mark_hook): Ditto.  Add default case where needed.
+	(cris_elf_gc_sweep_hook): Ditto.  Handle reference-counting for
+	the new assembly-generated relocs.  Rewrite refcount handling to
+	set temporary variables to pointers to reloc-specific variables
+	and entry size and common code for the update.
+	(additional_relocation_error_msg_count): New variable.
+	(cris_elf_relocate_section): Use a function-local variable srelgot
+	for the .rela.got section instead of looking it up for every need.
+	Make r_type a enum elf_cris_reloc_type, not int.  Actually set
+	symname for non-local symbols.  Handle new assembly-generated
+	relocs.  For overflow, emit additional messages for the new 16-bit
+	relocs as well as R_CRIS_16_GOTPLT and R_CRIS_16_GOT.
+	(elf_cris_finish_dynamic_symbol): Use elf_cris_finish_dynamic_symbol
+	instead of plain casts.  Check new hash entry member 
+	reg_got_refcount when checking whether to emit a GOT entry.
+	(elf_cris_finish_dynamic_sections): Update head comment to warn
+	about emitting relocs here.  Use a temporary variable when testing
+	the relocation type.
+	(elf_cris_discard_excess_program_dynamics)
+	(elf_cris_adjust_gotplt_to_got): Handle reference counting change
+	regarding h->reg_got_refcount.
+	(cris_elf_check_relocs): Rewrite refcount handling to set
+	temporary variables and entry size and common code for the update
+	for local symbols.  Use new macro elf_cris_hash_entry.  Adjust
+	allocation for change in reference counting of GOT entries for
+	local symbols.
+	(elf_cris_size_dynamic_sections): Adjust calculated size of
+	.got.plt and .rela.got if we need a GOT entry for a
+	R_CRIS_DTPMOD relocation.
+	(elf_cris_got_elt_size): New function.
+	(elf_backend_got_elt_size): Define.
+
 2008-11-21  Sterling Augustine  <sterling@tensilica.com>
 
 	* xtensa-isa.c (xtensa_state_is_shared_or): New function.
