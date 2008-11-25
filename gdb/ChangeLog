@@ -1,3 +1,8 @@
+2008-11-24  Tom Tromey  <tromey@redhat.com>
+
+	* inferior.h (number_of_inferiors, first_inferior_in_set,
+	set_inferior_exec, inferior_list): Remove duplicate declarations.
+
 2008-11-20  Stan Shebs  <stan@codesourcery.com>
 
 	Multi-process (primarily multi-exec) support.

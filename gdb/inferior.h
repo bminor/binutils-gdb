@@ -580,15 +580,11 @@ extern int have_real_inferiors (void);
 
 extern int number_of_inferiors (void);
 
-extern int number_of_inferiors (void);
-
 /* Return a pointer to the current inferior.  It is an error to call
    this if there is no current inferior.  */
 extern struct inferior *current_inferior (void);
 
 extern void set_inferior_name (struct inferior *inf, char *name);
-
-extern void set_inferior_exec (struct inferior *inf, struct exec *exec);
 
 extern void set_inferior_exec (struct inferior *inf, struct exec *exec);
 
@@ -608,11 +604,7 @@ extern int itset_member (struct itset *itset, struct inferior *inf, int thread_i
 
 extern struct inferior *first_inferior_in_set (struct itset *itset);
 
-extern struct inferior *first_inferior_in_set (struct itset *itset);
-
 extern void dump_itset (struct itset *itset);
-
-extern struct inferior *inferior_list;
 
 extern struct inferior *inferior_list;
 
