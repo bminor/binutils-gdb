@@ -1451,42 +1451,15 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		 section in dynobj and make room for the reloc.  */
 	      if (sreloc == NULL)
 		{
-		  const char *name;
-		  bfd *dynobj;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (abfd,
-			   elf_elfheader (abfd)->e_shstrndx,
-			   elf_section_data (sec)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    return FALSE;
-
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-			      && strcmp (bfd_get_section_name (abfd, sec),
-					 name + 5) == 0);
-
 		  if (htab->elf.dynobj == NULL)
 		    htab->elf.dynobj = abfd;
-		  dynobj = htab->elf.dynobj;
 
-		  sreloc = bfd_get_section_by_name (dynobj, name);
+		  sreloc = _bfd_elf_make_dynamic_reloc_section
+		    (sec, htab->elf.dynobj, htab->word_align_power,
+		     abfd, /*rela?*/ TRUE);
+
 		  if (sreloc == NULL)
-		    {
-		      flagword flags;
-
-		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
-			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-		      if ((sec->flags & SEC_ALLOC) != 0)
-			flags |= SEC_ALLOC | SEC_LOAD;
-		      sreloc = bfd_make_section_with_flags (dynobj,
-							    name,
-							    flags);
-		      if (sreloc == NULL
-			  || ! bfd_set_section_alignment (dynobj, sreloc,
-							  htab->word_align_power))
-			return FALSE;
-		    }
-		  elf_section_data (sec)->sreloc = sreloc;
+		    return FALSE;
 		}
 
 	      /* If this is a global symbol, we count the number of

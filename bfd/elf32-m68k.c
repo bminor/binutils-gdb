@@ -2368,35 +2368,11 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		 section in dynobj and make room for this reloc.  */
 	      if (sreloc == NULL)
 		{
-		  const char *name;
+		  sreloc = _bfd_elf_make_dynamic_reloc_section
+		    (sec, dynobj, 2, abfd, /*rela?*/ TRUE);
 
-		  name = (bfd_elf_string_from_elf_section
-			  (abfd,
-			   elf_elfheader (abfd)->e_shstrndx,
-			   elf_section_data (sec)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    return FALSE;
-
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-			      && strcmp (bfd_get_section_name (abfd, sec),
-					 name + 5) == 0);
-
-		  sreloc = bfd_get_section_by_name (dynobj, name);
 		  if (sreloc == NULL)
-		    {
-		      sreloc = bfd_make_section_with_flags (dynobj,
-							    name,
-							    (SEC_ALLOC
-							     | SEC_LOAD
-							     | SEC_HAS_CONTENTS
-							     | SEC_IN_MEMORY
-							     | SEC_LINKER_CREATED
-							     | SEC_READONLY));
-		      if (sreloc == NULL
-			  || !bfd_set_section_alignment (dynobj, sreloc, 2))
-			return FALSE;
-		    }
-		  elf_section_data (sec)->sreloc = sreloc;
+		    return FALSE;
 		}
 
 	      if (sec->flags & SEC_READONLY

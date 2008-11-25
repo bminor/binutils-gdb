@@ -1,3 +1,51 @@
+2008-11-25  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (is_reloc_section): New function.  Returns true if the
+	given name matches the name of the reloc-containing section
+	associated with the given section.
+	(get_dynamic_reloc_section_name): New function.  Computes the name
+	of the section that contains the dynamic relocs associated with
+	the given section.
+	(_bfd_elf_get_dynamic_reloc_section): New function.  Returns a
+	pointer to the section containing the dynamic relocs associated
+	with the given section.
+	(_bfd_elf_make_dynamic_reloc_section): New function.  Creates a
+	section to contain the dynamic relocs associated with a given
+	section.
+	* elf-bfd.h: Prototype the new functions.
+	* elf-m10300.c (mn10300_elf_check_relocs): Use new functions.
+	(mn10300_elf_final_link_relocs): Likewise.
+	* elf32-arm.c (reloc_section_p): Delete - replaced by new
+	functions.
+	(elf32_arm_final_link_relocate): Use new functions.
+	(elf32_arm_check_relocs): Likewise.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
+	(elf_cris_check_relocs): Likewise.
+	* elf32-hppa.c (elf32_hppa_check_relocs): Likewise.
+	* elf32-i370.c (i370_elf_check_relocs): Likewise.
+	(i370_elf_relocate_section): Likewise.
+	* elf32-i386.c (elf_i386_check_relocs): Likewise.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	(m32r_elf_check_relocs): Likewise.
+	* elf32-m68k.c (elf_m68k_check_relocs): Likewise.
+	* elf32_ppc.c (ppc_elf_check_relocs): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_check_relocs): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	(sh_elf_check_relocs): Likewise.
+	* elf32-vax.c (elf_vax_check_relocs): Likewise.
+	(elf_vax_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_check_relocs): Likewise.
+	* elf64-ppc.c (ppc64_elf_check_relocs): Likewise.
+	* elf64-s390.c (elf_s390_check_relocs): Likewise.
+	* elf64-sh64.c (sh_elf64_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): Likewise.
+	* elf32-bfin.c (bfin_check_relocs): Remove redundant local
+	variable 'sreloc'.
+	(bfin_relocate_section): Likewise.
+	* elf32-v850.c (v850_elf_check_relocs): Likewise.
+
 2008-11-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	Implement TLS for CRIS.

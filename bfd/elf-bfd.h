@@ -1764,6 +1764,10 @@ extern long _bfd_elf_get_reloc_upper_bound
   (bfd *, sec_ptr);
 extern long _bfd_elf_canonicalize_reloc
   (bfd *, sec_ptr, arelent **, asymbol **);
+extern asection * _bfd_elf_get_dynamic_reloc_section
+  (bfd *, asection *, bfd_boolean);
+extern asection * _bfd_elf_make_dynamic_reloc_section
+  (asection *, bfd *, unsigned int, bfd *, bfd_boolean);
 extern long _bfd_elf_get_dynamic_reloc_upper_bound
   (bfd *);
 extern long _bfd_elf_canonicalize_dynamic_reloc

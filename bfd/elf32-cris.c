@@ -1,5 +1,5 @@
 /* CRIS-specific support for 32-bit ELF.
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson, based on elf32-fr30.c
@@ -1500,33 +1500,13 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      if (sreloc == NULL)
 		{
-		  const char *name;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (input_bfd,
-			   elf_elfheader (input_bfd)->e_shstrndx,
-			   elf_section_data (input_section)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    return FALSE;
-
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-			      && strcmp (bfd_get_section_name (input_bfd,
-							       input_section),
-					 name + 5) == 0);
-
-		  sreloc = bfd_get_section_by_name (dynobj, name);
-
-		  /* That section should have been created in
-		     cris_elf_check_relocs, but that function will not be
-		     called for objects which fail in
+		  sreloc = _bfd_elf_get_dynamic_reloc_section
+		    (input_bfd, input_section, /*rela?*/ TRUE);
+		  /* The section should have been created in cris_elf_check_relocs,
+		     but that function will not be called for objects which fail in
 		     cris_elf_merge_private_bfd_data.  */
 		  if (sreloc == NULL)
 		    {
-		      (*_bfd_error_handler)
-			(_("%B: Internal inconsistency; no relocation section %s"),
-			 input_bfd,
-			 name);
-
 		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;
 		    }
@@ -3507,37 +3487,16 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 		}
 	    }
 
-	  /* We create a reloc section in dynobj and make room for this
-	     reloc.  */
+	  /* We may need to create a reloc section in the dynobj and made room
+	     for this reloc.  */
 	  if (sreloc == NULL)
 	    {
-	      const char *name;
+	      sreloc = _bfd_elf_make_dynamic_reloc_section
+		(sec, dynobj, 2, abfd, /*rela?*/ TRUE);
 
-	      name = (bfd_elf_string_from_elf_section
-		      (abfd,
-		       elf_elfheader (abfd)->e_shstrndx,
-		       elf_section_data (sec)->rel_hdr.sh_name));
-	      if (name == NULL)
+	      if (sreloc == NULL)
 		return FALSE;
 
-	      BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-			  && strcmp (bfd_get_section_name (abfd, sec),
-				     name + 5) == 0);
-
-	      sreloc = bfd_get_section_by_name (dynobj, name);
-	      if (sreloc == NULL)
-		{
-		  sreloc = bfd_make_section_with_flags (dynobj, name,
-							(SEC_ALLOC
-							 | SEC_LOAD
-							 | SEC_HAS_CONTENTS
-							 | SEC_IN_MEMORY
-							 | SEC_LINKER_CREATED
-							 | SEC_READONLY));
-		  if (sreloc == NULL
-		      || !bfd_set_section_alignment (dynobj, sreloc, 2))
-		    return FALSE;
-		}
 	      if (sec->flags & SEC_READONLY)
 		info->flags |= DF_TEXTREL;
 	    }

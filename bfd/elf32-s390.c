@@ -1279,46 +1279,14 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		 this reloc.  */
 	      if (sreloc == NULL)
 		{
-		  const char *name;
-		  bfd *dynobj;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (abfd,
-			   elf_elfheader (abfd)->e_shstrndx,
-			   elf_section_data (sec)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    return FALSE;
-
-		  if (! CONST_STRNEQ (name, ".rela")
-		      || strcmp (bfd_get_section_name (abfd, sec),
-				 name + 5) != 0)
-		    {
-		      (*_bfd_error_handler)
-			(_("%B: bad relocation section name `%s\'"),
-			 abfd, name);
-		    }
-
 		  if (htab->elf.dynobj == NULL)
 		    htab->elf.dynobj = abfd;
 
-		  dynobj = htab->elf.dynobj;
-		  sreloc = bfd_get_section_by_name (dynobj, name);
-		  if (sreloc == NULL)
-		    {
-		      flagword flags;
+		  sreloc = _bfd_elf_make_dynamic_reloc_section
+		    (sec, htab->elf.dynobj, 2, abfd, /*rela?*/ TRUE);
 
-		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
-			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-		      if ((sec->flags & SEC_ALLOC) != 0)
-			flags |= SEC_ALLOC | SEC_LOAD;
-		      sreloc = bfd_make_section_with_flags (dynobj,
-							    name,
-							    flags);
-		      if (sreloc == NULL
-			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
-			return FALSE;
-		    }
-		  elf_section_data (sec)->sreloc = sreloc;
+		  if (sreloc == NULL)
+		    return FALSE;
 		}
 
 	      /* If this is a global symbol, we count the number of

@@ -3768,38 +3768,14 @@ ppc_elf_check_relocs (bfd *abfd,
 #endif
 	      if (sreloc == NULL)
 		{
-		  const char *name;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (abfd,
-			   elf_elfheader (abfd)->e_shstrndx,
-			   elf_section_data (sec)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    return FALSE;
-
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-			      && strcmp (bfd_get_section_name (abfd, sec),
-					 name + 5) == 0);
-
 		  if (htab->elf.dynobj == NULL)
 		    htab->elf.dynobj = abfd;
-		  sreloc = bfd_get_section_by_name (htab->elf.dynobj, name);
-		  if (sreloc == NULL)
-		    {
-		      flagword flags;
 
-		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
-			       | SEC_IN_MEMORY | SEC_LINKER_CREATED
-			       | SEC_ALLOC | SEC_LOAD);
-		      sreloc = bfd_make_section_with_flags (htab->elf.dynobj,
-							    name,
-							    flags);
-		      if (sreloc == NULL
-			  || ! bfd_set_section_alignment (htab->elf.dynobj,
-							  sreloc, 2))
-			return FALSE;
-		    }
-		  elf_section_data (sec)->sreloc = sreloc;
+		  sreloc = _bfd_elf_make_dynamic_reloc_section
+		    (sec, htab->elf.dynobj, 2, abfd, /*rela?*/ TRUE);
+
+		  if (sreloc == NULL)
+		    return FALSE;
 		}
 
 	      /* If this is a global symbol, we count the number of
@@ -6836,22 +6812,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		 time.  */
 	      if (sreloc == NULL)
 		{
-		  const char *name;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (input_bfd,
-			   elf_elfheader (input_bfd)->e_shstrndx,
-			   elf_section_data (input_section)->rel_hdr.sh_name));
-		  if (name == NULL)
+		  sreloc = _bfd_elf_get_dynamic_reloc_section
+		    (input_bfd, input_section, /*rela?*/ TRUE);
+		  if (sreloc == NULL)
 		    return FALSE;
-
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-			      && strcmp (bfd_get_section_name (input_bfd,
-							       input_section),
-					 name + 5) == 0);
-
-		  sreloc = bfd_get_section_by_name (htab->elf.dynobj, name);
-		  BFD_ASSERT (sreloc != NULL);
 		}
 
 	      skip = 0;
