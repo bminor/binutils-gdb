@@ -3,7 +3,7 @@
 	Fix automatic restoration of breakpoints memory for ia64.
 	* ia64-tdep.c: New #if check on BREAKPOINT_MAX vs. BUNDLE_LEN.  
 	(ia64_memory_insert_breakpoint): New comment part for SHADOW_CONTENTS
-	content.  Remove variable instr.  New variable cleanup.  Force
+	content.  Remove variable instr.  New variable cleanup.  Disable
 	automatic breakpoints restoration.  PLACED_SIZE and SHADOW_LEN are now
 	set larger, to BUNDLE_LEN - 2.  Variable `bundle' type update.  Return
 	error if even just final target_write_memory has failed.
