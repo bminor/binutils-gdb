@@ -1,3 +1,7 @@
+2008-11-26  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-m32c.c (md_pseudo_table): Add support for .loc et al.
+
 2008-11-25  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-m32c.c (md_convert_frag): Fix ADJNZ reloc math.
