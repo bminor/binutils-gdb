@@ -608,11 +608,10 @@ value_at_lazy (struct type *type, CORE_ADDR addr)
   if (TYPE_CODE (check_typedef (type)) == TYPE_CODE_VOID)
     error (_("Attempt to dereference a generic pointer."));
 
-  val = allocate_value (type);
+  val = allocate_value_lazy (type);
 
   VALUE_LVAL (val) = lval_memory;
   VALUE_ADDRESS (val) = addr;
-  set_value_lazy (val, 1);
 
   return val;
 }
@@ -634,6 +633,8 @@ value_at_lazy (struct type *type, CORE_ADDR addr)
 int
 value_fetch_lazy (struct value *val)
 {
+  gdb_assert (value_lazy (val));
+  allocate_value_contents (val);
   if (VALUE_LVAL (val) == lval_memory)
     {
       CORE_ADDR addr = VALUE_ADDRESS (val) + value_offset (val);
@@ -1535,7 +1536,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
 	  int boffset;
-	  struct value *v2 = allocate_value (basetype);
+	  struct value *v2;
 
 	  boffset = baseclass_offset (type, i,
 				      value_contents (arg1) + offset,
@@ -1553,6 +1554,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	    {
 	      CORE_ADDR base_addr;
 
+	      v2  = allocate_value (basetype);
 	      base_addr = 
 		VALUE_ADDRESS (arg1) + value_offset (arg1) + boffset;
 	      if (target_read_memory (base_addr, 
@@ -1564,16 +1566,19 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	    }
 	  else
 	    {
+	      if (VALUE_LVAL (arg1) == lval_memory && value_lazy (arg1))
+		v2  = allocate_value_lazy (basetype);
+	      else
+		{
+		  v2  = allocate_value (basetype);
+		  memcpy (value_contents_raw (v2),
+			  value_contents_raw (arg1) + boffset,
+			  TYPE_LENGTH (basetype));
+		}
 	      VALUE_LVAL (v2) = VALUE_LVAL (arg1);
 	      VALUE_ADDRESS (v2) = VALUE_ADDRESS (arg1);
 	      VALUE_FRAME_ID (v2) = VALUE_FRAME_ID (arg1);
 	      set_value_offset (v2, value_offset (arg1) + boffset);
-	      if (VALUE_LVAL (arg1) == lval_memory && value_lazy (arg1))
-		set_value_lazy (v2, 1);
-	      else
-		memcpy (value_contents_raw (v2),
-			value_contents_raw (arg1) + boffset,
-			TYPE_LENGTH (basetype));
 	    }
 
 	  if (found_baseclass)
@@ -2969,13 +2974,15 @@ value_slice (struct value *array, int lowbound, int length)
 				      slice_range_type);
       TYPE_CODE (slice_type) = TYPE_CODE (array_type);
 
-      slice = allocate_value (slice_type);
       if (VALUE_LVAL (array) == lval_memory && value_lazy (array))
-	set_value_lazy (slice, 1);
+	slice = allocate_value_lazy (slice_type);
       else
-	memcpy (value_contents_writeable (slice),
-		value_contents (array) + offset,
-		TYPE_LENGTH (slice_type));
+	{
+	  slice = allocate_value (slice_type);
+	  memcpy (value_contents_writeable (slice),
+		  value_contents (array) + offset,
+		  TYPE_LENGTH (slice_type));
+	}
 
       if (VALUE_LVAL (array) == lval_internalvar)
 	VALUE_LVAL (slice) = lval_internalvar_component;

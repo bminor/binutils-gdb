@@ -163,21 +163,9 @@ struct value
   /* If value is a variable, is it initialized or not.  */
   int initialized;
 
-  /* Actual contents of the value.  For use of this value; setting it
-     uses the stuff above.  Not valid if lazy is nonzero.  Target
-     byte-order.  We force it to be aligned properly for any possible
-     value.  Note that a value therefore extends beyond what is
-     declared here.  */
-  union
-  {
-    gdb_byte contents[1];
-    DOUBLEST force_doublest_align;
-    LONGEST force_longest_align;
-    CORE_ADDR force_core_addr_align;
-    void *force_pointer_align;
-  } aligner;
-  /* Do not add any new members here -- contents above will trash
-     them.  */
+  /* Actual contents of the value.  Target byte-order.  NULL or not
+     valid if lazy is nonzero.  */
+  gdb_byte *contents;
 };
 
 /* Prototypes for local functions. */
@@ -213,15 +201,18 @@ static int value_history_count;	/* Abs number of last entry stored */
 
 static struct value *all_values;
 
-/* Allocate a  value  that has the correct length for type TYPE.  */
+/* Allocate a lazy value for type TYPE.  Its actual content is
+   "lazily" allocated too: the content field of the return value is
+   NULL; it will be allocated when it is fetched from the target.  */
 
 struct value *
-allocate_value (struct type *type)
+allocate_value_lazy (struct type *type)
 {
   struct value *val;
   struct type *atype = check_typedef (type);
 
-  val = (struct value *) xzalloc (sizeof (struct value) + TYPE_LENGTH (atype));
+  val = (struct value *) xzalloc (sizeof (struct value));
+  val->contents = NULL;
   val->next = all_values;
   all_values = val;
   val->type = type;
@@ -233,12 +224,32 @@ allocate_value (struct type *type)
   val->bitpos = 0;
   val->bitsize = 0;
   VALUE_REGNUM (val) = -1;
-  val->lazy = 0;
+  val->lazy = 1;
   val->optimized_out = 0;
   val->embedded_offset = 0;
   val->pointed_to_offset = 0;
   val->modifiable = 1;
   val->initialized = 1;  /* Default to initialized.  */
+  return val;
+}
+
+/* Allocate the contents of VAL if it has not been allocated yet.  */
+
+void
+allocate_value_contents (struct value *val)
+{
+  if (!val->contents)
+    val->contents = (gdb_byte *) xzalloc (TYPE_LENGTH (val->enclosing_type));
+}
+
+/* Allocate a  value  and its contents for type TYPE.  */
+
+struct value *
+allocate_value (struct type *type)
+{
+  struct value *val = allocate_value_lazy (type);
+  allocate_value_contents (val);
+  val->lazy = 0;
   return val;
 }
 
@@ -340,13 +351,15 @@ set_value_bitsize (struct value *value, int bit)
 gdb_byte *
 value_contents_raw (struct value *value)
 {
-  return value->aligner.contents + value->embedded_offset;
+  allocate_value_contents (value);
+  return value->contents + value->embedded_offset;
 }
 
 gdb_byte *
 value_contents_all_raw (struct value *value)
 {
-  return value->aligner.contents;
+  allocate_value_contents (value);
+  return value->contents;
 }
 
 struct type *
@@ -360,7 +373,7 @@ value_contents_all (struct value *value)
 {
   if (value->lazy)
     value_fetch_lazy (value);
-  return value->aligner.contents;
+  return value->contents;
 }
 
 int
@@ -495,6 +508,14 @@ value_mark (void)
   return all_values;
 }
 
+void
+value_free (struct value *val)
+{
+  if (val)
+    xfree (val->contents);
+  xfree (val);
+}
+
 /* Free all values allocated since MARK was obtained by value_mark
    (except for those released).  */
 void
@@ -579,7 +600,12 @@ struct value *
 value_copy (struct value *arg)
 {
   struct type *encl_type = value_enclosing_type (arg);
-  struct value *val = allocate_value (encl_type);
+  struct value *val;
+
+  if (value_lazy (arg))
+    val = allocate_value_lazy (encl_type);
+  else
+    val = allocate_value (encl_type);
   val->type = arg->type;
   VALUE_LVAL (val) = VALUE_LVAL (arg);
   val->location = arg->location;
@@ -1319,39 +1345,12 @@ value_static_field (struct type *type, int fieldno)
 struct value *
 value_change_enclosing_type (struct value *val, struct type *new_encl_type)
 {
-  if (TYPE_LENGTH (new_encl_type) <= TYPE_LENGTH (value_enclosing_type (val))) 
-    {
-      val->enclosing_type = new_encl_type;
-      return val;
-    }
-  else
-    {
-      struct value *new_val;
-      struct value *prev;
-      
-      new_val = (struct value *) xrealloc (val, sizeof (struct value) + TYPE_LENGTH (new_encl_type));
+  if (TYPE_LENGTH (new_encl_type) > TYPE_LENGTH (value_enclosing_type (val))) 
+    val->contents =
+      (gdb_byte *) xrealloc (val->contents, TYPE_LENGTH (new_encl_type));
 
-      new_val->enclosing_type = new_encl_type;
- 
-      /* We have to make sure this ends up in the same place in the value
-	 chain as the original copy, so it's clean-up behavior is the same. 
-	 If the value has been released, this is a waste of time, but there
-	 is no way to tell that in advance, so... */
-      
-      if (val != all_values) 
-	{
-	  for (prev = all_values; prev != NULL; prev = prev->next)
-	    {
-	      if (prev->next == val) 
-		{
-		  prev->next = new_val;
-		  break;
-		}
-	    }
-	}
-      
-      return new_val;
-    }
+  val->enclosing_type = new_encl_type;
+  return val;
 }
 
 /* Given a value ARG1 (offset by OFFSET bytes)
@@ -1388,18 +1387,20 @@ value_primitive_field (struct value *arg1, int offset,
       /* This field is actually a base subobject, so preserve the
          entire object's contents for later references to virtual
          bases, etc.  */
-      v = allocate_value (value_enclosing_type (arg1));
-      v->type = type;
 
       /* Lazy register values with offsets are not supported.  */
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
 	value_fetch_lazy (arg1);
 
       if (value_lazy (arg1))
-	set_value_lazy (v, 1);
+	v = allocate_value_lazy (value_enclosing_type (arg1));
       else
-	memcpy (value_contents_all_raw (v), value_contents_all_raw (arg1),
-		TYPE_LENGTH (value_enclosing_type (arg1)));
+	{
+	  v = allocate_value (value_enclosing_type (arg1));
+	  memcpy (value_contents_all_raw (v), value_contents_all_raw (arg1),
+		  TYPE_LENGTH (value_enclosing_type (arg1)));
+	}
+      v->type = type;
       v->offset = value_offset (arg1);
       v->embedded_offset = (offset + value_embedded_offset (arg1)
 			    + TYPE_FIELD_BITPOS (arg_type, fieldno) / 8);
@@ -1408,18 +1409,20 @@ value_primitive_field (struct value *arg1, int offset,
     {
       /* Plain old data member */
       offset += TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
-      v = allocate_value (type);
 
       /* Lazy register values with offsets are not supported.  */
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
 	value_fetch_lazy (arg1);
 
       if (value_lazy (arg1))
-	set_value_lazy (v, 1);
+	v = allocate_value_lazy (type);
       else
-	memcpy (value_contents_raw (v),
-		value_contents_raw (arg1) + offset,
-		TYPE_LENGTH (type));
+	{
+	  v = allocate_value (type);
+	  memcpy (value_contents_raw (v),
+		  value_contents_raw (arg1) + offset,
+		  TYPE_LENGTH (type));
+	}
       v->offset = (value_offset (arg1) + offset
 		   + value_embedded_offset (arg1));
     }

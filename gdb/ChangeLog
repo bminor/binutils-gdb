@@ -1,3 +1,25 @@
+2008-11-26  Jerome Guitton  <guitton@adacore.com>
+
+	* value.h (allocate_value_lazy): New function declaration.
+	(value_free): Remove macro, make it a function.
+	* value.c (value): Move actual content outside of the memory space
+	of the struct; add a pointer to this actual content.
+	(allocate_value_lazy, allocate_value_contents): New function.
+	(allocate_value): Reimplement using these two new functions.
+	(value_contents_raw, value_contents_all_raw): If no memory
+	has been allocated yet for the actual content, allocate it.
+	(value_contents_all): Resync with struct value's changes.
+	(value_free): New function.
+	(value_copy, value_primitive_field): Use new function
+	allocate_value_lazy to allocate lazy values.
+	(value_change_enclosing_type): Resync with struct value's changes.
+	As the value is not reallocated, remove the special handling for
+	the value chain (now obsolete).
+	* valops.c (value_at_lazy): Use new function allocate_value_lazy.
+	(value_fetch_lazy): Allocate value content. Use allocate_value_lazy
+	to allocate lazy values.
+	(value_slice): Use allocate_value_lazy to allocate lazy values.
+
 2008-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix automatic restoration of breakpoints memory for ia64.

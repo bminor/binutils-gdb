@@ -318,6 +318,8 @@ extern struct value *locate_var_value (struct symbol *var,
 				       struct frame_info *frame);
 
 extern struct value *allocate_value (struct type *type);
+extern struct value *allocate_value_lazy (struct type *type);
+extern void allocate_value_contents (struct value *value);
 
 extern struct value *allocate_repeat_value (struct type *type, int count);
 
@@ -504,7 +506,7 @@ extern int unop_user_defined_p (enum exp_opcode op, struct value *arg1);
 
 extern int destructor_name_p (const char *name, const struct type *type);
 
-#define value_free(val) xfree (val)
+extern void value_free (struct value *val);
 
 extern void free_all_values (void);
 
