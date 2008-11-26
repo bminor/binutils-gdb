@@ -1,3 +1,8 @@
+2008-11-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* strings.c (main): New variable `s'.  Have string_min parsing
+	call fatal for invalid input strings.
+
 2008-11-25  Nick Clifton  <nickc@redhat.com>
 
 	PR7044

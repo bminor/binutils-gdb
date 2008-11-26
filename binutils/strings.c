@@ -155,6 +155,7 @@ main (int argc, char **argv)
   int optc;
   int exit_status = 0;
   bfd_boolean files_given = FALSE;
+  char *s;
 
 #if defined (HAVE_SETLOCALE)
   setlocale (LC_ALL, "");
@@ -192,7 +193,9 @@ main (int argc, char **argv)
 	  usage (stdout, 0);
 
 	case 'n':
-	  string_min = (int) strtoul (optarg, NULL, 0);
+	  string_min = (int) strtoul (optarg, &s, 0);
+	  if (s != NULL && *s != 0)
+	    fatal (_("invalid integer argument %s"), optarg);
 	  break;
 
 	case 'o':
@@ -242,7 +245,9 @@ main (int argc, char **argv)
 	  usage (stderr, 1);
 
 	default:
-	  string_min = (int) strtoul (argv[optind - 1] + 1, NULL, 0);
+	  string_min = (int) strtoul (argv[optind - 1] + 1, &s, 0);
+	  if (s != NULL && *s != 0)
+	    fatal (_("invalid integer argument %s"), argv[optind - 1] + 1);
 	  break;
 	}
     }
