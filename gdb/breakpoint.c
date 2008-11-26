@@ -5010,19 +5010,32 @@ bp_loc_is_permanent (struct bp_location *loc)
   CORE_ADDR addr;
   const gdb_byte *brk;
   gdb_byte *target_mem;
+  struct cleanup *cleanup;
+  int retval = 0;
 
   gdb_assert (loc != NULL);
 
   addr = loc->address;
   brk = gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &len);
 
+  /* Software breakpoints unsupported?  */
+  if (brk == NULL)
+    return 0;
+
   target_mem = alloca (len);
+
+  /* Enable the automatic memory restoration from breakpoints while
+     we read the memory.  Otherwise we could say about our temporary
+     breakpoints they are permanent.  */
+  cleanup = make_show_memory_breakpoints_cleanup (0);
 
   if (target_read_memory (loc->address, target_mem, len) == 0
       && memcmp (target_mem, brk, len) == 0)
-    return 1;
+    retval = 1;
 
-  return 0;
+  do_cleanups (cleanup);
+
+  return retval;
 }
 
 

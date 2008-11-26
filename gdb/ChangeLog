@@ -1,3 +1,25 @@
+2008-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix automatic restoration of breakpoints memory for ia64.
+	* ia64-tdep.c: New #if check on BREAKPOINT_MAX vs. BUNDLE_LEN.  
+	(ia64_memory_insert_breakpoint): New comment part for SHADOW_CONTENTS
+	content.  Remove variable instr.  New variable cleanup.  Force
+	automatic breakpoints restoration.  PLACED_SIZE and SHADOW_LEN are now
+	set larger, to BUNDLE_LEN - 2.  Variable `bundle' type update.  Return
+	error if even just final target_write_memory has failed.
+	(ia64_memory_remove_breakpoint): Rename variables bundle to bundle_mem
+	and instr to instr_saved.  New variables bundle_saved and
+	instr_breakpoint.  Comment new reasons why we need to disable automatic
+	restoration of breakpoints.  Assert PLACED_SIZE and SHADOW_LEN.  New
+	check of the original memory content.  Return error if even just final
+	target_write_memory has failed.
+	(ia64_breakpoint_from_pc): Implement the emulation of permanent
+	breakpoints compatible with current bp_loc_is_permanent.
+	(template_encoding_table): Make it `const'.
+	* breakpoint.c (bp_loc_is_permanent): Support unsupported software
+	breakpoints.  New variables `cleanup' and `retval'.
+	* monitor.c (monitor_insert_breakpoint): Remove unused variable `bp'.
+
 2008-11-24  Tom Tromey  <tromey@redhat.com>
 
 	* ada-lang.c (value_from_contents_and_address): Move...

@@ -110,6 +110,12 @@ typedef enum instruction_type
 
 #define BUNDLE_LEN 16
 
+/* See the saved memory layout comment for ia64_memory_insert_breakpoint.  */
+
+#if BREAKPOINT_MAX < BUNDLE_LEN - 2
+# error "BREAKPOINT_MAX < BUNDLE_LEN - 2"
+#endif
+
 static gdbarch_init_ftype ia64_gdbarch_init;
 
 static gdbarch_register_name_ftype ia64_register_name;
@@ -442,7 +448,7 @@ replace_slotN_contents (char *bundle, long long instr, int slotnum)
   replace_bit_field (bundle, instr, 5+41*slotnum, 41);
 }
 
-static enum instruction_type template_encoding_table[32][3] =
+static const enum instruction_type template_encoding_table[32][3] =
 {
   { M, I, I },				/* 00 */
   { M, I, I },				/* 01 */
@@ -545,7 +551,45 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
    simulators.  So I changed the pattern slightly to do "break.i 0x080001"
    instead.  But that didn't work either (I later found out that this
    pattern was used by the simulator that I was using.)  So I ended up
-   using the pattern seen below. */
+   using the pattern seen below.
+
+   SHADOW_CONTENTS has byte-based addressing (PLACED_ADDRESS and SHADOW_LEN)
+   while we need bit-based addressing as the instructions length is 41 bits and
+   we must not modify/corrupt the adjacent slots in the same bundle.
+   Fortunately we may store larger memory incl. the adjacent bits with the
+   original memory content (not the possibly already stored breakpoints there).
+   We need to be careful in ia64_memory_remove_breakpoint to always restore
+   only the specific bits of this instruction ignoring any adjacent stored
+   bits.
+
+   We use the original addressing with the low nibble in the range <0..2> which
+   gets incorrectly interpreted by generic non-ia64 breakpoint_restore_shadows
+   as the direct byte offset of SHADOW_CONTENTS.  We store whole BUNDLE_LEN
+   bytes just without these two possibly skipped bytes to not to exceed to the
+   next bundle.
+
+   If we would like to store the whole bundle to SHADOW_CONTENTS we would have
+   to store already the base address (`address & ~0x0f') into PLACED_ADDRESS.
+   In such case there is no other place where to store
+   SLOTNUM (`adress & 0x0f', value in the range <0..2>).  We need to know
+   SLOTNUM in ia64_memory_remove_breakpoint.
+
+   ia64 16-byte bundle layout:
+   | 5 bits | slot 0 with 41 bits | slot 1 with 41 bits | slot 2 with 41 bits |
+   
+   The current addressing used by the code below:
+   original PC   placed_address   placed_size             required    covered
+                                  == bp_tgt->shadow_len   reqd \subset covered
+   0xABCDE0      0xABCDE0         0xE                     <0x0...0x5> <0x0..0xD>
+   0xABCDE1      0xABCDE1         0xE                     <0x5...0xA> <0x1..0xE>
+   0xABCDE2      0xABCDE2         0xE                     <0xA...0xF> <0x2..0xF>
+   
+   `objdump -d' and some other tools show a bit unjustified offsets:
+   original PC   byte where starts the instruction   objdump offset
+   0xABCDE0      0xABCDE0                            0xABCDE0
+   0xABCDE1      0xABCDE5                            0xABCDE6
+   0xABCDE2      0xABCDEA                            0xABCDEC
+   */
 
 #define IA64_BREAKPOINT 0x00003333300LL
 
@@ -554,34 +598,55 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
 			       struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
-  char bundle[BUNDLE_LEN];
+  gdb_byte bundle[BUNDLE_LEN];
   int slotnum = (int) (addr & 0x0f) / SLOT_MULTIPLIER;
-  long long instr;
+  long long instr_breakpoint;
   int val;
   int template;
+  struct cleanup *cleanup;
 
   if (slotnum > 2)
     error (_("Can't insert breakpoint for slot numbers greater than 2."));
 
   addr &= ~0x0f;
 
+  /* Disable the automatic memory restoration from breakpoints while
+     we read our instruction bundle.  Otherwise, the general restoration
+     mechanism kicks in and we would possibly remove parts of the adjacent
+     placed breakpoints.  It is due to our SHADOW_CONTENTS overlapping the real
+     breakpoint instruction bits region.  */
+  cleanup = make_show_memory_breakpoints_cleanup (1);
   val = target_read_memory (addr, bundle, BUNDLE_LEN);
 
-  /* Check for L type instruction in 2nd slot, if present then
-     bump up the slot number to the 3rd slot */
+  /* Check for L type instruction in slot 1, if present then bump up the slot
+     number to the slot 2.  */
   template = extract_bit_field (bundle, 0, 5);
-  if (slotnum == 1 && template_encoding_table[template][1] == L)
-    {
-      slotnum = 2;
-    }
+  if (slotnum == 1 && template_encoding_table[template][slotnum] == L)
+    slotnum = 2;
 
-  instr = slotN_contents (bundle, slotnum);
-  memcpy (bp_tgt->shadow_contents, &instr, sizeof (instr));
-  bp_tgt->placed_size = bp_tgt->shadow_len = sizeof (instr);
+  /* Slot number 2 may skip at most 2 bytes at the beginning.  */
+  bp_tgt->placed_size = bp_tgt->shadow_len = BUNDLE_LEN - 2;
+
+  /* Store the whole bundle, except for the initial skipped bytes by the slot
+     number interpreted as bytes offset in PLACED_ADDRESS.  */
+  memcpy (bp_tgt->shadow_contents, bundle + slotnum, bp_tgt->shadow_len);
+
+  /* Breakpoints already present in the code will get deteacted and not get
+     reinserted by bp_loc_is_permanent.  Multiple breakpoints at the same
+     location cannot induce the internal error as they are optimized into
+     a single instance by update_global_location_list.  */
+  instr_breakpoint = slotN_contents (bundle, slotnum);
+  if (instr_breakpoint == IA64_BREAKPOINT)
+    internal_error (__FILE__, __LINE__,
+		    _("Address %s already contains a breakpoint."),
+		    paddr_nz (bp_tgt->placed_address));
   replace_slotN_contents (bundle, IA64_BREAKPOINT, slotnum);
-  if (val == 0)
-    target_write_memory (addr, bundle, BUNDLE_LEN);
 
+  if (val == 0)
+    val = target_write_memory (addr + slotnum, bundle + slotnum,
+			       bp_tgt->shadow_len);
+
+  do_cleanups (cleanup);
   return val;
 }
 
@@ -590,9 +655,9 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
 			       struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
-  char bundle[BUNDLE_LEN];
+  gdb_byte bundle_mem[BUNDLE_LEN], bundle_saved[BUNDLE_LEN];
   int slotnum = (addr & 0x0f) / SLOT_MULTIPLIER;
-  long long instr;
+  long long instr_breakpoint, instr_saved;
   int val;
   int template;
   struct cleanup *cleanup;
@@ -601,40 +666,96 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
 
   /* Disable the automatic memory restoration from breakpoints while
      we read our instruction bundle.  Otherwise, the general restoration
-     mechanism kicks in and ends up corrupting our bundle, because it
-     is not aware of the concept of instruction bundles.  */
+     mechanism kicks in and we would possibly remove parts of the adjacent
+     placed breakpoints.  It is due to our SHADOW_CONTENTS overlapping the real
+     breakpoint instruction bits region.  */
   cleanup = make_show_memory_breakpoints_cleanup (1);
-  val = target_read_memory (addr, bundle, BUNDLE_LEN);
+  val = target_read_memory (addr, bundle_mem, BUNDLE_LEN);
 
-  /* Check for L type instruction in 2nd slot, if present then
-     bump up the slot number to the 3rd slot */
-  template = extract_bit_field (bundle, 0, 5);
-  if (slotnum == 1 && template_encoding_table[template][1] == L)
+  /* Check for L type instruction in slot 1, if present then bump up the slot
+     number to the slot 2.  */
+  template = extract_bit_field (bundle_mem, 0, 5);
+  if (slotnum == 1 && template_encoding_table[template][slotnum] == L)
+    slotnum = 2;
+
+  gdb_assert (bp_tgt->placed_size == BUNDLE_LEN - 2);
+  gdb_assert (bp_tgt->placed_size == bp_tgt->shadow_len);
+
+  instr_breakpoint = slotN_contents (bundle_mem, slotnum);
+  if (instr_breakpoint != IA64_BREAKPOINT)
     {
-      slotnum = 2;
+      warning (_("Cannot remove breakpoint at address %s, "
+		 "no break instruction at such address."),
+	       paddr_nz (bp_tgt->placed_address));
+      return -1;
     }
 
-  memcpy (&instr, bp_tgt->shadow_contents, sizeof instr);
-  replace_slotN_contents (bundle, instr, slotnum);
+  /* Extract the original saved instruction from SLOTNUM normalizing its
+     bit-shift for INSTR_SAVED.  */
+  memcpy (bundle_saved, bundle_mem, BUNDLE_LEN);
+  memcpy (bundle_saved + slotnum, bp_tgt->shadow_contents, bp_tgt->shadow_len);
+  instr_saved = slotN_contents (bundle_saved, slotnum);
+
+  /* In BUNDLE_MEM be careful to modify only the bits belonging to SLOTNUM and
+     never any other possibly also stored in SHADOW_CONTENTS.  */
+  replace_slotN_contents (bundle_mem, instr_saved, slotnum);
   if (val == 0)
-    target_write_memory (addr, bundle, BUNDLE_LEN);
+    val = target_write_memory (addr, bundle_mem, BUNDLE_LEN);
 
   do_cleanups (cleanup);
   return val;
 }
 
-/* We don't really want to use this, but remote.c needs to call it in order
-   to figure out if Z-packets are supported or not.  Oh, well. */
-const unsigned char *
+/* As gdbarch_breakpoint_from_pc ranges have byte granularity and ia64
+   instruction slots ranges are bit-granular (41 bits) we have to provide an
+   extended range as described for ia64_memory_insert_breakpoint.  We also take
+   care of preserving the `break' instruction 21-bit (or 62-bit) parameter to
+   make a match for permanent breakpoints.  */
+
+static const gdb_byte *
 ia64_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
-  static unsigned char breakpoint[] =
-    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-  *lenptr = sizeof (breakpoint);
-#if 0
-  *pcptr &= ~0x0f;
-#endif
-  return breakpoint;
+  CORE_ADDR addr = *pcptr;
+  static gdb_byte bundle[BUNDLE_LEN];
+  int slotnum = (int) (*pcptr & 0x0f) / SLOT_MULTIPLIER;
+  long long instr_fetched;
+  int val;
+  int template;
+  struct cleanup *cleanup;
+
+  if (slotnum > 2)
+    error (_("Can't insert breakpoint for slot numbers greater than 2."));
+
+  addr &= ~0x0f;
+
+  /* Enable the automatic memory restoration from breakpoints while
+     we read our instruction bundle to match bp_loc_is_permanent.  */
+  cleanup = make_show_memory_breakpoints_cleanup (0);
+  val = target_read_memory (addr, bundle, BUNDLE_LEN);
+  do_cleanups (cleanup);
+
+  /* The memory might be unreachable.  This can happen, for instance,
+     when the user inserts a breakpoint at an invalid address.  */
+  if (val != 0)
+    return NULL;
+
+  /* Check for L type instruction in slot 1, if present then bump up the slot
+     number to the slot 2.  */
+  template = extract_bit_field (bundle, 0, 5);
+  if (slotnum == 1 && template_encoding_table[template][slotnum] == L)
+    slotnum = 2;
+
+  /* A break instruction has its all its opcode bits cleared except for
+     the parameter value.  For L+X slot pair we are at the X slot (slot 2) so
+     we should not touch the L slot - the upper 41 bits of the parameter.  */
+  instr_fetched = slotN_contents (bundle, slotnum);
+  instr_fetched &= 0x1003ffffc0;
+  replace_slotN_contents (bundle, instr_fetched, slotnum);
+
+  *lenptr = BUNDLE_LEN - 2;
+
+  /* SLOTNUM is possibly already locally modified - use caller's *PCPTR.  */
+  return bundle + (*pcptr & 0x0f);
 }
 
 static CORE_ADDR
