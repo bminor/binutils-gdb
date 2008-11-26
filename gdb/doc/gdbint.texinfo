@@ -3430,15 +3430,22 @@ favor of @code{gdbarch_breakpoint_from_pc}.
 @findex gdbarch_breakpoint_from_pc
 @anchor{gdbarch_breakpoint_from_pc} Use the program counter to determine the
 contents and size of a breakpoint instruction.  It returns a pointer to
-a string of bytes that encode a breakpoint instruction, stores the
+a static string of bytes that encode a breakpoint instruction, stores the
 length of the string to @code{*@var{lenptr}}, and adjusts the program
 counter (if necessary) to point to the actual memory location where the
-breakpoint should be inserted.
+breakpoint should be inserted.  May return @code{NULL} to indicate that
+software breakpoints are not supported.
 
 Although it is common to use a trap instruction for a breakpoint, it's
 not required; for instance, the bit pattern could be an invalid
 instruction.  The breakpoint must be no longer than the shortest
 instruction of the architecture.
+
+Provided breakpoint bytes can be also used by @code{bp_loc_is_permanent} to
+detect permanent breakpoints.  @code{gdbarch_breakpoint_from_pc} should return
+an unchanged memory copy if it was called for a location with permanent
+breakpoint as some architectures use breakpoint instructions containing
+arbitrary parameter value.
 
 Replaces all the other @var{BREAKPOINT} macros.
 

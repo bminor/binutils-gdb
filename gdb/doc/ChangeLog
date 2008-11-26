@@ -1,3 +1,8 @@
+2008-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbint.texinfo (Target Conditionals): Extend the
+	gdbarch_breakpoint_from_pc description.
+
 2008-11-22  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (M68K Features): Fix typo.
