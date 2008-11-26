@@ -64,7 +64,7 @@ static char *const reg_half_names[] =
   do						\
     {						\
       p += 2;					\
-      if (FETCH_DATA (info, p) < 0)		\
+      if (!FETCH_DATA (info, p))		\
 	return -3;				\
       val = COERCE_SIGNED_CHAR (p[-1]);		\
     }						\
@@ -77,7 +77,7 @@ static char *const reg_half_names[] =
   do						\
     {						\
       p += 2;					\
-      if (FETCH_DATA (info, p) < 0)		\
+      if (!FETCH_DATA (info, p))		\
 	return ret_val;				\
       val = COERCE16 ((p[-2] << 8) + p[-1]);	\
     }						\
@@ -90,7 +90,7 @@ static char *const reg_half_names[] =
   do									\
     {									\
       p += 4;								\
-      if (FETCH_DATA (info, p) < 0)					\
+      if (!FETCH_DATA (info, p))					\
 	return ret_val;							\
       val = COERCE32 ((((((p[-4] << 8) + p[-3]) << 8) + p[-2]) << 8) + p[-1]); \
     }									\
@@ -101,7 +101,7 @@ static char *const reg_half_names[] =
   do									\
     {									\
       p += 4;								\
-      if (FETCH_DATA (info, p) < 0)					\
+      if (!FETCH_DATA (info, p))					\
 	return -3;							\
       val = (unsigned int) ((((((p[-4] << 8) + p[-3]) << 8) + p[-2]) << 8) + p[-1]); \
     }									\
@@ -112,7 +112,7 @@ static char *const reg_half_names[] =
   do								\
     {								\
       p += 4;							\
-      if (FETCH_DATA (info, p) < 0)				\
+      if (!FETCH_DATA (info, p))				\
 	return -3;						\
       floatformat_to_double (& floatformat_ieee_single_big,	\
 			     (char *) p - 4, & val);		\
@@ -124,7 +124,7 @@ static char *const reg_half_names[] =
   do								\
     {								\
       p += 8;							\
-      if (FETCH_DATA (info, p) , 0)				\
+      if (!FETCH_DATA (info, p))				\
 	return -3;						\
       floatformat_to_double (& floatformat_ieee_double_big,	\
 			     (char *) p - 8, & val);		\
@@ -136,7 +136,7 @@ static char *const reg_half_names[] =
   do							\
     {							\
       p += 12;						\
-      if (FETCH_DATA (info, p) < 0)			\
+      if (!FETCH_DATA (info, p))			\
 	return -3;					\
       floatformat_to_double (& floatformat_m68881_ext,	\
 			     (char *) p - 12, & val);	\
@@ -151,7 +151,7 @@ static char *const reg_half_names[] =
   do						\
     {						\
       p += 12;					\
-      if (FETCH_DATA (info, p) < 0)		\
+      if (!FETCH_DATA (info, p))		\
 	return -3;				\
       val = 0.0;				\
     }						\
@@ -170,9 +170,6 @@ struct private
   bfd_byte the_buffer[MAXLEN];
   bfd_vma insn_start;
 };
-
-static fprintf_ftype save_printer;
-static void (* save_print_address) (bfd_vma, struct disassemble_info *);
 
 /* Make sure that bytes from INFO->PRIVATE_DATA->BUFFER (inclusive)
    to ADDR (exclusive) are valid.  Returns 1 for success, 0 on error.  */
@@ -194,8 +191,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
   if (status != 0)
     {
       (*info->memory_error_func) (status, start, info);
-      info->fprintf_func = save_printer;
-      info->print_address_func = save_print_address;
       return 0;
     }
   else
@@ -1400,14 +1395,12 @@ match_insn_m68k (bfd_vma memaddr,
 
       if (eaten >= 0)
 	p += eaten;
-      else if (eaten == -1)
+      else if (eaten == -1 || eaten == -3)
 	{
 	  info->fprintf_func = save_printer;
 	  info->print_address_func = save_print_address;
 	  return 0;
 	}
-      else if (eaten == -3)
-	return 0;
       else
 	{
 	  /* We must restore the print functions before trying to print the
@@ -1574,18 +1567,11 @@ m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,
 int
 print_insn_m68k (bfd_vma memaddr, disassemble_info *info)
 {
-  fprintf_ftype save_printer;
-  void (* save_print_address) (bfd_vma, struct disassemble_info *);
   unsigned int arch_mask;
   struct private priv;
   int val;
 
   bfd_byte *buffer = priv.the_buffer;
-
-  /* Save these printing functions in case we need to restore them
-     later.  */
-  save_printer = info->fprintf_func;
-  save_print_address = info->print_address_func;
 
   info->private_data = & priv;
   /* Tell objdump to use two bytes per chunk
@@ -1613,10 +1599,6 @@ print_insn_m68k (bfd_vma memaddr, disassemble_info *info)
   if (val == 0)
     /* Handle undefined instructions.  */
     info->fprintf_func (info->stream, "0%o", (buffer[0] << 8) + buffer[1]);
-
-  /* Restore print functions.  */
-  info->fprintf_func = save_printer;
-  info->print_address_func = save_print_address;
 
   return val ? val : 2;
 }
