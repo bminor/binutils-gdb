@@ -1,3 +1,7 @@
+2008-11-26  Tristan Gingold  <gingold@adacore.com>
+
+	* MAINTAINERS: Add myself for write after approval privileges.
+
 2008-11-26  Jerome Guitton  <guitton@adacore.com>
 
 	* value.h (allocate_value_lazy): New function declaration.
