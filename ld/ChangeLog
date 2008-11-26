@@ -1,3 +1,16 @@
+2008-11-26  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 7047
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_new_vers_pattern): Update
+	for changes to struct bfd_elf_version_expr.
+	* ldlang.c (lang_vers_match, version_expr_head_hash): Likewise.
+	(version_expr_head_eq, lang_finalize_version_expr_head): Likewise.
+	(lang_register_vers_node): Likewise.
+	(lang_new_vers_pattern): Likewise.  Ensure "literal" is set when
+	no glob chars found in "pattern".
+	(realsymbol): Correct backslash quote logic.
+	* ld.texinfo (VERSION): Warn about global wildcards.
+
 2008-11-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_record_phdrs): Don't add orphans to PT_INTERP header.

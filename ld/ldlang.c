@@ -6989,7 +6989,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	java_sym = sym;
     }
 
-  if (head->htab && (prev == NULL || prev->symbol))
+  if (head->htab && (prev == NULL || prev->literal))
     {
       struct bfd_elf_version_expr e;
 
@@ -6998,9 +6998,9 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	case 0:
 	  if (head->mask & BFD_ELF_VERSION_C_TYPE)
 	    {
-	      e.symbol = sym;
+	      e.pattern = sym;
 	      expr = htab_find (head->htab, &e);
-	      while (expr && strcmp (expr->symbol, sym) == 0)
+	      while (expr && strcmp (expr->pattern, sym) == 0)
 		if (expr->mask == BFD_ELF_VERSION_C_TYPE)
 		  goto out_ret;
 		else
@@ -7010,9 +7010,9 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	case BFD_ELF_VERSION_C_TYPE:
 	  if (head->mask & BFD_ELF_VERSION_CXX_TYPE)
 	    {
-	      e.symbol = cxx_sym;
+	      e.pattern = cxx_sym;
 	      expr = htab_find (head->htab, &e);
-	      while (expr && strcmp (expr->symbol, cxx_sym) == 0)
+	      while (expr && strcmp (expr->pattern, cxx_sym) == 0)
 		if (expr->mask == BFD_ELF_VERSION_CXX_TYPE)
 		  goto out_ret;
 		else
@@ -7022,9 +7022,9 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	case BFD_ELF_VERSION_CXX_TYPE:
 	  if (head->mask & BFD_ELF_VERSION_JAVA_TYPE)
 	    {
-	      e.symbol = java_sym;
+	      e.pattern = java_sym;
 	      expr = htab_find (head->htab, &e);
-	      while (expr && strcmp (expr->symbol, java_sym) == 0)
+	      while (expr && strcmp (expr->pattern, java_sym) == 0)
 		if (expr->mask == BFD_ELF_VERSION_JAVA_TYPE)
 		  goto out_ret;
 		else
@@ -7037,7 +7037,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
     }
 
   /* Finally, try the wildcards.  */
-  if (prev == NULL || prev->symbol)
+  if (prev == NULL || prev->literal)
     expr = head->remaining;
   else
     expr = prev->next;
@@ -7070,7 +7070,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 }
 
 /* Return NULL if the PATTERN argument is a glob pattern, otherwise,
-   return a string pointing to the symbol name.  */
+   return a pointer to the symbol name with any backslash quotes removed.  */
 
 static const char *
 realsymbol (const char *pattern)
@@ -7083,22 +7083,24 @@ realsymbol (const char *pattern)
     {
       /* It is a glob pattern only if there is no preceding
 	 backslash.  */
-      if (! backslash && (*p == '?' || *p == '*' || *p == '['))
-	{
-	  free (symbol);
-	  return NULL;
-	}
-
       if (backslash)
 	{
 	  /* Remove the preceding backslash.  */
 	  *(s - 1) = *p;
+	  backslash = FALSE;
 	  changed = TRUE;
 	}
       else
-	*s++ = *p;
+	{
+	  if (*p == '?' || *p == '*' || *p == '[')
+	    {
+	      free (symbol);
+	      return NULL;
+	    }
 
-      backslash = *p == '\\';
+	  *s++ = *p;
+	  backslash = *p == '\\';
+	}
     }
 
   if (changed)
@@ -7127,10 +7129,15 @@ lang_new_vers_pattern (struct bfd_elf_version_expr *orig,
 
   ret = xmalloc (sizeof *ret);
   ret->next = orig;
-  ret->pattern = literal_p ? NULL : new;
   ret->symver = 0;
   ret->script = 0;
-  ret->symbol = literal_p ? new : realsymbol (new);
+  ret->literal = TRUE;
+  ret->pattern = literal_p ? new : realsymbol (new);
+  if (ret->pattern == NULL)
+    {
+      ret->pattern = new;
+      ret->literal = FALSE;
+    }
 
   if (lang == NULL || strcasecmp (lang, "C") == 0)
     ret->mask = BFD_ELF_VERSION_C_TYPE;
@@ -7174,7 +7181,7 @@ version_expr_head_hash (const void *p)
 {
   const struct bfd_elf_version_expr *e = p;
 
-  return htab_hash_string (e->symbol);
+  return htab_hash_string (e->pattern);
 }
 
 static int
@@ -7183,7 +7190,7 @@ version_expr_head_eq (const void *p1, const void *p2)
   const struct bfd_elf_version_expr *e1 = p1;
   const struct bfd_elf_version_expr *e2 = p2;
 
-  return strcmp (e1->symbol, e2->symbol) == 0;
+  return strcmp (e1->pattern, e2->pattern) == 0;
 }
 
 static void
@@ -7195,7 +7202,7 @@ lang_finalize_version_expr_head (struct bfd_elf_version_expr_head *head)
 
   for (e = head->list; e; e = e->next)
     {
-      if (e->symbol)
+      if (e->literal)
 	count++;
       head->mask |= e->mask;
     }
@@ -7209,7 +7216,7 @@ lang_finalize_version_expr_head (struct bfd_elf_version_expr_head *head)
       for (e = head->list; e; e = next)
 	{
 	  next = e->next;
-	  if (!e->symbol)
+	  if (!e->literal)
 	    {
 	      *remaining_loc = e;
 	      remaining_loc = &e->next;
@@ -7234,14 +7241,14 @@ lang_finalize_version_expr_head (struct bfd_elf_version_expr_head *head)
 		      last = e1;
 		      e1 = e1->next;
 		    }
-		  while (e1 && strcmp (e1->symbol, e->symbol) == 0);
+		  while (e1 && strcmp (e1->pattern, e->pattern) == 0);
 
 		  if (last == NULL)
 		    {
 		      /* This is a duplicate.  */
 		      /* FIXME: Memory leak.  Sometimes pattern is not
 			 xmalloced alone, but in larger chunk of memory.  */
-		      /* free (e->symbol); */
+		      /* free (e->pattern); */
 		      free (e);
 		    }
 		  else
@@ -7305,18 +7312,18 @@ lang_register_vers_node (const char *name,
 	{
 	  struct bfd_elf_version_expr *e2;
 
-	  if (t->locals.htab && e1->symbol)
+	  if (t->locals.htab && e1->literal)
 	    {
 	      e2 = htab_find (t->locals.htab, e1);
-	      while (e2 && strcmp (e1->symbol, e2->symbol) == 0)
+	      while (e2 && strcmp (e1->pattern, e2->pattern) == 0)
 		{
 		  if (e1->mask == e2->mask)
 		    einfo (_("%X%P: duplicate expression `%s'"
-			     " in version information\n"), e1->symbol);
+			     " in version information\n"), e1->pattern);
 		  e2 = e2->next;
 		}
 	    }
-	  else if (!e1->symbol)
+	  else if (!e1->literal)
 	    for (e2 = t->locals.remaining; e2 != NULL; e2 = e2->next)
 	      if (strcmp (e1->pattern, e2->pattern) == 0
 		  && e1->mask == e2->mask)
@@ -7331,19 +7338,19 @@ lang_register_vers_node (const char *name,
 	{
 	  struct bfd_elf_version_expr *e2;
 
-	  if (t->globals.htab && e1->symbol)
+	  if (t->globals.htab && e1->literal)
 	    {
 	      e2 = htab_find (t->globals.htab, e1);
-	      while (e2 && strcmp (e1->symbol, e2->symbol) == 0)
+	      while (e2 && strcmp (e1->pattern, e2->pattern) == 0)
 		{
 		  if (e1->mask == e2->mask)
 		    einfo (_("%X%P: duplicate expression `%s'"
 			     " in version information\n"),
-			   e1->symbol);
+			   e1->pattern);
 		  e2 = e2->next;
 		}
 	    }
-	  else if (!e1->symbol)
+	  else if (!e1->literal)
 	    for (e2 = t->globals.remaining; e2 != NULL; e2 = e2->next)
 	      if (strcmp (e1->pattern, e2->pattern) == 0
 		  && e1->mask == e2->mask)

@@ -1,3 +1,16 @@
+2008-11-26  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 7047
+	* configure.in: Bump version.
+	* configure: Regenerate.
+	* elflink.c (_bfd_elf_link_assign_sym_version): Continue matching
+	against version nodes when a global match is a wildcard.  Similarly
+	continue matching on local wildcard matches, rather than only
+	continuing for "*".  Have any global wildcard match override a
+	local wildcard match.  Correct logic hiding unversioned symbol.
+	(bfd_elf_size_dynamic_sections): Update for changes to struct
+	bfd_elf_version_expr.
+
 2008-11-25  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.in: Deactivate large-file support on native x86-solaris
