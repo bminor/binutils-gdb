@@ -27,13 +27,14 @@
 
 #define TARGET_BYTES_BIG_ENDIAN 0
 
+#define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
+
 #define TARGET_FORMAT "elf32-cr16"
 #define TARGET_ARCH   bfd_arch_cr16
 
 #define WORKING_DOT_WORD
 #define LOCAL_LABEL_PREFIX '.'
 
-#define md_undefined_symbol(s)  0
 #define md_number_to_chars      number_to_chars_littleendian
 
 /* We do relaxing in the assembler as well as the linker.  */

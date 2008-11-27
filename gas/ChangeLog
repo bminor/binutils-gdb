@@ -1,3 +1,16 @@
+2008-11-27  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* config/tc-cr16.h (GLOBAL_OFFSET_TABLE_NAME): Defined
+	* config/tc-cr16.c (md_pseudo_table): Add "4byte" directive to
+	md_pseudo_table and accept @c prefix, same as long directive.
+	(cr16_cons_fix_new): Initialize rtype to BFD_RELOC_UNUSED.
+	(tc_gen_reloc): Declare a variable of type bfd_reloc_code_real_type
+	and set it for GOT related relocations.
+	(md_undefined_symbol): Defined
+	(process_label_constant): Added checks for GOT/got and cGOT/cGOT
+	prefixes with constant label and set the appropriate relocation type.
+	* doc/c-cr16.texi (cr16-operand specifiers): Add got/GOT and cgot/cGOT. 
+
 2008-11-26  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-m32c.c (md_pseudo_table): Add support for .loc et al.

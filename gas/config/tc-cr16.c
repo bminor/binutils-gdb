@@ -99,6 +99,11 @@ const char EXP_CHARS[] = "eE";
 /* Chars that mean this number is a floating point constant as in 0f12.456  */
 const char FLT_CHARS[] = "f'";
 
+#ifdef OBJ_ELF
+/* Pre-defined "_GLOBAL_OFFSET_TABLE_"  */
+symbolS * GOT_symbol;
+#endif
+
 /* Target-specific multicharacter options, not const-declared at usage.  */
 const char *md_shortopts = "";
 struct option md_longopts[] =
@@ -236,7 +241,6 @@ l_cons (int nbytes)
   demand_empty_rest_of_line ();
 }
 
-
 /* This table describes all the machine specific pseudo-ops
    the assembler has to support.  The fields are:
    *** Pseudo-op name without dot.
@@ -248,6 +252,7 @@ const pseudo_typeS md_pseudo_table[] =
   /* In CR16 machine, align is in bytes (not a ptwo boundary).  */
   {"align", s_align_bytes, 0},
   {"long", l_cons,  4 },
+  {"4byte", l_cons, 4 },
   {0, 0, 0}
 };
 
@@ -489,7 +494,8 @@ cr16_force_relocation (fixS *fix)
 void
 cr16_cons_fix_new (fragS *frag, int offset, int len, expressionS *exp)
 {
-  int rtype;
+  int rtype = BFD_RELOC_UNUSED;
+
   switch (len)
     {
     default: rtype = BFD_RELOC_NONE; break;
@@ -515,6 +521,7 @@ arelent *
 tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS * fixP)
 {
   arelent * reloc;
+  bfd_reloc_code_real_type code;
 
   reloc = xmalloc (sizeof (arelent));
   reloc->sym_ptr_ptr  = xmalloc (sizeof (asymbol *));
@@ -562,6 +569,22 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS * fixP)
                         segment_name (S_GET_SEGMENT (fixP->fx_addsy)));
         }
     }
+#ifdef OBJ_ELF
+      if ((fixP->fx_r_type == BFD_RELOC_CR16_GOT_REGREL20)
+           && GOT_symbol
+	   && fixP->fx_addsy == GOT_symbol)
+	{
+	    code = BFD_RELOC_CR16_GOT_REGREL20;
+	    reloc->addend = fixP->fx_offset = reloc->address;
+	}
+      else if ((fixP->fx_r_type == BFD_RELOC_CR16_GOTC_REGREL20)
+           && GOT_symbol
+	   && fixP->fx_addsy == GOT_symbol)
+	{
+	    code = BFD_RELOC_CR16_GOTC_REGREL20;
+	    reloc->addend = fixP->fx_offset = reloc->address;
+	}
+#endif
 
   assert ((int) fixP->fx_r_type > 0);
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
@@ -651,6 +674,24 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, fragS *fragP)
            fragP->fr_symbol, fragP->fr_offset, 1, reloc);
   fragP->fr_var = 0;
   fragP->fr_fix += md_relax_table[fragP->fr_subtype].rlx_length;
+}
+
+symbolS *
+md_undefined_symbol (char *name)
+{
+  if (*name == '_' && *(name + 1) == 'G'
+      && strcmp (name, "_GLOBAL_OFFSET_TABLE_") == 0)
+   {
+     if (!GOT_symbol)
+       {
+         if (symbol_find (name))
+             as_bad (_("GOT already in symbol table"));
+          GOT_symbol = symbol_new (name, undefined_section,
+                                   (valueT) 0, &zero_address_frag);
+       }
+     return GOT_symbol;
+   }
+  return 0;
 }
 
 /* Process machine-dependent command line options.  Called once for
@@ -813,6 +854,8 @@ process_label_constant (char *str, ins * cr16_ins)
   int symbol_with_s = 0;
   int symbol_with_m = 0;
   int symbol_with_l = 0;
+  int symbol_with_at_got = 0;
+  int symbol_with_at_gotc = 0;
   argument *cur_arg = cr16_ins->arg + cur_arg_num;  /* Current argument.  */
 
   saved_input_line_pointer = input_line_pointer;
@@ -842,6 +885,8 @@ process_label_constant (char *str, ins * cr16_ins)
     case O_subtract:
     case O_add:
       cur_arg->X_op = O_symbol;
+      cur_arg->constant = cr16_ins->exp.X_add_number;
+      cr16_ins->exp.X_add_number = 0;
       cr16_ins->rtype = BFD_RELOC_NONE;
       relocatable = 1;
 
@@ -860,12 +905,37 @@ process_label_constant (char *str, ins * cr16_ins)
           || strneq (input_line_pointer, ":s", 2))
         symbol_with_s = 1;
 
+      if (strneq (input_line_pointer, "@cGOT", 5)
+          || strneq (input_line_pointer, "@cgot", 5))
+	{
+	  if (GOT_symbol == NULL)
+           GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
+
+          symbol_with_at_gotc = 1;
+	}
+      else if (strneq (input_line_pointer, "@GOT", 4)
+          || strneq (input_line_pointer, "@got", 4))
+	{
+          if ((strneq (input_line_pointer, "+", 1)) 
+	       || (strneq (input_line_pointer, "-", 1)))
+           as_warn (_("GOT bad expression with %s."), input_line_pointer);
+
+	  if (GOT_symbol == NULL)
+           GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
+
+          symbol_with_at_got = 1;
+	}
+
       switch (cur_arg->type)
         {
         case arg_cr:
           if (IS_INSN_TYPE (LD_STOR_INS) || IS_INSN_TYPE (CSTBIT_INS))
             {
-              if (cur_arg->size == 20)
+	      if (symbol_with_at_got)
+	          cr16_ins->rtype = BFD_RELOC_CR16_GOT_REGREL20;
+	      else if (symbol_with_at_gotc)
+	          cr16_ins->rtype = BFD_RELOC_CR16_GOTC_REGREL20;
+	      else if (cur_arg->size == 20)
                 cr16_ins->rtype = BFD_RELOC_CR16_REGREL20;
               else
                 cr16_ins->rtype = BFD_RELOC_CR16_REGREL20a;
@@ -874,6 +944,12 @@ process_label_constant (char *str, ins * cr16_ins)
 
         case arg_crp:
           if (IS_INSN_TYPE (LD_STOR_INS) || IS_INSN_TYPE (CSTBIT_INS))
+	   {
+	    if (symbol_with_at_got)
+	      cr16_ins->rtype = BFD_RELOC_CR16_GOT_REGREL20;
+	    else if (symbol_with_at_gotc)
+	      cr16_ins->rtype = BFD_RELOC_CR16_GOTC_REGREL20;
+	   } else {
             switch (instruction->size)
               {
               case 1:
@@ -903,15 +979,29 @@ process_label_constant (char *str, ins * cr16_ins)
               default:
                 break;
               }
+	    }
           break;
 
         case arg_idxr:
           if (IS_INSN_TYPE (LD_STOR_INS) || IS_INSN_TYPE (CSTBIT_INS))
-            cr16_ins->rtype = BFD_RELOC_CR16_REGREL20;
+	    {
+	      if (symbol_with_at_got)
+	        cr16_ins->rtype = BFD_RELOC_CR16_GOT_REGREL20;
+	      else if (symbol_with_at_gotc)
+	        cr16_ins->rtype = BFD_RELOC_CR16_GOTC_REGREL20;
+	      else
+                cr16_ins->rtype = BFD_RELOC_CR16_REGREL20;
+	    }
           break;
 
         case arg_idxrp:
           if (IS_INSN_TYPE (LD_STOR_INS) || IS_INSN_TYPE (CSTBIT_INS))
+	    {
+	    if (symbol_with_at_got)
+	      cr16_ins->rtype = BFD_RELOC_CR16_GOT_REGREL20;
+	    else if (symbol_with_at_gotc)
+	      cr16_ins->rtype = BFD_RELOC_CR16_GOTC_REGREL20;
+	    else {
             switch (instruction->size)
               {
               case 1: cr16_ins->rtype = BFD_RELOC_CR16_REGREL0; break;
@@ -919,6 +1009,8 @@ process_label_constant (char *str, ins * cr16_ins)
               case 3: cr16_ins->rtype = BFD_RELOC_CR16_REGREL20; break;
               default: break;
               }
+	    }
+	   }
           break;
 
         case arg_c:
@@ -936,9 +1028,13 @@ process_label_constant (char *str, ins * cr16_ins)
           else if (IS_INSN_TYPE (STOR_IMM_INS) || IS_INSN_TYPE (LD_STOR_INS)
                    || IS_INSN_TYPE (CSTBIT_INS))
             {
-              if (symbol_with_s)
+	      if (symbol_with_s)
                 as_bad (_("operand %d: illegal use expression: `%s`"), cur_arg_num + 1, str);
-              if (symbol_with_m)
+	      if (symbol_with_at_got)
+	        cr16_ins->rtype = BFD_RELOC_CR16_GOT_REGREL20;
+	      else if (symbol_with_at_gotc)
+	        cr16_ins->rtype = BFD_RELOC_CR16_GOTC_REGREL20;
+	      else if (symbol_with_m)
                 cr16_ins->rtype = BFD_RELOC_CR16_ABS20;
               else /* Default to (symbol_with_l) */
                 cr16_ins->rtype = BFD_RELOC_CR16_ABS24;
@@ -950,7 +1046,11 @@ process_label_constant (char *str, ins * cr16_ins)
         case arg_ic:
           if (IS_INSN_TYPE (ARITH_INS))
             {
-              if (symbol_with_s)
+	      if (symbol_with_at_got)
+	        cr16_ins->rtype = BFD_RELOC_CR16_GOT_REGREL20;
+	      else if (symbol_with_at_gotc)
+	        cr16_ins->rtype = BFD_RELOC_CR16_GOTC_REGREL20;
+	      else if (symbol_with_s)
                 cr16_ins->rtype = BFD_RELOC_CR16_IMM4;
               else if (symbol_with_m)
                 cr16_ins->rtype = BFD_RELOC_CR16_IMM20;
@@ -2330,7 +2430,7 @@ print_insn (ins *insn)
         this_frag = frag_var (rs_machine_dependent, insn_size *2,
                               4, relax_subtype,
                               insn->exp.X_add_symbol,
-                              insn->exp.X_add_number,
+                              0,
                               0);
       }
     else
