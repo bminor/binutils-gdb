@@ -172,6 +172,10 @@ macro undef
   These allow macros to be defined, undefined, and listed
   interactively.
 
+* New native configurations
+
+x86/x86_64 Darwin		i[34567]86-*-darwin*
+
 * New targets
 
 x86 DICOS			i[34567]86-*-dicos*

@@ -1,3 +1,7 @@
+2008-11-27  Tristan Gingold  <gingold@adacore.com>
+
+	* gdb.texinfo (Darwin): Document Darwin specific features.
+
 2008-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbint.texinfo (Target Conditionals): Extend the

@@ -14675,6 +14675,7 @@ configurations.
 * Cygwin Native::		Features specific to the Cygwin port
 * Hurd Native::                 Features specific to @sc{gnu} Hurd
 * Neutrino::                    Features specific to QNX Neutrino
+* Darwin::			Features specific to Darwin
 @end menu
 
 @node HP-UX
@@ -15454,6 +15455,48 @@ Neutrino support.
 @item show debug nto-debug
 @kindex show debug nto-debug
 Show the current state of QNX Neutrino messages.
+@end table
+
+@node Darwin
+@subsection Darwin
+@cindex Darwin
+
+@value{GDBN} provides the following commands specific to the Darwin target:
+
+@table @code
+@item set debug darwin @var{num}
+@kindex set debug darwin
+When set to a non zero value, enables debugging messages specific to
+the Darwin support.  Higher values produce more verbose output.
+
+@item show debug darwin
+@kindex show debug darwin
+Show the current state of Darwin messages.
+
+@item set debug mach-o @var{num}
+@kindex set debug mach-o
+When set to a non zero value, enables debugging messages while
+@value{GDBN} is reading Darwin object files.  (@dfn{Mach-O} is the
+file format used on Darwin for object and executable files.)  Higher
+values produce more verbose output.  This is a command to diagnose
+problems internal to @value{GDBN} and should not be needed in normal
+usage.
+
+@item show debug mach-o
+@kindex show debug mach-o
+Show the current state of Mach-O file messages.
+
+@item set mach-exceptions on
+@itemx set mach-exceptions off
+@kindex set mach-exceptions
+On Darwin, faults are first reported as a Mach exception and are then
+mapped to a Posix signal.  Use this command to turn on trapping of
+Mach exceptions in the inferior.  This might be sometimes useful to
+better understand the cause of a fault.  The default is off.
+
+@item show mach-exceptions
+@kindex show mach-exceptions
+Show the current state of exceptions trapping.
 @end table
 
 

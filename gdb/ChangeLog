@@ -1,3 +1,19 @@
+2008-11-27  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add entry for new native configuration: Darwin.
+	* configure.host: Add Darwin host.
+	* configure.tgt: Add Darwin target.
+	* defs.h (enum gdb_osabi): Add GDB_OSABI_DARWIN.
+	* osabi.c (gdb_osabi_names): Add name for Darwin abi.
+	* i386-darwin-nat.c: New file.
+	* i386-darwin-tdep.c: New file.
+	* machoread.c: New file.
+	* darwin-nat-info.c: New file.
+	* darwin-nat.c: New file.
+	* darwin-nat.h: New file.
+	* darwin.defs: New file.
+	* config/i386/darwin.mh: New file.
+
 2008-11-26  Tristan Gingold  <gingold@adacore.com>
 
 	* MAINTAINERS: Add myself for write after approval privileges.

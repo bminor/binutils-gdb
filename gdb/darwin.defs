@@ -1,0 +1,6 @@
+#include "config.h"
+#ifdef HAVE_64_BIT_MACH_EXCEPTIONS
+#import <mach/mach_exc.defs>
+#else
+#import <mach/exc.defs>
+#endif
