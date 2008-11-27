@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add CR16 ELF --embedded-relocs (used to embedded relocations into binaries 
+  for Embedded-PIC code) option.
+
 * Add to the PE/PE+ targets the support of two different kinds of
   pseudo-relocations.  They can be selected by the switches
   --enable-runtime-pseudo-reloc-v1 and --enable-runtime-pseudo-reloc-v2.

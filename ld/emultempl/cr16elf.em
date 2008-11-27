@@ -30,6 +30,84 @@ fragment <<EOF
 /* Flag for the emulation-specific "--no-relax" option.  */
 static bfd_boolean disable_relaxation = FALSE;
 
+static void check_sections (bfd *, asection *, void *);
+
+
+/* This function is run after all the input files have been opened.  */
+
+static void
+cr16_elf_after_open (void)
+{
+  /* Call the standard elf routine.  */
+  gld${EMULATION_NAME}_after_open ();
+
+   if (command_line.embedded_relocs
+       && (! link_info.relocatable))
+     {
+       bfd *abfd;
+
+      /* In the embedded relocs mode we create a .emreloc section for each
+	 input file with a nonzero .data section.  The BFD backend will fill in
+	 these sections with magic numbers which can be used to relocate the
+	 data section at run time.  */
+      for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link_next)
+	{
+	  asection *datasec;
+
+	  /* As first-order business, make sure that each input BFD is either
+	     COFF or ELF.  We need to call a special BFD backend function to
+	     generate the embedded relocs, and we have such functions only for
+	     COFF and ELF.  */
+	  if (bfd_get_flavour (abfd) != bfd_target_coff_flavour
+	      && bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+	    einfo ("%F%B: all input objects must be COFF or ELF for --embedded-relocs\n");
+
+	  datasec = bfd_get_section_by_name (abfd, ".data.rel");
+
+	  /* Note that we assume that the reloc_count field has already
+	     been set up.  We could call bfd_get_reloc_upper_bound, but
+	     that returns the size of a memory buffer rather than a reloc
+	     count.  We do not want to call bfd_canonicalize_reloc,
+	     because although it would always work it would force us to
+	     read in the relocs into BFD canonical form, which would waste
+	     a significant amount of time and memory.  */
+	  if (datasec != NULL && datasec->reloc_count > 0)
+	    {
+	      asection *relsec;
+
+	      relsec = bfd_make_section (abfd, ".emreloc");
+	      if (relsec == NULL
+		  || ! bfd_set_section_flags (abfd, relsec,
+					      (SEC_ALLOC
+					       | SEC_LOAD
+					       | SEC_HAS_CONTENTS
+					       | SEC_IN_MEMORY))
+		  || ! bfd_set_section_alignment (abfd, relsec, 2)
+		  || ! bfd_set_section_size (abfd, relsec,
+					     datasec->reloc_count * 8))
+		einfo ("%F%B: can not create .emreloc section: %E\n");
+	    }
+
+	  /* Double check that all other data sections are empty, as is
+	     required for embedded PIC code.  */
+	  bfd_map_over_sections (abfd, check_sections, datasec); 
+	}
+    }
+}
+
+/* Check that of the data sections, only the .data section has
+   relocs.  This is called via bfd_map_over_sections.  */
+
+static void
+check_sections (bfd *abfd, asection *sec, void *datasec)
+{
+  if ((strncmp (bfd_get_section_name (abfd, sec), ".data.rel", 9) == 0)
+     && sec != datasec
+     && sec->reloc_count == 0 )
+    einfo ("%B%X: section %s has relocs; can not use --embedded-relocs\n",
+	   abfd, bfd_get_section_name (abfd, sec));
+}
+
 static void
 cr16elf_after_parse (void)
 {
@@ -53,6 +131,41 @@ cr16elf_before_allocation (void)
 {
   /* Call the default first.  */
   gld${EMULATION_NAME}_before_allocation ();
+
+   if (command_line.embedded_relocs
+       && (! link_info.relocatable))
+     {
+
+   bfd *abfd;
+
+   /* If we are generating embedded relocs, call a special BFD backend
+	 routine to do the work.  */
+   for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link_next)
+      {
+	  asection *datasec, *relsec;
+	  char *errmsg;
+
+	  datasec = bfd_get_section_by_name (abfd, ".data.rel");
+
+	  if (datasec == NULL || datasec->reloc_count == 0)
+	    continue;
+
+	  relsec = bfd_get_section_by_name (abfd, ".emreloc");
+	  ASSERT (relsec != NULL);
+
+	  if (! bfd_cr16_elf32_create_embedded_relocs (abfd, &link_info,
+							   datasec, relsec,
+							   &errmsg))
+		{
+		  if (errmsg == NULL)
+		    einfo ("%B%X: can not create runtime reloc information: %E\n",
+			   abfd);
+		  else
+		    einfo ("%X%B: can not create runtime reloc information: %s\n",
+			   abfd, errmsg);
+		}
+       }
+     }
 
   /* Enable relaxation by default if the "--no-relax" option was not
      specified.  This is done here instead of in the before_parse hook
@@ -88,5 +201,6 @@ PARSE_AND_LIST_ARGS_CASES='
 
 # Put these extra cr16-elf routines in ld_${EMULATION_NAME}_emulation
 #
+LDEMUL_AFTER_OPEN=cr16_elf_after_open
 LDEMUL_AFTER_PARSE=cr16elf_after_parse
 LDEMUL_BEFORE_ALLOCATION=cr16elf_before_allocation

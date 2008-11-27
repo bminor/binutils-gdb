@@ -1,3 +1,11 @@
+2008-11-27  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+        * emultempl/cr16elf.em (cr16_after_open): New function to handle
+	CR16 ELF embedded reloc creation (ld --embedded-relocs).
+	(check_sections): New function.
+	(LDEMUL_AFTER_OPEN): Define.
+	* emulparams/elf32cr16.sh (EMBEDDED): Define.
+
 2008-11-26  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 7047
