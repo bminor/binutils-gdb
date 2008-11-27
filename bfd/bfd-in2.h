@@ -720,6 +720,10 @@ extern bfd_boolean bfd_bfin_elf32_create_embedded_relocs
   (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *,
    char **);
 
+extern bfd_boolean bfd_cr16_elf32_create_embedded_relocs
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *,
+   char **);
+
 /* SunOS shared library support routines for the linker.  */
 
 extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
@@ -4129,6 +4133,9 @@ This is the 5 bits of a value.  */
   BFD_RELOC_CR16_SWITCH8,
   BFD_RELOC_CR16_SWITCH16,
   BFD_RELOC_CR16_SWITCH32,
+  BFD_RELOC_CR16_GOT_REGREL20,
+  BFD_RELOC_CR16_GOTC_REGREL20,
+  BFD_RELOC_CR16_GLOB_DAT,
 
 /* NS CRX Relocations.  */
   BFD_RELOC_CRX_REL4,

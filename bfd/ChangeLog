@@ -1,3 +1,35 @@
+2008-11-27   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* Add PIC support for CR16 target.
+	* elf32-cr16.c (R_CR16_GOT_REGREL20, R_CR16_GOTC_REGREL20 and
+	R_CR16_GLOB_DAT): New macros
+	(cr16_elf_howto_table): Add entries for for R_CR16_GOT_REGREL20,
+	R_CR16_GOTC_REGREL20 and R_CR16_GLOB_DAT.
+	(cr16_reloc_map): Ditto
+	(_bfd_cr16_elf_create_got_section): New function to create GOT section.
+	(_bfd_cr16_elf_create_dynamic_sections): New function to create dynamic
+	section.
+	(_bfd_cr16_elf_adjust_dynamic_symbol): New function to adjust symbol
+	defined by dynamic object.
+	(_bfd_cr16_elf_size_dynamic_sections): New function to find the size of
+	dynamic sections.
+	(_bfd_cr16_elf_finish_dynamic_symbol): New function to handle dynamic
+	symbols.
+	(_bfd_cr16_elf_finish_dynamic_symbol): New function to handle dynamic
+	sections.
+	(bfd_cr16_elf32_create_embedded_relocs): New function to create
+	embedded relocs in .emreloc section in memory for .data.rel section.
+	(_bfd_cr16_elf_reloc_type_class): New function for classify reloc types.
+	(cr16_elf_check_relocs): New function for checking reloc types in first
+	phase.
+	(cr16_elf_final_link_relocate): Update for handling the new reloc types
+	R_CR16_GOT_REGREL20 and R_CR16_GOTC_REGREL20.
+	(elf32_cr16_relax_section): Update relax implementation.
+	* reloc.c (bfd_reloc_code_type): Add entries for R_CR16_GOT_REGREL20,
+	R_CR16_GOTC_REGREL20 and R_CR16_GLOB_DAT.
+	* bfd-in.h (bfd_boolean bfd_cr16_elf32_create_embedded_relocs): Declared
+	* libbfd.h, bfd-in2.h: Regenerate.
+
 2008-11-26  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 7047
