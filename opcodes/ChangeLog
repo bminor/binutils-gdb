@@ -1,3 +1,8 @@
+2008-11-27  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* cr16-dis.c (match_opcode): Truncate mcode to 32 bit and
+	adjusted the mask for 32-bit branch instruction.
+
 2008-11-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (extract_sprg): Correct operand range check.
