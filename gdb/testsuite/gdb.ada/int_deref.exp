@@ -37,9 +37,9 @@ gdb_load ${binfile}
 set bp_location [gdb_get_line_number "Pck.Watch" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
-gdb_test "print *integer(watch'address)" \
+gdb_test "print *long_integer(watch'address)" \
          " = 4874"
 
-gdb_test "print integer(watch'address).all" \
+gdb_test "print long_integer(watch'address).all" \
          " = 4874"
 

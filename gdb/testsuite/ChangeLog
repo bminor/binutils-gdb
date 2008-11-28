@@ -1,3 +1,9 @@
+2008-11-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/int_deref.exp: Convert the addresses into long_integer
+        rather than integer, as integer might not be big enough when
+        on 64bit targets.
+
 2008-11-27  Jerome Guitton  <guitton@adacore.com>
 
 	* gdb.cp/formatted-ref.exp: Add equality test.
