@@ -167,6 +167,8 @@ DESCRIPTION
 .#define bfd_mach_mips9000		9000
 .#define bfd_mach_mips10000		10000
 .#define bfd_mach_mips12000		12000
+.#define bfd_mach_mips14000		14000
+.#define bfd_mach_mips16000		16000
 .#define bfd_mach_mips16		16
 .#define bfd_mach_mips5                 5
 .#define bfd_mach_mips_loongson_2e      3001

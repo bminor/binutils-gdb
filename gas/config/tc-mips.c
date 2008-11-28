@@ -472,6 +472,8 @@ static int mips_32bitmode = 0;
    || mips_opts.arch == CPU_R4010                     \
    || mips_opts.arch == CPU_R10000                    \
    || mips_opts.arch == CPU_R12000                    \
+   || mips_opts.arch == CPU_R14000                    \
+   || mips_opts.arch == CPU_R16000                    \
    || mips_opts.arch == CPU_RM7000                    \
    || mips_opts.arch == CPU_VR5500                    \
    )
@@ -15090,6 +15092,8 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "r8000",          0,			ISA_MIPS4,      CPU_R8000 },
   { "r10000",         0,			ISA_MIPS4,      CPU_R10000 },
   { "r12000",         0,			ISA_MIPS4,      CPU_R12000 },
+  { "r14000",         0,			ISA_MIPS4,      CPU_R14000 },
+  { "r16000",         0,			ISA_MIPS4,      CPU_R16000 },
   { "vr5000",         0,			ISA_MIPS4,      CPU_R5000 },
   { "vr5400",         0,			ISA_MIPS4,      CPU_VR5400 },
   { "vr5500",         0,			ISA_MIPS4,      CPU_VR5500 },

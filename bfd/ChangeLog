@@ -1,3 +1,16 @@
+2008-11-28  Joshua Kinard  <kumba@gentoo.org>
+
+	* aoutx.h (NAME): Add case statements for bfd_mach_mips14000,
+	bfd_mach_mips16000.
+	* archures.c (bfd_architecture): Add .#defines for bfd_mach_mips14000,
+	bfd_mach_mips16000.
+	* bfd-in2.h: Regenerate.
+	* cpu-mips.c: Add enums I_mips14000, I_mips16000.
+	(arch_info_struct): Add refs to R14000, R16000.
+	* elfxx-mips.c (mips_set_isa_flags): Handle bfd_mach_mips14000,
+	bfd_mach_mips16000.
+	(mips_mach_extensions): Map R14000, R16000 to R10000.
+
 2008-11-27   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* Add PIC support for CR16 target.

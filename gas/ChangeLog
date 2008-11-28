@@ -1,3 +1,9 @@
+2008-11-28  Joshua Kinard  <kumba@gentoo.org>
+
+	* config/tc-mips.c (hilo_interlocks): Handle CPU_R14000, CPU_R16000.
+	(mips_cpu_info_table): Add r14000, r16000.
+	* doc/c-mips.texi: Add entries for 14000, 16000.
+
 2008-11-27  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* config/tc-cr16.h (GLOBAL_OFFSET_TABLE_NAME): Defined
