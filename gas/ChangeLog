@@ -1,3 +1,20 @@
+2008-11-28  Jakub Jelinek  <jakub@redhat.com>
+
+	* Makefile.am (ehopt.o): Add struc-symbol.h.
+	* Makefile.in: Regenerated.
+	* ehopt.c: Include struc-symbol.h.
+	(check_eh_frame): For very small O_constant DW_CFA_advance_loc4
+	create correct DW_CFA_advance_loc.  Handle O_subtract only
+	for code alignment factor 1, otherwise handle O_divide or
+	O_right_shift of O_subtract and O_constant.
+	(eh_frame_estimate_size_before_relax): Always divide by ca.
+	(eh_frame_convert_frag): Likewise.
+
+2008-11-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* dw2gencfi.c (output_cfi_insn): Scale DW_CFA_advance_loc1,
+	DW_CFA_advance_loc2 and DW_CFA_advance_loc4 outputs.
+
 2008-11-28  Joshua Kinard  <kumba@gentoo.org>
 
 	* config/tc-mips.c (hilo_interlocks): Handle CPU_R14000, CPU_R16000.

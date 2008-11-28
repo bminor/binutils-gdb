@@ -2159,7 +2159,8 @@ dwarf2dbg.o: dwarf2dbg.c $(INCDIR)/safe-ctype.h dwarf2dbg.h \
 dw2gencfi.o: dw2gencfi.c dw2gencfi.h $(INCDIR)/elf/dwarf2.h \
   subsegs.h $(INCDIR)/obstack.h
 ecoff.o: ecoff.c ecoff.h
-ehopt.o: ehopt.c subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
+ehopt.o: ehopt.c subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h \
+  struc-symbol.h
 expr.o: expr.c $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h
 flonum-copy.o: flonum-copy.c
 flonum-konst.o: flonum-konst.c
