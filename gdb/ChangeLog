@@ -60,7 +60,6 @@
 	(template_encoding_table): Make it `const'.
 	* breakpoint.c (bp_loc_is_permanent): Support unsupported software
 	breakpoints.  New variables `cleanup' and `retval'.
-	* monitor.c (monitor_insert_breakpoint): Remove unused variable `bp'.
 
 2008-11-24  Tom Tromey  <tromey@redhat.com>
 
