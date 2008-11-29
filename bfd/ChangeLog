@@ -1,3 +1,7 @@
+2008-11-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* hpux-core.c: Don't include sys/file.h.
+
 2008-11-28  Joshua Kinard  <kumba@gentoo.org>
 
 	* aoutx.h (NAME): Add case statements for bfd_mach_mips14000,
