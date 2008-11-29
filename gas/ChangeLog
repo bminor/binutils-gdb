@@ -1,3 +1,8 @@
+2008-11-29  Kai Tietz  <kai.tietz@onevision.com>
+
+	* config/tc-i386.c (i386_target_format): For coff flavour in TE_PEP
+	use "pe-i386" for 32-bit.
+
 2008-11-28  Jakub Jelinek  <jakub@redhat.com>
 
 	* Makefile.am (ehopt.o): Add struc-symbol.h.

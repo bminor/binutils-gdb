@@ -8337,7 +8337,7 @@ i386_target_format (void)
     {
 #ifdef TE_PEP
     case bfd_target_coff_flavour:
-      return flag_code == CODE_64BIT ? COFF_TARGET_FORMAT : "coff-i386";
+      return flag_code == CODE_64BIT ? COFF_TARGET_FORMAT : "pe-i386";
       break;
 #endif
 #ifdef OBJ_MAYBE_AOUT
