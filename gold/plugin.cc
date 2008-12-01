@@ -68,7 +68,7 @@ static enum ld_plugin_status
 add_input_file(char *pathname);
 
 static enum ld_plugin_status
-message(int level, char *format, ...);
+message(int level, const char *format, ...);
 
 };
 
@@ -194,7 +194,7 @@ Plugin::load()
   // Call the onload entry point.
   (*onload)(tv);
 
-  delete tv;
+  delete[] tv;
 #endif // ENABLE_PLUGINS
 }
 
@@ -892,7 +892,7 @@ add_input_file(char *pathname)
 // Issue a diagnostic message from a plugin.
 
 static enum ld_plugin_status
-message(int level, char * format, ...)
+message(int level, const char * format, ...)
 {
   va_list args;
   va_start(args, format);
