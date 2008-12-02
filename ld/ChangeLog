@@ -1,3 +1,8 @@
+2008-12-02  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pe-dll.c (make_runtime_pseudo_reloc): Make symtab big enough to
+	hold relocations.
+
 2008-11-27  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
         * emultempl/cr16elf.em (cr16_after_open): New function to handle

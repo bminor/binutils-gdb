@@ -2284,7 +2284,14 @@ make_runtime_pseudo_reloc (const char *name ATTRIBUTE_UNUSED,
   bfd_set_arch_mach (abfd, pe_details->bfd_arch, 0);
 
   symptr = 0;
-  symtab = xmalloc (2 * sizeof (asymbol *));
+  if (link_info.pei386_runtime_pseudo_reloc == 2)
+    {
+      symtab = xmalloc ((runtime_pseudp_reloc_v2_init ? 3 : 6) * sizeof (asymbol *));
+    }
+  else
+    {
+      symtab = xmalloc (2 * sizeof (asymbol *));
+    }
   rt_rel = quick_section (abfd, ".rdata_runtime_pseudo_reloc",
 			  SEC_HAS_CONTENTS, 2);
 
