@@ -1,3 +1,7 @@
+2008-12-02  Doug Evans  <dje@google.com>
+
+	* infrun.c (handle_inferior_event): Delete unused local tp.
+
 2008-12-02  Pedro Alves  <pedro@codesourcery.com>
 	    Vladimir Prus  <vladimir@codesourcery.com>
 

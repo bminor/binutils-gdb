@@ -2521,8 +2521,6 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	 the fact that we were supposed to switch back.  */
       if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP)
 	{
-	  struct thread_info *tp;
-
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog,
 				"infrun: handling deferred step\n");
