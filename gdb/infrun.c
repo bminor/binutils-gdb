@@ -1303,7 +1303,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   struct thread_info *tp;
   CORE_ADDR pc = regcache_read_pc (regcache);
   int oneproc = 0;
-  enum target_signal stop_signal;
 
   if (step > 0)
     step_start_function = find_pc_function (pc);
