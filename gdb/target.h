@@ -1286,6 +1286,12 @@ extern int target_resize_to_sections (struct target_ops *target,
 
 extern void remove_target_sections (bfd *abfd);
 
+/* Read OS data object of type TYPE from the target, and return it in
+   XML format.  The result is NUL-terminated and returned as a string,
+   allocated using xmalloc.  If an error occurs or the transfer is
+   unsupported, NULL is returned.  Empty objects are returned as
+   allocated but empty strings.  */
+
 extern char *target_get_osdata (const char *type);
 
 

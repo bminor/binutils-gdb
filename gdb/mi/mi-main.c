@@ -377,7 +377,7 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
   if (argc > 0)
     id = argv[0];
 
-  back_to = make_cleanup (&null_cleanup, NULL);
+  back_to = make_cleanup (null_cleanup, NULL);
 
   if (available && id)
     {
@@ -385,18 +385,21 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
     }
   else if (available)
     {
-      struct osdata *data = get_osdata ("processes");
+      struct osdata *data;
       struct osdata_item *item;
       int ix_items;
 
+      data = get_osdata ("processes");
+      make_cleanup_osdata_free (data);
+
       make_cleanup_ui_out_list_begin_end (uiout, "groups");
-      
+
       for (ix_items = 0;
-          VEC_iterate (osdata_item_s, data->items,
-                       ix_items, item);
+	   VEC_iterate (osdata_item_s, data->items,
+			ix_items, item);
 	   ix_items++)
 	{
-	  struct cleanup *back_to = 
+	  struct cleanup *back_to =
 	    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
 	  const char *pid = get_osdata_column (item, "pid");
@@ -409,8 +412,8 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
 	    ui_out_field_string (uiout, "description", cmd);
 	  if (user)
 	    ui_out_field_string (uiout, "user", user);
-  
-	  do_cleanups (back_to);	  
+
+	  do_cleanups (back_to);
 	}
     }
   else if (id)

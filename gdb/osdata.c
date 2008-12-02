@@ -54,26 +54,6 @@ struct osdata_parsing_data
     char *property_name;
   };
 
-static void
-osdata_item_clear (struct osdata_item *item)
-{
-  if (item->columns != NULL)
-    {
-      struct osdata_column *col;
-      int ix;
-      for (ix = 0;
-          VEC_iterate (osdata_column_s, item->columns,
-                       ix, col);
-          ix++)
-       {
-         xfree (col->name);
-         xfree (col->value);
-       }
-      VEC_free (osdata_column_s, item->columns);
-      item->columns = NULL;
-    }
-}
-
 /* Handle the start of a <osdata> element.  */
 
 static void
@@ -205,6 +185,26 @@ osdata_parse (const char *xml)
 }
 #endif
 
+static void
+osdata_item_clear (struct osdata_item *item)
+{
+  if (item->columns != NULL)
+    {
+      struct osdata_column *col;
+      int ix;
+      for (ix = 0;
+	   VEC_iterate (osdata_column_s, item->columns,
+			ix, col);
+	   ix++)
+       {
+	 xfree (col->name);
+	 xfree (col->value);
+       }
+      VEC_free (osdata_column_s, item->columns);
+      item->columns = NULL;
+    }
+}
+
 void
 osdata_free (struct osdata *osdata)
 {
@@ -226,18 +226,36 @@ osdata_free (struct osdata *osdata)
   xfree (osdata);
 }
 
-struct osdata *get_osdata (const char *type)
+static void
+osdata_free_cleanup (void *arg)
 {
-  struct osdata * osdata = NULL;
+  struct osdata *osdata = arg;
+  osdata_free (osdata);
+}
+
+struct cleanup *
+make_cleanup_osdata_free (struct osdata *data)
+{
+  return make_cleanup (osdata_free_cleanup, data);
+}
+
+struct osdata *
+get_osdata (const char *type)
+{
+  struct osdata *osdata = NULL;
   char *xml = target_get_osdata (type);
   if (xml)
     {
+      struct cleanup *old_chain = make_cleanup (xfree, xml);
+
       if (xml[0] == '\0')
 	warning (_("Empty data returned by target.  Wrong osdata type?"));
-      
-      osdata = osdata_parse (xml);
+      else
+	osdata = osdata_parse (xml);
+
+      do_cleanups (old_chain);
     }
-  
+
   if (!osdata)
     error (_("Can not fetch data now.\n"));
 
@@ -263,9 +281,9 @@ get_osdata_column (struct osdata_item *item, const char *name)
 void
 info_osdata_command (char *type, int from_tty)
 {
-  struct osdata * osdata = NULL;
-  struct cleanup *proc_tbl_chain;
+  struct osdata *osdata = NULL;
   struct osdata_item *last;
+  struct cleanup *old_chain;
   int ncols;
   int nprocs;
 
@@ -274,6 +292,7 @@ info_osdata_command (char *type, int from_tty)
     error (_("Argument required."));
 
   osdata = get_osdata (type);
+  old_chain = make_cleanup_osdata_free (osdata);
 
   nprocs = VEC_length (osdata_item_s, osdata->items);
 
@@ -283,9 +302,8 @@ info_osdata_command (char *type, int from_tty)
   else
     ncols = 0;
 
-  proc_tbl_chain
-    = make_cleanup_ui_out_table_begin_end (uiout, ncols, nprocs,
-                                          "OSDataTable");
+  make_cleanup_ui_out_table_begin_end (uiout, ncols, nprocs,
+				       "OSDataTable");
 
   if (last && last->columns)
     {
@@ -310,14 +328,14 @@ info_osdata_command (char *type, int from_tty)
                        ix_items, item);
           ix_items++)
        {
-         struct cleanup *old_chain, *chain;
+         struct cleanup *old_chain;
          struct ui_stream *stb;
          int ix_cols;
          struct osdata_column *col;
 
          stb = ui_out_stream_new (uiout);
          old_chain = make_cleanup_ui_out_stream_delete (stb);
-         chain = make_cleanup_ui_out_tuple_begin_end (uiout, "item");
+         make_cleanup_ui_out_tuple_begin_end (uiout, "item");
 
          for (ix_cols = 0;
               VEC_iterate (osdata_column_s, item->columns,
@@ -325,22 +343,13 @@ info_osdata_command (char *type, int from_tty)
               ix_cols++)
            ui_out_field_string (uiout, col->name, col->value);
 
-         do_cleanups (chain);
          do_cleanups (old_chain);
 
          ui_out_text (uiout, "\n");
        }
     }
 
-  do_cleanups (proc_tbl_chain);
-
-  osdata_free (osdata);
-}
-
-static void
-info_processes_command (char *args, int from_tty)
-{
-  info_osdata_command ("processes", from_tty);
+  do_cleanups (old_chain);
 }
 
 extern initialize_file_ftype _initialize_osdata; /* -Wmissing-prototypes */
@@ -350,8 +359,4 @@ _initialize_osdata (void)
 {
   add_info ("os", info_osdata_command,
            _("Show OS data ARG."));
-
-  /* An alias for "info osdata processes".  */
-  add_info ("processes", info_processes_command,
-           _("List running processes on the target."));
 }

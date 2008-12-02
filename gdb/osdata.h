@@ -46,6 +46,7 @@ DEF_VEC_P(osdata_p);
 
 struct osdata *osdata_parse (const char *xml);
 void osdata_free (struct osdata *);
+struct cleanup *make_cleanup_osdata_free (struct osdata *data);
 struct osdata *get_osdata (const char *type);
 const char *get_osdata_column (struct osdata_item *item, const char *name);
 

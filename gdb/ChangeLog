@@ -1,3 +1,17 @@
+2008-12-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.h (target_get_osdata): Describe.
+	* osdata.h (make_cleanup_osdata_free): Declare.
+	* osdata.c (osdata_item_clear): Define even if HAVE_LIBEXPAT is
+	not defined.
+	(osdata_free_cleanup): New.
+	(make_cleanup_osdata_free): New.
+	(get_osdata): Fix leak.
+	(info_osdata_command): Use make_cleanup_osdata_free.
+	(info_processes_command): Delete.
+	(_initialize_osdata): Drop undocumented "info processes" alias.
+	* mi/mi-main.c (mi_cmd_list_thread_groups): Fix leak.
+
 2008-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix resolving external references to TLS variables.
