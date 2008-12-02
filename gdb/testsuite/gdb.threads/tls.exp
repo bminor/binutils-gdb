@@ -15,7 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 set testfile tls
+set testfile2 tls2
 set srcfile ${testfile}.c
+set srcfile2 ${testfile2}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 if [istarget "*-*-linux"] then {
@@ -24,7 +26,7 @@ if [istarget "*-*-linux"] then {
     set target_cflags ""
 }
 
-if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "incdir=${objdir}"]] != "" } {
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile2}" "${binfile}" executable [list debug "incdir=${objdir}"]] != "" } {
     return -1
 }
 
@@ -283,6 +285,20 @@ gdb_test "info address a_global" \
 
 setup_kfail "gdb/1294" "*-*-*"
 gdb_test "info address me" ".*me.*is a variable at offset.*" "info address me"
+
+
+# Test LOC_UNRESOLVED references resolving for `extern' TLS variables.
+
+gdb_test "p a_thread_local" " = \[0-9\]+"
+# Here it could crash with: Cannot access memory at address 0x0
+gdb_test "p file2_thread_local" " = \[0-9\]+"
+# Depending on the current lookup scope we get LOC_UNRESOLVED or LOC_COMPUTED
+# both printing:
+# Symbol "file2_thread_local" is a thread-local variable at offset 8 in the thread-local storage for `.../gdb.threads/tls'.
+gdb_test "info address file2_thread_local" "Symbol \"file2_thread_local\" is a thread-local variable.*"
+# Here it could also crash with: Cannot access memory at address 0x0
+gdb_test "p a_thread_local" " = \[0-9\]+" "p a_thread_local second time"
+gdb_test "info address a_thread_local" "Symbol \"a_thread_local\" is a thread-local variable.*"
 
 # Done!
 #

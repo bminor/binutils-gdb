@@ -1,8 +1,18 @@
+2008-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Test resolving external references to TLS variables.
+	* gdb.threads/tls.exp: New tests to examine A_THREAD_LOCAL and
+	FILE2_THREAD_LOCAL.
+	(testfile2, srcfile2): New variables.
+	* gdb.threads/tls.c (file2_thread_local)
+	(function_referencing_file2_thread_local): New.
+	* gdb.threads/tls2.c: New file.
+
 2008-11-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/int_deref.exp: Convert the addresses into long_integer
-        rather than integer, as integer might not be big enough when
-        on 64bit targets.
+	rather than integer, as integer might not be big enough when
+	on 64bit targets.
 
 2008-11-27  Jerome Guitton  <guitton@adacore.com>
 

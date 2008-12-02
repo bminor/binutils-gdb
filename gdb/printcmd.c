@@ -1241,16 +1241,25 @@ address_info (char *exp, int from_tty)
 	else
 	  {
 	    section = SYMBOL_OBJ_SECTION (msym);
-	    printf_filtered (_("static storage at address "));
 	    load_addr = SYMBOL_VALUE_ADDRESS (msym);
-	    fputs_filtered (paddress (load_addr), gdb_stdout);
-	    if (section_is_overlay (section))
+
+	    if (section
+		&& (section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
+	      printf_filtered (_("a thread-local variable at offset %s "
+				 "in the thread-local storage for `%s'"),
+			       paddr_nz (load_addr), section->objfile->name);
+	    else
 	      {
-		load_addr = overlay_unmapped_address (load_addr, section);
-		printf_filtered (_(",\n -- loaded at "));
+		printf_filtered (_("static storage at address "));
 		fputs_filtered (paddress (load_addr), gdb_stdout);
-		printf_filtered (_(" in overlay section %s"),
-				 section->the_bfd_section->name);
+		if (section_is_overlay (section))
+		  {
+		    load_addr = overlay_unmapped_address (load_addr, section);
+		    printf_filtered (_(",\n -- loaded at "));
+		    fputs_filtered (paddress (load_addr), gdb_stdout);
+		    printf_filtered (_(" in overlay section %s"),
+				     section->the_bfd_section->name);
+		  }
 	      }
 	  }
       }

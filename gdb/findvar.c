@@ -34,6 +34,7 @@
 #include "regcache.h"
 #include "user-regs.h"
 #include "block.h"
+#include "objfiles.h"
 
 /* Basic byte-swapping routines.  GDB has needed these for a long time...
    All extract a target-format integer at ADDR which is LEN bytes long.  */
@@ -536,6 +537,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
     case LOC_UNRESOLVED:
       {
 	struct minimal_symbol *msym;
+	struct obj_section *obj_section;
 
 	msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (var), NULL, NULL);
 	if (msym == NULL)
@@ -545,6 +547,11 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 					   SYMBOL_OBJ_SECTION (msym));
 	else
 	  addr = SYMBOL_VALUE_ADDRESS (msym);
+
+	obj_section = SYMBOL_OBJ_SECTION (msym);
+	if (obj_section
+	    && (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
+	  addr = target_translate_tls_address (obj_section->objfile, addr);
       }
       break;
 

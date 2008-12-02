@@ -1,3 +1,12 @@
+2008-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix resolving external references to TLS variables.
+	* findvar.c: Include `objfiles.h'.
+	(read_var_value <LOC_UNRESOLVED>): New variable `obj_section'.  Handle
+	SEC_THREAD_LOCAL variables.
+	* printcmd.c (address_info <LOC_UNRESOLVED>): Handle SEC_THREAD_LOCAL
+	variables.
+
 2008-12-02  Doug Evans  <dje@google.com>
 
 	* infrun.c (handle_inferior_event): Delete unused local tp.
