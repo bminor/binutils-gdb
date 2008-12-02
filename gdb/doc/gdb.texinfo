@@ -18877,6 +18877,7 @@ may repeat one or more times.
 @end ignore
 
 @menu
+* GDB/MI General Design::
 * GDB/MI Command Syntax::
 * GDB/MI Compatibility with CLI::
 * GDB/MI Development and Front Ends::
@@ -18902,6 +18903,181 @@ may repeat one or more times.
 * GDB/MI File Transfer Commands::
 * GDB/MI Miscellaneous Commands::
 @end menu
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI General Design
+@section @sc{gdb/mi} General Design
+@cindex GDB/MI General Design
+
+Interaction of a @sc{GDB/MI} frontend with @value{GDBN} involves three
+parts---commands sent to @value{GDBN}, responses to those commands
+and notifications.  Each command results in exactly one response,
+indicating either successful completion of the command, or an error.
+For the commands that do not resume the target, the response contains the
+requested information.  For the commands that resume the target, the
+response only indicates whether the target was successfully resumed.
+Notifications is the mechanism for reporting changes in the state of the
+target, or in @value{GDBN} state, that cannot conveniently be associated with
+a command and reported as part of that command response.
+
+The important examples of notifications are:
+@itemize @bullet
+
+@item 
+Exec notifications.  These are used to report changes in
+target state---when a target is resumed, or stopped.  It would not
+be feasible to include this information in response of resuming
+commands, because one resume commands can result in multiple events in
+different threads.  Also, quite some time may pass before any event
+happens in the target, while a frontend needs to know whether the resuming
+command itself was successfully executed.
+
+@item 
+Console output, and status notifications.  Console output
+notifications are used to report output of CLI commands, as well as
+diagnostics for other commands.  Status notifications are used to
+report the progress of a long-running operation.  Naturally, including
+this information in command response would mean no output is produced
+until the command is finished, which is undesirable.
+
+@item
+General notifications.  Commands may have various side effects on
+the @value{GDBN} or target state beyond their official purpose.  For example,
+a command may change the selected thread.  Although such changes can
+be included in command response, using notification allows for more
+orthogonal frontend design.
+
+@end itemize
+
+There's no guarantee that whenever an MI command reports an error,
+@value{GDBN} or the target are in any specific state, and especially,
+the state is not reverted to the state before the MI command was
+processed.  Therefore, whenever an MI command results in an error, 
+we recommend that the frontend refreshes all the information shown in 
+the user interface.
+
+@subsection Context management
+
+In most cases when @value{GDBN} accesses the target, this access is
+done in context of a specific thread and frame (@pxref{Frames}).
+Often, even when accessing global data, the target requires that a thread
+be specified.  The CLI interface maintains the selected thread and frame,
+and supplies them to target on each command.  This is convenient,
+because a command line user would not want to specify that information
+explicitly on each command, and because user interacts with
+@value{GDBN} via a single terminal, so no confusion is possible as 
+to what thread and frame are the current ones.
+
+In the case of MI, the concept of selected thread and frame is less
+useful.  First, a frontend can easily remember this information
+itself.  Second, a graphical frontend can have more than one window,
+each one used for debugging a different thread, and the frontend might
+want to access additional threads for internal purposes.  This
+increases the risk that by relying on implicitly selected thread, the
+frontend may be operating on a wrong one.  Therefore, each MI command
+should explicitly specify which thread and frame to operate on.  To
+make it possible, each MI command accepts the @samp{--thread} and
+@samp{--frame} options, the value to each is @value{GDBN} identifier
+for thread and frame to operate on.
+
+Usually, each top-level window in a frontend allows the user to select
+a thread and a frame, and remembers the user selection for further
+operations.  However, in some cases @value{GDBN} may suggest that the
+current thread be changed.  For example, when stopping on a breakpoint
+it is reasonable to switch to the thread where breakpoint is hit.  For
+another example, if the user issues the CLI @samp{thread} command via
+the frontend, it is desirable to change the frontend's selected thread to the
+one specified by user.  @value{GDBN} communicates the suggestion to
+change current thread using the @samp{=thread-selected} notification.
+No such notification is available for the selected frame at the moment.
+
+Note that historically, MI shares the selected thread with CLI, so 
+frontends used the @code{-thread-select} to execute commands in the
+right context.  However, getting this to work right is cumbersome.  The
+simplest way is for frontend to emit @code{-thread-select} command
+before every command.  This doubles the number of commands that need
+to be sent.  The alternative approach is to suppress @code{-thread-select}
+if the selected thread in @value{GDBN} is supposed to be identical to the
+thread the frontend wants to operate on.  However, getting this
+optimization right can be tricky.  In particular, if the frontend
+sends several commands to @value{GDBN}, and one of the commands changes the
+selected thread, then the behaviour of subsequent commands will
+change.  So, a frontend should either wait for response from such
+problematic commands, or explicitly add @code{-thread-select} for
+all subsequent commands.  No frontend is known to do this exactly
+right, so it is suggested to just always pass the @samp{--thread} and
+@samp{--frame} options.
+
+@subsection Asynchronous command execution and non-stop mode
+
+On some targets, @value{GDBN} is capable of processing MI commands
+even while the target is running.  This is called @dfn{asynchronous
+command execution} (@pxref{Background Execution}).  The frontend may
+specify a preferrence for asynchronous execution using the
+@code{-gdb-set target-async 1} command, which should be emitted before
+either running the executable or attaching to the target.  After the
+frontend has started the executable or attached to the target, it can
+find if asynchronous execution is enabled using the
+@code{-list-target-features} command.
+
+Even if @value{GDBN} can accept a command while target is running,
+many commands that access the target do not work when the target is
+running.  Therefore, asynchronous command execution is most useful
+when combined with non-stop mode (@pxref{Non-Stop Mode}).  Then,
+it is possible to examine the state of one thread, while other threads
+are running.
+
+When a given thread is running, MI commands that try to access the
+target in the context of that thread may not work, or may work only on
+some targets.  In particular, commands that try to operate on thread's
+stack will not work, on any target.  Commands that read memory, or
+modify breakpoints, may work or not work, depending on the target.  Note
+that even commands that operate on global state, such as @code{print},
+@code{set}, and breakpoint commands, still access the target in the
+context of a specific thread,  so frontend should try to find a
+stopped thread and perform the operation on that thread (using the
+@samp{--thread} option).
+
+Which commands will work in the context of a running thread is
+highly target dependent.  However, the two commands
+@code{-exec-interrupt}, to stop a thread, and @code{-thread-info},
+to find the state of a thread, will always work.
+
+@subsection Thread groups
+@value{GDBN} may be used to debug several processes at the same time.
+On some platfroms, @value{GDBN} may support debugging of several
+hardware systems, each one having several cores with several different
+processes running on each core.  This section describes the MI
+mechanism to support such debugging scenarios.
+
+The key observation is that regardless of the structure of the 
+target, MI can have a global list of threads, because most commands that 
+accept the @samp{--thread} option do not need to know what process that
+thread belongs to.  Therefore, it is not necessary to introduce
+neither additional @samp{--process} option, nor an notion of the
+current process in the MI interface.  The only strictly new feature
+that is required is the ability to find how the threads are grouped
+into processes.
+
+To allow the user to discover such grouping, and to support arbitrary
+hierarchy of machines/cores/processes, MI introduces the concept of a
+@dfn{thread group}.  Thread group is a collection of threads and other
+thread groups.  A thread group always has a string identifier, a type,
+and may have additional attributes specific to the type.  A new
+command, @code{-list-thread-groups}, returns the list of top-level
+thread groups, which correspond to processes that @value{GDBN} is
+debugging at the moment.  By passing an identifier of a thread group
+to the @code{-list-thread-groups} command, it is possible to obtain
+the members of specific thread group.
+
+To allow the user to easily discover processes, and other objects, he
+wishes to debug, a concept of @dfn{available thread group} is
+introduced.  Available thread group is an thread group that
+@value{GDBN} is not debugging, but that can be attached to, using the
+@code{-target-attach} command.  The list of available top-level thread
+groups can be obtained using @samp{-list-thread-groups --available}.
+In general, the content of a thread group may be only retrieved only
+after attaching to that thread group.
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Command Syntax
@@ -19206,6 +19382,7 @@ follow development on @email{gdb@@sourceware.org} and
 * GDB/MI Result Records::
 * GDB/MI Stream Records::
 * GDB/MI Async Records::
+* GDB/MI Frame Information::
 @end menu
 
 @node GDB/MI Result Records
@@ -19298,7 +19475,7 @@ several times, either for different threads, because it cannot resume
 all threads together, or even for a single thread, if the thread must
 be stepped though some code before letting it run freely.
 
-@item *stopped,reason="@var{reason}"
+@item *stopped,reason="@var{reason}",thread-id="@var{id}",stopped-threads="@var{stopped}"
 The target has stopped.  The @var{reason} field can have one of the
 following values:
 
@@ -19330,10 +19507,27 @@ The inferior exited normally.
 A signal was received by the inferior.
 @end table
 
-@item =thread-created,id="@var{id}"
-@itemx =thread-exited,id="@var{id}"
+The @var{id} field identifies the thread that directly caused the stop
+-- for example by hitting a breakpoint.  Depending on whether all-stop
+mode is in effect (@pxref{All-Stop Mode}), @value{GDBN} may either
+stop all threads, or only the thread that directly triggered the stop.
+If all threads are stopped, the @var{stopped} field will have the
+value of @code{"all"}.  Otherwise, the value of the @var{stopped}
+field will be a list of thread identifiers.  Presently, this list will
+always include a single thread, but frontend should be prepared to see
+several threads in the list.
+
+@item =thread-group-created,id="@var{id}"
+@itemx =thread-group-exited,id="@var{id}"
+A thread thread group either was attached to, or has exited/detached
+from.  The @var{id} field contains the @value{GDBN} identifier of the
+thread group.
+
+@item =thread-created,id="@var{id}",group-id="@var{gid}"
+@itemx =thread-exited,id="@var{id}",group-id="@var{gid}"
 A thread either was created, or has exited.  The @var{id} field
-contains the @value{GDBN} identifier of the thread.
+contains the @value{GDBN} identifier of the thread.  The @var{gid}
+field identifies the thread group this thread belongs to.
 
 @item =thread-selected,id="@var{id}"
 Informs that the selected thread was changed as result of the last
@@ -19349,6 +19543,38 @@ that thread.
 
 @end table
 
+@node GDB/MI Frame Information
+@subsection @sc{gdb/mi} Frame Information
+
+Response from many MI commands includes an information about stack
+frame.  This information is a tuple that may have the following
+fields:
+
+@table @code
+@item level
+The level of the stack frame.  The innermost frame has the level of
+zero.  This field is always present.
+
+@item func
+The name of the function corresponding to the frame.  This field may
+be absent if @value{GDBN} is unable to determine the function name.
+
+@item addr
+The code address for the frame.  This field is always present.
+
+@item file
+The name of the source files that correspond to the frame's code
+address.  This field may be absent.
+
+@item line
+The source line corresponding to the frames' code address.  This field
+may be absent.
+
+@item from
+The name of the binary file (either executable or shared library) the
+corresponds to the frame's code address.  This field may be absent.
+
+@end table
 
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20235,13 +20461,26 @@ about all threads.
 -thread-info
 ^done,threads=[
 @{id="2",target-id="Thread 0xb7e14b90 (LWP 21257)",
-   frame=@{level="0",addr="0xffffe410",func="__kernel_vsyscall",args=[]@},
+   frame=@{level="0",addr="0xffffe410",func="__kernel_vsyscall",args=[]@},state="running"@},
 @{id="1",target-id="Thread 0xb7e156b0 (LWP 21254)",
    frame=@{level="0",addr="0x0804891f",func="foo",args=[@{name="i",value="10"@}],
-           file="/tmp/a.c",fullname="/tmp/a.c",line="158"@}@}],
+           file="/tmp/a.c",fullname="/tmp/a.c",line="158"@},state="running"@}],
 current-thread-id="1"
 (gdb)
 @end smallexample
+
+The @samp{state} field may have the following values:
+
+@table @code
+@item stopped
+The thread is stopped.  Frame information is available for stopped
+threads.
+
+@item running
+The thread is running.  There's no frame information for running
+threads.
+
+@end table
 
 @subheading The @code{-thread-list-ids} Command
 @findex -thread-list-ids
@@ -20254,6 +20493,9 @@ current-thread-id="1"
 
 Produces a list of the currently known @value{GDBN} thread ids.  At the
 end of the list it also prints the total number of such threads.
+
+This command is retained for historical reasons, the
+@code{-thread-info} command should be used instead.
 
 @subsubheading @value{GDBN} Command
 
@@ -20293,6 +20535,9 @@ number-of-threads="3"
 
 Make @var{threadnum} the current thread.  It prints the number of the new
 current thread, and the topmost frame for that thread.
+
+This command is deprecated in favor of explicitly using the
+@samp{--thread} option to each command.
 
 @subsubheading @value{GDBN} Command
 
@@ -20336,11 +20581,20 @@ other cases.
 @subsubheading Synopsis
 
 @smallexample
- -exec-continue
+ -exec-continue [--all|--thread-group N]
 @end smallexample
 
 Resumes the execution of the inferior program until a breakpoint is
-encountered, or until the inferior exits.
+encountered, or until the inferior exits.  In all-stop mode
+(@pxref{All-Stop Mode}), may resume only one thread, or all threads,
+depending on the value of the @samp{scheduler-locking} variable.  In
+non-stop mode (@pxref{Non-Stop Mode}), if the @samp{--all} is not
+specified, only the thread specified with the @samp{--thread} option
+(or current thread, if no @samp{--thread} is provided) is resumed.  If
+@samp{--all} is specified, all threads will be resumed.  The
+@samp{--all} option is ignored in all-stop mode.  If the
+@samp{--thread-group} options is specified, then all threads in that
+thread group are resumed.
 
 @subsubheading @value{GDBN} Command
 
@@ -20412,7 +20666,7 @@ gdb-result-var="$1",return-value="0"
 @subsubheading Synopsis
 
 @smallexample
- -exec-interrupt
+ -exec-interrupt [--all|--thread-group N]
 @end smallexample
 
 Interrupts the background execution of the target.  Note how the token
@@ -20420,6 +20674,16 @@ associated with the stop message is the one for the execution command
 that has been interrupted.  The token for the interrupt itself only
 appears in the @samp{^done} output.  If the user is trying to
 interrupt a non-running program, an error message will be printed.
+
+Note that when asynchronous execution is enabled, this command is
+asynchronous just like other execution commands.  That is, first the
+@samp{^done} response will be printed, and the target stop will be
+reported after that using the @samp{*stopped} notification.
+
+In non-stop mode, only the context thread is interrupted by default.
+All threads will be interrupted if the @samp{--all} option is
+specified.  If the @samp{--thread-group} option is specified, all
+threads in that group will be interrupted.
 
 @subsubheading @value{GDBN} Command
 
@@ -21058,6 +21322,9 @@ more detail.
 Change the selected frame.  Select a different frame @var{framenum} on
 the stack.
 
+This command in deprecated in favor of passing the @samp{--frame}
+option to every command.
+
 @subsubheading @value{GDBN} Command
 
 The corresponding @value{GDBN} commands are @samp{frame}, @samp{up},
@@ -21163,6 +21430,37 @@ visible on the screen, or ``closed''.  This is possible using so
 called ``frozen variable objects''.  Such variable objects are never
 implicitly updated.  
 
+Variable objects can be either @dfn{fixed} or @dfn{floating}.  For the
+fixed variable object, the expression is parsed when the variable
+object is created, including associating identifiers to specific
+variables.  The meaning of expression never changes.  For a floating
+variable object the values of variables whose names appear in the
+expressions are re-evaluated every time in the context of the current
+frame.  Consider this example:
+
+@smallexample
+void do_work(...)
+@{
+        struct work_state state;
+
+        if (...)
+           do_work(...);
+@}
+@end smallexample
+
+If a fixed variable object for the @code{state} variable is created in
+this function, and we enter the recursive call, the the variable
+object will report the value of @code{state} in the top-level
+@code{do_work} invocation.  On the other hand, a floating variable
+object will report the value of @code{state} in the current frame.
+
+If an expression specified when creating a fixed variable object
+refers to a local variable, the variable object becomes bound to the
+thread and frame in which the variable object is created.  When such
+variable object is updated, @value{GDBN} makes sure that the
+thread/frame combination the variable object is bound to still exists,
+and re-evaluates the variable object in context of that thread/frame.
+
 The following is the complete set of @sc{gdb/mi} operations defined to
 access this functionality:
 
@@ -21212,7 +21510,7 @@ how it can be used.
 
 @smallexample
  -var-create @{@var{name} | "-"@}
-    @{@var{frame-addr} | "*"@} @var{expression}
+    @{@var{frame-addr} | "*" | "@@"@} @var{expression}
 @end smallexample
 
 This operation creates a variable object, which allows the monitoring of
@@ -21222,12 +21520,13 @@ register.
 The @var{name} parameter is the string by which the object can be
 referenced.  It must be unique.  If @samp{-} is specified, the varobj
 system will generate a string ``varNNNNNN'' automatically.  It will be
-unique provided that one does not specify @var{name} on that format.
+unique provided that one does not specify @var{name} of that format.
 The command fails if a duplicate name is found.
 
 The frame under which the expression should be evaluated can be
 specified by @var{frame-addr}.  A @samp{*} indicates that the current
-frame should be used.
+frame should be used.  A @samp{@@} indicates that a floating variable
+object must be created.
 
 @var{expression} is any expression valid on the current language set (must not
 begin with a @samp{*}), or one of the following:
@@ -21247,10 +21546,11 @@ begin with a @samp{*}), or one of the following:
 
 This operation returns the name, number of children and the type of the
 object created.  Type is returned as a string as the ones generated by
-the @value{GDBN} CLI:
+the @value{GDBN} CLI.  If a fixed variable object is bound to a
+specific thread, the thread is is also printed:
 
 @smallexample
- name="@var{name}",numchild="N",type="@var{type}"
+ name="@var{name}",numchild="@var{N}",type="@var{type}",thread-id="@var{M}"
 @end smallexample
 
 
@@ -21525,6 +21825,9 @@ as for @code{-var-list-children} (@pxref{-var-list-children}).  It is
 recommended to use the @samp{--all-values} option, to reduce the
 number of MI commands needed on each program stop.
 
+With the @samp{*} parameter, if a variable object is bound to a
+currently running thread, it will not be updated, without any
+diagnostic.
 
 @subsubheading Example
 
@@ -22583,10 +22886,13 @@ Signal handling commands are not implemented.
 @subsubheading Synopsis
 
 @smallexample
- -target-attach @var{pid} | @var{file}
+ -target-attach @var{pid} | @var{gid} | @var{file}
 @end smallexample
 
-Attach to a process @var{pid} or a file @var{file} outside of @value{GDBN}.
+Attach to a process @var{pid} or a file @var{file} outside of
+@value{GDBN}, or a thread group @var{gid}.  If attaching to a thread
+group, the id previously returned by 
+@samp{-list-thread-groups --available} must be used.
 
 @subsubheading @value{GDBN} Command
 
@@ -22628,11 +22934,12 @@ N.A.
 @subsubheading Synopsis
 
 @smallexample
- -target-detach
+ -target-detach [ @var{pid} | @var{gid} ]
 @end smallexample
 
 Detach from the remote target which normally resumes its execution.
-There's no output.
+If either @var{pid} or @var{gid} is specified, detaches from either
+the specified process, or specified thread group.  There's no output.
 
 @subsubheading @value{GDBN} Command
 
@@ -23180,6 +23487,40 @@ while the target is running.
 
 @end table
 
+@subheading The @code{-list-thread-groups} Command
+@findex -list-thread-groups
+
+@subheading Synopsis
+
+@smallexample
+-list-thread-groups [ --available ] [ @var{group} ]
+@end smallexample
+
+When used without the @var{group} parameter, lists top-level thread
+groups that are being debugged.  When used with the @var{group}
+parameter, the children of the specified group are listed.  The
+children can be either threads, or other groups.  At present,
+@value{GDBN} will not report both threads and groups as children at
+the same time, but it may change in future.
+
+With the @samp{--available} option, instead of reporting groups that
+are been debugged, GDB will report all thread groups available on the
+target.  Using the @samp{--available} option together with @var{group}
+is not allowed.
+
+@subheading Example
+
+@smallexample
+@value{GDBP}
+-list-thread-groups
+^done,groups=[@{id="17",type="process",pid="yyy",num_children="2"@}]
+-list-thread-groups 17
+^done,threads=[@{id="2",target-id="Thread 0xb7e14b90 (LWP 21257)",
+   frame=@{level="0",addr="0xffffe410",func="__kernel_vsyscall",args=[]@},state="running"@},
+@{id="1",target-id="Thread 0xb7e156b0 (LWP 21254)",
+   frame=@{level="0",addr="0x0804891f",func="foo",args=[@{name="i",value="10"@}],
+           file="/tmp/a.c",fullname="/tmp/a.c",line="158"@},state="running"@}]]
+@end smallexample
 
 @subheading The @code{-interpreter-exec} Command
 @findex -interpreter-exec

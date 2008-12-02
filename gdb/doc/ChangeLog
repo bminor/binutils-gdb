@@ -1,5 +1,21 @@
 2008-12-02  Vladimir Prus  <vladimir@codesourcery.com>
 
+	MI non-stop and multiprocess docs.
+
+        * gdb.texinfo (GDB/MI): New section 'GDB/MI General Design'
+        (GDB/MI Output Records): New section 'GDB/MI Frame Information'
+        Adjust documentation for *stopped, document =thread-created,
+        =thread-exited, =thread-group-created and =thread-group-exited.
+        (GDB/MI Thread Commands): Document the 'state' field in
+        -thread-info output.
+        (GDB/MI Program Execution): Mention --all and --thread-group
+        options.
+        (GDB/MI Variable Objects): Describe floating and fixed variable
+        objects.
+        (GDB/MI Miscellaneous Commands): Document -list-thread-groups.
+
+2008-12-02  Vladimir Prus  <vladimir@codesourcery.com>
+
         * gdb.texinfo (Operating System Information): New appendix.
         (Operating System Auxiliary Information): Document 'info os processes'
         (Remote Configuration): Document 'osdata'
