@@ -1,3 +1,7 @@
+2008-12-02  Tristan Gingold  <gingold@adacore.com>
+
+	* config.bfd: Add x86_64-*-darwin*
+
 2008-11-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* hpux-core.c: Don't include sys/file.h.
