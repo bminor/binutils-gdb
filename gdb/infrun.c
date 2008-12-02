@@ -2510,8 +2510,6 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	}
     }
 
-  stepping_past_singlestep_breakpoint = 0;
-
   if (!ptid_equal (deferred_step_ptid, null_ptid))
     {
       /* In non-stop mode, there's never a deferred_step_ptid set.  */

@@ -1,3 +1,8 @@
+2008-12-02  Doug Evans  <dje@google.com>
+
+	* infrun.c (handle_inferior_event): Remove redundant resetting of
+	stepping_past_singlestep_breakpoint.
+
 2008-12-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* target.h (target_get_osdata): Describe.
