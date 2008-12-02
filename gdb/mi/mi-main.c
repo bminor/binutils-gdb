@@ -48,6 +48,7 @@
 #include "language.h"
 #include "valprint.h"
 #include "inferior.h"
+#include "osdata.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -378,7 +379,41 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
 
   back_to = make_cleanup (&null_cleanup, NULL);
 
-  if (id)
+  if (available && id)
+    {
+      error (_("Can only report top-level available thread groups"));
+    }
+  else if (available)
+    {
+      struct osdata *data = get_osdata ("processes");
+      struct osdata_item *item;
+      int ix_items;
+
+      make_cleanup_ui_out_list_begin_end (uiout, "groups");
+      
+      for (ix_items = 0;
+          VEC_iterate (osdata_item_s, data->items,
+                       ix_items, item);
+	   ix_items++)
+	{
+	  struct cleanup *back_to = 
+	    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+
+	  const char *pid = get_osdata_column (item, "pid");
+	  const char *cmd = get_osdata_column (item, "command");
+	  const char *user = get_osdata_column (item, "user");
+
+	  ui_out_field_fmt (uiout, "id", "%s", pid);
+	  ui_out_field_string (uiout, "type", "process");
+	  if (cmd)
+	    ui_out_field_string (uiout, "description", cmd);
+	  if (user)
+	    ui_out_field_string (uiout, "user", user);
+  
+	  do_cleanups (back_to);	  
+	}
+    }
+  else if (id)
     {
       int pid = atoi (id);
       if (!in_inferior_list (pid))

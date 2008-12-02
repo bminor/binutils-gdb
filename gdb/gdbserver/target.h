@@ -188,6 +188,11 @@ struct target_ops
   /* Fill BUF with an hostio error packet representing the last hostio
      error.  */
   void (*hostio_last_error) (char *buf);
+
+  /* Read/Write OS data using qXfer packets.  */
+  int (*qxfer_osdata) (const char *annex, unsigned char *readbuf,
+		       unsigned const char *writebuf, CORE_ADDR offset, 
+		       int len);
 };
 
 extern struct target_ops *the_target;

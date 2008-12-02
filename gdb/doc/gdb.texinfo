@@ -178,6 +178,8 @@ software in general.  We will miss him.
 * Agent Expressions::           The GDB Agent Expression Mechanism
 * Target Descriptions::         How targets can describe themselves to
                                 @value{GDBN}
+* Operating System Information:: Getting additional information from
+                                 the operating system
 * Copying::			GNU General Public License says
                                 how you can copy and share GDB
 * GNU Free Documentation License::  The license for this documentation
@@ -7595,6 +7597,18 @@ most appropriate form for a recognized tag, and in hexadecimal for
 an unrecognized tag.
 @end table
 
+On some targets, @value{GDBN} can access operating-system-specific information
+and display it to user, without interpretation.  For remote targets,
+this functionality depends on the remote stub's support of the 
+@samp{qXfer:osdata:read} packet, see @ref{qXfer osdata read}.
+
+@table @code
+@kindex info os processes
+@item info os processes
+Display the list of processes on the target.  For each process,
+@value{GDBN} prints the process identifier, the name of the user, and
+the command corresponding to the process.
+@end table
 
 @node Memory Region Attributes
 @section Memory Region Attributes
@@ -14332,6 +14346,10 @@ are:
 @item @code{noack-packet}
 @tab @code{QStartNoAckMode}
 @tab Packet acknowledgment
+
+@item @code{osdata}
+@tab @code{qXfer:osdata:read}
+@tab @code{info os}
 @end multitable
 
 @node Remote Stub
@@ -26243,6 +26261,10 @@ debugging of more than one process at a time.  The stub must not use
 multiprocess extensions in packet replies unless @value{GDBN} has also
 indicated it supports them in its @samp{qSupported} request.
 
+@item qXfer:osdata:read
+The remote stub understands the @samp{qXfer:osdata:read} packet
+((@pxref{qXfer osdata read}).
+
 @end table
 
 @item qSymbol::
@@ -26381,7 +26403,14 @@ in the target process, and @var{name} identifes the @code{spufs} file
 in that context to be accessed.
 
 This packet is not probed by default; the remote stub must request it,
-by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).
+
+@item qXfer:osdata:read::@var{offset},@var{length}
+@anchor{qXfer osdata read}
+Access the target's @dfn{operating system information}.  
+@xref{Operating System Information}.
+
 @end table
 
 Reply:
@@ -28779,6 +28808,55 @@ contain registers @samp{ev0h} through @samp{ev31h}, @samp{acc}, and
 @samp{ev0h} through @samp{ev31h}.  @value{GDBN} will combine
 these to present registers @samp{ev0} through @samp{ev31} to the
 user.
+
+@node Operating System Information
+@appendix Operating System Information
+@cindex operating system information
+
+@menu
+* Process list::
+@end menu
+
+Users of @value{GDBN} often wish to obtain information about the state of
+the operating system running on the target---for example the list of
+processes, or the list of open files.  This section describes the
+mechanism that makes it possible.  This mechanism is similar to the 
+target features mechanism (@pxref{Target Descriptions}), but focuses
+on a different aspect of target.
+
+Operating system information is retrived from the target via the
+remote protocol, using @samp{qXfer} requests (@pxref{qXfer osdata
+read}).  The object name in the request should be @samp{osdata}, and
+the @var{annex} identifies the data to be fetched.
+
+@node Process list
+@appendixsection Process list
+@cindex operating system information, process list
+
+When requesting the process list, the @var{annex} field in the
+@samp{qXfer} request should be @samp{processes}.  The returned data is
+an XML document.  The formal syntax of this document is defined in
+@file{gdb/features/osdata.dtd}.
+
+An example document is:
+
+@smallexample
+<?xml version="1.0"?>
+<!DOCTYPE target SYSTEM "osdata.dtd">
+<osdata type="processes">
+  <item>
+    <column name="pid">1</column>
+    <column name="user">root</column>
+    <column name="command">/sbin/init</column>
+  </item>
+</osdata>
+@end smallexample
+
+Each item should include a column whose name is @samp{pid}.  The value
+of that column should identify the process on the target.  The
+@samp{user} and @samp{command} columns are optional, and will be
+displayed by @value{GDBN}.  Target may provide additional columns,
+which @value{GDBN} currently ignores.
 
 @include gpl.texi
 

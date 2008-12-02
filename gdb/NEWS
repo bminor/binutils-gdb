@@ -36,6 +36,9 @@ QStartNoAckMode
   operation over reliable transport links.  Use of this packet is
   controlled by the `set remote noack-packet' command.
 
+qXfer:osdata:read
+  Obtains additional operating system information
+
 * Removed remote protocol undocumented extension
 
   An undocumented extension to the remote protocol's `S' stop reply
@@ -175,6 +178,9 @@ macro undef
 * New native configurations
 
 x86/x86_64 Darwin		i[34567]86-*-darwin*
+
+info os processes
+  Show operating system information about processes.
 
 * New targets
 

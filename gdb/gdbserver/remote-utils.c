@@ -1291,3 +1291,95 @@ xml_escape_text (const char *text)
 
   return result;
 }
+
+void
+buffer_grow (struct buffer *buffer, const char *data, size_t size)
+{
+  char *new_buffer;
+  size_t new_buffer_size;
+
+  if (size == 0)
+    return;
+
+  new_buffer_size = buffer->buffer_size;
+
+  if (new_buffer_size == 0)
+    new_buffer_size = 1;
+
+  while (buffer->used_size + size > new_buffer_size)
+    new_buffer_size *= 2;
+  new_buffer = realloc (buffer->buffer, new_buffer_size);
+  if (!new_buffer)
+    abort ();
+  memcpy (new_buffer + buffer->used_size, data, size);
+  buffer->buffer = new_buffer;
+  buffer->buffer_size = new_buffer_size;
+  buffer->used_size += size;
+}
+
+void
+buffer_free (struct buffer *buffer)
+{
+  if (!buffer)
+    return;
+
+  free (buffer->buffer);
+  buffer->buffer = NULL;
+  buffer->buffer_size = 0;
+  buffer->used_size = 0;
+}
+
+void
+buffer_init (struct buffer *buffer)
+{
+  memset (buffer, 0, sizeof (*buffer));
+}
+
+char*
+buffer_finish (struct buffer *buffer)
+{
+  char *ret = buffer->buffer;
+  buffer->buffer = NULL;
+  buffer->buffer_size = 0;
+  buffer->used_size = 0;
+  return ret;
+}
+
+void
+buffer_xml_printf (struct buffer *buffer, const char *format, ...)
+{
+  va_list ap;
+  const char *f;
+  const char *prev;
+  int percent = 0;
+
+  va_start (ap, format);
+
+  prev = format;
+  for (f = format; *f; f++)
+    {
+      if (percent)
+       {
+         switch (*f)
+           {
+           case 's':
+             {
+               char *p;
+               char *a = va_arg (ap, char *);
+               buffer_grow (buffer, prev, f - prev - 1);
+               p = xml_escape_text (a);
+               buffer_grow_str (buffer, p);
+               free (p);
+               prev = f + 1;
+             }
+             break;
+           }
+         percent = 0;
+       }
+      else if (*f == '%')
+       percent = 1;
+    }
+
+  buffer_grow_str (buffer, prev);
+  va_end (ap);
+}

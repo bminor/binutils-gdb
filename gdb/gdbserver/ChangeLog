@@ -1,3 +1,19 @@
+2008-12-02  Pedro Alves  <pedro@codesourcery.com>
+
+        * target.h (struct target_ops): Add qxfer_osdata member.
+        * linux-low.c: Include ctype.h and pwd.h and sys/types.h
+        and dirent.h.
+        (linux_qxfer_osdata): New functions.
+        (linux_target_ops): Register linux_qxfer_osdata as qxfer_osdata
+        callback.
+        * server.c (handle_query): Handle "qXfer:osdata:read:".
+        * remote-utils.c (buffer_grow, buffer_free, buffer_init, buffer_finish)
+        (buffer_xml_printf): New functions.
+        * server.h (struct buffer): New.
+        (buffer_grow_str, buffer_grow_str0): New macros.
+        (buffer_grow, buffer_free, buffer_init, buffer_finish)
+        (buffer_xml_printf): Declare.
+
 2008-11-24  Doug Evans  <dje@google.com>
 
 	* Makefile.in (VERSION,DIST,LINT,LINTFLAGS): Delete, unused.

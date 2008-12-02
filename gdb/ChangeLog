@@ -1,3 +1,33 @@
+2008-12-02  Pedro Alves  <pedro@codesourcery.com>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement -list-thread-groups --available
+
+        * Makefile.in (XMLFILES): Add osdata.dtd.
+        (SFILES): Add osdata.c.
+        (COMMON_OBS): Add osdata.o.
+        * linux-nat.c: Include pwd.h, sys/types.h, gdb_dirent.h and xml-support.h.
+        (linux_nat_xfer_osdata): New function.
+        (linux_xfer_partial): Handle TARGET_OBJECT_OSDATA.
+        * osdata.c: New file.
+        * osdata.h: New file.
+        * remote.c (PACKET_qXfer_osdata): New packet enum.
+        (remote_protocol_features): Add "qXfer:osdata:read".
+        (remote_read_qxfer): Handle TARGET_OBJECT_OSDATA.
+        (extended_remote_can_run): New.
+        (init_extended_remote_ops): Set to_can_run to
+        extended_remote_can_run.
+        (_initialize_remote): Add packet config command for
+        "qXfer:osdata:read".
+        * xml-support.c (obstack_xml_printf): New function.
+        * xml-support.h (obstack_xml_printf): Declare.
+        * target.c (target_get_osdata): New function.
+        * target.h (enum target_object): Add TARGET_OBJECT_OSDATA.
+        (target_os_data): Declare.
+        * features/osdata.dtd: New file.
+        * mi/mi-main.c (mi_list_thread_groups): Handle the --available
+        option.
+
 2008-12-01  Doug Evans  <dje@google.com>
 
 	* infrun.c (proceed): Delete unused local stop_signal.

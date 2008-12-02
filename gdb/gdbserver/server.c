@@ -768,6 +768,38 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       return;
     }
 
+  if (the_target->qxfer_osdata != NULL
+      && strncmp ("qXfer:osdata:read:", own_buf, 18) == 0)
+    {
+      char *annex;
+      int n;
+      unsigned int len;
+      CORE_ADDR ofs;
+      unsigned char *workbuf;
+
+      strcpy (own_buf, "E00");
+      if (decode_xfer_read (own_buf + 18, &annex, &ofs, &len) < 0)
+       return;
+      if (len > PBUFSIZ - 2)
+       len = PBUFSIZ - 2;
+      workbuf = malloc (len + 1);
+      if (!workbuf)
+        return;
+
+      n = (*the_target->qxfer_osdata) (annex, workbuf, NULL, ofs, len + 1);
+      if (n < 0)
+       write_enn (own_buf);
+      else if (n > len)
+       *new_packet_len_p = write_qxfer_response
+                             (own_buf, workbuf, len, 1);
+      else
+       *new_packet_len_p = write_qxfer_response
+                             (own_buf, workbuf, n, 0);
+
+      free (workbuf);
+      return;
+    }
+
   /* Protocol features query.  */
   if (strncmp ("qSupported", own_buf, 10) == 0
       && (own_buf[10] == ':' || own_buf[10] == '\0'))
@@ -792,6 +824,10 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (transport_is_reliable)
 	strcat (own_buf, ";QStartNoAckMode+");
+
+      if (the_target->qxfer_osdata != NULL)
+        strcat (own_buf, ";qXfer:osdata:read+");
+
       return;
     }
 

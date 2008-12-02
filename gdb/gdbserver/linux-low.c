@@ -33,6 +33,10 @@
 #include <errno.h>
 #include <sys/syscall.h>
 #include <sched.h>
+#include <ctype.h>
+#include <pwd.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #ifndef PTRACE_GETSIGINFO
 # define PTRACE_GETSIGINFO 0x4202
@@ -2049,6 +2053,109 @@ linux_read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
 }
 #endif
 
+static int
+linux_qxfer_osdata (const char *annex,
+                   unsigned char *readbuf, unsigned const char *writebuf,
+                   CORE_ADDR offset, int len)
+{
+  /* We make the process list snapshot when the object starts to be
+     read.  */
+  static const char *buf;
+  static long len_avail = -1;
+  static struct buffer buffer;
+
+  DIR *dirp;
+
+  if (strcmp (annex, "processes") != 0)
+    return 0;
+
+  if (!readbuf || writebuf)
+    return 0;
+
+  if (offset == 0)
+    {
+      if (len_avail != -1 && len_avail != 0)
+       buffer_free (&buffer);
+      len_avail = 0;
+      buf = NULL;
+      buffer_init (&buffer);
+      buffer_grow_str (&buffer, "<osdata type=\"processes\">");
+
+      dirp = opendir ("/proc");
+      if (dirp)
+       {
+         struct dirent *dp;
+         while ((dp = readdir (dirp)) != NULL)
+           {
+             struct stat statbuf;
+             char procentry[sizeof ("/proc/4294967295")];
+
+             if (!isdigit (dp->d_name[0])
+                 || strlen (dp->d_name) > sizeof ("4294967295") - 1)
+               continue;
+
+             sprintf (procentry, "/proc/%s", dp->d_name);
+             if (stat (procentry, &statbuf) == 0
+                 && S_ISDIR (statbuf.st_mode))
+               {
+                 char pathname[128];
+                 FILE *f;
+                 char cmd[MAXPATHLEN + 1];
+                 struct passwd *entry;
+
+                 sprintf (pathname, "/proc/%s/cmdline", dp->d_name);
+                 entry = getpwuid (statbuf.st_uid);
+
+                 if ((f = fopen (pathname, "r")) != NULL)
+                   {
+                     size_t len = fread (cmd, 1, sizeof (cmd) - 1, f);
+                     if (len > 0)
+                       {
+                         int i;
+                         for (i = 0; i < len; i++)
+                           if (cmd[i] == '\0')
+                             cmd[i] = ' ';
+                         cmd[len] = '\0';
+
+                         buffer_xml_printf (
+			   &buffer,
+			   "<item>"
+			   "<column name=\"pid\">%s</column>"
+			   "<column name=\"user\">%s</column>"
+			   "<column name=\"command\">%s</column>"
+			   "</item>",
+			   dp->d_name,
+			   entry ? entry->pw_name : "?",
+			   cmd);
+                       }
+                     fclose (f);
+                   }
+               }
+           }
+
+         closedir (dirp);
+       }
+      buffer_grow_str0 (&buffer, "</osdata>\n");
+      buf = buffer_finish (&buffer);
+      len_avail = strlen (buf);
+    }
+
+  if (offset >= len_avail)
+    {
+      /* Done.  Get rid of the data.  */
+      buffer_free (&buffer);
+      buf = NULL;
+      len_avail = 0;
+      return 0;
+    }
+
+  if (len > len_avail - offset)
+    len = len_avail - offset;
+  memcpy (readbuf, buf + offset, len);
+
+  return len;
+}
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
@@ -2081,6 +2188,7 @@ static struct target_ops linux_target_ops = {
 #endif
   NULL,
   hostio_last_error_from_errno,
+  linux_qxfer_osdata,
 };
 
 static void

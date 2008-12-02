@@ -992,6 +992,7 @@ enum {
   PACKET_qXfer_memory_map,
   PACKET_qXfer_spu_read,
   PACKET_qXfer_spu_write,
+  PACKET_qXfer_osdata,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
   PACKET_QPassSignals,
@@ -2958,6 +2959,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_spu_read },
   { "qXfer:spu:write", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_spu_write },
+  { "qXfer:osdata:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_osdata },
   { "QPassSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QPassSignals },
   { "QStartNoAckMode", PACKET_DISABLE, remote_supported_packet,
@@ -7355,6 +7358,13 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       return remote_read_qxfer (ops, "memory-map", annex, readbuf, offset, len,
 				&remote_protocol_packets[PACKET_qXfer_memory_map]);
 
+    case TARGET_OBJECT_OSDATA:
+      /* Should only get here if we're connected.  */
+      gdb_assert (remote_desc);
+      return remote_read_qxfer
+       (ops, "osdata", annex, readbuf, offset, len,
+        &remote_protocol_packets[PACKET_qXfer_osdata]);
+
     default:
       return -1;
     }
@@ -8647,6 +8657,15 @@ remote_supports_multi_process (void)
   return remote_multi_process_p (rs);
 }
 
+static int
+extended_remote_can_run (void)
+{
+  if (remote_desc != NULL)
+    return 1;
+
+  return 0;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -8732,6 +8751,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   extended_remote_ops.to_detach = extended_remote_detach;
   extended_remote_ops.to_attach = extended_remote_attach;
   extended_remote_ops.to_kill = extended_remote_kill;
+  extended_remote_ops.to_can_run = extended_remote_can_run;
 }
 
 static int
@@ -9040,6 +9060,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_spu_write],
                          "qXfer:spu:write", "write-spu-object", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_osdata],
+                        "qXfer:osdata:read", "osdata", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",

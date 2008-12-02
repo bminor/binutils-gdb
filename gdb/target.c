@@ -2224,6 +2224,26 @@ target_supports_non_stop ()
 }
 
 
+char *
+target_get_osdata (const char *type)
+{
+  char *document;
+  struct target_ops *t;
+
+  if (target_can_run (&current_target))
+    t = &current_target;
+  else
+    t = find_default_run_target ("get OS data");
+
+  if (!t)
+    return NULL;
+
+  document = target_read_stralloc (t,
+                                  TARGET_OBJECT_OSDATA,
+                                  type);
+  return document;
+}
+
 static int
 default_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {

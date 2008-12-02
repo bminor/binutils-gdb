@@ -1,3 +1,10 @@
+2008-12-02  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * gdb.texinfo (Operating System Information): New appendix.
+        (Operating System Auxiliary Information): Document 'info os processes'
+        (Remote Configuration): Document 'osdata'
+        (General Query Packets): Document qXfer:osdata:read.
+
 2008-11-27  Tristan Gingold  <gingold@adacore.com>
 
 	* gdb.texinfo (Darwin): Document Darwin specific features.

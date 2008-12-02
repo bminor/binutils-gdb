@@ -233,4 +233,11 @@ extern gdb_xml_attribute_handler gdb_xml_parse_attr_enum;
 ULONGEST gdb_xml_parse_ulongest (struct gdb_xml_parser *parser,
 				 const char *value);
 
+/* Simple printf to obstack function.  Current implemented formatters:
+   %s - grow an xml escaped text in OBSTACK.  */
+
+extern void obstack_xml_printf (struct obstack *obstack,
+                               const char *format, ...)
+  ATTRIBUTE_PRINTF_2;
+
 #endif

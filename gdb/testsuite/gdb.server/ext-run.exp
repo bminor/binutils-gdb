@@ -44,5 +44,10 @@ gdb_test "set remote exec-file $target_exec" "" "set remote exec-file"
 gdb_breakpoint main
 gdb_test "run" "Breakpoint.* main .*" "continue to main"
 
+if { [istarget *-*-linux*] } {
+    # On Linux, gdbserver can also report the list of processes.
+    gdb_test "info os processes" ".*pid +user +command.*1 +root +/sbin/init.*" "get process list"
+}
+
 gdb_test "kill" "" "kill" "Kill the program being debugged.*" "y"
 gdb_test "monitor exit" ""

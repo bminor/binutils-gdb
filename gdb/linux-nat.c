@@ -49,6 +49,10 @@
 #include "inf-loop.h"
 #include "event-loop.h"
 #include "event-top.h"
+#include <pwd.h>
+#include <sys/types.h>
+#include "gdb_dirent.h"
+#include "xml-support.h"
 
 #ifdef HAVE_PERSONALITY
 # include <sys/personality.h>
@@ -3995,6 +3999,113 @@ linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigse
 }
 
 static LONGEST
+linux_nat_xfer_osdata (struct target_ops *ops, enum target_object object,
+                    const char *annex, gdb_byte *readbuf,
+                    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+{
+  /* We make the process list snapshot when the object starts to be
+     read.  */
+  static const char *buf;
+  static LONGEST len_avail = -1;
+  static struct obstack obstack;
+
+  DIR *dirp;
+
+  gdb_assert (object == TARGET_OBJECT_OSDATA);
+
+  if (strcmp (annex, "processes") != 0)
+    return 0;
+
+  gdb_assert (readbuf && !writebuf);
+
+  if (offset == 0)
+    {
+      if (len_avail != -1 && len_avail != 0)
+       obstack_free (&obstack, NULL);
+      len_avail = 0;
+      buf = NULL;
+      obstack_init (&obstack);
+      obstack_grow_str (&obstack, "<osdata type=\"processes\">\n");
+
+      dirp = opendir ("/proc");
+      if (dirp)
+       {
+         struct dirent *dp;
+         while ((dp = readdir (dirp)) != NULL)
+           {
+             struct stat statbuf;
+             char procentry[sizeof ("/proc/4294967295")];
+
+             if (!isdigit (dp->d_name[0])
+                 || strlen (dp->d_name) > sizeof ("4294967295") - 1)
+               continue;
+
+             sprintf (procentry, "/proc/%s", dp->d_name);
+             if (stat (procentry, &statbuf) == 0
+                 && S_ISDIR (statbuf.st_mode))
+               {
+                 char *pathname;
+                 FILE *f;
+                 char cmd[MAXPATHLEN + 1];
+                 struct passwd *entry;
+
+                 pathname = xstrprintf ("/proc/%s/cmdline", dp->d_name);
+                 entry = getpwuid (statbuf.st_uid);
+
+                 if ((f = fopen (pathname, "r")) != NULL)
+                   {
+                     size_t len = fread (cmd, 1, sizeof (cmd) - 1, f);
+                     if (len > 0)
+                       {
+                         int i;
+                         for (i = 0; i < len; i++)
+                           if (cmd[i] == '\0')
+                             cmd[i] = ' ';
+                         cmd[len] = '\0';
+
+                         obstack_xml_printf (
+			   &obstack,
+			   "<item>"
+			   "<column name=\"pid\">%s</column>"
+			   "<column name=\"user\">%s</column>"
+			   "<column name=\"command\">%s</column>"
+			   "</item>",
+			   dp->d_name,
+			   entry ? entry->pw_name : "?",
+			   cmd);
+                       }
+                     fclose (f);
+                   }
+
+                 xfree (pathname);
+               }
+           }
+
+         closedir (dirp);
+       }
+
+      obstack_grow_str0 (&obstack, "</osdata>\n");
+      buf = obstack_finish (&obstack);
+      len_avail = strlen (buf);
+    }
+
+  if (offset >= len_avail)
+    {
+      /* Done.  Get rid of the obstack.  */
+      obstack_free (&obstack, NULL);
+      buf = NULL;
+      len_avail = 0;
+      return 0;
+    }
+
+  if (len > len_avail - offset)
+    len = len_avail - offset;
+  memcpy (readbuf, buf + offset, len);
+
+  return len;
+}
+
+static LONGEST
 linux_xfer_partial (struct target_ops *ops, enum target_object object,
                     const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
@@ -4004,6 +4115,10 @@ linux_xfer_partial (struct target_ops *ops, enum target_object object,
   if (object == TARGET_OBJECT_AUXV)
     return procfs_xfer_auxv (ops, object, annex, readbuf, writebuf,
 			     offset, len);
+
+  if (object == TARGET_OBJECT_OSDATA)
+    return linux_nat_xfer_osdata (ops, object, annex, readbuf, writebuf,
+                               offset, len);
 
   xfer = linux_proc_xfer_partial (ops, object, annex, readbuf, writebuf,
 				  offset, len);
