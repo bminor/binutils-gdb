@@ -6427,6 +6427,8 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 
       if ((flags & BSF_THREAD_LOCAL) != 0)
 	type = STT_TLS;
+      else if ((flags & BSF_INDIRECT_FUNCTION) != 0)
+	type = STT_IFUNC;
       else if ((flags & BSF_FUNCTION) != 0)
 	type = STT_FUNC;
       else if ((flags & BSF_OBJECT) != 0)
@@ -7120,6 +7122,7 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
 	  continue;
 	case STT_NOTYPE:
 	case STT_FUNC:
+	case STT_IFUNC:
 	  if (bfd_get_section (&q->symbol) == section
 	      && q->symbol.value >= low_func
 	      && q->symbol.value <= offset)
@@ -8938,10 +8941,10 @@ _bfd_elf_set_osabi (bfd * abfd,
 
 /* Return TRUE for ELF symbol types that represent functions.
    This is the default version of this function, which is sufficient for
-   most targets.  It returns true if TYPE is STT_FUNC.  */
+   most targets.  It returns true if TYPE is STT_FUNC or STT_IFUNC.  */
 
 bfd_boolean
 _bfd_elf_is_function_type (unsigned int type)
 {
-  return (type == STT_FUNC);
+  return (type == STT_FUNC || type == STT_IFUNC);
 }

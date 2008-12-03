@@ -1,3 +1,12 @@
+2008-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* ld-mips-elf/reloc-1-n32.d: Updated expected output for reloc
+	descriptions.
+	* ld-mips-elf/reloc-1-n64.d: Likewise.
+	* ld-i386/ifunc.d: New test.
+	* ld-i386/ifunc.s: Source file for the new test.
+	* ld-i386/i386.exp: Run the new test.
+
 2008-11-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-arm/thumb2-bl-undefweak.d, ld-arm/thumb2-bl-undefweak.s: New.

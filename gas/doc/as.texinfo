@@ -6267,7 +6267,7 @@ The syntaxes supported are:
   .type <name> STT_<TYPE_IN_UPPER_CASE>
   .type <name>,#<type>
   .type <name>,@@<type>
-  .type <name>,%>type>
+  .type <name>,%<type>
   .type <name>,"<type>"
 @end smallexample
 
@@ -6289,6 +6289,15 @@ Mark the symbol as being a thead-local data object.
 @item STT_COMMON
 @itemx common
 Mark the symbol as being a common data object.
+
+@item STT_NOTYPE
+@itemx notype
+Does not mark the symbol in any way.  It is supported just for completeness.
+
+@item STT_IFUNC
+@itemx indirect_function
+Mark the symbol as an indirect function when evaluated during reloc
+processing.  (This is only supported on Linux targeted assemblers).
 @end table
 
 Note: Some targets support extra types in addition to those listed above.

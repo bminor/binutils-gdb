@@ -1,3 +1,9 @@
+2008-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/type.s: Add test of STT_IFUNC symbol type.
+	* gas/elf/type.e: Update expected disassembly.
+	* gas/elf/elf.exp: Update grep of symbol types.
+
 2008-11-27  M R Swami Reddy  <MR.Swami.Reddy@nsc.com>
 
 	* gas/cr16/pic-1.s: New.

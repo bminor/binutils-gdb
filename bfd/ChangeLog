@@ -1,3 +1,37 @@
+2008-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* syms.c (struct bfd_symbol): Add new flag BSF_INDIRECT_FUNCTION.
+	Remove redundant flag BFD_FORT_COMM_DEFAULT_VALUE.  Renumber flags
+	to remove gaps.
+	(bfd_print_symbol_vandf): Return 'i' for BSF_INDIRECT_FUNCTION.
+	(bfd_decode_symclass): Likewise.
+	* elf.c (swap_out_syms): Translate BSF_INDIRECT_FUNCTION into
+	STT_IFUNC.
+	(elf_find_function): Treat STT_IFUNC in the same way as STT_FUNC.
+	(_bfd_elf_is_function_type): Likewise.
+	* elf32-arm.c (arm_elf_find_function): Likewise.
+	(elf32_arm_adjust_dynamic_symbol): Likewise.
+	(elf32_arm_swap_symbol_in): Likewise.
+	(elf32_arm_additional_program_headers): Likewise.
+	* elf32-i386.c (is_indirect_symbol): New function.
+	(elf_i386_check_relocs): Also generate dynamic relocs for
+	relocations against STT_IFUNC symbols.
+	(allocate_dynrelocs): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	* elf64-x86-64.c (is_indirect_symbol): New function.
+	(elf64_x86_64_check_relocs): Also generate dynamic relocs for
+	relocations against STT_IFUNC symbols.
+	(allocate_dynrelocs): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+	* elfcode.h (elf_slurp_symbol_table): Translate STT_IFUNC into
+	BSF_INDIRECT_FUNCTION.
+	* elflink.c (_bfd_elf_adjust_dynamic_reloc_section): Add support
+	for STT_IFUNC symbols.
+	(get_ifunc_reloc_section_name): New function.
+	(_bfd_elf_make_ifunc_reloc_section): New function.
+	* elf-bfd.h (struct bfd_elf_section_data): Add indirect_relocs field.
+	* bfd-in2.h: Regenerate.
+
 2008-12-02  Tristan Gingold  <gingold@adacore.com>
 
 	* config.bfd: Add x86_64-*-darwin*

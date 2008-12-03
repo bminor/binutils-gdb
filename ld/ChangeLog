@@ -1,3 +1,11 @@
+2008-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention new feature.
+	* pe-dll.c (process_def_file): Replace use of redundant
+	BFD_FORT_COMM_DEFAULT_VALUE with 0.
+	* scripttempl/elf.sc: Add .rel.ifunc.dyn and .rela.ifunc.dyn
+	sections.
+
 2008-12-02  Kai Tietz  <kai.tietz@onevision.com>
 
 	* pe-dll.c (make_runtime_pseudo_reloc): Make symtab big enough to

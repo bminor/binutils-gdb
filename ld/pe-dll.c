@@ -633,7 +633,7 @@ process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		 We should not export undefined symbols.  */
 	      if (symbols[j]->section != &bfd_und_section
 		  && ((symbols[j]->flags & BSF_GLOBAL)
-		      || (symbols[j]->flags == BFD_FORT_COMM_DEFAULT_VALUE)))
+		      || (symbols[j]->flags == 0)))
 		{
 		  const char *sn = symbols[j]->name;
 

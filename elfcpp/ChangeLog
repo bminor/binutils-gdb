@@ -1,3 +1,7 @@
+2008-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* elfcpp.h (enum STT): Add STT_IFUNC.
+
 2008-06-12  David S. Miller  <davem@davemloft.net>
 
 	* powerpc.h: New file.

@@ -9430,6 +9430,7 @@ arm_elf_find_function (bfd *         abfd ATTRIBUTE_UNUSED,
 	  filename = bfd_asymbol_name (&q->symbol);
 	  break;
 	case STT_FUNC:
+	case STT_IFUNC:
 	case STT_ARM_TFUNC:
 	case STT_NOTYPE:
 	  /* Skip mapping symbols.  */
@@ -9555,7 +9556,7 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later,
      when we know the address of the .got section.  */
-  if (h->type == STT_FUNC || h->type == STT_ARM_TFUNC
+  if (h->type == STT_FUNC || h->type == STT_ARM_TFUNC || h->type == STT_IFUNC
       || h->needs_plt)
     {
       if (h->plt.refcount <= 0
@@ -11729,7 +11730,8 @@ elf32_arm_swap_symbol_in (bfd * abfd,
 
   /* New EABI objects mark thumb function symbols by setting the low bit of
      the address.  Turn these into STT_ARM_TFUNC.  */
-  if (ELF_ST_TYPE (dst->st_info) == STT_FUNC
+  if ((ELF_ST_TYPE (dst->st_info) == STT_FUNC
+       || ELF_ST_TYPE (dst->st_info) == STT_IFUNC)
       && (dst->st_value & 1))
     {
       dst->st_info = ELF_ST_INFO (ELF_ST_BIND (dst->st_info), STT_ARM_TFUNC);
@@ -11830,7 +11832,7 @@ elf32_arm_additional_program_headers (bfd *abfd,
 static bfd_boolean
 elf32_arm_is_function_type (unsigned int type)
 {
-  return (type == STT_FUNC) || (type == STT_ARM_TFUNC);
+  return (type == STT_FUNC) || (type == STT_ARM_TFUNC) || (type == STT_IFUNC);
 }
 
 /* We use this to override swap_symbol_in and swap_symbol_out.  */

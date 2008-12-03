@@ -1,3 +1,9 @@
+2008-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-elf.c (obj_elf_type): Add support for STT_IFUNC type.
+	* doc/as.texinfo: Document new feature.
+	* NEWS: Mention new feature.
+
 2008-11-29  Kai Tietz  <kai.tietz@onevision.com>
 
 	* config/tc-i386.c (i386_target_format): For coff flavour in TE_PEP
