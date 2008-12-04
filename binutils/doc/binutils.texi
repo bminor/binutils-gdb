@@ -2045,8 +2045,10 @@ symbol's name is a message to be displayed if the symbol following the
 warning symbol is ever referenced.
 
 @item I
-The symbol is an indirect reference to another symbol (I) or a normal
-symbol (a space).
+@item i
+The symbol is an indirect reference to another symbol (I), a function
+to be evaluated during reloc processing (i) or a normal symbol (a
+space).
 
 @item d
 @itemx D

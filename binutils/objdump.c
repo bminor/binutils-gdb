@@ -2718,8 +2718,13 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 	printf (" %-16s  ", q->howto->name);
       else
 	printf (" %-16d  ", q->howto->type);
+
       if (sym_name)
-	objdump_print_symname (abfd, NULL, *q->sym_ptr_ptr);
+	{
+	  objdump_print_symname (abfd, NULL, *q->sym_ptr_ptr);
+	  if ((*q->sym_ptr_ptr)->flags & BSF_INDIRECT_FUNCTION)
+	    printf ("() ");
+	}
       else
 	{
 	  if (section_name == NULL)

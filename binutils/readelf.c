@@ -414,35 +414,31 @@ print_vma (bfd_vma vma, print_mode mode)
   return 0;
 }
 
-/* Display a symbol on stdout.  Handles the display of
-   non-printing characters.
-   If DO_WIDE is not true then format the symbol to be
-   at most WIDTH characters, truncating as necessary.
-   If WIDTH is negative then format the string to be
-   exactly - WIDTH characters, truncating or padding
-   as necessary.  */
+/* Display a symbol on stdout.  Handles the display of non-printing characters.
 
-static void
+   If DO_WIDE is not true then format the symbol to be at most WIDTH characters,
+   truncating as necessary.  If WIDTH is negative then format the string to be
+   exactly - WIDTH characters, truncating or padding as necessary.
+
+   Returns the number of emitted characters.  */
+
+static unsigned int
 print_symbol (int width, const char *symbol)
 {
-  const char * format_string;
   const char * c;
+  bfd_boolean extra_padding = FALSE;
+  unsigned int num_printed = 0;
 
   if (do_wide)
     {
-      format_string = "%.*s";
       /* Set the width to a very large value.  This simplifies the code below.  */
       width = INT_MAX;
     }
   else if (width < 0)
     {
-      format_string = "%-*.*2s";
       /* Keep the width positive.  This also helps.  */
       width = - width;
-    }
-  else
-    {
-      format_string = "%-.*s";
+      extra_padding = TRUE;
     }
 
   while (width)
@@ -464,9 +460,10 @@ print_symbol (int width, const char *symbol)
 	  if (len > width)
 	    len = width;
 
-	  printf (format_string, len, symbol);
+	  printf ("%.*s", len, symbol);
 
 	  width -= len;
+	  num_printed += len;
 	}
 
       if (* c == 0 || width == 0)
@@ -482,6 +479,7 @@ print_symbol (int width, const char *symbol)
 	  printf ("^%c", *c + 0x40);
 
 	  width -= 2;
+	  num_printed += 2;
 	}
       else
 	{
@@ -491,10 +489,20 @@ print_symbol (int width, const char *symbol)
 	  printf ("<0x%.2x>", *c);
 
 	  width -= 6;
+	  num_printed += 6;
 	}
 
       symbol = c + 1;
     }
+
+  if (extra_padding && width > 0)
+    {
+      /* Fill in the remaining spaces.  */
+      printf ("%-*s", width, " ");
+      num_printed += 2;
+    }
+
+  return num_printed;
 }
 
 static void
@@ -1242,8 +1250,39 @@ dump_relocations (FILE *file,
 	      psym = symtab + symtab_index;
 
 	      printf (" ");
-	      print_vma (psym->st_value, LONG_HEX);
-	      printf (is_32bit_elf ? "   " : " ");
+
+	      if (ELF_ST_TYPE (psym->st_info) == STT_IFUNC)
+		{
+		  const char * name;
+		  unsigned int len;
+		  unsigned int width = is_32bit_elf ? 8 : 14;
+
+		  /* Relocations against IFUNC symbols do not use the value of
+		     the symbol as the address to relocate against.  Instead
+		     they invoke the function named by the symbol and use its
+		     result as the address for relocation.
+
+		     To indicate this to the user, do not display the value of
+		     the symbol in the "Symbols's Value" field.  Instead show
+		     its name followed by () as a hint that the symbol is
+		     invoked.  */
+
+		  if (strtab == NULL
+		      || psym->st_name == 0
+		      || psym->st_name >= strtablen)
+		    name = "??";
+		  else
+		    name = strtab + psym->st_name;
+
+		  len = print_symbol (width, name);
+		  printf ("()%-*s", len <= width ? (width + 1) - len : 1, " ");
+		}
+	      else
+		{
+		  print_vma (psym->st_value, LONG_HEX);
+
+		  printf (is_32bit_elf ? "   " : " ");
+		}
 
 	      if (psym->st_name == 0)
 		{
@@ -1294,7 +1333,14 @@ dump_relocations (FILE *file,
 		print_symbol (22, strtab + psym->st_name);
 
 	      if (is_rela)
-		printf (" + %lx", (unsigned long) rels[i].r_addend);
+		{
+		  long offset = (long) (bfd_signed_vma) rels[i].r_addend;
+
+		  if (offset < 0)
+		    printf (" - %lx", - offset);
+		  else
+		    printf (" + %lx", offset);
+		}
 	    }
 	}
       else if (is_rela)
@@ -7018,6 +7064,14 @@ get_symbol_type (unsigned int type)
 		return "HP_OPAQUE";
 	      if (type == STT_HP_STUB)
 		return "HP_STUB";
+	    }
+	  else if (elf_header.e_ident[EI_OSABI] == ELFOSABI_LINUX
+		   || elf_header.e_ident[EI_OSABI] == ELFOSABI_HURD
+		   /* GNU/Linux is still using the default value 0.  */
+		   || elf_header.e_ident[EI_OSABI] == ELFOSABI_NONE)
+	    {
+	      if (type == STT_IFUNC)
+		return "IFUNC";
 	    }
 
 	  snprintf (buff, sizeof (buff), _("<OS specific>: %d"), type);

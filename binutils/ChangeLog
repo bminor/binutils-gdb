@@ -1,3 +1,14 @@
+2008-12-04  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (dump_reloc_set): Append "()" to symbol names which
+	have the BSF_INDIRECT_FUNCTION type.
+	* readelf.c (print_symbol): Fix handling of negative widths.
+	(dump_relocations): Append "()" to symbol names which have the
+	STT_IFUNC type. Display negative offsets as a positive number with
+	a "-" prefix.
+	(get_symbol_type): Return "IFUNC" for STT_IFUNC symbols.
+	* doc/binutils.texi: Document 'i' symbol type.
+
 2008-11-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* strings.c (main): New variable `s'.  Have string_min parsing
