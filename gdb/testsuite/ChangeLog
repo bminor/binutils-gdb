@@ -1,3 +1,7 @@
+2008-12-04  Doug Evans  <dje@google.com>
+
+	* gdb.server/ext-run.exp: Relax regexp for init program.
+
 2008-12-03  Tristan Gingold  <gingold@adacore.com>
 
 	* gdb.base/macscp.exp: Generate an object file during compilation
