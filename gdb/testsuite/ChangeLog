@@ -1,3 +1,8 @@
+2008-12-03  Tristan Gingold  <gingold@adacore.com>
+
+	* gdb.base/macscp.exp: Generate an object file during compilation
+	to work around Darwin dsymutil limitations.
+
 2008-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Test resolving external references to TLS variables.

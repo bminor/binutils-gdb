@@ -23,6 +23,7 @@ set bug_id 0
 
 set srcfile macscp1.c
 set testfile "macscp"
+set objfile "macscp.o"
 set binfile ${objdir}/${subdir}/${testfile}
 
 set options { debug }
@@ -32,7 +33,11 @@ if [test_compiler_info gcc*] {
     lappend options additional_flags=-g3
 }
 
-if  {[gdb_compile "${srcdir}/${subdir}/macscp1.c" "${binfile}" executable $options] != "" } {
+# Generate the intermediate object file.  This is required by Darwin to
+# have access to the .debug_macinfo section.
+if  {[gdb_compile "${srcdir}/${subdir}/macscp1.c" "${objfile}" \
+	  object $options] != "" 
+     || [gdb_compile "${objfile}" "${binfile}" executable $options] != "" } {
     untested macscp.exp
     return -1
 }
