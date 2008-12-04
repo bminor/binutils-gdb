@@ -1,3 +1,7 @@
+2008-12-04  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Type): Reword description of STT_IFUNC type.
+
 2008-12-03  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-elf.c (obj_elf_type): Add support for STT_IFUNC type.
