@@ -1,3 +1,8 @@
+2008-12-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+	
+	* elf64-s390.c (elf_s390_check_relocs): Initialize
+	htab->elf.dynobj if necessary.
+
 2008-12-03  Nick Clifton  <nickc@redhat.com>
 
 	* syms.c (struct bfd_symbol): Add new flag BSF_INDIRECT_FUNCTION.

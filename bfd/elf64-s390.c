@@ -1246,6 +1246,9 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		 this reloc.  */
 	      if (sreloc == NULL)
 		{
+		  if (htab->elf.dynobj == NULL)
+		    htab->elf.dynobj = abfd;
+
 		  sreloc = _bfd_elf_make_dynamic_reloc_section
 		    (sec, htab->elf.dynobj, 3, abfd, /*rela?*/ TRUE);
 
