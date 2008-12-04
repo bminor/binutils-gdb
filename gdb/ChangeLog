@@ -1,3 +1,7 @@
+2008-12-04  Doug Evans  <dje@google.com>
+
+	* infcall.c (call_function_by_hand): Clean up use of local dummy_addr.
+
 2008-12-02  Doug Evans  <dje@google.com>
 
 	* infrun.c (handle_inferior_event): Remove redundant resetting of
