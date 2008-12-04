@@ -1,5 +1,5 @@
 # Expect script for ld-x86_64 tests
-#   Copyright (C) 2002, 2005, 2006, 2007 Free Software Foundation
+#   Copyright (C) 2002, 2005, 2006, 2007, 2008 Free Software Foundation
 #
 # This file is part of the GNU Binutils.
 #
@@ -92,3 +92,4 @@ run_dump_test "hidden3"
 run_dump_test "protected1"
 run_dump_test "protected2"
 run_dump_test "protected3"
+run_dump_test "ifunc"
