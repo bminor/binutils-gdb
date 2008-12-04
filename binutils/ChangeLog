@@ -1,3 +1,8 @@
+2008-12-04  Ben Elliston  <bje@au.ibm.com>
+
+	* doc/binutils.texi (objdump): Update booke documentation.
+	* NEWS: Document user-visible changes to command line options.
+
 2008-12-04  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (dump_reloc_set): Append "()" to symbol names which

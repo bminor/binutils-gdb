@@ -1,3 +1,11 @@
+2008-12-04  Ben Elliston  <bje@au.ibm.com>
+
+	* config/tc-ppc.c (parse_cpu): Remove booke64 support. Update
+	usage strings.
+	(ppc_setup_opcodes): Likewise, remove booke64 support.
+	* doc/c-ppc.texi (PowerPC-Opts): Remove -mbooke32 and -mbooke64.
+	* doc/as.texinfo (Overview): Likewise.
+
 2008-12-04  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.texinfo (Type): Reword description of STT_IFUNC type.

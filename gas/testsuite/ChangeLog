@@ -1,3 +1,12 @@
+2008-12-04  Ben Elliston  <bje@au.ibm.com>
+
+	* gas/ppc/booke.s: Remove booke64 instructions.
+	* gas/ppc/booke.d: Update expected disassembly output.
+	* gas/ppc/booke_xcoff.s: Use -mbooke/-Mbooke.
+	* gas/ppc/booke_xcoff.d: Likewise.
+	* gas/ppc/booke_xcoff64.d: Likewise.
+	* gas/ppc/booke_xcoff64.s: Likewise.
+
 2008-12-03  Nick Clifton  <nickc@redhat.com>
 
 	* gas/elf/type.s: Add test of STT_IFUNC symbol type.
