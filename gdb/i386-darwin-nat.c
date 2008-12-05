@@ -34,6 +34,7 @@
 #include "i387-tdep.h"
 #include "gdbarch.h"
 #include "arch-utils.h"
+#include "gdbcore.h"
 
 #include "darwin-nat.h"
 #include "i386-darwin-tdep.h"
@@ -433,6 +434,70 @@ darwin_check_osabi (darwin_inferior *inf, thread_t thread)
 
 #define X86_EFLAGS_T 0x100UL
 
+/* Returning from a signal trampoline is done by calling a
+   special system call (sigreturn).  This system call
+   restores the registers that were saved when the signal was
+   raised, including %eflags/%rflags.  That means that single-stepping
+   won't work.  Instead, we'll have to modify the signal context
+   that's about to be restored, and set the trace flag there.  */
+
+static int
+i386_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
+{
+  static const gdb_byte darwin_syscall[] = { 0xcd, 0x80 }; /* int 0x80 */
+  gdb_byte buf[sizeof (darwin_syscall)];
+
+  /* Check if PC is at a sigreturn system call.  */
+  if (target_read_memory (regs->uts.ts32.__eip, buf, sizeof (buf)) == 0
+      && memcmp (buf, darwin_syscall, sizeof (darwin_syscall)) == 0
+      && regs->uts.ts32.__eax == 0xb8 /* SYS_sigreturn */)
+    {
+      ULONGEST uctx_addr;
+      ULONGEST mctx_addr;
+      ULONGEST flags_addr;
+      unsigned int eflags;
+
+      uctx_addr = read_memory_unsigned_integer (regs->uts.ts32.__esp + 4, 4);
+      mctx_addr = read_memory_unsigned_integer (uctx_addr + 28, 4);
+
+      flags_addr = mctx_addr + 12 + 9 * 4;
+      read_memory (flags_addr, (gdb_byte *) &eflags, 4);
+      eflags |= X86_EFLAGS_T;
+      write_memory (flags_addr, (gdb_byte *) &eflags, 4);
+
+      return 1;
+    }
+  return 0;
+}
+
+static int
+amd64_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
+{
+  static const gdb_byte darwin_syscall[] = { 0x0f, 0x05 }; /* syscall */
+  gdb_byte buf[sizeof (darwin_syscall)];
+
+  /* Check if PC is at a sigreturn system call.  */
+  if (target_read_memory (regs->uts.ts64.__rip, buf, sizeof (buf)) == 0
+      && memcmp (buf, darwin_syscall, sizeof (darwin_syscall)) == 0
+      && (regs->uts.ts64.__rax & 0xffffffff) == 0x20000b8 /* SYS_sigreturn */)
+    {
+      ULONGEST mctx_addr;
+      ULONGEST flags_addr;
+      unsigned int rflags;
+
+      mctx_addr = read_memory_unsigned_integer (regs->uts.ts64.__rdi + 48, 8);
+      flags_addr = mctx_addr + 16 + 17 * 8;
+
+      /* AMD64 is little endian.  */
+      read_memory (flags_addr, (gdb_byte *) &rflags, 4);
+      rflags |= X86_EFLAGS_T;
+      write_memory (flags_addr, (gdb_byte *) &rflags, 4);
+
+      return 1;
+    }
+  return 0;
+}
+
 void
 darwin_set_sstep (thread_t thread, int enable)
 {
@@ -448,12 +513,15 @@ darwin_set_sstep (thread_t thread, int enable)
 			 kret, thread);
       return;
     }
+
   switch (regs.tsh.flavor)
     {
     case x86_THREAD_STATE32:
       {
 	__uint32_t bit = enable ? X86_EFLAGS_T : 0;
 	
+	if (enable && i386_darwin_sstep_at_sigreturn (&regs))
+	  return;
 	if ((regs.uts.ts32.__eflags & X86_EFLAGS_T) == bit)
 	  return;
 	regs.uts.ts32.__eflags = (regs.uts.ts32.__eflags & ~X86_EFLAGS_T) | bit;
@@ -466,6 +534,8 @@ darwin_set_sstep (thread_t thread, int enable)
       {
 	__uint64_t bit = enable ? X86_EFLAGS_T : 0;
 
+	if (enable && amd64_darwin_sstep_at_sigreturn (&regs))
+	  return;
 	if ((regs.uts.ts64.__rflags & X86_EFLAGS_T) == bit)
 	  return;
 	regs.uts.ts64.__rflags = (regs.uts.ts64.__rflags & ~X86_EFLAGS_T) | bit;

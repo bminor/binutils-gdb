@@ -1,3 +1,10 @@
+2008-12-05  Tristan Gingold  <gingold@adacore.com>
+
+	* i386-darwin-nat.c (i386_darwin_sstep_at_sigreturn): New function.
+	(amd64_darwin_sstep_at_sigreturn): New function.
+	(darwin_set_sstep): The sigreturn is a special case: the trace flag
+	must be set in the mcontext structure.
+
 2008-12-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcmd.c (step_once): Remove dead code.
