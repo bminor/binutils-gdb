@@ -749,7 +749,7 @@ ia64_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
      the parameter value.  For L+X slot pair we are at the X slot (slot 2) so
      we should not touch the L slot - the upper 41 bits of the parameter.  */
   instr_fetched = slotN_contents (bundle, slotnum);
-  instr_fetched &= 0x1003ffffc0;
+  instr_fetched &= 0x1003ffffc0LL;
   replace_slotN_contents (bundle, instr_fetched, slotnum);
 
   *lenptr = BUNDLE_LEN - 2;

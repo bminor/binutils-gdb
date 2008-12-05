@@ -1,3 +1,8 @@
+2008-12-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compilation on 32-bit host configurations.
+	* ia64-tdep.c (ia64_breakpoint_from_pc): Suffix a constant by `LL'.
+
 2008-12-05  Tristan Gingold  <gingold@adacore.com>
 
 	* i386-darwin-nat.c (i386_darwin_sstep_at_sigreturn): New function.
