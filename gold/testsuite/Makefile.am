@@ -959,7 +959,7 @@ check_SCRIPTS += plugin_test_1.sh
 check_DATA += plugin_test_1.err
 MOSTLYCLEANFILES += plugin_test_1.err
 plugin_test_1: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so;_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms 2>plugin_test_1.err
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms 2>plugin_test_1.err
 plugin_test_1.err: plugin_test_1
 	@touch plugin_test_1.err
 

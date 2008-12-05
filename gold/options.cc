@@ -304,6 +304,15 @@ General_options::parse_plugin(const char*, const char* arg,
 {
   this->add_plugin(arg);
 }
+
+// Parse --plugin-opt.
+
+void
+General_options::parse_plugin_opt(const char*, const char* arg,
+                                  Command_line*)
+{
+  this->add_plugin_option(arg);
+}
 #endif // ENABLE_PLUGINS
 
 void
@@ -650,14 +659,24 @@ General_options::add_sysroot()
   free(canonical_sysroot);
 }
 
-// Add a plugin and its arguments to the list of plugins.
+// Add a plugin to the list of plugins.
 
 void
-General_options::add_plugin(const char* arg)
+General_options::add_plugin(const char* filename)
 {
   if (this->plugins_ == NULL)
     this->plugins_ = new Plugin_manager(*this);
-  this->plugins_->add_plugin(arg);
+  this->plugins_->add_plugin(filename);
+}
+
+// Add a plugin option to a plugin.
+
+void
+General_options::add_plugin_option(const char* arg)
+{
+  if (this->plugins_ == NULL)
+    gold_fatal("--plugin-opt requires --plugin.");
+  this->plugins_->add_plugin_option(arg);
 }
 
 // Set up variables and other state that isn't set up automatically by

@@ -85,31 +85,13 @@ void
 Plugin::load()
 {
 #ifdef ENABLE_PLUGINS
-  std::string filename;
-  std::vector<std::string> args;
-
-  // Parse the filename and arguments, each separated by commas.
-  // FIXME:  Temporarily allowing semicolon as an argument separator
-  // so args can be passed through gcc's -Wl,... option, which
-  // breaks arguments at the commas.
-  const char* p = this->args_;
-  int n = strcspn(p, ",;");
-  filename.assign(p, n);
-  p += n;
-  while (*p == ',' || *p == ';')
-    {
-      ++p;
-      n = strcspn(p, ",;");
-      args.push_back(std::string(p, n));
-      p += n;
-    }
-
   // Load the plugin library.
   // FIXME: Look for the library in standard locations.
-  this->handle_ = dlopen(filename.c_str(), RTLD_NOW);
+  this->handle_ = dlopen(this->filename_.c_str(), RTLD_NOW);
   if (this->handle_ == NULL)
     {
-      gold_error(_("%s: could not load plugin library"), filename.c_str());
+      gold_error(_("%s: could not load plugin library"),
+                 this->filename_.c_str());
       return;
     }
 
@@ -118,7 +100,8 @@ Plugin::load()
     (dlsym(this->handle_, "onload"));
   if (onload == NULL)
     {
-      gold_error(_("%s: could not find onload entry point"), filename.c_str());
+      gold_error(_("%s: could not find onload entry point"),
+                 this->filename_.c_str());
       return;
     }
 
@@ -130,7 +113,7 @@ Plugin::load()
 
   // Allocate and populate a transfer vector.
   const int tv_fixed_size = 11;
-  int tv_size = args.size() + tv_fixed_size;
+  int tv_size = this->args_.size() + tv_fixed_size;
   ld_plugin_tv *tv = new ld_plugin_tv[tv_size];
 
   int i = 0;
@@ -150,11 +133,11 @@ Plugin::load()
   else
     tv[i].tv_u.tv_val = LDPO_EXEC;
 
-  for (unsigned int j = 0; j < args.size(); ++j)
+  for (unsigned int j = 0; j < this->args_.size(); ++j)
     {
       ++i;
       tv[i].tv_tag = LDPT_OPTION;
-      tv[i].tv_u.tv_string = args[j].c_str();
+      tv[i].tv_u.tv_string = this->args_[j].c_str();
     }
 
   ++i;

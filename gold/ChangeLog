@@ -1,3 +1,20 @@
+2008-12-05  Rafael Avila de Espindola  <espindola@google.com>
+
+	* options.cc (General_options::parse_plugin_opt): New.
+	(General_options::add_plugin): The argument now is just the filename.
+	(General_options::add_plugin_option): New.
+	* options.h (plugin_opt): New.
+	(add_plugin): Change argument name.
+	(add_plugin_option): New.
+	* plugin.cc (Plugin::load): Don't parse the plugin option.
+	* plugin.h (Plugin::Plugin): Rename argument. Init filename_.
+	(Plugin::add_option): New.
+	(Plugin::args_): Change type.
+	(Plugin::filename_): New.
+	(Plugin_manager::add_plugin_option): New.
+	* testsuite/Makefile.am (plugin_test_1): Use new syntax.
+	* testsuite/Makefile.in: Regenerate.
+
 2008-12-05  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (Layout::include_section): Check for SHF_EXCLUDE.

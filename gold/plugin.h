@@ -48,9 +48,10 @@ class Pluginobj;
 class Plugin
 {
  public:
-  Plugin(const char* args)
+  Plugin(const char* filename)
     : handle_(NULL),
-      args_(args),
+      filename_(filename),
+      args_(),
       claim_file_handler_(NULL),
       all_symbols_read_handler_(NULL),
       cleanup_handler_(NULL)      
@@ -90,6 +91,13 @@ class Plugin
   set_cleanup_handler(ld_plugin_cleanup_handler handler)
   { this->cleanup_handler_ = handler; }
 
+  // Add an argument
+  void
+  add_option(const char *arg)
+  {
+    this->args_.push_back(arg);
+  }
+
  private:
   Plugin(const Plugin&);
   Plugin& operator=(const Plugin&);
@@ -97,7 +105,9 @@ class Plugin
   // The shared library handle returned by dlopen.
   void* handle_;
   // The argument string given to --plugin.
-  const char* args_;
+  std::string filename_;
+  // The list of argument string given to --plugin-opt.
+  std::vector<std::string> args_;
   // The plugin's event handlers.
   ld_plugin_claim_file_handler claim_file_handler_;
   ld_plugin_all_symbols_read_handler all_symbols_read_handler_;
@@ -119,8 +129,16 @@ class Plugin_manager
 
   // Add a plugin library.
   void
-  add_plugin(const char* args)
-  { this->plugins_.push_back(new Plugin(args)); }
+  add_plugin(const char* filename)
+  { this->plugins_.push_back(new Plugin(filename)); }
+
+  // Add an argument to the current plugin.
+  void
+  add_plugin_option(const char* opt)
+  {
+    Plugin* last = this->plugins_.back();
+    last->add_option(opt);
+  }
 
   // Load all plugin libraries.
   void

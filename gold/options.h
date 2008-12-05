@@ -704,7 +704,9 @@ class General_options
 
 #ifdef ENABLE_PLUGINS
   DEFINE_special(plugin, options::TWO_DASHES, '\0',
-                 N_("Load a plugin library"), N_("PLUGIN[,ARG,...]"));
+                 N_("Load a plugin library"), N_("PLUGIN"));
+  DEFINE_special(plugin_opt, options::TWO_DASHES, '\0',
+                 N_("Pass an option to the plugin"), N_("OPTION"));
 #endif
 
   DEFINE_bool(preread_archive_symbols, options::TWO_DASHES, '\0', false,
@@ -991,7 +993,11 @@ class General_options
 
   // Add a plugin and its arguments to the list of plugins.
   void
-  add_plugin(const char* arg);
+  add_plugin(const char *filename);
+
+  // Add a plugin option.
+  void
+  add_plugin_option(const char* opt);
 
   // Whether to mark the stack as executable.
   Execstack execstack_status_;
