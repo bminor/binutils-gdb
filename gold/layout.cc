@@ -206,6 +206,9 @@ bool
 Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
 			const elfcpp::Shdr<size, big_endian>& shdr)
 {
+  if (shdr.get_sh_flags() & elfcpp::SHF_EXCLUDE)
+    return false;
+
   switch (shdr.get_sh_type())
     {
     case elfcpp::SHT_NULL:
@@ -256,6 +259,14 @@ Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
               && !is_gdb_debug_section(name))
 	    return false;
 	}
+      if (parameters->options().strip_lto_sections()
+          && !parameters->options().relocatable()
+          && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
+        {
+          // Ignore LTO sections containing intermediate code.
+          if (is_prefix_of(".gnu.lto_", name))
+            return false;
+        }
       return true;
 
     default:

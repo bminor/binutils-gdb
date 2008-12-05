@@ -748,6 +748,8 @@ class General_options
   DEFINE_bool(strip_debug_gdb, options::TWO_DASHES, '\0', false,
               N_("Strip debug symbols that are unused by gdb "
                  "(at least versions <= 6.7)"), NULL);
+  DEFINE_bool(strip_lto_sections, options::TWO_DASHES, '\0', true,
+              N_("Strip LTO intermediate code sections"), NULL);
 
   DEFINE_bool(shared, options::ONE_DASH, '\0', false,
               N_("Generate shared library"), NULL);

@@ -1,3 +1,9 @@
+2008-12-05  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (Layout::include_section): Check for SHF_EXCLUDE.
+	Handle --strip-lto-sections option.
+	* options.h (strip_lto_sections): New option.
+
 2008-12-01  Cary Coutant  <ccoutant@google.com>
 
 	* plugin.cc (ld_plugin_message): Change format parameter to const.
