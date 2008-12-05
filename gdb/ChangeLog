@@ -1,3 +1,7 @@
+2008-12-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (step_once): Remove dead code.
+
 2008-12-04  Doug Evans  <dje@google.com>
 
 	* infcall.c (call_function_by_hand): Clean up use of local dummy_addr.

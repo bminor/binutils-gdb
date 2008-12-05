@@ -928,8 +928,6 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
       clear_proceed_status ();
 
       frame = get_current_frame ();
-      if (!frame)		/* Avoid coredump here.  Why tho? */
-	error (_("No current frame"));
       tp->step_frame_id = get_frame_id (frame);
 
       if (!single_inst)
