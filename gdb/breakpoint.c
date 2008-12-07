@@ -6811,7 +6811,7 @@ breakpoint_auto_delete (bpstat bs)
   }
 }
 
-/* If SHOULD_INSERT is true, do not insert any breakpoint locations
+/* If SHOULD_INSERT is false, do not insert any breakpoint locations
    into the inferior, only remove already-inserted locations that no
    longer should be inserted.  Functions that delete a breakpoint or
    breakpoints should pass false, so that deleting a breakpoint
