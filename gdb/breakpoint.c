@@ -181,8 +181,7 @@ static int single_step_breakpoint_inserted_here_p (CORE_ADDR pc);
 
 static void free_bp_location (struct bp_location *loc);
 
-static struct bp_location *
-allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type);
+static struct bp_location *allocate_bp_location (struct breakpoint *bpt);
 
 static void update_global_location_list (int);
 
@@ -924,7 +923,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
 		  else if (b->type == bp_access_watchpoint)
 		    type = hw_access;
 		  
-		  loc = allocate_bp_location (b, bp_hardware_watchpoint);
+		  loc = allocate_bp_location (b);
 		  for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
 		    ;
 		  *tmp = loc;
@@ -4013,7 +4012,7 @@ adjust_breakpoint_address (CORE_ADDR bpaddr, enum bptype bptype)
 /* Allocate a struct bp_location.  */
 
 static struct bp_location *
-allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
+allocate_bp_location (struct breakpoint *bpt)
 {
   struct bp_location *loc, *loc_p;
 
@@ -4025,7 +4024,7 @@ allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
   loc->shlib_disabled = 0;
   loc->enabled = 1;
 
-  switch (bp_type)
+  switch (bpt->type)
     {
     case bp_breakpoint:
     case bp_until:
@@ -4153,9 +4152,9 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
      breakpoint may cause target_read_memory() to be called and we do
      not want its scan of the location chain to find a breakpoint and
      location that's only been partially initialized.  */
-  adjusted_address = adjust_breakpoint_address (sal.pc, bptype);
+  adjusted_address = adjust_breakpoint_address (sal.pc, b->type);
 
-  b->loc = allocate_bp_location (b, bptype);
+  b->loc = allocate_bp_location (b);
   b->loc->requested_address = sal.pc;
   b->loc->address = adjusted_address;
 
@@ -4981,18 +4980,17 @@ mention (struct breakpoint *b)
 
 
 static struct bp_location *
-add_location_to_breakpoint (struct breakpoint *b, enum bptype bptype,
+add_location_to_breakpoint (struct breakpoint *b,
 			    const struct symtab_and_line *sal)
 {
   struct bp_location *loc, **tmp;
 
-  loc = allocate_bp_location (b, bptype);
+  loc = allocate_bp_location (b);
   for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
     ;
   *tmp = loc;
   loc->requested_address = sal->pc;
-  loc->address = adjust_breakpoint_address (loc->requested_address,
-					    bptype);
+  loc->address = adjust_breakpoint_address (loc->requested_address, b->type);
   loc->section = sal->section;
 
   set_breakpoint_location_function (loc);
@@ -5090,7 +5088,7 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
 	}
       else
 	{
-	  loc = add_location_to_breakpoint (b, type, &sal);
+	  loc = add_location_to_breakpoint (b, &sal);
 	}
 
       if (bp_loc_is_permanent (loc))
@@ -7226,7 +7224,7 @@ update_breakpoint_locations (struct breakpoint *b,
   for (i = 0; i < sals.nelts; ++i)
     {
       struct bp_location *new_loc = 
-	add_location_to_breakpoint (b, b->type, &(sals.sals[i]));
+	add_location_to_breakpoint (b, &(sals.sals[i]));
 
       /* Reparse conditions, they might contain references to the
 	 old symtab.  */

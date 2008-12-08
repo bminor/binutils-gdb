@@ -1,3 +1,12 @@
+2008-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix loc_type of `bp_location's created by update_watchpoint.
+	* breakpoint.c (allocate_bp_location): Remove the bp_type parameter.
+	Replace bp_type by bpt->type.  Update prototype.  All callers updated.
+	(add_location_to_breakpoint):  Remove the bp_type parameter.
+	Replace bp_type by b->type.  All callers updated.
+	(set_breakpoint_location_function): Replace bptype by b->type.
+
 2008-12-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (update_global_location_list): Fix the comment.
