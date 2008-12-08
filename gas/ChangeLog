@@ -1,3 +1,8 @@
+2008-12-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_modrm_byte): Remove an extra blank
+	line.
+
 2008-12-04  Ben Elliston  <bje@au.ibm.com>
 
 	* config/tc-ppc.c (parse_cpu): Remove booke64 support. Update

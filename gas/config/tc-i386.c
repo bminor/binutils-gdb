@@ -5198,7 +5198,6 @@ build_modrm_byte (void)
       assert (operand_type_equal (&i.tm.operand_types[nds], &regxmm)
 	      || operand_type_equal (&i.tm.operand_types[nds], &regymm));
       i.vex.register_specifier = i.op[nds].regs;
-
     }
   else
     source = dest = 0;
