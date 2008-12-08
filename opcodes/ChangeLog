@@ -1,5 +1,9 @@
 2008-12-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (opcode_modifiers): Move VexNDS before VexNDD.
+
+2008-12-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (putop): Remove strayed comments.
 
 2008-12-04  Ben Elliston  <bje@au.ibm.com>
