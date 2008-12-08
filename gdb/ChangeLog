@@ -1,3 +1,8 @@
+2008-12-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* python/python-value.c (values_in_python): Add specific initialization
+	to NULL to work-around a MacOS linker bug.
+
 2008-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix loc_type of `bp_location's created by update_watchpoint.
