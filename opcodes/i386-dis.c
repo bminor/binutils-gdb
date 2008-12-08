@@ -11163,7 +11163,6 @@ case_Q:
 		}
 	    }
 	  break;
-	  /* implicit operand size 'l' for i386 or 'q' for x86-64 */
 	case 'W':
 	  /* operand size flag for cwtl, cbtw */
 	  USED_REX (REX_W);
