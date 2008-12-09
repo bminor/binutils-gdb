@@ -1,6 +1,6 @@
 /* srconv.c -- Sysroff conversion program
    Copyright 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2007 Free Software Foundation, Inc.
+   2005, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -415,7 +415,7 @@ wr_hd (struct coff_ofile *p)
       abort ();
     }
 
-  if (! bfd_get_file_flags(abfd) & EXEC_P)
+  if (! (bfd_get_file_flags(abfd) & EXEC_P))
     {
       hd.ep = 0;
     }

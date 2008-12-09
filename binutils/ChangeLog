@@ -1,3 +1,7 @@
+2008-12-09  Tom Tromey  <tromey@redhat.com>
+
+	* srconv.c (wr_hd): Add parens to placate gcc 4.4.
+
 2008-12-09  Andrew Stubbs  <ams@codesourcery.com>
 
 	* readelf.c (arm_attr_tag_CPU_arch): Add "v6-M" and "v6S-M".

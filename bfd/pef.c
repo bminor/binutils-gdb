@@ -97,7 +97,7 @@ bfd_pef_parse_traceback_table (bfd *abfd,
   if (! (table.flags2 & TB_NAME_PRESENT))
     return -1;
 
-  if (! table.flags1 & TB_HAS_TBOFF)
+  if (! (table.flags1 & TB_HAS_TBOFF))
     return -1;
 
   offset = 8;

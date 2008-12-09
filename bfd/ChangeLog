@@ -1,3 +1,8 @@
+2008-12-09  Tom Tromey  <tromey@redhat.com>
+
+	* pef.c (bfd_pef_parse_traceback_table): Add parens to placate gcc
+	4.4.
+
 2008-12-09  Tristan Gingold  <gingold@adacore.com>
 
 	* cpu-avr.c (compatible): Makes avr-6 compatible only with itself.
