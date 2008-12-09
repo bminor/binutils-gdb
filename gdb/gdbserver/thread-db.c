@@ -280,7 +280,6 @@ find_one_thread (int lwpid)
     return 0;
 
   process->thread_known = 1;
-  process->tid = ti.ti_tid;
   process->th = th;
 
   return 1;
@@ -313,7 +312,6 @@ maybe_attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
 
   process = inferior_target_data (inferior);
 
-  process->tid = ti_p->ti_tid;
   process->thread_known = 1;
   process->th = *th_p;
 

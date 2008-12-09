@@ -1,3 +1,9 @@
+2008-12-09  Doug Evans  <dje@google.com>
+
+	* linux-low.h (struct process_info): Delete member tid, unused.
+	* thread-db.c (find_one_thread): Update.
+	(maybe_attach_thread): Update.
+
 2008-12-02  Pedro Alves  <pedro@codesourcery.com>
 
         * target.h (struct target_ops): Add qxfer_osdata member.
