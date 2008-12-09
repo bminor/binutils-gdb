@@ -1,3 +1,7 @@
+2008-12-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote.c (remote_parse_stop_reply): Use REG only after its NULL check.
+
 2008-12-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* python/python-value.c (values_in_python): Add specific initialization

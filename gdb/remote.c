@@ -4305,8 +4305,6 @@ Packet: '%s'\n"),
 		struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
 		cached_reg_t cached_reg;
 
-		cached_reg.num = reg->regnum;
-
 		p = p1;
 
 		if (*p != ':')
@@ -4319,6 +4317,8 @@ Packet: '%s'\n"),
 		  error (_("Remote sent bad register number %s: %s\n\
 Packet: '%s'\n"),
 			 phex_nz (pnum, 0), p, buf);
+
+		cached_reg.num = reg->regnum;
 
 		fieldsize = hex2bin (p, cached_reg.data,
 				     register_size (target_gdbarch,
