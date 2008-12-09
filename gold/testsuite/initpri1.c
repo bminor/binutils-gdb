@@ -30,9 +30,9 @@
 int i;
 int j;
 
-void c1() __attribute__((constructor (500)));
-void c2() __attribute__((constructor (700)));
-void c3() __attribute__((constructor (600)));
+void c1(void) __attribute__((constructor (500)));
+void c2(void) __attribute__((constructor (700)));
+void c3(void) __attribute__((constructor (600)));
 
 void c1() {
   if (i++ != 0)
@@ -49,9 +49,9 @@ void c3() {
     abort ();
 }
 
-void d1() __attribute__((destructor (500)));
-void d2() __attribute__((destructor (700)));
-void d3() __attribute__((destructor (600)));
+void d1(void) __attribute__((destructor (500)));
+void d2(void) __attribute__((destructor (700)));
+void d3(void) __attribute__((destructor (600)));
 
 void d1() {
   if (--i != 0)
@@ -70,7 +70,7 @@ void d3() {
     abort ();
 }
 
-void cd4() __attribute__((constructor (800), destructor (800)));
+void cd4(void) __attribute__((constructor (800), destructor (800)));
 
 void cd4() {
   if (i != 3)
@@ -78,7 +78,7 @@ void cd4() {
   ++j;
 }
 
-void cd5() __attribute__((constructor, destructor));
+void cd5(void) __attribute__((constructor, destructor));
 
 void cd5() {
   if (i != 3)
@@ -86,7 +86,7 @@ void cd5() {
   ++j;
 }
 
-int main () {
+int main (void) {
   if (i != 3)
     return 1;
   if (j != 2)
