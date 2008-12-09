@@ -38,7 +38,13 @@ compatible (const bfd_arch_info_type * a,
   if (a->mach == b->mach)
     return a;
 
-  if (a->mach <= bfd_mach_avr6 && b->mach <= bfd_mach_avr6)
+  /* avr-6 is compatible only with itself as its call convention is not
+     compatible with other avr (the mcu saves the return address on 3 bytes
+     instead of 2).  */
+  if (a->mach == bfd_mach_avr6 || b->mach == bfd_mach_avr6)
+    return NULL;
+
+  if (a->mach < bfd_mach_avr6 && b->mach < bfd_mach_avr6)
     {
       /* Special case for ATmega[16]03 (avr:3) and ATmega83 (avr:4).  */
       if ((a->mach == bfd_mach_avr3 && b->mach == bfd_mach_avr4)

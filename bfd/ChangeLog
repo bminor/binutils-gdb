@@ -1,3 +1,7 @@
+2008-12-09  Tristan Gingold  <gingold@adacore.com>
+
+	* cpu-avr.c (compatible): Makes avr-6 compatible only with itself.
+
 2008-12-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 	
 	* elf64-s390.c (elf_s390_check_relocs): Initialize
