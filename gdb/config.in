@@ -175,6 +175,9 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define if your <locale.h> file defines LC_MESSAGES. */
+#undef HAVE_LC_MESSAGES
+
 /* Define to 1 if you have the `dl' library (-ldl). */
 #undef HAVE_LIBDL
 
@@ -207,6 +210,9 @@
 
 /* Define to 1 if you have the <link.h> header file. */
 #undef HAVE_LINK_H
+
+/* Define to 1 if you have the <locale.h> header file. */
+#undef HAVE_LOCALE_H
 
 /* Define to 1 if the compiler supports long double. */
 #undef HAVE_LONG_DOUBLE
@@ -324,6 +330,9 @@
 
 /* Define to 1 if you have the `sbrk' function. */
 #undef HAVE_SBRK
+
+/* Define to 1 if you have the `setlocale' function. */
+#undef HAVE_SETLOCALE
 
 /* Define to 1 if you have the `setpgid' function. */
 #undef HAVE_SETPGID

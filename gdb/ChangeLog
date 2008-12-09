@@ -1,3 +1,10 @@
+2008-12-09  Tom Tromey  <tromey@redhat.com>
+
+	* config.in, configure: Rebuild.
+	* configure.ac: Check for locale.h, setlocale.  Call
+	AM_LC_MESSAGES.
+	* acinclude.m4: Include lcmessage.m4.
+
 2008-12-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* remote.c (remote_parse_stop_reply): Use REG only after its NULL check.

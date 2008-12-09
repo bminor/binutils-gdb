@@ -696,7 +696,7 @@ AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
 		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
 		  sys/types.h sys/wait.h wait.h termios.h termio.h \
-		  sgtty.h unistd.h elf_hp.h ctype.h time.h])
+		  sgtty.h unistd.h elf_hp.h ctype.h time.h locale.h])
 AC_CHECK_HEADERS(link.h, [], [],
 [#if HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -740,6 +740,7 @@ AC_CHECK_HEADERS(term.h, [], [],
 
 AC_CHECK_DECLS([free, malloc, realloc, strerror, strstr, getopt,
                 snprintf, vsnprintf])
+AM_LC_MESSAGES
 
 # ----------------------- #
 # Checks for structures.  #
@@ -775,7 +776,7 @@ AC_FUNC_VFORK
 AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid \
                 getgid poll pread64 sbrk setpgid setpgrp setsid \
 		sigaction sigprocmask sigsetmask socketpair syscall \
-		ttrace wborder])
+		ttrace wborder setlocale])
 
 # Check the return and argument types of ptrace.  No canned test for
 # this, so roll our own.
