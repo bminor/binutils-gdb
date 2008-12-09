@@ -1,3 +1,26 @@
+2008-12-09  Andrew Stubbs  <ams@codesourcery.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch): Add "v6-M" and "v6S-M".
+	(arm_attr_tag_WMMX_arch): Add "WMMXv2".
+	(arm_attr_tag_NEON_arch): Rename to ...
+	(arm_attr_tag_Advanced_SIMD_arch): ... official name.
+	(arm_attr_tag_ABI_PCS_config): Rename to ...
+	(arm_attr_tag_PCS_config): ... official name.
+	(arm_attr_tag_ABI_PCS_RO_DATA): Rename to ...
+	(arm_attr_tag_ABI_PCS_RO_data): ... official name.
+	(arm_attr_tag_ABI_FP_denormal): Add "Sign only".
+	(arm_attr_tag_CPU_unaligned_access): New array.
+	(arm_attr_tag_T2EE_use): New array.
+	(arm_attr_tag_Virtualization_use): New array.
+	(arm_attr_tag_MPextension_use): New array.
+	(arm_attr_publ): NEON_arch -> Advanced_SIMD_arch.
+	ABI_PCS_config -> PCS_config.
+	ABI_PCS_RO_DATA -> ABI_PCS_RO_data.
+	Add CPU_unaligned_access, nodefaults, also_compatible_with,
+	T2EE_use, conformance, Virtualization_use and MPextension_use.
+	(display_arm_attribute): Handle Tag_nodefaults and
+	Tag_also_compatible_with.
+
 2008-12-04  Ben Elliston  <bje@au.ibm.com>
 
 	* doc/binutils.texi (objdump): Update booke documentation.

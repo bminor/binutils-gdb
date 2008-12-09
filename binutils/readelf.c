@@ -8794,29 +8794,30 @@ typedef struct
 
 static const char *arm_attr_tag_CPU_arch[] =
   {"Pre-v4", "v4", "v4T", "v5T", "v5TE", "v5TEJ", "v6", "v6KZ", "v6T2",
-   "v6K", "v7"};
+   "v6K", "v7", "v6-M", "v6S-M"};
 static const char *arm_attr_tag_ARM_ISA_use[] = {"No", "Yes"};
 static const char *arm_attr_tag_THUMB_ISA_use[] =
   {"No", "Thumb-1", "Thumb-2"};
 static const char *arm_attr_tag_VFP_arch[] =
   {"No", "VFPv1", "VFPv2", "VFPv3", "VFPv3-D16"};
-static const char *arm_attr_tag_WMMX_arch[] = {"No", "WMMXv1"};
-static const char *arm_attr_tag_NEON_arch[] = {"No", "NEONv1"};
-static const char *arm_attr_tag_ABI_PCS_config[] =
+static const char *arm_attr_tag_WMMX_arch[] = {"No", "WMMXv1", "WMMXv2"};
+static const char *arm_attr_tag_Advanced_SIMD_arch[] = {"No", "NEONv1"};
+static const char *arm_attr_tag_PCS_config[] =
   {"None", "Bare platform", "Linux application", "Linux DSO", "PalmOS 2004",
    "PalmOS (reserved)", "SymbianOS 2004", "SymbianOS (reserved)"};
 static const char *arm_attr_tag_ABI_PCS_R9_use[] =
   {"V6", "SB", "TLS", "Unused"};
 static const char *arm_attr_tag_ABI_PCS_RW_data[] =
   {"Absolute", "PC-relative", "SB-relative", "None"};
-static const char *arm_attr_tag_ABI_PCS_RO_DATA[] =
+static const char *arm_attr_tag_ABI_PCS_RO_data[] =
   {"Absolute", "PC-relative", "None"};
 static const char *arm_attr_tag_ABI_PCS_GOT_use[] =
   {"None", "direct", "GOT-indirect"};
 static const char *arm_attr_tag_ABI_PCS_wchar_t[] =
   {"None", "??? 1", "2", "??? 3", "4"};
 static const char *arm_attr_tag_ABI_FP_rounding[] = {"Unused", "Needed"};
-static const char *arm_attr_tag_ABI_FP_denormal[] = {"Unused", "Needed"};
+static const char *arm_attr_tag_ABI_FP_denormal[] =
+  {"Unused", "Needed", "Sign only"};
 static const char *arm_attr_tag_ABI_FP_exceptions[] = {"Unused", "Needed"};
 static const char *arm_attr_tag_ABI_FP_user_exceptions[] = {"Unused", "Needed"};
 static const char *arm_attr_tag_ABI_FP_number_model[] =
@@ -8838,10 +8839,15 @@ static const char *arm_attr_tag_ABI_optimization_goals[] =
 static const char *arm_attr_tag_ABI_FP_optimization_goals[] =
   {"None", "Prefer Speed", "Aggressive Speed", "Prefer Size",
     "Aggressive Size", "Prefer Accuracy", "Aggressive Accuracy"};
+static const char *arm_attr_tag_CPU_unaligned_access[] = {"None", "v6"};
 static const char *arm_attr_tag_VFP_HP_extension[] =
   {"Not Allowed", "Allowed"};
 static const char *arm_attr_tag_ABI_FP_16bit_format[] =
   {"None", "IEEE 754", "Alternative Format"};
+static const char *arm_attr_tag_T2EE_use[] = {"Not Allowed", "Allowed"};
+static const char *arm_attr_tag_Virtualization_use[] =
+  {"Not Allowed", "Allowed"};
+static const char *arm_attr_tag_MPextension_use[] = {"Not Allowed", "Allowed"};
 
 #define LOOKUP(id, name) \
   {id, #name, 0x80 | ARRAY_SIZE(arm_attr_tag_##name), arm_attr_tag_##name}
@@ -8855,11 +8861,11 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   LOOKUP(9, THUMB_ISA_use),
   LOOKUP(10, VFP_arch),
   LOOKUP(11, WMMX_arch),
-  LOOKUP(12, NEON_arch),
-  LOOKUP(13, ABI_PCS_config),
+  LOOKUP(12, Advanced_SIMD_arch),
+  LOOKUP(13, PCS_config),
   LOOKUP(14, ABI_PCS_R9_use),
   LOOKUP(15, ABI_PCS_RW_data),
-  LOOKUP(16, ABI_PCS_RO_DATA),
+  LOOKUP(16, ABI_PCS_RO_data),
   LOOKUP(17, ABI_PCS_GOT_use),
   LOOKUP(18, ABI_PCS_wchar_t),
   LOOKUP(19, ABI_FP_rounding),
@@ -8876,8 +8882,15 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   LOOKUP(30, ABI_optimization_goals),
   LOOKUP(31, ABI_FP_optimization_goals),
   {32, "compatibility", 0, NULL},
+  LOOKUP(34, CPU_unaligned_access),
   LOOKUP(36, VFP_HP_extension),
   LOOKUP(38, ABI_FP_16bit_format),
+  {64, "nodefaults", 0, NULL},
+  {65, "also_compatible_with", 0, NULL},
+  LOOKUP(66, T2EE_use),
+  {67, "conformance", 1, NULL},
+  LOOKUP(68, Virtualization_use),
+  LOOKUP(70, MPextension_use)
 };
 #undef LOOKUP
 
@@ -8955,6 +8968,28 @@ display_arm_attribute (unsigned char *p)
 	      p += len;
 	      printf ("flag = %d, vendor = %s\n", val, p);
 	      p += strlen((char *)p) + 1;
+	      break;
+
+	    case 64: /* Tag_nodefaults.  */
+	      p++;
+	      printf ("True\n");
+	      break;
+
+	    case 65: /* Tag_also_compatible_with.  */
+	      val = read_uleb128 (p, &len);
+	      p += len;
+	      if (val == 6 /* Tag_CPU_arch.  */)
+		{
+		  val = read_uleb128 (p, &len);
+		  p += len;
+		  if ((unsigned int)val >= ARRAY_SIZE(arm_attr_tag_CPU_arch))
+		    printf ("??? (%d)\n", val);
+		  else
+		    printf ("%s\n", arm_attr_tag_CPU_arch[val]);
+		}
+	      else
+		printf ("???\n");
+	      while (*(p++) != '\0' /* NUL terminator.  */);
 	      break;
 
 	    default:
