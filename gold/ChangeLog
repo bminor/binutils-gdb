@@ -1,5 +1,8 @@
 2008-12-09  Ian Lance Taylor  <iant@google.com>
 
+	PR 7088
+	* yyscript.y (file_cmd): Handle INPUT.
+
 	* testsuite/initpri1.c: Change all declarations to be full
 	prototypes by adding void, to avoid compiler warnings.
 
