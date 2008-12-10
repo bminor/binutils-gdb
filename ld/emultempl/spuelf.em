@@ -26,31 +26,23 @@ fragment <<EOF
 #include "ldctor.h"
 #include "elf32-spu.h"
 
-/* Non-zero if no overlay processing should be done.  */
-static int no_overlays = 0;
+static void spu_place_special_section (asection *, asection *, const char *);
+static bfd_size_type spu_elf_load_ovl_mgr (void);
+static FILE *spu_elf_open_overlay_script (void);
+static void spu_elf_relink (void);
 
-/* Non-zero if we want stubs on all calls out of overlay regions.  */
-static int non_overlay_stubs = 0;
-
-/* Whether to emit symbols for stubs.  */
-static int emit_stub_syms = 0;
-
-/* Non-zero to perform stack space analysis.  */
-static int stack_analysis = 0;
-
-/* Whether to emit symbols with stack requirements for each function.  */
-static int emit_stack_syms = 0;
-
-/* Range of valid addresses for loadable sections.  */
-static bfd_vma local_store_lo = 0;
-static bfd_vma local_store_hi = 0x3ffff;
-
-/* Control --auto-overlay feature.  */
-static int auto_overlay = 0;
+static struct spu_elf_params params =
+{
+  &spu_place_special_section,
+  &spu_elf_load_ovl_mgr,
+  &spu_elf_open_overlay_script,
+  &spu_elf_relink,
+  0, ovly_normal, 0, 0, 0, 0,
+  0, 0x3ffff,
+  0, 0, 2000
+};
+  
 static char *auto_overlay_file = 0;
-static unsigned int auto_overlay_fixed = 0;
-static unsigned int auto_overlay_reserved = 0;
-static int extra_stack_space = 2000;
 int my_argc;
 char **my_argv;
 
@@ -86,12 +78,19 @@ is_spu_target (void)
 static void
 spu_after_open (void)
 {
-  if (is_spu_target ()
-      && !link_info.relocatable
-      && link_info.input_bfds != NULL
-      && !spu_elf_create_sections (&link_info,
-				   stack_analysis, emit_stack_syms))
-    einfo ("%X%P: can not create note section: %E\n");
+  if (is_spu_target ())
+    {
+      /* Pass params to backend.  */
+      if ((params.auto_overlay & AUTO_OVERLAY) == 0)
+	params.auto_overlay = 0;
+      params.emit_stub_syms |= link_info.emitrelocations;
+      spu_elf_setup (&link_info, &params);
+
+      if (!link_info.relocatable
+	  && link_info.input_bfds != NULL
+	  && !spu_elf_create_sections (&link_info))
+	einfo ("%X%P: can not create note section: %E\n");
+    }
 
   gld${EMULATION_NAME}_after_open ();
 }
@@ -112,7 +111,9 @@ spu_place_special_section (asection *s, asection *o, const char *output_name)
 {
   lang_output_section_statement_type *os;
 
-  os = lang_output_section_find (o != NULL ? o->name : output_name);
+  if (o != NULL)
+    output_name = o->name;
+  os = lang_output_section_find (output_name);
   if (os == NULL)
     gld${EMULATION_NAME}_place_orphan (s, output_name, 0);
   else if (o != NULL && os->children.head != NULL)
@@ -130,13 +131,13 @@ spu_place_special_section (asection *s, asection *o, const char *output_name)
   s->output_section->size += s->size;
 }
 
-/* Load built-in overlay manager, and tweak overlay section alignment.  */
+/* Load built-in overlay manager.  */
 
-static void
+static bfd_size_type
 spu_elf_load_ovl_mgr (void)
 {
-  lang_output_section_statement_type *os;
   struct elf_link_hash_entry *h;
+  bfd_size_type total = 0;
 
   h = elf_link_hash_lookup (elf_hash_table (&link_info),
 			    "__ovly_load", FALSE, FALSE, FALSE);
@@ -171,24 +172,13 @@ spu_elf_load_ovl_mgr (void)
 	  for (in = ovl_is->the_bfd->sections; in != NULL; in = in->next)
 	    if ((in->flags & (SEC_ALLOC | SEC_LOAD))
 		== (SEC_ALLOC | SEC_LOAD))
-	      spu_place_special_section (in, NULL, ".text");
+	      {
+		total += in->size;
+		spu_place_special_section (in, NULL, ".text");
+	      }
 	}
     }
-
-  /* Ensure alignment of overlay sections is sufficient.  */
-  for (os = &lang_output_section_statement.head->output_section_statement;
-       os != NULL;
-       os = os->next)
-    if (os->bfd_section != NULL
-	&& spu_elf_section_data (os->bfd_section) != NULL
-	&& spu_elf_section_data (os->bfd_section)->u.o.ovl_index != 0)
-      {
-	if (os->bfd_section->alignment_power < 4)
-	  os->bfd_section->alignment_power = 4;
-
-	/* Also ensure size rounds up.  */
-	os->block_value = 16;
-      }
+  return total;
 }
 
 /* Go find if we need to do anything special for overlays.  */
@@ -198,7 +188,7 @@ spu_before_allocation (void)
 {
   if (is_spu_target ()
       && !link_info.relocatable
-      && !no_overlays)
+      && params.ovly_flavour != ovly_none)
     {
       /* Size the sections.  This is premature, but we need to know the
 	 rough layout so that overlays can be found.  */
@@ -210,16 +200,30 @@ spu_before_allocation (void)
       if (spu_elf_find_overlays (&link_info))
 	{
 	  int ret;
+	  lang_output_section_statement_type *os;
 
-	  if (auto_overlay != 0)
+	  if (params.auto_overlay != 0)
 	    {
 	      einfo ("%P: --auto-overlay ignored with user overlay script\n");
-	      auto_overlay = 0;
+	      params.auto_overlay = 0;
 	    }
 
-	  ret = spu_elf_size_stubs (&link_info,
-				    spu_place_special_section,
-				    non_overlay_stubs);
+	  /* Ensure alignment of overlay sections is sufficient.  */
+	  for (os = &lang_output_section_statement.head->output_section_statement;
+	       os != NULL;
+	       os = os->next)
+	    if (os->bfd_section != NULL
+		&& spu_elf_section_data (os->bfd_section) != NULL
+		&& spu_elf_section_data (os->bfd_section)->u.o.ovl_index != 0)
+	      {
+		if (os->bfd_section->alignment_power < 4)
+		  os->bfd_section->alignment_power = 4;
+
+		/* Also ensure size rounds up.  */
+		os->block_value = 16;
+	      }
+
+	  ret = spu_elf_size_stubs (&link_info);
 	  if (ret == 0)
 	    einfo ("%X%P: can not size overlay stubs: %E\n");
 	  else if (ret == 2)
@@ -324,25 +328,18 @@ gld${EMULATION_NAME}_finish (void)
 
   if (is_spu_target ())
     {
-      if (local_store_lo < local_store_hi)
+      if (params.local_store_lo < params.local_store_hi)
         {
 	  asection *s;
 
-	  s = spu_elf_check_vma (&link_info, auto_overlay,
-				 local_store_lo, local_store_hi,
-				 auto_overlay_fixed, auto_overlay_reserved,
-				 extra_stack_space,
-				 spu_elf_load_ovl_mgr,
-				 spu_elf_open_overlay_script,
-				 spu_elf_relink);
-	  if (s != NULL && !auto_overlay)
+	  s = spu_elf_check_vma (&link_info);
+	  if (s != NULL && !params.auto_overlay)
 	    einfo ("%X%P: %A exceeds local store range\n", s);
 	}
-      else if (auto_overlay)
+      else if (params.auto_overlay)
 	einfo ("%P: --auto-overlay ignored with zero local store range\n");
 
-      if (!spu_elf_build_stubs (&link_info,
-				emit_stub_syms || link_info.emitrelocations))
+      if (!spu_elf_build_stubs (&link_info))
 	einfo ("%F%P: can not build overlay stubs: %E\n");
     }
 
@@ -574,24 +571,24 @@ PARSE_AND_LIST_ARGS_CASES='
       break;
 
     case OPTION_SPU_NO_OVERLAYS:
-      no_overlays = 1;
+      params.ovly_flavour = ovly_none;
       break;
 
     case OPTION_SPU_STUB_SYMS:
-      emit_stub_syms = 1;
+      params.emit_stub_syms = 1;
       break;
 
     case OPTION_SPU_NON_OVERLAY_STUBS:
-      non_overlay_stubs = 1;
+      params.non_overlay_stubs = 1;
       break;
 
     case OPTION_SPU_LOCAL_STORE:
       {
 	char *end;
-	local_store_lo = strtoul (optarg, &end, 0);
+	params.local_store_lo = strtoul (optarg, &end, 0);
 	if (*end == '\'':'\'')
 	  {
-	    local_store_hi = strtoul (end + 1, &end, 0);
+	    params.local_store_hi = strtoul (end + 1, &end, 0);
 	    if (*end == 0)
 	      break;
 	  }
@@ -600,15 +597,15 @@ PARSE_AND_LIST_ARGS_CASES='
       break;
 
     case OPTION_SPU_STACK_ANALYSIS:
-      stack_analysis = 1;
+      params.stack_analysis = 1;
       break;
 
     case OPTION_SPU_STACK_SYMS:
-      emit_stack_syms = 1;
+      params.emit_stack_syms = 1;
       break;
 
     case OPTION_SPU_AUTO_OVERLAY:
-      auto_overlay |= 1;
+      params.auto_overlay |= 1;
       if (optarg != NULL)
 	{
 	  auto_overlay_file = optarg;
@@ -617,17 +614,17 @@ PARSE_AND_LIST_ARGS_CASES='
       /* Fall thru */
 
     case OPTION_SPU_AUTO_RELINK:
-      auto_overlay |= 2;
+      params.auto_overlay |= 2;
       break;
 
     case OPTION_SPU_OVERLAY_RODATA:
-      auto_overlay |= 4;
+      params.auto_overlay |= 4;
       break;
 
     case OPTION_SPU_FIXED_SPACE:
       {
 	char *end;
-	auto_overlay_fixed = strtoul (optarg, &end, 0);
+	params.auto_overlay_fixed = strtoul (optarg, &end, 0);
 	if (*end != 0)
 	  einfo (_("%P%F: invalid --fixed-space value `%s'\''\n"), optarg);
       }
@@ -636,7 +633,7 @@ PARSE_AND_LIST_ARGS_CASES='
     case OPTION_SPU_RESERVED_SPACE:
       {
 	char *end;
-	auto_overlay_reserved = strtoul (optarg, &end, 0);
+	params.auto_overlay_reserved = strtoul (optarg, &end, 0);
 	if (*end != 0)
 	  einfo (_("%P%F: invalid --reserved-space value `%s'\''\n"), optarg);
       }
@@ -645,14 +642,14 @@ PARSE_AND_LIST_ARGS_CASES='
     case OPTION_SPU_EXTRA_STACK:
       {
 	char *end;
-	extra_stack_space = strtol (optarg, &end, 0);
+	params.extra_stack_space = strtol (optarg, &end, 0);
 	if (*end != 0)
 	  einfo (_("%P%F: invalid --extra-stack-space value `%s'\''\n"), optarg);
       }
       break;
 
     case OPTION_SPU_NO_AUTO_OVERLAY:
-      auto_overlay = 0;
+      params.auto_overlay = 0;
       if (optarg != NULL)
 	{
 	  struct tflist *tf;

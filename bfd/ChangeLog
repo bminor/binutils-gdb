@@ -1,5 +1,30 @@
 2008-12-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-spu.g (struct spu_elf_params, enum _ovly_flavour): New.
+	(spu_elf_setup): Declare.
+	(spu_elf_create_sections, spu_elf_size_stubs): Update prototype.
+	(spu_elf_build_stubs, spu_elf_check_vma): Likewise.
+	* elf32-spu.c (struct spu_link_hash_table): Add "params". Remove
+	various other fields now in "params".  Adjust code throughout.
+	(struct call_info, struct function_info): Move earlier in file.
+	(struct spu_elf_stack_info): Likewise.
+	(spu_elf_setup): New function.
+	(spu_elf_create_sections): Remove args other than "info".
+	(spu_elf_size_stubs, spu_elf_build_stubs, spu_elf_check_vma): Likewise.
+	(maybe_needs_stubs): Remove "output_bfd" arg.  Adjust all calls.
+	(interesting_section): Similarly with "obfd" arg.
+	(needs_ovl_stub): Adjust output_section test.
+	(allocate_spuear_stubs): Likewise.
+	(OVL_STUB_SIZE): Don't define.
+	(ovl_stub_size): New function, use in place of OVL_STUB_SIZE.
+	(build_stub): Test params->ovly_flavour rather than OVL_STUB_SIZE.
+	(spu_elf_auto_overlay): Remove args other than "info".  Make use
+	of size returned from spu_elf_load_ovl_mgr.
+	(spu_elf_stack_analysis): Remove args other than "info".
+	(spu_elf_relocate_section): Tidy setting of "ea".
+
+2008-12-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-spu.c (find_function_stack_adjust): Don't limit number
 	of insns scanned.  Correct sp tests.  Handle "fsmbi" and "andbi".
 	(mark_detached_root): New function.

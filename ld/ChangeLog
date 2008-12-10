@@ -1,3 +1,13 @@
+2008-12-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spuelf.em (params): New var, used instead of various others.
+	Adjust use throughout file.
+	(spu_after_open): Call spu_elf_setup.
+	(spu_place_special_section): Tidy.
+	(spu_elf_load_ovl_mgr): Return total size of sections loaded.  Move
+	code setting overlay section alignment to..
+	(spu_before_allocation): ..here.
+
 2008-12-03  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Mention new feature.
