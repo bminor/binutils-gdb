@@ -1,5 +1,10 @@
 2008-12-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-spu.h (struct spu_elf_params): Add num_regions.
+	* elf32-spu.c (spu_elf_auto_overlay): Handle multiple overlay regions.
+
+2008-12-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-spu.g (struct spu_elf_params, enum _ovly_flavour): New.
 	(spu_elf_setup): Declare.
 	(spu_elf_create_sections, spu_elf_size_stubs): Update prototype.

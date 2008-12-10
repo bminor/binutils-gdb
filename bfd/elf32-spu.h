@@ -55,6 +55,7 @@ struct spu_elf_params
   bfd_vma local_store_hi;
 
   /* Control --auto-overlay feature.  */
+  unsigned int num_regions;
   unsigned int auto_overlay_fixed;
   unsigned int auto_overlay_reserved;
   int extra_stack_space;

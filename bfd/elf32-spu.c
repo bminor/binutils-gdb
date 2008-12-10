@@ -3444,8 +3444,9 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
   unsigned int fixed_size, lo, hi;
   struct spu_link_hash_table *htab;
   unsigned int base, i, count, bfd_count;
-  int ovlynum;
+  unsigned int region, ovlynum;
   asection **ovly_sections, **ovly_p;
+  unsigned int *ovly_map;
   FILE *script;
   unsigned int total_overlay_size, overlay_size;
   struct elf_link_hash_entry *h;
@@ -3625,20 +3626,17 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
   if (!for_each_node (collect_overlays, info, &ovly_p, TRUE))
     goto err_exit;
   count = (size_t) (ovly_p - ovly_sections) / 2;
-
-  script = (*htab->params->spu_elf_open_overlay_script) ();
-
-  if (fprintf (script, "SECTIONS\n{\n OVERLAY :\n {\n") <= 0)
-    goto file_err;
+  ovly_map = bfd_malloc (count * sizeof (*ovly_map));
+  if (ovly_map == NULL)
+    goto err_exit;
 
   memset (&dummy_caller, 0, sizeof (dummy_caller));
-  overlay_size = htab->local_store - fixed_size;
+  overlay_size = (htab->local_store - fixed_size) / htab->params->num_regions;
   base = 0;
   ovlynum = 0;
   while (base < count)
     {
       unsigned int size = 0;
-      unsigned int j;
 
       for (i = base; i < count; i++)
 	{
@@ -3741,78 +3739,6 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  goto err_exit;
 	}
 
-      if (fprintf (script, "  .ovly%d {\n", ++ovlynum) <= 0)
-	goto file_err;
-      for (j = base; j < i; j++)
-	{
-	  asection *sec = ovly_sections[2 * j];
-
-	  if (fprintf (script, "   %s%c%s (%s)\n",
-		       (sec->owner->my_archive != NULL
-			? sec->owner->my_archive->filename : ""),
-		       info->path_separator,
-		       sec->owner->filename,
-		       sec->name) <= 0)
-	    goto file_err;
-	  if (sec->segment_mark)
-	    {
-	      struct call_info *call = find_pasted_call (sec);
-	      while (call != NULL)
-		{
-		  struct function_info *call_fun = call->fun;
-		  sec = call_fun->sec;
-		  if (fprintf (script, "   %s%c%s (%s)\n",
-			       (sec->owner->my_archive != NULL
-				? sec->owner->my_archive->filename : ""),
-			       info->path_separator,
-			       sec->owner->filename,
-			       sec->name) <= 0)
-		    goto file_err;
-		  for (call = call_fun->call_list; call; call = call->next)
-		    if (call->is_pasted)
-		      break;
-		}
-	    }
-	}
-
-      for (j = base; j < i; j++)
-	{
-	  asection *sec = ovly_sections[2 * j + 1];
-	  if (sec != NULL
-	      && fprintf (script, "   %s%c%s (%s)\n",
-			  (sec->owner->my_archive != NULL
-			   ? sec->owner->my_archive->filename : ""),
-			  info->path_separator,
-			  sec->owner->filename,
-			  sec->name) <= 0)
-	    goto file_err;
-
-	  sec = ovly_sections[2 * j];
-	  if (sec->segment_mark)
-	    {
-	      struct call_info *call = find_pasted_call (sec);
-	      while (call != NULL)
-		{
-		  struct function_info *call_fun = call->fun;
-		  sec = call_fun->rodata;
-		  if (sec != NULL
-		      && fprintf (script, "   %s%c%s (%s)\n",
-				  (sec->owner->my_archive != NULL
-				   ? sec->owner->my_archive->filename : ""),
-				  info->path_separator,
-				  sec->owner->filename,
-				  sec->name) <= 0)
-		    goto file_err;
-		  for (call = call_fun->call_list; call; call = call->next)
-		    if (call->is_pasted)
-		      break;
-		}
-	    }
-	}
-
-      if (fprintf (script, "  }\n") <= 0)
-	goto file_err;
-
       while (dummy_caller.call_list != NULL)
 	{
 	  struct call_info *call = dummy_caller.call_list;
@@ -3820,11 +3746,120 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  free (call);
 	}
 
-      base = i;
+      ++ovlynum;
+      while (base < i)
+	ovly_map[base++] = ovlynum;
     }
+
+  script = htab->params->spu_elf_open_overlay_script ();
+
+  if (fprintf (script, "SECTIONS\n{\n") <= 0)
+    goto file_err;
+
+  for (region = 1; region <= htab->params->num_regions; region++)
+    {
+      ovlynum = region;
+      base = 0;
+      while (base < count && ovly_map[base] < ovlynum)
+	base++;
+
+      if (base == count)
+	break;
+
+      if (fprintf (script, " OVERLAY :\n {\n") <= 0)
+	goto file_err;
+
+      while (base < count)
+	{
+	  unsigned int j;
+	  
+	  if (fprintf (script, "  .ovly%u {\n", ovlynum) <= 0)
+	    goto file_err;
+
+	  for (j = base; j < count && ovly_map[j] == ovlynum; j++)
+	    {
+	      asection *sec = ovly_sections[2 * j];
+
+	      if (fprintf (script, "   %s%c%s (%s)\n",
+			   (sec->owner->my_archive != NULL
+			    ? sec->owner->my_archive->filename : ""),
+			   info->path_separator,
+			   sec->owner->filename,
+			   sec->name) <= 0)
+		goto file_err;
+	      if (sec->segment_mark)
+		{
+		  struct call_info *call = find_pasted_call (sec);
+		  while (call != NULL)
+		    {
+		      struct function_info *call_fun = call->fun;
+		      sec = call_fun->sec;
+		      if (fprintf (script, "   %s%c%s (%s)\n",
+				   (sec->owner->my_archive != NULL
+				    ? sec->owner->my_archive->filename : ""),
+				   info->path_separator,
+				   sec->owner->filename,
+				   sec->name) <= 0)
+			goto file_err;
+		      for (call = call_fun->call_list; call; call = call->next)
+			if (call->is_pasted)
+			  break;
+		    }
+		}
+	    }
+
+	  for (j = base; j < count && ovly_map[j] == ovlynum; j++)
+	    {
+	      asection *sec = ovly_sections[2 * j + 1];
+	      if (sec != NULL
+		  && fprintf (script, "   %s%c%s (%s)\n",
+			      (sec->owner->my_archive != NULL
+			       ? sec->owner->my_archive->filename : ""),
+			      info->path_separator,
+			      sec->owner->filename,
+			      sec->name) <= 0)
+		goto file_err;
+
+	      sec = ovly_sections[2 * j];
+	      if (sec->segment_mark)
+		{
+		  struct call_info *call = find_pasted_call (sec);
+		  while (call != NULL)
+		    {
+		      struct function_info *call_fun = call->fun;
+		      sec = call_fun->rodata;
+		      if (sec != NULL
+			  && fprintf (script, "   %s%c%s (%s)\n",
+				      (sec->owner->my_archive != NULL
+				       ? sec->owner->my_archive->filename : ""),
+				      info->path_separator,
+				      sec->owner->filename,
+				      sec->name) <= 0)
+			goto file_err;
+		      for (call = call_fun->call_list; call; call = call->next)
+			if (call->is_pasted)
+			  break;
+		    }
+		}
+	    }
+
+	  if (fprintf (script, "  }\n") <= 0)
+	    goto file_err;
+
+	  base = j;
+	  ovlynum += htab->params->num_regions;
+	  while (base < count && ovly_map[base] < ovlynum)
+	    base++;
+	}
+
+      if (fprintf (script, " }\n") <= 0)
+	goto file_err;
+    }
+
+  free (ovly_map);
   free (ovly_sections);
 
-  if (fprintf (script, " }\n}\nINSERT AFTER .text;\n") <= 0)
+  if (fprintf (script, "}\nINSERT BEFORE .text;\n") <= 0)
     goto file_err;
   if (fclose (script) != 0)
     goto file_err;

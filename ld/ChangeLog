@@ -1,5 +1,12 @@
 2008-12-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/spuelf.em (params): Init new field.
+	(OPTION_SPU_NUM_REGIONS): Define.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add --num-regions.
+	(PARSE_AND_LIST_ARGS_CASES): Handle --num-regions.
+
+2008-12-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/spuelf.em (params): New var, used instead of various others.
 	Adjust use throughout file.
 	(spu_after_open): Call spu_elf_setup.

@@ -39,7 +39,7 @@ static struct spu_elf_params params =
   &spu_elf_relink,
   0, ovly_normal, 0, 0, 0, 0,
   0, 0x3ffff,
-  0, 0, 2000
+  1, 0, 0, 2000
 };
   
 static char *auto_overlay_file = 0;
@@ -520,7 +520,8 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_SPU_AUTO_OVERLAY		(OPTION_SPU_STACK_SYMS + 1)
 #define OPTION_SPU_AUTO_RELINK		(OPTION_SPU_AUTO_OVERLAY + 1)
 #define OPTION_SPU_OVERLAY_RODATA	(OPTION_SPU_AUTO_RELINK + 1)
-#define OPTION_SPU_FIXED_SPACE		(OPTION_SPU_OVERLAY_RODATA + 1)
+#define OPTION_SPU_NUM_REGIONS		(OPTION_SPU_OVERLAY_RODATA + 1)
+#define OPTION_SPU_FIXED_SPACE		(OPTION_SPU_NUM_REGIONS + 1)
 #define OPTION_SPU_RESERVED_SPACE	(OPTION_SPU_FIXED_SPACE + 1)
 #define OPTION_SPU_EXTRA_STACK		(OPTION_SPU_RESERVED_SPACE + 1)
 #define OPTION_SPU_NO_AUTO_OVERLAY	(OPTION_SPU_EXTRA_STACK + 1)
@@ -537,6 +538,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "auto-overlay", optional_argument, NULL, OPTION_SPU_AUTO_OVERLAY },
   { "auto-relink", no_argument, NULL, OPTION_SPU_AUTO_RELINK },
   { "overlay-rodata", no_argument, NULL, OPTION_SPU_OVERLAY_RODATA },
+  { "num-regions", required_argument, NULL, OPTION_SPU_NUM_REGIONS },
   { "fixed-space", required_argument, NULL, OPTION_SPU_FIXED_SPACE },
   { "reserved-space", required_argument, NULL, OPTION_SPU_RESERVED_SPACE },
   { "extra-stack-space", required_argument, NULL, OPTION_SPU_EXTRA_STACK },
@@ -557,6 +559,7 @@ PARSE_AND_LIST_OPTIONS='
   --auto-relink               Rerun linker using auto-overlay script.\n\
   --overlay-rodata            Place read-only data with associated function\n\
                               code in overlays.\n\
+  --num-regions               Number of overlay buffers (default 1).\n\
   --fixed-space=bytes         Local store for non-overlay code and data.\n\
   --reserved-space=bytes      Local store for stack and heap.  If not specified\n\
                               ld will estimate stack size and assume no heap.\n\
@@ -619,6 +622,16 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_SPU_OVERLAY_RODATA:
       params.auto_overlay |= 4;
+      break;
+
+    case OPTION_SPU_NUM_REGIONS:
+      {
+	char *end;
+	params.num_regions = strtoul (optarg, &end, 0);
+	if (*end == 0)
+	  break;
+	einfo (_("%P%F: invalid --num-regions `%s'\''\n"), optarg);
+      }
       break;
 
     case OPTION_SPU_FIXED_SPACE:
