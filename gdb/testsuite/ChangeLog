@@ -1,3 +1,8 @@
+2008-12-09  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/commands.exp (redefine_backtrace_test): New proc.
+	Call it.
+
 2008-12-04  Doug Evans  <dje@google.com>
 
 	* gdb.server/ext-run.exp: Relax regexp for init program.

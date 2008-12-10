@@ -1,5 +1,18 @@
 2008-12-09  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/1815:
+	* cli/cli-decode.c (delete_cmd): Forward declare.
+	(delete_cmd): Now static.  Change return type.  Remove command
+	from alias chain.  Rewrite.
+	(add_cmd): Initialize new fields.  Update cmd_pointer on all
+	aliases.
+	(add_alias_cmd): Put command on alias chain.
+	* command.h (delete_cmd): Don't declare.
+	* cli/cli-decode.h (delete_cmd): Don't declare.
+	(struct cmd_list_element) <aliases, alias_chain>: New fields.
+
+2008-12-09  Tom Tromey  <tromey@redhat.com>
+
 	* config.in, configure: Rebuild.
 	* configure.ac: Check for locale.h, setlocale.  Call
 	AM_LC_MESSAGES.

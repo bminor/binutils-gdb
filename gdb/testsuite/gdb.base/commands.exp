@@ -692,6 +692,34 @@ proc if_commands_test {} {
     }
 }
 
+proc redefine_backtrace_test {} {
+    global gdb_prompt
+
+    gdb_test_multiple "define backtrace" "define backtrace" {
+	-re "Really redefine built-in.*$" {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+
+	-re "End with"  {
+	    pass "define backtrace in redefine_backtrace_test"
+	}
+        default {
+	    fail "(timeout or eof) define backtrace in redefine_backtrace_test"
+	}
+    }
+    gdb_test "echo hibob\\n\nend" \
+	    "" \
+	    "enter commands in redefine_backtrace_test"
+
+    gdb_test "backtrace" \
+	    "hibob" \
+	    "execute backtrace command in redefine_backtrace_test"
+    gdb_test "bt" \
+	    "hibob" \
+	    "execute bt command in redefine_backtrace_test"
+}
+
 gdbvar_simple_if_test
 gdbvar_simple_while_test
 gdbvar_complex_if_while_test
@@ -710,3 +738,5 @@ temporary_breakpoint_commands
 stray_arg0_test
 recursive_source_test
 if_commands_test
+# This one should come last, as it redefines "backtrace".
+redefine_backtrace_test
