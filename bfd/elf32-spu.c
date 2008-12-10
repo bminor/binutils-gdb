@@ -1591,11 +1591,10 @@ spu_elf_check_vma (struct bfd_link_info *info,
 static int
 find_function_stack_adjust (asection *sec, bfd_vma offset)
 {
-  int unrecog;
   int reg[128];
 
   memset (reg, 0, sizeof (reg));
-  for (unrecog = 0; offset + 4 <= sec->size && unrecog < 32; offset += 4)
+  for ( ; offset + 4 <= sec->size; offset += 4)
     {
       unsigned char buf[4];
       int rt, ra;
@@ -1621,7 +1620,7 @@ find_function_stack_adjust (asection *sec, bfd_vma offset)
 
 	  if (rt == 1 /* sp */)
 	    {
-	      if (imm > 0)
+	      if (reg[rt] > 0)
 		break;
 	      return reg[rt];
 	    }
@@ -1632,7 +1631,11 @@ find_function_stack_adjust (asection *sec, bfd_vma offset)
 
 	  reg[rt] = reg[ra] + reg[rb];
 	  if (rt == 1)
-	    return reg[rt];
+	    {
+	      if (reg[rt] > 0)
+		break;
+	      return reg[rt];
+	    }
 	}
       else if ((buf[0] & 0xfc) == 0x40 /* il, ilh, ilhu, ila */)
 	{
@@ -1645,7 +1648,7 @@ find_function_stack_adjust (asection *sec, bfd_vma offset)
 	      if (buf[0] == 0x40 /* il */)
 		{
 		  if ((buf[1] & 0x80) == 0)
-		    goto unknown_insn;
+		    continue;
 		  imm = (imm ^ 0x8000) - 0x8000;
 		}
 	      else if ((buf[1] & 0x80) == 0 /* ilhu */)
@@ -1666,18 +1669,33 @@ find_function_stack_adjust (asection *sec, bfd_vma offset)
 	  reg[rt] = reg[ra] | imm;
 	  continue;
 	}
-      else if ((buf[0] == 0x33 && imm == 1 /* brsl .+4 */)
-	       || (buf[0] == 0x08 && (buf[1] & 0xe0) == 0 /* sf */))
+      else if (buf[0] == 0x32 && (buf[1] & 0x80) != 0 /* fsmbi */)
 	{
-	  /* Used in pic reg load.  Say rt is trashed.  */
+	  reg[rt] = (  ((imm & 0x8000) ? 0xff000000 : 0)
+		     | ((imm & 0x4000) ? 0x00ff0000 : 0)
+		     | ((imm & 0x2000) ? 0x0000ff00 : 0)
+		     | ((imm & 0x1000) ? 0x000000ff : 0));
+	  continue;
+	}
+      else if (buf[0] == 0x16 /* andbi */)
+	{
+	  imm >>= 7;
+	  imm &= 0xff;
+	  imm |= imm << 8;
+	  imm |= imm << 16;
+	  reg[rt] = reg[ra] & imm;
+	  continue;
+	}
+      else if (buf[0] == 0x33 && imm == 1 /* brsl .+4 */)
+	{
+	  /* Used in pic reg load.  Say rt is trashed.  Won't be used
+	     in stack adjust, but we need to continue past this branch.  */
 	  reg[rt] = 0;
 	  continue;
 	}
       else if (is_branch (buf) || is_indirect_branch (buf))
 	/* If we hit a branch then we must be out of the prologue.  */
 	break;
-    unknown_insn:
-      ++unrecog;
     }
 
   return 0;
@@ -2718,6 +2736,23 @@ remove_cycles (struct function_info *fun,
   return TRUE;
 }
 
+/* Check that we actually visited all nodes in remove_cycles.  If we
+   didn't, then there is some cycle in the call graph not attached to
+   any root node.  Arbitrarily choose a node in the cycle as a new
+   root and break the cycle.  */
+
+static bfd_boolean
+mark_detached_root (struct function_info *fun,
+		    struct bfd_link_info *info,
+		    void *param)
+{
+  if (fun->visit2)
+    return TRUE;
+  fun->non_root = FALSE;
+  *(unsigned int *) param = 0;
+  return remove_cycles (fun, info, param);
+}
+
 /* Populate call_list for each function.  */
 
 static bfd_boolean
@@ -2752,7 +2787,10 @@ build_call_tree (struct bfd_link_info *info)
   /* Remove cycles from the call graph.  We start from the root node(s)
      so that we break cycles in a reasonable place.  */
   depth = 0;
-  return for_each_node (remove_cycles, info, &depth, TRUE);
+  if (!for_each_node (remove_cycles, info, &depth, TRUE))
+    return FALSE;
+
+  return for_each_node (mark_detached_root, info, &depth, FALSE);
 }
 
 /* qsort predicate to sort calls by max_depth then count.  */
@@ -2772,7 +2810,7 @@ sort_calls (const void *a, const void *b)
   if (delta != 0)
     return delta;
 
-  return c1 - c2;
+  return (char *) c1 - (char *) c2;
 }
 
 struct _mos_param {

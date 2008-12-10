@@ -1,3 +1,11 @@
+2008-12-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (find_function_stack_adjust): Don't limit number
+	of insns scanned.  Correct sp tests.  Handle "fsmbi" and "andbi".
+	(mark_detached_root): New function.
+	(build_call_tree): Call it.
+	(sort_calls): Don't do void* arithmetic.
+
 2008-12-09  Tom Tromey  <tromey@redhat.com>
 
 	* pef.c (bfd_pef_parse_traceback_table): Add parens to placate gcc
