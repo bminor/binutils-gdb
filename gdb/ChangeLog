@@ -1,3 +1,8 @@
+2008-12-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (until_next_command, finish_backward): Use get_frame_pc
+	instead of read_pc.
+
 2008-12-09  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/1815:

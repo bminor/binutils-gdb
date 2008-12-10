@@ -1181,7 +1181,7 @@ until_next_command (int from_tty)
      than the current line (if in symbolic section) or pc (if
      not). */
 
-  pc = read_pc ();
+  pc = get_frame_pc (frame);
   func = find_pc_function (pc);
 
   if (!func)
@@ -1405,11 +1405,13 @@ finish_backward (struct symbol *function)
   struct thread_info *tp = inferior_thread ();
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
+  CORE_ADDR pc;
   CORE_ADDR func_addr;
   int back_up;
 
-  if (find_pc_partial_function (get_frame_pc (get_current_frame ()),
-				NULL, &func_addr, NULL) == 0)
+  pc = get_frame_pc (get_current_frame ());
+
+  if (find_pc_partial_function (pc, NULL, &func_addr, NULL) == 0)
     internal_error (__FILE__, __LINE__,
 		    _("Finish: couldn't find function."));
 
@@ -1426,7 +1428,7 @@ finish_backward (struct symbol *function)
      no way that a function up the stack can have a return address
      that's equal to its entry point.  */
 
-  if (sal.pc != read_pc ())
+  if (sal.pc != pc)
     {
       /* Set breakpoint and continue.  */
       breakpoint =
