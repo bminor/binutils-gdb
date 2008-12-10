@@ -47,6 +47,7 @@
 #include "reloc.h"
 #include "descriptors.h"
 #include "layout.h"
+#include "plugin.h"
 
 namespace gold
 {
@@ -2959,6 +2960,14 @@ Layout::add_comdat(Relobj* object, unsigned int shndx,
   if (ins.first->second.group_)
     {
       // We've already seen a real section group with this signature.
+      // If the kept group is from a plugin object, and we're in
+      // the replacement phase, accept the new one as a replacement.
+      if (ins.first->second.object_ == NULL
+          && parameters->options().plugins()->in_replacement_phase())
+        {
+          ins.first->second = kept;
+          return true;
+        }
       return false;
     }
   else if (group)

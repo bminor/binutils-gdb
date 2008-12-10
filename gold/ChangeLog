@@ -1,3 +1,8 @@
+2008-12-10  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (Layout::add_comdat): Allow COMDAT group from a replacement
+	object to override a kept COMDAT group from a plugin object.
+
 2008-12-09  Ian Lance Taylor  <iant@google.com>
 
 	PR 7088
