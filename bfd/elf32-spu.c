@@ -1401,10 +1401,17 @@ define_ovtab_symbol (struct spu_link_hash_table *htab, const char *name)
       h->ref_regular_nonweak = 1;
       h->non_elf = 0;
     }
-  else
+  else if (h->root.u.def.section->owner != NULL)
     {
       (*_bfd_error_handler) (_("%B is not allowed to define %s"),
 			     h->root.u.def.section->owner,
+			     h->root.root.string);
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
+    }
+  else
+    {
+      (*_bfd_error_handler) (_("you are not allowed to define %s in a script"),
 			     h->root.root.string);
       bfd_set_error (bfd_error_bad_value);
       return NULL;
@@ -2434,7 +2441,8 @@ discover_functions (struct bfd_link_info *info)
       sec_arr[bfd_idx] = psecs;
       for (psy = psyms, p = psecs, sy = syms; sy < syms + symcount; ++p, ++sy)
 	if (ELF_ST_TYPE (sy->st_info) == STT_NOTYPE
-	    || ELF_ST_TYPE (sy->st_info) == STT_FUNC)
+	    || ELF_ST_TYPE (sy->st_info) == STT_FUNC
+	    || ELF_ST_TYPE (sy->st_info) == STT_SECTION)
 	  {
 	    asection *s;
 
@@ -3047,18 +3055,18 @@ collect_lib_sections (struct function_info *fun,
   size = fun->sec->size;
   if (fun->rodata)
     size += fun->rodata->size;
-  if (size > lib_param->lib_size)
-    return TRUE;
-
-  *lib_param->lib_sections++ = fun->sec;
-  fun->sec->gc_mark = 0;
-  if (fun->rodata && fun->rodata->linker_mark && fun->rodata->gc_mark)
+  if (size <= lib_param->lib_size)
     {
-      *lib_param->lib_sections++ = fun->rodata;
-      fun->rodata->gc_mark = 0;
+      *lib_param->lib_sections++ = fun->sec;
+      fun->sec->gc_mark = 0;
+      if (fun->rodata && fun->rodata->linker_mark && fun->rodata->gc_mark)
+	{
+	  *lib_param->lib_sections++ = fun->rodata;
+	  fun->rodata->gc_mark = 0;
+	}
+      else
+	*lib_param->lib_sections++ = NULL;
     }
-  else
-    *lib_param->lib_sections++ = NULL;
 
   for (call = fun->call_list; call != NULL; call = call->next)
     collect_lib_sections (call->fun, info, param);

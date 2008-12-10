@@ -5,6 +5,10 @@
 	(mark_detached_root): New function.
 	(build_call_tree): Call it.
 	(sort_calls): Don't do void* arithmetic.
+	(define_ovtab_symbol): Don't abort on symbols defined in linker scripts.
+	(discover_functions): Consider STT_SECTION symbols too.
+	(collect_lib_sections): Don't cut short call tree traversal
+	when function size is too large.
 
 2008-12-09  Tom Tromey  <tromey@redhat.com>
 
