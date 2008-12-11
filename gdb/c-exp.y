@@ -54,6 +54,8 @@ Boston, MA 02110-1301, USA.  */
 #include "block.h"
 #include "cp-support.h"
 #include "dfp.h"
+#include "gdb_assert.h"
+#include "macroscope.h"
 
 #define parse_type builtin_type (parse_gdbarch)
 
@@ -1396,6 +1398,85 @@ static const struct token tokentab2[] =
     {">=", GEQ, BINOP_END}
   };
 
+/* When we find that lexptr (the global var defined in parse.c) is
+   pointing at a macro invocation, we expand the invocation, and call
+   scan_macro_expansion to save the old lexptr here and point lexptr
+   into the expanded text.  When we reach the end of that, we call
+   end_macro_expansion to pop back to the value we saved here.  The
+   macro expansion code promises to return only fully-expanded text,
+   so we don't need to "push" more than one level.
+
+   This is disgusting, of course.  It would be cleaner to do all macro
+   expansion beforehand, and then hand that to lexptr.  But we don't
+   really know where the expression ends.  Remember, in a command like
+
+     (gdb) break *ADDRESS if CONDITION
+
+   we evaluate ADDRESS in the scope of the current frame, but we
+   evaluate CONDITION in the scope of the breakpoint's location.  So
+   it's simply wrong to try to macro-expand the whole thing at once.  */
+static char *macro_original_text;
+
+/* We save all intermediate macro expansions on this obstack for the
+   duration of a single parse.  The expansion text may sometimes have
+   to live past the end of the expansion, due to yacc lookahead.
+   Rather than try to be clever about saving the data for a single
+   token, we simply keep it all and delete it after parsing has
+   completed.  */
+static struct obstack expansion_obstack;
+
+static void
+scan_macro_expansion (char *expansion)
+{
+  char *copy;
+
+  /* We'd better not be trying to push the stack twice.  */
+  gdb_assert (! macro_original_text);
+
+  /* Copy to the obstack, and then free the intermediate
+     expansion.  */
+  copy = obstack_copy0 (&expansion_obstack, expansion, strlen (expansion));
+  xfree (expansion);
+
+  /* Save the old lexptr value, so we can return to it when we're done
+     parsing the expanded text.  */
+  macro_original_text = lexptr;
+  lexptr = copy;
+}
+
+
+static int
+scanning_macro_expansion (void)
+{
+  return macro_original_text != 0;
+}
+
+
+static void 
+finished_macro_expansion (void)
+{
+  /* There'd better be something to pop back to.  */
+  gdb_assert (macro_original_text);
+
+  /* Pop back to the original text.  */
+  lexptr = macro_original_text;
+  macro_original_text = 0;
+}
+
+
+static void
+scan_macro_cleanup (void *dummy)
+{
+  if (macro_original_text)
+    finished_macro_expansion ();
+
+  obstack_free (&expansion_obstack, NULL);
+}
+
+
+/* The scope used for macro expansion.  */
+static struct macro_scope *expression_macro_scope;
+
 /* This is set if a NAME token appeared at the very end of the input
    string, with no whitespace separating the name from the EOF.  This
    is used only when parsing to do field name completion.  */
@@ -1431,8 +1512,8 @@ yylex ()
   if (! scanning_macro_expansion ())
     {
       char *expanded = macro_expand_next (&lexptr,
-                                          expression_macro_lookup_func,
-                                          expression_macro_lookup_baton);
+                                          standard_macro_lookup,
+                                          expression_macro_scope);
 
       if (expanded)
         scan_macro_expansion (expanded);
@@ -1903,10 +1984,35 @@ yylex ()
 int
 c_parse (void)
 {
+  int result;
+  struct cleanup *back_to = make_cleanup (free_current_contents,
+					  &expression_macro_scope);
+
+  /* Set up the scope for macro expansion.  */
+  expression_macro_scope = NULL;
+
+  if (expression_context_block)
+    expression_macro_scope
+      = sal_macro_scope (find_pc_line (expression_context_pc, 0));
+  else
+    expression_macro_scope = default_macro_scope ();
+  if (! expression_macro_scope)
+    expression_macro_scope = user_macro_scope ();
+
+  /* Initialize macro expansion code.  */
+  obstack_init (&expansion_obstack);
+  gdb_assert (! macro_original_text);
+  make_cleanup (scan_macro_cleanup, 0);
+
+  /* Initialize some state used by the lexer.  */
   last_was_structop = 0;
   saw_name_at_eof = 0;
-  return yyparse ();
+
+  result = yyparse ();
+  do_cleanups (back_to);
+  return result;
 }
+
 
 void
 yyerror (msg)

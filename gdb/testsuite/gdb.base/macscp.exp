@@ -415,6 +415,10 @@ gdb_test "break [gdb_get_line_number "set breakpoint here"]" \
 
 gdb_test "continue" "foo = 0;.*" "continue to macsp_expr"
 
+gdb_test "print address.addr" \
+  " = 0" \
+  "print address.addr"
+
 gdb_test "print MACRO_TO_EXPAND" \
     "No symbol \"MACRO_TO_EXPAND\" in current context\." \
     "print expression with macro before define."

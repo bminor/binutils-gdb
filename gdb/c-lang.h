@@ -55,13 +55,6 @@ extern void c_printstr (struct ui_file * stream, const gdb_byte *string,
 			int force_ellipses,
 			const struct value_print_options *options);
 
-extern void scan_macro_expansion (char *expansion);
-extern int scanning_macro_expansion (void);
-extern void finished_macro_expansion (void);
-
-extern macro_lookup_ftype *expression_macro_lookup_func;
-extern void *expression_macro_lookup_baton;
-
 extern void c_language_arch_info (struct gdbarch *gdbarch,
 				  struct language_arch_info *lai);
 
