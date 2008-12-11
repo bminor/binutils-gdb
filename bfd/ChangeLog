@@ -1,3 +1,9 @@
+2008-12-11  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 7041
+	* elf64-ppc.c (func_desc_adjust): Correct logic making fake function
+	descriptors.  Similarly correct making function descriptors dynamic.
+
 2008-12-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.h (struct spu_elf_params): Add num_regions.
