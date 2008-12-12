@@ -1527,8 +1527,13 @@ read_ptid (char *buf, char **obuf)
   pp = unpack_varlen_hex (p, &tid);
 
   /* Since the stub is not sending a process id, then default to
-     what's in inferior_ptid.  */
-  pid = ptid_get_pid (inferior_ptid);
+     what's in inferior_ptid, unless it's null at this point.  If so,
+     then since there's no way to know the pid of the reported
+     threads, use the magic number.  */
+  if (ptid_equal (inferior_ptid, null_ptid))
+    pid = ptid_get_pid (magic_null_ptid);
+  else
+    pid = ptid_get_pid (inferior_ptid);
 
   if (obuf)
     *obuf = pp;
@@ -2576,13 +2581,6 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 	 controlling.  We default to adding them in the running state.
 	 The '?' query below will then tell us about which threads are
 	 stopped.  */
-
-      /* If we're not using the multi-process extensions, there's no
-	 way to know the pid of the reported threads; use the magic
-	 number.  */
-      if (!remote_multi_process_p (rs))
-	inferior_ptid = magic_null_ptid;
-
       remote_threads_info ();
     }
   else if (rs->non_stop_aware)

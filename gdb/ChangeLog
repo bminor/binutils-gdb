@@ -1,3 +1,10 @@
+2008-12-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (read_ptid): If we don't know about any inferior yet,
+	use the pid of magic_null_ptid.
+	(remote_start_remote): In the non-stop mode case, don't set
+	inferior_ptid to magic_null_ptid here.
+
 2008-12-11  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
