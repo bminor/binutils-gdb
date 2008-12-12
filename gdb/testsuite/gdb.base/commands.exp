@@ -692,6 +692,40 @@ proc if_commands_test {} {
     }
 }
 
+proc redefine_hook_test {} {
+    global gdb_prompt
+
+    gdb_test "define one\nend" \
+      "" \
+      "define one"
+
+    gdb_test "define hook-one\necho hibob\\n\nend" \
+      "" \
+      "define hook-one"
+
+    gdb_test_multiple "define one" "redefine one" {
+	-re "Redefine command .one.. .y or n. $" {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+
+	-re "End with"  {
+	    pass "define one in redefine_hook_test"
+	}
+        default {
+	    fail "(timeout or eof) define one in redefine_hook_test"
+	}
+    }
+
+    gdb_test "end" \
+	    "" \
+	    "enter commands for one redefinition in redefine_hook_test"
+
+    gdb_test "one" \
+	    "hibob" \
+	    "execute one command in redefine_hook_test"
+}
+
 proc redefine_backtrace_test {} {
     global gdb_prompt
 
@@ -738,5 +772,6 @@ temporary_breakpoint_commands
 stray_arg0_test
 recursive_source_test
 if_commands_test
+redefine_hook_test
 # This one should come last, as it redefines "backtrace".
 redefine_backtrace_test

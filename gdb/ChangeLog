@@ -1,3 +1,10 @@
+2008-12-12  Tom Tromey  <tromey@redhat.com>
+
+	PR cli/2563:
+	* cli/cli-decode.c (delete_cmd): Add hook-related out parameters.
+	(add_cmd): Update.  Install hooks into new command.
+	(add_alias_cmd): Update.
+
 2008-12-11  Tom Tromey  <tromey@redhat.com>
 
 	* macroexp.c (get_pp_number): Require digit after leading ".".

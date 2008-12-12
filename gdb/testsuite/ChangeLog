@@ -1,3 +1,8 @@
+2008-12-12  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/commands.exp (redefine_hook_test): New proc.
+	Call it.
+
 2008-12-11  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/macscp.exp: New regression test.
