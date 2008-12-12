@@ -1,3 +1,7 @@
+2008-12-12  Doug Evans  <dje@google.com>
+
+	* linux-low.c (handle_extended_wait): Simplify, use my_waitpid.
+
 2008-12-09  Doug Evans  <dje@google.com>
 
 	* linux-low.h (struct process_info): Delete member tid, unused.
