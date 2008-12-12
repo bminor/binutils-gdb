@@ -642,11 +642,13 @@ retry:
   if (debug_threads
       && WIFSTOPPED (*wstatp))
     {
+      struct thread_info *saved_inferior = current_inferior;
       current_inferior = (struct thread_info *)
 	find_inferior_id (&all_threads, (*childp)->lwpid);
       /* For testing only; i386_stop_pc prints out a diagnostic.  */
       if (the_low_target.get_pc != NULL)
 	get_stop_pc ();
+      current_inferior = saved_inferior;
     }
 }
 

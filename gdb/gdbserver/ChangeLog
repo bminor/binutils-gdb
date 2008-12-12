@@ -1,5 +1,8 @@
 2008-12-12  Doug Evans  <dje@google.com>
 
+	* linux-low.c (linux_wait_for_process): Don't clobber current_inferior
+	in debugging printf.
+
 	* linux-low.c (handle_extended_wait): Simplify, use my_waitpid.
 
 2008-12-09  Doug Evans  <dje@google.com>
