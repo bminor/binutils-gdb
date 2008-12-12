@@ -1,3 +1,9 @@
+2008-12-12  Ian Lance Taylor  <iant@google.com>
+
+	* configure.ac: Update test for TLS descriptors: they are
+	supported as of glibc 2.9.
+	* configure: Rebuild.
+
 2008-12-11  Ian Lance Taylor  <iant@google.com>
 
 	PR 7091
