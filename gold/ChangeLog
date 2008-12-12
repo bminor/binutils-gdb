@@ -1,5 +1,12 @@
 2008-12-12  Ian Lance Taylor  <iant@google.com>
 
+	* target-reloc.h (Default_scan_relocatable_relocs): Only discard
+	r_type == 0 for a local symbol with r_sym == 0.
+	(scan_relocatable_relocs): Pass r_sym to
+	local_non_section_strategy.
+	* reloc.cc (Emit_relocs_strategy::local_non_section_strategy): Add
+	r_sym parameter.
+
 	* configure.ac: Update test for TLS descriptors: they are
 	supported as of glibc 2.9.
 	* configure: Rebuild.

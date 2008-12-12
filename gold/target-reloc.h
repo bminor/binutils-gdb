@@ -308,11 +308,11 @@ class Default_scan_relocatable_relocs
   // Return the strategy to use for a local symbol which is not a
   // section symbol, given the relocation type.
   inline Relocatable_relocs::Reloc_strategy
-  local_non_section_strategy(unsigned int r_type, Relobj*)
+  local_non_section_strategy(unsigned int r_type, Relobj*, unsigned int r_sym)
   {
     // We assume that relocation type 0 is NONE.  Targets which are
     // different must override.
-    if (r_type == 0)
+    if (r_type == 0 && r_sym == 0)
       return Relocatable_relocs::RELOC_DISCARD;
     return Relocatable_relocs::RELOC_COPY;
   }
@@ -322,10 +322,6 @@ class Default_scan_relocatable_relocs
   inline Relocatable_relocs::Reloc_strategy
   local_section_strategy(unsigned int r_type, Relobj* object)
   {
-    // We assume that relocation type 0 is NONE.  Targets which are
-    // different must override.
-    if (r_type == 0)
-      return Relocatable_relocs::RELOC_DISCARD;
     if (sh_type == elfcpp::SHT_RELA)
       return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA;
     else
@@ -352,14 +348,8 @@ class Default_scan_relocatable_relocs
   // Return the strategy to use for a global symbol, given the
   // relocation type, the object, and the symbol index.
   inline Relocatable_relocs::Reloc_strategy
-  global_strategy(unsigned int r_type, Relobj*, unsigned int)
-  {
-    // We assume that relocation type 0 is NONE.  Targets which are
-    // different must override.
-    if (r_type == 0)
-      return Relocatable_relocs::RELOC_DISCARD;
-    return Relocatable_relocs::RELOC_COPY;
-  }
+  global_strategy(unsigned int, Relobj*, unsigned int)
+  { return Relocatable_relocs::RELOC_COPY; }
 };
 
 // Scan relocs during a relocatable link.  This is a default
@@ -429,7 +419,8 @@ scan_relocatable_relocs(
 		  strategy = Relocatable_relocs::RELOC_DISCARD;
 		}
 	      else if (lsym.get_st_type() != elfcpp::STT_SECTION)
-		strategy = scan.local_non_section_strategy(r_type, object);
+		strategy = scan.local_non_section_strategy(r_type, object,
+							   r_sym);
 	      else
 		{
 		  strategy = scan.local_section_strategy(r_type, object);

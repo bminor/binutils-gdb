@@ -368,7 +368,7 @@ class Emit_relocs_strategy
  public:
   // A local non-section symbol.
   inline Relocatable_relocs::Reloc_strategy
-  local_non_section_strategy(unsigned int, Relobj*)
+  local_non_section_strategy(unsigned int, Relobj*, unsigned int)
   { return Relocatable_relocs::RELOC_COPY; }
 
   // A local section symbol.
