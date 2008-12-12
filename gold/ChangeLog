@@ -1,3 +1,9 @@
+2008-12-11  Ian Lance Taylor  <iant@google.com>
+
+	PR 7091
+	* target-reloc.h (Default_scan_relocatable_relocs): For each
+	function, map r_type == 0 to RELOC_DISCARD.
+
 2008-12-10  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (Layout::add_comdat): Allow COMDAT group from a replacement
