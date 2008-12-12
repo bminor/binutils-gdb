@@ -1,5 +1,10 @@
 2008-12-11  Tom Tromey  <tromey@redhat.com>
 
+	* macroexp.c (get_pp_number): Require digit after leading ".".
+	Correctly handle suffixes.
+
+2008-12-11  Tom Tromey  <tromey@redhat.com>
+
 	* macrocmd.c (macro_define_command): Skip whitespace after
 	macro name.
 	(print_one_macro): Print space after macro name.

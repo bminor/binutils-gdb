@@ -656,3 +656,11 @@ gdb_test "print str(maude)" \
 gdb_test "print xstr(maude)" \
   " = \"5\"" \
   "stringify with substitution"
+
+# Regression test for pp-number bug.
+gdb_test "macro define si_addr fields.fault.si_addr" \
+  "" \
+  "define si_addr macro"
+gdb_test "macro expand siginfo.si_addr" \
+  "expands to: siginfo.fields.fault.si_addr" \
+  "macro expand siginfo.si_addr"

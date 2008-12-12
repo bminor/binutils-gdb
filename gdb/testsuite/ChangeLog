@@ -1,5 +1,9 @@
 2008-12-11  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/macscp.exp: New regression test.
+
+2008-12-11  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/macscp.exp: Print "address.addr".
 	* gdb.base/macscp1.c (struct outer): New struct.
 	(address): New global.
