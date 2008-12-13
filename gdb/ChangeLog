@@ -1,3 +1,15 @@
+2008-12-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* gnu-v3-abi.c (vtable_ptrdiff_type): New function.
+	(gnuv3_decode_method_ptr, gnuv3_print_method_ptr)
+	(gnuv3_method_ptr_to_value): Use a better approximation for
+	`ptrdiff_t' instead of `long'.
+
+2008-12-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* m32c-tdep.c (m32c_gdbarch_init): Call set_gdbarch_vbit_in_delta().
+	(m32c_push_dummy_call): Dereference pointer type.
+
 2008-12-12  Tom Tromey  <tromey@redhat.com>
 
 	PR cli/2563:
