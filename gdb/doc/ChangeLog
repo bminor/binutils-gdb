@@ -1,3 +1,9 @@
+2008-12-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Omissions from Ada): Remove incorrect documentation
+	about the result of 'Address not being of type System.Address.
+	This problem has been fixed a while ago.
+
 2008-12-02  Vladimir Prus  <vladimir@codesourcery.com>
 
 	MI non-stop and multiprocess docs.

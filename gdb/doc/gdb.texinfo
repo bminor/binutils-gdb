@@ -11757,9 +11757,6 @@ floating-point arithmetic, and may give results that only approximate those on
 the host machine.
 
 @item
-The type of the @t{'Address} attribute may not be @code{System.Address}.
-
-@item
 The GNAT compiler never generates the prefix @code{Standard} for any of 
 the standard symbols defined by the Ada language.  @value{GDBN} knows about 
 this: it will strip the prefix from names when you use it, and will never
