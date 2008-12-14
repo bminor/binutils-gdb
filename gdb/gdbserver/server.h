@@ -70,6 +70,14 @@ extern void *memmem (const void *, size_t , const void *, size_t);
 #endif
 #endif
 
+#ifndef ATTR_MALLOC
+#if defined(__GNUC__) && (__GNUC__ >= 3)
+#define ATTR_MALLOC __attribute__ ((__malloc__))
+#else
+#define ATTR_MALLOC             /* nothing */
+#endif
+#endif
+
 /* A type used for binary buffers.  */
 typedef unsigned char gdb_byte;
 
@@ -265,6 +273,9 @@ char *target_signal_to_name (enum target_signal);
 
 /* Functions from utils.c */
 
+void *xmalloc (size_t) ATTR_MALLOC;
+void *xcalloc (size_t, size_t) ATTR_MALLOC;
+char *xstrdup (const char *) ATTR_MALLOC;
 void perror_with_name (char *string);
 void error (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void fatal (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);

@@ -1,3 +1,18 @@
+2008-12-13  Doug Evans  <dje@google.com>
+
+	* utils.c (xmalloc,xcalloc,xstrdup): New fns.
+	* server.h (ATTR_MALLOC): New macro.
+	(xmalloc,xcalloc,xstrdup): Declare.
+	* hostio.c: Replace malloc,calloc,strdup with xmalloc,xcalloc,xstrdup.
+	* inferiors.c: Ditto.
+	* linux-low.c: Ditto.
+	* mem-break.c: Ditto.
+	* regcache.c: Ditto.
+	* remote-utils.c: Ditto.
+	* server.c: Ditto.
+	* target.c: Ditto.
+	* win32-low.c: Ditto.
+
 2008-12-12  Doug Evans  <dje@google.com>
 
 	* linux-low.c (linux_wait_for_process): Don't clobber current_inferior

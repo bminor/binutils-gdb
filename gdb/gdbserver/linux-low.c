@@ -249,7 +249,7 @@ add_process (unsigned long pid)
 {
   struct process_info *process;
 
-  process = (struct process_info *) malloc (sizeof (*process));
+  process = (struct process_info *) xmalloc (sizeof (*process));
   memset (process, 0, sizeof (*process));
 
   process->head.id = pid;
@@ -1120,7 +1120,7 @@ linux_resume_one_process (struct inferior_list_entry *entry,
 	  || process->bp_reinsert != 0))
     {
       struct pending_signals *p_sig;
-      p_sig = malloc (sizeof (*p_sig));
+      p_sig = xmalloc (sizeof (*p_sig));
       p_sig->prev = process->pending_signals;
       p_sig->signal = signal;
       if (info == NULL)
@@ -1291,7 +1291,7 @@ linux_queue_one_thread (struct inferior_list_entry *entry)
   if (process->resume->sig != 0)
     {
       struct pending_signals *p_sig;
-      p_sig = malloc (sizeof (*p_sig));
+      p_sig = xmalloc (sizeof (*p_sig));
       p_sig->prev = process->pending_signals;
       p_sig->signal = process->resume->sig;
       memset (&p_sig->info, 0, sizeof (siginfo_t));
@@ -1527,7 +1527,7 @@ regsets_fetch_inferior_registers ()
 	  continue;
 	}
 
-      buf = malloc (regset->size);
+      buf = xmalloc (regset->size);
 #ifndef __sparc__
       res = ptrace (regset->get_request, inferior_pid, 0, buf);
 #else
@@ -1580,7 +1580,7 @@ regsets_store_inferior_registers ()
 	  continue;
 	}
 
-      buf = malloc (regset->size);
+      buf = xmalloc (regset->size);
 
       /* First fill the buffer with the current register set contents,
 	 in case there are any items in the kernel's regset that are
@@ -1832,7 +1832,7 @@ linux_test_for_tracefork (void)
 {
   int child_pid, ret, status;
   long second_pid;
-  char *stack = malloc (STACK_SIZE * 4);
+  char *stack = xmalloc (STACK_SIZE * 4);
 
   linux_supports_tracefork_flag = 0;
 
@@ -2212,6 +2212,6 @@ initialize_low (void)
 #ifdef HAVE_LINUX_REGSETS
   for (num_regsets = 0; target_regsets[num_regsets].size >= 0; num_regsets++)
     ;
-  disabled_regsets = malloc (num_regsets);
+  disabled_regsets = xmalloc (num_regsets);
 #endif
 }

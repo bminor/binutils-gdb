@@ -436,7 +436,7 @@ handle_search_memory (char *own_buf, int packet_len)
   CORE_ADDR found_addr;
   int cmd_name_len = sizeof ("qSearch:memory:") - 1;
 
-  pattern = malloc (packet_len);
+  pattern = xmalloc (packet_len);
   if (pattern == NULL)
     {
       error ("Unable to allocate memory to perform the search");
@@ -460,7 +460,7 @@ handle_search_memory (char *own_buf, int packet_len)
   if (search_space_len < search_buf_size)
     search_buf_size = search_space_len;
 
-  search_buf = malloc (search_buf_size);
+  search_buf = xmalloc (search_buf_size);
   if (search_buf == NULL)
     {
       free (pattern);
@@ -575,7 +575,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  return;
       if (len > PBUFSIZ - 2)
 	len = PBUFSIZ - 2;
-      spu_buf = malloc (len + 1);
+      spu_buf = xmalloc (len + 1);
       if (!spu_buf)
         return;
 
@@ -604,7 +604,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       require_running (own_buf);
       strcpy (own_buf, "E00");
-      spu_buf = malloc (packet_len - 15);
+      spu_buf = xmalloc (packet_len - 15);
       if (!spu_buf)
         return;
       if (decode_xfer_write (own_buf + 16, packet_len - 16, &annex,
@@ -648,7 +648,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	 more.  */
       if (len > PBUFSIZ - 2)
 	len = PBUFSIZ - 2;
-      data = malloc (len + 1);
+      data = xmalloc (len + 1);
       n = (*the_target->read_auxv) (ofs, data, len + 1);
       if (n < 0)
 	write_enn (own_buf);
@@ -726,7 +726,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       for (dll_ptr = all_dlls.head; dll_ptr != NULL; dll_ptr = dll_ptr->next)
 	total_len += 128 + 6 * strlen (((struct dll_info *) dll_ptr)->name);
 
-      document = malloc (total_len);
+      document = xmalloc (total_len);
       strcpy (document, "<library-list>\n");
       p = document + strlen (document);
 
@@ -782,7 +782,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
        return;
       if (len > PBUFSIZ - 2)
        len = PBUFSIZ - 2;
-      workbuf = malloc (len + 1);
+      workbuf = xmalloc (len + 1);
       if (!workbuf)
         return;
 
@@ -895,7 +895,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   /* Handle "monitor" commands.  */
   if (strncmp ("qRcmd,", own_buf, 6) == 0)
     {
-      char *mon = malloc (PBUFSIZ);
+      char *mon = xmalloc (PBUFSIZ);
       int len = strlen (own_buf + 6);
 
       if ((len % 2) != 0 || unhexify (mon, own_buf + 6, len / 2) != len / 2)
@@ -975,7 +975,7 @@ handle_v_cont (char *own_buf, char *status, int *signal)
   /* Allocate room for one extra action, for the default remain-stopped
      behavior; if no default action is in the list, we'll need the extra
      slot.  */
-  resume_info = malloc ((n + 1) * sizeof (resume_info[0]));
+  resume_info = xmalloc ((n + 1) * sizeof (resume_info[0]));
 
   default_action.thread = -1;
   default_action.leave_stopped = 1;
@@ -1107,7 +1107,7 @@ handle_v_run (char *own_buf, char *status, int *signal)
       new_argc++;
     }
 
-  new_argv = calloc (new_argc + 2, sizeof (char *));
+  new_argv = xcalloc (new_argc + 2, sizeof (char *));
   i = 0;
   for (p = own_buf + strlen ("vRun;"); *p; p = next_p)
     {
@@ -1119,7 +1119,7 @@ handle_v_run (char *own_buf, char *status, int *signal)
 	new_argv[i] = NULL;
       else
 	{
-	  new_argv[i] = malloc (1 + (next_p - p) / 2);
+	  new_argv[i] = xmalloc (1 + (next_p - p) / 2);
 	  unhexify (new_argv[i], p, (next_p - p) / 2);
 	  new_argv[i][(next_p - p) / 2] = '\0';
 	}
@@ -1141,7 +1141,7 @@ handle_v_run (char *own_buf, char *status, int *signal)
 	  return 0;
 	}
 
-      new_argv[0] = strdup (program_argv[0]);
+      new_argv[0] = xstrdup (program_argv[0]);
     }
 
   /* Free the old argv.  */
@@ -1443,17 +1443,17 @@ main (int argc, char *argv[])
   initialize_async_io ();
   initialize_low ();
 
-  own_buf = malloc (PBUFSIZ + 1);
-  mem_buf = malloc (PBUFSIZ);
+  own_buf = xmalloc (PBUFSIZ + 1);
+  mem_buf = xmalloc (PBUFSIZ);
 
   if (pid == 0 && *next_arg != NULL)
     {
       int i, n;
 
       n = argc - (next_arg - argv);
-      program_argv = malloc (sizeof (char *) * (n + 1));
+      program_argv = xmalloc (sizeof (char *) * (n + 1));
       for (i = 0; i < n; i++)
-	program_argv[i] = strdup (next_arg[i]);
+	program_argv[i] = xstrdup (next_arg[i]);
       program_argv[i] = NULL;
 
       /* Wait till we are at first instruction in program.  */

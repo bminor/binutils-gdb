@@ -95,7 +95,7 @@ remove_inferior (struct inferior_list *list,
 void
 add_thread (unsigned long thread_id, void *target_data, unsigned int gdb_id)
 {
-  struct thread_info *new_thread = malloc (sizeof (*new_thread));
+  struct thread_info *new_thread = xmalloc (sizeof (*new_thread));
 
   memset (new_thread, 0, sizeof (*new_thread));
 
@@ -261,12 +261,12 @@ match_dll (struct inferior_list_entry *inf, void *arg)
 void
 loaded_dll (const char *name, CORE_ADDR base_addr)
 {
-  struct dll_info *new_dll = malloc (sizeof (*new_dll));
+  struct dll_info *new_dll = xmalloc (sizeof (*new_dll));
   memset (new_dll, 0, sizeof (*new_dll));
 
   new_dll->entry.id = -1;
 
-  new_dll->name = strdup (name);
+  new_dll->name = xstrdup (name);
   new_dll->base_addr = base_addr;
 
   add_inferior_to_list (&all_dlls, &new_dll->entry);
@@ -314,7 +314,7 @@ add_pid_to_list (struct inferior_list *list, unsigned long pid)
 {
   struct inferior_list_entry *new_entry;
 
-  new_entry = malloc (sizeof (struct inferior_list_entry));
+  new_entry = xmalloc (sizeof (struct inferior_list_entry));
   new_entry->id = pid;
   add_inferior_to_list (list, new_entry);
 }

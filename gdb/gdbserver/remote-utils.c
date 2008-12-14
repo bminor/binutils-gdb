@@ -530,7 +530,7 @@ putpkt_binary (char *buf, int cnt)
   char buf3[1];
   char *p;
 
-  buf2 = malloc (PBUFSIZ);
+  buf2 = xmalloc (PBUFSIZ);
 
   /* Copy the packet into buffer BUF2, encapsulating it
      and giving it a checksum.  */
@@ -1178,7 +1178,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
       unsigned int mem_len;
 
       decode_m_packet (&own_buf[1], &mem_addr, &mem_len);
-      mem_buf = malloc (mem_len);
+      mem_buf = xmalloc (mem_len);
       if (read_inferior_memory (mem_addr, mem_buf, mem_len) == 0)
 	convert_int_to_ascii (mem_buf, own_buf, mem_len);
       else
@@ -1209,8 +1209,8 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
   decode_address (addrp, p, q - p);
 
   /* Save the symbol in our cache.  */
-  sym = malloc (sizeof (*sym));
-  sym->name = strdup (name);
+  sym = xmalloc (sizeof (*sym));
+  sym->name = xstrdup (name);
   sym->addr = *addrp;
   sym->next = symbol_cache;
   symbol_cache = sym;
@@ -1221,7 +1221,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
 void
 monitor_output (const char *msg)
 {
-  char *buf = malloc (strlen (msg) * 2 + 2);
+  char *buf = xmalloc (strlen (msg) * 2 + 2);
 
   buf[0] = 'O';
   hexify (buf + 1, msg, 0);
@@ -1259,7 +1259,7 @@ xml_escape_text (const char *text)
       }
 
   /* Expand the result.  */
-  result = malloc (i + special + 1);
+  result = xmalloc (i + special + 1);
   for (i = 0, special = 0; text[i] != '\0'; i++)
     switch (text[i])
       {
