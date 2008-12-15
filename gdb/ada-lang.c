@@ -2346,12 +2346,12 @@ ada_value_ptr_subscript (struct value *arr, struct type *type, int arity,
 }
 
 /* Given that ARRAY_PTR is a pointer or reference to an array of type TYPE (the
-   actual type of ARRAY_PTR is ignored), returns a reference to
-   the Ada slice of HIGH-LOW+1 elements starting at index LOW.  The lower
-   bound of this array is LOW, as per Ada rules. */
+   actual type of ARRAY_PTR is ignored), returns the Ada slice of HIGH-LOW+1
+   elements starting at index LOW.  The lower bound of this array is LOW, as
+   per Ada rules. */
 static struct value *
-ada_value_slice_ptr (struct value *array_ptr, struct type *type,
-                     int low, int high)
+ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
+                          int low, int high)
 {
   CORE_ADDR base = value_as_address (array_ptr)
     + ((low - TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)))
@@ -2361,7 +2361,7 @@ ada_value_slice_ptr (struct value *array_ptr, struct type *type,
                        low, high);
   struct type *slice_type =
     create_array_type (NULL, TYPE_TARGET_TYPE (type), index_type);
-  return value_from_pointer (lookup_reference_type (slice_type), base);
+  return value_at_lazy (slice_type, base);
 }
 
 
@@ -6178,9 +6178,7 @@ ada_index_struct_field_1 (int *index_p, struct value *arg, int offset,
 /* Given ARG, a value of type (pointer or reference to a)*
    structure/union, extract the component named NAME from the ultimate
    target structure/union and return it as a value with its
-   appropriate type.  If ARG is a pointer or reference and the field
-   is not packed, returns a reference to the field, otherwise the
-   value of the field (an lvalue if ARG is an lvalue).     
+   appropriate type.
 
    The routine searches for NAME among all members of the structure itself
    and (recursively) among all members of any wrapper members
@@ -6257,8 +6255,7 @@ ada_value_struct_elt (struct value *arg, char *name, int no_err)
                                                   field_type);
             }
           else
-            v = value_from_pointer (lookup_reference_type (field_type),
-                                    address + byte_offset);
+            v = value_at_lazy (field_type, address + byte_offset);
         }
     }
 
@@ -8808,9 +8805,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                 struct type *arr_type0 =
                   to_fixed_array_type (TYPE_TARGET_TYPE (value_type (array)),
                                        NULL, 1);
-                return ada_value_slice_ptr (array, arr_type0,
-                                            longest_to_int (low_bound),
-					    longest_to_int (high_bound));
+                return ada_value_slice_from_ptr (array, arr_type0,
+                                                 longest_to_int (low_bound),
+                                                 longest_to_int (high_bound));
               }
           }
         else if (noside == EVAL_AVOID_SIDE_EFFECTS)
