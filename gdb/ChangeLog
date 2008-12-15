@@ -1,3 +1,7 @@
+2008-12-15  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf2expr.c (execute_stack_op): Handle DW_OP_swap.
+
 2008-12-15  Jerome Guitton  <guitton@adacore.com>
 
 	* ada-lang.c (ada_value_slice_ptr): Rename to...
