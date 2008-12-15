@@ -1,3 +1,8 @@
+2008-12-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (elf_cris_got_elt_size) <symtab_hdr>: Initialize
+	using ibfd, not abfd.
+
 2008-12-11  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 7041

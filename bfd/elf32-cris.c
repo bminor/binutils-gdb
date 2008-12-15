@@ -4094,13 +4094,13 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 		       unsigned long symndx)
 {
   struct elf_link_hash_entry *h = (struct elf_link_hash_entry *) hr;
-  Elf_Internal_Shdr *symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   bfd_vma eltsiz = 0;
 
   /* We may have one regular GOT entry or up to two TLS GOT
      entries.  */
   if (h == NULL)
     {
+      Elf_Internal_Shdr *symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
       bfd_signed_vma *local_got_refcounts = elf_local_got_refcounts (ibfd);
 
       BFD_ASSERT (local_got_refcounts != NULL);
@@ -4137,6 +4137,9 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 	eltsiz += 4;
     }
 
+  /* We're only called when h->got.refcount is non-zero, so we must
+     have a non-zero size.  */
+  BFD_ASSERT (eltsiz != 0);
   return eltsiz;
 }
 
