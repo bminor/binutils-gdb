@@ -3402,6 +3402,14 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	    case spr_dec:
 	      *rT = cpu_get_decrementer(processor);
 	      break;
+		case spr_tbrl:
+	  	  if (is_64bit_implementation) *rT = TB;
+	  	  else                         *rT = EXTRACTED64(TB, 32, 63);
+		break;
+		case spr_tbru:
+	  	  if (is_64bit_implementation) *rT = EXTRACTED64(TB, 0, 31);
+		  else                         *rT = EXTRACTED64(TB, 0, 31);
+		break;
 	    case spr_tbu:
 	    case spr_tbl:
 	      /* NOTE - these SPR's are not readable. Use mftb[ul] */
