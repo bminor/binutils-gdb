@@ -1,5 +1,19 @@
 2008-12-15  Hans-Peter Nilsson  <hp@axis.com>
 
+	* elf32-cris.c (struct elf_cris_pcrel_relocs_copied): New member
+	r_type.  Fix formatting.
+	(cris_elf_relocate_section) <R_CRIS_8_PCREL, R_CRIS_16_PCREL>
+	<R_CRIS_32_PCREL>: Also break early if the symbol doesn't get
+	emitted as a dynamic one.
+	(cris_elf_check_relocs) <R_CRIS_7, R_CRIS_16, R_CRIS_32>: Fork
+	from PCREL relocs code and simplify; don't fall through.
+	<R_CRIS_8_PCREL, R_CRIS_16_PCREL, R_CRIS_32_PCREL>: Simplify for
+	pcrel only.  For non-local or overridable symbols in a DSO, always
+	keep count of relocs, not just when -Bsymbolic.  Don't emit
+	message nor mark as TEXTREL here.
+	(elf_cris_discard_excess_dso_dynamics): Emit warning and mark as
+	TEXTREL here, if there are nondiscarded pcrel relocs.
+
 	* elf32-cris.c (elf_cris_got_elt_size) <symtab_hdr>: Initialize
 	using ibfd, not abfd.
 

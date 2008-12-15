@@ -794,10 +794,15 @@ struct elf_cris_pcrel_relocs_copied
 {
   /* Next section.  */
   struct elf_cris_pcrel_relocs_copied *next;
+
   /* A section in dynobj.  */
   asection *section;
+
   /* Number of relocs copied in this section.  */
   bfd_size_type count;
+
+  /* Example of reloc being copied, for message.  */
+  enum elf_cris_reloc_type r_type;
 };
 
 /* CRIS ELF linker hash entry.  */
@@ -1474,7 +1479,8 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_CRIS_16_PCREL:
 	case R_CRIS_32_PCREL:
 	  /* If the symbol was local, we need no shlib-specific handling.  */
-	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || h->dynindx == -1)
 	    break;
 
 	  /* Fall through.  */
@@ -3398,12 +3404,13 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	case R_CRIS_16:
 	case R_CRIS_32:
 	  /* Let's help debug shared library creation.  Any of these
-	     relocs can be used in shared libs, but pages containing them
-	     cannot be shared.  Don't warn for sections we don't care
-	     about, such as debug sections or non-constant sections.  We
-	     can't help tables of (global) function pointers, for example,
-	     though they must be emitted in a data section to avoid having
-	     impure text sections.  */
+	     relocs *can* be used in shared libs, but pages containing
+	     them cannot be shared, so they're not appropriate for
+	     common use.  Don't warn for sections we don't care about,
+	     such as debug sections or non-constant sections.  We
+	     can't help tables of (global) function pointers, for
+	     example, though they must be emitted in a (writable) data
+	     section to avoid having impure text sections.  */
 	  if (info->shared
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (sec->flags & SEC_READONLY) != 0)
@@ -3416,8 +3423,56 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 		 sec,
 		 cris_elf_howto_table[r_type].name);
 	    }
+	  if (h != NULL)
+	    {
+	      h->non_got_ref = 1;
 
-	  /* Fall through.  */
+	      /* Make sure a plt entry is created for this symbol if it
+		 turns out to be a function defined by a dynamic object.  */
+	      if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+		h->plt.refcount++;
+	    }
+
+	  /* If we are creating a shared library and this is not a local
+	     symbol, we need to copy the reloc into the shared library.
+	     However when linking with -Bsymbolic and this is a global
+	     symbol which is defined in an object we are including in the
+	     link (i.e., DEF_REGULAR is set), then we can resolve the
+	     reloc directly.  At this point we have not seen all the input
+	     files, so it is possible that DEF_REGULAR is not set now but
+	     will be set later (it is never cleared).  In case of a weak
+	     definition, DEF_REGULAR may be cleared later by a strong
+	     definition in a shared library.  We account for that
+	     possibility below by storing information in the relocs_copied
+	     field of the hash table entry.  A similar situation occurs
+	     when creating shared libraries and symbol visibility changes
+	     render the symbol local.  */
+
+	  /* No need to do anything if we're not creating a shared object.  */
+	  if (! info->shared)
+	    break;
+
+	  /* We don't need to handle relocs into sections not going into
+	     the "real" output.  */
+	  if ((sec->flags & SEC_ALLOC) == 0)
+	    break;
+
+	  /* We may need to create a reloc section in the dynobj and made room
+	     for this reloc.  */
+	  if (sreloc == NULL)
+	    {
+	      sreloc = _bfd_elf_make_dynamic_reloc_section
+		(sec, dynobj, 2, abfd, /*rela?*/ TRUE);
+
+	      if (sreloc == NULL)
+		return FALSE;
+	    }
+
+	  if (sec->flags & SEC_READONLY)
+	    info->flags |= DF_TEXTREL;
+
+	  sreloc->size += sizeof (Elf32_External_Rela);
+	  break;
 
 	case R_CRIS_8_PCREL:
 	case R_CRIS_16_PCREL:
@@ -3456,36 +3511,20 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	  if ((sec->flags & SEC_ALLOC) == 0)
 	    break;
 
-	  /* We can only eliminate PC-relative relocs.  */
-	  if (r_type == R_CRIS_8_PCREL
-	      || r_type == R_CRIS_16_PCREL
-	      || r_type == R_CRIS_32_PCREL)
-	    {
-	      /* If the symbol is local, then we can eliminate the reloc.  */
-	      if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-		break;
+	  /* If the symbol is local, then we know already we can
+	     eliminate the reloc.  */
+	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	    break;
 
-	      /* If this is with -Bsymbolic and the symbol isn't weak, and
-		 is defined by an ordinary object (the ones we include in
-		 this shared library) then we can also eliminate the
-		 reloc.  See comment above for more eliminable cases which
-		 we can't identify at this time.  */
-	      if (info->symbolic
-		  && h->root.type != bfd_link_hash_defweak
-		  && h->def_regular)
-		break;
-
-	      if ((sec->flags & SEC_READONLY) != 0)
-		{
-		  /* FIXME: How do we make this optionally a warning only?  */
-		  (*_bfd_error_handler)
-		    (_("%B, section %A:\n  relocation %s should not be used"
-		       " in a shared object; recompile with -fPIC"),
-		     abfd,
-		     sec,
-		     cris_elf_howto_table[r_type].name);
-		}
-	    }
+	  /* If this is with -Bsymbolic and the symbol isn't weak, and
+	     is defined by an ordinary object (the ones we include in
+	     this shared library) then we can also eliminate the
+	     reloc.  See comment above for more eliminable cases which
+	     we can't identify at this time.  */
+	  if (info->symbolic
+	      && h->root.type != bfd_link_hash_defweak
+	      && h->def_regular)
+	    break;
 
 	  /* We may need to create a reloc section in the dynobj and made room
 	     for this reloc.  */
@@ -3496,46 +3535,40 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
 	      if (sreloc == NULL)
 		return FALSE;
-
-	      if (sec->flags & SEC_READONLY)
-		info->flags |= DF_TEXTREL;
 	    }
 
 	  sreloc->size += sizeof (Elf32_External_Rela);
 
-	  /* If we are linking with -Bsymbolic, we count the number of PC
-	     relative relocations we have entered for this symbol, so that
-	     we can discard them again if the symbol is later defined by a
-	     regular object.  We know that h is really a pointer to an
+	  /* We count the number of PC relative relocations we have
+	     entered for this symbol, so that we can discard them
+	     again if the symbol is later defined by a regular object.
+	     We know that h is really a pointer to an
 	     elf_cris_link_hash_entry.  */
-	  if ((r_type == R_CRIS_8_PCREL
-	       || r_type == R_CRIS_16_PCREL
-	       || r_type == R_CRIS_32_PCREL)
-	      && info->symbolic)
-	    {
-	      struct elf_cris_link_hash_entry *eh;
-	      struct elf_cris_pcrel_relocs_copied *p;
+	  {
+	    struct elf_cris_link_hash_entry *eh;
+	    struct elf_cris_pcrel_relocs_copied *p;
 
-	      eh = elf_cris_hash_entry (h);
+	    eh = elf_cris_hash_entry (h);
 
-	      for (p = eh->pcrel_relocs_copied; p != NULL; p = p->next)
-		if (p->section == sreloc)
-		  break;
+	    for (p = eh->pcrel_relocs_copied; p != NULL; p = p->next)
+	      if (p->section == sreloc)
+		break;
 
-	      if (p == NULL)
-		{
-		  p = ((struct elf_cris_pcrel_relocs_copied *)
-		       bfd_alloc (dynobj, (bfd_size_type) sizeof *p));
-		  if (p == NULL)
-		    return FALSE;
-		  p->next = eh->pcrel_relocs_copied;
-		  eh->pcrel_relocs_copied = p;
-		  p->section = sreloc;
-		  p->count = 0;
-		}
+	    if (p == NULL)
+	      {
+		p = ((struct elf_cris_pcrel_relocs_copied *)
+		     bfd_alloc (dynobj, (bfd_size_type) sizeof *p));
+		if (p == NULL)
+		  return FALSE;
+		p->next = eh->pcrel_relocs_copied;
+		eh->pcrel_relocs_copied = p;
+		p->section = sreloc;
+		p->count = 0;
+		p->r_type = r_type;
+	      }
 
-	      ++p->count;
-	    }
+	    ++p->count;
+	  }
 	  break;
 
         /* This relocation describes the C++ object vtable hierarchy.
@@ -3785,6 +3818,31 @@ elf_cris_discard_excess_dso_dynamics (h, inf)
     {
       for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
 	s->section->size -= s->count * sizeof (Elf32_External_Rela);
+
+      return TRUE;
+    }
+
+  /* If we have accounted for PC-relative relocs for read-only
+     sections, now is the time to warn for them.  We can't do it in
+     cris_elf_check_relocs, because we don't know the status of all
+     symbols at that time (and it's common to force symbols local
+     late).  */
+
+  for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
+    {
+      BFD_ASSERT ((s->section->flags & SEC_READONLY) != 0);
+
+      /* FIXME: How do we make this optionally a warning only?  */
+      (*_bfd_error_handler)
+	(_("%B, section `%A', to symbol `%s':\n"
+	   "  relocation %s should not be used"
+	   " in a shared object; recompile with -fPIC"),
+	 s->section->owner,
+	 s->section,
+	 h->root.root.root.string,
+	 cris_elf_howto_table[s->r_type].name);
+
+      info->flags |= DF_TEXTREL;
     }
 
   return TRUE;
