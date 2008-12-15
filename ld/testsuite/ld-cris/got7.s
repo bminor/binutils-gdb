@@ -9,7 +9,7 @@ got7fn:
 	move.d	got7var\n:GOT,$r10
 	.endr
 .Lfe:
-	.size	dsofn5,.Lfe-got7fn
+	.size	got7fn,.Lfe-got7fn
 
 	.irpc	n,1234567
 	.data

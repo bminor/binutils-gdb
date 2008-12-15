@@ -1,3 +1,8 @@
+2008-12-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/got7.s: Correct .size expression.
+	* ld-cris/tls-e-20a.d: Adjust accordingly.
+
 2008-12-04  Nick Clifton  <nickc@redhat.com>
 
 	* ld-x86-64/ifunc.d: New test (of STT_IFUNC for x86_64).

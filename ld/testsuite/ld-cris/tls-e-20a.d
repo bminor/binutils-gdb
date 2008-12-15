@@ -48,7 +48,7 @@ SYMBOL TABLE:
 0+88 g       \.tdata	0+4 \.hidden x2
 0+821ac g     O \.data	0+4 got7var3
 0+821bc g     O \.data	0+4 got7var7
-0+80098 g     F \.text	0+ got7fn
+0+80098 g     F \.text	0+2a got7fn
 0+821b8 g     O \.data	0+4 got7var6
 0+80094 g       \.text	0+ _start
 0+821c0 g       \*ABS\*	0+ __bss_start
