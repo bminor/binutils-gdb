@@ -1,3 +1,8 @@
+2008-12-15  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): Disassemble VFP instructions using
+	unified syntax.
+
 2008-12-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Move VexNDS before VexNDD.

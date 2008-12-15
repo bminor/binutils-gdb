@@ -389,53 +389,53 @@ Disassembly of section .text:
 			2f8: R_ARM_LDC_SB_G1	f
 0[0-9a-f]+ <[^>]+> ed408185 	stfp	f0, \[r0, #-532\]
 			2fc: R_ARM_LDC_SB_G2	f
-0[0-9a-f]+ <[^>]+> ed900a85 	flds	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed900a85 	(vldr|flds)	s0, \[r0, #532\]
 			300: R_ARM_LDC_PC_G0	f
-0[0-9a-f]+ <[^>]+> ed900a85 	flds	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed900a85 	(vldr|flds)	s0, \[r0, #532\]
 			304: R_ARM_LDC_PC_G1	f
-0[0-9a-f]+ <[^>]+> ed900a85 	flds	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed900a85 	(vldr|flds)	s0, \[r0, #532\]
 			308: R_ARM_LDC_PC_G2	f
-0[0-9a-f]+ <[^>]+> ed900a85 	flds	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed900a85 	(vldr|flds)	s0, \[r0, #532\]
 			30c: R_ARM_LDC_SB_G0	f
-0[0-9a-f]+ <[^>]+> ed900a85 	flds	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed900a85 	(vldr|flds)	s0, \[r0, #532\]
 			310: R_ARM_LDC_SB_G1	f
-0[0-9a-f]+ <[^>]+> ed900a85 	flds	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed900a85 	(vldr|flds)	s0, \[r0, #532\]
 			314: R_ARM_LDC_SB_G2	f
-0[0-9a-f]+ <[^>]+> ed800a85 	fsts	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed800a85 	(vstr|fsts)	s0, \[r0, #532\]
 			318: R_ARM_LDC_PC_G0	f
-0[0-9a-f]+ <[^>]+> ed800a85 	fsts	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed800a85 	(vstr|fsts)	s0, \[r0, #532\]
 			31c: R_ARM_LDC_PC_G1	f
-0[0-9a-f]+ <[^>]+> ed800a85 	fsts	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed800a85 	(vstr|fsts)	s0, \[r0, #532\]
 			320: R_ARM_LDC_PC_G2	f
-0[0-9a-f]+ <[^>]+> ed800a85 	fsts	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed800a85 	(vstr|fsts)	s0, \[r0, #532\]
 			324: R_ARM_LDC_SB_G0	f
-0[0-9a-f]+ <[^>]+> ed800a85 	fsts	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed800a85 	(vstr|fsts)	s0, \[r0, #532\]
 			328: R_ARM_LDC_SB_G1	f
-0[0-9a-f]+ <[^>]+> ed800a85 	fsts	s0, \[r0, #532\]
+0[0-9a-f]+ <[^>]+> ed800a85 	(vstr|fsts)	s0, \[r0, #532\]
 			32c: R_ARM_LDC_SB_G2	f
-0[0-9a-f]+ <[^>]+> ed100a85 	flds	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed100a85 	(vldr|flds)	s0, \[r0, #-532\]
 			330: R_ARM_LDC_PC_G0	f
-0[0-9a-f]+ <[^>]+> ed100a85 	flds	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed100a85 	(vldr|flds)	s0, \[r0, #-532\]
 			334: R_ARM_LDC_PC_G1	f
-0[0-9a-f]+ <[^>]+> ed100a85 	flds	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed100a85 	(vldr|flds)	s0, \[r0, #-532\]
 			338: R_ARM_LDC_PC_G2	f
-0[0-9a-f]+ <[^>]+> ed100a85 	flds	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed100a85 	(vldr|flds)	s0, \[r0, #-532\]
 			33c: R_ARM_LDC_SB_G0	f
-0[0-9a-f]+ <[^>]+> ed100a85 	flds	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed100a85 	(vldr|flds)	s0, \[r0, #-532\]
 			340: R_ARM_LDC_SB_G1	f
-0[0-9a-f]+ <[^>]+> ed100a85 	flds	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed100a85 	(vldr|flds)	s0, \[r0, #-532\]
 			344: R_ARM_LDC_SB_G2	f
-0[0-9a-f]+ <[^>]+> ed000a85 	fsts	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed000a85 	(vstr|fsts)	s0, \[r0, #-532\]
 			348: R_ARM_LDC_PC_G0	f
-0[0-9a-f]+ <[^>]+> ed000a85 	fsts	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed000a85 	(vstr|fsts)	s0, \[r0, #-532\]
 			34c: R_ARM_LDC_PC_G1	f
-0[0-9a-f]+ <[^>]+> ed000a85 	fsts	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed000a85 	(vstr|fsts)	s0, \[r0, #-532\]
 			350: R_ARM_LDC_PC_G2	f
-0[0-9a-f]+ <[^>]+> ed000a85 	fsts	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed000a85 	(vstr|fsts)	s0, \[r0, #-532\]
 			354: R_ARM_LDC_SB_G0	f
-0[0-9a-f]+ <[^>]+> ed000a85 	fsts	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed000a85 	(vstr|fsts)	s0, \[r0, #-532\]
 			358: R_ARM_LDC_SB_G1	f
-0[0-9a-f]+ <[^>]+> ed000a85 	fsts	s0, \[r0, #-532\]
+0[0-9a-f]+ <[^>]+> ed000a85 	(vstr|fsts)	s0, \[r0, #-532\]
 			35c: R_ARM_LDC_SB_G2	f
 0[0-9a-f]+ <[^>]+> ed900b85 	vldr	d0, \[r0, #532\]
 			360: R_ARM_LDC_PC_G0	f

@@ -1,3 +1,9 @@
+2008-12-15  Richard Earnshaw  <rearnsha@arm.com>
+
+	* ld-arm/vfp11-fix-scalar.d: Disassembly of VFP instructions now uses
+	unified syntax.
+	* ld-arm/vfp11-fix-vector.d: Likewise.
+	
 2008-12-15  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/libdso-13b.d: New test.

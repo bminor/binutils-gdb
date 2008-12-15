@@ -1,3 +1,19 @@
+2008-12-15  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/group-reloc-ldc.d: Disassembly of VFP instructions now uses
+	unified syntax.
+	* gas/arm/vfp-non-overlap.d: Likewise.
+	* gas/arm/vfp-neon-syntax.d: Likewise.
+	* gas/arm/vfp-neon-syntax_t2.d: Likewise.
+	* gas/arm/vfp1.d: Likewise.
+	* gas/arm/vfp1_t2.d: Likewise.
+	* gas/arm/vfp1xD.d: Likewise.
+	* gas/arm/vfp1xD_t2.d: Likewise.
+	* gas/arm/vfp2.d: Likewise.
+	* gas/arm/vfp2_t2.d: Likewise.
+	* gas/arm/vfpv3-32drs.d: Likewise.
+	* gas/arm/vfpv3-const-conv.d: Likewise.
+
 2008-12-04  Ben Elliston  <bje@au.ibm.com>
 
 	* gas/ppc/booke.s: Remove booke64 instructions.
