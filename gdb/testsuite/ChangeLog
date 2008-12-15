@@ -1,3 +1,7 @@
+2008-12-15  Jie Zhang  <jie.zhang@analog.com>
+
+	* gdb.base/consecutive.exp: Don't use global in gdb_expect.
+
 2008-12-12  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/commands.exp (redefine_hook_test): New proc.
