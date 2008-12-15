@@ -1,5 +1,8 @@
 2008-12-15  Hans-Peter Nilsson  <hp@axis.com>
 
+	* elf32-cris.c (elf_cris_copy_indirect_symbol): New function.
+	(elf_backend_copy_indirect_symbol): Define to above.
+
 	* elf32-cris.c (struct elf_cris_pcrel_relocs_copied): New member
 	r_type.  Fix formatting.
 	(cris_elf_relocate_section) <R_CRIS_8_PCREL, R_CRIS_16_PCREL>

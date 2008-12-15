@@ -3012,6 +3012,35 @@ elf_cris_adjust_dynamic_symbol (info, h)
   return _bfd_elf_adjust_dynamic_copy (h, s);
 }
 
+/* Adjust our "subclass" elements for an indirect symbol.  */
+
+static void
+elf_cris_copy_indirect_symbol (struct bfd_link_info *info,
+			       struct elf_link_hash_entry *dir,
+			       struct elf_link_hash_entry *ind)
+{
+  struct elf_cris_link_hash_entry *edir, *eind;
+
+  edir = (struct elf_cris_link_hash_entry *) dir;
+  eind = (struct elf_cris_link_hash_entry *) ind;
+
+  BFD_ASSERT (edir->pcrel_relocs_copied == NULL);
+  BFD_ASSERT (edir->gotplt_offset == 0 || eind->gotplt_offset == 0);
+
+#define XMOVOPZ(F, OP, Z) edir->F OP eind->F; eind->F = Z
+#define XMOVE(F) XMOVOPZ (F, +=, 0)
+  XMOVOPZ (pcrel_relocs_copied, =, NULL);
+  XMOVE (gotplt_refcount);
+  XMOVE (gotplt_offset);
+  XMOVE (reg_got_refcount);
+  XMOVE (tprel_refcount);
+  XMOVE (dtp_refcount);
+#undef XMOVE
+#undef XMOVOPZ
+
+  _bfd_elf_link_hash_copy_indirect (info, dir, ind);
+}
+
 /* Look through the relocs for a section during the first phase.  */
 
 static bfd_boolean
@@ -4238,6 +4267,8 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 	elf_cris_link_hash_table_create
 #define elf_backend_adjust_dynamic_symbol \
 	elf_cris_adjust_dynamic_symbol
+#define elf_backend_copy_indirect_symbol \
+	elf_cris_copy_indirect_symbol
 #define elf_backend_size_dynamic_sections \
 	elf_cris_size_dynamic_sections
 #define elf_backend_init_index_section		_bfd_elf_init_1_index_section
