@@ -1,5 +1,7 @@
 2008-12-15  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-cris/libdso-13b.d: New test.
+
 	* ld-cris/hidedsofns2468, ld-cris/libdso-12b.d,
 	ld-cris/libdso-12c.d, ld-cris/libdso-1b.d, ld-cris/dso-1b.s: New
 	tests.
