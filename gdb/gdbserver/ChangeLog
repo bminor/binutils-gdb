@@ -1,3 +1,7 @@
+2008-12-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* event-loop.c: Really add it.
+
 2008-11-25  Pedro Alves  <pedro@codesourcery.com>
 
 	2008-10-13  Pedro Alves  <pedro@codesourcery.com>
