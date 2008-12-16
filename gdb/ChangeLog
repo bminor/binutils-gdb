@@ -1,3 +1,18 @@
+2008-12-16  Tristan Gingold  <gingold@adacore.com>
+
+	* inflow.c: Remove old_sigio, handle_sigio, old_fcntl_flags,
+	set_sigio_trap, clear_sigio_trap definitions.
+	* inferior.h: Remove set_sigio_trap and clear_sigio_trap declarations.
+	* inf-ptrace.c (inf_ptrace_wait): Remove call to set_sigio_trap
+	and clear_sigio_trap.
+	* inf-ttrace.c (inf_ttrace_wait): Ditto.
+	* linux-nat.c (linux_nat_wait): Ditto.
+	* spu-linux-nat.c (spu_child_wait): Ditto.
+	* rs6000-nat.c (rs6000_wait): Ditto.
+	* target.c: Remove target_activity_function and target_activity_fd.
+	* target.h: Remove target_activity_function and target_activity_fd
+	declarations.
+
 2008-12-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* dbxread.c (read_ofile_symtab): Sign-extend 32-bit N_LSYM and

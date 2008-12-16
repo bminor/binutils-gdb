@@ -2475,10 +2475,6 @@ store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
     }
 }
 
-/* Returns zero to leave the inferior alone, one to interrupt it.  */
-int (*target_activity_function) (void);
-int target_activity_fd;
-
 /* Convert a normal process ID to a string.  Returns the string in a
    static buffer.  */
 

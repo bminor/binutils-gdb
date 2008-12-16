@@ -299,15 +299,6 @@ extern void get_target_memory (struct target_ops *ops, CORE_ADDR addr,
 extern ULONGEST get_target_memory_unsigned (struct target_ops *ops,
 					    CORE_ADDR addr, int len);
 
-
-/* If certain kinds of activity happen, target_wait should perform
-   callbacks.  */
-/* Right now we just call (*TARGET_ACTIVITY_FUNCTION) if I/O is possible
-   on TARGET_ACTIVITY_FD.  */
-extern int target_activity_fd;
-/* Returns zero to leave the inferior alone, one to interrupt it.  */
-extern int (*target_activity_function) (void);
-
 struct thread_info;		/* fwd decl for parameter list below: */
 
 struct target_ops

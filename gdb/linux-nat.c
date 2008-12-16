@@ -2868,7 +2868,6 @@ retry:
     {
       /* Causes SIGINT to be passed on to the attached process.  */
       set_sigint_trap ();
-      set_sigio_trap ();
     }
 
   while (status == 0)
@@ -2937,10 +2936,7 @@ retry:
     }
 
   if (!target_can_async_p ())
-    {
-      clear_sigio_trap ();
-      clear_sigint_trap ();
-    }
+    clear_sigint_trap ();
 
   gdb_assert (lp);
 
