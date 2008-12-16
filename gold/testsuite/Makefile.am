@@ -958,8 +958,8 @@ check_PROGRAMS += plugin_test_1
 check_SCRIPTS += plugin_test_1.sh
 check_DATA += plugin_test_1.err
 MOSTLYCLEANFILES += plugin_test_1.err
-plugin_test_1: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms gcctestdir/ld plugin_test.so
-	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms 2>plugin_test_1.err
+plugin_test_1: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms 2>plugin_test_1.err
 plugin_test_1.err: plugin_test_1
 	@touch plugin_test_1.err
 
@@ -985,6 +985,9 @@ two_file_test_1b.syms: two_file_test_1b.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 two_file_test_2.syms: two_file_test_2.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+empty.syms:
+	@echo "" >empty.syms
+	@echo "Symbol table" >>empty.syms
 
 endif PLUGINS
 

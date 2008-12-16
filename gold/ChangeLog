@@ -1,3 +1,20 @@
+2008-12-16  Cary Coutant  <ccoutant@google.com>
+
+	* plugin.cc (Plugin::load): Move LDPT_MESSAGE to front of transfer
+	vector.
+	(Plugin_manager::claim_file): Create plugin object even if
+	plugin did not call the add_symbols callback.
+	(Plugin_obj::get_symbol_resolution_info): Guard against plugin
+	asking for more symbols than were added.
+	* testsuite/Makefile.am (plugin_test_1): Add test case with
+	no global symbols.
+	(empty.syms): New target.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/plugin_test.c (claim_file_hook): Add new debug
+	message. Don't call add_symbols if no globals.
+	(all_symbols_read_hook): Don't provide replacement for empty
+	claimed file.
+
 2008-12-12  Ian Lance Taylor  <iant@google.com>
 
 	* target-reloc.h (Default_scan_relocatable_relocs): Only discard

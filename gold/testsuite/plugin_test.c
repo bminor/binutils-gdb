@@ -319,7 +319,11 @@ claim_file_hook (const struct ld_plugin_input_file* file, int* claimed)
     last_claimed_file->next = claimed_file;
   last_claimed_file = claimed_file;
 
-  (*add_symbols)(file->handle, nsyms, syms);
+  (*message)(LDPL_INFO, "%s: claiming file, adding %d symbols",
+             file->name, nsyms);
+
+  if (nsyms > 0)
+    (*add_symbols)(file->handle, nsyms, syms);
 
   *claimed = 1;
   return LDPS_OK;
@@ -398,6 +402,8 @@ all_symbols_read_hook(void)
        claimed_file != NULL;
        claimed_file = claimed_file->next)
     {
+      if (claimed_file->nsyms == 0)
+        continue;
       if (strlen(claimed_file->name) >= sizeof(buf))
         {
           (*message)(LDPL_FATAL, "%s: filename too long", claimed_file->name);

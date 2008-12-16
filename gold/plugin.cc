@@ -116,7 +116,13 @@ Plugin::load()
   int tv_size = this->args_.size() + tv_fixed_size;
   ld_plugin_tv *tv = new ld_plugin_tv[tv_size];
 
+  // Put LDPT_MESSAGE at the front of the list so the plugin can use it
+  // while processing subsequent entries.
   int i = 0;
+  tv[i].tv_tag = LDPT_MESSAGE;
+  tv[i].tv_u.tv_message = message;
+
+  ++i;
   tv[i].tv_tag = LDPT_API_VERSION;
   tv[i].tv_u.tv_val = LD_PLUGIN_API_VERSION;
 
@@ -163,10 +169,6 @@ Plugin::load()
   ++i;
   tv[i].tv_tag = LDPT_ADD_INPUT_FILE;
   tv[i].tv_u.tv_add_input_file = add_input_file;
-
-  ++i;
-  tv[i].tv_tag = LDPT_MESSAGE;
-  tv[i].tv_u.tv_message = message;
 
   ++i;
   tv[i].tv_tag = LDPT_NULL;
@@ -265,14 +267,13 @@ Plugin_manager::claim_file(Input_file* input_file, off_t offset,
     {
       if ((*this->current_)->claim_file(&this->plugin_input_file_))
         {
-          if (this->objects_.size() <= handle)
-            {
-              gold_error(_("%s: plugin claimed the file "
-                           "but did not provide any symbols"),
-                         this->plugin_input_file_.name);
-              return NULL;
-            }
-          return this->objects_[handle];
+          if (this->objects_.size() > handle)
+            return this->objects_[handle];
+
+          // If the plugin claimed the file but did not call the
+          // add_symbols callback, we need to create the Pluginobj now.
+          Pluginobj* obj = this->make_plugin_object(handle);
+          return obj;
         }
     }
 
@@ -369,7 +370,7 @@ Pluginobj::Pluginobj(const std::string& name, Input_file* input_file,
 ld_plugin_status
 Pluginobj::get_symbol_resolution_info(int nsyms, ld_plugin_symbol* syms) const
 {
-  if (this->nsyms_ == 0)
+  if (nsyms > this->nsyms_)
     return LDPS_NO_SYMS;
   for (int i = 0; i < nsyms; i++)
     {

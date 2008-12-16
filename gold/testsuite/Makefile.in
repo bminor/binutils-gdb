@@ -1463,9 +1463,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  testsuite/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  testsuite/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  testsuite/Makefile
+	  $(AUTOMAKE) --foreign  testsuite/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -2453,8 +2453,8 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@alt/thin_archive_test_4.o: thin_archive_test_4.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d alt || mkdir -p alt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_1: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms gcctestdir/ld plugin_test.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms 2>plugin_test_1.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_1: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms empty.syms 2>plugin_test_1.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_1.err: plugin_test_1
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_1.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_2: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_shared_2.so gcctestdir/ld plugin_test.so
@@ -2475,6 +2475,9 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_2.syms: two_file_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@empty.syms:
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "" >empty.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "Symbol table" >>empty.syms
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
