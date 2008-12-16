@@ -889,8 +889,8 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
     return ptid;
 
   if (ourstatus->kind == TARGET_WAITKIND_EXITED
-    || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
-    return pid_to_ptid (-1);
+      || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
+    return ptid;
 
   if (ourstatus->kind == TARGET_WAITKIND_EXECD)
     {

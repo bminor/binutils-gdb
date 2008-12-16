@@ -2265,6 +2265,7 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_EXITED:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_EXITED\n");
+      inferior_ptid = ecs->ptid;
       target_terminal_ours ();	/* Must do this before mourn anyway */
       print_stop_reason (EXITED, ecs->ws.value.integer);
 
@@ -2283,6 +2284,7 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_SIGNALLED:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_SIGNALLED\n");
+      inferior_ptid = ecs->ptid;
       stop_print_frame = 0;
       target_terminal_ours ();	/* Must do this before mourn anyway */
 

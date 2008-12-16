@@ -414,7 +414,7 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  /* Claim it exited with unknown signal.  */
 	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
 	  ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
-	  return minus_one_ptid;
+	  return inferior_ptid;
 	}
 
       /* Ignore terminated detached child processes.  */
