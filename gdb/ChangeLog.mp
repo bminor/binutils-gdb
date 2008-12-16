@@ -3,6 +3,15 @@
 	Merge from head:
 	2008-12-12  Pedro Alves  <pedro@codesourcery.com>
 
+	* infrun.c (handle_inferior_event): Correctly tag non-executing
+	threads in multi-process.
+	(normal_stop): Correctly tag stopped threads in multi-process.
+
+2008-12-16  Pedro Alves  <pedro@codesourcery.com>
+
+	Merge from head:
+	2008-12-12  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote.c (extended_remote_mourn_1): Always call
 	generic_mourn_inferior.
 
