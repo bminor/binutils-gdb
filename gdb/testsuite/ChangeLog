@@ -1,3 +1,8 @@
+2008-12-16  Christophe Lyon  <christophe.lyon@st.com>
+
+	* gdb.base/expand-psymtabs.c: Insert code in foo so that the
+	compiler actually generate code at the expected line number.
+
 2008-12-15  Jie Zhang  <jie.zhang@analog.com>
 
 	* gdb.base/consecutive.exp: Don't use global in gdb_expect.
