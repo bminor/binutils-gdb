@@ -929,12 +929,15 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 
 	  if (!single_inst)
 	    {
-	      find_pc_line_pc_range (stop_pc,
+	      CORE_ADDR pc;
+
+	      pc = get_frame_pc (frame);
+	      find_pc_line_pc_range (pc,
 				     &tp->step_range_start, &tp->step_range_end);
 	      if (tp->step_range_end == 0)
 		{
 		  char *name;
-		  if (find_pc_partial_function (stop_pc, &name,
+		  if (find_pc_partial_function (pc, &name,
 						&tp->step_range_start,
 						&tp->step_range_end) == 0)
 		    error (_("Cannot find bounds of current function"));
@@ -1051,7 +1054,10 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 
       if (!single_inst)
 	{
-	  find_pc_line_pc_range (stop_pc,
+	  CORE_ADDR pc;
+
+	  pc = get_frame_pc (frame);
+	  find_pc_line_pc_range (pc,
 				 &tp->step_range_start, &tp->step_range_end);
 
 	  /* If we have no line info, switch to stepi mode.  */
@@ -1062,7 +1068,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	  else if (tp->step_range_end == 0)
 	    {
 	      char *name;
-	      if (find_pc_partial_function (stop_pc, &name,
+	      if (find_pc_partial_function (pc, &name,
 					    &tp->step_range_start,
 					    &tp->step_range_end) == 0)
 		error (_("Cannot find bounds of current function"));
