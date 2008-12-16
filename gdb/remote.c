@@ -6677,6 +6677,9 @@ extended_remote_mourn_1 (struct target_ops *target)
   /* Unlike "target remote", we do not want to unpush the target; then
      the next time the user says "run", we won't be connected.  */
 
+  /* Call common code to mark the inferior as not running.    */
+  generic_mourn_inferior ();
+
   if (have_real_inferiors ())
     {
       extern void nullify_last_target_wait_ptid ();
@@ -6688,10 +6691,6 @@ extended_remote_mourn_1 (struct target_ops *target)
     }
   else
     {
-      struct remote_state *rs = get_remote_state ();
-
-      /* Call common code to mark the inferior as not running.	*/
-      generic_mourn_inferior ();
       if (!remote_multi_process_p (rs))
 	{
 	  /* Check whether the target is running now - some remote stubs

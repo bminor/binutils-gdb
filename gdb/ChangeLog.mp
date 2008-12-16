@@ -3,6 +3,14 @@
 	Merge from head:
 	2008-12-12  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote.c (extended_remote_mourn_1): Always call
+	generic_mourn_inferior.
+
+2008-12-16  Pedro Alves  <pedro@codesourcery.com>
+
+	Merge from head:
+	2008-12-12  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote.c (remote_detach_1): Don't delete the inferior here.
 	(process_stop_reply): Ditto.
 	(extended_remote_kill): Ditto.
