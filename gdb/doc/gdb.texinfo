@@ -11334,12 +11334,12 @@ There is limited support for array and record aggregates.  They are
 permitted only on the right sides of assignments, as in these examples:
 
 @smallexample
-set An_Array := (1, 2, 3, 4, 5, 6)
-set An_Array := (1, others => 0)
-set An_Array := (0|4 => 1, 1..3 => 2, 5 => 6)
-set A_2D_Array := ((1, 2, 3), (4, 5, 6), (7, 8, 9))
-set A_Record := (1, "Peter", True);
-set A_Record := (Name => "Peter", Id => 1, Alive => True)
+(@value{GDBP}) set An_Array := (1, 2, 3, 4, 5, 6)
+(@value{GDBP}) set An_Array := (1, others => 0)
+(@value{GDBP}) set An_Array := (0|4 => 1, 1..3 => 2, 5 => 6)
+(@value{GDBP}) set A_2D_Array := ((1, 2, 3), (4, 5, 6), (7, 8, 9))
+(@value{GDBP}) set A_Record := (1, "Peter", True);
+(@value{GDBP}) set A_Record := (Name => "Peter", Id => 1, Alive => True)
 @end smallexample
 
 Changing a
@@ -11361,8 +11361,8 @@ you can assign a value with a different size of @code{Vals} with two
 assignments:
 
 @smallexample
-set A_Rec.Len := 4
-set A_Rec := (Id => 42, Vals => (1, 2, 3, 4))
+(@value{GDBP}) set A_Rec.Len := 4
+(@value{GDBP}) set A_Rec := (Id => 42, Vals => (1, 2, 3, 4))
 @end smallexample
 
 As this example also illustrates, @value{GDBN} is very loose about the usual
@@ -11448,8 +11448,8 @@ The assignment statement is allowed as an expression, returning
 its right-hand operand as its value.  Thus, you may enter
 
 @smallexample
-set x := y + 3
-print A(tmp := y + 1)
+(@value{GDBP}) set x := y + 3
+(@value{GDBP}) print A(tmp := y + 1)
 @end smallexample
 
 @item 
@@ -11459,8 +11459,8 @@ This allows, for example,
 complex conditional breaks:
 
 @smallexample
-break f
-condition 1 (report(i); k += 1; A(k) > 100)
+(@value{GDBP}) break f
+(@value{GDBP}) condition 1 (report(i); k += 1; A(k) > 100)
 @end smallexample
 
 @item 
@@ -11484,7 +11484,7 @@ The subtype used as a prefix for the attributes @t{'Pos}, @t{'Min}, and
 to write
 
 @smallexample
-print 'max(x, y)
+(@value{GDBP}) print 'max(x, y)
 @end smallexample
 
 @item
@@ -11517,7 +11517,7 @@ For the rare occasions when you actually have to look at them,
 enclose them in angle brackets to avoid the lower-case mapping. 
 For example,
 @smallexample
-@value{GDBP} print <JMPBUF_SAVE>[0]
+(@value{GDBP}) print <JMPBUF_SAVE>[0]
 @end smallexample
 
 @item

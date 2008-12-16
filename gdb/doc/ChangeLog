@@ -1,3 +1,10 @@
+2008-12-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Omissions from Ada): Add missing GDB prompt in
+	examples.
+	(Additions to Ada): Likewise.  Add the missing opening and closing
+	parenthesis of the GDB prompt in one of the examples.
+
 2008-12-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Omissions from Ada): Remove incorrect documentation
