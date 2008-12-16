@@ -916,70 +916,41 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
       make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
     }
 
-  /* In synchronous case, all is well, just use the regular for loop. */
+  /* In synchronous case, all is well; each step_once call will step once.  */
   if (!target_can_async_p ())
     {
       for (; count > 0; count--)
 	{
-	  struct thread_info *tp = inferior_thread ();
-	  clear_proceed_status ();
+	  struct thread_info *tp;
+	  step_once (skip_subroutines, single_inst, count, thread);
 
-	  frame = get_current_frame ();
-	  tp->step_frame_id = get_frame_id (frame);
-
-	  if (!single_inst)
-	    {
-	      CORE_ADDR pc;
-
-	      pc = get_frame_pc (frame);
-	      find_pc_line_pc_range (pc,
-				     &tp->step_range_start, &tp->step_range_end);
-	      if (tp->step_range_end == 0)
-		{
-		  char *name;
-		  if (find_pc_partial_function (pc, &name,
-						&tp->step_range_start,
-						&tp->step_range_end) == 0)
-		    error (_("Cannot find bounds of current function"));
-
-		  target_terminal_ours ();
-		  printf_filtered (_("\
-Single stepping until exit from function %s, \n\
-which has no line number information.\n"), name);
-		}
-	    }
+	  if (target_has_execution
+	      && !ptid_equal (inferior_ptid, null_ptid))
+	    tp = inferior_thread ();
 	  else
+	    tp = NULL;
+
+	  if (!tp || !tp->stop_step || !tp->step_multi)
 	    {
-	      /* Say we are stepping, but stop after one insn whatever it does.  */
-	      tp->step_range_start = tp->step_range_end = 1;
-	      if (!skip_subroutines)
-		/* It is stepi.
-		   Don't step over function calls, not even to functions lacking
-		   line numbers.  */
-		tp->step_over_calls = STEP_OVER_NONE;
+	      /* If we stopped for some reason that is not stepping
+		 there are no further steps to make.  */
+	      if (tp)
+		tp->step_multi = 0;
+	      break;
 	    }
-
-	  if (skip_subroutines)
-	    tp->step_over_calls = STEP_OVER_ALL;
-
-	  tp->step_multi = (count > 1);
-	  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
-
-	  if (!target_has_execution
-	      || !inferior_thread ()->stop_step)
-	    break;
 	}
 
       do_cleanups (cleanups);
-      return;
     }
-  /* In case of asynchronous target things get complicated, do only
-     one step for now, before returning control to the event loop. Let
-     the continuation figure out how many other steps we need to do,
-     and handle them one at the time, through step_once(). */
   else
     {
+      /* In the case of an asynchronous target things get complicated;
+	 do only one step for now, before returning control to the
+	 event loop.  Let the continuation figure out how many other
+	 steps we need to do, and handle them one at the time, through
+	 step_once.  */
       step_once (skip_subroutines, single_inst, count, thread);
+
       /* We are running, and the continuation is installed.  It will
 	 disable the longjmp breakpoint as appropriate.  */
       discard_cleanups (cleanups);
@@ -1013,7 +984,8 @@ step_1_continuation (void *args)
 	{
 	  /* There are more steps to make, and we did stop due to
 	     ending a stepping range.  Do another step.  */
-	  step_once (a->skip_subroutines, a->single_inst, a->count - 1, a->thread);
+	  step_once (a->skip_subroutines, a->single_inst,
+		     a->count - 1, a->thread);
 	  return;
 	}
       tp->step_multi = 0;
@@ -1025,18 +997,16 @@ step_1_continuation (void *args)
     delete_longjmp_breakpoint (a->thread);
 }
 
-/* Do just one step operation. If count >1 we will have to set up a
-   continuation to be done after the target stops (after this one
-   step). This is useful to implement the 'step n' kind of commands, in
-   case of asynchronous targets. We had to split step_1 into two parts,
-   one to be done before proceed() and one afterwards. This function is
-   called in case of step n with n>1, after the first step operation has
-   been completed.*/
-static void 
+/* Do just one step operation.  This is useful to implement the 'step
+   n' kind of commands.  In case of asynchronous targets, we will have
+   to set up a continuation to be done after the target stops (after
+   this one step).  For synch targets, the caller handles further
+   stepping.  */
+
+static void
 step_once (int skip_subroutines, int single_inst, int count, int thread)
 {
   struct frame_info *frame;
-  struct step_1_continuation_args *args;
 
   if (count > 0)
     {
@@ -1096,12 +1066,21 @@ which has no line number information.\n"), name);
       tp->step_multi = (count > 1);
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
 
-      args = xmalloc (sizeof (*args));
-      args->skip_subroutines = skip_subroutines;
-      args->single_inst = single_inst;
-      args->count = count;
-      args->thread = thread;
-      add_intermediate_continuation (tp, step_1_continuation, args, xfree);
+      /* For async targets, register a continuation to do any
+	 additional steps.  For sync targets, the caller will handle
+	 further stepping.  */
+      if (target_can_async_p ())
+	{
+	  struct step_1_continuation_args *args;
+
+	  args = xmalloc (sizeof (*args));
+	  args->skip_subroutines = skip_subroutines;
+	  args->single_inst = single_inst;
+	  args->count = count;
+	  args->thread = thread;
+
+	  add_intermediate_continuation (tp, step_1_continuation, args, xfree);
+	}
     }
 }
 

@@ -1,9 +1,19 @@
 2008-12-16  Pedro Alves  <pedro@codesourcery.com>
 
 	Merge from head:
+	2008-12-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (step_1): Use step_once in the synchronous case too.
+	(step_1_continuation): Wrap line.
+	(step_once): Adjust comment.  Only install the continuation in
+	async mode.
+
+2008-12-16  Pedro Alves  <pedro@codesourcery.com>
+
+	Merge from head:
 	2008-12-07  Pedro Alves  <pedro@codesourcery.com>
 
-	(handle_inferior_event): On a TARGET_WAITKIND_EXITED or
+	* infrun.c (handle_inferior_event): On a TARGET_WAITKIND_EXITED or
 	TARGET_WAITKIND_SIGNALLED, switch inferior_ptid to the event ptid.
 	* linux_thread_db.c (thread_db_wait): On a TARGET_WAITKIND_EXITED
 	or TARGET_WAITKIND_SIGNALLED, return the ptid the beneath target
