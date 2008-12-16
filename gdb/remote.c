@@ -3377,7 +3377,6 @@ remote_detach_1 (char *args, int from_tty, int extended)
     }
 
   discard_pending_stop_replies (pid);
-  detach_inferior (pid);
   target_mourn_inferior ();
 }
 
@@ -4629,31 +4628,28 @@ process_stop_reply (struct stop_reply *stop_reply,
   if (ptid_equal (ptid, null_ptid))
     ptid = inferior_ptid;
 
-  if (status->kind == TARGET_WAITKIND_EXITED
-      || status->kind == TARGET_WAITKIND_SIGNALLED)
+  if (status->kind != TARGET_WAITKIND_EXITED
+      && status->kind != TARGET_WAITKIND_SIGNALLED)
     {
-      int pid = ptid_get_pid (ptid);
-      delete_inferior (pid);
+      /* Expedited registers.  */
+      if (stop_reply->regcache)
+	{
+	  cached_reg_t *reg;
+	  int ix;
+
+	  for (ix = 0;
+	       VEC_iterate(cached_reg_t, stop_reply->regcache, ix, reg);
+	       ix++)
+	    regcache_raw_supply (get_thread_regcache (ptid),
+				 reg->num, reg->data);
+	  VEC_free (cached_reg_t, stop_reply->regcache);
+	}
+
+      notice_new_inferiors (ptid, 0);
+
+      remote_stopped_by_watchpoint_p = stop_reply->stopped_by_watchpoint_p;
+      remote_watch_data_address = stop_reply->watch_data_address;
     }
-  else
-    notice_new_inferiors (ptid, 0);
-
-  /* Expedited registers.  */
-  if (stop_reply->regcache)
-    {
-      cached_reg_t *reg;
-      int ix;
-
-      for (ix = 0;
-	   VEC_iterate(cached_reg_t, stop_reply->regcache, ix, reg);
-	   ix++)
-	regcache_raw_supply (get_thread_regcache (ptid),
-			     reg->num, reg->data);
-      VEC_free (cached_reg_t, stop_reply->regcache);
-    }
-
-  remote_stopped_by_watchpoint_p = stop_reply->stopped_by_watchpoint_p;
-  remote_watch_data_address = stop_reply->watch_data_address;
 
   stop_reply_xfree (stop_reply);
   return ptid;
@@ -6635,7 +6631,6 @@ extended_remote_kill (void)
   if (res != 0)
     error (_("Can't kill process"));
 
-  delete_inferior (pid);
   target_mourn_inferior ();
 }
 

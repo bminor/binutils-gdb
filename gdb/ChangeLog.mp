@@ -1,6 +1,15 @@
 2008-12-16  Pedro Alves  <pedro@codesourcery.com>
 
 	Merge from head:
+	2008-12-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_detach_1): Don't delete the inferior here.
+	(process_stop_reply): Ditto.
+	(extended_remote_kill): Ditto.
+
+2008-12-16  Pedro Alves  <pedro@codesourcery.com>
+
+	Merge from head:
 	2008-12-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcmd.c (step_1): Use step_once in the synchronous case too.
