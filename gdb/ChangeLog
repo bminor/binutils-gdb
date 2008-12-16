@@ -1,3 +1,8 @@
+2008-12-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* dbxread.c (read_ofile_symtab): Sign-extend 32-bit N_LSYM and
+	N_PSYM STABS values for 64-bit GDB.
+
 2008-12-15  Tristan Gingold  <gingold@adacore.com>
 
 	* dwarf2expr.c (execute_stack_op): Handle DW_OP_swap.
