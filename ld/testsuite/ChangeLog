@@ -1,3 +1,8 @@
+2008-12-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/expalltst3, ld-cris/expdyn2.s, ld-cris/libdso-15.d: New
+	tests.
+
 2008-12-15  Richard Earnshaw  <rearnsha@arm.com>
 
 	* ld-arm/vfp11-fix-scalar.d: Disassembly of VFP instructions now uses
