@@ -1494,7 +1494,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		   && r_type != R_CRIS_16_PCREL
 		   && r_type != R_CRIS_32_PCREL)
 		  || (!info->symbolic
-		      || !h->def_regular)))
+		      || (h != NULL && !h->def_regular))))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;

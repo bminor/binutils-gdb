@@ -2,6 +2,8 @@
 
 	* elf32-cris.c (elf_cris_copy_indirect_symbol): Return without
 	action for symbols other than bfd_link_hash_indirect.
+	(cris_elf_relocate_section) <R_CRIS_8, R_CRIS_16, R_CRIS_32>: Add missing
+	gate h != NULL for h->def_regular test.
 
 2008-12-15  Hans-Peter Nilsson  <hp@axis.com>
 
