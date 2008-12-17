@@ -1,3 +1,8 @@
+2008-12-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (elf_cris_copy_indirect_symbol): Return without
+	action for symbols other than bfd_link_hash_indirect.
+
 2008-12-15  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (elf_cris_copy_indirect_symbol): New function.
