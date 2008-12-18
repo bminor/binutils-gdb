@@ -12,5 +12,5 @@ Disassembly of section .text:
 0+001 <bar>:
    1:	8d 83 00 00 00 00 [ 	]*lea    0x0\(%ebx\),%eax
    7:	8b 83 00 00 00 00 [ 	]*mov    0x0\(%ebx\),%eax
-   d:	90 [ 	]*nop    
+   d:	90 [ 	]*nop
 [ 	]*...

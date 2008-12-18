@@ -1,3 +1,28 @@
+2008-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/intel.d: Remove trailing white spaces after nop.
+	* gas/i386/intelpic.d: Likewise.
+	* gas/i386/nops16-1.d: Likewise.
+	* gas/i386/nops-1-i686.d: Likewise.
+	* gas/i386/nops-3.d: Likewise.
+	* gas/i386/nops-3-i386.d: Likewise.
+	* gas/i386/nops-3-i686.d: Likewise.
+	* gas/i386/nops-4.d: Likewise.
+	* gas/i386/nops-4-i386.d: Likewise.
+	* gas/i386/nops-4-i686.d: Likewise.
+	* gas/i386/opcode.d: Likewise.
+	* gas/i386/opcode-suffix.d: Likewise.
+	* gas/i386/reloc.d: Likewise.
+	* gas/i386/tlsnopic.d: Likewise.
+	* gas/i386/x86-64-nops-1.d: Likewise.
+	* gas/i386/x86-64-nops-1-nocona.d: Likewise.
+	* gas/i386/x86-64-nops-2.d: Likewise.
+	* gas/i386/x86-64-nops-3.d: Likewise.
+	* gas/i386/x86-64-nops-4-core2.d: Likewise.
+	* gas/i386/x86-64-nops-4.d: Likewise.
+	* gas/i386/x86-64-nops-4-k8.d: Likewise.
+	* gas/i386/x86-64-opcode.d: Likewise.
+
 2008-12-15  Richard Earnshaw  <rearnsha@arm.com>
 
 	* gas/arm/group-reloc-ldc.d: Disassembly of VFP instructions now uses

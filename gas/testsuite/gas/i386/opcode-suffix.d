@@ -142,7 +142,7 @@ Disassembly of section .text:
  *[0-9a-f]+:	8d 90 90 90 90 90[ 	]+leal[ 	]+-0x6f6f6f70\(%eax\),%edx
  *[0-9a-f]+:	8e 90 90 90 90 90[ 	]+movw[ 	]+-0x6f6f6f70\(%eax\),%ss
  *[0-9a-f]+:	8f 80 90 90 90 90[ 	]+popl[ 	]+-0x6f6f6f70\(%eax\)
- *[0-9a-f]+:	90[ 	]+nop[ 	]+
+ *[0-9a-f]+:	90[ 	]+nop
  *[0-9a-f]+:	91[ 	]+xchgl[ 	]+%eax,%ecx
  *[0-9a-f]+:	92[ 	]+xchgl[ 	]+%eax,%edx
  *[0-9a-f]+:	93[ 	]+xchgl[ 	]+%eax,%ebx

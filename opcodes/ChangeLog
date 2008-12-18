@@ -1,3 +1,26 @@
+2008-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (mnemonicendp): New.
+	(op): Likewise.
+	(print_insn): Use mnemonicendp.
+	(OP_3DNowSuffix): Likewise.
+	(CMP_Fixup): Likewise.
+	(CMPXCHG8B_Fixup): Likewise.
+	(CRC32_Fixup): Likewise.
+	(OP_DREX_FCMP): Likewise.
+	(OP_DREX_ICMP): Likewise.
+	(VZERO_Fixup): Likewise.
+	(VCMP_Fixup): Likewise.
+	(PCLMUL_Fixup): Likewise.
+	(VPERMIL2_Fixup): Likewise.
+	(MOVBE_Fixup): Likewise.
+	(putop): Update mnemonicendp.
+	(oappend): Use stpcpy.
+	(simd_cmp_op): Changed to struct op.
+	(vex_cmp_op): Likewise.
+	(pclmul_op): Likewise.
+	(vpermil2_op): Likewise.
+
 2008-12-15  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-dis.c (coprocessor_opcodes): Disassemble VFP instructions using

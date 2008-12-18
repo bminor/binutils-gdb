@@ -1,3 +1,7 @@
+2008-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/tlsld1.dd: Remove trailing white spaces after nop.
+
 2008-12-17  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/expalltst3, ld-cris/expdyn2.s, ld-cris/libdso-15.d: New
