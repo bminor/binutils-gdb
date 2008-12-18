@@ -1,3 +1,8 @@
+2008-12-17  Ian Lance Taylor  <iant@google.com>
+
+	* options.h (class General_options): Add --no case for
+	--export-dynamic.
+
 2008-12-16  Cary Coutant  <ccoutant@google.com>
 
 	* plugin.cc (Plugin::load): Move LDPT_MESSAGE to front of transfer

@@ -636,7 +636,8 @@ class General_options
                 N_("Set program start address"), N_("ADDRESS"));
 
   DEFINE_bool(export_dynamic, options::TWO_DASHES, 'E', false,
-              N_("Export all dynamic symbols"), NULL);
+              N_("Export all dynamic symbols"),
+	      N_("Do not export all dynamic symbols (default)"));
 
   DEFINE_bool(eh_frame_hdr, options::TWO_DASHES, '\0', false,
               N_("Create exception frame header"), NULL);
