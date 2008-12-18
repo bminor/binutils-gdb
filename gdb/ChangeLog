@@ -1,3 +1,12 @@
+2008-12-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_child_follow_fork): If following the child,
+	and not detaching the parent, also add the child fork to the fork
+	list.
+	* linux-fork.c (linux_fork_context): Remove dead error call.
+	Assert that the incoming newfp argument is not null.  Do not add a
+	new fork for inferior_ptid.  Assert that there is one already.
+
 2008-12-16  Tristan Gingold  <gingold@adacore.com>
 
 	* inflow.c: Remove old_sigio, handle_sigio, old_fcntl_flags,
