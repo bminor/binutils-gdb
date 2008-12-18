@@ -863,6 +863,12 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 	  if (!fp)
 	    fp = add_fork (parent_pid);
 	  fork_save_infrun_state (fp, 0);
+
+	  /* Also add an entry for the child fork.  */
+	  fp = find_fork_pid (child_pid);
+	  if (!fp)
+	    fp = add_fork (child_pid);
+	  fork_save_infrun_state (fp, 0);
 	}
       else
 	target_detach (NULL, 0);

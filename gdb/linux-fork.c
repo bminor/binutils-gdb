@@ -597,15 +597,14 @@ static void
 linux_fork_context (struct fork_info *newfp, int from_tty)
 {
   /* Now we attempt to switch processes.  */
-  struct fork_info *oldfp = find_fork_ptid (inferior_ptid);
+  struct fork_info *oldfp;
   ptid_t ptid;
   int id, i;
 
-  if (!newfp)
-    error (_("No such fork/process"));
+  gdb_assert (newfp != NULL);
 
-  if (!oldfp)
-    oldfp = add_fork (ptid_get_pid (inferior_ptid));
+  oldfp = find_fork_ptid (inferior_ptid);
+  gdb_assert (oldfp != NULL);
 
   fork_save_infrun_state (oldfp, 1);
   remove_breakpoints ();
