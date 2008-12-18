@@ -2561,7 +2561,8 @@ d_expression (struct d_info *di)
 			    d_make_comp (di, DEMANGLE_COMPONENT_TEMPLATE, name,
 					 d_template_args (di)));
     }
-  else if (peek == 's' && d_peek_next_char (di) == 'T')
+  else if (peek == 's'
+	   && (d_peek_next_char (di) == 'T' || d_peek_next_char (di) == 'R'))
     {
       /* Just demangle a parameter placeholder as its type.  */
       d_advance (di, 2);
@@ -3763,8 +3764,14 @@ d_print_comp (struct d_print_info *dpi,
 	d_print_comp (dpi, d_left (dc));
       if (d_right (dc) != NULL)
 	{
+	  size_t len;
 	  d_append_string (dpi, ", ");
+	  len = dpi->len;
 	  d_print_comp (dpi, d_right (dc));
+	  /* If that didn't print anything (which can happen with empty
+	     template argument packs), remove the comma and space.  */
+	  if (dpi->len == len)
+	    dpi->len -= 2;
 	}
       return;
 
