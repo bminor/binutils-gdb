@@ -1,3 +1,8 @@
+2008-12-20  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/tls-err-77.d, ld-cris/tls-gc-79.d, ld-cris/tls-ie-8e.s,
+	ld-cris/tls-ie-8e1.d: New tests.
+
 2008-12-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/tlsld1.dd: Remove trailing white spaces after nop.
