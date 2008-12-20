@@ -284,6 +284,7 @@ static bitfield opcode_modifiers[] =
 {
   BITFIELD (D),
   BITFIELD (W),
+  BITFIELD (S),
   BITFIELD (Modrm),
   BITFIELD (ShortForm),
   BITFIELD (Jump),

@@ -166,8 +166,10 @@ typedef union i386_cpu_flags
 #define D			0
 /* set if operands can be words or dwords encoded the canonical way */
 #define W			(D + 1)
+/* Swap operand in encoding. */
+#define S			(W + 1)
 /* insn has a modrm byte. */
-#define Modrm			(W + 1)
+#define Modrm			(S + 1)
 /* register is in low 3 bits of opcode */
 #define ShortForm		(Modrm + 1)
 /* special case for jump insns.  */
@@ -284,6 +286,7 @@ typedef struct i386_opcode_modifier
 {
   unsigned int d:1;
   unsigned int w:1;
+  unsigned int s:1;
   unsigned int modrm:1;
   unsigned int shortform:1;
   unsigned int jump:1;

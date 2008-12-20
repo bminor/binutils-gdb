@@ -279,6 +279,9 @@ struct _i386_insn
     sib_byte sib;
     drex_byte drex;
     vex_prefix vex;
+
+    /* Swap operand in encoding.  */
+    unsigned int swap_operand : 1;
   };
 
 typedef struct _i386_insn i386_insn;
@@ -2908,6 +2911,7 @@ parse_insn (char *line, char *mnemonic)
   char *mnem_p;
   int supported;
   const template *t;
+  char *dot_p = NULL;
 
   /* Non-zero if we found a prefix only acceptable with string insns.  */
   const char *expecting_string_instruction = NULL;
@@ -2917,6 +2921,8 @@ parse_insn (char *line, char *mnemonic)
       mnem_p = mnemonic;
       while ((*mnem_p = mnemonic_chars[(unsigned char) *l]) != 0)
 	{
+	  if (*mnem_p == '.')
+	    dot_p = mnem_p;
 	  mnem_p++;
 	  if (mnem_p >= mnemonic + MAX_MNEM_SIZE)
 	    {
@@ -2988,8 +2994,24 @@ parse_insn (char *line, char *mnemonic)
 	break;
     }
 
+  if (!current_templates && dot_p)
+    {
+      if (mnem_p - 2 == dot_p)
+	{
+	  /* Check if we should swap operand in encoding.  */
+	  if (dot_p[1] == 's')
+	    i.swap_operand = 1;
+	  else
+	    goto check_suffix;
+	  mnem_p = dot_p;
+	  *dot_p = '\0';
+	  current_templates = hash_find (op_hash, mnemonic);
+	}
+    }
+
   if (!current_templates)
     {
+check_suffix:
       /* See if we can get a match by trimming off a suffix.  */
       switch (mnem_p[-1])
 	{
@@ -3712,6 +3734,16 @@ match_template (void)
 	      && operand_type_equal (&i.types [0], &acc32)
 	      && operand_type_equal (&i.types [1], &acc32))
 	    continue;
+	  if (i.swap_operand)
+	    {
+	      /* If we swap operand in encoding, we either match
+		 the next one or reverse direction of operands.  */
+	      if (t->opcode_modifier.s)
+		continue;
+	      else if (t->opcode_modifier.d)
+		goto check_reverse;
+	    }
+
 	case 3:
 	case 4:
 	case 5:
@@ -3728,6 +3760,7 @@ match_template (void)
 	      if (!t->opcode_modifier.d && !t->opcode_modifier.floatd)
 		continue;
 
+check_reverse:
 	      /* Try reversing direction of operands.  */
 	      overlap0 = operand_type_and (i.types[0], operand_types[1]);
 	      overlap1 = operand_type_and (i.types[1], operand_types[0]);

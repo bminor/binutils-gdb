@@ -1,3 +1,20 @@
+2008-12-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run opts, opts-intel, sse2avx-opts,
+	sse2avx-opts-intel, x86-64-opts, x86-64-opts-intel,
+	x86-64-sse2avx-opts and x86-64-sse2avx-opts-intel.
+
+	* gas/i386/opts.d: New.
+	* gas/i386/opts-intel.d: Likewise.
+	* gas/i386/opts.s: Likewise.
+	* gas/i386/sse2avx-opts.d: Likewise.
+	* gas/i386/sse2avx-opts-intel.d: Likewise.
+	* gas/i386/x86-64-opts.d: Likewise.
+	* gas/i386/x86-64-opts-intel.d: Likewise.
+	* gas/i386/x86-64-opts.s: Likewise.
+	* gas/i386/x86-64-sse2avx-opts.d: Likewise.
+	* gas/i386/x86-64-sse2avx-opts-intel.d: Likewise.
+
 2008-12-20  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/rd-tls-1.s, gas/cris/rd-tls-1.d: Test :IE and

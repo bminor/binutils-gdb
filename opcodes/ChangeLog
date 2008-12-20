@@ -1,3 +1,41 @@
+2008-12-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (EbS): New.
+	(EvS): Likewise.
+	(EMS): Likewise.
+	(EXqS): Likewise.
+	(EXxS): Likewise.
+	(b_swap_mode): Likewise.
+	(v_swap_mode): Likewise.
+	(q_swap_mode): Likewise.
+	(x_swap_mode): Likewise.
+	(v_mode): Updated.
+	(w_mode): Likewise.
+	(t_mode): Likewise.
+	(xmm_mode): Likewise.
+	(swap_operand): Likewise.
+	(dis386): Use EbS on movB.  Use EvS on moveS.
+	(dis386_twobyte): Use EXxS on movapX.
+	(prefix_table): Use EXxS on movups, movupd, movdqu, movdqa,
+	vmovups, vmovdqu, vmovdqa. Use EMS and EXqS on movq.
+	(vex_table): Use EXxS on vmovapX.
+	(vex_len_table): Use EXqS on vmovq.
+	(intel_operand_size): Handle b_swap_mode, v_swap_mode,
+	q_swap_mode and x_swap_mode.
+	(OP_E_register): Handle b_swap_mode and v_swap_mode.
+	(OP_EM): Handle v_swap_mode.
+	(OP_EX): x_swap_mode and q_swap_mode.
+
+	* i386-gen.c (opcode_modifiers): Add S.
+
+	* i386-opc.h (S): New.
+	(Modrm): Updated.
+	(i386_opcode_modifier): Add s.
+
+	* i386-opc.tbl: Add S to movapd, movaps, movdqa, movdqu, movq,
+	movupd, movups, vmovapd, vmovaps, vmovdqa, vmovdqu and vmovq.
+	* i386-tbl.h: Regenerated.
+
 2008-12-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (mnemonicendp): New.

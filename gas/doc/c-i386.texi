@@ -14,7 +14,7 @@
 @end ifclear
 
 @cindex i386 support
-@cindex i80306 support
+@cindex i80386 support
 @cindex x86-64 support
 
 The i386 version @code{@value{AS}} supports both the original Intel 386
@@ -352,6 +352,13 @@ thus, are @samp{bl} (from byte to long), @samp{bw} (from byte to word),
 @samp{wl} (from word to long), @samp{bq} (from byte to quadruple word),
 @samp{wq} (from word to quadruple word), and @samp{lq} (from long to
 quadruple word).
+
+@cindex encoding options, i386
+@cindex encoding options, x86-64
+
+Different encoding options can be specified via optional mnemonic
+suffix.  @samp{.s} suffix swaps 2 register operands in encoding when
+moving from one register to another.
 
 @cindex conversion instructions, i386
 @cindex i386 conversion instructions
