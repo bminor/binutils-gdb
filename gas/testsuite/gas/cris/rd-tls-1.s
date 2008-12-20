@@ -21,3 +21,5 @@ start:
 	move.d [r7=r3+extsym10:GD-330],r13
 	move.d [r11+extsym14:TPOFF16-256],r9
 	add.d [r10+extsym3:TPOFF+56],r7,r8
+	move.d [extsym5:IE],r1
+	add.d extsym7:IE,r11

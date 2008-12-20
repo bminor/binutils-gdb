@@ -14,3 +14,5 @@ start:
  move.b extsym15:GD,r7		; { dg-error "TLS relocation size does not match" }
  move.w extsym6:GD,r5		; { dg-error "TLS relocation size does not match" }
  move extsym8:TPOFF16,srp	; { dg-error "TLS relocation size does not match" }
+ move.b extsym5:IE,r7		; { dg-error "TLS relocation size does not match" }
+ move.w extsym16:IE,r5		; { dg-error "TLS relocation size does not match" }

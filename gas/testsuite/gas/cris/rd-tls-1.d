@@ -25,4 +25,7 @@ Disassembly of section \.text:
 [ 	]+2e:[ 	]+R_CRIS_16_TPREL	extsym14\+0xffffff00
 [ 	]+32:[ 	]+6fad 0000 0000 287a[ 	]+add\.d \[\$?r10\+0 <start>\],\$?r7,\$?r8
 [ 	]+34:[ 	]+R_CRIS_32_TPREL	extsym3\+0x38
-[ 	]+\.\.\.
+[ 	]+3a:[ 	]+7f0d 0000 0000 611a[ 	]+move.d \[0 <start>],\$?r1
+[ 	]+3c:[ 	]+R_CRIS_32_IE[ 	]+extsym5
+[ 	]+42:[ 	]+2fbe 0000 0000[ 	]+add\.d 0 <start>,\$?r11
+[ 	]+44:[ 	]+R_CRIS_32_IE[ 	]+extsym7

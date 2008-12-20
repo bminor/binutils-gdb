@@ -1,3 +1,9 @@
+2008-12-20  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-tls-1.s, gas/cris/rd-tls-1.d: Test :IE and
+	decoration on double-indirect.
+	* gas/cris/tls-err-1.s: Test :IE on wrong-size operand.
+
 2008-12-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/intel.d: Remove trailing white spaces after nop.
