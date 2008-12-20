@@ -2994,19 +2994,16 @@ parse_insn (char *line, char *mnemonic)
 	break;
     }
 
-  if (!current_templates && dot_p)
+  if (!current_templates)
     {
-      if (mnem_p - 2 == dot_p)
-	{
-	  /* Check if we should swap operand in encoding.  */
-	  if (dot_p[1] == 's')
-	    i.swap_operand = 1;
-	  else
-	    goto check_suffix;
-	  mnem_p = dot_p;
-	  *dot_p = '\0';
-	  current_templates = hash_find (op_hash, mnemonic);
-	}
+      /* Check if we should swap operand in encoding.  */
+      if (mnem_p - 2 == dot_p && dot_p[1] == 's')
+	i.swap_operand = 1;
+      else
+	goto check_suffix;
+      mnem_p = dot_p;
+      *dot_p = '\0';
+      current_templates = hash_find (op_hash, mnemonic);
     }
 
   if (!current_templates)

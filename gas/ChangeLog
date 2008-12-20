@@ -1,5 +1,9 @@
 2008-12-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (parse_insn): Optimize ".s" handling.
+
+2008-12-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (_i386_insn): Add swap_operand.
 	(parse_insn): Handle ".s".
 	(match_template): Handle swap_operand.
