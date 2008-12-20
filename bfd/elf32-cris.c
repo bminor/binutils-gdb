@@ -436,7 +436,8 @@ static reloc_howto_type cris_elf_howto_table [] =
   TLSHOWTO16S (R_CRIS_16_GOT_TPREL),
   TLSHOWTO32 (R_CRIS_32_TPREL),
   TLSHOWTO16S (R_CRIS_16_TPREL),
-  TLSHOWTO32 (R_CRIS_DTPMOD)
+  TLSHOWTO32 (R_CRIS_DTPMOD),
+  TLSHOWTO32 (R_CRIS_32_IE)
 };
 
 /* Map BFD reloc types to CRIS ELF reloc types.  */
@@ -479,7 +480,8 @@ static const struct cris_reloc_map cris_reloc_map [] =
   { BFD_RELOC_CRIS_16_GOT_TPREL, R_CRIS_16_GOT_TPREL },
   { BFD_RELOC_CRIS_32_TPREL,	R_CRIS_32_TPREL },
   { BFD_RELOC_CRIS_16_TPREL,	R_CRIS_16_TPREL },
-  { BFD_RELOC_CRIS_DTPMOD,	R_CRIS_DTPMOD }
+  { BFD_RELOC_CRIS_DTPMOD,	R_CRIS_DTPMOD },
+  { BFD_RELOC_CRIS_32_IE,	R_CRIS_32_IE }
 };
 
 static reloc_howto_type *
@@ -1832,6 +1834,17 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     the GOT entry.  */
 	  break;
 
+	case R_CRIS_32_IE:
+	  if (info->shared)
+	    {
+	      bfd_set_error (bfd_error_invalid_operation);
+
+	      /* We've already informed in cris_elf_check_relocs that
+		 this is an error.  */
+	      return FALSE;
+	    }
+	  /* Fall through.  */
+
 	case R_CRIS_32_GOT_TPREL:
 	case R_CRIS_16_GOT_TPREL:
 	  if (rel->r_addend != 0)
@@ -1884,7 +1897,8 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		off &= ~3;
 
-	      relocation = sgot->output_offset + off;
+	      relocation = sgot->output_offset + off
+		+ (r_type == R_CRIS_32_IE ? sgot->output_section->vma : 0);
 	    }
 	  else
 	    {
@@ -1944,10 +1958,12 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		off &= ~3;
 
-	      relocation = sgot->output_offset + off;
+	      relocation = sgot->output_offset + off
+		+ (r_type == R_CRIS_32_IE ? sgot->output_section->vma : 0);
 	    }
 
-	  /* The GOT-relative offset to the GOT entry is the relocation.  */
+	  /* The GOT-relative offset to the GOT entry is the relocation,
+	     or for R_CRIS_32_GD, the actual address of the GOT entry.  */
 	  break;
 
 	case R_CRIS_16_TPREL:
@@ -2559,6 +2575,7 @@ cris_elf_gc_sweep_hook (bfd *abfd,
 	    : &local_got_refcounts[LGOT_DTP_NDX (r_symndx)];
 	  break;
 
+	case R_CRIS_32_IE:
 	case R_CRIS_16_GOT_TPREL:
 	case R_CRIS_32_GOT_TPREL:
 	  specific_refcount = h != NULL
@@ -2572,6 +2589,7 @@ cris_elf_gc_sweep_hook (bfd *abfd,
 
       switch (r_type)
 	{
+	case R_CRIS_32_IE:
 	case R_CRIS_32_GD:
 	case R_CRIS_16_GOT_TPREL:
 	case R_CRIS_32_GOT_TPREL:
@@ -3115,6 +3133,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	  elf_cris_hash_table (info)->dtpmod_refcount++;
 	  /* Fall through.  */
 
+	case R_CRIS_32_IE:
 	case R_CRIS_32_GD:
 	case R_CRIS_16_GOT_GD:
 	case R_CRIS_32_GOT_GD:
@@ -3188,6 +3207,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	    break;
 	  /* Fall through.  */
 
+	case R_CRIS_32_IE:
 	case R_CRIS_32_GD:
 	case R_CRIS_16_GOT_GD:
 	case R_CRIS_32_GOT_GD:
@@ -3234,6 +3254,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
       /* Warn and error for invalid input.  */
       switch (r_type)
 	{
+	case R_CRIS_32_IE:
 	case R_CRIS_32_TPREL:
 	case R_CRIS_16_TPREL:
 	case R_CRIS_32_GD:
@@ -3271,11 +3292,12 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	     elsewhere.  */
 	  break;
 
+	case R_CRIS_32_IE:
 	case R_CRIS_32_GOT_TPREL:
 	case R_CRIS_16_GOT_TPREL:
 	  r_symndx_lgot = LGOT_TPREL_NDX (r_symndx);
 
-	  /* Those two relocs also require that a DSO is of type
+	  /* Those relocs also require that a DSO is of type
 	     Initial Exec.  Like other targets, we don't reset this
 	     flag even if the relocs are GC:ed away.  */
 	  if (info->shared)
@@ -3306,6 +3328,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	     GOT entry for it, so handle it like a GOT reloc.  */
 	  /* Fall through.  */
 
+	case R_CRIS_32_IE:
 	case R_CRIS_32_GD:
 	case R_CRIS_16_GOT_GD:
 	case R_CRIS_32_GOT_GD:
@@ -3356,6 +3379,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 		  elf_cris_hash_entry (h)->dtp_refcount++;
 		  break;
 
+		case R_CRIS_32_IE:
 		case R_CRIS_32_GOT_TPREL:
 		case R_CRIS_16_GOT_TPREL:
 		  if (elf_cris_hash_entry (h)->tprel_refcount == 0)

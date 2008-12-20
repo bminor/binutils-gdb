@@ -1,3 +1,12 @@
+2008-12-20  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c 	(cris_elf_howto_table): Add entry for R_CRIS_32_IE.
+	(cris_reloc_map): Similarly.
+	(cris_elf_relocate_section, cris_elf_gc_sweep_hook)
+	(cris_elf_check_relocs): Handle R_CRIS_32_IE.
+	* reloc.c (bfd_reloc_code_type): Add entry for R_CRIS_32_IE.
+	* bfd-in2.h, libbfd.h: Regenerate.
+
 2008-12-17  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (elf_cris_copy_indirect_symbol): Return without

@@ -4213,6 +4213,7 @@ This is the 5 bits of a value.  */
   BFD_RELOC_CRIS_32_TPREL,
   BFD_RELOC_CRIS_16_TPREL,
   BFD_RELOC_CRIS_DTPMOD,
+  BFD_RELOC_CRIS_32_IE,
 
 /* Intel i860 Relocations.  */
   BFD_RELOC_860_COPY,
