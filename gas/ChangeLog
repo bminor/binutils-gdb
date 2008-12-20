@@ -1,3 +1,12 @@
+2008-12-20  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c (cris_process_instruction): Handle
+	BFD_RELOC_CRIS_32_IE, in the test whether the relocation fits.
+	(get_3op_or_dip_prefix_op): Handle TLS/PIC decoration for the
+	"double indirect" addressing mode.
+	(cris_get_reloc_suffix): Add entry for :IE for BFD_RELOC_CRIS_32_IE.
+	(cris_number_to_imm, tc_gen_reloc): Handle BFD_RELOC_CRIS_32_IE.
+
 2008-12-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Remove an extra blank

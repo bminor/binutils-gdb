@@ -2208,6 +2208,7 @@ cris_process_instruction (char *insn_text, struct cris_instruction *out_insnp,
 		as_bad (out_insnp->reloc == BFD_RELOC_CRIS_32_GD
 			|| out_insnp->reloc == BFD_RELOC_CRIS_32_TPREL
 			|| out_insnp->reloc == BFD_RELOC_CRIS_16_TPREL
+			|| out_insnp->reloc == BFD_RELOC_CRIS_32_IE
 			? _("TLS relocation size does not match operand size")
 			: _("PIC relocation size does not match operand size"));
 	    }
@@ -3045,6 +3046,10 @@ get_3op_or_dip_prefix_op (char **cPP, struct cris_prefix *prefixp)
       prefixp->kind = PREFIX_DIP;
       prefixp->opcode = DIP_OPCODE | (AUTOINCR_BIT << 8) | REG_PC;
       prefixp->reloc = BFD_RELOC_32;
+
+      /* For :GD and :IE, it makes sense to have TLS specifiers here.  */
+      if ((pic || tls) && **cPP == RELOC_SUFFIX_CHAR)
+	cris_get_reloc_suffix (cPP, &prefixp->reloc, &prefixp->expr);
     }
   else
     /* Neither '[' nor register nor expression.  We lose.  */
@@ -3489,6 +3494,7 @@ cris_get_reloc_suffix (char **cPP, bfd_reloc_code_real_type *relocp,
       TLSMAP ("GD", BFD_RELOC_CRIS_32_GD),
       PICTLSMAP ("DTPREL16", BFD_RELOC_CRIS_16_DTPREL),
       PICTLSMAP ("DTPREL", BFD_RELOC_CRIS_32_DTPREL),
+      TLSMAP ("IE", BFD_RELOC_CRIS_32_IE),
       PICTLSMAP ("TPOFFGOT16", BFD_RELOC_CRIS_16_GOT_TPREL),
       PICTLSMAP ("TPOFFGOT", BFD_RELOC_CRIS_32_GOT_TPREL),
       TLSMAP ("TPOFF16", BFD_RELOC_CRIS_16_TPREL),
@@ -3630,6 +3636,7 @@ cris_number_to_imm (char *bufp, long val, int n, fixS *fixP, segT seg)
     case BFD_RELOC_CRIS_32_GOT_GD:
     case BFD_RELOC_CRIS_16_GOT_GD:
     case BFD_RELOC_CRIS_32_GD:
+    case BFD_RELOC_CRIS_32_IE:
     case BFD_RELOC_CRIS_32_DTPREL:
     case BFD_RELOC_CRIS_16_DTPREL:
     case BFD_RELOC_CRIS_32_GOT_TPREL:
@@ -3911,6 +3918,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
     case BFD_RELOC_CRIS_32_GOT_GD:
     case BFD_RELOC_CRIS_16_GOT_GD:
     case BFD_RELOC_CRIS_32_GD:
+    case BFD_RELOC_CRIS_32_IE:
     case BFD_RELOC_CRIS_32_DTPREL:
     case BFD_RELOC_CRIS_16_DTPREL:
     case BFD_RELOC_CRIS_32_GOT_TPREL:
