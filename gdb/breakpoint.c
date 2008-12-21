@@ -891,6 +891,27 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	  b->val_valid = 1;
 	}
 
+	/* Change the type of breakpoint between hardware assisted or an
+	   ordinary watchpoint depending on the hardware support and free
+	   hardware slots.  REPARSE is set when the inferior is started.  */
+	if ((b->type == bp_watchpoint || b->type == bp_hardware_watchpoint)
+	    && reparse)
+	  {
+	    int i, mem_cnt, target_resources_ok, other_type_used;
+
+	    i = hw_watchpoint_used_count (bp_hardware_watchpoint,
+					  &other_type_used);
+	    mem_cnt = can_use_hardware_watchpoint (val_chain);
+
+	    if (mem_cnt)
+	      target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT
+			 (bp_hardware_watchpoint, i + mem_cnt, other_type_used);
+	    if (!mem_cnt || target_resources_ok <= 0)
+	      b->type = bp_watchpoint;
+	    else
+	      b->type = bp_hardware_watchpoint;
+	  }
+
       /* Look at each value on the value chain.  */
       for (v = val_chain; v; v = next)
 	{

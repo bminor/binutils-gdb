@@ -1,3 +1,7 @@
+2008-12-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/watchpoint-hw.exp, gdb.base/watchpoint-hw.c: New.
+
 2008-12-16  Christophe Lyon  <christophe.lyon@st.com>
 
 	* gdb.base/expand-psymtabs.c: Insert code in foo so that the

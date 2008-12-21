@@ -1,3 +1,9 @@
+2008-12-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix hw watchpoints created before the inferior was started.
+	* breakpoint.c (update_watchpoint): Convert the bp_watchpoint and
+	bp_hardware_watchpoint types according to the current runtime state.
+
 2008-12-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_child_follow_fork): If following the child,
