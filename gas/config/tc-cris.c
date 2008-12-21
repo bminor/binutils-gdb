@@ -148,6 +148,7 @@ static void s_syntax (int);
 static void s_cris_file (int);
 static void s_cris_loc (int);
 static void s_cris_arch (int);
+static void s_cris_dtpoff (int);
 
 /* Get ":GOT", ":GOTOFF", ":PLT" etc. suffixes.  */
 static void cris_get_reloc_suffix (char **, bfd_reloc_code_real_type *,
@@ -198,6 +199,7 @@ static enum cris_archs cris_arch = XCONCAT2 (arch_,DEFAULT_CRIS_ARCH);
 const pseudo_typeS md_pseudo_table[] =
 {
   {"dword", cons, 4},
+  {"dtpoffd", s_cris_dtpoff, 4},
   {"syntax", s_syntax, 0},
   {"file", s_cris_file, 0},
   {"loc", s_cris_loc, 0},
@@ -4212,6 +4214,30 @@ s_cris_loc (int dummy)
   else
     dwarf2_directive_loc (dummy);
 }
+
+/* Worker for .dtpoffd: generate a R_CRIS_32_DTPREL reloc, as for
+   expr:DTPREL but for use in debug info.  */
+
+static void
+s_cris_dtpoff (int bytes)
+{
+  expressionS ex;
+  char *p;
+
+  if (bytes != 4)
+    as_fatal (_("internal inconsistency problem: %s called for %d bytes"),
+	      __FUNCTION__, bytes);
+
+  expression (&ex);
+
+  p = frag_more (bytes);
+  md_number_to_chars (p, 0, bytes);
+  fix_new_exp (frag_now, p - frag_now->fr_literal, bytes, &ex, FALSE,
+	       BFD_RELOC_CRIS_32_DTPREL);
+
+  demand_empty_rest_of_line ();
+}
+
 
 /* Translate a <arch> string (as common to --march=<arch> and .arch <arch>)
    into an enum.  If the string *STR is recognized, *STR is updated to point
