@@ -1,5 +1,13 @@
 2008-12-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix for PR gdb/8648.
+	* gdb.arch/ppc-fp.exp, gdb.arch/vsx-regs.exp, gdb.base/watchpoint-hw.c,
+	gdb.gdbtk/browser.test, gdb.gdbtk/console.test, gdb.gdbtk/srcwin.test,
+	gdb.gdbtk/srcwin2.test, gdb.gdbtk/srcwin3.test, gdb.gdbtk/windows.test,
+	gdb.threads/tls2.c: Remove reference to bug-gdb@prep.ai.mit.edu .
+
+2008-12-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/watchpoint-hw.exp, gdb.base/watchpoint-hw.c: New.
 
 2008-12-16  Christophe Lyon  <christophe.lyon@st.com>
