@@ -59,6 +59,10 @@
 	(pclmul_op): Likewise.
 	(vpermil2_op): Likewise.
 
+2008-12-18  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
 2008-12-15  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-dis.c (coprocessor_opcodes): Disassemble VFP instructions using

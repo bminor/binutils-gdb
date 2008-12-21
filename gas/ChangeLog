@@ -19,6 +19,10 @@
 	(cris_get_reloc_suffix): Add entry for :IE for BFD_RELOC_CRIS_32_IE.
 	(cris_number_to_imm, tc_gen_reloc): Handle BFD_RELOC_CRIS_32_IE.
 
+2008-12-18  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
 2008-12-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Remove an extra blank

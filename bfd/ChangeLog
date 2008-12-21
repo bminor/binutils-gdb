@@ -7,6 +7,10 @@
 	* reloc.c (bfd_reloc_code_type): Add entry for R_CRIS_32_IE.
 	* bfd-in2.h, libbfd.h: Regenerate.
 
+2008-12-18  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
 2008-12-17  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (elf_cris_copy_indirect_symbol): Return without
