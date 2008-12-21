@@ -1,3 +1,7 @@
+2008-12-21  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-dtpoffd1.d, gas/cris/rd-dtpoffd1.s: New test.
+
 2008-12-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run opts, opts-intel, sse2avx-opts,
