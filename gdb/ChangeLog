@@ -1,3 +1,8 @@
+2008-12-22  Joel  Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (update_watchpoint): Adjust and extend the description
+	of this function.  Fix one error message accordingly.
+
 2008-12-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix hw watchpoints created before the inferior was started.

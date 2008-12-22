@@ -808,9 +808,11 @@ fetch_watchpoint_value (struct expression *exp, struct value **valp,
     }
 }
 
-/* Assuming that B is a hardware watchpoint:
-   - Reparse watchpoint expression, is REPARSE is non-zero
+/* Assuming that B is a watchpoint:
+   - Reparse watchpoint expression, if REPARSE is non-zero
    - Evaluate expression and store the result in B->val
+   - Evaluate the condition if there is one, and store the result
+     in b->loc->cond.
    - Update the list of values that must be watched in B->loc.
 
    If the watchpoint is disabled, do nothing.  If this is
@@ -823,10 +825,9 @@ update_watchpoint (struct breakpoint *b, int reparse)
   struct bp_location *loc;
   bpstat bs;
 
-  /* We don't free locations.  They are stored in
-     bp_location_chain and update_global_locations will
-     eventually delete them and remove breakpoints if
-     needed.  */
+  /* We don't free locations.  They are stored in bp_location_chain and
+     update_global_locations will eventually delete them and remove
+     breakpoints if needed.  */
   b->loc = NULL;
 
   if (b->disposition == disp_del_at_next_stop)
@@ -972,7 +973,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
   else if (!within_current_scope)
     {
       printf_filtered (_("\
-Hardware watchpoint %d deleted because the program has left the block \n\
+Watchpoint %d deleted because the program has left the block \n\
 in which its expression is valid.\n"),
 		       b->number);
       if (b->related_breakpoint)
