@@ -1,5 +1,17 @@
 2008-12-22  Tom Tromey  <tromey@redhat.com>
 
+	* stack.c (print_block_frame_locals): Print spaces, not tabs.
+	Update for call to print_variable_and_value.
+	(print_frame_arg_vars): Update.
+	* value.h (print_variable_and_value): Rename from
+	print_variable_value.  Add 'name' and 'indent' parameters.
+	* printcmd.c (print_variable_and_value): Rename from
+	print_variable_value.  Add 'name' and 'indent' parameters.  Use
+	common_val_print.
+	* f-valprint.c (info_common_command): Update.
+
+2008-12-22  Tom Tromey  <tromey@redhat.com>
+
 	* python/python-value.c (valpy_length): Remove #if.
 
 2008-12-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
