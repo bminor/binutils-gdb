@@ -132,11 +132,7 @@ valpy_dereference (PyObject *self, PyObject *args)
   return value_to_value_object (res_val);
 }
 
-#ifdef HAVE_LIBPYTHON2_4
-static int
-#else
 static Py_ssize_t
-#endif
 valpy_length (PyObject *self)
 {
   /* We don't support getting the number of elements in a struct / class.  */

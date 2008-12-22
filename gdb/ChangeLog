@@ -1,3 +1,7 @@
+2008-12-22  Tom Tromey  <tromey@redhat.com>
+
+	* python/python-value.c (valpy_length): Remove #if.
+
 2008-12-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* python/python-internal.h (PyEval_ReleaseLock): New define.
