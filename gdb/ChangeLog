@@ -1,3 +1,8 @@
+2008-12-22  Adam Denton  <adenton@yahoo.com>
+
+	PR gdb/8307:
+	* environ.c (free_environ): Free e->vector.
+
 2008-12-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix memory double-free.
