@@ -219,6 +219,8 @@ focus_command (char *spec, int from_tty)
       return;
     }
 
+  if (current_itset)
+    xfree (current_itset);
   current_itset = itset;
 
   /* For now, set a current exec from the first element of the focus
