@@ -1,4 +1,9 @@
-2008-12-22  Joel  Brobecker  <brobecker@adacore.com>
+2008-12-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix memory double-free.
+	* completer.c (line_completion_function): Clear LIST after called xfree.
+
+2008-12-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (update_watchpoint): Adjust and extend the description
 	of this function.  Fix one error message accordingly.

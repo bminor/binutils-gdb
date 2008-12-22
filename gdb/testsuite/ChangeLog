@@ -1,3 +1,7 @@
+2008-12-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/completion.exp (Completing non-existing component): New test.
+
 2008-12-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix for PR gdb/8648.
