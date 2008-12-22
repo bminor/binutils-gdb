@@ -1,3 +1,7 @@
+2008-12-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/punctuator.exp: New file.
+
 2008-12-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/completion.exp (Completing non-existing component): New test.

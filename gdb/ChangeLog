@@ -1,3 +1,11 @@
+2008-12-22  Tom Tromey  <tromey@redhat.com>
+
+	* c-exp.y (ident_tokens): New global.
+	(struct token) <cxx_only>: New field.
+	(tokentab3): Update.
+	(tokentab2): Update.
+	(yylex): Use ident_tokens.
+
 2008-12-22  Adam Denton  <adenton@yahoo.com>
 
 	PR gdb/8307:
