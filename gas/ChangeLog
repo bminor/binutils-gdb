@@ -1,3 +1,11 @@
+2008-12-23  Anatoly Sokolov  <aesok@post.ru>
+
+        * config/tc-avr.c (mcu_types): Add attiny87, attiny327, atmega4hvd,
+        atmega8hvd, atmega16hvb, atmega32hvb, atmega64c1, atmega16m1, 
+        atmega64m1, atmega32u6, atmega128rfa1,  at90pwm81, at90scr100, 
+        m3000f, m3000s and m3001b devices.
+        * doc/c-avr.texi: Likewise.
+
 2008-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS :Remove mention of STT_IFUNC support.
