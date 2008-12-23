@@ -1,3 +1,8 @@
+2008-12-23  Tristan Gingold  <gingold@adacore.com>
+
+	* Makefile.am (EXTRA_DIST): Add deffilep.c and deffilep.h
+	* Makefile.in: Regenerate.
+
 2008-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Remove mention of support for STT_IFUNC.
