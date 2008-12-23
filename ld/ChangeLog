@@ -1,3 +1,8 @@
+2008-12-23  Tristan Gingold  <gingold@adacore.com>
+
+	* Makefile.am (EXTRA_DIST): Add deffilep.c and deffilep.h
+	* Makefile.in: Regenerate.
+
 2008-11-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (spu_ovl.o_c): Add missing line continuations.

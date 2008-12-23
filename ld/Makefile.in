@@ -730,7 +730,9 @@ html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.
-EXTRA_DIST = ldgram.c ldgram.h ldlex.c emultempl/spu_ovl.o_c $(man_MANS)
+EXTRA_DIST = ldgram.c ldgram.h ldlex.c emultempl/spu_ovl.o_c \
+           deffilep.c deffilep.h $(man_MANS)
+
 DISTCLEANFILES = tdirs site.exp site.bak stringify.sed $(am__append_1)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
