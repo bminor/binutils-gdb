@@ -166,7 +166,8 @@ typedef union i386_cpu_flags
 #define D			0
 /* set if operands can be words or dwords encoded the canonical way */
 #define W			(D + 1)
-/* Swap operand in encoding. */
+/* Skip the current insn and use the next insn in i386-opc.tbl to swap
+   operand in encoding.  */
 #define S			(W + 1)
 /* insn has a modrm byte. */
 #define Modrm			(S + 1)

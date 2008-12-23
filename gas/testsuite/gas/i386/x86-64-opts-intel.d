@@ -46,6 +46,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f3 0f 7f e6          	movdqu.s xmm6,xmm4
 [ 	]*[a-f0-9]+:	f3 0f 7e f4          	movq   xmm6,xmm4
 [ 	]*[a-f0-9]+:	66 0f d6 e6          	movq.s xmm6,xmm4
+[ 	]*[a-f0-9]+:	f2 0f 10 f4          	movsd  xmm6,xmm4
+[ 	]*[a-f0-9]+:	f2 0f 11 e6          	movsd.s xmm6,xmm4
+[ 	]*[a-f0-9]+:	f3 0f 10 f4          	movss  xmm6,xmm4
+[ 	]*[a-f0-9]+:	f3 0f 11 e6          	movss.s xmm6,xmm4
 [ 	]*[a-f0-9]+:	66 0f 10 f4          	movupd xmm6,xmm4
 [ 	]*[a-f0-9]+:	66 0f 11 e6          	movupd.s xmm6,xmm4
 [ 	]*[a-f0-9]+:	0f 10 f4             	movups xmm6,xmm4
@@ -64,6 +68,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 11 e6          	vmovupd.s xmm6,xmm4
 [ 	]*[a-f0-9]+:	c5 f8 10 f4          	vmovups xmm6,xmm4
 [ 	]*[a-f0-9]+:	c5 f8 11 e6          	vmovups.s xmm6,xmm4
+[ 	]*[a-f0-9]+:	c5 cb 10 d4          	vmovsd xmm2,xmm6,xmm4
+[ 	]*[a-f0-9]+:	c5 cb 11 e2          	vmovsd.s xmm2,xmm6,xmm4
+[ 	]*[a-f0-9]+:	c5 ca 10 d4          	vmovss xmm2,xmm6,xmm4
+[ 	]*[a-f0-9]+:	c5 ca 11 e2          	vmovss.s xmm2,xmm6,xmm4
 [ 	]*[a-f0-9]+:	0f 6f e0             	movq   mm4,mm0
 [ 	]*[a-f0-9]+:	0f 7f c4             	movq.s mm4,mm0
 [ 	]*[a-f0-9]+:	88 d1                	mov    cl,dl
@@ -96,6 +104,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f3 0f 7f e6          	movdqu.s xmm6,xmm4
 [ 	]*[a-f0-9]+:	f3 0f 7e f4          	movq   xmm6,xmm4
 [ 	]*[a-f0-9]+:	66 0f d6 e6          	movq.s xmm6,xmm4
+[ 	]*[a-f0-9]+:	f2 0f 10 f4          	movsd  xmm6,xmm4
+[ 	]*[a-f0-9]+:	f2 0f 11 e6          	movsd.s xmm6,xmm4
+[ 	]*[a-f0-9]+:	f3 0f 10 f4          	movss  xmm6,xmm4
+[ 	]*[a-f0-9]+:	f3 0f 11 e6          	movss.s xmm6,xmm4
 [ 	]*[a-f0-9]+:	66 0f 10 f4          	movupd xmm6,xmm4
 [ 	]*[a-f0-9]+:	66 0f 11 e6          	movupd.s xmm6,xmm4
 [ 	]*[a-f0-9]+:	0f 10 f4             	movups xmm6,xmm4
@@ -114,6 +126,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 11 e6          	vmovupd.s xmm6,xmm4
 [ 	]*[a-f0-9]+:	c5 f8 10 f4          	vmovups xmm6,xmm4
 [ 	]*[a-f0-9]+:	c5 f8 11 e6          	vmovups.s xmm6,xmm4
+[ 	]*[a-f0-9]+:	c5 cb 10 d4          	vmovsd xmm2,xmm6,xmm4
+[ 	]*[a-f0-9]+:	c5 cb 11 e2          	vmovsd.s xmm2,xmm6,xmm4
+[ 	]*[a-f0-9]+:	c5 ca 10 d4          	vmovss xmm2,xmm6,xmm4
+[ 	]*[a-f0-9]+:	c5 ca 11 e2          	vmovss.s xmm2,xmm6,xmm4
 [ 	]*[a-f0-9]+:	0f 6f e0             	movq   mm4,mm0
 [ 	]*[a-f0-9]+:	0f 7f c4             	movq.s mm4,mm0
 #pass

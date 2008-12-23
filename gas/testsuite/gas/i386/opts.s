@@ -43,6 +43,10 @@ _start:
 	movdqu.s %xmm4,%xmm6
 	movq %xmm4,%xmm6
 	movq.s %xmm4,%xmm6
+	movsd %xmm4,%xmm6
+	movsd.s %xmm4,%xmm6
+	movss %xmm4,%xmm6
+	movss.s %xmm4,%xmm6
 	movupd %xmm4,%xmm6
 	movupd.s %xmm4,%xmm6
 	movups %xmm4,%xmm6
@@ -61,6 +65,12 @@ _start:
 	vmovupd.s %xmm4,%xmm6
 	vmovups %xmm4,%xmm6
 	vmovups.s %xmm4,%xmm6
+
+# Tests for op xmm, xmm, xmm
+	vmovsd %xmm4,%xmm6,%xmm2
+	vmovsd.s %xmm4,%xmm6,%xmm2
+	vmovss %xmm4,%xmm6,%xmm2
+	vmovss.s %xmm4,%xmm6,%xmm2
 
 # Tests for op mm, mm
 	movq %mm0,%mm4
@@ -101,6 +111,10 @@ _start:
 	movdqu.s xmm6,xmm4
 	movq xmm6,xmm4
 	movq.s xmm6,xmm4
+	movsd xmm6,xmm4
+	movsd.s xmm6,xmm4
+	movss xmm6,xmm4
+	movss.s xmm6,xmm4
 	movupd xmm6,xmm4
 	movupd.s xmm6,xmm4
 	movups xmm6,xmm4
@@ -119,6 +133,12 @@ _start:
 	vmovupd.s xmm6,xmm4
 	vmovups xmm6,xmm4
 	vmovups.s xmm6,xmm4
+
+# Tests for op xmm, xmm, xmm
+	vmovsd xmm2,xmm6,xmm4
+	vmovsd.s xmm2,xmm6,xmm4
+	vmovss xmm2,xmm6,xmm4
+	vmovss.s xmm2,xmm6,xmm4
 
 # Tests for op mm, mm
 	movq mm4,mm0

@@ -1,3 +1,20 @@
+2008-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (EXdS): New.
+	(EXdVexS): Likewise.
+	(EXqVexS): Likewise.
+	(d_swap_mode): Likewise.
+	(q_mode): Updated.
+	(prefix_table): Use EXdS on movss and EXqS on movsd.
+	(vex_len_table): Use EXdVexS on vmovss and EXqVexS on vmovsd.
+	(intel_operand_size): Handle d_swap_mode.
+	(OP_EX): Likewise.
+
+	* i386-opc.h (S): Update comments.
+
+	* i386-opc.tbl: Add S to movss, movsd, vmovss and vmovsd.
+	* i386-tbl.h: Regenerated.
+
 2008-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/ga.po: Updated Irish translation.

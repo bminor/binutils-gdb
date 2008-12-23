@@ -180,7 +180,7 @@ static void swap_operands (void);
 static void swap_2_operands (int, int);
 static void optimize_imm (void);
 static void optimize_disp (void);
-static int match_template (void);
+static const template *match_template (void);
 static int check_string (void);
 static int process_suffix (void);
 static int check_byte_reg (void);
@@ -2543,7 +2543,7 @@ intel_float_operand (const char *mnemonic)
 /* Build the VEX prefix.  */
 
 static void
-build_vex_prefix (void)
+build_vex_prefix (const template *t)
 {
   unsigned int register_specifier;
   unsigned int implied_prefix;
@@ -2559,6 +2559,36 @@ build_vex_prefix (void)
     }
   else
     register_specifier = 0xf;
+
+  /* Use 2-byte VEX prefix by swappping destination and source
+     operand.  */
+  if (!i.swap_operand
+      && i.operands == i.reg_operands
+      && i.tm.opcode_modifier.vex0f
+      && i.tm.opcode_modifier.s
+      && i.rex == REX_B)
+    {
+      unsigned int xchg = i.operands - 1;
+      union i386_op temp_op;
+      i386_operand_type temp_type;
+
+      temp_type = i.types[xchg];
+      i.types[xchg] = i.types[0];
+      i.types[0] = temp_type;
+      temp_op = i.op[xchg];
+      i.op[xchg] = i.op[0];
+      i.op[0] = temp_op;
+
+      assert (i.rm.mode == 3);
+
+      i.rex = REX_R;
+      xchg = i.rm.regmem;
+      i.rm.regmem = i.rm.reg;
+      i.rm.reg = xchg;
+
+      /* Use the next insn.  */
+      i.tm = t[1];
+    }
 
   vector_length = i.tm.opcode_modifier.vex256 ? 1 : 0;
 
@@ -2691,6 +2721,7 @@ md_assemble (char *line)
 {
   unsigned int j;
   char mnemonic[MAX_MNEM_SIZE];
+  const template *t;
 
   /* Initialize globals.  */
   memset (&i, '\0', sizeof (i));
@@ -2748,7 +2779,7 @@ md_assemble (char *line)
      making sure the overlap of the given operands types is consistent
      with the template operand types.  */
 
-  if (!match_template ())
+  if (!(t = match_template ()))
     return;
 
   if (sse_check != sse_check_none
@@ -2829,7 +2860,7 @@ md_assemble (char *line)
     }
 
   if (i.tm.opcode_modifier.vex)
-    build_vex_prefix ();
+    build_vex_prefix (t);
 
   /* Handle conversion of 'int $3' --> special int3 insn.  */
   if (i.tm.base_opcode == INT_OPCODE && i.op[0].imms->X_add_number == 3)
@@ -3548,7 +3579,7 @@ VEX_check_operands (const template *t)
   return 0;
 }
 
-static int
+static const template *
 match_template (void)
 {
   /* Points to template once we've found it.  */
@@ -3742,6 +3773,9 @@ match_template (void)
 	    }
 
 	case 3:
+	  /* If we swap operand in encoding, we match the next one.  */
+	  if (i.swap_operand && t->opcode_modifier.s)
+	    continue;
 	case 4:
 	case 5:
 	  overlap1 = operand_type_and (i.types[1], operand_types[1]);
@@ -3866,7 +3900,7 @@ check_reverse:
       else
 	as_bad (_("suffix or operands invalid for `%s'"),
 		current_templates->start->name);
-      return 0;
+      return NULL;
     }
 
   if (!quiet_warnings)
@@ -3906,7 +3940,7 @@ check_reverse:
       i.tm.operand_types[1] = operand_types[0];
     }
 
-  return 1;
+  return t;
 }
 
 static int
@@ -5325,12 +5359,13 @@ build_modrm_byte (void)
 	    {
 	      /* For instructions with VexNDS, the register-only
 		 source operand must be XMM or YMM register. It is
-		 encoded in VEX prefix.  */
+		 encoded in VEX prefix.  We need to clear RegMem bit
+		 before calling operand_type_equal.  */
+	      i386_operand_type op = i.tm.operand_types[dest];
+	      op.bitfield.regmem = 0;
 	      if ((dest + 1) >= i.operands
-		  || (!operand_type_equal (&i.tm.operand_types[dest],
-					   &regxmm)
-		      && !operand_type_equal (&i.tm.operand_types[dest],
-					      &regymm)))
+		  || (!operand_type_equal (&op, &regxmm)
+		      && !operand_type_equal (&op, &regymm)))
 		abort ();
 	      i.vex.register_specifier = i.op[dest].regs;
 	      dest++;

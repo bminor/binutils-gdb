@@ -1,3 +1,24 @@
+2008-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run x86-64-avx-swap and x86-64-avx-swap-intel.
+
+	* gas/i386/opts.s: Add tests for movsd, movss, vmovsd and
+	vmovss.
+	* gas/i386/x86-64-opts.s: Likewise.
+
+	* gas/i386/opts.d: Updated.
+	* gas/i386/opts-intel.d: Likewise.
+	* gas/i386/sse2avx-opts.d: Likewise.
+	* gas/i386/sse2avx-opts-intel.d: Likewise.
+	* gas/i386/x86-64-opts.d: Likewise.
+	* gas/i386/x86-64-opts-intel.d: Likewise.
+	* gas/i386/x86-64-sse2avx-opts.d: Likewise.
+	* gas/i386/x86-64-sse2avx-opts-intel.d: Likewise.
+
+	* gas/i386/x86-64-avx-swap.d: New.
+	* gas/i386/x86-64-avx-swap.s: Likewise.
+	* gas/i386/x86-64-avx-swap-intel.d: Likewise.
+
 2008-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* gas/elf/type.s: Remove test of STT_IFUNC support.

@@ -362,6 +362,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EMx { OP_EM, x_mode }
 #define EXw { OP_EX, w_mode }
 #define EXd { OP_EX, d_mode }
+#define EXdS { OP_EX, d_swap_mode }
 #define EXq { OP_EX, q_mode }
 #define EXqS { OP_EX, q_swap_mode }
 #define EXx { OP_EX, x_mode }
@@ -384,7 +385,9 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VexFMA { OP_VEX_FMA, vex_mode }
 #define Vex128FMA { OP_VEX_FMA, vex128_mode }
 #define EXdVex { OP_EX_Vex, d_mode }
+#define EXdVexS { OP_EX_Vex, d_swap_mode }
 #define EXqVex { OP_EX_Vex, q_mode }
+#define EXqVexS { OP_EX_Vex, q_swap_mode }
 #define EXVexW { OP_EX_VexW, x_mode }
 #define EXdVexW { OP_EX_VexW, d_mode }
 #define EXqVexW { OP_EX_VexW, q_mode }
@@ -427,8 +430,10 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define w_mode			(v_swap_mode + 1)
 /* double word operand  */
 #define d_mode			(w_mode + 1)
+/* double word operand with operand swapped */
+#define d_swap_mode		(d_mode + 1)
 /* quad word operand */
-#define q_mode			(d_mode + 1)
+#define q_mode			(d_swap_mode + 1)
 /* quad word operand with operand swapped */
 #define q_swap_mode		(q_mode + 1)
 /* ten-byte operand */
@@ -2427,9 +2432,9 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0F11 */
   {
     { "movups",	{ EXxS, XM } },
-    { "movss",	{ EXd, XM } },
+    { "movss",	{ EXdS, XM } },
     { "movupd",	{ EXxS, XM } },
-    { "movsd",	{ EXq, XM } },
+    { "movsd",	{ EXqS, XM } },
   },
 
   /* PREFIX_0F12 */
@@ -7843,13 +7848,13 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_11_P_1 */
   {
-    { "vmovss",		{ EXdVex, Vex128, XM } },
+    { "vmovss",		{ EXdVexS, Vex128, XM } },
     { "(bad)",		{ XX } },
   },
 
   /* VEX_LEN_11_P_3 */
   {
-    { "vmovsd",		{ EXqVex, Vex128, XM } },
+    { "vmovsd",		{ EXqVexS, Vex128, XM } },
     { "(bad)",		{ XX } },
   },
 
@@ -11415,6 +11420,7 @@ intel_operand_size (int bytemode, int sizeflag)
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case d_mode:
+    case d_swap_mode:
     case dqd_mode:
       oappend ("DWORD PTR ");
       break;
@@ -12652,7 +12658,9 @@ OP_EX (int bytemode, int sizeflag)
     add = 0;
 
   if ((sizeflag & SUFFIX_ALWAYS)
-      && (bytemode == x_swap_mode || bytemode == q_swap_mode))
+      && (bytemode == x_swap_mode
+	  || bytemode == d_swap_mode
+	  || bytemode == q_swap_mode))
     swap_operand ();
 
   /* Skip mod/rm byte.  */
