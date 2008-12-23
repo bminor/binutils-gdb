@@ -1,4 +1,6 @@
 -*- text -*-
+* Add support for Lattice Mico32 (lm32) architecture.
+
 * Add CR16 ELF --embedded-relocs (used to embedded relocations into binaries 
   for Embedded-PIC code) option.
 

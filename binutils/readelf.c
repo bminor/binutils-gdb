@@ -130,6 +130,7 @@
 #include "elf/i960.h"
 #include "elf/ia64.h"
 #include "elf/ip2k.h"
+#include "elf/lm32.h"
 #include "elf/iq2000.h"
 #include "elf/m32c.h"
 #include "elf/m32r.h"
@@ -598,6 +599,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_IP2K:
     case EM_IP2K_OLD:
     case EM_IQ2000:
+    case EM_LATTICEMICO32:
     case EM_M32C_OLD:
     case EM_M32C:
     case EM_M32R:
@@ -1184,6 +1186,10 @@ dump_relocations (FILE *file,
 	case EM_XTENSA_OLD:
 	case EM_XTENSA:
 	  rtype = elf_xtensa_reloc_type (type);
+	  break;
+
+	case EM_LATTICEMICO32:
+	  rtype = elf_lm32_reloc_type (type);
 	  break;
 
 	case EM_M32C_OLD:
@@ -1833,6 +1839,7 @@ get_machine_name (unsigned e_machine)
     case EM_IQ2000:       	return "Vitesse IQ2000";
     case EM_XTENSA_OLD:
     case EM_XTENSA:		return "Tensilica Xtensa Processor";
+    case EM_LATTICEMICO32:	return "Lattice Mico32";
     case EM_M32C_OLD:
     case EM_M32C:	        return "Renesas M32c";
     case EM_MT:                 return "Morpho Techologies MT processor";
@@ -8082,6 +8089,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 2; /* R_IP2K_32.  */
     case EM_IQ2000:
       return reloc_type == 2; /* R_IQ2000_32.  */
+    case EM_LATTICEMICO32:
+      return reloc_type == 3; /* R_LM32_32.  */
     case EM_M32C_OLD:
     case EM_M32C:
       return reloc_type == 3; /* R_M32C_32.  */

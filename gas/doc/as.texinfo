@@ -6679,6 +6679,9 @@ subject, see the hardware manufacturer's manual.
 @ifset IP2K
 * IP2K-Dependent::              IP2K Dependent Features
 @end ifset
+@ifset LM32
+* LM32-Dependent::              LM32 Dependent Features
+@end ifset
 @ifset M32C
 * M32C-Dependent::              M32C Dependent Features
 @end ifset
@@ -6831,6 +6834,10 @@ family.
 
 @ifset IP2K
 @include c-ip2k.texi
+@end ifset
+
+@ifset LM32
+@include c-lm32.texi
 @end ifset
 
 @ifset M32C
@@ -7211,6 +7218,8 @@ Inc.@: added support for Xtensa processors.
 
 Several engineers at Cygnus Support have also provided many small bug fixes and
 configuration enhancements.
+
+Jon Beniston added support for the Lattice Mico32 architecture.
 
 Many others have contributed large or small bugfixes and enhancements.  If
 you have contributed significant work and are not mentioned on this list, and

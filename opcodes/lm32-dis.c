@@ -33,8 +33,8 @@
 #include "bfd.h"
 #include "symcat.h"
 #include "libiberty.h"
-#include "@prefix@-desc.h"
-#include "@prefix@-opc.h"
+#include "lm32-desc.h"
+#include "lm32-opc.h"
 #include "opintl.h"
 
 /* Default text to print if an instruction isn't recognized.  */
@@ -57,6 +57,114 @@ static int read_insn
    unsigned long *);
 
 /* -- disassembler routines inserted here.  */
+
+
+void lm32_cgen_print_operand
+  (CGEN_CPU_DESC, int, PTR, CGEN_FIELDS *, void const *, bfd_vma, int);
+
+/* Main entry point for printing operands.
+   XINFO is a `void *' and not a `disassemble_info *' to not put a requirement
+   of dis-asm.h on cgen.h.
+
+   This function is basically just a big switch statement.  Earlier versions
+   used tables to look up the function to use, but
+   - if the table contains both assembler and disassembler functions then
+     the disassembler contains much of the assembler and vice-versa,
+   - there's a lot of inlining possibilities as things grow,
+   - using a switch statement avoids the function call overhead.
+
+   This function could be moved into `print_insn_normal', but keeping it
+   separate makes clear the interface between `print_insn_normal' and each of
+   the handlers.  */
+
+void
+lm32_cgen_print_operand (CGEN_CPU_DESC cd,
+			   int opindex,
+			   void * xinfo,
+			   CGEN_FIELDS *fields,
+			   void const *attrs ATTRIBUTE_UNUSED,
+			   bfd_vma pc,
+			   int length)
+{
+  disassemble_info *info = (disassemble_info *) xinfo;
+
+  switch (opindex)
+    {
+    case LM32_OPERAND_BRANCH :
+      print_address (cd, info, fields->f_branch, 0|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
+      break;
+    case LM32_OPERAND_CALL :
+      print_address (cd, info, fields->f_call, 0|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
+      break;
+    case LM32_OPERAND_CSR :
+      print_keyword (cd, info, & lm32_cgen_opval_h_csr, fields->f_csr, 0);
+      break;
+    case LM32_OPERAND_EXCEPTION :
+      print_normal (cd, info, fields->f_exception, 0, pc, length);
+      break;
+    case LM32_OPERAND_GOT16 :
+      print_normal (cd, info, fields->f_imm, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case LM32_OPERAND_GOTOFFHI16 :
+      print_normal (cd, info, fields->f_imm, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case LM32_OPERAND_GOTOFFLO16 :
+      print_normal (cd, info, fields->f_imm, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case LM32_OPERAND_GP16 :
+      print_normal (cd, info, fields->f_imm, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case LM32_OPERAND_HI16 :
+      print_normal (cd, info, fields->f_uimm, 0, pc, length);
+      break;
+    case LM32_OPERAND_IMM :
+      print_normal (cd, info, fields->f_imm, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case LM32_OPERAND_LO16 :
+      print_normal (cd, info, fields->f_uimm, 0, pc, length);
+      break;
+    case LM32_OPERAND_R0 :
+      print_keyword (cd, info, & lm32_cgen_opval_h_gr, fields->f_r0, 0);
+      break;
+    case LM32_OPERAND_R1 :
+      print_keyword (cd, info, & lm32_cgen_opval_h_gr, fields->f_r1, 0);
+      break;
+    case LM32_OPERAND_R2 :
+      print_keyword (cd, info, & lm32_cgen_opval_h_gr, fields->f_r2, 0);
+      break;
+    case LM32_OPERAND_SHIFT :
+      print_normal (cd, info, fields->f_shift, 0, pc, length);
+      break;
+    case LM32_OPERAND_UIMM :
+      print_normal (cd, info, fields->f_uimm, 0, pc, length);
+      break;
+    case LM32_OPERAND_USER :
+      print_normal (cd, info, fields->f_user, 0, pc, length);
+      break;
+
+    default :
+      /* xgettext:c-format */
+      fprintf (stderr, _("Unrecognized field %d while printing insn.\n"),
+	       opindex);
+    abort ();
+  }
+}
+
+cgen_print_fn * const lm32_cgen_print_handlers[] = 
+{
+  print_insn_normal,
+};
+
+
+void
+lm32_cgen_init_dis (CGEN_CPU_DESC cd)
+{
+  lm32_cgen_init_opcode_table (cd);
+  lm32_cgen_init_ibld_table (cd);
+  cd->print_handlers = & lm32_cgen_print_handlers[0];
+  cd->print_operand = lm32_cgen_print_operand;
+}
+
 
 /* Default print handler.  */
 
@@ -164,7 +272,7 @@ print_insn_normal (CGEN_CPU_DESC cd,
 	}
 
       /* We have an operand.  */
-      @arch@_cgen_print_operand (cd, CGEN_SYNTAX_FIELD (*syn), info,
+      lm32_cgen_print_operand (cd, CGEN_SYNTAX_FIELD (*syn), info,
 				 fields, CGEN_INSN_ATTRS (insn), pc, length);
     }
 }
@@ -243,7 +351,7 @@ print_insn (CGEN_CPU_DESC cd,
 #ifdef CGEN_VALIDATE_INSN_SUPPORTED 
       /* Not needed as insn shouldn't be in hash lists if not supported.  */
       /* Supported by this cpu?  */
-      if (! @arch@_cgen_insn_supported (cd, insn))
+      if (! lm32_cgen_insn_supported (cd, insn))
         {
           insn_list = CGEN_DIS_NEXT_INSN (insn_list);
 	  continue;
@@ -354,7 +462,7 @@ typedef struct cpu_desc_list
 } cpu_desc_list;
 
 int
-print_insn_@arch@ (bfd_vma pc, disassemble_info *info)
+print_insn_lm32 (bfd_vma pc, disassemble_info *info)
 {
   static cpu_desc_list *cd_list = 0;
   cpu_desc_list *cl = 0;
@@ -372,7 +480,7 @@ print_insn_@arch@ (bfd_vma pc, disassemble_info *info)
 
   /* ??? gdb will set mach but leave the architecture as "unknown" */
 #ifndef CGEN_BFD_ARCH
-#define CGEN_BFD_ARCH bfd_arch_@arch@
+#define CGEN_BFD_ARCH bfd_arch_lm32
 #endif
   arch = info->arch;
   if (arch == bfd_arch_unknown)
@@ -433,7 +541,7 @@ print_insn_@arch@ (bfd_vma pc, disassemble_info *info)
       prev_isa = cgen_bitset_copy (isa);
       prev_mach = mach;
       prev_endian = endian;
-      cd = @arch@_cgen_cpu_open (CGEN_CPU_OPEN_ISAS, prev_isa,
+      cd = lm32_cgen_cpu_open (CGEN_CPU_OPEN_ISAS, prev_isa,
 				 CGEN_CPU_OPEN_BFDMACH, mach_name,
 				 CGEN_CPU_OPEN_ENDIAN, prev_endian,
 				 CGEN_CPU_OPEN_END);
@@ -449,7 +557,7 @@ print_insn_@arch@ (bfd_vma pc, disassemble_info *info)
       cl->next = cd_list;
       cd_list = cl;
 
-      @arch@_cgen_init_dis (cd);
+      lm32_cgen_init_dis (cd);
     }
 
   /* We try to have as much common code as possible.

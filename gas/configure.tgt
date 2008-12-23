@@ -44,6 +44,7 @@ case ${cpu} in
   ia64)			cpu_type=ia64 ;;
   ip2k)			cpu_type=ip2k endian=big ;; 
   iq2000)		cpu_type=iq2000 endian=big ;; 
+  lm32)		        cpu_type=lm32 ;;
   m32c)			cpu_type=m32c endian=big ;;
   m32r)			cpu_type=m32r endian=big ;;
   m32rle)		cpu_type=m32r endian=little ;;
@@ -245,6 +246,8 @@ case ${generic_target} in
   iq2000-*-elf)         		fmt=elf ;;
 
   m32c-*-elf | m32c-*-rtems*)		fmt=elf ;;
+
+  lm32-*-*)				fmt=elf ;;
 
   m32r-*-elf* | m32r-*-rtems*)		fmt=elf ;;
   m32r-*-linux*)			fmt=elf em=linux;;

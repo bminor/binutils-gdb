@@ -1,3 +1,12 @@
+2008-12-23  Jon Beniston <jon@beniston.com>
+
+	* gas/lm32: New directory.
+	* gas/lm32/all.exp: New file.
+	* gas/lm32/csr.d: New file.
+	* gas/lm32/csr.s: New file.
+	* gas/lm32/insn.d: New file.
+	* gas/lm32/insn.s: New file.
+
 2008-12-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run x86-64-avx-swap and x86-64-avx-swap-intel.

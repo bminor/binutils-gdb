@@ -1,3 +1,12 @@
+2008-12-23  Jon Beniston <jon@beniston.com>
+
+	* Makefile.am: Add LM32 object files and dependencies.
+	* Makefile.in: Regenate.
+	* NEWS: Record that support for LM32 has been added.
+	* configure.tgt: Add LM32 targets.	 
+	* emulparams/elf32lm32.sh: New file.
+	* emulparams/elf32lm32fd.sh: New file.
+
 2008-12-23  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.am (EXTRA_DIST): Add deffilep.c and deffilep.h
@@ -43,7 +52,7 @@
 
 2008-11-27  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
-        * emultempl/cr16elf.em (cr16_after_open): New function to handle
+	* emultempl/cr16elf.em (cr16_after_open): New function to handle
 	CR16 ELF embedded reloc creation (ld --embedded-relocs).
 	(check_sections): New function.
 	(LDEMUL_AFTER_OPEN): Define.
@@ -519,13 +528,13 @@
 
 2008-07-09  Danny Smith  <dannysmith@users.sourceforge.net>
 
-           *pe-dll.c (autofilter_symbolprefixlist): Excude all symbols
-           starting with ".".
-           Exclude "_IMPORT_DESCRIPTOR_".
-           (autofilter_symbolsuffixlist): Exclude "_NULL_THUNK_DATA".
-           (autofilter_symbollist_generic): Don't check for ".text".
-           Exclude "_NULL_IMPORT_DESCRIPTOR".
-           (autofilter_symbollist_i386): Likewise.
+	*pe-dll.c (autofilter_symbolprefixlist): Excude all symbols
+	starting with ".".
+	Exclude "_IMPORT_DESCRIPTOR_".
+	(autofilter_symbolsuffixlist): Exclude "_NULL_THUNK_DATA".
+	(autofilter_symbollist_generic): Don't check for ".text".
+	Exclude "_NULL_IMPORT_DESCRIPTOR".
+	(autofilter_symbollist_i386): Likewise.
 
 2008-07-07  Alan Modra  <amodra@bigpond.net.au>
 

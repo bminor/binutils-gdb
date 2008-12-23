@@ -1,3 +1,8 @@
+2008-12-23  Jon Beniston <jon@beniston.com>
+
+	* lm32.cpu: New file.
+	* lm32.opc: New file.
+
 2008-01-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* mt.opc (parse_imm16): Apply 2007-09-26 opcodes/mt-asm.c change

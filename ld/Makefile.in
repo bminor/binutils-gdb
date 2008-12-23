@@ -443,6 +443,8 @@ ALL_EMULATIONS = \
 	eelf32ip2k.o \
 	eelf32iq2000.o \
 	eelf32iq10.o \
+	eelf32lm32.o \
+	eelf32lm32fd.o \
 	eelf32l4300.o \
 	eelf32lmip.o \
 	eelf32lppc.o \
@@ -1780,6 +1782,13 @@ eelf32iq2000.c: $(srcdir)/emulparams/elf32iq2000.sh \
 eelf32iq10.c: $(srcdir)/emulparams/elf32iq10.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/iq2000.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32iq10 "$(tdir_iq10)"
+eelf32lm32.c: $(srcdir)/emulparams/elf32lm32.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32lm32 "$(tdir_elf32lm32)"
+eelf32lm32fd.c: $(srcdir)/emulparams/elf32lm32fd.sh \
+  $(srcdir)/emulparams/elf32lm32.sh $(ELF_DEPS) \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS} 
+	${GENSCRIPTS} elf32lm32fd "$(tdir_elf32lm32fd)" 
 eelf64alpha.c: $(srcdir)/emulparams/elf64alpha.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/alphaelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

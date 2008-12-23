@@ -32,8 +32,8 @@
 #include "ansidecl.h"
 #include "bfd.h"
 #include "symcat.h"
-#include "@prefix@-desc.h"
-#include "@prefix@-opc.h"
+#include "lm32-desc.h"
+#include "lm32-opc.h"
 #include "opintl.h"
 #include "xregex.h"
 #include "libiberty.h"
@@ -48,6 +48,328 @@ static const char * parse_insn_normal
   (CGEN_CPU_DESC, const CGEN_INSN *, const char **, CGEN_FIELDS *);
 
 /* -- assembler routines inserted here.  */
+
+/* -- asm.c */
+
+/* Handle signed/unsigned literal.  */
+
+static const char *
+parse_imm (CGEN_CPU_DESC cd,
+	   const char **strp,
+	   int opindex,
+	   unsigned long *valuep)
+{
+  const char *errmsg;
+  signed long value;
+
+  errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);
+  if (errmsg == NULL)
+    {
+      unsigned long x = value & 0xFFFF0000;
+      if (x != 0 && x != 0xFFFF0000)
+        errmsg = _("immediate value out of range");
+      else
+        *valuep = (value & 0xFFFF);
+    }
+  return errmsg;
+}
+
+/* Handle hi() */
+
+static const char *
+parse_hi16 (CGEN_CPU_DESC cd,
+	    const char **strp,
+	    int opindex,
+	    unsigned long *valuep)
+{
+  if (strncasecmp (*strp, "hi(", 3) == 0)
+    {
+      enum cgen_parse_operand_result result_type;
+      bfd_vma value;
+      const char *errmsg;
+
+      *strp += 3;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_HI16,
+                                   &result_type, &value);
+      if (**strp != ')')
+        return _("missing `)'");
+
+      ++*strp;
+      if (errmsg == NULL
+          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+        value = (value >> 16) & 0xffff;
+      *valuep = value;
+
+      return errmsg;
+    }
+
+  return parse_imm (cd, strp, opindex, valuep);
+}
+
+/* Handle lo() */
+
+static const char *
+parse_lo16 (CGEN_CPU_DESC cd,
+	    const char **strp,
+	    int opindex,
+	    unsigned long *valuep)
+{
+  if (strncasecmp (*strp, "lo(", 3) == 0)
+    {
+      const char *errmsg;
+      enum cgen_parse_operand_result result_type;
+      bfd_vma value;
+
+      *strp += 3;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_LO16,
+                                   &result_type, &value);
+      if (**strp != ')')
+        return _("missing `)'");
+      ++*strp;
+      if (errmsg == NULL
+          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+        value &= 0xffff;
+      *valuep = value;
+      return errmsg;
+    }
+
+  return parse_imm (cd, strp, opindex, valuep);
+}
+
+/* Handle gp() */
+
+static const char *
+parse_gp16 (CGEN_CPU_DESC cd,
+	    const char **strp,
+	    int opindex,
+	    long *valuep)
+{
+  if (strncasecmp (*strp, "gp(", 3) == 0)
+    {
+      const char *errmsg;
+      enum cgen_parse_operand_result result_type;
+      bfd_vma value;
+
+      *strp += 3;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_GPREL16,
+                                   & result_type, & value);
+      if (**strp != ')')
+        return _("missing `)'");
+      ++*strp;
+      if (errmsg == NULL
+          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+        value &= 0xffff;
+      *valuep = value;
+      return errmsg;
+    }
+
+  return _("expecting gp relative address: gp(symbol)");
+}
+
+/* Handle got() */
+
+static const char *
+parse_got16 (CGEN_CPU_DESC cd,
+	     const char **strp,
+	     int opindex,
+	     long *valuep)
+{
+  if (strncasecmp (*strp, "got(", 4) == 0)
+    {
+      const char *errmsg;
+      enum cgen_parse_operand_result result_type;
+      bfd_vma value;
+
+      *strp += 4;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_LM32_16_GOT,
+                                   & result_type, & value);
+      if (**strp != ')')
+        return _("missing `)'");
+      ++*strp;
+      if (errmsg == NULL
+          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+        value &= 0xffff;
+      *valuep = value;
+      return errmsg;
+    }
+
+  return _("expecting got relative address: got(symbol)");
+}
+
+/* Handle gotoffhi16() */
+
+static const char *
+parse_gotoff_hi16 (CGEN_CPU_DESC cd,
+		   const char **strp,
+		   int opindex,
+		   long *valuep)
+{
+  if (strncasecmp (*strp, "gotoffhi16(", 11) == 0)
+    {
+      const char *errmsg;
+      enum cgen_parse_operand_result result_type;
+      bfd_vma value;
+
+      *strp += 11;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_LM32_GOTOFF_HI16,
+                                   & result_type, & value);
+      if (**strp != ')')
+        return _("missing `)'");
+      ++*strp;
+      if (errmsg == NULL
+          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+        value &= 0xffff;
+      *valuep = value;
+      return errmsg;
+    }
+
+  return _("expecting got relative address: gotoffhi16(symbol)");
+}
+
+/* Handle gotofflo16() */
+
+static const char *
+parse_gotoff_lo16 (CGEN_CPU_DESC cd,
+		   const char **strp,
+		   int opindex,
+		   long *valuep)
+{
+  if (strncasecmp (*strp, "gotofflo16(", 11) == 0)
+    {
+      const char *errmsg;
+      enum cgen_parse_operand_result result_type;
+      bfd_vma value;
+
+      *strp += 11;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_LM32_GOTOFF_LO16,
+                                   &result_type, &value);
+      if (**strp != ')')
+        return _("missing `)'");
+      ++*strp;
+      if (errmsg == NULL
+          && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+        value &= 0xffff;
+      *valuep = value;
+      return errmsg;
+    }
+
+  return _("expecting got relative address: gotofflo16(symbol)");
+}
+
+const char * lm32_cgen_parse_operand
+  (CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *);
+
+/* Main entry point for operand parsing.
+
+   This function is basically just a big switch statement.  Earlier versions
+   used tables to look up the function to use, but
+   - if the table contains both assembler and disassembler functions then
+     the disassembler contains much of the assembler and vice-versa,
+   - there's a lot of inlining possibilities as things grow,
+   - using a switch statement avoids the function call overhead.
+
+   This function could be moved into `parse_insn_normal', but keeping it
+   separate makes clear the interface between `parse_insn_normal' and each of
+   the handlers.  */
+
+const char *
+lm32_cgen_parse_operand (CGEN_CPU_DESC cd,
+			   int opindex,
+			   const char ** strp,
+			   CGEN_FIELDS * fields)
+{
+  const char * errmsg = NULL;
+  /* Used by scalar operands that still need to be parsed.  */
+  long junk ATTRIBUTE_UNUSED;
+
+  switch (opindex)
+    {
+    case LM32_OPERAND_BRANCH :
+      {
+        bfd_vma value = 0;
+        errmsg = cgen_parse_address (cd, strp, LM32_OPERAND_BRANCH, 0, NULL,  & value);
+        fields->f_branch = value;
+      }
+      break;
+    case LM32_OPERAND_CALL :
+      {
+        bfd_vma value = 0;
+        errmsg = cgen_parse_address (cd, strp, LM32_OPERAND_CALL, 0, NULL,  & value);
+        fields->f_call = value;
+      }
+      break;
+    case LM32_OPERAND_CSR :
+      errmsg = cgen_parse_keyword (cd, strp, & lm32_cgen_opval_h_csr, & fields->f_csr);
+      break;
+    case LM32_OPERAND_EXCEPTION :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, LM32_OPERAND_EXCEPTION, (unsigned long *) (& fields->f_exception));
+      break;
+    case LM32_OPERAND_GOT16 :
+      errmsg = parse_got16 (cd, strp, LM32_OPERAND_GOT16, (long *) (& fields->f_imm));
+      break;
+    case LM32_OPERAND_GOTOFFHI16 :
+      errmsg = parse_gotoff_hi16 (cd, strp, LM32_OPERAND_GOTOFFHI16, (long *) (& fields->f_imm));
+      break;
+    case LM32_OPERAND_GOTOFFLO16 :
+      errmsg = parse_gotoff_lo16 (cd, strp, LM32_OPERAND_GOTOFFLO16, (long *) (& fields->f_imm));
+      break;
+    case LM32_OPERAND_GP16 :
+      errmsg = parse_gp16 (cd, strp, LM32_OPERAND_GP16, (long *) (& fields->f_imm));
+      break;
+    case LM32_OPERAND_HI16 :
+      errmsg = parse_hi16 (cd, strp, LM32_OPERAND_HI16, (unsigned long *) (& fields->f_uimm));
+      break;
+    case LM32_OPERAND_IMM :
+      errmsg = cgen_parse_signed_integer (cd, strp, LM32_OPERAND_IMM, (long *) (& fields->f_imm));
+      break;
+    case LM32_OPERAND_LO16 :
+      errmsg = parse_lo16 (cd, strp, LM32_OPERAND_LO16, (unsigned long *) (& fields->f_uimm));
+      break;
+    case LM32_OPERAND_R0 :
+      errmsg = cgen_parse_keyword (cd, strp, & lm32_cgen_opval_h_gr, & fields->f_r0);
+      break;
+    case LM32_OPERAND_R1 :
+      errmsg = cgen_parse_keyword (cd, strp, & lm32_cgen_opval_h_gr, & fields->f_r1);
+      break;
+    case LM32_OPERAND_R2 :
+      errmsg = cgen_parse_keyword (cd, strp, & lm32_cgen_opval_h_gr, & fields->f_r2);
+      break;
+    case LM32_OPERAND_SHIFT :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, LM32_OPERAND_SHIFT, (unsigned long *) (& fields->f_shift));
+      break;
+    case LM32_OPERAND_UIMM :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, LM32_OPERAND_UIMM, (unsigned long *) (& fields->f_uimm));
+      break;
+    case LM32_OPERAND_USER :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, LM32_OPERAND_USER, (unsigned long *) (& fields->f_user));
+      break;
+
+    default :
+      /* xgettext:c-format */
+      fprintf (stderr, _("Unrecognized field %d while parsing.\n"), opindex);
+      abort ();
+  }
+
+  return errmsg;
+}
+
+cgen_parse_fn * const lm32_cgen_parse_handlers[] = 
+{
+  parse_insn_normal,
+};
+
+void
+lm32_cgen_init_asm (CGEN_CPU_DESC cd)
+{
+  lm32_cgen_init_opcode_table (cd);
+  lm32_cgen_init_ibld_table (cd);
+  cd->parse_handlers = & lm32_cgen_parse_handlers[0];
+  cd->parse_operand = lm32_cgen_parse_operand;
+#ifdef CGEN_ASM_INIT_HOOK
+CGEN_ASM_INIT_HOOK
+#endif
+}
+
 
 
 /* Regex construction routine.
@@ -57,12 +379,12 @@ static const char * parse_insn_normal
    opcode) with the pattern '.*'
 
    It then compiles the regex and stores it in the opcode, for
-   later use by @arch@_cgen_assemble_insn
+   later use by lm32_cgen_assemble_insn
 
    Returns NULL for success, an error message for failure.  */
 
 char * 
-@arch@_cgen_build_insn_regex (CGEN_INSN *insn)
+lm32_cgen_build_insn_regex (CGEN_INSN *insn)
 {  
   CGEN_OPCODE *opc = (CGEN_OPCODE *) CGEN_INSN_OPCODE (insn);
   const char *mnem = CGEN_INSN_MNEMONIC (insn);
@@ -326,7 +648,7 @@ parse_insn_normal (CGEN_CPU_DESC cd,
    mind helps keep the design clean.  */
 
 const CGEN_INSN *
-@arch@_cgen_assemble_insn (CGEN_CPU_DESC cd,
+lm32_cgen_assemble_insn (CGEN_CPU_DESC cd,
 			   const char *str,
 			   CGEN_FIELDS *fields,
 			   CGEN_INSN_BYTES_PTR buf,
@@ -357,7 +679,7 @@ const CGEN_INSN *
       /* Not usually needed as unsupported opcodes
 	 shouldn't be in the hash lists.  */
       /* Is this insn supported by the selected cpu?  */
-      if (! @arch@_cgen_insn_supported (cd, insn))
+      if (! lm32_cgen_insn_supported (cd, insn))
 	continue;
 #endif
       /* If the RELAXED attribute is set, this is an insn that shouldn't be

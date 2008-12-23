@@ -1,3 +1,22 @@
+2008-12-12  Jon Beniston <jon@beniston.com>
+
+	* Makefile.am: Add LM32 object files and dependencies.
+	* Makefile.in: Regenerate.
+	* configure.in: Add LM32 target.
+	* configure: Regenerate.
+	* disassemble.c: Add LM32 disassembler.
+	* cgen-asm.in: Update copyright year.
+	* cgen-dis.in: Update copyright year.
+	* cgen-ibld.in: Update copyright year.
+	* lm32-asm.c: New file.
+	* lm32-desc.c: New file.
+	* lm32-desc.h: New file.
+	* lm32-dis.c: New file.
+	* lm32-ibld.c: New file.
+	* lm32-opc.c: New file.
+	* lm32-opc.h: New file.
+	* lm32-opinst.c: New file.
+
 2008-12-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (EXdS): New.

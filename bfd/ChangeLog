@@ -1,3 +1,17 @@
+2008-12-23  Jon Beniston <jon@beniston.com>
+
+	* Makefile.am: Add LM32 object files and dependencies.
+	* Makefile.in: Regenerate.
+	* archures.c: Add LM32 architechiture info.
+	* targets.c: Likewise.
+	* reloc.c: Likewise.
+	* bfd-in2.h: Regenerate.
+	* config.bfd: Add LM32 targets.
+	* configure.in: Likewise.
+	* configure: Regenerate.
+	* cpu-lm32.c: New file.
+	* elf32-lm32.c: New file.
+
 2008-12-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/7036

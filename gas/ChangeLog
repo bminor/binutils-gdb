@@ -1,3 +1,19 @@
+2008-12-23  Jon Beniston <jon@beniston.com>
+
+	* NEWS: Record that support for LM32 has been added.
+	* Makefile.am: Add LM32 object files and dependencies.
+	* Makefile.in: Regenerate.
+	* configure.in: Indicate LM32 uses cgen.
+	* configure: Regenerate.
+	* configure.tgt: Add LM32 target.
+	* config/tc-lm32.c: New file.
+	* config/tc-lm32.h: New file.
+	* doc/Makefile.am: Add c-lm32.texi to CPU_DOCS.
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi: Add LM32 as CPU of interest.
+	* doc/as.texinfo: Add LM32 dependent features link.
+	* doc/c-lm32.texi: New file.
+
 2008-12-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (match_template): Changed to return

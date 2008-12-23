@@ -43,6 +43,7 @@
 @set I960
 @set IA64
 @set IP2K
+@set LM32
 @set M32C
 @set M32R
 @set xc16x

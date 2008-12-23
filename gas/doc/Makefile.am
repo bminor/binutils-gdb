@@ -44,6 +44,7 @@ CPU_DOCS = \
 	c-i860.texi \
 	c-i960.texi \
 	c-ip2k.texi \
+	c-lm32.texi \
 	c-m32c.texi \
 	c-m32r.texi \
 	c-m68hc11.texi \

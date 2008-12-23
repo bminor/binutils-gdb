@@ -409,6 +409,8 @@ DESCRIPTION
 .#define bfd_mach_z80            3 {* With ixl, ixh, iyl, and iyh.  *}
 .#define bfd_mach_z80full        7 {* All undocumented instructions.  *}
 .#define bfd_mach_r800           11 {* R800: successor with multiplication.  *}
+.  bfd_arch_lm32,      {* Lattice Mico32 *}
+.#define bfd_mach_lm32      1
 .  bfd_arch_last
 .  };
 */
@@ -471,6 +473,7 @@ extern const bfd_arch_info_type bfd_i960_arch;
 extern const bfd_arch_info_type bfd_ia64_arch;
 extern const bfd_arch_info_type bfd_ip2k_arch;
 extern const bfd_arch_info_type bfd_iq2000_arch;
+extern const bfd_arch_info_type bfd_lm32_arch;
 extern const bfd_arch_info_type bfd_m32c_arch;
 extern const bfd_arch_info_type bfd_m32r_arch;
 extern const bfd_arch_info_type bfd_m68hc11_arch;
@@ -542,6 +545,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_ia64_arch,
     &bfd_ip2k_arch,
     &bfd_iq2000_arch,
+    &bfd_lm32_arch,
     &bfd_m32c_arch,
     &bfd_m32r_arch,
     &bfd_m68hc11_arch,
