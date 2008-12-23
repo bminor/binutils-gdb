@@ -1,3 +1,7 @@
+2008-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/punctuator.exp: Backslash the '$' signs.
+
 2008-12-22  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/punctuator.exp: New file.

@@ -35,18 +35,18 @@ gdb_test "print (0x5a5a or 0xaaaa) == (0x5a5a || 0xaaaa)" " = true"
 gdb_test "print (not not 0xaaaa) == (!!0xaaaa)" " = true"
 gdb_test "print (compl 0xaaaa) == (~0xaaaa)" " = true"
 
-gdb_test "set $u = 0x5a5a" ""
-gdb_test "set $v = 0x5a5a" ""
-gdb_test "print ($u not_eq 0xaaaa) == ($v != 0xaaaa)" "= true"
-gdb_test "print ($u and_eq 0xaaaa) == ($v &= 0xaaaa)" "= true"
+gdb_test "set \$u = 0x5a5a" ""
+gdb_test "set \$v = 0x5a5a" ""
+gdb_test "print (\$u not_eq 0xaaaa) == (\$v != 0xaaaa)" "= true"
+gdb_test "print (\$u and_eq 0xaaaa) == (\$v &= 0xaaaa)" "= true"
 
-gdb_test "set $u = 0x5a5a" ""
-gdb_test "set $v = 0x5a5a" ""
-gdb_test "print ($u or_eq 0xaaaa) == ($v |= 0xaaaa)" "= true"
+gdb_test "set \$u = 0x5a5a" ""
+gdb_test "set \$v = 0x5a5a" ""
+gdb_test "print (\$u or_eq 0xaaaa) == (\$v |= 0xaaaa)" "= true"
 
-gdb_test "set $u = 0x5a5a" ""
-gdb_test "set $v = 0x5a5a" ""
-gdb_test "print ($u xor_eq 0xaaaa) == ($v ^= 0xaaaa)" "= true"
+gdb_test "set \$u = 0x5a5a" ""
+gdb_test "set \$v = 0x5a5a" ""
+gdb_test "print (\$u xor_eq 0xaaaa) == (\$v ^= 0xaaaa)" "= true"
 
 gdb_exit
 return 0
