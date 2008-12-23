@@ -1,3 +1,8 @@
+2008-12-23  Johan Olmutz Nielsen  <jnielsen@ddci.com>
+
+	* coffcode.h (coff_write_object_contents): Always initialise
+	section.s_page.
+
 2008-12-23  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (elf_m68k_discard_copies): Use SYMBOL_CALLS_LOCAL.
