@@ -564,6 +564,9 @@ proc simple_diff { file_1 file_2 } {
 #       Link assembled files using FLAGS, in the order of the "source"
 #       directives, when using multiple files.
 #
+#   ld_after_inputfiles: FLAGS
+#       Similar to "ld", but put after all input files.
+#
 #   objcopy_linked_file: FLAGS
 #	Run objcopy on the linked file with the specified flags.
 #	This lets you transform the linked file using objcopy, before the
@@ -650,6 +653,7 @@ proc run_dump_test { name } {
     set run_objcopy 0
     set opts(as) {}
     set opts(ld) {}
+    set opts(ld_after_inputfiles) {}
     set opts(xfail) {}
     set opts(target) {}
     set opts(notarget) {}
@@ -842,7 +846,7 @@ proc run_dump_test { name } {
 	# Add -L$srcdir/$subdir so that the linker command can use
 	# linker scripts in the source directory.
 	set cmd "$LD $LDFLAGS -L$srcdir/$subdir \
-		   $opts(ld) -o $objfile $objfiles"
+		   $opts(ld) -o $objfile $objfiles $opts(ld_after_inputfiles)"
 
 	send_log "$cmd\n"
 	set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "ld.tmp"]

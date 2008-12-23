@@ -1,3 +1,10 @@
+2008-12-23  Hans-Peter Nilsson  <hp@axis.com>
+
+	* lib/ld-lib.exp (run_dump_test): New option ld_after_inputfiles.
+	* ld-cris/libdso-1c.d, ld-cris/expdref2.s, ld-cris/libdso-15b.d,
+	ld-cris/expdyn1w.s, ld-cris/libdso-1d.d, ld-cris/tls-ie-78.d: New
+	tests.
+
 2008-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* ld-i386/i386.exp: Do not run ifunc test.
