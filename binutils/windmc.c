@@ -1144,7 +1144,7 @@ main (int argc, char **argv)
     unichar *u;
     rc_uint_type ul;
     char *buff;
-    long flen;
+    bfd_size_type flen;
     FILE *fp = fopen (input_filename, "rb");
 
     if (!fp)

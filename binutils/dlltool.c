@@ -1980,7 +1980,7 @@ gen_exp_file (void)
       int addr;
       long need[PAGE_SIZE];
       long page_addr;
-      int numbytes;
+      bfd_size_type numbytes;
       int num_entries;
       long *copy;
       int j;

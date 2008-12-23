@@ -1,3 +1,8 @@
+2008-12-23  Nick Clifton  <nickc@redhat.com>
+
+	* windmc.c (main): Use correct type for file length.
+	* dlltool.c (gen_exp_file): Likewise.
+
 2008-12-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 7044
