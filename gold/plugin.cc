@@ -306,11 +306,18 @@ Plugin_manager::all_symbols_read(Workqueue* workqueue,
   *last_blocker = this->this_blocker_;
 }
 
-// Call the cleanup handlers.
+// Layout deferred sections and call the cleanup handlers.
 
 void
-Plugin_manager::cleanup()
+Plugin_manager::finish()
 {
+  Deferred_layout_list::iterator obj;
+
+  for (obj = this->deferred_layout_objects_.begin();
+       obj != this->deferred_layout_objects_.end();
+       ++obj)
+    (*obj)->layout_deferred_sections(this->layout_);
+
   for (this->current_ = this->plugins_.begin();
        this->current_ != this->plugins_.end();
        ++this->current_)
@@ -713,17 +720,18 @@ Add_plugin_symbols::run(Workqueue*)
   this->obj_->add_symbols(this->symtab_, this->layout_);
 }
 
-// Class Plugin_cleanup.  This task calls the plugin cleanup hooks once all
-// replacement files have been added.
+// Class Plugin_finish.  This task runs after all replacement files have
+// been added.  It calls Layout::layout for any deferred sections and
+// calls each plugin's cleanup handler.
 
-class Plugin_cleanup : public Task
+class Plugin_finish : public Task
 {
  public:
-  Plugin_cleanup(Task_token* this_blocker, Task_token* next_blocker)
+  Plugin_finish(Task_token* this_blocker, Task_token* next_blocker)
     : this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
 
-  ~Plugin_cleanup()
+  ~Plugin_finish()
   {
     if (this->this_blocker_ != NULL)
       delete this->this_blocker_;
@@ -743,11 +751,11 @@ class Plugin_cleanup : public Task
 
   void
   run(Workqueue*)
-  { parameters->options().plugins()->cleanup(); }
+  { parameters->options().plugins()->finish(); }
 
   std::string
   get_name() const
-  { return "Plugin_cleanup"; }
+  { return "Plugin_finish"; }
 
  private:
   Task_token* this_blocker_;
@@ -778,18 +786,10 @@ Plugin_hook::locks(Task_locker*)
 {
 }
 
-// Run a Plugin_hook task.
-
-void
-Plugin_hook::run(Workqueue* workqueue)
-{
-  this->do_plugin_hook(workqueue);
-}
-
 // Run the "all symbols read" plugin hook.
 
 void
-Plugin_hook::do_plugin_hook(Workqueue* workqueue)
+Plugin_hook::run(Workqueue* workqueue)
 {
   gold_assert(this->options_.has_plugins());
   this->options_.plugins()->all_symbols_read(workqueue,
@@ -799,8 +799,8 @@ Plugin_hook::do_plugin_hook(Workqueue* workqueue)
                                              this->dirpath_,
                                              this->mapfile_,
                                              &this->this_blocker_);
-  workqueue->queue_soon(new Plugin_cleanup(this->this_blocker_,
-					   this->next_blocker_));
+  workqueue->queue_soon(new Plugin_finish(this->this_blocker_,
+					  this->next_blocker_));
 }
 
 // The C interface routines called by the plugins.

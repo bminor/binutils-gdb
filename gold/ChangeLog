@@ -1,3 +1,30 @@
+2008-12-22  Cary Coutant  <ccoutant@google.com>
+
+	* object.cc (Sized_relobj::layout_section): New function.
+	(Sized_relobj::do_layout): Defer layout of input sections until after
+	plugin has provided replacement files.
+	(Sized_relobj::do_layout_deferred_sections): New function.
+	* object.h (Relobj::set_section_offset): Remove virtual keyword.
+	(Relobj::layout_deferred_sections): New function.
+	(Relobj::do_layout_deferred_sections): New function.
+	(Sized_relobj::do_layout_deferred_sections): New function.
+	(Sized_relobj::layout_section): New function.
+	(Sized_relobj::Deferred_layout): New structure.
+	(Sized_relobj::deferred_layout_): New field.
+	* plugin.cc (Plugin_manager::finish): Renamed, was cleanup.
+	Change all callers.  Layout deferred sections.
+	(class Plugin_finish): Renamed, was Plugin_cleanup.  Change all
+	references.
+	(Plugin_hook::run): Move code from do_plugin_hook inline.
+	(Plugin_hook::do_plugin_hook): Remove.
+	* plugin.h (Plugin_manager::Plugin_manager): Add missing initializers.
+	(Plugin_manager::finish): Renamed, was cleanup.
+	(Plugin_manager::should_defer_layout): New function.
+	(Plugin_manager::add_deferred_layout_object): New function.
+	(Plugin_manager::Deferred_layout_list): New type.
+	(Plugin_manager::deferred_layout_objects_): New field.
+	(Plugin_hook::do_plugin_hook): Remove.
+
 2008-12-17  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (class General_options): Add --no case for

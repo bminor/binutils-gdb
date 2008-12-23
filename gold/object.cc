@@ -37,6 +37,7 @@
 #include "reloc.h"
 #include "object.h"
 #include "dynobj.h"
+#include "plugin.h"
 
 namespace gold
 {
@@ -784,6 +785,34 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
   return include1 && include2;
 }
 
+// Layout an input section.
+
+template<int size, bool big_endian>
+inline void
+Sized_relobj<size, big_endian>::layout_section(Layout* layout,
+                                               unsigned int shndx,
+                                               const char* name,
+                                               typename This::Shdr& shdr,
+                                               unsigned int reloc_shndx,
+                                               unsigned int reloc_type)
+{
+  off_t offset;
+  Output_section* os = layout->layout(this, shndx, name, shdr,
+					  reloc_shndx, reloc_type, &offset);
+
+  this->output_sections()[shndx] = os;
+  if (offset == -1)
+    this->section_offsets_[shndx] = invalid_address;
+  else
+    this->section_offsets_[shndx] = convert_types<Address, off_t>(offset);
+
+  // If this section requires special handling, and if there are
+  // relocs that apply to it, then we must do the special handling
+  // before we apply the relocs.
+  if (offset == -1 && reloc_shndx != 0)
+    this->set_relocs_must_follow_section_writes();
+}
+
 // Lay out the input sections.  We walk through the sections and check
 // whether they should be included in the link.  If they should, we
 // pass them to the Layout object, which will return an output section
@@ -807,6 +836,13 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   const unsigned char* pnamesu = sd->section_names->data();
   const char* pnames = reinterpret_cast<const char*>(pnamesu);
 
+  // If any input files have been claimed by plugins, we need to defer
+  // actual layout until the replacement files have arrived.
+  const bool should_defer_layout =
+      (parameters->options().has_plugins()
+       && parameters->options().plugins()->should_defer_layout());
+  unsigned int num_sections_to_defer = 0;
+
   // For each section, record the index of the reloc section if any.
   // Use 0 to mean that there is no reloc section, -1U to mean that
   // there is more than one.
@@ -817,6 +853,10 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   for (unsigned int i = 1; i < shnum; ++i, pshdrs += This::shdr_size)
     {
       typename This::Shdr shdr(pshdrs);
+
+      // Count the number of sections whose layout will be deferred.
+      if (should_defer_layout && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC))
+        ++num_sections_to_defer;
 
       unsigned int sh_type = shdr.get_sh_type();
       if (sh_type == elfcpp::SHT_REL || sh_type == elfcpp::SHT_RELA)
@@ -854,6 +894,12 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       delete sd->section_names;
       sd->section_names = NULL;
       return;
+    }
+
+  if (num_sections_to_defer > 0)
+    {
+      parameters->options().plugins()->add_deferred_layout_object(this);
+      this->deferred_layout_.reserve(num_sections_to_defer);
     }
 
   // Whether we've seen a .note.GNU-stack section.
@@ -960,22 +1006,22 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	  continue;
 	}
 
-      off_t offset;
-      Output_section* os = layout->layout(this, i, name, shdr,
-					  reloc_shndx[i], reloc_type[i],
-					  &offset);
+      if (should_defer_layout && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC))
+        {
+          this->deferred_layout_.push_back(Deferred_layout(i, name, pshdrs,
+                                                           reloc_shndx[i],
+                                                           reloc_type[i]));
 
-      out_sections[i] = os;
-      if (offset == -1)
-        out_section_offsets[i] = invalid_address;
+          // Put dummy values here; real values will be supplied by
+          // do_layout_deferred_sections.
+          out_sections[i] = reinterpret_cast<Output_section*>(1);
+          out_section_offsets[i] = invalid_address;
+        }
       else
-        out_section_offsets[i] = convert_types<Address, off_t>(offset);
-
-      // If this section requires special handling, and if there are
-      // relocs that apply to it, then we must do the special handling
-      // before we apply the relocs.
-      if (offset == -1 && reloc_shndx[i] != 0)
-	this->set_relocs_must_follow_section_writes();
+        {
+          this->layout_section(layout, i, name, shdr, reloc_shndx[i],
+                               reloc_type[i]);
+        }
     }
 
   layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags);
@@ -1057,6 +1103,27 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   sd->section_headers = NULL;
   delete sd->section_names;
   sd->section_names = NULL;
+}
+
+// Layout sections whose layout was deferred while waiting for
+// input files from a plugin.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::do_layout_deferred_sections(Layout* layout)
+{
+  typename std::vector<Deferred_layout>::iterator deferred;
+
+  for (deferred = this->deferred_layout_.begin();
+       deferred != this->deferred_layout_.end();
+       ++deferred)
+    {
+      typename This::Shdr shdr(deferred->shdr_data_);
+      this->layout_section(layout, deferred->shndx_, deferred->name_.c_str(),
+                           shdr, deferred->reloc_shndx_, deferred->reloc_type_);
+    }
+
+  this->deferred_layout_.clear();
 }
 
 // Add the symbols to the symbol table.

@@ -671,7 +671,7 @@ class Relobj : public Object
   { return this->do_output_section_offset(shndx); }
 
   // Set the offset of an input section within its output section.
-  virtual void
+  void
   set_section_offset(unsigned int shndx, uint64_t off)
   { this->do_set_section_offset(shndx, off); }
 
@@ -711,6 +711,12 @@ class Relobj : public Object
     gold_assert(reloc_shndx < this->shnum());
     return (*this->map_to_relocatable_relocs_)[reloc_shndx];
   }
+
+  // Layout sections whose layout was deferred while waiting for
+  // input files from a plugin.
+  void
+  layout_deferred_sections(Layout* layout)
+  { this->do_layout_deferred_sections(layout); }
 
  protected:
   // The output section to be used for each input section, indexed by
@@ -763,6 +769,11 @@ class Relobj : public Object
   // Set the offset of a section--implemented by child class.
   virtual void
   do_set_section_offset(unsigned int shndx, uint64_t off) = 0;
+
+  // Layout sections whose layout was deferred while waiting for
+  // input files from a plugin--implemented by child class.
+  virtual void
+  do_layout_deferred_sections(Layout*) = 0;
 
   // Return the vector mapping input sections to output sections.
   Output_sections&
@@ -1368,6 +1379,11 @@ class Sized_relobj : public Relobj
   void
   do_layout(Symbol_table*, Layout*, Read_symbols_data*);
 
+  // Layout sections whose layout was deferred while waiting for
+  // input files from a plugin.
+  void
+  do_layout_deferred_sections(Layout*);
+
   // Add the symbols to the symbol table.
   void
   do_add_symbols(Symbol_table*, Read_symbols_data*);
@@ -1558,6 +1574,12 @@ class Sized_relobj : public Relobj
   include_linkonce_section(Layout*, unsigned int, const char*,
 			   const elfcpp::Shdr<size, big_endian>&);
 
+  // Layout an input section.
+  void
+  layout_section(Layout* layout, unsigned int shndx, const char* name,
+                 typename This::Shdr& shdr, unsigned int reloc_shndx,
+                 unsigned int reloc_type);
+
   // Views and sizes when relocating.
   struct View_size
   {
@@ -1681,6 +1703,25 @@ class Sized_relobj : public Relobj
   };
   typedef Unordered_map<unsigned int, Tls_got_entry> Local_tls_got_offsets;
 
+  // Saved information for sections whose layout was deferred.
+  struct Deferred_layout
+  {
+    static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
+    Deferred_layout(unsigned int shndx, const char* name,
+                    const unsigned char* pshdr,
+                    unsigned int reloc_shndx, unsigned int reloc_type)
+      : shndx_(shndx), name_(name), reloc_shndx_(reloc_shndx),
+        reloc_type_(reloc_type)
+    {
+      memcpy(this->shdr_data_, pshdr, shdr_size);
+    }
+    unsigned int shndx_;
+    std::string name_;
+    unsigned int reloc_shndx_;
+    unsigned int reloc_type_;
+    unsigned char shdr_data_[shdr_size];
+  };
+
   // General access to the ELF file.
   elfcpp::Elf_file<size, big_endian, Object> elf_file_;
   // Index of SHT_SYMTAB section.
@@ -1715,6 +1756,8 @@ class Sized_relobj : public Relobj
   Comdat_group_table comdat_groups_;
   // Whether this object has a GNU style .eh_frame section.
   bool has_eh_frame_;
+  // The list of sections whose layout was deferred.
+  std::vector<Deferred_layout> deferred_layout_;
 };
 
 // A class to manage the list of all objects.

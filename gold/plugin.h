@@ -120,7 +120,8 @@ class Plugin_manager
 {
  public:
   Plugin_manager(const General_options& options)
-    : plugins_(), in_replacement_phase_(false), options_(options),
+    : plugins_(), objects_(), deferred_layout_objects_(), input_file_(NULL),
+      plugin_input_file_(), in_replacement_phase_(false), options_(options),
       workqueue_(NULL), input_objects_(NULL), symtab_(NULL), layout_(NULL),
       dirpath_(NULL), mapfile_(NULL), this_blocker_(NULL)
   { this->current_ = plugins_.end(); }
@@ -154,9 +155,9 @@ class Plugin_manager
                    Symbol_table* symtab, Layout* layout, Dirsearch* dirpath,
                    Mapfile* mapfile, Task_token** last_blocker);
 
-  // Call the cleanup handlers.
+  // Run deferred layout and call the cleanup handlers.
   void
-  cleanup();
+  finish();
 
   // Register a claim-file handler.
   void
@@ -196,6 +197,19 @@ class Plugin_manager
     return this->objects_[handle];
   }
 
+  // Return TRUE if any input files have been claimed by a plugin
+  // and we are still in the initial input phase.
+  bool
+  should_defer_layout() const
+  { return !this->objects_.empty() && !this->in_replacement_phase_; }
+
+  // Add a regular object to the deferred layout list.  These are
+  // objects whose layout has been deferred until after the
+  // replacement files have arrived.
+  void
+  add_deferred_layout_object(Relobj* obj)
+  { this->deferred_layout_objects_.push_back(obj); }
+
   // Add a new input file.
   ld_plugin_status
   add_input_file(char *pathname);
@@ -211,6 +225,7 @@ class Plugin_manager
 
   typedef std::list<Plugin*> Plugin_list;
   typedef std::vector<Pluginobj*> Object_list;
+  typedef std::vector<Relobj*> Deferred_layout_list;
 
   // The list of plugin libraries.
   Plugin_list plugins_;
@@ -220,6 +235,9 @@ class Plugin_manager
   // The list of plugin objects.  The index of an item in this list
   // serves as the "handle" that we pass to the plugins.
   Object_list objects_;
+
+  // The list of regular objects whose layout has been deferred.
+  Deferred_layout_list deferred_layout_objects_;
 
   // The file currently up for claim by the plugins.
   Input_file* input_file_;
@@ -456,10 +474,6 @@ class Plugin_hook : public Task
   { return "Plugin_hook"; }
 
  private:
-  // Call the plugin hook.
-  void
-  do_plugin_hook(Workqueue*);
-
   const General_options& options_;
   Input_objects* input_objects_;
   Symbol_table* symtab_;
