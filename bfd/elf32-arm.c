@@ -4608,6 +4608,10 @@ bfd_elf32_arm_init_maps (bfd *abfd)
   Elf_Internal_Shdr *hdr;
   unsigned int i, localsyms;
 
+  /* PR 7093: Make sure that we are dealing with an arm elf binary.  */
+  if (! is_arm_elf (abfd))
+    return;
+
   if ((abfd->flags & DYNAMIC) != 0)
     return;
 

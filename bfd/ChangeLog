@@ -1,3 +1,9 @@
+2008-12-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 7093
+	* elf32-arm.c (bfd_elf32_arm_init_maps): Only process ARM ELF
+	object files.
+
 2008-12-23  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_make_bfd_section): Use the standard ELF name
