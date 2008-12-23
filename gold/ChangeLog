@@ -1,3 +1,13 @@
+2008-12-23  Cary Coutant  <ccoutant@google.com>
+
+	* plugin.cc (is_visible_from_outside): New function.
+	(Pluginobj::get_symbol_resolution_info): Call is_visible_from_outside
+	so we don't return "IR only" status for exported symbols or -r links.
+
+	* testsuite/Makefile.am (plugin_test_3): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/plugin_test_3.sh: New file.
+
 2008-12-22  Cary Coutant  <ccoutant@google.com>
 
 	* object.cc (Sized_relobj::layout_section): New function.

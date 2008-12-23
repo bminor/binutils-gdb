@@ -372,6 +372,21 @@ Pluginobj::Pluginobj(const std::string& name, Input_file* input_file,
 {
 }
 
+// Return TRUE if a defined symbol might be reachable from outside the
+// universe of claimed objects.
+
+static inline bool
+is_visible_from_outside(Symbol* lsym)
+{
+  if (lsym->in_real_elf())
+    return true;
+  if (parameters->options().relocatable())
+    return true;
+  if (parameters->options().export_dynamic() || parameters->options().shared())
+    return lsym->is_externally_visible();
+  return false;
+}
+
 // Get symbol resolution info.
 
 ld_plugin_status
@@ -408,7 +423,7 @@ Pluginobj::get_symbol_resolution_info(int nsyms, ld_plugin_symbol* syms) const
           if (lsym->source() != Symbol::FROM_OBJECT)
             res = LDPR_PREEMPTED_REG;
           else if (lsym->object() == static_cast<const Object*>(this))
-            res = (lsym->in_real_elf()
+            res = (is_visible_from_outside(lsym)
                    ? LDPR_PREVAILING_DEF
                    : LDPR_PREVAILING_DEF_IRONLY);
           else
