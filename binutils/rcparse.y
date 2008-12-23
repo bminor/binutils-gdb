@@ -1248,6 +1248,10 @@ rcdata_data:
 	    $1.last->next = ri;
 	    $$.last = ri;
 	  }
+	| rcdata_data ','
+	  {
+	    $$=$1;
+	  }
 	;
 
 /* Stringtable resources.  */
