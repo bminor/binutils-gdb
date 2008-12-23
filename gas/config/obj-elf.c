@@ -1663,20 +1663,6 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
 	    }
 	}
     }
-  else if (strcmp (typename, "indirect_function") == 0
-      || strcmp (typename, "10") == 0
-      || strcmp (typename, "STT_IFUNC") == 0)
-    {
-      const struct elf_backend_data *bed;
-
-      bed = get_elf_backend_data (stdoutput);
-      if (!(bed->elf_osabi == ELFOSABI_LINUX
-	    /* GNU/Linux is still using the default value 0.  */
-	    || bed->elf_osabi == ELFOSABI_NONE))
-	as_bad (_("symbol type \"%s\" is supported only by GNU targets"),
-		typename);
-      type = BSF_FUNCTION | BSF_INDIRECT_FUNCTION;
-    }
 #ifdef md_elf_symbol_type
   else if ((type = md_elf_symbol_type (typename, sym, elfsym)) != -1)
     ;

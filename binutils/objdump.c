@@ -2722,8 +2722,6 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
       if (sym_name)
 	{
 	  objdump_print_symname (abfd, NULL, *q->sym_ptr_ptr);
-	  if ((*q->sym_ptr_ptr)->flags & BSF_INDIRECT_FUNCTION)
-	    printf ("() ");
 	}
       else
 	{

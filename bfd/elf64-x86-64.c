@@ -974,26 +974,6 @@ elf64_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
   return TRUE;
 }
 
-/* Returns true if the hash entry refers to a symbol
-   marked for indirect handling during reloc processing.  */
-
-static bfd_boolean
-is_indirect_symbol (bfd * abfd, struct elf_link_hash_entry * h)
-{
-  const struct elf_backend_data * bed;
-
-  if (abfd == NULL || h == NULL)
-    return FALSE;
-
-  bed = get_elf_backend_data (abfd);
-
-  return h->type == STT_IFUNC
-    && bed != NULL
-    && (bed->elf_osabi == ELFOSABI_LINUX
-	/* GNU/Linux is still using the default value 0.  */
-	|| bed->elf_osabi == ELFOSABI_NONE);
-}
-
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure
    linkage table, and dynamic reloc sections.  */
@@ -1275,10 +1255,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     If on the other hand, we are creating an executable, we
 	     may need to keep relocations for symbols satisfied by a
 	     dynamic library if we manage to avoid copy relocs for the
-	     symbol.
+	     symbol.  */
 
-	     Also we must keep any relocations against IFUNC symbols as
-	     they will be evaluated at load time.  */
 	  if ((info->shared
 	       && (sec->flags & SEC_ALLOC) != 0
 	       && (((r_type != R_X86_64_PC8)
@@ -1294,8 +1272,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  && (sec->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && (h->root.type == bfd_link_hash_defweak
-		      || !h->def_regular))
-	      || is_indirect_symbol (abfd, h))
+		      || !h->def_regular)))
 	    {
 	      struct elf64_x86_64_dyn_relocs *p;
 	      struct elf64_x86_64_dyn_relocs **head;
@@ -1314,9 +1291,6 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (sreloc == NULL)
 		    return FALSE;
 		}
-
-	      if (is_indirect_symbol (abfd, h))
-		(void) _bfd_elf_make_ifunc_reloc_section (abfd, sec, htab->elf.dynobj, 2);
 
 	      /* If this is a global symbol, we count the number of
 		 relocations we need for this symbol.  */
@@ -1857,13 +1831,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    }
 	}
     }
-  else if (is_indirect_symbol (info->output_bfd, h))
-    {
-      if (h->dynindx == -1
-	  && ! h->forced_local
-	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
-	return FALSE;    
-    }
   else if (ELIMINATE_COPY_RELOCS)
     {
       /* For the non-shared case, discard space for relocs against
@@ -1902,11 +1869,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
     {
       asection * sreloc;
 
-      if (! info->shared
-	  && is_indirect_symbol (info->output_bfd, h))
-	sreloc = elf_section_data (p->sec)->indirect_relocs;
-      else
-	sreloc = elf_section_data (p->sec)->sreloc;
+      sreloc = elf_section_data (p->sec)->sreloc;
 
       BFD_ASSERT (sreloc != NULL);
 
@@ -2721,8 +2684,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  && ((h->def_dynamic
 		       && !h->def_regular)
 		      || h->root.type == bfd_link_hash_undefweak
-		      || h->root.type == bfd_link_hash_undefined))
-	      || is_indirect_symbol (output_bfd, h))
+		      || h->root.type == bfd_link_hash_undefined)))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
@@ -2808,10 +2770,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    }
 		}
 
-	      if ((! info->shared) && is_indirect_symbol (output_bfd, h))
-		sreloc = elf_section_data (input_section)->indirect_relocs;
-	      else
-		sreloc = elf_section_data (input_section)->sreloc;
+	      sreloc = elf_section_data (input_section)->sreloc;
 		
 	      BFD_ASSERT (sreloc != NULL && sreloc->contents != NULL);
 
@@ -2823,7 +2782,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		 not want to fiddle with the addend.  Otherwise, we
 		 need to include the symbol value so that it becomes
 		 an addend for the dynamic reloc.  */
-	      if (! relocate || is_indirect_symbol (output_bfd, h))
+	      if (! relocate)
 		continue;
 	    }
 

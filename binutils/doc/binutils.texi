@@ -729,10 +729,6 @@ The symbol is in an initialized data section for small objects.  Some
 object file formats permit more efficient access to small data objects,
 such as a global int variable as opposed to a large global array.
 
-@item I
-The symbol is an indirect reference to another symbol.  This is a @sc{gnu}
-extension to the a.out object file format which is rarely used.
-
 @item i
 The symbol is in a section specific to the implementation of DLLs.
 

@@ -1287,9 +1287,6 @@ struct bfd_elf_section_data
   /* A pointer to the bfd section used for dynamic relocs.  */
   asection *sreloc;
 
-  /* A pointer to the bfd section used for dynamic relocs against ifunc symbols.  */
-  asection *indirect_relocs;
-
   union {
     /* Group name, if this section is a member of a group.  */
     const char *name;
@@ -1771,8 +1768,6 @@ extern asection * _bfd_elf_get_dynamic_reloc_section
   (bfd *, asection *, bfd_boolean);
 extern asection * _bfd_elf_make_dynamic_reloc_section
   (asection *, bfd *, unsigned int, bfd *, bfd_boolean);
-extern asection * _bfd_elf_make_ifunc_reloc_section
-  (bfd *, asection *, bfd *, unsigned int);
 extern long _bfd_elf_get_dynamic_reloc_upper_bound
   (bfd *);
 extern long _bfd_elf_canonicalize_dynamic_reloc

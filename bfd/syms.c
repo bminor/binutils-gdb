@@ -231,13 +231,6 @@ CODE_FRAGMENT
 .     perhaps others someday.  *}
 .#define BSF_FUNCTION		(1 << 3)
 .
-.  {* The symbol is an indirect code object.  Unrelated to BSF_INDIRECT.
-.     Relocations against a symbol with this flag have to evaluated at
-.     run-time, where the function pointed to by this symbol is invoked
-.     in order to determine the value to be used in the relocation.
-.     BSF_FUNCTION must also be set for symbols with this flag.  *}
-.#define BSF_INDIRECT_FUNCTION	(1 << 4)
-. 
 .  {* Used by the linker.  *}
 .#define BSF_KEEP		(1 << 5)
 .#define BSF_KEEP_G		(1 << 6)
@@ -490,7 +483,7 @@ bfd_print_symbol_vandf (bfd *abfd, void *arg, asymbol *symbol)
 	   (type & BSF_WEAK) ? 'w' : ' ',
 	   (type & BSF_CONSTRUCTOR) ? 'C' : ' ',
 	   (type & BSF_WARNING) ? 'W' : ' ',
-	   (type & BSF_INDIRECT) ? 'I' : (type & BSF_INDIRECT_FUNCTION) ? 'i' : ' ',
+	   (type & BSF_INDIRECT) ? 'I' : ' ',
 	   (type & BSF_DEBUGGING) ? 'd' : (type & BSF_DYNAMIC) ? 'D' : ' ',
 	   ((type & BSF_FUNCTION)
 	    ? 'F'
@@ -676,8 +669,6 @@ bfd_decode_symclass (asymbol *symbol)
     }
   if (bfd_is_ind_section (symbol->section))
     return 'I';
-  if (symbol->flags & BSF_INDIRECT_FUNCTION)
-    return 'i';
   if (symbol->flags & BSF_WEAK)
     {
       /* If weak, determine if it's specifically an object

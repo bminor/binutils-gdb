@@ -1,3 +1,31 @@
+2008-12-23  Nick Clifton  <nickc@redhat.com>
+
+	* elf-bfd.h (struct bfd_elf_section_data): Remove indirect_relocs
+	field.
+	(_bfd_elf_make_ifunc_reloc_section): Remove prototype.
+	* elf.c (swap_out_syms): Remove STT_IFUNC support.
+	(elf_find_function): Likewise.
+	* elf32-arm.c (arm_elf_find_function): Likewise.
+	(elf32_arm_adjust_dynamic_symbol): Likewise.
+	(elf32_arm_swap_symbol_in): Likewise.
+	(elf32_arm_is_function_type): Likewise.
+	* elf32-i386.c (is_indirect_symbol): Delete.
+	(elf_i386_check_relocs): Remove STT_IFUNC support.
+	(allocate_dynrelocs): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	* elf64-x86-64.c (is_indirect_symbol): Delete.
+	(elf64_x86_64_check_relocs): Remove STT_IFUNC support.
+	(allocate_dynrelocs): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+	* elfcode.h (elf_slurp_symbol_table): Likewise.
+	* elflink.c (_bfd_elf_adjust_symbol): Likewise.
+	(get_ifunc_reloc_section_name): Delete.
+	(_bfd_elf_make_ifunc_reloc_section): Delete.
+	* syms.c (BSF_INDIRECT_FUNCTION): Delete.
+	(bfd_print_symbol_vandf): Remove STT_IFUNC support.
+	(bfd_decode_symclass): Likewise.
+	* bfd-in2.h: Regenerate.
+
 2008-12-20  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c 	(cris_elf_howto_table): Add entry for R_CRIS_32_IE.

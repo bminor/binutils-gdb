@@ -1,3 +1,10 @@
+2008-12-23  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (dump_reloc_set): Remove STT_IFUNC support.
+	* readelf.c (dump_relocations): Likewise.
+	(get_symbol_type): Likewise.
+	* doc/binutils.texi: Likewise.
+
 2008-12-18  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

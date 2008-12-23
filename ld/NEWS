@@ -1,8 +1,4 @@
 -*- text -*-
-* For GNU/Linux systems the linker will now forego processing any relocations
-  made against symbols of the STT_IFUNC type and instead emit them into
-  the resulting binary for processing by the loader.
-
 * Add CR16 ELF --embedded-relocs (used to embedded relocations into binaries 
   for Embedded-PIC code) option.
 

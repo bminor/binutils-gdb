@@ -4472,13 +4472,6 @@ typedef struct bfd_symbol
      perhaps others someday.  */
 #define BSF_FUNCTION           (1 << 3)
 
-  /* The symbol is an indirect code object.  Unrelated to BSF_INDIRECT.
-     Relocations against a symbol with this flag have to evaluated at
-     run-time, where the function pointed to by this symbol is invoked
-     in order to determine the value to be used in the relocation.
-     BSF_FUNCTION must also be set for symbols with this flag.  */
-#define BSF_INDIRECT_FUNCTION  (1 << 4)
- 
   /* Used by the linker.  */
 #define BSF_KEEP               (1 << 5)
 #define BSF_KEEP_G             (1 << 6)

@@ -1,10 +1,5 @@
 -*- text -*-
 
-* The .type pseudo-op now accepts a type of STT_IFUNC which can be used to
-  indicate that if the symbol is the target of a relocation, its value should
-  not be used.  Instead the function should be invoked and its result used as
-  the value.
- 
 Changes in 2.19:
 
 * New pseudo op .cfi_val_encoded_addr, to record constant addresses in unwind

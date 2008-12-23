@@ -1,3 +1,9 @@
+2008-12-23  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS :Remove mention of STT_IFUNC support.
+	* config/obj-elf.c (obj_elf_type): Remove STT_IFUNC support.
+	* doc/as.texinfo: Remove mention of STT_IFUNC support.
+
 2008-12-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c (s_cris_dtpoff): New function.

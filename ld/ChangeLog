@@ -1,3 +1,7 @@
+2008-12-23  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Remove mention of support for STT_IFUNC.
+
 2008-12-18  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
