@@ -1,3 +1,12 @@
+2008-12-23  Nick Clifton  <nickc@redhat.com>
+
+	* Import this patch from the mainline:
+	2008-11-10  Andreas Schwab  <schwab@suse.de>
+
+	PR 7011
+	* elf.c (assign_file_positions_for_non_load_sections): Handle
+	PT_GNU_RELRO specially.
+
 2008-11-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (allocate_dynrelocs): Always use tlsld_got for
