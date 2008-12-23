@@ -2980,9 +2980,7 @@ elf_m68k_discard_copies (h, inf)
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  if (!h->def_regular
-      || (!info->symbolic
-	  && !h->forced_local))
+  if (!SYMBOL_CALLS_LOCAL (info, h))
     {
       if ((info->flags & DF_TEXTREL) == 0)
 	{
@@ -3205,10 +3203,9 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 		dyn = elf_hash_table (info)->dynamic_sections_created;
 		if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		    || (info->shared
-			&& (info->symbolic
-			    || h->dynindx == -1
-			    || h->forced_local)
-			&& h->def_regular))
+			&& SYMBOL_REFERENCES_LOCAL (info, h))
+		    || (ELF_ST_VISIBILITY (h->other)
+			&& h->root.type == bfd_link_hash_undefweak))
 		  {
 		    /* This is actually a static link, or it is a
 		       -Bsymbolic link and the symbol is defined
@@ -3348,17 +3345,12 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  break;
 
-	case R_68K_PC8:
-	case R_68K_PC16:
-	case R_68K_PC32:
-	  if (h == NULL
-	      || (info->shared
-		  && h->forced_local))
-	    break;
-	  /* Fall through.  */
 	case R_68K_8:
 	case R_68K_16:
 	case R_68K_32:
+	case R_68K_PC8:
+	case R_68K_PC16:
+	case R_68K_PC32:
 	  if (info->shared
 	      && r_symndx != 0
 	      && (input_section->flags & SEC_ALLOC) != 0
@@ -3368,10 +3360,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && ((r_type != R_68K_PC8
 		   && r_type != R_68K_PC16
 		   && r_type != R_68K_PC32)
-		  || (h != NULL
-		      && h->dynindx != -1
-		      && (!info->symbolic
-			  || !h->def_regular))))
+		  || !SYMBOL_CALLS_LOCAL (info, h)))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
@@ -3675,10 +3664,7 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 	     The entry in the global offset table will already have been
 	     initialized in the relocate_section function.  */
 	  if (info->shared
-	      && (info->symbolic
-		  || h->dynindx == -1
-		  || h->forced_local)
-	      && h->def_regular)
+	      && SYMBOL_REFERENCES_LOCAL (info, h))
 	    {
 	      rela.r_info = ELF32_R_INFO (0, R_68K_RELATIVE);
 	      rela.r_addend = bfd_get_signed_32 (output_bfd,

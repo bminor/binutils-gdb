@@ -1,3 +1,10 @@
+2008-12-23  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_discard_copies): Use SYMBOL_CALLS_LOCAL.
+	(elf_m68k_relocate_section): Use SYMBOL_CALLS_LOCAL and
+	SYMBOL_REFERENCES_LOCAL.
+	(elf_m68k_relocate_section): Likewise.
+
 2008-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* elf-bfd.h (struct bfd_elf_section_data): Remove indirect_relocs
@@ -126,7 +133,7 @@
 	* cpu-avr.c (compatible): Makes avr-6 compatible only with itself.
 
 2008-12-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
-	
+
 	* elf64-s390.c (elf_s390_check_relocs): Initialize
 	htab->elf.dynobj if necessary.
 
@@ -323,7 +330,7 @@
 	relocs.  For overflow, emit additional messages for the new 16-bit
 	relocs as well as R_CRIS_16_GOTPLT and R_CRIS_16_GOT.
 	(elf_cris_finish_dynamic_symbol): Use elf_cris_finish_dynamic_symbol
-	instead of plain casts.  Check new hash entry member 
+	instead of plain casts.  Check new hash entry member
 	reg_got_refcount when checking whether to emit a GOT entry.
 	(elf_cris_finish_dynamic_sections): Update head comment to warn
 	about emitting relocs here.  Use a temporary variable when testing
@@ -376,7 +383,7 @@
 	Leave addend zero on LD DTPMOD dynamic reloc.
 
 2008-11-19  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* xtensa-modules.c (sysregs): Add MMID, VECBASE, EPC5, EPC6, EPC7,
 	EXCSAVE5, EXCSAVE6, EXCSAVE7, EPS5, EPS6, EPS7, CPENABLE,
 	SCOMPARE1, and THREADPTR registers.
@@ -439,7 +446,7 @@
 	(Slot_inst16b_get_field_fns, Slot_inst16b_set_field_fns): Likewise.
 	(xtensa_modules): Update number of fields, operands, iclasses and
 	opcodes.
-	
+
 2008-11-19  Nix  <nix@esperi.org.uk>
 
 	* elf.c (swap_out_syms) [USE_STT_COMMON]: Fix syntax error.
@@ -457,7 +464,7 @@
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Merge
 	half-precision attributes.
 	(elf32_arm_copy_one_eabi_other_attribute): New.
-	(elf32_arm_copy_other_attribute_list): New. 
+	(elf32_arm_copy_other_attribute_list): New.
 
 2008-11-18  Nick Clifton  <nickc@redhat.com>
 
@@ -492,7 +499,7 @@
 
 2008-11-14  Tristan Gingold  <gingold@adacore.com>
 
-	* configure.com: Handle bfd_default_target_size, BFD_HOST_LONG_LONG, 
+	* configure.com: Handle bfd_default_target_size, BFD_HOST_LONG_LONG,
 	BFD_HOST_64BIT_LONG_LONG, BFD_HOSTPTR_T, bfd_file_ptr.
 	Generate bfdver.h.
 	* vms-hdr.c (_bfd_vms_write_hdr): Use strdup/free instead of alloca.
