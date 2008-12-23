@@ -1,3 +1,10 @@
+2008-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/7036
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Assume linker will
+	always insert 32byte between the .plt and .text sections after
+	the the first relaxation pass.
+
 2008-12-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 7093
