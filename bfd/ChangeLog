@@ -1,3 +1,21 @@
+2008-12-23  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_make_bfd_section): Use the standard ELF name
+	.eh_frame for __TEXT.__eh_frame so that it is recognized by gdb.
+	Use shorter sections name for well known sections.
+	(bfd_mach_o_scan_read_dylinker): Only put dylinker name in the
+	section content.
+	(bfd_mach_o_scan_read_segment): Use shorter sections name for
+	well known segments.
+	(bfd_mach_o_scan_read_command): Ignore some new commands.
+	(bfd_mach_o_openr_next_archived_file): Use more descriptive names
+	for members filename.
+	(bfd_mach_o_fat_extract): New function to easily extract members
+	of a fat binary.
+	* mach-o.h (bfd_mach_o_load_command_type): Add new constants.
+	(bfd_mach_o_dylinker_command): Fix comment and reindent.
+	(bfd_mach_o_fat_extract): New prototype.
+
 2008-12-23  Johan Olmutz Nielsen  <jnielsen@ddci.com>
 
 	* coffcode.h (coff_write_object_contents): Always initialise

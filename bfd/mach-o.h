@@ -105,7 +105,11 @@ typedef enum bfd_mach_o_load_command_type
                                            in a dylib.  */
   BFD_MACH_O_LC_UUID = 0x1b,            /* 128-bit UUID of the executable.  */
   BFD_MACH_O_LC_RPATH = 0x1c,		/* Run path addiions.  */
-  BFD_MACH_O_LC_CODE_SIGNATURE = 0x1d	/* Local of code signature.  */
+  BFD_MACH_O_LC_CODE_SIGNATURE = 0x1d,	/* Local of code signature.  */
+  BFD_MACH_O_LC_SEGMENT_SPLIT_INFO = 0x1e, /* Local of info to split seg.  */
+  BFD_MACH_O_LC_REEXPORT_DYLIB = 0x1f,  /* Load and re-export lib.  */
+  BFD_MACH_O_LC_LAZY_LOAD_DYLIB = 0x20, /* Delay load of lib until use.  */
+  BFD_MACH_O_LC_ENCRYPTION_INFO = 0x21  /* Encrypted segment info.  */
 }
 bfd_mach_o_load_command_type;
 
@@ -458,10 +462,10 @@ bfd_mach_o_thread_command;
 
 typedef struct bfd_mach_o_dylinker_command
 {
-  unsigned long cmd;                   /* LC_ID_DYLIB or LC_LOAD_DYLIB.  */
-  unsigned long cmdsize;               /* Includes pathname string.  */
-  unsigned long name_offset;           /* Offset to library's path name.  */
-  unsigned long name_len;              /* Offset to library's path name.  */
+  unsigned long cmd;                 /* LC_ID_DYLINKER or LC_LOAD_DYLINKER.  */
+  unsigned long cmdsize;             /* Includes pathname string.  */
+  unsigned long name_offset;         /* Offset to library's path name.  */
+  unsigned long name_len;            /* Offset to library's path name.  */
   asection *section;
 }
 bfd_mach_o_dylinker_command;
@@ -555,6 +559,7 @@ int                bfd_mach_o_core_fetch_environment         (bfd *, unsigned ch
 char *             bfd_mach_o_core_file_failing_command      (bfd *);
 int                bfd_mach_o_core_file_failing_signal       (bfd *);
 bfd_boolean        bfd_mach_o_core_file_matches_executable_p (bfd *, bfd *);
+bfd *bfd_mach_o_fat_extract (bfd *, bfd_format , const bfd_arch_info_type *);
 
 extern const bfd_target mach_o_be_vec;
 extern const bfd_target mach_o_le_vec;
