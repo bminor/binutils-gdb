@@ -121,9 +121,9 @@ class Plugin_manager
  public:
   Plugin_manager(const General_options& options)
     : plugins_(), objects_(), deferred_layout_objects_(), input_file_(NULL),
-      plugin_input_file_(), in_replacement_phase_(false), options_(options),
-      workqueue_(NULL), input_objects_(NULL), symtab_(NULL), layout_(NULL),
-      dirpath_(NULL), mapfile_(NULL), this_blocker_(NULL)
+      plugin_input_file_(), in_replacement_phase_(false), cleanup_done_(false),
+      options_(options), workqueue_(NULL), input_objects_(NULL), symtab_(NULL),
+      layout_(NULL), dirpath_(NULL), mapfile_(NULL), this_blocker_(NULL)
   { this->current_ = plugins_.end(); }
 
   ~Plugin_manager();
@@ -155,9 +155,13 @@ class Plugin_manager
                    Symbol_table* symtab, Layout* layout, Dirsearch* dirpath,
                    Mapfile* mapfile, Task_token** last_blocker);
 
-  // Run deferred layout and call the cleanup handlers.
+  // Run deferred layout.
   void
-  finish();
+  layout_deferred_objects();
+
+  // Call the cleanup handlers.
+  void
+  cleanup();
 
   // Register a claim-file handler.
   void
@@ -247,6 +251,9 @@ class Plugin_manager
   // processing replacement files whose symbols should replace the
   // placeholder symbols from the Pluginobj objects.
   bool in_replacement_phase_;
+
+  // TRUE if the cleanup handlers have been called.
+  bool cleanup_done_;
 
   const General_options& options_;
   Workqueue* workqueue_;

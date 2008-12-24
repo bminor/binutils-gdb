@@ -50,6 +50,10 @@ const char* program_name;
 void
 gold_exit(bool status)
 {
+  if (parameters != NULL
+      && parameters->options_valid()
+      && parameters->options().has_plugins())
+    parameters->options().plugins()->cleanup();
   if (!status && parameters != NULL && parameters->options_valid())
     unlink_if_ordinary(parameters->options().output_file_name());
   exit(status ? EXIT_SUCCESS : EXIT_FAILURE);

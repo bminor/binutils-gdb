@@ -306,10 +306,10 @@ Plugin_manager::all_symbols_read(Workqueue* workqueue,
   *last_blocker = this->this_blocker_;
 }
 
-// Layout deferred sections and call the cleanup handlers.
+// Layout deferred objects.
 
 void
-Plugin_manager::finish()
+Plugin_manager::layout_deferred_objects()
 {
   Deferred_layout_list::iterator obj;
 
@@ -317,11 +317,20 @@ Plugin_manager::finish()
        obj != this->deferred_layout_objects_.end();
        ++obj)
     (*obj)->layout_deferred_sections(this->layout_);
+}
 
+// Call the cleanup handlers.
+
+void
+Plugin_manager::cleanup()
+{
+  if (this->cleanup_done_)
+    return;
   for (this->current_ = this->plugins_.begin();
        this->current_ != this->plugins_.end();
        ++this->current_)
     (*this->current_)->cleanup();
+  this->cleanup_done_ = true;
 }
 
 // Make a new Pluginobj object.  This is called when the plugin calls
@@ -766,7 +775,12 @@ class Plugin_finish : public Task
 
   void
   run(Workqueue*)
-  { parameters->options().plugins()->finish(); }
+  {
+    Plugin_manager* plugins = parameters->options().plugins();
+    gold_assert(plugins != NULL);
+    plugins->layout_deferred_objects();
+    plugins->cleanup();
+  }
 
   std::string
   get_name() const
