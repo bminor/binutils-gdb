@@ -123,6 +123,14 @@ CFILES = \
 	iq2000-dis.c \
 	iq2000-ibld.c \
 	iq2000-opc.c \
+	lm32-asm.c \
+	lm32-desc.c \
+	lm32-desc.h \
+	lm32-dis.c \
+	lm32-ibld.c \
+	lm32-opc.c \
+	lm32-opc.h \
+	lm32-opinst.c \
 	m32c-asm.c \
 	m32c-desc.c \
 	m32c-dis.c \
@@ -265,6 +273,12 @@ ALL_MACHINES = \
 	iq2000-dis.lo \
 	iq2000-ibld.lo \
 	iq2000-opc.lo \
+	lm32-asm.lo \
+	lm32-desc.lo \
+	lm32-dis.lo \
+	lm32-ibld.lo \
+	lm32-opc.lo \
+	lm32-opinst.lo \
 	m32c-asm.lo \
 	m32c-desc.lo \
 	m32c-dis.lo \

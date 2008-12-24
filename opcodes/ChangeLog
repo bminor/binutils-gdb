@@ -1,3 +1,8 @@
+2008-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.am (CFILES, ALL_MACHINES): Add LM32 source and object files.
+	* Makefile.in: Regenerate.
+
 2008-12-12  Jon Beniston <jon@beniston.com>
 
 	* Makefile.am: Add LM32 object files and dependencies.
