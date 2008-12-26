@@ -1,3 +1,8 @@
+2008-12-26  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* breakpoint.c (update_watchpoint): Refactor to avoid compiler
+	warning.
+
 2008-12-22  Tom Tromey  <tromey@redhat.com>
 
 	* stack.c (print_block_frame_locals): Print spaces, not tabs.

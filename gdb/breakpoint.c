@@ -898,19 +898,23 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	if ((b->type == bp_watchpoint || b->type == bp_hardware_watchpoint)
 	    && reparse)
 	  {
-	    int i, mem_cnt, target_resources_ok, other_type_used;
+	    int i, mem_cnt, other_type_used;
 
 	    i = hw_watchpoint_used_count (bp_hardware_watchpoint,
 					  &other_type_used);
 	    mem_cnt = can_use_hardware_watchpoint (val_chain);
 
-	    if (mem_cnt)
-	      target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT
-			 (bp_hardware_watchpoint, i + mem_cnt, other_type_used);
-	    if (!mem_cnt || target_resources_ok <= 0)
+	    if (!mem_cnt)
 	      b->type = bp_watchpoint;
 	    else
-	      b->type = bp_hardware_watchpoint;
+	      {
+		int target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT
+		  (bp_hardware_watchpoint, i + mem_cnt, other_type_used);
+		if (target_resources_ok <= 0)
+		  b->type = bp_watchpoint;
+		else
+		  b->type = bp_hardware_watchpoint;
+	      }
 	  }
 
       /* Look at each value on the value chain.  */
