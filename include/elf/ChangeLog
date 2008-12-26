@@ -1,3 +1,29 @@
+2008-12-23  Jon Beniston <jon@beniston.com>
+
+	* lm32.h: New file.
+
+2008-12-23  Nick Clifton  <nickc@redhat.com>
+
+	* commmon.h (STT_IFUNC): Delete.
+
+2008-12-20  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris.h (R_CRIS_32_IE): New relocation.
+
+2008-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* common.h (STT_IFUNC): Define.
+
+2008-11-27  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* cr16.h (R_CR16_GOT_REGREL20, R_CR16_GOTC_REGREL20 and
+	R_CR16_GLOB_DAT): New relocations.
+
+2008-11-25  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris.h (R_CRIS_32_TPREL): Correct comment.
+	(R_CRIS_DTPMOD): Open up for use elsewhere than the fourth GOT entry.
+
 2008-11-18  Catherine Moore  <clm@codesourcery.com>
 
 	* arm.h (Tag_ABI_FP_16bit_format): Define.

@@ -70,6 +70,14 @@ extern void *memmem (const void *, size_t , const void *, size_t);
 #endif
 #endif
 
+#ifndef ATTR_MALLOC
+#if defined(__GNUC__) && (__GNUC__ >= 3)
+#define ATTR_MALLOC __attribute__ ((__malloc__))
+#else
+#define ATTR_MALLOC             /* nothing */
+#endif
+#endif
+
 /* A type used for binary buffers.  */
 typedef unsigned char gdb_byte;
 
@@ -223,6 +231,40 @@ void monitor_output (const char *msg);
 
 char *xml_escape_text (const char *text);
 
+/* Simple growing buffer.  */
+
+struct buffer
+{
+  char *buffer;
+  size_t buffer_size; /* allocated size */
+  size_t used_size; /* actually used size */
+};
+
+/* Append DATA of size SIZE to the end of BUFFER.  Grows the buffer to
+   accommodate the new data.  */
+void buffer_grow (struct buffer *buffer, const char *data, size_t size);
+
+/* Release any memory held by BUFFER.  */
+void buffer_free (struct buffer *buffer);
+
+/* Initialize BUFFER.  BUFFER holds no memory afterwards.  */
+void buffer_init (struct buffer *buffer);
+
+/* Return a pointer into BUFFER data, effectivelly transfering
+   ownership of the buffer memory to the caller.  Calling buffer_free
+   afterwards has no effect on the returned data.  */
+char* buffer_finish (struct buffer *buffer);
+
+/* Simple printf to BUFFER function.  Current implemented formatters:
+   %s - grow an xml escaped text in OBSTACK.  */
+void buffer_xml_printf (struct buffer *buffer, const char *format, ...)
+  ATTR_FORMAT (printf, 2, 3);;
+
+#define buffer_grow_str(BUFFER,STRING)         \
+  buffer_grow (BUFFER, STRING, strlen (STRING))
+#define buffer_grow_str0(BUFFER,STRING)                        \
+  buffer_grow (BUFFER, STRING, strlen (STRING) + 1)
+
 /* Functions from ``signals.c''.  */
 enum target_signal target_signal_from_host (int hostsig);
 int target_signal_to_host_p (enum target_signal oursig);
@@ -231,6 +273,9 @@ char *target_signal_to_name (enum target_signal);
 
 /* Functions from utils.c */
 
+void *xmalloc (size_t) ATTR_MALLOC;
+void *xcalloc (size_t, size_t) ATTR_MALLOC;
+char *xstrdup (const char *) ATTR_MALLOC;
 void perror_with_name (char *string);
 void error (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void fatal (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);

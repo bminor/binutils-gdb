@@ -1526,6 +1526,17 @@ xtensa_state_is_exported (xtensa_isa isa, xtensa_state st)
 }
 
 
+int
+xtensa_state_is_shared_or (xtensa_isa isa, xtensa_state st)
+{
+  xtensa_isa_internal *intisa = (xtensa_isa_internal *) isa;
+  CHECK_STATE (intisa, st, XTENSA_UNDEFINED);
+  if ((intisa->states[st].flags & XTENSA_STATE_IS_SHARED_OR) != 0)
+    return 1;
+  return 0;
+}
+
+
 
 /* Sysregs.  */
 

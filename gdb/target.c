@@ -2224,6 +2224,26 @@ target_supports_non_stop ()
 }
 
 
+char *
+target_get_osdata (const char *type)
+{
+  char *document;
+  struct target_ops *t;
+
+  if (target_can_run (&current_target))
+    t = &current_target;
+  else
+    t = find_default_run_target ("get OS data");
+
+  if (!t)
+    return NULL;
+
+  document = target_read_stralloc (t,
+                                  TARGET_OBJECT_OSDATA,
+                                  type);
+  return document;
+}
+
 static int
 default_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
@@ -2454,10 +2474,6 @@ store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
       ourstatus->value.sig = target_signal_from_host (WSTOPSIG (hoststatus));
     }
 }
-
-/* Returns zero to leave the inferior alone, one to interrupt it.  */
-int (*target_activity_function) (void);
-int target_activity_fd;
 
 /* Convert a normal process ID to a string.  Returns the string in a
    static buffer.  */

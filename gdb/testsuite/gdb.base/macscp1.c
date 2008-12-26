@@ -10,6 +10,20 @@
 #define FORTY_EIGHT 48
 #undef  FORTY_EIGHT
 
+struct outer
+{
+  struct fields
+  {
+    struct fault
+    {
+      int addr;
+    } fault;
+  } fields;
+};
+struct outer address;
+
+#define addr fields.fault.addr
+
 /* A macro named UNTIL_<func> is #defined until just before the
    definition of the function <func>.
 

@@ -96,13 +96,6 @@ INTERNAL_CFLAGS =  $(WARN_CFLAGS) ${CFLAGS} ${GLOBAL_CFLAGS} \
 LDFLAGS = @LDFLAGS@
 INTERNAL_LDFLAGS = $(LDFLAGS) @RDYNAMIC@
 
-# Perhaps should come from parent Makefile
-VERSION = gdbserver-4.12.3
-DIST=gdb
-
-LINT=/usr/5bin/lint
-LINTFLAGS=
-
 # All source files that go into linking GDB remote server.
 
 SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \

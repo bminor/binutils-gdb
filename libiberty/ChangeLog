@@ -1,3 +1,21 @@
+2008-12-18  Jason Merrill  <jason@redhat.com>
+
+	PR c++/38561
+	* cp-demangle.c (d_expression, d_print_comp): Revert
+	cast changes.
+
+2008-12-17  Jason Merrill  <jason@redhat.com>
+
+	* cp-demangle.c (d_expression): Handle rvalue stubs too.
+	[DEMANGLE_COMPONENT_CAST]: Update mangling.
+	(d_print_comp): Avoid extra ", " with empty template argument packs.
+	Remove handling for obsolete T() mangling.
+
+2008-12-10  Jason Merrill  <jason@redhat.com>
+
+	* cp-demangle.c (cplus_demangle_type): Support fixed-point types.
+	(d_print_comp, d_dump): Likewise.
+
 2008-10-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (CPPFLAGS): Define.

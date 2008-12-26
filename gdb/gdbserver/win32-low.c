@@ -176,7 +176,7 @@ child_add_thread (DWORD tid, HANDLE h)
   if ((th = thread_rec (tid, FALSE)))
     return th;
 
-  th = calloc (1, sizeof (*th));
+  th = xcalloc (1, sizeof (*th));
   th->tid = tid;
   th->h = h;
 

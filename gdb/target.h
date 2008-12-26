@@ -214,8 +214,11 @@ enum target_object
      See "target-descriptions.c".  ANNEX should never be empty.  */
   TARGET_OBJECT_AVAILABLE_FEATURES,
   /* Currently loaded libraries, in XML format.  */
-  TARGET_OBJECT_LIBRARIES
-  /* Possible future objects: TARGET_OBJECT_FILE, TARGET_OBJECT_PROC, ... */
+  TARGET_OBJECT_LIBRARIES,
+  /* Get OS specific data.  The ANNEX specifies the type (running
+     processes, etc.).  */
+  TARGET_OBJECT_OSDATA
+  /* Possible future objects: TARGET_OBJECT_FILE, ... */
 };
 
 /* Request that OPS transfer up to LEN 8-bit bytes of the target's
@@ -295,15 +298,6 @@ extern void get_target_memory (struct target_ops *ops, CORE_ADDR addr,
 			       gdb_byte *buf, LONGEST len);
 extern ULONGEST get_target_memory_unsigned (struct target_ops *ops,
 					    CORE_ADDR addr, int len);
-
-
-/* If certain kinds of activity happen, target_wait should perform
-   callbacks.  */
-/* Right now we just call (*TARGET_ACTIVITY_FUNCTION) if I/O is possible
-   on TARGET_ACTIVITY_FD.  */
-extern int target_activity_fd;
-/* Returns zero to leave the inferior alone, one to interrupt it.  */
-extern int (*target_activity_function) (void);
 
 struct thread_info;		/* fwd decl for parameter list below: */
 
@@ -1282,6 +1276,14 @@ extern int target_resize_to_sections (struct target_ops *target,
 				      int num_added);
 
 extern void remove_target_sections (bfd *abfd);
+
+/* Read OS data object of type TYPE from the target, and return it in
+   XML format.  The result is NUL-terminated and returned as a string,
+   allocated using xmalloc.  If an error occurs or the transfer is
+   unsupported, NULL is returned.  Empty objects are returned as
+   allocated but empty strings.  */
+
+extern char *target_get_osdata (const char *type);
 
 
 /* Stuff that should be shared among the various remote targets.  */

@@ -26,6 +26,9 @@ sinclude(../config/tcl.m4)
 dnl For dependency tracking macros.
 sinclude([../config/depstand.m4])
 
+dnl For AM_LC_MESSAGES
+sinclude([../config/lcmessage.m4])
+
 #
 # Sometimes the native compiler is a bogus stub for gcc or /usr/ucb/cc. This
 # makes configure think it's cross compiling. If --target wasn't used, then

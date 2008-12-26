@@ -414,9 +414,11 @@ expression_completer (char *text, char *word)
 
 	  add_struct_fields (type, &out, result, fieldname, flen);
 	  result[out] = NULL;
+	  xfree (fieldname);
 	  return result;
 	}
     }
+  xfree (fieldname);
 
   /* Commands which complete on locations want to see the entire
      argument.  */
@@ -750,8 +752,10 @@ line_completion_function (const char *text, int matches,
       if (list)
 	{
 	  /* Free the storage used by LIST, but not by the strings inside.
-	     This is because rl_complete_internal () frees the strings.  */
+	     This is because rl_complete_internal () frees the strings.
+	     As complete_line may abort by calling `error' clear LIST now.  */
 	  xfree (list);
+	  list = NULL;
 	}
       index = 0;
       list = complete_line (text, line_buffer, point);

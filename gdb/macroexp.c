@@ -278,20 +278,22 @@ get_pp_number (struct macro_buffer *tok, char *p, char *end)
 {
   if (p < end
       && (macro_is_digit (*p)
-          || *p == '.'))
+          || (*p == '.'
+	      && p + 2 <= end
+	      && macro_is_digit (p[1]))))
     {
       char *tok_start = p;
 
       while (p < end)
         {
-          if (macro_is_digit (*p)
-              || macro_is_identifier_nondigit (*p)
-              || *p == '.')
-            p++;
-          else if (p + 2 <= end
-                   && strchr ("eEpP.", *p)
-                   && (p[1] == '+' || p[1] == '-'))
+	  if (p + 2 <= end
+	      && strchr ("eEpP", *p)
+	      && (p[1] == '+' || p[1] == '-'))
             p += 2;
+          else if (macro_is_digit (*p)
+		   || macro_is_identifier_nondigit (*p)
+		   || *p == '.')
+            p++;
           else
             break;
         }

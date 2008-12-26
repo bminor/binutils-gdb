@@ -20,6 +20,9 @@
 # tests because only a few parameter types in Ada are required to be 
 # passed by reference, and there is no equivalent of &(&x) for reference
 # values.
+# This also tests that some other arithmetic operations on references
+# work properly: condition expression using a reference object as one of its
+# operand.
 
 if $tracelevel then {
 	strace $tracelevel
@@ -88,6 +91,11 @@ proc test_p_x_addr { var addr } {
     return 0
 }
 
+proc test_p_op1_equals_op2 {op1 op2} {
+    set test "print $op1 = $op2"
+    gdb_test $test "\\$\[0-9\]+ = true"
+}
+
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
@@ -100,3 +108,5 @@ set s1_address  [get_address "s1"]
 test_p_x "s" "(x => 0xd, y => 0x13)" $s1_address
 
 test_p_x_addr "s" $s1_address
+
+test_p_op1_equals_op2 "s.x" "13"

@@ -1150,7 +1150,6 @@ bfin_check_relocs (bfd * abfd,
   const Elf_Internal_Rela *rel_end;
   asection *sgot;
   asection *srelgot;
-  asection *sreloc;
   if (info->relocatable)
     return TRUE;
 
@@ -1161,7 +1160,6 @@ bfin_check_relocs (bfd * abfd,
 
   sgot = NULL;
   srelgot = NULL;
-  sreloc = NULL;
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
@@ -1363,7 +1361,6 @@ bfin_relocate_section (bfd * output_bfd,
   struct elf_link_hash_entry **sym_hashes;
   bfd_vma *local_got_offsets;
   asection *sgot;
-  asection *sreloc;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   int i = 0;
@@ -1374,7 +1371,6 @@ bfin_relocate_section (bfd * output_bfd,
   local_got_offsets = elf_local_got_offsets (input_bfd);
 
   sgot = NULL;
-  sreloc = NULL;
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;

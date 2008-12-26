@@ -193,8 +193,6 @@ extern char **complete_on_cmdlist (struct cmd_list_element *, char *, char *);
 
 extern char **complete_on_enum (const char *enumlist[], char *, char *);
 
-extern void delete_cmd (char *, struct cmd_list_element **);
-
 extern void help_cmd (char *, struct ui_file *);
 
 extern void help_list (struct cmd_list_element *, char *,

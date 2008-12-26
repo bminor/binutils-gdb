@@ -20,6 +20,9 @@
 __thread int a_thread_local;
 __thread int another_thread_local;
 
+/* psymtabs->symtabs resolving check.  */
+extern __thread int file2_thread_local;
+
 /* Global variable just for info addr in gdb.  */
 int a_global;
 
@@ -116,6 +119,12 @@ void *spin( vp )
       fprintf (stderr, "th %d Wait on tell_thread\n", me);
 #endif
 
+}
+
+void
+function_referencing_file2_thread_local (void)
+{
+  file2_thread_local = file2_thread_local;
 }
 
 void

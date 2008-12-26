@@ -64,11 +64,6 @@ set stop_addr 0
 
 send_gdb "x /2i \$pc\n"
 gdb_expect {
-    global hex
-    global nl
-    global bp_addr
-    global gdb_prompt
-
     -re "$hex.*${nl}($hex).*$gdb_prompt $" {
 	set bp_addr $expect_out(1,string)
 	pass "get breakpoint address for foo"

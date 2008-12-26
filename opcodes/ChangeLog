@@ -1,3 +1,162 @@
+2008-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.am (CFILES, ALL_MACHINES): Add LM32 source and object files.
+	* Makefile.in: Regenerate.
+
+2008-12-23  Jon Beniston <jon@beniston.com>
+
+	* Makefile.am: Add LM32 object files and dependencies.
+	* Makefile.in: Regenerate.
+	* configure.in: Add LM32 target.
+	* configure: Regenerate.
+	* disassemble.c: Add LM32 disassembler.
+	* cgen-asm.in: Update copyright year.
+	* cgen-dis.in: Update copyright year.
+	* cgen-ibld.in: Update copyright year.
+	* lm32-asm.c: New file.
+	* lm32-desc.c: New file.
+	* lm32-desc.h: New file.
+	* lm32-dis.c: New file.
+	* lm32-ibld.c: New file.
+	* lm32-opc.c: New file.
+	* lm32-opc.h: New file.
+	* lm32-opinst.c: New file.
+
+2008-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (EXdS): New.
+	(EXdVexS): Likewise.
+	(EXqVexS): Likewise.
+	(d_swap_mode): Likewise.
+	(q_mode): Updated.
+	(prefix_table): Use EXdS on movss and EXqS on movsd.
+	(vex_len_table): Use EXdVexS on vmovss and EXqVexS on vmovsd.
+	(intel_operand_size): Handle d_swap_mode.
+	(OP_EX): Likewise.
+
+	* i386-opc.h (S): Update comments.
+
+	* i386-opc.tbl: Add S to movss, movsd, vmovss and vmovsd.
+	* i386-tbl.h: Regenerated.
+
+2008-12-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/ga.po: Updated Irish translation.
+
+2008-12-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (EbS): New.
+	(EvS): Likewise.
+	(EMS): Likewise.
+	(EXqS): Likewise.
+	(EXxS): Likewise.
+	(b_swap_mode): Likewise.
+	(v_swap_mode): Likewise.
+	(q_swap_mode): Likewise.
+	(x_swap_mode): Likewise.
+	(v_mode): Updated.
+	(w_mode): Likewise.
+	(t_mode): Likewise.
+	(xmm_mode): Likewise.
+	(swap_operand): Likewise.
+	(dis386): Use EbS on movB.  Use EvS on moveS.
+	(dis386_twobyte): Use EXxS on movapX.
+	(prefix_table): Use EXxS on movups, movupd, movdqu, movdqa,
+	vmovups, vmovdqu, vmovdqa. Use EMS and EXqS on movq.
+	(vex_table): Use EXxS on vmovapX.
+	(vex_len_table): Use EXqS on vmovq.
+	(intel_operand_size): Handle b_swap_mode, v_swap_mode,
+	q_swap_mode and x_swap_mode.
+	(OP_E_register): Handle b_swap_mode and v_swap_mode.
+	(OP_EM): Handle v_swap_mode.
+	(OP_EX): x_swap_mode and q_swap_mode.
+
+	* i386-gen.c (opcode_modifiers): Add S.
+
+	* i386-opc.h (S): New.
+	(Modrm): Updated.
+	(i386_opcode_modifier): Add s.
+
+	* i386-opc.tbl: Add S to movapd, movaps, movdqa, movdqu, movq,
+	movupd, movups, vmovapd, vmovaps, vmovdqa, vmovdqu and vmovq.
+	* i386-tbl.h: Regenerated.
+
+2008-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (mnemonicendp): New.
+	(op): Likewise.
+	(print_insn): Use mnemonicendp.
+	(OP_3DNowSuffix): Likewise.
+	(CMP_Fixup): Likewise.
+	(CMPXCHG8B_Fixup): Likewise.
+	(CRC32_Fixup): Likewise.
+	(OP_DREX_FCMP): Likewise.
+	(OP_DREX_ICMP): Likewise.
+	(VZERO_Fixup): Likewise.
+	(VCMP_Fixup): Likewise.
+	(PCLMUL_Fixup): Likewise.
+	(VPERMIL2_Fixup): Likewise.
+	(MOVBE_Fixup): Likewise.
+	(putop): Update mnemonicendp.
+	(oappend): Use stpcpy.
+	(simd_cmp_op): Changed to struct op.
+	(vex_cmp_op): Likewise.
+	(pclmul_op): Likewise.
+	(vpermil2_op): Likewise.
+
+2008-12-18  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
+2008-12-15  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-dis.c (coprocessor_opcodes): Disassemble VFP instructions using
+	unified syntax.
+
+2008-12-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Move VexNDS before VexNDD.
+
+2008-12-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (putop): Remove strayed comments.
+
+2008-12-04  Ben Elliston  <bje@au.ibm.com>
+
+	* ppc-dis.c (powerpc_init_dialect): Do not set PPC_OPCODE_BOOKE
+	for -Mbooke.
+	(print_ppc_disassembler_options): Update usage.
+	* ppc-opc.c (DE, DES, DEO, DE_MASK): Remove.
+	(BOOKE64): Remove.
+	(PPCCHLK64): Likewise.
+	(powerpc_opcodes): Remove all BOOKE64 instructions.
+
+2008-11-28  Joshua Kinard  <kumba@gentoo.org>
+
+	* mips-dis.c (mips_arch_choices): Add r14000, r16000.
+
+2008-11-27  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* cr16-dis.c (match_opcode): Truncate mcode to 32 bit and
+	adjusted the mask for 32-bit branch instruction.
+
+2008-11-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (extract_sprg): Correct operand range check.
+
+2008-11-26  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-dis.c (NEXTBYTE, NEXTWORD, NEXTLONG, NEXTULONG, NEXTSINGLE)
+	(NEXTDOUBLE, NEXTEXTEND, NEXTPACKED): Fix error handling.
+	(save_printer, save_print_address): Remove.
+	(fetch_data): Don't use them.
+	(match_insn_m68k): Always restore printing functions.
+	(print_insn_m68k): Don't save/restore printing functions.
+
+2008-11-25  Nick Clifton  <nickc@redhat.com>
+
+	* m68k-dis.c: Rewrite to remove use of setjmp/longjmp.
+
 2008-11-18  Catherine Moore  <clm@codesourcery.com>
 
 	* arm-dis.c (coprocessor_opcodes): Add half-precision vcvt
@@ -17,7 +176,7 @@
 	* mips-opc.c (synciobdma, syncs, syncw, syncws): Move these
 	before sync.
 	(sync): New instruction with 5-bit sync type.
-	* mips-dis.c (print_insn_args: Add case '1' to print 5-bit values.
+	* mips-dis.c (print_insn_args): Add case '1' to print 5-bit values.
 
 2008-11-06  Nick Clifton  <nickc@redhat.com>
 
@@ -313,7 +472,7 @@
 
 	PR gas/6517
 	* i386-opc.tbl: Break cvtsi2ss/cvtsi2sd/vcvtsi2sd/vcvtsi2ss
-	into 32bit and 64bit.  Remove Reg64|Qword and add 
+	into 32bit and 64bit.  Remove Reg64|Qword and add
 	IgnoreSize|No_qSuf on 32bit version.
 	* i386-tbl.h: Regenerated.
 

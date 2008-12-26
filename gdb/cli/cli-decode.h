@@ -197,6 +197,12 @@ struct cmd_list_element
     /* Pointer to command that is aliased by this one, so the
        aliased command can be located in case it has been hooked.  */
     struct cmd_list_element *cmd_pointer;
+
+    /* Start of a linked list of all aliases of this command.  */
+    struct cmd_list_element *aliases;
+
+    /* Link pointer for aliases on an alias list.  */
+    struct cmd_list_element *alias_chain;
   };
 
 /* API to the manipulation of command lists.  */
@@ -289,8 +295,6 @@ extern struct cmd_list_element *add_info_alias (char *, char *, int);
 extern char **complete_on_cmdlist (struct cmd_list_element *, char *, char *);
 
 extern char **complete_on_enum (const char *enumlist[], char *, char *);
-
-extern void delete_cmd (char *, struct cmd_list_element **);
 
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 			   char *, int, struct ui_file *);

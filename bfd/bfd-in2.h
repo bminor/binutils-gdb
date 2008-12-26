@@ -720,6 +720,10 @@ extern bfd_boolean bfd_bfin_elf32_create_embedded_relocs
   (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *,
    char **);
 
+extern bfd_boolean bfd_cr16_elf32_create_embedded_relocs
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *,
+   char **);
+
 /* SunOS shared library support routines for the linker.  */
 
 extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
@@ -1789,6 +1793,8 @@ enum bfd_architecture
 #define bfd_mach_mips9000              9000
 #define bfd_mach_mips10000             10000
 #define bfd_mach_mips12000             12000
+#define bfd_mach_mips14000             14000
+#define bfd_mach_mips16000             16000
 #define bfd_mach_mips16                16
 #define bfd_mach_mips5                 5
 #define bfd_mach_mips_loongson_2e      3001
@@ -2029,6 +2035,8 @@ enum bfd_architecture
 #define bfd_mach_z80            3 /* With ixl, ixh, iyl, and iyh.  */
 #define bfd_mach_z80full        7 /* All undocumented instructions.  */
 #define bfd_mach_r800           11 /* R800: successor with multiplication.  */
+  bfd_arch_lm32,      /* Lattice Mico32 */
+#define bfd_mach_lm32      1
   bfd_arch_last
   };
 
@@ -4129,6 +4137,9 @@ This is the 5 bits of a value.  */
   BFD_RELOC_CR16_SWITCH8,
   BFD_RELOC_CR16_SWITCH16,
   BFD_RELOC_CR16_SWITCH32,
+  BFD_RELOC_CR16_GOT_REGREL20,
+  BFD_RELOC_CR16_GOTC_REGREL20,
+  BFD_RELOC_CR16_GLOB_DAT,
 
 /* NS CRX Relocations.  */
   BFD_RELOC_CRX_REL4,
@@ -4204,6 +4215,7 @@ This is the 5 bits of a value.  */
   BFD_RELOC_CRIS_32_TPREL,
   BFD_RELOC_CRIS_16_TPREL,
   BFD_RELOC_CRIS_DTPMOD,
+  BFD_RELOC_CRIS_32_IE,
 
 /* Intel i860 Relocations.  */
   BFD_RELOC_860_COPY,
@@ -4402,6 +4414,17 @@ BFD_RELOC_XTENSA_ASM_EXPAND.  */
 
 /* 4 bit value.  */
   BFD_RELOC_Z8K_IMM4L,
+
+/* Lattice Mico32 relocations.  */
+  BFD_RELOC_LM32_CALL,
+  BFD_RELOC_LM32_BRANCH,
+  BFD_RELOC_LM32_16_GOT,
+  BFD_RELOC_LM32_GOTOFF_HI16,
+  BFD_RELOC_LM32_GOTOFF_LO16,
+  BFD_RELOC_LM32_COPY,
+  BFD_RELOC_LM32_GLOB_DAT,
+  BFD_RELOC_LM32_JMP_SLOT,
+  BFD_RELOC_LM32_RELATIVE,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *bfd_reloc_type_lookup
@@ -4436,100 +4459,97 @@ typedef struct bfd_symbol
   symvalue value;
 
   /* Attributes of a symbol.  */
-#define BSF_NO_FLAGS    0x00
+#define BSF_NO_FLAGS           0x00
 
   /* The symbol has local scope; <<static>> in <<C>>. The value
      is the offset into the section of the data.  */
-#define BSF_LOCAL      0x01
+#define BSF_LOCAL              (1 << 0)
 
   /* The symbol has global scope; initialized data in <<C>>. The
      value is the offset into the section of the data.  */
-#define BSF_GLOBAL     0x02
+#define BSF_GLOBAL             (1 << 1)
 
   /* The symbol has global scope and is exported. The value is
      the offset into the section of the data.  */
 #define BSF_EXPORT     BSF_GLOBAL /* No real difference.  */
 
   /* A normal C symbol would be one of:
-     <<BSF_LOCAL>>, <<BSF_FORT_COMM>>,  <<BSF_UNDEFINED>> or
+     <<BSF_LOCAL>>, <<BSF_COMMON>>,  <<BSF_UNDEFINED>> or
      <<BSF_GLOBAL>>.  */
 
   /* The symbol is a debugging record. The value has an arbitrary
      meaning, unless BSF_DEBUGGING_RELOC is also set.  */
-#define BSF_DEBUGGING  0x08
+#define BSF_DEBUGGING          (1 << 2)
 
   /* The symbol denotes a function entry point.  Used in ELF,
      perhaps others someday.  */
-#define BSF_FUNCTION    0x10
+#define BSF_FUNCTION           (1 << 3)
 
   /* Used by the linker.  */
-#define BSF_KEEP        0x20
-#define BSF_KEEP_G      0x40
+#define BSF_KEEP               (1 << 5)
+#define BSF_KEEP_G             (1 << 6)
 
   /* A weak global symbol, overridable without warnings by
      a regular global symbol of the same name.  */
-#define BSF_WEAK        0x80
+#define BSF_WEAK               (1 << 7)
 
   /* This symbol was created to point to a section, e.g. ELF's
      STT_SECTION symbols.  */
-#define BSF_SECTION_SYM 0x100
+#define BSF_SECTION_SYM        (1 << 8)
 
   /* The symbol used to be a common symbol, but now it is
      allocated.  */
-#define BSF_OLD_COMMON  0x200
-
-  /* The default value for common data.  */
-#define BFD_FORT_COMM_DEFAULT_VALUE 0
+#define BSF_OLD_COMMON         (1 << 9)
 
   /* In some files the type of a symbol sometimes alters its
      location in an output file - ie in coff a <<ISFCN>> symbol
      which is also <<C_EXT>> symbol appears where it was
      declared and not at the end of a section.  This bit is set
      by the target BFD part to convey this information.  */
-#define BSF_NOT_AT_END    0x400
+#define BSF_NOT_AT_END         (1 << 10)
 
   /* Signal that the symbol is the label of constructor section.  */
-#define BSF_CONSTRUCTOR   0x800
+#define BSF_CONSTRUCTOR        (1 << 11)
 
   /* Signal that the symbol is a warning symbol.  The name is a
      warning.  The name of the next symbol is the one to warn about;
      if a reference is made to a symbol with the same name as the next
      symbol, a warning is issued by the linker.  */
-#define BSF_WARNING       0x1000
+#define BSF_WARNING            (1 << 12)
 
   /* Signal that the symbol is indirect.  This symbol is an indirect
      pointer to the symbol with the same name as the next symbol.  */
-#define BSF_INDIRECT      0x2000
+#define BSF_INDIRECT           (1 << 13)
 
   /* BSF_FILE marks symbols that contain a file name.  This is used
      for ELF STT_FILE symbols.  */
-#define BSF_FILE          0x4000
+#define BSF_FILE               (1 << 14)
 
   /* Symbol is from dynamic linking information.  */
-#define BSF_DYNAMIC       0x8000
+#define BSF_DYNAMIC            (1 << 15)
 
   /* The symbol denotes a data object.  Used in ELF, and perhaps
      others someday.  */
-#define BSF_OBJECT        0x10000
+#define BSF_OBJECT             (1 << 16)
 
   /* This symbol is a debugging symbol.  The value is the offset
      into the section of the data.  BSF_DEBUGGING should be set
      as well.  */
-#define BSF_DEBUGGING_RELOC 0x20000
+#define BSF_DEBUGGING_RELOC    (1 << 17)
 
   /* This symbol is thread local.  Used in ELF.  */
-#define BSF_THREAD_LOCAL  0x40000
+#define BSF_THREAD_LOCAL       (1 << 18)
 
   /* This symbol represents a complex relocation expression,
      with the expression tree serialized in the symbol name.  */
-#define BSF_RELC 0x80000
+#define BSF_RELC               (1 << 19)
 
   /* This symbol represents a signed complex relocation expression,
      with the expression tree serialized in the symbol name.  */
-#define BSF_SRELC 0x100000
+#define BSF_SRELC              (1 << 20)
 
   /* This symbol was created by bfd_get_synthetic_symtab.  */
-#define BSF_SYNTHETIC 0x200000
+#define BSF_SYNTHETIC          (1 << 21)
 
   flagword flags;
 

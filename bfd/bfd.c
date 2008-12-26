@@ -1475,9 +1475,8 @@ is32bit (bfd *abfd)
       return bed->s->elfclass == ELFCLASS32;
     }
 
-  /* For non-ELF, make a guess based on the target name.  */
-  return (strstr (bfd_get_target (abfd), "64") == NULL
-	  && strcmp (bfd_get_target (abfd), "mmo") != 0);
+  /* For non-ELF targets, use architecture information.  */
+  return bfd_arch_bits_per_address (abfd) <= 32;
 }
 #endif
 

@@ -514,6 +514,20 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  offset = *op_ptr++;
 	  result = dwarf_expr_fetch (ctx, offset);
 	  break;
+	  
+	case DW_OP_swap:
+	  {
+	    CORE_ADDR t1, t2;
+
+	    if (ctx->stack_len < 2)
+	       error (_("Not enough elements for DW_OP_swap. Need 2, have %d."),
+		      ctx->stack_len);
+	    t1 = ctx->stack[ctx->stack_len - 1];
+	    t2 = ctx->stack[ctx->stack_len - 2];
+	    ctx->stack[ctx->stack_len - 1] = t2;
+	    ctx->stack[ctx->stack_len - 2] = t1;
+	    goto no_push;
+	  }
 
 	case DW_OP_over:
 	  result = dwarf_expr_fetch (ctx, 1);

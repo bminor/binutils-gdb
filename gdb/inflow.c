@@ -651,68 +651,6 @@ clear_sigint_trap (void)
     }
 }
 
-#if defined (SIGIO) && defined (FASYNC) && defined (FD_SET) && defined (F_SETOWN)
-static void (*old_sigio) ();
-
-static void
-handle_sigio (int signo)
-{
-  int numfds;
-  fd_set readfds;
-
-  signal (SIGIO, handle_sigio);
-
-  FD_ZERO (&readfds);
-  FD_SET (target_activity_fd, &readfds);
-  numfds = gdb_select (target_activity_fd + 1, &readfds, NULL, NULL, NULL);
-  if (numfds >= 0 && FD_ISSET (target_activity_fd, &readfds))
-    {
-#ifndef _WIN32
-      if ((*target_activity_function) ())
-	kill (PIDGET (inferior_ptid), SIGINT);
-#endif
-    }
-}
-
-static int old_fcntl_flags;
-
-void
-set_sigio_trap (void)
-{
-  if (target_activity_function)
-    {
-      old_sigio = (void (*)()) signal (SIGIO, handle_sigio);
-      fcntl (target_activity_fd, F_SETOWN, getpid ());
-      old_fcntl_flags = fcntl (target_activity_fd, F_GETFL, 0);
-      fcntl (target_activity_fd, F_SETFL, old_fcntl_flags | FASYNC);
-    }
-}
-
-void
-clear_sigio_trap (void)
-{
-  if (target_activity_function)
-    {
-      signal (SIGIO, old_sigio);
-      fcntl (target_activity_fd, F_SETFL, old_fcntl_flags);
-    }
-}
-#else /* No SIGIO.  */
-void
-set_sigio_trap (void)
-{
-  if (target_activity_function)
-    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
-}
-
-void
-clear_sigio_trap (void)
-{
-  if (target_activity_function)
-    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
-}
-#endif /* No SIGIO.  */
-
 
 /* Create a new session if the inferior will run in a different tty.
    A session is UNIX's way of grouping processes that share a controlling

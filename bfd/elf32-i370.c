@@ -1,6 +1,6 @@
 /* i370-specific support for 32-bit ELF
    Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008  Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Hacked by Linas Vepstas for i370 linas@linas.org
 
@@ -852,33 +852,11 @@ i370_elf_check_relocs (bfd *abfd,
 #endif
 	  if (sreloc == NULL)
 	    {
-	      const char *name;
+	      sreloc = _bfd_elf_make_dynamic_reloc_section
+		(sec, dynobj, 2, abfd, /*rela?*/ TRUE);
 
-	      name = (bfd_elf_string_from_elf_section
-		      (abfd,
-		       elf_elfheader (abfd)->e_shstrndx,
-		       elf_section_data (sec)->rel_hdr.sh_name));
-	      if (name == NULL)
-		return FALSE;
-
-	      BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-			  && strcmp (bfd_get_section_name (abfd, sec), name + 5) == 0);
-
-	      sreloc = bfd_get_section_by_name (dynobj, name);
 	      if (sreloc == NULL)
-		{
-		  flagword flags;
-
-		  flags = (SEC_HAS_CONTENTS | SEC_READONLY
-			   | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-		  if ((sec->flags & SEC_ALLOC) != 0)
-		    flags |= SEC_ALLOC | SEC_LOAD;
-		  sreloc = bfd_make_section_with_flags (dynobj, name,
-							flags);
-		  if (sreloc == NULL
-		      || ! bfd_set_section_alignment (dynobj, sreloc, 2))
-		    return FALSE;
-		}
+		return FALSE;
 	    }
 
 	  sreloc->size += sizeof (Elf32_External_Rela);
@@ -1064,7 +1042,6 @@ i370_elf_relocate_section (bfd *output_bfd,
 {
   Elf_Internal_Shdr *symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
-  bfd *dynobj = elf_hash_table (info)->dynobj;
   Elf_Internal_Rela *rel = relocs;
   Elf_Internal_Rela *relend = relocs + input_section->reloc_count;
   asection *sreloc = NULL;
@@ -1232,22 +1209,10 @@ i370_elf_relocate_section (bfd *output_bfd,
 
 	      if (sreloc == NULL)
 		{
-		  const char *name;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (input_bfd,
-			   elf_elfheader (input_bfd)->e_shstrndx,
-			   elf_section_data (input_section)->rel_hdr.sh_name));
-		  if (name == NULL)
+		  sreloc = _bfd_elf_get_dynamic_reloc_section
+		    (input_bfd, input_section, /*rela?*/ TRUE);
+		  if (sreloc == NULL)
 		    return FALSE;
-
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-			      && strcmp (bfd_get_section_name (input_bfd,
-							       input_section),
-					 name + 5) == 0);
-
-		  sreloc = bfd_get_section_by_name (dynobj, name);
-		  BFD_ASSERT (sreloc != NULL);
 		}
 
 	      skip = 0;

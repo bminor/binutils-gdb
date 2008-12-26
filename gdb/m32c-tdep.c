@@ -2018,6 +2018,10 @@ m32c_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   {
     struct type *func_type = value_type (function);
 
+    /* Dereference function pointer types.  */
+    if (TYPE_CODE (func_type) == TYPE_CODE_PTR)
+      func_type = TYPE_TARGET_TYPE (func_type);
+
     gdb_assert (TYPE_CODE (func_type) == TYPE_CODE_FUNC ||
 		TYPE_CODE (func_type) == TYPE_CODE_METHOD);
 
@@ -2595,6 +2599,16 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_trampoline_code (arch, m32c_skip_trampoline_code);
 
   set_gdbarch_virtual_frame_pointer (arch, m32c_virtual_frame_pointer);
+
+  /* m32c function boundary addresses are not necessarily even.
+     Therefore, the `vbit', which indicates a pointer to a virtual
+     member function, is stored in the delta field, rather than as
+     the low bit of a function pointer address.  
+
+     In order to verify this, see the definition of
+     TARGET_PTRMEMFUNC_VBIT_LOCATION in gcc/defaults.h along with the
+     definition of FUNCTION_BOUNDARY in gcc/config/m32c/m32c.h.  */
+  set_gdbarch_vbit_in_delta (arch, 1);
 
   return arch;
 }

@@ -315,13 +315,17 @@ macro_define_command (char *exp, int from_tty)
 	}
       /* Skip the closing paren.  */
       ++exp;
+      skip_ws (&exp);
 
       macro_define_function (macro_main (macro_user_macros), -1, name,
 			     new_macro.argc, (const char **) new_macro.argv,
 			     exp);
     }
   else
-    macro_define_object (macro_main (macro_user_macros), -1, name, exp);
+    {
+      skip_ws (&exp);
+      macro_define_object (macro_main (macro_user_macros), -1, name, exp);
+    }
 
   do_cleanups (cleanup_chain);
 }
@@ -358,9 +362,7 @@ print_one_macro (const char *name, const struct macro_definition *macro,
 			  macro->argv[i]);
       fprintf_filtered (gdb_stdout, ")");
     }
-  /* Note that we don't need a leading space here -- "macro define"
-     provided it.  */
-  fprintf_filtered (gdb_stdout, "%s\n", macro->replacement);
+  fprintf_filtered (gdb_stdout, " %s\n", macro->replacement);
 }
 
 

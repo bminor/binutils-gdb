@@ -130,7 +130,6 @@ struct process_info
   struct thread_resume *resume;
 
   int thread_known;
-  unsigned long tid;
 #ifdef HAVE_THREAD_DB_H
   /* The thread handle, used for e.g. TLS access.  Only valid if
      THREAD_KNOWN is set.  */

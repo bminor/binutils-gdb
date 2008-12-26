@@ -1,3 +1,55 @@
+2008-12-13  Doug Evans  <dje@google.com>
+
+	* utils.c (xmalloc,xcalloc,xstrdup): New fns.
+	* server.h (ATTR_MALLOC): New macro.
+	(xmalloc,xcalloc,xstrdup): Declare.
+	* hostio.c: Replace malloc,calloc,strdup with xmalloc,xcalloc,xstrdup.
+	* inferiors.c: Ditto.
+	* linux-low.c: Ditto.
+	* mem-break.c: Ditto.
+	* regcache.c: Ditto.
+	* remote-utils.c: Ditto.
+	* server.c: Ditto.
+	* target.c: Ditto.
+	* win32-low.c: Ditto.
+
+2008-12-12  Doug Evans  <dje@google.com>
+
+	* linux-low.c (linux_wait_for_process): Don't clobber current_inferior
+	in debugging printf.
+
+	* linux-low.c (handle_extended_wait): Simplify, use my_waitpid.
+
+2008-12-09  Doug Evans  <dje@google.com>
+
+	* linux-low.h (struct process_info): Delete member tid, unused.
+	* thread-db.c (find_one_thread): Update.
+	(maybe_attach_thread): Update.
+
+2008-12-02  Pedro Alves  <pedro@codesourcery.com>
+
+        * target.h (struct target_ops): Add qxfer_osdata member.
+        * linux-low.c: Include ctype.h and pwd.h and sys/types.h
+        and dirent.h.
+        (linux_qxfer_osdata): New functions.
+        (linux_target_ops): Register linux_qxfer_osdata as qxfer_osdata
+        callback.
+        * server.c (handle_query): Handle "qXfer:osdata:read:".
+        * remote-utils.c (buffer_grow, buffer_free, buffer_init, buffer_finish)
+        (buffer_xml_printf): New functions.
+        * server.h (struct buffer): New.
+        (buffer_grow_str, buffer_grow_str0): New macros.
+        (buffer_grow, buffer_free, buffer_init, buffer_finish)
+        (buffer_xml_printf): Declare.
+
+2008-11-24  Doug Evans  <dje@google.com>
+
+	* Makefile.in (VERSION,DIST,LINT,LINTFLAGS): Delete, unused.
+
+2008-11-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* server.c (handle_v_run): Always use the supplied argument list.
+
 2008-11-19  Bob Wilson  <bob.wilson@acm.org>
 	
 	* xtensa-xtregs.c (XTENSA_ELF_XTREG_SIZE): Change to 4.

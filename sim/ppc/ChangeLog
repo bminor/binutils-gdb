@@ -1,3 +1,8 @@
+2008-12-15 Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* ppc-instructions, ppc-spr-table: Add ability
+	to read tbrl and tbru special registers.
+
 2008-11-18  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* configure: Regenerated.

@@ -49,6 +49,7 @@ free_environ (struct gdb_environ *e)
   while (*vector)
     xfree (*vector++);
 
+  xfree (e->vector);
   xfree (e);
 }
 

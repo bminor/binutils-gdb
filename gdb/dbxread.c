@@ -2597,6 +2597,19 @@ read_ofile_symtab (struct partial_symtab *pst)
 
       if (type & N_STAB)
 	{
+	  if (sizeof (nlist.n_value) > 4
+	      /* We are a 64-bit debugger debugging a 32-bit program.  */
+	      && (type == N_LSYM || type == N_PSYM))
+	      /* We have to be careful with the n_value in the case of N_LSYM
+		 and N_PSYM entries, because they are signed offsets from frame
+		 pointer, but we actually read them as unsigned 32-bit values.
+		 This is not a problem for 32-bit debuggers, for which negative
+		 values end up being interpreted correctly (as negative
+		 offsets) due to integer overflow.
+		 But we need to sign-extend the value for 64-bit debuggers,
+		 or we'll end up interpreting negative values as very large
+		 positive offsets.  */
+	    nlist.n_value = (nlist.n_value ^ 0x80000000) - 0x80000000;
 	  process_one_symbol (type, nlist.n_desc, nlist.n_value,
 			      namestring, section_offsets, objfile);
 	}

@@ -1,3 +1,31 @@
+2008-12-23  Jon Beniston <jon@beniston.com>
+
+	* dis-asm.h: Add LM32 disassembler function prototype.
+
+2008-12-10  Jason Merrill  <jason@redhat.com>
+
+	* demangle.h (enum demangle_component_type): Add
+	DEMANGLE_COMPONENT_FIXED_TYPE.
+
+2008-12-01  Cary Coutant  <ccoutant@google.com>
+
+	* plugin-api.h (ld_plugin_message): Change format parameter to const.
+
+2008-12-01  Cary Coutant  <ccoutant@google.com>
+
+	* plugin-api.h: Fix syntax error when compiling with C++.
+
+2008-11-26  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 7047
+	* bfdlink.h (struct bfd_elf_version_expr): Delete "symbol".
+	Add "literal".
+
+2008-11-21  Sterling Augustine  <sterling@tensilica.com>
+
+	* xtensa-isa-internal.h (XTENSA_STATE_IS_SHARED_OR): New flag.
+	* xtensa-isa.h (xtensa_state_is_shared_or): New prototype.
+
 2008-11-19  Bob Wilson  <bob.wilson@acm.org>
 	
 	* xtensa-config.h (XCHAL_HAVE_MUL16, XCHAL_HAVE_MUL32, XCHAL_HAVE_DIV32)

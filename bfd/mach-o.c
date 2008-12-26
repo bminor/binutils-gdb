@@ -796,6 +796,22 @@ bfd_mach_o_make_bfd_section (bfd *abfd, bfd_mach_o_section *section,
   if (strcmp (section->segname, "__DWARF") == 0
       && strncmp (section->sectname, "__", 2) == 0)
     sprintf (sname, ".%s", section->sectname + 2);
+  else if (strcmp (section->segname, "__TEXT") == 0)
+    {
+      if (strcmp (section->sectname, "__eh_frame") == 0)
+	strcpy (sname, ".eh_frame");
+      else if (section->sectname[0])
+	sprintf (sname, "%s.%s", section->segname, section->sectname);
+      else
+	strcpy (sname, section->segname);
+    }
+  else if (strcmp (section->segname, "__DATA") == 0)
+    {
+      if (section->sectname[0])
+	sprintf (sname, "%s.%s", section->segname, section->sectname);
+      else
+	strcpy (sname, section->segname);
+    }
   else
     sprintf (sname, "%s.%s.%s", prefix, section->segname, section->sectname);
 
@@ -1210,8 +1226,8 @@ bfd_mach_o_scan_read_dylinker (bfd *abfd,
 
   bfdsec->vma = 0;
   bfdsec->lma = 0;
-  bfdsec->size = command->len - 8;
-  bfdsec->filepos = command->offset + 8;
+  bfdsec->size = command->len - nameoff;
+  bfdsec->filepos = command->offset + nameoff;
   bfdsec->alignment_power = 0;
 
   cmd->section = bfdsec;
@@ -1584,7 +1600,13 @@ bfd_mach_o_scan_read_segment (bfd *abfd,
   sname = bfd_alloc (abfd, snamelen);
   if (sname == NULL)
     return -1;
-  sprintf (sname, "%s.%s", prefix, seg->segname);
+  if (strcmp (seg->segname, "__TEXT") == 0
+      || strcmp (seg->segname, "__DATA") == 0
+      || strcmp (seg->segname, "__IMPORT") == 0
+      || strcmp (seg->segname, "__LINKEDIT") == 0)
+    strcpy (sname, seg->segname);
+  else
+    sprintf (sname, "%s.%s", prefix, seg->segname);
 
   bfdsec = bfd_make_section_anyway (abfd, sname);
   if (bfdsec == NULL)
@@ -1708,6 +1730,8 @@ bfd_mach_o_scan_read_command (bfd *abfd, bfd_mach_o_load_command *command)
 	return -1;
       break;
     case BFD_MACH_O_LC_CODE_SIGNATURE:
+    case BFD_MACH_O_LC_SEGMENT_SPLIT_INFO:
+    case BFD_MACH_O_LC_REEXPORT_DYLIB:
       break;
     default:
       fprintf (stderr, "unable to read unknown load command 0x%lx\n",
@@ -2110,10 +2134,8 @@ bfd_mach_o_openr_next_archived_file (bfd *archive, bfd *prev)
   mach_o_fat_archentry *entry = NULL;
   unsigned long i;
   bfd *nbfd;
-  const char *arch_name;
   enum bfd_architecture arch_type;
   unsigned long arch_subtype;
-  char *s = NULL;
 
   adata = (mach_o_fat_data_struct *) archive->tdata.mach_o_fat_data;
   BFD_ASSERT (adata != NULL);
@@ -2153,15 +2175,87 @@ bfd_mach_o_openr_next_archived_file (bfd *archive, bfd *prev)
 
   bfd_mach_o_convert_architecture (entry->cputype, entry->cpusubtype,
 				   &arch_type, &arch_subtype);
-  arch_name = bfd_printable_arch_mach (arch_type, arch_subtype);
-  s = bfd_malloc (strlen (arch_name) + 1);
-  if (s == NULL)
-    return NULL;
-  strcpy (s, arch_name);
-  nbfd->filename = s;
+  /* Create the member filename.
+     Use FILENAME:ARCH_NAME.  */
+  {
+    char *s = NULL;
+    const char *arch_name;
+    size_t arch_file_len = strlen (bfd_get_filename (archive));
+
+    arch_name = bfd_printable_arch_mach (arch_type, arch_subtype);
+    s = bfd_malloc (arch_file_len + 1 + strlen (arch_name) + 1);
+    if (s == NULL)
+      return NULL;
+    memcpy (s, bfd_get_filename (archive), arch_file_len);
+    s[arch_file_len] = ':';
+    strcpy (s + arch_file_len + 1, arch_name);
+    nbfd->filename = s;
+  }
   nbfd->iostream = NULL;
+  bfd_set_arch_mach (nbfd, arch_type, arch_subtype);
 
   return nbfd;
+}
+
+/* If ABFD format is FORMAT and architecture is ARCH, return it.
+   If ABFD is a fat image containing a member that corresponds to FORMAT
+   and ARCH, returns it.
+   In other case, returns NULL.
+   This function allows transparent uses of fat images.  */
+bfd *
+bfd_mach_o_fat_extract (bfd *abfd,
+			bfd_format format,
+			const bfd_arch_info_type *arch)
+{
+  bfd *res;
+  mach_o_fat_data_struct *adata;
+  unsigned int i;
+
+  if (bfd_check_format (abfd, format))
+    {
+      if (bfd_get_arch_info (abfd) == arch)
+	return abfd;
+      return NULL;
+    }
+  if (!bfd_check_format (abfd, bfd_archive)
+      || abfd->xvec != &mach_o_fat_vec)
+    return NULL;
+  
+  /* This is a Mach-O fat image.  */
+  adata = (mach_o_fat_data_struct *) abfd->tdata.mach_o_fat_data;
+  BFD_ASSERT (adata != NULL);
+
+  for (i = 0; i < adata->nfat_arch; i++)
+    {
+      struct mach_o_fat_archentry *e = &adata->archentries[i];
+      enum bfd_architecture cpu_type;
+      unsigned long cpu_subtype;
+
+      bfd_mach_o_convert_architecture (e->cputype, e->cpusubtype,
+				       &cpu_type, &cpu_subtype);
+      if (cpu_type != arch->arch || cpu_subtype != arch->mach)
+	continue;
+
+      /* The architecture is found.  */
+      res = _bfd_new_bfd_contained_in (abfd);
+      if (res == NULL)
+	return NULL;
+
+      res->origin = e->offset;
+
+      res->filename = strdup (abfd->filename);
+      res->iostream = NULL;
+
+      if (bfd_check_format (res, format))
+	{
+	  BFD_ASSERT (bfd_get_arch_info (res) == arch);
+	  return res;
+	}
+      bfd_close (res);
+      return NULL;
+    }
+
+  return NULL;
 }
 
 int

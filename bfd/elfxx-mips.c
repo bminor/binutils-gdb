@@ -10400,6 +10400,8 @@ mips_set_isa_flags (bfd *abfd)
     case bfd_mach_mips8000:
     case bfd_mach_mips10000:
     case bfd_mach_mips12000:
+    case bfd_mach_mips14000:
+    case bfd_mach_mips16000:
       val = E_MIPS_ARCH_4;
       break;
 
@@ -12124,6 +12126,8 @@ static const struct mips_mach_extension mips_mach_extensions[] = {
 
   /* R10000 extensions.  */
   { bfd_mach_mips12000, bfd_mach_mips10000 },
+  { bfd_mach_mips14000, bfd_mach_mips10000 },
+  { bfd_mach_mips16000, bfd_mach_mips10000 },
 
   /* R5000 extensions.  Note: the vr5500 ISA is an extension of the core
      vr5400 ISA, but doesn't include the multimedia stuff.  It seems

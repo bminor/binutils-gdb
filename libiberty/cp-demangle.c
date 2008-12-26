@@ -621,6 +621,9 @@ d_dump (struct demangle_component *dc, int indent)
     case DEMANGLE_COMPONENT_PTRMEM_TYPE:
       printf ("pointer to member type\n");
       break;
+    case DEMANGLE_COMPONENT_FIXED_TYPE:
+      printf ("fixed-point type\n");
+      break;
     case DEMANGLE_COMPONENT_ARGLIST:
       printf ("argument list\n");
       break;
@@ -2115,6 +2118,19 @@ cplus_demangle_type (struct d_info *di)
 	  ret = d_make_builtin_type (di, &cplus_demangle_builtin_types[31]);
 	  di->expansion += ret->u.s_builtin.type->len;
 	  break;
+
+	case 'F':
+	  /* Fixed point types. DF<int bits><length><fract bits><sat>  */
+	  ret = d_make_empty (di);
+	  ret->type = DEMANGLE_COMPONENT_FIXED_TYPE;
+	  if ((ret->u.s_fixed.accum = IS_DIGIT (d_peek_char (di))))
+	    /* For demangling we don't care about the bits.  */
+	    d_number (di);
+	  ret->u.s_fixed.length = cplus_demangle_type (di);
+	  d_number (di);
+	  peek = d_next_char (di);
+	  ret->u.s_fixed.sat = (peek == 's');
+	  break;
 	}
       break;
 
@@ -2545,7 +2561,8 @@ d_expression (struct d_info *di)
 			    d_make_comp (di, DEMANGLE_COMPONENT_TEMPLATE, name,
 					 d_template_args (di)));
     }
-  else if (peek == 's' && d_peek_next_char (di) == 'T')
+  else if (peek == 's'
+	   && (d_peek_next_char (di) == 'T' || d_peek_next_char (di) == 'R'))
     {
       /* Just demangle a parameter placeholder as its type.  */
       d_advance (di, 2);
@@ -3725,14 +3742,36 @@ d_print_comp (struct d_print_info *dpi,
 	return;
       }
 
+    case DEMANGLE_COMPONENT_FIXED_TYPE:
+      if (dc->u.s_fixed.sat)
+	d_append_string (dpi, "_Sat ");
+      /* Don't print "int _Accum".  */
+      if (dc->u.s_fixed.length->u.s_builtin.type
+	  != &cplus_demangle_builtin_types['i'-'a'])
+	{
+	  d_print_comp (dpi, dc->u.s_fixed.length);
+	  d_append_char (dpi, ' ');
+	}
+      if (dc->u.s_fixed.accum)
+	d_append_string (dpi, "_Accum");
+      else
+	d_append_string (dpi, "_Fract");
+      return;
+
     case DEMANGLE_COMPONENT_ARGLIST:
     case DEMANGLE_COMPONENT_TEMPLATE_ARGLIST:
       if (d_left (dc) != NULL)
 	d_print_comp (dpi, d_left (dc));
       if (d_right (dc) != NULL)
 	{
+	  size_t len;
 	  d_append_string (dpi, ", ");
+	  len = dpi->len;
 	  d_print_comp (dpi, d_right (dc));
+	  /* If that didn't print anything (which can happen with empty
+	     template argument packs), remove the comma and space.  */
+	  if (dpi->len == len)
+	    dpi->len -= 2;
 	}
       return;
 

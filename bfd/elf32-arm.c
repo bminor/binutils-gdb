@@ -2466,19 +2466,6 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
   return entry;
 }
 
-/* Return true if NAME is the name of the relocation section associated
-   with S.  */
-
-static bfd_boolean
-reloc_section_p (struct elf32_arm_link_hash_table *htab,
-		 const char *name, asection *s)
-{
-  if (htab->use_rel)
-    return CONST_STRNEQ (name, ".rel") && strcmp (s->name, name + 4) == 0;
-  else
-    return CONST_STRNEQ (name, ".rela") && strcmp (s->name, name + 5) == 0;
-}
-
 /* Create .got, .gotplt, and .rel(a).got sections in DYNOBJ, and set up
    shortcuts to them in our hash table.  */
 
@@ -4621,6 +4608,10 @@ bfd_elf32_arm_init_maps (bfd *abfd)
   Elf_Internal_Shdr *hdr;
   unsigned int i, localsyms;
 
+  /* PR 7093: Make sure that we are dealing with an arm elf binary.  */
+  if (! is_arm_elf (abfd))
+    return;
+
   if ((abfd->flags & DYNAMIC) != 0)
     return;
 
@@ -5960,19 +5951,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	  if (sreloc == NULL)
 	    {
-	      const char * name;
+	      sreloc = _bfd_elf_get_dynamic_reloc_section (input_bfd, input_section,
+							   ! globals->use_rel);
 
-	      name = (bfd_elf_string_from_elf_section
-		      (input_bfd,
-		       elf_elfheader (input_bfd)->e_shstrndx,
-		       elf_section_data (input_section)->rel_hdr.sh_name));
-	      if (name == NULL)
+	      if (sreloc == NULL)
 		return bfd_reloc_notsupported;
-
-	      BFD_ASSERT (reloc_section_p (globals, name, input_section));
-
-	      sreloc = bfd_get_section_by_name (dynobj, name);
-	      BFD_ASSERT (sreloc != NULL);
 	    }
 
 	  skip = FALSE;
@@ -6381,8 +6364,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	int thumb2 = using_thumb2 (globals);
 
 	/* A branch to an undefined weak symbol is turned into a jump to
-	   the next instruction.  */
-	if (h && h->root.type == bfd_link_hash_undefweak)
+	   the next instruction unless a PLT entry will be created.  */
+	if (h && h->root.type == bfd_link_hash_undefweak
+	    && !(splt != NULL && h->plt.offset != (bfd_vma) -1))
 	  {
 	    bfd_put_16 (input_bfd, 0xe000, hit_data);
 	    bfd_put_16 (input_bfd, 0xbf00, hit_data + 2);
@@ -9278,40 +9262,23 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	        /* When creating a shared object, we must copy these
                    reloc types into the output file.  We create a reloc
                    section in dynobj and make room for this reloc.  */
-	        if (sreloc == NULL)
+  	        if (sreloc == NULL)
 		  {
-		    const char * name;
+		    sreloc = _bfd_elf_make_dynamic_reloc_section
+		      (sec, dynobj, 2, abfd, ! htab->use_rel);
 
-		    name = (bfd_elf_string_from_elf_section
-			    (abfd,
-			     elf_elfheader (abfd)->e_shstrndx,
-			     elf_section_data (sec)->rel_hdr.sh_name));
-		    if (name == NULL)
+		    if (sreloc == NULL)
 		      return FALSE;
 
-		    BFD_ASSERT (reloc_section_p (htab, name, sec));
-
-		    sreloc = bfd_get_section_by_name (dynobj, name);
-		    if (sreloc == NULL)
+		    /* BPABI objects never have dynamic relocations mapped.  */
+		    if (! htab->symbian_p)
 		      {
-		        flagword flags;
+			flagword flags;
 
-		        flags = (SEC_HAS_CONTENTS | SEC_READONLY
-			         | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-		        if ((sec->flags & SEC_ALLOC) != 0
-			    /* BPABI objects never have dynamic
-			       relocations mapped.  */
-			    && !htab->symbian_p)
-			  flags |= SEC_ALLOC | SEC_LOAD;
-		        sreloc = bfd_make_section_with_flags (dynobj,
-							      name,
-							      flags);
-		        if (sreloc == NULL
-			    || ! bfd_set_section_alignment (dynobj, sreloc, 2))
-			  return FALSE;
+			flags = bfd_get_section_flags (dynobj, sreloc);
+			flags &= ~(SEC_LOAD | SEC_ALLOC);
+			bfd_set_section_flags (dynobj, sreloc, flags);
 		      }
-
-		    elf_section_data (sec)->sreloc = sreloc;
 		  }
 
 		/* If this is a global symbol, we count the number of
@@ -11766,7 +11733,7 @@ elf32_arm_swap_symbol_in (bfd * abfd,
 
   /* New EABI objects mark thumb function symbols by setting the low bit of
      the address.  Turn these into STT_ARM_TFUNC.  */
-  if (ELF_ST_TYPE (dst->st_info) == STT_FUNC
+  if ((ELF_ST_TYPE (dst->st_info) == STT_FUNC)
       && (dst->st_value & 1))
     {
       dst->st_info = ELF_ST_INFO (ELF_ST_BIND (dst->st_info), STT_ARM_TFUNC);

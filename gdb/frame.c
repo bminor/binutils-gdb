@@ -1392,8 +1392,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
 /* Debug routine to print a NULL frame being returned.  */
 
 static void
-frame_debug_got_null_frame (struct ui_file *file,
-			    struct frame_info *this_frame,
+frame_debug_got_null_frame (struct frame_info *this_frame,
 			    const char *reason)
 {
   if (frame_debug)
@@ -1482,7 +1481,7 @@ get_prev_frame (struct frame_info *this_frame)
 
          Per the above, this code shouldn't even be called with a NULL
          THIS_FRAME.  */
-      frame_debug_got_null_frame (gdb_stdlog, this_frame, "this_frame NULL");
+      frame_debug_got_null_frame (this_frame, "this_frame NULL");
       return current_frame;
     }
 
@@ -1510,7 +1509,7 @@ get_prev_frame (struct frame_info *this_frame)
        user later decides to enable unwinds past main(), that will
        automatically happen.  */
     {
-      frame_debug_got_null_frame (gdb_stdlog, this_frame, "inside main func");
+      frame_debug_got_null_frame (this_frame, "inside main func");
       return NULL;
     }
 
@@ -1521,8 +1520,7 @@ get_prev_frame (struct frame_info *this_frame)
      frame.  */
   if (this_frame->level + 2 > backtrace_limit)
     {
-      frame_debug_got_null_frame (gdb_stdlog, this_frame,
-				  "backtrace limit exceeded");
+      frame_debug_got_null_frame (this_frame, "backtrace limit exceeded");
       return NULL;
     }
 
@@ -1552,7 +1550,7 @@ get_prev_frame (struct frame_info *this_frame)
       && get_frame_type (this_frame) != DUMMY_FRAME && this_frame->level >= 0
       && inside_entry_func (this_frame))
     {
-      frame_debug_got_null_frame (gdb_stdlog, this_frame, "inside entry func");
+      frame_debug_got_null_frame (this_frame, "inside entry func");
       return NULL;
     }
 
@@ -1564,7 +1562,7 @@ get_prev_frame (struct frame_info *this_frame)
       && get_frame_type (get_next_frame (this_frame)) == NORMAL_FRAME
       && get_frame_pc (this_frame) == 0)
     {
-      frame_debug_got_null_frame (gdb_stdlog, this_frame, "zero PC");
+      frame_debug_got_null_frame (this_frame, "zero PC");
       return NULL;
     }
 

@@ -63,7 +63,7 @@ powerpc_init_dialect (struct disassemble_info *info)
     dialect |= PPC_OPCODE_PPCPS;
   else if (info->disassembler_options
       && strstr (info->disassembler_options, "booke") != NULL)
-    dialect |= PPC_OPCODE_BOOKE | PPC_OPCODE_BOOKE64;
+    dialect |= PPC_OPCODE_BOOKE;
   else if ((info->mach == bfd_mach_ppc_e500mc)
 	   || (info->disassembler_options
 	       && strstr (info->disassembler_options, "e500mc") != NULL))
@@ -402,7 +402,7 @@ print_ppc_disassembler_options (FILE *stream)
 The following PPC specific disassembler options are supported for use with\n\
 the -M switch:\n");
 
-  fprintf (stream, "  booke|booke32|booke64    Disassemble the BookE instructions\n");
+  fprintf (stream, "  booke                    Disassemble the BookE instructions\n");
   fprintf (stream, "  e300                     Disassemble the e300 instructions\n");
   fprintf (stream, "  e500|e500x2              Disassemble the e500 instructions\n");
   fprintf (stream, "  e500mc                   Disassemble the e500mc instructions\n");

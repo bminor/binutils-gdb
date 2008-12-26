@@ -54,6 +54,8 @@ Boston, MA 02110-1301, USA.  */
 #include "block.h"
 #include "cp-support.h"
 #include "dfp.h"
+#include "gdb_assert.h"
+#include "macroscope.h"
 
 #define parse_type builtin_type (parse_gdbarch)
 
@@ -1364,37 +1366,150 @@ struct token
   char *operator;
   int token;
   enum exp_opcode opcode;
+  int cxx_only;
 };
 
 static const struct token tokentab3[] =
   {
-    {">>=", ASSIGN_MODIFY, BINOP_RSH},
-    {"<<=", ASSIGN_MODIFY, BINOP_LSH}
+    {">>=", ASSIGN_MODIFY, BINOP_RSH, 0},
+    {"<<=", ASSIGN_MODIFY, BINOP_LSH, 0}
   };
 
 static const struct token tokentab2[] =
   {
-    {"+=", ASSIGN_MODIFY, BINOP_ADD},
-    {"-=", ASSIGN_MODIFY, BINOP_SUB},
-    {"*=", ASSIGN_MODIFY, BINOP_MUL},
-    {"/=", ASSIGN_MODIFY, BINOP_DIV},
-    {"%=", ASSIGN_MODIFY, BINOP_REM},
-    {"|=", ASSIGN_MODIFY, BINOP_BITWISE_IOR},
-    {"&=", ASSIGN_MODIFY, BINOP_BITWISE_AND},
-    {"^=", ASSIGN_MODIFY, BINOP_BITWISE_XOR},
-    {"++", INCREMENT, BINOP_END},
-    {"--", DECREMENT, BINOP_END},
-    {"->", ARROW, BINOP_END},
-    {"&&", ANDAND, BINOP_END},
-    {"||", OROR, BINOP_END},
-    {"::", COLONCOLON, BINOP_END},
-    {"<<", LSH, BINOP_END},
-    {">>", RSH, BINOP_END},
-    {"==", EQUAL, BINOP_END},
-    {"!=", NOTEQUAL, BINOP_END},
-    {"<=", LEQ, BINOP_END},
-    {">=", GEQ, BINOP_END}
+    {"+=", ASSIGN_MODIFY, BINOP_ADD, 0},
+    {"-=", ASSIGN_MODIFY, BINOP_SUB, 0},
+    {"*=", ASSIGN_MODIFY, BINOP_MUL, 0},
+    {"/=", ASSIGN_MODIFY, BINOP_DIV, 0},
+    {"%=", ASSIGN_MODIFY, BINOP_REM, 0},
+    {"|=", ASSIGN_MODIFY, BINOP_BITWISE_IOR, 0},
+    {"&=", ASSIGN_MODIFY, BINOP_BITWISE_AND, 0},
+    {"^=", ASSIGN_MODIFY, BINOP_BITWISE_XOR, 0},
+    {"++", INCREMENT, BINOP_END, 0},
+    {"--", DECREMENT, BINOP_END, 0},
+    {"->", ARROW, BINOP_END, 0},
+    {"&&", ANDAND, BINOP_END, 0},
+    {"||", OROR, BINOP_END, 0},
+    {"::", COLONCOLON, BINOP_END, 0},
+    {"<<", LSH, BINOP_END, 0},
+    {">>", RSH, BINOP_END, 0},
+    {"==", EQUAL, BINOP_END, 0},
+    {"!=", NOTEQUAL, BINOP_END, 0},
+    {"<=", LEQ, BINOP_END, 0},
+    {">=", GEQ, BINOP_END, 0}
   };
+
+/* Identifier-like tokens.  */
+static const struct token ident_tokens[] =
+  {
+    {"unsigned", UNSIGNED, OP_NULL, 0},
+    {"template", TEMPLATE, OP_NULL, 1},
+    {"volatile", VOLATILE_KEYWORD, OP_NULL, 0},
+    {"struct", STRUCT, OP_NULL, 0},
+    {"signed", SIGNED_KEYWORD, OP_NULL, 0},
+    {"sizeof", SIZEOF, OP_NULL, 0},
+    {"double", DOUBLE_KEYWORD, OP_NULL, 0},
+    {"false", FALSEKEYWORD, OP_NULL, 1},
+    {"class", CLASS, OP_NULL, 1},
+    {"union", UNION, OP_NULL, 0},
+    {"short", SHORT, OP_NULL, 0},
+    {"const", CONST_KEYWORD, OP_NULL, 0},
+    {"enum", ENUM, OP_NULL, 0},
+    {"long", LONG, OP_NULL, 0},
+    {"true", TRUEKEYWORD, OP_NULL, 1},
+    {"int", INT_KEYWORD, OP_NULL, 0},
+
+    {"and", ANDAND, BINOP_END, 1},
+    {"and_eq", ASSIGN_MODIFY, BINOP_BITWISE_AND, 1},
+    {"bitand", '&', OP_NULL, 1},
+    {"bitor", '|', OP_NULL, 1},
+    {"compl", '~', OP_NULL, 1},
+    {"not", '!', OP_NULL, 1},
+    {"not_eq", NOTEQUAL, BINOP_END, 1},
+    {"or", OROR, BINOP_END, 1},
+    {"or_eq", ASSIGN_MODIFY, BINOP_BITWISE_IOR, 1},
+    {"xor", '^', OP_NULL, 1},
+    {"xor_eq", ASSIGN_MODIFY, BINOP_BITWISE_XOR, 1}
+  };
+
+/* When we find that lexptr (the global var defined in parse.c) is
+   pointing at a macro invocation, we expand the invocation, and call
+   scan_macro_expansion to save the old lexptr here and point lexptr
+   into the expanded text.  When we reach the end of that, we call
+   end_macro_expansion to pop back to the value we saved here.  The
+   macro expansion code promises to return only fully-expanded text,
+   so we don't need to "push" more than one level.
+
+   This is disgusting, of course.  It would be cleaner to do all macro
+   expansion beforehand, and then hand that to lexptr.  But we don't
+   really know where the expression ends.  Remember, in a command like
+
+     (gdb) break *ADDRESS if CONDITION
+
+   we evaluate ADDRESS in the scope of the current frame, but we
+   evaluate CONDITION in the scope of the breakpoint's location.  So
+   it's simply wrong to try to macro-expand the whole thing at once.  */
+static char *macro_original_text;
+
+/* We save all intermediate macro expansions on this obstack for the
+   duration of a single parse.  The expansion text may sometimes have
+   to live past the end of the expansion, due to yacc lookahead.
+   Rather than try to be clever about saving the data for a single
+   token, we simply keep it all and delete it after parsing has
+   completed.  */
+static struct obstack expansion_obstack;
+
+static void
+scan_macro_expansion (char *expansion)
+{
+  char *copy;
+
+  /* We'd better not be trying to push the stack twice.  */
+  gdb_assert (! macro_original_text);
+
+  /* Copy to the obstack, and then free the intermediate
+     expansion.  */
+  copy = obstack_copy0 (&expansion_obstack, expansion, strlen (expansion));
+  xfree (expansion);
+
+  /* Save the old lexptr value, so we can return to it when we're done
+     parsing the expanded text.  */
+  macro_original_text = lexptr;
+  lexptr = copy;
+}
+
+
+static int
+scanning_macro_expansion (void)
+{
+  return macro_original_text != 0;
+}
+
+
+static void 
+finished_macro_expansion (void)
+{
+  /* There'd better be something to pop back to.  */
+  gdb_assert (macro_original_text);
+
+  /* Pop back to the original text.  */
+  lexptr = macro_original_text;
+  macro_original_text = 0;
+}
+
+
+static void
+scan_macro_cleanup (void *dummy)
+{
+  if (macro_original_text)
+    finished_macro_expansion ();
+
+  obstack_free (&expansion_obstack, NULL);
+}
+
+
+/* The scope used for macro expansion.  */
+static struct macro_scope *expression_macro_scope;
 
 /* This is set if a NAME token appeared at the very end of the input
    string, with no whitespace separating the name from the EOF.  This
@@ -1422,6 +1537,7 @@ yylex ()
   char * token_string = NULL;
   int class_prefix = 0;
   int saw_structop = last_was_structop;
+  char *copy;
 
   last_was_structop = 0;
 
@@ -1431,8 +1547,8 @@ yylex ()
   if (! scanning_macro_expansion ())
     {
       char *expanded = macro_expand_next (&lexptr,
-                                          expression_macro_lookup_func,
-                                          expression_macro_lookup_baton);
+                                          standard_macro_lookup,
+                                          expression_macro_scope);
 
       if (expanded)
         scan_macro_expansion (expanded);
@@ -1758,64 +1874,23 @@ yylex ()
 
   tryname:
 
-  /* Catch specific keywords.  Should be done with a data structure.  */
-  switch (namelen)
-    {
-    case 8:
-      if (strncmp (tokstart, "unsigned", 8) == 0)
-	return UNSIGNED;
-      if (parse_language->la_language == language_cplus
-	  && strncmp (tokstart, "template", 8) == 0)
-	return TEMPLATE;
-      if (strncmp (tokstart, "volatile", 8) == 0)
-	return VOLATILE_KEYWORD;
-      break;
-    case 6:
-      if (strncmp (tokstart, "struct", 6) == 0)
-	return STRUCT;
-      if (strncmp (tokstart, "signed", 6) == 0)
-	return SIGNED_KEYWORD;
-      if (strncmp (tokstart, "sizeof", 6) == 0)
-	return SIZEOF;
-      if (strncmp (tokstart, "double", 6) == 0)
-	return DOUBLE_KEYWORD;
-      break;
-    case 5:
-      if (parse_language->la_language == language_cplus)
-        {
-          if (strncmp (tokstart, "false", 5) == 0)
-            return FALSEKEYWORD;
-          if (strncmp (tokstart, "class", 5) == 0)
-            return CLASS;
-        }
-      if (strncmp (tokstart, "union", 5) == 0)
-	return UNION;
-      if (strncmp (tokstart, "short", 5) == 0)
-	return SHORT;
-      if (strncmp (tokstart, "const", 5) == 0)
-	return CONST_KEYWORD;
-      break;
-    case 4:
-      if (strncmp (tokstart, "enum", 4) == 0)
-	return ENUM;
-      if (strncmp (tokstart, "long", 4) == 0)
-	return LONG;
-      if (parse_language->la_language == language_cplus)
-          {
-            if (strncmp (tokstart, "true", 4) == 0)
-              return TRUEKEYWORD;
-          }
-      break;
-    case 3:
-      if (strncmp (tokstart, "int", 3) == 0)
-	return INT_KEYWORD;
-      break;
-    default:
-      break;
-    }
-
   yylval.sval.ptr = tokstart;
   yylval.sval.length = namelen;
+
+  /* Catch specific keywords.  */
+  copy = copy_name (yylval.sval);
+  for (i = 0; i < sizeof ident_tokens / sizeof ident_tokens[0]; i++)
+    if (strcmp (copy, ident_tokens[i].operator) == 0)
+      {
+	if (ident_tokens[i].cxx_only
+	    && parse_language->la_language != language_cplus)
+	  break;
+
+	/* It is ok to always set this, even though we don't always
+	   strictly need to.  */
+	yylval.opcode = ident_tokens[i].opcode;
+	return ident_tokens[i].token;
+      }
 
   if (*tokstart == '$')
     {
@@ -1829,12 +1904,11 @@ yylex ()
      currently as names of types; NAME for other symbols.
      The caller is not constrained to care about the distinction.  */
   {
-    char *tmp = copy_name (yylval.sval);
     struct symbol *sym;
     int is_a_field_of_this = 0;
     int hextype;
 
-    sym = lookup_symbol (tmp, expression_context_block,
+    sym = lookup_symbol (copy, expression_context_block,
 			 VAR_DOMAIN,
 			 parse_language->la_language == language_cplus
 			 ? &is_a_field_of_this : (int *) NULL);
@@ -1851,7 +1925,7 @@ yylex ()
       {				/* See if it's a file name. */
 	struct symtab *symtab;
 
-	symtab = lookup_symtab (tmp);
+	symtab = lookup_symtab (copy);
 
 	if (symtab)
 	  {
@@ -1870,7 +1944,7 @@ yylex ()
         }
     yylval.tsym.type
       = language_lookup_primitive_type_by_name (parse_language,
-						parse_gdbarch, tmp);
+						parse_gdbarch, copy);
     if (yylval.tsym.type != NULL)
       return TYPENAME;
 
@@ -1903,10 +1977,35 @@ yylex ()
 int
 c_parse (void)
 {
+  int result;
+  struct cleanup *back_to = make_cleanup (free_current_contents,
+					  &expression_macro_scope);
+
+  /* Set up the scope for macro expansion.  */
+  expression_macro_scope = NULL;
+
+  if (expression_context_block)
+    expression_macro_scope
+      = sal_macro_scope (find_pc_line (expression_context_pc, 0));
+  else
+    expression_macro_scope = default_macro_scope ();
+  if (! expression_macro_scope)
+    expression_macro_scope = user_macro_scope ();
+
+  /* Initialize macro expansion code.  */
+  obstack_init (&expansion_obstack);
+  gdb_assert (! macro_original_text);
+  make_cleanup (scan_macro_cleanup, 0);
+
+  /* Initialize some state used by the lexer.  */
   last_was_structop = 0;
   saw_name_at_eof = 0;
-  return yyparse ();
+
+  result = yyparse ();
+  do_cleanups (back_to);
+  return result;
 }
+
 
 void
 yyerror (msg)

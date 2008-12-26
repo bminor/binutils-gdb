@@ -994,8 +994,20 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 		     + sec->output_offset
 		     + roff) & (bfd_vma) -4;
 
+	  /* The .plt section is aligned at 32byte and the .text section
+	     is aligned at 64byte. The .text section is right after the
+	     .plt section.  After the first relaxation pass, linker may
+	     increase the gap between the .plt and .text sections up
+	     to 32byte.  We assume linker will always insert 32byte
+	     between the .plt and .text sections after the the first
+	     relaxation pass.  */
+	  if (tsec == ia64_info->plt_sec)
+	    offset = -0x1000000 + 32;
+	  else
+	    offset = -0x1000000;
+
 	  /* If the branch is in range, no need to do anything.  */
-	  if ((bfd_signed_vma) (symaddr - reladdr) >= -0x1000000
+	  if ((bfd_signed_vma) (symaddr - reladdr) >= offset 
 	      && (bfd_signed_vma) (symaddr - reladdr) <= 0x0FFFFF0)
 	    {
 	      /* If the 60-bit branch is in 21-bit range, optimize it. */

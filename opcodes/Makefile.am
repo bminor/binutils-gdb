@@ -123,6 +123,14 @@ CFILES = \
 	iq2000-dis.c \
 	iq2000-ibld.c \
 	iq2000-opc.c \
+	lm32-asm.c \
+	lm32-desc.c \
+	lm32-desc.h \
+	lm32-dis.c \
+	lm32-ibld.c \
+	lm32-opc.c \
+	lm32-opc.h \
+	lm32-opinst.c \
 	m32c-asm.c \
 	m32c-desc.c \
 	m32c-dis.c \
@@ -265,6 +273,12 @@ ALL_MACHINES = \
 	iq2000-dis.lo \
 	iq2000-ibld.lo \
 	iq2000-opc.lo \
+	lm32-asm.lo \
+	lm32-desc.lo \
+	lm32-dis.lo \
+	lm32-ibld.lo \
+	lm32-opc.lo \
+	lm32-opinst.lo \
 	m32c-asm.lo \
 	m32c-desc.lo \
 	m32c-dis.lo \
@@ -442,6 +456,7 @@ CGEN_CPUS = fr30 frv ip2k m32c m32r mep mt openrisc xc16x xstormy16
 
 if CGEN_MAINT
 IP2K_DEPS = stamp-ip2k
+LM32_DEPS = stamp-lm32
 M32C_DEPS = stamp-m32c
 M32R_DEPS = stamp-m32r
 FR30_DEPS = stamp-fr30
@@ -454,6 +469,7 @@ XC16X_DEPS = stamp-xc16x
 XSTORMY16_DEPS = stamp-xstormy16
 else
 IP2K_DEPS =
+LM32_DEPS = 
 M32C_DEPS =
 M32R_DEPS =
 FR30_DEPS =
@@ -487,6 +503,14 @@ $(srcdir)/ip2k-desc.h $(srcdir)/ip2k-desc.c $(srcdir)/ip2k-opc.h $(srcdir)/ip2k-
 stamp-ip2k: $(CGENDEPS) $(CPUDIR)/ip2k.cpu $(CPUDIR)/ip2k.opc
 	$(MAKE) run-cgen arch=ip2k prefix=ip2k options= \
 		archfile=$(CPUDIR)/ip2k.cpu opcfile=$(CPUDIR)/ip2k.opc extrafiles=
+
+$(srcdir)lm32-desc.h $(srcdir)/lm32-desc.c $(srcdir)/lm32-opc.h $(srcdir)/lm32-opc.c $(srcdir)/lm32-ibld.c $(srcdir)/lm32-opinst.c $(srcdir)/lm32-asm.c $(srcdir)/lm32-dis.c: $(LM32_DEPS)
+	@true
+stamp-lm32: $(CGENDEPS) $(srcdir)/../cpu/lm32.cpu $(srcdir)/../cpu/lm32.opc
+	$(MAKE) run-cgen arch=lm32 prefix=lm32 options=opinst \
+		archfile=$(srcdir)/../cpu/lm32.cpu \
+		opcfile=$(srcdir)/../cpu/lm32.opc \
+		extrafiles=opinst
 
 $(srcdir)/m32c-desc.h $(srcdir)/m32c-desc.c $(srcdir)/m32c-opc.h $(srcdir)/m32c-opc.c $(srcdir)/m32c-ibld.c $(srcdir)/m32c-asm.c $(srcdir)/m32c-dis.c: $(M32C_DEPS)
 #	@true
@@ -872,6 +896,26 @@ iq2000-opc.lo: iq2000-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h iq2000-desc.h $(INCDIR)/opcode/cgen-bitset.h \
   $(INCDIR)/opcode/cgen.h $(INCDIR)/opcode/cgen-bitset.h \
   iq2000-opc.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h
+lm32-asm.lo: lm32-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h lm32-desc.h $(INCDIR)/opcode/cgen.h \
+  lm32-opc.h opintl.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
+lm32-desc.lo: lm32-desc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h lm32-desc.h $(INCDIR)/opcode/cgen.h \
+  lm32-opc.h opintl.h $(INCDIR)/libiberty.h $(INCDIR)/xregex.h \
+  $(INCDIR)/xregex2.h
+lm32-dis.lo: lm32-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
+  lm32-desc.h $(INCDIR)/opcode/cgen.h lm32-opc.h opintl.h
+lm32-ibld.lo: lm32-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h lm32-desc.h \
+  $(INCDIR)/opcode/cgen.h lm32-opc.h opintl.h $(INCDIR)/safe-ctype.h
+lm32-opc.lo: lm32-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h lm32-desc.h $(INCDIR)/opcode/cgen.h \
+  lm32-opc.h $(INCDIR)/libiberty.h
+lm32-opinst.lo: lm32-opinst.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h lm32-desc.h $(INCDIR)/opcode/cgen.h \
+  lm32-opc.h
 m32c-asm.lo: m32c-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h m32c-desc.h $(INCDIR)/opcode/cgen-bitset.h \
   $(INCDIR)/opcode/cgen.h $(INCDIR)/opcode/cgen-bitset.h \

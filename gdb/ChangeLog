@@ -1,3 +1,483 @@
+2008-12-26  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* breakpoint.c (update_watchpoint): Refactor to avoid compiler
+	warning.
+
+2008-12-22  Tom Tromey  <tromey@redhat.com>
+
+	* stack.c (print_block_frame_locals): Print spaces, not tabs.
+	Update for call to print_variable_and_value.
+	(print_frame_arg_vars): Update.
+	* value.h (print_variable_and_value): Rename from
+	print_variable_value.  Add 'name' and 'indent' parameters.
+	* printcmd.c (print_variable_and_value): Rename from
+	print_variable_value.  Add 'name' and 'indent' parameters.  Use
+	common_val_print.
+	* f-valprint.c (info_common_command): Update.
+
+2008-12-22  Tom Tromey  <tromey@redhat.com>
+
+	* python/python-value.c (valpy_length): Remove #if.
+
+2008-12-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* python/python-internal.h (PyEval_ReleaseLock): New define.
+	
+2008-12-22  Tom Tromey  <tromey@redhat.com>
+
+	* c-exp.y (ident_tokens): New global.
+	(struct token) <cxx_only>: New field.
+	(tokentab3): Update.
+	(tokentab2): Update.
+	(yylex): Use ident_tokens.
+
+2008-12-22  Adam Denton  <adenton@yahoo.com>
+
+	PR gdb/8307:
+	* environ.c (free_environ): Free e->vector.
+
+2008-12-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix memory double-free.
+	* completer.c (line_completion_function): Clear LIST after called xfree.
+
+2008-12-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (update_watchpoint): Adjust and extend the description
+	of this function.  Fix one error message accordingly.
+
+2008-12-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix hw watchpoints created before the inferior was started.
+	* breakpoint.c (update_watchpoint): Convert the bp_watchpoint and
+	bp_hardware_watchpoint types according to the current runtime state.
+
+2008-12-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_child_follow_fork): If following the child,
+	and not detaching the parent, also add the child fork to the fork
+	list.
+	* linux-fork.c (linux_fork_context): Remove dead error call.
+	Assert that the incoming newfp argument is not null.  Do not add a
+	new fork for inferior_ptid.  Assert that there is one already.
+
+2008-12-16  Tristan Gingold  <gingold@adacore.com>
+
+	* inflow.c: Remove old_sigio, handle_sigio, old_fcntl_flags,
+	set_sigio_trap, clear_sigio_trap definitions.
+	* inferior.h: Remove set_sigio_trap and clear_sigio_trap declarations.
+	* inf-ptrace.c (inf_ptrace_wait): Remove call to set_sigio_trap
+	and clear_sigio_trap.
+	* inf-ttrace.c (inf_ttrace_wait): Ditto.
+	* linux-nat.c (linux_nat_wait): Ditto.
+	* spu-linux-nat.c (spu_child_wait): Ditto.
+	* rs6000-nat.c (rs6000_wait): Ditto.
+	* target.c: Remove target_activity_function and target_activity_fd.
+	* target.h: Remove target_activity_function and target_activity_fd
+	declarations.
+
+2008-12-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* dbxread.c (read_ofile_symtab): Sign-extend 32-bit N_LSYM and
+	N_PSYM STABS values for 64-bit GDB.
+
+2008-12-15  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf2expr.c (execute_stack_op): Handle DW_OP_swap.
+
+2008-12-15  Jerome Guitton  <guitton@adacore.com>
+
+	* ada-lang.c (ada_value_slice_ptr): Rename to...
+	(ada_value_slice_from_ptr): ... this. Return a lazy value instead
+	of a reference.	Update comment.
+	(ada_value_struct_elt): Ditto if arg is a pointer or a reference.
+	Update comment as well.
+	(ada_evaluate_subexp): Update use of ada_value_slice_ptr.
+
+2008-12-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* gnu-v3-abi.c (vtable_ptrdiff_type): New function.
+	(gnuv3_decode_method_ptr, gnuv3_print_method_ptr)
+	(gnuv3_method_ptr_to_value): Use a better approximation for
+	`ptrdiff_t' instead of `long'.
+
+2008-12-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* m32c-tdep.c (m32c_gdbarch_init): Call set_gdbarch_vbit_in_delta().
+	(m32c_push_dummy_call): Dereference pointer type.
+
+2008-12-12  Tom Tromey  <tromey@redhat.com>
+
+	PR cli/2563:
+	* cli/cli-decode.c (delete_cmd): Add hook-related out parameters.
+	(add_cmd): Update.  Install hooks into new command.
+	(add_alias_cmd): Update.
+
+2008-12-11  Tom Tromey  <tromey@redhat.com>
+
+	* macroexp.c (get_pp_number): Require digit after leading ".".
+	Correctly handle suffixes.
+
+2008-12-11  Tom Tromey  <tromey@redhat.com>
+
+	* macrocmd.c (macro_define_command): Skip whitespace after
+	macro name.
+	(print_one_macro): Print space after macro name.
+
+2008-12-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Correctly tag non-executing
+	threads in multi-process.
+	(normal_stop): Correctly tag stopped threads in multi-process.
+
+2008-12-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (extended_remote_mourn_1): Always call
+	generic_mourn_inferior.
+
+2008-12-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_detach_1): Don't delete the inferior here.
+	(process_stop_reply): Ditto.
+	(extended_remote_kill): Ditto.
+
+2008-12-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (read_ptid): If we don't know about any inferior yet,
+	use the pid of magic_null_ptid.
+	(remote_start_remote): In the non-stop mode case, don't set
+	inferior_ptid to magic_null_ptid here.
+
+2008-12-11  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (step_1): Use step_once in the synchronous case too.
+	(step_1_continuation): Wrap line.
+	(step_once): Adjust comment.  Only install the continuation in
+	async mode.
+
+2008-12-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): On a TARGET_WAITKIND_EXITED or
+	TARGET_WAITKIND_SIGNALLED, switch inferior_ptid to the event ptid.
+	* linux_thread_db.c (thread_db_wait): On a TARGET_WAITKIND_EXITED
+	or TARGET_WAITKIND_SIGNALLED, return the ptid the beneath target
+	returned.
+	* inf-ptrace.c (inf_ptrace_wait): Return inferior_ptid instead of
+	minus_one_ptid if the inferior disappeared.
+	* rs6000-nat.c (rs6000_wait): Likewise.
+	* spu-linux-nat.c (spu_child_wait): Likewise.
+
+2008-12-11  Tom Tromey  <tromey@redhat.com>
+
+	PR macros/2564:
+	* c-exp.y (macro_original_text, expansion_obstack,
+	expression_macro_scope): New globals.
+	(scan_macro_expansion): New function.
+	(scanning_macro_expansion): Likewise.
+	(finished_macro_expansion): Likewise.
+	(scan_macro_cleanup): Likewise.
+	(c_parse): Find macro scope.  Initialize obstack.
+	* c-lang.h (scan_macro_expansion, scanning_macro_expansion,
+	finished_macro_expansion, expression_macro_lookup_func,
+	expression_macro_lookup_baton): Remove.
+	* c-lang.c (scan_macro_expansion, scanning_macro_expansion,
+	finished_macro_expansion, expression_macro_lookup_func,
+	expression_macro_lookup_baton): Remove.
+	(macro_original_text, macro_expanded_text,
+	c_preprocess_and_parse): Remove.
+	(c_language_defn, cplus_language_defn, asm_language_defn,
+	minimal_language_defn): Use c_parse.
+
+2008-12-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (until_next_command, finish_backward): Use get_frame_pc
+	instead of read_pc.
+
+2008-12-09  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/1815:
+	* cli/cli-decode.c (delete_cmd): Forward declare.
+	(delete_cmd): Now static.  Change return type.  Remove command
+	from alias chain.  Rewrite.
+	(add_cmd): Initialize new fields.  Update cmd_pointer on all
+	aliases.
+	(add_alias_cmd): Put command on alias chain.
+	* command.h (delete_cmd): Don't declare.
+	* cli/cli-decode.h (delete_cmd): Don't declare.
+	(struct cmd_list_element) <aliases, alias_chain>: New fields.
+
+2008-12-09  Tom Tromey  <tromey@redhat.com>
+
+	* config.in, configure: Rebuild.
+	* configure.ac: Check for locale.h, setlocale.  Call
+	AM_LC_MESSAGES.
+	* acinclude.m4: Include lcmessage.m4.
+
+2008-12-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote.c (remote_parse_stop_reply): Use REG only after its NULL check.
+
+2008-12-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* python/python-value.c (values_in_python): Add specific initialization
+	to NULL to work-around a MacOS linker bug.
+
+2008-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix loc_type of `bp_location's created by update_watchpoint.
+	* breakpoint.c (allocate_bp_location): Remove the bp_type parameter.
+	Replace bp_type by bpt->type.  Update prototype.  All callers updated.
+	(add_location_to_breakpoint):  Remove the bp_type parameter.
+	Replace bp_type by b->type.  All callers updated.
+	(set_breakpoint_location_function): Replace bptype by b->type.
+
+2008-12-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (update_global_location_list): Fix the comment.
+
+2008-12-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (step_1, step_once): Look up the stepping range based
+	on the current frame's PC, not on stop_pc.
+
+2008-12-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compilation on 32-bit host configurations.
+	* ia64-tdep.c (ia64_breakpoint_from_pc): Suffix a constant by `LL'.
+
+2008-12-05  Tristan Gingold  <gingold@adacore.com>
+
+	* i386-darwin-nat.c (i386_darwin_sstep_at_sigreturn): New function.
+	(amd64_darwin_sstep_at_sigreturn): New function.
+	(darwin_set_sstep): The sigreturn is a special case: the trace flag
+	must be set in the mcontext structure.
+
+2008-12-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (step_once): Remove dead code.
+
+2008-12-04  Doug Evans  <dje@google.com>
+
+	* infcall.c (call_function_by_hand): Clean up use of local dummy_addr.
+
+2008-12-02  Doug Evans  <dje@google.com>
+
+	* infrun.c (handle_inferior_event): Remove redundant resetting of
+	stepping_past_singlestep_breakpoint.
+
+2008-12-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.h (target_get_osdata): Describe.
+	* osdata.h (make_cleanup_osdata_free): Declare.
+	* osdata.c (osdata_item_clear): Define even if HAVE_LIBEXPAT is
+	not defined.
+	(osdata_free_cleanup): New.
+	(make_cleanup_osdata_free): New.
+	(get_osdata): Fix leak.
+	(info_osdata_command): Use make_cleanup_osdata_free.
+	(info_processes_command): Delete.
+	(_initialize_osdata): Drop undocumented "info processes" alias.
+	* mi/mi-main.c (mi_cmd_list_thread_groups): Fix leak.
+
+2008-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix resolving external references to TLS variables.
+	* findvar.c: Include `objfiles.h'.
+	(read_var_value <LOC_UNRESOLVED>): New variable `obj_section'.  Handle
+	SEC_THREAD_LOCAL variables.
+	* printcmd.c (address_info <LOC_UNRESOLVED>): Handle SEC_THREAD_LOCAL
+	variables.
+
+2008-12-02  Doug Evans  <dje@google.com>
+
+	* infrun.c (handle_inferior_event): Delete unused local tp.
+
+2008-12-02  Pedro Alves  <pedro@codesourcery.com>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement -list-thread-groups --available
+
+        * Makefile.in (XMLFILES): Add osdata.dtd.
+        (SFILES): Add osdata.c.
+        (COMMON_OBS): Add osdata.o.
+        * linux-nat.c: Include pwd.h, sys/types.h, gdb_dirent.h and xml-support.h.
+        (linux_nat_xfer_osdata): New function.
+        (linux_xfer_partial): Handle TARGET_OBJECT_OSDATA.
+        * osdata.c: New file.
+        * osdata.h: New file.
+        * remote.c (PACKET_qXfer_osdata): New packet enum.
+        (remote_protocol_features): Add "qXfer:osdata:read".
+        (remote_read_qxfer): Handle TARGET_OBJECT_OSDATA.
+        (extended_remote_can_run): New.
+        (init_extended_remote_ops): Set to_can_run to
+        extended_remote_can_run.
+        (_initialize_remote): Add packet config command for
+        "qXfer:osdata:read".
+        * xml-support.c (obstack_xml_printf): New function.
+        * xml-support.h (obstack_xml_printf): Declare.
+        * target.c (target_get_osdata): New function.
+        * target.h (enum target_object): Add TARGET_OBJECT_OSDATA.
+        (target_os_data): Declare.
+        * features/osdata.dtd: New file.
+        * mi/mi-main.c (mi_list_thread_groups): Handle the --available
+        option.
+
+2008-12-01  Doug Evans  <dje@google.com>
+
+	* infrun.c (proceed): Delete unused local stop_signal.
+
+2008-11-27  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add entry for new native configuration: Darwin.
+	* configure.host: Add Darwin host.
+	* configure.tgt: Add Darwin target.
+	* defs.h (enum gdb_osabi): Add GDB_OSABI_DARWIN.
+	* osabi.c (gdb_osabi_names): Add name for Darwin abi.
+	* i386-darwin-nat.c: New file.
+	* i386-darwin-tdep.c: New file.
+	* machoread.c: New file.
+	* darwin-nat-info.c: New file.
+	* darwin-nat.c: New file.
+	* darwin-nat.h: New file.
+	* darwin.defs: New file.
+	* config/i386/darwin.mh: New file.
+
+2008-11-26  Tristan Gingold  <gingold@adacore.com>
+
+	* MAINTAINERS: Add myself for write after approval privileges.
+
+2008-11-26  Jerome Guitton  <guitton@adacore.com>
+
+	* value.h (allocate_value_lazy): New function declaration.
+	(value_free): Remove macro, make it a function.
+	* value.c (value): Move actual content outside of the memory space
+	of the struct; add a pointer to this actual content.
+	(allocate_value_lazy, allocate_value_contents): New function.
+	(allocate_value): Reimplement using these two new functions.
+	(value_contents_raw, value_contents_all_raw): If no memory
+	has been allocated yet for the actual content, allocate it.
+	(value_contents_all): Resync with struct value's changes.
+	(value_free): New function.
+	(value_copy, value_primitive_field): Use new function
+	allocate_value_lazy to allocate lazy values.
+	(value_change_enclosing_type): Resync with struct value's changes.
+	As the value is not reallocated, remove the special handling for
+	the value chain (now obsolete).
+	* valops.c (value_at_lazy): Use new function allocate_value_lazy.
+	(value_fetch_lazy): Allocate value content. Use allocate_value_lazy
+	to allocate lazy values.
+	(value_slice): Use allocate_value_lazy to allocate lazy values.
+
+2008-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix automatic restoration of breakpoints memory for ia64.
+	* ia64-tdep.c: New #if check on BREAKPOINT_MAX vs. BUNDLE_LEN.  
+	(ia64_memory_insert_breakpoint): New comment part for SHADOW_CONTENTS
+	content.  Remove variable instr.  New variable cleanup.  Disable
+	automatic breakpoints restoration.  PLACED_SIZE and SHADOW_LEN are now
+	set larger, to BUNDLE_LEN - 2.  Variable `bundle' type update.  Return
+	error if even just final target_write_memory has failed.
+	(ia64_memory_remove_breakpoint): Rename variables bundle to bundle_mem
+	and instr to instr_saved.  New variables bundle_saved and
+	instr_breakpoint.  Comment new reasons why we need to disable automatic
+	restoration of breakpoints.  Assert PLACED_SIZE and SHADOW_LEN.  New
+	check of the original memory content.  Return error if even just final
+	target_write_memory has failed.
+	(ia64_breakpoint_from_pc): Implement the emulation of permanent
+	breakpoints compatible with current bp_loc_is_permanent.
+	(template_encoding_table): Make it `const'.
+	* breakpoint.c (bp_loc_is_permanent): Support unsupported software
+	breakpoints.  New variables `cleanup' and `retval'.
+
+2008-11-24  Tom Tromey  <tromey@redhat.com>
+
+	* ada-lang.c (value_from_contents_and_address): Move...
+	* value.c: ... here.
+	* ada-lang.h (value_from_contents_and_address): Move
+	declaration...
+	* value.h: ... here.
+
+2008-11-24  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* valprint.c (val_print_array_elements): Pass correct
+	element address to val_print.
+	
+2008-11-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix access of an already freed memory.
+	* parse.c (parse_field_expression): Call xstrdup on `*name'.
+	* completer.c (expression_completer): Free fieldname.
+
+2008-11-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/2474
+	* remote.c (remote_read_description_p): New function.
+	(remote_start_remote): Try to fetch the target description
+	before adding shared libraries.  Try again later if the
+	target is running but stopped.
+	(remote_open_1): Mark extended targets as exited by default.
+	(remote_read_description): Check target_has_execution.
+
+2008-11-24  Jerome Guitton  <guitton@adacore.com>
+
+	* alpha-mdebug-tdep.c (alpha_mdebug_frame_unwind_cache): Use
+        the frame address in block instead of the return address to
+        locate the mdebug PDR of the frame.
+
+2008-11-21  Joel Brobecker  <brobecker@adacore.com>
+
+	Remove the unused BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK.
+
+	* breakpoint.h (enum bpstat_what_main_action): Remove
+	BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK.
+	* breakpoint.c (bpstat_what): Delete catch_shlib_event from enum class.
+	Remove the BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK column from
+	variable table.
+	* infrun.c (wait_for_inferior): Remove handling of
+	BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK.
+
+2008-11-21  Tom Tromey  <tromey@redhat.com>
+
+	* configure: Rebuild.
+	* configure.ac: Merge calls to AC_CHECK_FUNCS, AC_CHECK_HEADERS,
+	AC_CHECK_DECLS, and AC_CHECK_MEMBERS.
+
+2008-11-21  Tom Tromey  <tromey@redhat.com>
+
+	* python/python-internal.h (PyGILState_Ensure): New define.
+	(PyGILState_Release): Likewise.
+	(PyEval_InitThreads): Likewise.
+	(PyThreadState_Swap): Likewise.
+	(PyEval_InitThreads): Likewise.
+	* python/python.c (_initialize_python): Initialize threads.
+	Release GIL.
+	(eval_python_from_control_command): Acquire GIL.
+	(python_command): Likewise.
+	* python/python-internal.h (make_cleanup_py_restore_gil):
+	Declare.
+	* python/python-utils.c (py_gil_restore): New function.
+	(make_cleanup_py_restore_gil): Likewise.
+
+2008-11-20  Doug Evans  <dje@google.com>
+
+	* frame.c (frame_debug_got_null_frame): Remove file arg.
+	All callers updated.
+
+2008-11-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (resume): If following a fork, also reset regcache,
+	gdbarch and pc.
+
+2008-11-20  Doug Evans  <dje@google.com>
+
+	* printcmd.c (sym_info): Don't print the offset if it's zero.
+
+2008-11-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (resume): If following a fork, reread the current
+	thread.  Avoid dereferencing a possibly dangling pointer.
+
 2008-11-19  Doug Evans  <dje@google.com>
 
 	* inferior.h (proceed_to_finish): Delete, unused.

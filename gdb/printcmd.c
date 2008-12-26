@@ -1013,6 +1013,8 @@ sym_info (char *arg, int from_tty)
 	&& (msymbol = lookup_minimal_symbol_by_pc_section (sect_addr, osect)))
       {
 	const char *obj_name, *mapped, *sec_name, *msym_name;
+	char *loc_string;
+	struct cleanup *old_chain;
 
 	matches = 1;
 	offset = sect_addr - SYMBOL_VALUE_ADDRESS (msymbol);
@@ -1020,43 +1022,55 @@ sym_info (char *arg, int from_tty)
 	sec_name = osect->the_bfd_section->name;
 	msym_name = SYMBOL_PRINT_NAME (msymbol);
 
+	/* Don't print the offset if it is zero.
+	   We assume there's no need to handle i18n of "sym + offset".  */
+	if (offset)
+	  xasprintf (&loc_string, "%s + %u", msym_name, offset);
+	else
+	  xasprintf (&loc_string, "%s", msym_name);
+
+	/* Use a cleanup to free loc_string in case the user quits
+	   a pagination request inside printf_filtered.  */
+	old_chain = make_cleanup (xfree, loc_string);
+
 	gdb_assert (osect->objfile && osect->objfile->name);
 	obj_name = osect->objfile->name;
 
 	if (MULTI_OBJFILE_P ())
 	  if (pc_in_unmapped_range (addr, osect))
 	    if (section_is_overlay (osect))
-	      printf_filtered (_("%s + %u in load address range of "
+	      printf_filtered (_("%s in load address range of "
 				 "%s overlay section %s of %s\n"),
-			       msym_name, offset,
-			       mapped, sec_name, obj_name);
+			       loc_string, mapped, sec_name, obj_name);
 	    else
-	      printf_filtered (_("%s + %u in load address range of "
+	      printf_filtered (_("%s in load address range of "
 				 "section %s of %s\n"),
-			       msym_name, offset, sec_name, obj_name);
+			       loc_string, sec_name, obj_name);
 	  else
 	    if (section_is_overlay (osect))
-	      printf_filtered (_("%s + %u in %s overlay section %s of %s\n"),
-			       msym_name, offset, mapped, sec_name, obj_name);
+	      printf_filtered (_("%s in %s overlay section %s of %s\n"),
+			       loc_string, mapped, sec_name, obj_name);
 	    else
-	      printf_filtered (_("%s + %u in section %s of %s\n"),
-			       msym_name, offset, sec_name, obj_name);
+	      printf_filtered (_("%s in section %s of %s\n"),
+			       loc_string, sec_name, obj_name);
 	else
 	  if (pc_in_unmapped_range (addr, osect))
 	    if (section_is_overlay (osect))
-	      printf_filtered (_("%s + %u in load address range of %s overlay "
+	      printf_filtered (_("%s in load address range of %s overlay "
 				 "section %s\n"),
-			       msym_name, offset, mapped, sec_name);
+			       loc_string, mapped, sec_name);
 	    else
-	      printf_filtered (_("%s + %u in load address range of section %s\n"),
-			       msym_name, offset, sec_name);
+	      printf_filtered (_("%s in load address range of section %s\n"),
+			       loc_string, sec_name);
 	  else
 	    if (section_is_overlay (osect))
-	      printf_filtered (_("%s + %u in %s overlay section %s\n"),
-			       msym_name, offset, mapped, sec_name);
+	      printf_filtered (_("%s in %s overlay section %s\n"),
+			       loc_string, mapped, sec_name);
 	    else
-	      printf_filtered (_("%s + %u in section %s\n"),
-			       msym_name, offset, sec_name);
+	      printf_filtered (_("%s in section %s\n"),
+			       loc_string, sec_name);
+
+	do_cleanups (old_chain);
       }
   }
   if (matches == 0)
@@ -1227,16 +1241,25 @@ address_info (char *exp, int from_tty)
 	else
 	  {
 	    section = SYMBOL_OBJ_SECTION (msym);
-	    printf_filtered (_("static storage at address "));
 	    load_addr = SYMBOL_VALUE_ADDRESS (msym);
-	    fputs_filtered (paddress (load_addr), gdb_stdout);
-	    if (section_is_overlay (section))
+
+	    if (section
+		&& (section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
+	      printf_filtered (_("a thread-local variable at offset %s "
+				 "in the thread-local storage for `%s'"),
+			       paddr_nz (load_addr), section->objfile->name);
+	    else
 	      {
-		load_addr = overlay_unmapped_address (load_addr, section);
-		printf_filtered (_(",\n -- loaded at "));
+		printf_filtered (_("static storage at address "));
 		fputs_filtered (paddress (load_addr), gdb_stdout);
-		printf_filtered (_(" in overlay section %s"),
-				 section->the_bfd_section->name);
+		if (section_is_overlay (section))
+		  {
+		    load_addr = overlay_unmapped_address (load_addr, section);
+		    printf_filtered (_(",\n -- loaded at "));
+		    fputs_filtered (paddress (load_addr), gdb_stdout);
+		    printf_filtered (_(" in overlay section %s"),
+				     section->the_bfd_section->name);
+		  }
 	      }
 	  }
       }
@@ -1708,17 +1731,28 @@ disable_display_command (char *args, int from_tty)
 
 
 /* Print the value in stack frame FRAME of a variable specified by a
-   struct symbol.  */
+   struct symbol.  NAME is the name to print; if NULL then VAR's print
+   name will be used.  STREAM is the ui_file on which to print the
+   value.  INDENT specifies the number of indent levels to print
+   before printing the variable name.  */
 
 void
-print_variable_value (struct symbol *var, struct frame_info *frame,
-		      struct ui_file *stream)
+print_variable_and_value (const char *name, struct symbol *var,
+			  struct frame_info *frame,
+			  struct ui_file *stream, int indent)
 {
-  struct value *val = read_var_value (var, frame);
+  struct value *val;
   struct value_print_options opts;
 
+  if (!name)
+    name = SYMBOL_PRINT_NAME (var);
+
+  fprintf_filtered (stream, "%s%s = ", n_spaces (2 * indent), name);
+
+  val = read_var_value (var, frame);
   get_user_print_options (&opts);
-  value_print (val, stream, &opts);
+  common_val_print (val, stream, indent, &opts, current_language);
+  fprintf_filtered (stream, "\n");
 }
 
 static void

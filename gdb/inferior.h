@@ -97,10 +97,6 @@ extern void set_sigint_trap (void);
 
 extern void clear_sigint_trap (void);
 
-extern void set_sigio_trap (void);
-
-extern void clear_sigio_trap (void);
-
 /* Set/get file name for default use for standard in/out in the inferior.  */
 
 extern void set_inferior_io_terminal (const char *terminal_name);

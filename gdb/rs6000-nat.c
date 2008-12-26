@@ -525,7 +525,6 @@ rs6000_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   do
     {
       set_sigint_trap ();
-      set_sigio_trap ();
 
       do
 	{
@@ -534,7 +533,6 @@ rs6000_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	}
       while (pid == -1 && errno == EINTR);
 
-      clear_sigio_trap ();
       clear_sigint_trap ();
 
       if (pid == -1)
@@ -546,7 +544,7 @@ rs6000_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  /* Claim it exited with unknown signal.  */
 	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
 	  ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
-	  return minus_one_ptid;
+	  return inferior_ptid;
 	}
 
       /* Ignore terminated detached child processes.  */

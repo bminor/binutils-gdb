@@ -4,7 +4,7 @@ AutoGen definitions Makefile.tpl;
 // Makefile.in is generated from Makefile.tpl by 'autogen Makefile.def'.
 // This file was originally written by Nathanael Nerode.
 //
-//   Copyright 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation
+//   Copyright 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation
 //
 // This file is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -65,6 +65,16 @@ host_modules= { module= gmp; lib_path=.libs; bootstrap=true;
 		target="none-${host_vendor}-${host_os}"; };
 host_modules= { module= mpfr; lib_path=.libs; bootstrap=true;
 		extra_configure_flags='--disable-shared --with-gmp-build=$$r/$(HOST_SUBDIR)/gmp';
+		no_install= true; 
+	        host="none-${host_vendor}-${host_os}";
+		target="none-${host_vendor}-${host_os}"; };
+host_modules= { module= ppl; lib_path=.libs; bootstrap=true;
+		extra_configure_flags='--disable-shared --with-libgmp-prefix=$$r/$(HOST_SUBDIR)/gmp/ --with-libgmpxx-prefix=$$r/$(HOST_SUBDIR)/gmp/';
+		no_install= true; 
+	        host="none-${host_vendor}-${host_os}";
+		target="none-${host_vendor}-${host_os}"; };
+host_modules= { module= cloog; lib_path=.libs; bootstrap=true;
+		extra_configure_flags='--disable-shared --with-gmp-library=$$r/$(HOST_SUBDIR)/gmp/.libs --with-gmp-include=$$r/$(HOST_SUBDIR)/gmp --with-ppl=$$r/$(HOST_SUBDIR)/ppl/ --with-bits=gmp';
 		no_install= true; 
 	        host="none-${host_vendor}-${host_os}";
 		target="none-${host_vendor}-${host_os}"; };
@@ -295,6 +305,8 @@ dependencies = { module=all-gcc; on=all-libiberty; hard=true; };
 dependencies = { module=all-gcc; on=all-gmp; };
 dependencies = { module=all-gcc; on=all-intl; };
 dependencies = { module=all-gcc; on=all-mpfr; };
+dependencies = { module=all-gcc; on=all-ppl; };
+dependencies = { module=all-gcc; on=all-cloog; };
 dependencies = { module=all-gcc; on=all-build-texinfo; };
 dependencies = { module=all-gcc; on=all-build-bison; };
 dependencies = { module=all-gcc; on=all-build-byacc; };
@@ -318,6 +330,9 @@ dependencies = { module=all-fixincludes; on=all-libiberty; };
 dependencies = { module=all-gnattools; on=all-target-libada; };
 
 dependencies = { module=configure-mpfr; on=all-gmp; };
+dependencies = { module=configure-ppl; on=all-gmp; };
+dependencies = { module=configure-ppl; on=all-mpfr; };
+dependencies = { module=configure-cloog; on=all-ppl; };
 
 // Host modules specific to gdb.
 dependencies = { module=configure-gdb; on=all-intl; };
@@ -481,6 +496,7 @@ lang_env_dependencies = { module=libgcc; no_gcc=true; no_c=true; };
 lang_env_dependencies = { module=libiberty; no_c=true; };
 
 dependencies = { module=configure-target-boehm-gc; on=configure-target-qthreads; };
+dependencies = { module=configure-target-boehm-gc; on=all-target-libstdc++-v3; };
 dependencies = { module=configure-target-fastjar; on=configure-target-zlib; };
 dependencies = { module=all-target-fastjar; on=all-target-zlib; };
 dependencies = { module=all-target-fastjar; on=all-target-libiberty; };

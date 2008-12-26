@@ -27,9 +27,14 @@ main (void)
 
 #else
 void
+bar (void)
+  {
+  }
+
+void
 foo (void)
   {
-    /* Break here  */
+    bar(); /* Break here  */
   }
 
 #endif

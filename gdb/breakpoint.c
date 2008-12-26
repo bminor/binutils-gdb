@@ -181,8 +181,7 @@ static int single_step_breakpoint_inserted_here_p (CORE_ADDR pc);
 
 static void free_bp_location (struct bp_location *loc);
 
-static struct bp_location *
-allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type);
+static struct bp_location *allocate_bp_location (struct breakpoint *bpt);
 
 static void update_global_location_list (int);
 
@@ -809,9 +808,11 @@ fetch_watchpoint_value (struct expression *exp, struct value **valp,
     }
 }
 
-/* Assuming that B is a hardware watchpoint:
-   - Reparse watchpoint expression, is REPARSE is non-zero
+/* Assuming that B is a watchpoint:
+   - Reparse watchpoint expression, if REPARSE is non-zero
    - Evaluate expression and store the result in B->val
+   - Evaluate the condition if there is one, and store the result
+     in b->loc->cond.
    - Update the list of values that must be watched in B->loc.
 
    If the watchpoint is disabled, do nothing.  If this is
@@ -824,10 +825,9 @@ update_watchpoint (struct breakpoint *b, int reparse)
   struct bp_location *loc;
   bpstat bs;
 
-  /* We don't free locations.  They are stored in
-     bp_location_chain and update_global_locations will
-     eventually delete them and remove breakpoints if
-     needed.  */
+  /* We don't free locations.  They are stored in bp_location_chain and
+     update_global_locations will eventually delete them and remove
+     breakpoints if needed.  */
   b->loc = NULL;
 
   if (b->disposition == disp_del_at_next_stop)
@@ -892,6 +892,31 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	  b->val_valid = 1;
 	}
 
+	/* Change the type of breakpoint between hardware assisted or an
+	   ordinary watchpoint depending on the hardware support and free
+	   hardware slots.  REPARSE is set when the inferior is started.  */
+	if ((b->type == bp_watchpoint || b->type == bp_hardware_watchpoint)
+	    && reparse)
+	  {
+	    int i, mem_cnt, other_type_used;
+
+	    i = hw_watchpoint_used_count (bp_hardware_watchpoint,
+					  &other_type_used);
+	    mem_cnt = can_use_hardware_watchpoint (val_chain);
+
+	    if (!mem_cnt)
+	      b->type = bp_watchpoint;
+	    else
+	      {
+		int target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT
+		  (bp_hardware_watchpoint, i + mem_cnt, other_type_used);
+		if (target_resources_ok <= 0)
+		  b->type = bp_watchpoint;
+		else
+		  b->type = bp_hardware_watchpoint;
+	      }
+	  }
+
       /* Look at each value on the value chain.  */
       for (v = val_chain; v; v = next)
 	{
@@ -924,7 +949,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
 		  else if (b->type == bp_access_watchpoint)
 		    type = hw_access;
 		  
-		  loc = allocate_bp_location (b, bp_hardware_watchpoint);
+		  loc = allocate_bp_location (b);
 		  for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
 		    ;
 		  *tmp = loc;
@@ -952,7 +977,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
   else if (!within_current_scope)
     {
       printf_filtered (_("\
-Hardware watchpoint %d deleted because the program has left the block \n\
+Watchpoint %d deleted because the program has left the block \n\
 in which its expression is valid.\n"),
 		       b->number);
       if (b->related_breakpoint)
@@ -3054,9 +3079,6 @@ bpstat_what (bpstat bs)
       /* We hit the shared library event breakpoint.  */
       shlib_event,
 
-      /* We caught a shared library event.  */
-      catch_shlib_event,
-
       /* This is just used to count how many enums there are.  */
       class_last
     };
@@ -3072,7 +3094,6 @@ bpstat_what (bpstat bs)
 #define clr BPSTAT_WHAT_CLEAR_LONGJMP_RESUME
 #define sr BPSTAT_WHAT_STEP_RESUME
 #define shl BPSTAT_WHAT_CHECK_SHLIBS
-#define shlr BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK
 
 /* "Can't happen."  Might want to print an error message.
    abort() is not out of the question, but chances are GDB is just
@@ -3093,14 +3114,13 @@ bpstat_what (bpstat bs)
      back and decide something of a lower priority is better.  The
      ordering is:
 
-     kc   < clr sgl shl shlr slr sn sr ss
-     sgl  < shl shlr slr sn sr ss
-     slr  < err shl shlr sn sr ss
-     clr  < err shl shlr sn sr ss
-     ss   < shl shlr sn sr
-     sn   < shl shlr sr
-     shl  < shlr sr
-     shlr < sr
+     kc   < clr sgl shl slr sn sr ss
+     sgl  < shl slr sn sr ss
+     slr  < err shl sn sr ss
+     clr  < err shl sn sr ss
+     ss   < shl sn sr
+     sn   < shl sr
+     shl  < sr
      sr   <
 
      What I think this means is that we don't need a damned table
@@ -3117,30 +3137,28 @@ bpstat_what (bpstat bs)
     table[(int) class_last][(int) BPSTAT_WHAT_LAST] =
   {
   /*                              old action */
-  /*       kc    ss    sn    sgl    slr   clr   sr   shl   shlr
+  /*       kc    ss    sn    sgl    slr   clr   sr   shl
    */
 /*no_effect */
-    {kc, ss, sn, sgl, slr, clr, sr, shl, shlr},
+    {kc, ss, sn, sgl, slr, clr, sr, shl},
 /*wp_silent */
-    {ss, ss, sn, ss, ss, ss, sr, shl, shlr},
+    {ss, ss, sn, ss, ss, ss, sr, shl},
 /*wp_noisy */
-    {sn, sn, sn, sn, sn, sn, sr, shl, shlr},
+    {sn, sn, sn, sn, sn, sn, sr, shl},
 /*bp_nostop */
-    {sgl, ss, sn, sgl, slr, slr, sr, shl, shlr},
+    {sgl, ss, sn, sgl, slr, slr, sr, shl},
 /*bp_silent */
-    {ss, ss, sn, ss, ss, ss, sr, shl, shlr},
+    {ss, ss, sn, ss, ss, ss, sr, shl},
 /*bp_noisy */
-    {sn, sn, sn, sn, sn, sn, sr, shl, shlr},
+    {sn, sn, sn, sn, sn, sn, sr, shl},
 /*long_jump */
-    {slr, ss, sn, slr, slr, err, sr, shl, shlr},
+    {slr, ss, sn, slr, slr, err, sr, shl},
 /*long_resume */
-    {clr, ss, sn, err, err, err, sr, shl, shlr},
+    {clr, ss, sn, err, err, err, sr, shl},
 /*step_resume */
-    {sr, sr, sr, sr, sr, sr, sr, sr, sr},
+    {sr, sr, sr, sr, sr, sr, sr, sr},
 /*shlib */
-    {shl, shl, shl, shl, shl, shl, sr, shl, shlr},
-/*catch_shlib */
-    {shlr, shlr, shlr, shlr, shlr, shlr, sr, shlr, shlr}
+    {shl, shl, shl, shl, shl, shl, sr, shl}
   };
 
 #undef kc
@@ -3153,7 +3171,6 @@ bpstat_what (bpstat bs)
 #undef sr
 #undef ts
 #undef shl
-#undef shlr
   enum bpstat_what_main_action current_action = BPSTAT_WHAT_KEEP_CHECKING;
   struct bpstat_what retval;
 
@@ -4021,7 +4038,7 @@ adjust_breakpoint_address (CORE_ADDR bpaddr, enum bptype bptype)
 /* Allocate a struct bp_location.  */
 
 static struct bp_location *
-allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
+allocate_bp_location (struct breakpoint *bpt)
 {
   struct bp_location *loc, *loc_p;
 
@@ -4033,7 +4050,7 @@ allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
   loc->shlib_disabled = 0;
   loc->enabled = 1;
 
-  switch (bp_type)
+  switch (bpt->type)
     {
     case bp_breakpoint:
     case bp_until:
@@ -4161,9 +4178,9 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
      breakpoint may cause target_read_memory() to be called and we do
      not want its scan of the location chain to find a breakpoint and
      location that's only been partially initialized.  */
-  adjusted_address = adjust_breakpoint_address (sal.pc, bptype);
+  adjusted_address = adjust_breakpoint_address (sal.pc, b->type);
 
-  b->loc = allocate_bp_location (b, bptype);
+  b->loc = allocate_bp_location (b);
   b->loc->requested_address = sal.pc;
   b->loc->address = adjusted_address;
 
@@ -4989,18 +5006,17 @@ mention (struct breakpoint *b)
 
 
 static struct bp_location *
-add_location_to_breakpoint (struct breakpoint *b, enum bptype bptype,
+add_location_to_breakpoint (struct breakpoint *b,
 			    const struct symtab_and_line *sal)
 {
   struct bp_location *loc, **tmp;
 
-  loc = allocate_bp_location (b, bptype);
+  loc = allocate_bp_location (b);
   for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
     ;
   *tmp = loc;
   loc->requested_address = sal->pc;
-  loc->address = adjust_breakpoint_address (loc->requested_address,
-					    bptype);
+  loc->address = adjust_breakpoint_address (loc->requested_address, b->type);
   loc->section = sal->section;
 
   set_breakpoint_location_function (loc);
@@ -5018,19 +5034,32 @@ bp_loc_is_permanent (struct bp_location *loc)
   CORE_ADDR addr;
   const gdb_byte *brk;
   gdb_byte *target_mem;
+  struct cleanup *cleanup;
+  int retval = 0;
 
   gdb_assert (loc != NULL);
 
   addr = loc->address;
   brk = gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &len);
 
+  /* Software breakpoints unsupported?  */
+  if (brk == NULL)
+    return 0;
+
   target_mem = alloca (len);
+
+  /* Enable the automatic memory restoration from breakpoints while
+     we read the memory.  Otherwise we could say about our temporary
+     breakpoints they are permanent.  */
+  cleanup = make_show_memory_breakpoints_cleanup (0);
 
   if (target_read_memory (loc->address, target_mem, len) == 0
       && memcmp (target_mem, brk, len) == 0)
-    return 1;
+    retval = 1;
 
-  return 0;
+  do_cleanups (cleanup);
+
+  return retval;
 }
 
 
@@ -5085,7 +5114,7 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
 	}
       else
 	{
-	  loc = add_location_to_breakpoint (b, type, &sal);
+	  loc = add_location_to_breakpoint (b, &sal);
 	}
 
       if (bp_loc_is_permanent (loc))
@@ -6806,7 +6835,7 @@ breakpoint_auto_delete (bpstat bs)
   }
 }
 
-/* If SHOULD_INSERT is true, do not insert any breakpoint locations
+/* If SHOULD_INSERT is false, do not insert any breakpoint locations
    into the inferior, only remove already-inserted locations that no
    longer should be inserted.  Functions that delete a breakpoint or
    breakpoints should pass false, so that deleting a breakpoint
@@ -7221,7 +7250,7 @@ update_breakpoint_locations (struct breakpoint *b,
   for (i = 0; i < sals.nelts; ++i)
     {
       struct bp_location *new_loc = 
-	add_location_to_breakpoint (b, b->type, &(sals.sals[i]));
+	add_location_to_breakpoint (b, &(sals.sals[i]));
 
       /* Reparse conditions, they might contain references to the
 	 old symtab.  */

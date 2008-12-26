@@ -917,32 +917,10 @@ mn10300_elf_check_relocs (bfd *abfd,
 		     section in dynobj and make room for this reloc.  */
 		  if (sreloc == NULL)
 		    {
-		      const char * name;
-
-		      name = (bfd_elf_string_from_elf_section
-			      (abfd,
-			       elf_elfheader (abfd)->e_shstrndx,
-			       elf_section_data (sec)->rel_hdr.sh_name));
-		      if (name == NULL)
-			goto fail;
-
-		      BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-				  && streq (bfd_get_section_name (abfd, sec), name + 5));
-
-		      sreloc = bfd_get_section_by_name (dynobj, name);
+		      sreloc = _bfd_elf_make_dynamic_reloc_section
+			(sec, dynobj, 2, abfd, /*rela?*/ TRUE);
 		      if (sreloc == NULL)
-			{
-			  flagword flags;
-
-			  flags = (SEC_HAS_CONTENTS | SEC_READONLY
-			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-			  if ((sec->flags & SEC_ALLOC) != 0)
-			    flags |= SEC_ALLOC | SEC_LOAD;
-			  sreloc = bfd_make_section_with_flags (dynobj, name, flags);
-			  if (sreloc == NULL
-			      || ! bfd_set_section_alignment (dynobj, sreloc, 2))
-			    goto fail;
-			}
+			goto fail;
 		    }
 
 		  sreloc->size += sizeof (Elf32_External_Rela);
@@ -1108,22 +1086,10 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 	     time.  */
 	  if (sreloc == NULL)
 	    {
-	      const char * name;
-
-	      name = (bfd_elf_string_from_elf_section
-		      (input_bfd,
-		       elf_elfheader (input_bfd)->e_shstrndx,
-		       elf_section_data (input_section)->rel_hdr.sh_name));
-	      if (name == NULL)
+	      sreloc = _bfd_elf_get_dynamic_reloc_section
+		(input_bfd, input_section, /*rela?*/ TRUE);
+	      if (sreloc == NULL)
 		return FALSE;
-
-	      BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-			  && streq (bfd_get_section_name (input_bfd,
-							  input_section),
-				    name + 5));
-
-	      sreloc = bfd_get_section_by_name (dynobj, name);
-	      BFD_ASSERT (sreloc != NULL);
 	    }
 
 	  skip = FALSE;

@@ -1,6 +1,6 @@
 /* M32R-specific support for 32-bit ELF.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007 Free Software Foundation, Inc.
+   2006, 2007, 2008  Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2911,22 +2911,10 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                      time.  */
                   if (sreloc == NULL)
                     {
-                      const char *name;
-
-                      name = (bfd_elf_string_from_elf_section
-                              (input_bfd,
-                               elf_elfheader (input_bfd)->e_shstrndx,
-                               elf_section_data (input_section)->rel_hdr.sh_name));
-                      if (name == NULL)
-                        return FALSE;
-
-                      BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-                                  && strcmp (bfd_get_section_name (input_bfd,
-                                                                   input_section),
-                                             name + 5) == 0);
-
-                      sreloc = bfd_get_section_by_name (dynobj, name);
-                      BFD_ASSERT (sreloc != NULL);
+		      sreloc = _bfd_elf_get_dynamic_reloc_section
+			(input_bfd, input_section, /*rela?*/ TRUE);
+		      if (sreloc == NULL)
+			return FALSE;
                     }
 
                   skip = FALSE;
@@ -3950,36 +3938,11 @@ m32r_elf_check_relocs (bfd *abfd,
                  section in dynobj and make room for the reloc.  */
               if (sreloc == NULL)
                 {
-                  const char *name;
+		  sreloc = _bfd_elf_make_dynamic_reloc_section
+		    (sec, dynobj, 2, abfd, /*rela?*/ TRUE);
 
-                  name = (bfd_elf_string_from_elf_section
-                          (abfd,
-                           elf_elfheader (abfd)->e_shstrndx,
-                           elf_section_data (sec)->rel_hdr.sh_name));
-                  if (name == NULL)
-                    return FALSE;
-
-                  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-                              && strcmp (bfd_get_section_name (abfd, sec),
-                                         name + 5) == 0);
-
-                  sreloc = bfd_get_section_by_name (dynobj, name);
-                  if (sreloc == NULL)
-                    {
-                      flagword flags;
-
-                      flags = (SEC_HAS_CONTENTS | SEC_READONLY
-                               | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-                      if ((sec->flags & SEC_ALLOC) != 0)
-                        flags |= SEC_ALLOC | SEC_LOAD;
-                      sreloc = bfd_make_section_with_flags (dynobj,
-							    name,
-							    flags);
-                      if (sreloc == NULL
-                          || ! bfd_set_section_alignment (dynobj, sreloc, 2))
-                        return FALSE;
-                    }
-                  elf_section_data (sec)->sreloc = sreloc;
+		  if (sreloc == NULL)
+		    return FALSE;
                 }
 
               /* If this is a global symbol, we count the number of

@@ -1505,44 +1505,17 @@ elf32_hppa_check_relocs (bfd *abfd,
 		 this reloc.  */
 	      if (sreloc == NULL)
 		{
-		  char *name;
-		  bfd *dynobj;
-
-		  name = (bfd_elf_string_from_elf_section
-			  (abfd,
-			   elf_elfheader (abfd)->e_shstrndx,
-			   elf_section_data (sec)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    {
-		      (*_bfd_error_handler)
-			(_("Could not find relocation section for %s"),
-			 sec->name);
-		      bfd_set_error (bfd_error_bad_value);
-		      return FALSE;
-		    }
-
 		  if (htab->etab.dynobj == NULL)
 		    htab->etab.dynobj = abfd;
 
-		  dynobj = htab->etab.dynobj;
-		  sreloc = bfd_get_section_by_name (dynobj, name);
+		  sreloc = _bfd_elf_make_dynamic_reloc_section
+		    (sec, htab->etab.dynobj, 2, abfd, /*rela?*/ TRUE);
+
 		  if (sreloc == NULL)
 		    {
-		      flagword flags;
-
-		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
-			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-		      if ((sec->flags & SEC_ALLOC) != 0)
-			flags |= SEC_ALLOC | SEC_LOAD;
-		      sreloc = bfd_make_section_with_flags (dynobj,
-							    name,
-							    flags);
-		      if (sreloc == NULL
-			  || !bfd_set_section_alignment (dynobj, sreloc, 2))
-			return FALSE;
+		      bfd_set_error (bfd_error_bad_value);
+		      return FALSE;
 		    }
-
-		  elf_section_data (sec)->sreloc = sreloc;
 		}
 
 	      /* If this is a global symbol, we count the number of

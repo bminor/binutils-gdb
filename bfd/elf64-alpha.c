@@ -1748,7 +1748,6 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 {
   bfd *dynobj;
   asection *sreloc;
-  const char *rel_sec_name;
   Elf_Internal_Shdr *symtab_hdr;
   struct alpha_elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel, *relend;
@@ -1773,7 +1772,6 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
     elf_hash_table (info)->dynobj = dynobj = abfd;
 
   sreloc = NULL;
-  rel_sec_name = NULL;
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = alpha_elf_sym_hashes (abfd);
 
@@ -1923,41 +1921,16 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (need & NEED_DYNREL)
 	{
-	  if (rel_sec_name == NULL)
-	    {
-	      rel_sec_name = (bfd_elf_string_from_elf_section
-			      (abfd, elf_elfheader(abfd)->e_shstrndx,
-			       elf_section_data(sec)->rel_hdr.sh_name));
-	      if (rel_sec_name == NULL)
-		return FALSE;
-
-	      BFD_ASSERT (CONST_STRNEQ (rel_sec_name, ".rela")
-			  && strcmp (bfd_get_section_name (abfd, sec),
-				     rel_sec_name+5) == 0);
-	    }
-
 	  /* We need to create the section here now whether we eventually
 	     use it or not so that it gets mapped to an output section by
-	     the linker.  If not used, we'll kill it in
-	     size_dynamic_sections.  */
+	     the linker.  If not used, we'll kill it in size_dynamic_sections.  */
 	  if (sreloc == NULL)
 	    {
-	      sreloc = bfd_get_section_by_name (dynobj, rel_sec_name);
-	      if (sreloc == NULL)
-		{
-		  flagword flags;
+	      sreloc = _bfd_elf_make_dynamic_reloc_section
+		(sec, dynobj, 3, abfd, /*rela?*/ TRUE);
 
-		  flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY
-			   | SEC_LINKER_CREATED | SEC_READONLY);
-		  if (sec->flags & SEC_ALLOC)
-		    flags |= SEC_ALLOC | SEC_LOAD;
-		  sreloc = bfd_make_section_with_flags (dynobj,
-							rel_sec_name,
-							flags);
-		  if (sreloc == NULL
-		      || !bfd_set_section_alignment (dynobj, sreloc, 3))
-		    return FALSE;
-		}
+	      if (sreloc == NULL)
+		return FALSE;
 	    }
 
 	  if (h)

@@ -30,7 +30,9 @@
    can copy the values' types if needed.  This is declared
    unconditionally to reduce the number of uses of HAVE_PYTHON in the
    generic code.  */
-struct value *values_in_python;
+/* This variable is unnecessarily initialized to NULL in order to 
+   work around a linker bug on MacOS.  */
+struct value *values_in_python = NULL;
 
 #ifdef HAVE_PYTHON
 
@@ -130,11 +132,7 @@ valpy_dereference (PyObject *self, PyObject *args)
   return value_to_value_object (res_val);
 }
 
-#ifdef HAVE_LIBPYTHON2_4
-static int
-#else
 static Py_ssize_t
-#endif
 valpy_length (PyObject *self)
 {
   /* We don't support getting the number of elements in a struct / class.  */

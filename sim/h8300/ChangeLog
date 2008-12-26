@@ -1,3 +1,7 @@
+2008-12-01  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* compile.c: Add const to remove warning.
+
 2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure: Regenerate to track ../common/common.m4 changes.

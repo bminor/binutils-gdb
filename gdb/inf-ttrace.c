@@ -930,7 +930,6 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   do
     {
       set_sigint_trap ();
-      set_sigio_trap ();
 
       if (ttrace_wait (pid, lwpid, TTRACE_WAITOK, &tts, sizeof tts) == -1)
 	perror_with_name (("ttrace_wait"));
@@ -949,7 +948,6 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  tts.tts_event = TTEVT_NONE;
 	}
 
-      clear_sigio_trap ();
       clear_sigint_trap ();
     }
   while (tts.tts_event == TTEVT_NONE);

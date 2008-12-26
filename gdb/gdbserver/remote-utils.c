@@ -530,7 +530,7 @@ putpkt_binary (char *buf, int cnt)
   char buf3[1];
   char *p;
 
-  buf2 = malloc (PBUFSIZ);
+  buf2 = xmalloc (PBUFSIZ);
 
   /* Copy the packet into buffer BUF2, encapsulating it
      and giving it a checksum.  */
@@ -1178,7 +1178,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
       unsigned int mem_len;
 
       decode_m_packet (&own_buf[1], &mem_addr, &mem_len);
-      mem_buf = malloc (mem_len);
+      mem_buf = xmalloc (mem_len);
       if (read_inferior_memory (mem_addr, mem_buf, mem_len) == 0)
 	convert_int_to_ascii (mem_buf, own_buf, mem_len);
       else
@@ -1209,8 +1209,8 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
   decode_address (addrp, p, q - p);
 
   /* Save the symbol in our cache.  */
-  sym = malloc (sizeof (*sym));
-  sym->name = strdup (name);
+  sym = xmalloc (sizeof (*sym));
+  sym->name = xstrdup (name);
   sym->addr = *addrp;
   sym->next = symbol_cache;
   symbol_cache = sym;
@@ -1221,7 +1221,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
 void
 monitor_output (const char *msg)
 {
-  char *buf = malloc (strlen (msg) * 2 + 2);
+  char *buf = xmalloc (strlen (msg) * 2 + 2);
 
   buf[0] = 'O';
   hexify (buf + 1, msg, 0);
@@ -1259,7 +1259,7 @@ xml_escape_text (const char *text)
       }
 
   /* Expand the result.  */
-  result = malloc (i + special + 1);
+  result = xmalloc (i + special + 1);
   for (i = 0, special = 0; text[i] != '\0'; i++)
     switch (text[i])
       {
@@ -1290,4 +1290,96 @@ xml_escape_text (const char *text)
   result[i + special] = '\0';
 
   return result;
+}
+
+void
+buffer_grow (struct buffer *buffer, const char *data, size_t size)
+{
+  char *new_buffer;
+  size_t new_buffer_size;
+
+  if (size == 0)
+    return;
+
+  new_buffer_size = buffer->buffer_size;
+
+  if (new_buffer_size == 0)
+    new_buffer_size = 1;
+
+  while (buffer->used_size + size > new_buffer_size)
+    new_buffer_size *= 2;
+  new_buffer = realloc (buffer->buffer, new_buffer_size);
+  if (!new_buffer)
+    abort ();
+  memcpy (new_buffer + buffer->used_size, data, size);
+  buffer->buffer = new_buffer;
+  buffer->buffer_size = new_buffer_size;
+  buffer->used_size += size;
+}
+
+void
+buffer_free (struct buffer *buffer)
+{
+  if (!buffer)
+    return;
+
+  free (buffer->buffer);
+  buffer->buffer = NULL;
+  buffer->buffer_size = 0;
+  buffer->used_size = 0;
+}
+
+void
+buffer_init (struct buffer *buffer)
+{
+  memset (buffer, 0, sizeof (*buffer));
+}
+
+char*
+buffer_finish (struct buffer *buffer)
+{
+  char *ret = buffer->buffer;
+  buffer->buffer = NULL;
+  buffer->buffer_size = 0;
+  buffer->used_size = 0;
+  return ret;
+}
+
+void
+buffer_xml_printf (struct buffer *buffer, const char *format, ...)
+{
+  va_list ap;
+  const char *f;
+  const char *prev;
+  int percent = 0;
+
+  va_start (ap, format);
+
+  prev = format;
+  for (f = format; *f; f++)
+    {
+      if (percent)
+       {
+         switch (*f)
+           {
+           case 's':
+             {
+               char *p;
+               char *a = va_arg (ap, char *);
+               buffer_grow (buffer, prev, f - prev - 1);
+               p = xml_escape_text (a);
+               buffer_grow_str (buffer, p);
+               free (p);
+               prev = f + 1;
+             }
+             break;
+           }
+         percent = 0;
+       }
+      else if (*f == '%')
+       percent = 1;
+    }
+
+  buffer_grow_str (buffer, prev);
+  va_end (ap);
 }

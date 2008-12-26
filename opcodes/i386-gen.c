@@ -284,6 +284,7 @@ static bitfield opcode_modifiers[] =
 {
   BITFIELD (D),
   BITFIELD (W),
+  BITFIELD (S),
   BITFIELD (Modrm),
   BITFIELD (ShortForm),
   BITFIELD (Jump),
@@ -323,8 +324,8 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Drexc),
   BITFIELD (Vex),
   BITFIELD (Vex256),
-  BITFIELD (VexNDD),
   BITFIELD (VexNDS),
+  BITFIELD (VexNDD),
   BITFIELD (VexW0),
   BITFIELD (VexW1),
   BITFIELD (Vex0F),

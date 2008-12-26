@@ -8,7 +8,7 @@ AC_CONFIG_SRCDIR([libbfd.c])
 AC_CANONICAL_TARGET
 AC_ISC_POSIX
 
-AM_INIT_AUTOMAKE(bfd, 2.19.50)
+AM_INIT_AUTOMAKE(bfd, 2.19.51)
 
 dnl These must be called before LT_INIT, because it may want
 dnl to call AC_CHECK_PROG.
@@ -24,9 +24,11 @@ AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
 
 case "${target}" in
-  sparc-*-solaris*)
-    # On native 32bit sparc-solaris, large-file and procfs support are
-    # mutually exclusive; and without procfs support, the elf module
+changequote(,)dnl
+  sparc-*-solaris*|i[3-7]86-*-solaris*)
+changequote([,])dnl
+    # On native 32bit sparc and ia32 solaris, large-file and procfs support
+    # are mutually exclusive; and without procfs support, the elf module
     # cannot provide certain routines such as elfcore_write_prpsinfo
     # or elfcore_write_prstatus.  So unless the user explicitly requested
     # large-file support through the --enable-largefile switch, disable
@@ -687,6 +689,8 @@ do
     bfd_elf32_ia64_hpux_big_vec) tb="$tb elf32-ia64.lo elf32.lo $elf";;
     bfd_elf32_ip2k_vec)		tb="$tb elf32-ip2k.lo elf32.lo $elf" ;;
     bfd_elf32_iq2000_vec)       tb="$tb elf32-iq2000.lo elf32.lo $elf" ;;
+    bfd_elf32_lm32_vec)         tb="$tb elf32-lm32.lo elf32.lo $elf" ;;
+    bfd_elf32_lm32fdpic_vec)         tb="$tb elf32-lm32.lo elf32.lo $elf" ;;
     bfd_elf32_little_generic_vec) tb="$tb elf32-gen.lo elf32.lo $elf" ;;
     bfd_elf32_littlearc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
     bfd_elf32_littlearm_symbian_vec)

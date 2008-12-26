@@ -234,6 +234,8 @@ static void remote_async_get_pending_events_handler (gdb_client_data);
 
 static void remote_terminal_ours (void);
 
+static int remote_read_description_p (struct target_ops *target);
+
 /* The non-stop remote protocol provisions for one pending stop reply.
    This is where we keep it until it is acknowledged.  */
 
@@ -990,6 +992,7 @@ enum {
   PACKET_qXfer_memory_map,
   PACKET_qXfer_spu_read,
   PACKET_qXfer_spu_write,
+  PACKET_qXfer_osdata,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
   PACKET_QPassSignals,
@@ -1524,8 +1527,13 @@ read_ptid (char *buf, char **obuf)
   pp = unpack_varlen_hex (p, &tid);
 
   /* Since the stub is not sending a process id, then default to
-     what's in inferior_ptid.  */
-  pid = ptid_get_pid (inferior_ptid);
+     what's in inferior_ptid, unless it's null at this point.  If so,
+     then since there's no way to know the pid of the reported
+     threads, use the magic number.  */
+  if (ptid_equal (inferior_ptid, null_ptid))
+    pid = ptid_get_pid (magic_null_ptid);
+  else
+    pid = ptid_get_pid (inferior_ptid);
 
   if (obuf)
     *obuf = pp;
@@ -2549,14 +2557,14 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       getpkt (&rs->buf, &rs->buf_size, 0);
     }
 
+  /* Next, if the target can specify a description, read it.  We do
+     this before anything involving memory or registers.  */
+  target_find_description ();
+
   /* On OSs where the list of libraries is global to all
      processes, we fetch them early.  */
   if (gdbarch_has_global_solist (target_gdbarch))
     solib_add (NULL, args->from_tty, args->target, auto_solib_add);
-
-  /* Next, if the target can specify a description, read it.  We do
-     this before anything involving memory or registers.  */
-  target_find_description ();
 
   if (non_stop)
     {
@@ -2573,13 +2581,6 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 	 controlling.  We default to adding them in the running state.
 	 The '?' query below will then tell us about which threads are
 	 stopped.  */
-
-      /* If we're not using the multi-process extensions, there's no
-	 way to know the pid of the reported threads; use the magic
-	 number.  */
-      if (!remote_multi_process_p (rs))
-	inferior_ptid = magic_null_ptid;
-
       remote_threads_info ();
     }
   else if (rs->non_stop_aware)
@@ -2642,6 +2643,17 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       add_thread_silent (inferior_ptid);
 
       get_offsets ();		/* Get text, data & bss offsets.  */
+
+      /* If we could not find a description using qXfer, and we know
+	 how to do it some other way, try again.  This is not
+	 supported for non-stop; it could be, but it is tricky if
+	 there are no stopped threads when we connect.  */
+      if (remote_read_description_p (args->target)
+	  && gdbarch_target_desc (target_gdbarch) == NULL)
+	{
+	  target_clear_description ();
+	  target_find_description ();
+	}
 
       /* Use the previously fetched status.  */
       gdb_assert (wait_status != NULL);
@@ -2945,6 +2957,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_spu_read },
   { "qXfer:spu:write", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_spu_write },
+  { "qXfer:osdata:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_osdata },
   { "QPassSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QPassSignals },
   { "QStartNoAckMode", PACKET_DISABLE, remote_supported_packet,
@@ -3163,8 +3177,9 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
     }
   push_target (target);		/* Switch to using remote target now.  */
 
-  /* Assume that the target is running, unless we learn otherwise.  */
-  target_mark_running (target);
+  /* Assume that the target is not running, until we learn otherwise.  */
+  if (extended_p)
+    target_mark_exited (target);
 
   /* Register extra event sources in the event loop.  */
   remote_async_inferior_event_token
@@ -3301,7 +3316,6 @@ remote_detach_1 (char *args, int from_tty, int extended)
     }
 
   discard_pending_stop_replies (pid);
-  detach_inferior (pid);
   target_mourn_inferior ();
 }
 
@@ -4288,8 +4302,6 @@ Packet: '%s'\n"),
 		struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
 		cached_reg_t cached_reg;
 
-		cached_reg.num = reg->regnum;
-
 		p = p1;
 
 		if (*p != ':')
@@ -4302,6 +4314,8 @@ Packet: '%s'\n"),
 		  error (_("Remote sent bad register number %s: %s\n\
 Packet: '%s'\n"),
 			 phex_nz (pnum, 0), p, buf);
+
+		cached_reg.num = reg->regnum;
 
 		fieldsize = hex2bin (p, cached_reg.data,
 				     register_size (target_gdbarch,
@@ -4495,31 +4509,28 @@ process_stop_reply (struct stop_reply *stop_reply,
   if (ptid_equal (ptid, null_ptid))
     ptid = inferior_ptid;
 
-  if (status->kind == TARGET_WAITKIND_EXITED
-      || status->kind == TARGET_WAITKIND_SIGNALLED)
+  if (status->kind != TARGET_WAITKIND_EXITED
+      && status->kind != TARGET_WAITKIND_SIGNALLED)
     {
-      int pid = ptid_get_pid (ptid);
-      delete_inferior (pid);
+      notice_new_inferiors (ptid);
+
+      /* Expedited registers.  */
+      if (stop_reply->regcache)
+	{
+	  cached_reg_t *reg;
+	  int ix;
+
+	  for (ix = 0;
+	       VEC_iterate(cached_reg_t, stop_reply->regcache, ix, reg);
+	       ix++)
+	    regcache_raw_supply (get_thread_regcache (ptid),
+				 reg->num, reg->data);
+	  VEC_free (cached_reg_t, stop_reply->regcache);
+	}
+
+      remote_stopped_by_watchpoint_p = stop_reply->stopped_by_watchpoint_p;
+      remote_watch_data_address = stop_reply->watch_data_address;
     }
-  else
-    notice_new_inferiors (ptid);
-
-  /* Expedited registers.  */
-  if (stop_reply->regcache)
-    {
-      cached_reg_t *reg;
-      int ix;
-
-      for (ix = 0;
-	   VEC_iterate(cached_reg_t, stop_reply->regcache, ix, reg);
-	   ix++)
-	regcache_raw_supply (get_thread_regcache (ptid),
-			     reg->num, reg->data);
-      VEC_free (cached_reg_t, stop_reply->regcache);
-    }
-
-  remote_stopped_by_watchpoint_p = stop_reply->stopped_by_watchpoint_p;
-  remote_watch_data_address = stop_reply->watch_data_address;
 
   stop_reply_xfree (stop_reply);
   return ptid;
@@ -6494,7 +6505,6 @@ extended_remote_kill (void)
   if (res != 0)
     error (_("Can't kill process"));
 
-  delete_inferior (pid);
   target_mourn_inferior ();
 }
 
@@ -6541,6 +6551,9 @@ extended_remote_mourn_1 (struct target_ops *target)
   /* Unlike "target remote", we do not want to unpush the target; then
      the next time the user says "run", we won't be connected.  */
 
+  /* Call common code to mark the inferior as not running.	*/
+  generic_mourn_inferior ();
+
   if (have_inferiors ())
     {
       extern void nullify_last_target_wait_ptid ();
@@ -6552,10 +6565,6 @@ extended_remote_mourn_1 (struct target_ops *target)
     }
   else
     {
-      struct remote_state *rs = get_remote_state ();
-
-      /* Call common code to mark the inferior as not running.	*/
-      generic_mourn_inferior ();
       if (!remote_multi_process_p (rs))
 	{
 	  /* Check whether the target is running now - some remote stubs
@@ -7341,6 +7350,13 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       return remote_read_qxfer (ops, "memory-map", annex, readbuf, offset, len,
 				&remote_protocol_packets[PACKET_qXfer_memory_map]);
 
+    case TARGET_OBJECT_OSDATA:
+      /* Should only get here if we're connected.  */
+      gdb_assert (remote_desc);
+      return remote_read_qxfer
+       (ops, "osdata", annex, readbuf, offset, len,
+        &remote_protocol_packets[PACKET_qXfer_osdata]);
+
     default:
       return -1;
     }
@@ -7852,11 +7868,31 @@ register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
   VEC_safe_push (remote_g_packet_guess_s, data->guesses, &new_guess);
 }
 
+/* Return 1 if remote_read_description would do anything on this target
+   and architecture, 0 otherwise.  */
+
+static int
+remote_read_description_p (struct target_ops *target)
+{
+  struct remote_g_packet_data *data
+    = gdbarch_data (target_gdbarch, remote_g_packet_data_handle);
+
+  if (!VEC_empty (remote_g_packet_guess_s, data->guesses))
+    return 1;
+
+  return 0;
+}
+
 static const struct target_desc *
 remote_read_description (struct target_ops *target)
 {
   struct remote_g_packet_data *data
     = gdbarch_data (target_gdbarch, remote_g_packet_data_handle);
+
+  /* Do not try this during initial connection, when we do not know
+     whether there is a running but stopped thread.  */
+  if (!target_has_execution || ptid_equal (inferior_ptid, null_ptid))
+    return NULL;
 
   if (!VEC_empty (remote_g_packet_guess_s, data->guesses))
     {
@@ -8613,6 +8649,15 @@ remote_supports_multi_process (void)
   return remote_multi_process_p (rs);
 }
 
+static int
+extended_remote_can_run (void)
+{
+  if (remote_desc != NULL)
+    return 1;
+
+  return 0;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -8698,6 +8743,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   extended_remote_ops.to_detach = extended_remote_detach;
   extended_remote_ops.to_attach = extended_remote_attach;
   extended_remote_ops.to_kill = extended_remote_kill;
+  extended_remote_ops.to_can_run = extended_remote_can_run;
 }
 
 static int
@@ -9006,6 +9052,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_spu_write],
                          "qXfer:spu:write", "write-spu-object", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_osdata],
+                        "qXfer:osdata:read", "osdata", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",

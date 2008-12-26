@@ -185,111 +185,6 @@ c_printstr (struct ui_file *stream, const gdb_byte *string,
 /* Preprocessing and parsing C and C++ expressions.  */
 
 
-/* When we find that lexptr (the global var defined in parse.c) is
-   pointing at a macro invocation, we expand the invocation, and call
-   scan_macro_expansion to save the old lexptr here and point lexptr
-   into the expanded text.  When we reach the end of that, we call
-   end_macro_expansion to pop back to the value we saved here.  The
-   macro expansion code promises to return only fully-expanded text,
-   so we don't need to "push" more than one level.
-
-   This is disgusting, of course.  It would be cleaner to do all macro
-   expansion beforehand, and then hand that to lexptr.  But we don't
-   really know where the expression ends.  Remember, in a command like
-
-     (gdb) break *ADDRESS if CONDITION
-
-   we evaluate ADDRESS in the scope of the current frame, but we
-   evaluate CONDITION in the scope of the breakpoint's location.  So
-   it's simply wrong to try to macro-expand the whole thing at once.  */
-static char *macro_original_text;
-static char *macro_expanded_text;
-
-
-void
-scan_macro_expansion (char *expansion)
-{
-  /* We'd better not be trying to push the stack twice.  */
-  gdb_assert (! macro_original_text);
-  gdb_assert (! macro_expanded_text);
-
-  /* Save the old lexptr value, so we can return to it when we're done
-     parsing the expanded text.  */
-  macro_original_text = lexptr;
-  lexptr = expansion;
-
-  /* Save the expanded text, so we can free it when we're finished.  */
-  macro_expanded_text = expansion;
-}
-
-
-int
-scanning_macro_expansion (void)
-{
-  return macro_original_text != 0;
-}
-
-
-void 
-finished_macro_expansion (void)
-{
-  /* There'd better be something to pop back to, and we better have
-     saved a pointer to the start of the expanded text.  */
-  gdb_assert (macro_original_text);
-  gdb_assert (macro_expanded_text);
-
-  /* Pop back to the original text.  */
-  lexptr = macro_original_text;
-  macro_original_text = 0;
-
-  /* Free the expanded text.  */
-  xfree (macro_expanded_text);
-  macro_expanded_text = 0;
-}
-
-
-static void
-scan_macro_cleanup (void *dummy)
-{
-  if (macro_original_text)
-    finished_macro_expansion ();
-}
-
-
-/* We set these global variables before calling c_parse, to tell it
-   how it to find macro definitions for the expression at hand.  */
-macro_lookup_ftype *expression_macro_lookup_func;
-void *expression_macro_lookup_baton;
-
-
-static int
-c_preprocess_and_parse (void)
-{
-  /* Set up a lookup function for the macro expander.  */
-  struct macro_scope *scope = 0;
-  struct cleanup *back_to = make_cleanup (free_current_contents, &scope);
-
-  if (expression_context_block)
-    scope = sal_macro_scope (find_pc_line (expression_context_pc, 0));
-  else
-    scope = default_macro_scope ();
-  if (! scope)
-    scope = user_macro_scope ();
-
-  expression_macro_lookup_func = standard_macro_lookup;
-  expression_macro_lookup_baton = (void *) scope;
-
-  gdb_assert (! macro_original_text);
-  make_cleanup (scan_macro_cleanup, 0);
-
-  {
-    int result = c_parse ();
-    do_cleanups (back_to);
-    return result;
-  }
-}
-
-
 
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
@@ -395,7 +290,7 @@ const struct language_defn c_language_defn =
   array_row_major,
   macro_expansion_c,
   &exp_descriptor_standard,
-  c_preprocess_and_parse,
+  c_parse,
   c_error,
   null_post_parser,
   c_printchar,			/* Print a character constant */
@@ -513,7 +408,7 @@ const struct language_defn cplus_language_defn =
   array_row_major,
   macro_expansion_c,
   &exp_descriptor_standard,
-  c_preprocess_and_parse,
+  c_parse,
   c_error,
   null_post_parser,
   c_printchar,			/* Print a character constant */
@@ -550,7 +445,7 @@ const struct language_defn asm_language_defn =
   array_row_major,
   macro_expansion_c,
   &exp_descriptor_standard,
-  c_preprocess_and_parse,
+  c_parse,
   c_error,
   null_post_parser,
   c_printchar,			/* Print a character constant */
@@ -592,7 +487,7 @@ const struct language_defn minimal_language_defn =
   array_row_major,
   macro_expansion_c,
   &exp_descriptor_standard,
-  c_preprocess_and_parse,
+  c_parse,
   c_error,
   null_post_parser,
   c_printchar,			/* Print a character constant */

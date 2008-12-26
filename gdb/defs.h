@@ -957,6 +957,7 @@ enum gdb_osabi
   GDB_OSABI_CYGWIN,
   GDB_OSABI_AIX,
   GDB_OSABI_DICOS,
+  GDB_OSABI_DARWIN,
 
   GDB_OSABI_INVALID		/* keep this last */
 };

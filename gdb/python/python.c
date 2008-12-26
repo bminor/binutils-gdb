@@ -103,9 +103,14 @@ void
 eval_python_from_control_command (struct command_line *cmd)
 {
   char *script;
+  struct cleanup *cleanup;
+  PyGILState_STATE state;
 
   if (cmd->body_count != 1)
     error (_("Invalid \"python\" block structure."));
+
+  state = PyGILState_Ensure ();
+  cleanup = make_cleanup_py_restore_gil (&state);
 
   script = compute_python_string (cmd->body_list[0]);
   PyRun_SimpleString (script);
@@ -115,6 +120,8 @@ eval_python_from_control_command (struct command_line *cmd)
       gdbpy_print_stack ();
       error (_("error while executing Python code"));
     }
+
+  do_cleanups (cleanup);
 }
 
 /* Implementation of the gdb "python" command.  */
@@ -122,6 +129,12 @@ eval_python_from_control_command (struct command_line *cmd)
 static void
 python_command (char *arg, int from_tty)
 {
+  struct cleanup *cleanup;
+  PyGILState_STATE state;
+
+  state = PyGILState_Ensure ();
+  cleanup = make_cleanup_py_restore_gil (&state);
+
   while (arg && *arg && isspace (*arg))
     ++arg;
   if (arg && *arg)
@@ -136,10 +149,11 @@ python_command (char *arg, int from_tty)
   else
     {
       struct command_line *l = get_command_line (python_control, "");
-      struct cleanup *cleanups = make_cleanup_free_command_lines (&l);
+      make_cleanup_free_command_lines (&l);
       execute_control_command_untraced (l);
-      do_cleanups (cleanups);
     }
+
+  do_cleanups (cleanup);
 }
 
 
@@ -392,6 +406,7 @@ Enables or disables printing of Python stack traces."),
 
 #ifdef HAVE_PYTHON
   Py_Initialize ();
+  PyEval_InitThreads ();
 
   gdb_module = Py_InitModule ("gdb", GdbMethods);
 
@@ -429,5 +444,10 @@ class GdbOutputFile:\n\
 sys.stderr = GdbOutputFile()\n\
 sys.stdout = GdbOutputFile()\n\
 ");
+
+  /* Release the GIL while gdb runs.  */
+  PyThreadState_Swap (NULL);
+  PyEval_ReleaseLock ();
+
 #endif /* HAVE_PYTHON */
 }

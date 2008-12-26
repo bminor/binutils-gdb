@@ -3528,6 +3528,8 @@ coff_write_object_contents (bfd * abfd)
       section.s_size =  current->size;
 #ifdef coff_get_section_load_page
       section.s_page = coff_get_section_load_page (current);
+#else
+      section.s_page = 0;
 #endif
 
 #ifdef COFF_WITH_PE
