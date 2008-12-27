@@ -47,7 +47,7 @@ static int record_resume_step = 0;
 static enum target_signal record_resume_siggnal;
 static int record_get_sig = 0;
 static sigset_t record_maskall;
-static int record_not_record = 0;
+static int in_record_wait = 0;
 int record_will_store_registers = 0;
 
 extern struct bp_location *bp_location_chain;
@@ -364,19 +364,19 @@ record_message (struct gdbarch *gdbarch)
     }
 }
 
-/* Things to clean up if we QUIT out of function that set
-   record_not_record.  */
+/* Things to clean up if we error or QUIT out of function that set
+   in_record_wait (ie. command that called 'proceed').  */
 static void
-record_not_record_cleanups (void *ignore)
+in_record_wait_cleanups (void *ignore)
 {
-  record_not_record = 0;
+  in_record_wait = 0;
 }
 
 void
-record_not_record_set (void)
+in_record_wait_set (void)
 {
-  struct cleanup *old_cleanups = make_cleanup (record_not_record_cleanups, 0);
-  record_not_record = 1;
+  struct cleanup *old_cleanups = make_cleanup (in_record_wait_cleanups, 0);
+  in_record_wait = 1;
 }
 
 static void
@@ -483,6 +483,7 @@ record_wait_cleanups (void *ignore)
 static ptid_t
 record_wait (ptid_t ptid, struct target_waitstatus *status)
 {
+  in_record_wait_set ();
   if (record_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
@@ -696,10 +697,14 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 				      paddr_nz ((CORE_ADDR)record_list),
 				      record_list->u.reg.num);
 		}
+	      /* MVS: This step fetches the reg from the target.  */
 	      regcache_cooked_read (regcache, record_list->u.reg.num, reg);
+	      /* MVS: This step writes the execution log reg to the target.  */
 	      regcache_cooked_write (regcache, record_list->u.reg.num,
 				     record_list->u.reg.val);
+	      /* MVS: And this step saves the target reg in the exec log.  */
 	      memcpy (record_list->u.reg.val, reg, MAX_REGISTER_SIZE);
+	      /* MVS: Net result -- swap.  */
 	    }
 	  else if (record_list->type == record_mem)
 	    {
@@ -713,6 +718,8 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 				      paddr_nz (record_list->u.mem.addr),
 				      record_list->u.mem.len);
 		}
+
+	      /* MVS: This step fetches 'mem' from the target.  */
 	      if (target_read_memory
 		  (record_list->u.mem.addr, mem, record_list->u.mem.len))
 		{
@@ -720,6 +727,8 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 			 paddr_nz (record_list->u.mem.addr),
 			 record_list->u.mem.len);
 		}
+
+	      /* MVS: This step writes from the exec log to the target.  */
 	      if (target_write_memory
 		  (record_list->u.mem.addr, record_list->u.mem.val,
 		   record_list->u.mem.len))
@@ -729,7 +738,9 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 			 paddr_nz (record_list->u.mem.addr),
 			 record_list->u.mem.len);
 		}
+	      /* MVS: And this step writes target 'mem' to the exec log.  */
 	      memcpy (record_list->u.mem.val, mem, record_list->u.mem.len);
+	      /* MVS: Net result: swap.  */
 	    }
 	  else
 	    {
@@ -937,7 +948,7 @@ record_registers_change (struct regcache *regcache, int regnum)
 static void
 record_store_registers (struct regcache *regcache, int regno)
 {
-  if (!record_not_record)
+  if (!in_record_wait)
     {
       if (RECORD_IS_REPLAY)
 	{
@@ -1000,7 +1011,7 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte * readbuf,
 		     const gdb_byte * writebuf, ULONGEST offset, LONGEST len)
 {
-  if (!record_not_record
+  if (!in_record_wait
       && (object == TARGET_OBJECT_MEMORY
 	  || object == TARGET_OBJECT_RAW_MEMORY) && writebuf)
     {
@@ -1058,7 +1069,6 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 	  record_insn_num++;
 	}
     }
-
   return record_beneath_to_xfer_partial (ops, object, annex, readbuf,
 					 writebuf, offset, len);
 }
@@ -1071,7 +1081,7 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 static int
 record_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
-  if (!RECORD_IS_REPLAY)
+  if (!RECORD_IS_USED)
     {
       return record_beneath_to_insert_breakpoint (bp_tgt);
     }
@@ -1082,7 +1092,7 @@ record_insert_breakpoint (struct bp_target_info *bp_tgt)
 static int
 record_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
-  if (!RECORD_IS_REPLAY)
+  if (!RECORD_IS_USED)
     {
       return record_beneath_to_remove_breakpoint (bp_tgt);
     }

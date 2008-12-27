@@ -80,7 +80,6 @@ extern int record_arch_list_add_reg (int num);
 extern int record_arch_list_add_mem (CORE_ADDR addr, int len);
 extern int record_arch_list_add_end (int need_dasm);
 extern void record_message (struct gdbarch *gdbarch);
-extern void record_not_record_set (void);
 
 extern void (*record_beneath_to_resume) (ptid_t, int, enum target_signal);
 extern ptid_t (*record_beneath_to_wait) (ptid_t, struct target_waitstatus *);

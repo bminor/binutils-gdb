@@ -1,5 +1,15 @@
 2008-12-26  Michael Snyder  <msnyder@vmware.com>
 
+	* record.h: Don't export record_not_record.
+	* infrun.c (proceed): Don't call record_not_record_set.
+	* record.h (record_not_record): Rename to in_record_wait.
+	(record_not_record_set): Rename to in_record_wait_set.
+	(record_not_record_cleanup): Rename to in_record_wait_cleanup.
+	(record_store_registers): Check in_record_wait flag.
+	(record_xfer_partial): Ditto.
+
+2008-12-26  Michael Snyder  <msnyder@vmware.com>
+
 	* Marker: adding teawater patches to branch.
 
 2008-12-26  Sandra Loosemore  <sandra@codesourcery.com>

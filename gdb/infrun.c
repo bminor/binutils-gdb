@@ -1312,12 +1312,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   if (step < 0)
     stop_after_trap = 1;
 
-   /* When GDB resume the inferior, process record target doesn't need to
-      record the memory and register store operation of GDB. So set
-      record_not_record to 1. */
-  if (RECORD_IS_USED)
-    record_not_record_set ();
-
   if (addr == (CORE_ADDR) -1)
     {
       if (pc == stop_pc && breakpoint_here_p (pc) 
