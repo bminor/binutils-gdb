@@ -3509,8 +3509,7 @@ This method has been replaced by @code{gdbarch_push_dummy_code}
 @item int gdbarch_cannot_fetch_register (@var{gdbarch}, @var{regum})
 @findex gdbarch_cannot_fetch_register
 This function should return nonzero if @var{regno} cannot be fetched
-from an inferior process.  This is only relevant if
-@code{FETCH_INFERIOR_REGISTERS} is not defined.
+from an inferior process.
 
 @item int gdbarch_cannot_store_register (@var{gdbarch}, @var{regnum})
 @findex gdbarch_cannot_store_register
@@ -3524,6 +3523,11 @@ default so that @value{GDBN} will assume that all registers may be written.
 Return non-zero if register @var{regnum} represents data values of type
 @var{type} in a non-standard form.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
+
+@item int gdbarch_fp0_regnum (@var{gdbarch})
+@findex gdbarch_fp0_regnum
+This function returns the number of the first floating point register,
+if the machine has such registers.  Otherwise, it returns -1.
 
 @item CORE_ADDR gdbarch_decr_pc_after_break (@var{gdbarch})
 @findex gdbarch_decr_pc_after_break
@@ -4516,37 +4520,6 @@ target systems are the same.  These macros should be defined (or left
 undefined) in @file{nm-@var{system}.h}.
 
 @table @code
-
-@item CHILD_PREPARE_TO_STORE
-@findex CHILD_PREPARE_TO_STORE
-If the machine stores all registers at once in the child process, then
-define this to ensure that all values are correct.  This usually entails
-a read from the child.
-
-[Note that this is incorrectly defined in @file{xm-@var{system}.h} files
-currently.]
-
-@item FETCH_INFERIOR_REGISTERS
-@findex FETCH_INFERIOR_REGISTERS
-Define this if the native-dependent code will provide its own routines
-@code{fetch_inferior_registers} and @code{store_inferior_registers} in
-@file{@var{host}-nat.c}.  If this symbol is @emph{not} defined, and
-@file{infptrace.c} is included in this configuration, the default
-routines in @file{infptrace.c} are used for these functions.
-
-@item int gdbarch_fp0_regnum (@var{gdbarch})
-@findex gdbarch_fp0_regnum
-This functions normally returns the number of the first floating
-point register, if the machine has such registers.  As such, it would
-appear only in target-specific code.  However, @file{/proc} support uses this
-to decide whether floats are in use on this target.
-
-@item int gdbarch_get_longjmp_target (@var{gdbarch})
-@findex gdbarch_get_longjmp_target
-This function determines the target PC address that @code{longjmp} will jump to,
-assuming that we have just stopped at a longjmp breakpoint.  It takes a
-@code{CORE_ADDR *} as argument, and stores the target PC value through this
-pointer.  It examines the current state of the machine as needed.
 
 @item I386_USE_GENERIC_WATCHPOINTS
 An x86-based machine can define this to use the generic x86 watchpoint
