@@ -711,16 +711,18 @@ create_range_type (struct type *result_type, struct type *index_type,
   else
     TYPE_LENGTH (result_type) = TYPE_LENGTH (check_typedef (index_type));
   TYPE_NFIELDS (result_type) = 2;
-  TYPE_FIELDS (result_type) = (struct field *)
-    TYPE_ALLOC (result_type, 2 * sizeof (struct field));
-  memset (TYPE_FIELDS (result_type), 0, 2 * sizeof (struct field));
-  TYPE_FIELD_BITPOS (result_type, 0) = low_bound;
-  TYPE_FIELD_BITPOS (result_type, 1) = high_bound;
+  TYPE_FIELDS (result_type) = TYPE_ALLOC (result_type,
+					  TYPE_NFIELDS (result_type)
+					  * sizeof (struct field));
+  memset (TYPE_FIELDS (result_type), 0,
+	  TYPE_NFIELDS (result_type) * sizeof (struct field));
+  TYPE_LOW_BOUND (result_type) = low_bound;
+  TYPE_HIGH_BOUND (result_type) = high_bound;
 
   if (low_bound >= 0)
     TYPE_UNSIGNED (result_type) = 1;
 
-  return (result_type);
+  return result_type;
 }
 
 /* Set *LOWP and *HIGHP to the lower and upper bounds of discrete type
@@ -831,7 +833,7 @@ create_array_type (struct type *result_type,
   TYPE_FIELDS (result_type) =
     (struct field *) TYPE_ALLOC (result_type, sizeof (struct field));
   memset (TYPE_FIELDS (result_type), 0, sizeof (struct field));
-  TYPE_FIELD_TYPE (result_type, 0) = range_type;
+  TYPE_INDEX_TYPE (result_type) = range_type;
   TYPE_VPTR_FIELDNO (result_type) = -1;
 
   /* TYPE_FLAG_TARGET_STUB will take care of zero length arrays */
@@ -1517,15 +1519,15 @@ check_typedef (struct type *type)
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_ARRAY
 	       && TYPE_NFIELDS (type) == 1
-	       && (TYPE_CODE (range_type = TYPE_FIELD_TYPE (type, 0))
+	       && (TYPE_CODE (range_type = TYPE_INDEX_TYPE (type))
 		   == TYPE_CODE_RANGE))
 	{
 	  /* Now recompute the length of the array type, based on its
 	     number of elements and the target type's length.
 	     Watch out for Ada null Ada arrays where the high bound
 	     is smaller than the low bound.  */
-	  const int low_bound = TYPE_FIELD_BITPOS (range_type, 0);
-	  const int high_bound = TYPE_FIELD_BITPOS (range_type, 1);
+	  const int low_bound = TYPE_LOW_BOUND (range_type);
+	  const int high_bound = TYPE_HIGH_BOUND (range_type);
 	  int nb_elements;
 	
 	  if (high_bound < low_bound)

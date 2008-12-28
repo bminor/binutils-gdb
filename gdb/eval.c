@@ -824,7 +824,7 @@ evaluate_subexp_standard (struct type *expect_type,
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
 	  && TYPE_CODE (type) == TYPE_CODE_ARRAY)
 	{
-	  struct type *range_type = TYPE_FIELD_TYPE (type, 0);
+	  struct type *range_type = TYPE_INDEX_TYPE (type);
 	  struct type *element_type = TYPE_TARGET_TYPE (type);
 	  struct value *array = allocate_value (expect_type);
 	  int element_size = TYPE_LENGTH (check_typedef (element_type));

@@ -1,3 +1,28 @@
+2008-12-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix TYPE_HIGH_BOUND for TYPE_CODE_RANGE using arbitrary TYPE_NFIELDS in
+	preparation for supporting DW_AT_byte_stride.
+	* ada-lang.c (packed_array_type, ada_index_type): Use TYPE_INDEX_TYPE.
+	(ada_array_bound_from_type): Move `index_type' declaration to the
+	function start.  New variable `retval'.  Return the bounds for
+	TYPE_CODE_RANGE using TYPE_LOW_BOUND and TYPE_HIGH_BOUND.  Abort on
+	invalid index type codes.
+	* ada-typeprint.c (print_range): Set `upper_bound' for TYPE_CODE_RANGE
+	now using TYPE_HIGH_BOUND.
+	* ada-valprint.c (val_print_packed_array_elements): Use `index_type'.
+	* eval.c (evaluate_subexp_standard): Use TYPE_INDEX_TYPE.
+	* gdbtypes.c (create_range_type): Use TYPE_LOW_BOUND, TYPE_HIGH_BOUND,
+	refer to the number of fields only through TYPE_NFIELDS.
+	(create_array_type): Use TYPE_INDEX_TYPE.
+	(check_typedef): Use TYPE_INDEX_TYPE, TYPE_LOW_BOUND, TYPE_HIGH_BOUND.
+	* gdbtypes.h (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED)
+	(TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED): Use TYPE_INDEX_TYPE.
+	(TYPE_ARRAY_UPPER_BOUND_VALUE, TYPE_ARRAY_LOWER_BOUND_VALUE): Use
+	TYPE_INDEX_TYPE, TYPE_LOW_BOUND, TYPE_HIGH_BOUND,
+	* hppa-tdep.c (hppa_alignof <TYPE_CODE_ARRAY>): Use TYPE_INDEX_TYPE.
+	* mdebugread.c (parse_type): Use TYPE_LOW_BOUND, TYPE_HIGH_BOUND,
+	* valarith.c (value_bit_index): Use TYPE_INDEX_TYPE.
+
 2008-12-26  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* breakpoint.c (update_watchpoint): Refactor to avoid compiler

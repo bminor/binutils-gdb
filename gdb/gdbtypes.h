@@ -815,15 +815,15 @@ extern void allocate_cplus_struct_type (struct type *);
 /* Moto-specific stuff for FORTRAN arrays */
 
 #define TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED(arraytype) \
-   (TYPE_FIELD_ARTIFICIAL((TYPE_FIELD_TYPE((arraytype),0)),1))
+   (TYPE_FIELD_ARTIFICIAL(TYPE_INDEX_TYPE((arraytype)),1))
 #define TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED(arraytype) \
-   (TYPE_FIELD_ARTIFICIAL((TYPE_FIELD_TYPE((arraytype),0)),0))
+   (TYPE_FIELD_ARTIFICIAL(TYPE_INDEX_TYPE((arraytype)),0))
 
 #define TYPE_ARRAY_UPPER_BOUND_VALUE(arraytype) \
-   (TYPE_FIELD_BITPOS((TYPE_FIELD_TYPE((arraytype),0)),1))
+   (TYPE_HIGH_BOUND(TYPE_INDEX_TYPE((arraytype))))
 
 #define TYPE_ARRAY_LOWER_BOUND_VALUE(arraytype) \
-   (TYPE_FIELD_BITPOS((TYPE_FIELD_TYPE((arraytype),0)),0))
+   (TYPE_LOW_BOUND(TYPE_INDEX_TYPE((arraytype))))
 
 /* C++ */
 

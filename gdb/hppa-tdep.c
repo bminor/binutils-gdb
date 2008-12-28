@@ -1313,7 +1313,7 @@ hppa_alignof (struct type *type)
     case TYPE_CODE_FLT:
       return TYPE_LENGTH (type);
     case TYPE_CODE_ARRAY:
-      return hppa_alignof (TYPE_FIELD_TYPE (type, 0));
+      return hppa_alignof (TYPE_INDEX_TYPE (type));
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       max_align = 1;

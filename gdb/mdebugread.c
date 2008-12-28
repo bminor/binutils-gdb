@@ -1644,11 +1644,11 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 			  TYPE_ALLOC (tp, 2 * sizeof (struct field)));
       TYPE_FIELD_NAME (tp, 0) = obsavestring ("Low", strlen ("Low"),
 					    &current_objfile->objfile_obstack);
-      TYPE_FIELD_BITPOS (tp, 0) = AUX_GET_DNLOW (bigend, ax);
+      TYPE_LOW_BOUND (tp) = AUX_GET_DNLOW (bigend, ax);
       ax++;
       TYPE_FIELD_NAME (tp, 1) = obsavestring ("High", strlen ("High"),
 					    &current_objfile->objfile_obstack);
-      TYPE_FIELD_BITPOS (tp, 1) = AUX_GET_DNHIGH (bigend, ax);
+      TYPE_HIGH_BOUND (tp) = AUX_GET_DNHIGH (bigend, ax);
       ax++;
     }
 

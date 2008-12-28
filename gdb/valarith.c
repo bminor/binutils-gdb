@@ -1557,7 +1557,7 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
   LONGEST low_bound, high_bound;
   LONGEST word;
   unsigned rel_index;
-  struct type *range = TYPE_FIELD_TYPE (type, 0);
+  struct type *range = TYPE_INDEX_TYPE (type);
   if (get_discrete_bounds (range, &low_bound, &high_bound) < 0)
     return -2;
   if (index < low_bound || index > high_bound)

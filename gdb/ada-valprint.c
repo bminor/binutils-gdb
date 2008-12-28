@@ -162,7 +162,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 
   {
     LONGEST high;
-    if (get_discrete_bounds (TYPE_FIELD_TYPE (type, 0), &low, &high) < 0)
+    if (get_discrete_bounds (index_type, &low, &high) < 0)
       len = 1;
     else
       len = high - low + 1;
