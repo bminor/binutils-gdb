@@ -25,16 +25,16 @@
 #include <stdint.h>
 
 /* These macros are the values of the first argument of system call
-   "sys_ptrace". The values of these macros are gotten from Linux Kernel
-   source.  */
+   "sys_ptrace".  The values of these macros were obtained from Linux 
+   Kernel source.  */
 
 #define RECORD_PTRACE_PEEKTEXT	1
 #define RECORD_PTRACE_PEEKDATA	2
 #define RECORD_PTRACE_PEEKUSR	3
 
 /* These macros are the values of the first argument of system call
-   "sys_socketcall". The values of these macros are gotten from Linux Kernel
-   source.  */
+   "sys_socketcall".  The values of these macros were obtained from 
+   Linux Kernel source.  */
 
 #define RECORD_SYS_SOCKET	1
 #define RECORD_SYS_BIND		2
@@ -55,8 +55,8 @@
 #define RECORD_SYS_RECVMSG	17
 
 /* These macros are the values of the first argument of system call
-   "sys_ipc". The values of these macros are gotten from Linux Kernel source.
- */
+   "sys_ipc".  The values of these macros were obtained from Linux 
+   Kernel source.  */
 
 #define RECORD_SEMOP		1
 #define RECORD_SEMGET		2
@@ -72,23 +72,25 @@
 #define RECORD_SHMCTL		24
 
 /* These macros are the values of the first argument of system call
-   "sys_quotactl". The values of these macros are gotten from Linux Kernel
-   source.  */
+   "sys_quotactl".  The values of these macros were obtained from Linux
+   Kernel source.  */
 
 #define RECORD_Q_GETFMT		0x800004
 #define RECORD_Q_GETINFO	0x800005
 #define RECORD_Q_GETQUOTA	0x800007
-#define RECORD_Q_XGETQSTAT	(('5'<<8)+(5))
-#define RECORD_Q_XGETQUOTA	(('3'<<8)+(3))
+#define RECORD_Q_XGETQSTAT	(('5' << 8) + 5)
+#define RECORD_Q_XGETQUOTA	(('3' << 8) + 3)
 
-/* When the architecture process record get a Linux syscall instruction, it
-   will get a Linux syscall number of this architecture and convert it to the
-   Linux syscall number "num" which is internal to GDB.
-   Most Linux syscalls across architectures in Linux would be similar and
-   mostly differ by sizes of types and structures.  This sizes are put
-   to "tdep".
-   Record the values of the registers and memory that will be changed in
-   current system call.
+/* When the architecture process record get a Linux syscall
+   instruction, it will get a Linux syscall number of this
+   architecture and convert it to the Linux syscall number "num" which
+   is internal to GDB.  Most Linux syscalls across architectures in
+   Linux would be similar and mostly differ by sizes of types and
+   structures.  This sizes are put to "tdep".
+
+   Record the values of the registers and memory that will be changed
+   in current system call.
+
    Return -1 if something wrong.  */
 
 int
@@ -275,7 +277,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 
       /* sys_ioctl */
     case 54:
-      /* XXX there need add a lot of support of other ioctl requests.  */
+      /* XXX Need to add a lot of support of other ioctl requests.  */
       regcache_raw_read (record_regcache, tdep->arg2, (gdb_byte *) & tmpu32);
       if (tmpu32 == tdep->ioctl_FIOCLEX || tmpu32 == tdep->ioctl_FIONCLEX
 	  || tmpu32 == tdep->ioctl_FIONBIO || tmpu32 == tdep->ioctl_FIOASYNC
@@ -1278,7 +1280,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	{
 	  regcache_raw_read (record_regcache, tdep->arg3,
 			     (gdb_byte *) & tmpu32);
-	  /*XXX the size of memory is not very clear */
+	  /*XXX the size of memory is not very clear.  */
 	  if (record_arch_list_add_mem (tmpu32, 10))
 	    {
 	      return (-1);

@@ -292,13 +292,13 @@ record_check_insn_num (int set_terminal)
       gdb_assert (record_insn_num <= record_insn_max_num);
       if (record_insn_num == record_insn_max_num)
 	{
-	  /* Ask user what to do */
+	  /* Ask user what to do.  */
 	  if (record_stop_at_limit)
 	    {
 	      int q;
 	      if (set_terminal)
 		target_terminal_ours ();
-	      q = yquery (_("Do you want to auto delete previous execute log entries when record/replay buffer becomes full (record-stop-at-limit)?"));
+	      q = yquery (_("Do you want to auto delete previous execution log entries when record/replay buffer becomes full (record-stop-at-limit)?"));
 	      if (set_terminal)
 		target_terminal_inferior ();
 	      if (q)
@@ -365,7 +365,7 @@ record_message (struct gdbarch *gdbarch)
 }
 
 /* Things to clean up if we error or QUIT out of function that set
-   in_record_wait (ie. command that called 'proceed').  */
+   in_record_wait (ie. command that caused target_wait to be called).  */
 static void
 in_record_wait_cleanups (void *ignore)
 {
@@ -406,7 +406,7 @@ record_open (char *name, int from_tty)
       error (_("Process record: the current architecture doesn't support record function."));
     }
 
-  /* Check if record target is already running */
+  /* Check if record target is already running.  */
   if (RECORD_IS_USED)
     {
       if (!nquery
@@ -582,9 +582,9 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 		  is_breakpoint = 0;
 
 		breakpoint:
-		  /* Add gdbarch_decr_pc_after_break to pc because pc will
-		     be break at address add gdbarch_decr_pc_after_break
-		     when inferior non-step execute.  */
+		  /* Add gdbarch_decr_pc_after_break to pc because gdb will
+		     expect the pc to be at address plus decr_pc_after_break
+		     when the inferior stops at a breakpoint.  */
 		  if (is_breakpoint)
 		    {
 		      CORE_ADDR decr_pc_after_break =
@@ -653,13 +653,13 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	{
 	  perror_with_name (_("Process record: sigaction failed"));
 	}
-      /* If GDB is in terminal_inferior, it will not get the signal.
-         And in GDB replay mode, GDB doesn't need to in terminal_inferior
-         because inferior will not executed.
+      /* If GDB is in terminal_inferior mode, it will not get the signal.
+         And in GDB replay mode, GDB doesn't need to be in terminal_inferior
+         mode, because inferior will not executed.
          Then set it to terminal_ours to make GDB get the signal.  */
       target_terminal_ours ();
 
-      /* In EXEC_FORWARD mode, record_list point to the tail of prev
+      /* In EXEC_FORWARD mode, record_list points to the tail of prev
          instruction.  */
       if (execution_direction == EXEC_FORWARD && record_list->next)
         {
@@ -685,7 +685,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	      break;
 	    }
 
-	  /* set ptid, register and memory according to record_list */
+	  /* Set ptid, register and memory according to record_list.  */
 	  if (record_list->type == record_reg)
 	    {
 	      /* reg */
@@ -697,14 +697,10 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 				      paddr_nz ((CORE_ADDR)record_list),
 				      record_list->u.reg.num);
 		}
-	      /* MVS: This step fetches the reg from the target.  */
 	      regcache_cooked_read (regcache, record_list->u.reg.num, reg);
-	      /* MVS: This step writes the execution log reg to the target.  */
 	      regcache_cooked_write (regcache, record_list->u.reg.num,
 				     record_list->u.reg.val);
-	      /* MVS: And this step saves the target reg in the exec log.  */
 	      memcpy (record_list->u.reg.val, reg, MAX_REGISTER_SIZE);
-	      /* MVS: Net result -- swap.  */
 	    }
 	  else if (record_list->type == record_mem)
 	    {
@@ -719,7 +715,6 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 				      record_list->u.mem.len);
 		}
 
-	      /* MVS: This step fetches 'mem' from the target.  */
 	      if (target_read_memory
 		  (record_list->u.mem.addr, mem, record_list->u.mem.len))
 		{
@@ -728,7 +723,6 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 			 record_list->u.mem.len);
 		}
 
-	      /* MVS: This step writes from the exec log to the target.  */
 	      if (target_write_memory
 		  (record_list->u.mem.addr, record_list->u.mem.val,
 		   record_list->u.mem.len))
@@ -738,9 +732,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 			 paddr_nz (record_list->u.mem.addr),
 			 record_list->u.mem.len);
 		}
-	      /* MVS: And this step writes target 'mem' to the exec log.  */
 	      memcpy (record_list->u.mem.val, mem, record_list->u.mem.len);
-	      /* MVS: Net result: swap.  */
 	    }
 	  else
 	    {
@@ -778,7 +770,8 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 		    {
 		      if (record_debug > 1)
 			{
-			  fprintf_unfiltered (gdb_stdlog, "Process record: step.\n");
+			  fprintf_unfiltered (gdb_stdlog, 
+					      "Process record: step.\n");
 			}
 		      continue_flag = 0;
 		    }
@@ -882,7 +875,7 @@ record_mourn_inferior (struct target_ops *ops)
   target_mourn_inferior ();
 }
 
-/* Close process record target before kill the inferior process.  */
+/* Close process record target before killing the inferior process.  */
 static void
 record_kill (void)
 {
@@ -955,25 +948,25 @@ record_store_registers (struct regcache *regcache, int regno)
 	  int n;
 	  struct cleanup *old_cleanups;
 
-	  /* Let user choice if he want to write register or not.  */
+	  /* Let user choose if he wants to write register or not.  */
 	  if (regno < 0)
 	    {
 	      n =
 		nquery (_
-			("Becuse GDB is in replay mode, changing the value of a register will make the execute log unusable from this point onward.  Change all register?"));
+			("Because GDB is in replay mode, changing the value of a register will make the execution log unusable from this point onward.  Change all registers?"));
 	    }
 	  else
 	    {
 	      n =
 		nquery (_
-			("Becuse GDB is in replay mode, changing the value of a register will make the execute log unusable from this point onward.  Change register %s?"),
+			("Because GDB is in replay mode, changing the value of a register will make the execution log unusable from this point onward.  Change register %s?"),
 			gdbarch_register_name (get_regcache_arch (regcache),
 					       regno));
 	    }
 
 	  if (!n)
 	    {
-	      /* Invalidate the value of regcache that set in function
+	      /* Invalidate the value of regcache that was set in function
 	         "regcache_raw_write".  */
 	      if (regno < 0)
 		{
@@ -1017,8 +1010,8 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
     {
       if (RECORD_IS_REPLAY)
 	{
-	  /* Let user choice if he want to write memory or not.  */
-	  if (!nquery (_("Because GDB is in replay mode, writing to memory will make the execute log unusable from this point onward.  Write memory at address 0x%s?"),
+	  /* Let user choose if he wants to write memory or not.  */
+	  if (!nquery (_("Because GDB is in replay mode, writing to memory will make the execution log unusable from this point onward.  Write memory at address 0x%s?"),
 		       paddr_nz (offset)))
 	    {
 	      return -1;
@@ -1075,8 +1068,9 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 
 /* record_insert_breakpoint
    record_remove_breakpoint
-   Behavior is conditional on RECORD_IS_REPLAY.
-   We will not actually insert or remove breakpoints when replaying.  */
+   Behavior is conditional on RECORD_IS_USED.
+   We will not actually insert or remove breakpoints when replaying,
+   nor when recording.  */
 
 static int
 record_insert_breakpoint (struct bp_target_info *bp_tgt)
@@ -1121,7 +1115,7 @@ init_record_ops (void)
   record_ops.to_detach = record_detach;
   record_ops.to_mourn_inferior = record_mourn_inferior;
   record_ops.to_kill = record_kill;
-  record_ops.to_create_inferior = find_default_create_inferior;	/* Make record suppport command "run".  */
+  record_ops.to_create_inferior = find_default_create_inferior;	/* Make record support command "run".  */
   record_ops.to_store_registers = record_store_registers;
   record_ops.to_xfer_partial = record_xfer_partial;
   record_ops.to_insert_breakpoint = record_insert_breakpoint;
@@ -1135,7 +1129,8 @@ static void
 show_record_debug (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging of process record target is %s.\n"), value);
+  fprintf_filtered (file, _("Debugging of process record target is %s.\n"), 
+		    value);
 }
 
 /* cmd_record_start -- alias for "target record".  */

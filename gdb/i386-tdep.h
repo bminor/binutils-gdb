@@ -107,8 +107,9 @@ struct gdbarch_tdep
   struct type *i386_mmx_type;
   struct type *i386_sse_type;
 
-  int (*i386_intx80_record) (void);
-  int (*i386_sysenter_record) (void);
+  /* Process record/replay target.  */
+  int (*i386_intx80_record) (void);	/* Parse intx80 args.  */
+  int (*i386_sysenter_record) (void);	/* Parse sysenter args.  */
 };
 
 /* Floating-point registers.  */

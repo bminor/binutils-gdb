@@ -1,3 +1,7 @@
+2008-12-28  Michael Snyder  <msnyder@vmware.com>
+
+	* Comments, spelling, white space clean-ups.
+
 2008-12-26  Michael Snyder  <msnyder@vmware.com>
 
 	* record.h: Don't export record_not_record.

@@ -789,7 +789,7 @@ extern void set_gdbarch_static_transform_name (struct gdbarch *gdbarch, gdbarch_
 extern int gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch);
 extern void set_gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch, int sofun_address_maybe_missing);
 
-/* For the process record and replay target */
+/* For the process record and replay target. */
 
 extern int gdbarch_process_record_p (struct gdbarch *gdbarch);
 

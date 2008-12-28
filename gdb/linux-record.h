@@ -22,7 +22,7 @@
 
 typedef struct linux_record_tdep_s
 {
-  /* The size of the type that will be use in system call.  */
+  /* The size of the type that will be used in a system call.  */
   int size__old_kernel_stat;
   int size_tms;
   int size_loff_t;
@@ -91,7 +91,7 @@ typedef struct linux_record_tdep_s
   int size_serial_icounter_struct;
   int size_hayes_esp_config;
 
-  /* the values of the second argument of system call "sys_ioctl".  */
+  /* The values of the second argument of system call "sys_ioctl".  */
   int ioctl_TCGETS;
   int ioctl_TCSETS;
   int ioctl_TCSETSW;
@@ -158,7 +158,8 @@ typedef struct linux_record_tdep_s
   int ioctl_TIOCSHAYESESP;
   int ioctl_FIOQSIZE;
 
-  /* The number of the registers that use to be the arguments of system call.  */
+  /* The number of the registers that are used as the arguments of 
+     a system call.  */
   int arg1;
   int arg2;
   int arg3;

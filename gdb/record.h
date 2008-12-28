@@ -46,10 +46,12 @@ enum record_type
 };
 
 /* This is the core struct of record function.
+
    An entity of record_t is a record of the value change of a register
-   ("record_reg") or a part of memory ("record_mem"). And Each instruction must
-   has a record_t ("record_end") that point out this is the last record_t of
-   this instruction.
+   ("record_reg") or a part of memory ("record_mem").  And each
+   instruction must has a record_t ("record_end") that points out this
+   is the last record_t of this instruction.
+
    Each record_t is linked to "record_list" by "prev" and "next".
  */
 typedef struct record_s

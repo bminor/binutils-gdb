@@ -698,7 +698,7 @@ F:char *:static_transform_name:char *name:name
 # Set if the address in N_SO or N_FUN stabs may be zero.
 v:int:sofun_address_maybe_missing:::0:0::0
 
-# For the process record and replay target
+# For the process record and replay target.
 M:int:process_record:CORE_ADDR addr:addr
 M:void:process_record_dasm:void
 
