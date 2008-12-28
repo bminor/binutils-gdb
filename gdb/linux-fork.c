@@ -387,6 +387,40 @@ linux_fork_mourn_inferior (void)
     delete_fork (inferior_ptid);
 }
 
+/* The current inferior_ptid is being detached, but there are other
+   viable forks to debug.  Detach and delete it and context-switch to
+   the first available.  */
+
+extern void
+linux_fork_detach (char *args, int from_tty)
+{
+  /* OK, inferior_ptid is the one we are detaching from.  We need to
+     delete it from the fork_list, and switch to the next available
+     fork.  */
+
+  if (ptrace (PTRACE_DETACH, PIDGET (inferior_ptid), 0, 0))
+    error (_("Unable to detach %s"), target_pid_to_str (inferior_ptid));
+
+  delete_fork (inferior_ptid);
+  /* Delete process from GDB's inferior list.  */
+  delete_inferior (ptid_get_pid (inferior_ptid));
+
+  /* There should still be a fork - if there's only one left,
+     delete_fork won't remove it, because we haven't updated
+     inferior_ptid yet.  */
+  gdb_assert (fork_list);
+
+  fork_load_infrun_state (fork_list);
+
+  if (from_tty)
+    printf_filtered (_("[Switching to %s]\n"),
+		     target_pid_to_str (inferior_ptid));
+
+  /* If there's only one fork, switch back to non-fork mode.  */
+  if (fork_list->next == NULL)
+    delete_fork (inferior_ptid);
+}
+
 /* Fork list <-> user interface.  */
 
 static void

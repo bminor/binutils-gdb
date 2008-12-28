@@ -1,3 +1,17 @@
+2008-12-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-fork.c (linux_fork_detach): New.
+	* linux-fork.h (linux_fork_detach): Declare.
+	* linux-nat.c (linux_child_follow_fork): When following the fork
+	child, add the child inferior before possibly detaching from the
+	parent.  Don't reinstall ourselves.
+	(linux_nat_detach): Call linux_fork_detach if there are other
+	forks to debug.
+	* linux-thread-db.c (thread_db_detach): Don't call
+	target_mourn_inferior.  Instead inline the necessary bits.
+	* inf-ptrace.c (inf_ptrace_detach): Don't unpush the target if
+	there are other inferiors to debug.
+
 2008-12-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix TYPE_HIGH_BOUND for TYPE_CODE_RANGE using arbitrary TYPE_NFIELDS in

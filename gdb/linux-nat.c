@@ -826,6 +826,11 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 			    child_pid);
 	}
 
+      /* Add the new inferior first, so that the target_detach below
+	 doesn't unpush the target.  */
+
+      add_inferior (child_pid);
+
       /* If we're vforking, we may want to hold on to the parent until
 	 the child exits or execs.  At exec time we can remove the old
 	 breakpoints from the parent and detach it; at exit time we
@@ -868,12 +873,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 	target_detach (NULL, 0);
 
       inferior_ptid = ptid_build (child_pid, child_pid, 0);
-      add_inferior (child_pid);
 
-      /* Reinstall ourselves, since we might have been removed in
-	 target_detach (which does other necessary cleanup).  */
-
-      push_target (ops);
       linux_nat_switch_fork (inferior_ptid);
       check_for_thread_db ();
 
@@ -1621,12 +1621,24 @@ linux_nat_detach (struct target_ops *ops, char *args, int from_tty)
   /* Destroy LWP info; it's no longer valid.  */
   init_lwp_list ();
 
-  pid = GET_PID (inferior_ptid);
-  inferior_ptid = pid_to_ptid (pid);
-  linux_ops->to_detach (ops, args, from_tty);
+  pid = ptid_get_pid (inferior_ptid);
 
   if (target_can_async_p ())
     drain_queued_events (pid);
+
+  if (forks_exist_p ())
+    {
+      /* Multi-fork case.  The current inferior_ptid is being detached
+	 from, but there are other viable forks to debug.  Detach from
+	 the current fork, and context-switch to the first
+	 available.  */
+      linux_fork_detach (args, from_tty);
+
+      if (non_stop && target_can_async_p ())
+ 	target_async (inferior_event_handler, 0);
+    }
+  else
+    linux_ops->to_detach (ops, args, from_tty);
 }
 
 /* Resume LP.  */
