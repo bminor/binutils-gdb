@@ -1851,7 +1851,7 @@ value_struct_elt (struct value **argp, struct value **args,
 }
 
 /* Search through the methods of an object (and its bases) to find a
-   specified method. Return the pointer to the fn_field list of
+   specified method.  Return the pointer to the fn_field list of
    overloaded instances.
 
    Helper function for value_find_oload_list.
