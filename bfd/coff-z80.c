@@ -30,7 +30,7 @@
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER 0
 
 static reloc_howto_type r_imm32 =
-HOWTO (R_IMM32, 0, 1, 32, FALSE, 0,
+HOWTO (R_IMM32, 0, 2, 32, FALSE, 0,
        complain_overflow_dont, 0, "r_imm32", TRUE, 0xffffffff, 0xffffffff,
        FALSE);
 
