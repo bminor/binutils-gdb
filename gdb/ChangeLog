@@ -1,3 +1,19 @@
+2008-12-29  Pedro Alves  <pedro@codesourcery.com>
+
+	PR gdb/7536:
+	* valprint.c (input_radix_1): New static global.
+	(set_input_radix): Use it instead of "input_radix".
+	(set_input_radix_1): Always leave input_radix_1 set to
+	input_radix.
+	(output_radix_1): New static global.
+	(set_output_radix): Use it instead of "output_radix".
+	(set_output_radix_1): Always leave output_radix_1 set to
+	output_radix.
+	(_initialize_valprint): Use "input_radix_1" instead of
+	"input_radix" with the "input-radix" command.  Use
+	"output_radix_1" instead of "output_radix" with the "output-radix"
+	command.
+
 2008-12-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-fork.c (linux_fork_detach): New.

@@ -1,3 +1,9 @@
+2008-12-29  Pedro Alves  <pedro@codesourcery.com>
+
+	PR gdb/7536:
+	* gdb.base/radix.exp: Add tests to ensure invalid input radices
+	and unsupported output radices are really rejected.
+
 2008-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/punctuator.exp: Backslash the '$' signs.

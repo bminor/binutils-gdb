@@ -1359,6 +1359,12 @@ val_print_string (CORE_ADDR addr, int len, int width, struct ui_file *stream,
 }
 
 
+/* The 'set input-radix' command writes to this auxiliary variable.
+   If the requested radix is valid, INPUT_RADIX is updated; otherwise,
+   it is left unchanged.  */
+
+static unsigned input_radix_1 = 10;
+
 /* Validate an input or output radix setting, and make sure the user
    knows what they really did here.  Radix setting is confusing, e.g.
    setting the input radix to "10" never changes it!  */
@@ -1366,7 +1372,7 @@ val_print_string (CORE_ADDR addr, int len, int width, struct ui_file *stream,
 static void
 set_input_radix (char *args, int from_tty, struct cmd_list_element *c)
 {
-  set_input_radix_1 (from_tty, input_radix);
+  set_input_radix_1 (from_tty, input_radix_1);
 }
 
 static void
@@ -1381,12 +1387,11 @@ set_input_radix_1 (int from_tty, unsigned radix)
 
   if (radix < 2)
     {
-      /* FIXME: cagney/2002-03-17: This needs to revert the bad radix
-         value.  */
+      input_radix_1 = input_radix;
       error (_("Nonsense input radix ``decimal %u''; input radix unchanged."),
 	     radix);
     }
-  input_radix = radix;
+  input_radix_1 = input_radix = radix;
   if (from_tty)
     {
       printf_filtered (_("Input radix now set to decimal %u, hex %x, octal %o.\n"),
@@ -1394,10 +1399,16 @@ set_input_radix_1 (int from_tty, unsigned radix)
     }
 }
 
+/* The 'set output-radix' command writes to this auxiliary variable.
+   If the requested radix is valid, OUTPUT_RADIX is updated,
+   otherwise, it is left unchanged.  */
+
+static unsigned output_radix_1 = 10;
+
 static void
 set_output_radix (char *args, int from_tty, struct cmd_list_element *c)
 {
-  set_output_radix_1 (from_tty, output_radix);
+  set_output_radix_1 (from_tty, output_radix_1);
 }
 
 static void
@@ -1417,12 +1428,11 @@ set_output_radix_1 (int from_tty, unsigned radix)
       user_print_options.output_format = 'o';	/* octal */
       break;
     default:
-      /* FIXME: cagney/2002-03-17: This needs to revert the bad radix
-         value.  */
+      output_radix_1 = output_radix;
       error (_("Unsupported output radix ``decimal %u''; output radix unchanged."),
 	     radix);
     }
-  output_radix = radix;
+  output_radix_1 = output_radix = radix;
   if (from_tty)
     {
       printf_filtered (_("Output radix now set to decimal %u, hex %x, octal %o.\n"),
@@ -1566,14 +1576,16 @@ Show printing of addresses."), NULL,
 			   show_addressprint,
 			   &setprintlist, &showprintlist);
 
-  add_setshow_uinteger_cmd ("input-radix", class_support, &input_radix, _("\
+  add_setshow_uinteger_cmd ("input-radix", class_support, &input_radix_1,
+			    _("\
 Set default input radix for entering numbers."), _("\
 Show default input radix for entering numbers."), NULL,
 			    set_input_radix,
 			    show_input_radix,
 			    &setlist, &showlist);
 
-  add_setshow_uinteger_cmd ("output-radix", class_support, &output_radix, _("\
+  add_setshow_uinteger_cmd ("output-radix", class_support, &output_radix_1,
+			    _("\
 Set default output radix for printing of values."), _("\
 Show default output radix for printing of values."), NULL,
 			    set_output_radix,
