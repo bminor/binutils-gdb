@@ -607,7 +607,7 @@ use_displaced_stepping (struct gdbarch *gdbarch)
 	    && non_stop)
 	   || can_use_displaced_stepping == can_use_displaced_stepping_on)
 	  && gdbarch_displaced_step_copy_insn_p (gdbarch)
-	  && !RECORD_IS_USED);
+	  && !TARGET_IS_PROCESS_RECORD);
 }
 
 /* Clean out any stray displaced stepping state.  */

@@ -20,7 +20,7 @@
 #ifndef _RECORD_H_
 #define _RECORD_H_
 
-#define RECORD_IS_USED   \
+#define TARGET_IS_PROCESS_RECORD   \
      (current_target.beneath == &record_ops)
 #define RECORD_IS_REPLAY \
      (record_list->next || execution_direction == EXEC_REVERSE)

@@ -407,7 +407,7 @@ record_open (char *name, int from_tty)
     }
 
   /* Check if record target is already running.  */
-  if (RECORD_IS_USED)
+  if (TARGET_IS_PROCESS_RECORD)
     {
       if (!nquery
 	  (_("Process record target already running, do you want to delete the old record log?")))
@@ -510,7 +510,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	      /* This is not a single step.  */
 	      ptid_t ret;
 	      int is_breakpoint = 1;
-	      CORE_ADDR pc;
+	      CORE_ADDR pc = 0;
 	      int pc_is_read = 0;
 	      struct bp_location *bl;
 	      struct breakpoint *b;
@@ -1068,14 +1068,14 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 
 /* record_insert_breakpoint
    record_remove_breakpoint
-   Behavior is conditional on RECORD_IS_USED.
+   Behavior is conditional on TARGET_IS_PROCESS_RECORD.
    We will not actually insert or remove breakpoints when replaying,
    nor when recording.  */
 
 static int
 record_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
-  if (!RECORD_IS_USED)
+  if (!TARGET_IS_PROCESS_RECORD)
     {
       return record_beneath_to_insert_breakpoint (bp_tgt);
     }
@@ -1086,7 +1086,7 @@ record_insert_breakpoint (struct bp_target_info *bp_tgt)
 static int
 record_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
-  if (!RECORD_IS_USED)
+  if (!TARGET_IS_PROCESS_RECORD)
     {
       return record_beneath_to_remove_breakpoint (bp_tgt);
     }
@@ -1147,7 +1147,7 @@ cmd_record_start (char *args, int from_tty)
 static void
 cmd_record_delete (char *args, int from_tty)
 {
-  if (RECORD_IS_USED)
+  if (TARGET_IS_PROCESS_RECORD)
     {
       if (RECORD_IS_REPLAY)
 	{
@@ -1173,7 +1173,7 @@ cmd_record_delete (char *args, int from_tty)
 static void
 cmd_record_stop (char *args, int from_tty)
 {
-  if (RECORD_IS_USED)
+  if (TARGET_IS_PROCESS_RECORD)
     {
       if (!record_list || !from_tty || query (_("Delete recorded log and stop recording?")))
 	{
