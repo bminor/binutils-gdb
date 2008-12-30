@@ -30,6 +30,23 @@ if [istarget cris-*-*] {
 if { [target_compile $srcdir/$subdir/hello.c compilercheck.x \
 	  "executable" "" ] == "" } {
     set has_cc 1
+
+    # Now check if we can link a program dynamically, and where
+    # libc.so is located.  If it is, we provide a sym link to the
+    # directory (which must end in /lib) in [pwd], so /lib/ld.so.1 is
+    # found (which must reside along libc.so).  We don't bother
+    # replacing the board ldflags like below as we don't care about
+    # detrimental effects on the executable from the specs and
+    # -static in the board ldflags, we just add -Bdynamic.
+    if [regexp "(.*/lib)/libc.so" \
+	    [target_compile $srcdir/$subdir/hello.c compilercheck.x \
+		 "executable" \
+		 "ldflags=-print-file-name=libc.so -Wl,-Bdynamic"] \
+	    xxx libcsodir]  {
+	file delete lib 
+	verbose -log "Creating link to $libcsodir in [pwd]"
+	file link lib $libcsodir
+    }
 } {
     verbose -log "Can't execute C compiler"
     set has_cc 0
@@ -48,6 +65,8 @@ proc anytarget { targets } {
 }
 
 foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
+    set orig_ldflags ""
+
     if ![runtest_file_p $runtests $src] {
 	continue
     }
@@ -84,6 +103,7 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     set opts(xfail) ""
     set opts(target) ""
     set opts(notarget) ""
+    set opts(dynamic) ""
 
     # Clear any machine specific options specified in a previous test case
     if [info exists opts(sim,$mach)] {
@@ -118,6 +138,16 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 	    if { $opts($opt_name) != "" } {
 		set opt_val "$opts($opt_name) $opt_val"
 	    }
+	}
+
+	if { $opt_name == "dynamic" \
+		 && [info exists board_info([target_info name],ldflags)] } {
+	    # Weed out -static from ldflags, but keep the original in
+	    # $orig_ldflags.
+	    set orig_ldflags $board_info([target_info name],ldflags)
+	    set ldflags " $orig_ldflags "
+	    regsub -all " -static " $ldflags " " ldflags
+	    set board_info([target_info name],ldflags) $ldflags
 	}
 
 	foreach m $opt_machs {
@@ -158,6 +188,10 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     if { [sim_compile $src $dest "executable" "$opts(cc)" ] != "" } {
 	unresolved $testname
 	continue
+    }
+
+    if { $orig_ldflags != "" } {
+	set board_info([target_info name],ldflags) $orig_ldflags
     }
 
     verbose -log "Simulating $src with $opts(sim,$mach)"

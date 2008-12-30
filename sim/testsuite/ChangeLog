@@ -1,5 +1,14 @@
 2008-12-30  Hans-Peter Nilsson  <hp@axis.com>
 
+	* sim/cris/asm/badarch1.ms, sim/cris/c/badldso1.c,
+	sim/cris/c/badldso2.c, sim/cris/c/badldso3.c,
+	sim/cris/c/helloaout.c, sim/cris/c/hellodyn.c,
+	sim/cris/c/hellodyn2.c, sim/cris/c/writev1.c,
+	sim/cris/c/writev2.c: New tests.
+	* sim/cris/c/c.exp: If compiler links libc.so when attempting to
+	link dynamically, create symlink named "lib" to the directory
+	where it is found.  Handle new test-case option "dynamic".
+
 	* sim/cris/asm/opterr1.ms, sim/cris/asm/opterr2.ms: Adjust for
 	differences in getopt_long error message quoting.
 
