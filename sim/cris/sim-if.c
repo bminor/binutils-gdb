@@ -688,12 +688,10 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 			    : NULL),
 			   abfd) != SIM_RC_OK)
     {
-      if (STATE_PROG_ARGV (sd) != NULL)
-	sim_io_eprintf (sd, "%s: invalid executable `%s'\n",
-			STATE_MY_NAME (sd), *STATE_PROG_ARGV (sd));
-      else
-	sim_io_eprintf (sd, "%s: invalid executable\n",
-			STATE_MY_NAME (sd));
+      /* When there's an error, sim_analyze_program has already output
+	 a message.  Let's just clarify it, as "not an object file"
+	 perhaps doesn't ring a bell.  */
+      sim_io_eprintf (sd, "(not a CRIS program)\n");
       free_state (sd);
       return 0;
     }
@@ -707,7 +705,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   if (bfd_get_arch (abfd) == bfd_arch_unknown)
     {
       if (STATE_PROG_ARGV (sd) != NULL)
-	sim_io_eprintf (sd, "%s: not a CRIS program `%s'\n",
+	sim_io_eprintf (sd, "%s: `%s' is not a CRIS program\n",
 			STATE_MY_NAME (sd), *STATE_PROG_ARGV (sd));
       else
 	sim_io_eprintf (sd, "%s: program to be run is not a CRIS program\n",

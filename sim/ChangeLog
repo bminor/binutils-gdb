@@ -1,5 +1,9 @@
 2008-12-30  Hans-Peter Nilsson  <hp@axis.com>
 
+	* cris/sim-if.c (sim_open): If sim_analyze_program fails, emit
+	just a short CRIS-specific notice.  Tweak the wording for a
+	failing architecture test.
+
 	* cris/traps.c (TARGET_SYS_writev): New macro.
 	(is_mapped_only, cris_dump_map): New functions.
 	(cris_break_13_handler) <case TARGET_SYS_mmap2>: Handle more flags
