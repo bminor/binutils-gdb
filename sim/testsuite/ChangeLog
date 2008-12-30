@@ -1,5 +1,7 @@
 2008-12-30  Hans-Peter Nilsson  <hp@axis.com>
 
+	* sim/cris/asm/badarch1.ms: Tweak error message match.
+
 	* sim/cris/asm/badarch1.ms, sim/cris/c/badldso1.c,
 	sim/cris/c/badldso2.c, sim/cris/c/badldso3.c,
 	sim/cris/c/helloaout.c, sim/cris/c/hellodyn.c,
