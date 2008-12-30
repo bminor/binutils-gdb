@@ -1,3 +1,8 @@
+2008-12-30  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/asm/opterr1.ms, sim/cris/asm/opterr2.ms: Adjust for
+	differences in getopt_long error message quoting.
+
 2008-02-12  M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* sim/cr16/: New directory. Tests for CR16 simulator.
