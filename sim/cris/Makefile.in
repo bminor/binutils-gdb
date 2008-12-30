@@ -27,7 +27,6 @@ CONFIG_DEVICES =
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-cpu.o \
-	sim-hload.o \
 	sim-hrw.o \
 	sim-model.o \
 	sim-reg.o \

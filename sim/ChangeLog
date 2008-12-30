@@ -1,3 +1,26 @@
+2008-12-30  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/Makefile.in (SIM_OBJS): Remove sim-hload.o.
+	* cris/sim-if.c: Include elf-bfd.h.
+	(struct progbounds): New members end_loadmem, start_nonloadmem.
+	(xprintf, eprintf): New functions, copied from common/sim-load.c.
+	(cris_load_elf_file, sim_load, cris_get_progbounds): New functions.
+	(get_progbounds_iterator): Renamed from get_progbounds.  Make
+	static.  Update head comment.  Set new struct progbounds members.
+	(exec_load_addr, interp_load_addr, interp_start_addr): New static
+	variables.
+	(aux_ent_phdr, aux_ent_phent, aux_ent_phnum, aux_ent_base)
+	(aux_ent_entry, cris_write_interp, cris_handle_interpreter): New
+	functions.
+	(sim_open): New constant array auxv_entries.  Rewrite AUX_ENT
+	handling to use auxv_entries.  Improve error message and checking
+	for invalid programs.  Use new variable abfd for the program
+	instead of for each access reaching into sd to get it.
+	(sim_create_inferior): If non-zero, use interp_start_addr instead
+	of the program start address.
+	(cris_disassemble_insn): Remove incorrect and unclear, supposedly
+	stale comment.  Always specify little-endian.
+
 2008-07-29  Nick Clifton  <nickc@redhat.com>
 
 	* common/genmloop.sh: Add new parameter: -shell to specify the

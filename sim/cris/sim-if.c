@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "libiberty.h"
 #include "bfd.h"
+#include "elf-bfd.h"
 
 #include "sim-main.h"
 #ifdef HAVE_STDLIB_H
@@ -62,10 +63,12 @@ char *missing_environ[] = { "SHELL=/bin/sh", "PATH=/bin:/usr/bin", NULL };
 struct progbounds {
   USI startmem;
   USI endmem;
+  USI end_loadmem;
+  USI start_nonloadmem;
 };
 
 static void free_state (SIM_DESC);
-static void get_progbounds (bfd *, asection *, void *);
+static void get_progbounds_iterator (bfd *, asection *, void *);
 static SIM_RC cris_option_handler (SIM_DESC, sim_cpu *, int, char *, int);
 
 /* Since we don't build the cgen-opcode table, we use the old
@@ -211,6 +214,127 @@ cris_option_handler (SIM_DESC sd, sim_cpu *cpu ATTRIBUTE_UNUSED, int opt,
   return sim_profile_set_option (sd, "-model", PROFILE_MODEL_IDX, "on");
 }
 
+/* FIXME: Remove these, globalize those in sim-load.c, move elsewhere.  */
+
+static void
+xprintf  (host_callback *callback, const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start (ap, fmt);
+
+  (*callback->vprintf_filtered) (callback, fmt, ap);
+
+  va_end (ap);
+}
+
+static void
+eprintf (host_callback *callback, const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start (ap, fmt);
+
+  (*callback->evprintf_filtered) (callback, fmt, ap);
+
+  va_end (ap);
+}
+
+/* An ELF-specific simplified ../common/sim-load.c:sim_load_file,
+   using the program headers, not sections, in order to make sure that
+   the program headers themeselves are also loaded.  The caller is
+   responsible for asserting that ABFD is an ELF file.  */
+
+static bfd_boolean
+cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
+{
+  Elf_Internal_Phdr *phdr;
+  int n_hdrs;
+  int i;
+  bfd_boolean verbose = STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG;
+  host_callback *callback = STATE_CALLBACK (sd);
+
+  phdr = elf_tdata (abfd)->phdr;
+  n_hdrs = elf_elfheader (abfd)->e_phnum;
+
+  /* We're only interested in PT_LOAD; all necessary information
+     should be covered by that.  */
+  for (i = 0; i < n_hdrs; i++)
+    {
+      bfd_byte *buf;
+      bfd_vma lma = STATE_LOAD_AT_LMA_P (sd)
+	? phdr[i].p_paddr : phdr[i].p_vaddr;
+
+      if (phdr[i].p_type != PT_LOAD)
+	continue;
+
+      buf = xmalloc (phdr[i].p_filesz);
+
+      if (verbose)
+	xprintf (callback, "Loading segment at 0x%lx, size 0x%lx\n",
+		 lma, phdr[i].p_filesz);
+
+      if (bfd_seek (abfd, phdr[i].p_offset, SEEK_SET) != 0
+	  || (bfd_bread (buf, phdr[i].p_filesz, abfd) != phdr[i].p_filesz))
+	{
+	  eprintf (callback,
+		   "%s: could not read segment at 0x%lx, size 0x%lx\n",
+		   STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
+	  free (buf);
+	  return FALSE;
+	}
+
+      if (do_write (sd, lma, buf, phdr[i].p_filesz) != phdr[i].p_filesz)
+	{
+	  eprintf (callback,
+		   "%s: could not load segment at 0x%lx, size 0x%lx\n",
+		   STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
+	  free (buf);
+	  return FALSE;
+	}
+
+      free (buf);
+    }
+
+  return TRUE;
+}
+
+/* Replacement for ../common/sim-hload.c:sim_load, so we can treat ELF
+   files differently.  */
+
+SIM_RC
+sim_load (SIM_DESC sd, char *prog_name, struct bfd *prog_bfd,
+	  int from_tty ATTRIBUTE_UNUSED)
+{
+  bfd *result_bfd;
+
+  if (bfd_get_flavour (prog_bfd) != bfd_target_elf_flavour)
+    {
+      SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+      if (sim_analyze_program (sd, prog_name, prog_bfd) != SIM_RC_OK)
+	return SIM_RC_FAIL;
+      SIM_ASSERT (STATE_PROG_BFD (sd) != NULL);
+
+      result_bfd = sim_load_file (sd, STATE_MY_NAME (sd),
+				  STATE_CALLBACK (sd),
+				  prog_name,
+				  STATE_PROG_BFD (sd),
+				  STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG,
+				  STATE_LOAD_AT_LMA_P (sd),
+				  sim_write);
+      if (result_bfd == NULL)
+	{
+	  bfd_close (STATE_PROG_BFD (sd));
+	  STATE_PROG_BFD (sd) = NULL;
+	  return SIM_RC_FAIL;
+	}
+      return SIM_RC_OK;
+    }
+
+  return cris_load_elf_file (sd, prog_bfd, sim_write)
+    ? SIM_RC_OK : SIM_RC_FAIL;
+}
+
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 
 static void
@@ -222,12 +346,11 @@ free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
-/* BFD section iterator to find the highest allocated section address
-   (plus one).  If we could, we should use the program header table
-   instead, but we can't get to that using bfd.  */
+/* BFD section iterator to find the highest and lowest allocated and
+   non-allocated section addresses (plus one).  */
 
-void
-get_progbounds (bfd *abfd ATTRIBUTE_UNUSED, asection *s, void *vp)
+static void
+get_progbounds_iterator (bfd *abfd ATTRIBUTE_UNUSED, asection *s, void *vp)
 {
   struct progbounds *pbp = (struct progbounds *) vp;
 
@@ -242,7 +365,246 @@ get_progbounds (bfd *abfd ATTRIBUTE_UNUSED, asection *s, void *vp)
 
       if (sec_start < pbp->startmem)
 	pbp->startmem = sec_start;
+
+      if ((bfd_get_section_flags (abfd, s) & SEC_LOAD))
+	{
+	  if (sec_end > pbp->end_loadmem)
+	    pbp->end_loadmem = sec_end;
+	}
+      else if (sec_start < pbp->start_nonloadmem)
+	pbp->start_nonloadmem = sec_start;
     }
+}
+
+/* Get the program boundaries.  Because not everything is covered by
+   sections in ELF, notably the program headers, we use the program
+   headers instead.  */
+
+static void
+cris_get_progbounds (struct bfd *abfd, struct progbounds *pbp)
+{
+  Elf_Internal_Phdr *phdr;
+  int n_hdrs;
+  int i;
+
+  pbp->startmem = 0xffffffff;
+  pbp->endmem = 0;
+  pbp->end_loadmem = 0;
+  pbp->start_nonloadmem = 0xffffffff;
+
+  /* In case we're ever used for something other than ELF, use the
+     generic method.  */
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    {
+      bfd_map_over_sections (abfd, get_progbounds_iterator, pbp);
+      return;
+    }
+
+  phdr = elf_tdata (abfd)->phdr;
+  n_hdrs = elf_elfheader (abfd)->e_phnum;
+
+  /* We're only interested in PT_LOAD; all necessary information
+     should be covered by that.  */
+  for (i = 0; i < n_hdrs; i++)
+    {
+      if (phdr[i].p_type != PT_LOAD)
+	continue;
+
+      if (phdr[i].p_paddr < pbp->startmem)
+	pbp->startmem = phdr[i].p_paddr;
+
+      if (phdr[i].p_paddr + phdr[i].p_memsz > pbp->endmem)
+	pbp->endmem = phdr[i].p_paddr + phdr[i].p_memsz;
+
+      if (phdr[i].p_paddr + phdr[i].p_filesz > pbp->end_loadmem)
+	pbp->end_loadmem = phdr[i].p_paddr + phdr[i].p_filesz;
+
+      if (phdr[i].p_memsz > phdr[i].p_filesz
+	  && phdr[i].p_paddr + phdr[i].p_filesz < pbp->start_nonloadmem)
+	pbp->start_nonloadmem = phdr[i].p_paddr + phdr[i].p_filesz;
+    }  
+}
+
+/* Parameter communication by static variables, hmm...  Oh well, for
+   simplicity.  */
+static bfd_vma exec_load_addr;
+static bfd_vma interp_load_addr;
+static bfd_vma interp_start_addr;
+
+/* Supposed to mimic Linux' "NEW_AUX_ENT (AT_PHDR, load_addr + exec->e_phoff)".  */
+
+static USI
+aux_ent_phdr (struct bfd *ebfd)
+{
+  return elf_elfheader (ebfd)->e_phoff + exec_load_addr;
+}
+
+/* We just pass on the header info; we don't have our own idea of the
+   program header entry size.  */
+
+static USI
+aux_ent_phent (struct bfd *ebfd)
+{
+  return elf_elfheader (ebfd)->e_phentsize;
+}
+
+/* Like "NEW_AUX_ENT(AT_PHNUM, exec->e_phnum)".  */
+
+static USI
+aux_ent_phnum (struct bfd *ebfd)
+{
+  return elf_elfheader (ebfd)->e_phnum;
+}
+
+/* Like "NEW_AUX_ENT(AT_BASE, interp_load_addr)".  */
+
+static USI
+aux_ent_base (struct bfd *ebfd)
+{
+  return interp_load_addr;
+}
+
+/* Like "NEW_AUX_ENT(AT_ENTRY, exec->e_entry)".  */
+
+static USI
+aux_ent_entry (struct bfd *ebfd)
+{
+  ASSERT (elf_elfheader (ebfd)->e_entry == bfd_get_start_address (ebfd));
+  return elf_elfheader (ebfd)->e_entry;
+}
+
+/* Helper for cris_handle_interpreter: like sim_write, but load at
+   interp_load_addr offset.  */
+
+static int
+cris_write_interp (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
+{
+  return sim_write (sd, mem + interp_load_addr, buf, length);
+}
+
+/* Cater to the presence of an interpreter: load it and set
+   interp_start_addr.  Return FALSE if there was an error, TRUE if
+   everything went fine, including an interpreter being absent and
+   the program being in a non-ELF format.  */
+
+static bfd_boolean
+cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
+{
+  int i, n_hdrs;
+  bfd_vma phaddr;
+  bfd_byte buf[4];
+  char *interp = NULL;
+  struct bfd *ibfd;
+  bfd_boolean ok = FALSE;
+  Elf_Internal_Phdr *phdr;
+
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return TRUE;
+
+  phdr = elf_tdata (abfd)->phdr;
+  n_hdrs = aux_ent_phnum (abfd);
+
+  /* Check the program headers for presence of an interpreter.  */
+  for (i = 0; i < n_hdrs; i++)
+    {
+      int interplen;
+      bfd_size_type interpsiz, interp_filesiz;
+      struct progbounds interp_bounds;
+
+      if (phdr[i].p_type != PT_INTERP)
+	continue;
+
+      /* Get the name of the interpreter, prepended with the sysroot
+	 (empty if absent).  */
+      interplen = phdr[i].p_filesz;
+      interp = xmalloc (interplen + strlen (simulator_sysroot));
+      strcpy (interp, simulator_sysroot);
+
+      /* Read in the name.  */
+      if (bfd_seek (abfd, phdr[i].p_offset, SEEK_SET) != 0
+	  || (bfd_bread (interp + strlen (simulator_sysroot), interplen, abfd)
+	      != interplen))
+	goto interpname_failed;
+
+      /* Like Linux, require the string to be 0-terminated.  */
+      if (interp[interplen + strlen (simulator_sysroot) - 1] != 0)
+	goto interpname_failed;
+
+      /* Inspect the interpreter.  */
+      ibfd = bfd_openr (interp, STATE_TARGET (sd));
+      if (ibfd == NULL)
+	goto interpname_failed;
+
+      /* The interpreter is at leat something readable to BFD; make
+	 sure it's an ELF non-archive file.  */
+      if (!bfd_check_format (ibfd, bfd_object)
+	  || bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+	goto interp_failed;
+
+      /* Check the layout of the interpreter.  */
+      cris_get_progbounds (ibfd, &interp_bounds);
+
+      /* Round down to pagesize the start page and up the endpage.
+	 Don't round the *load and *nonload members.  */
+      interp_bounds.startmem &= ~8191;
+      interp_bounds.endmem = (interp_bounds.endmem + 8191) & ~8191;
+
+      /* Until we need a more dynamic solution, assume we can put the
+	 interpreter at this fixed location.  NB: this is not what
+	 happens for Linux 2008-12-28, but it could and might and
+	 perhaps should.  */
+      interp_load_addr = 0x40000;
+      interpsiz = interp_bounds.endmem - interp_bounds.startmem;
+      interp_filesiz = interp_bounds.end_loadmem - interp_bounds.startmem;
+
+      /* If we have a non-DSO or interpreter starting at the wrong
+	 address, bail.  */
+      if (interp_bounds.startmem != 0
+	  || interpsiz + interp_load_addr >= exec_load_addr)
+	goto interp_failed;
+
+      /* We don't have the API to get the address of a simulator
+	 memory area, so we go via a temporary area.  Luckily, the
+	 interpreter is supposed to be small, less than 0x40000
+	 bytes.  */
+      sim_do_commandf (sd, "memory region 0x%lx,0x%lx",
+		       interp_load_addr, interpsiz);
+
+      /* Now that memory for the interpreter is defined, load it.  */
+      if (!cris_load_elf_file (sd, ibfd, cris_write_interp))
+	goto interp_failed;
+
+      /* It's no use setting STATE_START_ADDR, because it gets
+	 overwritten by a sim_analyze_program call in sim_load.  Let's
+	 just store it locally.  */
+      interp_start_addr
+	= (bfd_get_start_address (ibfd)
+	   - interp_bounds.startmem + interp_load_addr);
+
+      /* Linux cares only about the first PT_INTERP, so let's ignore
+	 the rest.  */
+      goto all_done;
+    }
+
+  /* Register R10 should hold 0 at static start (no finifunc), but
+     that's the default, so don't bother.  */
+  return TRUE;
+
+ all_done:
+  ok = TRUE;
+
+ interp_failed:
+  bfd_close (ibfd);
+
+ interpname_failed:
+  if (!ok)
+    sim_io_eprintf (sd,
+		    "%s: could not load ELF interpreter `%s' for program `%s'\n",
+		    STATE_MY_NAME (sd),
+		    interp == NULL ? "(what's-its-name)" : interp,
+		    bfd_get_filename (abfd));
+  free (interp);
+  return ok;
 }
 
 /* Create an instance of the simulator.  */
@@ -258,6 +620,33 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   USI endbrk = endmem;
   USI stack_low = 0;
   SIM_DESC sd = sim_state_alloc (kind, callback);
+
+  static const struct auxv_entries_s
+  {
+    bfd_byte id;
+    USI (*efn) (struct bfd *ebfd);
+    USI val;
+  } auxv_entries[] =
+    {
+#define AUX_ENT(a, b) {TARGET_ ## a, NULL, b}
+#define AUX_ENTF(a, b, f) {TARGET_ ## a, f, b}
+      AUX_ENT (AT_HWCAP, 0),
+      AUX_ENT (AT_PAGESZ, 8192),
+      AUX_ENT (AT_CLKTCK, 100),
+      AUX_ENTF (AT_PHDR, 0, aux_ent_phdr),
+      AUX_ENTF (AT_PHENT, 0, aux_ent_phent),
+      AUX_ENTF (AT_PHNUM, 0, aux_ent_phnum),
+      AUX_ENTF (AT_BASE, 0, aux_ent_base),
+      AUX_ENT (AT_FLAGS, 0),
+      AUX_ENTF (AT_ENTRY, 0, aux_ent_entry),
+
+      /* Or is root better?  Maybe have it settable?  */
+      AUX_ENT (AT_UID, 500),
+      AUX_ENT (AT_EUID, 500),
+      AUX_ENT (AT_GID, 500),
+      AUX_ENT (AT_EGID, 500),
+      AUX_ENT (AT_NULL, 0)
+    };
 
   /* Can't initialize to "" below.  It's either a GCC bug in old
      releases (up to and including 2.95.3 (.4 in debian) or a bug in the
@@ -299,6 +688,30 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 			    : NULL),
 			   abfd) != SIM_RC_OK)
     {
+      if (STATE_PROG_ARGV (sd) != NULL)
+	sim_io_eprintf (sd, "%s: invalid executable `%s'\n",
+			STATE_MY_NAME (sd), *STATE_PROG_ARGV (sd));
+      else
+	sim_io_eprintf (sd, "%s: invalid executable\n",
+			STATE_MY_NAME (sd));
+      free_state (sd);
+      return 0;
+    }
+
+  /* We might get called with the caller expecting us to get hold of
+     the bfd for ourselves, which would happen at the
+     sim_analyze_program call above.  */
+  if (abfd == NULL)
+    abfd = STATE_PROG_BFD (sd);
+
+  if (bfd_get_arch (abfd) == bfd_arch_unknown)
+    {
+      if (STATE_PROG_ARGV (sd) != NULL)
+	sim_io_eprintf (sd, "%s: not a CRIS program `%s'\n",
+			STATE_MY_NAME (sd), *STATE_PROG_ARGV (sd));
+      else
+	sim_io_eprintf (sd, "%s: program to be run is not a CRIS program\n",
+			STATE_MY_NAME (sd));
       free_state (sd);
       return 0;
     }
@@ -306,14 +719,12 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   /* For CRIS simulator-specific use, we need to find out the bounds of
      the program as well, which is not done by sim_analyze_program
      above.  */
-  if (STATE_PROG_BFD (sd))
+  if (abfd != NULL)
     {
       struct progbounds pb;
 
       /* The sections should now be accessible using bfd functions.  */
-      pb.startmem = 0x7fffffff;
-      pb.endmem = 0;
-      bfd_map_over_sections (STATE_PROG_BFD (sd), get_progbounds, &pb);
+      cris_get_progbounds (abfd, &pb);
 
       /* We align the area that the program uses to page boundaries.  */
       startmem = pb.startmem & ~8191;
@@ -324,9 +735,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   /* Find out how much room is needed for the environment and argv, create
      that memory and fill it.  Only do this when there's a program
      specified.  */
-  if (STATE_PROG_BFD (sd) && !cris_bare_iron)
+  if (abfd != NULL && !cris_bare_iron)
     {
-      char *name = bfd_get_filename (STATE_PROG_BFD (sd));
+      char *name = bfd_get_filename (abfd);
       char **my_environ = GET_ENVIRON ();
       /* We use these maps to give the same behavior as the old xsim
 	 simulator.  */
@@ -367,7 +778,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
       /* Note that the linux kernel does not correctly compute the storage
 	 needs for the static-exe AUX vector.  */
-      csp -= 4 * 4 * 2;
+
+      csp -= sizeof (auxv_entries) / sizeof (auxv_entries[0]) * 4 * 2;
 
       csp -= (envc + 1) * 4;
       csp -= (my_argc + 1) * 4;
@@ -442,28 +854,26 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
       write_dword (csp, 0);
       csp += 4;
 
-#define NEW_AUX_ENT(nr, id, val)			\
- do							\
-   {							\
-     write_dword (csp + (nr) * 4 * 2, (id));		\
-     write_dword (csp + (nr) * 4 * 2 + 4, (val));	\
-   }							\
- while (0)
+      /* The load address of the executable could presumably be
+	 different than the lowest used memory address, but let's
+	 stick to simplicity until needed.  And
+	 cris_handle_interpreter might change startmem and endmem, so
+	 let's set it now.  */
+      exec_load_addr = startmem;
 
-      /* Note that there are some extra AUX entries for a dynlinked
-	 program loaded image.  */
+      if (!cris_handle_interpreter (sd, abfd))
+	goto abandon_chip;
 
-      /* AUX entries always present. */
-      NEW_AUX_ENT (0, TARGET_AT_HWCAP, 0);
-      NEW_AUX_ENT (1, TARGET_AT_PAGESZ, 8192);
-      NEW_AUX_ENT (2, TARGET_AT_CLKTCK, 100);
-
-      csp += 4 * 2 * 3;
-      NEW_AUX_ENT (0, TARGET_AT_NULL, 0);
-#undef NEW_AUX_ENT
-
-      /* Register R10 should hold 0 at static start (no initfunc), but
-	 that's the default, so don't bother.  */
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	for (i = 0; i < sizeof (auxv_entries) / sizeof (auxv_entries[0]); i++)
+	  {
+	    write_dword (csp, auxv_entries[i].id);
+	    write_dword (csp + 4,
+			 auxv_entries[i].efn != NULL
+			 ? (*auxv_entries[i].efn) (abfd)
+			 : auxv_entries[i].val);
+	    csp += 4 + 4;
+	  }
     }
 
   /* Allocate core managed memory if none specified by user.  */
@@ -568,8 +978,9 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
   SIM_ADDR addr;
 
-  if (abfd != NULL)
-    addr = bfd_get_start_address (abfd);
+  if (sd != NULL)
+    addr = interp_start_addr != 0
+      ? interp_start_addr : bfd_get_start_address (abfd);
   else
     addr = 0;
   sim_pc_set (current_cpu, addr);
@@ -606,14 +1017,8 @@ cris_disassemble_insn (SIM_CPU *cpu,
   sfile.buffer = sfile.current = buf;
   INIT_DISASSEMBLE_INFO (disasm_info, (FILE *) &sfile,
 			 (fprintf_ftype) sim_disasm_sprintf);
-  disasm_info.endian =
-    (bfd_big_endian (STATE_PROG_BFD (sd)) ? BFD_ENDIAN_BIG
-     : bfd_little_endian (STATE_PROG_BFD (sd)) ? BFD_ENDIAN_LITTLE
-     : BFD_ENDIAN_UNKNOWN);
-  /* We live with the cast until the prototype is fixed, or else we get a
-     warning because the functions differ in the signedness of one parameter.  */
-  disasm_info.read_memory_func =
-    sim_disasm_read_memory;
+  disasm_info.endian = BFD_ENDIAN_LITTLE;
+  disasm_info.read_memory_func = sim_disasm_read_memory;
   disasm_info.memory_error_func = sim_disasm_perror_memory;
   disasm_info.application_data = (PTR) cpu;
   pinsn = cris_get_disassembler (STATE_PROG_BFD (sd));
