@@ -1,3 +1,7 @@
+2008-12-30  Martin Schwidefsky  <schwidefskyy@de.ibm.com>
+
+	* s390-opc.txt: Add ptff instruction.
+
 2008-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.am (CFILES, ALL_MACHINES): Add LM32 source and object files.
