@@ -173,6 +173,13 @@ record_list_release_first (void)
 static void
 record_arch_list_add (record_t * rec)
 {
+  if (record_debug > 1)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Process record: record_arch_list_add 0x%s.\n",
+			  paddr_nz ((CORE_ADDR)rec));
+    }
+
   if (record_arch_list_tail)
     {
       record_arch_list_tail->next = rec;
