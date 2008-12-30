@@ -1,5 +1,14 @@
 2008-12-30  Hans-Peter Nilsson  <hp@axis.com>
 
+	* cris/traps.c (TARGET_SYS_writev): New macro.
+	(is_mapped_only, cris_dump_map): New functions.
+	(cris_break_13_handler) <case TARGET_SYS_mmap2>: Handle more flags
+	and prot combinations and a non-zero page-offset.  If
+	TARGET_MAP_FIXED, unmap pages before mapping them.
+	<case TARGET_SYS_mprotect>: When checking, allow any length
+	argument.  Don't actually do anything.
+	<case TARGET_SYS_writev>: New case.
+
 	* cris/Makefile.in (SIM_OBJS): Remove sim-hload.o.
 	* cris/sim-if.c: Include elf-bfd.h.
 	(struct progbounds): New members end_loadmem, start_nonloadmem.
