@@ -1,5 +1,12 @@
 2008-12-31  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.threads/attach-into-signal.exp: Don't use
+	gdb_suppress_entire_file.
+	* gdb.threads/attach-stopped.exp: Ditto.
+	* gdb.threads/attachstop-mt.exp: Ditto.
+
+2008-12-31  Pedro Alves  <pedro@codesourcery.com>
+
 	PR gdb/8812:
 	* gdb.base/signal.exp: Change kfail to fail, and update PR number.
 
