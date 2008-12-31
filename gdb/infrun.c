@@ -4639,20 +4639,22 @@ Are you sure you want to change it? ", target_signal_to_name ((enum target_signa
       argv++;
     }
 
-  target_notice_signals (inferior_ptid);
+  for (signum = 0; signum < nsigs; signum++)
+    if (sigs[signum])
+      {
+	target_notice_signals (inferior_ptid);
 
-  if (from_tty)
-    {
-      /* Show the results.  */
-      sig_print_header ();
-      for (signum = 0; signum < nsigs; signum++)
-	{
-	  if (sigs[signum])
-	    {
-	      sig_print_info (signum);
-	    }
-	}
-    }
+	if (from_tty)
+	  {
+	    /* Show the results.  */
+	    sig_print_header ();
+	    for (; signum < nsigs; signum++)
+	      if (sigs[signum])
+		sig_print_info (signum);
+	  }
+
+	break;
+      }
 
   do_cleanups (old_chain);
 }

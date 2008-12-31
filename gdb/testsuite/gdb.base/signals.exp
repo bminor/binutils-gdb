@@ -248,7 +248,7 @@ The program being debugged stopped while in a function called from GDB.*" \
 	    gdb_test_multiple "n" "$test" {
 		-re "Not confirmed, unchanged.*Signal.*$gdb_prompt $"  {
 		    # "Signal ..." should not be in the output.
-		    kfail gdb/1707 "$test"
+		    fail gdb/8812 "$test"
 		}
 		-re "Not confirmed, unchanged.*$gdb_prompt $" {
 		    pass "$test"

@@ -1,3 +1,9 @@
+2008-12-31  Pedro Alves  <pedro@codesourcery.com>
+
+	PR gdb/8812:
+	* infrun.c (handle_command): Don't print a header or notify the
+	target about signal changes if we didn't change any signal.
+
 2008-12-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* valops.c (find_method_list): Minor reformatting in comment.
