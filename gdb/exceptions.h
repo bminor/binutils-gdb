@@ -72,6 +72,9 @@ enum errors {
   /* Problem parsing an XML document.  */
   XML_PARSE_ERROR,
 
+  /* Error accessing memory.  */
+  MEMORY_ERROR,
+
   /* Add more errors here.  */
   NR_ERRORS
 };

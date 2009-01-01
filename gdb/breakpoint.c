@@ -755,7 +755,7 @@ is_hardware_watchpoint (struct breakpoint *bpt)
    in *VAL_CHAIN.  RESULTP and VAL_CHAIN may be NULL if the caller does
    not need them.
 
-   If an error occurs while evaluating the expression, *RESULTP will
+   If a memory error occurs while evaluating the expression, *RESULTP will
    be set to NULL.  *RESULTP may be a lazy value, if the result could
    not be read from memory.  It is used to determine whether a value
    is user-specified (we should watch the whole value) or intermediate
@@ -776,6 +776,7 @@ fetch_watchpoint_value (struct expression *exp, struct value **valp,
 			struct value **resultp, struct value **val_chain)
 {
   struct value *mark, *new_mark, *result;
+  volatile struct gdb_exception ex;
 
   *valp = NULL;
   if (resultp)
@@ -786,7 +787,26 @@ fetch_watchpoint_value (struct expression *exp, struct value **valp,
   /* Evaluate the expression.  */
   mark = value_mark ();
   result = NULL;
-  gdb_evaluate_expression (exp, &result);
+
+  TRY_CATCH (ex, RETURN_MASK_ALL)
+    {
+      result = evaluate_expression (exp);
+    }
+  if (ex.reason < 0)
+    {
+      /* Ignore memory errors, we want watchpoints pointing at
+	 inaccessible memory to still be created; otherwise, throw the
+	 error to some higher catcher.  */
+      switch (ex.error)
+	{
+	case MEMORY_ERROR:
+	  break;
+	default:
+	  throw_exception (ex);
+	  break;
+	}
+    }
+
   new_mark = value_mark ();
   if (mark == new_mark)
     return;

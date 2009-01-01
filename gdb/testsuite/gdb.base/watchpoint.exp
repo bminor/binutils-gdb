@@ -649,6 +649,18 @@ proc test_inaccessible_watchpoint {} {
     # valid) memory.
 
     if [runto func4] then {
+	# Make sure we only allow memory access errors.
+	set msg "watchpoint refused to insert on nonexistent struct member"
+	gdb_test_multiple "watch struct1.nosuchmember" $msg {
+	    -re ".*atchpoint \[0-9\]+: struct1.nosuchmember.*$gdb_prompt $" {
+		# PR breakpoints/9681
+		fail $msg
+	    }
+	    -re "There is no member named nosuchmember\\..*$gdb_prompt $" {
+		pass $msg
+	    }
+	}
+
 	gdb_test "watch *global_ptr" ".*atchpoint \[0-9\]+: \\*global_ptr"
 	gdb_test "next" ".*global_ptr = buf.*"
 	gdb_test_multiple "next" "next over ptr init" {

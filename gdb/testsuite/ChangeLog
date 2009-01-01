@@ -1,3 +1,8 @@
+2009-01-01  Pedro Alves  <pedro@codesourcery.com>
+
+	PR breakpoints/9681:
+	* gdb.base/watchpoint.exp: Add regression test.
+
 2008-12-31  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/attach-into-signal.exp: Don't use
