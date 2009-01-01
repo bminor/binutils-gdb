@@ -750,6 +750,7 @@ c00c oihf RIL_RU "or immediate high" z9-109 zarch
 c00d oilf RIL_RU "or immediate low" z9-109 zarch
 c205 slfi RIL_RU "subtract logical immediate 32" z9-109 zarch
 c204 slgfi RIL_RU "subtract logical immediate 64<32" z9-109 zarch
+0104 ptff E "perform timing facility function" z9-109 zarch
 # z9-109 store facility list extended
 b2b0 stfle S_RD "store facility list extended" z9-109 zarch
 # z9-109 store clock fast
