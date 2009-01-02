@@ -1,3 +1,8 @@
+2009-01-02  Matthias Klose  <doko@ubuntu.com> 
+ 
+        * or32-opc.c (or32_print_register, or32_print_immediate, 
+        disassemble_insn): Don't rely on undefined sprintf behaviour. 
+
 2008-12-30  Martin Schwidefsky  <schwidefskyy@de.ibm.com>
 
 	* s390-opc.txt: Add ptff instruction.

@@ -1,5 +1,5 @@
 /* Table of opcodes for the OpenRISC 1000 ISA.
-   Copyright 2002, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
+   Copyright 2002, 2004, 2005, 2007, 2008, 2009 Free Software Foundation, Inc.
    Contributed by Damjan Lampret (lampret@opencores.org).
    
    This file is part of the GNU opcodes library.
@@ -951,8 +951,10 @@ static void
 or32_print_register (char param_ch, char *encoding, unsigned long insn)
 {
   int regnum = or32_extract(param_ch, encoding, insn);
-  
-  sprintf (disassembled, "%sr%d", disassembled, regnum);
+  char s_regnum[20];
+
+  sprintf (s_regnum, "r%d", regnum);
+  strcat (disassembled, s_regnum);
 }
 
 /* Print immediate. Used only by print_insn.  */
@@ -961,18 +963,20 @@ static void
 or32_print_immediate (char param_ch, char *encoding, unsigned long insn)
 {
   int imm = or32_extract (param_ch, encoding, insn);
+  char s_imm[20];
 
   imm = extend_imm (imm, param_ch);
-  
+
   if (letter_signed (param_ch))
     {
       if (imm < 0)
-        sprintf (disassembled, "%s%d", disassembled, imm);
+	sprintf (s_imm, "%d", imm);
       else
-        sprintf (disassembled, "%s0x%x", disassembled, imm);
+	sprintf (s_imm, "0x%x", imm);
     }
   else
-    sprintf (disassembled, "%s%#x", disassembled, imm);
+    sprintf (s_imm, "%#x", imm);
+  strcat (disassembled, s_imm);
 }
 
 /* Disassemble one instruction from insn to disassemble.
@@ -1005,14 +1009,22 @@ disassemble_insn (unsigned long insn)
               if (strchr (opcode->encoding, *s))
                 or32_print_immediate (*s, opcode->encoding, insn);
               else
-                sprintf (disassembled, "%s%c", disassembled, *s);
+		{
+		  char s_encoding[2] = { *s, '\0' };
+
+		  strcat (disassembled, s_encoding);
+		}
+
             }
         }
     }
   else
     {
+      char s_insn[20];
+
       /* This used to be %8x for binutils.  */
-      sprintf (disassembled, "%s.word 0x%08lx", disassembled, insn);
+      sprintf (s_insn, ".word 0x%08lx", insn);
+      strcat (disassembled, s_insn);
     }
 
   return insn_len (insn);

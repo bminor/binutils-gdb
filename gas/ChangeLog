@@ -1,3 +1,8 @@
+2009-01-02  Matthias Klose  <doko@ubuntu.com> 
+ 
+        * itbl-ops.c (itbl_disassemble): Don't rely on undefined sprintf 
+        behaviour. 
+
 2008-12-23  Jon Beniston <jon@beniston.com>
 
 	* NEWS: Record that support for LM32 has been added.
