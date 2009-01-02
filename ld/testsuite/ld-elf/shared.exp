@@ -129,6 +129,22 @@ set build_tests {
   {"Build libfunc1.so"
    "-shared" "-fPIC"
    {func1.c} {} "libfunc1.so"}
+  {"Build libpr9676-1.a"
+   "" "-fPIC"
+   {pr9676-1.c} {} "libpr9676-1.a"}
+  {"Build libpr9676-2.a"
+   "" "-fPIC"
+   {pr9676-2.c} {} "libpr9676-2.a"}
+  {"Build libpr9676-3.so"
+   "-shared" "-fPIC"
+   {pr9676-3.c} {} "libpr9676-3.so"}
+  {"Build libpr9676-4.so"
+   "-shared" "-fPIC"
+   {pr9676-4.c} {} "libpr9676-4.so"}
+  {"Build libpr9676-4a.so"
+   "-shared tmpdir/pr9676-4.o -Ltmpdir -lpr9676-3 -Wl,--start-group -lpr9676-1 -lpr9676-2 -Wl,--end-group"
+   "-fPIC"
+   {dummy.c} {{readelf {-s} pr9676.rd}} "libpr9676-4a.so"}
 }
 
 set run_tests {

@@ -4296,7 +4296,15 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		    h->ref_regular_nonweak = 1;
 		}
 	      else
-		h->def_regular = 1;
+		{
+		  h->def_regular = 1;
+		  if (h->def_dynamic)
+		    {
+		      h->def_dynamic = 0;
+		      h->ref_dynamic = 1;
+		      h->dynamic_def = 1;
+		    }
+		}
 	      if (! info->executable
 		  || h->def_dynamic
 		  || h->ref_dynamic)
