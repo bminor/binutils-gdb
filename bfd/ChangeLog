@@ -1,5 +1,13 @@
 2009-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/9679
+	* elflink.c (elf_merge_st_other): New.
+	(_bfd_elf_merge_symbol): Use it on skipped weak definitions and
+	hide them if needed.
+	(elf_link_add_object_symbols): Updated.
+
+2009-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/9676
 	* elflink.c (elf_link_add_object_symbols): Update def_dynamic,
 	ref_dynamic and dynamic_def fields when setting def_regular

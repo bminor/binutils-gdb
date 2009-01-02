@@ -822,6 +822,54 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
   return dynsymcount;
 }
 
+/* Merge st_other field.  */
+
+static void
+elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
+		    Elf_Internal_Sym *isym, bfd_boolean definition,
+		    bfd_boolean dynamic)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+  /* If st_other has a processor-specific meaning, specific
+     code might be needed here. We never merge the visibility
+     attribute with the one from a dynamic object.  */
+  if (bed->elf_backend_merge_symbol_attribute)
+    (*bed->elf_backend_merge_symbol_attribute) (h, isym, definition,
+						dynamic);
+
+  /* If this symbol has default visibility and the user has requested
+     we not re-export it, then mark it as hidden.  */
+  if (definition
+      && !dynamic
+      && (abfd->no_export
+	  || (abfd->my_archive && abfd->my_archive->no_export))
+      && ELF_ST_VISIBILITY (isym->st_other) != STV_INTERNAL)
+    isym->st_other = (STV_HIDDEN
+		      | (isym->st_other & ~ELF_ST_VISIBILITY (-1)));
+
+  if (!dynamic && ELF_ST_VISIBILITY (isym->st_other) != 0)
+    {
+      unsigned char hvis, symvis, other, nvis;
+
+      /* Only merge the visibility. Leave the remainder of the
+	 st_other field to elf_backend_merge_symbol_attribute.  */
+      other = h->other & ~ELF_ST_VISIBILITY (-1);
+
+      /* Combine visibilities, using the most constraining one.  */
+      hvis = ELF_ST_VISIBILITY (h->other);
+      symvis = ELF_ST_VISIBILITY (isym->st_other);
+      if (! hvis)
+	nvis = symvis;
+      else if (! symvis)
+	nvis = hvis;
+      else
+	nvis = hvis < symvis ? hvis : symvis;
+
+      h->other = other | nvis;
+    }
+}
+
 /* This function is called when we want to define a new symbol.  It
    handles the various cases which arise when we find a definition in
    a dynamic object, or when there is already a definition in a
@@ -1347,7 +1395,22 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   /* Skip weak definitions of symbols that are already defined.  */
   if (newdef && olddef && newweak)
-    *skip = TRUE;
+    {
+      *skip = TRUE;
+
+      /* Merge st_other.  If the symbol already has a dynamic index,
+	 but visibility says it should not be visible, turn it into a
+	 local symbol.  */
+      elf_merge_st_other (abfd, h, sym, newdef, newdyn);
+      if (h->dynindx != -1)
+	switch (ELF_ST_VISIBILITY (h->other))
+	  {
+	  case STV_INTERNAL:
+	  case STV_HIDDEN:
+	    (*bed->elf_backend_hide_symbol) (info, h, TRUE);
+	    break;
+	  }
+    }
 
   /* If the old symbol is from a dynamic object, and the new symbol is
      a definition which is not from a dynamic object, then the new
@@ -4244,42 +4307,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      h->type = ELF_ST_TYPE (isym->st_info);
 	    }
 
-	  /* If st_other has a processor-specific meaning, specific
-	     code might be needed here. We never merge the visibility
-	     attribute with the one from a dynamic object.  */
-	  if (bed->elf_backend_merge_symbol_attribute)
-	    (*bed->elf_backend_merge_symbol_attribute) (h, isym, definition,
-							dynamic);
-
-	  /* If this symbol has default visibility and the user has requested
-	     we not re-export it, then mark it as hidden.  */
-	  if (definition && !dynamic
-	      && (abfd->no_export
-		  || (abfd->my_archive && abfd->my_archive->no_export))
-	      && ELF_ST_VISIBILITY (isym->st_other) != STV_INTERNAL)
-	    isym->st_other = (STV_HIDDEN
-			      | (isym->st_other & ~ELF_ST_VISIBILITY (-1)));
-
-	  if (ELF_ST_VISIBILITY (isym->st_other) != 0 && !dynamic)
-	    {
-	      unsigned char hvis, symvis, other, nvis;
-
-	      /* Only merge the visibility. Leave the remainder of the
-		 st_other field to elf_backend_merge_symbol_attribute.  */
-	      other = h->other & ~ELF_ST_VISIBILITY (-1);
-
-	      /* Combine visibilities, using the most constraining one.  */
-	      hvis   = ELF_ST_VISIBILITY (h->other);
-	      symvis = ELF_ST_VISIBILITY (isym->st_other);
-	      if (! hvis)
-		nvis = symvis;
-	      else if (! symvis)
-		nvis = hvis;
-	      else
-		nvis = hvis < symvis ? hvis : symvis;
-
-	      h->other = other | nvis;
-	    }
+	  /* Merge st_other field.  */
+	  elf_merge_st_other (abfd, h, isym, definition, dynamic);
 
 	  /* Set a flag in the hash table entry indicating the type of
 	     reference or definition we just found.  Keep a count of

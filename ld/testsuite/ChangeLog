@@ -1,5 +1,14 @@
 2009-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/9679
+	* ld-elf/pr9679-1.c: New.
+	* ld-elf/pr9679-2.c: Likewise.
+	* ld-elf/pr9679.rd: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add test for libpr9679.so.
+
+2009-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/9676
 	* ld-elf/pr9676-1.c: New.
 	* ld-elf/pr9676-2.c: Likewiswe.

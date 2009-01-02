@@ -145,6 +145,9 @@ set build_tests {
    "-shared tmpdir/pr9676-4.o -Ltmpdir -lpr9676-3 -Wl,--start-group -lpr9676-1 -lpr9676-2 -Wl,--end-group"
    "-fPIC"
    {dummy.c} {{readelf {-s} pr9676.rd}} "libpr9676-4a.so"}
+  {"Build libpr9679.so"
+   "-shared" "-fPIC -O0"
+   {pr9679-1.c pr9679-2.c} {{readelf {-s} pr9679.rd}} "libpr9679.so"}
 }
 
 set run_tests {
