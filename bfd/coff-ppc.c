@@ -1543,9 +1543,9 @@ dump_toc (vfile)
   FILE *file = (FILE *) vfile;
   struct list_ele *t;
 
-  fprintf (file, _(h1));
-  fprintf (file, _(h2));
-  fprintf (file, _(h3));
+  fputs (_(h1), file);
+  fputs (_(h2), file);
+  fputs (_(h3), file);
 
   for (t = head; t != 0; t=t->next)
     {

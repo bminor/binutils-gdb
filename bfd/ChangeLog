@@ -1,3 +1,9 @@
+2009-01-02  Curtis Mackie  <curtmackevo@gmail.com>
+
+	PR 9682
+	* coff-ppc.c (dump_toc): Fix up calls to fprintf without a string
+	literal.
+
 2008-12-29  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* coff-z80.c (r_imm32): Fix copy-paste bug that caused z80-objdump to
