@@ -1,5 +1,5 @@
-/* Copyright (C) 1991, 1993, 1995, 1997, 1998, 2003, 2006 Free Software
-   Foundation, Inc.
+/* Copyright (C) 1991, 1993, 1995, 1997, 1998, 2003, 2006, 2009
+Free Software Foundation, Inc.
 
    Contributed by Torbjorn Granlund (tege@sics.se).
 

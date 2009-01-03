@@ -1,6 +1,6 @@
 /* Header file for GDB command decoding library.
 
-   Copyright (c) 2000, 2003, 2007, 2008 Free Software Foundation, Inc.
+   Copyright (c) 2000, 2003, 2007, 2008, 2009 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -129,7 +129,7 @@ struct cmd_list_element
     /* Hook for another command to be executed after this command.  */
     struct cmd_list_element *hook_post;
 
-    /* Flag that specifies if this command is already running it's hook.  */
+    /* Flag that specifies if this command is already running its hook.  */
     /* Prevents the possibility of hook recursion.  */
     int hook_in;
 

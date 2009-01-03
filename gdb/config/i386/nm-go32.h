@@ -1,5 +1,5 @@
 /* Native definitions for Intel x86 running DJGPP.
-   Copyright 1997, 1998, 1999, 2001, 2002, 2007, 2008
+   Copyright 1997, 1998, 1999, 2001, 2002, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    This file is part of GDB.

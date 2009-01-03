@@ -1,5 +1,9 @@
 2009-01-03  Joel Brobecker  <brobecker@adacore.com>
 
+	Updated copyright notices for most files.
+
+2009-01-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* top.c (print_gdb_version): Update copyright year.
 
 2009-01-03  Joel Brobecker  <brobecker@adacore.com>

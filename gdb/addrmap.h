@@ -1,6 +1,6 @@
 /* addrmap.h --- interface to address map data structure.
 
-   Copyright (C) 2007, 2008 Free Software Foundation, Inc.
+   Copyright (C) 2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -63,7 +63,7 @@ struct addrmap *addrmap_create_mutable (struct obstack *obstack);
    (and isn't the lexical block for a function's body), we omit it
    from GDB's data structures entirely.
 
-   However, this menas that we don't decide to create a block (and
+   However, this means that we don't decide to create a block (and
    thus record it in the address map) until after we've traversed its
    children.  If we do decide to create the block, we do so at a time
    when all its children have already been recorded in the map.  So
