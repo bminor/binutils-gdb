@@ -191,6 +191,9 @@ struct _sim_cpu {
   void* (*make_thread_cpu_data) (SIM_CPU *, void *);
   size_t thread_cpu_data_size;
 
+  /* The register differs, so we dispatch to a CPU-specific function.  */
+  void (*set_target_thread_data) (SIM_CPU *, USI);
+
   /* CPU-model specific parts go here.
      Note that in files that don't need to access these pieces WANT_CPU_FOO
      won't be defined and thus these parts won't appear.  This is ok in the

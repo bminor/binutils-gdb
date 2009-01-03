@@ -233,6 +233,14 @@ MY (f_model_mark_set_h_gr) (SIM_CPU *current_cpu, ARGBUF *abuf)
 }
 #endif
 
+/* Set the thread register contents.  */
+
+void
+MY (set_target_thread_data) (SIM_CPU *current_cpu, USI val)
+{
+  (CPU (XCONCAT2 (h_sr_v, BASENUM) [CRIS_TLS_REGISTER])) = val;
+}
+
 /* Create the context for a thread.  */
 
 void *
@@ -256,6 +264,7 @@ MY (f_specific_init) (SIM_CPU *current_cpu)
 {
   current_cpu->make_thread_cpu_data = MY (make_thread_cpu_data);
   current_cpu->thread_cpu_data_size = sizeof (current_cpu->cpu_data);
+  current_cpu->set_target_thread_data = MY (set_target_thread_data);
 #if WITH_HW
   current_cpu->deliver_interrupt = MY (deliver_interrupt);
 #endif

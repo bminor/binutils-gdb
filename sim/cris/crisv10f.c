@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define WANT_CPU_CRISV10F
 
 #define BASENUM 10
+#define CRIS_TLS_REGISTER 14
 #include "cris-tmpl.c"
 
 #if WITH_PROFILE_MODEL_P

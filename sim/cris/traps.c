@@ -113,6 +113,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define TARGET_SYS_getegid32 202
 #define TARGET_SYS_getgid32 200
 #define TARGET_SYS_fcntl64 221
+#define TARGET_SYS_set_thread_area 243
 #define TARGET_SYS_exit_group 252
 
 #define TARGET_PROT_READ	0x1
@@ -3152,6 +3153,17 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 	/* Better watch these in case they do something necessary.  */
 	case TARGET_SYS_socketcall:
 	  retval = -cb_host_to_target_errno (cb, ENOSYS);
+	  break;
+
+	case TARGET_SYS_set_thread_area:
+	  /* Do the same error check as Linux.  */
+	  if (arg1 & 255)
+	    {
+	      retval = -cb_host_to_target_errno (cb, EINVAL);
+	      break;
+	    }
+	  (*current_cpu->set_target_thread_data) (current_cpu, arg1);
+	  retval = 0;
 	  break;
 
 	unimplemented_syscall:

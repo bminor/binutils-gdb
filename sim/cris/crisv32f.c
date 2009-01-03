@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SPECIFIC_U_MEM_FN
 #define SPECIFIC_U_MOVEM_FN
 #define BASENUM 32
+#define CRIS_TLS_REGISTER 2
 #include "cris-tmpl.c"
 
 #if WITH_PROFILE_MODEL_P

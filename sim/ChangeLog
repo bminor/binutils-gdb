@@ -1,5 +1,15 @@
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
+	* cris/sim-main.h (struct _sim_cpu): New member
+	set_target_thread_data.
+	* cris/crisv32f.c (CRIS_TLS_REGISTER): Define.
+	* cris/crisv10f.c: Ditto.
+	* cris/cris-tmpl.c (MY (set_target_thread_data)): New function.
+	(MY (f_specific_init)): Set new _sim_cpu member to new function.
+	* cris/traps.c (TARGET_SYS_set_thread_area): Define.
+	(cris_break_13_handler) <case TARGET_SYS_set_thread_area>: New
+	case.
+
 	* cris/traps.c (TARGET_SYS_exit_group): Define.
 	(cris_break_13_handler): Handle it like the exit for the last
 	thread.
