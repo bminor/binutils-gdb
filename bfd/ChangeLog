@@ -1,3 +1,9 @@
+2009-01-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* coff-ppc.c: Add 2009 to Copyright.
+	* elf32-cris.c: Likewise.
+	* elflink.c: Likewise.
+
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (elf_cris_finish_dynamic_symbol): Rename
