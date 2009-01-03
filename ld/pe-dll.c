@@ -314,6 +314,7 @@ static const autofilter_entry_type autofilter_liblist[] =
   { STRING_COMMA_LEN ("libcegcc") },
   { STRING_COMMA_LEN ("libcygwin") },
   { STRING_COMMA_LEN ("libgcc") },
+  { STRING_COMMA_LEN ("libgcc_s") },
   { STRING_COMMA_LEN ("libstdc++") },
   { STRING_COMMA_LEN ("libmingw32") },
   { STRING_COMMA_LEN ("libmingwex") },
@@ -323,6 +324,37 @@ static const autofilter_entry_type autofilter_liblist[] =
   { STRING_COMMA_LEN ("libgcj") },
   { NULL, 0 }
 };
+
+/* Regardless of the suffix issue mentioned above, we must ensure that
+  we do not falsely match on a leading substring, such as when libtool
+  builds libstdc++ as a DLL using libsupc++convenience.a as an intermediate.
+  This routine ensures that the leading part of the name matches and that
+  it is followed by only an optional version suffix and a file extension,
+  returning zero if so or -1 if not.  */
+static int libnamencmp (const char *libname, const autofilter_entry_type *afptr)
+{
+  if (strncmp (libname, afptr->name, afptr->len))
+    return -1;
+
+  libname += afptr->len;
+
+  /* Be liberal in interpreting what counts as a version suffix; we
+    accept anything that has a dash to separate it from the name and
+    begins with a digit.  */
+  if (libname[0] == '-')
+    {
+      if (!ISDIGIT (*++libname))
+	return -1;
+      /* Ensure the filename has an extension.  */
+      while (*++libname != '.')
+	if (!*libname)
+	  return -1;
+    }
+  else if (libname[0] != '.')
+    return -1;
+
+  return 0;
+}
 
 static const autofilter_entry_type autofilter_objlist[] =
 {
@@ -501,7 +533,7 @@ auto_export (bfd *abfd, def_file *d, const char *n)
 
 	  while (afptr->name)
 	    {
-	      if (strncmp (libname, afptr->name, afptr->len) == 0 )
+	      if (libnamencmp (libname, afptr) == 0 )
 		return 0;
 	      afptr++;
 	    }
