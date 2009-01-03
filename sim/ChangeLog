@@ -1,3 +1,7 @@
+2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/semcrisv32f-switch.c: Regenerate.
+
 2008-12-30  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/sim-if.c (sim_open): If sim_analyze_program fails, emit

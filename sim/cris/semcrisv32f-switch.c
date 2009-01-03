@@ -3118,16 +3118,12 @@ cgen_rtx_error (current_cpu, "move-r-spr: trying to set a read-only special regi
   tmp_prno = FLD (f_operand2);
   tmp_newval = GET_H_SR (FLD (f_operand2));
 if (EQSI (tmp_prno, 2)) {
-{
-  SI tmp_oldregval;
-  tmp_oldregval = GET_H_RAW_GR_ACR (FLD (f_operand1));
   {
-    SI opval = ORSI (ANDSI (tmp_newval, 255), ANDSI (tmp_oldregval, 0xffffff00));
+    SI opval = tmp_newval;
     SET_H_GR (FLD (f_operand1), opval);
     written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
   }
-}
 }
  else if (EQSI (tmp_prno, 3)) {
 {
@@ -3301,16 +3297,16 @@ cgen_rtx_error (current_cpu, "move-spr-r from unimplemented register");
   SI tmp_newval;
   tmp_rno = FLD (f_operand2);
 if (EQSI (tmp_rno, 2)) {
-  tmp_newval = EXTQISI (({   SI tmp_addr;
-  QI tmp_tmp_mem;
+  tmp_newval = ({   SI tmp_addr;
+  SI tmp_tmp_mem;
   BI tmp_postinc;
   tmp_postinc = FLD (f_memmode);
 ;   tmp_addr = ((EQBI (GET_H_INSN_PREFIXED_P (), 0)) ? (GET_H_GR (FLD (f_operand1))) : (GET_H_PREFIXREG_V32 ()));
-;   tmp_tmp_mem = GETMEMQI (current_cpu, pc, tmp_addr);
+;   tmp_tmp_mem = GETMEMSI (current_cpu, pc, tmp_addr);
 ; if (NEBI (tmp_postinc, 0)) {
 {
 if (EQBI (GET_H_INSN_PREFIXED_P (), 0)) {
-  tmp_addr = ADDSI (tmp_addr, 1);
+  tmp_addr = ADDSI (tmp_addr, 4);
 }
   {
     SI opval = tmp_addr;
@@ -3320,7 +3316,7 @@ if (EQBI (GET_H_INSN_PREFIXED_P (), 0)) {
   }
 }
 }
-; tmp_tmp_mem; }));
+; tmp_tmp_mem; });
 }
  else if (EQSI (tmp_rno, 3)) {
   tmp_newval = EXTQISI (({   SI tmp_addr;
@@ -4009,9 +4005,9 @@ if (ANDIF (GET_H_V32_V32 (), NEBI (CPU (h_xbit), 0))) {
 if (EQBI (CPU (h_pbit), 0)) {
 {
   {
-    QI opval = GET_H_SR (FLD (f_operand2));
-    SETMEMQI (current_cpu, pc, tmp_addr, opval);
-    written |= (1 << 12);
+    SI opval = GET_H_SR (FLD (f_operand2));
+    SETMEMSI (current_cpu, pc, tmp_addr, opval);
+    written |= (1 << 13);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
   {
@@ -4031,16 +4027,16 @@ if (EQBI (CPU (h_pbit), 0)) {
 }
 } else {
   {
-    QI opval = GET_H_SR (FLD (f_operand2));
-    SETMEMQI (current_cpu, pc, tmp_addr, opval);
-    written |= (1 << 12);
+    SI opval = GET_H_SR (FLD (f_operand2));
+    SETMEMSI (current_cpu, pc, tmp_addr, opval);
+    written |= (1 << 13);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
 }
 if (NEBI (tmp_postinc, 0)) {
 {
 if (EQBI (GET_H_INSN_PREFIXED_P (), 0)) {
-  tmp_addr = ADDSI (tmp_addr, 1);
+  tmp_addr = ADDSI (tmp_addr, 4);
 }
   {
     SI opval = tmp_addr;
