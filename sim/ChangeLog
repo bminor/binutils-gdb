@@ -1,5 +1,9 @@
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
+	* cris/traps.c (TARGET_SYS_exit_group): Define.
+	(cris_break_13_handler): Handle it like the exit for the last
+	thread.
+
 	* cris/traps.c (TARGET_UTSNAME): Update to 2009-01-01.
 	(TARGET_EPOCH): Update to match TARGET_UTSNAME.  Correct comment.
 	(cris_break_13_handler) <case TARGET_SYS_uname>: Update to

@@ -113,6 +113,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define TARGET_SYS_getegid32 202
 #define TARGET_SYS_getgid32 200
 #define TARGET_SYS_fcntl64 221
+#define TARGET_SYS_exit_group 252
 
 #define TARGET_PROT_READ	0x1
 #define TARGET_PROT_WRITE	0x2
@@ -1456,7 +1457,8 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
   s.arg2 = arg2;
   s.arg3 = arg3;
 
-  if (callnum == TARGET_SYS_exit && current_cpu->m1threads == 0)
+  if (callnum == TARGET_SYS_exit_group
+      || (callnum == TARGET_SYS_exit && current_cpu->m1threads == 0))
     {
       if (CPU_CRIS_MISC_PROFILE (current_cpu)->flags
 	  & FLAG_CRIS_MISC_PROFILE_ALL)
