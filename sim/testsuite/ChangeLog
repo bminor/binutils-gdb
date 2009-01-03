@@ -1,5 +1,6 @@
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
+	* sim/cris/c/uname1.c: New test.
 	* sim/cris/c/mmap1.c (MMAP_FLAGS): Default-define to
 	MAP_PRIVATE and use this macro in the mmap call.
 	* sim/cris/c/mmap4.c: New test.
