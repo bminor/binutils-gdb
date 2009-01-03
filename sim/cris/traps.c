@@ -65,6 +65,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define TARGET_SYS_time 13
 #define TARGET_SYS_lseek 19
 #define TARGET_SYS_getpid 20
+#define TARGET_SYS_access 33
 #define TARGET_SYS_kill 37
 #define TARGET_SYS_rename 38
 #define TARGET_SYS_pipe 42
@@ -243,6 +244,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* From linux/limits.h. */
 #define TARGET_PIPE_BUF 4096
+
+/* From unistd.h.  */
+#define	TARGET_R_OK 4
+#define	TARGET_W_OK 2
+#define	TARGET_X_OK 1
+#define	TARGET_F_OK 0
 
 static const char stat_map[] =
 "st_dev,2:space,10:space,4:st_mode,4:st_nlink,4:st_uid,4"
@@ -2645,6 +2652,56 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		  retval = -cb_host_to_target_errno (cb, EFAULT);
 	      }
 	    free (cwd);
+	    break;
+	  }
+
+	case TARGET_SYS_access:
+	  {
+	    SI path = arg1;
+	    SI mode = arg2;
+	    char *pbuf = xmalloc (SIM_PATHMAX);
+	    int i;
+	    int o = 0;
+	    int hmode = 0;
+
+	    if (sim_core_read_unaligned_1 (current_cpu, pc, 0, path) == '/')
+	      {
+		strcpy (pbuf, simulator_sysroot);
+		o += strlen (simulator_sysroot);
+	      }
+
+	    for (i = 0; i + o < SIM_PATHMAX; i++)
+	      {
+		pbuf[i + o]
+		  = sim_core_read_unaligned_1 (current_cpu, pc, 0, path + i);
+		if (pbuf[i + o] == 0)
+		  break;
+	      }
+
+	    if (i + o == SIM_PATHMAX)
+	      {
+		retval = -cb_host_to_target_errno (cb, ENAMETOOLONG);
+		break;
+	      }
+
+	    /* Assert that we don't get calls for files for which we
+	       don't have support.  */
+	    if (strncmp (pbuf + strlen (simulator_sysroot),
+			 "/proc/", 6) == 0)
+	      abort ();
+#define X_AFLAG(x) if (mode & TARGET_ ## x) hmode |= x
+	    X_AFLAG (R_OK);
+	    X_AFLAG (W_OK);
+	    X_AFLAG (X_OK);
+	    X_AFLAG (F_OK);
+#undef X_AFLAG
+
+	    if (access (pbuf, hmode) != 0)
+	      retval = -cb_host_to_target_errno (cb, errno);
+	    else
+	      retval = 0;
+
+	    free (pbuf);
 	    break;
 	  }
 

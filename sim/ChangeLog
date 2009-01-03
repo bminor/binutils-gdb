@@ -1,5 +1,9 @@
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
+	* cris/traps.c (TARGET_SYS_access, TARGET_R_OK, TARGET_W_OK)
+	(TARGET_X_OK, TARGET_F_OK): Define.
+	(cris_break_13_handler) <case TARGET_SYS_access>: New case.
+
 	* cris/semcrisv32f-switch.c: Regenerate.
 
 2008-12-30  Hans-Peter Nilsson  <hp@axis.com>
