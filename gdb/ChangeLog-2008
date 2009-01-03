@@ -1,11 +1,3 @@
-2009-01-01  Pedro Alves  <pedro@codesourcery.com>
-
-	PR breakpoints/9681:
-	* exceptions.h (enum errors): New error type, MEMORY_ERROR.
-	* corefile.c (memory_error): Rewrite to throw a MEMORY_ERROR.
-	* breakpoint.c (fetch_watchpoint_value): Ignore MEMORY_ERRORs, but
-	retrow all other exceptions.
-
 2008-12-31  Pedro Alves  <pedro@codesourcery.com>
 
 	PR gdb/8812:
