@@ -1,5 +1,6 @@
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
+	* sim/cris/c/access1.c: New test.
 	* sim/cris/asm/pid1.ms: New test.
 
 2008-12-30  Hans-Peter Nilsson  <hp@axis.com>
