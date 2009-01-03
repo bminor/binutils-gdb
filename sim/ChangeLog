@@ -1,7 +1,14 @@
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
+	* cris/traps.c (TARGET_UTSNAME): Update to 2009-01-01.
+	(TARGET_EPOCH): Update to match TARGET_UTSNAME.  Correct comment.
+	(cris_break_13_handler) <case TARGET_SYS_uname>: Update to
+	2.6.27.  Set machine field to the BFD printable name of the
+	machine.
+
 	* cris/traps.c (TARGET_MAP_DENYWRITE): Define.
-	<case TARGET_SYS_mmap2>: Handle TARGET_MAP_DENYWRITE.
+	(cris_break_13_handler) <case TARGET_SYS_mmap2>: Handle
+	TARGET_MAP_DENYWRITE.
 
 	* cris/traps.c (TARGET_SYS_access, TARGET_R_OK, TARGET_W_OK)
 	(TARGET_X_OK, TARGET_F_OK): Define.

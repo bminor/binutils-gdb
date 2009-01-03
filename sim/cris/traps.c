@@ -144,10 +144,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define TARGET_TCGETS 0x5401
 
-#define TARGET_UTSNAME "#38 Sun Apr 1 00:00:00 MET 2001"
+#define TARGET_UTSNAME "#7 Thu Jan 1 00:00:00 MET 2009"
 
-/* Seconds since the above date + 10 minutes.  */
-#define TARGET_EPOCH 986080200
+/* Seconds since 1970-01-01 to the above date + 10 minutes;
+   'date -d "Thu Jan 1 00:00:10 MET 2009" +%s'.  */
+#define TARGET_EPOCH 1230764410
 
 /* Milliseconds since start of run.  We use the number of syscalls to
    avoid introducing noise in the execution time.  */
@@ -1570,15 +1571,22 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 	case TARGET_SYS_uname:
 	  {
 	    /* Fill in a few constants to appease glibc.  */
-	    static const char sim_utsname[6][65] =
+	    static char sim_utsname[6][65] =
 	    {
 	      "Linux",
 	      "sim-target",
-	      "2.4.5",
+	      "2.6.27",
 	      TARGET_UTSNAME,
-	      "cris",
+	      "cris",		/* Overwritten below.  */
 	      "localdomain"
 	    };
+
+	    /* Having the hardware type in Linux equal to the bfd
+	       printable name is deliberate: if you make config.guess
+	       work on your Linux-type system the usual way, it
+	       probably will; either the bfd printable_name or the
+	       ambiguous arch_name.  */
+	    strcpy (sim_utsname[4], STATE_ARCHITECTURE (sd)->printable_name);
 
 	    if ((s.write_mem) (cb, &s, arg1, (const char *) sim_utsname,
 			       sizeof (sim_utsname))
