@@ -175,7 +175,8 @@ enum options
   OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC,
   OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC,
   OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1,
-  OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2
+  OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2,
+  OPTION_EXCLUDE_MODULES_FOR_IMPLIB
 };
 
 static void
@@ -213,6 +214,7 @@ gld${EMULATION_NAME}_add_options
     {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL},
     {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMBOLS},
     {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},
+    {"exclude-modules-for-implib", required_argument, NULL, OPTION_EXCLUDE_MODULES_FOR_IMPLIB},
     {"kill-at", no_argument, NULL, OPTION_KILL_ATS},
     {"add-stdcall-alias", no_argument, NULL, OPTION_STDCALL_ALIASES},
     {"enable-stdcall-fixup", no_argument, NULL, OPTION_ENABLE_STDCALL_FIXUP},
@@ -307,6 +309,9 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"));
   fprintf (file, _("  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"));
   fprintf (file, _("  --exclude-libs lib,lib,...         Exclude libraries from automatic export\n"));
+  fprintf (file, _("  --exclude-modules-for-implib mod,mod,...\n"));
+  fprintf (file, _("                                     Exclude objects, archive members from auto\n"));
+  fprintf (file, _("                                     export, place into import library instead.\n"));
   fprintf (file, _("  --export-all-symbols               Automatically export all globals to DLL\n"));
   fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
   fprintf (file, _("  --out-implib <file>                Generate import library\n"));
@@ -559,10 +564,13 @@ gld${EMULATION_NAME}_handle_option (int optc)
       pep_dll_export_everything = 1;
       break;
     case OPTION_EXCLUDE_SYMBOLS:
-      pep_dll_add_excludes (optarg, 0);
+      pep_dll_add_excludes (optarg, EXCLUDESYMS);
       break;
     case OPTION_EXCLUDE_LIBS:
-      pep_dll_add_excludes (optarg, 1);
+      pep_dll_add_excludes (optarg, EXCLUDELIBS);
+      break;
+    case OPTION_EXCLUDE_MODULES_FOR_IMPLIB:
+      pep_dll_add_excludes (optarg, EXCLUDEFORIMPLIB);
       break;
     case OPTION_KILL_ATS:
       pep_dll_kill_ats = 1;
@@ -1386,7 +1394,7 @@ gld_${EMULATION_NAME}_finish (void)
     {
       pep_dll_fill_sections (link_info.output_bfd, &link_info);
       if (pep_implib_filename)
-	pep_dll_generate_implib (pep_def_file, pep_implib_filename);
+	pep_dll_generate_implib (pep_def_file, pep_implib_filename, &link_info);
     }
 
   if (pep_out_def_filename)

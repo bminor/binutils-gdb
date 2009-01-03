@@ -457,13 +457,26 @@ and other ways of specifying the entry point.
 @kindex --exclude-libs
 @item --exclude-libs @var{lib},@var{lib},...
 Specifies a list of archive libraries from which symbols should not be automatically
-exported. The library names may be delimited by commas or colons.  Specifying
+exported.  The library names may be delimited by commas or colons.  Specifying
 @code{--exclude-libs ALL} excludes symbols in all archive libraries from
 automatic export.  This option is available only for the i386 PE targeted
 port of the linker and for ELF targeted ports.  For i386 PE, symbols
 explicitly listed in a .def file are still exported, regardless of this
 option.  For ELF targeted ports, symbols affected by this option will
 be treated as hidden.
+
+@kindex --exclude-modules-for-implib
+@item --exclude-modules-for-implib @var{module},@var{module},...
+Specifies a list of object files or archive members, from which symbols
+should not be automatically exported, but which should be copied wholesale
+into the import library being generated during the link.  The module names
+may be delimited by commas or colons, and must match exactly the filenames
+used by @command{ld} to open the files; for archive members, this is simply
+the member name, but for object files the name listed must include and
+match precisely any path used to specify the input file on the linker's
+command-line.  This option is available only for the i386 PE targeted port
+of the linker.  Symbols explicitly listed in a .def file are still exported,
+regardless of this option.
 
 @cindex dynamic symbol table
 @kindex -E
@@ -6232,6 +6245,7 @@ which is controlled by the following command line options:
 @item --export-all-symbols   [This is the default]
 @item --exclude-symbols
 @item --exclude-libs
+@item --exclude-modules-for-implib
 @end itemize
 
 If, however, @samp{--export-all-symbols} is not given explicitly on the

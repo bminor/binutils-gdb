@@ -1,5 +1,36 @@
 2009-01-03  Dave Korn  <dave.korn.cygwin@gmail.com>
 
+	* NEWS:  Mention new feature --exclude-modules-for-implib.
+	* ld.texinfo:  Document new --exclude-modules-for-implib option.
+	* pe-dll.c (exclude_list_struct):  Change type member from int to
+	new enumeration exclude_type.
+	(pe_dll_add_excludes):  Accept exclude_type instead of int param.
+	(auto_export):  Replace magic constants by exclude_type values and
+	handle new choice EXCLUDEFORIMPLIB.
+	(pe_dll_generate_implib):  Accept a pointer to the link_info and
+	iterate all input BFDs looking for EXCLUDEFORIMPLIB modules; re-open
+	fresh BFDs for any found and link into import lib archive chain.
+	* pe-dll.h (exclude_type):  Add new enumerated type to replace magic
+	constants previously used for exclude_list_struct type member.
+	(pe_dll_add_excludes, pe_dll_generate_implib):  Update prototypes.
+	* pep-dll.h (exclude_type, pe_dll_add_excludes,
+	pe_dll_generate_implib):  Likewise to all the above.
+	* emultempl/pe.em (OPTION_EXCLUDE_MODULES_FOR_IMPLIB):  Define new
+	getopts long option code for new --exclude-modules-for-implib option.
+	(gld${EMULATION_NAME}_add_options):  Add new entry to xtra_long[].
+	(gld_${EMULATION_NAME}_list_options):  List usage for it.
+	(gld${EMULATION_NAME}_handle_option):  Use exclude_type enumerated
+	values when calling pe_dll_add_excludes, and handle EXCLUDEFORIMPLIB.
+	(gld_${EMULATION_NAME}_finish):  Pass pointer to link_info when
+	calling pe_dll_generate_implib.
+	* emultempl/pep.em (options):  Define new enumerated value for getopts
+	long option code for new --exclude-modules-for-implib option.
+	(gld${EMULATION_NAME}_add_options, gld_${EMULATION_NAME}_list_options,
+	gld${EMULATION_NAME}_handle_option, gld_${EMULATION_NAME}_finish):
+	Again, likewise to all the above.
+
+2009-01-03  Dave Korn  <dave.korn.cygwin@gmail.com>
+
 	* pe-dll.c (autofilter_liblist):  Add entry for shared libgcc.
 	(libnamencmp):  New function.
 	(auto_export):  Use it in place of strncmp when filtering libraries.

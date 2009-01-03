@@ -1,4 +1,8 @@
 -*- text -*-
+* Windows PE systems now support a new --exclude-modules-for-implib option,
+  allowing users to partition object files and archive members between a DLL
+  and its associated import library as they are generated during linking.
+
 * Add support for Lattice Mico32 (lm32) architecture.
 
 * Add CR16 ELF --embedded-relocs (used to embedded relocations into binaries 

@@ -36,14 +36,16 @@ extern int pe_dll_warn_dup_exports;
 extern int pe_dll_compat_implib;
 extern int pe_dll_extra_pe_debug;
 
+typedef enum { EXCLUDESYMS, EXCLUDELIBS, EXCLUDEFORIMPLIB } exclude_type;
+
 extern void pe_dll_id_target
   (const char *);
 extern void pe_dll_add_excludes
-  (const char *, const int);
+  (const char *, const exclude_type);
 extern void pe_dll_generate_def_file
   (const char *);
 extern void pe_dll_generate_implib
-  (def_file *, const char *);
+  (def_file *, const char *, struct bfd_link_info *);
 extern void pe_process_import_defs
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean pe_implied_import_dll

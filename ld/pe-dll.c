@@ -463,14 +463,14 @@ typedef struct exclude_list_struct
   {
     char *string;
     struct exclude_list_struct *next;
-    int type;
+    exclude_type type;
   }
 exclude_list_struct;
 
 static struct exclude_list_struct *excludes = 0;
 
 void
-pe_dll_add_excludes (const char *new_excludes, const int type)
+pe_dll_add_excludes (const char *new_excludes, const exclude_type type)
 {
   char *local_copy;
   char *exclude_string;
@@ -593,11 +593,16 @@ auto_export (bfd *abfd, def_file *d, const char *n)
 
   for (ex = excludes; ex; ex = ex->next)
     {
-      if (ex->type == 1) /* exclude-libs */
+      if (ex->type == EXCLUDELIBS)
 	{
 	  if (libname
 	      && ((strcmp (libname, ex->string) == 0)
 		   || (strcasecmp ("ALL", ex->string) == 0)))
+	    return 0;
+	}
+      else if (ex->type == EXCLUDEFORIMPLIB)
+	{
+	  if (strcmp (abfd->filename, ex->string) == 0)
 	    return 0;
 	}
       else if (strcmp (n, ex->string) == 0)
@@ -2480,12 +2485,13 @@ pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend)
 
 
 void
-pe_dll_generate_implib (def_file *def, const char *impfilename)
+pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_info *info)
 {
   int i;
   bfd *ar_head;
   bfd *ar_tail;
   bfd *outarch;
+  bfd *ibfd;
   bfd *head = 0;
 
   dll_filename = (def->name) ? def->name : dll_name;
@@ -2513,6 +2519,61 @@ pe_dll_generate_implib (def_file *def, const char *impfilename)
 
   /* Work out a reasonable size of things to put onto one line.  */
   ar_head = make_head (outarch);
+
+  /* Iterate the input BFDs, looking for exclude-modules-for-implib.  */
+  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link_next)
+    {
+      /* Iterate the exclude list.  */
+      struct exclude_list_struct *ex;
+      char found;
+      for (ex = excludes, found = 0; ex && !found; ex = ex->next)
+	{
+	  if (ex->type != EXCLUDEFORIMPLIB)
+	    continue;
+	  found = (strcmp (ex->string, ibfd->filename) == 0);
+	}
+      /* If it matched, we must open a fresh BFD for it (the original
+        input BFD is still needed for the DLL's final link) and add
+	it into the archive member chain.  */
+      if (found)
+	{
+	  bfd *newbfd = bfd_openr (ibfd->my_archive 
+		? ibfd->my_archive->filename : ibfd->filename, NULL);
+	  if (!newbfd)
+	    {
+	      einfo (_("%Xbfd_openr %s: %E\n"), ibfd->filename);
+	      return;
+	    }
+	  if (ibfd->my_archive)
+	    {
+	      /* Must now iterate through archive until we find the
+		required member.  A minor shame that we'll open the
+		archive once per member that we require from it, and
+		leak those archive bfds rather than reuse them.  */
+	      bfd *arbfd = newbfd;
+	      if (!bfd_check_format_matches (arbfd, bfd_archive, NULL))
+		{
+		  einfo (_("%X%s(%s): can't find member in non-archive file"), 
+		    ibfd->my_archive->filename, ibfd->filename);
+		  return;
+		}
+	      newbfd = NULL;
+	      while ((newbfd = bfd_openr_next_archived_file (arbfd, newbfd)) != 0)
+		{
+		  if (strcmp (newbfd->filename, ibfd->filename) == 0)
+		    break;
+		}
+	      if (!newbfd)
+		{
+		  einfo (_("%X%s(%s): can't find member in archive"), 
+		    ibfd->my_archive->filename, ibfd->filename);
+		  return;
+		}
+	    }
+	  newbfd->archive_next = head;
+	  head = newbfd;
+	}
+    }
 
   for (i = 0; i < def->num_exports; i++)
     {
