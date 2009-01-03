@@ -1,5 +1,5 @@
 /* bfin-parse.y  ADI Blackfin parser
-   Copyright 2005, 2006, 2007
+   Copyright 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -23,7 +23,7 @@
 #include "as.h"
 #include <obstack.h>
 
-#include "bfin-aux.h"  // opcode generating auxiliaries
+#include "bfin-aux.h"  /* Opcode generating auxiliaries.  */
 #include "libbfd.h"
 #include "elf/common.h"
 #include "elf/bfin.h"
@@ -1932,22 +1932,20 @@ asm_1:
 	  else
 	    return yyerror ("Bad shift value or register");
 	}
-	| HALF_REG ASSIGN HALF_REG LESS_LESS expr
-	{
-	  if (IS_UIMM ($5, 4))
-	    {
-	      notethat ("dsp32shiftimm: dregs_half = dregs_half << uimm4\n");
-	      $$ = DSP32SHIFTIMM (0x0, &$1, imm5 ($5), &$3, 2, HL2 ($1, $3));
-	    }
-	  else
-	    return yyerror ("Bad shift value");
-	}
 	| HALF_REG ASSIGN HALF_REG LESS_LESS expr smod 
 	{
 	  if (IS_UIMM ($5, 4))
 	    {
-	      notethat ("dsp32shiftimm: dregs_half = dregs_half << uimm4\n");
-	      $$ = DSP32SHIFTIMM (0x0, &$1, imm5 ($5), &$3, $6.s0, HL2 ($1, $3));
+	      if ($6.s0)
+		{
+		  notethat ("dsp32shiftimm: dregs_half = dregs_half << uimm4 (S)\n");
+		  $$ = DSP32SHIFTIMM (0x0, &$1, imm5 ($5), &$3, $6.s0, HL2 ($1, $3));
+		}
+	      else
+		{
+		  notethat ("dsp32shiftimm: dregs_half = dregs_half << uimm4\n");
+		  $$ = DSP32SHIFTIMM (0x0, &$1, imm5 ($5), &$3, 2, HL2 ($1, $3));
+		}
 	    }
 	  else
 	    return yyerror ("Bad shift value");

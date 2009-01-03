@@ -9,6 +9,7 @@ AUTOMAKE_OPTIONS =
 # The two_file_test tests -fmerge-constants, so we simply always turn
 # it on.  This may need to be controlled by a configure option
 # eventually.
+AM_CFLAGS = $(WARN_CFLAGS) $(LFS_CFLAGS) -fmerge-constants
 AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) -fmerge-constants
 
 INCLUDES = \
@@ -21,6 +22,11 @@ TEST_READELF = $(top_builddir)/../binutils/readelf
 TEST_OBJDUMP = $(top_builddir)/../binutils/objdump
 TEST_CXXFILT = $(top_builddir)/../binutils/cxxfilt
 TEST_STRIP = $(top_builddir)/../binutils/strip-new
+TEST_AR = $(top_builddir)/../binutils/ar
+
+if PLUGINS
+LIBDL = -ldl
+endif
 
 if THREADS
 THREADSLIB = -lpthread
@@ -57,7 +63,7 @@ libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 DEPENDENCIES = \
 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL_DEP)
 LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADSLIB)
+	$(THREADSLIB) $(LIBDL)
 
 
 # The unittests themselves
@@ -468,7 +474,7 @@ tls_test_file2_pic.o: tls_test_file2.cc
 tls_test_c_pic.o: tls_test_c.c
 	$(COMPILE) -c -fpic $(TLS_TEST_C_CFLAGS) -o $@ $<
 tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o -Wl,-z,defs
 tls_test_shared2.so: tls_test_file2_pic.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared tls_test_file2_pic.o
 
@@ -896,6 +902,76 @@ script_test_4: basic_test.o gcctestdir/ld $(srcdir)/script_test_4.t
 	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_4.t
 script_test_4.stdout: script_test_4
 	$(TEST_READELF) -SlW script_test_4 > script_test_4.stdout
+
+check_PROGRAMS += thin_archive_test_1
+thin_archive_test_1_SOURCES = thin_archive_main.cc
+thin_archive_test_1_DEPENDENCIES = gcctestdir/ld libthin1.a alt/libthin2.a
+thin_archive_test_1_LDFLAGS = -Bgcctestdir/ -Lalt
+thin_archive_test_1_LDADD = libthin1.a -lthin2
+
+check_PROGRAMS += thin_archive_test_2
+thin_archive_test_2_SOURCES = thin_archive_main.cc
+thin_archive_test_2_DEPENDENCIES = gcctestdir/ld libthinall.a
+thin_archive_test_2_LDFLAGS = -Bgcctestdir/ -L.
+thin_archive_test_2_LDADD = -lthinall
+
+libthin1.a: thin_archive_test_1.o alt/thin_archive_test_2.o
+	rm -f $@
+	$(TEST_AR) crT $@ $^
+alt/libthin2.a: thin_archive_test_3.o alt/thin_archive_test_4.o
+	rm -f $@
+	$(TEST_AR) crT $@ $^
+libthin3.a: thin_archive_test_1.o alt/thin_archive_test_4.o
+	rm -f $@
+	$(TEST_AR) crT $@ $^
+alt/libthin4.a: alt/thin_archive_test_2.o thin_archive_test_3.o
+	rm -f $@
+	$(TEST_AR) crT $@ $^
+libthinall.a: libthin3.a alt/libthin4.a
+	rm -f $@
+	$(TEST_AR) crT $@ $^
+alt/thin_archive_test_2.o: thin_archive_test_2.cc
+	test -d alt || mkdir -p alt
+	$(CXXCOMPILE) -c -o $@ $<
+alt/thin_archive_test_4.o: thin_archive_test_4.cc
+	test -d alt || mkdir -p alt
+	$(CXXCOMPILE) -c -o $@ $<
+
+if PLUGINS
+
+check_PROGRAMS += plugin_test_1
+check_SCRIPTS += plugin_test_1.sh
+check_DATA += plugin_test_1.err
+MOSTLYCLEANFILES += plugin_test_1.err
+plugin_test_1: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so;_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms 2>plugin_test_1.err
+plugin_test_1.err: plugin_test_1
+	@touch plugin_test_1.err
+
+check_PROGRAMS += plugin_test_2
+check_SCRIPTS += plugin_test_2.sh
+check_DATA += plugin_test_2.err
+MOSTLYCLEANFILES += plugin_test_2.err
+plugin_test_2: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_shared_2.so gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,-R,.,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_shared_2.so 2>plugin_test_2.err
+plugin_test_2.err: plugin_test_2
+	@touch plugin_test_2.err
+
+plugin_test.so: plugin_test.o
+	$(LINK) -Bgcctestdir/ -shared plugin_test.o
+plugin_test.o: plugin_test.c
+	$(COMPILE) -O0 -c -fpic -o $@ $<
+
+two_file_test_main.syms: two_file_test_main.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+two_file_test_1.syms: two_file_test_1.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+two_file_test_1b.syms: two_file_test_1b.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+two_file_test_2.syms: two_file_test_2.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+
+endif PLUGINS
 
 endif GCC
 endif NATIVE_LINKER

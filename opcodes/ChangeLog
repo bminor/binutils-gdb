@@ -1,3 +1,70 @@
+2008-10-22  Nick Clifton  <nickc@redhat.com>
+
+	PR 6937
+	* configure.in (SHARED_LIBADD): Revert previous change.
+	Add a comment explaining why.
+	(SHARED_DEPENDENCIES): Revert previous change.
+	* configure: Regenerate.
+
+2008-10-10  Nick Clifton  <nickc@redhat.com>
+
+	PR 6937
+	* configure.in (SHARED_LIBADD): Add libiberty.a.
+	(SHARED_DEPENDENCIES): Add libiberty.a.
+
+2008-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c: Include "hashtab.h".
+	(next_field): Take a new argument, last.  Check last.
+	(process_i386_cpu_flag): Updated.
+	(process_i386_opcode_modifier): Likewise.
+	(process_i386_operand_type): Likewise.
+	(process_i386_registers): Likewise.
+	(output_i386_opcode): New.
+	(opcode_hash_entry): Likewise.
+	(opcode_hash_table): Likewise.
+	(opcode_hash_hash): Likewise.
+	(opcode_hash_eq): Likewise.
+	(process_i386_opcodes): Use opcode hash table and opcode array.
+
+2008-09-30  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* s390-opc.txt (stdy, stey): Fix description
+
+2008-09-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2008-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* aclocal.m4: Regenerated.
+	* configure: Likewise.
+	* Makefile.in: Likewise.
+
+2008-09-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+	* po/fr.po: Updated French translation.
+
+2008-09-26  Florian Krohm  <fkrohm@us.ibm.com>
+
+	* s390-opc.txt (thder, thdr): Change RRE_RR to RRE_FF.
+	(cfxr, cfdr, cfer, clclu): Add esa flag.
+	(sqd): Instruction added.
+	(qadtr, qaxtr): Change RRF_FFFU to RRF_FUFF.
+	* s390-opc.c: (INSTR_RRF_FFFU, MASK_RRF_FFFU): Removed.
+
+2008-09-14  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* z80-dis.c (prt_rr_nn): Fix register pair for two byte opcodes.
+	(tab_elt opc_ed): Add "ld r,a" and "ld r,a" instructions.
+
+2008-09-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Fix memory operand size for cmpXXXs[sd].
+	* i386-tbl.h: Regenerated.
+
 2008-08-28  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (dis386): Adjust far return mnemonics.

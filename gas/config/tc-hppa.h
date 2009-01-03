@@ -155,7 +155,7 @@ int hppa_fix_adjustable (struct fix *);
    difference expression can't be used between text and data symbols,
    or between symbols in different executable modules.  */
 #define DIFF_EXPR_OK 1
-#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX) 1
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG) 1
 #define UNDEFINED_DIFFERENCE_OK
 #endif
 

@@ -838,11 +838,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
   Output_section* os = this->u1_.relobj->output_section(lsi);
   gold_assert(os != NULL);
   Address offset = this->u1_.relobj->get_output_section_offset(lsi);
-  if (offset != -1U)
+  if (offset != invalid_address)
     return offset + addend;
   // This is a merge section.
   offset = os->output_address(this->u1_.relobj, lsi, addend);
-  gold_assert(offset != -1U);
+  gold_assert(offset != invalid_address);
   return offset;
 }
 
@@ -858,13 +858,13 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_address() const
       Output_section* os = this->u2_.relobj->output_section(this->shndx_);
       gold_assert(os != NULL);
       Address off = this->u2_.relobj->get_output_section_offset(this->shndx_);
-      if (off != -1U)
+      if (off != invalid_address)
 	address += os->address() + off;
       else
 	{
 	  address = os->output_address(this->u2_.relobj, this->shndx_,
 				       address);
-	  gold_assert(address != -1U);
+	  gold_assert(address != invalid_address);
 	}
     }
   else if (this->u2_.od != NULL)
@@ -2043,7 +2043,7 @@ Output_section::output_address(const Relobj* object, unsigned int shndx,
       if (p->output_offset(object, shndx, offset, &output_offset))
 	{
 	  if (output_offset == -1)
-	    return -1U;
+	    return -1ULL;
 	  return addr + output_offset;
 	}
       addr += p->data_size();

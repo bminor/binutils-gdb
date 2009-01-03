@@ -164,6 +164,30 @@ byte_get_signed (unsigned char *field, int size)
     }
 }
 
+static int
+size_of_encoded_value (int encoding)
+{
+  switch (encoding & 0x7)
+    {
+    default:	/* ??? */
+    case 0:	return eh_addr_size;
+    case 2:	return 2;
+    case 3:	return 4;
+    case 4:	return 8;
+    }
+}
+
+static dwarf_vma
+get_encoded_value (unsigned char *data, int encoding)
+{
+  int size = size_of_encoded_value (encoding);
+
+  if (encoding & DW_EH_PE_signed)
+    return byte_get_signed (data, size);
+  else
+    return byte_get (data, size);
+}
+
 /* Print a dwarf_vma value (typically an address, offset or length) in
    hexadecimal format, followed by a space.  The length of the value (and
    hence the precision displayed) is determined by the byte_size parameter.  */
@@ -186,7 +210,7 @@ print_dwarf_vma (dwarf_vma val, unsigned byte_size)
   snprintf (buff, sizeof (buff), "%16.16lx ", val);
 #endif
 
-  printf (buff + (byte_size == 4 ? 8 : 0));
+  fputs (buff + (byte_size == 4 ? 8 : 0), stdout);
 }
 
 static unsigned long int
@@ -651,7 +675,8 @@ static int
 decode_location_expression (unsigned char * data,
 			    unsigned int pointer_size,
 			    unsigned long length,
-			    unsigned long cu_offset)
+			    unsigned long cu_offset,
+			    struct dwarf_section * section)
 {
   unsigned op;
   unsigned int bytes_read;
@@ -988,6 +1013,21 @@ decode_location_expression (unsigned char * data,
 	case DW_OP_GNU_uninit:
 	  printf ("DW_OP_GNU_uninit");
 	  /* FIXME: Is there data associated with this OP ?  */
+	  break;
+	case DW_OP_GNU_encoded_addr:
+	  {
+	    int encoding;
+	    dwarf_vma addr;
+	
+	    encoding = *data++;
+	    addr = get_encoded_value (data, encoding);
+	    if ((encoding & 0x70) == DW_EH_PE_pcrel)
+	      addr += section->address + (data - section->start);
+	    data += size_of_encoded_value (encoding);
+
+	    printf ("DW_OP_GNU_encoded_addr: fmt:%02x addr:", encoding);
+	    print_dwarf_vma (addr, pointer_size);
+	  }
 	  break;
 
 	  /* HP extensions.  */
@@ -1508,7 +1548,7 @@ read_and_display_attr_value (unsigned long attribute,
 	  need_frame_base = decode_location_expression (block_start,
 							pointer_size,
 							uvalue,
-							cu_offset);
+							cu_offset, section);
 	  printf (")");
 	  if (need_frame_base && !have_frame_base)
 	    printf (_(" [without DW_AT_frame_base]"));
@@ -1799,7 +1839,7 @@ process_debug_info (struct dwarf_section *section,
 
   if (!do_loc)
     {
-      printf (_("The section %s contains:\n\n"), section->name);
+      printf (_("Contents of the %s section:\n\n"), section->name);
 
       load_debug_section (str, file);
     }
@@ -2864,7 +2904,7 @@ display_debug_pubnames (struct dwarf_section *section,
 	  if (offset != 0)
 	    {
 	      data += offset_size;
-	      printf ("    %-6ld\t\t%s\n", offset, data);
+	      printf ("    %-6lx\t%s\n", offset, data);
 	      data += strlen ((char *) data) + 1;
 	    }
 	}
@@ -3186,7 +3226,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	      need_frame_base = decode_location_expression (start,
 							    pointer_size,
 							    length,
-							    cu_offset);
+							    cu_offset, section);
 	      putchar (')');
 
 	      if (need_frame_base && !has_frame_base)
@@ -3282,7 +3322,7 @@ display_debug_aranges (struct dwarf_section *section,
   unsigned char *start = section->start;
   unsigned char *end = start + section->size;
 
-  printf (_("The section %s contains:\n\n"), section->name);
+  printf (_("Contents of the %s section:\n\n"), section->name);
 
   /* It does not matter if this load fails,
      we test for that later on.  */
@@ -3383,6 +3423,7 @@ display_debug_aranges (struct dwarf_section *section,
 
 	  ranges += address_size;
 
+	  printf ("    ");
 	  print_dwarf_vma (address, address_size);
 	  print_dwarf_vma (length, address_size);
 	  putchar ('\n');
@@ -3756,30 +3797,6 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, int *max_regs)
   printf ("\n");
 }
 
-static int
-size_of_encoded_value (int encoding)
-{
-  switch (encoding & 0x7)
-    {
-    default:	/* ??? */
-    case 0:	return eh_addr_size;
-    case 2:	return 2;
-    case 3:	return 4;
-    case 4:	return 8;
-    }
-}
-
-static dwarf_vma
-get_encoded_value (unsigned char *data, int encoding)
-{
-  int size = size_of_encoded_value (encoding);
-
-  if (encoding & DW_EH_PE_signed)
-    return byte_get_signed (data, size);
-  else
-    return byte_get (data, size);
-}
-
 #define GET(N)	byte_get (start, N); start += N
 #define LEB()	read_leb128 (start, & length_return, 0); start += length_return
 #define SLEB()	read_leb128 (start, & length_return, 1); start += length_return
@@ -3798,7 +3815,7 @@ display_debug_frames (struct dwarf_section *section,
   unsigned int length_return;
   int max_regs = 0;
 
-  printf (_("The section %s contains:\n"), section->name);
+  printf (_("Contents of the %s section:\n"), section->name);
 
   while (start < end)
     {
@@ -4379,7 +4396,8 @@ display_debug_frames (struct dwarf_section *section,
 	      if (! do_debug_frames_interp)
 		{
 		  printf ("  DW_CFA_def_cfa_expression (");
-		  decode_location_expression (start, eh_addr_size, ul, 0);
+		  decode_location_expression (start, eh_addr_size, ul, 0,
+					      section);
 		  printf (")\n");
 		}
 	      fc->cfa_exp = 1;
@@ -4394,7 +4412,7 @@ display_debug_frames (struct dwarf_section *section,
 		  printf ("  DW_CFA_expression: %s (",
 			  regname (reg, 0));
 		  decode_location_expression (start, eh_addr_size,
-					      ul, 0);
+					      ul, 0, section);
 		  printf (")\n");
 		}
 	      fc->col_type[reg] = DW_CFA_expression;
@@ -4408,7 +4426,8 @@ display_debug_frames (struct dwarf_section *section,
 		{
 		  printf ("  DW_CFA_val_expression: %s (",
 			  regname (reg, 0));
-		  decode_location_expression (start, eh_addr_size, ul, 0);
+		  decode_location_expression (start, eh_addr_size, ul, 0,
+					      section);
 		  printf (")\n");
 		}
 	      fc->col_type[reg] = DW_CFA_val_expression;

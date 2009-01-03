@@ -1,3 +1,103 @@
+2008-10-29  Nick Clifton  <nickc@redhat.com>
+
+	* ld-gc/gc.c (dummy_func): New function - present so that
+	underscore prefixed aliases can be created of the used_func and
+	main functions.
+
+2008-10-10  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* ld-powerpc/gnu-attr-12-1.s: New file.
+	* ld-powerpc/gnu-attr-12-2.s: New file.
+	* ld-powerpc/gnu-attr-12-11.d: New file.
+	* ld-powerpc/gnu-attr-12-21.d: New file.
+	* ld-powerpc/powerpc.exp: Run new dump tests.
+
+2008-10-07  Nick Clifton  <nickc@redhat.com>
+
+	* ld-ia64/tlsbin.rd: Update expected output now that --wide does
+	not truncate section names.
+	* ld-ia64/tlspic.rd: Likewise.
+
+2008-10-06  Tom Tromey  <tromey@redhat.com>
+
+	* ld-elf/eh1.d, ld-elf/eh2.d, ld-elf/eh3.d, ld-elf/eh4.d,
+	ld-elf/eh5.d, ld-elf/eh6.d, ld-mips-elf/eh-frame1-n32.d,
+	ld-mips-elf/eh-frame1-n64.d, ld-mips-elf/eh-frame2-n32.d,
+	ld-mips-elf/eh-frame2-n64.d, ld-mips-elf/eh-frame3.d,
+	ld-mips-elf/eh-frame4.d: Update for readelf change.
+
+2008-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6931
+	* ld-elf/group7.d: New.
+
+2008-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/group5.d: Updated.
+	* ld-elf/group6.d: Likewise.
+
+2008-10-03  Tristan Gingold  <gingold@adacore.com>
+
+	* ld-elf/stab.d: Don't run on alpha (to avoid relocation
+	overflow on 64 bits targets whose stab values is 32 bits).
+
+2008-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6931
+	* ld-elf/group4.d: New.
+	* ld-elf/group5.d: Likewise.
+	* ld-elf/group6.d: Likewise.
+
+2008-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/vxworks1-lib.rd: Update.
+
+2008-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/extract-symbol-1sec.d: Correct section lma.
+
+2008-09-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/eh-group.exp: Only run on ELF targets.
+	* ld-elf/eh5b.s: Export main, start, __start.
+
+2008-09-20  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* ld-mips-elf/reloc-estimate-1.d: Make endian-neutral.
+
+2008-09-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Provide virtual target "cfi" for targets supporting CFI.
+	* ld-elf/eh-frame-hdr.d: Replace target and xfail statements by single
+	`target: cfi'.
+	* ld-elf/eh-group.exp: Call check_as_cfi instead of is_elf_format.
+	* ld-elf/eh-group1.s, elf/eh-group2.s: Use more compatible section
+	flags prefix '%'.
+	* ld-elf/eh5.d: Replace target statement by `target: cfi' with an Alpha
+	exception.  Relax the `Code alignment factor' matching.
+	* lib/ld-lib.exp: Rename istarget as istarget_ld.
+	(istarget, check_as_cfi): New procedure.
+	(run_dump_test): New comment for the virtual target `cfi'.
+
+2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ld-elf/eh-group.exp, ld-elf/eh-group1.s, ld-elf/eh-group2.s: New test.
+
+2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix testcases compilation failures due to unused variables.
+	* ld-elfcomm/common1b.c (dummy1): Mark the variable for GCC as USED.
+	* ld-shared/main.c (main): Move the P variable only to the places where
+	it is used.
+
+2008-09-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6877
+	* ld-elf/comm1.c: New.
+	* ld-elf/func1.c: Likewise.
+
+	* ld-elf/shared.exp: Add tests for libfunc1.so and comm1.
+
 2008-08-26  Nick Clifton  <nickc@redhat.com>
 
 	* ld-arm/arm-elf.exp: Add farcall-thumb-arm-short test.

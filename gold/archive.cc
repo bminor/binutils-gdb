@@ -37,6 +37,7 @@
 #include "symtab.h"
 #include "object.h"
 #include "archive.h"
+#include "plugin.h"
 
 namespace gold
 {
@@ -126,6 +127,9 @@ Archive::setup(Input_objects* input_objects)
                        && parameters->options().preread_archive_symbols());
 #ifndef ENABLE_THREADS
   preread_syms = false;
+#else
+  if (parameters->options().has_plugins())
+    preread_syms = false;
 #endif
   if (preread_syms)
     this->read_all_symbols(input_objects);
@@ -439,11 +443,11 @@ Archive::end()
 bool
 Archive::get_file_and_offset(off_t off, Input_objects* input_objects,
                              Input_file** input_file, off_t* memoff,
-                             std::string* member_name)
+                             off_t* memsize, std::string* member_name)
 {
   off_t nested_off;
 
-  this->read_header(off, false, member_name, &nested_off);
+  *memsize = this->read_header(off, false, member_name, &nested_off);
 
   *input_file = this->input_file_;
   *memoff = off + static_cast<off_t>(sizeof(Archive_header));
@@ -455,11 +459,11 @@ Archive::get_file_and_offset(off_t off, Input_objects* input_objects,
   // to the directory containing the archive.
   if (!IS_ABSOLUTE_PATH(member_name->c_str()))
     {
-      const char* arch_path = this->name().c_str();
+      const char* arch_path = this->filename().c_str();
       const char* basename = lbasename(arch_path);
       if (basename > arch_path)
         member_name->replace(0, 0,
-                             this->name().substr(0, basename - arch_path));
+                             this->filename().substr(0, basename - arch_path));
     }
 
   if (nested_off > 0)
@@ -488,8 +492,8 @@ Archive::get_file_and_offset(off_t off, Input_objects* input_objects,
             this->nested_archives_.insert(std::make_pair(*member_name, arch));
           gold_assert(ins.second);
         }
-      return arch->get_file_and_offset(nested_off, input_objects,
-                                       input_file, memoff, member_name);
+      return arch->get_file_and_offset(nested_off, input_objects, input_file,
+                                       memoff, memsize, member_name);
     }
 
   // This is an external member of a thin archive.  Open the
@@ -503,6 +507,7 @@ Archive::get_file_and_offset(off_t off, Input_objects* input_objects,
     return false;
 
   *memoff = 0;
+  *memsize = (*input_file)->file().filesize();
   return true;
 }
 
@@ -515,10 +520,25 @@ Archive::get_elf_object_for_member(off_t off, Input_objects* input_objects)
   std::string member_name;
   Input_file* input_file;
   off_t memoff;
+  off_t memsize;
 
   if (!this->get_file_and_offset(off, input_objects, &input_file, &memoff,
-                                 &member_name))
+                                 &memsize, &member_name))
     return NULL;
+
+  if (parameters->options().has_plugins())
+    {
+      Object* obj = parameters->options().plugins()->claim_file(input_file,
+                                                                memoff,
+                                                                memsize);
+      if (obj != NULL)
+        {
+          // The input file was claimed by a plugin, and its symbols
+          // have been provided by the plugin.
+	  input_file->file().claim_for_plugin();
+          return obj;
+        }
+    }
 
   off_t filesize = input_file->file().filesize();
   int read_size = elfcpp::Elf_sizes<64>::ehdr_size;
@@ -753,12 +773,24 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
   if (mapfile != NULL)
     mapfile->report_include_archive_member(obj->name(), sym, why);
 
+  Pluginobj* pluginobj = obj->pluginobj();
+  if (pluginobj != NULL)
+    {
+      pluginobj->add_symbols(symtab, layout);
+      return;
+    }
+
   if (input_objects->add_object(obj))
     {
       Read_symbols_data sd;
       obj->read_symbols(&sd);
       obj->layout(symtab, layout, &sd);
       obj->add_symbols(symtab, &sd);
+
+      // If this is an external member of a thin archive, unlock the file
+      // for the next task.
+      if (obj->offset() == 0)
+        obj->unlock(this->task_);
     }
   else
     {

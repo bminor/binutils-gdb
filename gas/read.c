@@ -220,9 +220,9 @@ static void s_reloc (int);
 static int hex_float (int, char *);
 static segT get_known_segmented_expression (expressionS * expP);
 static void pobegin (void);
-static int get_line_sb (sb *);
+static int get_non_macro_line_sb (sb *);
 static void generate_file_debug (void);
-static char *_find_end_of_line (char *, int, int);
+static char *_find_end_of_line (char *, int, int, int);
 
 void
 read_begin (void)
@@ -530,7 +530,7 @@ pobegin (void)
 #define HANDLE_CONDITIONAL_ASSEMBLY()					\
   if (ignore_input ())							\
     {									\
-      char *eol = find_end_of_line (input_line_pointer, flag_m68k_mri);	\
+      char *eol = find_end_of_line (input_line_pointer, flag_m68k_mri); \
       input_line_pointer = (input_line_pointer <= buffer_limit		\
 			    && eol >= buffer_limit)			\
 			   ? buffer_limit				\
@@ -923,7 +923,7 @@ read_a_source_file (char *name)
 		      /* WARNING: c has char, which may be end-of-line.  */
 		      /* Also: input_line_pointer->`\0` where c was.  */
 		      *input_line_pointer = c;
-		      input_line_pointer = _find_end_of_line (input_line_pointer, flag_m68k_mri, 1);
+		      input_line_pointer = _find_end_of_line (input_line_pointer, flag_m68k_mri, 1, 0);
 		      c = *input_line_pointer;
 		      *input_line_pointer = '\0';
 
@@ -2178,7 +2178,7 @@ s_irp (int irpc)
 
   sb_new (&out);
 
-  err = expand_irp (irpc, 0, &s, &out, get_line_sb);
+  err = expand_irp (irpc, 0, &s, &out, get_non_macro_line_sb);
   if (err != NULL)
     as_bad_where (file, line, "%s", err);
 
@@ -2468,7 +2468,7 @@ s_lsym (int ignore ATTRIBUTE_UNUSED)
    or zero if there are no more lines.  */
 
 static int
-get_line_sb (sb *line)
+get_line_sb (sb *line, int in_macro)
 {
   char *eol;
 
@@ -2482,7 +2482,7 @@ get_line_sb (sb *line)
 	return 0;
     }
 
-  eol = find_end_of_line (input_line_pointer, flag_m68k_mri);
+  eol = _find_end_of_line (input_line_pointer, flag_m68k_mri, 0, in_macro);
   sb_add_buffer (line, input_line_pointer, eol - input_line_pointer);
   input_line_pointer = eol;
 
@@ -2492,6 +2492,18 @@ get_line_sb (sb *line)
      return the character skipped so that the caller can re-insert it if
      necessary.   */
   return *input_line_pointer++;
+}
+
+static int
+get_non_macro_line_sb (sb *line)
+{
+  return get_line_sb (line, 0);
+}
+
+static int
+get_macro_line_sb (sb *line)
+{
+  return get_line_sb (line, 1);
 }
 
 /* Define a macro.  This is an interface to macro.c.  */
@@ -2518,11 +2530,11 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
 
       sb_new (&label);
       sb_add_string (&label, S_GET_NAME (line_label));
-      err = define_macro (0, &s, &label, get_line_sb, file, line, &name);
+      err = define_macro (0, &s, &label, get_macro_line_sb, file, line, &name);
       sb_kill (&label);
     }
   else
-    err = define_macro (0, &s, NULL, get_line_sb, file, line, &name);
+    err = define_macro (0, &s, NULL, get_macro_line_sb, file, line, &name);
   if (err != NULL)
     as_bad_where (file, line, err, name);
   else
@@ -2928,7 +2940,7 @@ do_repeat (int count, const char *start, const char *end)
   sb many;
 
   sb_new (&one);
-  if (!buffer_and_nest (start, end, &one, get_line_sb))
+  if (!buffer_and_nest (start, end, &one, get_non_macro_line_sb))
     {
       as_bad (_("%s without %s"), start, end);
       return;
@@ -3609,12 +3621,14 @@ pseudo_set (symbolS *symbolP)
       break;
 
     case O_register:
+#ifndef TC_GLOBAL_REGISTER_SYMBOL_OK
       if (S_IS_EXTERNAL (symbolP))
 	{
 	  as_bad ("can't equate global symbol `%s' with register name",
 		  S_GET_NAME (symbolP));
 	  return;
 	}
+#endif
       S_SET_SEGMENT (symbolP, reg_section);
       S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
       set_zero_frag (symbolP);
@@ -5780,7 +5794,8 @@ input_scrub_insert_file (char *path)
 #endif
 
 static char *
-_find_end_of_line (char *s, int mri_string, int insn ATTRIBUTE_UNUSED)
+_find_end_of_line (char *s, int mri_string, int insn ATTRIBUTE_UNUSED,
+		   int in_macro)
 {
   char inquote = '\0';
   int inescape = 0;
@@ -5791,6 +5806,13 @@ _find_end_of_line (char *s, int mri_string, int insn ATTRIBUTE_UNUSED)
 #ifdef TC_EOL_IN_INSN
 	 || (insn && TC_EOL_IN_INSN (s))
 #endif
+	 /* PR 6926:  When we are parsing the body of a macro the sequence
+	    \@ is special - it refers to the invocation count.  If the @
+	    character happens to be registered as a line-separator character
+	    by the target, then the is_end_of_line[] test above will have
+	    returned true, but we need to ignore the line separating
+	    semantics in this particular case.  */
+	 || (in_macro && inescape && *s == '@')
 	)
     {
       if (mri_string && *s == '\'')
@@ -5818,5 +5840,5 @@ _find_end_of_line (char *s, int mri_string, int insn ATTRIBUTE_UNUSED)
 char *
 find_end_of_line (char *s, int mri_string)
 {
-  return _find_end_of_line (s, mri_string, 0);
+  return _find_end_of_line (s, mri_string, 0, 0);
 }

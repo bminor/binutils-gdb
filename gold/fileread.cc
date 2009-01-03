@@ -191,6 +191,19 @@ File_read::release()
   this->released_ = true;
 }
 
+// Claim the file for a plugin.  This effectively releases the file without
+// closing it; the plugin will assume responsibility for closing it.
+
+void
+File_read::claim_for_plugin()
+{
+  gold_assert(this->is_locked());
+  claim_descriptor_for_plugin(this->descriptor_);
+  this->descriptor_ = -1;
+  this->is_descriptor_opened_ = false;
+  this->released_ = true;
+}
+
 // Lock the file.
 
 void
@@ -354,6 +367,16 @@ File_read::make_view(off_t start, section_size_type size,
 		     unsigned int byteshift, bool cache)
 {
   gold_assert(size > 0);
+
+  // Check that start and end of the view are within the file.
+  if (start > this->size_
+      || (static_cast<unsigned long long>(size)
+          > static_cast<unsigned long long>(this->size_ - start)))
+    gold_fatal(_("%s: attempt to map %lld bytes at offset %lld exceeds "
+                 "size of file; the file may be corrupt"),
+		   this->filename().c_str(),
+		   static_cast<long long>(size),
+		   static_cast<long long>(start));
 
   off_t poff = File_read::page_offset(start);
 

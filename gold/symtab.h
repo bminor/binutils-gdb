@@ -43,6 +43,8 @@ class Object;
 class Relobj;
 template<int size, bool big_endian>
 class Sized_relobj;
+template<int size, bool big_endian>
+class Sized_pluginobj;
 class Dynobj;
 template<int size, bool big_endian>
 class Sized_dynobj;
@@ -272,6 +274,18 @@ class Symbol
   void
   set_in_dyn()
   { this->in_dyn_ = true; }
+
+  // Return whether this symbol has been seen in a real ELF object.
+  // (IN_REG will return TRUE if the symbol has been seen in either
+  // a real ELF object or an object claimed by a plugin.)
+  bool
+  in_real_elf() const
+  { return this->in_real_elf_; }
+
+  // Mark this symbol as having been seen in a real ELF object.
+  void
+  set_in_real_elf()
+  { this->in_real_elf_ = true; }
 
   // Return the index of this symbol in the output file symbol table.
   // A value of -1U means that this symbol is not going into the
@@ -871,8 +885,10 @@ class Symbol
   bool is_forced_local_ : 1;
   // True if the field u_.from_object.shndx is an ordinary section
   // index, not one of the special codes from SHN_LORESERVE to
-  // SHN_HIRESERVE.
+  // SHN_HIRESERVE (bit 31).
   bool is_ordinary_shndx_ : 1;
+  // True if we've seen this symbol in a real ELF object.
+  bool in_real_elf_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template
@@ -1138,6 +1154,14 @@ class Symbol_table
 		  size_t sym_name_size,
 		  typename Sized_relobj<size, big_endian>::Symbols*,
 		  size_t* defined);
+
+  // Add one external symbol from the plugin object OBJ to the symbol table.
+  // Returns a pointer to the resolved symbol in the symbol table.
+  template<int size, bool big_endian>
+  Symbol*
+  add_from_pluginobj(Sized_pluginobj<size, big_endian>* obj,
+                     const char* name, const char* ver,
+                     elfcpp::Sym<size, big_endian>* sym);
 
   // Add COUNT dynamic symbols from the dynamic object DYNOBJ to the
   // symbol table.  SYMS is the symbols.  SYM_NAMES is their names.

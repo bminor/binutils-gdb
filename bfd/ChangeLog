@@ -1,3 +1,202 @@
+2008-10-30  Jay Krell  <jay.krell@cornell.edu>
+
+	* cache.c (cache_bread): Cast void * pointer before performing
+	arithmetic on it.
+
+2008-10-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_process_dot_syms): Renamed from
+	ppc64_elf_check_directives.
+	* elf32-sh-symbian.c (sh_symbian_process_directives): Combine..
+	(sh_symbian_check_directives): ..this
+	(bfd_elf32_sh_symbian_process_directives) ..and this function.
+
+2008-10-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (bfd_elf_final_link): Move code reading relocs to..
+	* elf32-spu.c (spu_elf_count_relocs): ..here.  Adjust params.
+	* elf-bfd.h (struct elf_backend_data): Update elf_backend_count_relocs
+	params.
+
+2008-10-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (bfd_elf_final_link): Use d_ptr rather than d_val
+	where Elf_Internal_Dyn holds an address.
+
+2008-10-10  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* elf32-ppc.c (ppc_elf_merge_obj_attributes): Merge
+	Tag_GNU_Power_ABI_Struct_Return.
+
+2008-10-09  Kai Tietz  <kai.tietz@onevision.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Dump bfd_vma
+	sized addresses instead of long sized.
+
+2008-10-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Don't attempt to
+	read plt relocs if no dynamic syms.
+
+2008-10-08  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add "id".
+	* configure: Regenerate.
+	* po/id.po: New Indonesian translation.
+
+2008-10-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_for_load_sections): When checking
+	a segment for contents, don't assume that a non-TLS nobits section
+	must only be followed by nobits sections.
+
+2008-10-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (TLSHOWTO32, TLSHOWTO16): New macros.
+	(cris_elf_howto_table): Add entries for R_CRIS_32_GOT_GD,
+	R_CRIS_16_GOT_GD, R_CRIS_32_GD, R_CRIS_DTP, R_CRIS_32_DTPREL,
+	R_CRIS_16_DTPREL, R_CRIS_DTPMOD, R_CRIS_32_GOT_TPREL,
+	R_CRIS_16_GOT_TPREL,  R_CRIS_32_TPREL,  R_CRIS_16_TPREL.
+	(cris_reloc_map): Similarly.
+	* reloc.c (bfd_reloc_code_type): Add entries for
+	BFD_RELOC_CRIS_32_GOT_GD, BFD_RELOC_CRIS_16_GOT_GD,
+	BFD_RELOC_CRIS_32_GD, BFD_RELOC_CRIS_DTP,
+	BFD_RELOC_CRIS_32_DTPREL, BFD_RELOC_CRIS_16_DTPREL,
+	BFD_RELOC_CRIS_DTPMOD, BFD_RELOC_CRIS_32_GOT_TPREL,
+	BFD_RELOC_CRIS_16_GOT_TPREL, BFD_RELOC_CRIS_32_TPREL,
+	BFD_RELOC_CRIS_16_TPREL.
+	* libbfd.h, bfd-in2.h: Regenerate.
+
+2008-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6931
+	* elf.c (bfd_elf_set_group_contents): Assign sh_info for ld -r when
+	the signature symbol is global.
+	* elflink.c (elf_link_input_bfd): Ensure group signature symbol
+	is output when ld -r.  Set group sh_info when local.
+	* linker.c (default_indirect_link_order): Handle group sections
+	specially.
+
+2008-09-30  Wesley W. Terpstra  <wesley@terpstra.ca>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* coffgen.c (coff_write_symbols): Check to see if a symbol's flags
+	do not match it class and if necessary update the class.
+	(null_error_handler): New function.  Suppresses the generation of
+	bfd error messages.
+	* coff64-rs6000.c (bfd_xcoff_backend_data): Update comment.
+
+2008-09-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2008-09-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_link_add_object_symbols): Don't ignore returned
+	value of check_directives.
+
+2008-09-29  Peter O'Gorman  <pogma@thewrittenword.com>
+	    Steve Ellcey  <sje@cup.hp.com>
+
+	* configure: Regenerate for new libtool.
+	* aclocal.m4: Ditto.
+	* Makefile.in: Ditto.
+	* doc/Makefile.in: Ditto.
+
+2008-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6789
+	* elf.c (assign_file_positions_for_load_sections): Call
+	_bfd_elf_map_sections_to_segments, not elf_modify_segment_map.
+	(get_program_header_size): Protect against NULL info.
+	(_bfd_elf_map_sections_to_segments): Likewise.
+	* elf32-spu.c (spu_elf_additional_program_headers): Likewise.
+
+2008-09-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
+2008-09-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (_bfd_elf_init_private_section_data): Tweak union copy.
+	(bfd_section_from_shdr): Don't change SHT_GROUP section name.
+	* elflink.c (section_signature): New function.
+	(_bfd_elf_section_already_linked): Use it.
+
+2008-09-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_finish_dynamic_sections): Handle vxworks
+	_GLOBAL_OFFSET_TABLE_ in .got.plt section.  Add BFD_ASSERTs.
+
+2008-09-17  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_check_relocs): Check for negative
+	refcount.
+
+2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR 6893 - Do not consider FDEs for discarded sections as invalid.
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): New REQUIRE_CLEARED_RELOCS.
+	Consider FDEs with cleared relocations as valid and ignorable.
+
+2008-09-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6877
+	* elflink.c (_bfd_elf_merge_symbol): Allow a common symbol to
+	override the function in a shared library.
+
+2008-09-16  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6844
+	* elf32-ppc.c (SYM_VAL): Define.  Use throughout to find symbol vma.
+	(ppc_elf_relocate_section): Correct GOT offset calculation.
+	(ppc_elf_finish_dynamic_symbol): Use PPC_HA and PPC_LO.
+	(ppc_elf_finish_dynamic_sections): Likewise.  Error if
+	htab->elf.hgot symbol is not defined in htab->got section.
+
+2008-09-16  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6888
+	* elf32-ppc.c (ppc_elf_relocate_section): Handle NULL symbol section
+	on R_PPC_TOC16, R_PPC_SDAREL16, R_PPC_EMB_SDA2REL, R_PPC_EMB_SDA21,
+	R_PPC_EMB_RELSDA, R_PPC_SECTOFF* relocs.
+
+2008-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix loading large elf64 binaries on 32bit hosts.
+	* configure.in: Call AC_SYS_LARGEFILE.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2008-09-08  Tom Tromey  <tromey@redhat.com>
+
+	* elfxx-mips.c (mips16_stub_symndx) <sec>: Mark argument as
+	unused.
+
+2008-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR ld/3191
+	* dwarf2.c (struct adjusted_section): Renamed from struct
+	loadable_section.
+	(struct dwarf2_debug): Adjust for renaming.  Add version field.
+	(read_attribute_value): Correctly handle DW_FORM_ref_addr for
+	DWARF3.
+	(find_abstract_instance_name): Pass a pointer to
+	attribute instead of offset.  For DW_FORM_ref_addr, get the
+	entry at the offset from the .debug_info section.
+	(scan_unit_for_symbols): Update.
+	(parse_comp_unit): Allow DWARF3.  Save the version.
+	(unset_sections): Update for renaming.
+	(place_sections): Likewise.  Set new VMAs for DWARF sections
+	also.
+
+2008-09-08  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Update version to 2.19.50
+	* configure: Regenerated.
+
 2008-09-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2.c: Change leading whitespace to tabs.
@@ -13,7 +212,7 @@
 	BFD_MACH_O_x86_EXCEPTION_STATE.
 	(bfd_mach_o_load_command_type): Add
 	BFD_MACH_O_LC_SEGMENT_64, BFD_MACH_O_LC_ROUTINES_64,
-	BFD_MACH_O_LC_UUID.	
+	BFD_MACH_O_LC_UUID.
 	(BFD_MACH_O_CPU_IS64BIT): Added.
 	(bfd_mach_o_cpu_type): Add BFD_MACH_O_CPU_TYPE_POWERPC_64,
 	BFD_MACH_O_CPU_TYPE_X86_64.
@@ -45,7 +244,7 @@
 	(bfd_mach_o_scan_start_address): Ditto.
 	(bfd_mach_o_scan): Ditto.
 	(bfd_mach_o_lookup_section): Ditto.
-	
+
 2008-08-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf-hppa.h (elf_hppa_reloc_final_type): Handle R_PARISC_GPREL64,

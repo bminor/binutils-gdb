@@ -1,3 +1,56 @@
+2008-10-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (CPPFLAGS): Define.
+	(FLAGS_TO_PASS, COMPILE.c): Add CPPFLAGS.
+
+2008-10-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	PR bootstrap/37137
+	* Makefile.in (LIBCFLAGS): Remove.
+	(FLAGS_TO_PASS): Don't mention it.
+	(COMPILE.c, MULTIOSDIR): Replace it with CFLAGS.
+
+2008-10-08  David Edelsohn  <edelsohn@gnu.org>
+
+	* xstrdup.c: Include <sys/types.h> after "config.h"
+ 
+2008-10-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.ac: Call AC_SYS_LARGEFILE.
+	* config.in: Regenerated.
+	* configure: Likewise.
+
+2008-10-06  Jason Merrill  <jason@redhat.com>
+
+	* cp-demangle.c (struct d_print_info): Add pack_index.
+	(d_dump): Add DEMANGLE_COMPONENT_PACK_EXPANSION.
+	(d_make_comp): Likewise.  DEMANGLE_COMPONENT_ARGLIST and
+	DEMANGLE_COMPONENT_TEMPLATE_ARGLIST can have two null args.
+	(cplus_demangle_builtin_types): Add char16/32_t.
+	(cplus_demangle_type): Recognize them.
+	(d_template_args): Handle empty argument packs.
+	(d_template_arg): Handle argument packs.
+	(d_expression): Handle dependent name.
+	(d_index_template_argument): New fn.
+	(d_lookup_template_argument): New fn.
+	(d_find_pack, d_pack_length): New fn.
+	(d_print_subexpr): Split out...
+	(d_print_comp): ...from here.  Use d_*_template_argument.
+	Handle empty arg lists.  Support pack expansions.
+	* cp-demangle.h (D_BUILTIN_TYPE_COUNT): Increase to 32.
+
+2008-09-09  Jason Merrill  <jason@redhat.com>
+
+	* cp-demangle.c (d_dump): Handle DEMANGLE_COMPONENT_DECLTYPE.
+	(d_make_comp): Likewise.
+	(cplus_demangle_type): Handle decltype and DFP types.
+	(cplus_demangle_operators): Call operator takes 2 args.
+	(cplus_demangle_builtin_types): Add DFP types.
+	(d_exprlist): New fn.
+	(d_expression): Handle parm placeholders, T() and calls.
+	(d_print_comp): Handle decltype, T() and calls.
+	* testsuite/demangle-expected: Test the above.
+
 2008-08-07  Aaron W. LaFramboise  <aaronavay62@aaronwl.com>
 
 	* pex-win32.c (argv_to_argc): New function.
@@ -4901,7 +4954,7 @@ Thu Oct  8 23:42:08 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* Merge egcs & devo libiberty.
 
-1998-09-08  Martin von Löwis  <loewis@informatik.hu-berlin.de>
+1998-09-08  Martin von LÃ¶wis  <loewis@informatik.hu-berlin.de>
 
 	* cplus-dem.c (demangle_arm_pt): Demangle anonymous namespaces.
 

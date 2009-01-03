@@ -40,6 +40,7 @@
 #include "layout.h"
 #include "reloc.h"
 #include "defstd.h"
+#include "plugin.h"
 
 namespace gold
 {
@@ -151,6 +152,16 @@ queue_initial_tasks(const General_options& options,
       this_blocker = next_blocker;
     }
 
+  if (options.has_plugins())
+    {
+      Task_token* next_blocker = new Task_token(true);
+      next_blocker->add_blocker();
+      workqueue->queue(new Plugin_hook(options, input_objects, symtab, layout,
+				       &search_path, mapfile, this_blocker,
+				       next_blocker));
+      this_blocker = next_blocker;
+    }
+
   workqueue->queue(new Task_function(new Middle_runner(options,
 						       input_objects,
 						       symtab,
@@ -192,6 +203,7 @@ queue_middle_tasks(const General_options& options,
   if (!doing_static_link && options.is_static())
     {
       // We print out just the first .so we see; there may be others.
+      gold_assert(input_objects->dynobj_begin() != input_objects->dynobj_end());
       gold_error(_("cannot mix -static with dynamic object %s"),
 		 (*input_objects->dynobj_begin())->name().c_str());
     }

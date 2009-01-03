@@ -23,3 +23,27 @@ start:
 	dstt	8,7,0
 	dstst	5,6,3
 	dststt	4,5,2
+	attn
+	mtcr    3
+	mtcrf   0xff,3
+	mtcrf   0x81,3
+	mtcrf   0x01,3
+	mtcrf   0x02,3
+	mtcrf   0x04,3
+	mtcrf   0x08,3
+	mtcrf   0x10,3
+	mtcrf   0x20,3
+	mtcrf   0x40,3
+	mtcrf   0x80,3
+	mfcr    3
+	mfcr    3,0x01
+	mfcr    3,0x02
+	mfcr    3,0x04
+	mfcr    3,0x08
+	mfcr    3,0x10
+	mfcr    3,0x20
+	mfcr    3,0x40
+	mfcr    3,0x80
+	dcbz    1, 2
+	dcbzl   3, 4
+	dcbz    5, 6

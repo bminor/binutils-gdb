@@ -193,7 +193,7 @@ input_statement_is_archive_path (const char *file_spec, char *sep,
   return match;
 }
 
-bfd_boolean
+static bfd_boolean
 unique_section_p (const asection *sec)
 {
   struct unique_sections *unam;
@@ -1278,19 +1278,25 @@ lang_output_section_statement_lookup (const char *const name,
       struct out_section_hash_entry *last_ent;
       unsigned long hash = entry->root.hash;
 
-      do
-	{
-	  if (entry->s.output_section_statement.constraint >= 0
-	      && (constraint == 0
-		  || (constraint == entry->s.output_section_statement.constraint
-		      && constraint != SPECIAL)))
-	    return &entry->s.output_section_statement;
-	  last_ent = entry;
-	  entry = (struct out_section_hash_entry *) entry->root.next;
-	}
-      while (entry != NULL
-	     && entry->root.hash == hash
-	     && strcmp (name, entry->s.output_section_statement.name) == 0);
+      if (create && constraint == SPECIAL)
+	/* Not traversing to the end reverses the order of the second
+	   and subsequent SPECIAL sections in the hash table chain,
+	   but that shouldn't matter.  */
+	last_ent = entry;
+      else
+	do
+	  {
+	    if (entry->s.output_section_statement.constraint >= 0
+		&& (constraint == 0
+		    || (constraint
+			== entry->s.output_section_statement.constraint)))
+	      return &entry->s.output_section_statement;
+	    last_ent = entry;
+	    entry = (struct out_section_hash_entry *) entry->root.next;
+	  }
+	while (entry != NULL
+	       && entry->root.hash == hash
+	       && strcmp (name, entry->s.output_section_statement.name) == 0);
 
       if (!create)
 	return NULL;
@@ -1357,7 +1363,8 @@ lang_output_section_find_by_flags (const asection *sec,
       return found;
     }
 
-  if (sec->flags & SEC_CODE)
+  if ((sec->flags & SEC_CODE) != 0
+      && (sec->flags & SEC_ALLOC) != 0)
     {
       /* Try for a rw code section.  */
       for (look = first; look; look = look->next)
@@ -1377,7 +1384,8 @@ lang_output_section_find_by_flags (const asection *sec,
 	    found = look;
 	}
     }
-  else if (sec->flags & (SEC_READONLY | SEC_THREAD_LOCAL))
+  else if ((sec->flags & (SEC_READONLY | SEC_THREAD_LOCAL)) != 0
+	   && (sec->flags & SEC_ALLOC) != 0)
     {
       /* .rodata can go after .text, .sdata2 after .rodata.  */
       for (look = first; look; look = look->next)
@@ -1398,7 +1406,8 @@ lang_output_section_find_by_flags (const asection *sec,
 	    found = look;
 	}
     }
-  else if (sec->flags & SEC_SMALL_DATA)
+  else if ((sec->flags & SEC_SMALL_DATA) != 0
+	   && (sec->flags & SEC_ALLOC) != 0)
     {
       /* .sdata goes after .data, .sbss after .sdata.  */
       for (look = first; look; look = look->next)
@@ -1420,7 +1429,8 @@ lang_output_section_find_by_flags (const asection *sec,
 	    found = look;
 	}
     }
-  else if (sec->flags & SEC_HAS_CONTENTS)
+  else if ((sec->flags & SEC_HAS_CONTENTS) != 0
+	   && (sec->flags & SEC_ALLOC) != 0)
     {
       /* .data goes after .rodata.  */
       for (look = first; look; look = look->next)
@@ -1440,9 +1450,9 @@ lang_output_section_find_by_flags (const asection *sec,
 	    found = look;
 	}
     }
-  else
+  else if ((sec->flags & SEC_ALLOC) != 0)
     {
-      /* .bss goes last.  */
+      /* .bss goes after any other alloc section.  */
       for (look = first; look; look = look->next)
 	{
 	  flags = look->flags;
@@ -1458,6 +1468,20 @@ lang_output_section_find_by_flags (const asection *sec,
 	  if (!(flags & SEC_ALLOC))
 	    found = look;
 	}
+    }
+  else
+    {
+      /* non-alloc go last.  */
+      for (look = first; look; look = look->next)
+	{
+	  flags = look->flags;
+	  if (look->bfd_section != NULL)
+	    flags = look->bfd_section->flags;
+	  flags ^= sec->flags;
+	  if (!(flags & SEC_DEBUGGING))
+	    found = look;
+	}
+      return found;
     }
 
   if (found || !match_type)
@@ -1556,6 +1580,7 @@ insert_os_after (lang_output_section_statement_type *after)
 lang_output_section_statement_type *
 lang_insert_orphan (asection *s,
 		    const char *secname,
+		    int constraint,
 		    lang_output_section_statement_type *after,
 		    struct orphan_save *place,
 		    etree_type *address,
@@ -1611,7 +1636,7 @@ lang_insert_orphan (asection *s,
   os_tail = ((lang_output_section_statement_type **)
 	     lang_output_section_statement.tail);
   os = lang_enter_output_section_statement (secname, address, 0, NULL, NULL,
-					    NULL, 0);
+					    NULL, constraint);
 
   if (add_child == NULL)
     add_child = &os->children;
@@ -1914,10 +1939,11 @@ init_os (lang_output_section_statement_type *s, asection *isec,
   if (strcmp (s->name, DISCARD_SECTION_NAME) == 0)
     einfo (_("%P%F: Illegal use of `%s' section\n"), DISCARD_SECTION_NAME);
 
-  s->bfd_section = bfd_get_section_by_name (link_info.output_bfd, s->name);
+  if (s->constraint != SPECIAL)
+    s->bfd_section = bfd_get_section_by_name (link_info.output_bfd, s->name);
   if (s->bfd_section == NULL)
-    s->bfd_section = bfd_make_section_with_flags (link_info.output_bfd,
-						  s->name, flags);
+    s->bfd_section = bfd_make_section_anyway_with_flags (link_info.output_bfd,
+							 s->name, flags);
   if (s->bfd_section == NULL)
     {
       einfo (_("%P%F: output format %s cannot represent section called %s\n"),
@@ -4600,7 +4626,12 @@ lang_size_sections_1
 			     os->name, (unsigned long) (newdot - savedot));
 		  }
 
-		bfd_set_section_vma (0, os->bfd_section, newdot);
+		/* PR 6945: Do not update the vma's of output sections
+		   when performing a relocatable link on COFF objects.  */
+		if (! link_info.relocatable
+		    || (bfd_get_flavour (link_info.output_bfd)
+			!= bfd_target_coff_flavour))
+		  bfd_set_section_vma (0, os->bfd_section, newdot);
 
 		os->bfd_section->output_offset = 0;
 	      }
@@ -5652,14 +5683,22 @@ lang_place_orphans (void)
 					default_common_section);
 		    }
 		}
-	      else if (ldemul_place_orphan (s))
-		;
 	      else
 		{
-		  lang_output_section_statement_type *os;
+		  const char *name = s->name;
+		  int constraint = 0;
 
-		  os = lang_output_section_statement_lookup (s->name, 0, TRUE);
-		  lang_add_section (&os->children, s, os);
+		  if (config.unique_orphan_sections || unique_section_p (s))
+		    constraint = SPECIAL;
+
+		  if (!ldemul_place_orphan (s, name, constraint))
+		    {
+		      lang_output_section_statement_type *os;
+		      os = lang_output_section_statement_lookup (name,
+								 constraint,
+								 TRUE);
+		      lang_add_section (&os->children, s, os);
+		    }
 		}
 	    }
 	}

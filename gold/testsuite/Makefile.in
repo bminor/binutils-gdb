@@ -47,7 +47,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6) \
 	$(am__EXEEXT_7) $(am__EXEEXT_8) $(am__EXEEXT_9) \
 	$(am__EXEEXT_10) $(am__EXEEXT_11) $(am__EXEEXT_12) \
-	$(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15)
+	$(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15) \
+	$(am__EXEEXT_16)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
@@ -66,32 +67,38 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_relocatable_test
 @GCC_FALSE@constructor_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@constructor_test_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@constructor_static_test_DEPENDENCIES = libgoldtest.a \
 @GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@constructor_static_test_DEPENDENCIES =  \
 @NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
 @NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@two_file_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@two_file_test_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@two_file_static_test_DEPENDENCIES = libgoldtest.a \
 @GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@two_file_static_test_DEPENDENCIES =  \
 @NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
 @NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 
@@ -116,31 +123,36 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test weak_undef_test
 @GCC_FALSE@common_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@common_test_1_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@exception_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@exception_test_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@exception_static_test_DEPENDENCIES = libgoldtest.a \
 @GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@exception_static_test_DEPENDENCIES =  \
 @NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
 @NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@weak_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@weak_test_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = weak_undef_nonpic_test
@@ -187,9 +199,11 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test
 @GCC_FALSE@many_sections_test_DEPENDENCIES = libgoldtest.a \
 @GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@many_sections_test_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_14 = many_sections_define.h \
@@ -199,12 +213,14 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @CONSTRUCTOR_PRIORITY_FALSE@	../libgold.a \
 @CONSTRUCTOR_PRIORITY_FALSE@	../../libiberty/libiberty.a \
 @CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1) \
+@CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1) \
 @CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@initpri1_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = debug_msg.err \
@@ -232,35 +248,55 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test relro_script_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1 script_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms binary_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_1 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_2
 @GCC_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@script_test_2_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@script_test_2_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@justsyms_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@justsyms_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@binary_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@binary_test_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@thin_archive_test_2_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@thin_archive_test_2_DEPENDENCIES =
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_20 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_21 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_22 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_23 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.err
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -357,32 +393,36 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_1$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_2$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__EXEEXT_16 = plugin_test_1$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 basic_pic_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 basic_static_pic_test_SOURCES = basic_static_pic_test.c
 basic_static_pic_test_OBJECTS = basic_static_pic_test.$(OBJEXT)
 basic_static_pic_test_LDADD = $(LDADD)
 basic_static_pic_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 basic_static_test_SOURCES = basic_static_test.c
 basic_static_test_OBJECTS = basic_static_test.$(OBJEXT)
 basic_static_test_LDADD = $(LDADD)
 basic_static_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 basic_test_SOURCES = basic_test.c
 basic_test_OBJECTS = basic_test.$(OBJEXT)
 basic_test_LDADD = $(LDADD)
 basic_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__binary_test_SOURCES_DIST = binary_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_binary_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test.$(OBJEXT)
@@ -393,7 +433,7 @@ binary_unittest_OBJECTS = $(am_binary_unittest_OBJECTS)
 binary_unittest_LDADD = $(LDADD)
 binary_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__common_test_1_SOURCES_DIST = common_test_1.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_common_test_1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1.$(OBJEXT)
@@ -472,13 +512,13 @@ flagstest_compress_debug_sections_OBJECTS =  \
 flagstest_compress_debug_sections_LDADD = $(LDADD)
 flagstest_compress_debug_sections_DEPENDENCIES = libgoldtest.a \
 	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 flagstest_o_specialfile_SOURCES = flagstest_o_specialfile.c
 flagstest_o_specialfile_OBJECTS = flagstest_o_specialfile.$(OBJEXT)
 flagstest_o_specialfile_LDADD = $(LDADD)
 flagstest_o_specialfile_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 flagstest_o_specialfile_and_compress_debug_sections_SOURCES =  \
 	flagstest_o_specialfile_and_compress_debug_sections.c
 flagstest_o_specialfile_and_compress_debug_sections_OBJECTS =  \
@@ -486,7 +526,8 @@ flagstest_o_specialfile_and_compress_debug_sections_OBJECTS =  \
 flagstest_o_specialfile_and_compress_debug_sections_LDADD = $(LDADD)
 flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES =  \
 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__initpri1_SOURCES_DIST = initpri1.c
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_initpri1_OBJECTS = initpri1.$(OBJEXT)
 initpri1_OBJECTS = $(am_initpri1_OBJECTS)
@@ -501,7 +542,7 @@ many_sections_r_test_OBJECTS = many_sections_r_test.$(OBJEXT)
 many_sections_r_test_LDADD = $(LDADD)
 many_sections_r_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__many_sections_test_SOURCES_DIST = many_sections_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_many_sections_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_test.$(OBJEXT)
@@ -512,7 +553,19 @@ object_unittest_OBJECTS = $(am_object_unittest_OBJECTS)
 object_unittest_LDADD = $(LDADD)
 object_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+plugin_test_1_SOURCES = plugin_test_1.c
+plugin_test_1_OBJECTS = plugin_test_1.$(OBJEXT)
+plugin_test_1_LDADD = $(LDADD)
+plugin_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+plugin_test_2_SOURCES = plugin_test_2.c
+plugin_test_2_OBJECTS = plugin_test_2.$(OBJEXT)
+plugin_test_2_LDADD = $(LDADD)
+plugin_test_2_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__protected_1_SOURCES_DIST = protected_main_1.cc protected_main_2.cc \
 	protected_main_3.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_protected_1_OBJECTS =  \
@@ -551,7 +604,15 @@ script_test_3_OBJECTS = script_test_3.$(OBJEXT)
 script_test_3_LDADD = $(LDADD)
 script_test_3_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am__thin_archive_test_1_SOURCES_DIST = thin_archive_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_thin_archive_test_1_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_main.$(OBJEXT)
+thin_archive_test_1_OBJECTS = $(am_thin_archive_test_1_OBJECTS)
+am__thin_archive_test_2_SOURCES_DIST = thin_archive_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_thin_archive_test_2_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_main.$(OBJEXT)
+thin_archive_test_2_OBJECTS = $(am_thin_archive_test_2_OBJECTS)
 am__tls_pic_test_SOURCES_DIST = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am_tls_pic_test_OBJECTS = tls_test_main.$(OBJEXT)
 tls_pic_test_OBJECTS = $(am_tls_pic_test_OBJECTS)
@@ -708,7 +769,7 @@ two_file_strip_test_OBJECTS = two_file_strip_test.$(OBJEXT)
 two_file_strip_test_LDADD = $(LDADD)
 two_file_strip_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__two_file_test_SOURCES_DIST = two_file_test_1.cc \
 	two_file_test_1b.cc two_file_test_2.cc two_file_test_main.cc \
 	two_file_test.h
@@ -748,7 +809,7 @@ weak_plt_OBJECTS = weak_plt.$(OBJEXT)
 weak_plt_LDADD = $(LDADD)
 weak_plt_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__weak_test_SOURCES_DIST = weak_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test.$(OBJEXT)
@@ -788,11 +849,12 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(initpri1_SOURCES) $(justsyms_SOURCES) many_sections_r_test.c \
 	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
-	$(protected_1_SOURCES) $(protected_2_SOURCES) \
-	$(relro_script_test_SOURCES) $(relro_test_SOURCES) \
-	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
-	script_test_3.c $(tls_pic_test_SOURCES) \
-	$(tls_shared_gd_to_ie_test_SOURCES) \
+	plugin_test_1.c plugin_test_2.c $(protected_1_SOURCES) \
+	$(protected_2_SOURCES) $(relro_script_test_SOURCES) \
+	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
+	$(script_test_2_SOURCES) script_test_3.c \
+	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
+	$(tls_pic_test_SOURCES) $(tls_shared_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
@@ -838,12 +900,15 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(am__initpri1_SOURCES_DIST) $(am__justsyms_SOURCES_DIST) \
 	many_sections_r_test.c $(am__many_sections_test_SOURCES_DIST) \
-	$(object_unittest_SOURCES) $(am__protected_1_SOURCES_DIST) \
+	$(object_unittest_SOURCES) plugin_test_1.c plugin_test_2.c \
+	$(am__protected_1_SOURCES_DIST) \
 	$(am__protected_2_SOURCES_DIST) \
 	$(am__relro_script_test_SOURCES_DIST) \
 	$(am__relro_test_SOURCES_DIST) \
 	$(am__script_test_1_SOURCES_DIST) \
 	$(am__script_test_2_SOURCES_DIST) script_test_3.c \
+	$(am__thin_archive_test_1_SOURCES_DIST) \
+	$(am__thin_archive_test_2_SOURCES_DIST) \
 	$(am__tls_pic_test_SOURCES_DIST) \
 	$(am__tls_shared_gd_to_ie_test_SOURCES_DIST) \
 	$(am__tls_shared_gnu2_gd_to_ie_test_SOURCES_DIST) \
@@ -954,6 +1019,8 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PLUGINS_FALSE = @PLUGINS_FALSE@
+PLUGINS_TRUE = @PLUGINS_TRUE@
 POSUB = @POSUB@
 RANDOM_SEED_CFLAGS = @RANDOM_SEED_CFLAGS@
 RANLIB = @RANLIB@
@@ -1027,6 +1094,7 @@ AUTOMAKE_OPTIONS =
 # The two_file_test tests -fmerge-constants, so we simply always turn
 # it on.  This may need to be controlled by a configure option
 # eventually.
+AM_CFLAGS = $(WARN_CFLAGS) $(LFS_CFLAGS) -fmerge-constants
 AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) -fmerge-constants
 INCLUDES = \
 	-I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../../include \
@@ -1038,6 +1106,8 @@ TEST_READELF = $(top_builddir)/../binutils/readelf
 TEST_OBJDUMP = $(top_builddir)/../binutils/objdump
 TEST_CXXFILT = $(top_builddir)/../binutils/cxxfilt
 TEST_STRIP = $(top_builddir)/../binutils/strip-new
+TEST_AR = $(top_builddir)/../binutils/ar
+@PLUGINS_TRUE@LIBDL = -ldl
 @THREADS_TRUE@THREADSLIB = -lpthread
 @OMP_SUPPORT_TRUE@TLS_TEST_C_CFLAGS = -fopenmp
 
@@ -1045,13 +1115,13 @@ TEST_STRIP = $(top_builddir)/../binutils/strip-new
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so $(am__append_16)
+MOSTLYCLEANFILES = *.so $(am__append_16) $(am__append_23)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_6)
-check_DATA = $(am__append_7)
+check_SCRIPTS = $(am__append_6) $(am__append_21)
+check_DATA = $(am__append_7) $(am__append_22)
 BUILT_SOURCES = $(am__append_14)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
@@ -1065,7 +1135,7 @@ DEPENDENCIES = \
 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL_DEP)
 
 LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADSLIB)
+	$(THREADSLIB) $(LIBDL)
 
 object_unittest_SOURCES = object_unittest.cc
 binary_unittest_SOURCES = binary_unittest.cc
@@ -1366,6 +1436,14 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_SOURCES = binary_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_DEPENDENCIES = gcctestdir/ld binary.txt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_LDFLAGS = -Bgcctestdir/ -Wl,--format,binary,binary.txt,--format,elf
+@GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_1_SOURCES = thin_archive_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_1_DEPENDENCIES = gcctestdir/ld libthin1.a alt/libthin2.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_1_LDFLAGS = -Bgcctestdir/ -Lalt
+@GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_1_LDADD = libthin1.a -lthin2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_2_SOURCES = thin_archive_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_2_DEPENDENCIES = gcctestdir/ld libthinall.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_2_LDFLAGS = -Bgcctestdir/ -L.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_2_LDADD = -lthinall
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -1515,6 +1593,24 @@ many_sections_test$(EXEEXT): $(many_sections_test_OBJECTS) $(many_sections_test_
 object_unittest$(EXEEXT): $(object_unittest_OBJECTS) $(object_unittest_DEPENDENCIES) 
 	@rm -f object_unittest$(EXEEXT)
 	$(CXXLINK) $(object_unittest_LDFLAGS) $(object_unittest_OBJECTS) $(object_unittest_LDADD) $(LIBS)
+@GCC_FALSE@plugin_test_1$(EXEEXT): $(plugin_test_1_OBJECTS) $(plugin_test_1_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f plugin_test_1$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(plugin_test_1_LDFLAGS) $(plugin_test_1_OBJECTS) $(plugin_test_1_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@plugin_test_1$(EXEEXT): $(plugin_test_1_OBJECTS) $(plugin_test_1_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f plugin_test_1$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(plugin_test_1_LDFLAGS) $(plugin_test_1_OBJECTS) $(plugin_test_1_LDADD) $(LIBS)
+@PLUGINS_FALSE@plugin_test_1$(EXEEXT): $(plugin_test_1_OBJECTS) $(plugin_test_1_DEPENDENCIES) 
+@PLUGINS_FALSE@	@rm -f plugin_test_1$(EXEEXT)
+@PLUGINS_FALSE@	$(LINK) $(plugin_test_1_LDFLAGS) $(plugin_test_1_OBJECTS) $(plugin_test_1_LDADD) $(LIBS)
+@GCC_FALSE@plugin_test_2$(EXEEXT): $(plugin_test_2_OBJECTS) $(plugin_test_2_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f plugin_test_2$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(plugin_test_2_LDFLAGS) $(plugin_test_2_OBJECTS) $(plugin_test_2_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@plugin_test_2$(EXEEXT): $(plugin_test_2_OBJECTS) $(plugin_test_2_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f plugin_test_2$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(plugin_test_2_LDFLAGS) $(plugin_test_2_OBJECTS) $(plugin_test_2_LDADD) $(LIBS)
+@PLUGINS_FALSE@plugin_test_2$(EXEEXT): $(plugin_test_2_OBJECTS) $(plugin_test_2_DEPENDENCIES) 
+@PLUGINS_FALSE@	@rm -f plugin_test_2$(EXEEXT)
+@PLUGINS_FALSE@	$(LINK) $(plugin_test_2_LDFLAGS) $(plugin_test_2_OBJECTS) $(plugin_test_2_LDADD) $(LIBS)
 protected_1$(EXEEXT): $(protected_1_OBJECTS) $(protected_1_DEPENDENCIES) 
 	@rm -f protected_1$(EXEEXT)
 	$(CXXLINK) $(protected_1_LDFLAGS) $(protected_1_OBJECTS) $(protected_1_LDADD) $(LIBS)
@@ -1539,6 +1635,12 @@ script_test_2$(EXEEXT): $(script_test_2_OBJECTS) $(script_test_2_DEPENDENCIES)
 @NATIVE_LINKER_FALSE@script_test_3$(EXEEXT): $(script_test_3_OBJECTS) $(script_test_3_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f script_test_3$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(script_test_3_LDFLAGS) $(script_test_3_OBJECTS) $(script_test_3_LDADD) $(LIBS)
+thin_archive_test_1$(EXEEXT): $(thin_archive_test_1_OBJECTS) $(thin_archive_test_1_DEPENDENCIES) 
+	@rm -f thin_archive_test_1$(EXEEXT)
+	$(CXXLINK) $(thin_archive_test_1_LDFLAGS) $(thin_archive_test_1_OBJECTS) $(thin_archive_test_1_LDADD) $(LIBS)
+thin_archive_test_2$(EXEEXT): $(thin_archive_test_2_OBJECTS) $(thin_archive_test_2_DEPENDENCIES) 
+	@rm -f thin_archive_test_2$(EXEEXT)
+	$(CXXLINK) $(thin_archive_test_2_LDFLAGS) $(thin_archive_test_2_OBJECTS) $(thin_archive_test_2_LDADD) $(LIBS)
 tls_pic_test$(EXEEXT): $(tls_pic_test_OBJECTS) $(tls_pic_test_DEPENDENCIES) 
 	@rm -f tls_pic_test$(EXEEXT)
 	$(CXXLINK) $(tls_pic_test_LDFLAGS) $(tls_pic_test_OBJECTS) $(tls_pic_test_LDADD) $(LIBS)
@@ -1692,6 +1794,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_r_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_2.Po@am__quote@
@@ -1705,6 +1809,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testmain.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thin_archive_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_test_file2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_test_main.Po@am__quote@
@@ -2125,7 +2230,7 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_c_pic.o: tls_test_c.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(COMPILE) -c -fpic $(TLS_TEST_C_CFLAGS) -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o -Wl,-z,defs
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared2.so: tls_test_file2_pic.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_file2_pic.o
 
@@ -2313,6 +2418,50 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_4.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_4.stdout: script_test_4
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SlW script_test_4 > script_test_4.stdout
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@libthin1.a: thin_archive_test_1.o alt/thin_archive_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) crT $@ $^
+@GCC_TRUE@@NATIVE_LINKER_TRUE@alt/libthin2.a: thin_archive_test_3.o alt/thin_archive_test_4.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) crT $@ $^
+@GCC_TRUE@@NATIVE_LINKER_TRUE@libthin3.a: thin_archive_test_1.o alt/thin_archive_test_4.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) crT $@ $^
+@GCC_TRUE@@NATIVE_LINKER_TRUE@alt/libthin4.a: alt/thin_archive_test_2.o thin_archive_test_3.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) crT $@ $^
+@GCC_TRUE@@NATIVE_LINKER_TRUE@libthinall.a: libthin3.a alt/libthin4.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) crT $@ $^
+@GCC_TRUE@@NATIVE_LINKER_TRUE@alt/thin_archive_test_2.o: thin_archive_test_2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d alt || mkdir -p alt
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@alt/thin_archive_test_4.o: thin_archive_test_4.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d alt || mkdir -p alt
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_1: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so;_Z4f13iv" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms 2>plugin_test_1.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_1.err: plugin_test_1
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_1.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_2: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_shared_2.so gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,-R,.,--plugin,"./plugin_test.so" two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_shared_2.so 2>plugin_test_2.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_2.err: plugin_test_2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@touch plugin_test_2.err
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test.so: plugin_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(LINK) -Bgcctestdir/ -shared plugin_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test.o: plugin_test.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -O0 -c -fpic -o $@ $<
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_main.syms: two_file_test_main.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_1.syms: two_file_test_1.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_1b.syms: two_file_test_1b.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_2.syms: two_file_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

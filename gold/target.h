@@ -164,7 +164,7 @@ class Target
   // Return whether SYM is known to be defined by the ABI.  This is
   // used to avoid inappropriate warnings about undefined symbols.
   bool
-  is_defined_by_abi(Symbol* sym) const
+  is_defined_by_abi(const Symbol* sym) const
   { return this->do_is_defined_by_abi(sym); }
 
  protected:
@@ -222,7 +222,7 @@ class Target
 
   // Virtual function which may be implemented by the child class.
   virtual bool
-  do_is_defined_by_abi(Symbol*) const
+  do_is_defined_by_abi(const Symbol*) const
   { return false; }
 
  private:

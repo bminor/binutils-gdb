@@ -1,3 +1,282 @@
+2008-10-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/id.po: Update.
+
+2008-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-mips.c (mips_cpu_info_table): Move the MIPS64r2
+	comment so that Broadcom SB-1 cores are in the MIPS64 section.
+
+2008-10-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-bfin.c (gencode, allocate): Remove unnecessary cast.
+	* config/tc-ns32k.c (bit_fix_new): Likewise.
+	* config/tc-m68k.c (md_begin): Likewise.
+	* hash.c (hash_insert, hash_jam): Likewise.
+	* symbols.c (symbol_create, local_symbol_make): Likewise.
+	* frags.c (frag_alloc): Likewise.
+
+2008-10-20  Jay Krell  <jay.krell@cornell.edu>
+
+	* config/bfin-parse.y: Use C style comments.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-mips.c: Likewise.
+
+2008-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (processor_type): Moved to tc-i386.h.
+	(cpu_arch_tune): Make it global.
+	(cpu_arch_isa): Likewise.
+	(cpu_arch_isa_flags): Likewise.
+	(i386_align_code): Check fragP->tc_frag_data.isa,
+	fragP->tc_frag_data.isa_flags and cpu_arch_tune instead of
+	cpu_arch_isa, cpu_arch_isa_flags and cpu_arch_tune,
+	respectively.
+
+	* config/tc-i386.h (processor_type): Moved from tc-i386.c.
+	(cpu_arch_tune): New.
+	(cpu_arch_isa): Likewise.
+	(cpu_arch_isa_flags): Likewise.
+	(i386_tc_frag_data): Likewise.
+	(TC_FRAG_TYPE): Likewise.
+	(TC_FRAG_INIT): Likewise.
+
+2008-10-09  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/as.texinfo (Pseudo Ops): Swap order of Comm and CFI menu entries.
+	(Altmacro, Comm, Loc, Loc_mark_labels, List, MRI, PopSection, Sleb128):
+	Moved into alphabetical order.
+
+2008-10-09  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/as.texinfo (Dot): Expand no-space-dir conditional to include
+	a complete sentence.
+	(Pseudo Ops): Put conditionals around Skip and Space menu entries.
+	(Line): Remove conditional declaration of Ln node and section here.
+	Put aout-bout description inside the no-line-dir conditional.
+	(Skip, Space): Use a separate conditional for each node.
+
+2008-10-09  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/as.texinfo (Pseudo Ops): Remove no-file-dir conditional around
+	menu entry for File; remove version-specific .file operands from menu
+	description.  Replace "LNS directives" menu entry with new entries
+	for "Loc" and "Loc_mark_labels".
+	(LNS directives): Split into separate nodes for each directive.
+	(Loc): New node for .loc directive.  Mention that this directive
+	is for DWARF2 and add a missing article.
+	(Loc_mark_labels): Likewise for .loc_mark_labels.
+	(File): Change this node to describe both the default version and
+	the DWARF2 version of .file.  Move the no-file-dir conditional to
+	include only the default version.
+
+2008-10-09  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* dw2gencfi.c (cfi_finish): Deal with md_fix_up_eh_frame.
+	* config/tc-i386.h (md_fix_up_eh_frame): Define on Solaris.
+	(i386_solaris_fix_up_eh_frame): Declare.
+	* config/tc-i386.c (i386_solaris_fix_up_eh_frame): New function.
+
+2008-10-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 6944
+	* doc/as.texinfo (Dollar Local Labels): Correct description of
+	dollar local labels to show that the colon suffix is still
+	needed.
+
+2008-10-08  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add "id".
+	* configure: Regenerate.
+	* po/id.po: New Indonesian translation.
+
+2008-10-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* read.c (pseudo_set): Don't allow global register symbol only
+	if TC_GLOBAL_REGISTER_SYMBOL_OK is undefined.
+	* symbols.c (S_SET_EXTERNAL): Likewise.
+
+	* config/tc-mmix.h (TC_GLOBAL_REGISTER_SYMBOL_OK): Defined.
+
+	* doc/internals.texi: Document TC_GLOBAL_REGISTER_SYMBOL_OK.
+
+2008-10-06  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/as.texinfo (Local): New description of ELF .local directive.
+
+2008-10-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 6926
+	* read.c (get_line_sb): Renamed to get_non_macro_line_sb.
+	(_find_end_of_line): Add extra parameter indicating if the line is
+	inside a macro.  If it is then do not allow the @ character to be
+	treated as a line separator character.
+	(read_a_source): Update use of _find_end_of_line.
+	(find_end_of_line): Likewise.
+	(s_irp): Update use of get_line_sb.
+	(s_macro): Likewise.
+	(do_repeat): Likewise.
+	(get_line_sb): New function.  Like the old version of get_line_sb
+	except that it takes an extra parameter indicating whether the
+	line is inside a macro.
+	(get_macro_line_sb): New function.
+
+2008-10-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c: Update all comments regarding explicit relocations
+	to, besides PIC, also imply TLS or to say "relocation specifier" or
+	similar.
+	(RELOC_SUFFIX_CHAR): Rename from PIC_SUFFIX_CHAR.  Change all callers.
+	(cris_get_reloc_suffix): Rename from cris_get_pic_suffix.  Change all
+	callers.  Also handle TLS relocs.
+	(cris_get_specified_reloc_size): Rename from cris_get_pic_reloc_size.
+	Change all callers.  Also handle TLS relocs.
+	(tls): New constant.
+	(cris_process_instruction): Check for non-PIC TLS relocations and
+	adjust message when emitting error message about relocation not
+	fitting.
+	(get_autoinc_prefix_or_indir_op): Also check for relocation suffix
+	when tls is true.
+	(get_3op_or_dip_prefix_op): Ditto.
+	(cris_number_to_imm, tc_gen_reloc): Handle TLS relocs like PIC relocs.
+
+2008-10-03  Kazu Hirata  <kazu@codesourcery.com>
+
+	* listing.c (buffer_line): Open the source file with FOPEN_RB.
+	Manually process line ends.
+
+2008-09-30  Wesley W. Terpstra  <wesley@terpstra.ca>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-tic4x.c (tic4x_globl): Call S_SET_EXTERNAL as well as
+	S_SET_STORAGE_CLASS.
+
+2008-09-30  Wesley W. Terpstra  <wesley@terpstra.ca>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* coffgen.c (coff_write_symbols): Check to see if a symbol's flags
+	do not match it class and if necessary update the class.
+	(null_error_handler): New function.  Suppresses the generation of
+	bfd error messages.
+	* coff64-rs6000.c (bfd_xcoff_backend_data): Update comment.
+
+2008-09-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2008-09-29  Nick Clifton  <nickc@redhat.com>
+
+	* dw2gencfi.c (output_cfi_insn): Fix typo in invocation of
+	tc_cfi_emit_pcrel_expr macro.
+
+2008-09-29  Peter O'Gorman  <pogma@thewrittenword.com>
+	    Steve Ellcey  <sje@cup.hp.com>
+
+	* configure: Regenerate for new libtool.
+	* aclocal.m4: Ditto.
+	* Makefile.in: Ditto.
+	* doc/Makefile.in: Ditto.
+
+2008-09-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 6878
+	* app.c (do_scrub_chars): Only issue warnings about tick
+	characters detected in symbol strings if hex ticks are supported.
+
+2008-09-29  Nick Clifton  <nickc@redhat.com>
+
+	* dw2gencfi.c (output_cfi_insn): Fix typo in invocation of
+	tc_cfi_emit_pcrel_expr macro.
+
+2008-09-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* NEWS: Mention .cfi_val_encoded_addr.
+
+2008-09-26  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* Makefile.am (TARG_ENV_HFILES): Add config/te-solaris.h.
+	* Makefile.in (TARG_ENV_HFILES): Likewise.
+	* configure.tgt (Solaris targets): Set em=solaris.
+	* config/te-solaris.h: New file.
+
+2008-09-26  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/bfin-parse.y (asm_1): Fix reduce/reduce conflicts.
+
+2008-09-24  Richard Henderson  <rth@redhat.com>
+
+	* dw2gencfi.c (DWARF2_ADDR_SIZE): Provide default.
+	(struct cfi_insn_data): Add ea member.
+	(CFI_val_encoded_addr, dot_cfi_val_encoded_addr): New.
+	(output_cfi_insn): Handle CFI_val_encoded_addr.
+	(select_cie_for_fde): Don't match CFI_val_encoded_addr.
+	* doc/as.texinfo (.cfi_val_encoded_addr): Document.
+
+2008-09-25  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6913
+	* listing.c (print_options): Don't call fprintf without format string.
+
+2008-09-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.c (TC_FORCE_RELOCATION_SUB_LOCAL): Heed md_register_arithmetic.
+	(TC_VALIDATE_FIX_SUB): Likewise.
+	* config/tc-frv.h (TC_FORCE_RELOCATION_SUB_LOCAL): Likewise.
+	* config/tc-hppa.h (TC_FORCE_RELOCATION_SUB_LOCAL): Likewise.
+	* config/tc-mn10300.h (TC_VALIDATE_FIX_SUB): Likewise.
+	* config/tc-sh.h (TC_VALIDATE_FIX_SUB): Likewise.
+	(TC_FORCE_RELOCATION_SUB_LOCAL): Likewise.
+	* config/tc-sh64.h (TC_VALIDATE_FIX_SUB): Likewise.
+	* config/tc-xtensa.h (TC_VALIDATE_FIX_SUB): Likewise.
+	* doc/internals.texi (TC_FORCE_RELOCATION_SUB_ABS,
+	TC_FORCE_RELOCATION_SUB_LOCAL, TC_VALIDATE_FIX_SUB): Show new param.
+
+	* write.c (md_register_arithmetic): Define.
+	(fixup_segment): Adjust TC_FORCE_RELOCATION_SUB_ABS invocation.
+	Modify error message when registers involved.
+	(TC_FORCE_RELOCATION_SUB_ABS): Heed md_register_arithmetic.
+	* config/tc-sh.h (TC_FORCE_RELOCATION_SUB_ABS): Likewise.
+
+2008-09-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.c (install_reloc): Correct EMIT_SECTION_SYMBOLS test.
+
+2008-09-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-frv.c (md_apply_fix): Use abs_section_sym for
+	relocs with no symbol.
+	* config/tc-mmix.c (md_assemble): Mark fake symbol on
+	BFD_RELOC_MMIX_BASE_PLUS_OFFSET as OK for use by relocs.
+	(mmix_md_end): Likewise mark mmix reg contents section symbol.
+
+2008-09-14  Chris Smith <chris@zxdesign.info>
+
+	* config/tc-z80.c: Opcode generation of ld a,(bc) and ld a,(de) was
+	broken, as the opcode of ld a,(de) was being emitted for both.
+
+2008-09-12  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (init_op_placement_info_table): Allow number of
+	operands equal to MAX_INSN_ARGS.
+
+2008-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.in: Call AC_SYS_LARGEFILE.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2008-09-09  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (ppc_setup_opcodes): Simplify POWER4/NOPOWER4 test.
+	Remove POWER5 and POWER6 tests.
+
+2008-09-08  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* config/tc-hppa.c (hppa_regname_to_dw2regnum): Add register name to
+	number support for 32-bit targets.
+
 2008-09-08  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add a marker for the 2.19 features.

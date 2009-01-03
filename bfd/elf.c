@@ -1863,13 +1863,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       return TRUE;
 
     case SHT_GROUP:
-      /* We need a BFD section for objcopy and relocatable linking,
-	 and it's handy to have the signature available as the section
-	 name.  */
       if (! IS_VALID_GROUP_SECTION_HEADER (hdr))
-	return FALSE;
-      name = group_signature (abfd, hdr);
-      if (name == NULL)
 	return FALSE;
       if (!_bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
 	return FALSE;
@@ -2687,13 +2681,15 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
     *failedptr = TRUE;
 }
 
-/* Fill in the contents of a SHT_GROUP section.  */
+/* Fill in the contents of a SHT_GROUP section.  Called from
+   _bfd_elf_compute_section_file_positions for gas, objcopy, and
+   when ELF targets use the generic linker, ld.  Called for ld -r
+   from bfd_elf_final_link.  */
 
 void
 bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 {
   bfd_boolean *failedptr = failedptrarg;
-  unsigned long symindx;
   asection *elt, *first;
   unsigned char *loc;
   bfd_boolean gas;
@@ -2704,20 +2700,49 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
       || *failedptr)
     return;
 
-  symindx = 0;
-  if (elf_group_id (sec) != NULL)
-    symindx = elf_group_id (sec)->udata.i;
-
-  if (symindx == 0)
+  if (elf_section_data (sec)->this_hdr.sh_info == 0)
     {
-      /* If called from the assembler, swap_out_syms will have set up
-	 elf_section_syms;  If called for "ld -r", use target_index.  */
-      if (elf_section_syms (abfd) != NULL)
-	symindx = elf_section_syms (abfd)[sec->index]->udata.i;
-      else
-	symindx = sec->target_index;
+      unsigned long symindx = 0;
+
+      /* elf_group_id will have been set up by objcopy and the
+	 generic linker.  */
+      if (elf_group_id (sec) != NULL)
+	symindx = elf_group_id (sec)->udata.i;
+
+      if (symindx == 0)
+	{
+	  /* If called from the assembler, swap_out_syms will have set up
+	     elf_section_syms.  */
+	  BFD_ASSERT (elf_section_syms (abfd) != NULL);
+	  symindx = elf_section_syms (abfd)[sec->index]->udata.i;
+	}
+      elf_section_data (sec)->this_hdr.sh_info = symindx;
     }
-  elf_section_data (sec)->this_hdr.sh_info = symindx;
+  else if (elf_section_data (sec)->this_hdr.sh_info == (unsigned int) -2)
+    {
+      /* The ELF backend linker sets sh_info to -2 when the group
+	 signature symbol is global, and thus the index can't be
+	 set until all local symbols are output.  */
+      asection *igroup = elf_sec_group (elf_next_in_group (sec));
+      struct bfd_elf_section_data *sec_data = elf_section_data (igroup);
+      unsigned long symndx = sec_data->this_hdr.sh_info;
+      unsigned long extsymoff = 0;
+      struct elf_link_hash_entry *h;
+
+      if (!elf_bad_symtab (igroup->owner))
+	{
+	  Elf_Internal_Shdr *symtab_hdr;
+
+	  symtab_hdr = &elf_tdata (igroup->owner)->symtab_hdr;
+	  extsymoff = symtab_hdr->sh_info;
+	}
+      h = elf_sym_hashes (igroup->owner)[symndx - extsymoff];
+      while (h->root.type == bfd_link_hash_indirect
+	     || h->root.type == bfd_link_hash_warning)
+	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+      elf_section_data (sec)->this_hdr.sh_info = h->indx;
+    }
 
   /* The contents won't be allocated for "ld -r" or objcopy.  */
   gas = TRUE;
@@ -3386,7 +3411,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
       ++segs;
     }
 
-  if (info->relro)
+  if (info != NULL && info->relro)
     {
       /* We need a PT_GNU_RELRO segment.  */
       ++segs;
@@ -3768,8 +3793,13 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	    }
 
 	  /* Allow interested parties a chance to override our decision.  */
-	  if (last_hdr && info->callbacks->override_segment_assignment)
-	    new_segment = info->callbacks->override_segment_assignment (info, abfd, hdr, last_hdr, new_segment);
+	  if (last_hdr != NULL
+	      && info != NULL
+	      && info->callbacks->override_segment_assignment != NULL)
+	    new_segment
+	      = info->callbacks->override_segment_assignment (info, abfd, hdr,
+							      last_hdr,
+							      new_segment);
 
 	  if (! new_segment)
 	    {
@@ -3944,7 +3974,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  pm = &m->next;
 	}
 
-      if (info->relro)
+      if (info != NULL && info->relro)
 	{
 	  for (m = mfirst; m != NULL; m = m->next)
 	    {
@@ -4128,7 +4158,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   unsigned int i, j;
 
   if (link_info == NULL
-      && !elf_modify_segment_map (abfd, link_info, FALSE))
+      && !_bfd_elf_map_sections_to_segments (abfd, link_info))
     return FALSE;
 
   alloc = 0;
@@ -4258,21 +4288,14 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	      elf_section_type (m->sections[i]) = SHT_NOBITS;
 
 	  /* Find out whether this segment contains any loadable
-	     sections.  If the first section isn't loadable, the same
-	     holds for any other sections.  */
-	  i = 0;
-	  while (elf_section_type (m->sections[i]) == SHT_NOBITS)
-	    {
-	      /* If a segment starts with .tbss, we need to look
-		 at the next section to decide whether the segment
-		 has any loadable sections.  */
-	      if ((elf_section_flags (m->sections[i]) & SHF_TLS) == 0
-		  || ++i >= m->count)
-		{
-		  no_contents = TRUE;
-		  break;
-		}
-	    }
+	     sections.  */
+	  no_contents = TRUE;
+	  for (i = 0; i < m->count; i++)
+	    if (elf_section_type (m->sections[i]) != SHT_NOBITS)
+	      {
+		no_contents = FALSE;
+		break;
+	      }
 
 	  off_adjust = vma_page_aligned_bias (m->sections[0]->vma, off, align);
 	  off += off_adjust;
@@ -6019,7 +6042,7 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
 	  if (elf_section_flags (isec) & SHF_GROUP)
 	    elf_section_flags (osec) |= SHF_GROUP;
 	  elf_next_in_group (osec) = elf_next_in_group (isec);
-	  elf_group_name (osec) = elf_group_name (isec);
+	  elf_section_data (osec)->group = elf_section_data (isec)->group;
 	}
     }
 

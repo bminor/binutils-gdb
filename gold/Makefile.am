@@ -19,6 +19,10 @@ INCLUDES = \
 
 LIBIBERTY = ../libiberty/libiberty.a
 
+if PLUGINS
+LIBDL = -ldl
+endif
+
 if THREADS
 THREADSLIB = -lpthread
 endif
@@ -53,6 +57,7 @@ CCFILES = \
 	options.cc \
 	output.cc \
 	parameters.cc \
+	plugin.cc \
 	readsyms.cc \
 	reduced_debug_output.cc \
 	reloc.cc \
@@ -90,6 +95,7 @@ HFILES = \
 	options.h \
 	output.h \
 	parameters.h \
+	plugin.h \
 	readsyms.h \
 	reduced_debug_output.h \
 	reloc.h \
@@ -122,7 +128,8 @@ libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
 
 sources_var = main.cc
 deps_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
-ldadd_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL) $(THREADSLIB)
+ldadd_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL) \
+	 $(THREADSLIB) $(LIBDL)
 
 ld_new_SOURCES = $(sources_var)
 ld_new_DEPENDENCIES = $(deps_var) $(LIBOBJS)

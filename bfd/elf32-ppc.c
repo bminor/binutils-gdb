@@ -157,6 +157,12 @@ static const bfd_vma ppc_elf_vxworks_pic_plt0_entry
 /* Offset of tp and dtp pointers from start of TLS block.  */
 #define TP_OFFSET	0x7000
 #define DTP_OFFSET	0x8000
+
+/* The value of a defined global symbol.  */
+#define SYM_VAL(SYM) \
+  ((SYM)->root.u.def.section->output_section->vma	\
+   + (SYM)->root.u.def.section->output_offset		\
+   + (SYM)->root.u.def.value)
 
 static reloc_howto_type *ppc_elf_howto_table[R_PPC_max];
 
@@ -3958,6 +3964,33 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 	   ibfd, obfd, in_abi, out_abi);
     }
 
+  /* Check for conflicting Tag_GNU_Power_ABI_Struct_Return attributes
+     and merge non-conflicting ones.  */
+  in_attr = &in_attrs[Tag_GNU_Power_ABI_Struct_Return];
+  out_attr = &out_attrs[Tag_GNU_Power_ABI_Struct_Return];
+  if (in_attr->i != out_attr->i)
+    {
+      out_attr->type = 1;
+      if (out_attr->i == 0)
+       out_attr->i = in_attr->i;
+      else if (in_attr->i == 0)
+       ;
+      else if (out_attr->i == 1 && in_attr->i == 2)
+       _bfd_error_handler
+         (_("Warning: %B uses r3/r4 for small structure returns, %B uses memory"), obfd, ibfd);
+      else if (out_attr->i == 2 && in_attr->i == 1)
+       _bfd_error_handler
+         (_("Warning: %B uses r3/r4 for small structure returns, %B uses memory"), ibfd, obfd);
+      else if (in_attr->i > 2)
+       _bfd_error_handler
+         (_("Warning: %B uses unknown small structure return convention %d"), ibfd,
+          in_attr->i);
+      else
+       _bfd_error_handler
+         (_("Warning: %B uses unknown small structure return convention %d"), obfd,
+          out_attr->i);
+    }
+
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
   _bfd_elf_merge_object_attributes (ibfd, obfd);
 
@@ -6656,8 +6689,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  }
 	      }
 
-	    relocation = htab->got->output_offset + off;
-	    relocation -= htab->elf.hgot->root.u.def.value;
+	    relocation = (htab->got->output_section->vma
+			  + htab->got->output_offset
+			  + off
+			  - SYM_VAL (htab->elf.hgot));
 
 	    /* Addends on got relocations don't make much sense.
 	       x+off@got is actually x@got+off, and since the got is
@@ -6971,12 +7006,15 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	     an embedded ELF object, for which the .got section acts like the
 	     AIX .toc section.  */
 	case R_PPC_TOC16:			/* phony GOT16 relocations */
-	  BFD_ASSERT (sec != NULL);
-	  BFD_ASSERT (bfd_is_und_section (sec)
-		      || strcmp (bfd_get_section_name (abfd, sec), ".got") == 0
+	  if (sec == NULL || sec->output_section == NULL)
+	    {
+	      unresolved_reloc = TRUE;
+	      break;
+	    }
+	  BFD_ASSERT (strcmp (bfd_get_section_name (abfd, sec), ".got") == 0
 		      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0);
 
-	    addend -= sec->output_section->vma + sec->output_offset + 0x8000;
+	  addend -= sec->output_section->vma + sec->output_offset + 0x8000;
 	  break;
 
 	case R_PPC_PLTREL24:
@@ -7011,9 +7049,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_SDAREL16:
 	  {
 	    const char *name;
-	    struct elf_link_hash_entry *sh;
 
-	    BFD_ASSERT (sec != NULL);
+	    if (sec == NULL || sec->output_section == NULL)
+	      {
+		unresolved_reloc = TRUE;
+		break;
+	      }
+
 	    name = bfd_get_section_name (abfd, sec->output_section);
 	    if (! ((CONST_STRNEQ (name, ".sdata")
 		    && (name[6] == 0 || name[6] == '.'))
@@ -7028,10 +7070,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		   howto->name,
 		   name);
 	      }
-	    sh = htab->sdata[0].sym;
-	    addend -= (sh->root.u.def.value
-		       + sh->root.u.def.section->output_offset
-		       + sh->root.u.def.section->output_section->vma);
+	    addend -= SYM_VAL (htab->sdata[0].sym);
 	  }
 	  break;
 
@@ -7039,9 +7078,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_EMB_SDA2REL:
 	  {
 	    const char *name;
-	    struct elf_link_hash_entry *sh;
 
-	    BFD_ASSERT (sec != NULL);
+	    if (sec == NULL || sec->output_section == NULL)
+	      {
+		unresolved_reloc = TRUE;
+		break;
+	      }
+
 	    name = bfd_get_section_name (abfd, sec->output_section);
 	    if (! (CONST_STRNEQ (name, ".sdata2")
 		   || CONST_STRNEQ (name, ".sbss2")))
@@ -7058,10 +7101,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		ret = FALSE;
 		continue;
 	      }
-	    sh = htab->sdata[1].sym;
-	    addend -= (sh->root.u.def.value
-		       + sh->root.u.def.section->output_offset
-		       + sh->root.u.def.section->output_section->vma);
+	    addend -= SYM_VAL (htab->sdata[1].sym);
 	  }
 	  break;
 
@@ -7071,9 +7111,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  {
 	    const char *name;
 	    int reg;
-	    struct elf_link_hash_entry *sh;
 
-	    BFD_ASSERT (sec != NULL);
+	    if (sec == NULL || sec->output_section == NULL)
+	      {
+		unresolved_reloc = TRUE;
+		break;
+	      }
+
 	    name = bfd_get_section_name (abfd, sec->output_section);
 	    if (((CONST_STRNEQ (name, ".sdata")
 		  && (name[6] == 0 || name[6] == '.'))
@@ -7081,28 +7125,19 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		     && (name[5] == 0 || name[5] == '.'))))
 	      {
 		reg = 13;
-		sh = htab->sdata[0].sym;
-		addend -= (sh->root.u.def.value
-			   + sh->root.u.def.section->output_offset
-			   + sh->root.u.def.section->output_section->vma);
+		addend -= SYM_VAL (htab->sdata[0].sym);
 	      }
-
 	    else if (CONST_STRNEQ (name, ".sdata2")
 		     || CONST_STRNEQ (name, ".sbss2"))
 	      {
 		reg = 2;
-		sh = htab->sdata[1].sym;
-		addend -= (sh->root.u.def.value
-			   + sh->root.u.def.section->output_offset
-			   + sh->root.u.def.section->output_section->vma);
+		addend -= SYM_VAL (htab->sdata[1].sym);
 	      }
-
 	    else if (strcmp (name, ".PPC.EMB.sdata0") == 0
 		     || strcmp (name, ".PPC.EMB.sbss0") == 0)
 	      {
 		reg = 0;
 	      }
-
 	    else
 	      {
 		(*_bfd_error_handler)
@@ -7132,7 +7167,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_SECTOFF_LO:
 	case R_PPC_SECTOFF_HI:
 	case R_PPC_SECTOFF_HA:
-	  BFD_ASSERT (sec != NULL);
+	  if (sec == NULL || sec->output_section == NULL)
+	    {
+	      unresolved_reloc = TRUE;
+	      break;
+	    }
 	  addend -= sec->output_section->vma;
 	  break;
 
@@ -7347,31 +7386,22 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 		/* Fill in the .plt on VxWorks.  */
 		if (info->shared)
 		  {
-		    bfd_vma got_offset_hi = (got_offset >> 16)
-					    + ((got_offset & 0x8000) >> 15);
-
 		    bfd_put_32 (output_bfd,
-				plt_entry[0] | (got_offset_hi & 0xffff),
+				plt_entry[0] | PPC_HA (got_offset),
 				htab->plt->contents + ent->plt.offset + 0);
 		    bfd_put_32 (output_bfd,
-				plt_entry[1] | (got_offset & 0xffff),
+				plt_entry[1] | PPC_LO (got_offset),
 				htab->plt->contents + ent->plt.offset + 4);
 		  }
 		else
 		  {
-		    bfd_vma got_loc
-		      = (got_offset
-			 + htab->elf.hgot->root.u.def.value
-			 + htab->elf.hgot->root.u.def.section->output_offset
-			 + htab->elf.hgot->root.u.def.section->output_section->vma);
-		    bfd_vma got_loc_hi = (got_loc >> 16)
-					 + ((got_loc & 0x8000) >> 15);
+		    bfd_vma got_loc = got_offset + SYM_VAL (htab->elf.hgot);
 
 		    bfd_put_32 (output_bfd,
-				plt_entry[0] | (got_loc_hi & 0xffff),
+				plt_entry[0] | PPC_HA (got_loc),
 				htab->plt->contents + ent->plt.offset + 0);
 		    bfd_put_32 (output_bfd,
-				plt_entry[1] | (got_loc & 0xffff),
+				plt_entry[1] | PPC_LO (got_loc),
 				htab->plt->contents + ent->plt.offset + 4);
 		  }
 
@@ -7531,9 +7561,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 			 + ent->sec->output_section->vma
 			 + ent->sec->output_offset);
 		else if (htab->elf.hgot != NULL)
-		  got = (htab->elf.hgot->root.u.def.value
-			 + htab->elf.hgot->root.u.def.section->output_section->vma
-			 + htab->elf.hgot->root.u.def.section->output_offset);
+		  got = SYM_VAL (htab->elf.hgot);
 
 		plt -= got;
 
@@ -7599,9 +7627,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 	s = htab->relbss;
       BFD_ASSERT (s != NULL);
 
-      rela.r_offset = (h->root.u.def.value
-		       + h->root.u.def.section->output_section->vma
-		       + h->root.u.def.section->output_offset);
+      rela.r_offset = SYM_VAL (h);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_PPC_COPY);
       rela.r_addend = 0;
       loc = s->contents + s->reloc_count++ * sizeof (Elf32_External_Rela);
@@ -7651,7 +7677,8 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
   asection *splt;
   struct ppc_elf_link_hash_table *htab;
   bfd_vma got;
-  bfd * dynobj;
+  bfd *dynobj;
+  bfd_boolean ret = TRUE;
 
 #ifdef DEBUG
   fprintf (stderr, "ppc_elf_finish_dynamic_sections called\n");
@@ -7667,9 +7694,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
   got = 0;
   if (htab->elf.hgot != NULL)
-    got = (htab->elf.hgot->root.u.def.value
-	   + htab->elf.hgot->root.u.def.section->output_section->vma
-	   + htab->elf.hgot->root.u.def.section->output_offset);
+    got = SYM_VAL (htab->elf.hgot);
 
   if (htab->elf.dynamic_sections_created)
     {
@@ -7729,21 +7754,41 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  /* Add a blrl instruction at _GLOBAL_OFFSET_TABLE_-4 so that a function can
-     easily find the address of the _GLOBAL_OFFSET_TABLE_.  */
   if (htab->got != NULL)
     {
-      unsigned char *p = htab->got->contents;
-      bfd_vma val;
+      if (htab->elf.hgot->root.u.def.section == htab->got
+	  || htab->elf.hgot->root.u.def.section == htab->sgotplt)
+	{
+	  unsigned char *p = htab->elf.hgot->root.u.def.section->contents;
 
-      p += htab->elf.hgot->root.u.def.value;
-      if (htab->plt_type == PLT_OLD)
-	bfd_put_32 (output_bfd, 0x4e800021 /* blrl */, p - 4);
+	  p += htab->elf.hgot->root.u.def.value;
+	  if (htab->plt_type == PLT_OLD)
+	    {
+	      /* Add a blrl instruction at _GLOBAL_OFFSET_TABLE_-4
+		 so that a function can easily find the address of
+		 _GLOBAL_OFFSET_TABLE_.  */
+	      BFD_ASSERT (htab->elf.hgot->root.u.def.value - 4
+			  < htab->elf.hgot->root.u.def.section->size);
+	      bfd_put_32 (output_bfd, 0x4e800021, p - 4);
+	    }
 
-      val = 0;
-      if (sdyn != NULL)
-	val = sdyn->output_section->vma + sdyn->output_offset;
-      bfd_put_32 (output_bfd, val, p);
+	  if (sdyn != NULL)
+	    {
+	      bfd_vma val = sdyn->output_section->vma + sdyn->output_offset;
+	      BFD_ASSERT (htab->elf.hgot->root.u.def.value
+			  < htab->elf.hgot->root.u.def.section->size);
+	      bfd_put_32 (output_bfd, val, p);
+	    }
+	}
+      else
+	{
+	  (*_bfd_error_handler) (_("%s not defined in linker created %s"),
+				 htab->elf.hgot->root.root.string,
+				 (htab->sgotplt != NULL
+				  ? htab->sgotplt->name : htab->got->name));
+	  bfd_set_error (bfd_error_bad_value);
+	  ret = FALSE;
+	}
 
       elf_section_data (htab->got->output_section)->this_hdr.sh_entsize = 4;
     }
@@ -7758,15 +7803,11 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
       if (!info->shared)
 	{
-	  bfd_vma got_value =
-	    (htab->elf.hgot->root.u.def.section->output_section->vma
-	     + htab->elf.hgot->root.u.def.section->output_offset
-	     + htab->elf.hgot->root.u.def.value);
-	  bfd_vma got_hi = (got_value >> 16) + ((got_value & 0x8000) >> 15);
+	  bfd_vma got_value = SYM_VAL (htab->elf.hgot);
 
-	  bfd_put_32 (output_bfd, plt_entry[0] | (got_hi & 0xffff),
+	  bfd_put_32 (output_bfd, plt_entry[0] | PPC_HA (got_value),
 		      splt->contents +  0);
-	  bfd_put_32 (output_bfd, plt_entry[1] | (got_value & 0xffff),
+	  bfd_put_32 (output_bfd, plt_entry[1] | PPC_LO (got_value),
 		      splt->contents +  4);
 	}
       else
@@ -8031,7 +8072,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  return TRUE;
+  return ret;
 }
 
 #define TARGET_LITTLE_SYM	bfd_elf32_powerpcle_vec

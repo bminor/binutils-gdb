@@ -926,7 +926,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	{
 	  // Do not include this section in the link.
 	  out_sections[i] = NULL;
-          out_section_offsets[i] = -1U;
+          out_section_offsets[i] = invalid_address;
 	  continue;
 	}
 
@@ -967,7 +967,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 
       out_sections[i] = os;
       if (offset == -1)
-        out_section_offsets[i] = -1U;
+        out_section_offsets[i] = invalid_address;
       else
         out_section_offsets[i] = convert_types<Address, off_t>(offset);
 
@@ -1004,7 +1004,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       if (data_section == NULL)
 	{
 	  out_sections[i] = NULL;
-          out_section_offsets[i] = -1U;
+          out_section_offsets[i] = invalid_address;
 	  continue;
 	}
 
@@ -1014,7 +1014,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       Output_section* os = layout->layout_reloc(this, i, shdr, data_section,
 						rr);
       out_sections[i] = os;
-      out_section_offsets[i] = -1U;
+      out_section_offsets[i] = invalid_address;
     }
 
   // Handle the .eh_frame sections at the end.
@@ -1042,7 +1042,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 						   &offset);
       out_sections[i] = os;
       if (offset == -1)
-        out_section_offsets[i] = -1U;
+        out_section_offsets[i] = invalid_address;
       else
         out_section_offsets[i] = convert_types<Address, off_t>(offset);
 
@@ -1266,7 +1266,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
               // so we leave the input value unchanged here.
 	      continue;
 	    }
-	  else if (out_offsets[shndx] == -1U)
+	  else if (out_offsets[shndx] == invalid_address)
 	    {
 	      // This is a SHF_MERGE section or one which otherwise
 	      // requires special handling.  We get the output address
@@ -1573,7 +1573,7 @@ Sized_relobj<size, big_endian>::map_to_kept_section(
       *found = true;
       Output_section* os = kept->object_->output_section(kept->shndx_);
       Address offset = kept->object_->get_output_section_offset(kept->shndx_);
-      gold_assert(os != NULL && offset != -1U);
+      gold_assert(os != NULL && offset != invalid_address);
       return os->address() + offset;
     }
   *found = false;

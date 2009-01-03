@@ -895,7 +895,7 @@ pep_find_data_imports (void)
 		    {
 		      warned = TRUE;
 		      einfo (_("%P: warning: auto-importing has been activated without --enable-auto-import specified on the command line.\n\
-This should work unless it involves constant data structures referencing symbols from auto-imported DLLs."));
+This should work unless it involves constant data structures referencing symbols from auto-imported DLLs.\n"));
 		    }
 		}
 
@@ -1060,7 +1060,7 @@ gld_${EMULATION_NAME}_after_open (void)
 		    if (nrelocs < 0)
 		      {
 			free (relocs);
-			einfo ("%X%P: unable to process relocs: %E");
+			einfo ("%X%P: unable to process relocs: %E\n");
 			return;
 		      }
 
@@ -1371,41 +1371,38 @@ gld_${EMULATION_NAME}_finish (void)
    default linker script using wildcards, and are sorted by
    sort_sections.  */
 
-static bfd_boolean
-gld_${EMULATION_NAME}_place_orphan (asection *s)
+static lang_output_section_statement_type *
+gld_${EMULATION_NAME}_place_orphan (asection *s,
+				    const char *secname,
+				    int constraint)
 {
-  const char *secname;
-  const char *orig_secname;
+  const char *orig_secname = secname;
   char *dollar = NULL;
   lang_output_section_statement_type *os;
   lang_statement_list_type add_child;
 
-  secname = bfd_get_section_name (s->owner, s);
-
   /* Look through the script to see where to place this section.  */
-  orig_secname = secname;
   if (!link_info.relocatable
       && (dollar = strchr (secname, '$')) != NULL)
     {
-      size_t len = dollar - orig_secname;
+      size_t len = dollar - secname;
       char *newname = xmalloc (len + 1);
-      memcpy (newname, orig_secname, len);
+      memcpy (newname, secname, len);
       newname[len] = '\0';
       secname = newname;
     }
 
-  os = lang_output_section_find (secname);
-
   lang_list_init (&add_child);
 
-  if (os != NULL
-      && (os->bfd_section == NULL
-	  || os->bfd_section->flags == 0
+  if (constraint == 0
+      && (os = lang_output_section_find (secname)) != NULL
+      && os->bfd_section != NULL
+      && (os->bfd_section->flags == 0
 	  || ((s->flags ^ os->bfd_section->flags)
 	      & (SEC_LOAD | SEC_ALLOC)) == 0))
     {
       /* We already have an output section statement with this
-	 name, and its bfd section, if any, has compatible flags.
+	 name, and its bfd section has compatible flags.
 	 If the section already exists but does not have any flags set,
 	 then it has been created by the linker, probably as a result of
 	 a --section-start command line switch.  */
@@ -1482,21 +1479,10 @@ gld_${EMULATION_NAME}_place_orphan (asection *s)
 		     ->output_section_statement);
 	}
 
-      /* Choose a unique name for the section.  This will be needed if the
-	 same section name appears in the input file with different
-	 loadable or allocatable characteristics.  */
-      if (bfd_get_section_by_name (link_info.output_bfd, secname) != NULL)
-	{
-	  static int count = 1;
-	  secname = bfd_get_unique_section_name (link_info.output_bfd,
-						 secname, &count);
-	  if (secname == NULL)
-	    einfo ("%F%P: place_orphan failed: %E\n");
-	}
-
       /* All sections in an executable must be aligned to a page boundary.  */
       address = exp_unop (ALIGN_K, exp_nameop (NAME, "__section_alignment__"));
-      os = lang_insert_orphan (s, secname, after, place, address, &add_child);
+      os = lang_insert_orphan (s, secname, constraint, after, place, address,
+			       &add_child);
     }
 
   {
@@ -1541,7 +1527,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s)
       }
   }
 
-  return TRUE;
+  return os;
 }
 
 static bfd_boolean

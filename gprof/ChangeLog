@@ -1,3 +1,24 @@
+2008-09-29  Peter O'Gorman  <pogma@thewrittenword.com>
+	    Steve Ellcey  <sje@cup.hp.com>
+
+	* configure: Regenerate for new libtool.
+	* aclocal.m4: Ditto.
+	* Makefile.in: Ditto.
+
+2008-09-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
+2008-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.in: Call AC_SYS_LARGEFILE.
+	* gconfig.in: Regenerate.
+	* configure: Regenerate.
+
+2008-09-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/ro.po: New file.
+
 2008-08-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* gmon_io.h: Don't include sysdep.h here.

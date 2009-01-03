@@ -55,16 +55,6 @@ gld${EMULATION_NAME}_before_parse (void)
 static void
 arm_elf_after_open (void)
 {
-  if (strstr (bfd_get_target (link_info.output_bfd), "arm") == NULL)
-    {
-      /* The arm backend needs special fields in the output hash structure.
-	 These will only be created if the output format is an arm format,
-	 hence we do not support linking and changing output formats at the
-	 same time.  Use a link followed by objcopy to change output formats.  */
-      einfo ("%F%X%P: error: cannot change output format whilst linking ARM binaries\n");
-      return;
-    }
-
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
@@ -439,6 +429,16 @@ gld${EMULATION_NAME}_finish (void)
 static void
 arm_elf_create_output_section_statements (void)
 {
+  if (strstr (bfd_get_target (link_info.output_bfd), "arm") == NULL)
+    {
+      /* The arm backend needs special fields in the output hash structure.
+	 These will only be created if the output format is an arm format,
+	 hence we do not support linking and changing output formats at the
+	 same time.  Use a link followed by objcopy to change output formats.  */
+      einfo ("%F%X%P: error: Cannot change output format whilst linking ARM binaries.\n");
+      return;
+    }
+
   bfd_elf32_arm_set_target_relocs (link_info.output_bfd, &link_info,
 				   target1_is_rel,
 				   target2_type, fix_v4bx, use_blx,
@@ -525,7 +525,7 @@ PARSE_AND_LIST_LONGOPTS='
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --thumb-entry=<sym>         Set the entry point to be Thumb symbol <sym>\n"));
-  fprintf (file, _("  --be8                       Oputput BE8 format image\n"));
+  fprintf (file, _("  --be8                       Output BE8 format image\n"));
   fprintf (file, _("  --target1=rel               Interpret R_ARM_TARGET1 as R_ARM_REL32\n"));
   fprintf (file, _("  --target1=abs               Interpret R_ARM_TARGET1 as R_ARM_ABS32\n"));
   fprintf (file, _("  --target2=<type>            Specify definition of R_ARM_TARGET2\n"));

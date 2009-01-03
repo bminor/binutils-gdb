@@ -61,7 +61,7 @@ extern int frv_force_relocation (struct fix *);
 /* If we simplify subtractions that aren't SUB_SAME or SUB_ABS, we end
    up with PCrel fixups, but since we don't have any PCrel relocs, we
    crash.  Preventing simplification gets us a good, early error.  */
-#define TC_FORCE_RELOCATION_SUB_LOCAL(fixP) 1
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG) 1
 
 #undef GAS_CGEN_MAX_FIXUPS
 #define GAS_CGEN_MAX_FIXUPS 1

@@ -53,6 +53,20 @@ if test "$threads" = "yes"; then
 fi
 AM_CONDITIONAL(THREADS, test "$threads" = "yes")
 
+AC_ARG_ENABLE([plugins],
+[  --enable-plugins        linker plugins],
+[case "${enableval}" in
+  yes | "") plugins=yes ;;
+  no) plugins=no ;;
+  *) plugins=yes ;;
+ esac],
+[plugins=no])
+if test "$plugins" = "yes"; then
+  AC_DEFINE(ENABLE_PLUGINS, 1,
+	    [Define to enable linker plugins])
+fi
+AM_CONDITIONAL(PLUGINS, test "$plugins" = "yes")
+
 AC_ARG_ENABLE([targets],
 [  --enable-targets        alternative target configurations],
 [case "${enableval}" in

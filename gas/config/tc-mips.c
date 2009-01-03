@@ -1949,17 +1949,17 @@ md_begin (void)
      helps us detect invalid uses of them.  */
   for (i = 0; reg_names[i].name; i++) 
     symbol_table_insert (symbol_new (reg_names[i].name, reg_section,
-				     reg_names[i].num, // & RNUM_MASK,
+				     reg_names[i].num, /* & RNUM_MASK, */
 				     &zero_address_frag));
   if (HAVE_NEWABI)
     for (i = 0; reg_names_n32n64[i].name; i++) 
       symbol_table_insert (symbol_new (reg_names_n32n64[i].name, reg_section,
-				       reg_names_n32n64[i].num, // & RNUM_MASK,
+				       reg_names_n32n64[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
   else
     for (i = 0; reg_names_o32[i].name; i++) 
       symbol_table_insert (symbol_new (reg_names_o32[i].name, reg_section,
-				       reg_names_o32[i].num, // & RNUM_MASK,
+				       reg_names_o32[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
 
   mips_no_prev_insn ();
@@ -15163,14 +15163,14 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "20kc",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64,	CPU_MIPS64 },
   { "25kf",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64,     CPU_MIPS64 },
 
-  /* MIPS 64 Release 2 */
-
   /* Broadcom SB-1 CPU core */
   { "sb1",            MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
 						ISA_MIPS64,	CPU_SB1 },
   /* Broadcom SB-1A CPU core */
   { "sb1a",           MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
 						ISA_MIPS64,	CPU_SB1 },
+
+  /* MIPS 64 Release 2 */
 
   /* Cavium Networks Octeon CPU core */
   { "octeon",	      0,      ISA_MIPS64R2,   CPU_OCTEON },

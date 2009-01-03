@@ -36,6 +36,7 @@
 #include "script.h"
 #include "target-select.h"
 #include "options.h"
+#include "plugin.h"
 
 namespace gold
 {
@@ -295,6 +296,15 @@ General_options::parse_library(const char*, const char* arg,
   Input_file_argument file(arg, true, "", false, *this);
   cmdline->inputs().add_file(file);
 }
+
+#ifdef ENABLE_PLUGINS
+void
+General_options::parse_plugin(const char*, const char* arg,
+                              Command_line*)
+{
+  this->add_plugin(arg);
+}
+#endif // ENABLE_PLUGINS
 
 void
 General_options::parse_R(const char* option, const char* arg,
@@ -594,7 +604,7 @@ namespace gold
 
 General_options::General_options()
   : execstack_status_(General_options::EXECSTACK_FROM_INPUT), static_(false),
-    do_demangle_(false)
+    do_demangle_(false), plugins_()
 {
 }
 
@@ -630,6 +640,16 @@ General_options::add_sysroot()
     p->add_sysroot(this->sysroot(), canonical_sysroot);
 
   free(canonical_sysroot);
+}
+
+// Add a plugin and its arguments to the list of plugins.
+
+void
+General_options::add_plugin(const char* arg)
+{
+  if (this->plugins_ == NULL)
+    this->plugins_ = new Plugin_manager(*this);
+  this->plugins_->add_plugin(arg);
 }
 
 // Set up variables and other state that isn't set up automatically by
@@ -772,6 +792,9 @@ General_options::finalize()
   this->add_sysroot();
 
   // Now that we've normalized the options, check for contradictory ones.
+  if (this->shared() && this->is_static())
+    gold_fatal(_("-shared and -static are incompatible"));
+
   if (this->shared() && this->relocatable())
     gold_fatal(_("-shared and -r are incompatible"));
 

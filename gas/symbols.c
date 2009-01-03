@@ -137,7 +137,7 @@ symbol_create (const char *name, /* It is copied, the caller can destroy/modify.
 
   preserved_copy_of_name = save_symbol_name (name);
 
-  symbolP = (symbolS *) obstack_alloc (&notes, sizeof (symbolS));
+  symbolP = obstack_alloc (&notes, sizeof (symbolS));
 
   /* symbol must be born in some fixed state.  This seems as good as any.  */
   memset (symbolP, 0, sizeof (symbolS));
@@ -197,7 +197,7 @@ local_symbol_make (const char *name, segT section, valueT value, fragS *frag)
 
   name_copy = save_symbol_name (name);
 
-  ret = (struct local_symbol *) obstack_alloc (&notes, sizeof *ret);
+  ret = obstack_alloc (&notes, sizeof *ret);
   ret->lsy_marker = NULL;
   ret->lsy_name = name_copy;
   ret->lsy_section = section;
@@ -2191,12 +2191,14 @@ S_SET_EXTERNAL (symbolS *s)
 		     _("section symbols are already global"));
       return;
     }
+#ifndef TC_GLOBAL_REGISTER_SYMBOL_OK
   if (S_GET_SEGMENT (s) == reg_section)
     {
       as_bad ("can't make register symbol `%s' global",
 	      S_GET_NAME (s));
       return;
     }
+#endif
   s->bsym->flags |= BSF_GLOBAL;
   s->bsym->flags &= ~(BSF_LOCAL | BSF_WEAK);
 

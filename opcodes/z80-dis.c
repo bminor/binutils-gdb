@@ -128,8 +128,10 @@ static int
 prt_rr_nn (struct buffer *buf, disassemble_info * info, char *txt)
 {
   char mytxt[TXTSIZ];
+  int rr;
 
-  snprintf (mytxt, TXTSIZ, txt, rr_str[(buf->data[0] >> 4) & 3]);
+  rr = (buf->data[buf->n_fetch - 1] >> 4) & 3; 
+  snprintf (mytxt, TXTSIZ, txt, rr_str[rr]);
   return prt_nn (buf, info, mytxt);
 }
 
@@ -297,9 +299,11 @@ struct tab_elt opc_ed[] =
   { 0x4A, 0xCF, prt_rr, "adc hl," },
   { 0x4B, 0xCF, prt_rr_nn, "ld %s,(0x%%04x)" },
   { 0x4D, 0xFF, prt, "reti" },
+  { 0x4F, 0xFF, prt, "ld r,a" },
   { 0x56, 0xFF, prt, "im 1" },
   { 0x57, 0xFF, prt, "ld a,i" },
   { 0x5E, 0xFF, prt, "im 2" },
+  { 0x5F, 0xFF, prt, "ld a,r" },
   { 0x67, 0xFF, prt, "rrd" },
   { 0x6F, 0xFF, prt, "rld" },
   { 0xA0, 0xE4, cis, "" },

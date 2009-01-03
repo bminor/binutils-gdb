@@ -26,6 +26,7 @@
 #include "target.h"
 #include "object.h"
 #include "symtab.h"
+#include "plugin.h"
 
 namespace gold
 {
@@ -238,6 +239,24 @@ Symbol_table::resolve(Sized_symbol<size>* to,
     {
       // Record that we've seen this symbol in a dynamic object.
       to->set_in_dyn();
+    }
+
+  // Record if we've seen this symbol in a real ELF object (i.e., the
+  // symbol is referenced from outside the world known to the plugin).
+  if (object->pluginobj() == NULL)
+    to->set_in_real_elf();
+
+  // If we're processing replacement files, allow new symbols to override
+  // the placeholders from the plugin objects.
+  if (to->source() == Symbol::FROM_OBJECT)
+    {
+      Pluginobj* obj = to->object()->pluginobj();
+      if (obj != NULL
+          && parameters->options().plugins()->in_replacement_phase())
+        {
+          this->override(to, sym, st_shndx, is_ordinary, object, version);
+          return;
+        }
     }
 
   unsigned int frombits = symbol_to_bits(sym.get_st_bind(),

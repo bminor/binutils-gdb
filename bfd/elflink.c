@@ -854,7 +854,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   int bind;
   bfd *oldbfd;
   bfd_boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
-  bfd_boolean newweak, oldweak;
+  bfd_boolean newweak, oldweak, newfunc, oldfunc;
   const struct elf_backend_data *bed;
 
   *skip = FALSE;
@@ -972,6 +972,15 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	    && h->root.type != bfd_link_hash_undefweak
 	    && h->root.type != bfd_link_hash_common);
 
+  /* NEWFUNC and OLDFUNC indicate whether the new or old symbol,
+     respectively, appear to be a function.  */
+
+  newfunc = (ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
+	     && bed->is_function_type (ELF_ST_TYPE (sym->st_info)));
+
+  oldfunc = (h->type != STT_NOTYPE
+	     && bed->is_function_type (h->type));
+
   /* When we try to create a default indirect symbol from the dynamic
      definition with the default version, we skip it if its type and
      the type of existing regular definition mismatch.  We only do it
@@ -987,8 +996,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && ELF_ST_TYPE (sym->st_info) != h->type
       && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
       && h->type != STT_NOTYPE
-      && !(bed->is_function_type (ELF_ST_TYPE (sym->st_info))
-	   && bed->is_function_type (h->type)))
+      && !(newfunc && oldfunc))
     {
       *skip = TRUE;
       return TRUE;
@@ -1180,8 +1188,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
     oldweak = FALSE;
 
   /* Allow changes between different types of funciton symbol.  */
-  if (bed->is_function_type (ELF_ST_TYPE (sym->st_info))
-      && bed->is_function_type (h->type))
+  if (newfunc && oldfunc)
     *type_change_ok = TRUE;
 
   /* It's OK to change the type if either the existing symbol or the
@@ -1230,7 +1237,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && (sec->flags & SEC_ALLOC) != 0
       && (sec->flags & SEC_LOAD) == 0
       && sym->st_size > 0
-      && !bed->is_function_type (ELF_ST_TYPE (sym->st_info)))
+      && !newfunc)
     newdyncommon = TRUE;
   else
     newdyncommon = FALSE;
@@ -1242,7 +1249,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && (h->root.u.def.section->flags & SEC_ALLOC) != 0
       && (h->root.u.def.section->flags & SEC_LOAD) == 0
       && h->size > 0
-      && !bed->is_function_type (h->type))
+      && !oldfunc)
     olddyncommon = TRUE;
   else
     olddyncommon = FALSE;
@@ -1302,8 +1309,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && newdef
       && (olddef
 	  || (h->root.type == bfd_link_hash_common
-	      && (newweak
-		  || bed->is_function_type (ELF_ST_TYPE (sym->st_info))))))
+	      && (newweak || newfunc))))
     {
       *override = TRUE;
       newdef = FALSE;
@@ -1357,8 +1363,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   if (!newdyn
       && (newdef
 	  || (bfd_is_com_section (sec)
-	      && (oldweak
-		  || bed->is_function_type (h->type))))
+	      && (oldweak || oldfunc)))
       && olddyn
       && olddef
       && h->def_dynamic)
@@ -1378,7 +1383,17 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	 overriding a function.  */
 
       if (bfd_is_com_section (sec))
-	*type_change_ok = TRUE;
+	{
+	  if (oldfunc)
+	    {
+	      /* If a common symbol overrides a function, make sure
+		 that it isn't defined dynamically nor has type
+		 function.  */
+	      h->def_dynamic = 0;
+	      h->type = STT_NOTYPE;
+	    }
+	  *type_change_ok = TRUE;
+	}
 
       if ((*sym_hash)->root.type == bfd_link_hash_indirect)
 	flip = *sym_hash;
@@ -4656,8 +4671,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       free (sorted_sym_hash);
     }
 
-  if (bed->check_directives)
-    (*bed->check_directives) (abfd, info);
+  if (bed->check_directives
+      && !(*bed->check_directives) (abfd, info))
+    return FALSE;
 
   /* If this object is the same format as the output object, and it is
      not a shared library, then let the backend look through the
@@ -9046,6 +9062,63 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	  continue;
 	}
 
+      if (finfo->info->relocatable
+	  && (o->flags & (SEC_LINKER_CREATED | SEC_GROUP)) == SEC_GROUP)
+	{
+	  /* Deal with the group signature symbol.  */
+	  struct bfd_elf_section_data *sec_data = elf_section_data (o);
+	  unsigned long symndx = sec_data->this_hdr.sh_info;
+	  asection *osec = o->output_section;
+
+	  if (symndx >= locsymcount
+	      || (elf_bad_symtab (input_bfd)
+		  && finfo->sections[symndx] == NULL))
+	    {
+	      struct elf_link_hash_entry *h = sym_hashes[symndx - extsymoff];
+	      while (h->root.type == bfd_link_hash_indirect
+		     || h->root.type == bfd_link_hash_warning)
+		h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	      /* Arrange for symbol to be output.  */
+	      h->indx = -2;
+	      elf_section_data (osec)->this_hdr.sh_info = -2;
+	    }
+	  else if (ELF_ST_TYPE (isymbuf[symndx].st_info) == STT_SECTION)
+	    {
+	      /* We'll use the output section target_index.  */
+	      asection *sec = finfo->sections[symndx]->output_section;
+	      elf_section_data (osec)->this_hdr.sh_info = sec->target_index;
+	    }
+	  else
+	    {
+	      if (finfo->indices[symndx] == -1)
+		{
+		  /* Otherwise output the local symbol now.  */
+		  Elf_Internal_Sym sym = isymbuf[symndx];
+		  asection *sec = finfo->sections[symndx]->output_section;
+		  const char *name;
+
+		  name = bfd_elf_string_from_elf_section (input_bfd,
+							  symtab_hdr->sh_link,
+							  sym.st_name);
+		  if (name == NULL)
+		    return FALSE;
+
+		  sym.st_shndx = _bfd_elf_section_from_bfd_section (output_bfd,
+								    sec);
+		  if (sym.st_shndx == SHN_BAD)
+		    return FALSE;
+
+		  sym.st_value += o->output_offset;
+
+		  finfo->indices[symndx] = bfd_get_symcount (output_bfd);
+		  if (! elf_link_output_sym (finfo, name, &sym, o, NULL))
+		    return FALSE;
+		}
+	      elf_section_data (osec)->this_hdr.sh_info
+		= finfo->indices[symndx];
+	    }
+	}
+
       if ((o->flags & SEC_HAS_CONTENTS) == 0
 	  || (o->size == 0 && (o->flags & SEC_RELOC) == 0))
 	continue;
@@ -10022,22 +10095,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      if (info->relocatable || info->emitrelocations)
 		reloc_count = sec->reloc_count;
 	      else if (bed->elf_backend_count_relocs)
-		{
-		  Elf_Internal_Rela * relocs;
-
-		  relocs = _bfd_elf_link_read_relocs (sec->owner, sec,
-						      NULL, NULL,
-						      info->keep_memory);
-
-		  if (relocs != NULL)
-		    {
-		      reloc_count
-			= (*bed->elf_backend_count_relocs) (sec, relocs);
-
-		      if (elf_section_data (sec)->relocs != relocs)
-			free (relocs);
-		    }
-		}
+		reloc_count = (*bed->elf_backend_count_relocs) (info, sec);
 
 	      if (sec->rawsize > max_contents_size)
 		max_contents_size = sec->rawsize;
@@ -10683,16 +10741,16 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    && (h->root.type == bfd_link_hash_defined
 			|| h->root.type == bfd_link_hash_defweak))
 		  {
-		    dyn.d_un.d_val = h->root.u.def.value;
+		    dyn.d_un.d_ptr = h->root.u.def.value;
 		    o = h->root.u.def.section;
 		    if (o->output_section != NULL)
-		      dyn.d_un.d_val += (o->output_section->vma
+		      dyn.d_un.d_ptr += (o->output_section->vma
 					 + o->output_offset);
 		    else
 		      {
 			/* The symbol is imported from another shared
 			   library and does not apply to this one.  */
-			dyn.d_un.d_val = 0;
+			dyn.d_un.d_ptr = 0;
 		      }
 		    break;
 		  }
@@ -10771,6 +10829,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      else
 		type = SHT_RELA;
 	      dyn.d_un.d_val = 0;
+	      dyn.d_un.d_ptr = 0;
 	      for (i = 1; i < elf_numsections (abfd); i++)
 		{
 		  Elf_Internal_Shdr *hdr;
@@ -10783,9 +10842,9 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 			dyn.d_un.d_val += hdr->sh_size;
 		      else
 			{
-			  if (dyn.d_un.d_val == 0
-			      || hdr->sh_addr < dyn.d_un.d_val)
-			    dyn.d_un.d_val = hdr->sh_addr;
+			  if (dyn.d_un.d_ptr == 0
+			      || hdr->sh_addr < dyn.d_un.d_ptr)
+			    dyn.d_un.d_ptr = hdr->sh_addr;
 			}
 		    }
 		}
@@ -11982,8 +12041,21 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
   return ret;
 }
 
+/* For a SHT_GROUP section, return the group signature.  For other
+   sections, return the normal section name.  */
+
+static const char *
+section_signature (asection *sec)
+{
+  if ((sec->flags & SEC_GROUP) != 0
+      && elf_next_in_group (sec) != NULL
+      && elf_group_name (elf_next_in_group (sec)) != NULL)
+    return elf_group_name (elf_next_in_group (sec));
+  return sec->name;
+}
+
 void
-_bfd_elf_section_already_linked (bfd *abfd, struct bfd_section *sec,
+_bfd_elf_section_already_linked (bfd *abfd, asection *sec,
 				 struct bfd_link_info *info)
 {
   flagword flags;
@@ -12023,7 +12095,7 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section *sec,
      causes trouble for MIPS ELF, which relies on link once semantics
      to handle the .reginfo section correctly.  */
 
-  name = bfd_get_section_name (abfd, sec);
+  name = section_signature (sec);
 
   if (CONST_STRNEQ (name, ".gnu.linkonce.")
       && (p = strchr (name + sizeof (".gnu.linkonce.") - 1, '.')) != NULL)
@@ -12038,7 +12110,7 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section *sec,
       /* We may have 2 different types of sections on the list: group
 	 sections and linkonce sections.  Match like sections.  */
       if ((flags & SEC_GROUP) == (l->sec->flags & SEC_GROUP)
-	  && strcmp (name, l->sec->name) == 0
+	  && strcmp (name, section_signature (l->sec)) == 0
 	  && bfd_coff_get_comdat_section (l->sec->owner, l->sec) == NULL)
 	{
 	  /* The section has already been linked.  See if we should

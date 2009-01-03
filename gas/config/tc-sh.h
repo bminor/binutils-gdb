@@ -83,8 +83,9 @@ extern int sh_force_relocation (struct fix *);
    || (sh_relax && SWITCH_TABLE (FIX)))
 
 /* Don't complain when we leave fx_subsy around.  */
-#define TC_VALIDATE_FIX_SUB(FIX)			\
-  (sh_relax && SWITCH_TABLE (FIX))
+#define TC_VALIDATE_FIX_SUB(FIX, SEG)			\
+  ((md_register_arithmetic || (SEG) != reg_section)	\
+   && sh_relax && SWITCH_TABLE (FIX))
 
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
 extern long md_pcrel_from_section (struct fix *, segT);
@@ -207,18 +208,22 @@ extern bfd_boolean sh_fix_adjustable (struct fix *);
    || (FIX)->fx_r_type == BFD_RELOC_SH_GOTPC		\
    || TC_FORCE_RELOCATION (FIX))
 
-#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX) (sh_relax && SWITCH_TABLE (FIX))
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG)		\
+  ((!md_register_arithmetic && (SEG) == reg_section)	\
+   || (sh_relax && SWITCH_TABLE (FIX)))
 
 /* This keeps the subtracted symbol around, for use by PLT_PCREL
    relocs.  */
-#define TC_FORCE_RELOCATION_SUB_ABS(FIX)		\
-  ((FIX)->fx_r_type == BFD_RELOC_32_PLT_PCREL)
+#define TC_FORCE_RELOCATION_SUB_ABS(FIX, SEG)		\
+  ((FIX)->fx_r_type == BFD_RELOC_32_PLT_PCREL		\
+   || (!md_register_arithmetic && (SEG) == reg_section))
 
 /* Don't complain when we leave fx_subsy around.  */
 #undef TC_VALIDATE_FIX_SUB
-#define TC_VALIDATE_FIX_SUB(FIX)			\
-  ((FIX)->fx_r_type == BFD_RELOC_32_PLT_PCREL		\
-   || (sh_relax && SWITCH_TABLE (FIX)))
+#define TC_VALIDATE_FIX_SUB(FIX, SEG)			\
+  ((md_register_arithmetic || (SEG) != reg_section)	\
+   && ((FIX)->fx_r_type == BFD_RELOC_32_PLT_PCREL	\
+       || (sh_relax && SWITCH_TABLE (FIX))))
 
 #define md_parse_name(name, exprP, mode, nextcharP) \
   sh_parse_name ((name), (exprP), (mode), (nextcharP))

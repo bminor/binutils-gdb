@@ -1,6 +1,6 @@
 /* stabs.c -- Parse stabs debugging information
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2006, 2007 Free Software Foundation, Inc.
+   2006, 2007, 2008  Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -1105,6 +1105,26 @@ parse_stab_string (void *dhandle, struct stab_handle *info, int stabtype,
 	return FALSE;
       break;
 
+    case 'Y':
+      /* SUNPro C++ Namespace =Yn0.  */
+      /* Skip the namespace mapping, as it is not used now.  */
+      if (*(++p) == 'n' && *(++p) == '0')
+	{
+	  /* =Yn0name; */
+	  while (*p != ';')
+	    ++p;
+	  ++p;
+	  return TRUE;
+	}
+      /* TODO SUNPro C++ support:
+         Support default arguments after F,P parameters
+         Ya = Anonymous unions
+         YM,YD = Pointers to class members
+         YT,YI = Templates
+         YR = Run-time type information (RTTI)  */
+
+      /* Fall through.  */
+
     default:
       bad_stab (string);
       return FALSE;
@@ -1837,11 +1857,13 @@ parse_stab_sun_builtin_type (void *dhandle, const char **pp)
     }
   ++*pp;
 
-  /* For some odd reason, all forms of char put a c here.  This is strange
-     because no other type has this honor.  We can safely ignore this because
-     we actually determine 'char'acterness by the number of bits specified in
-     the descriptor.  */
-  if (**pp == 'c')
+  /* OpenSolaris source code indicates that one of "cbv" characters
+     can come next and specify the intrinsic 'iformat' encoding.
+     'c' is character encoding, 'b' is boolean encoding, and 'v' is
+     varargs encoding.  This field can be safely ignored because
+     the type of the field is determined from the bitwidth extracted
+     below.  */
+  if (**pp == 'c' || **pp == 'b' || **pp == 'v')
     ++*pp;
 
   /* The first number appears to be the number of bytes occupied

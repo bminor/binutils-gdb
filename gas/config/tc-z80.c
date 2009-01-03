@@ -1471,7 +1471,7 @@ emit_ldreg (int dest, expressionS * src)
 	  && (src->X_add_number == REG_BC || src->X_add_number == REG_DE))
 	{
 	  q = frag_more (1);
-	  *q = 0x0A + ((dest & 1) << 4);
+	  *q = 0x0A + ((src->X_add_number & 1) << 4);
 	  break;
 	}
 

@@ -22,6 +22,7 @@
 #include <errno.h>
 #include "getopt.h"
 #include "libiberty.h"
+#include "hashtab.h"
 #include "safe-ctype.h"
 
 #include "i386-opc.h"
@@ -473,7 +474,7 @@ remove_trailing_whitespaces (char *str)
    pointer to the one after it.  */
 
 static char *
-next_field (char *str, char sep, char **next)
+next_field (char *str, char sep, char **next, char *last)
 {
   char *p;
 
@@ -484,6 +485,9 @@ next_field (char *str, char sep, char **next)
   remove_trailing_whitespaces (p);
 
   *next = str + 1; 
+
+  if (p >= last)
+    abort ();
 
   return p;
 }
@@ -559,7 +563,7 @@ process_i386_cpu_flag (FILE *table, char *flag, int macro,
       last = flag + strlen (flag);
       for (next = flag; next && next < last; )
 	{
-	  str = next_field (next, '|', &next);
+	  str = next_field (next, '|', &next, last);
 	  if (str)
 	    set_bitfield (str, flags, ARRAY_SIZE (flags));
 	}
@@ -600,7 +604,7 @@ process_i386_opcode_modifier (FILE *table, char *mod)
       last = mod + strlen (mod);
       for (next = mod; next && next < last; )
 	{
-	  str = next_field (next, '|', &next);
+	  str = next_field (next, '|', &next, last);
 	  if (str)
 	    set_bitfield (str, modifiers, ARRAY_SIZE (modifiers));
 	}
@@ -647,7 +651,7 @@ process_i386_operand_type (FILE *table, char *op, int macro,
       last = op + strlen (op);
       for (next = op; next && next < last; )
 	{
-	  str = next_field (next, '|', &next);
+	  str = next_field (next, '|', &next, last);
 	  if (str)
 	    set_bitfield (str, types, ARRAY_SIZE (types));
 	}
@@ -657,15 +661,139 @@ process_i386_operand_type (FILE *table, char *op, int macro,
 }
 
 static void
+output_i386_opcode (FILE *table, const char *name, char *str,
+		    char *last)
+{
+  unsigned int i;
+  char *operands, *base_opcode, *extension_opcode, *opcode_length;
+  char *cpu_flags, *opcode_modifier, *operand_types [MAX_OPERANDS];
+
+  /* Find number of operands.  */
+  operands = next_field (str, ',', &str, last);
+
+  /* Find base_opcode.  */
+  base_opcode = next_field (str, ',', &str, last);
+
+  /* Find extension_opcode.  */
+  extension_opcode = next_field (str, ',', &str, last);
+
+  /* Find opcode_length.  */
+  opcode_length = next_field (str, ',', &str, last);
+
+  /* Find cpu_flags.  */
+  cpu_flags = next_field (str, ',', &str, last);
+
+  /* Find opcode_modifier.  */
+  opcode_modifier = next_field (str, ',', &str, last);
+
+  /* Remove the first {.  */
+  str = remove_leading_whitespaces (str);
+  if (*str != '{')
+    abort ();
+  str = remove_leading_whitespaces (str + 1);
+
+  i = strlen (str);
+
+  /* There are at least "X}".  */
+  if (i < 2)
+    abort ();
+
+  /* Remove trailing white spaces and }. */
+  do
+    {
+      i--;
+      if (ISSPACE (str[i]) || str[i] == '}')
+	str[i] = '\0';
+      else
+	break;
+    }
+  while (i != 0);
+
+  last = str + i;
+
+  /* Find operand_types.  */
+  for (i = 0; i < ARRAY_SIZE (operand_types); i++)
+    {
+      if (str >= last)
+	{
+	  operand_types [i] = NULL;
+	  break;
+	}
+
+      operand_types [i] = next_field (str, ',', &str, last);
+      if (*operand_types[i] == '0')
+	{
+	  if (i != 0)
+	    operand_types[i] = NULL;
+	  break;
+	}
+    }
+
+  fprintf (table, "  { \"%s\", %s, %s, %s, %s,\n",
+	   name, operands, base_opcode, extension_opcode,
+	   opcode_length);
+
+  process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ");
+
+  process_i386_opcode_modifier (table, opcode_modifier);
+
+  fprintf (table, "    { ");
+
+  for (i = 0; i < ARRAY_SIZE (operand_types); i++)
+    {
+      if (operand_types[i] == NULL || *operand_types[i] == '0')
+	{
+	  if (i == 0)
+	    process_i386_operand_type (table, "0", 0, "\t  ");
+	  break;
+	}
+
+      if (i != 0)
+	fprintf (table, ",\n      ");
+
+      process_i386_operand_type (table, operand_types[i], 0,
+				 "\t  ");
+    }
+  fprintf (table, " } },\n");
+}
+
+struct opcode_hash_entry
+{
+  struct opcode_hash_entry *next;
+  char *name;
+  char *opcode;
+};
+
+/* Calculate the hash value of an opcode hash entry P.  */
+
+static hashval_t
+opcode_hash_hash (const void *p)
+{
+  struct opcode_hash_entry *entry = (struct opcode_hash_entry *) p;
+  return htab_hash_string (entry->name);
+}
+
+/* Compare a string Q against an opcode hash entry P.  */
+
+static int
+opcode_hash_eq (const void *p, const void *q)
+{
+  struct opcode_hash_entry *entry = (struct opcode_hash_entry *) p;
+  const char *name = (const char *) q;
+  return strcmp (name, entry->name) == 0;
+}
+
+static void
 process_i386_opcodes (FILE *table)
 {
   FILE *fp;
   char buf[2048];
-  unsigned int i;
-  char *str, *p, *last;
-  char *name, *operands, *base_opcode, *extension_opcode;
-  char *opcode_length;
-  char *cpu_flags, *opcode_modifier, *operand_types [MAX_OPERANDS];
+  unsigned int i, j;
+  char *str, *p, *last, *name;
+  struct opcode_hash_entry **hash_slot, **entry, *next;
+  htab_t opcode_hash_table;
+  struct opcode_hash_entry **opcode_array;
+  unsigned int opcode_array_size = 1024;
 
   filename = "i386-opc.tbl";
   fp = fopen (filename, "r");
@@ -674,9 +802,18 @@ process_i386_opcodes (FILE *table)
     fail (_("can't find i386-opc.tbl for reading, errno = %s\n"),
 	  xstrerror (errno));
 
+  i = 0;
+  opcode_array = (struct opcode_hash_entry **)
+    xmalloc (sizeof (*opcode_array) * opcode_array_size);
+
+  opcode_hash_table = htab_create_alloc (16, opcode_hash_hash,
+					 opcode_hash_eq, NULL,
+					 xcalloc, free);
+
   fprintf (table, "\n/* i386 opcode table.  */\n\n");
   fprintf (table, "const template i386_optab[] =\n{\n");
 
+  /* Put everything on opcode array.  */
   while (!feof (fp))
     {
       if (fgets (buf, sizeof (buf), fp) == NULL)
@@ -697,7 +834,7 @@ process_i386_opcodes (FILE *table)
       switch (p[0])
 	{
 	case '#':
-	  fprintf (table, "%s\n", p);
+	  /* Ignore comments.  */
 	case '\0':
 	  continue;
 	  break;
@@ -708,117 +845,58 @@ process_i386_opcodes (FILE *table)
       last = p + strlen (p);
 
       /* Find name.  */
-      name = next_field (p, ',', &str);
+      name = next_field (p, ',', &str, last);
 
-      if (str >= last)
-	abort ();
+      /* Get the slot in hash table.  */
+      hash_slot = (struct opcode_hash_entry **)
+	htab_find_slot_with_hash (opcode_hash_table, name,
+				  htab_hash_string (name),
+				  INSERT);
 
-      /* Find number of operands.  */
-      operands = next_field (str, ',', &str);
-
-      if (str >= last)
-	abort ();
-
-      /* Find base_opcode.  */
-      base_opcode = next_field (str, ',', &str);
-
-      if (str >= last)
-	abort ();
-
-      /* Find extension_opcode.  */
-      extension_opcode = next_field (str, ',', &str);
-
-      if (str >= last)
-	abort ();
-
-      /* Find opcode_length.  */
-      opcode_length = next_field (str, ',', &str);
-
-      if (str >= last)
-	abort ();
-
-      /* Find cpu_flags.  */
-      cpu_flags = next_field (str, ',', &str);
-
-      if (str >= last)
-	abort ();
-
-      /* Find opcode_modifier.  */
-      opcode_modifier = next_field (str, ',', &str);
-
-      if (str >= last)
-	abort ();
-
-      /* Remove the first {.  */
-      str = remove_leading_whitespaces (str);
-      if (*str != '{')
-	abort ();
-      str = remove_leading_whitespaces (str + 1);
-
-      i = strlen (str);
-
-      /* There are at least "X}".  */
-      if (i < 2)
-	abort ();
-
-      /* Remove trailing white spaces and }. */
-      do
+      if (*hash_slot == NULL)
 	{
-	  i--;
-	  if (ISSPACE (str[i]) || str[i] == '}')
-	    str[i] = '\0';
-	  else
-	    break;
-	}
-      while (i != 0);
-
-      last = str + i;
-
-      /* Find operand_types.  */
-      for (i = 0; i < ARRAY_SIZE (operand_types); i++)
-	{
-	  if (str >= last)
+	  /* It is the new one.  Put it on opcode array.  */
+	  if (i >= opcode_array_size)
 	    {
-	      operand_types [i] = NULL;
-	      break;
+	      /* Grow the opcode array when needed.  */
+	      opcode_array_size += 1024;
+	      opcode_array = (struct opcode_hash_entry **)
+		xrealloc (opcode_array,
+			  sizeof (*opcode_array) * opcode_array_size);
 	    }
 
-	  operand_types [i] = next_field (str, ',', &str);
-	  if (*operand_types[i] == '0')
-	    {
-	      if (i != 0)
-		operand_types[i] = NULL;
-	      break;
-	    }
+	  opcode_array[i] = (struct opcode_hash_entry *)
+	    xmalloc (sizeof (struct opcode_hash_entry));
+	  opcode_array[i]->next = NULL;
+	  opcode_array[i]->name = xstrdup (name);
+	  opcode_array[i]->opcode = xstrdup (str);
+	  *hash_slot = opcode_array[i];
+	  i++;
 	}
-
-      fprintf (table, "  { \"%s\", %s, %s, %s, %s,\n",
-	       name, operands, base_opcode, extension_opcode,
-	       opcode_length);
-
-      process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ");
-
-      process_i386_opcode_modifier (table, opcode_modifier);
-
-      fprintf (table, "    { ");
-
-      for (i = 0; i < ARRAY_SIZE (operand_types); i++)
+      else
 	{
-	  if (operand_types[i] == NULL
-	      || *operand_types[i] == '0')
-	    {
-	      if (i == 0)
-		process_i386_operand_type (table, "0", 0, "\t  ");
-	      break;
-	    }
-
-	  if (i != 0)
-	    fprintf (table, ",\n      ");
-
-	  process_i386_operand_type (table, operand_types[i], 0,
-				     "\t  ");
+	  /* Append it to the existing one.  */
+	  entry = hash_slot;
+	  while ((*entry) != NULL)
+	    entry = &(*entry)->next;
+	  *entry = (struct opcode_hash_entry *)
+	    xmalloc (sizeof (struct opcode_hash_entry));
+	  (*entry)->next = NULL;
+	  (*entry)->name = (*hash_slot)->name;
+	  (*entry)->opcode = xstrdup (str);
 	}
-      fprintf (table, " } },\n");
+    }
+
+  /* Process opcode array.  */
+  for (j = 0; j < i; j++)
+    {
+      for (next = opcode_array[j]; next; next = next->next)
+	{
+	  name = next->name;
+	  str = next->opcode;
+	  last = str + strlen (str);
+	  output_i386_opcode (table, name, str, last);
+	}
     }
 
   fclose (fp);
@@ -885,41 +963,26 @@ process_i386_registers (FILE *table)
       last = p + strlen (p);
 
       /* Find reg_name.  */
-      reg_name = next_field (p, ',', &str);
-
-      if (str >= last)
-	abort ();
+      reg_name = next_field (p, ',', &str, last);
 
       /* Find reg_type.  */
-      reg_type = next_field (str, ',', &str);
-
-      if (str >= last)
-	abort ();
+      reg_type = next_field (str, ',', &str, last);
 
       /* Find reg_flags.  */
-      reg_flags = next_field (str, ',', &str);
-
-      if (str >= last)
-	abort ();
+      reg_flags = next_field (str, ',', &str, last);
 
       /* Find reg_num.  */
-      reg_num = next_field (str, ',', &str);
-
-      if (str >= last)
-	abort ();
+      reg_num = next_field (str, ',', &str, last);
 
       fprintf (table, "  { \"%s\",\n    ", reg_name);
 
       process_i386_operand_type (table, reg_type, 0, "\t");
 
       /* Find 32-bit Dwarf2 register number.  */
-      dw2_32_num = next_field (str, ',', &str);
-
-      if (str >= last)
-	abort ();
+      dw2_32_num = next_field (str, ',', &str, last);
 
       /* Find 64-bit Dwarf2 register number.  */
-      dw2_64_num = next_field (str, ',', &str);
+      dw2_64_num = next_field (str, ',', &str, last);
 
       fprintf (table, ",\n    %s, %s, { %s, %s } },\n",
 	       reg_flags, reg_num, dw2_32_num, dw2_64_num);

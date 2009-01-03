@@ -184,7 +184,7 @@ class Archive
   bool
   get_file_and_offset(off_t off, Input_objects* input_objects,
                       Input_file** input_file, off_t* memoff,
-                      std::string* member_name);
+                      off_t* memsize, std::string* member_name);
 
   // Return an ELF object for the member at offset OFF.  Set *MEMBER_NAME to
   // the name of the member.

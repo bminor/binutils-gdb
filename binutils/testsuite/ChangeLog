@@ -1,3 +1,43 @@
+2008-10-06  Tom Tromey  <tromey@redhat.com>
+
+	* binutils-all/objdump.W: Update.
+
+2008-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/group.s: Updated.
+	* binutils-all/group-2.s: Likewise.
+	* binutils-all/group-3.s: Likewise.
+	* binutils-all/group-4.s: Likewise.
+	* binutils-all/strip-7.d: Likewise.
+	* binutils-all/strip-9.d: Likewise.
+
+2008-10-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/group-4.s: New.
+	* binutils-all/strip-8.d: Likewise.
+	* binutils-all/strip-9.d: Likewise.
+
+	* binutils-all/objcopy.exp: Test objcopy on group-4.s.  Run
+	strip-8 and strip-9.
+
+2008-10-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/group-3.s: New.
+	* binutils-all/strip-6.d: Likewise.
+	* binutils-all/strip-7.d: Likewise.
+
+	* binutils-all/objcopy.exp: Test objcopy on group-3.s.  Run
+	strip-6 and strip-7.
+
+2008-10-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/group-2.s: New.
+	* binutils-all/strip-4.d: Likewise.
+	* binutils-all/strip-5.d: Likewise.
+
+	* binutils-all/objcopy.exp: Test objcopy on group-2.s.  Run
+	strip-4 and strip-5.
+
 2008-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/objdump.exp: Run compressed debug test only for ELF.

@@ -237,7 +237,7 @@ hash_insert (struct hash_control *table, const char *key, void *value)
   ++table->insertions;
 #endif
 
-  p = (struct hash_entry *) obstack_alloc (&table->memory, sizeof (*p));
+  p = obstack_alloc (&table->memory, sizeof (*p));
   p->string = key;
   p->hash = hash;
   p->data = value;
@@ -274,7 +274,7 @@ hash_jam (struct hash_control *table, const char *key, void *value)
       ++table->insertions;
 #endif
 
-      p = (struct hash_entry *) obstack_alloc (&table->memory, sizeof (*p));
+      p = obstack_alloc (&table->memory, sizeof (*p));
       p->string = key;
       p->hash = hash;
       p->data = value;

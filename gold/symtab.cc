@@ -37,6 +37,7 @@
 #include "target.h"
 #include "workqueue.h"
 #include "symtab.h"
+#include "plugin.h"
 
 namespace gold
 {
@@ -73,6 +74,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->is_copied_from_dynobj_ = false;
   this->is_forced_local_ = false;
   this->is_ordinary_shndx_ = false;
+  this->in_real_elf_ = false;
 }
 
 // Return the demangled version of the symbol's name, but only
@@ -117,6 +119,7 @@ Symbol::init_base_object(const char* name, const char* version, Object* object,
   this->source_ = FROM_OBJECT;
   this->in_reg_ = !object->is_dynamic();
   this->in_dyn_ = object->is_dynamic();
+  this->in_real_elf_ = object->pluginobj() == NULL;
 }
 
 // Initialize the fields in the base class Symbol for a symbol defined
@@ -133,6 +136,7 @@ Symbol::init_base_output_data(const char* name, const char* version,
   this->u_.in_output_data.offset_is_from_end = offset_is_from_end;
   this->source_ = IN_OUTPUT_DATA;
   this->in_reg_ = true;
+  this->in_real_elf_ = true;
 }
 
 // Initialize the fields in the base class Symbol for a symbol defined
@@ -150,6 +154,7 @@ Symbol::init_base_output_segment(const char* name, const char* version,
   this->u_.in_output_segment.offset_base = offset_base;
   this->source_ = IN_OUTPUT_SEGMENT;
   this->in_reg_ = true;
+  this->in_real_elf_ = true;
 }
 
 // Initialize the fields in the base class Symbol for a symbol defined
@@ -163,6 +168,7 @@ Symbol::init_base_constant(const char* name, const char* version,
   this->init_fields(name, version, type, binding, visibility, nonvis);
   this->source_ = IS_CONSTANT;
   this->in_reg_ = true;
+  this->in_real_elf_ = true;
 }
 
 // Initialize the fields in the base class Symbol for an undefined
@@ -177,6 +183,7 @@ Symbol::init_base_undefined(const char* name, const char* version,
   this->dynsym_index_ = -1U;
   this->source_ = IS_UNDEFINED;
   this->in_reg_ = true;
+  this->in_real_elf_ = true;
 }
 
 // Allocate a common symbol in the base.
@@ -357,6 +364,7 @@ Symbol::output_section() const
 	if (shndx != elfcpp::SHN_UNDEF && this->is_ordinary_shndx_)
 	  {
 	    gold_assert(!this->u_.from_object.object->is_dynamic());
+	    gold_assert(this->u_.from_object.object->pluginobj() == NULL);
 	    Relobj* relobj = static_cast<Relobj*>(this->u_.from_object.object);
 	    return relobj->output_section(shndx);
 	  }
@@ -971,6 +979,68 @@ Symbol_table::add_from_relobj(
 
       (*sympointers)[i] = res;
     }
+}
+
+// Add a symbol from a plugin-claimed file.
+
+template<int size, bool big_endian>
+Symbol*
+Symbol_table::add_from_pluginobj(
+    Sized_pluginobj<size, big_endian>* obj,
+    const char* name,
+    const char* ver,
+    elfcpp::Sym<size, big_endian>* sym)
+{
+  unsigned int st_shndx = sym->get_st_shndx();
+
+  Stringpool::Key ver_key = 0;
+  bool def = false;
+  bool local = false;
+
+  if (ver != NULL)
+    {
+      ver = this->namepool_.add(ver, true, &ver_key);
+    }
+  // We don't want to assign a version to an undefined symbol,
+  // even if it is listed in the version script.  FIXME: What
+  // about a common symbol?
+  else
+    {
+      if (!this->version_script_.empty()
+          && st_shndx != elfcpp::SHN_UNDEF)
+        {
+          // The symbol name did not have a version, but the
+          // version script may assign a version anyway.
+          std::string version;
+          if (this->version_script_.get_symbol_version(name, &version))
+            {
+              // The version can be empty if the version script is
+              // only used to force some symbols to be local.
+              if (!version.empty())
+                {
+                  ver = this->namepool_.add_with_length(version.c_str(),
+                                                        version.length(),
+                                                        true,
+                                                        &ver_key);
+                  def = true;
+                }
+            }
+          else if (this->version_script_.symbol_is_local(name))
+            local = true;
+        }
+    }
+
+  Stringpool::Key name_key;
+  name = this->namepool_.add(name, true, &name_key);
+
+  Sized_symbol<size>* res;
+  res = this->add_from_object(obj, name, name_key, ver, ver_key,
+		              def, *sym, st_shndx, true, st_shndx);
+
+  if (local)
+	this->force_local(res);
+
+  return res;
 }
 
 // Add all the symbols in a dynamic object to the hash table.
@@ -2043,6 +2113,11 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 	    value = 0;
 	    shndx = elfcpp::SHN_UNDEF;
 	  }
+	else if (symobj->pluginobj() != NULL)
+	  {
+	    value = 0;
+	    shndx = elfcpp::SHN_UNDEF;
+	  }
 	else if (shndx == elfcpp::SHN_UNDEF)
 	  value = 0;
 	else if (!is_ordinary
@@ -2061,11 +2136,20 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 	      }
 
             uint64_t secoff64 = relobj->output_section_offset(shndx);
-            Value_type secoff = convert_types<Value_type, uint64_t>(secoff64);
-	    if (sym->type() == elfcpp::STT_TLS)
-	      value = sym->value() + os->tls_offset() + secoff;
-	    else
-	      value = sym->value() + os->address() + secoff;
+            if (secoff64 == -1ULL)
+              {
+                // The section needs special handling (e.g., a merge section).
+	        value = os->output_address(relobj, shndx, sym->value());
+	      }
+            else
+              {
+                Value_type secoff =
+                  convert_types<Value_type, uint64_t>(secoff64);
+	        if (sym->type() == elfcpp::STT_TLS)
+	          value = sym->value() + os->tls_offset() + secoff;
+	        else
+	          value = sym->value() + os->address() + secoff;
+	      }
 	  }
       }
       break;
@@ -2261,6 +2345,8 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 		      dynsym_value = target.dynsym_value(sym);
 		    shndx = elfcpp::SHN_UNDEF;
 		  }
+		else if (symobj->pluginobj() != NULL)
+		  shndx = elfcpp::SHN_UNDEF;
 		else if (in_shndx == elfcpp::SHN_UNDEF
 			 || (!is_ordinary
 			     && (in_shndx == elfcpp::SHN_ABS
@@ -2699,6 +2785,46 @@ Symbol_table::add_from_relobj<64, true>(
     size_t sym_name_size,
     Sized_relobj<64, true>::Symbols* sympointers,
     size_t* defined);
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+Symbol*
+Symbol_table::add_from_pluginobj<32, false>(
+    Sized_pluginobj<32, false>* obj,
+    const char* name,
+    const char* ver,
+    elfcpp::Sym<32, false>* sym);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+Symbol*
+Symbol_table::add_from_pluginobj<32, true>(
+    Sized_pluginobj<32, true>* obj,
+    const char* name,
+    const char* ver,
+    elfcpp::Sym<32, true>* sym);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+Symbol*
+Symbol_table::add_from_pluginobj<64, false>(
+    Sized_pluginobj<64, false>* obj,
+    const char* name,
+    const char* ver,
+    elfcpp::Sym<64, false>* sym);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+Symbol*
+Symbol_table::add_from_pluginobj<64, true>(
+    Sized_pluginobj<64, true>* obj,
+    const char* name,
+    const char* ver,
+    elfcpp::Sym<64, true>* sym);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

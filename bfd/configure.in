@@ -8,7 +8,7 @@ AC_CONFIG_SRCDIR([libbfd.c])
 AC_CANONICAL_TARGET
 AC_ISC_POSIX
 
-AM_INIT_AUTOMAKE(bfd, 2.18.50)
+AM_INIT_AUTOMAKE(bfd, 2.19.50)
 
 dnl These must be called before LT_INIT, because it may want
 dnl to call AC_CHECK_PROG.
@@ -22,6 +22,7 @@ AC_DISABLE_SHARED
 AC_PROG_CC
 AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
+AC_SYS_LARGEFILE
 
 LT_INIT
 
@@ -119,7 +120,7 @@ bfd_default_target_size=32
 
 # host stuff:
 
-ALL_LINGUAS="fr tr ja es sv da zh_CN ro rw vi fi"
+ALL_LINGUAS="fr tr ja es sv da zh_CN ro rw vi fi id"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 

@@ -2985,16 +2985,16 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 		 absolute.  We output the address here to a file.
 		 This file is then read by dlltool when generating the
 		 reloc section.  Note that the base file is not
-		 portable between systems.  We write out a long here,
-		 and dlltool reads in a long.  */
-	      long addr = (rel->r_vaddr
+		 portable between systems.  We write out a bfd_vma here,
+		 and dlltool reads in a bfd_vma.  */
+	      bfd_vma addr = (rel->r_vaddr
 			   - input_section->vma
 			   + input_section->output_offset
 			   + input_section->output_section->vma);
 	      if (coff_data (output_bfd)->pe)
 		addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
-	      if (fwrite (&addr, 1, sizeof (long), (FILE *) info->base_file)
-		  != sizeof (long))
+	      if (fwrite (&addr, 1, sizeof (bfd_vma), (FILE *) info->base_file)
+		  != sizeof (bfd_vma))
 		{
 		  bfd_set_error (bfd_error_system_call);
 		  return FALSE;

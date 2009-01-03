@@ -827,6 +827,9 @@ if { ([istarget "ia64-*-elf*"]
 if [is_elf_format] {
     objcopy_test "ELF unknown section type" unknown.s
     objcopy_test_readelf "ELF group" group.s
+    objcopy_test_readelf "ELF group" group-2.s
+    objcopy_test_readelf "ELF group" group-3.s
+    objcopy_test_readelf "ELF group" group-4.s
     run_dump_test "copy-1"
 }
 
@@ -837,6 +840,12 @@ if [is_elf_format] {
     run_dump_test "strip-1"
     run_dump_test "strip-2"
     run_dump_test "strip-3"
+    run_dump_test "strip-4"
+    run_dump_test "strip-5"
+    run_dump_test "strip-6"
+    run_dump_test "strip-7"
+    run_dump_test "strip-8"
+    run_dump_test "strip-9"
 
     if { [istarget "i*86-*"] || [istarget "x86_64-*-*"] } {
 	# Check to make sure we don't strip a symbol named in relocations.

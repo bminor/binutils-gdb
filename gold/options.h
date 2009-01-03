@@ -54,6 +54,7 @@ class Search_directory;
 class Input_file_group;
 class Position_dependent_options;
 class Target;
+class Plugin_manager;
 
 // The nested namespace is to contain all the global variables and
 // structs that need to be defined in the .h file, but do not need to
@@ -689,8 +690,14 @@ class General_options
   DEFINE_string(oformat, options::EXACTLY_TWO_DASHES, '\0', "elf",
 		N_("Set output format"), N_("[binary]"));
 
+#ifdef ENABLE_PLUGINS
+  DEFINE_special(plugin, options::TWO_DASHES, '\0',
+                 N_("Load a plugin library"), N_("PLUGIN[,ARG,...]"));
+#endif
+
   DEFINE_bool(preread_archive_symbols, options::TWO_DASHES, '\0', false,
               N_("Preread archive symbols when multi-threaded"), NULL);
+
   DEFINE_string(print_symbol_counts, options::TWO_DASHES, '\0', NULL,
 		N_("Print symbols defined and used for each input"),
 		N_("FILENAME"));
@@ -837,6 +844,9 @@ class General_options
   DEFINE_bool(relro, options::DASH_Z, '\0', false,
 	      N_("Where possible mark variables read-only after relocation"),
 	      N_("Don't mark variables read-only after relocation"));
+  DEFINE_bool(origin, options::DASH_Z, '\0', false,
+	      N_("Mark DSO to indicate that needs immediate $ORIGIN "
+                 "processing at runtime"), NULL);
 
  public:
   typedef options::Dir_list Dir_list;
@@ -861,6 +871,20 @@ class General_options
   bool
   output_is_position_independent() const
   { return this->shared(); }
+
+  // Return true if the output is something that can be exec()ed, such
+  // as a static executable, or a position-dependent or
+  // position-independent executable, but not a dynamic library or an
+  // object file.
+  bool
+  output_is_executable() const
+  { return !this->shared() || this->output_is_pie(); }
+
+  // Return true if the output is a position-independent executable.
+  // This is currently not supported.
+  bool
+  output_is_pie() const
+  { return false; }
 
   // This would normally be static(), and defined automatically, but
   // since static is a keyword, we need to come up with our own name.
@@ -899,6 +923,16 @@ class General_options
   do_demangle() const
   { return this->do_demangle_; }
 
+  // Returns TRUE if any plugin libraries have been loaded.
+  bool
+  has_plugins() const
+  { return this->plugins_ != NULL; }
+
+  // Return a pointer to the plugin manager.
+  Plugin_manager*
+  plugins() const
+  { return this->plugins_; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -936,12 +970,18 @@ class General_options
   void
   add_sysroot();
 
+  // Add a plugin and its arguments to the list of plugins.
+  void
+  add_plugin(const char* arg);
+
   // Whether to mark the stack as executable.
   Execstack execstack_status_;
   // Whether to do a static link.
   bool static_;
   // Whether to do demangling.
   bool do_demangle_;
+  // List of plugin libraries.
+  Plugin_manager* plugins_;
 };
 
 // The position-dependent options.  We use this to store the state of

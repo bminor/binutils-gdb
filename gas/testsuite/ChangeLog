@@ -1,3 +1,80 @@
+2008-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run nops-5, nops-5-i686, x86-64-nops-5 and
+	x86-64-nops-5-k8.
+
+	* gas/i386/nops-5.d: New.
+	* gas/i386/nops-5.s: Likewise.
+	* gas/i386/nops-5-i686.d: Likewise.
+	* gas/i386/x86-64-nops-5.d: Likewise.
+	* gas/i386/x86-64-nops-5-k8.d: Likewise.
+
+2008-10-06  Tom Tromey  <tromey@redhat.com>
+
+	* gas/cfi/cfi-alpha-1.d, gas/cfi/cfi-alpha-3.d,
+	gas/cfi/cfi-arm-1.d, gas/cfi/cfi-common-1.d,
+	gas/cfi/cfi-common-2.d, gas/cfi/cfi-common-3.d,
+	gas/cfi/cfi-common-4.d, gas/cfi/cfi-common-5.d,
+	gas/cfi/cfi-common-6.d, gas/cfi/cfi-hppa-1.d,
+	gas/cfi/cfi-i386-2.d, gas/cfi/cfi-i386.d, gas/cfi/cfi-m68k.d,
+	gas/cfi/cfi-mips-1.d, gas/cfi/cfi-ppc-1.d, gas/cfi/cfi-s390-1.d,
+	gas/cfi/cfi-s390x-1.d, gas/cfi/cfi-sh-1.d, gas/cfi/cfi-sparc-1.d,
+	gas/cfi/cfi-sparc64-1.d, gas/cfi/cfi-x86_64.d: Update for readelf
+	change.
+
+2008-10-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-tls-1.s, gas/cris/rd-tls-1.d, gas/cris/rd-tls-2.s,
+	gas/cris/rd-tls-2.d, gas/cris/tls-err-1.s, gas/cris/tls-err-2.s,
+	gas/cris/tls-err-3.s: New tests.
+
+2008-09-26  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* gas/s390/esa-g5.d: Adjust according to the s390-opc changes.
+	* gas/s390/esa-g5.s: Likewise.
+	* gas/s390/esa-z990.d: Likewise.
+	* gas/s390/esa-z990.s: Likewise.
+	* gas/s390/zarch-z900.d: Likewise.
+	* gas/s390/zarch-z900.s: Likewise.
+	* gas/s390/zarch-z990.d: Likewise.
+	* gas/s390/zarch-z990.s: Likewise.
+
+2008-09-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/all/gas.exp: Don't run redef tests on a bunch of targets.
+	* gas/elf/elf.exp: Likewise.
+
+2008-09-14  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* gas/z80/ld-group.s, gas/z80/ld-group.d: New test.
+	* gas/z80/block.s, gas/z80/block.d: New test
+	* gas/z80/arith.s, gas/z80/arith.d: New test
+	* gas/z80/rotate.s, gas/z80/rotate.d: New test
+	* gas/z80/bit.s, gas/z80/bit.d: New test
+	* gas/z80/branch.s, gas/z80/branch.d: New test
+	* gas/z80/inout.s, gas/z80/inout.d: New test
+	* gas/z80/misc.s, gas/z80/misc.d: New test
+	* gas/z80/z80.exp: Run them.
+
+2008-09-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/sse2avx.s: Remove pclmulXXX tests.  Add tests for
+	Intel syntax.
+	* gas/i386/x86-64-sse2avx.s: Likewise.
+
+	* gas/i386/sse2avx.d: Updated.
+	* gas/i386/x86-64-sse2avx.d: Likewise. 
+
+2008-09-09  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/common.s: New test.
+	* gas/ppc/common.d: Likewise.
+	* gas/ppc/power4_32.s: Likewise.
+	* gas/ppc/power4_32.d: Likewise.
+	* gas/ppc/power6.s: Add attn, mtcr, mtcrf, mfcr, dcbz.
+	* gas/ppc/power6.d: Likewise.
+	* gas/ppc/ppc.exp: Run power4_32 test.
+
 2008-09-06  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/cfi-n64-1.s, gas/mips/cfi-n64-1.d: New test.

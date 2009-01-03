@@ -960,7 +960,7 @@ note_reloc2 (INSTR_T code, const char *symbol, int reloc, int value, int pcrel)
 INSTR_T
 gencode (unsigned long x)
 {
-  INSTR_T cell = (INSTR_T) obstack_alloc (&mempool, sizeof (struct bfin_insn));
+  INSTR_T cell = obstack_alloc (&mempool, sizeof (struct bfin_insn));
   memset (cell, 0, sizeof (struct bfin_insn));
   cell->value = (x);
   return cell;
@@ -973,7 +973,7 @@ int count_insns;
 static void *
 allocate (int n)
 {
-  return (void *) obstack_alloc (&mempool, n);
+  return obstack_alloc (&mempool, n);
 }
 
 Expr_Node *
@@ -1452,14 +1452,14 @@ bfin_gen_ldstidxi (REG_T ptr, REG_T reg, int W, int sz, int Z, Expr_Node * poffs
     {
       int value, offset;
       switch (sz)
-	{				// load/store access size
-	case 0:			// 32 bit
+	{				/* load/store access size */
+	case 0:			/* 32 bit */
 	  value = EXPR_VALUE (poffset) >> 2;
 	  break;
-	case 1:			// 16 bit
+	case 1:			/* 16 bit */
 	  value = EXPR_VALUE (poffset) >> 1;
 	  break;
-	case 2:			// 8 bit
+	case 2:			/* 8 bit */
 	  value = EXPR_VALUE (poffset);
 	  break;
 	default:
