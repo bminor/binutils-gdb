@@ -325,6 +325,20 @@ example:
 ld -o myprog /lib/gcrt0.o myprog.o utils.o -lc_p
 @end example
 
+If you are running the program on a system which supports shared
+libraries you may run into problems with the profiling support code in
+a shared library being called before that library has been fully
+initialised.  This is usually detected by the program encountering a
+segmentation fault as soon as it is run.  The solution is to link
+against a static version of the library containing the profiling
+support code, which for @code{gcc} users can be done via the
+@samp{-static} or @samp{-static-libgcc} command line option.  For
+example:
+
+@example
+gcc -g -pg -static-libgcc myprog.c utils.c -o myprog
+@end example
+
 If you compile only some of the modules of the program with @samp{-pg}, you
 can still profile the program, but you won't get complete information about
 the modules that were compiled without @samp{-pg}.  The only information

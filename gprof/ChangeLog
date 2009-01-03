@@ -1,3 +1,9 @@
+2009-01-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 7099
+	* gprof.texi (Compiling): Mention the need for using
+	-static-libgcc on shared library systems.
+
 2009-01-02  Nick Clifton  <nickc@redhat.com>
 
 	* po/id.po: Updated Indonesian translation.
