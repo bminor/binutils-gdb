@@ -38,7 +38,11 @@ int main (int argc, char *argv[])
   if ((size & 8191) == 0)
     size--;
 
-  a = mmap (NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+#ifndef MMAP_FLAGS
+#define MMAP_FLAGS MAP_PRIVATE
+#endif
+
+  a = mmap (NULL, size, PROT_READ, MMAP_FLAGS, fd, 0);
 
   if (memmem (a, size, str, strlen (str) + 1) == NULL)
     abort ();
