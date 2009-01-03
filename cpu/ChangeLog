@@ -1,3 +1,8 @@
+2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris.cpu (cris-implemented-writable-specregs-v32): Correct size
+	of number 2, PID.
+
 2008-12-23  Jon Beniston <jon@beniston.com>
 
 	* lm32.cpu: New file.
