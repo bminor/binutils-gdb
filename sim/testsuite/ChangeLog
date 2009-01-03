@@ -1,3 +1,7 @@
+2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/asm/pid1.ms: New test.
+
 2008-12-30  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/asm/badarch1.ms: Tweak error message match.
