@@ -1,5 +1,6 @@
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
+	* sim/cris/c/settls1.c: New test.
 	* sim/cris/c/exitg1.c, sim/cris/c/exitg2.c: New tests.
 	* sim/cris/c/uname1.c: New test.
 	* sim/cris/c/mmap1.c (MMAP_FLAGS): Default-define to
