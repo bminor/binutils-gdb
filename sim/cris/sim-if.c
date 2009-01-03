@@ -41,22 +41,6 @@ char *missing_environ[] = { "SHELL=/bin/sh", "PATH=/bin:/usr/bin", NULL };
 #define GET_ENVIRON() missing_environ
 #endif
 
-/* AUX vector entries.  */
-#define TARGET_AT_NULL 0
-#define TARGET_AT_PHDR 3
-#define TARGET_AT_PHENT 4
-#define TARGET_AT_PHNUM 5
-#define TARGET_AT_PAGESZ 6
-#define TARGET_AT_BASE 7
-#define TARGET_AT_FLAGS 8
-#define TARGET_AT_ENTRY 9
-#define TARGET_AT_UID 11
-#define TARGET_AT_EUID 12
-#define TARGET_AT_GID 13
-#define TARGET_AT_EGID 14
-#define TARGET_AT_HWCAP 16
-#define TARGET_AT_CLKTCK 17
-
 /* Used with get_progbounds to find out how much memory is needed for the
    program.  We don't want to allocate more, since that could mask
    invalid memory accesses program bugs.  */
@@ -628,23 +612,24 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
     USI val;
   } auxv_entries[] =
     {
-#define AUX_ENT(a, b) {TARGET_ ## a, NULL, b}
-#define AUX_ENTF(a, b, f) {TARGET_ ## a, f, b}
+#define AUX_ENT(a, b) {a, NULL, b}
+#define AUX_ENTF(a, f) {a, f, 0}
       AUX_ENT (AT_HWCAP, 0),
       AUX_ENT (AT_PAGESZ, 8192),
       AUX_ENT (AT_CLKTCK, 100),
-      AUX_ENTF (AT_PHDR, 0, aux_ent_phdr),
-      AUX_ENTF (AT_PHENT, 0, aux_ent_phent),
-      AUX_ENTF (AT_PHNUM, 0, aux_ent_phnum),
-      AUX_ENTF (AT_BASE, 0, aux_ent_base),
+      AUX_ENTF (AT_PHDR, aux_ent_phdr),
+      AUX_ENTF (AT_PHENT, aux_ent_phent),
+      AUX_ENTF (AT_PHNUM, aux_ent_phnum),
+      AUX_ENTF (AT_BASE, aux_ent_base),
       AUX_ENT (AT_FLAGS, 0),
-      AUX_ENTF (AT_ENTRY, 0, aux_ent_entry),
+      AUX_ENTF (AT_ENTRY, aux_ent_entry),
 
       /* Or is root better?  Maybe have it settable?  */
       AUX_ENT (AT_UID, 500),
       AUX_ENT (AT_EUID, 500),
       AUX_ENT (AT_GID, 500),
       AUX_ENT (AT_EGID, 500),
+      AUX_ENT (AT_SECURE, 0),
       AUX_ENT (AT_NULL, 0)
     };
 

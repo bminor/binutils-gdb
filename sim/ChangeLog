@@ -1,5 +1,15 @@
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
+	* cris/sim-if.c (TARGET_AT_NULL, TARGET_AT_PHDR, TARGET_AT_PHENT)
+	(TARGET_AT_PHNUM, TARGET_AT_PAGESZ, TARGET_AT_BASE)
+	(TARGET_AT_FLAGS, TARGET_AT_ENTRY, TARGET_AT_UID, TARGET_AT_EUID)
+	(TARGET_AT_GID, TARGET_AT_EGID, TARGET_AT_HWCAP)
+	(TARGET_AT_CLKTCK): Remove redundant macros.
+	(AUX_ENT): Adjust to use standard ELF AT_* macros.
+	(AUX_ENTF): Ditto.  Remove always-0 middle argument.  Update all
+	callers.
+	(sim_open): Also pass AT_SECURE.
+
 	* cris/sim-main.h (struct _sim_cpu): New member
 	set_target_thread_data.
 	* cris/crisv32f.c (CRIS_TLS_REGISTER): Define.
