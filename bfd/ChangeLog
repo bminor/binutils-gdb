@@ -1,3 +1,8 @@
+2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (elf_cris_finish_dynamic_symbol): Rename
+	gotplt_index to rela_plt_index.  Adjust for R_CRIS_DTPMOD entry.
+
 2009-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/9679

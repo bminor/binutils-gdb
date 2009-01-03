@@ -2146,13 +2146,19 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_byte *loc;
       bfd_boolean has_gotplt = gotplt_offset != 0;
 
-      /* Get the index in the procedure linkage table which
-	 corresponds to this symbol.  This is the index of this symbol
-	 in all the symbols for which we are making plt entries.  The
-	 first entry in the procedure linkage table is reserved.  */
-      /* We have to count backwards here, and the result is only valid as
-	 an index into .got.plt and its relocations.  FIXME: Constants...  */
-      bfd_vma gotplt_index = gotplt_offset/4 - 3;
+      /* Get the index in the .rela.plt relocations for the .got.plt
+	 entry that corresponds to this symbol.
+	 We have to count backwards here, and the result is only valid
+	 as an index into .rela.plt.  We also have to undo the effect
+	 of the R_CRIS_DTPMOD entry at .got index 3 (offset 12 into
+	 .got.plt) for which gotplt_offset is adjusted, because while
+	 that entry goes into .got.plt, its relocation goes into
+	 .rela.got, not .rela.plt.  (It's not PLT-specific; not to be
+	 processed as part of the runtime lazy .rela.plt relocation).
+	 FIXME: There be literal constants here...  */
+      bfd_vma rela_plt_index
+	= (elf_cris_hash_table (info)->dtpmod_refcount != 0
+	   ? gotplt_offset/4 - 2 - 3 : gotplt_offset/4 - 3);
 
       /* Get the offset into the .got table of the entry that corresponds
 	 to this function.  Note that we embed knowledge that "incoming"
@@ -2202,7 +2208,7 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
 	{
 	  /* Fill in the offset to the reloc table.  */
 	  bfd_put_32 (output_bfd,
-		      gotplt_index * sizeof (Elf32_External_Rela),
+		      rela_plt_index * sizeof (Elf32_External_Rela),
 		      splt->contents + h->plt.offset + plt_off2);
 
 	  /* Fill in the offset to the first PLT entry, where to "jump".  */
@@ -2225,7 +2231,7 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
 			   + got_offset);
 	  rela.r_info = ELF32_R_INFO (h->dynindx, R_CRIS_JUMP_SLOT);
 	  rela.r_addend = 0;
-	  loc = srela->contents + gotplt_index * sizeof (Elf32_External_Rela);
+	  loc = srela->contents + rela_plt_index * sizeof (Elf32_External_Rela);
 	  bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
 	}
 
