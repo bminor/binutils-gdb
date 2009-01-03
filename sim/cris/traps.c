@@ -124,6 +124,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define TARGET_MAP_TYPE		0x0f
 #define TARGET_MAP_FIXED	0x10
 #define TARGET_MAP_ANONYMOUS	0x20
+#define TARGET_MAP_DENYWRITE	0x800
 
 #define TARGET_CTL_KERN		1
 #define TARGET_CTL_VM		2
@@ -1661,6 +1662,11 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 	    USI flags = arg4;
 	    USI fd = arg5;
 	    USI pgoff = arg6;
+
+	    /* At 2.6.27, Linux (many (all?) ports, in the mmap2 syscalls)
+	       still masked away this bit, so let's just ignore
+	       it.  */
+	    flags &= ~TARGET_MAP_DENYWRITE;
 
 	    /* If the simulator wants to mmap more than the very large
 	       limit, something is wrong.  FIXME: Return an error or
