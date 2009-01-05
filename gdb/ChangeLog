@@ -1,3 +1,7 @@
+2009-01-05  Tom Tromey  <tromey@redhat.com>
+
+	* python/python-internal.h (Py_ssize_t): Define as int.
+
 2009-01-05  Jim Blandy  <jimb@red-bean.com>
 
 	* MAINTAINERS: Fix my e-mail address as steering committee member.
