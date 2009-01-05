@@ -1419,7 +1419,7 @@ gld_${EMULATION_NAME}_finish (void)
    We use this to put sections in a reasonable place in the file, and
    to ensure that they are aligned as required.
 
-   We handle grouped sections here as well.  A section named .foo$nn
+   We handle grouped sections here as well.  A section named .foo\$nn
    goes into the output section .foo.  All grouped sections are sorted
    by name.
 
@@ -1439,7 +1439,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 
   /* Look through the script to see where to place this section.  */
   if (!link_info.relocatable
-      && (dollar = strchr (secname, '$')) != NULL)
+      && (dollar = strchr (secname, '\$')) != NULL)
     {
       size_t len = dollar - secname;
       char *newname = xmalloc (len + 1);
@@ -1548,7 +1548,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
       {
 	bfd_boolean found_dollar;
 
-	/* The section name has a '$'.  Sort it with the other '$'
+	/* The section name has a '\$'.  Sort it with the other '\$'
 	   sections.  */
 	found_dollar = FALSE;
 	for ( ; *pl != NULL; pl = &(*pl)->header.next)
@@ -1562,7 +1562,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 	    ls = &(*pl)->input_section;
 
 	    lname = bfd_get_section_name (ls->section->owner, ls->section);
-	    if (strchr (lname, '$') == NULL)
+	    if (strchr (lname, '\$') == NULL)
 	      {
 		if (found_dollar)
 		  break;

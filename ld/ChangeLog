@@ -1,3 +1,9 @@
+2009-01-05  Kai Tietz  <kai.tietz@onevision.com>
+
+	* emultempl/pe.em: Prefix dollar characters to be outputed in
+	generated C file.
+	* emultempl/pep.em: Likewise.
+
 2009-01-03  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* NEWS:  Mention new feature --exclude-modules-for-implib.

@@ -1300,14 +1300,14 @@ gld_${EMULATION_NAME}_after_open (void)
        import libraries which are dead code and eliminates them
        from the final link. For each exported symbol <sym>, there
        is a object file in the import library with a .text section
-       and several .idata$* sections. The .text section contains the
+       and several .idata\$* sections. The .text section contains the
        symbol definition for <sym> which is a jump stub of the form
-       jmp *__imp_<sym>. The .idata$5 contains the symbol definition
+       jmp *__imp_<sym>. The .idata\$5 contains the symbol definition
        for __imp_<sym> which is the address of the slot for <sym> in
        the import address table. When a symbol is imported explicitly
        using __declspec(dllimport) declaration, the compiler generates
        a reference to __imp_<sym> which directly resolves to the
-       symbol in .idata$5, in which case the jump stub code is not
+       symbol in .idata\$5, in which case the jump stub code is not
        needed. The following code tries to identify jump stub sections
        in import libraries which are not referred to by anyone and
        marks them for exclusion from the final link.  */
@@ -1625,7 +1625,7 @@ gld_${EMULATION_NAME}_finish (void)
    We use this to put sections in a reasonable place in the file, and
    to ensure that they are aligned as required.
 
-   We handle grouped sections here as well.  A section named .foo$nn
+   We handle grouped sections here as well.  A section named .foo\$nn
    goes into the output section .foo.  All grouped sections are sorted
    by name.
 
@@ -1645,7 +1645,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 
   /* Look through the script to see where to place this section.  */
   if (!link_info.relocatable
-      && (dollar = strchr (secname, '$')) != NULL)
+      && (dollar = strchr (secname, '\$')) != NULL)
     {
       size_t len = dollar - secname;
       char *newname = xmalloc (len + 1);
@@ -1754,7 +1754,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
       {
 	bfd_boolean found_dollar;
 
-	/* The section name has a '$'.  Sort it with the other '$'
+	/* The section name has a '\$'.  Sort it with the other '\$'
 	   sections.  */
 	found_dollar = FALSE;
 	for ( ; *pl != NULL; pl = &(*pl)->header.next)
@@ -1768,7 +1768,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 	    ls = &(*pl)->input_section;
 
 	    lname = bfd_get_section_name (ls->section->owner, ls->section);
-	    if (strchr (lname, '$') == NULL)
+	    if (strchr (lname, '\$') == NULL)
 	      {
 		if (found_dollar)
 		  break;
