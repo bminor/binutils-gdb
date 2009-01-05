@@ -1,5 +1,9 @@
 2008-12-13  Doug Evans  <dje@google.com>
 
+	* linux-low.c (linux_attach_lwp): Add some comments/fixmes.
+
+2008-12-13  Doug Evans  <dje@google.com>
+
 	* utils.c (xmalloc,xcalloc,xstrdup): New fns.
 	* server.h (ATTR_MALLOC): New macro.
 	(xmalloc,xcalloc,xstrdup): Declare.

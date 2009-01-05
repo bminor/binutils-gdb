@@ -326,6 +326,8 @@ linux_attach_lwp (unsigned long pid)
 	       strerror (errno), errno);
     }
 
+  /* FIXME: This intermittently fails.
+     We need to wait for SIGSTOP first.  */
   ptrace (PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACECLONE);
 
   new_process = (struct process_info *) add_process (pid);
@@ -333,15 +335,36 @@ linux_attach_lwp (unsigned long pid)
   new_thread_notify (thread_id_to_gdb_id (new_process->lwpid));
 
   /* The next time we wait for this LWP we'll see a SIGSTOP as PTRACE_ATTACH
-     brings it to a halt.  We should ignore that SIGSTOP and resume the process
-     (unless this is the first process, in which case the flag will be cleared
-     in linux_attach).
+     brings it to a halt.
+
+     There are several cases to consider here:
+
+     1) gdbserver has already attached to the process and is being notified
+        of a new thread that is being created.
+        In this case we should ignore that SIGSTOP and resume the process.
+        This is handled below by setting stop_expected = 1.
+
+     2) This is the first thread (the process thread), and we're attaching
+        to it via attach_inferior.
+        In this case we want the process thread to stop.
+        This is handled by having linux_attach clear stop_expected after
+        we return.
+        ??? If the process already has several threads we leave the other
+        threads running.
+
+     3) GDB is connecting to gdbserver and is requesting an enumeration of all
+        existing threads.
+        In this case we want the thread to stop.
+        FIXME: This case is currently not properly handled.
+        We should wait for the SIGSTOP but don't.  Things work apparently
+        because enough time passes between when we ptrace (ATTACH) and when
+        gdb makes the next ptrace call on the thread.
 
      On the other hand, if we are currently trying to stop all threads, we
      should treat the new thread as if we had sent it a SIGSTOP.  This works
-     because we are guaranteed that add_process added us to the end of the
-     list, and so the new thread has not yet reached wait_for_sigstop (but
-     will).  */
+     because we are guaranteed that the add_process call above added us to the
+     end of the list, and so the new thread has not yet reached
+     wait_for_sigstop (but will).  */
   if (! stopping_threads)
     new_process->stop_expected = 1;
 }
