@@ -1,5 +1,12 @@
 2009-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (process_copyright): Update for 2009.
+
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2009-01-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	AVX Programming Reference (December, 2008)
 	* i386-dis.c (OP_VEX_FMA): Removed.
 	(OP_EX_VexW): Likewise.
