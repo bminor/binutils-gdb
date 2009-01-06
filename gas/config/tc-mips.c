@@ -8656,6 +8656,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       create_insn (ip, insn);
       insn_error = NULL;
       argnum = 1;
+      lastregno = 0xffffffff;
       for (args = insn->args;; ++args)
 	{
 	  int is_mdmx;
@@ -9397,14 +9398,14 @@ do_msbd:
 		  if (c == 'z' && regno != 0)
 		    break;
 
-		  if (c == 's' && !strcmp (ip->insn_mo->name, "jalr"))
+		  if (c == 's' && !strncmp (ip->insn_mo->name, "jalr", 4))
 		    {
 		      if (regno == lastregno)
 		        {
-			  insn_error = _("source and destinationations must be different");
+			  insn_error = _("source and destination must be different");
 			  continue;
 		        }
-		      if (regno == 31 && lastregno == 0)
+		      if (regno == 31 && lastregno == 0xffffffff)
 		        {
 			  insn_error = _("a destination register must be supplied");
 			  continue;
