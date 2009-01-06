@@ -1062,6 +1062,25 @@ main (int argc, char **argv)
   return 0;
 }
 
+static int
+find_arch_match(const char *tname,const char **arch)
+{
+  while (*arch != NULL)
+    {
+      const char *in_a = strstr (*arch, tname);
+      char end_ch = (in_a ? in_a[strlen(tname)] : 0);
+
+      if (in_a && (in_a == *arch || in_a[-1] == ':')
+	  && end_ch == 0)
+        {
+	  def_target_arch = *arch;
+	  return 1;
+        }
+      arch++;
+    }
+  return 0;
+}
+
 static void
 set_endianess (bfd *abfd, const char *target)
 {
@@ -1079,23 +1098,28 @@ set_endianess (bfd *abfd, const char *target)
 
     if (arches && tname)
       {
-	const char ** arch = arches;
+	char *hyp = strchr (tname, '-');
 
-	if (strchr (tname, '-') != NULL)
-	  tname = strchr (tname, '-') + 1;
-	while (*arch != NULL)
+	if (hyp != NULL)
 	  {
-	    const char *in_a = strstr (*arch, tname);
-	    char end_ch = (in_a ? in_a[strlen(tname)] : 0);
+	    tname = hyp + 1;
 
-	    if (in_a && (in_a == *arch || in_a[-1] == ':')
-	        && end_ch == 0)
+	    /* Make sure we dectect architecture names
+	       for triplets like "pe-arm-wince-little".  */
+	    if (!find_arch_match (tname, arches))
 	      {
-		def_target_arch = *arch;
-		break;
+		char *new_tname = (char *) alloca (strlen (hyp) + 1);
+		strcpy (new_tname, hyp);
+		while ((hyp = strrchr (new_tname, '-')) != NULL)
+		  {
+		    *hyp = 0;
+		    if (find_arch_match (new_tname, arches))
+		      break;
+		  }
 	      }
-	    arch++;
 	  }
+	else
+	  find_arch_match (tname, arches);
       }
 
     free (arches);
