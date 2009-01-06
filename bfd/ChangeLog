@@ -1,3 +1,6 @@
+2009-01-05  Joel Sherrill <joel.sherrill@oarcorp.com>
+ 
+	* config.bfd: Add lm32-*-rtems*.
 2009-01-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coff-ppc.c: Add 2009 to Copyright.
