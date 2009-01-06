@@ -755,6 +755,11 @@ static const CB_TARGET_DEFS_MAP open_map[] = {
   { -1, -1 }
 };
 
+/* Let's be less drastic and more traceable.  FIXME: mark as noreturn.  */
+#define abort()							\
+  sim_io_error (sd, "simulator unhandled condition at %s:%d",	\
+		__FUNCTION__, __LINE__)
+
 /* Needed for the cris_pipe_nonempty and cris_pipe_empty syscalls.  */
 static SIM_CPU *current_cpu_for_cb_callback;
 
@@ -975,7 +980,8 @@ cris_dump_map (SIM_CPU *current_cpu)
     sim_io_eprintf (CPU_STATE (current_cpu), "0x%x..0x%x\n", start, end);
 }
 
-/* Create mmapped memory.  */
+/* Create mmapped memory.  ADDR is -1 if any address will do.  Caller
+   must make sure that the address isn't already mapped.  */
 
 static USI
 create_map (SIM_DESC sd, struct cris_sim_mmapped_page **rootp, USI addr,
@@ -985,9 +991,9 @@ create_map (SIM_DESC sd, struct cris_sim_mmapped_page **rootp, USI addr,
   struct cris_sim_mmapped_page **higher_prevp = rootp;
   USI new_addr = 0x40000000;
 
-  if (addr != 0)
+  if (addr != (USI) -1)
     new_addr = addr;
-  else if (*rootp)
+  else if (*rootp && rootp[0]->addr >= new_addr)
     new_addr = rootp[0]->addr + 8192;
 
   if (len != 8192)
@@ -1010,6 +1016,10 @@ create_map (SIM_DESC sd, struct cris_sim_mmapped_page **rootp, USI addr,
        mapp != NULL && mapp->addr > new_addr;
        mapp = mapp->prev)
     higher_prevp = &mapp->prev;
+
+  /* Assert for consistency that we don't create duplicate maps.  */
+  if (is_mapped (sd, rootp, new_addr, len))
+    abort ();
 
   /* Allocate the new page, on the next higher page from the last one
      allocated, and link in the new descriptor before previous ones.  */
@@ -1041,6 +1051,7 @@ unmap_pages (SIM_DESC sd, struct cris_sim_mmapped_page **rootp, USI addr,
   if (len != 8192)
     {
       USI page_addr;
+      int ret = 0;
 
       if (len & 8191)
 	/* Which is better: return an error for this, or just round it up?  */
@@ -1049,12 +1060,15 @@ unmap_pages (SIM_DESC sd, struct cris_sim_mmapped_page **rootp, USI addr,
       /* Loop backwards to make each call is O(1) over the number of pages
 	 allocated, if we're unmapping from the high end of the pages.  */
       for (page_addr = addr + len - 8192;
-	   page_addr >= addr;
+	   page_addr > addr;
 	   page_addr -= 8192)
-	if (unmap_pages (sd, rootp, page_addr, 8192) != 0)
-	  abort ();
+	if (unmap_pages (sd, rootp, page_addr, 8192))
+	  ret = EINVAL;
 
-      return 0;
+      if (unmap_pages (sd, rootp, addr, 8192))
+	ret = EINVAL;
+
+      return ret;
     }
 
   for (mapp = *rootp; mapp != NULL && mapp->addr > addr; mapp = mapp->prev)
@@ -1087,6 +1101,7 @@ cris_bmod_handler (SIM_CPU *current_cpu ATTRIBUTE_UNUSED,
 		   UINT srcreg ATTRIBUTE_UNUSED,
 		   USI dstreg ATTRIBUTE_UNUSED)
 {
+  SIM_DESC sd = CPU_STATE (current_cpu);
   abort ();
 }
 
@@ -1096,6 +1111,7 @@ h_supr_set_handler (SIM_CPU *current_cpu ATTRIBUTE_UNUSED,
 		    USI page ATTRIBUTE_UNUSED,
 		    USI newval ATTRIBUTE_UNUSED)
 {
+  SIM_DESC sd = CPU_STATE (current_cpu);
   abort ();
 }
 
@@ -1104,6 +1120,7 @@ h_supr_get_handler (SIM_CPU *current_cpu ATTRIBUTE_UNUSED,
 		    UINT index ATTRIBUTE_UNUSED,
 		    USI page ATTRIBUTE_UNUSED)
 {
+  SIM_DESC sd = CPU_STATE (current_cpu);
   abort ();
 }
 
@@ -1260,6 +1277,7 @@ schedule (SIM_CPU *current_cpu, int next)
 static void
 reschedule (SIM_CPU *current_cpu)
 {
+  SIM_DESC sd = CPU_STATE (current_cpu);
   int i;
 
   /* Iterate over all thread slots, because after a few thread creations
@@ -1397,6 +1415,7 @@ deliver_signal (SIM_CPU *current_cpu, int sig, unsigned int pid)
 static void
 make_first_thread (SIM_CPU *current_cpu)
 {
+  SIM_DESC sd = CPU_STATE (current_cpu);
   current_cpu->thread_data
     = xcalloc (1,
 	       SIM_TARGET_MAX_THREADS
@@ -1706,10 +1725,7 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		    && prot != (TARGET_PROT_READ | TARGET_PROT_EXEC)
 		    && prot != (TARGET_PROT_READ | TARGET_PROT_WRITE))
 		|| (fd == (USI) -1 && pgoff != 0)
-		|| (fd != (USI) -1 && (flags & TARGET_MAP_ANONYMOUS))
-		|| ((flags & TARGET_MAP_FIXED) == 0
-		    && is_mapped (sd, &current_cpu->highest_mmapped_page,
-				  addr, (len + 8191) & ~8191)))
+		|| (fd != (USI) -1 && (flags & TARGET_MAP_ANONYMOUS)))
 	      {
 		retval
 		  = cris_unknown_syscall (current_cpu, pc,
@@ -1742,13 +1758,17 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		    && prot != (TARGET_PROT_READ | TARGET_PROT_WRITE))
 		  abort ();
 
-		if ((flags & TARGET_MAP_FIXED)
-		    && unmap_pages (sd, &current_cpu->highest_mmapped_page,
-				    addr, newlen) != 0)
-		  abort ();
+		if (flags & TARGET_MAP_FIXED)
+		  unmap_pages (sd, &current_cpu->highest_mmapped_page,
+			       addr, newlen);
+		else if (is_mapped (sd, &current_cpu->highest_mmapped_page,
+				    addr, newlen))
+		  addr = 0;
 
 		newaddr
-		  = create_map (sd, &current_cpu->highest_mmapped_page, addr,
+		  = create_map (sd, &current_cpu->highest_mmapped_page,
+				addr != 0 || (flags & TARGET_MAP_FIXED)
+				? addr : -1,
 				newlen);
 
 		if (newaddr >= (USI) -8191)
@@ -1800,7 +1820,9 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		if (cb_syscall (cb, &s) != CB_RC_OK)
 		  abort ();
 
-		if ((USI) s.result != len)
+		/* If the result is a page or more lesser than what
+		   was requested, something went wrong.  */
+		if (len >= 8192 && (USI) s.result <= len - 8192)
 		  abort ();
 
 		/* After reading, we need to go back to the previous
@@ -1821,13 +1843,17 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		USI newlen = (len + 8191) & ~8191;
 		USI newaddr;
 
-		if ((flags & TARGET_MAP_FIXED)
-		    && unmap_pages (sd, &current_cpu->highest_mmapped_page,
-				    addr, newlen) != 0)
-		  abort ();
+		if (flags & TARGET_MAP_FIXED)
+		  unmap_pages (sd, &current_cpu->highest_mmapped_page,
+			       addr, newlen);
+		else if (is_mapped (sd, &current_cpu->highest_mmapped_page,
+				    addr, newlen))
+		  addr = 0;
 
-		newaddr = create_map (sd, &current_cpu->highest_mmapped_page, addr,
-				newlen);
+		newaddr = create_map (sd, &current_cpu->highest_mmapped_page,
+				      addr != 0 || (flags & TARGET_MAP_FIXED)
+				      ? addr : -1,
+				      newlen);
 
 		if (newaddr >= (USI) -8191)
 		  retval = -cb_host_to_target_errno (cb, -(SI) newaddr);
@@ -2114,7 +2140,7 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 
 		mapped_addr
 		  = create_map (sd, &current_cpu->highest_mmapped_page,
-				0, new_len);
+				-1, new_len);
 
 		if (mapped_addr > (USI) -8192)
 		  {
@@ -3263,6 +3289,7 @@ cris_pipe_empty (host_callback *cb,
 {
   int i;
   SIM_CPU *cpu = current_cpu_for_cb_callback;
+  SIM_DESC sd = CPU_STATE (current_cpu_for_cb_callback);
   bfd_byte r10_buf[4];
   int remaining
     = cb->pipe_buffer[writer].size - cb->pipe_buffer[reader].size;

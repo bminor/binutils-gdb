@@ -1,3 +1,20 @@
+2009-01-06  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/traps.c (abort): Define to call sim_io_error.
+	(create_map): Make -1 imply a non-fixed address, not 0.  All
+	callers changed.  Only prefer the next higher unmapped address if
+	the last mapped address is no less than 0x40000000.  Check that
+	the address to be mapped is not already mapped.  Update head
+	comment.
+	(unmap_pages): Don't call abort when recursive call fails, just
+	note and return an error if a page in the range couldn't be unmapped.
+	(cris_bmod_handler, h_supr_set_handler, h_supr_get_handler)
+	(schedule, make_first_thread, cris_pipe_empty): New local variable sd.
+	(cris_break_13_handler) <case TARGET_SYS_mmap2>: Handle
+	non-MAP_FIXED argument overlapping existing map.  For MAP_FIXED,
+	don't abort on page not being mapped.  Handle non-anon filemap
+	with length padded to pagesize.
+
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/sim-if.c (TARGET_AT_NULL, TARGET_AT_PHDR, TARGET_AT_PHENT)
