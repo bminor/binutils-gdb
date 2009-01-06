@@ -1,3 +1,8 @@
+2009-01-06  Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/jalr.s, gas/mips/jalr.l: Add more tests for jalr
+	and jalr.hb.
+
 2009-01-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (December, 2008)
