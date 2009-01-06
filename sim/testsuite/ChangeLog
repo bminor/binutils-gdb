@@ -1,3 +1,8 @@
+2009-01-06  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/c/mmap5.c, sim/cris/c/mmap6.c, sim/cris/c/mmap7.c,
+	sim/cris/c/mmap8.c, sim/cris/c/hellodyn3.c: New tests.
+
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/c/settls1.c: New test.
