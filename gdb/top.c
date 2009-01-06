@@ -1643,9 +1643,6 @@ gdb_init (char *argv0)
 
   /* Run the init function of each source file */
 
-  getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
-  current_directory = gdb_dirbuf;
-
 #ifdef __MSDOS__
   /* Make sure we return to the original directory upon exit, come
      what may, since the OS doesn't do that for us.  */
