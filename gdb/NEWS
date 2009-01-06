@@ -169,6 +169,14 @@ set target-async
   with GDB while the target is running.  "show target-async" displays the
   current state of asynchronous execution of the target.
 
+set tcp auto-retry (on|off)
+show tcp auto-retry
+set tcp connect-timeout
+show tcp connect-timeout
+  These commands allow GDB to retry failed TCP connections to a remote stub
+  with a specified timeout period; this is useful if the stub is launched
+  in parallel with GDB but may not be ready to accept connections immediately.
+
 macro define
 macro list
 macro undef

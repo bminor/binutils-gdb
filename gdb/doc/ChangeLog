@@ -1,3 +1,9 @@
+2009-01-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.texinfo (Remote Configuration): Document new
+	"set/show tcp auto-retry" and "set/show tcp connect-timeout"
+	commands.
+
 2008-12-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdbint.texinfo (gdbarch_cannot_fetch_register): Don't mention

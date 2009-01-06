@@ -14206,6 +14206,36 @@ Select the file used for @code{run} with @code{target
 extended-remote}.  This should be set to a filename valid on the
 target system.  If it is not set, the target will use a default
 filename (e.g.@: the last program run).
+
+@kindex set tcp
+@kindex show tcp
+@item set tcp auto-retry on
+@cindex auto-retry, for remote TCP target
+Enable auto-retry for remote TCP connections.  This is useful if the remote
+debugging agent is launched in parallel with @value{GDBN}; there is a race
+condition because the agent may not become ready to accept the connection
+before @value{GDBN} attempts to connect.  When auto-retry is
+enabled, if the initial attempt to connect fails, @value{GDBN} reattempts
+to establish the connection using the timeout specified by 
+@code{set tcp connect-timeout}.
+
+@item set tcp auto-retry off
+Do not auto-retry failed TCP connections.
+
+@item show tcp auto-retry
+Show the current auto-retry setting.
+
+@item set tcp connect-timeout @var{seconds}
+@cindex connection timeout, for remote TCP target
+@cindex timeout, for remote target connection
+Set the timeout for establishing a TCP connection to the remote target to
+@var{seconds}.  The timeout affects both polling to retry failed connections 
+(enabled by @code{set tcp auto-retry on}) and waiting for connections
+that are merely slow to complete, and represents an approximate cumulative
+value.
+
+@item show tcp connect-timeout
+Show the current connection timeout setting.
 @end table
 
 @cindex remote packets, enabling and disabling

@@ -22,6 +22,9 @@
 #include "serial.h"
 #include "ser-base.h"
 #include "ser-tcp.h"
+#include "gdbcmd.h"
+#include "cli/cli-decode.h"
+#include "cli/cli-setshow.h"
 
 #include <sys/types.h>
 
@@ -49,6 +52,7 @@
 
 #include <signal.h>
 #include "gdb_string.h"
+#include "gdb_select.h"
 
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
@@ -56,10 +60,93 @@ typedef int socklen_t;
 
 void _initialize_ser_tcp (void);
 
-/* seconds to wait for connect */
-#define TIMEOUT 15
+/* For "set tcp" and "show tcp".  */
+
+static struct cmd_list_element *tcp_set_cmdlist;
+static struct cmd_list_element *tcp_show_cmdlist;
+
+/* Whether to auto-retry refused connections.  */
+
+static int tcp_auto_retry = 1;
+
+/* Timeout period for connections, in seconds.  */
+
+static int tcp_retry_limit = 15;
+
 /* how many times per second to poll deprecated_ui_loop_hook */
-#define POLL_INTERVAL 2
+
+#define POLL_INTERVAL 5
+
+/* Helper function to wait a while.  If SCB is non-null, wait on its
+   file descriptor.  Otherwise just wait on a timeout, updating *POLLS.
+   Returns -1 on timeout or interrupt, otherwise the value of select.  */
+
+static int
+wait_for_connect (struct serial *scb, int *polls)
+{
+  struct timeval t;
+  int n;
+
+  /* While we wait for the connect to complete, 
+     poll the UI so it can update or the user can 
+     interrupt.  */
+  if (deprecated_ui_loop_hook && deprecated_ui_loop_hook (0))
+    {
+      errno = EINTR;
+      return -1;
+    }
+
+  /* Check for timeout.  */
+  if (*polls > tcp_retry_limit * POLL_INTERVAL)
+    {
+      errno = ETIMEDOUT;
+      return -1;
+    }
+
+  /* Back off to polling once per second after the first POLL_INTERVAL
+     polls.  */
+  if (*polls < POLL_INTERVAL)
+    {
+      t.tv_sec = 0;
+      t.tv_usec = 1000000 / POLL_INTERVAL;
+    }
+  else
+    {
+      t.tv_sec = 1;
+      t.tv_usec = 0;
+    }
+
+  if (scb)
+    {
+      fd_set rset, wset, eset;
+      FD_ZERO (&rset);
+      FD_SET (scb->fd, &rset);
+      wset = rset;
+      eset = rset;
+	  
+      /* POSIX systems return connection success or failure by signalling
+	 wset.  Windows systems return success in wset and failure in
+	 eset.
+     
+	 We must call select here, rather than gdb_select, because
+	 the serial structure has not yet been initialized - the
+	 MinGW select wrapper will not know that this FD refers
+	 to a socket.  */
+      n = select (scb->fd + 1, &rset, &wset, &eset, &t);
+    }
+  else
+    /* Use gdb_select here, since we have no file descriptors, and on
+       Windows, plain select doesn't work in that case.  */
+    n = gdb_select (0, NULL, NULL, NULL, &t);
+
+  /* If we didn't time out, only count it as one poll.  */
+  if (n > 0 || *polls < POLL_INTERVAL)
+    (*polls)++;
+  else
+    (*polls) += POLL_INTERVAL;
+
+  return n;
+}
 
 /* Open a tcp socket */
 
@@ -76,6 +163,7 @@ net_open (struct serial *scb, const char *name)
 #else
   int ioarg;
 #endif
+  int polls = 0;
 
   use_udp = 0;
   if (strncmp (name, "udp:", 4) == 0)
@@ -108,6 +196,13 @@ net_open (struct serial *scb, const char *name)
       return -1;
     }
 
+  sockaddr.sin_family = PF_INET;
+  sockaddr.sin_port = htons (port);
+  memcpy (&sockaddr.sin_addr.s_addr, hostent->h_addr,
+	  sizeof (struct in_addr));
+
+ retry:
+
   if (use_udp)
     scb->fd = socket (PF_INET, SOCK_DGRAM, 0);
   else
@@ -116,11 +211,6 @@ net_open (struct serial *scb, const char *name)
   if (scb->fd < 0)
     return -1;
   
-  sockaddr.sin_family = PF_INET;
-  sockaddr.sin_port = htons (port);
-  memcpy (&sockaddr.sin_addr.s_addr, hostent->h_addr,
-	  sizeof (struct in_addr));
-
   /* set socket nonblocking */
   ioarg = 1;
   ioctl (scb->fd, FIONBIO, &ioarg);
@@ -128,68 +218,51 @@ net_open (struct serial *scb, const char *name)
   /* Use Non-blocking connect.  connect() will return 0 if connected already. */
   n = connect (scb->fd, (struct sockaddr *) &sockaddr, sizeof (sockaddr));
 
-  if (n < 0
+  if (n < 0)
+    {
 #ifdef USE_WIN32API
-      /* Under Windows, calling "connect" with a non-blocking socket
-	 results in WSAEWOULDBLOCK, not WSAEINPROGRESS.  */
-      && WSAGetLastError() != WSAEWOULDBLOCK
+      int err = WSAGetLastError();
 #else
-      && errno != EINPROGRESS
+      int err = errno;
 #endif
-      )
-    {
+
+      /* Maybe we're waiting for the remote target to become ready to
+	 accept connections.  */
+      if (tcp_auto_retry
 #ifdef USE_WIN32API
-      errno = WSAGetLastError();
+	  && err == WSAECONNREFUSED
+#else
+	  && err == ECONNREFUSED
 #endif
-      net_close (scb);
-      return -1;
-    }
+	  && wait_for_connect (NULL, &polls) >= 0)
+	{
+	  close (scb->fd);
+	  goto retry;
+	}
 
-  if (n)
-    {
+      if (
+#ifdef USE_WIN32API
+	  /* Under Windows, calling "connect" with a non-blocking socket
+	     results in WSAEWOULDBLOCK, not WSAEINPROGRESS.  */
+	  err != WSAEWOULDBLOCK
+#else
+	  err != EINPROGRESS
+#endif
+	  )
+	{
+	  errno = err;
+	  net_close (scb);
+	  return -1;
+	}
+
       /* looks like we need to wait for the connect */
-      struct timeval t;
-      fd_set rset, wset, eset;
-      int polls = 0;
-      FD_ZERO (&rset);
-
       do 
 	{
-	  /* While we wait for the connect to complete, 
-	     poll the UI so it can update or the user can 
-	     interrupt.  */
-	  if (deprecated_ui_loop_hook)
-	    {
-	      if (deprecated_ui_loop_hook (0))
-		{
-		  errno = EINTR;
-		  net_close (scb);
-		  return -1;
-		}
-	    }
-	  
-	  FD_SET (scb->fd, &rset);
-	  wset = rset;
-	  eset = rset;
-	  t.tv_sec = 0;
-	  t.tv_usec = 1000000 / POLL_INTERVAL;
-	  
-	  /* POSIX systems return connection success or failure by signalling
-	     wset.  Windows systems return success in wset and failure in
-	     eset.
-
-	     We must call select here, rather than gdb_select, because
-	     the serial structure has not yet been initialized - the
-	     MinGW select wrapper will not know that this FD refers
-	     to a socket.  */
-	  n = select (scb->fd + 1, &rset, &wset, &eset, &t);
-	  polls++;
+	  n = wait_for_connect (scb, &polls);
 	} 
-      while (n == 0 && polls <= TIMEOUT * POLL_INTERVAL);
-      if (n < 0 || polls > TIMEOUT * POLL_INTERVAL)
+      while (n == 0);
+      if (n < 0)
 	{
-	  if (polls > TIMEOUT * POLL_INTERVAL)
-	    errno = ETIMEDOUT;
 	  net_close (scb);
 	  return -1;
 	}
@@ -207,6 +280,18 @@ net_open (struct serial *scb, const char *name)
     res = getsockopt (scb->fd, SOL_SOCKET, SO_ERROR, (void *) &err, &len);
     if (res < 0 || err)
       {
+	/* Maybe the target still isn't ready to accept the connection.  */
+	if (tcp_auto_retry
+#ifdef USE_WIN32API
+	    && err == WSAECONNREFUSED
+#else
+	    && err == ECONNREFUSED
+#endif
+	    && wait_for_connect (NULL, &polls) >= 0)
+	  {
+	    close (scb->fd);
+	    goto retry;
+	  }
 	if (err)
 	  errno = err;
 	net_close (scb);
@@ -264,13 +349,27 @@ ser_tcp_send_break (struct serial *scb)
   return (serial_write (scb, "\377\363", 2));
 }
 
+/* Support for "set tcp" and "show tcp" commands.  */
+
+static void
+set_tcp_cmd (char *args, int from_tty)
+{
+  help_list (tcp_set_cmdlist, "set tcp ", -1, gdb_stdout);
+}
+
+static void
+show_tcp_cmd (char *args, int from_tty)
+{
+  help_list (tcp_show_cmdlist, "show tcp ", -1, gdb_stdout);
+}
+
+
 void
 _initialize_ser_tcp (void)
 {
 #ifdef USE_WIN32API
   /* Do nothing; the TCP serial operations will be initialized in
      ser-mingw.c.  */
-  return;
 #else
   struct serial_ops *ops;
   ops = XMALLOC (struct serial_ops);
@@ -297,4 +396,29 @@ _initialize_ser_tcp (void)
   ops->write_prim = net_write_prim;
   serial_add_interface (ops);
 #endif /* USE_WIN32API */
+
+  add_prefix_cmd ("tcp", class_maintenance, set_tcp_cmd, _("\
+TCP protocol specific variables\n\
+Configure variables specific to remote TCP connections"),
+		  &tcp_set_cmdlist, "set tcp ",
+		  0 /* allow-unknown */, &setlist);
+  add_prefix_cmd ("tcp", class_maintenance, show_tcp_cmd, _("\
+TCP protocol specific variables\n\
+Configure variables specific to remote TCP connections"),
+		  &tcp_show_cmdlist, "show tcp ",
+		  0 /* allow-unknown */, &showlist);
+
+  add_setshow_boolean_cmd ("auto-retry", class_obscure,
+			   &tcp_auto_retry, _("\
+Set auto-retry on socket connect"), _("\
+Show auto-retry on socket connect"), 
+			   NULL, NULL, NULL,
+			   &tcp_set_cmdlist, &tcp_show_cmdlist);
+
+  add_setshow_uinteger_cmd ("connect-timeout", class_obscure,
+			    &tcp_retry_limit, _("\
+Set timeout limit for socket connection"), _("\
+Show timeout limit for socket connection"),
+			   NULL, NULL, NULL,
+			   &tcp_set_cmdlist, &tcp_show_cmdlist);
 }

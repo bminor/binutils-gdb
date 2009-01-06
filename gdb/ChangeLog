@@ -1,3 +1,17 @@
+2009-01-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* ser-tcp.c: Adjust includes.
+	(tcp_set_cmdlist, tcp_show_cmdlist): Declare.
+	(tcp_auto_retry, tcp_retry_limit): Declare.
+	(TIMEOUT): Remove, in favor of tcp_retry_limit.
+	(POLL_INTERVAL): Increase to 5, in favor of backoff logic.
+	(wait_for_connect): New function.
+	(net_open): Use it.  Add auto-retry logic.
+	(set_tcp_cmd, show_tcp_cmd): New functions.
+	(_initialize_ser_tcp): Initialize new "set/show tcp auto-retry"
+	and "set/show tcp connect-timeout" commands.
+	* NEWS: Document new commands.
+
 2009-01-05  Tom Tromey  <tromey@redhat.com>
 
 	* python/python-internal.h (Py_ssize_t): Define as int.
