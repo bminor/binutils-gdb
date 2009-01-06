@@ -523,6 +523,20 @@ new_tty_prefork (const char *ttyname)
   inferior_thisrun_terminal = ttyname;
 }
 
+
+/* If RESULT, assumed to be the return value from a system call, is
+   negative, print the error message indicated by errno and exit.
+   MSG should identify the operation that failed.  */
+static void
+check_syscall (const char *msg, int result)
+{
+  if (result < 0)
+    {
+      print_sys_errmsg (msg, errno);
+      _exit (1);
+    }
+}
+
 void
 new_tty (void)
 {
@@ -549,27 +563,23 @@ new_tty (void)
 
   /* Now open the specified new terminal.  */
   tty = open (inferior_thisrun_terminal, O_RDWR | O_NOCTTY);
-  if (tty == -1)
-    {
-      print_sys_errmsg (inferior_thisrun_terminal, errno);
-      _exit (1);
-    }
+  check_syscall (inferior_thisrun_terminal, tty);
 
   /* Avoid use of dup2; doesn't exist on all systems.  */
   if (tty != 0)
     {
       close (0);
-      dup (tty);
+      check_syscall ("dup'ing tty into fd 0", dup (tty));
     }
   if (tty != 1)
     {
       close (1);
-      dup (tty);
+      check_syscall ("dup'ing tty into fd 1", dup (tty));
     }
   if (tty != 2)
     {
       close (2);
-      dup (tty);
+      check_syscall ("dup'ing tty into fd 2", dup (tty));
     }
 
 #ifdef TIOCSCTTY

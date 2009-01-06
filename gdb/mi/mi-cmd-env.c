@@ -79,7 +79,10 @@ mi_cmd_env_pwd (char *command, char **argv, int argc)
      
   /* Otherwise the mi level is 2 or higher.  */
 
-  getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
+  if (! getcwd (gdb_dirbuf, sizeof (gdb_dirbuf)))
+    error (_("mi_cmd_env_pwd: error finding name of working directory: %s"),
+           safe_strerror (errno));
+    
   ui_out_field_string (uiout, "cwd", gdb_dirbuf);
 }
 

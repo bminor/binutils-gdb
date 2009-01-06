@@ -862,10 +862,16 @@ internal_vproblem (struct internal_problem *problem,
       case 1:
 	dejavu = 2;
 	fputs_unfiltered (msg, gdb_stderr);
-	abort ();	/* NOTE: GDB has only three calls to abort().  */
+	abort ();	/* NOTE: GDB has only four calls to abort().  */
       default:
 	dejavu = 3;
-	write (STDERR_FILENO, msg, sizeof (msg));
+        /* Newer GLIBC versions put the warn_unused_result attribute
+           on write, but this is one of those rare cases where
+           ignoring the return value is correct.  Casting to (void)
+           does not fix this problem.  This is the solution suggested
+           at http://gcc.gnu.org/bugzilla/show_bug.cgi?id=25509.  */
+	if (write (STDERR_FILENO, msg, sizeof (msg)) != sizeof (msg))
+          abort (); /* NOTE: GDB has only four calls to abort().  */
 	exit (1);
       }
   }
@@ -930,7 +936,7 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
   if (quit_p)
     {
       if (dump_core_p)
-	abort ();		/* NOTE: GDB has only three calls to abort().  */
+	abort ();		/* NOTE: GDB has only four calls to abort().  */
       else
 	exit (1);
     }
@@ -940,7 +946,7 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
 	{
 #ifdef HAVE_WORKING_FORK
 	  if (fork () == 0)
-	    abort ();		/* NOTE: GDB has only three calls to abort().  */
+	    abort ();		/* NOTE: GDB has only four calls to abort().  */
 #endif
 	}
     }

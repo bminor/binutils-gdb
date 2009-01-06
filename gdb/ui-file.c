@@ -481,7 +481,9 @@ stdio_file_write (struct ui_file *file, const char *buf, long length_buf)
   if (stdio->magic != &stdio_file_magic)
     internal_error (__FILE__, __LINE__,
 		    _("stdio_file_write: bad magic number"));
-  fwrite (buf, length_buf, 1, stdio->file);
+  /* Calling error crashes when we are called from the exception framework.  */
+  if (fwrite (buf, length_buf, 1, stdio->file))
+    ;
 }
 
 static void
@@ -491,7 +493,9 @@ stdio_file_fputs (const char *linebuffer, struct ui_file *file)
   if (stdio->magic != &stdio_file_magic)
     internal_error (__FILE__, __LINE__,
 		    _("stdio_file_fputs: bad magic number"));
-  fputs (linebuffer, stdio->file);
+  /* Calling error crashes when we are called from the exception framework.  */
+  if (fputs (linebuffer, stdio->file))
+    ;
 }
 
 static int

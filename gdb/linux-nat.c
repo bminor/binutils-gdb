@@ -3684,8 +3684,10 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       if ((procfile = fopen (fname1, "r")) != NULL)
 	{
 	  struct cleanup *cleanup = make_cleanup_fclose (procfile);
-	  fgets (buffer, sizeof (buffer), procfile);
-	  printf_filtered ("cmdline = '%s'\n", buffer);
+          if (fgets (buffer, sizeof (buffer), procfile))
+            printf_filtered ("cmdline = '%s'\n", buffer);
+          else
+            warning (_("unable to read '%s'"), fname1);
 	  do_cleanups (cleanup);
 	}
       else
