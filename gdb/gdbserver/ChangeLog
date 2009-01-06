@@ -1,6 +1,7 @@
-2008-12-13  Doug Evans  <dje@google.com>
+2009-01-05  Doug Evans  <dje@google.com>
 
 	* linux-low.c (linux_attach_lwp): Add some comments/fixmes.
+	(handle_extended_wait): Improve comment.
 
 2008-12-13  Doug Evans  <dje@google.com>
 

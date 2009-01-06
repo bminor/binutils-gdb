@@ -180,7 +180,7 @@ handle_extended_wait (struct process_info *event_child, int wstat)
 
       /* Normally we will get the pending SIGSTOP.  But in some cases
 	 we might get another signal delivered to the group first.
-         If we do, be sure not to lose it.  */
+	 If we do get another signal, be sure not to lose it.  */
       if (WSTOPSIG (status) == SIGSTOP)
 	{
 	  if (stopping_threads)
