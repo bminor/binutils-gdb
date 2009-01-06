@@ -22,7 +22,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 38 dc 01       	aesenc \(%rcx\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 3a 44 c1 08    	pclmulqdq \$0x8,%xmm1,%xmm0
 [ 	]*[a-f0-9]+:	c4 e2 79 dc 11       	vaesenc \(%rcx\),%xmm0,%xmm2
-[ 	]*[a-f0-9]+:	c4 e3 cd 69 fc 20    	vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7
+[ 	]*[a-f0-9]+:	c4 e2 c9 98 d4       	vfmadd132pd %xmm4,%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	0f 38 f0 19          	movbe  \(%rcx\),%ebx
 [ 	]*[a-f0-9]+:	66 0f 38 80 19       	invept \(%rcx\),%rbx
 [ 	]*[a-f0-9]+:	0f 0f dc b7          	pmulhrw %mm4,%mm3

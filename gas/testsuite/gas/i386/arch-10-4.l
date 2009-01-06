@@ -54,7 +54,7 @@ GAS LISTING .*
 [ 	]*31[ 	]+\# AES \+ AVX
 [ 	]*32[ 	]+vaesenc  \(%ecx\),%xmm0,%xmm2
 [ 	]*33[ 	]+\# FMA
-[ 	]*34[ 	]+vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7
+[ 	]*34[ 	]+vfmadd132pd %xmm4,%xmm6,%xmm2
 [ 	]*35[ 	]+\# MOVBE
 [ 	]*36[ 	]+movbe   \(%ecx\),%ebx
 [ 	]*37[ 	]+\# EPT

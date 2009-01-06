@@ -31,7 +31,7 @@ pclmulqdq $8,%xmm1,%xmm0
 # AES + AVX
 vaesenc  (%rcx),%xmm0,%xmm2
 # FMA
-vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7
+vfmadd132pd %xmm4,%xmm6,%xmm2
 # MOVBE
 movbe   (%rcx),%ebx
 # EPT

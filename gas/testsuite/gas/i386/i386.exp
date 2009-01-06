@@ -144,6 +144,8 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "opts-intel"
     run_dump_test "sse2avx-opts"
     run_dump_test "sse2avx-opts-intel"
+    run_dump_test "fma"
+    run_dump_test "fma-intel"
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.
@@ -303,6 +305,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-sse2avx-opts-intel"
     run_dump_test "x86-64-avx-swap"
     run_dump_test "x86-64-avx-swap-intel"
+    run_dump_test "x86-64-fma"
+    run_dump_test "x86-64-fma-intel"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]
