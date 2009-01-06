@@ -475,11 +475,11 @@ decode_r8c()
 
   /** 0111 1110 0101 srcx  BNAND src */
 
-  BIT_OPC (srcx, !b & carry);
+  BIT_OPC (srcx, (!b) & carry);
 
   /** 0111 1110 0111 srcx  BNOR src */
 
-  BIT_OPC (srcx, !b | carry);
+  BIT_OPC (srcx, (!b) | carry);
 
   /** 0111 1110 1010 dest  BNOT:G dest */
 

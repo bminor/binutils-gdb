@@ -642,13 +642,13 @@ next_opcode:
 
   prefix (0, 0, 0);
   sc = decode_src23 (sss, ss, 1);
-  BIT_OPC (sc, bit, !b & carry);
+  BIT_OPC (sc, bit, (!b) & carry);
 
   /** 0000 0001 1101 sss0 ss11 0bit	BNOR src */
 
   prefix (0, 0, 0);
   sc = decode_src23 (sss, ss, 1);
-  BIT_OPC (sc, bit, !b | carry);
+  BIT_OPC (sc, bit, (!b) | carry);
 
   /** 1101 ddd0 dd01 1bit		BNOT dest */
 
