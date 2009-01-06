@@ -1,3 +1,8 @@
+2009-01-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* callback.c (os_error): Mark as being a noreturn function.
+	* sim-io.h (sim_io_error): Similar for sim_io_error.
+
 2008-11-12  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* aclocal.m4:  Fix underquoting of function names.

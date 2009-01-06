@@ -75,7 +75,9 @@ void sim_io_evprintf (SIM_DESC sd, const char *fmt, va_list ap);
 
 void sim_io_error (SIM_DESC sd,
 		   const char *fmt,
-		   ...) __attribute__ ((format (printf, 2, 3)));
+		   ...)
+  __attribute__ ((format (printf, 2, 3)))
+  __attribute__ ((__noreturn__));
 
 void sim_io_poll_quit (SIM_DESC sd);
 

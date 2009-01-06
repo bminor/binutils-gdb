@@ -91,7 +91,11 @@ static int os_get_errno PARAMS ((host_callback *));
 static int os_close PARAMS ((host_callback *, int));
 static void os_vprintf_filtered PARAMS ((host_callback *, const char *, va_list));
 static void os_evprintf_filtered PARAMS ((host_callback *, const char *, va_list));
-static void os_error PARAMS ((host_callback *, const char *, ...));
+static void os_error PARAMS ((host_callback *, const char *, ...))
+#ifdef __GNUC__
+  __attribute__ ((__noreturn__))
+#endif
+  ;
 static int fdmap PARAMS ((host_callback *, int));
 static int fdbad PARAMS ((host_callback *, int));
 static int wrap PARAMS ((host_callback *, int));
