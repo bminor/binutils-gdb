@@ -273,6 +273,11 @@ _start:
 # Tests for op mem256, ymm
 	vlddqu (%ecx),%ymm4
 
+# Tests for op ymm, mem256
+	vmovntdq %ymm4,(%ecx)
+	vmovntpd %ymm4,(%ecx)
+	vmovntps %ymm4,(%ecx)
+
 # Tests for op imm8, ymm/mem256, ymm, ymm
 	vblendpd $7,%ymm4,%ymm6,%ymm2
 	vblendpd $7,(%ecx),%ymm6,%ymm2
@@ -1808,6 +1813,14 @@ _start:
 # Tests for op mem256, ymm
 	vlddqu ymm4,YMMWORD PTR [ecx]
 	vlddqu ymm4,[ecx]
+
+# Tests for op ymm, mem256
+	vmovntdq YMMWORD PTR [ecx],ymm4
+	vmovntdq [ecx],ymm4
+	vmovntpd YMMWORD PTR [ecx],ymm4
+	vmovntpd [ecx],ymm4
+	vmovntps YMMWORD PTR [ecx],ymm4
+	vmovntps [ecx],ymm4
 
 # Tests for op imm8, ymm/mem256, ymm, ymm
 	vblendpd ymm2,ymm6,ymm4,7

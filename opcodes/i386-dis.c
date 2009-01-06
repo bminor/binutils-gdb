@@ -1066,8 +1066,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VEX_LEN_17_M_0	(VEX_LEN_16_P_2 + 1)
 #define VEX_LEN_2A_P_1	(VEX_LEN_17_M_0 + 1)
 #define VEX_LEN_2A_P_3	(VEX_LEN_2A_P_1 + 1)
-#define VEX_LEN_2B_M_0	(VEX_LEN_2A_P_3 + 1)
-#define VEX_LEN_2C_P_1	(VEX_LEN_2B_M_0 + 1)
+#define VEX_LEN_2C_P_1	(VEX_LEN_2A_P_3 + 1)
 #define VEX_LEN_2C_P_3	(VEX_LEN_2C_P_1 + 1)
 #define VEX_LEN_2D_P_1	(VEX_LEN_2C_P_3 + 1)
 #define VEX_LEN_2D_P_3	(VEX_LEN_2D_P_1 + 1)
@@ -1153,8 +1152,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VEX_LEN_E3_P_2	(VEX_LEN_E2_P_2 + 1)
 #define VEX_LEN_E4_P_2	(VEX_LEN_E3_P_2 + 1)
 #define VEX_LEN_E5_P_2	(VEX_LEN_E4_P_2 + 1)
-#define VEX_LEN_E7_P_2_M_0	(VEX_LEN_E5_P_2 + 1)
-#define VEX_LEN_E8_P_2	(VEX_LEN_E7_P_2_M_0 + 1)
+#define VEX_LEN_E8_P_2	(VEX_LEN_E5_P_2 + 1)
 #define VEX_LEN_E9_P_2	(VEX_LEN_E8_P_2 + 1)
 #define VEX_LEN_EA_P_2	(VEX_LEN_E9_P_2 + 1)
 #define VEX_LEN_EB_P_2	(VEX_LEN_EA_P_2 + 1)
@@ -7971,12 +7969,6 @@ static const struct dis386 vex_len_table[][2] = {
     { "(bad)",		{ XX } },
   },
 
-  /* VEX_LEN_2B_M_0 */
-  {
-    { "vmovntpX",	{ Mx, XM } },
-    { "(bad)",		{ XX } },
-  },
-
   /* VEX_LEN_2C_P_1 */
   {
     { "vcvttss2siY",	{ Gv, EXd } },
@@ -8490,12 +8482,6 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_E5_P_2 */
   {
     { "vpmulhw",	{ XM, Vex128, EXx } },
-    { "(bad)",		{ XX } },
-  },
-
-  /* VEX_LEN_E7_P_2_M_0 */
-  {
-    { "vmovntdq",	{ Mx, XM } },
     { "(bad)",		{ XX } },
   },
 
@@ -9356,7 +9342,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_VEX_2B */
-    { VEX_LEN_TABLE (VEX_LEN_2B_M_0) },
+    { "vmovntpX",	{ Mx, XM } },
     { "(bad)",		{ XX } },
   },
   {
@@ -9431,7 +9417,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_VEX_E7_PREFIX_2 */
-    { VEX_LEN_TABLE (VEX_LEN_E7_P_2_M_0) },
+    { "vmovntdq",	{ Mx, XM } },
     { "(bad)",		{ XX } },
   },
   {

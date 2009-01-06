@@ -1,3 +1,16 @@
+2009-01-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (December, 2008)
+	* i386-dis.c (VEX_LEN_2B_M_0): Removed.
+	(VEX_LEN_E7_P_2_M_0): Likewise.
+	(VEX_LEN_2C_P_1): Updated.
+	(VEX_LEN_E8_P_2): Likewise.
+	(vex_len_table): Remove VEX_LEN_2B_M_0 and VEX_LEN_E7_P_2_M_0.
+	(mod_table): Likewise.
+
+	* i386-opc.tbl: Add 256bit vmovntdq, vmovntpd and vmovntps.
+	* i386-tbl.h: Regenerated.
+
 2009-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (process_copyright): Update for 2009.

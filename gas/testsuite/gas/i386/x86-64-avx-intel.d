@@ -260,6 +260,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e f4       	vtestps ymm6,ymm4
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e 21       	vtestps ymm4,YMMWORD PTR \[rcx\]
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu ymm4,\[rcx\]
+[ 	]*[a-f0-9]+:	c5 fd e7 21          	vmovntdq YMMWORD PTR \[rcx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fd 2b 21          	vmovntpd YMMWORD PTR \[rcx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fc 2b 21          	vmovntps YMMWORD PTR \[rcx\],ymm4
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d d4 07    	vblendpd ymm2,ymm6,ymm4,0x7
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d 11 07    	vblendpd ymm2,ymm6,YMMWORD PTR \[rcx\],0x7
 [ 	]*[a-f0-9]+:	c4 e3 4d 0c d4 07    	vblendps ymm2,ymm6,ymm4,0x7
@@ -1201,26 +1204,26 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 43 7d 19 87 99 00 00 00 07 	vextractf128 XMMWORD PTR \[r15\+0x99\],ymm8,0x7
 [ 	]*[a-f0-9]+:	c4 43 3d 06 bf 99 00 00 00 07 	vperm2f128 ymm15,ymm8,YMMWORD PTR \[r15\+0x99\],0x7
 [ 	]*[a-f0-9]+:	c4 43 1d 4b b7 99 00 00 00 80 	vblendvpd ymm14,ymm12,YMMWORD PTR \[r15\+0x99\],ymm8
-[ 	]*[a-f0-9]+:	c5 f8 ae 15 99 00 00 00 	vldmxcsr DWORD PTR \[rip\+0x99\]        # 17bc <_start\+0x17bc>
-[ 	]*[a-f0-9]+:	c5 79 6f 05 99 00 00 00 	vmovdqa xmm8,XMMWORD PTR \[rip\+0x99\]        # 17c4 <_start\+0x17c4>
-[ 	]*[a-f0-9]+:	c5 79 7f 05 99 00 00 00 	vmovdqa XMMWORD PTR \[rip\+0x99\],xmm8        # 17cc <_start\+0x17cc>
-[ 	]*[a-f0-9]+:	c5 79 7e 05 99 00 00 00 	vmovd  DWORD PTR \[rip\+0x99\],xmm8        # 17d4 <_start\+0x17d4>
-[ 	]*[a-f0-9]+:	c5 7b 2d 05 99 00 00 00 	vcvtsd2si r8d,QWORD PTR \[rip\+0x99\]        # 17dc <_start\+0x17dc>
-[ 	]*[a-f0-9]+:	c5 7e e6 05 99 00 00 00 	vcvtdq2pd ymm8,XMMWORD PTR \[rip\+0x99\]        # 17e4 <_start\+0x17e4>
-[ 	]*[a-f0-9]+:	c5 7d 5a 05 99 00 00 00 	vcvtpd2ps xmm8,YMMWORD PTR \[rip\+0x99\]        # 17ec <_start\+0x17ec>
-[ 	]*[a-f0-9]+:	c5 39 e0 3d 99 00 00 00 	vpavgb xmm15,xmm8,XMMWORD PTR \[rip\+0x99\]        # 17f4 <_start\+0x17f4>
-[ 	]*[a-f0-9]+:	c4 63 79 df 05 99 00 00 00 07 	vaeskeygenassist xmm8,XMMWORD PTR \[rip\+0x99\],0x7        # 17fe <_start\+0x17fe>
-[ 	]*[a-f0-9]+:	c4 63 79 14 05 99 00 00 00 07 	vpextrb BYTE PTR \[rip\+0x99\],xmm8,0x7        # 1808 <_start\+0x1808>
-[ 	]*[a-f0-9]+:	c5 3b 2a 3d 99 00 00 00 	vcvtsi2sd xmm15,xmm8,DWORD PTR \[rip\+0x99\]        # 1810 <_start\+0x1810>
-[ 	]*[a-f0-9]+:	c4 63 19 4a 35 99 00 00 00 80 	vblendvps xmm14,xmm12,XMMWORD PTR \[rip\+0x99\],xmm8        # 181a <_start\+0x181a>
-[ 	]*[a-f0-9]+:	c4 63 39 20 3d 99 00 00 00 07 	vpinsrb xmm15,xmm8,BYTE PTR \[rip\+0x99\],0x7        # 1824 <_start\+0x1824>
-[ 	]*[a-f0-9]+:	c5 7d 6f 05 99 00 00 00 	vmovdqa ymm8,YMMWORD PTR \[rip\+0x99\]        # 182c <_start\+0x182c>
-[ 	]*[a-f0-9]+:	c5 7d 7f 05 99 00 00 00 	vmovdqa YMMWORD PTR \[rip\+0x99\],ymm8        # 1834 <_start\+0x1834>
-[ 	]*[a-f0-9]+:	c4 62 3d 0d 3d 99 00 00 00 	vpermilpd ymm15,ymm8,YMMWORD PTR \[rip\+0x99\]        # 183d <_start\+0x183d>
-[ 	]*[a-f0-9]+:	c4 63 7d 09 05 99 00 00 00 07 	vroundpd ymm8,YMMWORD PTR \[rip\+0x99\],0x7        # 1847 <_start\+0x1847>
-[ 	]*[a-f0-9]+:	c4 63 7d 19 05 99 00 00 00 07 	vextractf128 XMMWORD PTR \[rip\+0x99\],ymm8,0x7        # 1851 <_start\+0x1851>
-[ 	]*[a-f0-9]+:	c4 63 3d 06 3d 99 00 00 00 07 	vperm2f128 ymm15,ymm8,YMMWORD PTR \[rip\+0x99\],0x7        # 185b <_start\+0x185b>
-[ 	]*[a-f0-9]+:	c4 63 1d 4b 35 99 00 00 00 80 	vblendvpd ymm14,ymm12,YMMWORD PTR \[rip\+0x99\],ymm8        # 1865 <_start\+0x1865>
+[ 	]*[a-f0-9]+:	c5 f8 ae 15 99 00 00 00 	vldmxcsr DWORD PTR \[rip\+0x99\]        # 17c8 <_start\+0x17c8>
+[ 	]*[a-f0-9]+:	c5 79 6f 05 99 00 00 00 	vmovdqa xmm8,XMMWORD PTR \[rip\+0x99\]        # 17d0 <_start\+0x17d0>
+[ 	]*[a-f0-9]+:	c5 79 7f 05 99 00 00 00 	vmovdqa XMMWORD PTR \[rip\+0x99\],xmm8        # 17d8 <_start\+0x17d8>
+[ 	]*[a-f0-9]+:	c5 79 7e 05 99 00 00 00 	vmovd  DWORD PTR \[rip\+0x99\],xmm8        # 17e0 <_start\+0x17e0>
+[ 	]*[a-f0-9]+:	c5 7b 2d 05 99 00 00 00 	vcvtsd2si r8d,QWORD PTR \[rip\+0x99\]        # 17e8 <_start\+0x17e8>
+[ 	]*[a-f0-9]+:	c5 7e e6 05 99 00 00 00 	vcvtdq2pd ymm8,XMMWORD PTR \[rip\+0x99\]        # 17f0 <_start\+0x17f0>
+[ 	]*[a-f0-9]+:	c5 7d 5a 05 99 00 00 00 	vcvtpd2ps xmm8,YMMWORD PTR \[rip\+0x99\]        # 17f8 <_start\+0x17f8>
+[ 	]*[a-f0-9]+:	c5 39 e0 3d 99 00 00 00 	vpavgb xmm15,xmm8,XMMWORD PTR \[rip\+0x99\]        # 1800 <_start\+0x1800>
+[ 	]*[a-f0-9]+:	c4 63 79 df 05 99 00 00 00 07 	vaeskeygenassist xmm8,XMMWORD PTR \[rip\+0x99\],0x7        # 180a <_start\+0x180a>
+[ 	]*[a-f0-9]+:	c4 63 79 14 05 99 00 00 00 07 	vpextrb BYTE PTR \[rip\+0x99\],xmm8,0x7        # 1814 <_start\+0x1814>
+[ 	]*[a-f0-9]+:	c5 3b 2a 3d 99 00 00 00 	vcvtsi2sd xmm15,xmm8,DWORD PTR \[rip\+0x99\]        # 181c <_start\+0x181c>
+[ 	]*[a-f0-9]+:	c4 63 19 4a 35 99 00 00 00 80 	vblendvps xmm14,xmm12,XMMWORD PTR \[rip\+0x99\],xmm8        # 1826 <_start\+0x1826>
+[ 	]*[a-f0-9]+:	c4 63 39 20 3d 99 00 00 00 07 	vpinsrb xmm15,xmm8,BYTE PTR \[rip\+0x99\],0x7        # 1830 <_start\+0x1830>
+[ 	]*[a-f0-9]+:	c5 7d 6f 05 99 00 00 00 	vmovdqa ymm8,YMMWORD PTR \[rip\+0x99\]        # 1838 <_start\+0x1838>
+[ 	]*[a-f0-9]+:	c5 7d 7f 05 99 00 00 00 	vmovdqa YMMWORD PTR \[rip\+0x99\],ymm8        # 1840 <_start\+0x1840>
+[ 	]*[a-f0-9]+:	c4 62 3d 0d 3d 99 00 00 00 	vpermilpd ymm15,ymm8,YMMWORD PTR \[rip\+0x99\]        # 1849 <_start\+0x1849>
+[ 	]*[a-f0-9]+:	c4 63 7d 09 05 99 00 00 00 07 	vroundpd ymm8,YMMWORD PTR \[rip\+0x99\],0x7        # 1853 <_start\+0x1853>
+[ 	]*[a-f0-9]+:	c4 63 7d 19 05 99 00 00 00 07 	vextractf128 XMMWORD PTR \[rip\+0x99\],ymm8,0x7        # 185d <_start\+0x185d>
+[ 	]*[a-f0-9]+:	c4 63 3d 06 3d 99 00 00 00 07 	vperm2f128 ymm15,ymm8,YMMWORD PTR \[rip\+0x99\],0x7        # 1867 <_start\+0x1867>
+[ 	]*[a-f0-9]+:	c4 63 1d 4b 35 99 00 00 00 80 	vblendvpd ymm14,ymm12,YMMWORD PTR \[rip\+0x99\],ymm8        # 1871 <_start\+0x1871>
 [ 	]*[a-f0-9]+:	c5 f8 ae 94 24 99 00 00 00 	vldmxcsr DWORD PTR \[rsp\+0x99\]
 [ 	]*[a-f0-9]+:	c5 79 6f 84 24 99 00 00 00 	vmovdqa xmm8,XMMWORD PTR \[rsp\+0x99\]
 [ 	]*[a-f0-9]+:	c5 79 7f 84 24 99 00 00 00 	vmovdqa XMMWORD PTR \[rsp\+0x99\],xmm8
@@ -1822,6 +1825,12 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e 21       	vtestps ymm4,YMMWORD PTR \[rcx\]
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu ymm4,\[rcx\]
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu ymm4,\[rcx\]
+[ 	]*[a-f0-9]+:	c5 fd e7 21          	vmovntdq YMMWORD PTR \[rcx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fd e7 21          	vmovntdq YMMWORD PTR \[rcx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fd 2b 21          	vmovntpd YMMWORD PTR \[rcx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fd 2b 21          	vmovntpd YMMWORD PTR \[rcx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fc 2b 21          	vmovntps YMMWORD PTR \[rcx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fc 2b 21          	vmovntps YMMWORD PTR \[rcx\],ymm4
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d d4 07    	vblendpd ymm2,ymm6,ymm4,0x7
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d 11 07    	vblendpd ymm2,ymm6,YMMWORD PTR \[rcx\],0x7
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d 11 07    	vblendpd ymm2,ymm6,YMMWORD PTR \[rcx\],0x7
@@ -3156,26 +3165,26 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 43 7d 19 87 99 00 00 00 07 	vextractf128 XMMWORD PTR \[r15\+0x99\],ymm8,0x7
 [ 	]*[a-f0-9]+:	c4 43 3d 06 bf 99 00 00 00 07 	vperm2f128 ymm15,ymm8,YMMWORD PTR \[r15\+0x99\],0x7
 [ 	]*[a-f0-9]+:	c4 43 1d 4b b7 99 00 00 00 80 	vblendvpd ymm14,ymm12,YMMWORD PTR \[r15\+0x99\],ymm8
-[ 	]*[a-f0-9]+:	c5 f8 ae 15 99 00 00 00 	vldmxcsr DWORD PTR \[rip\+0x99\]        # 415a <_start\+0x415a>
-[ 	]*[a-f0-9]+:	c5 79 6f 05 99 00 00 00 	vmovdqa xmm8,XMMWORD PTR \[rip\+0x99\]        # 4162 <_start\+0x4162>
-[ 	]*[a-f0-9]+:	c5 79 7f 05 99 00 00 00 	vmovdqa XMMWORD PTR \[rip\+0x99\],xmm8        # 416a <_start\+0x416a>
-[ 	]*[a-f0-9]+:	c5 79 7e 05 99 00 00 00 	vmovd  DWORD PTR \[rip\+0x99\],xmm8        # 4172 <_start\+0x4172>
-[ 	]*[a-f0-9]+:	c5 7b 2d 05 99 00 00 00 	vcvtsd2si r8d,QWORD PTR \[rip\+0x99\]        # 417a <_start\+0x417a>
-[ 	]*[a-f0-9]+:	c5 7e e6 05 99 00 00 00 	vcvtdq2pd ymm8,XMMWORD PTR \[rip\+0x99\]        # 4182 <_start\+0x4182>
-[ 	]*[a-f0-9]+:	c5 7d 5a 05 99 00 00 00 	vcvtpd2ps xmm8,YMMWORD PTR \[rip\+0x99\]        # 418a <_start\+0x418a>
-[ 	]*[a-f0-9]+:	c5 39 e0 3d 99 00 00 00 	vpavgb xmm15,xmm8,XMMWORD PTR \[rip\+0x99\]        # 4192 <_start\+0x4192>
-[ 	]*[a-f0-9]+:	c4 63 79 df 05 99 00 00 00 07 	vaeskeygenassist xmm8,XMMWORD PTR \[rip\+0x99\],0x7        # 419c <_start\+0x419c>
-[ 	]*[a-f0-9]+:	c4 63 79 14 05 99 00 00 00 07 	vpextrb BYTE PTR \[rip\+0x99\],xmm8,0x7        # 41a6 <_start\+0x41a6>
-[ 	]*[a-f0-9]+:	c5 3b 2a 3d 99 00 00 00 	vcvtsi2sd xmm15,xmm8,DWORD PTR \[rip\+0x99\]        # 41ae <_start\+0x41ae>
-[ 	]*[a-f0-9]+:	c4 63 19 4a 35 99 00 00 00 80 	vblendvps xmm14,xmm12,XMMWORD PTR \[rip\+0x99\],xmm8        # 41b8 <_start\+0x41b8>
-[ 	]*[a-f0-9]+:	c4 63 39 20 3d 99 00 00 00 07 	vpinsrb xmm15,xmm8,BYTE PTR \[rip\+0x99\],0x7        # 41c2 <_start\+0x41c2>
-[ 	]*[a-f0-9]+:	c5 7d 6f 05 99 00 00 00 	vmovdqa ymm8,YMMWORD PTR \[rip\+0x99\]        # 41ca <_start\+0x41ca>
-[ 	]*[a-f0-9]+:	c5 7d 7f 05 99 00 00 00 	vmovdqa YMMWORD PTR \[rip\+0x99\],ymm8        # 41d2 <_start\+0x41d2>
-[ 	]*[a-f0-9]+:	c4 62 3d 0d 3d 99 00 00 00 	vpermilpd ymm15,ymm8,YMMWORD PTR \[rip\+0x99\]        # 41db <_start\+0x41db>
-[ 	]*[a-f0-9]+:	c4 63 7d 09 05 99 00 00 00 07 	vroundpd ymm8,YMMWORD PTR \[rip\+0x99\],0x7        # 41e5 <_start\+0x41e5>
-[ 	]*[a-f0-9]+:	c4 63 7d 19 05 99 00 00 00 07 	vextractf128 XMMWORD PTR \[rip\+0x99\],ymm8,0x7        # 41ef <_start\+0x41ef>
-[ 	]*[a-f0-9]+:	c4 63 3d 06 3d 99 00 00 00 07 	vperm2f128 ymm15,ymm8,YMMWORD PTR \[rip\+0x99\],0x7        # 41f9 <_start\+0x41f9>
-[ 	]*[a-f0-9]+:	c4 63 1d 4b 35 99 00 00 00 80 	vblendvpd ymm14,ymm12,YMMWORD PTR \[rip\+0x99\],ymm8        # 4203 <_start\+0x4203>
+[ 	]*[a-f0-9]+:	c5 f8 ae 15 99 00 00 00 	vldmxcsr DWORD PTR \[rip\+0x99\]        # 417e <_start\+0x417e>
+[ 	]*[a-f0-9]+:	c5 79 6f 05 99 00 00 00 	vmovdqa xmm8,XMMWORD PTR \[rip\+0x99\]        # 4186 <_start\+0x4186>
+[ 	]*[a-f0-9]+:	c5 79 7f 05 99 00 00 00 	vmovdqa XMMWORD PTR \[rip\+0x99\],xmm8        # 418e <_start\+0x418e>
+[ 	]*[a-f0-9]+:	c5 79 7e 05 99 00 00 00 	vmovd  DWORD PTR \[rip\+0x99\],xmm8        # 4196 <_start\+0x4196>
+[ 	]*[a-f0-9]+:	c5 7b 2d 05 99 00 00 00 	vcvtsd2si r8d,QWORD PTR \[rip\+0x99\]        # 419e <_start\+0x419e>
+[ 	]*[a-f0-9]+:	c5 7e e6 05 99 00 00 00 	vcvtdq2pd ymm8,XMMWORD PTR \[rip\+0x99\]        # 41a6 <_start\+0x41a6>
+[ 	]*[a-f0-9]+:	c5 7d 5a 05 99 00 00 00 	vcvtpd2ps xmm8,YMMWORD PTR \[rip\+0x99\]        # 41ae <_start\+0x41ae>
+[ 	]*[a-f0-9]+:	c5 39 e0 3d 99 00 00 00 	vpavgb xmm15,xmm8,XMMWORD PTR \[rip\+0x99\]        # 41b6 <_start\+0x41b6>
+[ 	]*[a-f0-9]+:	c4 63 79 df 05 99 00 00 00 07 	vaeskeygenassist xmm8,XMMWORD PTR \[rip\+0x99\],0x7        # 41c0 <_start\+0x41c0>
+[ 	]*[a-f0-9]+:	c4 63 79 14 05 99 00 00 00 07 	vpextrb BYTE PTR \[rip\+0x99\],xmm8,0x7        # 41ca <_start\+0x41ca>
+[ 	]*[a-f0-9]+:	c5 3b 2a 3d 99 00 00 00 	vcvtsi2sd xmm15,xmm8,DWORD PTR \[rip\+0x99\]        # 41d2 <_start\+0x41d2>
+[ 	]*[a-f0-9]+:	c4 63 19 4a 35 99 00 00 00 80 	vblendvps xmm14,xmm12,XMMWORD PTR \[rip\+0x99\],xmm8        # 41dc <_start\+0x41dc>
+[ 	]*[a-f0-9]+:	c4 63 39 20 3d 99 00 00 00 07 	vpinsrb xmm15,xmm8,BYTE PTR \[rip\+0x99\],0x7        # 41e6 <_start\+0x41e6>
+[ 	]*[a-f0-9]+:	c5 7d 6f 05 99 00 00 00 	vmovdqa ymm8,YMMWORD PTR \[rip\+0x99\]        # 41ee <_start\+0x41ee>
+[ 	]*[a-f0-9]+:	c5 7d 7f 05 99 00 00 00 	vmovdqa YMMWORD PTR \[rip\+0x99\],ymm8        # 41f6 <_start\+0x41f6>
+[ 	]*[a-f0-9]+:	c4 62 3d 0d 3d 99 00 00 00 	vpermilpd ymm15,ymm8,YMMWORD PTR \[rip\+0x99\]        # 41ff <_start\+0x41ff>
+[ 	]*[a-f0-9]+:	c4 63 7d 09 05 99 00 00 00 07 	vroundpd ymm8,YMMWORD PTR \[rip\+0x99\],0x7        # 4209 <_start\+0x4209>
+[ 	]*[a-f0-9]+:	c4 63 7d 19 05 99 00 00 00 07 	vextractf128 XMMWORD PTR \[rip\+0x99\],ymm8,0x7        # 4213 <_start\+0x4213>
+[ 	]*[a-f0-9]+:	c4 63 3d 06 3d 99 00 00 00 07 	vperm2f128 ymm15,ymm8,YMMWORD PTR \[rip\+0x99\],0x7        # 421d <_start\+0x421d>
+[ 	]*[a-f0-9]+:	c4 63 1d 4b 35 99 00 00 00 80 	vblendvpd ymm14,ymm12,YMMWORD PTR \[rip\+0x99\],ymm8        # 4227 <_start\+0x4227>
 [ 	]*[a-f0-9]+:	c5 f8 ae 94 24 99 00 00 00 	vldmxcsr DWORD PTR \[rsp\+0x99\]
 [ 	]*[a-f0-9]+:	c5 79 6f 84 24 99 00 00 00 	vmovdqa xmm8,XMMWORD PTR \[rsp\+0x99\]
 [ 	]*[a-f0-9]+:	c5 79 7f 84 24 99 00 00 00 	vmovdqa XMMWORD PTR \[rsp\+0x99\],xmm8

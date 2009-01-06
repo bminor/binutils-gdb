@@ -259,6 +259,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e f4       	vtestps %ymm4,%ymm6
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e 21       	vtestps \(%ecx\),%ymm4
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu \(%ecx\),%ymm4
+[ 	]*[a-f0-9]+:	c5 fd e7 21          	vmovntdq %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fd 2b 21          	vmovntpd %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fc 2b 21          	vmovntps %ymm4,\(%ecx\)
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d d4 07    	vblendpd \$0x7,%ymm4,%ymm6,%ymm2
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d 11 07    	vblendpd \$0x7,\(%ecx\),%ymm6,%ymm2
 [ 	]*[a-f0-9]+:	c4 e3 4d 0c d4 07    	vblendps \$0x7,%ymm4,%ymm6,%ymm2
@@ -1669,6 +1672,12 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e 21       	vtestps \(%ecx\),%ymm4
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu \(%ecx\),%ymm4
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu \(%ecx\),%ymm4
+[ 	]*[a-f0-9]+:	c5 fd e7 21          	vmovntdq %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fd e7 21          	vmovntdq %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fd 2b 21          	vmovntpd %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fd 2b 21          	vmovntpd %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fc 2b 21          	vmovntps %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fc 2b 21          	vmovntps %ymm4,\(%ecx\)
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d d4 07    	vblendpd \$0x7,%ymm4,%ymm6,%ymm2
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d 11 07    	vblendpd \$0x7,\(%ecx\),%ymm6,%ymm2
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d 11 07    	vblendpd \$0x7,\(%ecx\),%ymm6,%ymm2

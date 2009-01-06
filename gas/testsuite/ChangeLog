@@ -1,3 +1,15 @@
+2009-01-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (December, 2008)
+	* gas/i386/avx.s: Add tests for 256bit vmovntdq, vmovntpd and
+	vmovntps.
+	* gas/i386/x86-64-avx.s: Likewise.
+
+	* gas/i386/avx.d: Updated.
+	* gas/i386/avx-intel.d: Likewise.
+	* gas/i386/x86-64-avx.d: Likewise.
+	* gas/i386/x86-64-avx-intel.d: Likewise.
+
 2009-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (December, 2008)

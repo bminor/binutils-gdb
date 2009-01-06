@@ -260,6 +260,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e f4       	vtestps ymm6,ymm4
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e 21       	vtestps ymm4,YMMWORD PTR \[ecx\]
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu ymm4,\[ecx\]
+[ 	]*[a-f0-9]+:	c5 fd e7 21          	vmovntdq YMMWORD PTR \[ecx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fd 2b 21          	vmovntpd YMMWORD PTR \[ecx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fc 2b 21          	vmovntps YMMWORD PTR \[ecx\],ymm4
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d d4 07    	vblendpd ymm2,ymm6,ymm4,0x7
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d 11 07    	vblendpd ymm2,ymm6,YMMWORD PTR \[ecx\],0x7
 [ 	]*[a-f0-9]+:	c4 e3 4d 0c d4 07    	vblendps ymm2,ymm6,ymm4,0x7
@@ -1670,6 +1673,12 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e 21       	vtestps ymm4,YMMWORD PTR \[ecx\]
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu ymm4,\[ecx\]
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu ymm4,\[ecx\]
+[ 	]*[a-f0-9]+:	c5 fd e7 21          	vmovntdq YMMWORD PTR \[ecx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fd e7 21          	vmovntdq YMMWORD PTR \[ecx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fd 2b 21          	vmovntpd YMMWORD PTR \[ecx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fd 2b 21          	vmovntpd YMMWORD PTR \[ecx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fc 2b 21          	vmovntps YMMWORD PTR \[ecx\],ymm4
+[ 	]*[a-f0-9]+:	c5 fc 2b 21          	vmovntps YMMWORD PTR \[ecx\],ymm4
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d d4 07    	vblendpd ymm2,ymm6,ymm4,0x7
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d 11 07    	vblendpd ymm2,ymm6,YMMWORD PTR \[ecx\],0x7
 [ 	]*[a-f0-9]+:	c4 e3 4d 0d 11 07    	vblendpd ymm2,ymm6,YMMWORD PTR \[ecx\],0x7
