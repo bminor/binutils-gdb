@@ -1,3 +1,7 @@
+2009-01-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sem.c: Regenerate.
+
 2008-12-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	* arch.c, arch.h, cpu.c, cpu.h, cpuall.h, decode.c, decode.h,

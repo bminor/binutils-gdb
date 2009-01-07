@@ -20352,7 +20352,7 @@ SEM_FN_NAME (frvbf,mabshs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   }
   tmp_arghi = GET_H_FR_HI (((FLD (f_FRj)) + (0)));
   tmp_arglo = GET_H_FR_LO (((FLD (f_FRj)) + (0)));
-if (GTDI (ABSHI (tmp_arghi), 32767)) {
+if (GTDI (ABSDI (EXTHIDI (tmp_arghi)), 32767)) {
 {
   {
     UHI opval = 32767;
@@ -20363,7 +20363,7 @@ if (GTDI (ABSHI (tmp_arghi), 32767)) {
 frvbf_media_overflow (current_cpu, 8);
 }
 } else {
-if (LTDI (ABSHI (tmp_arghi), -32768)) {
+if (LTDI (ABSDI (EXTHIDI (tmp_arghi)), -32768)) {
 {
   {
     UHI opval = -32768;
@@ -20375,14 +20375,14 @@ frvbf_media_overflow (current_cpu, 8);
 }
 } else {
   {
-    UHI opval = ABSHI (tmp_arghi);
+    UHI opval = ABSDI (EXTHIDI (tmp_arghi));
     sim_queue_fn_hi_write (current_cpu, frvbf_h_fr_hi_set, ((FLD (f_FRk)) + (0)), opval);
     written |= (1 << 8);
     TRACE_RESULT (current_cpu, abuf, "fr_hi", 'x', opval);
   }
 }
 }
-if (GTDI (ABSHI (tmp_arglo), 32767)) {
+if (GTDI (ABSDI (EXTHIDI (tmp_arglo)), 32767)) {
 {
   {
     UHI opval = 32767;
@@ -20393,7 +20393,7 @@ if (GTDI (ABSHI (tmp_arglo), 32767)) {
 frvbf_media_overflow (current_cpu, 4);
 }
 } else {
-if (LTDI (ABSHI (tmp_arglo), -32768)) {
+if (LTDI (ABSDI (EXTHIDI (tmp_arglo)), -32768)) {
 {
   {
     UHI opval = -32768;
@@ -20405,7 +20405,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 } else {
   {
-    UHI opval = ABSHI (tmp_arglo);
+    UHI opval = ABSDI (EXTHIDI (tmp_arglo));
     sim_queue_fn_hi_write (current_cpu, frvbf_h_fr_lo_set, ((FLD (f_FRk)) + (0)), opval);
     written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "fr_lo", 'x', opval);
@@ -20443,7 +20443,7 @@ SEM_FN_NAME (frvbf,maddhss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -20477,7 +20477,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -20540,7 +20540,7 @@ SEM_FN_NAME (frvbf,maddhus) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -20574,7 +20574,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -20637,7 +20637,7 @@ SEM_FN_NAME (frvbf,msubhss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -20671,7 +20671,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -20734,7 +20734,7 @@ SEM_FN_NAME (frvbf,msubhus) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -20768,7 +20768,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -20832,7 +20832,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -20866,7 +20866,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -20931,7 +20931,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -20965,7 +20965,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -21030,7 +21030,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -21064,7 +21064,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -21129,7 +21129,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -21163,7 +21163,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -21236,7 +21236,7 @@ frvbf_media_register_not_aligned (current_cpu);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -21270,7 +21270,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -21310,7 +21310,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -21344,7 +21344,7 @@ frvbf_media_overflow (current_cpu, 2);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -21417,7 +21417,7 @@ frvbf_media_register_not_aligned (current_cpu);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -21451,7 +21451,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -21491,7 +21491,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -21525,7 +21525,7 @@ frvbf_media_overflow (current_cpu, 2);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -21598,7 +21598,7 @@ frvbf_media_register_not_aligned (current_cpu);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -21632,7 +21632,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -21672,7 +21672,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -21706,7 +21706,7 @@ frvbf_media_overflow (current_cpu, 2);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -21779,7 +21779,7 @@ frvbf_media_register_not_aligned (current_cpu);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -21813,7 +21813,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -21853,7 +21853,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -21887,7 +21887,7 @@ frvbf_media_overflow (current_cpu, 2);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -21961,7 +21961,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -21995,7 +21995,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -22035,7 +22035,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -22069,7 +22069,7 @@ frvbf_media_overflow (current_cpu, 2);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -22144,7 +22144,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -22178,7 +22178,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -22218,7 +22218,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -22252,7 +22252,7 @@ frvbf_media_overflow (current_cpu, 2);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = ADDHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = ADDDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -22327,7 +22327,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -22361,7 +22361,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -22401,7 +22401,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argihi), EXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -22435,7 +22435,7 @@ frvbf_media_overflow (current_cpu, 2);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (EXTHIDI (tmp_argilo), EXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 32767)) {
 {
   {
@@ -22510,7 +22510,7 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -22544,7 +22544,7 @@ frvbf_media_overflow (current_cpu, 8);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -22584,7 +22584,7 @@ frvbf_media_overflow (current_cpu, 4);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argihi, tmp_argjhi);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argihi), ZEXTHIDI (tmp_argjhi));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
@@ -22618,7 +22618,7 @@ frvbf_media_overflow (current_cpu, 2);
 }
 {
   DI tmp_tmp;
-  tmp_tmp = SUBHI (tmp_argilo, tmp_argjlo);
+  tmp_tmp = SUBDI (ZEXTHIDI (tmp_argilo), ZEXTHIDI (tmp_argjlo));
 if (GTDI (tmp_tmp, 65535)) {
 {
   {
