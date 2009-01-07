@@ -1,7 +1,7 @@
 #source: start1.s
-#source: tls128.s
 #source: tls-le-12s.s
 #source: tls-z.s
+#source: tls128.s
 #as: --no-underscore --em=criself -I$srcdir/$subdir
 #ld: -m crislinux
 #objdump: -d -s -t -r -p -h
@@ -21,7 +21,7 @@ private flags = 0:
                   CONTENTS.*
 SYMBOL TABLE:
 #...
-0+80 g       \.tdata	0+4 z
+0+ g       \.tdata	0+4 z
 #...
 Contents of section \.text:
 #...
@@ -34,5 +34,5 @@ Disassembly of section \.text:
    80094:	41b2                	moveq 1,\$r11
 #...
 00080098 <tlsfn12>:
-   80098:	5fac 8000           	movu\.w 0x80,\$r10
+   80098:	7fac 7cff           	movs\.w -132,\$r10
 #...

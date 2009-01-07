@@ -44,7 +44,7 @@ OFFSET   TYPE              VALUE
 Contents of section .interp:
 #...
 Contents of section \.text:
- 801dc 41b20000 6fae8000 00006fae 84000000  .*
+ 801dc 41b20000 6faef8ff ffff6fae fcffffff  .*
  801ec 6fae1023 08000000 6fae1823 08000000  .*
 #...
 Contents of section \.got:

@@ -36,6 +36,6 @@ Disassembly of section \.text:
    80094:	41b2                	moveq 1,\$r11
 #...
 00080098 <tlsfn13>:
-   80098:	6fae 8000 0000      	move\.d 80 <x1>,\$r10
-   8009e:	6fae 8400 0000      	move\.d 84 <x2>,\$r10
+   80098:	6fae f8ff ffff      	move\.d 0xfffffff8,\$r10
+   8009e:	6fae fcff ffff      	move\.d 0xfffffffc,\$r10
 #...

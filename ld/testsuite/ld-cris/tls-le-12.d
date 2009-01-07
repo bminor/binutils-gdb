@@ -34,5 +34,5 @@ Disassembly of section \.text:
    80094:	41b2                	moveq 1,\$r11
 #...
 00080098 <tlsfn12>:
-   80098:	6fae 8000 0000      	move\.d 80 <z>,\$r10
+   80098:	6fae fcff ffff      	move\.d 0xfffffffc,\$r10
 #...

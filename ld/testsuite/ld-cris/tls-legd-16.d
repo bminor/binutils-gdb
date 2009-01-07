@@ -39,7 +39,7 @@ Contents of section \.text:
 #...
 Contents of section \.got:
  82144 0+ 0+ 0+ 010+  .*
- 82154 80+ 010+ 840+           .*
+ 82154 f0ffffff 010+ f4ffffff  .*
 
 Disassembly of section \.text:
 
@@ -47,8 +47,8 @@ Disassembly of section \.text:
    80094:	41b2                	moveq 1,\$r11
 #...
 00080098 <tlsfn13>:
-   80098:	6fae 8800 0000      	move.d 88 <x1>,\$r10
-   8009e:	6fae 8c00 0000      	move.d 8c <x2>,\$r10
+   80098:	6fae f8ff ffff      	move.d 0xfffffff8,\$r10
+   8009e:	6fae fcff ffff      	move.d 0xfffffffc,\$r10
 
 000800a4 <tlsfn>:
    800a4:	6fae 5021 0800      	move.d 82150 <_GLOBAL_OFFSET_TABLE_\+0xc>,\$r10

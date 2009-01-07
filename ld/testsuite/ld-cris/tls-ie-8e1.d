@@ -30,7 +30,7 @@ Contents of section .text:
  80094 41b20000 6fae3021 08000000           .*
 #...
 Contents of section .got:
- 82124 00000000 00000000 00000000 80000000  .*
+ 82124 00000000 00000000 00000000 fcffffff  .*
 
 Disassembly of section .text:
 

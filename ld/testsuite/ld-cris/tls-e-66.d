@@ -33,5 +33,5 @@ Disassembly of section \.text:
    80094:	41b2                	moveq 1,\$r11
 #...
 00080098 <tlsfn12>:
-   80098:	5fac 0000           	movu\.w 0x0,\$r10
+   80098:	7fac fcff           	movs\.w -4,\$r10
 #...

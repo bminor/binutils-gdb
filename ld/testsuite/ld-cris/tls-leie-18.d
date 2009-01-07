@@ -30,8 +30,8 @@ SYMBOL TABLE:
 Contents of section \.text:
 #...
 Contents of section \.got:
- 82130 0+ 0+ 0+ 840+  .*
- 82140 80+                             ....            
+ 82130 0+ 0+ 0+ fcffffff  .*
+ 82140 f8ffffff  .*
 
 Disassembly of section \.text:
 
@@ -39,8 +39,8 @@ Disassembly of section \.text:
    80094:	41b2                	moveq 1,\$r11
 #...
 00080098 <tlsfn13>:
-   80098:	5fae 8000           	move.w 0x80,\$r10
-   8009c:	5fae 8400           	move.w 0x84,\$r10
+   80098:	5fae f8ff           	move.w 0xfff8,\$r10
+   8009c:	5fae fcff           	move.w 0xfffc,\$r10
 
 000800a0 <tlsdsofn9>:
    800a0:	5fae 1000           	move.w 0x10,\$r10

@@ -9,7 +9,7 @@
 .*:     file format elf32-cris
 
 Contents of section \.text:
- 80094 41b20000 5faeff7f                   .*
+ 80094 41b20000 5fae0080                   .*
 Contents of section \.tdata:
  8209c 2a2a2a2a 2a2a2a2a 2a2a2a2a 2a2a2a2a .*
 #...

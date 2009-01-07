@@ -1,3 +1,24 @@
+2009-01-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/tls-e-20.d, ld-cris/tls-e-20a.d, ld-cris/tls-e-21.d,
+	ld-cris/tls-e-23.d, ld-cris/tls-e-66.d, ld-cris/tls-gd-3.d,
+	ld-cris/tls-gd-3h.d, ld-cris/tls-global-74.d,
+	ld-cris/tls-ie-8e1.d, ld-cris/tls-ldgde-14.d,
+	ld-cris/tls-ldgde-15.d, ld-cris/tls-le-12.d, ld-cris/tls-le-13.d,
+	ld-cris/tls-le-13s.d, ld-cris/tls-legd-16.d,
+	ld-cris/tls-legd-17.d, ld-cris/tls-legdx-16.d,
+	ld-cris/tls-legdx-17.d, ld-cris/tls-leie-18.d,
+	ld-cris/tls-leie-19.d, ld-cris/tls-local-57.d,
+	ld-cris/tls-local-58.d, ld-cris/tls-local-59.d: Adjust for
+	relocation value now offset by negative program TLS block size.
+	* ld-cris/tls-le-12s.d: Ditto.  Move 128-byte tls-data to last.
+	Adjust accordingly.
+	* ld-cris/tls-le-12s.s: Use movs, not movu, for sign-extended
+	always-negative relocation.
+	* ld-cris/tls-tprelm.s: Move filler data to after symbol for
+	tested relocation.
+	* ld-cris/tls-ok-36.d: Adjust accordingly.
+
 2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/tls-js1.d: New test.

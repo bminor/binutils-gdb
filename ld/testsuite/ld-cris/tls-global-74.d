@@ -24,5 +24,5 @@ Contents of section .text:
  800a4 0+ 5fae1000 5fae0c00        .*
 #...
 Contents of section \.got:
- 820b4 0+ 0+ 0+ 0+  .*
- 820c4 010+ 0+              .*
+ 820b4 0+ 0+ 0+ fcffffff  .*
+ 820c4 010+ fcffffff  .*

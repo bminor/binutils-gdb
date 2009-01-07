@@ -26,7 +26,7 @@ Contents of section \.text:
 Contents of section \.tdata:
 #...
 Contents of section \.got:
- 82124 00000000 00000000 00000000 80000000  .*
+ 82124 00000000 00000000 00000000 fcffffff  .*
 
 Disassembly of section \.text:
 
