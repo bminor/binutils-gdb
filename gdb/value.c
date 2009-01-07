@@ -931,7 +931,7 @@ set_internalvar (struct internalvar *var, struct value *val)
      something in the value chain (i.e., before release_value is
      called), because after the error free_all_values will get called before
      long.  */
-  xfree (var->value);
+  value_free (var->value);
   var->value = newval;
   var->endian = gdbarch_byte_order (current_gdbarch);
   release_value (newval);
