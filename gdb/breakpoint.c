@@ -1029,14 +1029,14 @@ should_be_inserted (struct bp_location *bpt)
 
 /* Insert a low-level "breakpoint" of some type.  BPT is the breakpoint.
    Any error messages are printed to TMP_ERROR_STREAM; and DISABLED_BREAKS,
-   PROCESS_WARNING, and HW_BREAKPOINT_ERROR are used to report problems.
+   and HW_BREAKPOINT_ERROR are used to report problems.
 
    NOTE drow/2003-09-09: This routine could be broken down to an object-style
    method for each breakpoint or catchpoint type.  */
 static int
 insert_bp_location (struct bp_location *bpt,
 		    struct ui_file *tmp_error_stream,
-		    int *disabled_breaks, int *process_warning,
+		    int *disabled_breaks,
 		    int *hw_breakpoint_error)
 {
   int val = 0;
@@ -1179,9 +1179,6 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 	    }
 	  else
 	    {
-#ifdef ONE_PROCESS_WRITETEXT
-	      *process_warning = 1;
-#endif
 	      if (bpt->loc_type == bp_loc_hardware_breakpoint)
 		{
 		  *hw_breakpoint_error = 1;
@@ -1279,7 +1276,6 @@ insert_breakpoint_locations (void)
   int val = 0;
   int disabled_breaks = 0;
   int hw_breakpoint_error = 0;
-  int process_warning = 0;
 
   struct ui_file *tmp_error_stream = mem_fileopen ();
   make_cleanup_ui_file_delete (tmp_error_stream);
@@ -1300,7 +1296,7 @@ insert_breakpoint_locations (void)
 	continue;
 
       val = insert_bp_location (b, tmp_error_stream,
-				    &disabled_breaks, &process_warning,
+				    &disabled_breaks,
 				    &hw_breakpoint_error);
       if (val)
 	error = val;
@@ -1352,11 +1348,6 @@ insert_breakpoint_locations (void)
 			      "Could not insert hardware breakpoints:\n\
 You may have requested too many hardware breakpoints/watchpoints.\n");
 	}
-#ifdef ONE_PROCESS_WRITETEXT
-      if (process_warning)
-	fprintf_unfiltered (tmp_error_stream,
-			    "The same program may be running in another process.");
-#endif
       target_terminal_ours_for_output ();
       error_stream (tmp_error_stream);
     }
@@ -1405,7 +1396,7 @@ reattach_breakpoints (int pid)
   int val;
   struct cleanup *old_chain = save_inferior_ptid ();
   struct ui_file *tmp_error_stream = mem_fileopen ();
-  int dummy1 = 0, dummy2 = 0, dummy3 = 0;
+  int dummy1 = 0, dummy2 = 0;
 
   make_cleanup_ui_file_delete (tmp_error_stream);
 
@@ -1416,7 +1407,7 @@ reattach_breakpoints (int pid)
       {
 	b->inserted = 0;
 	val = insert_bp_location (b, tmp_error_stream,
-				  &dummy1, &dummy2, &dummy3);
+				  &dummy1, &dummy2);
 	if (val != 0)
 	  {
 	    do_cleanups (old_chain);

@@ -4207,7 +4207,6 @@ normal_stop (void)
 	  target_terminal_ours_for_output ();
 	  printf_filtered (_("\
 Cannot remove breakpoints because program is no longer writable.\n\
-It might be running in another process.\n\
 Further execution is probably impossible.\n"));
 	}
     }

@@ -4035,40 +4035,9 @@ end
 @c  @ifclear BARETARGET
 @node Error in Breakpoints
 @subsection ``Cannot insert breakpoints''
-@c
-@c  FIXME!! 14/6/95  Is there a real example of this?  Let's use it.
-@c
-Under some operating systems, breakpoints cannot be used in a program if
-any other process is running that program.  In this situation,
-attempting to run or continue a program with a breakpoint causes
-@value{GDBN} to print an error message:
 
-@smallexample
-Cannot insert breakpoints.
-The same program may be running in another process.
-@end smallexample
-
-When this happens, you have three ways to proceed:
-
-@enumerate
-@item
-Remove or disable the breakpoints, then continue.
-
-@item
-Suspend @value{GDBN}, and copy the file containing your program to a new
-name.  Resume @value{GDBN} and use the @code{exec-file} command to specify
-that @value{GDBN} should run your program under that name.
-Then start your program again.
-
-@item
-Relink your program so that the text segment is nonsharable, using the
-linker option @samp{-N}.  The operating system limitation may not apply
-to nonsharable executables.
-@end enumerate
-@c  @end ifclear
-
-A similar message can be printed if you request too many active
-hardware-assisted breakpoints and watchpoints:
+If you request too many active hardware-assisted breakpoints and
+watchpoints, you will see this error message:
 
 @c FIXME: the precise wording of this message may change; the relevant
 @c source change is not committed yet (Sep 3, 1999).
