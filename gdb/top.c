@@ -132,9 +132,6 @@ void (*window_hook) (FILE *, char *);
 int epoch_interface;
 int xgdb_verbose;
 
-/* gdb prints this when reading a command interactively */
-static char *gdb_prompt_string;	/* the global prompt string */
-
 /* Buffer used for reading command lines, and the size
    allocated for it so far.  */
 
