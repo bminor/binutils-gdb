@@ -1261,12 +1261,7 @@ print_spaces (int n, struct ui_file *file)
 void
 gdb_print_host_address (const void *addr, struct ui_file *stream)
 {
-
-  /* We could use the %p conversion specifier to fprintf if we had any
-     way of knowing whether this host supports it.  But the following
-     should work on the Alpha and on 32 bit machines.  */
-
-  fprintf_filtered (stream, "0x%lx", (unsigned long) addr);
+  fprintf_filtered (stream, "%s", host_address_to_string (addr));
 }
 
 
@@ -3075,6 +3070,10 @@ const char *
 host_address_to_string (const void *addr)
 {
   char *str = get_cell ();
+
+  /* We could use the %p conversion specifier to sprintf if we had any
+     way of knowing whether this host supports it.  But the following
+     should work on the Alpha and on 32 bit machines.  */
   sprintf (str, "0x%lx", (unsigned long) addr);
   return str;
 }

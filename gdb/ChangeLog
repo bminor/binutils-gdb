@@ -1,3 +1,10 @@
+2009-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* utils.c (gdb_print_host_address): Adjust implementation to
+	reuse host_address_to_string. Move comment explaining the conversion
+	from host address to string from here...
+	(host_address_to_string): ... to there.
+
 2009-01-07  Emi Suzuki  <emi-suzuki@tjsys.co.jp>
 
 	* MAINTAINERS: Add myself for write after approval privileges.
