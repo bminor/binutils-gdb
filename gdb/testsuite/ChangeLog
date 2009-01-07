@@ -1,3 +1,12 @@
+2009-01-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.fortran/derived-type.exp: New variables int4 and real4.  Match
+	now the output exactly, using less wildcards.  Expect also the output
+	of gfortran-4.3.  Update for the f-valprint.c modification from
+	2008-04-22.
+	* gdb.fortran/subarray.exp: Expect also the output of gfortran-4.3.
+	Remove gdb_test test names where matching the command.
+
 2009-01-01  Pedro Alves  <pedro@codesourcery.com>
 
 	PR breakpoints/9681:

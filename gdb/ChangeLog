@@ -1,3 +1,8 @@
+2009-01-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* f-typeprint.c (f_type_print_base <TYPE_CODE_STRUCT>): Fix output
+	spacing, a regression from 2008-04-22.
+
 2009-01-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* utils.c (gdb_print_host_address): Adjust implementation to
