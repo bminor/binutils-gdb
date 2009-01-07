@@ -1,5 +1,11 @@
 2009-01-07  Hans-Peter Nilsson  <hp@axis.com>
 
+	* cgen-ops.h (ADDQI, SUBQI, MULQI, NEGQI, ABSQI, ADDHI, SUBHI)
+	(MULHI, NEGHI, ABSHI, ADDSI, SUBSI, MULSI, NEGSI, ABSSI, ADDDI)
+	(SUBDI, MULDI, NEGDI, ABSDI): Cast arguments to the unsigned type
+	variant; UQI, UHI, USI, UDI, and cast the result to the signed
+	type, QI, HI, SI, DI.
+
 	* callback.c (os_error): Mark as being a noreturn function.
 	* sim-io.h (sim_io_error): Similar for sim_io_error.
 
