@@ -1543,9 +1543,12 @@ transition_applies (insn_pattern *initial_insn,
 	  else if (!strcmp (option_name, "Loops"))
 	    option_available = (XCHAL_HAVE_LOOPS == 1);
 	  else if (!strcmp (option_name, "WideBranches"))
-	    option_available = (XCHAL_HAVE_WIDE_BRANCHES == 1);
+	    option_available 
+	      = (XCHAL_HAVE_WIDE_BRANCHES == 1 && produce_flix == FLIX_ALL);
 	  else if (!strcmp (option_name, "PredictedBranches"))
-	    option_available = (XCHAL_HAVE_PREDICTED_BRANCHES == 1);
+	    option_available
+	      = (XCHAL_HAVE_PREDICTED_BRANCHES == 1
+		 && produce_flix == FLIX_ALL);
 	  else if (!strcmp (option_name, "Booleans"))
 	    option_available = (XCHAL_HAVE_BOOLEANS == 1);
 	  else

@@ -177,4 +177,13 @@ extern TransitionTable *xg_build_widen_table (transition_cmp_fn);
 extern bfd_boolean xg_has_userdef_op_fn (OpType);
 extern long xg_apply_userdef_op_fn (OpType, long);
 
+enum flix_level
+{
+  FLIX_ALL,
+  FLIX_NO_GENERATE,
+  FLIX_NONE
+};
+
+extern enum flix_level produce_flix;
+
 #endif /* !XTENSA_RELAX_H */

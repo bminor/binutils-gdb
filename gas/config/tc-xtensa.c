@@ -591,6 +591,7 @@ static xtensa_opcode xtensa_waiti_opcode;
 /* Command-line Options.  */
 
 bfd_boolean use_literal_section = TRUE;
+enum flix_level produce_flix = FLIX_ALL;
 static bfd_boolean align_targets = TRUE;
 static bfd_boolean warn_unaligned_branch_targets = FALSE;
 static bfd_boolean has_a0_b_retw = FALSE;
@@ -634,6 +635,10 @@ enum
 {
   option_density = OPTION_MD_BASE,
   option_no_density,
+
+  option_flix,
+  option_no_generate_flix,
+  option_no_flix,
 
   option_relax,
   option_no_relax,
@@ -692,6 +697,10 @@ struct option md_longopts[] =
 {
   { "density", no_argument, NULL, option_density },
   { "no-density", no_argument, NULL, option_no_density },
+
+  { "flix", no_argument, NULL, option_flix },
+  { "no-generate-flix", no_argument, NULL, option_no_generate_flix },
+  { "no-allow-flix", no_argument, NULL, option_no_flix },
 
   /* Both "relax" and "generics" are deprecated and treated as equivalent
      to the "transform" option.  */
@@ -774,6 +783,15 @@ md_parse_option (int c, char *arg)
       return 1;
     case option_no_link_relax:
       linkrelax = 0;
+      return 1;
+    case option_flix:
+      produce_flix = FLIX_ALL;
+      return 1;
+    case option_no_generate_flix:
+      produce_flix = FLIX_NO_GENERATE;
+      return 1;
+    case option_no_flix:
+      produce_flix = FLIX_NONE;
       return 1;
     case option_generics:
       as_warn (_("--generics is deprecated; use --transform instead"));
@@ -941,6 +959,11 @@ Xtensa options:\n\
   --[no-]target-align     [Do not] try to align branch targets\n\
   --[no-]longcalls        [Do not] emit 32-bit call sequences\n\
   --[no-]transform        [Do not] transform instructions\n\
+  --flix                  both allow hand-written and generate flix bundles\n\
+  --no-generate-flix      allow hand-written but do not generate\n\
+                          flix bundles\n\
+  --no-allow-flix         neither allow hand-written nor generate\n\
+                          flix bundles\n\
   --rename-section old=new Rename section 'old' to 'new'\n", stream);
 }
 
@@ -6179,6 +6202,14 @@ finish_vinsn (vliw_insn *vinsn)
   /* First, find a format that works.  */
   if (vinsn->format == XTENSA_UNDEFINED)
     vinsn->format = xg_find_narrowest_format (vinsn);
+
+  if (xtensa_format_num_slots (xtensa_default_isa, vinsn->format) > 1
+      && produce_flix == FLIX_NONE)
+    {
+      as_bad (_("The option \"--no-allow-flix\" prohibits multi-slot flix."));
+      xg_clear_vinsn (vinsn);
+      return;
+    }
 
   if (vinsn->format == XTENSA_UNDEFINED)
     {

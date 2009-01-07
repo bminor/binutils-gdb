@@ -1,3 +1,18 @@
+2009-01-07  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (produce_flix): New.
+	(option_flix, optoin_no_generate_flix, option_no_flix) Define.
+	(md_longopts): Add support for them.
+	(md_parse_option): Likewise.
+	(md_show_usage): Add help message.
+	(finish_vinsn): Don't allow multi-slot flix when produce_flix
+	option is set to FLIX_NONE.
+	* config/xtensa-relax.c (transition_applies): Only relax to
+	flix branches when produce_flix equals FLIX_ALL.
+	* config/xtensa-relax.h (flix_level, FLIX_ALL, FLIX_NO_GENERATE
+	FLIX_NONE): New.
+	(produce_flix): Declare.
+
 2009-01-06  Chao-ying Fu  <fu@mips.com>
 
 	* config/tc-mips.c (mips_ip): Set lastregno to 0xffffffff.
