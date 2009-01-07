@@ -1,3 +1,7 @@
+2009-01-07  Doug Evans  <dje@google.com>
+
+	* cli/cli-cmds.c (set_debug): Fix cut-n-paste error.
+
 2009-01-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* f-typeprint.c (f_type_print_base <TYPE_CODE_STRUCT>): Fix output

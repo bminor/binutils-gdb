@@ -1111,7 +1111,7 @@ ambiguous_line_spec (struct symtabs_and_lines *sals)
 static void
 set_debug (char *arg, int from_tty)
 {
-  printf_unfiltered (_("\"set debug\" must be followed by the name of a print subcommand.\n"));
+  printf_unfiltered (_("\"set debug\" must be followed by the name of a debug subcommand.\n"));
   help_list (setdebuglist, "set debug ", -1, gdb_stdout);
 }
 
