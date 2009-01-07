@@ -1,3 +1,10 @@
+2009-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbint.texinfo (Start of New Year Procedure): Add the "coding"
+	emacs local variable to be placed at the end of the ChangeLog.
+	Add server.c and gdbreplay.c to the list of files where the
+	copyright year needs to be updated.
+
 2009-01-06  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.texinfo (Remote Configuration): Document new

@@ -5842,6 +5842,7 @@ mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never
+coding: utf-8
 End:
 @end smallexample
 
@@ -5852,8 +5853,12 @@ in @file{gdb/config/djgpp/fnchange.lst}.
 @item
 Update the copyright year in the startup message
 
-Update the copyright year in file @file{top.c}, function
-@code{print_gdb_version}.
+Update the copyright year in:
+@itemize @bullet
+@item file @file{top.c}, function @code{print_gdb_version}
+@item file @file{gdbserver/server.c}, function @code{gdbserver_version}
+@item file @file{gdbserver/gdbreplay.c}, function @code{gdbreplay_version}
+@end itemize
 
 @item
 Add the new year in the copyright notices of all source and documentation
