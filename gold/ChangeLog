@@ -1,3 +1,7 @@
+2009-01-07  Ian Lance Taylor  <iant@google.com>
+
+	* version.cc (version_string): Bump to 1.8.
+
 2008-12-23  Cary Coutant  <ccoutant@google.com>
 
 	* gold.cc (gold_exit): Call plugin cleanup handlers on exit.
