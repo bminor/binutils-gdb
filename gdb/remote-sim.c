@@ -70,7 +70,7 @@ static void gdb_os_vprintf_filtered (host_callback *, const char *, va_list);
 
 static void gdb_os_evprintf_filtered (host_callback *, const char *, va_list);
 
-static void gdb_os_error (host_callback *, const char *, ...);
+static void gdb_os_error (host_callback *, const char *, ...) ATTR_NORETURN;
 
 static void gdbsim_fetch_register (struct regcache *regcache, int regno);
 
@@ -273,6 +273,7 @@ gdb_os_error (host_callback * p, const char *format,...)
       verror (format, args);
       va_end (args);
     }
+  exit (1);
 }
 
 int

@@ -1,3 +1,8 @@
+2009-01-08  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* remote-sim.c (gdb_os_error): Mark as a noreturn function.
+	Call exit to make it obvious to GCC.
+
 2009-01-08  Tom Tromey  <tromey@redhat.com>
 
 	PR breakpoints/9350:
