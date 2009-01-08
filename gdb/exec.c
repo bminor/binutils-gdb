@@ -194,6 +194,7 @@ exec_file_attach (char *filename, int from_tty)
     }
   else
     {
+      struct cleanup *cleanups;
       char *scratch_pathname;
       int scratch_chan;
 
@@ -228,7 +229,7 @@ exec_file_attach (char *filename, int from_tty)
          via the exec_bfd->name pointer, so we need to make another copy and
          leave exec_bfd as the new owner of the original copy. */
       scratch_pathname = xstrdup (scratch_pathname);
-      make_cleanup (xfree, scratch_pathname);
+      cleanups = make_cleanup (xfree, scratch_pathname);
 
       if (!bfd_check_format (exec_bfd, bfd_object))
 	{
@@ -276,6 +277,8 @@ exec_file_attach (char *filename, int from_tty)
       /* Tell display code (if any) about the changed file name.  */
       if (deprecated_exec_file_display_hook)
 	(*deprecated_exec_file_display_hook) (filename);
+
+      do_cleanups (cleanups);
     }
   bfd_cache_close_all ();
   observer_notify_executable_changed ();
@@ -302,11 +305,13 @@ exec_file_command (char *args, int from_tty)
 
   if (args)
     {
+      struct cleanup *cleanups;
+
       /* Scan through the args and pick up the first non option arg
          as the filename.  */
 
       argv = gdb_buildargv (args);
-      make_cleanup_freeargv (argv);
+      cleanups = make_cleanup_freeargv (argv);
 
       for (; (*argv != NULL) && (**argv == '-'); argv++)
         {;
@@ -317,6 +322,8 @@ exec_file_command (char *args, int from_tty)
       filename = tilde_expand (*argv);
       make_cleanup (xfree, filename);
       exec_file_attach (filename, from_tty);
+
+      do_cleanups (cleanups);
     }
   else
     exec_file_attach (NULL, from_tty);

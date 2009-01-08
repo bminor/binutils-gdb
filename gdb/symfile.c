@@ -899,6 +899,7 @@ syms_from_objfile (struct objfile *objfile,
   /* Discard cleanups as symbol reading was successful.  */
 
   discard_cleanups (old_chain);
+  xfree (local_addr);
 }
 
 /* Perform required actions after either reading in the initial

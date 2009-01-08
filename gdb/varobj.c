@@ -2780,7 +2780,7 @@ varobj_invalidate (void)
 
         varp++;
       }
-    xfree (all_rootvarobj);
   }
+  xfree (all_rootvarobj);
   return;
 }

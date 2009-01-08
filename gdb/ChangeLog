@@ -1,3 +1,23 @@
+2009-01-08  Tom Tromey  <tromey@redhat.com>
+
+	PR breakpoints/9350:
+	* varobj.c (varobj_invalidate): Unconditionally free
+	all_rootvarobj.
+	* symfile.c (syms_from_objfile): Free local_addr when returning
+	normally.
+	* exec.c (exec_file_attach): Do cleanups before returning.
+	(exec_file_command): Likewise.
+	* corefile.c (reopen_exec_file): Do cleanups before returning.
+	* breakpoint.c (insert_breakpoint_locations): Do cleanups before
+	returning. 
+	(do_vec_free): New function.
+	(update_global_location_list): Make a cleanup for old_locations.
+	Do cleanups before returning.  Remove unused variable 'e'.
+	(find_condition_and_thread): Free result of parsing the
+	expression.
+	(print_it_typical): Do cleanups before returning.
+	(breakpoint_re_set_one): Always free sals.sals.
+
 2009-01-08  Joel Brobecker  <brobecker@adacore.com>
 	    Emi Suzuki  <emi-suzuki@tjsys.co.jp>
  

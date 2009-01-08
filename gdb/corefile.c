@@ -153,6 +153,7 @@ reopen_exec_file (void)
   int res;
   struct stat st;
   long mtime;
+  struct cleanup *cleanups;
 
   /* Don't do anything if there isn't an exec file. */
   if (exec_bfd == NULL)
@@ -160,7 +161,7 @@ reopen_exec_file (void)
 
   /* If the timestamp of the exec file has changed, reopen it. */
   filename = xstrdup (bfd_get_filename (exec_bfd));
-  make_cleanup (xfree, filename);
+  cleanups = make_cleanup (xfree, filename);
   res = stat (filename, &st);
 
   if (exec_bfd_mtime && exec_bfd_mtime != st.st_mtime)
@@ -170,6 +171,8 @@ reopen_exec_file (void)
        this stops GDB from holding the executable open after it
        exits.  */
     bfd_cache_close_all ();
+
+  do_cleanups (cleanups);
 #endif
 }
 

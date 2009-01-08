@@ -1278,7 +1278,7 @@ insert_breakpoint_locations (void)
   int hw_breakpoint_error = 0;
 
   struct ui_file *tmp_error_stream = mem_fileopen ();
-  make_cleanup_ui_file_delete (tmp_error_stream);
+  struct cleanup *cleanups = make_cleanup_ui_file_delete (tmp_error_stream);
   
   /* Explicitly mark the warning -- this will only be printed if
      there was an error.  */
@@ -1351,6 +1351,8 @@ You may have requested too many hardware breakpoints/watchpoints.\n");
       target_terminal_ours_for_output ();
       error_stream (tmp_error_stream);
     }
+
+  do_cleanups (cleanups);
 }
 
 int
@@ -2232,19 +2234,22 @@ watchpoint_value_print (struct value *val, struct ui_file *stream)
 static enum print_stop_action
 print_it_typical (bpstat bs)
 {
-  struct cleanup *old_chain, *ui_out_chain;
+  struct cleanup *old_chain;
   struct breakpoint *b;
   const struct bp_location *bl;
   struct ui_stream *stb;
-  int bp_temp = 0;  
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
+  int bp_temp = 0;
+  enum print_stop_action result;
+
   /* bs->breakpoint_at can be NULL if it was a momentary breakpoint
      which has since been deleted.  */
   if (bs->breakpoint_at == NULL)
     return PRINT_UNKNOWN;
   bl = bs->breakpoint_at;
   b = bl->owner;
+
+  stb = ui_out_stream_new (uiout);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
 
   switch (b->type)
     {
@@ -2268,7 +2273,7 @@ print_it_typical (bpstat bs)
 	}
       ui_out_field_int (uiout, "bkptno", b->number);
       ui_out_text (uiout, ", ");
-      return PRINT_SRC_AND_LOC;
+      result = PRINT_SRC_AND_LOC;
       break;
 
     case bp_shlib_event:
@@ -2276,20 +2281,20 @@ print_it_typical (bpstat bs)
 	 variable?  (If so, we report this as a generic, "Stopped due
 	 to shlib event" message.) */
       printf_filtered (_("Stopped due to shared library event\n"));
-      return PRINT_NOTHING;
+      result = PRINT_NOTHING;
       break;
 
     case bp_thread_event:
       /* Not sure how we will get here. 
 	 GDB should not stop for these breakpoints.  */
       printf_filtered (_("Thread Event Breakpoint: gdb should not stop!\n"));
-      return PRINT_NOTHING;
+      result = PRINT_NOTHING;
       break;
 
     case bp_overlay_event:
       /* By analogy with the thread event, GDB should not stop for these. */
       printf_filtered (_("Overlay Event Breakpoint: gdb should not stop!\n"));
-      return PRINT_NOTHING;
+      result = PRINT_NOTHING;
       break;
 
     case bp_watchpoint:
@@ -2300,17 +2305,16 @@ print_it_typical (bpstat bs)
 	  (uiout, "reason",
 	   async_reason_lookup (EXEC_ASYNC_WATCHPOINT_TRIGGER));
       mention (b);
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
+      make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       ui_out_text (uiout, "\nOld value = ");
       watchpoint_value_print (bs->old_val, stb->stream);
       ui_out_field_stream (uiout, "old", stb);
       ui_out_text (uiout, "\nNew value = ");
       watchpoint_value_print (b->val, stb->stream);
       ui_out_field_stream (uiout, "new", stb);
-      do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
       /* More than one watchpoint may have been triggered.  */
-      return PRINT_UNKNOWN;
+      result = PRINT_UNKNOWN;
       break;
 
     case bp_read_watchpoint:
@@ -2319,13 +2323,12 @@ print_it_typical (bpstat bs)
 	  (uiout, "reason",
 	   async_reason_lookup (EXEC_ASYNC_READ_WATCHPOINT_TRIGGER));
       mention (b);
-      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
+      make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       ui_out_text (uiout, "\nValue = ");
       watchpoint_value_print (b->val, stb->stream);
       ui_out_field_stream (uiout, "value", stb);
-      do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
-      return PRINT_UNKNOWN;
+      result = PRINT_UNKNOWN;
       break;
 
     case bp_access_watchpoint:
@@ -2337,7 +2340,7 @@ print_it_typical (bpstat bs)
 	      (uiout, "reason",
 	       async_reason_lookup (EXEC_ASYNC_ACCESS_WATCHPOINT_TRIGGER));
 	  mention (b);
-	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
+	  make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
 	  watchpoint_value_print (bs->old_val, stb->stream);
 	  ui_out_field_stream (uiout, "old", stb);
@@ -2350,14 +2353,13 @@ print_it_typical (bpstat bs)
 	    ui_out_field_string
 	      (uiout, "reason",
 	       async_reason_lookup (EXEC_ASYNC_ACCESS_WATCHPOINT_TRIGGER));
-	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
+	  make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nValue = ");
 	}
       watchpoint_value_print (b->val, stb->stream);
       ui_out_field_stream (uiout, "new", stb);
-      do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
-      return PRINT_UNKNOWN;
+      result = PRINT_UNKNOWN;
       break;
 
     /* Fall through, we don't deal with these types of breakpoints
@@ -2368,7 +2370,7 @@ print_it_typical (bpstat bs)
 	ui_out_field_string
 	  (uiout, "reason",
 	   async_reason_lookup (EXEC_ASYNC_FUNCTION_FINISHED));
-      return PRINT_UNKNOWN;
+      result = PRINT_UNKNOWN;
       break;
 
     case bp_until:
@@ -2376,7 +2378,7 @@ print_it_typical (bpstat bs)
 	ui_out_field_string
 	  (uiout, "reason",
 	   async_reason_lookup (EXEC_ASYNC_LOCATION_REACHED));
-      return PRINT_UNKNOWN;
+      result = PRINT_UNKNOWN;
       break;
 
     case bp_none:
@@ -2386,8 +2388,12 @@ print_it_typical (bpstat bs)
     case bp_watchpoint_scope:
     case bp_call_dummy:
     default:
-      return PRINT_UNKNOWN;
+      result = PRINT_UNKNOWN;
+      break;
     }
+
+  do_cleanups (old_chain);
+  return result;
 }
 
 /* Generic routine for printing messages indicating why we
@@ -5432,8 +5438,11 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
       
       if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
 	{
+	  struct expression *expr;
+
 	  tok = cond_start = end_tok + 1;
-	  parse_exp_1 (&tok, block_for_pc (pc), 0);
+	  expr = parse_exp_1 (&tok, block_for_pc (pc), 0);
+	  xfree (expr);
 	  cond_end = tok;
 	  *cond_string = savestring (cond_start, 
 				     cond_end - cond_start);
@@ -6846,6 +6855,16 @@ breakpoint_auto_delete (bpstat bs)
   }
 }
 
+/* A cleanup function which destroys a vector.  */
+
+static void
+do_vec_free (void *p)
+{
+  VEC(bp_location_p) **vec = p;
+  if (*vec)
+    VEC_free (bp_location_p, *vec);
+}
+
 /* If SHOULD_INSERT is false, do not insert any breakpoint locations
    into the inferior, only remove already-inserted locations that no
    longer should be inserted.  Functions that delete a breakpoint or
@@ -6868,11 +6887,12 @@ update_global_location_list (int should_insert)
   struct bp_location **next = &bp_location_chain;
   struct bp_location *loc;
   struct bp_location *loc2;
-  struct gdb_exception e;
   VEC(bp_location_p) *old_locations = NULL;
   int ret;
   int ix;
-  
+  struct cleanup *cleanups;
+
+  cleanups = make_cleanup (do_vec_free, &old_locations);
   /* Store old locations for future reference.  */
   for (loc = bp_location_chain; loc; loc = loc->global_next)
     VEC_safe_push (bp_location_p, old_locations, loc);
@@ -7001,6 +7021,8 @@ update_global_location_list (int should_insert)
 	  || (gdbarch_has_global_solist (target_gdbarch)
 	      && target_supports_multi_process ())))
     insert_breakpoint_locations ();
+
+  do_cleanups (cleanups);
 }
 
 void
@@ -7360,7 +7382,7 @@ breakpoint_re_set_one (void *bint)
   char *s;
   enum enable_state save_enable;
   struct gdb_exception e;
-
+  struct cleanup *cleanups;
 
   switch (b->type)
     {
@@ -7430,9 +7452,9 @@ breakpoint_re_set_one (void *bint)
 	  b->condition_not_parsed = 0;
 	}
       expanded = expand_line_sal_maybe (sals.sals[0]);
+      cleanups = make_cleanup (xfree, sals.sals);
       update_breakpoint_locations (b, expanded);
-
-      xfree (sals.sals);
+      do_cleanups (cleanups);
       break;
 
     case bp_watchpoint:
