@@ -176,7 +176,8 @@ enum options
   OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC,
   OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1,
   OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2,
-  OPTION_EXCLUDE_MODULES_FOR_IMPLIB
+  OPTION_EXCLUDE_MODULES_FOR_IMPLIB,
+  OPTION_USE_NUL_PREFIXED_IMPORT_TABLES
 };
 
 static void
@@ -206,6 +207,8 @@ gld${EMULATION_NAME}_add_options
     {"stack", required_argument, NULL, OPTION_STACK},
     {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
     {"support-old-code", no_argument, NULL, OPTION_SUPPORT_OLD_CODE},
+    {"use-nul-prefixed-import-tables", no_argument, NULL,
+     OPTION_USE_NUL_PREFIXED_IMPORT_TABLES},
 #ifdef DLL_SUPPORT
     /* getopt allows abbreviations, so we do this to stop it
        from treating -o as an abbreviation for this option.  */
@@ -555,6 +558,9 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
     case OPTION_SUPPORT_OLD_CODE:
       support_old_code = 1;
+      break;
+    case OPTION_USE_NUL_PREFIXED_IMPORT_TABLES:
+      pep_use_nul_prefixed_import_tables = TRUE;
       break;
 #ifdef DLL_SUPPORT
     case OPTION_OUT_DEF:

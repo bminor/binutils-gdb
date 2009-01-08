@@ -209,6 +209,8 @@ gld_${EMULATION_NAME}_before_parse (void)
 					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1 + 1)
 #define OPTION_EXCLUDE_MODULES_FOR_IMPLIB \
 					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2 + 1)
+#define OPTION_USE_NUL_PREFIXED_IMPORT_TABLES \
+  (OPTION_EXCLUDE_MODULES_FOR_IMPLIB + 1)
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -234,6 +236,8 @@ gld${EMULATION_NAME}_add_options
     {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
     {"support-old-code", no_argument, NULL, OPTION_SUPPORT_OLD_CODE},
     {"thumb-entry", required_argument, NULL, OPTION_THUMB_ENTRY},
+    {"use-nul-prefixed-import-tables", no_argument, NULL,
+     OPTION_USE_NUL_PREFIXED_IMPORT_TABLES},
 #ifdef DLL_SUPPORT
     /* getopt allows abbreviations, so we do this to stop it from treating -o
        as an abbreviation for this option */
@@ -595,6 +599,9 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
     case OPTION_THUMB_ENTRY:
       thumb_entry_symbol = optarg;
+      break;
+    case OPTION_USE_NUL_PREFIXED_IMPORT_TABLES:
+      pe_use_nul_prefixed_import_tables = TRUE;
       break;
 #ifdef DLL_SUPPORT
     case OPTION_OUT_DEF:

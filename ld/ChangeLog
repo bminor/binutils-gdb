@@ -1,3 +1,21 @@
+2009-01-08  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pe.em (OPTION_USE_NUL_PREFIXED_IMPORT_TABLES): New.
+	(gld..._add_options): Add new option
+	--use-nul-prefixed-import-tables.
+	(gld..._handle_option): Likewise.
+	* pep.em: Same as for pe.em.
+	* ld.texinfo: Add new option documentation for
+	--use-nul-prefixed-import-tables.
+	* pe-dll.c (pe_use_nul_prefixed_import_tables): New.
+	(make_head): Make prefix leading zero prefix element for
+	idata$4 and idata$5 dependent to new flag.
+	(make_import_fixup_entry): Remove idata4/5 prefix.
+	* pe-dll.h (pe_use_nul_prefixed_import_tables): New.
+	* pep-dll.c (pe_use_nul_prefixed_import_tables): New.
+	* pep-dll.h (pep_use_nul_prefixed_import_tables): New.
+	* NEWS: Add new option.
+
 2009-01-05  Kai Tietz  <kai.tietz@onevision.com>
 
 	* emultempl/pe.em: Prefix dollar characters to be outputed in

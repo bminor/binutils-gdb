@@ -35,6 +35,7 @@ extern int pe_dll_stdcall_aliases;
 extern int pe_dll_warn_dup_exports;
 extern int pe_dll_compat_implib;
 extern int pe_dll_extra_pe_debug;
+extern int pe_use_nul_prefixed_import_tables;
 
 typedef enum { EXCLUDESYMS, EXCLUDELIBS, EXCLUDEFORIMPLIB } exclude_type;
 

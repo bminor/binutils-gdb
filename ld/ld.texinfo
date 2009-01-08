@@ -5619,6 +5619,13 @@ But it also sets the bottom bit of the address, so that it can be
 branched to using a BX instruction, and the program will start
 executing in Thumb mode straight away.
 
+@cindex PE import table prefixing
+@kindex --use-nul-prefixed-import-tables
+The @samp{--use-nul-prefixed-import-tables} switch is specifying, that
+the import tables idata4 and idata5 have to be generated with a zero
+elememt prefix for import libraries. This is the old style to generate
+import tables. By default this option is turned off.
+
 @cindex BE8
 @kindex --be8
 The @samp{--be8} switch instructs @command{ld} to generate BE8 format

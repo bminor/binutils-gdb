@@ -155,6 +155,7 @@ int pe_dll_stdcall_aliases = 0;
 int pe_dll_warn_dup_exports = 0;
 int pe_dll_compat_implib = 0;
 int pe_dll_extra_pe_debug = 0;
+int pe_use_nul_prefixed_import_tables = 0;
 
 /* Static variables and types.  */
 
@@ -1796,18 +1797,24 @@ make_head (bfd *parent)
   d2 = xmalloc (20);
   id2->contents = d2;
   memset (d2, 0, 20);
-  d2[0] = d2[16] = PE_IDATA5_SIZE; /* Reloc addend.  */
+  if (pe_use_nul_prefixed_import_tables)
+    d2[0] = d2[16] = PE_IDATA5_SIZE; /* Reloc addend.  */
   quick_reloc (abfd,  0, BFD_RELOC_RVA, 2);
   quick_reloc (abfd, 12, BFD_RELOC_RVA, 4);
   quick_reloc (abfd, 16, BFD_RELOC_RVA, 1);
   save_relocs (id2);
 
-  bfd_set_section_size (abfd, id5, PE_IDATA5_SIZE);
+  if (pe_use_nul_prefixed_import_tables)
+    bfd_set_section_size (abfd, id5, PE_IDATA5_SIZE);
+  else
+    bfd_set_section_size (abfd, id5, 0);
   d5 = xmalloc (PE_IDATA5_SIZE);
   id5->contents = d5;
   memset (d5, 0, PE_IDATA5_SIZE);
-
-  bfd_set_section_size (abfd, id4, PE_IDATA4_SIZE);
+  if (pe_use_nul_prefixed_import_tables)
+    bfd_set_section_size (abfd, id4, PE_IDATA4_SIZE);
+  else
+    bfd_set_section_size (abfd, id4, 0);
   d4 = xmalloc (PE_IDATA4_SIZE);
   id4->contents = d4;
   memset (d4, 0, PE_IDATA4_SIZE);
@@ -1815,8 +1822,16 @@ make_head (bfd *parent)
   bfd_set_symtab (abfd, symtab, symptr);
 
   bfd_set_section_contents (abfd, id2, d2, 0, 20);
-  bfd_set_section_contents (abfd, id5, d5, 0, PE_IDATA5_SIZE);
-  bfd_set_section_contents (abfd, id4, d4, 0, PE_IDATA4_SIZE);
+  if (pe_use_nul_prefixed_import_tables)
+    {
+      bfd_set_section_contents (abfd, id5, d5, 0, PE_IDATA5_SIZE);
+      bfd_set_section_contents (abfd, id4, d4, 0, PE_IDATA4_SIZE);
+    }
+  else
+    {
+      bfd_set_section_contents (abfd, id5, d5, 0, 0);
+      bfd_set_section_contents (abfd, id4, d4, 0, 0);
+    }
 
   bfd_make_readable (abfd);
   return abfd;
@@ -2279,7 +2294,6 @@ make_import_fixup_entry (const char *name,
   d2 = xmalloc (20);
   id2->contents = d2;
   memset (d2, 0, 20);
-  d2[0] = d2[16] = PE_IDATA5_SIZE; /* Reloc addend.  */
 
   quick_reloc (abfd, 0, BFD_RELOC_RVA, 1);
   quick_reloc (abfd, 12, BFD_RELOC_RVA, 2);

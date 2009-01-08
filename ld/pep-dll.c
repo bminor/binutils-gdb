@@ -33,6 +33,8 @@
 #define pe_dll_kill_ats             pep_dll_kill_ats
 #define pe_dll_stdcall_aliases      pep_dll_stdcall_aliases
 #define pe_dll_warn_dup_exports     pep_dll_warn_dup_exports
+#define pe_use_nul_prefixed_import_tables \
+  pep_use_nul_prefixed_import_tables
 
 /* External globals.  */
 #define pe_data_import_dll          pep_data_import_dll

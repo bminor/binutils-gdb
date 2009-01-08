@@ -1,4 +1,8 @@
 -*- text -*-
+
+* Add new option --use-nul-prefixed-import-tables to ld for PE targets to
+  allow fallback to old import table generation with null element prefix.
+
 * Windows PE systems now support a new --exclude-modules-for-implib option,
   allowing users to partition object files and archive members between a DLL
   and its associated import library as they are generated during linking.
