@@ -1,6 +1,8 @@
 2009-01-08  Kai Tietz  <kai.tietz@onevision.com>
 
 	* MAINTAINERS: Add myself to Write After Approval.
+	* coff-pe-read.c (read_pe_exported_syms): Enable read of PE+
+	export directory.
 
 2009-01-08  Nathan Froyd  <froydnj@codesourcery.com>
 

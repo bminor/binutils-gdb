@@ -191,6 +191,8 @@ read_pe_exported_syms (struct objfile *objfile)
   unsigned char *expdata, *erva;
   unsigned long name_rvas, ordinals, nexp, ordbase;
   char *dll_name;
+  int is_pe64 = 0;
+  int is_pe32 = 0;
 
   /* Array elements are for text, data and bss in that order
      Initialization with start_rva > end_rva guarantees that
@@ -205,7 +207,11 @@ read_pe_exported_syms (struct objfile *objfile)
 
   char const *target = bfd_get_target (objfile->obfd);
 
-  if ((strcmp (target, "pe-i386") != 0) && (strcmp (target, "pei-i386") != 0))
+  is_pe64 = ((strcmp (target, "pe-x86-64") == 0)
+             || (strcmp (target, "pei-x86-64") == 0));
+  is_pe32 = ((strcmp (target, "pe-i386") == 0)
+             || (strcmp (target, "pei-i386") == 0));
+  if (!is_pe32 && !is_pe64)
     {
       /* This is not an i386 format file. Abort now, because the code
          is untested on anything else. *FIXME* test on further
@@ -216,15 +222,26 @@ read_pe_exported_syms (struct objfile *objfile)
   /* Get pe_header, optional header and numbers of export entries.  */
   pe_header_offset = pe_get32 (dll, 0x3c);
   opthdr_ofs = pe_header_offset + 4 + 20;
-  num_entries = pe_get32 (dll, opthdr_ofs + 92);
+  if (is_pe64)
+    num_entries = pe_get32 (dll, opthdr_ofs + 108;
+  else
+    num_entries = pe_get32 (dll, opthdr_ofs + 92);
 
   if (num_entries < 1)		/* No exports.  */
     {
       return;
     }
 
-  export_rva = pe_get32 (dll, opthdr_ofs + 96);
-  export_size = pe_get32 (dll, opthdr_ofs + 100);
+  if (is_pe64)
+    {
+      export_rva = pe_get32 (dll, opthdr_ofs + 112);
+      export_size = pe_get32 (dll, opthdr_ofs + 116);
+    }
+  else
+    {
+      export_rva = pe_get32 (dll, opthdr_ofs + 96);
+      export_size = pe_get32 (dll, opthdr_ofs + 100);
+    }
   nsections = pe_get16 (dll, pe_header_offset + 4 + 2);
   secptr = (pe_header_offset + 4 + 20 +
 	    pe_get16 (dll, pe_header_offset + 4 + 16));
