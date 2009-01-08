@@ -1,3 +1,9 @@
+2009-01-08  Joel Brobecker  <brobecker@adacore.com>
+	    Emi Suzuki  <emi-suzuki@tjsys.co.jp>
+ 
+	* breakpoint.c (do_enable_breakpoint): Use update_watchpoint for
+	watchpoints.
+
 2009-01-07  Doug Evans  <dje@google.com>
 
 	* top.c (gdb_prompt_string): Delete, unused.

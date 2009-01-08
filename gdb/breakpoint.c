@@ -7780,56 +7780,18 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
       bpt->type == bp_read_watchpoint || 
       bpt->type == bp_access_watchpoint)
     {
-      struct frame_id saved_frame_id;
-      
-      saved_frame_id = get_frame_id (get_selected_frame (NULL));
-      if (bpt->exp_valid_block != NULL)
-	{
-	  struct frame_info *fr =
-	    fr = frame_find_by_id (bpt->watchpoint_frame);
-	  if (fr == NULL)
-	    {
-	      printf_filtered (_("\
-Cannot enable watchpoint %d because the block in which its expression\n\
-is valid is not currently in scope.\n"), bpt->number);
-	      return;
-	    }
-	  select_frame (fr);
-	}
-      
-      if (bpt->val)
-	value_free (bpt->val);
-      mark = value_mark ();
-      fetch_watchpoint_value (bpt->exp, &bpt->val, NULL, NULL);
-      if (bpt->val)
-	release_value (bpt->val);
-      bpt->val_valid = 1;
+      struct gdb_exception e;
 
-      if (bpt->type == bp_hardware_watchpoint ||
-	  bpt->type == bp_read_watchpoint ||
-	  bpt->type == bp_access_watchpoint)
+      TRY_CATCH (e, RETURN_MASK_ALL)
 	{
-	  int i = hw_watchpoint_used_count (bpt->type, &other_type_used);
-	  int mem_cnt = can_use_hardware_watchpoint (bpt->val);
-	  
-	  /* Hack around 'unused var' error for some targets here */
-	  (void) mem_cnt, (void) i;
-	  target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT (
-								    bpt->type, i + mem_cnt, other_type_used);
-	  /* we can consider of type is bp_hardware_watchpoint, convert to 
-	     bp_watchpoint in the following condition */
-	  if (target_resources_ok < 0)
-	    {
-	      printf_filtered (_("\
-Cannot enable watchpoint %d because target watch resources\n\
-have been allocated for other watchpoints.\n"), bpt->number);
-	      value_free_to_mark (mark);
-	      return;
-	    }
+	  update_watchpoint (bpt, 1 /* reparse */);
 	}
-      
-      select_frame (frame_find_by_id (saved_frame_id));
-      value_free_to_mark (mark);
+      if (e.reason < 0)
+	{
+	  exception_fprintf (gdb_stderr, e, _("Cannot enable watchpoint %d: "),
+			     bpt->number);
+	  return;
+	}
     }
 
   if (bpt->enable_state != bp_permanent)
