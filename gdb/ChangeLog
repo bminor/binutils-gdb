@@ -1,3 +1,7 @@
+2009-01-08  Kai Tietz  <kai.tietz@onevision.com>
+
+	* MAINTAINERS: Add myself to Write After Approval.
+
 2009-01-08  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* remote-sim.c (gdb_os_error): Mark as a noreturn function.
