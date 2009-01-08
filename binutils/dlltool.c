@@ -371,6 +371,8 @@ static bfd_boolean export_all_symbols;
    exporting all symbols.  */
 static bfd_boolean do_default_excludes = TRUE;
 
+static bfd_boolean use_nul_prefixed_import_tables = FALSE;
+
 /* Default symbols to exclude when exporting all the symbols.  */
 static const char *default_excludes = "DllMain@12,DllEntryPoint@0,impure_ptr";
 
@@ -2720,19 +2722,28 @@ make_head (void)
   if (!no_idata5)
     {
       fprintf (f, "\t.section\t.idata$5\n");
+      if (use_nul_prefixed_import_tables)
+        {
 #ifdef DLLTOOL_MX86_64
-      fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG); /* NULL terminating list.  */
+          fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
 #else
-      fprintf (f,"\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
+          fprintf (f,"\t%s\t0\n", ASM_LONG);
 #endif
+        }
       fprintf (f, "fthunk:\n");
     }
 
   if (!no_idata4)
     {
       fprintf (f, "\t.section\t.idata$4\n");
-      fprintf (f, "\t%s\t0\n", ASM_LONG);
-      fprintf (f, "\t.section	.idata$4\n");
+      if (use_nul_prefixed_import_tables)
+        {
+#ifdef DLLTOOL_MX86_64
+          fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
+#else
+          fprintf (f,"\t%s\t0\n", ASM_LONG);
+#endif
+        }
       fprintf (f, "hname:\n");
     }
 
@@ -3356,6 +3367,7 @@ usage (FILE *file, int status)
   fprintf (file, _("   -b --base-file <basefile> Read linker generated base file.\n"));
   fprintf (file, _("   -x --no-idata4            Don't generate idata$4 section.\n"));
   fprintf (file, _("   -c --no-idata5            Don't generate idata$5 section.\n"));
+  fprintf (file, _("      --use-nul-prefixed-import-tables Use zero prefixed idata$4 and idata$5.\n"));
   fprintf (file, _("   -U --add-underscore       Add underscores to all symbols in interface library.\n"));
   fprintf (file, _("      --add-stdcall-underscore Add underscores to stdcall symbols in interface library.\n"));
   fprintf (file, _("   -k --kill-at              Kill @<n> from exported names.\n"));
@@ -3386,6 +3398,8 @@ usage (FILE *file, int status)
 #define OPTION_EXCLUDE_SYMS		(OPTION_NO_EXPORT_ALL_SYMS + 1)
 #define OPTION_NO_DEFAULT_EXCLUDES	(OPTION_EXCLUDE_SYMS + 1)
 #define OPTION_ADD_STDCALL_UNDERSCORE	(OPTION_NO_DEFAULT_EXCLUDES + 1)
+#define OPTION_USE_NUL_PREFIXED_IMPORT_TABLES \
+  (OPTION_ADD_STDCALL_UNDERSCORE + 1)
 
 static const struct option long_options[] =
 {
@@ -3393,6 +3407,8 @@ static const struct option long_options[] =
   {"dllname", required_argument, NULL, 'D'},
   {"no-idata4", no_argument, NULL, 'x'},
   {"no-idata5", no_argument, NULL, 'c'},
+  {"use-nul-prefixed-import-tables", no_argument, NULL,
+   OPTION_USE_NUL_PREFIXED_IMPORT_TABLES},
   {"output-exp", required_argument, NULL, 'e'},
   {"output-def", required_argument, NULL, 'z'},
   {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL_SYMS},
@@ -3466,6 +3482,9 @@ main (int ac, char **av)
 	  break;
 	case OPTION_NO_DEFAULT_EXCLUDES:
 	  do_default_excludes = FALSE;
+	  break;
+	case OPTION_USE_NUL_PREFIXED_IMPORT_TABLES:
+	  use_nul_prefixed_import_tables = TRUE;
 	  break;
 	case OPTION_ADD_STDCALL_UNDERSCORE:
 	  add_stdcall_underscore = 1;

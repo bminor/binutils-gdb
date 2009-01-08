@@ -3370,6 +3370,7 @@ dlltool [@option{-d}|@option{--input-def} @var{def-file-name}]
         [@option{-k}|@option{--kill-at}] [@option{-A}|@option{--add-stdcall-alias}]
         [@option{-p}|@option{--ext-prefix-alias} @var{prefix}]
         [@option{-x}|@option{--no-idata4}] [@option{-c}|@option{--no-idata5}]
+        [@option{--use-nul-prefixed-import-tables}]
         [@option{-I}|@option{--identify} @var{library-file-name}] [@option{-i}|@option{--interwork}]
         [@option{-n}|@option{--nodelete}] [@option{-t}|@option{--temp-prefix} @var{prefix}]
         [@option{-v}|@option{--verbose}]
@@ -3582,6 +3583,12 @@ external and import symbols with no leading underscore.
 Specifies that when @command{dlltool} is creating the exports and library
 files it should omit the @code{.idata4} section.  This is for compatibility
 with certain operating systems.
+
+@item --use-nul-prefixed-import-tables
+Specifies that when @command{dlltool} is creating the exports and library
+files it should prefix the @code{.idata4} and @code{.idata5} by zero an
+element. This emulates old gnu import library generation of
+@code{dlltool}. By default this option is turned off.
 
 @item -c
 @itemx --no-idata5

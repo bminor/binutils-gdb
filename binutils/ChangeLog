@@ -1,3 +1,16 @@
+2009-01-08  Kai Tietz  <kai.tietz@onevision.com>
+
+	* dlltool.c (use_nul_prefixed_import_tables): New.
+	(make_head): Make prefix leading zero prefix element for
+	idata$4 and idata$5 dependent to new flag.
+	(usage): Add new option  --use-nul-prefixed-import-tables.
+	(OPTION_USE_NUL_PREFIXED_IMPORT_TABLES): New.
+	(long_options): Add --use-nul-prefixed-import-tables.
+	(main): Likewise.
+	* doc/binutils.texi: Add new option documentation for
+	--use-nul-prefixed-import-tables.
+	* NEWS: Add new option.
+
 2009-01-06  Kai Tietz  <kai.tietz@onevision.com>
 
 	* windres.c (set_endianess): Get architecture name
