@@ -1581,8 +1581,8 @@ do_initial_win32_stuff (struct target_ops *ops, DWORD pid, int attaching)
    If loading these functions succeeds use them to actually detach from
    the inferior process, otherwise behave as usual, pretending that
    detach has worked. */
-static BOOL WINAPI (*DebugSetProcessKillOnExit)(BOOL);
-static BOOL WINAPI (*DebugActiveProcessStop)(DWORD);
+static BOOL WINAPI (*kernel32_DebugSetProcessKillOnExit)(BOOL);
+static BOOL WINAPI (*kernel32_DebugActiveProcessStop)(DWORD);
 
 static int
 has_detach_ability (void)
@@ -1593,13 +1593,14 @@ has_detach_ability (void)
     kernel32 = LoadLibrary ("kernel32.dll");
   if (kernel32)
     {
-      if (!DebugSetProcessKillOnExit)
-	DebugSetProcessKillOnExit = GetProcAddress (kernel32,
+      if (!kernel32_DebugSetProcessKillOnExit)
+	kernel32_DebugSetProcessKillOnExit = GetProcAddress (kernel32,
 						 "DebugSetProcessKillOnExit");
-      if (!DebugActiveProcessStop)
-	DebugActiveProcessStop = GetProcAddress (kernel32,
+      if (!kernel32_DebugActiveProcessStop)
+	kernel32_DebugActiveProcessStop = GetProcAddress (kernel32,
 						 "DebugActiveProcessStop");
-      if (DebugSetProcessKillOnExit && DebugActiveProcessStop)
+      if (kernel32_DebugSetProcessKillOnExit
+	  && kernel32_DebugActiveProcessStop)
 	return 1;
     }
   return 0;
@@ -1719,7 +1720,7 @@ win32_attach (struct target_ops *ops, char *args, int from_tty)
     error (_("Can't attach to process."));
 
   if (has_detach_ability ())
-    DebugSetProcessKillOnExit (FALSE);
+    kernel32_DebugSetProcessKillOnExit (FALSE);
 
   if (from_tty)
     {
@@ -1749,13 +1750,13 @@ win32_detach (struct target_ops *ops, char *args, int from_tty)
       ptid_t ptid = {-1};
       win32_resume (ptid, 0, TARGET_SIGNAL_0);
 
-      if (!DebugActiveProcessStop (current_event.dwProcessId))
+      if (!kernel32_DebugActiveProcessStop (current_event.dwProcessId))
 	{
 	  error (_("Can't detach process %lu (error %lu)"),
 		 current_event.dwProcessId, GetLastError ());
 	  detached = 0;
 	}
-      DebugSetProcessKillOnExit (FALSE);
+      kernel32_DebugSetProcessKillOnExit (FALSE);
     }
   if (detached && from_tty)
     {

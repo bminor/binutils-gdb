@@ -1,4 +1,11 @@
-2009-01-07  Joel Brobecker  <brobecker@adacore.com>
+2009-01-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* win32-nat.c (kernel32_DebugSetProcessKillOnExit): Renames
+	DebugSetProcessKillOnExit.  Update all uses in this file.
+	(kernel32_DebugActiveProcessStop): Renames DebugActiveProcessStop.
+	Update all uses in this file.
+
+2009-01-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* win32-nat.c (do_initial_win32_stuff): Add new ops parameter,
 	and use it when pushing the target.
