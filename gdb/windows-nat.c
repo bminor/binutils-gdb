@@ -481,7 +481,7 @@ static DWORD WINAPI (*psapi_GetModuleFileNameExA) (HANDLE, HMODULE, LPSTR,
    is zero return the first loaded module (which is always the name of the
    executable).  */
 static int
-get_module_name (DWORD base_address, char *dll_name_ret)
+get_module_name (LPVOID base_address, char *dll_name_ret)
 {
   DWORD len;
   MODULEINFO mi;
@@ -524,7 +524,7 @@ get_module_name (DWORD base_address, char *dll_name_ret)
 				       &mi, sizeof (mi)))
 	error (_("Can't get module info"));
 
-      if (!base_address || (DWORD) (mi.lpBaseOfDll) == base_address)
+      if (!base_address || mi.lpBaseOfDll == base_address)
 	{
 	  /* Try to find the name of the given module */
 	  len = psapi_GetModuleFileNameExA (current_process_handle,
@@ -560,7 +560,7 @@ struct safe_symbol_file_add_args
 /* Maintain a linked list of "so" information. */
 struct lm_info
 {
-  DWORD load_addr;
+  LPVOID load_addr;
 };
 
 static struct so_list solib_start, *solib_end;
@@ -619,7 +619,7 @@ safe_symbol_file_add (char *name, int from_tty,
 }
 
 static struct so_list *
-win32_make_so (const char *name, DWORD load_addr)
+win32_make_so (const char *name, LPVOID load_addr)
 {
   struct so_list *so;
   char buf[MAX_PATH + 1];
@@ -746,7 +746,7 @@ handle_load_dll (void *dummy)
 
   dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
 
-  if (!get_module_name ((DWORD) event->lpBaseOfDll, dll_buf))
+  if (!get_module_name (event->lpBaseOfDll, dll_buf))
     dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
 
   dll_name = dll_buf;
@@ -757,11 +757,11 @@ handle_load_dll (void *dummy)
   if (!dll_name)
     return 1;
 
-  solib_end->next = win32_make_so (dll_name, (DWORD) event->lpBaseOfDll);
+  solib_end->next = win32_make_so (dll_name, event->lpBaseOfDll);
   solib_end = solib_end->next;
 
   DEBUG_EVENTS (("gdb: Loading dll \"%s\" at 0x%lx.\n", solib_end->so_name,
-		 (DWORD) solib_end->lm_info->load_addr));
+		 solib_end->lm_info->load_addr));
 
   return 1;
 }
@@ -777,7 +777,7 @@ win32_free_so (struct so_list *so)
 static int
 handle_unload_dll (void *dummy)
 {
-  DWORD lpBaseOfDll = (DWORD) current_event.u.UnloadDll.lpBaseOfDll;
+  LPVOID lpBaseOfDll = current_event.u.UnloadDll.lpBaseOfDll;
   struct so_list *so;
 
   for (so = &solib_start; so->next != NULL; so = so->next)
@@ -2082,7 +2082,8 @@ win32_xfer_shared_libraries (struct target_ops *ops,
   obstack_init (&obstack);
   obstack_grow_str (&obstack, "<library-list>\n");
   for (so = solib_start.next; so; so = so->next)
-    win32_xfer_shared_library (so->so_name, so->lm_info->load_addr, &obstack);
+    win32_xfer_shared_library (so->so_name, (CORE_ADDR) so->lm_info->load_addr,
+                               &obstack);
   obstack_grow_str0 (&obstack, "</library-list>\n");
 
   buf = obstack_finish (&obstack);
