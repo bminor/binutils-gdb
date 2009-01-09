@@ -1,3 +1,12 @@
+2009-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* win32-nat.c (do_initial_win32_stuff): Add new ops parameter,
+	and use it when pushing the target.
+	(win32_attach, win32_create_inferior): Update call to
+	do_initial_win32_stuff.
+	(win32_detach, win32_mourn_inferior): Use our ops parameter
+	instead of the global win32_ops to unpush the target.
+
 2009-01-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* ser-mingw.c (ser_windows_open): Use proper type when casting

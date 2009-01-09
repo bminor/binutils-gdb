@@ -1521,7 +1521,7 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 }
 
 static void
-do_initial_win32_stuff (DWORD pid, int attaching)
+do_initial_win32_stuff (struct target_ops *ops, DWORD pid, int attaching)
 {
   extern int stop_after_trap;
   int i;
@@ -1541,7 +1541,7 @@ do_initial_win32_stuff (DWORD pid, int attaching)
 #endif
   current_event.dwProcessId = pid;
   memset (&current_event, 0, sizeof (current_event));
-  push_target (&win32_ops);
+  push_target (ops);
   disable_breakpoints_in_shlibs ();
   win32_clear_solib ();
   clear_proceed_status ();
@@ -1735,7 +1735,7 @@ win32_attach (struct target_ops *ops, char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
-  do_initial_win32_stuff (pid, 1);
+  do_initial_win32_stuff (ops, pid, 1);
   target_terminal_ours ();
 }
 
@@ -1770,7 +1770,7 @@ win32_detach (struct target_ops *ops, char *args, int from_tty)
   inferior_ptid = null_ptid;
   detach_inferior (current_event.dwProcessId);
 
-  unpush_target (&win32_ops);
+  unpush_target (ops);
 }
 
 static char *
@@ -1945,7 +1945,7 @@ win32_create_inferior (struct target_ops *ops, char *exec_file,
   else
     saw_create = 0;
 
-  do_initial_win32_stuff (pi.dwProcessId, 0);
+  do_initial_win32_stuff (ops, pi.dwProcessId, 0);
 
   /* win32_continue (DBG_CONTINUE, -1); */
 }
@@ -1960,7 +1960,7 @@ win32_mourn_inferior (struct target_ops *ops)
       CHECK (CloseHandle (current_process_handle));
       open_process_used = 0;
     }
-  unpush_target (&win32_ops);
+  unpush_target (ops);
   generic_mourn_inferior ();
 }
 
