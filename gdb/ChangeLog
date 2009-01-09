@@ -1,3 +1,7 @@
+2009-01-09  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (init.c): Set LANG/LC_ALL to C, not c.
+
 2009-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbtypes.c (append_composite_type_field): Correct the location of
