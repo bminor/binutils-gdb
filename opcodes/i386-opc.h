@@ -94,8 +94,10 @@
 #define CpuMovbe	(CpuFMA + 1)
 /* EPT Instructions required */
 #define CpuEPT		(CpuMovbe + 1)
+/* RDTSCP Instuction support required */
+#define CpuRdtscp	(CpuEPT + 1)
 /* 64bit support available, used by -march= in assembler.  */
-#define CpuLM		(CpuEPT + 1)
+#define CpuLM		(CpuRdtscp + 1)
 /* 64bit support required  */
 #define Cpu64		(CpuLM + 1)
 /* Not supported in the 64bit mode  */
@@ -150,6 +152,7 @@ typedef union i386_cpu_flags
       unsigned int cpufma:1;
       unsigned int cpumovbe:1;
       unsigned int cpuept:1;
+      unsigned int cpurdtscp:1;
       unsigned int cpulm:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;

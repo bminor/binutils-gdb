@@ -1,3 +1,18 @@
+2009-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Add CpuRdtscp to CPU_K8_FLAGS
+	and CPU_AMDFAM10_FLAGS.  Add CPU_RDTSCP_FLAGS.
+	(cpu_flags): Add CpuRdtscp.
+	(set_bitfield): Remove CpuSledgehammer check.
+
+	* i386-opc.h (CpuRdtscp): New.
+	(CpuLM): Updated.
+	(i386_cpu_flags): Add cpurdtscp.
+
+	* i386-opc.tbl: Replace CpuSledgehammer with CpuRdtscp.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2009-01-09  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (PPCNONE): Define.

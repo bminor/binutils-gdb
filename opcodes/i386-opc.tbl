@@ -2493,7 +2493,7 @@ syscall, 0, 0xf05, None, 2, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ld
 sysret, 0, 0xf07, None, 2, CpuK6, DefaultSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { 0 }
 sysret, 0, 0xf07, None, 2, Cpu64, DefaultSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { 0 }
 swapgs, 0, 0xf01, 0xf8, 2, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
-rdtscp, 0, 0xf01, 0xf9, 2, CpuSledgehammer, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
+rdtscp, 0, 0xf01, 0xf9, 2, CpuRdtscp, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
 
 // AMD Pacifica additions.
 clgi, 0, 0xf01, 0xdd, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }

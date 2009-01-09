@@ -1,3 +1,10 @@
+2009-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .rdtscp.
+	(md_show_usage): Display rdtscp.
+
+	* doc/c-i386.texi: Document rdtscp.
+
 2009-01-09  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (ppc_setup_opcodes): Remove PPC_OPCODE_NOPOWER4 test.

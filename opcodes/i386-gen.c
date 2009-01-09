@@ -81,9 +81,9 @@ static initializer cpu_flag_init [] =
   { "CPU_ATHLON_FLAGS",
     "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuMMX|Cpu3dnow|Cpu3dnowA" },
   { "CPU_K8_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuK8|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuK8|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuRdtscp|CpuLM" },
   { "CPU_AMDFAM10_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuK8|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuK8|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuRdtscp|CpuLM" },
   { "CPU_MMX_FLAGS",
     "CpuMMX" },
   { "CPU_SSE_FLAGS",
@@ -112,6 +112,8 @@ static initializer cpu_flag_init [] =
     "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuAVX|CpuFMA" },
   { "CPU_MOVBE_FLAGS",
     "CpuMovbe" },
+  { "CPU_RDTSCP_FLAGS",
+    "CpuRdtscp" },
   { "CPU_EPT_FLAGS",
     "CpuEPT" },
   { "CPU_3DNOW_FLAGS",
@@ -274,6 +276,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuLM),
   BITFIELD (CpuMovbe),
   BITFIELD (CpuEPT),
+  BITFIELD (CpuRdtscp),
   BITFIELD (Cpu64),
   BITFIELD (CpuNo64),
 #ifdef CpuUnused
@@ -500,9 +503,7 @@ set_bitfield (const char *f, bitfield *array, unsigned int size)
 {
   unsigned int i;
 
-  if (strcmp (f, "CpuSledgehammer") == 0)
-    f= "CpuK8";
-  else if (strcmp (f, "Mmword") == 0)
+  if (strcmp (f, "Mmword") == 0)
     f= "Qword";
   else if (strcmp (f, "Oword") == 0)
     f= "Xmmword";

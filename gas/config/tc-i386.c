@@ -650,6 +650,8 @@ static const arch_entry cpu_arch[] =
     CPU_MOVBE_FLAGS },
   { ".ept", PROCESSOR_UNKNOWN,
     CPU_EPT_FLAGS },
+  { ".rdtscp", PROCESSOR_UNKNOWN,
+    CPU_RDTSCP_FLAGS },
   { ".3dnow", PROCESSOR_UNKNOWN,
     CPU_3DNOW_FLAGS },
   { ".3dnowa", PROCESSOR_UNKNOWN,
@@ -8235,7 +8237,8 @@ md_show_usage (stream)
                           EXTENSION is combination of:\n\
                            mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, sse4,\n\
                            avx, vmx, smx, xsave, movbe, ept, aes, pclmul, fma,\n\
-                           3dnow, 3dnowa, sse4a, sse5, svme, abm, padlock\n"));
+                           rdtscp, 3dnow, 3dnowa, sse4a, sse5, svme, abm,\n\
+                           padlock\n"));
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\

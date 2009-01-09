@@ -36,6 +36,8 @@ vfmadd132pd %xmm4,%xmm6,%xmm2
 movbe   (%ecx),%ebx
 # EPT
 invept  (%ecx),%ebx
+# RDTSCP
+rdtscp
 # 3DNow
 pmulhrw %mm4,%mm3
 # 3DNow Extensions
