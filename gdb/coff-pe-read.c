@@ -223,7 +223,7 @@ read_pe_exported_syms (struct objfile *objfile)
   pe_header_offset = pe_get32 (dll, 0x3c);
   opthdr_ofs = pe_header_offset + 4 + 20;
   if (is_pe64)
-    num_entries = pe_get32 (dll, opthdr_ofs + 108;
+    num_entries = pe_get32 (dll, opthdr_ofs + 108);
   else
     num_entries = pe_get32 (dll, opthdr_ofs + 92);
 

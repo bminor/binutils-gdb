@@ -1,3 +1,7 @@
+2009-01-09  Kai Tietz  <kai.tietz@onevision.com>
+
+	* coff-pe-read.c (read_pe_exported_syms): Fix typo.
+
 2009-01-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* CONTRIBUTE: Minor reformatting.
