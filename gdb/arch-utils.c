@@ -495,8 +495,8 @@ gdbarch_update_p (struct gdbarch_info info)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
-			    "Architecture 0x%08lx (%s) unchanged\n",
-			    (long) new_gdbarch,
+			    "Architecture %s (%s) unchanged\n",
+			    host_address_to_string (new_gdbarch),
 			    gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
       return 1;
     }
@@ -504,8 +504,8 @@ gdbarch_update_p (struct gdbarch_info info)
   /* It's a new architecture, swap it in.  */
   if (gdbarch_debug)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
-			"New architecture 0x%08lx (%s) selected\n",
-			(long) new_gdbarch,
+			"New architecture %s (%s) selected\n",
+			host_address_to_string (new_gdbarch),
 			gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
   deprecated_current_gdbarch_select_hack (new_gdbarch);
 
