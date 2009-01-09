@@ -1,3 +1,9 @@
+2009-01-09  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (PPCNONE): Define.
+	(NOPOWER4): Delete.
+	(powerpc_opcodes): Initialize the new "deprecated" field.
+
 2009-01-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (December, 2008)
