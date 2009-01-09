@@ -1,5 +1,10 @@
 2009-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* event-top.c (async_disconnect, async_stop_sig): use "raise"
+	instead of "kill" to raise a signal.
+
+2009-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* win32-nat.c (get_module_name): Change the type of parameter
 	"base_address" to LPVOID.  Remove unnecessary cast.
 	(struct lm_info): Change type of load_addr to LPVOID.

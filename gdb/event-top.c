@@ -977,7 +977,7 @@ async_disconnect (gdb_client_data arg)
 		"Could not kill the program being debugged",
 		RETURN_MASK_ALL);
   signal (SIGHUP, SIG_DFL);	/*FIXME: ??????????? */
-  kill (getpid (), SIGHUP);
+  raise (SIGHUP);
 }
 #endif
 
@@ -1005,7 +1005,7 @@ async_stop_sig (gdb_client_data arg)
 #elif HAVE_SIGSETMASK
   sigsetmask (0);
 #endif
-  kill (getpid (), SIGTSTP);
+  raise (SIGTSTP);
   signal (SIGTSTP, handle_stop_sig);
 #else
   signal (STOP_SIGNAL, handle_stop_sig);
