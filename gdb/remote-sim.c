@@ -262,18 +262,12 @@ gdb_os_evprintf_filtered (host_callback * p, const char *format, va_list ap)
 /* GDB version of error callback.  */
 
 static void
-gdb_os_error (host_callback * p, const char *format,...)
+gdb_os_error (host_callback * p, const char *format, ...)
 {
-  if (deprecated_error_hook)
-    (*deprecated_error_hook) ();
-  else
-    {
-      va_list args;
-      va_start (args, format);
-      verror (format, args);
-      va_end (args);
-    }
-  exit (1);
+  va_list args;
+  va_start (args, format);
+  verror (format, args);
+  va_end (args);
 }
 
 int

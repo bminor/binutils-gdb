@@ -1,3 +1,11 @@
+2009-01-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* defs.h (deprecated_error_hook): Delete declaration.
+	* interps.c (clear_interpreter_hooks): Adjust.
+	* remote-sim.c (gdb_os_error): Don't try to call
+	deprecated_error_hook.  No need to call exit anymore.
+	* top.c (deprecated_error_hook): Delete.
+
 2009-01-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* arch-utils.c (gdbarch_update_p): Use host_address_to_string

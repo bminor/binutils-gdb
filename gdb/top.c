@@ -283,11 +283,6 @@ void (*deprecated_set_hook) (struct cmd_list_element * c);
 
 void (*deprecated_context_hook) (int id);
 
-/* Takes control from error ().  Typically used to prevent longjmps out of the
-   middle of the GUI.  Usually used in conjunction with a catch routine.  */
-
-void (*deprecated_error_hook) (void);
-
 /* Handler for SIGHUP.  */
 
 #ifdef SIGHUP

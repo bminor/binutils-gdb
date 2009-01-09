@@ -1109,8 +1109,6 @@ extern void (*deprecated_call_command_hook) (struct cmd_list_element * c,
 
 extern void (*deprecated_set_hook) (struct cmd_list_element * c);
 
-extern void (*deprecated_error_hook) (void);
-
 extern void (*deprecated_error_begin_hook) (void);
 
 extern int (*deprecated_ui_load_progress_hook) (const char *section,
