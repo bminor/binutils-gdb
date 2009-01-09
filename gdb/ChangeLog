@@ -1,5 +1,13 @@
 2009-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbarch.sh: Fix all the compilation errors on amd64-windows
+	due to casting a pointer to a long when printing a function
+	address. Instead, use host_address_to_string to convert our
+	address to a string.
+	* gdbarch.c: Regenerate.
+
+2009-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* event-top.c (async_disconnect, async_stop_sig): use "raise"
 	instead of "kill" to raise a signal.
 

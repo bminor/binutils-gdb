@@ -343,7 +343,7 @@ i:int:byte_order_for_code:::BFD_ENDIAN_BIG
 #
 i:enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
 #
-i:const struct target_desc *:target_desc:::::::plongest ((long) gdbarch->target_desc)
+i:const struct target_desc *:target_desc:::::::host_address_to_string (gdbarch->target_desc)
 
 # The bit byte-order has to do just with numbering of bits in debugging symbols
 # and such.  Conceptually, it's quite separate from byte/word byte order.
@@ -1474,8 +1474,8 @@ do
     if class_is_function_p
     then
 	printf "  fprintf_unfiltered (file,\n"
-	printf "                      \"gdbarch_dump: ${function} = <0x%%lx>\\\\n\",\n"
-	printf "                      (long) gdbarch->${function});\n"
+	printf "                      \"gdbarch_dump: ${function} = <%%s>\\\\n\",\n"
+	printf "                      host_address_to_string (gdbarch->${function}));\n"
     else
 	# It is a variable
 	case "${print}:${returntype}" in
@@ -1826,9 +1826,9 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
     }
   /* log it */
   if (gdbarch_debug)
-    fprintf_unfiltered (gdb_stdlog, "register_gdbarch_init (%s, 0x%08lx)\n",
+    fprintf_unfiltered (gdb_stdlog, "register_gdbarch_init (%s, %s)\n",
 			bfd_arch_info->printable_name,
-			(long) init);
+			host_address_to_string (init));
   /* Append it */
   (*curr) = XMALLOC (struct gdbarch_registration);
   (*curr)->bfd_architecture = bfd_architecture;
@@ -1907,11 +1907,11 @@ find_arch_by_info (struct gdbarch_info info)
 			  "find_arch_by_info: info.osabi %d (%s)\n",
 			  info.osabi, gdbarch_osabi_name (info.osabi));
       fprintf_unfiltered (gdb_stdlog,
-			  "find_arch_by_info: info.abfd 0x%lx\n",
-			  (long) info.abfd);
+			  "find_arch_by_info: info.abfd %s\n",
+			  host_address_to_string (info.abfd));
       fprintf_unfiltered (gdb_stdlog,
-			  "find_arch_by_info: info.tdep_info 0x%lx\n",
-			  (long) info.tdep_info);
+			  "find_arch_by_info: info.tdep_info %s\n",
+			  host_address_to_string (info.tdep_info));
     }
 
   /* Find the tdep code that knows about this architecture.  */
@@ -1950,8 +1950,8 @@ find_arch_by_info (struct gdbarch_info info)
       struct gdbarch_list *this;
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "find_arch_by_info: "
-			    "Previous architecture 0x%08lx (%s) selected\n",
-			    (long) new_gdbarch,
+			    "Previous architecture %s (%s) selected\n",
+			    host_address_to_string (new_gdbarch),
 			    new_gdbarch->bfd_arch_info->printable_name);
       /* Find the existing arch in the list.  */
       for (list = &rego->arches;
@@ -1972,8 +1972,8 @@ find_arch_by_info (struct gdbarch_info info)
   /* It's a new architecture.  */
   if (gdbarch_debug)
     fprintf_unfiltered (gdb_stdlog, "find_arch_by_info: "
-			"New architecture 0x%08lx (%s) selected\n",
-			(long) new_gdbarch,
+			"New architecture %s (%s) selected\n",
+			host_address_to_string (new_gdbarch),
 			new_gdbarch->bfd_arch_info->printable_name);
   
   /* Insert the new architecture into the front of the architecture
