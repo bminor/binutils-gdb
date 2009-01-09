@@ -1,3 +1,9 @@
+2009-01-08  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* gas/mips/mips1-fp.s, gas/mips/mips1-fp.d, gas/mips/mips1-fp.l:
+	New tests.
+	* gas/mips/mips.exp: Run them.
+
 2008-09-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/all/gas.exp: Don't run redef tests on a bunch of targets.
