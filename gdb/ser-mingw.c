@@ -61,7 +61,7 @@ ser_windows_open (struct serial *scb, const char *name)
       return -1;
     }
 
-  scb->fd = _open_osfhandle ((long) h, O_RDWR);
+  scb->fd = _open_osfhandle ((intptr_t) h, O_RDWR);
   if (scb->fd < 0)
     {
       errno = ENOENT;
