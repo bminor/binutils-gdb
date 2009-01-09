@@ -1,3 +1,8 @@
+2009-01-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbtypes.c (append_composite_type_field): Correct the location of
+	appended fields.
+
 2009-01-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* defs.h (deprecated_error_hook): Delete declaration.

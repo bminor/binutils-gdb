@@ -1856,10 +1856,9 @@ append_composite_type_field (struct type *t, char *name,
     {
       TYPE_LENGTH (t) = TYPE_LENGTH (t) + TYPE_LENGTH (field);
       if (TYPE_NFIELDS (t) > 1)
-	{
-	  FIELD_BITPOS (f[0]) = (FIELD_BITPOS (f[-1])
-				 + TYPE_LENGTH (field) * TARGET_CHAR_BIT);
-	}
+	FIELD_BITPOS (f[0]) = (FIELD_BITPOS (f[-1])
+			       + (TYPE_LENGTH (FIELD_TYPE (f[-1]))
+				  * TARGET_CHAR_BIT));
     }
 }
 
