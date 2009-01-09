@@ -85,6 +85,12 @@ enum
 #endif
 #include <psapi.h>
 
+#ifndef CONTEXT_EXTENDED_REGISTERS
+/* This macro is only defined on ia32.  It only makes sense on this target,
+   so define it as zero if not already defined.  */
+#define CONTEXT_EXTENDED_REGISTERS 0
+#endif
+
 #define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_DEBUG_REGISTERS \
 	| CONTEXT_EXTENDED_REGISTERS
 
