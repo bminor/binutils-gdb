@@ -1,5 +1,11 @@
 2009-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* win32-nat.c (has_detach_ability, set_process_privilege):
+	Cast the result of GetProcAddress to (void *) to avoid
+	a compilation warning.
+
+2009-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* win32-nat.c (CONTEXT_EXTENDED_REGISTERS): Define to 0 if not
 	already defined.
 

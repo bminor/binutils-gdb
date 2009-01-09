@@ -1600,11 +1600,11 @@ has_detach_ability (void)
   if (kernel32)
     {
       if (!kernel32_DebugSetProcessKillOnExit)
-	kernel32_DebugSetProcessKillOnExit = GetProcAddress (kernel32,
-						 "DebugSetProcessKillOnExit");
+	kernel32_DebugSetProcessKillOnExit =
+	  (void *) GetProcAddress (kernel32, "DebugSetProcessKillOnExit");
       if (!kernel32_DebugActiveProcessStop)
-	kernel32_DebugActiveProcessStop = GetProcAddress (kernel32,
-						 "DebugActiveProcessStop");
+	kernel32_DebugActiveProcessStop =
+	  (void *) GetProcAddress (kernel32, "DebugActiveProcessStop");
       if (kernel32_DebugSetProcessKillOnExit
 	  && kernel32_DebugActiveProcessStop)
 	return 1;
@@ -1641,13 +1641,14 @@ set_process_privilege (const char *privilege, BOOL enable)
       if (!(advapi32 = LoadLibrary ("advapi32.dll")))
 	goto out;
       if (!OpenProcessToken)
-	OpenProcessToken = GetProcAddress (advapi32, "OpenProcessToken");
+	OpenProcessToken =
+          (void *) GetProcAddress (advapi32, "OpenProcessToken");
       if (!LookupPrivilegeValue)
-	LookupPrivilegeValue = GetProcAddress (advapi32,
-					       "LookupPrivilegeValueA");
+	LookupPrivilegeValue =
+          (void *) GetProcAddress (advapi32, "LookupPrivilegeValueA");
       if (!AdjustTokenPrivileges)
-	AdjustTokenPrivileges = GetProcAddress (advapi32,
-						"AdjustTokenPrivileges");
+	AdjustTokenPrivileges =
+          (void *) GetProcAddress (advapi32, "AdjustTokenPrivileges");
       if (!OpenProcessToken || !LookupPrivilegeValue || !AdjustTokenPrivileges)
 	{
 	  advapi32 = NULL;
