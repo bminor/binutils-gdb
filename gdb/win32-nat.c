@@ -696,7 +696,7 @@ get_image_name (HANDLE h, void *address, int unicode)
   char *address_ptr;
   int len = 0;
   char b[2];
-  DWORD done;
+  SIZE_T done;
 
   /* Attempt to read the name of the dll that was detected.
      This is documented to work only when actively debugging
@@ -1001,7 +1001,7 @@ info_w32_command (char *args, int from_tty)
 
 #define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
   printf_unfiltered ("gdb: Target exception %s at 0x%08lx\n", x, \
-  (DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress)
+          current_event.u.Exception.ExceptionRecord.ExceptionAddress)
 
 static int
 handle_exception (struct target_waitstatus *ourstatus)
@@ -1115,7 +1115,7 @@ handle_exception (struct target_waitstatus *ourstatus)
 	return -1;
       printf_unfiltered ("gdb: unknown target exception 0x%08lx at 0x%08lx\n",
 		    current_event.u.Exception.ExceptionRecord.ExceptionCode,
-	(DWORD) current_event.u.Exception.ExceptionRecord.ExceptionAddress);
+	        current_event.u.Exception.ExceptionRecord.ExceptionAddress);
       ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
       break;
     }
@@ -1981,7 +1981,7 @@ win32_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
 		   int write, struct mem_attrib *mem,
 		   struct target_ops *target)
 {
-  DWORD done = 0;
+  SIZE_T done = 0;
   if (write)
     {
       DEBUG_MEM (("gdb: write target memory, %d bytes at 0x%08lx\n",

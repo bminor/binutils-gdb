@@ -1,5 +1,11 @@
 2009-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* win32-nat.c (get_image_name, win32_xfer_memory): Fix type
+	definition of local variable "done".
+	(info_w32_command, handle_exception): Remove unnecessary cast.
+
+2009-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* win32-nat.c (kernel32_DebugSetProcessKillOnExit): Renames
 	DebugSetProcessKillOnExit.  Update all uses in this file.
 	(kernel32_DebugActiveProcessStop): Renames DebugActiveProcessStop.
