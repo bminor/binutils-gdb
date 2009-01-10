@@ -42,14 +42,12 @@
 #define Cpu586		(Cpu486 + 1)
 /* i686 or better required */
 #define Cpu686		(Cpu586 + 1)
-/* Pentium4 or better required */
-#define CpuP4		(Cpu686 + 1)
-/* AMD K6 or better required*/
-#define CpuK6		(CpuP4 + 1)
-/* AMD K8 or better required */
-#define CpuK8		(CpuK6 + 1)
+/* CLFLUSH Instuction support required */
+#define CpuClflush	(Cpu686 + 1)
+/* SYSCALL Instuctions support required */
+#define CpuSYSCALL	(CpuClflush + 1)
 /* MMX support required */
-#define CpuMMX		(CpuK8 + 1)
+#define CpuMMX		(CpuSYSCALL + 1)
 /* SSE support required */
 #define CpuSSE		(CpuMMX + 1)
 /* SSE2 support required */
@@ -126,9 +124,8 @@ typedef union i386_cpu_flags
       unsigned int cpui486:1;
       unsigned int cpui586:1;
       unsigned int cpui686:1;
-      unsigned int cpup4:1;
-      unsigned int cpuk6:1;
-      unsigned int cpuk8:1;
+      unsigned int cpuclflush:1;
+      unsigned int cpusyscall:1;
       unsigned int cpummx:1;
       unsigned int cpusse:1;
       unsigned int cpusse2:1;

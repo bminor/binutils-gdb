@@ -909,11 +909,12 @@ fucompi, 1, 0xdfe8, None, 2, Cpu686, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|N
 
 // Pentium4 extensions.
 
-movnti, 2, 0xfc3, None, 2, CpuP4, Modrm|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-clflush, 1, 0xfae, 0x7, 2, CpuP4, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-lfence, 0, 0xfae, 0xe8, 2, CpuP4, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
-mfence, 0, 0xfae, 0xf0, 2, CpuP4, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
-pause, 0, 0xf390, None, 2, CpuP4, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+movnti, 2, 0xfc3, None, 2, CpuSSE2, Modrm|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+clflush, 1, 0xfae, 0x7, 2, CpuClflush, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+lfence, 0, 0xfae, 0xe8, 2, CpuSSE2, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
+mfence, 0, 0xfae, 0xf0, 2, CpuSSE2, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
+// Processors that do not support PAUSE treat this opcode as a NOP instruction.
+pause, 0, 0xf390, None, 2, Cpu186, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
 // MMX/SSE2 instructions.
 
@@ -2488,9 +2489,9 @@ pmulhrw, 2, 0xf0f, 0xb7, 2, Cpu3dnow, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|N
 pswapd, 2, 0xf0f, 0xbb, 2, Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegMMX, RegMMX }
 
 // AMD extensions.
-syscall, 0, 0xf05, None, 2, CpuK6, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+syscall, 0, 0xf05, None, 2, CpuSYSCALL, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 syscall, 0, 0xf05, None, 2, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
-sysret, 0, 0xf07, None, 2, CpuK6, DefaultSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { 0 }
+sysret, 0, 0xf07, None, 2, CpuSYSCALL, DefaultSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { 0 }
 sysret, 0, 0xf07, None, 2, Cpu64, DefaultSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { 0 }
 swapgs, 0, 0xf01, 0xf8, 2, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
 rdtscp, 0, 0xf01, 0xf9, 2, CpuRdtscp, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }

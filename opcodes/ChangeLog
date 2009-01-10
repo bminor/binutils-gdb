@@ -1,3 +1,36 @@
+2009-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Replace CpuP4 and CpuK6 with
+	CpuClflush and CpuSYSCALL, respectively. Remove CpuK8.  Add
+	CPU_COREI7_FLAGS, CPU_CLFLUSH_FLAGS and CPU_SYSCALL_FLAGS.
+	(cpu_flags): Remove CpuP4, CpuK6 and CpuK8.  Add CpuClflush
+	and CpuSYSCALL.
+	(lineno): Removed.
+	(set_bitfield): Take an argument, lineno.  Don't report lineno
+	on error if it is -1.
+	(process_i386_cpu_flag): Take an argument, lineno.
+	(process_i386_opcode_modifier): Likewise.
+	(process_i386_operand_type): Likewise.
+	(output_i386_opcode): Likewise.
+	(opcode_hash_entry): Add lineno.
+	(process_i386_opcodes): Updated.
+	(process_i386_registers): Likewise.
+	(process_i386_initializers): Likewise.
+
+	* i386-opc.h (CpuP4): Removed.
+	(CpuK6): Likewise.
+	(CpuK8): Likewise.
+	(CpuClflush): New.
+	(CpuSYSCALL): Likewise.
+	(CpuMMX): Updated.
+	(i386_cpu_flags): Remove cpup4, cpuk6 and cpuk8.  Add
+	cpuclflush and cpusyscall.
+
+	* i386-opc.tbl: Update movnti, clflush, lfence, mfence, pause,
+	syscall and sysret.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2009-01-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Add CpuRdtscp to CPU_K8_FLAGS

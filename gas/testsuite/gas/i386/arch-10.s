@@ -2,6 +2,10 @@
 	.text
 # cmov feature 
 cmove	%eax,%ebx
+# clflush
+clflush (%eax)
+# SYSCALL
+syscall
 # MMX
 paddb %mm4,%mm3
 # SSE

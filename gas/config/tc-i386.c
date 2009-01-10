@@ -600,6 +600,8 @@ static const arch_entry cpu_arch[] =
     CPU_CORE2_FLAGS },
   { "core2", PROCESSOR_CORE2,
     CPU_CORE2_FLAGS },
+  { "corei7", PROCESSOR_COREI7,
+    CPU_COREI7_FLAGS },
   { "k6", PROCESSOR_K6,
     CPU_K6_FLAGS },
   { "k6_2", PROCESSOR_K6,
@@ -650,6 +652,10 @@ static const arch_entry cpu_arch[] =
     CPU_MOVBE_FLAGS },
   { ".ept", PROCESSOR_UNKNOWN,
     CPU_EPT_FLAGS },
+  { ".clflush", PROCESSOR_UNKNOWN,
+    CPU_CLFLUSH_FLAGS },
+  { ".syscall", PROCESSOR_UNKNOWN,
+    CPU_SYSCALL_FLAGS },
   { ".rdtscp", PROCESSOR_UNKNOWN,
     CPU_RDTSCP_FLAGS },
   { ".3dnow", PROCESSOR_UNKNOWN,
@@ -950,8 +956,8 @@ i386_align_code (fragS *fragP, int count)
      1. For PROCESSOR_I386, PROCESSOR_I486, PROCESSOR_PENTIUM and
      PROCESSOR_GENERIC32, f32_patt will be used.
      2. For PROCESSOR_PENTIUMPRO, PROCESSOR_PENTIUM4, PROCESSOR_NOCONA,
-     PROCESSOR_CORE, PROCESSOR_CORE2, and PROCESSOR_GENERIC64,
-     alt_long_patt will be used.
+     PROCESSOR_CORE, PROCESSOR_CORE2, PROCESSOR_COREI7, and
+     PROCESSOR_GENERIC64, alt_long_patt will be used.
      3. For PROCESSOR_ATHLON, PROCESSOR_K6, PROCESSOR_K8 and
      PROCESSOR_AMDFAM10, alt_short_patt will be used.
 
@@ -997,6 +1003,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_NOCONA:
 	    case PROCESSOR_CORE:
 	    case PROCESSOR_CORE2:
+	    case PROCESSOR_COREI7:
 	    case PROCESSOR_GENERIC64:
 	      patt = alt_long_patt;
 	      break;
@@ -1044,6 +1051,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_NOCONA:
 	    case PROCESSOR_CORE:
 	    case PROCESSOR_CORE2:
+	    case PROCESSOR_COREI7:
 	      if (fragP->tc_frag_data.isa_flags.bitfield.cpui686)
 		patt = alt_long_patt;
 	      else
@@ -8232,18 +8240,18 @@ md_show_usage (stream)
                           generate code for CPU and EXTENSION, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\
                            pentiumii, pentiumiii, pentium4, prescott, nocona,\n\
-                           core, core2, k6, k6_2, athlon, k8, amdfam10,\n\
+                           core, core2, corei7, k6, k6_2, athlon, k8, amdfam10,\n\
                            generic32, generic64\n\
                           EXTENSION is combination of:\n\
                            mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, sse4,\n\
                            avx, vmx, smx, xsave, movbe, ept, aes, pclmul, fma,\n\
-                           rdtscp, 3dnow, 3dnowa, sse4a, sse5, svme, abm,\n\
-                           padlock\n"));
+                           clflush, syscall, rdtscp, 3dnow, 3dnowa, sse4a,\n\
+                           sse5, svme, abm, padlock\n"));
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\
                            pentiumii, pentiumiii, pentium4, prescott, nocona,\n\
-                           core, core2, k6, k6_2, athlon, k8, amdfam10,\n\
+                           core, core2, corei7, k6, k6_2, athlon, k8, amdfam10,\n\
                            generic32, generic64\n"));
   fprintf (stream, _("\
   -msse2avx               encode SSE instructions with VEX prefix\n"));
@@ -8281,7 +8289,7 @@ i386_target_format (void)
 	  cpu_arch_isa_flags.bitfield.cpui486 = 1;
 	  cpu_arch_isa_flags.bitfield.cpui586 = 1;
 	  cpu_arch_isa_flags.bitfield.cpui686 = 1;
-	  cpu_arch_isa_flags.bitfield.cpup4 = 1;
+	  cpu_arch_isa_flags.bitfield.cpuclflush = 1;
 	  cpu_arch_isa_flags.bitfield.cpummx= 1;
 	  cpu_arch_isa_flags.bitfield.cpusse = 1;
 	  cpu_arch_isa_flags.bitfield.cpusse2 = 1;
@@ -8294,7 +8302,7 @@ i386_target_format (void)
 	  cpu_arch_tune_flags.bitfield.cpui486 = 1;
 	  cpu_arch_tune_flags.bitfield.cpui586 = 1;
 	  cpu_arch_tune_flags.bitfield.cpui686 = 1;
-	  cpu_arch_tune_flags.bitfield.cpup4 = 1;
+	  cpu_arch_tune_flags.bitfield.cpuclflush = 1;
 	  cpu_arch_tune_flags.bitfield.cpummx= 1;
 	  cpu_arch_tune_flags.bitfield.cpusse = 1;
 	  cpu_arch_tune_flags.bitfield.cpusse2 = 1;

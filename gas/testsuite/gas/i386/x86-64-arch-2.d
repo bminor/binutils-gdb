@@ -1,4 +1,4 @@
-#as: -march=generic64+avx+vmx+smx+xsave+aes+pclmul+fma+movbe+ept+rdtscp+sse5+3dnowa+svme+padlock
+#as: -march=generic64+avx+vmx+smx+xsave+aes+pclmul+fma+movbe+ept+clflush+syscall+rdtscp+sse5+3dnowa+svme+padlock
 #objdump: -dw
 #name: x86-64 arch 2
 
@@ -8,6 +8,8 @@ Disassembly of section .text:
 
 0+ <.text>:
 [ 	]*[a-f0-9]+:	0f 44 d8             	cmove  %eax,%ebx
+[ 	]*[a-f0-9]+:	0f ae 38             	clflush \(%rax\)
+[ 	]*[a-f0-9]+:	0f 05                	syscall 
 [ 	]*[a-f0-9]+:	0f fc dc             	paddb  %mm4,%mm3
 [ 	]*[a-f0-9]+:	f3 0f 58 dc          	addss  %xmm4,%xmm3
 [ 	]*[a-f0-9]+:	f2 0f 58 dc          	addsd  %xmm4,%xmm3

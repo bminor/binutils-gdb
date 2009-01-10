@@ -47,7 +47,7 @@ static initializer cpu_flag_init [] =
   { "CPU_GENERIC32_FLAGS",
     "Cpu186|Cpu286|Cpu386" },
   { "CPU_GENERIC64_FLAGS", 
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuSSE|CpuSSE2|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2|CpuLM" },
   { "CPU_NONE_FLAGS",
    "0" },
   { "CPU_I186_FLAGS",
@@ -67,23 +67,29 @@ static initializer cpu_flag_init [] =
   { "CPU_P3_FLAGS",
     "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|CpuSSE" },
   { "CPU_P4_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuSSE|CpuSSE2" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2" },
   { "CPU_NOCONA_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuLM" },
   { "CPU_CORE_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3" },
   { "CPU_CORE2_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuLM" },
+  { "CPU_COREI7_FLAGS",
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuRdtscp|CpuLM" },
   { "CPU_K6_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuSYSCALL|CpuMMX" },
   { "CPU_K6_2_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX|Cpu3dnow" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuSYSCALL|CpuMMX|Cpu3dnow" },
   { "CPU_ATHLON_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuMMX|Cpu3dnow|Cpu3dnowA" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSYSCALL|CpuMMX|Cpu3dnow|Cpu3dnowA" },
   { "CPU_K8_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuK8|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuRdtscp|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSYSCALL|CpuRdtscp|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuLM" },
   { "CPU_AMDFAM10_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuK8|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuRdtscp|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSYSCALL|CpuRdtscp|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuLM" },
+  { "CPU_CLFLUSH_FLAGS",
+    "CpuClflush" },
+  { "CPU_SYSCALL_FLAGS",
+    "CpuSYSCALL" },
   { "CPU_MMX_FLAGS",
     "CpuMMX" },
   { "CPU_SSE_FLAGS",
@@ -249,9 +255,8 @@ static bitfield cpu_flags[] =
   BITFIELD (Cpu486),
   BITFIELD (Cpu586),
   BITFIELD (Cpu686),
-  BITFIELD (CpuP4),
-  BITFIELD (CpuK6),
-  BITFIELD (CpuK8),
+  BITFIELD (CpuClflush),
+  BITFIELD (CpuSYSCALL),
   BITFIELD (CpuMMX),
   BITFIELD (CpuSSE),
   BITFIELD (CpuSSE2),
@@ -397,7 +402,6 @@ static bitfield operand_types[] =
 #endif
 };
 
-static int lineno;
 static const char *filename;
 
 static int
@@ -499,7 +503,7 @@ next_field (char *str, char sep, char **next, char *last)
 }
 
 static void
-set_bitfield (const char *f, bitfield *array, unsigned int size)
+set_bitfield (const char *f, bitfield *array, unsigned int size, int lineno)
 {
   unsigned int i;
 
@@ -515,7 +519,10 @@ set_bitfield (const char *f, bitfield *array, unsigned int size)
 	return;
       }
 
-  fail (_("%s: %d: Unknown bitfield: %s\n"), filename, lineno, f);
+  if (lineno != -1)
+    fail (_("%s: %d: Unknown bitfield: %s\n"), filename, lineno, f);
+  else
+    fail (_("Unknown bitfield: %s\n"), f);
 }
 
 static void
@@ -544,7 +551,8 @@ output_cpu_flags (FILE *table, bitfield *flags, unsigned int size,
 
 static void
 process_i386_cpu_flag (FILE *table, char *flag, int macro,
-		       const char *comma, const char *indent)
+		       const char *comma, const char *indent,
+		       int lineno)
 {
   char *str, *next, *last;
   bitfield flags [ARRAY_SIZE (cpu_flags)];
@@ -569,7 +577,7 @@ process_i386_cpu_flag (FILE *table, char *flag, int macro,
 	{
 	  str = next_field (next, '|', &next, last);
 	  if (str)
-	    set_bitfield (str, flags, ARRAY_SIZE (flags));
+	    set_bitfield (str, flags, ARRAY_SIZE (flags), lineno);
 	}
     }
 
@@ -595,7 +603,7 @@ output_opcode_modifier (FILE *table, bitfield *modifier, unsigned int size)
 }
 
 static void
-process_i386_opcode_modifier (FILE *table, char *mod)
+process_i386_opcode_modifier (FILE *table, char *mod, int lineno)
 {
   char *str, *next, *last;
   bitfield modifiers [ARRAY_SIZE (opcode_modifiers)];
@@ -610,7 +618,7 @@ process_i386_opcode_modifier (FILE *table, char *mod)
 	{
 	  str = next_field (next, '|', &next, last);
 	  if (str)
-	    set_bitfield (str, modifiers, ARRAY_SIZE (modifiers));
+	    set_bitfield (str, modifiers, ARRAY_SIZE (modifiers), lineno);
 	}
     }
   output_opcode_modifier (table, modifiers, ARRAY_SIZE (modifiers));
@@ -642,7 +650,7 @@ output_operand_type (FILE *table, bitfield *types, unsigned int size,
 
 static void
 process_i386_operand_type (FILE *table, char *op, int macro,
-			   const char *indent)
+			   const char *indent, int lineno)
 {
   char *str, *next, *last;
   bitfield types [ARRAY_SIZE (operand_types)];
@@ -657,7 +665,7 @@ process_i386_operand_type (FILE *table, char *op, int macro,
 	{
 	  str = next_field (next, '|', &next, last);
 	  if (str)
-	    set_bitfield (str, types, ARRAY_SIZE (types));
+	    set_bitfield (str, types, ARRAY_SIZE (types), lineno);
 	}
     }
   output_operand_type (table, types, ARRAY_SIZE (types), macro,
@@ -666,7 +674,7 @@ process_i386_operand_type (FILE *table, char *op, int macro,
 
 static void
 output_i386_opcode (FILE *table, const char *name, char *str,
-		    char *last)
+		    char *last, int lineno)
 {
   unsigned int i;
   char *operands, *base_opcode, *extension_opcode, *opcode_length;
@@ -737,9 +745,9 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 	   name, operands, base_opcode, extension_opcode,
 	   opcode_length);
 
-  process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ");
+  process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ", lineno);
 
-  process_i386_opcode_modifier (table, opcode_modifier);
+  process_i386_opcode_modifier (table, opcode_modifier, lineno);
 
   fprintf (table, "    { ");
 
@@ -748,7 +756,7 @@ output_i386_opcode (FILE *table, const char *name, char *str,
       if (operand_types[i] == NULL || *operand_types[i] == '0')
 	{
 	  if (i == 0)
-	    process_i386_operand_type (table, "0", 0, "\t  ");
+	    process_i386_operand_type (table, "0", 0, "\t  ", lineno);
 	  break;
 	}
 
@@ -756,7 +764,7 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 	fprintf (table, ",\n      ");
 
       process_i386_operand_type (table, operand_types[i], 0,
-				 "\t  ");
+				 "\t  ", lineno);
     }
   fprintf (table, " } },\n");
 }
@@ -766,6 +774,7 @@ struct opcode_hash_entry
   struct opcode_hash_entry *next;
   char *name;
   char *opcode;
+  int lineno;
 };
 
 /* Calculate the hash value of an opcode hash entry P.  */
@@ -798,6 +807,7 @@ process_i386_opcodes (FILE *table)
   htab_t opcode_hash_table;
   struct opcode_hash_entry **opcode_array;
   unsigned int opcode_array_size = 1024;
+  int lineno = 0;
 
   filename = "i386-opc.tbl";
   fp = fopen (filename, "r");
@@ -874,6 +884,7 @@ process_i386_opcodes (FILE *table)
 	  opcode_array[i]->next = NULL;
 	  opcode_array[i]->name = xstrdup (name);
 	  opcode_array[i]->opcode = xstrdup (str);
+	  opcode_array[i]->lineno = lineno;
 	  *hash_slot = opcode_array[i];
 	  i++;
 	}
@@ -888,6 +899,7 @@ process_i386_opcodes (FILE *table)
 	  (*entry)->next = NULL;
 	  (*entry)->name = (*hash_slot)->name;
 	  (*entry)->opcode = xstrdup (str);
+	  (*entry)->lineno = lineno;
 	}
     }
 
@@ -898,8 +910,9 @@ process_i386_opcodes (FILE *table)
 	{
 	  name = next->name;
 	  str = next->opcode;
+	  lineno = next->lineno;
 	  last = str + strlen (str);
-	  output_i386_opcode (table, name, str, last);
+	  output_i386_opcode (table, name, str, last, lineno);
 	}
     }
 
@@ -907,12 +920,12 @@ process_i386_opcodes (FILE *table)
 
   fprintf (table, "  { NULL, 0, 0, 0, 0,\n");
 
-  process_i386_cpu_flag (table, "0", 0, ",", "    ");
+  process_i386_cpu_flag (table, "0", 0, ",", "    ", -1);
 
-  process_i386_opcode_modifier (table, "0");
+  process_i386_opcode_modifier (table, "0", -1);
  
   fprintf (table, "    { ");
-  process_i386_operand_type (table, "0", 0, "\t  ");
+  process_i386_operand_type (table, "0", 0, "\t  ", -1);
   fprintf (table, " } }\n");
 
   fprintf (table, "};\n");
@@ -926,6 +939,7 @@ process_i386_registers (FILE *table)
   char *str, *p, *last;
   char *reg_name, *reg_type, *reg_flags, *reg_num;
   char *dw2_32_num, *dw2_64_num;
+  int lineno = 0;
 
   filename = "i386-reg.tbl";
   fp = fopen (filename, "r");
@@ -980,7 +994,7 @@ process_i386_registers (FILE *table)
 
       fprintf (table, "  { \"%s\",\n    ", reg_name);
 
-      process_i386_operand_type (table, reg_type, 0, "\t");
+      process_i386_operand_type (table, reg_type, 0, "\t", lineno);
 
       /* Find 32-bit Dwarf2 register number.  */
       dw2_32_num = next_field (str, ',', &str, last);
@@ -1016,7 +1030,7 @@ process_i386_initializers (void)
     {
       fprintf (fp, "\n#define %s \\\n", cpu_flag_init[i].name);
       init = xstrdup (cpu_flag_init[i].init);
-      process_i386_cpu_flag (fp, init, 1, "", "  ");
+      process_i386_cpu_flag (fp, init, 1, "", "  ", -1);
       free (init);
     }
 
@@ -1024,7 +1038,7 @@ process_i386_initializers (void)
     {
       fprintf (fp, "\n\n#define %s \\\n  ", operand_type_init[i].name);
       init = xstrdup (operand_type_init[i].init);
-      process_i386_operand_type (fp, init, 1, "      ");
+      process_i386_operand_type (fp, init, 1, "      ", -1);
       free (init);
     }
   fprintf (fp, "\n");
