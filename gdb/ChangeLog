@@ -1,5 +1,11 @@
 2009-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* f-typeprint.c (f_type_print_varspec_suffix): Convert the autovariable
+	arrayprint_recurse_level to a parameter.  Update all the callers.  New
+	comment at autovariables.
+
+2009-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdbtypes.c (make_qualified_type, replace_type): Reformat to the GNU
 	coding style.
 
