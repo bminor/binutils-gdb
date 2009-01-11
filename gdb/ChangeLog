@@ -1,4 +1,9 @@
-2009-10-11  Joel Brobecker  <brobecker@adacore.com>
+2009-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbtypes.c (make_qualified_type, replace_type): Reformat to the GNU
+	coding style.
+
+2009-01-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* target.c (target_xfer_partial): Use host_address_to_string to
 	print the address of readbuf and writebuf. Cast the address of
@@ -7,7 +12,7 @@
 	Cast the address of elements inside the myaddr buffer into
 	intptr_t.
 
-2009-10-11  Joel Brobecker  <brobecker@adacore.com>
+2009-01-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* amd64-windows-nat.c, amd64-windows-tdep.c: New files.
 	* config/i386/mingw64.mh, config/i386/nm-cygwin64.h: New files.
@@ -15,7 +20,7 @@
 	* config/djgpp/fnchange.lst: Add entries for amd64-windows-nat.c
 	and amd64-windows-tdep.c.
 
-2009-10-11  Joel Brobecker  <brobecker@adacore.com>
+2009-01-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* win32-tdep.h, win32-tdep.c: New files.
 	* i386-cygwin-tdep.h: Delete.
@@ -26,7 +31,7 @@
 	* configure.tgt: Add win32-tdep.o to the list of target object
 	files for i386-cygwin and i386-mingw targets.
 
-2009-10-11  Joel Brobecker  <brobecker@adacore.com>
+2009-01-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* win32-nat.h: New file.
 	* win32-nat.c (mappings): Initialize to NULL.

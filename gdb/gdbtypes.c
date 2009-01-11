@@ -478,11 +478,13 @@ make_qualified_type (struct type *type, int new_flags,
   struct type *ntype;
 
   ntype = type;
-  do {
-    if (TYPE_INSTANCE_FLAGS (ntype) == new_flags)
-      return ntype;
-    ntype = TYPE_CHAIN (ntype);
-  } while (ntype != type);
+  do
+    {
+      if (TYPE_INSTANCE_FLAGS (ntype) == new_flags)
+	return ntype;
+      ntype = TYPE_CHAIN (ntype);
+    }
+  while (ntype != type);
 
   /* Create a new type instance.  */
   if (storage == NULL)
@@ -620,18 +622,20 @@ replace_type (struct type *ntype, struct type *type)
   /* The type length is not a part of the main type.  Update it for
      each type on the variant chain.  */
   chain = ntype;
-  do {
-    /* Assert that this element of the chain has no address-class bits
-       set in its flags.  Such type variants might have type lengths
-       which are supposed to be different from the non-address-class
-       variants.  This assertion shouldn't ever be triggered because
-       symbol readers which do construct address-class variants don't
-       call replace_type().  */
-    gdb_assert (TYPE_ADDRESS_CLASS_ALL (chain) == 0);
+  do
+    {
+      /* Assert that this element of the chain has no address-class bits
+	 set in its flags.  Such type variants might have type lengths
+	 which are supposed to be different from the non-address-class
+	 variants.  This assertion shouldn't ever be triggered because
+	 symbol readers which do construct address-class variants don't
+	 call replace_type().  */
+      gdb_assert (TYPE_ADDRESS_CLASS_ALL (chain) == 0);
 
-    TYPE_LENGTH (chain) = TYPE_LENGTH (type);
-    chain = TYPE_CHAIN (chain);
-  } while (ntype != chain);
+      TYPE_LENGTH (chain) = TYPE_LENGTH (type);
+      chain = TYPE_CHAIN (chain);
+    }
+  while (ntype != chain);
 
   /* Assert that the two types have equivalent instance qualifiers.
      This should be true for at least all of our debug readers.  */
