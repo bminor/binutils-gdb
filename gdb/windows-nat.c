@@ -60,7 +60,7 @@
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 
-#include "i386-cygwin-tdep.h"
+#include "win32-tdep.h"
 #include "win32-nat.h"
 
 static struct target_ops win32_ops;

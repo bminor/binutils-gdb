@@ -1,5 +1,16 @@
 2009-10-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* win32-tdep.h, win32-tdep.c: New files.
+	* i386-cygwin-tdep.h: Delete.
+	* i386-cygwin-tdep.c: Include win32-tdep.h instead of
+	i386-cygwin-tdep.h.
+	(win32_xfer_shared_library): Delete.  Moved to win32-tdep.c.
+	* win32-nat.c: Likewise.
+	* configure.tgt: Add win32-tdep.o to the list of target object
+	files for i386-cygwin and i386-mingw targets.
+
+2009-10-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* win32-nat.h: New file.
 	* win32-nat.c (mappings): Initialize to NULL.
 	(win32_set_context_register_offsets): New function.
