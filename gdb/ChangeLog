@@ -1,3 +1,14 @@
+2009-10-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* win32-nat.h: New file.
+	* win32-nat.c (mappings): Initialize to NULL.
+	(win32_set_context_register_offsets): New function.
+	* i386-windows-nat.c: New file.
+	(mappings): Moved here from win32-nat.c.
+	(_initialize_i386_windows_nat): New function.
+	* config/i386/mingw.mh (NATDEPFILES): Add i386-windows-nat.o.
+	* config/i386/cygwin.mh (NATDEPFILES): Likewise.
+
 2009-01-09  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.in (init.c): Set LANG/LC_ALL to C, not c.

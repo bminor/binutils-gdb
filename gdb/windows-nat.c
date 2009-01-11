@@ -61,6 +61,7 @@
 #include "i387-tdep.h"
 
 #include "i386-cygwin-tdep.h"
+#include "win32-nat.h"
 
 static struct target_ops win32_ops;
 
@@ -161,10 +162,15 @@ static int debug_memory = 0;		/* show target memory accesses */
 static int debug_exceptions = 0;	/* show target exceptions */
 static int useshell = 0;		/* use shell for subprocesses */
 
-/* This vector maps GDB's idea of a register's number into an address
+/* This vector maps GDB's idea of a register's number into an offset
    in the win32 exception context vector.
 
    It also contains the bit mask needed to load the register in question.
+
+   The contents of this table can only be computed by the units
+   that provide CPU-specific support for Windows native debugging.
+   These units should set the table by calling
+   win32_set_context_register_offsets.
 
    One day we could read a reg, we could inspect the context we
    already have loaded, if it doesn't have the bit set that we need,
@@ -174,55 +180,7 @@ static int useshell = 0;		/* use shell for subprocesses */
    the other regs of the group, and then we copy the info in and set
    out bit. */
 
-#define context_offset(x) ((int)&(((CONTEXT *)NULL)->x))
-static const int mappings[] =
-{
-  context_offset (Eax),
-  context_offset (Ecx),
-  context_offset (Edx),
-  context_offset (Ebx),
-  context_offset (Esp),
-  context_offset (Ebp),
-  context_offset (Esi),
-  context_offset (Edi),
-  context_offset (Eip),
-  context_offset (EFlags),
-  context_offset (SegCs),
-  context_offset (SegSs),
-  context_offset (SegDs),
-  context_offset (SegEs),
-  context_offset (SegFs),
-  context_offset (SegGs),
-  context_offset (FloatSave.RegisterArea[0 * 10]),
-  context_offset (FloatSave.RegisterArea[1 * 10]),
-  context_offset (FloatSave.RegisterArea[2 * 10]),
-  context_offset (FloatSave.RegisterArea[3 * 10]),
-  context_offset (FloatSave.RegisterArea[4 * 10]),
-  context_offset (FloatSave.RegisterArea[5 * 10]),
-  context_offset (FloatSave.RegisterArea[6 * 10]),
-  context_offset (FloatSave.RegisterArea[7 * 10]),
-  context_offset (FloatSave.ControlWord),
-  context_offset (FloatSave.StatusWord),
-  context_offset (FloatSave.TagWord),
-  context_offset (FloatSave.ErrorSelector),
-  context_offset (FloatSave.ErrorOffset),
-  context_offset (FloatSave.DataSelector),
-  context_offset (FloatSave.DataOffset),
-  context_offset (FloatSave.ErrorSelector)
-  /* XMM0-7 */ ,
-  context_offset (ExtendedRegisters[10*16]),
-  context_offset (ExtendedRegisters[11*16]),
-  context_offset (ExtendedRegisters[12*16]),
-  context_offset (ExtendedRegisters[13*16]),
-  context_offset (ExtendedRegisters[14*16]),
-  context_offset (ExtendedRegisters[15*16]),
-  context_offset (ExtendedRegisters[16*16]),
-  context_offset (ExtendedRegisters[17*16]),
-  /* MXCSR */
-  context_offset (ExtendedRegisters[24])
-};
-
-#undef context_offset
+static const int *mappings;
 
 /* This vector maps the target's idea of an exception (extracted
    from the DEBUG_EVENT structure) to GDB's idea. */
@@ -243,6 +201,15 @@ static const struct xlate_exception
   {EXCEPTION_SINGLE_STEP, TARGET_SIGNAL_TRAP},
   {STATUS_FLOAT_DIVIDE_BY_ZERO, TARGET_SIGNAL_FPE},
   {-1, -1}};
+
+/* Set the MAPPINGS static global to OFFSETS.
+   See the description of MAPPINGS for more details.  */
+
+void
+win32_set_context_register_offsets (const int *offsets)
+{
+  mappings = offsets;
+}
 
 static void
 check (BOOL ok, const char *file, int line)
