@@ -83,6 +83,8 @@
 @V@/gdb/ChangeLog-2008 @V@/gdb/ChangeLog.008
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
 @V@/gdb/ada-exp.tab.c @V@/gdb/ada-exp_tab.c
+@V@/gdb/amd64-windows-nat.c @V@/gdb/a64w-nat.c
+@V@/gdb/amd64-windows-tdep.c @V@/gdb/a64w-tdep.c
 @V@/gdb/amd64fbsd-nat.c @V@/gdb/a64fb-nat.c
 @V@/gdb/amd64fbsd-tdep.c @V@/gdb/a64fb-tdep.c
 @V@/gdb/amd64nbsd-nat.c @V@/gdb/a64nb-nat.c

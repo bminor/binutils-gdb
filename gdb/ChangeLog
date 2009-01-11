@@ -1,5 +1,13 @@
 2009-10-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* amd64-windows-nat.c, amd64-windows-tdep.c: New files.
+	* config/i386/mingw64.mh, config/i386/nm-cygwin64.h: New files.
+	* configure.host, configure.tgt: Add handling for x86_64/windows.
+	* config/djgpp/fnchange.lst: Add entries for amd64-windows-nat.c
+	and amd64-windows-tdep.c.
+
+2009-10-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* win32-tdep.h, win32-tdep.c: New files.
 	* i386-cygwin-tdep.h: Delete.
 	* i386-cygwin-tdep.c: Include win32-tdep.h instead of
