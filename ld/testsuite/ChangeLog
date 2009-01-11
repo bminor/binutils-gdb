@@ -1,3 +1,8 @@
+2009-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ld-elf/linkoncerdiff.d, ld-elf/linkoncerdiff1.s,
+	ld-elf/linkoncerdiff2.s: New.
+
 2009-01-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/tls-e-20.d, ld-cris/tls-e-20a.d, ld-cris/tls-e-21.d,

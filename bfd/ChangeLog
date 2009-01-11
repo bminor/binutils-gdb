@@ -1,3 +1,8 @@
+2009-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elflink.c (_bfd_elf_section_already_linked): Handle g++-3.4
+	relocations in `.gnu.linkonce.r.*' referencing its `.gnu.linkonce.t.*'.
+
 2009-01-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_32_GD>
