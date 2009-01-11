@@ -1200,11 +1200,12 @@ target_xfer_partial (struct target_ops *ops,
       const unsigned char *myaddr = NULL;
 
       fprintf_unfiltered (gdb_stdlog,
-			  "%s:target_xfer_partial (%d, %s, 0x%lx,  0x%lx,  %s, %s) = %s",
+			  "%s:target_xfer_partial (%d, %s, %s, %s, %s, %s) = %s",
 			  ops->to_shortname,
 			  (int) object,
 			  (annex ? annex : "(null)"),
-			  (long) readbuf, (long) writebuf,
+			  host_address_to_string (readbuf),
+			  host_address_to_string (writebuf),
 			  core_addr_to_string_nz (offset),
 			  plongest (len), plongest (retval));
 
@@ -1219,7 +1220,7 @@ target_xfer_partial (struct target_ops *ops,
 	  fputs_unfiltered (", bytes =", gdb_stdlog);
 	  for (i = 0; i < retval; i++)
 	    {
-	      if ((((long) &(myaddr[i])) & 0xf) == 0)
+	      if ((((intptr_t) &(myaddr[i])) & 0xf) == 0)
 		{
 		  if (targetdebug < 2 && i > 0)
 		    {
@@ -2717,9 +2718,9 @@ deprecated_debug_xfer_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len,
 						attrib, target);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_xfer_memory (0x%x, xxx, %d, %s, xxx) = %d",
-		      (unsigned int) memaddr,	/* possable truncate long long */
-		      len, write ? "write" : "read", retval);
+		      "target_xfer_memory (%s, xxx, %d, %s, xxx) = %d",
+		      paddress (memaddr), len, write ? "write" : "read",
+                      retval);
 
   if (retval > 0)
     {
@@ -2728,7 +2729,7 @@ deprecated_debug_xfer_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len,
       fputs_unfiltered (", bytes =", gdb_stdlog);
       for (i = 0; i < retval; i++)
 	{
-	  if ((((long) &(myaddr[i])) & 0xf) == 0)
+	  if ((((intptr_t) &(myaddr[i])) & 0xf) == 0)
 	    {
 	      if (targetdebug < 2 && i > 0)
 		{

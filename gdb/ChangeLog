@@ -1,5 +1,14 @@
 2009-10-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* target.c (target_xfer_partial): Use host_address_to_string to
+	print the address of readbuf and writebuf. Cast the address of
+	elements inside the myaddr buffer into intptr_t.
+	(deprecated_debug_xfer_memory): Use paddress to print memaddr.
+	Cast the address of elements inside the myaddr buffer into
+	intptr_t.
+
+2009-10-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* amd64-windows-nat.c, amd64-windows-tdep.c: New files.
 	* config/i386/mingw64.mh, config/i386/nm-cygwin64.h: New files.
 	* configure.host, configure.tgt: Add handling for x86_64/windows.
