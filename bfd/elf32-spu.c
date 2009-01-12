@@ -1951,8 +1951,8 @@ spu_elf_build_stubs (struct bfd_link_info *info)
       h = define_ovtab_symbol (htab, "__icache_base");
       if (h == NULL)
 	return FALSE;
-      h->root.u.def.value = 0;
-      h->root.u.def.section = htab->ovl_sec[0];
+      h->root.u.def.value = htab->ovl_sec[0]->vma;
+      h->root.u.def.section = bfd_abs_section_ptr;
       h->size = htab->num_buf << htab->line_size_log2;
 
       if (htab->init != NULL && htab->init->size != 0)
