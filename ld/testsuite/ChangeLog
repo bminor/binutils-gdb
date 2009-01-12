@@ -1,3 +1,11 @@
+2009-01-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/elf.exp: Save and restore LDFLAGS.
+	* ld-scripts/default-script.exp: Likewise.
+	* ld-scripts/empty-orphan.exp: Likewise, and add to LDFLAGS rather
+	than replacing.
+	* ld-scripts/include.exp: Set --local-store for SPU.
+
 2009-01-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/ovl.d: Allow for absolute branches in stubs.
