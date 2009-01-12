@@ -753,7 +753,7 @@ eelf32_sparc_vxworks.c: $(srcdir)/emulparams/elf32_sparc_vxworks.sh \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_sparc_vxworks "$(tdir_elf32_sparc_vxworks)"
 eelf32_spu.c: $(srcdir)/emulparams/elf32_spu.sh $(srcdir)/emultempl/spuelf.em \
-  $(srcdir)/emultempl/spu_ovl.o_c \
+  $(srcdir)/emultempl/spu_ovl.o_c $(srcdir)/emultempl/spu_icache.o_c \
   ldemul-list.h \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_spu "$(tdir_elf32_spu)"
@@ -763,6 +763,13 @@ $(srcdir)/emultempl/spu_ovl.o_c: @MAINT@ $(srcdir)/emultempl/spu_ovl.S
 	  cpp -DOVLY_IRQ_SAVE $(srcdir)/emultempl/spu_ovl.S spu_ovl.s; \
 	  ../gas/as-new -o spu_ovl.o spu_ovl.s; \
 	  ../binutils/bin2c <spu_ovl.o >$@; \
+	fi
+$(srcdir)/emultempl/spu_icache.o_c: @MAINT@ $(srcdir)/emultempl/spu_icache.S
+	if ../gas/as-new --version \
+		| grep 'target.*spu' >/dev/null 2>/dev/null; then \
+	  cpp -DOVLY_IRQ_SAVE $(srcdir)/emultempl/spu_icache.S spu_icache.s; \
+	  ../gas/as-new -o spu_icache.o spu_icache.s; \
+	  ../binutils/bin2c <spu_icache.o >$@; \
 	fi
 eelf32_i860.c: $(srcdir)/emulparams/elf32_i860.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -1844,7 +1851,7 @@ MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h crtbegin.o crtend.o ld.log ld.sum
 mostlyclean-local:
 	-rm -rf tmpdir
-CLEANFILES = dep.sed DEP DEPA DEP1 DEP2 spu_ovl.s spu_ovl.o
+CLEANFILES = dep.sed DEP DEPA DEP1 DEP2 spu_ovl.s spu_ovl.o spu_icache.s spu_icache.o
 
 .PHONY: install-html install-html-am install-html-recursive
 
@@ -1924,7 +1931,7 @@ install-data-local: install-info
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.
 EXTRA_DIST = ldgram.c ldgram.h ldlex.c emultempl/spu_ovl.o_c \
-           deffilep.c deffilep.h $(man_MANS)
+	     emultempl/spu_icache.o_c deffilep.c deffilep.h $(man_MANS)
 diststuff: info $(EXTRA_DIST)
 all: info ld.1
 

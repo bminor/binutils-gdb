@@ -1,3 +1,12 @@
+2009-01-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-spu.c (md_pseudo_table): Add "brinfo".
+	(brinfo): New var.
+	(md_assemble): Poke brinfo into branch instructions.
+	(spu_brinfo): New function.
+	(md_apply_fix): Don't assume insn fields start off at zero, mask
+	them to remove possible brinfo.
+
 2009-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/c-i386.texi: Reformat.

@@ -1,3 +1,46 @@
+2009-01-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (struct spu_link_hash_table): Add init, line_size_log2,
+	num_lines_log2.
+	(struct got_entry): Add br_addr.
+	(struct call_info): Add priority.
+	(struct function_info): Add lr_store and sp_adjust.
+	(spu_elf_setup): Init line_size_log2 and num_lines_log2.
+	(spu_elf_find_overlays): For soft-icache, mark any section within cache
+	area as an overlay, and check that no other overlays exist.  Look up
+	icache overlay manager entry sym.
+	(BRA_STUBS, BRA, BRASL): Define.
+	(enum _stub_type): Replace ovl_stub with call_ovl_stub and br*_ovl_stub.
+	(needs_ovl_stub): Adjust for soft-icache.  Return priority encoded
+	in branch insn.
+	(count_stub, build_stub): Support soft-icache.
+	(build_spuear_stubs, process_stubs): Adjust build_stub call.
+	(spu_elf_size_stubs): Size soft-icache stubs.
+	(overlay_index): New function.
+	(spu_elf_build_stubs): Make static.  Support soft-icache.
+	(spu_elf_check_vma): Don't turn off auto_overlay if soft-icache.
+	(find_function_stack_adjust): Save lr store and stack adjust insn
+	offsets.
+	(maybe_insert_function): Adjust find_function_stack_adjust call.
+	(mark_functions_via_relocs): Retrieve priority.
+	(remove_cycles): Only warn about pruned arcs when stack_analysis.
+	(sort_calls): Sort by priority first.
+	(mark_overlay_section): Ignore .ovl.init.
+	(sum_stack): Only print when stack_analysis.
+	(print_one_overlay_section): New function, extracted from..
+	(spu_elf_auto_overlay): ..here.  Support soft-icache overlays.
+	(spu_elf_stack_analysis): Only print when htab->stack_analysis.
+	(spu_elf_final_link): Call spu_elf_stack_analysis for lrlive
+	analysis.  Call spu_elf_build_stubs.
+	(spu_elf_relocate_section): For soft-icache encode overlay index
+	into addresses.
+	(spu_elf_output_symbol_hook): Support soft-icache.
+	(spu_elf_modify_program_headers: Likewise.
+	* elf32-spu.h (struct spu_elf_params): Add lrlive_analysis.  Rename
+	num_regions to num_lines.  Add line_size and max_branch.
+	(enum _ovly_flavour): Add ovly_soft_icache.
+	(spu_elf_build_stubs): Delete.
+
 2009-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elflink.c (_bfd_elf_section_already_linked): Handle g++-3.4

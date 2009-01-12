@@ -1,3 +1,26 @@
+2009-01-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spuelf.em (params): Init new fields.
+	(num_lines_set, line_size_set, icache_mgr, icache_mgr_stream): New vars.
+	(spu_place_special_section): Adjust placement for soft-icache.  Pad
+	soft-icache section to a fixed size.  Clear addr_tree.
+	(spu_elf_load_ovl_mgr): Support soft-icache.  Map overlay manager
+	sections a little more intelligently.
+	(gld${EMULATION_NAME}_finish): Don't call spu_elf_build_stubs.
+	(OPTION_SPU_NUM_LINES): Rename from OPTION_SPU_NUM_REGIONS.
+	(OPTION_SPU_SOFT_ICACHE, OPTION_SPU_LINE_SIZE): Define.
+	(OPTION_SPU_LRLIVE): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add new soft-icache options.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Handle them.
+	* emultempl/spu_icache.S: Dummy file.
+	* emultempl/spu_icache.o_c: Regenerate.
+	* Makefile.am (eelf32_spu.c): Depend on spu_icache.o_c.
+	(spu_icache.o_c): Add rule to build.
+	(CLEANFILES): Zap temp files.
+	(EXTRA_DIST): Add spu_icache.o_c.
+	* Makefile.in: Regenerate.
+
 2009-01-08  Kai Tietz  <kai.tietz@onevision.com>
 
 	* pe.em (OPTION_USE_NUL_PREFIXED_IMPORT_TABLES): New.

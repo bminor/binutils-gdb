@@ -24,40 +24,40 @@ Disassembly of section \.text:
 	\.\.\.
 
 #00000118 <00000000\.ovl_call.f1_a1>:
-#.*	brsl	\$75,.* <__ovly_load>.*
+#.*	bra?sl	\$75,.* <__ovly_load>.*
 #.*00 04 04 00.*
 #
 #00000120 <00000000\.ovl_call.setjmp>:
-#.*	brsl	\$75,.* <__ovly_load>.*
+#.*	bra?sl	\$75,.* <__ovly_load>.*
 #.*00 00 01 0c.*
 #
 #00000128 <_SPUEAR_f1_a2>:
-#.*	brsl	\$75,.* <__ovly_load>.*
+#.*	bra?sl	\$75,.* <__ovly_load>.*
 #.*00 08 04 00.*
 
 00000120 <00000000\.ovl_call.f1_a1>:
 .*	ila	\$78,1
 .*	lnop
 .*	ila	\$79,1040	# 410
-.*	br	.* <__ovly_load>.*
+.*	bra?	.* <__ovly_load>.*
 
 00000130 <00000000\.ovl_call.setjmp>:
 .*	ila	\$78,0
 .*	lnop
 .*	ila	\$79,268	# 10c
-.*	br	.* <__ovly_load>.*
+.*	bra?	.* <__ovly_load>.*
 
 00000140 <00000000\.ovl_call\.13:5>:
 .* 	ila	\$78,1
 .* 	lnop
 .* 	ila	\$79,1044	# 414
-.* 	br	.* <__ovly_load>.*
+.* 	bra?	.* <__ovly_load>.*
 
 00000150 <_SPUEAR_f1_a2>:
 .*	ila	\$78,2
 .*	lnop
 .*	ila	\$79,1040	# 410
-.*	br	.* <__ovly_load>.*
+.*	bra?	.* <__ovly_load>.*
 
 #...
 Disassembly of section \.ov_a1:
@@ -66,7 +66,7 @@ Disassembly of section \.ov_a1:
 .* 	ila	\$78,2
 .* 	lnop
 .* 	ila	\$79,1044	# 414
-.* 	br	.* <__ovly_load>.*
+.* 	bra?	.* <__ovly_load>.*
 
 00000410 <f1_a1>:
 .*	bi	\$0
@@ -83,7 +83,7 @@ Disassembly of section \.ov_a2:
 .*	ila	\$78,1
 .*	lnop
 .*	ila	\$79,1056	# 420
-.*	br	.* <__ovly_load>.*
+.*	bra?	.* <__ovly_load>.*
 
 00000410 <f1_a2>:
 .*	br	.* <longjmp>.*

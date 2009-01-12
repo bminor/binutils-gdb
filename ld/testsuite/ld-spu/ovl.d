@@ -29,64 +29,64 @@ Disassembly of section \.text:
 .*	bi	\$0
 
 #00000130 <00000000\.ovl_call\.f1_a1>:
-#.*	brsl	\$75,.* <__ovly_load>.*
+#.*	bra?sl	\$75,.* <__ovly_load>.*
 #.*00 04 04 00.*
 #
 #00000138 <00000000\.ovl_call\.f2_a1>:
-#.*	brsl	\$75,.* <__ovly_load>.*
+#.*	bra?sl	\$75,.* <__ovly_load>.*
 #.*00 04 04 04.*
 #
 #00000140 <00000000\.ovl_call\.f1_a2>:
-#.*	brsl	\$75,.* <__ovly_load>.*
+#.*	bra?sl	\$75,.* <__ovly_load>.*
 #.*00 08 04 00.*
 #
 #00000148 <00000000\.ovl_call\.f2_a2>:
-#.*	brsl	\$75,.* <__ovly_load>.*
+#.*	bra?sl	\$75,.* <__ovly_load>.*
 #.*00 08 04 24.*
 #
 #00000150 <00000000\.ovl_call\.f4_a1>:
-#.*	brsl	\$75,.* <__ovly_load>.*
+#.*	bra?sl	\$75,.* <__ovly_load>.*
 #.*00 04 04 10.*
 #
 #00000158 <00000000.ovl_call.14:8>:
-#.*	brsl	\$75,.* <__ovly_load>.*
+#.*	bra?sl	\$75,.* <__ovly_load>.*
 #.*00 08 04 34.*
 
 00000130 <00000000\.ovl_call\.f1_a1>:
 .*	ila	\$78,1
 .*	lnop
 .*	ila	\$79,1024	# 400
-.*	br	.* <__ovly_load>.*
+.*	bra?	.* <__ovly_load>.*
 
 00000140 <00000000\.ovl_call\.f2_a1>:
 .*	ila	\$78,1
 .*	lnop
 .*	ila	\$79,1028	# 404
-.*	br	.* <__ovly_load>.*
+.*	bra?	.* <__ovly_load>.*
 
 00000150 <00000000.ovl_call.f1_a2>:
 .*	ila	\$78,2
 .*	lnop
 .*	ila	\$79,1024	# 400
-.*	br	.* <__ovly_load>.*
+.*	bra?	.* <__ovly_load>.*
 
 00000160 <00000000\.ovl_call\.f2_a2>:
 .*	ila	\$78,2
 .*	lnop
 .*	ila	\$79,1060	# 424
-.*	br	.* <__ovly_load>.*
+.*	bra?	.* <__ovly_load>.*
 
 00000170 <00000000\.ovl_call\.f4_a1>:
 .*	ila	\$78,1
 .*	lnop
 .*	ila	\$79,1040	# 410
-.*	br	.* <__ovly_load>.*
+.*	bra?	.* <__ovly_load>.*
 
 00000180 <00000000.ovl_call.14:8>:
 .*	ila	\$78,2
 .*	lnop
 .*	ila	\$79,1076	# 434
-.*	br	.* <__ovly_load>.*
+.*	bra?	.* <__ovly_load>.*
 
 #...
 [0-9a-f]+ <__ovly_return>:

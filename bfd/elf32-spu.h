@@ -44,6 +44,9 @@ struct spu_elf_params
      non-overlay regions.  */
   unsigned int non_overlay_stubs : 1;
 
+  /* Set if lr liveness analysis should be done.  */
+  unsigned int lrlive_analysis : 1;
+
   /* Set if stack size analysis should be done.  */
   unsigned int stack_analysis : 1;
 
@@ -55,7 +58,9 @@ struct spu_elf_params
   bfd_vma local_store_hi;
 
   /* Control --auto-overlay feature.  */
-  unsigned int num_regions;
+  unsigned int num_lines;
+  unsigned int line_size;
+  unsigned int max_branch;
   unsigned int auto_overlay_fixed;
   unsigned int auto_overlay_reserved;
   int extra_stack_space;
@@ -92,6 +97,7 @@ enum _ovly_flavour
 {
   ovly_compact,
   ovly_normal,
+  ovly_soft_icache,
   ovly_none
 };
 
@@ -108,5 +114,4 @@ extern bfd_boolean spu_elf_open_builtin_lib (bfd **,
 extern bfd_boolean spu_elf_create_sections (struct bfd_link_info *);
 extern bfd_boolean spu_elf_find_overlays (struct bfd_link_info *);
 extern int spu_elf_size_stubs (struct bfd_link_info *);
-extern bfd_boolean spu_elf_build_stubs (struct bfd_link_info *);
 extern asection *spu_elf_check_vma (struct bfd_link_info *);
