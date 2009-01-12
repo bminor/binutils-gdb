@@ -1,3 +1,7 @@
+2009-01-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (remove_cycles): Always set call->max_depth.
+
 2009-01-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_auto_overlay): Correct vma mask.

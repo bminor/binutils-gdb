@@ -3140,9 +3140,9 @@ remove_cycles (struct function_info *fun,
   callp = &fun->call_list;
   while ((call = *callp) != NULL)
     {
+      call->max_depth = depth + !call->is_pasted;
       if (!call->fun->visit2)
 	{
-	  call->max_depth = depth + !call->is_pasted;
 	  if (!remove_cycles (call->fun, info, &call->max_depth))
 	    return FALSE;
 	  if (max_depth < call->max_depth)
