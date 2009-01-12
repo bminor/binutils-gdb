@@ -380,6 +380,9 @@ static const char *default_excludes = "DllMain@12,DllEntryPoint@0,impure_ptr";
    compatibility to old Cygwin releases.  */
 static bfd_boolean create_compat_implib;
 
+/* TRUE if we have to write PE+ import libraries.  */
+static bfd_boolean create_for_pep;
+
 static char *def_file;
 
 extern char * program_name;
@@ -1620,13 +1623,16 @@ flush_page (FILE *f, bfd_vma *need, bfd_vma page_addr, int on_page)
 
       if (needed)
         {
-#ifndef DLLTOOL_MX86_64
-	  /* Relocation via HIGHLOW.  */
-          needed = ((needed - page_addr) | 0x3000) & 0xffff;
-#else
-	  /* Relocation via DIR64.  */
-	  needed = ((needed - page_addr) | 0xa000) & 0xffff;
-#endif
+	  if (!create_for_pep)
+	    {
+	      /* Relocation via HIGHLOW.  */
+	      needed = ((needed - page_addr) | 0x3000) & 0xffff;
+	    }
+	  else
+	    {
+	      /* Relocation via DIR64.  */
+	      needed = ((needed - page_addr) | 0xa000) & 0xffff;
+	    }
 	}
 
       fprintf (f, "\t%s\t0x%lx\n", ASM_SHORT, (long) needed);
@@ -1742,18 +1748,19 @@ generate_idata_ofile (FILE *filvar)
     {
       fprintf (filvar, "listone%d:\n", headindex);
       for (funcindex = 0; funcindex < headptr->nfuncs; funcindex++)
-#ifdef DLLTOOL_MX86_64
-	fprintf (filvar, "\t%sfuncptr%d_%d%s\n%s\t0\n",
-		 ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER,ASM_LONG);
-#else
-	fprintf (filvar, "\t%sfuncptr%d_%d%s\n",
-		 ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER);
-#endif
-#ifdef DLLTOOL_MX86_64
-      fprintf (filvar, "\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG); /* NULL terminating list.  */
-#else
-      fprintf (filvar, "\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
-#endif
+        {
+	  if (create_for_pep)
+	    fprintf (filvar, "\t%sfuncptr%d_%d%s\n%s\t0\n",
+		     ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER,
+		     ASM_LONG);
+	  else
+	    fprintf (filvar, "\t%sfuncptr%d_%d%s\n",
+		     ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER);
+        }
+      if (create_for_pep)
+	fprintf (filvar, "\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
+      else
+	fprintf (filvar, "\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
       headindex++;
     }
 
@@ -1763,18 +1770,19 @@ generate_idata_ofile (FILE *filvar)
     {
       fprintf (filvar, "listtwo%d:\n", headindex);
       for (funcindex = 0; funcindex < headptr->nfuncs; funcindex++)
-#ifdef DLLTOOL_MX86_64
-	fprintf (filvar, "\t%sfuncptr%d_%d%s\n%s\t0\n",
-		 ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER,ASM_LONG);
-#else
-	fprintf (filvar, "\t%sfuncptr%d_%d%s\n",
-		 ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER);
-#endif
-#ifdef DLLTOOL_MX86_64
-      fprintf (filvar, "\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG); /* NULL terminating list.  */
-#else
-      fprintf (filvar, "\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
-#endif
+        {
+	  if (create_for_pep)
+	    fprintf (filvar, "\t%sfuncptr%d_%d%s\n%s\t0\n",
+		     ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER,
+		     ASM_LONG);
+	  else
+	    fprintf (filvar, "\t%sfuncptr%d_%d%s\n",
+		     ASM_RVA_BEFORE, headindex, funcindex, ASM_RVA_AFTER);
+        }
+      if (create_for_pep)
+	fprintf (filvar, "\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
+      else
+	fprintf (filvar, "\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
       headindex++;
     }
 
@@ -2454,61 +2462,63 @@ make_one_lib_file (export_type *exp, int i)
 	  /* An idata$4 or idata$5 is one word long, and has an
 	     rva to idata$6.  */
 
-#ifdef DLLTOOL_MX86_64
-	  si->data = xmalloc (8);
-	  si->size = 8;
-
-	  if (exp->noname)
+	  if (create_for_pep)
 	    {
-	      si->data[0] = exp->ordinal ;
-	      si->data[1] = exp->ordinal >> 8;
-	      si->data[2] = exp->ordinal >> 16;
-	      si->data[3] = exp->ordinal >> 24;
-	      si->data[4] = 0;
-	      si->data[5] = 0;
-	      si->data[6] = 0;
-	      si->data[7] = 0x80;
+	      si->data = xmalloc (8);
+	      si->size = 8;
+	      if (exp->noname)
+	        {
+		  si->data[0] = exp->ordinal ;
+		  si->data[1] = exp->ordinal >> 8;
+		  si->data[2] = exp->ordinal >> 16;
+		  si->data[3] = exp->ordinal >> 24;
+		  si->data[4] = 0;
+		  si->data[5] = 0;
+		  si->data[6] = 0;
+		  si->data[7] = 0x80;
+	        }
+	      else
+	        {
+		  sec->reloc_count = 1;
+		  memset (si->data, 0, si->size);
+		  rel = xmalloc (sizeof (arelent));
+		  rpp = xmalloc (sizeof (arelent *) * 2);
+		  rpp[0] = rel;
+		  rpp[1] = 0;
+		  rel->address = 0;
+		  rel->addend = 0;
+		  rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_RVA);
+		  rel->sym_ptr_ptr = secdata[IDATA6].sympp;
+		  sec->orelocation = rpp;
+	        }
 	    }
 	  else
 	    {
-	      sec->reloc_count = 1;
-	      memset (si->data, 0, si->size);
-	      rel = xmalloc (sizeof (arelent));
-	      rpp = xmalloc (sizeof (arelent *) * 2);
-	      rpp[0] = rel;
-	      rpp[1] = 0;
-	      rel->address = 0;
-	      rel->addend = 0;
-	      rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_RVA);
-	      rel->sym_ptr_ptr = secdata[IDATA6].sympp;
-	      sec->orelocation = rpp;
+	      si->data = xmalloc (4);
+	      si->size = 4;
+	      
+	      if (exp->noname)
+	        {
+		  si->data[0] = exp->ordinal ;
+		  si->data[1] = exp->ordinal >> 8;
+		  si->data[2] = exp->ordinal >> 16;
+		  si->data[3] = 0x80;
+	        }
+	      else
+	        {
+		  sec->reloc_count = 1;
+		  memset (si->data, 0, si->size);
+		  rel = xmalloc (sizeof (arelent));
+		  rpp = xmalloc (sizeof (arelent *) * 2);
+		  rpp[0] = rel;
+		  rpp[1] = 0;
+		  rel->address = 0;
+		  rel->addend = 0;
+		  rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_RVA);
+		  rel->sym_ptr_ptr = secdata[IDATA6].sympp;
+		  sec->orelocation = rpp;
+	      }
 	    }
-#else
-	  si->data = xmalloc (4);
-	  si->size = 4;
-
-	  if (exp->noname)
-	    {
-	      si->data[0] = exp->ordinal ;
-	      si->data[1] = exp->ordinal >> 8;
-	      si->data[2] = exp->ordinal >> 16;
-	      si->data[3] = 0x80;
-	    }
-	  else
-	    {
-	      sec->reloc_count = 1;
-	      memset (si->data, 0, si->size);
-	      rel = xmalloc (sizeof (arelent));
-	      rpp = xmalloc (sizeof (arelent *) * 2);
-	      rpp[0] = rel;
-	      rpp[1] = 0;
-	      rel->address = 0;
-	      rel->addend = 0;
-	      rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_RVA);
-	      rel->sym_ptr_ptr = secdata[IDATA6].sympp;
-	      sec->orelocation = rpp;
-	    }
-#endif
 	  break;
 
 	case IDATA6:
@@ -2724,11 +2734,10 @@ make_head (void)
       fprintf (f, "\t.section\t.idata$5\n");
       if (use_nul_prefixed_import_tables)
         {
-#ifdef DLLTOOL_MX86_64
-          fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
-#else
-          fprintf (f,"\t%s\t0\n", ASM_LONG);
-#endif
+	  if (create_for_pep)
+	    fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
+	  else
+	    fprintf (f,"\t%s\t0\n", ASM_LONG);
         }
       fprintf (f, "fthunk:\n");
     }
@@ -2738,11 +2747,10 @@ make_head (void)
       fprintf (f, "\t.section\t.idata$4\n");
       if (use_nul_prefixed_import_tables)
         {
-#ifdef DLLTOOL_MX86_64
-          fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
-#else
-          fprintf (f,"\t%s\t0\n", ASM_LONG);
-#endif
+	  if (create_for_pep)
+	    fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
+	  else
+	    fprintf (f,"\t%s\t0\n", ASM_LONG);
         }
       fprintf (f, "hname:\n");
     }
@@ -2768,21 +2776,19 @@ make_tail (void)
   if (!no_idata4)
     {
       fprintf (f, "\t.section	.idata$4\n");
-#ifdef DLLTOOL_MX86_64
-      fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG); /* NULL terminating list.  */
-#else
-      fprintf (f,"\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
-#endif
+      if (create_for_pep)
+	fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
+      else
+	fprintf (f,"\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
     }
 
   if (!no_idata5)
     {
       fprintf (f, "\t.section	.idata$5\n");
-#ifdef DLLTOOL_MX86_64
-      fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG); /* NULL terminating list.  */
-#else
-      fprintf (f,"\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
-#endif
+      if (create_for_pep)
+	fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
+      else
+	fprintf (f,"\t%s\t0\n", ASM_LONG); /* NULL terminating list.  */
     }
 
 #ifdef DLLTOOL_PPC
@@ -3600,6 +3606,9 @@ main (int ac, char **av)
     fatal (_("Machine '%s' not supported"), mname);
 
   machine = i;
+
+  /* Check if we generated PE+.  */
+  create_for_pep = strcmp (mname, "i386:x86-64") == 0;
 
   if (!dll_name && exp_name)
     {

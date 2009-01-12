@@ -1,3 +1,14 @@
+2009-01-12  Kai Tietz  <kai.tietz@onevision.com>
+
+	* dlltool.c (create_for_pep): New.
+	(flush_page): Use create_for_pep instead of using
+	macro DLLTOOL_MX86_64 clause.
+	(generate_idata_ofile): Likewise.
+	(make_one_lib_file): Likewise.
+	(make_head): Likewise.
+	(make_tail): Likewise.
+	(main): Initialize create_for_pep.
+
 2009-01-08  Kai Tietz  <kai.tietz@onevision.com>
 
 	* dlltool.c (use_nul_prefixed_import_tables): New.
