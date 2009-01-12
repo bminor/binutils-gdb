@@ -1,3 +1,8 @@
+2009-01-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (disassemble_section): Don't assume non-instruction
+	data if object symbol at given address is in different section.
+
 2009-01-12  Kai Tietz  <kai.tietz@onevision.com>
 
 	* dlltool.c (create_for_pep): New.
