@@ -1,3 +1,7 @@
+2009-01-12  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* ppc-instructions (sync): Add L field.
+
 2008-12-15 Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* ppc-instructions, ppc-spr-table: Add ability

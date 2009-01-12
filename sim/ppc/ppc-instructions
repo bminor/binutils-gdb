@@ -2494,7 +2494,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	}
 	PPC_INSN_INT(0, (RA_BITMASK & ~1) | RB_BITMASK | RS_BITMASK, 1/*Rc*/);
 
-0.31,6./,11./,16./,21.598,31./:X::sync:Synchronize
+0.31,6./,9.L,11./,16./,21.598,31./:X::sync:Synchronize
 *601: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
