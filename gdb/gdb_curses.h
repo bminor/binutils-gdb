@@ -36,7 +36,7 @@
 #include <term.h>
 #else
 /* On MinGW, a real termcap library is usually not present.  Stub versions
-   of the termcap functions will be built from win32-termcap.c.  Readline
+   of the termcap functions will be built from windows-termcap.c.  Readline
    provides its own extern declarations when there's no termcap.h; do the
    same here for the termcap functions used in GDB.  */
 extern int tgetnum (const char *);

@@ -515,7 +515,8 @@ ALL_TARGET_OBS = \
 	xcoffread.o \
 	prologue-value.o \
 	symfile-mem.o \
-	corelow.o
+	corelow.o \
+	windows-tdep.o
 
 # Host-dependent makefile fragment comes in here.
 @host_makefile_frag@
@@ -727,7 +728,7 @@ config/sparc/nm-sol2.h config/nm-linux.h config/mips/nm-irix5.h	\
 config/rs6000/nm-rs6000.h top.h bsd-kvm.h gdb-stabs.h reggroups.h \
 annotate.h sim-regno.h dictionary.h dfp.h main.h frame-unwind.h	\
 remote-fileio.h i386-linux-tdep.h vax-tdep.h objc-lang.h \
-sentinel-frame.h bcache.h symfile.h
+sentinel-frame.h bcache.h symfile.h windows-tdep.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1340,7 +1341,7 @@ ALLDEPFILES = \
 	spu-linux-nat.c spu-tdep.c \
 	v850-tdep.c \
 	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
-	win32-nat.c \
+	windows-nat.c windows-tdep.c \
 	xcoffread.c xcoffsolib.c \
 	xstormy16-tdep.c \
 	xtensa-tdep.c xtensa-config.c \

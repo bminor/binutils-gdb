@@ -21,7 +21,7 @@
 #include "osabi.h"
 #include "gdb_string.h"
 #include "i386-tdep.h"
-#include "win32-tdep.h"
+#include "windows-tdep.h"
 #include "regset.h"
 #include "gdb_obstack.h"
 #include "xml-support.h"

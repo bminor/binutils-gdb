@@ -60,8 +60,8 @@
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 
-#include "win32-tdep.h"
-#include "win32-nat.h"
+#include "windows-tdep.h"
+#include "windows-nat.h"
 
 static struct target_ops win32_ops;
 
@@ -651,8 +651,8 @@ win32_make_so (const char *name, LPVOID load_addr)
       /* The symbols in a dll are offset by 0x1000, which is the the
 	 offset from 0 of the first byte in an image - because of the
 	 file header and the section alignment. */
-      cygwin_load_start = load_addr + 0x1000;
-      cygwin_load_end = cygwin_load_start + bfd_section_size (abfd, text);
+      cygwin_load_start = (bfd_vma) ((char *) load_addr + 0x1000);
+      cygwin_load_end = (bfd_vma) ((char *) cygwin_load_start + bfd_section_size (abfd, text));
 
       bfd_close (abfd);
     }
@@ -727,7 +727,7 @@ handle_load_dll (void *dummy)
   solib_end->next = win32_make_so (dll_name, event->lpBaseOfDll);
   solib_end = solib_end->next;
 
-  DEBUG_EVENTS (("gdb: Loading dll \"%s\" at 0x%lx.\n", solib_end->so_name,
+  DEBUG_EVENTS (("gdb: Loading dll \"%s\" at %p.\n", solib_end->so_name,
 		 solib_end->lm_info->load_addr));
 
   return 1;
@@ -973,7 +973,7 @@ info_w32_command (char *args, int from_tty)
 
 
 #define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
-  printf_unfiltered ("gdb: Target exception %s at 0x%08lx\n", x, \
+  printf_unfiltered ("gdb: Target exception %s at %p\n", x, \
           current_event.u.Exception.ExceptionRecord.ExceptionAddress)
 
 static int
@@ -1086,7 +1086,7 @@ handle_exception (struct target_waitstatus *ourstatus)
       /* Treat unhandled first chance exceptions specially. */
       if (current_event.u.Exception.dwFirstChance)
 	return -1;
-      printf_unfiltered ("gdb: unknown target exception 0x%08lx at 0x%08lx\n",
+      printf_unfiltered ("gdb: unknown target exception 0x%08lx at %p\n",
 		    current_event.u.Exception.ExceptionRecord.ExceptionCode,
 	        current_event.u.Exception.ExceptionRecord.ExceptionAddress);
       ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;

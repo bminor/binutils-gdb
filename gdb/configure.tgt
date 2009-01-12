@@ -201,13 +201,13 @@ i[34567]86-*-gnu*)
 i[34567]86-*-cygwin*)
 	# Target: Intel 386 running win32
 	gdb_target_obs="i386-tdep.o i386-cygwin-tdep.o i387-tdep.o \
-			solib-target.o corelow.o win32-tdep.o"
+			solib-target.o corelow.o windows-tdep.o"
 	build_gdbserver=yes
 	;;
 i[34567]86-*-mingw32*)
 	# Target: Intel 386 running win32
 	gdb_target_obs="i386-tdep.o i386-cygwin-tdep.o i387-tdep.o \
-			solib-target.o corelow.o win32-tdep.o"
+			solib-target.o corelow.o windows-tdep.o"
 	build_gdbserver=yes
 	;;
 i[34567]86-*-*)
@@ -526,7 +526,7 @@ x86_64-*-mingw*)
         # Target: MingW/amd64
 	gdb_target_obs="amd64-tdep.o amd64-windows-tdep.o \
                         i386-tdep.o i386-cygwin-tdep.o i387-tdep.o \
-                        solib-target.o win32-tdep.o"
+                        solib-target.o windows-tdep.o"
         ;;
 x86_64-*-netbsd* | x86_64-*-knetbsd*-gnu)
 	# Target: NetBSD/amd64

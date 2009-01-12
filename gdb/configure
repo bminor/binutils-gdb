@@ -10170,7 +10170,7 @@ case $host_os in
     ;;
   *mingw32*)
     ac_cv_search_tgetent="none required"
-    CONFIG_OBS="$CONFIG_OBS win32-termcap.o"
+    CONFIG_OBS="$CONFIG_OBS windows-termcap.o"
     ;;
 esac
 

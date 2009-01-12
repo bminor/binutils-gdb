@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "win32-nat.h"
+#include "windows-nat.h"
 
 #include <windows.h>
 

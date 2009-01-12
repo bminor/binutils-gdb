@@ -1,5 +1,43 @@
 2009-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix linking with --enable-targets=all:
+	* Makefile.in (ALL_TARGET_OBS): Add windows-tdep.o.
+	(HFILES_NO_SRCDIR): Add windows-tdep.h.
+	(ALLDEPFILES): Add windows-tdep.c.
+
+2009-01-11  Christ Faylor  <me.gdb@cgf.cx>
+
+	* win32-nat.h: Delete.
+	* windows-nat.h: Rename from win32-nat.h.
+	* win32-nat.c: Delete.
+	* windows-nat.c: Rename from win32-nat.c.
+	* win32-termcap.c: Delete.
+	* windows-termcap.c: Rename from win32-termcap.c.
+	* amd64-windows-nat.c: Handle rename from win32-nat.h -> windows-nat.h.
+	* configure.ac: Handle rename from win32-termcap.c ->
+	windows-termcap.c.
+	* configure: Regenerate.
+	* gdb_curses.h: Change comment to reflect rename from win32-termcap.c
+	-> windows-termcap.c.
+	* i386-cygwin-tdep.c: Handle rename from win32-tdep.h ->
+	windows-tdep.h.
+	* i386-windows-nat.c: Refect rename from win32-nat.h -> windows-nat.h.
+	* windows-nat.c: Ditto.  Also reflect rename from from win32-tdep.h ->
+	windows-tdep.h.
+	(win32_make_so): Handle cygwin compiler warning due to change of
+	load_addr from DWORD to LPVOID.
+	(handle_load_dll): Use %p in format string to properly print address
+	and avoid a compiler warning.
+	(DEBUG_EXCEPTION_SIMPLE): Ditto.
+	(handle_exception): Ditto.
+	* windows-tdep.c: Handle rename from win32-tdep.h -> windows-tdep.h.
+	* config/i386/cygwin.mh: Handle rename from win32-nat.o ->
+	windows-nat.o.
+	* config/i386/mingw.mh: Ditto.
+	* config/i386/mingw64.mh: Ditto.
+
+2009-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* f-typeprint.c (f_type_print_varspec_suffix): Convert the autovariable
 	arrayprint_recurse_level to a parameter.  Update all the callers.  New
 	comment at autovariables.

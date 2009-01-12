@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "win32-tdep.h"
+#include "windows-tdep.h"
 #include "gdb_obstack.h"
 #include "xml-support.h"
 
