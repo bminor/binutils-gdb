@@ -6,8 +6,12 @@
 
 	* gas/i386/opts.d: Updated.
 	* gas/i386/opts-intel.d: Likewise.
+	* gas/i386/sse2avx-opts.d: Likewise.
+	* gas/i386/sse2avx-opts-intel.d: Likewise.
 	* gas/i386/x86-64-opts.d: Likewise.
 	* gas/i386/x86-64-opts-intel.d: Likewise.
+	* gas/i386/x86-64-sse2avx-opts.d: Likewise.
+	* gas/i386/x86-64-sse2avx-opts-intel.d: Likewise.
 
 2009-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
