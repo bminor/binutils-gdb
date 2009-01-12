@@ -1310,8 +1310,8 @@ static const struct dis386 dis386[] = {
   /* 00 */
   { "addB",		{ Eb, Gb } },
   { "addS",		{ Ev, Gv } },
-  { "addB",		{ Gb, Eb } },
-  { "addS",		{ Gv, Ev } },
+  { "addB",		{ Gb, EbS } },
+  { "addS",		{ Gv, EvS } },
   { "addB",		{ AL, Ib } },
   { "addS",		{ eAX, Iv } },
   { X86_64_TABLE (X86_64_06) },
@@ -1319,8 +1319,8 @@ static const struct dis386 dis386[] = {
   /* 08 */
   { "orB",		{ Eb, Gb } },
   { "orS",		{ Ev, Gv } },
-  { "orB",		{ Gb, Eb } },
-  { "orS",		{ Gv, Ev } },
+  { "orB",		{ Gb, EbS } },
+  { "orS",		{ Gv, EvS } },
   { "orB",		{ AL, Ib } },
   { "orS",		{ eAX, Iv } },
   { X86_64_TABLE (X86_64_0D) },
@@ -1328,8 +1328,8 @@ static const struct dis386 dis386[] = {
   /* 10 */
   { "adcB",		{ Eb, Gb } },
   { "adcS",		{ Ev, Gv } },
-  { "adcB",		{ Gb, Eb } },
-  { "adcS",		{ Gv, Ev } },
+  { "adcB",		{ Gb, EbS } },
+  { "adcS",		{ Gv, EvS } },
   { "adcB",		{ AL, Ib } },
   { "adcS",		{ eAX, Iv } },
   { X86_64_TABLE (X86_64_16) },
@@ -1337,8 +1337,8 @@ static const struct dis386 dis386[] = {
   /* 18 */
   { "sbbB",		{ Eb, Gb } },
   { "sbbS",		{ Ev, Gv } },
-  { "sbbB",		{ Gb, Eb } },
-  { "sbbS",		{ Gv, Ev } },
+  { "sbbB",		{ Gb, EbS } },
+  { "sbbS",		{ Gv, EvS } },
   { "sbbB",		{ AL, Ib } },
   { "sbbS",		{ eAX, Iv } },
   { X86_64_TABLE (X86_64_1E) },
@@ -1346,8 +1346,8 @@ static const struct dis386 dis386[] = {
   /* 20 */
   { "andB",		{ Eb, Gb } },
   { "andS",		{ Ev, Gv } },
-  { "andB",		{ Gb, Eb } },
-  { "andS",		{ Gv, Ev } },
+  { "andB",		{ Gb, EbS } },
+  { "andS",		{ Gv, EvS } },
   { "andB",		{ AL, Ib } },
   { "andS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG ES prefix */
@@ -1355,8 +1355,8 @@ static const struct dis386 dis386[] = {
   /* 28 */
   { "subB",		{ Eb, Gb } },
   { "subS",		{ Ev, Gv } },
-  { "subB",		{ Gb, Eb } },
-  { "subS",		{ Gv, Ev } },
+  { "subB",		{ Gb, EbS } },
+  { "subS",		{ Gv, EvS } },
   { "subB",		{ AL, Ib } },
   { "subS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG CS prefix */
@@ -1364,8 +1364,8 @@ static const struct dis386 dis386[] = {
   /* 30 */
   { "xorB",		{ Eb, Gb } },
   { "xorS",		{ Ev, Gv } },
-  { "xorB",		{ Gb, Eb } },
-  { "xorS",		{ Gv, Ev } },
+  { "xorB",		{ Gb, EbS } },
+  { "xorS",		{ Gv, EvS } },
   { "xorB",		{ AL, Ib } },
   { "xorS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG SS prefix */
@@ -1373,8 +1373,8 @@ static const struct dis386 dis386[] = {
   /* 38 */
   { "cmpB",		{ Eb, Gb } },
   { "cmpS",		{ Ev, Gv } },
-  { "cmpB",		{ Gb, Eb } },
-  { "cmpS",		{ Gv, Ev } },
+  { "cmpB",		{ Gb, EbS } },
+  { "cmpS",		{ Gv, EvS } },
   { "cmpB",		{ AL, Ib } },
   { "cmpS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG DS prefix */

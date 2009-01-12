@@ -1,3 +1,9 @@
+2009-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (dis386): Use EbS on addB, orB, adcB, sbbB, andB,
+	subB, xorB and cmpB.  Use EvS on addS, orS, adcS, sbbS, andS,
+	subS, xorS and cmpS.
+
 2009-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Replace CpuP4 and CpuK6 with

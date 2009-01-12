@@ -1,3 +1,14 @@
+2009-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/opts.s: Add tests for add, adc, and, cmp, or, sbb,
+	sub and xor.
+	* gas/i386/x86-64-opts.s: Likewise.
+
+	* gas/i386/opts.d: Updated.
+	* gas/i386/opts-intel.d: Likewise.
+	* gas/i386/x86-64-opts.d: Likewise.
+	* gas/i386/x86-64-opts-intel.d: Likewise.
+
 2009-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/arch-10.s: Add clflush and syscall.
