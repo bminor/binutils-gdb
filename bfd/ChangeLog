@@ -1,5 +1,9 @@
 2009-01-12  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-spu.c (spu_elf_auto_overlay): Correct vma mask.
+
+2009-01-12  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-spu.c (struct spu_link_hash_table): Add init, line_size_log2,
 	num_lines_log2.
 	(struct got_entry): Add br_addr.
@@ -36,6 +40,7 @@
 	into addresses.
 	(spu_elf_output_symbol_hook): Support soft-icache.
 	(spu_elf_modify_program_headers: Likewise.
+
 	* elf32-spu.h (struct spu_elf_params): Add lrlive_analysis.  Rename
 	num_regions to num_lines.  Add line_size and max_branch.
 	(enum _ovly_flavour): Add ovly_soft_icache.

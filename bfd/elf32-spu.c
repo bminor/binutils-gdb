@@ -4372,7 +4372,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  unsigned int indx = ovlynum - 1;
 	  unsigned int vma, lma;
 
-	  vma = (indx & (htab->num_lines_log2 - 1)) << htab->line_size_log2;
+	  vma = (indx & (htab->params->num_lines - 1)) << htab->line_size_log2;
 	  lma = indx << htab->line_size_log2;
 
 	  if (fprintf (script, " .ovly%u ABSOLUTE (ADDR (.ovl.init)) + %u "
