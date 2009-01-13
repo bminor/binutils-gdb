@@ -1,5 +1,10 @@
 2009-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.tbl: Add NoAVX to movnti, lfence and mfence.
+	* i386-tbl.h: Regenerated.
+
+2009-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (dis386): Use EbS on addB, orB, adcB, sbbB, andB,
 	subB, xorB and cmpB.  Use EvS on addS, orS, adcS, sbbS, andS,
 	subS, xorS and cmpS.
