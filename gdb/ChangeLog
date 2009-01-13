@@ -1,3 +1,12 @@
+2009-01-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* mdebugread.c (parse_symbol): Save the symbol private data
+	using SYMBOL_VALUE_BYTES instead of SYMBOL_VALUE.
+	(psymtab_to_symtab_1): Likewise.
+	(parse_procedure): Declare variable "e" only in the scope
+	where it is used. Extract the symbol private data using
+	SYMBOL_VALUE_BYTES.
+
 2009-01-13  Jim Blandy  <jimb@codesourcery.com>
 
 	Abstract out common code for copying value locations.
