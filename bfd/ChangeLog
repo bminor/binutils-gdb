@@ -1,3 +1,9 @@
+2009-01-14  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 9735
+	* syms.c (_bfd_stab_section_find_nearest_line): Don't free
+	saved filename, use bfd_alloc rather than bfd_malloc for it.
+
 2009-01-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_build_stubs): Make __icache_base absolute.
