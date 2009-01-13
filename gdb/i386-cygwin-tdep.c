@@ -32,9 +32,9 @@
 /* Core file support.  */
 
 /* This vector maps GDB's idea of a register's number into an address
-   in the win32 exception context vector.  */
+   in the windows exception context vector.  */
 
-static int i386_win32_gregset_reg_offset[] =
+static int i386_windows_gregset_reg_offset[] =
 {
   176, /* eax */
   172, /* ecx */
@@ -88,19 +88,19 @@ static int i386_win32_gregset_reg_offset[] =
   228 /* ExtendedRegisters[24] */
 };
 
-#define I386_WIN32_SIZEOF_GREGSET 716
+#define I386_WINDOWS_SIZEOF_GREGSET 716
 
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
 static const struct regset *
-i386_win32_regset_from_core_section (struct gdbarch *gdbarch,
+i386_windows_regset_from_core_section (struct gdbarch *gdbarch,
 				     const char *sect_name, size_t sect_size)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (strcmp (sect_name, ".reg") == 0
-      && sect_size == I386_WIN32_SIZEOF_GREGSET)
+      && sect_size == I386_WINDOWS_SIZEOF_GREGSET)
     {
       if (tdep->gregset == NULL)
         tdep->gregset = regset_alloc (gdbarch, i386_supply_gregset,
@@ -143,7 +143,7 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
 
 
 
-  /* A DWORD (data_type) followed by struct win32_core_module_info.  */
+  /* A DWORD (data_type) followed by struct windows_core_module_info.  */
 
   base_addr =
     extract_unsigned_integer (buf + 4, 4);
@@ -157,7 +157,7 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
 
   /* The first module is the .exe itself.  */
   if (data->module_count != 0)
-    win32_xfer_shared_library (module_name, base_addr, data->obstack);
+    windows_xfer_shared_library (module_name, base_addr, data->obstack);
   data->module_count++;
 
 out:
@@ -167,7 +167,7 @@ out:
 }
 
 static LONGEST
-win32_core_xfer_shared_libraries (struct gdbarch *gdbarch,
+windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 				  gdb_byte *readbuf,
 				  ULONGEST offset, LONGEST len)
 {
@@ -213,17 +213,17 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->struct_return = reg_struct_return;
 
-  tdep->gregset_reg_offset = i386_win32_gregset_reg_offset;
-  tdep->gregset_num_regs = ARRAY_SIZE (i386_win32_gregset_reg_offset);
-  tdep->sizeof_gregset = I386_WIN32_SIZEOF_GREGSET;
+  tdep->gregset_reg_offset = i386_windows_gregset_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (i386_windows_gregset_reg_offset);
+  tdep->sizeof_gregset = I386_WINDOWS_SIZEOF_GREGSET;
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
 
   /* Core file support.  */
   set_gdbarch_regset_from_core_section
-    (gdbarch, i386_win32_regset_from_core_section);
+    (gdbarch, i386_windows_regset_from_core_section);
   set_gdbarch_core_xfer_shared_libraries
-    (gdbarch, win32_core_xfer_shared_libraries);
+    (gdbarch, windows_core_xfer_shared_libraries);
 }
 
 static enum gdb_osabi
@@ -242,7 +242,7 @@ i386_cygwin_osabi_sniffer (bfd *abfd)
     {
       asection *section = bfd_get_section_by_name (abfd, ".reg");
       if (section
-	  && bfd_section_size (abfd, section) == I386_WIN32_SIZEOF_GREGSET)
+	  && bfd_section_size (abfd, section) == I386_WINDOWS_SIZEOF_GREGSET)
 	return GDB_OSABI_CYGWIN;
     }
 

@@ -15,13 +15,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef WIN32_TDEP_H
-#define WIN32_TDEP_H
+#ifndef WINDOWS_TDEP_H
+#define WINDOWS_TDEP_H
 
 struct obstack;
 
-extern void win32_xfer_shared_library (const char* so_name,
-				       CORE_ADDR load_addr,
-				       struct obstack *obstack);
-
+extern void windows_xfer_shared_library (const char* so_name,
+					 CORE_ADDR load_addr,
+					 struct obstack *obstack);
 #endif

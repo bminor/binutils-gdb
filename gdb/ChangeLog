@@ -1,3 +1,23 @@
+2009-01-12  Christopher Faylor  <me+cygwin@cgf.cx>
+
+	* amd64-windows-nat.c Rename gdb-specific win32_* to windows_*
+	throughout.
+	* i386-cygwin-tdep.c: Ditto.
+	* i386-windows-nat.c: Ditto.
+	* windows-nat.h: Ditto.
+	* windows-tdep.c: Ditto.
+	* windows-tdep.h: Ditto.
+	* windows-nat.c: Ditto.
+	(cygwin_load_start): Redefine as CORE_ADDR.
+	(cygwin_load_end): Ditto.
+	(windows_make_so): Coerce result of address arithmetic to to uintptr_t
+	before coercing to CORE_ADDR to avoid a compiler warning.
+	(handle_exception): Define addr as CORE_ADDR and coerce
+	ExceptionAddress to uintptr_t before assigining to avoid a compiler
+	warning.
+	* config/djgpp/fnchange.lst: Add mappings for recently renamed windows
+	files.
+
 2009-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix linking with --enable-targets=all:

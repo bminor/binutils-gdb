@@ -21,8 +21,8 @@
 #include "xml-support.h"
 
 void
-win32_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
-			   struct obstack *obstack)
+windows_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
+			     struct obstack *obstack)
 {
   char *p;
   obstack_grow_str (obstack, "<library name=\"");
@@ -37,5 +37,3 @@ win32_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
   obstack_grow_str (obstack, p);
   obstack_grow_str (obstack, "\"/></library>");
 }
-
-

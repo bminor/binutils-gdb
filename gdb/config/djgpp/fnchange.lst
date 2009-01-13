@@ -278,6 +278,14 @@
 @V@/gdb/hppa-linux-nat.c @V@/gdb/palnxnat.c
 @V@/gdb/hppa-hpux-nat.c @V@/gdb/pahpuxnat.c
 @V@/gdb/hppa-hpux-tdep.c @V@/gdb/pahpuxtdep.c
+@V@/gdb/amd64-windows-nat.c @V@/gdb/amd64-wnat.c
+@V@/gdb/amd64-windows-tdep.c @V@/gdb/amd64-wtdep.c
+@V@/gdb/i386-windows-nat.c @V@/gdb/i386-wnat.c
+@V@/gdb/windows-nat.c @V@/gdb/win-nat.c
+@V@/gdb/windows-nat.h @V@/gdb/win-nat.h
+@V@/gdb/windows-tdep.c @V@/gdb/win-tdep.c
+@V@/gdb/windows-tdep.h @V@/gdb/win-tdep.h
+@V@/gdb/windows-termcap.c @V@/gdb/win-tcap.c
 @V@/include/ChangeLog-9103 @V@/include/ChangeLog.9103
 @V@/include/coff/ChangeLog-9103 @V@/include/coff/ChangeLog.9103
 @V@/include/elf/ChangeLog-9103 @V@/include/elf/ChangeLog.9103

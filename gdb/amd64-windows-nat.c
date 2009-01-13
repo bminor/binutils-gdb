@@ -88,5 +88,5 @@ static const int mappings[] =
 void
 _initialize_amd64_windows_nat (void)
 {
-  win32_set_context_register_offsets (mappings);
+  windows_set_context_register_offsets (mappings);
 }

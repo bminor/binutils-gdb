@@ -15,10 +15,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef WIN32_NAT_H
-#define WIN32_NAT_H
+#ifndef WINDOWS_NAT_H
+#define WINDOWS_NAT_H
 
-extern void win32_set_context_register_offsets (const int *offsets);
+extern void windows_set_context_register_offsets (const int *offsets);
 
 #endif
 
