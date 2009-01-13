@@ -1,3 +1,15 @@
+2009-01-13  Jim Blandy  <jimb@codesourcery.com>
+
+	Abstract out common code for copying value locations.
+
+	* value.h (set_value_component_location): New declaration.
+	* value.c (set_value_component_location): New function.
+	(value_primitive_field): Use it.
+	* valarith.c (value_subscript, value_subscripted_rvalue): Same.
+	* valops.c (search_struct_field, value_slice): Same.
+	* ada-lang.c (coerce_unspec_val_to_type)
+	(ada_value_primitive_packed_val): Same.
+
 2009-01-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS (GLOBAL MAINTAINERS): Add Tom Tromey.

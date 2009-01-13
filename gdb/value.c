@@ -627,6 +627,17 @@ value_copy (struct value *arg)
     }
   return val;
 }
+
+void
+set_value_component_location (struct value *component, struct value *whole)
+{
+  if (VALUE_LVAL (whole) == lval_internalvar)
+    VALUE_LVAL (component) = lval_internalvar_component;
+  else
+    VALUE_LVAL (component) = VALUE_LVAL (whole);
+  component->location = whole->location;
+}
+
 
 /* Access to the value history.  */
 
@@ -1426,10 +1437,7 @@ value_primitive_field (struct value *arg1, int offset,
       v->offset = (value_offset (arg1) + offset
 		   + value_embedded_offset (arg1));
     }
-  VALUE_LVAL (v) = VALUE_LVAL (arg1);
-  if (VALUE_LVAL (arg1) == lval_internalvar)
-    VALUE_LVAL (v) = lval_internalvar_component;
-  v->location = arg1->location;
+  set_value_component_location (v, arg1);
   VALUE_REGNUM (v) = VALUE_REGNUM (arg1);
   VALUE_FRAME_ID (v) = VALUE_FRAME_ID (arg1);
   return v;

@@ -483,10 +483,10 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
       check_size (type);
 
       result = allocate_value (type);
-      VALUE_LVAL (result) = VALUE_LVAL (val);
+      set_value_component_location (result, val);
       set_value_bitsize (result, value_bitsize (val));
       set_value_bitpos (result, value_bitpos (val));
-      VALUE_ADDRESS (result) = VALUE_ADDRESS (val) + value_offset (val);
+      VALUE_ADDRESS (result) += value_offset (val);
       if (value_lazy (val)
           || TYPE_LENGTH (type) > TYPE_LENGTH (value_type (val)))
         set_value_lazy (result, 1);
@@ -2018,10 +2018,8 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 
   if (obj != NULL)
     {
-      VALUE_LVAL (v) = VALUE_LVAL (obj);
-      if (VALUE_LVAL (obj) == lval_internalvar)
-        VALUE_LVAL (v) = lval_internalvar_component;
-      VALUE_ADDRESS (v) = VALUE_ADDRESS (obj) + value_offset (obj) + offset;
+      set_value_component_location (v, obj);
+      VALUE_ADDRESS (v) += value_offset (obj) + offset;
       set_value_bitpos (v, bit_offset + value_bitpos (obj));
       set_value_bitsize (v, bit_size);
       if (value_bitpos (v) >= HOST_CHAR_BIT)

@@ -233,11 +233,7 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
     memcpy (value_contents_writeable (v),
 	    value_contents (array) + elt_offs, elt_size);
 
-  if (VALUE_LVAL (array) == lval_internalvar)
-    VALUE_LVAL (v) = lval_internalvar_component;
-  else
-    VALUE_LVAL (v) = VALUE_LVAL (array);
-  VALUE_ADDRESS (v) = VALUE_ADDRESS (array);
+  set_value_component_location (v, array);
   VALUE_REGNUM (v) = VALUE_REGNUM (array);
   VALUE_FRAME_ID (v) = VALUE_FRAME_ID (array);
   set_value_offset (v, value_offset (array) + elt_offs);
@@ -277,11 +273,7 @@ value_bitstring_subscript (struct type *type,
 
   set_value_bitpos (v, bit_index);
   set_value_bitsize (v, 1);
-
-  VALUE_LVAL (v) = VALUE_LVAL (bitstring);
-  if (VALUE_LVAL (bitstring) == lval_internalvar)
-    VALUE_LVAL (v) = lval_internalvar_component;
-  VALUE_ADDRESS (v) = VALUE_ADDRESS (bitstring);
+  set_value_component_location (v, bitstring);
   VALUE_FRAME_ID (v) = VALUE_FRAME_ID (bitstring);
 
   set_value_offset (v, offset + value_offset (bitstring));

@@ -1575,8 +1575,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 			  value_contents_raw (arg1) + boffset,
 			  TYPE_LENGTH (basetype));
 		}
-	      VALUE_LVAL (v2) = VALUE_LVAL (arg1);
-	      VALUE_ADDRESS (v2) = VALUE_ADDRESS (arg1);
+	      set_value_component_location (v2, arg1);
 	      VALUE_FRAME_ID (v2) = VALUE_FRAME_ID (arg1);
 	      set_value_offset (v2, value_offset (arg1) + boffset);
 	    }
@@ -2984,12 +2983,7 @@ value_slice (struct value *array, int lowbound, int length)
 		  TYPE_LENGTH (slice_type));
 	}
 
-      if (VALUE_LVAL (array) == lval_internalvar)
-	VALUE_LVAL (slice) = lval_internalvar_component;
-      else
-	VALUE_LVAL (slice) = VALUE_LVAL (array);
-
-      VALUE_ADDRESS (slice) = VALUE_ADDRESS (array);
+      set_value_component_location (slice, array);
       VALUE_FRAME_ID (slice) = VALUE_FRAME_ID (array);
       set_value_offset (slice, value_offset (array) + offset);
     }
