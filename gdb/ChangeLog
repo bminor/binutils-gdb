@@ -1,3 +1,7 @@
+2009-01-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS (GLOBAL MAINTAINERS): Add Tom Tromey.
+
 2009-01-12  Christopher Faylor  <me+cygwin@cgf.cx>
 
 	* amd64-windows-nat.c Rename gdb-specific win32_* to windows_*
