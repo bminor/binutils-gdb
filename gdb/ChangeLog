@@ -1,3 +1,8 @@
+2009-01-13  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Do not call get_frame_arch
+	for NULL frame pointers.
+
 2009-01-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* utils.c (host_address_to_string): Reimplement in a way that
