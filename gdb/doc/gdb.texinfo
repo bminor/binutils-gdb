@@ -26795,7 +26795,7 @@ Here are the specific requests of this form defined so far.  All
 formats, listed below.
 
 @table @samp
-@item qXfer:@var{spu}:write:@var{annex}:@var{offset}:@var{data}@dots{}
+@item qXfer:spu:write:@var{annex}:@var{offset}:@var{data}@dots{}
 @anchor{qXfer spu write}
 Write @var{data} to an @code{spufs} file on the target system.  The
 annex specifies which file to write; it must be of the form
