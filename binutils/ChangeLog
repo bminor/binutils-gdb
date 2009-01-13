@@ -1,5 +1,10 @@
 2009-01-13  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 7034
+	* doc/binutils.texi (objdump -R): Note effect of -d or -D.
+
+2009-01-13  Alan Modra  <amodra@bigpond.net.au>
+
 	* objdump.c (disassemble_section): Don't assume non-instruction
 	data if object symbol at given address is in different section.
 

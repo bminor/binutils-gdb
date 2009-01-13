@@ -1918,7 +1918,9 @@ disassembly.
 @cindex dynamic relocation entries, in object file
 Print the dynamic relocation entries of the file.  This is only
 meaningful for dynamic objects, such as certain types of shared
-libraries.
+libraries.  As for @option{-r}, if used with @option{-d} or
+@option{-D}, the relocations are printed interspersed with the
+disassembly.
 
 @item -s
 @itemx --full-contents
