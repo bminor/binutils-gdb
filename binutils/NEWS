@@ -3,6 +3,13 @@
 * Add new option --use-nul-prefixed-import-tables to dlltool to allow fall-
   back to old import table generation with null element prefix.
 
+* Added --identify-strict switch to cause --identify <implib> to 
+  report an error when the import library is associated with
+  multiple DLLs.
+
+* Added --identify <implib> option to dlltool, which determines the
+  name of the DLL associated with the specified <implib>.
+
 * Support for PowerPC booke64 instructions has been removed.  The assembler no
   longer accepts -mbooke32 or -mbooke64 and the disassembler no longer accepts
   -Mbooke32 or -Mbooke64.  Instead, -mbooke and -Mbooke should be used.

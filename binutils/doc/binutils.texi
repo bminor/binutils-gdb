@@ -11,7 +11,7 @@
 @copying
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -3373,7 +3373,8 @@ dlltool [@option{-d}|@option{--input-def} @var{def-file-name}]
         [@option{-p}|@option{--ext-prefix-alias} @var{prefix}]
         [@option{-x}|@option{--no-idata4}] [@option{-c}|@option{--no-idata5}]
         [@option{--use-nul-prefixed-import-tables}]
-        [@option{-I}|@option{--identify} @var{library-file-name}] [@option{-i}|@option{--interwork}]
+        [@option{-I}|@option{--identify} @var{library-file-name}] [@option{--identify-strict}]
+        [@option{-i}|@option{--interwork}]
         [@option{-n}|@option{--nodelete}] [@option{-t}|@option{--temp-prefix} @var{prefix}]
         [@option{-v}|@option{--verbose}]
         [@option{-h}|@option{--help}] [@option{-V}|@option{--version}]
@@ -3601,12 +3602,16 @@ with certain operating systems.
 @item -I @var{filename}
 @itemx --identify @var{filename}
 Specifies that @command{dlltool} should inspect the import library
-indicated by @var{filename} and report, on @code{stdout}, the name of
-the associated DLL.  This can be performed in addition to any other
-operations indicated by the other options and arguments.  @command{dlltool}
-@option{--identify} fails if the import library does not exist, is not
-actually an import library, or (rarely) if the import library somehow
-specifies more than one associated DLL.
+indicated by @var{filename} and report, on @code{stdout}, the name(s)
+of the associated DLL(s).  This can be performed in addition to any
+other operations indicated by the other options and arguments.
+@command{dlltool} fails if the import library does not exist or is not
+actually an import library. See also @option{--identify-strict}.
+
+@item --identify-strict
+Modifies the behavior of the @option{--identify} option, such
+that an error is reported if @var{filename} is associated with
+more than one DLL.
 
 @item -i
 @itemx --interwork

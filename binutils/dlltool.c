@@ -1,6 +1,6 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -353,7 +353,28 @@ static int no_idata5;
 static char *exp_name;
 static char *imp_name;
 static char *identify_imp_name;
-static char *identify_dll_name;
+static bfd_boolean identify_ms;
+static bfd_boolean identify_strict;
+
+/* Holds a linked list of dllnames associated with the
+   specified import lib. Used by the identify_* code.
+   The _head entry is always empty (_head->dllname is
+   NULL).  */
+typedef struct dll_name_list_t
+{
+  char *                   dllname;
+  struct dll_name_list_t * next;
+} dll_name_list_type;
+
+static dll_name_list_type * identify_dll_name_list_head;
+static dll_name_list_type * identify_dll_name_list_tail;
+/* dll_name_list management functions.  */
+static void identify_append_dll_name_to_list (bfd_byte *);
+static int  identify_count_dll_name_list (void);
+static void identify_print_dll_name_list (void);
+static void identify_free_dll_name_list (dll_name_list_type *);
+static bfd_boolean identify_member_contains_symname_result = FALSE;
+
 static char *head_label;
 static char *imp_name_lab;
 static char *dll_name;
@@ -732,10 +753,13 @@ static bfd *make_head (void);
 static bfd *make_tail (void);
 static void gen_lib_file (void);
 static void identify_dll_for_implib (void);
-static void identify_search_archive (bfd*);
-static void identify_search_member (bfd*, bfd*);
+static void identify_search_archive
+  (bfd *, void (*) (bfd *, bfd *, void *),  void *);
+static void identify_search_member (bfd *, bfd *, void *);
 static bfd_boolean identify_process_section_p (asection *);
 static void identify_search_section (bfd *, asection *, void *);
+static void identify_member_contains_symname (bfd *, bfd  *, void *);
+
 static int pfunc (const void *, const void *);
 static int nfunc (const void *, const void *);
 static void remove_null_names (export_type **);
@@ -2943,69 +2967,220 @@ gen_lib_file (void)
   inform (_("Created lib file"));
 }
 
-/* identify_dll_for_implib
+/* Management of the identify_dll_name_list.  */
 
-   This is the main implementation for the --identify option.
-   Given the name of an import library in identify_imp_name,
-   search all archive members for an .idata$7 section
-   (.idata$6 on PPC). This section will consist of a single
-   char* constant, indicating the name of the DLL represented
-   by the import library.
+static void
+identify_append_dll_name_to_list (bfd_byte * data)
+{
+  /* Allocate new node.  */
+  dll_name_list_type * entry =
+    (dll_name_list_type *) xmalloc (sizeof (dll_name_list_type));
 
-   It is possible to construct an import library that has
-   two members with a non-empty .idata$7 section, but these
-   are not often seen in normal operation.  In this case,
-   an error is flagged.
-*/   
+  /* Initialize its values.  */
+  entry->dllname = xstrdup ((char *) data);
+  entry->next = NULL;
+
+  /* Add to tail, and move tail.  */
+  identify_dll_name_list_tail->next = entry;
+  identify_dll_name_list_tail = entry;
+}
+
+static int 
+identify_count_dll_name_list (void)
+{
+  int count = 0;
+  dll_name_list_type * p = identify_dll_name_list_head;
+
+  while (p && p->next)
+    {
+      count++;
+      p = p->next;
+    }
+  return count;
+}
+
+static void 
+identify_print_dll_name_list (void)
+{
+  dll_name_list_type * p = identify_dll_name_list_head;
+
+  while (p && p->next && p->next->dllname && *(p->next->dllname))
+    {
+      printf ("%s\n", p->next->dllname);
+      p = p->next;
+    }
+}
+
+static void 
+identify_free_dll_name_list (dll_name_list_type * entry)
+{
+  if (entry)
+    {
+      if (entry->next)
+        {
+          identify_free_dll_name_list (entry->next);
+          entry->next = NULL;
+        }
+      if (entry->dllname)
+        {
+          free (entry->dllname);
+          entry->dllname = NULL;
+        }
+      free (entry);
+    }
+}
+
+/* Search the symbol table of the suppled BFD for a symbol whose name matches
+   OBJ (where obj is cast to const char *).  If found, set global variable
+   identify_member_contains_symname_result TRUE.  It is the caller's
+   responsibility to set the result variable FALSE before iterating with
+   this function.  */   
+
+static void 
+identify_member_contains_symname (bfd  * abfd,
+				  bfd  * archive_bfd ATTRIBUTE_UNUSED,
+				  void * obj)
+{
+  long storage_needed;
+  asymbol ** symbol_table;
+  long number_of_symbols;
+  long i;
+  const char * name = (const char *) obj;
+
+  /* If we already found the symbol in a different member,
+     short circuit.  */
+  if (identify_member_contains_symname_result)
+    return;
+
+  storage_needed = bfd_get_symtab_upper_bound (abfd);
+  if (storage_needed <= 0)
+    return;
+
+  symbol_table = xmalloc (storage_needed);
+  number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
+  if (number_of_symbols < 0)
+    {
+      free (symbol_table);
+      return;
+    }
+
+  for (i = 0; i < number_of_symbols; i++)
+    {
+      if (strncmp (symbol_table[i]->name, name, strlen (name)) == 0)
+	{
+	  identify_member_contains_symname_result = TRUE;
+	  break;
+	}
+    }
+  free (symbol_table);
+}
+
+/* This is the main implementation for the --identify option.
+   Given the name of an import library in identify_imp_name, first determine
+   if the import library is a GNU binutils-style one (where the DLL name is
+   stored in an .idata$7 (.idata$6 on PPC) section, or if it is a MS-style
+   one (where the DLL name, along with much other data, is stored in the
+   .idata$6 section). We determine the style of import library by searching
+   for the DLL-structure symbol inserted by MS tools:
+   __NULL_IMPORT_DESCRIPTOR.
+
+   Once we know which section to search, evaluate each section for the
+   appropriate properties that indicate it may contain the name of the
+   associated DLL (this differs depending on the style).  Add the contents
+   of all sections which meet the criteria to a linked list of dll names.
+
+   Finally, print them all to stdout. (If --identify-strict, an error is
+   reported if more than one match was found).  */   
+
 static void 
 identify_dll_for_implib (void)
 {
-  bfd* abfd = NULL;
+  bfd * abfd = NULL;
+  int count = 0;
+
+  /* Initialize identify_dll_name_list.  */
+  identify_dll_name_list_head = xmalloc (sizeof (dll_name_list_type));
+  identify_dll_name_list_head->dllname = NULL;
+  identify_dll_name_list_head->next = NULL;
+  identify_dll_name_list_tail = identify_dll_name_list_head;
 
   bfd_init ();
 
   abfd = bfd_openr (identify_imp_name, 0);
   if (abfd == NULL)
+    bfd_fatal (identify_imp_name);
+
+  if (! bfd_check_format (abfd, bfd_archive))
     {
-      bfd_fatal (identify_imp_name);
+      if (! bfd_close (abfd))
+        bfd_fatal (identify_imp_name);
+
+      fatal (_("%s is not a library"), identify_imp_name);
     }
+
+  /* Detect if this a Microsoft import library.  */
+  identify_member_contains_symname_result = FALSE;
+  identify_search_archive (abfd, identify_member_contains_symname,
+			   "__NULL_IMPORT_DESCRIPTOR");
+  if (identify_member_contains_symname_result)
+    identify_ms = TRUE;
+  
+  /* Rewind the bfd.  */
+  if (! bfd_close (abfd))
+    bfd_fatal (identify_imp_name);
+  abfd = bfd_openr (identify_imp_name, 0);
+  if (abfd == NULL)
+    bfd_fatal (identify_imp_name);
+
   if (!bfd_check_format (abfd, bfd_archive))
     {
       if (!bfd_close (abfd))
         bfd_fatal (identify_imp_name);
 
-      fatal ("%s is not a library", identify_imp_name);
+      fatal (_("%s is not a library"), identify_imp_name);
     }
+ 
+  /* Now search for the dll name.  */
+  identify_search_archive (abfd, identify_search_member, NULL);
 
-  identify_search_archive (abfd);
-
-  if (!bfd_close (abfd))
+  if (! bfd_close (abfd))
     bfd_fatal (identify_imp_name);
 
-  if (identify_dll_name && *identify_dll_name)
+  count = identify_count_dll_name_list();
+  if (count > 0)
     {
-      printf ("%s\n",identify_dll_name);
-      free (identify_dll_name);
-      identify_dll_name = NULL;
+      if (identify_strict && count > 1)
+        {
+          identify_free_dll_name_list (identify_dll_name_list_head);
+          identify_dll_name_list_head = NULL;
+          fatal (_("Import library `%s' specifies two or more dlls"),
+		 identify_imp_name);
+        }
+      identify_print_dll_name_list();
+      identify_free_dll_name_list (identify_dll_name_list_head);
+      identify_dll_name_list_head = NULL;
     }
   else
     {
-      fatal ("Unable to determine dll name for %s (not an import library?)", identify_imp_name);
+      identify_free_dll_name_list (identify_dll_name_list_head);
+      identify_dll_name_list_head = NULL;
+      fatal (_("Unable to determine dll name for `%s' (not an import library?)"),
+	     identify_imp_name);
     }
 }
 
-/* identify_search_archive
+/* Loop over all members of the archive, applying the supplied function to
+   each member that is a bfd_object.  The function will be called as if:
+      func (member_bfd, abfd, user_storage)  */   
 
-   Loop over all members of the archive, inspecting 
-   each for the presence of an .idata$7 (.idata$6 on PPC)
-   section with non-empty contents.
-*/   
 static void
-identify_search_archive (bfd* abfd)
+identify_search_archive (bfd * abfd, 
+			 void (* operation) (bfd *, bfd *, void *),
+			 void * user_storage)
 {
-  bfd *arfile = NULL;
-  bfd *last_arfile = NULL;
-  char **matching;
+  bfd *   arfile = NULL;
+  bfd *   last_arfile = NULL;
+  char ** matching;
 
   while (1)
     {
@@ -3017,19 +3192,18 @@ identify_search_archive (bfd* abfd)
             bfd_fatal (bfd_get_filename (abfd));
           break;
         }
+
       if (bfd_check_format_matches (arfile, bfd_object, &matching))
-        {
-          identify_search_member (arfile, abfd);
-        }
+	(*operation) (arfile, abfd, user_storage);
       else
         {
           bfd_nonfatal (bfd_get_filename (arfile));
           free (matching);
         }
+
       if (last_arfile != NULL)
-        {
-          bfd_close (last_arfile);
-        }
+	bfd_close (last_arfile);
+
       last_arfile = arfile;
     }
 
@@ -3039,23 +3213,20 @@ identify_search_archive (bfd* abfd)
     }
 }
 
-/* identify_search_member
+/* Call the identify_search_section() function for each section of this
+   archive member.  */   
 
-   Search all sections of an archive member for the 
-   one with section name of .idata$7 (.idata$6 on PPC)
-   and non-empty contents.
-*/   
 static void
-identify_search_member (bfd* abfd, bfd* archive_bfd ATTRIBUTE_UNUSED)
+identify_search_member (bfd  *abfd,
+			bfd  *archive_bfd ATTRIBUTE_UNUSED,
+			void *obj)
 {
-  bfd_map_over_sections (abfd, identify_search_section, NULL);
+  bfd_map_over_sections (abfd, identify_search_section, obj);
 }
 
-/* identify_process_section_p
+/* This predicate returns true if section->name matches the desired value.
+   By default, this is .idata$7 (.idata$6 on PPC, or when --identify-ms).  */   
 
-   This predicate returns true if section->name
-   is .idata$7 (.idata$6 on PPC).
-*/   
 static bfd_boolean
 identify_process_section_p (asection * section)
 {
@@ -3066,27 +3237,23 @@ identify_process_section_p (asection * section)
 #else
   ".idata$7";
 #endif
+  static const char * MS_SECTION_NAME = ".idata$6";
 
-  if (strcmp (SECTION_NAME, section->name) == 0)
+  const char * section_name =
+    (identify_ms ? MS_SECTION_NAME : SECTION_NAME);
+  
+  if (strcmp (section_name, section->name) == 0)
     return TRUE;
   return FALSE;
 }
 
-/* identify_search_section
+/* If *section has contents and its name is .idata$7 (.data$6 on PPC or if
+   import lib ms-generated) -- and it satisfies several other constraints
+   -- then store the contents in the list pointed to by
+   identify_dll_name_list_head.  */   
 
-   If *section has contents and its name is .idata$7
-   (.data$6 on PPC) then store the contents in 
-   identify_dll_name as an xmalloc'ed array.
-
-   However, if identify_dll_name already has
-   a value, flag an error. We don't know how to handle
-   import libraries that directly reference more than
-   one DLL. (This is different than forwarded symbols.
-   Such import libraries are not seen in normal operation,
-   and must be specifically constructed.)
-*/   
 static void
-identify_search_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
+identify_search_section (bfd * abfd, asection * section, void * dummy ATTRIBUTE_UNUSED)
 {
   bfd_byte *data = 0;
   bfd_size_type datasize;
@@ -3097,35 +3264,44 @@ identify_search_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNU
   if (! identify_process_section_p (section))
     return;
 
+  /* Binutils import libs seem distinguish the .idata$7 section that contains
+     the DLL name from other .idata$7 sections by the absence of the
+     SEC_RELOC flag.  */
+  if (!identify_ms && ((section->flags & SEC_RELOC) == SEC_RELOC))
+    return;
+
+  /* MS import libs seem to distinguish the .idata$6 section
+     that contains the DLL name from other .idata$6 sections
+     by the presence of the SEC_DATA flag.  */
+  if (identify_ms && ((section->flags & SEC_DATA) == 0))
+    return;
+
   if ((datasize = bfd_section_size (abfd, section)) == 0)
     return;
 
-  data = (bfd_byte*) xmalloc (datasize + 1);
+  data = (bfd_byte *) xmalloc (datasize + 1);
   data[0] = '\0';
 
   bfd_get_section_contents (abfd, section, data, 0, datasize);
   data[datasize] = '\0';
 
-  if (data[0] != '\0')
-    {
-      if (identify_dll_name != NULL)
-        {
-          if (*identify_dll_name != '\0')
-            {
-              /* The import library specifies two different DLLs.
-                 Treat this as an error. */
-              fatal ("Import library `%s' specifies two or more dlls: `%s' and `%s'",
-                     identify_imp_name, identify_dll_name, data);
-            }
-          else
-            {
-              /* For some reason memory was allocated, but the
-                 contents were empty. Free the memory and continue. */
-              free (identify_dll_name);
-            }
-        }
-      identify_dll_name = xstrdup ((char*) data);
-    }
+  /* Use a heuristic to determine if data is a dll name.
+     Possible to defeat this if (a) the library has MANY
+     (more than 0x302f) imports, (b) it is an ms-style 
+     import library, but (c) it is buggy, in that the SEC_DATA
+     flag is set on the "wrong" sections.  This heuristic might
+     also fail to record a valid dll name if the dllname is
+     uses a multibyte or unicode character set (is that valid?).
+
+     This heuristic is based on the fact that symbols names in
+     the chosen section -- as opposed to the dll name -- begin
+     at offset 2 in the data. The first two bytes are a 16bit
+     little-endian count, and start at 0x0000. However, the dll
+     name begins at offset 0 in the data. We assume that the
+     dll name does not contain unprintable characters.   */
+  if (data[0] != '\0' && ISPRINT (data[0])
+      && ((datasize < 2) || ISPRINT (data[1])))
+    identify_append_dll_name_to_list (data);
 
   free (data);
 }
@@ -3138,6 +3314,7 @@ pfunc (const void *a, const void *b)
 {
   export_type *ap = *(export_type **) a;
   export_type *bp = *(export_type **) b;
+
   if (ap->ordinal == bp->ordinal)
     return 0;
 
@@ -3385,6 +3562,7 @@ usage (FILE *file, int status)
   fprintf (file, _("   -n --no-delete            Keep temp files (repeat for extra preservation).\n"));
   fprintf (file, _("   -t --temp-prefix <prefix> Use <prefix> to construct temp file names.\n"));
   fprintf (file, _("   -I --identify <implib>    Report the name of the DLL associated with <implib>.\n"));
+  fprintf (file, _("      --identify-strict      Causes --identify to report error when multiple DLLs.\n"));
   fprintf (file, _("   -v --verbose              Be verbose.\n"));
   fprintf (file, _("   -V --version              Display the program version.\n"));
   fprintf (file, _("   -h --help                 Display this information.\n"));
@@ -3406,6 +3584,7 @@ usage (FILE *file, int status)
 #define OPTION_ADD_STDCALL_UNDERSCORE	(OPTION_NO_DEFAULT_EXCLUDES + 1)
 #define OPTION_USE_NUL_PREFIXED_IMPORT_TABLES \
   (OPTION_ADD_STDCALL_UNDERSCORE + 1)
+#define OPTION_IDENTIFY_STRICT		(OPTION_USE_NUL_PREFIXED_IMPORT_TABLES + 1)
 
 static const struct option long_options[] =
 {
@@ -3430,6 +3609,7 @@ static const struct option long_options[] =
   {"add-stdcall-alias", no_argument, NULL, 'A'},
   {"ext-prefix-alias", required_argument, NULL, 'p'},
   {"identify", required_argument, NULL, 'I'},
+  {"identify-strict", no_argument, NULL, OPTION_IDENTIFY_STRICT},
   {"verbose", no_argument, NULL, 'v'},
   {"version", no_argument, NULL, 'V'},
   {"help", no_argument, NULL, 'h'},
@@ -3494,6 +3674,9 @@ main (int ac, char **av)
 	  break;
 	case OPTION_ADD_STDCALL_UNDERSCORE:
 	  add_stdcall_underscore = 1;
+	  break;
+	case OPTION_IDENTIFY_STRICT:
+	  identify_strict = 1;
 	  break;
 	case 'x':
 	  no_idata4 = 1;

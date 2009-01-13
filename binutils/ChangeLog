@@ -1,3 +1,34 @@
+2009-01-13  Charles Wilson  <cygwin@cwilson.fastmail.fm>
+
+	Add --identify-strict option.  Handle ms-style implibs:
+
+	* dlltool.c (file scope): Added new globals identify_ms and
+	identify_strict. New typedef dll_name_list_type, and globals
+	identify_dll_name_list_head and identify_dll_name_list_tail. Added
+	new global identify_member_contains_symname_result.
+	(identify_append_dll_name_to_list): New function.
+	(identify_count_dll_name_list): New function.
+	(identify_print_dll_name_list): New function.
+	(identify_free_dll_name_list): New function.
+	(identify_search_archive): Changed signature to take function
+	pointer to operation to apply to each member, and data to pass on
+	to that function.
+	(identify_search_member): Changed signature to accept user data
+	from caller.
+	(identify_member_contains_symname): New function.
+	(identify_dll_for_implib): Rewrite. Now determines whether implib
+	is ms- or binutils- style, before searching sections for
+	dllname. Allows multiple dllnames. 
+	(identify_process_section_p): Search alternate section for dllname
+	when implib is ms-style.
+	(identify_search_section): Add additional conditions to excludes
+	candidate sections from consideration.
+	(usage): Added --identify-strict.
+	(long_options): Added --identify-strict.
+	(main): Handle --identify-strict option.
+	* doc/binutils.texi: Document --identify-strict	option.
+	* NEWS: Document --identify and	--identify-strict options.
+
 2009-01-13  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 7034
