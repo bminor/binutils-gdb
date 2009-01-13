@@ -1,3 +1,8 @@
+2009-01-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* utils.c (host_address_to_string): Reimplement in a way that
+	avoids the cast of the address to long.
+
 2009-01-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* mdebugread.c (parse_symbol): Save the symbol private data

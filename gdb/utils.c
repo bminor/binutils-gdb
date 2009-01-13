@@ -3071,10 +3071,7 @@ host_address_to_string (const void *addr)
 {
   char *str = get_cell ();
 
-  /* We could use the %p conversion specifier to sprintf if we had any
-     way of knowing whether this host supports it.  But the following
-     should work on the Alpha and on 32 bit machines.  */
-  sprintf (str, "0x%lx", (unsigned long) addr);
+  xsnprintf (str, CELLSIZE, "0x%s", phex_nz ((uintptr_t) addr, sizeof (addr)));
   return str;
 }
 
