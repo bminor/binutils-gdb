@@ -40,7 +40,7 @@ typedef struct initializer
   const char *init;
 } initializer;
 
-static initializer cpu_flag_init [] =
+static initializer cpu_flag_init[] =
 {
   { "CPU_UNKNOWN_FLAGS",
     "unknown" },
@@ -140,7 +140,7 @@ static initializer cpu_flag_init [] =
     "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuAVX" },
 };
 
-static initializer operand_type_init [] =
+static initializer operand_type_init[] =
 {
   { "OPERAND_TYPE_NONE",
     "0" },
