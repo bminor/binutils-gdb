@@ -184,6 +184,7 @@ run_dump_test "group-relocs-alu-bad"
 run_dump_test "group-relocs-ldr-bad"
 run_dump_test "group-relocs-ldrs-bad"
 run_dump_test "group-relocs-ldc-bad"
+run_dump_test "thumb2-bl-undefweak"
 run_dump_test "emit-relocs1"
 
 # Exclude non-ARM-EABI targets.

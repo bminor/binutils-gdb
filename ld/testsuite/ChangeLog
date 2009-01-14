@@ -1,3 +1,8 @@
+2009-01-14  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-arm/thumb2-bl-undefweak.d, ld-arm/thumb2-bl-undefweak.s: New.
+	* ld-arm/arm-elf.exp: Run thumb2-bl-undefweak test.
+
 2008-09-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/extract-symbol-1sec.d: Correct section lma.

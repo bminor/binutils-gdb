@@ -1,3 +1,9 @@
+2009-01-14  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Do not turn
+	branches to undefine weak symbols into branches to the next
+	instruction if creating PLT entries for those symbols.
+
 2008-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* Import this patch from the mainline:
