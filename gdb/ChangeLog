@@ -1,5 +1,10 @@
 2009-01-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote.c (extended_remote_mourn_1): Invalidate our notion of
+	current general thread.
+
+2009-01-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* mi/mi-main.c (mi_cmd_execute): Also allow -list-thread-groups
 	without a live selected thread.
 

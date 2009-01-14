@@ -6548,6 +6548,31 @@ extended_remote_mourn_1 (struct target_ops *target)
   /* We're no longer interested in these events.  */
   discard_pending_stop_replies (ptid_get_pid (inferior_ptid));
 
+  /* If the current general thread belonged to the process we just
+     detached from or has exited, the remote side current general
+     thread becomes undefined.  Considering a case like this:
+
+     - We just got here due to a detach.
+     - The process that we're detaching from happens to immediately
+       report a global breakpoint being hit in non-stop mode, in the
+       same thread we had selected before.
+     - GDB attaches to this process again.
+     - This event happens to be the next event we handle.
+
+     GDB would consider that the current general thread didn't need to
+     be set on the stub side (with Hg), since for all it knew,
+     GENERAL_THREAD hadn't changed.
+
+     Notice that although in all-stop mode, the remote server always
+     sets the current thread to the thread reporting the stop event,
+     that doesn't happen in non-stop mode; in non-stop, the stub *must
+     not* change the current thread when reporting a breakpoint hit,
+     due to the decoupling of event reporting and event handling.
+
+     To keep things simple, we always invalidate our notion of the
+     current thread.  */
+  record_currthread (minus_one_ptid);
+
   /* Unlike "target remote", we do not want to unpush the target; then
      the next time the user says "run", we won't be connected.  */
 
