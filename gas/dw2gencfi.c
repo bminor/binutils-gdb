@@ -1,5 +1,5 @@
 /* dw2gencfi.c - Support for generating Dwarf2 CFI information.
-   Copyright 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Contributed by Michal Ludvig <mludvig@suse.cz>
 
    This file is part of GAS, the GNU Assembler.
@@ -972,20 +972,20 @@ output_cfi_insn (struct cfi_insn_data *insn)
 
 	    if (scaled <= 0x3F)
 	      out_one (DW_CFA_advance_loc + scaled);
-	    else if (delta <= 0xFF)
+	    else if (scaled <= 0xFF)
 	      {
 		out_one (DW_CFA_advance_loc1);
-		out_one (delta);
+		out_one (scaled);
 	      }
-	    else if (delta <= 0xFFFF)
+	    else if (scaled <= 0xFFFF)
 	      {
 		out_one (DW_CFA_advance_loc2);
-		out_two (delta);
+		out_two (scaled);
 	      }
 	    else
 	      {
 		out_one (DW_CFA_advance_loc4);
-		out_four (delta);
+		out_four (scaled);
 	      }
 	  }
 	else
