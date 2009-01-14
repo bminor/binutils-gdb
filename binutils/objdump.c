@@ -1903,6 +1903,7 @@ disassemble_section (bfd *abfd, asection *section, void *info)
 	 disassembling them.  */
       if (disassemble_all
 	  || sym == NULL
+	  || sym->section != section
 	  || bfd_asymbol_value (sym) > addr
 	  || ((sym->flags & BSF_OBJECT) == 0
 	      && (strstr (bfd_asymbol_name (sym), "gnu_compiled")
