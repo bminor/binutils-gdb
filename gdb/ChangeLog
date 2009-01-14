@@ -1,5 +1,10 @@
 2009-01-14  Joel Brobecker  <brobecker@adacore.com>
 
+	Update the copyright notice of some of the files I missed
+	in the previous copyright update.
+
+2009-01-14  Joel Brobecker  <brobecker@adacore.com>
+
 	* windows-nat.c (handle_unload_dll): Use %p to print the DLL
 	base address instead of casting it to DWORD.
 
