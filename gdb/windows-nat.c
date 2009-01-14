@@ -761,7 +761,7 @@ handle_unload_dll (void *dummy)
 	return 1;
       }
 
-  error (_("Error: dll starting at 0x%lx not found."), (DWORD) lpBaseOfDll);
+  error (_("Error: dll starting at %p not found."), lpBaseOfDll);
 
   return 0;
 }

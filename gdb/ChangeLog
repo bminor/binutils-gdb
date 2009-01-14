@@ -1,3 +1,8 @@
+2009-01-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (handle_unload_dll): Use %p to print the DLL
+	base address instead of casting it to DWORD.
+
 2009-01-13  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Do not call get_frame_arch
