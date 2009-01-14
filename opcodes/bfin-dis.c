@@ -481,7 +481,7 @@ static enum machine_registers decode_allregs[] =
 
 /* (arch.pm)arch_disassembler_functions.  */
 #ifndef OUTS
-#define OUTS(p, txt) ((p) ? (((txt)[0]) ? (p->fprintf_func)(p->stream, txt) :0) :0)
+#define OUTS(p, txt) ((p) ? (((txt)[0]) ? (p->fprintf_func)(p->stream, "%s", txt) :0) :0)
 #endif
 
 static void

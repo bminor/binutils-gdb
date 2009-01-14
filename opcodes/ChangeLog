@@ -1,3 +1,7 @@
+2009-01-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (OUTS): Use "%s" as format string.
+
 2009-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Remove a white space.
