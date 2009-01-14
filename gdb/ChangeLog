@@ -1,5 +1,10 @@
 2009-01-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* mi/mi-main.c (mi_cmd_execute): Clean up parenthesis mess from
+	previous change.
+
+2009-01-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote.c (extended_remote_mourn_1): Invalidate our notion of
 	current general thread.
 

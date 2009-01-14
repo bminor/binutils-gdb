@@ -1352,11 +1352,11 @@ mi_cmd_execute (struct mi_parse *parse)
     {
       if (target_can_async_p ()
 	  && target_has_execution
-	  && (is_exited (inferior_ptid))
+	  && is_exited (inferior_ptid)
 	  && (strcmp (parse->command, "thread-info") != 0
 	      && strcmp (parse->command, "thread-list-ids") != 0
-	      && strcmp (parse->command, "thread-select") != 0)
-	      && strcmp (parse->command, "list-thread-groups") != 0)
+	      && strcmp (parse->command, "thread-select") != 0
+	      && strcmp (parse->command, "list-thread-groups") != 0))
 	{
 	  struct ui_file *stb;
 	  stb = mem_fileopen ();
