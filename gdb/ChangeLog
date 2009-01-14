@@ -1,3 +1,16 @@
+2009-01-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* NEWS: Document "define" for prefixed commands.
+	* cli/cli-cmds.c (show_user): Update calls to show_user_1.  Call
+	show_user_1 for prefix commands.
+	* cli/cli-decode.c (help_cmd_list): Recurse for "help user-defined".
+	* cli/cli-script.c (validate_comname): Rewrite to handle prefix
+	commands.  Return the containing command list.
+	(define_command, document_command): Update to handle prefix commands.
+	(show_user_1): Add prefix and name arguments.  Handle prefix
+	commands.
+	* cli/cli-script.h (show_user_1): Update prototype.
+
 2009-01-14  Kai Tietz  <kai.tietz@onevision.com>
 
 	* mingw-ser.c (console_select_thread): Add return to make

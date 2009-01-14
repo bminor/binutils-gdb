@@ -346,6 +346,37 @@ gdb_expect {
   timeout {fail "(timeout) define hook undefined command: bar"}
 }
 
+# Test creation of an additional target subcommand.
+gdb_test_multiple "define target testsuite" "" {
+    -re "Type commands for definition of \"target testsuite\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "printf \"hello\\n\"\nend" "" "define target testsuite"
+    }
+}
+gdb_test_multiple "document target testsuite" "" {
+    -re "Type documentation for \"target testsuite\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "A test target.\nend" "" "document target testsuite"
+    }
+}
+
+gdb_test "help target" ".*A test target.*"
+gdb_test "target testsuite" "hello"
+gdb_test "show user target testsuite" "User command \"target testsuite\":\r\n  printf \"hello\\\\n\"\r\n"
+
+# We should even be able to hook subcommands.
+gdb_test_multiple "define target hook-testsuite" "" {
+    -re "Type commands for definition of \"target hook-testsuite\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "printf \"one\\n\"\nend" "" "define target hook-testsuite"
+    }
+}
+
+gdb_test_multiple "define target hookpost-testsuite" "" {
+    -re "Type commands for definition of \"target hookpost-testsuite\".\r\nEnd with a line saying just \"end\".\r\n>$" {
+	gdb_test "printf \"two\\n\"\nend" "" "define target hookpost-testsuite"
+    }
+}
+
+gdb_test "target testsuite" "one\r\nhello\r\ntwo" "target testsuite with hooks"
+
 # This is a quasi-define command: Verify that the user can redefine
 # GDB's gdb_prompt.
 #
@@ -367,9 +398,3 @@ gdb_expect {
 
 gdb_exit
 return 0
-
-
-
-
-
-

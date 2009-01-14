@@ -17573,6 +17573,10 @@ end
 @item define @var{commandname}
 Define a command named @var{commandname}.  If there is already a command
 by that name, you are asked to confirm that you want to redefine it.
+@var{commandname} may be a bare command name consisting of letters,
+numbers, dashes, and underscores.  It may also start with any predefined
+prefix command.  For example, @samp{define target my-target} creates
+a user-defined @samp{target my-target} command.
 
 The definition of the command is made up of other @value{GDBN} command lines,
 which are given following the @code{define} command.  The end of these
@@ -17707,6 +17711,10 @@ not for command aliases; you should define a hook for the basic command
 name, e.g.@:  @code{backtrace} rather than @code{bt}.
 @c FIXME!  So how does Joe User discover whether a command is an alias
 @c or not?
+You can hook a multi-word command by adding @code{hook-} or
+@code{hookpost-} to the last word of the command, e.g.@:
+@samp{define target hook-remote} to add a hook to @samp{target remote}.
+
 If an error occurs during the execution of your hook, execution of
 @value{GDBN} commands stops and @value{GDBN} issues a prompt
 (before the command that you actually typed had a chance to run).

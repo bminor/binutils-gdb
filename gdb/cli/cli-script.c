@@ -45,8 +45,6 @@ static char *insert_args (char *line);
 
 static struct cleanup * setup_user_args (char *p);
 
-static void validate_comname (char *);
-
 /* Level of control structure when reading.  */
 static int control_level;
 
@@ -1254,21 +1252,57 @@ copy_command_lines (struct command_line *cmds)
   return result;
 }
 
-static void
-validate_comname (char *comname)
-{
-  char *p;
+/* Validate that *COMNAME is a valid name for a command.  Return the
+   containing command list, in case it starts with a prefix command.
+   The prefix must already exist.  *COMNAME is advanced to point after
+   any prefix, and a NUL character overwrites the space after the
+   prefix.  */
 
-  if (comname == 0)
+static struct cmd_list_element **
+validate_comname (char **comname)
+{
+  struct cmd_list_element **list = &cmdlist;
+  char *p, *last_word;
+
+  if (*comname == 0)
     error_no_arg (_("name of command to define"));
 
-  p = comname;
+  /* Find the last word of the argument.  */
+  p = *comname + strlen (*comname);
+  while (p > *comname && isspace (p[-1]))
+    p--;
+  while (p > *comname && !isspace (p[-1]))
+    p--;
+  last_word = p;
+
+  /* Find the corresponding command list.  */
+  if (last_word != *comname)
+    {
+      struct cmd_list_element *c;
+      char saved_char, *tem = *comname;
+
+      /* Separate the prefix and the command.  */
+      saved_char = last_word[-1];
+      last_word[-1] = '\0';
+
+      c = lookup_cmd (&tem, cmdlist, "", 0, 1);
+      if (c->prefixlist == NULL)
+	error (_("\"%s\" is not a prefix command."), *comname);
+
+      list = c->prefixlist;
+      last_word[-1] = saved_char;
+      *comname = last_word;
+    }
+
+  p = *comname;
   while (*p)
     {
       if (!isalnum (*p) && *p != '-' && *p != '_')
 	error (_("Junk in argument list: \"%s\""), p);
       p++;
     }
+
+  return list;
 }
 
 /* This is just a placeholder in the command data structures.  */
@@ -1288,9 +1322,8 @@ define_command (char *comname, int from_tty)
       CMD_POST_HOOK
     };
   struct command_line *cmds;
-  struct cmd_list_element *c, *newc, *oldc, *hookc = 0;
-  char *tem = comname;
-  char *tem2; 
+  struct cmd_list_element *c, *newc, *oldc, *hookc = 0, **list;
+  char *tem, *tem2, *comfull;
   char tmpbuf[MAX_TMPBUF];
   int  hook_type      = CMD_NO_HOOK;
   int  hook_name_size = 0;
@@ -1300,10 +1333,12 @@ define_command (char *comname, int from_tty)
 #define HOOK_POST_STRING "hookpost-"
 #define HOOK_POST_LEN    9
 
-  validate_comname (comname);
+  comfull = comname;
+  list = validate_comname (&comname);
 
   /* Look it up, and verify that we got an exact match.  */
-  c = lookup_cmd (&tem, cmdlist, "", -1, 1);
+  tem = comname;
+  c = lookup_cmd (&tem, *list, "", -1, 1);
   if (c && strcmp (comname, c->name) != 0)
     c = 0;
 
@@ -1337,13 +1372,13 @@ define_command (char *comname, int from_tty)
     {
       /* Look up cmd it hooks, and verify that we got an exact match.  */
       tem = comname + hook_name_size;
-      hookc = lookup_cmd (&tem, cmdlist, "", -1, 0);
+      hookc = lookup_cmd (&tem, *list, "", -1, 0);
       if (hookc && strcmp (comname + hook_name_size, hookc->name) != 0)
 	hookc = 0;
       if (!hookc)
 	{
 	  warning (_("Your new `%s' command does not hook any existing command."),
-		   comname);
+		   comfull);
 	  if (!query ("Proceed? "))
 	    error (_("Not confirmed."));
 	}
@@ -1357,7 +1392,7 @@ define_command (char *comname, int from_tty)
     if (isupper (*tem))
       *tem = tolower (*tem);
 
-  sprintf (tmpbuf, "Type commands for definition of \"%s\".", comname);
+  sprintf (tmpbuf, "Type commands for definition of \"%s\".", comfull);
   cmds = read_command_lines (tmpbuf, from_tty, 1);
 
   if (c && c->class == class_user)
@@ -1365,7 +1400,7 @@ define_command (char *comname, int from_tty)
 
   newc = add_cmd (comname, class_user, user_defined_command,
 		  (c && c->class == class_user)
-		  ? c->doc : savestring ("User-defined.", 13), &cmdlist);
+		  ? c->doc : savestring ("User-defined.", 13), list);
   newc->user_commands = cmds;
 
   /* If this new command is a hook, then mark both commands as being
@@ -1393,18 +1428,20 @@ void
 document_command (char *comname, int from_tty)
 {
   struct command_line *doclines;
-  struct cmd_list_element *c;
-  char *tem = comname;
+  struct cmd_list_element *c, **list;
+  char *tem, *comfull;
   char tmpbuf[128];
 
-  validate_comname (comname);
+  comfull = comname;
+  list = validate_comname (&comname);
 
-  c = lookup_cmd (&tem, cmdlist, "", 0, 1);
+  tem = comname;
+  c = lookup_cmd (&tem, *list, "", 0, 1);
 
   if (c->class != class_user)
-    error (_("Command \"%s\" is built-in."), comname);
+    error (_("Command \"%s\" is built-in."), comfull);
 
-  sprintf (tmpbuf, "Type documentation for \"%s\".", comname);
+  sprintf (tmpbuf, "Type documentation for \"%s\".", comfull);
   doclines = read_command_lines (tmpbuf, from_tty, 0);
 
   if (c->doc)
@@ -1505,17 +1542,29 @@ script_from_file (FILE *stream, char *file)
   do_cleanups (old_cleanups);
 }
 
+/* Print the definition of user command C to STREAM.  Or, if C is a
+   prefix command, show the definitions of all user commands under C
+   (recursively).  PREFIX and NAME combined are the name of the
+   current command.  */
 void
-show_user_1 (struct cmd_list_element *c, struct ui_file *stream)
+show_user_1 (struct cmd_list_element *c, char *prefix, char *name,
+	     struct ui_file *stream)
 {
   struct command_line *cmdlines;
+
+  if (c->prefixlist != NULL)
+    {
+      char *prefixname = c->prefixname;
+      for (c = *c->prefixlist; c != NULL; c = c->next)
+	if (c->class == class_user || c->prefixlist != NULL)
+	  show_user_1 (c, prefixname, c->name, gdb_stdout);
+      return;
+    }
 
   cmdlines = c->user_commands;
   if (!cmdlines)
     return;
-  fputs_filtered ("User command ", stream);
-  fputs_filtered (c->name, stream);
-  fputs_filtered (":\n", stream);
+  fprintf_filtered (stream, "User command \"%s%s\":\n", prefix, name);
 
   print_command_lines (uiout, cmdlines, 1);
   fputs_filtered ("\n", stream);

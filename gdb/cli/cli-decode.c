@@ -1052,6 +1052,10 @@ help_cmd_list (struct cmd_list_element *list, enum command_class class,
 	{
 	  print_help_for_command (c, prefix, recurse, stream);
 	}
+      else if (c->abbrev_flag == 0 && recurse
+	       && class == class_user && c->prefixlist != NULL)
+	/* User-defined commands may be subcommands.  */
+	help_cmd_list (*c->prefixlist, class, c->prefixname, recurse, stream);
     }
 }
 

@@ -110,6 +110,9 @@ are treated as the standard definitions, regardless of context.
     task N
       Switch the context of debugging to task number N.
 
+* Support for user-defined prefixed commands.  The "define" command can
+add new commands to existing prefixes, e.g. "target".
+
 * New commands
 
 find [/size-char] [/max-count] start-address, end-address|+search-space-size,

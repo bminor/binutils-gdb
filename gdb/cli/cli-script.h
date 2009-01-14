@@ -33,7 +33,8 @@ extern void while_command (char *arg, int from_tty);
 
 extern void if_command (char *arg, int from_tty);
 
-extern void show_user_1 (struct cmd_list_element *c, struct ui_file *stream);
+extern void show_user_1 (struct cmd_list_element *c, char *prefix,
+			 char *name, struct ui_file *stream);
 
 /* Exported to gdb/breakpoint.c */
 

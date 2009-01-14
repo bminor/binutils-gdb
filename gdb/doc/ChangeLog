@@ -1,3 +1,7 @@
+2009-01-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Define, Hooks): Document prefix command support.
+
 2009-01-14  Joseph Myers  <joseph@codesourcery.com>
             Carlos O'Donell  <carlos@codesourcery.com>
 

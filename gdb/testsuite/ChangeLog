@@ -1,3 +1,8 @@
+2009-01-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/define.exp: Test defining and hooking prefix commands.
+	* gdb.python/python.exp: Update test for "show user" output.
+
 2009-01-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.fortran/derived-type.exp: New variables int4 and real4.  Match
