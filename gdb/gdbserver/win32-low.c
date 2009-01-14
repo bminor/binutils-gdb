@@ -1453,6 +1453,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		(unsigned) current_event.dwThreadId));
       ourstatus->kind = TARGET_WAITKIND_EXITED;
       ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
+      child_continue (DBG_CONTINUE, -1);
       CloseHandle (current_process_handle);
       current_process_handle = NULL;
       break;
