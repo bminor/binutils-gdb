@@ -26,10 +26,9 @@
 @c more expensive, form factor and would drive up the manuals publication
 @c cost.  Having a smaller cheaper manual helps the GNU Press with its sales.
 
-@ifinfo
-This file documents @value{GDBN}'s obsolete annotations.
-
-Copyright (C) 1994, 1995, 2000, 2001, 2003 Free Software Foundation, Inc.
+@copying
+Copyright @copyright{} 1994, 1995, 2000, 2001, 2003, 2004, 2005, 2007,
+2008, 2009 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -37,8 +36,13 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
 Texts.  A copy of the license is included in the section entitled ``GNU
 Free Documentation License''.
+@end copying
 
-@end ifinfo
+@ifnottex
+This file documents @value{GDBN}'s obsolete annotations.
+
+@insertcopying
+@end ifnottex
 
 @titlepage
 @title @value{GDBN}'s Obsolete Annotations
@@ -47,18 +51,10 @@ Free Documentation License''.
 @author Free Software Foundation
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1994, 1995, 2000, 2001, 2003 Free Software
-Foundation, Inc.
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1 or
-any later version published by the Free Software Foundation; with no
-Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
-Texts.  A copy of the license is included in the section entitled ``GNU
-Free Documentation License''.
+@insertcopying
 @end titlepage
 
-@ifinfo
+@ifnottex
 @node Top
 @top GDB Annotations
 
@@ -68,7 +64,7 @@ implemented in older @value{GDBN} versions.
 @ignore
 This is Edition @value{EDITION}, @value{DATE}.
 @end ignore
-@end ifinfo
+@end ifnottex
 
 @menu
 * Annotations Overview::  What annotations are; the general syntax.

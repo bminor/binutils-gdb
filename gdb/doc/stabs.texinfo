@@ -10,11 +10,9 @@
 * Stabs: (stabs).                 The "stabs" debugging information format.   
 @end direntry
 
-@ifinfo
-This document describes the stabs debugging symbol tables.
-
-Copyright (C) 1992,1993,1994,1995,1997,1998,2000,2001
-   Free Software Foundation, Inc.
+@copying
+Copyright @copyright{} 1992, 1993, 1994, 1995, 1997, 1998, 2000, 2001,
+2002, 2003, 2004, 2005, 2006, 2007, 2009 Free Software Foundation, Inc.
 Contributed by Cygnus Support.  Written by Julia Menapace, Jim Kingdon,
 and David MacKenzie.
 
@@ -24,7 +22,13 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
 Texts.  A copy of the license is included in the section entitled ``GNU
 Free Documentation License''.
-@end ifinfo
+@end copying
+
+@ifnottex
+This document describes the stabs debugging symbol tables.
+
+@insertcopying
+@end ifnottex
 
 @setchapternewpage odd
 @settitle STABS
@@ -44,18 +48,10 @@ Free Documentation License''.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1992,1993,1994,1995,1997,1998,2000,2001 Free Software Foundation, Inc.
-Contributed by Cygnus Support.
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1 or
-any later version published by the Free Software Foundation; with no
-Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
-Texts.  A copy of the license is included in the section entitled ``GNU
-Free Documentation License''.
+@insertcopying
 @end titlepage
 
-@ifinfo
+@ifnottex
 @node Top
 @top The "stabs" representation of debugging information
 
@@ -80,12 +76,9 @@ This document describes the stabs debugging format.
 * Symbol Types Index::          Index of symbolic stab symbol type names.
 * GNU Free Documentation License::  The license for this documentation
 @end menu
-@end ifinfo
+@end ifnottex
 
-@c TeX can handle the contents at the start but makeinfo 3.12 can not
-@iftex
 @contents
-@end iftex
 
 @node Overview
 @chapter Overview of Stabs
@@ -4129,13 +4122,5 @@ However, no one has yet designed or implemented such a scheme.
 @unnumbered Symbol Types Index
 
 @printindex fn
-
-@c TeX can handle the contents at the start but makeinfo 3.12 can not
-@ifinfo
-@contents
-@end ifinfo
-@ifhtml
-@contents
-@end ifhtml
 
 @bye

@@ -1,3 +1,17 @@
+2009-01-14  Joseph Myers  <joseph@codesourcery.com>
+            Carlos O'Donell  <carlos@codesourcery.com>
+
+	Fixes for makeinfo --html.
+
+	* annotate.texinfo: Use @copying and @insertcopying.  Use
+	@ifnottex in place of @ifinfo.
+	* gdb.texinfo: Use @copying and @insertcopying.  Use @ifnottex in
+	place of @ifinfo.  Use @ifnotinfo for one index entry.
+	* gdbint.texinfo: Use @copying and @insertcopying.  Use @ifnottex
+	in place of @ifinfo.
+	* stabs.texinfo: Use @copying and @insertcopying.  Use @ifnottex
+	in place of @ifinfo.  Include contents at start unconditionally.
+
 2009-01-13  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (General Query Packets): Remove @var{} around the
