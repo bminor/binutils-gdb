@@ -1,3 +1,13 @@
+2009-01-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/9727
+	* ld-elf/group8.s: New.
+	* ld-elf/group8a.d: Likewise.
+	* ld-elf/group8b.d: Likewise.
+	* ld-elf/group9.s: Likewise.
+	* ld-elf/group9a.d: Likewise.
+	* ld-elf/group9b.d: Likewise.
+
 2009-01-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/icache1.s: New file.

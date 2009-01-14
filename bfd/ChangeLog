@@ -1,3 +1,9 @@
+2009-01-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/9727
+	* elflink.c (elf_gc_sweep): Exclude the group section if the
+	first member of the section group is excluded.
+
 2009-01-14  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 9735
