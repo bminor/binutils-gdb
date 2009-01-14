@@ -51,6 +51,8 @@ extern const char *s390_target_format (void);
 /* Whether or not the target is big endian */
 extern int target_big_endian;
 
+#define LOCAL_LABEL_PREFIX '.'
+
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
 

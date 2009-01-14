@@ -1,3 +1,7 @@
+2009-01-14  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+	
+	* config/tc-s390.h: Define LOCAL_LABEL_PREFIX.
+
 2009-01-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-spu.c (md_pseudo_table): Add "brinfo".
