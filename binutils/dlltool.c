@@ -353,27 +353,35 @@ static int no_idata5;
 static char *exp_name;
 static char *imp_name;
 static char *identify_imp_name;
-static bfd_boolean identify_ms;
 static bfd_boolean identify_strict;
 
-/* Holds a linked list of dllnames associated with the
-   specified import lib. Used by the identify_* code.
-   The _head entry is always empty (_head->dllname is
-   NULL).  */
+/* Types used to implement a linked list of dllnames associated
+   with the specified import lib. Used by the identify_* code.
+   The head entry is acts as a sentinal node and is always empty
+   (head->dllname is NULL).  */
+typedef struct dll_name_list_node_t
+{
+  char *                        dllname;
+  struct dll_name_list_node_t * next;
+} dll_name_list_node_type;
 typedef struct dll_name_list_t
 {
-  char *                   dllname;
-  struct dll_name_list_t * next;
-} dll_name_list_type;
+  dll_name_list_node_type * head;
+  dll_name_list_node_type * tail;
+} dll_name_list_type; 
 
-static dll_name_list_type * identify_dll_name_list_head;
-static dll_name_list_type * identify_dll_name_list_tail;
-/* dll_name_list management functions.  */
-static void identify_append_dll_name_to_list (bfd_byte *);
-static int  identify_count_dll_name_list (void);
-static void identify_print_dll_name_list (void);
-static void identify_free_dll_name_list (dll_name_list_type *);
-static bfd_boolean identify_member_contains_symname_result = FALSE;
+/* Types used to pass data to iterator functions.  */
+typedef struct symname_search_data_t
+{
+  const char * symname;
+  bfd_boolean  found;
+} symname_search_data_type;
+typedef struct identify_data_t
+{
+   dll_name_list_type * list;
+   bfd_boolean          ms_style_implib;
+} identify_data_type; 
+
 
 static char *head_label;
 static char *imp_name_lab;
@@ -752,11 +760,17 @@ static bfd *make_one_lib_file (export_type *, int);
 static bfd *make_head (void);
 static bfd *make_tail (void);
 static void gen_lib_file (void);
+static void dll_name_list_append (dll_name_list_type *, bfd_byte *);
+static int  dll_name_list_count (dll_name_list_type *);
+static void dll_name_list_print (dll_name_list_type *);
+static void dll_name_list_free_contents (dll_name_list_node_type *);
+static void dll_name_list_free (dll_name_list_type *);
+static dll_name_list_type * dll_name_list_create (void);
 static void identify_dll_for_implib (void);
 static void identify_search_archive
   (bfd *, void (*) (bfd *, bfd *, void *),  void *);
 static void identify_search_member (bfd *, bfd *, void *);
-static bfd_boolean identify_process_section_p (asection *);
+static bfd_boolean identify_process_section_p (asection *, bfd_boolean);
 static void identify_search_section (bfd *, asection *, void *);
 static void identify_member_contains_symname (bfd *, bfd  *, void *);
 
@@ -2967,29 +2981,39 @@ gen_lib_file (void)
   inform (_("Created lib file"));
 }
 
-/* Management of the identify_dll_name_list.  */
+/* Append a copy of data (cast to char *) to list.  */
 
 static void
-identify_append_dll_name_to_list (bfd_byte * data)
+dll_name_list_append (dll_name_list_type * list, bfd_byte * data)
 {
+  /* Error checking.  */
+  if (! list || ! list->tail)
+    return;
+
   /* Allocate new node.  */
-  dll_name_list_type * entry =
-    (dll_name_list_type *) xmalloc (sizeof (dll_name_list_type));
+  dll_name_list_node_type * entry =
+    (dll_name_list_node_type *) xmalloc (sizeof (dll_name_list_node_type));
 
   /* Initialize its values.  */
   entry->dllname = xstrdup ((char *) data);
   entry->next = NULL;
 
   /* Add to tail, and move tail.  */
-  identify_dll_name_list_tail->next = entry;
-  identify_dll_name_list_tail = entry;
+  list->tail->next = entry;
+  list->tail = entry;
 }
 
+/* Count the number of entries in list.  */
+
 static int 
-identify_count_dll_name_list (void)
+dll_name_list_count (dll_name_list_type * list)
 {
+  /* Error checking.  */
+  if (! list || ! list->head)
+    return 0;
+
   int count = 0;
-  dll_name_list_type * p = identify_dll_name_list_head;
+  dll_name_list_node_type * p = list->head;
 
   while (p && p->next)
     {
@@ -2999,10 +3023,16 @@ identify_count_dll_name_list (void)
   return count;
 }
 
+/* Print each entry in list to stdout.  */
+
 static void 
-identify_print_dll_name_list (void)
+dll_name_list_print (dll_name_list_type * list)
 {
-  dll_name_list_type * p = identify_dll_name_list_head;
+  /* Error checking.  */
+  if (! list || ! list->head)
+    return;
+
+  dll_name_list_node_type * p = list->head;
 
   while (p && p->next && p->next->dllname && *(p->next->dllname))
     {
@@ -3011,14 +3041,31 @@ identify_print_dll_name_list (void)
     }
 }
 
+/* Free all entries in list, and list itself.  */
+
+static void
+dll_name_list_free (dll_name_list_type * list)
+{
+  if (list)
+    {
+      dll_name_list_free_contents (list->head);
+      list->head = NULL;
+      list->tail = NULL;
+      free (list);
+    }
+}
+
+/* Recursive function to free all nodes entry->next->next...
+   as well as entry itself.  */
+
 static void 
-identify_free_dll_name_list (dll_name_list_type * entry)
+dll_name_list_free_contents (dll_name_list_node_type * entry)
 {
   if (entry)
     {
       if (entry->next)
         {
-          identify_free_dll_name_list (entry->next);
+          dll_name_list_free_contents (entry->next);
           entry->next = NULL;
         }
       if (entry->dllname)
@@ -3028,6 +3075,28 @@ identify_free_dll_name_list (dll_name_list_type * entry)
         }
       free (entry);
     }
+}
+
+/* Allocate and initialize a dll_name_list_type object,
+   including its sentinel node.  Caller is responsible
+   for calling dll_name_list_free when finished with 
+   the list.  */
+
+static dll_name_list_type *
+dll_name_list_create (void)
+{
+  /* Allocate list.  */
+  dll_name_list_type * list = xmalloc (sizeof (dll_name_list_type));
+
+  /* Allocate and initialize sentinel node.  */
+  list->head = xmalloc (sizeof (dll_name_list_node_type));
+  list->head->dllname = NULL;
+  list->head->next = NULL;
+
+  /* Bookkeeping for empty list.  */
+  list->tail = list->head;
+
+  return list;
 }
 
 /* Search the symbol table of the suppled BFD for a symbol whose name matches
@@ -3045,11 +3114,11 @@ identify_member_contains_symname (bfd  * abfd,
   asymbol ** symbol_table;
   long number_of_symbols;
   long i;
-  const char * name = (const char *) obj;
+  symname_search_data_type * search_data = (symname_search_data_type *) obj;
 
   /* If we already found the symbol in a different member,
      short circuit.  */
-  if (identify_member_contains_symname_result)
+  if (search_data->found)
     return;
 
   storage_needed = bfd_get_symtab_upper_bound (abfd);
@@ -3066,9 +3135,11 @@ identify_member_contains_symname (bfd  * abfd,
 
   for (i = 0; i < number_of_symbols; i++)
     {
-      if (strncmp (symbol_table[i]->name, name, strlen (name)) == 0)
+      if (strncmp (symbol_table[i]->name,
+                   search_data->symname,
+                   strlen (search_data->symname)) == 0)
 	{
-	  identify_member_contains_symname_result = TRUE;
+	  search_data->found = TRUE;
 	  break;
 	}
     }
@@ -3097,12 +3168,16 @@ identify_dll_for_implib (void)
 {
   bfd * abfd = NULL;
   int count = 0;
+  identify_data_type identify_data;
+  symname_search_data_type search_data;
 
-  /* Initialize identify_dll_name_list.  */
-  identify_dll_name_list_head = xmalloc (sizeof (dll_name_list_type));
-  identify_dll_name_list_head->dllname = NULL;
-  identify_dll_name_list_head->next = NULL;
-  identify_dll_name_list_tail = identify_dll_name_list_head;
+  /* Initialize identify_data.  */
+  identify_data.list = dll_name_list_create ();
+  identify_data.ms_style_implib = FALSE;
+
+  /* Initialize search_data.  */
+  search_data.symname = "__NULL_IMPORT_DESCRIPTOR";
+  search_data.found = FALSE;
 
   bfd_init ();
 
@@ -3119,11 +3194,11 @@ identify_dll_for_implib (void)
     }
 
   /* Detect if this a Microsoft import library.  */
-  identify_member_contains_symname_result = FALSE;
-  identify_search_archive (abfd, identify_member_contains_symname,
-			   "__NULL_IMPORT_DESCRIPTOR");
-  if (identify_member_contains_symname_result)
-    identify_ms = TRUE;
+  identify_search_archive (abfd,
+			   identify_member_contains_symname,
+			   (void *)(& search_data));
+  if (search_data.found)
+    identify_data.ms_style_implib = TRUE;
   
   /* Rewind the bfd.  */
   if (! bfd_close (abfd))
@@ -3141,29 +3216,31 @@ identify_dll_for_implib (void)
     }
  
   /* Now search for the dll name.  */
-  identify_search_archive (abfd, identify_search_member, NULL);
+  identify_search_archive (abfd,
+			   identify_search_member,
+			   (void *)(& identify_data));
 
   if (! bfd_close (abfd))
     bfd_fatal (identify_imp_name);
 
-  count = identify_count_dll_name_list();
+  count = dll_name_list_count (identify_data.list);
   if (count > 0)
     {
       if (identify_strict && count > 1)
         {
-          identify_free_dll_name_list (identify_dll_name_list_head);
-          identify_dll_name_list_head = NULL;
+          dll_name_list_free (identify_data.list);
+          identify_data.list = NULL;
           fatal (_("Import library `%s' specifies two or more dlls"),
 		 identify_imp_name);
         }
-      identify_print_dll_name_list();
-      identify_free_dll_name_list (identify_dll_name_list_head);
-      identify_dll_name_list_head = NULL;
+      dll_name_list_print (identify_data.list);
+      dll_name_list_free (identify_data.list);
+      identify_data.list = NULL;
     }
   else
     {
-      identify_free_dll_name_list (identify_dll_name_list_head);
-      identify_dll_name_list_head = NULL;
+      dll_name_list_free (identify_data.list);
+      identify_data.list = NULL;
       fatal (_("Unable to determine dll name for `%s' (not an import library?)"),
 	     identify_imp_name);
     }
@@ -3225,10 +3302,11 @@ identify_search_member (bfd  *abfd,
 }
 
 /* This predicate returns true if section->name matches the desired value.
-   By default, this is .idata$7 (.idata$6 on PPC, or when --identify-ms).  */   
+   By default, this is .idata$7 (.idata$6 on PPC, or if the import
+   library is ms-style).  */   
 
 static bfd_boolean
-identify_process_section_p (asection * section)
+identify_process_section_p (asection * section, bfd_boolean ms_style_implib)
 {
   static const char * SECTION_NAME =
 #ifdef DLLTOOL_PPC
@@ -3238,9 +3316,9 @@ identify_process_section_p (asection * section)
   ".idata$7";
 #endif
   static const char * MS_SECTION_NAME = ".idata$6";
-
+  
   const char * section_name =
-    (identify_ms ? MS_SECTION_NAME : SECTION_NAME);
+    (ms_style_implib ? MS_SECTION_NAME : SECTION_NAME);
   
   if (strcmp (section_name, section->name) == 0)
     return TRUE;
@@ -3249,31 +3327,32 @@ identify_process_section_p (asection * section)
 
 /* If *section has contents and its name is .idata$7 (.data$6 on PPC or if
    import lib ms-generated) -- and it satisfies several other constraints
-   -- then store the contents in the list pointed to by
-   identify_dll_name_list_head.  */   
+   -- then add the contents of the section to obj->list.  */
 
 static void
-identify_search_section (bfd * abfd, asection * section, void * dummy ATTRIBUTE_UNUSED)
+identify_search_section (bfd * abfd, asection * section, void * obj)
 {
   bfd_byte *data = 0;
   bfd_size_type datasize;
+  identify_data_type * identify_data = (identify_data_type *)obj;
+  bfd_boolean ms_style = identify_data->ms_style_implib;
 
   if ((section->flags & SEC_HAS_CONTENTS) == 0)
     return;
 
-  if (! identify_process_section_p (section))
+  if (! identify_process_section_p (section, ms_style))
     return;
 
   /* Binutils import libs seem distinguish the .idata$7 section that contains
      the DLL name from other .idata$7 sections by the absence of the
      SEC_RELOC flag.  */
-  if (!identify_ms && ((section->flags & SEC_RELOC) == SEC_RELOC))
+  if (!ms_style && ((section->flags & SEC_RELOC) == SEC_RELOC))
     return;
 
   /* MS import libs seem to distinguish the .idata$6 section
      that contains the DLL name from other .idata$6 sections
      by the presence of the SEC_DATA flag.  */
-  if (identify_ms && ((section->flags & SEC_DATA) == 0))
+  if (ms_style && ((section->flags & SEC_DATA) == 0))
     return;
 
   if ((datasize = bfd_section_size (abfd, section)) == 0)
@@ -3290,8 +3369,8 @@ identify_search_section (bfd * abfd, asection * section, void * dummy ATTRIBUTE_
      (more than 0x302f) imports, (b) it is an ms-style 
      import library, but (c) it is buggy, in that the SEC_DATA
      flag is set on the "wrong" sections.  This heuristic might
-     also fail to record a valid dll name if the dllname is
-     uses a multibyte or unicode character set (is that valid?).
+     also fail to record a valid dll name if the dllname uses
+     a multibyte or unicode character set (is that valid?).
 
      This heuristic is based on the fact that symbols names in
      the chosen section -- as opposed to the dll name -- begin
@@ -3301,7 +3380,7 @@ identify_search_section (bfd * abfd, asection * section, void * dummy ATTRIBUTE_
      dll name does not contain unprintable characters.   */
   if (data[0] != '\0' && ISPRINT (data[0])
       && ((datasize < 2) || ISPRINT (data[1])))
-    identify_append_dll_name_to_list (data);
+    dll_name_list_append (identify_data->list, data);
 
   free (data);
 }

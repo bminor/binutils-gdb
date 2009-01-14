@@ -1,3 +1,38 @@
+2008-01-14  Charles Wilson  <cygwin@cwilson.fastmail.fm>
+
+	Cleanup code related to --identify option.
+
+	* binutils/dlltool.c (file scope): Removed globals identify_ms,
+	identify_member_contains_symname_result,
+	identify_dll_name_list_head, and identify_dll_name_list_tail.
+	Renamed existing typedef dll_name_list_type to
+	dll_name_list_node_type.
+	Added new typedefs dll_name_list_type, symname_search_data_type,
+	and identify_data_type.
+	(identify_append_dll_name_to_list): Renamed to...
+	(dll_name_list_append): ...here.  Changed signature to accept list
+	argument rather than use global.
+	(identify_count_dll_name_list): Renamed to...
+	(dll_name_list_count): ...here.  Changed signature to accept list
+	argument rather than use global.
+	(identify_print_dll_name_list): Renamed to...
+	(dll_name_list_print): ...here.  Changed signature to accept list
+	argument rather than use global.
+	(identify_free_dll_name_list): Renamed to...
+	(dll_name_list_free_contents): ...here.
+	(dll_name_list_free): New function.
+	(dll_name_list_create): New function.
+	(identify_process_section_p): Changed signature to accept
+	ms_style_implib argument rather than use global.
+	(identify_member_contains_symname): Expect incoming void * data to
+	be symname_search_data_type.
+	(identify_dll_for_implib): Use new functions dll_name_list_create
+	and dll_name_list_free.  Use new types symname_search_data_type
+	and identify_data_type to communicate with search routines.
+	(identify_search_section): Expect incoming void * data to be
+	identify_data_type. Use its contents rather than global
+	variables.
+
 2009-01-13  Charles Wilson  <cygwin@cwilson.fastmail.fm>
 
 	Add --identify-strict option.  Handle ms-style implibs:
