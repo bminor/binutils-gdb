@@ -1,3 +1,10 @@
+2009-01-14  Kai Tietz  <kai.tietz@onevision.com>
+
+	* mingw-ser.c (console_select_thread): Add return to make
+	compiler happy.
+	(pipe_select_thread): Likewise.
+	(file_select_thread): Likewise.
+
 2009-01-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* mi/mi-main.c (mi_cmd_execute): Clean up parenthesis mess from

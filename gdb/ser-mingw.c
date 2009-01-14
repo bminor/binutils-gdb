@@ -573,6 +573,7 @@ console_select_thread (void *arg)
 
       SetEvent(state->have_stopped);
     }
+  return 0;
 }
 
 static int
@@ -633,6 +634,7 @@ pipe_select_thread (void *arg)
 
       SetEvent (state->have_stopped);
     }
+  return 0;
 }
 
 static DWORD WINAPI
@@ -657,6 +659,7 @@ file_select_thread (void *arg)
 
       SetEvent (state->have_stopped);
     }
+  return 0;
 }
 
 static void
