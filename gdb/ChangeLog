@@ -4,7 +4,6 @@
 	(target_signal_to_name): Ditto.
 	(target_signal_from_name): Make arg const char *.
 	* thread-db.c (thread_db_err_str): Make return type const char *.
-	* utils.c (perror_with_name): Make arg const char *.
 	* infrun.c (sig_print_info): Update.
 
 	* signals/signals.c (signals): Make array and struct members const.
