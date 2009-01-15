@@ -1,3 +1,9 @@
+2009-01-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 9722
+	* config/tc-arm.c (do_t_nop): Check for availability of Thumb2
+	instructions before generating a Thumb2 nop.
+
 2009-01-14  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 	
 	* config/tc-s390.h: Define LOCAL_LABEL_PREFIX.

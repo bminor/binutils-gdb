@@ -1,3 +1,10 @@
+2009-01-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 9722
+	* gas/testsuite/gas/arm/archv6m.d: Update expected NOP opcode.
+	* gas/testsuite/gas/arm/pr9722.s: New test.
+	* gas/testsuite/gas/arm/pr9722.d: Expected disassembly.
+
 2009-01-14  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/power6.s ("mtfsf", "mtfsf.", "mtfsfi", "mtfsfi."): Add tests.

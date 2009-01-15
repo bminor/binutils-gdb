@@ -12,4 +12,4 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> bf30      	wfi
 0[0-9a-f]+ <[^>]+> bf40      	sev
 0[0-9a-f]+ <[^>]+> 4408      	add	r0, r1
-0[0-9a-f]+ <[^>]+> bf00      	nop
+0[0-9a-f]+ <[^>]+> 46c0      	nop.*

@@ -9927,8 +9927,15 @@ do_t_nop (void)
 	}
       else
 	{
-	  inst.instruction = THUMB_OP16 (inst.instruction);
-	  inst.instruction |= inst.operands[0].imm << 4;
+	  /* PR9722: Check for Thumb2 availability before
+	     generating a thumb2 nop instruction.  */
+	  if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2))
+	    {
+	      inst.instruction = THUMB_OP16 (inst.instruction);
+	      inst.instruction |= inst.operands[0].imm << 4;
+	    }
+	  else
+	    inst.instruction = 0x46c0;
 	}
     }
   else
