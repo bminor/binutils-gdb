@@ -1,5 +1,9 @@
 2009-01-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* frame.c (get_frame_arch): Abort if called with NULL this_frame.
+
+2009-01-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* value.h (address_of_variable): Add prototype.
 	(locate_var_value): Remove prototype.
 

@@ -1795,6 +1795,11 @@ safe_frame_unwind_memory (struct frame_info *this_frame,
 struct gdbarch *
 get_frame_arch (struct frame_info *this_frame)
 {
+  /* In the future, this function will return a per-frame
+     architecture instead of current_gdbarch.  Calling the
+     routine with a NULL value of this_frame is a bug!  */
+  gdb_assert (this_frame);
+
   return current_gdbarch;
 }
 
