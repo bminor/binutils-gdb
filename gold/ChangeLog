@@ -1,6 +1,11 @@
+2009-01-15  Ian Lance Taylor  <iant@google.com>
+
+	* object.cc (Sized_relobj::write_local_symbols): Don't write out
+	local symbols when stripping all symbols.
+
 2009-01-14  Cary Coutant  <ccoutant@google.com>
 
-	* output.cc  (Output_reloc): Add explicit instantiations.
+	* output.cc (Output_reloc): Add explicit instantiations.
 
 2009-01-14  Cary Coutant  <ccoutant@google.com>
 

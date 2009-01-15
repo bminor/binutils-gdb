@@ -1416,9 +1416,13 @@ Sized_relobj<size, big_endian>::write_local_symbols(
     Output_symtab_xindex* symtab_xindex,
     Output_symtab_xindex* dynsym_xindex)
 {
-  if (parameters->options().strip_all()
-      && this->output_local_dynsym_count_ == 0)
-    return;
+  const bool strip_all = parameters->options().strip_all();
+  if (strip_all)
+    {
+      if (this->output_local_dynsym_count_ == 0)
+	return;
+      this->output_local_symbol_count_ = 0;
+    }
 
   gold_assert(this->symtab_shndx_ != -1U);
   if (this->symtab_shndx_ == 0)
@@ -1487,7 +1491,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(
 	  st_shndx = out_sections[st_shndx]->out_shndx();
 	  if (st_shndx >= elfcpp::SHN_LORESERVE)
 	    {
-	      if (lv.needs_output_symtab_entry())
+	      if (lv.needs_output_symtab_entry() && !strip_all)
 		symtab_xindex->add(lv.output_symtab_index(), st_shndx);
 	      if (lv.needs_output_dynsym_entry())
 		dynsym_xindex->add(lv.output_dynsym_index(), st_shndx);
@@ -1496,8 +1500,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(
 	}
 
       // Write the symbol to the output symbol table.
-      if (!parameters->options().strip_all()
-	  && lv.needs_output_symtab_entry())
+      if (!strip_all && lv.needs_output_symtab_entry())
         {
           elfcpp::Sym_write<size, big_endian> osym(ov);
 
