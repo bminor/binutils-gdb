@@ -310,6 +310,8 @@ extern CORE_ADDR address_from_register (struct type *type, int regnum,
 
 extern struct value *value_of_variable (struct symbol *var, struct block *b);
 
+extern struct value *address_of_variable (struct symbol *var, struct block *b);
+
 extern struct value *value_of_register (int regnum, struct frame_info *frame);
 
 struct value *value_of_register_lazy (struct frame_info *frame, int regnum);
@@ -318,9 +320,6 @@ extern int symbol_read_needs_frame (struct symbol *);
 
 extern struct value *read_var_value (struct symbol *var,
 				     struct frame_info *frame);
-
-extern struct value *locate_var_value (struct symbol *var,
-				       struct frame_info *frame);
 
 extern struct value *allocate_value (struct type *type);
 extern struct value *allocate_value_lazy (struct type *type);

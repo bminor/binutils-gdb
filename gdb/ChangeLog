@@ -1,3 +1,19 @@
+2009-01-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* value.h (address_of_variable): Add prototype.
+	(locate_var_value): Remove prototype.
+
+	* findvar.c (read_var_value): Do not attempt to default frame
+	to selected frame.
+	(locate_var_value): Remove function.
+	* valops.c (value_of_variable): Retrieve selected frame for
+	symbols that require a frame when called with NULL block.
+	* valops.c (address_of_variable): New function.
+
+	* eval.c (evaluate_subexp_for_address): Call address_of_variable
+	instead of calling locate_var_value.
+	(evaluate_subexp_with_coercion): Likewise.
+
 2009-01-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Document "define" for prefixed commands.

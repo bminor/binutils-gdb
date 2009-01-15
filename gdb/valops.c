@@ -988,11 +988,13 @@ struct value *
 value_of_variable (struct symbol *var, struct block *b)
 {
   struct value *val;
-  struct frame_info *frame = NULL;
+  struct frame_info *frame;
 
-  if (!b)
-    frame = NULL;		/* Use selected frame.  */
-  else if (symbol_read_needs_frame (var))
+  if (!symbol_read_needs_frame (var))
+    frame = NULL;
+  else if (!b)
+    frame = get_selected_frame (_("No frame selected."));
+  else
     {
       frame = block_innermost_frame (b);
       if (!frame)
@@ -1009,6 +1011,54 @@ value_of_variable (struct symbol *var, struct block *b)
   val = read_var_value (var, frame);
   if (!val)
     error (_("Address of symbol \"%s\" is unknown."), SYMBOL_PRINT_NAME (var));
+
+  return val;
+}
+
+struct value *
+address_of_variable (struct symbol *var, struct block *b)
+{
+  struct type *type = SYMBOL_TYPE (var);
+  struct value *val;
+
+  /* Evaluate it first; if the result is a memory address, we're fine.
+     Lazy evaluation pays off here. */
+
+  val = value_of_variable (var, b);
+
+  if ((VALUE_LVAL (val) == lval_memory && value_lazy (val))
+      || TYPE_CODE (type) == TYPE_CODE_FUNC)
+    {
+      CORE_ADDR addr = VALUE_ADDRESS (val);
+      return value_from_pointer (lookup_pointer_type (type), addr);
+    }
+
+  /* Not a memory address; check what the problem was.  */
+  switch (VALUE_LVAL (val))
+    {
+    case lval_register:
+      {
+	struct frame_info *frame;
+	const char *regname;
+
+	frame = frame_find_by_id (VALUE_FRAME_ID (val));
+	gdb_assert (frame);
+
+	regname = gdbarch_register_name (get_frame_arch (frame),
+					 VALUE_REGNUM (val));
+	gdb_assert (regname && *regname);
+
+	error (_("Address requested for identifier "
+		 "\"%s\" which is in register $%s"),
+	       SYMBOL_PRINT_NAME (var), regname);
+	break;
+      }
+
+    default:
+      error (_("Can't take address of \"%s\" which isn't an lvalue."),
+	     SYMBOL_PRINT_NAME (var));
+      break;
+    }
 
   return val;
 }

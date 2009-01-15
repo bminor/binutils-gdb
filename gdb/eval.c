@@ -2560,13 +2560,8 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
 	  return
 	    value_zero (type, not_lval);
 	}
-      else if (symbol_read_needs_frame (var))
-	return
-	  locate_var_value
-	  (var,
-	   block_innermost_frame (exp->elts[pc + 1].block));
       else
-	return locate_var_value (var, NULL);
+	return address_of_variable (var, exp->elts[pc + 1].block);
 
     case OP_SCOPE:
       tem = longest_to_int (exp->elts[pc + 2].longconst);
@@ -2620,6 +2615,7 @@ evaluate_subexp_with_coercion (struct expression *exp,
   int pc;
   struct value *val;
   struct symbol *var;
+  struct type *type;
 
   pc = (*pos);
   op = exp->elts[pc].opcode;
@@ -2628,14 +2624,13 @@ evaluate_subexp_with_coercion (struct expression *exp,
     {
     case OP_VAR_VALUE:
       var = exp->elts[pc + 2].symbol;
-      if (TYPE_CODE (check_typedef (SYMBOL_TYPE (var))) == TYPE_CODE_ARRAY
+      type = check_typedef (SYMBOL_TYPE (var));
+      if (TYPE_CODE (type) == TYPE_CODE_ARRAY
 	  && CAST_IS_CONVERSION)
 	{
 	  (*pos) += 4;
-	  val =
-	    locate_var_value
-	    (var, block_innermost_frame (exp->elts[pc + 1].block));
-	  return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (check_typedef (SYMBOL_TYPE (var)))),
+	  val = address_of_variable (var, exp->elts[pc + 1].block);
+	  return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
 			     val);
 	}
       /* FALLTHROUGH */
