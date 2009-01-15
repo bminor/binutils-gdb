@@ -1,6 +1,6 @@
 // plugin.c -- plugin manager for gold      -*- C++ -*-
 
-// Copyright 2008 Free Software Foundation, Inc.
+// Copyright 2008, 2009 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.
@@ -62,6 +62,12 @@ static enum ld_plugin_status
 add_symbols(void *handle, int nsyms, const struct ld_plugin_symbol *syms);
 
 static enum ld_plugin_status
+get_input_file(const void *handle, struct ld_plugin_input_file *file);
+
+static enum ld_plugin_status
+release_input_file(const void *handle);
+
+static enum ld_plugin_status
 get_symbols(const void *handle, int nsyms, struct ld_plugin_symbol *syms);
 
 static enum ld_plugin_status
@@ -75,7 +81,7 @@ message(int level, const char *format, ...);
 #endif // ENABLE_PLUGINS
 
 static Pluginobj* make_sized_plugin_object(Input_file* input_file,
-                                           off_t offset);
+                                           off_t offset, off_t filesize);
 
 // Plugin methods.
 
@@ -112,7 +118,7 @@ Plugin::load()
   sscanf(ver, "%d.%d", &major, &minor);
 
   // Allocate and populate a transfer vector.
-  const int tv_fixed_size = 11;
+  const int tv_fixed_size = 13;
   int tv_size = this->args_.size() + tv_fixed_size;
   ld_plugin_tv *tv = new ld_plugin_tv[tv_size];
 
@@ -161,6 +167,14 @@ Plugin::load()
   ++i;
   tv[i].tv_tag = LDPT_ADD_SYMBOLS;
   tv[i].tv_u.tv_add_symbols = add_symbols;
+
+  ++i;
+  tv[i].tv_tag = LDPT_GET_INPUT_FILE;
+  tv[i].tv_u.tv_get_input_file = get_input_file;
+
+  ++i;
+  tv[i].tv_tag = LDPT_RELEASE_INPUT_FILE;
+  tv[i].tv_u.tv_release_input_file = release_input_file;
 
   ++i;
   tv[i].tv_tag = LDPT_GET_SYMBOLS;
@@ -283,7 +297,7 @@ Plugin_manager::claim_file(Input_file* input_file, off_t offset,
 // Call the all-symbols-read handlers.
 
 void
-Plugin_manager::all_symbols_read(Workqueue* workqueue,
+Plugin_manager::all_symbols_read(Workqueue* workqueue, Task* task,
                                  Input_objects* input_objects,
 	                         Symbol_table* symtab, Layout* layout,
 	                         Dirsearch* dirpath, Mapfile* mapfile,
@@ -291,6 +305,7 @@ Plugin_manager::all_symbols_read(Workqueue* workqueue,
 {
   this->in_replacement_phase_ = true;
   this->workqueue_ = workqueue;
+  this->task_ = task;
   this->input_objects_ = input_objects;
   this->symtab_ = symtab;
   this->layout_ = layout;
@@ -344,9 +359,43 @@ Plugin_manager::make_plugin_object(unsigned int handle)
     return NULL;
 
   Pluginobj* obj = make_sized_plugin_object(this->input_file_,
-                                            this->plugin_input_file_.offset);
+                                            this->plugin_input_file_.offset,
+                                            this->plugin_input_file_.filesize);
   this->objects_.push_back(obj);
   return obj;
+}
+
+// Get the input file information with an open (possibly re-opened)
+// file descriptor.
+
+ld_plugin_status
+Plugin_manager::get_input_file(unsigned int handle,
+                               struct ld_plugin_input_file *file)
+{
+  Pluginobj* obj = this->object(handle);
+  if (obj == NULL)
+    return LDPS_BAD_HANDLE;
+
+  obj->lock(this->task_);
+  file->name = obj->filename().c_str();
+  file->fd = obj->descriptor();
+  file->offset = obj->offset();
+  file->filesize = obj->filesize();
+  file->handle = reinterpret_cast<void*>(handle);
+  return LDPS_OK;
+}
+
+// Release the input file.
+
+ld_plugin_status
+Plugin_manager::release_input_file(unsigned int handle)
+{
+  Pluginobj* obj = this->object(handle);
+  if (obj == NULL)
+    return LDPS_BAD_HANDLE;
+
+  obj->unlock(this->task_);
+  return LDPS_OK;
 }
 
 // Add a new input file.
@@ -375,9 +424,9 @@ Plugin_manager::add_input_file(char *pathname)
 // Class Pluginobj.
 
 Pluginobj::Pluginobj(const std::string& name, Input_file* input_file,
-                     off_t offset)
+                     off_t offset, off_t filesize)
   : Object(name, input_file, false, offset),
-    nsyms_(0), syms_(NULL), symbols_(), comdat_map_()
+    nsyms_(0), syms_(NULL), symbols_(), filesize_(filesize), comdat_map_()
 {
 }
 
@@ -468,8 +517,9 @@ template<int size, bool big_endian>
 Sized_pluginobj<size, big_endian>::Sized_pluginobj(
     const std::string& name,
     Input_file* input_file,
-    off_t offset)
-  : Pluginobj(name, input_file, offset)
+    off_t offset,
+    off_t filesize)
+  : Pluginobj(name, input_file, offset, filesize)
 {
 }
 
@@ -822,6 +872,7 @@ Plugin_hook::run(Workqueue* workqueue)
 {
   gold_assert(this->options_.has_plugins());
   this->options_.plugins()->all_symbols_read(workqueue,
+                                             this,
                                              this->input_objects_,
                                              this->symtab_,
                                              this->layout_,
@@ -880,6 +931,29 @@ add_symbols(void* handle, int nsyms, const ld_plugin_symbol *syms)
   return LDPS_OK;
 }
 
+// Get the input file information with an open (possibly re-opened)
+// file descriptor.
+
+static enum ld_plugin_status
+get_input_file(const void *handle, struct ld_plugin_input_file *file)
+{
+  gold_assert(parameters->options().has_plugins());
+  unsigned int obj_index =
+      static_cast<unsigned int>(reinterpret_cast<intptr_t>(handle));
+  return parameters->options().plugins()->get_input_file(obj_index, file);
+}
+
+// Release the input file.
+
+static enum ld_plugin_status
+release_input_file(const void *handle)
+{
+  gold_assert(parameters->options().has_plugins());
+  unsigned int obj_index =
+      static_cast<unsigned int>(reinterpret_cast<intptr_t>(handle));
+  return parameters->options().plugins()->release_input_file(obj_index);
+}
+
 // Get the symbol resolution info for a plugin-claimed input file.
 
 static enum ld_plugin_status
@@ -936,7 +1010,7 @@ message(int level, const char * format, ...)
 // Allocate a Pluginobj object of the appropriate size and endianness.
 
 static Pluginobj*
-make_sized_plugin_object(Input_file* input_file, off_t offset)
+make_sized_plugin_object(Input_file* input_file, off_t offset, off_t filesize)
 {
   Target* target;
   Pluginobj* obj = NULL;
@@ -951,7 +1025,7 @@ make_sized_plugin_object(Input_file* input_file, off_t offset)
       if (target->is_big_endian())
 #ifdef HAVE_TARGET_32_BIG
         obj = new Sized_pluginobj<32, true>(input_file->filename(),
-                                            input_file, offset);
+                                            input_file, offset, filesize);
 #else
         gold_error(_("%s: not configured to support "
 		     "32-bit big-endian object"),
@@ -960,7 +1034,7 @@ make_sized_plugin_object(Input_file* input_file, off_t offset)
       else
 #ifdef HAVE_TARGET_32_LITTLE
         obj = new Sized_pluginobj<32, false>(input_file->filename(),
-                                             input_file, offset);
+                                             input_file, offset, filesize);
 #else
         gold_error(_("%s: not configured to support "
 		     "32-bit little-endian object"),
@@ -972,7 +1046,7 @@ make_sized_plugin_object(Input_file* input_file, off_t offset)
       if (target->is_big_endian())
 #ifdef HAVE_TARGET_64_BIG
         obj = new Sized_pluginobj<64, true>(input_file->filename(),
-                                            input_file, offset);
+                                            input_file, offset, filesize);
 #else
         gold_error(_("%s: not configured to support "
 		     "64-bit big-endian object"),
@@ -981,7 +1055,7 @@ make_sized_plugin_object(Input_file* input_file, off_t offset)
       else
 #ifdef HAVE_TARGET_64_LITTLE
         obj = new Sized_pluginobj<64, false>(input_file->filename(),
-                                             input_file, offset);
+                                             input_file, offset, filesize);
 #else
         gold_error(_("%s: not configured to support "
 		     "64-bit little-endian object"),

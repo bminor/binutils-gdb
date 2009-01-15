@@ -1,6 +1,6 @@
 /* test_plugin.c -- simple linker plugin test
 
-   Copyright 2008 Free Software Foundation, Inc.
+   Copyright 2008, 2009 Free Software Foundation, Inc.
    Written by Cary Coutant <ccoutant@google.com>.
 
    This file is part of gold.
@@ -34,6 +34,16 @@ struct claimed_file
   struct claimed_file* next;
 };
 
+struct sym_info
+{
+  int size;
+  char* type;
+  char* bind;
+  char* vis;
+  char* sect;
+  char* name;
+};
+
 static struct claimed_file* first_claimed_file = NULL;
 static struct claimed_file* last_claimed_file = NULL;
 
@@ -44,6 +54,8 @@ static ld_plugin_add_symbols add_symbols = NULL;
 static ld_plugin_get_symbols get_symbols = NULL;
 static ld_plugin_add_input_file add_input_file = NULL;
 static ld_plugin_message message = NULL;
+static ld_plugin_get_input_file get_input_file = NULL;
+static ld_plugin_release_input_file release_input_file = NULL;
 
 #define MAXOPTS 10
 
@@ -55,6 +67,8 @@ enum ld_plugin_status claim_file_hook(const struct ld_plugin_input_file *file,
                                       int *claimed);
 enum ld_plugin_status all_symbols_read_hook(void);
 enum ld_plugin_status cleanup_hook(void);
+
+static void parse_readelf_line(char*, struct sym_info*);
 
 enum ld_plugin_status
 onload(struct ld_plugin_tv *tv)
@@ -101,6 +115,12 @@ onload(struct ld_plugin_tv *tv)
           break;
         case LDPT_MESSAGE:
           message = entry->tv_u.tv_message;
+          break;
+        case LDPT_GET_INPUT_FILE:
+          get_input_file = entry->tv_u.tv_get_input_file;
+          break;
+        case LDPT_RELEASE_INPUT_FILE:
+          release_input_file = entry->tv_u.tv_release_input_file;
           break;
         default:
           break;
@@ -162,21 +182,17 @@ enum ld_plugin_status
 claim_file_hook (const struct ld_plugin_input_file* file, int* claimed)
 {
   int len;
+  off_t end_offset;
   char buf[160];
   struct claimed_file* claimed_file;
   struct ld_plugin_symbol* syms;
   int nsyms = 0;
   int maxsyms = 0;
   FILE* irfile;
-  char *p;
-  char *pbind;
-  char *pvis;
-  char *psect;
+  struct sym_info info;
   int weak;
   int def;
   int vis;
-  int size;
-  char* name;
   int is_comdat;
   int i;
 
@@ -187,6 +203,7 @@ claim_file_hook (const struct ld_plugin_input_file* file, int* claimed)
   /* Look for the beginning of output from readelf -s.  */
   irfile = fdopen(file->fd, "r");
   (void)fseek(irfile, file->offset, SEEK_SET);
+  end_offset = file->offset + file->filesize;
   len = fread(buf, 1, 13, irfile);
   if (len < 13 || strncmp(buf, "\nSymbol table", 13) != 0)
     return LDPS_OK;
@@ -207,68 +224,28 @@ claim_file_hook (const struct ld_plugin_input_file* file, int* claimed)
   if (syms == NULL)
     return LDPS_ERR;
   maxsyms = 8;
-  while (fgets(buf, sizeof(buf), irfile) != NULL)
+  while (ftell(irfile) < end_offset
+         && fgets(buf, sizeof(buf), irfile) != NULL)
     {
-      p = buf;
-      p += strspn(p, " ");
-
-      /* Index field.  */
-      p += strcspn(p, " ");
-      p += strspn(p, " ");
-
-      /* Value field.  */
-      p += strcspn(p, " ");
-      p += strspn(p, " ");
-
-      /* Size field.  */
-      size = atoi(p);
-      p += strcspn(p, " ");
-      p += strspn(p, " ");
-
-      /* Type field.  */
-      p += strcspn(p, " ");
-      p += strspn(p, " ");
-
-      /* Binding field.  */
-      pbind = p;
-      p += strcspn(p, " ");
-      p += strspn(p, " ");
-
-      /* Visibility field.  */
-      pvis = p;
-      p += strcspn(p, " ");
-      p += strspn(p, " ");
-
-      /* Section field.  */
-      psect = p;
-      p += strcspn(p, " ");
-      p += strspn(p, " ");
-
-      /* Name field.  */
-      /* FIXME:  Look for version.  */
-      len = strlen(p);
-      if (p[len-1] == '\n')
-        p[--len] = '\0';
-      name = malloc(len + 1);
-      strncpy(name, p, len + 1);
+      parse_readelf_line(buf, &info);
 
       /* Ignore local symbols.  */
-      if (strncmp(pbind, "LOCAL", 5) == 0)
+      if (strncmp(info.bind, "LOCAL", 5) == 0)
         continue;
 
-      weak = strncmp(pbind, "WEAK", 4) == 0;
-      if (strncmp(psect, "UND", 3) == 0)
+      weak = strncmp(info.bind, "WEAK", 4) == 0;
+      if (strncmp(info.sect, "UND", 3) == 0)
         def = weak ? LDPK_WEAKUNDEF : LDPK_UNDEF;
-      else if (strncmp(psect, "COM", 3) == 0)
+      else if (strncmp(info.sect, "COM", 3) == 0)
         def = LDPK_COMMON;
       else
         def = weak ? LDPK_WEAKDEF : LDPK_DEF;
 
-      if (strncmp(pvis, "INTERNAL", 8) == 0)
+      if (strncmp(info.vis, "INTERNAL", 8) == 0)
         vis = LDPV_INTERNAL;
-      else if (strncmp(pvis, "HIDDEN", 6) == 0)
+      else if (strncmp(info.vis, "HIDDEN", 6) == 0)
         vis = LDPV_HIDDEN;
-      else if (strncmp(pvis, "PROTECTED", 9) == 0)
+      else if (strncmp(info.vis, "PROTECTED", 9) == 0)
         vis = LDPV_PROTECTED;
       else
         vis = LDPV_DEFAULT;
@@ -278,7 +255,7 @@ claim_file_hook (const struct ld_plugin_input_file* file, int* claimed)
       is_comdat = 0;
       for (i = 0; i < nopts; ++i)
         {
-          if (name != NULL && strcmp(name, opts[i]) == 0)
+          if (info.name != NULL && strcmp(info.name, opts[i]) == 0)
             {
               is_comdat = 1;
               break;
@@ -294,12 +271,19 @@ claim_file_hook (const struct ld_plugin_input_file* file, int* claimed)
           maxsyms *= 2;
         }
 
-      syms[nsyms].name = name;
+      if (info.name == NULL)
+        syms[nsyms].name = NULL;
+      else
+        {
+          len = strlen(info.name);
+          syms[nsyms].name = malloc(len + 1);
+          strncpy(syms[nsyms].name, info.name, len + 1);
+        }
       syms[nsyms].version = NULL;
       syms[nsyms].def = def;
       syms[nsyms].visibility = vis;
-      syms[nsyms].size = size;
-      syms[nsyms].comdat_key = is_comdat ? name : NULL;
+      syms[nsyms].size = info.size;
+      syms[nsyms].comdat_key = is_comdat ? syms[nsyms].name : NULL;
       syms[nsyms].resolution = LDPR_UNKNOWN;
       ++nsyms;
     }
@@ -335,8 +319,14 @@ all_symbols_read_hook(void)
   int i;
   const char* res;
   struct claimed_file* claimed_file;
+  struct ld_plugin_input_file file;
+  FILE* irfile;
+  off_t end_offset;
+  struct sym_info info;
+  int len;
   char buf[160];
-  char *p;
+  char* p;
+  const char* filename;
 
   (*message)(LDPL_INFO, "all symbols read hook called");
 
@@ -352,6 +342,7 @@ all_symbols_read_hook(void)
     {
       (*get_symbols)(claimed_file->handle, claimed_file->nsyms,
                      claimed_file->syms);
+
       for (i = 0; i < claimed_file->nsyms; ++i)
         {
           switch (claimed_file->syms[i].resolution)
@@ -397,28 +388,83 @@ all_symbols_read_hook(void)
       fprintf(stderr, "tv_add_input_file interface missing\n");
       return LDPS_ERR;
     }
+  if (get_input_file == NULL)
+    {
+      fprintf(stderr, "tv_get_input_file interface missing\n");
+      return LDPS_ERR;
+    }
+  if (release_input_file == NULL)
+    {
+      fprintf(stderr, "tv_release_input_file interface missing\n");
+      return LDPS_ERR;
+    }
 
   for (claimed_file = first_claimed_file;
        claimed_file != NULL;
        claimed_file = claimed_file->next)
     {
-      if (claimed_file->nsyms == 0)
-        continue;
-      if (strlen(claimed_file->name) >= sizeof(buf))
+      (*get_input_file) (claimed_file->handle, &file);
+
+      /* Look for the beginning of output from readelf -s.  */
+      irfile = fdopen(file.fd, "r");
+      (void)fseek(irfile, file.offset, SEEK_SET);
+      end_offset = file.offset + file.filesize;
+      len = fread(buf, 1, 13, irfile);
+      if (len < 13 || strncmp(buf, "\nSymbol table", 13) != 0)
         {
-          (*message)(LDPL_FATAL, "%s: filename too long", claimed_file->name);
+          fprintf(stderr, "%s: can't re-read original input file\n",
+                  claimed_file->name);
           return LDPS_ERR;
         }
-      strcpy(buf, claimed_file->name);
-      p = strrchr(buf, '.');
-      if (p == NULL || strcmp(p, ".syms") != 0)
+
+      /* Skip the two header lines.  */
+      (void) fgets(buf, sizeof(buf), irfile);
+      (void) fgets(buf, sizeof(buf), irfile);
+
+      filename = NULL;
+      while (ftell(irfile) < end_offset
+             && fgets(buf, sizeof(buf), irfile) != NULL)
         {
-          (*message)(LDPL_FATAL, "%s: filename must have '.syms' suffix",
-                     claimed_file->name);
+          parse_readelf_line(buf, &info);
+
+          /* Look for file name.  */
+          if (strncmp(info.type, "FILE", 4) == 0)
+            {
+              len = strlen(info.name);
+              p = malloc(len + 1);
+              strncpy(p, info.name, len + 1);
+              filename = p;
+              break;
+            }
+        }
+
+      (*release_input_file) (claimed_file->handle);
+
+      if (filename == NULL)
+        filename = claimed_file->name;
+
+      if (claimed_file->nsyms == 0)
+        continue;
+
+      if (strlen(filename) >= sizeof(buf))
+        {
+          (*message)(LDPL_FATAL, "%s: filename too long", filename);
+          return LDPS_ERR;
+        }
+      strcpy(buf, filename);
+      p = strrchr(buf, '.');
+      if (p == NULL
+          || (strcmp(p, ".syms") != 0
+              && strcmp(p, ".c") != 0
+              && strcmp(p, ".cc") != 0))
+        {
+          (*message)(LDPL_FATAL, "%s: filename has unknown suffix",
+                     filename);
           return LDPS_ERR;
         }
       p[1] = 'o';
       p[2] = '\0';
+      (*message)(LDPL_INFO, "%s: adding new input file", buf);
       (*add_input_file)(buf);
     }
 
@@ -430,4 +476,54 @@ cleanup_hook(void)
 {
   (*message)(LDPL_INFO, "cleanup hook called");
   return LDPS_OK;
+}
+
+static void
+parse_readelf_line(char* p, struct sym_info* info)
+{
+  int len;
+
+  p += strspn(p, " ");
+
+  /* Index field.  */
+  p += strcspn(p, " ");
+  p += strspn(p, " ");
+
+  /* Value field.  */
+  p += strcspn(p, " ");
+  p += strspn(p, " ");
+
+  /* Size field.  */
+  info->size = atoi(p);
+  p += strcspn(p, " ");
+  p += strspn(p, " ");
+
+  /* Type field.  */
+  info->type = p;
+  p += strcspn(p, " ");
+  p += strspn(p, " ");
+
+  /* Binding field.  */
+  info->bind = p;
+  p += strcspn(p, " ");
+  p += strspn(p, " ");
+
+  /* Visibility field.  */
+  info->vis = p;
+  p += strcspn(p, " ");
+  p += strspn(p, " ");
+
+  /* Section field.  */
+  info->sect = p;
+  p += strcspn(p, " ");
+  p += strspn(p, " ");
+
+  /* Name field.  */
+  /* FIXME:  Look for version.  */
+  len = strlen(p);
+  if (len == 0)
+    p = NULL;
+  else if (p[len-1] == '\n')
+    p[--len] = '\0';
+  info->name = p;
 }

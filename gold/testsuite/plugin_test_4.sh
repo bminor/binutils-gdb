@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# plugin_test_2.sh -- a test case for the plugin API.
+# plugin_test_4.sh -- a test case for the plugin API.
 
-# Copyright 2008, 2009 Free Software Foundation, Inc.
+# Copyright 2009 Free Software Foundation, Inc.
 # Written by Cary Coutant <ccoutant@google.com>.
 
 # This file is part of gold.
@@ -22,7 +22,7 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-# This file goes with plugin_test_1.c, a simple plug-in library that
+# This file goes with plugin_test_4.c, a simple plug-in library that
 # exercises the basic interfaces and prints out version numbers and
 # options passed to the plugin.
 
@@ -39,18 +39,20 @@ check()
     fi
 }
 
-check plugin_test_2.err "API version:"
-check plugin_test_2.err "gold version:"
-check plugin_test_2.err "two_file_test_main.o: claim file hook called"
-check plugin_test_2.err "two_file_test_1.syms: claim file hook called"
-check plugin_test_2.err "two_file_test_1b.syms: claim file hook called"
-check plugin_test_2.err "two_file_shared_2.so: claim file hook called"
-check plugin_test_2.err "two_file_test_1.syms: _Z4f13iv: PREVAILING_DEF_REG"
-check plugin_test_2.err "two_file_test_1.syms: _Z2t2v: PREVAILING_DEF_REG"
-check plugin_test_2.err "two_file_test_1.syms: v2: RESOLVED_DYN"
-check plugin_test_2.err "two_file_test_1.syms: t17data: RESOLVED_DYN"
-check plugin_test_2.err "two_file_test_1.o: adding new input file"
-check plugin_test_2.err "two_file_test_1b.o: adding new input file"
-check plugin_test_2.err "cleanup hook called"
+check plugin_test_4.err "API version:"
+check plugin_test_4.err "gold version:"
+check plugin_test_4.err "option: _Z4f13iv"
+check plugin_test_4.err "two_file_test_main.o: claim file hook called"
+check plugin_test_4.err "plugin_test_4.a: claim file hook called"
+check plugin_test_4.err "plugin_test_4.a: claiming file"
+check plugin_test_4.err "plugin_test_4.a: _Z4f13iv: PREVAILING_DEF_IRONLY"
+check plugin_test_4.err "plugin_test_4.a: _Z2t2v: PREVAILING_DEF_REG"
+check plugin_test_4.err "plugin_test_4.a: v2: RESOLVED_IR"
+check plugin_test_4.err "plugin_test_4.a: t17data: RESOLVED_IR"
+check plugin_test_4.err "plugin_test_4.a: _Z4f13iv: PREEMPTED_IR"
+check plugin_test_4.err "two_file_test_1.o: adding new input file"
+check plugin_test_4.err "two_file_test_1b.o: adding new input file"
+check plugin_test_4.err "two_file_test_2.o: adding new input file"
+check plugin_test_4.err "cleanup hook called"
 
 exit 0

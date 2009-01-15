@@ -981,6 +981,18 @@ plugin_test_3: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms t
 plugin_test_3.err: plugin_test_3
 	@touch plugin_test_3.err
 
+check_PROGRAMS += plugin_test_4
+check_SCRIPTS += plugin_test_4.sh
+check_DATA += plugin_test_4.err
+MOSTLYCLEANFILES += plugin_test_4.err
+plugin_test_4: two_file_test_main.o plugin_test_4.a gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o -Wl,--whole-archive,plugin_test_4.a,--no-whole-archive 2>plugin_test_4.err
+plugin_test_4.err: plugin_test_4
+	@touch plugin_test_4.err
+
+plugin_test_4.a: two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms
+	$(TEST_AR) cr $@ $^
+
 plugin_test.so: plugin_test.o
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 plugin_test.o: plugin_test.c

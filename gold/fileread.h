@@ -1,6 +1,6 @@
 // fileread.h -- read files for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -109,11 +109,6 @@ class File_read
   void
   release();
 
-  // Claim the file for a plugin.  This effectively releases the file without
-  // closing it; the plugin will assume responsibility for closing it.
-  void
-  claim_for_plugin();
-
   // Return the size of the file.
   off_t
   filesize() const
@@ -190,9 +185,9 @@ class File_read
 
   // Return the open file descriptor (for plugins).
   int
-  descriptor() const
+  descriptor()
   {
-    gold_assert(this->descriptor_ >= 0);
+    this->reopen_descriptor();
     return this->descriptor_;
   }
 

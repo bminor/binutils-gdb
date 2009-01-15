@@ -1,3 +1,59 @@
+2009-01-14  Cary Coutant  <ccoutant@google.com>
+
+	* archive.cc (Archive::get_elf_object_for_member): Remove call
+	to File_read::claim_for_plugin.
+	* descriptors.cc (Descriptors::open): Remove reference to
+	is_claimed.
+	(Descriptors::claim_for_plugin): Remove.
+	* descriptors.h (Descriptors::claim_for_plugin): Remove.
+	(Descriptors::is_claimed): Remove.
+	(claim_descriptor_for_plugin): Remove.
+	* fileread.cc (File_read::claim_for_plugin): Remove.
+	* fileread.h (File_read::claim_for_plugin): Remove.
+	(File_read::descriptor): Reopen descriptor if necessary.
+	* plugin.cc  (Plugin::load): Add two new APIs to transfer vector.
+	(Plugin_manager::all_symbols_read): Add task parameter. Change
+	all callers.
+	(Plugin_manager::get_input_file): New function.
+	(Plugin_manager::release_input_file): New function.
+	(Pluginobj::Pluginobj): Add filesize parameter and initialize
+	corresponding data member.
+	(Sized_pluginobj::Sized_pluginobj): Add filesize parameter
+	and pass to base constructor. Change all callers.
+	(get_input_file, release_input_file): New functions.
+	(make_sized_plugin_object): Add filesize parameter. Change all callers.
+	* plugin.h (Plugin_manager::Plugin_manager): Initialize task_ member.
+	(Plugin_manager::all_symbols_read): Add task parameter.
+	(Plugin_manager::get_input_file): New function.
+	(Plugin_manager::release_input_file): New function.
+	(Plugin_manager::task_): New data member.
+	(Pluginobj::Pluginobj): Add filesize parameter.
+	(Pluginobj::filename): New function.
+	(Pluginobj::descriptor): New function.
+	(Pluginobj::filesize): New function.
+	(Pluginobj::filesize_): New data member.
+	(Sized_pluginobj::Sized_pluginobj): Add filesize parameter.
+	* readsyms.cc (Read_symbols::do_read_symbols): Remove call to
+	File_read::claim_for_plugin; use Object::unlock to unlock the file.
+
+	* testsuite/Makefile.am (plugin_test_4): New test case for plugins
+	with archive libraries.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/plugin_test.c (struct sym_info): New type.
+	(get_input_file, release_input_file): New static variables.
+	(onload): Capture new transfer vector entries.
+	(claim_file_hook): Stop reading at end of file according to filesize.
+	Factor out parsing of readelf output into separate function.
+	(all_symbols_read_hook): Exercise get_input_file and release_input_file
+	APIs and get the source file name from the symbol table.  Convert
+	source file name to corresponding object file name.  Print info
+	message when adding new input files.
+	(parse_readelf_line): New function.
+	* testsuite/plugin_test_1.sh: Add checks for new info messages.
+	* testsuite/plugin_test_2.sh: Likewise.
+	* testsuite/plugin_test_3.sh: Likewise.
+	* testsuite/plugin_test_4.sh: New test case.
+
 2009-01-07  Ian Lance Taylor  <iant@google.com>
 
 	* version.cc (version_string): Bump to 1.8.

@@ -1,6 +1,6 @@
 // readsyms.cc -- read input file symbols for gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -196,8 +196,10 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
         {
           // The input file was claimed by a plugin, and its symbols
           // have been provided by the plugin.
-	  input_file->file().claim_for_plugin();
-	  input_file->file().unlock(this);
+
+          // We are done with the file at this point, so unlock it.
+          obj->unlock(this);
+
           workqueue->queue_next(new Add_plugin_symbols(this->symtab_,
                                                        this->layout_,
                                                        obj,

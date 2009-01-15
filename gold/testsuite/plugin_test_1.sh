@@ -2,7 +2,7 @@
 
 # plugin_test_1.sh -- a test case for the plugin API.
 
-# Copyright 2008 Free Software Foundation, Inc.
+# Copyright 2008, 2009 Free Software Foundation, Inc.
 # Written by Cary Coutant <ccoutant@google.com>.
 
 # This file is part of gold.
@@ -51,6 +51,9 @@ check plugin_test_1.err "two_file_test_1.syms: _Z2t2v: PREVAILING_DEF_REG"
 check plugin_test_1.err "two_file_test_1.syms: v2: RESOLVED_IR"
 check plugin_test_1.err "two_file_test_1.syms: t17data: RESOLVED_IR"
 check plugin_test_1.err "two_file_test_2.syms: _Z4f13iv: PREEMPTED_IR"
+check plugin_test_1.err "two_file_test_1.o: adding new input file"
+check plugin_test_1.err "two_file_test_1b.o: adding new input file"
+check plugin_test_1.err "two_file_test_2.o: adding new input file"
 check plugin_test_1.err "cleanup hook called"
 
 exit 0

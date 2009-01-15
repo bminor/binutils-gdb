@@ -1,6 +1,6 @@
 // archive.cc -- archive support for gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -535,7 +535,6 @@ Archive::get_elf_object_for_member(off_t off, Input_objects* input_objects)
         {
           // The input file was claimed by a plugin, and its symbols
           // have been provided by the plugin.
-	  input_file->file().claim_for_plugin();
           return obj;
         }
     }

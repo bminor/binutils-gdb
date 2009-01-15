@@ -1,6 +1,6 @@
 // plugin.h -- plugin manager for gold      -*- C++ -*-
 
-// Copyright 2008 Free Software Foundation, Inc.
+// Copyright 2008, 2009 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.
@@ -122,8 +122,9 @@ class Plugin_manager
   Plugin_manager(const General_options& options)
     : plugins_(), objects_(), deferred_layout_objects_(), input_file_(NULL),
       plugin_input_file_(), in_replacement_phase_(false), cleanup_done_(false),
-      options_(options), workqueue_(NULL), input_objects_(NULL), symtab_(NULL),
-      layout_(NULL), dirpath_(NULL), mapfile_(NULL), this_blocker_(NULL)
+      options_(options), workqueue_(NULL), task_(NULL), input_objects_(NULL),
+      symtab_(NULL), layout_(NULL), dirpath_(NULL), mapfile_(NULL),
+      this_blocker_(NULL)
   { this->current_ = plugins_.end(); }
 
   ~Plugin_manager();
@@ -151,9 +152,10 @@ class Plugin_manager
 
   // Call the all-symbols-read handlers.
   void
-  all_symbols_read(Workqueue* workqueue, Input_objects* input_objects,
-                   Symbol_table* symtab, Layout* layout, Dirsearch* dirpath,
-                   Mapfile* mapfile, Task_token** last_blocker);
+  all_symbols_read(Workqueue* workqueue, Task* task,
+                   Input_objects* input_objects, Symbol_table* symtab,
+                   Layout* layout, Dirsearch* dirpath, Mapfile* mapfile,
+                   Task_token** last_blocker);
 
   // Run deferred layout.
   void
@@ -214,6 +216,15 @@ class Plugin_manager
   add_deferred_layout_object(Relobj* obj)
   { this->deferred_layout_objects_.push_back(obj); }
 
+  // Get input file information with an open (possibly re-opened)
+  // file descriptor.
+  ld_plugin_status
+  get_input_file(unsigned int handle, struct ld_plugin_input_file *file);
+
+  // Release an input file.
+  ld_plugin_status
+  release_input_file(unsigned int handle);
+
   // Add a new input file.
   ld_plugin_status
   add_input_file(char *pathname);
@@ -257,6 +268,7 @@ class Plugin_manager
 
   const General_options& options_;
   Workqueue* workqueue_;
+  Task* task_;
   Input_objects* input_objects_;
   Symbol_table* symtab_;
   Layout* layout_;
@@ -275,7 +287,8 @@ class Pluginobj : public Object
 
   typedef std::vector<Symbol*> Symbols;
 
-  Pluginobj(const std::string& name, Input_file* input_file, off_t offset);
+  Pluginobj(const std::string& name, Input_file* input_file, off_t offset,
+            off_t filesize);
 
   // Fill in the symbol resolution status for the given plugin symbols.
   ld_plugin_status
@@ -299,6 +312,21 @@ class Pluginobj : public Object
   bool
   include_comdat_group(std::string comdat_key, Layout* layout);
 
+  // Return the filename.
+  const std::string&
+  filename() const
+  { return this->input_file()->filename(); }
+
+  // Return the file descriptor.
+  int
+  descriptor()
+  { return this->input_file()->file().descriptor(); }
+
+  // Return the size of the file or archive member.
+  off_t
+  filesize()
+  { return this->filesize_; }
+
  protected:
   // Return TRUE if this is an object claimed by a plugin.
   virtual Pluginobj*
@@ -320,6 +348,8 @@ class Pluginobj : public Object
   Symbols symbols_;
 
  private:
+  // Size of the file (or archive member).
+  off_t filesize_;
   // Map a comdat key symbol to a boolean indicating whether the comdat
   // group in this object with that key should be kept.
   typedef Unordered_map<std::string, bool> Comdat_map;
@@ -333,7 +363,7 @@ class Sized_pluginobj : public Pluginobj
 {
  public:
   Sized_pluginobj(const std::string& name, Input_file* input_file,
-                  off_t offset);
+                  off_t offset, off_t filesize);
 
   // Read the symbols.
   void
