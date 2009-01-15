@@ -317,36 +317,17 @@ bfd_elf_add_obj_attr_string (bfd *abfd, int vendor, int tag, const char *s)
   attr->s = _bfd_elf_attr_strdup (abfd, s);
 }
 
-/* Add a Tag_compatibility object attribute.  */
+/* Add a int+string object attribute.  */
 void
-bfd_elf_add_obj_attr_compat (bfd *abfd, int vendor, unsigned int i,
-			     const char *s)
+bfd_elf_add_obj_attr_int_string (bfd *abfd, int vendor, int tag,
+				 unsigned int i, const char *s)
 {
-  obj_attribute_list *list;
-  obj_attribute_list *p;
-  obj_attribute_list **lastp;
+  obj_attribute *attr;
 
-  list = (obj_attribute_list *)
-    bfd_alloc (abfd, sizeof (obj_attribute_list));
-  memset (list, 0, sizeof (obj_attribute_list));
-  list->tag = Tag_compatibility;
-  list->attr.type = 3;
-  list->attr.i = i;
-  list->attr.s = _bfd_elf_attr_strdup (abfd, s);
-
-  lastp = &elf_other_obj_attributes (abfd)[vendor];
-  for (p = *lastp; p; p = p->next)
-    {
-      int cmp;
-      if (p->tag != Tag_compatibility)
-	break;
-      cmp = strcmp(s, p->attr.s);
-      if (cmp < 0 || (cmp == 0 && i < p->attr.i))
-	break;
-      lastp = &p->next;
-    }
-  list->next = *lastp;
-  *lastp = list;
+  attr = elf_new_obj_attr (abfd, vendor, tag);
+  attr->type = 3;
+  attr->i = i;
+  attr->s = _bfd_elf_attr_strdup (abfd, s);
 }
 
 /* Copy the object attributes from IBFD to OBFD.  */
@@ -388,8 +369,8 @@ _bfd_elf_copy_obj_attributes (bfd *ibfd, bfd *obfd)
 					   in_attr->s);
 	      break;
 	    case 3:
-	      bfd_elf_add_obj_attr_compat (obfd, vendor, in_attr->i,
-					   in_attr->s);
+	      bfd_elf_add_obj_attr_int_string (obfd, vendor, list->tag,
+					       in_attr->i, in_attr->s);
 	      break;
 	    default:
 	      abort ();
@@ -511,8 +492,8 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 			case 3:
 			  val = read_unsigned_leb128 (abfd, p, &n);
 			  p += n;
-			  bfd_elf_add_obj_attr_compat (abfd, vendor, val,
-						       (char *)p);
+			  bfd_elf_add_obj_attr_int_string (abfd, vendor, tag,
+							   val, (char *)p);
 			  p += strlen ((char *)p) + 1;
 			  break;
 			case 2:
@@ -561,67 +542,35 @@ _bfd_elf_merge_object_attributes (bfd *ibfd, bfd *obfd)
 {
   obj_attribute *in_attr;
   obj_attribute *out_attr;
-  obj_attribute_list *in_list;
-  obj_attribute_list *out_list;
   int vendor;
 
   /* The only common attribute is currently Tag_compatibility,
      accepted in both processor and "gnu" sections.  */
   for (vendor = OBJ_ATTR_FIRST; vendor <= OBJ_ATTR_LAST; vendor++)
     {
-      in_list = elf_other_obj_attributes (ibfd)[vendor];
-      out_list = elf_other_obj_attributes (ibfd)[vendor];
-      while (in_list && in_list->tag == Tag_compatibility)
+      /* Handle Tag_compatibility.  The tags are only compatible if the flags
+	 are identical and, if the flags are '1', the strings are identical.
+	 If the flags are non-zero, then we can only use the string "gnu".  */
+      in_attr = &elf_known_obj_attributes (ibfd)[vendor][Tag_compatibility];
+      out_attr = &elf_known_obj_attributes (obfd)[vendor][Tag_compatibility];
+
+      if (in_attr->i > 0 && strcmp (in_attr->s, "gnu") != 0)
 	{
-	  in_attr = &in_list->attr;
-	  if (in_attr->i == 0)
-	    continue;
-	  if (in_attr->i == 1 && strcmp (in_attr->s, "gnu") != 0)
-	    {
-	      _bfd_error_handler
+	  _bfd_error_handler
 		(_("ERROR: %B: Must be processed by '%s' toolchain"),
 		 ibfd, in_attr->s);
-	      return FALSE;
-	    }
-	  if (!out_list || out_list->tag != Tag_compatibility
-	      || strcmp (in_attr->s, out_list->attr.s) != 0)
-	    {
-	      /* Add this compatibility tag to the output.  */
-	      bfd_elf_add_proc_attr_compat (obfd, in_attr->i, in_attr->s);
-	      continue;
-	    }
-	  out_attr = &out_list->attr;
-	  /* Check all the input tags with the same identifier.  */
-	  for (;;)
-	    {
-	      if (out_list->tag != Tag_compatibility
-		  || in_attr->i != out_attr->i
-		  || strcmp (in_attr->s, out_attr->s) != 0)
-		{
-		  _bfd_error_handler
-		    (_("ERROR: %B: Incompatible object tag '%s':%d"),
-		     ibfd, in_attr->s, in_attr->i);
-		  return FALSE;
-		}
-	      in_list = in_list->next;
-	      if (in_list->tag != Tag_compatibility
-		  || strcmp (in_attr->s, in_list->attr.s) != 0)
-		break;
-	      in_attr = &in_list->attr;
-	      out_list = out_list->next;
-	      if (out_list)
-		out_attr = &out_list->attr;
-	    }
+	  return FALSE;
+	}
 
-	  /* Check the output doesn't have extra tags with this identifier.  */
-	  if (out_list && out_list->tag == Tag_compatibility
-	      && strcmp (in_attr->s, out_list->attr.s) == 0)
-	    {
-	      _bfd_error_handler
-		(_("ERROR: %B: Incompatible object tag '%s':%d"),
-		 ibfd, in_attr->s, out_list->attr.i);
-	      return FALSE;
-	    }
+      if (in_attr->i != out_attr->i
+	  || (in_attr->i != 0 && strcmp (in_attr->s, out_attr->s) != 0))
+	{
+	  _bfd_error_handler (_("ERROR: %B: Object tag '%d, %s' is "
+				"incompatible with tag '%d, %s'"),
+			      ibfd,
+			      in_attr->i, in_attr->s ? in_attr->s : "",
+			      out_attr->i, out_attr->s ? out_attr->s : "");
+	  return FALSE;
 	}
     }
 

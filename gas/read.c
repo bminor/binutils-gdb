@@ -2121,7 +2121,7 @@ s_vendor_attribute (int vendor)
   switch (type)
     {
     case 3:
-      bfd_elf_add_obj_attr_compat (stdoutput, vendor, i, s);
+      bfd_elf_add_obj_attr_int_string (stdoutput, vendor, tag, i, s);
       break;
     case 2:
       bfd_elf_add_obj_attr_string (stdoutput, vendor, tag, s);

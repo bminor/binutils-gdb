@@ -1,3 +1,23 @@
+2009-01-15  Andrew Stubbs  <ams@codesourcery.com>
+
+	* elf-attrs.c (bfd_elf_add_obj_attr_compat): Rename to
+	bfd_elf_add_obj_attr_int_string.
+	Read Tag_compatibility from its new location in the attribute array,
+	rather than the attribute list.
+	(_bfd_elf_copy_obj_attributes): bfd_elf_add_obj_attr_compat ->
+	bfd_elf_add_obj_attr_int_string.
+	(_bfd_elf_parse_attributes): Likewise.
+	(_bfd_elf_merge_object_attributes): There's now only one
+	Tag_compatibility, and it's in the array, not the list.
+	* elf-bfd.h (NUM_KNOWN_OBJ_ATTRIBUTES): Set to 33 to include
+	Tag_compatibility.
+	(bfd_elf_add_obj_attr_compat): Rename to
+	bfd_elf_add_obj_attr_int_string.
+	(bfd_elf_add_proc_attr_compat): Rename to
+	bfd_elf_add_proc_attr_int_string.
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Explicitly don't handle
+	Tag_compatibility.
+
 2009-01-15  Douglas B Rupp  <rupp@gnat.com>
 
 	* Makefile.am (BFD32_BACKENDS): Add new object vmsutil.lo

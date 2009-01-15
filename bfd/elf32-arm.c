@@ -8375,6 +8375,10 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	    }
 	  break;
 
+	case Tag_compatibility:
+	  /* Merged in target-independent code.  */
+	  break;
+
 	default: /* All known attributes should be explicitly covered.   */
 	  abort ();
 	}
@@ -8402,12 +8406,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 
   /* Check for any attributes not known on ARM.  */
   in_list = elf_other_obj_attributes_proc (ibfd);
-  while (in_list && in_list->tag == Tag_compatibility)
-    in_list = in_list->next;
-
   out_list = elf_other_obj_attributes_proc (obfd);
-  while (out_list && out_list->tag == Tag_compatibility)
-    out_list = out_list->next;
 
   for (; in_list != NULL; )
     {
