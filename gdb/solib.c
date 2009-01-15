@@ -107,11 +107,11 @@ The search path for loading non-absolute shared library symbol files is %s.\n"),
 
    GLOBAL FUNCTION
 
-   solib_bfd_open -- Find a shared library file and open BFD for it.
+   solib_find -- Find a shared library file.
 
    SYNOPSIS
 
-   struct bfd *solib_open (char *in_pathname);
+   char *solib_find (char *in_pathname, int *fd);
 
    DESCRIPTION
 
@@ -138,17 +138,17 @@ The search path for loading non-absolute shared library symbol files is %s.\n"),
 
    RETURNS
 
-   BFD file handle for opened solib; throws error on failure.  */
+   Full pathname of the shared library file, or NULL if not found.
+   (The pathname is malloc'ed; it needs to be freed by the caller.)
+   *FD is set to either -1 or an open file handle for the library.  */
 
-bfd *
-solib_bfd_open (char *in_pathname)
+char *
+solib_find (char *in_pathname, int *fd)
 {
   struct target_so_ops *ops = solib_ops (target_gdbarch);
   int found_file = -1;
   char *temp_pathname = NULL;
-  char *p = in_pathname;
   int gdb_sysroot_is_empty;
-  bfd *abfd;
 
   gdb_sysroot_is_empty = (gdb_sysroot == NULL || *gdb_sysroot == 0);
 
@@ -173,24 +173,8 @@ solib_bfd_open (char *in_pathname)
   /* Handle remote files.  */
   if (remote_filename_p (temp_pathname))
     {
-      temp_pathname = xstrdup (temp_pathname);
-      abfd = remote_bfd_open (temp_pathname, gnutarget);
-      if (!abfd)
-	{
-	  make_cleanup (xfree, temp_pathname);
-	  error (_("Could not open `%s' as an executable file: %s"),
-		 temp_pathname, bfd_errmsg (bfd_get_error ()));
-	}
-
-      if (!bfd_check_format (abfd, bfd_object))
-	{
-	  bfd_close (abfd);
-	  make_cleanup (xfree, temp_pathname);
-	  error (_("`%s': not in executable format: %s"),
-		 temp_pathname, bfd_errmsg (bfd_get_error ()));
-	}
-
-      return abfd;
+      *fd = -1;
+      return xstrdup (temp_pathname);
     }
 
   /* Now see if we can open it.  */
@@ -253,29 +237,79 @@ solib_bfd_open (char *in_pathname)
 			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY, 0,
 			&temp_pathname);
 
-  /* Done.  If still not found, error.  */
-  if (found_file < 0)
-    perror_with_name (in_pathname);
+  *fd = found_file;
+  return temp_pathname;
+}
 
-  /* Leave temp_pathname allocated.  abfd->name will point to it.  */
-  abfd = bfd_fopen (temp_pathname, gnutarget, FOPEN_RB, found_file);
-  if (!abfd)
+/* Open and return a BFD for the shared library PATHNAME.  If FD is not -1,
+   it is used as file handle to open the file.  Throws an error if the file
+   could not be opened.  Handles both local and remote file access.
+
+   PATHNAME must be malloc'ed by the caller.  If successful, the new BFD's
+   name will point to it.  If unsuccessful, PATHNAME will be freed and the
+   FD will be closed (unless FD was -1).  */
+
+bfd *
+solib_bfd_fopen (char *pathname, int fd)
+{
+  bfd *abfd;
+
+  if (remote_filename_p (pathname))
     {
-      close (found_file);
-      make_cleanup (xfree, temp_pathname);
-      error (_("Could not open `%s' as an executable file: %s"),
-	     temp_pathname, bfd_errmsg (bfd_get_error ()));
+      gdb_assert (fd == -1);
+      abfd = remote_bfd_open (pathname, gnutarget);
+    }
+  else
+    {
+      abfd = bfd_fopen (pathname, gnutarget, FOPEN_RB, fd);
+
+      if (abfd)
+	bfd_set_cacheable (abfd, 1);
+      else if (fd != -1)
+	close (fd);
     }
 
+  if (!abfd)
+    {
+      make_cleanup (xfree, pathname);
+      error (_("Could not open `%s' as an executable file: %s"),
+	     pathname, bfd_errmsg (bfd_get_error ()));
+    }
+
+  return abfd;
+}
+
+/* Find shared library PATHNAME and open a BFD for it.  */
+
+bfd *
+solib_bfd_open (char *pathname)
+{
+  struct target_so_ops *ops = solib_ops (target_gdbarch);
+  char *found_pathname;
+  int found_file;
+  bfd *abfd;
+
+  /* Use target-specific override if present.  */
+  if (ops->bfd_open)
+    return ops->bfd_open (pathname);
+
+  /* Search for shared library file.  */
+  found_pathname = solib_find (pathname, &found_file);
+  if (found_pathname == NULL)
+    perror_with_name (pathname);
+
+  /* Open bfd for shared library.  */
+  abfd = solib_bfd_fopen (found_pathname, found_file);
+
+  /* Check bfd format.  */
   if (!bfd_check_format (abfd, bfd_object))
     {
       bfd_close (abfd);
-      make_cleanup (xfree, temp_pathname);
+      make_cleanup (xfree, found_pathname);
       error (_("`%s': not in executable format: %s"),
-	     temp_pathname, bfd_errmsg (bfd_get_error ()));
+	     found_pathname, bfd_errmsg (bfd_get_error ()));
     }
 
-  bfd_set_cacheable (abfd, 1);
   return abfd;
 }
 
@@ -432,8 +466,8 @@ symbol_add_stub (void *arg)
   sap = build_section_addr_info_from_section_table (so->sections,
                                                     so->sections_end);
 
-  so->objfile = symbol_file_add (so->so_name, so->from_tty,
-				 sap, 0, OBJF_SHARED);
+  so->objfile = symbol_file_add_from_bfd (so->abfd, so->from_tty,
+					  sap, 0, OBJF_SHARED | OBJF_KEEPBFD);
   free_section_addr_info (sap);
 
   return (1);

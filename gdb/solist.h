@@ -103,6 +103,9 @@ struct target_so_ops
        the run time loader */
     int (*in_dynsym_resolve_code) (CORE_ADDR pc);
 
+    /* Find and open shared library binary file.  */
+    bfd *(*bfd_open) (char *pathname);
+
     /* Extra hook for finding and opening a solib.  
        Convenience function for remote debuggers finding host libs.  */
     int (*find_and_open_solib) (char *soname,
@@ -125,6 +128,12 @@ void free_so (struct so_list *so);
 
 /* Return address of first so_list entry in master shared object list.  */
 struct so_list *master_so_list (void);
+
+/* Find shared library binary file.  */
+extern char *solib_find (char *in_pathname, int *fd);
+
+/* Open BFD for shared library file.  */
+extern bfd *solib_bfd_fopen (char *pathname, int fd);
 
 /* Find solib binary file and open it.  */
 extern bfd *solib_bfd_open (char *in_pathname);

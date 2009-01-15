@@ -422,9 +422,9 @@ free_objfile (struct objfile *objfile)
       (*objfile->sf->sym_finish) (objfile);
     }
 
-  /* We always close the bfd. */
+  /* We always close the bfd, unless the OBJF_KEEPBFD flag is set.  */
 
-  if (objfile->obfd != NULL)
+  if (objfile->obfd != NULL && !(objfile->flags & OBJF_KEEPBFD))
     {
       char *name = bfd_get_filename (objfile->obfd);
       if (!bfd_close (objfile->obfd))

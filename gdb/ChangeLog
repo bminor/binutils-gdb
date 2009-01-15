@@ -1,4 +1,21 @@
 2009-01-15  Ulrich Weigand  <uweigand@de.ibm.com>
+	    Tristan Gingold  <gingold@adacore.com>
+
+	* solist.h (struct target_so_ops): New member bfd_open.
+	(solib_find): Add prototype.
+	(solib_bfd_fopen): Add prototype.
+	* solib.c (solib_find, solib_bfd_fopen): New functions, extracted
+	from solib_bfd_open.
+	(solib_bfd_open): Use ops->bfd_open override if present.  Call
+	solib_find and solib_bfd_open otherwise.
+
+	* objfiles.h (OBJF_KEEPBFD): New define.
+	* objfiles.c (free_objfile): Do not close BFD if OBJF_KEEPBFD
+	objfile flag is set.
+	* solib.c (symbol_add_stub): Do not allocate second BFD for
+	shared library; use OBJF_KEEPBFD flag on solib objfile.
+
+2009-01-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* frame.c (get_frame_arch): Abort if called with NULL this_frame.
 
