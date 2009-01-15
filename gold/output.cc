@@ -3493,6 +3493,86 @@ Output_section::add_input_section<64, true>(
 
 #ifdef HAVE_TARGET_32_LITTLE
 template
+class Output_reloc<elfcpp::SHT_REL, false, 32, false>;
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+class Output_reloc<elfcpp::SHT_REL, false, 32, true>;
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+class Output_reloc<elfcpp::SHT_REL, false, 64, false>;
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+class Output_reloc<elfcpp::SHT_REL, false, 64, true>;
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+class Output_reloc<elfcpp::SHT_REL, true, 32, false>;
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+class Output_reloc<elfcpp::SHT_REL, true, 32, true>;
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+class Output_reloc<elfcpp::SHT_REL, true, 64, false>;
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+class Output_reloc<elfcpp::SHT_REL, true, 64, true>;
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+class Output_reloc<elfcpp::SHT_RELA, false, 32, false>;
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+class Output_reloc<elfcpp::SHT_RELA, false, 32, true>;
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+class Output_reloc<elfcpp::SHT_RELA, false, 64, false>;
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+class Output_reloc<elfcpp::SHT_RELA, false, 64, true>;
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+class Output_reloc<elfcpp::SHT_RELA, true, 32, false>;
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+class Output_reloc<elfcpp::SHT_RELA, true, 32, true>;
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+class Output_reloc<elfcpp::SHT_RELA, true, 64, false>;
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+class Output_reloc<elfcpp::SHT_RELA, true, 64, true>;
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
 class Output_data_reloc<elfcpp::SHT_REL, false, 32, false>;
 #endif
 

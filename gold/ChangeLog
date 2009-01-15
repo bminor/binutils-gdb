@@ -1,5 +1,9 @@
 2009-01-14  Cary Coutant  <ccoutant@google.com>
 
+	* output.cc  (Output_reloc): Add explicit instantiations.
+
+2009-01-14  Cary Coutant  <ccoutant@google.com>
+
 	* archive.cc (Archive::get_elf_object_for_member): Remove call
 	to File_read::claim_for_plugin.
 	* descriptors.cc (Descriptors::open): Remove reference to
