@@ -131,7 +131,7 @@ strerror (DWORD error)
    Then return to command level.  */
 
 static void
-perror_with_name (char *string)
+perror_with_name (const char *string)
 {
 #ifndef STDC_HEADERS
   extern int errno;

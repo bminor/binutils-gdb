@@ -1,3 +1,9 @@
+2009-01-15  Doug Evans  <dje@google.com>
+
+	* gdbserver/gdbreplay.c (perror_with_name): Make arg const char *.
+	* gdbserver/server.h (target_signal_to_name): Make return type
+	const char *.
+
 2009-01-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* win32-low.c (get_child_debug_event): Issue a final DBG_CONTINUE

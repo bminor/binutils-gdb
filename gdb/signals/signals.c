@@ -50,9 +50,9 @@ struct gdbarch;
 /* This table must match in order and size the signals in enum target_signal
    in src/include/gdb/signals.h.  */
 /* *INDENT-OFF* */
-static struct {
-  char *name;
-  char *string;
+static const struct {
+  const char *name;
+  const char *string;
   } signals [] =
 {
   {"0", "Signal 0"},
@@ -219,7 +219,7 @@ static struct {
 
 
 /* Return the string for a signal.  */
-char *
+const char *
 target_signal_to_string (enum target_signal sig)
 {
   if ((int) sig >= TARGET_SIGNAL_FIRST && (int) sig <= TARGET_SIGNAL_LAST)
@@ -229,7 +229,7 @@ target_signal_to_string (enum target_signal sig)
 }
 
 /* Return the name for a signal.  */
-char *
+const char *
 target_signal_to_name (enum target_signal sig)
 {
   if ((int) sig >= TARGET_SIGNAL_FIRST && (int) sig <= TARGET_SIGNAL_LAST
@@ -243,7 +243,7 @@ target_signal_to_name (enum target_signal sig)
 
 /* Given a name, return its signal.  */
 enum target_signal
-target_signal_from_name (char *name)
+target_signal_from_name (const char *name)
 {
   enum target_signal sig;
 

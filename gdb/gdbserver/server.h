@@ -269,14 +269,14 @@ void buffer_xml_printf (struct buffer *buffer, const char *format, ...)
 enum target_signal target_signal_from_host (int hostsig);
 int target_signal_to_host_p (enum target_signal oursig);
 int target_signal_to_host (enum target_signal oursig);
-char *target_signal_to_name (enum target_signal);
+const char *target_signal_to_name (enum target_signal);
 
 /* Functions from utils.c */
 
 void *xmalloc (size_t) ATTR_MALLOC;
 void *xcalloc (size_t, size_t) ATTR_MALLOC;
 char *xstrdup (const char *) ATTR_MALLOC;
-void perror_with_name (char *string);
+void perror_with_name (const char *string);
 void error (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void fatal (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void warning (const char *string,...) ATTR_FORMAT (printf, 1, 2);

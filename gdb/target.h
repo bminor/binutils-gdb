@@ -174,13 +174,13 @@ enum inferior_event_type
   };
 
 /* Return the string for a signal.  */
-extern char *target_signal_to_string (enum target_signal);
+extern const char *target_signal_to_string (enum target_signal);
 
 /* Return the name (SIGHUP, etc.) for a signal.  */
-extern char *target_signal_to_name (enum target_signal);
+extern const char *target_signal_to_name (enum target_signal);
 
 /* Given a name (SIGHUP, etc.), return its signal.  */
-enum target_signal target_signal_from_name (char *);
+enum target_signal target_signal_from_name (const char *);
 
 /* Target objects which can be transfered using target_read,
    target_write, et cetera.  */

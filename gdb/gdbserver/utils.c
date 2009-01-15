@@ -92,7 +92,7 @@ xstrdup (const char *s)
    Then return to command level.  */
 
 void
-perror_with_name (char *string)
+perror_with_name (const char *string)
 {
   const char *err;
   char *combined;

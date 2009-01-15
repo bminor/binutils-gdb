@@ -1,3 +1,17 @@
+2009-01-15  Doug Evans  <dje@google.com>
+
+	* target.h (target_signal_to_string): Make return type const char *.
+	(target_signal_to_name): Ditto.
+	(target_signal_from_name): Make arg const char *.
+	* thread-db.c (thread_db_err_str): Make return type const char *.
+	* utils.c (perror_with_name): Make arg const char *.
+	* infrun.c (sig_print_info): Update.
+
+	* signals/signals.c (signals): Make array and struct members const.
+	(target_signal_to_string): Make return type const char *.
+	(target_signal_to_name): Ditto.
+	(target_signal_from_name): Make arg const char *.
+
 2009-01-15  Ulrich Weigand  <uweigand@de.ibm.com>
 	    Tristan Gingold  <gingold@adacore.com>
 

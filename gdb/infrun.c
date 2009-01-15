@@ -4464,7 +4464,7 @@ Signal        Stop\tPrint\tPass to program\tDescription\n"));
 static void
 sig_print_info (enum target_signal oursig)
 {
-  char *name = target_signal_to_name (oursig);
+  const char *name = target_signal_to_name (oursig);
   int name_padding = 13 - strlen (name);
 
   if (name_padding <= 0)

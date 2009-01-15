@@ -45,7 +45,7 @@ static td_thragent_t *thread_agent;
 static int find_one_thread (int);
 static int find_new_threads_callback (const td_thrhandle_t *th_p, void *data);
 
-static char *
+static const char *
 thread_db_err_str (td_err_e err)
 {
   static char buf[64];
