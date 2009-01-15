@@ -31,7 +31,9 @@ int    md_parse_option (int, char *);
 void   md_show_usage (FILE *);
 void   md_assemble (char *);
 void   md_begin (void);
+#ifndef md_number_to_chars
 void   md_number_to_chars (char *, valueT, int);
+#endif
 void   md_apply_fix (fixS *, valueT *, segT);
 
 #ifndef WORKING_DOT_WORD

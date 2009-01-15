@@ -2778,14 +2778,17 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
       asection *s;
       unsigned int idx;
 
-      loc -= 4;
       s = elt;
-      if (!gas)
-	s = s->output_section;
-      idx = 0;
-      if (s != NULL)
-	idx = elf_section_data (s)->this_idx;
-      H_PUT_32 (abfd, idx, loc);
+      if (! elf_discarded_section (s))
+	{
+	  loc -= 4;
+	  if (!gas)
+	    s = s->output_section;
+	  idx = 0;
+	  if (s != NULL)
+	    idx = elf_section_data (s)->this_idx;
+	  H_PUT_32 (abfd, idx, loc);
+	}
       elt = elf_next_in_group (elt);
       if (elt == first)
 	break;

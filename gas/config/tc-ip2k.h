@@ -59,7 +59,7 @@ extern int ip2k_force_relocation (struct fix *);
 #define tc_gen_reloc gas_cgen_tc_gen_reloc
 
 #define md_elf_section_flags ip2k_elf_section_flags
-extern int ip2k_elf_section_flags (int, int, int);
+extern int ip2k_elf_section_flags (flagword, bfd_vma, int);
 
 #define md_operand(x) gas_cgen_md_operand (x)
 extern void gas_cgen_md_operand (expressionS *);

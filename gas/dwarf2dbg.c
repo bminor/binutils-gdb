@@ -76,6 +76,18 @@
 # define DWARF2_ADDR_SIZE(bfd) (bfd_arch_bits_per_address (bfd) / 8)
 #endif
 
+#ifndef DWARF2_FILE_NAME
+#define DWARF2_FILE_NAME(FILENAME, DIRNAME) FILENAME
+#endif
+
+#ifndef DWARF2_FILE_TIME_NAME
+#define DWARF2_FILE_TIME_NAME(FILENAME,DIRNAME) 0
+#endif
+
+#ifndef DWARF2_FILE_SIZE_NAME
+#define DWARF2_FILE_SIZE_NAME(FILENAME,DIRNAME) 0
+#endif
+
 #include "subsegs.h"
 
 #include "elf/dwarf2.h"
@@ -434,7 +446,9 @@ get_filenum (const char *filename, unsigned int num)
   dir = 0;
   if (dir_len)
     {
+#ifndef DWARF2_DIR_SHOULD_END_WITH_SEPARATOR
       --dir_len;
+#endif
       for (dir = 1; dir < dirs_in_use; ++dir)
 	if (strncmp (filename, dirs[dir], dir_len) == 0
 	    && dirs[dir][dir_len] == '\0')
@@ -1281,6 +1295,8 @@ out_file_list (void)
 
   for (i = 1; i < files_in_use; ++i)
     {
+      const char *fullfilename;
+
       if (files[i].filename == NULL)
 	{
 	  as_bad (_("unassigned file number %ld"), (long) i);
@@ -1289,13 +1305,19 @@ out_file_list (void)
 	  continue;
 	}
 
-      size = strlen (files[i].filename) + 1;
+      fullfilename = DWARF2_FILE_NAME (files[i].filename,
+				       files[i].dir ? dirs [files [i].dir] : "");
+      size = strlen (fullfilename) + 1;
       cp = frag_more (size);
-      memcpy (cp, files[i].filename, size);
+      memcpy (cp, fullfilename, size);
 
       out_uleb128 (files[i].dir);	/* directory number */
-      out_uleb128 (0);			/* last modification timestamp */
-      out_uleb128 (0);			/* filesize */
+      /* Output the last modification timestamp.  */
+      out_uleb128 (DWARF2_FILE_TIME_NAME (files[i].filename,
+				          files[i].dir ? dirs [files [i].dir] : ""));
+      /* Output the filesize.  */
+      out_uleb128 (DWARF2_FILE_SIZE_NAME (files[i].filename,
+				          files[i].dir ? dirs [files [i].dir] : ""));
     }
 
   /* Terminate filename list.  */

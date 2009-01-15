@@ -1,6 +1,6 @@
 /* ELF object file format
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -524,7 +524,7 @@ get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 void
 obj_elf_change_section (const char *name,
 			int type,
-			int attr,
+			bfd_vma attr,
 			int entsize,
 			const char *group_name,
 			int linkonce,
@@ -720,10 +720,10 @@ obj_elf_change_section (const char *name,
 #endif
 }
 
-static int
+static bfd_vma
 obj_elf_parse_section_letters (char *str, size_t len)
 {
-  int attr = 0;
+  bfd_vma attr = 0;
 
   while (len > 0)
     {
@@ -766,8 +766,8 @@ obj_elf_parse_section_letters (char *str, size_t len)
 	  {
 	    char *bad_msg = _("unrecognized .section attribute: want a,w,x,M,S,G,T");
 #ifdef md_elf_section_letter
-	    int md_attr = md_elf_section_letter (*str, &bad_msg);
-	    if (md_attr >= 0)
+	    bfd_vma md_attr = md_elf_section_letter (*str, &bad_msg);
+	    if (md_attr > 0)
 	      attr |= md_attr;
 	    else
 #endif
@@ -810,7 +810,7 @@ obj_elf_section_type (char *str, size_t len, bfd_boolean warn)
   return 0;
 }
 
-static int
+static bfd_vma
 obj_elf_section_word (char *str, size_t len, int *type)
 {
   int ret;
@@ -826,8 +826,8 @@ obj_elf_section_word (char *str, size_t len, int *type)
 
 #ifdef md_elf_section_word
   {
-    int md_attr = md_elf_section_word (str, len);
-    if (md_attr >= 0)
+    bfd_vma md_attr = md_elf_section_word (str, len);
+    if (md_attr > 0)
       return md_attr;
   }
 #endif
@@ -888,7 +888,8 @@ void
 obj_elf_section (int push)
 {
   char *name, *group_name, *beg;
-  int type, attr, dummy;
+  int type, dummy;
+  bfd_vma attr;
   int entsize;
   int linkonce;
   subsegT new_subsection = -1;

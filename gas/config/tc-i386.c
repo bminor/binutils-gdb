@@ -10104,7 +10104,7 @@ tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 /* For ELF on x86-64, add support for SHF_X86_64_LARGE.  */
 
-int
+bfd_vma
 x86_64_section_letter (int letter, char **ptr_msg)
 {
   if (flag_code == CODE_64BIT)
@@ -10119,7 +10119,7 @@ x86_64_section_letter (int letter, char **ptr_msg)
   return -1;
 }
 
-int
+bfd_vma
 x86_64_section_word (char *str, size_t len)
 {
   if (len == 5 && flag_code == CODE_64BIT && CONST_STRNEQ (str, "large"))

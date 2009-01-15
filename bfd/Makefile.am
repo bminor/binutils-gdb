@@ -371,6 +371,7 @@ BFD32_BACKENDS = \
 	vms-hdr.lo \
 	vms-misc.lo \
 	vms-tir.lo \
+	vmsutil.lo \
 	xcofflink.lo \
 	xsym.lo \
 	xtensa-isa.lo \
@@ -552,6 +553,7 @@ BFD32_BACKENDS_CFILES = \
 	vms-hdr.c \
 	vms-misc.c \
 	vms-tir.c \
+	vmsutil.c \
 	xcofflink.c \
 	xsym.c \
 	xtensa-isa.c \
@@ -1833,6 +1835,7 @@ vms-misc.lo: vms-misc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h vms.h
 vms-tir.lo: vms-tir.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h vms.h
+vmsutil.lo: vmsutil.c vmsutil.h $(INCDIR)/ansidecl.h
 xcofflink.lo: xcofflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h \
   libcoff.h libxcoff.h

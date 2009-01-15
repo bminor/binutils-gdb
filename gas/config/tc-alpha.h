@@ -121,9 +121,9 @@ extern void alpha_frob_file_before_adjust (void);
 
 #ifdef OBJ_ELF
 #define md_elf_section_letter		alpha_elf_section_letter
-extern int alpha_elf_section_letter (int, char **);
+extern bfd_vma alpha_elf_section_letter (int, char **);
 #define md_elf_section_flags		alpha_elf_section_flags
-extern flagword alpha_elf_section_flags (flagword, int, int);
+extern flagword alpha_elf_section_flags (flagword, bfd_vma, int);
 #endif
 
 /* Whether to add support for explicit !relocation_op!sequence_number.  At the

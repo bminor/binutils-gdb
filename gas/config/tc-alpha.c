@@ -4780,7 +4780,7 @@ select_gp_value (void)
 #ifdef OBJ_ELF
 /* Map 's' to SHF_ALPHA_GPREL.  */
 
-int
+bfd_vma
 alpha_elf_section_letter (int letter, char **ptr_msg)
 {
   if (letter == 's')
@@ -4793,7 +4793,7 @@ alpha_elf_section_letter (int letter, char **ptr_msg)
 /* Map SHF_ALPHA_GPREL to SEC_SMALL_DATA.  */
 
 flagword
-alpha_elf_section_flags (flagword flags, int attr, int type ATTRIBUTE_UNUSED)
+alpha_elf_section_flags (flagword flags, bfd_vma attr, int type ATTRIBUTE_UNUSED)
 {
   if (attr & SHF_ALPHA_GPREL)
     flags |= SEC_SMALL_DATA;

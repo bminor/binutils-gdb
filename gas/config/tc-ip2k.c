@@ -411,8 +411,8 @@ ip2k_apply_fix (fixS *fixP, valueT *valueP, segT seg)
 }
 
 int
-ip2k_elf_section_flags (int flags,
-			int attr ATTRIBUTE_UNUSED,
+ip2k_elf_section_flags (flagword flags,
+			bfd_vma attr ATTRIBUTE_UNUSED,
 			int type ATTRIBUTE_UNUSED)
 {
   /* This is used to detect when the section changes to an executable section.

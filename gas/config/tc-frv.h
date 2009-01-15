@@ -46,6 +46,7 @@ extern void frv_tomcat_workaround (void);
 #define md_cleanup frv_tomcat_workaround
 
 #define md_number_to_chars frv_md_number_to_chars
+extern void frv_md_number_to_chars (char *, valueT, int);
 
 extern long frv_relax_frag (fragS *, long);
 #define md_relax_frag(segment, fragP, stretch) frv_relax_frag(fragP, stretch)

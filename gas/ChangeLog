@@ -1,3 +1,51 @@
+2009-01-15  Douglas B Rupp  <rupp@gnat.com>
+
+	* configure.tgt(ia64-*-*vms*): New target.
+	* dwarf2dbg.h (dwarf2_loc_mark_labels): Make extern.
+	* tc.h (md_number_to_chars): Declare iff undefined.
+	* config/obj-elf.c (obj_elf_change_section): Change type of arg
+	attr to bfd_vma.
+	(obj_elf_parse_section_letters): Return a bfd_vma. Change type of
+	variables attr, md_attr to bfd_vma.
+	(obj_elf_section_word): Likewise.
+	(obj_elf_section): Change type of variable attr to bfd_vma
+	* config/obj-elf.h (obj_elf_change_section): Change type of arg
+	attr to bfd_vma.
+	* config/tc-ia64.c (bfdver.h,time.h): Include.
+	(ia64_elf_section_letter): Now returns a bfd_vma.
+	Handle VMS specific attributes.
+	(ia64_elf_section_flags): Arg attr now a bfd_vma.
+	(ia64_init): Don't turn on dependency checking for VMS.
+	(ia64_target_format): Check for VMS flag bit.
+	(do_alias): Hande decc$ functions.
+	(get_vms_time): New function.
+	(ia64_vms_note): New function.
+	* config/tc-ia64.h (ia64_elf_section_letter): Now returns a bfd_vma.
+	(ia64_elf_section_flags): Arg attr now a bfd_vma.
+	(tc_init_after_args): Define for VMS.
+	* config/tc-alpha.c (alpha_elf_section_letter): Return a bfd_vma.
+	(alpha_elf_section_flags): Change type of arg attr to bfd_vma.
+	* config/tc-alpha.h: Likewise.
+	* config/tc-i386.c (x86_64_section_letter): Return a bfd_vma.
+	(x86_64_section_word): Return a bfd_vma.
+	* config/tc-i386.h: Likewise.
+	* config/tc-ip2k.c (ip2k_elf_section_flags): Change type of arg
+	attr to bfd_vma.
+	* config/tc-ip2k.h: Likewise.
+	* config/tc-mep.c (mep_elf_section_letter): Return a bfd_vma.
+	(mep_elf_section_flags): Change type of arg attr to bfd_vma.
+	* config/tc-mep.h: Likewise.
+	* config/tc-ppc.c  (ppc_section_letter): Return a bfd_vma.
+	(ppc_section_word): Return a bfd_vma.
+	(ppc_section_flags): Change type of arg attr to bfd_vma.
+	* config/tc-ppc.h: Likewise.
+	* config/tc-frv.h: Provide a prototype for frv_md_number_to_chars.
+	* config/te-vms.h (DWARF2_DIR_SHOULD_END_WITH_SEPARATOR,
+        DWAR2_FILE_TIME_NAME, DWARF2_FILE_SIZE_NAME, DWARF2_FILEN_NAME):
+        New file with new macros
+        * dwarf2dbg.c (get_filenum, out_file_list): Default and call new
+        macros.
+
 2009-01-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 9722

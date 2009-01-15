@@ -1,6 +1,6 @@
 /* IA-64 support for 64-bit ELF
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+   2009  Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -5618,6 +5618,267 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
     }
 }
 
+static bfd_boolean
+elfNN_vms_section_from_shdr (bfd *abfd,
+			     Elf_Internal_Shdr *hdr,
+			     const char *name,
+			     int shindex)
+{
+  asection *newsect;
+
+  switch (hdr->sh_type)
+    {
+    case SHT_IA_64_VMS_TRACE:
+    case SHT_IA_64_VMS_DEBUG:
+    case SHT_IA_64_VMS_DEBUG_STR:
+      break;
+
+    default:
+      return elfNN_ia64_section_from_shdr (abfd, hdr, name, shindex);
+    }
+
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
+    return FALSE;
+  newsect = hdr->bfd_section;
+
+  return TRUE;
+}
+
+static bfd_boolean
+elfNN_vms_object_p (bfd *abfd)
+{
+  Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
+  Elf_Internal_Phdr *i_phdr = elf_tdata (abfd)->phdr;
+  unsigned int i;
+  unsigned int num_text = 0;
+  unsigned int num_data = 0;
+  unsigned int num_rodata = 0;
+  char name[16];
+
+  if (!elfNN_ia64_object_p (abfd))
+    return FALSE;
+
+  for (i = 0; i < i_ehdrp->e_phnum; i++, i_phdr++)
+    {
+      /* Is there a section for this segment?  */
+      bfd_vma base_vma = i_phdr->p_vaddr;
+      bfd_vma limit_vma = base_vma + i_phdr->p_filesz;
+
+      if (i_phdr->p_type != PT_LOAD)
+	continue;
+
+    again:
+      while (base_vma < limit_vma)
+	{
+	  bfd_vma next_vma = limit_vma;
+	  asection *nsec;
+	  asection *sec;
+	  flagword flags;
+	  char *nname = NULL;
+
+	  /* Find a section covering base_vma.  */
+	  for (sec = abfd->sections; sec != NULL; sec = sec->next)
+	    {
+	      if ((sec->flags & (SEC_ALLOC | SEC_LOAD)) == 0)
+		continue;
+	      if (sec->vma <= base_vma && sec->vma + sec->size > base_vma)
+		{
+		  base_vma = sec->vma + sec->size;
+		  goto again;
+		}
+	      if (sec->vma < next_vma && sec->vma + sec->size >= base_vma)
+		next_vma = sec->vma;
+	    }
+
+	  /* No section covering [base_vma; next_vma).  Create a fake one.  */
+	  flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS;
+	  if (i_phdr->p_flags & PF_X)
+	    {
+	      flags |= SEC_CODE;
+	      if (num_text++ == 0)
+		nname = ".text";
+	      else
+		sprintf (name, ".text$%u", num_text);
+	    }
+	  else if ((i_phdr->p_flags & (PF_R | PF_W)) == PF_R)
+	    {
+	      flags |= SEC_READONLY;
+	      sprintf (name, ".rodata$%u", num_rodata++);
+	    }
+	  else
+	    {
+	      flags |= SEC_DATA;
+	      sprintf (name, ".data$%u", num_data++);
+	    }
+
+	  /* Allocate name.  */
+	  if (nname == NULL)
+	    {
+	      size_t name_len = strlen (name) + 1;
+	      nname = bfd_alloc (abfd, name_len);
+	      if (nname == NULL)
+		return FALSE;
+	      memcpy (nname, name, name_len);
+	    }
+
+	  /* Create and fill new section.  */
+	  nsec = bfd_make_section_anyway_with_flags (abfd, nname, flags);
+	  if (nsec == NULL)
+	    return FALSE;
+	  nsec->vma = base_vma;
+	  nsec->size = next_vma - base_vma;
+	  nsec->filepos = i_phdr->p_offset + (base_vma - i_phdr->p_vaddr);
+	  
+	  base_vma = next_vma;
+	}
+    }
+  return TRUE;
+}
+
+static void
+elfNN_vms_post_process_headers (bfd *abfd,
+				struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
+
+  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_OPENVMS;
+  i_ehdrp->e_ident[EI_ABIVERSION] = 2;
+}
+
+static bfd_boolean
+elfNN_vms_section_processing (bfd *abfd ATTRIBUTE_UNUSED,
+			      Elf_Internal_Shdr *hdr)
+{
+  if (hdr->bfd_section != NULL)
+    {
+      const char *name = bfd_get_section_name (abfd, hdr->bfd_section);
+
+      if (strcmp (name, ".text") == 0)
+	hdr->sh_flags |= SHF_IA_64_VMS_SHARED;
+      else if ((strcmp (name, ".debug") == 0)
+	    || (strcmp (name, ".debug_abbrev") == 0)
+	    || (strcmp (name, ".debug_aranges") == 0)
+	    || (strcmp (name, ".debug_frame") == 0)
+	    || (strcmp (name, ".debug_info") == 0)
+	    || (strcmp (name, ".debug_loc") == 0)
+	    || (strcmp (name, ".debug_macinfo") == 0)
+	    || (strcmp (name, ".debug_pubnames") == 0)
+	    || (strcmp (name, ".debug_pubtypes") == 0))
+	hdr->sh_type = SHT_IA_64_VMS_DEBUG;
+      else if ((strcmp (name, ".debug_line") == 0)
+	    || (strcmp (name, ".debug_ranges") == 0))
+	hdr->sh_type = SHT_IA_64_VMS_TRACE;
+      else if (strcmp (name, ".debug_str") == 0)
+	hdr->sh_type = SHT_IA_64_VMS_DEBUG_STR;
+      else if (strcmp (name, ".vms_display_name_info") == 0)
+	{
+	  int idx, symcount;
+	  asymbol **syms;
+	  struct elf_obj_tdata *t = elf_tdata (abfd);
+	  int buf[2];
+	  int demangler_sym_idx = -1;
+
+	  symcount = bfd_get_symcount (abfd);
+	  syms = bfd_get_outsymbols (abfd);
+	  for (idx = 0; idx < symcount; idx++)
+	    {
+	      asymbol *sym;
+	      sym = syms[idx];
+	      if ((sym->flags & (BSF_DEBUGGING | BSF_DYNAMIC))
+	          && strchr (sym->name, '@')
+		  && (strcmp (sym->section->name, BFD_ABS_SECTION_NAME) == 0))
+		{
+		  demangler_sym_idx = sym->udata.i;
+		  break;
+		}
+	    }
+
+	  hdr->sh_type = SHT_IA_64_VMS_DISPLAY_NAME_INFO;
+	  hdr->sh_entsize = 4;
+	  hdr->sh_addralign = 0;
+	  hdr->sh_link = t->symtab_section;
+
+	  /* Find symtab index of demangler routine and stuff it in
+	     the second long word of section data.  */
+
+	  if (demangler_sym_idx > -1)
+	    {
+	      bfd_seek (abfd, hdr->sh_offset, SEEK_SET);
+	      bfd_bread (buf, hdr->sh_size, abfd);
+	      buf [1] = demangler_sym_idx;
+	      bfd_seek (abfd, hdr->sh_offset, SEEK_SET);
+	      bfd_bwrite (buf, hdr->sh_size, abfd);
+	    }
+	}
+    }
+
+  return TRUE;
+}
+
+/* The final processing done just before writing out a VMS IA-64 ELF
+   object file.  */
+
+static void
+elfNN_vms_final_write_processing (bfd *abfd,
+				  bfd_boolean linker ATTRIBUTE_UNUSED)
+{
+  Elf_Internal_Shdr *hdr;
+  asection *s;
+  int unwind_info_sect_idx = 0;
+
+  for (s = abfd->sections; s; s = s->next)
+    {
+      hdr = &elf_section_data (s)->this_hdr;
+
+      if (strcmp (bfd_get_section_name (abfd, hdr->bfd_section),
+		  ".IA_64.unwind_info") == 0)
+	unwind_info_sect_idx = elf_section_data (s)->this_idx;
+
+      switch (hdr->sh_type)
+	{
+	case SHT_IA_64_UNWIND:
+	  /* VMS requires sh_info to point to the unwind info section.  */
+          hdr->sh_info = unwind_info_sect_idx;
+	  break;
+	}
+    }
+
+  if (! elf_flags_init (abfd))
+    {
+      unsigned long flags = 0;
+
+      if (abfd->xvec->byteorder == BFD_ENDIAN_BIG)
+	flags |= EF_IA_64_BE;
+      if (bfd_get_mach (abfd) == bfd_mach_ia64_elf64)
+	flags |= EF_IA_64_ABI64;
+
+      elf_elfheader(abfd)->e_flags = flags;
+      elf_flags_init (abfd) = TRUE;
+    }
+}
+
+static bfd_boolean
+elfNN_vms_close_and_cleanup (bfd *abfd)
+{
+  if (bfd_get_format (abfd) == bfd_object)
+    {
+      long isize, irsize;
+
+      if (elf_shstrtab (abfd) != NULL)
+	_bfd_elf_strtab_free (elf_shstrtab (abfd));
+
+      /* Pad to 8 byte boundary for IPF/VMS.  */
+      isize = bfd_get_size (abfd);
+      if ((irsize = isize/8*8) < isize)
+	{
+	  int ishort = (irsize + 8) - isize;
+	  bfd_seek (abfd, isize, SEEK_SET);
+	  bfd_bwrite (bfd_zmalloc (ishort), ishort, abfd);
+	}
+    }
+
+  return _bfd_generic_close_and_cleanup (abfd);
+}
 
 #define TARGET_LITTLE_SYM		bfd_elfNN_ia64_little_vec
 #define TARGET_LITTLE_NAME		"elfNN-ia64-little"
@@ -5750,4 +6011,45 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 
 #include "elfNN-target.h"
 
+/* VMS-specific vectors.  */
+
+#undef  TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM		bfd_elfNN_ia64_vms_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		"elfNN-ia64-vms"
+#undef  TARGET_BIG_SYM
+#undef  TARGET_BIG_NAME
+
+/* These are VMS specific functions.  */
+
+#undef  elf_backend_object_p
+#define elf_backend_object_p elfNN_vms_object_p
+
+#undef  elf_backend_section_from_shdr
+#define elf_backend_section_from_shdr elfNN_vms_section_from_shdr
+
+#undef  elf_backend_post_process_headers
+#define elf_backend_post_process_headers elfNN_vms_post_process_headers
+
+#undef  elf_backend_section_processing
+#define elf_backend_section_processing elfNN_vms_section_processing
+
+#undef  elf_backend_final_write_processing
+#define elf_backend_final_write_processing elfNN_vms_final_write_processing
+
+#undef  bfd_elfNN_close_and_cleanup
+#define bfd_elfNN_close_and_cleanup elfNN_vms_close_and_cleanup
+
+#undef  elf_backend_section_from_bfd_section
+
+#undef  elf_backend_symbol_processing
+
 #undef  elf_backend_want_p_paddr_set_to_zero
+
+#undef  ELF_MAXPAGESIZE
+#define ELF_MAXPAGESIZE			0x10000	/* 64KB */
+
+#undef  elfNN_bed
+#define elfNN_bed elfNN_ia64_vms_bed
+
+#include "elfNN-target.h"

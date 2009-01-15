@@ -1,3 +1,22 @@
+2009-01-15  Douglas B Rupp  <rupp@gnat.com>
+
+	* Makefile.am (BFD32_BACKENDS): Add new object vmsutil.lo
+	(BFD32_BACKENDS_CFILES): Add new file vmsutil.c
+	(vmsutil.lo): Add dependency rule.
+	* Makefile.in: Regenerate.
+	* config.bfd (ia64*-*-*vms*): Add case.
+	* configure.in (bfd_elf64_ia64_vms_vec): Add case.
+	* configure: Regenerate.
+	* vmsutil.c: New file.
+	* vmsutil.h: New file.
+	* elf-bfd.h (struct bfd_elf_special_section): Change type of
+	attr to bfd_vma.
+	* elfxx-ia64.c (elfNN_vms_post_process_headers,
+	elfNN_vms_section_processing, elfNN_vms_final_write_processing,
+	elfNN_vms_close_and_cleanup, elfNN_vms_section_from_shdr,
+	elfNN_vms_object_p): New functions
+	* targets.c (bfd_elf64_ia64_vms_vec): New target.
+
 2009-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/9727

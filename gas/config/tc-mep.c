@@ -1716,7 +1716,7 @@ mep_fix_adjustable (fixS *fixP)
   return 1;
 }
 
-int
+bfd_vma
 mep_elf_section_letter (int letter, char **ptrmsg)
 {
   if (letter == 'v')
@@ -1727,7 +1727,7 @@ mep_elf_section_letter (int letter, char **ptrmsg)
 }
 
 flagword
-mep_elf_section_flags (flagword flags, int attr, int type ATTRIBUTE_UNUSED)
+mep_elf_section_flags (flagword flags, bfd_vma attr, int type ATTRIBUTE_UNUSED)
 {
   if (attr & SHF_MEP_VLIW)
     flags |= SEC_MEP_VLIW;

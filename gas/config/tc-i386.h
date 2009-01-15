@@ -263,8 +263,8 @@ extern void i386_solaris_fix_up_eh_frame (segT);
 #endif
 
 /* Support for SHF_X86_64_LARGE */
-extern int x86_64_section_word (char *, size_t);
-extern int x86_64_section_letter (int, char **);
+extern bfd_vma x86_64_section_word (char *, size_t);
+extern bfd_vma x86_64_section_letter (int, char **);
 #define md_elf_section_letter(LETTER, PTR_MSG)	x86_64_section_letter (LETTER, PTR_MSG)
 #define md_elf_section_word(STR, LEN)		x86_64_section_word (STR, LEN)
 

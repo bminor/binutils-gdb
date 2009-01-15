@@ -103,9 +103,9 @@ extern int mep_unrecognized_line (int);
 extern void mep_cleanup (void);
 
 #define md_elf_section_letter		mep_elf_section_letter
-extern int mep_elf_section_letter (int, char **);
+extern bfd_vma mep_elf_section_letter (int, char **);
 #define md_elf_section_flags		mep_elf_section_flags
-extern flagword mep_elf_section_flags  (flagword, int, int);
+extern flagword mep_elf_section_flags  (flagword, bfd_vma, int);
 
 #define ELF_TC_SPECIAL_SECTIONS \
   { VTEXT_SECTION_NAME, SHT_PROGBITS, SHF_ALLOC|SHF_EXECINSTR|SHF_MEP_VLIW },

@@ -2952,7 +2952,7 @@ ppc_macro (char *str, const struct powerpc_macro *macro)
 #ifdef OBJ_ELF
 /* For ELF, add support for SHF_EXCLUDE and SHT_ORDERED.  */
 
-int
+bfd_vma
 ppc_section_letter (int letter, char **ptr_msg)
 {
   if (letter == 'e')
@@ -2962,7 +2962,7 @@ ppc_section_letter (int letter, char **ptr_msg)
   return -1;
 }
 
-int
+bfd_vma
 ppc_section_word (char *str, size_t len)
 {
   if (len == 7 && strncmp (str, "exclude", 7) == 0)
@@ -2981,7 +2981,7 @@ ppc_section_type (char *str, size_t len)
 }
 
 int
-ppc_section_flags (int flags, int attr, int type)
+ppc_section_flags (flagword flags, bfd_vma attr, int type)
 {
   if (type == SHT_ORDERED)
     flags |= SEC_ALLOC | SEC_LOAD | SEC_SORT_ENTRIES;
