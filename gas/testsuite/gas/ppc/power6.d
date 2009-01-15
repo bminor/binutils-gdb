@@ -52,3 +52,17 @@ Disassembly of section \.text:
   a8:	7c 01 17 ec 	dcbz    r1,r2
   ac:	7c 23 27 ec 	dcbzl   r3,r4
   b0:	7c 05 37 ec 	dcbz    r5,r6
+  b4:	fc 0c 55 8e 	mtfsf   6,f10
+  b8:	fc 0c 5d 8f 	mtfsf.  6,f11
+  bc:	fc 0c 55 8e 	mtfsf   6,f10
+  c0:	fc 0c 5d 8f 	mtfsf.  6,f11
+  c4:	fc 0d 55 8e 	mtfsf   6,f10,0,1
+  c8:	fc 0d 5d 8f 	mtfsf.  6,f11,0,1
+  cc:	fe 0c 55 8e 	mtfsf   6,f10,1,0
+  d0:	fe 0c 5d 8f 	mtfsf.  6,f11,1,0
+  d4:	ff 00 01 0c 	mtfsfi  6,0
+  d8:	ff 00 f1 0d 	mtfsfi. 6,15
+  dc:	ff 00 01 0c 	mtfsfi  6,0
+  e0:	ff 00 f1 0d 	mtfsfi. 6,15
+  e4:	ff 01 01 0c 	mtfsfi  6,0,1
+  e8:	ff 01 f1 0d 	mtfsfi. 6,15,1

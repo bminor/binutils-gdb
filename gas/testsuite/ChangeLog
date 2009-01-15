@@ -1,3 +1,8 @@
+2009-01-14  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/power6.s ("mtfsf", "mtfsf.", "mtfsfi", "mtfsfi."): Add tests.
+	* gas/ppc/power6.d: Likewise.
+
 2009-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/sse-noavx.s: Add tests for lfence, mfence and movnti.

@@ -47,3 +47,17 @@ start:
 	dcbz    1, 2
 	dcbzl   3, 4
 	dcbz    5, 6
+	mtfsf   6,10
+	mtfsf.  6,11
+	mtfsf   6,10,0,0
+	mtfsf.  6,11,0,0
+	mtfsf   6,10,0,1
+	mtfsf.  6,11,0,1
+	mtfsf   6,10,1,0
+	mtfsf.  6,11,1,0
+	mtfsfi  6,0
+	mtfsfi. 6,15
+	mtfsfi  6,0,0
+	mtfsfi. 6,15,0
+	mtfsfi  6,0,1
+	mtfsfi. 6,15,1
