@@ -8147,31 +8147,207 @@ elf32_arm_obj_attrs_arg_type (int tag)
     return (tag & 1) != 0 ? 2 : 1;
 }
 
-static void
-elf32_arm_copy_one_eabi_other_attribute (bfd *ibfd, bfd *obfd, obj_attribute_list *in_list)
-{
-  switch (in_list->tag)
-    {
-    case Tag_VFP_HP_extension:
-    case Tag_ABI_FP_16bit_format:
-      bfd_elf_add_obj_attr_int (obfd, OBJ_ATTR_PROC, in_list->tag, in_list->attr.i);
-      break;
+/* Read the architecture from the Tag_also_compatible_with attribute, if any.
+   Returns -1 if no architecture could be read.  */
 
-    default:
-      if ((in_list->tag & 127) < 64)
-	{
-	  _bfd_error_handler
-	      (_("Warning: %B: Unknown EABI object attribute %d"), ibfd, in_list->tag);
-	  break;
-	}
-    }
+static int
+get_secondary_compatible_arch (bfd *abfd)
+{
+  obj_attribute *attr =
+    &elf_known_obj_attributes_proc (abfd)[Tag_also_compatible_with];
+
+  /* Note: the tag and its argument below are uleb128 values, though
+     currently-defined values fit in one byte for each.  */
+  if (attr->s
+      && attr->s[0] == Tag_CPU_arch
+      && (attr->s[1] & 128) != 128
+      && attr->s[2] == 0)
+   return attr->s[1];
+
+  /* This tag is "safely ignorable", so don't complain if it looks funny.  */
+  return -1;
 }
 
-static void 
-elf32_arm_copy_eabi_other_attribute_list (bfd *ibfd, bfd *obfd, obj_attribute_list *in_list)
+/* Set, or unset, the architecture of the Tag_also_compatible_with attribute.
+   The tag is removed if ARCH is -1.  */
+
+static void
+set_secondary_compatible_arch (bfd *abfd, int arch)
 {
-  for (; in_list; in_list = in_list->next )
-    elf32_arm_copy_one_eabi_other_attribute (ibfd, obfd, in_list);
+  obj_attribute *attr =
+    &elf_known_obj_attributes_proc (abfd)[Tag_also_compatible_with];
+
+  if (arch == -1)
+    {
+      attr->s = NULL;
+      return;
+    }
+
+  /* Note: the tag and its argument below are uleb128 values, though
+     currently-defined values fit in one byte for each.  */
+  if (!attr->s)
+    attr->s = bfd_alloc (abfd, 3);
+  attr->s[0] = Tag_CPU_arch;
+  attr->s[1] = arch;
+  attr->s[2] = '\0';
+}
+
+/* Combine two values for Tag_CPU_arch, taking secondary compatibility tags
+   into account.  */
+
+static int
+tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
+		      int newtag, int secondary_compat)
+{
+#define T(X) TAG_CPU_ARCH_##X
+  int tagl, tagh, result;
+  const int v6t2[] =
+    {
+      T(V6T2),   /* PRE_V4.  */
+      T(V6T2),   /* V4.  */
+      T(V6T2),   /* V4T.  */
+      T(V6T2),   /* V5T.  */
+      T(V6T2),   /* V5TE.  */
+      T(V6T2),   /* V5TEJ.  */
+      T(V6T2),   /* V6.  */
+      T(V7),     /* V6KZ.  */
+      T(V6T2)    /* V6T2.  */
+    };
+  const int v6k[] =
+    {
+      T(V6K),    /* PRE_V4.  */
+      T(V6K),    /* V4.  */
+      T(V6K),    /* V4T.  */
+      T(V6K),    /* V5T.  */
+      T(V6K),    /* V5TE.  */
+      T(V6K),    /* V5TEJ.  */
+      T(V6K),    /* V6.  */
+      T(V6KZ),   /* V6KZ.  */
+      T(V7),     /* V6T2.  */
+      T(V6K)     /* V6K.  */
+    };
+  const int v7[] =
+    {
+      T(V7),     /* PRE_V4.  */
+      T(V7),     /* V4.  */
+      T(V7),     /* V4T.  */
+      T(V7),     /* V5T.  */
+      T(V7),     /* V5TE.  */
+      T(V7),     /* V5TEJ.  */
+      T(V7),     /* V6.  */
+      T(V7),     /* V6KZ.  */
+      T(V7),     /* V6T2.  */
+      T(V7),     /* V6K.  */
+      T(V7)      /* V7.  */
+    };
+  const int v6_m[] =
+    {
+      -1,        /* PRE_V4.  */
+      -1,        /* V4.  */
+      T(V6K),    /* V4T.  */
+      T(V6K),    /* V5T.  */
+      T(V6K),    /* V5TE.  */
+      T(V6K),    /* V5TEJ.  */
+      T(V6K),    /* V6.  */
+      T(V6KZ),   /* V6KZ.  */
+      T(V7),     /* V6T2.  */
+      T(V6K),    /* V6K.  */
+      T(V7),     /* V7.  */
+      T(V6_M)    /* V6_M.  */
+    };
+  const int v6s_m[] =
+    {
+      -1,        /* PRE_V4.  */
+      -1,        /* V4.  */
+      T(V6K),    /* V4T.  */
+      T(V6K),    /* V5T.  */
+      T(V6K),    /* V5TE.  */
+      T(V6K),    /* V5TEJ.  */
+      T(V6K),    /* V6.  */
+      T(V6KZ),   /* V6KZ.  */
+      T(V7),     /* V6T2.  */
+      T(V6K),    /* V6K.  */
+      T(V7),     /* V7.  */
+      T(V6S_M),  /* V6_M.  */
+      T(V6S_M)   /* V6S_M.  */
+    };
+  const int v4t_plus_v6_m[] =
+    {
+      -1,		/* PRE_V4.  */
+      -1,		/* V4.  */
+      T(V4T),		/* V4T.  */
+      T(V5T),		/* V5T.  */
+      T(V5TE),		/* V5TE.  */
+      T(V5TEJ),		/* V5TEJ.  */
+      T(V6),		/* V6.  */
+      T(V6KZ),		/* V6KZ.  */
+      T(V6T2),		/* V6T2.  */
+      T(V6K),		/* V6K.  */
+      T(V7),		/* V7.  */
+      T(V6_M),		/* V6_M.  */
+      T(V6S_M),		/* V6S_M.  */
+      T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
+    };
+  const int *comb[] =
+    {
+      v6t2,
+      v6k,
+      v7,
+      v6_m,
+      v6s_m,
+      /* Pseudo-architecture.  */
+      v4t_plus_v6_m
+    };
+
+  /* Check we've not got a higher architecture than we know about.  */
+
+  if (oldtag >= MAX_TAG_CPU_ARCH || newtag >= MAX_TAG_CPU_ARCH)
+    {
+      _bfd_error_handler (_("ERROR: %B: Unknown CPU architecture"), ibfd);
+      return -1;
+    }
+
+  /* Override old tag if we have a Tag_also_compatible_with on the output.  */
+
+  if ((oldtag == T(V6_M) && *secondary_compat_out == T(V4T))
+      || (oldtag == T(V4T) && *secondary_compat_out == T(V6_M)))
+    oldtag = T(V4T_PLUS_V6_M);
+
+  /* And override the new tag if we have a Tag_also_compatible_with on the
+     input.  */
+
+  if ((newtag == T(V6_M) && secondary_compat == T(V4T))
+      || (newtag == T(V4T) && secondary_compat == T(V6_M)))
+    newtag = T(V4T_PLUS_V6_M);
+
+  tagl = (oldtag < newtag) ? oldtag : newtag;
+  result = tagh = (oldtag > newtag) ? oldtag : newtag;
+
+  /* Architectures before V6KZ add features monotonically.  */
+  if (tagh <= TAG_CPU_ARCH_V6KZ)
+    return result;
+
+  result = comb[tagh - T(V6T2)][tagl];
+
+  /* Use Tag_CPU_arch == V4T and Tag_also_compatible_with (Tag_CPU_arch V6_M)
+     as the canonical version.  */
+  if (result == T(V4T_PLUS_V6_M))
+    {
+      result = T(V4T);
+      *secondary_compat_out = T(V6_M);
+    }
+  else
+    *secondary_compat_out = -1;
+
+  if (result == -1)
+    {
+      _bfd_error_handler (_("ERROR: %B: Conflicting CPU architectures %d/%d"),
+			  ibfd, oldtag, newtag);
+      return -1;
+    }
+
+  return result;
+#undef T
 }
 
 /* Merge EABI object attributes from IBFD into OBFD.  Raise an error if there
@@ -8184,12 +8360,14 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   obj_attribute *out_attr;
   obj_attribute_list *in_list;
   obj_attribute_list *out_list;
+  obj_attribute_list **out_listp;
   /* Some tags have 0 = don't care, 1 = strong requirement,
      2 = weak requirement.  */
-  static const int order_312[3] = {3, 1, 2};
+  static const int order_021[3] = {0, 2, 1};
   /* For use with Tag_VFP_arch.  */
   static const int order_01243[5] = {0, 1, 2, 4, 3};
   int i;
+  bfd_boolean result = TRUE;
 
   if (!elf_known_obj_attributes_proc (obfd)[0].i)
     {
@@ -8216,7 +8394,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	  _bfd_error_handler
 	    (_("ERROR: %B uses VFP register arguments, %B does not"),
 	     ibfd, obfd);
-	  return FALSE;
+	  result = FALSE;
 	}
     }
 
@@ -8227,12 +8405,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	{
 	case Tag_CPU_raw_name:
 	case Tag_CPU_name:
-	  /* Use whichever has the greatest architecture requirements.  We
-	     won't necessarily have both the above tags, so make sure input
-	     name is non-NULL.  */
-	  if (in_attr[Tag_CPU_arch].i > out_attr[Tag_CPU_arch].i
-	      && in_attr[i].s)
-	    out_attr[i].s = _bfd_elf_attr_strdup (obfd, in_attr[i].s);
+	  /* These are merged after Tag_CPU_arch. */
 	  break;
 
 	case Tag_ABI_optimization_goals:
@@ -8241,38 +8414,148 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	  break;
 
 	case Tag_CPU_arch:
+	  {
+	    int secondary_compat = -1, secondary_compat_out = -1;
+	    unsigned int saved_out_attr = out_attr[i].i;
+	    static const char *name_table[] = {
+		/* These aren't real CPU names, but we can't guess
+		   that from the architecture version alone.  */
+		"Pre v4",
+		"ARM v4",
+		"ARM v4T",
+		"ARM v5T",
+		"ARM v5TE",
+		"ARM v5TEJ",
+		"ARM v6",
+		"ARM v6KZ",
+		"ARM v6T2",
+		"ARM v6K",
+		"ARM v7",
+		"ARM v6-M",
+		"ARM v6S-M"
+	    };
+
+	    /* Merge Tag_CPU_arch and Tag_also_compatible_with.  */
+	    secondary_compat = get_secondary_compatible_arch (ibfd);
+	    secondary_compat_out = get_secondary_compatible_arch (obfd);
+	    out_attr[i].i = tag_cpu_arch_combine (ibfd, out_attr[i].i,
+						  &secondary_compat_out,
+						  in_attr[i].i,
+						  secondary_compat);
+	    set_secondary_compatible_arch (obfd, secondary_compat_out);
+
+	    /* Merge Tag_CPU_name and Tag_CPU_raw_name.  */
+	    if (out_attr[i].i == saved_out_attr)
+	      ; /* Leave the names alone.  */
+	    else if (out_attr[i].i == in_attr[i].i)
+	      {
+		/* The output architecture has been changed to match the
+		   input architecture.  Use the input names.  */
+		out_attr[Tag_CPU_name].s = in_attr[Tag_CPU_name].s
+		  ? _bfd_elf_attr_strdup (obfd, in_attr[Tag_CPU_name].s)
+		  : NULL;
+		out_attr[Tag_CPU_raw_name].s = in_attr[Tag_CPU_raw_name].s
+		  ? _bfd_elf_attr_strdup (obfd, in_attr[Tag_CPU_raw_name].s)
+		  : NULL;
+	      }
+	    else
+	      {
+		out_attr[Tag_CPU_name].s = NULL;
+		out_attr[Tag_CPU_raw_name].s = NULL;
+	      }
+
+	    /* If we still don't have a value for Tag_CPU_name,
+	       make one up now.  Tag_CPU_raw_name remains blank.  */
+	    if (out_attr[Tag_CPU_name].s == NULL
+		&& out_attr[i].i < ARRAY_SIZE (name_table))
+	      out_attr[Tag_CPU_name].s =
+		_bfd_elf_attr_strdup (obfd, name_table[out_attr[i].i]);
+	  }
+	  break;
+
 	case Tag_ARM_ISA_use:
 	case Tag_THUMB_ISA_use:
 	case Tag_WMMX_arch:
-	case Tag_NEON_arch:
-	  /* ??? Do NEON and WMMX conflict?  */
+	case Tag_Advanced_SIMD_arch:
+	  /* ??? Do Advanced_SIMD (NEON) and WMMX conflict?  */
 	case Tag_ABI_FP_rounding:
-	case Tag_ABI_FP_denormal:
 	case Tag_ABI_FP_exceptions:
 	case Tag_ABI_FP_user_exceptions:
 	case Tag_ABI_FP_number_model:
-	case Tag_ABI_align8_preserved:
-	case Tag_ABI_HardFP_use:
+	case Tag_VFP_HP_extension:
+	case Tag_CPU_unaligned_access:
+	case Tag_T2EE_use:
+	case Tag_Virtualization_use:
+	case Tag_MPextension_use:
 	  /* Use the largest value specified.  */
 	  if (in_attr[i].i > out_attr[i].i)
 	    out_attr[i].i = in_attr[i].i;
 	  break;
 
-	case Tag_CPU_arch_profile:
-	  /* Warn if conflicting architecture profiles used.  */
-	  if (out_attr[i].i && in_attr[i].i && in_attr[i].i != out_attr[i].i)
-	    {
-	      _bfd_error_handler
-		(_("ERROR: %B: Conflicting architecture profiles %c/%c"),
-		 ibfd, in_attr[i].i, out_attr[i].i);
-	      return FALSE;
-	    }
-	  if (in_attr[i].i)
+	case Tag_ABI_align8_preserved:
+	case Tag_ABI_PCS_RO_data:
+	  /* Use the smallest value specified.  */
+	  if (in_attr[i].i < out_attr[i].i)
 	    out_attr[i].i = in_attr[i].i;
 	  break;
+
+	case Tag_ABI_align8_needed:
+	  if ((in_attr[i].i > 0 || out_attr[i].i > 0)
+	      && (in_attr[Tag_ABI_align8_preserved].i == 0
+		  || out_attr[Tag_ABI_align8_preserved].i == 0))
+	    {
+	      /* This error message should be enabled once all non-conformant
+		 binaries in the toolchain have had the attributes set
+		 properly.
+	      _bfd_error_handler
+		(_("ERROR: %B: 8-byte data alignment conflicts with %B"),
+		 obfd, ibfd);
+	      result = FALSE; */
+	    }
+	  /* Fall through.  */
+	case Tag_ABI_FP_denormal:
+	case Tag_ABI_PCS_GOT_use:
+	  /* Use the "greatest" from the sequence 0, 2, 1, or the largest
+	     value if greater than 2 (for future-proofing).  */
+	  if ((in_attr[i].i > 2 && in_attr[i].i > out_attr[i].i)
+	      || (in_attr[i].i <= 2 && out_attr[i].i <= 2
+		  && order_021[in_attr[i].i] > order_021[out_attr[i].i]))
+	    out_attr[i].i = in_attr[i].i;
+	  break;
+
+
+	case Tag_CPU_arch_profile:
+	  if (out_attr[i].i != in_attr[i].i)
+	    {
+	      /* 0 will merge with anything.
+		 'A' and 'S' merge to 'A'.
+		 'R' and 'S' merge to 'R'.
+	         'M' and 'A|R|S' is an error.  */
+	      if (out_attr[i].i == 0
+		  || (out_attr[i].i == 'S'
+		      && (in_attr[i].i == 'A' || in_attr[i].i == 'R')))
+		out_attr[i].i = in_attr[i].i;
+	      else if (in_attr[i].i == 0
+		       || (in_attr[i].i == 'S'
+			   && (out_attr[i].i == 'A' || out_attr[i].i == 'R')))
+		; /* Do nothing. */
+	      else
+		{
+		  _bfd_error_handler
+		    (_("ERROR: %B: Conflicting architecture profiles %c/%c"),
+		     ibfd,
+		     in_attr[i].i ? in_attr[i].i : '0',
+		     out_attr[i].i ? out_attr[i].i : '0');
+		  result = FALSE;
+		}
+	    }
+	  break;
 	case Tag_VFP_arch:
-	  if (in_attr[i].i > 4 || out_attr[i].i > 4
-	      || order_01243[in_attr[i].i] > order_01243[out_attr[i].i])
+	  /* Use the "greatest" from the sequence 0, 1, 2, 4, 3, or the
+	     largest value if greater than 4 (for future-proofing).  */
+	  if ((in_attr[i].i > 4 && in_attr[i].i > out_attr[i].i)
+	      || (in_attr[i].i <= 4 && out_attr[i].i <= 4
+		  && order_01243[in_attr[i].i] > order_01243[out_attr[i].i]))
 	    out_attr[i].i = in_attr[i].i;
 	  break;
 	case Tag_PCS_config:
@@ -8293,7 +8576,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	    {
 	      _bfd_error_handler
 		(_("ERROR: %B: Conflicting use of R9"), ibfd);
-	      return FALSE;
+	      result = FALSE;
 	    }
 	  if (out_attr[i].i == AEABI_R9_unused)
 	    out_attr[i].i = in_attr[i].i;
@@ -8306,20 +8589,10 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	      _bfd_error_handler
 		(_("ERROR: %B: SB relative addressing conflicts with use of R9"),
 		 ibfd);
-	      return FALSE;
+	      result = FALSE;
 	    }
 	  /* Use the smallest value specified.  */
 	  if (in_attr[i].i < out_attr[i].i)
-	    out_attr[i].i = in_attr[i].i;
-	  break;
-	case Tag_ABI_PCS_RO_data:
-	  /* Use the smallest value specified.  */
-	  if (in_attr[i].i < out_attr[i].i)
-	    out_attr[i].i = in_attr[i].i;
-	  break;
-	case Tag_ABI_PCS_GOT_use:
-	  if (in_attr[i].i > 2 || out_attr[i].i > 2
-	      || order_312[in_attr[i].i] < order_312[out_attr[i].i])
 	    out_attr[i].i = in_attr[i].i;
 	  break;
 	case Tag_ABI_PCS_wchar_t:
@@ -8331,12 +8604,6 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		 ibfd, in_attr[i].i, out_attr[i].i);
 	    }
 	  else if (in_attr[i].i && !out_attr[i].i)
-	    out_attr[i].i = in_attr[i].i;
-	  break;
-	case Tag_ABI_align8_needed:
-	  /* ??? Check against Tag_ABI_align8_preserved.  */
-	  if (in_attr[i].i > 2 || out_attr[i].i > 2
-	      || order_312[in_attr[i].i] < order_312[out_attr[i].i])
 	    out_attr[i].i = in_attr[i].i;
 	  break;
 	case Tag_ABI_enum_size:
@@ -8353,12 +8620,19 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		       && out_attr[i].i != in_attr[i].i
 		       && !elf_arm_tdata (obfd)->no_enum_size_warning)
 		{
-		  const char *aeabi_enum_names[] =
+		  static const char *aeabi_enum_names[] =
 		    { "", "variable-size", "32-bit", "" };
+		  const char *in_name =
+		    in_attr[i].i < ARRAY_SIZE(aeabi_enum_names)
+		    ? aeabi_enum_names[in_attr[i].i]
+		    : "<unknown>";
+		  const char *out_name =
+		    out_attr[i].i < ARRAY_SIZE(aeabi_enum_names)
+		    ? aeabi_enum_names[out_attr[i].i]
+		    : "<unknown>";
 		  _bfd_error_handler
 		    (_("warning: %B uses %s enums yet the output is to use %s enums; use of enum values across objects may fail"),
-		     ibfd, aeabi_enum_names[in_attr[i].i],
-		     aeabi_enum_names[out_attr[i].i]);
+		     ibfd, in_name, out_name);
 		}
 	    }
 	  break;
@@ -8371,34 +8645,98 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	      _bfd_error_handler
 		(_("ERROR: %B uses iWMMXt register arguments, %B does not"),
 		 ibfd, obfd);
-	      return FALSE;
+	      result = FALSE;
 	    }
 	  break;
-
 	case Tag_compatibility:
 	  /* Merged in target-independent code.  */
 	  break;
+	case Tag_ABI_HardFP_use:
+	  /* 1 (SP) and 2 (DP) conflict, so combine to 3 (SP & DP).  */
+	  if ((in_attr[i].i == 1 && out_attr[i].i == 2)
+	      || (in_attr[i].i == 2 && out_attr[i].i == 1))
+	    out_attr[i].i = 3;
+	  else if (in_attr[i].i > out_attr[i].i)
+	    out_attr[i].i = in_attr[i].i;
+	  break;
+	case Tag_ABI_FP_16bit_format:
+	  if (in_attr[i].i != 0 && out_attr[i].i != 0)
+	    {
+	      if (in_attr[i].i != out_attr[i].i)
+		{
+		  _bfd_error_handler
+		    (_("ERROR: fp16 format mismatch between %B and %B"),
+		     ibfd, obfd);
+		  result = FALSE;
+		}
+	    }
+	  if (in_attr[i].i != 0)
+	    out_attr[i].i = in_attr[i].i;
+	  break;
 
-	default: /* All known attributes should be explicitly covered.   */
-	  abort ();
+	case Tag_nodefaults:
+	  /* This tag is set if it exists, but the value is unused.
+	     Unfortunately, we don't record whether each attribute is zero
+	     initialized, or read from the file, so the information has been
+	     lost.  In any case, we don't write attributes with zero values.
+	     Do nothing. */
+	  break;
+	case Tag_also_compatible_with:
+	  /* Already done in Tag_CPU_arch.  */
+	  break;
+	case Tag_conformance:
+	  /* Keep the attribute if it matches.  Throw it away otherwise.
+	     No attribute means no claim to conform.  */
+	  if (!in_attr[i].s || !out_attr[i].s
+	      || strcmp (in_attr[i].s, out_attr[i].s) != 0)
+	    out_attr[i].s = NULL;
+	  break;
+
+	default:
+	  {
+	    bfd *err_bfd = NULL;
+
+	    /* The "known_obj_attributes" table does contain some undefined
+	       attributes.  Ensure that there are unused.  */
+	    if (out_attr[i].i != 0 || out_attr[i].s != NULL)
+	      err_bfd = obfd;
+	    else if (in_attr[i].i != 0 || in_attr[i].s != NULL)
+	      err_bfd = ibfd;
+
+	    if (err_bfd != NULL)
+	      {
+		/* Attribute numbers >=64 (mod 128) can be safely ignored.  */
+		if ((i & 127) < 64)
+		  {
+		    _bfd_error_handler
+		      (_("%B: Unknown mandatory EABI object attribute %d"),
+		       err_bfd, i);
+		    bfd_set_error (bfd_error_bad_value);
+		    result = FALSE;
+		  }
+		else
+		  {
+		    _bfd_error_handler
+		      (_("Warning: %B: Unknown EABI object attribute %d"),
+		       err_bfd, i);
+		  }
+	      }
+
+	    /* Only pass on attributes that match in both inputs.  */
+	    if (in_attr[i].i != out_attr[i].i
+		|| in_attr[i].s != out_attr[i].s
+		|| (in_attr[i].s != NULL && out_attr[i].s != NULL
+		    && strcmp (in_attr[i].s, out_attr[i].s) != 0))
+	      {
+		out_attr[i].i = 0;
+		out_attr[i].s = NULL;
+	      }
+	  }
 	}
 
+      /* If out_attr was copied from in_attr then it won't have a type yet.  */
       if (in_attr[i].type && !out_attr[i].type)
-	switch (in_attr[i].type)
-	  {
-	  case 1:
-	    if (out_attr[i].i)
-	      out_attr[i].type = 1;
-	    break;
-
-	  case 2:
-	    if (out_attr[i].s)
-	      out_attr[i].type = 2;
-	    break;
-
-	  default:
-	    abort ();
-	  }
+	out_attr[i].type = in_attr[i].type;
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
@@ -8406,67 +8744,78 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 
   /* Check for any attributes not known on ARM.  */
   in_list = elf_other_obj_attributes_proc (ibfd);
-  out_list = elf_other_obj_attributes_proc (obfd);
+  out_listp = &elf_other_obj_attributes_proc (obfd);
+  out_list = *out_listp;
 
-  for (; in_list != NULL; )
+  for (; in_list || out_list; )
     {
-      if (out_list == NULL)
-	{
-	  elf32_arm_copy_eabi_other_attribute_list (ibfd, obfd, in_list);
-	  return TRUE;
-	}
+      bfd *err_bfd = NULL;
+      int err_tag = 0;
 
       /* The tags for each list are in numerical order.  */
       /* If the tags are equal, then merge.  */
-      if (in_list->tag == out_list->tag)
-        {
-	  switch (in_list->tag)
+      if (out_list && (!in_list || in_list->tag > out_list->tag))
+	{
+	  /* This attribute only exists in obfd.  We can't merge, and we don't
+	     know what the tag means, so delete it.  */
+	  err_bfd = obfd;
+	  err_tag = out_list->tag;
+	  *out_listp = out_list->next;
+	  out_list = *out_listp;
+	}
+      else if (in_list && (!out_list || in_list->tag < out_list->tag))
+	{
+	  /* This attribute only exists in ibfd. We can't merge, and we don't
+	     know what the tag means, so ignore it.  */
+	  err_bfd = ibfd;
+	  err_tag = in_list->tag;
+	  in_list = in_list->next;
+	}
+      else /* The tags are equal.  */
+	{
+	  /* As present, all attributes in the list are unknown, and
+	     therefore can't be merged meaningfully.  */
+	  err_bfd = obfd;
+	  err_tag = out_list->tag;
+
+	  /*  Only pass on attributes that match in both inputs.  */
+	  if (in_list->attr.i != out_list->attr.i
+	      || in_list->attr.s != out_list->attr.s
+	      || (in_list->attr.s && out_list->attr.s
+		  && strcmp (in_list->attr.s, out_list->attr.s) != 0))
 	    {
-	    case Tag_VFP_HP_extension:
-	      if (out_list->attr.i == 0)
-	    	out_list->attr.i = in_list->attr.i;
-	      break;
-
-	    case Tag_ABI_FP_16bit_format:
-	      if (in_list->attr.i != 0 && out_list->attr.i != 0)
-		{
-	          if (in_list->attr.i != out_list->attr.i)
-	            {
-		      _bfd_error_handler
-		        (_("ERROR: fp16 format mismatch between %B and %B"),
-		         ibfd, obfd);
-		      return FALSE;
-	            }
-		}
-	      if (in_list->attr.i != 0)
-		out_list->attr.i = in_list->attr.i;
-	      break;
-
-	    default:
-	      if ((in_list->tag & 127) < 64)
-	        {
-	          _bfd_error_handler
-		    (_("Warning: %B: Unknown EABI object attribute %d"), ibfd, in_list->tag);
-	          break;
-	        }
+	      /* No match.  Delete the attribute.  */
+	      *out_listp = out_list->next;
+	      out_list = *out_listp;
+	    }
+	  else
+	    {
+	      /* Matched.  Keep the attribute and move to the next.  */
+	      out_list = out_list->next;
+	      in_list = in_list->next;
 	    }
 	}
-      else if (in_list->tag < out_list->tag)
+
+      if (err_bfd)
 	{
-	  /* This attribute is in ibfd, but not obfd.  Copy to obfd and advance to
-            next input attribute.  */
-	  elf32_arm_copy_one_eabi_other_attribute (ibfd, obfd, in_list);
+	  /* Attribute numbers >=64 (mod 128) can be safely ignored.  */
+	  if ((err_tag & 127) < 64)
+	    {
+	      _bfd_error_handler
+		(_("%B: Unknown mandatory EABI object attribute %d"),
+		 err_bfd, err_tag);
+	      bfd_set_error (bfd_error_bad_value);
+	      result = FALSE;
+	    }
+	  else
+	    {
+	      _bfd_error_handler
+		(_("Warning: %B: Unknown EABI object attribute %d"),
+		 err_bfd, err_tag);
+	    }
 	}
-      if (in_list->tag <= out_list->tag)
-	{
-	  in_list = in_list->next;
-	  if (in_list == NULL)
-	    continue;
-	}
-      while (out_list && out_list->tag < in_list->tag)
-        out_list = out_list->next;
     }
-  return TRUE;
+  return result;
 }
 
 

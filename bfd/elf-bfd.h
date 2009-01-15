@@ -1369,7 +1369,7 @@ struct elf_find_verdep_info
 };
 
 /* The maximum number of known object attributes for any target.  */
-#define NUM_KNOWN_OBJ_ATTRIBUTES 33
+#define NUM_KNOWN_OBJ_ATTRIBUTES 71
 
 /* The value of an object attribute.  type & 1 indicates whether there
    is an integer value; type & 2 indicates whether there is a string

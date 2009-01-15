@@ -20719,7 +20719,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {6, ARM_ARCH_V6},
     {7, ARM_ARCH_V6Z},
     {9, ARM_ARCH_V6K},
-    {9, ARM_ARCH_V6M},
+    {11, ARM_ARCH_V6M},
     {8, ARM_ARCH_V6T2},
     {10, ARM_ARCH_V7A},
     {10, ARM_ARCH_V7R},

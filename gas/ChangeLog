@@ -1,4 +1,9 @@
 2009-01-15  Andrew Stubbs  <ams@codesourcery.com>
+	    Julian Brown   <julian@codesourcery.com>
+
+	* config/tc-arm.c (cpu_arch): Change ARM_ARCH_V6M to 11.
+
+2009-01-15  Andrew Stubbs  <ams@codesourcery.com>
 
 	* read.c (s_vendor_attribute): bfd_elf_add_obj_attr_compat ->
 	bfd_elf_add_obj_attr_int_string.

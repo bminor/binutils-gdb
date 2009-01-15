@@ -1,4 +1,26 @@
 2009-01-15  Andrew Stubbs  <ams@codesourcery.com>
+	    Julian Brown   <julian@codesourcery.com>
+
+	* elf-bfd.h (NUM_KNOWN_OBJ_ATTRIBUTES): Set to 71 to include all known
+	ARM attributes in ABI 2.07.
+	* elf32-arm.c (get_secondary_compatible_arch): New function.
+	(set_secondary_compatible_arch): New function.
+	(tag_cpu_arch_combine): New function.
+	(elf32_arm_copy_one_eabi_other_attribute): Delete function.
+	(elf32_arm_copy_eabi_other_attribute_list): Delete function.
+	(elf32_arm_merge_eabi_attributes): Rename order_312 to order_021 to
+	make it fit with order_01243.
+	Add support for Tag_also_compatible_with,
+	Tag_CPU_unaligned_access, Tag_T2EE_use, Tag_Virtualization_use,
+	Tag_MPextension_use, Tag_nodefaults and Tag_conformance.
+	Improve/tidy up support for Tag_CPU_raw_name, Tag_CPU_name,
+	Tag_CPU_arch, Tag_ABI_HardFP_use, Tag_VFP_HP_extension,
+	Tag_ABI_FP_denormal, Tag_ABI_PCS_GOT_use, Tag_ABI_align8_needed,
+	Tag_VFP_arch and Tag_ABI_FP_16bit_format.
+	Rework the way unknown attributes are handled.
+	Defer errors until all attributes have been processed.
+
+2009-01-15  Andrew Stubbs  <ams@codesourcery.com>
 
 	* elf-attrs.c (bfd_elf_add_obj_attr_compat): Rename to
 	bfd_elf_add_obj_attr_int_string.
