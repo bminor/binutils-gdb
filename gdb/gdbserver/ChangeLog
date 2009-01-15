@@ -2,6 +2,7 @@
 
 	* gdbreplay.c (perror_with_name): Make arg const char *.
 	* server.h (target_signal_to_name): Make return type const char *.
+	* thread-db.c (thread_db_err_str): Make return type const char *.
 	* utils.c (perror_with_name): Make arg const char *.
 
 2009-01-14  Pedro Alves  <pedro@codesourcery.com>
