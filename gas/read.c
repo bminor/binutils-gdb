@@ -2069,13 +2069,45 @@ s_vendor_attribute (int vendor)
   int tag;
   unsigned int i = 0;
   char *s = NULL;
-  char saved_char;
 
-  expression (& exp);
-  if (exp.X_op != O_constant)
-    goto bad;
+  /* Read the first number or name.  */
+  skip_whitespace (input_line_pointer);
+  s = input_line_pointer;
+  if (ISDIGIT (*input_line_pointer))
+    {
+      expression (& exp);
+      if (exp.X_op != O_constant)
+	goto bad;
+      tag = exp.X_add_number;
+    }
+  else
+    {
+      char *name;
 
-  tag = exp.X_add_number;
+      /* A name may contain '_', but no other punctuation.  */
+      for (; ISALNUM (*input_line_pointer) || *input_line_pointer == '_';
+	   ++input_line_pointer)
+	i++;
+      if (i == 0)
+	goto bad;
+
+      name = alloca (i + 1);
+      memcpy (name, s, i);
+      name[i] = '\0';
+
+#ifndef CONVERT_SYMBOLIC_ATTRIBUTE
+#define CONVERT_SYMBOLIC_ATTRIBUTE(a) -1
+#endif
+
+      tag = CONVERT_SYMBOLIC_ATTRIBUTE (name);
+      if (tag == -1)
+	{
+	  as_bad (_("Attribute name not recognised: %s"), name);
+	  ignore_rest_of_line ();
+	  return;
+	}
+    }
+
   type = _bfd_elf_obj_attrs_arg_type (stdoutput, vendor, tag);
 
   if (skip_past_comma (&input_line_pointer) == -1)
@@ -2100,22 +2132,12 @@ s_vendor_attribute (int vendor)
     }
   if (type & 2)
     {
-      skip_whitespace(input_line_pointer);
+      int len;
+
+      skip_whitespace (input_line_pointer);
       if (*input_line_pointer != '"')
 	goto bad_string;
-      input_line_pointer++;
-      s = input_line_pointer;
-      while (*input_line_pointer && *input_line_pointer != '"')
-	input_line_pointer++;
-      if (*input_line_pointer != '"')
-	goto bad_string;
-      saved_char = *input_line_pointer;
-      *input_line_pointer = 0;
-    }
-  else
-    {
-      s = NULL;
-      saved_char = 0;
+      s = demand_copy_C_string (&len);
     }
 
   switch (type)
@@ -2133,11 +2155,6 @@ s_vendor_attribute (int vendor)
       abort ();
     }
 
-  if (s)
-    {
-      *input_line_pointer = saved_char;
-      input_line_pointer++;
-    }
   demand_empty_rest_of_line ();
   return;
 bad_string:

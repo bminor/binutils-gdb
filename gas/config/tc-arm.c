@@ -20972,3 +20972,67 @@ arm_copy_symbol_attributes (symbolS *dest, symbolS *src)
 {
   ARM_GET_FLAG (dest) = ARM_GET_FLAG (src);
 }
+
+/* Given a symbolic attribute NAME, return the proper integer value.
+   Returns -1 if the attribute is not known.  */
+int
+arm_convert_symbolic_attribute (const char *name)
+{
+#define T(tag) {#tag, tag}
+  /* When you modify this table you should also
+     modify the list in doc/c-arm.texi.  */
+  static const struct {
+    const char *name;
+    const int tag;
+  } attribute_table[] = {
+      T(Tag_CPU_raw_name),
+      T(Tag_CPU_name),
+      T(Tag_CPU_arch),
+      T(Tag_CPU_arch_profile),
+      T(Tag_ARM_ISA_use),
+      T(Tag_THUMB_ISA_use),
+      T(Tag_VFP_arch),
+      T(Tag_WMMX_arch),
+      T(Tag_Advanced_SIMD_arch),
+      T(Tag_PCS_config),
+      T(Tag_ABI_PCS_R9_use),
+      T(Tag_ABI_PCS_RW_data),
+      T(Tag_ABI_PCS_RO_data),
+      T(Tag_ABI_PCS_GOT_use),
+      T(Tag_ABI_PCS_wchar_t),
+      T(Tag_ABI_FP_rounding),
+      T(Tag_ABI_FP_denormal),
+      T(Tag_ABI_FP_exceptions),
+      T(Tag_ABI_FP_user_exceptions),
+      T(Tag_ABI_FP_number_model),
+      T(Tag_ABI_align8_needed),
+      T(Tag_ABI_align8_preserved),
+      T(Tag_ABI_enum_size),
+      T(Tag_ABI_HardFP_use),
+      T(Tag_ABI_VFP_args),
+      T(Tag_ABI_WMMX_args),
+      T(Tag_ABI_optimization_goals),
+      T(Tag_ABI_FP_optimization_goals),
+      T(Tag_compatibility),
+      T(Tag_CPU_unaligned_access),
+      T(Tag_VFP_HP_extension),
+      T(Tag_ABI_FP_16bit_format),
+      T(Tag_nodefaults),
+      T(Tag_also_compatible_with),
+      T(Tag_conformance),
+      T(Tag_T2EE_use),
+      T(Tag_Virtualization_use),
+      T(Tag_MPextension_use)
+  };
+#undef T
+  unsigned int i;
+
+  if (name == NULL)
+    return -1;
+
+  for (i = 0; i < ARRAY_SIZE(attribute_table); i++)
+    if (strcmp (name, attribute_table[i].name) == 0)
+      return attribute_table[i].tag;
+
+  return -1;
+}

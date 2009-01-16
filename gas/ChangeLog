@@ -1,3 +1,14 @@
+2009-01-16  Andrew Stubbs  <ams@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/tc-arm.c (arm_copy_symbol_attributes): New function.
+	* config/tc-arm.h (arm_copy_symbol_attributes): New prototype.
+	(CONVERT_SYMBOLIC_ATTRIBUTE): New define.
+	* read.c (s_vendor_attribute): Add support for symbolic tag names.
+	Improve string parser.
+	* doc/c-arm.texi (ARM Machine Directives): Document
+	.eabi_attribute symbolic tag names.
+
 2009-01-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in (commonbfdlib): Delete.

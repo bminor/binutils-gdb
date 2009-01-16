@@ -284,3 +284,6 @@ extern void tc_arm_frame_initial_instructions (void);
 void tc_pe_dwarf2_emit_offset (symbolS *, unsigned int);
 
 #endif /* TE_PE */
+
+extern int arm_convert_symbolic_attribute (const char *);
+#define CONVERT_SYMBOLIC_ATTRIBUTE(name) arm_convert_symbolic_attribute (name)
