@@ -193,6 +193,8 @@ info os processes
 
 x86/x86_64 Darwin		i[34567]86-*-darwin*
 
+x86_64 MinGW			x86_64-*-mingw*
+
 * New targets
 
 x86 DICOS			i[34567]86-*-dicos*

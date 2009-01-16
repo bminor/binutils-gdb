@@ -1,5 +1,9 @@
 2009-01-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Document x86_64/MinGW as a new native configuration.
+
+2009-01-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Move the documentation of "info os processes" to
 	the appropriate section (documenting the new commands).
 
