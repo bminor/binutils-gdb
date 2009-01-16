@@ -1,3 +1,8 @@
+2009-01-16  Mark Shinwell  <shinwell@codesourcery.com>
+
+	* config/te-armeabi.h (EABI_DEFAULT): Use EF_ARM_EABI_VER5.
+	* config/te-armlinuxeabi.h (EABI_DEFAULT): Likewise.
+
 2009-01-16  Andrew Stubbs  <ams@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
