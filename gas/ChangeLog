@@ -1,3 +1,9 @@
+2009-01-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in (commonbfdlib): Delete.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2009-01-15  Andrew Stubbs  <ams@codesourcery.com>
 	    Julian Brown   <julian@codesourcery.com>
 

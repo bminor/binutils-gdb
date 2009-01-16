@@ -1011,7 +1011,6 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-targets        alternative target configurations besides the primary
-  --enable-commonbfdlib   build shared BFD/opcodes/libiberty library
   --enable-checking       enable run-time checks
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
@@ -5504,13 +5503,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5507: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5506: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5510: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5509: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5513: output\"" >&5)
+  (eval echo "\"\$as_me:5512: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6667,7 +6666,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6670 "configure"' > conftest.$ac_ext
+  echo '#line 6669 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7973,11 +7972,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7976: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7975: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7980: \$? = $ac_status" >&5
+   echo "$as_me:7979: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8312,11 +8311,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8315: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8314: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8319: \$? = $ac_status" >&5
+   echo "$as_me:8318: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8417,11 +8416,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8420: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8419: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8424: \$? = $ac_status" >&5
+   echo "$as_me:8423: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8472,11 +8471,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8475: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8474: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8479: \$? = $ac_status" >&5
+   echo "$as_me:8478: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11284,7 +11283,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11287 "configure"
+#line 11286 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11380,7 +11379,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11383 "configure"
+#line 11382 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11618,17 +11617,6 @@ echo "$as_me: error: enable-targets option must specify target names or 'all'" >
 	    ;;
   no)	    enable_targets= ;;
   *)	    enable_targets=$enableval ;;
-esac
-fi;
-# Check whether --enable-commonbfdlib or --disable-commonbfdlib was given.
-if test "${enable_commonbfdlib+set}" = set; then
-  enableval="$enable_commonbfdlib"
-  case "${enableval}" in
-  yes) commonbfdlib=true ;;
-  no)  commonbfdlib=false ;;
-  *)   { { echo "$as_me:$LINENO: error: bad value ${enableval} for BFD commonbfdlib option" >&5
-echo "$as_me: error: bad value ${enableval} for BFD commonbfdlib option" >&2;}
-   { (exit 1); exit 1; }; } ;;
 esac
 fi;
 ac_checking=yes

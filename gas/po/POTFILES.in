@@ -75,6 +75,8 @@ config/tc-ip2k.c
 config/tc-ip2k.h
 config/tc-iq2000.c
 config/tc-iq2000.h
+config/tc-lm32.c
+config/tc-lm32.h
 config/tc-m32c.c
 config/tc-m32c.h
 config/tc-m32r.c
@@ -172,6 +174,7 @@ config/te-pc532mach.h
 config/te-pe.h
 config/te-psos.h
 config/te-riscix.h
+config/te-solaris.h
 config/te-sparcaout.h
 config/te-sun3.h
 config/te-svr4.h

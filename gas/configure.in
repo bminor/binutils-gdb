@@ -37,14 +37,6 @@ AC_ARG_ENABLE(targets,
   *)	    enable_targets=$enableval ;;
 esac])dnl
 
-AC_ARG_ENABLE(commonbfdlib,
-[  --enable-commonbfdlib   build shared BFD/opcodes/libiberty library],
-[case "${enableval}" in
-  yes) commonbfdlib=true ;;
-  no)  commonbfdlib=false ;;
-  *)   AC_MSG_ERROR([bad value ${enableval} for BFD commonbfdlib option]) ;;
-esac])dnl
-
 ac_checking=yes
 if grep '^RELEASE=y' ${srcdir}/../bfd/Makefile.am >/dev/null 2>/dev/null ; then
   ac_checking=

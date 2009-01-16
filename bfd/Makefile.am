@@ -769,8 +769,8 @@ ofiles: stamp-ofiles ; @true
 # libbfd_la_SOURCES, we put BFD64_LIBS in OFILES instead.
 libbfd_la_SOURCES = $(BFD32_LIBS_CFILES)
 libbfd_la_DEPENDENCIES = $(OFILES) ofiles
-libbfd_la_LIBADD = `cat ofiles` @WIN32LIBADD@
-libbfd_la_LDFLAGS = -release `cat libtool-soversion` @WIN32LDFLAGS@
+libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@
+libbfd_la_LDFLAGS = -release `cat libtool-soversion` @SHARED_LDFLAGS@
 
 # libtool will build .libs/libbfd.a.  We create libbfd.a in the build
 # directory so that we don't have to convert all the programs that use

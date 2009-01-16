@@ -1,3 +1,15 @@
+2009-01-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (libbfd_la_LIBADD, libbfd_la_LDFLAGS): Substitute
+	SHARED_LIBADD and SHARED_LDFLAGS rather than WIN32LIBADD, WIN32LDFLAGS.
+	* configure.in (commonbfdlib): Delete.
+	(SHARED_LDFLAGS): Rename from WIN32LDFLAGS/
+	(SHARED_LIBADD): Rename from WIN32LIBADD.  Add pic libiberty if such
+	is available, not just for linux.
+	* po/SRC-POTFILES.in: Regenerate.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2009-01-15  Andrew Stubbs  <ams@codesourcery.com>
 	    Julian Brown   <julian@codesourcery.com>
 

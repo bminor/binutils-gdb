@@ -1,3 +1,8 @@
+2009-01-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in (commonbfdlib): Delete.
+	* configure: Regenerate.
+
 2008-01-14  Charles Wilson  <cygwin@cwilson.fastmail.fm>
 
 	Cleanup code related to --identify option.

@@ -40,13 +40,6 @@ AC_ARG_ENABLE(targets,
   no)       enable_targets= ;;
   *)        enable_targets=$enableval ;;
 esac])dnl
-AC_ARG_ENABLE(commonbfdlib,
-[  --enable-commonbfdlib   build shared BFD/opcodes/libiberty library],
-[case "${enableval}" in
-  yes) commonbfdlib=true ;;
-  no)  commonbfdlib=false ;;
-  *)   AC_MSG_ERROR([bad value ${enableval} for opcodes commonbfdlib option]) ;;
-esac])dnl
 
 AM_BINUTILS_WARNINGS
 
@@ -103,26 +96,37 @@ SHARED_LDFLAGS=
 SHARED_LIBADD=
 SHARED_DEPENDENCIES=
 if test "$enable_shared" = "yes"; then
+# When building a shared libopcodes, link against the pic version of libiberty
+# so that apps that use libopcodes won't need libiberty just to satisfy any
+# libopcodes references.
+# We can't do that if a pic libiberty is unavailable since including non-pic
+# code would insert text relocations into libopcodes.
+# Note that linking against libbfd as we do here, which is itself linked
+# against libiberty, may not satisfy all the libopcodes libiberty references
+# since libbfd may not pull in the entirety of libiberty.
+changequote(,)dnl
+  x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | sed -n '$p'`
+changequote([,])dnl
+  if test -n "$x"; then
+    SHARED_LIBADD="-L`pwd`/../libiberty/pic -liberty"
+  fi
+
   case "${host}" in
     *-*-cygwin*)
       SHARED_LDFLAGS="-no-undefined"
       SHARED_LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
       ;;
    *-*-darwin*)
-     SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.dylib"
+     SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.dylib ${SHARED_LIBADD}"
      SHARED_DEPENDENCIES="../bfd/libbfd.la"
      ;;
     *)
       case "$host_vendor" in
         hp)
-          SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.sl"
+          SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.sl ${SHARED_LIBADD}"
 	  ;;
 	*)
-	  # It is tempting to include libiberty here as well, but
-	  # that library is only built as a static version.
-	  # Including it here would insert text relocations into
-	  # the opcodes library, which is undesirable.
-          SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.so"
+          SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.so ${SHARED_LIBADD}"
 	  ;;
       esac
       SHARED_DEPENDENCIES="../bfd/libbfd.la"
