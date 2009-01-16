@@ -1,3 +1,8 @@
+2009-01-16  Kai Tietz  <kai.tietz@onevision.com>
+
+	* coffcode.h (styp_to_sec_flags): Correct interpretation of
+	IMAGE_SCN_MEM_DISCARDABLE.
+
 2009-01-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (libbfd_la_LIBADD, libbfd_la_LDFLAGS): Substitute

@@ -1069,10 +1069,19 @@ styp_to_sec_flags (bfd *abfd,
 	  sec_flags &= ~ SEC_READONLY;
 	  break;
 	case IMAGE_SCN_MEM_DISCARDABLE:
-	  /* The MS PE spec sets the DISCARDABLE flag on .reloc sections
-	     but we do not want them to be labelled as debug section, since
-	     then strip would remove them.  */
-	  if (! CONST_STRNEQ (name, ".reloc"))
+	  /* The MS PE spec says that debug sections are DISCARDABLE,
+	     but the presence of a DISCARDABLE flag does not necessarily
+	     mean that a given section contains debug information.  Thus
+	     we only set the SEC_DEBUGGING flag on sections that we
+	     recognise as containing debug information.  */
+	     if (CONST_STRNEQ (name, DOT_DEBUG)
+#ifdef _COMMENT
+	      || strcmp (name, _COMMENT) == 0
+#endif
+#ifdef COFF_LONG_SECTION_NAMES
+  	      || CONST_STRNEQ (name, GNU_LINKONCE_WI)
+#endif
+	      || CONST_STRNEQ (name, ".stab"))
 	    sec_flags |= SEC_DEBUGGING;
 	  break;
 	case IMAGE_SCN_MEM_SHARED:
