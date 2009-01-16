@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add a new command line option, -Ttext-segment ADDR, for ELF targets
+  to set the address of the first byte of the text segment.
+
 * Add new option --use-nul-prefixed-import-tables to ld for PE targets to
   allow fallback to old import table generation with null element prefix.
 

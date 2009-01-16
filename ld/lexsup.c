@@ -103,6 +103,7 @@ enum option_values
   OPTION_TBSS,
   OPTION_TDATA,
   OPTION_TTEXT,
+  OPTION_TTEXT_SEGMENT,
   OPTION_TRADITIONAL_FORMAT,
   OPTION_UR,
   OPTION_VERBOSE,
@@ -512,6 +513,8 @@ static const struct ld_option ld_options[] =
     '\0', N_("ADDRESS"), N_("Set address of .data section"), ONE_DASH },
   { {"Ttext", required_argument, NULL, OPTION_TTEXT},
     '\0', N_("ADDRESS"), N_("Set address of .text section"), ONE_DASH },
+  { {"Ttext-segment", required_argument, NULL, OPTION_TTEXT_SEGMENT},
+    '\0', N_("ADDRESS"), N_("Set address of text segment"), ONE_DASH },
   { {"unresolved-symbols=<method>", required_argument, NULL,
      OPTION_UNRESOLVED_SYMBOLS},
     '\0', NULL, N_("How to handle unresolved symbols.  <method> is:\n"
@@ -1230,6 +1233,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_TTEXT:
 	  set_segment_start (".text", optarg);
+	  break;
+	case OPTION_TTEXT_SEGMENT:
+	  set_segment_start (".text-segment", optarg);
 	  break;
 	case OPTION_TRADITIONAL_FORMAT:
 	  link_info.traditional_format = TRUE;

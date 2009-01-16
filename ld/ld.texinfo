@@ -1723,6 +1723,12 @@ sign (``@key{=}''), and @var{org}.
 Same as --section-start, with @code{.bss}, @code{.data} or
 @code{.text} as the @var{sectionname}.
 
+@kindex -Ttext-segment @var{org}
+@itemx -Ttext-segment @var{org}
+@cindex text segment origin, cmd line
+When creating an ELF executable or shared object, it will set the address
+of the first byte of the text segment.
+
 @kindex --unresolved-symbols
 @item --unresolved-symbols=@var{method}
 Determine how to handle unresolved symbols.  There are four possible

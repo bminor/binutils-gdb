@@ -1,3 +1,16 @@
+2009-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lexsup.c (option_values): Add OPTION_TTEXT_SEGMENT.
+	(ld_options): Add -Ttext-segment.
+	(parse_args): Handle OPTION_TTEXT_SEGMENT.
+
+	* ld.texinfo: Document -Ttext-segment.
+
+	* NEWS: Mention -Ttext-segment.
+
+	* scripttempl/elf.sc (TEXT_START_ADDR): Use SEGMENT_START.
+	(SHLIB_TEXT_START_ADDR): Likewise.
+
 2009-01-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/spu_icache.o_c: Regenerate.

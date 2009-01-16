@@ -1,3 +1,8 @@
+2009-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/textaddr1.d: New.
+	* ld-elf/textaddr2.d: Likewise.
+
 2009-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/9727
