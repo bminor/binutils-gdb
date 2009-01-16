@@ -1,3 +1,8 @@
+2009-01-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Move the documentation of "info os processes" to
+	the appropriate section (documenting the new commands).
+
 2009-01-15  Doug Evans  <dje@google.com>
 
 	* target.h (target_signal_to_string): Make return type const char *.

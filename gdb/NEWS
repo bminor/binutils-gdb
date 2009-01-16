@@ -186,12 +186,12 @@ macro undef
   These allow macros to be defined, undefined, and listed
   interactively.
 
+info os processes
+  Show operating system information about processes.
+
 * New native configurations
 
 x86/x86_64 Darwin		i[34567]86-*-darwin*
-
-info os processes
-  Show operating system information about processes.
 
 * New targets
 
