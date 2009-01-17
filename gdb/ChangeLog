@@ -1,3 +1,10 @@
+2009-01-18  Nick Roberts  <nickrob@snap.net.nz>
+
+	* thread.c (thread_command): Move call to annotate_thread_changed
+	to...
+	(do_captured_thread_select): ... here, to avoid printing an
+	annotation if the thread change generates an exception.
+
 2009-01-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Document x86_64/MinGW as a new native configuration.
