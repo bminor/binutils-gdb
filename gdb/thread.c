@@ -1045,7 +1045,6 @@ thread_command (char *tidstr, int from_tty)
       return;
     }
 
-  annotate_thread_changed ();
   gdb_thread_select (uiout, tidstr, NULL);
 }
 
@@ -1077,6 +1076,8 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
     error (_("Thread ID %d has terminated."), num);
 
   switch_to_thread (tp->ptid);
+
+  annotate_thread_changed ();
 
   ui_out_text (uiout, "[Switching to thread ");
   ui_out_field_int (uiout, "new-thread-id", pid_to_thread_id (inferior_ptid));
