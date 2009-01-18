@@ -441,6 +441,7 @@ tui_update_breakpoint_info (struct tui_win_info *win,
                && bp->line_number == line->line_or_addr.u.line_no)
               || (win == TUI_DISASM_WIN
 		  && line->line_or_addr.loa == LOA_ADDRESS
+		  && bp->loc != NULL
                   && bp->loc->address == line->line_or_addr.u.addr))
             {
               if (bp->enable_state == bp_disabled)

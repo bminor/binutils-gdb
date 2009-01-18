@@ -1,5 +1,10 @@
 2009-01-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* tui/tui-winsource.c (tui_update_breakpoint_info): In asm layout,
+	skip breakpoints without a location (pending breakpoints).
+
+2009-01-18  Pedro Alves  <pedro@codesourcery.com>
+
 	PR build/9186:
 	* hppa-hpux-tdep.c (hppa_hpux_write_pc): Remove 'return'.
 
