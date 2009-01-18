@@ -1783,6 +1783,8 @@ wait_for_inferior (int treat_exec_as_sigtrap)
 
   while (1)
     {
+      struct cleanup *old_chain;
+
       if (deprecated_target_wait_hook)
 	ecs->ptid = deprecated_target_wait_hook (waiton_ptid, &ecs->ws);
       else
@@ -1795,8 +1797,16 @@ wait_for_inferior (int treat_exec_as_sigtrap)
           ecs->ws.value.sig = TARGET_SIGNAL_TRAP;
         }
 
+      /* If an error happens while handling the event, propagate GDB's
+	 knowledge of the executing state to the frontend/user running
+	 state.  */
+      old_chain = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
+
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (ecs);
+
+      /* No error, don't finish the state yet.  */
+      discard_cleanups (old_chain);
 
       if (!ecs->wait_some_more)
 	break;
@@ -1820,6 +1830,7 @@ fetch_inferior_event (void *client_data)
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+  struct cleanup *ts_old_chain;
   int was_sync = sync_execution;
 
   memset (ecs, 0, sizeof (*ecs));
@@ -1863,6 +1874,14 @@ fetch_inferior_event (void *client_data)
        thread.  */
     context_switch (ecs->ptid);
 
+  /* If an error happens while handling the event, propagate GDB's
+     knowledge of the executing state to the frontend/user running
+     state.  */
+  if (!non_stop)
+    ts_old_chain = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
+  else
+    ts_old_chain = make_cleanup (finish_thread_state_cleanup, &ecs->ptid);
+
   /* Now figure out what to do with the result of the result.  */
   handle_inferior_event (ecs);
 
@@ -1885,6 +1904,9 @@ fetch_inferior_event (void *client_data)
       else
 	inferior_event_handler (INF_EXEC_COMPLETE, NULL);
     }
+
+  /* No error, don't finish the thread states yet.  */
+  discard_cleanups (ts_old_chain);
 
   /* Revert thread and frame.  */
   do_cleanups (old_chain);
@@ -4161,8 +4183,22 @@ normal_stop (void)
 {
   struct target_waitstatus last;
   ptid_t last_ptid;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   get_last_target_status (&last_ptid, &last);
+
+  /* If an exception is thrown from this point on, make sure to
+     propagate GDB's knowledge of the executing state to the
+     frontend/user running state.  A QUIT is an easy exception to see
+     here, so do this before any filtered output.  */
+  if (target_has_execution)
+    {
+      if (!non_stop)
+	old_chain = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
+      else if (last.kind != TARGET_WAITKIND_SIGNALLED
+	       && last.kind != TARGET_WAITKIND_EXITED)
+	old_chain = make_cleanup (finish_thread_state_cleanup, &inferior_ptid);
+    }
 
   /* In non-stop mode, we don't want GDB to switch threads behind the
      user's back, to avoid races where the user is typing a command to
@@ -4383,19 +4419,10 @@ done:
 	/* Delete the breakpoint we stopped at, if it wants to be deleted.
 	   Delete any breakpoint that is to be deleted at the next stop.  */
 	breakpoint_auto_delete (inferior_thread ()->stop_bpstat);
-
-      /* Mark the stopped threads accordingly.  In all-stop, all
-	 threads of all processes are stopped when we get any event
-	 reported.  In non-stop mode, only the event thread stops.  If
-	 we're handling a process exit in non-stop mode, there's
-	 nothing to do, as threads of the dead process are gone, and
-	 threads of any other process were left running.  */
-      if (!non_stop)
-	set_running (minus_one_ptid, 0);
-      else if (last.kind != TARGET_WAITKIND_SIGNALLED
-	       && last.kind != TARGET_WAITKIND_EXITED)
-	set_running (inferior_ptid, 0);
     }
+
+  /* Tell the frontend about the new thread states.  */
+  do_cleanups (old_chain);
 
   /* Look up the hook_stop and run it (CLI internally handles problem
      of stop_command's pre-hook not existing).  */

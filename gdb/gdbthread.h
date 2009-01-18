@@ -288,6 +288,23 @@ extern void set_executing (ptid_t ptid, int executing);
 /* Reports if thread PTID is executing.  */
 extern int is_executing (ptid_t ptid);
 
+/* Merge the executing property of thread PTID over to its thread
+   state property (frontend running/stopped view).
+
+   "not executing" -> "stopped"
+   "executing"     -> "running"
+   "exited"        -> "exited"
+
+   If PIDGET (PTID) is -1, go over all threads.
+
+   Notifications are only emitted if the thread state did change.  */
+extern void finish_thread_state (ptid_t ptid);
+
+/* Same as FINISH_THREAD_STATE, but with an interface suitable to be
+   registered as a cleanup.  PTID_P points to the ptid_t that is
+   passed to FINISH_THREAD_STATE.  */
+extern void finish_thread_state_cleanup (void *ptid_p);
+
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;
 

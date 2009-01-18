@@ -1,5 +1,17 @@
 2009-01-18  Pedro Alves  <pedro@codesourcery.com>
 
+	PR gdb/9747:
+	* gdbthread.h (finish_thread_state, finish_thread_state_cleanup):
+	Declare.
+	* thread.c (finish_thread_state, finish_thread_state_cleanup): New.
+	* infrun.c (wait_for_inferior, fetch_inferior_event): If an error
+	is thrown while handling an event, finish the thread state.
+	(normal_stop): Use finish_thread_state cleanup.
+	* infcmd.c (run_command_1): If an error is thrown while starting
+	the inferior, finish the thread state.
+
+2009-01-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* tui/tui-winsource.c (tui_update_breakpoint_info): In asm layout,
 	skip breakpoints without a location (pending breakpoints).
 
