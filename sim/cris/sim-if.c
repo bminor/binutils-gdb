@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include <errno.h>
 #include "sim-options.h"
 #include "dis-asm.h"
 
@@ -67,6 +68,15 @@ static char cris_bare_iron = 0;
 /* Whether 0x9000000xx have simulator-specific meanings.  */
 char cris_have_900000xxif = 0;
 
+/* Used to optionally override the default start address of the
+   simulation.  */
+static USI cris_start_address = 0xffffffffu;
+
+/* Used to optionally add offsets to the loaded image and its start
+   address.  (Not used for the interpreter of dynamically loaded
+   programs or the DSO:s.)  */
+static int cris_program_offset = 0;
+
 /* What to do when we face a more or less unknown syscall.  */
 enum cris_unknown_syscall_action_type cris_unknown_syscall_action
   = CRIS_USYSC_MSG_STOP;
@@ -80,6 +90,8 @@ typedef enum {
   OPTION_CRIS_STATS = OPTION_START,
   OPTION_CRIS_TRACE,
   OPTION_CRIS_NAKED,
+  OPTION_CRIS_PROGRAM_OFFSET,
+  OPTION_CRIS_STARTADDR,
   OPTION_CRIS_900000XXIF,
   OPTION_CRIS_UNKNOWN_SYSCALL
 } CRIS_OPTIONS;
@@ -104,6 +116,14 @@ static const OPTION cris_options[] =
      OPTION_CRIS_UNKNOWN_SYSCALL},
      '\0', "stop|enosys|enosys-quiet", "Action at an unknown system call",
      cris_option_handler, NULL },
+  { {"cris-program-offset", required_argument, NULL,
+     OPTION_CRIS_PROGRAM_OFFSET},
+      '\0', "OFFSET",
+    "Offset image addresses and default start address of a program",
+      cris_option_handler },
+  { {"cris-start-address", required_argument, NULL, OPTION_CRIS_STARTADDR},
+      '\0', "ADDRESS", "Set start address",
+      cris_option_handler },
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
 };
 
@@ -130,6 +150,7 @@ cris_option_handler (SIM_DESC sd, sim_cpu *cpu ATTRIBUTE_UNUSED, int opt,
      to the module-specific CPU data when we store things in the
      cpu-specific structure.  */
   char *tracefp = STATE_TRACE_FLAGS (sd);
+  char *chp = arg;
 
   switch ((CRIS_OPTIONS) opt)
     {
@@ -171,6 +192,30 @@ cris_option_handler (SIM_DESC sd, sim_cpu *cpu ATTRIBUTE_UNUSED, int opt,
 
       case OPTION_CRIS_900000XXIF:
 	cris_have_900000xxif = 1;
+	break;
+
+      case OPTION_CRIS_STARTADDR:
+	errno = 0;
+	cris_start_address = (USI) strtoul (chp, &chp, 0);
+
+	if (errno != 0 || *chp != 0)
+	  {
+	    sim_io_eprintf (sd, "Invalid option `--cris-start-address=%s'\n",
+			    arg);
+	    return SIM_RC_FAIL;
+	  }
+	break;
+
+      case OPTION_CRIS_PROGRAM_OFFSET:
+	errno = 0;
+	cris_program_offset = (int) strtol (chp, &chp, 0);
+
+	if (errno != 0 || *chp != 0)
+	  {
+	    sim_io_eprintf (sd, "Invalid option `--cris-program-offset=%s'\n",
+			    arg);
+	    return SIM_RC_FAIL;
+	  }
 	break;
 
       case OPTION_CRIS_UNKNOWN_SYSCALL:
@@ -284,6 +329,16 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
   return TRUE;
 }
 
+/* Helper for sim_load (needed just for ELF files): like sim_write,
+   but offset load at cris_program_offset offset.  */
+
+static int
+cris_program_offset_write (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf,
+			   int length)
+{
+  return sim_write (sd, mem + cris_program_offset, buf, length);
+}
+
 /* Replacement for ../common/sim-hload.c:sim_load, so we can treat ELF
    files differently.  */
 
@@ -316,7 +371,7 @@ sim_load (SIM_DESC sd, char *prog_name, struct bfd *prog_bfd,
       return SIM_RC_OK;
     }
 
-  return cris_load_elf_file (sd, prog_bfd, sim_write)
+  return cris_load_elf_file (sd, prog_bfd, cris_program_offset_write)
     ? SIM_RC_OK : SIM_RC_FAIL;
 }
 
@@ -329,6 +384,60 @@ free_state (SIM_DESC sd)
     sim_module_uninstall (sd);
   sim_cpu_free_all (sd);
   sim_state_free (sd);
+}
+
+/* Helper struct for cris_set_section_offset_iterator.  */
+
+struct offsetinfo
+{
+  SIM_DESC sd;
+  int offset;
+};
+
+/* BFD section iterator to offset the LMA and VMA.  */
+
+static void
+cris_set_section_offset_iterator (bfd *abfd, asection *s, void *vp)
+{
+  struct offsetinfo *p = (struct offsetinfo *) vp;
+  SIM_DESC sd = p->sd;
+  int offset = p->offset;
+
+  if ((bfd_get_section_flags (abfd, s) & SEC_ALLOC))
+    {
+      bfd_vma vma = bfd_get_section_vma (abfd, s);
+      
+      bfd_set_section_vma (abfd, s, vma + offset);
+    }
+
+  /* This seems clumsy and inaccurate, but let's stick to doing it the
+     same way as sim_analyze_program for consistency.  */
+  if (strcmp (bfd_get_section_name (abfd, s), ".text") == 0)
+    STATE_TEXT_START (sd) = bfd_get_section_vma (abfd, s);
+}
+
+/* Adjust the start-address, LMA and VMA of a SD.  Must be called
+   after sim_analyze_program.  */
+
+static void
+cris_offset_sections (SIM_DESC sd, int offset)
+{
+  bfd_boolean ret;
+  struct bfd *abfd = STATE_PROG_BFD (sd);
+  asection *text;
+  struct offsetinfo oi;
+
+  /* Only happens for usage error.  */
+  if (abfd == NULL)
+    return;
+
+  oi.sd = sd;
+  oi.offset = offset;
+
+  bfd_map_over_sections (abfd, cris_set_section_offset_iterator, &oi);
+  ret = bfd_set_start_address (abfd, bfd_get_start_address (abfd) + offset);
+
+  STATE_START_ADDR (sd) = bfd_get_start_address (abfd);
 }
 
 /* BFD section iterator to find the highest and lowest allocated and
@@ -520,7 +629,7 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
       if (ibfd == NULL)
 	goto interpname_failed;
 
-      /* The interpreter is at leat something readable to BFD; make
+      /* The interpreter is at least something readable to BFD; make
 	 sure it's an ELF non-archive file.  */
       if (!bfd_check_format (ibfd, bfd_object)
 	  || bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
@@ -688,7 +797,12 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   if (abfd == NULL)
     abfd = STATE_PROG_BFD (sd);
 
-  if (bfd_get_arch (abfd) == bfd_arch_unknown)
+  /* Adjust the addresses of the program at this point.  Unfortunately
+     this does not affect ELF program headers, so we have to handle
+     that separately.  */
+  cris_offset_sections (sd, cris_program_offset);
+
+  if (abfd != NULL && bfd_get_arch (abfd) == bfd_arch_unknown)
     {
       if (STATE_PROG_ARGV (sd) != NULL)
 	sim_io_eprintf (sd, "%s: `%s' is not a CRIS program\n",
@@ -963,8 +1077,11 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   SIM_ADDR addr;
 
   if (sd != NULL)
-    addr = interp_start_addr != 0
-      ? interp_start_addr : bfd_get_start_address (abfd);
+    addr = cris_start_address != (SIM_ADDR) -1
+      ? cris_start_address
+      : (interp_start_addr != 0
+	 ? interp_start_addr
+	 : bfd_get_start_address (abfd));
   else
     addr = 0;
   sim_pc_set (current_cpu, addr);

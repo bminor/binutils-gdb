@@ -1,3 +1,23 @@
+2009-01-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/sim-if.c: Include errno.h.
+	(cris_start_address, cris_program_offset): New variables.
+	(OPTION_CRIS_PROGRAM_OFFSET, OPTION_CRIS_STARTADDR): New option
+	enums.
+	(cris_options): New options --cris-program-offset and
+	--cris-start-address.
+	(cris_option_handler): Handle new options.
+	(cris_program_offset_write, cris_set_section_offset_iterator)
+	(cris_offset_sections, cris_offset_sections): New functions.
+	(sim_load): Use cris_program_offset_write as function argument to
+	cris_load_elf_file, not sim_write.
+	(struct offsetinfo): New struct.
+	(cris_handle_interpreter): Fix typo in comment.
+	(sim_open): Call cris_offset_sections as soon as the bfd of the
+	infile is available.  Gate bfd validity checks on abfd non-NULL.
+	(sim_create_inferior): Let cris_start_address when != -1 override
+	other start-address choices.
+
 2009-01-06  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/traps.c (abort): Define to call sim_io_error.
