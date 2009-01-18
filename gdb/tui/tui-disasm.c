@@ -379,24 +379,17 @@ tui_vertical_disassem_scroll (enum tui_scroll_direction scroll_direction,
     {
       CORE_ADDR pc;
       tui_win_content content;
-      struct symtab *s;
       struct tui_line_or_address val;
-      int max_lines, dir;
-      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+      int dir;
 
       content = (tui_win_content) TUI_DISASM_WIN->generic.content;
-      if (cursal.symtab == (struct symtab *) NULL)
-	s = find_pc_symtab (get_frame_pc (get_selected_frame (NULL)));
-      else
-	s = cursal.symtab;
 
-      /* Account for hilite.  */
-      max_lines = TUI_DISASM_WIN->generic.height - 2;
       pc = content[0]->which_element.source.line_or_addr.u.addr;
-      dir = (scroll_direction == FORWARD_SCROLL) ? max_lines : - max_lines;
+      num_to_scroll++;
+      dir = (scroll_direction == FORWARD_SCROLL) ? num_to_scroll : -num_to_scroll;
 
       val.loa = LOA_ADDRESS;
       val.u.addr = tui_find_disassembly_address (pc, dir);
-      tui_update_source_window_as_is (TUI_DISASM_WIN, s, val, FALSE);
+      tui_update_source_window_as_is (TUI_DISASM_WIN, NULL, val, FALSE);
     }
 }

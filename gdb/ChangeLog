@@ -1,5 +1,12 @@
 2009-01-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* tui/tui-disasm.c (tui_vertical_disassem_scroll): Scroll one line
+	at a time, times NUM_TO_SCROLL.
+	* tui/tui-winsource.c (tui_horizontal_source_scroll): Don't try to
+	fetch the selected frame if there is no stack.
+
+2009-01-18  Pedro Alves  <pedro@codesourcery.com>
+
 	PR gdb/9747:
 	* gdbthread.h (finish_thread_state, finish_thread_state_cleanup):
 	Declare.

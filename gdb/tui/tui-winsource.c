@@ -312,13 +312,16 @@ tui_horizontal_source_scroll (struct tui_win_info *win_info,
   if (win_info->generic.content != NULL)
     {
       int offset;
-      struct symtab *s;
-      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+      struct symtab *s = NULL;
 
-      if (cursal.symtab == (struct symtab *) NULL)
-	s = find_pc_symtab (get_frame_pc (get_selected_frame (NULL)));
-      else
-	s = cursal.symtab;
+      if (win_info->generic.type == SRC_WIN)
+	{
+	  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+	  if (cursal.symtab == NULL)
+	    s = find_pc_symtab (get_frame_pc (get_selected_frame (NULL)));
+	  else
+	    s = cursal.symtab;
+	}
 
       if (direction == LEFT_SCROLL)
 	offset = win_info->detail.source_info.horizontal_offset + num_to_scroll;
