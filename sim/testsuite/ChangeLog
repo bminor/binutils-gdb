@@ -1,3 +1,9 @@
+2009-01-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/asm/opterr5.ms, sim/cris/asm/opterr4.ms,
+	sim/cris/asm/opterr3.ms, sim/cris/asm/bare3.ms: New tests.
+	* lib/sim-defs.exp (run_sim_test): New option progopts.
+
 2009-01-06  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/c/mmap5.c, sim/cris/c/mmap6.c, sim/cris/c/mmap7.c,

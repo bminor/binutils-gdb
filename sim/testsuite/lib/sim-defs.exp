@@ -161,6 +161,7 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 # as[(mach-list)]: <assembler options>
 # ld[(mach-list)]: <linker options>
 # sim[(mach-list)]: <simulator options>
+# progopts: <arguments to the program being simulated>
 # output: program output pattern to match with string-match
 # xerror: program is expected to return with a "failure" exit code
 # xfail: <PRMS-opt> <target-triplets-where-test-fails>
@@ -197,6 +198,7 @@ proc run_sim_test { name requested_machs } {
     # Clear default options
     set opts(as) ""
     set opts(ld) ""
+    set opts(progopts) ""
     set opts(sim) ""
     set opts(output) ""
     set opts(mach) ""
@@ -330,7 +332,7 @@ proc run_sim_test { name requested_machs } {
 	    set options "$options timeout=$opts(timeout)"
 	}
 
-	set result [sim_run ${name}.x "$opts(sim,$mach) $global_sim_options" "" "" "$options"]
+	set result [sim_run ${name}.x "$opts(sim,$mach) $global_sim_options" "$opts(progopts)" "" "$options"]
 	set status [lindex $result 0]
 	set output [lindex $result 1]
 
