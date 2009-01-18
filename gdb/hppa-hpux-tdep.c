@@ -1404,7 +1404,7 @@ hppa_hpux_write_pc (struct regcache *regcache, CORE_ADDR pc)
   if (flags & HPPA_HPUX_SS_INSYSCALL)
     regcache_cooked_write_unsigned (regcache, HPPA_R31_REGNUM, pc | 0x3);
 
-  return hppa_write_pc (regcache, pc);
+  hppa_write_pc (regcache, pc);
 }
 
 static CORE_ADDR

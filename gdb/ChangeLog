@@ -1,3 +1,8 @@
+2009-01-18  Pedro Alves  <pedro@codesourcery.com>
+
+	PR build/9186:
+	* hppa-hpux-tdep.c (hppa_hpux_write_pc): Remove 'return'.
+
 2009-01-18  Nick Roberts  <nickrob@snap.net.nz>
 
 	* thread.c (thread_command): Move call to annotate_thread_changed
