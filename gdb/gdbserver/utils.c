@@ -87,6 +87,23 @@ xstrdup (const char *s)
   return ret;
 }
 
+/* Free a standard argv vector.  */
+
+void
+freeargv (char **vector)
+{
+  char **scan;
+
+  if (vector != NULL)
+    {
+      for (scan = vector; *scan != NULL; scan++)
+	{
+	  free (*scan);
+	}
+      free (vector);
+    }
+}
+
 /* Print the system error message for errno, and also mention STRING
    as the file name for which the error was encountered.
    Then return to command level.  */

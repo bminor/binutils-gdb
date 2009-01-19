@@ -276,6 +276,7 @@ const char *target_signal_to_name (enum target_signal);
 void *xmalloc (size_t) ATTR_MALLOC;
 void *xcalloc (size_t, size_t) ATTR_MALLOC;
 char *xstrdup (const char *) ATTR_MALLOC;
+void freeargv (char **argv);
 void perror_with_name (const char *string);
 void error (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void fatal (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);

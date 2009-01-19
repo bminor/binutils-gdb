@@ -1,3 +1,15 @@
+2009-01-18  Doug Evans  <dje@google.com>
+
+	* regcache.c (new_register_cache): No need to check result of xcalloc.
+	* server.c (handle_search_memory): Back out calls to xmalloc,
+	result is checked and error is returned to user upon failure.
+	(handle_query): Ditto.  Add more checks for result of malloc.
+	(handle_v_cont): Check result of malloc, report error back to
+	user upon failure.
+	(handle_v_run): Ditto.  Call freeargv.
+	* server.h (freeargv): Declare.
+	* utils.c (freeargv): New fn.
+
 2009-01-15  Doug Evans  <dje@google.com>
 
 	* gdbreplay.c (perror_with_name): Make arg const char *.

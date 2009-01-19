@@ -100,8 +100,6 @@ new_register_cache (void)
      in case there are registers the target never fetches.  This way they'll
      read as zero instead of garbage.  */
   regcache->registers = xcalloc (1, register_bytes);
-  if (regcache->registers == NULL)
-    fatal ("Could not allocate register cache.");
 
   regcache->registers_valid = 0;
 

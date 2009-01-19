@@ -436,7 +436,7 @@ handle_search_memory (char *own_buf, int packet_len)
   CORE_ADDR found_addr;
   int cmd_name_len = sizeof ("qSearch:memory:") - 1;
 
-  pattern = xmalloc (packet_len);
+  pattern = malloc (packet_len);
   if (pattern == NULL)
     {
       error ("Unable to allocate memory to perform the search");
@@ -460,7 +460,7 @@ handle_search_memory (char *own_buf, int packet_len)
   if (search_space_len < search_buf_size)
     search_buf_size = search_space_len;
 
-  search_buf = xmalloc (search_buf_size);
+  search_buf = malloc (search_buf_size);
   if (search_buf == NULL)
     {
       free (pattern);
@@ -575,7 +575,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  return;
       if (len > PBUFSIZ - 2)
 	len = PBUFSIZ - 2;
-      spu_buf = xmalloc (len + 1);
+      spu_buf = malloc (len + 1);
       if (!spu_buf)
         return;
 
@@ -604,7 +604,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       require_running (own_buf);
       strcpy (own_buf, "E00");
-      spu_buf = xmalloc (packet_len - 15);
+      spu_buf = malloc (packet_len - 15);
       if (!spu_buf)
         return;
       if (decode_xfer_write (own_buf + 16, packet_len - 16, &annex,
@@ -648,7 +648,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	 more.  */
       if (len > PBUFSIZ - 2)
 	len = PBUFSIZ - 2;
-      data = xmalloc (len + 1);
+      data = malloc (len + 1);
+      if (data == NULL)
+	{
+	  write_enn (own_buf);
+	  return;
+	}
       n = (*the_target->read_auxv) (ofs, data, len + 1);
       if (n < 0)
 	write_enn (own_buf);
@@ -726,7 +731,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       for (dll_ptr = all_dlls.head; dll_ptr != NULL; dll_ptr = dll_ptr->next)
 	total_len += 128 + 6 * strlen (((struct dll_info *) dll_ptr)->name);
 
-      document = xmalloc (total_len);
+      document = malloc (total_len);
+      if (document == NULL)
+	{
+	  write_enn (own_buf);
+	  return;
+	}
       strcpy (document, "<library-list>\n");
       p = document + strlen (document);
 
@@ -782,7 +792,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
        return;
       if (len > PBUFSIZ - 2)
        len = PBUFSIZ - 2;
-      workbuf = xmalloc (len + 1);
+      workbuf = malloc (len + 1);
       if (!workbuf)
         return;
 
@@ -895,8 +905,14 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   /* Handle "monitor" commands.  */
   if (strncmp ("qRcmd,", own_buf, 6) == 0)
     {
-      char *mon = xmalloc (PBUFSIZ);
+      char *mon = malloc (PBUFSIZ);
       int len = strlen (own_buf + 6);
+
+      if (mon == NULL)
+	{
+	  write_enn (own_buf);
+	  return;
+	}
 
       if ((len % 2) != 0 || unhexify (mon, own_buf + 6, len / 2) != len / 2)
 	{
@@ -975,7 +991,9 @@ handle_v_cont (char *own_buf, char *status, int *signal)
   /* Allocate room for one extra action, for the default remain-stopped
      behavior; if no default action is in the list, we'll need the extra
      slot.  */
-  resume_info = xmalloc ((n + 1) * sizeof (resume_info[0]));
+  resume_info = malloc ((n + 1) * sizeof (resume_info[0]));
+  if (resume_info == NULL)
+    goto err;
 
   default_action.thread = -1;
   default_action.leave_stopped = 1;
@@ -1097,7 +1115,7 @@ handle_v_attach (char *own_buf, char *status, int *signal)
 static int
 handle_v_run (char *own_buf, char *status, int *signal)
 {
-  char *p, **pp, *next_p, **new_argv;
+  char *p, *next_p, **new_argv;
   int i, new_argc;
 
   new_argc = 0;
@@ -1107,7 +1125,13 @@ handle_v_run (char *own_buf, char *status, int *signal)
       new_argc++;
     }
 
-  new_argv = xcalloc (new_argc + 2, sizeof (char *));
+  new_argv = calloc (new_argc + 2, sizeof (char *));
+  if (new_argv == NULL)
+    {
+      write_enn (own_buf);
+      return 0;
+    }
+
   i = 0;
   for (p = own_buf + strlen ("vRun;"); *p; p = next_p)
     {
@@ -1119,6 +1143,7 @@ handle_v_run (char *own_buf, char *status, int *signal)
 	new_argv[i] = NULL;
       else
 	{
+	  /* FIXME: Fail request if out of memory instead of dying.  */
 	  new_argv[i] = xmalloc (1 + (next_p - p) / 2);
 	  unhexify (new_argv[i], p, (next_p - p) / 2);
 	  new_argv[i][(next_p - p) / 2] = '\0';
@@ -1137,20 +1162,22 @@ handle_v_run (char *own_buf, char *status, int *signal)
 
       if (program_argv == NULL)
 	{
+	  /* FIXME: new_argv memory leak */
 	  write_enn (own_buf);
 	  return 0;
 	}
 
-      new_argv[0] = xstrdup (program_argv[0]);
+      new_argv[0] = strdup (program_argv[0]);
+      if (new_argv[0] == NULL)
+	{
+	  /* FIXME: new_argv memory leak */
+	  write_enn (own_buf);
+	  return 0;
+	}	  
     }
 
-  /* Free the old argv.  */
-  if (program_argv)
-    {
-      for (pp = program_argv; *pp != NULL; pp++)
-	free (*pp);
-      free (program_argv);
-    }
+  /* Free the old argv and install the new one.  */
+  freeargv (program_argv);
   program_argv = new_argv;
 
   *signal = start_inferior (program_argv, status);
