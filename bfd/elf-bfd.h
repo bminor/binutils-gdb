@@ -1373,7 +1373,8 @@ struct elf_find_verdep_info
 
 /* The value of an object attribute.  type & 1 indicates whether there
    is an integer value; type & 2 indicates whether there is a string
-   value.  */
+   value; type & 4 indicates whether the type has a default value
+   (i.e. is there a value that need not be written to file).  */
 
 typedef struct obj_attribute
 {

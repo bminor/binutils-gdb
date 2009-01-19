@@ -1,3 +1,16 @@
+2009-01-19  Andrew Stubbs  <ams@codesourcery.com>
+
+	* elf-attrs.c (is_default_attr): Support defaultless attributes.
+	(bfd_elf_add_obj_attr_int): Get type from _bfd_elf_obj_attrs_arg_type.
+	(bfd_elf_add_obj_attr_string): Likewise.
+	(bfd_elf_add_obj_attr_int_string): Likewise.
+	(_bfd_elf_parse_attributes): Allow for unknown flag bits in type.
+	* elf-bfd.h (struct obj_attribute): Document new flag bit.
+	* elf32-arm.c (elf32_arm_obj_attrs_arg_type): Specify that
+	Tag_nodefaults has no default value.
+	(elf32_arm_merge_eabi_attributes): Modify the Tag_nodefaults
+	comment to reflect the new state.
+
 2009-01-19  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 9695

@@ -47,6 +47,8 @@ is_default_attr (obj_attribute *attr)
     return FALSE;
   if ((attr->type & 2) && attr->s && *attr->s)
     return FALSE;
+  if (attr->type & 4)
+    return FALSE;
 
   return TRUE;
 }
@@ -290,7 +292,7 @@ bfd_elf_add_obj_attr_int (bfd *abfd, int vendor, int tag, unsigned int i)
   obj_attribute *attr;
 
   attr = elf_new_obj_attr (abfd, vendor, tag);
-  attr->type = 1;
+  attr->type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
   attr->i = i;
 }
 
@@ -313,7 +315,7 @@ bfd_elf_add_obj_attr_string (bfd *abfd, int vendor, int tag, const char *s)
   obj_attribute *attr;
 
   attr = elf_new_obj_attr (abfd, vendor, tag);
-  attr->type = 2;
+  attr->type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
   attr->s = _bfd_elf_attr_strdup (abfd, s);
 }
 
@@ -325,7 +327,7 @@ bfd_elf_add_obj_attr_int_string (bfd *abfd, int vendor, int tag,
   obj_attribute *attr;
 
   attr = elf_new_obj_attr (abfd, vendor, tag);
-  attr->type = 3;
+  attr->type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
   attr->i = i;
   attr->s = _bfd_elf_attr_strdup (abfd, s);
 }
@@ -487,7 +489,7 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 		      tag = read_unsigned_leb128 (abfd, p, &n);
 		      p += n;
 		      type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
-		      switch (type)
+		      switch (type & 3)
 			{
 			case 3:
 			  val = read_unsigned_leb128 (abfd, p, &n);

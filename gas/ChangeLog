@@ -1,3 +1,7 @@
+2009-01-19  Andrew Stubbs  <ams@codesourcery.com>
+
+	* read.c (s_vendor_attribute): Allow for unknown flag bits in type.
+
 2009-01-16  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* config/te-armeabi.h (EABI_DEFAULT): Use EF_ARM_EABI_VER5.

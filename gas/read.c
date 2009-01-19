@@ -2123,7 +2123,7 @@ s_vendor_attribute (int vendor)
 	}
       i = exp.X_add_number;
     }
-  if (type == 3
+  if ((type & 3) == 3
       && skip_past_comma (&input_line_pointer) == -1)
     {
       as_bad (_("expected comma"));
@@ -2140,7 +2140,7 @@ s_vendor_attribute (int vendor)
       s = demand_copy_C_string (&len);
     }
 
-  switch (type)
+  switch (type & 3)
     {
     case 3:
       bfd_elf_add_obj_attr_int_string (stdoutput, vendor, tag, i, s);

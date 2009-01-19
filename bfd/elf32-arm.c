@@ -8139,6 +8139,8 @@ elf32_arm_obj_attrs_arg_type (int tag)
 {
   if (tag == Tag_compatibility)
     return 3;
+  else if (tag == Tag_nodefaults)
+    return 5;
   else if (tag == 4 || tag == 5)
     return 2;
   else if (tag < 32)
@@ -8675,11 +8677,10 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	  break;
 
 	case Tag_nodefaults:
-	  /* This tag is set if it exists, but the value is unused.
-	     Unfortunately, we don't record whether each attribute is zero
-	     initialized, or read from the file, so the information has been
-	     lost.  In any case, we don't write attributes with zero values.
-	     Do nothing. */
+	  /* This tag is set if it exists, but the value is unused (and is
+	     typically zero).  We don't actually need to do anything here -
+	     the merge happens automatically when the type flags are merged
+	     below.  */
 	  break;
 	case Tag_also_compatible_with:
 	  /* Already done in Tag_CPU_arch.  */
