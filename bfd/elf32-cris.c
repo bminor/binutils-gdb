@@ -3055,7 +3055,11 @@ elf_cris_copy_indirect_symbol (struct bfd_link_info *info,
   /* Only indirect symbols are replaced; we're not interested in
      updating any of EIND's fields for other symbols.  */
   if (eind->root.root.type != bfd_link_hash_indirect)
-    return;
+    {
+      /* Still, we need to copy flags for e.g. weak definitions.  */
+      _bfd_elf_link_hash_copy_indirect (info, dir, ind);
+      return;
+    }
 
   BFD_ASSERT (edir->pcrel_relocs_copied == NULL);
   BFD_ASSERT (edir->gotplt_offset == 0 || eind->gotplt_offset == 0);

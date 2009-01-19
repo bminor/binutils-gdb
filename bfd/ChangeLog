@@ -1,3 +1,9 @@
+2009-01-19  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (elf_cris_copy_indirect_symbol): For other symbol
+	types than bfd_link_hash_indirect, before early return, call
+	_bfd_elf_link_hash_copy_indirect.
+
 2009-01-19  Andrew Stubbs  <ams@codesourcery.com>
 
 	* elf-attrs.c (vendor_set_obj_attr_contents): Support tag ordering.
