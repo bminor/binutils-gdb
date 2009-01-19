@@ -1,3 +1,7 @@
+2009-01-19  Andreas Schwab  <schwab@suse.de>
+
+	* configure.tgt (powerpc64-*): Fix targ_obj.
+
 2009-01-15  Ian Lance Taylor  <iant@google.com>
 
 	* object.cc (Sized_relobj::write_local_symbols): Don't write out
@@ -583,7 +587,7 @@
 	* testsuite/script_test_2.cc (test_addr): Declare.
 	(test_addr_alias): Declare.
 	(main): Check that test_addr and test_addr_alias have the right
-	values. 
+	values.
 	* testsuite/script_test_2.t: Define test_addr_alias and
 	test_addr.
 
@@ -765,10 +769,10 @@
 
 	* symtab.cc (Symbol_table::warn_about_undefined_dynobj_symbol):
 	Include symbol version in error message.
-	
+
 2008-07-20  Chris Demetriou  <cgd@google.com>
 
-        * configure.ac (gold_cv_c_random_seed): New configured variable.
+	* configure.ac (gold_cv_c_random_seed): New configured variable.
 	(RANDOM_SEED_CFLAGS): New substituted variable.
 	* Makefile.am (AM_CFLAGS, AM_CXXFLAGS): Add $(RANDOM_SEED_CFLAGS).
 	* configure: Rebuild.
@@ -947,7 +951,7 @@
 2008-06-05  Kris Van Hees  <kris.van.hees@oracle.com>
 
 	PR 6584
-        * binary.cc (Binary_to_elf::sized_convert): Fix .data
+	* binary.cc (Binary_to_elf::sized_convert): Fix .data
 	alignment.
 
 2008-05-30  Cary Coutant  <ccoutant@google.com>
@@ -2124,7 +2128,7 @@
 	for thin archives.  Pass additional parameters to
 	Archive::Archive.  Unlock the archive file after calling
 	Archive::setup.
-	
+
 2008-03-29  Ian Lance Taylor  <iant@google.com>
 
 	* symtab.cc (Symbol_table::do_define_as_constant): Don't force a
@@ -2431,4 +2435,3 @@
 2008-03-21  Ian Lance Taylor  <iant@google.com>
 
 	* Added source code to GNU binutils.
-	
