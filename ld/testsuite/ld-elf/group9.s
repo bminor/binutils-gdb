@@ -12,4 +12,4 @@ foo.data:
 	.globl bar
 	.type	bar,%function
 bar:
-	.byte foo.data
+	.long foo.data

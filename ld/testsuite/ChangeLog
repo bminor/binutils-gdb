@@ -1,3 +1,7 @@
+2009-01-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/group9.s: Replace .byte with .long.
+
 2009-01-19  Andrew Stubbs  <ams@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (armeabitests): Add EABI attribute merging 3,
