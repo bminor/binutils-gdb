@@ -1167,6 +1167,12 @@ struct elf_backend_data
   /* The section type to use for an attributes section.  */
   unsigned int obj_attrs_section_type;
 
+  /* This function determines the order in which any attributes are written.
+     It must be defined for input in the range 4..NUM_KNOWN_OBJ_ATTRIBUTES-1
+     (this range is used in order to make unity easy).  The returned value is
+     the actual tag number to place in the input position.  */
+  int (*obj_attrs_order) (int);
+
   /* This is TRUE if the linker should act like collect and gather
      global constructors and destructors by name.  This is TRUE for
      MIPS ELF because the Irix 5 tools can not handle the .init

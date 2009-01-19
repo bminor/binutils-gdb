@@ -1,5 +1,14 @@
 2009-01-19  Andrew Stubbs  <ams@codesourcery.com>
 
+	* elf-attrs.c (vendor_set_obj_attr_contents): Support tag ordering.
+	* elf-bfd.h (elf_backend_data): Add obj_attrs_order.
+	* elf32-arm.c (elf32_arm_obj_attrs_order): New function.
+	(elf_backend_obj_attrs_order): New define.
+	* elfxx-target.h (elf_backend_obj_attrs_order): New define.
+	(elfNN_bed): Add elf_backend_obj_attrs_order.
+
+2009-01-19  Andrew Stubbs  <ams@codesourcery.com>
+
 	* elf-attrs.c (is_default_attr): Substitute magic numbers with macros.
 	(obj_attr_size): Likewise.
 	(write_obj_attribute): Likewise.

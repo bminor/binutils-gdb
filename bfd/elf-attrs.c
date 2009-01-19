@@ -189,7 +189,12 @@ vendor_set_obj_attr_contents (bfd *abfd, bfd_byte *contents, bfd_vma size,
 
   attr = elf_known_obj_attributes (abfd)[vendor];
   for (i = 4; i < NUM_KNOWN_OBJ_ATTRIBUTES; i++)
-    p = write_obj_attribute (p, i, &attr[i]);
+    {
+      int tag = i;
+      if (get_elf_backend_data (abfd)->obj_attrs_order)
+	tag = get_elf_backend_data (abfd)->obj_attrs_order (i);
+      p = write_obj_attribute (p, tag, &attr[tag]);
+    }
 
   for (list = elf_other_obj_attributes (abfd)[vendor];
        list;

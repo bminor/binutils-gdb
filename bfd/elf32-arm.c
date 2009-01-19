@@ -8149,6 +8149,24 @@ elf32_arm_obj_attrs_arg_type (int tag)
     return (tag & 1) != 0 ? ATTR_TYPE_FLAG_STR_VAL : ATTR_TYPE_FLAG_INT_VAL;
 }
 
+/* The ABI defines that Tag_conformance should be emitted first, and that
+   Tag_nodefaults should be second (if either is defined).  This sets those
+   two positions, and bumps up the position of all the remaining tags to
+   compensate.  */
+static int
+elf32_arm_obj_attrs_order (int num)
+{
+  if (num == 4)
+    return Tag_conformance;
+  if (num == 5)
+    return Tag_nodefaults;
+  if ((num - 2) < Tag_nodefaults)
+    return num - 2;
+  if ((num - 1) < Tag_conformance)
+    return num - 1;
+  return num;
+}
+
 /* Read the architecture from the Tag_also_compatible_with attribute, if any.
    Returns -1 if no architecture could be read.  */
 
@@ -12292,6 +12310,7 @@ const struct elf_size_info elf32_arm_size_info =
 #define elf_backend_obj_attrs_arg_type		elf32_arm_obj_attrs_arg_type
 #undef  elf_backend_obj_attrs_section_type
 #define elf_backend_obj_attrs_section_type	SHT_ARM_ATTRIBUTES
+#define elf_backend_obj_attrs_order	elf32_arm_obj_attrs_order
 
 #include "elf32-target.h"
 

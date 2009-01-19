@@ -1,3 +1,8 @@
+2009-01-19  Andrew Stubbs  <ams@codesourcery.com>
+
+	* gas/arm/attr-order.d: New file.
+	* gas/arm/attr-order.s: New file.
+
 2009-01-16  Andrew Stubbs  <ams@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
