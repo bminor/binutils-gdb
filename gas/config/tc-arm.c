@@ -1,6 +1,6 @@
 /* tc-arm.c -- Assemble for the ARM
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008
+   2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
@@ -12727,6 +12727,7 @@ do_vfp_nsyn_cvtz (void)
   if (flavour >= 0 && flavour < (int) ARRAY_SIZE (enc) && enc[flavour])
     do_vfp_nsyn_opcode (enc[flavour]);
 }
+
 static void
 do_neon_cvt (void)
 {
@@ -16028,7 +16029,7 @@ static const struct asm_opcode insns[] =
  nCEF(vcvt,     vcvt,    3, (RNSDQ, RNSDQ, oI32b), neon_cvt),
  nCEF(vcvtb,	vcvt,	 2, (RVS, RVS), neon_cvtb),
  nCEF(vcvtt,	vcvt,	 2, (RVS, RVS), neon_cvtt),
- 
+
 
   /* NOTE: All VMOV encoding is special-cased!  */
  NCE(vmov,      0,       1, (VMOV), neon_mov),
@@ -20935,7 +20936,6 @@ s_arm_object_arch (int ignored ATTRIBUTE_UNUSED)
   ignore_rest_of_line ();
 }
 
-
 /* Parse a .fpu directive.  */
 
 static void
@@ -20967,72 +20967,79 @@ s_arm_fpu (int ignored ATTRIBUTE_UNUSED)
 }
 
 /* Copy symbol information.  */
+
 void
 arm_copy_symbol_attributes (symbolS *dest, symbolS *src)
 {
   ARM_GET_FLAG (dest) = ARM_GET_FLAG (src);
 }
 
+#ifdef OBJ_ELF
 /* Given a symbolic attribute NAME, return the proper integer value.
    Returns -1 if the attribute is not known.  */
+
 int
 arm_convert_symbolic_attribute (const char *name)
 {
+  static const struct
+  {
+    const char * name;
+    const int    tag;
+  }
+  attribute_table[] =
+    {
+      /* When you modify this table you should
+	 also modify the list in doc/c-arm.texi.  */
 #define T(tag) {#tag, tag}
-  /* When you modify this table you should also
-     modify the list in doc/c-arm.texi.  */
-  static const struct {
-    const char *name;
-    const int tag;
-  } attribute_table[] = {
-      T(Tag_CPU_raw_name),
-      T(Tag_CPU_name),
-      T(Tag_CPU_arch),
-      T(Tag_CPU_arch_profile),
-      T(Tag_ARM_ISA_use),
-      T(Tag_THUMB_ISA_use),
-      T(Tag_VFP_arch),
-      T(Tag_WMMX_arch),
-      T(Tag_Advanced_SIMD_arch),
-      T(Tag_PCS_config),
-      T(Tag_ABI_PCS_R9_use),
-      T(Tag_ABI_PCS_RW_data),
-      T(Tag_ABI_PCS_RO_data),
-      T(Tag_ABI_PCS_GOT_use),
-      T(Tag_ABI_PCS_wchar_t),
-      T(Tag_ABI_FP_rounding),
-      T(Tag_ABI_FP_denormal),
-      T(Tag_ABI_FP_exceptions),
-      T(Tag_ABI_FP_user_exceptions),
-      T(Tag_ABI_FP_number_model),
-      T(Tag_ABI_align8_needed),
-      T(Tag_ABI_align8_preserved),
-      T(Tag_ABI_enum_size),
-      T(Tag_ABI_HardFP_use),
-      T(Tag_ABI_VFP_args),
-      T(Tag_ABI_WMMX_args),
-      T(Tag_ABI_optimization_goals),
-      T(Tag_ABI_FP_optimization_goals),
-      T(Tag_compatibility),
-      T(Tag_CPU_unaligned_access),
-      T(Tag_VFP_HP_extension),
-      T(Tag_ABI_FP_16bit_format),
-      T(Tag_nodefaults),
-      T(Tag_also_compatible_with),
-      T(Tag_conformance),
-      T(Tag_T2EE_use),
-      T(Tag_Virtualization_use),
-      T(Tag_MPextension_use)
-  };
+      T (Tag_CPU_raw_name),
+      T (Tag_CPU_name),
+      T (Tag_CPU_arch),
+      T (Tag_CPU_arch_profile),
+      T (Tag_ARM_ISA_use),
+      T (Tag_THUMB_ISA_use),
+      T (Tag_VFP_arch),
+      T (Tag_WMMX_arch),
+      T (Tag_Advanced_SIMD_arch),
+      T (Tag_PCS_config),
+      T (Tag_ABI_PCS_R9_use),
+      T (Tag_ABI_PCS_RW_data),
+      T (Tag_ABI_PCS_RO_data),
+      T (Tag_ABI_PCS_GOT_use),
+      T (Tag_ABI_PCS_wchar_t),
+      T (Tag_ABI_FP_rounding),
+      T (Tag_ABI_FP_denormal),
+      T (Tag_ABI_FP_exceptions),
+      T (Tag_ABI_FP_user_exceptions),
+      T (Tag_ABI_FP_number_model),
+      T (Tag_ABI_align8_needed),
+      T (Tag_ABI_align8_preserved),
+      T (Tag_ABI_enum_size),
+      T (Tag_ABI_HardFP_use),
+      T (Tag_ABI_VFP_args),
+      T (Tag_ABI_WMMX_args),
+      T (Tag_ABI_optimization_goals),
+      T (Tag_ABI_FP_optimization_goals),
+      T (Tag_compatibility),
+      T (Tag_CPU_unaligned_access),
+      T (Tag_VFP_HP_extension),
+      T (Tag_ABI_FP_16bit_format),
+      T (Tag_nodefaults),
+      T (Tag_also_compatible_with),
+      T (Tag_conformance),
+      T (Tag_T2EE_use),
+      T (Tag_Virtualization_use),
+      T (Tag_MPextension_use)
 #undef T
+    };
   unsigned int i;
 
   if (name == NULL)
     return -1;
 
-  for (i = 0; i < ARRAY_SIZE(attribute_table); i++)
+  for (i = 0; i < ARRAY_SIZE (attribute_table); i++)
     if (strcmp (name, attribute_table[i].name) == 0)
       return attribute_table[i].tag;
 
   return -1;
 }
+#endif /* OBJ_ELF */
