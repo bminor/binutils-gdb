@@ -9,12 +9,14 @@
 # definition is also in the other DSO.
 # There was a bug causing GOT markups to be during symbol handling,
 # with a newly added assertion failure and a reloc turned R_CRIS_NONE.
+# The dynamic __expobj2 entry is unused and seems spurious, or there
+# should at least be a similar __expfn2 reference
 
 .*:     file format elf32-cris
 
 DYNAMIC SYMBOL TABLE:
 #...
-0+  w[	 ]+DO \*UND\*[	 ]+0+  TST3[	 ]+__expobj2
+0+[	 ]+DO \*UND\*[	 ]+0+  TST3[	 ]+__expobj2
 #...
 0+[	 ]+DO \*UND\*[	 ]+0+  TST3[	 ]+expobj2
 0+[	 ]+DF \*UND\*[	 ]+0+  TST3[	 ]+expfn2
