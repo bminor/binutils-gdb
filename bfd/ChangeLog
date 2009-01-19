@@ -1,5 +1,19 @@
 2009-01-19  Andrew Stubbs  <ams@codesourcery.com>
 
+	* elf-attrs.c (is_default_attr): Substitute magic numbers with macros.
+	(obj_attr_size): Likewise.
+	(write_obj_attribute): Likewise.
+	(_bfd_elf_copy_obj_attributes): Likewise.
+	(_bfd_elf_parse_attributes): Likewise.
+	* elf-bfd.h (ATTR_TYPE_FLAG_INT_VAL): New define.
+	(ATTR_TYPE_FLAG_STR_VAL, ATTR_TYPE_FLAG_NO_DEFAULT): New defines.
+	(ATTR_TYPE_HAS_INT_VAL, ATTR_TYPE_HAS_STR_VAL): New defines.
+	(ATTR_TYPE_HAS_NO_DEFAULT): New define.
+	* elf32-arm.c (elf32_arm_obj_attrs_arg_type): Replace magic numbers
+	with macros.
+
+2009-01-19  Andrew Stubbs  <ams@codesourcery.com>
+
 	* elf-attrs.c (is_default_attr): Support defaultless attributes.
 	(bfd_elf_add_obj_attr_int): Get type from _bfd_elf_obj_attrs_arg_type.
 	(bfd_elf_add_obj_attr_string): Likewise.

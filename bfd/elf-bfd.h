@@ -1371,13 +1371,20 @@ struct elf_find_verdep_info
 /* The maximum number of known object attributes for any target.  */
 #define NUM_KNOWN_OBJ_ATTRIBUTES 71
 
-/* The value of an object attribute.  type & 1 indicates whether there
-   is an integer value; type & 2 indicates whether there is a string
-   value; type & 4 indicates whether the type has a default value
-   (i.e. is there a value that need not be written to file).  */
+/* The value of an object attribute.  The type indicates whether the attribute
+   holds and integer, a string, or both.  It can also indicate that there can
+   be no default (i.e. all values must be written to file, even zero).  */
 
 typedef struct obj_attribute
 {
+#define ATTR_TYPE_FLAG_INT_VAL    (1 << 0)
+#define ATTR_TYPE_FLAG_STR_VAL    (1 << 1)
+#define ATTR_TYPE_FLAG_NO_DEFAULT (1 << 2)
+
+#define ATTR_TYPE_HAS_INT_VAL(TYPE)	((TYPE) & ATTR_TYPE_FLAG_INT_VAL)
+#define ATTR_TYPE_HAS_STR_VAL(TYPE)	((TYPE) & ATTR_TYPE_FLAG_STR_VAL)
+#define ATTR_TYPE_HAS_NO_DEFAULT(TYPE)	((TYPE) & ATTR_TYPE_FLAG_NO_DEFAULT)
+
   int type;
   unsigned int i;
   char *s;

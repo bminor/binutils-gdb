@@ -43,11 +43,11 @@ uleb128_size (unsigned int i)
 static bfd_boolean
 is_default_attr (obj_attribute *attr)
 {
-  if ((attr->type & 1) && attr->i != 0)
+  if (ATTR_TYPE_HAS_INT_VAL (attr->type) && attr->i != 0)
     return FALSE;
-  if ((attr->type & 2) && attr->s && *attr->s)
+  if (ATTR_TYPE_HAS_STR_VAL (attr->type) && attr->s && *attr->s)
     return FALSE;
-  if (attr->type & 4)
+  if (ATTR_TYPE_HAS_NO_DEFAULT (attr->type))
     return FALSE;
 
   return TRUE;
@@ -63,9 +63,9 @@ obj_attr_size (int tag, obj_attribute *attr)
     return 0;
 
   size = uleb128_size (tag);
-  if (attr->type & 1)
+  if (ATTR_TYPE_HAS_INT_VAL (attr->type))
     size += uleb128_size (attr->i);
-  if (attr->type & 2)
+  if (ATTR_TYPE_HAS_STR_VAL (attr->type))
     size += strlen ((char *)attr->s) + 1;
   return size;
 }
@@ -151,9 +151,9 @@ write_obj_attribute (bfd_byte *p, int tag, obj_attribute *attr)
     return p;
 
   p = write_uleb128 (p, tag);
-  if (attr->type & 1)
+  if (ATTR_TYPE_HAS_INT_VAL (attr->type))
     p = write_uleb128 (p, attr->i);
-  if (attr->type & 2)
+  if (ATTR_TYPE_HAS_STR_VAL (attr->type))
     {
       int len;
 
@@ -361,16 +361,16 @@ _bfd_elf_copy_obj_attributes (bfd *ibfd, bfd *obfd)
 	   list = list->next)
 	{
 	  in_attr = &list->attr;
-	  switch (in_attr->type)
+	  switch (in_attr->type & (ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL))
 	    {
-	    case 1:
+	    case ATTR_TYPE_FLAG_INT_VAL:
 	      bfd_elf_add_obj_attr_int (obfd, vendor, list->tag, in_attr->i);
 	      break;
-	    case 2:
+	    case ATTR_TYPE_FLAG_STR_VAL:
 	      bfd_elf_add_obj_attr_string (obfd, vendor, list->tag,
 					   in_attr->s);
 	      break;
-	    case 3:
+	    case ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL:
 	      bfd_elf_add_obj_attr_int_string (obfd, vendor, list->tag,
 					       in_attr->i, in_attr->s);
 	      break;
@@ -489,21 +489,21 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 		      tag = read_unsigned_leb128 (abfd, p, &n);
 		      p += n;
 		      type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
-		      switch (type & 3)
+		      switch (type & (ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL))
 			{
-			case 3:
+			case ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL:
 			  val = read_unsigned_leb128 (abfd, p, &n);
 			  p += n;
 			  bfd_elf_add_obj_attr_int_string (abfd, vendor, tag,
 							   val, (char *)p);
 			  p += strlen ((char *)p) + 1;
 			  break;
-			case 2:
+			case ATTR_TYPE_FLAG_STR_VAL:
 			  bfd_elf_add_obj_attr_string (abfd, vendor, tag,
 						       (char *)p);
 			  p += strlen ((char *)p) + 1;
 			  break;
-			case 1:
+			case ATTR_TYPE_FLAG_INT_VAL:
 			  val = read_unsigned_leb128 (abfd, p, &n);
 			  p += n;
 			  bfd_elf_add_obj_attr_int (abfd, vendor, tag, val);

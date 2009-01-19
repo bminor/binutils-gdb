@@ -8138,15 +8138,15 @@ static int
 elf32_arm_obj_attrs_arg_type (int tag)
 {
   if (tag == Tag_compatibility)
-    return 3;
+    return ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL;
   else if (tag == Tag_nodefaults)
-    return 5;
-  else if (tag == 4 || tag == 5)
-    return 2;
+    return ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_NO_DEFAULT;
+  else if (tag == Tag_CPU_raw_name || tag == Tag_CPU_name)
+    return ATTR_TYPE_FLAG_STR_VAL;
   else if (tag < 32)
-    return 1;
+    return ATTR_TYPE_FLAG_INT_VAL;
   else
-    return (tag & 1) != 0 ? 2 : 1;
+    return (tag & 1) != 0 ? ATTR_TYPE_FLAG_STR_VAL : ATTR_TYPE_FLAG_INT_VAL;
 }
 
 /* Read the architecture from the Tag_also_compatible_with attribute, if any.
