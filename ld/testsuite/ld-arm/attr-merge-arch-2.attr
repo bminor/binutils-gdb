@@ -1,0 +1,5 @@
+Attribute Section: aeabi
+File Attributes
+  Tag_CPU_raw_name: "arch_v6k"
+  Tag_CPU_name: "MPCORE"
+  Tag_CPU_arch: v6K

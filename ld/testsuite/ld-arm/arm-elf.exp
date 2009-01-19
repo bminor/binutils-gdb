@@ -205,6 +205,27 @@ set armeabitests {
      {"EABI attribute merging 2" "-r" "" {attr-merge-2a.s attr-merge-2b.s}
       {{readelf -A attr-merge-2.attr}}
       "attr-merge-2"}
+     {"EABI attribute merging 3" "-r" "" {attr-merge-3a.s attr-merge-3b.s}
+      {{readelf -A attr-merge-3.attr}}
+      "attr-merge-3"}
+     {"EABI attribute merging 4" "-r" "" {attr-merge-4a.s attr-merge-4b.s}
+      {{readelf -A attr-merge-4.attr}}
+      "attr-merge-4"}
+     {"EABI attribute merging 5" "-r" "" {attr-merge-5.s attr-merge-5.s}
+      {{readelf -A attr-merge-5.attr}}
+      "attr-merge-5"}
+     {"EABI attribute arch merging 1" "-r" "" {arch-v6k.s arch-v6t2.s}
+      {{readelf -A attr-merge-arch-1.attr}}
+      "attr-merge-arch-1"}
+     {"EABI attribute arch merging 1 reversed" "-r" "" {arch-v6t2.s arch-v6k.s}
+      {{readelf -A attr-merge-arch-1.attr}}
+      "attr-merge-arch-1r"}
+     {"EABI attribute arch merging 2" "-r" "" {arch-v6k.s arch-v6.s}
+      {{readelf -A attr-merge-arch-2.attr}}
+      "attr-merge-arch-2"}
+     {"EABI attribute arch merging 2 reversed" "-r" "" {arch-v6.s arch-v6k.s}
+      {{readelf -A attr-merge-arch-2.attr}}
+      "attr-merge-arch-2r"}
      {"Thumb-2 BL" "-Ttext 0x1000 --section-start .foo=0x1001000" "" {thumb2-bl.s}
       {{objdump -dr thumb2-bl.d}}
       "thumb2-bl"}
@@ -310,3 +331,7 @@ run_dump_test "farcall-thumb-thumb-pic-veneer"
 run_dump_test "farcall-thumb-thumb-m-pic-veneer"
 run_dump_test "farcall-thumb-arm-pic-veneer"
 run_dump_test "farcall-section"
+run_dump_test "attr-merge-unknown-1"
+run_dump_test "attr-merge-unknown-2"
+run_dump_test "attr-merge-unknown-2r"
+run_dump_test "attr-merge-unknown-3"
