@@ -1,5 +1,5 @@
 /* BFD back-end for PDP-11 a.out binaries.
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -65,12 +65,9 @@
 #define N_FLAGS(exec)		0
 
 #define N_SET_FLAGS(exec, flags) do { } while (0)
-#define N_BADMAG(x) (((x).a_info != OMAGIC)   \
-		  && ((x).a_info != NMAGIC)   \
-		  && ((x).a_info != A_MAGIC3) \
-		  && ((x).a_info != A_MAGIC4) \
-		  && ((x).a_info != A_MAGIC5) \
-		  && ((x).a_info != A_MAGIC6))
+#define N_BADMAG(x) (N_MAGIC(x) != OMAGIC	\
+		     && N_MAGIC(x) != NMAGIC	\
+		     && N_MAGIC(x) != ZMAGIC)
 
 #include "sysdep.h"
 #include "bfd.h"
@@ -507,19 +504,12 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
       abfd->flags |= D_PAGED | WP_TEXT;
       adata (abfd).magic = z_magic;
     }
-  else if (N_MAGIC (*execp) == QMAGIC)
-    {
-      abfd->flags |= D_PAGED | WP_TEXT;
-      adata (abfd).magic = z_magic;
-      adata (abfd).subformat = q_magic_format;
-    }
   else if (N_MAGIC (*execp) == NMAGIC)
     {
       abfd->flags |= WP_TEXT;
       adata (abfd).magic = n_magic;
     }
-  else if (N_MAGIC (*execp) == OMAGIC
-	   || N_MAGIC (*execp) == BMAGIC)
+  else if (N_MAGIC (*execp) == OMAGIC)
     adata (abfd).magic = o_magic;
   else
     {
@@ -958,10 +948,7 @@ adjust_z_magic (bfd *abfd, struct internal_exec *execp)
   execp->a_text = obj_textsec(abfd)->size;
   if (ztih && (!abdp || (abdp && !abdp->exec_header_not_counted)))
     execp->a_text += adata(abfd).exec_bytes_size;
-  if (obj_aout_subformat (abfd) == q_magic_format)
-    N_SET_MAGIC (*execp, QMAGIC);
-  else
-    N_SET_MAGIC (*execp, ZMAGIC);
+  N_SET_MAGIC (*execp, ZMAGIC);
 
   /* Spec says data section should be rounded up to page boundary.  */
   obj_datasec(abfd)->size

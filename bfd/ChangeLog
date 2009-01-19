@@ -1,3 +1,10 @@
+2009-01-19  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 9695
+	* pdp11.c (N_BADMAG): True for anything but OMAGIC, NMAGIC, ZMAGIC.
+	(some_aout_object_p): Delete dead code handling QMAGIC and BMAGIC.
+	(adjust_z_magix): Delete dead code handling QMAGIC.
+
 2009-01-16  Kai Tietz  <kai.tietz@onevision.com>
 
 	* coffcode.h (styp_to_sec_flags): Correct interpretation of
