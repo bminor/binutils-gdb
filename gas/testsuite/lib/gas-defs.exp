@@ -962,8 +962,8 @@ if ![string length [info proc prune_warnings]] {
 
 # run_list_test NAME (optional): OPTS TESTNAME
 #
-# Assemble the file "NAME.d" with command line options OPTS and
-# compare the assembler standard error output against thee regular
+# Assemble the file "NAME.s" with command line options OPTS and
+# compare the assembler standard error output against the regular
 # expressions given in the file "NAME.l".  If TESTNAME is provided,
 # it will be used as the name of the test.
 

@@ -1,5 +1,9 @@
 2009-01-19  Nick Clifton  <nickc@redhat.com>
 
+	* lib/gas-defs.exp (run_list_test): Fix typo in comment.
+
+2009-01-19  Nick Clifton  <nickc@redhat.com>
+
 	* gas/arm/attr-syntax.d: Do not run for non-ELF based ARM
 	targets.
 
