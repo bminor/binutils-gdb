@@ -22,8 +22,7 @@
 
 #include "frame.h"
 
-struct frame_info;
-struct regcache;
+struct inferior_thread_state;
 struct frame_unwind;
 
 /* Push the information needed to identify, and unwind from, a dummy
@@ -39,8 +38,17 @@ struct frame_unwind;
    be expanded so that it knowns the lower/upper extent of the dummy
    frame's code.  */
 
-extern void dummy_frame_push (struct regcache *regcache,
-			      const struct frame_id *dummy_id);
+extern void dummy_frame_push (struct inferior_thread_state *caller_state,
+                              const struct frame_id *dummy_id);
+
+/* Pop the dummy frame DUMMY_ID, restoring program state to that before the
+   frame was created.
+   On return reinit_frame_cache has been called.
+   If the frame isn't found, flag an internal error.
+
+   NOTE: This can only pop the one frame, even if it is in the middle of the
+   stack, because the other frames may be for different threads, and there's
+   currently no way to tell which stack frame is for which thread.  */
 
 extern void dummy_frame_pop (struct frame_id dummy_id);
 

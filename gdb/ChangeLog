@@ -1,3 +1,51 @@
+2009-01-19  Doug Evans  <dje@google.com>
+
+	* dummy-frame.c (dummy_frame): Replace regcache member with
+	caller_state.
+	(dummy_frame_push): Replace caller_regcache arg with caller_state.
+	All callers updated.
+	(remove_dummy_frame,pop_dummy_frame,lookup_dummy_frame): New fns.
+	(dummy_frame_pop): Rewrite.  Verify requested frame is in the
+	dummy frame stack.  Restore program state.
+	(cleanup_dummy_frames): Rewrite.
+	(dummy_frame_sniffer): Update.  Make static.
+	* dummy-frame.h (regcache,frame_info): Delete forward decls.
+	(inferior_thread_state): New forward decl.
+	(dummy_frame_push): Update prototype.
+	* frame.c (frame_pop): dummy_frame_pop now does all the work for
+	DUMMY_FRAMEs.
+	* infcall.c (breakpoint_auto_delete_contents): Delete.
+	(get_function_name,run_inferior_call): New fns.
+	(call_function_by_hand): Simplify by moving some code to
+	get_function_name, run_inferior_call.  Inferior function call wrapped
+	in TRY_CATCH so there's less need for cleanups and all exits from
+	proceed are handled similarily.  Detect program exit.
+	Detect program stopping in a different thread.
+	Make error messages more consistent.
+	* inferior.h (inferior_thread_state): Declare (opaque type).
+	(save_inferior_thread_state,restore_inferior_thread_state,
+	make_cleanup_restore_inferior_thread_state,
+	discard_inferior_thread_state, get_inferior_thread_state_regcache):
+	Declare.
+	(save_inferior_status): Update prototype.
+	* infrun.c: (normal_stop): When stopped for the completion of an
+	inferior function call, verify the expected stack frame kind.
+	(inferior_thread_state): New struct.
+	(save_inferior_thread_state,restore_inferior_thread_state,
+	do_restore_inferior_thread_state_cleanup,
+	make_cleanup_restore_inferior_thread_state,
+	discard_inferior_thread_state,
+	get_inferior_thread_state_regcache): New functions.
+	(inferior_status): Move stop_signal, stop_pc, registers to
+	inferior_thread_state.  Remove restore_stack_info.
+	(save_inferior_status): Remove arg restore_stack_info.
+	All callers updated.  Remove saving of state now saved by
+	save_inferior_thread_state.
+	(restore_inferior_status): Remove restoration of state now done by
+	restore_inferior_thread_state.
+	(discard_inferior_status): Remove freeing of registers, now done by
+	discard_inferior_thread_state.
+
 2009-01-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* tui/tui-disasm.c (tui_vertical_disassem_scroll): Scroll one line

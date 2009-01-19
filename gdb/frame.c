@@ -536,6 +536,14 @@ frame_pop (struct frame_info *this_frame)
   struct regcache *scratch;
   struct cleanup *cleanups;
 
+  if (get_frame_type (this_frame) == DUMMY_FRAME)
+    {
+      /* Popping a dummy frame involves restoring more than just registers.
+	 dummy_frame_pop does all the work.  */
+      dummy_frame_pop (get_frame_id (this_frame));
+      return;
+    }
+
   /* Ensure that we have a frame to pop to.  */
   prev_frame = get_prev_frame_1 (this_frame);
 
@@ -548,11 +556,6 @@ frame_pop (struct frame_info *this_frame)
      at the same time writing new values into that same cache.  */
   scratch = frame_save_as_regcache (prev_frame);
   cleanups = make_cleanup_regcache_xfree (scratch);
-
-  /* If we are popping a dummy frame, clean up the associated
-     data as well.  */
-  if (get_frame_type (this_frame) == DUMMY_FRAME)
-    dummy_frame_pop (get_frame_id (this_frame));
 
   /* FIXME: cagney/2003-03-16: It should be possible to tell the
      target's register cache that it is about to be hit with a burst

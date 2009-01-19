@@ -1,3 +1,17 @@
+2009-01-19  Doug Evans  <dje@google.com>
+
+	* gdb.base/break.exp: Update expected gdb output.
+	* gdb.base/sepdebug.exp: Ditto.
+	* gdb.mi/mi-syn-frame.exp: Ditto.
+	* gdb.mi/mi2-syn-frame.exp: Ditto.
+	* gdb.base/call-signal-resume.exp: New file.
+	* gdb.base/call-signals.c: New file.
+	* gdb.base/unwindonsignal.exp: New file.
+	* gdb.base/unwindonsignal.c: New file.
+	* gdb.threads/interrupted-hand-call.exp: New file.
+	* gdb.threads/interrupted-hand-call.c: New file.
+	* gdb.threads/thread-unwindonsignal.exp: New file.
+
 2009-01-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/define.exp: Test defining and hooking prefix commands.

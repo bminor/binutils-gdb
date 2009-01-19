@@ -40,23 +40,37 @@ struct ui_out;
 /* For struct frame_id.  */
 #include "frame.h"
 
-/* Structure in which to save the status of the inferior.  Create/Save
-   through "save_inferior_status", restore through
-   "restore_inferior_status".
+/* Two structures are used to record inferior state.
 
-   This pair of routines should be called around any transfer of
-   control to the inferior which you don't want showing up in your
-   control variables.  */
+   inferior_thread_state contains state about the program itself like its
+   registers and any signal it received when it last stopped.
+   This state must be restored regardless of how the inferior function call
+   ends (either successfully, or after it hits a breakpoint or signal)
+   if the program is to properly continue where it left off.
 
+   inferior_status contains state regarding gdb's control of the inferior
+   itself like stepping control.  It also contains session state like the
+   user's currently selected frame.
+
+   Call these routines around hand called functions, including function calls
+   in conditional breakpoints for example.  */
+
+struct inferior_thread_state;
 struct inferior_status;
 
-extern struct inferior_status *save_inferior_status (int);
+extern struct inferior_thread_state *save_inferior_thread_state (void);
+extern struct inferior_status *save_inferior_status (void);
 
+extern void restore_inferior_thread_state (struct inferior_thread_state *);
 extern void restore_inferior_status (struct inferior_status *);
 
+extern struct cleanup *make_cleanup_restore_inferior_thread_state (struct inferior_thread_state *);
 extern struct cleanup *make_cleanup_restore_inferior_status (struct inferior_status *);
 
+extern void discard_inferior_thread_state (struct inferior_thread_state *);
 extern void discard_inferior_status (struct inferior_status *);
+
+extern struct regcache *get_inferior_thread_state_regcache (struct inferior_thread_state *);
 
 /* The -1 ptid, often used to indicate either an error condition
    or a "don't care" condition, i.e, "run all threads."  */

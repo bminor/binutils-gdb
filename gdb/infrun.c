@@ -45,7 +45,6 @@
 #include "language.h"
 #include "solib.h"
 #include "main.h"
-
 #include "gdb_assert.h"
 #include "mi/mi-common.h"
 #include "event-top.h"
@@ -4387,14 +4386,20 @@ Further execution is probably impossible.\n"));
 
   if (stop_stack_dummy)
     {
-      /* Pop the empty frame that contains the stack dummy.  POP_FRAME
-         ends with a setting of the current frame, so we can use that
-         next. */
-      frame_pop (get_current_frame ());
-      /* Set stop_pc to what it was before we called the function.
-         Can't rely on restore_inferior_status because that only gets
-         called if we don't stop in the called function.  */
-      stop_pc = read_pc ();
+      /* Pop the empty frame that contains the stack dummy.
+	 This also restores inferior state prior to the call
+	 (struct inferior_thread_state).  */
+      struct frame_info *frame = get_current_frame ();
+      gdb_assert (get_frame_type (frame) == DUMMY_FRAME);
+      frame_pop (frame);
+      /* frame_pop() calls reinit_frame_cache as the last thing it does
+	 which means there's currently no selected frame.  We don't need
+	 to re-establish a selected frame if the dummy call returns normally,
+	 that will be done by restore_inferior_status.  However, we do have
+	 to handle the case where the dummy call is returning after being
+	 stopped (e.g. the dummy call previously hit a breakpoint).  We
+	 can't know which case we have so just always re-establish a
+	 selected frame here.  */
       select_frame (get_current_frame ());
     }
 
@@ -4792,10 +4797,85 @@ signals_info (char *signum_exp, int from_tty)
   printf_filtered (_("\nUse the \"handle\" command to change these tables.\n"));
 }
 
-struct inferior_status
+/* Inferior thread state.
+   These are details related to the inferior itself, and don't include
+   things like what frame the user had selected or what gdb was doing
+   with the target at the time.
+   For inferior function calls these are things we want to restore
+   regardless of whether the function call successfully completes
+   or the dummy frame has to be manually popped.  */
+
+struct inferior_thread_state
 {
   enum target_signal stop_signal;
   CORE_ADDR stop_pc;
+  struct regcache *registers;
+};
+
+struct inferior_thread_state *
+save_inferior_thread_state (void)
+{
+  struct inferior_thread_state *inf_state = XMALLOC (struct inferior_thread_state);
+  struct thread_info *tp = inferior_thread ();
+
+  inf_state->stop_signal = tp->stop_signal;
+  inf_state->stop_pc = stop_pc;
+
+  inf_state->registers = regcache_dup (get_current_regcache ());
+
+  return inf_state;
+}
+
+/* Restore inferior session state to INF_STATE.  */
+
+void
+restore_inferior_thread_state (struct inferior_thread_state *inf_state)
+{
+  struct thread_info *tp = inferior_thread ();
+
+  tp->stop_signal = inf_state->stop_signal;
+  stop_pc = inf_state->stop_pc;
+
+  /* The inferior can be gone if the user types "print exit(0)"
+     (and perhaps other times).  */
+  if (target_has_execution)
+    /* NB: The register write goes through to the target.  */
+    regcache_cpy (get_current_regcache (), inf_state->registers);
+  regcache_xfree (inf_state->registers);
+  xfree (inf_state);
+}
+
+static void
+do_restore_inferior_thread_state_cleanup (void *state)
+{
+  restore_inferior_thread_state (state);
+}
+
+struct cleanup *
+make_cleanup_restore_inferior_thread_state (struct inferior_thread_state *inf_state)
+{
+  return make_cleanup (do_restore_inferior_thread_state_cleanup, inf_state);
+}
+
+void
+discard_inferior_thread_state (struct inferior_thread_state *inf_state)
+{
+  regcache_xfree (inf_state->registers);
+  xfree (inf_state);
+}
+
+struct regcache *
+get_inferior_thread_state_regcache (struct inferior_thread_state *inf_state)
+{
+  return inf_state->registers;
+}
+
+/* Session related state for inferior function calls.
+   These are the additional bits of state that need to be restored
+   when an inferior function call successfully completes.  */
+
+struct inferior_status
+{
   bpstat stop_bpstat;
   int stop_step;
   int stop_stack_dummy;
@@ -4809,32 +4889,23 @@ struct inferior_status
   int stop_after_trap;
   int stop_soon;
 
-  /* These are here because if call_function_by_hand has written some
-     registers and then decides to call error(), we better not have changed
-     any registers.  */
-  struct regcache *registers;
-
-  /* A frame unique identifier.  */
+  /* ID if the selected frame when the inferior function call was made.  */
   struct frame_id selected_frame_id;
 
   int breakpoint_proceeded;
-  int restore_stack_info;
   int proceed_to_finish;
 };
 
 /* Save all of the information associated with the inferior<==>gdb
-   connection.  INF_STATUS is a pointer to a "struct inferior_status"
-   (defined in inferior.h).  */
+   connection.  */
 
 struct inferior_status *
-save_inferior_status (int restore_stack_info)
+save_inferior_status (void)
 {
   struct inferior_status *inf_status = XMALLOC (struct inferior_status);
   struct thread_info *tp = inferior_thread ();
   struct inferior *inf = current_inferior ();
 
-  inf_status->stop_signal = tp->stop_signal;
-  inf_status->stop_pc = stop_pc;
   inf_status->stop_step = tp->stop_step;
   inf_status->stop_stack_dummy = stop_stack_dummy;
   inf_status->stopped_by_random_signal = stopped_by_random_signal;
@@ -4852,12 +4923,10 @@ save_inferior_status (int restore_stack_info)
   inf_status->stop_bpstat = tp->stop_bpstat;
   tp->stop_bpstat = bpstat_copy (tp->stop_bpstat);
   inf_status->breakpoint_proceeded = breakpoint_proceeded;
-  inf_status->restore_stack_info = restore_stack_info;
   inf_status->proceed_to_finish = tp->proceed_to_finish;
 
-  inf_status->registers = regcache_dup (get_current_regcache ());
-
   inf_status->selected_frame_id = get_frame_id (get_selected_frame (NULL));
+
   return inf_status;
 }
 
@@ -4882,14 +4951,14 @@ restore_selected_frame (void *args)
   return (1);
 }
 
+/* Restore inferior session state to INF_STATUS.  */
+
 void
 restore_inferior_status (struct inferior_status *inf_status)
 {
   struct thread_info *tp = inferior_thread ();
   struct inferior *inf = current_inferior ();
 
-  tp->stop_signal = inf_status->stop_signal;
-  stop_pc = inf_status->stop_pc;
   tp->stop_step = inf_status->stop_step;
   stop_stack_dummy = inf_status->stop_stack_dummy;
   stopped_by_random_signal = inf_status->stopped_by_random_signal;
@@ -4902,24 +4971,11 @@ restore_inferior_status (struct inferior_status *inf_status)
   inf->stop_soon = inf_status->stop_soon;
   bpstat_clear (&tp->stop_bpstat);
   tp->stop_bpstat = inf_status->stop_bpstat;
+  inf_status->stop_bpstat = NULL;
   breakpoint_proceeded = inf_status->breakpoint_proceeded;
   tp->proceed_to_finish = inf_status->proceed_to_finish;
 
-  /* The inferior can be gone if the user types "print exit(0)"
-     (and perhaps other times).  */
-  if (target_has_execution)
-    /* NB: The register write goes through to the target.  */
-    regcache_cpy (get_current_regcache (), inf_status->registers);
-  regcache_xfree (inf_status->registers);
-
-  /* FIXME: If we are being called after stopping in a function which
-     is called from gdb, we should not be trying to restore the
-     selected frame; it just prints a spurious error message (The
-     message is useful, however, in detecting bugs in gdb (like if gdb
-     clobbers the stack)).  In fact, should we be restoring the
-     inferior status at all in that case?  .  */
-
-  if (target_has_stack && inf_status->restore_stack_info)
+  if (target_has_stack)
     {
       /* The point of catch_errors is that if the stack is clobbered,
          walking the stack might encounter a garbage pointer and
@@ -4931,7 +4987,6 @@ restore_inferior_status (struct inferior_status *inf_status)
 	/* Error in restoring the selected frame.  Select the innermost
 	   frame.  */
 	select_frame (get_current_frame ());
-
     }
 
   xfree (inf_status);
@@ -4954,10 +5009,9 @@ discard_inferior_status (struct inferior_status *inf_status)
 {
   /* See save_inferior_status for info on stop_bpstat. */
   bpstat_clear (&inf_status->stop_bpstat);
-  regcache_xfree (inf_status->registers);
   xfree (inf_status);
 }
-
+
 int
 inferior_has_forked (ptid_t pid, ptid_t *child_pid)
 {

@@ -599,7 +599,7 @@ gdb_expect {
 }
 send_gdb "print marker2(99)\n"
 gdb_expect {
-  -re "The program being debugged stopped while in a function called from GDB.\r\nWhen the function .marker2. is done executing, GDB will silently\r\nstop .instead of continuing to evaluate the expression containing\r\nthe function call...*$gdb_prompt $"\
+  -re "The program being debugged stopped while in a function called from GDB.\r\nEvaluation of the expression containing the function\r\n.marker2. will be abandoned.\r\nWhen the function is done executing, GDB will silently stop..*$gdb_prompt $"\
           {pass "hit breakpoint on called function"}
   -re "$gdb_prompt $"\
           {fail "hit breakpoint on called function"}
