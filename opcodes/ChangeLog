@@ -1,3 +1,14 @@
+2009-01-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* fr30-asm.c, fr30-dis.c, fr30-ibld.c, frv-asm.c, frv-dis.c,
+	* frv-ibld.c, ip2k-asm.c, ip2k-dis.c, ip2k-ibld.c,
+	* iq2000-asm.c, iq2000-dis.c, iq2000-ibld.c, m32c-asm.c,
+	* m32c-dis.c, m32c-ibld.c, m32r-asm.c, m32r-dis.c,
+	* m32r-ibld.c, mep-asm.c, mep-dis.c, mep-ibld.c, mt-asm.c,
+	* mt-dis.c, mt-ibld.c, openrisc-asm.c, openrisc-dis.c,
+	* openrisc-ibld.c, xc16x-asm.c, xc16x-dis.c, xc16x-ibld.c,
+	* xstormy16-asm.c, xstormy16-dis.c, xstormy16-ibld.c: Regenerate.
+
 2009-01-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in (commonbfdlib): Delete.
