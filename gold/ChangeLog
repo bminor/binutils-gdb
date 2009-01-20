@@ -1,3 +1,10 @@
+2009-01-20  Andreas Schwab  <schwab@suse.de>
+
+	* powerpc.cc (Powerpc_relocate_functions::rel16_ha): Don't try to
+	read the value in the contents, since we don't use it.  Use the
+	template endianness when writing.
+	(Relocate::relocate): Use it for R_PPC_REL16_HA.
+
 2009-01-19  Andreas Schwab  <schwab@suse.de>
 
 	* configure.tgt (powerpc64-*): Fix targ_obj.

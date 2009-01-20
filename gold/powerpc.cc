@@ -663,9 +663,6 @@ public:
 	   typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	   typename elfcpp::Elf_types<size>::Elf_Addr address)
   {
-    typedef typename elfcpp::Swap<16, true>::Valtype Valtype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Valtype val = elfcpp::Swap<16, true>::readval(wv);
     typename elfcpp::Elf_types<size>::Elf_Addr reloc;
 
     reloc = (psymval->value(object, addend) - address);
@@ -673,10 +670,7 @@ public:
       reloc += 0x10000;
     reloc >>= 16;
 
-    val &= ~static_cast<Valtype>(0xffff);
-    reloc &= static_cast<Valtype>(0xffff);
-
-    elfcpp::Swap<16, true>::writeval(wv, val | reloc);
+    elfcpp::Swap<16, big_endian>::writeval(view, reloc);
   }
 };
 
@@ -1681,7 +1675,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_PPC_REL16_HA:
-      Reloc::rel16_lo(view, object, psymval, addend, address);
+      Reloc::rel16_ha(view, object, psymval, addend, address);
       break;
 
     case elfcpp::R_POWERPC_GOT16:
