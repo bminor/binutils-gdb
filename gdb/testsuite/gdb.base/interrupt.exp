@@ -34,7 +34,13 @@ set bug_id 0
 set testfile interrupt
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+
+set options { debug }
+if { ! [target_info exists gdb,nosignals] } {
+    lappend options "additional_flags=-DSIGNALS"
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $options] != "" } {
      untested interrupt.exp
      return -1
 }
@@ -165,7 +171,35 @@ if ![file exists $binfile] then {
 	    eof { fail "echo data (eof)" }
 	}
 
-	setup_xfail "i*86-pc-linux*-gnu*"
+ 	if { ! [target_info exists gdb,nosignals] } {
+	    # Wait until the program is in the read system call again.
+	    sleep 2
+
+	    # Stop the program for another test.
+	    set msg "Send Control-C, second time"
+	    send_gdb "\003"
+	    gdb_test_multiple "" "$msg" {
+		-re "Program received signal SIGINT.*$gdb_prompt $" {
+		    pass "$msg"
+		}
+	    }
+
+	    # The "signal" command should deliver the correct signal and
+	    # return to the loop.
+	    set msg "signal SIGINT"
+	    gdb_test_multiple "signal SIGINT" "$msg" {
+		-re "^signal SIGINT\r\nContinuing with signal SIGINT.\r\n(\r\n|)$" { pass "$msg" }
+	    }
+
+	    # We should be back in the loop.
+	    send_gdb "more data\n"
+	    gdb_expect {
+		-re "^(\r\n|)more data\r\n(|more data\r\n)$" { pass "echo more data" }
+		timeout { fail "echo more data (timeout)" }
+		eof { fail "echo more data (eof)" }
+	    }
+	}
+
 	send_gdb "\004"
 	gdb_expect {
 	    -re "end of file.*Program exited normally.*$gdb_prompt $" {

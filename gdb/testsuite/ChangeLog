@@ -1,3 +1,12 @@
+2009-01-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/9346
+	* gdb.base/interrupt.c (sigint_handler): New.
+	(main): Install a SIGINT handler if SIGNALS is defined.  Exit
+	on error.
+	* gdb.base/interrupt.exp: Define SIGNALS unless gdb,nosignals.
+	Test "signal SIGINT".
+
 2009-01-19  Doug Evans  <dje@google.com>
 
 	* gdb.base/break.exp: Update expected gdb output.

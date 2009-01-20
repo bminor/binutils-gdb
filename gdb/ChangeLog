@@ -1,3 +1,8 @@
+2008-01-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/9346
+	* infcmd.c (signal_command): Do not specify a resume PC.
+
 2009-01-19  Doug Evans  <dje@google.com>
 
 	* dummy-frame.c (dummy_frame): Replace regcache member with
