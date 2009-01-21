@@ -5791,17 +5791,17 @@ info_mappings_callback (struct prmap *map, int (*ignore) (), void *unused)
 #endif
 
   if (gdbarch_addr_bit (current_gdbarch) == 32)
-    printf_filtered ("\t%#10lx %#10lx %#10x %#10x %7s\n",
+    printf_filtered ("\t%#10lx %#10lx %#10lx %#10x %7s\n",
 		     (unsigned long) map->pr_vaddr,
 		     (unsigned long) map->pr_vaddr + map->pr_size - 1,
-		     map->pr_size,
+		     (unsigned long) map->pr_size,
 		     pr_off,
 		     mappingflags (map->pr_mflags));
   else
-    printf_filtered ("  %#18lx %#18lx %#10x %#10x %7s\n",
+    printf_filtered ("  %#18lx %#18lx %#10lx %#10x %7s\n",
 		     (unsigned long) map->pr_vaddr,
 		     (unsigned long) map->pr_vaddr + map->pr_size - 1,
-		     map->pr_size,
+		     (unsigned long) map->pr_size,
 		     pr_off,
 		     mappingflags (map->pr_mflags));
 
