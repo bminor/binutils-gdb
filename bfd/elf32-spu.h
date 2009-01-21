@@ -1,6 +1,6 @@
 /* SPU specific support for 32-bit ELF.
 
-   Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+   Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -52,6 +52,9 @@ struct spu_elf_params
 
   /* Set if __stack_* syms will be emitted.  */
   unsigned int emit_stack_syms : 1;
+
+  /* Set if non-icache code should be allowed in icache lines.  */
+  unsigned int non_ia_text : 1;
 
   /* Range of valid addresses for loadable sections.  */
   bfd_vma local_store_lo;

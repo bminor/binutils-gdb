@@ -3279,12 +3279,16 @@ mark_overlay_section (struct function_info *fun,
   struct call_info *call;
   unsigned int count;
   struct _mos_param *mos_param = param;
+  struct spu_link_hash_table *htab = spu_hash_table (info);
 
   if (fun->visit4)
     return TRUE;
 
   fun->visit4 = TRUE;
-  if (!fun->sec->linker_mark)
+  if (!fun->sec->linker_mark
+      && (htab->params->ovly_flavour != ovly_soft_icache
+	  || htab->params->non_ia_text
+	  || strncmp (fun->sec->name, ".text.ia.", 9) == 0))
     {
       unsigned int size;
 
@@ -3296,7 +3300,8 @@ mark_overlay_section (struct function_info *fun,
 	 this flag to differentiate the two overlay section types.  */
       fun->sec->flags |= SEC_CODE;
 
-      if (spu_hash_table (info)->params->auto_overlay & OVERLAY_RODATA)
+      size = fun->sec->size;
+      if (htab->params->auto_overlay & OVERLAY_RODATA)
 	{
 	  char *name = NULL;
 
@@ -3347,16 +3352,23 @@ mark_overlay_section (struct function_info *fun,
 	      fun->rodata = rodata;
 	      if (fun->rodata)
 		{
-		  fun->rodata->linker_mark = 1;
-		  fun->rodata->gc_mark = 1;
-		  fun->rodata->flags &= ~SEC_CODE;
+		  size += fun->rodata->size;
+		  if (htab->params->line_size != 0
+		      && size > htab->params->line_size)
+		    {
+		      size -= fun->rodata->size;
+		      fun->rodata = NULL;
+		    }
+		  else
+		    {
+		      fun->rodata->linker_mark = 1;
+		      fun->rodata->gc_mark = 1;
+		      fun->rodata->flags &= ~SEC_CODE;
+		    }
 		}
 	      free (name);
 	    }
 	}
-      size = fun->sec->size;
-      if (fun->rodata)
-	size += fun->rodata->size;
       if (mos_param->max_overlay_size < size)
 	mos_param->max_overlay_size = size;
     }

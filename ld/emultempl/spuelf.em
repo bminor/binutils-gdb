@@ -37,7 +37,7 @@ static struct spu_elf_params params =
   &spu_elf_load_ovl_mgr,
   &spu_elf_open_overlay_script,
   &spu_elf_relink,
-  0, ovly_normal, 0, 0, 0, 0, 0,
+  0, ovly_normal, 0, 0, 0, 0, 0, 0,
   0, 0x3ffff,
   1, 0, 16, 0, 0, 2000
 };
@@ -594,7 +594,8 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_SPU_LINE_SIZE		(OPTION_SPU_SOFT_ICACHE + 1)
 #define OPTION_SPU_NUM_LINES		(OPTION_SPU_LINE_SIZE + 1)
 #define OPTION_SPU_LRLIVE		(OPTION_SPU_NUM_LINES + 1)
-#define OPTION_SPU_FIXED_SPACE		(OPTION_SPU_LRLIVE + 1)
+#define OPTION_SPU_NON_IA_TEXT		(OPTION_SPU_LRLIVE + 1)
+#define OPTION_SPU_FIXED_SPACE		(OPTION_SPU_NON_IA_TEXT + 1)
 #define OPTION_SPU_RESERVED_SPACE	(OPTION_SPU_FIXED_SPACE + 1)
 #define OPTION_SPU_EXTRA_STACK		(OPTION_SPU_RESERVED_SPACE + 1)
 #define OPTION_SPU_NO_AUTO_OVERLAY	(OPTION_SPU_EXTRA_STACK + 1)
@@ -606,6 +607,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "lrlive-analysis", no_argument, NULL, OPTION_SPU_LRLIVE },
   { "num-lines", required_argument, NULL, OPTION_SPU_NUM_LINES },
   { "line-size", required_argument, NULL, OPTION_SPU_LINE_SIZE },
+  { "non-ia-text", no_argument, NULL, OPTION_SPU_NON_IA_TEXT },
   { "no-overlays", no_argument, NULL, OPTION_SPU_NO_OVERLAYS },
   { "emit-stub-syms", no_argument, NULL, OPTION_SPU_STUB_SYMS },
   { "extra-overlay-stubs", no_argument, NULL, OPTION_SPU_NON_OVERLAY_STUBS },
@@ -647,6 +649,7 @@ PARSE_AND_LIST_OPTIONS='
   --soft-icache               Generate software icache overlays.\n\
   --num-lines                 Number of soft-icache lines (default 32).\n\
   --line-size                 Size of soft-icache lines (default 1k).\n\
+  --non-ia-text               Allow non-icache code in icache lines.\n\
   --lrlive-analysis           Scan function prologue for lr liveness.\n"
 		   ));
 '
@@ -723,6 +726,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_SPU_LRLIVE:
       params.lrlive_analysis = 1;
+      break;
+
+    case OPTION_SPU_NON_IA_TEXT:
+      params.non_ia_text = 1;
       break;
 
     case OPTION_SPU_NUM_LINES:

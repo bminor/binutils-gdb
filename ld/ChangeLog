@@ -1,3 +1,10 @@
+2009-01-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spuelf.em (params): Init new field.
+	(OPTION_SPU_NON_IA_TEXT): Define.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add --non-ia-text.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_SPU_NON_IA_TEXT.
+
 2009-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lexsup.c (option_values): Add OPTION_TTEXT_SEGMENT.
