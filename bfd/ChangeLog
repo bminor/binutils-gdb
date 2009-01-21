@@ -1,3 +1,9 @@
+2009-01-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 9769
+	* vmsutil.c (vms_file_stats_name): Remove use of unsupported
+	tm_gmtoff field in struct tm.
+
 2009-01-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.h (struct spu_elf_params): Add non_ia_text.

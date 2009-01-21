@@ -238,7 +238,6 @@ vms_file_stats_name (const char *filename,
 #else
   struct stat buff;
   struct tm *ts;
-  long gmtoff;
 
   if ((stat (filename, &buff)) != 0)
      return 1;
@@ -246,8 +245,7 @@ vms_file_stats_name (const char *filename,
   if (cdt)
     {
       ts = localtime (&buff.st_mtime);
-      gmtoff = ts->tm_gmtoff;
-      *cdt = (long long) (((buff.st_mtim.tv_sec + gmtoff) * VMS_GRANULARITY_FACTOR)
+      *cdt = (long long) ((buff.st_mtim.tv_sec * VMS_GRANULARITY_FACTOR)
                           + (buff.st_mtim.tv_nsec / 100))
                          + VMS_EPOCH_OFFSET;
     }
