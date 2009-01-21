@@ -1,5 +1,5 @@
 #source: icache1.s
-#ld: --soft-icache --num-lines=4 --auto-overlay=tmpdir/icache1.lnk --auto-relink
+#ld: --soft-icache --num-lines=4 --non-ia-text --auto-overlay=tmpdir/icache1.lnk --auto-relink
 #objdump: -D
 
 .* elf32-spu

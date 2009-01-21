@@ -1,3 +1,7 @@
+2009-01-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/icache1.d: Add --non-ia-text to ld options.
+
 2009-01-19  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/expdref3.s, ld-cris/expdref4.s, ld-cris/weakref3.d,
