@@ -1,3 +1,8 @@
+2009-01-22  Pedro Alves  <pedro@codesourcery.com>
+
+	PR c++/9631:
+	* gdb.cp/pr9631.cc, gdb.cp/pr9631.exp: New.
+
 2009-01-22  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.server/file-transfer.exp: Use EXEEXT variable for

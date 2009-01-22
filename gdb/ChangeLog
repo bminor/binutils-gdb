@@ -1,3 +1,9 @@
+2009-01-22  Pedro Alves  <pedro@codesourcery.com>
+
+	PR c++/9631:
+	* gnu-v3-abi.c (gnuv3_baseclass_offset): Call check_typedef on
+	vbasetype.
+
 2009-01-20  Kazu Hirata  <kazu@codesourcery.com>
 
 	* gdb/procfs.c (info_mappings_callback): Cast map->pr_size to
