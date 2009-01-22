@@ -1,6 +1,6 @@
 ; Fujitsu FRV opcode support, for GNU Binutils.  -*- Scheme -*-
 ;
-; Copyright 2000, 2001, 2003, 2004, 2007 Free Software Foundation, Inc.
+; Copyright 2000, 2001, 2003, 2004, 2007, 2009 Free Software Foundation, Inc.
 ;
 ; Contributed by Red Hat Inc; developed under contract from Fujitsu.
 ;
@@ -8229,18 +8229,28 @@
 	       (set FRintk (c-raw-call SI "frv_ref_SI" FRintk))
 	       (set arghi (halfword hi FRintj 0))
 	       (set arglo (halfword lo FRintj 0))
-	       (saturate-v (abs arghi) 32767 -32768 (msr-sie-fri-hi)
+	       ; We extend the argument before the abs operation so we can
+	       ; notice -32768 overflowing as 32768.
+	       (saturate-v (abs (ext DI arghi)) 32767 -32768 (msr-sie-fri-hi)
 			   (halfword hi FRintk 0))
-	       (saturate-v (abs arglo) 32767 -32768 (msr-sie-fri-lo)
+	       (saturate-v (abs (ext DI arglo)) 32767 -32768 (msr-sie-fri-lo)
 			   (halfword lo FRintk 0)))
      ((fr400 (unit u-media-1)) (fr450 (unit u-media-1))
       (fr550 (unit u-media)))
 )
 
+; How to extend from a mode to get the intended signedness.
+(define-pmacro (DI-ext-HI x) (ext DI x))
+(define-pmacro (DI-ext-UHI x) (zext DI x))
+(define-pmacro (DI-ext-DI x) x)
+
 (define-pmacro (media-arith-sat-semantics
 		operation arg1 arg2 res mode max min sie)
   (sequence ((DI tmp))
-	    (set tmp (operation arg1 arg2))
+	    ; Make sure we saturate at max/min against a value that is
+	    ; sign- or zero-extended appropriately from "mode".
+	    (set tmp (operation DI
+		      ((.sym DI-ext- mode) arg1) ((.sym DI-ext- mode) arg2)))
 	    (saturate-v tmp max min sie res))
 )
 

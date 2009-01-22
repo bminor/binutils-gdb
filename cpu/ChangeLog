@@ -1,3 +1,15 @@
+2009-01-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* frv.cpu (mabshs): Explicitly sign-extend arguments of abs to DI.
+	(DI-ext-HI, DI-ext-UHI, DI-ext-DI): New pmacros.
+	(media-arith-sat-semantics): Explicitly sign- or zero-extend
+	arguments of "operation" to DI using "mode" and the new pmacros.
+
+2009-01-03  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris.cpu (cris-implemented-writable-specregs-v32): Correct size
+	of number 2, PID.
+
 2008-12-23  Jon Beniston <jon@beniston.com>
 
 	* lm32.cpu: New file.
