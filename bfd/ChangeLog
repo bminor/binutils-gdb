@@ -1,3 +1,9 @@
+2009-01-22  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6832
+	* dwarf2.c (find_line): Don't update stash->sec_info_ptr until
+	after comp_unit_find_line call.
+
 2009-01-21  Nick Clifton  <nickc@redhat.com>
 
 	PR 9769
