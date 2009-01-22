@@ -1,3 +1,8 @@
+2009-01-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.server/file-transfer.exp: Use EXEEXT variable for
+	binfile definition to fix Windows OS failure.
+
 2009-01-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/9346
