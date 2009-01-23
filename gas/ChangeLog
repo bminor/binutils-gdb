@@ -1,3 +1,13 @@
+2009-01-23  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* doc/c-arm.texi (): Document -mwarn-deprecated.
+	* config/tc-arm.c (WARN_DEPRECATED): Remove.  Replace with ...
+	(warn_on_deprecated): ... this.
+	(opcode_lookup, md_assemble): Check it before warning.
+	(arm_opts): Add m[no-]warn-deprecated.
+	(md_parse_option): Replace WARN_DEPRECATED with
+	warn_on_deprecated.
+
 2009-01-23  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-mips.c (macro) [M_DINS, M_SEQ_I, M_SNE_I]: Cast

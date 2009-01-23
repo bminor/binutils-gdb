@@ -42,8 +42,6 @@
 
 #include "dwarf2dbg.h"
 
-#define WARN_DEPRECATED 1
-
 #ifdef OBJ_ELF
 /* Must be at least the size of the largest unwind opcode (currently two).  */
 #define ARM_OPCODE_CHUNK_SIZE 8
@@ -144,6 +142,9 @@ static int support_interwork = FALSE;
 static int uses_apcs_float   = FALSE;
 static int pic_code	     = FALSE;
 static int fix_v4bx	     = FALSE;
+/* Warn on using deprecated features.  */
+static int warn_on_deprecated = TRUE;
+
 
 /* Variables that we set while parsing command-line options.  Once all
    options have been read we re-process these values to set the real
@@ -14162,7 +14163,7 @@ opcode_lookup (char **str)
 	  return opcode;
 	}
 
-      if (unified_syntax)
+      if (warn_on_deprecated && unified_syntax)
 	as_warn (_("conditional infixes are deprecated in unified syntax"));
       affix = base + (opcode->tag - OT_odd_infix_0);
       cond = hash_find_n (arm_cond_hsh, affix, 2);
@@ -14246,7 +14247,7 @@ opcode_lookup (char **str)
 	  || opcode->tag == OT_cinfix3_legacy))
     {
       /* step CM */
-      if (unified_syntax
+      if (warn_on_deprecated && unified_syntax
 	  && (opcode->tag == OT_cinfix3
 	      || opcode->tag == OT_cinfix3_deprecated))
 	as_warn (_("conditional infixes are deprecated in unified syntax"));
@@ -14287,7 +14288,7 @@ md_assemble (char *str)
       return;
     }
 
-  if (opcode->tag == OT_cinfix3_deprecated)
+  if (warn_on_deprecated && opcode->tag == OT_cinfix3_deprecated)
     as_warn (_("s suffix on comparison instruction is deprecated"));
 
   /* The value which unconditional instructions should have in place of the
@@ -19902,6 +19903,8 @@ md_begin (void)
 	      -mthumb			 Start in Thumb mode
 	      -mthumb-interwork		 Code supports ARM/Thumb interworking
 
+	      -m[no-]warn-deprecated     Warn about deprecated features
+	      
       For now we will also provide support for:
 
 	      -mapcs-32			 32-bit Program counter
@@ -19999,6 +20002,10 @@ struct arm_option_table arm_opts[] =
   /* These are recognized by the assembler, but have no affect on code.	 */
   {"mapcs-frame", N_("use frame pointer"), NULL, 0, NULL},
   {"mapcs-stack-check", N_("use stack size checking"), NULL, 0, NULL},
+
+  {"mwarn-deprecated", NULL, &warn_on_deprecated, 1, NULL},
+  {"mno-warn-deprecated", N_("do not warn on use of deprecated feature"),
+   &warn_on_deprecated, 0, NULL},
   {NULL, NULL, NULL, 0, NULL}
 };
 
@@ -20610,12 +20617,10 @@ md_parse_option (int c, char * arg)
 	      && ((arg == NULL && opt->option[1] == 0)
 		  || streq (arg, opt->option + 1)))
 	    {
-#if WARN_DEPRECATED
 	      /* If the option is deprecated, tell the user.  */
-	      if (opt->deprecated != NULL)
+	      if (warn_on_deprecated && opt->deprecated != NULL)
 		as_tsktsk (_("option `-%c%s' is deprecated: %s"), c,
 			   arg ? arg : "", _(opt->deprecated));
-#endif
 
 	      if (opt->var != NULL)
 		*opt->var = opt->value;
@@ -20630,12 +20635,10 @@ md_parse_option (int c, char * arg)
 	      && ((arg == NULL && fopt->option[1] == 0)
 		  || streq (arg, fopt->option + 1)))
 	    {
-#if WARN_DEPRECATED
 	      /* If the option is deprecated, tell the user.  */
-	      if (fopt->deprecated != NULL)
+	      if (warn_on_deprecated && fopt->deprecated != NULL)
 		as_tsktsk (_("option `-%c%s' is deprecated: %s"), c,
 			   arg ? arg : "", _(fopt->deprecated));
-#endif
 
 	      if (fopt->var != NULL)
 		*fopt->var = &fopt->value;
@@ -20652,12 +20655,10 @@ md_parse_option (int c, char * arg)
 	      && strncmp (arg, lopt->option + 1,
 			  strlen (lopt->option + 1)) == 0)
 	    {
-#if WARN_DEPRECATED
 	      /* If the option is deprecated, tell the user.  */
-	      if (lopt->deprecated != NULL)
+	      if (warn_on_deprecated && lopt->deprecated != NULL)
 		as_tsktsk (_("option `-%c%s' is deprecated: %s"), c, arg,
 			   _(lopt->deprecated));
-#endif
 
 	      /* Call the sup-option parser.  */
 	      return lopt->func (arg + strlen (lopt->option) - 1);

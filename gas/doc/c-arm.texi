@@ -291,6 +291,12 @@ as position-independent code (PIC).
 Allow @code{BX} instructions in ARMv4 code.  This is intended for use with
 the linker option of the same name.
 
+@cindex @code{-mwarn-deprecated} command line option, ARM
+@item -mwarn-deprecated
+@itemx -mno-warn-deprecated
+Enable or disable warnings about using deprecated options or
+features.  The default is to warn.
+
 @end table
 
 
