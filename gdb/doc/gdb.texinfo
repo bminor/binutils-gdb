@@ -4679,6 +4679,10 @@ are:
 @kindex next&
 @xref{Continuing and Stepping, next}.
 
+@item nexti
+@kindex nexti&
+@xref{Continuing and Stepping, nexti}.
+
 @item continue
 @kindex continue&
 @xref{Continuing and Stepping, continue}.
