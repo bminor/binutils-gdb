@@ -98,6 +98,10 @@ struct elf_obj_sy
 #endif
 extern void elf_begin (void);
 
+#ifndef LOCAL_LABEL_PREFIX
+#define LOCAL_LABEL_PREFIX '.'
+#endif
+
 /* should be conditional on address size! */
 #define elf_symbol(asymbol) ((elf_symbol_type *) (&(asymbol)->the_bfd))
 

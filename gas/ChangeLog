@@ -1,3 +1,8 @@
+2009-01-23  Andreas Schwab  <schwab@suse.de>
+
+	* config/obj-elf.h (LOCAL_LABEL_PREFIX): Conditionally define.
+	* config/tc-s390.h (LOCAL_LABEL_PREFIX): Don't define.
+
 2009-01-19  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.h (CONVERT_SYMBOLIC_ATTRIBUTE): Only define for
