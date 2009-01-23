@@ -1,5 +1,8 @@
 2009-01-23  Andreas Schwab  <schwab@suse.de>
 
+	* config/tc-mips.c (macro) [M_DINS, M_SEQ_I, M_SNE_I]: Cast
+	arguments to macro_build to match format.
+
 	* config/obj-elf.h (LOCAL_LABEL_PREFIX): Conditionally define.
 	* config/tc-s390.h (LOCAL_LABEL_PREFIX): Don't define.
 
@@ -93,10 +96,10 @@
 	* config/tc-ppc.h: Likewise.
 	* config/tc-frv.h: Provide a prototype for frv_md_number_to_chars.
 	* config/te-vms.h (DWARF2_DIR_SHOULD_END_WITH_SEPARATOR,
-        DWAR2_FILE_TIME_NAME, DWARF2_FILE_SIZE_NAME, DWARF2_FILEN_NAME):
-        New file with new macros
-        * dwarf2dbg.c (get_filenum, out_file_list): Default and call new
-        macros.
+	DWAR2_FILE_TIME_NAME, DWARF2_FILE_SIZE_NAME, DWARF2_FILEN_NAME):
+	New file with new macros
+	* dwarf2dbg.c (get_filenum, out_file_list): Default and call new
+	macros.
 
 2009-01-15  Nick Clifton  <nickc@redhat.com>
 
@@ -105,7 +108,7 @@
 	instructions before generating a Thumb2 nop.
 
 2009-01-14  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
-	
+
 	* config/tc-s390.h: Define LOCAL_LABEL_PREFIX.
 
 2009-01-12  Alan Modra  <amodra@bigpond.net.au>
@@ -172,10 +175,10 @@
 	* config/tc-i386.c (build_modrm_byte): Remove 5 operand instruction
 	support.  Don't swap REG and NDS for FMA.
 
-2009-01-02  Matthias Klose  <doko@ubuntu.com> 
+2009-01-02  Matthias Klose  <doko@ubuntu.com>
 
-	* itbl-ops.c (itbl_disassemble): Don't rely on undefined sprintf 
-	behaviour. 
+	* itbl-ops.c (itbl_disassemble): Don't rely on undefined sprintf
+	behaviour.
 
 For older changes see ChangeLog-2008
 

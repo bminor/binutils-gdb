@@ -5241,8 +5241,8 @@ macro (struct mips_cl_insn *ip)
 	    s = "dinsm";
 	    fmt = "t,r,+A,+F";
 	  }
-	macro_build ((expressionS *) NULL, s, fmt, treg, sreg, pos,
-		     pos + size - 1);
+	macro_build ((expressionS *) NULL, s, fmt, treg, sreg, (int) pos,
+		     (int) (pos + size - 1));
       }
       break;
 
@@ -7637,7 +7637,7 @@ macro2 (struct mips_cl_insn *ip)
 	  && imm_expr.X_add_number < 512)
 	{
 	  macro_build (NULL, "seqi", "t,r,+Q", dreg, sreg,
-		       imm_expr.X_add_number);
+		       (int) imm_expr.X_add_number);
 	  break;
 	}
       if (imm_expr.X_op == O_constant
@@ -7799,7 +7799,7 @@ macro2 (struct mips_cl_insn *ip)
 	  && imm_expr.X_add_number < 512)
 	{
 	  macro_build (NULL, "snei", "t,r,+Q", dreg, sreg,
-		       imm_expr.X_add_number);
+		       (int) imm_expr.X_add_number);
 	  break;
 	}
       if (imm_expr.X_op == O_constant
