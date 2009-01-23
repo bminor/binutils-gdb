@@ -1,5 +1,10 @@
 2009-01-23  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.base/hook-stop-frame.c, gdb.base/hook-stop-frame.exp: Update
+	copyright years.
+
+2009-01-23  Pedro Alves  <pedro@codesourcery.com>
+
 	PR gdb/9664:
 	* gdb.base/hook-stop-frame.c, gdb.base/hook-stop-frame.exp: New.
 
