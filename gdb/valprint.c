@@ -1576,21 +1576,21 @@ Show printing of addresses."), NULL,
 			   show_addressprint,
 			   &setprintlist, &showprintlist);
 
-  add_setshow_uinteger_cmd ("input-radix", class_support, &input_radix_1,
-			    _("\
+  add_setshow_zuinteger_cmd ("input-radix", class_support, &input_radix_1,
+			     _("\
 Set default input radix for entering numbers."), _("\
 Show default input radix for entering numbers."), NULL,
-			    set_input_radix,
-			    show_input_radix,
-			    &setlist, &showlist);
+			     set_input_radix,
+			     show_input_radix,
+			     &setlist, &showlist);
 
-  add_setshow_uinteger_cmd ("output-radix", class_support, &output_radix_1,
-			    _("\
+  add_setshow_zuinteger_cmd ("output-radix", class_support, &output_radix_1,
+			     _("\
 Set default output radix for printing of values."), _("\
 Show default output radix for printing of values."), NULL,
-			    set_output_radix,
-			    show_output_radix,
-			    &setlist, &showlist);
+			     set_output_radix,
+			     show_output_radix,
+			     &setlist, &showlist);
 
   /* The "set radix" and "show radix" commands are special in that
      they are like normal set and show commands but allow two normally

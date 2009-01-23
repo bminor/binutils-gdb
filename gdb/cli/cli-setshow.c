@@ -232,6 +232,11 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    error_no_arg (_("integer to set it to."));
 	  *(int *) c->var = parse_and_eval_long (arg);
 	  break;
+	case var_zuinteger:
+	  if (arg == NULL)
+	    error_no_arg (_("integer to set it to."));
+	  *(unsigned int *) c->var = parse_and_eval_long (arg);
+	  break;
 	case var_enum:
 	  {
 	    int i;
@@ -351,6 +356,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	      break;
 	    }
 	  /* else fall through */
+	case var_zuinteger:
 	case var_zinteger:
 	  fprintf_filtered (stb->stream, "%u", *(unsigned int *) c->var);
 	  break;

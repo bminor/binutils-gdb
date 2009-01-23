@@ -162,19 +162,32 @@ gdb_test "set radix" \
     "Input and output radices now set to decimal 10, hex a, octal 12\." \
     "Reset radices"
 
+gdb_test "set input-radix 0" \
+    "Nonsense input radix ``decimal 0''; input radix unchanged\\." \
+    "Reject input-radix 0"
+gdb_test "show input-radix" \
+    "Default input radix for entering numbers is 10\\." \
+    "Input radix unchanged after rejecting 0"
+
 gdb_test "set input-radix 1" \
     "Nonsense input radix ``decimal 1''; input radix unchanged\\." \
     "Reject input-radix 1"
 gdb_test "show input-radix" \
     "Default input radix for entering numbers is 10\\." \
-    "Input radix unchanged after rejection"
+    "Input radix unchanged after rejecting 1"
 
+gdb_test "set output-radix 0" \
+    "Unsupported output radix ``decimal 0''; output radix unchanged\\." \
+    "Reject output-radix 0"
+gdb_test "show output-radix" \
+    "Default output radix for printing of values is 10\\." \
+    "Output radix unchanged after rejecting 0"
 gdb_test "set output-radix 1" \
     "Unsupported output radix ``decimal 1''; output radix unchanged\\." \
     "Reject output-radix 1"
 gdb_test "show output-radix" \
     "Default output radix for printing of values is 10\\." \
-    "Output radix unchanged after rejection"
+    "Output radix unchanged after rejecting 1"
 
 gdb_test "set radix 7" \
     "Unsupported output radix ``decimal 7''; output radix unchanged\\." \

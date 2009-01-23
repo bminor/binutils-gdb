@@ -1,5 +1,10 @@
 2009-01-23  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.base/radix.exp: Add tests to ensure that that set
+	input-radix 0 and set output-radix 0 are really rejected.
+
+2009-01-23  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.base/hook-stop-frame.c, gdb.base/hook-stop-frame.exp: Update
 	copyright years.
 

@@ -87,6 +87,9 @@ typedef enum var_types
     /* ZeroableInteger.  *VAR is an int.  Like Unsigned Integer except
        that zero really means zero.  */
     var_zinteger,
+    /* ZeroableUnsignedInteger.  *VAR is an unsigned int.  Zero really
+       means zero.  */
+    var_zuinteger,
     /* Enumerated type.  Can only have one of the specified values.  *VAR is a
        char pointer to the name of the element that we find.  */
     var_enum
@@ -331,6 +334,17 @@ extern void add_setshow_zinteger_cmd (char *name,
 				      show_value_ftype *show_func,
 				      struct cmd_list_element **set_list,
 				      struct cmd_list_element **show_list);
+
+extern void add_setshow_zuinteger_cmd (char *name,
+				       enum command_class class,
+				       unsigned int *var,
+				       const char *set_doc,
+				       const char *show_doc,
+				       const char *help_doc,
+				       cmd_sfunc_ftype *set_func,
+				       show_value_ftype *show_func,
+				       struct cmd_list_element **set_list,
+				       struct cmd_list_element **show_list);
 
 /* Do a "show" command for each thing on a command list.  */
 

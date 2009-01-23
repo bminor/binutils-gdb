@@ -1,5 +1,15 @@
 2009-01-23  Pedro Alves  <pedro@codesourcery.com>
 
+	* cli/cli-decode.c (add_setshow_zuinteger_cmd): New.
+	* cli/cli-setshow.c (do_setshow_command): Handle it.
+	* command.h (enum var_types): Add var_zuinteger.
+	(add_setshow_zuinteger_cmd): Declare.
+
+	* valprint.c (_initialize_valprint): Change the set input-radix
+	and set output-radix commands to zuinteger type.
+
+2009-01-23  Pedro Alves  <pedro@codesourcery.com>
+
 	PR gdb/9664:
 	* infrun.c (normal_stop): Tag threads as stopped, and run the
 	hook-stop before printing the stack frame.
