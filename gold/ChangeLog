@@ -1,3 +1,10 @@
+2009-01-20  Chris Faylor <me.sourceware@sourceware.org>
+
+	* options.h (General_options::gc_sections): Define as a no-op for now.
+	(General_options::no_keep_memory): Ditto.
+	(General_options::Bshareable): Define.
+	* options.cc (General_options::finalize): Honor -Bshareable.
+
 2009-01-20  Andreas Schwab  <schwab@suse.de>
 
 	* powerpc.cc (Powerpc_relocate_functions::rel16_ha): Don't try to

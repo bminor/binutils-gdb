@@ -696,6 +696,9 @@ General_options::finalize()
   if (this->strip_debug_non_line())
     this->set_strip_debug_gdb(true);
 
+  if (this->Bshareable())
+    this->set_shared(true);
+
   // If the user specifies both -s and -r, convert the -s to -S.
   // -r requires us to keep externally visible symbols!
   if (this->strip_all() && this->relocatable())

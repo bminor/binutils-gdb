@@ -581,6 +581,10 @@ class General_options
 	      N_("Check segment addresses for overlaps (default)"),
 	      N_("Do not check segment addresses for overlaps"));
 
+  DEFINE_bool(gc_sections, options::TWO_DASHES, '\0', true,
+	      N_("(noop) Garbage collect sections"),
+	      N_("(noop) Do not garbage collect sections"));
+
 #ifdef HAVE_ZLIB_H
   DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
               N_("Compress .debug_* sections in the output file"),
@@ -754,7 +758,13 @@ class General_options
   DEFINE_bool(strip_lto_sections, options::TWO_DASHES, '\0', true,
               N_("Strip LTO intermediate code sections"), NULL);
 
+  DEFINE_bool(no_keep_memory, options::TWO_DASHES, 's', false,
+              N_("Use less memory and more disk I/O (included only for compatibility with GNU ld)"), NULL);
+
   DEFINE_bool(shared, options::ONE_DASH, '\0', false,
+              N_("Generate shared library"), NULL);
+
+  DEFINE_bool(Bshareable, options::ONE_DASH, '\0', false,
               N_("Generate shared library"), NULL);
 
   // This is not actually special in any way, but I need to give it
