@@ -1,3 +1,9 @@
+2009-01-23  Pedro Alves  <pedro@codesourcery.com>
+
+	PR gdb/9664:
+	* infrun.c (normal_stop): Tag threads as stopped, and run the
+	hook-stop before printing the stack frame.
+
 2009-01-22  Pedro Alves  <pedro@codesourcery.com>
 
 	PR c++/9631:

@@ -4269,6 +4269,15 @@ Further execution is probably impossible.\n"));
   if (target_has_stack && !stop_stack_dummy)
     set_current_sal_from_frame (get_current_frame (), 1);
 
+  /* Let the user/frontend see the threads as stopped.  */
+  do_cleanups (old_chain);
+
+  /* Look up the hook_stop and run it (CLI internally handles problem
+     of stop_command's pre-hook not existing).  */
+  if (stop_command)
+    catch_errors (hook_stop_stub, stop_command,
+		  "Error while running hook_stop:\n", RETURN_MASK_ALL);
+
   if (!target_has_stack)
     goto done;
 
@@ -4425,16 +4434,6 @@ done:
 	   Delete any breakpoint that is to be deleted at the next stop.  */
 	breakpoint_auto_delete (inferior_thread ()->stop_bpstat);
     }
-
-  /* Tell the frontend about the new thread states.  */
-  do_cleanups (old_chain);
-
-  /* Look up the hook_stop and run it (CLI internally handles problem
-     of stop_command's pre-hook not existing).  */
-  if (stop_command)
-    catch_errors (hook_stop_stub, stop_command,
-		  "Error while running hook_stop:\n", RETURN_MASK_ALL);
-
 }
 
 static int

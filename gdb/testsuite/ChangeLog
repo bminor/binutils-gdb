@@ -1,3 +1,8 @@
+2009-01-23  Pedro Alves  <pedro@codesourcery.com>
+
+	PR gdb/9664:
+	* gdb.base/hook-stop-frame.c, gdb.base/hook-stop-frame.exp: New.
+
 2009-01-22  Pedro Alves  <pedro@codesourcery.com>
 
 	PR c++/9631:
