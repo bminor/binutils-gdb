@@ -4,7 +4,11 @@ if ![is_elf_format] then {
 
 run_list_test "lns-diag-1" ""
 
-run_dump_test "lns-duplicate"
+# Does not work on targets that do not generate line number
+# information (d10v).
+if {![istarget d10v-*-*]} {
+    run_dump_test "lns-duplicate"
+}
 
 # ??? Won't work on targets that don't have a bare "nop" insn.
 # Perhaps we could arrange for an include file or something that

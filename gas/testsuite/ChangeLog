@@ -1,3 +1,7 @@
+2009-01-24  Andreas Schwab  <schwab@suse.de>
+
+	* gas/lns/lns.exp: Don't run lns-duplicate for d10v target.
+
 2009-01-23  Andreas Schwab  <schwab@suse.de>
 
 	* gas/mips/mips16-e.d: Adjust for change in LOCAL_LABEL_PREFIX.
