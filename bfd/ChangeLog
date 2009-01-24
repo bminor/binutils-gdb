@@ -1,3 +1,11 @@
+2009-01-24  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6022
+	* elflink.c (find_version_for_sym): New function split out from,
+	but without export_dynamic test, ..
+	(_bfd_elf_link_assign_sym_version): ..here.
+	(_bfd_elf_export_symbol): Use it.
+
 2009-01-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_assign_sym_version_info): Delete.
