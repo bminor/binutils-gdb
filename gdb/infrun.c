@@ -4224,17 +4224,6 @@ normal_stop (void)
       previous_inferior_ptid = inferior_ptid;
     }
 
-  /* NOTE drow/2004-01-17: Is this still necessary?  */
-  /* Make sure that the current_frame's pc is correct.  This
-     is a correction for setting up the frame info before doing
-     gdbarch_decr_pc_after_break */
-  if (target_has_execution)
-    /* FIXME: cagney/2002-12-06: Has the PC changed?  Thanks to
-       gdbarch_decr_pc_after_break, the program counter can change.  Ask the
-       frame code to check for this and sort out any resultant mess.
-       gdbarch_decr_pc_after_break needs to just go away.  */
-    deprecated_update_frame_pc_hack (get_current_frame (), read_pc ());
-
   if (!breakpoints_always_inserted_mode () && target_has_execution)
     {
       if (remove_breakpoints ())

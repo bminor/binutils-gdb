@@ -1,3 +1,13 @@
+2009-01-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (normal_stop): Don't call
+	deprecated_update_frame_pc_hack.
+	* frame.c (deprecated_update_frame_pc_hack)
+	(deprecated_update_frame_base_hack): Delete, and ...
+	(create_new_frame): ... inline here.
+	* frame.h (deprecated_update_frame_pc_hack)
+	(deprecated_update_frame_base_hack): Delete declarations.
+
 2009-01-23  Pedro Alves  <pedro@codesourcery.com>
 
 	* cli/cli-decode.c (add_setshow_zuinteger_cmd): New.

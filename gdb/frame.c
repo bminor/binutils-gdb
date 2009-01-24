@@ -1111,8 +1111,12 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   fi->unwind = frame_unwind_find_by_frame (fi, &fi->prologue_cache);
 
   fi->this_id.p = 1;
-  deprecated_update_frame_base_hack (fi, addr);
-  deprecated_update_frame_pc_hack (fi, pc);
+  fi->this_id.value.stack_addr = addr;
+  /* While we're at it, update this frame's cached PC value, found
+     in the next frame.  Oh for the day when "struct frame_info"
+     is opaque and this hack on hack can just go away.  */
+  fi->next->prev_pc.value = pc;
+  fi->next->prev_pc.p = 1;
 
   if (frame_debug)
     {
@@ -1728,38 +1732,6 @@ get_frame_type (struct frame_info *frame)
        provides the frame's type.  */
     frame->unwind = frame_unwind_find_by_frame (frame, &frame->prologue_cache);
   return frame->unwind->type;
-}
-
-void
-deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
-{
-  if (frame_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"{ deprecated_update_frame_pc_hack (frame=%d,pc=0x%s) }\n",
-			frame->level, paddr_nz (pc));
-  /* NOTE: cagney/2003-03-11: Some architectures (e.g., Arm) are
-     maintaining a locally allocated frame object.  Since such frames
-     are not in the frame chain, it isn't possible to assume that the
-     frame has a next.  Sigh.  */
-  if (frame->next != NULL)
-    {
-      /* While we're at it, update this frame's cached PC value, found
-	 in the next frame.  Oh for the day when "struct frame_info"
-	 is opaque and this hack on hack can just go away.  */
-      frame->next->prev_pc.value = pc;
-      frame->next->prev_pc.p = 1;
-    }
-}
-
-void
-deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
-{
-  if (frame_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"{ deprecated_update_frame_base_hack (frame=%d,base=0x%s) }\n",
-			frame->level, paddr_nz (base));
-  /* See comment in "frame.h".  */
-  frame->this_id.value.stack_addr = base;
 }
 
 /* Memory access methods.  */
