@@ -1,3 +1,9 @@
+2009-01-25  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf-hppa.h (elf_hppa_final_link_relocate): Add check to ensure that
+	branch targets can be reached for R_PARISC_PCREL22F, R_PARISC_PCREL17F
+	and R_PARISC_PCREL12F relocations.
+
 2009-01-24  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6022

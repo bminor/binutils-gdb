@@ -1606,10 +1606,11 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 			      bfd_vma value,
 			      struct bfd_link_info *info,
 			      asection *sym_sec,
-			      struct elf_link_hash_entry *h ATTRIBUTE_UNUSED,
+			      struct elf_link_hash_entry *h,
 			      struct elf64_hppa_dyn_hash_entry *dyn_h)
 {
   int insn;
+  bfd_vma max_branch_offset = 0;
   bfd_vma offset = rel->r_offset;
   bfd_signed_vma addend = rel->r_addend;
   reloc_howto_type *howto = elf_hppa_howto_table + ELF_R_TYPE (rel->r_info);
@@ -1629,7 +1630,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
        Note for a call to a function defined in another dynamic library
        we want to redirect the call to a stub.  */
 
-    /* Random PC relative relocs.  */
+    /* PC relative relocs without an implicit offset.  */
     case R_PARISC_PCREL21L:
     case R_PARISC_PCREL14R:
     case R_PARISC_PCREL14F:
@@ -1683,6 +1684,27 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	/* Turn VALUE into a proper PC relative address.  */
 	value -= (offset + input_section->output_offset
 		  + input_section->output_section->vma);
+
+	if (r_type == (unsigned int) R_PARISC_PCREL22F)
+	  max_branch_offset = (1 << (22-1)) << 2;
+	else if (r_type == (unsigned int) R_PARISC_PCREL17F)
+	  max_branch_offset = (1 << (17-1)) << 2;
+	else if (r_type == (unsigned int) R_PARISC_PCREL12F)
+	  max_branch_offset = (1 << (12-1)) << 2;
+
+	/* Make sure we can reach the branch target.  */
+	if (max_branch_offset != 0
+	    && value + addend + max_branch_offset >= 2*max_branch_offset)
+	  {
+	    (*_bfd_error_handler)
+	      (_("%B(%A+0x%lx): cannot reach %s"),
+	      input_bfd,
+	      input_section,
+	      offset,
+	      h->root.root.string);
+	    bfd_set_error (bfd_error_bad_value);
+	    return bfd_reloc_notsupported;
+	  }
 
 	/* Adjust for any field selectors.  */
 	if (r_type == R_PARISC_PCREL17R)
