@@ -1,3 +1,8 @@
+2009-01-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (program_info): Use paddress instead of casting stop_pc
+	to unsigned long.
+
 2009-01-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (normal_stop): Don't call

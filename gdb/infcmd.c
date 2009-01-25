@@ -1583,8 +1583,7 @@ program_info (char *args, int from_tty)
   stat = bpstat_num (&bs, &num);
 
   target_files_info ();
-  printf_filtered (_("Program stopped at %s.\n"),
-		   hex_string ((unsigned long) stop_pc));
+  printf_filtered (_("Program stopped at %s.\n"), paddress (stop_pc));
   if (tp->stop_step)
     printf_filtered (_("It stopped after being stepped.\n"));
   else if (stat != 0)
