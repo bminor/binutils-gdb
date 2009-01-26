@@ -2,6 +2,8 @@
 # source: attr-order.s
 # as:
 # readelf: -A
+# This test is only valid on ELF based ports.
+# not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 
 Attribute Section: aeabi
 File Attributes

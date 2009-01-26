@@ -1,3 +1,8 @@
+2009-01-26  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/attr-order.d: Do not run this test for non-ELF based ARM
+	targets. 
+
 2009-01-24  Andreas Schwab  <schwab@suse.de>
 
 	* gas/lns/lns.exp: Don't run lns-duplicate for d10v target.
