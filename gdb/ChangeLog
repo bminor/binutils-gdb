@@ -1,5 +1,13 @@
 2009-01-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* frame.c (create_new_frame): Update the frame's cached PC before
+	finding its unwinder.  Use frame_id_build to build the new frame's
+	id.
+	* stack.c (parse_frame_specification_1): Correct setting ``addrs''
+	array values from the ``args'' array values.
+
+2009-01-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdbtypes.c (alloc_type, alloc_type_instance, create_range_type)
 	(create_array_type, create_set_type, init_flags_type)
 	(copy_type_recursive): Replace pairs of calls to XALLOC and memset

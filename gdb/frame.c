@@ -1106,17 +1106,19 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   fi->next = create_sentinel_frame (get_current_regcache ());
 
+  /* Set/update this frame's cached PC value, found in the next frame.
+     Do this before looking for this frame's unwinder.  A sniffer is
+     very likely to read this, and the corresponding unwinder is
+     entitled to rely that the PC doesn't magically change.  */
+  fi->next->prev_pc.value = pc;
+  fi->next->prev_pc.p = 1;
+
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
   fi->unwind = frame_unwind_find_by_frame (fi, &fi->prologue_cache);
 
   fi->this_id.p = 1;
-  fi->this_id.value.stack_addr = addr;
-  /* While we're at it, update this frame's cached PC value, found
-     in the next frame.  Oh for the day when "struct frame_info"
-     is opaque and this hack on hack can just go away.  */
-  fi->next->prev_pc.value = pc;
-  fi->next->prev_pc.p = 1;
+  fi->this_id.value = frame_id_build (addr, pc);
 
   if (frame_debug)
     {

@@ -832,7 +832,7 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
   {
     int i;
     for (i = 0; i < numargs; i++)
-      addrs[i] = value_as_address (args[0]);
+      addrs[i] = value_as_address (args[i]);
   }
 
   /* Assume that the single arg[0] is an address, use that to identify
