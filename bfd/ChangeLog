@@ -1,3 +1,10 @@
+2009-01-26  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-ppc.c (ppc_elf_relax_section): Add space for relocs
+	describing the trampolines.
+	(ppc_elf_relocate_section): Update relocs to describe the
+	trampolines.
+
 2009-01-25  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf-hppa.h (elf_hppa_final_link_relocate): Add check to ensure that
