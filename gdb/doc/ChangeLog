@@ -1,5 +1,11 @@
 2009-01-26  Pedro Alves  <pedro@codesourcery.com>
 
+	PR gdb/7580:
+	* gdb.texinfo (Maintenance Commands): Document "maint set|show
+	internal-error|internal-warning quit|corefile ask|yes|no".
+
+2009-01-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.texinfo (Using the `gdbserver' Program): Document
 	--remote-debug.
 

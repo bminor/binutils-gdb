@@ -1,3 +1,20 @@
+2009-01-26  Pedro Alves  <pedro@codesourcery.com>
+
+	Add "maint set|show internal-error|internal-warning quit|corefile
+	ask|yes|no" commands.
+
+	PR gdb/7580:
+	* utils.c (internal_problem_ask, internal_problem_yes)
+	(internal_problem_no, internal_problem_modes): New.
+	(struct internal_problem): Remove FIXME.  Make should_quit and
+	should_dump_core types to char *.
+	(internal_vproblem, internal_error_problem)
+	(internal_warning_problem): Adjust.
+	(set_internal_problem_cmd, show_internal_problem_cmd): New dummy
+	functions.
+	(add_internal_problem_command): New.
+	(_initialize_utils): New.
+
 2009-01-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcmd.c (program_info): Use paddress instead of casting stop_pc

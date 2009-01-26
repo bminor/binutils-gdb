@@ -24798,6 +24798,33 @@ Create a core file? (y or n) @kbd{n}
 (@value{GDBP})
 @end smallexample
 
+@cindex @value{GDBN} internal error
+@cindex internal errors, control of @value{GDBN} behavior
+
+@kindex maint set internal-error
+@kindex maint show internal-error
+@kindex maint set internal-warning
+@kindex maint show internal-warning
+@item maint set internal-error @var{action} [ask|yes|no]
+@itemx maint show internal-error @var{action}
+@itemx maint set internal-warning @var{action} [ask|yes|no]
+@itemx maint show internal-warning @var{action}
+When @value{GDBN} reports an internal problem (error or warning) it
+gives the user the opportunity to both quit @value{GDBN} and create a
+core file of the current @value{GDBN} session.  These commands let you
+override the default behaviour for each particular @var{action},
+described in the table below.
+
+@table @samp
+@item quit
+You can specify that @value{GDBN} should always (yes) or never (no)
+quit.  The default is to ask the user what to do.
+
+@item corefile
+You can specify that @value{GDBN} should always (yes) or never (no)
+create a core file.  The default is to ask the user what to do.
+@end table
+
 @kindex maint packet
 @item maint packet @var{text}
 If @value{GDBN} is talking to an inferior via the serial protocol,

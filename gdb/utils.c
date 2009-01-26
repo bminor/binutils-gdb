@@ -825,6 +825,21 @@ error_stream (struct ui_file *stream)
   error (("%s"), message);
 }
 
+/* Allow the user to configure the debugger behavior with respect to
+   what to do when an internal problem is detected.  */
+
+const char internal_problem_ask[] = "ask";
+const char internal_problem_yes[] = "yes";
+const char internal_problem_no[] = "no";
+static const char *internal_problem_modes[] =
+{
+  internal_problem_ask,
+  internal_problem_yes,
+  internal_problem_no,
+  NULL
+};
+static const char *internal_problem_mode = internal_problem_ask;
+
 /* Print a message reporting an internal error/warning. Ask the user
    if they want to continue, dump core, or just exit.  Return
    something to indicate a quit.  */
@@ -832,10 +847,8 @@ error_stream (struct ui_file *stream)
 struct internal_problem
 {
   const char *name;
-  /* FIXME: cagney/2002-08-15: There should be ``maint set/show''
-     commands available for controlling these variables.  */
-  enum auto_boolean should_quit;
-  enum auto_boolean should_dump_core;
+  const char *should_quit;
+  const char *should_dump_core;
 };
 
 /* Report a problem, internal to GDB, to the user.  Once the problem
@@ -896,42 +909,33 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
     make_cleanup (xfree, reason);
   }
 
-  switch (problem->should_quit)
+  if (problem->should_quit == internal_problem_ask)
     {
-    case AUTO_BOOLEAN_AUTO:
       /* Default (yes/batch case) is to quit GDB.  When in batch mode
-         this lessens the likelhood of GDB going into an infinate
-         loop.  */
+	 this lessens the likelihood of GDB going into an infinite
+	 loop.  */
       quit_p = query (_("%s\nQuit this debugging session? "), reason);
-      break;
-    case AUTO_BOOLEAN_TRUE:
-      quit_p = 1;
-      break;
-    case AUTO_BOOLEAN_FALSE:
-      quit_p = 0;
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
+  else if (problem->should_quit == internal_problem_yes)
+    quit_p = 1;
+  else if (problem->should_quit == internal_problem_no)
+    quit_p = 0;
+  else
+    internal_error (__FILE__, __LINE__, _("bad switch"));
 
-  switch (problem->should_dump_core)
+  if (problem->should_dump_core == internal_problem_ask)
     {
-    case AUTO_BOOLEAN_AUTO:
       /* Default (yes/batch case) is to dump core.  This leaves a GDB
          `dropping' so that it is easier to see that something went
          wrong in GDB.  */
       dump_core_p = query (_("%s\nCreate a core file of GDB? "), reason);
-      break;
-      break;
-    case AUTO_BOOLEAN_TRUE:
-      dump_core_p = 1;
-      break;
-    case AUTO_BOOLEAN_FALSE:
-      dump_core_p = 0;
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
     }
+  else if (problem->should_dump_core == internal_problem_yes)
+    dump_core_p = 1;
+  else if (problem->should_dump_core == internal_problem_no)
+    dump_core_p = 0;
+  else
+    internal_error (__FILE__, __LINE__, _("bad switch"));
 
   if (quit_p)
     {
@@ -955,7 +959,7 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
 }
 
 static struct internal_problem internal_error_problem = {
-  "internal-error", AUTO_BOOLEAN_AUTO, AUTO_BOOLEAN_AUTO
+  "internal-error", internal_problem_ask, internal_problem_ask
 };
 
 NORETURN void
@@ -975,7 +979,7 @@ internal_error (const char *file, int line, const char *string, ...)
 }
 
 static struct internal_problem internal_warning_problem = {
-  "internal-warning", AUTO_BOOLEAN_AUTO, AUTO_BOOLEAN_AUTO
+  "internal-warning", internal_problem_ask, internal_problem_ask
 };
 
 void
@@ -991,6 +995,99 @@ internal_warning (const char *file, int line, const char *string, ...)
   va_start (ap, string);
   internal_vwarning (file, line, string, ap);
   va_end (ap);
+}
+
+/* Dummy functions to keep add_prefix_cmd happy.  */
+
+static void
+set_internal_problem_cmd (char *args, int from_tty)
+{
+}
+
+static void
+show_internal_problem_cmd (char *args, int from_tty)
+{
+}
+
+/* When GDB reports an internal problem (error or warning) it gives
+   the user the opportunity to quit GDB and/or create a core file of
+   the current debug session.  This function registers a few commands
+   that make it possible to specify that GDB should always or never
+   quit or create a core file, without asking.  The commands look
+   like:
+
+   maint set PROBLEM-NAME quit ask|yes|no
+   maint show PROBLEM-NAME quit
+   maint set PROBLEM-NAME corefile ask|yes|no
+   maint show PROBLEM-NAME corefile
+
+   Where PROBLEM-NAME is currently "internal-error" or
+   "internal-warning".  */
+
+static void
+add_internal_problem_command (struct internal_problem *problem)
+{
+  struct cmd_list_element **set_cmd_list;
+  struct cmd_list_element **show_cmd_list;
+  char *set_doc;
+  char *show_doc;
+
+  set_cmd_list = xmalloc (sizeof (*set_cmd_list));
+  show_cmd_list = xmalloc (sizeof (*set_cmd_list));
+  *set_cmd_list = NULL;
+  *show_cmd_list = NULL;
+
+  set_doc = xstrprintf (_("Configure what GDB does when %s is detected."),
+			problem->name);
+
+  show_doc = xstrprintf (_("Show what GDB does when %s is detected."),
+			 problem->name);
+
+  add_prefix_cmd ((char*) problem->name,
+		  class_maintenance, set_internal_problem_cmd, set_doc,
+		  set_cmd_list,
+		  concat ("maintenance set ", problem->name, " ", NULL),
+		  0/*allow-unknown*/, &maintenance_set_cmdlist);
+
+  add_prefix_cmd ((char*) problem->name,
+		  class_maintenance, show_internal_problem_cmd, show_doc,
+		  show_cmd_list,
+		  concat ("maintenance show ", problem->name, " ", NULL),
+		  0/*allow-unknown*/, &maintenance_show_cmdlist);
+
+  set_doc = xstrprintf (_("\
+Set whether GDB should quit when an %s is detected"),
+			problem->name);
+  show_doc = xstrprintf (_("\
+Show whether GDB will quit when an %s is detected"),
+			 problem->name);
+  add_setshow_enum_cmd ("quit", class_maintenance,
+			internal_problem_modes,
+			&problem->should_quit,
+			set_doc,
+			show_doc,
+			NULL, /* help_doc */
+			NULL, /* setfunc */
+			NULL, /* showfunc */
+			set_cmd_list,
+			show_cmd_list);
+
+  set_doc = xstrprintf (_("\
+Set whether GDB should create a core file of GDB when %s is detected"),
+			problem->name);
+  show_doc = xstrprintf (_("\
+Show whether GDB will create a core file of GDB when %s is detected"),
+			 problem->name);
+  add_setshow_enum_cmd ("corefile", class_maintenance,
+			internal_problem_modes,
+			&problem->should_dump_core,
+			set_doc,
+			show_doc,
+			NULL, /* help_doc */
+			NULL, /* setfunc */
+			NULL, /* showfunc */
+			set_cmd_list,
+			show_cmd_list);
 }
 
 /* Print the system error message for errno, and also mention STRING
@@ -3442,4 +3539,11 @@ gdb_buildargv (const char *s)
   if (s != NULL && argv == NULL)
     nomem (0);
   return argv;
+}
+
+void
+_initialize_utils (void)
+{
+  add_internal_problem_command (&internal_error_problem);
+  add_internal_problem_command (&internal_warning_problem);
 }
