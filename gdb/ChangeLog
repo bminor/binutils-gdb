@@ -1,5 +1,6 @@
 2009-01-26  Pedro Alves  <pedro@codesourcery.com>
 
+	PR backtrace/9458, PR backtrace/8864:
 	* frame.c (create_new_frame): Update the frame's cached PC before
 	finding its unwinder.  Use frame_id_build to build the new frame's
 	id.
