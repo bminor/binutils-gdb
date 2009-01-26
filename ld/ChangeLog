@@ -1,3 +1,13 @@
+2009-01-26  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* lexsup.c (parse_args): Set check_section_addresses to 1 or 0.
+	* ld.h (args_type): Make check_section_addresses a char.
+	ldlang.c (lang_process): Don't consider relocatable flag when
+	checking for overlap.
+	* ldmain.c (main): Default check_section_addresses to -1. Check it
+	for relocatable links.
+	* ld.texinfo (--check-sections): Update documentation.
+
 2009-01-26  Kai Tietz  <kai.tietz@onevision.com>
 
 	* pe-dll.c (tmp_seq2): New static variable.

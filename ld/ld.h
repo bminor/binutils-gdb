@@ -167,10 +167,9 @@ typedef struct {
      search.  */
   bfd_boolean warn_search_mismatch;
 
-
-  /* If TRUE (the default) check section addresses, once compute,
-     fpor overlaps.  */
-  bfd_boolean check_section_addresses;
+  /* If non-zero check section addresses, once computed,
+     for overlaps.  Relocatable links only check when this is > 0.  */
+  signed char check_section_addresses;
 
   /* If TRUE allow the linking of input files in an unknown architecture
      assuming that the user knows what they are doing.  This was the old

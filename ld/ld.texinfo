@@ -1205,6 +1205,9 @@ perform this check, and if it finds any overlaps it will produce
 suitable error messages.  The linker does know about, and does make
 allowances for sections in overlays.  The default behaviour can be
 restored by using the command line switch @option{--check-sections}.
+Section overlap is not usually checked for relocatable links.  You can
+force checking in that case by using the @option{--check-sections}
+option.
 
 @cindex cross reference table
 @kindex --cref
