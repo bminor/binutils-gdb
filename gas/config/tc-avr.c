@@ -192,7 +192,7 @@ static struct mcu_type_s mcu_types[] =
   {"atmega1280", AVR_ISA_AVR51,   bfd_mach_avr51},
   {"atmega1281", AVR_ISA_AVR51,   bfd_mach_avr51},
   {"atmega1284p",AVR_ISA_AVR51,   bfd_mach_avr51},
-  {"atmega128rfa",AVR_ISA_AVR51,  bfd_mach_avr51},
+  {"atmega128rfa1",AVR_ISA_AVR51, bfd_mach_avr51},
   {"at90can128", AVR_ISA_AVR51,   bfd_mach_avr51},
   {"at90usb1286",AVR_ISA_AVR51,   bfd_mach_avr51},
   {"at90usb1287",AVR_ISA_AVR51,   bfd_mach_avr51},
