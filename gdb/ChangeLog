@@ -1,5 +1,13 @@
 2009-01-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdbtypes.c (alloc_type, alloc_type_instance, create_range_type)
+	(create_array_type, create_set_type, init_flags_type)
+	(copy_type_recursive): Replace pairs of calls to XALLOC and memset
+	with a call to XZALLOC or XCALLOC, and pairs of calls to
+	obstack_alloc and memset with a call to OBSTACK_ZALLOC.
+
+2009-01-26  Pedro Alves  <pedro@codesourcery.com>
+
 	Add "maint set|show internal-error|internal-warning quit|corefile
 	ask|yes|no" commands.
 
