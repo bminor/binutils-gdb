@@ -1,3 +1,9 @@
+2009-01-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 9766
+	* dlltool.c (xlate): When strip text after the @ sign, look for
+	the last one not the first one.
+
 2009-01-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in (commonbfdlib): Delete.

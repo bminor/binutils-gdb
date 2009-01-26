@@ -2131,8 +2131,9 @@ xlate (const char *name)
       char *p;
 
       name += lead_at;
-      p = strchr (name, '@');
-      if (p)
+      /* PR 9766: Look for the last @ sign in the name.  */
+      p = strrchr (name, '@');
+      if (p && ISDIGIT (p[1]))
 	*p = 0;
     }
   return name;
