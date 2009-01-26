@@ -2060,8 +2060,9 @@ skip_past_char (char ** str, char c)
 }
 #define skip_past_comma(str) skip_past_char (str, ',')
 
-/* Parse an attribute directive for VENDOR.  */
-void
+/* Parse an attribute directive for VENDOR.
+   Returns the attribute number read, or zero on error.  */
+int
 s_vendor_attribute (int vendor)
 {
   expressionS exp;
@@ -2104,7 +2105,7 @@ s_vendor_attribute (int vendor)
 	{
 	  as_bad (_("Attribute name not recognised: %s"), name);
 	  ignore_rest_of_line ();
-	  return;
+	  return 0;
 	}
     }
 
@@ -2119,7 +2120,7 @@ s_vendor_attribute (int vendor)
 	{
 	  as_bad (_("expected numeric constant"));
 	  ignore_rest_of_line ();
-	  return;
+	  return 0;
 	}
       i = exp.X_add_number;
     }
@@ -2128,7 +2129,7 @@ s_vendor_attribute (int vendor)
     {
       as_bad (_("expected comma"));
       ignore_rest_of_line ();
-      return;
+      return 0;
     }
   if (type & 2)
     {
@@ -2156,14 +2157,15 @@ s_vendor_attribute (int vendor)
     }
 
   demand_empty_rest_of_line ();
-  return;
+  return tag;
 bad_string:
   as_bad (_("bad string constant"));
   ignore_rest_of_line ();
-  return;
+  return 0;
 bad:
   as_bad (_("expected <tag> , <value>"));
   ignore_rest_of_line ();
+  return 0;
 }
 
 /* Parse a .gnu_attribute directive.  */

@@ -3,11 +3,15 @@
 #as:
 #ld: -r
 #readelf: -A
+# This test is only valid on ELF based ports.
+# not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 
 Attribute Section: aeabi
 File Attributes
   Tag_CPU_name: "ARM7TDMI"
   Tag_CPU_arch: v4T
+  Tag_ARM_ISA_use: Yes
+  Tag_THUMB_ISA_use: Thumb-1
   Tag_ABI_PCS_wchar_t: 4
   Tag_ABI_FP_denormal: Needed
   Tag_ABI_FP_exceptions: Needed

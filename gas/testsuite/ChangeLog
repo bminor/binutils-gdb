@@ -1,3 +1,80 @@
+2009-01-26  Andrew Stubbs  <ams@codesourcery.com>
+
+	* gas/arm/attr-cpu-directive.d: New file.
+	* gas/arm/attr-cpu-directive.s: New file.
+	* gas/arm/attr-default.d: New file.
+	* gas/arm/attr-march-all.d: New file.
+	* gas/arm/attr-march-armv1.d: New file.
+	* gas/arm/attr-march-armv2.d: New file.
+	* gas/arm/attr-march-armv2a.d: New file.
+	* gas/arm/attr-march-armv2s.d: New file.
+	* gas/arm/attr-march-armv3.d: New file.
+	* gas/arm/attr-march-armv3m.d: New file.
+	* gas/arm/attr-march-armv4.d: New file.
+	* gas/arm/attr-march-armv4t.d: New file.
+	* gas/arm/attr-march-armv4txm.d: New file.
+	* gas/arm/attr-march-armv4xm.d: New file.
+	* gas/arm/attr-march-armv5.d: New file.
+	* gas/arm/attr-march-armv5t.d: New file.
+	* gas/arm/attr-march-armv5te.d: New file.
+	* gas/arm/attr-march-armv5tej.d: New file.
+	* gas/arm/attr-march-armv5texp.d: New file.
+	* gas/arm/attr-march-armv5txm.d: New file.
+	* gas/arm/attr-march-armv6-m.d: New file.
+	* gas/arm/attr-march-armv6.d: New file.
+	* gas/arm/attr-march-armv6j.d: New file.
+	* gas/arm/attr-march-armv6k.d: New file.
+	* gas/arm/attr-march-armv6kt2.d: New file.
+	* gas/arm/attr-march-armv6t2.d: New file.
+	* gas/arm/attr-march-armv6z.d: New file.
+	* gas/arm/attr-march-armv6zk.d: New file.
+	* gas/arm/attr-march-armv6zkt2.d: New file.
+	* gas/arm/attr-march-armv6zt2.d: New file.
+	* gas/arm/attr-march-armv7-a.d: New file.
+	* gas/arm/attr-march-armv7-m.d: New file.
+	* gas/arm/attr-march-armv7-r.d: New file.
+	* gas/arm/attr-march-armv7.d: New file.
+	* gas/arm/attr-march-armv7a.d: New file.
+	* gas/arm/attr-march-armv7m.d: New file.
+	* gas/arm/attr-march-armv7r.d: New file.
+	* gas/arm/attr-march-iwmmxt.d: New file.
+	* gas/arm/attr-march-iwmmxt2.d: New file.
+	* gas/arm/attr-march-xscale.d: New file.
+	* gas/arm/attr-mcpu.d: New file.
+	* gas/arm/attr-mfpu-arm1020e.d: New file.
+	* gas/arm/attr-mfpu-arm1020t.d: New file.
+	* gas/arm/attr-mfpu-arm1136jf-s.d: New file.
+	* gas/arm/attr-mfpu-arm1136jfs.d: New file.
+	* gas/arm/attr-mfpu-arm7500fe.d: New file.
+	* gas/arm/attr-mfpu-fpa.d: New file.
+	* gas/arm/attr-mfpu-fpa10.d: New file.
+	* gas/arm/attr-mfpu-fpa11.d: New file.
+	* gas/arm/attr-mfpu-fpe.d: New file.
+	* gas/arm/attr-mfpu-fpe2.d: New file.
+	* gas/arm/attr-mfpu-fpe3.d: New file.
+	* gas/arm/attr-mfpu-maverick.d: New file.
+	* gas/arm/attr-mfpu-neon-fp16.d: New file.
+	* gas/arm/attr-mfpu-neon.d: New file.
+	* gas/arm/attr-mfpu-softfpa.d: New file.
+	* gas/arm/attr-mfpu-softvfp+vfp.d: New file.
+	* gas/arm/attr-mfpu-softvfp.d: New file.
+	* gas/arm/attr-mfpu-vfp.d: New file.
+	* gas/arm/attr-mfpu-vfp10-r0.d: New file.
+	* gas/arm/attr-mfpu-vfp10.d: New file.
+	* gas/arm/attr-mfpu-vfp3.d: New file.
+	* gas/arm/attr-mfpu-vfp9.d: New file.
+	* gas/arm/attr-mfpu-vfpv2.d: New file.
+	* gas/arm/attr-mfpu-vfpv3-d16.d: New file.
+	* gas/arm/attr-mfpu-vfpv3.d: New file.
+	* gas/arm/attr-mfpu-vfpxd.d: New file.
+	* gas/arm/attr-order.d: Update Tag_ARM_ISA_use and Tag_THUMB_ISA_use.
+	* gas/arm/attr-override-cpu-directive.d: New file.
+	* gas/arm/attr-override-cpu-directive.s: New file.
+	* gas/arm/attr-override-mcpu.d: New file.
+	* gas/arm/attr-override-mcpu.s: New file.
+	* gas/arm/blank.s: New file.
+	* gas/arm/eabi_attr_1.d: Update Tag_ARM_ISA_use and Tag_THUMB_ISA_use.
+
 2009-01-26  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/attr-order.d: Do not run this test for non-ELF based ARM

@@ -241,6 +241,8 @@ static int meabi_flags = EABI_DEFAULT;
 static int meabi_flags = EF_ARM_EABI_UNKNOWN;
 # endif
 
+static int attributes_set_explicitly[NUM_KNOWN_OBJ_ATTRIBUTES];
+
 bfd_boolean
 arm_is_eabi (void)
 {
@@ -3884,7 +3886,10 @@ s_arm_unwind_raw (int ignored ATTRIBUTE_UNUSED)
 static void
 s_arm_eabi_attribute (int ignored ATTRIBUTE_UNUSED)
 {
-  s_vendor_attribute (OBJ_ATTR_PROC);
+  int tag = s_vendor_attribute (OBJ_ATTR_PROC);
+
+  if (tag < NUM_KNOWN_OBJ_ATTRIBUTES)
+    attributes_set_explicitly[tag] = 1;
 }
 #endif /* OBJ_ELF */
 
@@ -20716,6 +20721,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {1, ARM_ARCH_V4},
     {2, ARM_ARCH_V4T},
     {3, ARM_ARCH_V5},
+    {3, ARM_ARCH_V5T},
     {4, ARM_ARCH_V5TE},
     {5, ARM_ARCH_V5TEJ},
     {6, ARM_ARCH_V6},
@@ -20728,6 +20734,25 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {10, ARM_ARCH_V7M},
     {0, ARM_ARCH_NONE}
 };
+
+/* Set an attribute if it has not already been set by the user.  */
+static void
+aeabi_set_attribute_int (int tag, int value)
+{
+  if (tag < 1
+      || tag >= NUM_KNOWN_OBJ_ATTRIBUTES
+      || !attributes_set_explicitly[tag])
+    bfd_elf_add_proc_attr_int (stdoutput, tag, value);
+}
+
+static void
+aeabi_set_attribute_string (int tag, const char *value)
+{
+  if (tag < 1
+      || tag >= NUM_KNOWN_OBJ_ATTRIBUTES
+      || !attributes_set_explicitly[tag])
+    bfd_elf_add_proc_attr_string (stdoutput, tag, value);
+}
 
 /* Set the public EABI object attributes.  */
 static void
@@ -20775,49 +20800,47 @@ aeabi_set_public_attributes (void)
 	  for (i = 0; p[i]; i++)
 	    p[i] = TOUPPER (p[i]);
 	}
-      bfd_elf_add_proc_attr_string (stdoutput, 5, p);
+      aeabi_set_attribute_string (Tag_CPU_name, p);
     }
   /* Tag_CPU_arch.  */
-  bfd_elf_add_proc_attr_int (stdoutput, 6, arch);
+  aeabi_set_attribute_int (Tag_CPU_arch, arch);
   /* Tag_CPU_arch_profile.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a))
-    bfd_elf_add_proc_attr_int (stdoutput, 7, 'A');
+    aeabi_set_attribute_int (Tag_CPU_arch_profile, 'A');
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7r))
-    bfd_elf_add_proc_attr_int (stdoutput, 7, 'R');
+    aeabi_set_attribute_int (Tag_CPU_arch_profile, 'R');
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_m))
-    bfd_elf_add_proc_attr_int (stdoutput, 7, 'M');
+    aeabi_set_attribute_int (Tag_CPU_arch_profile, 'M');
   /* Tag_ARM_ISA_use.  */
-  if (ARM_CPU_HAS_FEATURE (arm_arch_used, arm_arch_full))
-    bfd_elf_add_proc_attr_int (stdoutput, 8, 1);
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v1)
+      || arch == 0)
+    aeabi_set_attribute_int (Tag_ARM_ISA_use, 1);
   /* Tag_THUMB_ISA_use.  */
-  if (ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_full))
-    bfd_elf_add_proc_attr_int (stdoutput, 9,
-	ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_t2) ? 2 : 1);
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v4t)
+      || arch == 0)
+    aeabi_set_attribute_int (Tag_THUMB_ISA_use,
+	ARM_CPU_HAS_FEATURE (flags, arm_arch_t2) ? 2 : 1);
   /* Tag_VFP_arch.  */
-  if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_d32)
-      || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_vfp_ext_d32))
-    bfd_elf_add_proc_attr_int (stdoutput, 10, 4);
-  else if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_v3)
-      || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_vfp_ext_v3))
-    bfd_elf_add_proc_attr_int (stdoutput, 10, 3);
-  else if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_v2)
-           || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_vfp_ext_v2))
-    bfd_elf_add_proc_attr_int (stdoutput, 10, 2);
-  else if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_v1)
-           || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_vfp_ext_v1)
-           || ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_v1xd)
-           || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_vfp_ext_v1xd))
-    bfd_elf_add_proc_attr_int (stdoutput, 10, 1);
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_d32))
+    aeabi_set_attribute_int (Tag_VFP_arch, 3);
+  else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v3))
+    aeabi_set_attribute_int (Tag_VFP_arch, 4);
+  else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v2))
+    aeabi_set_attribute_int (Tag_VFP_arch, 2);
+  else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v1)
+           || ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v1xd))
+    aeabi_set_attribute_int (Tag_VFP_arch, 1);
   /* Tag_WMMX_arch.  */
-  if (ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_cext_iwmmxt)
-      || ARM_CPU_HAS_FEATURE (arm_arch_used, arm_cext_iwmmxt))
-    bfd_elf_add_proc_attr_int (stdoutput, 11, 1);
-  /* Tag_NEON_arch.  */
+  if (ARM_CPU_HAS_FEATURE (flags, arm_cext_iwmmxt2))
+    aeabi_set_attribute_int (Tag_WMMX_arch, 2);
+  else if (ARM_CPU_HAS_FEATURE (flags, arm_cext_iwmmxt))
+    aeabi_set_attribute_int (Tag_WMMX_arch, 1);
+  /* Tag_Advanced_SIMD_arch (formerly Tag_NEON_arch).  */
   if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_v1))
-    bfd_elf_add_proc_attr_int (stdoutput, 12, 1);
-  /* Tag_NEON_FP16_arch.  */
+    aeabi_set_attribute_int (Tag_Advanced_SIMD_arch, 1);
+  /* Tag_VFP_HP_extension (formerly Tag_NEON_FP16_arch).  */
   if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_fp16))
-    bfd_elf_add_proc_attr_int (stdoutput, 36, 1);
+    aeabi_set_attribute_int (Tag_VFP_HP_extension, 1);
 }
 
 /* Add the default contents for the .ARM.attributes section.  */

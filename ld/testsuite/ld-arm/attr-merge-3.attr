@@ -2,7 +2,7 @@ Attribute Section: aeabi
 File Attributes
   Tag_nodefaults: True
   Tag_CPU_name: "ARM9E"
-  Tag_CPU_arch: v5TE
+  Tag_CPU_arch: v5T
   Tag_ARM_ISA_use: Yes
   Tag_THUMB_ISA_use: Thumb-2
   Tag_VFP_arch: VFPv3

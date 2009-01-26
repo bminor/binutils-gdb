@@ -1,3 +1,19 @@
+2009-01-26  Andrew Stubbs  <ams@codesourcery.com>
+
+	* config/tc-arm.c (attributes_set_explicitly): New array.
+	(s_arm_eabi_attribute): Check return value from s_vendor_attribute.
+	(cpu_arch): Add ARM_ARCH_V5T.
+	(aeabi_set_attribute_int): New function.
+	(aeabi_set_attribute_string): New function.
+	(aeabi_set_public_attributes): Set attributes according to the user's
+	intentions, rather than the actual state of the binary.
+	Use aeabi_set_attribute_int and aeabi_set_attribute_string instead of
+	bfd_elf_add_proc_attr_int and bfd_elf_add_proc_attr_string.
+	Support WMMXv2. Use attribute names instead of numbers.
+	* read.c (s_vendor_attribute): Change return type to int.
+	Return the tag number that was set.
+	* read.h (s_vendor_attribute): Change return type to int.
+
 2009-01-26  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	PR 9789
