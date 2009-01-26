@@ -1,3 +1,12 @@
+2009-01-26  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pe-dll.c (tmp_seq2): New static variable.
+	(make_singleton_name_imp): New.
+	(make_import_fixup_entry): Use for v2 the _imp_<name> symbol and
+	avoid duplicate import table generation for same symbol.
+	(pe_create_runtime_relocator_reference): Make reference for
+	64-bit 8 bytes.
+
 2009-01-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/spuelf.em (params): Init new field.

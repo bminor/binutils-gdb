@@ -1656,6 +1656,7 @@ pe_dll_generate_def_file (const char *pe_out_def_filename)
 static asymbol **symtab;
 static int symptr;
 static int tmp_seq;
+static int tmp_seq2;
 static const char *dll_filename;
 static char *dll_symname;
 
@@ -2171,6 +2172,47 @@ make_one (def_file_export *exp, bfd *parent, bfd_boolean include_jmp_stub)
 }
 
 static bfd *
+make_singleton_name_imp (const char *import, bfd *parent)
+{
+  /* Name thunks go to idata$4.  */
+  asection *id5;
+  unsigned char *d5;
+  char *oname;
+  bfd *abfd;
+
+  oname = xmalloc (20);
+  sprintf (oname, "nmimp%06d.o", tmp_seq2);
+  tmp_seq2++;
+
+  abfd = bfd_create (oname, parent);
+  bfd_find_target (pe_details->object_target, abfd);
+  bfd_make_writable (abfd);
+
+  bfd_set_format (abfd, bfd_object);
+  bfd_set_arch_mach (abfd, pe_details->bfd_arch, 0);
+
+  symptr = 0;
+  symtab = xmalloc (3 * sizeof (asymbol *));
+  id5 = quick_section (abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
+  quick_symbol (abfd, U ("_imp_"), import, "", id5, BSF_GLOBAL, 0);
+
+  /* We need space for the real thunk and for the null terminator.  */
+  bfd_set_section_size (abfd, id5, PE_IDATA5_SIZE * 2);
+  d5 = xmalloc (PE_IDATA5_SIZE * 2);
+  id5->contents = d5;
+  memset (d5, 0, PE_IDATA5_SIZE * 2);
+  quick_reloc (abfd, 0, BFD_RELOC_RVA, 2);
+  save_relocs (id5);
+
+  bfd_set_symtab (abfd, symtab, symptr);
+
+  bfd_set_section_contents (abfd, id5, d5, 0, PE_IDATA4_SIZE * 2);
+
+  bfd_make_readable (abfd);
+  return abfd;
+}
+
+static bfd *
 make_singleton_name_thunk (const char *import, bfd *parent)
 {
   /* Name thunks go to idata$4.  */
@@ -2288,7 +2330,12 @@ make_import_fixup_entry (const char *name,
 
   quick_symbol (abfd, U ("_nm_thnk_"), name, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U (""), dll_symname, "_iname", UNDSEC, BSF_GLOBAL, 0);
-  quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
+  /* For relocator v2 we have to use the .idata$5 element and not 
+     fixup_name.  */
+  if (link_info.pei386_runtime_pseudo_reloc == 2)
+    quick_symbol (abfd, U ("_imp_"), name, "", UNDSEC, BSF_GLOBAL, 0);
+  else
+    quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
 
   bfd_set_section_size (abfd, id2, 20);
   d2 = xmalloc (20);
@@ -2422,8 +2469,8 @@ pe_create_runtime_relocator_reference (bfd *parent)
   quick_symbol (abfd, "", U ("_pei386_runtime_relocator"), "", UNDSEC,
 		BSF_NO_FLAGS, 0);
 
-  bfd_set_section_size (abfd, extern_rt_rel, 4);
-  extern_rt_rel_d = xmalloc (4);
+  bfd_set_section_size (abfd, extern_rt_rel, PE_IDATA5_SIZE);
+  extern_rt_rel_d = xmalloc (PE_IDATA5_SIZE);
   extern_rt_rel->contents = extern_rt_rel_d;
 
   quick_reloc (abfd, 0, BFD_RELOC_RVA, 1);
@@ -2431,7 +2478,7 @@ pe_create_runtime_relocator_reference (bfd *parent)
 
   bfd_set_symtab (abfd, symtab, symptr);
 
-  bfd_set_section_contents (abfd, extern_rt_rel, extern_rt_rel_d, 0, 4);
+  bfd_set_section_contents (abfd, extern_rt_rel, extern_rt_rel_d, 0, PE_IDATA5_SIZE);
 
   bfd_make_readable (abfd);
   return abfd;
@@ -2443,25 +2490,48 @@ pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend)
   char buf[300];
   struct bfd_symbol *sym = *rel->sym_ptr_ptr;
   struct bfd_link_hash_entry *name_thunk_sym;
+  struct bfd_link_hash_entry *name_imp_sym;
   const char *name = sym->name;
   char *fixup_name = make_import_fixup_mark (rel);
   bfd *b;
+  int need_import_table = 1;
+
+  sprintf (buf, U ("_imp_%s"), name);
+  name_imp_sym = bfd_link_hash_lookup (link_info.hash, buf, 0, 0, 1);
 
   sprintf (buf, U ("_nm_thnk_%s"), name);
 
   name_thunk_sym = bfd_link_hash_lookup (link_info.hash, buf, 0, 0, 1);
 
-  if (!name_thunk_sym || name_thunk_sym->type != bfd_link_hash_defined)
+  /* For version 2 pseudo relocation we don't need to add an import
+     if the import symbol is already present.  */
+  if (link_info.pei386_runtime_pseudo_reloc == 2
+      && name_imp_sym
+      && name_imp_sym->type == bfd_link_hash_defined)
+    need_import_table = 0;
+
+  if (need_import_table == 1
+      && (!name_thunk_sym || name_thunk_sym->type != bfd_link_hash_defined))
     {
       bfd *b = make_singleton_name_thunk (name, link_info.output_bfd);
       add_bfd_to_link (b, b->filename, &link_info);
 
-      /* If we ever use autoimport, we have to cast text section writable.  */
-      config.text_read_only = FALSE;
-      link_info.output_bfd->flags &= ~WP_TEXT;   
+      /* If we ever use autoimport, we have to cast text section writable.
+         But not for version 2.  */
+      if (link_info.pei386_runtime_pseudo_reloc != 2)
+        {
+          config.text_read_only = FALSE;
+          link_info.output_bfd->flags &= ~WP_TEXT;
+        }
+      if (link_info.pei386_runtime_pseudo_reloc == 2)
+        {
+	  b = make_singleton_name_imp (name, link_info.output_bfd);
+          add_bfd_to_link (b, b->filename, &link_info);
+	}
     }
 
-  if (addend == 0 || link_info.pei386_runtime_pseudo_reloc)
+  if ((addend == 0 || link_info.pei386_runtime_pseudo_reloc)
+      && need_import_table == 1)
     {
       extern char * pe_data_import_dll;
       char * dll_symname = pe_data_import_dll ? pe_data_import_dll : "unknown";
@@ -2527,7 +2597,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
 
   /* xgettext:c-format */
   info_msg (_("Creating library file: %s\n"), impfilename);
- 
+
   bfd_set_format (outarch, bfd_archive);
   outarch->has_armap = 1;
 
@@ -2551,7 +2621,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
 	it into the archive member chain.  */
       if (found)
 	{
-	  bfd *newbfd = bfd_openr (ibfd->my_archive 
+	  bfd *newbfd = bfd_openr (ibfd->my_archive
 		? ibfd->my_archive->filename : ibfd->filename, NULL);
 	  if (!newbfd)
 	    {
@@ -2567,7 +2637,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
 	      bfd *arbfd = newbfd;
 	      if (!bfd_check_format_matches (arbfd, bfd_archive, NULL))
 		{
-		  einfo (_("%X%s(%s): can't find member in non-archive file"), 
+		  einfo (_("%X%s(%s): can't find member in non-archive file"),
 		    ibfd->my_archive->filename, ibfd->filename);
 		  return;
 		}
@@ -2579,7 +2649,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
 		}
 	      if (!newbfd)
 		{
-		  einfo (_("%X%s(%s): can't find member in archive"), 
+		  einfo (_("%X%s(%s): can't find member in archive"),
 		    ibfd->my_archive->filename, ibfd->filename);
 		  return;
 		}
@@ -2595,7 +2665,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
       char *internal = def->exports[i].internal_name;
       bfd *n;
 
-      /* Don't add PRIVATE entries to import lib.  */ 	
+      /* Don't add PRIVATE entries to import lib.  */
       if (pe_def_file->exports[i].flag_private)
 	continue;
       def->exports[i].internal_name = def->exports[i].name;
@@ -2693,7 +2763,7 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *link_info)
 	    if (!blhe || (blhe && blhe->type != bfd_link_hash_undefined))
 	      {
 		if (lead_at)
-		  sprintf (name, "%s%s", "__imp_", 
+		  sprintf (name, "%s%s", "__imp_",
 			   pe_def_file->imports[i].internal_name);
 		else
 		  sprintf (name, "%s%s%s", "__imp_", U (""),
@@ -2826,7 +2896,7 @@ pe_implied_import_dll (const char *filename)
   export_rva = pe_get32 (dll, opthdr_ofs + 96);
   export_size = pe_get32 (dll, opthdr_ofs + 100);
 #endif
-  
+
   nsections = pe_get16 (dll, pe_header_offset + 4 + 2);
   secptr = (pe_header_offset + 4 + 20 +
 	    pe_get16 (dll, pe_header_offset + 4 + 16));
