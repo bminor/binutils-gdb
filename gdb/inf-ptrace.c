@@ -73,7 +73,8 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
       CORE_ADDR step_range_start = last_tp->step_range_start;
       CORE_ADDR step_range_end = last_tp->step_range_end;
       struct frame_id step_frame_id = last_tp->step_frame_id;
-
+      int attach_flag = find_inferior_pid (pid)->attach_flag;
+      struct inferior *inf;
       struct thread_info *tp;
 
       /* Otherwise, deleting the parent would get rid of this
@@ -82,7 +83,7 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
 
       /* Before detaching from the parent, remove all breakpoints from
 	 it.  */
-      detach_breakpoints (pid);
+      remove_breakpoints ();
 
       if (ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3)1, 0) == -1)
 	perror_with_name (("ptrace"));
@@ -94,7 +95,8 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
       detach_inferior (pid);
 
       /* Add the child.  */
-      add_inferior (fpid);
+      inf = add_inferior (fpid);
+      inf->attach_flag = attach_flag;
       tp = add_thread_silent (inferior_ptid);
 
       tp->step_resume_breakpoint = step_resume_breakpoint;

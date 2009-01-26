@@ -1,5 +1,13 @@
 2009-01-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (linux_child_follow_fork): Copy attach_flag from the
+	parent to the child.
+	* inf-ttrace.c (inf_ttrace_follow_fork): Likewise.
+	* inf-ptrace.c (inf_ptrace_follow_fork): Likewise.  Use
+	remove_breakpoints to remove breakpoints from the parent.
+
+2009-01-26  Pedro Alves  <pedro@codesourcery.com>
+
 	PR backtrace/9458, PR backtrace/8864:
 	* frame.c (create_new_frame): Update the frame's cached PC before
 	finding its unwinder.  Use frame_id_build to build the new frame's

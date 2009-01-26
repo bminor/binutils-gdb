@@ -458,6 +458,8 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
 
   if (follow_child)
     {
+      struct inferior *inf;
+
       /* Copy user stepping state to the new inferior thread.  */
       step_resume_breakpoint = last_tp->step_resume_breakpoint;
       step_range_start = last_tp->step_range_start;
@@ -469,7 +471,8 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
       last_tp->step_resume_breakpoint = NULL;
 
       inferior_ptid = ptid_build (fpid, flwpid, 0);
-      add_inferior (fpid);
+      inf = add_inferior (fpid);
+      inf->attach_flag = find_inferior_pid (pid)->attach_flag;
       detach_breakpoints (pid);
 
       target_terminal_ours ();

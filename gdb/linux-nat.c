@@ -730,9 +730,13 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
       else
 	{
 	  struct fork_info *fp;
+	  struct inferior *parent_inf, *child_inf;
 
 	  /* Add process to GDB's tables.  */
-	  add_inferior (child_pid);
+	  child_inf = add_inferior (child_pid);
+
+	  parent_inf = find_inferior_pid (GET_PID (last_ptid));
+	  child_inf->attach_flag = parent_inf->attach_flag;
 
 	  /* Retain child fork in ptrace (stopped) state.  */
 	  fp = find_fork_pid (child_pid);
@@ -800,6 +804,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
       struct thread_info *last_tp = find_thread_pid (last_ptid);
       struct thread_info *tp;
       char child_pid_spelling[40];
+      struct inferior *parent_inf, *child_inf;
 
       /* Copy user stepping state to the new inferior thread.  */
       struct breakpoint *step_resume_breakpoint = last_tp->step_resume_breakpoint;
@@ -829,7 +834,10 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
       /* Add the new inferior first, so that the target_detach below
 	 doesn't unpush the target.  */
 
-      add_inferior (child_pid);
+      child_inf = add_inferior (child_pid);
+
+      parent_inf = find_inferior_pid (GET_PID (last_ptid));
+      child_inf->attach_flag = parent_inf->attach_flag;
 
       /* If we're vforking, we may want to hold on to the parent until
 	 the child exits or execs.  At exec time we can remove the old
