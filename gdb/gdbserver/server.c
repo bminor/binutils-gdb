@@ -1299,9 +1299,10 @@ gdbserver_usage (FILE *stream)
 	   "HOST:PORT to listen for a TCP connection.\n"
 	   "\n"
 	   "Options:\n"
-	   "  --debug\t\tEnable debugging output.\n"
-	   "  --version\t\tDisplay version information and exit.\n"
-	   "  --wrapper WRAPPER --\tRun WRAPPER to start new programs.\n");
+	   "  --debug               Enable general debugging output.\n"
+	   "  --remote-debug        Enable remote protocol debugging output.\n"
+	   "  --version             Display version information and exit.\n"
+	   "  --wrapper WRAPPER --  Run WRAPPER to start new programs.\n");
   if (REPORT_BUGS_TO[0] && stream == stdout)
     fprintf (stream, "Report bugs to \"%s\".\n", REPORT_BUGS_TO);
 }
@@ -1378,6 +1379,8 @@ main (int argc, char *argv[])
 	}
       else if (strcmp (*next_arg, "--debug") == 0)
 	debug_threads = 1;
+      else if (strcmp (*next_arg, "--remote-debug") == 0)
+	remote_debug = 1;
       else if (strcmp (*next_arg, "--disable-packet") == 0)
 	{
 	  gdbserver_show_disableable (stdout);

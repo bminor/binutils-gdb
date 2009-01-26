@@ -1,3 +1,8 @@
+2009-01-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (gdbserver_usage): Mention --remote-debug.
+	(main): Accept '--remote-debug' switch.
+
 2009-01-18  Doug Evans  <dje@google.com>
 
 	* regcache.c (new_register_cache): No need to check result of xcalloc.

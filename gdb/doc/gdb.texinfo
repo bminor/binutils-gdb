@@ -13985,10 +13985,11 @@ You can terminate it by using @code{monitor exit}
 
 @subsubsection Other Command-Line Arguments for @code{gdbserver}
 
-You can include @option{--debug} on the @code{gdbserver} command line.
-@code{gdbserver} will display extra status information about the debugging
-process.  This option is intended for @code{gdbserver} development and
-for bug reports to the developers.
+The @option{--debug} option tells @code{gdbserver} to display extra
+status information about the debugging process.  The
+@option{--remote-debug} option tells @code{gdbserver} to display
+remote protocol debug output.  These options are intended for
+@code{gdbserver} development and for bug reports to the developers.
 
 The @option{--wrapper} option specifies a wrapper to launch programs
 for debugging.  The option should be followed by the name of the
