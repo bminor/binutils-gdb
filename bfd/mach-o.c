@@ -2098,6 +2098,11 @@ bfd_mach_o_archive_p (bfd *abfd)
   adata->nfat_arch = bfd_getb32 (buf + 4);
   if (adata->magic != 0xcafebabe)
     goto error;
+  /* Avoid matching Java bytecode files, which have the same magic number.
+     In the Java bytecode file format this field contains the JVM version,
+     which starts at 43.0.  */
+  if (adata->nfat_arch > 30)
+    goto error;
 
   adata->archentries = 
     bfd_alloc (abfd, adata->nfat_arch * sizeof (mach_o_fat_archentry));
