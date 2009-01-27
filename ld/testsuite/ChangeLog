@@ -1,5 +1,7 @@
 2009-01-27  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-cris/tls-tbss64.s, ld-cris/tls-e-80.d: New test.
+
 	* ld-cris/tls-e-20.d, ld-cris/tls-e-20a.d, ld-cris/tls-e-22.d,
 	ld-cris/tls-ldgde-14.d, ld-cris/tls-ldgde-15.d,
 	ld-cris/tls-ldgdex-14.d, ld-cris/tls-ldgdex-15.d: Adjust for
