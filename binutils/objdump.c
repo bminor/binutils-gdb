@@ -1,6 +1,6 @@
 /* objdump.c -- dump information about an object file.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -1708,6 +1708,8 @@ disassemble_bytes (struct disassemble_info * info,
 static void
 disassemble_section (bfd *abfd, asection *section, void *info)
 {
+  const struct elf_backend_data * bed;
+  bfd_vma                      sign_adjust = 0;
   struct disassemble_info *    pinfo = (struct disassemble_info *) info;
   struct objdump_disasm_info * paux;
   unsigned int                 opb = pinfo->octets_per_byte;
@@ -1775,7 +1777,6 @@ disassemble_section (bfd *abfd, asection *section, void *info)
 	      qsort (rel_pp, rel_count, sizeof (arelent *), compare_relocs);
 	    }
 	}
-
     }
   rel_ppend = rel_pp + rel_count;
 
@@ -1821,6 +1822,14 @@ disassemble_section (bfd *abfd, asection *section, void *info)
   sym = find_symbol_for_address (section->vma + addr_offset, info, &place);
   paux->require_sec = FALSE;
 
+  /* PR 9774: If the target used signed 32-bit addresses then we must make
+     sure that we sign extend the value that we calculate for 'addr' in the
+     loop below.  */
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+      && (bed = get_elf_backend_data (abfd)) != NULL
+      && bed->sign_extend_vma)
+    sign_adjust = 0x80000000;
+
   /* Disassemble a block of instructions up to the address associated with
      the symbol we have just found.  Then print the symbol and find the
      next symbol on.  Repeat until we have disassembled the entire section
@@ -1833,6 +1842,7 @@ disassemble_section (bfd *abfd, asection *section, void *info)
       bfd_boolean insns;
 
       addr = section->vma + addr_offset;
+      addr = (addr ^ sign_adjust) - sign_adjust;
 
       if (sym != NULL && bfd_asymbol_value (sym) <= addr)
 	{

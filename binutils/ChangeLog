@@ -1,5 +1,11 @@
 2009-01-27  Nick Clifton  <nickc@redhat.com>
 
+	PR 9774
+	* objdump.c (disassemble_section): When the target uses signed
+	addresses make sure that we compute signed values.
+
+2009-01-27  Nick Clifton  <nickc@redhat.com>
+
 	* MAINTAINERS: Remove Thiemo Seufer's name from the list of MIPS
 	maintainers.
 
