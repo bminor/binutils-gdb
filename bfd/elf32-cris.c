@@ -1694,7 +1694,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation -= elf_hash_table (info)->tls_sec == NULL
 	    ? 0 : (elf_hash_table (info)->tls_sec->vma
 		   + (info->shared
-		      ? 0 : elf_hash_table (info)->tls_sec->size));
+		      ? 0 : elf_hash_table (info)->tls_size));
 	  break;
 
 	case R_CRIS_32_GD:
@@ -1737,7 +1737,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* The symbol is defined in the program, so just write
 		 (1, -prog_tls_size+known_tpoffset) into the GOT.  */
 	      relocation -= elf_hash_table (info)->tls_sec->vma;
-	      relocation -= elf_hash_table (info)->tls_sec->size;
+	      relocation -= elf_hash_table (info)->tls_size;
 
 	      if (h != NULL)
 		{
@@ -1889,7 +1889,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* The symbol is defined in the program, so just write
 		 the -prog_tls_size+known_tpoffset into the GOT.  */
 	      relocation -= elf_hash_table (info)->tls_sec->vma;
-	      relocation -= elf_hash_table (info)->tls_sec->size;
+	      relocation -= elf_hash_table (info)->tls_size;
 
 	      if (h != NULL)
 		off = h->got.offset;
@@ -2019,7 +2019,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation -= elf_hash_table (info)->tls_sec == NULL
 	    ? 0
 	    : (elf_hash_table (info)->tls_sec->vma
-	       + elf_hash_table (info)->tls_sec->size);
+	       + elf_hash_table (info)->tls_size);
 
 	  /* The TLS-relative offset is the relocation.  */
 	  break;

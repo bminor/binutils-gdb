@@ -1,3 +1,9 @@
+2009-01-27  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_relocate_section): Use elf_hash_table
+	(info)->tls_size, not elf_hash_table (info)->tls_sec->size for
+	the size of local TLS data.
+
 2009-01-27  Andreas Schwab  <schwab@suse.de>
 
 	* mach-o.c (bfd_mach_o_archive_p): Restrict the number of
