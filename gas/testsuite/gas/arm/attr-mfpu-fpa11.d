@@ -2,8 +2,8 @@
 # source: blank.s
 # as: -mfpu=fpa11
 # readelf: -A
-# This test is only valid on ELF based ports.
-# not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
+# This test is only valid on EABI based ports.
+# target: *-*-*eabi
 
 Attribute Section: aeabi
 File Attributes
