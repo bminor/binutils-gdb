@@ -1,5 +1,10 @@
 2009-01-27  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-cris/tls-e-20.d, ld-cris/tls-e-20a.d, ld-cris/tls-e-22.d,
+	ld-cris/tls-ldgde-14.d, ld-cris/tls-ldgde-15.d,
+	ld-cris/tls-ldgdex-14.d, ld-cris/tls-ldgdex-15.d: Adjust for
+	change in relocation values.
+
 	* ld-cris/weakhiddso.d, ld-cris/weakhid.s: New test.
 
 2009-01-26  Nathan Sidwell  <nathan@codesourcery.com>
