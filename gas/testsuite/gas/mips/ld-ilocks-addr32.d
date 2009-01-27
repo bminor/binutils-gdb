@@ -2,6 +2,7 @@
 #as: -mips3 -mtune=r4000 -march=r4000
 #name: MIPS ld-ilocks
 #source: ld.s
+#not-target: mipstx39-*-*
 
 # Test the ld macro.
 

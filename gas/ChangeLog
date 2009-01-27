@@ -1,3 +1,13 @@
+2009-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-mips.c (append_insn): Cope with a complex reloc
+	sequence containing an unsupported reloc type.
+	(enum options): Replace computed #define's constants for option
+	numbers with this enum.
+	(struct md_longopts): Use the enum.  Allow OPTION_32 in a non-ELF
+	environment.
+	(md_parse_option): Allow -32 in a non-ELF environment.
+
 2009-01-26  Andrew Stubbs  <ams@codesourcery.com>
 
 	* config/tc-arm.c (attributes_set_explicitly): New array.

@@ -34,7 +34,6 @@ if { [istarget powerpc*-*-*] } then {
     if { [istarget powerpc-*-*aix*] } then {
 	run_dump_test "altivec_xcoff"
 	run_dump_test "altivec_xcoff64"
-	run_dump_test "booke_xcoff"
     } else {
 	run_dump_test "altivec"
 	run_dump_test "altivec_and_spe"

@@ -1,3 +1,22 @@
+2009-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* gas/lib/gas-defs.exp: Update description of run_dump_test proc.
+
+	* gas/mips/dli.d: Pass -64 to gas.
+	* gas/mips/mips64-mips3d-incl.d: Likewise.
+	* gas/mips/octeon.d: Likewise.
+	* gas/mips/sb1-ext-mdmx.d: Likewise.
+	* gas/mips/sb1-ext-ps.d: Likewise.
+	* gas/mips/e32el-rel2.s: Pass -march=mips3 to gas.
+	Update expected relocs.
+	* gas/mips/ld-ilocks-addr32.d: Do not run for tx39 targets.
+	* gas/mips/mips.exp: Remove 'ilocks' variable.
+	Add ecoff targets to 'addr32' variable.
+	Set 'no_mips16' for ecoff targets.
+	Do not run div-ilocks or mul-ilocks test variants.
+	* gas/mips/mips16-intermix.d: Use nm instead of objdump so that
+	the symbol table output is sorted.  Update expecetd output.
+
 2009-01-26  Andrew Stubbs  <ams@codesourcery.com>
 
 	* gas/arm/attr-cpu-directive.d: New file.
@@ -78,7 +97,7 @@
 2009-01-26  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/attr-order.d: Do not run this test for non-ELF based ARM
-	targets. 
+	targets.
 
 2009-01-24  Andreas Schwab  <schwab@suse.de>
 

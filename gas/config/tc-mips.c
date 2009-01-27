@@ -1,6 +1,6 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -2964,6 +2964,15 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      break;
 
 	  howto = bfd_reloc_type_lookup (stdoutput, reloc_type[i - 1]);
+	  if (howto == NULL)
+	    {
+	      /* To reproduce this failure try assembling gas/testsuites/
+		 gas/mips/mips16-intermix.s with a mips-ecoff targeted
+		 assembler.  */
+	      as_bad (_("Unsupported MIPS relocation number %d"), reloc_type[i - 1]);
+	      howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_16);
+	    }
+	  
 	  ip->fixp[0] = fix_new_exp (ip->frag, ip->where,
 				     bfd_get_reloc_size (howto),
 				     address_expr,
@@ -11092,174 +11101,180 @@ static int support_64bit_objects(void)
 
 const char *md_shortopts = "O::g::G:";
 
+enum options
+  {
+    OPTION_MARCH = OPTION_MD_BASE,
+    OPTION_MTUNE,
+    OPTION_MIPS1,
+    OPTION_MIPS2,
+    OPTION_MIPS3,
+    OPTION_MIPS4,
+    OPTION_MIPS5,
+    OPTION_MIPS32,
+    OPTION_MIPS64,
+    OPTION_MIPS32R2,
+    OPTION_MIPS64R2,
+    OPTION_MIPS16,
+    OPTION_NO_MIPS16,
+    OPTION_MIPS3D,
+    OPTION_NO_MIPS3D,
+    OPTION_MDMX,
+    OPTION_NO_MDMX,
+    OPTION_DSP,
+    OPTION_NO_DSP,
+    OPTION_MT,
+    OPTION_NO_MT,
+    OPTION_SMARTMIPS,
+    OPTION_NO_SMARTMIPS,
+    OPTION_DSPR2,
+    OPTION_NO_DSPR2,
+    OPTION_COMPAT_ARCH_BASE,
+    OPTION_M4650,
+    OPTION_NO_M4650,
+    OPTION_M4010,
+    OPTION_NO_M4010,
+    OPTION_M4100,
+    OPTION_NO_M4100,
+    OPTION_M3900,
+    OPTION_NO_M3900,
+    OPTION_M7000_HILO_FIX,
+    OPTION_MNO_7000_HILO_FIX,
+    OPTION_FIX_VR4120,
+    OPTION_NO_FIX_VR4120,
+    OPTION_FIX_VR4130,
+    OPTION_NO_FIX_VR4130,
+    OPTION_TRAP,
+    OPTION_BREAK,
+    OPTION_EB,
+    OPTION_EL,
+    OPTION_FP32,
+    OPTION_GP32,
+    OPTION_CONSTRUCT_FLOATS,
+    OPTION_NO_CONSTRUCT_FLOATS,
+    OPTION_FP64,
+    OPTION_GP64,
+    OPTION_RELAX_BRANCH,
+    OPTION_NO_RELAX_BRANCH,
+    OPTION_MSHARED,
+    OPTION_MNO_SHARED,
+    OPTION_MSYM32,
+    OPTION_MNO_SYM32,
+    OPTION_SOFT_FLOAT,
+    OPTION_HARD_FLOAT,
+    OPTION_SINGLE_FLOAT,
+    OPTION_DOUBLE_FLOAT,
+    OPTION_32,
+#ifdef OBJ_ELF
+    OPTION_CALL_SHARED,
+    OPTION_CALL_NONPIC,
+    OPTION_NON_SHARED,
+    OPTION_XGOT,
+    OPTION_MABI,
+    OPTION_N32,
+    OPTION_64,
+    OPTION_MDEBUG,
+    OPTION_NO_MDEBUG,
+    OPTION_PDR,
+    OPTION_NO_PDR,
+    OPTION_MVXWORKS_PIC,
+#endif /* OBJ_ELF */
+    OPTION_END_OF_ENUM    
+  };
+  
 struct option md_longopts[] =
 {
   /* Options which specify architecture.  */
-#define OPTION_ARCH_BASE    (OPTION_MD_BASE)
-#define OPTION_MARCH (OPTION_ARCH_BASE + 0)
   {"march", required_argument, NULL, OPTION_MARCH},
-#define OPTION_MTUNE (OPTION_ARCH_BASE + 1)
   {"mtune", required_argument, NULL, OPTION_MTUNE},
-#define OPTION_MIPS1 (OPTION_ARCH_BASE + 2)
   {"mips0", no_argument, NULL, OPTION_MIPS1},
   {"mips1", no_argument, NULL, OPTION_MIPS1},
-#define OPTION_MIPS2 (OPTION_ARCH_BASE + 3)
   {"mips2", no_argument, NULL, OPTION_MIPS2},
-#define OPTION_MIPS3 (OPTION_ARCH_BASE + 4)
   {"mips3", no_argument, NULL, OPTION_MIPS3},
-#define OPTION_MIPS4 (OPTION_ARCH_BASE + 5)
   {"mips4", no_argument, NULL, OPTION_MIPS4},
-#define OPTION_MIPS5 (OPTION_ARCH_BASE + 6)
   {"mips5", no_argument, NULL, OPTION_MIPS5},
-#define OPTION_MIPS32 (OPTION_ARCH_BASE + 7)
   {"mips32", no_argument, NULL, OPTION_MIPS32},
-#define OPTION_MIPS64 (OPTION_ARCH_BASE + 8)
   {"mips64", no_argument, NULL, OPTION_MIPS64},
-#define OPTION_MIPS32R2 (OPTION_ARCH_BASE + 9)
   {"mips32r2", no_argument, NULL, OPTION_MIPS32R2},
-#define OPTION_MIPS64R2 (OPTION_ARCH_BASE + 10)
   {"mips64r2", no_argument, NULL, OPTION_MIPS64R2},
 
   /* Options which specify Application Specific Extensions (ASEs).  */
-#define OPTION_ASE_BASE (OPTION_ARCH_BASE + 11)
-#define OPTION_MIPS16 (OPTION_ASE_BASE + 0)
   {"mips16", no_argument, NULL, OPTION_MIPS16},
-#define OPTION_NO_MIPS16 (OPTION_ASE_BASE + 1)
   {"no-mips16", no_argument, NULL, OPTION_NO_MIPS16},
-#define OPTION_MIPS3D (OPTION_ASE_BASE + 2)
   {"mips3d", no_argument, NULL, OPTION_MIPS3D},
-#define OPTION_NO_MIPS3D (OPTION_ASE_BASE + 3)
   {"no-mips3d", no_argument, NULL, OPTION_NO_MIPS3D},
-#define OPTION_MDMX (OPTION_ASE_BASE + 4)
   {"mdmx", no_argument, NULL, OPTION_MDMX},
-#define OPTION_NO_MDMX (OPTION_ASE_BASE + 5)
   {"no-mdmx", no_argument, NULL, OPTION_NO_MDMX},
-#define OPTION_DSP (OPTION_ASE_BASE + 6)
   {"mdsp", no_argument, NULL, OPTION_DSP},
-#define OPTION_NO_DSP (OPTION_ASE_BASE + 7)
   {"mno-dsp", no_argument, NULL, OPTION_NO_DSP},
-#define OPTION_MT (OPTION_ASE_BASE + 8)
   {"mmt", no_argument, NULL, OPTION_MT},
-#define OPTION_NO_MT (OPTION_ASE_BASE + 9)
   {"mno-mt", no_argument, NULL, OPTION_NO_MT},
-#define OPTION_SMARTMIPS (OPTION_ASE_BASE + 10)
   {"msmartmips", no_argument, NULL, OPTION_SMARTMIPS},
-#define OPTION_NO_SMARTMIPS (OPTION_ASE_BASE + 11)
   {"mno-smartmips", no_argument, NULL, OPTION_NO_SMARTMIPS},
-#define OPTION_DSPR2 (OPTION_ASE_BASE + 12)
   {"mdspr2", no_argument, NULL, OPTION_DSPR2},
-#define OPTION_NO_DSPR2 (OPTION_ASE_BASE + 13)
   {"mno-dspr2", no_argument, NULL, OPTION_NO_DSPR2},
 
   /* Old-style architecture options.  Don't add more of these.  */
-#define OPTION_COMPAT_ARCH_BASE (OPTION_ASE_BASE + 14)
-#define OPTION_M4650 (OPTION_COMPAT_ARCH_BASE + 0)
   {"m4650", no_argument, NULL, OPTION_M4650},
-#define OPTION_NO_M4650 (OPTION_COMPAT_ARCH_BASE + 1)
   {"no-m4650", no_argument, NULL, OPTION_NO_M4650},
-#define OPTION_M4010 (OPTION_COMPAT_ARCH_BASE + 2)
   {"m4010", no_argument, NULL, OPTION_M4010},
-#define OPTION_NO_M4010 (OPTION_COMPAT_ARCH_BASE + 3)
   {"no-m4010", no_argument, NULL, OPTION_NO_M4010},
-#define OPTION_M4100 (OPTION_COMPAT_ARCH_BASE + 4)
   {"m4100", no_argument, NULL, OPTION_M4100},
-#define OPTION_NO_M4100 (OPTION_COMPAT_ARCH_BASE + 5)
   {"no-m4100", no_argument, NULL, OPTION_NO_M4100},
-#define OPTION_M3900 (OPTION_COMPAT_ARCH_BASE + 6)
   {"m3900", no_argument, NULL, OPTION_M3900},
-#define OPTION_NO_M3900 (OPTION_COMPAT_ARCH_BASE + 7)
   {"no-m3900", no_argument, NULL, OPTION_NO_M3900},
 
   /* Options which enable bug fixes.  */
-#define OPTION_FIX_BASE    (OPTION_COMPAT_ARCH_BASE + 8)
-#define OPTION_M7000_HILO_FIX (OPTION_FIX_BASE + 0)
   {"mfix7000", no_argument, NULL, OPTION_M7000_HILO_FIX},
-#define OPTION_MNO_7000_HILO_FIX (OPTION_FIX_BASE + 1)
   {"no-fix-7000", no_argument, NULL, OPTION_MNO_7000_HILO_FIX},
   {"mno-fix7000", no_argument, NULL, OPTION_MNO_7000_HILO_FIX},
-#define OPTION_FIX_VR4120 (OPTION_FIX_BASE + 2)
-#define OPTION_NO_FIX_VR4120 (OPTION_FIX_BASE + 3)
   {"mfix-vr4120",    no_argument, NULL, OPTION_FIX_VR4120},
   {"mno-fix-vr4120", no_argument, NULL, OPTION_NO_FIX_VR4120},
-#define OPTION_FIX_VR4130 (OPTION_FIX_BASE + 4)
-#define OPTION_NO_FIX_VR4130 (OPTION_FIX_BASE + 5)
   {"mfix-vr4130",    no_argument, NULL, OPTION_FIX_VR4130},
   {"mno-fix-vr4130", no_argument, NULL, OPTION_NO_FIX_VR4130},
 
   /* Miscellaneous options.  */
-#define OPTION_MISC_BASE (OPTION_FIX_BASE + 6)
-#define OPTION_TRAP (OPTION_MISC_BASE + 0)
   {"trap", no_argument, NULL, OPTION_TRAP},
   {"no-break", no_argument, NULL, OPTION_TRAP},
-#define OPTION_BREAK (OPTION_MISC_BASE + 1)
   {"break", no_argument, NULL, OPTION_BREAK},
   {"no-trap", no_argument, NULL, OPTION_BREAK},
-#define OPTION_EB (OPTION_MISC_BASE + 2)
   {"EB", no_argument, NULL, OPTION_EB},
-#define OPTION_EL (OPTION_MISC_BASE + 3)
   {"EL", no_argument, NULL, OPTION_EL},
-#define OPTION_FP32 (OPTION_MISC_BASE + 4)
   {"mfp32", no_argument, NULL, OPTION_FP32},
-#define OPTION_GP32 (OPTION_MISC_BASE + 5)
   {"mgp32", no_argument, NULL, OPTION_GP32},
-#define OPTION_CONSTRUCT_FLOATS (OPTION_MISC_BASE + 6)
   {"construct-floats", no_argument, NULL, OPTION_CONSTRUCT_FLOATS},
-#define OPTION_NO_CONSTRUCT_FLOATS (OPTION_MISC_BASE + 7)
   {"no-construct-floats", no_argument, NULL, OPTION_NO_CONSTRUCT_FLOATS},
-#define OPTION_FP64 (OPTION_MISC_BASE + 8)
   {"mfp64", no_argument, NULL, OPTION_FP64},
-#define OPTION_GP64 (OPTION_MISC_BASE + 9)
   {"mgp64", no_argument, NULL, OPTION_GP64},
-#define OPTION_RELAX_BRANCH (OPTION_MISC_BASE + 10)
-#define OPTION_NO_RELAX_BRANCH (OPTION_MISC_BASE + 11)
   {"relax-branch", no_argument, NULL, OPTION_RELAX_BRANCH},
   {"no-relax-branch", no_argument, NULL, OPTION_NO_RELAX_BRANCH},
-#define OPTION_MSHARED (OPTION_MISC_BASE + 12)
-#define OPTION_MNO_SHARED (OPTION_MISC_BASE + 13)
   {"mshared", no_argument, NULL, OPTION_MSHARED},
   {"mno-shared", no_argument, NULL, OPTION_MNO_SHARED},
-#define OPTION_MSYM32 (OPTION_MISC_BASE + 14)
-#define OPTION_MNO_SYM32 (OPTION_MISC_BASE + 15)
   {"msym32", no_argument, NULL, OPTION_MSYM32},
   {"mno-sym32", no_argument, NULL, OPTION_MNO_SYM32},
-#define OPTION_SOFT_FLOAT (OPTION_MISC_BASE + 16)
-#define OPTION_HARD_FLOAT (OPTION_MISC_BASE + 17)
   {"msoft-float", no_argument, NULL, OPTION_SOFT_FLOAT},
   {"mhard-float", no_argument, NULL, OPTION_HARD_FLOAT},
-#define OPTION_SINGLE_FLOAT (OPTION_MISC_BASE + 18)
-#define OPTION_DOUBLE_FLOAT (OPTION_MISC_BASE + 19)
   {"msingle-float", no_argument, NULL, OPTION_SINGLE_FLOAT},
   {"mdouble-float", no_argument, NULL, OPTION_DOUBLE_FLOAT},
+
+  /* Strictly speaking this next option is ELF specific,
+     but we allow it for other ports as well in order to
+     make testing easier.  */
+  {"32",          no_argument, NULL, OPTION_32},
   
   /* ELF-specific options.  */
 #ifdef OBJ_ELF
-#define OPTION_ELF_BASE    (OPTION_MISC_BASE + 20)
-#define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
-#define OPTION_CALL_NONPIC (OPTION_ELF_BASE + 1)
   {"call_nonpic", no_argument, NULL, OPTION_CALL_NONPIC},
-#define OPTION_NON_SHARED  (OPTION_ELF_BASE + 2)
   {"non_shared",  no_argument, NULL, OPTION_NON_SHARED},
-#define OPTION_XGOT        (OPTION_ELF_BASE + 3)
   {"xgot",        no_argument, NULL, OPTION_XGOT},
-#define OPTION_MABI        (OPTION_ELF_BASE + 4)
   {"mabi", required_argument, NULL, OPTION_MABI},
-#define OPTION_32 	   (OPTION_ELF_BASE + 5)
-  {"32",          no_argument, NULL, OPTION_32},
-#define OPTION_N32 	   (OPTION_ELF_BASE + 6)
   {"n32",         no_argument, NULL, OPTION_N32},
-#define OPTION_64          (OPTION_ELF_BASE + 7)
   {"64",          no_argument, NULL, OPTION_64},
-#define OPTION_MDEBUG      (OPTION_ELF_BASE + 8)
   {"mdebug", no_argument, NULL, OPTION_MDEBUG},
-#define OPTION_NO_MDEBUG   (OPTION_ELF_BASE + 9)
   {"no-mdebug", no_argument, NULL, OPTION_NO_MDEBUG},
-#define OPTION_PDR	   (OPTION_ELF_BASE + 10)
   {"mpdr", no_argument, NULL, OPTION_PDR},
-#define OPTION_NO_PDR	   (OPTION_ELF_BASE + 11)
   {"mno-pdr", no_argument, NULL, OPTION_NO_PDR},
-#define OPTION_MVXWORKS_PIC (OPTION_ELF_BASE + 12)
   {"mvxworks-pic", no_argument, NULL, OPTION_MVXWORKS_PIC},
 #endif /* OBJ_ELF */
 
@@ -11556,18 +11571,16 @@ md_parse_option (int c, char *arg)
       g_switch_seen = 1;
       break;
 
-#ifdef OBJ_ELF
       /* The -32, -n32 and -64 options are shortcuts for -mabi=32, -mabi=n32
 	 and -mabi=64.  */
     case OPTION_32:
-      if (!IS_ELF)
-	{
-	  as_bad (_("-32 is supported for ELF format only"));
-	  return 0;
-	}
-      mips_abi = O32_ABI;
+      if (IS_ELF)
+	mips_abi = O32_ABI;
+      /* We silently ignore -32 for non-ELF targets.  This greatly
+	 simplifies the construction of the MIPS GAS test cases.  */
       break;
 
+#ifdef OBJ_ELF
     case OPTION_N32:
       if (!IS_ELF)
 	{

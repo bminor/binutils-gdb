@@ -1,5 +1,5 @@
 # Copyright (C) 1993, 1994, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-# 2004, 2005, 2007 Free Software Foundation, Inc.
+# 2004, 2005, 2007, 2009  Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -371,19 +371,16 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #   as: FLAGS
 #	When assembling FILE.s, pass FLAGS to the assembler.
 #
-#   PROG: PROGRAM-NAME
-#       The name of the program to run to analyze the .o file produced
-#       by the assembler.  This can be omitted; run_dump_test will guess
-#       which program to run by seeing which of the flags options below
-#	is present.
-#
-#   objdump: FLAGS
 #   nm: FLAGS
 #   objcopy: FLAGS
+#   objdump: FLAGS
+#   readelf: FLAGS
 #	Use the specified program to analyze the .o file, and pass it
 #	FLAGS, in addition to the .o file name.  Note that they are run
 #	with LC_ALL=C in the environment to give consistent sorting
-#	of symbols.
+#	of symbols.  If no FLAGS are needed then use:
+#        PROG: [nm objcopy objdump readelf]
+#       instead.
 #
 #   source: SOURCE
 #	Assemble the file SOURCE.s.  If omitted, this defaults to FILE.s.
