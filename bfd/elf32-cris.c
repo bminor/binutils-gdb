@@ -1528,7 +1528,16 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					 rel->r_offset);
 	      if (outrel.r_offset == (bfd_vma) -1)
 		skip = TRUE;
-	      else if (outrel.r_offset == (bfd_vma) -2)
+	      else if (outrel.r_offset == (bfd_vma) -2
+		       /* For now, undefined weak symbols with non-default
+			  visibility (yielding 0), like exception info for
+			  discarded sections, will get a R_CRIS_NONE
+			  relocation rather than no relocation, because we
+			  notice too late that the symbol doesn't need a
+			  relocation.  */
+		       || (h != NULL
+			   && h->root.type == bfd_link_hash_undefweak
+			   && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT))
 		skip = TRUE, relocate = TRUE;
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);

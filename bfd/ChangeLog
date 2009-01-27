@@ -1,3 +1,9 @@
+2009-01-27  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_8>
+	<R_CRIS_16, R_CRIS_32>: Don't call BFD_ASSERT for weak undefined
+	symbols with non-default visibility.
+
 2009-01-26  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-ppc.c (ppc_elf_relax_section): Add space for relocs
