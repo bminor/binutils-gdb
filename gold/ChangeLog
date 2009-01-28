@@ -1,3 +1,13 @@
+2009-01-28  Ian Lance Taylor  <iant@google.com>
+
+	* gold.h: Include <cstring> and <stdint.h>.
+	* version.cc: Include <cstdio>.
+	* object.cc (Sized_relobj::do_layout): Initialize gc_sd to avoid a
+	warning.
+	* reduced_debug_output.cc (insert_into_vector): Rename from
+	Insert_into_vector; change all callers.  Use Swap_unaligned to
+	avoid aliasing issue; remove union since it is unnecessary.
+
 2009-01-27  Sriraman Tallam  <tmsriram@google.com>
 
 	* Makefile.am (CCFILES): Add gc.cc.

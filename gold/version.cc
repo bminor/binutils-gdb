@@ -23,6 +23,7 @@
 #include "gold.h"
 
 #include <string>
+#include <cstdio>
 
 #include "../bfd/bfdver.h"
 

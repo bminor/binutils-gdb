@@ -913,7 +913,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
                          && symtab->gc()->is_worklist_ready());
   if (shnum == 0)
     return;
-  Symbols_data* gc_sd;
+  Symbols_data* gc_sd = NULL;
   if (is_gc_pass_one)
     {
       // During garbage collection save the symbols data to use it when 

@@ -27,6 +27,8 @@
 #include "ansidecl.h"
 
 #include <cstddef>
+#include <cstring>
+#include <stdint.h>
 #include <sys/types.h>
 
 #ifndef ENABLE_NLS
