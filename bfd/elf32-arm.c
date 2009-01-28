@@ -9643,7 +9643,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 			flagword flags;
 
 			flags = bfd_get_section_flags (dynobj, sreloc);
-			flags &= ~(SEC_LOAD | SEC_ALLOC);
+			flags |= (SEC_LOAD | SEC_ALLOC);
 			bfd_set_section_flags (dynobj, sreloc, flags);
 		      }
 		  }

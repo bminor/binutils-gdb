@@ -1,3 +1,8 @@
+2009-01-28  Catherine Moore <clm@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_check_relocs): Set SEC_ALLOC and
+	SEC_LOAD for dynamic relocation sections.
+
 2009-01-27  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section): Use elf_hash_table
