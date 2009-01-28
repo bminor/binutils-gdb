@@ -1,6 +1,6 @@
 /* mips-opc.c -- MIPS opcode list.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   2003, 2004, 2005, 2007, 2008  Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007, 2008, 2009  Free Software Foundation, Inc.
    Contributed by Ralph Campbell and OSF
    Commented and modified by Ian Lance Taylor, Cygnus Support
    Extended for MIPS32 support by Anders Norlander, and by SiByte, Inc.
@@ -1295,7 +1295,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"subu",	"D,S,T",	0x45800001,	0xffe0003f,	RD_S|RD_T|WR_D|FP_S,	0,	IL2E	},
 {"subu",	"D,S,T",	0x4b00000d,	0xffe0003f,	RD_S|RD_T|WR_D|FP_S,	0,	IL2F	},
 {"suspend", "",         0x42000022, 0xffffffff,	0,			0,		V1	},
-{"suxc1",   "S,t(b)",   0x4c00000d, 0xfc0007ff, SM|RD_S|RD_t|RD_b,	0,		I5_33|N55},
+{"suxc1",   "S,t(b)",   0x4c00000d, 0xfc0007ff, SM|RD_S|RD_t|RD_b|FP_D,	0,		I5_33|N55},
 {"sw",      "t,o(b)",	0xac000000, 0xfc000000,	SM|RD_t|RD_b,		0,		I1	},
 {"sw",      "t,A(b)",	0,    (int) M_SW_AB,	INSN_MACRO,		0,		I1	},
 {"swc0",    "E,o(b)",	0xe0000000, 0xfc000000,	SM|RD_C0|RD_b,		0,		I1	},

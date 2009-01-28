@@ -1,3 +1,7 @@
+2009-01-28  Chao-ying Fu  <fu@mips.com>
+
+        * mips-opc.c (suxc1): Add the flag of FP_D.
+
 2009-01-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* fr30-asm.c, fr30-dis.c, fr30-ibld.c, frv-asm.c, frv-dis.c,
