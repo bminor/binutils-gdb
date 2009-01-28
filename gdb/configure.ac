@@ -1489,6 +1489,34 @@ AC_ARG_WITH(sysroot,
 AC_SUBST(TARGET_SYSTEM_ROOT)
 AC_SUBST(TARGET_SYSTEM_ROOT_DEFINE)
 
+system_gdbinit=
+AC_ARG_WITH(system-gdbinit,
+[  --with-system-gdbinit=file       Automatically load a system-wide gdbinit file],
+[system_gdbinit=${withval}])
+
+AC_DEFINE_DIR(SYSTEM_GDBINIT, system_gdbinit,
+              [System-wide gdbinit file.])
+
+if test "x$prefix" = xNONE; then
+  test_prefix=$ac_default_prefix
+else
+  test_prefix=$prefix
+fi
+if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
+  test_exec_prefix=$test_prefix
+else
+  test_exec_prefix=$exec_prefix
+fi
+case ${system_gdbinit} in
+ "${test_prefix}"|"${test_prefix}/"*|\
+ "${test_exec_prefix}"|"${test_exec_prefix}/"*|\
+ '${prefix}'|'${prefix}/'*|\
+ '${exec_prefix}'|'${exec_prefix}/'*)
+  AC_DEFINE(SYSTEM_GDBINIT_RELOCATABLE, 1,
+            [Define if the system-wide gdbinit file should be relocated when GDB is moved.])
+   ;;
+esac
+
 AC_ARG_ENABLE(werror,
   [  --enable-werror    treat compile warnings as errors],
   [case "${enableval}" in

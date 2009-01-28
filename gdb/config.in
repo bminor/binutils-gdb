@@ -655,6 +655,13 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* System-wide gdbinit file. */
+#undef SYSTEM_GDBINIT
+
+/* Define if the system-wide gdbinit file should be relocated when GDB is
+   moved. */
+#undef SYSTEM_GDBINIT_RELOCATABLE
+
 /* Define if <thread_db.h> has the TD_NOTALLOC error code. */
 #undef THREAD_DB_HAS_TD_NOTALLOC
 
