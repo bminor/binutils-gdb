@@ -1,3 +1,9 @@
+2009-01-28  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Jerome Guitton  <guitton@adacore.com>
+
+	* gdb.texinfo (Startup): Document --with-system-gdbinit.
+	(System-wide configuration): New section.
+
 2009-01-26  Pedro Alves  <pedro@codesourcery.com>
 
 	PR gdb/7580:

@@ -1211,7 +1211,13 @@ Sets up the command interpreter as specified by the command line
 
 @item
 @cindex init file
-Reads the @dfn{init file} (if any) in your home directory@footnote{On
+Reads the system-wide @dfn{init file} (if @option{--with-system-gdbinit} was
+used when building @value{GDBN}; @pxref{System-wide configuration,
+ ,System-wide configuration and settings}) and executes all the commands in
+that file.
+
+@item
+Reads the init file (if any) in your home directory@footnote{On
 DOS/Windows systems, the home directory is the one pointed to by the
 @code{HOME} environment variable.} and executes all the commands in
 that file.
@@ -1243,6 +1249,9 @@ file in your home directory can set options (such as @samp{set
 complaints}) that affect subsequent processing of command line options
 and operands.  Init files are not executed if you use the @samp{-nx}
 option (@pxref{Mode Options, ,Choosing Modes}).
+
+To display the list of init files loaded by gdb at startup, you
+can use @kbd{gdb --help}.
 
 @cindex init file name
 @cindex @file{.gdbinit}
@@ -24317,6 +24326,7 @@ Then give @file{gdb.dvi} to your @sc{dvi} printing program.
 * Separate Objdir::             Compiling @value{GDBN} in another directory
 * Config Names::                Specifying names for hosts and targets
 * Configure Options::           Summary of options for configure
+* System-wide configuration::   Having a system-wide init file
 @end menu
 
 @node Requirements
@@ -24658,6 +24668,42 @@ There is no convenient way to generate a list of all available hosts.
 
 There are many other options available as well, but they are generally
 needed for special purposes only.
+
+@node System-wide configuration
+@section System-wide configuration and settings
+@cindex system-wide init file
+
+@value{GDBN} can be configured to have a system-wide init file;
+this file will be read and executed at startup (@pxref{Startup, , What
+@value{GDBN} does during startup}).
+
+Here is the corresponding configure option:
+
+@table @code
+@item --with-system-gdbinit=@var{file}
+Specify that the default location of the system-wide init file is
+@var{file}.
+@end table
+
+If @value{GDBN} has been configured with the option @option{--prefix=$prefix},
+it may be subject to relocation.  Two possible cases:
+
+@itemize @bullet
+@item 
+If the default location of this init file contains @file{$prefix},
+it will be subject to relocation.  Suppose that the configure options
+are @option{--prefix=$prefix --with-system-gdbinit=$prefix/etc/gdbinit};
+if @value{GDBN} is moved from @file{$prefix} to @file{$install}, the system
+init file is looked for as @file{$install/etc/gdbinit} instead of
+@file{$prefix/etc/gdbinit}.
+
+@item
+By contrast, if the default location does not contain the prefix,
+it will not be relocated.  E.g.@: if @value{GDBN} has been configured with
+@option{--prefix=/usr/local --with-system-gdbinit=/usr/share/gdb/gdbinit},
+then @value{GDBN} will always look for @file{/usr/share/gdb/gdbinit},
+wherever @value{GDBN} is installed.
+@end itemize
 
 @node Maintenance Commands
 @appendix Maintenance Commands
