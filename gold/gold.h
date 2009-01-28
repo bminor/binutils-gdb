@@ -1,6 +1,6 @@
 // gold.h -- general definitions for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -259,6 +259,18 @@ queue_initial_tasks(const General_options&,
 		    Layout*,
 		    Mapfile*);
 
+// Queue up the set of tasks to be done before
+// the middle set of tasks.  Only used when garbage
+// collection is to be done. 
+extern void
+queue_middle_gc_tasks(const General_options&,
+                      const Task*,
+                      const Input_objects*,
+                      Symbol_table*,
+                      Layout*,
+                      Workqueue*,
+                      Mapfile*);
+
 // Queue up the middle set of tasks.
 extern void
 queue_middle_tasks(const General_options&,
@@ -277,6 +289,12 @@ queue_final_tasks(const General_options&,
 		  Layout*,
 		  Workqueue*,
 		  Output_file* of);
+
+inline bool
+is_prefix_of(const char* prefix, const char* str)
+{
+  return strncmp(prefix, str, strlen(prefix)) == 0;
+}
 
 } // End namespace gold.
 

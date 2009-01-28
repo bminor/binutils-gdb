@@ -1,6 +1,6 @@
 // object.h -- support for an object file for linking in gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -46,6 +46,7 @@ class Pluginobj;
 class Dynobj;
 class Object_merge_map;
 class Relocatable_relocs;
+class Symbols_data;
 
 template<typename Stringpool_char>
 class Stringpool_template;
@@ -598,10 +599,51 @@ class Relobj : public Object
       relocs_must_follow_section_writes_(false)
   { }
 
+  // During garbage collection, the Read_symbols_data pass for 
+  // each object is stored as layout needs to be done after 
+  // reloc processing.
+  Symbols_data* 
+  get_symbols_data()
+  { return this->sd_; }
+
+  // Decides which section names have to be included in the worklist
+  // as roots.
+  bool
+  is_section_name_included(const char *name);
+ 
+  void
+  copy_symbols_data(Symbols_data* gc_sd, Read_symbols_data* sd,
+                    unsigned int section_header_size);
+
+  void
+  set_symbols_data(Symbols_data* sd)
+  { this->sd_ = sd; }
+
+  // During garbage collection, the Read_relocs pass for all objects 
+  // is done before scanning the relocs.  In that case, this->rd_ is
+  // used to store the information from Read_relocs for each object.
+  // This data is also used to compute the list of relevant sections.
+  Read_relocs_data*
+  get_relocs_data()
+  { return this->rd_; }
+
+  void
+  set_relocs_data(Read_relocs_data* rd)
+  { this->rd_ = rd; }
+
+  virtual bool
+  is_output_section_offset_invalid(unsigned int shndx) const = 0;
+
   // Read the relocs.
   void
   read_relocs(Read_relocs_data* rd)
   { return this->do_read_relocs(rd); }
+
+  // Process the relocs, during garbage collection only.
+  void
+  gc_process_relocs(const General_options& options, Symbol_table* symtab,
+	            Layout* layout, Read_relocs_data* rd)
+  { return this->do_gc_process_relocs(options, symtab, layout, rd); }
 
   // Scan the relocs and adjust the symbol table.
   void
@@ -728,6 +770,11 @@ class Relobj : public Object
   virtual void
   do_read_relocs(Read_relocs_data*) = 0;
 
+  // Process the relocs--implemented by child class.
+  virtual void
+  do_gc_process_relocs(const General_options&, Symbol_table*, Layout*,
+		 Read_relocs_data*) = 0;
+
   // Scan the relocs--implemented by child class.
   virtual void
   do_scan_relocs(const General_options&, Symbol_table*, Layout*,
@@ -810,6 +857,13 @@ class Relobj : public Object
   // Whether we need to wait for output sections to be written before
   // we can apply relocations.
   bool relocs_must_follow_section_writes_;
+  // Used to store the relocs data computed by the Read_relocs pass. 
+  // Used during garbage collection of unused sections.
+  Read_relocs_data* rd_;
+  // Used to store the symbols data computed by the Read_symbols pass.
+  // Again used during garbage collection when laying out referenced
+  // sections.
+  gold::Symbols_data *sd_;
 };
 
 // This class is used to handle relocations against a section symbol
@@ -1220,6 +1274,12 @@ class Sized_relobj : public Relobj
 
   ~Sized_relobj();
 
+  // Checks if the offset of input section SHNDX within its output
+  // section is invalid. 
+  bool
+  is_output_section_offset_invalid(unsigned int shndx) const
+  { return this->get_output_section_offset(shndx) == invalid_address; }
+
   // Set up the object file based on the ELF header.
   void
   setup(const typename elfcpp::Ehdr<size, big_endian>&);
@@ -1391,6 +1451,12 @@ class Sized_relobj : public Relobj
   // Read the relocs.
   void
   do_read_relocs(Read_relocs_data*);
+
+  // Process the relocs to find list of referenced sections. Used only
+  // during garbage collection.
+  void
+  do_gc_process_relocs(const General_options&, Symbol_table*, Layout*,
+		       Read_relocs_data*);
 
   // Scan the relocs and adjust the symbol table.
   void

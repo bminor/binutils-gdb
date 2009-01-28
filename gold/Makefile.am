@@ -48,6 +48,7 @@ CCFILES = \
 	errors.cc \
 	expression.cc \
 	fileread.cc \
+        gc.cc \
 	gold.cc \
 	gold-threads.cc \
 	layout.cc \
@@ -86,6 +87,7 @@ HFILES = \
 	ehframe.h \
 	errors.h \
 	fileread.h \
+        gc.h \
 	gold.h \
 	gold-threads.h \
 	layout.h \

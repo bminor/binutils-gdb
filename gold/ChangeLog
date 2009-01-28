@@ -1,3 +1,74 @@
+2009-01-20  Sriraman Tallam <tmsriram@google.com>
+
+	* Makefile.am (CCFILES): Add gc.cc.
+	(HFILES): Add gc.h.
+	* Makefile.in: Regenerate.
+	* gold.cc (Gc_runner): New class.
+	(queue_initial_tasks): Call garbage collection related tasks
+	when corresponding options are invoked.
+	(queue_middle_gc_tasks): New function.
+	(queue_middle_tasks): Reorder tasks to allow relocs to be read and
+	processed early before laying out sections during garbage collection.
+	* gold.h (queue_middle_gc_tasks): New function.
+	(is_prefix_of): Move from "layout.cc".
+	* i386.cc (Target_i386::gc_process_relocs): New function.
+	* layout.cc (is_prefix_of): Remove. Move to "gold.h"
+	* main.cc (main): Create object of class "Garbage_collection".
+	* object.cc (Relobj::copy_symbols_data): New function.
+	(Relobj::is_section_name_included): New function.
+	(Sized_relobj::do_layout): Allow this function to be called twice 
+	during garbage collection and defer layout of section during the 
+	first call.
+	* object.h (Relobj::get_symbols_data): New function.
+	(Relobj::is_section_name_included): New function.
+	(Relobj::copy_symbols_data): New function.
+	(Relobj::set_symbols_data): New function.
+	(Relobj::get_relocs_data): New function.
+	(Relobj::set_relocs_data): New function.
+	(Relobj::is_output_section_offset_invalid): New pure virtual function.
+	(Relobj::gc_process_relocs): New function.
+	(Relobj::do_gc_process_relocs): New pure virtual function.
+	(Relobj::sd_): New data member.
+	(Sized_relobj::is_output_section_offset_invalid): New function.
+	(Sized_relobj::do_gc_process_relocs): New function.
+	* options.h (General_options::gc_sections): Modify to not be a no-op.
+	(General_options::print_gc_sections): New option.
+	* plugin.cc (Plugin_finish::run): Remove function call to
+	Plugin_manager::layout_deferred_objects.  Move it to "gold.cc".
+	* powerpc.cc (Target_powerpc::gc_process_relocs): New function.
+	* reloc.cc (Read_relocs::run): Add task to process relocs and
+	determine unreferenced sections when doing garbage collection.
+	(Gc_process_relocs): New class.
+	(Sized_relobj::do_gc_process_relocs): New function.
+	(Sized_relobj::do_scan_relocs): Don't try to scan the relocs for
+	sections that are garbage collected.
+	* reloc.h (Gc_process_relocs): New class.
+	* sparc.cc (Target_sparc::gc_process_relocs): New function.
+	* symtab.cc (Symbol::should_add_dynsym_entry): Do not add entries for
+	symbols whose corresponding sections are garbage collected.
+	(Symbol_table::Symbol_table): Add new parameter for the garbage
+	collection object.
+	(Symbol_table::gc_mark_undef_symbols): New function.
+	(Symbol_table::gc_mark_symbol_for_shlib): New function.
+	(Symbol_table::gc_mark_dyn_syms): New function.
+	(Symbol_table::resolve): Do not treat symbols seen in dynamic objects
+	as garbage.
+	(Symbol_table::add_from_object): Likewise.
+	(Symbol_table::add_from_relobj): When building shared objects, do not
+	treat externally visible symbols as garbage.
+	(Symbol_table::sized_finalize_symbol): Do not check dynamic symbol
+	table information for static and relocatable links.
+	* symtab.h (Symbol_table::set_gc): New function.
+	(Symbol_table::gc): New function.
+	(Symbol_table::gc_mark_undef_symbols): New function.
+	(Symbol_table::gc_mark_symbol_for_shlib): New function.
+	(Symbol_table::gc_mark_dyn_syms): New function.
+	(Symbol_table::gc_): New data member.
+	* target.h (Sized_target::gc_process_relocs): New pure virtual 
+	function.
+	* x86_64.cc (Target_x86_64::gc_process_relocs): New function.
+	* testsuite/testfile.cc (Target_test::gc_process_relocs): New function.
+
 2009-01-20  Chris Faylor <me.sourceware@sourceware.org>
 
 	* options.h (General_options::gc_sections): Define as a no-op for now.

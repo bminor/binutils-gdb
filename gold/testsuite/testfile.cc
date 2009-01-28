@@ -1,6 +1,6 @@
 // testfile.cc -- Dummy ELF objects for testing purposes.
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -42,6 +42,13 @@ class Target_test : public Sized_target<size, big_endian>
   Target_test()
     : Sized_target<size, big_endian>(&test_target_info)
   { }
+
+  void
+  gc_process_relocs(const General_options&, Symbol_table*, Layout*,
+                    Sized_relobj<size, big_endian>*, unsigned int,
+                    unsigned int, const unsigned char*, size_t, Output_section*,
+                    bool, size_t, const unsigned char*)
+  { ERROR("call to Target_test::gc_process_relocs"); }
 
   void
   scan_relocs(const General_options&, Symbol_table*, Layout*,

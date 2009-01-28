@@ -1,6 +1,6 @@
 // gold.cc -- main linker functions
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -122,6 +122,38 @@ Middle_runner::run(Workqueue* workqueue, const Task* task)
 		     this->layout_, workqueue, this->mapfile_);
 }
 
+// This class arranges the tasks to process the relocs for garbage collection.
+
+class Gc_runner : public Task_function_runner 
+{
+  public:
+   Gc_runner(const General_options& options,
+	     const Input_objects* input_objects,
+	     Symbol_table* symtab,
+	     Layout* layout, Mapfile* mapfile)
+    : options_(options), input_objects_(input_objects), symtab_(symtab),
+      layout_(layout), mapfile_(mapfile)
+   { }
+
+  void
+  run(Workqueue*, const Task*);
+
+ private:
+  const General_options& options_;
+  const Input_objects* input_objects_;
+  Symbol_table* symtab_;
+  Layout* layout_;
+  Mapfile* mapfile_;
+};
+
+void
+Gc_runner::run(Workqueue* workqueue, const Task* task)
+{
+  queue_middle_gc_tasks(this->options_, task, this->input_objects_, 
+                        this->symtab_, this->layout_, workqueue, 
+                        this->mapfile_);
+}
+
 // Queue up the initial set of tasks for this link job.
 
 void
@@ -166,13 +198,69 @@ queue_initial_tasks(const General_options& options,
       this_blocker = next_blocker;
     }
 
+  if (parameters->options().relocatable()
+      && parameters->options().gc_sections())
+    gold_error(_("cannot mix -r with garbage collection"));
+
+  if (parameters->options().gc_sections())
+    {
+      workqueue->queue(new Task_function(new Gc_runner(options,
+                                                       input_objects,
+                                                       symtab,
+                                                       layout,
+                                                       mapfile),
+                                         this_blocker,
+                                         "Task_function Gc_runner"));
+    }
+  else
+    {
+      workqueue->queue(new Task_function(new Middle_runner(options,
+                                                           input_objects,
+                                                           symtab,
+                                                           layout,
+                                                           mapfile),
+                                         this_blocker,
+                                         "Task_function Middle_runner"));
+    }
+}
+
+// Queue up a set of tasks to be done before queueing the middle set 
+// of tasks.  This is only necessary when garbage collection 
+// (--gc-sections) of unused sections is desired.  The relocs are read
+// and processed here early to determine the garbage sections before the
+// relocs can be scanned in later tasks.
+
+void
+queue_middle_gc_tasks(const General_options& options,
+		      const Task* ,
+		      const Input_objects* input_objects,
+		      Symbol_table* symtab,
+		      Layout* layout,
+		      Workqueue* workqueue,
+		      Mapfile* mapfile)
+{
+  // Read_relocs for all the objects must be done and processed to find
+  // unused sections before any scanning of the relocs can take place.
+  Task_token* blocker = new Task_token(true);
+  Task_token* symtab_lock = new Task_token(false);
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
+       ++p)
+    {
+      // We can read and process the relocations in any order.  
+      blocker->add_blocker();
+      workqueue->queue(new Read_relocs(options, symtab, layout, *p,
+				       symtab_lock, blocker));
+    }
+
+  Task_token* this_blocker = new Task_token(true);
   workqueue->queue(new Task_function(new Middle_runner(options,
-						       input_objects,
-						       symtab,
-						       layout,
-						       mapfile),
-				     this_blocker,
-				     "Task_function Middle_runner"));
+                                                       input_objects,
+                                                       symtab,
+                                                       layout,
+                                                       mapfile),
+                                     this_blocker,
+                                     "Task_function Middle_runner"));
 }
 
 // Queue up the middle set of tasks.  These are the tasks which run
@@ -188,6 +276,70 @@ queue_middle_tasks(const General_options& options,
 		   Workqueue* workqueue,
 		   Mapfile* mapfile)
 {
+  // Add any symbols named with -u options to the symbol table.
+  symtab->add_undefined_symbols_from_command_line();
+
+  // If garbage collection was chosen, relocs have been read and processed
+  // at this point by pre_middle_tasks.  Layout can then be done for all 
+  // objects.
+  if (parameters->options().gc_sections())
+    {
+      // Find the start symbol if any.
+      Symbol* start_sym;
+      if (parameters->options().entry())
+        start_sym = symtab->lookup(parameters->options().entry());
+      else
+        start_sym = symtab->lookup("_start");
+      if (start_sym !=NULL)
+        {
+          bool is_ordinary;
+          unsigned int shndx = start_sym->shndx(&is_ordinary);
+          if (is_ordinary) 
+            {
+              symtab->gc()->worklist().push(
+                Section_id(start_sym->object(), shndx));
+            }
+        }
+      // Symbols named with -u should not be considered garbage.
+      symtab->gc_mark_undef_symbols();
+      gold_assert(symtab->gc() != NULL);
+      // Do a transitive closure on all references to determine the worklist.
+      symtab->gc()->do_transitive_closure();
+      // Call do_layout again to determine the output_sections for all 
+      // referenced input sections.
+      for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+           p != input_objects->relobj_end();
+           ++p)
+        {
+          (*p)->layout(symtab, layout, NULL);
+        }
+    }
+  // Layout deferred objects due to plugins.
+  if (parameters->options().has_plugins())
+    {
+      Plugin_manager* plugins = parameters->options().plugins();
+      gold_assert(plugins != NULL);
+      plugins->layout_deferred_objects();
+    }     
+  if (parameters->options().gc_sections())
+    {
+      for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+           p != input_objects->relobj_end();
+           ++p)
+        {
+          // Update the value of output_section stored in rd.
+          Read_relocs_data *rd = (*p)->get_relocs_data();
+          for (Read_relocs_data::Relocs_list::iterator q = rd->relocs.begin();
+               q != rd->relocs.end();
+               ++q)
+            {
+              q->output_section = (*p)->output_section(q->data_shndx);
+              q->needs_special_offset_handling = 
+                      (*p)->is_output_section_offset_invalid(q->data_shndx);
+            }
+        }
+    }
+
   // We have to support the case of not seeing any input objects, and
   // generate an empty file.  Existing builds depend on being able to
   // pass an empty archive to the linker and get an empty object file
@@ -240,9 +392,6 @@ queue_middle_tasks(const General_options& options,
   // Define symbols from any linker scripts.
   layout->define_script_symbols(symtab);
 
-  // Add any symbols named with -u options to the symbol table.
-  symtab->add_undefined_symbols_from_command_line();
-
   // Attach sections to segments.
   layout->attach_sections_to_segments();
 
@@ -259,31 +408,48 @@ queue_middle_tasks(const General_options& options,
   // Make sure we have symbols for any required group signatures.
   layout->define_group_signatures(symtab);
 
-  // Read the relocations of the input files.  We do this to find
-  // which symbols are used by relocations which require a GOT and/or
-  // a PLT entry, or a COPY reloc.  When we implement garbage
-  // collection we will do it here by reading the relocations in a
-  // breadth first search by references.
-  //
-  // We could also read the relocations during the first pass, and
-  // mark symbols at that time.  That is how the old GNU linker works.
-  // Doing that is more complex, since we may later decide to discard
-  // some of the sections, and thus change our minds about the types
-  // of references made to the symbols.
   Task_token* blocker = new Task_token(true);
   Task_token* symtab_lock = new Task_token(false);
-  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
-       p != input_objects->relobj_end();
-       ++p)
+
+  // If doing garbage collection, the relocations have already been read.
+  // Otherwise, read and scan the relocations.
+  if (parameters->options().gc_sections())
     {
-      // We can read and process the relocations in any order.  But we
-      // only want one task to write to the symbol table at a time.
-      // So we queue up a task for each object to read the
-      // relocations.  That task will in turn queue a task to wait
-      // until it can write to the symbol table.
-      blocker->add_blocker();
-      workqueue->queue(new Read_relocs(options, symtab, layout, *p,
-				       symtab_lock, blocker));
+      for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+           p != input_objects->relobj_end();
+           ++p)
+        {
+          blocker->add_blocker();
+          workqueue->queue(new Scan_relocs(options, symtab, layout, *p, 
+                           (*p)->get_relocs_data(),symtab_lock, blocker));
+        }
+    }
+  else
+    {
+      // Read the relocations of the input files.  We do this to find
+      // which symbols are used by relocations which require a GOT and/or
+      // a PLT entry, or a COPY reloc.  When we implement garbage
+      // collection we will do it here by reading the relocations in a
+      // breadth first search by references.
+      //
+      // We could also read the relocations during the first pass, and
+      // mark symbols at that time.  That is how the old GNU linker works.
+      // Doing that is more complex, since we may later decide to discard
+      // some of the sections, and thus change our minds about the types
+      // of references made to the symbols.
+      for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+           p != input_objects->relobj_end();
+           ++p)
+        {
+          // We can read and process the relocations in any order.  But we
+          // only want one task to write to the symbol table at a time.
+          // So we queue up a task for each object to read the
+          // relocations.  That task will in turn queue a task to wait
+          // until it can write to the symbol table.
+          blocker->add_blocker();
+          workqueue->queue(new Read_relocs(options, symtab, layout, *p,
+                   symtab_lock, blocker));
+        }
     }
 
   // Allocate common symbols.  This requires write access to the

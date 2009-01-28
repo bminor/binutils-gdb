@@ -1,6 +1,6 @@
 // powerpc.cc -- powerpc target support for gold.
 
-// Copyright 2008 Free Software Foundation, Inc.
+// Copyright 2008, 2009 Free Software Foundation, Inc.
 // Written by David S. Miller <davem@davemloft.net>
 //        and David Edelsohn <edelsohn@gnu.org>
 
@@ -60,6 +60,22 @@ class Target_powerpc : public Sized_target<size, big_endian>
       dynbss_(NULL), got_mod_index_offset_(-1U)
   {
   }
+
+  // Process the relocations to determine unreferenced sections for 
+  // garbage collection.
+  void
+  gc_process_relocs(const General_options& options,
+	            Symbol_table* symtab,
+	            Layout* layout,
+	            Sized_relobj<size, big_endian>* object,
+	            unsigned int data_shndx,
+	            unsigned int sh_type,
+	            const unsigned char* prelocs,
+	            size_t reloc_count,
+	            Output_section* output_section,
+	            bool needs_special_offset_handling,
+	            size_t local_symbol_count,
+	            const unsigned char* plocal_symbols);
 
   // Scan the relocations to look for symbol adjustments.
   void
@@ -1412,6 +1428,42 @@ Target_powerpc<size, big_endian>::Scan::global(
       unsupported_reloc_global(object, r_type, gsym);
       break;
     }
+}
+
+// Process relocations for gc.
+
+template<int size, bool big_endian>
+void
+Target_powerpc<size, big_endian>::gc_process_relocs(
+			const General_options& options,
+			Symbol_table* symtab,
+			Layout* layout,
+			Sized_relobj<size, big_endian>* object,
+			unsigned int data_shndx,
+			unsigned int,
+			const unsigned char* prelocs,
+			size_t reloc_count,
+			Output_section* output_section,
+			bool needs_special_offset_handling,
+			size_t local_symbol_count,
+			const unsigned char* plocal_symbols)
+{
+  typedef Target_powerpc<size, big_endian> Powerpc;
+  typedef typename Target_powerpc<size, big_endian>::Scan Scan;
+
+  gold::gc_process_relocs<size, big_endian, Powerpc, elfcpp::SHT_RELA, Scan>(
+    options,
+    symtab,
+    layout,
+    this,
+    object,
+    data_shndx,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    local_symbol_count,
+    plocal_symbols);
 }
 
 // Scan relocations for a section.

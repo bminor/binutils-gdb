@@ -1,6 +1,6 @@
 // symtab.cc -- the gold symbol table
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -30,6 +30,7 @@
 #include <utility>
 #include "demangle.h"
 
+#include "gc.h"
 #include "object.h"
 #include "dwarf_reader.h"
 #include "dynobj.h"
@@ -302,6 +303,22 @@ Symbol::should_add_dynsym_entry() const
   if (this->needs_dynsym_entry())
     return true;
 
+  // If this symbol's section is not added, the symbol need not be added. 
+  // The section may have been GCed.  Note that export_dynamic is being 
+  // overridden here.  This should not be done for shared objects.
+  if (parameters->options().gc_sections() 
+      && !parameters->options().shared()
+      && this->source() == Symbol::FROM_OBJECT
+      && !this->object()->is_dynamic())
+    {
+      Relobj* relobj = static_cast<Relobj*>(this->object());
+      bool is_ordinary;
+      unsigned int shndx = this->shndx(&is_ordinary);
+      if (is_ordinary && shndx != elfcpp::SHN_UNDEF
+          && !relobj->is_section_included(shndx))
+        return false;
+    }
+
   // If the symbol was forced local in a version script, do not add it.
   if (this->is_forced_local())
     return false;
@@ -461,7 +478,7 @@ Symbol_table::Symbol_table(unsigned int count,
                            const Version_script_info& version_script)
   : saw_undefined_(0), offset_(0), table_(count), namepool_(),
     forwarders_(), commons_(), tls_commons_(), forced_locals_(), warnings_(),
-    version_script_(version_script)
+    version_script_(version_script), gc_(NULL)
 {
   namepool_.reserve(count);
 }
@@ -486,6 +503,72 @@ Symbol_table::Symbol_table_eq::operator()(const Symbol_table_key& k1,
 					  const Symbol_table_key& k2) const
 {
   return k1.first == k2.first && k1.second == k2.second;
+}
+
+// For symbols that have been listed with -u option, add them to the
+// work list to avoid gc'ing them.
+
+void 
+Symbol_table::gc_mark_undef_symbols()
+{
+  for (options::String_set::const_iterator p =
+	 parameters->options().undefined_begin();
+       p != parameters->options().undefined_end();
+       ++p)
+    {
+      const char* name = p->c_str();
+      Symbol* sym = this->lookup(name);
+      gold_assert (sym != NULL);
+      if (sym->source() == Symbol::FROM_OBJECT 
+          && !sym->object()->is_dynamic())
+        {
+          Relobj* obj = static_cast<Relobj*>(sym->object());
+          bool is_ordinary;
+          unsigned int shndx = sym->shndx(&is_ordinary);
+          if (is_ordinary)
+            {
+              gold_assert(this->gc_ != NULL);
+              this->gc_->worklist().push(Section_id(obj, shndx));
+            }
+        }
+    }
+}
+
+void
+Symbol_table::gc_mark_symbol_for_shlib(Symbol* sym)
+{
+  if (!sym->is_from_dynobj() 
+      && sym->is_externally_visible())
+    {
+      //Add the object and section to the work list.
+      Relobj* obj = static_cast<Relobj*>(sym->object());
+      bool is_ordinary;
+      unsigned int shndx = sym->shndx(&is_ordinary);
+      if (is_ordinary && shndx != elfcpp::SHN_UNDEF)
+        {
+          gold_assert(this->gc_!= NULL);
+          this->gc_->worklist().push(Section_id(obj, shndx));
+        }
+    }
+}
+
+// When doing garbage collection, keep symbols that have been seen in
+// dynamic objects.
+inline void 
+Symbol_table::gc_mark_dyn_syms(Symbol* sym)
+{
+  if (sym->in_dyn() && sym->source() == Symbol::FROM_OBJECT
+      && !sym->object()->is_dynamic())
+    {
+      Relobj *obj = static_cast<Relobj*>(sym->object()); 
+      bool is_ordinary;
+      unsigned int shndx = sym->shndx(&is_ordinary);
+      if (is_ordinary && shndx != elfcpp::SHN_UNDEF)
+        {
+          gold_assert(this->gc_ != NULL);
+          this->gc_->worklist().push(Section_id(obj, shndx));
+        }
+    }
 }
 
 // Make TO a symbol which forwards to FROM.
@@ -561,6 +644,8 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from)
     to->set_in_reg();
   if (from->in_dyn())
     to->set_in_dyn();
+  if (parameters->options().gc_sections())
+    this->gc_mark_dyn_syms(to);
 }
 
 // Record that a symbol is forced to be local by a version script.
@@ -732,6 +817,8 @@ Symbol_table::add_from_object(Object* object,
 
       this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, object,
 		    version);
+      if (parameters->options().gc_sections())
+        this->gc_mark_dyn_syms(ret);
 
       if (def)
 	{
@@ -814,6 +901,8 @@ Symbol_table::add_from_object(Object* object,
 
 	  this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, object,
 			version);
+          if (parameters->options().gc_sections())
+            this->gc_mark_dyn_syms(ret);
 	  ins.first->second = ret;
 	}
       else
@@ -1019,6 +1108,12 @@ Symbol_table::add_from_relobj(
       res = this->add_from_object(relobj, name, name_key, ver, ver_key,
 				  def, *psym, st_shndx, is_ordinary,
 				  orig_st_shndx);
+      
+      // If building a shared library using garbage collection, do not 
+      // treat externally visible symbols as garbage.
+      if (parameters->options().gc_sections() 
+          && parameters->options().shared())
+        this->gc_mark_symbol_for_shlib(res);
 
       if (local)
 	this->force_local(res);
@@ -2177,7 +2272,10 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 	    if (os == NULL)
 	      {
 		sym->set_symtab_index(-1U);
-		gold_assert(sym->dynsym_index() == -1U);
+                bool static_or_reloc = (parameters->doing_static_link() ||
+                                        parameters->options().relocatable());
+                gold_assert(static_or_reloc || sym->dynsym_index() == -1U);
+
 		return false;
 	      }
 

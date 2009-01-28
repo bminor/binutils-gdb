@@ -1,6 +1,6 @@
 // layout.cc -- lay out output file sections for gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -138,14 +138,6 @@ size_t
 Layout::Hash_key::operator()(const Layout::Key& k) const
 {
  return k.first + k.second.first + k.second.second;
-}
-
-// Return whether PREFIX is a prefix of STR.
-
-static inline bool
-is_prefix_of(const char* prefix, const char* str)
-{
-  return strncmp(prefix, str, strlen(prefix)) == 0;
 }
 
 // Returns whether the given section is in the list of

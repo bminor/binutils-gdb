@@ -1,6 +1,6 @@
 // target.h -- target support for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -258,6 +258,24 @@ class Sized_target : public Target
   resolve(Symbol*, const elfcpp::Sym<size, big_endian>&, Object*,
 	  const char*)
   { gold_unreachable(); }
+
+  // Process the relocs for a section, and record information of the
+  // mapping from source to destination sections. This mapping is later
+  // used to determine unreferenced garbage sections. This procedure is
+  // only called during garbage collection.
+  virtual void
+  gc_process_relocs(const General_options& options,
+	      Symbol_table* symtab,
+	      Layout* layout,
+	      Sized_relobj<size, big_endian>* object,
+	      unsigned int data_shndx,
+	      unsigned int sh_type,
+	      const unsigned char* prelocs,
+	      size_t reloc_count,
+	      Output_section* output_section,
+	      bool needs_special_offset_handling,
+	      size_t local_symbol_count,
+	      const unsigned char* plocal_symbols) = 0;
 
   // Scan the relocs for a section, and record any information
   // required for the symbol.  OPTIONS is the command line options.

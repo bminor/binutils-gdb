@@ -1,6 +1,6 @@
 // reloc.cc -- relocate input files for gold.
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -62,11 +62,28 @@ Read_relocs::run(Workqueue* workqueue)
 {
   Read_relocs_data *rd = new Read_relocs_data;
   this->object_->read_relocs(rd);
+  this->object_->set_relocs_data(rd);
   this->object_->release();
 
-  workqueue->queue_next(new Scan_relocs(this->options_, this->symtab_,
-					this->layout_, this->object_, rd,
-					this->symtab_lock_, this->blocker_));
+  // If garbage collection is desired, we must process the relocs
+  // instead of scanning the relocs as reloc processing is necessary 
+  // to determine unused sections.
+  if (parameters->options().gc_sections())
+    {  
+      workqueue->queue_next(new Gc_process_relocs(this->options_, 
+                                                  this->symtab_,
+                                                  this->layout_, 
+                                                  this->object_, rd,
+                                                  this->symtab_lock_, 
+                                                  this->blocker_));
+    }
+  else
+    {
+      workqueue->queue_next(new Scan_relocs(this->options_, this->symtab_,
+                                            this->layout_, this->object_, rd,
+                                            this->symtab_lock_, 
+                                            this->blocker_));
+    }
 }
 
 // Return a debugging name for the task.
@@ -75,6 +92,43 @@ std::string
 Read_relocs::get_name() const
 {
   return "Read_relocs " + this->object_->name();
+}
+
+// Gc_process_relocs methods.
+
+// These tasks process the relocations read by Read_relocs and 
+// determine which sections are referenced and which are garbage.
+// This task is done only when --gc-sections is used.
+
+Task_token*
+Gc_process_relocs::is_runnable()
+{
+  if (this->object_->is_locked())
+    return this->object_->token();
+  return NULL;
+}
+
+void
+Gc_process_relocs::locks(Task_locker* tl)
+{
+  tl->add(this, this->object_->token());
+  tl->add(this, this->blocker_);
+}
+
+void
+Gc_process_relocs::run(Workqueue*)
+{
+  this->object_->gc_process_relocs(this->options_, this->symtab_, this->layout_,
+            	     this->rd_);
+  this->object_->release();
+}
+
+// Return a debugging name for the task.
+
+std::string
+Gc_process_relocs::get_name() const
+{
+  return "Gc_process_relocs " + this->object_->name();
 }
 
 // Scan_relocs methods.
@@ -296,6 +350,47 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
     }
 }
 
+// Process the relocs to generate mappings from source sections to referenced
+// sections.  This is used during garbage colletion to determine garbage 
+// sections.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::do_gc_process_relocs(const General_options& options,
+					       Symbol_table* symtab,
+					       Layout* layout,
+					       Read_relocs_data* rd)
+{  
+  Sized_target<size, big_endian>* target = this->sized_target();
+
+  const unsigned char* local_symbols;
+  if (rd->local_symbols == NULL)
+    local_symbols = NULL;
+  else
+    local_symbols = rd->local_symbols->data();
+
+  for (Read_relocs_data::Relocs_list::iterator p = rd->relocs.begin();
+       p != rd->relocs.end();
+       ++p)
+    {
+      if (!parameters->options().relocatable())
+	  {
+	    // As noted above, when not generating an object file, we
+	    // only scan allocated sections.  We may see a non-allocated
+	    // section here if we are emitting relocs.
+	    if (p->is_data_section_allocated)
+              target->gc_process_relocs(options, symtab, layout, this, 
+                                        p->data_shndx, p->sh_type, 
+                                        p->contents->data(), p->reloc_count, 
+                                        p->output_section,
+                                        p->needs_special_offset_handling,
+                                        this->local_symbol_count_, 
+                                        local_symbols);
+        }
+    }
+}
+
+
 // Scan the relocs and adjust the symbol table.  This looks for
 // relocations which require GOT/PLT/COPY relocations.
 
@@ -318,6 +413,14 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
        p != rd->relocs.end();
        ++p)
     {
+      // When garbage collection is on, unreferenced sections are not included
+      // in the link that would have been included normally. This is known only
+      // after Read_relocs hence this check has to be done again.
+      if (parameters->options().gc_sections())
+        {
+          if (p->output_section == NULL)
+            continue;
+        }
       if (!parameters->options().relocatable())
 	{
 	  // As noted above, when not generating an object file, we
@@ -1075,6 +1178,42 @@ Sized_relobj<64, false>::do_read_relocs(Read_relocs_data* rd);
 template
 void
 Sized_relobj<64, true>::do_read_relocs(Read_relocs_data* rd);
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+void
+Sized_relobj<32, false>::do_gc_process_relocs(const General_options& options,
+					Symbol_table* symtab,
+					Layout* layout,
+					Read_relocs_data* rd);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+void
+Sized_relobj<32, true>::do_gc_process_relocs(const General_options& options,
+				       Symbol_table* symtab,
+				       Layout* layout,
+				       Read_relocs_data* rd);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+void
+Sized_relobj<64, false>::do_gc_process_relocs(const General_options& options,
+					Symbol_table* symtab,
+					Layout* layout,
+					Read_relocs_data* rd);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+Sized_relobj<64, true>::do_gc_process_relocs(const General_options& options,
+				       Symbol_table* symtab,
+				       Layout* layout,
+				       Read_relocs_data* rd);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

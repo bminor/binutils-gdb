@@ -79,7 +79,8 @@ am__objects_1 = archive.$(OBJEXT) binary.$(OBJEXT) common.$(OBJEXT) \
 	cref.$(OBJEXT) defstd.$(OBJEXT) descriptors.$(OBJEXT) \
 	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) dwarf_reader.$(OBJEXT) \
 	ehframe.$(OBJEXT) errors.$(OBJEXT) expression.$(OBJEXT) \
-	fileread.$(OBJEXT) gold.$(OBJEXT) gold-threads.$(OBJEXT) \
+	fileread.$(OBJEXT) gc.$(OBJEXT) \
+      gold.$(OBJEXT) gold-threads.$(OBJEXT) \
 	layout.$(OBJEXT) mapfile.$(OBJEXT) merge.$(OBJEXT) \
 	object.$(OBJEXT) options.$(OBJEXT) output.$(OBJEXT) \
 	parameters.$(OBJEXT) plugin.$(OBJEXT) readsyms.$(OBJEXT) \
@@ -330,6 +331,7 @@ CCFILES = \
 	errors.cc \
 	expression.cc \
 	fileread.cc \
+        gc.cc \
 	gold.cc \
 	gold-threads.cc \
 	layout.cc \
@@ -368,6 +370,7 @@ HFILES = \
 	ehframe.h \
 	errors.h \
 	fileread.h \
+        gc.h \
 	gold.h \
 	gold-threads.h \
 	layout.h \

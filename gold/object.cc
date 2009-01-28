@@ -1,6 +1,6 @@
 // object.cc -- support for an object file for linking in gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -28,6 +28,7 @@
 #include "demangle.h"
 #include "libiberty.h"
 
+#include "gc.h"
 #include "target-select.h"
 #include "dwarf_reader.h"
 #include "layout.h"
@@ -228,6 +229,79 @@ Object::handle_gnu_warning_section(const char* name, unsigned int shndx,
       std::string warning(reinterpret_cast<const char*>(contents), len);
       symtab->add_warning(name + warn_prefix_len, this, warning);
       return true;
+    }
+  return false;
+}
+
+// Class Relobj
+
+// To copy the symbols data read from the file to a local data structure.
+// This function is called from do_layout only while doing garbage 
+// collection.
+
+void
+Relobj::copy_symbols_data(Symbols_data* gc_sd, Read_symbols_data* sd, 
+                          unsigned int section_header_size)
+{
+  gc_sd->section_headers_data = 
+         new unsigned char[(section_header_size)];
+  memcpy(gc_sd->section_headers_data, sd->section_headers->data(),
+         section_header_size);
+  gc_sd->section_names_data = 
+         new unsigned char[sd->section_names_size];
+  memcpy(gc_sd->section_names_data, sd->section_names->data(),
+         sd->section_names_size);
+  gc_sd->section_names_size = sd->section_names_size;
+  if (sd->symbols != NULL)
+    {
+      gc_sd->symbols_data = 
+             new unsigned char[sd->symbols_size];
+      memcpy(gc_sd->symbols_data, sd->symbols->data(),
+            sd->symbols_size);
+    }
+  else
+    {
+      gc_sd->symbols_data = NULL;
+    }
+  gc_sd->symbols_size = sd->symbols_size;
+  gc_sd->external_symbols_offset = sd->external_symbols_offset;
+  if (sd->symbol_names != NULL)
+    {
+      gc_sd->symbol_names_data =
+             new unsigned char[sd->symbol_names_size];
+      memcpy(gc_sd->symbol_names_data, sd->symbol_names->data(),
+            sd->symbol_names_size);
+    }
+  else
+    {
+      gc_sd->symbol_names_data = NULL;
+    }
+  gc_sd->symbol_names_size = sd->symbol_names_size;
+}
+
+// This function determines if a particular section name must be included
+// in the link.  This is used during garbage collection to determine the
+// roots of the worklist.
+
+bool
+Relobj::is_section_name_included(const char* name)
+{
+  if (is_prefix_of(".ctors", name) 
+      || is_prefix_of(".dtors", name) 
+      || is_prefix_of(".note", name) 
+      || is_prefix_of(".init", name) 
+      || is_prefix_of(".fini", name) 
+      || is_prefix_of(".gcc_except_table", name) 
+      || is_prefix_of(".jcr", name) 
+      || is_prefix_of(".preinit_array", name) 
+      || (is_prefix_of(".text", name) 
+          && strstr(name, "personality")) 
+      || (is_prefix_of(".data", name) 
+          &&  strstr(name, "personality")) 
+      || (is_prefix_of(".gnu.linkonce.d", name) && 
+            strstr(name, "personality")))
+    {
+      return true; 
     }
   return false;
 }
@@ -816,7 +890,15 @@ Sized_relobj<size, big_endian>::layout_section(Layout* layout,
 // Lay out the input sections.  We walk through the sections and check
 // whether they should be included in the link.  If they should, we
 // pass them to the Layout object, which will return an output section
-// and an offset.
+// and an offset.  
+// During garbage collection (gc-sections), this function is called
+// twice.  When it is called the first time, it is for setting up some
+// sections as roots to a work-list and to do comdat processing.  Actual
+// layout happens the second time around after all the relevant sections
+// have been determined.  The first time, is_worklist_ready is false.  
+// It is then set to true after the worklist is processed and the relevant 
+// sections are determined.  Then, this function is called again to 
+// layout the sections.
 
 template<int size, bool big_endian>
 void
@@ -825,15 +907,65 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 					  Read_symbols_data* sd)
 {
   const unsigned int shnum = this->shnum();
+  bool is_gc_pass_one = (parameters->options().gc_sections() 
+                         && !symtab->gc()->is_worklist_ready());
+  bool is_gc_pass_two = (parameters->options().gc_sections() 
+                         && symtab->gc()->is_worklist_ready());
   if (shnum == 0)
     return;
+  Symbols_data* gc_sd;
+  if (is_gc_pass_one)
+    {
+      // During garbage collection save the symbols data to use it when 
+      // re-entering this function.   
+      gc_sd = new Symbols_data;
+      this->copy_symbols_data(gc_sd, sd, This::shdr_size * shnum);
+      this->set_symbols_data(gc_sd);
+    }
+  else if (is_gc_pass_two)
+    {
+      gc_sd = this->get_symbols_data();
+    }
+
+  const unsigned char* section_headers_data = NULL;
+  section_size_type section_names_size;
+  const unsigned char* symbols_data = NULL;
+  section_size_type symbols_size;
+  section_offset_type external_symbols_offset;
+  const unsigned char* symbol_names_data = NULL;
+  section_size_type symbol_names_size;
+ 
+  if (parameters->options().gc_sections())
+    {
+      section_headers_data = gc_sd->section_headers_data;
+      section_names_size = gc_sd->section_names_size;
+      symbols_data = gc_sd->symbols_data;
+      symbols_size = gc_sd->symbols_size;
+      external_symbols_offset = gc_sd->external_symbols_offset;
+      symbol_names_data = gc_sd->symbol_names_data;
+      symbol_names_size = gc_sd->symbol_names_size;
+    }
+  else
+    {
+      section_headers_data = sd->section_headers->data();
+      section_names_size = sd->section_names_size;
+      if (sd->symbols != NULL)
+        symbols_data = sd->symbols->data();
+      symbols_size = sd->symbols_size;
+      external_symbols_offset = sd->external_symbols_offset;
+      if (sd->symbol_names != NULL)
+        symbol_names_data = sd->symbol_names->data();
+      symbol_names_size = sd->symbol_names_size;
+    }
 
   // Get the section headers.
-  const unsigned char* shdrs = sd->section_headers->data();
+  const unsigned char* shdrs = section_headers_data;
   const unsigned char* pshdrs;
 
   // Get the section names.
-  const unsigned char* pnamesu = sd->section_names->data();
+  const unsigned char* pnamesu = parameters->options().gc_sections() ?
+                                 gc_sd->section_names_data :
+                                 sd->section_names->data();
   const char* pnames = reinterpret_cast<const char*>(pnamesu);
 
   // If any input files have been claimed by plugins, we need to defer
@@ -882,17 +1014,23 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   Output_sections& out_sections(this->output_sections());
   std::vector<Address>& out_section_offsets(this->section_offsets_);
 
-  out_sections.resize(shnum);
-  out_section_offsets.resize(shnum);
+  if (!is_gc_pass_two)
+    {
+      out_sections.resize(shnum);
+      out_section_offsets.resize(shnum);
+    }
 
   // If we are only linking for symbols, then there is nothing else to
   // do here.
   if (this->input_file()->just_symbols())
     {
-      delete sd->section_headers;
-      sd->section_headers = NULL;
-      delete sd->section_names;
-      sd->section_names = NULL;
+      if (!is_gc_pass_two)
+        {
+          delete sd->section_headers;
+          sd->section_headers = NULL;
+          delete sd->section_names;
+          sd->section_names = NULL;
+        }
       return;
     }
 
@@ -925,7 +1063,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
     {
       typename This::Shdr shdr(pshdrs);
 
-      if (shdr.get_sh_name() >= sd->section_names_size)
+      if (shdr.get_sh_name() >= section_names_size)
 	{
 	  this->error(_("bad section name offset for section %u: %lu"),
 		      i, static_cast<unsigned long>(shdr.get_sh_name()));
@@ -934,53 +1072,68 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 
       const char* name = pnames + shdr.get_sh_name();
 
-      if (this->handle_gnu_warning_section(name, i, symtab))
-	{
-	  if (!relocatable)
-	    omit[i] = true;
-	}
-
-      // The .note.GNU-stack section is special.  It gives the
-      // protection flags that this object file requires for the stack
-      // in memory.
-      if (strcmp(name, ".note.GNU-stack") == 0)
-	{
-	  seen_gnu_stack = true;
-	  gnu_stack_flags |= shdr.get_sh_flags();
-	  omit[i] = true;
-	}
-
-      bool discard = omit[i];
-      if (!discard)
-	{
-	  if (shdr.get_sh_type() == elfcpp::SHT_GROUP)
-	    {
-	      if (!this->include_section_group(symtab, layout, i, name, shdrs,
-					       pnames, sd->section_names_size,
-					       &omit))
-		discard = true;
+      if (!is_gc_pass_two)
+        { 
+          if (this->handle_gnu_warning_section(name, i, symtab))
+            { 
+    	      if (!relocatable)
+	        omit[i] = true;
 	    }
-          else if ((shdr.get_sh_flags() & elfcpp::SHF_GROUP) == 0
-                   && Layout::is_linkonce(name))
-	    {
-	      if (!this->include_linkonce_section(layout, i, name, shdr))
-		discard = true;
-	    }
-	}
 
-      if (discard)
-	{
-	  // Do not include this section in the link.
-	  out_sections[i] = NULL;
-          out_section_offsets[i] = invalid_address;
-	  continue;
-	}
+          // The .note.GNU-stack section is special.  It gives the
+          // protection flags that this object file requires for the stack
+          // in memory.
+          if (strcmp(name, ".note.GNU-stack") == 0)
+            {
+	      seen_gnu_stack = true;
+	      gnu_stack_flags |= shdr.get_sh_flags();
+	      omit[i] = true;
+            }
+
+          bool discard = omit[i];
+          if (!discard)
+            {
+	      if (shdr.get_sh_type() == elfcpp::SHT_GROUP)
+	        {
+	          if (!this->include_section_group(symtab, layout, i, name, 
+                                                   shdrs, pnames, 
+                                                   section_names_size,
+					           &omit))
+		    discard = true;
+	        }
+              else if ((shdr.get_sh_flags() & elfcpp::SHF_GROUP) == 0
+                       && Layout::is_linkonce(name))
+	        {
+	          if (!this->include_linkonce_section(layout, i, name, shdr))
+   		    discard = true;
+	        }
+	    }
+
+          if (discard)
+            {
+	      // Do not include this section in the link.
+	      out_sections[i] = NULL;
+              out_section_offsets[i] = invalid_address;
+	      continue;
+            }
+        }
+ 
+      if (is_gc_pass_one)
+        {
+          if (is_section_name_included(name)
+              || shdr.get_sh_type() == elfcpp::SHT_INIT_ARRAY 
+              || shdr.get_sh_type() == elfcpp::SHT_FINI_ARRAY)
+            {
+              symtab->gc()->worklist().push(Section_id(this, i)); 
+            }
+        }
 
       // When doing a relocatable link we are going to copy input
       // reloc sections into the output.  We only want to copy the
       // ones associated with sections which are not being discarded.
       // However, we don't know that yet for all sections.  So save
-      // reloc sections and process them later.
+      // reloc sections and process them later. Garbage collection is
+      // not triggered when relocatable code is desired.
       if (emit_relocs
 	  && (shdr.get_sh_type() == elfcpp::SHT_REL
 	      || shdr.get_sh_type() == elfcpp::SHT_RELA))
@@ -999,44 +1152,98 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       // determine which sections are being discarded, and discard the
       // corresponding information.
       if (!relocatable
-	  && strcmp(name, ".eh_frame") == 0
-	  && this->check_eh_frame_flags(&shdr))
-	{
-	  eh_frame_sections.push_back(i);
-	  continue;
-	}
+          && strcmp(name, ".eh_frame") == 0
+          && this->check_eh_frame_flags(&shdr))
+        {
+          if (is_gc_pass_one)
+            {
+              out_sections[i] = reinterpret_cast<Output_section*>(1);
+              out_section_offsets[i] = invalid_address;
+            }
+          else
+            eh_frame_sections.push_back(i);
+          continue;
+        }
 
+      if (is_gc_pass_two)
+        {
+          // This is executed during the second pass of garbage 
+          // collection. do_layout has been called before and some 
+          // sections have been already discarded. Simply ignore 
+          // such sections this time around.
+          if (out_sections[i] == NULL)
+            {
+              gold_assert(out_section_offsets[i] == invalid_address);
+              continue; 
+            }
+          if ((shdr.get_sh_flags() & elfcpp::SHF_ALLOC) != 0)
+            if (symtab->gc()->referenced_list().find(Section_id(this,i)) 
+                == symtab->gc()->referenced_list().end())
+              {
+                if (parameters->options().print_gc_sections())
+                  gold_info(_("%s: Removing unused section from '%s'" 
+                              " in file '%s"),
+                            program_name, this->section_name(i).c_str(), 
+                            this->name().c_str());
+                out_sections[i] = NULL;
+                out_section_offsets[i] = invalid_address;
+                continue;
+              }
+        }
+      // Defer layout here if input files are claimed by plugins.  When gc
+      // is turned on this function is called twice.  For the second call
+      // should_defer_layout should be false.
       if (should_defer_layout && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC))
         {
-          this->deferred_layout_.push_back(Deferred_layout(i, name, pshdrs,
+          gold_assert(!is_gc_pass_two);
+          this->deferred_layout_.push_back(Deferred_layout(i, name, 
+                                                           pshdrs,
                                                            reloc_shndx[i],
                                                            reloc_type[i]));
-
           // Put dummy values here; real values will be supplied by
           // do_layout_deferred_sections.
+          out_sections[i] = reinterpret_cast<Output_section*>(2);
+          out_section_offsets[i] = invalid_address;
+          continue;
+              }
+      // During gc_pass_two if a section that was previously deferred is
+      // found, do not layout the section as layout_deferred_sections will
+      // do it later from gold.cc.
+      if (is_gc_pass_two 
+          && (out_sections[i] == reinterpret_cast<Output_section*>(2)))
+        continue;
+
+      if (is_gc_pass_one)
+        {
+          // This is during garbage collection. The out_sections are 
+          // assigned in the second call to this function. 
           out_sections[i] = reinterpret_cast<Output_section*>(1);
           out_section_offsets[i] = invalid_address;
         }
       else
         {
+          // When garbage collection is switched on the actual layout
+          // only happens in the second call.
           this->layout_section(layout, i, name, shdr, reloc_shndx[i],
                                reloc_type[i]);
         }
     }
 
-  layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags);
+  if (!is_gc_pass_one)
+    layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags);
 
   // When doing a relocatable link handle the reloc sections at the
-  // end.
+  // end.  Garbage collection is not turned on for relocatable code. 
   if (emit_relocs)
     this->size_relocatable_relocs();
+  gold_assert(!parameters->options().gc_sections() || reloc_sections.empty());
   for (std::vector<unsigned int>::const_iterator p = reloc_sections.begin();
        p != reloc_sections.end();
        ++p)
     {
       unsigned int i = *p;
       const unsigned char* pshdr;
-      pshdr = sd->section_headers->data() + i * This::shdr_size;
+      pshdr = section_headers_data + i * This::shdr_size;
       typename This::Shdr shdr(pshdr);
 
       unsigned int data_shndx = this->adjust_shndx(shdr.get_sh_info());
@@ -1064,24 +1271,25 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
     }
 
   // Handle the .eh_frame sections at the end.
+  gold_assert(!is_gc_pass_one || eh_frame_sections.empty());
   for (std::vector<unsigned int>::const_iterator p = eh_frame_sections.begin();
        p != eh_frame_sections.end();
        ++p)
     {
       gold_assert(this->has_eh_frame_);
-      gold_assert(sd->external_symbols_offset != 0);
+      gold_assert(external_symbols_offset != 0);
 
       unsigned int i = *p;
       const unsigned char *pshdr;
-      pshdr = sd->section_headers->data() + i * This::shdr_size;
+      pshdr = section_headers_data + i * This::shdr_size;
       typename This::Shdr shdr(pshdr);
 
       off_t offset;
       Output_section* os = layout->layout_eh_frame(this,
-						   sd->symbols->data(),
-						   sd->symbols_size,
-						   sd->symbol_names->data(),
-						   sd->symbol_names_size,
+						   symbols_data,
+						   symbols_size,
+						   symbol_names_data,
+						   symbol_names_size,
 						   i, shdr,
 						   reloc_shndx[i],
 						   reloc_type[i],
@@ -1099,10 +1307,20 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	this->set_relocs_must_follow_section_writes();
     }
 
-  delete sd->section_headers;
-  sd->section_headers = NULL;
-  delete sd->section_names;
-  sd->section_names = NULL;
+  if (is_gc_pass_two)
+    {
+      delete[] gc_sd->section_headers_data;
+      delete[] gc_sd->section_names_data;
+      delete[] gc_sd->symbols_data;
+      delete[] gc_sd->symbol_names_data;
+    }
+  else
+    {
+      delete sd->section_headers;
+      sd->section_headers = NULL;
+      delete sd->section_names;
+      sd->section_names = NULL;
+    }
 }
 
 // Layout sections whose layout was deferred while waiting for

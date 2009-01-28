@@ -1,6 +1,6 @@
 // options.h -- handle command line options for gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -581,10 +581,6 @@ class General_options
 	      N_("Check segment addresses for overlaps (default)"),
 	      N_("Do not check segment addresses for overlaps"));
 
-  DEFINE_bool(gc_sections, options::TWO_DASHES, '\0', true,
-	      N_("(noop) Garbage collect sections"),
-	      N_("(noop) Do not garbage collect sections"));
-
 #ifdef HAVE_ZLIB_H
   DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
               N_("Compress .debug_* sections in the output file"),
@@ -771,6 +767,14 @@ class General_options
   // a non-standard accessor-function name because 'static' is a keyword.
   DEFINE_special(static, options::ONE_DASH, '\0',
                  N_("Do not link against shared libraries"), NULL);
+
+  DEFINE_bool(gc_sections, options::TWO_DASHES, '\0', false,
+              N_("Remove unused sections"), 
+              N_("Don't remove unused sections (default)"));
+ 
+  DEFINE_bool(print_gc_sections, options::TWO_DASHES, '\0', false,
+              N_("List removed unused sections on stderr"), 
+              N_("Do not list removed unused sections"));
 
   DEFINE_bool(stats, options::TWO_DASHES, '\0', false,
               N_("Print resource usage statistics"), NULL);

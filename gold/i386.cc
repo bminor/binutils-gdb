@@ -1,6 +1,6 @@
 // i386.cc -- i386 target support for gold.
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -61,6 +61,22 @@ class Target_i386 : public Sized_target<32, false>
       copy_relocs_(elfcpp::R_386_COPY), dynbss_(NULL),
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
   { }
+
+  // Process the relocations to determine unreferenced sections for 
+  // garbage collection.
+  void
+  gc_process_relocs(const General_options& options,
+                    Symbol_table* symtab,
+                    Layout* layout,
+                    Sized_relobj<32, false>* object,
+                    unsigned int data_shndx,
+                    unsigned int sh_type,
+                    const unsigned char* prelocs,
+                    size_t reloc_count,
+                    Output_section* output_section,
+                    bool needs_special_offset_handling,
+                    size_t local_symbol_count,
+                    const unsigned char* plocal_symbols);
 
   // Scan the relocations to look for symbol adjustments.
   void
@@ -1454,6 +1470,38 @@ Target_i386::Scan::global(const General_options&,
       unsupported_reloc_global(object, r_type, gsym);
       break;
     }
+}
+
+// Process relocations for gc.
+
+void
+Target_i386::gc_process_relocs(const General_options& options,
+                               Symbol_table* symtab,
+                               Layout* layout,
+                               Sized_relobj<32, false>* object,
+                               unsigned int data_shndx,
+                               unsigned int,
+                               const unsigned char* prelocs,
+                               size_t reloc_count,
+                               Output_section* output_section,
+                               bool needs_special_offset_handling,
+                               size_t local_symbol_count,
+                               const unsigned char* plocal_symbols)
+{
+  gold::gc_process_relocs<32, false, Target_i386, elfcpp::SHT_REL,
+		          Target_i386::Scan>(
+    options,
+    symtab,
+    layout,
+    this,
+    object,
+    data_shndx,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    local_symbol_count,
+    plocal_symbols);
 }
 
 // Scan relocations for a section.

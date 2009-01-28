@@ -1,6 +1,6 @@
 // x86_64.cc -- x86_64 target support for gold.
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -65,6 +65,21 @@ class Target_x86_64 : public Sized_target<64, false>
       copy_relocs_(elfcpp::R_X86_64_COPY), dynbss_(NULL),
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
   { }
+
+  // Scan the relocations to look for symbol adjustments.
+  void
+  gc_process_relocs(const General_options& options,
+	            Symbol_table* symtab,
+	            Layout* layout,
+	            Sized_relobj<64, false>* object,
+	            unsigned int data_shndx,
+	            unsigned int sh_type,
+	            const unsigned char* prelocs,
+	            size_t reloc_count,
+	            Output_section* output_section,
+	            bool needs_special_offset_handling,
+	            size_t local_symbol_count,
+	            const unsigned char* plocal_symbols);
 
   // Scan the relocations to look for symbol adjustments.
   void
@@ -1544,6 +1559,42 @@ Target_x86_64::Scan::global(const General_options&,
     }
 }
 
+void
+Target_x86_64::gc_process_relocs(const General_options& options,
+                                 Symbol_table* symtab,
+                                 Layout* layout,
+                                 Sized_relobj<64, false>* object,
+                                 unsigned int data_shndx,
+                                 unsigned int sh_type,
+                                 const unsigned char* prelocs,
+                                 size_t reloc_count,
+			         Output_section* output_section,
+			         bool needs_special_offset_handling,
+                                 size_t local_symbol_count,
+                                 const unsigned char* plocal_symbols)
+{
+
+  if (sh_type == elfcpp::SHT_REL)
+    {
+      return;
+    }
+
+   gold::gc_process_relocs<64, false, Target_x86_64, elfcpp::SHT_RELA,
+                           Target_x86_64::Scan>(
+    options,
+    symtab,
+    layout,
+    this,
+    object,
+    data_shndx,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    local_symbol_count,
+    plocal_symbols);
+ 
+}
 // Scan relocations for a section.
 
 void

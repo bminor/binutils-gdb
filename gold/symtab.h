@@ -27,6 +27,7 @@
 #include <utility>
 #include <vector>
 
+#include "gc.h"
 #include "elfcpp.h"
 #include "parameters.h"
 #include "stringpool.h"
@@ -56,6 +57,7 @@ class Output_section;
 class Output_segment;
 class Output_file;
 class Output_symtab_xindex;
+class Garbage_collection;
 
 // The base class of an entry in the symbol table.  The symbol table
 // can have a lot of entries, so we don't want this class to big.
@@ -1140,6 +1142,28 @@ class Symbol_table
 
   ~Symbol_table();
 
+  void
+  set_gc(Garbage_collection* gc)
+  { this->gc_ = gc; }
+
+  Garbage_collection*
+  gc()
+  { return this->gc_; }
+
+  // During garbage collection, this keeps undefined symbols.
+  void
+  gc_mark_undef_symbols(); 
+
+  // During garbage collection, this ensures externally visible symbols
+  // are not treated as garbage while building shared objects.
+  void
+  gc_mark_symbol_for_shlib(Symbol* sym);
+
+  // During garbage collection, this keeps sections that correspond to 
+  // symbols seen in dynamic objects.
+  inline void
+  gc_mark_dyn_syms(Symbol* sym);
+
   // Add COUNT external symbols from the relocatable object RELOBJ to
   // the symbol table.  SYMS is the symbols, SYMNDX_OFFSET is the
   // offset in the symbol table of the first symbol, SYM_NAMES is
@@ -1602,6 +1626,7 @@ class Symbol_table
   Copied_symbol_dynobjs copied_symbol_dynobjs_;
   // Information parsed from the version script, if any.
   const Version_script_info& version_script_;
+  Garbage_collection* gc_;
 };
 
 // We inline get_sized_symbol for efficiency.

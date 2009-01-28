@@ -1,6 +1,6 @@
 // reloc.h -- relocate input files for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -88,6 +88,45 @@ class Read_relocs : public Task
   Symbol_table* symtab_;
   Layout* layout_;
   Relobj* object_;
+  Task_token* symtab_lock_;
+  Task_token* blocker_;
+};
+
+// Process the relocs to figure out which sections are garbage.
+// Very similar to scan relocs.
+
+class Gc_process_relocs : public Task
+{
+ public:
+  // SYMTAB_LOCK is used to lock the symbol table.  BLOCKER should be
+  // unblocked when the task completes.
+  Gc_process_relocs(const General_options& options, Symbol_table* symtab,
+	      Layout* layout, Relobj* object, Read_relocs_data* rd,
+	      Task_token* symtab_lock, Task_token* blocker)
+    : options_(options), symtab_(symtab), layout_(layout), object_(object),
+      rd_(rd), symtab_lock_(symtab_lock), blocker_(blocker)
+  { }
+
+  // The standard Task methods.
+
+  Task_token*
+  is_runnable();
+
+  void
+  locks(Task_locker*);
+
+  void
+  run(Workqueue*);
+
+  std::string
+  get_name() const;
+
+ private:
+  const General_options& options_;
+  Symbol_table* symtab_;
+  Layout* layout_;
+  Relobj* object_;
+  Read_relocs_data* rd_;
   Task_token* symtab_lock_;
   Task_token* blocker_;
 };

@@ -1,4 +1,4 @@
-// plugin.c -- plugin manager for gold      -*- C++ -*-
+// plugin.cc -- plugin manager for gold      -*- C++ -*-
 
 // Copyright 2008, 2009 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
@@ -795,8 +795,7 @@ Add_plugin_symbols::run(Workqueue*)
 }
 
 // Class Plugin_finish.  This task runs after all replacement files have
-// been added.  It calls Layout::layout for any deferred sections and
-// calls each plugin's cleanup handler.
+// been added.  It calls each plugin's cleanup handler.
 
 class Plugin_finish : public Task
 {
@@ -828,7 +827,6 @@ class Plugin_finish : public Task
   {
     Plugin_manager* plugins = parameters->options().plugins();
     gold_assert(plugins != NULL);
-    plugins->layout_deferred_objects();
     plugins->cleanup();
   }
 

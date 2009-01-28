@@ -1,6 +1,6 @@
 // main.cc -- gold main function.
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -43,6 +43,7 @@
 #include "symtab.h"
 #include "layout.h"
 #include "plugin.h"
+#include "gc.h"
 
 using namespace gold;
 
@@ -201,12 +202,18 @@ main(int argc, char** argv)
   // The list of input objects.
   Input_objects input_objects;
 
+  // The Garbage Collection Object.
+  Garbage_collection gc;
+
   // The symbol table.  We're going to guess here how many symbols
   // we're going to see based on the number of input files.  Even when
   // this is off, it means at worst we don't quite optimize hashtable
   // resizing as well as we could have (perhap using more memory).
   Symbol_table symtab(command_line.number_of_input_files() * 1024,
                       command_line.version_script());
+
+  if (parameters->options().gc_sections())
+    symtab.set_gc(&gc);
 
   // The layout object.
   Layout layout(command_line.options(), &command_line.script_options());
