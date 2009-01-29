@@ -55,8 +55,8 @@ Disassembly of section .text:
     102e:	00 00       	nop
     1030:	00 00       	nop
     1032:	c5 3c 10 12 	lb \$5,4114\(\$3\)
-    1036:	de e9 ff ff 	bsr 1012 <&:s3:foo:s3:bar>
-    103a:	e5 09 ff ec 	repeat \$5,1012 <&:s3:foo:s3:bar>
+    1036:	de e9 ff ff 	bsr 1012 <foo>
+    103a:	e5 09 ff ec 	repeat \$5,1012 <foo>
     103e:	00 00       	nop
     1040:	00 00       	nop
     1042:	c5 3c ef ee 	lb \$5,-4114\(\$3\)
@@ -79,7 +79,7 @@ Disassembly of section .text:
     1082:	d8 28 00 00 	jmp 4 <__assert_based_size\+0x3>
     1086:	d8 48 00 00 	jmp 8 <\^:s3:foo:s3:bar>
     108a:	d8 d8 00 10 	jmp 101a <|:s3:foo:s3:bar>
-    108e:	d8 98 00 10 	jmp 1012 <&:s3:foo:s3:bar>
+    108e:	d8 98 00 10 	jmp 1012 <foo>
     1092:	d8 08 00 00 	jmp 0 <<<:==:s3:foo:s3:bar:#0+05>
     1096:	d9 08 00 00 	jmp 20 <<<:&&:s3:foo:s3:bar:#0+05>
     109a:	d9 08 00 00 	jmp 20 <<<:&&:s3:foo:s3:bar:#0+05>

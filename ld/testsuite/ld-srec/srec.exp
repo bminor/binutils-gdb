@@ -1,6 +1,6 @@
 # Test linking directly to S-records.
 # By Ian Lance Taylor, Cygnus Support.
-#   Copyright 1999, 2000, 2001, 2002, 2003, 2006, 2007
+#   Copyright 1999, 2000, 2001, 2002, 2003, 2006, 2007, 2009
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -383,7 +383,8 @@ setup_xfail "alpha*-*-elf*" "alpha*-*-linux-*" "alpha*-*-gnu*"
 setup_xfail "alpha*-*-netbsd*"
 
 # The S-record linker hasn't any hope of coping with HPPA relocs.
-setup_xfail "hppa*-*-*"
+# Or MeP complex relocs.
+setup_xfail "hppa*-*-*" "mep-*-*"
 
 # The S-record linker doesn't handle IA64 Elf relaxation.
 setup_xfail "ia64-*-*"
@@ -420,7 +421,7 @@ setup_xfail "thumb-*-*"
 setup_xfail "v850*-*-elf"
 setup_xfail "alpha*-*-elf*" "alpha*-*-linux-*" "alpha*-*-gnu*"
 setup_xfail "alpha*-*-netbsd*"
-setup_xfail "hppa*-*-*"
+setup_xfail "hppa*-*-*" "mep-*-*"
 setup_xfail "ia64-*-*"
 setup_xfail "*-*-cygwin*" "*-*-mingw*" "*-*-pe*" "*-*-winnt*"
 setup_xfail "score-*-*"

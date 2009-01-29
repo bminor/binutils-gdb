@@ -1,3 +1,9 @@
+2009-01-29  Nick Clifton  <nickc@redhat.com>
+
+	* gas/all/gas.exp: Expect forward test to fail for MeP.
+	Expect relax test to fail for MeP.
+	* gas/mep/relocs.d: Update expected disassembly.
+
 2009-01-27  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/attr-cpu-directive.d: Only run test for EABI targets.

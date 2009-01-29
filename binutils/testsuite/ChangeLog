@@ -1,3 +1,8 @@
+2009-01-29  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objdump.W: Do not assume that high and low PC
+	addresses will have been computed.
+
 2008-10-06  Tom Tromey  <tromey@redhat.com>
 
 	* binutils-all/objdump.W: Update.

@@ -1,5 +1,5 @@
 /* tc-mep.h -- Header file for tc-mep.c.
-   Copyright (C) 2001, 2002, 2005, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002, 2005, 2007, 2009 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -39,8 +39,7 @@
 /* Permit temporary numeric labels. */
 #define LOCAL_LABELS_FB 1
 
-/* .-foo gets turned into PC relative relocs.  */
-#define DIFF_EXPR_OK
+/* Do not define DIFF_EXPR_OK - the MeP does not have a 32-bit PC-relative reloc.  */
 
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD

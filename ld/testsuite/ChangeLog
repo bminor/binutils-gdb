@@ -1,3 +1,13 @@
+2009-01-29  Nick Clifton  <nickc@redhat.com>
+
+	* lib/ld-lib.exp (check_gc_sections_available): Add MeP to list of
+	targets which do not support garbage collection.
+	* ld-srec/srec.exp (run_srec_test): Expect tests to fail for MeP.
+	* ld-elf/group8a.d: Likewise.
+	* ld-elf/group8b.d: Likewise.
+	* ld-elf/group9a.d: Likewise.
+	* ld-elf/group9b.d: Likewise.
+
 2009-01-27  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/tls-tbss64.s, ld-cris/tls-e-80.d: New test.

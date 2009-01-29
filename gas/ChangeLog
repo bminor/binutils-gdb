@@ -1,3 +1,7 @@
+2009-01-29  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-mep.h (DIFF_EXPR_OK): Do not define.
+
 2009-01-29  Nathan Sidwell  <nathan@codesourcery.com>
 	    Catherine Moore <clm@codesourcery.com?
 
