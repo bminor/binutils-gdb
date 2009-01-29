@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "frame.h"
 #include "gdbcore.h"
 #include "regcache.h"
@@ -286,6 +287,15 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
+
+  /* Displaced stepping.  */
+  set_gdbarch_displaced_step_copy_insn (gdbarch,
+                                        amd64_displaced_step_copy_insn);
+  set_gdbarch_displaced_step_fixup (gdbarch, amd64_displaced_step_fixup);
+  set_gdbarch_displaced_step_free_closure (gdbarch,
+                                           simple_displaced_step_free_closure);
+  set_gdbarch_displaced_step_location (gdbarch,
+                                       displaced_step_at_entry_point);
 }
 
 

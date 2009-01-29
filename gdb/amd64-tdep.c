@@ -21,6 +21,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "opcode/i386.h"
+#include "dis-asm.h"
 #include "arch-utils.h"
 #include "block.h"
 #include "dummy-frame.h"
@@ -198,6 +200,42 @@ amd64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
     warning (_("Unmapped DWARF Register #%d encountered."), reg);
 
   return regnum;
+}
+
+/* Map architectural register numbers to gdb register numbers.  */
+
+static const int amd64_arch_regmap[16] =
+{
+  AMD64_RAX_REGNUM,	/* %rax */
+  AMD64_RCX_REGNUM,	/* %rcx */
+  AMD64_RDX_REGNUM,	/* %rdx */
+  AMD64_RBX_REGNUM,	/* %rbx */
+  AMD64_RSP_REGNUM,	/* %rsp */
+  AMD64_RBP_REGNUM,	/* %rbp */
+  AMD64_RSI_REGNUM,	/* %rsi */
+  AMD64_RDI_REGNUM,	/* %rdi */
+  AMD64_R8_REGNUM,	/* %r8 */
+  AMD64_R9_REGNUM,	/* %r9 */
+  AMD64_R10_REGNUM,	/* %r10 */
+  AMD64_R11_REGNUM,	/* %r11 */
+  AMD64_R12_REGNUM,	/* %r12 */
+  AMD64_R13_REGNUM,	/* %r13 */
+  AMD64_R14_REGNUM,	/* %r14 */
+  AMD64_R15_REGNUM	/* %r15 */
+};
+
+static const int amd64_arch_regmap_len =
+  (sizeof (amd64_arch_regmap) / sizeof (amd64_arch_regmap[0]));
+
+/* Convert architectural register number REG to the appropriate register
+   number used by GDB.  */
+
+static int
+amd64_arch_reg_to_regnum (int reg)
+{
+  gdb_assert (reg >= 0 && reg < amd64_arch_regmap_len);
+
+  return amd64_arch_regmap[reg];
 }
 
 
@@ -666,7 +704,678 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   return sp + 16;
 }
 
+/* Displaced instruction handling.  */
 
+/* A partially decoded instruction.
+   This contains enough details for displaced stepping purposes.  */
+
+struct amd64_insn
+{
+  /* The number of opcode bytes.  */
+  int opcode_len;
+  /* The offset of the rex prefix or -1 if not present.  */
+  int rex_offset;
+  /* The offset to the first opcode byte.  */
+  int opcode_offset;
+  /* The offset to the modrm byte or -1 if not present.  */
+  int modrm_offset;
+
+  /* The raw instruction.  */
+  gdb_byte *raw_insn;
+};
+
+struct displaced_step_closure
+{
+  /* For rip-relative insns, saved copy of the reg we use instead of %rip.  */
+  int tmp_used;
+  int tmp_regno;
+  ULONGEST tmp_save;
+
+  /* Details of the instruction.  */
+  struct amd64_insn insn_details;
+
+  /* Amount of space allocated to insn_buf.  */
+  int max_len;
+
+  /* The possibly modified insn.
+     This is a variable-length field.  */
+  gdb_byte insn_buf[1];
+};
+
+/* WARNING: Keep onebyte_has_modrm, twobyte_has_modrm in sync with
+   ../opcodes/i386-dis.c (until libopcodes exports them, or an alternative,
+   at which point delete these in favor of libopcodes' versions).  */
+
+static const unsigned char onebyte_has_modrm[256] = {
+  /*	   0 1 2 3 4 5 6 7 8 9 a b c d e f	  */
+  /*	   -------------------------------	  */
+  /* 00 */ 1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0, /* 00 */
+  /* 10 */ 1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0, /* 10 */
+  /* 20 */ 1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0, /* 20 */
+  /* 30 */ 1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0, /* 30 */
+  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 40 */
+  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 50 */
+  /* 60 */ 0,0,1,1,0,0,0,0,0,1,0,1,0,0,0,0, /* 60 */
+  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 70 */
+  /* 80 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 80 */
+  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 90 */
+  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* a0 */
+  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* b0 */
+  /* c0 */ 1,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0, /* c0 */
+  /* d0 */ 1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1, /* d0 */
+  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* e0 */
+  /* f0 */ 0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1  /* f0 */
+  /*	   -------------------------------	  */
+  /*	   0 1 2 3 4 5 6 7 8 9 a b c d e f	  */
+};
+
+static const unsigned char twobyte_has_modrm[256] = {
+  /*	   0 1 2 3 4 5 6 7 8 9 a b c d e f	  */
+  /*	   -------------------------------	  */
+  /* 00 */ 1,1,1,1,0,0,0,0,0,0,0,0,0,1,0,1, /* 0f */
+  /* 10 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 1f */
+  /* 20 */ 1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1, /* 2f */
+  /* 30 */ 0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0, /* 3f */
+  /* 40 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 4f */
+  /* 50 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 5f */
+  /* 60 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 6f */
+  /* 70 */ 1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1, /* 7f */
+  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
+  /* 90 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 9f */
+  /* a0 */ 0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1, /* af */
+  /* b0 */ 1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1, /* bf */
+  /* c0 */ 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0, /* cf */
+  /* d0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* df */
+  /* e0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ef */
+  /* f0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0  /* ff */
+  /*	   -------------------------------	  */
+  /*	   0 1 2 3 4 5 6 7 8 9 a b c d e f	  */
+};
+
+static int amd64_syscall_p (const struct amd64_insn *insn, int *lengthp);
+
+static int
+rex_prefix_p (gdb_byte pfx)
+{
+  return REX_PREFIX_P (pfx);
+}
+
+/* Skip the legacy instruction prefixes in INSN.
+   We assume INSN is properly sentineled so we don't have to worry
+   about falling off the end of the buffer.  */
+
+static gdb_byte *
+skip_prefixes (gdb_byte *insn)
+{
+  while (1)
+    {
+      switch (*insn)
+	{
+	case DATA_PREFIX_OPCODE:
+	case ADDR_PREFIX_OPCODE:
+	case CS_PREFIX_OPCODE:
+	case DS_PREFIX_OPCODE:
+	case ES_PREFIX_OPCODE:
+	case FS_PREFIX_OPCODE:
+	case GS_PREFIX_OPCODE:
+	case SS_PREFIX_OPCODE:
+	case LOCK_PREFIX_OPCODE:
+	case REPE_PREFIX_OPCODE:
+	case REPNE_PREFIX_OPCODE:
+	  ++insn;
+	  continue;
+	default:
+	  break;
+	}
+      break;
+    }
+
+  return insn;
+}
+
+/* fprintf-function for amd64_insn_length.
+   This function is a nop, we don't want to print anything, we just want to
+   compute the length of the insn.  */
+
+static int ATTR_FORMAT (printf, 2, 3)
+amd64_insn_length_fprintf (void *stream, const char *format, ...)
+{
+  return 0;
+}
+
+/* Initialize a struct disassemble_info for amd64_insn_length.	*/
+
+static void
+amd64_insn_length_init_dis (struct gdbarch *gdbarch,
+			    struct disassemble_info *di,
+			    const gdb_byte *insn, int max_len,
+			    CORE_ADDR addr)
+{
+  init_disassemble_info (di, NULL, amd64_insn_length_fprintf);
+
+  /* init_disassemble_info installs buffer_read_memory, etc.
+     so we don't need to do that here.
+     The cast is necessary until disassemble_info is const-ified.  */
+  di->buffer = (gdb_byte *) insn;
+  di->buffer_length = max_len;
+  di->buffer_vma = addr;
+
+  di->arch = gdbarch_bfd_arch_info (gdbarch)->arch;
+  di->mach = gdbarch_bfd_arch_info (gdbarch)->mach;
+  di->endian = gdbarch_byte_order (gdbarch);
+  di->endian_code = gdbarch_byte_order_for_code (gdbarch);
+
+  disassemble_init_for_target (di);
+}
+
+/* Return the length in bytes of INSN.
+   MAX_LEN is the size of the buffer containing INSN.
+   libopcodes currently doesn't export a utility to compute the
+   instruction length, so use the disassembler until then.  */
+
+static int
+amd64_insn_length (struct gdbarch *gdbarch,
+		   const gdb_byte *insn, int max_len, CORE_ADDR addr)
+{
+  struct disassemble_info di;
+
+  amd64_insn_length_init_dis (gdbarch, &di, insn, max_len, addr);
+
+  return gdbarch_print_insn (gdbarch, addr, &di);
+}
+
+/* Return an integer register (other than RSP) that is unused as an input
+   operand in INSN.
+   In order to not require adding a rex prefix if the insn doesn't already
+   have one, the result is restricted to RAX ... RDI, sans RSP.
+   The register numbering of the result follows architecture ordering,
+   e.g. RDI = 7.  */
+
+static int
+amd64_get_unused_input_int_reg (const struct amd64_insn *details)
+{
+  /* 1 bit for each reg */
+  int used_regs_mask = 0;
+
+  /* There can be at most 3 int regs used as inputs in an insn, and we have
+     7 to choose from (RAX ... RDI, sans RSP).
+     This allows us to take a conservative approach and keep things simple.
+     E.g. By avoiding RAX, we don't have to specifically watch for opcodes
+     that implicitly specify RAX.  */
+
+  /* Avoid RAX.  */
+  used_regs_mask |= 1 << EAX_REG_NUM;
+  /* Similarily avoid RDX, implicit operand in divides.  */
+  used_regs_mask |= 1 << EDX_REG_NUM;
+  /* Avoid RSP.  */
+  used_regs_mask |= 1 << ESP_REG_NUM;
+
+  /* If the opcode is one byte long and there's no ModRM byte,
+     assume the opcode specifies a register.  */
+  if (details->opcode_len == 1 && details->modrm_offset == -1)
+    used_regs_mask |= 1 << (details->raw_insn[details->opcode_offset] & 7);
+
+  /* Mark used regs in the modrm/sib bytes.  */
+  if (details->modrm_offset != -1)
+    {
+      int modrm = details->raw_insn[details->modrm_offset];
+      int mod = MODRM_MOD_FIELD (modrm);
+      int reg = MODRM_REG_FIELD (modrm);
+      int rm = MODRM_RM_FIELD (modrm);
+      int have_sib = mod != 3 && rm == 4;
+
+      /* Assume the reg field of the modrm byte specifies a register.  */
+      used_regs_mask |= 1 << reg;
+
+      if (have_sib)
+	{
+	  int base = SIB_BASE_FIELD (details->raw_insn[details->modrm_offset + 1]);
+	  int index = SIB_INDEX_FIELD (details->raw_insn[details->modrm_offset + 1]);
+	  used_regs_mask |= 1 << base;
+	  used_regs_mask |= 1 << index;
+	}
+      else
+	{
+	  used_regs_mask |= 1 << rm;
+	}
+    }
+
+  gdb_assert (used_regs_mask < 256);
+  gdb_assert (used_regs_mask != 255);
+
+  /* Finally, find a free reg.  */
+  {
+    int i;
+
+    for (i = 0; i < 8; ++i)
+      {
+	if (! (used_regs_mask & (1 << i)))
+	  return i;
+      }
+
+    /* We shouldn't get here.  */
+    internal_error (__FILE__, __LINE__, _("unable to find free reg"));
+  }
+}
+
+/* Extract the details of INSN that we need.  */
+
+static void
+amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
+{
+  gdb_byte *start = insn;
+  int need_modrm;
+
+  details->raw_insn = insn;
+
+  details->opcode_len = -1;
+  details->rex_offset = -1;
+  details->opcode_offset = -1;
+  details->modrm_offset = -1;
+
+  /* Skip legacy instruction prefixes.  */
+  insn = skip_prefixes (insn);
+
+  /* Skip REX instruction prefix.  */
+  if (rex_prefix_p (*insn))
+    {
+      details->rex_offset = insn - start;
+      ++insn;
+    }
+
+  details->opcode_offset = insn - start;
+
+  if (*insn == TWO_BYTE_OPCODE_ESCAPE)
+    {
+      /* Two or three-byte opcode.  */
+      ++insn;
+      need_modrm = twobyte_has_modrm[*insn];
+
+      /* Check for three-byte opcode.  */
+      if (*insn == 0x38 || *insn == 0x3a)
+	{
+	  ++insn;
+	  details->opcode_len = 3;
+	}
+      else
+	details->opcode_len = 2;
+    }
+  else
+    {
+      /* One-byte opcode.  */
+      need_modrm = onebyte_has_modrm[*insn];
+      details->opcode_len = 1;
+    }
+
+  if (need_modrm)
+    {
+      ++insn;
+      details->modrm_offset = insn - start;
+    }
+}
+
+/* Update %rip-relative addressing in INSN.
+
+   %rip-relative addressing only uses a 32-bit displacement.
+   32 bits is not enough to be guaranteed to cover the distance between where
+   the real instruction is and where its copy is.
+   Convert the insn to use base+disp addressing.
+   We set base = pc + insn_length so we can leave disp unchanged.  */
+
+static void
+fixup_riprel (struct gdbarch *gdbarch, struct displaced_step_closure *dsc,
+	      CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
+{
+  const struct amd64_insn *insn_details = &dsc->insn_details;
+  int modrm_offset = insn_details->modrm_offset;
+  gdb_byte *insn = insn_details->raw_insn + modrm_offset;
+  CORE_ADDR rip_base;
+  int32_t disp;
+  int insn_length;
+  int arch_tmp_regno, tmp_regno;
+  ULONGEST orig_value;
+
+  /* %rip+disp32 addressing mode, displacement follows ModRM byte.  */
+  ++insn;
+
+  /* Compute the rip-relative address.	*/
+  disp = extract_signed_integer (insn, sizeof (int32_t));
+  insn_length = amd64_insn_length (gdbarch, dsc->insn_buf, dsc->max_len, from);
+  rip_base = from + insn_length;
+
+  /* We need a register to hold the address.
+     Pick one not used in the insn.
+     NOTE: arch_tmp_regno uses architecture ordering, e.g. RDI = 7.  */
+  arch_tmp_regno = amd64_get_unused_input_int_reg (insn_details);
+  tmp_regno = amd64_arch_reg_to_regnum (arch_tmp_regno);
+
+  /* REX.B should be unset as we were using rip-relative addressing,
+     but ensure it's unset anyway, tmp_regno is not r8-r15.  */
+  if (insn_details->rex_offset != -1)
+    dsc->insn_buf[insn_details->rex_offset] &= ~REX_B;
+
+  regcache_cooked_read_unsigned (regs, tmp_regno, &orig_value);
+  dsc->tmp_regno = tmp_regno;
+  dsc->tmp_save = orig_value;
+  dsc->tmp_used = 1;
+
+  /* Convert the ModRM field to be base+disp.  */
+  dsc->insn_buf[modrm_offset] &= ~0xc7;
+  dsc->insn_buf[modrm_offset] |= 0x80 + arch_tmp_regno;
+
+  regcache_cooked_write_unsigned (regs, tmp_regno, rip_base);
+
+  if (debug_displaced)
+    fprintf_unfiltered (gdb_stdlog, "displaced: %%rip-relative addressing used.\n"
+			"displaced: using temp reg %d, old value 0x%s, new value 0x%s\n",
+			dsc->tmp_regno, paddr_nz (dsc->tmp_save),
+			paddr_nz (rip_base));
+}
+
+static void
+fixup_displaced_copy (struct gdbarch *gdbarch,
+		      struct displaced_step_closure *dsc,
+		      CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
+{
+  const struct amd64_insn *details = &dsc->insn_details;
+
+  if (details->modrm_offset != -1)
+    {
+      gdb_byte modrm = details->raw_insn[details->modrm_offset];
+
+      if ((modrm & 0xc7) == 0x05)
+	{
+	  /* The insn uses rip-relative addressing.
+	     Deal with it.  */
+	  fixup_riprel (gdbarch, dsc, from, to, regs);
+	}
+    }
+}
+
+struct displaced_step_closure *
+amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
+				CORE_ADDR from, CORE_ADDR to,
+				struct regcache *regs)
+{
+  int len = gdbarch_max_insn_length (gdbarch);
+  /* Extra space for sentinels so fixup_{riprel,displaced_copy don't have to
+     continually watch for running off the end of the buffer.  */
+  int fixup_sentinel_space = len;
+  struct displaced_step_closure *dsc =
+    xmalloc (sizeof (*dsc) + len + fixup_sentinel_space);
+  gdb_byte *buf = &dsc->insn_buf[0];
+  struct amd64_insn *details = &dsc->insn_details;
+
+  dsc->tmp_used = 0;
+  dsc->max_len = len + fixup_sentinel_space;
+
+  read_memory (from, buf, len);
+
+  /* Set up the sentinel space so we don't have to worry about running
+     off the end of the buffer.  An excessive number of leading prefixes
+     could otherwise cause this.  */
+  memset (buf + len, 0, fixup_sentinel_space);
+
+  amd64_get_insn_details (buf, details);
+
+  /* GDB may get control back after the insn after the syscall.
+     Presumably this is a kernel bug.
+     If this is a syscall, make sure there's a nop afterwards.  */
+  {
+    int syscall_length;
+
+    if (amd64_syscall_p (details, &syscall_length))
+      buf[details->opcode_offset + syscall_length] = NOP_OPCODE;
+  }
+
+  /* Modify the insn to cope with the address where it will be executed from.
+     In particular, handle any rip-relative addressing.	 */
+  fixup_displaced_copy (gdbarch, dsc, from, to, regs);
+
+  write_memory (to, buf, len);
+
+  if (debug_displaced)
+    {
+      fprintf_unfiltered (gdb_stdlog, "displaced: copy 0x%s->0x%s: ",
+			  paddr_nz (from), paddr_nz (to));
+      displaced_step_dump_bytes (gdb_stdlog, buf, len);
+    }
+
+  return dsc;
+}
+
+static int
+amd64_absolute_jmp_p (const struct amd64_insn *details)
+{
+  const gdb_byte *insn = &details->raw_insn[details->opcode_offset];
+
+  if (insn[0] == 0xff)
+    {
+      /* jump near, absolute indirect (/4) */
+      if ((insn[1] & 0x38) == 0x20)
+	return 1;
+
+      /* jump far, absolute indirect (/5) */
+      if ((insn[1] & 0x38) == 0x28)
+	return 1;
+    }
+
+  return 0;
+}
+
+static int
+amd64_absolute_call_p (const struct amd64_insn *details)
+{
+  const gdb_byte *insn = &details->raw_insn[details->opcode_offset];
+
+  if (insn[0] == 0xff)
+    {
+      /* Call near, absolute indirect (/2) */
+      if ((insn[1] & 0x38) == 0x10)
+	return 1;
+
+      /* Call far, absolute indirect (/3) */
+      if ((insn[1] & 0x38) == 0x18)
+	return 1;
+    }
+
+  return 0;
+}
+
+static int
+amd64_ret_p (const struct amd64_insn *details)
+{
+  /* NOTE: gcc can emit "repz ; ret".  */
+  const gdb_byte *insn = &details->raw_insn[details->opcode_offset];
+
+  switch (insn[0])
+    {
+    case 0xc2: /* ret near, pop N bytes */
+    case 0xc3: /* ret near */
+    case 0xca: /* ret far, pop N bytes */
+    case 0xcb: /* ret far */
+    case 0xcf: /* iret */
+      return 1;
+
+    default:
+      return 0;
+    }
+}
+
+static int
+amd64_call_p (const struct amd64_insn *details)
+{
+  const gdb_byte *insn = &details->raw_insn[details->opcode_offset];
+
+  if (amd64_absolute_call_p (details))
+    return 1;
+
+  /* call near, relative */
+  if (insn[0] == 0xe8)
+    return 1;
+
+  return 0;
+}
+
+static int
+amd64_breakpoint_p (const struct amd64_insn *details)
+{
+  const gdb_byte *insn = &details->raw_insn[details->opcode_offset];
+
+  return insn[0] == 0xcc; /* int 3 */
+}
+
+/* Return non-zero if INSN is a system call, and set *LENGTHP to its
+   length in bytes.  Otherwise, return zero.  */
+
+static int
+amd64_syscall_p (const struct amd64_insn *details, int *lengthp)
+{
+  const gdb_byte *insn = &details->raw_insn[details->opcode_offset];
+
+  if (insn[0] == 0x0f && insn[1] == 0x05)
+    {
+      *lengthp = 2;
+      return 1;
+    }
+
+  return 0;
+}
+
+/* Fix up the state of registers and memory after having single-stepped
+   a displaced instruction.  */
+
+void
+amd64_displaced_step_fixup (struct gdbarch *gdbarch,
+			    struct displaced_step_closure *dsc,
+			    CORE_ADDR from, CORE_ADDR to,
+			    struct regcache *regs)
+{
+  /* The offset we applied to the instruction's address.  */
+  ULONGEST insn_offset = to - from;
+  gdb_byte *insn = dsc->insn_buf;
+  const struct amd64_insn *insn_details = &dsc->insn_details;
+
+  if (debug_displaced)
+    fprintf_unfiltered (gdb_stdlog,
+			"displaced: fixup (0x%s, 0x%s), "
+			"insn = 0x%02x 0x%02x ...\n",
+			paddr_nz (from), paddr_nz (to), insn[0], insn[1]);
+
+  /* If we used a tmp reg, restore it.	*/
+
+  if (dsc->tmp_used)
+    {
+      if (debug_displaced)
+	fprintf_unfiltered (gdb_stdlog, "displaced: restoring reg %d to 0x%s\n",
+			    dsc->tmp_regno, paddr_nz (dsc->tmp_save));
+      regcache_cooked_write_unsigned (regs, dsc->tmp_regno, dsc->tmp_save);
+    }
+
+  /* The list of issues to contend with here is taken from
+     resume_execution in arch/x86/kernel/kprobes.c, Linux 2.6.28.
+     Yay for Free Software!  */
+
+  /* Relocate the %rip back to the program's instruction stream,
+     if necessary.  */
+
+  /* Except in the case of absolute or indirect jump or call
+     instructions, or a return instruction, the new rip is relative to
+     the displaced instruction; make it relative to the original insn.
+     Well, signal handler returns don't need relocation either, but we use the
+     value of %rip to recognize those; see below.  */
+  if (! amd64_absolute_jmp_p (insn_details)
+      && ! amd64_absolute_call_p (insn_details)
+      && ! amd64_ret_p (insn_details))
+    {
+      ULONGEST orig_rip;
+      int insn_len;
+
+      regcache_cooked_read_unsigned (regs, AMD64_RIP_REGNUM, &orig_rip);
+
+      /* A signal trampoline system call changes the %rip, resuming
+	 execution of the main program after the signal handler has
+	 returned.  That makes them like 'return' instructions; we
+	 shouldn't relocate %rip.
+
+	 But most system calls don't, and we do need to relocate %rip.
+
+	 Our heuristic for distinguishing these cases: if stepping
+	 over the system call instruction left control directly after
+	 the instruction, the we relocate --- control almost certainly
+	 doesn't belong in the displaced copy.	Otherwise, we assume
+	 the instruction has put control where it belongs, and leave
+	 it unrelocated.  Goodness help us if there are PC-relative
+	 system calls.	*/
+      if (amd64_syscall_p (insn_details, &insn_len)
+	  && orig_rip != to + insn_len
+	  /* GDB can get control back after the insn after the syscall.
+	     Presumably this is a kernel bug.
+	     Fixup ensures its a nop, we add one to the length for it.  */
+	  && orig_rip != to + insn_len + 1)
+	{
+	  if (debug_displaced)
+	    fprintf_unfiltered (gdb_stdlog,
+				"displaced: syscall changed %%rip; "
+				"not relocating\n");
+	}
+      else
+	{
+	  ULONGEST rip = orig_rip - insn_offset;
+
+	  /* If we have stepped over a breakpoint, set %rip to
+	     point at the breakpoint instruction itself.
+
+	     (gdbarch_decr_pc_after_break was never something the core
+	     of GDB should have been concerned with; arch-specific
+	     code should be making PC values consistent before
+	     presenting them to GDB.)  */
+	  if (amd64_breakpoint_p (insn_details))
+	    {
+	      if (debug_displaced)
+		fprintf_unfiltered (gdb_stdlog,
+				    "displaced: stepped breakpoint\n");
+	      rip--;
+	    }
+
+	  regcache_cooked_write_unsigned (regs, AMD64_RIP_REGNUM, rip);
+
+	  if (debug_displaced)
+	    fprintf_unfiltered (gdb_stdlog,
+				"displaced: "
+				"relocated %%rip from 0x%s to 0x%s\n",
+				paddr_nz (orig_rip), paddr_nz (rip));
+	}
+    }
+
+  /* If the instruction was PUSHFL, then the TF bit will be set in the
+     pushed value, and should be cleared.  We'll leave this for later,
+     since GDB already messes up the TF flag when stepping over a
+     pushfl.  */
+
+  /* If the instruction was a call, the return address now atop the
+     stack is the address following the copied instruction.  We need
+     to make it the address following the original instruction.	 */
+  if (amd64_call_p (insn_details))
+    {
+      ULONGEST rsp;
+      ULONGEST retaddr;
+      const ULONGEST retaddr_len = 8;
+
+      regcache_cooked_read_unsigned (regs, AMD64_RSP_REGNUM, &rsp);
+      retaddr = read_memory_unsigned_integer (rsp, retaddr_len);
+      retaddr = (retaddr - insn_offset) & 0xffffffffUL;
+      write_memory_unsigned_integer (rsp, retaddr_len, retaddr);
+
+      if (debug_displaced)
+	fprintf_unfiltered (gdb_stdlog,
+			    "displaced: relocated return addr at 0x%s "
+			    "to 0x%s\n",
+			    paddr_nz (rsp),
+			    paddr_nz (retaddr));
+    }
+}
+
 /* The maximum number of saved registers.  This should include %rip.  */
 #define AMD64_NUM_SAVED_REGS	AMD64_NUM_GREGS
 
@@ -756,24 +1465,6 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
   gdb_byte buf[18];
   int reg, r;
   int offset, offset_and;
-  static int regnums[16] = {
-    AMD64_RAX_REGNUM,		/* %rax */
-    AMD64_RCX_REGNUM,		/* %rcx */
-    AMD64_RDX_REGNUM,		/* %rdx */
-    AMD64_RBX_REGNUM,		/* %rbx */
-    AMD64_RSP_REGNUM,		/* %rsp */
-    AMD64_RBP_REGNUM,		/* %rbp */
-    AMD64_RSI_REGNUM,		/* %rsi */
-    AMD64_RDI_REGNUM,		/* %rdi */
-    AMD64_R8_REGNUM,		/* %r8 */
-    AMD64_R9_REGNUM,		/* %r9 */
-    AMD64_R10_REGNUM,		/* %r10 */
-    AMD64_R11_REGNUM,		/* %r11 */
-    AMD64_R12_REGNUM,		/* %r12 */
-    AMD64_R13_REGNUM,		/* %r13 */
-    AMD64_R14_REGNUM,		/* %r14 */
-    AMD64_R15_REGNUM,		/* %r15 */
-  };
 
   if (target_read_memory (pc, buf, sizeof buf))
     return pc;
@@ -889,7 +1580,7 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
     return pc;
 
   if (current_pc > pc + offset_and)
-    cache->saved_sp_reg = regnums[reg];
+    cache->saved_sp_reg = amd64_arch_reg_to_regnum (reg);
 
   return min (pc + offset + 2, current_pc);
 }

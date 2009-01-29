@@ -67,6 +67,14 @@ enum amd64_regnum
 /* Number of general purpose registers.  */
 #define AMD64_NUM_GREGS		24
 
+extern struct displaced_step_closure *amd64_displaced_step_copy_insn
+  (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to,
+   struct regcache *regs);
+extern void amd64_displaced_step_fixup (struct gdbarch *gdbarch,
+					struct displaced_step_closure *closure,
+					CORE_ADDR from, CORE_ADDR to,
+					struct regcache *regs);
+
 extern void amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 
 /* Functions from amd64-tdep.c which may be needed on architectures

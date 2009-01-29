@@ -1,3 +1,26 @@
+2009-01-28  Doug Evans  <dje@google.com>
+
+	* amd64-tdep.h (amd64_displaced_step_copy_insn): Declare.
+	(amd64_displaced_step_fixup): Declare.
+	* amd64-tdep.c: #include opcode/i386.h, dis-asm.h.
+	(amd64_arch_regmap): Move out of amd64_analyze_stack_align
+	and make static global.
+	(amd64_arch_regmap_len): New static global.
+	(amd64_arch_reg_to_regnum): New function.
+	(struct amd64_insn): New struct.
+	(struct displaced_step_closure): New struct.
+	(onebyte_has_modrm,twobyte_has_modrm): New static globals.
+	(rex_prefix_p,skip_prefixes)
+	(amd64_insn_length_fprintf,amd64_insn_length_init_dis)
+	(amd64_insn_length,amd64_get_unused_input_int_reg)
+	(amd64_get_insn_details,fixup_riprel,fixup_displaced_copy)
+	(amd64_displaced_step_copy_insn)
+	(amd64_absolute_jmp_p,amd64_absolute_call_p,amd64_ret_p)
+	(amd64_call_p,amd64_breakpoint_p,amd64_syscall_p)
+	(amd64_displaced_step_fixup): New functions.
+	* amd64-linux-tdep.c: #include arch-utils.h.
+	(amd64_linux_init_abi): Install displaced stepping support.
+
 2009-01-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* corefile.c (generic_search): Delete disabled code.

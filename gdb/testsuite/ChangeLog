@@ -1,3 +1,10 @@
+2009-01-28  Doug Evans  <dje@google.com>
+
+	* gdb.arch/amd64-disp-step.S: New file.
+	* gdb.arch/amd64-disp-step.exp: New file.
+	* gdb.arch/i386-disp-step.S: New file.
+	* gdb.arch/i386-disp-step.exp: New file.
+
 2009-01-27  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.base/find.exp: Set newline variable
