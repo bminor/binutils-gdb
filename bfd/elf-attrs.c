@@ -238,7 +238,7 @@ elf_new_obj_attr (bfd *abfd, int vendor, int tag)
 
   if (tag < NUM_KNOWN_OBJ_ATTRIBUTES)
     {
-      /* Knwon tags are preallocated.  */
+      /* Known tags are preallocated.  */
       attr = &elf_known_obj_attributes (abfd)[vendor][tag];
     }
   else
@@ -272,7 +272,7 @@ bfd_elf_get_obj_attr_int (bfd *abfd, int vendor, int tag)
 
   if (tag < NUM_KNOWN_OBJ_ATTRIBUTES)
     {
-      /* Knwon tags are preallocated.  */
+      /* Known tags are preallocated.  */
       return elf_known_obj_attributes (abfd)[vendor][tag].i;
     }
   else

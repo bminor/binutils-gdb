@@ -1,3 +1,9 @@
+2009-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+            Mark Shinwell  <shinwell@codesourcery.com>
+            Catherine Moore  <clm@codesourcery.com>
+
+	* elf-attrs.c, elflink.c, elfxx-mips.c: Correct typos in comments.
+
 2009-01-28  Catherine Moore <clm@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_check_relocs): Set SEC_ALLOC and

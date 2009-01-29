@@ -1262,7 +1262,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   if (olddef && newdyn)
     oldweak = FALSE;
 
-  /* Allow changes between different types of funciton symbol.  */
+  /* Allow changes between different types of function symbol.  */
   if (newfunc && oldfunc)
     *type_change_ok = TRUE;
 
