@@ -9879,24 +9879,35 @@ do_t_msr (void)
 static void
 do_t_mul (void)
 {
+  bfd_boolean narrow;
+
   if (!inst.operands[2].present)
     inst.operands[2].reg = inst.operands[0].reg;
 
-  /* There is no 32-bit MULS and no 16-bit MUL. */
-  if (unified_syntax && inst.instruction == T_MNEM_mul)
+  if (unified_syntax)
     {
-      inst.instruction = THUMB_OP32 (inst.instruction);
-      inst.instruction |= inst.operands[0].reg << 8;
-      inst.instruction |= inst.operands[1].reg << 16;
-      inst.instruction |= inst.operands[2].reg << 0;
+      if (inst.size_req == 4
+	  || (inst.operands[0].reg != inst.operands[1].reg
+	      && inst.operands[0].reg != inst.operands[2].reg)
+	  || inst.operands[1].reg > 7
+	  || inst.operands[2].reg > 7)
+	narrow = FALSE;
+      else if (inst.instruction == T_MNEM_muls)
+	narrow = (current_it_mask == 0);
+      else
+	narrow = (current_it_mask != 0);
     }
   else
     {
-      constraint (!unified_syntax
-		  && inst.instruction == T_MNEM_muls, BAD_THUMB32);
-      constraint (inst.operands[0].reg > 7 || inst.operands[1].reg > 7,
+      constraint (inst.instruction == T_MNEM_muls, BAD_THUMB32);
+      constraint (inst.operands[1].reg > 7 || inst.operands[2].reg > 7,
 		  BAD_HIREG);
+      narrow = TRUE;
+    }
 
+  if (narrow)
+    {
+      /* 16-bit MULS/Conditional MUL.  */
       inst.instruction = THUMB_OP16 (inst.instruction);
       inst.instruction |= inst.operands[0].reg;
 
@@ -9906,6 +9917,16 @@ do_t_mul (void)
 	inst.instruction |= inst.operands[1].reg << 3;
       else
 	constraint (1, _("dest must overlap one source register"));
+    }
+  else
+    {
+      constraint(inst.instruction != T_MNEM_mul,
+		 _("Thumb-2 MUL must not set flags"));
+      /* 32-bit MUL.  */
+      inst.instruction = THUMB_OP32 (inst.instruction);
+      inst.instruction |= inst.operands[0].reg << 8;
+      inst.instruction |= inst.operands[1].reg << 16;
+      inst.instruction |= inst.operands[2].reg << 0;
     }
 }
 

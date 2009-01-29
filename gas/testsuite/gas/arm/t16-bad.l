@@ -185,3 +185,6 @@
 [^:]*:135: Error: Thumb does not support the 2-argument form of this instruction -- `cpsid ai,#5'
 [^:]*:138: Error: Thumb does not support conditional execution
 [^:]*:141: Error: cannot honor width suffix -- `add r0,r1'
+[^:]*:145: Error: lo register required -- `mul r0,r0,r8'
+[^:]*:146: Error: lo register required -- `mul r0,r8,r0'
+[^:]*:147: Error: dest must overlap one source register -- `mul r8,r0,r0'
