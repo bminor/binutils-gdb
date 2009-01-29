@@ -1,3 +1,8 @@
+2009-01-29  Andrew Jenner  <andrew@codesourcery.com>
+
+	* emultempl/armelf.em: Correct formatting of help text for
+	--no-enum-size-warning option.
+
 2009-01-26  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* lexsup.c (parse_args): Set check_section_addresses to 1 or 0.

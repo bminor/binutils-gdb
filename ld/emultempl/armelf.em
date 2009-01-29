@@ -533,7 +533,7 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --fix-v4bx-interworking     Rewrite BX rn branch to ARMv4 interworking veneer\n"));
   fprintf (file, _("  --use-blx                   Enable use of BLX instructions\n"));
   fprintf (file, _("  --vfp11-denorm-fix          Specify how to fix VFP11 denorm erratum\n"));
-  fprintf (file, _("  --no-enum-size-warning      Don'\''t warn about objects with incompatible"
+  fprintf (file, _("  --no-enum-size-warning      Don'\''t warn about objects with incompatible\n"
 		   "                                enum sizes\n"));
   fprintf (file, _("  --no-wchar-size-warning     Don'\''t warn about objects with incompatible"
 		   "                                wchar_t sizes\n"));
