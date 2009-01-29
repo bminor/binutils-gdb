@@ -1,3 +1,10 @@
+2009-01-29  Nathan Sidwell  <nathan@codesourcery.com>
+	    Catherine Moore <clm@codesourcery.com?
+
+	* doc/c-arm.texi (ARM Directives): Alphabetize. Document .2byte,
+	.4byte, .8byte, .bss, .even, .extend, .ldouble, .packed, .secrel32
+	directives.
+
 2009-01-27  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-mips.c (append_insn): Cope with a complex reloc

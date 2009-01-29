@@ -393,37 +393,65 @@ respectively.  For example to load the 32-bit address of foo into r0:
 @cindex ARM machine directives
 @table @code
 
-@cindex @code{align} directive, ARM
+@c AAAAAAAAAAAAAAAAAAAAAAAAA
+
+@cindex @code{.2byte} directive, ARM
+@cindex @code{.4byte} directive, ARM
+@cindex @code{.8byte} directive, ARM
+@item .2byte @var{expression} [, @var{expression}]*
+@itemx .4byte @var{expression} [, @var{expression}]*
+@itemx .8byte @var{expression} [, @var{expression}]*
+These directives write 2, 4 or 8 byte values to the output section.
+
+@cindex @code{.align} directive, ARM
 @item .align @var{expression} [, @var{expression}]
 This is the generic @var{.align} directive.  For the ARM however if the
 first argument is zero (ie no alignment is needed) the assembler will
 behave as if the argument had been 2 (ie pad to the next four byte
 boundary).  This is for compatibility with ARM's own assembler.
 
-@cindex @code{req} directive, ARM
-@item @var{name} .req @var{register name}
-This creates an alias for @var{register name} called @var{name}.  For
-example:
+@cindex @code{.arch} directive, ARM
+@item .arch @var{name}
+Select the target architecture.  Valid values for @var{name} are the same as
+for the @option{-march} commandline option.
 
-@smallexample
-        foo .req r0
-@end smallexample
+@cindex @code{.arm} directive, ARM
+@item .arm
+This performs the same action as @var{.code 32}.
 
-@cindex @code{unreq} directive, ARM
-@item .unreq @var{alias-name}
-This undefines a register alias which was previously defined using the
-@code{req}, @code{dn} or @code{qn} directives.  For example:
+@anchor{arm_pad}
+@cindex @code{.pad} directive, ARM
+@item .pad #@var{count}
+Generate unwinder annotations for a stack adjustment of @var{count} bytes.
+A positive value indicates the function prologue allocated stack space by
+decrementing the stack pointer.
 
-@smallexample
-        foo .req r0
-        .unreq foo
-@end smallexample
+@c BBBBBBBBBBBBBBBBBBBBBBBBBB
 
-An error occurs if the name is undefined.  Note - this pseudo op can
-be used to delete builtin in register name aliases (eg 'r0').  This
-should only be done if it is really necessary.
+@cindex @code{.bss} directive, ARM
+@item .bss
+This directive switches to the @code{.bss} section.
 
-@cindex @code{dn} and @code{qn} directives, ARM
+@c CCCCCCCCCCCCCCCCCCCCCCCCCC
+
+@cindex @code{.cantunwind} directive, ARM
+@item .cantunwind
+Prevents unwinding through the current function.  No personality routine
+or exception table data is required or permitted.
+
+@cindex @code{.code} directive, ARM
+@item .code @code{[16|32]}
+This directive selects the instruction set being generated. The value 16
+selects Thumb, with the value 32 selecting ARM.
+
+@cindex @code{.cpu} directive, ARM
+@item .cpu @var{name}
+Select the target processor.  Valid values for @var{name} are the same as
+for the @option{-mcpu} commandline option.
+
+@c DDDDDDDDDDDDDDDDDDDDDDDDDD
+
+@cindex @code{.dn} and @code{.qn} directives, ARM
 @item @var{name} .dn @var{register name} [@var{.type}] [[@var{index}]]
 @item @var{name} .qn @var{register name} [@var{.type}] [[@var{index}]]
 
@@ -453,43 +481,93 @@ This is equivalent to writing the following:
 Aliases created using @code{dn} or @code{qn} can be destroyed using
 @code{unreq}.
 
-@cindex @code{code} directive, ARM
-@item .code @code{[16|32]}
-This directive selects the instruction set being generated. The value 16
-selects Thumb, with the value 32 selecting ARM.
+@c EEEEEEEEEEEEEEEEEEEEEEEEEE
 
-@cindex @code{thumb} directive, ARM
-@item .thumb
-This performs the same action as @var{.code 16}.
+@cindex @code{.eabi_attribute} directive, ARM
+@item .eabi_attribute @var{tag}, @var{value}
+Set the EABI object attribute @var{tag} to @var{value}.
 
-@cindex @code{arm} directive, ARM
-@item .arm
-This performs the same action as @var{.code 32}.
+The @var{tag} is either an attribute number, or one of the following:
+@code{Tag_CPU_raw_name}, @code{Tag_CPU_name}, @code{Tag_CPU_arch},
+@code{Tag_CPU_arch_profile}, @code{Tag_ARM_ISA_use},
+@code{Tag_THUMB_ISA_use}, @code{Tag_VFP_arch}, @code{Tag_WMMX_arch},
+@code{Tag_Advanced_SIMD_arch}, @code{Tag_PCS_config},
+@code{Tag_ABI_PCS_R9_use}, @code{Tag_ABI_PCS_RW_data},
+@code{Tag_ABI_PCS_RO_data}, @code{Tag_ABI_PCS_GOT_use},
+@code{Tag_ABI_PCS_wchar_t}, @code{Tag_ABI_FP_rounding},
+@code{Tag_ABI_FP_denormal}, @code{Tag_ABI_FP_exceptions},
+@code{Tag_ABI_FP_user_exceptions}, @code{Tag_ABI_FP_number_model},
+@code{Tag_ABI_align8_needed}, @code{Tag_ABI_align8_preserved},
+@code{Tag_ABI_enum_size}, @code{Tag_ABI_HardFP_use},
+@code{Tag_ABI_VFP_args}, @code{Tag_ABI_WMMX_args},
+@code{Tag_ABI_optimization_goals}, @code{Tag_ABI_FP_optimization_goals},
+@code{Tag_compatibility}, @code{Tag_CPU_unaligned_access},
+@code{Tag_VFP_HP_extension}, @code{Tag_ABI_FP_16bit_format},
+@code{Tag_nodefaults}, @code{Tag_also_compatible_with},
+@code{Tag_conformance}, @code{Tag_T2EE_use},
+@code{Tag_Virtualization_use}, @code{Tag_MPextension_use}
 
-@cindex @code{force_thumb} directive, ARM
+The @var{value} is either a @code{number}, @code{"string"}, or
+@code{number, "string"} depending on the tag.
+
+@cindex @code{.even} directive, ARM
+@item .even
+This directive aligns to an even-numbered address.
+
+@cindex @code{.extend} directive, ARM
+@cindex @code{.ldouble} directive, ARM
+@item .extend  @var{expression} [, @var{expression}]*
+@itemx .ldouble  @var{expression} [, @var{expression}]*
+These directives write 12byte long double floating-point values to the
+output section.  These are not compatible with current ARM processors
+or ABIs.
+
+@c FFFFFFFFFFFFFFFFFFFFFFFFFF
+
+@anchor{arm_fnend}
+@cindex @code{.fnend} directive, ARM
+@item .fnend
+Marks the end of a function with an unwind table entry.  The unwind index
+table entry is created when this directive is processed.
+
+If no personality routine has been specified then standard personality
+routine 0 or 1 will be used, depending on the number of unwind opcodes
+required.
+
+@anchor{arm_fnstart}
+@cindex @code{.fnstart} directive, ARM
+@item .fnstart
+Marks the start of a function with an unwind table entry.
+
+@cindex @code{.force_thumb} directive, ARM
 @item .force_thumb
 This directive forces the selection of Thumb instructions, even if the
 target processor does not support those instructions
 
-@cindex @code{thumb_func} directive, ARM
-@item .thumb_func
-This directive specifies that the following symbol is the name of a
-Thumb encoded function.  This information is necessary in order to allow
-the assembler and linker to generate correct code for interworking
-between Arm and Thumb instructions and should be used even if
-interworking is not going to be performed.  The presence of this
-directive also implies @code{.thumb}
+@cindex @code{.fpu} directive, ARM
+@item .fpu @var{name}
+Select the floating-point unit to assemble for.  Valid values for @var{name}
+are the same as for the @option{-mfpu} commandline option.
 
-This directive is not neccessary when generating EABI objects.  On these
-targets the encoding is implicit when generating Thumb code.
+@c GGGGGGGGGGGGGGGGGGGGGGGGGG
+@c HHHHHHHHHHHHHHHHHHHHHHHHHH
 
-@cindex @code{thumb_set} directive, ARM
-@item .thumb_set
-This performs the equivalent of a @code{.set} directive in that it
-creates a symbol which is an alias for another symbol (possibly not yet
-defined).  This directive also has the added property in that it marks
-the aliased symbol as being a thumb function entry point, in the same
-way that the @code{.thumb_func} directive does.
+@cindex @code{.handlerdata} directive, ARM
+@item .handlerdata
+Marks the end of the current function, and the start of the exception table
+entry for that function.  Anything between this directive and the
+@code{.fnend} directive will be added to the exception table entry.
+
+Must be preceded by a @code{.personality} or @code{.personalityindex}
+directive.
+
+@c IIIIIIIIIIIIIIIIIIIIIIIIII
+@c JJJJJJJJJJJJJJJJJJJJJJJJJJ
+@c KKKKKKKKKKKKKKKKKKKKKKKKKK
+@c LLLLLLLLLLLLLLLLLLLLLLLLLL
+
+@item .ldouble  @var{expression} [, @var{expression}]*
+See @code{.extend}.
 
 @cindex @code{.ltorg} directive, ARM
 @item .ltorg
@@ -505,29 +583,36 @@ Note - older versions of @code{GAS} would dump the current literal
 pool any time a section change occurred.  This is no longer done, since
 it prevents accurate control of the placement of literal pools.
 
-@cindex @code{.pool} directive, ARM
-@item .pool
-This is a synonym for .ltorg.
+@c MMMMMMMMMMMMMMMMMMMMMMMMMM
 
-@anchor{arm_fnstart}
-@cindex @code{.fnstart} directive, ARM
-@item .fnstart
-Marks the start of a function with an unwind table entry.
+@cindex @code{.movsp} directive, ARM
+@item .movsp @var{reg} [, #@var{offset}]
+Tell the unwinder that @var{reg} contains an offset from the current
+stack pointer.  If @var{offset} is not specified then it is assumed to be
+zero.
 
-@anchor{arm_fnend}
-@cindex @code{.fnend} directive, ARM
-@item .fnend
-Marks the end of a function with an unwind table entry.  The unwind index
-table entry is created when this directive is processed.
+@c NNNNNNNNNNNNNNNNNNNNNNNNNN
+@c OOOOOOOOOOOOOOOOOOOOOOOOOO
 
-If no personality routine has been specified then standard personality
-routine 0 or 1 will be used, depending on the number of unwind opcodes
-required.
+@cindex @code{.object_arch} directive, ARM
+@item .object_arch @var{name}
+Override the architecture recorded in the EABI object attribute section.
+Valid values for @var{name} are the same as for the @code{.arch} directive.
+Typically this is useful when code uses runtime detection of CPU features.
 
-@cindex @code{.cantunwind} directive, ARM
-@item .cantunwind
-Prevents unwinding through the current function.  No personality routine
-or exception table data is required or permitted.
+@c PPPPPPPPPPPPPPPPPPPPPPPPPP
+
+@cindex @code{.packed} directive, ARM
+@item .packed  @var{expression} [, @var{expression}]*
+This directive writes 12-byte packed floating-point values to the
+output section.  These are not compatible with current ARM processors
+or ABIs.
+
+@cindex @code{.pad} directive, ARM
+@item .pad #@var{count}
+Generate unwinder annotations for a stack adjustment of @var{count} bytes.
+A positive value indicates the function prologue allocated stack space by
+decrementing the stack pointer.
 
 @cindex @code{.personality} directive, ARM
 @item .personality @var{name}
@@ -538,14 +623,23 @@ Sets the personality routine for the current function to @var{name}.
 Sets the personality routine for the current function to the EABI standard
 routine number @var{index}
 
-@cindex @code{.handlerdata} directive, ARM
-@item .handlerdata
-Marks the end of the current function, and the start of the exception table
-entry for that function.  Anything between this directive and the
-@code{.fnend} directive will be added to the exception table entry.
+@cindex @code{.pool} directive, ARM
+@item .pool
+This is a synonym for .ltorg.
 
-Must be preceded by a @code{.personality} or @code{.personalityindex}
-directive.
+@c QQQQQQQQQQQQQQQQQQQQQQQQQQ
+@c RRRRRRRRRRRRRRRRRRRRRRRRRR
+
+@cindex @code{.req} directive, ARM
+@item @var{name} .req @var{register name}
+This creates an alias for @var{register name} called @var{name}.  For
+example:
+
+@smallexample
+        foo .req r0
+@end smallexample
+
+@c SSSSSSSSSSSSSSSSSSSSSSSSSS
 
 @anchor{arm_save}
 @cindex @code{.save} directive, ARM
@@ -575,6 +669,82 @@ or
   wstrd wr10, [sp, #-8]!
 @end smallexample
 
+@anchor{arm_setfp}
+@cindex @code{.setfp} directive, ARM
+@item .setfp @var{fpreg}, @var{spreg} [, #@var{offset}]
+Make all unwinder annotations relative to a frame pointer.  Without this
+the unwinder will use offsets from the stack pointer.
+
+The syntax of this directive is the same as the @code{sub} or @code{mov}
+instruction used to set the frame pointer.  @var{spreg} must be either
+@code{sp} or mentioned in a previous @code{.movsp} directive.
+
+@smallexample
+.movsp ip
+mov ip, sp
+@dots{}
+.setfp fp, ip, #4
+sub fp, ip, #4
+@end smallexample
+
+@cindex @code{.secrel32} directive, ARM
+@item .secrel32 @var{expression} [, @var{expression}]*
+This directive emits relocations that evaluate to the section-relative
+offset of each expression's symbol.  This directive is only supported
+for PE targets.
+
+@c TTTTTTTTTTTTTTTTTTTTTTTTTT
+
+@cindex @code{.thumb} directive, ARM
+@item .thumb
+This performs the same action as @var{.code 16}.
+
+@cindex @code{.thumb_func} directive, ARM
+@item .thumb_func
+This directive specifies that the following symbol is the name of a
+Thumb encoded function.  This information is necessary in order to allow
+the assembler and linker to generate correct code for interworking
+between Arm and Thumb instructions and should be used even if
+interworking is not going to be performed.  The presence of this
+directive also implies @code{.thumb}
+
+This directive is not neccessary when generating EABI objects.  On these
+targets the encoding is implicit when generating Thumb code.
+
+@cindex @code{.thumb_set} directive, ARM
+@item .thumb_set
+This performs the equivalent of a @code{.set} directive in that it
+creates a symbol which is an alias for another symbol (possibly not yet
+defined).  This directive also has the added property in that it marks
+the aliased symbol as being a thumb function entry point, in the same
+way that the @code{.thumb_func} directive does.
+
+@c UUUUUUUUUUUUUUUUUUUUUUUUUU
+
+@cindex @code{.unreq} directive, ARM
+@item .unreq @var{alias-name}
+This undefines a register alias which was previously defined using the
+@code{req}, @code{dn} or @code{qn} directives.  For example:
+
+@smallexample
+        foo .req r0
+        .unreq foo
+@end smallexample
+
+An error occurs if the name is undefined.  Note - this pseudo op can
+be used to delete builtin in register name aliases (eg 'r0').  This
+should only be done if it is really necessary.
+
+@cindex @code{.unwind_raw} directive, ARM
+@item .unwind_raw @var{offset}, @var{byte1}, @dots{}
+Insert one of more arbitary unwind opcode bytes, which are known to adjust
+the stack pointer by @var{offset} bytes.
+
+For example @code{.unwind_raw 4, 0xb1, 0x01} is equivalent to
+@code{.save @{r0@}}
+
+@c VVVVVVVVVVVVVVVVVVVVVVVVVV
+
 @cindex @code{.vsave} directive, ARM
 @item .vsave @var{vfp-reglist}
 Generate unwinder annotations to restore the VFP registers in @var{vfp-reglist}
@@ -595,93 +765,10 @@ instruction.
 Since FLDMX and FSTMX are now deprecated, this directive should be
 used in favour of @code{.save} for saving VFP registers for ARMv6 and above.
 
-@anchor{arm_pad}
-@cindex @code{.pad} directive, ARM
-@item .pad #@var{count}
-Generate unwinder annotations for a stack adjustment of @var{count} bytes.
-A positive value indicates the function prologue allocated stack space by
-decrementing the stack pointer.
-
-@anchor{arm_movsp}
-@cindex @code{.movsp} directive, ARM
-@item .movsp @var{reg} [, #@var{offset}]
-Tell the unwinder that @var{reg} contains an offset from the current
-stack pointer.  If @var{offset} is not specified then it is assumed to be
-zero.
-
-@anchor{arm_setfp}
-@cindex @code{.setfp} directive, ARM
-@item .setfp @var{fpreg}, @var{spreg} [, #@var{offset}]
-Make all unwinder annotations relaive to a frame pointer.  Without this
-the unwinder will use offsets from the stack pointer.
-
-The syntax of this directive is the same as the @code{sub} or @code{mov}
-instruction used to set the frame pointer.  @var{spreg} must be either
-@code{sp} or mentioned in a previous @code{.movsp} directive.
-
-@smallexample
-.movsp ip
-mov ip, sp
-@dots{}
-.setfp fp, ip, #4
-sub fp, ip, #4
-@end smallexample
-
-@cindex @code{.unwind_raw} directive, ARM
-@item .raw @var{offset}, @var{byte1}, @dots{}
-Insert one of more arbitary unwind opcode bytes, which are known to adjust
-the stack pointer by @var{offset} bytes.
-
-For example @code{.unwind_raw 4, 0xb1, 0x01} is equivalent to
-@code{.save @{r0@}}
-
-@cindex @code{.cpu} directive, ARM
-@item .cpu @var{name}
-Select the target processor.  Valid values for @var{name} are the same as
-for the @option{-mcpu} commandline option.
-
-@cindex @code{.arch} directive, ARM
-@item .arch @var{name}
-Select the target architecture.  Valid values for @var{name} are the same as
-for the @option{-march} commandline option.
-
-@cindex @code{.object_arch} directive, ARM
-@item .object_arch @var{name}
-Override the architecture recorded in the EABI object attribute section.
-Valid values for @var{name} are the same as for the @code{.arch} directive.
-Typically this is useful when code uses runtime detection of CPU features.
-
-@cindex @code{.fpu} directive, ARM
-@item .fpu @var{name}
-Select the floating point unit to assemble for.  Valid values for @var{name}
-are the same as for the @option{-mfpu} commandline option.
-
-@cindex @code{.eabi_attribute} directive, ARM
-@item .eabi_attribute @var{tag}, @var{value}
-Set the EABI object attribute @var{tag} to @var{value}.
-
-The @var{tag} is either an attribute number, or one of the following:
-@code{Tag_CPU_raw_name}, @code{Tag_CPU_name}, @code{Tag_CPU_arch},
-@code{Tag_CPU_arch_profile}, @code{Tag_ARM_ISA_use},
-@code{Tag_THUMB_ISA_use}, @code{Tag_VFP_arch}, @code{Tag_WMMX_arch},
-@code{Tag_Advanced_SIMD_arch}, @code{Tag_PCS_config},
-@code{Tag_ABI_PCS_R9_use}, @code{Tag_ABI_PCS_RW_data},
-@code{Tag_ABI_PCS_RO_data}, @code{Tag_ABI_PCS_GOT_use},
-@code{Tag_ABI_PCS_wchar_t}, @code{Tag_ABI_FP_rounding},
-@code{Tag_ABI_FP_denormal}, @code{Tag_ABI_FP_exceptions},
-@code{Tag_ABI_FP_user_exceptions}, @code{Tag_ABI_FP_number_model},
-@code{Tag_ABI_align8_needed}, @code{Tag_ABI_align8_preserved},
-@code{Tag_ABI_enum_size}, @code{Tag_ABI_HardFP_use},
-@code{Tag_ABI_VFP_args}, @code{Tag_ABI_WMMX_args},
-@code{Tag_ABI_optimization_goals}, @code{Tag_ABI_FP_optimization_goals},
-@code{Tag_compatibility}, @code{Tag_CPU_unaligned_access},
-@code{Tag_VFP_HP_extension}, @code{Tag_ABI_FP_16bit_format},
-@code{Tag_nodefaults}, @code{Tag_also_compatible_with},
-@code{Tag_conformance}, @code{Tag_T2EE_use},
-@code{Tag_Virtualization_use}, @code{Tag_MPextension_use}
-
-The @var{value} is either a @code{number}, @code{"string"}, or
-@code{number, "string"} depending on the tag.
+@c WWWWWWWWWWWWWWWWWWWWWWWWWW
+@c XXXXXXXXXXXXXXXXXXXXXXXXXX
+@c YYYYYYYYYYYYYYYYYYYYYYYYYY
+@c ZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 @end table
 
