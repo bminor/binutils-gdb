@@ -686,41 +686,53 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> fa92 f113 	qadd16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa82 f113 	qadd8	r1, r2, r3
 0[0-9a-f]+ <[^>]+> faa2 f113 	qaddsubx	r1, r2, r3
+0[0-9a-f]+ <[^>]+> faa2 f113 	qaddsubx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa82 f193 	qdadd	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa82 f1b3 	qdsub	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa82 f1a3 	qsub	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fad2 f113 	qsub16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fac2 f113 	qsub8	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fae2 f113 	qsubaddx	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fae2 f113 	qsubaddx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa92 f103 	sadd16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa82 f103 	sadd8	r1, r2, r3
+0[0-9a-f]+ <[^>]+> faa2 f103 	saddsubx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> faa2 f103 	saddsubx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fad2 f103 	ssub16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fac2 f103 	ssub8	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fae2 f103 	ssubaddx	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fae2 f103 	ssubaddx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa92 f123 	shadd16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa82 f123 	shadd8	r1, r2, r3
+0[0-9a-f]+ <[^>]+> faa2 f123 	shaddsubx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> faa2 f123 	shaddsubx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fad2 f123 	shsub16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fac2 f123 	shsub8	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fae2 f123 	shsubaddx	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fae2 f123 	shsubaddx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa92 f143 	uadd16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa82 f143 	uadd8	r1, r2, r3
+0[0-9a-f]+ <[^>]+> faa2 f143 	uaddsubx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> faa2 f143 	uaddsubx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fad2 f143 	usub16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fac2 f143 	usub8	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fae2 f143 	usubaddx	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fae2 f143 	usubaddx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa92 f163 	uhadd16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa82 f163 	uhadd8	r1, r2, r3
+0[0-9a-f]+ <[^>]+> faa2 f163 	uhaddsubx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> faa2 f163 	uhaddsubx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fad2 f163 	uhsub16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fac2 f163 	uhsub8	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fae2 f163 	uhsubaddx	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fae2 f163 	uhsubaddx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa92 f153 	uqadd16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa82 f153 	uqadd8	r1, r2, r3
 0[0-9a-f]+ <[^>]+> faa2 f153 	uqaddsubx	r1, r2, r3
+0[0-9a-f]+ <[^>]+> faa2 f153 	uqaddsubx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fad2 f153 	uqsub16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fac2 f153 	uqsub8	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fae2 f153 	uqsubaddx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fae2 f153 	uqsubaddx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> faa2 f183 	sel	r1, r2, r3
 0[0-9a-f]+ <[^>]+> ba00      	rev	r0, r0
@@ -917,26 +929,26 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> fa52 f183 	uxtab	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa32 f183 	uxtab16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa12 f183 	uxtah	r1, r2, r3
-0[0-9a-f]+ <[^>]+> f89f 12aa 	ldrb\.w	r1, \[pc, #682\]	; 0+e12 <[^>]+>
-0[0-9a-f]+ <[^>]+> f89f 1155 	ldrb\.w	r1, \[pc, #341\]	; 0+cc1 <[^>]+>
-0[0-9a-f]+ <[^>]+> f81f 12aa 	ldrb\.w	r1, \[pc, #-682\]	; 0+8c6 <[^>]+>
-0[0-9a-f]+ <[^>]+> f81f 1155 	ldrb\.w	r1, \[pc, #-341\]	; 0+a1f <[^>]+>
-0[0-9a-f]+ <[^>]+> f99f 12aa 	ldrsb\.w	r1, \[pc, #682\]	; 0+e22 <[^>]+>
-0[0-9a-f]+ <[^>]+> f99f 1155 	ldrsb\.w	r1, \[pc, #341\]	; 0+cd1 <[^>]+>
-0[0-9a-f]+ <[^>]+> f91f 12aa 	ldrsb\.w	r1, \[pc, #-682\]	; 0+8d6 <[^>]+>
-0[0-9a-f]+ <[^>]+> f91f 1155 	ldrsb\.w	r1, \[pc, #-341\]	; 0+a2f <[^>]+>
-0[0-9a-f]+ <[^>]+> f8bf 12aa 	ldrh\.w	r1, \[pc, #682\]	; 0+e32 <[^>]+>
-0[0-9a-f]+ <[^>]+> f8bf 1155 	ldrh\.w	r1, \[pc, #341\]	; 0+ce1 <[^>]+>
-0[0-9a-f]+ <[^>]+> f83f 12aa 	ldrh\.w	r1, \[pc, #-682\]	; 0+8e6 <[^>]+>
-0[0-9a-f]+ <[^>]+> f83f 1155 	ldrh\.w	r1, \[pc, #-341\]	; 0+a3f <[^>]+>
-0[0-9a-f]+ <[^>]+> f9bf 12aa 	ldrsh\.w	r1, \[pc, #682\]	; 0+e42 <[^>]+>
-0[0-9a-f]+ <[^>]+> f9bf 1155 	ldrsh\.w	r1, \[pc, #341\]	; 0+cf1 <[^>]+>
-0[0-9a-f]+ <[^>]+> f93f 12aa 	ldrsh\.w	r1, \[pc, #-682\]	; 0+8f6 <[^>]+>
-0[0-9a-f]+ <[^>]+> f93f 1155 	ldrsh\.w	r1, \[pc, #-341\]	; 0+a4f <[^>]+>
-0[0-9a-f]+ <[^>]+> f8df 12aa 	ldr\.w	r1, \[pc, #682\]	; 0+e52 <[^>]+>
-0[0-9a-f]+ <[^>]+> f8df 1155 	ldr\.w	r1, \[pc, #341\]	; 0+d01 <[^>]+>
-0[0-9a-f]+ <[^>]+> f85f 12aa 	ldr\.w	r1, \[pc, #-682\]	; 0+906 <[^>]+>
-0[0-9a-f]+ <[^>]+> f85f 1155 	ldr\.w	r1, \[pc, #-341\]	; 0+a5f <[^>]+>
+0[0-9a-f]+ <[^>]+> f89f 12aa 	ldrb\.w	r1, \[pc, #682\]	; 0+e42 <[^>]+>
+0[0-9a-f]+ <[^>]+> f89f 1155 	ldrb\.w	r1, \[pc, #341\]	; 0+cf1 <[^>]+>
+0[0-9a-f]+ <[^>]+> f81f 12aa 	ldrb\.w	r1, \[pc, #-682\]	; 0+8f6 <[^>]+>
+0[0-9a-f]+ <[^>]+> f81f 1155 	ldrb\.w	r1, \[pc, #-341\]	; 0+a4f <[^>]+>
+0[0-9a-f]+ <[^>]+> f99f 12aa 	ldrsb\.w	r1, \[pc, #682\]	; 0+e52 <[^>]+>
+0[0-9a-f]+ <[^>]+> f99f 1155 	ldrsb\.w	r1, \[pc, #341\]	; 0+d01 <[^>]+>
+0[0-9a-f]+ <[^>]+> f91f 12aa 	ldrsb\.w	r1, \[pc, #-682\]	; 0+906 <[^>]+>
+0[0-9a-f]+ <[^>]+> f91f 1155 	ldrsb\.w	r1, \[pc, #-341\]	; 0+a5f <[^>]+>
+0[0-9a-f]+ <[^>]+> f8bf 12aa 	ldrh\.w	r1, \[pc, #682\]	; 0+e62 <[^>]+>
+0[0-9a-f]+ <[^>]+> f8bf 1155 	ldrh\.w	r1, \[pc, #341\]	; 0+d11 <[^>]+>
+0[0-9a-f]+ <[^>]+> f83f 12aa 	ldrh\.w	r1, \[pc, #-682\]	; 0+916 <[^>]+>
+0[0-9a-f]+ <[^>]+> f83f 1155 	ldrh\.w	r1, \[pc, #-341\]	; 0+a6f <[^>]+>
+0[0-9a-f]+ <[^>]+> f9bf 12aa 	ldrsh\.w	r1, \[pc, #682\]	; 0+e72 <[^>]+>
+0[0-9a-f]+ <[^>]+> f9bf 1155 	ldrsh\.w	r1, \[pc, #341\]	; 0+d21 <[^>]+>
+0[0-9a-f]+ <[^>]+> f93f 12aa 	ldrsh\.w	r1, \[pc, #-682\]	; 0+926 <[^>]+>
+0[0-9a-f]+ <[^>]+> f93f 1155 	ldrsh\.w	r1, \[pc, #-341\]	; 0+a7f <[^>]+>
+0[0-9a-f]+ <[^>]+> f8df 12aa 	ldr\.w	r1, \[pc, #682\]	; 0+e82 <[^>]+>
+0[0-9a-f]+ <[^>]+> f8df 1155 	ldr\.w	r1, \[pc, #341\]	; 0+d31 <[^>]+>
+0[0-9a-f]+ <[^>]+> f85f 12aa 	ldr\.w	r1, \[pc, #-682\]	; 0+936 <[^>]+>
+0[0-9a-f]+ <[^>]+> f85f 1155 	ldr\.w	r1, \[pc, #-341\]	; 0+a8f <[^>]+>
 0[0-9a-f]+ <[^>]+> f200 0900 	addw	r9, r0, #0	; 0x0
 0[0-9a-f]+ <[^>]+> f60f 76ff 	addw	r6, pc, #4095	; 0xfff
 0[0-9a-f]+ <[^>]+> f6a9 2685 	subw	r6, r9, #2693	; 0xa85

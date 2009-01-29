@@ -529,42 +529,54 @@ qadd:
 	qadd		r1, r2, r3
 	qadd16		r1, r2, r3
 	qadd8		r1, r2, r3
+	qasx		r1, r2, r3
 	qaddsubx	r1, r2, r3
 	qdadd		r1, r2, r3
 	qdsub		r1, r2, r3
 	qsub		r1, r2, r3
 	qsub16		r1, r2, r3
 	qsub8		r1, r2, r3
+	qsax		r1, r2, r3
 	qsubaddx	r1, r2, r3
 	sadd16		r1, r2, r3
 	sadd8		r1, r2, r3
+	sasx		r1, r2, r3
 	saddsubx	r1, r2, r3
 	ssub16		r1, r2, r3
 	ssub8		r1, r2, r3
+	ssax		r1, r2, r3
 	ssubaddx	r1, r2, r3
 	shadd16		r1, r2, r3
 	shadd8		r1, r2, r3
+	shasx		r1, r2, r3
 	shaddsubx	r1, r2, r3
 	shsub16		r1, r2, r3
 	shsub8		r1, r2, r3
+	shsax		r1, r2, r3
 	shsubaddx	r1, r2, r3
 	uadd16		r1, r2, r3
 	uadd8		r1, r2, r3
+	uasx		r1, r2, r3
 	uaddsubx	r1, r2, r3
 	usub16		r1, r2, r3
 	usub8		r1, r2, r3
+	usax		r1, r2, r3
 	usubaddx	r1, r2, r3
 	uhadd16		r1, r2, r3
 	uhadd8		r1, r2, r3
+	uhasx		r1, r2, r3
 	uhaddsubx	r1, r2, r3
 	uhsub16		r1, r2, r3
 	uhsub8		r1, r2, r3
+	uhsax		r1, r2, r3
 	uhsubaddx	r1, r2, r3
 	uqadd16		r1, r2, r3
 	uqadd8		r1, r2, r3
+	uqasx		r1, r2, r3
 	uqaddsubx	r1, r2, r3
 	uqsub16		r1, r2, r3
 	uqsub8		r1, r2, r3
+	uqsax		r1, r2, r3
 	uqsubaddx	r1, r2, r3
 	sel		r1, r2, r3
 

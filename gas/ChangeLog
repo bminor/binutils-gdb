@@ -1,5 +1,10 @@
 2009-01-29  Mark Mitchell  <mark@codesourcery.com>
 
+	* config/tc-arm.c (insns): Add qasx, qsax, shasx, shsax, ssax,
+	uasx, uhasx, uhsx, uqasx, uqsax, usax. 
+
+2009-01-29  Mark Mitchell  <mark@codesourcery.com>
+
 	* config/tc-arm.c (insns): Correct encoding of qadd, qdadd, qsub,
 	qdsub in Thumb-2 mode.
 
