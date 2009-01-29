@@ -1,5 +1,53 @@
 2009-01-29  Mark Mitchell  <mark@codesourcery.com>
 
+	* config/tc-arm.c (BAD_SP): Define.
+	(s_arm_unwind_fnstart): Use REG_SP.
+	(s_arm_unwind_setfp): Likewise.
+	(reject_bad_reg): New macro.
+	(do_co_reg): Check for bad registers.
+	(do_co_reg2c): Likewise.
+	(do_srs): Use REG_SP.
+	(do_t_add_sub): Check for bad registers.
+	(do_t_adr): Likewise.
+	(do_t_arit3): Likewise.
+	(do_t_arit3c): Likewise.
+	(do_t_bfc): Likewise.
+	(do_t_bfi): Likewise.
+	(do_t_bfx): Likewise.
+	(do_t_blx): Likewise.
+	(do_t_bx): Likewise.
+	(do_t_bxj): Likewise.
+	(do_t_clz): Likewise.
+	(do_t_div): Likewise.
+	(do_t_mla): Likewise.
+	(do_t_mlal): Likewise.
+	(do_t_mov_cmp): Likewise.
+	(do_t_mov16): Likewise.
+	(do_t_mvn_tst): Likewise.
+	(do_t_mrs): Likewise.
+	(do_t_msr): Likewise.
+	(do_t_mul): Likewise.
+	(do_t_mull): Likewise.
+	(do_t_orn): Likewise.
+	(do_t_pkhbt): Likewise.
+	(do_t_pld): Likewise.
+	(do_t_rbit): Likewise.
+	(do_t_rev): Likewise.
+	(do_t_rrx): Likewise.
+	(do_t_rsb): Likewise.
+	(do_t_shift): Likewise.
+	(do_t_simd): Likewise.
+	(do_t_ssat): Likewise.
+	(do_t_ssat16): Likewise.
+	(do_t_sxtah): Likewise.
+	(do_t_sxth): Likewise.
+	(do_t_tb): Likewise.
+	(do_t_usat): Likewise.
+	(do_t_usat16): Likewise.
+	(nysn_insert_sp): Use REG_SP.
+
+2009-01-29  Mark Mitchell  <mark@codesourcery.com>
+
 	* config/tc-arm.c (do_t_orn): New function.
 	(do_t_rrx): Likewise.
 	(insns): Add orn and rrx.

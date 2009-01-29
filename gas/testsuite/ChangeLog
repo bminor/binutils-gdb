@@ -1,5 +1,13 @@
 2009-01-29  Mark Mitchell  <mark@codesourcery.com>
 
+	* gas/arm/copro.s: Avoid using r15 where not permitted.
+	* gas/arm/copro.d: Adjust accordingly.
+	* gas/arm/thumb2_bad_reg.s: New.
+	* gas/arm/thumb2_bad_reg.l: Likewise.
+	* gas/arm/thumb2_bad_reg.d: Likewise.
+
+2009-01-29  Mark Mitchell  <mark@codesourcery.com>
+
 	* gas/arm/thumb32.s: Add tests for orn and rrx.
 	* gas/arm/thumb32.d: Adjust accordingly.
 	* gas/arm/thumb32.l: Likewise.

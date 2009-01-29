@@ -660,6 +660,7 @@ struct asm_opcode
 #define THUMB2_LOAD_BIT 0x00100000
 
 #define BAD_ARGS	_("bad arguments to instruction")
+#define BAD_SP          _("r13 not allowed here")
 #define BAD_PC		_("r15 not allowed here")
 #define BAD_COND	_("instruction cannot be conditional")
 #define BAD_OVERLAP	_("registers may not be the same")
@@ -3092,7 +3093,7 @@ s_arm_unwind_fnstart (int ignored ATTRIBUTE_UNUSED)
   unwind.personality_index = -1;
   unwind.frame_size = 0;
   unwind.fp_offset = 0;
-  unwind.fp_reg = 13;
+  unwind.fp_reg = REG_SP;
   unwind.fp_used = 0;
   unwind.sp_restored = 0;
 }
@@ -3805,7 +3806,7 @@ s_arm_unwind_setfp (int ignored ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
 
-  if (sp_reg != 13 && sp_reg != unwind.fp_reg)
+  if (sp_reg != REG_SP && sp_reg != unwind.fp_reg)
     {
       as_bad (_("register must be either sp or set by a previous"
 		"unwind_movsp directive"));
@@ -3815,7 +3816,7 @@ s_arm_unwind_setfp (int ignored ATTRIBUTE_UNUSED)
   /* Don't generate any opcodes, just record the information for later.	 */
   unwind.fp_reg = fp_reg;
   unwind.fp_used = 1;
-  if (sp_reg == 13)
+  if (sp_reg == REG_SP)
     unwind.fp_offset = unwind.frame_size - offset;
   else
     unwind.fp_offset -= offset;
@@ -6123,6 +6124,18 @@ parse_operands (char *str, const unsigned char *pattern)
     }						\
 } while (0)
 
+/* Reject "bad registers" for Thumb-2 instructions.  Many Thumb-2
+   instructions are unpredictable if these registers are used.  This
+   is the BadReg predicate in ARM's Thumb-2 documentation.  */
+#define reject_bad_reg(reg)				\
+  do							\
+   if (reg == REG_SP || reg == REG_PC)			\
+     {							\
+       inst.error = (reg == REG_SP) ? BAD_SP : BAD_PC;	\
+       return;						\
+     }							\
+  while (0)
+
 /* Functions for operand encoding.  ARM, then Thumb.  */
 
 #define rotate_left(v, n) (v << n | v >> (32 - n))
@@ -6847,9 +6860,30 @@ do_cmp (void)
 static void
 do_co_reg (void)
 {
+  unsigned Rd;
+
+  Rd = inst.operands[2].reg;
+  if (thumb_mode)
+    {
+      if (inst.instruction == 0xee000010
+	  || inst.instruction == 0xfe000010)
+	/* MCR, MCR2  */
+	reject_bad_reg (Rd);
+      else
+	/* MRC, MRC2  */
+	constraint (Rd == REG_SP, BAD_SP);
+    }
+  else
+    {
+      /* MCR */
+      if (inst.instruction == 0xe000010)
+	constraint (Rd == REG_PC, BAD_PC);
+    }
+
+
   inst.instruction |= inst.operands[0].reg << 8;
   inst.instruction |= inst.operands[1].imm << 21;
-  inst.instruction |= inst.operands[2].reg << 12;
+  inst.instruction |= Rd << 12;
   inst.instruction |= inst.operands[3].reg << 16;
   inst.instruction |= inst.operands[4].reg;
   inst.instruction |= inst.operands[5].imm << 5;
@@ -6871,10 +6905,26 @@ do_co_reg (void)
 static void
 do_co_reg2c (void)
 {
+  unsigned Rd, Rn;
+
+  Rd = inst.operands[2].reg;
+  Rn = inst.operands[3].reg;
+
+  if (thumb_mode)
+    {
+      reject_bad_reg (Rd);
+      reject_bad_reg (Rn);
+    }
+  else
+    {
+      constraint (Rd == REG_PC, BAD_PC);
+      constraint (Rn == REG_PC, BAD_PC);
+    }
+
   inst.instruction |= inst.operands[0].reg << 8;
   inst.instruction |= inst.operands[1].imm << 4;
-  inst.instruction |= inst.operands[2].reg << 12;
-  inst.instruction |= inst.operands[3].reg << 16;
+  inst.instruction |= Rd << 12;
+  inst.instruction |= Rn << 16;
   inst.instruction |= inst.operands[4].reg;
 }
 
@@ -7504,10 +7554,10 @@ do_srs (void)
   if (inst.operands[0].present)
     {
       reg = inst.operands[0].reg;
-      constraint (reg != 13, _("SRS base register must be r13"));
+      constraint (reg != REG_SP, _("SRS base register must be r13"));
     }
   else
-    reg = 13;
+    reg = REG_SP;
 
   inst.instruction |= reg << 16;
   inst.instruction |= inst.operands[1].imm;
@@ -8397,7 +8447,10 @@ do_t_add_sub_w (void)
   Rd = inst.operands[0].reg;
   Rn = inst.operands[1].reg;
 
-  constraint (Rd == 15, _("PC not allowed as destination"));
+  /* If Rn is REG_PC, this is ADR; if Rn is REG_SP, then this is the
+     SP-{plus,minute}-immediate form of the instruction.  */
+  reject_bad_reg (Rd);
+
   inst.instruction |= (Rn << 16) | (Rd << 8);
   inst.reloc.type = BFD_RELOC_ARM_T32_IMM12;
 }
@@ -8430,6 +8483,8 @@ do_t_add_sub (void)
       if (!inst.operands[2].isreg)
 	{
 	  int add;
+
+	  constraint (Rd == REG_SP && Rs != REG_SP, BAD_SP);
 
 	  add = (inst.instruction == T_MNEM_add
 		 || inst.instruction == T_MNEM_adds);
@@ -8467,6 +8522,7 @@ do_t_add_sub (void)
 	    {
 	      if (Rd == REG_PC)
 		{
+		  constraint (add, BAD_PC);
 		  constraint (Rs != REG_LR || inst.instruction != T_MNEM_subs,
 			     _("only SUBS PC, LR, #const allowed"));
 		  constraint (inst.reloc.exp.X_op != O_constant,
@@ -8539,6 +8595,12 @@ do_t_add_sub (void)
 		    }
 		}
 	    }
+	  
+	  constraint (Rd == REG_PC, BAD_PC);
+	  constraint (Rd == REG_SP && Rs != REG_SP, BAD_SP);
+	  constraint (Rs == REG_PC, BAD_PC);
+	  reject_bad_reg (Rn);
+
 	  /* If we get here, it can't be done in 16 bits.  */
 	  constraint (inst.operands[2].shifted && inst.operands[2].immisreg,
 		      _("shift must be constant"));
@@ -8597,18 +8659,23 @@ do_t_add_sub (void)
 static void
 do_t_adr (void)
 {
-  if (unified_syntax && inst.size_req == 0 && inst.operands[0].reg <= 7)
+  unsigned Rd;
+
+  Rd = inst.operands[0].reg;
+  reject_bad_reg (Rd);
+
+  if (unified_syntax && inst.size_req == 0 && Rd <= 7)
     {
       /* Defer to section relaxation.  */
       inst.relax = inst.instruction;
       inst.instruction = THUMB_OP16 (inst.instruction);
-      inst.instruction |= inst.operands[0].reg << 4;
+      inst.instruction |= Rd << 4;
     }
   else if (unified_syntax && inst.size_req != 2)
     {
       /* Generate a 32-bit opcode.  */
       inst.instruction = THUMB_OP32 (inst.instruction);
-      inst.instruction |= inst.operands[0].reg << 8;
+      inst.instruction |= Rd << 8;
       inst.reloc.type = BFD_RELOC_ARM_T32_ADD_PC12;
       inst.reloc.pc_rel = 1;
     }
@@ -8620,7 +8687,7 @@ do_t_adr (void)
       inst.reloc.exp.X_add_number -= 4; /* PC relative adjust.  */
       inst.reloc.pc_rel = 1;
 
-      inst.instruction |= inst.operands[0].reg << 4;
+      inst.instruction |= Rd << 4;
     }
 }
 
@@ -8640,6 +8707,11 @@ do_t_arit3 (void)
 	? inst.operands[1].reg    /* Rd, Rs, foo */
 	: inst.operands[0].reg);  /* Rd, foo -> Rd, Rd, foo */
   Rn = inst.operands[2].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rs);
+  if (inst.operands[2].isreg)
+    reject_bad_reg (Rn);
 
   if (unified_syntax)
     {
@@ -8723,6 +8795,11 @@ do_t_arit3c (void)
 	? inst.operands[1].reg    /* Rd, Rs, foo */
 	: inst.operands[0].reg);  /* Rd, foo -> Rd, Rd, foo */
   Rn = inst.operands[2].reg;
+  
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rs);
+  if (inst.operands[2].isreg)
+    reject_bad_reg (Rn);
 
   if (unified_syntax)
     {
@@ -8821,11 +8898,14 @@ do_t_barrier (void)
 static void
 do_t_bfc (void)
 {
+  unsigned Rd;
   unsigned int msb = inst.operands[1].imm + inst.operands[2].imm;
   constraint (msb > 32, _("bit-field extends past end of register"));
   /* The instruction encoding stores the LSB and MSB,
      not the LSB and width.  */
-  inst.instruction |= inst.operands[0].reg << 8;
+  Rd = inst.operands[0].reg;
+  reject_bad_reg (Rd);
+  inst.instruction |= Rd << 8;
   inst.instruction |= (inst.operands[1].imm & 0x1c) << 10;
   inst.instruction |= (inst.operands[1].imm & 0x03) << 6;
   inst.instruction |= msb - 1;
@@ -8834,19 +8914,28 @@ do_t_bfc (void)
 static void
 do_t_bfi (void)
 {
+  int Rd, Rn;
   unsigned int msb;
+
+  Rd = inst.operands[0].reg;
+  reject_bad_reg (Rd);
 
   /* #0 in second position is alternative syntax for bfc, which is
      the same instruction but with REG_PC in the Rm field.  */
   if (!inst.operands[1].isreg)
-    inst.operands[1].reg = REG_PC;
+    Rn = REG_PC;
+  else
+    {
+      Rn = inst.operands[1].reg;
+      reject_bad_reg (Rn);
+    }
 
   msb = inst.operands[2].imm + inst.operands[3].imm;
   constraint (msb > 32, _("bit-field extends past end of register"));
   /* The instruction encoding stores the LSB and MSB,
      not the LSB and width.  */
-  inst.instruction |= inst.operands[0].reg << 8;
-  inst.instruction |= inst.operands[1].reg << 16;
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rn << 16;
   inst.instruction |= (inst.operands[2].imm & 0x1c) << 10;
   inst.instruction |= (inst.operands[2].imm & 0x03) << 6;
   inst.instruction |= msb - 1;
@@ -8855,10 +8944,18 @@ do_t_bfi (void)
 static void
 do_t_bfx (void)
 {
+  unsigned Rd, Rn;
+
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[1].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rn);
+
   constraint (inst.operands[2].imm + inst.operands[3].imm > 32,
 	      _("bit-field extends past end of register"));
-  inst.instruction |= inst.operands[0].reg << 8;
-  inst.instruction |= inst.operands[1].reg << 16;
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rn << 16;
   inst.instruction |= (inst.operands[2].imm & 0x1c) << 10;
   inst.instruction |= (inst.operands[2].imm & 0x03) << 6;
   inst.instruction |= inst.operands[3].imm - 1;
@@ -8879,8 +8976,11 @@ do_t_blx (void)
 {
   constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
   if (inst.operands[0].isreg)
-    /* We have a register, so this is BLX(2).  */
-    inst.instruction |= inst.operands[0].reg << 3;
+    {
+      constraint (inst.operands[0].reg == REG_PC, BAD_PC);
+      /* We have a register, so this is BLX(2).  */
+      inst.instruction |= inst.operands[0].reg << 3;
+    }
   else
     {
       /* No register.  This must be BLX(1).  */
@@ -8992,19 +9092,29 @@ do_t_bx (void)
 static void
 do_t_bxj (void)
 {
-  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
-  if (inst.operands[0].reg == REG_PC)
-    as_tsktsk (_("use of r15 in bxj is not really useful"));
+  int Rm;
 
-  inst.instruction |= inst.operands[0].reg << 16;
+  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
+  Rm = inst.operands[0].reg;
+  reject_bad_reg (Rm);
+  inst.instruction |= Rm << 16;
 }
 
 static void
 do_t_clz (void)
 {
-  inst.instruction |= inst.operands[0].reg << 8;
-  inst.instruction |= inst.operands[1].reg << 16;
-  inst.instruction |= inst.operands[1].reg;
+  unsigned Rd;
+  unsigned Rm;
+
+  Rd = inst.operands[0].reg;
+  Rm = inst.operands[1].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rm);
+
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rm << 16;
+  inst.instruction |= Rm;
 }
 
 static void
@@ -9080,11 +9190,20 @@ do_t_dbg (void)
 static void
 do_t_div (void)
 {
-  if (!inst.operands[1].present)
-    inst.operands[1].reg = inst.operands[0].reg;
-  inst.instruction |= inst.operands[0].reg << 8;
-  inst.instruction |= inst.operands[1].reg << 16;
-  inst.instruction |= inst.operands[2].reg;
+  unsigned Rd, Rn, Rm;
+
+  Rd = inst.operands[0].reg;
+  Rn = (inst.operands[1].present
+	? inst.operands[1].reg : Rd);
+  Rm = inst.operands[2].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rn);
+  reject_bad_reg (Rm);
+
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rn << 16;
+  inst.instruction |= Rm;
 }
 
 static void
@@ -9489,24 +9608,53 @@ do_t_ldstt (void)
 static void
 do_t_mla (void)
 {
-  inst.instruction |= inst.operands[0].reg << 8;
-  inst.instruction |= inst.operands[1].reg << 16;
-  inst.instruction |= inst.operands[2].reg;
-  inst.instruction |= inst.operands[3].reg << 12;
+  unsigned Rd, Rn, Rm, Ra;
+  
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[1].reg;
+  Rm = inst.operands[2].reg;
+  Ra = inst.operands[3].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rn);
+  reject_bad_reg (Rm);
+  reject_bad_reg (Ra);
+
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rn << 16;
+  inst.instruction |= Rm;
+  inst.instruction |= Ra << 12;
 }
 
 static void
 do_t_mlal (void)
 {
-  inst.instruction |= inst.operands[0].reg << 12;
-  inst.instruction |= inst.operands[1].reg << 8;
-  inst.instruction |= inst.operands[2].reg << 16;
-  inst.instruction |= inst.operands[3].reg;
+  unsigned RdLo, RdHi, Rn, Rm;
+
+  RdLo = inst.operands[0].reg;
+  RdHi = inst.operands[1].reg;
+  Rn = inst.operands[2].reg;
+  Rm = inst.operands[3].reg;
+
+  reject_bad_reg (RdLo);
+  reject_bad_reg (RdHi);
+  reject_bad_reg (Rn);
+  reject_bad_reg (Rm);
+
+  inst.instruction |= RdLo << 12;
+  inst.instruction |= RdHi << 8;
+  inst.instruction |= Rn << 16;
+  inst.instruction |= Rm;
 }
 
 static void
 do_t_mov_cmp (void)
 {
+  unsigned Rn, Rm;
+
+  Rn = inst.operands[0].reg;
+  Rm = inst.operands[1].reg;
+
   if (unified_syntax)
     {
       int r0off = (inst.instruction == T_MNEM_mov
@@ -9515,7 +9663,7 @@ do_t_mov_cmp (void)
       bfd_boolean narrow;
       bfd_boolean low_regs;
 
-      low_regs = (inst.operands[0].reg <= 7 && inst.operands[1].reg <= 7);
+      low_regs = (Rn <= 7 && Rm <= 7);
       opcode = inst.instruction;
       if (current_it_mask)
 	narrow = opcode != T_MNEM_movs;
@@ -9528,11 +9676,34 @@ do_t_mov_cmp (void)
       /* MOVS PC, LR is encoded as SUBS PC, LR, #0.  */
       if (opcode == T_MNEM_movs && inst.operands[1].isreg
 	  && !inst.operands[1].shifted
-	  && inst.operands[0].reg == REG_PC
-	  && inst.operands[1].reg == REG_LR)
+	  && Rn == REG_PC
+	  && Rm == REG_LR)
 	{
 	  inst.instruction = T2_SUBS_PC_LR;
 	  return;
+	}
+
+      if (opcode == T_MNEM_cmp)
+	{
+	  constraint (Rn == REG_PC, BAD_PC);
+	  reject_bad_reg (Rm);
+	}
+      else if (opcode == T_MNEM_mov
+	       || opcode == T_MNEM_movs)
+	{
+	  if (inst.operands[1].isreg)
+	    {
+	      if (opcode == T_MNEM_movs)
+		{
+		  reject_bad_reg (Rn);
+		  reject_bad_reg (Rm);
+		}
+	      else if ((Rn == REG_SP || Rn == REG_PC)
+		       && (Rm == REG_SP || Rm == REG_PC))
+		reject_bad_reg (Rm);
+	    }
+	  else
+	    reject_bad_reg (Rn);
 	}
 
       if (!inst.operands[1].isreg)
@@ -9543,7 +9714,7 @@ do_t_mov_cmp (void)
 	  if (low_regs && narrow)
 	    {
 	      inst.instruction = THUMB_OP16 (opcode);
-	      inst.instruction |= inst.operands[0].reg << 8;
+	      inst.instruction |= Rn << 8;
 	      if (inst.size_req == 2)
 		inst.reloc.type = BFD_RELOC_ARM_THUMB_IMM;
 	      else
@@ -9553,7 +9724,7 @@ do_t_mov_cmp (void)
 	    {
 	      inst.instruction = THUMB_OP32 (inst.instruction);
 	      inst.instruction = (inst.instruction & 0xe1ffffff) | 0x10000000;
-	      inst.instruction |= inst.operands[0].reg << r0off;
+	      inst.instruction |= Rn << r0off;
 	      inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
 	    }
 	}
@@ -9575,7 +9746,7 @@ do_t_mov_cmp (void)
 	  if (!low_regs || inst.operands[1].imm > 7)
 	    narrow = FALSE;
 
-	  if (inst.operands[0].reg != inst.operands[1].reg)
+	  if (Rn != Rm)
 	    narrow = FALSE;
 
 	  switch (inst.operands[1].shift_kind)
@@ -9599,7 +9770,7 @@ do_t_mov_cmp (void)
 	  inst.instruction = opcode;
 	  if (narrow)
 	    {
-	      inst.instruction |= inst.operands[0].reg;
+	      inst.instruction |= Rn;
 	      inst.instruction |= inst.operands[1].imm << 3;
 	    }
 	  else
@@ -9607,8 +9778,8 @@ do_t_mov_cmp (void)
 	      if (flags)
 		inst.instruction |= CONDS_BIT;
 
-	      inst.instruction |= inst.operands[0].reg << 8;
-	      inst.instruction |= inst.operands[1].reg << 16;
+	      inst.instruction |= Rn << 8;
+	      inst.instruction |= Rm << 16;
 	      inst.instruction |= inst.operands[1].imm;
 	    }
 	}
@@ -9639,14 +9810,14 @@ do_t_mov_cmp (void)
 
 	  if (narrow)
 	    {
-	      inst.instruction |= inst.operands[0].reg;
-	      inst.instruction |= inst.operands[1].reg << 3;
+	      inst.instruction |= Rn;
+	      inst.instruction |= Rm << 3;
 	      inst.reloc.type = BFD_RELOC_ARM_THUMB_SHIFT;
 	    }
 	  else
 	    {
 	      inst.instruction = THUMB_OP32 (inst.instruction);
-	      inst.instruction |= inst.operands[0].reg << r0off;
+	      inst.instruction |= Rn << r0off;
 	      encode_thumb32_shifted_operand (1);
 	    }
 	}
@@ -9655,32 +9826,32 @@ do_t_mov_cmp (void)
 	  {
 	  case T_MNEM_mov:
 	    inst.instruction = T_OPCODE_MOV_HR;
-	    inst.instruction |= (inst.operands[0].reg & 0x8) << 4;
-	    inst.instruction |= (inst.operands[0].reg & 0x7);
-	    inst.instruction |= inst.operands[1].reg << 3;
+	    inst.instruction |= (Rn & 0x8) << 4;
+	    inst.instruction |= (Rn & 0x7);
+	    inst.instruction |= Rm << 3;
 	    break;
 
 	  case T_MNEM_movs:
 	    /* We know we have low registers at this point.
 	       Generate ADD Rd, Rs, #0.  */
 	    inst.instruction = T_OPCODE_ADD_I3;
-	    inst.instruction |= inst.operands[0].reg;
-	    inst.instruction |= inst.operands[1].reg << 3;
+	    inst.instruction |= Rn;
+	    inst.instruction |= Rm << 3;
 	    break;
 
 	  case T_MNEM_cmp:
 	    if (low_regs)
 	      {
 		inst.instruction = T_OPCODE_CMP_LR;
-		inst.instruction |= inst.operands[0].reg;
-		inst.instruction |= inst.operands[1].reg << 3;
+		inst.instruction |= Rn;
+		inst.instruction |= Rm << 3;
 	      }
 	    else
 	      {
 		inst.instruction = T_OPCODE_CMP_HR;
-		inst.instruction |= (inst.operands[0].reg & 0x8) << 4;
-		inst.instruction |= (inst.operands[0].reg & 0x7);
-		inst.instruction |= inst.operands[1].reg << 3;
+		inst.instruction |= (Rn & 0x8) << 4;
+		inst.instruction |= (Rn & 0x7);
+		inst.instruction |= Rm << 3;
 	      }
 	    break;
 	  }
@@ -9690,7 +9861,7 @@ do_t_mov_cmp (void)
   inst.instruction = THUMB_OP16 (inst.instruction);
   if (inst.operands[1].isreg)
     {
-      if (inst.operands[0].reg < 8 && inst.operands[1].reg < 8)
+      if (Rn < 8 && Rm < 8)
 	{
 	  /* A move of two lowregs is encoded as ADD Rd, Rs, #0
 	     since a MOV instruction produces unpredictable results.  */
@@ -9699,8 +9870,8 @@ do_t_mov_cmp (void)
 	  else
 	    inst.instruction = T_OPCODE_CMP_LR;
 
-	  inst.instruction |= inst.operands[0].reg;
-	  inst.instruction |= inst.operands[1].reg << 3;
+	  inst.instruction |= Rn;
+	  inst.instruction |= Rm << 3;
 	}
       else
 	{
@@ -9713,9 +9884,9 @@ do_t_mov_cmp (void)
     }
   else
     {
-      constraint (inst.operands[0].reg > 7,
+      constraint (Rn > 7,
 		  _("only lo regs allowed with immediate"));
-      inst.instruction |= inst.operands[0].reg << 8;
+      inst.instruction |= Rn << 8;
       inst.reloc.type = BFD_RELOC_ARM_THUMB_IMM;
     }
 }
@@ -9723,6 +9894,7 @@ do_t_mov_cmp (void)
 static void
 do_t_mov16 (void)
 {
+  unsigned Rd;
   bfd_vma imm;
   bfd_boolean top;
 
@@ -9738,7 +9910,10 @@ do_t_mov16 (void)
       inst.reloc.type = BFD_RELOC_ARM_THUMB_MOVT;
     }
 
-  inst.instruction |= inst.operands[0].reg << 8;
+  Rd = inst.operands[0].reg;
+  reject_bad_reg (Rd);
+
+  inst.instruction |= Rd << 8;
   if (inst.reloc.type == BFD_RELOC_UNUSED)
     {
       imm = inst.reloc.exp.X_add_number;
@@ -9752,6 +9927,18 @@ do_t_mov16 (void)
 static void
 do_t_mvn_tst (void)
 {
+  unsigned Rn, Rm;
+  
+  Rn = inst.operands[0].reg;
+  Rm = inst.operands[1].reg;
+
+  if (inst.instruction == T_MNEM_cmp
+      || inst.instruction == T_MNEM_cmn)
+    constraint (Rn == REG_PC, BAD_PC);
+  else
+    reject_bad_reg (Rn);
+  reject_bad_reg (Rm);
+
   if (unified_syntax)
     {
       int r0off = (inst.instruction == T_MNEM_mvn
@@ -9761,7 +9948,7 @@ do_t_mvn_tst (void)
       if (inst.size_req == 4
 	  || inst.instruction > 0xffff
 	  || inst.operands[1].shifted
-	  || inst.operands[0].reg > 7 || inst.operands[1].reg > 7)
+	  || Rn > 7 || Rm > 7)
 	narrow = FALSE;
       else if (inst.instruction == T_MNEM_cmn)
 	narrow = TRUE;
@@ -9777,7 +9964,7 @@ do_t_mvn_tst (void)
 	  if (inst.instruction < 0xffff)
 	    inst.instruction = THUMB_OP32 (inst.instruction);
 	  inst.instruction = (inst.instruction & 0xe1ffffff) | 0x10000000;
-	  inst.instruction |= inst.operands[0].reg << r0off;
+	  inst.instruction |= Rn << r0off;
 	  inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
 	}
       else
@@ -9786,8 +9973,8 @@ do_t_mvn_tst (void)
 	  if (narrow)
 	    {
 	      inst.instruction = THUMB_OP16 (inst.instruction);
-	      inst.instruction |= inst.operands[0].reg;
-	      inst.instruction |= inst.operands[1].reg << 3;
+	      inst.instruction |= Rn;
+	      inst.instruction |= Rm << 3;
 	    }
 	  else
 	    {
@@ -9796,7 +9983,7 @@ do_t_mvn_tst (void)
 			  _("shift must be constant"));
 	      if (inst.instruction < 0xffff)
 		inst.instruction = THUMB_OP32 (inst.instruction);
-	      inst.instruction |= inst.operands[0].reg << r0off;
+	      inst.instruction |= Rn << r0off;
 	      encode_thumb32_shifted_operand (1);
 	    }
 	}
@@ -9807,18 +9994,19 @@ do_t_mvn_tst (void)
 		  || inst.instruction == T_MNEM_mvns, BAD_THUMB32);
       constraint (!inst.operands[1].isreg || inst.operands[1].shifted,
 		  _("unshifted register required"));
-      constraint (inst.operands[0].reg > 7 || inst.operands[1].reg > 7,
+      constraint (Rn > 7 || Rm > 7,
 		  BAD_HIREG);
 
       inst.instruction = THUMB_OP16 (inst.instruction);
-      inst.instruction |= inst.operands[0].reg;
-      inst.instruction |= inst.operands[1].reg << 3;
+      inst.instruction |= Rn;
+      inst.instruction |= Rm << 3;
     }
 }
 
 static void
 do_t_mrs (void)
 {
+  unsigned Rd;
   int flags;
 
   if (do_vfp_nsyn_mrs () == SUCCESS)
@@ -9841,7 +10029,10 @@ do_t_mrs (void)
 		  _("'CPSR' or 'SPSR' expected"));
     }
 
-  inst.instruction |= inst.operands[0].reg << 8;
+  Rd = inst.operands[0].reg;
+  reject_bad_reg (Rd);
+
+  inst.instruction |= Rd << 8;
   inst.instruction |= (flags & SPSR_BIT) >> 2;
   inst.instruction |= inst.operands[1].imm & 0xff;
 }
@@ -9850,6 +10041,7 @@ static void
 do_t_msr (void)
 {
   int flags;
+  unsigned Rn;
 
   if (do_vfp_nsyn_msr () == SUCCESS)
     return;
@@ -9870,27 +10062,36 @@ do_t_msr (void)
 		    "requested special purpose register"));
       flags |= PSR_f;
     }
+  
+  Rn = inst.operands[1].reg;
+  reject_bad_reg (Rn);
+
   inst.instruction |= (flags & SPSR_BIT) >> 2;
   inst.instruction |= (flags & ~SPSR_BIT) >> 8;
   inst.instruction |= (flags & 0xff);
-  inst.instruction |= inst.operands[1].reg << 16;
+  inst.instruction |= Rn << 16;
 }
 
 static void
 do_t_mul (void)
 {
   bfd_boolean narrow;
+  unsigned Rd, Rn, Rm;
 
   if (!inst.operands[2].present)
     inst.operands[2].reg = inst.operands[0].reg;
 
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[1].reg;
+  Rm = inst.operands[2].reg;
+
   if (unified_syntax)
     {
       if (inst.size_req == 4
-	  || (inst.operands[0].reg != inst.operands[1].reg
-	      && inst.operands[0].reg != inst.operands[2].reg)
-	  || inst.operands[1].reg > 7
-	  || inst.operands[2].reg > 7)
+	  || (Rd != Rn
+	      && Rd != Rm)
+	  || Rn > 7
+	  || Rm > 7)
 	narrow = FALSE;
       else if (inst.instruction == T_MNEM_muls)
 	narrow = (current_it_mask == 0);
@@ -9900,7 +10101,7 @@ do_t_mul (void)
   else
     {
       constraint (inst.instruction == T_MNEM_muls, BAD_THUMB32);
-      constraint (inst.operands[1].reg > 7 || inst.operands[2].reg > 7,
+      constraint (Rn > 7 || Rm > 7,
 		  BAD_HIREG);
       narrow = TRUE;
     }
@@ -9909,12 +10110,12 @@ do_t_mul (void)
     {
       /* 16-bit MULS/Conditional MUL.  */
       inst.instruction = THUMB_OP16 (inst.instruction);
-      inst.instruction |= inst.operands[0].reg;
+      inst.instruction |= Rd;
 
-      if (inst.operands[0].reg == inst.operands[1].reg)
-	inst.instruction |= inst.operands[2].reg << 3;
-      else if (inst.operands[0].reg == inst.operands[2].reg)
-	inst.instruction |= inst.operands[1].reg << 3;
+      if (Rd == Rn)
+	inst.instruction |= Rm << 3;
+      else if (Rd == Rm)
+	inst.instruction |= Rn << 3;
       else
 	constraint (1, _("dest must overlap one source register"));
     }
@@ -9924,21 +10125,37 @@ do_t_mul (void)
 		 _("Thumb-2 MUL must not set flags"));
       /* 32-bit MUL.  */
       inst.instruction = THUMB_OP32 (inst.instruction);
-      inst.instruction |= inst.operands[0].reg << 8;
-      inst.instruction |= inst.operands[1].reg << 16;
-      inst.instruction |= inst.operands[2].reg << 0;
+      inst.instruction |= Rd << 8;
+      inst.instruction |= Rn << 16;
+      inst.instruction |= Rm << 0;
+
+      reject_bad_reg (Rd);
+      reject_bad_reg (Rn);
+      reject_bad_reg (Rm);
     }
 }
 
 static void
 do_t_mull (void)
 {
-  inst.instruction |= inst.operands[0].reg << 12;
-  inst.instruction |= inst.operands[1].reg << 8;
-  inst.instruction |= inst.operands[2].reg << 16;
-  inst.instruction |= inst.operands[3].reg;
+  unsigned RdLo, RdHi, Rn, Rm;
 
-  if (inst.operands[0].reg == inst.operands[1].reg)
+  RdLo = inst.operands[0].reg;
+  RdHi = inst.operands[1].reg;
+  Rn = inst.operands[2].reg;
+  Rm = inst.operands[3].reg;
+
+  reject_bad_reg (RdLo);
+  reject_bad_reg (RdHi);
+  reject_bad_reg (Rn);
+  reject_bad_reg (Rm);
+
+  inst.instruction |= RdLo << 12;
+  inst.instruction |= RdHi << 8;
+  inst.instruction |= Rn << 16;
+  inst.instruction |= Rm;
+
+ if (RdLo == RdHi)
     as_tsktsk (_("rdhi and rdlo must be different"));
 }
 
@@ -10022,6 +10239,10 @@ do_t_orn (void)
   Rd = inst.operands[0].reg;
   Rn = inst.operands[1].present ? inst.operands[1].reg : Rd;
 
+  reject_bad_reg (Rd);
+  /* Rn == REG_SP is unpredictable; Rn == REG_PC is MVN.  */
+  reject_bad_reg (Rn);
+
   inst.instruction |= Rd << 8;
   inst.instruction |= Rn << 16;
 
@@ -10035,6 +10256,7 @@ do_t_orn (void)
       unsigned Rm;
 
       Rm = inst.operands[2].reg;
+      reject_bad_reg (Rm);
 
       constraint (inst.operands[2].shifted
 		  && inst.operands[2].immisreg,
@@ -10046,9 +10268,19 @@ do_t_orn (void)
 static void
 do_t_pkhbt (void)
 {
-  inst.instruction |= inst.operands[0].reg << 8;
-  inst.instruction |= inst.operands[1].reg << 16;
-  inst.instruction |= inst.operands[2].reg;
+  unsigned Rd, Rn, Rm;
+
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[1].reg;
+  Rm = inst.operands[2].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rn);
+  reject_bad_reg (Rm);
+
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rn << 16;
+  inst.instruction |= Rm;
   if (inst.operands[3].present)
     {
       unsigned int val = inst.reloc.exp.X_add_number;
@@ -10070,6 +10302,9 @@ do_t_pkhtb (void)
 static void
 do_t_pld (void)
 {
+  if (inst.operands[0].immisreg)
+    reject_bad_reg (inst.operands[0].imm);
+
   encode_thumb32_addr_mode (0, /*is_t=*/FALSE, /*is_d=*/FALSE);
 }
 
@@ -10110,27 +10345,43 @@ do_t_push_pop (void)
 static void
 do_t_rbit (void)
 {
-  inst.instruction |= inst.operands[0].reg << 8;
-  inst.instruction |= inst.operands[1].reg << 16;
-  inst.instruction |= inst.operands[1].reg;
+  unsigned Rd, Rm;
+
+  Rd = inst.operands[0].reg;
+  Rm = inst.operands[1].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rm);
+
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rm << 16;
+  inst.instruction |= Rm;
 }
 
 static void
 do_t_rev (void)
 {
-  if (inst.operands[0].reg <= 7 && inst.operands[1].reg <= 7
+  unsigned Rd, Rm;
+
+  Rd = inst.operands[0].reg;
+  Rm = inst.operands[1].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rm);
+
+  if (Rd <= 7 && Rm <= 7
       && inst.size_req != 4)
     {
       inst.instruction = THUMB_OP16 (inst.instruction);
-      inst.instruction |= inst.operands[0].reg;
-      inst.instruction |= inst.operands[1].reg << 3;
+      inst.instruction |= Rd;
+      inst.instruction |= Rm << 3;
     }
   else if (unified_syntax)
     {
       inst.instruction = THUMB_OP32 (inst.instruction);
-      inst.instruction |= inst.operands[0].reg << 8;
-      inst.instruction |= inst.operands[1].reg << 16;
-      inst.instruction |= inst.operands[1].reg;
+      inst.instruction |= Rd << 8;
+      inst.instruction |= Rm << 16;
+      inst.instruction |= Rm;
     }
   else
     inst.error = BAD_HIREG;
@@ -10144,6 +10395,9 @@ do_t_rrx (void)
   Rd = inst.operands[0].reg;
   Rm = inst.operands[1].reg;
 
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rm);
+  
   inst.instruction |= Rd << 8;
   inst.instruction |= Rm;
 }
@@ -10151,12 +10405,17 @@ do_t_rrx (void)
 static void
 do_t_rsb (void)
 {
-  int Rd, Rs;
+  unsigned Rd, Rs;
 
   Rd = inst.operands[0].reg;
   Rs = (inst.operands[1].present
 	? inst.operands[1].reg    /* Rd, Rs, foo */
 	: inst.operands[0].reg);  /* Rd, foo -> Rd, Rd, foo */
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rs);
+  if (inst.operands[2].isreg)
+    reject_bad_reg (inst.operands[2].reg);
 
   inst.instruction |= Rd << 8;
   inst.instruction |= Rs << 16;
@@ -10245,10 +10504,14 @@ do_t_shift (void)
       if (inst.size_req == 4)
 	narrow = FALSE;
 
+      reject_bad_reg (inst.operands[0].reg);
+      reject_bad_reg (inst.operands[1].reg);
+					    
       if (!narrow)
 	{
 	  if (inst.operands[2].isreg)
 	    {
+	      reject_bad_reg (inst.operands[2].reg);
 	      inst.instruction = THUMB_OP32 (inst.instruction);
 	      inst.instruction |= inst.operands[0].reg << 8;
 	      inst.instruction |= inst.operands[1].reg << 16;
@@ -10341,9 +10604,19 @@ do_t_shift (void)
 static void
 do_t_simd (void)
 {
-  inst.instruction |= inst.operands[0].reg << 8;
-  inst.instruction |= inst.operands[1].reg << 16;
-  inst.instruction |= inst.operands[2].reg;
+  unsigned Rd, Rn, Rm;
+
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[1].reg;
+  Rm = inst.operands[2].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rn);
+  reject_bad_reg (Rm);
+
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rn << 16;
+  inst.instruction |= Rm;
 }
 
 static void
@@ -10361,9 +10634,17 @@ do_t_smc (void)
 static void
 do_t_ssat (void)
 {
-  inst.instruction |= inst.operands[0].reg << 8;
+  unsigned Rd, Rn;
+
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[2].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rn);
+
+  inst.instruction |= Rd << 8;
   inst.instruction |= inst.operands[1].imm - 1;
-  inst.instruction |= inst.operands[2].reg << 16;
+  inst.instruction |= Rn << 16;
 
   if (inst.operands[3].present)
     {
@@ -10384,9 +10665,17 @@ do_t_ssat (void)
 static void
 do_t_ssat16 (void)
 {
-  inst.instruction |= inst.operands[0].reg << 8;
+  unsigned Rd, Rn;
+
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[2].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rn);
+
+  inst.instruction |= Rd << 8;
   inst.instruction |= inst.operands[1].imm - 1;
-  inst.instruction |= inst.operands[2].reg << 16;
+  inst.instruction |= Rn << 16;
 }
 
 static void
@@ -10425,29 +10714,47 @@ do_t_strexd (void)
 static void
 do_t_sxtah (void)
 {
-  inst.instruction |= inst.operands[0].reg << 8;
-  inst.instruction |= inst.operands[1].reg << 16;
-  inst.instruction |= inst.operands[2].reg;
+  unsigned Rd, Rn, Rm;
+
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[1].reg;
+  Rm = inst.operands[2].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rn);
+  reject_bad_reg (Rm);
+
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rn << 16;
+  inst.instruction |= Rm;
   inst.instruction |= inst.operands[3].imm << 4;
 }
 
 static void
 do_t_sxth (void)
 {
+  unsigned Rd, Rm;
+
+  Rd = inst.operands[0].reg;
+  Rm = inst.operands[1].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rm);
+		     
   if (inst.instruction <= 0xffff && inst.size_req != 4
-      && inst.operands[0].reg <= 7 && inst.operands[1].reg <= 7
+      && Rd <= 7 && Rm <= 7
       && (!inst.operands[2].present || inst.operands[2].imm == 0))
     {
       inst.instruction = THUMB_OP16 (inst.instruction);
-      inst.instruction |= inst.operands[0].reg;
-      inst.instruction |= inst.operands[1].reg << 3;
+      inst.instruction |= Rd;
+      inst.instruction |= Rm << 3;
     }
   else if (unified_syntax)
     {
       if (inst.instruction <= 0xffff)
 	inst.instruction = THUMB_OP32 (inst.instruction);
-      inst.instruction |= inst.operands[0].reg << 8;
-      inst.instruction |= inst.operands[1].reg;
+      inst.instruction |= Rd << 8;
+      inst.instruction |= Rm;
       inst.instruction |= inst.operands[2].imm << 4;
     }
   else
@@ -10467,25 +10774,39 @@ do_t_swi (void)
 static void
 do_t_tb (void)
 {
+  unsigned Rn, Rm;
   int half;
 
   half = (inst.instruction & 0x10) != 0;
   constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
   constraint (inst.operands[0].immisreg,
 	      _("instruction requires register index"));
-  constraint (inst.operands[0].imm == 15,
-	      _("PC is not a valid index register"));
+
+  Rn = inst.operands[0].reg;
+  Rm = inst.operands[0].imm;
+  
+  constraint (Rn == REG_SP, BAD_SP);
+  reject_bad_reg (Rm);
+
   constraint (!half && inst.operands[0].shifted,
 	      _("instruction does not allow shifted index"));
-  inst.instruction |= (inst.operands[0].reg << 16) | inst.operands[0].imm;
+  inst.instruction |= (Rn << 16) | Rm;
 }
 
 static void
 do_t_usat (void)
 {
-  inst.instruction |= inst.operands[0].reg << 8;
+  unsigned Rd, Rn;
+
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[2].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rn);
+
+  inst.instruction |= Rd << 8;
   inst.instruction |= inst.operands[1].imm;
-  inst.instruction |= inst.operands[2].reg << 16;
+  inst.instruction |= Rn << 16;
 
   if (inst.operands[3].present)
     {
@@ -10506,9 +10827,17 @@ do_t_usat (void)
 static void
 do_t_usat16 (void)
 {
-  inst.instruction |= inst.operands[0].reg << 8;
+  unsigned Rd, Rn;
+
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[2].reg;
+
+  reject_bad_reg (Rd);
+  reject_bad_reg (Rn);
+
+  inst.instruction |= Rd << 8;
   inst.instruction |= inst.operands[1].imm;
-  inst.instruction |= inst.operands[2].reg << 16;
+  inst.instruction |= Rn << 16;
 }
 
 /* Neon instruction encoder helpers.  */
@@ -11550,7 +11879,7 @@ nsyn_insert_sp (void)
 {
   inst.operands[1] = inst.operands[0];
   memset (&inst.operands[0], '\0', sizeof (inst.operands[0]));
-  inst.operands[0].reg = 13;
+  inst.operands[0].reg = REG_SP;
   inst.operands[0].isreg = 1;
   inst.operands[0].writeback = 1;
   inst.operands[0].present = 1;
