@@ -1,6 +1,6 @@
 /* bucomm.c -- Bin Utils COMmon code.
    Copyright 1991, 1992, 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002,
-   2003, 2006, 2007
+   2003, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -88,7 +88,7 @@ bfd_nonfatal_message (const char *filename,
   if (bfd)
     {
       if (!filename)
-	filename = bfd_get_filename (bfd);
+	filename = bfd_get_archive_filename (bfd);
       if (section)
 	section_name = bfd_get_section_name (bfd, section);
     }
@@ -577,7 +577,7 @@ get_file_size (const char * file_name)
 /* Return the filename in a static buffer.  */
 
 const char *
-bfd_get_archive_filename (bfd *abfd)
+bfd_get_archive_filename (const bfd *abfd)
 {
   static size_t curr = 0;
   static char *buf;

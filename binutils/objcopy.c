@@ -1,6 +1,6 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -58,11 +58,6 @@ section_rename;
 
 /* List of sections to be renamed.  */
 static section_rename *section_rename_list;
-
-#define RETURN_NONFATAL(bfd) \
-  do { \
-    status = 1; bfd_nonfatal_message (NULL, bfd, NULL, NULL); return; \
-  } while (0)
 
 static asymbol **isympp = NULL;	/* Input symbols.  */
 static asymbol **osympp = NULL;	/* Output symbols that survive stripping.  */
@@ -1291,7 +1286,7 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
 
   if (bfd_stat_arch_elt (ibfd, &buf) != 0)
     {
-      bfd_nonfatal_message (bfd_get_archive_filename (ibfd), NULL, NULL, NULL);
+      bfd_nonfatal_message (NULL, ibfd, NULL, NULL);
       return FALSE;
     }
 
@@ -1324,8 +1319,7 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
       if (bfd_bread (cbuf, (bfd_size_type) tocopy, ibfd)
 	  != (bfd_size_type) tocopy)
 	{
-	  bfd_nonfatal_message (bfd_get_archive_filename (ibfd),
-				NULL, NULL, NULL);
+	  bfd_nonfatal_message (NULL, ibfd, NULL, NULL);
 	  free (cbuf);
 	  return FALSE;
 	}
@@ -1404,8 +1398,7 @@ copy_object (bfd *ibfd, bfd *obfd)
       if (!bfd_set_start_address (obfd, start)
 	  || !bfd_set_file_flags (obfd, flags))
 	{
-	  bfd_nonfatal_message (bfd_get_archive_filename (ibfd),
-				NULL, NULL, NULL);
+	  bfd_nonfatal_message (NULL, ibfd, NULL, NULL);
 	  return FALSE;
 	}
     }
@@ -1429,7 +1422,7 @@ copy_object (bfd *ibfd, bfd *obfd)
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
     {
-      bfd_nonfatal_message (bfd_get_archive_filename (ibfd), NULL, NULL, NULL);
+      bfd_nonfatal_message (NULL, ibfd, NULL, NULL);
       return FALSE;
     }
 
@@ -1445,7 +1438,7 @@ copy_object (bfd *ibfd, bfd *obfd)
   symsize = bfd_get_symtab_upper_bound (ibfd);
   if (symsize < 0)
     {
-      bfd_nonfatal_message (bfd_get_archive_filename (ibfd), NULL, NULL, NULL);
+      bfd_nonfatal_message (NULL, ibfd, NULL, NULL);
       return FALSE;
     }
 
@@ -1856,7 +1849,8 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
     } *list, *l;
   bfd **ptr = &obfd->archive_head;
   bfd *this_element;
-  char * dir;
+  char *dir;
+  const char *filename;
 
   /* Make a temp directory to hold the contents.  */
   dir = make_tempdir (bfd_get_filename (obfd));
@@ -1872,7 +1866,11 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   this_element = bfd_openr_next_archived_file (ibfd, NULL);
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
-    RETURN_NONFATAL (obfd);
+    {
+      status = 1;
+      bfd_nonfatal_message (NULL, obfd, NULL, NULL);
+      return;
+    }
 
   while (!status && this_element != NULL)
     {
@@ -1942,7 +1940,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	    {
 	      if (!bfd_close (output_bfd))
 		{
-		  bfd_nonfatal_message (NULL, output_bfd, NULL, NULL);
+		  bfd_nonfatal_message (output_name, NULL, NULL, NULL);
 		  /* Error in new object file. Don't change archive.  */
 		  status = 1;
 		}
@@ -1952,8 +1950,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	}
       else
 	{
-	  bfd_nonfatal_message (bfd_get_archive_filename (this_element),
-				NULL, NULL,
+	  bfd_nonfatal_message (NULL, this_element, NULL,
 				_("Unable to recognise the format of file"));
 
 	  output_bfd = bfd_openw (output_name, output_target);
@@ -1961,7 +1958,7 @@ copy_unknown_element:
 	  delete = !copy_unknown_object (this_element, output_bfd);
 	  if (!bfd_close_all_done (output_bfd))
 	    {
-	      bfd_nonfatal_message (NULL, output_bfd, NULL, NULL);
+	      bfd_nonfatal_message (output_name, NULL, NULL, NULL);
 	      /* Error in new object file. Don't change archive.  */
 	      status = 1;
 	    }
@@ -1994,11 +1991,21 @@ copy_unknown_element:
     }
   *ptr = NULL;
 
+  filename = bfd_get_filename (obfd);
   if (!bfd_close (obfd))
-    RETURN_NONFATAL (obfd);
+    {
+      status = 1;
+      bfd_nonfatal_message (filename, NULL, NULL, NULL);
+      return;
+    }
 
+  filename = bfd_get_filename (ibfd);
   if (!bfd_close (ibfd))
-    RETURN_NONFATAL (obfd);
+    {
+      status = 1;
+      bfd_nonfatal_message (filename, NULL, NULL, NULL);
+      return;
+    }
 
   /* Delete all the files that we opened.  */
   for (l = list; l != NULL; l = l->next)
@@ -2087,10 +2094,18 @@ copy_file (const char *input_filename, const char *output_filename,
 	status = 1;
 
       if (!bfd_close (obfd))
-	RETURN_NONFATAL (obfd);
+	{
+	  status = 1;
+	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
+	  return;
+	}
 
       if (!bfd_close (ibfd))
-	RETURN_NONFATAL (ibfd);
+	{
+	  status = 1;
+	  bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
+	  return;
+	}
     }
   else
     {
@@ -2195,7 +2210,7 @@ setup_bfd_headers (bfd *ibfd, bfd *obfd)
     {
       status = 1;
       bfd_nonfatal_message (NULL, ibfd, NULL,
-			    _("error in private h	eader data"));
+			    _("error in private header data"));
       return;
     }
 

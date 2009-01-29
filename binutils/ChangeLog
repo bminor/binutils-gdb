@@ -1,3 +1,17 @@
+2009-01-29  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 9798
+	* bucomm.c (bfd_nonfatal_message): Use bfd_get_archive_filename.
+	(bfd_get_archive_filename): Constify param.
+	* bucomm.h (bfd_get_archive_filename): Update prototype.
+	* objcopy.c (RETURN_NONFATAL): Delete.
+	(copy_unknown_object): Don't call bfd_get_archive_filename for
+	bfd_nonfatal_message filename, instead just pass bfd.
+	(copy_object): Likewise.
+	(copy_archive, copy_file): Likewise.  Expand RETURN_NONFATAL.  On
+	bfd_close errors, do not pass the bfd to bfd_nonfatal_message.
+	(setup_bfd_headers): Fix error message.
+
 2009-01-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 9774
