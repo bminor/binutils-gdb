@@ -15232,10 +15232,10 @@ static const struct asm_opcode insns[] =
  TCE(smulwb,	12000a0, fb30f000, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
  TCE(smulwt,	12000e0, fb30f010, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
 
- TCE(qadd,	1000050, fa80f080, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, rd_rm_rn),
- TCE(qdadd,	1400050, fa80f090, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, rd_rm_rn),
- TCE(qsub,	1200050, fa80f0a0, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, rd_rm_rn),
- TCE(qdsub,	1600050, fa80f0b0, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, rd_rm_rn),
+ TCE(qadd,	1000050, fa80f080, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
+ TCE(qdadd,	1400050, fa80f090, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
+ TCE(qsub,	1200050, fa80f0a0, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
+ TCE(qdsub,	1600050, fa80f0b0, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v5e /*  ARM Architecture 5TE.  */

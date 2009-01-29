@@ -1,3 +1,8 @@
+2009-01-29  Mark Mitchell  <mark@codesourcery.com>
+
+	* arm-dis.c (thumb32_opcodes): Correct decoding for qadd, qdadd,
+	qsub, and qdsub.
+
 2009-01-28  Chao-ying Fu  <fu@mips.com>
 
         * mips-opc.c (suxc1): Add the flag of FP_D.

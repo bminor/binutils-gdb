@@ -1,3 +1,8 @@
+2009-01-29  Mark Mitchell  <mark@codesourcery.com>
+
+	* gas/arm/thumb32.s (qadd): Add qadd, qdadd, qsub, and qdsub.
+	* gas/arm/thumb32.d: Likewise.
+
 2009-01-29  Paul Brook  <paul@codesourcery.com>
             Mark Mitchell  <mark@codesourcery.com>
 

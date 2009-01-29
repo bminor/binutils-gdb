@@ -526,9 +526,13 @@ push_pop:
 	pop	{r8,r9,r10,r11,r12}
 
 qadd:
+	qadd		r1, r2, r3
 	qadd16		r1, r2, r3
 	qadd8		r1, r2, r3
 	qaddsubx	r1, r2, r3
+	qdadd		r1, r2, r3
+	qdsub		r1, r2, r3
+	qsub		r1, r2, r3
 	qsub16		r1, r2, r3
 	qsub8		r1, r2, r3
 	qsubaddx	r1, r2, r3
