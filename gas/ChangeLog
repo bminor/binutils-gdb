@@ -1,5 +1,11 @@
 2009-01-29  Mark Mitchell  <mark@codesourcery.com>
 
+	* config/tc-arm.c (do_t_orn): New function.
+	(do_t_rrx): Likewise.
+	(insns): Add orn and rrx.
+
+2009-01-29  Mark Mitchell  <mark@codesourcery.com>
+
 	* config/tc-arm.c (insns): Add qasx, qsax, shasx, shsax, ssax,
 	uasx, uhasx, uhsx, uqasx, uqsax, usax. 
 

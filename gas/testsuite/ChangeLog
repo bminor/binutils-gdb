@@ -1,5 +1,15 @@
 2009-01-29  Mark Mitchell  <mark@codesourcery.com>
 
+	* gas/arm/thumb32.s: Add tests for orn and rrx.
+	* gas/arm/thumb32.d: Adjust accordingly.
+	* gas/arm/thumb32.l: Likewise.
+	* gas/arm/thumb2_invert.s: Add tests for orn and orr.
+	* gas/arm/thumb2_invert.d: Adjust accordingly.
+	* gas/arm/tcompat.s: Add tests for rrx.
+	* gas/arm/tcompat.d: Adjust accordingly.
+
+2009-01-29  Mark Mitchell  <mark@codesourcery.com>
+
 	* gas/arm/thumb32.s (qadd): Add tests for them.
 	* gas/arm/thumb32.d: Adjust accordingly.
 

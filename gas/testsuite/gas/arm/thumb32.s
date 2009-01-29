@@ -153,6 +153,7 @@ arit3:
 	arit3	orr orrs orr.w orrs.w
 	arit3	rsb rsbs rsb.w rsbs.w
 	arit3	sbc sbcs sbc.w sbcs.w
+	arit3	orn orns orn orns
 
 	.purgem arit3
 
@@ -624,6 +625,10 @@ shift:
 	sh	ror rors ror.w rors.w
 
 	.purgem sh
+
+rrx:	
+	rrx	r1, r2
+	rrxs	r3, r4
 
 smc:
 	smc	#0

@@ -10015,6 +10015,35 @@ do_t_neg (void)
 }
 
 static void
+do_t_orn (void)
+{
+  unsigned Rd, Rn;
+
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[1].present ? inst.operands[1].reg : Rd;
+
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rn << 16;
+
+  if (!inst.operands[2].isreg)
+    {
+      inst.instruction = (inst.instruction & 0xe1ffffff) | 0x10000000;
+      inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
+    }
+  else
+    {
+      unsigned Rm;
+
+      Rm = inst.operands[2].reg;
+
+      constraint (inst.operands[2].shifted
+		  && inst.operands[2].immisreg,
+		  _("shift must be constant"));
+      encode_thumb32_shifted_operand (2);
+    }
+}
+
+static void
 do_t_pkhbt (void)
 {
   inst.instruction |= inst.operands[0].reg << 8;
@@ -10105,6 +10134,18 @@ do_t_rev (void)
     }
   else
     inst.error = BAD_HIREG;
+}
+
+static void
+do_t_rrx (void)
+{
+  unsigned Rd, Rm;
+
+  Rd = inst.operands[0].reg;
+  Rm = inst.operands[1].reg;
+
+  inst.instruction |= Rd << 8;
+  inst.instruction |= Rm;
 }
 
 static void
@@ -15434,21 +15475,24 @@ static const struct asm_opcode insns[] =
  /* ARM does not really have an IT instruction, so always allow it.  */
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v1
- TUE(it,        0, bf08, 1, (COND),    it, t_it),
- TUE(itt,       0, bf0c, 1, (COND),    it, t_it),
- TUE(ite,       0, bf04, 1, (COND),    it, t_it),
- TUE(ittt,      0, bf0e, 1, (COND),    it, t_it),
- TUE(itet,      0, bf06, 1, (COND),    it, t_it),
- TUE(itte,      0, bf0a, 1, (COND),    it, t_it),
- TUE(itee,      0, bf02, 1, (COND),    it, t_it),
- TUE(itttt,     0, bf0f, 1, (COND),    it, t_it),
- TUE(itett,     0, bf07, 1, (COND),    it, t_it),
- TUE(ittet,     0, bf0b, 1, (COND),    it, t_it),
- TUE(iteet,     0, bf03, 1, (COND),    it, t_it),
- TUE(ittte,     0, bf0d, 1, (COND),    it, t_it),
- TUE(itete,     0, bf05, 1, (COND),    it, t_it),
- TUE(ittee,     0, bf09, 1, (COND),    it, t_it),
- TUE(iteee,     0, bf01, 1, (COND),    it, t_it),
+ TUE(it,        0,        bf08,     1, (COND),   it,    t_it),
+ TUE(itt,       0,        bf0c,     1, (COND),   it,    t_it),
+ TUE(ite,       0,        bf04,     1, (COND),   it,    t_it),
+ TUE(ittt,      0,        bf0e,     1, (COND),   it,    t_it),
+ TUE(itet,      0,        bf06,     1, (COND),   it,    t_it),
+ TUE(itte,      0,        bf0a,     1, (COND),   it,    t_it),
+ TUE(itee,      0,        bf02,     1, (COND),   it,    t_it),
+ TUE(itttt,     0,        bf0f,     1, (COND),   it,    t_it),
+ TUE(itett,     0,        bf07,     1, (COND),   it,    t_it),
+ TUE(ittet,     0,        bf0b,     1, (COND),   it,    t_it),
+ TUE(iteet,     0,        bf03,     1, (COND),   it,    t_it),
+ TUE(ittte,     0,        bf0d,     1, (COND),   it,    t_it),
+ TUE(itete,     0,        bf05,     1, (COND),   it,    t_it),
+ TUE(ittee,     0,        bf09,     1, (COND),   it,    t_it),
+ TUE(iteee,     0,        bf01,     1, (COND),   it,    t_it),
+ /* ARM/Thumb-2 instructions with no Thumb-1 equivalent.  */
+ TC3(rrx,       01a00060, ea4f0030, 2, (RR, RR), rd_rm, t_rrx),
+ TC3(rrxs,      01b00060, ea5f0030, 2, (RR, RR), rd_rm, t_rrx),
 
  /* Thumb2 only instructions.  */
 #undef ARM_VARIANT
@@ -15456,6 +15500,8 @@ static const struct asm_opcode insns[] =
 
  TCE(addw,	0, f2000000, 3, (RR, RR, EXPi), 0, t_add_sub_w),
  TCE(subw,	0, f2a00000, 3, (RR, RR, EXPi), 0, t_add_sub_w),
+ TCE(orn,       0, ea600000, 3, (RR, oRR, SH),  0, t_orn),
+ TCE(orns,      0, ea700000, 3, (RR, oRR, SH),  0, t_orn),
  TCE(tbb,       0, e8d0f000, 1, (TB), 0, t_tb),
  TCE(tbh,       0, e8d0f010, 1, (TB), 0, t_tb),
 
