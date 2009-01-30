@@ -1,3 +1,12 @@
+2009-01-30  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* breakpoint.c (create_breakpoint, create_breakpoints)
+	(break_command_really, set_breakpoint): New parameter enabled.
+	(create_breakpoint, break_command_really): Make breakpoint
+	disabled if so requested.
+	* breakpoint.h (set_breakpoint): New parameter enabled.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert): Handle the -d option.
+
 2009-01-28  Doug Evans  <dje@google.com>
 
 	* amd64-tdep.h (amd64_displaced_step_copy_insn): Declare.

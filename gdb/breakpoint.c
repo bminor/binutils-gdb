@@ -5090,7 +5090,7 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
 		   char *cond_string,
 		   enum bptype type, enum bpdisp disposition,
 		   int thread, int ignore_count, 
-		   struct breakpoint_ops *ops, int from_tty)
+		   struct breakpoint_ops *ops, int from_tty, int enabled)
 {
   struct breakpoint *b = NULL;
   int i;
@@ -5124,7 +5124,7 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
   
 	  b->cond_string = cond_string;
 	  b->ignore_count = ignore_count;
-	  b->enable_state = bp_enabled;
+	  b->enable_state = enabled ? bp_enabled : bp_disabled;
 	  b->disposition = disposition;
 
 	  loc = b->loc;
@@ -5299,7 +5299,8 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 		    char *cond_string,
 		    enum bptype type, enum bpdisp disposition,
 		    int thread, int ignore_count, 
-		    struct breakpoint_ops *ops, int from_tty)
+		    struct breakpoint_ops *ops, int from_tty,
+		    int enabled)
 {
   int i;
   for (i = 0; i < sals.nelts; ++i)
@@ -5309,7 +5310,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 
       create_breakpoint (expanded, addr_string[i],
 			 cond_string, type, disposition,
-			 thread, ignore_count, ops, from_tty);
+			 thread, ignore_count, ops, from_tty, enabled);
     }
 
   update_global_location_list (1);
@@ -5481,7 +5482,8 @@ break_command_really (char *arg, char *cond_string, int thread,
 		      int ignore_count,
 		      enum auto_boolean pending_break_support,
 		      struct breakpoint_ops *ops,
-		      int from_tty)
+		      int from_tty,
+		      int enabled)
 {
   struct gdb_exception e;
   struct symtabs_and_lines sals;
@@ -5614,7 +5616,7 @@ break_command_really (char *arg, char *cond_string, int thread,
 			  hardwareflag ? bp_hardware_breakpoint 
 			  : bp_breakpoint,
 			  tempflag ? disp_del : disp_donttouch,
-			  thread, ignore_count, ops, from_tty);
+			  thread, ignore_count, ops, from_tty, enabled);
     }
   else
     {
@@ -5635,6 +5637,7 @@ break_command_really (char *arg, char *cond_string, int thread,
       b->disposition = tempflag ? disp_del : disp_donttouch;
       b->condition_not_parsed = 1;
       b->ops = ops;
+      b->enable_state = enabled ? bp_enabled : bp_disabled;
 
       update_global_location_list (1);
       mention (b);
@@ -5669,7 +5672,8 @@ break_command_1 (char *arg, int flag, int from_tty)
 			0 /* Ignore count */,
 			pending_break_support, 
 			NULL /* breakpoint_ops */,
-			from_tty);
+			from_tty,
+			1 /* enabled */);
 }
 
 
@@ -5677,7 +5681,7 @@ void
 set_breakpoint (char *address, char *condition,
 		int hardwareflag, int tempflag,
 		int thread, int ignore_count,
-		int pending)
+		int pending, int enabled)
 {
   break_command_really (address, condition, thread,
 			0 /* condition and thread are valid.  */,
@@ -5685,7 +5689,7 @@ set_breakpoint (char *address, char *condition,
 			ignore_count,
 			pending 
 			? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
-			NULL, 0);
+			NULL, 0, enabled);
 }
 
 /* Adjust SAL to the first instruction past the function prologue.
@@ -6536,7 +6540,8 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
 			tempflag, 0,
 			0,
 			AUTO_BOOLEAN_TRUE /* pending */,
-			&gnu_v3_exception_catchpoint_ops, from_tty);
+			&gnu_v3_exception_catchpoint_ops, from_tty,
+			1 /* enabled */);
 
   return 1;
 }

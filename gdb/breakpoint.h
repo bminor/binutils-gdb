@@ -705,7 +705,8 @@ extern void tbreak_command (char *, int);
 extern void set_breakpoint (char *address, char *condition,
 			    int hardwareflag, int tempflag,
 			    int thread, int ignore_count,
-			    int pending);
+			    int pending,
+			    int enabled);
 
 extern void insert_breakpoints (void);
 

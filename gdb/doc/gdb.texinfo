@@ -19925,7 +19925,7 @@ N.A.
 @subsubheading Synopsis
 
 @smallexample
- -break-insert [ -t ] [ -h ] [ -f ]
+ -break-insert [ -t ] [ -h ] [ -f ] [ -d ]
     [ -c @var{condition} ] [ -i @var{ignore-count} ]
     [ -p @var{thread} ] [ @var{location} ]
 @end smallexample
@@ -19960,6 +19960,8 @@ refers to unknown files or functions), create a pending
 breakpoint. Without this flag, @value{GDBN} will report
 an error, and won't create a breakpoint, if @var{location}
 cannot be parsed.
+@item -d
+Create a disabled breakpoint.
 @end table
 
 @subsubheading Result
