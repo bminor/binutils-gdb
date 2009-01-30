@@ -1,3 +1,7 @@
+2009-01-30  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove i386-cygwin-tdep.h.
+
 2009-01-30  Vladimir Prus  <vladimir@codesourcery.com>
 
 	PR 8145.
