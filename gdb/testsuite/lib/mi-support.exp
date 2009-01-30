@@ -1605,7 +1605,7 @@ proc get_mi_thread_list {name} {
   # ^done,thread-ids=[thread-id="1",thread-id="2",...],number-of-threads="N"
   # (gdb)
   mi_gdb_test "-thread-list-ids" \
-    {.*\^done,thread-ids={(thread-id="[0-9]+"(,)?)+},number-of-threads="[0-9]+"} \
+    {.*\^done,thread-ids={(thread-id="[0-9]+"(,)?)+},current-thread-id="[0-9]+",number-of-threads="[0-9]+"} \
     "-thread_list_ids ($name)"
 
   set output {}
@@ -1639,7 +1639,7 @@ proc check_mi_and_console_threads {name} {
   global expect_out
 
   mi_gdb_test "-thread-list-ids" \
-    {.*\^done,thread-ids={(thread-id="[0-9]+"(,)*)+},number-of-threads="[0-9]+"} \
+    {.*\^done,thread-ids={(thread-id="[0-9]+"(,)*)+},current-thread-id="[0-9]+",number-of-threads="[0-9]+"} \
     "-thread-list-ids ($name)"
   set mi_output {}
   if {[info exists expect_out(buffer)]} {

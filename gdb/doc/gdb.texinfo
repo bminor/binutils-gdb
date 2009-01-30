@@ -20513,23 +20513,11 @@ Part of @samp{info threads} supplies the same information.
 
 @subsubheading Example
 
-No threads present, besides the main process:
-
-@smallexample
-(gdb)
--thread-list-ids
-^done,thread-ids=@{@},number-of-threads="0"
-(gdb)
-@end smallexample
-
-
-Several threads:
-
 @smallexample
 (gdb)
 -thread-list-ids
 ^done,thread-ids=@{thread-id="3",thread-id="2",thread-id="1"@},
-number-of-threads="3"
+current-thread-id="1",number-of-threads="3"
 (gdb)
 @end smallexample
 

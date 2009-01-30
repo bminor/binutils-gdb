@@ -410,6 +410,7 @@ do_captured_list_thread_ids (struct ui_out *uiout, void *arg)
   struct thread_info *tp;
   int num = 0;
   struct cleanup *cleanup_chain;
+  int current_thread = -1;
 
   prune_threads ();
   target_find_new_threads ();
@@ -420,11 +421,18 @@ do_captured_list_thread_ids (struct ui_out *uiout, void *arg)
     {
       if (tp->state_ == THREAD_EXITED)
 	continue;
+
+      if (ptid_equal (tp->ptid, inferior_ptid))
+	current_thread = tp->num;
+
       num++;
       ui_out_field_int (uiout, "thread-id", tp->num);
     }
 
   do_cleanups (cleanup_chain);
+
+  if (current_thread != -1)
+    ui_out_field_int (uiout, "current-thread-id", current_thread);
   ui_out_field_int (uiout, "number-of-threads", num);
   return GDB_RC_OK;
 }
