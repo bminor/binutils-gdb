@@ -1,3 +1,9 @@
+2009-01-30  Julian Brown  <julian@codesourcery.com>
+
+	* elf32-arm.c (bfd_elf32_arm_vfp11_erratum_scan): Skip BFDs with
+	EXEC_P or DYNAMIC flags, and skip sections which are being linked
+	with --just-symbols (-R).
+
 2009-01-29  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* dwarf2.c (read_rangelist): Use read_address to read low_pc and

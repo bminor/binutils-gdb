@@ -4998,6 +4998,10 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
   if (globals->vfp11_fix == BFD_ARM_VFP11_FIX_NONE)
     return TRUE;
 
+  /* Skip this BFD if it corresponds to an executable or dynamic object.  */
+  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
+    return TRUE;
+
   for (sec = abfd->sections; sec != NULL; sec = sec->next)
     {
       unsigned int i, span, first_fmac = 0, veneer_of_insn = 0;
@@ -5008,6 +5012,8 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
       if (elf_section_type (sec) != SHT_PROGBITS
           || (elf_section_flags (sec) & SHF_EXECINSTR) == 0
           || (sec->flags & SEC_EXCLUDE) != 0
+	  || sec->sec_info_type == ELF_INFO_TYPE_JUST_SYMS
+	  || sec->output_section == bfd_abs_section_ptr
           || strcmp (sec->name, VFP11_ERRATUM_VENEER_SECTION_NAME) == 0)
         continue;
 
