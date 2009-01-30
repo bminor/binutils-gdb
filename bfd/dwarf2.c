@@ -1803,20 +1803,11 @@ read_rangelist (struct comp_unit *unit, struct arange *arange, bfd_uint64_t offs
       bfd_vma low_pc;
       bfd_vma high_pc;
 
-      if (unit->addr_size == 4)
-	{
-	  low_pc = read_4_bytes (unit->abfd, ranges_ptr);
-	  ranges_ptr += 4;
-	  high_pc = read_4_bytes (unit->abfd, ranges_ptr);
-	  ranges_ptr += 4;
-	}
-      else
-	{
-	  low_pc = read_8_bytes (unit->abfd, ranges_ptr);
-	  ranges_ptr += 8;
-	  high_pc = read_8_bytes (unit->abfd, ranges_ptr);
-	  ranges_ptr += 8;
-	}
+      low_pc = read_address (unit, ranges_ptr);
+      ranges_ptr += unit->addr_size;
+      high_pc = read_address (unit, ranges_ptr);
+      ranges_ptr += unit->addr_size;
+
       if (low_pc == 0 && high_pc == 0)
 	break;
       if (low_pc == -1UL && high_pc != -1UL)

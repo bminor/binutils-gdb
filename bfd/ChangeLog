@@ -1,3 +1,8 @@
+2009-01-29  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* dwarf2.c (read_rangelist): Use read_address to read low_pc and
+	high_pc in order to properly sign-extend VMAs.
+
 2009-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
             Mark Shinwell  <shinwell@codesourcery.com>
             Catherine Moore  <clm@codesourcery.com>
