@@ -1633,7 +1633,8 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 {
   if (this->skip_call_tls_get_addr_)
     {
-      if (r_type != elfcpp::R_386_PLT32
+      if ((r_type != elfcpp::R_386_PLT32
+           && r_type != elfcpp::R_386_PC32)
 	  || gsym == NULL
 	  || strcmp(gsym->name(), "___tls_get_addr") != 0)
 	gold_error_at_location(relinfo, relnum, rel.get_r_offset(),

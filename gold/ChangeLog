@@ -1,6 +1,12 @@
+2009-01-29  Cary Coutant  <ccoutant@google.com>
+
+	* i386.cc (Target_i386::Relocate::relocate): Recognize non-PIC calls
+	to __tls_get_addr.
+	* x86_64.cc (Target_x86_64::Relocate::relocate): Likewise.
+
 2009-01-28  Ian Lance Taylor  <iant@google.com>
 
-	* version.cc (version_string): Bump to 1.8.
+	* version.cc (version_string): Bump to 1.9.
 
 	* gold.h: Include <cstring> and <stdint.h>.
 	* version.cc: Include <cstdio>.

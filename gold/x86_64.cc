@@ -1703,7 +1703,8 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
 {
   if (this->skip_call_tls_get_addr_)
     {
-      if (r_type != elfcpp::R_X86_64_PLT32
+      if ((r_type != elfcpp::R_X86_64_PLT32
+           && r_type != elfcpp::R_X86_64_PC32)
 	  || gsym == NULL
 	  || strcmp(gsym->name(), "__tls_get_addr") != 0)
 	{
