@@ -3199,6 +3199,16 @@ elf_add_dt_needed_tag (bfd *abfd,
   return 0;
 }
 
+static bfd_boolean
+on_needed_list (const char *soname, struct bfd_link_needed_list *needed)
+{
+  for (; needed != NULL; needed = needed->next)
+    if (strcmp (soname, needed->name) == 0)
+      return TRUE;
+
+  return FALSE;
+}
+
 /* Sort symbol by value and section.  */
 static int
 elf_sort_symbol (const void *arg1, const void *arg2)
@@ -4434,8 +4444,11 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  if (!add_needed
 	      && definition
-	      && dynsym
-	      && h->ref_regular)
+	      && ((dynsym
+		   && h->ref_regular)
+		  || (h->ref_dynamic
+		      && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0
+		      && !on_needed_list (elf_dt_name (abfd), htab->needed))))
 	    {
 	      int ret;
 	      const char *soname = elf_dt_name (abfd);

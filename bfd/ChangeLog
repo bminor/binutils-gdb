@@ -1,3 +1,9 @@
+2009-01-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (on_needed_list): New function.
+	(elf_link_add_object_symbols): Link in --as-needed libs if they
+	satisfy undefined symbols in other libs.
+
 2009-01-30  Julian Brown  <julian@codesourcery.com>
 
 	* elf32-arm.c (bfd_elf32_arm_vfp11_erratum_scan): Skip BFDs with

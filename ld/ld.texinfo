@@ -1093,9 +1093,11 @@ This option affects ELF DT_NEEDED tags for dynamic libraries mentioned
 on the command line after the @option{--as-needed} option.  Normally,
 the linker will add a DT_NEEDED tag for each dynamic library mentioned
 on the command line, regardless of whether the library is actually
-needed.  @option{--as-needed} causes DT_NEEDED tags to only be emitted
-for libraries that satisfy some symbol reference from regular objects
-which is undefined at the point that the library was linked.
+needed.  @option{--as-needed} causes a DT_NEEDED tag to only be emitted
+for a library that satisfies a symbol reference from regular objects
+which is undefined at the point that the library was linked, or, if
+the library is not found in the DT_NEEDED lists of other libraries
+linked up to that point, a reference from another dynamic library.
 @option{--no-as-needed} restores the default behaviour.
 
 @kindex --add-needed
