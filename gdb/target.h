@@ -151,6 +151,10 @@ struct target_waitstatus
     value;
   };
 
+/* Return a pretty printed form of target_waitstatus.
+   Space for the result is malloc'd, caller must free.  */
+extern char *target_waitstatus_to_string (const struct target_waitstatus *);
+
 /* Possible types of events that the inferior handler will have to
    deal with.  */
 enum inferior_event_type

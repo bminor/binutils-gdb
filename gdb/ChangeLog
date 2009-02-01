@@ -1,3 +1,15 @@
+2009-02-01  Doug Evans  <dje@google.com>
+
+	* target.h (target_waitstatus_to_string): Declare.
+	* target.c (target_waitstatus_to_string): New function.  Copied from
+	debug_to_wait.  Add missing entries for TARGET_WAITKIND_SYSCALL_ENTRY,
+	TARGET_WAITKIND_SYSCALL_RETURN, TARGET_WAITKIND_IGNORE,
+	TARGET_WAITKIND_NO_HISTORY.
+	(debug_to_wait): Call it.
+	* infrun.c (wait_for_inferior): If debug_infrun, print result of
+	target_wait.
+	(fetch_inferior_event): Ditto.
+
 2009-01-30  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove i386-cygwin-tdep.h.

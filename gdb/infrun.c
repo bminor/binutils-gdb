@@ -1789,6 +1789,16 @@ wait_for_inferior (int treat_exec_as_sigtrap)
       else
 	ecs->ptid = target_wait (waiton_ptid, &ecs->ws);
 
+      if (debug_infrun)
+	{
+	  char *status_string = target_waitstatus_to_string (&ecs->ws);
+	  fprintf_unfiltered (gdb_stdlog,
+			      "infrun: target_wait (%d, status) = %d, %s\n",
+			      PIDGET (waiton_ptid), PIDGET (ecs->ptid),
+			      status_string);
+	  xfree (status_string);
+	}
+
       if (treat_exec_as_sigtrap && ecs->ws.kind == TARGET_WAITKIND_EXECD)
         {
           xfree (ecs->ws.value.execd_pathname);
@@ -1863,6 +1873,16 @@ fetch_inferior_event (void *client_data)
       deprecated_target_wait_hook (waiton_ptid, &ecs->ws);
   else
     ecs->ptid = target_wait (waiton_ptid, &ecs->ws);
+
+  if (debug_infrun)
+    {
+      char *status_string = target_waitstatus_to_string (&ecs->ws);
+      fprintf_unfiltered (gdb_stdlog,
+			  "infrun: target_wait (%d, status) = %d, %s\n",
+			  PIDGET (waiton_ptid), PIDGET (ecs->ptid),
+			  status_string);
+      xfree (status_string);
+    }
 
   if (non_stop
       && ecs->ws.kind != TARGET_WAITKIND_IGNORE

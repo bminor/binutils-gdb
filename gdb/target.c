@@ -2603,50 +2603,63 @@ debug_to_resume (ptid_t ptid, int step, enum target_signal siggnal)
 		      target_signal_to_name (siggnal));
 }
 
+/* Return a pretty printed form of target_waitstatus.
+   Space for the result is malloc'd, caller must free.  */
+
+char *
+target_waitstatus_to_string (const struct target_waitstatus *ws)
+{
+  const char *kind_str = "status->kind = ";
+
+  switch (ws->kind)
+    {
+    case TARGET_WAITKIND_EXITED:
+      return xstrprintf ("%sexited, status = %d",
+			 kind_str, ws->value.integer);
+    case TARGET_WAITKIND_STOPPED:
+      return xstrprintf ("%sstopped, signal = %s",
+			 kind_str, target_signal_to_name (ws->value.sig));
+    case TARGET_WAITKIND_SIGNALLED:
+      return xstrprintf ("%ssignalled, signal = %s",
+			 kind_str, target_signal_to_name (ws->value.sig));
+    case TARGET_WAITKIND_LOADED:
+      return xstrprintf ("%sloaded", kind_str);
+    case TARGET_WAITKIND_FORKED:
+      return xstrprintf ("%sforked", kind_str);
+    case TARGET_WAITKIND_VFORKED:
+      return xstrprintf ("%svforked", kind_str);
+    case TARGET_WAITKIND_EXECD:
+      return xstrprintf ("%sexecd", kind_str);
+    case TARGET_WAITKIND_SYSCALL_ENTRY:
+      return xstrprintf ("%ssyscall-entry", kind_str);
+    case TARGET_WAITKIND_SYSCALL_RETURN:
+      return xstrprintf ("%ssyscall-return", kind_str);
+    case TARGET_WAITKIND_SPURIOUS:
+      return xstrprintf ("%sspurious", kind_str);
+    case TARGET_WAITKIND_IGNORE:
+      return xstrprintf ("%signore", kind_str);
+    case TARGET_WAITKIND_NO_HISTORY:
+      return xstrprintf ("%sno-history", kind_str);
+    default:
+      return xstrprintf ("%sunknown???", kind_str);
+    }
+}
+
 static ptid_t
 debug_to_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   ptid_t retval;
+  char *status_string;
 
   retval = debug_target.to_wait (ptid, status);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_wait (%d, status) = %d,   ", PIDGET (ptid),
 		      PIDGET (retval));
-  fprintf_unfiltered (gdb_stdlog, "status->kind = ");
-  switch (status->kind)
-    {
-    case TARGET_WAITKIND_EXITED:
-      fprintf_unfiltered (gdb_stdlog, "exited, status = %d\n",
-			  status->value.integer);
-      break;
-    case TARGET_WAITKIND_STOPPED:
-      fprintf_unfiltered (gdb_stdlog, "stopped, signal = %s\n",
-			  target_signal_to_name (status->value.sig));
-      break;
-    case TARGET_WAITKIND_SIGNALLED:
-      fprintf_unfiltered (gdb_stdlog, "signalled, signal = %s\n",
-			  target_signal_to_name (status->value.sig));
-      break;
-    case TARGET_WAITKIND_LOADED:
-      fprintf_unfiltered (gdb_stdlog, "loaded\n");
-      break;
-    case TARGET_WAITKIND_FORKED:
-      fprintf_unfiltered (gdb_stdlog, "forked\n");
-      break;
-    case TARGET_WAITKIND_VFORKED:
-      fprintf_unfiltered (gdb_stdlog, "vforked\n");
-      break;
-    case TARGET_WAITKIND_EXECD:
-      fprintf_unfiltered (gdb_stdlog, "execd\n");
-      break;
-    case TARGET_WAITKIND_SPURIOUS:
-      fprintf_unfiltered (gdb_stdlog, "spurious\n");
-      break;
-    default:
-      fprintf_unfiltered (gdb_stdlog, "unknown???\n");
-      break;
-    }
+
+  status_string = target_waitstatus_to_string (status);
+  fprintf_unfiltered (gdb_stdlog, "%s\n", status_string);
+  xfree (status_string);
 
   return retval;
 }
