@@ -1,3 +1,8 @@
+2009-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elf-eh-frame.c (REQUIRE_CLEARED_RELOCS) Remove.
+	(_bfd_elf_parse_eh_frame): Do not check relocations for removed FDEs.
+
 2009-01-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (on_needed_list): New function.
