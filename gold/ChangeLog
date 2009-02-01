@@ -1,3 +1,9 @@
+2009-01-31  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* script.cc (Lazy_demangler): New class.
+        (Version_script_info::get_symbol_version_helper): Demangle a
+	symbol only once.
+
 2009-01-29  Cary Coutant  <ccoutant@google.com>
 
 	* i386.cc (Target_i386::Relocate::relocate): Recognize non-PIC calls

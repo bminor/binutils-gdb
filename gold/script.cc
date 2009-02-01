@@ -1699,6 +1699,52 @@ Keyword_to_parsecode::keyword_to_parsecode(const char* keyword,
   return ktt->parsecode;
 }
 
+// Helper class that calls cplus_demangle when needed and takes care of freeing
+// the result.
+
+class Lazy_demangler
+{
+ public:
+  Lazy_demangler(const char* symbol, int options)
+    : symbol_(symbol), options_(options), demangled_(NULL), did_demangle_(false)
+  { }
+
+  ~Lazy_demangler()
+  { free(this->demangled_); }
+
+  // Return the demangled name. The actual demangling happens on the first call,
+  // and the result is later cached.
+
+  inline char*
+  get();
+
+ private:
+  // The symbol to demangle.
+  const char *symbol_;
+  // Option flags to pass to cplus_demagle.
+  const int options_;
+  // The cached demangled value, or NULL if demangling didn't happen yet or
+  // failed.
+  char *demangled_;
+  // Whether we already called cplus_demangle
+  bool did_demangle_;
+};
+
+// Return the demangled name. The actual demangling happens on the first call,
+// and the result is later cached. Returns NULL if the symbol cannot be
+// demangled.
+
+inline char*
+Lazy_demangler::get()
+{
+  if (!this->did_demangle_)
+    {
+      this->demangled_ = cplus_demangle(this->symbol_, this->options_);
+      this->did_demangle_ = true;
+    }
+  return this->demangled_;
+}
+
 // The following structs are used within the VersionInfo class as well
 // as in the bison helper functions.  They store the information
 // parsed from the version script.
@@ -1801,6 +1847,9 @@ Version_script_info::get_symbol_version_helper(const char* symbol_name,
                                                bool check_global,
 					       std::string* pversion) const
 {
+  Lazy_demangler cpp_demangled_name(symbol_name, DMGL_ANSI | DMGL_PARAMS);
+  Lazy_demangler java_demangled_name(symbol_name,
+                                     DMGL_ANSI | DMGL_PARAMS | DMGL_JAVA);
   for (size_t j = 0; j < version_trees_.size(); ++j)
     {
       // Is it a global symbol for this version?
@@ -1811,25 +1860,19 @@ Version_script_info::get_symbol_version_helper(const char* symbol_name,
           {
             const char* name_to_match = symbol_name;
             const struct Version_expression& exp = explist->expressions[k];
-            char* demangled_name = NULL;
             if (exp.language == "C++")
               {
-                demangled_name = cplus_demangle(symbol_name,
-                                                DMGL_ANSI | DMGL_PARAMS);
+                name_to_match = cpp_demangled_name.get();
                 // This isn't a C++ symbol.
-                if (demangled_name == NULL)
+                if (name_to_match == NULL)
                   continue;
-                name_to_match = demangled_name;
               }
             else if (exp.language == "Java")
               {
-                demangled_name = cplus_demangle(symbol_name,
-                                                (DMGL_ANSI | DMGL_PARAMS
-						 | DMGL_JAVA));
+                name_to_match = java_demangled_name.get();
                 // This isn't a Java symbol.
-                if (demangled_name == NULL)
+                if (name_to_match == NULL)
                   continue;
-                name_to_match = demangled_name;
               }
             bool matched;
             if (exp.exact_match)
@@ -1837,8 +1880,6 @@ Version_script_info::get_symbol_version_helper(const char* symbol_name,
             else
               matched = fnmatch(exp.pattern.c_str(), name_to_match,
                                 FNM_NOESCAPE) == 0;
-            if (demangled_name != NULL)
-              free(demangled_name);
             if (matched)
 	      {
 		if (pversion != NULL)
