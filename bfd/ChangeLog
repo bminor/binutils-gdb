@@ -1,3 +1,9 @@
+2009-02-02  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.19.1
+	* Makefile.am (RELEASE): Set.
+	* configure, Makefile.in: Regenerated.
+
 2009-01-14  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Do not turn
