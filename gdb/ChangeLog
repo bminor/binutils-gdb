@@ -1,3 +1,9 @@
+2009-02-02  Tom Tromey  <tromey@redhat.com>
+
+	PR exp/9059:
+	* valops.c (find_overload_match): Follow typedefs before taking
+	address of object argument.
+
 2009-02-01  Doug Evans  <dje@google.com>
 
 	* target.h (target_waitstatus_to_string): Declare.

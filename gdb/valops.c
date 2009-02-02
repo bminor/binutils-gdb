@@ -2173,9 +2173,11 @@ find_overload_match (struct type **arg_types, int nargs,
 
   if (objp)
     {
-      if (TYPE_CODE (value_type (temp)) != TYPE_CODE_PTR
-	  && (TYPE_CODE (value_type (*objp)) == TYPE_CODE_PTR
-	      || TYPE_CODE (value_type (*objp)) == TYPE_CODE_REF))
+      struct type *temp_type = check_typedef (value_type (temp));
+      struct type *obj_type = check_typedef (value_type (*objp));
+      if (TYPE_CODE (temp_type) != TYPE_CODE_PTR
+	  && (TYPE_CODE (obj_type) == TYPE_CODE_PTR
+	      || TYPE_CODE (obj_type) == TYPE_CODE_REF))
 	{
 	  temp = value_addr (temp);
 	}

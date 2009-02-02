@@ -49,3 +49,6 @@ gdb_test "b [gdb_get_line_number {breakpoint here} ${testfile}.cc ]" \
 gdb_test "print foo(1)" "\\\$$decimal = 1"
 gdb_test "continue" ".*breakpoint here.*" "continue to bp"
 gdb_test "print rf->func()" "\\\$$decimal = 1"
+
+# Regression test for method call via a typedef.
+gdb_test "print handle->func()" "\\\$$decimal = 1"

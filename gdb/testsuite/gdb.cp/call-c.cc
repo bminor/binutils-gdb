@@ -28,11 +28,14 @@ struct Foo {
   int x_;
 };
 
+typedef Foo *FooHandle;
+
 int main()
 {
     Foo f;
     Foo *pf = &f;
     Foo* &rf = pf;
+    FooHandle handle = pf;
     rf->func(); /* set breakpoint here */
     return func(0);
 }
