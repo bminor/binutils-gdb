@@ -1696,7 +1696,12 @@ if test "${enable_gdbtk}" = "yes"; then
     cd $here
 
     SC_PATH_TCLCONFIG
-    if test -z "${no_tcl}"; then
+
+    # If $no_tk is nonempty, then we can't do Tk, and there is no
+    # point to doing Tcl.
+    SC_PATH_TKCONFIG
+
+    if test -z "${no_tcl}" -a -z "${no_tk}"; then
 	SC_LOAD_TCLCONFIG
 
         # Check for in-tree tcl
@@ -1728,62 +1733,57 @@ if test "${enable_gdbtk}" = "yes"; then
 	AC_SUBST(TCL_LIBRARY)
         AC_SUBST(TCL_DEPS)
 
-	# If $no_tk is nonempty, then we can't do Tk, and there is no
-	# point to doing Tcl.
-	if test -z "${no_tk}"; then
-           SC_PATH_TKCONFIG
-	   SC_LOAD_TKCONFIG
+	SC_LOAD_TKCONFIG
 
-           # Check for in-tree Tk
-           intree="no"
-           if test "${TK_SRC_DIR}" = "${topdir}/tk"; then
-             intree="yes" 
-           fi
+        # Check for in-tree Tk
+        intree="no"
+        if test "${TK_SRC_DIR}" = "${topdir}/tk"; then
+          intree="yes" 
+        fi
 
-           # Find Tk private headers
-           if test x"${intree}" = xno; then
-             CY_AC_TK_PRIVATE_HEADERS
-	     TK_INCLUDE="${TK_INCLUDE_SPEC} ${TK_PRIVATE_INCLUDE}"
-	     TK_LIBRARY=${TK_LIB_SPEC}
-             TK_DEPS=""
-           else
-             TK_INCLUDE="-I${TK_SRC_DIR}/generic"
-             TK_LIBRARY="${TK_BUILD_LIB_SPEC}"
-             TK_DEPS="../tk/${configdir}/${TK_LIB_FILE}"
-           fi
-	   AC_SUBST(TK_INCLUDE)
-	   AC_SUBST(TK_LIBRARY)
-           AC_SUBST(TK_DEPS)
-	   AC_SUBST(TK_XINCLUDES)
+        # Find Tk private headers
+        if test x"${intree}" = xno; then
+          CY_AC_TK_PRIVATE_HEADERS
+	  TK_INCLUDE="${TK_INCLUDE_SPEC} ${TK_PRIVATE_INCLUDE}"
+	  TK_LIBRARY=${TK_LIB_SPEC}
+          TK_DEPS=""
+        else
+          TK_INCLUDE="-I${TK_SRC_DIR}/generic"
+          TK_LIBRARY="${TK_BUILD_LIB_SPEC}"
+          TK_DEPS="../tk/${configdir}/${TK_LIB_FILE}"
+        fi
+	AC_SUBST(TK_INCLUDE)
+	AC_SUBST(TK_LIBRARY)
+	AC_SUBST(TK_DEPS)
+	AC_SUBST(TK_XINCLUDES)
 
-           ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
+        ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
 
-	   # Include some libraries that Tcl and Tk want.
-	   TCL_LIBS='$(LIBGUI) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
-	   # Yes, the ordering seems wrong here.  But it isn't.
-	   # TK_LIBS is the list of libraries that need to be linked
-	   # after Tcl/Tk.  Note that this isn't put into LIBS.  If it
-	   # were in LIBS then any link tests after this point would
-	   # try to include things like `$(LIBGUI)', which wouldn't work.
-	   GDBTKLIBS="${TCL_LIBS} ${TK_LIBS}"
+	# Include some libraries that Tcl and Tk want.
+	TCL_LIBS='$(LIBGUI) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	# Yes, the ordering seems wrong here.  But it isn't.
+	# TK_LIBS is the list of libraries that need to be linked
+	# after Tcl/Tk.  Note that this isn't put into LIBS.  If it
+	# were in LIBS then any link tests after this point would
+	# try to include things like `$(LIBGUI)', which wouldn't work.
+	GDBTKLIBS="${TCL_LIBS} ${TK_LIBS}"
 
-           CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_GDBTK_OBS)"
-           CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_GDBTK_DEPS)"
-           CONFIG_SRCS="${CONFIG_SRCS} \$(SUBDIR_GDBTK_SRCS)"
-	   CONFIG_ALL="${CONFIG_ALL} all-gdbtk"
-	   CONFIG_CLEAN="${CONFIG_CLEAN} clean-gdbtk"
-	   CONFIG_INSTALL="${CONFIG_INSTALL} install-gdbtk"
-	   CONFIG_UNINSTALL="${CONFIG_UNINSTALL} uninstall-gdbtk"
+        CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_GDBTK_OBS)"
+        CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_GDBTK_DEPS)"
+        CONFIG_SRCS="${CONFIG_SRCS} \$(SUBDIR_GDBTK_SRCS)"
+	CONFIG_ALL="${CONFIG_ALL} all-gdbtk"
+	CONFIG_CLEAN="${CONFIG_CLEAN} clean-gdbtk"
+	CONFIG_INSTALL="${CONFIG_INSTALL} install-gdbtk"
+	CONFIG_UNINSTALL="${CONFIG_UNINSTALL} uninstall-gdbtk"
 
-	   if test x$gdb_cv_os_cygwin = xyes; then
-	      WIN32LIBS="${WIN32LIBS} -lshell32 -lgdi32 -lcomdlg32 -ladvapi32"
-	      WIN32LDAPP="-Wl,--subsystem,console"
-	      CONFIG_OBS="${CONFIG_OBS} gdbres.o"
-	   fi
+	if test x$gdb_cv_os_cygwin = xyes; then
+	  WIN32LIBS="${WIN32LIBS} -lshell32 -lgdi32 -lcomdlg32 -ladvapi32"
+	  WIN32LDAPP="-Wl,--subsystem,console"
+	  CONFIG_OBS="${CONFIG_OBS} gdbres.o"
 	fi
-    fi
 
-    AC_CONFIG_SUBDIRS(gdbtk)
+        AC_CONFIG_SUBDIRS(gdbtk)
+    fi
 fi
 
 AC_SUBST(X_CFLAGS)

@@ -1,3 +1,11 @@
+2009-02-02  Doug Evans  <dje@google.com>
+
+	* configure.ac (gdbkt): Check both no_tcl/no_tk first, before
+	doing any further tcl/tk configury.  Don't configure gdbtk if
+	tcl or tk check fails.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2009-02-02  Tom Tromey  <tromey@redhat.com>
 
 	PR exp/9059:
