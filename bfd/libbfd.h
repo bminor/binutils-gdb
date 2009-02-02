@@ -2075,5 +2075,3 @@ bfd_boolean bfd_default_scan
    (const struct bfd_arch_info *info, const char *string);
 
 /* Extracted from elf.c.  */
-struct elf_internal_shdr *bfd_elf_find_section (bfd *abfd, char *name);
-

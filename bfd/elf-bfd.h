@@ -1626,8 +1626,6 @@ extern unsigned int _bfd_elf_section_from_bfd_section
   (bfd *, asection *);
 extern char *bfd_elf_string_from_elf_section
   (bfd *, unsigned, unsigned);
-extern char *bfd_elf_get_str_section
-  (bfd *, unsigned);
 extern Elf_Internal_Sym *bfd_elf_get_elf_syms
   (bfd *, Elf_Internal_Shdr *, size_t, size_t, Elf_Internal_Sym *, void *,
    Elf_External_Sym_Shndx *);
@@ -1671,8 +1669,6 @@ extern bfd_boolean bfd_elf_make_generic_object
   (bfd *);
 extern bfd_boolean bfd_elf_mkcorefile
   (bfd *);
-extern Elf_Internal_Shdr *bfd_elf_find_section
-  (bfd *, char *);
 extern bfd_boolean _bfd_elf_make_section_from_shdr
   (bfd *, Elf_Internal_Shdr *, const char *, int);
 extern bfd_boolean _bfd_elf_make_section_from_phdr
@@ -2142,11 +2138,6 @@ extern bfd_boolean _bfd_elf_merge_object_attributes (bfd *, bfd *);
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;
-
-/* SH ELF specific routine.  */
-
-extern bfd_boolean _sh_elf_set_mach_from_flags
-  (bfd *);
 
 /* This is the condition under which finish_dynamic_symbol will be called.
    If our finish_dynamic_symbol isn't called, we'll need to do something

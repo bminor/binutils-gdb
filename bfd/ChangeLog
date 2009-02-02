@@ -1,3 +1,11 @@
+2009-02-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (bfd_elf_get_str_section): Don't declare.
+	(bfd_elf_find_section, _sh_elf_set_mach_from_flags): Likewise.
+	* elf.c (bfd_elf_get_str_section): Make static.
+	(bfd_elf_find_section): Delete.
+	* libbfd.h: Regenerate.
+
 2009-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf-eh-frame.c (REQUIRE_CLEARED_RELOCS) Remove.

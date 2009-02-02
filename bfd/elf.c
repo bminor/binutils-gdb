@@ -1,7 +1,8 @@
 /* ELF executable support for BFD.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -258,7 +259,7 @@ bfd_elf_mkcorefile (bfd *abfd)
   return bfd_elf_make_generic_object (abfd);
 }
 
-char *
+static char *
 bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
 {
   Elf_Internal_Shdr **i_shdrp;
@@ -1017,45 +1018,6 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
     }
 
   return TRUE;
-}
-
-/*
-INTERNAL_FUNCTION
-	bfd_elf_find_section
-
-SYNOPSIS
-	struct elf_internal_shdr *bfd_elf_find_section (bfd *abfd, char *name);
-
-DESCRIPTION
-	Helper functions for GDB to locate the string tables.
-	Since BFD hides string tables from callers, GDB needs to use an
-	internal hook to find them.  Sun's .stabstr, in particular,
-	isn't even pointed to by the .stab section, so ordinary
-	mechanisms wouldn't work to find it, even if we had some.
-*/
-
-struct elf_internal_shdr *
-bfd_elf_find_section (bfd *abfd, char *name)
-{
-  Elf_Internal_Shdr **i_shdrp;
-  char *shstrtab;
-  unsigned int max;
-  unsigned int i;
-
-  i_shdrp = elf_elfsections (abfd);
-  if (i_shdrp != NULL)
-    {
-      shstrtab = bfd_elf_get_str_section (abfd,
-					  elf_elfheader (abfd)->e_shstrndx);
-      if (shstrtab != NULL)
-	{
-	  max = elf_numsections (abfd);
-	  for (i = 1; i < max; i++)
-	    if (!strcmp (&shstrtab[i_shdrp[i]->sh_name], name))
-	      return i_shdrp[i];
-	}
-    }
-  return 0;
 }
 
 const char *const bfd_elf_section_type_names[] = {
