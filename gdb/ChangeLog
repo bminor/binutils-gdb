@@ -1,3 +1,7 @@
+2009-02-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS: Update Elena's email address.
+
 2009-02-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint (update_watchpoint): Minor comment adjustment.

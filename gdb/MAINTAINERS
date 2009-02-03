@@ -169,7 +169,7 @@ Stan Shebs			stan@codesourcery.com
 Michael Snyder			msnyder@vmware.com
 Tom Tromey			tromey@redhat.com
 Ulrich Weigand			Ulrich.Weigand@de.ibm.com
-Elena Zannoni			ezannoni@redhat.com
+Elena Zannoni			elena.zannoni@oracle.com
 Eli Zaretskii			eliz@gnu.org
 
 
@@ -433,12 +433,12 @@ AIX			Kevin Buettner		kevinb@redhat.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@redhat.com
 gdb.java tests		Anthony Green		green@redhat.com
 FreeBSD native & host	David O'Brien		obrien@freebsd.org
-event loop		Elena Zannoni		ezannoni@redhat.com
-generic symtabs		Elena Zannoni		ezannoni@redhat.com
-dwarf readers		Elena Zannoni		ezannoni@redhat.com
-elf reader		Elena Zannoni		ezannoni@redhat.com
-stabs reader		Elena Zannoni		ezannoni@redhat.com
-readline/		Elena Zannoni		ezannoni@redhat.com
+event loop		Elena Zannoni		elena.zannoni@oracle.com
+generic symtabs		Elena Zannoni		elena.zannoni@oracle.com
+dwarf readers		Elena Zannoni		elena.zannoni@oracle.com
+elf reader		Elena Zannoni		elena.zannoni@oracle.com
+stabs reader		Elena Zannoni		elena.zannoni@oracle.com
+readline/		Elena Zannoni		elena.zannoni@oracle.com
 NetBSD native & host	Jason Thorpe		thorpej@netbsd.org
 Pascal support		Pierre Muller		muller@sources.redhat.com
 avr			Theodore A. Roth	troth@openavr.org
@@ -597,7 +597,7 @@ Ulrich Weigand					uweigand@de.ibm.com
 Nathan Williams					nathanw@wasabisystems.com
 Bob Wilson					bob.wilson@acm.org
 Jim Wilson					wilson@tuliptree.org
-Elena Zannoni					ezannoni@redhat.com
+Elena Zannoni					elena.zannoni@oracle.com
 Eli Zaretskii					eliz@gnu.org
 Wu Zhou						woodzltc@cn.ibm.com
 Yoshinori Sato					ysato@users.sourceforge.jp
