@@ -1,5 +1,10 @@
 -*- text -*-
 
+* --as-needed now links in a dynamic library if it satisfies undefined
+  symbols in regular objects, or in other dynamic libraries.  In the
+  latter case the library is not linked if it is found in a DT_NEEDED
+  entry of one of the libraries already linked.
+
 * Add a new command line option, -Ttext-segment ADDR, for ELF targets
   to set the address of the first byte of the text segment.
 

@@ -1,12 +1,7 @@
 -*- text -*-
 
-* --as-needed now links in a dynamic library if it satisfies undefined
-  symbols in regular objects, or in other dynamic libraries.  In the
-  latter case the library is not linked if it is found in a DT_NEEDED
-  entry of one of the libraries already linked.
-
 * Added --prefix=PREFIX and --prefix-strip=LEVEL switches to objdump to
-add absolute paths for -S.
+  add absolute paths for -S.
 
 * Add new option --use-nul-prefixed-import-tables to dlltool to allow fall-
   back to old import table generation with null element prefix.

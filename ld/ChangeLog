@@ -1,3 +1,7 @@
+2009-02-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* NEWS: Mention --as-needed change.
+
 2009-02-03  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* configure.in: AC_SUBST pdfdir.
