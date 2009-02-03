@@ -1,3 +1,7 @@
+2009-02-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint (update_watchpoint): Minor comment adjustment.
+
 2009-02-02  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/9594:

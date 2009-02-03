@@ -835,8 +835,8 @@ fetch_watchpoint_value (struct expression *exp, struct value **valp,
      in b->loc->cond.
    - Update the list of values that must be watched in B->loc.
 
-   If the watchpoint is disabled, do nothing.  If this is
-   local watchpoint that is out of scope, delete it.  */
+   If the watchpoint disposition is disp_del_at_next_stop, then do nothing.
+   If this is local watchpoint that is out of scope, delete it.  */
 static void
 update_watchpoint (struct breakpoint *b, int reparse)
 {
