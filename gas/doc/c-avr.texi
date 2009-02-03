@@ -44,7 +44,8 @@ at90s8535).
 Instruction set avr25 is for the classic AVR core with up to 8K program memory
 space plus the MOVW instruction (MCU types: attiny13, attiny13a, attiny2313,
 attiny24, attiny44, attiny84, attiny25, attiny45, attiny85, attiny261,
-attiny461, attiny861, attiny87, attiny43u, attiny48, attiny88, at86rf401).
+attiny461, attiny861, attiny87, attiny43u, attiny48, attiny88, at86rf401,
+ata6289).
 
 Instruction set avr3 is for the classic AVR core with up to 128K program
 memory space (MCU types: at43usb355, at76c711).

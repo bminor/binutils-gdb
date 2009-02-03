@@ -1,3 +1,8 @@
+2009-01-29  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add ata6289.
+	* doc/c-avr.texi: Likewise.
+
 2009-02-03  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* configure.in: AC_SUBST pdfdir.
