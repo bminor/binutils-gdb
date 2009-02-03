@@ -1,5 +1,11 @@
 2009-02-02  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.cp/Makefile.in (EXECUTABLES): Add pr2489.
+	* gdb.cp/pr2489.cc: New file.
+	* gdb.cp/cpcompletion.exp: New file.
+
+2009-02-02  Tom Tromey  <tromey@redhat.com>
+
 	PR exp/9059:
 	* gdb.cp/call-c.exp: Add regression test.
 	* gdb.cp/call-c.cc (FooHandle): New typedef.

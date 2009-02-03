@@ -339,7 +339,7 @@ location_completer (char *text, char *word)
 }
 
 /* Helper for expression_completer which recursively counts the number
-   of named fields in a structure or union type.  */
+   of named fields and methods in a structure or union type.  */
 static int
 count_struct_fields (struct type *type)
 {
@@ -353,17 +353,25 @@ count_struct_fields (struct type *type)
       else if (TYPE_FIELD_NAME (type, i))
 	++result;
     }
+
+  for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
+    {
+      if (TYPE_FN_FIELDLIST_NAME (type, i))
+	++result;
+    }
+
   return result;
 }
 
-/* Helper for expression_completer which recursively adds field names
-   from TYPE, a struct or union type, to the array OUTPUT.  This
-   function assumes that OUTPUT is correctly-sized.  */
+/* Helper for expression_completer which recursively adds field and
+   method names from TYPE, a struct or union type, to the array
+   OUTPUT.  This function assumes that OUTPUT is correctly-sized.  */
 static void
 add_struct_fields (struct type *type, int *nextp, char **output,
 		   char *fieldname, int namelen)
 {
   int i;
+  char *type_name = NULL;
 
   CHECK_TYPEDEF (type);
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
@@ -376,6 +384,22 @@ add_struct_fields (struct type *type, int *nextp, char **output,
 	{
 	  output[*nextp] = xstrdup (TYPE_FIELD_NAME (type, i));
 	  ++*nextp;
+	}
+    }
+
+  for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
+    {
+      char *name = TYPE_FN_FIELDLIST_NAME (type, i);
+      if (name && ! strncmp (name, fieldname, namelen))
+	{
+	  if (!type_name)
+	    type_name = type_name_no_tag (type);
+	  /* Omit constructors from the completion list.  */
+	  if (strcmp (type_name, name))
+	    {
+	      output[*nextp] = xstrdup (name);
+	      ++*nextp;
+	    }
 	}
     }
 }

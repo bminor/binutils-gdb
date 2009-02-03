@@ -1,3 +1,9 @@
+2009-02-02  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/2489:
+	* completer.c (count_struct_fields): Count method names.
+	(add_struct_fields): Add matching method names.
+
 2009-02-02  Doug Evans  <dje@google.com>
 
 	* configure.ac (gdbkt): Check both no_tcl/no_tk first, before
