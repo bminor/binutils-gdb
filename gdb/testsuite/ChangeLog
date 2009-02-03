@@ -1,5 +1,11 @@
 2009-02-02  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.cp/cpcompletion.exp: Name the test "pr9594".
+	* gdb.cp/pr2489.cc: Rename...
+	* gdb.cp/pr9594.cc: ... to this.
+
+2009-02-02  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.cp/Makefile.in (EXECUTABLES): Add pr2489.
 	* gdb.cp/pr2489.cc: New file.
 	* gdb.cp/cpcompletion.exp: New file.

@@ -21,7 +21,7 @@ if $tracelevel then {
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile pr2489
+set testfile pr9594
 set binfile ${objdir}/${subdir}/${testfile}
 
 if {[gdb_compile "${srcdir}/${subdir}/${testfile}.cc" "${testfile}.o" object {c++ debug}] != ""} {

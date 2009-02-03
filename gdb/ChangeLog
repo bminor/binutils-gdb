@@ -1,6 +1,6 @@
 2009-02-02  Tom Tromey  <tromey@redhat.com>
 
-	PR gdb/2489:
+	PR gdb/9594:
 	* completer.c (count_struct_fields): Count method names.
 	(add_struct_fields): Add matching method names.
 
