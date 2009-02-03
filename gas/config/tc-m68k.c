@@ -1,6 +1,6 @@
 /* tc-m68k.c -- Assemble for the m68k family
    Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -36,6 +36,10 @@
 
 #ifdef M68KCOFF
 #include "obj-coff.h"
+#endif
+
+#ifdef OBJ_ELF
+static void m68k_elf_cons (int);
 #endif
 
 /* This string holds the chars that always start a comment.  If the
@@ -528,14 +532,14 @@ static const struct m68k_cpu m68k_extensions[] =
   {m68851,					NULL, "68851", -1},
   {m68881,					NULL, "68881", -1},
   {m68881,					NULL, "68882", -1},
-  
+
   {cfloat|m68881,				NULL, "float", 0},
-  
+
   {mcfhwdiv,					NULL, "div", 1},
   {mcfusp,					NULL, "usp", 1},
   {mcfmac,					NULL, "mac", 1},
   {mcfemac,					NULL, "emac", 1},
-   
+
   {0,NULL,NULL, 0}
 };
 
@@ -562,7 +566,7 @@ static const struct m68k_cpu m68k_cpus[] =
   {m68040,					m68040_ctrl, "68ec040", 1},
   {m68060,					m68060_ctrl, "68060", 0},
   {m68060,					m68060_ctrl, "68ec060", 1},
-  
+
   {cpu32|m68881,				cpu32_ctrl, "cpu32",  0},
   {cpu32|m68881,				cpu32_ctrl, "68330", 1},
   {cpu32|m68881,				cpu32_ctrl, "68331", 1},
@@ -576,24 +580,24 @@ static const struct m68k_cpu m68k_cpus[] =
   {cpu32|m68881,				cpu32_ctrl, "68360", 1},
 
   {mcfisa_a|mcfisa_c|mcfusp,                    mcf51qe_ctrl, "51qe", 0},
-  
+
   {mcfisa_a,					mcf_ctrl, "5200", 0},
   {mcfisa_a,					mcf_ctrl, "5202", 1},
   {mcfisa_a,					mcf_ctrl, "5204", 1},
   {mcfisa_a,					mcf5206_ctrl, "5206", 1},
-  
+
   {mcfisa_a|mcfhwdiv|mcfmac,			mcf5206_ctrl, "5206e", 0},
-  
+
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5208_ctrl, "5207", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5208_ctrl, "5208", 0},
-  
+
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5210a_ctrl, "5210a", 0},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5210a_ctrl, "5211a", 1},
-  
+
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5213_ctrl, "5211", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5213_ctrl, "5212", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5213_ctrl, "5213", 0},
-  
+
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5216_ctrl, "5214", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5216_ctrl, "5216", 0},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5216_ctrl, "521x", 2},
@@ -605,10 +609,10 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,  mcf52235_ctrl, "52233", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,  mcf52235_ctrl, "52234", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,  mcf52235_ctrl, "52235", 0},
-  
+
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,   mcf5225_ctrl, "5224", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,   mcf5225_ctrl, "5225", 0},
-  
+
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5235_ctrl, "5232", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5235_ctrl, "5233", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5235_ctrl, "5234", -1},
@@ -832,6 +836,7 @@ const pseudo_typeS md_pseudo_table[] =
 #endif
 #ifdef OBJ_ELF
   {"swbeg", s_ignore, 0},
+  {"long", m68k_elf_cons, 4},
 #endif
   {"extend", float_cons, 'x'},
   {"ldouble", float_cons, 'x'},
@@ -1004,6 +1009,66 @@ get_reloc_code (int size, int pcrel, enum pic_relocation pic)
 	}
       break;
 
+    case pic_tls_gd:
+      switch (size)
+	{
+	case 1:
+	  return BFD_RELOC_68K_TLS_GD8;
+	case 2:
+	  return BFD_RELOC_68K_TLS_GD16;
+	case 4:
+	  return BFD_RELOC_68K_TLS_GD32;
+	}
+      break;
+
+    case pic_tls_ldm:
+      switch (size)
+	{
+	case 1:
+	  return BFD_RELOC_68K_TLS_LDM8;
+	case 2:
+	  return BFD_RELOC_68K_TLS_LDM16;
+	case 4:
+	  return BFD_RELOC_68K_TLS_LDM32;
+	}
+      break;
+
+    case pic_tls_ldo:
+      switch (size)
+	{
+	case 1:
+	  return BFD_RELOC_68K_TLS_LDO8;
+	case 2:
+	  return BFD_RELOC_68K_TLS_LDO16;
+	case 4:
+	  return BFD_RELOC_68K_TLS_LDO32;
+	}
+      break;
+
+    case pic_tls_ie:
+      switch (size)
+	{
+	case 1:
+	  return BFD_RELOC_68K_TLS_IE8;
+	case 2:
+	  return BFD_RELOC_68K_TLS_IE16;
+	case 4:
+	  return BFD_RELOC_68K_TLS_IE32;
+	}
+      break;
+
+    case pic_tls_le:
+      switch (size)
+	{
+	case 1:
+	  return BFD_RELOC_68K_TLS_LE8;
+	case 2:
+	  return BFD_RELOC_68K_TLS_LE16;
+	case 4:
+	  return BFD_RELOC_68K_TLS_LE32;
+	}
+      break;
+
     case pic_none:
       if (pcrel)
 	{
@@ -1072,6 +1137,21 @@ tc_m68k_fix_adjustable (fixS *fixP)
     case BFD_RELOC_8_PLTOFF:
     case BFD_RELOC_16_PLTOFF:
     case BFD_RELOC_32_PLTOFF:
+    case BFD_RELOC_68K_TLS_GD32:
+    case BFD_RELOC_68K_TLS_GD16:
+    case BFD_RELOC_68K_TLS_GD8:
+    case BFD_RELOC_68K_TLS_LDM32:
+    case BFD_RELOC_68K_TLS_LDM16:
+    case BFD_RELOC_68K_TLS_LDM8:
+    case BFD_RELOC_68K_TLS_LDO32:
+    case BFD_RELOC_68K_TLS_LDO16:
+    case BFD_RELOC_68K_TLS_LDO8:
+    case BFD_RELOC_68K_TLS_IE32:
+    case BFD_RELOC_68K_TLS_IE16:
+    case BFD_RELOC_68K_TLS_IE8:
+    case BFD_RELOC_68K_TLS_LE32:
+    case BFD_RELOC_68K_TLS_LE16:
+    case BFD_RELOC_68K_TLS_LE8:
       return 0;
 
     case BFD_RELOC_VTABLE_INHERIT:
@@ -1149,6 +1229,21 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	    case BFD_RELOC_8_PLTOFF:
 	    case BFD_RELOC_16_PLTOFF:
 	    case BFD_RELOC_32_PLTOFF:
+	    case BFD_RELOC_68K_TLS_GD32:
+	    case BFD_RELOC_68K_TLS_GD16:
+	    case BFD_RELOC_68K_TLS_GD8:
+	    case BFD_RELOC_68K_TLS_LDM32:
+	    case BFD_RELOC_68K_TLS_LDM16:
+	    case BFD_RELOC_68K_TLS_LDM8:
+	    case BFD_RELOC_68K_TLS_LDO32:
+	    case BFD_RELOC_68K_TLS_LDO16:
+	    case BFD_RELOC_68K_TLS_LDO8:
+	    case BFD_RELOC_68K_TLS_IE32:
+	    case BFD_RELOC_68K_TLS_IE16:
+	    case BFD_RELOC_68K_TLS_IE8:
+	    case BFD_RELOC_68K_TLS_LE32:
+	    case BFD_RELOC_68K_TLS_LE16:
+	    case BFD_RELOC_68K_TLS_LE8:
 	      break;
 	    default:
 	      as_bad_where (fixp->fx_file, fixp->fx_line,
@@ -4726,6 +4821,31 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  && !S_IS_DEFINED (fixP->fx_addsy)
 	  && !S_IS_WEAK (fixP->fx_addsy))
 	S_SET_WEAK (fixP->fx_addsy);
+
+      switch (fixP->fx_r_type)
+	{
+	case BFD_RELOC_68K_TLS_GD32:
+	case BFD_RELOC_68K_TLS_GD16:
+	case BFD_RELOC_68K_TLS_GD8:
+	case BFD_RELOC_68K_TLS_LDM32:
+	case BFD_RELOC_68K_TLS_LDM16:
+	case BFD_RELOC_68K_TLS_LDM8:
+	case BFD_RELOC_68K_TLS_LDO32:
+	case BFD_RELOC_68K_TLS_LDO16:
+	case BFD_RELOC_68K_TLS_LDO8:
+	case BFD_RELOC_68K_TLS_IE32:
+	case BFD_RELOC_68K_TLS_IE16:
+	case BFD_RELOC_68K_TLS_IE8:
+	case BFD_RELOC_68K_TLS_LE32:
+	case BFD_RELOC_68K_TLS_LE16:
+	case BFD_RELOC_68K_TLS_LE8:
+	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
+	  break;
+
+	default:
+	  break;
+	}
+
       return;
     }
 #elif defined(OBJ_AOUT)
@@ -7775,6 +7895,115 @@ m68k_elf_final_processing (void)
 	}
     }
   elf_elfheader (stdoutput)->e_flags |= flags;
+}
+
+/* Parse @TLSLDO and return the desired relocation.  */
+static bfd_reloc_code_real_type
+m68k_elf_suffix (char **str_p, expressionS *exp_p)
+{
+  char ident[20];
+  char *str = *str_p;
+  char *str2;
+  int ch;
+  int len;
+
+  if (*str++ != '@')
+    return BFD_RELOC_UNUSED;
+
+  for (ch = *str, str2 = ident;
+       (str2 < ident + sizeof (ident) - 1
+	&& (ISALNUM (ch) || ch == '@'));
+       ch = *++str)
+    {
+      *str2++ = ch;
+    }
+
+  *str2 = '\0';
+  len = str2 - ident;
+
+  if (strncmp (ident, "TLSLDO", 6) == 0
+      && len == 6)
+    {
+      /* Now check for identifier@suffix+constant.  */
+      if (*str == '-' || *str == '+')
+	{
+	  char *orig_line = input_line_pointer;
+	  expressionS new_exp;
+
+	  input_line_pointer = str;
+	  expression (&new_exp);
+	  if (new_exp.X_op == O_constant)
+	    {
+	      exp_p->X_add_number += new_exp.X_add_number;
+	      str = input_line_pointer;
+	    }
+
+	  if (&input_line_pointer != str_p)
+	    input_line_pointer = orig_line;
+	}
+      *str_p = str;
+
+      return BFD_RELOC_68K_TLS_LDO32;
+      }
+
+  return BFD_RELOC_UNUSED;
+}
+
+/* Handles .long <tls_symbol>+0x8000 debug info.
+   Clobbers input_line_pointer, checks end-of-line.
+   Adapted from tc-ppc.c:ppc_elf_cons.  */
+static void
+m68k_elf_cons (int nbytes /* 4=.long */)
+{
+  if (is_it_end_of_statement ())
+    {
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  do
+    {
+      expressionS exp;
+      bfd_reloc_code_real_type reloc;
+
+      expression (&exp);
+      if (exp.X_op == O_symbol
+	  && *input_line_pointer == '@'
+	  && (reloc = m68k_elf_suffix (&input_line_pointer,
+				      &exp)) != BFD_RELOC_UNUSED)
+	{
+	  reloc_howto_type *reloc_howto;
+	  int size;
+
+	  reloc_howto = bfd_reloc_type_lookup (stdoutput, reloc);
+	  size = bfd_get_reloc_size (reloc_howto);
+
+	  if (size > nbytes)
+	    {
+	      as_bad (_("%s relocations do not fit in %d bytes\n"),
+		      reloc_howto->name, nbytes);
+	    }
+	  else
+	    {
+	      char *p;
+	      int offset;
+
+	      p = frag_more (nbytes);
+	      offset = 0;
+	      if (target_big_endian)
+		offset = nbytes - size;
+	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size,
+			   &exp, 0, reloc);
+	    }
+	}
+      else
+	emit_expr (&exp, (unsigned int) nbytes);
+    }
+  while (*input_line_pointer++ == ',');
+
+  /* Put terminator back into stream.  */
+  input_line_pointer--;
+  demand_empty_rest_of_line ();
 }
 #endif
 

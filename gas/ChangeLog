@@ -1,3 +1,15 @@
+2009-02-03  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* config/m68k-parse.h (enum pic_relocation): Add values for TLS
+	relocations.
+	* config/m68k-parse.y (yylex): Parse TLS relocations.
+	* config/tc-m68k.c (m68k_elf_cons): New static function.
+	(md_pseudo_table): Use it.
+	(get_reloc_code, tc_m68k_fix_adjustable, tc_gen_reloc): Handle TLS
+	relocations.
+	(md_apply_fix): Fix to set thread local flag.
+	(m68k_elf_suffix): New static function; helper for m68k_elf_cons.
+
 2009-02-03  Vince Weaver <vince@csl.cornell.edu>
 
 	PR 9779

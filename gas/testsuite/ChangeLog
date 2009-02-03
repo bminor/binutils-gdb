@@ -1,3 +1,8 @@
+2009-02-03  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* gas/m68k/tls-gd-3.d, gas/m68k/tls-gd-3.s: New test.
+	* gas/m68k/all.exp: Run it.
+
 2009-01-29  Mark Mitchell  <mark@codesourcery.com>
 
 	* gas/arm/copro.s: Avoid using r15 where not permitted.

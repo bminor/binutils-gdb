@@ -86,6 +86,10 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
 	    pass $testname
 	}
     }
+
+    if { [istarget m68k-*-linux*] } then {
+      run_dump_test tls-gd-3
+    }
 }
 if [info exists errorInfo] then {
     unset errorInfo

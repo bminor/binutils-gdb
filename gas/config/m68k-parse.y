@@ -1010,7 +1010,20 @@ yylex ()
 
     yylval.exp.pic_reloc = pic_none;
     cp = s - tail;
-    if (cp - 6 > str && cp[-6] == '@')
+    if (cp - 7 > str && cp[-7] == '@')
+      {
+	if (strncmp (cp - 7, "@TLSLDM", 7) == 0)
+	  {
+	    yylval.exp.pic_reloc = pic_tls_ldm;
+	    tail += 7;
+	  }
+	else if (strncmp (cp - 7, "@TLSLDO", 7) == 0)
+	  {
+	    yylval.exp.pic_reloc = pic_tls_ldo;
+	    tail += 7;
+	  }
+      }
+    else if (cp - 6 > str && cp[-6] == '@')
       {
 	if (strncmp (cp - 6, "@PLTPC", 6) == 0)
 	  {
@@ -1022,6 +1035,21 @@ yylex ()
 	    yylval.exp.pic_reloc = pic_got_pcrel;
 	    tail += 6;
 	  }
+	else if (strncmp (cp - 6, "@TLSGD", 6) == 0)
+	  {
+	    yylval.exp.pic_reloc = pic_tls_gd;
+	    tail += 6;
+	  }
+	else if (strncmp (cp - 6, "@TLSIE", 6) == 0)
+	  {
+	    yylval.exp.pic_reloc = pic_tls_ie;
+	    tail += 6;
+	  }	
+	else if (strncmp (cp - 6, "@TLSLE", 6) == 0)
+	  {
+	    yylval.exp.pic_reloc = pic_tls_le;
+	    tail += 6;
+	  }	
       }
     else if (cp - 4 > str && cp[-4] == '@')
       {

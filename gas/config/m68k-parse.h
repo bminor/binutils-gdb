@@ -270,7 +270,12 @@ enum pic_relocation
   pic_plt_pcrel,		/* @PLTPC */
   pic_got_pcrel,		/* @GOTPC */
   pic_plt_off,			/* @PLT */
-  pic_got_off			/* @GOT */
+  pic_got_off,			/* @GOT */
+  pic_tls_gd,			/* @TLSGD */
+  pic_tls_ldm,			/* @TLSLDM */
+  pic_tls_ldo,			/* @TLSLDO */
+  pic_tls_ie,			/* @TLSIE */
+  pic_tls_le			/* @TLSLE */
 };
 #endif
 
