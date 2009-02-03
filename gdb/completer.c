@@ -371,6 +371,7 @@ add_struct_fields (struct type *type, int *nextp, char **output,
 		   char *fieldname, int namelen)
 {
   int i;
+  int computed_type_name = 0;
   char *type_name = NULL;
 
   CHECK_TYPEDEF (type);
@@ -392,10 +393,13 @@ add_struct_fields (struct type *type, int *nextp, char **output,
       char *name = TYPE_FN_FIELDLIST_NAME (type, i);
       if (name && ! strncmp (name, fieldname, namelen))
 	{
-	  if (!type_name)
-	    type_name = type_name_no_tag (type);
+	  if (!computed_type_name)
+	    {
+	      type_name = type_name_no_tag (type);
+	      computed_type_name = 1;
+	    }
 	  /* Omit constructors from the completion list.  */
-	  if (strcmp (type_name, name))
+	  if (type_name && strcmp (type_name, name))
 	    {
 	      output[*nextp] = xstrdup (name);
 	      ++*nextp;

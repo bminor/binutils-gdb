@@ -1,3 +1,8 @@
+2009-02-03  Tom Tromey  <tromey@redhat.com>
+
+	* completer.c (add_struct_fields): Check type_name against NULL
+	before use.
+
 2009-02-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS: Update Elena's email address.
