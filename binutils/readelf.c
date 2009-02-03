@@ -50,25 +50,6 @@
 #include <zlib.h>
 #endif
 
-/* For PATH_MAX.  */
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
-
-#ifndef PATH_MAX
-/* For MAXPATHLEN.  */
-# ifdef HAVE_SYS_PARAM_H
-#  include <sys/param.h>
-# endif
-# ifndef PATH_MAX
-#  ifdef MAXPATHLEN
-#   define PATH_MAX MAXPATHLEN
-#  else
-#   define PATH_MAX 1024
-#  endif
-# endif
-#endif
-
 #if __GNUC__ >= 2
 /* Define BFD64 here, even if our default architecture is 32 bit ELF
    as this will allow us to read in and parse 64bit and 32bit ELF files.

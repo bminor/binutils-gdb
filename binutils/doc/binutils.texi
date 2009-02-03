@@ -1614,6 +1614,8 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--[no-]show-raw-insn}]
         [@option{--adjust-vma=}@var{offset}]
         [@option{--special-syms}]
+        [@option{--prefix=}@var{prefix}]
+        [@option{--prefix-strip=}@var{level}]
         [@option{-V}|@option{--version}]
         [@option{-H}|@option{--help}]
         @var{objfile}@dots{}
@@ -1935,6 +1937,16 @@ non-empty sections are displayed.
 @cindex disassembly, with source
 Display source code intermixed with disassembly, if possible.  Implies
 @option{-d}.
+
+@item --prefix=@var{prefix}
+@cindex Add prefix to absolute paths
+Specify @var{prefix} to add to the absolute paths when used with
+@option{-S}. 
+
+@item --prefix-strip=@var{level}
+@cindex Strip absolute paths
+Indicate how many initial directory names to strip off the hardwired
+absolute paths. It has no effect without @option{--prefix=}@var{prefix}.
 
 @item --show-raw-insn
 When disassembling instructions, print the instruction in hex as well as

@@ -174,4 +174,23 @@ void *alloca ();
 /* Used by ar.c and objcopy.c.  */
 #define BUFSIZE 8192
 
+/* For PATH_MAX.  */
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
+#ifndef PATH_MAX
+/* For MAXPATHLEN.  */
+# ifdef HAVE_SYS_PARAM_H
+#  include <sys/param.h>
+# endif
+# ifndef PATH_MAX
+#  ifdef MAXPATHLEN
+#   define PATH_MAX MAXPATHLEN
+#  else
+#   define PATH_MAX 1024
+#  endif
+# endif
+#endif
+
 #endif /* _BIN_SYSDEP_H */

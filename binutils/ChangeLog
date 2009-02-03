@@ -1,3 +1,24 @@
+2009-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/9784
+	* NEWS: Mention --prefix=PREFIX and --prefix-strip=LEVEL.
+
+	* doc/binutils.texi: Document --prefix=PREFIX and
+	--prefix-strip=LEVEL.
+
+	* objdump.c: Include "filenames.h".
+	(prefix): New.
+	(prefix_strip): Likewise.
+	(prefix_length): Likewise.
+	(usage): Add --prefix=PREFIX and --prefix-strip=LEVEL.
+	(option_values): Add OPTION_PREFIX and OPTION_PREFIX_STRIP.
+	(long_options): Likewise.
+	(show_line): Handle prefix and prefix_strip.
+	(main): Handle OPTION_PREFIX and OPTION_PREFIX_STRIP.
+
+	* readelf.c (PATH_MAX): Moved to ...
+	* sysdep.h: Here.
+
 2009-01-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* NEWS: Mention --as-needed change.

@@ -61,6 +61,7 @@
 #include "dis-asm.h"
 #include "libiberty.h"
 #include "demangle.h"
+#include "filenames.h"
 #include "debug.h"
 #include "budbg.h"
 
@@ -111,6 +112,9 @@ static int dump_special_syms = 0;	/* --special-syms */
 static bfd_vma adjust_section_vma = 0;	/* --adjust-vma */
 static int file_start_context = 0;      /* --file-start-context */
 static bfd_boolean display_file_offsets;/* -F */
+static const char *prefix;		/* --prefix */
+static int prefix_strip;		/* --prefix-strip */
+static size_t prefix_length;
 
 /* Pointer to an array of section names provided by
    one or more "-j secname" command line options.  */
@@ -231,6 +235,8 @@ usage (FILE *stream, int status)
       --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n\
       --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n\
       --special-syms             Include special symbols in symbol dumps\n\
+      --prefix=PREFIX            Add PREFIX to absolute paths for -S\n\
+      --prefix-strip=LEVEL       Strip initial directory names for -S\n\
 \n"));
       list_supported_targets (program_name, stream);
       list_supported_architectures (program_name, stream);
@@ -248,6 +254,8 @@ enum option_values
     OPTION_ENDIAN=150,
     OPTION_START_ADDRESS,
     OPTION_STOP_ADDRESS,
+    OPTION_PREFIX,
+    OPTION_PREFIX_STRIP,
     OPTION_ADJUST_VMA
   };
 
@@ -293,6 +301,8 @@ static struct option long_options[]=
   {"target", required_argument, NULL, 'b'},
   {"version", no_argument, NULL, 'V'},
   {"wide", no_argument, NULL, 'w'},
+  {"prefix", required_argument, NULL, OPTION_PREFIX},
+  {"prefix-strip", required_argument, NULL, OPTION_PREFIX_STRIP},
   {0, no_argument, 0, 0}
 };
 
@@ -1190,6 +1200,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
   const char *filename;
   const char *functionname;
   unsigned int line;
+  bfd_boolean reloc;
 
   if (! with_line_numbers && ! with_source_code)
     return;
@@ -1202,6 +1213,44 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
     filename = NULL;
   if (functionname != NULL && *functionname == '\0')
     functionname = NULL;
+
+  if (filename
+      && IS_ABSOLUTE_PATH (filename)
+      && prefix)
+    {
+      char *path_up;
+      const char *fname = filename;
+      char *path = (char *) alloca (prefix_length + PATH_MAX + 1);
+
+      if (prefix_length)
+	memcpy (path, prefix, prefix_length);
+      path_up = path + prefix_length;
+
+      /* Build relocated filename, stripping off leading directories
+	 from the initial filename if requested. */
+      if (prefix_strip > 0)
+	{
+	  int level = 0;
+	  const char *s;
+
+	  /* Skip selected directory levels. */
+	  for (s = fname + 1; *s != '\0' && level < prefix_strip; s++)
+	    if (IS_DIR_SEPARATOR(*s))
+	      {
+		fname = s;
+		level++;
+	      }
+	}
+
+      /* Update complete filename. */
+      strncpy (path_up, fname, PATH_MAX);
+      path_up[PATH_MAX] = '\0';
+
+      filename = path;
+      reloc = TRUE;
+    }
+  else
+    reloc = FALSE;
 
   if (with_line_numbers)
     {
@@ -1226,7 +1275,11 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
       p = *pp;
 
       if (p == NULL)
+	{
+	  if (reloc)
+	    filename = xstrdup (filename);
 	  p = update_source_path (filename);
+	}
 
       if (p != NULL && line != p->last_line)
 	{
@@ -3160,6 +3213,18 @@ main (int argc, char **argv)
 	  stop_address = parse_vma (optarg, "--stop-address");
 	  if ((start_address != (bfd_vma) -1) && stop_address <= start_address)
 	    fatal (_("error: the stop address should be after the start address"));
+	  break;
+	case OPTION_PREFIX:
+	  prefix = optarg;
+	  prefix_length = strlen (prefix);
+	  /* Remove an unnecessary trailing '/' */
+	  while (IS_DIR_SEPARATOR (prefix[prefix_length - 1]))
+	    prefix_length--;
+	  break;
+	case OPTION_PREFIX_STRIP:
+	  prefix_strip = atoi (optarg);
+	  if (prefix_strip < 0)
+	    fatal (_("error: prefix strip must be non-negative"));
 	  break;
 	case 'E':
 	  if (strcmp (optarg, "B") == 0)
