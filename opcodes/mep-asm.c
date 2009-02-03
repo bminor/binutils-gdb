@@ -83,22 +83,6 @@ parse_csrn (CGEN_CPU_DESC cd, const char **strp,
 }
 
 /* begin-cop-ip-parse-handlers */
-static const char *
-parse_fmax_cr (CGEN_CPU_DESC cd,
-	const char **strp,
-	CGEN_KEYWORD *keyword_table  ATTRIBUTE_UNUSED,
-	long *field)
-{
-  return cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_cr_fmax, field);
-}
-static const char *
-parse_fmax_ccr (CGEN_CPU_DESC cd,
-	const char **strp,
-	CGEN_KEYWORD *keyword_table  ATTRIBUTE_UNUSED,
-	long *field)
-{
-  return cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_fmax, field);
-}
 /* end-cop-ip-parse-handlers */
 
 const char *
@@ -808,27 +792,6 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
       break;
     case MEP_OPERAND_EXC :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_csr, & junk);
-      break;
-    case MEP_OPERAND_FMAX_CCRN :
-      errmsg = parse_fmax_ccr (cd, strp, & mep_cgen_opval_h_ccr, & fields->f_fmax_4_4);
-      break;
-    case MEP_OPERAND_FMAX_FRD :
-      errmsg = parse_fmax_cr (cd, strp, & mep_cgen_opval_h_cr, & fields->f_fmax_frd);
-      break;
-    case MEP_OPERAND_FMAX_FRD_INT :
-      errmsg = parse_fmax_cr (cd, strp, & mep_cgen_opval_h_cr, & fields->f_fmax_frd);
-      break;
-    case MEP_OPERAND_FMAX_FRM :
-      errmsg = parse_fmax_cr (cd, strp, & mep_cgen_opval_h_cr, & fields->f_fmax_frm);
-      break;
-    case MEP_OPERAND_FMAX_FRN :
-      errmsg = parse_fmax_cr (cd, strp, & mep_cgen_opval_h_cr, & fields->f_fmax_frn);
-      break;
-    case MEP_OPERAND_FMAX_FRN_INT :
-      errmsg = parse_fmax_cr (cd, strp, & mep_cgen_opval_h_cr, & fields->f_fmax_frn);
-      break;
-    case MEP_OPERAND_FMAX_RM :
-      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_gpr, & fields->f_fmax_rm);
       break;
     case MEP_OPERAND_HI :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_csr, & junk);

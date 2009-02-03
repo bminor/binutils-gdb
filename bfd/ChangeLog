@@ -1,3 +1,7 @@
+2009-02-02  DJ Delorie  <dj@redhat.com>
+
+	* elf32-mep.c (config_names): Regenerate configuration.
+
 2009-02-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (bfd_elf_get_str_section): Don't declare.

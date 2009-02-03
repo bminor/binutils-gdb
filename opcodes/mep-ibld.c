@@ -737,82 +737,6 @@ mep_cgen_insert_operand (CGEN_CPU_DESC cd,
       break;
     case MEP_OPERAND_EXC :
       break;
-    case MEP_OPERAND_FMAX_CCRN :
-      errmsg = insert_normal (cd, fields->f_fmax_4_4, 0, 0, 4, 4, 32, total_length, buffer);
-      break;
-    case MEP_OPERAND_FMAX_FRD :
-      {
-{
-  FLD (f_fmax_4_4) = ((FLD (f_fmax_frd)) & (15));
-  FLD (f_fmax_28_1) = ((unsigned int) (FLD (f_fmax_frd)) >> (4));
-}
-        errmsg = insert_normal (cd, fields->f_fmax_28_1, 0, 0, 28, 1, 32, total_length, buffer);
-        if (errmsg)
-          break;
-        errmsg = insert_normal (cd, fields->f_fmax_4_4, 0, 0, 4, 4, 32, total_length, buffer);
-        if (errmsg)
-          break;
-      }
-      break;
-    case MEP_OPERAND_FMAX_FRD_INT :
-      {
-{
-  FLD (f_fmax_4_4) = ((FLD (f_fmax_frd)) & (15));
-  FLD (f_fmax_28_1) = ((unsigned int) (FLD (f_fmax_frd)) >> (4));
-}
-        errmsg = insert_normal (cd, fields->f_fmax_28_1, 0, 0, 28, 1, 32, total_length, buffer);
-        if (errmsg)
-          break;
-        errmsg = insert_normal (cd, fields->f_fmax_4_4, 0, 0, 4, 4, 32, total_length, buffer);
-        if (errmsg)
-          break;
-      }
-      break;
-    case MEP_OPERAND_FMAX_FRM :
-      {
-{
-  FLD (f_fmax_24_4) = ((FLD (f_fmax_frm)) & (15));
-  FLD (f_fmax_30_1) = ((unsigned int) (FLD (f_fmax_frm)) >> (4));
-}
-        errmsg = insert_normal (cd, fields->f_fmax_30_1, 0, 0, 30, 1, 32, total_length, buffer);
-        if (errmsg)
-          break;
-        errmsg = insert_normal (cd, fields->f_fmax_24_4, 0, 0, 24, 4, 32, total_length, buffer);
-        if (errmsg)
-          break;
-      }
-      break;
-    case MEP_OPERAND_FMAX_FRN :
-      {
-{
-  FLD (f_fmax_20_4) = ((FLD (f_fmax_frn)) & (15));
-  FLD (f_fmax_29_1) = ((unsigned int) (FLD (f_fmax_frn)) >> (4));
-}
-        errmsg = insert_normal (cd, fields->f_fmax_29_1, 0, 0, 29, 1, 32, total_length, buffer);
-        if (errmsg)
-          break;
-        errmsg = insert_normal (cd, fields->f_fmax_20_4, 0, 0, 20, 4, 32, total_length, buffer);
-        if (errmsg)
-          break;
-      }
-      break;
-    case MEP_OPERAND_FMAX_FRN_INT :
-      {
-{
-  FLD (f_fmax_20_4) = ((FLD (f_fmax_frn)) & (15));
-  FLD (f_fmax_29_1) = ((unsigned int) (FLD (f_fmax_frn)) >> (4));
-}
-        errmsg = insert_normal (cd, fields->f_fmax_29_1, 0, 0, 29, 1, 32, total_length, buffer);
-        if (errmsg)
-          break;
-        errmsg = insert_normal (cd, fields->f_fmax_20_4, 0, 0, 20, 4, 32, total_length, buffer);
-        if (errmsg)
-          break;
-      }
-      break;
-    case MEP_OPERAND_FMAX_RM :
-      errmsg = insert_normal (cd, fields->f_fmax_rm, 0, 0, 8, 4, 32, total_length, buffer);
-      break;
     case MEP_OPERAND_HI :
       break;
     case MEP_OPERAND_LO :
@@ -1192,57 +1116,6 @@ mep_cgen_extract_operand (CGEN_CPU_DESC cd,
       break;
     case MEP_OPERAND_EXC :
       break;
-    case MEP_OPERAND_FMAX_CCRN :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 4, 4, 32, total_length, pc, & fields->f_fmax_4_4);
-      break;
-    case MEP_OPERAND_FMAX_FRD :
-      {
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 28, 1, 32, total_length, pc, & fields->f_fmax_28_1);
-        if (length <= 0) break;
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 4, 4, 32, total_length, pc, & fields->f_fmax_4_4);
-        if (length <= 0) break;
-  FLD (f_fmax_frd) = ((((FLD (f_fmax_28_1)) << (4))) | (FLD (f_fmax_4_4)));
-      }
-      break;
-    case MEP_OPERAND_FMAX_FRD_INT :
-      {
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 28, 1, 32, total_length, pc, & fields->f_fmax_28_1);
-        if (length <= 0) break;
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 4, 4, 32, total_length, pc, & fields->f_fmax_4_4);
-        if (length <= 0) break;
-  FLD (f_fmax_frd) = ((((FLD (f_fmax_28_1)) << (4))) | (FLD (f_fmax_4_4)));
-      }
-      break;
-    case MEP_OPERAND_FMAX_FRM :
-      {
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 30, 1, 32, total_length, pc, & fields->f_fmax_30_1);
-        if (length <= 0) break;
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 24, 4, 32, total_length, pc, & fields->f_fmax_24_4);
-        if (length <= 0) break;
-  FLD (f_fmax_frm) = ((((FLD (f_fmax_30_1)) << (4))) | (FLD (f_fmax_24_4)));
-      }
-      break;
-    case MEP_OPERAND_FMAX_FRN :
-      {
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 29, 1, 32, total_length, pc, & fields->f_fmax_29_1);
-        if (length <= 0) break;
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 20, 4, 32, total_length, pc, & fields->f_fmax_20_4);
-        if (length <= 0) break;
-  FLD (f_fmax_frn) = ((((FLD (f_fmax_29_1)) << (4))) | (FLD (f_fmax_20_4)));
-      }
-      break;
-    case MEP_OPERAND_FMAX_FRN_INT :
-      {
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 29, 1, 32, total_length, pc, & fields->f_fmax_29_1);
-        if (length <= 0) break;
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 20, 4, 32, total_length, pc, & fields->f_fmax_20_4);
-        if (length <= 0) break;
-  FLD (f_fmax_frn) = ((((FLD (f_fmax_29_1)) << (4))) | (FLD (f_fmax_20_4)));
-      }
-      break;
-    case MEP_OPERAND_FMAX_RM :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 8, 4, 32, total_length, pc, & fields->f_fmax_rm);
-      break;
     case MEP_OPERAND_HI :
       break;
     case MEP_OPERAND_LO :
@@ -1545,27 +1418,6 @@ mep_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MEP_OPERAND_EXC :
       value = 0;
       break;
-    case MEP_OPERAND_FMAX_CCRN :
-      value = fields->f_fmax_4_4;
-      break;
-    case MEP_OPERAND_FMAX_FRD :
-      value = fields->f_fmax_frd;
-      break;
-    case MEP_OPERAND_FMAX_FRD_INT :
-      value = fields->f_fmax_frd;
-      break;
-    case MEP_OPERAND_FMAX_FRM :
-      value = fields->f_fmax_frm;
-      break;
-    case MEP_OPERAND_FMAX_FRN :
-      value = fields->f_fmax_frn;
-      break;
-    case MEP_OPERAND_FMAX_FRN_INT :
-      value = fields->f_fmax_frn;
-      break;
-    case MEP_OPERAND_FMAX_RM :
-      value = fields->f_fmax_rm;
-      break;
     case MEP_OPERAND_HI :
       value = 0;
       break;
@@ -1819,27 +1671,6 @@ mep_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MEP_OPERAND_EXC :
       value = 0;
-      break;
-    case MEP_OPERAND_FMAX_CCRN :
-      value = fields->f_fmax_4_4;
-      break;
-    case MEP_OPERAND_FMAX_FRD :
-      value = fields->f_fmax_frd;
-      break;
-    case MEP_OPERAND_FMAX_FRD_INT :
-      value = fields->f_fmax_frd;
-      break;
-    case MEP_OPERAND_FMAX_FRM :
-      value = fields->f_fmax_frm;
-      break;
-    case MEP_OPERAND_FMAX_FRN :
-      value = fields->f_fmax_frn;
-      break;
-    case MEP_OPERAND_FMAX_FRN_INT :
-      value = fields->f_fmax_frn;
-      break;
-    case MEP_OPERAND_FMAX_RM :
-      value = fields->f_fmax_rm;
       break;
     case MEP_OPERAND_HI :
       value = 0;
@@ -2097,27 +1928,6 @@ mep_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MEP_OPERAND_EXC :
       break;
-    case MEP_OPERAND_FMAX_CCRN :
-      fields->f_fmax_4_4 = value;
-      break;
-    case MEP_OPERAND_FMAX_FRD :
-      fields->f_fmax_frd = value;
-      break;
-    case MEP_OPERAND_FMAX_FRD_INT :
-      fields->f_fmax_frd = value;
-      break;
-    case MEP_OPERAND_FMAX_FRM :
-      fields->f_fmax_frm = value;
-      break;
-    case MEP_OPERAND_FMAX_FRN :
-      fields->f_fmax_frn = value;
-      break;
-    case MEP_OPERAND_FMAX_FRN_INT :
-      fields->f_fmax_frn = value;
-      break;
-    case MEP_OPERAND_FMAX_RM :
-      fields->f_fmax_rm = value;
-      break;
     case MEP_OPERAND_HI :
       break;
     case MEP_OPERAND_LO :
@@ -2345,27 +2155,6 @@ mep_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MEP_OPERAND_EPC :
       break;
     case MEP_OPERAND_EXC :
-      break;
-    case MEP_OPERAND_FMAX_CCRN :
-      fields->f_fmax_4_4 = value;
-      break;
-    case MEP_OPERAND_FMAX_FRD :
-      fields->f_fmax_frd = value;
-      break;
-    case MEP_OPERAND_FMAX_FRD_INT :
-      fields->f_fmax_frd = value;
-      break;
-    case MEP_OPERAND_FMAX_FRM :
-      fields->f_fmax_frm = value;
-      break;
-    case MEP_OPERAND_FMAX_FRN :
-      fields->f_fmax_frn = value;
-      break;
-    case MEP_OPERAND_FMAX_FRN_INT :
-      fields->f_fmax_frn = value;
-      break;
-    case MEP_OPERAND_FMAX_RM :
-      fields->f_fmax_rm = value;
       break;
     case MEP_OPERAND_HI :
       break;

@@ -89,24 +89,6 @@ print_spreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, PTR dis_info,
 }
 
 /* begin-cop-ip-print-handlers */
-static void
-print_fmax_cr (CGEN_CPU_DESC cd,
-	void *dis_info,
-	CGEN_KEYWORD *keyword_table ATTRIBUTE_UNUSED,
-	long value,
-	unsigned int attrs)
-{
-  print_keyword (cd, dis_info, & mep_cgen_opval_h_cr_fmax, value, attrs);
-}
-static void
-print_fmax_ccr (CGEN_CPU_DESC cd,
-	void *dis_info,
-	CGEN_KEYWORD *keyword_table ATTRIBUTE_UNUSED,
-	long value,
-	unsigned int attrs)
-{
-  print_keyword (cd, dis_info, & mep_cgen_opval_h_ccr_fmax, value, attrs);
-}
 /* end-cop-ip-print-handlers */
 
 /************************************************************\
@@ -583,27 +565,6 @@ mep_cgen_print_operand (CGEN_CPU_DESC cd,
       break;
     case MEP_OPERAND_EXC :
       print_keyword (cd, info, & mep_cgen_opval_h_csr, 0, 0);
-      break;
-    case MEP_OPERAND_FMAX_CCRN :
-      print_fmax_ccr (cd, info, & mep_cgen_opval_h_ccr, fields->f_fmax_4_4, 0);
-      break;
-    case MEP_OPERAND_FMAX_FRD :
-      print_fmax_cr (cd, info, & mep_cgen_opval_h_cr, fields->f_fmax_frd, 0|(1<<CGEN_OPERAND_VIRTUAL));
-      break;
-    case MEP_OPERAND_FMAX_FRD_INT :
-      print_fmax_cr (cd, info, & mep_cgen_opval_h_cr, fields->f_fmax_frd, 0|(1<<CGEN_OPERAND_VIRTUAL));
-      break;
-    case MEP_OPERAND_FMAX_FRM :
-      print_fmax_cr (cd, info, & mep_cgen_opval_h_cr, fields->f_fmax_frm, 0|(1<<CGEN_OPERAND_VIRTUAL));
-      break;
-    case MEP_OPERAND_FMAX_FRN :
-      print_fmax_cr (cd, info, & mep_cgen_opval_h_cr, fields->f_fmax_frn, 0|(1<<CGEN_OPERAND_VIRTUAL));
-      break;
-    case MEP_OPERAND_FMAX_FRN_INT :
-      print_fmax_cr (cd, info, & mep_cgen_opval_h_cr, fields->f_fmax_frn, 0|(1<<CGEN_OPERAND_VIRTUAL));
-      break;
-    case MEP_OPERAND_FMAX_RM :
-      print_keyword (cd, info, & mep_cgen_opval_h_gpr, fields->f_fmax_rm, 0);
       break;
     case MEP_OPERAND_HI :
       print_keyword (cd, info, & mep_cgen_opval_h_csr, 0, 0);

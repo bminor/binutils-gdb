@@ -148,22 +148,13 @@ typedef enum cgen_insn_type {
  , MEP_INSN_RI_15, MEP_INSN_RI_17, MEP_INSN_RI_20, MEP_INSN_RI_21
  , MEP_INSN_RI_22, MEP_INSN_RI_23, MEP_INSN_RI_24, MEP_INSN_RI_25
  , MEP_INSN_RI_26, MEP_INSN_RI_16, MEP_INSN_RI_18, MEP_INSN_RI_19
- , MEP_INSN_FADDS, MEP_INSN_FSUBS, MEP_INSN_FMULS, MEP_INSN_FDIVS
- , MEP_INSN_FSQRTS, MEP_INSN_FABSS, MEP_INSN_FNEGS, MEP_INSN_FMOVS
- , MEP_INSN_FROUNDWS, MEP_INSN_FTRUNCWS, MEP_INSN_FCEILWS, MEP_INSN_FFLOORWS
- , MEP_INSN_FCVTWS, MEP_INSN_FCVTSW, MEP_INSN_FCMPFS, MEP_INSN_FCMPUS
- , MEP_INSN_FCMPES, MEP_INSN_FCMPUES, MEP_INSN_FCMPLS, MEP_INSN_FCMPULS
- , MEP_INSN_FCMPLES, MEP_INSN_FCMPULES, MEP_INSN_FCMPFIS, MEP_INSN_FCMPUIS
- , MEP_INSN_FCMPEIS, MEP_INSN_FCMPUEIS, MEP_INSN_FCMPLIS, MEP_INSN_FCMPULIS
- , MEP_INSN_FCMPLEIS, MEP_INSN_FCMPULEIS, MEP_INSN_CMOV_FRN_RM, MEP_INSN_CMOV_RM_FRN
- , MEP_INSN_CMOVC_CCRN_RM, MEP_INSN_CMOVC_RM_CCRN
 } CGEN_INSN_TYPE;
 
 /* Index of `invalid' insn place holder.  */
 #define CGEN_INSN_INVALID MEP_INSN_INVALID
 
 /* Total number of insns in table.  */
-#define MAX_INSNS ((int) MEP_INSN_CMOVC_RM_CCRN + 1)
+#define MAX_INSNS ((int) MEP_INSN_RI_19 + 1)
 
 /* This struct records data prior to insertion or after extraction.  */
 struct cgen_fields
@@ -260,21 +251,6 @@ struct cgen_fields
   long f_ccrn_hi;
   long f_ccrn_lo;
   long f_ccrn;
-  long f_fmax_0_4;
-  long f_fmax_4_4;
-  long f_fmax_8_4;
-  long f_fmax_12_4;
-  long f_fmax_16_4;
-  long f_fmax_20_4;
-  long f_fmax_24_4;
-  long f_fmax_28_1;
-  long f_fmax_29_1;
-  long f_fmax_30_1;
-  long f_fmax_31_1;
-  long f_fmax_frd;
-  long f_fmax_frn;
-  long f_fmax_frm;
-  long f_fmax_rm;
 };
 
 #define CGEN_INIT_PARSE(od) \

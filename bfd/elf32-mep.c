@@ -684,8 +684,7 @@ static const char * config_names[] =
 {
   "basic"
   /* start-mepcfgtool */
-  ,"simple"
-  ,"fmax"
+  ,"default"
   /* end-mepcfgtool */
 };
 

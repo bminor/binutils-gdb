@@ -45,7 +45,6 @@ init_mep_all_core_isas_mask (void)
   cgen_bitset_set (& mep_all_core_isas_mask, ISA_MEP);
   /* begin-all-core-isas */
   cgen_bitset_add (& mep_all_core_isas_mask, ISA_EXT_CORE1);
-  cgen_bitset_add (& mep_all_core_isas_mask, ISA_EXT_CORE2);
   /* end-all-core-isas */
 }
 
@@ -58,10 +57,6 @@ init_mep_all_cop_isas_mask (void)
     return;
   cgen_bitset_init (& mep_all_cop_isas_mask, ISA_MAX);
   /* begin-all-cop-isas */
-  cgen_bitset_add (& mep_all_cop_isas_mask, ISA_EXT_COP2_16);
-  cgen_bitset_add (& mep_all_cop_isas_mask, ISA_EXT_COP2_32);
-  cgen_bitset_add (& mep_all_cop_isas_mask, ISA_EXT_COP2_48);
-  cgen_bitset_add (& mep_all_cop_isas_mask, ISA_EXT_COP2_64);
   /* end-all-cop-isas */
 }
 
@@ -93,12 +88,9 @@ mep_config_map_struct mep_config_map[] =
 {
   /* config-map-start */
   /* Default entry: mep core only, all options enabled. */
-  { "", 0, EF_MEP_CPU_C2, 1, 0, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x80"}, OPTION_MASK },
-  { "simple", CONFIG_SIMPLE, EF_MEP_CPU_C2, 1, 0, { 1, "\x0" }, { 1, "\x0" }, { 1, "\x0" }, { 1, "\x0" }, { 1, "\x0" }, { 1, "\xc0" },
-	  0 },
-  { "fmax", CONFIG_FMAX, EF_MEP_CPU_C2, 1, 0, { 1, "\x10" }, { 1, "\x8" }, { 1, "\x4" }, { 1, "\x2" }, { 1, "\x1e" }, { 1, "\xa0" },
+  { "", 0, EF_MEP_CPU_C4, 1, 0, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x80"}, OPTION_MASK },
+  { "default", CONFIG_DEFAULT, EF_MEP_CPU_C4, 0, 0, { 1, "\x0" }, { 1, "\x0" }, { 1, "\x0" }, { 1, "\x0" }, { 1, "\x0" }, { 1, "\xc0" },
 	  0
-	| (1 << CGEN_INSN_OPTIONAL_CP_INSN)
 	| (1 << CGEN_INSN_OPTIONAL_MUL_INSN)
 	| (1 << CGEN_INSN_OPTIONAL_DIV_INSN)
 	| (1 << CGEN_INSN_OPTIONAL_BIT_INSN)
@@ -410,34 +402,6 @@ static const CGEN_IFMT ifmt_bcpeq ATTRIBUTE_UNUSED = {
 
 static const CGEN_IFMT ifmt_sim_syscall ATTRIBUTE_UNUSED = {
   16, 16, 0xf8ef, { { F (F_MAJOR) }, { F (F_4) }, { F (F_CALLNUM) }, { F (F_8) }, { F (F_9) }, { F (F_10) }, { F (F_SUB4) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_fadds ATTRIBUTE_UNUSED = {
-  32, 32, 0xf0fff001, { { F (F_FMAX_0_4) }, { F (F_FMAX_FRD) }, { F (F_FMAX_8_4) }, { F (F_FMAX_12_4) }, { F (F_FMAX_16_4) }, { F (F_FMAX_FRN) }, { F (F_FMAX_FRM) }, { F (F_FMAX_31_1) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_fsqrts ATTRIBUTE_UNUSED = {
-  32, 32, 0xf0fff0f3, { { F (F_FMAX_0_4) }, { F (F_FMAX_FRD) }, { F (F_FMAX_8_4) }, { F (F_FMAX_12_4) }, { F (F_FMAX_16_4) }, { F (F_FMAX_FRN) }, { F (F_FMAX_24_4) }, { F (F_FMAX_30_1) }, { F (F_FMAX_31_1) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_froundws ATTRIBUTE_UNUSED = {
-  32, 32, 0xf0fff0f3, { { F (F_FMAX_0_4) }, { F (F_FMAX_FRD) }, { F (F_FMAX_8_4) }, { F (F_FMAX_12_4) }, { F (F_FMAX_16_4) }, { F (F_FMAX_FRN) }, { F (F_FMAX_24_4) }, { F (F_FMAX_30_1) }, { F (F_FMAX_31_1) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_fcvtsw ATTRIBUTE_UNUSED = {
-  32, 32, 0xf0fff0f3, { { F (F_FMAX_0_4) }, { F (F_FMAX_FRD) }, { F (F_FMAX_8_4) }, { F (F_FMAX_12_4) }, { F (F_FMAX_16_4) }, { F (F_FMAX_FRN) }, { F (F_FMAX_24_4) }, { F (F_FMAX_30_1) }, { F (F_FMAX_31_1) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_fcmpfs ATTRIBUTE_UNUSED = {
-  32, 32, 0xfffff009, { { F (F_FMAX_0_4) }, { F (F_FMAX_4_4) }, { F (F_FMAX_8_4) }, { F (F_FMAX_12_4) }, { F (F_FMAX_16_4) }, { F (F_FMAX_FRN) }, { F (F_FMAX_FRM) }, { F (F_FMAX_28_1) }, { F (F_FMAX_31_1) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_cmov_frn_rm ATTRIBUTE_UNUSED = {
-  32, 32, 0xf00ffff7, { { F (F_FMAX_0_4) }, { F (F_FMAX_FRD) }, { F (F_FMAX_RM) }, { F (F_FMAX_12_4) }, { F (F_FMAX_16_4) }, { F (F_FMAX_20_4) }, { F (F_FMAX_24_4) }, { F (F_FMAX_29_1) }, { F (F_FMAX_30_1) }, { F (F_FMAX_31_1) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_cmovc_ccrn_rm ATTRIBUTE_UNUSED = {
-  32, 32, 0xf00fffff, { { F (F_FMAX_0_4) }, { F (F_FMAX_4_4) }, { F (F_FMAX_RM) }, { F (F_FMAX_12_4) }, { F (F_FMAX_16_4) }, { F (F_FMAX_20_4) }, { F (F_FMAX_24_4) }, { F (F_FMAX_28_1) }, { F (F_FMAX_29_1) }, { F (F_FMAX_30_1) }, { F (F_FMAX_31_1) }, { 0 } }
 };
 
 #undef F
@@ -1705,210 +1669,6 @@ static const CGEN_OPCODE mep_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, 0 } },
     & ifmt_mov, { 0x700d }
   },
-/* fadds ${fmax-FRd},${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD), ',', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fadds, { 0xf0070000 }
-  },
-/* fsubs ${fmax-FRd},${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD), ',', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fadds, { 0xf0170000 }
-  },
-/* fmuls ${fmax-FRd},${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD), ',', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fadds, { 0xf0270000 }
-  },
-/* fdivs ${fmax-FRd},${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD), ',', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fadds, { 0xf0370000 }
-  },
-/* fsqrts ${fmax-FRd},${fmax-FRn} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD), ',', OP (FMAX_FRN), 0 } },
-    & ifmt_fsqrts, { 0xf0470000 }
-  },
-/* fabss ${fmax-FRd},${fmax-FRn} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD), ',', OP (FMAX_FRN), 0 } },
-    & ifmt_fsqrts, { 0xf0570000 }
-  },
-/* fnegs ${fmax-FRd},${fmax-FRn} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD), ',', OP (FMAX_FRN), 0 } },
-    & ifmt_fsqrts, { 0xf0770000 }
-  },
-/* fmovs ${fmax-FRd},${fmax-FRn} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD), ',', OP (FMAX_FRN), 0 } },
-    & ifmt_fsqrts, { 0xf0670000 }
-  },
-/* froundws ${fmax-FRd-int},${fmax-FRn} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD_INT), ',', OP (FMAX_FRN), 0 } },
-    & ifmt_froundws, { 0xf0c70000 }
-  },
-/* ftruncws ${fmax-FRd-int},${fmax-FRn} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD_INT), ',', OP (FMAX_FRN), 0 } },
-    & ifmt_froundws, { 0xf0d70000 }
-  },
-/* fceilws ${fmax-FRd-int},${fmax-FRn} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD_INT), ',', OP (FMAX_FRN), 0 } },
-    & ifmt_froundws, { 0xf0e70000 }
-  },
-/* ffloorws ${fmax-FRd-int},${fmax-FRn} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD_INT), ',', OP (FMAX_FRN), 0 } },
-    & ifmt_froundws, { 0xf0f70000 }
-  },
-/* fcvtws ${fmax-FRd-int},${fmax-FRn} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD_INT), ',', OP (FMAX_FRN), 0 } },
-    & ifmt_froundws, { 0xf0471000 }
-  },
-/* fcvtsw ${fmax-FRd},${fmax-FRn-int} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD), ',', OP (FMAX_FRN_INT), 0 } },
-    & ifmt_fcvtsw, { 0xf0079000 }
-  },
-/* fcmpfs ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0072000 }
-  },
-/* fcmpus ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0172000 }
-  },
-/* fcmpes ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0272000 }
-  },
-/* fcmpues ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0372000 }
-  },
-/* fcmpls ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0472000 }
-  },
-/* fcmpuls ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0572000 }
-  },
-/* fcmples ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0672000 }
-  },
-/* fcmpules ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0772000 }
-  },
-/* fcmpfis ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0872000 }
-  },
-/* fcmpuis ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0972000 }
-  },
-/* fcmpeis ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0a72000 }
-  },
-/* fcmpueis ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0b72000 }
-  },
-/* fcmplis ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0c72000 }
-  },
-/* fcmpulis ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0d72000 }
-  },
-/* fcmpleis ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0e72000 }
-  },
-/* fcmpuleis ${fmax-FRn},${fmax-FRm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRN), ',', OP (FMAX_FRM), 0 } },
-    & ifmt_fcmpfs, { 0xf0f72000 }
-  },
-/* cmov ${fmax-FRd-int},${fmax-Rm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_FRD_INT), ',', OP (FMAX_RM), 0 } },
-    & ifmt_cmov_frn_rm, { 0xf007f000 }
-  },
-/* cmov ${fmax-Rm},${fmax-FRd-int} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_RM), ',', OP (FMAX_FRD_INT), 0 } },
-    & ifmt_cmov_frn_rm, { 0xf007f001 }
-  },
-/* cmovc ${fmax-CCRn},${fmax-Rm} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_CCRN), ',', OP (FMAX_RM), 0 } },
-    & ifmt_cmovc_ccrn_rm, { 0xf007f002 }
-  },
-/* cmovc ${fmax-Rm},${fmax-CCRn} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (FMAX_RM), ',', OP (FMAX_CCRN), 0 } },
-    & ifmt_cmovc_ccrn_rm, { 0xf007f003 }
-  },
 };
 
 #undef A
@@ -2004,62 +1764,62 @@ static const CGEN_IBASE mep_cgen_macro_insn_table[] =
 /* sb $rnc,$zero($rma) */
   {
     -1, "sb16-0", "sb", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* sh $rns,$zero($rma) */
   {
     -1, "sh16-0", "sh", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* sw $rnl,$zero($rma) */
   {
     -1, "sw16-0", "sw", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* lb $rnc,$zero($rma) */
   {
     -1, "lb16-0", "lb", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* lh $rns,$zero($rma) */
   {
     -1, "lh16-0", "lh", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* lw $rnl,$zero($rma) */
   {
     -1, "lw16-0", "lw", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* lbu $rnuc,$zero($rma) */
   {
     -1, "lbu16-0", "lbu", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* lhu $rnus,$zero($rma) */
   {
     -1, "lhu16-0", "lhu", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* swcp $crn,$zero($rma) */
   {
     -1, "swcp16-0", "swcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* lwcp $crn,$zero($rma) */
   {
     -1, "lwcp16-0", "lwcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* smcp $crn64,$zero($rma) */
   {
     -1, "smcp16-0", "smcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* lmcp $crn64,$zero($rma) */
   {
     -1, "lmcp16-0", "lmcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 };
 

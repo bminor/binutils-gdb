@@ -59,7 +59,7 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #define CGEN_MNEMONIC_OPERANDS
 
 /* Maximum number of fields in an instruction.  */
-#define CGEN_ACTUAL_MAX_IFMT_OPERANDS 11
+#define CGEN_ACTUAL_MAX_IFMT_OPERANDS 9
 
 /* Enums.  */
 
@@ -71,14 +71,6 @@ typedef enum major {
  , MAJ_12, MAJ_13, MAJ_14, MAJ_15
 } MAJOR;
 
-/* Enum declaration for condition opcode enum.  */
-typedef enum fmax_cond {
-  FMAX_F, FMAX_U, FMAX_E, FMAX_UE
- , FMAX_L, FMAX_UL, FMAX_LE, FMAX_ULE
- , FMAX_FI, FMAX_UI, FMAX_EI, FMAX_UEI
- , FMAX_LI, FMAX_ULI, FMAX_LEI, FMAX_ULEI
-} FMAX_COND;
-
 /* Attributes.  */
 
 /* Enum declaration for machine type selection.  */
@@ -88,8 +80,7 @@ typedef enum mach_attr {
 
 /* Enum declaration for instruction set selection.  */
 typedef enum isa_attr {
-  ISA_MEP, ISA_EXT_CORE1, ISA_EXT_CORE2, ISA_EXT_COP2_16
- , ISA_EXT_COP2_32, ISA_EXT_COP2_48, ISA_EXT_COP2_64, ISA_MAX
+  ISA_MEP, ISA_EXT_CORE1, ISA_MAX
 } ISA_ATTR;
 
 /* Enum declaration for datatype to use for C intrinsics mapping.  */
@@ -101,7 +92,7 @@ typedef enum cdata_attr {
 
 /* Enum declaration for .  */
 typedef enum config_attr {
-  CONFIG_NONE, CONFIG_SIMPLE, CONFIG_FMAX
+  CONFIG_NONE, CONFIG_DEFAULT
 } CONFIG_ATTR;
 
 /* Number of architecture variants.  */
@@ -156,11 +147,7 @@ typedef enum ifield_type {
  , MEP_F_8S24A4, MEP_F_8S24A8, MEP_F_24U8A4N_HI, MEP_F_24U8A4N_LO
  , MEP_F_24U8A4N, MEP_F_24U8N_HI, MEP_F_24U8N_LO, MEP_F_24U8N
  , MEP_F_24U4N_HI, MEP_F_24U4N_LO, MEP_F_24U4N, MEP_F_CALLNUM
- , MEP_F_CCRN_HI, MEP_F_CCRN_LO, MEP_F_CCRN, MEP_F_FMAX_0_4
- , MEP_F_FMAX_4_4, MEP_F_FMAX_8_4, MEP_F_FMAX_12_4, MEP_F_FMAX_16_4
- , MEP_F_FMAX_20_4, MEP_F_FMAX_24_4, MEP_F_FMAX_28_1, MEP_F_FMAX_29_1
- , MEP_F_FMAX_30_1, MEP_F_FMAX_31_1, MEP_F_FMAX_FRD, MEP_F_FMAX_FRN
- , MEP_F_FMAX_FRM, MEP_F_FMAX_RM, MEP_F_MAX
+ , MEP_F_CCRN_HI, MEP_F_CCRN_LO, MEP_F_CCRN, MEP_F_MAX
 } IFIELD_TYPE;
 
 #define MAX_IFLD ((int) MEP_F_MAX)
@@ -190,8 +177,7 @@ typedef enum cgen_hw_attr {
 typedef enum cgen_hw_type {
   HW_H_MEMORY, HW_H_SINT, HW_H_UINT, HW_H_ADDR
  , HW_H_IADDR, HW_H_PC, HW_H_GPR, HW_H_CSR
- , HW_H_CR64, HW_H_CR, HW_H_CCR, HW_H_CR_FMAX
- , HW_H_CCR_FMAX, HW_H_FMAX_COMPARE_I_P, HW_MAX
+ , HW_H_CR64, HW_H_CR, HW_H_CCR, HW_MAX
 } CGEN_HW_TYPE;
 
 #define MAX_HW ((int) HW_MAX)
@@ -245,14 +231,11 @@ typedef enum cgen_operand_type {
  , MEP_OPERAND_UIMM4, MEP_OPERAND_UIMM5, MEP_OPERAND_UDISP7, MEP_OPERAND_UDISP7A2
  , MEP_OPERAND_UDISP7A4, MEP_OPERAND_UIMM7A4, MEP_OPERAND_UIMM24, MEP_OPERAND_CIMM4
  , MEP_OPERAND_CIMM5, MEP_OPERAND_CDISP8, MEP_OPERAND_CDISP8A2, MEP_OPERAND_CDISP8A4
- , MEP_OPERAND_CDISP8A8, MEP_OPERAND_ZERO, MEP_OPERAND_CP_FLAG, MEP_OPERAND_FMAX_FRD
- , MEP_OPERAND_FMAX_FRN, MEP_OPERAND_FMAX_FRM, MEP_OPERAND_FMAX_FRD_INT, MEP_OPERAND_FMAX_FRN_INT
- , MEP_OPERAND_FMAX_CCRN, MEP_OPERAND_FMAX_CIRR, MEP_OPERAND_FMAX_CBCR, MEP_OPERAND_FMAX_CERR
- , MEP_OPERAND_FMAX_RM, MEP_OPERAND_FMAX_COMPARE_I_P, MEP_OPERAND_MAX
+ , MEP_OPERAND_CDISP8A8, MEP_OPERAND_ZERO, MEP_OPERAND_CP_FLAG, MEP_OPERAND_MAX
 } CGEN_OPERAND_TYPE;
 
 /* Number of operands types.  */
-#define MAX_OPERANDS 90
+#define MAX_OPERANDS 79
 
 /* Maximum number of operands referenced by any insn.  */
 #define MAX_OPERAND_INSTANCES 8
@@ -332,8 +315,6 @@ extern CGEN_KEYWORD mep_cgen_opval_h_csr;
 extern CGEN_KEYWORD mep_cgen_opval_h_cr64;
 extern CGEN_KEYWORD mep_cgen_opval_h_cr;
 extern CGEN_KEYWORD mep_cgen_opval_h_ccr;
-extern CGEN_KEYWORD mep_cgen_opval_h_cr_fmax;
-extern CGEN_KEYWORD mep_cgen_opval_h_ccr_fmax;
 
 extern const CGEN_HW_ENTRY mep_cgen_hw_table[];
 
