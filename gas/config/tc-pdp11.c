@@ -1,5 +1,6 @@
 /* tc-pdp11.c - pdp11-specific -
-   Copyright 2001, 2002, 2004, 2005, 2007 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2004, 2005, 2007, 2009
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -15,7 +16,8 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   the Free Software Foundation, 51 Franklin Street - Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
 #include "as.h"
 #include "safe-ctype.h"
@@ -558,8 +560,8 @@ parse_op_no_deferred (char *str, struct pdp11_code *operand)
 	switch (operand->reloc.exp.X_op)
 	  {
 	  case O_symbol:
-	    operand->word = 0;
-	    operand->reloc.pc_rel = 1;
+	    operand->reloc.type = BFD_RELOC_16;
+	    operand->reloc.pc_rel = 0;
 	    break;
 	  case O_constant:
 	    if ((operand->code & 7) == 7)

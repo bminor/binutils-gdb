@@ -1,3 +1,9 @@
+2009-02-03  Vince Weaver <vince@csl.cornell.edu>
+
+	PR 9779
+	* config/tc-pdp11.c (parse_op_no_deferred): Fix handling of
+	indexed addressing for symbolic expressions.
+
 2009-01-29  Mark Mitchell  <mark@codesourcery.com>
 
 	* config/tc-arm.c (BAD_SP): Define.
