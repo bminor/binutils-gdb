@@ -447,6 +447,7 @@ AC_SUBST(EMULATION_VECTOR)
 AC_SUBST(datarootdir)
 AC_SUBST(docdir)
 AC_SUBST(htmldir)
+AC_SUBST(pdfdir)
 
 AC_CONFIG_FILES(Makefile doc/Makefile po/Makefile.in:po/Make-in)
 AC_OUTPUT

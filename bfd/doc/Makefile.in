@@ -176,14 +176,14 @@ REPORT_BUGS_TEXI = @REPORT_BUGS_TEXI@
 REPORT_BUGS_TO = @REPORT_BUGS_TO@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
+SHARED_LDFLAGS = @SHARED_LDFLAGS@
+SHARED_LIBADD = @SHARED_LIBADD@
 SHELL = @SHELL@
 STRIP = @STRIP@
 TDEFINES = @TDEFINES@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
-WIN32LDFLAGS = @WIN32LDFLAGS@
-WIN32LIBADD = @WIN32LIBADD@
 XGETTEXT = @XGETTEXT@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
@@ -239,6 +239,7 @@ lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
+pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 sbindir = @sbindir@
@@ -358,6 +359,7 @@ CLEANFILES = *.p *.ip
 DISTCLEANFILES = bfd.?? bfd.??? bfd.h libbfd.h libcoff.h texput.log \
 	$(am__append_1)
 MAINTAINERCLEANFILES = $(DOCFILES) bfd.info
+pdf__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 all: all-am
 
@@ -807,6 +809,18 @@ bfdver.texi: $(srcdir)/Makefile.in
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
 install: install-info
+
+install-pdf: install-pdf-am
+
+install-pdf-am: $(PDFS)
+	@$(NORMAL_INSTALL)
+	test -z "$(pdfdir)" || $(mkinstalldirs) "$(DESTDIR)$(pdfdir)"
+	@list='$(PDFS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(pdf__strip_dir) \
+	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(pdfdir)/$$f'"; \
+	  $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(pdfdir)/$$f"; \
+	done
 
 install-html: install-html-am
 

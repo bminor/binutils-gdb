@@ -1003,6 +1003,9 @@ uninstall-info: uninstall-info-recursive
 	uninstall-bfdlibLTLIBRARIES uninstall-info-am
 
 
+.PHONY: install-pdf
+install-pdf:
+
 .PHONY: install-html
 install-html:
 

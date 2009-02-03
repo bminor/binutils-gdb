@@ -692,10 +692,11 @@ AC_CHECK_DECLS([vsnprintf])
 
 BFD_BINARY_FOPEN
 
-dnl Required for html and install-html targets.
+dnl Required for html, pdf, install-pdf and install-html targets.
 AC_SUBST(datarootdir)
 AC_SUBST(docdir)
 AC_SUBST(htmldir)
+AC_SUBST(pdfdir)
 
 dnl This must come last.
 

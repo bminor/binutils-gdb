@@ -52,10 +52,11 @@ AC_SEARCH_LIBS(fabs, m)
 
 AM_BINUTILS_WARNINGS
 
-dnl Required by html and install-html
+dnl Required by html, pdf, install-pdf and install-html
 AC_SUBST(datarootdir)
 AC_SUBST(docdir)
 AC_SUBST(htmldir)
+AC_SUBST(pdfdir)
 
 AC_CONFIG_FILES([Makefile po/Makefile.in:po/Make-in])
 AC_OUTPUT

@@ -1063,10 +1063,11 @@ sed -e '/SRC-POTFILES =/r po/SRC-POTFILES' \
     -e "s,@GMOFILES@,$GMOFILES," \
     po/Makefile.in > po/Makefile]],[[]])
 
-dnl Required by html and install-html
+dnl Required by html, pdf, install-pdf and install-html
 AC_SUBST(datarootdir)
 AC_SUBST(docdir)
 AC_SUBST(htmldir)
+AC_SUBST(pdfdir)
 
 AC_OUTPUT
 

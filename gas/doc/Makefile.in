@@ -216,6 +216,7 @@ mandir = @mandir@
 mkdir_p = @mkdir_p@
 obj_format = @obj_format@
 oldincludedir = @oldincludedir@
+pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 sbindir = @sbindir@
@@ -287,6 +288,7 @@ CPU_DOCS = \
 	c-z80.texi \
 	c-z8k.texi
 
+pdf__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 
 # This one isn't ready for prime time yet.  Not even a little bit.
@@ -624,6 +626,18 @@ asconfig.texi: $(CONFIG).texi
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
 install-data-local: install-info
+
+install-pdf: install-pdf-am
+
+install-pdf-am: $(PDFS)
+	@$(NORMAL_INSTALL)
+	test -z "$(pdfdir)" || $(mkinstalldirs) "$(DESTDIR)$(pdfdir)"
+	@list='$(PDFS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(pdf__strip_dir) \
+	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(pdfdir)/$$f'"; \
+	  $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(pdfdir)/$$f"; \
+	done
 
 install-html: install-html-am
 

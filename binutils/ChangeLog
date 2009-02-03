@@ -1,3 +1,15 @@
+2009-02-03  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* configure.in: AC_SUBST pdfdir.
+	* Makefile.am: Add install-pdf, install-pdf-am,
+	and install-pdf-recursive targets.
+	* doc/Makefile.am: Define pdf__strip_dir. Add
+	install-pdf and install-pdf-am targets.
+	* po/Make-in: Add install-pdf target.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2009-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/9784

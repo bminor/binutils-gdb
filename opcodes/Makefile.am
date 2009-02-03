@@ -16,6 +16,9 @@ AM_CFLAGS = $(WARN_CFLAGS)
 bfdlibdir = @bfdlibdir@
 bfdincludedir = @bfdincludedir@
 
+.PHONY: install-pdf
+install-pdf:
+
 .PHONY: install-html
 install-html:
 
