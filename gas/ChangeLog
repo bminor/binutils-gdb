@@ -1,3 +1,10 @@
+2009-02-03  Sandip Matte  <sandip@rmicorp.com>
+
+	* config/tc-mips.c (macro): Handle M_MSGSND, M_MSGLD, M_MSGLD_T,
+	M_MSGWAIT and M_MSGWAIT_T.
+	(mips_cpu_info_table): Add XLR entry.
+	* doc/c-mips.texi (-march): Document xlr.
+
 2009-01-29  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add ata6289.

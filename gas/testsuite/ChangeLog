@@ -1,3 +1,9 @@
+2009-02-03  Sandip Matte  <sandip@rmicorp.com>
+
+	* gas/mips/mips.exp (xlr): New architecture.
+	(xlr-ext): Run test.
+	* gas/mips/xlr-ext.d, gas/mips/xlr-ext.s: New.
+
 2009-02-03  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* gas/m68k/tls-gd-3.d, gas/m68k/tls-gd-3.s: New test.

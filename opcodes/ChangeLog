@@ -1,3 +1,10 @@
+2009-02-03  Sandip Matte  <sandip@rmicorp.com>
+
+	* mips-dis.c (mips_cp0_names_xlr, mips_cp0sel_names_xlr): Define.
+	(mips_arch_choices): Add XLR entry.
+	* mips-opc.c (XLR): Define.
+	(mips_builtin_opcodes): Add XLR instructions.
+
 2009-02-03  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* Makefile.am: Add install-pdf target.

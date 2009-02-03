@@ -1,3 +1,14 @@
+2009-02-03  Sandip Matte  <sandip@rmicorp.com>
+
+	* aoutx.h (NAME (aout, machine_type)): Handle bfd_mach_mips_xlr.
+	* archures.c (bfd_mach_mips_xlr): Define.
+	* bfd-in2.h: Regenerate.
+	* cpu-mips.c (I_xlr): Define.
+	(arch_info_struct): Add XLR entry.
+	* elfxx-mips.c (_bfd_elf_mips_mach): Handle E_MIPS_MACH_XLR.
+	(mips_set_isa_flags): Handle bfd_mach_mips_xlr
+	(mips_mach_extensions): Add XLR entry.
+
 2009-02-03  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* elf32-avr.c (avr_final_link_relocate): Allow avr25 to wraparound.

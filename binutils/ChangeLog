@@ -1,3 +1,7 @@
+2009-02-03  Sandip Matte  <sandip@rmicorp.com>
+
+	* readelf.c (get_machine_flags): Handle E_MIPS_MACH_XLR.
+
 2009-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Move --as-needed change to ...
