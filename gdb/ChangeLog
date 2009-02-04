@@ -1,4 +1,4 @@
-2008-02-04  Jerome Guitton  <guitton@adacore.com>
+2009-02-04  Jerome Guitton  <guitton@adacore.com>
 
 	* ada-lang.c (ada_template_to_fixed_record_type_1): Check size
 	of type to guard against a crash.
