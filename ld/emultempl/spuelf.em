@@ -106,6 +106,9 @@ spu_after_open (void)
       params.emit_stub_syms |= link_info.emitrelocations;
       spu_elf_setup (&link_info, &params);
 
+      if (link_info.relocatable)
+	lang_add_unique (".text.ia.*");
+
       if (!link_info.relocatable
 	  && link_info.input_bfds != NULL
 	  && !spu_elf_create_sections (&link_info))
