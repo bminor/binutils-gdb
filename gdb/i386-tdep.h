@@ -172,6 +172,9 @@ extern struct type *i386_sse_type (struct gdbarch *gdbarch);
 extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
 extern CORE_ADDR i386_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc);
 
+/* Return whether the THIS_FRAME corresponds to a sigtramp routine.  */
+extern int i386_sigtramp_p (struct frame_info *this_frame);
+
 /* Return the name of register REGNUM.  */
 extern char const *i386_register_name (struct gdbarch * gdbarch, int regnum);
 

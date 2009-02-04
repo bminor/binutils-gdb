@@ -1,5 +1,10 @@
 2009-02-04  Tristan Gingold  <gingold@adacore.com>
 
+	* i386-tdep.c (i386_sigtramp_p): Make it public.
+	* i386-tdep.h (i386_sigtramp_p): Declare.
+
+2009-02-04  Tristan Gingold  <gingold@adacore.com>
+
 	* machoread.c (macho_symfile_read): Read minsymtab also from
 	shared libraries.
 	(macho_symfile_read): Try to read dwarf2 frame info from main

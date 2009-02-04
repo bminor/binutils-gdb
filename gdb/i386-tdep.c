@@ -2452,7 +2452,7 @@ i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name)
 /* Return whether the THIS_FRAME corresponds to a sigtramp
    routine.  */
 
-static int
+int
 i386_sigtramp_p (struct frame_info *this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
