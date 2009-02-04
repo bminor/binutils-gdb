@@ -1,3 +1,8 @@
+2009-02-04  Tristan Gingold  <gingold@adacore.com>
+
+	* solist.h (struct target_so_ops): Comment fallback behavior for
+	operation same.
+
 2009-02-03  Tom Tromey  <tromey@redhat.com>
 
 	* completer.c (add_struct_fields): Check type_name against NULL

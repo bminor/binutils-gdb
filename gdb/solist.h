@@ -119,7 +119,9 @@ struct target_so_ops
 
     /* Given two so_list objects, one from the GDB thread list
        and another from the list returned by current_sos, return 1
-       if they represent the same library.  */
+       if they represent the same library.
+       Falls back to using strcmp on so_original_name field when set
+       to NULL.  */
     int (*same) (struct so_list *gdb, struct so_list *inferior);
   };
 
