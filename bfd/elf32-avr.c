@@ -854,10 +854,11 @@ avr_final_link_relocate (reloc_howto_type *                 howto,
 	{
           /* Relative distance is too large.  */
 
-	  /* Always apply WRAPAROUND for avr2 and avr4.  */
+	  /* Always apply WRAPAROUND for avr2, avr25, and avr4.  */
 	  switch (bfd_get_mach (input_bfd))
 	    {
 	    case bfd_mach_avr2:
+	    case bfd_mach_avr25:
 	    case bfd_mach_avr4:
 	      break;
 

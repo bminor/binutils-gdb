@@ -1,3 +1,7 @@
+2009-02-04  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* elf32-avr.c (avr_final_link_relocate): Allow avr25 to wraparound.
+
 2009-02-03  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.am (RELEASE): Unset.
