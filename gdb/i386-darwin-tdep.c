@@ -39,6 +39,8 @@
 #include "frame.h"
 #include "gdb_assert.h"
 #include "i386-darwin-tdep.h"
+#include "solib.h"
+#include "solib-darwin.h"
 
 /* Offsets into the struct i386_thread_state where we'll find the saved regs.
    From <mach/i386/thread_status.h> and i386-tdep.h.  */
@@ -114,6 +116,8 @@ i386_darwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_num_regs = 16;
 
   tdep->jb_pc_offset = 20;
+
+  set_solib_ops (gdbarch, &darwin_so_ops);
 }
 
 static void
@@ -131,6 +135,8 @@ x86_darwin_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_num_regs = ARRAY_SIZE (amd64_darwin_thread_state_reg_offset);
 
   tdep->jb_pc_offset = 148;
+
+  set_solib_ops (gdbarch, &darwin_so_ops);
 }
 
 static enum gdb_osabi
