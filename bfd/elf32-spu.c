@@ -1886,7 +1886,7 @@ spu_elf_build_stubs (struct bfd_link_info *info)
   p = htab->ovtab->contents;
   if (htab->params->ovly_flavour == ovly_soft_icache)
     {
-#define BI_HANDLER "__icache_ptr___icache_bi_handler0"
+#define BI_HANDLER "__icache_ptr_handler0"
       char name[sizeof (BI_HANDLER)];
       bfd_vma off, icache_base, linklist, bihand;
 
@@ -1954,6 +1954,12 @@ spu_elf_build_stubs (struct bfd_link_info *info)
       h->root.u.def.value = htab->ovl_sec[0]->vma;
       h->root.u.def.section = bfd_abs_section_ptr;
       h->size = htab->num_buf << htab->line_size_log2;
+
+      h = define_ovtab_symbol (htab, "__icache_neg_log2_linesize");
+      if (h == NULL)
+	return FALSE;
+      h->root.u.def.value = -htab->line_size_log2;
+      h->root.u.def.section = bfd_abs_section_ptr;
 
       if (htab->init != NULL && htab->init->size != 0)
 	{

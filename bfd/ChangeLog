@@ -1,3 +1,8 @@
+2009-02-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_build_stubs): Define __icache_neg_log2_linesize.
+	Define __icache_ptr_handler*, not __icache_ptr___icache_bi_handler*.
+
 2009-02-03  Sandip Matte  <sandip@rmicorp.com>
 
 	* aoutx.h (NAME (aout, machine_type)): Handle bfd_mach_mips_xlr.
