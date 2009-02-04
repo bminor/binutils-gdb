@@ -1,3 +1,11 @@
+2009-02-04  Duncan Sands  <baldrick@free.fr>
+
+	PR 9812
+	* reduced_debug_output.h
+	(Output_reduced_debug_abbrev_section::failed): Use format for
+	gold_warning.
+	(Output_reduced_debug_info_section::faild): Likewise.
+
 2009-01-31  Mikolaj Zalewski  <mikolajz@google.com>
 
 	* script.cc (Lazy_demangler): New class.
