@@ -473,6 +473,14 @@ _start:
 	vpavgb (%rcx),%xmm6,%xmm7
 	vpavgw %xmm4,%xmm6,%xmm2
 	vpavgw (%rcx),%xmm6,%xmm7
+	vpclmullqlqdq %xmm4,%xmm6,%xmm2
+	vpclmullqlqdq (%rcx),%xmm6,%xmm7
+	vpclmulhqlqdq %xmm4,%xmm6,%xmm2
+	vpclmulhqlqdq (%rcx),%xmm6,%xmm7
+	vpclmullqhqdq %xmm4,%xmm6,%xmm2
+	vpclmullqhqdq (%rcx),%xmm6,%xmm7
+	vpclmulhqhqdq %xmm4,%xmm6,%xmm2
+	vpclmulhqhqdq (%rcx),%xmm6,%xmm7
 	vpcmpeqb %xmm4,%xmm6,%xmm2
 	vpcmpeqb (%rcx),%xmm6,%xmm7
 	vpcmpeqw %xmm4,%xmm6,%xmm2
@@ -815,6 +823,8 @@ _start:
 	vpalignr $7,(%rcx),%xmm6,%xmm2
 	vpblendw $7,%xmm4,%xmm6,%xmm2
 	vpblendw $7,(%rcx),%xmm6,%xmm2
+	vpclmulqdq $7,%xmm4,%xmm6,%xmm2
+	vpclmulqdq $7,(%rcx),%xmm6,%xmm2
 	vshufpd $7,%xmm4,%xmm6,%xmm2
 	vshufpd $7,(%rcx),%xmm6,%xmm2
 	vshufps $7,%xmm4,%xmm6,%xmm2
@@ -1255,6 +1265,7 @@ _start:
 	vaeskeygenassist $7,0x12345678,%xmm8
 	vpextrb $7,%xmm8,0x12345678
 	vcvtsi2sdl 0x12345678,%xmm8,%xmm15
+	vpclmulqdq $7,0x12345678,%xmm8,%xmm15
 	vblendvps %xmm8,0x12345678,%xmm12,%xmm14
 	vpinsrb $7,0x12345678,%xmm8,%xmm15
 	vmovdqa 0x12345678,%ymm8
@@ -1275,6 +1286,7 @@ _start:
 	vaeskeygenassist $7,(%rbp),%xmm8
 	vpextrb $7,%xmm8,(%rbp)
 	vcvtsi2sdl (%rbp),%xmm8,%xmm15
+	vpclmulqdq $7,(%rbp),%xmm8,%xmm15
 	vblendvps %xmm8,(%rbp),%xmm12,%xmm14
 	vpinsrb $7,(%rbp),%xmm8,%xmm15
 	vmovdqa (%rbp),%ymm8
@@ -1295,6 +1307,7 @@ _start:
 	vaeskeygenassist $7,(%rsp),%xmm8
 	vpextrb $7,%xmm8,(%rsp)
 	vcvtsi2sdl (%rsp),%xmm8,%xmm15
+	vpclmulqdq $7,(%rsp),%xmm8,%xmm15
 	vblendvps %xmm8,(%rsp),%xmm12,%xmm14
 	vpinsrb $7,(%rsp),%xmm8,%xmm15
 	vmovdqa (%rsp),%ymm8
@@ -1315,6 +1328,7 @@ _start:
 	vaeskeygenassist $7,0x99(%rbp),%xmm8
 	vpextrb $7,%xmm8,0x99(%rbp)
 	vcvtsi2sdl 0x99(%rbp),%xmm8,%xmm15
+	vpclmulqdq $7,0x99(%rbp),%xmm8,%xmm15
 	vblendvps %xmm8,0x99(%rbp),%xmm12,%xmm14
 	vpinsrb $7,0x99(%rbp),%xmm8,%xmm15
 	vmovdqa 0x99(%rbp),%ymm8
@@ -1335,6 +1349,7 @@ _start:
 	vaeskeygenassist $7,0x99(%r15),%xmm8
 	vpextrb $7,%xmm8,0x99(%r15)
 	vcvtsi2sdl 0x99(%r15),%xmm8,%xmm15
+	vpclmulqdq $7,0x99(%r15),%xmm8,%xmm15
 	vblendvps %xmm8,0x99(%r15),%xmm12,%xmm14
 	vpinsrb $7,0x99(%r15),%xmm8,%xmm15
 	vmovdqa 0x99(%r15),%ymm8
@@ -1355,6 +1370,7 @@ _start:
 	vaeskeygenassist $7,0x99(%rip),%xmm8
 	vpextrb $7,%xmm8,0x99(%rip)
 	vcvtsi2sdl 0x99(%rip),%xmm8,%xmm15
+	vpclmulqdq $7,0x99(%rip),%xmm8,%xmm15
 	vblendvps %xmm8,0x99(%rip),%xmm12,%xmm14
 	vpinsrb $7,0x99(%rip),%xmm8,%xmm15
 	vmovdqa 0x99(%rip),%ymm8
@@ -1375,6 +1391,7 @@ _start:
 	vaeskeygenassist $7,0x99(%rsp),%xmm8
 	vpextrb $7,%xmm8,0x99(%rsp)
 	vcvtsi2sdl 0x99(%rsp),%xmm8,%xmm15
+	vpclmulqdq $7,0x99(%rsp),%xmm8,%xmm15
 	vblendvps %xmm8,0x99(%rsp),%xmm12,%xmm14
 	vpinsrb $7,0x99(%rsp),%xmm8,%xmm15
 	vmovdqa 0x99(%rsp),%ymm8
@@ -1395,6 +1412,7 @@ _start:
 	vaeskeygenassist $7,0x99(%r12),%xmm8
 	vpextrb $7,%xmm8,0x99(%r12)
 	vcvtsi2sdl 0x99(%r12),%xmm8,%xmm15
+	vpclmulqdq $7,0x99(%r12),%xmm8,%xmm15
 	vblendvps %xmm8,0x99(%r12),%xmm12,%xmm14
 	vpinsrb $7,0x99(%r12),%xmm8,%xmm15
 	vmovdqa 0x99(%r12),%ymm8
@@ -1415,6 +1433,7 @@ _start:
 	vaeskeygenassist $7,-0x99(,%riz),%xmm8
 	vpextrb $7,%xmm8,-0x99(,%riz)
 	vcvtsi2sdl -0x99(,%riz),%xmm8,%xmm15
+	vpclmulqdq $7,-0x99(,%riz),%xmm8,%xmm15
 	vblendvps %xmm8,-0x99(,%riz),%xmm12,%xmm14
 	vpinsrb $7,-0x99(,%riz),%xmm8,%xmm15
 	vmovdqa -0x99(,%riz),%ymm8
@@ -1435,6 +1454,7 @@ _start:
 	vaeskeygenassist $7,-0x99(,%riz,2),%xmm8
 	vpextrb $7,%xmm8,-0x99(,%riz,2)
 	vcvtsi2sdl -0x99(,%riz,2),%xmm8,%xmm15
+	vpclmulqdq $7,-0x99(,%riz,2),%xmm8,%xmm15
 	vblendvps %xmm8,-0x99(,%riz,2),%xmm12,%xmm14
 	vpinsrb $7,-0x99(,%riz,2),%xmm8,%xmm15
 	vmovdqa -0x99(,%riz,2),%ymm8
@@ -1455,6 +1475,7 @@ _start:
 	vaeskeygenassist $7,-0x99(%rbx,%riz),%xmm8
 	vpextrb $7,%xmm8,-0x99(%rbx,%riz)
 	vcvtsi2sdl -0x99(%rbx,%riz),%xmm8,%xmm15
+	vpclmulqdq $7,-0x99(%rbx,%riz),%xmm8,%xmm15
 	vblendvps %xmm8,-0x99(%rbx,%riz),%xmm12,%xmm14
 	vpinsrb $7,-0x99(%rbx,%riz),%xmm8,%xmm15
 	vmovdqa -0x99(%rbx,%riz),%ymm8
@@ -1475,6 +1496,7 @@ _start:
 	vaeskeygenassist $7,-0x99(%rbx,%riz,2),%xmm8
 	vpextrb $7,%xmm8,-0x99(%rbx,%riz,2)
 	vcvtsi2sdl -0x99(%rbx,%riz,2),%xmm8,%xmm15
+	vpclmulqdq $7,-0x99(%rbx,%riz,2),%xmm8,%xmm15
 	vblendvps %xmm8,-0x99(%rbx,%riz,2),%xmm12,%xmm14
 	vpinsrb $7,-0x99(%rbx,%riz,2),%xmm8,%xmm15
 	vmovdqa -0x99(%rbx,%riz,2),%ymm8
@@ -1495,6 +1517,7 @@ _start:
 	vaeskeygenassist $7,-0x99(%r12,%r15,4),%xmm8
 	vpextrb $7,%xmm8,-0x99(%r12,%r15,4)
 	vcvtsi2sdl -0x99(%r12,%r15,4),%xmm8,%xmm15
+	vpclmulqdq $7,-0x99(%r12,%r15,4),%xmm8,%xmm15
 	vblendvps %xmm8,-0x99(%r12,%r15,4),%xmm12,%xmm14
 	vpinsrb $7,-0x99(%r12,%r15,4),%xmm8,%xmm15
 	vmovdqa -0x99(%r12,%r15,4),%ymm8
@@ -1515,6 +1538,7 @@ _start:
 	vaeskeygenassist $7,-0x99(%r8,%r15,8),%xmm8
 	vpextrb $7,%xmm8,-0x99(%r8,%r15,8)
 	vcvtsi2sdl -0x99(%r8,%r15,8),%xmm8,%xmm15
+	vpclmulqdq $7,-0x99(%r8,%r15,8),%xmm8,%xmm15
 	vblendvps %xmm8,-0x99(%r8,%r15,8),%xmm12,%xmm14
 	vpinsrb $7,-0x99(%r8,%r15,8),%xmm8,%xmm15
 	vmovdqa -0x99(%r8,%r15,8),%ymm8
@@ -1535,6 +1559,7 @@ _start:
 	vaeskeygenassist $7,-0x99(%rbp,%r13,4),%xmm8
 	vpextrb $7,%xmm8,-0x99(%rbp,%r13,4)
 	vcvtsi2sdl -0x99(%rbp,%r13,4),%xmm8,%xmm15
+	vpclmulqdq $7,-0x99(%rbp,%r13,4),%xmm8,%xmm15
 	vblendvps %xmm8,-0x99(%rbp,%r13,4),%xmm12,%xmm14
 	vpinsrb $7,-0x99(%rbp,%r13,4),%xmm8,%xmm15
 	vmovdqa -0x99(%rbp,%r13,4),%ymm8
@@ -1555,6 +1580,7 @@ _start:
 	vaeskeygenassist $7,-0x99(%rsp,%r12,1),%xmm8
 	vpextrb $7,%xmm8,-0x99(%rsp,%r12,1)
 	vcvtsi2sdl -0x99(%rsp,%r12,1),%xmm8,%xmm15
+	vpclmulqdq $7,-0x99(%rsp,%r12,1),%xmm8,%xmm15
 	vblendvps %xmm8,-0x99(%rsp,%r12,1),%xmm12,%xmm14
 	vpinsrb $7,-0x99(%rsp,%r12,1),%xmm8,%xmm15
 	vmovdqa -0x99(%rsp,%r12,1),%ymm8
@@ -1576,6 +1602,7 @@ _start:
 	vaeskeygenassist $7,%xmm8,%xmm15
 	vpextrb $7,%xmm8,%r8d
 	vcvtsi2sdl %r8d,%xmm8,%xmm15
+	vpclmulqdq $7,%xmm8,%xmm15,%xmm12
 	vblendvps %xmm8,%xmm8,%xmm12,%xmm14
 	vpinsrb $7,%r8d,%xmm8,%xmm15
 	vmovdqa %ymm8,%ymm15
@@ -2275,6 +2302,18 @@ _start:
 	vpavgw xmm2,xmm6,xmm4
 	vpavgw xmm7,xmm6,XMMWORD PTR [rcx]
 	vpavgw xmm7,xmm6,[rcx]
+	vpclmullqlqdq xmm2,xmm6,xmm4
+	vpclmullqlqdq xmm7,xmm6,XMMWORD PTR [rcx]
+	vpclmullqlqdq xmm7,xmm6,[rcx]
+	vpclmulhqlqdq xmm2,xmm6,xmm4
+	vpclmulhqlqdq xmm7,xmm6,XMMWORD PTR [rcx]
+	vpclmulhqlqdq xmm7,xmm6,[rcx]
+	vpclmullqhqdq xmm2,xmm6,xmm4
+	vpclmullqhqdq xmm7,xmm6,XMMWORD PTR [rcx]
+	vpclmullqhqdq xmm7,xmm6,[rcx]
+	vpclmulhqhqdq xmm2,xmm6,xmm4
+	vpclmulhqhqdq xmm7,xmm6,XMMWORD PTR [rcx]
+	vpclmulhqhqdq xmm7,xmm6,[rcx]
 	vpcmpeqb xmm2,xmm6,xmm4
 	vpcmpeqb xmm7,xmm6,XMMWORD PTR [rcx]
 	vpcmpeqb xmm7,xmm6,[rcx]
@@ -2786,6 +2825,9 @@ _start:
 	vpblendw xmm2,xmm6,xmm4,7
 	vpblendw xmm2,xmm6,XMMWORD PTR [rcx],7
 	vpblendw xmm2,xmm6,[rcx],7
+	vpclmulqdq xmm2,xmm6,xmm4,7
+	vpclmulqdq xmm2,xmm6,XMMWORD PTR [rcx],7
+	vpclmulqdq xmm2,xmm6,[rcx],7
 	vshufpd xmm2,xmm6,xmm4,7
 	vshufpd xmm2,xmm6,XMMWORD PTR [rcx],7
 	vshufpd xmm2,xmm6,[rcx],7
@@ -3383,6 +3425,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR ds:0x12345678,7
 	vpextrb ds:0x12345678,xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR ds:0x12345678
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR ds:0x12345678,7
 	vblendvps xmm14,xmm12,XMMWORD PTR ds:0x12345678,xmm8
 	vpinsrb xmm15,xmm8,ds:0x12345678,7
 	vmovdqa ymm8,YMMWORD PTR ds:0x12345678
@@ -3403,6 +3446,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [rbp],7
 	vpextrb [rbp],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [rbp]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [rbp],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [rbp],xmm8
 	vpinsrb xmm15,xmm8,[rbp],7
 	vmovdqa ymm8,YMMWORD PTR [rbp]
@@ -3423,6 +3467,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [rbp+0x99],7
 	vpextrb [rbp+0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [rbp+0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [rbp+0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [rbp+0x99],xmm8
 	vpinsrb xmm15,xmm8,[rbp+0x99],7
 	vmovdqa ymm8,YMMWORD PTR [rbp+0x99]
@@ -3443,6 +3488,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [r15+0x99],7
 	vpextrb [r15+0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [r15+0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [r15+0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [r15+0x99],xmm8
 	vpinsrb xmm15,xmm8,[r15+0x99],7
 	vmovdqa ymm8,YMMWORD PTR [r15+0x99]
@@ -3463,6 +3509,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [rip+0x99],7
 	vpextrb [rip+0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [rip+0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [rip+0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [rip+0x99],xmm8
 	vpinsrb xmm15,xmm8,[rip+0x99],7
 	vmovdqa ymm8,YMMWORD PTR [rip+0x99]
@@ -3483,6 +3530,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [rsp+0x99],7
 	vpextrb [rsp+0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [rsp+0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [rsp+0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [rsp+0x99],xmm8
 	vpinsrb xmm15,xmm8,[rsp+0x99],7
 	vmovdqa ymm8,YMMWORD PTR [rsp+0x99]
@@ -3503,6 +3551,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [r12+0x99],7
 	vpextrb [r12+0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [r12+0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [r12+0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [r12+0x99],xmm8
 	vpinsrb xmm15,xmm8,[r12+0x99],7
 	vmovdqa ymm8,YMMWORD PTR [r12+0x99]
@@ -3523,6 +3572,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [riz*1-0x99],7
 	vpextrb [riz*1-0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [riz*1-0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [riz*1-0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [riz*1-0x99],xmm8
 	vpinsrb xmm15,xmm8,[riz*1-0x99],7
 	vmovdqa ymm8,YMMWORD PTR [riz*1-0x99]
@@ -3543,6 +3593,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [riz*2-0x99],7
 	vpextrb [riz*2-0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [riz*2-0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [riz*2-0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [riz*2-0x99],xmm8
 	vpinsrb xmm15,xmm8,[riz*2-0x99],7
 	vmovdqa ymm8,YMMWORD PTR [riz*2-0x99]
@@ -3563,6 +3614,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [rbx+riz*1-0x99],7
 	vpextrb [rbx+riz*1-0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [rbx+riz*1-0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [rbx+riz*1-0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [rbx+riz*1-0x99],xmm8
 	vpinsrb xmm15,xmm8,[rbx+riz*1-0x99],7
 	vmovdqa ymm8,YMMWORD PTR [rbx+riz*1-0x99]
@@ -3583,6 +3635,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [rbx+riz*2-0x99],7
 	vpextrb [rbx+riz*2-0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [rbx+riz*2-0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [rbx+riz*2-0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [rbx+riz*2-0x99],xmm8
 	vpinsrb xmm15,xmm8,[rbx+riz*2-0x99],7
 	vmovdqa ymm8,YMMWORD PTR [rbx+riz*2-0x99]
@@ -3603,6 +3656,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [r12+r15*4-0x99],7
 	vpextrb [r12+r15*4-0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [r12+r15*4-0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [r12+r15*4-0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [r12+r15*4-0x99],xmm8
 	vpinsrb xmm15,xmm8,[r12+r15*4-0x99],7
 	vmovdqa ymm8,YMMWORD PTR [r12+r15*4-0x99]
@@ -3623,6 +3677,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [r8+r15*8-0x99],7
 	vpextrb [r8+r15*8-0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [r8+r15*8-0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [r8+r15*8-0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [r8+r15*8-0x99],xmm8
 	vpinsrb xmm15,xmm8,[r8+r15*8-0x99],7
 	vmovdqa ymm8,YMMWORD PTR [r8+r15*8-0x99]
@@ -3643,6 +3698,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [rbp+r12*4-0x99],7
 	vpextrb [rbp+r12*4-0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [rbp+r12*4-0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [rbp+r12*4-0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [rbp+r12*4-0x99],xmm8
 	vpinsrb xmm15,xmm8,[rbp+r12*4-0x99],7
 	vmovdqa ymm8,YMMWORD PTR [rbp+r12*4-0x99]
@@ -3663,6 +3719,7 @@ _start:
 	vaeskeygenassist xmm8,XMMWORD PTR [rsp+r13*1-0x99],7
 	vpextrb [rsp+r13*1-0x99],xmm8,7
 	vcvtsi2sd xmm15,xmm8,DWORD PTR [rsp+r13*1-0x99]
+	vpclmulqdq xmm15,xmm8,XMMWORD PTR [rsp+r13*1-0x99],7
 	vblendvps xmm14,xmm12,XMMWORD PTR [rsp+r13*1-0x99],xmm8
 	vpinsrb xmm15,xmm8,[rsp+r13*1-0x99],7
 	vmovdqa ymm8,YMMWORD PTR [rsp+r13*1-0x99]
@@ -3684,6 +3741,7 @@ _start:
 	vaeskeygenassist xmm15,xmm8,7
 	vpextrb r8d,xmm8,7
 	vcvtsi2sd xmm15,xmm8,r8d
+	vpclmulqdq xmm12,xmm15,xmm8,7
 	vblendvps xmm14,xmm12,xmm8,xmm8
 	vpinsrb xmm15,xmm8,r8d,7
 	vmovdqa ymm15,ymm8

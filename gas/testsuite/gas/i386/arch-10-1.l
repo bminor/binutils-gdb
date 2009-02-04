@@ -27,6 +27,7 @@
 .*:54: Error: .*
 .*:56: Error: .*
 .*:58: Error: .*
+.*:60: Error: .*
 GAS LISTING .*
 
 
@@ -67,28 +68,30 @@ GAS LISTING .*
 [ 	]*34[ 	]+pclmulqdq \$8,%xmm1,%xmm0
 [ 	]*35[ 	]+\# AES \+ AVX
 [ 	]*36[ 	]+vaesenc  \(%ecx\),%xmm0,%xmm2
-[ 	]*37[ 	]+\# FMA
-[ 	]*38[ 	]+vfmadd132pd %xmm4,%xmm6,%xmm2
-[ 	]*39[ 	]+\# MOVBE
-[ 	]*40[ 	]+movbe   \(%ecx\),%ebx
-[ 	]*41[ 	]+\# EPT
-[ 	]*42[ 	]+invept  \(%ecx\),%ebx
-[ 	]*43[ 	]+\# RDTSCP
-[ 	]*44[ 	]+rdtscp
-[ 	]*45[ 	]+\# 3DNow
-[ 	]*46[ 	]+pmulhrw %mm4,%mm3
-[ 	]*47[ 	]+\# 3DNow Extensions
-[ 	]*48[ 	]+pswapd %mm4,%mm3
-[ 	]*49[ 	]+\# SSE4a
-[ 	]*50[ 	]+insertq %xmm2,%xmm1
-[ 	]*51[ 	]+\# SVME
-[ 	]*52[ 	]+vmload
-[ 	]*53[ 	]+\# ABM
-[ 	]*54[ 	]+lzcnt %ecx,%ebx
-[ 	]*55[ 	]+\# SSE5
-[ 	]*56[ 	]+frczss          %xmm2, %xmm1
+[ 	]*37[ 	]+\# PCLMUL \+ AVX
+[ 	]*38[ 	]+vpclmulqdq \$8,%xmm4,%xmm6,%xmm2
+[ 	]*39[ 	]+\# FMA
+[ 	]*40[ 	]+vfmadd132pd %xmm4,%xmm6,%xmm2
+[ 	]*41[ 	]+\# MOVBE
+[ 	]*42[ 	]+movbe   \(%ecx\),%ebx
+[ 	]*43[ 	]+\# EPT
+[ 	]*44[ 	]+invept  \(%ecx\),%ebx
+[ 	]*45[ 	]+\# RDTSCP
+[ 	]*46[ 	]+rdtscp
+[ 	]*47[ 	]+\# 3DNow
+[ 	]*48[ 	]+pmulhrw %mm4,%mm3
+[ 	]*49[ 	]+\# 3DNow Extensions
+[ 	]*50[ 	]+pswapd %mm4,%mm3
+[ 	]*51[ 	]+\# SSE4a
+[ 	]*52[ 	]+insertq %xmm2,%xmm1
+[ 	]*53[ 	]+\# SVME
+[ 	]*54[ 	]+vmload
+[ 	]*55[ 	]+\# ABM
+[ 	]*56[ 	]+lzcnt %ecx,%ebx
 GAS LISTING .*
 
 
-[ 	]*57[ 	]+\# PadLock
-[ 	]*58[ 	]+xstorerng
+[ 	]*57[ 	]+\# SSE5
+[ 	]*58[ 	]+frczss          %xmm2, %xmm1
+[ 	]*59[ 	]+\# PadLock
+[ 	]*60[ 	]+xstorerng

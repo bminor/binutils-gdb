@@ -473,6 +473,14 @@ _start:
 	vpavgb (%ecx),%xmm6,%xmm7
 	vpavgw %xmm4,%xmm6,%xmm2
 	vpavgw (%ecx),%xmm6,%xmm7
+	vpclmullqlqdq %xmm4,%xmm6,%xmm2
+	vpclmullqlqdq (%ecx),%xmm6,%xmm7
+	vpclmulhqlqdq %xmm4,%xmm6,%xmm2
+	vpclmulhqlqdq (%ecx),%xmm6,%xmm7
+	vpclmullqhqdq %xmm4,%xmm6,%xmm2
+	vpclmullqhqdq (%ecx),%xmm6,%xmm7
+	vpclmulhqhqdq %xmm4,%xmm6,%xmm2
+	vpclmulhqhqdq (%ecx),%xmm6,%xmm7
 	vpcmpeqb %xmm4,%xmm6,%xmm2
 	vpcmpeqb (%ecx),%xmm6,%xmm7
 	vpcmpeqw %xmm4,%xmm6,%xmm2
@@ -815,6 +823,8 @@ _start:
 	vpalignr $7,(%ecx),%xmm6,%xmm2
 	vpblendw $7,%xmm4,%xmm6,%xmm2
 	vpblendw $7,(%ecx),%xmm6,%xmm2
+	vpclmulqdq $7,%xmm4,%xmm6,%xmm2
+	vpclmulqdq $7,(%ecx),%xmm6,%xmm2
 	vshufpd $7,%xmm4,%xmm6,%xmm2
 	vshufpd $7,(%ecx),%xmm6,%xmm2
 	vshufps $7,%xmm4,%xmm6,%xmm2
@@ -1206,6 +1216,7 @@ _start:
 	vaeskeygenassist $7,0x1234,%xmm0
 	vpextrb $7,%xmm0,0x1234
 	vcvtsi2sdl 0x1234,%xmm0,%xmm7
+	vpclmulqdq $7,0x1234,%xmm0,%xmm7
 	vblendvps %xmm0,0x1234,%xmm4,%xmm6
 	vpinsrb $7,0x1234,%xmm0,%xmm7
 	vmovdqa 0x1234,%ymm0
@@ -1226,6 +1237,7 @@ _start:
 	vaeskeygenassist $7,(%ebp),%xmm0
 	vpextrb $7,%xmm0,(%ebp)
 	vcvtsi2sdl (%ebp),%xmm0,%xmm7
+	vpclmulqdq $7,(%ebp),%xmm0,%xmm7
 	vblendvps %xmm0,(%ebp),%xmm4,%xmm6
 	vpinsrb $7,(%ebp),%xmm0,%xmm7
 	vmovdqa (%ebp),%ymm0
@@ -1246,6 +1258,7 @@ _start:
 	vaeskeygenassist $7,(%esp),%xmm0
 	vpextrb $7,%xmm0,(%esp)
 	vcvtsi2sdl (%esp),%xmm0,%xmm7
+	vpclmulqdq $7,(%esp),%xmm0,%xmm7
 	vblendvps %xmm0,(%esp),%xmm4,%xmm6
 	vpinsrb $7,(%esp),%xmm0,%xmm7
 	vmovdqa (%esp),%ymm0
@@ -1266,6 +1279,7 @@ _start:
 	vaeskeygenassist $7,0x99(%ebp),%xmm0
 	vpextrb $7,%xmm0,0x99(%ebp)
 	vcvtsi2sdl 0x99(%ebp),%xmm0,%xmm7
+	vpclmulqdq $7,0x99(%ebp),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%ebp),%xmm4,%xmm6
 	vpinsrb $7,0x99(%ebp),%xmm0,%xmm7
 	vmovdqa 0x99(%ebp),%ymm0
@@ -1286,6 +1300,7 @@ _start:
 	vaeskeygenassist $7,0x99(,%eiz),%xmm0
 	vpextrb $7,%xmm0,0x99(,%eiz)
 	vcvtsi2sdl 0x99(,%eiz),%xmm0,%xmm7
+	vpclmulqdq $7,0x99(,%eiz),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(,%eiz),%xmm4,%xmm6
 	vpinsrb $7,0x99(,%eiz),%xmm0,%xmm7
 	vmovdqa 0x99(,%eiz),%ymm0
@@ -1306,6 +1321,7 @@ _start:
 	vaeskeygenassist $7,0x99(,%eiz,2),%xmm0
 	vpextrb $7,%xmm0,0x99(,%eiz,2)
 	vcvtsi2sdl 0x99(,%eiz,2),%xmm0,%xmm7
+	vpclmulqdq $7,0x99(,%eiz,2),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(,%eiz,2),%xmm4,%xmm6
 	vpinsrb $7,0x99(,%eiz,2),%xmm0,%xmm7
 	vmovdqa 0x99(,%eiz,2),%ymm0
@@ -1326,6 +1342,7 @@ _start:
 	vaeskeygenassist $7,0x99(%eax,%eiz),%xmm0
 	vpextrb $7,%xmm0,0x99(%eax,%eiz)
 	vcvtsi2sdl 0x99(%eax,%eiz),%xmm0,%xmm7
+	vpclmulqdq $7,0x99(%eax,%eiz),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%eax,%eiz),%xmm4,%xmm6
 	vpinsrb $7,0x99(%eax,%eiz),%xmm0,%xmm7
 	vmovdqa 0x99(%eax,%eiz),%ymm0
@@ -1346,6 +1363,7 @@ _start:
 	vaeskeygenassist $7,0x99(%eax,%eiz,2),%xmm0
 	vpextrb $7,%xmm0,0x99(%eax,%eiz,2)
 	vcvtsi2sdl 0x99(%eax,%eiz,2),%xmm0,%xmm7
+	vpclmulqdq $7,0x99(%eax,%eiz,2),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%eax,%eiz,2),%xmm4,%xmm6
 	vpinsrb $7,0x99(%eax,%eiz,2),%xmm0,%xmm7
 	vmovdqa 0x99(%eax,%eiz,2),%ymm0
@@ -1366,6 +1384,7 @@ _start:
 	vaeskeygenassist $7,0x99(%eax,%ebx,4),%xmm0
 	vpextrb $7,%xmm0,0x99(%eax,%ebx,4)
 	vcvtsi2sdl 0x99(%eax,%ebx,4),%xmm0,%xmm7
+	vpclmulqdq $7,0x99(%eax,%ebx,4),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%eax,%ebx,4),%xmm4,%xmm6
 	vpinsrb $7,0x99(%eax,%ebx,4),%xmm0,%xmm7
 	vmovdqa 0x99(%eax,%ebx,4),%ymm0
@@ -1386,6 +1405,7 @@ _start:
 	vaeskeygenassist $7,0x99(%esp,%ecx,8),%xmm0
 	vpextrb $7,%xmm0,0x99(%esp,%ecx,8)
 	vcvtsi2sdl 0x99(%esp,%ecx,8),%xmm0,%xmm7
+	vpclmulqdq $7,0x99(%esp,%ecx,8),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%esp,%ecx,8),%xmm4,%xmm6
 	vpinsrb $7,0x99(%esp,%ecx,8),%xmm0,%xmm7
 	vmovdqa 0x99(%esp,%ecx,8),%ymm0
@@ -1406,6 +1426,7 @@ _start:
 	vaeskeygenassist $7,0x99(%ebp,%edx,1),%xmm0
 	vpextrb $7,%xmm0,0x99(%ebp,%edx,1)
 	vcvtsi2sdl 0x99(%ebp,%edx,1),%xmm0,%xmm7
+	vpclmulqdq $7,0x99(%ebp,%edx,1),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%ebp,%edx,1),%xmm4,%xmm6
 	vpinsrb $7,0x99(%ebp,%edx,1),%xmm0,%xmm7
 	vmovdqa 0x99(%ebp,%edx,1),%ymm0
@@ -2104,6 +2125,18 @@ _start:
 	vpavgw xmm2,xmm6,xmm4
 	vpavgw xmm7,xmm6,XMMWORD PTR [ecx]
 	vpavgw xmm7,xmm6,[ecx]
+	vpclmullqlqdq xmm2,xmm6,xmm4
+	vpclmullqlqdq xmm7,xmm6,XMMWORD PTR [ecx]
+	vpclmullqlqdq xmm7,xmm6,[ecx]
+	vpclmulhqlqdq xmm2,xmm6,xmm4
+	vpclmulhqlqdq xmm7,xmm6,XMMWORD PTR [ecx]
+	vpclmulhqlqdq xmm7,xmm6,[ecx]
+	vpclmullqhqdq xmm2,xmm6,xmm4
+	vpclmullqhqdq xmm7,xmm6,XMMWORD PTR [ecx]
+	vpclmullqhqdq xmm7,xmm6,[ecx]
+	vpclmulhqhqdq xmm2,xmm6,xmm4
+	vpclmulhqhqdq xmm7,xmm6,XMMWORD PTR [ecx]
+	vpclmulhqhqdq xmm7,xmm6,[ecx]
 	vpcmpeqb xmm2,xmm6,xmm4
 	vpcmpeqb xmm7,xmm6,XMMWORD PTR [ecx]
 	vpcmpeqb xmm7,xmm6,[ecx]
@@ -2615,6 +2648,9 @@ _start:
 	vpblendw xmm2,xmm6,xmm4,7
 	vpblendw xmm2,xmm6,XMMWORD PTR [ecx],7
 	vpblendw xmm2,xmm6,[ecx],7
+	vpclmulqdq xmm2,xmm6,xmm4,7
+	vpclmulqdq xmm2,xmm6,XMMWORD PTR [ecx],7
+	vpclmulqdq xmm2,xmm6,[ecx],7
 	vshufpd xmm2,xmm6,xmm4,7
 	vshufpd xmm2,xmm6,XMMWORD PTR [ecx],7
 	vshufpd xmm2,xmm6,[ecx],7
@@ -3154,6 +3190,7 @@ _start:
 	vaeskeygenassist xmm0,XMMWORD PTR ds:0x1234,7
 	vpextrb ds:0x1234,xmm0,7
 	vcvtsi2sd xmm7,xmm0,DWORD PTR ds:0x1234
+	vpclmulqdq xmm7,xmm0,XMMWORD PTR ds:0x1234,7
 	vblendvps xmm6,xmm4,XMMWORD PTR ds:0x1234,xmm0
 	vpinsrb xmm7,xmm0,ds:0x1234,7
 	vmovdqa ymm0,YMMWORD PTR ds:0x1234
@@ -3174,6 +3211,7 @@ _start:
 	vaeskeygenassist xmm0,XMMWORD PTR [ebp],7
 	vpextrb [ebp],xmm0,7
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [ebp]
+	vpclmulqdq xmm7,xmm0,XMMWORD PTR [ebp],7
 	vblendvps xmm6,xmm4,XMMWORD PTR [ebp],xmm0
 	vpinsrb xmm7,xmm0,[ebp],7
 	vmovdqa ymm0,YMMWORD PTR [ebp]
@@ -3194,6 +3232,7 @@ _start:
 	vaeskeygenassist xmm0,XMMWORD PTR [ebp+0x99],7
 	vpextrb [ebp+0x99],xmm0,7
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [ebp+0x99]
+	vpclmulqdq xmm7,xmm0,XMMWORD PTR [ebp+0x99],7
 	vblendvps xmm6,xmm4,XMMWORD PTR [ebp+0x99],xmm0
 	vpinsrb xmm7,xmm0,[ebp+0x99],7
 	vmovdqa ymm0,YMMWORD PTR [ebp+0x99]
@@ -3214,6 +3253,7 @@ _start:
 	vaeskeygenassist xmm0,XMMWORD PTR [eiz*1+0x99],7
 	vpextrb [eiz*1+0x99],xmm0,7
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [eiz*1+0x99]
+	vpclmulqdq xmm7,xmm0,XMMWORD PTR [eiz*1+0x99],7
 	vblendvps xmm6,xmm4,XMMWORD PTR [eiz*1+0x99],xmm0
 	vpinsrb xmm7,xmm0,[eiz*1+0x99],7
 	vmovdqa ymm0,YMMWORD PTR [eiz*1+0x99]
@@ -3234,6 +3274,7 @@ _start:
 	vaeskeygenassist xmm0,XMMWORD PTR [eiz*2+0x99],7
 	vpextrb [eiz*2+0x99],xmm0,7
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [eiz*2+0x99]
+	vpclmulqdq xmm7,xmm0,XMMWORD PTR [eiz*2+0x99],7
 	vblendvps xmm6,xmm4,XMMWORD PTR [eiz*2+0x99],xmm0
 	vpinsrb xmm7,xmm0,[eiz*2+0x99],7
 	vmovdqa ymm0,YMMWORD PTR [eiz*2+0x99]
@@ -3254,6 +3295,7 @@ _start:
 	vaeskeygenassist xmm0,XMMWORD PTR [eax+eiz*1+0x99],7
 	vpextrb [eax+eiz*1+0x99],xmm0,7
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [eax+eiz*1+0x99]
+	vpclmulqdq xmm7,xmm0,XMMWORD PTR [eax+eiz*1+0x99],7
 	vblendvps xmm6,xmm4,XMMWORD PTR [eax+eiz*1+0x99],xmm0
 	vpinsrb xmm7,xmm0,[eax+eiz*1+0x99],7
 	vmovdqa ymm0,YMMWORD PTR [eax+eiz*1+0x99]
@@ -3274,6 +3316,7 @@ _start:
 	vaeskeygenassist xmm0,XMMWORD PTR [eax+eiz*2+0x99],7
 	vpextrb [eax+eiz*2+0x99],xmm0,7
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [eax+eiz*2+0x99]
+	vpclmulqdq xmm7,xmm0,XMMWORD PTR [eax+eiz*2+0x99],7
 	vblendvps xmm6,xmm4,XMMWORD PTR [eax+eiz*2+0x99],xmm0
 	vpinsrb xmm7,xmm0,[eax+eiz*2+0x99],7
 	vmovdqa ymm0,YMMWORD PTR [eax+eiz*2+0x99]
@@ -3294,6 +3337,7 @@ _start:
 	vaeskeygenassist xmm0,XMMWORD PTR [eax+ebx*4+0x99],7
 	vpextrb [eax+ebx*4+0x99],xmm0,7
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [eax+ebx*4+0x99]
+	vpclmulqdq xmm7,xmm0,XMMWORD PTR [eax+ebx*4+0x99],7
 	vblendvps xmm6,xmm4,XMMWORD PTR [eax+ebx*4+0x99],xmm0
 	vpinsrb xmm7,xmm0,[eax+ebx*4+0x99],7
 	vmovdqa ymm0,YMMWORD PTR [eax+ebx*4+0x99]
@@ -3314,6 +3358,7 @@ _start:
 	vaeskeygenassist xmm0,XMMWORD PTR [esp+ecx*8+0x99],7
 	vpextrb [esp+ecx*8+0x99],xmm0,7
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [esp+ecx*8+0x99]
+	vpclmulqdq xmm7,xmm0,XMMWORD PTR [esp+ecx*8+0x99],7
 	vblendvps xmm6,xmm4,XMMWORD PTR [esp+ecx*8+0x99],xmm0
 	vpinsrb xmm7,xmm0,[esp+ecx*8+0x99],7
 	vmovdqa ymm0,YMMWORD PTR [esp+ecx*8+0x99]
@@ -3334,6 +3379,7 @@ _start:
 	vaeskeygenassist xmm0,XMMWORD PTR [ebp+edx*1+0x99],7
 	vpextrb [ebp+edx*1+0x99],xmm0,7
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [ebp+edx*1+0x99]
+	vpclmulqdq xmm7,xmm0,XMMWORD PTR [ebp+edx*1+0x99],7
 	vblendvps xmm6,xmm4,XMMWORD PTR [ebp+edx*1+0x99],xmm0
 	vpinsrb xmm7,xmm0,[ebp+edx*1+0x99],7
 	vmovdqa ymm0,YMMWORD PTR [ebp+edx*1+0x99]

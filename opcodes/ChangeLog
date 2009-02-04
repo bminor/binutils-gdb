@@ -1,3 +1,17 @@
+2009-02-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (January, 2009)
+	* i386-dis.c (PREFIX_VEX_3A44): New.
+	(VEX_LEN_3A44_P_2): Likewise.
+	(PREFIX_VEX_3A48): Updated.
+	(VEX_LEN_3A4C_P_2): Likewise.
+	(prefix_table): Add PREFIX_VEX_3A44.
+	(vex_table): Likewise.
+	(vex_len_table): Add VEX_LEN_3A44_P_2.
+
+	* i386-opc.tbl: Add PCLMUL + AVX instructions.
+	* i386-tbl.h: Regenerated.
+
 2009-02-03  Sandip Matte  <sandip@rmicorp.com>
 
 	* mips-dis.c (mips_cp0_names_xlr, mips_cp0sel_names_xlr): Define.

@@ -1003,7 +1003,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREFIX_VEX_3A40		(PREFIX_VEX_3A22 + 1)
 #define PREFIX_VEX_3A41		(PREFIX_VEX_3A40 + 1)
 #define PREFIX_VEX_3A42		(PREFIX_VEX_3A41 + 1)
-#define PREFIX_VEX_3A4A		(PREFIX_VEX_3A42 + 1)
+#define PREFIX_VEX_3A44		(PREFIX_VEX_3A42 + 1)
+#define PREFIX_VEX_3A4A		(PREFIX_VEX_3A44 + 1)
 #define PREFIX_VEX_3A4B		(PREFIX_VEX_3A4A + 1)
 #define PREFIX_VEX_3A4C		(PREFIX_VEX_3A4B + 1)
 #define PREFIX_VEX_3A60		(PREFIX_VEX_3A4C + 1)
@@ -1239,7 +1240,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VEX_LEN_3A22_P_2	(VEX_LEN_3A21_P_2 + 1)
 #define VEX_LEN_3A41_P_2	(VEX_LEN_3A22_P_2 + 1)
 #define VEX_LEN_3A42_P_2	(VEX_LEN_3A41_P_2 + 1)
-#define VEX_LEN_3A4C_P_2	(VEX_LEN_3A42_P_2 + 1)
+#define VEX_LEN_3A44_P_2	(VEX_LEN_3A42_P_2 + 1)
+#define VEX_LEN_3A4C_P_2	(VEX_LEN_3A44_P_2 + 1)
 #define VEX_LEN_3A60_P_2	(VEX_LEN_3A4C_P_2 + 1)
 #define VEX_LEN_3A61_P_2	(VEX_LEN_3A60_P_2 + 1)
 #define VEX_LEN_3A62_P_2	(VEX_LEN_3A61_P_2 + 1)
@@ -5024,6 +5026,14 @@ static const struct dis386 prefix_table[][4] = {
     { "(bad)",	{ XX } },
   },
 
+  /* PREFIX_VEX_3A44 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { VEX_LEN_TABLE (VEX_LEN_3A44_P_2) },
+    { "(bad)",	{ XX } },
+  },
+
   /* PREFIX_VEX_3A4A */
   {
     { "(bad)",	{ XX } },
@@ -7670,7 +7680,7 @@ static const struct dis386 vex_table[][256] = {
     { PREFIX_TABLE (PREFIX_VEX_3A41) },
     { PREFIX_TABLE (PREFIX_VEX_3A42) },
     { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { PREFIX_TABLE (PREFIX_VEX_3A44) },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
@@ -9004,6 +9014,12 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_3A42_P_2 */
   {
     { "vmpsadbw",	{ XM, Vex128, EXx, Ib } },
+    { "(bad)",		{ XX } },
+  },
+
+  /* VEX_LEN_3A44_P_2 */
+  {
+    { "vpclmulqdq",	{ XM, Vex128, EXx, PCLMUL } },
     { "(bad)",		{ XX } },
   },
 

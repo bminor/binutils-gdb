@@ -34,6 +34,8 @@ aesenc  (%ecx),%xmm0
 pclmulqdq $8,%xmm1,%xmm0
 # AES + AVX
 vaesenc  (%ecx),%xmm0,%xmm2
+# PCLMUL + AVX
+vpclmulqdq $8,%xmm4,%xmm6,%xmm2
 # FMA
 vfmadd132pd %xmm4,%xmm6,%xmm2
 # MOVBE

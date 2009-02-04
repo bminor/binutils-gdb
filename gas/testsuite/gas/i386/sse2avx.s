@@ -157,6 +157,14 @@ _start:
 	pavgb (%ecx),%xmm6
 	pavgw %xmm4,%xmm6
 	pavgw (%ecx),%xmm6
+	pclmullqlqdq %xmm4,%xmm6
+	pclmullqlqdq (%ecx),%xmm6
+	pclmulhqlqdq %xmm4,%xmm6
+	pclmulhqlqdq (%ecx),%xmm6
+	pclmullqhqdq %xmm4,%xmm6
+	pclmullqhqdq (%ecx),%xmm6
+	pclmulhqhqdq %xmm4,%xmm6
+	pclmulhqhqdq (%ecx),%xmm6
 	pcmpeqb %xmm4,%xmm6
 	pcmpeqb (%ecx),%xmm6
 	pcmpeqw %xmm4,%xmm6
@@ -387,6 +395,8 @@ _start:
 	palignr $100,(%ecx),%xmm6
 	pblendw $100,%xmm4,%xmm6
 	pblendw $100,(%ecx),%xmm6
+	pclmulqdq $100,%xmm4,%xmm6
+	pclmulqdq $100,(%ecx),%xmm6
 	shufpd $100,%xmm4,%xmm6
 	shufpd $100,(%ecx),%xmm6
 	shufps $100,%xmm4,%xmm6
@@ -808,6 +818,14 @@ _start:
 	pavgb xmm6,XMMWORD PTR [ecx]
 	pavgw xmm6,xmm4
 	pavgw xmm6,XMMWORD PTR [ecx]
+	pclmullqlqdq xmm6,xmm4
+	pclmullqlqdq xmm6,XMMWORD PTR [ecx]
+	pclmulhqlqdq xmm6,xmm4
+	pclmulhqlqdq xmm6,XMMWORD PTR [ecx]
+	pclmullqhqdq xmm6,xmm4
+	pclmullqhqdq xmm6,XMMWORD PTR [ecx]
+	pclmulhqhqdq xmm6,xmm4
+	pclmulhqhqdq xmm6,XMMWORD PTR [ecx]
 	pcmpeqb xmm6,xmm4
 	pcmpeqb xmm6,XMMWORD PTR [ecx]
 	pcmpeqw xmm6,xmm4
@@ -1038,6 +1056,8 @@ _start:
 	palignr xmm6,XMMWORD PTR [ecx],100
 	pblendw xmm6,xmm4,100
 	pblendw xmm6,XMMWORD PTR [ecx],100
+	pclmulqdq xmm6,xmm4,100
+	pclmulqdq xmm6,XMMWORD PTR [ecx],100
 	shufpd xmm6,xmm4,100
 	shufpd xmm6,XMMWORD PTR [ecx],100
 	shufps xmm6,xmm4,100

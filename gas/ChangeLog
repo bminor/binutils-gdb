@@ -1,3 +1,11 @@
+2009-02-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (January, 2009)
+	* config/tc-i386.c (CPU_FLAGS_PCLMUL_MATCH): New.
+	(CPU_FLAGS_AVX_MATCH): Updated.
+	(CPU_FLAGS_32BIT_MATCH): Likewise.
+	(cpu_flags_match): Likewise.
+
 2009-02-03  Sandip Matte  <sandip@rmicorp.com>
 
 	* config/tc-mips.c (macro): Handle M_MSGSND, M_MSGLD, M_MSGLD_T,
