@@ -1,3 +1,9 @@
+2009-02-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 9805
+	* ld.texinfo (--allow-shlib-undefined): Correct description of
+	default settings and tidy up the rest of the entry.
+
 2009-02-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/spuelf.em (spu_after_open): Don't combine .text.ia.*
