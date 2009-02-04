@@ -1,3 +1,44 @@
+2009-02-04  Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/python-internal.h (gdbpy_get_value_from_history): Rename
+	prototype to gdbpy_history.
+	(gdbpy_is_string): Declare.
+	(python_string_to_host_string): Declare.
+	* python/python-utils.c (gdbpy_is_string): New function.
+	(unicode_to_encoded_string): New function.
+	(unicode_to_target_string): Use it.
+	(python_string_to_host_string): New function.
+	* python/python-value.c (valpy_address): New function.
+	(convert_value_from_python): Use gdbpy_is_string.  Change to throw
+	Python exception instead of a GDB exception on error.  Properly check
+	Python booleans.
+	(valpy_getitem): Convert field name to host string.  Handle array
+	accesses.  Adapt to new behaviour of convert_value_from_python.
+	(valpy_new): Adapt to new behaviour of convert_value_from_python.
+	(enum valpy_opcode) <VALPY_LSH, VALPY_RSH, VALPY_BITAND,
+	VALPY_BITXOR, VALPY_BITOR>: New constants.
+	(valpy_binop): Update.  Adapt to new behaviour of
+	convert_value_from_python.
+	(valpy_invert): New function.
+	(valpy_lsh): Likewise.
+	(valpy_rsh): Likewise.
+	(valpy_and): Likewise.
+	(valpy_or): Likewise.
+	(valpy_xor): Likewise.
+	(valpy_richcompare): Call convert_value_from_python instead of doing
+	conversions itself.
+	(is_intlike, valpy_int, valpy_long, valpy_float): New functions.
+	(gdbpy_get_value_from_history): Rename
+	function to gdbpy_history.
+	(gdbpy_initialize_values): Don't set tp_new.
+	(value_object_type): Add valpy_new.
+	(value_object_methods): Add `address' entry.
+	(value_object_as_number): Update for new methods.
+	* python/python.c (GdbMethods): Rename entry from
+	`get_value_from_history' to `history'.
+
 2009-02-04  Jerome Guitton  <guitton@adacore.com>
 
 	* ada-lang.c (ada_template_to_fixed_record_type_1): Check size

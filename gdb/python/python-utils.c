@@ -95,6 +95,29 @@ python_string_to_unicode (PyObject *obj)
 }
 
 /* Returns a newly allocated string with the contents of the given unicode
+   string object converted to CHARSET.  If an error occurs during the
+   conversion, NULL will be returned and a python exception will be set.
+
+   The caller is responsible for xfree'ing the string.  */
+static char *
+unicode_to_encoded_string (PyObject *unicode_str, const char *charset)
+{
+  char *result;
+  PyObject *string;
+
+  /* Translate string to named charset.  */
+  string = PyUnicode_AsEncodedString (unicode_str, charset, NULL);
+  if (string == NULL)
+    return NULL;
+
+  result = xstrdup (PyString_AsString (string));
+
+  Py_DECREF (string);
+
+  return result;
+}
+
+/* Returns a newly allocated string with the contents of the given unicode
    string object converted to the target's charset.  If an error occurs during
    the conversion, NULL will be returned and a python exception will be set.
 
@@ -102,19 +125,7 @@ python_string_to_unicode (PyObject *obj)
 char *
 unicode_to_target_string (PyObject *unicode_str)
 {
-  char *target_string;
-  PyObject *string;
-
-  /* Translate string to target's charset.  */
-  string = PyUnicode_AsEncodedString (unicode_str, target_charset (), NULL);
-  if (string == NULL)
-    return NULL;
-
-  target_string = xstrdup (PyString_AsString (string));
-
-  Py_DECREF (string);
-
-  return target_string;
+  return unicode_to_encoded_string (unicode_str, target_charset ());
 }
 
 /* Converts a python string (8-bit or unicode) to a target string in
@@ -131,4 +142,29 @@ python_string_to_target_string (PyObject *obj)
     return NULL;
 
   return unicode_to_target_string (str);
+}
+
+/* Converts a python string (8-bit or unicode) to a target string in
+   the host's charset.  Returns NULL on error, with a python exception set.
+
+   The caller is responsible for xfree'ing the string.  */
+char *
+python_string_to_host_string (PyObject *obj)
+{
+  PyObject *str;
+
+  str = python_string_to_unicode (obj);
+  if (str == NULL)
+    return NULL;
+
+  return unicode_to_encoded_string (str, host_charset ());
+}
+
+/* Return true if OBJ is a Python string or unicode object, false
+   otherwise.  */
+
+int
+gdbpy_is_string (PyObject *obj)
+{
+  return PyString_Check (obj) || PyUnicode_Check (obj);
 }

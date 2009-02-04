@@ -111,13 +111,18 @@ proc test_value_numeric_ops {} {
   gdb_test "python print 'result = ' + str(1-i)" " = -4" "subtract python integer from integer value"
   gdb_test "python print 'result = ' + str(1.5+f)" " = 2.75" "add python float with double value"
 
+  # Conversion test.
+  gdb_test "print evalue" " = TWO"
+  gdb_test "python evalue = gdb.history (0)" ""
+  gdb_test "python print int (evalue)" "2"
+
   # Test pointer arithmethic
 
   # First, obtain the pointers
   gdb_test "print (void *) 2" "" ""
-  gdb_test "python a = gdb.get_value_from_history (0)" "" ""
+  gdb_test "python a = gdb.history (0)" "" ""
   gdb_test "print (void *) 5" "" ""
-  gdb_test "python b = gdb.get_value_from_history (0)" "" ""
+  gdb_test "python b = gdb.history (0)" "" ""
 
   gdb_test "python print 'result = ' + str(a+5)" " = 0x7" "add pointer value with python integer"
   gdb_test "python print 'result = ' + str(b-2)" " = 0x3" "subtract python integer from pointer value"
@@ -205,7 +210,7 @@ proc test_value_in_inferior {} {
   # Just get inferior variable s in the value history, available to python.
   gdb_test "print s" " = {a = 3, b = 5}" ""
 
-  gdb_py_test_silent_cmd "python s = gdb.get_value_from_history (0)" "get value from history" 1
+  gdb_py_test_silent_cmd "python s = gdb.history (0)" "get value from history" 1
 
   gdb_test "python print 'result = ' + str(s\['a'\])" " = 3" "access element inside struct using 8-bit string name"
   gdb_test "python print 'result = ' + str(s\[u'a'\])" " = 3" "access element inside struct using unicode name"
@@ -215,7 +220,7 @@ proc test_value_in_inferior {} {
   # Just get inferior variable argv the value history, available to python.
   gdb_test "print argv" " = \\(char \\*\\*\\) 0x.*" ""
 
-  gdb_py_test_silent_cmd "python argv = gdb.get_value_from_history (0)" "" 0
+  gdb_py_test_silent_cmd "python argv = gdb.history (0)" "" 0
   gdb_py_test_silent_cmd "python arg0 = argv.dereference ()" "dereference value" 1
 
   # Check that the dereferenced value is sane

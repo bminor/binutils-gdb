@@ -1,3 +1,13 @@
+2009-02-04  Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.python/python-value.exp: Use `gdb.history' instead of
+	`gdb.value_from_history'.
+	(test_value_numeric_ops): Add test for conversion of enum constant.
+	* gdb.python/python-value.c (enum e): New type.
+	(evalue): New global.
+	(main): Use argv.
+
 2009-02-04  Jerome Guitton  <guitton@adacore.com>
 
 	* gdb.ada/uninitialized_vars: New test program.

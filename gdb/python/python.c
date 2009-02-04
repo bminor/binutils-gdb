@@ -52,7 +52,7 @@ static PyObject *gdbpy_flush (PyObject *, PyObject *);
 
 static PyMethodDef GdbMethods[] =
 {
-  { "get_value_from_history", gdbpy_get_value_from_history, METH_VARARGS,
+  { "history", gdbpy_history, METH_VARARGS,
     "Get a value from history" },
   { "execute", execute_gdb_command, METH_VARARGS,
     "Execute a gdb command" },

@@ -27,6 +27,14 @@ union u
   float b;
 };
 
+enum e
+  {
+    ONE = 1,
+    TWO = 2
+  };
+
+enum e evalue = TWO;
+
 int
 main (int argc, char *argv[])
 {
@@ -36,6 +44,8 @@ main (int argc, char *argv[])
   s.a = 3;
   s.b = 5;
   u.a = 7;
+
+  argv[0][0] = 'a';   /* Just to avoid getting argv optimized out.  */
 
   return 0;      /* break to inspect struct and union */
 }

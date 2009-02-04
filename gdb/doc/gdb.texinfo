@@ -18097,6 +18097,21 @@ If the named parameter does not exist, this function throws a
 a Python value of the appropriate type, and returned.
 @end defun
 
+@findex gdb.history
+@defun history number
+Return a value from @value{GDBN}'s value history (@pxref{Value
+History}).  @var{number} indicates which history element to return.
+If @var{number} is negative, then @value{GDBN} will take its absolute value
+and count backward from the last element (i.e., the most recent element) to
+find the value to return.  If @var{number} is zero, then @value{GDBN} will
+return the most recent element.  If the element specified by @value{number}
+doesn't exist in the value history, a @code{RuntimeError} exception will be
+raised.
+
+If no exception is raised, the return value is always an instance of
+@code{gdb.Value} (@pxref{Values From Inferior}).
+@end defun
+
 @findex gdb.write
 @defun write string
 Print a string to @value{GDBN}'s paginated standard output stream.
