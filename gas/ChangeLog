@@ -13,7 +13,7 @@
 	(mips_cpu_info_table): Add XLR entry.
 	* doc/c-mips.texi (-march): Document xlr.
 
-2009-01-29  Eric B. Weddington  <eric.weddington@atmel.com>
+2009-02-03  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add ata6289.
 	* doc/c-avr.texi: Likewise.
