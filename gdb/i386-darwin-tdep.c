@@ -41,6 +41,7 @@
 #include "i386-darwin-tdep.h"
 #include "solib.h"
 #include "solib-darwin.h"
+#include "dwarf2-frame.h"
 
 /* Offsets into the struct i386_thread_state where we'll find the saved regs.
    From <mach/i386/thread_status.h> and i386-tdep.h.  */
@@ -100,6 +101,65 @@ int amd64_darwin_thread_state_reg_offset[] =
 const int amd64_darwin_thread_state_num_regs = 
   ARRAY_SIZE (amd64_darwin_thread_state_reg_offset);
 
+/* Assuming THIS_FRAME is a Darwin sigtramp routine, return the
+   address of the associated sigcontext structure.  */
+
+static CORE_ADDR
+i386_darwin_sigcontext_addr (struct frame_info *this_frame)
+{
+  CORE_ADDR bp;
+  CORE_ADDR si;
+  gdb_byte buf[4];
+
+  get_frame_register (this_frame, I386_EBP_REGNUM, buf);
+  bp = extract_unsigned_integer (buf, 4);
+
+  /* A pointer to the ucontext is passed as the fourth argument
+     to the signal handler.  */
+  read_memory (bp + 24, buf, 4);
+  si = extract_unsigned_integer (buf, 4);
+
+  /* The pointer to mcontext is at offset 28.  */
+  read_memory (si + 28, buf, 4);
+
+  /* First register (eax) is at offset 12.  */
+  return extract_unsigned_integer (buf, 4) + 12;
+}
+
+static CORE_ADDR
+amd64_darwin_sigcontext_addr (struct frame_info *this_frame)
+{
+  CORE_ADDR rbx;
+  CORE_ADDR si;
+  gdb_byte buf[8];
+
+  /* A pointer to the ucontext is passed as the fourth argument
+     to the signal handler, which is saved in rbx.  */
+  get_frame_register (this_frame, AMD64_RBX_REGNUM, buf);
+  rbx = extract_unsigned_integer (buf, 8);
+
+  /* The pointer to mcontext is at offset 48.  */
+  read_memory (rbx + 48, buf, 8);
+
+  /* First register (rax) is at offset 16.  */
+  return extract_unsigned_integer (buf, 8) + 16;
+}
+
+/* Return true if the PC of THIS_FRAME is in a signal trampoline which
+   may have DWARF-2 CFI.
+
+   On Darwin, signal trampolines have DWARF-2 CFI but it has only one FDE
+   that covers only the indirect call to the user handler.
+   Without this function, the frame is recognized as a normal frame which is
+   not expected.  */
+
+static int
+darwin_dwarf_signal_frame_p (struct gdbarch *gdbarch,
+			     struct frame_info *this_frame)
+{
+  return i386_sigtramp_p (this_frame);
+}
+
 static void
 i386_darwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -109,11 +169,14 @@ i386_darwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->num_xmm_regs = I386_NUM_XREGS - 1;
   set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS);
 
+  dwarf2_frame_set_signal_frame_p (gdbarch, darwin_dwarf_signal_frame_p);
+
   tdep->struct_return = reg_struct_return;
 
-  tdep->sigcontext_addr = NULL;
+  tdep->sigtramp_p = i386_sigtramp_p;
+  tdep->sigcontext_addr = i386_darwin_sigcontext_addr;
   tdep->sc_reg_offset = i386_darwin_thread_state_reg_offset;
-  tdep->sc_num_regs = 16;
+  tdep->sc_num_regs = i386_darwin_thread_state_num_regs;
 
   tdep->jb_pc_offset = 20;
 
@@ -129,10 +192,12 @@ x86_darwin_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->struct_return = reg_struct_return;
 
-  /* We don't do signals yet.  */
-  tdep->sigcontext_addr = NULL;
+  dwarf2_frame_set_signal_frame_p (gdbarch, darwin_dwarf_signal_frame_p);
+
+  tdep->sigtramp_p = i386_sigtramp_p;
+  tdep->sigcontext_addr = amd64_darwin_sigcontext_addr;
   tdep->sc_reg_offset = amd64_darwin_thread_state_reg_offset;
-  tdep->sc_num_regs = ARRAY_SIZE (amd64_darwin_thread_state_reg_offset);
+  tdep->sc_num_regs = amd64_darwin_thread_state_num_regs;
 
   tdep->jb_pc_offset = 148;
 

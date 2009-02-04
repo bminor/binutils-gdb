@@ -1,5 +1,14 @@
 2009-02-04  Tristan Gingold  <gingold@adacore.com>
 
+	* i386-darwin-tdep.c (i386_darwin_sigcontext_addr): New function.
+	(amd64_darwin_sigcontext_addr): Ditto.
+	(darwin_dwarf_signal_frame_p): Ditto.
+	(i386_darwin_init_abi): Handle signal frames, use the const for
+	sc_num_regs.
+	(x86_darwin_init_abi_64): Ditto.
+
+2009-02-04  Tristan Gingold  <gingold@adacore.com>
+
 	* i386-tdep.c (i386_sigtramp_p): Make it public.
 	* i386-tdep.h (i386_sigtramp_p): Declare.
 
