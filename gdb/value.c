@@ -1712,8 +1712,7 @@ value_from_contents_and_address (struct type *type,
   else
     memcpy (value_contents_raw (v), valaddr, TYPE_LENGTH (type));
   VALUE_ADDRESS (v) = address;
-  if (address != 0)
-    VALUE_LVAL (v) = lval_memory;
+  VALUE_LVAL (v) = lval_memory;
   return v;
 }
 
