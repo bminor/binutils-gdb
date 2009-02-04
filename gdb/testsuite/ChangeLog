@@ -1,3 +1,8 @@
+2009-02-04  Jerome Guitton  <guitton@adacore.com>
+
+	* gdb.ada/uninitialized_vars: New test program.
+	* gdb.ada/uninitialized_vars.exp: New testcase.
+
 2009-02-02  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/cpcompletion.exp: Name the test "pr9594".
