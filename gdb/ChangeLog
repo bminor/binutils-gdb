@@ -90,6 +90,16 @@
 	* amd64-linux-tdep.c: #include arch-utils.h.
 	(amd64_linux_init_abi): Install displaced stepping support.
 
+2009-01-28  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Jerome Guitton  <guitton@adacore.com>
+
+	* configure, config.in: Regenerated.
+	* configure.ac: Add --with-system-gdbinit.
+	* main.c (get_init_files): New.
+	(captured_main): Use get_init_files.  Load system gdbinit before
+	$HOME/.gdbinit.
+	(print_gdb_help): Print location of init files.
+
 2009-01-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* corefile.c (generic_search): Delete disabled code.
