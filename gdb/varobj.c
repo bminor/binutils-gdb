@@ -431,14 +431,15 @@ find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
   if (frame_addr == (CORE_ADDR) 0)
     return NULL;
 
-  while (1)
+  for (frame = get_current_frame ();
+       frame != NULL;
+       frame = get_prev_frame (frame))
     {
-      frame = get_prev_frame (frame);
-      if (frame == NULL)
-	return NULL;
       if (get_frame_base_address (frame) == frame_addr)
 	return frame;
     }
+
+  return NULL;
 }
 
 struct varobj *
@@ -462,20 +463,26 @@ varobj_create (char *objname,
       struct value *value = NULL;
       int expr_len;
 
-      /* Parse and evaluate the expression, filling in as much
-         of the variable's data as possible */
+      /* Parse and evaluate the expression, filling in as much of the
+         variable's data as possible.  */
 
-      /* Allow creator to specify context of variable */
-      if ((type == USE_CURRENT_FRAME) || (type == USE_SELECTED_FRAME))
-	fi = deprecated_safe_get_selected_frame ();
+      if (has_stack_frames ())
+	{
+	  /* Allow creator to specify context of variable */
+	  if ((type == USE_CURRENT_FRAME) || (type == USE_SELECTED_FRAME))
+	    fi = get_selected_frame (NULL);
+	  else
+	    /* FIXME: cagney/2002-11-23: This code should be doing a
+	       lookup using the frame ID and not just the frame's
+	       ``address''.  This, of course, means an interface
+	       change.  However, with out that interface change ISAs,
+	       such as the ia64 with its two stacks, won't work.
+	       Similar goes for the case where there is a frameless
+	       function.  */
+	    fi = find_frame_addr_in_frame_chain (frame);
+	}
       else
-	/* FIXME: cagney/2002-11-23: This code should be doing a
-	   lookup using the frame ID and not just the frame's
-	   ``address''.  This, of course, means an interface change.
-	   However, with out that interface change ISAs, such as the
-	   ia64 with its two stacks, won't work.  Similar goes for the
-	   case where there is a frameless function.  */
-	fi = find_frame_addr_in_frame_chain (frame);
+	fi = NULL;
 
       /* frame = -2 means always use selected frame */
       if (type == USE_SELECTED_FRAME)

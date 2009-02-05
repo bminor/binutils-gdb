@@ -1,3 +1,13 @@
+2009-02-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* frame.c (has_stack_frames): Make public.
+	(get_prev_frame): Don't allow a NULL this_frame anymore.
+	* frame.h (has_stack_frames): Declare.
+	* varobj.c (find_frame_addr_in_frame_chain): Don't ever pass NULL
+	to get_prev_frame, instead start at get_current_frame.
+	(varobj_create): Check has_stack_frames before getting any frame;
+	eliminate one usage of deprecated_safe_get_selected_frame.
+
 2009-02-05  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 

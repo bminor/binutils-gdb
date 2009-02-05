@@ -204,6 +204,11 @@ enum frame_type
    error.  */
 extern struct frame_info *get_current_frame (void);
 
+/* Does the current target interface have enough state to be able to
+   query the current inferior for frame info, and is the inferior in a
+   state where that is possible?  */
+extern int has_stack_frames (void);
+
 /* Invalidates the frame cache (this function should have been called
    invalidate_cached_frames).
 

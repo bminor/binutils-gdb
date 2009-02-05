@@ -997,7 +997,7 @@ get_current_frame (void)
 
 static struct frame_info *selected_frame;
 
-static int
+int
 has_stack_frames (void)
 {
   if (!target_has_registers || !target_has_stack || !target_has_memory)
@@ -1457,42 +1457,6 @@ struct frame_info *
 get_prev_frame (struct frame_info *this_frame)
 {
   struct frame_info *prev_frame;
-
-  /* Return the inner-most frame, when the caller passes in NULL.  */
-  /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
-     caller should have previously obtained a valid frame using
-     get_selected_frame() and then called this code - only possibility
-     I can think of is code behaving badly.
-
-     NOTE: cagney/2003-01-10: Talk about code behaving badly.  Check
-     block_innermost_frame().  It does the sequence: frame = NULL;
-     while (1) { frame = get_prev_frame (frame); .... }.  Ulgh!  Why
-     it couldn't be written better, I don't know.
-
-     NOTE: cagney/2003-01-11: I suspect what is happening in
-     block_innermost_frame() is, when the target has no state
-     (registers, memory, ...), it is still calling this function.  The
-     assumption being that this function will return NULL indicating
-     that a frame isn't possible, rather than checking that the target
-     has state and then calling get_current_frame() and
-     get_prev_frame().  This is a guess mind.  */
-  if (this_frame == NULL)
-    {
-      /* NOTE: cagney/2002-11-09: There was a code segment here that
-	 would error out when CURRENT_FRAME was NULL.  The comment
-	 that went with it made the claim ...
-
-	 ``This screws value_of_variable, which just wants a nice
-	 clean NULL return from block_innermost_frame if there are no
-	 frames.  I don't think I've ever seen this message happen
-	 otherwise.  And returning NULL here is a perfectly legitimate
-	 thing to do.''
-
-         Per the above, this code shouldn't even be called with a NULL
-         THIS_FRAME.  */
-      frame_debug_got_null_frame (this_frame, "this_frame NULL");
-      return current_frame;
-    }
 
   /* There is always a frame.  If this assertion fails, suspect that
      something should be calling get_selected_frame() or
