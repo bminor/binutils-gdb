@@ -1,3 +1,31 @@
+2009-02-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* language.h (language_dfn): Add la_get_string member.
+	(LA_GET_STRING): New macro.
+	(default_get_string): New prototype.
+	* language.c (default_get_string): New function.
+	(unknown_language_defn, auto_language_defn, local_language_defn): Use
+	default_get_string for la_get_string.
+	* c-lang.c (c_get_string): New function.
+	(c_language_defn, cplus_language_defn, asm_language_defn): Use
+	c_get_string for la_get_string.
+	(minimal_language_defn): Likewise
+	* ada-lang.c (ada_language_defn): Likewise.
+	* f-lang.c (f_language_defn): Use default_get_string for
+	la_get_string.
+	* jv-lang.c (java_language_defn): Likewise.
+	* m2-lang.c (m2_language_defn): Likewise.
+	* objc-lang.c (objc_language_defn): Likewise.
+	* p-lang.c (p_language_defn): Likewise.
+	* scm-lang.c (scm_language_defn): Likewise.
+	* typeprint.c (type_to_string): New function.
+	* value.h (type_to_string): New prototype.
+	* valprint.c (val_print_string): Factor out code for reading string
+	from the inferior into its own function.  Put 2 spaces after period
+	in comments.
+	(read_string): New function.
+	* valprint.h (read_string): New prototype.
+
 2009-01-07  Pierre Muller  <muller@ics.u-strasbg.fr>
 	    Tom Tromey  <tromey@redhat.com>
 

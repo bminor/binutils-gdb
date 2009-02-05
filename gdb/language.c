@@ -1043,6 +1043,13 @@ default_print_array_index (struct value *index_value, struct ui_file *stream,
   fprintf_filtered (stream, "] = ");
 }
 
+void
+default_get_string (struct value *value, gdb_byte **buffer, int *length,
+		    const char **charset)
+{
+  error (_("Getting a string is unsupported in this language."));
+}
+
 /* Define the language that is no language.  */
 
 static int
@@ -1165,6 +1172,7 @@ const struct language_defn unknown_language_defn =
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
+  default_get_string,
   LANG_MAGIC
 };
 
@@ -1203,6 +1211,7 @@ const struct language_defn auto_language_defn =
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
+  default_get_string,
   LANG_MAGIC
 };
 
@@ -1240,6 +1249,7 @@ const struct language_defn local_language_defn =
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
   default_pass_by_reference,
+  default_get_string,
   LANG_MAGIC
 };
 

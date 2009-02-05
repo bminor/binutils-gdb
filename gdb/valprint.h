@@ -136,4 +136,7 @@ extern void print_hex_chars (struct ui_file *, const gdb_byte *,
 
 extern void print_char_chars (struct ui_file *, const gdb_byte *,
 			      unsigned int, enum bfd_endian);
+
+int read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
+		 gdb_byte **buffer, int *bytes_read);
 #endif

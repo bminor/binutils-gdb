@@ -282,6 +282,14 @@ struct language_defn
        reference at the language level.  */
     int (*la_pass_by_reference) (struct type *type);
 
+    /* Obtain a string from the inferior, storing it in a newly allocated
+       buffer in BUFFER, which should be freed by the caller.  LENGTH will
+       hold the size in bytes of the string (only actual characters, excluding
+       an eventual terminating null character).  CHARSET will hold the encoding
+       used in the string.  */
+    void (*la_get_string) (struct value *value, gdb_byte **buffer, int *length,
+			  const char **charset);
+
     /* Add fields above this point, so the magic number is always last. */
     /* Magic number for compat checking */
 
@@ -380,6 +388,8 @@ extern enum language set_language (enum language);
 				 force_ellipses,options))
 #define LA_EMIT_CHAR(ch, stream, quoter) \
   (current_language->la_emitchar(ch, stream, quoter))
+#define LA_GET_STRING(value, buffer, length, encoding) \
+  (current_language->la_get_string(value, buffer, length, encoding))
 
 #define LA_PRINT_ARRAY_INDEX(index_value, stream, optins) \
   (current_language->la_print_array_index(index_value, stream, options))
@@ -488,5 +498,11 @@ int default_pass_by_reference (struct type *type);
 /* The default implementation of la_print_typedef.  */
 void default_print_typedef (struct type *type, struct symbol *new_symbol,
 			    struct ui_file *stream);
+
+void default_get_string (struct value *value, gdb_byte **buffer, int *length,
+			 const char **charset);
+
+void c_get_string (struct value *value, gdb_byte **buffer, int *length,
+		   const char **charset);
 
 #endif /* defined (LANGUAGE_H) */
