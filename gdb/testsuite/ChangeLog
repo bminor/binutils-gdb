@@ -1,3 +1,11 @@
+2009-02-05  Tristan Gingold  <gingold@adacore.com>
+
+	* gdb.base/sigbpt.exp: Detect which signal is received when a NULL
+	pointer is dereferenced and use this signal name in regexp.
+	* gdb.base/signull.exp: Ditto.
+	* gdb.base/sigbpt.c (main): Catch SIGBUS too.
+	* gdb.base/signull.c (main): Ditto.
+
 2009-02-04  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 

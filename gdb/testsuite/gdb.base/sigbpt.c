@@ -45,6 +45,7 @@ main ()
   memset (&act, 0, sizeof act);
   act.sa_handler = keeper;
   sigaction (SIGSEGV, &act, NULL);
+  sigaction (SIGBUS, &act, NULL);
 
   bowler ();
   return 0;

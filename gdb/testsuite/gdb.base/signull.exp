@@ -83,12 +83,17 @@ gdb_expect {
 gdb_test "set test = code_entry_point" "" "set for function pointer probe"
 set test "probe function pointer"
 set function_pointer code_entry_point
+set signame "SIGSEGV"
 gdb_test_multiple "continue" "$test" {
     -re "Program received signal SIGSEGV.*bowler .*$gdb_prompt $" {
 	set function_pointer code_descriptor
 	pass "$test (function descriptor)"
     }
     -re "Program received signal SIGSEGV.*0.*$gdb_prompt $" {
+	pass "$test (function entry-point)"
+    }
+    -re "Program received signal SIGBUS.*0.*$gdb_prompt $" {
+	set signame SIGBUS
 	pass "$test (function entry-point)"
     }
 }
@@ -100,20 +105,22 @@ gdb_test "break bowler"
 gdb_test "break keeper"
 # By default Stop:Yes Print:Yes Pass:Yes
 gdb_test "handle SIGSEGV" "SIGSEGV.*Yes.*Yes.*Yes.*Segmentation fault"
+gdb_test "handle SIGBUS" "SIGBUS.*Yes.*Yes.*Yes.*Bus error"
 
 # For the given signal type, check that: the SIGSEGV occures; a
 # backtrace from the SEGV works; the sigsegv is delivered; a backtrace
 # through the SEGV works.
 
 proc test_segv { name tag bt_from_segv bt_from_keeper } {
+    global signame
     gdb_test continue "Breakpoint.* bowler.*" "${name}; start with the bowler"
     # NB: Don't use $tag in the testname - changes across systems.
     gdb_test "set test = $tag" "" "${name}; select the pointer type"
-    gdb_test continue "Program received signal SIGSEGV.*" \
-	"${name}; take the SIGSEGV"
-    gdb_test backtrace $bt_from_segv "${name}; backtrace from SIGSEGV"
+    gdb_test continue "Program received signal ${signame}.*" \
+	"${name}; take the ${signame}"
+    gdb_test backtrace $bt_from_segv "${name}; backtrace from ${signame}"
     gdb_test continue "Breakpoint.* keeper.*" "${name}; continue to the keeper"
-    gdb_test backtrace $bt_from_keeper "${name}; backtrace from keeper through SIGSEGV"
+    gdb_test backtrace $bt_from_keeper "${name}; backtrace from keeper through ${signame}"
 }
 
 test_segv "data read" data_read \

@@ -83,15 +83,19 @@ gdb_test "break keeper"
 # the address of each single-step instruction (up to and including the
 # instruction that causes the SIGSEGV) in bowler_addrs, and the address
 # of the actual SIGSEGV in segv_addr.
+# Note: this test detects which signal is received.  Usually it is SIGSEGV
+# (and we use SIGSEGV in comments) but on Darwin it is SIGBUS.
 
 set bowler_addrs bowler
 set segv_addr none
 gdb_test {display/i $pc}
 gdb_test "advance *bowler" "bowler.*" "advance to the bowler"
-set test "stepping to SIGSEGV"
+set test "stepping to fault"
+set signame "SIGSEGV"
 gdb_test_multiple "stepi" "$test" {
-    -re "Program received signal SIGSEGV.*pc(\r\n| *) *(0x\[0-9a-f\]*).*$gdb_prompt $" {
-	set segv_addr $expect_out(2,string)
+    -re "Program received signal (SIGBUS|SIGSEGV).*pc(\r\n| *) *(0x\[0-9a-f\]*).*$gdb_prompt $" {
+	set signame $expect_out(1,string)
+	set segv_addr $expect_out(3,string)
 	pass "$test"
     }
     -re " .*pc(\r\n| *)(0x\[0-9a-f\]*).*bowler.*$gdb_prompt $" {
@@ -132,7 +136,7 @@ proc after_segv { } {
 
 # Check that the address table and SIGSEGV correspond.
 
-set test "Verify that SIGSEGV occurs at the last STEPI insn"
+set test "Verify that ${signame} occurs at the last STEPI insn"
 if {[string compare $segv_addr [at_segv]] == 0} {
     pass "$test"
 } else {
@@ -144,6 +148,7 @@ if {[string compare $segv_addr [at_segv]] == 0} {
 
 proc stepi_out { name args } {
     global gdb_prompt
+    global signame
 
     # Set SIGSEGV to pass+nostop and then run the inferior all the way
     # through to the signal handler.  With the handler is reached,
@@ -151,9 +156,9 @@ proc stepi_out { name args } {
     # inferior.  Stops a SIGSEGV infinite loop when a broke system
     # keeps re-executing the faulting instruction.
     rerun_to_main
-    gdb_test "handle SIGSEGV nostop print pass" "" "${name}; pass SIGSEGV"
+    gdb_test "handle ${signame} nostop print pass" "" "${name}; pass ${signame}"
     gdb_test "continue" "keeper.*" "${name}; continue to keeper"
-    gdb_test "handle SIGSEGV stop print nopass" "" "${name}; nopass SIGSEGV"
+    gdb_test "handle ${signame} stop print nopass" "" "${name}; nopass ${signame}"
 
     # Insert all the breakpoints.  To avoid the need to step over
     # these instructions, this is delayed until after the keeper has
@@ -213,6 +218,7 @@ proc stepi_out { name args } {
 
 proc cont_out { name args } {
     global gdb_prompt
+    global signame
 
     # Set SIGSEGV to pass+nostop and then run the inferior all the way
     # through to the signal handler.  With the handler is reached,
@@ -220,9 +226,9 @@ proc cont_out { name args } {
     # inferior.  Stops a SIGSEGV infinite loop when a broke system
     # keeps re-executing the faulting instruction.
     rerun_to_main
-    gdb_test "handle SIGSEGV nostop print pass" "" "${name}; pass SIGSEGV"
+    gdb_test "handle ${signame} nostop print pass" "" "${name}; pass ${signame}"
     gdb_test "continue" "keeper.*" "${name}; continue to keeper"
-    gdb_test "handle SIGSEGV stop print nopass" "" "${name}; nopass SIGSEGV"
+    gdb_test "handle ${signame} stop print nopass" "" "${name}; nopass ${signame}"
 
     # Insert all the breakpoints.  To avoid the need to step over
     # these instructions, this is delayed until after the keeper has
@@ -243,7 +249,7 @@ proc cont_out { name args } {
 
     # Now single step the faulted instrction at that breakpoint.
     gdb_test "stepi" \
-	"Program received signal SIGSEGV.*pc(\r\n| *)[at_segv] .*" \
+	"Program received signal ${signame}.*pc(\r\n| *)[at_segv] .*" \
 	"${name}; stepi fault"    
 
     # Clear any breakpoints
