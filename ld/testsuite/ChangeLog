@@ -1,3 +1,7 @@
+2009-02-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armeabitests): Restore thumb2-b-interwork.
+
 2009-02-03  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* ld-m68k/got-multigot-12-13-14-34-35-ok.d: Update.
