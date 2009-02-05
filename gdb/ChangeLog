@@ -1,3 +1,14 @@
+2009-02-05  Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* python/python.c (GdbMethods): Move to bottom of file.
+	(get_parameter, execute_gdb_command, gdbpy_write,
+	gdbpy_flush): Remove forward declarations.
+	(eval_python_from_control_command): Fix error checking of function
+	PyRun_SimpleString.  Fix error string.
+	(python_command): Likewise.
+	(execute_gdb_command): Added from_tty argument.
+
 2009-02-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* language.h (language_dfn): Add la_get_string member.

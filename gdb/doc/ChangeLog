@@ -1,3 +1,8 @@
+2009-02-05  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Basic Python): Document execute's from_tty
+	argument.
+
 2009-02-04  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Basic Python): Document gdb.history.
