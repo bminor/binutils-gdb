@@ -1353,21 +1353,6 @@ target_flash_done (void)
   tcomplain ();
 }
 
-#ifndef target_stopped_data_address_p
-int
-target_stopped_data_address_p (struct target_ops *target)
-{
-  if (target->to_stopped_data_address
-      == (int (*) (struct target_ops *, CORE_ADDR *)) return_zero)
-    return 0;
-  if (target->to_stopped_data_address == debug_to_stopped_data_address
-      && (debug_target.to_stopped_data_address
-	  == (int (*) (struct target_ops *, CORE_ADDR *)) return_zero))
-    return 0;
-  return 1;
-}
-#endif
-
 static void
 show_trust_readonly (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)

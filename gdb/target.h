@@ -1129,14 +1129,9 @@ extern char *normal_pid_to_str (ptid_t ptid);
      (*current_target.to_remove_hw_breakpoint) (bp_tgt)
 #endif
 
-extern int target_stopped_data_address_p (struct target_ops *);
-
 #ifndef target_stopped_data_address
 #define target_stopped_data_address(target, x) \
     (*target.to_stopped_data_address) (target, x)
-#else
-/* Horrible hack to get around existing macros :-(.  */
-#define target_stopped_data_address_p(CURRENT_TARGET) (1)
 #endif
 
 #define target_watchpoint_addr_within_range(target, addr, start, length) \

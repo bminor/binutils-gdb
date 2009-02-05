@@ -1,3 +1,9 @@
+2009-02-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.h (target_stopped_data_address_p): Delete declaration,
+	and don't define as macro.
+	* target.c (target_stopped_data_address_p): Delete.
+
 2009-02-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Tom Tromey  <tromey@redhat.com>
 
