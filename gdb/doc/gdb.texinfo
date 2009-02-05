@@ -18219,6 +18219,33 @@ The result @code{bar} will be a @code{gdb.Value} object holding the
 value pointed to by @code{foo}.
 @end defmethod
 
+@defmethod Value string @r{[}encoding @r{[}errors@r{]}@r{]}
+If this @code{gdb.Value} represents a string, then this method
+converts the contents to a Python string.  Otherwise, this method will
+throw an exception.
+
+Strings are recognized in a language-specific way; whether a given
+@code{gdb.Value} represents a string is determined by the current
+language.
+
+For C-like languages, a value is a string if it is a pointer to or an
+array of characters or ints.  The string is assumed to be terminated
+by a zero of the appropriate width.
+
+If the optional @var{encoding} argument is given, it must be a string
+naming the encoding of the string in the @code{gdb.Value}, such as
+@code{"ascii"}, @code{"iso-8859-6"} or @code{"utf-8"}.  It accepts
+the same encodings as the corresponding argument to Python's
+@code{string.decode} method, and the Python codec machinery will be used
+to convert the string.  If @var{encoding} is not given, or if
+@var{encoding} is the empty string, then either the @code{target-charset}
+(@pxref{Character Sets}) will be used, or a language-specific encoding
+will be used, if the current language is able to supply one.
+
+The optional @var{errors} argument is the same as the corresponding
+argument to Python's @code{string.decode} method.
+@end defmethod
+
 @node Interpreters
 @chapter Command Interpreters
 @cindex command interpreters

@@ -160,6 +160,19 @@ python_string_to_host_string (PyObject *obj)
   return unicode_to_encoded_string (str, host_charset ());
 }
 
+/* Converts a target string of LENGTH bytes in the target's charset to a
+   Python Unicode string. If LENGTH is -1, convert until a null byte is found.
+
+   Returns NULL on error, with a python exception set.  */
+PyObject *
+target_string_to_unicode (const gdb_byte *str, int length)
+{
+  if (length == -1)
+    length = strlen (str);
+
+  return PyUnicode_Decode (str, length, target_charset (), NULL);
+}
+
 /* Return true if OBJ is a Python string or unicode object, false
    otherwise.  */
 

@@ -1,5 +1,9 @@
 2009-02-05  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Values From Inferior): Document Value.string.
+
+2009-02-05  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (Basic Python): Document execute's from_tty
 	argument.
 

@@ -1,3 +1,11 @@
+2009-02-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* python/python-utils.c (target_string_to_unicode): New function.
+	* python/python-internal.h (target_string_to_unicode): New prototype.
+	* python/python-value.c (valpy_string): New function.
+	(value_object_methods): Add `string' entry.
+
 2009-02-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* target.h (target_tid_to_str): Delete.

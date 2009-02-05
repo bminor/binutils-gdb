@@ -91,6 +91,7 @@ PyObject *python_string_to_unicode (PyObject *obj);
 char *unicode_to_target_string (PyObject *unicode_str);
 char *python_string_to_target_string (PyObject *obj);
 char *python_string_to_host_string (PyObject *obj);
+PyObject *target_string_to_unicode (const gdb_byte *str, int length);
 int gdbpy_is_string (PyObject *obj);
 
 #endif /* GDB_PYTHON_INTERNAL_H */
