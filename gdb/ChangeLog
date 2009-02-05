@@ -1,3 +1,18 @@
+2009-01-07  Pierre Muller  <muller@ics.u-strasbg.fr>
+	    Tom Tromey  <tromey@redhat.com>
+
+	PR breakpoints/8079:
+	* breakpoint.c (print_one_breakpoint): Use exp_string field
+	to display expression of watchpoints.
+	(mention): Likewise.
+	(watch_command_1): Remove trailing whitespace from expression.
+	* printcmd.c (struct display) <exp_string>: New field.
+	(display_command): Set exp_string.
+	(free_display): Free exp_string.
+	(clear_displays): Use free_display.
+	(do_one_display): Print exp_string.
+	(display_info): Likewise.
+
 2009-02-04  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Phil Muldoon  <pmuldoon@redhat.com>

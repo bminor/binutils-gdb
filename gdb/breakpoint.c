@@ -3491,8 +3491,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	if (opts.addressprint)
 	  ui_out_field_skip (uiout, "addr");
 	annotate_field (5);
-	print_expression (b->exp, stb->stream);
-	ui_out_field_stream (uiout, "what", stb);
+	ui_out_field_string (uiout, "what", b->exp_string);
 	break;
 
       case bp_breakpoint:
@@ -4890,14 +4889,10 @@ static void
 mention (struct breakpoint *b)
 {
   int say_where = 0;
-  struct cleanup *old_chain, *ui_out_chain;
-  struct ui_stream *stb;
+  struct cleanup *ui_out_chain;
   struct value_print_options opts;
 
   get_user_print_options (&opts);
-
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
 
   /* FIXME: This is misplaced; mention() is called by things (like
      hitting a watchpoint) other than breakpoint creation.  It should
@@ -4918,8 +4913,7 @@ mention (struct breakpoint *b)
 	ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
 	ui_out_field_int (uiout, "number", b->number);
 	ui_out_text (uiout, ": ");
-	print_expression (b->exp, stb->stream);
-	ui_out_field_stream (uiout, "exp", stb);
+	ui_out_field_string (uiout, "exp", b->exp_string);
 	do_cleanups (ui_out_chain);
 	break;
       case bp_hardware_watchpoint:
@@ -4927,8 +4921,7 @@ mention (struct breakpoint *b)
 	ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
 	ui_out_field_int (uiout, "number", b->number);
 	ui_out_text (uiout, ": ");
-	print_expression (b->exp, stb->stream);
-	ui_out_field_stream (uiout, "exp", stb);
+	ui_out_field_string (uiout, "exp", b->exp_string);
 	do_cleanups (ui_out_chain);
 	break;
       case bp_read_watchpoint:
@@ -4936,8 +4929,7 @@ mention (struct breakpoint *b)
 	ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-rwpt");
 	ui_out_field_int (uiout, "number", b->number);
 	ui_out_text (uiout, ": ");
-	print_expression (b->exp, stb->stream);
-	ui_out_field_stream (uiout, "exp", stb);
+	ui_out_field_string (uiout, "exp", b->exp_string);
 	do_cleanups (ui_out_chain);
 	break;
       case bp_access_watchpoint:
@@ -4945,8 +4937,7 @@ mention (struct breakpoint *b)
 	ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-awpt");
 	ui_out_field_int (uiout, "number", b->number);
 	ui_out_text (uiout, ": ");
-	print_expression (b->exp, stb->stream);
-	ui_out_field_stream (uiout, "exp", stb);
+	ui_out_field_string (uiout, "exp", b->exp_string);
 	do_cleanups (ui_out_chain);
 	break;
       case bp_breakpoint:
@@ -5015,7 +5006,6 @@ mention (struct breakpoint *b)
 
 	}
     }
-  do_cleanups (old_chain);
   if (ui_out_is_mi_like_p (uiout))
     return;
   printf_filtered ("\n");
@@ -5954,6 +5944,12 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   exp_start = arg;
   exp = parse_exp_1 (&arg, 0, 0);
   exp_end = arg;
+  /* Remove trailing whitespace from the expression before saving it.
+     This makes the eventual display of the expression string a bit
+     prettier.  */
+  while (exp_end > exp_start && (exp_end[-1] == ' ' || exp_end[-1] == '\t'))
+    --exp_end;
+
   exp_valid_block = innermost_block;
   mark = value_mark ();
   fetch_watchpoint_value (exp, &val, NULL, NULL);
