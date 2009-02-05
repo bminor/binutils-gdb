@@ -1,5 +1,13 @@
 2009-02-05  Pedro Alves  <pedro@codesourcery.com>
 
+	* target.h (target_tid_to_str): Delete.
+	* thread.c (print_thread_info, thread_apply_all_command)
+	(thread_apply_command, thread_command, do_captured_thread_select):
+	Use target_pid_to_str instead of target_tid_to_str.
+	* linux-fork.c (delete_fork_command): Likewise.
+
+2009-02-05  Pedro Alves  <pedro@codesourcery.com>
+
 	* frame.c (has_stack_frames): Make public.
 	(get_prev_frame): Don't allow a NULL this_frame anymore.
 	* frame.h (has_stack_frames): Declare.

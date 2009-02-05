@@ -439,7 +439,7 @@ delete_fork_command (char *args, int from_tty)
     error (_("Please switch to another fork/checkpoint before deleting the current one"));
 
   if (ptrace (PTRACE_KILL, PIDGET (ptid), 0, 0))
-    error (_("Unable to kill pid %s"), target_tid_to_str (ptid));
+    error (_("Unable to kill pid %s"), target_pid_to_str (ptid));
 
   if (from_tty)
     printf_filtered (_("Killed %s\n"), target_pid_to_str (ptid));

@@ -1016,11 +1016,7 @@ int target_supports_non_stop (void);
 #undef target_pid_to_str
 #define target_pid_to_str(PID) current_target.to_pid_to_str (PID)
 
-#ifndef target_tid_to_str
-#define target_tid_to_str(PID) \
-     target_pid_to_str (PID)
 extern char *normal_pid_to_str (ptid_t ptid);
-#endif
 
 /* Return a short string describing extra information about PID,
    e.g. "sleeping", "runnable", "running on LWP 3".  Null return value

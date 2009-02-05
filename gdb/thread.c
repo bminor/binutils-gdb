@@ -746,7 +746,7 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
 
       ui_out_field_int (uiout, "id", tp->num);
       ui_out_text (uiout, " ");
-      ui_out_field_string (uiout, "target-id", target_tid_to_str (tp->ptid));
+      ui_out_field_string (uiout, "target-id", target_pid_to_str (tp->ptid));
 
       extra_info = target_extra_thread_info (tp);
       if (extra_info)
@@ -996,7 +996,7 @@ thread_apply_all_command (char *cmd, int from_tty)
 	switch_to_thread (tp->ptid);
 
 	printf_filtered (_("\nThread %d (%s):\n"),
-			 tp->num, target_tid_to_str (inferior_ptid));
+			 tp->num, target_pid_to_str (inferior_ptid));
 	execute_command (cmd, from_tty);
 	strcpy (cmd, saved_cmd);	/* Restore exact command used previously */
       }
@@ -1066,7 +1066,7 @@ thread_apply_command (char *tidlist, int from_tty)
 	      switch_to_thread (tp->ptid);
 
 	      printf_filtered (_("\nThread %d (%s):\n"), tp->num,
-			       target_tid_to_str (inferior_ptid));
+			       target_pid_to_str (inferior_ptid));
 	      execute_command (cmd, from_tty);
 
 	      /* Restore exact command used previously.  */
@@ -1091,11 +1091,11 @@ thread_command (char *tidstr, int from_tty)
 	  if (is_exited (inferior_ptid))
 	    printf_filtered (_("[Current thread is %d (%s) (exited)]\n"),
 			     pid_to_thread_id (inferior_ptid),
-			     target_tid_to_str (inferior_ptid));
+			     target_pid_to_str (inferior_ptid));
 	  else
 	    printf_filtered (_("[Current thread is %d (%s)]\n"),
 			     pid_to_thread_id (inferior_ptid),
-			     target_tid_to_str (inferior_ptid));
+			     target_pid_to_str (inferior_ptid));
 	}
       else
 	error (_("No stack."));
@@ -1139,7 +1139,7 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
   ui_out_text (uiout, "[Switching to thread ");
   ui_out_field_int (uiout, "new-thread-id", pid_to_thread_id (inferior_ptid));
   ui_out_text (uiout, " (");
-  ui_out_text (uiout, target_tid_to_str (inferior_ptid));
+  ui_out_text (uiout, target_pid_to_str (inferior_ptid));
   ui_out_text (uiout, ")]");
 
   /* Note that we can't reach this with an exited thread, due to the
