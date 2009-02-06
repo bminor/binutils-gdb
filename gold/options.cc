@@ -290,6 +290,30 @@ General_options::parse_defsym(const char*, const char* arg,
 }
 
 void
+General_options::parse_incremental_changed(const char*, const char*,
+                                           Command_line*)
+{
+  this->implicit_incremental_ = true;
+  this->incremental_disposition_ = INCREMENTAL_CHANGED;
+}
+
+void
+General_options::parse_incremental_unchanged(const char*, const char*,
+                                             Command_line*)
+{
+  this->implicit_incremental_ = true;
+  this->incremental_disposition_ = INCREMENTAL_UNCHANGED;
+}
+
+void
+General_options::parse_incremental_unknown(const char*, const char*,
+                                           Command_line*)
+{
+  this->implicit_incremental_ = true;
+  this->incremental_disposition_ = INCREMENTAL_CHECK;
+}
+
+void
 General_options::parse_library(const char*, const char* arg,
                                Command_line* cmdline)
 {
@@ -621,7 +645,8 @@ namespace gold
 
 General_options::General_options()
   : execstack_status_(General_options::EXECSTACK_FROM_INPUT), static_(false),
-    do_demangle_(false), plugins_()
+    do_demangle_(false), plugins_(),
+    incremental_disposition_(INCREMENTAL_CHECK), implicit_incremental_(false)
 {
 }
 
@@ -838,6 +863,10 @@ General_options::finalize()
     gold_fatal(_("--hash-bucket-empty-fraction value %g out of range "
 		 "[0.0, 1.0)"),
 	       this->hash_bucket_empty_fraction());
+
+  if (this->implicit_incremental_ && !this->incremental())
+    gold_fatal(_("Options --incremental-changed, --incremental-unchanged, "
+                 "--incremental-unknown require the use of --incremental"));
 
   // FIXME: we can/should be doing a lot more sanity checking here.
 }

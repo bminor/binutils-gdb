@@ -56,6 +56,18 @@ class Position_dependent_options;
 class Target;
 class Plugin_manager;
 
+// Incremental build action for a specific file, as selected by the user.
+
+enum Incremental_disposition
+{
+  // Determine the status from the timestamp (default).
+  INCREMENTAL_CHECK,
+  // Assume the file changed from the previous build.
+  INCREMENTAL_CHANGED,
+  // Assume the file didn't change from the previous build.
+  INCREMENTAL_UNCHANGED
+};
+
 // The nested namespace is to contain all the global variables and
 // structs that need to be defined in the .h file, but do not need to
 // be used outside this class.
@@ -660,6 +672,19 @@ class General_options
   DEFINE_string(dynamic_linker, options::TWO_DASHES, 'I', NULL,
                 N_("Set dynamic linker path"), N_("PROGRAM"));
 
+  DEFINE_bool(incremental, options::TWO_DASHES, '\0', false,
+              N_("Work in progress; do not use"),
+              N_("Do a full build"));
+
+  DEFINE_special(incremental_changed, options::TWO_DASHES, '\0',
+                 N_("Assume files changed"), NULL);
+
+  DEFINE_special(incremental_unchanged, options::TWO_DASHES, '\0',
+                 N_("Assume files didn't change"), NULL);
+
+  DEFINE_special(incremental_unknown, options::TWO_DASHES, '\0',
+                 N_("Use timestamps to check files (default)"), NULL);
+
   DEFINE_special(just_symbols, options::TWO_DASHES, '\0',
                  N_("Read only symbol values from FILE"), N_("FILE"));
 
@@ -769,11 +794,11 @@ class General_options
                  N_("Do not link against shared libraries"), NULL);
 
   DEFINE_bool(gc_sections, options::TWO_DASHES, '\0', false,
-              N_("Remove unused sections"), 
+              N_("Remove unused sections"),
               N_("Don't remove unused sections (default)"));
- 
+
   DEFINE_bool(print_gc_sections, options::TWO_DASHES, '\0', false,
-              N_("List removed unused sections on stderr"), 
+              N_("List removed unused sections on stderr"),
               N_("Do not list removed unused sections"));
 
   DEFINE_bool(stats, options::TWO_DASHES, '\0', false,
@@ -969,6 +994,13 @@ class General_options
   in_dynamic_list(const char* symbol) const
   { return this->dynamic_list_.version_script_info()->symbol_is_local(symbol); }
 
+  // The disposition given by the --incremental-changed,
+  // --incremental-unchanged or --incremental-unknown option.  The
+  // value may change as we proceed parsing the command line flags.
+  Incremental_disposition
+  incremental_disposition() const
+  { return this->incremental_disposition_; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -1026,6 +1058,14 @@ class General_options
   // script.cc, we store this as a Script_options object, even though
   // we only use a single Version_tree from it.
   Script_options dynamic_list_;
+  // The disposition given by the --incremental-changed,
+  // --incremental-unchanged or --incremental-unknown option.  The
+  // value may change as we proceed parsing the command line flags.
+  Incremental_disposition incremental_disposition_;
+  // Wheater we have seen one of the options that require incremental
+  // build (--incremental-changed, --incremental-unchanged or
+  // --incremental-unknown)
+  bool implicit_incremental_;
 };
 
 // The position-dependent options.  We use this to store the state of
@@ -1062,12 +1102,14 @@ class Position_dependent_options
     this->set_Bdynamic(options.Bdynamic());
     this->set_format_enum(options.format_enum());
     this->set_whole_archive(options.whole_archive());
+    this->set_incremental_disposition(options.incremental_disposition());
   }
 
   DEFINE_posdep(as_needed, bool);
   DEFINE_posdep(Bdynamic, bool);
   DEFINE_posdep(format_enum, General_options::Object_format);
   DEFINE_posdep(whole_archive, bool);
+  DEFINE_posdep(incremental_disposition, Incremental_disposition);
 
  private:
   // This is a General_options with everything set to its default

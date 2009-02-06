@@ -1,3 +1,24 @@
+2009-02-06  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* options.h (enum Incremental_disposition): Define.
+	(class General_options): Add new options: --incremental,
+	--incremental_changed, --incremental_unchanged,
+	--incremental_unknown.  Add incremental_disposition_ and
+	implicit_incremental_ fields.
+	(General_options::incremental_disposition): New function.
+	(class Position_dependent_options): Add incremental_disposition
+	option.
+	(Position_dependent_options::copy_from_options): Set incremental
+	dispositions.
+	* options.cc (General_options::parse_incremental_changed): New
+	function.
+        (General_options::parse_incremental_unchanged): New function.
+        (General_options::parse_incremental_unknown): New function.
+        (General_options::General_options): Initialize new fields
+	incremental_disposition_ and implicit_incremental_.
+        (General_options::finalize): Check for uasge of --incremental-*
+	without --incremental.
+
 2009-02-06  Chris Demetriou  <cgd@google.com>
 
 	* gold.h (gold_undefined_symbol): Change to take only a Symbol
