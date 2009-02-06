@@ -1,3 +1,10 @@
+2009-02-05  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/booke.s ("dcbt", "dcbtst"): New tests.
+	* gas/ppc/booke.d: Likewise.
+	* gas/ppc/power4_32.s: Likewise.
+	* gas/ppc/power4_32.d: Likewise.
+
 2009-02-05  Catherine Moore  <clm@codesourcery.com>
 
 	* gas/elf/elf.exp: Really run the symtab test.

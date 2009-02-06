@@ -38,3 +38,6 @@ Disassembly of section \.text:
   68:	7c 07 42 a6 	mfsprg  r0,7
   6c:	7c 17 43 a6 	mtsprg  7,r0
   70:	7c 17 43 a6 	mtsprg  7,r0
+  74:	7c 05 32 2c 	dcbt    r5,r6
+  78:	7c 05 32 2c 	dcbt    r5,r6
+  7c:	7d 05 32 2c 	dcbt    8,r5,r6

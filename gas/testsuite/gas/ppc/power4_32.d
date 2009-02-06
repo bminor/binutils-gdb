@@ -41,3 +41,6 @@ Disassembly of section \.text:
   7c:	7c 01 17 ec 	dcbz    r1,r2
   80:	7c 23 27 ec 	dcbzl   r3,r4
   84:	7c 05 37 ec 	dcbz    r5,r6
+  88:	7c 05 32 2c 	dcbt    r5,r6
+  8c:	7c 05 32 2c 	dcbt    r5,r6
+  90:	7d 05 32 2c 	dcbt    r5,r6,8

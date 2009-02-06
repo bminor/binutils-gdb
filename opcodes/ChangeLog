@@ -1,3 +1,9 @@
+2009-02-05  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c: Update copyright year.
+	(powerpc_opcodes) <"dcbt", "dcbtst">: Deprecate the Embedded operand
+	ordering for POWER4 and later and use the correct Server ordering.
+
 2009-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (January, 2009)
