@@ -680,7 +680,7 @@ core_read_description (struct target_ops *target)
 }
 
 static char *
-core_pid_to_str (ptid_t ptid)
+core_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
 

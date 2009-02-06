@@ -693,7 +693,8 @@ gdb_cntrl_c (int signo)
 }
 
 static ptid_t
-m32r_wait (ptid_t ptid, struct target_waitstatus *status)
+m32r_wait (struct target_ops *ops,
+	   ptid_t ptid, struct target_waitstatus *status)
 {
   static RETSIGTYPE (*prev_sigint) ();
   unsigned long bp_addr, pc_addr;
@@ -1507,7 +1508,7 @@ m32r_thread_alive (ptid_t ptid)
    buffer.  */
 
 static char *
-m32r_pid_to_str (ptid_t ptid)
+m32r_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
 

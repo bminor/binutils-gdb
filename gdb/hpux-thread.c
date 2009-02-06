@@ -191,7 +191,8 @@ hpux_thread_resume (ptid_t ptid, int step, enum target_signal signo)
    to a LWP id, and vice versa on the way out.  */
 
 static ptid_t
-hpux_thread_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+hpux_thread_wait (struct target_ops *ops,
+		  ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   ptid_t rtnval;
   struct cleanup *old_chain;
@@ -203,7 +204,8 @@ hpux_thread_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   if (!ptid_equal (ptid, minus_one_ptid))
     ptid = main_ptid;
 
-  rtnval = deprecated_child_ops.to_wait (ptid, ourstatus);
+  rtnval = deprecated_child_ops.to_wait (&deprecated_child_ops,
+					 ptid, ourstatus);
 
   rtnval = find_active_thread ();
 

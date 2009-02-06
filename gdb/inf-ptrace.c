@@ -385,7 +385,8 @@ inf_ptrace_resume (ptid_t ptid, int step, enum target_signal signal)
    the status in *OURSTATUS.  */
 
 static ptid_t
-inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+inf_ptrace_wait (struct target_ops *ops,
+		 ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   pid_t pid;
   int status, save_errno;
@@ -615,6 +616,12 @@ inf_ptrace_files_info (struct target_ops *ignore)
 		   target_pid_to_str (inferior_ptid));
 }
 
+static char *
+inf_ptrace_pid_to_str (struct target_ops *ops, ptid_t ptid)
+{
+  return normal_pid_to_str (ptid);
+}
+
 /* Create a prototype ptrace target.  The client can override it with
    local methods.  */
 
@@ -637,7 +644,7 @@ inf_ptrace_target (void)
 #endif
   t->to_mourn_inferior = inf_ptrace_mourn_inferior;
   t->to_thread_alive = inf_ptrace_thread_alive;
-  t->to_pid_to_str = normal_pid_to_str;
+  t->to_pid_to_str = inf_ptrace_pid_to_str;
   t->to_stop = inf_ptrace_stop;
   t->to_xfer_partial = inf_ptrace_xfer_partial;
 

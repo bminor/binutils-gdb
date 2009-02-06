@@ -340,12 +340,14 @@ bsd_uthread_xfer_partial (struct target_ops *ops, enum target_object object,
 }
 
 static ptid_t
-bsd_uthread_wait (ptid_t ptid, struct target_waitstatus *status)
+bsd_uthread_wait (struct target_ops *ops,
+		  ptid_t ptid, struct target_waitstatus *status)
 {
   CORE_ADDR addr;
+  struct target_ops *beneath = find_target_beneath (bsd_uthread_ops_hack);
 
   /* Pass the request to the layer beneath.  */
-  ptid = find_target_beneath (bsd_uthread_ops_hack)->to_wait (ptid, status);
+  ptid = beneath->to_wait (beneath, ptid, status);
 
   /* If the process is no longer alive, there's no point in figuring
      out the thread ID.  It will fail anyway.  */
@@ -487,7 +489,7 @@ bsd_uthread_extra_thread_info (struct thread_info *info)
 }
 
 static char *
-bsd_uthread_pid_to_str (ptid_t ptid)
+bsd_uthread_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   if (ptid_get_tid (ptid) != 0)
     {

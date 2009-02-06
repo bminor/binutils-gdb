@@ -997,14 +997,15 @@ aix_thread_resume (ptid_t ptid, int step, enum target_signal sig)
    thread.  */
 
 static ptid_t
-aix_thread_wait (ptid_t ptid, struct target_waitstatus *status)
+aix_thread_wait (struct target_ops *ops,
+		 ptid_t ptid, struct target_waitstatus *status)
 {
   struct cleanup *cleanup = save_inferior_ptid ();
 
   pid_to_prc (&ptid);
 
   inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-  ptid = base_target.to_wait (ptid, status);
+  ptid = base_target.to_wait (&base_target, ptid, status);
   do_cleanups (cleanup);
 
   if (PIDGET (ptid) == -1)
@@ -1691,12 +1692,12 @@ aix_thread_thread_alive (ptid_t ptid)
    "info threads" output.  */
 
 static char *
-aix_thread_pid_to_str (ptid_t ptid)
+aix_thread_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char *ret = NULL;
 
   if (!PD_TID (ptid))
-    return base_target.to_pid_to_str (ptid);
+    return base_target.to_pid_to_str (&base_target, ptid);
 
   /* Free previous return value; a new one will be allocated by
      xstrprintf().  */

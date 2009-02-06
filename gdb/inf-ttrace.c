@@ -915,7 +915,8 @@ inf_ttrace_resume (ptid_t ptid, int step, enum target_signal signal)
 }
 
 static ptid_t
-inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+inf_ttrace_wait (struct target_ops *ops,
+		 ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   pid_t pid = ptid_get_pid (ptid);
   lwpid_t lwpid = ptid_get_lwp (ptid);
@@ -1252,7 +1253,7 @@ inf_ttrace_extra_thread_info (struct thread_info *info)
 }
 
 static char *
-inf_ttrace_pid_to_str (ptid_t ptid)
+inf_ttrace_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   pid_t pid = ptid_get_pid (ptid);
   lwpid_t lwpid = ptid_get_lwp (ptid);

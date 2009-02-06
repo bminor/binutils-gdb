@@ -1,3 +1,65 @@
+2009-02-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_nat_wait): Adjust.
+	(linux_nat_pid_to_str): Adjust.  Remove call to thread_db_init.
+	* linux-nat.h (thread_db_init): Delete declaration.
+	* linux-thread-db.c (target_beneath): Delete.
+	(thread_db_init): Delete.
+	(thread_db_detach): Use find_target_beneath.
+	(thread_db_wait): Adjust interface.  Use find_target_beneath.
+	(thread_db_mourn_inferior): Use find_target_beneath.
+	(thread_db_can_async_p, thread_db_is_async_p, thread_db_async)
+	(thread_db_async_mask): Delete.
+	(thread_db_pid_to_str): Adjust interface.  Use
+	find_target_beneath.
+	(thread_db_get_thread_local_address): Adjust interface.  Use
+	find_target_beneath.
+	(init_thread_db_ops): Delete references to delete functions.
+	* target.c (update_current_target): Don't inherit or default
+	to_wait.  Don't inherit to_pid_to_str and
+	to_get_thread_local_address.
+	(target_translate_tls_address): Look for a pushed target that
+	implements to_get_thread_local_address, and use it instead of
+	checking for target_get_thread_local_address_p.
+	(target_wait, target_pid_to_str): Reimplement as functions.
+	(dummy_pid_to_str): New.
+	(init_dummy_target): Register it.
+	(debug_to_wait): Delete.
+	* target.h (struct target_ops): Make to_wait, to_pid_to_str and
+	to_get_thread_local_address accept a pointer to struct target_ops.
+	(target_wait): Delete macro, and declare as function.
+	(target_pid_to_str): Likewise.
+	(target_get_thread_local_address)
+	(target_get_thread_local_address_p): Delete.
+	(noprocess): Add NORETURN and ATTR_NORETURN tags.
+	* inf-ptrace.c (inf_ptrace_wait): Adjust.
+	(inf_ptrace_pid_to_str): New.
+	(inf_ptrace_target): Use inf_ptrace_pid_to_str.
+	* aix-thread.c (aix_thread_wait, aix_thread_pid_to_str): Adjust.
+	* bsd-kvm.c (bsd_kvm_pid_to_str): Adjust.
+	* bsd-uthread.c (bsd_uthread_wait, bsd_uthread_pid_to_str):
+	Adjust.
+	* corelow.c (core_pid_to_str): Adjust.
+	* darwin-nat.c (darwin_wait, darwin_pid_to_str): Adjust.
+	* dec-thread.c (dec_thread_wait, dec_thread_pid_to_str): Adjust.
+	* gnu-nat.c (gnu_wait, gnu_pid_to_str): Adjust.
+	* go32-nat.c (go32_wait, go32_pid_to_str): Adjust.
+	* hpux-thread.c (hpux_thread_wait): Adjust.
+	* inf-ttrace.c (inf_ttrace_wait, inf_ttrace_pid_to_str): Adjust.
+	* monitor.c (monitor_wait, monitor_pid_to_str): Adjust.
+	* nto-procfs.c (procfs_wait, procfs_pid_to_str): Adjust.
+	* procfs.c (procfs_pid_to_str): Adjust.
+	* remote-m32r-sdi.c (m32r_wait, m32r_pid_to_str): Adjust.
+	* remote-mips.c (mips_wait): Adjust.
+	* remote-sim.c (gdbsim_wait, gdbsim_pid_to_str): Adjust.
+	* remote.c (remote_wait, remote_pid_to_str)
+	(remote_get_thread_local_address): Adjust.
+	* rs6000-nat.c (rs6000_wait): Adjust.
+	* sol-thread.c (procfs_pid_to_str): Adjust declaration.
+	(sol_thread_wait, solaris_pid_to_str): Adjust.
+	* spu-linux-nat.c (spu_child_wait): Adjust.
+	* windows-nat.c (windows_wait, windows_pid_to_str): Adjust.
+
 2009-02-06  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (SUBDIR_PYTHON_OBS): Add python-cmd.o.

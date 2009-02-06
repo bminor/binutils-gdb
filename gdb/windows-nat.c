@@ -1444,7 +1444,8 @@ out:
 
 /* Wait for interesting events to occur in the target process.  */
 static ptid_t
-windows_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+windows_wait (struct target_ops *ops,
+	      ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   int pid = -1;
 
@@ -2017,7 +2018,7 @@ windows_close (int x)
 
 /* Convert pid to printable format. */
 static char *
-windows_pid_to_str (ptid_t ptid)
+windows_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[80];
 

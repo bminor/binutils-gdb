@@ -59,8 +59,6 @@ static void procfs_open (char *, int);
 
 static int procfs_can_run (void);
 
-static ptid_t procfs_wait (ptid_t, struct target_waitstatus *);
-
 static int procfs_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			       struct mem_attrib *attrib,
 			       struct target_ops *);
@@ -626,7 +624,8 @@ nto_interrupt (int signo)
 }
 
 static ptid_t
-procfs_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+procfs_wait (struct target_ops *ops,
+	     ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   sigset_t set;
   siginfo_t info;
@@ -1265,7 +1264,7 @@ procfs_thread_info (pid_t pid, short tid)
 }
 
 char *
-procfs_pid_to_str (ptid_t ptid)
+procfs_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[1024];
   int pid, tid, n;

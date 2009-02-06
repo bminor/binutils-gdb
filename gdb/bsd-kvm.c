@@ -316,7 +316,7 @@ bsd_kvm_thread_alive (ptid_t ptid)
 }
 
 static char *
-bsd_kvm_pid_to_str (ptid_t ptid)
+bsd_kvm_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
   xsnprintf (buf, sizeof buf, "<kvm>");

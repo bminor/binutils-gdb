@@ -453,13 +453,14 @@ get_active_ptid (void)
 /* The "to_wait" method of the dec_thread_ops.  */
 
 static ptid_t
-dec_thread_wait (ptid_t ptid, struct target_waitstatus *status)
+dec_thread_wait (struct target_ops *ops,
+		 ptid_t ptid, struct target_waitstatus *status)
 {
   ptid_t active_ptid;
 
   debug ("dec_thread_wait");
 
-  ptid = base_target.to_wait (ptid, status);
+  ptid = base_target.to_wait (&base_target, ptid, status);
 
   /* The ptid returned by the base_target is the ptid of the process.
      We need to find which thread is currently active and return its
@@ -622,12 +623,12 @@ dec_thread_thread_alive (ptid_t ptid)
 /* The "to_pid_to_str" method of the dec_thread_ops.  */
 
 static char *
-dec_thread_pid_to_str (ptid_t ptid)
+dec_thread_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char *ret = NULL;
 
   if (ptid_get_tid (ptid) == 0)
-    return base_target.to_pid_to_str (ptid);
+    return base_target.to_pid_to_str (&base_target, ptid);
 
   /* Free previous return value; a new one will be allocated by
      xstrprintf().  */

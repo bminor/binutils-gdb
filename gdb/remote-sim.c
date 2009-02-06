@@ -88,8 +88,6 @@ static void gdbsim_detach (struct target_ops *ops, char *args, int from_tty);
 
 static void gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal);
 
-static ptid_t gdbsim_wait (ptid_t ptid, struct target_waitstatus *status);
-
 static void gdbsim_prepare_to_store (struct regcache *regcache);
 
 static void gdbsim_files_info (struct target_ops *target);
@@ -680,7 +678,8 @@ gdbsim_cntrl_c (int signo)
 }
 
 static ptid_t
-gdbsim_wait (ptid_t ptid, struct target_waitstatus *status)
+gdbsim_wait (struct target_ops *ops,
+	     ptid_t ptid, struct target_waitstatus *status)
 {
   static RETSIGTYPE (*prev_sigint) ();
   int sigrc = 0;
@@ -874,7 +873,7 @@ gdbsim_thread_alive (ptid_t ptid)
    buffer.  */
 
 static char *
-gdbsim_pid_to_str (ptid_t ptid)
+gdbsim_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
 

@@ -80,7 +80,7 @@ struct target_ops sol_core_ops;
 extern int procfs_suppress_run;
 extern struct target_ops procfs_ops;	/* target vector for procfs.c */
 extern struct target_ops core_ops;	/* target vector for corelow.c */
-extern char *procfs_pid_to_str (ptid_t ptid);
+extern char *procfs_pid_to_str (struct target_ops *ops, ptid_t ptid);
 
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
@@ -424,7 +424,8 @@ sol_thread_resume (ptid_t ptid, int step, enum target_signal signo)
    thread ID to an LWP ID, and vice versa on the way out.  */
 
 static ptid_t
-sol_thread_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+sol_thread_wait (struct target_ops *ops,
+		 ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   ptid_t rtnval;
   ptid_t save_ptid;
@@ -449,7 +450,7 @@ sol_thread_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 		 GET_THREAD (save_ptid));
     }
 
-  rtnval = procfs_ops.to_wait (ptid, ourstatus);
+  rtnval = procfs_ops.to_wait (&procfs_ops, ptid, ourstatus);
 
   if (ourstatus->kind != TARGET_WAITKIND_EXITED)
     {
@@ -1323,13 +1324,13 @@ ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 /* Convert PTID to printable form.  */
 
 char *
-solaris_pid_to_str (ptid_t ptid)
+solaris_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[100];
 
   /* In case init failed to resolve the libthread_db library.  */
   if (!procfs_suppress_run)
-    return procfs_pid_to_str (ptid);
+    return procfs_pid_to_str (&procfs_ops, ptid);
 
   if (is_thread (ptid))
     {

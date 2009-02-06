@@ -99,8 +99,6 @@ static void debug_to_open (char *, int);
 
 static void debug_to_resume (ptid_t, int, enum target_signal);
 
-static ptid_t debug_to_wait (ptid_t, struct target_waitstatus *);
-
 static void debug_to_fetch_registers (struct regcache *, int);
 
 static void debug_to_store_registers (struct regcache *, int);
@@ -415,7 +413,7 @@ update_current_target (void)
       /* Do not inherit to_detach.  */
       /* Do not inherit to_disconnect.  */
       INHERIT (to_resume, t);
-      INHERIT (to_wait, t);
+      /* Do not inherit to_wait.  */
       INHERIT (to_fetch_registers, t);
       INHERIT (to_store_registers, t);
       INHERIT (to_prepare_to_store, t);
@@ -454,12 +452,12 @@ update_current_target (void)
       INHERIT (to_insert_exec_catchpoint, t);
       INHERIT (to_remove_exec_catchpoint, t);
       INHERIT (to_has_exited, t);
-      /* Do no inherit to_mourn_inferiour.  */
+      /* Do not inherit to_mourn_inferiour.  */
       INHERIT (to_can_run, t);
       INHERIT (to_notice_signals, t);
       INHERIT (to_thread_alive, t);
       INHERIT (to_find_new_threads, t);
-      INHERIT (to_pid_to_str, t);
+      /* Do not inherit to_pid_to_str.  */
       INHERIT (to_extra_thread_info, t);
       INHERIT (to_stop, t);
       /* Do not inherit to_xfer_partial.  */
@@ -481,7 +479,7 @@ update_current_target (void)
       INHERIT (to_async_mask, t);
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
-      INHERIT (to_get_thread_local_address, t);
+      /* Do not inherit to_get_thread_local_address.  */
       INHERIT (to_can_execute_reverse, t);
       /* Do not inherit to_read_description.  */
       INHERIT (to_get_ada_task_ptid, t);
@@ -513,9 +511,6 @@ update_current_target (void)
 	    target_ignore);
   de_fault (to_resume,
 	    (void (*) (ptid_t, int, enum target_signal))
-	    noprocess);
-  de_fault (to_wait,
-	    (ptid_t (*) (ptid_t, struct target_waitstatus *))
 	    noprocess);
   de_fault (to_fetch_registers,
 	    (void (*) (struct regcache *, int))
@@ -853,8 +848,17 @@ CORE_ADDR
 target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 {
   volatile CORE_ADDR addr = 0;
+  struct target_ops *target;
 
-  if (target_get_thread_local_address_p ()
+  for (target = current_target.beneath;
+       target != NULL;
+       target = target->beneath)
+    {
+      if (target->to_get_thread_local_address != NULL)
+	break;
+    }
+
+  if (target != NULL
       && gdbarch_fetch_tls_load_module_address_p (target_gdbarch))
     {
       ptid_t ptid = inferior_ptid;
@@ -872,7 +876,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	    throw_error (TLS_LOAD_MODULE_NOT_FOUND_ERROR,
 			 _("TLS load module not found"));
 
-	  addr = target_get_thread_local_address (ptid, lm_addr, offset);
+	  addr = target->to_get_thread_local_address (target, ptid, lm_addr, offset);
 	}
       /* If an error occurred, print TLS related messages here.  Otherwise,
          throw the error to some higher catcher.  */
@@ -1841,6 +1845,50 @@ target_disconnect (char *args, int from_tty)
   tcomplain ();
 }
 
+ptid_t
+target_wait (ptid_t ptid, struct target_waitstatus *status)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_wait != NULL)
+	{
+	  ptid_t retval = (*t->to_wait) (t, ptid, status);
+
+	  if (targetdebug)
+	    {
+	      char *status_string;
+
+	      status_string = target_waitstatus_to_string (status);
+	      fprintf_unfiltered (gdb_stdlog,
+				  "target_wait (%d, status) = %d,   %s\n",
+				  PIDGET (ptid), PIDGET (retval),
+				  status_string);
+	      xfree (status_string);
+	    }
+
+	  return retval;
+	}
+    }
+
+  noprocess ();
+}
+
+char *
+target_pid_to_str (ptid_t ptid)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_pid_to_str != NULL)
+	return (*t->to_pid_to_str) (t, ptid);
+    }
+
+  return normal_pid_to_str (ptid);
+}
+
 void
 target_resume (ptid_t ptid, int step, enum target_signal signal)
 {
@@ -2475,6 +2523,12 @@ normal_pid_to_str (ptid_t ptid)
   return buf;
 }
 
+char *
+dummy_pid_to_str (struct target_ops *ops, ptid_t ptid)
+{
+  return normal_pid_to_str (ptid);
+}
+
 /* Error-catcher for target_find_memory_regions */
 static int dummy_find_memory_regions (int (*ignore1) (), void *ignore2)
 {
@@ -2505,7 +2559,7 @@ init_dummy_target (void)
   dummy_target.to_can_async_p = find_default_can_async_p;
   dummy_target.to_is_async_p = find_default_is_async_p;
   dummy_target.to_supports_non_stop = find_default_supports_non_stop;
-  dummy_target.to_pid_to_str = normal_pid_to_str;
+  dummy_target.to_pid_to_str = dummy_pid_to_str;
   dummy_target.to_stratum = dummy_stratum;
   dummy_target.to_find_memory_regions = dummy_find_memory_regions;
   dummy_target.to_make_corefile_notes = dummy_make_corefile_notes;
@@ -2611,25 +2665,6 @@ target_waitstatus_to_string (const struct target_waitstatus *ws)
     default:
       return xstrprintf ("%sunknown???", kind_str);
     }
-}
-
-static ptid_t
-debug_to_wait (ptid_t ptid, struct target_waitstatus *status)
-{
-  ptid_t retval;
-  char *status_string;
-
-  retval = debug_target.to_wait (ptid, status);
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_wait (%d, status) = %d,   ", PIDGET (ptid),
-		      PIDGET (retval));
-
-  status_string = target_waitstatus_to_string (status);
-  fprintf_unfiltered (gdb_stdlog, "%s\n", status_string);
-  xfree (status_string);
-
-  return retval;
 }
 
 static void
@@ -3148,7 +3183,6 @@ setup_target_debug (void)
   current_target.to_open = debug_to_open;
   current_target.to_post_attach = debug_to_post_attach;
   current_target.to_resume = debug_to_resume;
-  current_target.to_wait = debug_to_wait;
   current_target.to_fetch_registers = debug_to_fetch_registers;
   current_target.to_store_registers = debug_to_store_registers;
   current_target.to_prepare_to_store = debug_to_prepare_to_store;

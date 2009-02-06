@@ -89,9 +89,6 @@ static void mips_detach (struct target_ops *ops, char *args, int from_tty);
 static void mips_resume (ptid_t ptid, int step,
                          enum target_signal siggnal);
 
-static ptid_t mips_wait (ptid_t ptid,
-                               struct target_waitstatus *status);
-
 static int mips_map_regno (struct gdbarch *, int);
 
 static void mips_fetch_registers (struct regcache *regcache, int regno);
@@ -1703,7 +1700,8 @@ mips_signal_from_protocol (int sig)
 /* Wait until the remote stops, and return a wait status.  */
 
 static ptid_t
-mips_wait (ptid_t ptid, struct target_waitstatus *status)
+mips_wait (struct target_ops *ops,
+	   ptid_t ptid, struct target_waitstatus *status)
 {
   int rstatus;
   int err;

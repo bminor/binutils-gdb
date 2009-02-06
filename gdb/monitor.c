@@ -1063,7 +1063,8 @@ monitor_wait_filter (char *buf,
    status just as `wait' would.  */
 
 static ptid_t
-monitor_wait (ptid_t ptid, struct target_waitstatus *status)
+monitor_wait (struct target_ops *ops,
+	      ptid_t ptid, struct target_waitstatus *status)
 {
   int old_timeout = timeout;
   char buf[TARGET_BUF_SIZE];
@@ -2244,7 +2245,7 @@ monitor_thread_alive (ptid_t ptid)
    buffer.  */
 
 static char *
-monitor_pid_to_str (ptid_t ptid)
+monitor_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
 

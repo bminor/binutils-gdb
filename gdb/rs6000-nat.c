@@ -517,7 +517,8 @@ rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
    the status in *OURSTATUS.  */
 
 static ptid_t
-rs6000_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+rs6000_wait (struct target_ops *ops,
+	     ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   pid_t pid;
   int status, save_errno;

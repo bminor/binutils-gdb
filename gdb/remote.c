@@ -117,9 +117,6 @@ static void remote_send (char **buf, long *sizeof_buf_p);
 
 static int readchar (int timeout);
 
-static ptid_t remote_wait (ptid_t ptid,
-			   struct target_waitstatus *status);
-
 static void remote_kill (void);
 
 static int tohex (int nib);
@@ -4733,7 +4730,8 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status)
    STATUS just as `wait' would.  */
 
 static ptid_t
-remote_wait (ptid_t ptid, struct target_waitstatus *status)
+remote_wait (struct target_ops *ops,
+	     ptid_t ptid, struct target_waitstatus *status)
 {
   ptid_t event_ptid;
 
@@ -7769,7 +7767,7 @@ Fetch and print the remote list of thread identifiers, one pkt only"));
    buffer.  */
 
 static char *
-remote_pid_to_str (ptid_t ptid)
+remote_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
   struct remote_state *rs = get_remote_state ();
@@ -7800,7 +7798,8 @@ remote_pid_to_str (ptid_t ptid)
    stored at OFFSET within the thread local storage for thread PTID.  */
 
 static CORE_ADDR
-remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
+remote_get_thread_local_address (struct target_ops *ops,
+				 ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
 {
   if (remote_protocol_packets[PACKET_qGetTLSAddr].support != PACKET_DISABLE)
     {

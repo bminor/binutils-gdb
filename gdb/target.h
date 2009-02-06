@@ -330,7 +330,8 @@ struct target_ops
     void (*to_detach) (struct target_ops *ops, char *, int);
     void (*to_disconnect) (struct target_ops *, char *, int);
     void (*to_resume) (ptid_t, int, enum target_signal);
-    ptid_t (*to_wait) (ptid_t, struct target_waitstatus *);
+    ptid_t (*to_wait) (struct target_ops *,
+		      ptid_t, struct target_waitstatus *);
     void (*to_fetch_registers) (struct regcache *, int);
     void (*to_store_registers) (struct regcache *, int);
     void (*to_prepare_to_store) (struct regcache *);
@@ -402,7 +403,7 @@ struct target_ops
     void (*to_notice_signals) (ptid_t ptid);
     int (*to_thread_alive) (ptid_t ptid);
     void (*to_find_new_threads) (void);
-    char *(*to_pid_to_str) (ptid_t);
+    char *(*to_pid_to_str) (struct target_ops *, ptid_t);
     char *(*to_extra_thread_info) (struct thread_info *);
     void (*to_stop) (ptid_t);
     void (*to_rcmd) (char *command, struct ui_file *output);
@@ -438,7 +439,8 @@ struct target_ops
        or executable file given by OBJFILE.  If that block of
        thread-local storage hasn't been allocated yet, this function
        may return an error.  */
-    CORE_ADDR (*to_get_thread_local_address) (ptid_t ptid,
+    CORE_ADDR (*to_get_thread_local_address) (struct target_ops *ops,
+					      ptid_t ptid,
 					      CORE_ADDR load_module_addr,
 					      CORE_ADDR offset);
 
@@ -625,8 +627,7 @@ extern void target_resume (ptid_t ptid, int step, enum target_signal signal);
    to the prompt with a debugging target but without the frame cache,
    stop_pc, etc., set up.  */
 
-#define	target_wait(ptid, status)		\
-     (*current_target.to_wait) (ptid, status)
+extern ptid_t target_wait (ptid_t ptid, struct target_waitstatus *status);
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
@@ -1013,8 +1014,7 @@ int target_supports_non_stop (void);
    `process xyz', but on some systems it may contain
    `process xyz thread abc'.  */
 
-#undef target_pid_to_str
-#define target_pid_to_str(PID) current_target.to_pid_to_str (PID)
+extern char *target_pid_to_str (ptid_t ptid);
 
 extern char *normal_pid_to_str (ptid_t ptid);
 
@@ -1056,13 +1056,6 @@ extern char *normal_pid_to_str (ptid_t ptid);
 
 #define target_make_corefile_notes(BFD, SIZE_P) \
      (current_target.to_make_corefile_notes) (BFD, SIZE_P)
-
-/* Thread-local values.  */
-#define target_get_thread_local_address \
-    (current_target.to_get_thread_local_address)
-#define target_get_thread_local_address_p() \
-    (target_get_thread_local_address != NULL)
-
 
 /* Hardware watchpoint interfaces.  */
 
@@ -1252,7 +1245,7 @@ extern int default_memory_insert_breakpoint (struct gdbarch *, struct bp_target_
 
 extern void initialize_targets (void);
 
-extern void noprocess (void);
+extern NORETURN void noprocess (void) ATTR_NORETURN;
 
 extern void target_require_runnable (void);
 

@@ -2776,7 +2776,8 @@ local_event_queue_to_pipe (void)
 }
 
 static ptid_t
-linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+linux_nat_wait (struct target_ops *ops,
+		ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   struct lwp_info *lp = NULL;
   int options = 0;
@@ -3266,7 +3267,7 @@ linux_nat_thread_alive (ptid_t ptid)
 }
 
 static char *
-linux_nat_pid_to_str (ptid_t ptid)
+linux_nat_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
 
@@ -4659,10 +4660,6 @@ linux_nat_add_target (struct target_ops *t)
      also want to be used for single-threaded processes.  */
 
   add_target (t);
-
-  /* TODO: Eliminate this and have libthread_db use
-     find_target_beneath.  */
-  thread_db_init (t);
 }
 
 /* Register a method to call whenever a new thread is attached.  */

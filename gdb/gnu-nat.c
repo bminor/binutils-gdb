@@ -1433,7 +1433,8 @@ struct inf *waiting_inf;
 
 /* Wait for something to happen in the inferior, returning what in STATUS. */
 static ptid_t
-gnu_wait (ptid_t ptid, struct target_waitstatus *status)
+gnu_wait (struct target_ops *ops,
+	  ptid_t ptid, struct target_waitstatus *status)
 {
   struct msg
     {
@@ -2594,7 +2595,7 @@ proc_string (struct proc *proc)
 }
 
 static char *
-gnu_pid_to_str (ptid_t ptid)
+gnu_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   struct inf *inf = gnu_current_inf;
   int tid = ptid_get_tid (ptid);

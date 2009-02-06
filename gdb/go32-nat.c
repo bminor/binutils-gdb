@@ -171,8 +171,6 @@ static void go32_attach (char *args, int from_tty);
 static void go32_detach (char *args, int from_tty);
 static void go32_resume (ptid_t ptid, int step,
                          enum target_signal siggnal);
-static ptid_t go32_wait (ptid_t ptid,
-                               struct target_waitstatus *status);
 static void go32_fetch_registers (struct regcache *, int regno);
 static void store_register (const struct regcache *, int regno);
 static void go32_store_registers (struct regcache *, int regno);
@@ -347,7 +345,8 @@ go32_resume (ptid_t ptid, int step, enum target_signal siggnal)
 static char child_cwd[FILENAME_MAX];
 
 static ptid_t
-go32_wait (ptid_t ptid, struct target_waitstatus *status)
+go32_wait (struct target_ops *ops,
+	   ptid_t ptid, struct target_waitstatus *status)
 {
   int i;
   unsigned char saved_opcode;
@@ -866,7 +865,7 @@ go32_thread_alive (ptid_t ptid)
 }
 
 static char *
-go32_pid_to_str (ptid_t ptid)
+go32_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
   xsnprintf (buf, sizeof buf, "Thread <main>");

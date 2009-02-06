@@ -89,8 +89,6 @@ static void darwin_stop (ptid_t);
 static void darwin_resume (ptid_t ptid, int step,
 			   enum target_signal signal);
 
-static ptid_t darwin_wait (ptid_t ptid, struct target_waitstatus *status);
-
 static void darwin_mourn_inferior (struct target_ops *ops);
 
 static int darwin_lookup_task (char *args, task_t * ptask, int *ppid);
@@ -105,8 +103,6 @@ static void darwin_create_inferior (struct target_ops *ops, char *exec_file,
 				    char *allargs, char **env, int from_tty);
 
 static void darwin_files_info (struct target_ops *ops);
-
-static char *darwin_pid_to_str (ptid_t tpid);
 
 static int darwin_thread_alive (ptid_t tpid);
 
@@ -483,7 +479,8 @@ catch_exception_raise (mach_port_t port,
 }
 
 static ptid_t
-darwin_wait (ptid_t ptid, struct target_waitstatus *status)
+darwin_wait (struct target_ops *ops,
+	     ptid_t ptid, struct target_waitstatus *status)
 {
   kern_return_t kret;
   mach_msg_header_t *hdr = &msgin.hdr;
@@ -1049,7 +1046,7 @@ darwin_files_info (struct target_ops *ops)
 }
 
 static char *
-darwin_pid_to_str (ptid_t ptid)
+darwin_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[128];
 

@@ -126,7 +126,8 @@ static void procfs_kill_inferior (void);
 static void procfs_mourn_inferior (struct target_ops *ops);
 static void procfs_create_inferior (struct target_ops *, char *, 
 				    char *, char **, int);
-static ptid_t procfs_wait (ptid_t, struct target_waitstatus *);
+static ptid_t procfs_wait (struct target_ops *,
+			   ptid_t, struct target_waitstatus *);
 static int procfs_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			       struct mem_attrib *attrib,
 			       struct target_ops *);
@@ -139,7 +140,7 @@ static LONGEST procfs_xfer_partial (struct target_ops *ops,
 static int procfs_thread_alive (ptid_t);
 
 void procfs_find_new_threads (void);
-char *procfs_pid_to_str (ptid_t);
+char *procfs_pid_to_str (struct target_ops *, ptid_t);
 
 static int proc_find_memory_regions (int (*) (CORE_ADDR,
 					      unsigned long,
@@ -3969,7 +3970,8 @@ syscall_is_lwp_create (procinfo *pi, int scall)
  */
 
 static ptid_t
-procfs_wait (ptid_t ptid, struct target_waitstatus *status)
+procfs_wait (struct target_ops *ops,
+	     ptid_t ptid, struct target_waitstatus *status)
 {
   /* First cut: loosely based on original version 2.1 */
   procinfo *pi;
@@ -5270,7 +5272,7 @@ procfs_thread_alive (ptid_t ptid)
 /* Convert PTID to a string.  Returns the string in a static buffer.  */
 
 char *
-procfs_pid_to_str (ptid_t ptid)
+procfs_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[80];
 
