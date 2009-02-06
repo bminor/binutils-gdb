@@ -1,3 +1,7 @@
+2009-02-06  Tristan Gingold  <gingold@adacore.com>
+
+	* gdb.arch/i386-sse.c (main): Replace call to puts by an nop asm.
+
 2009-02-05  Tristan Gingold  <gingold@adacore.com>
 
 	* gdb.base/sigbpt.exp: Detect which signal is received when a NULL

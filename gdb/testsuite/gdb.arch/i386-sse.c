@@ -66,7 +66,7 @@ main (int argc, char **argv)
            : "r" (data) 
            : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
 
-      puts ("Hi!"); /* first breakpoint here */
+      asm ("nop"); /* first breakpoint here */
 
       asm (
            "movaps %%xmm0, 0(%0)\n\t"
