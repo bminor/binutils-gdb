@@ -97,12 +97,6 @@ static struct target_ops debug_target;
 
 static void debug_to_open (char *, int);
 
-static void debug_to_close (int);
-
-static void debug_to_attach (struct target_ops *ops, char *, int);
-
-static void debug_to_detach (struct target_ops *ops, char *, int);
-
 static void debug_to_resume (ptid_t, int, enum target_signal);
 
 static ptid_t debug_to_wait (ptid_t, struct target_waitstatus *);
@@ -155,8 +149,6 @@ static void debug_to_kill (void);
 static void debug_to_load (char *, int);
 
 static int debug_to_lookup_symbol (char *, CORE_ADDR *);
-
-static void debug_to_mourn_inferior (struct target_ops *);
 
 static int debug_to_can_run (void);
 
@@ -281,8 +273,9 @@ target_load (char *arg, int from_tty)
   (*current_target.to_load) (arg, from_tty);
 }
 
-void target_create_inferior (char *exec_file, char *args,
-			     char **env, int from_tty)
+void
+target_create_inferior (char *exec_file, char *args,
+			char **env, int from_tty)
 {
   struct target_ops *t;
   for (t = current_target.beneath; t != NULL; t = t->beneath)
@@ -290,6 +283,10 @@ void target_create_inferior (char *exec_file, char *args,
       if (t->to_create_inferior != NULL)	
 	{
 	  t->to_create_inferior (t, exec_file, args, env, from_tty);
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"target_create_inferior (%s, %s, xxx, %d)\n",
+				exec_file, args, from_tty);
 	  return;
 	}
     }
@@ -1811,6 +1808,9 @@ target_detach (char *args, int from_tty)
       if (t->to_detach != NULL)
 	{
 	  t->to_detach (t, args, from_tty);
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_detach (%s, %d)\n",
+				args, from_tty);
 	  return;
 	}
     }
@@ -1883,6 +1883,8 @@ target_mourn_inferior (void)
       if (t->to_mourn_inferior != NULL)	
 	{
 	  t->to_mourn_inferior (t);
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_mourn_inferior ()\n");
 	  return;
 	}
     }
@@ -2519,13 +2521,6 @@ debug_to_open (char *args, int from_tty)
   fprintf_unfiltered (gdb_stdlog, "target_open (%s, %d)\n", args, from_tty);
 }
 
-static void
-debug_to_close (int quitting)
-{
-  target_close (&debug_target, quitting);
-  fprintf_unfiltered (gdb_stdlog, "target_close (%d)\n", quitting);
-}
-
 void
 target_close (struct target_ops *targ, int quitting)
 {
@@ -2533,6 +2528,9 @@ target_close (struct target_ops *targ, int quitting)
     targ->to_xclose (targ, quitting);
   else if (targ->to_close != NULL)
     targ->to_close (quitting);
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_close (%d)\n", quitting);
 }
 
 void
@@ -2544,6 +2542,9 @@ target_attach (char *args, int from_tty)
       if (t->to_attach != NULL)	
 	{
 	  t->to_attach (t, args, from_tty);
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_attach (%s, %d)\n",
+				args, from_tty);
 	  return;
 	}
     }
@@ -2552,30 +2553,12 @@ target_attach (char *args, int from_tty)
 		  "could not find a target to attach");
 }
 
-
-static void
-debug_to_attach (struct target_ops *ops, char *args, int from_tty)
-{
-  debug_target.to_attach (&debug_target, args, from_tty);
-
-  fprintf_unfiltered (gdb_stdlog, "target_attach (%s, %d)\n", args, from_tty);
-}
-
-
 static void
 debug_to_post_attach (int pid)
 {
   debug_target.to_post_attach (pid);
 
   fprintf_unfiltered (gdb_stdlog, "target_post_attach (%d)\n", pid);
-}
-
-static void
-debug_to_detach (struct target_ops *ops, char *args, int from_tty)
-{
-  debug_target.to_detach (&debug_target, args, from_tty);
-
-  fprintf_unfiltered (gdb_stdlog, "target_detach (%s, %d)\n", args, from_tty);
 }
 
 static void
@@ -2989,17 +2972,6 @@ debug_to_lookup_symbol (char *name, CORE_ADDR *addrp)
 }
 
 static void
-debug_to_create_inferior (struct target_ops *ops,
-			  char *exec_file, char *args, char **env,
-			  int from_tty)
-{
-  debug_target.to_create_inferior (ops, exec_file, args, env, from_tty);
-
-  fprintf_unfiltered (gdb_stdlog, "target_create_inferior (%s, %s, xxx, %d)\n",
-		      exec_file, args, from_tty);
-}
-
-static void
 debug_to_post_startup_inferior (ptid_t ptid)
 {
   debug_target.to_post_startup_inferior (ptid);
@@ -3096,14 +3068,6 @@ debug_to_has_exited (int pid, int wait_status, int *exit_status)
   return has_exited;
 }
 
-static void
-debug_to_mourn_inferior (struct target_ops *ops)
-{
-  debug_target.to_mourn_inferior (&debug_target);
-
-  fprintf_unfiltered (gdb_stdlog, "target_mourn_inferior ()\n");
-}
-
 static int
 debug_to_can_run (void)
 {
@@ -3182,10 +3146,7 @@ setup_target_debug (void)
   memcpy (&debug_target, &current_target, sizeof debug_target);
 
   current_target.to_open = debug_to_open;
-  current_target.to_close = debug_to_close;
-  current_target.to_attach = debug_to_attach;
   current_target.to_post_attach = debug_to_post_attach;
-  current_target.to_detach = debug_to_detach;
   current_target.to_resume = debug_to_resume;
   current_target.to_wait = debug_to_wait;
   current_target.to_fetch_registers = debug_to_fetch_registers;
@@ -3213,7 +3174,6 @@ setup_target_debug (void)
   current_target.to_kill = debug_to_kill;
   current_target.to_load = debug_to_load;
   current_target.to_lookup_symbol = debug_to_lookup_symbol;
-  current_target.to_create_inferior = debug_to_create_inferior;
   current_target.to_post_startup_inferior = debug_to_post_startup_inferior;
   current_target.to_acknowledge_created_inferior = debug_to_acknowledge_created_inferior;
   current_target.to_insert_fork_catchpoint = debug_to_insert_fork_catchpoint;
@@ -3223,7 +3183,6 @@ setup_target_debug (void)
   current_target.to_insert_exec_catchpoint = debug_to_insert_exec_catchpoint;
   current_target.to_remove_exec_catchpoint = debug_to_remove_exec_catchpoint;
   current_target.to_has_exited = debug_to_has_exited;
-  current_target.to_mourn_inferior = debug_to_mourn_inferior;
   current_target.to_can_run = debug_to_can_run;
   current_target.to_notice_signals = debug_to_notice_signals;
   current_target.to_thread_alive = debug_to_thread_alive;

@@ -1,3 +1,12 @@
+2009-02-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.c (target_create_inferior, target_detach)
+	(target_mourn_inferior, target_attach, target_close): Do target
+	debug output.
+	(debug_to_attach, debug_to_detach, debug_to_create_inferior)
+	(debug_to_mourn_inferior, debug_to_close): Delete.
+	(setup_target_debug): Adjust.
+
 2009-02-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* target.h (target_stopped_data_address_p): Delete declaration,
