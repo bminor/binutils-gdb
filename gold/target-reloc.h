@@ -286,7 +286,7 @@ relocate_section(
           && !target->is_defined_by_abi(sym)
 	  && (!parameters->options().shared()       // -shared
               || parameters->options().defs()))     // -z defs
-	gold_undefined_symbol(sym, relinfo, i, offset);
+	gold_undefined_symbol_at_location(sym, relinfo, i, offset);
 
       if (sym != NULL && sym->has_warning())
 	relinfo->symtab->issue_warning(sym, relinfo, i, offset);

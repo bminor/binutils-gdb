@@ -1,3 +1,29 @@
+2009-02-06  Chris Demetriou  <cgd@google.com>
+
+	* gold.h (gold_undefined_symbol): Change to take only a Symbol
+	pointer and to report location as the file name associated with
+	the symbol.
+	(gold_undefined_symbol_at_location): New function to replace the
+	old gold_undefined_symbol functionality.
+	* target-reloc.h (relocate_section): Update to use
+	gold_undefined_symbol_at_location.
+	* symtab.cc (Symbol_table::warn_about_undefined_dynobj_symbol):
+	Call gold_undefined_symbol function rather than gold_error.
+	* errors.h (Errors::undefined_symbol): Take location as a
+	string, rather than calculating it from a relocation.
+	* errors.cc (Errors::fatal): Print "fatal error:" before the
+	formatted message.
+	(Errors::error, Errors::error_at_location): Print "error: "
+	before the formatted message.
+	(Errors::undefined_symbol): Take location as a string, rather
+	than calculating it from a relocation.
+	(gold_undefined_symbol_at_location): New function akin to
+	old gold_undefined_symbol, calculates location from relocation.
+	(gold_undefined_symbol): Change to take only a Symbol pointer
+	and to report location as the file name associated with the symbol.
+	* testsuite/debug_msg.sh: Update for changed error messages.
+	* testsuite/undef_symbol.sh: Likewise.
+
 2009-02-04  Duncan Sands  <baldrick@free.fr>
 
 	PR 9812

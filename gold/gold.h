@@ -202,12 +202,22 @@ gold_warning_at_location(const Relocate_info<size, big_endian>*,
 			 size_t, off_t, const char* format, ...)
   TEMPLATE_ATTRIBUTE_PRINTF_4;
 
-// This function is called to report an undefined symbol.
+// This function is called to report an undefined symbol without
+// a relocation (e.g., referenced by a dynamic object).  SYM is
+// the undefined symbol.  The file name associated with the SYM
+// is used to print a location for the undefined symbol.
+extern void
+gold_undefined_symbol(const Symbol*);
+
+// This function is called to report an undefined symbol resulting
+// from a relocation.  SYM is the undefined symbol.  RELINFO is the
+// general relocation info.  RELNUM is the number of the reloc,
+// and RELOFFSET is the reloc's offset.
 template<int size, bool big_endian>
 extern void
-gold_undefined_symbol(const Symbol*,
-		      const Relocate_info<size, big_endian>*,
-		      size_t, off_t);
+gold_undefined_symbol_at_location(const Symbol*,
+		                  const Relocate_info<size, big_endian>*,
+		                  size_t, off_t);
 
 // This is function is called in some cases if we run out of memory.
 extern void
