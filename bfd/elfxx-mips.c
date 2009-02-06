@@ -6249,17 +6249,19 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
     {
       const char *name = bfd_get_section_name (abfd, hdr->bfd_section);
 
+      /* .sbss is not handled specially here because the GNU/Linux
+	 prelinker can convert .sbss from NOBITS to PROGBITS and
+	 changing it back to NOBITS breaks the binary.  The entry in
+	 _bfd_mips_elf_special_sections will ensure the correct flags
+	 are set on .sbss if BFD creates it without reading it from an
+	 input file, and without special handling here the flags set
+	 on it in an input file will be followed.  */
       if (strcmp (name, ".sdata") == 0
 	  || strcmp (name, ".lit8") == 0
 	  || strcmp (name, ".lit4") == 0)
 	{
 	  hdr->sh_flags |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
 	  hdr->sh_type = SHT_PROGBITS;
-	}
-      else if (strcmp (name, ".sbss") == 0)
-	{
-	  hdr->sh_flags |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
-	  hdr->sh_type = SHT_NOBITS;
 	}
       else if (strcmp (name, ".srdata") == 0)
 	{
