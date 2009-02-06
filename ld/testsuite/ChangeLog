@@ -1,3 +1,8 @@
+2009-02-06  Joseph Myers  <joseph@codesourcery.com>
+
+	* lib/ld-lib.exp (check_gc_sections_available): Return 0 for
+	*-*-mingw*.
+
 2009-02-05  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (armeabitests): Restore thumb2-b-interwork.

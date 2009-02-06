@@ -1592,7 +1592,8 @@ proc check_gc_sections_available { } {
 	# advertised by ld's options.
 	if { [istarget alpha*-*-*]
 	     || [istarget mep-*-*]
-	     || [istarget ia64-*-*] } {
+	     || [istarget ia64-*-*]
+	     || [istarget *-*-mingw*] } {
 	    set gc_sections_available_saved 0
 	    return 0
 	}
