@@ -2218,10 +2218,13 @@ target_get_osdata (const char *type)
   char *document;
   struct target_ops *t;
 
-  if (current_target.to_stratum == dummy_stratum)
-    t = find_default_run_target ("get OS data");
-  else
+  /* If we're already connected to something that can get us OS
+     related data, use it.  Otherwise, try using the native
+     target.  */
+  if (current_target.to_stratum >= process_stratum)
     t = current_target.beneath;
+  else
+    t = find_default_run_target ("get OS data");
 
   if (!t)
     return NULL;

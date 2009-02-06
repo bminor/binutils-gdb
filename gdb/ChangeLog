@@ -1,10 +1,15 @@
 2009-02-06  Pedro Alves  <pedro@codesourcery.com>
 
+	* target.c (target_get_osdata): Check for equal or higher than
+	process_stratum, not dummy_stratum.
+
+2009-02-06  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote.c (extended_remote_can_run): Delete.
 	(init_remote_ops): Don't register it.
 	* target.c (target_get_osdata): Don't check for target_can_run.
 	Instead any target that has already been pushed, otherwise
-	fallback to the default run target..
+	fallback to the default run target.
 
 2009-02-06  Pedro Alves  <pedro@codesourcery.com>
 
