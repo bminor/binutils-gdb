@@ -400,6 +400,239 @@ amd64_linux_child_post_startup_inferior (ptid_t ptid)
 }
 
 
+/* When GDB is built as a 64-bit application on linux, the
+   PTRACE_GETSIGINFO data is always presented in 64-bit layout.  Since
+   debugging a 32-bit inferior with a 64-bit GDB should look the same
+   as debugging it with a 32-bit GDB, we do the 32-bit <-> 64-bit
+   conversion in-place ourselves.  */
+
+/* These types below (compat_*) define a siginfo type that is layout
+   compatible with the siginfo type exported by the 32-bit userspace
+   support.  */
+
+typedef int compat_int_t;
+typedef unsigned int compat_uptr_t;
+
+typedef int compat_time_t;
+typedef int compat_timer_t;
+typedef int compat_clock_t;
+
+struct compat_timeval
+{
+  compat_time_t tv_sec;
+  int tv_usec;
+};
+
+typedef union compat_sigval
+{
+  compat_int_t sival_int;
+  compat_uptr_t sival_ptr;
+} compat_sigval_t;
+
+typedef struct compat_siginfo
+{
+  int si_signo;
+  int si_errno;
+  int si_code;
+
+  union
+  {
+    int _pad[((128 / sizeof (int)) - 3)];
+
+    /* kill() */
+    struct
+    {
+      unsigned int _pid;
+      unsigned int _uid;
+    } _kill;
+
+    /* POSIX.1b timers */
+    struct
+    {
+      compat_timer_t _tid;
+      int _overrun;
+      compat_sigval_t _sigval;
+    } _timer;
+
+    /* POSIX.1b signals */
+    struct
+    {
+      unsigned int _pid;
+      unsigned int _uid;
+      compat_sigval_t _sigval;
+    } _rt;
+
+    /* SIGCHLD */
+    struct
+    {
+      unsigned int _pid;
+      unsigned int _uid;
+      int _status;
+      compat_clock_t _utime;
+      compat_clock_t _stime;
+    } _sigchld;
+
+    /* SIGILL, SIGFPE, SIGSEGV, SIGBUS */
+    struct
+    {
+      unsigned int _addr;
+    } _sigfault;
+
+    /* SIGPOLL */
+    struct
+    {
+      int _band;
+      int _fd;
+    } _sigpoll;
+  } _sifields;
+} compat_siginfo_t;
+
+#define cpt_si_pid _sifields._kill._pid
+#define cpt_si_uid _sifields._kill._uid
+#define cpt_si_timerid _sifields._timer._tid
+#define cpt_si_overrun _sifields._timer._overrun
+#define cpt_si_status _sifields._sigchld._status
+#define cpt_si_utime _sifields._sigchld._utime
+#define cpt_si_stime _sifields._sigchld._stime
+#define cpt_si_ptr _sifields._rt._sigval.sival_ptr
+#define cpt_si_addr _sifields._sigfault._addr
+#define cpt_si_band _sifields._sigpoll._band
+#define cpt_si_fd _sifields._sigpoll._fd
+
+static void
+compat_siginfo_from_siginfo (compat_siginfo_t *to, siginfo_t *from)
+{
+  memset (to, 0, sizeof (*to));
+
+  to->si_signo = from->si_signo;
+  to->si_errno = from->si_errno;
+  to->si_code = from->si_code;
+
+  if (to->si_code < 0)
+    {
+      to->cpt_si_ptr = (intptr_t) from->si_ptr;
+    }
+  else if (to->si_code == SI_USER)
+    {
+      to->cpt_si_pid = from->si_pid;
+      to->cpt_si_uid = from->si_uid;
+    }
+  else if (to->si_code == SI_TIMER)
+    {
+      to->cpt_si_timerid = from->si_timerid;
+      to->cpt_si_overrun = from->si_overrun;
+      to->cpt_si_ptr = (intptr_t) from->si_ptr;
+    }
+  else
+    {
+      switch (to->si_signo)
+	{
+	case SIGCHLD:
+	  to->cpt_si_pid = from->si_pid;
+	  to->cpt_si_uid = from->si_uid;
+	  to->cpt_si_status = from->si_status;
+	  to->cpt_si_utime = from->si_utime;
+	  to->cpt_si_stime = from->si_stime;
+	  break;
+	case SIGILL:
+	case SIGFPE:
+	case SIGSEGV:
+	case SIGBUS:
+	  to->cpt_si_addr = (intptr_t) from->si_addr;
+	  break;
+	case SIGPOLL:
+	  to->cpt_si_band = from->si_band;
+	  to->cpt_si_fd = from->si_fd;
+	  break;
+	default:
+	  to->cpt_si_pid = from->si_pid;
+	  to->cpt_si_uid = from->si_uid;
+	  to->cpt_si_ptr = (intptr_t) from->si_ptr;
+	  break;
+	}
+    }
+}
+
+static void
+siginfo_from_compat_siginfo (siginfo_t *to, compat_siginfo_t *from)
+{
+  memset (to, 0, sizeof (*to));
+
+  to->si_signo = from->si_signo;
+  to->si_errno = from->si_errno;
+  to->si_code = from->si_code;
+
+  if (to->si_code < 0)
+    {
+      to->si_ptr = (void *) (intptr_t) from->cpt_si_ptr;
+    }
+  else if (to->si_code == SI_USER)
+    {
+      to->si_pid = from->cpt_si_pid;
+      to->si_uid = from->cpt_si_uid;
+    }
+  else if (to->si_code == SI_TIMER)
+    {
+      to->si_timerid = from->cpt_si_timerid;
+      to->si_overrun = from->cpt_si_overrun;
+      to->si_ptr = (void *) (intptr_t) from->cpt_si_ptr;
+    }
+  else
+    {
+      switch (to->si_signo)
+	{
+	case SIGCHLD:
+	  to->si_pid = from->cpt_si_pid;
+	  to->si_uid = from->cpt_si_uid;
+	  to->si_status = from->cpt_si_status;
+	  to->si_utime = from->cpt_si_utime;
+	  to->si_stime = from->cpt_si_stime;
+	  break;
+	case SIGILL:
+	case SIGFPE:
+	case SIGSEGV:
+	case SIGBUS:
+	  to->si_addr = (void *) (intptr_t) from->cpt_si_addr;
+	  break;
+	case SIGPOLL:
+	  to->si_band = from->cpt_si_band;
+	  to->si_fd = from->cpt_si_fd;
+	  break;
+	default:
+	  to->si_pid = from->cpt_si_pid;
+	  to->si_uid = from->cpt_si_uid;
+	  to->si_ptr = (void* ) (intptr_t) from->cpt_si_ptr;
+	  break;
+	}
+    }
+}
+
+/* Convert a native/host siginfo object, into/from the siginfo in the
+   layout of the inferiors' architecture.  Returns true if any
+   conversion was done; false otherwise.  If DIRECTION is 1, then copy
+   from INF to NATIVE.  If DIRECTION is 0, copy from NATIVE to
+   INF.  */
+
+static int
+amd64_linux_siginfo_fixup (struct siginfo *native, gdb_byte *inf, int direction)
+{
+  /* Is the inferior 32-bit?  If so, then do fixup the siginfo
+     object.  */
+  if (gdbarch_addr_bit (get_frame_arch (get_current_frame ())) == 32)
+    {
+      gdb_assert (sizeof (struct siginfo) == sizeof (compat_siginfo_t));
+
+      if (direction == 0)
+	compat_siginfo_from_siginfo ((struct compat_siginfo *) inf, native);
+      else
+	siginfo_from_compat_siginfo (native, (struct compat_siginfo *) inf);
+
+      return 1;
+    }
+  else
+    return 0;
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_amd64_linux_nat (void);
 
@@ -434,4 +667,5 @@ _initialize_amd64_linux_nat (void)
   /* Register the target.  */
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, amd64_linux_new_thread);
+  linux_nat_set_siginfo_fixup (t, amd64_linux_siginfo_fixup);
 }

@@ -1,5 +1,23 @@
 2009-02-06  Pedro Alves  <pedro@codesourcery.com>
 
+	* amd64-linux-nat.c (compat_int_t, compat_uptr_t, compat_time_t)
+	(compat_timer_t, compat_clock_t, struct compat_timeval)
+	(compat_sigval_t, compat_siginfo_t): New types.
+	(cpt_si_pid, cpt_si_uid, cpt_si_timerid, cpt_si_overrun)
+	(cpt_si_status, cpt_si_utime, cpt_si_stime, cpt_si_ptr)
+	(cpt_si_addr, cpt_si_band, cpt_si_fd): New defines.
+	(compat_siginfo_from_siginfo, siginfo_from_compat_siginfo)
+	(amd64_linux_siginfo_fixup): New.
+	* linux-nat.c (linux_nat_siginfo_fixup): New.
+	(siginfo_fixup): New.
+	(linux_xfer_siginfo): Use siginfo_fixup to convert between the
+	siginfo layout expected by ptrace and the siginfo layout of the
+	inferior.
+	(linux_nat_set_siginfo_fixup): New.
+	* linux-nat.h (linux_nat_set_siginfo_fixup): Declare.
+
+2009-02-06  Pedro Alves  <pedro@codesourcery.com>
+
 	* target.h (enum target_object): Add new TARGET_OBJECT_SIGNAL_INFO.
 	* infrun.c (siginfo_value_read, siginfo_value_write): New.
 	(siginfo_value_funcs): New.

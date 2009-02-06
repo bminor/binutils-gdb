@@ -125,6 +125,14 @@ void linux_nat_add_target (struct target_ops *);
 /* Register a method to call whenever a new thread is attached.  */
 void linux_nat_set_new_thread (struct target_ops *, void (*) (ptid_t));
 
+/* Register a method that converts a siginfo object between the layout
+   that ptrace returns, and the layout in the architecture of the
+   inferior.  */
+void linux_nat_set_siginfo_fixup (struct target_ops *,
+				  int (*) (struct siginfo *,
+					   gdb_byte *,
+					   int));
+
 /* Update linux-nat internal state when changing from one fork
    to another.  */
 void linux_nat_switch_fork (ptid_t new_ptid);
