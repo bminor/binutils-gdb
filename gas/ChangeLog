@@ -1,3 +1,12 @@
+2009-02-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 9814
+	* config/tc-arm.c (MODE_RECORDED): New define.
+	(output_inst): Record the thumb_mode in the current frag.
+	(arm_handle_align): Ignore the MODE_RECORDED bit in tc_frag_data.
+	(arm_init_frag): Only set the tc_frag_data field if it has not
+	already been set.
+
 2009-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (January, 2009)

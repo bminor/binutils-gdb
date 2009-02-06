@@ -260,6 +260,10 @@ symbolS * GOT_symbol;
    2: assemble for Thumb even though target CPU does not support thumb
       instructions.  */
 static int thumb_mode = 0;
+/* A value distinct from the possible values for thumb_mode that we
+   can use to record whether thumb_mode has been copied into the
+   tc_frag_data field of a frag.  */
+#define MODE_RECORDED (1 << 4)
 
 /* If unified_syntax is true, we are processing the new unified
    ARM/Thumb syntax.  Important differences from the old ARM mode:
@@ -14387,6 +14391,11 @@ output_inst (const char * str)
     return;
 
   to = frag_more (inst.size);
+  /* PR 9814: Record the thumb mode into the current frag so that we know
+     what type of NOP padding to use, if necessary.  We override any previous
+     setting so that if the mode has changed then the NOPS that we use will
+     match the encoding of the last instruction in the frag.  */
+  frag_now->tc_frag_data = thumb_mode | MODE_RECORDED;
 
   if (thumb_mode && (inst.size > THUMB_SIZE))
     {
@@ -17569,7 +17578,9 @@ arm_handle_align (fragS * fragP)
   if (bytes > MAX_MEM_FOR_RS_ALIGN_CODE)
     bytes &= MAX_MEM_FOR_RS_ALIGN_CODE;
 
-  if (fragP->tc_frag_data)
+  assert ((fragP->tc_frag_data & MODE_RECORDED) != 0);
+
+  if (fragP->tc_frag_data & (~ MODE_RECORDED))
     {
       if (target_big_endian)
 	noop = thumb_bigend_noop;
@@ -17629,13 +17640,19 @@ arm_frag_align_code (int n, int max)
   *p = 0;
 }
 
-/* Perform target specific initialisation of a frag.  */
+/* Perform target specific initialisation of a frag.
+   Note - despite the name this initialisation is not done when the frag
+   is created, but only when its type is assigned.  A frag can be created
+   and used a long time before its type is set, so beware of assuming that
+   this initialisationis performed first.  */
 
 void
 arm_init_frag (fragS * fragP)
 {
-  /* Record whether this frag is in an ARM or a THUMB area.  */
-  fragP->tc_frag_data = thumb_mode;
+  /* If the current ARM vs THUMB mode has not already
+     been recorded into this frag then do so now.  */
+  if ((fragP->tc_frag_data & MODE_RECORDED) == 0)
+    fragP->tc_frag_data = thumb_mode | MODE_RECORDED;
 }
 
 #ifdef OBJ_ELF
