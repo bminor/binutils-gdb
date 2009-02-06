@@ -1,3 +1,8 @@
+2009-02-06  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/symtab.d: But do not run the test for the Alpha or HPPA
+	ports.
+
 2009-02-05  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/booke.s ("dcbt", "dcbtst"): New tests.
