@@ -3890,6 +3890,16 @@ make_symbol_completion_list (char *text, char *word)
   return current_language->la_make_symbol_completion_list (text, word);
 }
 
+/* Like make_symbol_completion_list, but suitable for use as a
+   completion function.  */
+
+char **
+make_symbol_completion_list_fn (struct cmd_list_element *ignore,
+				char *text, char *word)
+{
+  return make_symbol_completion_list (text, word);
+}
+
 /* Like make_symbol_completion_list, but returns a list of symbols
    defined in a source file FILE.  */
 

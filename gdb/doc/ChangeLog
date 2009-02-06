@@ -1,3 +1,8 @@
+2009-02-06  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Python API): Add entry for Commands In Python.
+	(Commands In Python): New node.
+
 2009-02-05  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Values From Inferior): Document Value.string.

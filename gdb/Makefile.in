@@ -270,10 +270,12 @@ SUBDIR_TUI_CFLAGS= \
 #
 SUBDIR_PYTHON_OBS = \
 	python.o \
+	python-cmd.o \
 	python-utils.o \
 	python-value.o
 SUBDIR_PYTHON_SRCS = \
 	python/python.c \
+	python/python-cmd.c \
 	python/python-utils.c \
 	python/python-value.c
 SUBDIR_PYTHON_DEPS =
@@ -1834,6 +1836,10 @@ PYTHON_CFLAGS=@PYTHON_CFLAGS@
 
 python.o: $(srcdir)/python/python.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python.c
+	$(POSTCOMPILE)
+
+python-cmd.o: $(srcdir)/python/python-cmd.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-cmd.c
 	$(POSTCOMPILE)
 
 python-utils.o: $(srcdir)/python/python-utils.c

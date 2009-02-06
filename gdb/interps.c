@@ -71,7 +71,8 @@ struct interp
 
 /* Functions local to this file. */
 static void initialize_interps (void);
-static char **interpreter_completer (char *text, char *word);
+static char **interpreter_completer (struct cmd_list_element *cmd,
+				     char *text, char *word);
 
 /* The magic initialization routine for this module. */
 
@@ -416,7 +417,7 @@ interpreter_exec_cmd (char *args, int from_tty)
 
 /* List the possible interpreters which could complete the given text. */
 static char **
-interpreter_completer (char *text, char *word)
+interpreter_completer (struct cmd_list_element *ignore, char *text, char *word)
 {
   int alloced = 0;
   int textlen;

@@ -96,6 +96,8 @@ are treated as the standard definitions, regardless of context.
   GDB now has support for scripting using Python.  Whether this is
   available is determined at configure time.
 
+  New GDB commands can now be written in Python.
+
 * Ada tasking support
 
   Ada tasks can now be inspected in GDB. The following commands have

@@ -167,7 +167,12 @@ struct cmd_list_element
        returned relative to this position.  For example, suppose TEXT is "foo"
        and we want to complete to "foobar".  If WORD is "oo", return
        "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
-    char **(*completer) (char *text, char *word);
+    char **(*completer) (struct cmd_list_element *cmd, char *text, char *word);
+
+    /* Destruction routine for this command.  If non-NULL, this is
+       called when this command instance is destroyed.  This may be
+       used to finalize the CONTEXT field, if needed.  */
+    void (*destroyer) (struct cmd_list_element *self, void *context);
 
     /* Type of "set" or "show" command (or SET_NOT_SET if not "set"
        or "show").  */
@@ -242,7 +247,8 @@ extern void set_cmd_sfunc (struct cmd_list_element *cmd,
 					  struct cmd_list_element * c));
 
 extern void set_cmd_completer (struct cmd_list_element *cmd,
-			       char **(*completer) (char *text, char *word));
+			       char **(*completer) (struct cmd_list_element *self,
+						    char *text, char *word));
 
 /* HACK: cagney/2002-02-23: Code, mostly in tracepoints.c, grubs
    around in cmd objects to test the value of the commands sfunc().  */

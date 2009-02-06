@@ -1238,6 +1238,8 @@ extern void select_source_symtab (struct symtab *);
 
 extern char **default_make_symbol_completion_list (char *, char *);
 extern char **make_symbol_completion_list (char *, char *);
+extern char **make_symbol_completion_list_fn (struct cmd_list_element *,
+					      char *, char *);
 
 extern char **make_file_symbol_completion_list (char *, char *, char *);
 

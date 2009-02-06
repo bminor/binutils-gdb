@@ -46,6 +46,8 @@ static PyMethodDef GdbMethods[];
 
 PyObject *gdb_module;
 
+PyObject *gdbpy_doc_cst;
+
 /* Given a command_line, return a command string suitable for passing
    to Python.  Lines in the string are separated by newlines.  The
    return value is allocated using xmalloc and the caller is
@@ -407,8 +409,11 @@ Enables or disables printing of Python stack traces."),
   PyModule_AddStringConstant (gdb_module, "TARGET_CONFIG", (char*) target_name);
 
   gdbpy_initialize_values ();
+  gdbpy_initialize_commands ();
 
   PyRun_SimpleString ("import gdb");
+
+  gdbpy_doc_cst = PyString_FromString ("__doc__");
 
   /* Create a couple objects which are used for Python's stdout and
      stderr.  */

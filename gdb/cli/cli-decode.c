@@ -132,7 +132,8 @@ cmd_type (struct cmd_list_element *cmd)
 
 void
 set_cmd_completer (struct cmd_list_element *cmd,
-		   char **(*completer) (char *text, char *word))
+		   char **(*completer) (struct cmd_list_element *self,
+					char *text, char *word))
 {
   cmd->completer = completer; /* Ok.  */
 }
@@ -207,7 +208,8 @@ add_cmd (char *name, enum command_class class, void (*fun) (char *, int),
   c->prefixname = NULL;
   c->allow_unknown = 0;
   c->abbrev_flag = 0;
-  set_cmd_completer (c, make_symbol_completion_list);
+  set_cmd_completer (c, make_symbol_completion_list_fn);
+  c->destroyer = NULL;
   c->type = not_set_cmd;
   c->var = NULL;
   c->var_type = var_boolean;
@@ -688,6 +690,8 @@ delete_cmd (char *name, struct cmd_list_element **list,
     {
       if (strcmp (iter->name, name) == 0)
 	{
+	  if (iter->destroyer)
+	    iter->destroyer (iter, iter->context);
 	  if (iter->hookee_pre)
 	    iter->hookee_pre->hook_pre = 0;
 	  *prehook = iter->hook_pre;

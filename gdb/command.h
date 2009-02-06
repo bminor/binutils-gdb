@@ -138,7 +138,8 @@ extern void set_cmd_sfunc (struct cmd_list_element *cmd,
 			   cmd_sfunc_ftype *sfunc);
 
 extern void set_cmd_completer (struct cmd_list_element *cmd,
-			       char **(*completer) (char *text, char *word));
+			       char **(*completer) (struct cmd_list_element *cmd,
+						    char *text, char *word));
 
 /* HACK: cagney/2002-02-23: Code, mostly in tracepoints.c, grubs
    around in cmd objects to test the value of the commands sfunc().  */

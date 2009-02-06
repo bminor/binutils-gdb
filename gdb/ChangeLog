@@ -1,3 +1,38 @@
+2009-02-06  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add python-cmd.o.
+	(SUBDIR_PYTHON_SRCS): Add python-cmd.c.
+	(python-cmd.o): New target.
+	* cli/cli-decode.c (set_cmd_completer): Add self parameter to
+	completer prototype.
+	(add_cmd): Initialize destroyer member of cmd_list_element. Use
+	make_symbol_completion_list_fn as completer.
+	(delete_cmd): Call destroyer if one is set.
+	* cli/cli-decode.h (cmd_list_element): Add cmd parameter to
+	completer member.  Add destroyer member.
+	(set_cmd_completer): Add self parameter to
+	completer prototype.
+	* command.h (set_cmd_completer): Add cmd parameter to
+	completer prototype.
+	* completer.c (noop_completer, filename_completer,
+	location_completer, expression_completer, command_completer): Adapt
+	to new completer prototype.
+	(complete_line_internal): Pass new parameter to completer function.
+	* completer.h (noop_completer, filename_completer,
+	location_completer, expression_completer, command_completer): Adapt
+	prototypes to new completer prototype.
+	* interps.c (interpreter_completer): Adapt to new completer
+	prototype.
+	* python/python-cmd.c: New file.
+	* python/python-internal.h (gdbpy_initialize_commands): Add
+	prototype.
+	(gdbpy_doc_cst): Add forward declaration.
+	* python/python.c (gdbpy_doc_cst): Declare.
+	(_initialize_python): Call gdbpy_initialize_commands.  Initialize
+	gdbpy_doc_cst.
+	* symtab.c (make_symbol_completion_list_fn): New function.
+	* symtab.h (make_symbol_completion_list_fn): Add prototype.
+
 2009-02-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* target.c (target_get_osdata): Check for equal or higher than
