@@ -1,3 +1,30 @@
+2009-02-06  Jim Blandy  <jimb@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* defs.h (enum lval_type): New value: lval_computed.
+	* value.h (struct lval_funcs): New type.
+	(allocate_computed_value, value_computed_funcs)
+	(value_computed_closure): New declarations.
+	* value.c (struct value): Add a structure to the location union
+	for computed lvalues, containing 'funcs' and 'closure' members.
+	(allocate_computed_value, value_computed_funcs)
+	(value_computed_closure): New functions.
+	(value_free): For computed lvalues, call the closure's
+	'free_closure' function before freeing the value itself.
+	(value_copy): If we're copying an lval_computed value, call the
+	closure's 'copy_closure' function.
+	(set_value_component_location): If the original value is a
+	computed lvalue, then call the closure's 'copy_closure' function.
+	(value_of_internalvar): If an internal variable's value is a
+	computed lvalue, make retrieving its value produce an equivalent
+	computed lvalue.
+	* valops.c (value_fetch_lazy): Unlazy computed lvalues by calling
+	their read function.
+	(value_assign): Assign to computed lvalues by calling their write
+	function.
+
 2009-02-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_nat_wait): Adjust.

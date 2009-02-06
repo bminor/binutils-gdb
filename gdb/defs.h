@@ -652,7 +652,10 @@ enum lval_type
     /* In a gdb internal variable.  */
     lval_internalvar,
     /* Part of a gdb internal variable (structure field).  */
-    lval_internalvar_component
+    lval_internalvar_component,
+    /* Value's bits are fetched and stored using functions provided by
+       its creator.  */
+    lval_computed
   };
 
 /* Control types for commands */

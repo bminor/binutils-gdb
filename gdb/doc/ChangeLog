@@ -1,3 +1,7 @@
+2009-02-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbint.texinfo (Values): New chapter.
+
 2009-02-06  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Python API): Add entry for Commands In Python.

@@ -63,6 +63,15 @@ struct value
 
     /* Pointer to internal variable.  */
     struct internalvar *internalvar;
+
+    /* If lval == lval_computed, this is a set of function pointers
+       to use to access and describe the value, and a closure pointer
+       for them to use.  */
+    struct
+    {
+      struct lval_funcs *funcs; /* Functions to call.  */
+      void *closure;            /* Closure for those functions to use.  */
+    } computed;
   } location;
 
   /* Describes offset of a value within lval of a structure in bytes.
@@ -296,6 +305,20 @@ value_remove_from_list (struct value **head, struct value *val)
       }
 }
 
+struct value *
+allocate_computed_value (struct type *type,
+                         struct lval_funcs *funcs,
+                         void *closure)
+{
+  struct value *v = allocate_value (type);
+  VALUE_LVAL (v) = lval_computed;
+  v->location.computed.funcs = funcs;
+  v->location.computed.closure = closure;
+  set_value_lazy (v, 1);
+
+  return v;
+}
+
 /* Accessor methods.  */
 
 struct value *
@@ -458,6 +481,22 @@ set_value_pointed_to_offset (struct value *value, int val)
   value->pointed_to_offset = val;
 }
 
+struct lval_funcs *
+value_computed_funcs (struct value *v)
+{
+  gdb_assert (VALUE_LVAL (v) == lval_computed);
+
+  return v->location.computed.funcs;
+}
+
+void *
+value_computed_closure (struct value *v)
+{
+  gdb_assert (VALUE_LVAL (v) == lval_computed);
+
+  return v->location.computed.closure;
+}
+
 enum lval_type *
 deprecated_value_lval_hack (struct value *value)
 {
@@ -512,7 +551,17 @@ void
 value_free (struct value *val)
 {
   if (val)
-    xfree (val->contents);
+    {
+      if (VALUE_LVAL (val) == lval_computed)
+	{
+	  struct lval_funcs *funcs = val->location.computed.funcs;
+
+	  if (funcs->free_closure)
+	    funcs->free_closure (val);
+	}
+
+      xfree (val->contents);
+    }
   xfree (val);
 }
 
@@ -625,6 +674,13 @@ value_copy (struct value *arg)
 	      TYPE_LENGTH (value_enclosing_type (arg)));
 
     }
+  if (VALUE_LVAL (val) == lval_computed)
+    {
+      struct lval_funcs *funcs = val->location.computed.funcs;
+
+      if (funcs->copy_closure)
+        val->location.computed.closure = funcs->copy_closure (val);
+    }
   return val;
 }
 
@@ -635,7 +691,15 @@ set_value_component_location (struct value *component, struct value *whole)
     VALUE_LVAL (component) = lval_internalvar_component;
   else
     VALUE_LVAL (component) = VALUE_LVAL (whole);
+
   component->location = whole->location;
+  if (VALUE_LVAL (whole) == lval_computed)
+    {
+      struct lval_funcs *funcs = whole->location.computed.funcs;
+
+      if (funcs->copy_closure)
+        component->location.computed.closure = funcs->copy_closure (whole);
+    }
 }
 
 
@@ -872,8 +936,23 @@ value_of_internalvar (struct internalvar *var)
   val = value_copy (var->value);
   if (value_lazy (val))
     value_fetch_lazy (val);
-  VALUE_LVAL (val) = lval_internalvar;
-  VALUE_INTERNALVAR (val) = var;
+
+  /* If the variable's value is a computed lvalue, we want references
+     to it to produce another computed lvalue, where referencces and
+     assignments actually operate through the computed value's
+     functions.
+
+     This means that internal variables with computed values behave a
+     little differently from other internal variables: assignments to
+     them don't just replace the previous value altogether.  At the
+     moment, this seems like the behavior we want.  */
+  if (var->value->lval == lval_computed)
+    VALUE_LVAL (val) = lval_computed;
+  else
+    {
+      VALUE_LVAL (val) = lval_internalvar;
+      VALUE_INTERNALVAR (val) = var;
+    }
 
   /* Values are always stored in the target's byte order.  When connected to a
      target this will most likely always be correct, so there's normally no

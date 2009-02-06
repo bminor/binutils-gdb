@@ -727,6 +727,8 @@ value_fetch_lazy (struct value *val)
 	 watchpoints from trying to watch the saved frame pointer.  */
       value_free_to_mark (mark);
     }
+  else if (VALUE_LVAL (val) == lval_computed)
+    value_computed_funcs (val)->read (val);
   else
     internal_error (__FILE__, __LINE__, "Unexpected lazy value type.");
 
@@ -895,7 +897,15 @@ value_assign (struct value *toval, struct value *fromval)
 	observer_notify_target_changed (&current_target);
 	break;
       }
-      
+
+    case lval_computed:
+      {
+	struct lval_funcs *funcs = value_computed_funcs (toval);
+
+	funcs->write (toval, fromval);
+      }
+      break;
+
     default:
       error (_("Left operand of assignment is not an lvalue."));
     }

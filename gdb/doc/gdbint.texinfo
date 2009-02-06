@@ -73,6 +73,7 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 * Algorithms::
 * User Interface::
 * libgdb::
+* Values::
 * Stack Frames::
 * Symbol Handling::
 * Language Support::
@@ -1830,6 +1831,101 @@ instead of returning.
 the query interface.  Each function is parameterized by a @code{ui-out}
 builder.  The result of the query is constructed using that builder
 before the query function returns.
+
+@node Values
+@chapter Values
+@section Values
+
+@cindex values
+@cindex @code{value} structure
+@value{GDBN} uses @code{struct value}, or @dfn{values}, as an internal
+abstraction for the representation of a variety of inferior objects
+and @value{GDBN} convenience objects.
+
+Values have an associated @code{struct type}, that describes a virtual
+view of the raw data or object stored in or accessed through the
+value.
+
+A value is in addition discriminated by its lvalue-ness, given its
+@code{enum lval_type} enumeration type:
+
+@cindex @code{lval_type} enumeration, for values.
+@table @code
+@item @code{not_lval}
+This value is not an lval.  It can't be assigned to.
+
+@item @code{lval_memory}
+This value represents an object in memory.
+
+@item @code{lval_register}
+This value represents an object that lives in a register.
+
+@item @code{lval_internalvar}
+Represents the value of an internal variable.
+
+@item @code{lval_internalvar_component}
+Represents part of a @value{GDBN} internal variable.  E.g., a
+structure field.
+
+@cindex computed values
+@item @code{lval_computed}
+These are ``computed'' values.  They allow creating specialized value
+objects for specific purposes, all abstracted away from the core value
+support code.  The creator of such a value writes specialized
+functions to handle the reading and writing to/from the value's
+backend data, and optionally, a ``copy operator'' and a
+``destructor''.
+
+Pointers to these functions are stored in a @code{struct lval_funcs}
+instance (declared in @file{value.h}), and passed to the
+@code{allocate_computed_value} function, as in the example below.
+
+@smallexample
+static void
+nil_value_read (struct value *v)
+@{
+  /* This callback reads data from some backend, and stores it in V.
+     In this case, we always read null data.  You'll want to fill in
+     something more interesting.  */
+
+  memset (value_contents_all_raw (v),
+          value_offset (v),
+          TYPE_LENGTH (value_type (v)));
+@}
+
+static void
+nil_value_write (struct value *v, struct value *fromval)
+@{
+  /* Takes the data from FROMVAL and stores it in the backend of V.  */
+
+  to_oblivion (value_contents_all_raw (fromval),
+               value_offset (v),
+               TYPE_LENGTH (value_type (fromval)));
+@}
+
+static struct lval_funcs nil_value_funcs =
+  @{
+    nil_value_read,
+    nil_value_write
+  @};
+
+struct value *
+make_nil_value (void)
+@{
+   struct type *type;
+   struct value *v;
+
+   type = make_nils_type ();
+   v = allocate_computed_value (type, &nil_value_funcs, NULL);
+
+   return v;
+@}
+@end smallexample
+
+See the implementation of the @code{$_siginfo} convenience variable in
+@file{infrun.c} as a real example use of lval_computed.
+
+@end table
 
 @node Stack Frames
 @chapter Stack Frames
