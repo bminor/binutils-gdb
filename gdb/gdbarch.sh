@@ -705,6 +705,11 @@ m:enum target_signal:target_signal_from_host:int signo:signo::default_target_sig
 # signal number.
 m:int:target_signal_to_host:enum target_signal ts:ts::default_target_signal_to_host::0
 
+# Extra signal info inspection.
+#
+# Return a type suitable to inspect extra signal information.
+M:struct type *:get_siginfo_type:void:
+
 # Record architecture-specific information from the symbol table.
 M:void:record_special_symbol:struct objfile *objfile, asymbol *sym:objfile, sym
 

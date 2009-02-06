@@ -1822,8 +1822,8 @@ init_composite_type (char *name, enum type_code code)
 /* Helper function.  Append a field to a composite type.  */
 
 void
-append_composite_type_field (struct type *t, char *name, 
-			     struct type *field)
+append_composite_type_field_aligned (struct type *t, char *name,
+				     struct type *field, int alignment)
 {
   struct field *f;
   TYPE_NFIELDS (t) = TYPE_NFIELDS (t) + 1;
@@ -1842,10 +1842,29 @@ append_composite_type_field (struct type *t, char *name,
     {
       TYPE_LENGTH (t) = TYPE_LENGTH (t) + TYPE_LENGTH (field);
       if (TYPE_NFIELDS (t) > 1)
-	FIELD_BITPOS (f[0]) = (FIELD_BITPOS (f[-1])
-			       + (TYPE_LENGTH (FIELD_TYPE (f[-1]))
-				  * TARGET_CHAR_BIT));
+	{
+	  FIELD_BITPOS (f[0]) = (FIELD_BITPOS (f[-1])
+				 + (TYPE_LENGTH (FIELD_TYPE (f[-1]))
+				    * TARGET_CHAR_BIT));
+
+	  if (alignment)
+	    {
+	      int left = FIELD_BITPOS (f[0]) % (alignment * TARGET_CHAR_BIT);
+	      if (left)
+		{
+		  FIELD_BITPOS (f[0]) += left;
+		  TYPE_LENGTH (t) += left / TARGET_CHAR_BIT;
+		}
+	    }
+	}
     }
+}
+
+void
+append_composite_type_field (struct type *t, char *name,
+			     struct type *field)
+{
+  append_composite_type_field_aligned (t, name, field, 0);
 }
 
 int

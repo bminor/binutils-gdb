@@ -810,6 +810,77 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       return;
     }
 
+  if (the_target->qxfer_siginfo != NULL
+      && strncmp ("qXfer:siginfo:read:", own_buf, 19) == 0)
+    {
+      unsigned char *data;
+      int n;
+      CORE_ADDR ofs;
+      unsigned int len;
+      char *annex;
+
+      require_running (own_buf);
+
+      /* Reject any annex; grab the offset and length.  */
+      if (decode_xfer_read (own_buf + 19, &annex, &ofs, &len) < 0
+	  || annex[0] != '\0')
+	{
+	  strcpy (own_buf, "E00");
+	  return;
+	}
+
+      /* Read one extra byte, as an indicator of whether there is
+	 more.  */
+      if (len > PBUFSIZ - 2)
+	len = PBUFSIZ - 2;
+      data = malloc (len + 1);
+      if (!data)
+        return;
+      n = (*the_target->qxfer_siginfo) (annex, data, NULL, ofs, len + 1);
+      if (n < 0)
+	write_enn (own_buf);
+      else if (n > len)
+	*new_packet_len_p = write_qxfer_response (own_buf, data, len, 1);
+      else
+	*new_packet_len_p = write_qxfer_response (own_buf, data, n, 0);
+
+      free (data);
+      return;
+    }
+
+  if (the_target->qxfer_siginfo != NULL
+      && strncmp ("qXfer:siginfo:write:", own_buf, 20) == 0)
+    {
+      char *annex;
+      int n;
+      unsigned int len;
+      CORE_ADDR ofs;
+      unsigned char *data;
+
+      require_running (own_buf);
+
+      strcpy (own_buf, "E00");
+      data = malloc (packet_len - 19);
+      if (!data)
+        return;
+      if (decode_xfer_write (own_buf + 20, packet_len - 20, &annex,
+			     &ofs, &len, data) < 0)
+	{
+	  free (data);
+	  return;
+	}
+
+      n = (*the_target->qxfer_siginfo)
+	(annex, NULL, (unsigned const char *)data, ofs, len);
+      if (n < 0)
+	write_enn (own_buf);
+      else
+	sprintf (own_buf, "%x", n);
+
+      free (data);
+      return;
+    }
+
   /* Protocol features query.  */
   if (strncmp ("qSupported", own_buf, 10) == 0
       && (own_buf[10] == ':' || own_buf[10] == '\0'))
@@ -825,6 +896,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (the_target->qxfer_spu != NULL)
 	strcat (own_buf, ";qXfer:spu:read+;qXfer:spu:write+");
+
+      if (the_target->qxfer_siginfo != NULL)
+	strcat (own_buf, ";qXfer:siginfo:read+;qXfer:siginfo:write+");
 
       /* We always report qXfer:features:read, as targets may
 	 install XML files on a subsequent call to arch_setup.

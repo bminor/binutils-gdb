@@ -1,5 +1,13 @@
 2009-02-06  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.texinfo (Signals): Document $_siginfo.
+	(Convenience Variables): Mention $_siginfo.
+	(Remote Configuration): Document qXfer:siginfo:read,
+	qXfer:siginfo:write packets, and the read-siginfo-object,
+	write-siginfo-object commands.
+
+2009-02-06  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdbint.texinfo (Values): New chapter.
 
 2009-02-06  Tom Tromey  <tromey@redhat.com>

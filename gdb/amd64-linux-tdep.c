@@ -29,6 +29,7 @@
 #include "gdbtypes.h"
 #include "reggroups.h"
 #include "amd64-linux-tdep.h"
+#include "linux-tdep.h"
 
 #include "gdb_string.h"
 
@@ -296,6 +297,8 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                            simple_displaced_step_free_closure);
   set_gdbarch_displaced_step_location (gdbarch,
                                        displaced_step_at_entry_point);
+
+  set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 }
 
 

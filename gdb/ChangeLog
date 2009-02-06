@@ -1,3 +1,56 @@
+2009-02-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.h (enum target_object): Add new TARGET_OBJECT_SIGNAL_INFO.
+	* infrun.c (siginfo_value_read, siginfo_value_write): New.
+	(siginfo_value_funcs): New.
+	(siginfo_make_value): New.
+	(_initialize_infrun): Create the $_siginfo convenience variable.
+	* gdbtypes.h (append_composite_type_field_aligned): Declare.
+	* gdbtypes.c (append_composite_type_field): Rename to...
+	(append_composite_type_field_aligned): ... this.  Add ALIGNMENT
+	argument.  Handle it.
+	(append_composite_type_field): Rewrite on top of
+	append_composite_type_field_aligned.
+	* value.h (internalvar_make_value): New typedef.
+	(struct internalvar) <make_value>: New field.
+	(create_internalvar_type_lazy): Declare.
+	* value.c (create_internalvar): Clear make_value.
+	(create_internalvar_type_lazy): New.
+	(value_of_internalvar): If make_value is set use it.
+	(preserve_values): Skip internal variables that don't have a
+	value.
+	* gdbarch.sh (get_siginfo_type): New.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* linux-tdep.h, linux-tdep.c: New.
+	* amd64-linux-tdep.c: Include "linux-tdep.h".
+	(amd64_linux_init_abi): Register linux_get_siginfo_type and
+	linux_get_siginfo_mapper.
+	* i386-linux-tdep.c: Include "linux-tdep.h".
+	(i386_linux_init_abi): Register linux_get_siginfo_type and
+	linux_get_siginfo_mapper.
+	* arm-linux-tdep.c: Include "linux-tdep.h".
+	(i386_linux_init_abi): Register linux_get_siginfo_type and
+	linux_get_siginfo_mapper.
+
+	* linux-nat.c (linux_xfer_siginfo): New.
+	(linux_nat_xfer_partial): Handle TARGET_OBJECT_SIGNAL_INFO.
+	* remote.c (PACKET_qXfer_siginfo_read)
+	(PACKET_qXfer_siginfo_write): New.
+	(feature remote_protocol_features): Add "qXfer:siginfo:read" and
+	"qXfer:siginfo:write" features.
+	(remote_xfer_partial): Handle TARGET_OBJECT_SIGNAL_INFO.
+	(_initialize_remote): Add "set/show remote read-siginfo-object"
+	and "set/show remote write-siginfo-object" commands.
+
+	* Makefile.in (ALL_TARGET_OBS): Add linux-tdep.o.
+	(HFILES_NO_SRCDIR): Add linux-tdep.h.
+	(ALLDEPFILES): Add linux-tdep.c.
+	
+	* configure.tgt (arm*-*-linux* | arm*-*-uclinux*)
+	(i[34567]86-*-linux*, x86_64-*-linux*): Add linux-tdep.o to
+	gdb_target_obs.
+
 2009-02-06  Jim Blandy  <jimb@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 	    Vladimir Prus  <vladimir@codesourcery.com>

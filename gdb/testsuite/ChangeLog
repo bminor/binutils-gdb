@@ -1,3 +1,7 @@
+2009-02-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/siginfo-obj.c, gdb.base/siginfo-obj.exp: New.
+
 2009-02-06  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.python/python-cmd.exp: New file.

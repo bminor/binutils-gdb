@@ -305,11 +305,14 @@ extern struct value *coerce_array (struct value *value);
 /* Internal variables (variables for convenience of use of debugger)
    are recorded as a chain of these structures.  */
 
+typedef struct value * (*internalvar_make_value) (struct internalvar *);
+
 struct internalvar
 {
   struct internalvar *next;
   char *name;
   struct value *value;
+  internalvar_make_value make_value;
   int endian;
 };
 
@@ -533,6 +536,9 @@ extern void set_internalvar_component (struct internalvar *var,
 extern struct internalvar *lookup_only_internalvar (char *name);
 
 extern struct internalvar *create_internalvar (char *name);
+
+extern struct internalvar *
+  create_internalvar_type_lazy (char *name, internalvar_make_value fun);
 
 extern struct internalvar *lookup_internalvar (char *name);
 

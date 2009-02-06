@@ -998,6 +998,8 @@ enum {
   PACKET_vRun,
   PACKET_QStartNoAckMode,
   PACKET_vKill,
+  PACKET_qXfer_siginfo_read,
+  PACKET_qXfer_siginfo_write,
   PACKET_MAX
 };
 
@@ -2962,6 +2964,10 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_QStartNoAckMode },
   { "multiprocess", PACKET_DISABLE, remote_multi_process_feature, -1 },
   { "QNonStop", PACKET_DISABLE, remote_non_stop_feature, -1 },
+  { "qXfer:siginfo:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_siginfo_read },
+  { "qXfer:siginfo:write", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_siginfo_write },
 };
 
 static void
@@ -7323,6 +7329,19 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 				     [PACKET_qXfer_spu_write]);
     }
 
+  /* Handle extra signal info using qxfer packets.  */
+  if (object == TARGET_OBJECT_SIGNAL_INFO)
+    {
+      if (readbuf)
+	return remote_read_qxfer (ops, "siginfo", annex, readbuf, offset, len,
+				  &remote_protocol_packets
+				  [PACKET_qXfer_siginfo_read]);
+      else
+	return remote_write_qxfer (ops, "siginfo", annex, writebuf, offset, len,
+				   &remote_protocol_packets
+				   [PACKET_qXfer_siginfo_write]);
+    }
+
   /* Only handle flash writes.  */
   if (writebuf != NULL)
     {
@@ -9069,6 +9088,12 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_osdata],
                         "qXfer:osdata:read", "osdata", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_siginfo_read],
+                         "qXfer:siginfo:read", "read-siginfo-object", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_siginfo_write],
+                         "qXfer:siginfo:write", "write-siginfo-object", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",

@@ -1112,6 +1112,10 @@ extern struct type *init_type (enum type_code, int, int, char *,
 extern struct type *init_composite_type (char *name, enum type_code code);
 extern void append_composite_type_field (struct type *t, char *name,
 					 struct type *field);
+extern void append_composite_type_field_aligned (struct type *t,
+						 char *name,
+						 struct type *field,
+						 int alignment);
 
 /* Helper functions to construct a bit flags type.  An initially empty
    type is created using init_flag_type().  Flags are then added using

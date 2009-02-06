@@ -239,6 +239,7 @@ struct gdbarch
   int sofun_address_maybe_missing;
   gdbarch_target_signal_from_host_ftype *target_signal_from_host;
   gdbarch_target_signal_to_host_ftype *target_signal_to_host;
+  gdbarch_get_siginfo_type_ftype *get_siginfo_type;
   gdbarch_record_special_symbol_ftype *record_special_symbol;
   int has_global_solist;
 };
@@ -371,6 +372,7 @@ struct gdbarch startup_gdbarch =
   0,  /* sofun_address_maybe_missing */
   default_target_signal_from_host,  /* target_signal_from_host */
   default_target_signal_to_host,  /* target_signal_to_host */
+  0,  /* get_siginfo_type */
   0,  /* record_special_symbol */
   0,  /* has_global_solist */
   /* startup_gdbarch() */
@@ -624,6 +626,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of sofun_address_maybe_missing, invalid_p == 0 */
   /* Skip verify of target_signal_from_host, invalid_p == 0 */
   /* Skip verify of target_signal_to_host, invalid_p == 0 */
+  /* Skip verify of get_siginfo_type, has predicate */
   /* Skip verify of record_special_symbol, has predicate */
   /* Skip verify of has_global_solist, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
@@ -834,6 +837,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: get_longjmp_target = <%s>\n",
                       host_address_to_string (gdbarch->get_longjmp_target));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_get_siginfo_type_p() = %d\n",
+                      gdbarch_get_siginfo_type_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: get_siginfo_type = <0x%lx>\n",
+                      (long) gdbarch->get_siginfo_type);
   fprintf_unfiltered (file,
                       "gdbarch_dump: has_global_solist = %s\n",
                       plongest (gdbarch->has_global_solist));
@@ -3217,6 +3226,30 @@ set_gdbarch_target_signal_to_host (struct gdbarch *gdbarch,
                                    gdbarch_target_signal_to_host_ftype target_signal_to_host)
 {
   gdbarch->target_signal_to_host = target_signal_to_host;
+}
+
+int
+gdbarch_get_siginfo_type_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->get_siginfo_type != NULL;
+}
+
+struct type *
+gdbarch_get_siginfo_type (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->get_siginfo_type != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_get_siginfo_type called\n");
+  return gdbarch->get_siginfo_type (gdbarch);
+}
+
+void
+set_gdbarch_get_siginfo_type (struct gdbarch *gdbarch,
+                              gdbarch_get_siginfo_type_ftype get_siginfo_type)
+{
+  gdbarch->get_siginfo_type = get_siginfo_type;
 }
 
 int

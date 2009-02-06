@@ -221,7 +221,10 @@ enum target_object
   TARGET_OBJECT_LIBRARIES,
   /* Get OS specific data.  The ANNEX specifies the type (running
      processes, etc.).  */
-  TARGET_OBJECT_OSDATA
+  TARGET_OBJECT_OSDATA,
+  /* Extra signal info.  Usually the contents of `siginfo_t' on unix
+     platforms.  */
+  TARGET_OBJECT_SIGNAL_INFO,
   /* Possible future objects: TARGET_OBJECT_FILE, ... */
 };
 

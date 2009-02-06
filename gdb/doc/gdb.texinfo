@@ -4472,6 +4472,55 @@ a result of the fatal signal once it saw the signal.  To prevent this,
 you can continue with @samp{signal 0}.  @xref{Signaling, ,Giving your
 Program a Signal}.
 
+@cindex extra signal information
+@anchor{extra signal information}
+
+On some targets, @value{GDBN} can inspect extra signal information
+associated with the intercepted signal, before it is actually
+delivered to the program being debugged.  This information is exported
+by the convenience variable @code{$_siginfo}, and consists of data
+that is passed by the kernel to the signal handler at the time of the
+receipt of a signal.  The data type of the information itself is
+target dependent.  You can see the data type using the @code{ptype
+$_siginfo} command.  On Unix systems, it typically corresponds to the
+standard @code{siginfo_t} type, as defined in the @file{signal.h}
+system header.
+
+Here's an example, on a @sc{gnu}/Linux system, printing the stray
+referenced address that raised a segmentation fault.
+
+@smallexample
+@group
+(@value{GDBP}) continue
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000400766 in main ()
+69        *(int *)p = 0;
+(@value{GDBP}) ptype $_siginfo
+type = struct @{
+    int si_signo;
+    int si_errno;
+    int si_code;
+    union @{
+        int _pad[28];
+        struct @{...@} _kill;
+        struct @{...@} _timer;
+        struct @{...@} _rt;
+        struct @{...@} _sigchld;
+        struct @{...@} _sigfault;
+        struct @{...@} _sigpoll;
+    @} _sifields;
+@}
+(@value{GDBP}) ptype $_siginfo._sifields._sigfault
+type = struct @{
+    void *si_addr;
+@}
+(@value{GDBP}) p $_siginfo._sifields._sigfault.si_addr
+$1 = (void *) 0x7ffff7ff7000
+@end group
+@end smallexample
+
+Depending on target support, @code{$_siginfo} may also be writable.
+
 @node Thread Stops
 @section Stopping and Starting Multi-thread Programs
 
@@ -7348,6 +7397,11 @@ to match the format in which the data was printed.
 @vindex $_exitcode@r{, convenience variable}
 The variable @code{$_exitcode} is automatically set to the exit code when
 the program being debugged terminates.
+
+@item $_siginfo
+@vindex $_siginfo@r{, convenience variable}
+The variable @code{$_siginfo} is bound to extra signal information
+inspection (@pxref{extra signal information}).
 @end table
 
 On HP-UX systems, if you refer to a function or variable name that
@@ -14306,6 +14360,14 @@ are:
 @item @code{write-spu-object}
 @tab @code{qXfer:spu:write}
 @tab @code{info spu}
+
+@item @code{read-siginfo-object}
+@tab @code{qXfer:siginfo:read}
+@tab @code{print $_siginfo}
+
+@item @code{write-siginfo-object}
+@tab @code{qXfer:siginfo:write}
+@tab @code{set $_siginfo}
 
 @item @code{get-thread-local-@*storage-address}
 @tab @code{qGetTLSAddr}
@@ -26879,6 +26941,16 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:siginfo:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
+@item @samp{qXfer:siginfo:write}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{QNonStop}
 @tab No
 @tab @samp{-}
@@ -26938,6 +27010,14 @@ The remote stub understands the @samp{qXfer:spu:read} packet
 @item qXfer:spu:write
 The remote stub understands the @samp{qXfer:spu:write} packet
 (@pxref{qXfer spu write}).
+
+@item qXfer:siginfo:read
+The remote stub understands the @samp{qXfer:siginfo:read} packet
+(@pxref{qXfer siginfo read}).
+
+@item qXfer:siginfo:write
+The remote stub understands the @samp{qXfer:siginfo:write} packet
+(@pxref{qXfer siginfo write}).
 
 @item QNonStop
 The remote stub understands the @samp{QNonStop} packet
@@ -27097,6 +27177,16 @@ annex part of the generic @samp{qXfer} packet must be empty
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 
+@item qXfer:siginfo:read::@var{offset},@var{length}
+@anchor{qXfer siginfo read}
+Read contents of the extra signal information on the target
+system.  The annex part of the generic @samp{qXfer} packet must be
+empty (@pxref{qXfer read}).
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).
+
 @item qXfer:spu:read:@var{annex}:@var{offset},@var{length}
 @anchor{qXfer spu read}
 Read contents of an @code{spufs} file on the target system.  The
@@ -27149,6 +27239,7 @@ the stub, or that the object does not support reading.
 
 @item qXfer:@var{object}:write:@var{annex}:@var{offset}:@var{data}@dots{}
 @cindex write data into object, remote request
+@anchor{qXfer write}
 Write uninterpreted bytes into the target's special data area
 identified by the keyword @var{object}, starting at @var{offset} bytes
 into the data.  @var{data}@dots{} is the binary-encoded data
@@ -27161,6 +27252,16 @@ Here are the specific requests of this form defined so far.  All
 formats, listed below.
 
 @table @samp
+@item qXfer:siginfo:write::@var{offset}:@var{data}@dots{}
+@anchor{qXfer siginfo write}
+Write @var{data} to the extra signal information on the target system.
+The annex part of the generic @samp{qXfer} packet must be
+empty (@pxref{qXfer write}).
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qSupported}).
+
 @item qXfer:spu:write:@var{annex}:@var{offset}:@var{data}@dots{}
 @anchor{qXfer spu write}
 Write @var{data} to an @code{spufs} file on the target system.  The

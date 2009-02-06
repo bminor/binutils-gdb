@@ -1,3 +1,11 @@
+2009-02-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (handle_query): Report qXfer:siginfo:read and
+	qXfer:siginfo:write as supported and handle them.
+	* target.h (struct target_ops) <qxfer_siginfo>: New field.
+	* linux-low.c (linux_xfer_siginfo): New.
+	(linux_target_ops): Set it.
+
 2009-01-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.c (gdbserver_usage): Mention --remote-debug.

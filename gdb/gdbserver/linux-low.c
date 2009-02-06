@@ -2180,6 +2180,44 @@ linux_qxfer_osdata (const char *annex,
   return len;
 }
 
+static int
+linux_xfer_siginfo (const char *annex, unsigned char *readbuf,
+		    unsigned const char *writebuf, CORE_ADDR offset, int len)
+{
+  struct siginfo siginfo;
+  long pid = -1;
+
+  if (current_inferior == NULL)
+    return -1;
+
+  pid = pid_of (get_thread_process (current_inferior));
+
+  if (debug_threads)
+    fprintf (stderr, "%s siginfo for lwp %ld.\n",
+	     readbuf != NULL ? "Reading" : "Writing",
+	     pid);
+
+  if (offset > sizeof (siginfo))
+    return -1;
+
+  if (ptrace (PTRACE_GETSIGINFO, pid, 0, &siginfo) != 0)
+    return -1;
+
+  if (offset + len > sizeof (siginfo))
+    len = sizeof (siginfo) - offset;
+
+  if (readbuf != NULL)
+    memcpy (readbuf, (char *) &siginfo + offset, len);
+  else
+    {
+      memcpy ((char *) &siginfo + offset, writebuf, len);
+      if (ptrace (PTRACE_SETSIGINFO, pid, 0, &siginfo) != 0)
+	return -1;
+    }
+
+  return len;
+}
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
@@ -2213,6 +2251,7 @@ static struct target_ops linux_target_ops = {
   NULL,
   hostio_last_error_from_errno,
   linux_qxfer_osdata,
+  linux_xfer_siginfo,
 };
 
 static void

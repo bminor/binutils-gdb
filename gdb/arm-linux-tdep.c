@@ -36,6 +36,7 @@
 
 #include "arm-tdep.h"
 #include "arm-linux-tdep.h"
+#include "linux-tdep.h"
 #include "glibc-tdep.h"
 
 #include "gdb_string.h"
@@ -647,6 +648,8 @@ arm_linux_init_abi (struct gdbarch_info info,
   /* Core file support.  */
   set_gdbarch_regset_from_core_section (gdbarch,
 					arm_linux_regset_from_core_section);
+
+  set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 }
 
 void

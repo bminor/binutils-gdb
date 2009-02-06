@@ -4804,6 +4804,87 @@ signals_info (char *signum_exp, int from_tty)
 
   printf_filtered (_("\nUse the \"handle\" command to change these tables.\n"));
 }
+
+/* The $_siginfo convenience variable is a bit special.  We don't know
+   for sure the type of the value until we actually have a chance to
+   fetch the data.  The type can change depending on gdbarch, so it it
+   also dependent on which thread you have selected.
+
+     1. making $_siginfo be an internalvar that creates a new value on
+     access.
+
+     2. making the value of $_siginfo be an lval_computed value.  */
+
+/* This function implements the lval_computed support for reading a
+   $_siginfo value.  */
+
+static void
+siginfo_value_read (struct value *v)
+{
+  LONGEST transferred;
+
+  transferred =
+    target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO,
+		 NULL,
+		 value_contents_all_raw (v),
+		 value_offset (v),
+		 TYPE_LENGTH (value_type (v)));
+
+  if (transferred != TYPE_LENGTH (value_type (v)))
+    error (_("Unable to read siginfo"));
+}
+
+/* This function implements the lval_computed support for writing a
+   $_siginfo value.  */
+
+static void
+siginfo_value_write (struct value *v, struct value *fromval)
+{
+  LONGEST transferred;
+
+  transferred = target_write (&current_target,
+			      TARGET_OBJECT_SIGNAL_INFO,
+			      NULL,
+			      value_contents_all_raw (fromval),
+			      value_offset (v),
+			      TYPE_LENGTH (value_type (fromval)));
+
+  if (transferred != TYPE_LENGTH (value_type (fromval)))
+    error (_("Unable to write siginfo"));
+}
+
+static struct lval_funcs siginfo_value_funcs =
+  {
+    siginfo_value_read,
+    siginfo_value_write
+  };
+
+/* Return a new value with the correct type for the siginfo object of
+   the current thread.  Return a void value if there's no object
+   available.  */
+
+struct value *
+siginfo_make_value (struct internalvar *var)
+{
+  struct type *type;
+  struct gdbarch *gdbarch;
+
+  if (target_has_stack
+      && !ptid_equal (inferior_ptid, null_ptid))
+    {
+      gdbarch = get_frame_arch (get_current_frame ());
+
+      if (gdbarch_get_siginfo_type_p (gdbarch))
+	{
+	  type = gdbarch_get_siginfo_type (gdbarch);
+
+	  return allocate_computed_value (type, &siginfo_value_funcs, NULL);
+	}
+    }
+
+  return allocate_value (builtin_type_void);
+}
+
 
 /* Inferior thread state.
    These are details related to the inferior itself, and don't include
@@ -5467,4 +5548,10 @@ Options are 'forward' or 'reverse'."),
 
   observer_attach_thread_ptid_changed (infrun_thread_ptid_changed);
   observer_attach_thread_stop_requested (infrun_thread_stop_requested);
+
+  /* Explicitly create without lookup, since that tries to create a
+     value with a void typed value, and when we get here, gdbarch
+     isn't initialized yet.  At this point, we're quite sure there
+     isn't another convenience variable of the same name.  */
+  create_internalvar_type_lazy ("_siginfo", siginfo_make_value);
 }

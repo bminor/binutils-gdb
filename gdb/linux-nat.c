@@ -3224,13 +3224,61 @@ linux_nat_mourn_inferior (struct target_ops *ops)
 }
 
 static LONGEST
+linux_xfer_siginfo (struct target_ops *ops, enum target_object object,
+                    const char *annex, gdb_byte *readbuf,
+		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+{
+  struct lwp_info *lp;
+  LONGEST n;
+  int pid;
+  struct siginfo siginfo;
+
+  gdb_assert (object == TARGET_OBJECT_SIGNAL_INFO);
+  gdb_assert (readbuf || writebuf);
+
+  pid = GET_LWP (inferior_ptid);
+  if (pid == 0)
+    pid = GET_PID (inferior_ptid);
+
+  if (offset > sizeof (siginfo))
+    return -1;
+
+  errno = 0;
+  ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, &siginfo);
+  if (errno != 0)
+    return -1;
+
+  if (offset + len > sizeof (siginfo))
+    len = sizeof (siginfo) - offset;
+
+  if (readbuf != NULL)
+    memcpy (readbuf, (char *)&siginfo + offset, len);
+  else
+    {
+      memcpy ((char *)&siginfo + offset, writebuf, len);
+      errno = 0;
+      ptrace (PTRACE_SETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, &siginfo);
+      if (errno != 0)
+	return -1;
+    }
+
+  return len;
+}
+
+static LONGEST
 linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
 			const char *annex, gdb_byte *readbuf,
 			const gdb_byte *writebuf,
 			ULONGEST offset, LONGEST len)
 {
-  struct cleanup *old_chain = save_inferior_ptid ();
+  struct cleanup *old_chain;
   LONGEST xfer;
+
+  if (object == TARGET_OBJECT_SIGNAL_INFO)
+    return linux_xfer_siginfo (ops, object, annex, readbuf, writebuf,
+			       offset, len);
+
+  old_chain = save_inferior_ptid ();
 
   if (is_lwp (inferior_ptid))
     inferior_ptid = pid_to_ptid (GET_LWP (inferior_ptid));

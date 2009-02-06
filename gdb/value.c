@@ -901,12 +901,31 @@ create_internalvar (char *name)
   var->name = concat (name, (char *)NULL);
   var->value = allocate_value (builtin_type_void);
   var->endian = gdbarch_byte_order (current_gdbarch);
+  var->make_value = NULL;
   release_value (var->value);
   var->next = internalvars;
   internalvars = var;
   return var;
 }
 
+/* Create an internal variable with name NAME and register FUN as the
+   function that value_of_internalvar uses to create a value whenever
+   this variable is referenced.  NAME should not normally include a
+   dollar sign.  */
+
+struct internalvar *
+create_internalvar_type_lazy (char *name, internalvar_make_value fun)
+{
+  struct internalvar *var;
+  var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
+  var->name = concat (name, (char *)NULL);
+  var->value = NULL;
+  var->make_value = fun;
+  var->endian = gdbarch_byte_order (current_gdbarch);
+  var->next = internalvars;
+  internalvars = var;
+  return var;
+}
 
 /* Look up an internal variable with name NAME.  NAME should not
    normally include a dollar sign.
@@ -933,25 +952,31 @@ value_of_internalvar (struct internalvar *var)
   int i, j;
   gdb_byte temp;
 
-  val = value_copy (var->value);
-  if (value_lazy (val))
-    value_fetch_lazy (val);
-
-  /* If the variable's value is a computed lvalue, we want references
-     to it to produce another computed lvalue, where referencces and
-     assignments actually operate through the computed value's
-     functions.
-
-     This means that internal variables with computed values behave a
-     little differently from other internal variables: assignments to
-     them don't just replace the previous value altogether.  At the
-     moment, this seems like the behavior we want.  */
-  if (var->value->lval == lval_computed)
-    VALUE_LVAL (val) = lval_computed;
+  if (var->make_value != NULL)
+    val = (*var->make_value) (var);
   else
     {
-      VALUE_LVAL (val) = lval_internalvar;
-      VALUE_INTERNALVAR (val) = var;
+      val = value_copy (var->value);
+      if (value_lazy (val))
+	value_fetch_lazy (val);
+
+      /* If the variable's value is a computed lvalue, we want
+	 references to it to produce another computed lvalue, where
+	 referencces and assignments actually operate through the
+	 computed value's functions.
+
+	 This means that internal variables with computed values
+	 behave a little differently from other internal variables:
+	 assignments to them don't just replace the previous value
+	 altogether.  At the moment, this seems like the behavior we
+	 want.  */
+      if (var->value->lval == lval_computed)
+	VALUE_LVAL (val) = lval_computed;
+      else
+	{
+	  VALUE_LVAL (val) = lval_internalvar;
+	  VALUE_INTERNALVAR (val) = var;
+	}
     }
 
   /* Values are always stored in the target's byte order.  When connected to a
@@ -1075,7 +1100,8 @@ preserve_values (struct objfile *objfile)
 	preserve_one_value (cur->values[i], objfile, copied_types);
 
   for (var = internalvars; var; var = var->next)
-    preserve_one_value (var->value, objfile, copied_types);
+    if (var->value)
+      preserve_one_value (var->value, objfile, copied_types);
 
   for (val = values_in_python; val; val = val->next)
     preserve_one_value (val, objfile, copied_types);

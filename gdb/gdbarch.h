@@ -803,6 +803,16 @@ typedef int (gdbarch_target_signal_to_host_ftype) (struct gdbarch *gdbarch, enum
 extern int gdbarch_target_signal_to_host (struct gdbarch *gdbarch, enum target_signal ts);
 extern void set_gdbarch_target_signal_to_host (struct gdbarch *gdbarch, gdbarch_target_signal_to_host_ftype *target_signal_to_host);
 
+/* Extra signal info inspection.
+
+   Return a type suitable to inspect extra signal information. */
+
+extern int gdbarch_get_siginfo_type_p (struct gdbarch *gdbarch);
+
+typedef struct type * (gdbarch_get_siginfo_type_ftype) (struct gdbarch *gdbarch);
+extern struct type * gdbarch_get_siginfo_type (struct gdbarch *gdbarch);
+extern void set_gdbarch_get_siginfo_type (struct gdbarch *gdbarch, gdbarch_get_siginfo_type_ftype *get_siginfo_type);
+
 /* Record architecture-specific information from the symbol table. */
 
 extern int gdbarch_record_special_symbol_p (struct gdbarch *gdbarch);

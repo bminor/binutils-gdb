@@ -193,6 +193,11 @@ struct target_ops
   int (*qxfer_osdata) (const char *annex, unsigned char *readbuf,
 		       unsigned const char *writebuf, CORE_ADDR offset, 
 		       int len);
+
+  /* Read/Write extra signal info.  */
+  int (*qxfer_siginfo) (const char *annex, unsigned char *readbuf,
+			unsigned const char *writebuf,
+			CORE_ADDR offset, int len);
 };
 
 extern struct target_ops *the_target;

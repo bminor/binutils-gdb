@@ -31,6 +31,7 @@
 
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
+#include "linux-tdep.h"
 #include "glibc-tdep.h"
 #include "solib-svr4.h"
 #include "symtab.h"
@@ -469,6 +470,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                            simple_displaced_step_free_closure);
   set_gdbarch_displaced_step_location (gdbarch,
                                        displaced_step_at_entry_point);
+
+  set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
