@@ -2218,18 +2218,15 @@ target_get_osdata (const char *type)
   char *document;
   struct target_ops *t;
 
-  if (target_can_run (&current_target))
-    t = &current_target;
-  else
+  if (current_target.to_stratum == dummy_stratum)
     t = find_default_run_target ("get OS data");
+  else
+    t = current_target.beneath;
 
   if (!t)
     return NULL;
 
-  document = target_read_stralloc (t,
-                                  TARGET_OBJECT_OSDATA,
-                                  type);
-  return document;
+  return target_read_stralloc (t, TARGET_OBJECT_OSDATA, type);
 }
 
 static int

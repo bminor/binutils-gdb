@@ -8674,15 +8674,6 @@ remote_supports_multi_process (void)
   return remote_multi_process_p (rs);
 }
 
-static int
-extended_remote_can_run (void)
-{
-  if (remote_desc != NULL)
-    return 1;
-
-  return 0;
-}
-
 static void
 init_remote_ops (void)
 {
@@ -8768,7 +8759,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   extended_remote_ops.to_detach = extended_remote_detach;
   extended_remote_ops.to_attach = extended_remote_attach;
   extended_remote_ops.to_kill = extended_remote_kill;
-  extended_remote_ops.to_can_run = extended_remote_can_run;
 }
 
 static int
