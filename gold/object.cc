@@ -1181,7 +1181,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
                 == symtab->gc()->referenced_list().end())
               {
                 if (parameters->options().print_gc_sections())
-                  gold_info(_("%s: Removing unused section from '%s'" 
+                  gold_info(_("%s: removing unused section from '%s'" 
                               " in file '%s"),
                             program_name, this->section_name(i).c_str(), 
                             this->name().c_str());

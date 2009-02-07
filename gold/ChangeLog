@@ -1,3 +1,8 @@
+2009-02-06  Ian Lance Taylor  <iant@google.com>
+
+	* object.cc (Sized_relobj::do_layout): Make info message start
+	with lower case letter.
+
 2009-02-06  Mikolaj Zalewski  <mikolajz@google.com>
 
 	* binary.cc: Fix file comment.
