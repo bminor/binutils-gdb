@@ -26,6 +26,10 @@ completions will be "f1" and "f2".
 operators when expanding macros.  It also supports variable-arity
 macros.
 
+* GDB now supports inspecting extra signal information, exported by
+  the new $_siginfo convenience variable.  The feature is currently
+  implemented on linux ARM, i386 and amd64.
+
 * New remote packets
 
 qSearch:memory:
@@ -38,6 +42,10 @@ QStartNoAckMode
 
 qXfer:osdata:read
   Obtains additional operating system information
+
+qXfer:siginfo:read
+qXfer:siginfo:write
+  Read or write additional signal information.
 
 * Removed remote protocol undocumented extension
 

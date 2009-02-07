@@ -1,5 +1,10 @@
 2009-02-07  Pedro Alves  <pedro@codesourcery.com>
 
+	* NEWS: Mention inspecting extra signal information, $_siginfo,
+	and the qXfer:siginfo:read and qXfer:siginfo:write packets.
+
+2009-02-07  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.c (PTRACE_SETSIGINFO): Define if PTRACE_GETSIGINFO
 	isn't defined.
 
