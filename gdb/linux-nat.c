@@ -194,7 +194,8 @@ blocked.  */
 #endif
 
 #ifndef PTRACE_GETSIGINFO
-#define PTRACE_GETSIGINFO    0x4202
+# define PTRACE_GETSIGINFO    0x4202
+# define PTRACE_SETSIGINFO    0x4203
 #endif
 
 /* The single-threaded native GNU/Linux target_ops.  We save a pointer for

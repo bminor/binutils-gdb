@@ -1,3 +1,8 @@
+2009-02-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (PTRACE_SETSIGINFO): Define if PTRACE_GETSIGINFO
+	isn't defined.
+
 2009-02-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* amd64-linux-nat.c (compat_int_t, compat_uptr_t, compat_time_t)
