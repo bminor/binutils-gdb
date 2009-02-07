@@ -1,3 +1,10 @@
+2009-02-07  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Basic Python): Fix change from 2009-02-04.
+	(Commands In Python): Fix COMMAND_* constants in last change.  Use
+	@kbd for interactive input.  Add cross-references and index
+	entries.
+
 2009-02-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Signals): Document $_siginfo.
