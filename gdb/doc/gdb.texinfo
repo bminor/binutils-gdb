@@ -18171,7 +18171,7 @@ History}).  @var{number} indicates which history element to return.
 If @var{number} is negative, then @value{GDBN} will take its absolute value
 and count backward from the last element (i.e., the most recent element) to
 find the value to return.  If @var{number} is zero, then @value{GDBN} will
-return the most recent element.  If the element specified by @value{number}
+return the most recent element.  If the element specified by @var{number}
 doesn't exist in the value history, a @code{RuntimeError} exception will be
 raised.
 
@@ -18353,6 +18353,7 @@ documentation string is provided, the default value ``This command is
 not documented.'' is used.
 @end defmethod
 
+@cindex don't repeat Python command
 @defmethod Command dont_repeat
 By default, a @value{GDBN} command is repeated when the user enters a
 blank line at the command prompt.  A command can suppress this
@@ -18374,11 +18375,13 @@ If this method throws an exception, it is turned into a @value{GDBN}
 @code{error} call.  Otherwise, the return value is ignored.
 @end defmethod
 
+@cindex completion of Python commands
 @defmethod Command complete text word
 This method is called by @value{GDBN} when the user attempts
 completion on this command.  All forms of completion are handled by
-this method, that is, the @key{TAB} and @key{M-?} key bindings, and
-the @code{complete} command.
+this method, that is, the @key{TAB} and @key{M-?} key bindings
+(@pxref{Completion}), and the @code{complete} command (@pxref{Help,
+complete}).
 
 The arguments @var{text} and @var{word} are both strings.  @var{text}
 holds the complete command line up to the cursor's location.
@@ -18406,7 +18409,6 @@ completions.
 @end itemize
 @end defmethod
 
-
 When a new command is registered, it must be declared as a member of
 some general class of commands.  This is used to classify top-level
 commands in the on-line help system; note that prefix commands are not
@@ -18423,18 +18425,18 @@ this category will not be displayed in any of the help categories.
 
 @findex COMMAND_RUNNING
 @findex gdb.COMMAND_RUNNING
-@item COMMAND_RUN
+@item COMMAND_RUNNING
 The command is related to running the inferior.  For example,
 @code{start}, @code{step}, and @code{continue} are in this category.
-Type @code{help running} at the @value{GDBN} prompt to see a list of
+Type @kbd{help running} at the @value{GDBN} prompt to see a list of
 commands in this category.
 
 @findex COMMAND_DATA
 @findex gdb.COMMAND_DATA
-@item COMMAND_VARS
+@item COMMAND_DATA
 The command is related to data or variables.  For example,
 @code{call}, @code{find}, and @code{print} are in this category.  Type
-@code{help data} at the @value{GDBN} prompt to see a list of commands
+@kbd{help data} at the @value{GDBN} prompt to see a list of commands
 in this category.
 
 @findex COMMAND_STACK
@@ -18442,7 +18444,7 @@ in this category.
 @item COMMAND_STACK
 The command has to do with manipulation of the stack.  For example,
 @code{backtrace}, @code{frame}, and @code{return} are in this
-category.  Type @code{help stack} at the @value{GDBN} prompt to see a
+category.  Type @kbd{help stack} at the @value{GDBN} prompt to see a
 list of commands in this category.
 
 @findex COMMAND_FILES
@@ -18450,7 +18452,7 @@ list of commands in this category.
 @item COMMAND_FILES
 This class is used for file-related commands.  For example,
 @code{file}, @code{list} and @code{section} are in this category.
-Type @code{help files} at the @value{GDBN} prompt to see a list of
+Type @kbd{help files} at the @value{GDBN} prompt to see a list of
 commands in this category.
 
 @findex COMMAND_SUPPORT
@@ -18460,31 +18462,31 @@ This should be used for ``support facilities'', generally meaning
 things that are useful to the user when interacting with @value{GDBN},
 but not related to the state of the inferior.  For example,
 @code{help}, @code{make}, and @code{shell} are in this category.  Type
-@code{help support} at the @value{GDBN} prompt to see a list of
+@kbd{help support} at the @value{GDBN} prompt to see a list of
 commands in this category.
 
 @findex COMMAND_STATUS
 @findex gdb.COMMAND_STATUS
-@item COMMAND_INFO
+@item COMMAND_STATUS
 The command is an @samp{info}-related command, that is, related to the
 state of @value{GDBN} itself.  For example, @code{info}, @code{macro},
-and @code{show} are in this category.  Type @code{help status} at the
+and @code{show} are in this category.  Type @kbd{help status} at the
 @value{GDBN} prompt to see a list of commands in this category.
 
 @findex COMMAND_BREAKPOINTS
 @findex gdb.COMMAND_BREAKPOINTS
-@item COMMAND_BREAKPOINT
+@item COMMAND_BREAKPOINTS
 The command has to do with breakpoints.  For example, @code{break},
-@code{clear}, and @code{delete} are in this category.  Type @code{help
+@code{clear}, and @code{delete} are in this category.  Type @kbd{help
 breakpoints} at the @value{GDBN} prompt to see a list of commands in
 this category.
 
 @findex COMMAND_TRACEPOINTS
 @findex gdb.COMMAND_TRACEPOINTS
-@item COMMAND_TRACE
+@item COMMAND_TRACEPOINTS
 The command has to do with tracepoints.  For example, @code{trace},
 @code{actions}, and @code{tfind} are in this category.  Type
-@code{help tracepoints} at the @value{GDBN} prompt to see a list of
+@kbd{help tracepoints} at the @value{GDBN} prompt to see a list of
 commands in this category.
 
 @findex COMMAND_OBSCURE
@@ -18492,7 +18494,7 @@ commands in this category.
 @item COMMAND_OBSCURE
 The command is only used in unusual circumstances, or is not of
 general interest to users.  For example, @code{checkpoint},
-@code{fork}, and @code{stop} are in this category.  Type @code{help
+@code{fork}, and @code{stop} are in this category.  Type @kbd{help
 obscure} at the @value{GDBN} prompt to see a list of commands in this
 category.
 
@@ -18501,10 +18503,9 @@ category.
 @item COMMAND_MAINTENANCE
 The command is only useful to @value{GDBN} maintainers.  The
 @code{maintenance} and @code{flushregs} commands are in this category.
-Type @code{help internals} at the @value{GDBN} prompt to see a list of
+Type @kbd{help internals} at the @value{GDBN} prompt to see a list of
 commands in this category.
 @end table
-
 
 A new command can use a predefined completion function, either by
 specifying it via an argument at initialization, or by returning it
