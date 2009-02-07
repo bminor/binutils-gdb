@@ -1,3 +1,15 @@
+2009-02-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Move lowpc and highpc
+	inside the loop.  Only call addrmap_set_empty if the compilation unit
+	had DW_AT_high_pc and DW_AT_low_pc.  Update call to
+	scan_partial_symbols.
+	(scan_partial_symbols): Take NEED_PC argument and pass it along with
+	LOWPC and HIGHPC.
+	(add_partial_namespace): Take NEED_PC argument and pass it through.
+	(add_partial_subprogram): Take NEED_PC argument.  Update the addrmap
+	if necessary.
+
 2009-02-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* NEWS: Mention inspecting extra signal information, $_siginfo,
