@@ -1,5 +1,7 @@
 2009-02-06  Mikolaj Zalewski  <mikolajz@google.com>
 
+	* binary.cc: Fix file comment.
+
 	* options.h (enum Incremental_disposition): Define.
 	(class General_options): Add new options: --incremental,
 	--incremental_changed, --incremental_unchanged,

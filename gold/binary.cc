@@ -35,7 +35,7 @@
 // Support for reading binary files as input.  These become blobs in
 // the final output.  These files are treated as though they have a
 // single .data section and define three symbols:
-// _binary_FILENAME_start, _binary_FILENAME_end, _binary_FILENAME_end.
+// _binary_FILENAME_start, _binary_FILENAME_end, _binary_FILENAME_size.
 // The FILENAME is the name of the input file, with any
 // non-alphanumeric character changed to an underscore.
 
