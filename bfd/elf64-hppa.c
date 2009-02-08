@@ -1,5 +1,5 @@
 /* Support for HPPA 64-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -182,116 +182,119 @@ struct elf64_hppa_link_hash_table
   ((struct elf64_hppa_link_hash_table *) ((p)->hash))
 
 typedef struct bfd_hash_entry *(*new_hash_entry_func)
-  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 
 static struct bfd_hash_entry *elf64_hppa_new_dyn_hash_entry
-  PARAMS ((struct bfd_hash_entry *entry, struct bfd_hash_table *table,
-	   const char *string));
+  (struct bfd_hash_entry *entry, struct bfd_hash_table *table,
+   const char *string);
+
 static struct bfd_link_hash_table *elf64_hppa_hash_table_create
-  PARAMS ((bfd *abfd));
+  (bfd *abfd);
+
 static struct elf64_hppa_dyn_hash_entry *elf64_hppa_dyn_hash_lookup
-  PARAMS ((struct elf64_hppa_dyn_hash_table *table, const char *string,
-	   bfd_boolean create, bfd_boolean copy));
+  (struct elf64_hppa_dyn_hash_table *table, const char *string,
+   bfd_boolean create, bfd_boolean copy);
+
 static void elf64_hppa_dyn_hash_traverse
-  PARAMS ((struct elf64_hppa_dyn_hash_table *table,
-	   bfd_boolean (*func) (struct elf64_hppa_dyn_hash_entry *, PTR),
-	   PTR info));
+  (struct elf64_hppa_dyn_hash_table *table,
+   bfd_boolean (*func) (struct elf64_hppa_dyn_hash_entry *, void *),
+   void *info);
 
 static const char *get_dyn_name
-  PARAMS ((bfd *, struct elf_link_hash_entry *,
-	   const Elf_Internal_Rela *, char **, size_t *));
+  (bfd *, struct elf_link_hash_entry *,
+   const Elf_Internal_Rela *, char **, size_t *);
 
 /* This must follow the definitions of the various derived linker
    hash tables and shared functions.  */
 #include "elf-hppa.h"
 
 static bfd_boolean elf64_hppa_object_p
-  PARAMS ((bfd *));
+  (bfd *);
 
 static void elf64_hppa_post_process_headers
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 
 static bfd_boolean elf64_hppa_create_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 
 static bfd_boolean elf64_hppa_adjust_dynamic_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+  (struct bfd_link_info *, struct elf_link_hash_entry *);
 
 static bfd_boolean elf64_hppa_mark_milli_and_exported_functions
-  PARAMS ((struct elf_link_hash_entry *, PTR));
+  (struct elf_link_hash_entry *, void *);
 
 static bfd_boolean elf64_hppa_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 
 static bfd_boolean elf64_hppa_link_output_symbol_hook
-  PARAMS ((struct bfd_link_info *, const char *, Elf_Internal_Sym *,
-	   asection *, struct elf_link_hash_entry *));
+  (struct bfd_link_info *, const char *, Elf_Internal_Sym *,
+   asection *, struct elf_link_hash_entry *);
 
 static bfd_boolean elf64_hppa_finish_dynamic_symbol
-  PARAMS ((bfd *, struct bfd_link_info *,
-	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+  (bfd *, struct bfd_link_info *,
+   struct elf_link_hash_entry *, Elf_Internal_Sym *);
 
 static enum elf_reloc_type_class elf64_hppa_reloc_type_class
-  PARAMS ((const Elf_Internal_Rela *));
+  (const Elf_Internal_Rela *);
 
 static bfd_boolean elf64_hppa_finish_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 
 static bfd_boolean elf64_hppa_check_relocs
-  PARAMS ((bfd *, struct bfd_link_info *,
-	   asection *, const Elf_Internal_Rela *));
+  (bfd *, struct bfd_link_info *,
+   asection *, const Elf_Internal_Rela *);
 
 static bfd_boolean elf64_hppa_dynamic_symbol_p
-  PARAMS ((struct elf_link_hash_entry *, struct bfd_link_info *));
+  (struct elf_link_hash_entry *, struct bfd_link_info *);
 
 static bfd_boolean elf64_hppa_mark_exported_functions
-  PARAMS ((struct elf_link_hash_entry *, PTR));
+  (struct elf_link_hash_entry *, void *);
 
 static bfd_boolean elf64_hppa_finalize_opd
-  PARAMS ((struct elf64_hppa_dyn_hash_entry *, PTR));
+  (struct elf64_hppa_dyn_hash_entry *, void *);
 
 static bfd_boolean elf64_hppa_finalize_dlt
-  PARAMS ((struct elf64_hppa_dyn_hash_entry *, PTR));
+  (struct elf64_hppa_dyn_hash_entry *, void *);
 
 static bfd_boolean allocate_global_data_dlt
-  PARAMS ((struct elf64_hppa_dyn_hash_entry *, PTR));
+  (struct elf64_hppa_dyn_hash_entry *, void *);
 
 static bfd_boolean allocate_global_data_plt
-  PARAMS ((struct elf64_hppa_dyn_hash_entry *, PTR));
+  (struct elf64_hppa_dyn_hash_entry *, void *);
 
 static bfd_boolean allocate_global_data_stub
-  PARAMS ((struct elf64_hppa_dyn_hash_entry *, PTR));
+  (struct elf64_hppa_dyn_hash_entry *, void *);
 
 static bfd_boolean allocate_global_data_opd
-  PARAMS ((struct elf64_hppa_dyn_hash_entry *, PTR));
+  (struct elf64_hppa_dyn_hash_entry *, void *);
 
 static bfd_boolean get_reloc_section
-  PARAMS ((bfd *, struct elf64_hppa_link_hash_table *, asection *));
+  (bfd *, struct elf64_hppa_link_hash_table *, asection *);
 
 static bfd_boolean count_dyn_reloc
-  PARAMS ((bfd *, struct elf64_hppa_dyn_hash_entry *,
-	   int, asection *, int, bfd_vma, bfd_vma));
+  (bfd *, struct elf64_hppa_dyn_hash_entry *,
+   int, asection *, int, bfd_vma, bfd_vma);
 
 static bfd_boolean allocate_dynrel_entries
-  PARAMS ((struct elf64_hppa_dyn_hash_entry *, PTR));
+  (struct elf64_hppa_dyn_hash_entry *, void *);
 
 static bfd_boolean elf64_hppa_finalize_dynreloc
-  PARAMS ((struct elf64_hppa_dyn_hash_entry *, PTR));
+  (struct elf64_hppa_dyn_hash_entry *, void *);
 
 static bfd_boolean get_opd
-  PARAMS ((bfd *, struct bfd_link_info *, struct elf64_hppa_link_hash_table *));
+  (bfd *, struct bfd_link_info *, struct elf64_hppa_link_hash_table *);
 
 static bfd_boolean get_plt
-  PARAMS ((bfd *, struct bfd_link_info *, struct elf64_hppa_link_hash_table *));
+  (bfd *, struct bfd_link_info *, struct elf64_hppa_link_hash_table *);
 
 static bfd_boolean get_dlt
-  PARAMS ((bfd *, struct bfd_link_info *, struct elf64_hppa_link_hash_table *));
+  (bfd *, struct bfd_link_info *, struct elf64_hppa_link_hash_table *);
 
 static bfd_boolean get_stub
-  PARAMS ((bfd *, struct bfd_link_info *, struct elf64_hppa_link_hash_table *));
+  (bfd *, struct bfd_link_info *, struct elf64_hppa_link_hash_table *);
 
 static int elf64_hppa_elf_get_symbol_type
-  PARAMS ((Elf_Internal_Sym *, int));
+  (Elf_Internal_Sym *, int);
 
 static bfd_boolean
 elf64_hppa_dyn_hash_table_init (struct elf64_hppa_dyn_hash_table *ht,
@@ -304,10 +307,9 @@ elf64_hppa_dyn_hash_table_init (struct elf64_hppa_dyn_hash_table *ht,
 }
 
 static struct bfd_hash_entry*
-elf64_hppa_new_dyn_hash_entry (entry, table, string)
-     struct bfd_hash_entry *entry;
-     struct bfd_hash_table *table;
-     const char *string;
+elf64_hppa_new_dyn_hash_entry (struct bfd_hash_entry *entry,
+			       struct bfd_hash_table *table,
+			       const char *string)
 {
   struct elf64_hppa_dyn_hash_entry *ret;
   ret = (struct elf64_hppa_dyn_hash_entry *) entry;
@@ -337,8 +339,7 @@ elf64_hppa_new_dyn_hash_entry (entry, table, string)
    linker (without using static variables).  */
 
 static struct bfd_link_hash_table*
-elf64_hppa_hash_table_create (abfd)
-     bfd *abfd;
+elf64_hppa_hash_table_create (bfd *abfd)
 {
   struct elf64_hppa_link_hash_table *ret;
 
@@ -363,10 +364,10 @@ elf64_hppa_hash_table_create (abfd)
 /* Look up an entry in a PA64 ELF linker hash table.  */
 
 static struct elf64_hppa_dyn_hash_entry *
-elf64_hppa_dyn_hash_lookup(table, string, create, copy)
-     struct elf64_hppa_dyn_hash_table *table;
-     const char *string;
-     bfd_boolean create, copy;
+elf64_hppa_dyn_hash_lookup(struct elf64_hppa_dyn_hash_table *table,
+			   const char *string,
+			   bfd_boolean create,
+			   bfd_boolean copy)
 {
   return ((struct elf64_hppa_dyn_hash_entry *)
 	  bfd_hash_lookup (&table->root, string, create, copy));
@@ -375,23 +376,20 @@ elf64_hppa_dyn_hash_lookup(table, string, create, copy)
 /* Traverse a PA64 ELF linker hash table.  */
 
 static void
-elf64_hppa_dyn_hash_traverse (table, func, info)
-     struct elf64_hppa_dyn_hash_table *table;
-     bfd_boolean (*func) PARAMS ((struct elf64_hppa_dyn_hash_entry *, PTR));
-     PTR info;
+elf64_hppa_dyn_hash_traverse (struct elf64_hppa_dyn_hash_table *table,
+	bfd_boolean (*func) (struct elf64_hppa_dyn_hash_entry *, void *),
+        void *info)
 {
-  (bfd_hash_traverse
-   (&table->root,
-    (bfd_boolean (*) PARAMS ((struct bfd_hash_entry *, PTR))) func,
-    info));
+  bfd_hash_traverse (&table->root,
+		     (bfd_boolean (*) (struct bfd_hash_entry *, void *)) func,
+		     info);
 }
 
 /* Return nonzero if ABFD represents a PA2.0 ELF64 file.
 
    Additionally we set the default architecture and machine.  */
 static bfd_boolean
-elf64_hppa_object_p (abfd)
-     bfd *abfd;
+elf64_hppa_object_p (bfd *abfd)
 {
   Elf_Internal_Ehdr * i_ehdrp;
   unsigned int flags;
@@ -471,12 +469,11 @@ elf64_hppa_section_from_shdr (bfd *abfd,
    allocate memory as necessary, possibly reusing PBUF/PLEN.  */
 
 static const char *
-get_dyn_name (abfd, h, rel, pbuf, plen)
-     bfd *abfd;
-     struct elf_link_hash_entry *h;
-     const Elf_Internal_Rela *rel;
-     char **pbuf;
-     size_t *plen;
+get_dyn_name (bfd *abfd,
+	      struct elf_link_hash_entry *h,
+	      const Elf_Internal_Rela *rel,
+	      char **pbuf,
+	      size_t *plen)
 {
   asection *sec = abfd->sections;
   size_t nlen, tlen;
@@ -529,10 +526,9 @@ get_dyn_name (abfd, h, rel, pbuf, plen)
    a suitable section for holding relocs in the output BFD for a link.  */
 
 static bfd_boolean
-get_reloc_section (abfd, hppa_info, sec)
-     bfd *abfd;
-     struct elf64_hppa_link_hash_table *hppa_info;
-     asection *sec;
+get_reloc_section (bfd *abfd,
+		   struct elf64_hppa_link_hash_table *hppa_info,
+		   asection *sec)
 {
   const char *srel_name;
   asection *srel;
@@ -581,14 +577,13 @@ get_reloc_section (abfd, hppa_info, sec)
    output file.  */
 
 static bfd_boolean
-count_dyn_reloc (abfd, dyn_h, type, sec, sec_symndx, offset, addend)
-     bfd *abfd;
-     struct elf64_hppa_dyn_hash_entry *dyn_h;
-     int type;
-     asection *sec;
-     int sec_symndx;
-     bfd_vma offset;
-     bfd_vma addend;
+count_dyn_reloc (bfd *abfd,
+		 struct elf64_hppa_dyn_hash_entry *dyn_h,
+		 int type,
+		 asection *sec,
+	         int sec_symndx,
+	         bfd_vma offset,
+		 bfd_vma addend)
 {
   struct elf64_hppa_dyn_reloc_entry *rent;
 
@@ -612,11 +607,10 @@ count_dyn_reloc (abfd, dyn_h, type, sec, sec_symndx, offset, addend)
    referenced symbol needs.  */
 
 static bfd_boolean
-elf64_hppa_check_relocs (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+elf64_hppa_check_relocs (bfd *abfd,
+			 struct bfd_link_info *info,
+			 asection *sec,
+			 const Elf_Internal_Rela *relocs)
 {
   struct elf64_hppa_link_hash_table *hppa_info;
   const Elf_Internal_Rela *relend;
@@ -986,9 +980,8 @@ struct elf64_hppa_allocate_data
 /* Should we do dynamic things to this symbol?  */
 
 static bfd_boolean
-elf64_hppa_dynamic_symbol_p (h, info)
-     struct elf_link_hash_entry *h;
-     struct bfd_link_info *info;
+elf64_hppa_dynamic_symbol_p (struct elf_link_hash_entry *h,
+			     struct bfd_link_info *info)
 {
   /* ??? What, if anything, needs to happen wrt STV_PROTECTED symbols
      and relocations that retrieve a function descriptor?  Assume the
@@ -1009,9 +1002,8 @@ elf64_hppa_dynamic_symbol_p (h, info)
    entries in .opd for them.  */
 
 static bfd_boolean
-elf64_hppa_mark_exported_functions (h, data)
-     struct elf_link_hash_entry *h;
-     PTR data;
+elf64_hppa_mark_exported_functions (struct elf_link_hash_entry *h,
+				    void *data)
 {
   struct bfd_link_info *info = (struct bfd_link_info *)data;
   struct elf64_hppa_link_hash_table *hppa_info;
@@ -1051,9 +1043,8 @@ elf64_hppa_mark_exported_functions (h, data)
 /* Allocate space for a DLT entry.  */
 
 static bfd_boolean
-allocate_global_data_dlt (dyn_h, data)
-     struct elf64_hppa_dyn_hash_entry *dyn_h;
-     PTR data;
+allocate_global_data_dlt (struct elf64_hppa_dyn_hash_entry *dyn_h,
+			  void *data)
 {
   struct elf64_hppa_allocate_data *x = (struct elf64_hppa_allocate_data *)data;
 
@@ -1087,9 +1078,8 @@ allocate_global_data_dlt (dyn_h, data)
 /* Allocate space for a DLT.PLT entry.  */
 
 static bfd_boolean
-allocate_global_data_plt (dyn_h, data)
-     struct elf64_hppa_dyn_hash_entry *dyn_h;
-     PTR data;
+allocate_global_data_plt (struct elf64_hppa_dyn_hash_entry *dyn_h,
+			  void *data)
 {
   struct elf64_hppa_allocate_data *x = (struct elf64_hppa_allocate_data *)data;
 
@@ -1113,9 +1103,8 @@ allocate_global_data_plt (dyn_h, data)
 /* Allocate space for a STUB entry.  */
 
 static bfd_boolean
-allocate_global_data_stub (dyn_h, data)
-     struct elf64_hppa_dyn_hash_entry *dyn_h;
-     PTR data;
+allocate_global_data_stub (struct elf64_hppa_dyn_hash_entry *dyn_h,
+			   void *data)
 {
   struct elf64_hppa_allocate_data *x = (struct elf64_hppa_allocate_data *)data;
 
@@ -1136,9 +1125,8 @@ allocate_global_data_stub (dyn_h, data)
 /* Allocate space for a FPTR entry.  */
 
 static bfd_boolean
-allocate_global_data_opd (dyn_h, data)
-     struct elf64_hppa_dyn_hash_entry *dyn_h;
-     PTR data;
+allocate_global_data_opd (struct elf64_hppa_dyn_hash_entry *dyn_h,
+			  void *data)
 {
   struct elf64_hppa_allocate_data *x = (struct elf64_hppa_allocate_data *)data;
 
@@ -1223,9 +1211,8 @@ allocate_global_data_opd (dyn_h, data)
    EI_ABIVERSION may not be strictly necessary.  */
 
 static void
-elf64_hppa_post_process_headers (abfd, link_info)
-     bfd * abfd;
-     struct bfd_link_info * link_info ATTRIBUTE_UNUSED;
+elf64_hppa_post_process_headers (bfd *abfd,
+			 struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
 {
   Elf_Internal_Ehdr * i_ehdrp;
 
@@ -1241,10 +1228,9 @@ elf64_hppa_post_process_headers (abfd, link_info)
    of a procedure, thus ensuring a unique address for each procedure.  */
 
 static bfd_boolean
-get_opd (abfd, info, hppa_info)
-     bfd *abfd;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     struct elf64_hppa_link_hash_table *hppa_info;
+get_opd (bfd *abfd,
+	 struct bfd_link_info *info ATTRIBUTE_UNUSED,
+	 struct elf64_hppa_link_hash_table *hppa_info)
 {
   asection *opd;
   bfd *dynobj;
@@ -1278,10 +1264,9 @@ get_opd (abfd, info, hppa_info)
 /* Create the PLT section.  */
 
 static bfd_boolean
-get_plt (abfd, info, hppa_info)
-     bfd *abfd;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     struct elf64_hppa_link_hash_table *hppa_info;
+get_plt (bfd *abfd,
+	 struct bfd_link_info *info ATTRIBUTE_UNUSED,
+	 struct elf64_hppa_link_hash_table *hppa_info)
 {
   asection *plt;
   bfd *dynobj;
@@ -1315,10 +1300,9 @@ get_plt (abfd, info, hppa_info)
 /* Create the DLT section.  */
 
 static bfd_boolean
-get_dlt (abfd, info, hppa_info)
-     bfd *abfd;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     struct elf64_hppa_link_hash_table *hppa_info;
+get_dlt (bfd *abfd,
+	 struct bfd_link_info *info ATTRIBUTE_UNUSED,
+	 struct elf64_hppa_link_hash_table *hppa_info)
 {
   asection *dlt;
   bfd *dynobj;
@@ -1352,10 +1336,9 @@ get_dlt (abfd, info, hppa_info)
 /* Create the stubs section.  */
 
 static bfd_boolean
-get_stub (abfd, info, hppa_info)
-     bfd *abfd;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     struct elf64_hppa_link_hash_table *hppa_info;
+get_stub (bfd *abfd,
+	  struct bfd_link_info *info ATTRIBUTE_UNUSED,
+	  struct elf64_hppa_link_hash_table *hppa_info)
 {
   asection *stub;
   bfd *dynobj;
@@ -1425,9 +1408,8 @@ get_stub (abfd, info, hppa_info)
 	EPLT relocations for symbols exported from shared libraries.  */
 
 static bfd_boolean
-elf64_hppa_create_dynamic_sections (abfd, info)
-     bfd *abfd;
-     struct bfd_link_info *info;
+elf64_hppa_create_dynamic_sections (bfd *abfd,
+				    struct bfd_link_info *info)
 {
   asection *s;
 
@@ -1494,9 +1476,8 @@ elf64_hppa_create_dynamic_sections (abfd, info)
    to be dynamic.  */
 
 static bfd_boolean
-allocate_dynrel_entries (dyn_h, data)
-     struct elf64_hppa_dyn_hash_entry *dyn_h;
-     PTR data;
+allocate_dynrel_entries (struct elf64_hppa_dyn_hash_entry *dyn_h,
+			 void *data)
 {
   struct elf64_hppa_allocate_data *x = (struct elf64_hppa_allocate_data *)data;
   struct elf64_hppa_link_hash_table *hppa_info;
@@ -1566,9 +1547,8 @@ allocate_dynrel_entries (dyn_h, data)
    regular object.  */
 
 static bfd_boolean
-elf64_hppa_adjust_dynamic_symbol (info, h)
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     struct elf_link_hash_entry *h;
+elf64_hppa_adjust_dynamic_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+				  struct elf_link_hash_entry *h)
 {
   /* ??? Undefined symbols with PLT entries should be re-defined
      to be the PLT entry.  */
@@ -1601,9 +1581,8 @@ elf64_hppa_adjust_dynamic_symbol (info, h)
    elf64_hppa_mark_exported_functions is called.  */
 
 static bfd_boolean
-elf64_hppa_mark_milli_and_exported_functions (h, data)
-     struct elf_link_hash_entry *h;
-     PTR data;
+elf64_hppa_mark_milli_and_exported_functions (struct elf_link_hash_entry *h,
+					      void *data)
 {
   struct bfd_link_info *info = (struct bfd_link_info *)data;
   struct elf_link_hash_entry *elf = h;
@@ -1629,9 +1608,8 @@ elf64_hppa_mark_milli_and_exported_functions (h, data)
    the contents of our special sections.  */
 
 static bfd_boolean
-elf64_hppa_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
+elf64_hppa_size_dynamic_sections (bfd *output_bfd,
+				  struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *s;
@@ -1883,12 +1861,11 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
    table.  Ick.  */
 
 static bfd_boolean
-elf64_hppa_link_output_symbol_hook (info, name, sym, input_sec, h)
-     struct bfd_link_info *info;
-     const char *name;
-     Elf_Internal_Sym *sym;
-     asection *input_sec ATTRIBUTE_UNUSED;
-     struct elf_link_hash_entry *h;
+elf64_hppa_link_output_symbol_hook (struct bfd_link_info *info,
+				    const char *name,
+				    Elf_Internal_Sym *sym,
+				    asection *input_sec ATTRIBUTE_UNUSED,
+				    struct elf_link_hash_entry *h)
 {
   struct elf64_hppa_link_hash_table *hppa_info;
   struct elf64_hppa_dyn_hash_entry *dyn_h;
@@ -1926,11 +1903,10 @@ elf64_hppa_link_output_symbol_hook (info, name, sym, input_sec, h)
    dynamic sections here.  */
 
 static bfd_boolean
-elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
-     struct elf_link_hash_entry *h;
-     Elf_Internal_Sym *sym;
+elf64_hppa_finish_dynamic_symbol (bfd *output_bfd,
+				  struct bfd_link_info *info,
+				  struct elf_link_hash_entry *h,
+				  Elf_Internal_Sym *sym)
 {
   asection *stub, *splt, *sdlt, *sopd, *spltrel, *sdltrel;
   struct elf64_hppa_link_hash_table *hppa_info;
@@ -2101,9 +2077,8 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
    exports.  Initialize the FPTR entries.  */
 
 static bfd_boolean
-elf64_hppa_finalize_opd (dyn_h, data)
-     struct elf64_hppa_dyn_hash_entry *dyn_h;
-     PTR data;
+elf64_hppa_finalize_opd (struct elf64_hppa_dyn_hash_entry *dyn_h,
+			 void *data)
 {
   struct bfd_link_info *info = (struct bfd_link_info *)data;
   struct elf64_hppa_link_hash_table *hppa_info;
@@ -2221,9 +2196,8 @@ elf64_hppa_finalize_opd (dyn_h, data)
    we can not depend on finish_dynamic_symbol to initialize the .dlt.  */
 
 static bfd_boolean
-elf64_hppa_finalize_dlt (dyn_h, data)
-     struct elf64_hppa_dyn_hash_entry *dyn_h;
-     PTR data;
+elf64_hppa_finalize_dlt (struct elf64_hppa_dyn_hash_entry *dyn_h,
+			 void *data)
 {
   struct bfd_link_info *info = (struct bfd_link_info *)data;
   struct elf64_hppa_link_hash_table *hppa_info;
@@ -2315,9 +2289,8 @@ elf64_hppa_finalize_dlt (dyn_h, data)
    for dynamic functions used to initialize static data.  */
 
 static bfd_boolean
-elf64_hppa_finalize_dynreloc (dyn_h, data)
-     struct elf64_hppa_dyn_hash_entry *dyn_h;
-     PTR data;
+elf64_hppa_finalize_dynreloc (struct elf64_hppa_dyn_hash_entry *dyn_h,
+			      void *data)
 {
   struct bfd_link_info *info = (struct bfd_link_info *)data;
   struct elf64_hppa_link_hash_table *hppa_info;
@@ -2432,8 +2405,7 @@ elf64_hppa_finalize_dynreloc (dyn_h, data)
    dynamic linker, before writing them out.  */
 
 static enum elf_reloc_type_class
-elf64_hppa_reloc_type_class (rela)
-     const Elf_Internal_Rela *rela;
+elf64_hppa_reloc_type_class (const Elf_Internal_Rela *rela)
 {
   if (ELF64_R_SYM (rela->r_info) == 0)
     return reloc_class_relative;
@@ -2452,9 +2424,8 @@ elf64_hppa_reloc_type_class (rela)
 /* Finish up the dynamic sections.  */
 
 static bfd_boolean
-elf64_hppa_finish_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
+elf64_hppa_finish_dynamic_sections (bfd *output_bfd,
+				    struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *sdyn;
@@ -2638,7 +2609,7 @@ elf64_hppa_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 
 static int
 elf64_hppa_additional_program_headers (bfd *abfd,
-				       struct bfd_link_info *info ATTRIBUTE_UNUSED)
+				struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   asection *s;
 
@@ -2718,9 +2689,8 @@ elf64_hppa_modify_segment_map (bfd *abfd,
 /* Called when writing out an object file to decide the type of a
    symbol.  */
 static int
-elf64_hppa_elf_get_symbol_type (elf_sym, type)
-     Elf_Internal_Sym *elf_sym;
-     int type;
+elf64_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym,
+				int type)
 {
   if (ELF_ST_TYPE (elf_sym->st_info) == STT_PARISC_MILLI)
     return STT_PARISC_MILLI;
