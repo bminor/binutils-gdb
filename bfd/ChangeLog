@@ -1,3 +1,11 @@
+2009-02-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_find_overlays): Call bfd_set_error on errors.
+	(find_function): Likewise.
+	(pasted_function): Don't error if no prior function found.
+	(discover_functions): Revert 2008-12-10 change.  Extend first
+	function range to start of section.
+
 2009-02-08  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf64-hppa.c: Remove PARAMS macro.  Replace PTR with void *.  Convert

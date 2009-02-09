@@ -686,6 +686,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 		  info->callbacks->einfo (_("%X%P: overlay section %A "
 					    "does not start on a cache line.\n"),
 					  s);
+		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
 	      else if (s->size > htab->params->line_size)
@@ -693,6 +694,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 		  info->callbacks->einfo (_("%X%P: overlay section %A "
 					    "is larger than a cache line.\n"),
 					  s);
+		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
 
@@ -712,6 +714,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 	      info->callbacks->einfo (_("%X%P: overlay section %A "
 					"is not in cache area.\n"),
 				      alloc_sec[i-1]);
+	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
 	  else
@@ -752,6 +755,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 						"and %A do not start at the "
 						"same address.\n"),
 					      s0, s);
+		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;
 		    }
 		  if (ovl_end < s->vma + s->size)
@@ -2473,6 +2477,7 @@ find_function (asection *sec, bfd_vma offset, struct bfd_link_info *info)
     }
   info->callbacks->einfo (_("%A:0x%v not found in function table\n"),
 			  sec, offset);
+  bfd_set_error (bfd_error_bad_value);
   return NULL;
 }
 
@@ -2744,7 +2749,7 @@ mark_functions_via_relocs (asection *sec,
    These sections are pasted together to form a single function.  */
 
 static bfd_boolean
-pasted_function (asection *sec, struct bfd_link_info *info)
+pasted_function (asection *sec)
 {
   struct bfd_link_order *l;
   struct _spu_elf_section_data *sec_data;
@@ -2793,8 +2798,9 @@ pasted_function (asection *sec, struct bfd_link_info *info)
 	fun_start = &sinfo->fun[sinfo->num_fun - 1];
     }
 
-  info->callbacks->einfo (_("%A link_order not found\n"), sec);
-  return FALSE;
+  /* Don't return an error if we did not find a function preceding this
+     section.  The section may have incorrect flags.  */
+  return TRUE;
 }
 
 /* Map address ranges in code sections to functions.  */
@@ -2818,7 +2824,6 @@ discover_functions (struct bfd_link_info *info)
   sec_arr = bfd_zmalloc (bfd_idx * sizeof (*sec_arr));
   if (sec_arr == NULL)
     return FALSE;
-
   
   for (ibfd = info->input_bfds, bfd_idx = 0;
        ibfd != NULL;
@@ -2873,8 +2878,7 @@ discover_functions (struct bfd_link_info *info)
       sec_arr[bfd_idx] = psecs;
       for (psy = psyms, p = psecs, sy = syms; sy < syms + symcount; ++p, ++sy)
 	if (ELF_ST_TYPE (sy->st_info) == STT_NOTYPE
-	    || ELF_ST_TYPE (sy->st_info) == STT_FUNC
-	    || ELF_ST_TYPE (sy->st_info) == STT_SECTION)
+	    || ELF_ST_TYPE (sy->st_info) == STT_FUNC)
 	  {
 	    asection *s;
 
@@ -3004,7 +3008,7 @@ discover_functions (struct bfd_link_info *info)
 
 		sec_data = spu_elf_section_data (sec);
 		sinfo = sec_data->u.i.stack_info;
-		if (sinfo != NULL)
+		if (sinfo != NULL && sinfo->num_fun != 0)
 		  {
 		    int fun_idx;
 		    bfd_vma hi = sec->size;
@@ -3014,10 +3018,12 @@ discover_functions (struct bfd_link_info *info)
 			sinfo->fun[fun_idx].hi = hi;
 			hi = sinfo->fun[fun_idx].lo;
 		      }
+
+		    sinfo->fun[0].lo = 0;
 		  }
 		/* No symbols in this section.  Must be .init or .fini
 		   or something similar.  */
-		else if (!pasted_function (sec, info))
+		else if (!pasted_function (sec))
 		  return FALSE;
 	      }
 	}
