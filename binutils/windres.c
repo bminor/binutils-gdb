@@ -1102,7 +1102,7 @@ set_endianess (bfd *abfd, const char *target)
 
 	if (hyp != NULL)
 	  {
-	    tname = hyp + 1;
+	    tname = ++hyp;
 
 	    /* Make sure we dectect architecture names
 	       for triplets like "pe-arm-wince-little".  */
