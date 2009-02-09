@@ -6225,8 +6225,7 @@ lang_process (void)
   ldemul_finish ();
 
   /* Make sure that the section addresses make sense.  */
-  if (! link_info.relocatable
-      && command_line.check_section_addresses)
+  if (command_line.check_section_addresses)
     lang_check_section_addresses ();
 
   lang_end ();

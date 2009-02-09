@@ -1,3 +1,9 @@
+2009-02-09  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Missing piece of 2009-01-26 commit
+	* ldlang.c (lang_process): Don't consider relocatable flag when
+	checking for overlap.
+
 2009-02-05  Joseph Myers  <joseph@codesourcery.com>
 
 	* emulparams/m68kelf.sh: Add newline at end of file.
@@ -45,8 +51,6 @@
 
 	* lexsup.c (parse_args): Set check_section_addresses to 1 or 0.
 	* ld.h (args_type): Make check_section_addresses a char.
-	ldlang.c (lang_process): Don't consider relocatable flag when
-	checking for overlap.
 	* ldmain.c (main): Default check_section_addresses to -1. Check it
 	for relocatable links.
 	* ld.texinfo (--check-sections): Update documentation.
