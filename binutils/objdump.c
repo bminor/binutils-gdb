@@ -199,7 +199,9 @@ usage (FILE *stream, int status)
   -g, --debugging          Display debug information in object file\n\
   -e, --debugging-tags     Display debug information using ctags style\n\
   -G, --stabs              Display (in raw form) any STABS info in the file\n\
-  -W, --dwarf              Display DWARF info in the file\n\
+  -W[lLiaprmfFsoR] or\n\
+  --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n\
+                           Display DWARF info in the file\n\
   -t, --syms               Display the contents of the symbol table(s)\n\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\
   -r, --reloc              Display the relocation entries in the file\n\
@@ -254,6 +256,7 @@ enum option_values
     OPTION_ENDIAN=150,
     OPTION_START_ADDRESS,
     OPTION_STOP_ADDRESS,
+    OPTION_DWARF,
     OPTION_PREFIX,
     OPTION_PREFIX_STRIP,
     OPTION_ADJUST_VMA
@@ -293,7 +296,7 @@ static struct option long_options[]=
   {"source", no_argument, NULL, 'S'},
   {"special-syms", no_argument, &dump_special_syms, 1},
   {"include", required_argument, NULL, 'I'},
-  {"dwarf", no_argument, NULL, 'W'},
+  {"dwarf", optional_argument, NULL, OPTION_DWARF},
   {"stabs", no_argument, NULL, 'G'},
   {"start-address", required_argument, NULL, OPTION_START_ADDRESS},
   {"stop-address", required_argument, NULL, OPTION_STOP_ADDRESS},
@@ -2210,8 +2213,10 @@ dump_dwarf_section (bfd *abfd, asection *section,
     match = name;
 
   for (i = 0; i < max; i++)
-    if (strcmp (debug_displays [i].section.uncompressed_name, match) == 0
-        || strcmp (debug_displays [i].section.compressed_name, match) == 0)
+    if ((strcmp (debug_displays [i].section.uncompressed_name, match) == 0
+	 || strcmp (debug_displays [i].section.compressed_name, match) == 0)
+	&& debug_displays [i].enabled != NULL
+	&& *debug_displays [i].enabled)
       {
 	if (!debug_displays [i].eh_frame)
 	  {
@@ -3148,7 +3153,8 @@ main (int argc, char **argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "pib:m:M:VvCdDlfFaHhrRtTxsSI:j:wE:zgeGW",
+  while ((c = getopt_long (argc, argv,
+			   "pib:m:M:VvCdDlfFaHhrRtTxsSI:j:wE:zgeGW::",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -3311,16 +3317,18 @@ main (int argc, char **argv)
 	case 'W':
 	  dump_dwarf_section_info = TRUE;
 	  seenflag = TRUE;
-	  do_debug_info = 1;
-	  do_debug_abbrevs = 1;
-	  do_debug_lines = 1;
-	  do_debug_pubnames = 1;
-	  do_debug_aranges = 1;
-	  do_debug_ranges = 1;
-	  do_debug_frames = 1;
-	  do_debug_macinfo = 1;
-	  do_debug_str = 1;
-	  do_debug_loc = 1;
+	  if (optarg)
+	    dwarf_select_sections_by_letters (optarg);
+	  else
+	    dwarf_select_sections_all ();
+	  break;
+	case OPTION_DWARF:
+	  dump_dwarf_section_info = TRUE;
+	  seenflag = TRUE;
+	  if (optarg)
+	    dwarf_select_sections_by_names (optarg);
+	  else
+	    dwarf_select_sections_all ();
 	  break;
 	case 'G':
 	  dump_stab_section_info = TRUE;

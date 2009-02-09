@@ -44,7 +44,6 @@ int eh_addr_size;
 int do_debug_info;
 int do_debug_abbrevs;
 int do_debug_lines;
-int do_debug_lines_decoded;
 int do_debug_pubnames;
 int do_debug_aranges;
 int do_debug_ranges;
@@ -54,6 +53,10 @@ int do_debug_macinfo;
 int do_debug_str;
 int do_debug_loc;
 int do_wide;
+
+/* Values for do_debug_lines.  */
+#define FLAG_DEBUG_LINES_RAW	 1
+#define FLAG_DEBUG_LINES_DECODED 2
 
 dwarf_vma (*byte_get) (unsigned char *, int);
 
@@ -2781,8 +2784,8 @@ display_debug_lines (struct dwarf_section *section, void *file)
 {
   unsigned char *data = section->start;
   unsigned char *end = data + section->size;
-  int retValRaw = 0;
-  int retValDecoded = 0;
+  int retValRaw = 1;
+  int retValDecoded = 1;
 
   if (load_debug_info (file) == 0)
     {
@@ -2791,14 +2794,13 @@ display_debug_lines (struct dwarf_section *section, void *file)
       return 0;
     }
 
-  if (do_debug_lines)
+  if (do_debug_lines & FLAG_DEBUG_LINES_RAW)
     retValRaw = display_debug_lines_raw (section, data, end);
 
-  if (do_debug_lines_decoded)
+  if (do_debug_lines & FLAG_DEBUG_LINES_DECODED)
     retValDecoded = display_debug_lines_decoded (section, data, end);
 
-  if ((do_debug_lines && !retValRaw)
-      || (do_debug_lines_decoded && !retValDecoded))
+  if (!retValRaw || !retValDecoded)
     return 0;
 
   return 1;
@@ -4624,38 +4626,185 @@ free_debug_memory (void)
     }
 }
 
+void
+dwarf_select_sections_by_names (const char *names)
+{
+  typedef struct
+  {
+    const char * option;
+    int *        variable;
+    int val;
+  }
+  debug_dump_long_opts;
+
+  static const debug_dump_long_opts opts_table [] =
+    {
+      /* Please keep this table alpha- sorted.  */
+      { "Ranges", & do_debug_ranges, 1 },
+      { "abbrev", & do_debug_abbrevs, 1 },
+      { "aranges", & do_debug_aranges, 1 },
+      { "frames", & do_debug_frames, 1 },
+      { "frames-interp", & do_debug_frames_interp, 1 },
+      { "info", & do_debug_info, 1 },
+      { "line", & do_debug_lines, FLAG_DEBUG_LINES_RAW }, /* For backwards compatibility.  */
+      { "rawline", & do_debug_lines, FLAG_DEBUG_LINES_RAW },
+      { "decodedline", & do_debug_lines, FLAG_DEBUG_LINES_DECODED },
+      { "loc",  & do_debug_loc, 1 },
+      { "macro", & do_debug_macinfo, 1 },
+      { "pubnames", & do_debug_pubnames, 1 },
+      /* This entry is for compatability
+	 with earlier versions of readelf.  */
+      { "ranges", & do_debug_aranges, 1 },
+      { "str", & do_debug_str, 1 },
+      { NULL, NULL, 0 }
+    };
+
+  const char *p;
+  
+  p = names;
+  while (*p)
+    {
+      const debug_dump_long_opts * entry;
+      
+      for (entry = opts_table; entry->option; entry++)
+	{
+	  size_t len = strlen (entry->option);
+	  
+	  if (strncmp (p, entry->option, len) == 0
+	      && (p[len] == ',' || p[len] == '\0'))
+	    {
+	      * entry->variable |= entry->val;
+	      
+	      /* The --debug-dump=frames-interp option also
+		 enables the --debug-dump=frames option.  */
+	      if (do_debug_frames_interp)
+		do_debug_frames = 1;
+
+	      p += len;
+	      break;
+	    }
+	}
+      
+      if (entry->option == NULL)
+	{
+	  warn (_("Unrecognized debug option '%s'\n"), p);
+	  p = strchr (p, ',');
+	  if (p == NULL)
+	    break;
+	}
+      
+      if (*p == ',')
+	p++;
+    }
+}
+
+void
+dwarf_select_sections_by_letters (const char *letters)
+{
+  unsigned int index = 0;
+
+  while (letters[index])
+    switch (letters[index++])
+      {
+      case 'i':
+	do_debug_info = 1;
+	break;
+	
+      case 'a':
+	do_debug_abbrevs = 1;
+	break;
+	
+      case 'l':
+	do_debug_lines |= FLAG_DEBUG_LINES_RAW;
+	break;
+	
+      case 'L':
+	do_debug_lines |= FLAG_DEBUG_LINES_DECODED;
+	break;
+	
+      case 'p':
+	do_debug_pubnames = 1;
+	break;
+	
+      case 'r':
+	do_debug_aranges = 1;
+	break;
+	
+      case 'R':
+	do_debug_ranges = 1;
+	break;
+	
+      case 'F':
+	do_debug_frames_interp = 1;
+      case 'f':
+	do_debug_frames = 1;
+	break;
+	
+      case 'm':
+	do_debug_macinfo = 1;
+	break;
+	
+      case 's':
+	do_debug_str = 1;
+	break;
+	
+      case 'o':
+	do_debug_loc = 1;
+	break;
+	
+      default:
+	warn (_("Unrecognized debug option '%s'\n"), optarg);
+	break;
+      }
+}
+
+void
+dwarf_select_sections_all (void)
+{
+  do_debug_info = 1;
+  do_debug_abbrevs = 1;
+  do_debug_lines = FLAG_DEBUG_LINES_RAW;
+  do_debug_pubnames = 1;
+  do_debug_aranges = 1;
+  do_debug_ranges = 1;
+  do_debug_frames = 1;
+  do_debug_macinfo = 1;
+  do_debug_str = 1;
+  do_debug_loc = 1;
+}
+
 struct dwarf_section_display debug_displays[] =
 {
   { { ".debug_abbrev",		".zdebug_abbrev",	NULL,	NULL,	0,	0 },
-    display_debug_abbrev,		0,	0 },
+    display_debug_abbrev,		&do_debug_abbrevs,	0,	0 },
   { { ".debug_aranges",		".zdebug_aranges",	NULL,	NULL,	0,	0 },
-    display_debug_aranges,		0,	0 },
+    display_debug_aranges,		&do_debug_aranges,	0,	0 },
   { { ".debug_frame",		".zdebug_frame",	NULL,	NULL,	0,	0 },
-    display_debug_frames,		1,	0 },
+    display_debug_frames,		&do_debug_frames,	1,	0 },
   { { ".debug_info",		".zdebug_info",		NULL,	NULL,	0,	0 },
-    display_debug_info,			1,	0 },
+    display_debug_info,			&do_debug_info,		1,	0 },
   { { ".debug_line",		".zdebug_line",		NULL,	NULL,	0,	0 },
-    display_debug_lines,		0,	0 },
+    display_debug_lines,		&do_debug_lines,	0,	0 },
   { { ".debug_pubnames",	".zdebug_pubnames",	NULL,	NULL,	0,	0 },
-    display_debug_pubnames,		0,	0 },
+    display_debug_pubnames,		&do_debug_pubnames,	0,	0 },
   { { ".eh_frame",		"",			NULL,	NULL,	0,	0 },
-    display_debug_frames,		1,	1 },
+    display_debug_frames,		&do_debug_frames,	1,	1 },
   { { ".debug_macinfo",		".zdebug_macinfo",	NULL,	NULL,	0,	0 },
-    display_debug_macinfo,		0,	0 },
+    display_debug_macinfo,		&do_debug_macinfo,	0,	0 },
   { { ".debug_str",		".zdebug_str",		NULL,	NULL,	0,	0 },
-    display_debug_str,			0,	0 },
+    display_debug_str,			&do_debug_str,		0,	0 },
   { { ".debug_loc",		".zdebug_loc",		NULL,	NULL,	0,	0 },
-    display_debug_loc,			0,	0 },
+    display_debug_loc,			&do_debug_loc,		0,	0 },
   { { ".debug_pubtypes",	".zdebug_pubtypes",	NULL,	NULL,	0,	0 },
-    display_debug_pubnames,		0,	0 },
+    display_debug_pubnames,		&do_debug_pubnames,	0,	0 },
   { { ".debug_ranges",		".zdebug_ranges",	NULL,	NULL,	0,	0 },
-    display_debug_ranges,		0,	0 },
+    display_debug_ranges,		&do_debug_ranges,	0,	0 },
   { { ".debug_static_func",	".zdebug_static_func",	NULL,	NULL,	0,	0 },
-    display_debug_not_supported,	0,	0 },
+    display_debug_not_supported,	NULL,			0,	0 },
   { { ".debug_static_vars",	".zdebug_static_vars",	NULL,	NULL,	0,	0 },
-    display_debug_not_supported,	0,	0 },
-  { { ".debug_types",	".zdebug_types",		NULL,	NULL,	0,	0 },
-    display_debug_not_supported,	0,	0 },
+    display_debug_not_supported,	NULL,			0,	0 },
+  { { ".debug_types",		".zdebug_types",	NULL,	NULL,	0,	0 },
+    display_debug_not_supported,	NULL,			0,	0 },
   { { ".debug_weaknames",	".zdebug_weaknames",	NULL,	NULL,	0,	0 },
-    display_debug_not_supported,	0,	0 }
+    display_debug_not_supported,	NULL,			0,	0 }
 };

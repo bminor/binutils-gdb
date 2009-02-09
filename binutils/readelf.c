@@ -3040,63 +3040,8 @@ parse_args (int argc, char **argv)
 	    do_debugging = 1;
 	  else
 	    {
-	      unsigned int index = 0;
-
 	      do_debugging = 0;
-
-	      while (optarg[index])
-		switch (optarg[index++])
-		  {
-		  case 'i':
-		    do_debug_info = 1;
-		    break;
-
-		  case 'a':
-		    do_debug_abbrevs = 1;
-		    break;
-
-		  case 'l':
-		    do_debug_lines = 1;
-		    break;
-
-		  case 'L':
-		    do_debug_lines_decoded = 1;
-		    break;
-
-		  case 'p':
-		    do_debug_pubnames = 1;
-		    break;
-
-		  case 'r':
-		    do_debug_aranges = 1;
-		    break;
-
-		  case 'R':
-		    do_debug_ranges = 1;
-		    break;
-
-		  case 'F':
-		    do_debug_frames_interp = 1;
-		  case 'f':
-		    do_debug_frames = 1;
-		    break;
-
-		  case 'm':
-		    do_debug_macinfo = 1;
-		    break;
-
-		  case 's':
-		    do_debug_str = 1;
-		    break;
-
-		  case 'o':
-		    do_debug_loc = 1;
-		    break;
-
-		  default:
-		    warn (_("Unrecognized debug option '%s'\n"), optarg);
-		    break;
-		  }
+	      dwarf_select_sections_by_letters (optarg);
 	    }
 	  break;
 	case OPTION_DEBUG_DUMP:
@@ -3105,74 +3050,8 @@ parse_args (int argc, char **argv)
 	    do_debugging = 1;
 	  else
 	    {
-	      typedef struct
-	      {
-		const char * option;
-		int *        variable;
-	      }
-	      debug_dump_long_opts;
-
-	      debug_dump_long_opts opts_table [] =
-		{
-		  /* Please keep this table alpha- sorted.  */
-		  { "Ranges", & do_debug_ranges },
-		  { "abbrev", & do_debug_abbrevs },
-		  { "aranges", & do_debug_aranges },
-		  { "frames", & do_debug_frames },
-		  { "frames-interp", & do_debug_frames_interp },
-		  { "info", & do_debug_info },
-		  { "line", & do_debug_lines }, /* For backwards compatibility.  */
-		  { "rawline", & do_debug_lines },
-		  { "decodedline", & do_debug_lines_decoded },
-		  { "loc",  & do_debug_loc },
-		  { "macro", & do_debug_macinfo },
-		  { "pubnames", & do_debug_pubnames },
-		  /* This entry is for compatability
-		     with earlier versions of readelf.  */
-		  { "ranges", & do_debug_aranges },
-		  { "str", & do_debug_str },
-		  { NULL, NULL }
-		};
-
-	      const char *p;
-
 	      do_debugging = 0;
-
-	      p = optarg;
-	      while (*p)
-		{
-		  debug_dump_long_opts * entry;
-
-		  for (entry = opts_table; entry->option; entry++)
-		    {
-		      size_t len = strlen (entry->option);
-
-		      if (strneq (p, entry->option, len)
-			  && (p[len] == ',' || p[len] == '\0'))
-			{
-			  * entry->variable = 1;
-
-			  /* The --debug-dump=frames-interp option also
-			     enables the --debug-dump=frames option.  */
-			  if (do_debug_frames_interp)
-			    do_debug_frames = 1;
-
-			  p += len;
-			  break;
-			}
-		    }
-
-		  if (entry->option == NULL)
-		    {
-		      warn (_("Unrecognized debug option '%s'\n"), p);
-		      p = strchr (p, ',');
-		      if (p == NULL)
-			break;
-		    }
-
-		  if (*p == ',')
-		    p++;
-		}
+	      dwarf_select_sections_by_names (optarg);
 	    }
 	  break;
 #ifdef SUPPORT_DISASSEMBLY
@@ -4286,7 +4165,7 @@ process_section_headers (FILE *file)
       else if (section->sh_type == SHT_RELA)
 	CHECK_ENTSIZE (section, i, Rela);
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
-		|| do_debug_lines || do_debug_lines_decoded || do_debug_pubnames
+		|| do_debug_lines || do_debug_pubnames
 		|| do_debug_aranges || do_debug_frames || do_debug_macinfo
 		|| do_debug_str || do_debug_loc || do_debug_ranges)
 	       && (const_strneq (name, ".debug_")
@@ -4300,8 +4179,7 @@ process_section_headers (FILE *file)
 	  if (do_debugging
 	      || (do_debug_info     && streq (name, "info"))
 	      || (do_debug_abbrevs  && streq (name, "abbrev"))
-	      || ((do_debug_lines || do_debug_lines_decoded)
-		  && streq (name, "line"))
+	      || (do_debug_lines    && streq (name, "line"))
 	      || (do_debug_pubnames && streq (name, "pubnames"))
 	      || (do_debug_aranges  && streq (name, "aranges"))
 	      || (do_debug_ranges   && streq (name, "ranges"))

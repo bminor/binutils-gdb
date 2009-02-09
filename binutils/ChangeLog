@@ -1,3 +1,30 @@
+2009-02-09  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Mention feature match between objdump and readelf for dumping
+	dwarf info.
+
+	* doc/binutils.texi (objdump): Document -W/--dwarf improvments to
+	objdump.
+
+	* objdump.c (usage): Update documentation for -W/--dwarf.
+	(enum option_values): Add OPTION_DWARF.
+	(long_options): --dwarf can accept arguments.
+	(dump_dwarf_section): Also check enabled field.
+	(main): Option -W can accept arguments, code moved to
+	dwarf.c and call dwarf_select_sections_all instead.
+	* readelf.c (process_section_headers): Remove do_debug_lines_decoded.
+	(parse_args): Move code to...
+	* dwarf.c (dwarf_select_sections_by_letters,
+	dwarf_select_sections_by_names): : ...here (new functions).
+	(do_debug_lines_decoded): Remove and replaced by ...
+	(FLAG_DEBUG_LINES_RAW, FLAG_DEBUG_LINES_DECODED): ... new macros.
+	(display_debug_lines): Adjust for previous change.
+	(dwarf_select_sections_all): New function.
+	(debug_displays): Add initializer for enabled field.
+	* dwarf.h (do_debug_lines_decoded): Remove.
+	Add prototypes for the new functions.
+	(struct dwarf_section_display): Add enabled field.
+	
 2009-02-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.

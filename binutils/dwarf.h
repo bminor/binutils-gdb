@@ -37,7 +37,7 @@ struct dwarf_section
    * input file, as determined by load_debug_section().  */
   const char *uncompressed_name;
   const char *compressed_name;
-  const char* name;
+  const char *name;
   unsigned char *start;
   dwarf_vma address;
   dwarf_size_type size;
@@ -49,6 +49,7 @@ struct dwarf_section_display
 {
   struct dwarf_section section;
   int (*display) (struct dwarf_section *, void *);
+  int *enabled;
   unsigned int relocate : 1;
   unsigned int eh_frame : 1;
 };
@@ -102,7 +103,6 @@ extern int eh_addr_size;
 extern int do_debug_info;
 extern int do_debug_abbrevs;
 extern int do_debug_lines;
-extern int do_debug_lines_decoded;
 extern int do_debug_pubnames;
 extern int do_debug_aranges;
 extern int do_debug_ranges;
@@ -119,6 +119,10 @@ extern int load_debug_section (enum dwarf_section_display_enum,
 extern void free_debug_section (enum dwarf_section_display_enum);
 
 extern void free_debug_memory (void);
+
+extern void dwarf_select_sections_by_names (const char *names);
+extern void dwarf_select_sections_by_letters (const char *letters);
+extern void dwarf_select_sections_all (void);
 
 void *cmalloc (size_t, size_t);
 void *xcmalloc (size_t, size_t);

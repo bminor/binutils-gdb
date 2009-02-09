@@ -1,5 +1,12 @@
 -*- text -*-
 
+* Option --dwarf/-W of objdump is now as flexible as readelf --debug-dump/-w.
+
+* --as-needed now links in a dynamic library if it satisfies undefined
+  symbols in regular objects, or in other dynamic libraries.  In the
+  latter case the library is not linked if it is found in a DT_NEEDED
+  entry of one of the libraries already linked.
+
 * Added --prefix=PREFIX and --prefix-strip=LEVEL switches to objdump to
   add absolute paths for -S.
 
