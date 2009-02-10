@@ -86,7 +86,7 @@ pascal_main_name (void)
 }
 
 /* Determines if type TYPE is a pascal string type.
-   Returns 1 if the type is a known pascal type
+   Returns a positive value if the type is a known pascal string type.
    This function is used by p-valprint.c code to allow better string display.
    If it is a pascal string type, then it also sets info needed
    to get the length and the data of the string
@@ -126,14 +126,20 @@ is_pascal_string_type (struct type *type,int *length_pos,
           && strcmp (TYPE_FIELDS (type)[0].name, "Capacity") == 0
           && strcmp (TYPE_FIELDS (type)[1].name, "length") == 0)
         {
-          if (length_pos)
+	  struct type *char_type;
+	  if (length_pos)
 	    *length_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
-          if (length_size)
+	  if (length_size)
 	    *length_size = TYPE_LENGTH (TYPE_FIELD_TYPE (type, 1));
-          if (string_pos)
+	  if (string_pos)
 	    *string_pos = TYPE_FIELD_BITPOS (type, 2) / TARGET_CHAR_BIT;
           /* FIXME: how can I detect wide chars in GPC ?? */
-          if (char_size)
+	  char_type = TYPE_FIELD_TYPE (type,2);
+	  if (char_size && TYPE_CODE (char_type) == TYPE_CODE_ARRAY)
+	    {
+	      *char_size = TYPE_LENGTH (TYPE_TARGET_TYPE (char_type));
+	    }
+	  else if (char_size)
 	    *char_size = 1;
  	  if (arrayname)
 	    *arrayname = TYPE_FIELDS (type)[2].name;
@@ -218,7 +224,8 @@ pascal_printstr (struct ui_file *stream, const gdb_byte *string,
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in traditional C
      style.  */
-  if ((!force_ellipses) && length > 0 && string[length - 1] == '\0')
+  if ((!force_ellipses) && length > 0
+	&& extract_unsigned_integer (string + (length - 1) * width, width) == 0)
     length--;
 
   if (length == 0)
@@ -234,6 +241,7 @@ pascal_printstr (struct ui_file *stream, const gdb_byte *string,
       unsigned int rep1;
       /* Number of repetitions we have detected so far.  */
       unsigned int reps;
+      unsigned long int current_char;
 
       QUIT;
 
@@ -243,9 +251,13 @@ pascal_printstr (struct ui_file *stream, const gdb_byte *string,
 	  need_comma = 0;
 	}
 
+      current_char = extract_unsigned_integer (string + i * width, width);
+
       rep1 = i + 1;
       reps = 1;
-      while (rep1 < length && string[rep1] == string[i])
+      while (rep1 < length 
+	     && extract_unsigned_integer (string + rep1 * width, width) 
+		== current_char)
 	{
 	  ++rep1;
 	  ++reps;
@@ -261,7 +273,7 @@ pascal_printstr (struct ui_file *stream, const gdb_byte *string,
 		fputs_filtered ("', ", stream);
 	      in_quotes = 0;
 	    }
-	  pascal_printchar (string[i], stream);
+	  pascal_printchar (current_char, stream);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  i = rep1 - 1;
 	  things_printed += options->repeat_count_threshold;
@@ -269,8 +281,7 @@ pascal_printstr (struct ui_file *stream, const gdb_byte *string,
 	}
       else
 	{
-	  int c = string[i];
-	  if ((!in_quotes) && (PRINT_LITERAL_FORM (c)))
+	  if ((!in_quotes) && (PRINT_LITERAL_FORM (current_char)))
 	    {
 	      if (options->inspect_it)
 		fputs_filtered ("\\'", stream);
@@ -278,7 +289,7 @@ pascal_printstr (struct ui_file *stream, const gdb_byte *string,
 		fputs_filtered ("'", stream);
 	      in_quotes = 1;
 	    }
-	  pascal_one_char (c, stream, &in_quotes);
+	  pascal_one_char (current_char, stream, &in_quotes);
 	  ++things_printed;
 	}
     }

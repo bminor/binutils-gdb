@@ -1,3 +1,12 @@
+2009-02-10  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-lang.c (is_pascal_string_type): Fix comment.
+	Determine exact size of char elements for GPC
+	strings.
+	(pascal_printstr): Handle char width of 2 or 4.
+	* p-valprint.c (pascal_val_print): Handle char
+	of width 2 or 4.
+	
 2009-02-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Move lowpc and highpc

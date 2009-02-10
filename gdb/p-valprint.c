@@ -79,7 +79,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  /* For an array of chars, print with string syntax.  */
-	  if (eltlen == 1 
+	  if ((eltlen == 1 || eltlen == 2 || eltlen == 4)
 	      && ((TYPE_CODE (elttype) == TYPE_CODE_INT)
 	       || ((current_language->la_language == language_pascal)
 		   && (TYPE_CODE (elttype) == TYPE_CODE_CHAR)))
@@ -93,14 +93,15 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 
 		  /* Look for a NULL char. */
 		  for (temp_len = 0;
-		       (valaddr + embedded_offset)[temp_len]
+		       extract_unsigned_integer (valaddr + embedded_offset +
+						 temp_len * eltlen, eltlen)
 		       && temp_len < len && temp_len < options->print_max;
 		       temp_len++);
 		  len = temp_len;
 		}
 
-	      LA_PRINT_STRING (stream, valaddr + embedded_offset, len, 1, 0,
-			       options);
+	      LA_PRINT_STRING (stream, valaddr + embedded_offset, len, 
+			       eltlen, 0, options);
 	      i = len;
 	    }
 	  else
@@ -165,14 +166,17 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 
 	  /* For a pointer to char or unsigned char, also print the string
 	     pointed to, unless pointer is null.  */
-	  if (TYPE_LENGTH (elttype) == 1
-	      && (TYPE_CODE (elttype) == TYPE_CODE_INT
-		  || TYPE_CODE(elttype) == TYPE_CODE_CHAR)
+	  if (((TYPE_LENGTH (elttype) == 1
+	       && (TYPE_CODE (elttype) == TYPE_CODE_INT
+		  || TYPE_CODE (elttype) == TYPE_CODE_CHAR))
+	      || ((TYPE_LENGTH (elttype) == 2 || TYPE_LENGTH (elttype) == 4)
+		  && TYPE_CODE (elttype) == TYPE_CODE_CHAR))
 	      && (options->format == 0 || options->format == 's')
 	      && addr != 0)
 	    {
 	      /* no wide string yet */
-	      i = val_print_string (addr, -1, 1, stream, options);
+	      i = val_print_string (addr, -1, TYPE_LENGTH (elttype), stream, 
+		    options);
 	    }
 	  /* also for pointers to pascal strings */
 	  /* Note: this is Free Pascal specific:
