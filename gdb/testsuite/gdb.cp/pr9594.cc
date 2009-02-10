@@ -47,5 +47,6 @@ int main ()
   } a;
   Foo foo1;
   foo1.set_foo (42);		// Set breakpoint here.
+  a.get();			// Prevent compiler from throwing 'a' away.
   return 0;
 }

@@ -1,3 +1,7 @@
+2009-02-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.cp/pr9594.cc: Prevent GCC from optimizing 'a' out.
+
 2009-02-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/siginfo-obj.c, gdb.base/siginfo-obj.exp: New.
