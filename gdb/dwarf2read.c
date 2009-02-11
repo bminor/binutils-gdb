@@ -5098,11 +5098,13 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	type_flags |= TYPE_FLAG_UNSIGNED;
 	break;
       case DW_ATE_signed_char:
-	if (cu->language == language_ada || cu->language == language_m2)
+	if (cu->language == language_ada || cu->language == language_m2 
+	    || cu->language == language_pascal)
 	  code = TYPE_CODE_CHAR;
 	break;
       case DW_ATE_unsigned_char:
-	if (cu->language == language_ada || cu->language == language_m2)
+	if (cu->language == language_ada || cu->language == language_m2
+	    || cu->language == language_pascal)
 	  code = TYPE_CODE_CHAR;
 	type_flags |= TYPE_FLAG_UNSIGNED;
 	break;

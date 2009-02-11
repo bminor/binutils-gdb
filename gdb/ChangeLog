@@ -1,3 +1,9 @@
+2009-02-11  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* dwarf2read.c (read_base_type): Set code to TYPE_CODE_CHAR
+	for DW_ATE_signed_char and DW_ATE_unisgned_char
+	for pascal language.
+
 2009-02-11  Jim Meyering  <meyering@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
