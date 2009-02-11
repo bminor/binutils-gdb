@@ -1,3 +1,10 @@
+2009-02-11  Jim Meyering  <meyering@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Avoid NULL dereference.
+	* stack.c (return_command): Guard use of SYMBOL_TYPE (thisfun).
+	New variable func_type.
+
 2009-02-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdbarch.c: Regenerate.
