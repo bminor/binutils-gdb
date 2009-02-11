@@ -1,3 +1,7 @@
+2009-02-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbarch.c: Regenerate.
+
 2009-02-10  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-lang.c (is_pascal_string_type): Fix comment.

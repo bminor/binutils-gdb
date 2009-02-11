@@ -841,8 +841,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: gdbarch_get_siginfo_type_p() = %d\n",
                       gdbarch_get_siginfo_type_p (gdbarch));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: get_siginfo_type = <0x%lx>\n",
-                      (long) gdbarch->get_siginfo_type);
+                      "gdbarch_dump: get_siginfo_type = <%s>\n",
+                      host_address_to_string (gdbarch->get_siginfo_type));
   fprintf_unfiltered (file,
                       "gdbarch_dump: has_global_solist = %s\n",
                       plongest (gdbarch->has_global_solist));
