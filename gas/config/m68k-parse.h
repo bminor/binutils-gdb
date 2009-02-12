@@ -101,6 +101,7 @@ enum m68k_register
   CACR,
   VBR,
   CAAR,
+  CPUCR,
   MSP,
   ITT0,
   ITT1,

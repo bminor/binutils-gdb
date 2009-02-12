@@ -181,8 +181,8 @@ static const enum m68k_register mcf_ctrl[] = {
   RAMBAR0, RAMBAR1, RAMBAR, MBAR,
   0
 };
-static const enum m68k_register mcf51qe_ctrl[] = {
-  VBR,
+static const enum m68k_register mcf51_ctrl[] = {
+  VBR, CPUCR,
   0
 };
 static const enum m68k_register mcf5206_ctrl[] = {
@@ -217,6 +217,14 @@ static const enum m68k_register mcf5225_ctrl[] = {
   VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR, MBAR, RAMBAR1,
   0
 };
+static const enum m68k_register mcf52259_ctrl[] = {
+  VBR, FLASHBAR, RAMBAR, RAMBAR1,
+  0
+};
+static const enum m68k_register mcf52277_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, RAMBAR, RAMBAR1,
+  0
+};
 static const enum m68k_register mcf5235_ctrl[] = {
   VBR, CACR, ACR0, ACR1, RAMBAR, RAMBAR1,
   0
@@ -249,8 +257,12 @@ static const enum m68k_register mcf5282_ctrl[] = {
   VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR, RAMBAR1,
   0
 };
+static const enum m68k_register mcf53017_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, RAMBAR0, RAMBAR,
+  0
+};
 static const enum m68k_register mcf5307_ctrl[] = {
-  CACR, ACR0, ACR1,  VBR, RAMBAR0, RAMBAR_ALT, MBAR,
+  VBR, CACR, ACR0, ACR1, RAMBAR0, RAMBAR_ALT, MBAR,
   0
 };
 static const enum m68k_register mcf5329_ctrl[] = {
@@ -525,6 +537,9 @@ static const struct m68k_cpu m68k_archs[] =
   {0,0,NULL, 0}
 };
 
+/* For -mno-mac we want to turn off all types of mac.  */
+static const unsigned no_mac = mcfmac | mcfemac;
+
 /* Architecture extensions, here 'alias' -1 for m68k, +1 for cf and 0
    for either.  */
 static const struct m68k_cpu m68k_extensions[] =
@@ -537,7 +552,7 @@ static const struct m68k_cpu m68k_extensions[] =
 
   {mcfhwdiv,					NULL, "div", 1},
   {mcfusp,					NULL, "usp", 1},
-  {mcfmac,					NULL, "mac", 1},
+  {mcfmac,					(void *)&no_mac, "mac", 1},
   {mcfemac,					NULL, "emac", 1},
 
   {0,NULL,NULL, 0}
@@ -579,7 +594,12 @@ static const struct m68k_cpu m68k_cpus[] =
   {cpu32|m68881,				cpu32_ctrl, "68349", 1},
   {cpu32|m68881,				cpu32_ctrl, "68360", 1},
 
-  {mcfisa_a|mcfisa_c|mcfusp,                    mcf51qe_ctrl, "51qe", 0},
+  {mcfisa_a|mcfisa_c|mcfusp,                    mcf51_ctrl, "51", 0},
+  {mcfisa_a|mcfisa_c|mcfusp,                    mcf51_ctrl, "51ac", 1},
+  {mcfisa_a|mcfisa_c|mcfusp,                    mcf51_ctrl, "51cn", 1},
+  {mcfisa_a|mcfisa_c|mcfusp|mcfmac,  		mcf51_ctrl, "51em", 1},
+  {mcfisa_a|mcfisa_c|mcfusp,  			mcf51_ctrl, "51jm", 1},
+  {mcfisa_a|mcfisa_c|mcfusp,                    mcf51_ctrl, "51qe", 1},
 
   {mcfisa_a,					mcf_ctrl, "5200", 0},
   {mcfisa_a,					mcf_ctrl, "5202", 1},
@@ -613,6 +633,9 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,   mcf5225_ctrl, "5224", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,   mcf5225_ctrl, "5225", 0},
 
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,  mcf52277_ctrl, "52274", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,  mcf52277_ctrl, "52277", 0},
+  
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5235_ctrl, "5232", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5235_ctrl, "5233", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5235_ctrl, "5234", -1},
@@ -622,7 +645,14 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfhwdiv|mcfemac,			mcf5249_ctrl, "5249", 0},
   {mcfisa_a|mcfhwdiv|mcfemac,			mcf5250_ctrl, "5250", 0},
   {mcfisa_a|mcfhwdiv|mcfemac, 			mcf5253_ctrl, "5253", 0},
-  
+
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf52259_ctrl, "52252", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf52259_ctrl, "52254", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf52259_ctrl, "52255", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf52259_ctrl, "52256", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf52259_ctrl, "52258", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf52259_ctrl, "52259", 0},
+   
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5271_ctrl, "5270", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5271_ctrl, "5271", 0},
   
@@ -635,6 +665,14 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5282_ctrl, "5281", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5282_ctrl, "5282", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5282_ctrl, "528x", 0},
+  
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf53017_ctrl, "53011", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf53017_ctrl, "53012", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf53017_ctrl, "53013", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf53017_ctrl, "53014", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf53017_ctrl, "53015", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf53017_ctrl, "53016", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf53017_ctrl, "53017", 0},
   
   {mcfisa_a|mcfhwdiv|mcfmac,			mcf5307_ctrl, "5307", 0},
   
@@ -3275,6 +3313,7 @@ m68k_ip (char *instring)
 	      tmpreg = 0x801;
 	      break;
 	    case CAAR:
+	    case CPUCR:
 	      tmpreg = 0x802;
 	      break;
 	    case MSP:
@@ -4036,6 +4075,7 @@ static const struct init_entry init_table[] =
   { "dfcr", DFC },
   { "cacr", CACR },		/* Cache Control Register.  */
   { "caar", CAAR },		/* Cache Address Register.  */
+  { "cpucr", CPUCR },		/* CPU Control Register.  */
 
   { "usp", USP },		/* User Stack Pointer.  */
   { "vbr", VBR },		/* Vector Base Register.  */
@@ -7407,7 +7447,8 @@ m68k_set_extension (char const *name, int allow_m, int silent)
     }
 
   if (negated)
-    not_current_architecture |= ext->arch;
+    not_current_architecture |= (ext->control_regs
+				 ? *(unsigned *)ext->control_regs: ext->arch);
   else
     current_architecture |= ext->arch;
   return 1;
@@ -7665,7 +7706,7 @@ md_show_usage (FILE *stream)
     {
       if (i)
 	fprintf (stream, " | ");
-      fprintf (stream, m68k_archs[i].name);
+      fprintf (stream, "%s", m68k_archs[i].name);
     }
   fprintf (stream, "\n");
 
@@ -7674,7 +7715,7 @@ md_show_usage (FILE *stream)
     {
       if (i)
 	fprintf (stream, " | ");
-      fprintf (stream, m68k_cpus[i].name);
+      fprintf (stream, "%s", m68k_cpus[i].name);
     }
   fprintf (stream, _("\n"));
 }

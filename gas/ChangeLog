@@ -1,3 +1,18 @@
+2009-02-12  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (mcf51qe_ctrl): Add CPUCR.
+	(mcf52259_ctrl, mcf52277_ctrl, mcf53017_ctrl): New.
+	(mcf5307_ctrl): Add VBR.
+	(no_mac): New variable.
+	(m68k_extensions): Refer to no_mac mask.
+	(m68k_cpus): Add 51, 51ac, 51cn, 51em, 51jm, 52274, 52277,
+	52252..52259, 53011..53017.
+	(m68k_ip): Process CPUCR.
+	(init_table): Add cpucr entry.
+	(m68k_set_extension): Allow negated mask to refer to a variable.
+	(md_show_usage): Use '%s' to silence fprintf warning.
+	* config/m68k-parse.h (CPUCR): New control register.
+
 2009-02-10  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-ppc.c (ppc_insert_operand, md_assemble): Use '%s' for
