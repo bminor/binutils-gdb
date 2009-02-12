@@ -1,3 +1,8 @@
+2009-02-12  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-mips.c (mips_elf_final_gp): Don't add 0x4000 offset for
+	relocatable link.
+
 2009-02-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_find_overlays): Call bfd_set_error on errors.
