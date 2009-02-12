@@ -863,7 +863,7 @@
 	* windows-nat.c: Ditto.
 	(cygwin_load_start): Redefine as CORE_ADDR.
 	(cygwin_load_end): Ditto.
-	(windows_make_so): Coerce result of address arithmetic to to uintptr_t
+	(windows_make_so): Coerce result of address arithmetic to uintptr_t
 	before coercing to CORE_ADDR to avoid a compiler warning.
 	(handle_exception): Define addr as CORE_ADDR and coerce
 	ExceptionAddress to uintptr_t before assigining to avoid a compiler
