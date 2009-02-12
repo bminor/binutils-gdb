@@ -480,8 +480,7 @@ core_create_function_syms ()
       done (1);
     }
 
-  /* The "+ 2" is for the sentinels.  */
-  symtab.base = (Sym *) xmalloc ((symtab.len + 2) * sizeof (Sym));
+  symtab.base = (Sym *) xmalloc (symtab.len * sizeof (Sym));
 
   /* Pass 2 - create symbols.  */
   symtab.limit = symtab.base;
@@ -597,19 +596,6 @@ core_create_function_syms ()
       ++symtab.limit;
     }
 
-  /* Create sentinels.  */
-  sym_init (symtab.limit);
-  symtab.limit->name = "<locore>";
-  symtab.limit->addr = 0;
-  symtab.limit->end_addr = min_vma - 1;
-  ++symtab.limit;
-
-  sym_init (symtab.limit);
-  symtab.limit->name = "<hicore>";
-  symtab.limit->addr = max_vma + 1;
-  symtab.limit->end_addr = ~(bfd_vma) 0;
-  ++symtab.limit;
-
   symtab.len = symtab.limit - symtab.base;
   symtab_finalize (&symtab);
 }
@@ -623,7 +609,7 @@ core_create_line_syms ()
   char *prev_name, *prev_filename;
   unsigned int prev_name_len, prev_filename_len;
   bfd_vma vma, min_vma = ~(bfd_vma) 0, max_vma = 0;
-  Sym *prev, dummy, *sentinel, *sym;
+  Sym *prev, dummy, *sym;
   const char *filename;
   int prev_line_num;
   Sym_Table ltab;
@@ -744,7 +730,8 @@ core_create_line_syms ()
       else
 	{
 	  sym = sym_lookup(&symtab, ltab.limit->addr);
-	  ltab.limit->is_static = sym->is_static;
+          if (sym)
+	    ltab.limit->is_static = sym->is_static;
 	}
 
       prev = ltab.limit;
@@ -755,21 +742,6 @@ core_create_line_syms ()
 			      (unsigned long) ltab.limit->addr));
       ++ltab.limit;
     }
-
-  /* Update sentinels.  */
-  sentinel = sym_lookup (&symtab, (bfd_vma) 0);
-
-  if (sentinel
-      && strcmp (sentinel->name, "<locore>") == 0
-      && min_vma <= sentinel->end_addr)
-    sentinel->end_addr = min_vma - 1;
-
-  sentinel = sym_lookup (&symtab, ~(bfd_vma) 0);
-
-  if (sentinel
-      && strcmp (sentinel->name, "<hicore>") == 0
-      && max_vma >= sentinel->addr)
-    sentinel->addr = max_vma + 1;
 
   /* Copy in function symbols.  */
   memcpy (ltab.limit, symtab.base, symtab.len * sizeof (Sym));

@@ -1,3 +1,15 @@
+2009-02-12  Ken Werner  <ken.werner@de.ibm.com>
+
+        * corefile.c (core_create_function_syms): Remove "<locore>" and 
+        "<hicore>" sentinels.
+        * gprof.c: Likewise.
+        * cg_print.c (cg_print_function_ordering): Likewise.
+        * alpha.c (alpha_find_call): Add check for return value of sym_lookup.
+        * mips.c (mips_find_call): Likewise.
+        * sparc.c (sparc_find_call): Likewise.
+        * tahoe.c (tahoe_find_call): Likewise.
+        * vax.c (vax_find_call): Likewise.
+
 2009-02-03  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* configure.in: AC_SUBST pdfdir.

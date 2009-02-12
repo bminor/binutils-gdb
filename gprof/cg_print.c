@@ -804,13 +804,8 @@ cg_print_function_ordering ()
     {
       if (symtab.base[index].ncalls == 0)
 	{
-	  /* Filter out gprof generated names.  */
-	  if (strcmp (symtab.base[index].name, "<locore>")
-	      && strcmp (symtab.base[index].name, "<hicore>"))
-	    {
-	      unused_syms[unused++] = &symtab.base[index];
-	      symtab.base[index].has_been_placed = 1;
-	    }
+	  unused_syms[unused++] = &symtab.base[index];
+	  symtab.base[index].has_been_placed = 1;
 	}
       else
 	{
