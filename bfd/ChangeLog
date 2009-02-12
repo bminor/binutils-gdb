@@ -1,3 +1,10 @@
+2009-02-12  Nick Clifton  <nickc@redhat.com>
+
+	PR 9827
+	* elflink.c (bfd_elf_final_link): When counting the relocations,
+	if the header size has not been set yet then assume that it will
+	match the output section's reloc type.
+
 2009-02-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_final_gp): Don't add 0x4000 offset for

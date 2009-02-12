@@ -10228,8 +10228,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      bfd_size_type entsize1;
 
 	      entsize1 = esdi->rel_hdr.sh_entsize;
-	      BFD_ASSERT (entsize1 == bed->s->sizeof_rel
-			  || entsize1 == bed->s->sizeof_rela);
+	      /* PR 9827: If the header size has not been set yet then
+		 assume that it will match the output section's reloc type.  */
+	      if (entsize1 == 0)
+		entsize1 = o->use_rela_p ? bed->s->sizeof_rela : bed->s->sizeof_rel;
+	      else
+		BFD_ASSERT (entsize1 == bed->s->sizeof_rel
+			    || entsize1 == bed->s->sizeof_rela);
 	      same_size = !o->use_rela_p == (entsize1 == bed->s->sizeof_rel);
 
 	      if (!same_size)
