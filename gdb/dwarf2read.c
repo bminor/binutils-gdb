@@ -774,6 +774,10 @@ static void add_partial_namespace (struct partial_die_info *pdi,
 				   CORE_ADDR *lowpc, CORE_ADDR *highpc,
 				   int need_pc, struct dwarf2_cu *cu);
 
+static void add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
+				CORE_ADDR *highpc, int need_pc,
+				struct dwarf2_cu *cu);
+
 static void add_partial_enumeration (struct partial_die_info *enum_pdi,
 				     struct dwarf2_cu *cu);
 
@@ -955,6 +959,8 @@ static const char *determine_class_name (struct die_info *die,
 static void read_common_block (struct die_info *, struct dwarf2_cu *);
 
 static void read_namespace (struct die_info *die, struct dwarf2_cu *);
+
+static void read_module (struct die_info *die, struct dwarf2_cu *cu);
 
 static const char *namespace_name (struct die_info *die,
 				   int *is_anonymous, struct dwarf2_cu *);
@@ -1857,6 +1863,9 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	    case DW_TAG_namespace:
 	      add_partial_namespace (pdi, lowpc, highpc, need_pc, cu);
 	      break;
+	    case DW_TAG_module:
+	      add_partial_module (pdi, lowpc, highpc, need_pc, cu);
+	      break;
 	    default:
 	      break;
 	    }
@@ -2171,6 +2180,20 @@ add_partial_namespace (struct partial_die_info *pdi,
   add_partial_symbol (pdi, cu);
 
   /* Now scan partial symbols in that namespace.  */
+
+  if (pdi->has_children)
+    scan_partial_symbols (pdi->die_child, lowpc, highpc, need_pc, cu);
+}
+
+/* Read a partial die corresponding to a Fortran module.  */
+
+static void
+add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
+		    CORE_ADDR *highpc, int need_pc, struct dwarf2_cu *cu)
+{
+  /* Now scan partial symbols in that module.
+
+     FIXME: Support the separate Fortran module namespaces.  */
 
   if (pdi->has_children)
     scan_partial_symbols (pdi->die_child, lowpc, highpc, need_pc, cu);
@@ -2838,6 +2861,9 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_namespace:
       processing_has_namespace_info = 1;
       read_namespace (die, cu);
+      break;
+    case DW_TAG_module:
+      read_module (die, cu);
       break;
     case DW_TAG_imported_declaration:
     case DW_TAG_imported_module:
@@ -4745,6 +4771,22 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	  process_die (child_die, cu);
 	  child_die = sibling_die (child_die);
 	}
+    }
+}
+
+/* Read a Fortran module.  */
+
+static void
+read_module (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct die_info *child_die = die->child;
+
+  /* FIXME: Support the separate Fortran module namespaces.  */
+
+  while (child_die && child_die->tag)
+    {
+      process_die (child_die, cu);
+      child_die = sibling_die (child_die);
     }
 }
 

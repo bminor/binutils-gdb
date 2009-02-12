@@ -1,3 +1,8 @@
+2009-02-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR fortran/9806
+	* gdb.fortran/module.exp, gdb.fortran/module.f90: New.
+
 2009-02-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.cp/pr9594.cc: Prevent GCC from optimizing 'a' out.
