@@ -109,10 +109,10 @@ proc check_valueof { exp val } {
 
 # Check that GDB and the target agree over the sign of a character.
 
-set signof_byte [get_valueof "/d" "'\\377'" -1]
-set signof_char [get_valueof "/d" "(int) (char) -1" -1]
-set signof_signed_char [get_valueof "/d" "(int) (signed char) -1" -1]
-set signof_unsigned_char [get_valueof "/d" "(int) (unsigned char) -1" -1]
+set signof_byte [get_integer_valueof "'\\377'" -1]
+set signof_char [get_integer_valueof "(int) (char) -1" -1]
+set signof_signed_char [get_integer_valueof "(int) (signed char) -1" -1]
+set signof_unsigned_char [get_integer_valueof "(int) (unsigned char) -1" -1]
 
 check_valueof "'\\377'" ${signof_byte}
 check_valueof "(int) (char) -1" ${signof_char}

@@ -1,3 +1,11 @@
+2009-02-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* lib/gdb.exp (get_valueof): Accept anything as a return value.
+	(get_integer_valueof): New procedure.
+	(get_sizeof): Use new get_integer_value_of.
+	* gdb.base/sizeof.exp: Replace all uses of get_valueof
+	by get_integer_valueof.
+
 2009-02-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/remote.exp (get_sizeof): Remove.
