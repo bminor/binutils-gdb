@@ -200,11 +200,12 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
           // We are done with the file at this point, so unlock it.
           obj->unlock(this);
 
-          workqueue->queue_next(new Add_plugin_symbols(this->symtab_,
-                                                       this->layout_,
-                                                       obj,
-                                                       this->this_blocker_,
-                                                       this->next_blocker_));
+          workqueue->queue_next(new Add_symbols(this->input_objects_,
+                                                this->symtab_,
+                                                this->layout_,
+                                                obj, NULL,
+                                                this->this_blocker_,
+                                                this->next_blocker_));
           return true;
         }
     }
@@ -379,6 +380,13 @@ Add_symbols::locks(Task_locker* tl)
 void
 Add_symbols::run(Workqueue*)
 {
+  Pluginobj* pluginobj = this->object_->pluginobj();
+  if (pluginobj != NULL)
+    {
+      this->object_->add_symbols(this->symtab_, this->sd_, this->layout_);
+      return;
+    }
+
   if (!this->input_objects_->add_object(this->object_))
     {
       // FIXME: We need to close the descriptor here.
@@ -387,7 +395,7 @@ Add_symbols::run(Workqueue*)
   else
     {
       this->object_->layout(this->symtab_, this->layout_, this->sd_);
-      this->object_->add_symbols(this->symtab_, this->sd_);
+      this->object_->add_symbols(this->symtab_, this->sd_, this->layout_);
       this->object_->release();
     }
   delete this->sd_;

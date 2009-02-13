@@ -350,8 +350,8 @@ class Object
 
   // Add symbol information to the global symbol table.
   void
-  add_symbols(Symbol_table* symtab, Read_symbols_data* sd)
-  { this->do_add_symbols(symtab, sd); }
+  add_symbols(Symbol_table* symtab, Read_symbols_data* sd, Layout *layout)
+  { this->do_add_symbols(symtab, sd, layout); }
 
   // Functions and types for the elfcpp::Elf_file interface.  This
   // permit us to use Object as the File template parameter for
@@ -462,7 +462,7 @@ class Object
   // Add symbol information to the global symbol table--implemented by
   // child class.
   virtual void
-  do_add_symbols(Symbol_table*, Read_symbols_data*) = 0;
+  do_add_symbols(Symbol_table*, Read_symbols_data*, Layout*) = 0;
 
   // Return the location of the contents of a section.  Implemented by
   // child class.
@@ -1446,7 +1446,7 @@ class Sized_relobj : public Relobj
 
   // Add the symbols to the symbol table.
   void
-  do_add_symbols(Symbol_table*, Read_symbols_data*);
+  do_add_symbols(Symbol_table*, Read_symbols_data*, Layout*);
 
   // Read the relocs.
   void

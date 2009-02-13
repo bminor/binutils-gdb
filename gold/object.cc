@@ -1349,7 +1349,8 @@ Sized_relobj<size, big_endian>::do_layout_deferred_sections(Layout* layout)
 template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
-					       Read_symbols_data* sd)
+					       Read_symbols_data* sd,
+					       Layout*)
 {
   if (sd->symbols == NULL)
     {

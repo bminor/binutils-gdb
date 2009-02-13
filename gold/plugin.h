@@ -294,11 +294,6 @@ class Pluginobj : public Object
   ld_plugin_status
   get_symbol_resolution_info(int nsyms, ld_plugin_symbol* syms) const;
 
-  // Add symbol information to the global symbol table.
-  void
-  add_symbols(Symbol_table* symtab, Layout* layout)
-  { this->do_add_symbols(symtab, layout); }
-
   // Store the incoming symbols from the plugin for later processing.
   void
   store_incoming_symbols(int nsyms, const struct ld_plugin_symbol* syms)
@@ -332,11 +327,6 @@ class Pluginobj : public Object
   virtual Pluginobj*
   do_pluginobj()
   { return this; }
-
-  // Add symbol information to the global symbol table--implemented by
-  // child class.
-  virtual void
-  do_add_symbols(Symbol_table*, Layout*) = 0;
 
   // The number of symbols provided by the plugin.
   int nsyms_;
@@ -375,10 +365,7 @@ class Sized_pluginobj : public Pluginobj
 
   // Add the symbols to the symbol table.
   void
-  do_add_symbols(Symbol_table*, Read_symbols_data*);
-
-  void
-  do_add_symbols(Symbol_table*, Layout*);
+  do_add_symbols(Symbol_table*, Read_symbols_data*, Layout*);
 
   // Get the size of a section.
   uint64_t
@@ -431,50 +418,6 @@ class Sized_pluginobj : public Pluginobj
  protected:
 
  private:
-};
-
-// This Task handles adding the symbols to the symbol table.  These
-// tasks must be run in the same order as the arguments appear on the
-// command line.
-
-class Add_plugin_symbols : public Task
-{
- public:
-  // THIS_BLOCKER is used to prevent this task from running before the
-  // one for the previous input file.  NEXT_BLOCKER is used to prevent
-  // the next task from running.
-  Add_plugin_symbols(Symbol_table* symtab,
-	             Layout* layout,
-	             Pluginobj* obj,
-	             Task_token* this_blocker,
-	             Task_token* next_blocker)
-    : symtab_(symtab), layout_(layout), obj_(obj),
-      this_blocker_(this_blocker), next_blocker_(next_blocker)
-  { }
-
-  ~Add_plugin_symbols();
-
-  // The standard Task methods.
-
-  Task_token*
-  is_runnable();
-
-  void
-  locks(Task_locker*);
-
-  void
-  run(Workqueue*);
-
-  std::string
-  get_name() const
-  { return "Add_plugin_symbols " + this->obj_->name(); }
-
-private:
-  Symbol_table* symtab_;
-  Layout* layout_;
-  Pluginobj* obj_;
-  Task_token* this_blocker_;
-  Task_token* next_blocker_;
 };
 
 // This Task handles handles the "all symbols read" event hook.

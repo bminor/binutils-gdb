@@ -1,3 +1,24 @@
+2009-02-13  Rafael Avila de Espindola  <espindola@google.com>
+
+	* archive.cc (Archive::include_member): Update calls to add_symbols.
+	* dynobj.cc (Sized_dynobj<size, big_endian>::make_version_map): Add
+	the Layout argument.
+	* dynobj.h (do_add_symbols): Add the Layout argument.
+	* object.cc (Sized_relobj<size, big_endian>::do_add_symbols): Add the
+	Layout argument.
+	* object.h (Object::add_symbols): Add the Layout argument.
+	(Object::do_add_symbols): Add the Layout argument.
+	(Sized_relobj::do_add_symbols): Add the Layout argument.
+	* plugin.cc (Sized_pluginobj<size, big_endian>::do_add_symbols):
+	Unify the two versions.
+	(Add_plugin_symbols): Remove.
+	* plugin.h (Pluginobj::add_symbols, Pluginobj::do_add_symbols): Remove.
+	(Sized_pluginobj::do_add_symbols): Unify the two versions.
+	(Add_plugin_symbols): Remove.
+	* readsyms.cc (Read_symbols::do_read_symbols): Update call to
+	Add_symbols. Use Add_symbols instead of Add_plugin_symbols.
+	(Add_symbols::run): Make it work with Pulginobj.
+
 2009-02-06  Ian Lance Taylor  <iant@google.com>
 
 	* object.cc (Sized_relobj::do_layout): Make info message start

@@ -655,7 +655,8 @@ Sized_dynobj<size, big_endian>::make_version_map(
 template<int size, bool big_endian>
 void
 Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
-					       Read_symbols_data* sd)
+					       Read_symbols_data* sd,
+					       Layout*)
 {
   if (sd->symbols == NULL)
     {

@@ -546,15 +546,8 @@ Sized_pluginobj<size, big_endian>::do_layout(Symbol_table*, Layout*,
 
 template<int size, bool big_endian>
 void
-Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table*,
-                                                  Read_symbols_data*)
-{
-  gold_unreachable();
-}
-
-template<int size, bool big_endian>
-void
 Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
+                                                  Read_symbols_data*,
                                                   Layout* layout)
 {
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
@@ -754,44 +747,6 @@ Sized_pluginobj<size, big_endian>::do_get_global_symbol_counts(const Symbol_tabl
                                                    size_t*, size_t*) const
 {
   gold_unreachable();
-}
-
-// Class Add_plugin_symbols.
-
-Add_plugin_symbols::~Add_plugin_symbols()
-{
-  if (this->this_blocker_ != NULL)
-    delete this->this_blocker_;
-  // next_blocker_ is deleted by the task associated with the next
-  // input file.
-}
-
-// We are blocked by this_blocker_.  We block next_blocker_.  We also
-// lock the file.
-
-Task_token*
-Add_plugin_symbols::is_runnable()
-{
-  if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
-    return this->this_blocker_;
-  if (this->obj_->is_locked())
-    return this->obj_->token();
-  return NULL;
-}
-
-void
-Add_plugin_symbols::locks(Task_locker* tl)
-{
-  tl->add(this, this->next_blocker_);
-  tl->add(this, this->obj_->token());
-}
-
-// Add the symbols in the object to the symbol table.
-
-void
-Add_plugin_symbols::run(Workqueue*)
-{
-  this->obj_->add_symbols(this->symtab_, this->layout_);
 }
 
 // Class Plugin_finish.  This task runs after all replacement files have

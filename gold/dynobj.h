@@ -175,7 +175,7 @@ class Sized_dynobj : public Dynobj
 
   // Add the symbols to the symbol table.
   void
-  do_add_symbols(Symbol_table*, Read_symbols_data*);
+  do_add_symbols(Symbol_table*, Read_symbols_data*, Layout*);
 
   // Get the size of a section.
   uint64_t
