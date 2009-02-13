@@ -2092,8 +2092,7 @@ call0_analyze_prologue (CORE_ADDR start, CORE_ADDR pc, CORE_ADDR litbase,
   CORE_ADDR ia;		    /* Current insn address in prologue.  */
   CORE_ADDR ba = 0;	    /* Current address at base of insn buffer.  */
   CORE_ADDR bt;		    /* Current address at top+1 of insn buffer.  */
-  #define BSZ 32	    /* Instruction buffer size.  */
-  char ibuf[BSZ];	    /* Instruction buffer for decoding prologue.  */
+  char ibuf[XTENSA_ISA_BSZ];/* Instruction buffer for decoding prologue.  */
   xtensa_isa isa;	    /* libisa ISA handle.  */
   xtensa_insnbuf ins, slot; /* libisa handle to decoded insn, slot.  */
   xtensa_format ifmt;	    /* libisa instruction format.  */
@@ -2153,7 +2152,7 @@ call0_analyze_prologue (CORE_ADDR start, CORE_ADDR pc, CORE_ADDR litbase,
   if (!xtensa_default_isa)
     xtensa_default_isa = xtensa_isa_init (0, 0);
   isa = xtensa_default_isa;
-  gdb_assert (BSZ >= xtensa_isa_maxlength (isa));
+  gdb_assert (XTENSA_ISA_BSZ >= xtensa_isa_maxlength (isa));
   ins = xtensa_insnbuf_alloc (isa);
   slot = xtensa_insnbuf_alloc (isa);
 
@@ -2166,7 +2165,7 @@ call0_analyze_prologue (CORE_ADDR start, CORE_ADDR pc, CORE_ADDR litbase,
       if (ia + xtensa_isa_maxlength (isa) > bt)
         {
 	  ba = ia;
-	  bt = (ba + BSZ) < body_pc ? ba + BSZ : body_pc;
+	  bt = (ba + XTENSA_ISA_BSZ) < body_pc ? ba + XTENSA_ISA_BSZ : body_pc;
 	  read_memory (ba, ibuf, bt - ba);
 	}
 

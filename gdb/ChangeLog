@@ -1,3 +1,8 @@
+2009-02-13  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* xtensa-tdep.c (call0_analyze_prologue): Delete BSZ macro.
+	Replace BSZ macro uses by XTENSA_ISA_BSZ macro.
+
 2009-02-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR fortran/9806
