@@ -74,26 +74,6 @@ gdb_expect {
 
 # Detect the size of the target's basic types.
 
-proc get_valueof { fmt exp default } {
-    global gdb_prompt
-    send_gdb "print${fmt} ${exp}\n"
-    gdb_expect {
-	-re "\\$\[0-9\]* = (\[-\]*\[0-9\]*).*$gdb_prompt $" {
-	    set val $expect_out(1,string)
-	    pass "get value of ${exp} ($val)"
-	}
-	timeout {
-	    set size ${default}
-	    fail "get value of ${exp} (timeout)"
-	}
-    }
-    return ${val}
-}
-
-proc get_sizeof { type default } {
-    return [get_valueof "/d" "sizeof (${type})" $default]
-}
-
 set sizeof_char [get_sizeof "char" 1]
 set sizeof_short [get_sizeof "short" 2]
 set sizeof_int [get_sizeof "int" 4]

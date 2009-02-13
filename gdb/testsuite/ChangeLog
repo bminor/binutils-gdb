@@ -1,3 +1,12 @@
+2009-02-13  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/remote.exp (get_sizeof): Remove.
+	* gdb.base/long_long.exp (get_valueof, get_sizeof): Remove.
+	* gdb.base/dfp-test.exp (get_valueof, get_sizeof): Remove.
+	* gdb.base/sizeof.exp (get_valueof, get_sizeof): Remove.
+	* lib/gdb.exp (get_valueof): Move from long_long.exp.
+	(get_sizeof): Likewise.
+
 2009-02-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR fortran/9806

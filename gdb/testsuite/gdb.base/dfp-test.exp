@@ -43,26 +43,6 @@ if ![runto_main] then {
     continue
 }
 
-# Detect the size of the target's basic types (from gdb.base/long_long.exp).
-
-proc get_valueof { fmt exp default } {
-    global gdb_prompt
-    send_gdb "print${fmt} ${exp}\n"
-    gdb_expect {
-	-re "\\$\[0-9\]* = (\[-\]*\[0-9\]*).*$gdb_prompt $" {
-	    set val $expect_out(1,string)
-	}
-	timeout {
-	    set val ${default}
-	}
-    }
-    return ${val}
-}
-
-proc get_sizeof { type default } {
-    return [get_valueof "/d" "sizeof (${type})" $default]
-}
-
 set sizeof_long [get_sizeof "long" 4]
 
 proc d32_set_tests {} {
