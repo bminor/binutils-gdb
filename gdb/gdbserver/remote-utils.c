@@ -823,6 +823,14 @@ getpkt (char *buf)
 	  fflush (stderr);
 	}
     }
+  else
+    {
+      if (remote_debug)
+	{
+	  fprintf (stderr, "getpkt (\"%s\");  [no ack sent] \n", buf);
+	  fflush (stderr);
+	}
+    }
 
   return bp - buf;
 }

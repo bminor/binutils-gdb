@@ -1,3 +1,8 @@
+2009-02-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* remote-utils.c (getpkt): Also generate remote-debug
+	information if noack_mode is set.
+
 2009-02-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.c (handle_query): Report qXfer:siginfo:read and
