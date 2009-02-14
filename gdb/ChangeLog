@@ -1,3 +1,17 @@
+2009-02-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Include frame information for *stopped due to CLI commands.
+
+        * ada-tasks.c (ada_normal_stop_observer): Adjust prototype.
+        * infcmd.c (finish_command_continuation): Pass '1' for
+        'print_frame' parameter to the observer.
+        * infrun.c (normal_stop): Don't print mi-specific information
+        here. Pass 'stop_print_frame' to the 'print_frame' parameter
+        of the observer.
+        * mi/mi-interp.c (mi_on_normal_stop): Adjust prototype.
+        If we need to print frame, and current uiout is not the MI one,
+        print frame again.
+
 2009-02-13  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* xtensa-tdep.c (call0_analyze_prologue): Delete BSZ macro.

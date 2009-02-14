@@ -951,7 +951,7 @@ ada_task_list_changed (void)
 /* The 'normal_stop' observer notification callback.  */
 
 static void
-ada_normal_stop_observer (struct bpstats *unused_args)
+ada_normal_stop_observer (struct bpstats *unused_args, int unused_args2)
 {
   /* The inferior has been resumed, and just stopped. This means that
      our task_list needs to be recomputed before it can be used again.  */

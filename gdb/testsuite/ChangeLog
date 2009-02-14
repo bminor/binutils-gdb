@@ -1,3 +1,10 @@
+2009-02-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * lib/mi-support.exp (mi_expect_stop): Adjust the order of fields.
+        (mi_expect_interrupt): Likewise.
+        * gdb.mi/mi-cli.exp: Check that "step" results in proper *stopped
+        response.
+
 2009-02-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* lib/gdb.exp (get_hexadecimal_valueof): New procedure.

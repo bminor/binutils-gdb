@@ -88,8 +88,11 @@ Send a notification to all @var{event} observers.
 
 The following observable events are defined:
 
-@deftypefun void normal_stop (struct bpstats *@var{bs})
-The inferior has stopped for real.
+@deftypefun void normal_stop (struct bpstats *@var{bs}, int @var{print_frame})
+The inferior has stopped for real.  The  @var{bs} argument describes
+the breakpoints were are stopped at, if any.  Second argument
+@var{print_frame} non-zero means display the location where the
+inferior has stopped.
 @end deftypefun
 
 @deftypefun void target_changed (struct target_ops *@var{target})

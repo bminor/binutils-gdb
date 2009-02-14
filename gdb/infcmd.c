@@ -1374,7 +1374,7 @@ finish_command_continuation (void *arg)
      next stop will be in the same thread that we started doing a
      finish on.  This suppressing (or some other replacement means)
      should be a thread property.  */
-  observer_notify_normal_stop (bs);
+  observer_notify_normal_stop (bs, 1 /* print frame */);
   suppress_stop_observer = 0;
   delete_breakpoint (a->breakpoint);
 }

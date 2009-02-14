@@ -1,3 +1,8 @@
+2009-02-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * observer.texi: Add parameter 'print_frame' to normal_stop
+        observer.
+
 2009-02-07  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Basic Python): Fix change from 2009-02-04.

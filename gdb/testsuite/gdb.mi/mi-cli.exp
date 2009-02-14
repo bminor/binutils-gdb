@@ -140,6 +140,9 @@ mi_gdb_test "500-stack-select-frame 0" \
   {500\^done} \
   "-stack-select-frame 0"
 
+mi_execute_to "interpreter-exec console step" "" "callee4" "" ".*basics.c" "29" \
+    "" "check *stopped from CLI command"
+
 # NOTE: cagney/2003-02-03: Not yet.
 # mi_gdb_test "-break-insert -t basics.c:$line_main_hello" \
 #   {.*=breakpoint-create,number="3".*\^done} \

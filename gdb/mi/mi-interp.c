@@ -51,7 +51,7 @@ static void mi1_command_loop (void);
 
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
-static void mi_on_normal_stop (struct bpstats *bs);
+static void mi_on_normal_stop (struct bpstats *bs, int print_frame);
 
 static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t);
@@ -317,17 +317,46 @@ mi_inferior_exit (int pid)
 }
 
 static void
-mi_on_normal_stop (struct bpstats *bs)
+mi_on_normal_stop (struct bpstats *bs, int print_frame)
 {
   /* Since this can be called when CLI command is executing,
      using cli interpreter, be sure to use MI uiout for output,
      not the current one.  */
-  struct ui_out *uiout = interp_ui_out (top_level_interpreter ());
+  struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
   struct mi_interp *mi = top_level_interpreter_data ();
 
+  if (print_frame)
+    {
+      if (uiout != mi_uiout)
+	{
+	  /* The normal_stop function has printed frame information into 
+	     CLI uiout, or some other non-MI uiout.  There's no way we
+	     can extract proper fields from random uiout object, so we print
+	     the frame again.  In practice, this can only happen when running
+	     a CLI command in MI.  */
+	  struct ui_out *saved_uiout = uiout;
+	  uiout = mi_uiout;
+	  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
+	  uiout = saved_uiout;
+	}
+
+      ui_out_field_int (mi_uiout, "thread-id",
+			pid_to_thread_id (inferior_ptid));
+      if (non_stop)
+	{
+	  struct cleanup *back_to = make_cleanup_ui_out_list_begin_end 
+	    (mi_uiout, "stopped-threads");
+	  ui_out_field_int (mi_uiout, NULL,
+			    pid_to_thread_id (inferior_ptid));		  		  
+	  do_cleanups (back_to);
+	}
+      else
+	ui_out_field_string (mi_uiout, "stopped-threads", "all");
+    }
+  
   fputs_unfiltered ("*stopped", raw_stdout);
-  mi_out_put (uiout, raw_stdout);
-  mi_out_rewind (uiout);
+  mi_out_put (mi_uiout, raw_stdout);
+  mi_out_rewind (mi_uiout);
   fputs_unfiltered ("\n", raw_stdout);
   gdb_flush (raw_stdout);
 }
