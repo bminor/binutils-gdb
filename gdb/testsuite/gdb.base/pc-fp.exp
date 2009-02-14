@@ -53,26 +53,11 @@ if ![runto_main] then {
     continue
 }
 
-proc get_valueofx { fmt exp default } {
-    global gdb_prompt
-    send_gdb "print${fmt} ${exp}\n"
-    gdb_expect {
-	-re "\\$\[0-9\]* = (0x\[0-9a-zA-Z\]+).*$gdb_prompt $" {
-	    set val $expect_out(1,string)
-	    pass "get value of ${exp}"
-	}
-	timeout {
-	    set val ${default}
-	    fail "get value of ${exp} (timeout)"
-	}
-    }
-    return ${val}
-}
 
 # Get the value of PC and FP
 
-set valueof_pc [get_valueofx "/x" "\$pc" "0"]
-set valueof_fp [get_valueofx "/x" "\$fp" "0"]
+set valueof_pc [get_hexadecimal_valueof "\$pc" "0"]
+set valueof_fp [get_hexadecimal_valueof "\$fp" "0"]
 
 # Check that the sequence $REGNAME -> REGNUM -> $REGNAME works.  Use
 # display since that encodes and then decodes the expression parameter

@@ -1,5 +1,11 @@
 2009-02-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* lib/gdb.exp (get_hexadecimal_valueof): New procedure.
+	* gdb.base/pc-fp.exp (get_valueofx): Remove.
+	Replace calls to get_valueofx by get_hexadecimal_valueof.
+
+2009-02-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* lib/gdb.exp (get_valueof): Accept anything as a return value.
 	(get_integer_valueof): New procedure.
 	(get_sizeof): Use new get_integer_value_of.
