@@ -1684,6 +1684,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	/* Turn VALUE into a proper PC relative address.  */
 	value -= (offset + input_section->output_offset
 		  + input_section->output_section->vma);
+	addend -= 8;
 
 	if (r_type == (unsigned int) R_PARISC_PCREL22F)
 	  max_branch_offset = (1 << (22-1)) << 2;
@@ -1708,9 +1709,9 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 
 	/* Adjust for any field selectors.  */
 	if (r_type == R_PARISC_PCREL17R)
-	  value = hppa_field_adjust (value, -8 + addend, e_rsel);
+	  value = hppa_field_adjust (value, addend, e_rsel);
 	else
-	  value = hppa_field_adjust (value, -8 + addend, e_fsel);
+	  value = hppa_field_adjust (value, addend, e_fsel);
 
 	/* All branches are implicitly shifted by 2 places.  */
 	value >>= 2;
