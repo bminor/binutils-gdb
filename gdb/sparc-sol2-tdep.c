@@ -231,6 +231,10 @@ sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_software_single_step (gdbarch, NULL);
 
   frame_unwind_append_unwinder (gdbarch, &sparc32_sol2_sigtramp_frame_unwind);
+
+  /* Solaris encodes the pid of the inferior in regset section
+     names.  */
+  set_gdbarch_core_reg_section_encodes_pid (gdbarch, 1);
 }
 
 

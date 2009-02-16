@@ -199,8 +199,9 @@ core_close (int quitting)
 
   if (core_bfd)
     {
+      int pid = ptid_get_pid (inferior_ptid);
       inferior_ptid = null_ptid;	/* Avoid confusion from thread stuff */
-      delete_inferior_silent (CORELOW_PID);
+      delete_inferior_silent (pid);
 
       /* Clear out solib state while the bfd is still open. See
          comments in clear_solib in solib.c. */
@@ -244,7 +245,15 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
 
   thread_id = atoi (bfd_section_name (abfd, asect) + 5);
 
-  ptid = ptid_build (ptid_get_pid (inferior_ptid), thread_id, 0);
+  if (core_gdbarch
+      && gdbarch_core_reg_section_encodes_pid (core_gdbarch))
+    {
+      uint32_t merged_pid = thread_id;
+      ptid = ptid_build (merged_pid & 0xffff,
+			 merged_pid >> 16, 0);
+    }
+  else
+    ptid = ptid_build (ptid_get_pid (inferior_ptid), thread_id, 0);
 
   if (ptid_get_lwp (inferior_ptid) == 0)
     /* The main thread has already been added before getting here, and
@@ -374,15 +383,13 @@ core_open (char *filename, int from_tty)
      from ST to MT.  */
   add_thread_silent (inferior_ptid);
 
-  /* This is done first, before anything has a chance to query the
-     inferior for information such as symbols.  */
-  post_create_inferior (&core_ops, from_tty);
-
   /* Build up thread list from BFD sections, and possibly set the
      current thread to the .reg/NN section matching the .reg
      section. */
   bfd_map_over_sections (core_bfd, add_to_thread_list,
 			 bfd_get_section_by_name (core_bfd, ".reg"));
+
+  post_create_inferior (&core_ops, from_tty);
 
   /* Now go through the target stack looking for threads since there
      may be a thread_stratum target loaded on top of target core by
@@ -453,7 +460,18 @@ get_core_register_section (struct regcache *regcache,
   char *contents;
 
   xfree (section_name);
-  if (ptid_get_lwp (inferior_ptid))
+
+  if (core_gdbarch
+      && gdbarch_core_reg_section_encodes_pid (core_gdbarch))
+    {
+      uint32_t merged_pid;
+
+      merged_pid = ptid_get_lwp (inferior_ptid);
+      merged_pid = merged_pid << 16 | ptid_get_pid (inferior_ptid);
+
+      section_name = xstrprintf ("%s/%s", name, plongest (merged_pid));
+    }
+  else if (ptid_get_lwp (inferior_ptid))
     section_name = xstrprintf ("%s/%ld", name, ptid_get_lwp (inferior_ptid));
   else
     section_name = xstrdup (name);

@@ -1,3 +1,20 @@
+2009-02-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* corelow.c (core_close): Don't hardcode the core's pid.
+	(core_open): Find core threads before calling
+	post_create_inferior.
+	(add_to_thread_list, get_core_register_section): Take into account
+	systems where the regset section names encode the pid of the
+	inferior.
+
+	* gdbarch.sh (core_reg_section_encodes_pid): New gdbarch setting.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* amd64-sol2-tdep.c (amd64_sol2_init_abi): Set it.
+	* i386-sol2-tdep.c (i386_sol2_init_abi): Set it.
+	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Set it.
+	* sparc64-sol2-tdep.c (sparc64_sol2_init_abi): Set it.
+
 2009-02-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Include frame information for *stopped due to CLI commands.

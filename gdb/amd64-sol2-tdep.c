@@ -113,6 +113,10 @@ amd64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_solib_resolver (gdbarch, sol2_skip_solib_resolver);
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
+
+  /* Solaris encodes the pid of the inferior in regset section
+     names.  */
+  set_gdbarch_core_reg_section_encodes_pid (gdbarch, 1);
 }
 
 

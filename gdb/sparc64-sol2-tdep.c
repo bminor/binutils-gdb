@@ -180,6 +180,10 @@ sparc64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Solaris has kernel-assisted single-stepping support.  */
   set_gdbarch_software_single_step (gdbarch, NULL);
+
+  /* Solaris encodes the pid of the inferior in regset section
+     names.  */
+  set_gdbarch_core_reg_section_encodes_pid (gdbarch, 1);
 }
 
 
