@@ -3438,7 +3438,10 @@ process_insert_statements (void)
 	{
 	  /* Keep pointers to the first and last output section
 	     statement in the sequence we may be about to move.  */
-	  last_os = &(*s)->output_section_statement;
+	  os = &(*s)->output_section_statement;
+
+	  ASSERT (last_os == NULL || last_os->next == os);
+	  last_os = os;
 
 	  /* Set constraint negative so that lang_output_section_find
 	     won't match this output section statement.  At this
