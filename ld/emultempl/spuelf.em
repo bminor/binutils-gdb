@@ -160,12 +160,11 @@ spu_place_special_section (asection *s, asection *o, const char *output_name)
 	  /* Pad this stub section so that it finishes at the
 	     end of the icache line.  */
 	  etree_type *e_size;
-	  lang_statement_list_type *save = stat_ptr;
 
-	  stat_ptr = &os->children;
+	  push_stat_ptr (&os->children);
 	  e_size = exp_intop (params.line_size - s->size);
 	  lang_add_assignment (exp_assop ('=', ".", e_size));
-	  stat_ptr = save;
+	  pop_stat_ptr ();
 	}
       lang_add_section (&os->children, s, os);
     }
@@ -558,7 +557,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
   if (lang_add_input_file (oname, lang_input_file_is_file_enum, NULL) == NULL)
     return FALSE;
 
-  /* lang_add_input_file put the new list entry at the end of the statement
+  /* lang_add_input_file puts the new list entry at the end of the statement
      and input file lists.  Move it to just after the current entry.  */
   new_ent = *old_stat_tail;
   *old_stat_tail = NULL;

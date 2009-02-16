@@ -1,6 +1,6 @@
 /* ldlang.h - linker command language support
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
@@ -550,6 +550,10 @@ extern void lang_add_output_format
   (const char *, const char *, const char *, int);
 extern void lang_list_init
   (lang_statement_list_type *);
+extern void push_stat_ptr
+  (lang_statement_list_type *);
+extern void pop_stat_ptr
+  (void);
 extern void lang_add_data
   (int type, union etree_union *);
 extern void lang_add_reloc
