@@ -1,3 +1,20 @@
+2009-02-16  Nick Clifton  <nickc@redhat.com>
+
+	* gas/mips/e32-rel2.d: Adjust expected output to remove the 0x4000
+	offset.
+	* gas/mips/e32el-rel2.d: Likewise.
+	* gas/mips/elf-rel2.d: Likewise.
+	* gas/mips/elf-rel9-mips16.d: Likewise.
+	* gas/mips/elf-rel9.d: Likewise.
+	* gas/mips/elfel-rel2.d: Likewise.
+	* gas/mips/lb.d: Likewise.
+	* gas/mips/mips-abi32.d: Likewise.
+	* gas/mips/mips-gp32-fp32.d: Likewise.
+	* gas/mips/mips-gp32-fp64.d: Likewise.
+	* gas/mips/mips-gp64-fp32.d: Likewise.
+	* gas/mips/mips-gp64-fp64.d: Likewise.
+	* gas/mips/mips32-sf32.d: Likewise.
+
 2009-02-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* m68k/br-isac.d, m68k/br-isac.s: Add stldsr test.
