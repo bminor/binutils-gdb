@@ -1,3 +1,8 @@
+2009-02-16  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open):  Don't emit
+	inadvertent .reloc sections caused by refactoring accident.
+
 2009-02-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (process_insert_statements): ASSERT that output section

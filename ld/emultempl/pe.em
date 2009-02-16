@@ -1061,11 +1061,11 @@ gld_${EMULATION_NAME}_after_open (void)
     || defined (TARGET_IS_arm_wince_pe)
   if (!link_info.relocatable)
     pe_dll_build_sections (link_info.output_bfd, &link_info);
-  else
-    pe_exe_build_sections (link_info.output_bfd, &link_info);
 #else
   if (link_info.shared)
     pe_dll_build_sections (link_info.output_bfd, &link_info);
+  else
+    pe_exe_build_sections (link_info.output_bfd, &link_info);
 #endif
 #endif /* DLL_SUPPORT */
 
