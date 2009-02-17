@@ -1,3 +1,22 @@
+2009-02-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* Makefile.in (ALL_64_TARGET_OBS): Add amd64-dicos-tdep.o.
+	(ALL_TARGET_OBS): Add dicos-tdep.o.
+	(ALLDEPFILES): Add amd64-dicos-tdep.c and dicos-tdep.c.
+	* configure.tgt (i[34567]86-*-dicos*): Add dicos-tdep.o to
+	gdb_target_obs.
+	(x86_64-*-dicos*): Add dicos-tdep.o and amd64-dicos-tdep.o to
+	gdb_target_obs.
+	* dicos-tdep.h, dicos-tdep.c: New.
+	* amd64-dicos-tdep.c: New.
+	* i386-dicos-tdep.c: Don't include solib.h, solib-target.h or
+	inferior.h.  Include dicos-tdep.h.
+	(i386_dicos_init_abi): Call dicos_init_abi.
+	(i386_dicos_bfd_has_symbol_p): Delete.
+	(i386_dicos_osabi_sniffer): Use dicos_load_module_p.
+
+	* NEWS: Mention x86-64 DICOS target support.
+
 2009-02-16  Doug Evans  <dje@google.com>
 
 	* amd64-tdep.c (amd64_skip_prefixes): Renamed from skip_prefixes.

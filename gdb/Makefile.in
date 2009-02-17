@@ -461,8 +461,8 @@ TARGET_OBS = @TARGET_OBS@
 ALL_64_TARGET_OBS = \
 	alphabsd-tdep.o alphafbsd-tdep.o alpha-linux-tdep.o alpha-mdebug-tdep.o \
 	alphanbsd-tdep.o alphaobsd-tdep.o alpha-osf1-tdep.o alpha-tdep.o \
-	amd64fbsd-tdep.o amd64-linux-tdep.o amd64nbsd-tdep.o amd64obsd-tdep.o \
-	amd64-sol2-tdep.o amd64-tdep.o \
+	amd64fbsd-tdep.o amd64-dicos-tdep.o amd64-linux-tdep.o amd64nbsd-tdep.o \
+	amd64obsd-tdep.o amd64-sol2-tdep.o amd64-tdep.o \
 	ia64-linux-tdep.o ia64-tdep.o \
 	mips64obsd-tdep.o \
 	sparc64fbsd-tdep.o sparc64-linux-tdep.o sparc64nbsd-tdep.o \
@@ -474,6 +474,7 @@ ALL_TARGET_OBS = \
 	arm-tdep.o arm-wince-tdep.o \
 	avr-tdep.o \
 	cris-tdep.o \
+	dicos-tdep.o \
 	frv-linux-tdep.o frv-tdep.o \
 	h8300-tdep.o \
 	hppabsd-tdep.o hppanbsd-tdep.o hppaobsd-tdep.o \
@@ -1271,6 +1272,7 @@ ALLDEPFILES = \
 	amd64bsd-nat.c amd64fbsd-nat.c amd64fbsd-tdep.c \
 	amd64nbsd-nat.c amd64nbsd-tdep.c \
 	amd64obsd-nat.c amd64obsd-tdep.c \
+	amd64-dicos-tdep.c \
 	amd64-linux-nat.c amd64-linux-tdep.c \
 	amd64-sol2-tdep.c \
 	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
@@ -1278,7 +1280,8 @@ ALLDEPFILES = \
 	avr-tdep.c \
 	bsd-uthread.c bsd-kvm.c \
 	core-regset.c corelow.c \
-	dcache.c exec.c \
+	dcache.c dicos-tdep.c \
+	exec.c \
 	fbsd-nat.c \
 	fork-child.c \
 	glibc-tdep.c \

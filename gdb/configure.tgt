@@ -153,7 +153,7 @@ i[34567]86-*-darwin*)
 i[34567]86-*-dicos*)
 	# Target: DICOS/i386
 	gdb_target_obs="i386-tdep.o i387-tdep.o \
-			i386-dicos-tdep.o \
+			dicos-tdep.o i386-dicos-tdep.o \
 			corelow.o solib.o solib-target.o"
 	;;
 i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
@@ -506,7 +506,7 @@ vax-*-*)
 x86_64-*-dicos*)
 	# Target: DICOS/x86-64
 	gdb_target_obs="amd64-tdep.o i386-tdep.o i387-tdep.o \
-			i386-dicos-tdep.o \
+			dicos-tdep.o i386-dicos-tdep.o amd64-dicos-tdep.o \
 			corelow.o solib.o solib-target.o"
 	;;
 x86_64-*-linux*)

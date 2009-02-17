@@ -1,6 +1,6 @@
-/* Target-dependent code for DICOS running on i386's, for GDB.
+/* Target-dependent code for DICOS running on x86-64's, for GDB.
 
-   Copyright (C) 2008, 2009 Free Software Foundation, Inc.
+   Copyright (C) 2009 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,15 +20,16 @@
 #include "defs.h"
 #include "osabi.h"
 #include "gdb_string.h"
+#include "amd64-tdep.h"
 #include "dicos-tdep.h"
 
 static CORE_ADDR
-i386_dicos_push_dummy_code (struct gdbarch *gdbarch,
-			    CORE_ADDR sp, CORE_ADDR funaddr,
-			    struct value **args, int nargs,
-			    struct type *value_type,
-			    CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
-			    struct regcache *regcache)
+amd64_dicos_push_dummy_code (struct gdbarch *gdbarch,
+			     CORE_ADDR sp, CORE_ADDR funaddr,
+			     struct value **args, int nargs,
+			     struct type *value_type,
+			     CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
+			     struct regcache *regcache)
 {
   int bplen;
   CORE_ADDR bppc = sp;
@@ -41,37 +42,41 @@ i386_dicos_push_dummy_code (struct gdbarch *gdbarch,
 }
 
 static void
-i386_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+amd64_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  amd64_init_abi (info, gdbarch);
+
   dicos_init_abi (gdbarch);
 
-  set_gdbarch_push_dummy_code (gdbarch, i386_dicos_push_dummy_code);
+  set_gdbarch_push_dummy_code (gdbarch, amd64_dicos_push_dummy_code);
 }
 
 static enum gdb_osabi
-i386_dicos_osabi_sniffer (bfd *abfd)
+amd64_dicos_osabi_sniffer (bfd *abfd)
 {
   char *target_name = bfd_get_target (abfd);
 
-  /* On x86-DICOS, the Load Module's "header" section is 36 bytes.  */
-  if (strcmp (target_name, "elf32-i386") == 0
-      && dicos_load_module_p (abfd, 36))
+  /* On amd64-DICOS, the Load Module's "header" section is 72
+     bytes.  */
+  if (strcmp (target_name, "elf64-x86-64") == 0
+      && dicos_load_module_p (abfd, 72))
     return GDB_OSABI_DICOS;
 
   return GDB_OSABI_UNKNOWN;
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_i386_dicos_tdep (void);
+void _initialize_amd64_dicos_tdep (void);
 
 void
-_initialize_i386_dicos_tdep (void)
+_initialize_amd64_dicos_tdep (void)
 {
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,
-                                  i386_dicos_osabi_sniffer);
+				  amd64_dicos_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_DICOS,
-                          i386_dicos_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
+			  GDB_OSABI_DICOS,
+			  amd64_dicos_init_abi);
 }
