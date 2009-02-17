@@ -141,6 +141,26 @@ gdb_test "continue" \
 
 ##########################################
 
+# int3 (with prefixes)
+# These don't occur in normal code, but gdb should still DTRT.
+
+gdb_test "break test_int3" \
+    "Breakpoint.*at.* file .*$srcfile, line.*" \
+    "break test_int3"
+gdb_test "break test_int3_end" \
+    "Breakpoint.*at.* file .*$srcfile, line.*" \
+    "break test_int3_end"
+
+gdb_test "continue" \
+    "Continuing.*Breakpoint.*, test_int3 ().*" \
+    "continue to test_int3"
+
+gdb_test "continue" \
+    "Continuing.*Breakpoint.*, test_int3_end ().*" \
+    "continue to test_int3_end"
+
+##########################################
+
 # Test rip-relative.
 # GDB picks a spare register to hold the rip-relative address.
 # Exercise all the possibilities (rax-rdi, sans rsp).

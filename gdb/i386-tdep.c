@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "opcode/i386.h"
 #include "arch-utils.h"
 #include "command.h"
 #include "dummy-frame.h"
@@ -278,9 +279,44 @@ i386_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
 
 /* Displaced instruction handling.  */
 
+/* Skip the legacy instruction prefixes in INSN.
+   Not all prefixes are valid for any particular insn
+   but we needn't care, the insn will fault if it's invalid.
+   The result is a pointer to the first opcode byte,
+   or NULL if we run off the end of the buffer.  */
+
+static gdb_byte *
+i386_skip_prefixes (gdb_byte *insn, size_t max_len)
+{
+  gdb_byte *end = insn + max_len;
+
+  while (insn < end)
+    {
+      switch (*insn)
+	{
+	case DATA_PREFIX_OPCODE:
+	case ADDR_PREFIX_OPCODE:
+	case CS_PREFIX_OPCODE:
+	case DS_PREFIX_OPCODE:
+	case ES_PREFIX_OPCODE:
+	case FS_PREFIX_OPCODE:
+	case GS_PREFIX_OPCODE:
+	case SS_PREFIX_OPCODE:
+	case LOCK_PREFIX_OPCODE:
+	case REPE_PREFIX_OPCODE:
+	case REPNE_PREFIX_OPCODE:
+	  ++insn;
+	  continue;
+	default:
+	  return insn;
+	}
+    }
+
+  return NULL;
+}
 
 static int
-i386_absolute_jmp_p (gdb_byte *insn)
+i386_absolute_jmp_p (const gdb_byte *insn)
 {
   /* jmp far (absolute address in operand) */
   if (insn[0] == 0xea)
@@ -301,7 +337,7 @@ i386_absolute_jmp_p (gdb_byte *insn)
 }
 
 static int
-i386_absolute_call_p (gdb_byte *insn)
+i386_absolute_call_p (const gdb_byte *insn)
 {
   /* call far, absolute */
   if (insn[0] == 0x9a)
@@ -322,7 +358,7 @@ i386_absolute_call_p (gdb_byte *insn)
 }
 
 static int
-i386_ret_p (gdb_byte *insn)
+i386_ret_p (const gdb_byte *insn)
 {
   switch (insn[0])
     {
@@ -339,7 +375,7 @@ i386_ret_p (gdb_byte *insn)
 }
 
 static int
-i386_call_p (gdb_byte *insn)
+i386_call_p (const gdb_byte *insn)
 {
   if (i386_absolute_call_p (insn))
     return 1;
@@ -351,16 +387,11 @@ i386_call_p (gdb_byte *insn)
   return 0;
 }
 
-static int
-i386_breakpoint_p (gdb_byte *insn)
-{
-  return insn[0] == 0xcc;       /* int 3 */
-}
-
 /* Return non-zero if INSN is a system call, and set *LENGTHP to its
    length in bytes.  Otherwise, return zero.  */
+
 static int
-i386_syscall_p (gdb_byte *insn, ULONGEST *lengthp)
+i386_syscall_p (const gdb_byte *insn, ULONGEST *lengthp)
 {
   if (insn[0] == 0xcd)
     {
@@ -373,6 +404,7 @@ i386_syscall_p (gdb_byte *insn, ULONGEST *lengthp)
 
 /* Fix up the state of registers and memory after having single-stepped
    a displaced instruction.  */
+
 void
 i386_displaced_step_fixup (struct gdbarch *gdbarch,
                            struct displaced_step_closure *closure,
@@ -388,6 +420,8 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
   /* Since we use simple_displaced_step_copy_insn, our closure is a
      copy of the instruction.  */
   gdb_byte *insn = (gdb_byte *) closure;
+  /* The start of the insn, needed in case we see some prefixes.  */
+  gdb_byte *insn_start = insn;
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog,
@@ -400,6 +434,18 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
      Yay for Free Software!  */
 
   /* Relocate the %eip, if necessary.  */
+
+  /* The instruction recognizers we use assume any leading prefixes
+     have been skipped.  */
+  {
+    /* This is the size of the buffer in closure.  */
+    size_t max_insn_len = gdbarch_max_insn_length (gdbarch);
+    gdb_byte *opcode = i386_skip_prefixes (insn, max_insn_len);
+    /* If there are too many prefixes, just ignore the insn.
+       It will fault when run.  */
+    if (opcode != NULL)
+      insn = opcode;
+  }
 
   /* Except in the case of absolute or indirect jump or call
      instructions, or a return instruction, the new eip is relative to
@@ -430,7 +476,7 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
          it unrelocated.  Goodness help us if there are PC-relative
          system calls.  */
       if (i386_syscall_p (insn, &insn_len)
-          && orig_eip != to + insn_len)
+          && orig_eip != to + (insn - insn_start) + insn_len)
         {
           if (debug_displaced)
             fprintf_unfiltered (gdb_stdlog,
@@ -441,20 +487,9 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
         {
           ULONGEST eip = (orig_eip - insn_offset) & 0xffffffffUL;
 
-          /* If we have stepped over a breakpoint, set the %eip to
-             point at the breakpoint instruction itself.
-
-             (gdbarch_decr_pc_after_break was never something the core
-             of GDB should have been concerned with; arch-specific
-             code should be making PC values consistent before
-             presenting them to GDB.)  */
-          if (i386_breakpoint_p (insn))
-            {
-              if (debug_displaced)
-                fprintf_unfiltered (gdb_stdlog,
-                                    "displaced: stepped breakpoint\n");
-              eip--;
-            }
+	  /* If we just stepped over a breakpoint insn, we don't backup
+	     the pc on purpose; this is to match behaviour without
+	     stepping.  */
 
           regcache_cooked_write_unsigned (regs, I386_EIP_REGNUM, eip);
 
@@ -493,8 +528,6 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
                             paddr_nz (retaddr));
     }
 }
-
-
 
 #ifdef I386_REGNO_TO_SYMMETRY
 #error "The Sequent Symmetry is no longer supported."

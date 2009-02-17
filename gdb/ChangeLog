@@ -1,3 +1,20 @@
+2009-02-16  Doug Evans  <dje@google.com>
+
+	* amd64-tdep.c (amd64_skip_prefixes): Renamed from skip_prefixes.
+	All callers updated.
+	(amd64_get_insn_details): Handle more 3-byte opcode insns.
+	(amd64_breakpoint_p): Delete.
+	(amd64_displaced_step_fixup): When fixing up after stepping an int3,
+	don't back up pc to the start of the int3.
+	* i386-tdep.c: #include opcode/i386.h.
+	(i386_skip_prefixes): New function.
+	(i386_absolute_jmp_p): Constify argument.
+	(i386_absolute_call_p,i386_ret_p,i386_call_p,i386_syscall_p): Ditto.
+	(i386_breakpoint_p): Delete.
+	(i386_displaced_step_fixup): Handle unnecessary or redundant prefixes.
+	When fixing up after stepping an int3, don't back up pc to the start
+	of the int3.
+
 2009-02-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* corelow.c (core_close): Don't hardcode the core's pid.

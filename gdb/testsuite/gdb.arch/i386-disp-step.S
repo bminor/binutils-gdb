@@ -23,8 +23,11 @@
 main:
 	nop
 
-/* test call/ret */
+/***********************************************/
 
+/* Test call/ret.  */
+
+	nop
 	.global test_call
 test_call:
 	call test_call_subr
@@ -33,15 +36,71 @@ test_call:
 test_ret_end:
 	nop
 
-/* test syscall */
+/***********************************************/
 
-	.global test_syscall
+/* Absolute jump with leading prefixes.
+   These don't occur in normal code, but gdb should still DTRT.  */
+
+	nop
+	.global test_prefixed_abs_jump
+test_prefixed_abs_jump:
+	ds
+	jmp *test_prefixed_abs_jump_addr
+	.data
+test_prefixed_abs_jump_addr:
+	.4byte test_prefixed_abs_jump_target
+	.text
+test_prefixed_abs_jump_target:
+	nop
+	.global test_prefixed_abs_jump_end
+test_prefixed_abs_jump_end:
+	nop
+
+/***********************************************/
+
+/* Test syscall.  */
+
 	mov $0x14,%eax /* getpid */
+	.global test_syscall
 test_syscall:
 	int $0x80
 	nop
+	.global test_syscall_end
 test_syscall_end:
 	nop
+
+/***********************************************/
+
+/* Test syscall again, this time with a prefix.
+   These don't occur in normal code, but gdb should still DTRT.  */
+
+	mov $0x14,%eax /* getpid */
+	.global test_prefixed_syscall
+test_prefixed_syscall:
+	repnz
+	int $0x80
+	nop
+	.global test_prefixed_syscall_end
+test_prefixed_syscall_end:
+	nop
+
+/***********************************************/
+
+/* Test stepping over int3.
+   The prefixes are pointless, but it's possible, so we exercise it.  */
+
+	nop
+	.global test_int3
+test_int3:
+	repz
+	repz
+	int3
+	nop
+	.global test_int3_end
+test_int3_end:
+	nop
+
+/***********************************************/
 
 /* all done */
 

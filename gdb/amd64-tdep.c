@@ -805,7 +805,7 @@ rex_prefix_p (gdb_byte pfx)
    about falling off the end of the buffer.  */
 
 static gdb_byte *
-skip_prefixes (gdb_byte *insn)
+amd64_skip_prefixes (gdb_byte *insn)
 {
   while (1)
     {
@@ -974,7 +974,7 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
   details->modrm_offset = -1;
 
   /* Skip legacy instruction prefixes.  */
-  insn = skip_prefixes (insn);
+  insn = amd64_skip_prefixes (insn);
 
   /* Skip REX instruction prefix.  */
   if (rex_prefix_p (*insn))
@@ -992,13 +992,21 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
       need_modrm = twobyte_has_modrm[*insn];
 
       /* Check for three-byte opcode.  */
-      if (*insn == 0x38 || *insn == 0x3a)
+      switch (*insn)
 	{
+	case 0x24:
+	case 0x25:
+	case 0x38:
+	case 0x3a:
+	case 0x7a:
+	case 0x7b:
 	  ++insn;
 	  details->opcode_len = 3;
+	  break;
+	default:
+	  details->opcode_len = 2;
+	  break;
 	}
-      else
-	details->opcode_len = 2;
     }
   else
     {
@@ -1217,14 +1225,6 @@ amd64_call_p (const struct amd64_insn *details)
   return 0;
 }
 
-static int
-amd64_breakpoint_p (const struct amd64_insn *details)
-{
-  const gdb_byte *insn = &details->raw_insn[details->opcode_offset];
-
-  return insn[0] == 0xcc; /* int 3 */
-}
-
 /* Return non-zero if INSN is a system call, and set *LENGTHP to its
    length in bytes.  Otherwise, return zero.  */
 
@@ -1323,20 +1323,9 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 	{
 	  ULONGEST rip = orig_rip - insn_offset;
 
-	  /* If we have stepped over a breakpoint, set %rip to
-	     point at the breakpoint instruction itself.
-
-	     (gdbarch_decr_pc_after_break was never something the core
-	     of GDB should have been concerned with; arch-specific
-	     code should be making PC values consistent before
-	     presenting them to GDB.)  */
-	  if (amd64_breakpoint_p (insn_details))
-	    {
-	      if (debug_displaced)
-		fprintf_unfiltered (gdb_stdlog,
-				    "displaced: stepped breakpoint\n");
-	      rip--;
-	    }
+	  /* If we just stepped over a breakpoint insn, we don't backup
+	     the pc on purpose; this is to match behaviour without
+	     stepping.  */
 
 	  regcache_cooked_write_unsigned (regs, AMD64_RIP_REGNUM, rip);
 

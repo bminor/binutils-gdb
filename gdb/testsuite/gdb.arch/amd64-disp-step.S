@@ -23,6 +23,8 @@
 main:
 	nop
 
+/***********************************************/
+
 /* test call/ret */
 
 	.global test_call
@@ -32,6 +34,8 @@ test_call:
 	.global test_ret_end
 test_ret_end:
 	nop
+
+/***********************************************/
 
 /* test abs-jmp/rep-ret */
 
@@ -48,6 +52,8 @@ test_abs_jmp_return:
 test_rep_ret_end:
 	nop
 
+/***********************************************/
+
 /* test syscall */
 
 	.global test_syscall
@@ -57,6 +63,24 @@ test_syscall:
 	nop
 test_syscall_end:
 	nop
+
+/***********************************************/
+
+/* Test stepping over int3.
+   The prefixes are pointless, but it's possible, so we exercise it.  */
+
+	nop
+	.global test_int3
+test_int3:
+	repz
+	repz
+	int3
+	nop
+	.global test_int3_end
+test_int3_end:
+	nop
+
+/***********************************************/
 
 /* test rip-relative
    GDB picks a spare register to hold the rip-relative address.
@@ -118,6 +142,8 @@ test_rip_rdi_end:
 
 answer:	.8byte 42
 
+/***********************************************/
+
 /* all done */
 
 done:
@@ -138,6 +164,8 @@ test_call_end:
 	.global test_ret
 test_ret:
 	ret
+
+/***********************************************/
 
 /* subroutine to help test abs-jmp/rep-ret */
 
