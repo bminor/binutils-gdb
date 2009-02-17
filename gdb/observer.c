@@ -181,19 +181,19 @@ int observer_test_second_observer = 0;
 int observer_test_third_observer = 0;
 
 void
-observer_test_first_notification_function (struct bpstats *bs)
+observer_test_first_notification_function (int arg)
 {
   observer_test_first_observer++;
 }
 
 void
-observer_test_second_notification_function (struct bpstats *bs)
+observer_test_second_notification_function (int arg)
 {
   observer_test_second_observer++;
 }
 
 void
-observer_test_third_notification_function (struct bpstats *bs)
+observer_test_third_notification_function (int arg)
 {
   observer_test_third_observer++;
 }

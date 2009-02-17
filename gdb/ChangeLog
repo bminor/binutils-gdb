@@ -1,3 +1,9 @@
+2009-02-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* observer.c (observer_test_first_notification_function)
+	(observer_test_second_notification_function)
+	(observer_test_third_notification_function): Adjust prototype.
+
 2009-02-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* Makefile.in (ALL_64_TARGET_OBS): Add amd64-dicos-tdep.o.

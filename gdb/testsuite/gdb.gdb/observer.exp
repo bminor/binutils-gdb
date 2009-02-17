@@ -101,32 +101,32 @@ proc setup_test { executable } {
 }
 
 proc attach_first_observer { message } {
-    gdb_test "set \$first_obs = observer_attach_normal_stop (&observer_test_first_notification_function)" \
+    gdb_test "set \$first_obs = observer_attach_test_notification (&observer_test_first_notification_function)" \
 	"" "$message; attach first observer"
 }
 
 proc attach_second_observer { message } {
-    gdb_test "set \$second_obs = observer_attach_normal_stop (&observer_test_second_notification_function)" \
+    gdb_test "set \$second_obs = observer_attach_test_notification (&observer_test_second_notification_function)" \
 	"" "$message; attach second observer"
 }
 
 proc attach_third_observer { message } {
-    gdb_test "set \$third_obs = observer_attach_normal_stop (&observer_test_third_notification_function)" \
+    gdb_test "set \$third_obs = observer_attach_test_notification (&observer_test_third_notification_function)" \
 	"" "$message; attach third observer"
 }
 
 proc detach_first_observer { message } {
-    gdb_test "call observer_detach_normal_stop (\$first_obs)" \
+    gdb_test "call observer_detach_test_notification (\$first_obs)" \
 	"" "$message; detach first observer"
 }
 
 proc detach_second_observer { message } {
-    gdb_test "call observer_detach_normal_stop (\$second_obs)" \
+    gdb_test "call observer_detach_test_notification (\$second_obs)" \
 	"" "$message; detach second observer"
 }
 
 proc detach_third_observer { message } {
-    gdb_test "call observer_detach_normal_stop (\$third_obs)" \
+    gdb_test "call observer_detach_test_notification (\$third_obs)" \
 	"" "$message; detach third observer"
 }
 
@@ -151,21 +151,21 @@ proc reset_counters { message } {
 	"$message; reset third observer counter"
 }
 
-proc test_normal_stop_notifications { first second third message args } {
+proc test_notifications { first second third message args } {
     # Do any initialization
     for {set i 0} {$i < [llength $args]} {incr i} {
 	[lindex $args $i] $message
     }
     reset_counters $message
-    # Call observer_notify_normal_stop.  Note that this procedure
+    # Call observer_notify_test_notification.  Note that this procedure
     # takes one argument, but this argument is ignored by the observer
     # callbacks we have installed.  So we just pass an arbitrary value.
-    gdb_test "call observer_notify_normal_stop (0)" "" \
+    gdb_test "call observer_notify_test_notification (0)" "" \
 	"$message; sending notification"
     check_counters $first $second $third $message
 }
 
-proc test_observer_normal_stop { executable } {
+proc test_observer { executable } {
 
     set setup_result [setup_test $executable]
     if {$setup_result <0} then {
@@ -173,56 +173,56 @@ proc test_observer_normal_stop { executable } {
     }
 
     # First, try sending a notification without any observer attached.
-    test_normal_stop_notifications 0 0 0 "no observer attached"
+    test_notifications 0 0 0 "no observer attached"
 
     # Now, attach one observer, and send a notification.
-    test_normal_stop_notifications 0 1 0 "second observer attached" \
+    test_notifications 0 1 0 "second observer attached" \
 	attach_second_observer
 
     # Remove the observer, and send a notification.
-    test_normal_stop_notifications 0 0 0 "second observer detached" \
+    test_notifications 0 0 0 "second observer detached" \
 	detach_second_observer
 
     # With a new observer.
-    test_normal_stop_notifications 1 0 0 "1st observer added" \
+    test_notifications 1 0 0 "1st observer added" \
 	attach_first_observer
 
     # With 2 observers.
-    test_normal_stop_notifications 1 1 0 "2nd observer added" \
+    test_notifications 1 1 0 "2nd observer added" \
 	attach_second_observer
 
     # With 3 observers.
-    test_normal_stop_notifications 1 1 1 "3rd observer added" \
+    test_notifications 1 1 1 "3rd observer added" \
 	attach_third_observer
 
     # Remove middle observer.
-    test_normal_stop_notifications 1 0 1 "2nd observer removed" \
+    test_notifications 1 0 1 "2nd observer removed" \
 	detach_second_observer
 
     # Remove first observer.
-    test_normal_stop_notifications 0 0 1 "1st observer removed" \
+    test_notifications 0 0 1 "1st observer removed" \
 	detach_first_observer
 
     # Remove last observer.
-    test_normal_stop_notifications 0 0 0 "3rd observer removed" \
+    test_notifications 0 0 0 "3rd observer removed" \
 	detach_third_observer
 
     # Go back to 3 observers, and remove them in a different order...
-    test_normal_stop_notifications 1 1 1 "three observers added" \
+    test_notifications 1 1 1 "three observers added" \
 	attach_first_observer \
 	attach_second_observer \
 	attach_third_observer 
 
     # Remove the third observer.
-    test_normal_stop_notifications 1 1 0 "third observer removed" \
+    test_notifications 1 1 0 "third observer removed" \
 	detach_third_observer
 
     # Remove the second observer.
-    test_normal_stop_notifications 1 0 0 "second observer removed" \
+    test_notifications 1 0 0 "second observer removed" \
 	detach_second_observer
 
     # Remove the first observer, no more observers.
-    test_normal_stop_notifications 0 0 0 "first observer removed" \
+    test_notifications 0 0 0 "first observer removed" \
 	detach_first_observer
 
     return 0
@@ -262,7 +262,7 @@ remote_file host delete x$tool
 
 gdb_start
 set file [remote_download host $GDB_FULLPATH x$tool]
-set result [test_observer_normal_stop $file];
+set result [test_observer $file];
 gdb_exit;
 catch "remote_file host delete $file";
 

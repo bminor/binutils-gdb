@@ -1,3 +1,12 @@
+2009-02-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.gdb/observer.exp: Use test_notification observer, not
+	normal_stop, everywhere.
+	(test_normal_stop_notifications): Rename to...
+	(test_notifications): ...this.
+	(test_observer_normal_stop): Rename to...
+	(test_observer): ...this.
+
 2009-02-16  Doug Evans  <dje@google.com>
 
 	* gdb.arch/amd64-disp-step.S (test_int3): New test.
