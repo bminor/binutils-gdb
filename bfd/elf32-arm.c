@@ -2010,20 +2010,27 @@ static const bfd_vma elf32_arm_symbian_plt_entry [] =
 #define THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 2) + 4)
 #define THM2_MAX_BWD_BRANCH_OFFSET (-(1 << 24) + 4)
 
-static const bfd_vma arm_long_branch_stub[] =
+/* Arm/Thumb -> Arm/Thumb long branch stub. On V5T and above, use blx
+   to reach the stub if necessary.  */
+static const bfd_vma elf32_arm_stub_long_branch_any_any[] =
   {
     0xe51ff004,         /* ldr   pc, [pc, #-4] */
     0x00000000,         /* dcd   R_ARM_ABS32(X) */
   };
 
-static const bfd_vma arm_thumb_v4t_long_branch_stub[] =
+/* V4T Arm -> Thumb long branch stub. Used on V4T where blx is not
+   available.  */
+static const bfd_vma elf32_arm_stub_long_branch_v4t_arm_thumb[] =
   {
     0xe59fc000,         /* ldr   ip, [pc, #0] */
     0xe12fff1c,         /* bx    ip */
     0x00000000,         /* dcd   R_ARM_ABS32(X) */
   };
 
-static const bfd_vma arm_thumb_thumb_long_branch_stub[] =
+/* Thumb -> Thumb long branch stub. Used on architectures which
+   support only this mode, or on V4T where it is expensive to switch
+   to ARM.  */
+static const bfd_vma elf32_arm_stub_long_branch_thumb_only[] =
   {
     0x4e02b540,         /* push {r6, lr} */
                         /* ldr  r6, [pc, #8] */
@@ -2034,7 +2041,9 @@ static const bfd_vma arm_thumb_thumb_long_branch_stub[] =
     0x00000000,         /* dcd  R_ARM_ABS32(X) */
   };
 
-static const bfd_vma arm_thumb_arm_v4t_long_branch_stub[] =
+/* V4T Thumb -> ARM long branch stub. Used on V4T where blx is not
+   available.  */
+static const bfd_vma elf32_arm_stub_long_branch_v4t_thumb_arm[] =
   {
     0x4e03b540,         /* push {r6, lr} */
                         /* ldr  r6, [pc, #12] */
@@ -2045,14 +2054,18 @@ static const bfd_vma arm_thumb_arm_v4t_long_branch_stub[] =
     0x00000000,         /* dcd  R_ARM_ABS32(X) */
   };
 
-static const bfd_vma arm_thumb_arm_v4t_short_branch_stub[] =
+/* V4T Thumb -> ARM short branch stub. Shorter variant of the above
+   one, when the destination is close enough.  */
+static const bfd_vma elf32_arm_stub_short_branch_v4t_thumb_arm[] =
   {
     0x46c04778,         /* bx   pc */
                         /* nop   */
     0xea000000,         /* b    (X) */
   };
 
-static const bfd_vma arm_pic_long_branch_stub[] =
+/* ARM/Thumb -> ARM/Thumb long branch stub, PIC. On V5T and above, use
+   blx to reach the stub if necessary.  */
+static const bfd_vma elf32_arm_stub_long_branch_any_any_pic[] =
   {
     0xe59fc000,         /* ldr   r12, [pc] */
     0xe08ff00c,         /* add   pc, pc, ip */
@@ -2066,12 +2079,12 @@ static const bfd_vma arm_pic_long_branch_stub[] =
 enum elf32_arm_stub_type
 {
   arm_stub_none,
-  arm_stub_long_branch,
-  arm_thumb_v4t_stub_long_branch,
-  arm_thumb_thumb_stub_long_branch,
-  arm_thumb_arm_v4t_stub_long_branch,
-  arm_thumb_arm_v4t_stub_short_branch,
-  arm_stub_pic_long_branch,
+  arm_stub_long_branch_any_any,
+  arm_stub_long_branch_v4t_arm_thumb,
+  arm_stub_long_branch_thumb_only,
+  arm_stub_long_branch_v4t_thumb_arm,
+  arm_stub_short_branch_v4t_thumb_arm,
+  arm_stub_long_branch_any_any_pic,
 };
 
 struct elf32_arm_stub_hash_entry
@@ -2731,9 +2744,9 @@ arm_stub_is_thumb (enum elf32_arm_stub_type stub_type)
 {
   switch (stub_type)
     {
-    case arm_thumb_thumb_stub_long_branch:
-    case arm_thumb_arm_v4t_stub_long_branch:
-    case arm_thumb_arm_v4t_stub_short_branch:
+    case arm_stub_long_branch_thumb_only:
+    case arm_stub_long_branch_v4t_thumb_arm:
+    case arm_stub_short_branch_v4t_thumb_arm:
       return TRUE;
     case arm_stub_none:
       BFD_FAIL ();
@@ -2807,10 +2820,10 @@ arm_type_of_stub (struct bfd_link_info *info,
 		{
 		  stub_type = (info->shared | globals->pic_veneer)
 		    ? ((globals->use_blx)
-		       ? arm_stub_pic_long_branch
+		       ? arm_stub_long_branch_any_any_pic
 		       : arm_stub_none)
 		    : (globals->use_blx)
-		    ? arm_stub_long_branch
+		    ? arm_stub_long_branch_any_any
 		    : arm_stub_none;
 		}
 	      else
@@ -2818,7 +2831,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 		  stub_type = (info->shared | globals->pic_veneer)
 		    ? arm_stub_none
 		    : (globals->use_blx)
-		    ? arm_thumb_thumb_stub_long_branch
+		    ? arm_stub_long_branch_thumb_only
 		    : arm_stub_none;
 		}
 	    }
@@ -2837,17 +2850,17 @@ arm_type_of_stub (struct bfd_link_info *info,
 
 	      stub_type = (info->shared | globals->pic_veneer)
 		? ((globals->use_blx)
-		   ? arm_stub_pic_long_branch
+		   ? arm_stub_long_branch_any_any_pic
 		   : arm_stub_none)
 		: (globals->use_blx)
-		? arm_stub_long_branch
-		: arm_thumb_arm_v4t_stub_long_branch;
+		? arm_stub_long_branch_any_any
+		: arm_stub_long_branch_v4t_thumb_arm;
 
 	      /* Handle v4t short branches.  */
-	      if ((stub_type == arm_thumb_arm_v4t_stub_long_branch)
+	      if ((stub_type == arm_stub_long_branch_v4t_thumb_arm)
 		  && (branch_offset <= THM_MAX_FWD_BRANCH_OFFSET)
 		  && (branch_offset >= THM_MAX_BWD_BRANCH_OFFSET))
-		stub_type = arm_thumb_arm_v4t_stub_short_branch;
+		stub_type = arm_stub_short_branch_v4t_thumb_arm;
 	    }
 	}
     }
@@ -2874,10 +2887,10 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      || !globals->use_blx)
 	    {
 	      stub_type = (info->shared | globals->pic_veneer)
-		? arm_stub_pic_long_branch
+		? arm_stub_long_branch_any_any_pic
 		: (globals->use_blx)
-		? arm_stub_long_branch
-		: arm_thumb_v4t_stub_long_branch;
+		? arm_stub_long_branch_any_any
+		: arm_stub_long_branch_v4t_arm_thumb;
 	    }
 	}
       else
@@ -2887,8 +2900,8 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      || (branch_offset < ARM_MAX_BWD_BRANCH_OFFSET))
 	    {
 	      stub_type = (info->shared | globals->pic_veneer)
-		? arm_stub_pic_long_branch
-		: arm_stub_long_branch;
+		? arm_stub_long_branch_any_any_pic
+		: arm_stub_long_branch_any_any;
 	    }
 	}
     }
@@ -3108,29 +3121,29 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 
   switch (stub_entry->stub_type)
     {
-    case arm_stub_long_branch:
-      template = arm_long_branch_stub;
-      template_size = (sizeof (arm_long_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_long_branch_any_any:
+      template = elf32_arm_stub_long_branch_any_any;
+      template_size = (sizeof (elf32_arm_stub_long_branch_any_any) / sizeof (bfd_vma)) * 4;
       break;
-    case arm_thumb_v4t_stub_long_branch:
-      template =  arm_thumb_v4t_long_branch_stub;
-      template_size = (sizeof (arm_thumb_v4t_long_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_long_branch_v4t_arm_thumb:
+      template =  elf32_arm_stub_long_branch_v4t_arm_thumb;
+      template_size = (sizeof (elf32_arm_stub_long_branch_v4t_arm_thumb) / sizeof (bfd_vma)) * 4;
       break;
-    case arm_thumb_thumb_stub_long_branch:
-      template =  arm_thumb_thumb_long_branch_stub;
-      template_size = (sizeof (arm_thumb_thumb_long_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_long_branch_thumb_only:
+      template =  elf32_arm_stub_long_branch_thumb_only;
+      template_size = (sizeof (elf32_arm_stub_long_branch_thumb_only) / sizeof (bfd_vma)) * 4;
       break;
-    case arm_thumb_arm_v4t_stub_long_branch:
-      template =  arm_thumb_arm_v4t_long_branch_stub;
-      template_size = (sizeof (arm_thumb_arm_v4t_long_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_long_branch_v4t_thumb_arm:
+      template =  elf32_arm_stub_long_branch_v4t_thumb_arm;
+      template_size = (sizeof (elf32_arm_stub_long_branch_v4t_thumb_arm) / sizeof (bfd_vma)) * 4;
       break;
-    case arm_thumb_arm_v4t_stub_short_branch:
-      template =  arm_thumb_arm_v4t_short_branch_stub;
-      template_size = (sizeof(arm_thumb_arm_v4t_short_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_short_branch_v4t_thumb_arm:
+      template =  elf32_arm_stub_short_branch_v4t_thumb_arm;
+      template_size = (sizeof(elf32_arm_stub_short_branch_v4t_thumb_arm) / sizeof (bfd_vma)) * 4;
       break;
-    case arm_stub_pic_long_branch:
-      template = arm_pic_long_branch_stub;
-      template_size = (sizeof (arm_pic_long_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_long_branch_any_any_pic:
+      template = elf32_arm_stub_long_branch_any_any_pic;
+      template_size = (sizeof (elf32_arm_stub_long_branch_any_any_pic) / sizeof (bfd_vma)) * 4;
       break;
     default:
       BFD_FAIL ();
@@ -3157,27 +3170,27 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 
   switch (stub_entry->stub_type)
     {
-    case arm_stub_long_branch:
+    case arm_stub_long_branch_any_any:
       _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_ABS32),
 				stub_bfd, stub_sec, stub_sec->contents,
 				stub_entry->stub_offset + 4, sym_value, 0);
       break;
-    case arm_thumb_v4t_stub_long_branch:
+    case arm_stub_long_branch_v4t_arm_thumb:
       _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_ABS32),
 				stub_bfd, stub_sec, stub_sec->contents,
 				stub_entry->stub_offset + 8, sym_value, 0);
       break;
-    case arm_thumb_thumb_stub_long_branch:
+    case arm_stub_long_branch_thumb_only:
       _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_ABS32),
 				stub_bfd, stub_sec, stub_sec->contents,
 				stub_entry->stub_offset + 12, sym_value, 0);
       break;
-    case arm_thumb_arm_v4t_stub_long_branch:
+    case arm_stub_long_branch_v4t_thumb_arm:
       _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_ABS32),
 				stub_bfd, stub_sec, stub_sec->contents,
 				stub_entry->stub_offset + 16, sym_value, 0);
       break;
-    case arm_thumb_arm_v4t_stub_short_branch:
+    case arm_stub_short_branch_v4t_thumb_arm:
       {
 	long int rel_offset;
 	static const insn32 t2a3_b_insn = 0xea000000;
@@ -3190,7 +3203,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
       }
       break;
 
-    case arm_stub_pic_long_branch:
+    case arm_stub_long_branch_any_any_pic:
       /* We want the value relative to the address 8 bytes from the
 	 start of the stub.  */
       _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_REL32),
@@ -3224,29 +3237,29 @@ arm_size_one_stub (struct bfd_hash_entry *gen_entry,
 
   switch (stub_entry->stub_type)
     {
-    case arm_stub_long_branch:
-      template =  arm_long_branch_stub;
-      template_size = (sizeof (arm_long_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_long_branch_any_any:
+      template =  elf32_arm_stub_long_branch_any_any;
+      template_size = (sizeof (elf32_arm_stub_long_branch_any_any) / sizeof (bfd_vma)) * 4;
       break;
-    case arm_thumb_v4t_stub_long_branch:
-      template =  arm_thumb_v4t_long_branch_stub;
-      template_size = (sizeof (arm_thumb_v4t_long_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_long_branch_v4t_arm_thumb:
+      template =  elf32_arm_stub_long_branch_v4t_arm_thumb;
+      template_size = (sizeof (elf32_arm_stub_long_branch_v4t_arm_thumb) / sizeof (bfd_vma)) * 4;
       break;
-    case arm_thumb_thumb_stub_long_branch:
-      template =  arm_thumb_thumb_long_branch_stub;
-      template_size = (sizeof (arm_thumb_thumb_long_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_long_branch_thumb_only:
+      template =  elf32_arm_stub_long_branch_thumb_only;
+      template_size = (sizeof (elf32_arm_stub_long_branch_thumb_only) / sizeof (bfd_vma)) * 4;
       break;
-    case arm_thumb_arm_v4t_stub_long_branch:
-      template =  arm_thumb_arm_v4t_long_branch_stub;
-      template_size = (sizeof (arm_thumb_arm_v4t_long_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_long_branch_v4t_thumb_arm:
+      template =  elf32_arm_stub_long_branch_v4t_thumb_arm;
+      template_size = (sizeof (elf32_arm_stub_long_branch_v4t_thumb_arm) / sizeof (bfd_vma)) * 4;
       break;
-    case arm_thumb_arm_v4t_stub_short_branch:
-      template =  arm_thumb_arm_v4t_short_branch_stub;
-      template_size = (sizeof(arm_thumb_arm_v4t_short_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_short_branch_v4t_thumb_arm:
+      template =  elf32_arm_stub_short_branch_v4t_thumb_arm;
+      template_size = (sizeof(elf32_arm_stub_short_branch_v4t_thumb_arm) / sizeof (bfd_vma)) * 4;
       break;
-    case arm_stub_pic_long_branch:
-      template = arm_pic_long_branch_stub;
-      template_size = (sizeof (arm_pic_long_branch_stub) / sizeof (bfd_vma)) * 4;
+    case arm_stub_long_branch_any_any_pic:
+      template = elf32_arm_stub_long_branch_any_any_pic;
+      template_size = (sizeof (elf32_arm_stub_long_branch_any_any_pic) / sizeof (bfd_vma)) * 4;
       break;
     default:
       BFD_FAIL ();
@@ -11654,7 +11667,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
 
   switch (stub_entry->stub_type)
     {
-    case arm_stub_long_branch:
+    case arm_stub_long_branch_any_any:
       if (!elf32_arm_output_stub_sym (osi, stub_name, addr, 8))
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
@@ -11662,7 +11675,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 4))
 	return FALSE;
       break;
-    case arm_thumb_v4t_stub_long_branch:
+    case arm_stub_long_branch_v4t_arm_thumb:
       if (!elf32_arm_output_stub_sym (osi, stub_name, addr, 12))
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
@@ -11670,7 +11683,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 8))
 	return FALSE;
       break;
-    case arm_thumb_thumb_stub_long_branch:
+    case arm_stub_long_branch_thumb_only:
       if (!elf32_arm_output_stub_sym (osi, stub_name, addr | 1, 16))
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr))
@@ -11678,7 +11691,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 12))
 	return FALSE;
       break;
-    case arm_thumb_arm_v4t_stub_long_branch:
+    case arm_stub_long_branch_v4t_thumb_arm:
       if (!elf32_arm_output_stub_sym (osi, stub_name, addr | 1, 20))
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr))
@@ -11688,13 +11701,13 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 16))
 	return FALSE;
       break;
-    case arm_thumb_arm_v4t_stub_short_branch:
+    case arm_stub_short_branch_v4t_thumb_arm:
       if (!elf32_arm_output_stub_sym (osi, stub_name, addr | 1, 8))
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr + 4))
 	return FALSE;
       break;
-    case arm_stub_pic_long_branch:
+    case arm_stub_long_branch_any_any_pic:
       if (!elf32_arm_output_stub_sym (osi, stub_name, addr, 12))
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))

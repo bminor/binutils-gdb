@@ -1,3 +1,29 @@
+2009-02-16  Christophe Lyon  <christophe.lyon@st.com>
+
+	bfd/
+	* elf32-arm.c (arm_long_branch_stub,
+	arm_thumb_v4t_long_branch_stub,
+	arm_thumb_thumb_long_branch_stub,
+	arm_thumb_arm_v4t_long_branch_stub,
+	arm_thumb_arm_v4t_short_branch_stub,
+	arm_pic_long_branch_stub):
+	Renamed to elf32_arm_stub_long_branch_any_any,
+	elf32_arm_stub_long_branch_v4t_arm_thumb,
+	elf32_arm_stub_long_branch_thumb_only,
+	elf32_arm_stub_long_branch_v4t_thumb_arm,
+	elf32_arm_stub_short_branch_v4t_thumb_arm,
+	elf32_arm_stub_long_branch_any_any_pic.
+	(arm_stub_long_branch, arm_thumb_v4t_stub_long_branch,
+	arm_thumb_thumb_stub_long_branch,
+	arm_thumb_arm_v4t_stub_long_branch,
+	arm_thumb_arm_v4t_stub_short_branch, arm_stub_pic_long_branch):
+	Renamed to arm_stub_long_branch_any_any,
+	arm_stub_long_branch_v4t_arm_thumb,
+	arm_stub_long_branch_thumb_only,
+	arm_stub_long_branch_v4t_thumb_arm,
+	arm_stub_short_branch_v4t_thumb_arm,
+	arm_stub_long_branch_any_any_pic.
+
 2009-02-15  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf-hppa.h (elf_hppa_final_link_relocate): Correct addend value used
