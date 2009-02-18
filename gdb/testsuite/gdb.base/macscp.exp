@@ -23,7 +23,7 @@ set bug_id 0
 
 set srcfile macscp1.c
 set testfile "macscp"
-set objfile "macscp.o"
+set objfile ${objdir}/${subdir}/${testfile}.o
 set binfile ${objdir}/${subdir}/${testfile}
 
 set options { debug }
@@ -188,12 +188,12 @@ proc check_macro {macro expected where} {
     }
     return 0
 }
-    
+
 
 # List the function FUNC, and then show the definition of MACRO,
 # expecting the result EXPECTED.
 proc list_and_check_macro {func macro expected} {
-    gdb_test "list $func" ".*${func}.*"
+    gdb_test "list $func" ".*${func}.*" "list $func for $macro"
     return [check_macro $macro $expected "after `list $func'"]
 }
 
@@ -423,7 +423,7 @@ gdb_test "print MACRO_TO_EXPAND" \
     "No symbol \"MACRO_TO_EXPAND\" in current context\." \
     "print expression with macro before define."
 
-gdb_test "next" "foo = 1;" "next to definition"
+gdb_test "next" "foo = 1;" "next to definition 1"
 
 gdb_test "print MACRO_TO_EXPAND" \
     " = 0" \
@@ -445,7 +445,7 @@ gdb_test "print MACRO_TO_EXPAND" \
     " = 0" \
     "print expression with macro after removing override"
 
-gdb_test "next" "foo = 2;" "next to definition"
+gdb_test "next" "foo = 2;" "next to definition 2"
 
 gdb_test "print MACRO_TO_EXPAND" \
     "No symbol \"MACRO_TO_EXPAND\" in current context\." \

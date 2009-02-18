@@ -1,3 +1,9 @@
+2009-02-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/macscp.exp (objfile): Move it to ${objdir}/${subdir}/.
+	(list_and_check_macro): Use more specific test name.
+	(next to definition): Make the test names unique.
+
 2009-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.pascal/floats.exp: Accept approximate results everywhere.
