@@ -31,6 +31,7 @@ global mi_inferior_tty_name
 set MIFLAGS "-i=mi"
 
 set thread_selected_re "=thread-selected,id=\"\[0-9+\]\"\r\n"
+set library_loaded_re "=library-loaded\[^\n\]+\"\r\n"
 
 #
 # mi_gdb_exit -- exit the GDB, killing the target program if necessary
@@ -778,6 +779,7 @@ proc mi_run_cmd {args} {
     }
     global mi_gdb_prompt
     global thread_selected_re
+    global library_loaded_re
 
     if [target_info exists gdb_init_command] {
 	send_gdb "[target_info gdb_init_command]\n";
@@ -819,7 +821,7 @@ proc mi_run_cmd {args} {
 
     send_gdb "220-exec-run $args\n"
     gdb_expect {
-	-re "220\\^running\r\n(\\*running,thread-id=\"\[^\"\]+\"\r\n|=thread-created,id=\"1\",group-id=\"\[0-9\]+\"\r\n)*(${thread_selected_re})?${mi_gdb_prompt}" {
+	-re "220\\^running\r\n(\\*running,thread-id=\"\[^\"\]+\"\r\n|=thread-created,id=\"1\",group-id=\"\[0-9\]+\"\r\n)*(${library_loaded_re})*(${thread_selected_re})?${mi_gdb_prompt}" {
 	}
 	timeout {
 	    perror "Unable to start target"
@@ -1435,10 +1437,11 @@ proc mi_send_resuming_command_raw {command test} {
 
     global mi_gdb_prompt
     global thread_selected_re
+    global library_loaded_re
 
     send_gdb "$command\n"
     gdb_expect {
-        -re "\\^running\r\n\\*running,thread-id=\"\[^\"\]+\"\r\n($thread_selected_re)?${mi_gdb_prompt}" {
+        -re "\\^running\r\n\\*running,thread-id=\"\[^\"\]+\"\r\n($library_loaded_re)*($thread_selected_re)?${mi_gdb_prompt}" {
             # Note that lack of 'pass' call here -- this works around limitation
             # in DejaGNU xfail mechanism. mi-until.exp has this:
             #

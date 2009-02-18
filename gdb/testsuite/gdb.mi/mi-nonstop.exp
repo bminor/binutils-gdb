@@ -63,7 +63,7 @@ mi_gdb_test "200-break-insert -t main" ".*"
 set created "=thread-created,id=\"$decimal\"\r\n"
 set running "\\*running,thread-id=\"$decimal\"\r\n"
 
-set notifs "($created)*($running)*"
+set notifs "($created)*($running)*($library_loaded_re)*"
 
 # Note: presently, we skip this test on non-native targets,
 # so 'run' is OK.  As soon as we start to run this on remote

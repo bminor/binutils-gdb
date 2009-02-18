@@ -34,6 +34,7 @@
 #include "mi-common.h"
 #include "observer.h"
 #include "gdbthread.h"
+#include "solist.h"
 
 /* These are the interpreter setup, etc. functions for the MI interpreter */
 static void mi_execute_command_wrapper (char *cmd);
@@ -58,6 +59,8 @@ static void mi_thread_exit (struct thread_info *t);
 static void mi_new_inferior (int pid);
 static void mi_inferior_exit (int pid);
 static void mi_on_resume (ptid_t ptid);
+static void mi_solib_loaded (struct so_list *solib);
+static void mi_solib_unloaded (struct so_list *solib);
 
 static void *
 mi_interpreter_init (int top_level)
@@ -86,6 +89,8 @@ mi_interpreter_init (int top_level)
       observer_attach_inferior_exit (mi_inferior_exit);
       observer_attach_normal_stop (mi_on_normal_stop);
       observer_attach_target_resumed (mi_on_resume);
+      observer_attach_solib_loaded (mi_solib_loaded);
+      observer_attach_solib_unloaded (mi_solib_unloaded);
     }
 
   return mi;
@@ -407,6 +412,31 @@ mi_on_resume (ptid_t ptid)
     }
   gdb_flush (raw_stdout);
 }
+
+static void
+mi_solib_loaded (struct so_list *solib)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+  target_terminal_ours ();
+  fprintf_unfiltered (mi->event_channel, 
+		      "library-loaded,id=\"%s\",target-name=\"%s\",host-name=\"%s\",symbols-loaded=\"%d\"", 
+		      solib->so_original_name, solib->so_original_name, 
+		      solib->so_name, solib->symbols_loaded);
+  gdb_flush (mi->event_channel);
+}
+
+static void
+mi_solib_unloaded (struct so_list *solib)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+  target_terminal_ours ();
+  fprintf_unfiltered (mi->event_channel, 
+		      "library-unloaded,id=\"%s\",target-name=\"%s\",host-name=\"%s\"", 
+		      solib->so_original_name, solib->so_original_name, 
+		      solib->so_name);
+  gdb_flush (mi->event_channel);
+}
+
 
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */
 

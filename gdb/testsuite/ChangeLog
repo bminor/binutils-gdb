@@ -1,5 +1,14 @@
 2009-02-17  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* gdb.mi/mi-nonstop.exp (notifs): Adjust for library
+	notifications.
+	* gdb.mi/mi-nsintrall.exp (notifs): Likewise.
+	* gdb.mi/mi-nsmoribund.exp (notifs): Likewise.
+	* lib/mi-support.exp (library_loaded_re): New.
+	(mi_run_cmd, mi_send_resuming_command_raw): Adjust.
+
+2009-02-17  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* gdb.gdb/observer.exp: Use test_notification observer, not
 	normal_stop, everywhere.
 	(test_normal_stop_notifications): Rename to...

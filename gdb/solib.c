@@ -908,6 +908,7 @@ clear_solib (void)
     {
       struct so_list *so = so_list_head;
       so_list_head = so->next;
+      observer_notify_solib_unloaded (so);
       if (so->abfd)
 	remove_target_sections (so->abfd);
       free_so (so);

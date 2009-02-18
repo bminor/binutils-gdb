@@ -19912,6 +19912,22 @@ We suggest that in response to this notification, front ends
 highlight the selected thread and cause subsequent commands to apply to
 that thread.
 
+@item =library-loaded,...
+Reports that a new library file was loaded by the program.  This
+notification has 4 fields---@var{id}, @var{target-name},
+@var{host-name}, and @var{symbols-loaded}. The @var{id} field is an
+opaque identifier of the library.  For remote debugging case,
+@var{target-name} and @var{host-name} fields give the name of the
+library file on the target, and on the host respectively. For native
+debugging, both those fields have the same value. The
+@var{symbols-loaded} field reports if the debug symbols for this
+library are loaded.
+
+@item =library-unloaded,...
+Reports that a library was unloaded by the program. This notification
+has 3 fields---@var{id}, @var{target-name} and @var{host-name} with
+the same meaning as for the @code{=library-loaded} notification
+
 @end table
 
 @node GDB/MI Frame Information

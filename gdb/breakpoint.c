@@ -4457,6 +4457,14 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
   struct bp_location *loc;
   int disabled_shlib_breaks = 0;
 
+  /* SunOS a.out shared libraries are always mapped, so do not
+     disable breakpoints; they will only be reported as unloaded
+     through clear_solib when GDB discards its shared library
+     list.  See clear_solib for more information.  */
+  if (exec_bfd != NULL
+      && bfd_get_flavour (exec_bfd) == bfd_target_aout_flavour)
+    return;
+
   ALL_BP_LOCATIONS (loc)
   {
     struct breakpoint *b = loc->owner;
