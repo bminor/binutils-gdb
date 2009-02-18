@@ -1,5 +1,10 @@
 2009-02-18  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* gdb.texinfo (GDB/MI Async Records): Add double-spaces
+	between sentences.
+
+2009-02-18  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* gdb.texinfo (GDB/MI Async Records): Document the
 	=library-loaded and =library-unloaded notifications.
 
