@@ -1,3 +1,19 @@
+2009-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* fr30-opc.c: Regenerate.
+	* frv-opc.c: Regenerate.
+	* ip2k-opc.c: Regenerate.
+	* iq2000-opc.c: Regenerate.
+	* lm32-opc.c: Regenerate.
+	* m32c-opc.c: Regenerate.
+	* m32r-opc.c: Regenerate.
+	* mep-opc.c: Regenerate.
+	* mt-opc.c: Regenerate.
+	* xc16x-opc.c: Regenerate.
+	* xstormy16-opc.c: Regenerate.
+	* tic54x-dis.c (print_instruction): Avoid compiler warning on
+	sprintf call.
+
 2009-02-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* m68k-opc.c (m68k_opcodes): Add stldsr instruction.

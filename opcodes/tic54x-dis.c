@@ -380,7 +380,10 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
         case OP_CC3:
         {
           const char *code[] = { "eq", "lt", "gt", "neq" };
-          sprintf (operand[i], code[CC3 (opcode)]);
+
+	  /* Do not use sprintf with only two parameters as a
+	     compiler warning could be generated in such conditions.  */
+	  sprintf (operand[i], "%s", code[CC3 (opcode)]);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         }
