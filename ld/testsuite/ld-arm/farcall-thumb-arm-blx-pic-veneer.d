@@ -5,7 +5,7 @@ Disassembly of section .text:
 00001000 <__bar_from_thumb>:
     1000:	e59fc000 	ldr	ip, \[pc, #0\]	; 1008 <__bar_from_thumb\+0x8>
     1004:	e08ff00c 	add	pc, pc, ip
-    1008:	0200000c 	.word	0x0200000c
+    1008:	02000008 	.word	0x02000008
     100c:	00000000 	.word	0x00000000
 
 00001010 <_start>:

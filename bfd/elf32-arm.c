@@ -2069,7 +2069,7 @@ static const bfd_vma elf32_arm_stub_long_branch_any_any_pic[] =
   {
     0xe59fc000,         /* ldr   r12, [pc] */
     0xe08ff00c,         /* add   pc, pc, ip */
-    0x00000000,         /* dcd   R_ARM_REL32(X) */
+    0x00000000,         /* dcd   R_ARM_REL32(X-4) */
   };
 
 /* Section name for stubs is the associated section name plus this
@@ -3208,9 +3208,10 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 	 start of the stub.  */
       _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_REL32),
 				stub_bfd, stub_sec, stub_sec->contents,
-				stub_entry->stub_offset + 8, sym_value, 0);
+				stub_entry->stub_offset + 8, sym_value, -4);
       break;
     default:
+      BFD_FAIL();
       break;
     }
 
@@ -11703,6 +11704,8 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
       break;
     case arm_stub_short_branch_v4t_thumb_arm:
       if (!elf32_arm_output_stub_sym (osi, stub_name, addr | 1, 8))
+	return FALSE;
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr))
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr + 4))
 	return FALSE;

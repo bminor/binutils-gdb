@@ -1,3 +1,12 @@
+2009-02-18  Christophe Lyon  <christophe.lyon@st.com>
+
+	* ld-arm/farcall-arm-arm-pic-veneer.d,
+	ld-arm/farcall-arm-thumb-blx-pic-veneer.d,
+	ld-arm/farcall-arm-thumb-pic-veneer.d,
+	ld-arm/farcall-thumb-arm-blx-pic-veneer.d,
+	ld-arm/farcall-thumb-thumb-blx-pic-veneer.d: Fix expected stub
+	target.
+
 2009-02-06  Joseph Myers  <joseph@codesourcery.com>
 
 	* lib/ld-lib.exp (check_gc_sections_available): Return 0 for

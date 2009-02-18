@@ -1,3 +1,9 @@
+2009-02-18  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (arm_build_one_stub): Fix relocation target for pic
+	stub. Catch default case error.
+	(arm_map_one_stub): Add missing Thumb mapping symbol.
+
 2009-02-18  Bjoern Haase  <bjoern.m.haase@web.de>
 
 	PR 9841
