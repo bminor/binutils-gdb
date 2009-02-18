@@ -1415,7 +1415,6 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
   Elf_Internal_Rela *irelalign;
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymbuf = NULL;
-  Elf_Internal_Sym *isymend;
   bfd_vma toaddr;
   struct elf_link_hash_entry **sym_hashes;
   struct elf_link_hash_entry **end_hashes;
@@ -1553,13 +1552,19 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
 
   /* Adjust the local symbols defined in this section.  */
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;
-  isymend = isym + symtab_hdr->sh_info;
-  for (; isym < isymend; isym++)
+  /* Fix PR 9841, there may be no local symbols.  */
+  if (isym != NULL)
     {
-      if (isym->st_shndx == sec_shndx
-          && isym->st_value > addr
-          && isym->st_value < toaddr)
-        isym->st_value -= count;
+      Elf_Internal_Sym *isymend;
+
+      isymend = isym + symtab_hdr->sh_info;
+      for (; isym < isymend; isym++)
+	{
+	  if (isym->st_shndx == sec_shndx
+	      && isym->st_value > addr
+	      && isym->st_value < toaddr)
+	    isym->st_value -= count;
+	}
     }
 
   /* Now adjust the global symbols defined in this section.  */
