@@ -76,10 +76,10 @@ gdb_test "print r + t" " = -1\\.9(499.*|5|500.*)"
 #Test addition with float constants
 gdb_test "print r + 1.5" " = 2\\.7(499.*|5|500.*)"
 gdb_test "print r + 0.03" " = 1\\.2(799.*|8|800.*)"
-gdb_test "print r + (-0.2)" " = 1\\.0(499|5|500.*)"
+gdb_test "print r + (-0.2)" " = 1\\.0(499.*|5|500.*)"
 gdb_test "print r + 1.5E+3" " = 1501\\.2(499.*|5|500.*)"
 gdb_test "print r + 1.5E+2" " = 151\\.2(499.*|5|500.*)"
-gdb_test "print r + 1.5E+1" " = 16\\.2(499|5|500.*)"
+gdb_test "print r + 1.5E+1" " = 16\\.2(499.*|5|500.*)"
 gdb_test "print r + 1.5E+0" " = 2\\.7(499.*|5|500.*)"
 gdb_test "print r + 1.5E-1" " = 1\\.(399.*|4|400.*)"
 gdb_test "print r + 1.5E-2" " = 1\\.26(499.*|5|500.*)"
@@ -93,7 +93,7 @@ gdb_test "print l + t" " = -2\\.(199.*|2|200.*)"
 gdb_test "print r + 10" " = 11\\.2(499.*|5|500.*)"
 gdb_test "print r + 5" " = 6\\.2(499.*|5|500.*)"
 gdb_test "print r + 1" " = 2\\.2(499.*|5|500.*)"
-gdb_test "print r + 0" " = 1\\.2(499|5|500.*)"
+gdb_test "print r + 0" " = 1\\.2(499.*|5|500.*)"
 gdb_test "print r + (-1)" " = 0\\.2(499.*|5|500.*)"
 gdb_test "print r + (-5)" " = -3\\.7(499.*|5|500.*)"
 gdb_test "print r + (-10)" " = -8\\.7(499.*|5|500.*)"
@@ -120,7 +120,7 @@ gdb_test "print 35 / 2" " = 17\\.(499.*|5|500.*)"
 # 'set r' does not work, as there are set sub-commands starting with 'r'
 # Thus we need to use 'set var r'
 gdb_test "set var r := 2.56" " := 2\\.56"
-gdb_test "print r" " = 2\\.56.*" "Testing new r value"
+gdb_test "print r" " = 2\\.5(599.*|6|600.*)" "Testing new r value"
 
 gdb_test "cont" \
 	 "Breakpoint .*:${bp_location2}.*" \
