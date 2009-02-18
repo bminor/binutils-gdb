@@ -3629,8 +3629,29 @@ coff_write_object_contents (bfd * abfd)
 	  len = strlen (current->name);
 	  if (len > SCNNMLEN)
 	    {
-	      memset (section.s_name, 0, SCNNMLEN);
-	      sprintf (section.s_name, "/%lu", (unsigned long) string_size);
+	      /* The s_name field is defined to be NUL-padded but need not be
+		 NUL-terminated.  We use a temporary buffer so that we can still
+		 sprintf all eight chars without splatting a terminating NUL
+		 over the first byte of the following member (s_paddr).  */
+	      char s_name_buf[SCNNMLEN + 1];
+
+	      /* An inherent limitation of the /nnnnnnn notation used to indicate
+		 the offset of the long name in the string table is that we
+		 cannot address entries beyone the ten million byte boundary.  */
+	      if (string_size >= 10000000)
+		{
+		  bfd_set_error (bfd_error_file_too_big);
+		  (*_bfd_error_handler)
+		    (_("%B: section %s: string table overflow at offset %ld"),
+		    abfd, current->name, string_size);
+		  return FALSE;
+		}
+
+	      /* snprintf not strictly necessary now we've verified the value
+		 has less than eight ASCII digits, but never mind.  */
+	      snprintf (s_name_buf, SCNNMLEN + 1, "/%lu", (unsigned long) string_size);
+	      /* Then strncpy takes care of any padding for us.  */
+	      strncpy (section.s_name, s_name_buf, SCNNMLEN);
 	      string_size += len + 1;
 	      long_section_names = TRUE;
 	    }

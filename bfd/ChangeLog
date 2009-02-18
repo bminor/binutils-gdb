@@ -1,5 +1,11 @@
 2009-18-02  Dave Korn  <dave.korn.cygwin@gmail.com>
 
+	PR gas/7059
+	* coffcode.h (coff_write_object_contents):  Don't let the string
+	table offset overflow the s_name field when using long section names.
+
+2009-18-02  Dave Korn  <dave.korn.cygwin@gmail.com>
+
 	* coff-alpha.c (alpha_ecoff_backend_data):  Initialise fields which
 	control long section name handling with ECOFF_NO_LONG_SECTION_NAMES.
 	* coff-mips.c (mips_ecoff_backend_data):  Likewise.
