@@ -1,3 +1,9 @@
+2009-02-18  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* gas/mips/octeon.s: Add more tests for dmfc2 and dmtc2.
+	* gas/mips/octeon.d: Update.
+	* gas/mips/octeon-ill.l: Update error message.
+
 2009-02-16  Nick Clifton  <nickc@redhat.com>
 
 	* gas/mips/e32-rel2.d: Adjust expected output to remove the 0x4000

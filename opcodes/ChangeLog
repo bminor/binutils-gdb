@@ -1,3 +1,8 @@
+2009-02-18  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Move the Octeon-specific
+	dmfc2 and dmtc2 before the architecture-level variants.
+
 2009-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* fr30-opc.c: Regenerate.
