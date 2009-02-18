@@ -1,5 +1,10 @@
 -*- text -*-
 
+* PE targets no longer make use of the long section names PE extension to
+  the COFF format when generating executable images, by default.  The old
+  (slightly non-conformant) behaviour can still be invoked by using the
+  new '--enable-long-section-names' command-line option.
+
 * --as-needed now links in a dynamic library if it satisfies undefined
   symbols in regular objects, or in other dynamic libraries.  In the
   latter case the library is not linked if it is found in a DT_NEEDED

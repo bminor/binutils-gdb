@@ -223,6 +223,8 @@ extern bfd_boolean (*xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
 extern bfd_boolean (*xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW])
   (XCOFF_COMPLAIN_FUNCTION_ARGS);
 
+#define XCOFF_NO_LONG_SECTION_NAMES  (FALSE), bfd_coff_set_long_section_names_disallowed
+
 /* Relocation functions */
 bfd_boolean xcoff_reloc_type_noop (XCOFF_RELOC_FUNCTION_ARGS);
 bfd_boolean xcoff_reloc_type_fail (XCOFF_RELOC_FUNCTION_ARGS);

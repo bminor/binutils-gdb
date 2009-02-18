@@ -1,5 +1,5 @@
 /* BFD back-end for Intel64 UEFI runtime driver files.
-   Copyright 1999, 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
    Contributed by Peter Jones <pjones@redhat.com>
    Based on efi-app-x86_64.c by David Mosberger <davidm@hpl.hp.com>
 
@@ -30,7 +30,8 @@
 #define COFF_WITH_pep
 #define PCRELOFFSET TRUE
 #define TARGET_UNDERSCORE '_'
-#define COFF_LONG_SECTION_NAMES
+/* Long section names not allowed in executable images, only object files.  */
+#define COFF_LONG_SECTION_NAMES 0
 #define PEI_TARGET_SUBSYSTEM	IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER
 #define PEI_FORCE_MINIMUM_ALIGNMENT
 

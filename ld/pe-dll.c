@@ -1,6 +1,6 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008 Free Software Foundation, Inc.
+   2008, 2009 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of the GNU Binutils.
@@ -156,6 +156,7 @@ int pe_dll_warn_dup_exports = 0;
 int pe_dll_compat_implib = 0;
 int pe_dll_extra_pe_debug = 0;
 int pe_use_nul_prefixed_import_tables = 0;
+int pe_use_coff_long_section_names = -1;
 
 /* Static variables and types.  */
 
@@ -3033,6 +3034,15 @@ pe_implied_import_dll (const char *filename)
   return TRUE;
 }
 
+void
+pe_output_file_set_long_section_names (bfd *abfd)
+{
+  if (pe_use_coff_long_section_names < 0)
+    return;
+  if (!bfd_coff_set_long_section_names (abfd, pe_use_coff_long_section_names))
+    einfo (_("%XError: can't use long section names on this arch\n"));
+}
+
 /* These are the main functions, called from the emulation.  The first
    is called after the bfds are read, so we can guess at how much space
    we need.  The second is called after everything is placed, so we
@@ -3042,6 +3052,7 @@ void
 pe_dll_build_sections (bfd *abfd, struct bfd_link_info *info)
 {
   pe_dll_id_target (bfd_get_target (abfd));
+  pe_output_file_set_long_section_names (abfd);
   process_def_file (abfd, info);
 
   if (pe_def_file->num_exports == 0 && !info->shared)
@@ -3049,19 +3060,23 @@ pe_dll_build_sections (bfd *abfd, struct bfd_link_info *info)
 
   generate_edata (abfd, info);
   build_filler_bfd (1);
+  pe_output_file_set_long_section_names (filler_bfd);
 }
 
 void
 pe_exe_build_sections (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   pe_dll_id_target (bfd_get_target (abfd));
+  pe_output_file_set_long_section_names (abfd);
   build_filler_bfd (0);
+  pe_output_file_set_long_section_names (filler_bfd);
 }
 
 void
 pe_dll_fill_sections (bfd *abfd, struct bfd_link_info *info)
 {
   pe_dll_id_target (bfd_get_target (abfd));
+  pe_output_file_set_long_section_names (abfd);
   image_base = pe_data (abfd)->pe_opthdr.ImageBase;
 
   generate_reloc (abfd, info);
@@ -3093,6 +3108,7 @@ void
 pe_exe_fill_sections (bfd *abfd, struct bfd_link_info *info)
 {
   pe_dll_id_target (bfd_get_target (abfd));
+  pe_output_file_set_long_section_names (abfd);
   image_base = pe_data (abfd)->pe_opthdr.ImageBase;
 
   generate_reloc (abfd, info);

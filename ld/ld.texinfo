@@ -2098,6 +2098,22 @@ Create a DLL instead of a regular executable.  You may also use
 file.
 [This option is specific to the i386 PE targeted port of the linker]
 
+@kindex --enable-long-section-names
+@kindex --disable-long-section-names
+@item --enable-long-section-names
+@itemx --disable-long-section-names
+The PE variants of the Coff object format add an extension that permits
+the use of section names longer than eight characters, the normal limit
+for Coff.  By default, these names are only allowed in object files, as
+fully-linked executable images do not carry the Coff string table required
+to support the longer names.  As a GNU extension, it is possible to
+allow their use in executable images as well, or to (probably pointlessly!)
+disallow it in object files, by using these two options.  Executable images
+generated with these long section names are slightly non-standard, carrying
+as they do a string table, and may generate confusing output when examined
+with non-GNU PE-aware tools, such as file viewers and dumpers.
+[This option is valid for all PE targeted ports of the linker]
+
 @kindex --enable-stdcall-fixup
 @kindex --disable-stdcall-fixup
 @item --enable-stdcall-fixup

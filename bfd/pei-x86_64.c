@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 PE IMAGE COFF files.
-   Copyright 2006, 2007 Free Software Foundation, Inc.
+   Copyright 2006, 2007, 2009 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -30,7 +30,8 @@
 #define COFF_WITH_pex64
 #define PCRELOFFSET 		TRUE
 #define TARGET_UNDERSCORE 	'_'
-#define COFF_LONG_SECTION_NAMES
+/* Long section names not allowed in executable images, only object files.  */
+#define COFF_LONG_SECTION_NAMES 0
 #define COFF_SUPPORT_GNU_LINKONCE
 #define COFF_LONG_FILENAMES
 

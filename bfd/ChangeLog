@@ -1,3 +1,66 @@
+2009-18-02  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* coff-alpha.c (alpha_ecoff_backend_data):  Initialise fields which
+	control long section name handling with ECOFF_NO_LONG_SECTION_NAMES.
+	* coff-mips.c (mips_ecoff_backend_data):  Likewise.
+	* coff-rs6000.c (bfd_xcoff_backend_data):  Initialise fields which
+	control long section name handling with XCOFF_NO_LONG_SECTION_NAMES.
+	(bfd_pmac_xcoff_backend_data):  Likewise.
+	* coff64-rs6000.c (bfd_xcoff_backend_data):  Likewise.
+	(bfd_xcoff_aix5_backend_data):  Likewise.
+	(xcoff64_write_object_contents):  Delete unused long_section_names
+	local variable.
+	* coff-sh.c (bfd_coff_small_swap_table):  Initialise long section
+	name members using COFF_DEFAULT_LONG_SECTION_NAMES and make entire
+	struct non-const.
+	* coffcode.h (documentation):  Update to describe long section names.
+	(COFFLONGSECTIONCATHELPER):  New helper macro.
+	(BLANKOR1TOODD):  Likewise.
+	(COFF_ENABLE_LONG_SECTION_NAMES):  Likewise.
+	(COFF_LONG_SECTION_NAMES_SETTER):  Likewise.
+	(COFF_DEFAULT_LONG_SECTION_NAMES):  Likewise.
+	(bfd_coff_set_long_section_names_allowed):  New function.
+	(bfd_coff_set_long_section_names_disallowed):  Likewise.
+	(struct bfd_coff_backend_data):  Add new backend hook function
+	pointer _bfd_coff_set_long_section_names.
+	(bfd_coff_set_long_section_names):  New backend hook.
+	(coff_write_object_contents):  Only generate long section names if
+	bfd_coff_long_section_names() indicates they are currently enabled.
+	(bfd_coff_std_swap_table):  Make non-const, and initialise long
+	section name fields using COFF_DEFAULT_LONG_SECTION_NAMES.
+	(ticoff0_swap_table):  Likewise to both.
+	(ticoff1_swap_table):  Again, likewise to both.
+	* coffgen.c (make_a_section_from_file):  Allow long section names
+	as inputs even if not currently allowed for outputs.
+	* ecoff.c (_bfd_ecoff_no_long_sections):  New function.
+	* efi-app-ia32.c (COFF_LONG_SECTION_NAMES):  Define to 0, not blank.
+	* efi-app-ia64.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* efi-app-x86_64.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* efi-bsdrv-ia32.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* efi-bsdrv-ia64.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* efi-bsdrv-x86_64.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* efi-rtdrv-ia32.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* efi-rtdrv-ia64.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* efi-rtdrv-x86_64.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* pei-arm.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* pei-i386.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* pei-mcore.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* pei-mips.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* pei-ppc.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* pei-sh.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* pei-x86_64.c (COFF_LONG_SECTION_NAMES):  Likewise.
+	* libcoff-in.h:  Update copyright year to cause updated copyright
+	year in generated libcoff.h, and fix typo.
+	* libcoff.h:  Regenerated.
+	* libecoff.h (ECOFF_NO_LONG_SECTION_NAMES):  New macro.
+	(_bfd_ecoff_no_long_sections):  Add prototype.
+	* libxcoff.h (XCOFF_NO_LONG_SECTION_NAMES):  New macro.
+	* pe-mips.c (COFF_LONG_SECTION_NAMES):  Define empty if not already
+	defined by an including .c file.
+	* ticoff.h (ticoff0_swap_table):  Make non-const, and initialise
+	long section name fields using COFF_DEFAULT_LONG_SECTION_NAMES.
+	(ticoff1_swap_table):  Likewise to both.
+
 2009-02-18  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (arm_build_one_stub): Fix relocation target for pic

@@ -1,6 +1,6 @@
 /* BFD back-end for ALPHA Extended-Coff files.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007, 2008, 2009 Free Software Foundation, Inc.
    Modified from coff-mips.c by Steve Chamberlain <sac@cygnus.com> and
    Ian Lance Taylor <ian@cygnus.com>.
 
@@ -2297,7 +2297,8 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
     (unsigned (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* reloc_out */
     alpha_ecoff_swap_filehdr_out, alpha_ecoff_swap_aouthdr_out,
     alpha_ecoff_swap_scnhdr_out,
-    FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, 0, FILNMLEN, TRUE, FALSE, 4, FALSE, 2,
+    FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, 0, FILNMLEN, TRUE, 
+    ECOFF_NO_LONG_SECTION_NAMES, 4, FALSE, 2,
     alpha_ecoff_swap_filehdr_in, alpha_ecoff_swap_aouthdr_in,
     alpha_ecoff_swap_scnhdr_in, NULL,
     alpha_ecoff_bad_format_hook, _bfd_ecoff_set_arch_mach_hook,

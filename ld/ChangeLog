@@ -1,3 +1,35 @@
+2009-18-02  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld.texinfo:  Update to mention long section name options.
+	* NEWS:  Mention new behaviour and command-line options.
+	* pe-dll.c (pe_use_coff_long_section_names):  New global variable.
+	(pe_output_file_set_long_section_names):  New function.
+	(pe_dll_build_sections):  Call it on output BFDs.
+	(pe_exe_build_sections):  Likewise.
+	(pe_dll_fill_sections):  Likewise.
+	(pe_exe_fill_sections):  Likewise.
+	* pe-dll.h (pe_use_coff_long_section_names):  Declare extern.
+	(pe_output_file_set_long_section_names):  Add prototype.
+	* pep-dll.c (pe_use_coff_long_section_names):  Define pep_ alias.
+	(pe_output_file_set_long_section_names):  Likewise.
+	* pep-dll.h (pep_use_coff_long_section_names):  Declare extern.
+	(pep_output_file_set_long_section_names):  Add prototype.
+	* pe.em (OPTION_ENABLE_LONG_SECTION_NAMES):  New getopt value macro.
+	(OPTION_DISABLE_LONG_SECTION_NAMES):  Likewise.
+	(gld${EMULATION_NAME}_add_options):  Add new options to xtra_long[].
+	(gld_${EMULATION_NAME}_list_options):  Describe them.
+	(gld${EMULATION_NAME}_handle_option):  Set or clear global
+	pe_use_coff_long_section_names flag when options recognised.
+	(gld_${EMULATION_NAME}_after_open):  En/disable long section names
+	for main output bfd by calling pe_output_file_set_long_section_names.
+	* pep.em (enum options):  Extend enum with new getopt option values.
+	(gld${EMULATION_NAME}_add_options):  Add new options to xtra_long[].
+	(gld_${EMULATION_NAME}_list_options):  Describe them.
+	(gld${EMULATION_NAME}_handle_option):  Set or clear global
+	pe_use_coff_long_section_names flag when options recognised.
+	(gld_${EMULATION_NAME}_after_open):  En/disable long section names
+	for main output bfd by calling pep_output_file_set_long_section_names.
+
 2009-02-16  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open):  Don't emit

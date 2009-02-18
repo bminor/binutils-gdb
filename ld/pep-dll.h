@@ -1,5 +1,5 @@
 /* pep-dll.h: Header file for routines used to build Windows DLLs.
-   Copyright 2006, 2007 Free Software Foundation, Inc.
+   Copyright 2006, 2007, 2009 Free Software Foundation, Inc.
    Written by Kai Tietz, OneVision Software GmbH&CoKg.
 
    This file is part of the GNU Binutils.
@@ -36,6 +36,7 @@ extern int pep_dll_warn_dup_exports;
 extern int pep_dll_compat_implib;
 extern int pep_dll_extra_pe_debug;
 extern int pep_use_nul_prefixed_import_tables;
+extern int pep_use_coff_long_section_names;
 
 typedef enum { EXCLUDESYMS, EXCLUDELIBS, EXCLUDEFORIMPLIB } exclude_type;
 
@@ -53,5 +54,7 @@ extern void pep_walk_relocs_of_symbol
   (struct bfd_link_info *, const char *, int (*) (arelent *, asection *));
 extern void pep_create_import_fixup  (arelent * rel, asection *, bfd_vma);
 extern bfd_boolean pep_bfd_is_dll  (bfd *);
+extern void pep_output_file_set_long_section_names
+  (bfd *abfd);
 
 #endif /* PEP_DLL_H */

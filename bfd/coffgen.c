@@ -1,6 +1,6 @@
 /* Support for the generic parts of COFF, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
+   2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -59,8 +59,13 @@ make_a_section_from_file (bfd *abfd,
 
   name = NULL;
 
-  /* Handle long section names as in PE.  */
-  if (bfd_coff_long_section_names (abfd)
+  /* Handle long section names as in PE.  On reading, we want to
+    accept long names if the format permits them at all, regardless
+    of the current state of the flag that dictates if we would generate
+    them in outputs; this construct checks if that is the case by
+    attempting to set the flag, without changing its state; the call
+    will fail for formats that do not support long names at all.  */
+  if (bfd_coff_set_long_section_names (abfd, bfd_coff_long_section_names (abfd))
       && hdr->s_name[0] == '/')
     {
       char buf[SCNNMLEN];

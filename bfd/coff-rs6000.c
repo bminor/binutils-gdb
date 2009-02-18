@@ -1,6 +1,6 @@
 /* BFD back-end for IBM RS/6000 "XCOFF" files.
    Copyright 1990-1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008  Free Software Foundation, Inc.
+   2008, 2009  Free Software Foundation, Inc.
    Written by Metin G. Ozisik, Mimi Phuong-Thao Vo, and John Gilmore.
    Archive support from Damon A. Permezel.
    Contributed by IBM Corporation and Cygnus Support.
@@ -4011,7 +4011,7 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
       LINESZ,
       FILNMLEN,
       TRUE,			/* _bfd_coff_long_filenames */
-      FALSE,			/* _bfd_coff_long_section_names */
+      XCOFF_NO_LONG_SECTION_NAMES,  /* _bfd_coff_long_section_names */
       3,			/* _bfd_coff_default_section_alignment_power */
       FALSE,			/* _bfd_coff_force_symnames_in_strings */
       2,			/* _bfd_coff_debug_string_prefix_length */
@@ -4263,7 +4263,7 @@ static const struct xcoff_backend_data_rec bfd_pmac_xcoff_backend_data =
       LINESZ,
       FILNMLEN,
       TRUE,			/* _bfd_coff_long_filenames */
-      FALSE,			/* _bfd_coff_long_section_names */
+      XCOFF_NO_LONG_SECTION_NAMES,  /* _bfd_coff_long_section_names */
       3,			/* _bfd_coff_default_section_alignment_power */
       FALSE,			/* _bfd_coff_force_symnames_in_strings */
       2,			/* _bfd_coff_debug_string_prefix_length */

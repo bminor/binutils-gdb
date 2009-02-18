@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF64" files.
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
    Written Clinton Popetz.
    Contributed by Cygnus Support.
@@ -767,7 +767,6 @@ xcoff64_write_object_contents (abfd)
   file_ptr sym_base;
   unsigned long reloc_size = 0;
   unsigned long lnno_size = 0;
-  bfd_boolean long_section_names;
   asection *text_sec = ((void *) 0);
   asection *data_sec = ((void *) 0);
   asection *bss_sec = ((void *) 0);
@@ -837,7 +836,6 @@ xcoff64_write_object_contents (abfd)
   if (bfd_seek (abfd, scn_base, SEEK_SET) != 0)
     return FALSE;
 
-  long_section_names = FALSE;
   for (current = abfd->sections; current != NULL; current = current->next)
     {
       struct internal_scnhdr section;
@@ -2561,7 +2559,7 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
       LINESZ,
       FILNMLEN,
       TRUE,			/* _bfd_coff_long_filenames */
-      FALSE,			/* _bfd_coff_long_section_names */
+      XCOFF_NO_LONG_SECTION_NAMES,  /* _bfd_coff_long_section_names */
       3,			/* _bfd_coff_default_section_alignment_power */
       TRUE,			/* _bfd_coff_force_symnames_in_strings */
       4,			/* _bfd_coff_debug_string_prefix_length */
@@ -2815,7 +2813,7 @@ static const struct xcoff_backend_data_rec bfd_xcoff_aix5_backend_data =
       LINESZ,
       FILNMLEN,
       TRUE,			/* _bfd_coff_long_filenames */
-      FALSE,			/* _bfd_coff_long_section_names */
+      XCOFF_NO_LONG_SECTION_NAMES,  /* _bfd_coff_long_section_names */
       3,			/* _bfd_coff_default_section_alignment_power */
       TRUE,			/* _bfd_coff_force_symnames_in_strings */
       4,			/* _bfd_coff_debug_string_prefix_length */

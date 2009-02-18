@@ -1,6 +1,6 @@
 /* BFD ECOFF object file private structure.
    Copyright 1993, 1994, 1995, 1996, 1999, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -75,6 +75,11 @@ struct ecoff_backend_data
      is needed because OSF/1 3.2 uses a weird archive format.  */
   bfd *(*get_elt_at_filepos) (bfd *, file_ptr);
 };
+
+/* ECOFF targets don't support COFF long section names, so this
+  macro is provided to use as an initialiser for the related
+  members of the embedded bfd_coff_backend_data struct.  */
+#define ECOFF_NO_LONG_SECTION_NAMES (FALSE), _bfd_ecoff_no_long_sections
 
 /* This is the target specific information kept for ECOFF files.  */
 
@@ -320,6 +325,8 @@ extern void * _bfd_ecoff_mkobject_hook (bfd *, void *, void *);
   ((void (*) (bfd *, asection *, void *)) bfd_void)
 extern bfd_boolean _bfd_ecoff_set_arch_mach_hook
   (bfd *, void *);
+extern bfd_boolean _bfd_ecoff_no_long_sections
+  (bfd *abfd, int enable);
 extern bfd_boolean _bfd_ecoff_styp_to_sec_flags
   (bfd *, void *, const char *, asection *, flagword *);
 extern bfd_boolean _bfd_ecoff_slurp_symbol_table (bfd *);

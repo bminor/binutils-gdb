@@ -1,6 +1,6 @@
 /* Support for the generic parts of most COFF variants, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -107,6 +107,60 @@ SUBSUBSECTION
 	manipulate the i960 relocs.  This code is not in
 	@file{coffcode.h} because it would not be used by any other
 	target.
+
+SUBSUBSECTION
+	Coff long section names
+
+	In the standard Coff object format, section names are limited to
+	the eight bytes available in the @code{s_name} field of the
+	@code{SCNHDR} section header structure.  The format requires the
+	field to be NUL-padded, but not necessarily NUL-terminated, so
+	the longest section names permitted are a full eight characters.
+
+	The Microsoft PE variants of the Coff object file format add
+	an extension to support the use of long section names.  This
+	extension is defined in section 4 of the Microsoft PE/COFF 
+	specification (rev 8.1).  If a section name is too long to fit
+	into the section header's @code{s_name} field, it is instead
+	placed into the string table, and the @code{s_name} field is
+	filled with a slash ("/") followed by the ASCII decimal 
+	representation of the offset of the full name relative to the
+	string table base.
+
+	Note that this implies that the extension can only be used in object
+	files, as executables do not contain a string table.  The standard
+	specifies that long section names from objects emitted into executable
+	images are to be truncated.
+
+	However, as a GNU extension, BFD can generate executable images
+	that contain a string table and long section names.  This
+	would appear to be technically valid, as the standard only says
+	that Coff debugging information is deprecated, not forbidden,
+	and in practice it works, although some tools that parse PE files
+	expecting the MS standard format may become confused; @file{PEview} is
+	one known example.
+
+	The functionality is supported in BFD by code implemented under 
+	the control of the macro @code{COFF_LONG_SECTION_NAMES}.  If not
+	defined, the format does not support long section names in any way.
+	If defined, it is used to initialise a flag, 
+	@code{_bfd_coff_long_section_names}, and a hook function pointer, 
+	@code{_bfd_coff_set_long_section_names}, in the Coff backend data
+	structure.  The flag controls the generation of long section names
+	in output BFDs at runtime; if it is false, as it will be by default
+	when generating an executable image, long section names are truncated;
+	if true, the long section names extension is employed.  The hook
+	points to a function that allows the value of the flag to be altered
+	at runtime, on formats that support long section names at all; on
+	other formats it points to a stub that returns an error indication.
+
+	If @code{COFF_LONG_SECTION_NAMES} is simply defined (blank), or is
+	defined to the value "1", then long section names are enabled by
+	default; if it is defined to the value zero, they are disabled by
+	default (but still accepted in input BFDs).  The header @file{coffcode.h}
+	defines a macro, @code{COFF_DEFAULT_LONG_SECTION_NAMES}, which is
+	used in the backends to initialise the backend data structure fields
+	appropriately; see the comments for further detail.
 
 SUBSUBSECTION
 	Bit twiddling
@@ -310,6 +364,40 @@ CODE_FRAGMENT
 #define DOT_DEBUG	".debug"
 #define GNU_LINKONCE_WI ".gnu.linkonce.wi."
 
+#if defined (COFF_LONG_SECTION_NAMES)
+/* Needed to expand the inputs to BLANKOR1TOODD.  */
+#define COFFLONGSECTIONCATHELPER(x,y)    x ## y
+/* If the input macro Y is blank or '1', return an odd number; if it is
+   '0', return an even number.  Result undefined in all other cases.  */
+#define BLANKOR1TOODD(y)                 COFFLONGSECTIONCATHELPER(1,y)
+/* Defined to numerical 0 or 1 according to whether generation of long
+   section names is disabled or enabled by default.  */
+#define COFF_ENABLE_LONG_SECTION_NAMES   (BLANKOR1TOODD(COFF_LONG_SECTION_NAMES) & 1)
+/* Where long section names are supported, we allow them to be enabled
+   and disabled at runtime, so select an appropriate hook function for
+   _bfd_coff_set_long_section_names.  */
+#define COFF_LONG_SECTION_NAMES_SETTER   bfd_coff_set_long_section_names_allowed
+#else /* !defined (COFF_LONG_SECTION_NAMES) */
+/* If long section names are not supported, this stub disallows any
+   attempt to enable them at run-time.  */
+#define COFF_LONG_SECTION_NAMES_SETTER   bfd_coff_set_long_section_names_disallowed
+#endif /* defined (COFF_LONG_SECTION_NAMES) */
+
+/* Define a macro that can be used to initialise both the fields relating
+   to long section names in the backend data struct simultaneously.  */
+#if COFF_ENABLE_LONG_SECTION_NAMES
+#define COFF_DEFAULT_LONG_SECTION_NAMES  (TRUE), COFF_LONG_SECTION_NAMES_SETTER
+#else /* !COFF_ENABLE_LONG_SECTION_NAMES */
+#define COFF_DEFAULT_LONG_SECTION_NAMES  (FALSE), COFF_LONG_SECTION_NAMES_SETTER
+#endif /* COFF_ENABLE_LONG_SECTION_NAMES */
+
+#if defined (COFF_LONG_SECTION_NAMES)
+static bfd_boolean bfd_coff_set_long_section_names_allowed
+  (bfd *, int);
+#else /* !defined (COFF_LONG_SECTION_NAMES) */
+static bfd_boolean bfd_coff_set_long_section_names_disallowed
+  (bfd *, int);
+#endif /* defined (COFF_LONG_SECTION_NAMES) */
 static long sec_to_styp_flags
   (const char *, flagword);
 static bfd_boolean styp_to_sec_flags
@@ -371,6 +459,23 @@ static bfd_boolean ticoff1_bad_format_hook
 #endif
 
 /* void warning(); */
+
+#if defined (COFF_LONG_SECTION_NAMES)
+static bfd_boolean
+bfd_coff_set_long_section_names_allowed (bfd *abfd, int enable)
+{
+  coff_backend_info (abfd)->_bfd_coff_long_section_names = enable;
+  return TRUE;
+}
+#else /* !defined (COFF_LONG_SECTION_NAMES) */
+static bfd_boolean
+bfd_coff_set_long_section_names_disallowed (bfd *abfd, int enable)
+{
+  (void) abfd;
+  (void) enable;
+  return FALSE;
+}
+#endif /* defined (COFF_LONG_SECTION_NAMES) */
 
 /* Return a word with STYP_* (scnhdr.s_flags) flags set to represent
    the incoming SEC_* flags.  The inverse of this function is
@@ -1214,7 +1319,11 @@ Special entry points for gdb to swap in coff symbol table parts:
 .  unsigned int _bfd_linesz;
 .  unsigned int _bfd_filnmlen;
 .  bfd_boolean _bfd_coff_long_filenames;
+.
 .  bfd_boolean _bfd_coff_long_section_names;
+.  bfd_boolean (*_bfd_coff_set_long_section_names)
+.    (bfd *, int);
+.  
 .  unsigned int _bfd_coff_default_section_alignment_power;
 .  bfd_boolean _bfd_coff_force_symnames_in_strings;
 .  unsigned int _bfd_coff_debug_string_prefix_length;
@@ -1351,6 +1460,8 @@ Special entry points for gdb to swap in coff symbol table parts:
 .  (coff_backend_info (abfd)->_bfd_coff_long_filenames)
 .#define bfd_coff_long_section_names(abfd) \
 .  (coff_backend_info (abfd)->_bfd_coff_long_section_names)
+.#define bfd_coff_set_long_section_names(abfd, enable) \
+.  ((coff_backend_info (abfd)->_bfd_coff_set_long_section_names) (abfd, enable))
 .#define bfd_coff_default_section_alignment_power(abfd) \
 .  (coff_backend_info (abfd)->_bfd_coff_default_section_alignment_power)
 .#define bfd_coff_swap_filehdr_in(abfd, i,o) \
@@ -3511,18 +3622,19 @@ coff_write_object_contents (bfd * abfd)
 #ifdef COFF_LONG_SECTION_NAMES
       /* Handle long section names as in PE.  This must be compatible
 	 with the code in coff_write_symbols and _bfd_coff_final_link.  */
-      {
-	size_t len;
+      if (bfd_coff_long_section_names (abfd))
+	{
+	  size_t len;
 
-	len = strlen (current->name);
-	if (len > SCNNMLEN)
-	  {
-	    memset (section.s_name, 0, SCNNMLEN);
-	    sprintf (section.s_name, "/%lu", (unsigned long) string_size);
-	    string_size += len + 1;
-	    long_section_names = TRUE;
-	  }
-      }
+	  len = strlen (current->name);
+	  if (len > SCNNMLEN)
+	    {
+	      memset (section.s_name, 0, SCNNMLEN);
+	      sprintf (section.s_name, "/%lu", (unsigned long) string_size);
+	      string_size += len + 1;
+	      long_section_names = TRUE;
+	    }
+	}
 #endif
 
 #ifdef _LIB
@@ -5246,7 +5358,7 @@ coff_final_link_postscript (bfd * abfd ATTRIBUTE_UNUSED,
 #define coff_SWAP_scnhdr_in coff_swap_scnhdr_in
 #endif
 
-static const bfd_coff_backend_data bfd_coff_std_swap_table ATTRIBUTE_UNUSED =
+static bfd_coff_backend_data bfd_coff_std_swap_table ATTRIBUTE_UNUSED =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -5259,11 +5371,7 @@ static const bfd_coff_backend_data bfd_coff_std_swap_table ATTRIBUTE_UNUSED =
 #else
   FALSE,
 #endif
-#ifdef COFF_LONG_SECTION_NAMES
-  TRUE,
-#else
-  FALSE,
-#endif
+  COFF_DEFAULT_LONG_SECTION_NAMES,
   COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
 #ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
   TRUE,
@@ -5290,7 +5398,7 @@ static const bfd_coff_backend_data bfd_coff_std_swap_table ATTRIBUTE_UNUSED =
 #ifdef TICOFF
 /* COFF0 differs in file/section header size and relocation entry size.  */
 
-static const bfd_coff_backend_data ticoff0_swap_table =
+static bfd_coff_backend_data ticoff0_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -5303,11 +5411,7 @@ static const bfd_coff_backend_data ticoff0_swap_table =
 #else
   FALSE,
 #endif
-#ifdef COFF_LONG_SECTION_NAMES
-  TRUE,
-#else
-  FALSE,
-#endif
+  COFF_DEFAULT_LONG_SECTION_NAMES,
   COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
 #ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
   TRUE,
@@ -5335,7 +5439,7 @@ static const bfd_coff_backend_data ticoff0_swap_table =
 #ifdef TICOFF
 /* COFF1 differs in section header size.  */
 
-static const bfd_coff_backend_data ticoff1_swap_table =
+static bfd_coff_backend_data ticoff1_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -5348,11 +5452,7 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 #else
   FALSE,
 #endif
-#ifdef COFF_LONG_SECTION_NAMES
-  TRUE,
-#else
-  FALSE,
-#endif
+  COFF_DEFAULT_LONG_SECTION_NAMES,
   COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
 #ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
   TRUE,

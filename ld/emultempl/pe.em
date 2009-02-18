@@ -210,7 +210,11 @@ gld_${EMULATION_NAME}_before_parse (void)
 #define OPTION_EXCLUDE_MODULES_FOR_IMPLIB \
 					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2 + 1)
 #define OPTION_USE_NUL_PREFIXED_IMPORT_TABLES \
-  (OPTION_EXCLUDE_MODULES_FOR_IMPLIB + 1)
+					(OPTION_EXCLUDE_MODULES_FOR_IMPLIB + 1)
+#define OPTION_ENABLE_LONG_SECTION_NAMES \
+					(OPTION_USE_NUL_PREFIXED_IMPORT_TABLES + 1)
+#define OPTION_DISABLE_LONG_SECTION_NAMES \
+					(OPTION_ENABLE_LONG_SECTION_NAMES + 1)
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -270,6 +274,8 @@ gld${EMULATION_NAME}_add_options
     {"enable-runtime-pseudo-reloc-v2", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2},
 #endif
     {"large-address-aware", no_argument, NULL, OPTION_LARGE_ADDRESS_AWARE},
+    {"enable-long-section-names", no_argument, NULL, OPTION_ENABLE_LONG_SECTION_NAMES},
+    {"disable-long-section-names", no_argument, NULL, OPTION_DISABLE_LONG_SECTION_NAMES},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -377,6 +383,10 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
 #endif
   fprintf (file, _("  --large-address-aware              Executable supports virtual addresses\n\
                                        greater than 2 gigabytes\n"));
+  fprintf (file, _("  --enable-long-section-names        Use long COFF section names even in\n\
+                                       executable image files\n"));
+  fprintf (file, _("  --disable-long-section-names       Never use long COFF section names, even\n\
+                                       in object files\n"));
 }
 
 
@@ -676,6 +686,12 @@ gld${EMULATION_NAME}_handle_option (int optc)
 #endif
     case OPTION_LARGE_ADDRESS_AWARE:
       real_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
+      break;
+    case OPTION_ENABLE_LONG_SECTION_NAMES:
+      pe_use_coff_long_section_names = 1;
+      break;
+    case OPTION_DISABLE_LONG_SECTION_NAMES:
+      pe_use_coff_long_section_names = 0;
       break;
     }
   return TRUE;
@@ -1046,6 +1062,7 @@ gld_${EMULATION_NAME}_after_open (void)
   pe_data (link_info.output_bfd)->pe_opthdr = pe;
   pe_data (link_info.output_bfd)->dll = init[DLLOFF].value;
   pe_data (link_info.output_bfd)->real_flags |= real_flags;
+  pe_output_file_set_long_section_names (link_info.output_bfd);
 
 #ifdef DLL_SUPPORT
   if (pe_enable_stdcall_fixup) /* -1=warn or 1=disable */

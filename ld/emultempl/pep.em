@@ -177,7 +177,9 @@ enum options
   OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1,
   OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2,
   OPTION_EXCLUDE_MODULES_FOR_IMPLIB,
-  OPTION_USE_NUL_PREFIXED_IMPORT_TABLES
+  OPTION_USE_NUL_PREFIXED_IMPORT_TABLES,
+  OPTION_ENABLE_LONG_SECTION_NAMES,
+  OPTION_DISABLE_LONG_SECTION_NAMES
 };
 
 static void
@@ -240,6 +242,8 @@ gld${EMULATION_NAME}_add_options
     {"enable-runtime-pseudo-reloc-v1", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1},
     {"enable-runtime-pseudo-reloc-v2", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2},
 #endif
+    {"enable-long-section-names", no_argument, NULL, OPTION_ENABLE_LONG_SECTION_NAMES},
+    {"disable-long-section-names", no_argument, NULL, OPTION_DISABLE_LONG_SECTION_NAMES},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -338,6 +342,10 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
                                        auto-imported DATA.\n"));
   fprintf (file, _("  --enable-extra-pep-debug            Enable verbose debug output when building\n\
                                        or linking to DLLs (esp. auto-import)\n"));
+  fprintf (file, _("  --enable-long-section-names        Use long COFF section names even in\n\
+                                       executable image files\n"));
+  fprintf (file, _("  --disable-long-section-names       Never use long COFF section names, even\n\
+                                       in object files\n"));
 #endif
 }
 
@@ -633,6 +641,12 @@ gld${EMULATION_NAME}_handle_option (int optc)
       pep_dll_extra_pe_debug = 1;
       break;
 #endif
+    case OPTION_ENABLE_LONG_SECTION_NAMES:
+      pep_use_coff_long_section_names = 1;
+      break;
+    case OPTION_DISABLE_LONG_SECTION_NAMES:
+      pep_use_coff_long_section_names = 0;
+      break;
     }
   return TRUE;
 }
@@ -1039,6 +1053,7 @@ gld_${EMULATION_NAME}_after_open (void)
   pe_data (link_info.output_bfd)->pe_opthdr = pep;
   pe_data (link_info.output_bfd)->dll = init[DLLOFF].value;
   pe_data (link_info.output_bfd)->real_flags |= real_flags;
+  pep_output_file_set_long_section_names (link_info.output_bfd);
 
 #ifdef DLL_SUPPORT
   if (pep_enable_stdcall_fixup) /* -1=warn or 1=disable */

@@ -1,6 +1,6 @@
 /* BFD COFF object file private structure.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -593,7 +593,7 @@ extern bfd_boolean _bfd_ppc_xcoff_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    struct internal_reloc *, struct internal_syment *, asection **);
 
-/* Functions in coff-ppc.c.  FIXME: These are called be pe.em in the
+/* Functions in coff-ppc.c.  FIXME: These are called by pe.em in the
    linker, and so should start with bfd and be declared in bfd.h.  */
 
 extern bfd_boolean ppc_allocate_toc_section

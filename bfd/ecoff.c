@@ -1,6 +1,6 @@
 /* Generic ECOFF (Extended-COFF) routines.
    Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -231,6 +231,16 @@ _bfd_ecoff_set_arch_mach_hook (bfd *abfd, void * filehdr)
     }
 
   return bfd_default_set_arch_mach (abfd, arch, mach);
+}
+
+bfd_boolean
+_bfd_ecoff_no_long_sections (abfd, enable)
+     bfd *abfd;
+     int enable;
+{
+  (void) abfd;
+  (void) enable;
+  return FALSE;
 }
 
 /* Get the magic number to use based on the architecture and machine.

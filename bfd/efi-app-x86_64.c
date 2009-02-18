@@ -1,5 +1,5 @@
 /* BFD back-end for Intel64 UEFI application files.
-   Copyright 2007 Free Software Foundation, Inc.
+   Copyright 2007, 2009 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -28,7 +28,8 @@
 #define COFF_WITH_pep
 #define PCRELOFFSET TRUE
 #define TARGET_UNDERSCORE '_'
-#define COFF_LONG_SECTION_NAMES
+/* Long section names not allowed in executable images, only object files.  */
+#define COFF_LONG_SECTION_NAMES 0
 #define PEI_TARGET_SUBSYSTEM	IMAGE_SUBSYSTEM_EFI_APPLICATION
 #define PEI_FORCE_MINIMUM_ALIGNMENT
 

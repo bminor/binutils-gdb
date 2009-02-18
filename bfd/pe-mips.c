@@ -1,6 +1,6 @@
 /* BFD back-end for MIPS PE COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
+   2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
    Free Software Foundation, Inc.
    Modified from coff-i386.c by DJ Delorie, dj@cygnus.com
 
@@ -22,7 +22,13 @@
    MA 02110-1301, USA.  */
 
 #define COFF_WITH_PE
+/* pei-mips.c may have defined this to default off (0) before
+  including this file, so don't redefine if that's the case.
+  Otherwise we're generating objects, not executable images,
+  so we want to define it to default on.  */
+#ifndef COFF_LONG_SECTION_NAMES
 #define COFF_LONG_SECTION_NAMES
+#endif /* COFF_LONG_SECTION_NAMES */
 #define PCRELOFFSET TRUE
 
 #include "sysdep.h"
