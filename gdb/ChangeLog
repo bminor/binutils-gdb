@@ -1,3 +1,7 @@
+2009-02-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-typeprint.c (ada_typedef_print): Remove.  Unused.
+
 2009-02-18  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-interp.c (mi_solib_loaded, mi_solib_unloaded): New.

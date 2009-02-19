@@ -114,22 +114,6 @@ decoded_type_name (struct type *type)
     }
 }
 
-
-/* Print a description of a type in the format of a
-   typedef for the current language.
-   NEW is the new name for a type TYPE.  */
-
-void
-ada_typedef_print (struct type *type, struct symbol *new,
-		   struct ui_file *stream)
-{
-   /* XXX: type_sprint */
-  fprintf_filtered (stream, "type %.*s is ",
-		    ada_name_prefix_len (SYMBOL_PRINT_NAME (new)),
-		    SYMBOL_PRINT_NAME (new));
-  type_print (type, "", stream, 1);
-}
-
 /* Print range type TYPE on STREAM.  */
 
 static void
