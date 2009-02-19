@@ -1,3 +1,8 @@
+2009-02-19  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <"lfdepx", "stfdepx">: Fix the first
+	operand to be a float point register (FRT/FRS).
+
 2009-02-18  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Move the Octeon-specific
