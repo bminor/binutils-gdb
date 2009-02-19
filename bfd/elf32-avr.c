@@ -1554,7 +1554,8 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
   /* Adjust the local symbols defined in this section.  */
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;
   isymend = isym + symtab_hdr->sh_info;
-  for (; isym < isymend; isym++)
+  /* Fix PR 9841, there may be no local symbols.  */ 
+  for (; isym != NULL && isym < isymend; isym++)
     {
       if (isym->st_shndx == sec_shndx
           && isym->st_value > addr
