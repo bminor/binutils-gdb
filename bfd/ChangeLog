@@ -1,3 +1,8 @@
+2009-02-20  Cary Coutant  <ccoutant@google.com>
+
+	* vmsutil.c (vms_file_stats_name): Fix incorrect use of st_mtime
+	in struct stat.
+
 2009-18-02  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	PR gas/7059
