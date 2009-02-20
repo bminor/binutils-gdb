@@ -1,3 +1,16 @@
+2009-02-20  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* Extend use of i386_use_watchpoints to all i386 native files
+	using hardware watchpoints.
+	go32-nat.c (init_go32_ops): Call i386_use_watchpoints.
+	i386fbsd-nat.c (_initialize_i386fbsd_nat): Ditto.
+	windows-nat.c (init_windows_ops): Ditto.
+	config/i386/nm-cygwin.h: Define I386_WATCHPOINTS_IN_TARGET_VECTOR.
+	config/i386/nm-cygwin64.h: Ditto.
+	config/i386/nm-fbsd.h: Ditto.
+	config/i386/nm-go32.h: Ditto.
+
+
 2009-02-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-typeprint.c (ada_typedef_print): Remove.  Unused.

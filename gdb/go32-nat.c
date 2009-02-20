@@ -910,6 +910,9 @@ init_go32_ops (void)
   go32_ops.to_has_stack = 1;
   go32_ops.to_has_registers = 1;
   go32_ops.to_has_execution = 1;
+
+  i386_use_watchpoints (&go32_ops);
+
   go32_ops.to_magic = OPS_MAGIC;
 
   /* Initialize child's cwd as empty to be initialized when starting

@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define I386_USE_GENERIC_WATCHPOINTS
+#define I386_WATCHPOINTS_IN_TARGET_VECTOR
 
 #include "i386/nm-i386.h"
 

@@ -125,6 +125,7 @@ _initialize_i386fbsd_nat (void)
 
   /* Add some extra features to the common *BSD/i386 target.  */
   t = i386bsd_target ();
+  i386_use_watchpoints (t);
   t->to_resume = i386fbsd_resume;
   t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
   t->to_find_memory_regions = fbsd_find_memory_regions;
