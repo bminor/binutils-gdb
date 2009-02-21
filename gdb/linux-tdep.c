@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "gdbtypes.h"
+#include "linux-tdep.h"
 
 /* This function is suitable for architectures that don't
    extend/override the standard siginfo structure.  */

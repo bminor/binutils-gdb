@@ -66,7 +66,7 @@ build_target_sections_from_bfd (struct target_ops *targ, struct bfd *abfd)
   gdb_assert (cl.end - start <= count);
 }
 
-LONGEST
+static LONGEST
 target_bfd_xfer_partial (struct target_ops *ops,
 			 enum target_object object,
 			 const char *annex, gdb_byte *readbuf,
@@ -107,7 +107,7 @@ target_bfd_xfer_partial (struct target_ops *ops,
     }
 }
 
-void
+static void
 target_bfd_xclose (struct target_ops *t, int quitting)
 {
   bfd_close (t->to_data);

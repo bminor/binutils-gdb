@@ -4264,7 +4264,7 @@ add_undefined_type (struct type *type, int typenums[2])
 
 /* Try to fix all undefined types pushed on the UNDEF_TYPES vector.  */
 
-void
+static void
 cleanup_undefined_types_noname (void)
 {
   int i;
@@ -4299,7 +4299,7 @@ cleanup_undefined_types_noname (void)
    yet defined at the time a pointer to it was made.
    Fix:  Do a full lookup on the struct/union tag.  */
 
-void
+static void
 cleanup_undefined_types_1 (void)
 {
   struct type **type;

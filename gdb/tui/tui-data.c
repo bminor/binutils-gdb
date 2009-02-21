@@ -483,7 +483,7 @@ tui_init_generic_part (struct tui_gen_win_info *win)
 
 /* init_content_element().
  */
-void
+static void
 init_content_element (struct tui_win_element *element, 
 		      enum tui_win_type type)
 {
@@ -532,7 +532,7 @@ init_content_element (struct tui_win_element *element,
     }
 }
 
-void
+static void
 init_win_info (struct tui_win_info *win_info)
 {
   tui_init_generic_part (&win_info->generic);

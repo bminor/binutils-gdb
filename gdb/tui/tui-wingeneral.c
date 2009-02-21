@@ -77,7 +77,7 @@ tui_delete_win (WINDOW *window)
 
 
 /* Draw a border arround the window.  */
-void
+static void
 box_win (struct tui_gen_win_info *win_info, 
 	 int highlight_flag)
 {

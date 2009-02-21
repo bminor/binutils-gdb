@@ -1125,6 +1125,9 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
   printf_unfiltered ("}\n");
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_target_descriptions;
+
 void
 _initialize_target_descriptions (void)
 {

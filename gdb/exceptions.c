@@ -356,7 +356,7 @@ exception_fprintf (struct ui_file *file, struct gdb_exception e,
     }
 }
 
-void
+static void
 print_any_exception (struct ui_file *file, const char *prefix,
 		     struct gdb_exception e)
 {

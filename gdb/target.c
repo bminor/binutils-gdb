@@ -370,7 +370,7 @@ kill_or_be_killed (int from_tty)
    the PTID lwp and tid elements.  The pid used is the pid of the
    inferior_ptid.  */
 
-ptid_t
+static ptid_t
 default_get_ada_task_ptid (long lwp, long tid)
 {
   return ptid_build (ptid_get_pid (inferior_ptid), lwp, tid);
@@ -2207,7 +2207,7 @@ find_default_create_inferior (struct target_ops *ops,
   return;
 }
 
-int
+static int
 find_default_can_async_p (void)
 {
   struct target_ops *t;
@@ -2222,7 +2222,7 @@ find_default_can_async_p (void)
   return 0;
 }
 
-int
+static int
 find_default_is_async_p (void)
 {
   struct target_ops *t;
@@ -2237,7 +2237,7 @@ find_default_is_async_p (void)
   return 0;
 }
 
-int
+static int
 find_default_supports_non_stop (void)
 {
   struct target_ops *t;
@@ -2249,7 +2249,7 @@ find_default_supports_non_stop (void)
 }
 
 int
-target_supports_non_stop ()
+target_supports_non_stop (void)
 {
   struct target_ops *t;
   for (t = &current_target; t != NULL; t = t->beneath)
@@ -2523,7 +2523,7 @@ normal_pid_to_str (ptid_t ptid)
   return buf;
 }
 
-char *
+static char *
 dummy_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   return normal_pid_to_str (ptid);

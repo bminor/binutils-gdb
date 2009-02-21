@@ -511,6 +511,9 @@ gcore_memory_sections (bfd *obfd)
   return 1;
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_gcore;
+
 void
 _initialize_gcore (void)
 {

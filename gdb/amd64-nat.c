@@ -26,6 +26,7 @@
 
 #include "i386-tdep.h"
 #include "amd64-tdep.h"
+#include "amd64-nat.h"
 
 /* The following bits of code help with implementing debugging 32-bit
    code natively on AMD64.  The idea is to define two mappings between

@@ -4558,7 +4558,7 @@ linux_nat_terminal_inferior (void)
 
 /* target_terminal_ours implementation.  */
 
-void
+static void
 linux_nat_terminal_ours (void)
 {
   if (!target_is_async_p ())
@@ -4798,6 +4798,9 @@ linux_nat_setup_async (void)
   fcntl (linux_nat_event_pipe[0], F_SETFL, O_NONBLOCK);
   fcntl (linux_nat_event_pipe[1], F_SETFL, O_NONBLOCK);
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_linux_nat;
 
 void
 _initialize_linux_nat (void)

@@ -42,6 +42,7 @@ Boston, MA 02110-1301, USA.  */
 #include "safe-ctype.h"
 #include "libiberty.h"
 #include "demangle.h"
+#include "cp-support.h"
 
 /* Bison does not make it easy to create a parser without global
    state, unfortunately.  Here are all the global variables used

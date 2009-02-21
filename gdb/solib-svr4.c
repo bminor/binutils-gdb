@@ -149,7 +149,7 @@ LM_ADDR_FROM_LINK_MAP (struct so_list *so)
 }
 
 static int
-HAS_LM_DYNAMIC_FROM_LINK_MAP ()
+HAS_LM_DYNAMIC_FROM_LINK_MAP (void)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 

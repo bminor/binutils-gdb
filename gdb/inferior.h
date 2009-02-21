@@ -479,7 +479,7 @@ extern int in_inferior_list (int pid);
 
 /* Boolean test for an already-known inferior id (GDB's homegrown id,
    not the system's).  */
-extern int valid_inferior_id (int num);
+extern int valid_gdb_inferior_id (int num);
 
 /* Search function to lookup a inferior by target 'pid'.  */
 extern struct inferior *find_inferior_pid (int pid);

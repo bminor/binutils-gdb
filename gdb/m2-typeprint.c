@@ -371,7 +371,7 @@ m2_is_long_set (struct type *type)
                             This should be integrated into gdbtypes.c
                             inside get_discrete_bounds.  */
 
-int
+static int
 m2_get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 {
   CHECK_TYPEDEF (type);

@@ -538,7 +538,7 @@ struct target_ops
 			     CORE_ADDR *found_addrp);
 
     /* Can target execute in reverse?  */
-    int (*to_can_execute_reverse) ();
+    int (*to_can_execute_reverse) (void);
 
     /* Does this target support debugging multiple processes
        simultaneously?  */

@@ -1145,7 +1145,7 @@ get_next_frame (struct frame_info *this_frame)
 
 /* Observer for the target_changed event.  */
 
-void
+static void
 frame_observer_target_changed (struct target_ops *target)
 {
   reinit_frame_cache ();

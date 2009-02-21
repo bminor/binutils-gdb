@@ -480,7 +480,7 @@ struct place_section_arg
 /* Find a unique offset to use for loadable section SECT if
    the user did not provide an offset.  */
 
-void
+static void
 place_section (bfd *abfd, asection *sect, void *obj)
 {
   struct place_section_arg *arg = obj;

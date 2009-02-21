@@ -335,6 +335,9 @@ ps_getpid (gdb_ps_prochandle_t ph)
   return ph->pid;
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_proc_service;
+
 void
 _initialize_proc_service (void)
 {

@@ -502,7 +502,7 @@ cp_print_static_field (struct type *type,
    field number.  If OFFSET is not exactly at the start of some field, set
    *DOMAIN to NULL.  */
 
-void
+static void
 cp_find_class_member (struct type **domain_p, int *fieldno,
 		      LONGEST offset)
 {

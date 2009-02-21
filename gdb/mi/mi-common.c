@@ -42,6 +42,9 @@ async_reason_lookup (enum async_reply_reason reason)
   return async_reason_string_lookup[reason];
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_gdb_mi_common;
+
 void
 _initialize_gdb_mi_common (void)
 {

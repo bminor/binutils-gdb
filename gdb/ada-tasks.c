@@ -154,7 +154,7 @@ static int stale_task_list_p = 1;
 /* Return the task number of the task whose ptid is PTID, or zero
    if the task could not be found.  */
 
-int
+static int
 ada_get_task_number (ptid_t ptid)
 {
   int i;
@@ -199,7 +199,7 @@ valid_task_id (int task_num)
 /* Return the task info associated to the Environment Task.
    This function assumes that the inferior does in fact use tasking.  */
 
-struct ada_task_info *
+static struct ada_task_info *
 ada_get_environment_task (void)
 {
   ada_build_task_list (0);
@@ -942,7 +942,7 @@ Task switching not supported when debugging from core files\n\
 
 /* Indicate that the task list may have changed, so invalidate the cache.  */
 
-void
+static void
 ada_task_list_changed (void)
 {
   stale_task_list_p = 1;  
@@ -960,7 +960,7 @@ ada_normal_stop_observer (struct bpstats *unused_args, int unused_args2)
 
 /* A routine to be called when the objfiles have changed.  */
 
-void
+static void
 ada_new_objfile_observer (struct objfile *objfile)
 {
   /* Invalidate all cached data that were extracted from an objfile.  */
@@ -972,6 +972,9 @@ ada_new_objfile_observer (struct objfile *objfile)
 
   ada_tasks_check_symbol_table = 1;
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_tasks;
 
 void
 _initialize_tasks (void)

@@ -482,7 +482,7 @@ gnuv3_baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
    which has virtual table index VOFFSET.  The method has an associated
    "this" adjustment of ADJUSTMENT bytes.  */
 
-const char *
+static const char *
 gnuv3_find_method_in (struct type *domain, CORE_ADDR voffset,
 		      LONGEST adjustment)
 {

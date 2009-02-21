@@ -43,6 +43,7 @@
 #include "tui/tui-source.h"
 #include "tui/tui-winsource.h"
 #include "tui/tui-windata.h"
+#include "tui/tui-win.h"
 
 #include "gdb_curses.h"
 
@@ -348,6 +349,10 @@ tui_get_cmd_list (void)
 
 /* Function to initialize gdb commands, for tui window
    manipulation.  */
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_tui_win;
+
 void
 _initialize_tui_win (void)
 {
@@ -803,17 +808,18 @@ tui_resize_all (void)
     }
 }
 
-
+#ifdef SIGWINCH
 /* SIGWINCH signal handler for the tui.  This signal handler is always
    called, even when the readline package clears signals because it is
    set as the old_sigwinch() (TUI only).  */
-void
+static void
 tui_sigwinch_handler (int signal)
 {
   /* Say that a resize was done so that the readline can do it later
      when appropriate.  */
   tui_set_win_resized_to (TRUE);
 }
+#endif
 
 /* Initializes SIGWINCH signal handler for the tui.  */
 void

@@ -447,7 +447,7 @@ struct regcache *get_current_regcache (void)
 
 /* Observer for the target_changed event.  */
 
-void
+static void
 regcache_observer_target_changed (struct target_ops *target)
 {
   registers_changed ();

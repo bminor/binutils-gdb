@@ -27,6 +27,7 @@
 #include "target.h"
 #include "inferior.h"
 #include "gdb_string.h"
+#include "inf-child.h"
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */

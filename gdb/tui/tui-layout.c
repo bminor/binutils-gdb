@@ -36,6 +36,7 @@
 #include "tui/tui-win.h"
 #include "tui/tui-winsource.h"
 #include "tui/tui-disasm.h"
+#include "tui/tui-layout.h"
 
 #include "gdb_string.h"
 #include "gdb_curses.h"
@@ -375,6 +376,10 @@ tui_default_win_viewport_height (enum tui_win_type type,
 
 /* Function to initialize gdb commands, for tui window layout
    manipulation.  */
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_tui_layout;
+
 void
 _initialize_tui_layout (void)
 {

@@ -355,6 +355,9 @@ show_python (char *args, int from_tty)
 
 /* Initialize the Python code.  */
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_python;
+
 void
 _initialize_python (void)
 {

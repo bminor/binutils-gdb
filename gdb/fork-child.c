@@ -543,6 +543,9 @@ unset_exec_wrapper_command (char *args, int from_tty)
   exec_wrapper = NULL;
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_fork_child;
+
 void
 _initialize_fork_child (void)
 {

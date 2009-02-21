@@ -1,3 +1,99 @@
+2008-02-21  Pedro Alves  <pedro@codesorcery.com>
+
+	Silence a few -Wmissing-prototypes warnings.
+
+	PR build/9877:
+	* amd64-nat.c: Include "amd64-nat.h".
+	* fork-child.c (_initialize_fork_child): Ditto.
+	* gcore.c (_initialize_gcore): Ditto.
+	* inf-ptrace.c: Include "inf-ptrace.h".
+	(inf_ptrace_store_registers): Make it static.
+	* linux-nat.c (linux_nat_terminal_ours): Make it static.
+	(_initialize_linux_nat): Declare before definition.
+	* linux-tdep.c: Include "linux-tdep.h".
+	* linux-thread-db.c (_initialize_thread_db): Declare before
+	definition.
+	* proc-service.c (_initialize_proc_service): Ditto.
+	* remote.c (remote_send_printf): Make it static.
+	* solib.c: Include "solib.h".
+	* symfile-mem.c (_initialize_symfile_mem): Declare before
+	definition.
+	* ada-lang.c (ada_la_decode, ada_match_name)
+	(ada_suppress_symbol_printing, ada_is_array_type)
+	(ada_value_ptr_subscript, ada_array_length)
+	(ada_to_static_fixed_value): Make them static.
+	(_initialize_ada_language): Declare before definition.
+	* ada-tasks.c (ada_get_task_number, ada_get_environment_task)
+	(ada_task_list_changed, ada_new_objfile_observer): Make them
+	static.
+	(_initialize_tasks): Declare before definition.
+	* addrmap.c (_initialize_addrmap): Declare before definition.
+	* auxv.c (default_auxv_parse): Make it static.
+	* bfd-target.c (target_bfd_xfer_partial, target_bfd_xclose): Make
+	them static.
+	* breakpoint.c (remove_sal): Add line break.
+	(expand_line_sal_maybe): Make it static.
+	* cp-name-parser.y: Include "cp-support.h".
+	* cp-valprint.c (cp_find_class_member): Make it static.
+	* eval.c (value_f90_subarray): Ditto.
+	* exceptions.c (print_any_exception): Ditto.
+	* findcmd.c (_initialize_mem_search): Declare before definition.
+	* frame.c (frame_observer_target_changed): Make it static.
+	* gnu-v3-abi.c (gnuv3_find_method_in): Make it static.
+	* inf-child.c: Include "inf-child.h".
+	* inferior.h (valid_inferior_id): Rename to ...
+	(valid_gdb_inferior_id): ... this.
+	* infrun.c (infrun_thread_stop_requested, siginfo_make_value):
+	Make them static.
+	* jv-lang.c (java_language_arch_info): Make it static.
+	* m2-typeprint.c (m2_get_discrete_bounds): Ditto.
+	* osdata.c (info_osdata_command): Make it static.
+	* regcache.c (regcache_observer_target_changed): Make it static.
+	* reverse.c (_initialize_reverse): Declare before definition.
+	* stabsread.c (cleanup_undefined_types_noname)
+	(cleanup_undefined_types_1): Make them static.
+	* symfile.c (place_section): Make it static.
+	* symtab.c (find_pc_sect_psymtab_closer): Make it static.
+	* target-descriptions.c (_initialize_target_descriptions): Declare
+	before definition.
+	* target.c (default_get_ada_task_ptid, find_default_can_async_p)
+	(find_default_is_async_p, find_default_supports_non_stop): Make
+	them static.
+	(target_supports_non_stop): Add prototype.
+	(dummy_pid_to_str): Make it static.
+	* utils.c (_initialize_utils): Declare before definition.
+	* ada-exp.y (_initialize_ada_exp): Declare before definition.
+	* solib-svr4.c (HAS_LM_DYNAMIC_FROM_LINK_MAP): Add a prototype.
+	* target.h (struct target_ops): Add a prototype to the
+	to_can_execute_reverse callback.
+	* macroscope.c (_initialize_macroscope): Declare before definition. 
+	* cp-namespace.c (_initialize_cp_namespace): Declare before definition. 
+	* python/python.c (_initialize_python): Declare before definition.
+	* tui/tui-command.c: Include "tui/tui-command.h".
+	* tui/tui-data.c (init_content_element, init_win_info): Make them
+	static.
+	* tui/tui-disasm.c: Include "tui/tui-disasm.h".
+	* tui/tui-interp.c (_initialize_tui_interp): Declare before
+	definition.
+	* tui/tui-layout.c: Include "tui/tui-layout.h".
+	(_initialize_tui_layout): Declare before definition.
+	* tui/tui-regs.c: Include "tui/tui-regs.h".
+	(tui_display_reg_element_at_line): Make it static.
+	(_initialize_tui_regs): Declare before definition.
+	* tui/tui-stack.c (_initialize_tui_stack): Declare before
+	definition.
+	* tui/tui-win.c: Include "tui/tui-win.h".
+	(_initialize_tui_win): Declare before definition.
+	(tui_sigwinch_handler): Make it static.  Wrap in ifdef SIGWINCH.
+	* tui/tui-win.h (tui_sigwinch_handler): Delete declaration.
+	(tui_get_cmd_list): Add a prototype.
+	* tui/tui-windata.c: Include tui-windata.h.
+	* tui/tui-wingeneral.c (box_win): Make it static.
+	* cli/cli-logging.c (show_logging_command): Make it static.
+	(_initialize_cli_logging): Declare before definition.
+	* mi/mi-common.c (_initialize_gdb_mi_common): Declare before
+	definition.
+
 2009-02-20  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* Extend use of i386_use_watchpoints to all i386 native files

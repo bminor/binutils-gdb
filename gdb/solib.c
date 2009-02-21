@@ -45,6 +45,7 @@
 #include "observer.h"
 #include "readline/readline.h"
 #include "remote.h"
+#include "solib.h"
 
 /* Architecture-specific operations.  */
 

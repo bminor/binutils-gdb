@@ -5709,7 +5709,7 @@ remote_xfer_memory (CORE_ADDR mem_addr, gdb_byte *buffer, int mem_len,
    FORMAT and the remaining arguments, then gets the reply.  Returns
    whether the packet was a success, a failure, or unknown.  */
 
-enum packet_result
+static enum packet_result
 remote_send_printf (const char *format, ...)
 {
   struct remote_state *rs = get_remote_state ();

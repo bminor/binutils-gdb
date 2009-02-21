@@ -413,7 +413,7 @@ init_array_element (struct value *array, struct value *element,
   return index;
 }
 
-struct value *
+static struct value *
 value_f90_subarray (struct value *array,
 		    struct expression *exp, int *pos, enum noside noside)
 {

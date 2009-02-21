@@ -3541,6 +3541,9 @@ gdb_buildargv (const char *s)
   return argv;
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_utils;
+
 void
 _initialize_utils (void)
 {

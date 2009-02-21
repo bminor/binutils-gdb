@@ -5157,7 +5157,8 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
 
 /* Remove element at INDEX_TO_REMOVE from SAL, shifting other
    elements to fill the void space.  */
-static void remove_sal (struct symtabs_and_lines *sal, int index_to_remove)
+static void
+remove_sal (struct symtabs_and_lines *sal, int index_to_remove)
 {
   int i = index_to_remove+1;
   int last_index = sal->nelts-1;
@@ -5182,7 +5183,7 @@ static void remove_sal (struct symtabs_and_lines *sal, int index_to_remove)
    line in all existing instantiations of 'foo'.
 
 */
-struct symtabs_and_lines
+static struct symtabs_and_lines
 expand_line_sal_maybe (struct symtab_and_line sal)
 {
   struct symtabs_and_lines expanded;

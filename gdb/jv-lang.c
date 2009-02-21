@@ -1054,7 +1054,7 @@ enum java_primitive_types
   nr_java_primitive_types
 };
 
-void
+static void
 java_language_arch_info (struct gdbarch *gdbarch,
 			 struct language_arch_info *lai)
 {

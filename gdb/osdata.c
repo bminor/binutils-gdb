@@ -278,7 +278,7 @@ get_osdata_column (struct osdata_item *item, const char *name)
   return NULL;
 }
 
-void
+static void
 info_osdata_command (char *type, int from_tty)
 {
   struct osdata *osdata = NULL;

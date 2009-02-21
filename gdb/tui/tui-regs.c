@@ -36,6 +36,7 @@
 #include "tui/tui-windata.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-file.h"
+#include "tui/tui-regs.h"
 #include "reggroups.h"
 #include "valprint.h"
 
@@ -416,7 +417,7 @@ tui_display_registers_from (int start_element_no)
    'start_element_no' on 'start_line_no' until the end of the register
    content or the end of the display height.  This function checks
    that we won't display off the end of the register display.  */
-void
+static void
 tui_display_reg_element_at_line (int start_element_no,
 				 int start_line_no)
 {
@@ -603,6 +604,9 @@ tui_reg_command (char *args, int from_tty)
                      "tui reg command.\n"));
   help_list (tuireglist, "tui reg ", -1, gdb_stdout);
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_tui_regs;
 
 void
 _initialize_tui_regs (void)

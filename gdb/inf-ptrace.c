@@ -32,6 +32,7 @@
 #include "gdb_wait.h"
 #include <signal.h>
 
+#include "inf-ptrace.h"
 #include "inf-child.h"
 #include "gdbthread.h"
 
@@ -761,7 +762,7 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers.  */
 
-void
+static void
 inf_ptrace_store_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)

@@ -208,6 +208,10 @@ try using the \"file\" command first."));
 }
 
 
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_symfile_mem;
+
 void
 _initialize_symfile_mem (void)
 {

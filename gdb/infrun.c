@@ -1660,7 +1660,7 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
    Cleanup local state that assumed the PTID was to be resumed, and
    report the stop to the frontend.  */
 
-void
+static void
 infrun_thread_stop_requested (ptid_t ptid)
 {
   struct displaced_step_request *it, *next, *prev = NULL;
@@ -4848,7 +4848,7 @@ static struct lval_funcs siginfo_value_funcs =
    the current thread.  Return a void value if there's no object
    available.  */
 
-struct value *
+static struct value *
 siginfo_make_value (struct internalvar *var)
 {
   struct type *type;

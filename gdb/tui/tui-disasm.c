@@ -35,6 +35,7 @@
 #include "tui/tui-winsource.h"
 #include "tui/tui-stack.h"
 #include "tui/tui-file.h"
+#include "tui/tui-disasm.h"
 
 #include "gdb_curses.h"
 

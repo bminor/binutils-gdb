@@ -1175,6 +1175,9 @@ init_thread_db_ops (void)
   thread_db_ops.to_magic = OPS_MAGIC;
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_thread_db;
+
 void
 _initialize_thread_db (void)
 {
