@@ -1284,7 +1284,7 @@ spu_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR * pcptr, int *lenptr)
 
 /* Software single-stepping support.  */
 
-int
+static int
 spu_software_single_step (struct frame_info *frame)
 {
   CORE_ADDR pc, next_pc;
@@ -2153,6 +2153,9 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_spu_tdep;
 
 void
 _initialize_spu_tdep (void)

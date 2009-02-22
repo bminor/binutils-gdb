@@ -178,7 +178,7 @@
    else in the event that some other platform has similar needs with
    regard to removing breakpoints in some potentially self modifying
    code.  */
-int
+static int
 ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
 				    struct bp_target_info *bp_tgt)
 {
@@ -1159,6 +1159,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	}
     }
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_ppc_linux_tdep;
 
 void
 _initialize_ppc_linux_tdep (void)

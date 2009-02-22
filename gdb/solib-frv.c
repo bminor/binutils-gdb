@@ -556,7 +556,7 @@ frv_in_dynsym_resolve_code (CORE_ADDR pc)
 /* Given a loadmap and an address, return the displacement needed
    to relocate the address.  */
 
-CORE_ADDR
+static CORE_ADDR
 displacement_from_map (struct int_elf32_fdpic_loadmap *map,
                        CORE_ADDR addr)
 {
@@ -1268,6 +1268,9 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
 }
 
 struct target_so_ops frv_so_ops;
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_frv_solib;
 
 void
 _initialize_frv_solib (void)

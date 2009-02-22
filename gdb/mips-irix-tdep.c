@@ -84,6 +84,9 @@ mips_irix_init_abi (struct gdbarch_info info,
   set_solib_ops (gdbarch, &irix_so_ops);
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_mips_irix_tdep;
+
 void
 _initialize_mips_irix_tdep (void)
 {

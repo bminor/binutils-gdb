@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "gdb_string.h"
 #include "solib-svr4.h"
+#include "nbsd-tdep.h"
 
 /* FIXME: kettenis/20060115: We should really eliminate the next two
    functions completely.  */

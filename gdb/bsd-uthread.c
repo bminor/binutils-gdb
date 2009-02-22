@@ -225,7 +225,7 @@ bsd_uthread_deactivate (void)
   unpush_target (bsd_uthread_ops_hack);
 }
 
-void
+static void
 bsd_uthread_inferior_created (struct target_ops *ops, int from_tty)
 {
   bsd_uthread_activate (NULL);
@@ -239,7 +239,7 @@ static const char *bsd_uthread_solib_names[] =
   NULL
 };
 
-void
+static void
 bsd_uthread_solib_loaded (struct so_list *so)
 {
   const char **names = bsd_uthread_solib_names;
@@ -259,7 +259,7 @@ bsd_uthread_solib_loaded (struct so_list *so)
     }
 }
 
-void
+static void
 bsd_uthread_solib_unloaded (struct so_list *so)
 {
   if (!bsd_uthread_solib_name)
@@ -503,7 +503,7 @@ bsd_uthread_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
-struct target_ops *
+static struct target_ops *
 bsd_uthread_target (void)
 {
   struct target_ops *t = XZALLOC (struct target_ops);
@@ -528,6 +528,9 @@ bsd_uthread_target (void)
 
   return t;
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_bsd_uthread;
 
 void
 _initialize_bsd_uthread (void)

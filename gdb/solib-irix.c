@@ -139,7 +139,7 @@ extract_mips_address (void *addr, int len)
    this routine automatically determines which (of three) link map
    formats is in use by the target.  */
 
-struct lm_info
+static struct lm_info
 fetch_lm_info (CORE_ADDR addr)
 {
   struct lm_info li;
@@ -718,6 +718,9 @@ irix_in_dynsym_resolve_code (CORE_ADDR pc)
 }
 
 struct target_so_ops irix_so_ops;
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_irix_solib;
 
 void
 _initialize_irix_solib (void)

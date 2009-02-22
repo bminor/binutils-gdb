@@ -4645,7 +4645,7 @@ is_delayed (unsigned long insn)
 				       | INSN_COND_BRANCH_LIKELY)));
 }
 
-int
+static int
 mips_single_step_through_delay (struct gdbarch *gdbarch,
 				struct frame_info *frame)
 {

@@ -449,7 +449,7 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 
 #define DEFAULT_SEARCH_LIMIT 128
 
-CORE_ADDR
+static CORE_ADDR
 m32r_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
@@ -785,7 +785,7 @@ m32r_extract_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-enum return_value_convention
+static enum return_value_convention
 m32r_return_value (struct gdbarch *gdbarch, struct type *func_type,
 		   struct type *valtype, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)

@@ -771,7 +771,7 @@ m68hc11_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
    in the stack frame.  sp is even more special: the address we return
    for it IS the sp for the next frame. */
 
-struct m68hc11_unwind_cache *
+static struct m68hc11_unwind_cache *
 m68hc11_frame_unwind_cache (struct frame_info *this_frame,
                             void **this_prologue_cache)
 {
@@ -1309,7 +1309,7 @@ m68hc11_extract_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-enum return_value_convention
+static enum return_value_convention
 m68hc11_return_value (struct gdbarch *gdbarch, struct type *func_type,
 		      struct type *valtype, struct regcache *regcache,
 		      gdb_byte *readbuf, const gdb_byte *writebuf)

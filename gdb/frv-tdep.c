@@ -1325,7 +1325,7 @@ frv_store_return_value (struct type *type, struct regcache *regcache,
                     _("Don't know how to return a %d-byte value."), len);
 }
 
-enum return_value_convention
+static enum return_value_convention
 frv_return_value (struct gdbarch *gdbarch, struct type *func_type,
 		  struct type *valtype, struct regcache *regcache,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)

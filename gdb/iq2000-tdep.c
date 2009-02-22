@@ -842,6 +842,9 @@ iq2000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    Initializer function for the iq2000 module.
    Called by gdb at start-up. */
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_iq2000_tdep;
+
 void
 _initialize_iq2000_tdep (void)
 {

@@ -35,7 +35,7 @@
 /* Sizeof `struct fpreg' in <machine/reg.h.  */
 #define ARMBSD_SIZEOF_FPREGS	((1 + (8 * 3)) * 4)
 
-int
+static int
 armbsd_fpreg_offset (int regnum)
 {
   if (regnum == ARM_FPS_REGNUM)

@@ -419,7 +419,7 @@ static const struct regset s390_fpregset = {
 
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
-const struct regset *
+static const struct regset *
 s390_regset_from_core_section (struct gdbarch *gdbarch,
 			       const char *sect_name, size_t sect_size)
 {

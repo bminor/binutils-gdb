@@ -1267,7 +1267,7 @@ mep_pseudo_register_write (struct gdbarch *gdbarch,
 
 /* The mep disassembler needs to know about the section in order to
    work correctly. */
-int 
+static int
 mep_gdb_print_insn (bfd_vma pc, disassemble_info * info)
 {
   struct obj_section * s = find_pc_section (pc);
@@ -2184,7 +2184,7 @@ mep_store_return_value (struct gdbarch *arch,
            "Try using the 'return' command with no argument.");
 }
 
-enum return_value_convention
+static enum return_value_convention
 mep_return_value (struct gdbarch *gdbarch, struct type *func_type,
 		  struct type *type, struct regcache *regcache,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
@@ -2507,6 +2507,8 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_mep_tdep;
 
 void
 _initialize_mep_tdep (void)

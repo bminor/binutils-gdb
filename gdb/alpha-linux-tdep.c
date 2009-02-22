@@ -191,7 +191,7 @@ static struct regset alpha_linux_fpregset =
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
-const struct regset *
+static const struct regset *
 alpha_linux_regset_from_core_section (struct gdbarch *gdbarch,
 				      const char *sect_name, size_t sect_size)
 {
@@ -234,6 +234,9 @@ alpha_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_regset_from_core_section
     (gdbarch, alpha_linux_regset_from_core_section);
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_alpha_linux_tdep;
 
 void
 _initialize_alpha_linux_tdep (void)

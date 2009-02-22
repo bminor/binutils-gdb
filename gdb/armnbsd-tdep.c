@@ -107,6 +107,9 @@ arm_netbsd_aout_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_arm_netbsd_tdep;
+
 void
 _initialize_arm_netbsd_tdep (void)
 {

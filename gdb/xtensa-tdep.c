@@ -2445,7 +2445,7 @@ call0_frame_cache (struct frame_info *this_frame,
 
 /* #define DONT_SKIP_PROLOGUE  */
 
-CORE_ADDR
+static CORE_ADDR
 xtensa_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct symtab_and_line prologue_sal;
@@ -2534,7 +2534,7 @@ xtensa_verify_config (struct gdbarch *gdbarch)
 
 /* Derive specific register numbers from the array of registers.  */
 
-void
+static void
 xtensa_derive_tdep (struct gdbarch_tdep *tdep)
 {
   xtensa_register_t* rmap;
@@ -2705,6 +2705,9 @@ xtensa_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
   error (_("xtensa_dump_tdep(): not implemented"));
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_xtensa_tdep;
 
 void
 _initialize_xtensa_tdep (void)

@@ -28,6 +28,7 @@
 #include "gdb_string.h"
 
 #include "hppa-tdep.h"
+#include "hppabsd-tdep.h"
 
 /* Core file support.  */
 
@@ -84,9 +85,7 @@ hppaobsd_regset_from_core_section (struct gdbarch *gdbarch,
 }
 
 
-void hppabsd_init_abi (struct gdbarch_info, struct gdbarch *);
-
-void
+static void
 hppaobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   /* Obviously OpenBSD is BSD-based.  */

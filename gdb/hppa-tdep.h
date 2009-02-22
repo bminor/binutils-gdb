@@ -222,8 +222,6 @@ unsigned hppa_extract_5r_store (unsigned int);
 int hppa_extract_17 (unsigned int);
 int hppa_extract_21 (unsigned);
 int hppa_extract_14 (unsigned);
-int hppa_low_sign_extend (unsigned int, unsigned int);
-int hppa_sign_extend (unsigned int, unsigned int);
 CORE_ADDR hppa_symbol_address(const char *sym);
 
 extern struct value *

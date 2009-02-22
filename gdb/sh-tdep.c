@@ -2176,7 +2176,7 @@ sh_default_register_type (struct gdbarch *gdbarch, int reg_nr)
    The default code in reggroup.c doesn't identify system registers, some
    float registers or any of the vector registers.
    TODO: sh2a and dsp registers.  */
-int
+static int
 sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			struct reggroup *reggroup)
 {

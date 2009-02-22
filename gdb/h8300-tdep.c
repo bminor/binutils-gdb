@@ -798,7 +798,7 @@ h8300h_extract_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-int
+static int
 h8300_use_struct_convention (struct type *value_type)
 {
   /* Types of 1, 2 or 4 bytes are returned in R0/R1, everything else on the
@@ -812,7 +812,7 @@ h8300_use_struct_convention (struct type *value_type)
 	   || TYPE_LENGTH (value_type) == 4);
 }
 
-int
+static int
 h8300h_use_struct_convention (struct type *value_type)
 {
   /* Types of 1, 2 or 4 bytes are returned in R0, INT types of 8 bytes are

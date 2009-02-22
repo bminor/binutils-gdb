@@ -1,3 +1,115 @@
+2009-02-22  Pedro Alves  <pedro@codesourcery.com>
+
+	Silence a few -Wmissing-prototypes warnings.
+
+	PR build/9877:
+        * alpha-linux-tdep.c (alpha_linux_regset_from_core_section): Make
+	it static.
+        * alpha-osf1-tdep.c (_initialize_alpha_osf1_tdep): Declare.
+        * amd64fbsd-tdep.c (amd64fbsd_init_abi): Make it static.
+        * amd64nbsd-tdep.c (_initialize_amd64nbsd_ndep): Rename to ...
+	(_initialize_amd64nbsd_tdep): ... this.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Make it static.
+	(_initialize_arm_linux_tdep): Declare.
+	* armbsd-tdep.c (armbsd_fpreg_offset): Make it static.
+	* armnbsd-tdep.c (_initialize_arm_netbsd_tdep): Declare.
+	* armobsd-tdep.c (_initialize_armobsd_tdep): Declare.
+	* avr-tdep.c (avr_return_value): Make it static.
+	(avr_frame_unwind_cache): Ditto.
+	* bsd-uthread.c (bsd_uthread_inferior_created): Ditto.
+	(bsd_uthread_solib_loaded): Ditto.
+	(bsd_uthread_solib_unloaded): Ditto.
+	(bsd_uthread_target): Ditto.
+	(_initialize_bsd_uthread): Declare.
+	* cris-tdep.c (crisv32_single_step_through_delay): Make it static.
+	(cris_frame_unwind_cache): Ditto.
+	* frv-tdep.c (frv_return_value): Ditto.
+	* h8300-tdep.c (h8300_use_struct_convention): Ditto.
+	(h8300h_use_struct_convention): Ditto.
+	* hppa-tdep.c (hppa_sign_extend, hppa_low_hppa_sign_extend):
+	Ditto.
+	* hppa-tdep.h (hppa_low_sign_extend, hppa_sign_extend): Delete
+	declarations.
+	* hppabsd-tdep.c: Include hppabsd-tdep.h.
+	(hppabsd_find_global_pointer): Make it static.
+	* hppabsd-tdep.h: New.
+	* hppanbsd-tdep.c: Include hppabsd-tdep.h.
+	(hppabsd_init_abi): Remove declaration.
+	(_initialize_hppabsd_tdep): Remove declaration.
+	(_initialize_hppanbsd_tdep): Declare.
+	* hppaobsd-tdep.c: Include hppabsd-tdep.h.
+	(hppabsd_init_abi): Delete declaration.
+	(hppaobsd_init_abi): Make it static.
+	* i386-nto-tdep.c (_initialize_i386nto_tdep): Declare.
+	* i386nbsd-tdep.c (_initialize_i386nbsd_tdep): Declare.
+	* ia64-linux-tdep.c (_initialize_ia64_linux_tdep): Declare.
+	* ia64-tdep.c (ia64_register_reggroup_p): Make it static.
+	* iq2000-tdep.c (_initialize_iq2000_tdep): Declare.
+	* m32c-tdep.c (m32c_register_reggroup_p): Make it static.
+	(m32c_analyze_prologue, m32c_virtual_frame_pointer): Ditto.
+	(_initialize_m32c_tdep): Declare.
+	* m32r-rom.c (_initialize_m32r_rom): Declare.
+	* m32r-tdep.c (m32r_skip_prologue): Make it static.
+	(m32r_return_value): Ditto.
+	* m68hc11-tdep.c (m68hc11_frame_unwind_cache): Make it static.
+	(m68hc11_return_value): Ditto.
+	* m68klinux-tdep.c (_initialize_m68k_linux_tdep): Declare.
+	* m88k-tdep.c (m88k_frame_cache): Make it static.
+	* mep-tdep.c (mep_gdb_print_insn): Ditto.
+	(mep_return_value): Ditto.
+	(_initialize_mep_tdep): Declare.
+	* mips-irix-tdep.c (_initialize_mips_irix_tdep): Declare.
+	* mips-linux-tdep.c (supply_64bit_reg): Make it static.
+	(mips_linux_syscall_next_pc): Ditto.
+	(_initialize_mips_linux_tdep): Declare.
+	* mips-tdep.c (mips_single_step_through_delay): Make it static.
+	* mipsnbsd-tdep.c (_initialize_mipsnbsd_tdep): Declare.
+	* mn10300-linux-tdep.c (_initialize_mn10300_linux_tdep): Declare.
+	* mn10300-tdep.c (_initialize_mn10300_tdep): Declare.
+	* mt-tdep.c (_initialize_mt_tdep): Declare.
+	* nbsd-tdep.c: Include nbsd-tdep.h.
+	* nto-tdep.c (find_load_phdr): Make it static.
+	(_initialize_nto_tdep): Declare.
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Make it
+	static.
+	(_initialize_ppc_linux_tdep): Declare.
+	* remote-m32r-sdi.c (m32r_can_use_hw_watchpoint)
+	(m32r_insert_watchpoint, m32r_remove_watchpoint)
+	(m32r_stopped_data_address, m32r_stopped_by_watchpoint): Make
+	static.
+	* rs6000-aix-tdep.c (_initialize_rs6000_aix_tdep): Declare.
+	* rs6000-nat.c: Include xcoffread.h.
+	(find_toc_address): Don't extern declare get_toc_offset.  Adjust
+	to call xcoff_get_to_offset.
+	* rs6000-tdep.c (ppc_vsx_support_p, ppc_displaced_step_fixup)
+	(rs6000_skip_main_prologue, rs6000_in_solib_return_trampoline)
+	(rs6000_skip_trampoline_code): Make static.
+	* s390-tdep.c (s390_regset_from_core_section): Ditto.
+	* sh-tdep.c (sh_register_reggroup_p): Ditto.
+	* shnbsd-tdep.c (shnbsd_regset_from_core_section): Ditto.
+	(_initialize_shnbsd_tdep): Declare.
+	* solib-frv.c (displacement_from_map): Make static.
+	(_initialize_frv_solib): Declare.
+	* solib-irix.c (fetch_lm_info): Make static.
+	(_initialize_irix_solib): Declare.
+	* solib-som.c: Include solib-som.h.
+	(som_solib_select): Line break.
+	* sparc-tdep.c (sparc_regset_from_core_section): Make static.
+	* sparcnbsd-tdep.c (_initialize_sparnbsd_tdep): Rename to ...
+	(_initialize_sparcnbsd_tdep): ... this.
+	* spu-tdep.c (spu_software_single_step): Make it static.
+	(_initialize_spu_tdep): Declare.
+	* vax-tdep.c (vax_frame_cache): Make it static.
+	* xcoffread.c: Include xcoffread.h.
+	(get_toc_offset): Rename to ...
+	(xcoff_get_toc_offset): ... this.
+	(_initialize_xcoffread): Declare.
+	* xcoffread.h: New.
+	* xtensa-linux-tdep.c (_initialize_xtensa_linux_tdep): Declare.
+	* xtensa-tdep.c (xtensa_skip_prologue, xtensa_derive_tdep): Make
+	static.
+	(_initialize_xtensa_tdep): Declare.
+
 2008-02-21  Pedro Alves  <pedro@codesorcery.com>
 
 	Silence a few -Wmissing-prototypes warnings.

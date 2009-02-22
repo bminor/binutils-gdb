@@ -280,7 +280,7 @@ mips64_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 
 /* Supply a 64-bit register.  */
 
-void
+static void
 supply_64bit_reg (struct regcache *regcache, int regnum,
 		  const gdb_byte *buf)
 {
@@ -1105,7 +1105,7 @@ mips_linux_restart_reg_p (struct gdbarch *gdbarch)
 /* When FRAME is at a syscall instruction, return the PC of the next
    instruction to be executed.  */
 
-CORE_ADDR
+static CORE_ADDR
 mips_linux_syscall_next_pc (struct frame_info *frame)
 {
   CORE_ADDR pc = get_frame_pc (frame);
@@ -1215,6 +1215,9 @@ mips_linux_init_abi (struct gdbarch_info info,
 				 "restart");
     }
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_mips_linux_tdep;
 
 void
 _initialize_mips_linux_tdep (void)

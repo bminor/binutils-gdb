@@ -310,7 +310,7 @@ struct vax_frame_cache
   struct trad_frame_saved_reg *saved_regs;
 };
 
-struct vax_frame_cache *
+static struct vax_frame_cache *
 vax_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct vax_frame_cache *cache;

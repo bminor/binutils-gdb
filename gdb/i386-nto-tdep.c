@@ -302,6 +302,9 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   nto_set_target (&i386_nto_target);
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_i386nto_tdep;
+
 void
 _initialize_i386nto_tdep (void)
 {

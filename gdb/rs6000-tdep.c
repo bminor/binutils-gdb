@@ -216,7 +216,7 @@ ppc_floating_point_unit_p (struct gdbarch *gdbarch)
 
 /* Return non-zero if the architecture described by GDBARCH has
    VSX registers (vsr0 --- vsr63).  */
-int
+static int
 ppc_vsx_support_p (struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -965,11 +965,11 @@ rs6000_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
 
 /* Fix up the state of registers and memory after having single-stepped
    a displaced instruction.  */
-void
+static void
 ppc_displaced_step_fixup (struct gdbarch *gdbarch,
-			   struct displaced_step_closure *closure,
-			   CORE_ADDR from, CORE_ADDR to,
-			   struct regcache *regs)
+			  struct displaced_step_closure *closure,
+			  CORE_ADDR from, CORE_ADDR to,
+			  struct regcache *regs)
 {
   /* Since we use simple_displaced_step_copy_insn, our closure is a
      copy of the instruction.  */
@@ -2107,7 +2107,7 @@ rs6000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    address of the instruction following that call.  Otherwise, it simply
    returns PC.  */
 
-CORE_ADDR
+static CORE_ADDR
 rs6000_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_byte buf[4];
@@ -2165,7 +2165,7 @@ rs6000_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
    gdbarch_skip_trampoline_code hooks in handle_inferior_event() to skip past
    @FIX code.  */
 
-int
+static int
 rs6000_in_solib_return_trampoline (CORE_ADDR pc, char *name)
 {
   return name && !strncmp (name, "@FIX", 4);
@@ -2185,7 +2185,7 @@ rs6000_in_solib_return_trampoline (CORE_ADDR pc, char *name)
    Result is desired PC to step until, or NULL if we are not in
    code that should be skipped.  */
 
-CORE_ADDR
+static CORE_ADDR
 rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));

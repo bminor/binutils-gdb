@@ -261,7 +261,7 @@ m32c_debug_info_reg_to_regnum (struct gdbarch *gdbarch, int reg_nr)
 }
 
 
-int
+static int
 m32c_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			  struct reggroup *group)
 {
@@ -1519,7 +1519,7 @@ check_for_saved (void *prologue_untyped, pv_t addr, CORE_ADDR size, pv_t value)
 /* Analyze the function prologue for ARCH at START, going no further
    than LIMIT, and place a description of what we found in
    PROLOGUE.  */
-void
+static void
 m32c_analyze_prologue (struct gdbarch *arch,
 		       CORE_ADDR start, CORE_ADDR limit,
 		       struct m32c_prologue *prologue)
@@ -2499,7 +2499,7 @@ m32c_m16c_pointer_to_address (struct type *type, const gdb_byte *buf)
   return ptr;
 }
 
-void
+static void
 m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
 			    int *frame_regnum,
 			    LONGEST *frame_offset)
@@ -2613,6 +2613,8 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return arch;
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_m32c_tdep;
 
 void
 _initialize_m32c_tdep (void)

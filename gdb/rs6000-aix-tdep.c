@@ -749,6 +749,9 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
     set_gdbarch_frame_red_zone_size (gdbarch, 0);
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_rs6000_aix_tdep;
+
 void
 _initialize_rs6000_aix_tdep (void)
 {

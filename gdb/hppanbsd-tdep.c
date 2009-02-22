@@ -31,6 +31,7 @@
 #include "gdb_string.h"
 
 #include "hppa-tdep.h"
+#include "hppabsd-tdep.h"
 
 /* From <machine/mcontext.h>.  */
 static int hppanbsd_mc_reg_offset[] =
@@ -201,8 +202,6 @@ hppanbsd_regset_from_core_section (struct gdbarch *gdbarch,
   return NULL;
 }
 
-void hppabsd_init_abi (struct gdbarch_info, struct gdbarch *);
-
 static void
 hppanbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -218,7 +217,7 @@ hppanbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_hppabsd_tdep (void);
+extern initialize_file_ftype _initialize_hppanbsd_tdep;
 
 void
 _initialize_hppanbsd_tdep (void)

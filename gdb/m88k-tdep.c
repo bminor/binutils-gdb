@@ -644,7 +644,7 @@ m88k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   return m88k_analyze_prologue (pc, pc + m88k_max_prologue_size, NULL);
 }
 
-struct m88k_frame_cache *
+static struct m88k_frame_cache *
 m88k_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct m88k_frame_cache *cache;

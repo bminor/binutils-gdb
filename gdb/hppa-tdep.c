@@ -73,7 +73,7 @@ const struct objfile_data *hppa_objfile_priv_data = NULL;
 /* This assumes that no garbage lies outside of the lower bits of 
    value. */
 
-int
+static int
 hppa_sign_extend (unsigned val, unsigned bits)
 {
   return (int) (val >> (bits - 1) ? (-1 << bits) | val : val);
@@ -81,7 +81,7 @@ hppa_sign_extend (unsigned val, unsigned bits)
 
 /* For many immediate values the sign bit is the low bit! */
 
-int
+static int
 hppa_low_hppa_sign_extend (unsigned val, unsigned bits)
 {
   return (int) ((val & 0x1 ? (-1 << (bits - 1)) : 0) | val >> 1);

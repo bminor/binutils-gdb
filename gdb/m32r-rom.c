@@ -550,6 +550,9 @@ m32r_upload_command (char *args, int from_tty)
   clear_symtab_users ();
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_m32r_rom;
+
 void
 _initialize_m32r_rom (void)
 {

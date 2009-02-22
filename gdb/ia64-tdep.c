@@ -280,7 +280,7 @@ struct ia64_frame_cache
 
 };
 
-int
+static int
 ia64_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			  struct reggroup *group)
 {

@@ -1418,7 +1418,7 @@ m32r_stop (ptid_t ptid)
    is the number of hardware breakpoints already installed.  This
    implements the TARGET_CAN_USE_HARDWARE_WATCHPOINT macro.  */
 
-int
+static int
 m32r_can_use_hw_watchpoint (int type, int cnt, int othertype)
 {
   return sdi_desc != NULL && cnt < max_access_breaks;
@@ -1428,7 +1428,7 @@ m32r_can_use_hw_watchpoint (int type, int cnt, int othertype)
    for a write watchpoint, 1 for a read watchpoint, or 2 for a read/write
    watchpoint. */
 
-int
+static int
 m32r_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
   int i;
@@ -1452,7 +1452,7 @@ m32r_insert_watchpoint (CORE_ADDR addr, int len, int type)
   return 1;
 }
 
-int
+static int
 m32r_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
   int i;
@@ -1473,7 +1473,7 @@ m32r_remove_watchpoint (CORE_ADDR addr, int len, int type)
   return 0;
 }
 
-int
+static int
 m32r_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 {
   int rc = 0;
@@ -1485,7 +1485,7 @@ m32r_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
   return rc;
 }
 
-int
+static int
 m32r_stopped_by_watchpoint (void)
 {
   CORE_ADDR addr;

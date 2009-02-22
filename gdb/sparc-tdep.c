@@ -1324,7 +1324,7 @@ sparc_write_pc (struct regcache *regcache, CORE_ADDR pc)
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
-const struct regset *
+static const struct regset *
 sparc_regset_from_core_section (struct gdbarch *gdbarch,
 				const char *sect_name, size_t sect_size)
 {

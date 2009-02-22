@@ -1217,6 +1217,9 @@ mn10300_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 		      tdep->am33_mode);
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_mn10300_tdep;
+
 void
 _initialize_mn10300_tdep (void)
 {

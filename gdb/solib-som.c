@@ -29,6 +29,7 @@
 #include "hppa-tdep.h"
 #include "solist.h"
 #include "solib.h"
+#include "solib-som.h"
 
 #include <sys/utsname.h>
 #include <string.h>
@@ -806,7 +807,8 @@ _initialize_som_solib (void)
   som_so_ops.in_dynsym_resolve_code = som_in_dynsym_resolve_code;
 }
 
-void som_solib_select (struct gdbarch *gdbarch)
+void
+som_solib_select (struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   set_solib_ops (gdbarch, &som_so_ops);

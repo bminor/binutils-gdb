@@ -26,9 +26,10 @@
 #include "elf/common.h"
 
 #include "hppa-tdep.h"
+#include "hppabsd-tdep.h"
 #include "solib-svr4.h"
 
-CORE_ADDR
+static CORE_ADDR
 hppabsd_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 {
   CORE_ADDR faddr = value_as_address (function);

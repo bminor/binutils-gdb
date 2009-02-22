@@ -148,7 +148,7 @@ static struct regset shnbsd_gregset =
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
-const struct regset *
+static const struct regset *
 shnbsd_regset_from_core_section (struct gdbarch *gdbarch,
 				 const char *sect_name, size_t sect_size)
 {
@@ -197,6 +197,9 @@ shnbsd_core_osabi_sniffer (bfd *abfd)
 
   return GDB_OSABI_UNKNOWN;
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_shnbsd_tdep;
 
 void
 _initialize_shnbsd_tdep (void)

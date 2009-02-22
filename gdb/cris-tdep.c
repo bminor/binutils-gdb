@@ -453,7 +453,7 @@ static const struct frame_unwind cris_sigtramp_frame_unwind =
   cris_sigtramp_frame_sniffer
 };
 
-int
+static int
 crisv32_single_step_through_delay (struct gdbarch *gdbarch,
 				   struct frame_info *this_frame)
 {
@@ -745,7 +745,7 @@ pop_stack_item (struct stack_item *si)
    in the stack frame.  sp is even more special: the address we return
    for it IS the sp for the next frame.  */
 
-struct cris_unwind_cache *
+static struct cris_unwind_cache *
 cris_frame_unwind_cache (struct frame_info *this_frame,
 			 void **this_prologue_cache)
 {

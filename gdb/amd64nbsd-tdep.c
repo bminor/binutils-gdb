@@ -125,7 +125,7 @@ amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 void _initialize_amd64nbsd_tdep (void);
 
 void
-_initialize_amd64nbsd_ndep (void)
+_initialize_amd64nbsd_tdep (void)
 {
   /* The NetBSD/amd64 native dependent code makes this assumption.  */
   gdb_assert (ARRAY_SIZE (amd64nbsd_r_reg_offset) == AMD64_NUM_GREGS);

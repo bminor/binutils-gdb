@@ -39,6 +39,7 @@
 #include "coff/xcoff.h"
 #include "libxcoff.h"
 #include "coff/rs6000.h"
+#include "xcoffread.h"
 
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -2836,7 +2837,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 /* Return the toc offset value for a given objfile.  */
 
 CORE_ADDR
-get_toc_offset (struct objfile *objfile)
+xcoff_get_toc_offset (struct objfile *objfile)
 {
   if (objfile)
     return ((struct coff_symfile_info *) objfile->deprecated_sym_private)->toc_offset;
@@ -3027,6 +3028,9 @@ static struct sym_fns xcoff_sym_fns =
   aix_process_linenos,          /* sym_read_linetable */
   NULL				/* next: pointer to next struct sym_fns */
 };
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_xcoffread;
 
 void
 _initialize_xcoffread (void)

@@ -353,7 +353,7 @@ sparcnbsd_core_osabi_sniffer (bfd *abfd)
 void _initialize_sparcnbsd_tdep (void);
 
 void
-_initialize_sparnbsd_tdep (void)
+_initialize_sparcnbsd_tdep (void)
 {
   gdbarch_register_osabi_sniffer (bfd_arch_sparc, bfd_target_aout_flavour,
 				  sparcnbsd_aout_osabi_sniffer);

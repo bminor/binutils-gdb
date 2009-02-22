@@ -833,7 +833,7 @@ avr_extract_return_value (struct type *type, struct regcache *regcache,
    and copy it into READBUF.  If WRITEBUF is non-zero, write the value
    from WRITEBUF into REGCACHE.  */
 
-enum return_value_convention
+static enum return_value_convention
 avr_return_value (struct gdbarch *gdbarch, struct type *func_type,
 		  struct type *valtype, struct regcache *regcache,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
@@ -871,7 +871,7 @@ avr_return_value (struct gdbarch *gdbarch, struct type *func_type,
    in the stack frame.  sp is even more special: the address we return
    for it IS the sp for the next frame. */
 
-struct avr_unwind_cache *
+static struct avr_unwind_cache *
 avr_frame_unwind_cache (struct frame_info *this_frame,
                         void **this_prologue_cache)
 {

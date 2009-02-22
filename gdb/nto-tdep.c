@@ -299,7 +299,7 @@ nto_truncate_ptr (CORE_ADDR addr)
     return addr & (((CORE_ADDR) 1 << gdbarch_ptr_bit (target_gdbarch)) - 1);
 }
 
-Elf_Internal_Phdr *
+static Elf_Internal_Phdr *
 find_load_phdr (bfd *abfd)
 {
   Elf_Internal_Phdr *phdr;
@@ -397,6 +397,9 @@ nto_initialize_signals (void)
   signal_pass_update (SIGPHOTON, 1);
 #endif
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_nto_tdep;
 
 void
 _initialize_nto_tdep (void)

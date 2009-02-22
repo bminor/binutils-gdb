@@ -65,6 +65,9 @@ alpha_osf1_init_abi (struct gdbarch_info info,
   tdep->jb_elt_size = 8;
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_alpha_osf1_tdep;
+
 void
 _initialize_alpha_osf1_tdep (void)
 {
