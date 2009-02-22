@@ -1,3 +1,7 @@
+2009-02-22  Doug Evans  <dje@google.com>
+
+	* exec.c (exec_file_attach): Fix comment.
+
 2009-02-22  Pedro Alves  <pedro@codesourcery.com>
 
 	Silence a few -Wmissing-prototypes warnings.

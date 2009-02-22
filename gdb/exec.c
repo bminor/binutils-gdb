@@ -158,7 +158,7 @@ exec_file_clear (int from_tty)
     printf_unfiltered (_("No executable file now.\n"));
 }
 
-/*  Process the first arg in ARGS as the new exec file.
+/* Set FILENAME as the new exec file.
 
    This function is intended to be behave essentially the same
    as exec_file_command, except that the latter will detect when
@@ -173,9 +173,7 @@ exec_file_clear (int from_tty)
    given a pid but not a exec pathname, and the attach command could
    figure out the pathname from the pid.  (In this case, we shouldn't
    ask the user whether the current target should be shut down --
-   we're supplying the exec pathname late for good reason.)
-   
-   ARGS is assumed to be the filename. */
+   we're supplying the exec pathname late for good reason.)  */
 
 void
 exec_file_attach (char *filename, int from_tty)
