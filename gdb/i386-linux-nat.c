@@ -484,7 +484,7 @@ i386_linux_fetch_inferior_registers (struct target_ops *ops,
       /* The call above might reset `have_ptrace_getregs'.  */
       if (!have_ptrace_getregs)
 	{
-	  i386_linux_fetch_inferior_registers (regcache, regno);
+	  i386_linux_fetch_inferior_registers (ops, regcache, regno);
 	  return;
 	}
 

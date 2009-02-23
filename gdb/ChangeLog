@@ -1,5 +1,10 @@
 2009-02-23  Pedro Alves  <pedro@codesourcery.com>
 
+	* i386-linux-nat.c (i386_linux_fetch_inferior_registers): Pass
+	`ops' to recursive call.
+
+2009-02-23  Pedro Alves  <pedro@codesourcery.com>
+
 	* corelow.c (get_core_registers): Adjust.
 	(core_file_thread_alive): Rename to...
 	(core_thread_alive): ... this.
