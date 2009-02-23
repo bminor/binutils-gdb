@@ -1,5 +1,9 @@
 2009-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (type_names): Remove OPERAND_TYPE_VEX_IMM4.
+
+2009-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (vex_imm4): Removed.
 	(VEX_check_operands): Likewise.
 	(match_template): Updated.

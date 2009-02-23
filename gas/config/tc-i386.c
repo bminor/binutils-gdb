@@ -2329,7 +2329,6 @@ const type_names[] =
   { OPERAND_TYPE_REGMMX, "rMMX" },
   { OPERAND_TYPE_REGXMM, "rXMM" },
   { OPERAND_TYPE_ESSEG, "es" },
-  { OPERAND_TYPE_VEX_IMM4, "VEX i4" },
 };
 
 static void
