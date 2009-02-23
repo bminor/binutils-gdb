@@ -2361,7 +2361,7 @@ find_pc_line (CORE_ADDR pc, int notcurrent)
 struct symtab *
 find_line_symtab (struct symtab *symtab, int line, int *index, int *exact_match)
 {
-  int exact;
+  int exact = 0;  /* Initialized here to avoid a compiler warning.  */
 
   /* BEST_INDEX and BEST_LINETABLE identify the smallest linenumber > LINE
      so far seen.  */
