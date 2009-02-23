@@ -1,3 +1,8 @@
+2009-02-23  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-dis.c (neon_opcodes): Correct bit-mask and patterns for
+	vq{r}shr{u}n.s64 insnstructions.
+
 2009-02-19  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes) <"lfdepx", "stfdepx">: Fix the first
