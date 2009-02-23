@@ -416,6 +416,13 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mlittle}|@b{-mlittle-endian}|@b{-mbig}|@b{-mbig-endian}]
    [@b{-msolaris}|@b{-mno-solaris}]
 @end ifset
+@ifset S390
+
+@emph{Target s390 options:}
+   [@b{-m31}|@b{-m64}] [@b{-mesa}|@b{-mzarch}] [@b{-march}=@var{CPU}]
+   [@b{-mregnames}|@b{-mno-regnames}]
+   [@b{-mwarn-areg-zero}]
+@end ifset
 @ifset SPARC
 
 @emph{Target SPARC options:}
@@ -1160,6 +1167,30 @@ Assemble for a little endian target.
 
 @ifset MMIX
 See the info pages for documentation of the MMIX-specific options.
+@end ifset
+
+@ifset S390
+The following options are available when @value{AS} is configured for the s390
+processor family.
+
+@table @gcctabopt
+@item -m31
+@itemx -m64
+Select the word size, either 31/32 bits or 64 bits.
+@item -mesa
+@item -mzarch
+Select the architecture mode, either the Enterprise System
+Architecture (esa) or the z/Architecture mode (zarch).
+@item -march=@var{processor}
+Specify which s390 processor variant is the target, @samp{g6}, @samp{g6},
+@samp{z900}, @samp{z990}, @samp{z9-109}, @samp{z9-ec}, or @samp{z10}.
+@item -mregnames
+@itemx -mno-regnames
+Allow or disallow symbolic names for registers.
+@item -mwarn-areg-zero
+Warn whenever the operand for a base or index register has been specified
+but evaluates to zero.
+@end table
 @end ifset
 
 @ifset XTENSA
@@ -2201,6 +2232,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset PPC
 @samp{#} for Motorola PowerPC;
+@end ifset
+@ifset S390
+@samp{#} for IBM S/390;
 @end ifset
 @ifset SH
 @samp{!} for the Renesas / SuperH SH;
@@ -6716,6 +6750,9 @@ subject, see the hardware manufacturer's manual.
 @ifset PPC
 * PPC-Dependent::               PowerPC Dependent Features
 @end ifset
+@ifset S390
+* S/390-Dependent::             IBM S/390 Dependent Features
+@end ifset
 @ifset SPARC
 * Sparc-Dependent::             SPARC Dependent Features
 @end ifset
@@ -6882,6 +6919,10 @@ family.
 
 @ifset PPC
 @include c-ppc.texi
+@end ifset
+
+@ifset S390
+@include c-s390.texi
 @end ifset
 
 @ifset SH

@@ -1,3 +1,11 @@
+2009-02-23  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* doc/all.texi: Set S390.
+	* doc/as.texinfo: Add S390 support and pull in c-s390.texi.
+	* doc/Makefile.am (CPU_DOCS): Add c-s390.texi.
+	* doc/Makefile.in: Likewise.
+	* doc/c-s390.texi: New.
+
 2009-02-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-m68k.c (mcf51qe_ctrl): Add CPUCR.

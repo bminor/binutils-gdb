@@ -57,6 +57,7 @@
 @set PDP11
 @set PJ
 @set PPC
+@set S390
 @set SH
 @set SPARC
 @set TIC54X

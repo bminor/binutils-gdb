@@ -57,6 +57,7 @@ CPU_DOCS = \
 	c-pdp11.texi \
 	c-pj.texi \
 	c-ppc.texi \
+	c-s390.texi \
 	c-sh.texi \
 	c-sh64.texi \
 	c-sparc.texi \
