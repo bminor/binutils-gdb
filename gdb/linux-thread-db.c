@@ -139,7 +139,7 @@ static CORE_ADDR td_create_bp_addr;
 static CORE_ADDR td_death_bp_addr;
 
 /* Prototypes for local functions.  */
-static void thread_db_find_new_threads (void);
+static void thread_db_find_new_threads_1 (void);
 static void attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 			   const td_thrinfo_t *ti_p);
 static void detach_thread (ptid_t ptid);
@@ -281,7 +281,7 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
     {
       /* New thread.  Attach to it now (why wait?).  */
       if (!have_threads ())
-	thread_db_find_new_threads ();
+	thread_db_find_new_threads_1 ();
       else
 	attach_thread (thread_ptid, thp, &ti);
       thread_info = find_thread_pid (thread_ptid);
@@ -358,7 +358,7 @@ thread_db_attach_lwp (ptid_t ptid)
      initialized, we may not know its thread ID yet.  Make sure we do
      before we add another thread to the list.  */
   if (!have_threads ())
-    thread_db_find_new_threads ();
+    thread_db_find_new_threads_1 ();
 
   err = td_ta_map_lwp2thr_p (thread_agent, GET_LWP (ptid), &th);
   if (err != TD_OK)
@@ -655,7 +655,7 @@ check_for_thread_db (void)
       using_thread_db = 1;
 
       enable_thread_event_reporting ();
-      thread_db_find_new_threads ();
+      thread_db_find_new_threads_1 ();
       break;
 
     default:
@@ -816,7 +816,7 @@ check_event (ptid_t ptid)
      initialized, we may not know its thread ID yet.  Make sure we do
      before we add another thread to the list.  */
   if (!have_threads ())
-    thread_db_find_new_threads ();
+    thread_db_find_new_threads_1 ();
 
   /* If we are at a create breakpoint, we do not know what new lwp
      was created and cannot specifically locate the event message for it.
@@ -904,7 +904,7 @@ thread_db_wait (struct target_ops *ops,
   /* If we do not know about the main thread yet, this would be a good time to
      find it.  */
   if (ourstatus->kind == TARGET_WAITKIND_STOPPED && !have_threads ())
-    thread_db_find_new_threads ();
+    thread_db_find_new_threads_1 ();
 
   if (ourstatus->kind == TARGET_WAITKIND_STOPPED
       && ourstatus->value.sig == TARGET_SIGNAL_TRAP)
@@ -992,7 +992,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
    PTID.  */
 
 static void
-thread_db_find_new_threads (void)
+thread_db_find_new_threads_1 (void)
 {
   td_err_e err;
   struct lwp_info *lp;
@@ -1015,6 +1015,12 @@ thread_db_find_new_threads (void)
 			  TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
   if (err != TD_OK)
     error (_("Cannot find new threads: %s"), thread_db_err_str (err));
+}
+
+static void
+thread_db_find_new_threads (struct target_ops *ops)
+{
+  thread_db_find_new_threads_1 ();
 }
 
 static char *
@@ -1072,7 +1078,7 @@ thread_db_get_thread_local_address (struct target_ops *ops,
 
   /* If we have not discovered any threads yet, check now.  */
   if (!have_threads ())
-    thread_db_find_new_threads ();
+    thread_db_find_new_threads_1 ();
 
   /* Find the matching thread.  */
   thread_info = find_thread_pid (ptid);
@@ -1147,7 +1153,7 @@ thread_db_get_ada_task_ptid (long lwp, long thread)
 {
   struct thread_info *thread_info;
 
-  thread_db_find_new_threads ();
+  thread_db_find_new_threads_1 ();
   thread_info = iterate_over_threads (thread_db_find_thread_from_tid, &thread);
 
   gdb_assert (thread_info != NULL);

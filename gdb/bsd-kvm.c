@@ -172,7 +172,8 @@ bsd_kvm_fetch_pcb (struct regcache *regcache, struct pcb *paddr)
 }
 
 static void
-bsd_kvm_fetch_registers (struct regcache *regcache, int regnum)
+bsd_kvm_fetch_registers (struct target_ops *ops,
+			 struct regcache *regcache, int regnum)
 {
   struct nlist nl[2];
 
@@ -310,7 +311,8 @@ bsd_kvm_pcb_cmd (char *arg, int fromtty)
 }
 
 static int
-bsd_kvm_thread_alive (ptid_t ptid)
+bsd_kvm_thread_alive (struct target_ops *ops,
+		      ptid_t ptid)
 {
   return 1;
 }

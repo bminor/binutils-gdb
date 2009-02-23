@@ -204,7 +204,8 @@ store_fpregs (const struct regcache *regcache, int tid, int regnum)
 /* Fetch register REGNUM from the child process.  If REGNUM is -1, do
    this for all registers.  */
 static void
-s390_linux_fetch_inferior_registers (struct regcache *regcache, int regnum)
+s390_linux_fetch_inferior_registers (struct target_ops *ops,
+				     struct regcache *regcache, int regnum)
 {
   int tid = s390_inferior_tid ();
 
@@ -220,7 +221,8 @@ s390_linux_fetch_inferior_registers (struct regcache *regcache, int regnum)
 /* Store register REGNUM back into the child process.  If REGNUM is
    -1, do this for all registers.  */
 static void
-s390_linux_store_inferior_registers (struct regcache *regcache, int regnum)
+s390_linux_store_inferior_registers (struct target_ops *ops,
+				     struct regcache *regcache, int regnum)
 {
   int tid = s390_inferior_tid ();
 

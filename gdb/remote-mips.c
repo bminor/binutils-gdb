@@ -86,16 +86,9 @@ static void mips_close (int quitting);
 
 static void mips_detach (struct target_ops *ops, char *args, int from_tty);
 
-static void mips_resume (ptid_t ptid, int step,
-                         enum target_signal siggnal);
-
 static int mips_map_regno (struct gdbarch *, int);
 
-static void mips_fetch_registers (struct regcache *regcache, int regno);
-
 static void mips_prepare_to_store (struct regcache *regcache);
-
-static void mips_store_registers (struct regcache *regcache, int regno);
 
 static unsigned int mips_fetch_word (CORE_ADDR addr);
 
@@ -1667,7 +1660,8 @@ mips_detach (struct target_ops *ops, char *args, int from_tty)
    where PMON does return a reply.  */
 
 static void
-mips_resume (ptid_t ptid, int step, enum target_signal siggnal)
+mips_resume (struct target_ops *ops,
+	     ptid_t ptid, int step, enum target_signal siggnal)
 {
   int err;
 
@@ -1899,7 +1893,8 @@ mips_map_regno (struct gdbarch *gdbarch, int regno)
 /* Fetch the remote registers.  */
 
 static void
-mips_fetch_registers (struct regcache *regcache, int regno)
+mips_fetch_registers (struct target_ops *ops,
+		      struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   unsigned LONGEST val;
@@ -1908,7 +1903,7 @@ mips_fetch_registers (struct regcache *regcache, int regno)
   if (regno == -1)
     {
       for (regno = 0; regno < gdbarch_num_regs (gdbarch); regno++)
-	mips_fetch_registers (regcache, regno);
+	mips_fetch_registers (ops, regcache, regno);
       return;
     }
 
@@ -1962,7 +1957,8 @@ mips_prepare_to_store (struct regcache *regcache)
 /* Store remote register(s).  */
 
 static void
-mips_store_registers (struct regcache *regcache, int regno)
+mips_store_registers (struct target_ops *ops,
+		      struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   ULONGEST val;
@@ -1971,7 +1967,7 @@ mips_store_registers (struct regcache *regcache, int regno)
   if (regno == -1)
     {
       for (regno = 0; regno < gdbarch_num_regs (gdbarch); regno++)
-	mips_store_registers (regcache, regno);
+	mips_store_registers (ops, regcache, regno);
       return;
     }
 

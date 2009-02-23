@@ -72,10 +72,6 @@ static void gdb_os_evprintf_filtered (host_callback *, const char *, va_list);
 
 static void gdb_os_error (host_callback *, const char *, ...) ATTR_NORETURN;
 
-static void gdbsim_fetch_register (struct regcache *regcache, int regno);
-
-static void gdbsim_store_register (struct regcache *regcache, int regno);
-
 static void gdbsim_kill (void);
 
 static void gdbsim_load (char *prog, int fromtty);
@@ -277,13 +273,14 @@ one2one_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 }
 
 static void
-gdbsim_fetch_register (struct regcache *regcache, int regno)
+gdbsim_fetch_register (struct target_ops *ops,
+		       struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno == -1)
     {
       for (regno = 0; regno < gdbarch_num_regs (gdbarch); regno++)
-	gdbsim_fetch_register (regcache, regno);
+	gdbsim_fetch_register (ops, regcache, regno);
       return;
     }
 
@@ -345,13 +342,14 @@ gdbsim_fetch_register (struct regcache *regcache, int regno)
 
 
 static void
-gdbsim_store_register (struct regcache *regcache, int regno)
+gdbsim_store_register (struct target_ops *ops,
+		       struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno == -1)
     {
       for (regno = 0; regno < gdbarch_num_regs (gdbarch); regno++)
-	gdbsim_store_register (regcache, regno);
+	gdbsim_store_register (ops, regcache, regno);
       return;
     }
   else if (gdbarch_register_sim_regno (gdbarch, regno) >= 0)
@@ -860,7 +858,7 @@ simulator_command (char *args, int from_tty)
 /* Check to see if a thread is still alive.  */
 
 static int
-gdbsim_thread_alive (ptid_t ptid)
+gdbsim_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   if (ptid_equal (ptid, remote_sim_ptid))
     /* The simulators' task is always alive.  */

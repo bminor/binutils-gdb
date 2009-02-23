@@ -270,7 +270,8 @@ store_register (const struct regcache *regcache, int regno)
    point registers depending upon the value of regno.  */
 
 static void
-hppa_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
+hppa_linux_fetch_inferior_registers (struct target_ops *ops,
+				     struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {
@@ -290,7 +291,8 @@ hppa_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
    point registers depending upon the value of regno.  */
 
 static void
-hppa_linux_store_inferior_registers (struct regcache *regcache, int regno)
+hppa_linux_store_inferior_registers (struct target_ops *ops,
+				     struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {

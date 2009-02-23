@@ -334,7 +334,8 @@ store_register (const struct regcache *regcache, int regno)
    REGNO otherwise. */
 
 static void
-rs6000_fetch_inferior_registers (struct regcache *regcache, int regno)
+rs6000_fetch_inferior_registers (struct target_ops *ops,
+				 struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno != -1)
@@ -376,7 +377,8 @@ rs6000_fetch_inferior_registers (struct regcache *regcache, int regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 static void
-rs6000_store_inferior_registers (struct regcache *regcache, int regno)
+rs6000_store_inferior_registers (struct target_ops *ops,
+				 struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno != -1)

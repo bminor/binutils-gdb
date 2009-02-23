@@ -194,7 +194,8 @@ fetch_fp_regs (struct regcache *regcache)
 }
 
 static void
-armnbsd_fetch_registers (struct regcache *regcache, int regno)
+armnbsd_fetch_registers (struct target_ops *ops,
+			 struct regcache *regcache, int regno)
 {
   if (regno >= 0)
     {
@@ -394,7 +395,8 @@ store_fp_regs (const struct regcache *regcache)
 }
 
 static void
-armnbsd_store_registers (struct regcache *regcache, int regno)
+armnbsd_store_registers (struct target_ops *ops,
+			 struct regcache *regcache, int regno)
 {
   if (regno >= 0)
     {

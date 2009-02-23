@@ -226,6 +226,7 @@ struct gdbarch
   int core_reg_section_encodes_pid;
   struct core_regset_section * core_regset_sections;
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
+  gdbarch_core_pid_to_str_ftype *core_pid_to_str;
   int vtable_function_descriptors;
   int vbit_in_delta;
   gdbarch_skip_permanent_breakpoint_ftype *skip_permanent_breakpoint;
@@ -360,6 +361,7 @@ struct gdbarch startup_gdbarch =
   0,  /* core_reg_section_encodes_pid */
   0,  /* core_regset_sections */
   0,  /* core_xfer_shared_libraries */
+  0,  /* core_pid_to_str */
   0,  /* vtable_function_descriptors */
   0,  /* vbit_in_delta */
   0,  /* skip_permanent_breakpoint */
@@ -613,6 +615,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of regset_from_core_section, has predicate */
   /* Skip verify of core_reg_section_encodes_pid, invalid_p == 0 */
   /* Skip verify of core_xfer_shared_libraries, has predicate */
+  /* Skip verify of core_pid_to_str, has predicate */
   /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
   /* Skip verify of vbit_in_delta, invalid_p == 0 */
   /* Skip verify of skip_permanent_breakpoint, has predicate */
@@ -732,6 +735,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: convert_register_p = <%s>\n",
                       host_address_to_string (gdbarch->convert_register_p));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_core_pid_to_str_p() = %d\n",
+                      gdbarch_core_pid_to_str_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: core_pid_to_str = <%s>\n",
+                      host_address_to_string (gdbarch->core_pid_to_str));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_core_read_description_p() = %d\n",
                       gdbarch_core_read_description_p (gdbarch));
@@ -2960,6 +2969,30 @@ set_gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch,
                                         gdbarch_core_xfer_shared_libraries_ftype core_xfer_shared_libraries)
 {
   gdbarch->core_xfer_shared_libraries = core_xfer_shared_libraries;
+}
+
+int
+gdbarch_core_pid_to_str_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->core_pid_to_str != NULL;
+}
+
+char *
+gdbarch_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->core_pid_to_str != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_core_pid_to_str called\n");
+  return gdbarch->core_pid_to_str (gdbarch, ptid);
+}
+
+void
+set_gdbarch_core_pid_to_str (struct gdbarch *gdbarch,
+                             gdbarch_core_pid_to_str_ftype core_pid_to_str)
+{
+  gdbarch->core_pid_to_str = core_pid_to_str;
 }
 
 int

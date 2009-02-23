@@ -39,8 +39,6 @@
 #include "inf-child.h"
 #include "inf-ttrace.h"
 
-/* HACK: Save the ttrace ops returned by inf_ttrace_target.  */
-static struct target_ops *ttrace_ops_hack;
 
 
 /* HP-UX uses a threading model where each user-space thread
@@ -618,7 +616,7 @@ inf_ttrace_me (void)
 /* Start tracing PID.  */
 
 static void
-inf_ttrace_him (int pid)
+inf_ttrace_him (struct target_ops *ops, int pid)
 {
   struct cleanup *old_chain = make_cleanup (do_cleanup_pfds, 0);
   ttevent_t tte;
@@ -646,7 +644,7 @@ inf_ttrace_him (int pid)
 
   do_cleanups (old_chain);
 
-  push_target (ttrace_ops_hack);
+  push_target (ops);
 
   /* On some targets, there must be some explicit synchronization
      between the parent and child processes after the debugger forks,
@@ -669,14 +667,18 @@ static void
 inf_ttrace_create_inferior (struct target_ops *ops, char *exec_file, 
 			    char *allargs, char **env, int from_tty)
 {
+  int pid;
+
   gdb_assert (inf_ttrace_num_lwps == 0);
   gdb_assert (inf_ttrace_num_lwps_in_syscall == 0);
   gdb_assert (inf_ttrace_page_dict.count == 0);
   gdb_assert (inf_ttrace_reenable_page_protections == 0);
   gdb_assert (inf_ttrace_vfork_ppid == -1);
 
-  fork_inferior (exec_file, allargs, env, inf_ttrace_me, inf_ttrace_him,
-		 inf_ttrace_prepare, NULL);
+  pid = fork_inferior (exec_file, allargs, env, inf_ttrace_me, NULL,
+		       inf_ttrace_prepare, NULL);
+
+  inf_ttrace_him (ops, pid);
 }
 
 static void
@@ -703,7 +705,7 @@ inf_ttrace_mourn_inferior (struct target_ops *ops)
     }
   inf_ttrace_page_dict.count = 0;
 
-  unpush_target (ttrace_ops_hack);
+  unpush_target (ops);
   generic_mourn_inferior ();
 }
 
@@ -763,7 +765,7 @@ inf_ttrace_attach (struct target_ops *ops, char *args, int from_tty)
 	      (uintptr_t)&tte, sizeof tte, 0) == -1)
     perror_with_name (("ttrace"));
 
-  push_target (ttrace_ops_hack);
+  push_target (ops);
 
   /* We'll bump inf_ttrace_num_lwps up and add the private data to the
      thread as soon as we get to inf_ttrace_wait.  At this point, we
@@ -808,7 +810,7 @@ inf_ttrace_detach (struct target_ops *ops, char *args, int from_tty)
   inferior_ptid = null_ptid;
   detach_inferior (pid);
 
-  unpush_target (ttrace_ops_hack);
+  unpush_target (ops);
 }
 
 static void
@@ -891,7 +893,8 @@ inf_ttrace_resume_callback (struct thread_info *info, void *arg)
 }
 
 static void
-inf_ttrace_resume (ptid_t ptid, int step, enum target_signal signal)
+inf_ttrace_resume (struct target_ops *ops,
+		   ptid_t ptid, int step, enum target_signal signal)
 {
   int resume_all;
   ttreq_t request = step ? TT_LWP_SINGLE : TT_LWP_CONTINUE;
@@ -1232,7 +1235,7 @@ inf_ttrace_files_info (struct target_ops *ignore)
 }
 
 static int
-inf_ttrace_thread_alive (ptid_t ptid)
+inf_ttrace_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   return 1;
 }
@@ -1294,7 +1297,6 @@ inf_ttrace_target (void)
   t->to_pid_to_str = inf_ttrace_pid_to_str;
   t->to_xfer_partial = inf_ttrace_xfer_partial;
 
-  ttrace_ops_hack = t;
   return t;
 }
 #endif

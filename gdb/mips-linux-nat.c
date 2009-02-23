@@ -47,8 +47,8 @@ static int have_ptrace_regsets = 1;
 /* Saved function pointers to fetch and store a single register using
    PTRACE_PEEKUSER and PTRACE_POKEUSER.  */
 
-void (*super_fetch_registers) (struct regcache *, int);
-void (*super_store_registers) (struct regcache *, int);
+void (*super_fetch_registers) (struct target_ops *, struct regcache *, int);
+void (*super_store_registers) (struct target_ops *, struct regcache *, int);
 
 /* Map gdb internal register number to ptrace ``address''.
    These ``addresses'' are normally defined in <asm/ptrace.h>. 
@@ -304,7 +304,8 @@ mips64_linux_regsets_store_registers (const struct regcache *regcache, int regno
    using any working method.  */
 
 static void
-mips64_linux_fetch_registers (struct regcache *regcache, int regnum)
+mips64_linux_fetch_registers (struct target_ops *ops,
+			      struct regcache *regcache, int regnum)
 {
   /* Unless we already know that PTRACE_GETREGS does not work, try it.  */
   if (have_ptrace_regsets)
@@ -320,7 +321,8 @@ mips64_linux_fetch_registers (struct regcache *regcache, int regnum)
    using any working method.  */
 
 static void
-mips64_linux_store_registers (struct regcache *regcache, int regnum)
+mips64_linux_store_registers (struct target_ops *ops,
+			      struct regcache *regcache, int regnum)
 {
   /* Unless we already know that PTRACE_GETREGS does not work, try it.  */
   if (have_ptrace_regsets)

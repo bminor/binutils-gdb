@@ -114,10 +114,6 @@ extern void exec_file_clear (int from_tty);
 
 extern void validate_files (void);
 
-/* The target vector for core files. */
-
-extern struct target_ops core_ops;
-
 /* The current default bfd target.  */
 
 extern char *gnutarget;

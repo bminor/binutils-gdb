@@ -63,8 +63,6 @@ static int procfs_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			       struct mem_attrib *attrib,
 			       struct target_ops *);
 
-static void procfs_fetch_registers (struct regcache *, int);
-
 static void notice_signals (void);
 
 static void init_procfs_ops (void);
@@ -219,7 +217,7 @@ procfs_set_thread (ptid_t ptid)
 
 /*  Return nonzero if the thread TH is still alive.  */
 static int
-procfs_thread_alive (ptid_t ptid)
+procfs_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   pid_t tid;
 
@@ -230,7 +228,7 @@ procfs_thread_alive (ptid_t ptid)
 }
 
 void
-procfs_find_new_threads (void)
+procfs_find_new_threads (struct target_ops *ops)
 {
   procfs_status status;
   pid_t pid;
@@ -547,9 +545,9 @@ procfs_attach (struct target_ops *ops, char *args, int from_tty)
   inf = add_inferior (pid);
   inf->attach_flag = 1;
 
-  push_target (&procfs_ops);
+  push_target (ops);
 
-  procfs_find_new_threads ();
+  procfs_find_new_threads (ops);
 }
 
 static void
@@ -727,7 +725,8 @@ procfs_wait (struct target_ops *ops,
    general register set and floating point registers (if supported)
    and update gdb's idea of their current values.  */
 static void
-procfs_fetch_registers (struct regcache *regcache, int regno)
+procfs_fetch_registers (struct target_ops *ops,
+			struct regcache *regcache, int regno)
 {
   union
   {
@@ -851,7 +850,8 @@ procfs_remove_hw_breakpoint (struct bp_target_info *bp_tgt)
 }
 
 static void
-procfs_resume (ptid_t ptid, int step, enum target_signal signo)
+procfs_resume (struct target_ops *ops,
+	       ptid_t ptid, int step, enum target_signal signo)
 {
   int signal_to_pass;
   procfs_status status;
@@ -1092,7 +1092,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
     close (fds[2]);
 
   inferior_ptid = do_attach (pid_to_ptid (pid));
-  procfs_find_new_threads ();
+  procfs_find_new_threads (ops);
 
   inf = add_inferior (pid);
   inf->attach_flag = 0;
@@ -1105,7 +1105,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
       /* warning( "Failed to set Kill-on-Last-Close flag: errno = %d(%s)\n",
          errn, strerror(errn) ); */
     }
-  push_target (&procfs_ops);
+  push_target (ops);
   target_terminal_init ();
 
   if (exec_bfd != NULL
@@ -1166,7 +1166,8 @@ get_regset (int regset, char *buf, int bufsize, int *regsize)
 }
 
 void
-procfs_store_registers (struct regcache *regcache, int regno)
+procfs_store_registers (struct target_ops *ops,
+			struct regcache *regcache, int regno)
 {
   union
   {

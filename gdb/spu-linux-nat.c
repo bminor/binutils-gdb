@@ -452,7 +452,8 @@ spu_child_wait (struct target_ops *ops,
 
 /* Override the fetch_inferior_register routine.  */
 static void
-spu_fetch_inferior_registers (struct regcache *regcache, int regno)
+spu_fetch_inferior_registers (struct target_ops *ops,
+			      struct regcache *regcache, int regno)
 {
   int fd;
   ULONGEST addr;
@@ -493,7 +494,8 @@ spu_fetch_inferior_registers (struct regcache *regcache, int regno)
 
 /* Override the store_inferior_register routine.  */
 static void
-spu_store_inferior_registers (struct regcache *regcache, int regno)
+spu_store_inferior_registers (struct target_ops *ops,
+			      struct regcache *regcache, int regno)
 {
   int fd;
   ULONGEST addr;

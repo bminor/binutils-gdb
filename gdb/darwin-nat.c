@@ -86,9 +86,6 @@ extern boolean_t exc_server (mach_msg_header_t *in, mach_msg_header_t *out);
 
 static void darwin_stop (ptid_t);
 
-static void darwin_resume (ptid_t ptid, int step,
-			   enum target_signal signal);
-
 static void darwin_mourn_inferior (struct target_ops *ops);
 
 static int darwin_lookup_task (char *args, task_t * ptask, int *ppid);
@@ -103,8 +100,6 @@ static void darwin_create_inferior (struct target_ops *ops, char *exec_file,
 				    char *allargs, char **env, int from_tty);
 
 static void darwin_files_info (struct target_ops *ops);
-
-static int darwin_thread_alive (ptid_t tpid);
 
 /* Current inferior.  */
 darwin_inferior *darwin_inf = NULL;
@@ -342,7 +337,8 @@ darwin_stop (ptid_t t)
 }
 
 static void
-darwin_resume (ptid_t ptid, int step, enum target_signal signal)
+darwin_resume (struct target_ops *ops,
+	       ptid_t ptid, int step, enum target_signal signal)
 {
   struct target_waitstatus status;
   int pid;
@@ -686,7 +682,7 @@ darwin_stop_inferior (darwin_inferior *inf)
   MACH_CHECK_ERROR (kret);
 
   if (msg_state == GOT_MESSAGE)
-    darwin_resume (inferior_ptid, 0, 0);
+    darwin_resume (darwin_ops, inferior_ptid, 0, 0);
 
   res = kill (inf->pid, SIGSTOP);
   if (res != 0)
@@ -697,7 +693,7 @@ darwin_stop_inferior (darwin_inferior *inf)
 }
 
 static void
-darwin_kill_inferior (void)
+darwin_kill_inferior (struct target_ops *ops)
 {
   struct target_waitstatus wstatus;
   ptid_t ptid;
@@ -718,7 +714,7 @@ darwin_kill_inferior (void)
   if (msg_state == GOT_MESSAGE)
     {
       exc_msg.ex_type = 0;
-      darwin_resume (inferior_ptid, 0, 0);
+      darwin_resume (ops, inferior_ptid, 0, 0);
     }
 
   kret = task_resume (darwin_inf->task);
@@ -1023,7 +1019,7 @@ darwin_detach (struct target_ops *ops, char *args, int from_tty)
   if (msg_state == GOT_MESSAGE)
     {
       exc_msg.ex_type = 0;
-      darwin_resume (inferior_ptid, 0, 0);
+      darwin_resume (ops, inferior_ptid, 0, 0);
     }
 
   kret = task_resume (darwin_inf->task);
@@ -1058,7 +1054,7 @@ darwin_pid_to_str (struct target_ops *ops, ptid_t ptid)
 }
 
 static int
-darwin_thread_alive (ptid_t ptid)
+darwin_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   return 1;
 }

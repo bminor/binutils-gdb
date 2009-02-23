@@ -40,7 +40,9 @@ extern int sparc32_fpregset_supplies_p (int regnum);
 
 extern struct target_ops *sparc_target (void);
 
-extern void sparc_fetch_inferior_registers (struct regcache *, int);
-extern void sparc_store_inferior_registers (struct regcache *, int);
+extern void sparc_fetch_inferior_registers (struct target_ops *,
+					    struct regcache *, int);
+extern void sparc_store_inferior_registers (struct target_ops *,
+					    struct regcache *, int);
 
 #endif /* sparc-nat.h */

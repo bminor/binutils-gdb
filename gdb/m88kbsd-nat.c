@@ -63,7 +63,8 @@ m88kbsd_collect_gregset (const struct regcache *regcache,
    for all registers.  */
 
 static void
-m88kbsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
+m88kbsd_fetch_inferior_registers (struct target_ops *ops,
+				  struct regcache *regcache, int regnum)
 {
   struct reg regs;
 
@@ -78,7 +79,8 @@ m88kbsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
    this for all registers.  */
 
 static void
-m88kbsd_store_inferior_registers (struct regcache *regcache, int regnum)
+m88kbsd_store_inferior_registers (struct target_ops *ops,
+				  struct regcache *regcache, int regnum)
 {
   struct reg regs;
 

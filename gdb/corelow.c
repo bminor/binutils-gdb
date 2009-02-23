@@ -81,11 +81,7 @@ static void core_close (int);
 
 static void core_close_cleanup (void *ignore);
 
-static void get_core_registers (struct regcache *, int);
-
 static void add_to_thread_list (bfd *, asection *, void *);
-
-static int core_file_thread_alive (ptid_t tid);
 
 static void init_core_ops (void);
 
@@ -525,7 +521,8 @@ get_core_register_section (struct regcache *regcache,
 /* We just get all the registers, so we don't use regno.  */
 
 static void
-get_core_registers (struct regcache *regcache, int regno)
+get_core_registers (struct target_ops *ops,
+		    struct regcache *regcache, int regno)
 {
   int i;
 
@@ -678,7 +675,7 @@ ignore (struct bp_target_info *bp_tgt)
    behaviour.
  */
 static int
-core_file_thread_alive (ptid_t tid)
+core_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   return 1;
 }
@@ -701,6 +698,14 @@ static char *
 core_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[64];
+
+  if (core_gdbarch
+      && gdbarch_core_pid_to_str_p (core_gdbarch))
+    {
+      char *ret = gdbarch_core_pid_to_str (core_gdbarch, ptid);
+      if (ret != NULL)
+	return ret;
+    }
 
   if (ptid_get_lwp (ptid) == 0)
     xsnprintf (buf, sizeof buf, "<main task>");
@@ -730,7 +735,7 @@ init_core_ops (void)
   core_ops.to_insert_breakpoint = ignore;
   core_ops.to_remove_breakpoint = ignore;
   core_ops.to_create_inferior = find_default_create_inferior;
-  core_ops.to_thread_alive = core_file_thread_alive;
+  core_ops.to_thread_alive = core_thread_alive;
   core_ops.to_read_description = core_read_description;
   core_ops.to_pid_to_str = core_pid_to_str;
   core_ops.to_stratum = core_stratum;
@@ -740,19 +745,10 @@ init_core_ops (void)
   core_ops.to_magic = OPS_MAGIC;
 }
 
-/* non-zero if we should not do the add_target call in
-   _initialize_corelow; not initialized (i.e., bss) so that
-   the target can initialize it (i.e., data) if appropriate.
-   This needs to be set at compile time because we don't know
-   for sure whether the target's initialize routine is called
-   before us or after us. */
-int coreops_suppress_target;
-
 void
 _initialize_corelow (void)
 {
   init_core_ops ();
 
-  if (!coreops_suppress_target)
-    add_target (&core_ops);
+  add_target (&core_ops);
 }

@@ -63,7 +63,8 @@ vaxbsd_collect_gregset (const struct regcache *regcache,
    for all registers.  */
 
 static void
-vaxbsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
+vaxbsd_fetch_inferior_registers (struct target_ops *ops,
+				 struct regcache *regcache, int regnum)
 {
   struct reg regs;
 
@@ -78,7 +79,8 @@ vaxbsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
    this for all registers.  */
 
 static void
-vaxbsd_store_inferior_registers (struct regcache *regcache, int regnum)
+vaxbsd_store_inferior_registers (struct target_ops *ops,
+				 struct regcache *regcache, int regnum)
 {
   struct reg regs;
 

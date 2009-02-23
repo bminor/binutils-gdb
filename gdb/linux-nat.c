@@ -990,7 +990,7 @@ static struct sigaction sigchld_default_action;
 
 /* Prototypes for local functions.  */
 static int stop_wait_callback (struct lwp_info *lp, void *data);
-static int linux_nat_thread_alive (ptid_t ptid);
+static int linux_thread_alive (ptid_t ptid);
 static char *linux_child_pid_to_exec_file (int pid);
 static int cancel_breakpoint (struct lwp_info *lp);
 
@@ -1664,7 +1664,8 @@ resume_callback (struct lwp_info *lp, void *data)
 {
   if (lp->stopped && lp->status == 0)
     {
-      linux_ops->to_resume (pid_to_ptid (GET_LWP (lp->ptid)),
+      linux_ops->to_resume (linux_ops,
+			    pid_to_ptid (GET_LWP (lp->ptid)),
 			    0, TARGET_SIGNAL_0);
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -1699,7 +1700,8 @@ resume_set_callback (struct lwp_info *lp, void *data)
 }
 
 static void
-linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
+linux_nat_resume (struct target_ops *ops,
+		  ptid_t ptid, int step, enum target_signal signo)
 {
   struct lwp_info *lp;
   int resume_all;
@@ -1810,7 +1812,7 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
   if (resume_all)
     iterate_over_lwps (resume_callback, NULL);
 
-  linux_ops->to_resume (ptid, step, signo);
+  linux_ops->to_resume (linux_ops, ptid, step, signo);
   memset (&lp->siginfo, 0, sizeof (lp->siginfo));
 
   if (debug_linux_nat)
@@ -2655,7 +2657,7 @@ linux_nat_filter_event (int lwpid, int status, int options)
      thread model, LWPs other than the main thread do not issue
      signals when they exit so we must check whenever the thread has
      stopped.  A similar check is made in stop_wait_callback().  */
-  if (num_lwps > 1 && !linux_nat_thread_alive (lp->ptid))
+  if (num_lwps > 1 && !linux_thread_alive (lp->ptid))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -2686,7 +2688,7 @@ linux_nat_filter_event (int lwpid, int status, int options)
 
       registers_changed ();
 
-      linux_ops->to_resume (pid_to_ptid (GET_LWP (lp->ptid)),
+      linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 			    lp->step, TARGET_SIGNAL_0);
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -2716,7 +2718,7 @@ linux_nat_filter_event (int lwpid, int status, int options)
       lp->ignore_sigint = 0;
 
       registers_changed ();
-      linux_ops->to_resume (pid_to_ptid (GET_LWP (lp->ptid)),
+      linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 			    lp->step, TARGET_SIGNAL_0);
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -2885,7 +2887,7 @@ retry:
       /* Resume the thread.  It should halt immediately returning the
          pending SIGSTOP.  */
       registers_changed ();
-      linux_ops->to_resume (pid_to_ptid (GET_LWP (lp->ptid)),
+      linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 			    lp->step, TARGET_SIGNAL_0);
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -3006,7 +3008,7 @@ retry:
 	     newly attached threads may cause an unwanted delay in
 	     getting them running.  */
 	  registers_changed ();
-	  linux_ops->to_resume (pid_to_ptid (GET_LWP (lp->ptid)),
+	  linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 				lp->step, signo);
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -3334,7 +3336,7 @@ linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
 }
 
 static int
-linux_nat_thread_alive (ptid_t ptid)
+linux_thread_alive (ptid_t ptid)
 {
   int err;
 
@@ -3355,6 +3357,12 @@ linux_nat_thread_alive (ptid_t ptid)
     return 0;
 
   return 1;
+}
+
+static int
+linux_nat_thread_alive (struct target_ops *ops, ptid_t ptid)
+{
+  return linux_thread_alive (ptid);
 }
 
 static char *

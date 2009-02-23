@@ -91,10 +91,6 @@ static void remote_files_info (struct target_ops *ignore);
 
 static void remote_prepare_to_store (struct regcache *regcache);
 
-static void remote_fetch_registers (struct regcache *regcache, int regno);
-
-static void remote_resume (ptid_t ptid, int step,
-                           enum target_signal siggnal);
 static void remote_open (char *name, int from_tty);
 
 static void extended_remote_open (char *name, int from_tty);
@@ -102,8 +98,6 @@ static void extended_remote_open (char *name, int from_tty);
 static void remote_open_1 (char *, int, struct target_ops *, int extended_p);
 
 static void remote_close (int quitting);
-
-static void remote_store_registers (struct regcache *regcache, int regno);
 
 static void remote_mourn (struct target_ops *ops);
 
@@ -140,8 +134,6 @@ static void interrupt_query (void);
 
 static void set_general_thread (struct ptid ptid);
 static void set_continue_thread (struct ptid ptid);
-
-static int remote_thread_alive (ptid_t);
 
 static void get_offsets (void);
 
@@ -1327,7 +1319,7 @@ set_general_process (void)
     system.  */
 
 static int
-remote_thread_alive (ptid_t ptid)
+remote_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   struct remote_state *rs = get_remote_state ();
   int tid = ptid_get_tid (ptid);
@@ -2133,7 +2125,7 @@ remote_find_new_threads (void)
  */
 
 static void
-remote_threads_info (void)
+remote_threads_info (struct target_ops *ops)
 {
   struct remote_state *rs = get_remote_state ();
   char *bufp;
@@ -2580,7 +2572,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 	 controlling.  We default to adding them in the running state.
 	 The '?' query below will then tell us about which threads are
 	 stopped.  */
-      remote_threads_info ();
+      remote_threads_info (args->target);
     }
   else if (rs->non_stop_aware)
     {
@@ -3413,7 +3405,7 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
 
   if (non_stop)
     /* Get list of threads.  */
-    remote_threads_info ();
+    remote_threads_info (target);
   else
     /* Add the main thread to the thread list.  */
     add_thread_silent (inferior_ptid);
@@ -3696,7 +3688,8 @@ static enum target_signal last_sent_signal = TARGET_SIGNAL_0;
 static int last_sent_step;
 
 static void
-remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
+remote_resume (struct target_ops *ops,
+	       ptid_t ptid, int step, enum target_signal siggnal)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf;
@@ -4960,7 +4953,8 @@ fetch_registers_using_g (struct regcache *regcache)
 }
 
 static void
-remote_fetch_registers (struct regcache *regcache, int regnum)
+remote_fetch_registers (struct target_ops *ops,
+			struct regcache *regcache, int regnum)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
@@ -5109,7 +5103,8 @@ store_registers_using_G (const struct regcache *regcache)
    of the register cache buffer.  FIXME: ignores errors.  */
 
 static void
-remote_store_registers (struct regcache *regcache, int regnum)
+remote_store_registers (struct target_ops *ops,
+			struct regcache *regcache, int regnum)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();

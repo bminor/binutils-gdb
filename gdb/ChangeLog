@@ -1,3 +1,111 @@
+2009-02-23  Pedro Alves  <pedro@codesourcery.com>
+
+	* corelow.c (get_core_registers): Adjust.
+	(core_file_thread_alive): Rename to...
+	(core_thread_alive): ... this.
+	(core_pid_to_str): Try gdbarch_core_pid_to_str first.
+	(init_core_ops): Adjust.
+	(coreops_suppress_target): Delete.
+	(_initialize_corelow): Unconditionally add core_ops.
+	* procfs.c: Include "inf-child.h".
+	(procfs_ops): Delete.
+	(init_procfs_ops): Delete.  Reimplement as...
+	(procfs_target): ... this, inheriting from inf-child.
+	(procfs_attach, procfs_detach, procfs_fetch_registers): Adjust.
+	(procfs_prepare_to_store): Delete.
+	(procfs_store_registers, procfs_resume): Adjust.
+	(procfs_open): Delete.
+	(procfs_suppress_run): Delete.
+	(procfs_can_run): Delete.
+	(procfs_mourn_inferior): Adjust.
+	(procfs_init_inferior): Add target_ops parameter.  Adjust.
+	(procfs_create_inferior): Don't pass procfs_init_inferior to
+	fork_inferior.  Instead call it after fork_inferior returns.
+	(procfs_find_new_threads): Adjust.
+	(_initialize_procfs): Adjust to use procfs_target instead of
+	init_procfs_ops.
+	* sol-thread.c (orig_core_ops, sol_core_ops): Delete.
+	(lwp_to_thread): Use target_thread_alive.
+	(sol_thread_open): Delete.
+	(sol_thread_attach): Delete.
+	(sol_thread_detach, sol_thread_resume, sol_thread_wait)
+	(sol_thread_fetch_registers, sol_thread_store_registers): Adjust
+	to use find_target_beneath.
+	(sol_thread_prepare_to_store, sol_thread_xfer_memory): Delete.
+	(sol_thread_xfer_partial): Adjust to use find_target_beneath.
+	(sol_thread_files_info, sol_thread_kill_inferior): Delete.
+	(check_for_thread_db): New.
+	(sol_thread_notice_signals, sol_thread_create_inferior): Delete.
+	(sol_thread_new_objfile): Call check_for_thread_db.
+	(sol_thread_mourn_inferior): Adjust to use find_target_beneath.
+	(sol_thread_can_run): Delete.
+	(sol_thread_alive): Adjust to use find_target_beneath.
+	(sol_thread_stop): Delete.
+	(rw_common): Use target_write_memory or target_read_memory.
+	(ps_lgetregs, ps_lgetfpregs): Use target_fetch_registers.
+	(ps_lsetregs, ps_lsetfpregs): Use target_store_registers.
+	(solaris_pid_to_str): Remove check for libthread_db initialization
+	failing.
+	(sol_find_new_threads): Remove check for libthread_db
+	initialization failing, or for an invalid inferior_ptid.  Adjust
+	to use find_target_beneath.
+	(sol_core_open, sol_core_close, sol_core_detach,
+	sol_core_files_info, sol_find_memory_regions,
+	sol_make_note_section, ignore): Delete.
+	(init_sol_thread_ops): Make it a thread_stratum target.  Remove
+	unneeded callback settings.
+	(init_sol_core_ops): Delete.
+	(_initialize_sol_thread): No longer call init_sol_core_ops, set
+	procfs_suppress_run, or hack with core_ops.
+
+	* target.h (struct target_ops): Add a target_ops * parameter to
+	to_resume, to_fetch_registers, to_store_registers, to_thread_alive
+	and to_find_new_threads.
+	(target_fetch_registers, target_store_registers)
+	(target_thread_alive, target_find_new_threads): Redeclare as
+	function.
+	
+	* target.c (update_current_target): Do not inherit or de_fault
+	to_resume, to_fetch_registers, to_store_registers,
+	to_thread_alive, to_find_new_threads.
+	(target_resume): Adjust.
+	(target_thread_alive, target_find_new_threads): New.
+	(debug_to_resume, debug_to_fetch_registers): Delete.
+	(target_fetch_registers): New.
+	(debug_to_store_registers): Delete.
+	(target_store_registers): New.
+	(debug_to_thread_alive, debug_to_find_new_threads): Delete.
+	(setup_target_debug): Adjust.
+	
+	* gdbcore.h (core_ops): Delete declaration.
+	
+	* inf-ptrace.c, linux-nat.c, remote.c, amd64-linux-nat.c,
+	inf-child.c, linux-thread-db.c, bsd-uthread.c, inf-ttrace.c,
+	i386-sol2-tdep.c, darwin-nat.c, gnu-nat.c, go32-nat.c,
+	hpux-thread.c, i386-linux-nat.c, i386fbsd-nat.c, monitor.c,
+	nto-procfs.c, remote-m32r-sdi.c, remote-mips.c, windows-nat.c,
+	alphabsd-nat.c, amd64bsd-nat.c, arm-linux-nat.c, armnbsd-nat.c,
+	bsd-kvm.c, hppa-hpux-nat.c, hppa-linux-nat.c, hppabsd-nat.c,
+	hppanbsd-nat.c, i386-darwin-nat.c, i386bsd-nat.c,
+	ia64-linux-nat.c, m32r-linux-nat.c, m68kbsd-nat.c,
+	m68klinux-nat.c, m88kbsd-nat.c, mips-linux-nat.c,
+	mips64obsd-nat.c, mipsnbsd-nat.c, ppc-linux-nat.c, ppcnbsd-nat.c,
+	ppcobsd-nat.c, remote-sim.c, rs6000-nat.c, s390-nat.c,
+	shnbsd-nat.c, sparc-nat.c, sparc-nat.h, spu-linux-nat.c,
+	vaxbsd-nat.c, xtensa-linux-nat.c: Adjust to target_ops changes.
+
+	* gdbarch.sh (core_pid_to_str): New gdbarch callback.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* sol2-tdep.c: Include "inferior.h".
+	(sol2_core_pid_to_str): New.
+	* sol2-tdep.h (sol2_core_pid_to_str): Declare.
+
+	* amd64-sol2-tdep.c (amd64_sol2_init_abi): Set it.
+	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Set it.
+	* sparc64-sol2-tdep.c (sparc64_sol2_init_abi): Set it.
+	* i386-sol2-tdep.c (i386_sol2_init_abi): Set it.
+
 2009-02-22  Doug Evans  <dje@google.com>
 
 	* exec.c (exec_file_attach): Fix comment.

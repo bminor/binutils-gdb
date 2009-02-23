@@ -29,6 +29,7 @@
 #include "gdbcmd.h"
 #include "gdbthread.h"
 #include "regcache.h"
+#include "inf-child.h"
 
 #if defined (NEW_PROC_API)
 #define _STRUCTURED_PROC 1	/* Should be done by configure script. */
@@ -111,17 +112,17 @@
  * This module defines the GDB target vector and its methods.
  */
 
-static void procfs_open (char *, int);
 static void procfs_attach (struct target_ops *, char *, int);
 static void procfs_detach (struct target_ops *, char *, int);
-static void procfs_resume (ptid_t, int, enum target_signal);
-static int procfs_can_run (void);
+static void procfs_resume (struct target_ops *,
+			   ptid_t, int, enum target_signal);
 static void procfs_stop (ptid_t);
 static void procfs_files_info (struct target_ops *);
-static void procfs_fetch_registers (struct regcache *, int);
-static void procfs_store_registers (struct regcache *, int);
+static void procfs_fetch_registers (struct target_ops *,
+				    struct regcache *, int);
+static void procfs_store_registers (struct target_ops *,
+				    struct regcache *, int);
 static void procfs_notice_signals (ptid_t);
-static void procfs_prepare_to_store (struct regcache *);
 static void procfs_kill_inferior (void);
 static void procfs_mourn_inferior (struct target_ops *ops);
 static void procfs_create_inferior (struct target_ops *, char *, 
@@ -137,9 +138,9 @@ static LONGEST procfs_xfer_partial (struct target_ops *ops,
 				    gdb_byte *readbuf, const gdb_byte *writebuf,
 				    ULONGEST offset, LONGEST len);
 
-static int procfs_thread_alive (ptid_t);
+static int procfs_thread_alive (struct target_ops *ops, ptid_t);
 
-void procfs_find_new_threads (void);
+void procfs_find_new_threads (struct target_ops *ops);
 char *procfs_pid_to_str (struct target_ops *, ptid_t);
 
 static int proc_find_memory_regions (int (*) (CORE_ADDR,
@@ -151,8 +152,6 @@ static int proc_find_memory_regions (int (*) (CORE_ADDR,
 static char * procfs_make_note_section (bfd *, int *);
 
 static int procfs_can_use_hw_breakpoint (int, int, int);
-
-struct target_ops procfs_ops;		/* the target vector */
 
 #if defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
 /* When GDB is built as 64-bit application on Solaris, the auxv data is
@@ -182,60 +181,46 @@ procfs_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 }
 #endif
 
-static void
-init_procfs_ops (void)
+static struct target_ops *
+procfs_target (void)
 {
-  procfs_ops.to_shortname           = "procfs";
-  procfs_ops.to_longname            = "Unix /proc child process";
-  procfs_ops.to_doc                 =
+  struct target_ops *t = inf_child_target ();
+
+  t->to_shortname           = "procfs";
+  t->to_longname            = "Unix /proc child process";
+  t->to_doc                 =
     "Unix /proc child process (started by the \"run\" command).";
-  procfs_ops.to_open                = procfs_open;
-  procfs_ops.to_can_run             = procfs_can_run;
-  procfs_ops.to_create_inferior     = procfs_create_inferior;
-  procfs_ops.to_kill                = procfs_kill_inferior;
-  procfs_ops.to_mourn_inferior      = procfs_mourn_inferior;
-  procfs_ops.to_attach              = procfs_attach;
-  procfs_ops.to_detach              = procfs_detach;
-  procfs_ops.to_wait                = procfs_wait;
-  procfs_ops.to_resume              = procfs_resume;
-  procfs_ops.to_prepare_to_store    = procfs_prepare_to_store;
-  procfs_ops.to_fetch_registers     = procfs_fetch_registers;
-  procfs_ops.to_store_registers     = procfs_store_registers;
-  procfs_ops.to_xfer_partial        = procfs_xfer_partial;
-  procfs_ops.deprecated_xfer_memory = procfs_xfer_memory;
-  procfs_ops.to_insert_breakpoint   =  memory_insert_breakpoint;
-  procfs_ops.to_remove_breakpoint   =  memory_remove_breakpoint;
-  procfs_ops.to_notice_signals      = procfs_notice_signals;
-  procfs_ops.to_files_info          = procfs_files_info;
-  procfs_ops.to_stop                = procfs_stop;
+  t->to_create_inferior     = procfs_create_inferior;
+  t->to_kill                = procfs_kill_inferior;
+  t->to_mourn_inferior      = procfs_mourn_inferior;
+  t->to_attach              = procfs_attach;
+  t->to_detach              = procfs_detach;
+  t->to_wait                = procfs_wait;
+  t->to_resume              = procfs_resume;
+  t->to_fetch_registers     = procfs_fetch_registers;
+  t->to_store_registers     = procfs_store_registers;
+  t->to_xfer_partial        = procfs_xfer_partial;
+  t->deprecated_xfer_memory = procfs_xfer_memory;
+  t->to_notice_signals      = procfs_notice_signals;
+  t->to_files_info          = procfs_files_info;
+  t->to_stop                = procfs_stop;
 
-  procfs_ops.to_terminal_init       = terminal_init_inferior;
-  procfs_ops.to_terminal_inferior   = terminal_inferior;
-  procfs_ops.to_terminal_ours_for_output = terminal_ours_for_output;
-  procfs_ops.to_terminal_ours       = terminal_ours;
-  procfs_ops.to_terminal_save_ours  = terminal_save_ours;
-  procfs_ops.to_terminal_info       = child_terminal_info;
+  t->to_find_new_threads    = procfs_find_new_threads;
+  t->to_thread_alive        = procfs_thread_alive;
+  t->to_pid_to_str          = procfs_pid_to_str;
 
-  procfs_ops.to_find_new_threads    = procfs_find_new_threads;
-  procfs_ops.to_thread_alive        = procfs_thread_alive;
-  procfs_ops.to_pid_to_str          = procfs_pid_to_str;
-
-  procfs_ops.to_has_all_memory      = 1;
-  procfs_ops.to_has_memory          = 1;
-  procfs_ops.to_has_execution       = 1;
-  procfs_ops.to_has_stack           = 1;
-  procfs_ops.to_has_registers       = 1;
-  procfs_ops.to_stratum             = process_stratum;
-  procfs_ops.to_has_thread_control  = tc_schedlock;
-  procfs_ops.to_find_memory_regions = proc_find_memory_regions;
-  procfs_ops.to_make_corefile_notes = procfs_make_note_section;
-  procfs_ops.to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
+  t->to_has_thread_control  = tc_schedlock;
+  t->to_find_memory_regions = proc_find_memory_regions;
+  t->to_make_corefile_notes = procfs_make_note_section;
+  t->to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
 
 #if defined(PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
-  procfs_ops.to_auxv_parse = procfs_auxv_parse;
+  t->to_auxv_parse = procfs_auxv_parse;
 #endif
 
-  procfs_ops.to_magic               = OPS_MAGIC;
+  t->to_magic               = OPS_MAGIC;
+
+  return t;
 }
 
 /* =================== END, TARGET_OPS "MODULE" =================== */
@@ -3630,7 +3615,7 @@ procfs_attach (struct target_ops *ops, char *args, int from_tty)
       fflush (stdout);
     }
   inferior_ptid = do_attach (pid_to_ptid (pid));
-  push_target (&procfs_ops);
+  push_target (ops);
 }
 
 static void
@@ -3659,7 +3644,7 @@ procfs_detach (struct target_ops *ops, char *args, int from_tty)
 
   inferior_ptid = null_ptid;
   detach_inferior (pid);
-  unpush_target (&procfs_ops);
+  unpush_target (ops);
 }
 
 static ptid_t
@@ -3790,7 +3775,8 @@ do_detach (int signo)
    when the process is resumed.  */
 
 static void
-procfs_fetch_registers (struct regcache *regcache, int regnum)
+procfs_fetch_registers (struct target_ops *ops,
+			struct regcache *regcache, int regnum)
 {
   gdb_gregset_t *gregs;
   procinfo *pi;
@@ -3827,17 +3813,6 @@ procfs_fetch_registers (struct regcache *regcache, int regnum)
     }
 }
 
-/* Get ready to modify the registers array.  On machines which store
-   individual registers, this doesn't need to do anything.  On
-   machines which store all the registers in one fell swoop, such as
-   /proc, this makes sure that registers contains all the registers
-   from the program being debugged.  */
-
-static void
-procfs_prepare_to_store (struct regcache *regcache)
-{
-}
-
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers.
 
@@ -3849,7 +3824,8 @@ procfs_prepare_to_store (struct regcache *regcache)
    writing one register might affect the value of others, etc.  */
 
 static void
-procfs_store_registers (struct regcache *regcache, int regnum)
+procfs_store_registers (struct target_ops *ops,
+			struct regcache *regcache, int regnum)
 {
   gdb_gregset_t *gregs;
   procinfo *pi;
@@ -4564,7 +4540,8 @@ make_signal_thread_runnable (procinfo *process, procinfo *pi, void *ptr)
  */
 
 static void
-procfs_resume (ptid_t ptid, int step, enum target_signal signo)
+procfs_resume (struct target_ops *ops,
+	       ptid_t ptid, int step, enum target_signal signo)
 {
   procinfo *pi, *thread;
   int native_signo;
@@ -4701,44 +4678,6 @@ procfs_files_info (struct target_ops *ignore)
 }
 
 /*
- * Function: target_open
- *
- * A dummy: you don't open procfs.
- */
-
-static void
-procfs_open (char *args, int from_tty)
-{
-  error (_("Use the \"run\" command to start a Unix child process."));
-}
-
-/*
- * Function: target_can_run
- *
- * This tells GDB that this target vector can be invoked
- * for "run" or "attach".
- */
-
-int procfs_suppress_run = 0;	/* Non-zero if procfs should pretend not to
-				   be a runnable target.  Used by targets
-				   that can sit atop procfs, such as solaris
-				   thread support.  */
-
-
-static int
-procfs_can_run (void)
-{
-  /* This variable is controlled by modules that sit atop procfs that
-     may layer their own process structure atop that provided here.
-     sol-thread.c does this because of the Solaris two-level thread
-     model.  */
-
-  /* NOTE: possibly obsolete -- use the thread_stratum approach instead. */
-
-  return !procfs_suppress_run;
-}
-
-/*
  * Function: target_stop
  *
  * Stop the child process asynchronously, as when the
@@ -4856,7 +4795,7 @@ procfs_mourn_inferior (struct target_ops *ops)
       if (pi)
 	destroy_procinfo (pi);
     }
-  unpush_target (&procfs_ops);
+  unpush_target (ops);
 
   if (dbx_link_bpt != NULL)
     {
@@ -4878,7 +4817,7 @@ procfs_mourn_inferior (struct target_ops *ops)
  */
 
 static void
-procfs_init_inferior (int pid)
+procfs_init_inferior (struct target_ops *ops, int pid)
 {
   procinfo *pi;
   gdb_sigset_t signals;
@@ -4887,8 +4826,7 @@ procfs_init_inferior (int pid)
 
   /* This routine called on the parent side (GDB side)
      after GDB forks the inferior.  */
-
-  push_target (&procfs_ops);
+  push_target (ops);
 
   if ((pi = create_procinfo (pid, 0)) == NULL)
     perror ("procfs: out of memory in 'init_inferior'");
@@ -5119,6 +5057,8 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
 {
   char *shell_file = getenv ("SHELL");
   char *tryname;
+  int pid;
+
   if (shell_file != NULL && strchr (shell_file, '/') == NULL)
     {
 
@@ -5187,8 +5127,10 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
       shell_file = tryname;
     }
 
-  fork_inferior (exec_file, allargs, env, procfs_set_exec_trap,
-		 procfs_init_inferior, NULL, shell_file);
+  pid = fork_inferior (exec_file, allargs, env, procfs_set_exec_trap,
+		       NULL, NULL, shell_file);
+
+  procfs_init_inferior (ops, pid);
 
 #ifdef SYS_syssgi
   /* Make sure to cancel the syssgi() syscall-exit notifications.  
@@ -5227,7 +5169,7 @@ procfs_notice_thread (procinfo *pi, procinfo *thread, void *ptr)
  */
 
 void
-procfs_find_new_threads (void)
+procfs_find_new_threads (struct target_ops *ops)
 {
   procinfo *pi;
 
@@ -5247,7 +5189,7 @@ procfs_find_new_threads (void)
  */
 
 static int
-procfs_thread_alive (ptid_t ptid)
+procfs_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   int proc, thread;
   procinfo *pi;
@@ -6024,8 +5966,12 @@ proc_untrace_sysexit_cmd (char *args, int from_tty)
 void
 _initialize_procfs (void)
 {
-  init_procfs_ops ();
-  add_target (&procfs_ops);
+  struct target_ops * t;
+
+  t = procfs_target ();
+
+  add_target (t);
+
   add_info ("proc", info_proc_cmd, _("\
 Show /proc process information about any running process.\n\
 Specify process id, or use the program being debugged by default.\n\

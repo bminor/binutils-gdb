@@ -446,7 +446,8 @@ m32r_close (int quitting)
 /* Tell the remote machine to resume.  */
 
 static void
-m32r_resume (ptid_t ptid, int step, enum target_signal sig)
+m32r_resume (struct target_ops *ops,
+	     ptid_t ptid, int step, enum target_signal sig)
 {
   unsigned long pc_addr, bp_addr, ab_addr;
   int ib_breakpoints;
@@ -879,7 +880,7 @@ m32r_detach (struct target_ops *ops, char *args, int from_tty)
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_detach(%d)\n", from_tty);
 
-  m32r_resume (inferior_ptid, 0, 0);
+  m32r_resume (ops, inferior_ptid, 0, 0);
 
   /* calls m32r_close to do the real work */
   pop_target ();
@@ -910,30 +911,21 @@ get_reg_id (int regno)
   return regno;
 }
 
-/* Read the remote registers into the block REGS.  */
-
-static void m32r_fetch_register (struct regcache *, int);
-
-static void
-m32r_fetch_registers (struct regcache *regcache)
-{
-  int regno;
-
-  for (regno = 0;
-       regno < gdbarch_num_regs (get_regcache_arch (regcache));
-       regno++)
-    m32r_fetch_register (regcache, regno);
-}
-
 /* Fetch register REGNO, or all registers if REGNO is -1.
    Returns errno value.  */
 static void
-m32r_fetch_register (struct regcache *regcache, int regno)
+m32r_fetch_register (struct target_ops *ops,
+		     struct regcache *regcache, int regno)
 {
   unsigned long val, val2, regid;
 
   if (regno == -1)
-    m32r_fetch_registers (regcache);
+    {
+      for (regno = 0;
+	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regno++)
+	m32r_fetch_register (ops, regcache, regno);
+    }
   else
     {
       char buffer[MAX_REGISTER_SIZE];
@@ -961,33 +953,22 @@ m32r_fetch_register (struct regcache *regcache, int regno)
   return;
 }
 
-/* Store the remote registers from the contents of the block REGS.  */
-
-static void m32r_store_register (struct regcache *, int);
-
-static void
-m32r_store_registers (struct regcache *regcache)
-{
-  int regno;
-
-  for (regno = 0;
-       regno < gdbarch_num_regs (get_regcache_arch (regcache));
-       regno++)
-    m32r_store_register (regcache, regno);
-
-  registers_changed ();
-}
-
 /* Store register REGNO, or all if REGNO == 0.
    Return errno value.  */
 static void
-m32r_store_register (struct regcache *regcache, int regno)
+m32r_store_register (struct target_ops *ops,
+		     struct regcache *regcache, int regno)
 {
   int regid;
   ULONGEST regval, tmp;
 
   if (regno == -1)
-    m32r_store_registers (regcache);
+    {
+      for (regno = 0;
+	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regno++)
+	m32r_store_register (ops, regcache, regno);
+    }
   else
     {
       regcache_cooked_read_unsigned (regcache, regno, &regval);
@@ -1495,7 +1476,7 @@ m32r_stopped_by_watchpoint (void)
 /* Check to see if a thread is still alive.  */
 
 static int
-m32r_thread_alive (ptid_t ptid)
+m32r_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   if (ptid_equal (ptid, remote_m32r_ptid))
     /* The main task is always alive.  */

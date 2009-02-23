@@ -97,12 +97,6 @@ static struct target_ops debug_target;
 
 static void debug_to_open (char *, int);
 
-static void debug_to_resume (ptid_t, int, enum target_signal);
-
-static void debug_to_fetch_registers (struct regcache *, int);
-
-static void debug_to_store_registers (struct regcache *, int);
-
 static void debug_to_prepare_to_store (struct regcache *);
 
 static void debug_to_files_info (struct target_ops *);
@@ -151,8 +145,6 @@ static int debug_to_lookup_symbol (char *, CORE_ADDR *);
 static int debug_to_can_run (void);
 
 static void debug_to_notice_signals (ptid_t);
-
-static int debug_to_thread_alive (ptid_t);
 
 static void debug_to_stop (ptid_t);
 
@@ -412,10 +404,10 @@ update_current_target (void)
       INHERIT (to_attach_no_wait, t);
       /* Do not inherit to_detach.  */
       /* Do not inherit to_disconnect.  */
-      INHERIT (to_resume, t);
+      /* Do not inherit to_resume.  */
       /* Do not inherit to_wait.  */
-      INHERIT (to_fetch_registers, t);
-      INHERIT (to_store_registers, t);
+      /* Do not inherit to_fetch_registers.  */
+      /* Do not inherit to_store_registers.  */
       INHERIT (to_prepare_to_store, t);
       INHERIT (deprecated_xfer_memory, t);
       INHERIT (to_files_info, t);
@@ -455,8 +447,8 @@ update_current_target (void)
       /* Do not inherit to_mourn_inferiour.  */
       INHERIT (to_can_run, t);
       INHERIT (to_notice_signals, t);
-      INHERIT (to_thread_alive, t);
-      INHERIT (to_find_new_threads, t);
+      /* Do not inherit to_thread_alive.  */
+      /* Do not inherit to_find_new_threads.  */
       /* Do not inherit to_pid_to_str.  */
       INHERIT (to_extra_thread_info, t);
       INHERIT (to_stop, t);
@@ -509,15 +501,6 @@ update_current_target (void)
   de_fault (to_post_attach,
 	    (void (*) (int))
 	    target_ignore);
-  de_fault (to_resume,
-	    (void (*) (ptid_t, int, enum target_signal))
-	    noprocess);
-  de_fault (to_fetch_registers,
-	    (void (*) (struct regcache *, int))
-	    target_ignore);
-  de_fault (to_store_registers,
-	    (void (*) (struct regcache *, int))
-	    noprocess);
   de_fault (to_prepare_to_store,
 	    (void (*) (struct regcache *))
 	    noprocess);
@@ -613,12 +596,6 @@ update_current_target (void)
 	    return_zero);
   de_fault (to_notice_signals,
 	    (void (*) (ptid_t))
-	    target_ignore);
-  de_fault (to_thread_alive,
-	    (int (*) (ptid_t))
-	    return_zero);
-  de_fault (to_find_new_threads,
-	    (void (*) (void))
 	    target_ignore);
   de_fault (to_extra_thread_info,
 	    (char *(*) (struct thread_info *))
@@ -1892,10 +1869,28 @@ target_pid_to_str (ptid_t ptid)
 void
 target_resume (ptid_t ptid, int step, enum target_signal signal)
 {
+  struct target_ops *t;
+
   dcache_invalidate (target_dcache);
-  (*current_target.to_resume) (ptid, step, signal);
-  set_executing (ptid, 1);
-  set_running (ptid, 1);
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_resume != NULL)
+	{
+	  t->to_resume (t, ptid, step, signal);
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_resume (%d, %s, %s)\n",
+				PIDGET (ptid),
+				step ? "step" : "continue",
+				target_signal_to_name (signal));
+
+	  set_executing (ptid, 1);
+	  set_running (ptid, 1);
+	  return;
+	}
+    }
+
+  noprocess ();
 }
 /* Look through the list of possible targets for a target that can
    follow forks.  */
@@ -2607,22 +2602,51 @@ target_attach (char *args, int from_tty)
 		  "could not find a target to attach");
 }
 
+int
+target_thread_alive (ptid_t ptid)
+{
+  struct target_ops *t;
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_thread_alive != NULL)
+	{
+	  int retval;
+
+	  retval = t->to_thread_alive (t, ptid);
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_thread_alive (%d) = %d\n",
+				PIDGET (ptid), retval);
+
+	  return retval;
+	}
+    }
+
+  return 0;
+}
+
+void
+target_find_new_threads (void)
+{
+  struct target_ops *t;
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_find_new_threads != NULL)
+	{
+	  t->to_find_new_threads (t);
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_find_new_threads ()\n");
+
+	  return;
+	}
+    }
+}
+
 static void
 debug_to_post_attach (int pid)
 {
   debug_target.to_post_attach (pid);
 
   fprintf_unfiltered (gdb_stdlog, "target_post_attach (%d)\n", pid);
-}
-
-static void
-debug_to_resume (ptid_t ptid, int step, enum target_signal siggnal)
-{
-  debug_target.to_resume (ptid, step, siggnal);
-
-  fprintf_unfiltered (gdb_stdlog, "target_resume (%d, %s, %s)\n", PIDGET (ptid),
-		      step ? "step" : "continue",
-		      target_signal_to_name (siggnal));
 }
 
 /* Return a pretty printed form of target_waitstatus.
@@ -2700,19 +2724,41 @@ debug_print_register (const char * func,
   fprintf_unfiltered (gdb_stdlog, "\n");
 }
 
-static void
-debug_to_fetch_registers (struct regcache *regcache, int regno)
+void
+target_fetch_registers (struct regcache *regcache, int regno)
 {
-  debug_target.to_fetch_registers (regcache, regno);
-  debug_print_register ("target_fetch_registers", regcache, regno);
+  struct target_ops *t;
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_fetch_registers != NULL)
+	{
+	  t->to_fetch_registers (t, regcache, regno);
+	  if (targetdebug)
+	    debug_print_register ("target_fetch_registers", regcache, regno);
+	  return;
+	}
+    }
 }
 
-static void
-debug_to_store_registers (struct regcache *regcache, int regno)
+void
+target_store_registers (struct regcache *regcache, int regno)
 {
-  debug_target.to_store_registers (regcache, regno);
-  debug_print_register ("target_store_registers", regcache, regno);
-  fprintf_unfiltered (gdb_stdlog, "\n");
+
+  struct target_ops *t;
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_store_registers != NULL)
+	{
+	  t->to_store_registers (t, regcache, regno);
+	  if (targetdebug)
+	    {
+	      debug_print_register ("target_store_registers", regcache, regno);
+	    }
+	  return;
+	}
+    }
+
+  noprocess ();
 }
 
 static void
@@ -3124,27 +3170,6 @@ debug_to_notice_signals (ptid_t ptid)
                       PIDGET (ptid));
 }
 
-static int
-debug_to_thread_alive (ptid_t ptid)
-{
-  int retval;
-
-  retval = debug_target.to_thread_alive (ptid);
-
-  fprintf_unfiltered (gdb_stdlog, "target_thread_alive (%d) = %d\n",
-		      PIDGET (ptid), retval);
-
-  return retval;
-}
-
-static void
-debug_to_find_new_threads (void)
-{
-  debug_target.to_find_new_threads ();
-
-  fputs_unfiltered ("target_find_new_threads ()\n", gdb_stdlog);
-}
-
 static void
 debug_to_stop (ptid_t ptid)
 {
@@ -3182,9 +3207,6 @@ setup_target_debug (void)
 
   current_target.to_open = debug_to_open;
   current_target.to_post_attach = debug_to_post_attach;
-  current_target.to_resume = debug_to_resume;
-  current_target.to_fetch_registers = debug_to_fetch_registers;
-  current_target.to_store_registers = debug_to_store_registers;
   current_target.to_prepare_to_store = debug_to_prepare_to_store;
   current_target.deprecated_xfer_memory = deprecated_debug_xfer_memory;
   current_target.to_files_info = debug_to_files_info;
@@ -3219,8 +3241,6 @@ setup_target_debug (void)
   current_target.to_has_exited = debug_to_has_exited;
   current_target.to_can_run = debug_to_can_run;
   current_target.to_notice_signals = debug_to_notice_signals;
-  current_target.to_thread_alive = debug_to_thread_alive;
-  current_target.to_find_new_threads = debug_to_find_new_threads;
   current_target.to_stop = debug_to_stop;
   current_target.to_rcmd = debug_to_rcmd;
   current_target.to_pid_to_exec_file = debug_to_pid_to_exec_file;

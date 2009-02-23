@@ -155,7 +155,8 @@ fill_fpregset (const struct regcache *regcache,
    registers).  */
 
 static void
-amd64_linux_fetch_inferior_registers (struct regcache *regcache, int regnum)
+amd64_linux_fetch_inferior_registers (struct target_ops *ops,
+				      struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int tid;
@@ -193,7 +194,8 @@ amd64_linux_fetch_inferior_registers (struct regcache *regcache, int regnum)
    registers).  */
 
 static void
-amd64_linux_store_inferior_registers (struct regcache *regcache, int regnum)
+amd64_linux_store_inferior_registers (struct target_ops *ops,
+				      struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int tid;

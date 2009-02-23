@@ -272,21 +272,23 @@ bsd_uthread_solib_unloaded (struct so_list *so)
 static void
 bsd_uthread_mourn_inferior (struct target_ops *ops)
 {
-  struct target_ops *beneath = find_target_beneath (bsd_uthread_ops_hack);
+  struct target_ops *beneath = find_target_beneath (ops);
   beneath->to_mourn_inferior (beneath);
   bsd_uthread_deactivate ();
 }
 
 static void
-bsd_uthread_fetch_registers (struct regcache *regcache, int regnum)
+bsd_uthread_fetch_registers (struct target_ops *ops,
+			     struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  struct bsd_uthread_ops *ops = gdbarch_data (gdbarch, bsd_uthread_data);
+  struct bsd_uthread_ops *uthread_ops = gdbarch_data (gdbarch, bsd_uthread_data);
   CORE_ADDR addr = ptid_get_tid (inferior_ptid);
+  struct target_ops *beneath = find_target_beneath (ops);
   CORE_ADDR active_addr;
 
   /* Always fetch the appropriate registers from the layer beneath.  */
-  find_target_beneath (bsd_uthread_ops_hack)->to_fetch_registers (regcache, regnum);
+  beneath->to_fetch_registers (beneath, regcache, regnum);
 
   /* FIXME: That might have gotten us more than we asked for.  Make
      sure we overwrite all relevant registers with values from the
@@ -297,16 +299,18 @@ bsd_uthread_fetch_registers (struct regcache *regcache, int regnum)
   if (addr != 0 && addr != active_addr)
     {
       bsd_uthread_check_magic (addr);
-      ops->supply_uthread (regcache, regnum,
-			   addr + bsd_uthread_thread_ctx_offset);
+      uthread_ops->supply_uthread (regcache, regnum,
+				   addr + bsd_uthread_thread_ctx_offset);
     }
 }
 
 static void
-bsd_uthread_store_registers (struct regcache *regcache, int regnum)
+bsd_uthread_store_registers (struct target_ops *ops,
+			     struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  struct bsd_uthread_ops *ops = gdbarch_data (gdbarch, bsd_uthread_data);
+  struct bsd_uthread_ops *uthread_ops = gdbarch_data (gdbarch, bsd_uthread_data);
+  struct target_ops *beneath = find_target_beneath (ops);
   CORE_ADDR addr = ptid_get_tid (inferior_ptid);
   CORE_ADDR active_addr;
 
@@ -314,14 +318,14 @@ bsd_uthread_store_registers (struct regcache *regcache, int regnum)
   if (addr != 0 && addr != active_addr)
     {
       bsd_uthread_check_magic (addr);
-      ops->collect_uthread (regcache, regnum,
-			    addr + bsd_uthread_thread_ctx_offset);
+      uthread_ops->collect_uthread (regcache, regnum,
+				    addr + bsd_uthread_thread_ctx_offset);
     }
   else
     {
       /* Updating the thread that is currently running; pass the
          request to the layer beneath.  */
-      find_target_beneath (bsd_uthread_ops_hack)->to_store_registers (regcache, regnum);
+      beneath->to_store_registers (beneath, regcache, regnum);
     }
 }
 
@@ -344,7 +348,7 @@ bsd_uthread_wait (struct target_ops *ops,
 		  ptid_t ptid, struct target_waitstatus *status)
 {
   CORE_ADDR addr;
-  struct target_ops *beneath = find_target_beneath (bsd_uthread_ops_hack);
+  struct target_ops *beneath = find_target_beneath (ops);
 
   /* Pass the request to the layer beneath.  */
   ptid = beneath->to_wait (beneath, ptid, status);
@@ -389,15 +393,18 @@ bsd_uthread_wait (struct target_ops *ops,
 }
 
 static void
-bsd_uthread_resume (ptid_t ptid, int step, enum target_signal sig)
+bsd_uthread_resume (struct target_ops *ops,
+		    ptid_t ptid, int step, enum target_signal sig)
 {
   /* Pass the request to the layer beneath.  */
-  find_target_beneath (bsd_uthread_ops_hack)->to_resume (ptid, step, sig);
+  struct target_ops *beneath = find_target_beneath (ops);
+  beneath->to_resume (beneath, ptid, step, sig);
 }
 
 static int
-bsd_uthread_thread_alive (ptid_t ptid)
+bsd_uthread_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
+  struct target_ops *beneath = find_target_beneath (ops);
   CORE_ADDR addr = ptid_get_tid (inferior_ptid);
 
   if (addr != 0)
@@ -412,11 +419,11 @@ bsd_uthread_thread_alive (ptid_t ptid)
 	return 0;
     }
 
-  return find_target_beneath (bsd_uthread_ops_hack)->to_thread_alive (ptid);
+  return beneath->to_thread_alive (beneath, ptid);
 }
 
 static void
-bsd_uthread_find_new_threads (void)
+bsd_uthread_find_new_threads (struct target_ops *ops)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   int offset = bsd_uthread_thread_next_offset;

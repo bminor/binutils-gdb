@@ -332,11 +332,11 @@ struct target_ops
     void (*to_post_attach) (int);
     void (*to_detach) (struct target_ops *ops, char *, int);
     void (*to_disconnect) (struct target_ops *, char *, int);
-    void (*to_resume) (ptid_t, int, enum target_signal);
+    void (*to_resume) (struct target_ops *, ptid_t, int, enum target_signal);
     ptid_t (*to_wait) (struct target_ops *,
 		      ptid_t, struct target_waitstatus *);
-    void (*to_fetch_registers) (struct regcache *, int);
-    void (*to_store_registers) (struct regcache *, int);
+    void (*to_fetch_registers) (struct target_ops *, struct regcache *, int);
+    void (*to_store_registers) (struct target_ops *, struct regcache *, int);
     void (*to_prepare_to_store) (struct regcache *);
 
     /* Transfer LEN bytes of memory between GDB address MYADDR and
@@ -404,8 +404,8 @@ struct target_ops
     void (*to_mourn_inferior) (struct target_ops *);
     int (*to_can_run) (void);
     void (*to_notice_signals) (ptid_t ptid);
-    int (*to_thread_alive) (ptid_t ptid);
-    void (*to_find_new_threads) (void);
+    int (*to_thread_alive) (struct target_ops *, ptid_t ptid);
+    void (*to_find_new_threads) (struct target_ops *);
     char *(*to_pid_to_str) (struct target_ops *, ptid_t);
     char *(*to_extra_thread_info) (struct thread_info *);
     void (*to_stop) (ptid_t);
@@ -634,15 +634,13 @@ extern ptid_t target_wait (ptid_t ptid, struct target_waitstatus *status);
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
-#define	target_fetch_registers(regcache, regno)	\
-     (*current_target.to_fetch_registers) (regcache, regno)
+extern void target_fetch_registers (struct regcache *regcache, int regno);
 
 /* Store at least register REGNO, or all regs if REGNO == -1.
    It can store as many registers as it wants to, so target_prepare_to_store
    must have been previously called.  Calls error() if there are problems.  */
 
-#define	target_store_registers(regcache, regs)	\
-     (*current_target.to_store_registers) (regcache, regs)
+extern void target_store_registers (struct regcache *regcache, int regs);
 
 /* Get ready to modify the registers array.  On machines which store
    individual registers, this doesn't need to do anything.  On machines
@@ -918,13 +916,11 @@ void target_mourn_inferior (void);
 
 /* Check to see if a thread is still alive.  */
 
-#define target_thread_alive(ptid) \
-     (*current_target.to_thread_alive) (ptid)
+extern int target_thread_alive (ptid_t ptid);
 
 /* Query for new threads and add them to the thread list.  */
 
-#define target_find_new_threads() \
-     (*current_target.to_find_new_threads) ()
+extern void target_find_new_threads (void);
 
 /* Make target stop in a continuable fashion.  (For instance, under
    Unix, this should act like SIGSTOP).  This function is normally

@@ -661,6 +661,15 @@ typedef LONGEST (gdbarch_core_xfer_shared_libraries_ftype) (struct gdbarch *gdba
 extern LONGEST gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
 extern void set_gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries);
 
+/* How the core_stratum layer converts a PTID from a core file to a
+   string. */
+
+extern int gdbarch_core_pid_to_str_p (struct gdbarch *gdbarch);
+
+typedef char * (gdbarch_core_pid_to_str_ftype) (struct gdbarch *gdbarch, ptid_t ptid);
+extern char * gdbarch_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid);
+extern void set_gdbarch_core_pid_to_str (struct gdbarch *gdbarch, gdbarch_core_pid_to_str_ftype *core_pid_to_str);
+
 /* If the elements of C++ vtables are in-place function descriptors rather
    than normal function pointers (which may point to code or a descriptor),
    set this to one. */

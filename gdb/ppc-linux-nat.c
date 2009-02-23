@@ -647,7 +647,8 @@ fetch_ppc_registers (struct regcache *regcache, int tid)
    regno == -1, otherwise fetch all general registers or all floating
    point registers depending upon the value of regno.  */
 static void
-ppc_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
+ppc_linux_fetch_inferior_registers (struct target_ops *ops,
+				    struct regcache *regcache, int regno)
 {
   /* Overload thread id onto process id */
   int tid = TIDGET (inferior_ptid);
@@ -1179,7 +1180,8 @@ ppc_linux_watchpoint_addr_within_range (struct target_ops *target,
 }
 
 static void
-ppc_linux_store_inferior_registers (struct regcache *regcache, int regno)
+ppc_linux_store_inferior_registers (struct target_ops *ops,
+				    struct regcache *regcache, int regno)
 {
   /* Overload thread id onto process id */
   int tid = TIDGET (inferior_ptid);

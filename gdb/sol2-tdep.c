@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "symtab.h"
+#include "inferior.h"
 
 #include "sol2-tdep.h"
 
@@ -33,4 +34,16 @@ sol2_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
     return frame_pc_unwind (get_current_frame ());
 
   return 0;
+}
+
+/* This is how we want PTIDs from Solaris core files to be
+   printed.  */
+
+char *
+sol2_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
+{
+  static char buf[80];
+
+  xsnprintf (buf, sizeof buf, "LWP %ld", ptid_get_lwp (ptid));
+  return buf;
 }

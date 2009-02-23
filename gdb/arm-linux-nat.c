@@ -452,7 +452,8 @@ store_wmmx_regs (const struct regcache *regcache)
    point registers depending upon the value of regno.  */
 
 static void
-arm_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
+arm_linux_fetch_inferior_registers (struct target_ops *ops,
+				    struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {
@@ -478,7 +479,8 @@ arm_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
    point registers depending upon the value of regno.  */
 
 static void
-arm_linux_store_inferior_registers (struct regcache *regcache, int regno)
+arm_linux_store_inferior_registers (struct target_ops *ops,
+				    struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {

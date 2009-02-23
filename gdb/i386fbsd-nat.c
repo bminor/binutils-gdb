@@ -35,7 +35,8 @@
    single-step it.  If SIGNAL is nonzero, give it that signal.  */
 
 static void
-i386fbsd_resume (ptid_t ptid, int step, enum target_signal signal)
+i386fbsd_resume (struct target_ops *ops,
+		 ptid_t ptid, int step, enum target_signal signal)
 {
   pid_t pid = ptid_get_pid (ptid);
   int request = PT_STEP;

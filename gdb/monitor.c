@@ -912,7 +912,8 @@ monitor_supply_register (struct regcache *regcache, int regno, char *valstr)
 /* Tell the remote machine to resume.  */
 
 static void
-monitor_resume (ptid_t ptid, int step, enum target_signal sig)
+monitor_resume (struct target_ops *ops,
+		ptid_t ptid, int step, enum target_signal sig)
 {
   /* Some monitors require a different command when starting a program */
   monitor_debug ("MON resume\n");
@@ -1286,7 +1287,8 @@ monitor_dump_regs (struct regcache *regcache)
 }
 
 static void
-monitor_fetch_registers (struct regcache *regcache, int regno)
+monitor_fetch_registers (struct target_ops *ops,
+			 struct regcache *regcache, int regno)
 {
   monitor_debug ("MON fetchregs\n");
   if (current_monitor->getreg.cmd)
@@ -1368,7 +1370,8 @@ monitor_store_register (struct regcache *regcache, int regno)
 /* Store the remote registers.  */
 
 static void
-monitor_store_registers (struct regcache *regcache, int regno)
+monitor_store_registers (struct target_ops *ops,
+			 struct regcache *regcache, int regno)
 {
   if (regno >= 0)
     {
@@ -2232,7 +2235,7 @@ monitor_get_dev_name (void)
 /* Check to see if a thread is still alive.  */
 
 static int
-monitor_thread_alive (ptid_t ptid)
+monitor_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   if (ptid_equal (ptid, monitor_ptid))
     /* The monitor's task is always alive.  */

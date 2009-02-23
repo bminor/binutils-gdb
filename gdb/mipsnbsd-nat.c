@@ -40,7 +40,8 @@ getregs_supplies (struct gdbarch *gdbarch, int regno)
 }
 
 static void
-mipsnbsd_fetch_inferior_registers (struct regcache *regcache, int regno)
+mipsnbsd_fetch_inferior_registers (struct target_ops *ops,
+				   struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno == -1 || getregs_supplies (gdbarch, regno))
@@ -69,7 +70,8 @@ mipsnbsd_fetch_inferior_registers (struct regcache *regcache, int regno)
 }
 
 static void
-mipsnbsd_store_inferior_registers (struct regcache *regcache, int regno)
+mipsnbsd_store_inferior_registers (struct target_ops *ops,
+				   struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno == -1 || getregs_supplies (gdbarch, regno))

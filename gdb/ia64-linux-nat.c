@@ -718,7 +718,8 @@ ia64_linux_fetch_register (struct regcache *regcache, int regnum)
    for all registers.  */
 
 static void
-ia64_linux_fetch_registers (struct regcache *regcache, int regnum)
+ia64_linux_fetch_registers (struct target_ops *ops,
+			    struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0;
@@ -775,7 +776,8 @@ ia64_linux_store_register (const struct regcache *regcache, int regnum)
    this for all registers.  */
 
 static void
-ia64_linux_store_registers (struct regcache *regcache, int regnum)
+ia64_linux_store_registers (struct target_ops *ops,
+			    struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0;

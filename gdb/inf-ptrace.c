@@ -352,7 +352,8 @@ inf_ptrace_stop (ptid_t ptid)
    that signal.  */
 
 static void
-inf_ptrace_resume (ptid_t ptid, int step, enum target_signal signal)
+inf_ptrace_resume (struct target_ops *ops,
+		   ptid_t ptid, int step, enum target_signal signal)
 {
   pid_t pid = ptid_get_pid (ptid);
   int request = PT_CONTINUE;
@@ -599,7 +600,7 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 /* Return non-zero if the thread specified by PTID is alive.  */
 
 static int
-inf_ptrace_thread_alive (ptid_t ptid)
+inf_ptrace_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   /* ??? Is kill the right way to do this?  */
   return (kill (ptid_get_pid (ptid), 0) != -1);
@@ -706,7 +707,8 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
    for all registers.  */
 
 static void
-inf_ptrace_fetch_registers (struct regcache *regcache, int regnum)
+inf_ptrace_fetch_registers (struct target_ops *ops,
+			    struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0;
@@ -763,7 +765,8 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
    this for all registers.  */
 
 static void
-inf_ptrace_store_registers (struct regcache *regcache, int regnum)
+inf_ptrace_store_registers (struct target_ops *ops,
+			    struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
     for (regnum = 0;

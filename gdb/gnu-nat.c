@@ -1955,7 +1955,8 @@ port_msgs_queued (mach_port_t port)
    in multiple events returned by wait).
  */
 static void
-gnu_resume (ptid_t ptid, int step, enum target_signal sig)
+gnu_resume (struct target_ops *ops,
+	    ptid_t ptid, int step, enum target_signal sig)
 {
   struct proc *step_thread = 0;
   int resume_all;
@@ -2262,7 +2263,7 @@ gnu_stop (ptid_t ptid)
 }
 
 static int
-gnu_thread_alive (ptid_t ptid)
+gnu_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   inf_update_procs (gnu_current_inf);
   return !!inf_tid_to_thread (gnu_current_inf,
@@ -2612,8 +2613,10 @@ gnu_pid_to_str (struct target_ops *ops, ptid_t ptid)
 }
 
 
-extern void gnu_store_registers (struct regcache *regcache, int regno);
-extern void gnu_fetch_registers (struct regcache *regcache, int regno);
+extern void gnu_store_registers (struct target_ops *ops,
+				 struct regcache *regcache, int regno);
+extern void gnu_fetch_registers (struct target_ops *ops,
+				 struct regcache *regcache, int regno);
 
 struct target_ops gnu_ops;
 

@@ -450,7 +450,8 @@ static int store_fpxregs (const struct regcache *regcache, int tid, int regno) {
    registers).  */
 
 static void
-i386_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
+i386_linux_fetch_inferior_registers (struct target_ops *ops,
+				     struct regcache *regcache, int regno)
 {
   int tid;
 
@@ -522,7 +523,8 @@ i386_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
    do this for all registers (including the floating point and SSE
    registers).  */
 static void
-i386_linux_store_inferior_registers (struct regcache *regcache, int regno)
+i386_linux_store_inferior_registers (struct target_ops *ops,
+				     struct regcache *regcache, int regno)
 {
   int tid;
 
@@ -744,7 +746,8 @@ static const unsigned char linux_syscall[] = { 0xcd, 0x80 };
    If SIGNAL is nonzero, give it that signal.  */
 
 static void
-i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
+i386_linux_resume (struct target_ops *ops,
+		   ptid_t ptid, int step, enum target_signal signal)
 {
   int pid = PIDGET (ptid);
 
