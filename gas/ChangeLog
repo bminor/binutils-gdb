@@ -1,5 +1,10 @@
 2009-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (type_names): Add OPERAND_TYPE_REGYMM.
+	(pt): Replace UINTS_ALL_ZERO with operand_type_all_zero.
+
+2009-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (type_names): Remove OPERAND_TYPE_VEX_IMM4.
 
 2009-02-23  H.J. Lu  <hongjiu.lu@intel.com>

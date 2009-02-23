@@ -2328,6 +2328,7 @@ const type_names[] =
   { OPERAND_TYPE_JUMPABSOLUTE, "Jump Absolute" },
   { OPERAND_TYPE_REGMMX, "rMMX" },
   { OPERAND_TYPE_REGXMM, "rXMM" },
+  { OPERAND_TYPE_REGYMM, "rYMM" },
   { OPERAND_TYPE_ESSEG, "es" },
 };
 
@@ -2340,7 +2341,7 @@ pt (i386_operand_type t)
   for (j = 0; j < ARRAY_SIZE (type_names); j++)
     {
       a = operand_type_and (t, type_names[j].mask);
-      if (!UINTS_ALL_ZERO (a))
+      if (!operand_type_all_zero (&a))
 	fprintf (stdout, "%s, ",  type_names[j].name);
     }
   fflush (stdout);
