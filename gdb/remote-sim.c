@@ -82,8 +82,6 @@ static void gdbsim_close (int quitting);
 
 static void gdbsim_detach (struct target_ops *ops, char *args, int from_tty);
 
-static void gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal);
-
 static void gdbsim_prepare_to_store (struct regcache *regcache);
 
 static void gdbsim_files_info (struct target_ops *target);
@@ -614,7 +612,8 @@ static enum target_signal resume_siggnal;
 static int resume_step;
 
 static void
-gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal)
+gdbsim_resume (struct target_ops *ops,
+	       ptid_t ptid, int step, enum target_signal siggnal)
 {
   if (!ptid_equal (inferior_ptid, remote_sim_ptid))
     error (_("The program is not being run."));
