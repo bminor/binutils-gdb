@@ -1,3 +1,9 @@
+2009-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (vex_imm4): Removed.
+	(VEX_check_operands): Likewise.
+	(match_template): Updated.
+
 2009-02-23  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* doc/all.texi: Set S390.

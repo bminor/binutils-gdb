@@ -1398,7 +1398,6 @@ static const i386_operand_type imm64 = OPERAND_TYPE_IMM64;
 static const i386_operand_type imm16_32 = OPERAND_TYPE_IMM16_32;
 static const i386_operand_type imm16_32s = OPERAND_TYPE_IMM16_32S;
 static const i386_operand_type imm16_32_32s = OPERAND_TYPE_IMM16_32_32S;
-static const i386_operand_type vex_imm4 = OPERAND_TYPE_VEX_IMM4;
 
 enum operand_type
 {
@@ -3572,29 +3571,6 @@ optimize_disp (void)
       }
 }
 
-/* Check if operands are valid for the instrucrtion.  Update VEX
-   operand types.  */
-
-static int
-VEX_check_operands (const template *t)
-{
-  if (!t->opcode_modifier.vex)
-    return 0;
-
-  /* Only check VEX_Imm4, which must be the first operand.  */
-  if (t->operand_types[0].bitfield.vex_imm4)
-    {
-      if (i.op[0].imms->X_op != O_constant
-	  || !fits_in_imm4 (i.op[0].imms->X_add_number))
-	return 1;
-
-      /* Turn off Imm8 so that update_imm won't complain.  */
-      i.types[0] = vex_imm4;
-    }
-
-  return 0;
-}
-
 static const template *
 match_template (void)
 {
@@ -3898,10 +3874,6 @@ check_reverse:
 	  found_reverse_match = 0;
 	  continue;
 	}
-
-      /* Check if VEX operands are valid.  */
-      if (VEX_check_operands (t))
-	continue;
 
       /* We've found a match; break out of loop.  */
       break;

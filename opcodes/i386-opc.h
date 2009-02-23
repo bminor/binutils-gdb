@@ -447,11 +447,8 @@ typedef struct i386_opcode_modifier
 /* Any memory size.  */
 #define Anysize			(Unspecified  + 1)
 
-/* VEX 4 bit immediate */
-#define Vex_Imm4		(Anysize + 1)
-
 /* The last bitfield in i386_operand_type.  */
-#define OTMax			Vex_Imm4
+#define OTMax			Anysize
 
 #define OTNumOfUints \
   (OTMax / sizeof (unsigned int) / CHAR_BIT + 1)
@@ -510,7 +507,6 @@ typedef union i386_operand_type
       unsigned int ymmword:1;
       unsigned int unspecified:1;
       unsigned int anysize:1;
-      unsigned int vex_imm4:1;
 #ifdef OTUnused
       unsigned int unused:(OTNumOfBits - OTUnused);
 #endif

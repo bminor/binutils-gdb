@@ -1,3 +1,16 @@
+2009-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (operand_type_init): Remove OPERAND_TYPE_VEX_IMM4.
+	(operand_types): Remove Vex_Imm4.
+
+	* i386-opc.h (Vex_Imm4): Removed.
+	(OTMax): Updated.
+	(i386_operand_type): Remove vex_imm4.
+
+	* i386-opc.tbl: Remove Vex_Imm4 comments.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2009-02-23  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-dis.c (neon_opcodes): Correct bit-mask and patterns for
