@@ -1,5 +1,12 @@
 2009-02-23  Cary Coutant <ccoutant@google.com>
 
+	* objdump.c (load_specific_debug_section): New function, from
+	load_debug_section.
+	(load_debug_section): Use load_specific_debug_section.
+	(dump_dwarf_section): Likewise.
+
+2009-02-23  Cary Coutant <ccoutant@google.com>
+
 	* readelf.c (parse_args): Select all sections explicitly for -w.
 
 2009-02-09  Kai Tietz  <kai.tietz@onevision.com>

@@ -2122,12 +2122,12 @@ disassemble_data (bfd *abfd)
   free (sorted_syms);
 }
 
-int
-load_debug_section (enum dwarf_section_display_enum debug, void *file)
+static int
+load_specific_debug_section (enum dwarf_section_display_enum debug,
+			     asection *sec, void *file)
 {
   struct dwarf_section *section = &debug_displays [debug].section;
   bfd *abfd = file;
-  asection *sec;
   bfd_boolean ret;
   int section_is_compressed;
 
@@ -2135,18 +2135,6 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
   if (section->start != NULL)
     return 1;
 
-  /* Locate the debug section.  */
-  sec = bfd_get_section_by_name (abfd, section->uncompressed_name);
-  if (sec != NULL)
-    section->name = section->uncompressed_name;
-  else
-    {
-      sec = bfd_get_section_by_name (abfd, section->compressed_name);
-      if (sec != NULL)
-	section->name = section->compressed_name;
-    }
-  if (sec == NULL)
-    return 0;
   section_is_compressed = section->name == section->compressed_name;
 
   section->address = 0;
@@ -2182,7 +2170,34 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
       section->size = size;
     }
 
-  return ret;
+  return 1;
+}
+
+int
+load_debug_section (enum dwarf_section_display_enum debug, void *file)
+{
+  struct dwarf_section *section = &debug_displays [debug].section;
+  bfd *abfd = file;
+  asection *sec;
+
+  /* If it is already loaded, do nothing.  */
+  if (section->start != NULL)
+    return 1;
+
+  /* Locate the debug section.  */
+  sec = bfd_get_section_by_name (abfd, section->uncompressed_name);
+  if (sec != NULL)
+    section->name = section->uncompressed_name;
+  else
+    {
+      sec = bfd_get_section_by_name (abfd, section->compressed_name);
+      if (sec != NULL)
+        section->name = section->compressed_name;
+    }
+  if (sec == NULL)
+    return 0;
+
+  return load_specific_debug_section (debug, sec, file);
 }
 
 void
@@ -2222,7 +2237,11 @@ dump_dwarf_section (bfd *abfd, asection *section,
 	  {
 	    struct dwarf_section *sec = &debug_displays [i].section;
 
-	    if (load_debug_section (i, abfd))
+	    if (strcmp (sec->uncompressed_name, match) == 0)
+	      sec->name = sec->uncompressed_name;
+	    else
+	      sec->name = sec->compressed_name;
+	    if (load_specific_debug_section (i, section, abfd))
 	      {
 		debug_displays [i].display (sec, abfd);
 
