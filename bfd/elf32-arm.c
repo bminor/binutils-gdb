@@ -2032,11 +2032,11 @@ static const bfd_vma elf32_arm_stub_long_branch_v4t_arm_thumb[] =
    to ARM.  */
 static const bfd_vma elf32_arm_stub_long_branch_thumb_only[] =
   {
-    0x4e02b540,         /* push {r6, lr} */
-                        /* ldr  r6, [pc, #8] */
-    0x473046fe,         /* mov  lr, pc */
-                        /* bx   r6 */
-    0xbf00bd40,         /* pop  {r6, pc} */
+    0x4802b401,         /* push {r0} */
+                        /* ldr  r0, [pc, #8] */
+    0xbc014684,         /* mov  ip, r0 */
+                        /* pop  {r0} */
+    0xbf004760,         /* bx   ip */
                         /* nop */
     0x00000000,         /* dcd  R_ARM_ABS32(X) */
   };
@@ -2045,13 +2045,10 @@ static const bfd_vma elf32_arm_stub_long_branch_thumb_only[] =
    available.  */
 static const bfd_vma elf32_arm_stub_long_branch_v4t_thumb_arm[] =
   {
-    0x4e03b540,         /* push {r6, lr} */
-                        /* ldr  r6, [pc, #12] */
-    0x473046fe,         /* mov  lr, pc */
-                        /* bx   r6 */
-    0xe8bd4040,         /* pop  {r6, pc} */
-    0xe12fff1e,         /* bx   lr */
-    0x00000000,         /* dcd  R_ARM_ABS32(X) */
+    0x46c04778,         /* bx   pc */
+                        /* nop   */
+    0xe51ff004,         /* ldr   pc, [pc, #-4] */
+    0x00000000,         /* dcd   R_ARM_ABS32(X) */
   };
 
 /* V4T Thumb -> ARM short branch stub. Shorter variant of the above
@@ -2819,20 +2816,27 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      if (!thumb_only)
 		{
 		  stub_type = (info->shared | globals->pic_veneer)
+		    /* PIC stubs.  */
 		    ? ((globals->use_blx)
+		       /* V5T and above.  */
 		       ? arm_stub_long_branch_any_any_pic
+		       /* not yet supported on V4T.  */
 		       : arm_stub_none)
-		    : (globals->use_blx)
-		    ? arm_stub_long_branch_any_any
-		    : arm_stub_none;
+
+		    /* non-PIC stubs.  */
+		    : ((globals->use_blx)
+		       /* V5T and above.  */
+		       ? arm_stub_long_branch_any_any
+		       /* V4T.  */
+		       : arm_stub_long_branch_thumb_only);
 		}
 	      else
 		{
 		  stub_type = (info->shared | globals->pic_veneer)
+		    /* PIC stub not yet supported on V4T.  */
 		    ? arm_stub_none
-		    : (globals->use_blx)
-		    ? arm_stub_long_branch_thumb_only
-		    : arm_stub_none;
+		    /* non-PIC stub.  */
+		    : arm_stub_long_branch_thumb_only;
 		}
 	    }
 	  else
@@ -2849,12 +2853,19 @@ arm_type_of_stub (struct bfd_link_info *info,
 		}
 
 	      stub_type = (info->shared | globals->pic_veneer)
+		/* PIC stubs.  */
 		? ((globals->use_blx)
+		   /* V5T and above.  */
 		   ? arm_stub_long_branch_any_any_pic
+		   /* not yet supported on V4T.  */
 		   : arm_stub_none)
-		: (globals->use_blx)
-		? arm_stub_long_branch_any_any
-		: arm_stub_long_branch_v4t_thumb_arm;
+
+		/* non-PIC stubs.  */
+		: ((globals->use_blx)
+		   /* V5T and above.  */
+		   ? arm_stub_long_branch_any_any
+		   /* V4T.  */
+		   : arm_stub_long_branch_v4t_thumb_arm);
 
 	      /* Handle v4t short branches.  */
 	      if ((stub_type == arm_stub_long_branch_v4t_thumb_arm)
@@ -2876,7 +2887,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 	    {
 	      (*_bfd_error_handler)
 		(_("%B(%s): warning: interworking not enabled.\n"
-		   "  first occurrence: %B: Thumb call to ARM"),
+		   "  first occurrence: %B: ARM call to Thumb"),
 		 sym_sec->owner, input_bfd, name);
 	    }
 
@@ -2887,10 +2898,14 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      || !globals->use_blx)
 	    {
 	      stub_type = (info->shared | globals->pic_veneer)
+		/* PIC stubs.  */
 		? arm_stub_long_branch_any_any_pic
-		: (globals->use_blx)
-		? arm_stub_long_branch_any_any
-		: arm_stub_long_branch_v4t_arm_thumb;
+		/* non-PIC stubs.  */
+		: ((globals->use_blx)
+		   /* V5T and above.  */
+		   ? arm_stub_long_branch_any_any
+		   /* V4T.  */
+		   : arm_stub_long_branch_v4t_arm_thumb);
 	    }
 	}
       else
@@ -2900,7 +2915,9 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      || (branch_offset < ARM_MAX_BWD_BRANCH_OFFSET))
 	    {
 	      stub_type = (info->shared | globals->pic_veneer)
+		/* PIC stubs.  */
 		? arm_stub_long_branch_any_any_pic
+		/* non-PIC stubs.  */
 		: arm_stub_long_branch_any_any;
 	    }
 	}
@@ -3188,7 +3205,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
     case arm_stub_long_branch_v4t_thumb_arm:
       _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_ABS32),
 				stub_bfd, stub_sec, stub_sec->contents,
-				stub_entry->stub_offset + 16, sym_value, 0);
+				stub_entry->stub_offset + 8, sym_value, 0);
       break;
     case arm_stub_short_branch_v4t_thumb_arm:
       {
@@ -11697,9 +11714,9 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr))
 	return FALSE;
-      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr + 8))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr + 4))
 	return FALSE;
-      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 16))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 8))
 	return FALSE;
       break;
     case arm_stub_short_branch_v4t_thumb_arm:

@@ -1,3 +1,15 @@
+2009-02-23  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (elf32_arm_stub_long_branch_thumb_only): Fix stub
+	code.
+	(elf32_arm_stub_long_branch_v4t_thumb_arm): Likewise.
+	(arm_type_of_stub): Use Thumb-only long branch stub (non-PIC) when
+	BLX is not available. Fix typo in warning message. Add comments
+	and improve formatting.
+	(arm_build_one_stub): Adjust to new
+	elf32_arm_stub_long_branch_v4t_thumb_arm stub.
+	(arm_map_one_stub): Likewise.
+
 2009-02-23  Tristan Gingold  <gingold@adacore.com>
 
 	* vms.h: Update copyright year, fix comments, reorder declarations.

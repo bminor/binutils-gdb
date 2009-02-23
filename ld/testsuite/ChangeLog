@@ -1,3 +1,22 @@
+2009-02-23  Christophe Lyon  <christophe.lyon@st.com>
+	* ld-arm/arm-elf.exp: Rewrite non-EABI variants of
+	thumb2-bl-as-thumb1-bad and thumb2-bl-bad tests, which now
+	pass. farcall-thumb-thumb now passes in EABI mode.
+	* ld-arm/farcall-thumb-arm-pic-veneer.d: Fixed name, source, as
+	and ld flags to match intended test.
+	* ld-arm/farcall-thumb-arm.d: New expected result.
+	* ld-arm/farcall-thumb-thumb-m.d: Likewise.
+	* ld-arm/farcall-thumb-thumb-m-pic-veneer.d: Fixed name and ld
+	flags.
+	* ld-arm/farcall-thumb-thumb-pic-veneer.d: Likewise.
+	* ld-arm/farcall-thumb-thumb.d: New expected result, this test is
+	now expected to pass.
+	* ld-arm/thumb2-bl-as-thumb1-bad-noeabi.d: Likewise.
+	* ld-arm/thumb2-bl-bad-noeabi.d: Likewise.
+	* ld-arm/thumb2-bl-as-thumb1-bad.d: Update addresses according to
+	new use.
+	* ld-arm/thumb2-bl-as-thumb1-bad.s: Update comment.
+
 2009-18-02  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-pe/longsecn-1.d:  New test file.

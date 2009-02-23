@@ -3,11 +3,11 @@
 Disassembly of section .text:
 
 00001000 <__bar_veneer>:
-    1000:	b540      	push	{r6, lr}
-    1002:	4e02      	ldr	r6, \[pc, #8\]	\(100c <__bar_veneer\+0xc>\)
-    1004:	46fe      	mov	lr, pc
-    1006:	4730      	bx	r6
-    1008:	bd40      	pop	{r6, pc}
+    1000:	b401      	push	{r0}
+    1002:	4802      	ldr	r0, \[pc, #8\]	\(100c <__bar_veneer\+0xc>\)
+    1004:	4684      	mov	ip, r0
+    1006:	bc01      	pop	{r0}
+    1008:	4760      	bx	ip
     100a:	bf00      	nop
     100c:	02001015 	.word	0x02001015
 
