@@ -1,4 +1,11 @@
 2009-02-23  Christophe Lyon  <christophe.lyon@st.com>
+
+	* ld-arm/arm-elf.exp: Add new farcall-thumb-arm-be8 test.
+	* ld-arm/farcall-thumb-arm-be8.d: New expected result.
+	* ld-arm/farcall-arm-arm-be8.d: Replace wildcards by instructions.
+
+2009-02-23  Christophe Lyon  <christophe.lyon@st.com>
+
 	* ld-arm/arm-elf.exp: Rewrite non-EABI variants of
 	thumb2-bl-as-thumb1-bad and thumb2-bl-bad tests, which now
 	pass. farcall-thumb-thumb now passes in EABI mode.

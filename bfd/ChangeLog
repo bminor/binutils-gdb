@@ -1,3 +1,22 @@
+2009-02-20  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (stub_insn_type): New type.
+	(stub_reloc_type): Likewise.
+	(insn_sequence): Likewise.
+	(elf32_arm_stub_long_branch_any_any): Encode using insn_sequence.
+	(elf32_arm_stub_long_branch_v4t_arm_thumb): Likewise.
+	(elf32_arm_stub_long_branch_thumb_only): Likewise.
+	(elf32_arm_stub_long_branch_v4t_thumb_arm): Likewise.
+	(elf32_arm_stub_short_branch_v4t_thumb_arm): Likewise.
+	(elf32_arm_stub_long_branch_any_any_pic): Likewise.
+	(elf32_arm_stub_hash_entry): Add new helper fields.
+	(stub_hash_newfunc): Initialize these new fields.
+	(arm_build_one_stub): Encode Arm and Thumb instructions separately
+	to take endianness into account.
+	(arm_size_one_stub): Compute size of stubs using insn_sequence.
+	(arm_map_one_stub): Code is now more generic, thanks to
+	insn_sequence.
+
 2009-02-23  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (elf32_arm_stub_long_branch_thumb_only): Fix stub
