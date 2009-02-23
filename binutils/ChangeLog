@@ -1,3 +1,7 @@
+2009-02-23  Cary Coutant <ccoutant@google.com>
+
+	* readelf.c (parse_args): Select all sections explicitly for -w.
+
 2009-02-09  Kai Tietz  <kai.tietz@onevision.com>
 
 	* windres.c (set_endianess): Copy name without leading '-'.

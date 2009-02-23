@@ -3037,7 +3037,10 @@ parse_args (int argc, char **argv)
 	case 'w':
 	  do_dump++;
 	  if (optarg == 0)
-	    do_debugging = 1;
+	    {
+	      do_debugging = 1;
+	      dwarf_select_sections_all ();
+	    }
 	  else
 	    {
 	      do_debugging = 0;
