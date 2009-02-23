@@ -1,3 +1,9 @@
+2009-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armeabitests): Run new tests.  Correct BE8 output
+	filename.
+	* ld-arm/farcall-arm-arm-be.d, ld-arm/farcall-thumb-arm-be.d: New.
+
 2009-02-23  Christophe Lyon  <christophe.lyon@st.com>
 
 	* ld-arm/arm-elf.exp: Add new farcall-thumb-arm-be8 test.
