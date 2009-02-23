@@ -2110,6 +2110,30 @@ ENUMDOC
   STO_ALPHA_STD_GPLOAD.
 
 ENUM
+  BFD_RELOC_ALPHA_NOP
+ENUMDOC
+  The NOP relocation outputs a NOP if the longword displacement
+     between two procedure entry points is < 2^21.
+
+ENUM
+  BFD_RELOC_ALPHA_BSR
+ENUMDOC
+  The BSR relocation outputs a BSR if the longword displacement
+     between two procedure entry points is < 2^21.
+
+ENUM
+  BFD_RELOC_ALPHA_LDA
+ENUMDOC
+  The LDA relocation outputs a LDA if the longword displacement
+     between two procedure entry points is < 2^16.
+
+ENUM
+  BFD_RELOC_ALPHA_BOH
+ENUMDOC
+  The BOH relocation outputs a BSR if the longword displacement
+     between two procedure entry points is < 2^21, or else a hint.
+
+ENUM
   BFD_RELOC_ALPHA_TLSGD
 ENUMX
   BFD_RELOC_ALPHA_TLSLDM

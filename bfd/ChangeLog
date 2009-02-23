@@ -1,3 +1,215 @@
+2009-02-23  Tristan Gingold  <gingold@adacore.com>
+
+	* vms.h: Update copyright year, fix comments, reorder declarations.
+	(_bfd_save_vms_section): Remove the prototype.
+	(EGPS_S_V_NO_SHIFT): New constant.
+	(bfd_vms_set_section_flags): New prototype.
+	(EGPS_S_B_ALIGN, EGPS_S_W_FLAGS, EGPS_S_L_ALLOC, EGPS_S_B_NAMLNG): New
+	constants.
+	(EGSY_S_W_FLAGS): Ditto.
+	(EGSY_S_V_QUAD_VAL): Ditto.
+	(ESDF_S_L_VALUE, ESDF_S_L_PSINDX, ESDF_S_B_NAMLNG): Ditto.
+	(EGST_S_W_FLAGS, EGST_S_Q_LP_1, EGST_S_Q_LP_2, EGST_S_L_PSINDX,
+	EGST_S_B_NAMLNG): Ditto.
+	(ESRF_S_B_NAMLNG): Ditto.
+	(ETIR_S_C_HEADER_SIZE): Ditto.
+	(EGPS_S_V_ALLOC_64BIT): Ditto.
+	(DST_S_C_EPILOG): Ditto.
+	(DST_S_C_SRC_SETLNUM_L, DST_S_C_SRC_SETLNUM_W) : Ditto.
+	(DST_S_C_SRC_INCRLNUM_B): Ditto.
+	(DST_S_B_PCLINE_UNSBYTE, DST_S_W_PCLINE_UNSWORD): Ditto.
+	(DST_S_L_PCLINE_UNSLONG): Ditto.
+	(DST_S_B_MODBEG_NAME, DST_S_L_RTNBEG_ADDRESS) : Ditto
+	(DST_S_B_RTNBEG_NAME, DST_S_L_RTNEND_SIZE): Ditto
+	(DST_S_C_SOURCE_HEADER_SIZE): Ditto.
+	(DST_S_B_SRC_DF_LENGTH, DST_S_W_SRC_DF_FILEID): Ditto.
+	(DST_S_B_SRC_DF_FILENAME, DST_S_B_SRC_UNSBYTE): Ditto.
+	(DST_S_B_SRC_UNSBYTE): Ditto.
+	(DST_S_W_SRC_UNSWORD, DST_S_L_SRC_UNSLONG): Ditto.
+	Add prototypes.
+	(vms_section, vms_reloc): Remove types.
+	(hdr_struc): Replaced by ...
+	(hdr_struct): ... new type.
+	(EMH_S_W_HDRTYP, EMH_S_B_STRLVL, EMH_S_L_ARCH1): New constants.
+	(EMH_S_L_ARCH2, EMH_S_L_RECSIZ, EMH_S_B_NAMLNG): Ditto.
+	(EMH_DATE_LENGTH): Ditto.
+	(eom_struc): Replaced by ...
+	(eom_struct): ... new type.
+	(EEOM_S_L_TOTAL_LPS, EEOM_S_W_COMCOD, EEOM_S_B_TFRFLG): New constants.
+	(EEOM_S_L_PSINDX, EEOM_S_L_TFRADR): Ditto.
+	(EIHD_S_K_MAJORID, EIHD_S_K_MINORID, EIHD_S_K_EXE): Ditto.
+	(EIHD_S_L_SIZE, EIHD_S_L_ISDOFF, EIHD_S_L_SYMDBGOFF): Ditto.
+	(EIHD_S_Q_SYMVVA, EIHD_S_L_IMGTYPE): Ditto.
+	(EISD_S_L_EISDSIZE, EISD_S_L_SECSIZE, EISD_S_Q_VIR_ADDR): Ditto.
+	(EISD_S_L_FLAGS, EISD_S_L_VBN, EISD_S_R_CONTROL): Ditto.
+	(EISD_S_L_IDENT, EISD_S_T_GBLNAM): Ditto.
+	(EISD_S_M_GBL, EISD_S_M_CRF, EISD_S_M_DZRO, EISD_S_M_WRT): Ditto.
+	(EISD_S_M_INITALCODE, EISD_S_M_BASED, EISD_S_M_FIXUPVEC): Ditto.
+	(EISD_S_M_RESIDENT, EISD_S_M_VECTOR, EISD_S_M_PROTECT): Ditto.
+	(EISD_S_M_LASTCLU, EISD_S_M_EXE, EISD_S_M_NONSHRADR): Ditto.
+	(EISD_S_M_QUAD_LENGTH, EISD_S_M_ALLOC_64BIT): Ditto.
+	(EIHS_S_L_DSTVBN, EIHS_S_L_DSTSIZE, EIHS_S_L_GSTVBN): Ditto.
+	(EIHS_S_L_GSTSIZE, EIHS_S_L_DMTVBN, EIHS_S_L_DMTBYTES): Ditto.
+	(DBG_S_L_DMT_MODBEG, DBG_S_L_DST_SIZE): Ditto.
+	(DBG_S_W_DMT_PSECT_COUNT, DBG_S_C_DMT_HEADER_SIZE): Ditto.
+	(DBG_S_L_DMT_PSECT_START, DBG_S_L_DMT_PSECT_LENGTH)
+	(DBG_S_C_DMT_PSECT_SIZE): Ditto.
+	(enum file_type_enum): New type.
+	(struct location_struct): Removed.
+	(struct fileinfo, struct srecinfo, struct lineinfo): New types.
+	(struct funcinfo, struct module): Ditto.
+	(struct vms_private_data_struct): Update fields.
+	(struct vms_section_data_struct): New type.
+
+	* vms.c: Update copyright year, fix comments,
+	Fix includes for DECC, add prototypes.
+	(vms_initialize): Use bfd_alloc instead of bfd_zalloc and remove
+	some initializers.
+	Use flavour to set is_vax, location_stack is removed.
+	(struct pair): Declare.
+	(fill_section_ptr): Initialize variables at declaration.
+	Add guard to set SECTION_SYM flag, handlde und section.
+	(vms_fixup_sections): Use struct pair for fill_section_ptr argument.
+	(_bfd_vms_slurp_object_records): New function, replaces previous
+	vms_object_p.
+	(vms_slurp_module): New function.
+	(vms_slurp_image): Ditto.
+	(vms_object_p): Complete rewrite.
+	(vms_mkobject): Use is_vax field to slect architecture.
+	(free_reloc_stream): New function.
+	(vms_convert_to_var): Ditto.
+	(vms_convert_to_var_1): Ditto.
+	(vms_convert_to_var_unix_filename): Ditto.
+	(vms_close_and_cleanup): Call free_reloc_stream, convert file to
+	VAR format on VMS.
+	(vms_new_section_hook): Set alignment to 0, allocate private data.
+	(vms_get_section_contents): Load content.
+	(vms_get_symbol_info): Handle undefined section.
+	(vms_find_nearest_line): Handle.
+	(alloc_reloc_stream): New function.
+	(vms_slurp_reloc_table): Ditto.
+	(vms_get_reloc_upper_bound): Make it real.
+	(vms_canonicalize_reloc): Do the real work.
+	(alpha_howto_table): Add ALPHA_R_NOP, ALPHA_R_BSR, ALPHA_R_LDA,
+	ALPHA_R_BOH.
+	(vms_bfd_reloc_type_lookup): Handle NOP, BSR, LDA and BOH.
+	(vms_set_arch_mach): Check arch.
+	(vms_set_section_contents): Copy the content after allocation.
+	(vms_alpha_vec): Update object flags.
+
+	* vms-tir.c: Update copyright year, fix comments,
+	add prototypes for new functions.
+	(dst_define_location): New function.
+	(dst_restore_location): New function.
+	(dst_retrieve_location): New function.
+	(dst_check_allocation): New function.
+	(image_dump): Call dst_check_allocation.
+	(image_write_b): Ditto.
+	(image_write_w): Ditto.
+	(image_write_l): Ditto.
+	(image_write_q): Ditto.
+	(cmd_name): Handle STA_LW, STA_QW, STO_OFF, STO_IMM, STO_IMMR, STO_LW,
+	STO_QW, OPR_ADD, CTL_SETRB, STC_LP_PSB, CTL_DFLOC, CTL_STLOC,
+	CTL_STKDL.
+	Call error handler instead of abort if name is not known.
+	(etir_sta): Add quarter_relocs argument and set it.
+	Fix cast.
+	(etir_sto): Ditto.
+	(etir_opr): Ditto, return FALSE in case of error.
+	(etir_ctl): Add quarter_relocs argument and set it, fix cast.
+	Fix CTL_DFLOC, CTL_STLOC, CTL_STKDL.
+	(etir_stc): Add quarter_relocs argument and set it, fix cast.
+	Fix STC_LP, STC_LP_PSB, STC_GBL and STC_CGA.
+	Handle STC_LP_PSB, STC_BSR_GBL, STC_LDA_GBL, STC_BOH_GBL.
+	Move STC_NOP_PS, STC_BSR_PS, STC_LDA_PS, STC_BOH_PS, STC_NBH_PS.
+	Return FALSE in case of error.
+	(tir_sta): Change sign of psect.
+	(tir_ctl): Ditto.
+	(tir_cmd): Fix cast. Makes tir_table static const.
+	(etir_cmd): Add quarter_relocs argument, makes etir_table const,
+	add argument to explain.
+	(analyze_etir): Initialize maxptr, add quarter_relocs
+	declaration, move some declarations into inner scopes.
+	Handle quarter_relocs and STO_IMM.
+	(_bfd_vms_slurp_tir): Use constant instead of hard-coded values.
+	(_bfd_vms_slurp_relocs): New function.
+	(_bfd_vms_decode_relocs): New function.
+	(sto_imm): Rewritten.
+	(start_first_etbt_record): New function.
+	(start_another_etbt_record): Ditto.
+	(etir_output_check): Ditto.
+	(defer_reloc_p): Ditto.
+	(_bfd_vms_write_tir): Remove nextoffset, convert a while-loop to
+	a for-loop.  Correctly deals with contents, deals with .vmsdebug,
+	rewritte relocations handling.
+	(_bfd_vms_write_tbt): Removed.
+	(_bfd_vms_write_dbg): Ditto.
+
+	* vms-misc.c: Update copyright year, Fix comments.
+	(_bfd_vms_get_header_values): Use 'size' instead of 'length'.
+	(maybe_adjust_record_pointer_for_object): New function.
+	(_bfd_vms_get_first_record): New function, replaces ...
+	(_bfd_vms_get_record): ..  removed.
+	(_bfd_vms_get_object_record): New function.
+	(_bfd_vms_get_object_record): New function.
+	(vms_get_remaining_object_record): New function, replaces ...
+	(_bfd_vms_get_next_record): ... removed.
+	(add_new_contents): Removed.
+	(_bfd_save_vms_section): Removed.
+	(_bfd_get_vms_section): Removed.
+	(_bfd_vms_output_flush): Write in VAR format.
+	(new_symbol): Don't make UND section.
+
+	* vms-hdr.c: Update copyright year, update list of record handled.
+	(_bfd_vms_slurp_hdr): rec_length renamed to rec_size.
+	(_bfd_vms_write_hdr): Strip vms and unix patches,
+	add comments, truncate module name at 31 characters,
+	use constants instead of hard-coded value,
+	write BFD version instead of a fixed string.
+	(_bfd_vms_slurp_ihd): New function.
+	(_bfd_vms_slurp_isd): Ditto.
+	(_bfd_vms_slurp_ihs): Ditto.
+	(new_module): Ditto.
+	(parse_module): Ditto
+	(build_module_list): Ditto.
+	(module_find_nearest_line): Ditto.
+	(_bfd_vms_find_nearest_dst_line): Ditto.
+	(vms_slurp_debug): Ditto.
+	(_bfd_vms_slurp_dbg): Ditto.
+	(_bfd_vms_slurp_tbt): Ditto.
+	(_bfd_vms_write_dbg): Ditto.
+	(_bfd_vms_write_tbt): Ditto.
+
+	* vms-gsd.c: Update copyright year, update list of records handled.
+	(EVAX_LITERALS_NAME): New macro.
+	(evax_section_flags): Add an entry for EVAX_LITERALS_NAME.
+	(gpsflagdesc, gsyflagdesc): Moved out of _bfd_vms_slurp_gsd.
+	(register_universal_symbol): New function and prototype.
+	(_bfd_vms_slurp_gsd): Fix indentations and casts,
+	improve debug messages,
+	use constants instead of hard-coded value,
+	fix missing endianness conversion,
+	handle global symbol (SYMG).
+	(bfd_vms_set_section_flags): New function.
+	(_bfd_vms_write_gsd): Don't write .vmsdebug section,
+	handle section literals,
+	fix indentation,
+	handle section bfd and vms flags,
+	don't output LIB$INITIALIZE symbol,
+	fix handling of weak symbols,
+	fix evax vs vax procedure descriptor,
+	handle absolute symbols.
+
+	* reloc.c (BFD_RELOC_ALPHA_NOP, BFD_RELOC_ALPHA_BSR,
+	BFD_RELOC_ALPHA_LDA, BFD_RELOC_ALPHA_BOH): New relocations.
+
+	* makefile.vms (DEFS): Fix flags for VMS.
+
+	* bfdio.c (real_fopen): Handle multiple VMS fopen attributes.
+
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+
 2009-02-20  Cary Coutant  <ccoutant@google.com>
 
 	* vmsutil.c (vms_file_stats_name): Fix incorrect use of st_mtime

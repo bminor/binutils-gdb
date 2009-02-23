@@ -1,7 +1,9 @@
-/* vms-misc.c -- Miscellaneous functions for VAX (openVMS/VAX) and
+/* vms-misc.c -- BFD back-end for VMS/VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2007, 2008  Free Software Foundation, Inc.
+   2007, 2008, 2009  Free Software Foundation, Inc.
+
+   Miscellaneous functions.
 
    Written by Klaus K"ampf (kkaempf@rmi.de)
 
@@ -30,22 +32,29 @@
 #include "libbfd.h"
 
 #include "vms.h"
-
+
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+
+static int hash_string PARAMS ((const char *));
+static asymbol *new_symbol PARAMS ((bfd *, char *));
+static void maybe_adjust_record_pointer_for_object PARAMS ((bfd *));
+static int vms_get_remaining_object_record PARAMS ((bfd *, int ));
+static int vms_get_remaining_image_record PARAMS ((bfd *, int ));
+
 #if VMS_DEBUG
 /* Debug functions.  */
 
-/* Debug function for all vms extensions
-   evaluates environment variable VMS_DEBUG for a
-   numerical value on the first call
-   all error levels below this value are printed
+/* Debug function for all vms extensions evaluates environment
+   variable VMS_DEBUG for a numerical value on the first call all
+   error levels below this value are printed:
 
-   levels:
+   Levels:
    1	toplevel bfd calls (functions from the bfd vector)
    2	functions called by bfd calls
    ...
    9	almost everything
 
-   level is also indentation level. Indentation is performed
+   Level is also indentation level. Indentation is performed
    if level > 0.  */
 
 void
@@ -167,22 +176,23 @@ _bfd_vms_hash_newfunc (struct bfd_hash_entry *entry,
 
 /* Object file input functions.  */
 
-/* Return type and length from record header (buf) on Alpha.  */
+/* Return type and size from record header (buf) on Alpha.  */
 
 void
 _bfd_vms_get_header_values (bfd * abfd ATTRIBUTE_UNUSED,
 			    unsigned char *buf,
 			    int *type,
-			    int *length)
+			    int *size)
 {
-  if (type != 0)
+  if (type)
     *type = bfd_getl16 (buf);
-  buf += 2;
-  if (length != 0)
-    *length = bfd_getl16 (buf);
+
+  if (size)
+    *size = bfd_getl16 (buf+2);
 
 #if VMS_DEBUG
-  vms_debug (10, "_bfd_vms_get_header_values type %x, length %x\n", (type?*type:0), (length?*length:0));
+  vms_debug (10, "_bfd_vms_get_header_values type %x, size %x\n",
+	     type ? *type : 0, size ? *size : 0);
 #endif
 }
 
@@ -193,237 +203,341 @@ _bfd_vms_get_header_values (bfd * abfd ATTRIBUTE_UNUSED,
 
    The openVMS object file has 'variable length' which means that
    read() returns data in chunks of (hopefully) correct and expected
-   size. The linker (and other tools on vms) depend on that. Unix doesn't
-   know about 'formatted' files, so reading and writing such an object
-   file in a unix environment is not trivial.
+   size.  The linker (and other tools on VMS) depend on that. Unix
+   doesn't know about 'formatted' files, so reading and writing such
+   an object file in a Unix environment is not trivial.
 
-   With the tool 'file' (available on all vms ftp sites), one
-   can view and change the attributes of a file. Changing from
+   With the tool 'file' (available on all VMS FTP sites), one
+   can view and change the attributes of a file.  Changing from
    'variable length' to 'fixed length, 512 bytes' reveals the
-   record length at the first 2 bytes of every record. The same
-   happens during the transfer of object files from vms to unix,
-   at least with ucx, dec's implementation of tcp/ip.
+   record size at the first 2 bytes of every record.  The same
+   happens during the transfer of object files from VMS to Unix,
+   at least with UCX, the DEC implementation of TCP/IP.
 
-   The vms format repeats the length at bytes 2 & 3 of every record.
+   The VMS format repeats the size at bytes 2 & 3 of every record.
 
    On the first call (file_format == FF_UNKNOWN) we check if
    the first and the third byte pair (!) of the record match.
-   If they do it's an object file in an unix environment or with
-   wrong attributes (FF_FOREIGN), else we should be in a vms
+   If they do it's an object file in an Unix environment or with
+   wrong attributes (FF_FOREIGN), else we should be in a VMS
    environment where read() returns the record size (FF_NATIVE).
 
-   Reading is always done in 2 steps.
-   First just the record header is read and the length extracted
-   by get_header_values,
-   then the read buffer is adjusted and the remaining bytes are
-   read in.
+   Reading is always done in 2 steps:
+    1. first just the record header is read and the size extracted,
+    2. then the read buffer is adjusted and the remaining bytes are
+       read in.
 
-   All file i/o is always done on even file positions.  */
+   All file I/O is done on even file positions.  */
+
+#define VMS_OBJECT_ADJUSTMENT  2
+
+static void
+maybe_adjust_record_pointer_for_object (bfd *abfd)
+{
+  /* Set the file format once for all on the first invocation.  */
+  if (PRIV (file_format) == FF_UNKNOWN)
+    {
+      if (PRIV (vms_rec)[0] == PRIV (vms_rec)[4]
+	  && PRIV (vms_rec)[1] == PRIV (vms_rec)[5])
+	PRIV (file_format) = FF_FOREIGN;
+      else
+	PRIV (file_format) = FF_NATIVE;
+    }
+
+  /* The adjustment is needed only in an Unix environment.  */
+  if (PRIV (file_format) == FF_FOREIGN)
+    PRIV (vms_rec) += VMS_OBJECT_ADJUSTMENT;
+}
+
+/* Get first record from file and return the file type.  */
 
 int
-_bfd_vms_get_record (bfd * abfd)
+_bfd_vms_get_first_record (bfd *abfd)
 {
-  int test_len, test_start, remaining;
-  unsigned char *vms_buf;
+  unsigned int test_len;
 
 #if VMS_DEBUG
-  vms_debug (8, "_bfd_vms_get_record\n");
+  vms_debug (8, "_bfd_vms_get_first_record\n");
 #endif
 
-  /* Minimum is 6 bytes on Alpha
-     (2 bytes length, 2 bytes record id, 2 bytes length repeated)
+  if (PRIV (is_vax))
+    test_len = 0;
+  else
+    /* Minimum is 6 bytes for objects (2 bytes size, 2 bytes record id,
+       2 bytes size repeated) and 12 bytes for images (4 bytes major id,
+       4 bytes minor id, 4 bytes length).  */
+    test_len = 12;
 
-     On the VAX there's no length information in the record
-     so start with OBJ_S_C_MAXRECSIZ.   */
-
+  /* Size the main buffer.  */
   if (PRIV (buf_size) == 0)
     {
-      bfd_size_type amt;
-
-      if (PRIV (is_vax))
-	{
-	  amt = OBJ_S_C_MAXRECSIZ;
-	  PRIV (file_format) = FF_VAX;
-	}
-      else
-	amt = 6;
-      PRIV (vms_buf) = bfd_malloc (amt);
+      /* On VAX there's no size information in the record, so
+	 start with OBJ_S_C_MAXRECSIZ.  */
+      bfd_size_type amt = (test_len ? test_len : OBJ_S_C_MAXRECSIZ);
+      PRIV (vms_buf) = (unsigned char *) bfd_malloc (amt);
       PRIV (buf_size) = amt;
     }
 
-  vms_buf = PRIV (vms_buf);
+  /* Initialize the record pointer.  */
+  PRIV (vms_rec) = PRIV (vms_buf);
 
-  if (vms_buf == 0)
-    return -1;
-
-  switch (PRIV (file_format))
+  /* We only support modules on VAX.  */
+  if (PRIV (is_vax))
     {
-    case FF_UNKNOWN:
-    case FF_FOREIGN:
-      test_len = 6;			/* Probe 6 bytes.  */
-      test_start = 2;			/* Where the record starts.  */
-      break;
+      if (vms_get_remaining_object_record (abfd, test_len) <= 0)
+	return FT_UNKNOWN;
 
-    case FF_NATIVE:
-      test_len = 4;
-      test_start = 0;
-      break;
+#if VMS_DEBUG
+      vms_debug (2, "file type is VAX module\n");
+#endif
 
-    default:
-    case FF_VAX:
-      test_len = 0;
-      test_start = 0;
-      break;
+      return FT_MODULE;
     }
 
-  /* Skip odd alignment byte.  */
-
-  if (bfd_tell (abfd) & 1)
-    {
-      if (bfd_bread (PRIV (vms_buf), (bfd_size_type) 1, abfd) != 1)
-	{
-	  bfd_set_error (bfd_error_file_truncated);
-	  return 0;
-	}
-    }
-
-  /* Read the record header on Alpha.  */
-  if ((test_len != 0)
-      && (bfd_bread (PRIV (vms_buf), (bfd_size_type) test_len, abfd)
-	  != (bfd_size_type) test_len))
+  if (bfd_bread (PRIV (vms_buf), test_len, abfd) != test_len)
     {
       bfd_set_error (bfd_error_file_truncated);
-      return 0;
+      return FT_UNKNOWN;
     }
 
-  /* Check file format on first call.  */
-  if (PRIV (file_format) == FF_UNKNOWN)
-    {						/* Record length repeats ?  */
-      if (vms_buf[0] == vms_buf[4]
-	  && vms_buf[1] == vms_buf[5])
-	{
-	  PRIV (file_format) = FF_FOREIGN;	/* Y: foreign environment.  */
-	  test_start = 2;
-	}
-      else
-	{
-	  PRIV (file_format) = FF_NATIVE;	/* N: native environment.  */
-	  test_start = 0;
-	}
+  /* Is it an image?  */
+  if ((bfd_getl32 (PRIV (vms_rec)) == EIHD_S_K_MAJORID)
+      && (bfd_getl32 (PRIV (vms_rec) + 4) == EIHD_S_K_MINORID))
+    {
+      if (vms_get_remaining_image_record (abfd, test_len) <= 0)
+	return FT_UNKNOWN;
+
+#if VMS_DEBUG
+      vms_debug (2, "file type is image\n");
+#endif
+
+      return FT_IMAGE;
     }
+
+  /* Assume it's a module and adjust record pointer if necessary.  */
+  maybe_adjust_record_pointer_for_object (abfd);
+
+  /* But is it really a module?  */
+  if (bfd_getl16 (PRIV (vms_rec)) <= EOBJ_S_C_MAXRECTYP
+      && bfd_getl16 (PRIV (vms_rec) + 2) <= EOBJ_S_C_MAXRECSIZ)
+    {
+      if (vms_get_remaining_object_record (abfd, test_len) <= 0)
+	return FT_UNKNOWN;
+
+#if VMS_DEBUG
+      vms_debug (2, "file type is module\n");
+#endif
+
+      return FT_MODULE;
+    }
+
+#if VMS_DEBUG
+  vms_debug (2, "file type is unknown\n");
+#endif
+
+  return FT_UNKNOWN;
+}
+
+/* Implement step #1 of the object record reading procedure.
+   Return the record type or -1 on failure.  */
+
+int
+_bfd_vms_get_object_record (bfd *abfd)
+{
+  unsigned int test_len;
+  int type;
+
+#if VMS_DEBUG
+  vms_debug (8, "_bfd_vms_get_obj_record\n");
+#endif
+
+  if (PRIV (is_vax))
+    test_len = 0;
+  else
+    {
+      /* See _bfd_vms_get_first_record.  */
+      test_len = 6;
+
+      /* Skip odd alignment byte.  */
+      if (bfd_tell (abfd) & 1)
+	{
+	  if (bfd_bread (PRIV (vms_buf), 1, abfd) != 1)
+	    {
+	      bfd_set_error (bfd_error_file_truncated);
+	      return -1;
+	    }
+	}
+
+      /* Read the record header  */
+      if (bfd_bread (PRIV (vms_buf), test_len, abfd) != test_len)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
+
+      /* Reset the record pointer.  */
+      PRIV (vms_rec) = PRIV (vms_buf);
+      maybe_adjust_record_pointer_for_object (abfd);
+    }
+
+  if (vms_get_remaining_object_record (abfd, test_len) <= 0)
+    return -1;
+
+  if (PRIV (is_vax))
+    type = PRIV (vms_rec) [0];
+  else
+    type = bfd_getl16 (PRIV (vms_rec));
+
+#if VMS_DEBUG
+  vms_debug (8, "_bfd_vms_get_obj_record: rec %p, size %d, type %d\n",
+	      PRIV (vms_rec), PRIV (rec_size), type);
+#endif
+
+  return type;
+}
+
+/* Implement step #2 of the object record reading procedure.
+   Return the size of the record or 0 on failure.  */
+
+static int
+vms_get_remaining_object_record (bfd *abfd, int read_so_far)
+{
+#if VMS_DEBUG
+  vms_debug (8, "vms_get_remaining_obj_record\n");
+#endif
 
   if (PRIV (is_vax))
     {
-      PRIV (rec_length) = bfd_bread (vms_buf, (bfd_size_type) PRIV (buf_size),
-				     abfd);
-      if (PRIV (rec_length) <= 0)
+      if (read_so_far != 0)
+        abort ();
+
+      PRIV (rec_size) = bfd_bread (PRIV (vms_buf), PRIV (buf_size), abfd);
+
+      if (PRIV (rec_size) <= 0)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
 	  return 0;
 	}
-      PRIV (vms_rec) = vms_buf;
+
+      /* Reset the record pointer.  */
+      PRIV (vms_rec) = PRIV (vms_buf);
     }
   else
     {
-      /* Alpha.   */
-      /* Extract vms record length.  */
+      unsigned int to_read;
 
-      _bfd_vms_get_header_values (abfd, vms_buf + test_start, NULL,
-				  & PRIV (rec_length));
+      /* Extract record size.  */
+      PRIV (rec_size) = bfd_getl16 (PRIV (vms_rec) + 2);
 
-      if (PRIV (rec_length) <= 0)
+      if (PRIV (rec_size) <= 0)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
 	  return 0;
 	}
 
       /* That's what the linker manual says.  */
-
-      if (PRIV (rec_length) > EOBJ_S_C_MAXRECSIZ)
+      if (PRIV (rec_size) > EOBJ_S_C_MAXRECSIZ)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
 	  return 0;
 	}
 
-      /* Adjust the buffer.  */
+      /* Take into account object adjustment.  */
+      to_read = PRIV (rec_size);
+      if (PRIV (file_format) == FF_FOREIGN)
+	to_read += VMS_OBJECT_ADJUSTMENT;
 
-      if (PRIV (rec_length) > PRIV (buf_size))
+      /* Adjust the buffer.  */
+      if (to_read > PRIV (buf_size))
 	{
-	  PRIV (vms_buf) = bfd_realloc_or_free (vms_buf,
-					(bfd_size_type) PRIV (rec_length));
-	  vms_buf = PRIV (vms_buf);
-	  if (vms_buf == 0)
-	    return -1;
-	  PRIV (buf_size) = PRIV (rec_length);
+	  PRIV (vms_buf)
+	    = (unsigned char *) bfd_realloc (PRIV (vms_buf), to_read);
+	  if (PRIV (vms_buf) == NULL)
+	    return 0;
+	  PRIV (buf_size) = to_read;
 	}
 
       /* Read the remaining record.  */
-      remaining = PRIV (rec_length) - test_len + test_start;
+      to_read -= read_so_far;
 
 #if VMS_DEBUG
-      vms_debug (10, "bfd_bread remaining %d\n", remaining);
+      vms_debug (8, "vms_get_remaining_obj_record: to_read %d\n", to_read);
 #endif
-      if (bfd_bread (vms_buf + test_len, (bfd_size_type) remaining, abfd) !=
-	  (bfd_size_type) remaining)
+
+      if (bfd_bread (PRIV (vms_buf) + read_so_far, to_read, abfd) != to_read)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
 	  return 0;
 	}
-      PRIV (vms_rec) = vms_buf + test_start;
+
+      /* Reset the record pointer.  */
+      PRIV (vms_rec) = PRIV (vms_buf);
+      maybe_adjust_record_pointer_for_object (abfd);
     }
 
 #if VMS_DEBUG
-  vms_debug (11, "bfd_bread rec_length %d\n", PRIV (rec_length));
+  vms_debug (8, "vms_get_remaining_obj_record: size %d\n", PRIV (rec_size));
 #endif
 
-  return PRIV (rec_length);
+  return PRIV (rec_size);
 }
 
-/* Get next vms record from file
-   update vms_rec and rec_length to new (remaining) values.  */
+/* Implement step #2 of the record reading procedure for images.
+   Return the size of the record or 0 on failure.  */
 
-int
-_bfd_vms_next_record (bfd * abfd)
+static int
+vms_get_remaining_image_record (bfd *abfd, int read_so_far)
 {
-#if VMS_DEBUG
-  vms_debug (8, "_bfd_vms_next_record (len %d, size %d)\n",
-	      PRIV (rec_length), PRIV (rec_size));
-#endif
+  unsigned int to_read;
+  int remaining;
 
-  if (PRIV (rec_length) > 0)
-    PRIV (vms_rec) += PRIV (rec_size);
-  else
+  /* Extract record size.  */
+  PRIV (rec_size) = bfd_getl32 (PRIV (vms_rec) + EIHD_S_L_SIZE);
+
+  if (PRIV (rec_size) > PRIV (buf_size))
     {
-      if (_bfd_vms_get_record (abfd) <= 0)
-	return -1;
+      PRIV (vms_buf) = bfd_realloc (PRIV (vms_buf), PRIV (rec_size));
+
+      if (PRIV (vms_buf) == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return 0;
+	}
+
+      PRIV (buf_size) = PRIV (rec_size);
     }
 
-  if (!PRIV (vms_rec) || !PRIV (vms_buf)
-      || PRIV (vms_rec) >= (PRIV (vms_buf) + PRIV (buf_size)))
-    return -1;
+  /* Read the remaining record.  */
+  remaining = PRIV (rec_size) - read_so_far;
+  to_read = MIN (VMS_BLOCK_SIZE - read_so_far, remaining);
 
-  if (PRIV (is_vax))
+  while (remaining > 0)
     {
-      PRIV (rec_type) = *(PRIV (vms_rec));
-      PRIV (rec_size) = PRIV (rec_length);
+      if (bfd_bread (PRIV (vms_buf) + read_so_far, to_read, abfd) != to_read)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return 0;
+	}
+
+      read_so_far += to_read;
+      remaining -= to_read;
+
+      /* Eat trailing 0xff's.  */
+      if (remaining > 0)
+	while (PRIV (vms_buf) [read_so_far - 1] == 0xff)
+	  read_so_far--;
+
+      to_read = MIN (VMS_BLOCK_SIZE, remaining);
     }
-  else
-    _bfd_vms_get_header_values (abfd, PRIV (vms_rec), &PRIV (rec_type),
-				&PRIV (rec_size));
 
-  PRIV (rec_length) -= PRIV (rec_size);
+  /* Reset the record pointer.  */
+  PRIV (vms_rec) = PRIV (vms_buf);
 
-#if VMS_DEBUG
-  vms_debug (8, "_bfd_vms_next_record: rec %p, size %d, length %d, type %d\n",
-	      PRIV (vms_rec), PRIV (rec_size), PRIV (rec_length),
-	      PRIV (rec_type));
-#endif
-
-  return PRIV (rec_type);
+  return PRIV (rec_size);
 }
-
-/* Copy sized string (string with fixed length) to new allocated area
-   size is string length (size of record)  */
+
+/* Copy sized string (string with fixed size) to new allocated area
+   size is string size (size of record)  */
 
 char *
 _bfd_vms_save_sized_string (unsigned char *str, int size)
@@ -438,8 +552,8 @@ _bfd_vms_save_sized_string (unsigned char *str, int size)
   return newstr;
 }
 
-/* Copy counted string (string with length at first byte) to new allocated area
-   ptr points to length byte on entry  */
+/* Copy counted string (string with size at first byte) to new allocated area
+   ptr points to size byte on entry  */
 
 char *
 _bfd_vms_save_counted_string (unsigned char *ptr)
@@ -501,83 +615,12 @@ _bfd_vms_pop (bfd * abfd, int *psect)
   return value;
 }
 
-/* Object file output functions.  */
-
-/* GAS tends to write sections in little chunks (bfd_set_section_contents)
-   which we can't use directly. So we save the little chunks in linked
-   lists (one per section) and write them later.  */
-
-/* Add a new vms_section structure to vms_section_table
-   - forward chaining -.  */
-
-static vms_section *
-add_new_contents (bfd * abfd, sec_ptr section)
-{
-  vms_section *sptr, *newptr;
-
-  sptr = PRIV (vms_section_table)[section->index];
-  if (sptr != NULL)
-    return sptr;
-
-  newptr = bfd_alloc (abfd, (bfd_size_type) sizeof (vms_section));
-  if (newptr == NULL)
-    return NULL;
-  newptr->contents = bfd_alloc (abfd, section->size);
-  if (newptr->contents == NULL)
-    return NULL;
-  newptr->offset = 0;
-  newptr->size = section->size;
-  newptr->next = 0;
-  PRIV (vms_section_table)[section->index] = newptr;
-  return newptr;
-}
-
-/* Save section data & offset to a vms_section structure
-   vms_section_table[] holds the vms_section chain.  */
-
-bfd_boolean
-_bfd_save_vms_section (bfd * abfd,
-		       sec_ptr section,
-		       const void * data,
-		       file_ptr offset,
-		       bfd_size_type count)
-{
-  vms_section *sptr;
-
-  if (section->index >= VMS_SECTION_COUNT)
-    {
-      bfd_set_error (bfd_error_nonrepresentable_section);
-      return FALSE;
-    }
-  if (count == (bfd_size_type)0)
-    return TRUE;
-  sptr = add_new_contents (abfd, section);
-  if (sptr == NULL)
-    return FALSE;
-  memcpy (sptr->contents + offset, data, (size_t) count);
-
-  return TRUE;
-}
-
-/* Get vms_section pointer to saved contents for section # index  */
-
-vms_section *
-_bfd_get_vms_section (bfd * abfd, int index)
-{
-  if (index >=  VMS_SECTION_COUNT)
-    {
-      bfd_set_error (bfd_error_nonrepresentable_section);
-      return NULL;
-    }
-  return PRIV (vms_section_table)[index];
-}
-
 /* Object output routines.   */
 
 /* Begin new record or record header
    write 2 bytes rectype
    write 2 bytes record length (filled in at flush)
-   write 2 bytes header type (ommitted if rechead == -1).   */
+   write 2 bytes header type (ommitted if rechead == -1).  */
 
 void
 _bfd_vms_output_begin (bfd * abfd, int rectype, int rechead)
@@ -691,18 +734,11 @@ _bfd_vms_output_flush (bfd * abfd)
 
   if (PRIV (push_level) == 0)
     {
-      if (0
-#ifndef VMS
-	  /* Write length first, see FF_FOREIGN in the input routines.  */
-	  || fwrite (PRIV (output_buf) + 2, 2, 1,
-		     (FILE *) abfd->iostream) != 1
-#endif
-	  || (real_size != 0
-	      && fwrite (PRIV (output_buf), (size_t) real_size, 1,
-			 (FILE *) abfd->iostream) != 1))
-	/* FIXME: Return error status.  */
-	abort ();
-
+      /* File is open in undefined (UDF) format on VMS, but ultimately will be
+	 converted to variable length (VAR) format.  VAR format has a length
+	 word first which must be explicitly output in UDF format.  */
+      bfd_bwrite (PRIV (output_buf) + 2, 2, abfd);
+      bfd_bwrite (PRIV (output_buf), (size_t) real_size, abfd);
       PRIV (output_size) = 0;
     }
   else
@@ -948,7 +984,7 @@ new_symbol (bfd * abfd, char *name)
   if (symbol == 0)
     return symbol;
   symbol->name = name;
-  symbol->section = bfd_make_section (abfd, BFD_UND_SECTION_NAME);
+  symbol->section = (asection *)(unsigned long)-1;
 
   return symbol;
 }

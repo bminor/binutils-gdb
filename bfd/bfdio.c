@@ -102,13 +102,21 @@ real_fopen (const char *filename, const char *modes)
     }
   else
     {
-      /* Attribute found - rebuild modes.  */
-      size_t modes_len = vms_attr - modes;
+      /* Attributes found.  Split.  */
+      size_t modes_len = strlen (modes) + 1;
+      char attrs[modes_len + 1];
+      char *at[3];
+      int i;
 
-      BFD_ASSERT (modes_len < sizeof (vms_modes));
-      memcpy (vms_modes, modes, modes_len);
-      vms_modes[modes_len] = 0;
-      return close_on_exec (fopen (filename, vms_modes, vms_attr + 1));
+      memcpy (attrs, modes, modes_len);
+      at[0] = attrs;
+      for (i = 0; i < 2; i++)
+	{
+	  at[i + 1] = strchr (at[i], ',');
+	  BFD_ASSERT (at[i + 1] != NULL);
+	  *(at[i + 1]++) = 0; /* Replace ',' with a nul, and skip it.  */
+	}
+      return close_on_exec (fopen (filename, at[0], at[1], at[2]));
     }
 #else /* !VMS */
 #if defined (HAVE_FOPEN64)

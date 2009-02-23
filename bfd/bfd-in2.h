@@ -2586,6 +2586,22 @@ share a common GP, and the target address is adjusted for
 STO_ALPHA_STD_GPLOAD.  */
   BFD_RELOC_ALPHA_BRSGP,
 
+/* The NOP relocation outputs a NOP if the longword displacement
+between two procedure entry points is < 2^21.  */
+  BFD_RELOC_ALPHA_NOP,
+
+/* The BSR relocation outputs a BSR if the longword displacement
+between two procedure entry points is < 2^21.  */
+  BFD_RELOC_ALPHA_BSR,
+
+/* The LDA relocation outputs a LDA if the longword displacement
+between two procedure entry points is < 2^16.  */
+  BFD_RELOC_ALPHA_LDA,
+
+/* The BOH relocation outputs a BSR if the longword displacement
+between two procedure entry points is < 2^21, or else a hint.  */
+  BFD_RELOC_ALPHA_BOH,
+
 /* Alpha thread-local storage relocations.  */
   BFD_RELOC_ALPHA_TLSGD,
   BFD_RELOC_ALPHA_TLSLDM,
