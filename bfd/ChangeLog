@@ -1,3 +1,8 @@
+2009-02-24  Sterling Augustine  <sterling@jaw.hq.tensilica.com>
+
+	* xtensa-modules.c: Revert to previous version 1.11 due
+	to inadvertant commit.
+
 2009-02-24  Sterling Augustine  <sterling@tensilica.com>
 
 	* elf32-xtensa.c (text_action_add): Separate test for action
@@ -20,7 +25,6 @@
 	Undefine NEXT_SEC.
 	(elf32_arm_size_stubs): Update to use stubs_always_after_branch.
 
->>>>>>> 1.4473
 2009-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (arm_build_one_stub): Initialize stub_reloc_offset.
