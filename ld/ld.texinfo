@@ -335,11 +335,20 @@ prefixed by @samp{-Wl,} (or whatever is appropriate for the particular
 compiler driver) like this:
 
 @smallexample
-  gcc -Wl,--startgroup foo.o bar.o -Wl,--endgroup
+  gcc -Wl,--start-group foo.o bar.o -Wl,--end-group
 @end smallexample
 
 This is important, because otherwise the compiler driver program may
-silently drop the linker options, resulting in a bad link.
+silently drop the linker options, resulting in a bad link.  Confusion
+may also arise when passing options that require values through a
+driver, as the use of a space between option and argument acts as
+a separator, and causes the driver to pass only the option to the linker
+and the argument to the compiler.  In this case, it is simplest to use
+the joined forms of both single- and multiple-letter options, such as:
+
+@smallexample
+  gcc foo.o bar.o -Wl,-eENTRY -Wl,-Map=a.map
+@end smallexample
 
 Here is a table of the generic command line switches accepted by the GNU
 linker:
@@ -347,8 +356,8 @@ linker:
 @table @gcctabopt
 @include at-file.texi
 
-@kindex -a@var{keyword}
-@item -a@var{keyword}
+@kindex -a @var{keyword}
+@item -a @var{keyword}
 This option is supported for HP/UX compatibility.  The @var{keyword}
 argument must be one of the strings @samp{archive}, @samp{shared}, or
 @samp{default}.  @samp{-aarchive} is functionally equivalent to
@@ -357,8 +366,8 @@ to @samp{-Bdynamic}.  This option may be used any number of times.
 
 @ifset I960
 @cindex architectures
-@kindex -A@var{arch}
-@item -A@var{architecture}
+@kindex -A @var{arch}
+@item -A @var{architecture}
 @kindex --architecture=@var{arch}
 @itemx --architecture=@var{architecture}
 In the current release of @command{ld}, this option is useful only for the
@@ -514,10 +523,10 @@ Link big-endian objects.  This affects the default output format.
 Link little-endian objects.  This affects the default output format.
 @end ifclear
 
-@kindex -f
-@kindex --auxiliary
-@item -f
-@itemx --auxiliary @var{name}
+@kindex -f @var{name}
+@kindex --auxiliary=@var{name}
+@item -f @var{name}
+@itemx --auxiliary=@var{name}
 When creating an ELF shared object, set the internal DT_AUXILIARY field
 to the specified name.  This tells the dynamic linker that the symbol
 table of the shared object should be used as an auxiliary filter on the
@@ -536,10 +545,10 @@ machine specific performance.
 This option may be specified more than once.  The DT_AUXILIARY entries
 will be created in the order in which they appear on the command line.
 
-@kindex -F
-@kindex --filter
+@kindex -F @var{name}
+@kindex --filter=@var{name}
 @item -F @var{name}
-@itemx --filter @var{name}
+@itemx --filter=@var{name}
 When creating an ELF shared object, set the internal DT_FILTER field to
 the specified name.  This tells the dynamic linker that the symbol table
 of the shared object which is being created should be used as a filter
@@ -566,8 +575,8 @@ The @sc{gnu} linker will ignore the @option{-F} option when not
 creating an ELF shared object.
 
 @cindex finalization function
-@kindex -fini
-@item -fini @var{name}
+@kindex -fini=@var{name}
+@item -fini=@var{name}
 When creating an ELF executable or shared object, call NAME when the
 executable or shared object is unloaded, by setting DT_FINI to the
 address of the function.  By default, the linker uses @code{_fini} as
@@ -577,10 +586,10 @@ the function to call.
 @item -g
 Ignored.  Provided for compatibility with other tools.
 
-@kindex -G
-@kindex --gpsize
+@kindex -G @var{value}
+@kindex --gpsize=@var{value}
 @cindex object size
-@item -G@var{value}
+@item -G @var{value}
 @itemx --gpsize=@var{value}
 Set the maximum size of objects to be optimized using the GP register to
 @var{size}.  This is only meaningful for object file formats such as
@@ -588,9 +597,9 @@ MIPS ECOFF which supports putting large and small objects into different
 sections.  This is ignored for other object file formats.
 
 @cindex runtime library name
-@kindex -h@var{name}
+@kindex -h @var{name}
 @kindex -soname=@var{name}
-@item -h@var{name}
+@item -h @var{name}
 @itemx -soname=@var{name}
 When creating an ELF shared object, set the internal DT_SONAME field to
 the specified name.  When an executable is linked with a shared object
@@ -604,17 +613,17 @@ field rather than the using the file name given to the linker.
 Perform an incremental link (same as option @samp{-r}).
 
 @cindex initialization function
-@kindex -init
-@item -init @var{name}
+@kindex -init=@var{name}
+@item -init=@var{name}
 When creating an ELF executable or shared object, call NAME when the
 executable or shared object is loaded, by setting DT_INIT to the address
 of the function.  By default, the linker uses @code{_init} as the
 function to call.
 
 @cindex archive files, from cmd line
-@kindex -l@var{namespec}
+@kindex -l @var{namespec}
 @kindex --library=@var{namespec}
-@item -l@var{namespec}
+@item -l @var{namespec}
 @itemx --library=@var{namespec}
 Add the archive or object file specified by @var{namespec} to the
 list of files to link.  This option may be used any number of times.
@@ -650,9 +659,9 @@ behaviour of the AIX linker.
 @end ifset
 
 @cindex search directory, from cmd line
-@kindex -L@var{dir}
+@kindex -L @var{dir}
 @kindex --library-path=@var{dir}
-@item -L@var{searchdir}
+@item -L @var{searchdir}
 @itemx --library-path=@var{searchdir}
 Add path @var{searchdir} to the list of paths that @command{ld} will search
 for archive libraries and @command{ld} control scripts.  You may use this
@@ -677,7 +686,7 @@ at the point in which the linker script appears in the command line.
 
 @cindex emulation
 @kindex -m @var{emulation}
-@item -m@var{emulation}
+@item -m @var{emulation}
 Emulate the @var{emulation} linker.  You can list the available
 emulations with the @samp{--verbose} or @samp{-V} options.
 
@@ -1244,8 +1253,8 @@ duplicate when there are many dynamic modules with specialized search
 paths for runtime symbol resolution.
 
 @cindex symbols, from command line
-@kindex --defsym @var{symbol}=@var{exp}
-@item --defsym @var{symbol}=@var{expression}
+@kindex --defsym=@var{symbol}=@var{exp}
+@item --defsym=@var{symbol}=@var{expression}
 Create a global symbol in the output file, containing the absolute
 address given by @var{expression}.  You may use this option as many
 times as necessary to define multiple symbols in the command line.  A
@@ -1275,8 +1284,9 @@ is set.  These options may be used to override the default.
 
 @cindex dynamic linker, from command line
 @kindex -I@var{file}
-@kindex --dynamic-linker @var{file}
-@item --dynamic-linker @var{file}
+@kindex --dynamic-linker=@var{file}
+@item -I@var{file}
+@itemx --dynamic-linker=@var{file}
 Set the name of the dynamic linker.  This is only meaningful when
 generating dynamically linked ELF executables.  The default dynamic
 linker is normally correct; don't use this unless you know what you are
@@ -1347,8 +1357,8 @@ Print a summary of the command-line options on the standard output and exit.
 @item --target-help
 Print a summary of all target specific options on the standard output and exit.
 
-@kindex -Map
-@item -Map @var{mapfile}
+@kindex -Map=@var{mapfile}
+@item -Map=@var{mapfile}
 Print a link map to the file @var{mapfile}.  See the description of the
 @option{-M} option, above.
 
@@ -1463,8 +1473,8 @@ command line.  Library directories specified in linker scripts
 (including linker scripts specified on the command line) are ignored.
 
 @ifclear SingleFormat
-@kindex --oformat
-@item --oformat @var{output-format}
+@kindex --oformat=@var{output-format}
+@item --oformat=@var{output-format}
 @command{ld} may be configured to support more than one kind of object
 file.  If your @command{ld} is configured this way, you can use the
 @samp{--oformat} option to specify the binary format for the output
@@ -1542,7 +1552,8 @@ but ignored.
 @cindex retaining specified symbols
 @cindex stripping all but some symbols
 @cindex symbols, retaining selectively
-@item --retain-symbols-file @var{filename}
+@kindex --retain-symbols-file=@var{filename}
+@item --retain-symbols-file=@var{filename}
 Retain @emph{only} the symbols listed in the file @var{filename},
 discarding all others.  @var{filename} is simply a flat file, with one
 symbol name per line.  This option is especially useful in environments
@@ -1559,9 +1570,9 @@ You may only specify @samp{--retain-symbols-file} once in the command
 line.  It overrides @samp{-s} and @samp{-S}.
 
 @ifset GENERIC
-@item -rpath @var{dir}
+@item -rpath=@var{dir}
 @cindex runtime library search path
-@kindex -rpath
+@kindex -rpath=@var{dir}
 Add a directory to the runtime library search path.  This is used when
 linking an ELF executable with shared objects.  All @option{-rpath}
 arguments are concatenated and passed to the runtime linker, which uses
@@ -1587,8 +1598,8 @@ the @option{-rpath} option.
 
 @ifset GENERIC
 @cindex link-time runtime library search path
-@kindex -rpath-link
-@item -rpath-link @var{DIR}
+@kindex -rpath-link=@var{dir}
+@item -rpath-link=@var{dir}
 When using ELF or SunOS, one shared library may require another.  This
 happens when an @code{ld -shared} link includes a shared library as one
 of the input files.
@@ -1656,8 +1667,10 @@ and SunOS platforms.  On SunOS, the linker will automatically create a
 shared library if the @option{-e} option is not used and there are
 undefined symbols in the link.
 
-@item --sort-common [= ascending | descending]
 @kindex --sort-common
+@item --sort-common
+@itemx --sort-common=ascending
+@itemx --sort-common=descending
 This option tells @command{ld} to sort the common symbols by alignment in
 ascending or descending order when it places them in the appropriate output
 sections.  The symbol alignments considered are sixteen-byte or larger,
@@ -1665,24 +1678,24 @@ eight-byte, four-byte, two-byte, and one-byte. This is to prevent gaps
 between symbols due to alignment constraints.  If no sorting order is
 specified, then descending order is assumed.
 
-@kindex --sort-section name
-@item --sort-section name
+@kindex --sort-section=name
+@item --sort-section=name
 This option will apply @code{SORT_BY_NAME} to all wildcard section
 patterns in the linker script.
 
-@kindex --sort-section alignment
-@item --sort-section alignment
+@kindex --sort-section=alignment
+@item --sort-section=alignment
 This option will apply @code{SORT_BY_ALIGNMENT} to all wildcard section
 patterns in the linker script.
 
 @kindex --split-by-file
-@item --split-by-file [@var{size}]
+@item --split-by-file[=@var{size}]
 Similar to @option{--split-by-reloc} but creates a new output section for
 each input file when @var{size} is reached.  @var{size} defaults to a
 size of 1 if not given.
 
 @kindex --split-by-reloc
-@item --split-by-reloc [@var{count}]
+@item --split-by-reloc[=@var{count}]
 Tries to creates extra sections in the output file so that no single
 output section in the file contains more than @var{count} relocations.
 This is useful when generating huge relocatable files for downloading into
@@ -1699,7 +1712,7 @@ many relocations.  @var{count} defaults to a value of 32768.
 Compute and display statistics about the operation of the linker, such
 as execution time and memory usage.
 
-@kindex --sysroot
+@kindex --sysroot=@var{directory}
 @item --sysroot=@var{directory}
 Use @var{directory} as the location of the sysroot, overriding the
 configure-time default.  This option is only supported by linkers
@@ -1720,8 +1733,8 @@ full debugging information by over 30 percent.  Unfortunately, the SunOS
 trouble).  The @samp{--traditional-format} switch tells @command{ld} to not
 combine duplicate entries.
 
-@kindex --section-start @var{sectionname}=@var{org}
-@item --section-start @var{sectionname}=@var{org}
+@kindex --section-start=@var{sectionname}=@var{org}
+@item --section-start=@var{sectionname}=@var{org}
 Locate a section in the output file at the absolute
 address given by @var{org}.  You may use this option as many
 times as necessary to locate multiple sections in the command
@@ -1732,18 +1745,18 @@ for compatibility with other linkers, you may omit the leading
 should be no white space between @var{sectionname}, the equals
 sign (``@key{=}''), and @var{org}.
 
-@kindex -Tbss @var{org}
-@kindex -Tdata @var{org}
-@kindex -Ttext @var{org}
+@kindex -Tbss=@var{org}
+@kindex -Tdata=@var{org}
+@kindex -Ttext=@var{org}
 @cindex segment origins, cmd line
-@item -Tbss @var{org}
-@itemx -Tdata @var{org}
-@itemx -Ttext @var{org}
-Same as --section-start, with @code{.bss}, @code{.data} or
+@item -Tbss=@var{org}
+@itemx -Tdata=@var{org}
+@itemx -Ttext=@var{org}
+Same as @option{--section-start}, with @code{.bss}, @code{.data} or
 @code{.text} as the @var{sectionname}.
 
-@kindex -Ttext-segment @var{org}
-@itemx -Ttext-segment @var{org}
+@kindex -Ttext-segment=@var{org}
+@item -Ttext-segment=@var{org}
 @cindex text segment origin, cmd line
 When creating an ELF executable or shared object, it will set the address
 of the first byte of the text segment.
@@ -1789,7 +1802,7 @@ the linker script being used by the linker.
 
 @kindex --version-script=@var{version-scriptfile}
 @cindex version script, symbol versions
-@itemx --version-script=@var{version-scriptfile}
+@item --version-script=@var{version-scriptfile}
 Specify the name of a version script to the linker.  This is typically
 used when creating shared libraries to specify additional information
 about the version hierarchy for the library being created.  This option
@@ -1949,8 +1962,8 @@ Second, don't forget to use @option{-Wl,-no-whole-archive} after your
 list of archives, because gcc will add its own list of archives to
 your link and you may not want this flag to affect those as well.
 
-@kindex --wrap
-@item --wrap @var{symbol}
+@kindex --wrap=@var{symbol}
+@item --wrap=@var{symbol}
 Use a wrapper function for @var{symbol}.  Any undefined reference to
 @var{symbol} will be resolved to @code{__wrap_@var{symbol}}.  Any
 undefined reference to @code{__real_@var{symbol}} will be resolved to

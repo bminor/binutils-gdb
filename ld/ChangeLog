@@ -1,3 +1,38 @@
+2009-02-24  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* ld.texinfo (Options): Correct typos in example.  Recommend
+	using joined forms of syntax for passing options with arguments 
+	from a driver.
+	(-a): Use consistent syntax for documenting option arguments.
+	Clean up indexing and markup.
+	(-A/--architecture): Likewise.
+	(-f/--auxiliary): Likewise.
+	(-F/--filter): Likewise.
+	(-fini): Likewise.
+	(-G/--gpsize): Likewise.
+	(-h/-soname):Likewise.
+	(-init): Likewise.
+	(-l/--library): Likewise.
+	(-L/--library-path): Likewise.
+	(-m): Likewise.
+	(--defsym): Likewise.
+	(-I/--dynamic-linker): Likewise.
+	(-Map): Likewise.
+	(--oformat): Likewise.
+	(--retain-symbols-file): Likewise.
+	(-rpath): Likewise.
+	(-rpath-link): Likewise.
+	(--sort-common): Likewise.
+	(--sort-section): Likewise.
+	(--split-by-file): Likewise.
+	(--split-by-reloc): Likewise.
+	(--sysroot): Likewise.
+	(--section-start): Likewise.
+	(-Tbss, -Tdata, -Ttext): Likewise.
+	(-Ttext-segment): Likewise.
+	(--version-script): Likewise.
+	(--wrap): Likewise.
+
 2009-02-18  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld.texinfo:  Update to mention long section name options.
