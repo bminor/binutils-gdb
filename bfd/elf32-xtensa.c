@@ -5478,12 +5478,20 @@ text_action_add (text_action_list *l,
   for (m_p = &l->head; *m_p && (*m_p)->offset <= offset; m_p = &(*m_p)->next)
     {
       text_action *t = *m_p;
-      /* When the action is another fill at the same address,
-	 just increase the size.  */
-      if (t->offset == offset && t->action == ta_fill && action == ta_fill)
+      
+      if (action == ta_fill) 
 	{
-	  t->removed_bytes += removed;
-	  return;
+	  /* When the action is another fill at the same address,
+	     just increase the size.  */
+	  if (t->offset == offset && t->action == ta_fill)
+	    {
+	      t->removed_bytes += removed;
+	      return;
+	    }
+	  /* Fills need to happen before widens so that we don't
+	     insert fill bytes into the instruction stream.  */
+	  if (t->offset == offset && t->action == ta_widen_insn)
+	    break;
 	}
     }
 
