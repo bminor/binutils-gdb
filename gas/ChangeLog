@@ -1,3 +1,8 @@
+2009-02-24  Helge Deller <deller@gmx.de>
+
+	* gas/config/tc-hppa.c (pa_ip): Add check of immediate values.
+	(SAVE_IMMEDIATE): New define.
+
 2009-02-23  Mark Mitchell  <mark@codesourcery.com>
 
 	* config/tc-arm.c (warn_deprecated_sp): New macro.
