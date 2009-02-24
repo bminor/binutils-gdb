@@ -3,34 +3,35 @@
 
 Disassembly of section .text:
 
-00001000 <__bar2_veneer>:
-    1000:	e51ff004 	ldr	pc, \[pc, #-4\]	; 1004 <__bar2_veneer\+0x4>
-    1004:	02003024 	.word	0x02003024
-00001008 <__bar_from_arm>:
-    1008:	e59fc000 	ldr	ip, \[pc, #0\]	; 1010 <__bar_from_arm\+0x8>
-    100c:	e12fff1c 	bx	ip
-    1010:	02003021 	.word	0x02003021
-00001014 <__bar3_veneer>:
-    1014:	e51ff004 	ldr	pc, \[pc, #-4\]	; 1018 <__bar3_veneer\+0x4>
-    1018:	02003028 	.word	0x02003028
-0000101c <__bar4_from_arm>:
-    101c:	e59fc000 	ldr	ip, \[pc, #0\]	; 1024 <__bar4_from_arm\+0x8>
-    1020:	e12fff1c 	bx	ip
-    1024:	0200302d 	.word	0x0200302d
-00001028 <__bar5_from_arm>:
-    1028:	e59fc000 	ldr	ip, \[pc, #0\]	; 1030 <__bar5_from_arm\+0x8>
-    102c:	e12fff1c 	bx	ip
-    1030:	0200302f 	.word	0x0200302f
+00001000 <_start>:
+    1000:	eb000007 	bl	1024 <__bar_from_arm>
+    1004:	eb00000c 	bl	103c <__bar2_veneer>
+
+00001008 <myfunc>:
+    1008:	eb00000d 	bl	1044 <__bar3_veneer>
+    100c:	eb000007 	bl	1030 <__bar4_from_arm>
+    1010:	eb000000 	bl	1018 <__bar5_from_arm>
+    1014:	00000000 	andeq	r0, r0, r0
+
+00001018 <__bar5_from_arm>:
+    1018:	e59fc000 	ldr	ip, \[pc, #0\]	; 1020 <__bar5_from_arm\+0x8>
+    101c:	e12fff1c 	bx	ip
+    1020:	0200302f 	.word	0x0200302f
+00001024 <__bar_from_arm>:
+    1024:	e59fc000 	ldr	ip, \[pc, #0\]	; 102c <__bar_from_arm\+0x8>
+    1028:	e12fff1c 	bx	ip
+    102c:	02003021 	.word	0x02003021
+00001030 <__bar4_from_arm>:
+    1030:	e59fc000 	ldr	ip, \[pc, #0\]	; 1038 <__bar4_from_arm\+0x8>
+    1034:	e12fff1c 	bx	ip
+    1038:	0200302d 	.word	0x0200302d
+0000103c <__bar2_veneer>:
+    103c:	e51ff004 	ldr	pc, \[pc, #-4\]	; 1040 <__bar2_veneer\+0x4>
+    1040:	02003024 	.word	0x02003024
+00001044 <__bar3_veneer>:
+    1044:	e51ff004 	ldr	pc, \[pc, #-4\]	; 1048 <__bar3_veneer\+0x4>
+    1048:	02003028 	.word	0x02003028
 	...
-
-00001040 <_start>:
-    1040:	ebfffff0 	bl	1008 <__bar_from_arm>
-    1044:	ebffffed 	bl	1000 <__bar2_veneer>
-
-00001048 <myfunc>:
-    1048:	ebfffff1 	bl	1014 <__bar3_veneer>
-    104c:	ebfffff2 	bl	101c <__bar4_from_arm>
-    1050:	ebfffff4 	bl	1028 <__bar5_from_arm>
 Disassembly of section .foo:
 
 02003020 <bar>:

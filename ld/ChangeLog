@@ -1,3 +1,10 @@
+2009-02-24  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld.texinfo (ARM): Document changed meaning of --stub-group-size.
+	* emultempl/armelf.em (hook_in_stub): Insert after the input section.
+	(elf32_arm_add_stub_section): Update comment.
+	(PARSE_AND_LIST_OPTIONS): Update help for --stub-group-size.
+
 2009-02-24  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* ld.texinfo (Options): Correct typos in example.  Recommend

@@ -1,3 +1,22 @@
+2009-02-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armeabitests): Update duplicate test names.
+	Use normal output files for big-endian.
+	* ld-arm/farcall-arm-arm-be.d, ld-arm/farcall-thumb-arm-be.d: Delete.
+	* ld-arm/farcall-arm-arm-be8.d, ld-arm/farcall-arm-arm-pic-veneer.d,
+	ld-arm/farcall-arm-arm.d, ld-arm/farcall-arm-thumb-blx-pic-veneer.d,
+	ld-arm/farcall-arm-thumb-blx.d, ld-arm/farcall-arm-thumb-pic-veneer.d,
+	ld-arm/farcall-arm-thumb.d, ld-arm/farcall-group-size2.d,
+	ld-arm/farcall-group.d, ld-arm/farcall-mix.d, ld-arm/farcall-mix2.d,
+	ld-arm/farcall-thumb-arm-be8.d,
+	ld-arm/farcall-thumb-arm-blx-pic-veneer.d,
+	ld-arm/farcall-thumb-arm-blx.d, ld-arm/farcall-thumb-arm-short.d,
+	ld-arm/farcall-thumb-arm.d,
+	ld-arm/farcall-thumb-thumb-blx-pic-veneer.d,
+	ld-arm/farcall-thumb-thumb-blx.d, ld-arm/farcall-thumb-thumb-m.d,
+	ld-arm/farcall-thumb-thumb.d, ld-arm/thumb2-bl-as-thumb1-bad.d,
+	ld-arm/thumb2-bl-bad.d: Update for moved stubs.
+
 2009-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (armeabitests): Run new tests.  Correct BE8 output

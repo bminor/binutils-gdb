@@ -1,3 +1,11 @@
+2009-02-24  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf32-arm.c (PREV_SEC): Update comment.
+	(group_sections): Rename argument to stubs_always_after_branch.
+	Reverse the list and place stubs at the end of input sections.
+	Undefine NEXT_SEC.
+	(elf32_arm_size_stubs): Update to use stubs_always_after_branch.
+
 2009-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (arm_build_one_stub): Initialize stub_reloc_offset.

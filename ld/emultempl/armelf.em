@@ -213,9 +213,9 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 	  if (l->input_section.section == info->input_section)
 	    {
 	      /* We've found our section.  Insert the stub immediately
-		 before its associated input section.  */
-	      *lp = info->add.head;
-	      *(info->add.tail) = l;
+		 after its associated input section.  */
+	      *(info->add.tail) = l->header.next;
+	      l->header.next = info->add.head;
 	      return TRUE;
 	    }
 	  break;
@@ -244,7 +244,7 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 /* Call-back for elf32_arm_size_stubs.  */
 
 /* Create a new stub section, and arrange for it to be linked
-   immediately before INPUT_SECTION.  */
+   immediately after INPUT_SECTION.  */
 
 static asection *
 elf32_arm_add_stub_section (const char *stub_sec_name,
@@ -541,7 +541,7 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
    --stub-group-size=N   Maximum size of a group of input sections that can be\n\
                            handled by one stub section.  A negative value\n\
-                           locates all stubs before their branches (with a\n\
+                           locates all stubs after their branches (with a\n\
                            group size of -N), while a positive value allows\n\
                            two groups of input sections, one before, and one\n\
                            after each stub section.  Values of +/-1 indicate\n\

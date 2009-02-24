@@ -3417,7 +3417,7 @@ elf32_arm_next_input_section (struct bfd_link_info *info,
 	  /* Steal the link_sec pointer for our list.  */
 #define PREV_SEC(sec) (htab->stub_group[(sec)->id].link_sec)
 	  /* This happens to make the list in reverse order,
-	     which is what we want.  */
+	     which we reverse later.  */
 	  PREV_SEC (isec) = *list;
 	  *list = isec;
 	}
@@ -3426,7 +3426,7 @@ elf32_arm_next_input_section (struct bfd_link_info *info,
 
 /* See whether we can group stub sections together.  Grouping stub
    sections may result in fewer stubs.  More importantly, we need to
-   put all .init* and .fini* stubs at the beginning of the .init or
+   put all .init* and .fini* stubs at the end of the .init or
    .fini output sections respectively, because glibc splits the
    _init and _fini functions into multiple parts.  Putting a stub in
    the middle of a function is not a good idea.  */
@@ -3434,66 +3434,86 @@ elf32_arm_next_input_section (struct bfd_link_info *info,
 static void
 group_sections (struct elf32_arm_link_hash_table *htab,
 		bfd_size_type stub_group_size,
-		bfd_boolean stubs_always_before_branch)
+		bfd_boolean stubs_always_after_branch)
 {
-  asection **list = htab->input_list + htab->top_index;
+  asection **list = htab->input_list;
 
   do
     {
       asection *tail = *list;
+      asection *head;
+      asection *tp;
 
       if (tail == bfd_abs_section_ptr)
 	continue;
 
-      while (tail != NULL)
+      /* Reverse the list: we must avoid placing stubs at the
+	 beginning of the section because the beginning of the text
+	 section may be required for an interrupt vector in bare metal
+	 code.  */
+#define NEXT_SEC PREV_SEC
+      head = tail;
+      tp = NULL;
+      for (;;)
+	{
+	  asection *h = PREV_SEC (head);
+	  NEXT_SEC (head) = tp;
+	  if (h == NULL)
+	    break;
+	  tp = head;
+	  head = h;
+	}
+
+      while (head != NULL)
 	{
 	  asection *curr;
-	  asection *prev;
+	  asection *next;
 	  bfd_size_type total;
 
-	  curr = tail;
-	  total = tail->size;
-	  while ((prev = PREV_SEC (curr)) != NULL
-		 && ((total += curr->output_offset - prev->output_offset)
+	  curr = head;
+	  total = head->size;
+	  while ((next = NEXT_SEC (curr)) != NULL
+		 && ((total += next->output_offset - curr->output_offset)
 		     < stub_group_size))
-	    curr = prev;
+	    curr = next;
 
-	  /* OK, the size from the start of CURR to the end is less
+	  /* OK, the size from the start to the start of CURR is less
 	     than stub_group_size and thus can be handled by one stub
-	     section.  (Or the tail section is itself larger than
+	     section.  (Or the head section is itself larger than
 	     stub_group_size, in which case we may be toast.)
 	     We should really be keeping track of the total size of
 	     stubs added here, as stubs contribute to the final output
 	     section size.  */
 	  do
 	    {
-	      prev = PREV_SEC (tail);
+	      next = NEXT_SEC (head);
 	      /* Set up this stub group.  */
-	      htab->stub_group[tail->id].link_sec = curr;
+	      htab->stub_group[head->id].link_sec = curr;
 	    }
-	  while (tail != curr && (tail = prev) != NULL);
+	  while (head != curr && (head = next) != NULL);
 
 	  /* But wait, there's more!  Input sections up to stub_group_size
-	     bytes before the stub section can be handled by it too.  */
-	  if (!stubs_always_before_branch)
+	     bytes after the stub section can be handled by it too.  */
+	  if (!stubs_always_after_branch)
 	    {
 	      total = 0;
-	      while (prev != NULL
-		     && ((total += tail->output_offset - prev->output_offset)
+	      while (next != NULL
+		     && ((total += next->output_offset - head->output_offset)
 			 < stub_group_size))
 		{
-		  tail = prev;
-		  prev = PREV_SEC (tail);
-		  htab->stub_group[tail->id].link_sec = curr;
+		  head = next;
+		  next = NEXT_SEC (head);
+		  htab->stub_group[head->id].link_sec = curr;
 		}
 	    }
-	  tail = prev;
+	  head = next;
 	}
     }
-  while (list-- != htab->input_list);
+  while (list++ != htab->input_list + htab->top_index);
 
   free (htab->input_list);
 #undef PREV_SEC
+#undef NEXT_SEC
 }
 
 /* Determine and set the size of the stub section for a final link.
@@ -3511,7 +3531,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		      void (*layout_sections_again) (void))
 {
   bfd_size_type stub_group_size;
-  bfd_boolean stubs_always_before_branch;
+  bfd_boolean stubs_always_after_branch;
   bfd_boolean stub_changed = 0;
   struct elf32_arm_link_hash_table *htab = elf32_arm_hash_table (info);
 
@@ -3524,7 +3544,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
   htab->stub_bfd = stub_bfd;
   htab->add_stub_section = add_stub_section;
   htab->layout_sections_again = layout_sections_again;
-  stubs_always_before_branch = group_size < 0;
+  stubs_always_after_branch = group_size < 0;
   if (group_size < 0)
     stub_group_size = -group_size;
   else
@@ -3544,7 +3564,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
       stub_group_size = 4170000;
     }
 
-  group_sections (htab, stub_group_size, stubs_always_before_branch);
+  group_sections (htab, stub_group_size, stubs_always_after_branch);
 
   while (1)
     {

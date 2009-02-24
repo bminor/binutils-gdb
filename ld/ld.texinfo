@@ -5826,7 +5826,7 @@ where they should be placed.
 
 The value of @samp{N}, the parameter to the
 @option{--stub-group-size=} option controls where the stub groups are
-placed.  If it is negative then all stubs are placed before the first
+placed.  If it is negative then all stubs are placed after the first
 branch that needs them.  If it is positive then the stubs can be
 placed either before or after the branches that need them.  If the
 value of @samp{N} is 1 (either +1 or -1) then the linker will choose
