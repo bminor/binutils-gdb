@@ -1,4 +1,4 @@
-2009-18-02  Dave Korn  <dave.korn.cygwin@gmail.com>
+2009-02-18  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld.texinfo:  Update to mention long section name options.
 	* NEWS:  Mention new behaviour and command-line options.
