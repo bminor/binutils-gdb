@@ -1,3 +1,11 @@
+2009-02-24  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix windows-nat.c compilation failure.
+
+	* windows-nat.c (windows_thread_alive): Fix forward declaration.
+	(get_windows_debug_event): Add ops parameter to call to windows_resume.
+
+
 2009-02-23  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote-sim.c (gdbsim_resume): Add target_ops* argument.

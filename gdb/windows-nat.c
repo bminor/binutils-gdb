@@ -113,7 +113,7 @@ static int debug_registers_used;
 #define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf_unfiltered x
 
 static void windows_stop (ptid_t);
-static int windows_thread_alive (ptid_t);
+static int windows_thread_alive (struct target_ops *, ptid_t);
 static void windows_kill_inferior (void);
 
 static enum target_signal last_sig = TARGET_SIGNAL_0;
@@ -1432,7 +1432,7 @@ get_windows_debug_event (struct target_ops *ops,
   if (!retval || saw_create != 1)
     {
       if (continue_status == -1)
-	windows_resume (minus_one_ptid, 0, 1);
+	windows_resume (ops, minus_one_ptid, 0, 1);
       else
 	CHECK (windows_continue (continue_status, -1));
     }
