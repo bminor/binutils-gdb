@@ -6140,6 +6140,14 @@ parse_operands (char *str, const unsigned char *pattern)
      }							\
   while (0)
 
+/* If REG is R13 (the stack pointer), warn that its use is
+   deprecated.  */
+#define warn_deprecated_sp(reg)			\
+  do						\
+    if (warn_on_deprecated && reg == REG_SP)	\
+       as_warn (_("use of r13 is deprecated"));	\
+  while (0)
+
 /* Functions for operand encoding.  ARM, then Thumb.  */
 
 #define rotate_left(v, n) (v << n | v >> (32 - n))
@@ -9690,7 +9698,18 @@ do_t_mov_cmp (void)
       if (opcode == T_MNEM_cmp)
 	{
 	  constraint (Rn == REG_PC, BAD_PC);
-	  reject_bad_reg (Rm);
+	  if (narrow)
+	    {
+	      /* In the Thumb-2 ISA, use of R13 as Rm is deprecated,
+		 but valid.  */
+	      warn_deprecated_sp (Rm);
+	      /* R15 was documented as a valid choice for Rm in ARMv6,
+		 but as UNPREDICTABLE in ARMv7.  ARM's proprietary
+		 tools reject R15, so we do too.  */
+	      constraint (Rm == REG_PC, BAD_PC);
+	    }
+	  else
+	    reject_bad_reg (Rm);
 	}
       else if (opcode == T_MNEM_mov
 	       || opcode == T_MNEM_movs)

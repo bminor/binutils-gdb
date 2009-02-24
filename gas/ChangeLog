@@ -1,3 +1,9 @@
+2009-02-23  Mark Mitchell  <mark@codesourcery.com>
+
+	* config/tc-arm.c (warn_deprecated_sp): New macro.
+	(do_t_mov_cmp): Permit R13 as the second
+	argument to "cmp.n".
+
 2009-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (type_names): Add OPERAND_TYPE_REGYMM.

@@ -76,6 +76,10 @@
 [^:]*:[0-9]+: Error: r15 not allowed here -- `cmn.w r0,r15'
 [^:]*:[0-9]+: Error: r15 not allowed here -- `cmp.w r15,#1'
 [^:]*:[0-9]+: Error: r15 not allowed here -- `cmp r15,r0'
+[^:]*:[0-9]+: Warning: use of r13 is deprecated
+[^:]*:[0-9]+: Error: r15 not allowed here -- `cmp r0,r15'
+[^:]*:[0-9]+: Warning: use of r13 is deprecated
+[^:]*:[0-9]+: Error: r15 not allowed here -- `cmp.n r0,r15'
 [^:]*:[0-9]+: Error: r15 not allowed here -- `cmp.w r15,r0'
 [^:]*:[0-9]+: Error: r13 not allowed here -- `cmp.w r0,r13'
 [^:]*:[0-9]+: Error: r15 not allowed here -- `cmp.w r0,r15'

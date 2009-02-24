@@ -1,3 +1,9 @@
+2009-02-23  Mark Mitchell  <mark@codesourcery.com>
+
+	* gas/arm/thumb2_bad_reg.s: Update to allow R13 as second argument
+	for CMP.
+	* gas/arm/thumb2_bad_reg.l: Adjust accordingly.
+
 2009-02-19  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/e500mc.d ("lfdepx", "stfdepx"): Fix tests to expect a

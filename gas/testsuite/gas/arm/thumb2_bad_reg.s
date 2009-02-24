@@ -114,6 +114,10 @@ test:
 	@ CMP (register)
 	cmp r13, r0			@ OK
 	cmp r15, r0
+	cmp r0, r13                     @ Deprecated
+	cmp r0, r15                     
+	cmp.n r0, r13                   @ Deprecated
+	cmp.n r0, r15                   
 	cmp.w r13, r0			@ OK
 	cmp.w r15, r0
 	cmp.w r0, r13
