@@ -2089,13 +2089,25 @@ static const insn_sequence elf32_arm_stub_short_branch_v4t_thumb_arm[] =
     ARM_REL_INSN(0xea000000, -8),     /* b    (X-8) */
   };
 
-/* ARM/Thumb -> ARM/Thumb long branch stub, PIC. On V5T and above, use
+/* ARM/Thumb -> ARM long branch stub, PIC.  On V5T and above, use
    blx to reach the stub if necessary.  */
-static const insn_sequence elf32_arm_stub_long_branch_any_any_pic[] =
+static const insn_sequence elf32_arm_stub_long_branch_any_arm_pic[] =
   {
     ARM_INSN(0xe59fc000),             /* ldr   r12, [pc] */
     ARM_INSN(0xe08ff00c),             /* add   pc, pc, ip */
     DATA_WORD(0, R_ARM_REL32, -4),    /* dcd   R_ARM_REL32(X-4) */
+  };
+
+/* ARM/Thumb -> Thumb long branch stub, PIC.  On V5T and above, use
+   blx to reach the stub if necessary.  We can not add into pc;
+   it is not guaranteed to mode switch (different in ARMv6 and
+   ARMv7).  */
+static const insn_sequence elf32_arm_stub_long_branch_any_thumb_pic[] =
+  {
+    ARM_INSN(0xe59fc004),             /* ldr   r12, [pc, #4] */
+    ARM_INSN(0xe08fc00c),             /* add   ip, pc, ip */
+    ARM_INSN(0xe12fff1c),             /* bx    ip */
+    DATA_WORD(0, R_ARM_REL32, 0),     /* dcd   R_ARM_REL32(X) */
   };
 
 /* Section name for stubs is the associated section name plus this
@@ -2110,7 +2122,8 @@ enum elf32_arm_stub_type
   arm_stub_long_branch_thumb_only,
   arm_stub_long_branch_v4t_thumb_arm,
   arm_stub_short_branch_v4t_thumb_arm,
-  arm_stub_long_branch_any_any_pic,
+  arm_stub_long_branch_any_arm_pic,
+  arm_stub_long_branch_any_thumb_pic,
 };
 
 struct elf32_arm_stub_hash_entry
@@ -2858,7 +2871,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 		    /* PIC stubs.  */
 		    ? ((globals->use_blx)
 		       /* V5T and above.  */
-		       ? arm_stub_long_branch_any_any_pic
+		       ? arm_stub_long_branch_any_thumb_pic
 		       /* not yet supported on V4T.  */
 		       : arm_stub_none)
 
@@ -2895,7 +2908,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 		/* PIC stubs.  */
 		? ((globals->use_blx)
 		   /* V5T and above.  */
-		   ? arm_stub_long_branch_any_any_pic
+		   ? arm_stub_long_branch_any_arm_pic
 		   /* not yet supported on V4T.  */
 		   : arm_stub_none)
 
@@ -2938,7 +2951,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 	    {
 	      stub_type = (info->shared | globals->pic_veneer)
 		/* PIC stubs.  */
-		? arm_stub_long_branch_any_any_pic
+		? arm_stub_long_branch_any_thumb_pic
 		/* non-PIC stubs.  */
 		: ((globals->use_blx)
 		   /* V5T and above.  */
@@ -2955,7 +2968,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 	    {
 	      stub_type = (info->shared | globals->pic_veneer)
 		/* PIC stubs.  */
-		? arm_stub_long_branch_any_any_pic
+		? arm_stub_long_branch_any_arm_pic
 		/* non-PIC stubs.  */
 		: arm_stub_long_branch_any_any;
 	    }
@@ -3277,9 +3290,13 @@ arm_size_one_stub (struct bfd_hash_entry *gen_entry,
       template =  elf32_arm_stub_short_branch_v4t_thumb_arm;
       template_size = sizeof (elf32_arm_stub_short_branch_v4t_thumb_arm) / sizeof (insn_sequence);
       break;
-    case arm_stub_long_branch_any_any_pic:
-      template = elf32_arm_stub_long_branch_any_any_pic;
-      template_size = sizeof (elf32_arm_stub_long_branch_any_any_pic) / sizeof (insn_sequence);
+    case arm_stub_long_branch_any_arm_pic:
+      template = elf32_arm_stub_long_branch_any_arm_pic;
+      template_size = sizeof (elf32_arm_stub_long_branch_any_arm_pic) / sizeof (insn_sequence);
+      break;
+    case arm_stub_long_branch_any_thumb_pic:
+      template = elf32_arm_stub_long_branch_any_thumb_pic;
+      template_size = sizeof (elf32_arm_stub_long_branch_any_thumb_pic) / sizeof (insn_sequence);
       break;
     default:
       BFD_FAIL ();

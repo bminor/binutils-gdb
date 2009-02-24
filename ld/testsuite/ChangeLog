@@ -1,5 +1,12 @@
 2009-02-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* ld-arm/farcall-arm-thumb-blx-pic-veneer.d,
+	ld-arm/farcall-arm-thumb-pic-veneer.d,
+	ld-arm/farcall-thumb-thumb-blx-pic-veneer.d: Update for fixed
+	Thumb PIC stub.
+
+2009-02-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* ld-arm/arm-elf.exp (armeabitests): Update duplicate test names.
 	Use normal output files for big-endian.
 	* ld-arm/farcall-arm-arm-be.d, ld-arm/farcall-thumb-arm-be.d: Delete.
