@@ -3151,7 +3151,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   int i;
   struct elf32_arm_link_hash_table * globals;
   int stub_reloc_idx = -1;
-  int stub_reloc_offset;
+  int stub_reloc_offset = 0;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
@@ -3183,7 +3183,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   size = 0;
   for (i = 0; i < template_size; i++)
     {
-      switch(template[i].type)
+      switch (template[i].type)
 	{
 	case THUMB16_TYPE:
 	  put_thumb_insn (globals, stub_bfd, template[i].data, loc + size);
@@ -3284,13 +3284,12 @@ arm_size_one_stub (struct bfd_hash_entry *gen_entry,
     default:
       BFD_FAIL ();
       return FALSE;
-      break;
     }
 
   size = 0;
   for (i = 0; i < template_size; i++)
     {
-      switch(template[i].type)
+      switch (template[i].type)
 	{
 	case THUMB16_TYPE:
 	  size += 2;
@@ -11716,7 +11715,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
   stub_name = stub_entry->output_name;
 
   template = stub_entry->stub_template;
-  switch(template[0].type)
+  switch (template[0].type)
     {
     case ARM_TYPE:
       if (!elf32_arm_output_stub_sym (osi, stub_name, addr, stub_entry->stub_size))
@@ -11729,13 +11728,14 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
       break;
     default:
       BFD_FAIL ();
+      return FALSE;
     }
 
   prev_type = DATA_TYPE;
   size = 0;
   for (i = 0; i < stub_entry->stub_template_size; i++)
     {
-      switch(template[i].type)
+      switch (template[i].type)
 	{
 	case ARM_TYPE:
 	  sym_type = ARM_MAP_ARM;
@@ -11751,6 +11751,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
 
 	default:
 	  BFD_FAIL ();
+	  return FALSE;
 	}
 
       if (template[i].type != prev_type)
@@ -11760,7 +11761,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
 	    return FALSE;
 	}
 
-      switch(template[i].type)
+      switch (template[i].type)
 	{
 	case ARM_TYPE:
 	  size += 4;
@@ -11776,6 +11777,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
 
 	default:
 	  BFD_FAIL ();
+	  return FALSE;
 	}
     }
 

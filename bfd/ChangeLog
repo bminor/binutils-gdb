@@ -1,4 +1,11 @@
-2009-02-20  Christophe Lyon  <christophe.lyon@st.com>
+2009-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (arm_build_one_stub): Initialize stub_reloc_offset.
+	Fix formatting.
+	(arm_size_one_stub): Remove unnecessary break.
+	(arm_map_one_stub): Fix formatting.  Return after BFD_FAIL.
+
+2009-02-23  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (stub_insn_type): New type.
 	(stub_reloc_type): Likewise.
