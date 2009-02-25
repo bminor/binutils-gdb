@@ -1,3 +1,10 @@
+2009-02-25  Christophe Lyon  <christophe.lyon@st.com>
+
+	testsuite/
+	* ld-arm/thumb2-bl-as-thumb1-bad-noeabi.d: Update expected result,
+	as stubs are now generated and the end of the .text section.
+	* ld-arm/thumb2-bl-bad-noeabi.d: Likewise.
+
 2009-02-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/farcall-arm-thumb-blx-pic-veneer.d,
