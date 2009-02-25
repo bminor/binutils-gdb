@@ -1,3 +1,8 @@
+2009-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (elf_find_function): Use is_function_type to check
+	function symbol.
+
 2009-02-24  Sterling Augustine  <sterling@jaw.hq.tensilica.com>
 
 	* xtensa-modules.c: Revert to previous version 1.11 due

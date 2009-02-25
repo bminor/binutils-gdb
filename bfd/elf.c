@@ -7041,7 +7041,7 @@ _bfd_elf_set_arch_mach (bfd *abfd,
    for error reporting.  */
 
 static bfd_boolean
-elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
+elf_find_function (bfd *abfd,
 		   asection *section,
 		   asymbol **symbols,
 		   bfd_vma offset,
@@ -7061,6 +7061,7 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
      make a better choice of file name for local symbols by ignoring
      file symbols appearing after a given local symbol.  */
   enum { nothing_seen, symbol_seen, file_after_symbol_seen } state;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   filename = NULL;
   func = NULL;
@@ -7071,20 +7072,22 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
   for (p = symbols; *p != NULL; p++)
     {
       elf_symbol_type *q;
+      unsigned int type;
 
       q = (elf_symbol_type *) *p;
 
-      switch (ELF_ST_TYPE (q->internal_elf_sym.st_info))
+      type = ELF_ST_TYPE (q->internal_elf_sym.st_info);
+      switch (type)
 	{
-	default:
-	  break;
 	case STT_FILE:
 	  file = &q->symbol;
 	  if (state == symbol_seen)
 	    state = file_after_symbol_seen;
 	  continue;
+	default:
+	  if (!bed->is_function_type (type))
+	    break;
 	case STT_NOTYPE:
-	case STT_FUNC:
 	  if (bfd_get_section (&q->symbol) == section
 	      && q->symbol.value >= low_func
 	      && q->symbol.value <= offset)
