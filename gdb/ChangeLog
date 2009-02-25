@@ -1,5 +1,8 @@
 2009-02-25  Doug Evans  <dje@google.com>
 
+	* breakpoint.c (disable_breakpoints_in_shlibs): Delete local
+	disabled_shlib_breaks, unused.
+
 	* printcmd.c (build_address_symbolic): Fix comment.
 
 2009-02-25  Hui Zhu  <teawater@gmail.com>

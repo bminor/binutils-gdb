@@ -4424,7 +4424,6 @@ void
 disable_breakpoints_in_shlibs (void)
 {
   struct bp_location *loc;
-  int disabled_shlib_breaks = 0;
 
   ALL_BP_LOCATIONS (loc)
   {
