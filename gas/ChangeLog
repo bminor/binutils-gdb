@@ -1,3 +1,7 @@
+2009-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (fits_in_imm4): Removed.
+
 2009-02-24  Helge Deller <deller@gmx.de>
 
 	* config/tc-hppa.c (pa_ip): Add check of immediate values.

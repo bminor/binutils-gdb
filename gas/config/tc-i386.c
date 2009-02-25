@@ -1673,12 +1673,6 @@ fits_in_unsigned_long (offsetT num ATTRIBUTE_UNUSED)
 #endif
 }				/* fits_in_unsigned_long() */
 
-static INLINE int
-fits_in_imm4 (offsetT num)
-{
-  return (num & 0xf) == num;
-}
-
 static i386_operand_type
 smallest_imm_type (offsetT num)
 {
