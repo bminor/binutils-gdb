@@ -1,6 +1,6 @@
 2009-02-24  Helge Deller <deller@gmx.de>
 
-	* gas/config/tc-hppa.c (pa_ip): Add check of immediate values.
+	* config/tc-hppa.c (pa_ip): Add check of immediate values.
 	(SAVE_IMMEDIATE): New define.
 
 2009-02-23  Mark Mitchell  <mark@codesourcery.com>
@@ -362,13 +362,13 @@
 
 2009-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* gas/config/tc-i386.c (cpu_arch): Add corei7, .clflush and
+	* config/tc-i386.c (cpu_arch): Add corei7, .clflush and
 	.syscall.
 	(i386_align_code): Handle PROCESSOR_COREI7.
 	(md_show_usage): Add corei7, clflush and syscall.
 	(i386_target_format): Replace cpup4 with cpuclflush.
 
-	* gas/config/tc-i386.h (processor_type): Add PROCESSOR_COREI7.
+	* config/tc-i386.h (processor_type): Add PROCESSOR_COREI7.
 
 	* doc/c-i386.texi: Document corei7, clflush and syscall.
 
