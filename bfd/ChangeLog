@@ -69,6 +69,8 @@
 	(arm_map_one_stub): Likewise.
 
 2009-02-23  Tristan Gingold  <gingold@adacore.com>
+	    Eric Botcazou  <ebotcazou@adacore.com>
+	    Douglas B Rupp  <rupp@gnat.com>
 
 	* vms.h: Update copyright year, fix comments, reorder declarations.
 	(_bfd_save_vms_section): Remove the prototype.
