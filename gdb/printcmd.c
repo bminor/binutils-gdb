@@ -604,7 +604,7 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
   struct obj_section *section = NULL;
   char *name_temp = "";
   
-  /* Let's say it is unmapped.  */
+  /* Let's say it is mapped (not unmapped).  */
   *unmapped = 0;
 
   /* Determine if the address is in an overlay, and whether it is

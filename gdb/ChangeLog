@@ -1,3 +1,7 @@
+2009-02-25  Doug Evans  <dje@google.com>
+
+	* printcmd.c (build_address_symbolic): Fix comment.
+
 2009-02-25  Hui Zhu  <teawater@gmail.com>
 
 	* cli/cli-script.c (define_command): Add _() to query.
