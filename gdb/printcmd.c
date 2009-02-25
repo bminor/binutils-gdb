@@ -1482,7 +1482,7 @@ undisplay_command (char *args, int from_tty)
 
   if (args == 0)
     {
-      if (query ("Delete all auto-display expressions? "))
+      if (query (_("Delete all auto-display expressions? ")))
 	clear_displays ();
       dont_repeat ();
       return;

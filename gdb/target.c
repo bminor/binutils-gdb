@@ -341,7 +341,7 @@ kill_or_be_killed (int from_tty)
     {
       printf_unfiltered (_("You are already running a program:\n"));
       target_files_info ();
-      if (query ("Kill it? "))
+      if (query (_("Kill it? ")))
 	{
 	  target_kill ();
 	  if (target_has_execution)

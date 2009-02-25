@@ -611,7 +611,7 @@ irix_open_symbol_file_object (void *from_ttyp)
   char *filename;
 
   if (symfile_objfile)
-    if (!query ("Attempt to reload symbols from process? "))
+    if (!query (_("Attempt to reload symbols from process? ")))
       return 0;
 
   if ((debug_base = locate_base ()) == 0)

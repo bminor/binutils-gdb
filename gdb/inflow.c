@@ -607,7 +607,7 @@ kill_command (char *arg, int from_tty)
 
   if (ptid_equal (inferior_ptid, null_ptid))
     error (_("The program is not being run."));
-  if (!query ("Kill the program being debugged? "))
+  if (!query (_("Kill the program being debugged? ")))
     error (_("Not confirmed."));
   target_kill ();
 

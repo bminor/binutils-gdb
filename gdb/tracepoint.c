@@ -692,7 +692,7 @@ delete_trace_command (char *args, int from_tty)
     if (from_tty)		/* confirm only if from_tty...  */
       if (tracepoint_chain)	/* and if there are tracepoints to
 				   delete!  */
-	if (!query ("Delete all tracepoints? "))
+	if (!query (_("Delete all tracepoints? ")))
 	  return;
 
   map_args_over_tracepoints (args, from_tty, delete_op);

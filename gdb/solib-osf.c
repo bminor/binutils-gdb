@@ -584,7 +584,7 @@ osf_open_symbol_file_object (void *from_ttyp)
   int found;
 
   if (symfile_objfile)
-    if (!query ("Attempt to reload symbols from process? "))
+    if (!query (_("Attempt to reload symbols from process? ")))
       return 0;
 
   /* The first module after /sbin/loader is the main program.  */

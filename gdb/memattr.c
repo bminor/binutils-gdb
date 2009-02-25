@@ -690,7 +690,7 @@ mem_delete_command (char *args, int from_tty)
 
   if (p == 0)
     {
-      if (query ("Delete all memory regions? "))
+      if (query (_("Delete all memory regions? ")))
 	mem_clear ();
       dont_repeat ();
       return;

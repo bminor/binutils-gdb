@@ -696,7 +696,7 @@ som_open_symbol_file_object (void *from_ttyp)
   char buf[4];
 
   if (symfile_objfile)
-    if (!query ("Attempt to reload symbols from process? "))
+    if (!query (_("Attempt to reload symbols from process? ")))
       return 0;
 
   /* First link map member should be the executable.  */

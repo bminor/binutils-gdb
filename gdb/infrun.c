@@ -4637,8 +4637,8 @@ handle_command (char *args, int from_tty)
 	    case TARGET_SIGNAL_INT:
 	      if (!allsigs && !sigs[signum])
 		{
-		  if (query ("%s is used by the debugger.\n\
-Are you sure you want to change it? ", target_signal_to_name ((enum target_signal) signum)))
+		  if (query (_("%s is used by the debugger.\n\
+Are you sure you want to change it? "), target_signal_to_name ((enum target_signal) signum)))
 		    {
 		      sigs[signum] = 1;
 		    }

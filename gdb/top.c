@@ -1183,11 +1183,11 @@ quit_confirm (void)
          see if a GUI is running.  The `use_windows' variable doesn't
          cut it.  */
       if (deprecated_init_ui_hook)
-	s = "A debugging session is active.\nDo you still want to close the debugger?";
+	s = _("A debugging session is active.\nDo you still want to close the debugger?");
       else if (inf->attach_flag)
-	s = "The program is running.  Quit anyway (and detach it)? ";
+	s = _("The program is running.  Quit anyway (and detach it)? ");
       else
-	s = "The program is running.  Quit anyway (and kill it)? ";
+	s = _("The program is running.  Quit anyway (and kill it)? ");
 
       if (!query ("%s", s))
 	return 0;

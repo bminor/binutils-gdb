@@ -2142,8 +2142,8 @@ mips_kill (void)
 
       target_terminal_ours ();
 
-      if (query ("Interrupted while waiting for the program.\n\
-Give up (and stop debugging it)? "))
+      if (query (_("Interrupted while waiting for the program.\n\
+Give up (and stop debugging it)? ")))
 	{
 	  /* Clean up in such a way that mips_close won't try to talk to the
 	     board (it almost surely won't work since we weren't able to talk to

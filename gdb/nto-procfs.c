@@ -593,8 +593,8 @@ interrupt_query (void)
 {
   target_terminal_ours ();
 
-  if (query ("Interrupted while waiting for the program.\n\
-Give up (and stop debugging it)? "))
+  if (query (_("Interrupted while waiting for the program.\n\
+Give up (and stop debugging it)? ")))
     {
       target_mourn_inferior ();
       deprecated_throw_reason (RETURN_QUIT);

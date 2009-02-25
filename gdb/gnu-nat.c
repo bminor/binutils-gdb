@@ -854,8 +854,8 @@ inf_validate_task_sc (struct inf *inf)
       int abort;
 
       target_terminal_ours ();	/* Allow I/O.  */
-      abort = !query ("Pid %d has an additional task suspend count of %d;"
-		      " clear it? ", inf->pid,
+      abort = !query (_("Pid %d has an additional task suspend count of %d;"
+		      " clear it? "), inf->pid,
 		      suspend_count - inf->task->cur_sc);
       target_terminal_inferior ();	/* Give it back to the child.  */
 

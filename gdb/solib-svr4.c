@@ -845,7 +845,7 @@ open_symbol_file_object (void *from_ttyp)
   struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
 
   if (symfile_objfile)
-    if (!query ("Attempt to reload symbols from process? "))
+    if (!query (_("Attempt to reload symbols from process? ")))
       return 0;
 
   /* Always locate the debug struct, in case it has moved.  */

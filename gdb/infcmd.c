@@ -441,8 +441,8 @@ kill_if_already_running (int from_tty)
       target_require_runnable ();
 
       if (from_tty
-	  && !query ("The program being debugged has been started already.\n\
-Start it from the beginning? "))
+	  && !query (_("The program being debugged has been started already.\n\
+Start it from the beginning? ")))
 	error (_("Program not restarted."));
       target_kill ();
     }
@@ -1029,7 +1029,7 @@ jump_command (char *arg, int from_tty)
   sfn = find_pc_function (sal.pc);
   if (fn != NULL && sfn != fn)
     {
-      if (!query ("Line %d is not in `%s'.  Jump anyway? ", sal.line,
+      if (!query (_("Line %d is not in `%s'.  Jump anyway? "), sal.line,
 		  SYMBOL_PRINT_NAME (fn)))
 	{
 	  error (_("Not confirmed."));
@@ -1043,7 +1043,7 @@ jump_command (char *arg, int from_tty)
       if (section_is_overlay (SYMBOL_OBJ_SECTION (sfn)) &&
 	  !section_is_mapped (SYMBOL_OBJ_SECTION (sfn)))
 	{
-	  if (!query ("WARNING!!!  Destination is in unmapped overlay!  Jump anyway? "))
+	  if (!query (_("WARNING!!!  Destination is in unmapped overlay!  Jump anyway? ")))
 	    {
 	      error (_("Not confirmed."));
 	      /* NOTREACHED */
@@ -2235,7 +2235,7 @@ attach_command (char *args, int from_tty)
     ;
   else if (target_has_execution)
     {
-      if (query ("A program is being debugged already.  Kill it? "))
+      if (query (_("A program is being debugged already.  Kill it? ")))
 	target_kill ();
       else
 	error (_("Not killed."));

@@ -3944,8 +3944,8 @@ interrupt_query (void)
     }
   else
     {
-      if (query ("Interrupted while waiting for the program.\n\
-Give up (and stop debugging it)? "))
+      if (query (_("Interrupted while waiting for the program.\n\
+Give up (and stop debugging it)? ")))
 	{
 	  pop_target ();
 	  deprecated_throw_reason (RETURN_QUIT);

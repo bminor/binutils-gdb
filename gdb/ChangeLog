@@ -1,3 +1,30 @@
+2009-02-25  Hui Zhu  <teawater@gmail.com>
+
+	* cli/cli-script.c (define_command): Add _() to query.
+	* gnu-nat.c (inf_validate_task_sc): Ditto.
+	* infcmd.c (kill_if_already_running): Ditto.
+	(jump_command): Ditto.
+	(attach_command): Ditto.
+	* inflow.c (kill_command): Ditto.
+	* infrun.c (handle_command): Ditto.
+	* maint.c (maintenance_dump_me): Ditto.
+	* memattr.c (mem_delete_command): Ditto.
+	* monitor.c (monitor_interrupt_query): Ditto.
+	* nto-procfs.c (interrupt_query): Ditto.
+	* printcmd.c (undisplay_command): Ditto.
+	* remote-mips.c (mips_kill): Ditto.
+	* remote.c (interrupt_query): Ditto.
+	* solib-irix.c (irix_open_symbol_file_object): Ditto.
+	* solib-osf.c (osf_open_symbol_file_object): Ditto.
+	* solib-pa64.c (pa64_open_symbol_file_object): Ditto.
+	* solib-som.c (som_open_symbol_file_object): Ditto.
+	* solib-svr4.c (open_symbol_file_object): Ditto.
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Ditto.
+	* target.c (kill_or_be_killed): Ditto.
+	* tracepoint.c (delete_trace_command): Ditto.
+	* top.c (quit_confirm): Add _() to s that will be used
+	in query.
+
 2009-02-24  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Fix windows-nat.c compilation failure.

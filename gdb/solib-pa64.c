@@ -529,7 +529,7 @@ pa64_open_symbol_file_object (void *from_ttyp)
   char *dll_path;
 
   if (symfile_objfile)
-    if (!query ("Attempt to reload symbols from process? "))
+    if (!query (_("Attempt to reload symbols from process? ")))
       return 0;
 
   /* Read in the load map pointer if we have not done so already.  */

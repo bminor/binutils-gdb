@@ -98,7 +98,7 @@ maintenance_command (char *args, int from_tty)
 static void
 maintenance_dump_me (char *args, int from_tty)
 {
-  if (query ("Should GDB dump core? "))
+  if (query (_("Should GDB dump core? ")))
     {
 #ifdef __DJGPP__
       /* SIGQUIT by default is ignored, so use SIGABRT instead.  */

@@ -1379,7 +1379,7 @@ define_command (char *comname, int from_tty)
 	{
 	  warning (_("Your new `%s' command does not hook any existing command."),
 		   comfull);
-	  if (!query ("Proceed? "))
+	  if (!query (_("Proceed? ")))
 	    error (_("Not confirmed."));
 	}
     }
