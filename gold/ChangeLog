@@ -1,3 +1,15 @@
+2009-02-25  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (Layout::choose_output_section): Don't rename sections
+	when using a linker script that has a SECTIONS clause.
+	* Makefile.in: Regenerate.
+
+	* testsuite/Makefile.am (script_test_5.sh): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/script_test_5.cc: New file.
+	* testsuite/script_test_5.sh: New file.
+	* testsuite/script_test_5.t: New file.
+
 2009-02-13  Rafael Avila de Espindola  <espindola@google.com>
 
 	* archive.cc (Archive::include_member): Update calls to add_symbols.

@@ -426,7 +426,9 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
   // output section.
 
   size_t len = strlen(name);
-  if (is_input_section && !parameters->options().relocatable())
+  if (is_input_section
+      && !this->script_options_->saw_sections_clause()
+      && !parameters->options().relocatable())
     name = Layout::output_section_name(name, &len);
 
   Stringpool::Key name_key;
