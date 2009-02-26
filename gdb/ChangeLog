@@ -1,5 +1,8 @@
 2009-02-25  Doug Evans  <dje@google.com>
 
+	* breakpoint.c (insert_bp_location): Add \n to overlay breakpoint
+	error message.
+
 	* breakpoint.c (disable_breakpoints_in_shlibs): Delete local
 	disabled_shlib_breaks, unused.
 

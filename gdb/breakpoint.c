@@ -1135,8 +1135,8 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 		  bpt->overlay_target_info.placed_address = addr;
 		  val = target_insert_breakpoint (&bpt->overlay_target_info);
 		  if (val != 0)
-		    fprintf_unfiltered (tmp_error_stream, 
-					"Overlay breakpoint %d failed: in ROM?", 
+		    fprintf_unfiltered (tmp_error_stream,
+					"Overlay breakpoint %d failed: in ROM?\n",
 					bpt->owner->number);
 		}
 	    }
