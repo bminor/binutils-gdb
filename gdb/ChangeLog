@@ -1,4 +1,12 @@
-2009-02-26  Pedro Alves  <pedro@codesourcery.com>
+2009-02-26  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/python-utils.c (python_string_to_unicode): Always return
+	a new reference.
+	(python_string_to_target_string): Decrement transient python
+	instance.
+	(python_string_to_host_string): Likewise.
+
+2007-02-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* mips-linux-nat.c (mips64_linux_fetch_registers): Pass `ops' to
 	call to super_fetch_registers.

@@ -81,7 +81,11 @@ python_string_to_unicode (PyObject *obj)
   /* If obj is already a unicode string, just return it.
      I wish life was always that simple...  */
   if (PyUnicode_Check (obj))
-    unicode_str = obj;
+    {
+      unicode_str = obj;
+      Py_INCREF (obj);
+    }
+  
   else if (PyString_Check (obj))
     unicode_str = PyUnicode_FromEncodedObject (obj, host_charset (), NULL);
   else
@@ -136,12 +140,15 @@ char *
 python_string_to_target_string (PyObject *obj)
 {
   PyObject *str;
+  char *result;
 
   str = python_string_to_unicode (obj);
   if (str == NULL)
     return NULL;
 
-  return unicode_to_target_string (str);
+  result = unicode_to_target_string (str);
+  Py_DECREF (str);
+  return result;
 }
 
 /* Converts a python string (8-bit or unicode) to a target string in
@@ -152,12 +159,15 @@ char *
 python_string_to_host_string (PyObject *obj)
 {
   PyObject *str;
+  char *result;
 
   str = python_string_to_unicode (obj);
   if (str == NULL)
     return NULL;
 
-  return unicode_to_encoded_string (str, host_charset ());
+  result = unicode_to_encoded_string (str, host_charset ()); 
+  Py_DECREF (str);
+  return result;
 }
 
 /* Converts a target string of LENGTH bytes in the target's charset to a
