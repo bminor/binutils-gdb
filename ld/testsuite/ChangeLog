@@ -1,6 +1,13 @@
+2009-02-26  Christophe Lyon  <christophe.lyon@st.com>
+
+	* ld-arm/arm-elf.exp: Add 3 tests for the 3 new stubs.
+	* ld-arm/farcall-thumb-arm-pic-veneer.d: New expected result, the
+	test is now expected to pass.
+	* ld-arm/farcall-thumb-thumb-m-pic-veneer.d: Likewise.
+	* ld-arm/farcall-thumb-thumb-pic-veneer.d: Likewise.
+
 2009-02-25  Christophe Lyon  <christophe.lyon@st.com>
 
-	testsuite/
 	* ld-arm/thumb2-bl-as-thumb1-bad-noeabi.d: Update expected result,
 	as stubs are now generated and the end of the .text section.
 	* ld-arm/thumb2-bl-bad-noeabi.d: Likewise.

@@ -2018,13 +2018,6 @@ enum stub_insn_type
     DATA_TYPE
   };
 
-enum stub_reloc_type
-  {
-    STUB_RELOC_NONE = 0,
-    STUB_RELOC_ABS,
-    STUB_RELOC_PIC,
-  };
-
 #define THUMB16_INSN(X)    {(X), THUMB16_TYPE, R_ARM_NONE, 0}
 #define THUMB32_INSN(X)    {(X), THUMB32_TYPE, R_ARM_NONE, 0}
 #define ARM_INSN(X)        {(X), ARM_TYPE, R_ARM_NONE, 0}
@@ -2035,7 +2028,7 @@ typedef struct
 {
   bfd_vma data;
   enum stub_insn_type type;
-  enum stub_reloc_type reloc_type;
+  unsigned int r_type;
   int reloc_addend;
 }  insn_sequence;
 
@@ -2110,6 +2103,39 @@ static const insn_sequence elf32_arm_stub_long_branch_any_thumb_pic[] =
     DATA_WORD(0, R_ARM_REL32, 0),     /* dcd   R_ARM_REL32(X) */
   };
 
+/* V4T ARM -> ARM long branch stub, PIC.  */
+static const insn_sequence elf32_arm_stub_long_branch_v4t_arm_thumb_pic[] =
+  {
+    ARM_INSN(0xe59fc004),             /* ldr   ip, [pc, #4] */
+    ARM_INSN(0xe08fc00c),             /* add   ip, pc, ip */
+    ARM_INSN(0xe12fff1c),             /* bx    ip */
+    DATA_WORD(0, R_ARM_REL32, 0),     /* dcd   R_ARM_REL32(X) */
+  };
+
+/* V4T Thumb -> ARM long branch stub, PIC.  */
+static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_arm_pic[] =
+  {
+    THUMB16_INSN(0x4778),             /* bx   pc */
+    THUMB16_INSN(0x46c0),             /* nop  */
+    ARM_INSN(0xe59fc000),             /* ldr  ip, [pc, #0] */
+    ARM_INSN(0xe08cf00f),             /* add  pc, ip, pc */
+    DATA_WORD(0, R_ARM_REL32, -4),     /* dcd  R_ARM_REL32(X) */
+  };
+
+/* Thumb -> Thumb long branch stub, PIC. Used on architectures which
+   support only this mode, or on V4T where it is expensive to switch
+   to ARM.  */
+static const insn_sequence elf32_arm_stub_long_branch_thumb_only_pic[] =
+  {
+    THUMB16_INSN(0xb401),             /* push {r0} */
+    THUMB16_INSN(0x4802),             /* ldr  r0, [pc, #8] */
+    THUMB16_INSN(0x46fc),             /* mov  ip, pc */
+    THUMB16_INSN(0x4484),             /* add  ip, r0 */
+    THUMB16_INSN(0xbc01),             /* pop  {r0} */
+    THUMB16_INSN(0x4760),             /* bx   ip */
+    DATA_WORD(0, R_ARM_REL32, 4),     /* dcd  R_ARM_REL32(X) */
+  };
+
 /* Section name for stubs is the associated section name plus this
    string.  */
 #define STUB_SUFFIX ".stub"
@@ -2124,6 +2150,9 @@ enum elf32_arm_stub_type
   arm_stub_short_branch_v4t_thumb_arm,
   arm_stub_long_branch_any_arm_pic,
   arm_stub_long_branch_any_thumb_pic,
+  arm_stub_long_branch_v4t_arm_thumb_pic,
+  arm_stub_long_branch_v4t_thumb_arm_pic,
+  arm_stub_long_branch_thumb_only_pic,
 };
 
 struct elf32_arm_stub_hash_entry
@@ -2796,6 +2825,8 @@ arm_stub_is_thumb (enum elf32_arm_stub_type stub_type)
     case arm_stub_long_branch_thumb_only:
     case arm_stub_long_branch_v4t_thumb_arm:
     case arm_stub_short_branch_v4t_thumb_arm:
+    case arm_stub_long_branch_v4t_thumb_arm_pic:
+    case arm_stub_long_branch_thumb_only_pic:
       return TRUE;
     case arm_stub_none:
       BFD_FAIL ();
@@ -2872,8 +2903,8 @@ arm_type_of_stub (struct bfd_link_info *info,
 		    ? ((globals->use_blx)
 		       /* V5T and above.  */
 		       ? arm_stub_long_branch_any_thumb_pic
-		       /* not yet supported on V4T.  */
-		       : arm_stub_none)
+		       /* On V4T, use Thumb code only.  */
+		       : arm_stub_long_branch_thumb_only_pic)
 
 		    /* non-PIC stubs.  */
 		    : ((globals->use_blx)
@@ -2885,8 +2916,8 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      else
 		{
 		  stub_type = (info->shared | globals->pic_veneer)
-		    /* PIC stub not yet supported on V4T.  */
-		    ? arm_stub_none
+		    /* PIC stub.  */
+		    ? arm_stub_long_branch_thumb_only_pic
 		    /* non-PIC stub.  */
 		    : arm_stub_long_branch_thumb_only;
 		}
@@ -2909,8 +2940,8 @@ arm_type_of_stub (struct bfd_link_info *info,
 		? ((globals->use_blx)
 		   /* V5T and above.  */
 		   ? arm_stub_long_branch_any_arm_pic
-		   /* not yet supported on V4T.  */
-		   : arm_stub_none)
+		   /* V4T PIC stub.  */
+		   : arm_stub_long_branch_v4t_thumb_arm_pic)
 
 		/* non-PIC stubs.  */
 		: ((globals->use_blx)
@@ -2951,7 +2982,12 @@ arm_type_of_stub (struct bfd_link_info *info,
 	    {
 	      stub_type = (info->shared | globals->pic_veneer)
 		/* PIC stubs.  */
-		? arm_stub_long_branch_any_thumb_pic
+		? ((globals->use_blx)
+		   /* V5T and above.  */
+		   ? arm_stub_long_branch_any_thumb_pic
+		   /* V4T stub.  */
+		   : arm_stub_long_branch_v4t_arm_thumb_pic)
+
 		/* non-PIC stubs.  */
 		: ((globals->use_blx)
 		   /* V5T and above.  */
@@ -3207,7 +3243,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 	  put_arm_insn (globals, stub_bfd, template[i].data, loc + size);
 	  /* Handle cases where the target is encoded within the
 	     instruction.  */
-	  if (template[i].reloc_type == R_ARM_JUMP24)
+	  if (template[i].r_type == R_ARM_JUMP24)
 	    {
 	      stub_reloc_idx = i;
 	      stub_reloc_offset = size;
@@ -3241,7 +3277,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   /* Assume there is one and only one entry to relocate in each stub.  */
   BFD_ASSERT (stub_reloc_idx != -1);
 
-  _bfd_final_link_relocate (elf32_arm_howto_from_type (template[stub_reloc_idx].reloc_type),
+  _bfd_final_link_relocate (elf32_arm_howto_from_type (template[stub_reloc_idx].r_type),
 			    stub_bfd, stub_sec, stub_sec->contents,
 			    stub_entry->stub_offset + stub_reloc_offset,
 			    sym_value, template[stub_reloc_idx].reloc_addend);
@@ -3271,32 +3307,43 @@ arm_size_one_stub (struct bfd_hash_entry *gen_entry,
     {
     case arm_stub_long_branch_any_any:
       template =  elf32_arm_stub_long_branch_any_any;
-      template_size = sizeof (elf32_arm_stub_long_branch_any_any) / sizeof (insn_sequence);
-
+      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_any_any);
       break;
     case arm_stub_long_branch_v4t_arm_thumb:
       template =  elf32_arm_stub_long_branch_v4t_arm_thumb;
-      template_size = sizeof (elf32_arm_stub_long_branch_v4t_arm_thumb) / sizeof (insn_sequence);
+      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_v4t_arm_thumb);
       break;
     case arm_stub_long_branch_thumb_only:
       template =  elf32_arm_stub_long_branch_thumb_only;
-      template_size = sizeof (elf32_arm_stub_long_branch_thumb_only) / sizeof (insn_sequence);
+      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_thumb_only);
       break;
     case arm_stub_long_branch_v4t_thumb_arm:
       template =  elf32_arm_stub_long_branch_v4t_thumb_arm;
-      template_size = sizeof (elf32_arm_stub_long_branch_v4t_thumb_arm) / sizeof (insn_sequence);
+      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_v4t_thumb_arm);
       break;
     case arm_stub_short_branch_v4t_thumb_arm:
       template =  elf32_arm_stub_short_branch_v4t_thumb_arm;
-      template_size = sizeof (elf32_arm_stub_short_branch_v4t_thumb_arm) / sizeof (insn_sequence);
+      template_size = ARRAY_SIZE (elf32_arm_stub_short_branch_v4t_thumb_arm);
       break;
     case arm_stub_long_branch_any_arm_pic:
       template = elf32_arm_stub_long_branch_any_arm_pic;
-      template_size = sizeof (elf32_arm_stub_long_branch_any_arm_pic) / sizeof (insn_sequence);
+      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_any_arm_pic);
       break;
     case arm_stub_long_branch_any_thumb_pic:
       template = elf32_arm_stub_long_branch_any_thumb_pic;
-      template_size = sizeof (elf32_arm_stub_long_branch_any_thumb_pic) / sizeof (insn_sequence);
+      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_any_thumb_pic);
+      break;
+    case arm_stub_long_branch_v4t_arm_thumb_pic:
+      template = elf32_arm_stub_long_branch_v4t_arm_thumb_pic;
+      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_v4t_arm_thumb_pic);
+      break;
+    case arm_stub_long_branch_v4t_thumb_arm_pic:
+      template = elf32_arm_stub_long_branch_v4t_thumb_arm_pic;
+      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_v4t_thumb_arm_pic);
+      break;
+    case arm_stub_long_branch_thumb_only_pic:
+      template = elf32_arm_stub_long_branch_thumb_only_pic;
+      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_thumb_only_pic);
       break;
     default:
       BFD_FAIL ();
@@ -4647,8 +4694,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	      /* This one is a call from arm code.  We need to look up
 	         the target of the call.  If it is a thumb target, we
 	         insert glue.  */
-	      if (ELF_ST_TYPE (h->type) == STT_ARM_TFUNC
-		  && !(r_type == R_ARM_CALL && globals->use_blx))
+	      if (ELF_ST_TYPE (h->type) == STT_ARM_TFUNC)
 		record_arm_to_thumb_glue (link_info, h);
 	      break;
 

@@ -1,3 +1,17 @@
+2009-02-26  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (stub_reloc_type): Removed.
+	(insn_sequence): Renamed reloc_type field to r_type.
+	(elf32_arm_stub_long_branch_v4t_arm_thumb_pic): New stub.
+	(elf32_arm_stub_long_branch_v4t_thumb_arm_pic): Likewise.
+	(elf32_arm_stub_long_branch_thumb_only_pic): Likewise.
+	(elf32_arm_stub_type): Add new enum entries for the new stubs.
+	(arm_stub_is_thumb): Catch new stubs.
+	(arm_type_of_stub): Handle new stubs.
+	(arm_size_one_stub): Use ARRAY_SIZE. Handle new stubs.
+	(bfd_elf32_arm_process_before_allocation): Remove useless
+	condition.
+
 2009-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (elf_find_function): Use is_function_type to check
