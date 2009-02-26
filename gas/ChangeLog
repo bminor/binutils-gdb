@@ -1,3 +1,9 @@
+2009-02-26  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (pre_defined_registers): Add "f32" to "f63",
+	"f.32" to "f.63", "vs0" to "vs63" and "vs.0" to "vs.63".
+	(parse_cpu): Extend -mpower7 to accept power7 and isel instructions.
+
 2009-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (fits_in_imm4): Removed.

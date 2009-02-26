@@ -1,3 +1,57 @@
+2009-02-26  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (powerpc_init_dialect): Extend -Mpower7 to disassemble
+	the power7 and the isel instructions.
+	* ppc-opc.c (insert_xc6, extract_xc6): New static functions.
+	(insert_dm, extract_dm): Likewise.
+	(XB6): Update comment to include XX2 form.
+	(WC, XC6, SHW, DMEX, UIM, XX2, XX3RC, XX4, XX2_MASK, XX2UIM_MASK,
+	XX2BF_MASK, XX3BF_MASK, XX3SHW_MASK, XX4_MASK, XWC_MASK, POWER7): New.
+	(RemoveXX3DM): Delete.
+	(powerpc_opcodes): <"lfdp", "lfdpx", "mcrxr", "mftb", "mffgpr",
+	"mftgpr">: Deprecate for POWER7.
+	<"fres", "fres.", "frsqrtes", "frsqrtes.", "fre", "fre.", "frsqrte",
+	"frsqrte.">: Deprecate the three operand form and enable the two
+	operand form for POWER7 and later.
+	<"wait">: Extend to accept optional parameter.  Enable for POWER7.
+	<"waitsrv", "waitimpl">: Add extended opcodes.
+	<"ldbrx", "stdbrx">: Enable for POWER7.
+	<"cdtbcd", "cbcdtd", "addg6s">: Add POWER6 opcodes.
+	<"bpermd", "dcbtstt", "dcbtt", "dcffix.", "dcffix", "divde.", "divde",
+	"divdeo.", "divdeo", "divdeu.", "divdeu", "divdeuo.", "divdeuo",
+	"divwe.", "divwe", "divweo.", "divweo", "divweu.", "divweu", "divweuo.",
+	"divweuo", "fcfids.", "fcfids", "fcfidu.", "fcfidu", "fcfidus.",
+	"fcfidus", "fctidu.", "fctidu", "fctiduz.", "fctiduz", "fctiwu.",
+	"fctiwu", "fctiwuz.", "fctiwuz", "ftdiv", "ftsqrt", "lbarx", "lfiwzx",
+	"lharx", "popcntd", "popcntw", "stbcx.", "sthcx.">: Add POWER7 opcodes.
+	<"lxsdux", "lxsdx", "lxvdsx", "lxvw4ux", "lxvw4x", "stxsdux", "stxsdx",
+	"stxvw4ux", "stxvw4x", "xsabsdp", "xsadddp", "xscmpodp", "xscmpudp",
+	"xscpsgndp", "xscvdpsp", "xscvdpsxds", "xscvdpsxws", "xscvdpuxds",
+	"xscvdpuxws", "xscvspdp", "xscvsxddp", "xscvuxddp", "xsdivdp",
+	"xsmaddadp", "xsmaddmdp", "xsmaxdp", "xsmindp", "xsmsubadp",
+	"xsmsubmdp", "xsmuldp", "xsnabsdp", "xsnegdp", "xsnmaddadp",
+	"xsnmaddmdp", "xsnmsubadp", "xsnmsubmdp", "xsrdpi", "xsrdpic",
+	"xsrdpim", "xsrdpip", "xsrdpiz", "xsredp", "xsrsqrtedp", "xssqrtdp",
+	"xssubdp", "xstdivdp", "xstsqrtdp", "xvabsdp", "xvabssp", "xvadddp",
+	"xvaddsp", "xvcmpeqdp.", "xvcmpeqdp", "xvcmpeqsp.", "xvcmpeqsp",
+	"xvcmpgedp.", "xvcmpgedp", "xvcmpgesp.", "xvcmpgesp", "xvcmpgtdp.",
+	"xvcmpgtdp", "xvcmpgtsp.", "xvcmpgtsp", "xvcpsgnsp", "xvcvdpsp",
+	"xvcvdpsxds", "xvcvdpsxws", "xvcvdpuxds", "xvcvdpuxws", "xvcvspdp",
+	"xvcvspsxds", "xvcvspsxws", "xvcvspuxds", "xvcvspuxws", "xvcvsxddp",
+	"xvcvsxdsp", "xvcvsxwdp", "xvcvsxwsp", "xvcvuxddp", "xvcvuxdsp",
+	"xvcvuxwdp", "xvcvuxwsp", "xvdivdp", "xvdivsp", "xvmaddadp",
+	"xvmaddasp", "xvmaddmdp", "xvmaddmsp", "xvmaxdp", "xvmaxsp",
+	"xvmindp", "xvminsp", "xvmovsp", "xvmsubadp", "xvmsubasp", "xvmsubmdp",
+	"xvmsubmsp", "xvmuldp", "xvmulsp", "xvnabsdp", "xvnabssp", "xvnegdp",
+	"xvnegsp", "xvnmaddadp", "xvnmaddasp", "xvnmaddmdp", "xvnmaddmsp",
+	"xvnmsubadp", "xvnmsubasp", "xvnmsubmdp", "xvnmsubmsp", "xvrdpi",
+	"xvrdpic", "xvrdpim", "xvrdpip", "xvrdpiz", "xvredp", "xvresp",
+	"xvrspi", "xvrspic", "xvrspim", "xvrspip", "xvrspiz", "xvrsqrtedp",
+	"xvrsqrtesp", "xvsqrtdp", "xvsqrtsp", "xvsubdp", "xvsubsp", "xvtdivdp",
+	"xvtdivsp", "xvtsqrtdp", "xvtsqrtsp", "xxland", "xxlandc", "xxlnor",
+	"xxlor", "xxlxor", "xxmrghw", "xxmrglw", "xxsel", "xxsldwi", "xxspltd",
+	"xxspltw", "xxswapd">: Add VSX opcodes.
+
 2009-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (operand_type_init): Remove OPERAND_TYPE_VEX_IMM4.

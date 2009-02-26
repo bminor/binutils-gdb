@@ -112,8 +112,9 @@ powerpc_init_dialect (struct disassemble_info *info)
 
   if (info->disassembler_options
       && strstr (info->disassembler_options, "power7") != NULL)
-    dialect |= PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
-	       | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX;
+    dialect |= PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5
+	       | PPC_OPCODE_POWER6 | PPC_OPCODE_POWER7
+	       | PPC_OPCODE_ISEL | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX;
 
   if (info->disassembler_options
       && strstr (info->disassembler_options, "vsx") != NULL)
