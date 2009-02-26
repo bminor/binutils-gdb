@@ -314,7 +314,7 @@ mips64_linux_fetch_registers (struct target_ops *ops,
   /* If we know, or just found out, that PTRACE_GETREGS does not work, fall
      back to PTRACE_PEEKUSER.  */
   if (!have_ptrace_regsets)
-    super_fetch_registers (regcache, regnum);
+    super_fetch_registers (ops, regcache, regnum);
 }
 
 /* Store REGNO (or all registers if REGNO == -1) to the target
@@ -331,7 +331,7 @@ mips64_linux_store_registers (struct target_ops *ops,
   /* If we know, or just found out, that PTRACE_GETREGS does not work, fall
      back to PTRACE_PEEKUSER.  */
   if (!have_ptrace_regsets)
-    super_store_registers (regcache, regnum);
+    super_store_registers (ops, regcache, regnum);
 }
 
 /* Return the address in the core dump or inferior of register
