@@ -1,3 +1,22 @@
+2009-02-27  Ian Lance Taylor  <iant@google.com>
+
+	PR 9836
+	* symtab.cc (Symbol_table::add_from_object): If the visibility is
+	hidden or internal, force the symbol to be local.
+	* resolve.cc (Symbol::override_visibility): Define.
+	(Symbol::override_base): Use override_visibility.
+	(Symbol_table::resolve): Likewise.
+	(Symbol::override_base_with_special): Likewise.
+	(Symbol_table::override_with_special): If the visibility is hidden
+	or internal, force the symbol to be local.
+	* symtab.h (class Symbol): Add set_visibility and
+	override_visibility.
+	* testsuite/ver_test_1.sh: New file.
+	* testsuite/Makefile.am (check_SCRIPTS): Add ver_test_1.sh.
+	(check_DATA): Add ver_test_1.syms.
+	(ver_test_1.syms): New target.
+	* testsuite/Makefile.in: Rebuild.
+
 2009-02-25  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (Layout::choose_output_section): Don't rename sections

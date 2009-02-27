@@ -1,6 +1,6 @@
 // symtab.h -- the gold symbol table   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -209,6 +209,15 @@ class Symbol
   elfcpp::STV
   visibility() const
   { return this->visibility_; }
+
+  // Set the visibility.
+  void
+  set_visibility(elfcpp::STV visibility)
+  { this->visibility_ = visibility; }
+
+  // Override symbol visibility.
+  void
+  override_visibility(elfcpp::STV);
 
   // Return the non-visibility part of the st_other field.
   unsigned char
@@ -1384,7 +1393,8 @@ class Symbol_table
   void
   resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from);
 
-  // Record that a symbol is forced to be local by a version script.
+  // Record that a symbol is forced to be local by a version script or
+  // by visibility.
   void
   force_local(Symbol*);
 

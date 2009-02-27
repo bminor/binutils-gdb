@@ -1,6 +1,6 @@
 // resolve.cc -- symbol resolution for gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -63,6 +63,26 @@ Symbol::override_version(const char* version)
     }
 }
 
+// This symbol is being overidden by another symbol whose visibility
+// is VISIBILITY.  Updated the VISIBILITY_ field accordingly.
+
+inline void
+Symbol::override_visibility(elfcpp::STV visibility)
+{
+  // The rule for combining visibility is that we always choose the
+  // most constrained visibility.  In order of increasing constraint,
+  // visibility goes PROTECTED, HIDDEN, INTERNAL.  This is the reverse
+  // of the numeric values, so the effect is that we always want the
+  // smallest non-zero value.
+  if (visibility != elfcpp::STV_DEFAULT)
+    {
+      if (this->visibility_ == elfcpp::STV_DEFAULT)
+	this->visibility_ = visibility;
+      else if (this->visibility_ > visibility)
+	this->visibility_ = visibility;
+    }
+}
+
 // Override the fields in Symbol.
 
 template<int size, bool big_endian>
@@ -78,7 +98,7 @@ Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
   this->is_ordinary_shndx_ = is_ordinary;
   this->type_ = sym.get_st_type();
   this->binding_ = sym.get_st_bind();
-  this->visibility_ = sym.get_st_visibility();
+  this->override_visibility(sym.get_st_visibility());
   this->nonvis_ = sym.get_st_nonvis();
   if (object->is_dynamic())
     this->in_dyn_ = true;
@@ -279,6 +299,9 @@ Symbol_table::resolve(Sized_symbol<size>* to,
     {
       if (adjust_common_sizes && sym.get_st_size() > to->symsize())
         to->set_symsize(sym.get_st_size());
+      // The ELF ABI says that even for a reference to a symbol we
+      // merge the visibility.
+      to->override_visibility(sym.get_st_visibility());
     }
 
   // A new weak undefined reference, merging with an old weak
@@ -721,7 +744,7 @@ Symbol::override_base_with_special(const Symbol* from)
   this->override_version(from->version_);
   this->type_ = from->type_;
   this->binding_ = from->binding_;
-  this->visibility_ = from->visibility_;
+  this->override_visibility(from->visibility_);
   this->nonvis_ = from->nonvis_;
 
   // Special symbols are always considered to be regular symbols.
@@ -776,7 +799,12 @@ Symbol_table::override_with_special(Sized_symbol<size>* tosym,
 	}
       while (ssym != tosym);
     }
-  if (tosym->binding() == elfcpp::STB_LOCAL)
+  if (tosym->binding() == elfcpp::STB_LOCAL
+      || ((tosym->visibility() == elfcpp::STV_HIDDEN
+	   || tosym->visibility() == elfcpp::STV_INTERNAL)
+	  && (tosym->binding() == elfcpp::STB_GLOBAL
+	      || tosym->binding() == elfcpp::STB_WEAK)
+	  && !parameters->options().relocatable()))
     this->force_local(tosym);
 }
 

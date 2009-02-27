@@ -648,7 +648,8 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from)
     this->gc_mark_dyn_syms(to);
 }
 
-// Record that a symbol is forced to be local by a version script.
+// Record that a symbol is forced to be local by a version script or
+// by visibility.
 
 void
 Symbol_table::force_local(Symbol* sym)
@@ -962,6 +963,15 @@ Symbol_table::add_from_object(Object* object,
 	this->tls_commons_.push_back(ret);
     }
 
+  // If we're not doing a relocatable link, then any symbol with
+  // hidden or internal visibility is local.
+  if ((ret->visibility() == elfcpp::STV_HIDDEN
+       || ret->visibility() == elfcpp::STV_INTERNAL)
+      && (ret->binding() == elfcpp::STB_GLOBAL
+	  || ret->binding() == elfcpp::STB_WEAK)
+      && !parameters->options().relocatable())
+    this->force_local(ret);
+
   if (def)
     ret->set_is_default();
   return ret;
@@ -1179,7 +1189,7 @@ Symbol_table::add_from_pluginobj(
 		              def, *sym, st_shndx, true, st_shndx);
 
   if (local)
-	this->force_local(res);
+    this->force_local(res);
 
   return res;
 }

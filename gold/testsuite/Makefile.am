@@ -742,6 +742,11 @@ ver_test_3.o: ver_test_3.cc
 ver_test_4.o: ver_test_4.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
+check_SCRIPTS += ver_test_1.sh
+check_DATA += ver_test_1.syms
+ver_test_1.syms: ver_test_1.so
+	$(TEST_READELF) -s $< >$@ 2>/dev/null
+
 check_PROGRAMS += ver_test_2
 ver_test_2_SOURCES = ver_test_main_2.cc
 ver_test_2_DEPENDENCIES = gcctestdir/ld ver_test_4.so ver_test_2.so
