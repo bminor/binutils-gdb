@@ -265,7 +265,7 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
 	   thread_db_err_str (err));
 
   /* Fill the cache.  */
-  thread_ptid = ptid_build (GET_PID (inferior_ptid), ti.ti_lid, 0);
+  thread_ptid = ptid_build (GET_PID (proc_handle.ptid), ti.ti_lid, 0);
   thread_info = find_thread_pid (thread_ptid);
 
   /* In the case of a zombie thread, don't continue.  We don't want to
@@ -309,7 +309,7 @@ thread_from_lwp (ptid_t ptid)
   gdb_assert (GET_LWP (ptid) != 0);
 
   /* Access an lwp we know is stopped.  */
-  proc_handle.pid = GET_LWP (ptid);
+  proc_handle.ptid = ptid;
   err = td_ta_map_lwp2thr_p (thread_agent, GET_LWP (ptid), &th);
   if (err != TD_OK)
     error (_("Cannot find user-level thread for LWP %ld: %s"),
@@ -352,7 +352,7 @@ thread_db_attach_lwp (ptid_t ptid)
   gdb_assert (GET_LWP (ptid) != 0);
 
   /* Access an lwp we know is stopped.  */
-  proc_handle.pid = GET_LWP (ptid);
+  proc_handle.ptid = ptid;
 
   /* If we have only looked at the first thread before libpthread was
      initialized, we may not know its thread ID yet.  Make sure we do
@@ -457,7 +457,7 @@ enable_thread_event (td_thragent_t *thread_agent, int event, CORE_ADDR *bp)
   td_err_e err;
 
   /* Access an lwp we know is stopped.  */
-  proc_handle.pid = GET_LWP (inferior_ptid);
+  proc_handle.ptid = inferior_ptid;
 
   /* Get the breakpoint address for thread EVENT.  */
   err = td_ta_event_addr_p (thread_agent, event, &notify);
@@ -637,7 +637,7 @@ check_for_thread_db (void)
     return;
 
   /* Initialize the structure that identifies the child process.  */
-  proc_handle.pid = GET_PID (inferior_ptid);
+  proc_handle.ptid = inferior_ptid;
 
   /* Now attempt to open a connection to the thread library.  */
   err = td_ta_new_p (&proc_handle, &thread_agent);
@@ -779,7 +779,7 @@ thread_db_detach (struct target_ops *ops, char *args, int from_tty)
 
   /* Forget about the child's process ID.  We shouldn't need it
      anymore.  */
-  proc_handle.pid = 0;
+  proc_handle.ptid = null_ptid;
 
   /* Detach thread_db target ops.  */
   unpush_target (&thread_db_ops);
@@ -810,7 +810,7 @@ check_event (ptid_t ptid)
     return;
 
   /* Access an lwp we know is stopped.  */
-  proc_handle.pid = GET_LWP (ptid);
+  proc_handle.ptid = ptid;
 
   /* If we have only looked at the first thread before libpthread was
      initialized, we may not know its thread ID yet.  Make sure we do
@@ -934,7 +934,7 @@ thread_db_mourn_inferior (struct target_ops *ops)
 
   /* Forget about the child's process ID.  We shouldn't need it
      anymore.  */
-  proc_handle.pid = 0;
+  proc_handle.ptid = null_ptid;
 
   target_beneath->to_mourn_inferior (target_beneath);
 
@@ -963,7 +963,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
     return 0;			/* A zombie -- ignore.  */
 
-  ptid = ptid_build (GET_PID (inferior_ptid), ti.ti_lid, 0);
+  ptid = ptid_build (GET_PID (proc_handle.ptid), ti.ti_lid, 0);
 
   if (ti.ti_tid == 0)
     {
@@ -1008,7 +1008,7 @@ thread_db_find_new_threads_1 (void)
     return;
 
   /* Access an lwp we know is stopped.  */
-  proc_handle.pid = GET_LWP (ptid);
+  proc_handle.ptid = ptid;
   /* Iterate over all user-space threads to discover new threads.  */
   err = td_ta_thr_iter_p (thread_agent, find_new_threads_callback, NULL,
 			  TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,

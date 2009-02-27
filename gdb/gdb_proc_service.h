@@ -75,8 +75,8 @@ typedef prfpregset_t gdb_prfpregset_t;
 /* Structure that identifies the target process.  */
 struct ps_prochandle
 {
-  /* The process id is all we need.  */
-  pid_t pid;
+  /* The LWP we use for memory reads.  */
+  ptid_t ptid;
 };
 
 #endif /* gdb_proc_service.h */

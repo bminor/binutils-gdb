@@ -1,3 +1,16 @@
+2009-02-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb_proc_service.h (struct ps_prochandle): Replace pid_t field
+	with a ptid_t field.
+	* linux-thread-db.c (thread_get_info_callback): Build the ptid
+	using the pid stored in proc_handle.ptid.
+	(thread_from_lwp, thread_db_attach_lwp, enable_thread_event)
+	(check_for_thread_db, thread_db_detach, check_event)
+	(thread_db_mourn_inferior, find_new_threads_callback)
+	(thread_db_find_new_threads_1): Adjust.
+	* proc-service.c (ps_xfer_memory, ps_lgetregs, ps_lsetregs)
+	(ps_lgetfpregs, ps_lsetfpregs, ps_getpid): Adjust.
+
 2009-02-27  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* valprint.c (read_string): Rework clean-up logic. Use

@@ -97,7 +97,7 @@ ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
   int ret;
   CORE_ADDR core_addr = ps_addr_to_core_addr (addr);
 
-  inferior_ptid = pid_to_ptid (ph->pid);
+  inferior_ptid = ph->ptid;
 
   if (write)
     ret = target_write_memory (core_addr, buf, len);
@@ -257,7 +257,7 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
   struct cleanup *old_chain = save_inferior_ptid ();
   struct regcache *regcache;
 
-  inferior_ptid = BUILD_LWP (lwpid, ph->pid);
+  inferior_ptid = BUILD_LWP (lwpid, ptid_get_pid (ph->ptid));
   regcache = get_thread_regcache (inferior_ptid);
 
   target_fetch_registers (regcache, -1);
@@ -276,7 +276,7 @@ ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, const prgregset_t gregset)
   struct cleanup *old_chain = save_inferior_ptid ();
   struct regcache *regcache;
 
-  inferior_ptid = BUILD_LWP (lwpid, ph->pid);
+  inferior_ptid = BUILD_LWP (lwpid, ptid_get_pid (ph->ptid));
   regcache = get_thread_regcache (inferior_ptid);
 
   supply_gregset (regcache, (const gdb_gregset_t *) gregset);
@@ -296,7 +296,7 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
   struct cleanup *old_chain = save_inferior_ptid ();
   struct regcache *regcache;
 
-  inferior_ptid = BUILD_LWP (lwpid, ph->pid);
+  inferior_ptid = BUILD_LWP (lwpid, ptid_get_pid (ph->ptid));
   regcache = get_thread_regcache (inferior_ptid);
 
   target_fetch_registers (regcache, -1);
@@ -316,7 +316,7 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
   struct cleanup *old_chain = save_inferior_ptid ();
   struct regcache *regcache;
 
-  inferior_ptid = BUILD_LWP (lwpid, ph->pid);
+  inferior_ptid = BUILD_LWP (lwpid, ptid_get_pid (ph->ptid));
   regcache = get_thread_regcache (inferior_ptid);
 
   supply_fpregset (regcache, (const gdb_fpregset_t *) fpregset);
@@ -332,7 +332,7 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 pid_t
 ps_getpid (gdb_ps_prochandle_t ph)
 {
-  return ph->pid;
+  return ptid_get_pid (ph->ptid);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
