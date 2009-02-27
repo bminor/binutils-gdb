@@ -145,7 +145,21 @@ gld_${EMULATION_NAME}_before_parse (void)
 #ifdef DLL_SUPPORT
   config.dynamic_link = TRUE;
   config.has_shared = 1;
-  link_info.pei386_auto_import = -1;
+EOF
+
+# Cygwin no longer wants these noisy warnings.  Other PE
+# targets might like to consider adding themselves here.
+case ${target} in
+  *-*-cygwin*)
+    default_auto_import=1
+    ;;
+  *)
+    default_auto_import=-1
+    ;;
+esac
+
+fragment <<EOF
+  link_info.pei386_auto_import = ${default_auto_import};
   link_info.pei386_runtime_pseudo_reloc = 1; /* Use by default version 1.  */
 
 #if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)

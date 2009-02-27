@@ -1,3 +1,7 @@
+2009-02-27  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-pe/pe.exp:  Disable auto-import when linking on Cygwin.
+
 2009-02-26  Christophe Lyon  <christophe.lyon@st.com>
 
 	* ld-arm/arm-elf.exp: Add 3 tests for the 3 new stubs.

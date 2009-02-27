@@ -1,3 +1,8 @@
+2009-02-27  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_before_parse):  Set
+	default state of auto-import flag based on $target.
+
 2009-02-24  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld.texinfo (ARM): Document changed meaning of --stub-group-size.

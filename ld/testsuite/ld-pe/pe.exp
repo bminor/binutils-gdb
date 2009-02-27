@@ -34,6 +34,11 @@ if {[istarget x86_64-*-mingw*] } {
     {".secrel32" "" "" {secrel1.s secrel2.s}
     {{objdump -s secrel_64.d}} "secrel.x"}
   }
+} elseif {[istarget i*86-*-cygwin*] } {
+  set pe_tests {
+    {".secrel32" "--disable-auto-import" "" {secrel1.s secrel2.s}
+     {{objdump -s secrel.d}} "secrel.x"}
+  }
 } else {
   set pe_tests {
     {".secrel32" "" "" {secrel1.s secrel2.s}
