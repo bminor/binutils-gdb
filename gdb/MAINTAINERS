@@ -356,7 +356,7 @@ GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
 GNU/Linux MIPS native & host
 			Daniel Jacobowitz	dan@debian.org
-GNU/Linux m68k		Andreas Schwab		schwab@suse.de
+GNU/Linux m68k		Andreas Schwab		schwab@linux-m68k.org
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 
 
@@ -565,7 +565,7 @@ Kei Sakamoto					sakamoto.kei@renesas.com
 Mark Salter					msalter@redhat.com
 Richard Sandiford				richard@codesourcery.com
 Peter Schauer					Peter.Schauer@mytum.de
-Andreas Schwab					schwab@suse.de
+Andreas Schwab					schwab@linux-m68k.org
 Thomas Schwinge					tschwinge@gnu.org
 Keith Seitz					keiths@redhat.com
 Carlos Eduardo Seo				cseo@linux.vnet.ibm.com

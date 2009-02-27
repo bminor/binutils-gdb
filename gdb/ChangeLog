@@ -1,3 +1,7 @@
+2009-02-27  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* MAINTAINERS: Update e-mail address.
+
 2009-02-26  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/python-utils.c (python_string_to_unicode): Always return
@@ -137,7 +141,7 @@
 	(target_fetch_registers, target_store_registers)
 	(target_thread_alive, target_find_new_threads): Redeclare as
 	function.
-	
+
 	* target.c (update_current_target): Do not inherit or de_fault
 	to_resume, to_fetch_registers, to_store_registers,
 	to_thread_alive, to_find_new_threads.
@@ -149,9 +153,9 @@
 	(target_store_registers): New.
 	(debug_to_thread_alive, debug_to_find_new_threads): Delete.
 	(setup_target_debug): Adjust.
-	
+
 	* gdbcore.h (core_ops): Delete declaration.
-	
+
 	* inf-ptrace.c, linux-nat.c, remote.c, amd64-linux-nat.c,
 	inf-child.c, linux-thread-db.c, bsd-uthread.c, inf-ttrace.c,
 	i386-sol2-tdep.c, darwin-nat.c, gnu-nat.c, go32-nat.c,
@@ -188,11 +192,11 @@
 	Silence a few -Wmissing-prototypes warnings.
 
 	PR build/9877:
-        * alpha-linux-tdep.c (alpha_linux_regset_from_core_section): Make
+	* alpha-linux-tdep.c (alpha_linux_regset_from_core_section): Make
 	it static.
-        * alpha-osf1-tdep.c (_initialize_alpha_osf1_tdep): Declare.
-        * amd64fbsd-tdep.c (amd64fbsd_init_abi): Make it static.
-        * amd64nbsd-tdep.c (_initialize_amd64nbsd_ndep): Rename to ...
+	* alpha-osf1-tdep.c (_initialize_alpha_osf1_tdep): Declare.
+	* amd64fbsd-tdep.c (amd64fbsd_init_abi): Make it static.
+	* amd64nbsd-tdep.c (_initialize_amd64nbsd_ndep): Rename to ...
 	(_initialize_amd64nbsd_tdep): ... this.
 	* arm-linux-tdep.c (arm_linux_software_single_step): Make it static.
 	(_initialize_arm_linux_tdep): Declare.
@@ -363,8 +367,8 @@
 	* solib-svr4.c (HAS_LM_DYNAMIC_FROM_LINK_MAP): Add a prototype.
 	* target.h (struct target_ops): Add a prototype to the
 	to_can_execute_reverse callback.
-	* macroscope.c (_initialize_macroscope): Declare before definition. 
-	* cp-namespace.c (_initialize_cp_namespace): Declare before definition. 
+	* macroscope.c (_initialize_macroscope): Declare before definition.
+	* cp-namespace.c (_initialize_cp_namespace): Declare before definition.
 	* python/python.c (_initialize_python): Declare before definition.
 	* tui/tui-command.c: Include "tui/tui-command.h".
 	* tui/tui-data.c (init_content_element, init_win_info): Make them
@@ -478,15 +482,15 @@
 
 	Include frame information for *stopped due to CLI commands.
 
-        * ada-tasks.c (ada_normal_stop_observer): Adjust prototype.
-        * infcmd.c (finish_command_continuation): Pass '1' for
-        'print_frame' parameter to the observer.
-        * infrun.c (normal_stop): Don't print mi-specific information
-        here. Pass 'stop_print_frame' to the 'print_frame' parameter
-        of the observer.
-        * mi/mi-interp.c (mi_on_normal_stop): Adjust prototype.
-        If we need to print frame, and current uiout is not the MI one,
-        print frame again.
+	* ada-tasks.c (ada_normal_stop_observer): Adjust prototype.
+	* infcmd.c (finish_command_continuation): Pass '1' for
+	'print_frame' parameter to the observer.
+	* infrun.c (normal_stop): Don't print mi-specific information
+	here. Pass 'stop_print_frame' to the 'print_frame' parameter
+	of the observer.
+	* mi/mi-interp.c (mi_on_normal_stop): Adjust prototype.
+	If we need to print frame, and current uiout is not the MI one,
+	print frame again.
 
 2009-02-13  Pierre Muller  <muller@ics.u-strasbg.fr>
 
@@ -524,7 +528,7 @@
 	(pascal_printstr): Handle char width of 2 or 4.
 	* p-valprint.c (pascal_val_print): Handle char
 	of width 2 or 4.
-	
+
 2009-02-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Move lowpc and highpc
@@ -613,7 +617,7 @@
 	* Makefile.in (ALL_TARGET_OBS): Add linux-tdep.o.
 	(HFILES_NO_SRCDIR): Add linux-tdep.h.
 	(ALLDEPFILES): Add linux-tdep.c.
-	
+
 	* configure.tgt (arm*-*-linux* | arm*-*-uclinux*)
 	(i[34567]86-*-linux*, x86_64-*-linux*): Add linux-tdep.o to
 	gdb_target_obs.
@@ -1567,7 +1571,7 @@
 	(exec_file_command): Likewise.
 	* corefile.c (reopen_exec_file): Do cleanups before returning.
 	* breakpoint.c (insert_breakpoint_locations): Do cleanups before
-	returning. 
+	returning.
 	(do_vec_free): New function.
 	(update_global_location_list): Make a cleanup for old_locations.
 	Do cleanups before returning.  Remove unused variable 'e'.
@@ -1578,7 +1582,7 @@
 
 2009-01-08  Joel Brobecker  <brobecker@adacore.com>
 	    Emi Suzuki  <emi-suzuki@tjsys.co.jp>
- 
+
 	* breakpoint.c (do_enable_breakpoint): Use update_watchpoint for
 	watchpoints.
 
