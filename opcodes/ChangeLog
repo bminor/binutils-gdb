@@ -1,3 +1,7 @@
+2009-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (OP_EX): Call OP_E_memory instead of OP_E.
+
 2009-02-26  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-dis.c (powerpc_init_dialect): Extend -Mpower7 to disassemble

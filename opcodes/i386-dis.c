@@ -12676,11 +12676,17 @@ static void
 OP_EX (int bytemode, int sizeflag)
 {
   int add;
+
+  /* Skip mod/rm byte.  */
+  MODRM_CHECK;
+  codep++;
+
   if (modrm.mod != 3)
     {
-      OP_E (bytemode, sizeflag);
+      OP_E_memory (bytemode, sizeflag, 0);
       return;
     }
+
   USED_REX (REX_B);
   if (rex & REX_B)
     add = 8;
@@ -12693,9 +12699,6 @@ OP_EX (int bytemode, int sizeflag)
 	  || bytemode == q_swap_mode))
     swap_operand ();
 
-  /* Skip mod/rm byte.  */
-  MODRM_CHECK;
-  codep++;
   if (need_vex
       && bytemode != xmm_mode
       && bytemode != xmmq_mode)
