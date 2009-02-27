@@ -1226,13 +1226,14 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
      some error, such as bumping into the end of the address space.  */
 
   found_nul = 0;
-  old_chain = make_cleanup (null_cleanup, 0);
+  *buffer = NULL;
+
+  old_chain = make_cleanup (free_current_contents, buffer);
 
   if (len > 0)
     {
       *buffer = (gdb_byte *) xmalloc (len * width);
       bufptr = *buffer;
-      old_chain = make_cleanup (xfree, *buffer);
 
       nfetch = partial_memory_read (addr, bufptr, len * width, &errcode)
 	/ width;
@@ -1243,8 +1244,6 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
     {
       unsigned long bufsize = 0;
 
-      *buffer = NULL;
-
       do
 	{
 	  QUIT;
@@ -1253,13 +1252,9 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
 	  if (*buffer == NULL)
 	    *buffer = (gdb_byte *) xmalloc (nfetch * width);
 	  else
-	    {
-	      discard_cleanups (old_chain);
-	      *buffer = (gdb_byte *) xrealloc (*buffer,
-					       (nfetch + bufsize) * width);
-	    }
+	    *buffer = (gdb_byte *) xrealloc (*buffer,
+					     (nfetch + bufsize) * width);
 
-	  old_chain = make_cleanup (xfree, *buffer);
 	  bufptr = *buffer + bufsize * width;
 	  bufsize += nfetch;
 
