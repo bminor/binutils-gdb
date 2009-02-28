@@ -1,6 +1,6 @@
 // output.cc -- manage the output file for gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -2057,12 +2057,13 @@ Output_section::output_address(const Relobj* object, unsigned int shndx,
   gold_unreachable();
 }
 
-// Return the output address of the start of the merged section for
+// Find the output address of the start of the merged section for
 // input section SHNDX in object OBJECT.
 
-uint64_t
-Output_section::starting_output_address(const Relobj* object,
-					unsigned int shndx) const
+bool
+Output_section::find_starting_output_address(const Relobj* object,
+					     unsigned int shndx,
+					     uint64_t* paddr) const
 {
   uint64_t addr = this->address() + this->first_input_offset_;
   for (Input_section_list::const_iterator p = this->input_sections_.begin();
@@ -2076,11 +2077,16 @@ Output_section::starting_output_address(const Relobj* object,
       // Unfortunately we don't know for sure that input offset 0 is
       // mapped at all.
       if (p->is_merge_section_for(object, shndx))
-	return addr;
+	{
+	  *paddr = addr;
+	  return true;
+	}
 
       addr += p->data_size();
     }
-  gold_unreachable();
+
+  // We couldn't find a merge output section for this input section.
+  return false;
 }
 
 // Set the data size of an Output_section.  This is where we handle

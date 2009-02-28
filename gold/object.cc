@@ -1554,20 +1554,31 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 	    }
 	  else if (out_offsets[shndx] == invalid_address)
 	    {
+	      uint64_t start;
+
 	      // This is a SHF_MERGE section or one which otherwise
-	      // requires special handling.  We get the output address
-	      // of the start of the merged section.  If this is not a
-	      // section symbol, we can then determine the final
-	      // value.  If it is a section symbol, we can not, as in
-	      // that case we have to consider the addend to determine
-	      // the value to use in a relocation.
+	      // requires special handling.
 	      if (!lv.is_section_symbol())
-		lv.set_output_value(os->output_address(this, shndx,
-                                                       lv.input_value()));
+		{
+		  // This is not a section symbol.  We can determine
+		  // the final value now.
+		  lv.set_output_value(os->output_address(this, shndx,
+							 lv.input_value()));
+		}
+	      else if (!os->find_starting_output_address(this, shndx, &start))
+		{
+		  // This is a section symbol, but apparently not one
+		  // in a merged section.  Just use the start of the
+		  // output section.  This happens with relocatable
+		  // links when the input object has section symbols
+		  // for arbitrary non-merge sections.
+		  lv.set_output_value(os->address());
+		}
 	      else
 		{
-                  section_offset_type start =
-                    os->starting_output_address(this, shndx);
+		  // We have to consider the addend to determine the
+		  // value to use in a relocation.  START is the start
+		  // of this input section.
 		  Merged_symbol_value<size>* msv =
 		    new Merged_symbol_value<size>(lv.input_value(), start);
 		  lv.set_merged_symbol_value(msv);

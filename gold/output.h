@@ -1,6 +1,6 @@
 // output.h -- manage the output file for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -2260,12 +2260,14 @@ class Output_section : public Output_data
   output_address(const Relobj* object, unsigned int shndx,
 		 off_t offset) const;
 
-  // Return the output address of the start of the merged section for
-  // input section SHNDX in object OBJECT.  This is not necessarily
-  // the offset corresponding to input offset 0 in the section, since
-  // the section may be mapped arbitrarily.
-  uint64_t
-  starting_output_address(const Relobj* object, unsigned int shndx) const;
+  // Look for the merged section for input section SHNDX in object
+  // OBJECT.  If found, return true, and set *ADDR to the address of
+  // the start of the merged section.  This is not necessary the
+  // output offset corresponding to input offset 0 in the section,
+  // since the section may be mapped arbitrarily.
+  bool
+  find_starting_output_address(const Relobj* object, unsigned int shndx,
+			       uint64_t* addr) const;
 
   // Record that this output section was found in the SECTIONS clause
   // of a linker script.

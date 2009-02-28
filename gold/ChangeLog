@@ -1,5 +1,14 @@
 2009-02-27  Ian Lance Taylor  <iant@google.com>
 
+	PR 7091
+	* output.cc (Output_section::find_starting_output_address): Rename
+	from starting_output_address; add PADDR parameter; change return
+	type.
+	* output.h (class Output_section): Declare
+	find_starting_output_address instead of starting_output_address.
+	* object.cc (Sized_relobj::do_finalize_local_symbols): Handle a
+	section symbol for which we can't find a merge section.
+
 	PR 9836
 	* symtab.cc (Symbol_table::add_from_object): If the visibility is
 	hidden or internal, force the symbol to be local.
