@@ -1509,6 +1509,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
   const unsigned int loccount = this->local_symbol_count_;
   this->local_symbol_offset_ = off;
 
+  const bool relocatable = parameters->options().relocatable();
   const Output_sections& out_sections(this->output_sections());
   const std::vector<Address>& out_offsets(this->section_offsets_);
   unsigned int shnum = this->shnum();
@@ -1589,7 +1590,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 				+ out_offsets[shndx]
 				+ lv.input_value());
 	  else
-	    lv.set_output_value(os->address()
+	    lv.set_output_value((relocatable ? 0 : os->address())
 				+ out_offsets[shndx]
 				+ lv.input_value());
 	}

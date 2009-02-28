@@ -2693,7 +2693,10 @@ Symbol_table::sized_write_section_symbol(const Output_section* os,
 
   elfcpp::Sym_write<size, big_endian> osym(pov);
   osym.put_st_name(0);
-  osym.put_st_value(os->address());
+  if (parameters->options().relocatable())
+    osym.put_st_value(0);
+  else
+    osym.put_st_value(os->address());
   osym.put_st_size(0);
   osym.put_st_info(elfcpp::elf_st_info(elfcpp::STB_LOCAL,
 				       elfcpp::STT_SECTION));

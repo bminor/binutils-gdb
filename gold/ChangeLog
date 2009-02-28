@@ -1,3 +1,12 @@
+2009-02-28  Ian Lance Taylor  <iant@google.com>
+
+	PR 6992
+	* symtab.cc (Symbol_table::sized_write_section_symbol): In a
+	relocatable link set the value of the section symbol to zero.
+	* object.cc (Sized_relobj::do_finalize_local_symbols): In a
+	relocatable link don't include the section address in the local
+	symbol value.
+
 2009-02-27  Ian Lance Taylor  <iant@google.com>
 
 	PR 6811
