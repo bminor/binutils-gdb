@@ -1,5 +1,14 @@
 2009-02-27  Ian Lance Taylor  <iant@google.com>
 
+	PR 5990
+	* descriptors.h (Open_descriptor): Add is_on_stack field.
+	* descriptors.cc (Descriptors::open): If the descriptor is on the
+	top of the stack, remove it.  Initialize is_on_stack field.
+	(Descriptors::release): Only add pod to stack if it is not on the
+	stack already.
+	(Descriptors::close_some_descriptor): Clear stack_next and
+	is_on_stack fields.
+
 	PR 7091
 	* output.cc (Output_section::find_starting_output_address): Rename
 	from starting_output_address; add PADDR parameter; change return

@@ -69,6 +69,8 @@ class Descriptors
     bool inuse;
     // Whether this is a write descriptor.
     bool is_write;
+    // Whether the descriptor is on the stack.
+    bool is_on_stack;
   };
 
   bool

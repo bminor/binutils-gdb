@@ -75,6 +75,12 @@ Descriptors::open(int descriptor, const char* name, int flags, int mode)
 	{
 	  gold_assert(!pod->inuse);
 	  pod->inuse = true;
+	  if (descriptor == this->stack_top_)
+	    {
+	      this->stack_top_ = pod->stack_next;
+	      pod->stack_next = -1;
+	      pod->is_on_stack = false;
+	    }
 	  return descriptor;
 	}
     }
@@ -114,6 +120,7 @@ Descriptors::open(int descriptor, const char* name, int flags, int mode)
 	  pod->stack_next = -1;
 	  pod->inuse = true;
 	  pod->is_write = (flags & O_ACCMODE) != O_RDONLY;
+	  pod->is_on_stack = false;
 
 	  ++this->current_;
 	  if (this->current_ >= this->limit_)
@@ -158,10 +165,11 @@ Descriptors::release(int descriptor, bool permanent)
   else
     {
       pod->inuse = false;
-      if (!pod->is_write)
+      if (!pod->is_write && !pod->is_on_stack)
 	{
 	  pod->stack_next = this->stack_top_;
 	  this->stack_top_ = descriptor;
+	  pod->is_on_stack = true;
 	}
     }
 }
@@ -193,6 +201,8 @@ Descriptors::close_some_descriptor()
 	    this->stack_top_ = pod->stack_next;
 	  else
 	    this->open_descriptors_[last].stack_next = pod->stack_next;
+	  pod->stack_next = -1;
+	  pod->is_on_stack = false;
 	  return true;
 	}
       last = i;
