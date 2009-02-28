@@ -3317,8 +3317,8 @@ Write_symbols_task::locks(Task_locker* tl)
 void
 Write_symbols_task::run(Workqueue*)
 {
-  this->symtab_->write_globals(this->input_objects_, this->sympool_,
-			       this->dynpool_, this->layout_->symtab_xindex(),
+  this->symtab_->write_globals(this->sympool_, this->dynpool_,
+			       this->layout_->symtab_xindex(),
 			       this->layout_->dynsym_xindex(), this->of_);
 }
 

@@ -1342,7 +1342,7 @@ class Symbol_table
 
   // Write out the global symbols.
   void
-  write_globals(const Input_objects*, const Stringpool*, const Stringpool*,
+  write_globals(const Stringpool*, const Stringpool*,
 		Output_symtab_xindex*, Output_symtab_xindex*,
 		Output_file*) const;
 
@@ -1509,9 +1509,9 @@ class Symbol_table
   // Write globals specialized for size and endianness.
   template<int size, bool big_endian>
   void
-  sized_write_globals(const Input_objects*, const Stringpool*,
-		      const Stringpool*, Output_symtab_xindex*,
-		      Output_symtab_xindex*, Output_file*) const;
+  sized_write_globals(const Stringpool*, const Stringpool*,
+		      Output_symtab_xindex*, Output_symtab_xindex*,
+		      Output_file*) const;
 
   // Write out a symbol to P.
   template<int size, bool big_endian>
@@ -1523,7 +1523,7 @@ class Symbol_table
 
   // Possibly warn about an undefined symbol from a dynamic object.
   void
-  warn_about_undefined_dynobj_symbol(const Input_objects*, Symbol*) const;
+  warn_about_undefined_dynobj_symbol(Symbol*) const;
 
   // Write out a section symbol, specialized for size and endianness.
   template<int size, bool big_endian>

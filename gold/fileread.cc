@@ -738,6 +738,16 @@ Input_file::name() const
   return this->input_argument_->name();
 }
 
+// Return whether this file is in a system directory.
+
+bool
+Input_file::is_in_system_directory() const
+{
+  if (this->is_in_sysroot())
+    return true;
+  return parameters->options().is_in_system_directory(this->filename());
+}
+
 // Return whether we are only reading symbols.
 
 bool

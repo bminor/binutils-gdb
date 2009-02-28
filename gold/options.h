@@ -534,9 +534,22 @@ class Search_directory
   is_in_sysroot() const
   { return this->is_in_sysroot_; }
 
+  // Return whether this is considered a system directory.
+  bool
+  is_system_directory() const
+  { return this->put_in_sysroot_ || this->is_in_sysroot_; }
+
  private:
+  // The directory name.
   std::string name_;
+  // True if the sysroot should be added as a prefix for this
+  // directory (if there is a sysroot).  This is true for system
+  // directories that we search by default.
   bool put_in_sysroot_;
+  // True if this directory is in the sysroot (if there is a sysroot).
+  // This is true if there is a sysroot and either 1) put_in_sysroot_
+  // is true, or 2) the directory happens to be in the sysroot based
+  // on a pathname comparison.
   bool is_in_sysroot_;
 };
 
@@ -961,6 +974,10 @@ class General_options
   // Note: these functions are not very fast.
   Object_format format_enum() const;
   Object_format oformat_enum() const;
+
+  // Return whether FILENAME is in a system directory.
+  bool
+  is_in_system_directory(const std::string& name) const;
 
   // These are the best way to get access to the execstack state,
   // not execstack() and noexecstack() which are hard to use properly.

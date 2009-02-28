@@ -1,6 +1,6 @@
 // options.c -- handle command line options for gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -451,7 +451,7 @@ string_to_object_format(const char* arg)
 // If the default sysroot is relocatable, try relocating it based on
 // the prefix FROM.
 
-char*
+static char*
 get_relative_sysroot(const char* from)
 {
   char* path = make_relative_prefix(gold::program_name, from,
@@ -472,7 +472,7 @@ get_relative_sysroot(const char* from)
 // get_relative_sysroot, which is a small memory leak, but is
 // necessary since we store this pointer directly in General_options.
 
-const char*
+static const char*
 get_default_sysroot()
 {
   const char* sysroot = TARGET_SYSTEM_ROOT;
@@ -682,6 +682,26 @@ General_options::add_sysroot()
     p->add_sysroot(this->sysroot(), canonical_sysroot);
 
   free(canonical_sysroot);
+}
+
+// Return whether FILENAME is in a system directory.
+
+bool
+General_options::is_in_system_directory(const std::string& filename) const
+{
+  for (Dir_list::const_iterator p = this->library_path_.value.begin();
+       p != this->library_path_.value.end();
+       ++p)
+    {
+      // We use a straight string comparison rather than calling
+      // FILENAME_CMP because we are only interested in the cases
+      // where we found the file in a system directory, which means
+      // that we used the directory name as a prefix for a -L search.
+      if (p->is_system_directory()
+	  && filename.compare(0, p->name().size(), p->name()) == 0)
+	return true;
+    }
+  return false;
 }
 
 // Add a plugin to the list of plugins.

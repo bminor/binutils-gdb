@@ -471,6 +471,10 @@ class Input_file
   is_in_sysroot() const
   { return this->is_in_sysroot_; }
 
+  // Whether this file is in a system directory.
+  bool
+  is_in_system_directory() const;
+
   // Return whether this file is to be read only for its symbols.
   bool
   just_symbols() const;

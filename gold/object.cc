@@ -1941,19 +1941,6 @@ Input_objects::add_object(Object* obj)
 	}
 
       this->dynobj_list_.push_back(dynobj);
-
-      // If this is -lc, remember the directory in which we found it.
-      // We use this when issuing warnings about undefined symbols: as
-      // a heuristic, we don't warn about system libraries found in
-      // the same directory as -lc.
-      if (strncmp(soname, "libc.so", 7) == 0)
-	{
-	  const char* object_name = dynobj->name().c_str();
-	  const char* base = lbasename(object_name);
-	  if (base != object_name)
-	    this->system_library_directory_.assign(object_name,
-						   base - 1 - object_name);
-	}
     }
 
   // Add this object to the cross-referencer if requested.
@@ -1965,17 +1952,6 @@ Input_objects::add_object(Object* obj)
     }
 
   return true;
-}
-
-// Return whether an object was found in the system library directory.
-
-bool
-Input_objects::found_in_system_library_directory(const Object* object) const
-{
-  return (!this->system_library_directory_.empty()
-	  && object->name().compare(0,
-				    this->system_library_directory_.size(),
-				    this->system_library_directory_) == 0);
 }
 
 // For each dynamic object, record whether we've seen all of its

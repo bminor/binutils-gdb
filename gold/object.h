@@ -444,6 +444,11 @@ class Object
   set_target(Target* target)
   { this->target_ = target; }
 
+  // Return whether this object was found in a system directory.
+  bool
+  is_in_system_directory() const
+  { return this->input_file()->is_in_system_directory(); }
+
  protected:
   // Returns NULL for Objects that are not plugin objects.  This method
   // is overridden in the Pluginobj class.
@@ -1832,8 +1837,7 @@ class Input_objects
 {
  public:
   Input_objects()
-    : relobj_list_(), dynobj_list_(), sonames_(), system_library_directory_(),
-      cref_(NULL)
+    : relobj_list_(), dynobj_list_(), sonames_(), cref_(NULL)
   { }
 
   // The type of the list of input relocateable objects.
@@ -1911,8 +1915,6 @@ class Input_objects
   Dynobj_list dynobj_list_;
   // SONAMEs that we have seen.
   Unordered_set<std::string> sonames_;
-  // The directory in which we find the libc.so.
-  std::string system_library_directory_;
   // Manage cross-references if requested.
   Cref* cref_;
 };

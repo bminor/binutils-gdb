@@ -1,5 +1,25 @@
 2009-02-27  Ian Lance Taylor  <iant@google.com>
 
+	PR 6811
+	* options.h (class Search_directory): Add is_system_directory.
+	(class General_options): Declare is_in_system_directory.
+	* options.cc (get_relative_sysroot): Make static.
+	(get_default_sysroot): Make static.
+	(General_optoins::is_in_system_directory): New function.
+	* fileread.cc (Input_file::is_in_system_directory): New function.
+	* fileread.h (class Input_file): Declare is_in_system_directory.
+	* object.h (class Object): Add is_in_system_directory.
+	(class Input_objects): Remove system_library_directory_ field.
+	* object.cc (Input_objects::add_object): Don't set
+	system_library_directory_.
+	(input_objects::found_in_system_library_directory): Remove.
+	* symtab.cc (Symbol_table::write_globals): Remove input_objects
+	parameter.  Change all callers.
+	(Symbol_table::sized_write_globals): Likewise.
+	(Symbol_table::warn_about_undefined_dynobj_symbol): Likewise.
+	Call Object::is_in_system_directory.
+	* symtab.h (class Symbol_table): Update declarations.
+
 	PR 5990
 	* descriptors.h (Open_descriptor): Add is_on_stack field.
 	* descriptors.cc (Descriptors::open): If the descriptor is on the
