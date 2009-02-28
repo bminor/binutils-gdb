@@ -1,5 +1,8 @@
 2009-02-28  Ian Lance Taylor  <iant@google.com>
 
+	* README: --gc-sections and map files are now supported.  Document
+	some build requirements.
+
 	PR 6992
 	* symtab.cc (Symbol_table::sized_write_section_symbol): In a
 	relocatable link set the value of the section symbol to zero.
