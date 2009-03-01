@@ -1737,6 +1737,46 @@ delete_step_thread_step_resume_breakpoint_cleanup (void *arg)
   delete_step_thread_step_resume_breakpoint ();
 }
 
+/* Pretty print the results of target_wait, for debugging purposes.  */
+
+static void
+print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
+			   const struct target_waitstatus *ws)
+{
+  char *status_string = target_waitstatus_to_string (ws);
+  struct ui_file *tmp_stream = mem_fileopen ();
+  char *text;
+  long len;
+
+  /* The text is split over several lines because it was getting too long.
+     Call fprintf_unfiltered (gdb_stdlog) once so that the text is still
+     output as a unit; we want only one timestamp printed if debug_timestamp
+     is set.  */
+
+  fprintf_unfiltered (tmp_stream,
+		      "infrun: target_wait (%d", PIDGET (waiton_ptid));
+  if (PIDGET (waiton_ptid) != -1)
+    fprintf_unfiltered (tmp_stream,
+			" [%s]", target_pid_to_str (waiton_ptid));
+  fprintf_unfiltered (tmp_stream, ", status) =\n");
+  fprintf_unfiltered (tmp_stream,
+		      "infrun:   %d [%s],\n",
+		      PIDGET (result_ptid), target_pid_to_str (result_ptid));
+  fprintf_unfiltered (tmp_stream,
+		      "infrun:   %s\n",
+		      status_string);
+
+  text = ui_file_xstrdup (tmp_stream, &len);
+
+  /* This uses %s in part to handle %'s in the text, but also to avoid
+     a gcc error: the format attribute requires a string literal.  */
+  fprintf_unfiltered (gdb_stdlog, "%s", text);
+
+  xfree (status_string);
+  xfree (text);
+  ui_file_delete (tmp_stream);
+}
+
 /* Wait for control to return from inferior to debugger.
 
    If TREAT_EXEC_AS_SIGTRAP is non-zero, then handle EXEC signals
@@ -1790,14 +1830,7 @@ wait_for_inferior (int treat_exec_as_sigtrap)
 	ecs->ptid = target_wait (waiton_ptid, &ecs->ws);
 
       if (debug_infrun)
-	{
-	  char *status_string = target_waitstatus_to_string (&ecs->ws);
-	  fprintf_unfiltered (gdb_stdlog,
-			      "infrun: target_wait (%d, status) = %d, %s\n",
-			      PIDGET (waiton_ptid), PIDGET (ecs->ptid),
-			      status_string);
-	  xfree (status_string);
-	}
+	print_target_wait_results (waiton_ptid, ecs->ptid, &ecs->ws);
 
       if (treat_exec_as_sigtrap && ecs->ws.kind == TARGET_WAITKIND_EXECD)
         {
@@ -1875,14 +1908,7 @@ fetch_inferior_event (void *client_data)
     ecs->ptid = target_wait (waiton_ptid, &ecs->ws);
 
   if (debug_infrun)
-    {
-      char *status_string = target_waitstatus_to_string (&ecs->ws);
-      fprintf_unfiltered (gdb_stdlog,
-			  "infrun: target_wait (%d, status) = %d, %s\n",
-			  PIDGET (waiton_ptid), PIDGET (ecs->ptid),
-			  status_string);
-      xfree (status_string);
-    }
+    print_target_wait_results (waiton_ptid, ecs->ptid, &ecs->ws);
 
   if (non_stop
       && ecs->ws.kind != TARGET_WAITKIND_IGNORE

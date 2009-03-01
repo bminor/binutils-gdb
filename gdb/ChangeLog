@@ -1,3 +1,9 @@
+2009-03-01  Doug Evans  <dje@google.com>
+
+	Include thread ID in target_wait debugging output.
+	* infrun.c (print_target_wait_results): New function.
+	(wait_for_inferior,fetch_inferior_event): Call it.
+
 2009-02-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb_proc_service.h (struct ps_prochandle): Replace pid_t field
