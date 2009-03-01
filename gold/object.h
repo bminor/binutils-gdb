@@ -1584,32 +1584,6 @@ class Sized_relobj : public Relobj
   typedef std::map<unsigned int, Kept_comdat_section*>
       Kept_comdat_section_table;
 
-  // Information needed to keep track of kept comdat groups.  This is
-  // simply a map from the section name to its section index.  This may
-  // not be a one-to-one mapping, but we ignore that possibility since
-  // this is used only to attempt to handle stray relocations from
-  // non-comdat debug sections that refer to comdat loadable sections.
-  typedef Unordered_map<std::string, unsigned int> Comdat_group;
-
-  // A map from group section index to the table of group members.
-  typedef std::map<unsigned int, Comdat_group*> Comdat_group_table;
-
-  // Find a comdat group table given its group section SHNDX.
-  Comdat_group*
-  find_comdat_group(unsigned int shndx) const
-  {
-    Comdat_group_table::const_iterator p =
-      this->comdat_groups_.find(shndx);
-    if (p != this->comdat_groups_.end())
-      return p->second;
-    return NULL;
-  }
-
-  // Record a new comdat group whose group section index is SHNDX.
-  void
-  add_comdat_group(unsigned int shndx, Comdat_group* group)
-  { this->comdat_groups_[shndx] = group; }
-
   // Adjust a section index if necessary.
   unsigned int
   adjust_shndx(unsigned int shndx)
@@ -1823,8 +1797,6 @@ class Sized_relobj : public Relobj
   std::vector<Address> section_offsets_;
   // Table mapping discarded comdat sections to corresponding kept sections.
   Kept_comdat_section_table kept_comdat_sections_;
-  // Table of kept comdat groups.
-  Comdat_group_table comdat_groups_;
   // Whether this object has a GNU style .eh_frame section.
   bool has_eh_frame_;
   // The list of sections whose layout was deferred.

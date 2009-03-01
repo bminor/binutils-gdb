@@ -506,7 +506,12 @@ Pluginobj::include_comdat_group(std::string comdat_key, Layout* layout)
   // If this is the first time we've seen this comdat key, ask the
   // layout object whether it should be included.
   if (ins.second)
-    ins.first->second = layout->add_comdat(NULL, 1, comdat_key, true);
+    {
+      Kept_section to_add(NULL, 1, true);
+      ins.first->second = layout->find_or_add_kept_section(comdat_key,
+							   &to_add,
+							   NULL);
+    }
 
   return ins.first->second;
 }

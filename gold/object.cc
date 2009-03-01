@@ -327,7 +327,6 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     local_values_(),
     local_got_offsets_(),
     kept_comdat_sections_(),
-    comdat_groups_(),
     has_eh_frame_(false)
 {
 }
@@ -674,29 +673,25 @@ Sized_relobj<size, big_endian>::include_section_group(
 
   // Record this section group in the layout, and see whether we've already
   // seen one with the same signature.
-  bool include_group = ((flags & elfcpp::GRP_COMDAT) == 0
-                        || layout->add_comdat(this, index, signature, true));
-
+  bool include_group;
   Sized_relobj<size, big_endian>* kept_object = NULL;
-  Comdat_group* kept_group = NULL;
+  Kept_section::Comdat_group* kept_group = NULL;
 
-  if (!include_group)
+  if ((flags & elfcpp::GRP_COMDAT) == 0)
+    include_group = true;
+  else
     {
-      // This group is being discarded.  Find the object and group
-      // that was kept in its place.
-      unsigned int kept_group_index = 0;
-      Relobj* kept_relobj = layout->find_kept_object(signature,
-                                                     &kept_group_index);
-      kept_object = static_cast<Sized_relobj<size, big_endian>*>(kept_relobj);
-      if (kept_object != NULL)
-        kept_group = kept_object->find_comdat_group(kept_group_index);
-    }
-  else if (flags & elfcpp::GRP_COMDAT)
-    {
-      // This group is being kept.  Create the table to map section names
-      // to section indexes and add it to the table of groups.
-      kept_group = new Comdat_group();
-      this->add_comdat_group(index, kept_group);
+      Kept_section this_group(this, index, true);
+      Kept_section *kept_section_group;
+      include_group = layout->find_or_add_kept_section(signature,
+                                                       &this_group,
+                                                       &kept_section_group);
+      if (include_group)
+        kept_section_group->group_sections = new Kept_section::Comdat_group;
+
+      kept_group = kept_section_group->group_sections;
+      kept_object = (static_cast<Sized_relobj<size, big_endian>*>
+		     (kept_section_group->object));
     }
 
   size_t count = shdr.get_sh_size() / sizeof(elfcpp::Elf_Word);
@@ -745,7 +740,8 @@ Sized_relobj<size, big_endian>::include_section_group(
             {
               // Find the corresponding kept section, and store that info
               // in the discarded section table.
-              Comdat_group::const_iterator p = kept_group->find(mname);
+              Kept_section::Comdat_group::const_iterator p =
+                kept_group->find(mname);
               if (p != kept_group->end())
                 {
                   Kept_comdat_section* kept =
@@ -808,8 +804,12 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
     symname = strrchr(name, '.') + 1;
   std::string sig1(symname);
   std::string sig2(name);
-  bool include1 = layout->add_comdat(this, index, sig1, false);
-  bool include2 = layout->add_comdat(this, index, sig2, true);
+  Kept_section candidate1(this, index, false);
+  Kept_section candidate2(this, index, true);
+  Kept_section* kept1;
+  Kept_section* kept2;
+  bool include1 = layout->find_or_add_kept_section(sig1, &candidate1, &kept1);
+  bool include2 = layout->find_or_add_kept_section(sig2, &candidate2, &kept2);
 
   if (!include2)
     {
@@ -817,12 +817,12 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
       // name (i.e., the kept section was also a linkonce section).
       // In this case, the section index stored with the layout object
       // is the linkonce section that was kept.
-      unsigned int kept_group_index = 0;
-      Relobj* kept_relobj = layout->find_kept_object(sig2, &kept_group_index);
+      unsigned int kept_group_index = kept2->shndx;
+      Relobj* kept_relobj = kept2->object;
       if (kept_relobj != NULL)
         {
-          Sized_relobj<size, big_endian>* kept_object
-              = static_cast<Sized_relobj<size, big_endian>*>(kept_relobj);
+          Sized_relobj<size, big_endian>* kept_object =
+	    static_cast<Sized_relobj<size, big_endian>*>(kept_relobj);
           Kept_comdat_section* kept =
             new Kept_comdat_section(kept_object, kept_group_index);
           this->set_kept_comdat_section(index, kept);
@@ -837,17 +837,16 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
       // this linkonce section.  We'll handle the simple case where
       // the group has only one member section.  Otherwise, it's not
       // worth the effort.
-      unsigned int kept_group_index = 0;
-      Relobj* kept_relobj = layout->find_kept_object(sig1, &kept_group_index);
+      Relobj* kept_relobj = kept1->object;
       if (kept_relobj != NULL)
         {
           Sized_relobj<size, big_endian>* kept_object =
-              static_cast<Sized_relobj<size, big_endian>*>(kept_relobj);
-          Comdat_group* kept_group =
-            kept_object->find_comdat_group(kept_group_index);
+	    static_cast<Sized_relobj<size, big_endian>*>(kept_relobj);
+          Kept_section::Comdat_group* kept_group = kept1->group_sections;
           if (kept_group != NULL && kept_group->size() == 1)
             {
-              Comdat_group::const_iterator p = kept_group->begin();
+              Kept_section::Comdat_group::const_iterator p =
+		kept_group->begin();
               gold_assert(p != kept_group->end());
               Kept_comdat_section* kept =
                 new Kept_comdat_section(kept_object, p->second);

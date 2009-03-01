@@ -1,6 +1,6 @@
 // layout.h -- lay out output file sections for gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -87,6 +87,37 @@ class Layout_task_runner : public Task_function_runner
   Target* target_;
   Layout* layout_;
   Mapfile* mapfile_;
+};
+
+// This struct holds information about the comdat or .gnu.linkonce
+// that will be kept.
+
+struct Kept_section
+{
+  Kept_section()
+    : object(NULL), shndx(0), is_group(false), group_sections(NULL)
+  { }
+  Kept_section(Relobj* a_object, unsigned int a_shndx, bool a_is_group)
+    : object(a_object), shndx(a_shndx), is_group(a_is_group),
+      group_sections(NULL)
+  { }
+
+  typedef Unordered_map<std::string, unsigned int> Comdat_group;
+
+  // The object containing the comdat or .gnu.linkonce.
+  Relobj* object;
+  // Index to the group section for comdats and the section itself for
+  // .gnu.linkonce.
+  unsigned int shndx;
+  // The Kept_sections are values of a mapping, that maps names to
+  // them.  This field is true if this struct is associated with the
+  // name of a comdat or .gnu.linkonce, false if it is associated with
+  // the name of a symbol obtained from the .gnu.linkonce.* name
+  // through some heuristics.
+  bool is_group;
+  // For comdats, a map from names of the sections in the group to
+  // indexes in OBJECT_.  NULL for .gnu.linkonce.
+  Comdat_group* group_sections;
 };
 
 // This class handles the details of laying out input sections.
@@ -225,18 +256,24 @@ class Layout
   {
     // Debugging sections can only be recognized by name.
     return (strncmp(name, ".debug", sizeof(".debug") - 1) == 0
-            || strncmp(name, ".gnu.linkonce.wi.", 
+            || strncmp(name, ".gnu.linkonce.wi.",
                        sizeof(".gnu.linkonce.wi.") - 1) == 0
             || strncmp(name, ".line", sizeof(".line") - 1) == 0
             || strncmp(name, ".stab", sizeof(".stab") - 1) == 0);
   }
 
-  // Record the signature of a comdat section, and return whether to
-  // include it in the link.  The GROUP parameter is true for a
-  // section group signature, false for a signature derived from a
-  // .gnu.linkonce section.
+  // Check if a comdat group or .gnu.linkonce section with the given
+  // NAME is selected for the link.  If there is already a section,
+  // *KEPT_SECTION is set to point to the signature and the function
+  // returns false.  Otherwise, the CANDIDATE signature is recorded
+  // for this NAME in the layout object, *KEPT_SECTION is set to the
+  // internal copy and the function return false.  In some cases, with
+  // CANDIDATE->GROUP_ being false, KEPT_SECTION can point back to
+  // CANDIDATE.
   bool
-  add_comdat(Relobj*, unsigned int, const std::string&, bool group);
+  find_or_add_kept_section(const std::string name,
+                           Kept_section* candidate,
+                           Kept_section** kept_section);
 
   // Find the given comdat signature, and return the object and section
   // index of the kept group.
@@ -577,19 +614,7 @@ class Layout
   static bool
   segment_precedes(const Output_segment* seg1, const Output_segment* seg2);
 
-  // A mapping used for group signatures.
-  struct Kept_section
-    {
-      Kept_section()
-        : object_(NULL), shndx_(0), group_(false)
-      { }
-      Kept_section(Relobj* object, unsigned int shndx, bool group)
-        : object_(object), shndx_(shndx), group_(group)
-      { }
-      Relobj* object_;
-      unsigned int shndx_;
-      bool group_;
-    };
+  // A mapping used for kept comdats/.gnu.linkonce group signatures.
   typedef Unordered_map<std::string, Kept_section> Signatures;
 
   // Mapping from input section name/type/flags to output section.  We

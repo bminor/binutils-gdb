@@ -2930,46 +2930,50 @@ Layout::output_section_name(const char* name, size_t* plen)
   return name;
 }
 
-// Record the signature of a comdat section, and return whether to
-// include it in the link.  If GROUP is true, this is a regular
-// section group.  If GROUP is false, this is a group signature
-// derived from the name of a linkonce section.  We want linkonce
-// signatures and group signatures to block each other, but we don't
-// want a linkonce signature to block another linkonce signature.
+// Check if a comdat group or .gnu.linkonce section with the given
+// NAME is selected for the link.  If there is already a section,
+// *KEPT_SECTION is set to point to the signature and the function
+// returns false.  Otherwise, the CANDIDATE signature is recorded for
+// this NAME in the layout object, *KEPT_SECTION is set to the
+// internal copy and the function return false.  In some cases, with
+// CANDIDATE->GROUP_ being false, KEPT_SECTION can point back to
+// CANDIDATE.
 
 bool
-Layout::add_comdat(Relobj* object, unsigned int shndx,
-                   const std::string& signature, bool group)
+Layout::find_or_add_kept_section(const std::string name,
+                                 Kept_section* candidate,
+                                 Kept_section** kept_section)
 {
-  Kept_section kept(object, shndx, group);
   std::pair<Signatures::iterator, bool> ins(
-    this->signatures_.insert(std::make_pair(signature, kept)));
+    this->signatures_.insert(std::make_pair(name, *candidate)));
 
+  if (kept_section)
+    *kept_section = &ins.first->second;
   if (ins.second)
     {
       // This is the first time we've seen this signature.
       return true;
     }
 
-  if (ins.first->second.group_)
+  if (ins.first->second.is_group)
     {
       // We've already seen a real section group with this signature.
       // If the kept group is from a plugin object, and we're in
       // the replacement phase, accept the new one as a replacement.
-      if (ins.first->second.object_ == NULL
+      if (ins.first->second.object == NULL
           && parameters->options().plugins()->in_replacement_phase())
         {
-          ins.first->second = kept;
+          ins.first->second = *candidate;
           return true;
         }
       return false;
     }
-  else if (group)
+  else if (candidate->is_group)
     {
       // This is a real section group, and we've already seen a
       // linkonce section with this signature.  Record that we've seen
       // a section group, and don't include this section group.
-      ins.first->second.group_ = true;
+      ins.first->second.is_group = true;
       return false;
     }
   else
@@ -2977,6 +2981,7 @@ Layout::add_comdat(Relobj* object, unsigned int shndx,
       // We've already seen a linkonce section and this is a linkonce
       // section.  These don't block each other--this may be the same
       // symbol name with different section types.
+      *kept_section = candidate;
       return true;
     }
 }
@@ -2991,8 +2996,8 @@ Layout::find_kept_object(const std::string& signature,
   if (p == this->signatures_.end())
     return NULL;
   if (pshndx != NULL)
-    *pshndx = p->second.shndx_;
-  return p->second.object_;
+    *pshndx = p->second.shndx;
+  return p->second.object;
 }
 
 // Store the allocated sections into the section list.
@@ -3101,7 +3106,7 @@ Layout::write_sections_after_input_sections(Output_file* of)
     {
       off_t off = this->output_file_size_;
       off = this->set_section_offsets(off, POSTPROCESSING_SECTIONS_PASS);
-      
+
       // Now that we've finalized the names, we can finalize the shstrab.
       off =
 	this->set_section_offsets(off,

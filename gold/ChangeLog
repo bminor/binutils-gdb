@@ -1,3 +1,22 @@
+2009-03-01  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* layout.cc (Layout::find_or_add_kept_section): New function.
+	(Layout::add_comdat): Removed.
+	* layout.h (struct Kept_section): Move out of class Layout.
+	Remove trailing underscores from field names.  Add group_sections
+	field.  Rename group_ field to is_group.  Change all uses.
+	(class Layout): Declare find_or_add_kept_section, not add_comdat.
+	* object.cc (Sized_relobj::Sized_relobj): Don't initialize
+	comdat_groups_ field.
+	(Sized_relobj::include_section_group): Use
+	find_or_add_kept_section and Kept_section::group_sections.
+	(Sized_relobj::include_linkonce_section): Likewise.
+	* object.cc (class Sized_relobj): Don't define Comdat_group or
+	Comdat_group_table.  Remove find_comdat_group and
+	add_comdat_group.  Remove comdat_groups_ field.
+	* plugin.cc (include_comdat_group): Use
+	Layout::find_or_add_kept_section.
+
 2009-02-28  Ian Lance Taylor  <iant@google.com>
 
 	* README: --gc-sections and map files are now supported.  Document
