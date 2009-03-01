@@ -1,3 +1,44 @@
+2009-02-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf-hppa.h (elf_hppa_final_link): Use elf_hppa_final_link.
+	(elf_hppa_final_link_relocate ): Rewrite eliminating dynamic hash table.
+	(elf_hppa_relocate_section): Likewise.
+	* elf64-hppa.c (struct elf64_hppa_link_hash_entry): Change to derive
+	from struct elf_link_hash_entry.  Add count field.
+	(struct elf64_hppa_dyn_hash_table): Delete.
+	(struct elf64_hppa_link_hash_table): Delete dyn_hash_table field.
+	(elf64_hppa_hash_table): Rename to hppa_link_hash_table.
+	(hppa_elf_hash_entry, eh_name): Define.
+	(elf64_hppa_new_dyn_hash_entry): Delete.
+	(elf64_hppa_dyn_hash_lookup): Delete.
+	(elf64_hppa_dyn_hash_traverse): Delete.
+	(get_dyn_name): Delete.
+	(elf64_hppa_finalize_opd): Use struct elf_link_hash_entry * instead
+	of struct elf64_hppa_dyn_hash_entry *.
+	(elf64_hppa_finalize_dlt, llocate_global_data_dlt,
+	allocate_global_data_plt, allocate_global_data_stub,
+	allocate_global_data_opd, count_dyn_reloc, allocate_dynrel_entries):
+	Likewise.
+	(hppa64_link_hash_newfunc): New.
+	(elf64_hppa_hash_table_create): Rework.
+	(count_dyn_reloc): Likewise.
+	(hppa64_elf_local_refcounts): New.
+	(elf64_hppa_check_relocs): Rework using standard technique for recording
+	local DLT, PLT and OPD reference counts.
+	(elf64_hppa_dynamic_symbol_p): Revise using "eh" for struct
+	elf_link_hash_entry *.
+	(elf64_hppa_mark_exported_functions, allocate_global_data_dlt,
+	allocate_global_data_plt, allocate_global_data_stub,
+	allocate_global_data_opd, allocate_dynrel_entries,
+	elf64_hppa_adjust_dynamic_symbol,
+	elf64_hppa_mark_milli_and_exported_functions): Likewise.
+	(elf64_hppa_create_dynamic_sections, elf64_hppa_size_dynamic_sections):
+	Use hppa_link_hash_table.  Rework.
+	(elf64_hppa_link_output_symbol_hook): Rework.
+	(elf64_hppa_finish_dynamic_symbol, elf64_hppa_finalize_opd,
+	elf64_hppa_finalize_dlt, elf64_hppa_finalize_dynreloc,
+	elf64_hppa_finish_dynamic_sections): Likewise.
+
 2009-02-26  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (stub_reloc_type): Removed.
