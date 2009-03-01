@@ -162,7 +162,7 @@ h8500-*-hms* | h8500-*-coff* | h8500-*-rtems*)
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"
 			;;
 hppa*64*-*-linux-*)	targ_emul=hppa64linux ;;
-hppa*64*-*)		targ_emul=elf64hppa ;;
+hppa*64*-hpux*)		targ_emul=elf64hppa ;;
 hppa*-*-linux-*)	targ_emul=hppalinux ;;
 hppa*-*-*elf*)		targ_emul=hppaelf ;;
 hppa*-*-lites*)		targ_emul=hppaelf ;;

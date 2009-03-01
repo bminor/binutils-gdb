@@ -1,3 +1,16 @@
+2009-03-01  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* configure.tgt: Only use elf64hppa target emulation for hpux.
+	* emulparams/elf64hppa.sh: Don't include hppa64linux.sh.
+	(SCRIPT_NAME): Use new script elf64hppa.
+	(SCRIPT_NAME, ELFSIZE, NO_REL_RELOCS, ARCH, MACHINE, ENTRY,
+	TEMPLATE_NAME, GENERATE_SHLIB_SCRIPT, OTHER_READONLY_SECTIONS,
+	OTHER_READWRITE_SECTIONS, OTHER_BSS_SECTIONS, OTHER_GOT_RELOC_SECTIONS,
+	DATA_START_SYMBOLS, OTHER_SYMBOLS, DATA_PLT, PLT_BEFORE_GOT,
+	TEXT_DYNAMIC): Define.
+	* emulparams/hppa64linux.sh: Adjust comments.
+	* scripttempl/elf64hppa.sc: New file.
+
 2009-03-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

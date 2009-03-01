@@ -1,9 +1,5 @@
-# If you change this file, please also look at files which source this one:
-# elf64hppa.sh
-
 SCRIPT_NAME=elf
 ELFSIZE=64
-# FIXME: this output format is for hpux.
 OUTPUT_FORMAT="elf64-hppa-linux"
 NO_REL_RELOCS=yes
 TEXT_START_ADDR=0x10000
