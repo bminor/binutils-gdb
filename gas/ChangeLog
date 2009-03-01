@@ -1,3 +1,7 @@
+2009-03-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
 2009-02-26  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (pre_defined_registers): Add "f32" to "f63",
