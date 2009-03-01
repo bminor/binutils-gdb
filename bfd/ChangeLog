@@ -1,5 +1,8 @@
 2009-03-01  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
+	* elf32-hppa.c (hppa32_elf_local_refcounts): New function.
+	(elf32_hppa_check_relocs): Use it.
+
 	* elf_hppa_add_symbol_hook (elf_hppa_add_symbol_hook): Move to
 	elf64-hppa.c.
 	(elf_hppa_unmark_useless_dynamic_symbols): Likewise.

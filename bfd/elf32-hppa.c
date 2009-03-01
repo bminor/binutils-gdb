@@ -1113,6 +1113,38 @@ elf32_hppa_optimized_tls_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED,
   return r_type;
 }
 
+/* Return a pointer to the local GOT, PLT and TLS reference counts
+   for ABFD.  Returns NULL if the storage allocation fails.  */
+
+static bfd_signed_vma *
+hppa32_elf_local_refcounts (bfd *abfd)
+{
+  Elf_Internal_Shdr *symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  bfd_signed_vma *local_refcounts;
+                  
+  local_refcounts = elf_local_got_refcounts (abfd);
+  if (local_refcounts == NULL)
+    {
+      bfd_size_type size;
+
+      /* Allocate space for local GOT and PLT reference
+	 counts.  Done this way to save polluting elf_obj_tdata
+	 with another target specific pointer.  */
+      size = symtab_hdr->sh_info;
+      size *= 2 * sizeof (bfd_signed_vma);
+      /* Add in space to store the local GOT TLS types.  */
+      size += symtab_hdr->sh_info;
+      local_refcounts = bfd_zalloc (abfd, size);
+      if (local_refcounts == NULL)
+	return NULL;
+      elf_local_got_refcounts (abfd) = local_refcounts;
+      memset (hppa_elf_local_got_tls_type (abfd), GOT_UNKNOWN,
+	      symtab_hdr->sh_info);
+    }
+  return local_refcounts;
+}
+
+
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure linkage
    table, and dynamic reloc sections.  At this point we haven't
@@ -1359,26 +1391,9 @@ elf32_hppa_check_relocs (bfd *abfd,
 	          bfd_signed_vma *local_got_refcounts;
 		  
 	          /* This is a global offset table entry for a local symbol.  */
-	          local_got_refcounts = elf_local_got_refcounts (abfd);
+	          local_got_refcounts = hppa32_elf_local_refcounts (abfd);
 	          if (local_got_refcounts == NULL)
-		    {
-		      bfd_size_type size;
-
-		      /* Allocate space for local got offsets and local
-		         plt offsets.  Done this way to save polluting
-		         elf_obj_tdata with another target specific
-		         pointer.  */
-		      size = symtab_hdr->sh_info;
-		      size *= 2 * sizeof (bfd_signed_vma);
-		      /* Add in space to store the local GOT TLS types.  */
-		      size += symtab_hdr->sh_info;
-		      local_got_refcounts = bfd_zalloc (abfd, size);
-		      if (local_got_refcounts == NULL)
-		        return FALSE;
-		      elf_local_got_refcounts (abfd) = local_got_refcounts;
-		      memset (hppa_elf_local_got_tls_type (abfd),
-		    	  GOT_UNKNOWN, symtab_hdr->sh_info);
-		    }
+		    return FALSE;
 	          local_got_refcounts[r_symndx] += 1;
 
 	          old_tls_type = hppa_elf_local_got_tls_type (abfd) [r_symndx];
@@ -1425,22 +1440,9 @@ elf32_hppa_check_relocs (bfd *abfd,
 		  bfd_signed_vma *local_got_refcounts;
 		  bfd_signed_vma *local_plt_refcounts;
 
-		  local_got_refcounts = elf_local_got_refcounts (abfd);
+		  local_got_refcounts = hppa32_elf_local_refcounts (abfd);
 		  if (local_got_refcounts == NULL)
-		    {
-		      bfd_size_type size;
-
-		      /* Allocate space for local got offsets and local
-			 plt offsets.  */
-		      size = symtab_hdr->sh_info;
-		      size *= 2 * sizeof (bfd_signed_vma);
-		      /* Add in space to store the local GOT TLS types.  */
-		      size += symtab_hdr->sh_info;
-		      local_got_refcounts = bfd_zalloc (abfd, size);
-		      if (local_got_refcounts == NULL)
-			return FALSE;
-		      elf_local_got_refcounts (abfd) = local_got_refcounts;
-		    }
+		    return FALSE;
 		  local_plt_refcounts = (local_got_refcounts
 					 + symtab_hdr->sh_info);
 		  local_plt_refcounts[r_symndx] += 1;
