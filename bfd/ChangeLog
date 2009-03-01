@@ -1,3 +1,17 @@
+2009-03-01  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf_hppa_add_symbol_hook (elf_hppa_add_symbol_hook): Move to
+	elf64-hppa.c.
+	(elf_hppa_unmark_useless_dynamic_symbols): Likewise.
+	(elf_hppa_remark_useless_dynamic_symbols): Likewise.
+	(elf_hppa_is_dynamic_loader_symbol): Likewise.
+	(elf_hppa_record_segment_addrs): Likewise.
+	(elf_hppa_final_link): Likewise.
+	(elf_hppa_relocate_insn): Likewise.
+	(elf_hppa_final_link_relocate): Likewise.
+	(elf64_hppa_relocate_section): Likewise.
+	* elf64-hppa.c: Insert above.
+
 2009-02-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf-hppa.h (elf_hppa_final_link): Use elf_hppa_final_link.
