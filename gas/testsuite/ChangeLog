@@ -1,3 +1,8 @@
+2009-03-01  Mark Mitchell  <mark@codesourcery.com>
+
+	* gas/arm/archv6m.s: Add dmb, dsb, and isb.
+	* gas/arm/archv6m.d: Likewise.
+
 2009-02-26  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/e500mc.d ("wait", "waitsrv", "waitimpl"): Add tests.

@@ -1,3 +1,8 @@
+2009-03-01  Mark Mitchell  <mark@codesourcery.com>
+
+	* config/tc-arm.c (md_assemble): Allow barrier instructions on
+	ARMv6-M cores.
+
 2009-03-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

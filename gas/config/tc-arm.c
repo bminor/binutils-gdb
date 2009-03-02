@@ -14747,7 +14747,8 @@ md_assemble (char *str)
 	  /* Implicit require narrow instructions on Thumb-1.  This avoids
 	     relaxation accidentally introducing Thumb-2 instructions.  */
 	  if (opcode->tencode != do_t_blx && opcode->tencode != do_t_branch23
-	      && !ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_msr))
+	      && !(ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_msr)
+		   || ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_barrier)))
 	    inst.size_req = 2;
 	}
 
@@ -14805,7 +14806,8 @@ md_assemble (char *str)
 	 This is overly pessimistic for relaxable instructions.  */
       if (((inst.size == 4 && (inst.instruction & 0xf800e800) != 0xf000e800)
 	   || inst.relax)
-	  && !ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_msr))
+	  && !(ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_msr)
+	       || ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_barrier)))
 	ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 				arm_ext_v6t2);
     }
