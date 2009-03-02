@@ -1,5 +1,8 @@
 2009-03-01  Doug Evans  <dje@google.com>
 
+	* symtab.c: Remove trailing whitespace throughout the file.
+	(expand_line_sal): Fix some typos and whitespace.
+
 	* Makefile.in (clean): rm -f $(DEPDIR)/*.
 
 	* Makefile.in (GDB_CFLAGS): Add -I$(srcdir)/common.
