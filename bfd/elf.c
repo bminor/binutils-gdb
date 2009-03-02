@@ -4183,7 +4183,21 @@ assign_file_positions_for_load_sections (bfd *abfd,
       return TRUE;
     }
 
-  phdrs = bfd_alloc2 (abfd, alloc, sizeof (Elf_Internal_Phdr));
+  /* We're writing the size in elf_tdata (abfd)->program_header_size,
+     see assign_file_positions_except_relocs, so make sure we have
+     that amount allocated, with trailing space cleared.
+     The variable alloc contains the computed need, while elf_tdata
+     (abfd)->program_header_size contains the size used for the
+     layout.
+     See ld/emultempl/elf-generic.em:gld${EMULATION_NAME}_map_segments
+     where the layout is forced to according to a larger size in the
+     last iterations for the testcase ld-elf/header.  */
+  BFD_ASSERT (elf_tdata (abfd)->program_header_size % bed->s->sizeof_phdr
+	      == 0);
+  phdrs = bfd_zalloc2 (abfd,
+		       (elf_tdata (abfd)->program_header_size
+			/ bed->s->sizeof_phdr),
+		       sizeof (Elf_Internal_Phdr));
   elf_tdata (abfd)->phdr = phdrs;
   if (phdrs == NULL)
     return FALSE;
