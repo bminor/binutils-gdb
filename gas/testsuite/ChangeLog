@@ -1,5 +1,9 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2009-02-19  Peter Bergner  <bergner@vnet.ibm.com>
+	* gas/ppc/e500mc.d ("lfdepx", "stfdepx"): Fix tests to expect a
+	floating point register.
+
 	2009-02-05  Peter Bergner  <bergner@vnet.ibm.com>
 	* gas/ppc/booke.s ("dcbt", "dcbtst"): New tests.
 	* gas/ppc/booke.d: Likewise.

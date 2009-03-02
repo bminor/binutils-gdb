@@ -22,12 +22,12 @@ Disassembly of section \.text:
   30:	7c 85 32 3e 	lhepx   r4,r5,r6
   34:	7c e8 48 3e 	lwepx   r7,r8,r9
   38:	7d 4b 60 3a 	ldepx   r10,r11,r12
-  3c:	7d ae 7c be 	lfdepx  r13,r14,r15
+  3c:	7d ae 7c be 	lfdepx  f13,r14,r15
   40:	7e 11 91 be 	stbepx  r16,r17,r18
   44:	7e 74 ab 3e 	sthepx  r19,r20,r21
   48:	7e d7 c1 3e 	stwepx  r22,r23,r24
   4c:	7f 3a d9 3a 	stdepx  r25,r26,r27
-  50:	7f 9d f5 be 	stfdepx r28,r29,r30
+  50:	7f 9d f5 be 	stfdepx f28,r29,r30
   54:	7c 01 14 06 	lbdx    r0,r1,r2
   58:	7d 8d 74 46 	lhdx    r12,r13,r14
   5c:	7c 64 2c 86 	lwdx    r3,r4,r5

@@ -1,5 +1,9 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2009-02-19  Peter Bergner  <bergner@vnet.ibm.com>
+	* ppc-opc.c (powerpc_opcodes) <"lfdepx", "stfdepx">: Fix the first
+	operand to be a float point register (FRT/FRS).
+
 	2009-02-05  Peter Bergner  <bergner@vnet.ibm.com>
 	* ppc-opc.c: Update copyright year.
 	(powerpc_opcodes) <"dcbt", "dcbtst">: Deprecate the Embedded operand

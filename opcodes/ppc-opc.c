@@ -4286,7 +4286,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"lfdx",	X(31,599),	X_MASK,      COM,	PPCNONE,	{FRT, RA0, RB}},
 
-{"lfdepx",	X(31,607),	X_MASK,      E500MC,	PPCNONE,	{RT, RA, RB}},
+{"lfdepx",	X(31,607),	X_MASK,      E500MC,	PPCNONE,	{FRT, RA, RB}},
 {"mffgpr",	XRC(31,607,0),	XRA_MASK,    POWER6,	PPCNONE,	{FRT, RB}},
 
 {"lddx",	X(31,611),	X_MASK,      E500MC,	PPCNONE,	{RT, RA, RB}},
@@ -4373,7 +4373,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"sreq",	XRC(31,729,0),	X_MASK,      M601,	PPCNONE,	{RA, RS, RB}},
 {"sreq.",	XRC(31,729,1),	X_MASK,      M601,	PPCNONE,	{RA, RS, RB}},
 
-{"stfdepx",	X(31,735),	X_MASK,      E500MC,	PPCNONE,	{RS, RA, RB}},
+{"stfdepx",	X(31,735),	X_MASK,      E500MC,	PPCNONE,	{FRS, RA, RB}},
 {"mftgpr",	XRC(31,735,0),	XRA_MASK,    POWER6,	PPCNONE,	{RT, FRB}},
 
 {"stddx",	X(31,739),	X_MASK,      E500MC,	PPCNONE,	{RS, RA, RB}},
