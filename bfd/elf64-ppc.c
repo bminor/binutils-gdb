@@ -5847,7 +5847,7 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
       fdh = (struct ppc_link_hash_entry *) fdh->elf.root.u.i.link;
 
   if (fdh == NULL
-      && info->shared
+      && !info->executable
       && (fh->elf.root.type == bfd_link_hash_undefined
 	  || fh->elf.root.type == bfd_link_hash_undefweak))
     {
@@ -5880,7 +5880,7 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
 
   if (fdh != NULL
       && !fdh->elf.forced_local
-      && (info->shared
+      && (!info->executable
 	  || fdh->elf.def_dynamic
 	  || fdh->elf.ref_dynamic
 	  || (fdh->elf.root.type == bfd_link_hash_undefweak

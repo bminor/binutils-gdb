@@ -1,5 +1,10 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2008-12-11  Alan Modra  <amodra@bigpond.net.au>
+	PR 7041
+	* elf64-ppc.c (func_desc_adjust): Correct logic making fake function
+	descriptors.  Similarly correct making function descriptors dynamic.
+
 	2008-11-14  Nathan Sidwell  <nathan@codesourcery.com>
 	* elf.c (assign_file_positions_for_load_sections): Use header_size
 	to avoid moving the load address of file headers.
