@@ -2,6 +2,7 @@
 #ld: -r --gc-sections --entry foo
 #readelf: -g --wide
 #notarget: ia64-*-* mep-*-*
+#xfail: dlx-*-* openrisc-*-* or32-*-* alpha-*-* arc-*-*
 
 COMDAT group section \[[ 0-9]+\] `.group' \[foo\] contains 2 sections:
    \[Index\]    Name

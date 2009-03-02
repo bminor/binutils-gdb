@@ -1205,7 +1205,13 @@ lang_finish (void)
   In this case it is probably an error to create a region that has
   already been created.  If we are not inside a MEMORY block it is
   dubious to use an undeclared region name (except DEFAULT_MEMORY_REGION)
-  and so we issue a warning.  */
+  and so we issue a warning.
+  
+  Each region has at least one name.  The first name is either
+  DEFAULT_MEMORY_REGION or the name given in the MEMORY block.  You can add
+  alias names to an existing region within a script with
+  REGION_ALIAS (alias, region_name).  Each name corresponds to at most one
+  region.  */
 
 static lang_memory_region_type *lang_memory_region_list;
 static lang_memory_region_type **lang_memory_region_list_tail
@@ -1214,28 +1220,31 @@ static lang_memory_region_type **lang_memory_region_list_tail
 lang_memory_region_type *
 lang_memory_region_lookup (const char *const name, bfd_boolean create)
 {
-  lang_memory_region_type *p;
+  lang_memory_region_name *n;
+  lang_memory_region_type *r;
   lang_memory_region_type *new;
 
   /* NAME is NULL for LMA memspecs if no region was specified.  */
   if (name == NULL)
     return NULL;
 
-  for (p = lang_memory_region_list; p != NULL; p = p->next)
-    if (strcmp (p->name, name) == 0)
-      {
-	if (create)
-	  einfo (_("%P:%S: warning: redeclaration of memory region '%s'\n"),
-		 name);
-	return p;
-      }
+  for (r = lang_memory_region_list; r != NULL; r = r->next)
+    for (n = &r->name_list; n != NULL; n = n->next)
+      if (strcmp (n->name, name) == 0)
+        {
+          if (create)
+            einfo (_("%P:%S: warning: redeclaration of memory region `%s'\n"),
+                   name);
+          return r;
+        }
 
   if (!create && strcmp (name, DEFAULT_MEMORY_REGION))
-    einfo (_("%P:%S: warning: memory region %s not declared\n"), name);
+    einfo (_("%P:%S: warning: memory region `%s' not declared\n"), name);
 
   new = stat_alloc (sizeof (lang_memory_region_type));
 
-  new->name = xstrdup (name);
+  new->name_list.name = xstrdup (name);
+  new->name_list.next = NULL;
   new->next = NULL;
   new->origin = 0;
   new->length = ~(bfd_size_type) 0;
@@ -1251,8 +1260,50 @@ lang_memory_region_lookup (const char *const name, bfd_boolean create)
   return new;
 }
 
+void
+lang_memory_region_alias (const char * alias, const char * region_name)
+{
+  lang_memory_region_name * n;
+  lang_memory_region_type * r;
+  lang_memory_region_type * region;
+
+  /* The default region must be unique.  This ensures that it is not necessary
+     to iterate through the name list if someone wants the check if a region is
+     the default memory region.  */
+  if (strcmp (region_name, DEFAULT_MEMORY_REGION) == 0
+      || strcmp (alias, DEFAULT_MEMORY_REGION) == 0)
+    einfo (_("%F%P:%S: error: alias for default memory region\n"));
+
+  /* Look for the target region and check if the alias is not already
+     in use.  */
+  region = NULL;
+  for (r = lang_memory_region_list; r != NULL; r = r->next)
+    for (n = &r->name_list; n != NULL; n = n->next)
+      {
+        if (region == NULL && strcmp (n->name, region_name) == 0)
+          region = r;
+        if (strcmp (n->name, alias) == 0)
+          einfo (_("%F%P:%S: error: redefinition of memory region "
+                   "alias `%s'\n"),
+                 alias);
+      }
+
+  /* Check if the target region exists.  */
+  if (region == NULL)
+    einfo (_("%F%P:%S: error: memory region `%s' "
+             "for alias `%s' does not exist\n"),
+           region_name,
+           alias);
+
+  /* Add alias to region name list.  */
+  n = stat_alloc (sizeof (lang_memory_region_name));
+  n->name = xstrdup (alias);
+  n->next = region->name_list.next;
+  region->name_list.next = n;
+}
+
 static lang_memory_region_type *
-lang_memory_default (asection *section)
+lang_memory_default (asection * section)
 {
   lang_memory_region_type *p;
 
@@ -1847,7 +1898,7 @@ lang_map (void)
       char buf[100];
       int len;
 
-      fprintf (config.map_file, "%-16s ", m->name);
+      fprintf (config.map_file, "%-16s ", m->name_list.name);
 
       sprintf_vma (buf, m->origin);
       minfo ("0x%s ", buf);
@@ -4462,8 +4513,8 @@ lang_check_section_addresses (void)
      a bfd_vma quantity in decimal.  */
   for (m = lang_memory_region_list; m; m = m->next)
     if (m->had_full_message)
-      einfo (_("%X%P: region %s overflowed by %ld bytes\n"),
-	     m->name, (long)(m->current - (m->origin + m->length)));
+      einfo (_("%X%P: region `%s' overflowed by %ld bytes\n"),
+	     m->name_list.name, (long)(m->current - (m->origin + m->length)));
 
 }
 
@@ -4485,21 +4536,21 @@ os_region_check (lang_output_section_statement_type *os,
     {
       if (tree != NULL)
 	{
-	  einfo (_("%X%P: address 0x%v of %B section %s"
-		   " is not within region %s\n"),
+	  einfo (_("%X%P: address 0x%v of %B section `%s'"
+		   " is not within region `%s'\n"),
 		 region->current,
 		 os->bfd_section->owner,
 		 os->bfd_section->name,
-		 region->name);
+		 region->name_list.name);
 	}
       else if (!region->had_full_message)
 	{
 	  region->had_full_message = TRUE;
 
-	  einfo (_("%X%P: %B section %s will not fit in region %s\n"),
+	  einfo (_("%X%P: %B section `%s' will not fit in region `%s'\n"),
 		 os->bfd_section->owner,
 		 os->bfd_section->name,
-		 region->name);
+		 region->name_list.name);
 	}
     }
 }
@@ -4588,8 +4639,8 @@ lang_size_sections_1
 		       from the region specification.  */
 		    if (os->region == NULL
 			|| ((os->bfd_section->flags & (SEC_ALLOC | SEC_LOAD))
-			    && os->region->name[0] == '*'
-			    && strcmp (os->region->name,
+			    && os->region->name_list.name[0] == '*'
+			    && strcmp (os->region->name_list.name,
 				       DEFAULT_MEMORY_REGION) == 0))
 		      {
 			os->region = lang_memory_default (os->bfd_section);
@@ -4602,10 +4653,10 @@ lang_size_sections_1
 			&& !IGNORE_SECTION (os->bfd_section)
 			&& ! link_info.relocatable
 			&& check_regions
-			&& strcmp (os->region->name,
+			&& strcmp (os->region->name_list.name,
 				   DEFAULT_MEMORY_REGION) == 0
 			&& lang_memory_region_list != NULL
-			&& (strcmp (lang_memory_region_list->name,
+			&& (strcmp (lang_memory_region_list->name_list.name,
 				    DEFAULT_MEMORY_REGION) != 0
 			    || lang_memory_region_list->next != NULL)
 			&& expld.phase != lang_mark_phase_enum)

@@ -2785,6 +2785,7 @@ In this section we describe the simple linker script commands.
 * Format Commands::		Commands dealing with object file formats
 @end ifclear
 
+* REGION_ALIAS::		Assign alias names to memory regions
 * Miscellaneous Commands::	Other linker script commands
 @end menu
 
@@ -2968,6 +2969,162 @@ is used but @code{OUTPUT_FORMAT} is not, then the last @code{TARGET}
 command is also used to set the format for the output file.  @xref{BFD}.
 @end table
 @end ifclear
+
+@node REGION_ALIAS
+@subsection Assign alias names to memory regions
+@kindex REGION_ALIAS(@var{alias}, @var{region})
+@cindex region alias
+@cindex region names
+
+Alias names can be added to existing memory regions created with the
+@ref{MEMORY} command.  Each name corresponds to at most one memory region.
+
+@smallexample
+REGION_ALIAS(@var{alias}, @var{region})
+@end smallexample
+
+The @code{REGION_ALIAS} function creates an alias name @var{alias} for the
+memory region @var{region}.  This allows a flexible mapping of output sections
+to memory regions.  An example follows.
+
+Suppose we have an application for embedded systems which come with various
+memory storage devices.  All have a general purpose, volatile memory @code{RAM}
+that allows code execution or data storage.  Some may have a read-only,
+non-volatile memory @code{ROM} that allows code execution and read-only data
+access.  The last variant is a read-only, non-volatile memory @code{ROM2} with
+read-only data access and no code execution capability.  We have four output
+sections:
+
+@itemize @bullet
+@item
+@code{.text} program code;
+@item
+@code{.rodata} read-only data;
+@item
+@code{.data} read-write initialized data;
+@item
+@code{.bss} read-write zero initialized data.
+@end itemize
+
+The goal is to provide a linker command file that contains a system independent
+part defining the output sections and a system dependent part mapping the
+output sections to the memory regions available on the system.  Our embedded
+systems come with three different memory setups @code{A}, @code{B} and
+@code{C}:
+@multitable @columnfractions .25 .25 .25 .25
+@item Section @tab Variant A @tab Variant B @tab Variant C
+@item .text @tab RAM @tab ROM @tab ROM 
+@item .rodata @tab RAM @tab ROM @tab ROM2
+@item .data @tab RAM @tab RAM/ROM @tab RAM/ROM2
+@item .bss @tab RAM @tab RAM @tab RAM
+@end multitable
+The notation @code{RAM/ROM} or @code{RAM/ROM2} means that this section is
+loaded into region @code{ROM} or @code{ROM2} respectively.  Please note that
+the load address of the @code{.data} section starts in all three variants at
+the end of the @code{.rodata} section.
+
+The base linker script that deals with the output sections follows.  It
+includes the system dependent @code{linkcmds.memory} file that describes the
+memory layout:
+@smallexample
+INCLUDE linkcmds.memory
+
+SECTIONS
+  @{
+    .text :
+      @{
+        *(.text)
+      @} > REGION_TEXT
+    .rodata :
+      @{
+        *(.rodata)
+        rodata_end = .;
+      @} > REGION_RODATA
+    .data : AT (rodata_end)
+      @{
+        data_start = .;
+        *(.data)
+      @} > REGION_DATA
+    data_size = SIZEOF(.data);
+    data_load_start = LOADADDR(.data);
+    .bss :
+      @{
+        *(.bss)
+      @} > REGION_BSS
+  @}
+@end smallexample
+
+Now we need three different @code{linkcmds.memory} files to define memory
+regions and alias names.  The content of @code{linkcmds.memory} for the three
+variants @code{A}, @code{B} and @code{C}:
+@table @code
+@item A
+Here everything goes into the @code{RAM}.
+@smallexample
+MEMORY
+  @{
+    RAM : ORIGIN = 0, LENGTH = 4M
+  @}
+
+REGION_ALIAS("REGION_TEXT", RAM);
+REGION_ALIAS("REGION_RODATA", RAM);
+REGION_ALIAS("REGION_DATA", RAM);
+REGION_ALIAS("REGION_BSS", RAM);
+@end smallexample
+@item B
+Program code and read-only data go into the @code{ROM}.  Read-write data goes
+into the @code{RAM}.  An image of the initialized data is loaded into the
+@code{ROM} and will be copied during system start into the @code{RAM}.
+@smallexample
+MEMORY
+  @{
+    ROM : ORIGIN = 0, LENGTH = 3M
+    RAM : ORIGIN = 0x10000000, LENGTH = 1M
+  @}
+
+REGION_ALIAS("REGION_TEXT", ROM);
+REGION_ALIAS("REGION_RODATA", ROM);
+REGION_ALIAS("REGION_DATA", RAM);
+REGION_ALIAS("REGION_BSS", RAM);
+@end smallexample
+@item C
+Program code goes into the @code{ROM}.  Read-only data goes into the
+@code{ROM2}.  Read-write data goes into the @code{RAM}.  An image of the
+initialized data is loaded into the @code{ROM2} and will be copied during
+system start into the @code{RAM}.
+@smallexample
+MEMORY
+  @{
+    ROM : ORIGIN = 0, LENGTH = 2M
+    ROM2 : ORIGIN = 0x10000000, LENGTH = 1M
+    RAM : ORIGIN = 0x20000000, LENGTH = 1M
+  @}
+
+REGION_ALIAS("REGION_TEXT", ROM);
+REGION_ALIAS("REGION_RODATA", ROM2);
+REGION_ALIAS("REGION_DATA", RAM);
+REGION_ALIAS("REGION_BSS", RAM);
+@end smallexample
+@end table
+
+It is possible to write a common system initialization routine to copy the
+@code{.data} section from @code{ROM} or @code{ROM2} into the @code{RAM} if
+necessary:
+@smallexample
+#include <string.h>
+
+extern char data_start [];
+extern char data_size [];
+extern char data_load_start [];
+
+void copy_data(void)
+@{
+  if (data_start != data_load_start)
+    @{
+      memcpy(data_start, data_load_start, (size_t) data_size);
+    @}
+@}
+@end smallexample
 
 @node Miscellaneous Commands
 @subsection Other Linker Script Commands
@@ -4310,7 +4467,9 @@ The @var{name} is a name used in the linker script to refer to the
 region.  The region name has no meaning outside of the linker script.
 Region names are stored in a separate name space, and will not conflict
 with symbol names, file names, or section names.  Each memory region
-must have a distinct name.
+must have a distinct name within the @code{MEMORY} command.  However you can
+add later alias names to existing memory regions with the @ref{REGION_ALIAS}
+command.  
 
 @cindex memory region attributes
 The @var{attr} string is an optional list of attributes that specify

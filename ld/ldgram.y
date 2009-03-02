@@ -1,6 +1,6 @@
 /* A YACC grammar to parse a superset of the AT&T linker scripting language.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
    This file is part of the GNU Binutils.
@@ -131,6 +131,7 @@ static int error_index;
 %token SEGMENT_START
 %token INCLUDE
 %token MEMORY
+%token REGION_ALIAS
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token DEFINED TARGET_K SEARCH_DIR MAP ENTRY
 %token <integer> NEXT
@@ -352,6 +353,8 @@ ifile_p1:
 		{ lang_add_insert ($3, 0); }
 	|	INSERT_K BEFORE NAME
 		{ lang_add_insert ($3, 1); }
+	|	REGION_ALIAS '(' NAME ',' NAME ')'
+		{ lang_memory_region_alias ($3, $5); }
 	;
 
 input_list:

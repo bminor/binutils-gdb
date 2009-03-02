@@ -126,3 +126,13 @@ if ![ld_simple_link $ld tmpdir/script "$flags -T $srcdir/$subdir/memory.t tmpdir
 } else {
     check_script
 }
+
+set test_script_list [glob $srcdir/$subdir/region-alias-*.t]
+
+foreach test_script $test_script_list {
+    if ![ld_simple_link $ld tmpdir/script "$flags -T $test_script tmpdir/script.o"] {
+        xfail "REGION_ALIAS: $test_script"
+    } else {
+        xpass "REGION_ALIAS: $test_script"
+    }
+}

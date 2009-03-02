@@ -43,13 +43,19 @@ struct _fill_type
 
 typedef struct statement_list
 {
-  union lang_statement_union *head;
-  union lang_statement_union **tail;
+  union lang_statement_union *  head;
+  union lang_statement_union ** tail;
 } lang_statement_list_type;
+
+typedef struct memory_region_name_struct
+{
+  const char * name;
+  struct memory_region_name_struct * next;
+} lang_memory_region_name;
 
 typedef struct memory_region_struct
 {
-  char *name;
+  lang_memory_region_name name_list;
   struct memory_region_struct *next;
   bfd_vma origin;
   bfd_size_type length;
@@ -429,7 +435,8 @@ struct lang_definedness_hash_entry
 
 /* Used by place_orphan to keep track of orphan sections and statements.  */
 
-struct orphan_save {
+struct orphan_save
+{
   const char *name;
   flagword flags;
   lang_output_section_statement_type *os;
@@ -457,10 +464,10 @@ extern void lang_init
   (void);
 extern void lang_finish
   (void);
-extern lang_memory_region_type *lang_memory_region_lookup
-  (const char *const, bfd_boolean);
-extern lang_memory_region_type *lang_memory_region_default
-  (asection *);
+extern lang_memory_region_type * lang_memory_region_lookup
+  (const char * const, bfd_boolean);
+extern void lang_memory_region_alias
+  (const char *, const char *);
 extern void lang_map
   (void);
 extern void lang_set_flags

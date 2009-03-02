@@ -1,3 +1,11 @@
+2009-03-02  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* ld-scripts/regions-alias-1.t: New file.
+	* ld-scripts/regions-alias-2.t: New file.
+	* ld-scripts/regions-alias-3.t: New file.
+	* ld-scripts/regions-alias-4.t: New file.
+	* ld-scripts/script.exp: Run region alias tests.
+
 2009-02-27  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-pe/pe.exp:  Disable auto-import when linking on Cygwin.
