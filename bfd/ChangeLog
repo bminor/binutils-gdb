@@ -1,5 +1,10 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2009-01-14  Alan Modra  <amodra@bigpond.net.au>
+	PR 9735
+	* syms.c (_bfd_stab_section_find_nearest_line): Don't free
+	saved filename, use bfd_alloc rather than bfd_malloc for it.
+
 	2009-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	* elflink.c (_bfd_elf_section_already_linked): Handle g++-3.4
 	relocations in `.gnu.linkonce.r.*' referencing its `.gnu.linkonce.t.*'.
