@@ -1,6 +1,6 @@
 /* ieee.c -- Read and write IEEE-695 debugging information.
-   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2006, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2006, 2007,
+   2008, 2009  Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -1069,6 +1069,16 @@ parse_ieee_bb (struct ieee_info *info, const bfd_byte **pp)
 	      break;
 	  }
 
+	if (! info->saw_filename)
+	  {
+	    namcopy = savestring (name, namlen);
+	    if (namcopy == NULL)
+	      return FALSE;
+	    if (! debug_set_filename (info->dhandle, namcopy))
+	      return FALSE;
+	    info->saw_filename = TRUE;
+	  }
+
 	namcopy = savestring (name, namlen);
 	if (namcopy == NULL)
 	  return FALSE;
@@ -1786,6 +1796,7 @@ parse_ieee_ty (struct ieee_info *info, const bfd_byte **pp)
       break;
 
     case 'V':
+    case 'v':
       /* Void.  This is not documented, but the MRI compiler emits it.  */
       type = debug_make_void_type (dhandle);
       break;

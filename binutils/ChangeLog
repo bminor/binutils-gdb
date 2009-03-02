@@ -1,3 +1,9 @@
+2009-03-02  Sebastian Biallas  <sb@biallas.net>
+
+	* ieee.c (parse_ieee_ty): Add support for undocumented 'v' type.
+	(parse_ieee_bb): Set the filename if it has not already been
+	discovered.
+
 2009-03-02  Cary Coutant  <ccoutant@google.com>
 	
 	* readelf.c (adjust_relative_path): New function.
