@@ -1,3 +1,8 @@
+2009-03-02  Alan Modra  <amodra@bigpond.net.au>
+
+	2008-09-28  Alan Modra  <amodra@bigpond.net.au>
+	* objcopy.c (setup_section): Set elf_group_id.
+
 2008-12-23  Nick Clifton  <nickc@redhat.com>
 
 	* windmc.c (main): Use correct type for file length.

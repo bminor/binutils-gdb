@@ -1863,13 +1863,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       return TRUE;
 
     case SHT_GROUP:
-      /* We need a BFD section for objcopy and relocatable linking,
-	 and it's handy to have the signature available as the section
-	 name.  */
       if (! IS_VALID_GROUP_SECTION_HEADER (hdr))
-	return FALSE;
-      name = group_signature (abfd, hdr);
-      if (name == NULL)
 	return FALSE;
       if (!_bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
 	return FALSE;
@@ -6004,7 +5998,7 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
 	  if (elf_section_flags (isec) & SHF_GROUP)
 	    elf_section_flags (osec) |= SHF_GROUP;
 	  elf_next_in_group (osec) = elf_next_in_group (isec);
-	  elf_group_name (osec) = elf_group_name (isec);
+	  elf_section_data (osec)->group = elf_section_data (isec)->group;
 	}
     }
 
