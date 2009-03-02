@@ -4158,6 +4158,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   bfd_size_type maxpagesize;
   unsigned int alloc;
   unsigned int i, j;
+  bfd_vma header_pad = 0;
 
   if (link_info == NULL
       && !_bfd_elf_map_sections_to_segments (abfd, link_info))
@@ -4165,7 +4166,11 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
   alloc = 0;
   for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
-    ++alloc;
+    {
+      ++alloc;
+      if (m->header_size)
+	header_pad = m->header_size;
+    }
 
   elf_elfheader (abfd)->e_phoff = bed->s->sizeof_ehdr;
   elf_elfheader (abfd)->e_phentsize = bed->s->sizeof_phdr;
@@ -4208,6 +4213,11 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
   off = bed->s->sizeof_ehdr;
   off += alloc * bed->s->sizeof_phdr;
+  if (header_pad < (bfd_vma) off)
+    header_pad = 0;
+  else
+    header_pad -= off;
+  off += header_pad;
 
   for (m = elf_tdata (abfd)->segment_map, p = phdrs, j = 0;
        m != NULL;
@@ -4395,6 +4405,11 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
 	  p->p_filesz += alloc * bed->s->sizeof_phdr;
 	  p->p_memsz += alloc * bed->s->sizeof_phdr;
+	  if (m->count)
+	    {
+	      p->p_filesz += header_pad;
+	      p->p_memsz += header_pad;
+	    }
 	}
 
       if (p->p_type == PT_LOAD
@@ -5877,6 +5892,10 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	    phdr_included = TRUE;
 	}
 
+      if (map->includes_filehdr && first_section)
+	/* We need to keep the space used by the headers fixed.  */
+	map->header_size = first_section->vma - segment->p_vaddr;
+      
       if (!map->includes_phdrs
 	  && !map->includes_filehdr
 	  && map->p_paddr_valid)

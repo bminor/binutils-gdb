@@ -1,5 +1,11 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2008-11-14  Nathan Sidwell  <nathan@codesourcery.com>
+	* elf.c (assign_file_positions_for_load_sections): Use header_size
+	to avoid moving the load address of file headers.
+	(assign_file_positions_for_load_sections): Set header_size for
+	segments containing the file header.
+
 	2008-11-13  Hans-Peter Nilsson  <hp@axis.com>
 	PR ld/7028
 	* elf.c (assign_file_positions_for_load_sections): Allocate phrds
