@@ -1,5 +1,9 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2009-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	* elflink.c (_bfd_elf_section_already_linked): Handle g++-3.4
+	relocations in `.gnu.linkonce.r.*' referencing its `.gnu.linkonce.t.*'.
+
 	2008-12-11  Alan Modra  <amodra@bigpond.net.au>
 	PR 7041
 	* elf64-ppc.c (func_desc_adjust): Correct logic making fake function
