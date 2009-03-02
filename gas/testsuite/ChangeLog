@@ -1,5 +1,13 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2008-12-04  Ben Elliston  <bje@au.ibm.com>
+	* gas/ppc/booke.s: Remove booke64 instructions.
+	* gas/ppc/booke.d: Update expected disassembly output.
+	* gas/ppc/booke_xcoff.s: Use -mbooke/-Mbooke.
+	* gas/ppc/booke_xcoff.d: Likewise.
+	* gas/ppc/booke_xcoff64.d: Likewise.
+	* gas/ppc/booke_xcoff64.s: Likewise.
+
 	2008-09-09  Peter Bergner  <bergner@vnet.ibm.com>
 	* gas/ppc/common.s: New test.
 	* gas/ppc/common.d: Likewise.

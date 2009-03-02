@@ -1,3 +1,14 @@
+2009-03-02  Alan Modra  <amodra@bigpond.net.au>
+
+	2008-12-04  Ben Elliston  <bje@au.ibm.com>
+	* ppc-dis.c (powerpc_init_dialect): Do not set PPC_OPCODE_BOOKE
+	for -Mbooke.
+	(print_ppc_disassembler_options): Update usage.
+	* ppc-opc.c (DE, DES, DEO, DE_MASK): Remove.
+	(BOOKE64): Remove.
+	(PPCCHLK64): Likewise.
+	(powerpc_opcodes): Remove all BOOKE64 instructions.
+
 2008-11-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (extract_sprg): Correct operand range check.

@@ -1,5 +1,12 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2008-12-04  Ben Elliston  <bje@au.ibm.com>
+	* config/tc-ppc.c (parse_cpu): Remove booke64 support. Update
+	usage strings.
+	(ppc_setup_opcodes): Likewise, remove booke64 support.
+	* doc/c-ppc.texi (PowerPC-Opts): Remove -mbooke32 and -mbooke64.
+	* doc/as.texinfo (Overview): Likewise.
+
 	2008-09-09  Peter Bergner  <bergner@vnet.ibm.com>
 	* config/tc-ppc.c (ppc_setup_opcodes): Simplify POWER4/NOPOWER4 test.
 	Remove POWER5 and POWER6 tests.

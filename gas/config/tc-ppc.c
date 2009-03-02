@@ -919,12 +919,6 @@ parse_cpu (const char *arg)
     {
       ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_32;
     }
-  /* -mbooke64 means enable 64-bit BookE support.  */
-  else if (strcmp (arg, "booke64") == 0)
-    {
-      ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE
-		 | PPC_OPCODE_BOOKE64 | PPC_OPCODE_64);
-    }
   else if (strcmp (arg, "power4") == 0)
     {
       ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
@@ -1149,8 +1143,7 @@ PowerPC options:\n\
   fprintf (stream, _("\
 -mppc64, -m620		generate code for PowerPC 620/625/630\n\
 -mppc64bridge		generate code for PowerPC 64, including bridge insns\n\
--mbooke64		generate code for 64-bit PowerPC BookE\n\
--mbooke, mbooke32	generate code for 32-bit PowerPC BookE\n\
+-mbooke			generate code for 32-bit PowerPC BookE\n\
 -mpower4		generate code for Power4 architecture\n\
 -mpower5		generate code for Power5 architecture\n\
 -mpower6		generate code for Power6 architecture\n\
@@ -1359,8 +1352,7 @@ ppc_setup_opcodes (void)
 
 		 There are also cases where the table needs to be out
 		 of order to disassemble the correct instruction for
-		 processor variants.  eg. "lhae" booke64 insn must be
-		 found before "ld" ppc64 insn.  */
+		 processor variants.  */
 	      else if (0)
 		{
 		  unsigned long t1 = op[0].opcode;
@@ -1420,14 +1412,6 @@ ppc_setup_opcodes (void)
 	      || ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64))
 		  == (ppc_cpu & (PPC_OPCODE_32 | PPC_OPCODE_64)))
 	      || (ppc_cpu & PPC_OPCODE_64_BRIDGE) != 0)
-	  /* Certain instructions (eg: extsw) do not exist in the
-	     32-bit BookE instruction set, but they do exist in the
-	     64-bit BookE instruction set, and other PPC instruction
-	     sets.  Check to see if the opcode has the BOOKE64 flag set.
-	     If it does make sure that the target CPU is not the BookE32.  */
-	  && ((op->flags & PPC_OPCODE_BOOKE64) == 0
-	      || (ppc_cpu & PPC_OPCODE_BOOKE64) == PPC_OPCODE_BOOKE64
-	      || (ppc_cpu & PPC_OPCODE_BOOKE) == 0)
 	  && ((ppc_cpu & PPC_OPCODE_POWER4) == 0
 	      || (op->flags & PPC_OPCODE_NOPOWER4) == 0))
 	{
