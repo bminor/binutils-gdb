@@ -1,3 +1,14 @@
+2009-03-02  Alan Modra  <amodra@bigpond.net.au>
+
+	2008-09-09  Peter Bergner  <bergner@vnet.ibm.com>
+	* gas/ppc/common.s: New test.
+	* gas/ppc/common.d: Likewise.
+	* gas/ppc/power4_32.s: Likewise.
+	* gas/ppc/power4_32.d: Likewise.
+	* gas/ppc/power6.s: Add attn, mtcr, mtcrf, mfcr, dcbz.
+	* gas/ppc/power6.d: Likewise.
+	* gas/ppc/ppc.exp: Run power4_32 test.
+
 2009-01-08  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* gas/mips/mips1-fp.s, gas/mips/mips1-fp.d, gas/mips/mips1-fp.l:

@@ -1,3 +1,9 @@
+2009-03-02  Alan Modra  <amodra@bigpond.net.au>
+
+	2008-09-09  Peter Bergner  <bergner@vnet.ibm.com>
+	* config/tc-ppc.c (ppc_setup_opcodes): Simplify POWER4/NOPOWER4 test.
+	Remove POWER5 and POWER6 tests.
+
 2009-01-14  Jakub Jelinek  <jakub@redhat.com>
 
 	* Makefile.am (ehopt.o): Add struc-symbol.h.

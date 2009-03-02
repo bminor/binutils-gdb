@@ -1428,15 +1428,8 @@ ppc_setup_opcodes (void)
 	  && ((op->flags & PPC_OPCODE_BOOKE64) == 0
 	      || (ppc_cpu & PPC_OPCODE_BOOKE64) == PPC_OPCODE_BOOKE64
 	      || (ppc_cpu & PPC_OPCODE_BOOKE) == 0)
-	  && ((op->flags & (PPC_OPCODE_POWER4 | PPC_OPCODE_NOPOWER4)) == 0
-	      || ((op->flags & PPC_OPCODE_POWER4)
-		  == (ppc_cpu & PPC_OPCODE_POWER4)))
-	  && ((op->flags & PPC_OPCODE_POWER5) == 0
-	      || ((op->flags & PPC_OPCODE_POWER5)
-		  == (ppc_cpu & PPC_OPCODE_POWER5)))
-	  && ((op->flags & PPC_OPCODE_POWER6) == 0
-	      || ((op->flags & PPC_OPCODE_POWER6)
-		  == (ppc_cpu & PPC_OPCODE_POWER6))))
+	  && ((ppc_cpu & PPC_OPCODE_POWER4) == 0
+	      || (op->flags & PPC_OPCODE_NOPOWER4) == 0))
 	{
 	  const char *retval;
 
