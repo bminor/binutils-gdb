@@ -365,7 +365,8 @@ CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 # your system doesn't have fcntl.h in /usr/include (which is where it
 # should be according to Posix).
 DEFS = @DEFS@
-GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/config -DLOCALEDIR="\"$(localedir)\"" $(DEFS)
+GDB_CFLAGS = -I. -I$(srcdir) -I$(srcdir)/common -I$(srcdir)/config \
+	-DLOCALEDIR="\"$(localedir)\"" $(DEFS)
 
 # MH_CFLAGS, if defined, has host-dependent CFLAGS from the config directory.
 GLOBAL_CFLAGS = $(MH_CFLAGS)
@@ -1033,7 +1034,7 @@ init.c: $(INIT_FILES)
 	    -e '/^[a-z0-9A-Z_]*_[SU].[co]$$/d' \
 	    -e '/[a-z0-9A-Z_]*-exp.tab.[co]$$/d' \
 	    -e 's/\.[co]$$/.c/' \
-	    -e 's,signals\.c,signals/signals\.c,' \
+	    -e 's,signals\.c,common/signals\.c,' \
 	    -e 's|^\([^  /][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do \
 	    sed -n -e 's/^_initialize_\([a-z_0-9A-Z]*\).*/\1/p' $$f 2>/dev/null; \
@@ -1743,13 +1744,13 @@ mi-common.o: $(srcdir)/mi/mi-common.c
 	$(POSTCOMPILE)
 
 #
-# gdb/signals/ dependencies
+# gdb/common/ dependencies
 #
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the sub-directory.
 
-signals.o: $(srcdir)/signals/signals.c
-	$(COMPILE) $(srcdir)/signals/signals.c
+signals.o: $(srcdir)/common/signals.c
+	$(COMPILE) $(srcdir)/common/signals.c
 	$(POSTCOMPILE)
 
 #

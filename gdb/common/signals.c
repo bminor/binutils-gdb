@@ -23,13 +23,14 @@
 #include "server.h"
 #else
 #include "defs.h"
-#include "target.h"
 #include "gdb_string.h"
 #endif
 
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
+
+#include "gdb_signals.h"
 
 struct gdbarch;
 
@@ -807,6 +808,8 @@ target_signal_to_host (enum target_signal oursig)
     return targ_signo;
 }
 
+#ifndef GDBSERVER
+
 /* In some circumstances we allow a command to specify a numeric
    signal.  The idea is to keep these circumstances limited so that
    users (and scripts) develop portable habits.  For comparison,
@@ -824,7 +827,6 @@ target_signal_from_command (int num)
 Use \"info signals\" for a list of symbolic signals.");
 }
 
-#ifndef GDBSERVER
 extern initialize_file_ftype _initialize_signals; /* -Wmissing-prototype */
 
 void
@@ -833,7 +835,6 @@ _initialize_signals (void)
   if (strcmp (signals[TARGET_SIGNAL_LAST].string, "TARGET_SIGNAL_MAGIC") != 0)
     internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
-#endif
 
 int
 default_target_signal_to_host (struct gdbarch *gdbarch, enum target_signal ts)
@@ -846,3 +847,5 @@ default_target_signal_from_host (struct gdbarch *gdbarch, int signo)
 {
   return target_signal_from_host (signo);
 }
+
+#endif /* ! GDBSERVER */

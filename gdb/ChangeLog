@@ -1,5 +1,17 @@
 2009-03-01  Doug Evans  <dje@google.com>
 
+	* Makefile.in (GDB_CFLAGS): Add -I$(srcdir)/common.
+	(init.c): signals/ -> common/.
+	(signals.o): Update.
+	* target.h (target_signal_to_string,target_signal_to_string)
+	(target_signal_from_name,target_signal_to_host_p)
+	(target_signal_from_host,target_signal_to_host): Move to ...
+	* common/gdb_signals.h: ... here.  New file.
+	* common/signals.c: Moved here from signals/signals.c.
+	#include gdb_signals.h, remove #include of target.h in gdb case.
+	(target_signal_from_command,default_target_signal_to_host)
+	(default_target_signal_from_host): Move inside #ifndef GDBSERVER.
+
 	Include thread ID in target_wait debugging output.
 	* infrun.c (print_target_wait_results): New function.
 	(wait_for_inferior,fetch_inferior_event): Call it.

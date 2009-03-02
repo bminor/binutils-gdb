@@ -110,7 +110,7 @@ struct dll_info
 
 #include "regcache.h"
 #include "gdb/signals.h"
-
+#include "gdb_signals.h"
 #include "target.h"
 #include "mem-break.h"
 
@@ -264,12 +264,6 @@ void buffer_xml_printf (struct buffer *buffer, const char *format, ...)
   buffer_grow (BUFFER, STRING, strlen (STRING))
 #define buffer_grow_str0(BUFFER,STRING)                        \
   buffer_grow (BUFFER, STRING, strlen (STRING) + 1)
-
-/* Functions from ``signals.c''.  */
-enum target_signal target_signal_from_host (int hostsig);
-int target_signal_to_host_p (enum target_signal oursig);
-int target_signal_to_host (enum target_signal oursig);
-const char *target_signal_to_name (enum target_signal);
 
 /* Functions from utils.c */
 

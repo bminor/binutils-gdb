@@ -55,6 +55,7 @@ struct regcache;
 #include "dcache.h"
 #include "memattr.h"
 #include "vec.h"
+#include "gdb_signals.h"
 
 enum strata
   {
@@ -176,15 +177,6 @@ enum inferior_event_type
        'step n' like commands.  */
     INF_EXEC_CONTINUE
   };
-
-/* Return the string for a signal.  */
-extern const char *target_signal_to_string (enum target_signal);
-
-/* Return the name (SIGHUP, etc.) for a signal.  */
-extern const char *target_signal_to_name (enum target_signal);
-
-/* Given a name (SIGHUP, etc.), return its signal.  */
-enum target_signal target_signal_from_name (const char *);
 
 /* Target objects which can be transfered using target_read,
    target_write, et cetera.  */
@@ -1290,28 +1282,7 @@ extern int remote_timeout;
 /* This is for native targets which use a unix/POSIX-style waitstatus.  */
 extern void store_waitstatus (struct target_waitstatus *, int);
 
-/* Predicate to target_signal_to_host(). Return non-zero if the enum
-   targ_signal SIGNO has an equivalent ``host'' representation.  */
-/* FIXME: cagney/1999-11-22: The name below was chosen in preference
-   to the shorter target_signal_p() because it is far less ambigious.
-   In this context ``target_signal'' refers to GDB's internal
-   representation of the target's set of signals while ``host signal''
-   refers to the target operating system's signal.  Confused?  */
-
-extern int target_signal_to_host_p (enum target_signal signo);
-
-/* Convert between host signal numbers and enum target_signal's.
-   target_signal_to_host() returns 0 and prints a warning() on GDB's
-   console if SIGNO has no equivalent host representation.  */
-/* FIXME: cagney/1999-11-22: Here ``host'' is used incorrectly, it is
-   refering to the target operating system's signal numbering.
-   Similarly, ``enum target_signal'' is named incorrectly, ``enum
-   gdb_signal'' would probably be better as it is refering to GDB's
-   internal representation of a target operating system's signal.  */
-
-extern enum target_signal target_signal_from_host (int);
-extern int target_signal_to_host (enum target_signal);
-
+/* These are in common/signals.c, but they're only used by gdb.  */
 extern enum target_signal default_target_signal_from_host (struct gdbarch *,
 							   int);
 extern int default_target_signal_to_host (struct gdbarch *, 
@@ -1319,6 +1290,7 @@ extern int default_target_signal_to_host (struct gdbarch *,
 
 /* Convert from a number used in a GDB command to an enum target_signal.  */
 extern enum target_signal target_signal_from_command (int);
+/* End of files in common/signals.c.  */
 
 /* Set the show memory breakpoints mode to show, and installs a cleanup
    to restore it back to the current value.  */
