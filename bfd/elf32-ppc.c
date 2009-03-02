@@ -5600,7 +5600,7 @@ ppc_elf_relax_section (bfd *abfd,
   Elf_Internal_Rela *internal_relocs = NULL;
   Elf_Internal_Rela *irel, *irelend;
   struct one_fixup *fixups = NULL;
-  bfd_boolean changed;
+  unsigned changes = 0;
   struct ppc_elf_link_hash_table *htab;
   bfd_size_type trampoff;
   asection *got2;
@@ -5847,6 +5847,7 @@ ppc_elf_relax_section (bfd *abfd,
 	  fixups = f;
 
 	  trampoff += size;
+	  changes++;
 	}
       else
 	{
@@ -5897,7 +5898,6 @@ ppc_elf_relax_section (bfd *abfd,
     }
 
   /* Write out the trampolines.  */
-  changed = fixups != NULL;
   if (fixups != NULL)
     {
       const int *stub;
@@ -5963,7 +5963,7 @@ ppc_elf_relax_section (bfd *abfd,
   if (contents != NULL
       && elf_section_data (isec)->this_hdr.contents != contents)
     {
-      if (!changed && !link_info->keep_memory)
+      if (!changes && !link_info->keep_memory)
 	free (contents);
       else
 	{
@@ -5972,15 +5972,35 @@ ppc_elf_relax_section (bfd *abfd,
 	}
     }
 
-  if (elf_section_data (isec)->relocs != internal_relocs)
+  if (changes != 0)
     {
-      if (!changed)
-	free (internal_relocs);
-      else
-	elf_section_data (isec)->relocs = internal_relocs;
-    }
+      /* Append sufficient NOP relocs so we can write out relocation
+	 information for the trampolines.  */
+      Elf_Internal_Rela *new_relocs = bfd_malloc ((changes + isec->reloc_count)
+						  * sizeof (*new_relocs));
+      unsigned ix;
+      
+      if (!new_relocs)
+	goto error_return;
+      memcpy (new_relocs, internal_relocs,
+	      isec->reloc_count * sizeof (*new_relocs));
+      for (ix = changes; ix--;)
+	{
+	  irel = new_relocs + ix + isec->reloc_count;
 
-  *again = changed;
+	  irel->r_info = ELF32_R_INFO (0, R_PPC_NONE);
+	}
+      if (internal_relocs != elf_section_data (isec)->relocs)
+	free (internal_relocs);
+      elf_section_data (isec)->relocs = new_relocs;
+      isec->reloc_count += changes;
+      elf_section_data (isec)->rel_hdr.sh_size
+	+= changes * elf_section_data (isec)->rel_hdr.sh_entsize;
+    }
+  else if (elf_section_data (isec)->relocs != internal_relocs)
+    free (internal_relocs);
+
+  *again = changes != 0;
   return TRUE;
 
  error_return:
@@ -6986,6 +7006,17 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	    bfd_put_32 (output_bfd, t0, contents + rel->r_offset);
 	    bfd_put_32 (output_bfd, t1, contents + rel->r_offset + 4);
+
+	    /* Rewrite the reloc and convert one of the trailing nop
+	       relocs to describe this relocation.  */
+	    BFD_ASSERT (ELF32_R_TYPE (relend[-1].r_info) == R_PPC_NONE);
+	    /* The relocs are at the bottom 2 bytes */
+	    rel[0].r_offset += 2;
+	    memmove (rel + 1, rel, (relend - rel - 1) * sizeof (*rel));
+	    rel[0].r_info = ELF32_R_INFO (r_symndx, R_PPC_ADDR16_HA);
+	    rel[1].r_offset += 4;
+	    rel[1].r_info = ELF32_R_INFO (r_symndx, R_PPC_ADDR16_LO);
+	    rel++;
 	  }
 	  continue;
 
