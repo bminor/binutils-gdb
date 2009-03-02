@@ -3964,6 +3964,33 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 	   ibfd, obfd, in_abi, out_abi);
     }
 
+  /* Check for conflicting Tag_GNU_Power_ABI_Struct_Return attributes
+     and merge non-conflicting ones.  */
+  in_attr = &in_attrs[Tag_GNU_Power_ABI_Struct_Return];
+  out_attr = &out_attrs[Tag_GNU_Power_ABI_Struct_Return];
+  if (in_attr->i != out_attr->i)
+    {
+      out_attr->type = 1;
+      if (out_attr->i == 0)
+       out_attr->i = in_attr->i;
+      else if (in_attr->i == 0)
+       ;
+      else if (out_attr->i == 1 && in_attr->i == 2)
+       _bfd_error_handler
+         (_("Warning: %B uses r3/r4 for small structure returns, %B uses memory"), obfd, ibfd);
+      else if (out_attr->i == 2 && in_attr->i == 1)
+       _bfd_error_handler
+         (_("Warning: %B uses r3/r4 for small structure returns, %B uses memory"), ibfd, obfd);
+      else if (in_attr->i > 2)
+       _bfd_error_handler
+         (_("Warning: %B uses unknown small structure return convention %d"), ibfd,
+          in_attr->i);
+      else
+       _bfd_error_handler
+         (_("Warning: %B uses unknown small structure return convention %d"), obfd,
+          out_attr->i);
+    }
+
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
   _bfd_elf_merge_object_attributes (ibfd, obfd);
 

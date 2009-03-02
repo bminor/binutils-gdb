@@ -177,3 +177,6 @@ run_dump_test "attr-gnu-4-41"
 run_dump_test "attr-gnu-8-11"
 run_dump_test "attr-gnu-8-23"
 run_dump_test "attr-gnu-8-31"
+
+run_dump_test "attr-gnu-12-11"
+run_dump_test "attr-gnu-12-21"

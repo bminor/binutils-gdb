@@ -1,3 +1,12 @@
+2009-03-02  Alan Modra  <amodra@bigpond.net.au>
+
+	2008-10-10  Nathan Froyd  <froydnj@codesourcery.com>
+	* ld-powerpc/attr-gnu-12-1.s: New file.
+	* ld-powerpc/attr-gnu-12-2.s: New file.
+	* ld-powerpc/attr-gnu-12-11.d: New file.
+	* ld-powerpc/attr-gnu-12-21.d: New file.
+	* ld-powerpc/powerpc.exp: Run new dump tests.
+
 2009-01-14  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-arm/thumb2-bl-undefweak.d, ld-arm/thumb2-bl-undefweak.s: New.
