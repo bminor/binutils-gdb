@@ -1125,6 +1125,7 @@ clean mostlyclean: $(CONFIG_CLEAN)
 	rm -f gdb[0-9]$(EXEEXT)
 	rm -f test-cp-name-parser$(EXEEXT)
 	rm -f xml-builtin.c stamp-xml
+	rm -f $(DEPDIR)/*
 
 .PHONY: clean-tui
 clean-tui:

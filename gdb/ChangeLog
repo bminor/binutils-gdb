@@ -1,5 +1,7 @@
 2009-03-01  Doug Evans  <dje@google.com>
 
+	* Makefile.in (clean): rm -f $(DEPDIR)/*.
+
 	* Makefile.in (GDB_CFLAGS): Add -I$(srcdir)/common.
 	(init.c): signals/ -> common/.
 	(signals.o): Update.
