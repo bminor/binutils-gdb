@@ -1,5 +1,9 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2009-01-14  Peter Bergner  <bergner@vnet.ibm.com>
+	* gas/ppc/power6.s ("mtfsf", "mtfsf.", "mtfsfi", "mtfsfi."): Add tests.
+	* gas/ppc/power6.d: Likewise.
+
 	2008-12-04  Ben Elliston  <bje@au.ibm.com>
 	* gas/ppc/booke.s: Remove booke64 instructions.
 	* gas/ppc/booke.d: Update expected disassembly output.

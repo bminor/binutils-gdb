@@ -266,7 +266,8 @@ print_insn_powerpc (bfd_vma memaddr,
 	continue;
 
       if ((insn & opcode->mask) != opcode->opcode
-	  || (opcode->flags & dialect) == 0)
+	  || (opcode->flags & dialect) == 0
+	  || (opcode->deprecated & dialect) != 0)
 	continue;
 
       /* Make two passes over the operands.  First see if any of them

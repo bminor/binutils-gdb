@@ -1,5 +1,12 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2009-01-14  Peter Bergner  <bergner@vnet.ibm.com>
+	* ppc-dis.c (print_insn_powerpc): Skip insn if it is deprecated.
+	* ppc-opc.c (powerpc_opcodes) <mtfsf, mtfsf.>: Deprecate the two
+	operand form and enable the four operand form for POWER6 and later.
+	<mtfsfi, mtfsfi.>: Deprecate the two operand form and enable the
+	three operand form for POWER6 and later.
+
 	2009-01-09  Peter Bergner  <bergner@vnet.ibm.com>
 	* ppc-opc.c (PPCNONE): Define.
 	(NOPOWER4): Delete.
