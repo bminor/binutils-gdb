@@ -1,3 +1,16 @@
+2009-03-02  Cary Coutant  <ccoutant@google.com>
+	
+	* readelf.c (adjust_relative_path): New function.
+	(struct archive_info): New type.
+	(setup_archive): New function.
+	(release_archive): New function.
+	(setup_nested_archive): New function.
+	(get_archive_member_name): New function.
+	(get_archive_member_name_at): New function.
+	(make_qualified_name): New function.
+	(process_archive): Factor out code for reading archive index and
+	long filename table to setup_archive.  Add support for thin archives.
+
 2009-03-02  Nick Clifton  <nickc@redhat.com>
 
 	* po/sk.po: Updated Slovak translation.
