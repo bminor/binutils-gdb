@@ -1,6 +1,6 @@
 2009-03-01  Doug Evans  <dje@google.com>
 
-	* gdbserver/Makefile.in (INCLUDE_CFLAGS): Add -I$(srcdir)/../common.
+	* Makefile.in (INCLUDE_CFLAGS): Add -I$(srcdir)/../common.
 	(server_h): Add gdb_signals.h.
 	(signals.o): Update.
 	* server.h (target_signal_from_host,target_signal_to_host_p)
