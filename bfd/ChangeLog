@@ -1,5 +1,9 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2008-11-13  Alan Modra  <amodra@bigpond.net.au>
+	PR 7023
+	* elf.c (bfd_section_from_shdr <SHT_SYMTAB>): Fail on invalid sh_info.
+
 	2008-11-11  Alan Modra  <amodra@bigpond.net.au>
 	PR 7012
 	* dwarf2.c (find_line): Don't keep stale pointers into realloc'd

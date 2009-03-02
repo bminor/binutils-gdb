@@ -1608,6 +1608,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
       if (hdr->sh_entsize != bed->s->sizeof_sym)
 	return FALSE;
+      if (hdr->sh_info * hdr->sh_entsize > hdr->sh_size)
+	return FALSE;
       BFD_ASSERT (elf_onesymtab (abfd) == 0);
       elf_onesymtab (abfd) = shindex;
       elf_tdata (abfd)->symtab_hdr = *hdr;
