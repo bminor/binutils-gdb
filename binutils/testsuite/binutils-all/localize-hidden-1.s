@@ -20,17 +20,17 @@
 	.protected	Gprotected
 	.protected	Wprotected
 
-	.equ		Ldefault, 0x1100
-	.equ		Lhidden, 0x1200
-	.equ		Linternal, 0x1300
-	.equ		Lprotected, 0x1400
+	.set		Ldefault, 0x1100
+	.set		Lhidden, 0x1200
+	.set		Linternal, 0x1300
+	.set		Lprotected, 0x1400
 
-	.equ		Gdefault, 0x2100
-	.equ		Ghidden, 0x2200
-	.equ		Ginternal, 0x2300
-	.equ		Gprotected, 0x2400
+	.set		Gdefault, 0x2100
+	.set		Ghidden, 0x2200
+	.set		Ginternal, 0x2300
+	.set		Gprotected, 0x2400
 
-	.equ		Wdefault, 0x3100
-	.equ		Whidden, 0x3200
-	.equ		Winternal, 0x3300
-	.equ		Wprotected, 0x3400
+	.set		Wdefault, 0x3100
+	.set		Whidden, 0x3200
+	.set		Winternal, 0x3300
+	.set		Wprotected, 0x3400

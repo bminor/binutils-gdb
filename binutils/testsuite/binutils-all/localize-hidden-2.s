@@ -1,2 +1,2 @@
 	.globl	G
-	.equ	G,0x100
+	.set	G,0x100

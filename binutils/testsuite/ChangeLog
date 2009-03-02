@@ -1,3 +1,8 @@
+2009-03-02  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* binutils-all/localize-hidden-1.s: Change .equ to .set.
+	* binutils-all/localize-hidden-2.s: Likewise.
+
 2009-01-29  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/objdump.W: Do not assume that high and low PC
