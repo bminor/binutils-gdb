@@ -66,3 +66,6 @@ Disassembly of section \.text:
   e0:	ff 00 f1 0d 	mtfsfi. 6,15
   e4:	ff 01 01 0c 	mtfsfi  6,0,1
   e8:	ff 01 f1 0d 	mtfsfi. 6,15,1
+  ec:	7d 6a 02 74 	cbcdtd  r10,r11
+  f0:	7d 6a 02 34 	cdtbcd  r10,r11
+  f4:	7d 4b 60 94 	addg6s  r10,r11,r12

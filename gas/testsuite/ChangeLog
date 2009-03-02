@@ -1,5 +1,25 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2009-02-26  Peter Bergner  <bergner@vnet.ibm.com>
+	* gas/ppc/e500mc.d ("wait", "waitsrv", "waitimpl"): Add tests.
+	* gas/ppc/e500mc.s: Likewise.
+	* gas/ppc/power6.d ("cdtbcd", "cbcdtd", "addg6s"): Add tests.
+	* gas/ppc/power6.s: Likewise.
+	* gas/ppc/power7.d ("lfdpx", "mffgpr", "mftgpr"): Remove invalid tests.
+	("wait", "waitsrv", "waitimpl", "divwe", "divwe.", "divweo", "divweo.",
+	"divweu", "divweu.", "divweuo", "divweuo.", "bpermd", "popcntw",
+	"popcntd", "ldbrx", "stdbrx", "lfiwzx", "lfiwzx", "fcfids", "fcfids.",
+	"fcfidus", "fcfidus.", "fctiwu", "fctiwu.", "fctiwuz", "fctiwuz.",
+	"fctidu", "fctidu.", "fctiduz", "fctiduz.", "fcfidu", "fcfidu.",
+	"ftdiv", "ftdiv", "ftsqrt", "ftsqrt", "dcbtt", "dcbtstt", "dcffix",
+	"dcffix.", "lbarx", "lbarx", "lbarx", "lharx", "lharx", "lharx",
+	"stbcx.", "sthcx.", "fre", "fre.", "fres", "fres.", "frsqrte",
+	"frsqrte.", "frsqrtes", "frsqrtes.", "isel"): Add tests.
+	* gas/ppc/power7.s: Likewise.
+	* gas/ppc/vsx.d: New test.
+	* gas/ppc/vsx.s: Likewise.
+	* gas/ppc/ppc.exp: Run it.
+
 	2009-02-19  Peter Bergner  <bergner@vnet.ibm.com>
 	* gas/ppc/e500mc.d ("lfdepx", "stfdepx"): Fix tests to expect a
 	floating point register.

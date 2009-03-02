@@ -1,5 +1,10 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2009-02-26  Peter Bergner  <bergner@vnet.ibm.com>
+	* config/tc-ppc.c (pre_defined_registers): Add "f32" to "f63",
+	"f.32" to "f.63", "vs0" to "vs63" and "vs.0" to "vs.63".
+	(parse_cpu): Extend -mpower7 to accept power7 and isel instructions.
+
 	2009-01-09  Peter Bergner  <bergner@vnet.ibm.com>
 	* config/tc-ppc.c (ppc_setup_opcodes): Remove PPC_OPCODE_NOPOWER4 test.
 	Test the new "deprecated" opcode field.
