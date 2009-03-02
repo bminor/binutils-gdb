@@ -34,3 +34,6 @@ start:
 	dcbz    1, 2
 	dcbzl   3, 4
 	dcbz    5, 6
+	dcbt    5,6
+	dcbt    5,6,0
+	dcbt    5,6,8

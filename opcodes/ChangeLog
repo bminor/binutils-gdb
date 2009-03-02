@@ -1,5 +1,10 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2009-02-05  Peter Bergner  <bergner@vnet.ibm.com>
+	* ppc-opc.c: Update copyright year.
+	(powerpc_opcodes) <"dcbt", "dcbtst">: Deprecate the Embedded operand
+	ordering for POWER4 and later and use the correct Server ordering.
+
 	2009-01-14  Peter Bergner  <bergner@vnet.ibm.com>
 	* ppc-dis.c (print_insn_powerpc): Skip insn if it is deprecated.
 	* ppc-opc.c (powerpc_opcodes) <mtfsf, mtfsf.>: Deprecate the two

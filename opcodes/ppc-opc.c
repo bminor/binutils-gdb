@@ -1,6 +1,6 @@
 /* ppc-opc.c -- PowerPC opcode list
    Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
    This file is part of the GNU opcodes library.
@@ -3636,7 +3636,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mtsrin",	X(31,242),	XRA_MASK,    PPC32,	PPCNONE,	{RS, RB}},
 {"mtsri",	X(31,242),	XRA_MASK,    POWER32,	PPCNONE,	{RS, RB}},
 
-{"dcbtst",	X(31,246),	X_MASK,      PPC,	PPCNONE,	{CT, RA, RB}},
+{"dcbtst",	X(31,246),	X_MASK,      PPC,	POWER4,		{CT, RA, RB}},
+{"dcbtst",	X(31,246),	X_MASK,      POWER4,	PPCNONE,	{RA, RB, CT}},
 
 {"stbux",	X(31,247),	X_MASK,      COM,	PPCNONE,	{RS, RAS, RB}},
 
@@ -3667,7 +3668,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"lscbx",	XRC(31,277,0),	X_MASK,      M601,	PPCNONE,	{RT, RA, RB}},
 {"lscbx.",	XRC(31,277,1),	X_MASK,      M601,	PPCNONE,	{RT, RA, RB}},
 
-{"dcbt",	X(31,278),	X_MASK,      PPC,	PPCNONE,	{CT, RA, RB}},
+{"dcbt",	X(31,278),	X_MASK,      PPC,	POWER4,		{CT, RA, RB}},
+{"dcbt",	X(31,278),	X_MASK,      POWER4,	PPCNONE,	{RA, RB, CT}},
 
 {"lhzx",	X(31,279),	X_MASK,      COM,	PPCNONE,	{RT, RA0, RB}},
 
