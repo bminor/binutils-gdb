@@ -1,3 +1,9 @@
+2009-03-01  Ian Lance Taylor  <iant@google.com>
+
+	* configure.ac: Check for byteswap.h.
+	* configure: Rebuild.
+	* config.in: Rebuild.
+
 2009-03-01  Mikolaj Zalewski  <mikolajz@google.com>
 
 	* layout.cc (Layout::find_or_add_kept_section): New function.

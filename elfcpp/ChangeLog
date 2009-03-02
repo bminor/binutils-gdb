@@ -1,3 +1,10 @@
+2009-03-01  Ian Lance Taylor  <iant@google.com>
+
+	* elfcpp_swap.h: #include "config.h".  Only #include <byteswap.h>
+	if HAVE_BYTESWAP_H is defined; if not, provide definitions for
+	bswap_{16,32,64}.  For gcc 4.3 and later, use the builtin bswap
+	functions.  Check WORDS_BIGENDIAN rather than __BYTE_ORDER.
+
 2009-01-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfcpp.h (enum STT): Remove STT_IFUNC.

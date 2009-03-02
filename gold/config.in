@@ -19,6 +19,9 @@
 /* Default size (32 or 64) */
 #undef GOLD_DEFAULT_SIZE
 
+/* Define to 1 if you have the <byteswap.h> header file. */
+#undef HAVE_BYTESWAP_H
+
 /* Define to 1 if you have the <ext/hash_map> header file. */
 #undef HAVE_EXT_HASH_MAP
 
