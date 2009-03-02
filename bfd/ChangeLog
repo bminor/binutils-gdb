@@ -1,5 +1,13 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2008-10-03  Alan Modra  <amodra@bigpond.net.au>
+	* elf.c (bfd_elf_set_group_contents): Assign sh_info for ld -r when
+	the signature symbol is global.
+	* elflink.c (elf_link_input_bfd): Ensure group signature symbol
+	is output when ld -r.  Set group sh_info when local.
+	* linker.c (default_indirect_link_order): Handle group sections
+	specially.
+
 	2008-09-28  Alan Modra  <amodra@bigpond.net.au>
 	* elf.c (_bfd_elf_init_private_section_data): Tweak union copy.
 	(bfd_section_from_shdr): Don't change SHT_GROUP section name.

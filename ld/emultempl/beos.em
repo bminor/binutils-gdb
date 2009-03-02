@@ -665,9 +665,8 @@ gld_${EMULATION_NAME}_before_allocation (void)
    which are not mentioned in the linker script.  */
 
 static bfd_boolean
-gld${EMULATION_NAME}_place_orphan (asection *s)
+gld${EMULATION_NAME}_place_orphan (asection *s, const char *secname)
 {
-  const char *secname;
   char *output_secname, *ps;
   lang_output_section_statement_type *os;
   lang_statement_union_type *l;
@@ -681,8 +680,6 @@ gld${EMULATION_NAME}_place_orphan (asection *s)
      link-once-discard.  */
   if (link_info.relocatable)
     return FALSE;
-
-  secname = bfd_get_section_name (s->owner, s);
 
   /* Everything from the '\$' on gets deleted so don't allow '\$' as the
      first character.  */

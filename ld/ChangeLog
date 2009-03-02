@@ -1,5 +1,22 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2008-10-03  Alan Modra  <amodra@bigpond.net.au>
+	PR 6931
+	* ldemul.c (ldemul_place_orphan): Add "name" param.
+	* ldemul.h (ldemul_place_orphan): Update prototype.
+	(struct ld_emulation_xfer_struct <place_orphan>): Likewise.
+	* ldlang.c (lang_place_orphans): Generate unique section names here..
+	* emultempl/elf32.em (place_orphan): ..rather than here.  Don't
+	directly use an existing output section statement that has no
+	bfd section.
+	* emultempl/pe.em (place_orphan): Likewise.
+	* emultempl/pep.em (place_orphan): Likewise.
+	* emultempl/beos.em (place_orphan): Adjust.
+	* emultempl/spuelf.em (spu_place_special_section): Adjust
+	place_orphan call.
+	* emultempl/genelf.em (gld${EMULATION_NAME}_after_open): New function.
+	(LDEMUL_AFTER_OPEN): Define.
+
 	2008-09-25  Alan Modra  <amodra@bigpond.net.au>
 	* ldexp.c (fold_binary): Evaluate rhs when lhs not valid.
 

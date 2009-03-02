@@ -1613,24 +1613,20 @@ gld_${EMULATION_NAME}_finish (void)
    sort_sections.  */
 
 static bfd_boolean
-gld_${EMULATION_NAME}_place_orphan (asection *s)
+gld_${EMULATION_NAME}_place_orphan (asection *s, const char *secname)
 {
-  const char *secname;
-  const char *orig_secname;
+  const char *orig_secname = secname;
   char *dollar = NULL;
   lang_output_section_statement_type *os;
   lang_statement_list_type add_child;
 
-  secname = bfd_get_section_name (s->owner, s);
-
   /* Look through the script to see where to place this section.  */
-  orig_secname = secname;
   if (!link_info.relocatable
       && (dollar = strchr (secname, '$')) != NULL)
     {
-      size_t len = dollar - orig_secname;
+      size_t len = dollar - secname;
       char *newname = xmalloc (len + 1);
-      memcpy (newname, orig_secname, len);
+      memcpy (newname, secname, len);
       newname[len] = '\0';
       secname = newname;
     }
@@ -1640,13 +1636,13 @@ gld_${EMULATION_NAME}_place_orphan (asection *s)
   lang_list_init (&add_child);
 
   if (os != NULL
-      && (os->bfd_section == NULL
-	  || os->bfd_section->flags == 0
+      && os->bfd_section != NULL
+      && (os->bfd_section->flags == 0
 	  || ((s->flags ^ os->bfd_section->flags)
 	      & (SEC_LOAD | SEC_ALLOC)) == 0))
     {
       /* We already have an output section statement with this
-	 name, and its bfd section, if any, has compatible flags.
+	 name, and its bfd section has compatible flags.
 	 If the section already exists but does not have any flags set,
 	 then it has been created by the linker, probably as a result of
 	 a --section-start command line switch.  */
@@ -1721,18 +1717,6 @@ gld_${EMULATION_NAME}_place_orphan (asection *s)
 	    /* *ABS* is always the first output section statement.  */
 	    after = (&lang_output_section_statement.head
 		     ->output_section_statement);
-	}
-
-      /* Choose a unique name for the section.  This will be needed if the
-	 same section name appears in the input file with different
-	 loadable or allocatable characteristics.  */
-      if (bfd_get_section_by_name (link_info.output_bfd, secname) != NULL)
-	{
-	  static int count = 1;
-	  secname = bfd_get_unique_section_name (link_info.output_bfd,
-						 secname, &count);
-	  if (secname == NULL)
-	    einfo ("%F%P: place_orphan failed: %E\n");
 	}
 
       /* All sections in an executable must be aligned to a page boundary.  */

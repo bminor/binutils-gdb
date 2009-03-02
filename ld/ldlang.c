@@ -5652,14 +5652,29 @@ lang_place_orphans (void)
 					default_common_section);
 		    }
 		}
-	      else if (ldemul_place_orphan (s))
-		;
 	      else
 		{
-		  lang_output_section_statement_type *os;
+		  const char *name = s->name;
 
-		  os = lang_output_section_statement_lookup (s->name, 0, TRUE);
-		  lang_add_section (&os->children, s, os);
+		  if ((config.unique_orphan_sections
+		       || unique_section_p (s))
+		      && bfd_get_section_by_name (link_info.output_bfd,
+						  name) != NULL)
+		    {
+		      static int count = 1;
+		      name = bfd_get_unique_section_name (link_info.output_bfd,
+							  name, &count);
+		      if (name == NULL)
+			einfo ("%F%P: place_orphan failed: %E\n");
+		    }
+
+		  if (!ldemul_place_orphan (s, name))
+		    {
+		      lang_output_section_statement_type *os;
+		      os = lang_output_section_statement_lookup (name, 0,
+								 TRUE);
+		      lang_add_section (&os->children, s, os);
+		    }
 		}
 	    }
 	}
