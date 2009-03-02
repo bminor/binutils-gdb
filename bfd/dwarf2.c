@@ -1,6 +1,6 @@
 /* DWARF 2 support.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
    Adapted from gdb/dwarf2read.c by Gavin Koch of Cygnus Solutions
    (gavin@cygnus.com).
@@ -3186,13 +3186,6 @@ find_line (bfd *abfd,
 	    break;
 	  stash->info_ptr += length;
 
-	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
-	      == stash->sec->size)
-	    {
-	      stash->sec = find_debug_info (stash->bfd, stash->sec);
-	      stash->sec_info_ptr = stash->info_ptr;
-	    }
-
 	  if (stash->all_comp_units)
 	    stash->all_comp_units->prev_unit = each;
 	  else
@@ -3222,6 +3215,14 @@ find_line (bfd *abfd,
 						     functionname_ptr,
 						     linenumber_ptr,
 						     stash));
+
+	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
+	      == stash->sec->size)
+	    {
+	      stash->sec = find_debug_info (stash->bfd, stash->sec);
+	      stash->sec_info_ptr = stash->info_ptr;
+	    }
+
 	  if (found)
 	    goto done;
 	}
