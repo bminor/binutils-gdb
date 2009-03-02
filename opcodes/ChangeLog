@@ -1,5 +1,10 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2009-01-09  Peter Bergner  <bergner@vnet.ibm.com>
+	* ppc-opc.c (PPCNONE): Define.
+	(NOPOWER4): Delete.
+	(powerpc_opcodes): Initialize the new "deprecated" field.
+
 	2008-12-04  Ben Elliston  <bje@au.ibm.com>
 	* ppc-dis.c (powerpc_init_dialect): Do not set PPC_OPCODE_BOOKE
 	for -Mbooke.

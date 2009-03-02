@@ -1412,8 +1412,7 @@ ppc_setup_opcodes (void)
 	      || ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64))
 		  == (ppc_cpu & (PPC_OPCODE_32 | PPC_OPCODE_64)))
 	      || (ppc_cpu & PPC_OPCODE_64_BRIDGE) != 0)
-	  && ((ppc_cpu & PPC_OPCODE_POWER4) == 0
-	      || (op->flags & PPC_OPCODE_NOPOWER4) == 0))
+	  && !(ppc_cpu & op->deprecated))
 	{
 	  const char *retval;
 
