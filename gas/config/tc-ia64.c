@@ -11175,7 +11175,7 @@ fix_insn (fixS *fix, const struct ia64_operand *odesc, valueT value)
     err = (*odesc->insert) (odesc, value, insn + slot);
 
   if (err)
-    as_bad_where (fix->fx_file, fix->fx_line, err);
+    as_bad_where (fix->fx_file, fix->fx_line, "%s", err);
 
   t0 = control_bits | (insn[0] << 5) | (insn[1] << 46);
   t1 = ((insn[1] >> 18) & 0x7fffff) | (insn[2] << 23);

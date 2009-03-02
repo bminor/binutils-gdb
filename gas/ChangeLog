@@ -1,3 +1,9 @@
+2009-03-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 9874
+	* config/tc-ia64.c (fix_insn): Fix warning reported by
+	-Wformat-security.
+
 2009-03-02  Qinwei  <qinwei@sunnorth.com.cn>
 
 	* config/tc-score7.c: New file.
