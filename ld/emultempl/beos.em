@@ -665,7 +665,9 @@ gld_${EMULATION_NAME}_before_allocation (void)
    which are not mentioned in the linker script.  */
 
 static bfd_boolean
-gld${EMULATION_NAME}_place_orphan (asection *s, const char *secname)
+gld${EMULATION_NAME}_place_orphan (asection *s,
+				   const char *secname,
+				   int constraint)
 {
   char *output_secname, *ps;
   lang_output_section_statement_type *os;
@@ -694,7 +696,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s, const char *secname)
   output_secname = xstrdup (secname);
   ps = strchr (output_secname + 1, '\$');
   *ps = 0;
-  os = lang_output_section_statement_lookup (output_secname, 0, TRUE);
+  os = lang_output_section_statement_lookup (output_secname, constraint, TRUE);
 
   /* Find the '\$' wild statement for this section.  We currently require the
      linker script to explicitly mention "*(.foo\$)".

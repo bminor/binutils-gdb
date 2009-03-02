@@ -536,7 +536,7 @@ extern lang_output_section_statement_type *lang_output_section_find_by_flags
   (const asection *, lang_output_section_statement_type **,
    lang_match_sec_type_func);
 extern lang_output_section_statement_type *lang_insert_orphan
-  (asection *, const char *, lang_output_section_statement_type *,
+  (asection *, const char *, int, lang_output_section_statement_type *,
    struct orphan_save *, etree_type *, lang_statement_list_type *);
 extern lang_input_statement_type *lang_add_input_file
   (const char *, lang_input_file_enum_type, const char *);
@@ -604,8 +604,6 @@ extern void lang_register_vers_node
 extern void lang_append_dynamic_list (struct bfd_elf_version_expr *);
 extern void lang_append_dynamic_list_cpp_typeinfo (void);
 extern void lang_append_dynamic_list_cpp_new (void);
-bfd_boolean unique_section_p
-  (const asection *);
 extern void lang_add_unique
   (const char *);
 extern const char *lang_get_output_target

@@ -62,7 +62,8 @@ fragment <<EOF
 static void gld${EMULATION_NAME}_before_parse (void);
 static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
-static bfd_boolean gld${EMULATION_NAME}_place_orphan (asection *, const char *);
+static bfd_boolean gld${EMULATION_NAME}_place_orphan
+  (asection *, const char *, int);
 static void gld${EMULATION_NAME}_finish (void);
 
 EOF
@@ -1635,7 +1636,9 @@ output_rel_find (asection *sec, int isdyn)
    sections in the right segment.  */
 
 static bfd_boolean
-gld${EMULATION_NAME}_place_orphan (asection *s, const char *secname)
+gld${EMULATION_NAME}_place_orphan (asection *s,
+				   const char *secname,
+				   int constraint)
 {
   static struct orphan_save hold[] =
     {
@@ -1705,9 +1708,8 @@ gld${EMULATION_NAME}_place_orphan (asection *s, const char *secname)
     }
 
   /* Look through the script to see where to place this section.  */
-  os = lang_output_section_find (secname);
-
-  if (os != NULL
+  if (constraint == 0
+      && (os = lang_output_section_find (secname)) != NULL
       && os->bfd_section != NULL
       && (os->bfd_section->flags == 0
 	  || (_bfd_elf_match_sections_by_type (link_info.output_bfd,
@@ -1796,7 +1798,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s, const char *secname)
 	after = &lang_output_section_statement.head->output_section_statement;
     }
 
-  lang_insert_orphan (s, secname, after, place, NULL, NULL);
+  lang_insert_orphan (s, secname, constraint, after, place, NULL, NULL);
 
   return TRUE;
 }
