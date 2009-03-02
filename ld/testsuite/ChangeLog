@@ -1,5 +1,9 @@
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
+	2009-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	* ld-elf/eh-group2.s: New `.cfi_lsda' referencing `.gcc_except_table'.
+	* ld-elf/eh-group.exp: New test and conditional defininiton of `ELF64'.
+
 	2009-01-26  Nathan Sidwell  <nathan@codesourcery.com>
 	* ld-powerpc/powerpc.exp: Add vxworks relax testcase.
 	* ld-powerpc/vxworks-relax.s, ld-powerpc/vxworks-relax.rd: New.
