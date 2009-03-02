@@ -1,3 +1,35 @@
+2009-03-02  Qinwei  <qinwei@sunnorth.com.cn>
+
+	* gas/score/arith_32-lt.d: New file.
+	* gas/score/arith_32.d: New file.
+	* gas/score/arith_32.s: New file.
+	* gas/score/bit_32-lt.d: New file.
+	* gas/score/bit_32.d: New file.
+	* gas/score/bit_32.s: New file.
+	* gas/score/branch_32-lt.d: New file.
+	* gas/score/branch_32.d: New file.
+	* gas/score/branch_32.s: New file.
+	* gas/score/cmp_32-lt.d: New file.
+	* gas/score/cmp_32.d: New file.
+	* gas/score/cmp_32.s: New file.
+	* gas/score/load_store_32-lt.d: New file.
+	* gas/score/load_store_32.d: New file.
+	* gas/score/load_store_32.s: New file.
+	* gas/score/logical_32-lt.d: New file.
+	* gas/score/logical_32.d: New file.
+	* gas/score/logical_32.s: New file.
+	* gas/score/mv_32-lt.d: New file.
+	* gas/score/mv_32.d: New file.
+	* gas/score/mv_32.s: New file.
+	* gas/score/relax_32.exp: New file.
+	* gas/score/relaxation_macro.h: New file.
+	* gas/score/shift_32-lt.d: New file.
+	* gas/score/shift_32.d: New file.
+	* gas/score/shift_32.s: New file.
+	* gas/score/syscontrol_32-lt.d: New file.
+	* gas/score/syscontrol_32.d: New file.
+	* gas/score/syscontrol_32.s: New file.
+
 2009-03-01  Mark Mitchell  <mark@codesourcery.com>
 
 	* gas/arm/archv6m.s: Add dmb, dsb, and isb.

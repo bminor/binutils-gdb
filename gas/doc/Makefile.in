@@ -279,6 +279,7 @@ CPU_DOCS = \
 	c-pj.texi \
 	c-ppc.texi \
 	c-s390.texi \
+	c-score.texi \
 	c-sh.texi \
 	c-sh64.texi \
 	c-sparc.texi \

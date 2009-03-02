@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Sunplus score architecture.
+
 * Add support for Lattice Mico32 (lm32) architecture.
 
 Changes in 2.19:

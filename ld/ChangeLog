@@ -1,3 +1,13 @@
+2009-03-02  Qinwei  <qinwei@sunnorth.com.cn>
+
+	* Makefile.am: Replace score elf emulation with score3 and score7
+	emulations.
+	* Makefile.in: Regenerate,
+	* NEWS: Mention support for Score7 architecture.
+	* configure.tgt: Add score7 emulation to score-elf target.
+	* emulparams/scoreelf.sh: Add score7 support.
+	* emultempl/scoreelf.em: Likewise.
+
 2009-03-01  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* configure.tgt: Only use elf64hppa target emulation for hpux.

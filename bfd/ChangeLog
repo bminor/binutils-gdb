@@ -1,3 +1,20 @@
+2009-03-02  Qinwei  <qinwei@sunnorth.com.cn>
+
+	* elf32-score7.c: New file.
+	* elf32-score.h: New file.
+	* elf32-score.c: Add code to support score 7.  Set score7 as the
+	default.
+	* cpu-score.c: Add score7 architecure.
+	(compatibile): New function.
+	* Makefile.am: Add rules for building elf32-score7 object.
+	* Makefile.in: Regenerate.
+	* configure.in: Add elf32-score7 object to score vectors.
+	* configure: Regenerate.
+	* reloc.c: Add score7 relocs.
+	* archures.c: Add score3 and score7 machine numbers.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2009-03-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

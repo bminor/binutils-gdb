@@ -1,3 +1,17 @@
+2009-03-02  Qinwei  <qinwei@sunnorth.com.cn>
+
+	* config/tc-score7.c: New file.
+	* doc/c-score.texi: New file.
+	* Makefile.am: Update dependencies for tc-score.c.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention support for Score7 architecture.
+	* config/tc-score.c: Add support for Score7 architecture.
+	* config/tc-score.h: Likewise.
+	* doc/Makefile.am: Add c-score.texi.
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi: Add Score7.
+	* doc/as.texinfo: Add Score7.
+
 2009-03-01  Mark Mitchell  <mark@codesourcery.com>
 
 	* config/tc-arm.c (md_assemble): Allow barrier instructions on

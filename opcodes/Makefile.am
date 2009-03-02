@@ -189,6 +189,7 @@ CFILES = \
 	s390-opc.c \
 	s390-dis.c \
 	score-dis.c \
+	score7-dis.c \
 	sh-dis.c \
 	sh64-dis.c \
 	sh64-opc.c \
@@ -337,6 +338,7 @@ ALL_MACHINES = \
 	s390-dis.lo \
 	s390-opc.lo \
 	score-dis.lo \
+	score7-dis.lo \
 	sh-dis.lo \
 	sh64-dis.lo \
 	sh64-opc.lo \
@@ -1121,6 +1123,11 @@ s390-dis.lo: s390-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h \
   opintl.h $(INCDIR)/opcode/s390.h
 score-dis.lo: score-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h score-opc.h \
+  opintl.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/score.h $(INCDIR)/elf/reloc-macros.h
+score7-dis.lo: score7-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h score-opc.h \
   opintl.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h \

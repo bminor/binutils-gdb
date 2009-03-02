@@ -1,5 +1,5 @@
 @c Copyright 1992, 1993, 1994, 1996, 1997, 1999, 2000, 2001, 2002,
-@c 2003, 2005
+@c 2003, 2005, 2009
 @c Free Software Foundation, Inc.
 @c This file is part of the documentation for the GAS manual
 
@@ -58,6 +58,7 @@
 @set PJ
 @set PPC
 @set S390
+@set SCORE
 @set SH
 @set SPARC
 @set TIC54X

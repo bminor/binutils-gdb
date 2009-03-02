@@ -1,6 +1,6 @@
 \input texinfo @c                               -*-Texinfo-*-
 @c  Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c  2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+@c  2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
 @c  Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
@@ -101,7 +101,7 @@ This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002,
-2006, 2007, 2008 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -151,7 +151,7 @@ done.
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002,
-2006, 2007, 2008 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.3
@@ -422,6 +422,14 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-m31}|@b{-m64}] [@b{-mesa}|@b{-mzarch}] [@b{-march}=@var{CPU}]
    [@b{-mregnames}|@b{-mno-regnames}]
    [@b{-mwarn-areg-zero}]
+@end ifset
+@ifset SCORE
+
+@emph{Target SCORE options:}
+   [@b{-EB}][@b{-EL}][@b{-FIXDD}][@b{-NWARN}]
+   [@b{-SCORE5}][@b{-SCORE5U}][@b{-SCORE7}][@b{-SCORE3}]
+   [@b{-march=score7}][@b{-march=score3}]
+   [@b{-USE_R1}][@b{-KPIC}][@b{-O0}][@b{-G} @var{num}][@b{-V}]
 @end ifset
 @ifset SPARC
 
@@ -2233,9 +2241,15 @@ is considered a comment and is ignored.  The line comment character is
 @ifset PPC
 @samp{#} for Motorola PowerPC;
 @end ifset
+<<<<<<< as.texinfo
+@ifset SCORE
+@samp{#} for the Sunplus SCORE;
+@end ifset
+=======
 @ifset S390
 @samp{#} for IBM S/390;
 @end ifset
+>>>>>>> 1.196
 @ifset SH
 @samp{!} for the Renesas / SuperH SH;
 @end ifset
@@ -6750,9 +6764,15 @@ subject, see the hardware manufacturer's manual.
 @ifset PPC
 * PPC-Dependent::               PowerPC Dependent Features
 @end ifset
+<<<<<<< as.texinfo
+@ifset SCORE
+* SCORE-Dependent::             SCORE Dependent Features
+@end ifset
+=======
 @ifset S390
 * S/390-Dependent::             IBM S/390 Dependent Features
 @end ifset
+>>>>>>> 1.196
 @ifset SPARC
 * Sparc-Dependent::             SPARC Dependent Features
 @end ifset
@@ -6921,10 +6941,17 @@ family.
 @include c-ppc.texi
 @end ifset
 
+<<<<<<< as.texinfo
+@ifset SCORE
+@include c-score.texi
+@end ifset
+
+=======
 @ifset S390
 @include c-s390.texi
 @end ifset
 
+>>>>>>> 1.196
 @ifset SH
 @include c-sh.texi
 @include c-sh64.texi

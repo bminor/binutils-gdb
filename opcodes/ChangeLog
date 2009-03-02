@@ -1,3 +1,13 @@
+2009-03-02  Qinwei  <qinwei@sunnorth.com.cn>
+
+	* score7-dis.c: New file.
+	* Makefile.am: Add dependencies for score7-dis.c.
+	* Makefile.in: Regenerate.
+	* configure.in: Add score7-dis to score files.
+	* configure: Regenerate.
+	* score-dis.c: Add support for score7 architecture.
+	* score-opc.h: Likewise.
+
 2009-03-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

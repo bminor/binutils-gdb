@@ -4195,12 +4195,9 @@ ENUMDOC
   Long displacement extension.
 
 ENUM
-  BFD_RELOC_SCORE_DUMMY1
-ENUMDOC
-  Score relocations
-ENUM
   BFD_RELOC_SCORE_GPREL15
 ENUMDOC
+  Score relocations
   Low 16 bit for load/store  
 ENUM
   BFD_RELOC_SCORE_DUMMY2
@@ -4213,6 +4210,14 @@ ENUM
 ENUMDOC
   This is a 19-bit reloc with the right 1 bit assumed to be 0
 ENUM
+  BFD_RELOC_SCORE_IMM30
+ENUMDOC
+  This is a 32-bit reloc for 48-bit instructions.
+ENUM
+  BFD_RELOC_SCORE_IMM32
+ENUMDOC
+  This is a 32-bit reloc for 48-bit instructions.
+ENUM
   BFD_RELOC_SCORE16_JMP
 ENUMDOC
   This is a 11-bit reloc with the right 1 bit assumed to be 0
@@ -4220,6 +4225,10 @@ ENUM
   BFD_RELOC_SCORE16_BRANCH
 ENUMDOC
   This is a 8-bit reloc with the right 1 bit assumed to be 0
+ENUM
+  BFD_RELOC_SCORE_BCMP
+ENUMDOC
+   This is a 9-bit reloc with the right 1 bit assumed to be 0
 ENUM
   BFD_RELOC_SCORE_GOT15
 ENUMX

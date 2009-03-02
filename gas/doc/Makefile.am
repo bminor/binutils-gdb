@@ -58,6 +58,7 @@ CPU_DOCS = \
 	c-pj.texi \
 	c-ppc.texi \
 	c-s390.texi \
+	c-score.texi \
 	c-sh.texi \
 	c-sh64.texi \
 	c-sparc.texi \
@@ -75,7 +76,7 @@ install-data-local: install-info
 pdf__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 
 install-pdf: install-pdf-am
- 
+
 install-pdf-am: $(PDFS)
 	@$(NORMAL_INSTALL)
 	test -z "$(pdfdir)" || $(mkinstalldirs) "$(DESTDIR)$(pdfdir)"
