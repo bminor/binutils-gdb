@@ -5,7 +5,9 @@
 * PE targets no longer make use of the long section names PE extension to
   the COFF format when generating executable images, by default.  The old
   (slightly non-conformant) behaviour can still be invoked by using the
-  new '--enable-long-section-names' command-line option.
+  new '--enable-long-section-names' command-line option.  It is also enabled
+  automatically in the presence of un-stripped debug information, as GDB
+  needs to be able to find the debug info sections by their full names.
 
 * --as-needed now links in a dynamic library if it satisfies undefined
   symbols in regular objects, or in other dynamic libraries.  In the

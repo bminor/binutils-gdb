@@ -2124,7 +2124,13 @@ allow their use in executable images as well, or to (probably pointlessly!)
 disallow it in object files, by using these two options.  Executable images
 generated with these long section names are slightly non-standard, carrying
 as they do a string table, and may generate confusing output when examined
-with non-GNU PE-aware tools, such as file viewers and dumpers.
+with non-GNU PE-aware tools, such as file viewers and dumpers.  However, 
+GDB relies on the use of PE long section names to find Dwarf-2 debug 
+information sections in an executable image at runtime, and so if neither
+option is specified on the command-line, @command{ld} will enable long
+section names, overriding the default and technically correct behaviour,
+when it finds the presence of debug information while linking an executable
+image and not stripping symbols.
 [This option is valid for all PE targeted ports of the linker]
 
 @kindex --enable-stdcall-fixup

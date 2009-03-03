@@ -1043,6 +1043,13 @@ pr_sym (struct bfd_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 }
 #endif /* DLL_SUPPORT */
 
+static void 
+debug_section_p (bfd *abfd ATTRIBUTE_UNUSED, asection *sect, void *obj)
+{
+  int *found = (int *) obj;
+  if (strncmp (".debug_", sect->name, sizeof (".debug_") - 1) == 0)
+    *found = 1;
+}
 
 static void
 gld_${EMULATION_NAME}_after_open (void)
@@ -1076,6 +1083,29 @@ gld_${EMULATION_NAME}_after_open (void)
   pe_data (link_info.output_bfd)->pe_opthdr = pe;
   pe_data (link_info.output_bfd)->dll = init[DLLOFF].value;
   pe_data (link_info.output_bfd)->real_flags |= real_flags;
+
+  /* At this point we must decide whether to use long section names
+     in the output or not.  If the user hasn't explicitly specified
+     on the command line, we leave it to the default for the format
+     (object files yes, image files no), except if there is debug
+     information present; GDB relies on the long section names to
+     find it, so enable it in that case.  */
+  if (pe_use_coff_long_section_names < 0 && link_info.strip == strip_none)
+    {
+      /* Iterate over all sections of all input BFDs, checking
+         for any that begin 'debug_' and are long names.  */
+      LANG_FOR_EACH_INPUT_STATEMENT (is)
+	{
+	  int found_debug = 0;
+	  bfd_map_over_sections (is->the_bfd, debug_section_p, &found_debug);
+	  if (found_debug)
+	    {
+	      pe_use_coff_long_section_names = 1;
+	      break;
+	    }
+	}
+    }
+
   pe_output_file_set_long_section_names (link_info.output_bfd);
 
 #ifdef DLL_SUPPORT

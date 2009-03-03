@@ -1,3 +1,14 @@
+2009-03-03  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* emultempl/pe.em (debug_section_p):  New bfd_map_over_sections hook.
+	(gld_${EMULATION_NAME}_after_open):  Use it to iterate all sections
+	of all input BFDs, looking for debug info.  Enable long section names
+	if any found.
+	* emultempl/pe.em (debug_section_p):  Likewise.
+	(gld_${EMULATION_NAME}_after_open):  Likewise.
+	* NEWS:  Retrospectively adjust news announcement.
+	* ld.texinfo:  Update documentation to mention new behaviour.
+
 2009-03-02  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* ldgram.y: Add support for REGION_ALIAS operator.
