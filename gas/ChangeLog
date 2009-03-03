@@ -1,3 +1,9 @@
+2009-03-03  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	binutils/3807
+	* config/tc-hppa.h (tc_frob_symbol): Don't frob absolute symbols with
+	local scope for ELF targets.
+
 2009-03-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (md_assemble): APUinfo only for e500.
