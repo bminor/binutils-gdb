@@ -1,3 +1,109 @@
+2009-03-03  Tristan Gingold  <gingold@adacore.com>
+	    Eric Botcazou  <ebotcazou@adacore.com>
+	    Douglas B Rupp  <rupp@gnat.com>
+
+	* doc/as.texinfo (Overview): Mention -replace/-noreplace options
+	for Alpha.
+	* doc/c-alpha.texi (Alpha Options): Document -replace/-noreplace.
+	* config/tc-alpha.h (TC_VALIDATE_FIX_SUB): Define to 1 (evax).
+	(OBJ_SYMFIELD_TYPE): Remove.
+	(tc_canonicalize_symbol_name): Define to evax_shorten_name.
+	(TC_IMPLICIT_LCOMM_ALIGNMENT): For alignment to 3 on evax.
+	(tc_frob_file_before_fix): Do not defined on evax.
+	* config/tc-alpha.c: Always includes dwarf2dbg.h.
+	Include vms.h if OBJ_EVAX.
+	(struct alpha_fixup): Add xtrasym and procsym (evax only).
+	(enum alpha_macro_arg): Remove trailing comma.
+	(md_longopts): Add replace and noreplace arguments (evax only).
+	(alpha_evax_proc_hash): New variable.
+	(alpha_link_section): Make it global.
+	(alpha_ctors_section, alpha_dtors_section): Removed.
+	(alpha_ctors_symbol, alpha_dtors_symbol): Ditto.
+	(alpha_lit8_section): Ifndef'ed on evax.
+	(alpha_lit8_symbol): Ditto.
+	(alpha_prologue_label): New variable.
+	(alpha_linkage_symbol): New variable (evax only).
+	(alpha_flag_replace): Ditto.
+	(struct alpha_evax_procs): Add handler and handler_data field.
+	(alpha_evax_proc): Now of type pointer.
+	(alpha_linkage_fixup_root, alpha_linkage_fixup_tail): New variables.
+	(struct alpha_reloc_tag): Add sym and psym fields (evax only).
+	(get_alpha_reloc_tag): Initialize sym and psym fields (evax only).
+	(alpha_adjust_relocs): Ifndef'ed on evax.
+	(load_expression): Add opname argument.
+	Implement LDA/BSR optimization for evax.
+	(emit_lda): Adjust for new prototype of load_expression.
+	(emit_ir_load): Ditto. Do not nothing for GP if ..lk symbols.
+	(emit_loadstore): Likewise.
+	(emit_ldXu): Likewise.
+	(emit_stX): Likewise.
+	(emit_jsrjmp): Likewise.  Implement LDA/BSR optimization for evax.
+	(emit_ldgp): Avoid warning in evax case.
+	(add_to_link_pool): Make it static.  Return symbolic expression rather
+	than number expression for the offset.
+	(s_alpha_text): Create .text symbol for evax if not already created.
+	(s_alpha_comm): Do not create specific section for common symbol.
+	Fill common area with zeros for evax.
+	(s_alpha_prologue): Create alpha_prologue_label.
+	(s_alpha_section_name): New function (evax).
+	(s_alpha_section_word): Likewise.
+	(section_name): New static variabke moved out from ...
+	(s_alpha_section): ... here.  Create new sections on demand.
+	(s_alpha_literals): New function (evax).
+	(s_alpha_ent): Create alpha_evax_proc instance and insert it in the
+	alpha_evax_proc_hash table.
+	(s_alpha_handler): New function (evax).
+	(s_alpha_frame): Adjust for new type of alpha_evax_proc.
+	(s_alpha_prologue): New function (evax).
+	(s_alpha_pdesc): Adjust for new type of alpha_evax_proc and new
+	handling of procedures with hash table.
+	Add support for condition handlers.
+	(s_alpha_linkage): Create linkage_fixup instance and chain it.
+	(s_alpha_fp_save): Adjust for new type of alpha_evax_proc.
+	(s_alpha_mask): Likewise.
+	(s_alpha_fmask): Likewise.
+	(s_alpha_end): Clear alpha_evax_proc.
+	(s_alpha_align): Increase max_alignment to 16.
+	(alpha_print_token): Call print_expr_1 instead of print_expr.
+	(md_pseudo_table): Add "section", "literals", "handler" and 
+	"handler_data" (evax).  Do not ignore "prologue" on evax.
+	Fix indentation.
+	(md_begin): Create hash table for alpha_evax_proc_hash.
+	(md_parse_option): Handle OPTION_REPLACE and OPTION_NOREPLACE.
+	(md_show_usage): Mention -replace/-noreplace for evax.
+	(md_apply_fix): Handle evax relocs (_NOP, _LDA, _BSR and _BOH).
+	(alpha_force_relocation): Likewise.
+	(alpha_fix_adjustable): Likewise. Add BFD_RELOC_16 case.
+	(tc_gen_reloc): Likewise.  Add BFD_RELOC_ALPHA_LINKAGE for evax.
+	(emit_insn): New cases for evax specific relocs.
+	(assemble_insn): Fix indentation.
+	Take care of -MDISP in operand table.
+	* config/obj-evax.h (struct alpha_linkage_fixups): New struct.
+	(OBJ_SYMFIELD_TYPE): New macro.
+	(obj_symbol_new_hook): Define.
+	(obj_frob_symbol, obj_frob_file_before_adjust): Ditto.
+	(obj_frob_file_before_fix): Ditto.
+	(PDSC_S_M_HANDLER_VALID): New macro.
+	(PDSC_S_M_HANDLER_DATA_VALID): Ditto.
+	(TC_IMPLICIT_LCOMM_ALIGNMENT): Remove.
+	Add prototypes for functions declared in obj-evax.c
+	* config/obj-evax.c: Include subsegs.h, struc-symbol.h, safe-ctype.h.
+	(s_evax_weak): Convert to ansi-C.
+	(evax_symbol_new_hook): New function.
+	(evax_frob_symbol): Ditto.
+	(evax_frob_file_before_adjust): Ditto.
+	(evax_frob_file_before_fix): Ditto.
+	(evax_shorten_name): Ditto.
+	(crc32): Ditto.
+	(encode_32): Ditto.
+	(encode_16): Ditto.
+	(decode_16): Ditto.
+	(shorten_identifier): Ditto.
+	(is_truncated_identifier): Ditto.
+	* dwarf2dbg.c (out_debug_info): Do not append trailing slash on	VMS.
+	* as.c (close_output_file): Remove #ifndef OBJ_VMS.
+	(main): Ditto.
+
 2009-03-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 9874

@@ -1636,9 +1636,15 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
     {
       dirname = remap_debug_filename (dirs[files[1].dir]);
       len = strlen (dirname);
+#ifdef TE_VMS
+      /* Already has trailing slash.  */
+      p = frag_more (len);
+      memcpy (p, dirname, len);
+#else
       p = frag_more (len + 1);
       memcpy (p, dirname, len);
       INSERT_DIR_SEPARATOR (p, len);
+#endif
     }
   len = strlen (files[1].filename) + 1;
   p = frag_more (len);

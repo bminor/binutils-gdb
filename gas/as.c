@@ -948,13 +948,11 @@ dump_statistics (void)
 #endif
 }
 
-#ifndef OBJ_VMS
 static void
 close_output_file (void)
 {
   output_file_close (out_file_name);
 }
-#endif
 
 /* The interface between the macro code and gas expression handling.  */
 
@@ -1136,10 +1134,8 @@ main (int argc, char ** argv)
   input_scrub_begin ();
   expr_begin ();
 
-#ifndef OBJ_VMS /* Does its own file handling.  */
   /* It has to be called after dump_statistics ().  */
   xatexit (close_output_file);
-#endif
 
   if (flag_print_statistics)
     xatexit (dump_statistics);
