@@ -1246,7 +1246,8 @@ quit_target (void *arg)
   struct qt_args *qt = (struct qt_args *)arg;
 
   /* Kill or detach all inferiors.  */
-  iterate_over_inferiors (kill_or_detach, qt);
+  if (target_has_execution)
+    iterate_over_inferiors (kill_or_detach, qt);
 
   /* Give all pushed targets a chance to do minimal cleanup, and pop
      them all out.  */

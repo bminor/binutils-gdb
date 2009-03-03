@@ -1,3 +1,8 @@
+2009-03-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* top.c (quit_target): Check for target_has_execution before
+	killing or detaching from inferiors.
+
 2009-03-02  Joel Brobecker  <brobecker@adacore.com>
 
 	Remove some unused routines.
