@@ -732,42 +732,6 @@ const struct ada_opname_map ada_opname_table[] = {
   {NULL, NULL}
 };
 
-/* Return non-zero if STR should be suppressed in info listings.  */
-
-static int
-is_suppressed_name (const char *str)
-{
-  if (strncmp (str, "_ada_", 5) == 0)
-    str += 5;
-  if (str[0] == '_' || str[0] == '\000')
-    return 1;
-  else
-    {
-      const char *p;
-      const char *suffix = strstr (str, "___");
-      if (suffix != NULL && suffix[3] != 'X')
-        return 1;
-      if (suffix == NULL)
-        suffix = str + strlen (str);
-      for (p = suffix - 1; p != str; p -= 1)
-        if (isupper (*p))
-          {
-            int i;
-            if (p[0] == 'X' && p[-1] != '_')
-              goto OK;
-            if (*p != 'O')
-              return 1;
-            for (i = 0; ada_opname_table[i].encoded != NULL; i += 1)
-              if (strncmp (ada_opname_table[i].encoded, p,
-                           strlen (ada_opname_table[i].encoded)) == 0)
-                goto OK;
-            return 1;
-          OK:;
-          }
-      return 0;
-    }
-}
-
 /* The "encoded" form of DECODED, according to GNAT conventions.
    The result is valid until the next call to ada_encode.  */
 
@@ -1230,18 +1194,6 @@ ada_match_name (const char *sym_name, const char *name, int wild)
             && strncmp (sym_name + 5, name, len_name) == 0
             && is_name_suffix (sym_name + len_name + 5));
     }
-}
-
-/* True (non-zero) iff, in Ada mode, the symbol SYM should be
-   suppressed in info listings.  */
-
-static int
-ada_suppress_symbol_printing (struct symbol *sym)
-{
-  if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN)
-    return 1;
-  else
-    return is_suppressed_name (SYMBOL_LINKAGE_NAME (sym));
 }
 
 

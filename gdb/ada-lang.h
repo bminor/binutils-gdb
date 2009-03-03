@@ -463,10 +463,6 @@ extern char *ada_main_name (void);
 
 extern int valid_task_id (int);
 
-typedef void (ada_task_list_iterator_ftype) (struct ada_task_info *task);
-extern void iterate_over_live_ada_tasks
-  (ada_task_list_iterator_ftype *iterator);
-
 extern void ada_adjust_exception_stop (bpstat bs);
 
 extern void ada_print_exception_stop (bpstat bs);

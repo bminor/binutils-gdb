@@ -1,3 +1,14 @@
+2009-03-02  Joel Brobecker  <brobecker@adacore.com>
+
+	Remove some unused routines.
+
+	* ada-lang.c (is_suppressed_name, ada_suppress_symbol_printing):
+	Delete.
+	* ada-lang.c (ada_task_list_iterator_ftype)
+	(iterate_over_live_ada_tasks): Delete.
+	* ada-tasks.c (ada_get_environment_task, iterate_over_live_ada_tasks):
+	Delete.
+
 2009-03-01  Doug Evans  <dje@google.com>
 
 	* symtab.c: Remove trailing whitespace throughout the file.

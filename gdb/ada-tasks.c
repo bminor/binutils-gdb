@@ -196,43 +196,6 @@ valid_task_id (int task_num)
           && task_num <= VEC_length (ada_task_info_s, task_list));
 }
 
-/* Return the task info associated to the Environment Task.
-   This function assumes that the inferior does in fact use tasking.  */
-
-static struct ada_task_info *
-ada_get_environment_task (void)
-{
-  ada_build_task_list (0);
-  gdb_assert (VEC_length (ada_task_info_s, task_list) > 0);
-
-  /* We use a little bit of insider knowledge to determine which task
-     is the Environment Task:  We know that this task is created first,
-     and thus should always be task #1, which is at index 0 of the
-     TASK_LIST.  */
-  return (VEC_index (ada_task_info_s, task_list, 0));
-}
-
-/* Call the ITERATOR function once for each Ada task that hasn't been
-   terminated yet.  */
-
-void
-iterate_over_live_ada_tasks (ada_task_list_iterator_ftype *iterator)
-{
-  int i, nb_tasks;
-  struct ada_task_info *task;
-
-  ada_build_task_list (0);
-  nb_tasks = VEC_length (ada_task_info_s, task_list);
-
-  for (i = 0; i < nb_tasks; i++)
-    {
-      task = VEC_index (ada_task_info_s, task_list, i);
-      if (!ada_task_is_alive (task))
-        continue;
-      iterator (task);
-    }
-}
-
 /* Extract the contents of the value as a string whose length is LENGTH,
    and store the result in DEST.  */
 
