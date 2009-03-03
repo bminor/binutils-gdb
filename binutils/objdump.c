@@ -1898,7 +1898,7 @@ disassemble_section (bfd *abfd, asection *section, void *info)
       bfd_boolean insns;
 
       addr = section->vma + addr_offset;
-      addr = (addr ^ sign_adjust) - sign_adjust;
+      addr = ((addr & ((sign_adjust << 1) - 1)) ^ sign_adjust) - sign_adjust;
 
       if (sym != NULL && bfd_asymbol_value (sym) <= addr)
 	{

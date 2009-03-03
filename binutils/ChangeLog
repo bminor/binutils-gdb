@@ -1,3 +1,7 @@
+2009-03-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (disassemble_section): Mask address before sign extending.
+
 2009-03-02  Sebastian Biallas  <sb@biallas.net>
 
 	* ieee.c (parse_ieee_ty): Add support for undocumented 'v' type.
@@ -5,7 +9,7 @@
 	discovered.
 
 2009-03-02  Cary Coutant  <ccoutant@google.com>
-	
+
 	* readelf.c (adjust_relative_path): New function.
 	(struct archive_info): New type.
 	(setup_archive): New function.
@@ -66,7 +70,7 @@
 	* dwarf.h (do_debug_lines_decoded): Remove.
 	Add prototypes for the new functions.
 	(struct dwarf_section_display): Add enabled field.
-	
+
 2009-02-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
@@ -208,7 +212,7 @@
 	(identify_member_contains_symname): New function.
 	(identify_dll_for_implib): Rewrite. Now determines whether implib
 	is ms- or binutils- style, before searching sections for
-	dllname. Allows multiple dllnames. 
+	dllname. Allows multiple dllnames.
 	(identify_process_section_p): Search alternate section for dllname
 	when implib is ms-style.
 	(identify_search_section): Add additional conditions to excludes
