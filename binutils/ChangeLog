@@ -1,3 +1,7 @@
+2009-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c: Update formatting.
+
 2009-03-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* objdump.c (disassemble_section): Mask address before sign extending.
