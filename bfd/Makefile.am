@@ -1052,11 +1052,10 @@ archive.lo: archive.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
 archures.lo: archures.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/safe-ctype.h
 bfd.lo: bfd.c $(INCDIR)/filenames.h bfdver.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/demangle.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/hashtab.h $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/sym.h libcoff.h libecoff.h $(INCDIR)/coff/ecoff.h \
-  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/elf/internal.h
+  $(INCDIR)/demangle.h $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/hashtab.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h \
+  libcoff.h libecoff.h $(INCDIR)/coff/ecoff.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h
 bfdio.lo: bfdio.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 bfdwin.lo: bfdwin.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cache.lo: cache.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
@@ -1460,14 +1459,14 @@ elf32-iq2000.lo: elf32-iq2000.c $(INCDIR)/filenames.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/iq2000.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
+elf32-lm32.lo: elf32-lm32.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/lm32.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-m32c.lo: elf32-m32c.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/m32c.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/libiberty.h \
-  elf32-target.h
-elf32-lm32.lo: elf32-lm32.c $(INCDIR)/filenames.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/elf/lm32.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
 elf32-m32r.lo: elf32-m32r.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
@@ -1572,13 +1571,13 @@ elf32-s390.lo: elf32-s390.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 elf32-score.lo: elf32-score.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h $(INCDIR)/libiberty.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/bfdlink.h elf32-score.h $(INCDIR)/elf/score.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/score.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-score.h elf32-target.h
 elf32-score7.lo: elf32-score7.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h $(INCDIR)/libiberty.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/bfdlink.h elf32-score.h $(INCDIR)/elf/score.h $(INCDIR)/elf/reloc-macros.h \
-  elf32-target.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/elf/score.h $(INCDIR)/elf/reloc-macros.h \
+  elf32-score.h
 elf32-sh.lo: elf32-sh.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h elf-vxworks.h \
@@ -1723,7 +1722,8 @@ m88kopenbsd.lo: m88kopenbsd.c netbsd.h $(INCDIR)/filenames.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h
 mach-o.lo: mach-o.c $(INCDIR)/filenames.h mach-o.h \
-  $(INCDIR)/hashtab.h $(INCDIR)/libiberty.h mach-o-target.c
+  $(INCDIR)/hashtab.h $(INCDIR)/libiberty.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def mach-o-target.c
 mipsbsd.lo: mipsbsd.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   libaout.h $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
@@ -1872,7 +1872,7 @@ vms-misc.lo: vms-misc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h vms.h
 vms-tir.lo: vms-tir.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h vms.h
-vmsutil.lo: vmsutil.c vmsutil.h $(INCDIR)/ansidecl.h
+vmsutil.lo: vmsutil.c vmsutil.h
 xcofflink.lo: xcofflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/xcoff.h \
   libcoff.h libxcoff.h

@@ -2057,70 +2057,64 @@ ldemul.o: ldemul.c sysdep.h config.h $(INCDIR)/fopen-same.h \
 ldexp.o: ldexp.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/bfdlink.h ld.h ldmain.h ldmisc.h ldexp.h \
-  ldlex.h ldgram.h ldlang.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/safe-ctype.h
+  ldlex.h ldgram.h ldlang.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
 ldfile.o: ldfile.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h ld.h ldmisc.h \
   ldexp.h ldlang.h ldfile.h ldmain.h ldgram.h ldlex.h \
-  ldemul.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h
+  ldemul.h $(INCDIR)/libiberty.h $(INCDIR)/filenames.h
 ldlang.o: ldlang.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h \
-  $(INCDIR)/obstack.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
-  ldexp.h ldlang.h ldgram.h ldlex.h ldmisc.h ldctor.h \
-  ldfile.h ldemul.h $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/hashtab.h
+  $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h \
+  $(INCDIR)/bfdlink.h ld.h ldmain.h ldexp.h ldlang.h \
+  ldgram.h ldlex.h ldmisc.h ldctor.h ldfile.h ldemul.h \
+  $(INCDIR)/fnmatch.h $(INCDIR)/demangle.h $(INCDIR)/hashtab.h
 ldmain.o: ldmain.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  $(INCDIR)/safe-ctype.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/progress.h $(INCDIR)/bfdlink.h $(INCDIR)/filenames.h \
-  ld.h ldmain.h ldmisc.h ldwrite.h ldexp.h ldlang.h ldgram.h \
-  ldlex.h ldfile.h ldemul.h ldctor.h
+  $(INCDIR)/safe-ctype.h $(INCDIR)/libiberty.h $(INCDIR)/progress.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/filenames.h ld.h ldmain.h \
+  ldmisc.h ldwrite.h ldexp.h ldlang.h ldgram.h ldlex.h \
+  ldfile.h ldemul.h ldctor.h
 ldmisc.o: ldmisc.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/demangle.h $(INCDIR)/libiberty.h ld.h ldmisc.h \
-  ldexp.h ldlang.h ldgram.h ldlex.h ldmain.h ldfile.h \
-  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/elf/internal.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/demangle.h \
+  ld.h ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldmain.h \
+  ldfile.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h
 ldver.o: ldver.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   ../bfd/bfdver.h ld.h ldver.h ldexp.h ldlang.h ldfile.h \
   ldemul.h ldmain.h
 ldwrite.o: ldwrite.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/safe-ctype.h ld.h ldexp.h ldlang.h ldwrite.h \
-  ldmisc.h ldgram.h ldmain.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
+  ld.h ldexp.h ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h
 lexsup.o: lexsup.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  ../bfd/bfdver.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h ld.h ldmain.h \
-  ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldfile.h \
-  ldver.h ldemul.h $(INCDIR)/demangle.h $(INCDIR)/libiberty.h
+  ../bfd/bfdver.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
+  $(INCDIR)/bfdlink.h ld.h ldmain.h ldmisc.h ldexp.h \
+  ldlang.h ldgram.h ldlex.h ldfile.h ldver.h ldemul.h \
+  $(INCDIR)/demangle.h
 mri.o: mri.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  ld.h ldexp.h ldlang.h ldmisc.h mri.h ldgram.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/ansidecl.h
+  ld.h ldexp.h ldlang.h ldmisc.h mri.h ldgram.h $(INCDIR)/libiberty.h
 ldcref.o: ldcref.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/demangle.h $(INCDIR)/libiberty.h $(INCDIR)/objalloc.h \
-  ld.h ldmain.h ldmisc.h ldexp.h ldlang.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/demangle.h \
+  $(INCDIR)/objalloc.h ld.h ldmain.h ldmisc.h ldexp.h \
+  ldlang.h
 pe-dll.o: pe-dll.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/safe-ctype.h ld.h ldexp.h ldlang.h ldwrite.h \
-  ldmisc.h ldgram.h ldmain.h ldfile.h ldemul.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h deffile.h pe-dll.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
+  ld.h ldexp.h ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h \
+  ldfile.h ldemul.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
+  deffile.h pe-dll.h
 pep-dll.o: pep-dll.c pe-dll.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/safe-ctype.h ld.h ldexp.h ldlang.h ldwrite.h \
-  ldmisc.h ldgram.h ldmain.h ldfile.h ldemul.h $(INCDIR)/coff/internal.h \
-  $(BFDDIR)/libcoff.h deffile.h pe-dll.h pep-dll.h
+  $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
+  ld.h ldexp.h ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h \
+  ldfile.h ldemul.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
+  deffile.h pep-dll.h
 ldgram.o: ldgram.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/bfdlink.h ld.h ldexp.h ldver.h ldlang.h ldfile.h \
@@ -2129,9 +2123,8 @@ ldlex.o: ldlex.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h ld.h ldmisc.h \
   ldexp.h ldlang.h ldgram.h ldfile.h ldlex.h ldmain.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h
+  $(INCDIR)/libiberty.h
 deffilep.o: deffilep.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h \
-  ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  ld.h ldmisc.h deffile.h
+  ../bfd/bfd.h $(INCDIR)/symcat.h ld.h ldmisc.h deffile.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
