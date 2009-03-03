@@ -1,3 +1,7 @@
+2009-03-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (md_assemble): APUinfo only for e500.
+
 2009-03-03  Tristan Gingold  <gingold@adacore.com>
 	    Eric Botcazou  <ebotcazou@adacore.com>
 	    Douglas B Rupp  <rupp@gnat.com>
@@ -65,7 +69,7 @@
 	(s_alpha_end): Clear alpha_evax_proc.
 	(s_alpha_align): Increase max_alignment to 16.
 	(alpha_print_token): Call print_expr_1 instead of print_expr.
-	(md_pseudo_table): Add "section", "literals", "handler" and 
+	(md_pseudo_table): Add "section", "literals", "handler" and
 	"handler_data" (evax).  Do not ignore "prologue" on evax.
 	Fix indentation.
 	(md_begin): Create hash table for alpha_evax_proc_hash.
@@ -313,7 +317,7 @@
 2009-01-29  Mark Mitchell  <mark@codesourcery.com>
 
 	* config/tc-arm.c (insns): Add qasx, qsax, shasx, shsax, ssax,
-	uasx, uhasx, uhsx, uqasx, uqsax, usax. 
+	uasx, uhasx, uhsx, uqasx, uqsax, usax.
 
 2009-01-29  Mark Mitchell  <mark@codesourcery.com>
 
