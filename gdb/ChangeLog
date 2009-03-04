@@ -10,7 +10,8 @@
 	we just learned about an inferior, call notice_new_inferior.
 	(record_currthread): Adjust.
 	(remote_threads_info): Adjust to use remote_notice_new_inferior.
-	(remote_start_remote, extended_remote_attach_1): Use remote_add_inferior.
+	(remote_start_remote, extended_remote_attach_1): Use
+	remote_add_inferior.
 	(process_stop_reply): Adjust.  Call remote_notice_new_inferior
 	after handling expedited registers and watchpoint state.
 	(extended_remote_create_inferior_1): Use remote_add_inferior.
