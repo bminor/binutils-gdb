@@ -110,6 +110,7 @@ responsibility among the other maintainers.
   TIC54X           Timothy Wall <twall@alum.mit.edu>
   VAX		   Matt Thomas <matt@netbsd.org>
   VAX		   Jan-Benedict Glaw <jbglaw@lug-owl.de>
+  VMS		   Tristan Gingold <gingold@adacore.com>
   x86_64	   Jan Hubicka <jh@suse.cz>
   x86_64	   Andreas Jaeger <aj@suse.de>
   x86_64	   H.J. Lu <hjl.tools@gmail.com>

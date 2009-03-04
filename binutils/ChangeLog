@@ -1,3 +1,7 @@
+2009-03-04  Tristan Gingold  <gingold@adacore.com>
+
+	* MAINTAINERS: Add myself as VMS maintainer.
+
 2009-03-03  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c: Update formatting.
