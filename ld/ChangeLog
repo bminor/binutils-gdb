@@ -9,6 +9,11 @@
 	* NEWS:  Retrospectively adjust news announcement.
 	* ld.texinfo:  Update documentation to mention new behaviour.
 
+2009-03-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2009-03-02  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* ldgram.y: Add support for REGION_ALIAS operator.
