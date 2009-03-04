@@ -1118,9 +1118,53 @@ static ptid_t any_thread_ptid;
 static ptid_t general_thread;
 static ptid_t continue_thread;
 
-static void
-notice_new_inferiors (ptid_t currthread)
+/* Add PID to GDB's inferior table.  Since we can be connected to a
+   remote system before before knowing about any inferior, mark the
+   target with execution when we find the first inferior.  */
+
+static struct inferior *
+remote_add_inferior (int pid)
 {
+  struct remote_state *rs = get_remote_state ();
+  struct inferior *inf;
+
+  inf = add_inferior (pid);
+
+  /* This may be the first inferior we hear about.  */
+  if (!target_has_execution)
+    {
+      if (rs->extended)
+	target_mark_running (&extended_remote_ops);
+      else
+	target_mark_running (&remote_ops);
+    }
+
+  return inf;
+}
+
+/* Add thread PTID to GDB's thread list.  Tag it as executing/running
+   according to RUNNING.  */
+
+static void
+remote_add_thread (ptid_t ptid, int running)
+{
+  add_thread (ptid);
+
+  set_executing (ptid, running);
+  set_running (ptid, running);
+}
+
+/* Come here when we learn about a thread id from the remote target.
+   It may be the first time we hear about such thread, so take the
+   opportunity to add it to GDB's thread list.  In case this is the
+   first time we're noticing its corresponding inferior, add it to
+   GDB's inferior list as well.  */
+
+static void
+remote_notice_new_inferior (ptid_t currthread, int running)
+{
+  struct remote_state *rs = get_remote_state ();
+
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
 
@@ -1128,12 +1172,14 @@ notice_new_inferiors (ptid_t currthread)
     {
       /* We're seeing an event on a thread id we knew had exited.
 	 This has to be a new thread reusing the old id.  Add it.  */
-      add_thread (currthread);
+      remote_add_thread (currthread, running);
       return;
     }
 
   if (!in_thread_list (currthread))
     {
+      struct inferior *inf = NULL;
+
       if (ptid_equal (pid_to_ptid (ptid_get_pid (currthread)), inferior_ptid))
 	{
 	  /* inferior_ptid has no thread member yet.  This can happen
@@ -1161,10 +1207,16 @@ notice_new_inferiors (ptid_t currthread)
 	 may not know about it yet.  Add it before adding its child
 	 thread, so notifications are emitted in a sensible order.  */
       if (!in_inferior_list (ptid_get_pid (currthread)))
-	add_inferior (ptid_get_pid (currthread));
+	inf = remote_add_inferior (ptid_get_pid (currthread));
 
       /* This is really a new thread.  Add it.  */
-      add_thread (currthread);
+      remote_add_thread (currthread, running);
+
+      /* If we found a new inferior, let the common code do whatever
+	 it needs to with it (e.g., read shared libraries, insert
+	 breakpoints).  */
+      if (inf != NULL)
+	notice_new_inferior (currthread, running, 0);
     }
 }
 
@@ -1183,7 +1235,7 @@ record_currthread (ptid_t currthread)
     /* We're just invalidating the local thread mirror.  */
     return;
 
-  notice_new_inferiors (currthread);
+  remote_notice_new_inferior (currthread, 0);
 }
 
 static char *last_pass_packet;
@@ -2146,27 +2198,15 @@ remote_threads_info (struct target_ops *ops)
 	      do
 		{
 		  new_thread = read_ptid (bufp, &bufp);
-		  if (!ptid_equal (new_thread, null_ptid)
-		      && (!in_thread_list (new_thread)
-			  || is_exited (new_thread)))
+		  if (!ptid_equal (new_thread, null_ptid))
 		    {
-		      /* When connected to a multi-process aware stub,
-			 "info threads" may show up threads of
-			 inferiors we didn't know about yet.  Add them
-			 now, and before adding any of its child
-			 threads, so notifications are emitted in a
-			 sensible order.  */
-		      if (!in_inferior_list (ptid_get_pid (new_thread)))
-			add_inferior (ptid_get_pid (new_thread));
-
-		      add_thread (new_thread);
-
 		      /* In non-stop mode, we assume new found threads
-			 are running until we proven otherwise with a
+			 are running until proven otherwise with a
 			 stop reply.  In all-stop, we can only get
 			 here if all threads are stopped.  */
-		      set_executing (new_thread, non_stop ? 1 : 0);
-		      set_running (new_thread, non_stop ? 1 : 0);
+		      int running = non_stop ? 1 : 0;
+
+		      remote_notice_new_inferior (new_thread, running);
 		    }
 		}
 	      while (*bufp++ == ',');	/* comma-separated list */
@@ -2605,9 +2645,6 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 	}
       else
 	{
-	  if (args->extended_p)
-	    target_mark_running (args->target);
-
 	  /* Save the reply for later.  */
 	  wait_status = alloca (strlen (rs->buf) + 1);
 	  strcpy (wait_status, rs->buf);
@@ -2628,7 +2665,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       /* Now, if we have thread information, update inferior_ptid.  */
       inferior_ptid = remote_current_thread (inferior_ptid);
 
-      add_inferior (ptid_get_pid (inferior_ptid));
+      remote_add_inferior (ptid_get_pid (inferior_ptid));
 
       /* Always add the main thread.  */
       add_thread_silent (inferior_ptid);
@@ -3394,13 +3431,12 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
     error (_("Attaching to %s failed"),
 	   target_pid_to_str (pid_to_ptid (pid)));
 
-  target_mark_running (target);
   inferior_ptid = pid_to_ptid (pid);
 
   /* Now, if we have thread information, update inferior_ptid.  */
   inferior_ptid = remote_current_thread (inferior_ptid);
 
-  inf = add_inferior (pid);
+  inf = remote_add_inferior (pid);
   inf->attach_flag = 1;
 
   if (non_stop)
@@ -4508,8 +4544,6 @@ process_stop_reply (struct stop_reply *stop_reply,
   if (status->kind != TARGET_WAITKIND_EXITED
       && status->kind != TARGET_WAITKIND_SIGNALLED)
     {
-      notice_new_inferiors (ptid);
-
       /* Expedited registers.  */
       if (stop_reply->regcache)
 	{
@@ -4526,6 +4560,8 @@ process_stop_reply (struct stop_reply *stop_reply,
 
       remote_stopped_by_watchpoint_p = stop_reply->stopped_by_watchpoint_p;
       remote_watch_data_address = stop_reply->watch_data_address;
+
+      remote_notice_new_inferior (ptid, 0);
     }
 
   stop_reply_xfree (stop_reply);
@@ -6725,10 +6761,8 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
   /* Now, if we have thread information, update inferior_ptid.  */
   inferior_ptid = remote_current_thread (inferior_ptid);
 
-  add_inferior (ptid_get_pid (inferior_ptid));
+  remote_add_inferior (ptid_get_pid (inferior_ptid));
   add_thread_silent (inferior_ptid);
-
-  target_mark_running (&extended_remote_ops);
 
   /* Get updated offsets, if the stub uses qOffsets.  */
   get_offsets ();

@@ -1,3 +1,20 @@
+2009-03-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferior.h (notice_new_inferior): Declare.
+	* infcmd.c (notice_new_inferior): New.
+	* remote.c (remote_add_inferior, remote_add_thread): New.
+	(notice_new_inferiors): Rename to...
+	(remote_notice_new_inferior): ... this.  Add RUNNING argument.
+	Use remote_add_thread instead of add_thread, passing it the
+	RUNNING argument.  Add an inferior with remote_add_inferior.  If
+	we just learned about an inferior, call notice_new_inferior.
+	(record_currthread): Adjust.
+	(remote_threads_info): Adjust to use remote_notice_new_inferior.
+	(remote_start_remote, extended_remote_attach_1): Use remote_add_inferior.
+	(process_stop_reply): Adjust.  Call remote_notice_new_inferior
+	after handling expedited registers and watchpoint state.
+	(extended_remote_create_inferior_1): Use remote_add_inferior.
+
 2009-03-04  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* infcmd.c (registers_info): Remove register number case.

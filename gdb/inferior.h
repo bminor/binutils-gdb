@@ -281,6 +281,8 @@ extern void interrupt_target_1 (int all_threads);
 
 extern void detach_command (char *, int);
 
+extern void notice_new_inferior (ptid_t, int, int);
+
 /* Address at which inferior stopped.  */
 
 extern CORE_ADDR stop_pc;
