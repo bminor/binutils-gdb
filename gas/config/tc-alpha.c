@@ -355,7 +355,9 @@ static int alpha_addr32_on = 0;
    and the section happens to not be on an eight byte boundary, it
    will align both the symbol and the .quad to an eight byte boundary.  */
 static symbolS *alpha_insn_label;
+#ifdef OBJ_ELF
 static symbolS *alpha_prologue_label;
+#endif
 
 #ifdef OBJ_EVAX
 /* Symbol associate with the current jsr instruction.  */
@@ -3473,9 +3475,12 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
   char *name;
   char c;
   char *p;
-  offsetT temp, size;
+  offsetT size;
   symbolS *symbolP;
+#ifdef OBJ_EVAX
+  offsetT temp;
   int log_align = 0;
+#endif
 
   name = input_line_pointer;
   c = get_symbol_end ();

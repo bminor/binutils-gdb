@@ -1,3 +1,10 @@
+2009-03-04  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-alpha.c (alpha_prologue_label): Only define for ELF
+	based targets.
+	(s_alpha_comm): Only define "temp" and "log_align" local variables
+	for EVAX targets.
+
 2009-03-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_elf_suffix): Error if ppc32 tls got relocs
