@@ -1,3 +1,8 @@
+2009-03-03  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes): Reorder the opcode table so that
+	instructions from newer processors are listed before older ones.
+
 2009-03-02  Alan Modra  <amodra@bigpond.net.au>
 
 	2009-02-26  Peter Bergner  <bergner@vnet.ibm.com>
