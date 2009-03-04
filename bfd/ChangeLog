@@ -1,3 +1,10 @@
+2009-03-04  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6768
+	* configure.in: Test for ld --as-needed support.  Link shared
+	libbfd against libm.
+	* configure: Regenerate.
+
 2009-03-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

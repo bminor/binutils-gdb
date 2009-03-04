@@ -91,6 +91,16 @@ AC_SUBST(cgendir)
 
 using_cgen=no
 
+# Check if linker supports --as-needed and --no-as-needed options
+AC_CACHE_CHECK(linker --as-needed support, bfd_cv_ld_as_needed,
+	[bfd_cv_ld_as_needed=no
+	if $LD --help 2>/dev/null | grep as-needed > /dev/null; then
+		bfd_cv_ld_as_needed=yes
+	fi
+	])
+
+LT_LIB_M
+
 # Horrible hacks to build DLLs on Windows and a shared library elsewhere.
 SHARED_LDFLAGS=
 SHARED_LIBADD=
@@ -132,6 +142,18 @@ changequote([,])dnl
       SHARED_DEPENDENCIES="../bfd/libbfd.la"
       ;;
   esac
+
+  if test -n "$SHARED_LIBADD"; then
+    if test -n "$LIBM"; then
+      if test x"$bfd_cv_ld_as_needed" = xyes; then
+	# Link against libm only when needed.  Put -lc, -lm inside -Wl
+	# to stop libtool reordering these options.
+	SHARED_LIBADD="$SHARED_LIBADD -Wl,-lc,--as-needed,`echo $LIBM | sed 's/ /,/g'`,--no-as-needed"
+      else
+	SHARED_LIBADD="$SHARED_LIBADD $LIBM"
+      fi
+    fi
+  fi
 fi
 AC_SUBST(SHARED_LDFLAGS)
 AC_SUBST(SHARED_LIBADD)

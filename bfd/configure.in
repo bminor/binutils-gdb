@@ -494,6 +494,16 @@ if test -n "$TRAD_HEADER"; then
     [Name of host specific header file to include in trad-core.c.])
 fi
 
+# Check if linker supports --as-needed and --no-as-needed options
+AC_CACHE_CHECK(linker --as-needed support, bfd_cv_ld_as_needed,
+	[bfd_cv_ld_as_needed=no
+	if $LD --help 2>/dev/null | grep as-needed > /dev/null; then
+		bfd_cv_ld_as_needed=yes
+	fi
+	])
+
+LT_LIB_M
+
 # When building a shared libbfd, link against the pic version of libiberty
 # so that apps that use libbfd won't need libiberty just to satisfy any
 # libbfd references.
@@ -516,6 +526,18 @@ changequote([,])dnl
     SHARED_LIBADD="-L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin -lkernel32"
   ;;
   esac
+
+  if test -n "$SHARED_LIBADD"; then
+    if test -n "$LIBM"; then
+      if test x"$bfd_cv_ld_as_needed" = xyes; then
+	# Link against libm only when needed.  Put -lc, -lm inside -Wl
+	# to stop libtool reordering these options.
+	SHARED_LIBADD="$SHARED_LIBADD -Wl,-lc,--as-needed,`echo $LIBM | sed 's/ /,/g'`,--no-as-needed"
+      else
+	SHARED_LIBADD="$SHARED_LIBADD $LIBM"
+      fi
+    fi
+  fi
 fi
 AC_SUBST(SHARED_LDFLAGS)
 AC_SUBST(SHARED_LIBADD)

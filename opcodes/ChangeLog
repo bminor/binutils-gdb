@@ -1,3 +1,10 @@
+2009-03-04  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6768
+	* configure.in: Test for ld --as-needed support.  Link shared
+	libopcodes against libm.
+	* configure: Regenerate.
+
 2009-03-03  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes): Reorder the opcode table so that
