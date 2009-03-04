@@ -232,7 +232,8 @@ class Target_sparc : public Sized_target<size, big_endian>
     // any warnings about this relocation.
     inline bool
     relocate(const Relocate_info<size, big_endian>*, Target_sparc*,
-	     size_t relnum, const elfcpp::Rela<size, big_endian>&,
+	     Output_section*, size_t relnum,
+	     const elfcpp::Rela<size, big_endian>&,
 	     unsigned int r_type, const Sized_symbol<size>*,
 	     const Symbol_value<size>*,
 	     unsigned char*,
@@ -2356,6 +2357,7 @@ inline bool
 Target_sparc<size, big_endian>::Relocate::relocate(
 			const Relocate_info<size, big_endian>* relinfo,
 			Target_sparc* target,
+			Output_section*,
 			size_t relnum,
 			const elfcpp::Rela<size, big_endian>& rela,
 			unsigned int r_type,

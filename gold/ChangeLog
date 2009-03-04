@@ -1,3 +1,20 @@
+2009-03-03  Ian Lance Taylor  <iant@google.com>
+
+	PR 9918
+	* target-reloc.h (relocate_section): Pass output_section to
+	relocate.
+	* i386.cc (Target_i386::should_apply_static_reloc): Add
+	output_section parameter.  Change all callers.
+	(Target_i386::Relocate::relocate): Add output_section parameter.
+	* x86_64.cc (Target_x86_64::Relocate::relocate): Likewise.
+	* sparc.cc (Target_sparc::Relocate::relocate): Likewise.
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Likewise.
+	* testsuite/two_file_shared.sh: New script.
+	* testsuite/Makefile.am (check_SCRIPTS): Add two_file_shared.sh.
+	(check_DATA): Add two_file_shared.dbg.
+	(two_file_shared.dbg): New target.
+	* testsuite/Makefile.in: Rebuild.
+
 2009-03-01  Ian Lance Taylor  <iant@google.com>
 
 	* configure.ac: Check for byteswap.h.

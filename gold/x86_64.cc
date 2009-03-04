@@ -227,8 +227,8 @@ class Target_x86_64 : public Sized_target<64, false>
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
     inline bool
-    relocate(const Relocate_info<64, false>*, Target_x86_64*, size_t relnum,
-	     const elfcpp::Rela<64, false>&,
+    relocate(const Relocate_info<64, false>*, Target_x86_64*, Output_section*,
+	     size_t relnum, const elfcpp::Rela<64, false>&,
 	     unsigned int r_type, const Sized_symbol<64>*,
 	     const Symbol_value<64>*,
 	     unsigned char*, elfcpp::Elf_types<64>::Elf_Addr,
@@ -1692,6 +1692,7 @@ Target_x86_64::do_finalize_sections(Layout* layout)
 inline bool
 Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
                                   Target_x86_64* target,
+				  Output_section*,
                                   size_t relnum,
                                   const elfcpp::Rela<64, false>& rela,
                                   unsigned int r_type,

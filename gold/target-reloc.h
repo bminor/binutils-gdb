@@ -268,8 +268,9 @@ relocate_section(
 	  psymval = &symval;
 	}
 
-      if (!relocate.relocate(relinfo, target, i, reloc, r_type, sym, psymval,
-			     view + offset, view_address + offset, view_size))
+      if (!relocate.relocate(relinfo, target, output_section, i, reloc,
+			     r_type, sym, psymval, view + offset,
+			     view_address + offset, view_size))
 	continue;
 
       if (offset < 0 || static_cast<section_size_type>(offset) >= view_size)

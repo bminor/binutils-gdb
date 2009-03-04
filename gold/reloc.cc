@@ -279,7 +279,9 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       // PLT sections.  Relocations for sections which are not
       // allocated (typically debugging sections) should not add new
       // GOT and PLT entries.  So we skip them unless this is a
-      // relocatable link or we need to emit relocations.
+      // relocatable link or we need to emit relocations.  FIXME: What
+      // should we do if a linker script maps a section with SHF_ALLOC
+      // clear to a section with SHF_ALLOC set?
       typename This::Shdr secshdr(pshdrs + shndx * This::shdr_size);
       bool is_section_allocated = ((secshdr.get_sh_flags() & elfcpp::SHF_ALLOC)
 				   != 0);

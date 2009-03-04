@@ -102,16 +102,53 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 
+# Test --detect-odr-violations
+
+# Similar to --detect-odr-violations: check for undefined symbols in .so's
+
+# Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
+# and --dynamic-list-cpp-typeinfo
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = two_file_shared.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt.sh debug_msg.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_1.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2.sh ver_test_4.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_5.sh ver_test_7.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_5.sh dynamic_list.sh
+
+# Create the data files that debug_msg.sh analyzes.
+
+# See if we can also detect problems when we're linking .so's, not .o's.
+
+# We also want to make sure we do something reasonable when there's no
+# debug info available.  For the best test, we use .so's.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = two_file_shared.dbg \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt_shared.so debug_msg.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_1.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2.syms ver_test_4.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_5.syms ver_test_7.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_5.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
+
 # The nonpic tests will fail on platforms which can not put non-PIC
 # code into shared libraries, so we just don't run them in that case.
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = two_file_shared_1_nonpic_test \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = two_file_shared_1_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_12_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_shared_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = two_file_strip_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = two_file_strip_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_strip_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1 exception_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_static_test \
@@ -155,44 +192,9 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = weak_undef_nonpic_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = weak_alias_test weak_plt \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = weak_undef_nonpic_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = weak_alias_test weak_plt \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test
-
-# Test --detect-odr-violations
-
-# Similar to --detect-odr-violations: check for undefined symbols in .so's
-
-# Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
-# and --dynamic-list-cpp-typeinfo
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = weak_plt.sh debug_msg.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_1.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2.sh ver_test_4.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_5.sh ver_test_7.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_5.sh dynamic_list.sh
-
-# Create the data files that debug_msg.sh analyzes.
-
-# See if we can also detect problems when we're linking .so's, not .o's.
-
-# We also want to make sure we do something reasonable when there's no
-# debug info available.  For the best test, we use .so's.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = weak_plt_shared.so \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.err debug_msg_so.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_1.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2.syms ver_test_4.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_5.syms ver_test_7.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_5.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_8 = tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test \
@@ -1154,8 +1156,8 @@ MOSTLYCLEANFILES = *.so $(am__append_16) $(am__append_23)
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_6) $(am__append_21)
-check_DATA = $(am__append_7) $(am__append_22)
+check_SCRIPTS = $(am__append_2) $(am__append_21)
+check_DATA = $(am__append_3) $(am__append_22)
 BUILT_SOURCES = $(am__append_14)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
@@ -2205,6 +2207,8 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_relocatable.o: gcctestdir/ld two_file_test_1.o two_file_test_1b.o two_file_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ two_file_test_1.o two_file_test_1b.o two_file_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared.dbg: two_file_shared.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -w $< >$@ 2>/dev/null
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_nonpic.so: two_file_test_1.o gcctestdir/ld
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b.o
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_2_nonpic.so: two_file_test_2.o gcctestdir/ld

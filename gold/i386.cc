@@ -214,13 +214,14 @@ class Target_i386 : public Sized_target<32, false>
     inline bool
     should_apply_static_reloc(const Sized_symbol<32>* gsym,
                               int ref_flags,
-                              bool is_32bit);
+                              bool is_32bit,
+			      Output_section* output_section);
 
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
     inline bool
-    relocate(const Relocate_info<32, false>*, Target_i386*, size_t relnum,
-	     const elfcpp::Rel<32, false>&,
+    relocate(const Relocate_info<32, false>*, Target_i386*, Output_section*,
+	     size_t relnum, const elfcpp::Rel<32, false>&,
 	     unsigned int r_type, const Sized_symbol<32>*,
 	     const Symbol_value<32>*,
 	     unsigned char*, elfcpp::Elf_types<32>::Elf_Addr,
@@ -1595,8 +1596,15 @@ Target_i386::do_finalize_sections(Layout* layout)
 inline bool
 Target_i386::Relocate::should_apply_static_reloc(const Sized_symbol<32>* gsym,
                                                  int ref_flags,
-                                                 bool is_32bit)
+                                                 bool is_32bit,
+						 Output_section* output_section)
 {
+  // If the output section is not allocated, then we didn't call
+  // scan_relocs, we didn't create a dynamic reloc, and we must apply
+  // the reloc here.
+  if ((output_section->flags() & elfcpp::SHF_ALLOC) == 0)
+    return true;
+
   // For local symbols, we will have created a non-RELATIVE dynamic
   // relocation only if (a) the output is position independent,
   // (b) the relocation is absolute (not pc- or segment-relative), and
@@ -1622,6 +1630,7 @@ Target_i386::Relocate::should_apply_static_reloc(const Sized_symbol<32>* gsym,
 inline bool
 Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 				Target_i386* target,
+				Output_section *output_section,
 				size_t relnum,
 				const elfcpp::Rel<32, false>& rel,
 				unsigned int r_type,
@@ -1697,7 +1706,8 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       break;
 
     case elfcpp::R_386_32:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true))
+      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true,
+				    output_section))
         Relocate_functions<32, false>::rel32(view, object, psymval);
       break;
 
@@ -1706,13 +1716,14 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
         int ref_flags = Symbol::NON_PIC_REF;
         if (gsym != NULL && gsym->type() == elfcpp::STT_FUNC)
           ref_flags |= Symbol::FUNCTION_CALL;
-        if (should_apply_static_reloc(gsym, ref_flags, true))
+        if (should_apply_static_reloc(gsym, ref_flags, true, output_section))
           Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
       }
       break;
 
     case elfcpp::R_386_16:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false))
+      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
+				    output_section))
         Relocate_functions<32, false>::rel16(view, object, psymval);
       break;
 
@@ -1721,13 +1732,14 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
         int ref_flags = Symbol::NON_PIC_REF;
         if (gsym != NULL && gsym->type() == elfcpp::STT_FUNC)
           ref_flags |= Symbol::FUNCTION_CALL;
-        if (should_apply_static_reloc(gsym, ref_flags, false))
+        if (should_apply_static_reloc(gsym, ref_flags, false, output_section))
           Relocate_functions<32, false>::pcrel16(view, object, psymval, address);
       }
       break;
 
     case elfcpp::R_386_8:
-      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false))
+      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
+				    output_section))
         Relocate_functions<32, false>::rel8(view, object, psymval);
       break;
 
@@ -1736,7 +1748,8 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
         int ref_flags = Symbol::NON_PIC_REF;
         if (gsym != NULL && gsym->type() == elfcpp::STT_FUNC)
           ref_flags |= Symbol::FUNCTION_CALL;
-        if (should_apply_static_reloc(gsym, ref_flags, false))
+        if (should_apply_static_reloc(gsym, ref_flags, false,
+				      output_section))
           Relocate_functions<32, false>::pcrel8(view, object, psymval, address);
       }
       break;

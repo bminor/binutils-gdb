@@ -226,6 +226,11 @@ two_file_relocatable_test_LDADD = two_file_relocatable.o
 two_file_relocatable.o: gcctestdir/ld two_file_test_1.o two_file_test_1b.o two_file_test_2.o
 	gcctestdir/ld -r -o $@ two_file_test_1.o two_file_test_1b.o two_file_test_2.o
 
+check_SCRIPTS += two_file_shared.sh
+check_DATA += two_file_shared.dbg
+two_file_shared.dbg: two_file_shared.so
+	$(TEST_READELF) -w $< >$@ 2>/dev/null
+
 # The nonpic tests will fail on platforms which can not put non-PIC
 # code into shared libraries, so we just don't run them in that case.
 if FN_PTRS_IN_SO_WITHOUT_PIC
