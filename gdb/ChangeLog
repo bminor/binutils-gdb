@@ -1,3 +1,7 @@
+2009-03-04  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* infcmd.c (registers_info): Remove register number case.
+
 2009-03-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* top.c (quit_target): Check for target_has_execution before

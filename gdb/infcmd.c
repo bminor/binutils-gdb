@@ -1948,21 +1948,6 @@ registers_info (char *addr_exp, int fpregs)
 	  }
       }
 
-      /* A register number?  (how portable is this one?).  */
-      {
-	char *endptr;
-	int regnum = strtol (start, &endptr, 0);
-	if (endptr == end
-	    && regnum >= 0
-	    && regnum < gdbarch_num_regs (gdbarch)
-			+ gdbarch_num_pseudo_regs (gdbarch))
-	  {
-	    gdbarch_print_registers_info (gdbarch, gdb_stdout,
-					  frame, regnum, fpregs);
-	    continue;
-	  }
-      }
-
       /* A register group?  */
       {
 	struct reggroup *group;
