@@ -753,7 +753,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* Marker reloc for TLS.  */
+  /* Marker relocs for TLS.  */
   HOWTO (R_PPC_TLS,
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -763,6 +763,34 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_TLS",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_PPC_TLSGD,
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_PPC_TLSGD",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_PPC_TLSLD,
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_PPC_TLSLD",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
@@ -1531,6 +1559,8 @@ ppc_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_CTOR:		r = R_PPC_ADDR32;		break;
     case BFD_RELOC_PPC_TOC16:		r = R_PPC_TOC16;		break;
     case BFD_RELOC_PPC_TLS:		r = R_PPC_TLS;			break;
+    case BFD_RELOC_PPC_TLSGD:		r = R_PPC_TLSGD;		break;
+    case BFD_RELOC_PPC_TLSLD:		r = R_PPC_TLSLD;		break;
     case BFD_RELOC_PPC_DTPMOD:		r = R_PPC_DTPMOD32;		break;
     case BFD_RELOC_PPC_TPREL16:		r = R_PPC_TPREL16;		break;
     case BFD_RELOC_PPC_TPREL16_LO:	r = R_PPC_TPREL16_LO;		break;
@@ -3288,6 +3318,7 @@ ppc_elf_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *got2, *sreloc;
+  struct elf_link_hash_entry *tga;
 
   if (info->relocatable)
     return TRUE;
@@ -3313,6 +3344,8 @@ ppc_elf_check_relocs (bfd *abfd,
     ppc_elf_howto_init ();
 
   htab = ppc_elf_hash_table (info);
+  tga = elf_link_hash_lookup (&htab->elf, "__tls_get_addr",
+			      FALSE, FALSE, TRUE);
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   got2 = bfd_get_section_by_name (abfd, ".got2");
@@ -3324,7 +3357,7 @@ ppc_elf_check_relocs (bfd *abfd,
       unsigned long r_symndx;
       enum elf_ppc_reloc_type r_type;
       struct elf_link_hash_entry *h;
-      int tls_type = 0;
+      int tls_type;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
@@ -3351,9 +3384,44 @@ ppc_elf_check_relocs (bfd *abfd,
 	  BFD_ASSERT (h == htab->elf.hgot);
 	}
 
+      tls_type = 0;
       r_type = ELF32_R_TYPE (rel->r_info);
+      if (h != NULL && h == tga)
+	switch (r_type)
+	  {
+	  default:
+	    break;
+
+	  case R_PPC_PLTREL24:
+	  case R_PPC_LOCAL24PC:
+	  case R_PPC_REL24:
+	  case R_PPC_REL14:
+	  case R_PPC_REL14_BRTAKEN:
+	  case R_PPC_REL14_BRNTAKEN:
+	  case R_PPC_ADDR24:
+	  case R_PPC_ADDR14:
+	  case R_PPC_ADDR14_BRTAKEN:
+	  case R_PPC_ADDR14_BRNTAKEN:
+	    if (rel != relocs
+		&& (ELF32_R_TYPE (rel[-1].r_info) == R_PPC_TLSGD
+		    || ELF32_R_TYPE (rel[-1].r_info) == R_PPC_TLSLD))
+	      /* We have a new-style __tls_get_addr call with a marker
+		 reloc.  */
+	      ;
+	    else
+	      /* Mark this section as having an old-style call.  */
+	      sec->has_tls_get_addr_call = 1;
+	    break;
+	  }
+
       switch (r_type)
 	{
+	case R_PPC_TLSGD:
+	case R_PPC_TLSLD:
+	  /* These special tls relocs tie a call to __tls_get_addr with
+	     its parameter symbol.  */
+	  break;
+
 	case R_PPC_GOT_TLSLD16:
 	case R_PPC_GOT_TLSLD16_LO:
 	case R_PPC_GOT_TLSLD16_HI:
@@ -3607,7 +3675,7 @@ ppc_elf_check_relocs (bfd *abfd,
 
 	  /* This refers only to functions defined in the shared library.  */
 	case R_PPC_LOCAL24PC:
-	  if (h && h == htab->elf.hgot && htab->plt_type == PLT_UNSET)
+	  if (h != NULL && h == htab->elf.hgot && htab->plt_type == PLT_UNSET)
 	    {
 	      htab->plt_type = PLT_OLD;
 	      htab->old_bfd = abfd;
@@ -4484,7 +4552,8 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 
 		  if (pass == 0)
 		    {
-		      if (!expecting_tls_get_addr)
+		      if (!expecting_tls_get_addr
+			  || !sec->has_tls_get_addr_call)
 			continue;
 
 		      if (rel + 1 < relend
@@ -6234,16 +6303,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	 for the final instruction stream.  */
       tls_mask = 0;
       tls_gd = 0;
-      if (IS_PPC_TLS_RELOC (r_type))
+      if (h != NULL)
+	tls_mask = ((struct ppc_elf_link_hash_entry *) h)->tls_mask;
+      else if (local_got_offsets != NULL)
 	{
-	  if (h != NULL)
-	    tls_mask = ((struct ppc_elf_link_hash_entry *) h)->tls_mask;
-	  else if (local_got_offsets != NULL)
-	    {
-	      char *lgot_masks;
-	      lgot_masks = (char *) (local_got_offsets + symtab_hdr->sh_info);
-	      tls_mask = lgot_masks[r_symndx];
-	    }
+	  char *lgot_masks;
+	  lgot_masks = (char *) (local_got_offsets + symtab_hdr->sh_info);
+	  tls_mask = lgot_masks[r_symndx];
 	}
 
       /* Ensure reloc mapping code below stays sane.  */
@@ -6361,7 +6427,17 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      bfd_vma offset;
 
 	    tls_ldgd_opt:
-	      offset = rel[1].r_offset;
+	      offset = (bfd_vma) -1;
+	      /* If not using the newer R_PPC_TLSGD/LD to mark
+		 __tls_get_addr calls, we must trust that the call
+		 stays with its arg setup insns, ie. that the next
+		 reloc is the __tls_get_addr call associated with
+		 the current reloc.  Edit both insns.  */
+	      if (input_section->has_tls_get_addr_call
+		  && rel + 1 < relend
+		  && branch_reloc_hash_match (input_bfd, rel + 1,
+					      htab->tls_get_addr))
+		offset = rel[1].r_offset;
 	      if ((tls_mask & tls_gd) != 0)
 		{
 		  /* IE */
@@ -6369,9 +6445,14 @@ ppc_elf_relocate_section (bfd *output_bfd,
 				      contents + rel->r_offset - d_offset);
 		  insn1 &= (1 << 26) - 1;
 		  insn1 |= 32 << 26;	/* lwz */
-		  insn2 = 0x7c631214;	/* add 3,3,2 */
-		  rel[1].r_info
-		    = ELF32_R_INFO (ELF32_R_SYM (rel[1].r_info), R_PPC_NONE);
+		  if (offset != (bfd_vma) -1)
+		    {
+		      rel[1].r_info
+			= ELF32_R_INFO (ELF32_R_SYM (rel[1].r_info),
+					R_PPC_NONE);
+		      insn2 = 0x7c631214;	/* add 3,3,2 */
+		      bfd_put_32 (output_bfd, insn2, contents + offset);
+		    }
 		  r_type = (((r_type - (R_PPC_GOT_TLSGD16 & 3)) & 3)
 			    + R_PPC_GOT_TPREL16);
 		  rel->r_info = ELF32_R_INFO (r_symndx, r_type);
@@ -6380,7 +6461,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		{
 		  /* LE */
 		  insn1 = 0x3c620000;	/* addis 3,2,0 */
-		  insn2 = 0x38630000;	/* addi 3,3,0 */
 		  if (tls_gd == 0)
 		    {
 		      /* Was an LD reloc.  */
@@ -6399,14 +6479,17 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		    }
 		  r_type = R_PPC_TPREL16_HA;
 		  rel->r_info = ELF32_R_INFO (r_symndx, r_type);
-		  rel[1].r_info = ELF32_R_INFO (r_symndx,
-						R_PPC_TPREL16_LO);
-		  rel[1].r_offset += d_offset;
-		  rel[1].r_addend = rel->r_addend;
+		  if (offset != (bfd_vma) -1)
+		    {
+		      rel[1].r_info = ELF32_R_INFO (r_symndx, R_PPC_TPREL16_LO);
+		      rel[1].r_offset = offset + d_offset;
+		      rel[1].r_addend = rel->r_addend;
+		      insn2 = 0x38630000;	/* addi 3,3,0 */
+		      bfd_put_32 (output_bfd, insn2, contents + offset);
+		    }
 		}
 	      bfd_put_32 (output_bfd, insn1,
 			  contents + rel->r_offset - d_offset);
-	      bfd_put_32 (output_bfd, insn2, contents + offset);
 	      if (tls_gd == 0)
 		{
 		  /* We changed the symbol on an LD reloc.  Start over
@@ -6414,6 +6497,66 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  rel--;
 		  continue;
 		}
+	    }
+	  break;
+
+	case R_PPC_TLSGD:
+	  if (tls_mask != 0 && (tls_mask & TLS_GD) == 0)
+	    {
+	      unsigned int insn2;
+	      bfd_vma offset = rel->r_offset;
+
+	      if ((tls_mask & TLS_TPRELGD) != 0)
+		{
+		  /* IE */
+		  r_type = R_PPC_NONE;
+		  insn2 = 0x7c631214;	/* add 3,3,2 */
+		}
+	      else
+		{
+		  /* LE */
+		  r_type = R_PPC_TPREL16_LO;
+		  rel->r_offset += d_offset;
+		  insn2 = 0x38630000;	/* addi 3,3,0 */
+		}
+	      rel->r_info = ELF32_R_INFO (r_symndx, r_type);
+	      bfd_put_32 (output_bfd, insn2, contents + offset);
+	      /* Zap the reloc on the _tls_get_addr call too.  */
+	      BFD_ASSERT (offset == rel[1].r_offset);
+	      rel[1].r_info = ELF32_R_INFO (ELF32_R_SYM (rel[1].r_info),
+					    R_PPC_NONE);
+	    }
+	  break;
+
+	case R_PPC_TLSLD:
+	  if (tls_mask != 0 && (tls_mask & TLS_LD) == 0)
+	    {
+	      unsigned int insn2;
+
+	      for (r_symndx = 0;
+		   r_symndx < symtab_hdr->sh_info;
+		   r_symndx++)
+		if (local_sections[r_symndx] == sec)
+		  break;
+	      if (r_symndx >= symtab_hdr->sh_info)
+		r_symndx = 0;
+	      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
+	      if (r_symndx != 0)
+		rel->r_addend -= (local_syms[r_symndx].st_value
+				  + sec->output_offset
+				  + sec->output_section->vma);
+
+	      rel->r_info = ELF32_R_INFO (r_symndx, R_PPC_TPREL16_LO);
+	      rel->r_offset += d_offset;
+	      insn2 = 0x38630000;	/* addi 3,3,0 */
+	      bfd_put_32 (output_bfd, insn2,
+			  contents + rel->r_offset - d_offset);
+	      /* Zap the reloc on the _tls_get_addr call too.  */
+	      BFD_ASSERT (rel->r_offset - d_offset == rel[1].r_offset);
+	      rel[1].r_info = ELF32_R_INFO (ELF32_R_SYM (rel[1].r_info),
+					    R_PPC_NONE);
+	      rel--;
+	      continue;
 	    }
 	  break;
 	}
@@ -6468,6 +6611,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	case R_PPC_NONE:
 	case R_PPC_TLS:
+	case R_PPC_TLSGD:
+	case R_PPC_TLSLD:
 	case R_PPC_EMB_MRKREF:
 	case R_PPC_GNU_VTINHERIT:
 	case R_PPC_GNU_VTENTRY:
@@ -6509,6 +6654,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_GOT16_LO:
 	case R_PPC_GOT16_HI:
 	case R_PPC_GOT16_HA:
+	  tls_mask = 0;
 	dogot:
 	  {
 	    /* Relocation is to the entry for this symbol in the global

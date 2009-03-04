@@ -1974,13 +1974,38 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
       {
 	int reloc = ptr->reloc;
 
-	if (!ppc_obj64)
-	  if (exp_p->X_add_number != 0
-	      && (reloc == (int) BFD_RELOC_16_GOTOFF
-		  || reloc == (int) BFD_RELOC_LO16_GOTOFF
-		  || reloc == (int) BFD_RELOC_HI16_GOTOFF
-		  || reloc == (int) BFD_RELOC_HI16_S_GOTOFF))
-	    as_warn (_("identifier+constant@got means identifier@got+constant"));
+	if (!ppc_obj64 && exp_p->X_add_number != 0)
+	  {
+	    switch (reloc)
+	      {
+	      case BFD_RELOC_16_GOTOFF:
+	      case BFD_RELOC_LO16_GOTOFF:
+	      case BFD_RELOC_HI16_GOTOFF:
+	      case BFD_RELOC_HI16_S_GOTOFF:
+		as_warn (_("identifier+constant@got means "
+			   "identifier@got+constant"));
+		break;
+
+	      case BFD_RELOC_PPC_GOT_TLSGD16:
+	      case BFD_RELOC_PPC_GOT_TLSGD16_LO:
+	      case BFD_RELOC_PPC_GOT_TLSGD16_HI:
+	      case BFD_RELOC_PPC_GOT_TLSGD16_HA:
+	      case BFD_RELOC_PPC_GOT_TLSLD16:
+	      case BFD_RELOC_PPC_GOT_TLSLD16_LO:
+	      case BFD_RELOC_PPC_GOT_TLSLD16_HI:
+	      case BFD_RELOC_PPC_GOT_TLSLD16_HA:
+	      case BFD_RELOC_PPC_GOT_DTPREL16:
+	      case BFD_RELOC_PPC_GOT_DTPREL16_LO:
+	      case BFD_RELOC_PPC_GOT_DTPREL16_HI:
+	      case BFD_RELOC_PPC_GOT_DTPREL16_HA:
+	      case BFD_RELOC_PPC_GOT_TPREL16:
+	      case BFD_RELOC_PPC_GOT_TPREL16_LO:
+	      case BFD_RELOC_PPC_GOT_TPREL16_HI:
+	      case BFD_RELOC_PPC_GOT_TPREL16_HA:
+		as_bad (_("symbol+offset not supported for got tls"));
+		break;
+	      }
+	  }
 
 	/* Now check for identifier@suffix+constant.  */
 	if (*str == '-' || *str == '+')
@@ -2797,108 +2822,156 @@ md_assemble (char *str)
 				     ppc_cpu, (char *) NULL, 0);
 	}
 #ifdef OBJ_ELF
-      else if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_UNUSED)
+      else
 	{
-	  /* Some TLS tweaks.  */
-	  switch (reloc)
+	  if (ex.X_op == O_symbol && str[0] == '(')
 	    {
-	    default:
-	      break;
-	    case BFD_RELOC_PPC_TLS:
-	      insn = ppc_insert_operand (insn, operand, ppc_obj64 ? 13 : 2,
-					 ppc_cpu, (char *) NULL, 0);
-	      break;
-	  /* We'll only use the 32 (or 64) bit form of these relocations
-	     in constants.  Instructions get the 16 bit form.  */
-	    case BFD_RELOC_PPC_DTPREL:
-	      reloc = BFD_RELOC_PPC_DTPREL16;
-	      break;
-	    case BFD_RELOC_PPC_TPREL:
-	      reloc = BFD_RELOC_PPC_TPREL16;
-	      break;
-	    }
+	      const char *sym_name = S_GET_NAME (ex.X_add_symbol);
+	      if (sym_name[0] == '.')
+		++sym_name;
 
-	  /* For the absolute forms of branches, convert the PC
-	     relative form back into the absolute.  */
-	  if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
-	    {
-	      switch (reloc)
+	      if (strcasecmp (sym_name, "__tls_get_addr") == 0)
 		{
-		case BFD_RELOC_PPC_B26:
-		  reloc = BFD_RELOC_PPC_BA26;
-		  break;
-		case BFD_RELOC_PPC_B16:
-		  reloc = BFD_RELOC_PPC_BA16;
-		  break;
-		case BFD_RELOC_PPC_B16_BRTAKEN:
-		  reloc = BFD_RELOC_PPC_BA16_BRTAKEN;
-		  break;
-		case BFD_RELOC_PPC_B16_BRNTAKEN:
-		  reloc = BFD_RELOC_PPC_BA16_BRNTAKEN;
-		  break;
-		default:
-		  break;
+		  expressionS tls_exp;
+
+		  hold = input_line_pointer;
+		  input_line_pointer = str + 1;
+		  expression (&tls_exp);
+		  if (tls_exp.X_op == O_symbol)
+		    {
+		      reloc = BFD_RELOC_UNUSED;
+		      if (strncasecmp (input_line_pointer, "@tlsgd)", 7) == 0)
+			{
+			  reloc = BFD_RELOC_PPC_TLSGD;
+			  input_line_pointer += 7;
+			}
+		      else if (strncasecmp (input_line_pointer, "@tlsld)", 7) == 0)
+			{
+			  reloc = BFD_RELOC_PPC_TLSLD;
+			  input_line_pointer += 7;
+			}
+		      if (reloc != BFD_RELOC_UNUSED)
+			{
+			  SKIP_WHITESPACE ();
+			  str = input_line_pointer;
+
+			  if (fc >= MAX_INSN_FIXUPS)
+			    as_fatal (_("too many fixups"));
+			  fixups[fc].exp = tls_exp;
+			  fixups[fc].opindex = *opindex_ptr;
+			  fixups[fc].reloc = reloc;
+			  ++fc;
+			}
+		    }
+		  input_line_pointer = hold;
 		}
 	    }
 
-	  if (ppc_obj64
-	      && (operand->flags & (PPC_OPERAND_DS | PPC_OPERAND_DQ)) != 0)
+	  if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_UNUSED)
 	    {
+	      /* Some TLS tweaks.  */
 	      switch (reloc)
 		{
-		case BFD_RELOC_16:
-		  reloc = BFD_RELOC_PPC64_ADDR16_DS;
-		  break;
-		case BFD_RELOC_LO16:
-		  reloc = BFD_RELOC_PPC64_ADDR16_LO_DS;
-		  break;
-		case BFD_RELOC_16_GOTOFF:
-		  reloc = BFD_RELOC_PPC64_GOT16_DS;
-		  break;
-		case BFD_RELOC_LO16_GOTOFF:
-		  reloc = BFD_RELOC_PPC64_GOT16_LO_DS;
-		  break;
-		case BFD_RELOC_LO16_PLTOFF:
-		  reloc = BFD_RELOC_PPC64_PLT16_LO_DS;
-		  break;
-		case BFD_RELOC_16_BASEREL:
-		  reloc = BFD_RELOC_PPC64_SECTOFF_DS;
-		  break;
-		case BFD_RELOC_LO16_BASEREL:
-		  reloc = BFD_RELOC_PPC64_SECTOFF_LO_DS;
-		  break;
-		case BFD_RELOC_PPC_TOC16:
-		  reloc = BFD_RELOC_PPC64_TOC16_DS;
-		  break;
-		case BFD_RELOC_PPC64_TOC16_LO:
-		  reloc = BFD_RELOC_PPC64_TOC16_LO_DS;
-		  break;
-		case BFD_RELOC_PPC64_PLTGOT16:
-		  reloc = BFD_RELOC_PPC64_PLTGOT16_DS;
-		  break;
-		case BFD_RELOC_PPC64_PLTGOT16_LO:
-		  reloc = BFD_RELOC_PPC64_PLTGOT16_LO_DS;
-		  break;
-		case BFD_RELOC_PPC_DTPREL16:
-		  reloc = BFD_RELOC_PPC64_DTPREL16_DS;
-		  break;
-		case BFD_RELOC_PPC_DTPREL16_LO:
-		  reloc = BFD_RELOC_PPC64_DTPREL16_LO_DS;
-		  break;
-		case BFD_RELOC_PPC_TPREL16:
-		  reloc = BFD_RELOC_PPC64_TPREL16_DS;
-		  break;
-		case BFD_RELOC_PPC_TPREL16_LO:
-		  reloc = BFD_RELOC_PPC64_TPREL16_LO_DS;
-		  break;
-		case BFD_RELOC_PPC_GOT_DTPREL16:
-		case BFD_RELOC_PPC_GOT_DTPREL16_LO:
-		case BFD_RELOC_PPC_GOT_TPREL16:
-		case BFD_RELOC_PPC_GOT_TPREL16_LO:
-		  break;
 		default:
-		  as_bad (_("unsupported relocation for DS offset field"));
 		  break;
+
+		case BFD_RELOC_PPC_TLS:
+		  insn = ppc_insert_operand (insn, operand, ppc_obj64 ? 13 : 2,
+					     ppc_cpu, (char *) NULL, 0);
+		  break;
+
+		  /* We'll only use the 32 (or 64) bit form of these relocations
+		     in constants.  Instructions get the 16 bit form.  */
+		case BFD_RELOC_PPC_DTPREL:
+		  reloc = BFD_RELOC_PPC_DTPREL16;
+		  break;
+		case BFD_RELOC_PPC_TPREL:
+		  reloc = BFD_RELOC_PPC_TPREL16;
+		  break;
+		}
+
+	      /* For the absolute forms of branches, convert the PC
+		 relative form back into the absolute.  */
+	      if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
+		{
+		  switch (reloc)
+		    {
+		    case BFD_RELOC_PPC_B26:
+		      reloc = BFD_RELOC_PPC_BA26;
+		      break;
+		    case BFD_RELOC_PPC_B16:
+		      reloc = BFD_RELOC_PPC_BA16;
+		      break;
+		    case BFD_RELOC_PPC_B16_BRTAKEN:
+		      reloc = BFD_RELOC_PPC_BA16_BRTAKEN;
+		      break;
+		    case BFD_RELOC_PPC_B16_BRNTAKEN:
+		      reloc = BFD_RELOC_PPC_BA16_BRNTAKEN;
+		      break;
+		    default:
+		      break;
+		    }
+		}
+
+	      if (ppc_obj64
+		  && (operand->flags & (PPC_OPERAND_DS | PPC_OPERAND_DQ)) != 0)
+		{
+		  switch (reloc)
+		    {
+		    case BFD_RELOC_16:
+		      reloc = BFD_RELOC_PPC64_ADDR16_DS;
+		      break;
+		    case BFD_RELOC_LO16:
+		      reloc = BFD_RELOC_PPC64_ADDR16_LO_DS;
+		      break;
+		    case BFD_RELOC_16_GOTOFF:
+		      reloc = BFD_RELOC_PPC64_GOT16_DS;
+		      break;
+		    case BFD_RELOC_LO16_GOTOFF:
+		      reloc = BFD_RELOC_PPC64_GOT16_LO_DS;
+		      break;
+		    case BFD_RELOC_LO16_PLTOFF:
+		      reloc = BFD_RELOC_PPC64_PLT16_LO_DS;
+		      break;
+		    case BFD_RELOC_16_BASEREL:
+		      reloc = BFD_RELOC_PPC64_SECTOFF_DS;
+		      break;
+		    case BFD_RELOC_LO16_BASEREL:
+		      reloc = BFD_RELOC_PPC64_SECTOFF_LO_DS;
+		      break;
+		    case BFD_RELOC_PPC_TOC16:
+		      reloc = BFD_RELOC_PPC64_TOC16_DS;
+		      break;
+		    case BFD_RELOC_PPC64_TOC16_LO:
+		      reloc = BFD_RELOC_PPC64_TOC16_LO_DS;
+		      break;
+		    case BFD_RELOC_PPC64_PLTGOT16:
+		      reloc = BFD_RELOC_PPC64_PLTGOT16_DS;
+		      break;
+		    case BFD_RELOC_PPC64_PLTGOT16_LO:
+		      reloc = BFD_RELOC_PPC64_PLTGOT16_LO_DS;
+		      break;
+		    case BFD_RELOC_PPC_DTPREL16:
+		      reloc = BFD_RELOC_PPC64_DTPREL16_DS;
+		      break;
+		    case BFD_RELOC_PPC_DTPREL16_LO:
+		      reloc = BFD_RELOC_PPC64_DTPREL16_LO_DS;
+		      break;
+		    case BFD_RELOC_PPC_TPREL16:
+		      reloc = BFD_RELOC_PPC64_TPREL16_DS;
+		      break;
+		    case BFD_RELOC_PPC_TPREL16_LO:
+		      reloc = BFD_RELOC_PPC64_TPREL16_LO_DS;
+		      break;
+		    case BFD_RELOC_PPC_GOT_DTPREL16:
+		    case BFD_RELOC_PPC_GOT_DTPREL16_LO:
+		    case BFD_RELOC_PPC_GOT_TPREL16:
+		    case BFD_RELOC_PPC_GOT_TPREL16_LO:
+		      break;
+		    default:
+		      as_bad (_("unsupported relocation for DS offset field"));
+		      break;
+		    }
 		}
 	    }
 
@@ -2906,12 +2979,11 @@ md_assemble (char *str)
 	  if (fc >= MAX_INSN_FIXUPS)
 	    as_fatal (_("too many fixups"));
 	  fixups[fc].exp = ex;
-	  fixups[fc].opindex = 0;
+	  fixups[fc].opindex = *opindex_ptr;
 	  fixups[fc].reloc = reloc;
 	  ++fc;
 	}
-#endif /* OBJ_ELF */
-
+#else /* OBJ_ELF */
       else
 	{
 	  /* We need to generate a fixup for this expression.  */
@@ -2922,6 +2994,7 @@ md_assemble (char *str)
 	  fixups[fc].reloc = BFD_RELOC_UNUSED;
 	  ++fc;
 	}
+#endif /* OBJ_ELF */
 
       if (need_paren)
 	{
@@ -3006,9 +3079,6 @@ md_assemble (char *str)
      md_apply_fix.  */
   for (i = 0; i < fc; i++)
     {
-      const struct powerpc_operand *operand;
-
-      operand = &powerpc_operands[fixups[i].opindex];
       if (fixups[i].reloc != BFD_RELOC_UNUSED)
 	{
 	  reloc_howto_type *reloc_howto;
@@ -3055,13 +3125,18 @@ md_assemble (char *str)
 	    }
 	}
       else
-	fix_new_exp (frag_now,
-		     f - frag_now->fr_literal,
-		     4,
-		     &fixups[i].exp,
-		     (operand->flags & PPC_OPERAND_RELATIVE) != 0,
-		     ((bfd_reloc_code_real_type)
-		      (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+	{
+	  const struct powerpc_operand *operand;
+
+	  operand = &powerpc_operands[fixups[i].opindex];
+	  fix_new_exp (frag_now,
+		       f - frag_now->fr_literal,
+		       4,
+		       &fixups[i].exp,
+		       (operand->flags & PPC_OPERAND_RELATIVE) != 0,
+		       ((bfd_reloc_code_real_type)
+			(fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+	}
     }
 }
 
@@ -6155,6 +6230,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  break;
 
 	case BFD_RELOC_PPC_TLS:
+	case BFD_RELOC_PPC_TLSGD:
+	case BFD_RELOC_PPC_TLSLD:
 	  break;
 
 	case BFD_RELOC_PPC_DTPMOD:

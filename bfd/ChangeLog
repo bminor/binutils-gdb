@@ -1,5 +1,35 @@
 2009-03-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* reloc.c (BFD_RELOC_PPC_TLSGD, BFD_RELOC_PPC_TLSLD): New.
+	* section.c (struct bfd_section): Add has_tls_get_addr_call.
+	(BFD_FAKE_SECTION): Init new flag.
+	* ecoff.c (bfd_debug_section): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf32-ppc.c (ppc_elf_howto_raw): Add R_PPC_TLSGD and R_PPC_TLSLD.
+	(ppc_elf_reloc_type_lookup): Handle new relocs.
+	(ppc_elf_check_relocs): Set has_tls_get_addr_call on finding such
+	without marker relocs.
+	(ppc_elf_tls_optimize): Allow out-of-order __tls_get_addr relocs
+	if section has no old-style calls.
+	(ppc_elf_relocate_section): Set tls_mask for non-tls relocs too.
+	Don't try to optimize new-style __tls_get_addr call when handling
+	arg setup relocs.  Instead do so for R_PPC_TLSGD and R_PPC_TLSLD
+	relocs.
+	* elf64-ppc.c (ppc64_elf_howto_raw): Add R_PPC64_TLSGD, R_PPC64_TLSLD.
+	(ppc64_elf_reloc_type_lookup): Handle new relocs.
+	(ppc64_elf_check_relocs): Set has_tls_get_addr_call on finding such
+	without marker relocs.
+	(ppc64_elf_tls_optimize): Allow out-of-order __tls_get_addr relocs
+	if section has no old-style calls.  Set toc_ref for new relocs as
+	appropriate.
+	(ppc64_elf_relocate_section): Set tls_mask for non-tls relocs too.
+	Don't try to optimize new-style __tls_get_addr call when handling
+	arg setup relocs.  Instead do so for R_PPC_TLSGD and R_PPC_TLSLD
+	relocs.
+
+2009-03-04  Alan Modra  <amodra@bigpond.net.au>
+
 	PR 6768
 	* configure.in: Test for ld --as-needed support.  Link shared
 	libbfd against libm.

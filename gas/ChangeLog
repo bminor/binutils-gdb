@@ -1,3 +1,10 @@
+2009-03-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Error if ppc32 tls got relocs
+	have non-zero addend.
+	(md_assemble): Parse args of __tls_get_addr calls.
+	(md_apply_fix): Handle BFD_RELOC_PPC_TLSGD and BFD_RELOC_PPC_TLSLD.
+
 2009-03-03  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	binutils/3807
