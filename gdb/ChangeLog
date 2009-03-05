@@ -1,3 +1,23 @@
+2009-03-05  Joel Brobecker  <brobecker@adacore.com>
+
+	Get rid of the global "base_target" and use "find_target_beneath"
+	to find the underlying target.
+	* dec-thread.c (base_target): Delete.
+	(enable_dec_thread): Remove assignement to base_target.
+	(dec_thread_detach, dec_thread_wait, dec_thread_wait)
+	(dec_thread_fetch_registers, dec_thread_store_registers)
+	(dec_thread_mourn_inferior, dec_thread_pid_to_str):
+	Update the function profile if necessary.
+	Use find_target_beneath to call the same method but from
+	the underlying target, removing the need for "base_target".
+
+	* dec-thread.c (dec_thread_get_regsets, dec_thread_set_regsets):
+	Fix a copy/paste error in a few debug traces...
+
+	* solib-osf.c (init_so): Use a simpler method for computing
+	the size of lm_info structure. This also gets rid of warning
+	emitted by the compiler.
+
 2009-03-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (check_duplicates_for): Skip permanent breakpoints

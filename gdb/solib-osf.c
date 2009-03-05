@@ -424,8 +424,8 @@ init_so (struct so_list *so, char *name, int isloader, int nsecs)
   memcpy (so->so_name, so->so_original_name, namelen + 1);
 
   /* Allocate section space.  */
-  so->lm_info = xmalloc ((unsigned) &(((struct lm_info *)0)->secs) +
-			 nsecs * sizeof *so->lm_info);
+  so->lm_info = xmalloc (sizeof (struct lm_info)
+                         + (nsecs - 1) * sizeof (struct lm_sec));
   so->lm_info->isloader = isloader;
   so->lm_info->nsecs = nsecs;
   for (i = 0; i < nsecs; i++)
