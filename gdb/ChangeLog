@@ -1,5 +1,13 @@
 2009-03-05  Joel Brobecker  <brobecker@adacore.com>
 
+	Implement the target-specific part of Ada tasking support
+	on Tru64.
+
+	* dec-thread.c (dec_thread_get_ada_task_ptid): New function.
+	(init_dec_thread_ops): Set the to_get_ada_task_ptid method.
+
+2009-03-05  Joel Brobecker  <brobecker@adacore.com>
+
 	Get rid of the global "base_target" and use "find_target_beneath"
 	to find the underlying target.
 	* dec-thread.c (base_target): Delete.

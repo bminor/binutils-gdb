@@ -660,6 +660,26 @@ dec_thread_new_objfile_observer (struct objfile *objfile)
      disable_dec_thread ();
 }
 
+/* The "to_get_ada_task_ptid" method of the dec_thread_ops.  */
+
+static ptid_t
+dec_thread_get_ada_task_ptid (long lwp, long thread)
+{
+  int i;
+  struct dec_thread_info *info;
+
+  debug ("dec_thread_get_ada_task_ptid (lwp=0x%lx, thread=0x%lx)",
+         lwp, thread);
+
+  for (i = 0; VEC_iterate (dec_thread_info_s, dec_thread_list, i, info);
+       i++)
+    if (info->info.teb == (pthread_t) thread)
+      return ptid_build_from_info (*info);
+  
+  warning (_("Could not find thread id from THREAD = 0x%lx\n"), thread);
+  return inferior_ptid;
+}
+
 static void
 init_dec_thread_ops (void)
 {
@@ -674,6 +694,7 @@ init_dec_thread_ops (void)
   dec_thread_ops.to_thread_alive       = dec_thread_thread_alive;
   dec_thread_ops.to_pid_to_str         = dec_thread_pid_to_str;
   dec_thread_ops.to_stratum            = thread_stratum;
+  dec_thread_ops.to_get_ada_task_ptid  = dec_thread_get_ada_task_ptid;
   dec_thread_ops.to_magic              = OPS_MAGIC;
 }
 
