@@ -1,3 +1,15 @@
+2009-03-05  Christophe Lyon  <christophe.lyon@st.com>
+
+	* ld-arm/arm-elf.exp: Add 2 more tests to check long branch stubs
+	in PLT context.
+	* ld-arm/farcall-mixed-app-v5.d: New file.
+	* ld-arm/farcall-mixed-app.d: Likewise.
+	* ld-arm/farcall-mixed-app.r: Likewise.
+	* ld-arm/farcall-mixed-app.s: Likewise.
+	* ld-arm/farcall-mixed-app.sym: Likewise.
+	* ld-arm/farcall-mixed-lib.d: Likewise.
+	* ld-arm/farcall-mixed-lib.r: Likewise.
+
 2009-03-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsmark.s, * ld-powerpc/tlsmark.d: New test.
