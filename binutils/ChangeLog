@@ -1,3 +1,8 @@
+2009-03-05  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (disassemble_section): If the computed next offset is
+	not beyond the current offset then just continue to the end.
+
 2009-03-04  Tristan Gingold  <gingold@adacore.com>
 
 	* MAINTAINERS: Add myself as VMS maintainer.

@@ -1961,7 +1961,8 @@ disassemble_section (bfd *abfd, asection *section, void *info)
       else
 	nextstop_offset = bfd_asymbol_value (nextsym) - section->vma;
 
-      if (nextstop_offset > stop_offset)
+      if (nextstop_offset > stop_offset
+	  || nextstop_offset <= addr_offset)
 	nextstop_offset = stop_offset;
 
       /* If a symbol is explicitly marked as being an object
@@ -1984,7 +1985,7 @@ disassemble_section (bfd *abfd, asection *section, void *info)
       disassemble_bytes (pinfo, paux->disassemble_fn, insns, data,
 			 addr_offset, nextstop_offset,
 			 rel_offset, &rel_pp, rel_ppend);
-
+      
       addr_offset = nextstop_offset;
       sym = nextsym;
     }
