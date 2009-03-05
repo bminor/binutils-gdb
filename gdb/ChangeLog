@@ -1,3 +1,8 @@
+2009-03-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (check_duplicates_for): Skip permanent breakpoints
+	duplicates of permanent breakpoints.
+
 2009-03-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* inferior.h (notice_new_inferior): Declare.

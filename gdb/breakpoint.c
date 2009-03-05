@@ -3948,8 +3948,8 @@ check_duplicates_for (CORE_ADDR address, struct obj_section *section)
     }
 
   /* If we found a permanent breakpoint at this address, go over the
-     list again and declare all the other breakpoints there to be the
-     duplicates.  */
+     list again and declare all the other breakpoints there (except
+     other permanent breakpoints) to be the duplicates.  */
   if (perm_bp)
     {
       perm_bp->duplicate = 0;
@@ -3963,7 +3963,8 @@ check_duplicates_for (CORE_ADDR address, struct obj_section *section)
       ALL_BP_LOCATIONS (b)
 	if (b != perm_bp)
 	  {
-	    if (b->owner->enable_state != bp_disabled
+	    if (b->owner->enable_state != bp_permanent
+		&& b->owner->enable_state != bp_disabled
 		&& b->owner->enable_state != bp_call_disabled
 		&& b->enabled && !b->shlib_disabled		
 		&& b->address == address	/* address / overlay match */

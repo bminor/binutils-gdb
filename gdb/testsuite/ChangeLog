@@ -1,3 +1,7 @@
+2009-03-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.arch/i386-permbkpt.S, gdb.arch/i386-permbkpt.exp: New.
+
 2009-02-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/macscp.exp (objfile): Move it to ${objdir}/${subdir}/.
