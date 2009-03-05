@@ -1,3 +1,8 @@
+2009-03-05  Moritz Kroll  <Moritz.Kroll@gmx.de>
+
+	PR 9923
+	* peXXigen.c (_bfd_XXi_final_link_postscript): Check h->root.type.
+
 2009-03-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* reloc.c (BFD_RELOC_PPC_TLSGD, BFD_RELOC_PPC_TLSLD): New.

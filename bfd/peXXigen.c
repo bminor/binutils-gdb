@@ -1,6 +1,6 @@
 /* Support for the generic parts of PE/PEI; the common executable parts.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008  Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2277,7 +2277,9 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       /* PR ld/2729: We cannot rely upon all the output sections having been 
 	 created properly, so check before referencing them.  Issue a warning
 	 message for any sections tht could not be found.  */
-      if (h1->root.u.def.section != NULL
+      if ((h1->root.type == bfd_link_hash_defined
+	   || h1->root.type == bfd_link_hash_defweak)
+	  && h1->root.u.def.section != NULL
 	  && h1->root.u.def.section->output_section != NULL)
 	pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress =
 	  (h1->root.u.def.value
@@ -2294,6 +2296,8 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       h1 = coff_link_hash_lookup (coff_hash_table (info),
 				  ".idata$4", FALSE, FALSE, TRUE);
       if (h1 != NULL
+	  && (h1->root.type == bfd_link_hash_defined
+	   || h1->root.type == bfd_link_hash_defweak)
 	  && h1->root.u.def.section != NULL
 	  && h1->root.u.def.section->output_section != NULL)
 	pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].Size =
@@ -2314,6 +2318,8 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       h1 = coff_link_hash_lookup (coff_hash_table (info),
 				  ".idata$5", FALSE, FALSE, TRUE);
       if (h1 != NULL
+	  && (h1->root.type == bfd_link_hash_defined
+	   || h1->root.type == bfd_link_hash_defweak)
 	  && h1->root.u.def.section != NULL
 	  && h1->root.u.def.section->output_section != NULL)
 	pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_ADDRESS_TABLE].VirtualAddress =
@@ -2331,6 +2337,8 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       h1 = coff_link_hash_lookup (coff_hash_table (info),
 				  ".idata$6", FALSE, FALSE, TRUE);
       if (h1 != NULL
+	  && (h1->root.type == bfd_link_hash_defined
+	   || h1->root.type == bfd_link_hash_defweak)
 	  && h1->root.u.def.section != NULL
 	  && h1->root.u.def.section->output_section != NULL)
 	pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_ADDRESS_TABLE].Size =
@@ -2351,7 +2359,9 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 			      "__tls_used", FALSE, FALSE, TRUE);
   if (h1 != NULL)
     {
-      if (h1->root.u.def.section != NULL
+      if ((h1->root.type == bfd_link_hash_defined
+	   || h1->root.type == bfd_link_hash_defweak)
+	  && h1->root.u.def.section != NULL
 	  && h1->root.u.def.section->output_section != NULL)
 	pe_data (abfd)->pe_opthdr.DataDirectory[PE_TLS_TABLE].VirtualAddress =
 	  (h1->root.u.def.value
