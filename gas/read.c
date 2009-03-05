@@ -1920,6 +1920,10 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
   md_flush_pending_output ();
 #endif
 
+#ifdef md_cons_align
+  md_cons_align (1);
+#endif
+
   get_known_segmented_expression (&rep_exp);
   if (*input_line_pointer == ',')
     {
@@ -3119,6 +3123,10 @@ s_space (int mult)
   md_flush_pending_output ();
 #endif
 
+#ifdef md_cons_align
+  md_cons_align (1);
+#endif
+
   if (flag_mri)
     stop = mri_comment_field (&stopc);
 
@@ -3289,6 +3297,10 @@ s_float_space (int float_type)
   char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT];
   char *stop = NULL;
   char stopc = 0;
+
+#ifdef md_cons_align
+  md_cons_align (1);
+#endif
 
   if (flag_mri)
     stop = mri_comment_field (&stopc);
@@ -4631,6 +4643,10 @@ float_cons (/* Clobbers input_line-pointer, checks end-of-line.  */
   md_flush_pending_output ();
 #endif
 
+#ifdef md_cons_align
+  md_cons_align (1);
+#endif
+
   do
     {
       /* input_line_pointer->1st char of a flonum (we hope!).  */
@@ -5075,6 +5091,10 @@ stringer (int bits_appendzero)
   md_flush_pending_output ();
 #endif
 
+#ifdef md_cons_align
+  md_cons_align (1);
+#endif
+
   /* The following awkward logic is to parse ZERO or more strings,
      comma separated. Recall a string expression includes spaces
      before the opening '\"' and spaces after the closing '\"'.
@@ -5451,6 +5471,10 @@ s_incbin (int x ATTRIBUTE_UNUSED)
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
+#endif
+
+#ifdef md_cons_align
+  md_cons_align (1);
 #endif
 
   SKIP_WHITESPACE ();

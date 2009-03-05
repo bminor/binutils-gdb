@@ -1,3 +1,7 @@
+2009-03-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/arm/mapmisc.d, gas/arm/mapmisc.dat, gas/arm/mapmisc.s: New.
+
 2009-03-02  Qinwei  <qinwei@sunnorth.com.cn>
 
 	* gas/score/arith_32-lt.d: New file.

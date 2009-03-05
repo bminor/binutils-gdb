@@ -1,3 +1,8 @@
+2009-03-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* read.c (s_fill, s_space, s_float_space, float_cons, stringer,
+	s_incbin): Call md_cons_align (1).
+
 2009-03-04  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-alpha.c (alpha_prologue_label): Only define for ELF
