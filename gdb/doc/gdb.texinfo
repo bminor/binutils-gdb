@@ -4711,6 +4711,24 @@ the program to report that some thread has stopped before prompting for
 another command.  In background execution, @value{GDBN} immediately gives
 a command prompt so that you can issue other commands while your program runs.
 
+You need to explicitly enable asynchronous mode before you can use
+background execution commands.  You can use these commands to
+manipulate the asynchronous mode setting:
+
+@table @code
+@kindex set target-async
+@item set target-async on
+Enable asynchronous mode.
+@item set target-async off
+Disable asynchronous mode.
+@kindex show target-async
+@item show target-async
+Show the current target-async setting.
+@end table
+
+If the target doesn't support async mode, @value{GDBN} issues an error
+message if you attempt to use the background execution commands.
+
 To specify background execution, add a @code{&} to the command.  For example,
 the background form of the @code{continue} command is @code{continue&}, or
 just @code{c&}.  The execution commands that accept background execution
@@ -4775,11 +4793,6 @@ Suspend execution of the running program.  In all-stop mode,
 only the current thread.  To stop the whole program in non-stop mode, 
 use @code{interrupt -a}.
 @end table
-
-You may need to explicitly enable async mode before you can use background
-execution commands, with the @code{set target-async 1} command.  If the
-target doesn't support async mode, @value{GDBN} issues an error message
-if you attempt to use the background execution commands.
 
 @node Thread-Specific Breakpoints
 @subsection Thread-Specific Breakpoints
@@ -25401,28 +25414,6 @@ data in a @file{gmon.out} file, be sure to move it to a safe location.
 
 Configuring with @samp{--enable-profiling} arranges for @value{GDBN} to be
 compiled with the @samp{-pg} compiler option.
-
-@kindex maint set linux-async
-@kindex maint show linux-async
-@cindex asynchronous support
-@item maint set linux-async
-@itemx maint show linux-async
-Control the GNU/Linux native asynchronous support 
-(@pxref{Background Execution}) of @value{GDBN}.
-
-GNU/Linux native asynchronous support will be disabled until you use
-the @samp{maint set linux-async} command to enable it.
-
-@kindex maint set remote-async
-@kindex maint show remote-async
-@cindex asynchronous support
-@item maint set remote-async
-@itemx maint show remote-async
-Control the remote asynchronous support 
-(@pxref{Background Execution}) of @value{GDBN}.
-
-Remote asynchronous support will be disabled until you use
-the @samp{maint set remote-async} command to enable it.
 
 @kindex maint show-debug-regs
 @cindex x86 hardware debug registers

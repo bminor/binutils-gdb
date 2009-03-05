@@ -1,3 +1,10 @@
+2009-03-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Background Execution): Better describe the set
+	target-async command.
+	(Maintenance Commands): Delete description of the `maint set/show
+	linux-async' and `maint set/show remote-async' commands.
+
 2009-02-18  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Async Records): Add double-spaces
