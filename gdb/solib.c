@@ -999,8 +999,13 @@ sharedlibrary_command (char *args, int from_tty)
 void
 no_shared_libraries (char *ignored, int from_tty)
 {
-  objfile_purge_solibs ();
+  /* The order of the two routines below is important: clear_solib notifies
+     the solib_unloaded observers, and some of these observers might need
+     access to their associated objfiles.  Therefore, we can not purge the
+     solibs' objfiles before clear_solib has been called.  */
+
   clear_solib ();
+  objfile_purge_solibs ();
 }
 
 static void

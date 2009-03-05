@@ -43,6 +43,11 @@
 #include "disasm.h"
 #include "dfp.h"
 #include "valprint.h"
+#include "exceptions.h"
+#include "observer.h"
+#include "solist.h"
+#include "solib.h"
+#include "parser-defs.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et.al.   */
@@ -1395,7 +1400,7 @@ display_command (char *exp, int from_tty)
 	  fmt.count = 0;
 	}
 
-      innermost_block = 0;
+      innermost_block = NULL;
       expr = parse_expression (exp);
 
       new = (struct display *) xmalloc (sizeof (struct display));
@@ -1518,6 +1523,25 @@ do_one_display (struct display *d)
 
   if (d->enabled_p == 0)
     return;
+
+  if (d->exp == NULL)
+    {
+      volatile struct gdb_exception ex;
+      TRY_CATCH (ex, RETURN_MASK_ALL)
+	{
+	  innermost_block = NULL;
+	  d->exp = parse_expression (d->exp_string);
+	  d->block = innermost_block;
+	}
+      if (ex.reason < 0)
+	{
+	  /* Can't re-parse the expression.  Disable this display item.  */
+	  d->enabled_p = 0;
+	  warning (_("Unable to display \"%s\": %s"),
+		   d->exp_string, ex.message);
+	  return;
+	}
+    }
 
   if (d->block)
     within_current_scope = contained_in (get_selected_block (0), d->block);
@@ -1730,6 +1754,72 @@ disable_display_command (char *args, int from_tty)
 	while (*p == ' ' || *p == '\t')
 	  p++;
       }
+}
+
+/* Return 1 if D uses SOLIB (and will become dangling when SOLIB
+   is unloaded), otherwise return 0.  */
+
+static int
+display_uses_solib_p (const struct display *d,
+		      const struct so_list *solib)
+{
+  int i;
+  struct expression *const exp = d->exp;
+
+  if (d->block != NULL
+      && solib_address (d->block->startaddr) == solib->so_name)
+    return 1;
+
+  for (i = 0; i < exp->nelts; )
+    {
+      int args, oplen = 0;
+      const union exp_element *const elts = exp->elts;
+
+      if (elts[i].opcode == OP_VAR_VALUE)
+	{
+	  const struct block *const block = elts[i + 1].block;
+	  const struct symbol *const symbol = elts[i + 2].symbol;
+	  const struct obj_section *const section =
+	    SYMBOL_OBJ_SECTION (symbol);
+
+	  if (block != NULL
+	      && solib_address (block->startaddr) == solib->so_name)
+	    return 1;
+
+	  if (section && section->objfile == solib->objfile)
+	    return 1;
+	}
+      exp->language_defn->la_exp_desc->operator_length (exp, i + 1,
+							&oplen, &args);
+      gdb_assert (oplen > 0);
+      i += oplen;
+    }
+  return 0;
+}
+
+/* display_chain items point to blocks and expressions.  Some expressions in
+   turn may point to symbols.
+   Both symbols and blocks are obstack_alloc'd on objfile_stack, and are
+   obstack_free'd when a shared library is unloaded.
+   Clear pointers that are about to become dangling.
+   Both .exp and .block fields will be restored next time we need to display
+   an item by re-parsing .exp_string field in the new execution context.  */
+
+static void
+clear_dangling_display_expressions (struct so_list *solib)
+{
+  struct display *d;
+  struct objfile *objfile = NULL;
+
+  for (d = display_chain; d; d = d->next)
+    {
+      if (d->exp && display_uses_solib_p (d, solib))
+	{
+	  xfree (d->exp);
+	  d->exp = NULL;
+	  d->block = NULL;
+	}
+    }
 }
 
 
@@ -2366,6 +2456,8 @@ _initialize_printcmd (void)
   struct cmd_list_element *c;
 
   current_display_number = -1;
+
+  observer_attach_solib_unloaded (clear_dangling_display_expressions);
 
   add_info ("address", address_info,
 	    _("Describe where symbol SYM is stored."));

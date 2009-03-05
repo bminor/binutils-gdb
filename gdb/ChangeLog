@@ -1,3 +1,12 @@
+2009-03-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* printcmd.c (do_one_display): Reparse exp_string.
+	(display_uses_solib_p): New function.
+	(clear_dangling_display_expressions): New function.
+	(_initialize_printcmd): Add observer.
+	* solib.c (no_shared_libraries): Swap order of calls to
+	clear_solib and objfile_purge_solibs.
+	
 2009-03-05  Joel Brobecker  <brobecker@adacore.com>
 
 	Implement the target-specific part of Ada tasking support

@@ -1,3 +1,9 @@
+2009-03-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* solib-display.exp: New file.
+	* solib-display-main.c: New file.
+	* solib-display-lib.c: New file.
+	
 2009-03-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.arch/i386-permbkpt.S, gdb.arch/i386-permbkpt.exp: New.
