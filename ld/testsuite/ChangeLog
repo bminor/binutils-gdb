@@ -1,5 +1,12 @@
 2009-03-05  Christophe Lyon  <christophe.lyon@st.com>
 
+	* ld-arm/arm-elf.exp: Add new farcall-group-limit test.
+	* ld-arm/farcall-group-limit.d: New file.
+	* ld-arm/farcall-group3.s: New file.
+	* ld-arm/farcall-group4.s: New file.
+
+2009-03-05  Christophe Lyon  <christophe.lyon@st.com>
+
 	* ld-arm/arm-elf.exp: Add 2 more tests to check long branch stubs
 	in PLT context.
 	* ld-arm/farcall-mixed-app-v5.d: New file.

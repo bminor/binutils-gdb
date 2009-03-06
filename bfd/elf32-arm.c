@@ -3554,11 +3554,20 @@ group_sections (struct elf32_arm_link_hash_table *htab,
 	  bfd_size_type total;
 
 	  curr = head;
-	  total = head->size;
-	  while ((next = NEXT_SEC (curr)) != NULL
-		 && ((total += next->output_offset - curr->output_offset)
-		     < stub_group_size))
+	  total = 0;
+	  while ((next = NEXT_SEC (curr)) != NULL)
+	    {
+	      if ( (total + next->output_offset - curr->output_offset
+		    + next->size)
+		   < stub_group_size )
+		{
+		  total += next->output_offset - curr->output_offset;
+		}
+	      else
+		break;
+
 	    curr = next;
+	    }
 
 	  /* OK, the size from the start to the start of CURR is less
 	     than stub_group_size and thus can be handled by one stub
@@ -3579,11 +3588,18 @@ group_sections (struct elf32_arm_link_hash_table *htab,
 	     bytes after the stub section can be handled by it too.  */
 	  if (!stubs_always_after_branch)
 	    {
-	      total = 0;
-	      while (next != NULL
-		     && ((total += next->output_offset - head->output_offset)
-			 < stub_group_size))
+	      total = head->size;
+	      while (next != NULL)
 		{
+		  if ( (total + next->output_offset - head->output_offset
+			+ next->size)
+		       < stub_group_size )
+		    {
+		      total += next->output_offset - head->output_offset;
+		    }
+		  else
+		    break;
+
 		  head = next;
 		  next = NEXT_SEC (head);
 		  htab->stub_group[head->id].link_sec = curr;

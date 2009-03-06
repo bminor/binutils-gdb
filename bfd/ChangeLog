@@ -1,5 +1,10 @@
 2009-03-05  Christophe Lyon  <christophe.lyon@st.com>
 
+	* elf32-arm.c (group_sections): Take next section size into
+	account before accepting to group it.
+
+2009-03-05  Christophe Lyon  <christophe.lyon@st.com>
+
 	* elf32-arm.c (arm_type_of_stub): Handle long branches targetting
 	PLT entries.
 	(elf32_arm_final_link_relocate): Likewise.
