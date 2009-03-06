@@ -587,7 +587,7 @@ parse_short_option(int argc, const char** argv, int pos_in_argv_i,
 
   // We handle -z as a special case.
   static gold::options::One_option dash_z("", gold::options::DASH_Z,
-                                          'z', "", "-z", "Z-OPTION", false,
+                                          'z', "", NULL, "Z-OPTION", false,
 					  NULL);
   gold::options::One_option* retval = NULL;
   if (this_argv[pos_in_argv_i] == 'z')
