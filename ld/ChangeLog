@@ -1,3 +1,7 @@
+2009-03-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2009-03-03  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* emultempl/pe.em (debug_section_p):  New bfd_map_over_sections hook.
