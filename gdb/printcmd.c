@@ -1767,7 +1767,7 @@ display_uses_solib_p (const struct display *d,
   struct expression *const exp = d->exp;
 
   if (d->block != NULL
-      && solib_address (d->block->startaddr) == solib->so_name)
+      && solib_name_from_address (d->block->startaddr) == solib->so_name)
     return 1;
 
   for (i = 0; i < exp->nelts; )
@@ -1783,7 +1783,7 @@ display_uses_solib_p (const struct display *d,
 	    SYMBOL_OBJ_SECTION (symbol);
 
 	  if (block != NULL
-	      && solib_address (block->startaddr) == solib->so_name)
+	      && solib_name_from_address (block->startaddr) == solib->so_name)
 	    return 1;
 
 	  if (section && section->objfile == solib->objfile)

@@ -1160,7 +1160,7 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
       if (val)
 	{
 	  /* Can't set the breakpoint.  */
-	  if (solib_address (bpt->address))
+	  if (solib_name_from_address (bpt->address))
 	    {
 	      /* See also: disable_breakpoints_in_shlibs. */
 	      val = 0;
@@ -1629,7 +1629,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
       /* In some cases, we might not be able to remove a breakpoint
 	 in a shared library that has already been removed, but we
 	 have not yet processed the shlib unload event.  */
-      if (val && solib_address (b->address))
+      if (val && solib_name_from_address (b->address))
 	val = 0;
 
       if (val)
@@ -4439,7 +4439,7 @@ disable_breakpoints_in_shlibs (void)
 #ifdef PC_SOLIB
 	&& PC_SOLIB (loc->address)
 #else
-	&& solib_address (loc->address)
+	&& solib_name_from_address (loc->address)
 #endif
 	)
       {
@@ -4475,7 +4475,7 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 #ifdef PC_SOLIB
 	char *so_name = PC_SOLIB (loc->address);
 #else
-	char *so_name = solib_address (loc->address);
+	char *so_name = solib_name_from_address (loc->address);
 #endif
 	if (so_name && !strcmp (so_name, solib->so_name))
           {

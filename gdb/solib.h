@@ -45,7 +45,7 @@ extern void solib_create_inferior_hook (void);
 
 /* If ADDR lies in a shared library, return its name.  */
 
-extern char *solib_address (CORE_ADDR);
+extern char *solib_name_from_address (CORE_ADDR);
 
 /* Return 1 if PC lies in the dynamic symbol resolution code of the
    run time loader.  */

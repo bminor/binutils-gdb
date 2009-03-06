@@ -838,11 +838,12 @@ info_sharedlibrary_command (char *ignore, int from_tty)
 
    GLOBAL FUNCTION
 
-   solib_address -- check to see if an address is in a shared lib
+   solib_name_from_address -- if an address is in a shared lib, return
+   its name.
 
    SYNOPSIS
 
-   char * solib_address (CORE_ADDR address)
+   char * solib_name_from_address (CORE_ADDR address)
 
    DESCRIPTION
 
@@ -856,7 +857,7 @@ info_sharedlibrary_command (char *ignore, int from_tty)
  */
 
 char *
-solib_address (CORE_ADDR address)
+solib_name_from_address (CORE_ADDR address)
 {
   struct so_list *so = 0;	/* link map state variable */
 

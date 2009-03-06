@@ -1,3 +1,13 @@
+2009-03-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	Rename solib_address to solib_name_from_address.
+	* breakpoint.c (insert_bp_location, disable_breakpoints_in_shlibs)
+	(disable_breakpoints_in_unloaded_shlib): Update.
+	* printcmd.c (display_uses_solib_p): Likewise.
+	* stack.c (print_frame): Likewise.
+	* solib.c: Rename.
+	* solib.h: Rename.
+	
 2009-03-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* printcmd.c (do_one_display): Reparse exp_string.
