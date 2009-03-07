@@ -1,3 +1,8 @@
+2009-03-07  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* ld-elf/empty2.d: Remove xfail for hppa*-*-*.
+	* ld-elf/merge.d: Change xfail for hppa to hppa*64*-*-*.
+
 2009-03-05  Christophe Lyon  <christophe.lyon@st.com>
 
 	* ld-arm/arm-elf.exp: Add new farcall-group-limit test.
