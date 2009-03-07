@@ -1,3 +1,9 @@
+2009-03-07  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	PR binutils/9921
+	* som.c (som_bfd_derive_misc_symbol_info): Set symbol type ST_ABSOLUTE
+	for unknown symbols in absolute section.
+
 2009-03-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

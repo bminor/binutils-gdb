@@ -1,6 +1,6 @@
 /* bfd back-end for HP PA-RISC SOM objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -4015,7 +4015,9 @@ som_bfd_derive_misc_symbol_info (bfd *abfd ATTRIBUTE_UNUSED,
 	 section (ST_DATA for DATA sections, ST_CODE for CODE sections).  */
       else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN)
 	{
-	  if (sym->section->flags & SEC_CODE)
+	  if (bfd_is_abs_section (sym->section))
+	    info->symbol_type = ST_ABSOLUTE;
+	  else if (sym->section->flags & SEC_CODE)
 	    info->symbol_type = ST_CODE;
 	  else
 	    info->symbol_type = ST_DATA;
