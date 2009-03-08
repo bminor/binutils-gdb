@@ -1,3 +1,14 @@
+2009-03-08  Christopher Faylor  <me+cygwin@cgf.cx>
+
+	* windows-nat.c (dr): Redefine to use largest possible integer which
+	holds a pointer.
+	(cygwin_set_dr): Avoid coercion.
+
+2009-03-08  Oswald Buddenhagen  <oswald.buddenhagen@trolltech.de>
+
+	* windows-nat.c (windows_create_inferior): implement --tty handling on
+	non-cygwin.
+
 2009-03-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	Rename solib_address to solib_name_from_address.

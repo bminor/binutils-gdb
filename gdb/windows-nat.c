@@ -95,7 +95,7 @@ enum
 #define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_DEBUG_REGISTERS \
 	| CONTEXT_EXTENDED_REGISTERS
 
-static unsigned dr[8];
+static uintptr_t dr[8];
 static int debug_registers_changed;
 static int debug_registers_used;
 #define DR6_CLEAR_VALUE 0xffff0ff0
@@ -1815,8 +1815,12 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
   char *toexec;
   char shell[MAX_PATH + 1]; /* Path to shell */
   const char *sh;
+#ifdef __CYGWIN__
   int tty;
   int ostdin, ostdout, ostderr;
+#else
+  HANDLE tty;
+#endif
   const char *inferior_io_terminal = get_inferior_io_terminal ();
 
   if (!exec_file)
@@ -1886,6 +1890,28 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
 	  dup2 (tty, 2);
 	}
     }
+#else
+  if (!inferior_io_terminal)
+    tty = INVALID_HANDLE_VALUE;
+  else
+    {
+      SECURITY_ATTRIBUTES sa;
+      sa.nLength = sizeof(sa);
+      sa.lpSecurityDescriptor = 0;
+      sa.bInheritHandle = TRUE;
+      tty = CreateFileA (inferior_io_terminal, GENERIC_READ | GENERIC_WRITE,
+			 0, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+      if (tty == INVALID_HANDLE_VALUE)
+	warning (_("Warning: Failed to open TTY %s, error %#x."),
+		 inferior_io_terminal, (unsigned) GetLastError ());
+      else
+	{
+	  si.hStdInput = tty;
+	  si.hStdOutput = tty;
+	  si.hStdError = tty;
+	  si.dwFlags |= STARTF_USESTDHANDLES;
+	}
+    }
 #endif
 
   windows_init_thread_list ();
@@ -1911,6 +1937,9 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
       close (ostdout);
       close (ostderr);
     }
+#else
+  if (tty != INVALID_HANDLE_VALUE)
+    CloseHandle (tty);
 #endif
 
   if (!ret)
@@ -2245,7 +2274,7 @@ cygwin_set_dr (int i, CORE_ADDR addr)
   if (i < 0 || i > 3)
     internal_error (__FILE__, __LINE__,
 		    _("Invalid register %d in cygwin_set_dr.\n"), i);
-  dr[i] = (unsigned) addr;
+  dr[i] = addr;
   debug_registers_changed = 1;
   debug_registers_used = 1;
 }
