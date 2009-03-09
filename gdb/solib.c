@@ -1015,6 +1015,28 @@ reload_shared_libraries (char *ignored, int from_tty,
 {
   no_shared_libraries (NULL, from_tty);
   solib_add (NULL, from_tty, NULL, auto_solib_add);
+  /* Creating inferior hooks here has two purposes. First, if we reload 
+     shared libraries then the address of solib breakpoint we've computed
+     previously might be no longer valid.  For example, if we forgot to set
+     solib-absolute-prefix and are setting it right now, then the previous
+     breakpoint address is plain wrong.  Second, installing solib hooks
+     also implicitly figures were ld.so is and loads symbols for it.
+     Absent this call, if we've just connected to a target and set 
+     solib-absolute-prefix or solib-search-path, we'll lose all information
+     about ld.so.  */
+  if (target_has_execution)
+    {
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
+      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
+#else
+      solib_create_inferior_hook ();
+#endif
+    }
+  /* We have unloaded and then reloaded debug info for all shared libraries.
+     However, frames may still reference them, for example a frame's 
+     unwinder might still point of DWARF FDE structures that are now freed.
+     Reinit frame cache to avoid crashing.  */
+  reinit_frame_cache ();
 }
 
 static void

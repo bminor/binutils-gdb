@@ -1,3 +1,9 @@
+2008-03-09  Vladimir Prus  <vladimir@codesourcery.com>
+
+       * solib.c (reload_shared_libraries): Give
+       inferior a chance to reset solib breakpoint.
+       Reinit frame cache.
+
 2009-03-08  Christopher Faylor  <me+cygwin@cgf.cx>
 
 	* windows-nat.c (dr): Redefine to use largest possible integer which
