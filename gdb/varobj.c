@@ -1512,6 +1512,8 @@ new_root_variable (void)
 static void
 free_variable (struct varobj *var)
 {
+  value_free (var->value);
+
   /* Free the expression if this is a root variable. */
   if (is_root_p (var))
     {

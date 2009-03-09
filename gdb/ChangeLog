@@ -1,5 +1,9 @@
 2009-03-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* varobj.c (free_variable): Call value_free.
+
+2009-03-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR gdb/9873:
 	* dwarf2read.c (dwarf_decode_macros): New variable `at_commandline'.
 	Move the variable `macinfo_type' out of the loop.  Create a new
