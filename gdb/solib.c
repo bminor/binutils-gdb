@@ -834,6 +834,21 @@ info_sharedlibrary_command (char *ignore, int from_tty)
     }
 }
 
+/* Return 1 if ADDRESS lies within SOLIB.  */
+
+int
+solib_contains_address_p (const struct so_list *const solib,
+			  CORE_ADDR address)
+{
+  struct section_table *p;
+
+  for (p = solib->sections; p < solib->sections_end; p++)
+    if (p->addr <= address && address < p->endaddr)
+      return 1;
+
+  return 0;
+}
+
 /*
 
    GLOBAL FUNCTION
@@ -862,15 +877,8 @@ solib_name_from_address (CORE_ADDR address)
   struct so_list *so = 0;	/* link map state variable */
 
   for (so = so_list_head; so; so = so->next)
-    {
-      struct section_table *p;
-
-      for (p = so->sections; p < so->sections_end; p++)
-	{
-	  if (p->addr <= address && address < p->endaddr)
-	    return (so->so_name);
-	}
-    }
+    if (solib_contains_address_p (so, address))
+      return (so->so_name);
 
   return (0);
 }

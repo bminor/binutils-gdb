@@ -1,3 +1,10 @@
+2009-03-09  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* solib.c (solib_contains_address_p): New function.
+	(solib_name_from_address): Use it.
+	* printcmd.c (display_uses_solib_p): Use it.
+	* solib.h (solib_contains_address_p): Declare it.	
+	
 2009-03-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* varobj.c (free_variable): Call value_free.

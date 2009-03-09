@@ -47,6 +47,10 @@ extern void solib_create_inferior_hook (void);
 
 extern char *solib_name_from_address (CORE_ADDR);
 
+/* Return 1 if ADDR lies within SOLIB.  */
+
+extern int solib_contains_address_p (const struct so_list *, CORE_ADDR);
+
 /* Return 1 if PC lies in the dynamic symbol resolution code of the
    run time loader.  */
 
