@@ -90,6 +90,10 @@ extern void i386_elf_emit_arch_note (void);
 
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 
+/* '$' may be used as immediate prefix.  */
+#undef LOCAL_LABELS_DOLLAR
+#define LOCAL_LABELS_DOLLAR 0
+#undef LOCAL_LABELS_FB
 #define LOCAL_LABELS_FB 1
 
 extern const char extra_symbol_chars[];

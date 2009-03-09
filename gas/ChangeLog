@@ -1,3 +1,9 @@
+2009-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/9915
+	* config/tc-i386.h (LOCAL_LABELS_DOLLAR): New.  Defined as 0.
+	(LOCAL_LABELS_FB): Undefine befoe define.
+
 2009-03-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
