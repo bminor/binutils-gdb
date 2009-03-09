@@ -1,0 +1,34 @@
+2005-05-14  Soam Vasani  <soam.vasani@codito.com>
+
+	* proc-service.c (ps_pglobal_lookup): First look for NAME, then
+	for NAME with an underscore prepended.  The toolchain no longer
+	prepends underscores, but we should still work with older
+	toolchains.
+
+2005-05-14  Soam Vasani  <soam.vasani@codito.com>
+
+	* linux-arc-low.c (arg_regmap): Offsets were wrong, correct them.
+
+2005-05-14  Soam Vasani  <soam.vasani@codito.com>
+
+	* linux-arc-low.c: Remove #include reg.h.  Include linux/user.h to
+	get offsets of registers in the struct ptrace.
+
+2005-04-11  Soam Vasani  <soam.vasani@codito.com>
+
+	* linux-arc-low.c (arc_get_pc): Return stop_pc, not EFA.
+
+2005-04-09  Soam Vasani  <soam.vasani@codito.com>
+
+	* proc-service.c (ps_pglobal_lookup): Prepend underscore to symbol
+	names, because the toolchain does that.  Remove this hack when we
+	change the toolchain.
+	* linux-arc-low.c (arc_get_pc): Return EFA's value instead of RET,
+	so that gdbserver can do it's own breakpoints correctly.
+	(arc_reinsert_addr): Return blink's value.
+
+2005-04-07  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* configure.srv: Change arc-*-elf* to arc-linux .Include 
+	thread debugging for the ARC platform. 
+

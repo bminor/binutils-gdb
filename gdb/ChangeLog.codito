@@ -1,0 +1,1198 @@
+2006-05-18  Kunal Parmar  <kunal.parmar@codito.com>
+
+	18th May 2006 Release
+	* version.in: Change to 6.3_codito_20060518, which is when it is
+	scheduled to be released.
+
+2006-05-11  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* arc-tdep.c (a4_scan_prologue): Include function only for A4. 
+
+2006-04-28  Ashwin Pathmudi  <ashwin.pathmudi@codito.com>
+
+	* arc-tdep.c (arc_push_dummy_call): Correct handling
+	of struct return for the a4 core.  
+
+2006-04-26  Ashwin Pathmudi  <ashwin.pathmudi@codito.com>
+
+	* arc-tdep.c (a4_address_to_pointer): New. Converts address
+	to pointer for the a4 core.  
+	(a4_pointer_to_address): New.  Converts pointers to address
+	for the a4 core.  
+	(arc_gdbarch_init): Add the above 2 new functions to the 
+	gdbarch structure for the A4 core. 
+
+2006-03-29  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* Makefile.in (arc-jtag-ops.o): Add arc-tdep.h to the list of
+	dependencies. 
+	* arc-jtag-ops.h: Include arc-tdep.h.
+	(IS_ARC700): New macro. Return 1 if processor connected is
+	ARC700. 
+	(IS_ARC600): New macro. Return 1 if processor connected is
+	ARC600. 
+	(IS_A5): New macro. Return 1 if processor connected is A5. 
+	(IS_A4): New macro. Return 1 if processor connected is A4. 
+	* arc-jtag-ops.c (ARCProcessor): New global variable. Contains the
+	processor type that has been connected.
+	(arc_get_architecture): New function. Return the processor type
+	that has been connected. Set ``ARCProcessor'' when run the
+	first time.
+	(arc_jtag_close): Unset ``ARCProcessor''.
+	(arc_jtag_open): Remove ifdefs and use above macros instead.
+	(arc_jtag_wait): Ditto.
+	* arc-jtag.c (arc_update_architecture): Use above macros.
+
+2006-03-13  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* arc-tdep.c (arc_gdbarch_init): Characters are unsigned by
+	default. 
+
+2006-03-08  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* arc-jtag-ops.c (arcjtag_retry_count): New variable. Defines the
+	number of times a JTAG operation is attempted before returning a
+	failure.	
+	(arc_jtag_read_core_reg): Use above variable.
+	(arc_jtag_write_core_reg): Ditto.
+	(arc_jtag_read_aux_reg): Ditto.
+	(arc_jtag_write_aux_reg): Ditto.
+	(read_mem): Ditto.
+	(write_mem): Ditto.
+	* arc-jtag.c (_initialize_arc_debug): Add command to set above
+	variable. 
+
+2006-03-03  Ashwin Pathmudi  <ashwin.pathmudi@codito.com>
+
+	* arc-tdep.c (arc_push_dummy_call): Add support for dummy
+	call for the A4 core.  
+	(arc_extract_return_value): Enable for A4 core.  
+	(arc_store_return_value): Likewise.  
+	(arc_return_value): Likewise.  
+	(arc_gdbarch_init): Set call_dummy_location to 
+	AT_ENTRY_POINT for A4 core.  
+
+	* arc-jtag-tdep.c (arc_jtag_register_reggroup_p): Adding the 
+	status register to save/restore group for the A4 core.  
+
+2006-03-03  Ashwin Pathmudi  <ashwin.pathmudi@codito.com>
+
+	* arc-tdep.c (printFrameInfo): Print more verbose messages.  
+	(printInsnState): Likewise.  
+	(a4_scan_prologue): New.  Function to scan the prologue and 
+	fill the unwind cache.  
+	(arc_skip_prologue): Call a4_scan_prologue for a A4 core.  
+	(arc_frame_unwind_cache): Likewise.  
+	(arc_dwarf2_frame_init_reg): Defined for A4 core.  
+	(arc_unwind_pc): Defined for A4 core.  
+	(arc_scan_prologue): Cosmetic change.  
+	(arc_frame_this_id): Likewise.  
+	(arc_frame_prev_register): Likewise.  
+	(arc_next_pc): Likewise.  
+	(arc_software_single_step): Likewise.  
+	(arc_extract_return_value): Likewise.  
+	(arc_store_return_value): Likewise.  
+	(arc_return_value): Likewise.  
+	(arc_sigtramp_frame_cache): Likewise.  
+	(arc_sigtramp_frame_this_id): Likewise.  
+	(arc_sigtramp_frame_prev_register): Likewise.
+	(arc_sigtramp_frame_cache): Likewise.  
+	(arc_sigtramp_frame_sniffer): Likewise.  
+	(arc_push_dummy_call): Likewise.  
+	(arc_gdbarch_init): Change definition of disassembler to
+	arc_get_disassembler for the A4 core.  
+
+	* arc-jtag.h (debug_arc_jtag_target_message): New.  Definition
+	moved here.  
+
+	* arc-jtag.c (arc_debug_open): Cosmetic change.  
+	(arc_get_hw_regnum_mapping): Setting boundary limit for
+	A4 core.  
+
+	* arc-jtag-tdep.c (A4_HALT_VALUE): New. Define Halt 
+	value in status register.  
+	(a4_jtag_write_pc): Correct handling of write pc.
+	(a4_jtag_read_pc): New.  Function to read pc for the 
+	a4 core.  
+	(arc_jtag_init): Modify tdep gdbarch structure to
+	include read_pc.
+
+2006-03-03  Ashwin Pathmudi  <ashwin.pathmudi@codito.com>
+
+	* arc-tdep.c (arc_scan_prologue): Disabling temporarily for
+	the A4 core.  
+	(arc_skip_prologue): Likewise.  
+	(arc_frame_unwind_cache): Likewise.  
+	(arc_frame_this_id): Likewise.  
+	(arc_frame_prev_register): Likewise.  
+	(arc_next_pc): Likewise.  
+	(arc_software_single_step): Likewise.  
+	(arc_dwarf2_frame_init_reg): Likewise.  
+	(arc_extract_return_value): Likewise.  
+	(arc_store_return_value): Likewise.  
+	(arc_return_value): Likewise.  
+	(arc_sigtramp_frame_cache): Likewise.  
+	(arc_sigtramp_frame_this_id): Likewise.  
+	(arc_sigtramp_frame_prev_register): Likewise.  
+	(arc_sigtramp_frame_sniffer): Likewise.  
+	(arc_push_dummy_call): Likewise.  
+	(arc_gdbarch_init): Modify gdbarch structure for A4. 
+	(arc_binutils_reg_to_regnum): Add A4 specific conversion of
+	register numbers.  
+
+	* arc-jtag.c (arc_debug_open): A4 specific status register
+	read.  
+	(arc_debug_resume): A4 specific change for status and 
+	debug auxillary registers.  
+	(arc_debug_insert_breakpoint): Add opcode for the A4 break
+	instruction.  
+	(arc_debug_remove_breakpoint): Write 4 bytes back for the 
+	A4.  
+	(arc_print_processor_variant_info): Adding A4 to the list
+	of processors.  
+
+	* arc-jtag-tdep.c (a4_jtag_breakpoint_size): New. Defines
+	the size of the breakpoint instruction for A4.  
+	(a4_jtag_breakpoint_insn): New.  Defines the opcode for 
+	the breakpoint instruction for A4.  
+	(arc_jtag_register_name): Exclude non A4 registers for
+	A4-gdb.  
+	(a4_jtag_write_pc): New.  Write value to the program
+	counter for A4.  
+	(arc_jtag_init): Modify the target dependent part of 
+	gdbarch struct for the A4 core.  
+
+	* arc-jtag-ops.c (A4_HALT_VALUE): New. Halt bit set in
+	the status auxillary (0x0) register.  
+	(ARC700_HALT_VALUE): New.  Halt bit set in status32
+	auxillary register.  
+	(arc_jtag_read_aux_reg): Add more verbose messages.  
+	(arc_jtag_write_aux_reg): Likewise.  
+	(arc_jtag_open): Read the status auxillary register
+	for the A4 core.  
+	(arc_jtag_wait): Likewise.  
+
+2006-03-02  Ashwin Pathmudi  <ashwin.pathmudi@codito.com>
+
+	* configure.tgt: Add A4-JTAG target.  
+	* config/arc/a4-jtag.mt: New. Makefile fragment for
+	new A4-JTAG target.  
+	* config/arc/tm-a4-jtag.h: New. Target specific header file 
+	for the A4-JTAG target.  
+
+	* arc-tdep.h: Add the A4 to the ARC processor version
+	information.  
+
+	* arc-tdep.c (arc_cannot_store_register): Exclude non A4 
+	registers for A4-gdb.  
+	(arc_next_pc): Likewise.  
+	(arc_register_reggroup_p): Likewise.  
+
+	* arc-regnums-defs.h: Exclude non-A4 registers for A4-gdb.  
+
+	* arc-jtag.c (arc_update_architecture): Identify the A4 core.  
+	(clear_status32_user_bit): Allow only A4 Registers.  
+	(restore_status32_user_bit): Likewise.  
+	(arc_debug_open): Not compiling for the A4 core yet.
+	(arc_debug_resume): Likewise.  
+	(arc_debug_wait): Excluding Arc600 specific part for A4 core.  
+	(arc_get_hw_regnum_mapping): Exclude non-A4 registers for
+	the A4 core.  
+	(arc_debug_fetch_regs): Likewise.  
+	(arc_debug_store_regs): Likewise.  
+	(init_arc_debug_ops): Modify target_ops for A4 core.  
+
+	* arc-jtag-tdep.c (arc_jtag_register_reggroup_p): Allow only A4 
+	Registers.  
+	(arc_jtag_print_registers_info): Likewise.  
+	(arc_jtag_init): Likewise.  
+
+2006-01-02  Ashwin Pathmudi  <ashwin.pathmudi@codito.com>
+
+        PR 1496
+	* dwarf2-frame.c (dwarf2_frame_state_copy_regs): Correct 
+	allocated size.  
+
+2005-12-17  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* arc-jtag.c (arc_debug_wait): Reverting to version 1.40
+
+2005-12-16  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* arc-jtag-ops.c (arc_jtag_open): Change the message printed when
+	processor is running.
+	* arc-jtag.c (arc_debug_wait): Dont assume the program to have
+	exited when SH bit is set.
+
+2005-11-08  Kunal Parmar  <kunal.parmar@codito.com>
+
+	8th November Release
+	* version.in: Change to 6.3_codito_20051108, which is when it is
+	going to be released.
+
+2005-09-28  Kunal Parmar  <kunal.parmar@codito.com>
+
+	Bug #1479
+	* arc-jtag-tdep.c (arc_jtag_register_reggroup_p): Remove IDENTITY
+	register from save/restore group.
+
+2005-09-27  Kunal Parmar  <kunal.parmar@codito.com>
+
+	Bug #1476
+	* arc-jtag.c (arc_debug_xfer_partial): Fix for Bug #1476 (gdb for
+	JTAG goes into infinite loop).
+
+2005-09-24  Kunal Parmar  <kunal.parmar@codito.com>
+
+	Bug #1475
+	* arc-jtag-ops.c (arc_jtag_read_chunk): Fix for Bug #1475 (printf
+	command in gdb for JTAG fails).
+
+2005-09-23  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* arc-jtag.c (arc_debug_xfer_partial): The value being returned
+	was incorrect.
+
+2005-09-23  Kunal Parmar  <kunal.parmar@codito.com>
+
+	Bug #1286
+	* arc-jtag-ops.c: Fix for Bug #1286 (reading an invalid register
+	causes next operation to fail).
+	
+2005-09-23  Kunal Parmar  <kunal.parmar@codito.com>
+
+	Bug #1272
+	* arc-jtag.c (arc_debug_create_inferior): Check if an executable
+	file has been handed to us, print an error if none is specified.
+
+2005-07-14  Sameer Dhavale  <sameer.dhavale@codito.com>
+
+        Bug #1381
+	* arc-jtag-ops.c (arc_jtag_close): Close file descriptor opened
+	for communication with gpio driver.
+
+2005-07-06  Soam Vasani  <soam.vasani@codito.com>
+
+	Bug #1364
+	* arc-jtag.c (arc_debug_xfer_partial): Restore the User bit in
+	status32.  This fixes bug #1364 (userland debugging: kernel
+	panic).
+
+2005-06-28  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag.c (arc_debug_detach): Resume the inferior.
+
+2005-06-28  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag.c (arc_debug_xfer_partial): Clear STATUS32 user bit
+	when reading or writing memory (earlier, we only cleared it while
+	writing.)
+
+2005-06-25  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-linux-tdep.c (arc_linux_register_name): Change name of
+	stop_pc from "stop_pc" to "pc".
+	(arc_linux_print_registers_info): Remove "ret" and add stop_pc.
+
+2005-06-24  Soam Vasani  <soam.vasani@codito.com>
+
+	Bug #1325 (core file support)
+	* arc-linux-tdep.c (arcompact_linux_core_reg_offsets): New array.
+	offsets of registers in core file's register section, for
+	ARCompact.
+	(arcompact_linux_supply_gregset): New function.  Get registers
+	from core file's register section, for ARCompact.
+	(arc_linux_supply_gregset): New function.  Get registers from core
+	file register section.
+	(arc_linux_gregset): For the gdbarch function.
+	(arc_linux_regset_from_core_section): This is called through
+	gdbarch.
+	* config/arc/linux.mt (TDEPFILES): Add corelow.c to list.
+
+2005-06-21  Soam Vasani  <soam.vasani@codito.com>
+
+	* gdb/arc-jtag.c (arc_update_architecture): Check for A5, print a
+	warning but don't give an error.
+	* gdb/arc-tdep.h (ARCProcessorVersion): Add A5.
+
+2005-06-20  Soam Vasani  <soam.vasani@codito.com>
+
+	Bug #1311
+	* arc-jtag.c (arc_debug_wait): In ARC600, try to detect the case
+	of a breakpoint on the last instruction of a ZOL and warn the
+	user.
+	(arc_debug_read_core_register): New function.  Read a core
+	register and check for errors.
+
+2005-06-19  Soam Vasani  <soam.vasani@codito.com>
+
+	Bug #1305
+	* dwarf2read.c: Fix for bug #1305 (Failure with Metaware compiled
+	binaries)
+
+2005-05-21  Soam Vasani  <soam.vasani@codito.com>
+
+	23rd May Release
+	* version.in: Change to 6.3_codito_20050523, which is when it is
+	going to be released.
+
+2005-05-21  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag.c (arc_debug_store_regs): Show regno argument in debug
+	message.
+
+2005-05-21  Soam Vasani  <soam.vasani@codito.com>
+
+	* Makefile.in (arc-tdep.o): Add observer.h to the list of
+	dependencies.
+
+2005-05-21  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag-tdep.c (arc_jtag_register_reggroup_p): Remove extension
+	registers from _all_ reggroups, because they do not exist (as of
+	now).  Narrow down the list of registers in the save/restore group.
+
+2005-05-21  Sameer Dhavale  <sameer.dhavale@codito.com>
+
+        * arc-jtag-ops.c: Included more header files to remove build time
+	warnings
+	
+2005-05-21  Sameer Dhavale  <sameer.dhavale@codito.com>
+
+        PR arcgdb/1282
+	* arc-jtag.c: small changes to remove warnings during compilation.
+	* arc-jtag-ops.c(arc_debug_wait): Adding code to block and unblock
+	signals so that ctrl+c should work.
+
+2005-05-21  Soam Vasani  <soam.vasani@codito.com>
+
+	21st May 2005 Release.
+        * version.in: Bump version to 6.3_codito_20050521
+
+2005-05-21  Soam Vasani  <soam.vasani@codito.com>
+
+	Bug #1278
+	* arc-tdep.c (arc_set_main_name): New function.  Set main name to
+	_main if necessary.
+	(arc_gdbarch_init): Make arc_set_main_name an observer of
+	inferior_created.
+
+2005-05-16  Soam Vasani  <soam.vasani@codito.com>
+
+	Bug #1279
+	* remote.c (remote_open_1): Call observer_notify_inferior_created.
+	
+2005-05-16  Soam Vasani  <soam.vasani@codito.com>
+
+	15th May 2005 Release.
+        * version.in: Bump version to 6.3.50_cdt_gdb_20050515
+
+2005-05-15  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag-tdep.c (arc_jtag_init): Rename the aux-read command to
+	arc-aux-read and aux-write to arc-aux-write.
+
+2005-05-15  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag.c (arc_debug_wait): If the SH (self halt) bit is set,
+	assume that the program has exited, with exit code in R0.
+	* arc-jtag.h (ARC_DEBUG_REG_SH_BIT): Define.  Self halt bit in the
+	debug register.
+
+2005-05-15  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag-ops.c (arc_jtag_open): Correct and conditionalise debug
+	printfs.
+
+2005-05-15  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag.c (arc_debug_open): Call target_preopen,
+	reopen_exec_file and reread_symbols.
+
+2005-05-13  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag-ops.c (arc_jtag_close): Conditionalize a debug printf.
+
+2005-05-13  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag.h (ARC_TARGET_OBJECT_AUXREGS): Define.  For use in
+	target_xfer_partial.
+	(target_read_aux_reg, target_write_aux_reg): Change to use
+	target_xfer_partial.
+	* arc-jtag.c (arc_debug_xfer_partial): Support reading/writing of
+	auxillary registers, using ARC_TARGET_OBJECT_AUXREGS.
+	(init_arc_debug_ops): Stop using to_data (we'll use
+	target_xfer_partial for aux registers).
+	* arc-jtag-tdep.c (arc_jtag_aux_read_command): New command: read a
+	range of aux registers.
+	(arc_jtag_aux_write_command): New command: write an aux register.
+	(arc_jtag_init): Add the above commands.
+
+2005-05-13  Ramana Radhakrishnan  <ramana@codito.com>
+
+	* arc-jtag-ops.c(check_and_raise_error_if_jtag_closed):New function
+	for sanity checks. 
+	(arc_jtag_reset_board):Use above.
+	(arc_jtag_wait):Likewise.
+	(arc_jtag_read_chunk):Likewise.
+	(arc_jtag_read_core_reg):Likewise.
+	(arc_jtag_write_core_reg):Likewise.
+	(arc_jtag_read_aux_reg):Likewise.
+	(arc_jtag_write_aux_reg):Likewise.
+
+
+2005-05-13  Ramana Radhakrishnan  <ramana@codito.com>
+
+	* arc-jtag.c: Rename cmd arc_bcr_registers to arc-bcr-registers.
+	Rename arcjtag-debugstatemachine to arcjtag-debug-statemachine 
+
+2005-05-13  Ramana Radhakrishnan  <ramana@codito.com>
+
+	* arc-jtag-ops.h: Rename members to JTAG_OPENED and JTAG_CLOSED.
+	* arc-jtag-ops.c(arc_jtag_reset_board): Introduce
+	  sanity checks for checking target being opened. 
+	  (arc_jtag_open):set status to JTAG_OPENED.  
+
+2005-05-13  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* arc-jtag-ops.h: Add new member for reset_board.
+	* arc-jtag-ops.c(arc_jtag_reset_board):New function.
+	(initialize_arc_jtag_ops):Initialize reset board. 
+	* arc-jtag.c: New command arc-reset-board
+
+2005-05-13  Sameer Dhavale <sameer.dhavale@codito.com>
+
+	* arc-jtag.c: Add corrections to code to remove build time
+	warnings.
+	
+2005-05-13  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag.c (clear_status32_user_bit, restore_status32_user_bit):
+	New functions: clear/restore the user-mode bit in the status32
+	register.
+	(set_debug_user_bit): Set the UB bit in the debug register, so
+	that breakpoints work in user mode.
+	(arc_debug_open, arc_debug_resume): Call set_debug_user_bit.
+	(arc_debug_xfer_partial): When writing, go to kernel mode so that
+	we are not affected by privileges.
+	
+2005-05-12  Sameer Dhavale  <sameer.dhavale@codito.com>
+
+        PR arcgdb/1277
+	* arc-jtag-ops.c(gpio_write): Add function to write data to
+	parallel port.
+	(gpio_read): Add function to read from parallel port.
+	* gpio.h: New file. Add to support the interface with /dev/gpio.
+	
+2005-05-12  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* dwarf2-frame.c(execute_cfa_program): Ignore the contents
+	for a MW_ARC_info cfa directive. 
+
+2005-05-12  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* dwarf2-frame.c(decode_frame_entry_1):Ignore High C compilers
+	augmentation value in the frame entry. 
+
+2005-05-12  Sameer Dhavale <sameer.dhavale@codito.com>
+
+	* arc-jtag-ops.c(arc_jtag_write_aux_reg): Return value on
+	successful transaction.
+	* arc-jtag-ops.h: Change in prototype of function
+	jtag_memory_read().	
+
+2005-05-11  Sameer Dhavale  <sameer.dhavale@codito.com>
+
+	* arc-jtag-ops.c: Remove extra messages introduced by prev commit
+	and changing all printf() to printf_filtered().
+
+2005-05-10  Sameer Dhavale  <sameer.dhavale@codito.com>
+
+        PR arcgdb/1275 
+	* arc-jtag-ops.h(struct jtag_ops):Change protypes of functions
+	jtag_read_core_reg(), jtag_read_aux_reg(), jtag_write_core_reg(),
+	jtag_write_aux_reg() to handle errors gracefully.
+	* arc-jtag-ops.h(arc_jtag_read_core_reg): Change definition of
+	function to return the no of bytes read instead of returning
+	value.
+	(arc_jtag_write_core_reg): Change definition of function to return
+	the no of bytes actually written.
+	(arc_jtag_read_aux_reg):  Change definition of
+	function to return the no of bytes read instead of returning
+	value.
+	(arc_jtag_write_aux_reg): Change definition of function to return
+	the no of bytes actually written.
+	*arc-jtag.c: Change all calls to interface functions to accomodate
+	the changes made above and check and handle error gracefully with
+	error messages.
+
+2005-05-10  Ramana Radhakrishnan  <ramana@codito.com>
+
+	* arc-jtag.c(arc_update_architecture):Set up decr_pc_after_break
+	for ARC600 as 2 and 0 for ARC700.
+
+2005-05-10  Ramana Radhakrishnan  <ramana@codito.com>
+
+	* arc-jtag.h(is_arc700):New Function.
+	(is_arc600):New Function.
+	* arc-jtag.c(arc_jtag_resume):Single Step Mask 
+	is different for both ARC600 and ARC700. Use functions is_arc700
+	and is_arc600.
+
+2005-05-10  Ramana Radhakrishnan  <ramana@codito.com>
+	    Soam Vasani		  <soam.vasani@codito.com>
+
+	* arc-jtag.c(arc_debug_resume): Invalidate caches
+	for single stepping or even while resuming. 
+
+2005-05-10  Ramana Radhakrishnan  <ramana@codito.com>
+
+	* arc-jtag.c(arc_debug_open):Set STATUS32 to 1 
+	when opening JTAG .
+
+2005-05-10  Ramana Radhakrishnan  <ramana@codito.com>
+
+	* Makefile.in:Update dependency for arc-jtag-tdep.o
+	* ChangeLog.codito: Correct changelog entry. 
+
+2005-05-10  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* arc-jtag-tdep.c: Update copyright notice.
+	* arc-tdep.h: Likewise.
+	
+2005-05-10  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* Makefile.in:Update dependencies for ARC specific files.
+
+2005-05-10  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	*arc-jtag.h: (enum arc_hw_regnums): New enum. 
+	(arc-regnum-defs.h):Include.
+	(Define and undefine R_AUX and R_BCR)
+	* arc-regnum-defs.h: New file. 
+	* arc-jtag-ops.h(enum arc700_hw_regnum):Remove. 
+	* arc-jtag.c(R):Remove Macro.
+	(arc-regnum-defs.h):Include. 
+	(RAUX):New macro.
+	(RBCR):New macro. 
+	(arc_bcr_reg_info):Use above macros.
+	(arc_aux_reg_map):Likewise.
+	(struct arc_reg_info):Change type to arc_hw_regnum
+	(arc_update_architecture):Use ARC_HW_IDENTITY_REGNUM. 
+	(invalidateCaches):Use ARC_HW_ICACHE_IVIC
+	Use ARC_HW_DCACHE_IVIC to invalidate caches. 
+	(disableCaches):Use ARC_HW_ICACHE_CONTROL, 
+	ARC_HW_DCACHE_CONTROL to disable caches. 
+	(arc_debug_resume):Use ARC_HW_STATUS32_REGNUM. 
+	Use ARC_HW_DEBUG_REGNUM.
+	
+
+2005-05-10  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* arc-jtag-tdep.c(struct arc_reg_info):New struct. 
+	(arc_jtag_register_name):Move BCR registers below all 
+	the Auxiliary registers. This is to take care of printing
+	Build Configuration Registers and Auxiliary registers in 
+	one chunk. 
+	Rename BCR Registers to their correct names. 
+	(arc_jtag_print_registers_info):Use the all parameter to print
+	bcr registers and all the known ARC700 auxiliary registers 
+	and Build Configuration Registers.
+	* arc-jtag.c:(arc_aux_reg_map):New regmap for Auxiliary registers. 
+	(arc_get_hw_regnum_mapping):Use this to create mapping 
+	between gdb regnums and hw regnums. 
+	(arc_debug_fetch_regs):Use above.
+	(arc_debug_store_regs):Use above. 
+	* arc-tdep.h:Add processor versions UNSUPPORTED and ARCompact. 
+	* config/arc/tm-embed.h:Restructure the AUX Registers
+	information to be above the BCRs.
+	
+
+2005-05-09  Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>
+
+	* arc-jtag.c(arc_jtag_open):Remove call to invalidateCache. 
+	(arc_debug_load):Add code to zero out the bss section.
+
+2005-05-09  Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>
+
+	* arc-jtag.c(struct arc_reg_info): Correct typo for arc_gdb_regnums.
+
+2005-05-09  Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>
+
+	* arc-tdep.h (ARCProcessorVersion):New enum.
+	(ARCExtensionsSupportedInformation):New enum.
+	(ARCProcessorInformation):New structure to store ARC 
+	processor variant information.
+	(gdbarch_tdep):Add member of ARCProcessorInformation.
+	* arc-jtag-tdep.c (arc_debug_processor_information):Add new
+	variable. 
+	(arc_jtag_init):Initialize tdep->arc_processor_variant_info. 
+	* arc-linux-tdep.c (arc_linux_init_abi):Set ARC processor 
+	variant info to NULL.
+	* arc-jtag.c (arc_update_architecture):New function Update 
+	architecture information. 
+	(invalidateCaches):Invalidate Cache.
+	(disableCaches):Disable Cache.
+	(arc_debug_open):Call enable and invalidate caches and 
+	arc_update_architecture. 
+
+2005-05-06  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag.c (arc_debug_wait): Set status waitkind and signal
+	value, so that our caller thinks we stopped due to a SIGTRAP.
+
+2005-05-05  Sameer Dhavale  <sameer.dhavale@codito.com>
+
+	PR arcgdb/1271 
+	* arc-jtag.c (arc_debug_resume): Add support for hardware single
+	instruction stepping. 
+
+2005-05-05  Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>
+
+	* arc-jtag.h: Add copyright notice.
+
+2005-05-05  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag.c (arc_debug_read_aux_register,
+	arc_debug_write_aux_register): New functions.
+	(arc_debug_aux_reg_functions): Struct containing pointers to
+	arc_debug_read/write_aux_register.
+	(init_arc_debug_ops): Set to_data to arc_debug_aux_reg_functions.
+	* arc-jtag.h (target_read_aux_reg, target_write_aux_reg): New
+	macros.
+
+2005-05-05  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* arc-jtag-ops.c(AA3SSPinState):New enum for target comms
+	to AA3.
+	(arc_jtag_read_chunk):Change usage of rw_flag.
+	(arc_jtag_write_chunk):Change usage of rw_flag.
+	(read_mem):Change usage of rw_flag.
+	(write_mem):Change usage of rw_flag to use the new enum.
+	(arc_jtag_write_chunk):Formatting cleanups.
+	
+	
+
+2005-05-05  Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>
+
+	* arc-jtag-ops.c:Cleanup. 
+	(port_perms_setup): Make static.
+	(tapc_set_tms): Likewise.
+	(tapc_set_tck): Likewise.
+	(tapc_set_tdi): Likewise.
+	(clockdelay): Likewise.
+	(tapc_pulse): Likewise.
+	(tapc_reset): Likewise.
+	(tapc_tms): Likewise.
+	(tapc_readbit): Likewise.
+	(tapc_shiftbit): Likewise.
+	(tapc_shiftnbits): Likewise.
+	(read_jtag_status_reg): Likewise.
+	(print_jtag_status_reg_val): Likewise.
+	(write_jtag_reg): Likewise.
+	(read_jtag_reg): Likewise.
+	(arc_jtag_read_core_reg): Likewise.
+	(arc_jtag_write_core_reg): Likewise.
+	(arc_jtag_read_aux_reg): Likewise.
+	(arc_jtag_write_aux_reg): Likewise.
+	(read_mem): Likewise.
+	(write_mem): Likewise.
+	(arc_jtag_write_chunk): Likewise.
+	(arc_jtag_read_chunk): Likewise.
+	(arc_jtag_open): Likewise.
+	(arc_jtag_close): Likewise.
+	(arc_jtag_wait): Likewise.
+	(tapc_shift4bits):Remove.
+		
+2005-05-05  Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>
+
+	* arc-jtag-ops.c, arc-jtag-ops.h: Add copyright notice.
+
+2005-05-05  Ramana Radhakrishnan <ramana.radhakrishnan@codito.com>
+
+	* arc-jtag.c:debug_arc_jtag_target_messages New variable. 
+	(_initialize_arc_debug):Use above. Add a new boolean command, 
+	arcjtag-debug-target to print debug target messages.
+
+2005-05-05  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag.c (arc_debug_open): Print message on success.
+
+2005-05-05  Sameer Dhavale  <sameer.dhavale@codito.com>
+
+        PR arcgdb/1270
+	* arc-jtag-ops.c (tapc_pulse): Remove cals to clock delay to
+	achieve download speed-up.
+	(arc_jtag_read_core_reg): Add a call to tapc_reset() before
+	reading any register.
+	(arc_jtag_write_core_reg): Add a call to tapc_reset() before
+	writing any register. 
+	(arc_jtag_read_aux_reg): Add transition to run-test-idle state in
+	the wait loop.
+	(arc_jtag_read_aux_reg): Add a call to tapc_reset() before reading
+	any aux register.
+	(arc_jtag_write_chunk): Add a fix to support the writes to memory
+	which are not integral multiples of four.
+	(arc_jtag_read_chunk): Add a fix to support the reads from memory
+	which are not integral multiples of four.
+	(_initialize_arc_jtag_ops): Add entries to initialize read/write
+	core registers.
+	* arc-jtag-tdep.c (arc_jtag_init): Add to initialize
+	tdep->sigtramp_p to NULL. This avoids the segmentation fault.
+	* arc-jtag.c (arc_debug_open): Disable Dcache and Icache.
+	(arc_debug_xfer_partial): Add fix for address alignment.
+	(arc_debug_insert_breakpoint): Modify to support ARC700 specific
+	breakpoint.
+	(arc_debug_remove_breakpoint): Modify to support ARC700 specific
+	breakpoint.
+	
+
+2005-05-04  Ramana Radhakrishnan  <ramana@codito.com>
+
+	* arc-jtag-ops.c: Correct ioperms error messages. 
+	Setup read_core_register correctly.
+
+2005-05-04  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	PR arcgdb/1267
+	* arc-jtag-ops.h: Add new enum arc_jtag_status for housekeeping. 
+	  (arc_jtag_ops):Add data member to this. 
+	* arc-jtag-ops.c: #define printf to printf_filtered when used 
+	in gdb. 
+	(port_perms_setup):Return error message in case of errors
+	(arc_jtag_close):Call tapc_reset only when the JTAG is not 
+	already closed. 
+	
+2005-05-03  Soam Vasani  <soam.vasani@codito.com>
+
+	PR arcgdb/1260
+	* arc-tdep.h (struct gdbarch_tdep): Add member lowest_pc, which is
+	initialized in the linux or jtag tdep files.  It's meant to stop
+	backtraces at the entry point (_start).
+	* arc-tdep.c (arc_frame_this_id): Don't set frame_id if 
+	func <= lowest_pc.
+	* arc-linux-tdep.c (arc_linux_init_abi): Init lowest_pc to 0x74.
+	* arc-jtag-tdep.c (arc_jtag_init): Init lowest_pc to 0.
+	
+2005-05-03  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-tdep.c (arc_software_single_step): We cannot single-step
+	single instruction zero overhead loops and branch-to-self's.  Step
+	over them and print a warning.
+
+2005-05-02  Sameer Dhavale <sameer.dhavale@codito.com>
+
+	PR arcgdb/1265
+	* arc-jtag-ops.h (arc700_hw_regnums): Add entries to map LP_START
+	and LP_END registers.
+	* arc-jtag.c (arc_debug_store_regs): Add register mapping from
+	gdbarch register numbers to hardware register numbers.
+	(arc_debug_fetch_regs): Add register mapping from
+	gdbarch register numbers to hardware register numbers.
+
+2005-04-29  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-tdep.c (arc_gdbarch_init): Move the call of
+	set_gdbarch_software_single_step to arc-linux-tdep.c.
+	* arc-linux-tdep.c (arc_linux_init_abi): Set gdbarch software
+	single step.
+
+2005-04-28  Soam Vasani  <soam.vasani@codito.com>
+
+	* config/arc/tm-embed.h (enum arc700_jtag_regnums): Fix mistakes
+	in numbering.
+
+2005-04-28  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-tdep.c (arc_scan_prologue): Pass stream and fprintf_func to
+	init_disassemble_info, to be used in case of a memory error.
+
+2005-04-28  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-tdep.c (arc_scan_prologue): Handle R27 along with other
+	callee-saved registers.
+
+2005-04-27  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-jtag.c (arc_debug_wait): Setup control-C signal handler.
+	(arc_debug_interrupt): New function; handler for SIGINT.
+	(arc_debug_interrupt_twice): New function; called when user does
+	control-C twice.
+
+2005-04-26  Soam Vasani <soam.vasani@codito.com>
+
+	* arc-tdep.c (arc_register_name): Moved to arc-linux-tdep.c and
+	arc-jtag-tdep.c.
+	(arc_register_reggroup_p): Save/restore reggroups contain all
+	writable registers.
+	* arc-tdep.h (arc700_api_regnums): Define ARC_ARGx_REGNUMs and
+	ARC_RETURNx_REGNUMs.
+	(arc700_regnums): Moved to tm-linux.h and tm-embed.h.
+	(gdbarch_tdep): Removed member register_name.
+	gdbarch_register_name is now in arc-linux-tdep.c and
+	arc-jtag-tdep.c.
+	* arc-linux-tdep.c (arc700_linux_regnums): Moved to
+	config/arc/tm-linux.h.
+	(arc_linux_register_name): Names for all the registers in linux.
+	Moved from arc-tdep.c.
+	* arc-jtag.h (arc700_jtag_regnums): Moved to
+	config/arc/tm-embed.h.
+	* arc-jtag-tdep.c (arc_jtag_register_name): Names for all the
+	registers.  Moved from arc-tdep.c.
+	(arc_jtag_pseudo_register_read, arc_jtag_pseudo_register_write):
+	Removed; no pseudo registers when using JTAG.
+	* config/arc/tm-embed.h (arc700_jtag_regnums): Define all the
+	basecase registers (core as well as aux).  Renamed the
+	ARC_*_PSEUDO_REGNUMs to ARC_*_REGNUMs; changed references
+	appropriately.
+	* config/arc/tm-linux.h (arc700_linux_regnums): Define all the
+	registers that linux/ptrace gives.
+
+2005-04-25  Sameer Dhavale  <sameer.dhavale@codito.com>
+
+	* arc-jtag-ops.h: Add
+	Previous commit did not actually add the file to cvs.  So adding it
+	via this commit. 
+
+2005-04-22  Soam Vasani <soam.vasani@codito.com>
+
+	* arc-linux-tdep.c (arc_linux_skip_solib_resolver): New function;
+	skip uClibc's runtime resolver.
+	* arc-linux-tdep.c (arc_linux_init_abi): Set gdbarch
+	fetch_link_map_offset and skip_solib_resolver.
+	* config/arc/linux.mt (TDEPFILES): Remove glibc-tdep, we don't
+	need it.
+
+2005-04-20  Sameer Dhavale  <sameer.dhavale@codito.com>
+
+	PR arcgdb/1242
+	* arc-jtag-ops.h: Add 
+	(jtag_ops): New structure defined.
+	* arc-jtag-ops.c: Add
+	(port_perms_setup): New function. Add to set desired permissions
+	for port access.
+	(tapc_set_tms): New function. Add for Setting value to TMS pin of JTAG
+	port.
+	(tapc_set_tck): New function. Add for setting or resetting TCK pin
+	of JTAG port.
+	(tapc_set_tdi): New function. Add for sending data into JTAG
+	module via TDI input pin.
+	(clockdelay): New function. Add to generate required pulse width.
+	(tapc_pulse): New function. Add to generate pulse over TCK.
+	(tapc_reset): New function. Add to reset the JTAG state machine
+	(tapc_tms): New function. Add to set or reset the TMS pin of JTAG
+	port.
+	(tapc_readbit): New function. Add to read a single bit from TDO
+	pin of JTAG port.
+	(tapc_shiftbit): New function. Add to shift in one bit through TDI
+	and simultaneously shift out bit through TDO.
+	(tapc_shiftnbits): New function. Add to shift n bits in either
+	LSB-first or MSB-first fashion.
+	(read_jtag_status_reg): New function. Add to read the status of
+	transaction being requested by JTAG module.
+	(write_jtag_reg): New function. Add to write to any internal
+	registers of JTAG module.
+	(read_jtag_reg): New function. Add to read from any internal
+	register of JTAG.
+	(read_core_reg): New function. Add to read from any core register
+	of ARC700 via JTAG.
+	(write_core_reg): New function. Add to write to any core register
+	of ARC700 via JTAG.
+	(arc_jtag_read_aux_reg): New function. Add to write to any auxillary
+	register of ARC700 via JTAG.
+	(arc_jtag_write_aux_reg): New function. Add to write to any
+	auxillary register of ARC700 via JTAG.
+	(read_mem): New function. Add to read 4 bytes from memory.
+	(write_mem): New function. Add to write 4 bytes at a specified
+	memory location.
+	(arc_jtag_write_chunk): New function. Add to write to a stream of
+	data starting from the specified memory location. This function
+	makes use of speacial feature supported by ARC-JTAG for streaming
+	data.
+	(arc_jtag_read_chunk): New function. Add to read a stream of
+	data starting from the specified memory location. This function
+	makes use of speacial feature supported by ARC-JTAG for streaming
+	data. 
+	(arc_jtag_open): New function. Add to provide target specific open
+	function for GDB backend. This function sets port permissions and
+	resets JTAG state machine.
+	(arc_jtag_close): New function. Add to provide target specific
+	close function to GDB backend.
+	(arc_jtag_wait): New function. Add to poll the status32 register
+	of ARC700 till the processor is halted.
+	(_initialize_arc_jtag_ops): New function. Add to initialize
+	function pointers for structure arc_jtag_ops.
+	* gdb/config/arc/embed.mt (TDEPFILES): Add entry for
+	arc-jtag-ops.o
+	
+2005-04-20  Sameer Dhavale  <sameer.dhavale@codito.com>
+
+	PR arcgdb/1241
+	* target.c (target_read_memory_partial): Correct the handling of
+	variable err depending on the value returned
+	target_xfer_partial().
+	(target_write_memory_partial): Correct the handling of
+	variable err depending on the value returned
+	target_xfer_partial(). 
+??? patch sites don't exist any more, need to check for regression.
+
+2005-04-19  Soam Vasani <soam.vasani@codito.com>
+
+	* arc-jtag.h (enum arc700_jtag_regnums): Add debug register.
+	* arc-jtag-tdep.c (arc_jtag_register_name): Ditto.
+
+2005-04-19  Soam Vasani <soam.vasani@codito.com>
+
+	* arc-jtag.h: New file, defines arc700_jtag_regnums.
+
+2005-04-19  Soam Vasani <soam.vasani@codito.com>
+
+	* arc-tdep.c (ARC_ILINK1_PSEUDO_REGNUM, ARC_ILINK2_PSEUDO_REGNUM,
+	ARC_ERET_PSEUDO_REGNUM, ARC_STATUSL1_PSEUDO_REGNUM,
+	ARC_STATUSL2_PSEUDO_REGNUM, ARC_ERSTATUS_PSEUDO_REGNUM): Move to
+	arc-tdep.h.
+	(arc_pseudo_register_read, arc_pseudo_register_write,
+	arc_print_registers_info): Move to arc-linux-tdep.c and
+	arc-jtag-tdep.c.
+	(arc_register_name): Registers are split into 3 classes: the
+	registers common to both linux and jtag; registers available only
+	in one of the two targets; and pseudo registers.  Common registers
+	and pseudo-registers have their names defined here; for other
+	registers, call tdep->register_name.
+	(arc_register_reggroup_p): Call tdep->register_reggroup_p, for the
+	target-specific registers.
+	(arc_sigtramp_frame_prev_register): Use
+	tdep->pc_regnum_in_sigcontext rather than ARC_RET_REGNUM directly.
+	(arc_gdbarch_init): Do not assume OSABI = Linux.  Instead, get the
+	OSABI from the new CONFIG_OSABI macro in tm-<target>.h file.
+	Move to arc-linux-tdep.c and arc-jtag-tdep.c: Set
+	gdbarch_num_regs, gdbarch_pc_regnum, gdbarch_pseudo_register_read,
+	gdbarch_pseudo_register_write, gdbarch_print_registers_info.
+	Call CONFIG_INIT_TDEP, which is a macro defined in tm-<target>.h.
+	
+	* arc-linux-tdep.c: (enum arc700_linux_regnums): Moved here from
+	arc-tdep.h, so that arc-tdep.c cannot see them.  Contains the
+	registers that linux makes up, but do not actually exist on the
+	processor.  Also, change ARC_RET_REGNUM such that it is after all
+	the common registers.
+	(arc_linux_register_name): Names of the arc700_linux_regnums.
+	(arc_linux_pseudo_register_read): Moved from arc-tdep.c.  Here
+	we'll use orig_r8 to get the pseudo-registers.
+	(arc_linux_pseudo_register_write): Moved from arc-tdep.c.
+	(arc_linux_print_registers_info): Moved from arc-tdep.c.  Register
+	sets are different for different targets.
+	(arc_linux_sc_reg_offset): ARC_RET_REGNUM was changed, so changed
+	this appropriately.
+	(arc_linux_init_abi): Set tdep->pc_regnum_in_sigcontext to
+	ARC_RET_REGNUM (see comment in arc-tdep.h).  Set
+	tdep->register_name to arc_linux_register_name.  
+	And moved from arc-tdep.c: Set gdbarch_num_regs,
+	gdbarch_pc_regnum, gdbarch_pseudo_register_read,
+	gdbarch_pseudo_register_write, gdbarch_print_registers_info.
+	(arc_linux_register_reggroup_p): Register groups for linux-only
+	registers.
+
+	* arc-jtag-tdep.c: New file.  Define the breakpoint intruction,
+	register_name, pseudo register read/write, register_reggroup_p,
+	and print_registers_info.
+
+	* arc-tdep.h (enum arc700_regnums): Remove linux-only regnums like
+	ARC_RET_REGNUMS.
+	(ARC_ILINK1_PSEUDO_REGNUM, ARC_ILINK2_PSEUDO_REGNUM,
+	ARC_ERET_PSEUDO_REGNUM, ARC_STATUSL1_PSEUDO_REGNUM,
+	ARC_STATUSL2_PSEUDO_REGNUM, ARC_ERSTATUS_PSEUDO_REGNUM): Moved
+	from arc-tdep.c.  Though the regnums are different across targets
+	for these registers, the macros are same because the regnums are
+	define in terms of NUM_REGS.
+	(struct gdbarch_tdep): New fields: pc_regnum_in_sigcontext,
+	register_reggroup_p.
+
+	* config/arc/embed.mt (TDEPFILES): Add arc-jtag-tdep.o to this
+	list.	
+
+	* config/arc/tm-embed.h (CONFIG_OSABI, CONFIG_INIT_TDEP): New macros.
+	* config/arc/tm-linux.h (CONFIG_OSABI, CONFIG_INIT_TDEP): Ditto.
+	
+	* gdbserver/linux-arc-low.c (arc_regmap): ARC_RET_REGNUM was
+	changed in GDB, change this appropriately.
+	* regformats/reg-arc.dat: Ditto.
+	
+2005-04-12  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* arc-jtag.c: Add copyright, add comments to each of the 
+	functions explaining their role. 
+
+2005-04-08  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* arc-tdep.c(arc_print_float_info): New function. 
+	  (gdbarch_init):Initialize gdbarch_print_float_info.
+
+2005-04-07  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	PR arcgdb/1198
+	* arc-tdep.c(arc_push_dummy_call):Correct handling for
+	structures.Move initial assignment of structure address
+	above initialization.
+	(arc_frame_align): Align frame to natural boundary.
+
+2005-04-06  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	PR arcgdb/1194 
+	* arc-tdep.c(arc_push_dummy_call):Correct limit check. The ARC has
+	8 parameter registers.
+	* arc-tdep.h(enum arc700_regnums):Add ARC_ARG7_REGNUM.
+
+2005-04-04  Sameer Dhavale <sameer.dhavale@codito.com>
+
+	PR arcgdb/1189
+	* arc-jtag.c(): Add
+	  (struct arc_jtag_ops): New structure. Add to support
+	arcjtag target operations.
+	  (arc_jtag_open): New function. Add for initializations.
+	  (arc_jtag_attach): New function. Add for attaching to already
+	  running targets.
+	  (arc_jtag_detach): New function. Add for detaching from a
+	  target.
+	  (arc_jtag_resume): New function. Make the inferior to resume
+	  execution.
+	  (arc_jtag_wait): New function.
+	  (arc_jtag_fetch_regs): New function. Put values in register
+	  cache.
+	  (arc_jtag_store_regs): New function.
+	  (arc_jtag_prepare_to_store): New function.
+	  (arc_jtag_xfer_memory): New function.
+	  (arc_jtag_files_info): New function.
+	  (arc_jtag_insert_breakpoint): New function.
+	  (arc_jtag_remove_breakpoint): New function.
+	  (arc_jtag_kill): New function.
+	  (arc_jtag_load): New function.
+	  (arc_jtag_create_inferior): New function.
+	  (arc_jtag_mourn_inferior): New function.
+	  (arc_jtag_thread_alive): New function.
+	  (arc_jtag_stop): New function.
+	  (init_arc_jtag_ops): New function. Initialize jtag_target_ops to
+	  values appropriate for arcjtag target.
+	  (_initialize_arc_jtag): New function. Add a new target to gdb.
+	* config/arc/embed.mt: Add change to include arc-jtag.o so that
+	new target should be automatically built with arc-elf32.
+	 
+2005-04-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	PR arcgdb/1185
+	* arc-tdep.c(arc_write_pc): Remove. 
+	  (arc_gdbarch_init): Remove initialization of write_pc.
+	* arc-linux-tdep.c(arc700_linux_write_pc): New function . Add
+	fix for orig_r8 hack.
+	 (arc_linux_init_abi): Set gdbarch_init to arc700_linux_write_pc.
+
+2005-04-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	PR arcgdb/1184
+	* arc-tdep.h(struct gdbarch_tdep): Add members breakpoint_insn
+	and breakpoint_size.
+	* arc-tdep.c(arc_breakpoint_from_pc): Return gdbarch_tdep value
+	for software bp instructions to be used. 
+	* arc-linux-tdep.c(arc_linux_init_abi): Initialize the tdep for 
+	arc700_linux_default_breakpoints. 
+	  arc700_linux_breakpoint_insn:New breakpoint insn for ARC700
+	  linux.
+	  arc700_linux_breakpoint_size:New breakpoint size for ARC700 
+	  linux.
+
+2005-04-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* arc-tdep.c(arc_linux_write_pc):Correct comment for orig_r8.
+
+2005-04-02  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* version.in: should have been 20050401.
+
+2005-04-01  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* version.in: Bump up version for release.
+	
+2005-04-01  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+	
+	* ChangeLog.codito: Remove more spurious entries.
+
+	PR arcgdb/1175
+	* arc-tdep.c(arc_push_dummy_call): New function.
+	  (push_stack_item):New function.
+	  (pop_stack_item):New function.
+	  (arc_add_reggroups_p):Register system_reggroup.
+	  (arc_register_reggroup_p):Add orig_r8 to system_reggroup.
+	  (arc_linux_write_pc):	Set orig_r8 to -3 to work correctly 
+	  dummy frames and signal handlers. Fixes failures in signals.exp.
+	  (arc_gdbarch_init):Set dummy call to use arc_push_dummy_call. 
+	  Set breakpoint for dummy code at entry point.
+	  Register arc_linux_write_pc.
+	* ChangeLog.codito: Remove spurious Changelog entry.
+
+2005-04-01  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* arc-tdep.h: Add enum arc700_regnums for ARC register types. 
+
+
+
+2005-03-30  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	PR arcgdb/1172
+	* arc-tdep.c(arc_scan_prologue): Skip over argument save
+	registers. 
+
+2005-03-28  Ramana Radhakrishnan  <ramana@codito.com>
+
+<	* arc-tdep.c: Add contribution tag. 
+	  (printFrameInfo): Conditionally compile with ARC_DEBUG.
+	  (printInsnState): Likewise.
+	  (UPDATESTACKSPACE): Correct for variadic args. 
+	  (PUSHBLINKFI): Correct for variadic args. 
+	  (ISSUBSPFI): Update for mixed code.
+	  (arc_scan_prologue): Update prologue description and correct.
+	  (arc_scan_prologue): Clean up declarations. 
+	  Handle callee saves, Handle 16 bit ARCompact insns.
+	
+
+2005-03-21  Soam Vasani  <soam.vasani@codito.com>
+
+	* arc-tdep.c (arc_gdbarch_init): Assume OSABI = Linux for now.
+	Call gdbarch_init_osabi.
+	* arc-linux-tdep.c (_initialize_arc_linux_tdep): Pass machine = 0
+	to gdbarch_register_osabi.
+
+2005-03-20  Soam Vasani <soam.vasani@codito.com>
+
+	PR gdb/1098
+	* arc-tdep.c(arc_cannot_store_register): Don't print warning.
+	  (arc_register_reggroup_p): Remove read-only registers from 
+	  save/restore reggroups.
+
+2005-03-17  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* arc-linux-tdep.c:Add copyright notice. 
+
+2005-03-17  Soam Vasani <soam.vasani@codito.com>
+
+	* gdb/arc-tdep.c: Cleanup and remove warnings.
+	* gdb/arc-linux-tdep.c: Ditto.
+
+2005-03-17  Soam Vasani <soam.vasani@codito.com>
+
+	* gdb/arc-linux-tdep.c (arc_sigtramp_insn): Defined.
+	  (arc_linux_sigtramp_p): Defined: check if PC is in a signal 
+	  trampoline.
+	  (arc_linux_sigcontext_addr): Defined: return the address of the
+	  sigcontext structure.
+	  (arc_linux_sc_reg_offset): Defined: mapping from regnum to
+	  sigcontext offset.
+	  (arc_linux_linux_init_abi): Defined: add stuff to gdbarch->tdep.
+	* gdb/arc-tdep.h (ARC_PC_REGNUM): Replaced by ARC_RET_REGNUM.
+	* gdb/arc-tdep.c (ARC_PC_REGNUM): Replace all references by either
+	  PC_REGNUM or ARC_RET_REGNUM.
+	  (arc_unwind_pc): Call the unwinder with PC_REGNUM instead of
+	  ARC_RET_REGNUM.  The unwinder will decide what register to give
+	  for PC_REGNUM, because PC_REGNUM itself is not a real register.
+	  (arc_sigtramp_frame_cache, arc_sigtramp_frame_this_id, 
+	  arc_sigtramp_frame_prev_register, arc_sigtramp_frame_unwind,
+	  arc_sigtramp_frame_sniffer): Defined.
+	  (arc_gdbarch_init): Append arc_sigtramp_frame_sniffer.

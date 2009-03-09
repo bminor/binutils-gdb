@@ -1,0 +1,42 @@
+2007-09-17  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* gentvals.sh: Allow target-specific definitions to override
+	later generic ones.
+	* gennltvals.sh: Use ${srcroot}/newlib/libc/sys/arc/sys/fcntl.h
+	for open on arc.
+	* nltvals.def: Regenerate.
+
+2007-08-22  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* cgen-trace.c (sim_cgen_disassemble_insn):
+	Check for CGEN_INSN_DISASM_BITSIZE.
+
+2007-08-21  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* cgen-trace.c (sim_cgen_disassemble_insn): Disable bogus sanity check.
+
+2007-05-14  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* callback.c (fdmap, fdbad): No longer static.
+
+2007-05-02  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* syscall.c (get_path): No longer static.
+
+2007-04-30  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* gennltvals.sh: Add arc code.
+	* nltvals.def: Regenerate.
+
+	Speed up simulator startup:
+	* sim-utils.c (zalloc): Use xcalloc.
+
+	Debugging utility functions:
+	* sim-utils.c (dump_hex, dump_strn_1, dump_asc): New functions.
+	* (dump_str, dump_strn): Likewise.
+
+	Fix descriptor 0/1/2 handling in pesence of freopen:
+	* syscall.c (cb_syscall): Add comments about descriptors 0/1/2.
+	* callback.c (os_read_stdin): Use os_read.
+	(os_write): Use fwrite to stdout / stderr for descriptor 1 / 2.
+	(os_write_stdout, os_write_stderr): Use os_write.

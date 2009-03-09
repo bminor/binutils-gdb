@@ -1,0 +1,151 @@
+2005-11-08  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* arcgdbserverusinggdbserver.exp: Is a duplicate of
+	lib/arc-gdbserver.exp. Remove it.
+	* lib/arc-jtag.exp: Remove hardcoded compiler, assembler, etc. Use
+	environment variables instead.
+	* lib/arc-gdbserver.exp: Ditto. Disallow fileio tests. Use default
+	timeout. 
+	* config/remote-gdbserver.exp (rsh_gdbserver_spawn): Expect output
+	from the spawned rsh program. Check for errors. Return -1 on
+	error.
+	(gdbserver_spawn): Return spawn_id.
+	(gdb_load): Check the returned spawn_id from gdbserver_spawn and
+	return -1 on error. Remove sleep and expect output from the
+	spawned process instead. Do a wait on the spawned process after it
+	finishes.
+	* lib/mi-support.exp (gdb_load): Ditto.
+
+2005-10-31  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* gdb.asm/asm-source.exp: Add linker flag -marclinux for target arc.
+
+2005-10-24  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* gdb.asm/asm-source.exp: Set debug-flags to -gdwarf-2 for target arc.
+
+2005-10-21  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* gdb.asm/arc.inc: Define macro's declare and end.
+
+2005-10-18  Kunal Parmar  <kunal.parmar@codito.com>
+
+	Bug #1183
+	* lib/mi-support.exp (mi_gdb_load): Add support for target
+	remote. Fix for Bug #1183 (Testsuite does not complete for
+	gdb.mi).
+
+2005-10-14  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* config/remote-gdbserver.exp (gdb_load): Check the return value
+	from gdb_target_cmd. Retry on failure.
+
+2005-09-28  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* lib/arc-jtag.exp: Skip the huge.exp test.
+
+2005-09-28  Kunal Parmar  <kunal.parmar@codito.com>
+
+	Bug #1183
+	* lib/mi-support.exp (mi_gdb_load): Add support for target
+	arcjtag. Fix for Bug #1183 (Testsuite does not complete for
+	gdb.mi).
+
+2005-09-23  Kunal Parmar  <kunal.parmar@codito.com>
+
+	* config/arc-jtag.exp: Take care about timeouts. Kill previous
+	program being debugged after doing arc-reset-board.
+	* lib/arc-jtag.exp: Add board_info to disallow unsupported tests.
+	Add board_info for arcjtag as gdb_protocol.
+
+2005-05-20  Soam Vasani  <soam.vasani@codito.com>
+
+	* gdb.arch/arc-step-jtag.s: Define "main" label.
+	* gdb.arch/arc-step.s: Ditto.
+
+2005-05-15  Soam Vasani  <soam.vasani@codito.com>
+
+	* gdb.arch/arc-step-jtag.exp: Check gdb_load's return value.
+
+2005-05-15  Soam Vasani  <soam.vasani@codito.com>
+
+	* config/arc-jtag.exp (gdb_target_arcjtag): Increase timeout.
+	Kill previous program being debugged.  Return zero on success,
+	non-zero otherwise.
+	(gdb_load): Check return value of gdb_target_arcjtag.  Return zero
+	on success, non-zero otherwise.
+
+2005-05-14  Soam Vasani  <soam.vasani@codito.com>
+
+	* gdb.arch/arc-step-jtag.exp: Oops.  Use arc-step-jtag.s, not
+	arc-step.s.
+
+2005-05-14  Soam Vasani  <soam.vasani@codito.com>
+
+	* gdb.arch/arc-step-jtag.exp: New file for the JTAG target.
+	* arc-step-jtag.s: New file, derived from arc-step.s: added labels
+	in delay slots and ended using "flag 1"
+	(JTAG uses hardware single step which can step thru delay slots,
+	unlike software single step.)
+	* gdb.arch/arc-step.exp: Quit if not on linux.
+
+2005-05-14  Soam Vasani  <soam.vasani@codito.com>
+
+	* config/arc-jtag.exp (gdb_target_arcjtag): If target arcjtag
+	fails, once do arc-reset-board and try again.
+
+2005-05-12  Ramana Radhakrishnan  <ramana@codito.com>
+
+	* lib/gdbserver.exp: Use a special tests dir for specifying
+	the tests directory where the tests have been downloaded. 
+	* arcgdbserverusinggdbserver.exp: Use this to run the testsuite. 
+
+2005-05-04  Soam Vasani  <soam.vasani@codito.com>
+
+	* config/arc-jtag.exp: Target-specific file for the arcjtag target.
+	* lib/arc-jtag.exp: Baseboard file for arcjtag target.  (No real
+	reason to put it in this directory, but...)
+
+2005-04-13  Soam Vasani  <soam.vasani@codito.com>
+
+	* gdb.arch/arc-step.exp: Tests for software single step across
+	32 bit / 16bit instructions, branches with/without delay slots,
+	and zero-overhead-loops.
+	* gdb.arch/arc-step.s: Ditto.
+
+2005-04-11  Soam Vasani  <soam.vasani@codito.com>
+
+	* gdb.threads/thread_check.exp: Applied
+	  http://sources.redhat.com/ml/gdb-patches/2004-11/msg00458.html,
+	  which corrects the filename and the regexp.
+
+2005-04-08  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* gdb.base/float.exp: Add support for the ARC platform. 
+
+2005-03-30  Soam Vasani  <soam.vasani@codito.com>
+
+	* config/remote-gdbserver.exp (rsh_gdbserver_spawn): Find RSH.
+	* lib/arc-gdbserver.exp: Use rsh instead of telnet.
+
+2005-03-21  Soam Vasani  <soam.vasani@codito.com>
+
+	* config/remote-gdbserver.exp (mynewtelnet_open_and_exec): Assume
+	that telnet-exec.exp is in the path; do not hardcode the path.
+	* lib/arc-gdbserver.exp: Remove hardcoded paths, port numbers,
+	etc.  Use environment variables instead.
+
+2005-03-15  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* config/remote-gdbserver.exp: New file for nfs copying
+	* gdb.asm/arc.inc: New file for assembly language testing
+	* gdb.asm/asm-source.exp: Handle the arc architecture. 
+	* lib/telnet-exec.exp: A replacement for rsh using telnet to allow
+	  executing commands on the arc board. Used while testing
+	  gdbserver on ARC700. 
+	* lib/arc-gdbserver.exp: A setup for running the testsuite
+	  using arc-gdbserver. Should be a part of the dejagnu
+	  distribution but is kept here for convinience. Tailor this 
+	  for use. (Store usually in /usr/share/dejagnu/baseboards directory)
+	
+

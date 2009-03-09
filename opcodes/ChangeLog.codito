@@ -1,0 +1,16 @@
+2006-03-03  Ashwin Pathmudi  <ashwin.pathmudi@codito.com>
+
+	* arc-dis.c (a4AnalyzeInstr): New. Disassembler function
+	called by gdb for the a4 core.  
+
+2005-03-30  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* arcompact-dis.c(dsmOneArcInst): Update ARC register information
+	for the debugger.
+	* include/opcode/arc.h: Update struct arcDisState to contain
+	information about the targets of operands.
+
+2005-03-07  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
+
+	* arcompact-dis.c(dsmOneArcInst):Update address
+	writeback for the debugger. 

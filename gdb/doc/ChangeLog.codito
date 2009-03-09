@@ -1,0 +1,7 @@
+2005-05-16  Soam Vasani  <soam.vasani@codito.com>
+
+	* gdb.texinfo (Embedded Processors): Add a menu item for ARC and
+	include arc.texi.
+	* arc.texi: New file.  ARC specific commands etc.
+	* Makefile.in (GDB_DOC_SOURCE_INCLUDES): Add arc.texi to the list.
+

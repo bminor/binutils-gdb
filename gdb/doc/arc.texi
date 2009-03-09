@@ -1,0 +1,155 @@
+@c \input texinfo
+@c %**start of header
+@c @setfilename arc-cmds.info
+@c @settitle ARC specific commands
+@c @setchapternewpage off
+@c %**end of header
+
+@node ARC
+@subsection ARC
+
+GDB for ARC supports the ARC600 and ARC700 cores.
+
+On ARC700, you can debug linux applications using gdbserver.  On
+ARC700 and ARC600, you can debug any program using the arcjtag target.
+
+
+@menu
+* ARC specific commands::        ARC specific commands
+@end menu
+
+@node ARC specific commands, , , ARC
+@subsection ARC specific commands
+
+These commands can only be used when GDB has been build for ARC.
+
+
+@menu
+* target arcjtag::                  Use the JTAG target
+* arc-reset-board::                 Reset the ARC board
+* arc-aux-read::                    Read a range of auxillary registers
+* arc-aux-write::                   Write an auxillary register
+* info arc-bcr-registers::          Show build configuration registers
+
+Debugging:
+* set arcjtag-debug-statemachine::  JTAG state machine debugging messages
+* set arcjtag-debug-target::        arcjtag target debugging messages
+@end menu
+
+@node target arcjtag
+@subsubsection target arcjtag
+
+Usage: @code{target arcjtag}
+
+Connect to the arcjtag target.
+
+This target expects the ARC board to be connected to the parallel port
+on the host.  Currently we support debugging only on GNU/Linux hosts.
+
+This target uses the gpio device to access the parallel.  You must
+have the gpio driver installed and you must have read/write privileges
+to /dev/gpio.
+
+
+@node arc-reset-board
+@subsubsection arc-reset-board
+
+Usage: @code{arc-reset-board}
+
+Reset the board.
+
+For this command to work, you must be connected to the arcjtag target,
+by using the command @code{target arcjtag}.
+
+
+@node arc-aux-read
+@subsubsection arc-aux-read
+
+Usage: @code{arc-aux-read <REG-FROM> [<REG-TO>]}
+
+Read and show a range of auxillary registers.
+REG-FROM and REG-TO can be any expressions that evaluate to integers.
+REG-TO is optional; if it is not specified, only one register is displayed.
+
+For example:
+@example
+(gdb) arc-aux-read 0x400 0x406
+00000400: 00000100 80001abc 00001620 00200000
+00000404: 00000100 00000000 00000000
+@end example
+
+For this command to work, you must be connected to the arcjtag target,
+by using the command @code{target arcjtag}.
+
+
+
+@node arc-aux-write
+@subsubsection arc-aux-write
+
+Usage: @code{arc-aux-write <REG> = <VALUE>}
+
+Write to an auxillary register.
+REG and VALUE can be any expressions that evaluate to integers.
+
+For example:
+@example
+(gdb) arc-aux-write 6 = 0x123
+@end example
+
+For this command to work, you must be connected to the arcjtag target,
+by using the command @code{target arcjtag}.
+
+@node info arc-bcr-registers
+@subsubsection info arc-bcr-registers
+
+Usage: @code{info arc-bcr-registers}
+
+Show all the build configuration registers.
+
+For example:
+@example
+(gdb) info arc-bcr-registers
+[61] DCCM_BASE_BUILD : 0x1010121
+[62] CRC_BASE_BUILD  : 0x00
+[63] BTA_LINK_BUILD  : 0x1010121
+[64] DVBF_BUILD      : 0x00
+[65] TEL_INSTR_BUILD : 0x00
+[67] MEMSUBSYS       : 0x01
+[68] VECBASE_AC_BUILD : 0x01
+[69] P_BASE_ADDRESS  : 0xfc0001
+[6f] MMU_BUILD       : 0x1010121
+[70] ARCANGEL_BUILD  : 0x1010121
+[72] D_CACHE_BUILD   : 0x12001
+[73] MADI_BUILD      : 0x00
+[74] DCCM_BUILD      : 0x00
+[75] TIMER_BUILD     : 0x303
+[76] AP_BUILD        : 0x00
+[77] ICACHE_BUILD    : 0x22001
+[78] ICCM_BUILD      : 0x1010121
+[79] DSPRAM_BUILD    : 0x1203
+[7a] MAC_BUILD       : 0x00
+[7b] MULTIPLY_BUILD  : 0x01
+[7c] SWAP_BUILD      : 0x01
+[7d] NORM_BUILD      : 0x02
+[7e] MINMAX_BUILD    : 0x00
+[7f] BARREL_BUILD    : 0x02
+@end example
+
+For this command to work, you must be connected to the arcjtag target,
+by using the command @code{target arcjtag}.
+
+@node set arcjtag-debug-statemachine
+@subsubsection set arcjtag-debug-statemachine
+
+Usage: @code{set arcjtag-debug-statemachine ARG}
+
+Switch on JTAG state machine debugging messages if ARG is non-zero.
+Switch them off if it is zero.
+
+@node set arcjtag-debug-target
+@subsubsection set arcjtag-debug-target
+
+Usage: @code{set arcjtag-debug-target ARG}
+
+Switch on JTAG target debugging messages if ARG is non-zero.
+Switch them off if it is zero.
