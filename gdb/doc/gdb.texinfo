@@ -14677,6 +14677,7 @@ acceptable commands.
 
 
 @menu
+* ARC::                         ARC
 * ARM::                         ARM RDI
 * M32R/D::                      Renesas M32R/D
 * M68K::                        Motorola M68K
@@ -14691,6 +14692,8 @@ acceptable commands.
 * CRIS::                        CRIS
 * Super-H::                     Renesas Super-H
 @end menu
+
+@include arc.texi
 
 @node ARM
 @subsection ARM

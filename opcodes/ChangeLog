@@ -1,3 +1,21 @@
+2009-03-09  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* arc-ext.c (arcExtMap_add): Fix pointer basetype signedness problem.
+
+	* cgen-dis.c (hash_insn_array): Supply big_p parameter to cd->dis_hash.
+	(hash_insn_list, cgen_dis_lookup_insn): Likewise.
+
+	* configure.in (bfd_arc_arch): Use cgen.
+	* configure: Regenerate.
+	* arc-dis.c, arc-opc.c, arc-opc.h, arc-opinst.c: Generate.
+	* Makefile.am (HFILES, CFILES): Use cgen files.
+	(CLEANFILES): Add stamp-arc.
+	(CGEN_CPUS): Add arc.
+	(ARC_DEPS, stamp-arc): New.
+	(arc rules): Use rules for cgen build.
+	* Makefile.in: Regenerate.
+	* arc-desc.c, arc-ibld.c, arc-asm.c: Generate.
+
 2008-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Disallow 16-bit near indirect branches for

@@ -377,7 +377,11 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
   CGEN_CPU_DESC cd = CPU_CPU_DESC (cpu);
   CGEN_EXTRACT_INFO ex_info;
   CGEN_FIELDS *fields = alloca (CGEN_CPU_SIZEOF_FIELDS (cd));
+#ifdef CGEN_INSN_DISASM_BITSIZE
+  int insn_bit_length = CGEN_INSN_DISASM_BITSIZE (insn);
+#else
   int insn_bit_length = CGEN_INSN_BITSIZE (insn);
+#endif
   int insn_length = insn_bit_length / 8;
 
   sfile.buffer = sfile.current = buf;
@@ -421,10 +425,14 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
 
   length = (*CGEN_EXTRACT_FN (cd, insn)) (cd, insn, &ex_info, insn_value, fields, pc);
   /* Result of extract fn is in bits.  */
+#ifdef CGEN_INSN_DISASM_BITSIZE
+  if (length <= insn_bit_length)
+#else
   /* ??? This assumes that each instruction has a fixed length (and thus
      for insns with multiple versions of variable lengths they would each
      have their own table entry).  */
   if (length == insn_bit_length)
+#endif
     {
       (*CGEN_PRINT_FN (cd, insn)) (cd, &disasm_info, insn, fields, pc, length);
     }

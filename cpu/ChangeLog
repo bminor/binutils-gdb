@@ -1,3 +1,7 @@
+2009-03-09  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* arc.opc, sh-sim.cpu, arc.cpu, ARCompact.cpu: New files.
+
 2008-01-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* mt.opc (parse_imm16): Apply 2007-09-26 opcodes/mt-asm.c change

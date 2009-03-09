@@ -1,3 +1,9 @@
+2009-03-09  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* arc: New directory.
+	* configure.ac: Add arc case.
+	* configure: Regenerate.
+
 2008-02-05  DJ Delorie  <dj@redhat.com>
 
 	* configure.ac (v850): V850 now has a testsuite.

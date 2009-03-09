@@ -47,6 +47,10 @@ if test "${enable_sim}" != no; then
    common=yes
    igen=no
    case "${target}" in
+       arc-*-*)
+           AC_CONFIG_SUBDIRS(arc)
+	   testsuite=yes
+	   ;;
        arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
            AC_CONFIG_SUBDIRS(arm)
 	   testsuite=yes

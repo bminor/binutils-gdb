@@ -1,0 +1,3293 @@
+; ARCompact CPU description.  -*- Scheme -*-
+; Copyright 1998, 1999, 2000, 2001, 2003, 2006, 2007, 2008
+; Free Software Foundation, Inc.
+; This file is part of CGEN.
+; See file COPYING.CGEN for details.
+
+(include "simplify.inc")
+
+(if (application-is? SID-SIMULATOR)
+    (fixme))
+
+; This is how we do delayed jumps for sim.
+(define-pmacro (delay-jump target) (delay 1 (set pc target)))
+
+; define-arch must appear first
+
+(define-arch
+  (name ARCompact) ; name of cpu family
+  (comment "ARC ARCompact")
+  (default-alignment aligned)
+ ; Should be #t but cgen can't handle variable length insns with #t
+  (insn-lsb0? #f)
+  ; a4 not modelled here.
+  (machs a5 arc600 arc700)
+  (isas ARCompact)
+)
+
+; Attributes
+(define-attr
+  (type enum)
+  (for insn)
+  (name LIMM)
+  (comment "can take long immediate for operand")
+  (attrs)
+  (values none h B BC C)
+  (default none)
+)
+
+(define-attr
+  (type boolean)
+  (for insn)
+  (name SHORT_P)
+  (comment "has short opcode")
+  (attrs)
+  (default #f)
+)
+
+(define-attr
+  (type boolean)
+  (for mach)
+  (name ISARC700)
+  (comment "to test mach being arc700")
+  (attrs)
+  (default #f)
+)
+
+; Instruction set parameters.
+
+(define-isa
+  (name ARCompact)
+
+  ; The default size of an instruction in bits
+  (default-insn-bitsize 32)
+
+  ; Number of bits of insn we can initially fetch.
+  ; ??? FIXME: this should be 16, but that gives spurious decoder ambiguities.
+  ; ??? weirdly enough, base_insn is still expected to be 16 bits.
+  (base-insn-bitsize 32)
+
+  ; Used in computing bit numbers.
+  (default-insn-word-bitsize 32)
+
+  ; Initial bitnumbers to decode insns by.
+  ;(decode-assist (0 1 2 3 4))
+  ;(decode-assist (0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15))
+  (decode-splits
+    (f-F ()
+      ( (unchanged (0)) (update (1))))
+    (f-op-A ()
+      (
+	(normal (.iota 32))
+        (special (.iota 32 32))))
+    (f-op-B ()
+      (
+	(normal (.iota 32))
+        (special (.iota 32 32))))
+    (f-op-C ()
+      (
+	(no-ilink (.splice (.unsplice (.iota 28)) (.unsplice (.iota 30 31))))
+        (ilinkx (28 29))))
+    (f-op-Cj ()
+      (
+	(normal (.splice (.unsplice (.iota 28)) 30 31 60))
+        (ilinkx (28 29))
+	(jump-limm (62))
+	(special (.splice (.unsplice (.iota 28 32)) 61 63)))))
+
+  ; insn-types - not used.
+  ; Instruction framing (frame) - not used.
+)
+
+; Cpu family definitions.
+
+; ??? define-cpu-family [and in general "cpu-family"] might be clearer than
+; define-cpu.
+; ??? Have define-arch provide defaults for architecture that define-cpu can
+; then override [reduces duplication in define-cpu].
+; ??? Another way to go is to delete cpu-families entirely and have one mach
+; able to inherit things from another mach (would also need the ability to
+; not only override specific inherited things but also disable some,
+; e.g. if an insn wasn't supported).
+
+(define-cpu
+  ; cpu names must be distinct from the architecture name and machine names.
+  ; The "b" suffix stands for "base" and is the convention.
+  ; It does not make sense to label ARCtangent-A5 as the "base" in the cgen
+  ; sense here because the ARC600 supports only a reduced set of 16 core
+  ; registers.
+  ; The "f" suffix stands for "family" and is the convention.
+  (name a5f)
+  (comment "ARCtangent-A5 processor family")
+  (endian little)
+  (word-bitsize 32)
+  (insn-chunk-bitsize 16)
+  ; Generated files have a "5" suffix.
+  (file-transform "5")
+)
+
+(define-cpu
+  (name arc600f)
+  (comment "ARC 600 processor family")
+  (endian either)
+  (word-bitsize 32)
+  (insn-chunk-bitsize 16)
+  ; Generated files have a "6" suffix.
+  (file-transform "6")
+)
+
+(define-cpu
+  (name arc700f)
+  (comment "ARC 700 processor family")
+  (endian either)
+  (word-bitsize 32)
+  (insn-chunk-bitsize 16)
+  ; Generated files have a "7" suffix.
+  (file-transform "7")
+)
+
+(define-mach
+  (name a5)
+  (comment "ARCtangent-A5 cpu")
+  (cpu a5f)
+  (bfd-name "A5")
+)
+
+(define-mach
+  (name arc600)
+  (comment "ARC600 cpu")
+  (cpu arc600f)
+  (bfd-name "ARC600")
+)
+
+(define-mach
+  (name arc700)
+  (comment "ARC700 cpu")
+  (attrs ISARC700)
+  (cpu arc700f)
+  (bfd-name "ARC700")
+)
+
+; Model descriptions.  No exact timing modelling at the moment.
+(define-model
+  (name A5)
+  (comment "ARCtangent-A5 cpu")
+  (mach a5)
+  (unit u-exec "Execution Unit" ()
+    1 1 ; issue done
+    ()
+    ((b INT -1) (c INT -1)) ;inputs
+    ((a INT -1)) ; outputs
+    ())
+)
+
+(define-model
+  (name ARC600)
+  (comment "ARC600 cpu")
+  (mach arc600)
+  (unit u-exec "Execution Unit" ()
+    1 1 ; issue done
+    ()
+    ((b INT -1) (c INT -1)) ;inputs
+    ((a INT -1)) ; outputs
+    ())
+)
+
+(define-model
+  (name ARC700)
+  (comment "ARC700 cpu")
+  (mach arc700)
+  (unit u-exec "Execution Unit" ()
+    1 1 ; issue done
+    ()
+    ((b INT -1) (c INT -1)) ;inputs
+    ((a INT -1)) ; outputs
+    ())
+)
+
+; Instruction fields.
+;
+; Attributes:
+; RESERVED: bits are not used to decode insn,  must be all 0.
+
+;(define-attr
+;  (for ifield operand)
+;  (type boolean)
+;  (name RESERVED)
+;  (comment "This field is reserved.")
+;)
+
+(define-pmacro (d2nf xname xcomment xattrs xstart xlength)
+  (define-ifield
+    (name xname)
+    (comment xcomment)
+    (.splice attrs (.unsplice xattrs))
+    (word-offset 16)
+    (word-length 16)
+    (start xstart)
+    (length xlength)
+    (mode UINT)
+    (encode #f)
+    (decode #f)
+  )
+)
+
+(define-pmacro (d3f xname xcomment xattrs xstart xlength)
+  (define-ifield
+    (name xname)
+    (comment xcomment)
+    (.splice attrs (.unsplice xattrs))
+    (word-offset 32)
+    (word-length 16)
+    (start xstart)
+    (length xlength)
+    (mode UINT)
+    (encode #f)
+    (decode #f)
+  )
+)
+
+(dnf  f-cond-Q     "Condition"             () 27 5)
+;(d2nf f-cond-Q     "Condition"             () 11 5)
+(dnf  f-cond-i2    "Condition"             () 5 2)
+(dnf  f-cond-i3    "Condition"             () 7 3)
+(dnf  f-brcond     "brcc / bbit condition" () 28 4)
+;(d2nf f-brcond     "brcc / bbit condition" () 12 4)
+(dnf  f-op--a       "operand a"             () 13 3)
+(dnf  f-op--b       "operand b"             () 5 3)
+(dnf  f-op--c       "operand c"             () 8 3)
+(dnf  f-B-5-3      "bits 5..3 of B"        () 17 3)
+;(d2nf f-B-5-3      "bits 5..3 of B"        () 1 3)
+(dnmf f-op-B       "operand B"             () UINT
+      (f-op--b f-B-5-3)
+      (sequence () ; insert
+                (set (ifield f-op--b) (and (ifield f-op-B) (const 7)))
+                (set (ifield f-B-5-3) (srl (ifield f-op-B) (const 3)))
+                )
+      (sequence () ; extract
+                (set (ifield f-op-B) (or (ifield f-op--b)
+                                         (sll (ifield f-B-5-3) (const 3))))
+                )
+)
+(dnf  f-op-C       "operand C"             () 20 6)
+(dnf  f-op-Cj      "operand C"             () 20 6)
+;(d2nf f-op-C       "operand C"             () 4 6)
+(dnf  f-h-2-0      "bits 2..0 of h"        () 8 3)
+(dnf  f-h-5-3      "bits 5..3 of h"        () 13 3)
+(dnmf f-op-h       "operand h"             () UINT
+      (f-h-2-0 f-h-5-3)
+      (sequence () ; insert
+                (set (ifield f-h-2-0) (and (ifield f-op-h) (const 7)))
+                (set (ifield f-h-5-3) (srl (ifield f-op-h) (const 3)))
+                )
+      (sequence () ; extract
+                (set (ifield f-op-h) (or (ifield f-h-2-0)
+                                         (sll (ifield f-h-5-3) (const 3))))
+                )
+)
+(dnf  f-u6         "uns 6 bit immediate"   () 20 6)
+;(d2nf f-u6         "uns 6 bit immediate"   () 4 6)
+(df   f-u6x2     "uns 6 bit immediate x 2" () 20 6 UINT
+    ((value pc) (srl SI value 1))
+    ((value pc) (sll SI value 1)))
+(dnf  f-delay-N    "delay slot exposed"    () 26 1)
+;(d2nf f-delay-N    "delay slot exposed"    () 10 1)
+(dnf f-res27       "reserved bit 27" (RESERVED) 27 1)
+(dnf  f-F          "update flags"          () 16 1)
+;(d2nf f-F          "update flags"          () 0 1)
+(dnf f-cbranch-imm "compare immediate"     () 27 1)
+;(d2nf f-cbranch-imm "compare immediate"    () 11 1)
+(dnf  f-op-A       "operand A"             () 26 6)
+;(d2nf f-op-A       "operand A"             () 10 6)
+(df   f-s12h       "high part of s12imm"   () 26 6 INT #f #f)
+(dnmf f-s12        "signed 12 bit immediate" () INT
+      (f-u6 f-s12h)
+      (sequence () ; insert
+                (set (ifield f-u6) (and (ifield f-s12) (const 63)))
+                (set (ifield f-s12h) (sra (ifield f-s12) (const 6)))
+                )
+      (sequence () ; extract
+                (set (ifield f-s12) (or (ifield f-u6)
+                                        (sll (ifield f-s12h) (const 6))))
+                )
+)
+(dnmf f-s12x2        "signed 12 bit immediate times 2" () INT
+      (f-u6 f-s12h)
+      (sequence () ; insert
+                (set (ifield f-u6) (and (sra (ifield f-s12x2) 1) (const 63)))
+                (set (ifield f-s12h) (sra (ifield f-s12x2) (const 7)))
+                )
+      (sequence () ; extract
+                (set (ifield f-s12x2) (or (sll (ifield f-u6) (const 1))
+                                        (sll (ifield f-s12h) (const 7))))
+                )
+)
+(df f-rel10        "disp10" (PCREL-ADDR) 7 9 INT
+    ((value pc) (sra WI (sub WI value (and WI pc (const -4))) (const 1)))
+    ((value pc) (add WI (sll WI value (const 1)) (and WI pc (const -4)))))
+(df f-rel7         "disp7" (PCREL-ADDR) 10 6 INT
+    ((value pc) (sra WI (sub WI value (and WI pc (const -4))) (const 1)))
+    ((value pc) (add WI (sll WI value (const 1)) (and WI pc (const -4)))))
+(df f-rel8         "disp8" (PCREL-ADDR)  9 7 INT
+    ((value pc) (sra WI (sub WI value (and WI pc (const -4))) (const 1)))
+    ((value pc) (add WI (sll WI value (const 1)) (and WI pc (const -4)))))
+(df f-rel13bl      "disp13" (PCREL-ADDR) 5 11 INT
+    ((value pc) (sra WI (sub WI value (and WI pc (const -4))) (const 2)))
+    ((value pc) (add WI (sll WI value (const 2)) (and WI pc (const -4)))))
+(dnf  f-d21l       "21 bit disp low part"  () 5 10)
+(dnf  f-d21bl      "bl disp low part"      () 5 9)
+(df   f-d21h       "21 bit disp high part" () 16 10 INT #f #f)
+(dnf  f-d25m       "25 bit disp med part"  () 16 10)
+;(d2nf f-d25m       "25 bit disp med part"  () 0 10)
+(df   f-d25h       "25 bit disp high part" () 28 4 INT #f #f)
+(dnmf f-rel21      "21 bit pc relative signed offset" (PCREL-ADDR) INT
+      (f-d21l f-d21h)
+      (sequence () ; insert
+                (set (ifield f-d21l)
+                     (and (srl (sub (ifield f-rel21) (and pc (const -4)))
+                               (const 1))
+                          (const #x3ff)))
+                (set (ifield f-d21h)
+                     (sra (sub (ifield f-rel21) (and pc (const -4)))
+                          (const 11)))
+                )
+      (sequence () ; extract
+                (set (ifield f-rel21)
+                     (add (or (sll (ifield f-d21l) (const 1))
+                              (sll (ifield f-d21h) (const 11)))
+                          (and pc (const -4))))
+                )
+)
+(dnmf f-rel21bl    "21 bit bl pc relative signed offset" (PCREL-ADDR) INT
+      (f-d21bl f-d21h)
+      (sequence () ; insert
+                (set (ifield f-d21bl)
+                     (and (srl (sub (ifield f-rel21bl) (and pc (const -4)))
+                               (const 2))
+                          (const #x1ff)))
+                (set (ifield f-d21h)
+                     (sra (sub (ifield f-rel21bl) (and pc (const -4)))
+                          (const 11)))
+                )
+      (sequence () ; extract
+                (set (ifield f-rel21bl)
+                     (add (or (sll (ifield f-d21bl) (const 2))
+                              (sll (ifield f-d21h) (const 11)))
+                          (and pc (const -4))))
+                )
+)
+(dnmf f-rel25      "25 bit pc relative signed offset" (PCREL-ADDR) INT
+      (f-d21l f-d25m f-d25h)
+      (sequence () ; insert
+                (set (ifield f-d21l)
+                     (and (srl (sub (ifield f-rel25) (and pc (const -4)))
+                               (const 1))
+                          (const #x3ff)))
+                (set (ifield f-d25m)
+                     (srl (sub (ifield f-rel25) (and pc (const -4)))
+                          (const 11)))
+                (set (ifield f-d25h)
+                     (sra (sub (ifield f-rel25) (and pc (const -4)))
+                          (const 21)))
+                )
+      (sequence () ; extract
+                (set (ifield f-rel25)
+                     (add (or (or (sll (ifield f-d21l) (const 1))
+                                  (sll (ifield f-d25m) (const 11)))
+                              (sll (ifield f-d25h) (const 21)))
+                          (and pc (const -4))))
+                )
+)
+(dnmf f-rel25bl    "25 bit bl pc relative signed offset" (PCREL-ADDR) INT
+      (f-d21bl f-d25m f-d25h)
+      (sequence () ; insert
+                (set (ifield f-d21bl)
+                     (and (srl (sub (ifield f-rel25bl) (and pc (const -4)))
+                               (const 2))
+                          (const #x1ff)))
+                (set (ifield f-d25m)
+                     (srl (sub (ifield f-rel25bl) (and pc (const -4)))
+                          (const 11)))
+                (set (ifield f-d25h)
+                     (sra (sub (ifield f-rel25bl) (and pc (const -4)))
+                          (const 21)))
+                )
+      (sequence () ; extract
+                (set (ifield f-rel25bl)
+                     (add (or (or (sll (ifield f-d21bl) (const 2))
+                                  (sll (ifield f-d25m) (const 11)))
+                              (sll (ifield f-d25h) (const 21)))
+                          (and pc (const -4))))
+                )
+)
+
+(dnf  f-d9l        "9 bit disp low part"   () 8 7)
+(df   f-d9h        "9 bit disp high part"  () 16 1 INT #f #f)
+(dnmf f-rel9       "9 bit pc relative signed offset" (PCREL-ADDR) INT
+      (f-d9l f-d9h)
+      (sequence () ; insert
+                (set (ifield f-d9l)
+                     (and (srl (sub (ifield f-rel9) (and pc (const -4)))
+                               (const 1))
+                          (const #x7f)))
+                (set (ifield f-d9h)
+                     (sra (sub (ifield f-rel9) (and pc (const -4)))
+                          (const 8)))
+                )
+      (sequence () ; extract
+                (set (ifield f-rel9)
+                     (add (or (sll (ifield f-d9l) (const 1))
+                              (sll (ifield f-d9h) (const 8)))
+                          (and pc (const -4))))
+                )
+)
+(dnf  f-u3         "uns 3 bit immediate"   () 13 3)
+(dnf  f-u5         "uns 5 bit immediate"   () 11 5)
+(dnf  f-u7         "uns 7 bit immediate"   () 9 7)
+(dnf  f-u8         "uns 8 bit immediate"   () 8 8)
+(dnmf f-s9	   "sgn 9 bit immediate"   () INT
+      (f-u8 f-d9h)
+      (sequence () ; insert
+                (set (ifield f-u8)
+                     (and (ifield f-s9) (const #xff)))
+                (set (ifield f-d9h) (sra (ifield f-s9) (const 8)))
+                )
+      (sequence () ; extract
+                (set (ifield f-s9)
+                     (or (ifield f-u8)
+                              (sll (ifield f-d9h) (const 8))))
+                )
+)
+
+(df f-u5x2         "uns 5 bit immediate x 2" () 11 5 UINT
+    ((value pc) (srl SI value 1))
+    ((value pc) (sll SI value 1)))
+(df f-u5x4         "uns 5 bit immediate x 4" () 11 5 UINT
+    ((value pc) (srl SI value 2))
+    ((value pc) (sll SI value 2)))
+(df f-u8x4         "uns 8 bit immediate x 4" () 8 8 UINT
+    ((value pc) (srl SI value 2))
+    ((value pc) (sll SI value 2)))
+(df f-s9x1         "sgn 9 bit immediate x 1" () 7 9 INT #f #f)
+(df f-s9x2         "sgn 9 bit immediate x 2" () 7 9 INT
+    ((value pc) (srl SI value 1))
+    ((value pc) (sll SI value 1)))
+(df f-s9x4         "sgn 9 bit immediate x 4" () 7 9 INT
+    ((value pc) (srl SI value 2))
+    ((value pc) (sll SI value 2)))
+
+; ??? condition code setting and branching could be sped up if we
+; didn't compute the condition codes till they are used - e.g.
+; for a compare insn, store the two inputs and a code that says to
+; use compare semantics.
+
+; The condition code bits.
+
+(dsh h-lbit "loop inhibit bit" () (register BI))
+(dsh h-zbit "zerobit"      () (register BI))
+(dsh h-nbit "negative bit" () (register BI))
+(dsh h-cbit "carry bit"    () (register BI))
+(dsh h-vbit "overflow bit" () (register BI))
+(dsh h-ubit "user mode bit" () (register BI))
+(dsh h-e1 "interupt 1 enable bit" () (register BI))
+(dsh h-e2 "interupt 2 enable bit" () (register BI))
+(dsh h-s1bit "channel 1 saturate" () (register BI))
+(dsh h-s2bit "channel 2 saturate" () (register BI))
+
+(dnop lbit "loop inhibit bit" () h-lbit f-nil)
+(dnop zbit "zero bit"      () h-zbit f-nil)
+(dnop nbit "negative bit"  () h-nbit f-nil)
+(dnop cbit "carry bit"     () h-cbit f-nil)
+(dnop vbit "overflow bit"  () h-vbit f-nil)
+(dnop s1bit "channel 1 saturate" () h-s1bit f-nil)
+(dnop s2bit "channel 2 saturate" () h-s2bit f-nil)
+
+; ??? There should be an official rtx to do this.  Until then.
+(define-pmacro (invalid-insn)
+  (error VOID "invalid insn")
+)
+
+(define-pmacro (invalid-expr)
+  (sequence BI () (error "invalid insn") (const 0))
+)
+
+(define-pmacro (my-eval form)
+  (eval form)
+)
+
+(define-pmacro (twice val)
+  (val val)
+)
+
+; We simulate interrupts just before jumps - that's good enough for profiling.
+; We simulate timer0, which uses vector 3 (vector base + 0x18) and ilink1.
+(define-pmacro (int-jump xxjsemantics) (int-timer1 pc 0 xxjsemantics))
+(define-pmacro (int-jumpd xxjsemantics) (int-timer1 pc 1 xxjsemantics))
+(define-pmacro (int-timer1 retaddr delayed_p xjsemantics)
+  (if (andif (ge (sub (c-code SI "CPU_INSN_COUNT (current_cpu)")
+		      (reg h-timer-expire))
+		 0)
+	     (andif (reg h-e1) (and (aux-control0) 1)))
+    (sequence ()
+      (set (aux-count0) 
+	   (sub (c-code SI "CPU_INSN_COUNT (current_cpu)")
+		(reg h-timer-expire)))
+      (cond
+	( (reg h-ubit)
+	  (sequence ((SI countp) (UHI count))
+	    (set countp (add (and (srl retaddr 1) -2) (reg h-prof-offset)))
+	    (set count (add (mem UHI countp) 1))
+	    (if count (set (mem UHI countp) count))
+	    xjsemantics))
+	(delayed_p xjsemantics)
+	(else (sequence ()
+	  (set (reg h-cr 29) retaddr)
+	  (set (aux-status32_l1) (reg h-status32))
+	  (set (reg h-e1) 0)
+	  (set pc (add (aux-int_vector_base) #x18))))
+      ))
+    xjsemantics)
+)
+
+; Define the list of conditions selectable with the 'Q' instruction field.
+; This is a separate macro so that we can use it both for the enum
+; values sued in a case form and the indices that are extracted from
+; the insn.
+(define-pmacro (Qvalues)
+  (
+   (al 0) (eq 1) (z 1) (ne 2) (nz 2) (pl 3) (p 3) (mi 4) (n 4)
+   (cs 5) (c 5) (lo 5) (cc 6) (nc 6) (hs 6) (vs 7) (v 7) (vc 8) (nv 8)
+   (gt 9) (ge 10) (lt 11) (le 12) (hi 13) (ls 14) (pnz 15)
+   ; add custom conditions here
+  )
+)
+
+; ??? optional arguments don't work for apply - need matching arg count.
+(define-pmacro (.car2 l2) (.apply (.pmacro (x y) x) l2))
+(define-pmacro (.cadr2 l2) (.apply (.pmacro (x y) y) l2))
+(define-pmacro (.car3 l3) (.apply (.pmacro (x y z) x) l3))
+(define-pmacro (.cdr3 l3) (.apply (.pmacro (x y z) (y z)) l3))
+(define-pmacro (.cadr3 l3) (.apply (.pmacro (x y z) y) l3))
+(define-pmacro (.caddr3 l3) (.apply (.pmacro (x y z) z) l3))
+
+(define-pmacro (upvalues xvalues)
+  (values (.map (.pmacro (l) ((.upcase (.car2 l)) (.cadr2 l))) (xvalues))))
+
+(define-enum
+  (name e-Qvalues)
+  (comment "enum values for Qcond to be used in case form")
+  (prefix COND_)
+  (upvalues Qvalues)
+)
+
+; evaluate f, then substitute elements in fa with elements in aa.
+(define-pmacro (.subst fa aa f) (.apply (.subst1 .pmacro fa f) aa))
+(define-pmacro (.subst1 pm a f) (pm a f))
+
+; evaluate f, then for each element in aal, substitute elements in fa with
+; elements from elemnet in aal.
+(define-pmacro (.substmap fa aal f)
+  (.subst (- .sstr) (- .str)
+    (.subst (- .substx) (- .subst)
+      (.substmap1 .map .pmacro fa aal f))))
+(define-pmacro (.substmap1 mp pm fa aal f)
+  (mp (pm (aa) (.substx fa aa f)) aal))
+
+;define delayed branch
+(define-pmacro (dDbranch di xxname misc-arg d0semantics d1semantics)
+  (.splice begin
+    (.unsplice
+      (.substmap
+	(delay-S delay-N xxxsemantics)
+	( (""   (f-delay-N 0) (int-jump  d0semantics))
+	  (".d" (f-delay-N 1) (int-jumpd  d1semantics)))
+	  ; ??? should also use int-jump above, but that exposes delay bug.
+	(.splice di (.sstr xxname delay-S) (.unsplice misc-arg) xxxsemantics)
+      )
+    )
+  )
+)
+
+(define-pmacro (dQcond xname xprefix xccalias)
+  (define-hardware
+    (name xname)
+    (attrs VIRTUAL)
+    (type register BI (32))
+    (indices keyword ""
+      ; add un-prefixed empty key; prepend xprefix to the keys in
+      ; xccalias / Qvalues.
+      (.subst (xxprefix x.str) (xprefix .str)
+	(.splice ("" 0)
+	  (.unsplice
+	    (.map (.pmacro (l2) ((x.str xxprefix (.car2 l2)) (.cadr2 l2)))
+	      (.splice (.unsplice xccalias) (.unsplice (Qvalues))))))))
+    (get (Q)
+         (case BI Q 
+               ((COND_AL) 1)
+               ((COND_EQ) zbit)
+               ((COND_NE) (not zbit))
+               ((COND_PL) (not nbit))
+               ((COND_MI) nbit)
+               ((COND_CS) cbit)
+               ((COND_CC) (not cbit))
+               ((COND_VS) vbit)
+               ((COND_VC) (not vbit))
+               ((COND_GT) (and (not zbit) (eq nbit vbit)))
+               ((COND_GE) (eq nbit vbit))
+               ((COND_LT) (ne nbit vbit))
+               ((COND_LE) (or zbit (ne nbit vbit)))
+               ((COND_HI) (and (not cbit) (not zbit)))
+               ((COND_LS) (or cbit zbit))
+               ((COND_PNZ) (and (not nbit) (not zbit)))
+               ; add custom conditions here
+              (else (sequence BI () (invalid-expr) 1)))
+     )
+    (set (Q val) (nop))
+   )
+)
+
+; 'RA' is special; it is only valid for bra.  However, a macro insn
+; doesn't work for bra, because cgen macro insns bypass relaxation.
+(dQcond h-Qcondb "" ((ra 0)))
+(dQcond h-Qcondj "" ())
+(dQcond h-Qcondi "." ())
+
+(define-hardware
+  (name h-uncondb)
+  (type immediate BI)
+  (values keyword "" (("" 0) (al 0) (ra 0)))
+)
+
+(define-hardware
+  (name h-uncondj)
+  (type immediate BI)
+  (values keyword "" (("" 0) (al 0)))
+)
+
+(define-hardware
+  (name h-uncondi)
+  (type immediate BI)
+  (values keyword "" (("" 0) (".al" 0)))
+)
+
+;; ??? Without the else clause in the case form, syntactically invalid C is
+;; generated - the expression ends then with <condition> ? <value> .
+(define-hardware
+  (name h-i2cond)
+  (attrs VIRTUAL)
+  (type register BI (3))
+  (indices keyword "COND2_" (("" 0) (al 0) (ra 0) (eq 1) (z 1) (ne 2) (nz 2)))
+  (get (i2)
+       (case BI i2 
+             ((0) 1) ; COND2_AL
+             ((1) zbit) ; COND2_EQ
+             ((2) (not zbit)) ; COND2_NE
+	     (else (error BI "unreachable - put in because of parser error"))
+        )
+   )
+  (set (i2 val) (nop))
+)
+
+(define-pmacro (m-i3cond)
+  ((gt 0) (ge 1) (lt 2) (le 3)
+   (hi 4) (cc 5) (nc 5) (hs 5)
+   (cs 6) (c 6) (lo 6) (ls 7))
+)
+
+(define-enum
+  (name e-i3cond)
+  (comment "enum values for i3cond to be used in case form")
+  (prefix COND3_)
+  (upvalues m-i3cond)
+)
+
+(define-hardware
+  (name h-i3cond)
+  (attrs VIRTUAL)
+  (type register BI (8))
+  (indices keyword "COND3_" (m-i3cond))
+  (get (i3)
+       (case BI i3 
+             ((COND3_CS) cbit)
+             ((COND3_CC) (not cbit))
+             ((COND3_GT) (and (not zbit) (eq nbit vbit)))
+             ((COND3_GE) (eq nbit vbit))
+             ((COND3_LT) (ne nbit vbit))
+             ((COND3_LE) (or zbit (ne nbit vbit)))
+             ((COND3_HI) (and (not cbit) (not zbit)))
+             ((COND3_LS) (or cbit zbit))
+	     (else (error BI "unreachable - put in because of parser error"))
+        )
+   )
+  (set (i3 val) (nop))
+)
+
+(define-pmacro (m-brcond)
+  ((req 0) (rne 1) (rlt 2) (rge 3) (rlo 4) (rhs 5) (bit0 14) (bit1 15))
+)
+
+(define-enum
+  (name e-brcond)
+  (comment "enum values for brcond to be used in case form")
+  (prefix CONDBR_)
+  (upvalues m-brcond)
+)
+
+(define-hardware
+  (name h-delay)
+  (type immediate (UINT 1))
+  (values keyword "" (("" 0) (".d" 1)))
+)
+
+(define-hardware
+  (name h-uflags)
+  (type immediate (UINT 1))
+  (values keyword "" (("" 0) (".f" 1)))
+)
+
+; implicit 0
+(define-hardware
+  (name h-nil)
+  (type immediate (UINT 1))
+  (values keyword "" (("" 0)))
+)
+
+; for cmp / rcmp / tst / btst: always update flags, no syntactical suffix.
+(define-hardware
+  (name h-auflags)
+  (type immediate (UINT 1))
+  (values keyword "" (("" 1)))
+)
+
+; for cmp / rcmp / tst / btst: always update flags, .f optional
+(define-hardware
+  (name h-aufflags)
+  (type immediate (UINT 1))
+  (values keyword "" ((".f" 1) ("" 1)))
+)
+
+(define-hardware
+  (name h-Di)
+  (type immediate (UINT 1))
+  (values keyword "" (("" 0) (".di" 1)))
+)
+
+(define-hardware
+  (name h-insn16)
+  (type immediate BI)
+  (values keyword "" ((_s 0) ("" 0)))
+)
+
+(define-hardware
+  (name h-insn32)
+  (type immediate BI)
+  (values keyword "" (("" 0) (_l 0)))
+)
+
+(define-hardware
+  (name h-_aw)
+  (type immediate BI)
+  (values keyword "" ((.a 0) (.aw 0)))
+)
+
+(define-pmacro (cr-values prefix ilink-values)
+  (.splice 
+    (.unsplice prefix)
+    (gp 26) (fp 27) (sp 28) (blink 31) (mlo 57) (mmid 58) (mhi 59)
+    (lp_count 60) (pcl 63)
+    (.unsplice ilink-values)
+    ; r0 .. r60
+    (.unsplice (.map (.pmacro (n) ((.str "r" n) n)) (.iota 29)))
+    (.unsplice (.map (.pmacro (n) ((.str "r" n) n)) (.iota 30 31))))
+)
+
+(define-keyword
+  (name cr-names)
+  (print-name h-cr)
+  (prefix "")
+  (cr-values (values) ((ilink1 29) (ilink2 30) (r29 29) (r30 30)))
+)
+
+; ??? can't actually use this in define-hardware because that results
+; in linebreaks in a #define preprocessor directive.
+(define-pmacro (get-limm offset)
+  (sequence SI ((HI high) (HI low))
+    (set high (mem HI (add pc offset)))
+    (set low  (mem HI (add pc (add offset 2))))
+    (or (sll (zext SI high) 16) (zext SI low))
+  )
+)
+
+; ??? This doesn't work because the 'mem' rtx requires a 'pc' symbol to
+; be in scope.
+;(define-hardware
+;  (name h-limm)
+;  (comment "long immediate")
+;  (attrs VIRTUAL)
+;  (type register SI (5))
+;  (get (offset)
+;    (or
+;      (sll (zext SI (mem UHI (add (reg h-pc) offset))) 16)
+;      (zext SI (mem UHI (add (reg h-pc) (add offset 2))))))
+;  (set (offset newval) (nop))
+;)
+
+; ??? (reg h-pc) gives the wrong result when read inside of a pbb.
+(define-pmacro (set-pcl!) (set (raw-reg h-cr 63) (and (c-code SI "pc") -4)))
+
+(define-hardware
+  (name h-cr)
+  (comment "core registers")
+  (type register SI (64))
+  (indices extern-keyword cr-names)
+  (get (index)
+    (case SI index
+      ((61) (invalid-expr))
+      ; ??? Since memory can't be read from a define-hardware, we are
+      ; dependent on the semantic snippets in limmh / limmB / limmBC
+      ; to supply the long immediate value in reg 62.
+      ;((62) (reg h-limm 4))
+      ;((63) (and -4 (reg h-pc))) ; current insn address, made aligned
+      (else (raw-reg h-cr index))))
+  (set (index newval)
+    (case index
+      ((62) (nop))
+      ((61 63) (invalid-insn))
+      (else (set (raw-reg h-cr index) newval))))
+)
+
+; for 16 bit opcodes, normal operands can only access 8 registers.
+(define-hardware
+  (name h-cr16)
+  (comment "core registers - for 16 bit opcode access")
+  (attrs VIRTUAL)
+  (type register SI (8))
+  (indices keyword "r"
+    (.map (.pmacro (n m) ((.str n) m))
+      (.splice (.unsplice (.iota 4)) (.unsplice (.iota 4 12)))
+      (.iota 8)))
+  (get (index)
+    (case SI index
+      ((0 1 2 3) (raw-reg h-cr index))
+      (else (raw-reg h-cr (add index 8)))))
+  (set (index newval)
+    (case index
+      ((0 1 2 3) (set (raw-reg h-cr index) newval))
+      (else (set (raw-reg h-cr (add index 8)) newval))))
+)
+
+; ; for 16 bit opcodes, we need a different offset to fetch long immediates.
+; (define-hardware
+;   (name h-hr)
+;   (comment "core registers - for 16 bit opcode high register access")
+;   (attrs VIRTUAL)
+;   (type register SI (64))
+;   (indices extern-keyword cr-names)
+;   (get (index)
+;     (case SI index
+;       ((61) (invalid-expr))
+;       ((62) (reg h-limm 2))
+;       ((63) (and -4 (reg h-pc))) ; current insn address, made aligned
+;       (else (raw-reg h-cr index))))
+;   (set (index newval)
+;     (case index
+;       ((62) (nop))
+;       ((61 63) (invalid-insn))
+;       (else (set (raw-reg h-cr index) newval))))
+; )
+
+(define-hardware
+  (name h-r0)
+  (attrs VIRTUAL)
+  (comment "Core Register 0")
+  (type register SI (1))
+  (indices keyword "" ((r0 0)))
+  (get (index) (raw-reg h-cr 0))
+  (set (index newval) (set (raw-reg h-cr 0) newval))
+)
+
+(define-hardware
+  (name h-gp)
+  (attrs VIRTUAL)
+  (comment "global pointer")
+  (type register SI (1))
+  (indices keyword "" ((r26 0) (gp 0)))
+  (get (index) (raw-reg h-cr 26))
+  (set (index newval) (set (raw-reg h-cr 26) newval))
+)
+
+(define-hardware
+  (name h-sp)
+  (attrs VIRTUAL)
+  (comment "stack pointer")
+  (type register SI (1))
+  (indices keyword "" ((sp 0) (r28 0)))
+  (get (index) (raw-reg h-cr 28))
+  (set (index newval) (set (raw-reg h-cr 28) newval))
+)
+
+; This needs set-pcl! to be executed first.  h-pc can't be used because it
+; gives the wrong result inside a pbb.
+(define-hardware
+  (name h-pcl)
+  (attrs VIRTUAL)
+  (comment "read program counter aligned")
+  (type register SI (1))
+  (indices keyword "" ((pcl 0) (r63 0)))
+  (get (index) (raw-reg h-cr 63))
+  (set (index newval) (invalid-expr))
+)
+
+(define-hardware
+  (name h-noilink)
+  (attrs VIRTUAL)
+  (comment "not ilink1 nor ilink2")
+  (type register SI (2))
+  (indices keyword "" (cr-values () ()))
+  (get (index) (raw-reg h-cr index))
+  (set (index newval) (set (raw-reg h-cr index) newval))
+)
+
+(define-hardware
+  (name h-ilinkx)
+  (attrs VIRTUAL)
+  (comment "ilink1 or ilink2")
+  (type register SI (2))
+  (indices keyword "" ((ilink1 29) (r29 29) (ilink2 30) (r30 30)))
+  (get (index) (raw-reg h-cr index))
+  (set (index newval) (set (raw-reg h-cr index) newval))
+)
+
+(define-hardware
+  (name h-r31)
+  (attrs VIRTUAL)
+  (comment "Core Register 0")
+  (type register SI (1))
+  (indices keyword "" ((blink 0) (r31 0)))
+  (get (index) (raw-reg h-cr 31))
+  (set (index newval) (set (raw-reg h-cr 31) newval))
+)
+
+; (define-pmacro (aux-status) (reg h-auxr 0)) etc.
+(.splice begin (.unsplice (.map
+  (.pmacro (xname xnum) (define-pmacro ((.sym aux- xname)) (reg h-auxr xnum)))
+  (status semaphore lp_start lp_end identity debug pc
+   status32_l1 status32_l2
+   mulhi
+   count0 control0 limit0 int_vector_base macmode irq_lv12
+   count1 control1 limit1 urq_lev irq_hint
+   eret erbta erstatus ecr efa
+   icause1 icause2 ienable itrigger
+   xpu bta bta_l1 bta_l2 irq_pulse_cancel irq_pending)
+  (0 1 2 3 4 5 6 11 12 18 33 34 35 37 65 67 256 257 258 512 513
+   1024 1025 1026 1027 1028 1034 1035 1036 1037
+   1040 1042 1043 1044 1045 1046)
+)))
+
+(define-hardware
+  (name h-auxr)
+  (comment "auxiliary registers")
+  (type register SI (64))
+  (indices extern-keyword cr-names)
+  (get (index)
+    (case SI index
+      ((0) (invalid-expr)) ; obsolete, should not be used by gcc
+      ; 6 is next_pc.  This is only used from dlrsr, i.e. 32 bit opcode.
+      ;  limmB / limmBC has already been evaluated.
+      ((6) (add (reg h-pc) 4))
+      ((10) ; status32 ; FIXME: read other bits.
+	(or (sll (zext SI lbit) 12) (or (sll (zext SI zbit) 11)
+	    (or (sll (zext SI nbit) 10) (or (sll (zext SI cbit) 9)
+		(or (sll (zext SI vbit) 8) (or (sll (zext SI (reg h-e1)) 1)
+		    (sll (zext SI (reg h-e2)) 2))))))))
+      ((#x21) ; aux_count0 == insn_count + (aux_limit0 - timer_expire)
+	(add (c-code SI "CPU_INSN_COUNT (current_cpu)")
+	     (sub (raw-reg h-auxr #x23) (reg h-timer-expire))))
+      ((65) (or (sll (zext SI s1bit) 9) (sll (zext SI s2bit) 4)))
+	     (else (raw-reg h-auxr index))))
+  (set (index newval)
+       (case index
+	     ((0) (invalid-insn))
+	     ((3) (sequence () (set (raw-reg h-auxr 3) newval)
+			       (c-call "scache_flush_cpu")))
+	     ((4 5 6 10 1027 1040 1041 1046) (nop))
+	     ; handle [timer0] COUNT0, CONTROL0, LIMIT0
+	     ( (#x21 #x22 #x23)
+	       (sequence ()
+		 (set (raw-reg h-auxr index) newval)
+		 ; ??? This implementation does not actually support
+		 ; differences of aux-limit0 and aux-count0 that exceed
+		 ; or come close to 1<<31.
+		 ; timer_expire := insn_count + (aux_limit0 - aux_count0)
+		 (set (reg h-timer-expire)
+		      (add (c-code SI "CPU_INSN_COUNT (current_cpu)")
+			   (sub (raw-reg h-auxr #x23) (raw-reg h-auxr #x21))))))
+	     ((65) (cond ((and newval 2) (set s1bit 0) (set s2bit 0))))
+	     (else (set (raw-reg h-auxr index) newval)))
+   )
+)
+
+(define-hardware
+  (name h-status32)
+  (attrs VIRTUAL)
+  (comment "status32")
+  (type register SI (1))
+  (indices keyword "" (("status32" 0)))
+  (get (index) (reg h-auxr 10))
+  (set (index newval)
+    (sequence ()
+;      (if (eq-attr (current-mach) ISARC700 TRUE)
+	(set lbit (and (srl newval 12) 1))
+;)
+      (set zbit (and (srl newval 11) 1))
+      (set nbit (and (srl newval 10) 1))
+      (set cbit (and (srl newval 9) 1))
+      (set vbit (and (srl newval 8) 1))
+      (set (reg h-e1) (and (srl newval 1) 1))
+      (set (reg h-e2) (and (srl newval 2) 1))
+      ; FIXME: set other bits.
+    )
+  )
+)
+
+(define-hardware
+  (name h-timer-expire)
+  (comment "used internally in simulator to speed up timer expiration check")
+  (type register SI (1))
+)
+(define-hardware
+  (name h-prof-offset)
+  (comment "offset to profile counters")
+  (type register SI (1))
+)
+(define-hardware
+  (name h-ne)
+  (type immediate BI)
+  (values keyword "" ((ne 0)))
+)
+
+(dnh h-pc "program counter" (PC PROFILE) (pc) () () ())
+
+(dnop Qcondb   "Condition"                  () h-Qcondb f-cond-Q)
+(dnop Qcondj   "Condition"                  () h-Qcondj f-cond-Q)
+(dnop Qcondi   "Condition"                  () h-Qcondi f-cond-Q)
+(dnop uncondb  "unconditional branch"       () h-uncondb f-nil)
+(dnop uncondj  "unconditional jump"         () h-uncondj f-nil)
+(dnop uncondi  "unconditional insn"         () h-uncondi f-nil)
+(dnop i2cond   "Condition"                  () h-i2cond f-cond-i2)
+(dnop i3cond   "Condition"                  () h-i3cond f-cond-i3)
+(dnop delay_N  "Delay slot exposed"         () h-delay f-delay-N)
+(dnop _S       "16 bit opcode"              () h-insn16 f-nil)
+(dnop _L       "32 bit opcode"              () h-insn32 f-nil)
+(dnop F        "update flags"               () h-uflags f-F)
+(dnop F1       "always update flags"        () h-auflags f-F)
+(dnop F1F "always update flags; .F allowed" () h-aufflags f-F)
+(dnop F0       "never update flags"         () h-nil   f-F)
+(dnop R_a       "Core Register a"           () h-cr16  f-op--a)
+(dnop RA       "Core Register A"            () h-cr    f-op-A)
+(dnop R_b       "Core Register b"           () h-cr16  f-op--b)
+(dnop RB       "Core Register B"            () h-cr    f-op-B)
+(dnop R_c       "Core Register b"           () h-cr16  f-op--c)
+(dnop RC       "Core Register C"            () h-cr    f-op-C)
+;(dnop Rh       "Core register h"            () h-hr    f-op-h)
+(dnop Rh       "Core register h"            () h-cr    f-op-h)
+(dnop R0       "Core Register 0"            () h-r0    f-nil)
+(dnop R31      "Core Register 31"           () h-r31   f-nil)
+(dnop GP       "Global Pointer"             () h-gp    f-nil)
+(dnop SP       "Stack Pointer"              () h-sp    f-nil)
+(dnop PCL      "read PC - aligned"          () h-pcl   f-nil)
+(dnop RA_0     "encode A as 0"              () h-nil   f-op-A)
+(dnop RB_0     "encode B as 0"              () h-nil   f-op-B)
+(dnop RC_ilink "inlink[01] as op C"         () h-ilinkx f-op-Cj)
+(dnop RC_noilink "Core reg C, not ilink"    () h-noilink f-op-Cj)
+(dnop NE       "NE condition "              () h-ne    f-nil)
+(dnop U6       "6 bit unsigned immediate"   () h-uint  f-u6)
+(dnop U6x2     "6 bit unsigned immediate"   () h-uint  f-u6x2)
+(dnop u3       "3 bit unsigned immediate"   () h-uint  f-u3)
+(dnop u5       "5 bit unsigned immediate"   () h-uint  f-u5)
+(dnop u7       "7 bit unsigned immediate"   () h-uint  f-u7)
+(dnop u8       "8 bit unsigned immediate"   () h-uint  f-u8)
+(dnop s9       "8 bit signed immediate"     () h-sint  f-s9)
+(dnop s12      "12 bit signed immediate"    () h-sint  f-s12)
+(dnop s12x2    "12 bit signed immediate"    () h-sint  f-s12x2)
+(dnop u5x4     "5 bit uns imm times 4"      () h-uint  f-u5x4)
+(dnop sc_u5_   "5 bit uns imm times 4"      () h-uint  f-u5x4)
+(dnop sc_u5w   "5 bit uns imm times 2"      () h-uint  f-u5x2)
+(dnop sc_u5b   "5 bit uns imm times 1"      () h-uint  f-u5)
+(dnop u8x4     "8 bit uns imm times 4"      () h-uint  f-u8x4)
+(dnop s9x4     "9 bit sgn imm times 4"      () h-uint  f-s9x4)
+(dnop sc_s9_   "8 bit uns imm times 4"      () h-uint  f-s9x4)
+(dnop sc_s9w   "8 bit uns imm times 2"      () h-uint  f-s9x2)
+(dnop sc_s9b   "8 bit uns imm times 1"      () h-uint  f-s9x1)
+(dnop label7   "7 bit pc relative address"  () h-iaddr f-rel7)
+(dnop label8   "8 bit pc relative address"  () h-iaddr f-rel8)
+(dnop label9   "9 bit pc relative address"  () h-iaddr f-rel9)
+(dnop label10  "10 bit pc relative address" () h-iaddr f-rel10)
+(dnop label13a "13 bit bl pc rel address"   () h-iaddr f-rel13bl)
+(dnop label21  "21 bit pc relative address" () h-iaddr f-rel21)
+(dnop label21a "21 bit bl pc rel address"   () h-iaddr f-rel21bl)
+(dnop label25  "25 bit pc relative address" () h-iaddr f-rel25)
+(dnop label25a "25 bit bl pc rel address"   () h-iaddr f-rel25bl)
+
+(define-normal-insn-enum e-ra-rn
+  "Core Register A encodings"
+  () RA_R f-op-A (.map .str (.iota 64))
+)
+
+; process expansion of dd*i macros so that arguments are bound properly.
+(define-pmacro (dddgoi xxname xF xdstA xdstB xsrcB xsrcC xRA xRB
+		xscale xxxsemantics expansion)
+  (.subst
+    (xxF xxdstA xxdstB xxsrcB xxsrcC xxRA xxRB xxscale xxsemantics defpm)
+    (xF xdstA xdstB xsrcB xsrcC xRA xRB xscale xxxsemantics define-pmacro)
+    (defpm (xxname xop xformat xattrs xsemantics xfsemantics) expansion))
+)
+
+; ddgoi <name> <flag-syntax/encoding> <dsta-syntax> <dstb-syntax> <srcb-syntax> <RA-encode> <RB-encode> <semantics-expander>
+; define 'define general operations instruction' macro
+; this must be used before dnai / daiQ / x.str is defined to prevent
+; premature evaluation.
+(define-pmacro (ddgoi xxname xxF xxdstA xxdstB xxsrcB xxsrcC
+		xxRA xxRB xxsemantics)
+  (dddgoi xxname xxF xxdstA xxdstB xxsrcB xxsrcC xxRA xxRB "" xxsemantics
+    (begin (ddgoi_s12) (ddgoi_ccu6) (ddgoi_u6) (ddgoi_r_r) (ddgoi_cc)))
+)
+
+(define-pmacro (ddgoi_r_r)
+  (dnai ((x.str) xop "_L_r_r" xxdstA xxsrcC)
+    ((x.str) xop " register-register")
+    ((x.str) xop "$_L$" xxF xxdstA xxsrcB xxsrcC)
+    (+ (GO_BASE) GO_TYPE_R_R xformat xxF xxRB RC xxRA)
+    (splicelist (((LIMM BC)) xattrs))
+    (xxsemantics limmBC xsemantics xfsemantics xxRA RB RC))
+)
+
+(define-pmacro (ddgsoi_r_r)
+  (dnai ((x.str) xop "_L_r_r" xxdstA xxsrcC)
+    ((x.str) xop " register-register")
+    ((x.str) xop "$_L$" xxF xxdstA xxsrcB xxsrcC)
+    (+ (GO_BASE) GO_TYPE_R_R xformat xxF xxRB RC xxRA)
+    (splicelist (((LIMM C)) xattrs))
+    (xxsemantics limmC xsemantics xfsemantics xxRA RB RC))
+)
+
+(define-pmacro (ddgoi_u6)
+  (dnai ((x.str) xop "_L_u6" xxdstA)
+    ((x.str) xop " with unsigned 6 bit immediate")
+    ((x.str) xop "$_L$" xxF xxdstA xxsrcB "$U6")
+    (+ (GO_BASE) GO_TYPE_U6 xformat xxF xxRB U6 xxRA)
+    (splicelist (((LIMM B)) xattrs))
+    (xxsemantics limmB xsemantics xfsemantics xxRA RB U6))
+)
+
+(define-pmacro (ddgsoi_u6) (ddgsoi_u6_1 "$U6"))
+(define-pmacro (ddgsoi_u6_1 u6-syntax)
+  (dnai ((x.str) xop "_L_u6" xxdstA)
+    ((x.str) xop " with unsigned 6 bit immediate")
+    ((x.str) xop "$_L$" xxF xxdstA xxsrcB u6-syntax)
+    (+ (GO_BASE) GO_TYPE_U6 xformat xxF xxRB U6 xxRA)
+    (splicelist (((LIMM B)) xattrs))
+    (xxsemantics limmB xsemantics xfsemantics xxRA RB U6))
+)
+
+;??? default arguments are broken, otherwise we could use:
+;(define-pmacro (ddgoi_s12 (s12-syntax . "$s12")) ...
+(define-pmacro (ddgoi_s12) (ddgoi_s12_1 "$s12"))
+(define-pmacro (ddgoi_s12_1 s12-syntax)
+  (dnai ((x.str) xop "_L_s12" xxdstA)
+    ((x.str) xop " with signed 12 bit immediate " xxscale)
+    ((x.str) xop "$_L$" xxF xxdstB xxsrcB s12-syntax xxscale)
+    (+ (GO_BASE) GO_TYPE_S12 xformat xxF xxRB ((x.sym) s12 xxscale))
+    (splicelist (((LIMM B)) xattrs))
+    (xxsemantics limmB xsemantics xfsemantics RB RB ((x.sym) s12 xxscale)))
+)
+
+(define-pmacro (ddgoi_cc)
+  (daiQ ((x.str) xop "_cc" xxdstA xxsrcC)
+    ((x.str) xop " conditional register")
+    ((x.str) xop "$Qcondi$" xxF xxdstB xxsrcB xxsrcC)
+    (+ (GO_BASE) GO_TYPE_CC GO_CC_REG xformat xxF xxRB RC Qcondi)
+    (splicelist (((LIMM BC)) xattrs))
+    limmBC (xxsemantics nop xsemantics xfsemantics RB RB RC))
+)
+
+(define-pmacro (ddgoi_ccu6)
+  (daiQ ((x.str) xop "_ccu6" xxdstA)
+    ((x.str) xop " conditional with 6 bit immediate " xxscale)
+    ((x.str) xop "$Qcondi$" xxF xxdstB xxsrcB "$U6" xxscale)
+    (+ (GO_BASE) GO_TYPE_CC GO_CC_U6 xformat xxF xxRB ((x.sym) U6 xxscale)
+      Qcondi)
+    (splicelist (((LIMM B)) xattrs))
+    limmB (xxsemantics nop xsemantics xfsemantics RB RB ((x.sym) U6 xxscale)))
+)
+
+; like above, but we can't use daiQ because there is an 'else' action to do.
+(define-pmacro (ddlpcc_ccu6)
+  (define-insn
+    (name "lpcc_ccu6")
+    (comment "lpcc conditional with 6 bit immediate")
+    (attrs (LIMM B))
+    (syntax ((x.str) "lp$Qcondi$" xxF xxdstB xxsrcB "$U6" xxscale))
+    (format (+ OPM_GO GO_TYPE_CC GO_CC_U6 xformat xxF xxRB ((x.sym) U6 xxscale)
+	     Qcondi))
+    (semantics (sequence ()
+	(limmB)
+	(if Qcondb
+	  (xxsemantics nop xsemantics xfsemantics RB RB ((x.sym) U6 xxscale))
+	  (int-jump (set pc (add (and WI pc (const -4)) ((x.sym) U6 xxscale)))))
+    ))
+  )
+)
+
+; dgoi: define general operations instruction
+(ddgoi dgoi F " $RA," " $RB," "$RB," "$RC" RA RB fsemantics)
+; dgmov: define general move instruction
+(dddgoi dgmov F " " " " "$RB," "$RC" RA_0 RB "" esemantics
+  (.subst (limmB B limmBC BC) (nop none limmC C)
+    (begin (ddgoi_s12) (ddgoi_ccu6) (ddgoi_u6) (ddgoi_r_r) (ddgoi_cc)))
+)
+; dg2oi - define general 2-operand operations instruction
+(ddgoi dg2oi F1 " " " " "$RB," "$RC" RA_0 RB esemantics)
+; dsfi1 - define special format instruction, one operand
+(ddgoi dsfi  F0 " " " " "" "$RC" RA_0 RB_0 esemantics)
+; dji - define jump instruction
+(dddgoi dji  F0 " " " " "" "[-]" RA_0 RB_0 "" esemantics
+  (begin (ddgoi_s12) (ddgoi_ccu6) (ddgoi_u6)))
+; djri - define jump instruction / with register/limm field
+(dddgoi djri  F0 " " " " "" "[$RC_noilink]" RA_0 RB_0 "" esemantics
+  (.subst (RC) (RC_noilink)
+    (begin (ddgoi_r_r) (ddgoi_cc))))
+; djdi - define jump instruction with .d suffix
+(ddgoi djdi F0 ".d " ".d " "" "[$RC]" RA_0 RB_0 esemantics)
+; d_divaw: divaw instruction
+(ddgoi d_divaw F0 " $RA," " $RB," "$RB," "$RC" RA RB fsemantics)
+; define j with ilink[01] destination
+(dddgoi djilink  F1F " " " " "" "[$RC_ilink]" RA_0 RB_0 "" esemantics
+  (.subst (RC) (RC_ilink) ((ddgoi_r_r) (ddgoi_cc))))
+; dlpcci: define lpcc insn
+(dddgoi dlpcci F0 " " " " "" - RA_0 RB_0 x2 esemantics
+  (begin (ddgoi_s12) (ddlpcc_ccu6)))
+; dgsoi: define general single operand instruction
+(dddgoi dgsoi F " "  " $RB," "$RB," "$RC" RB GO_OP_SOP "" fsemantics
+  (begin (ddgsoi_r_r) (ddgsoi_u6)))
+; variant of same for ex insn
+(dddgoi dex EXDi " "  " $RB," "$RB," "$RC" RB GO_OP_SOP "" fsemantics
+  (begin (ddgoi_r_r) (ddgoi_u6)))
+(dddgoi dbegin - - - - - - - - - (begin))
+
+(define-pmacro (ddjsi xxname xxdelay)
+  (define-pmacro (xxname xop xformat xattrs xsemantics xdispose)
+    (
+      (dsai ((x.str) xop "_s" xxdelay) ((x.str) xop "_s" xxdelay)
+	((x.str) xop "$_S" xxdelay " [$R_b]")
+	(+ OPM_SGO I16_GO_SOP xformat R_b)
+	xattrs
+	(esemantics-f-0 nop xsemantics xdispose R_b R_b R_b))
+     )
+   )
+)
+
+(ddjsi djsi "")
+(ddjsi djsid ".d")
+
+(define-pmacro (ddjsblink xxname xxsuffix jcond)
+  (define-pmacro (xxname xop xformat xattrs xsemantics xdispose)
+    (
+      (dsai ((x.str) xop "_s" xxsuffix) ((x.str) xop "_s" xxsuffix)
+	((x.str) xop xxsuffix " [$R31]")
+	(+ OPM_SGO I16_GO_SOP I16_GO_SOP_ZOP xformat)
+	xattrs
+	(esemantics-f-0 nop (if jcond xsemantics) xdispose R31 R31 R31))
+     )
+   )
+)
+
+(ddjsblink djsblink "$_S" 1)
+(ddjsblink djsblinkd "$_S.d" 1)
+(ddjsblink djsblinkeq "eq$_S" (ne zbit 0))
+(ddjsblink djsblinkne "ne$_S" (eq zbit 0))
+
+(dddgoi dlrsr F0 " " " " "$RB," "[$RC]" RA_0 RB "" esemantics
+  (begin (ddgoi_r_r) (ddgoi_s12_1 "[$s12]") (ddgsoi_u6_1 "[$U6]")))
+
+; now that we are done with ddgoi, we can define x.str
+(define-pmacro (x.str) .str)
+(define-pmacro (x.sym) .sym)
+
+; redefine this when processing extension instructions
+(define-pmacro (GO_BASE) OPM_GO)
+
+; Same as dni but leave out timing.
+; Also, xattrs is moved after xformat to make it easier to
+; mix-and-match with dgoi / dmfi
+; dnai - define-normal-arc-insn
+
+(define-pmacro (dnai xname xcomment xsyntax xformat xattrs xsemantics)
+  (define-insn
+    (name xname)
+    (comment xcomment)
+    (.splice attrs (.unsplice xattrs))
+    (syntax xsyntax)
+    (format xformat)
+    (semantics xsemantics)
+    )
+)
+
+; ??? FIXME: When mixing 16 and 32 bit instructions straightforwardly, an
+; invalid decoder is generated, see:
+; http://www.sourceware.org/ml/cgen/2007-q1/msg00047.html
+; Therefore, we have to lie to cgen, pretending that the 16 bit opcode insns
+; have a 32 bit opcode.
+; we leave the value of f-dummy undefined, so that the disassembler will
+; find the 16 bit insn in any 32 bit word that starts with it.
+(dnf  f-dummy         "dummy field"   () 16 16)
+(dnop dummy-op "(first 16 bit of) next insn"      () h-uint  f-dummy)
+; define short arc instruction
+(define-pmacro (dsai xname xcomment xsyntax xformat xattrs xsemantics)
+  (dnai xname xcomment xsyntax
+    (.splice (.unsplice xformat) dummy-op)
+    (.splice (.unsplice xattrs) SHORT_P)
+    xsemantics
+  )
+)
+
+; daiQ - define-arc-insn-with-Q-condition-field
+(define-pmacro (daiQ xname xcomment xsyntax xformat xattrs limmsem xsemantics)
+  (define-insn
+    (name xname)
+    (comment xcomment)
+    (.splice attrs (.unsplice xattrs))
+    (syntax xsyntax)
+    (format xformat)
+    (semantics (sequence () (limmsem) (if Qcondb xsemantics)))
+    )
+)
+
+; Fetch long immediate.
+(define-pmacro (fetch-limm! offset)
+  (sequence ((HI high) (HI low))
+    (set high (mem HI (add pc offset)))
+    (set low  (mem HI (add pc (add offset 2))))
+    (set (raw-reg h-cr 62) (or (sll (zext SI high) 16) (zext SI low)))
+  )
+)
+
+(define-pmacro (limmB)
+  (sequence ()
+    (if (eq f-op-B 62) (fetch-limm! 4))
+    (if (eq f-op-B 63) (set-pcl!))
+  )
+)
+
+(define-pmacro (limmBC)
+  (sequence ()
+    (if (or (eq f-op-B 62) (eq f-op-C 62)) (fetch-limm! 4))
+    (if (or (eq f-op-B 63) (eq f-op-C 63)) (set-pcl!))
+  )
+)
+
+(define-pmacro (limmC)
+  (sequence ()
+    (if (eq f-op-C 62) (fetch-limm! 4))
+    (if (eq f-op-C 63) (set-pcl!))
+  )
+)
+
+(define-pmacro (limmh)
+  (sequence ()
+    (if (eq f-op-h 62) (fetch-limm! 2))
+    (if (eq f-op-h 63) (set-pcl!))
+  )
+)
+
+; semantics for dgoi: xsemantics specifies how to calculate the result
+; from xB and xC; xfsemantics specifies flag setting semantics that
+; are in effect when the F bit is set.  The result is assigned to xA.
+(define-pmacro (fsemantics limmsem xsemantics xfsemantics xA xB xC)
+  (.subst (A B C) (xA xB xC)
+    (sequence ((SI result) (BI cur_s1bit) (BI cur_s2bit))
+      (limmsem)
+      (set result xsemantics)
+      (if F xfsemantics)
+	(set xA result)
+     )
+   )
+)
+
+; semantics for dgmov, dg2oi:
+; evaluate the xdispose argument, passing the other arguments - 
+; except xA, which is ignored.
+(define-pmacro (esemantics limmsem xsemantics xdispose xA xB xC)
+  (xdispose limmsem xsemantics F xB xC))
+
+; likewise, but tpass const0 for F.
+(define-pmacro (esemantics-f-0 limmsem xsemantics xdispose xA xB xC)
+  (xdispose limmsem xsemantics (const 0) xB xC))
+
+(define-pmacro (nfsemantics limmsem xsemantics xA xB xC)
+  (sequence ((SI result) (SI B) (SI C))
+    (limmsem)
+    (set B xB)
+    (set C xC)
+    (set xA xsemantics)
+   )
+)
+
+(define-pmacro (flagNZ)
+  (sequence ()
+    (set nbit (nflag result))
+    (set zbit (zflag result))
+   )
+)
+
+(define-pmacro (cmpsemantics limmsem xsemantics xF xB xC)
+  (sequence ((SI result) (DI tmp) (DI B) (DI C))
+    (limmsem)
+    (set B (ext DI xB))
+    (set C (ext DI xC))
+    (set tmp xsemantics)
+    (set result (subword SI tmp 1))
+    (flagNZ)
+    (set vbit (ne (nflag result) (nflag tmp)))
+    (set B (zext DI xB))
+    (set C (zext DI xC))
+    (set tmp xsemantics)
+    (set cbit (nflag tmp))
+   )
+)
+
+(define-pmacro (tstsemantics limmsem xsemantics xF xB xC)
+  (sequence ((SI result) (SI B) (SI C))
+    (limmsem)
+    (set B xB)
+    (set C xC)
+    (set result xsemantics)
+    (flagNZ)
+   )
+)
+
+(define-pmacro (movsemantics limmsem xsemantics xF xB xC)
+  (sequence ((SI result))
+    (limmsem)
+    (set result xC)
+    (set xB result)
+    (if (gt SI xF 0) (flagNZ))
+   )
+)
+
+; for special format instructions
+(define-pmacro (sfisemantics limmsem xsemantics xF xB xC)
+  (sequence ((SI result))
+    (limmsem)
+    (.subst (F B C) (xF xB xC) xsemantics)
+   )
+)
+
+; For jumps
+(define-pmacro (jsemantics limmsem xsemantics xF xB xC)
+  (int-jump (sequence ((SI result))
+    (limmsem)
+    (.subst (F B C) (xF xB xC) xsemantics)
+   ))
+)
+
+(define-pmacro (jdsemantics limmsem xsemantics xF xB xC)
+  (int-jumpd (sequence ((SI result))
+    (limmsem)
+    (.subst (F B C) (xF xB xC) xsemantics)
+   ))
+)
+
+(dnf  f-opm "major opcode" () 0 5)
+
+(define-normal-insn-enum op-maj
+  "major opcode"
+  () OPM_ f-opm
+  (
+   (B 0) (BLR 1) (LD_S9 2) (ST_S9 3) (GO 4)
+   (X05 5) (X06 6) (X07 7)
+   (SLDADDR 12) (SADDSUBSHI 13) (SMOVCMPADDH 14) (SGO 15)
+   (LDO_S 16) (LDOB_S 17) (LDOW_S 18) (LDOWX_S 19)
+   (STO_S 20) (STOB_S 21) (STOW_S 22)
+   (SSHSUBBIMM 23)
+   (SP 24) (GP 25) (LDPCREL 26) (SMOVU8 27) (SADDCMPU7 28)
+   (BR_S 29) (B_S 30) (BL_S 31)
+   (PSEUDO 32)
+  )
+)
+
+(dnf  f-go-type "general operations type" () 8 2)
+(dnf  f-go-cc-type "general operations conditional subtype" () 26 1)
+;(d2nf f-go-cc-type "general operations conditional subtype" () 10 1)
+
+(dnf  f-go-op "general operations sub-opcode" () 10 6)
+
+(define-normal-insn-enum go-type
+  "general operations type"
+  () GO_TYPE_ f-go-type
+  ((R_R 0) (U6 1) (S12 2) (CC 3))
+)
+
+(define-normal-insn-enum go-cc-type
+  "general operations conditional subtype"
+  () GO_CC_ f-go-cc-type
+  ((REG 0) (U6 1))
+)
+
+(define-normal-insn-enum go-op
+  "general operations type"
+  () GO_OP_ f-go-op
+  (
+   (ADD 0) (ADC 1) (SUB 2) (SBC 3) (AND 4) (OR 5) (BIC 6) (XOR 7)
+   (MAX 8) (MIN 9) (MOV 10) (TST 11) (CMP 12) (RCMP 13) (RSUB 14) (BSET 15)
+   (BCLR 16) (BTST 17) (BXOR 18) (BMSK 19) (ADD1 20) (ADD2 21) (ADD3 22)
+   (SUB1 23) (SUB2 24) (SUB3 25) (MPY 26) (MPYH 27) (MPYHU 28) (MPYU 29)
+   (RES30 30) (RES31 31)
+   (J 32) (J_D 33) (JL 34) (JL_D 35) (LP 40) (FLAG 41) (LR 42) (SR 43) (SOP 47)
+  )
+)
+
+(define-normal-insn-enum go-sop
+  "general single-operand operations type"
+  () GO_OP_SOP_ f-op-A
+  (
+    (ASL 0) (ASR 1) (LSR 2) (ROR 3) (RRC 4) (SEXB 5) (SEXW 6) (EXTB 7)
+    (EXTW 8) (ABS 9) (NOT 10) (RLC 11) (EX 12) (ZOP 63)
+    (PSEUDO 62)
+  )
+)
+
+(dnf  f-i16-43 "short ld add register type" () 11 2)
+
+(define-normal-insn-enum i16ldaddr-type
+  "short add / sub immediate type"
+  () I16_LDADDR_ f-i16-43
+  ((LD 0) (LDB 1) (LDW 2) (ADD 3))
+)
+
+(define-normal-insn-enum i16addsubshi-type
+  "short add / sub immediate type"
+  () I16_ADDSUBSHI_ f-i16-43
+  ((ADD 0) (SUB 1) (ASL 2) (ASR 3))
+)
+
+(define-normal-insn-enum i16movcmpaddh-type
+  "short mov / cmp / add  with high register type"
+  () I16_MOVCMPADDH_ f-i16-43
+  ((ADD 0) (MOVbh 1) (CMP 2) (MOVhb 3))
+)
+
+(dnf  f-i16-go "short general operations type" () 11 5)
+
+(define-normal-insn-enum i16go-type
+  "short general operations"
+  () I16_GO_ f-i16-go
+  ((SOP 0) (SUB 2) (AND 4) (OR 5) (BIC 6) (XOR 7)
+   (TST 11) (MUL64 12) (SEXB 13) (SEXW 14)
+   (EXTB 15) (EXTW 16) (ABS 17) (NOT 18) (NEG 19) (ADD1 20) (ADD2 21) (ADD3 22)
+   (ASLM 24) (LSRM 25) (ASRM 26) (ASL 27) (ASR 28) (LSR 29) (TRAP 30) (BRK 31))
+)
+
+(define-normal-insn-enum i16go-sop-type
+  "short general operations single operand"
+  () I16_GO_SOP_ f-op--c
+  ((J 0) (J_D 1) (JL 2) (JL_D 3) (SUB_NE 6) (ZOP 7))
+)
+
+(define-normal-insn-enum i16go-zop-type
+  "short general operations single operand"
+  () I16_GO_ZOP_ f-op--b
+  ((NOP 0) (UNIMP 1) (JEQ 4) (JNE 5) (J 6) (J_D 7))
+)
+
+(define-normal-insn-enum i16sp-type
+  "sp based insn type"
+  () I16_SP_ f-op--c
+  ((LD 0) (LDB 1) (ST 2) (STB 3) (ADD 4) (ADDSUB 5) (POP 6) (PUSH 7))
+)
+
+(define-normal-insn-enum i16addsub_spsp-type
+  "sp based 1op insn type"
+  () I16_SP_ADDSUB_ f-op--b
+  ((ADD 0) (SUB 1))
+)
+
+(dnf  f-i16-gp-type "gp-relative insn type" () 5 2)
+
+(define-normal-insn-enum i16gp-type
+  "gp-relative insn type"
+  () I16_GP_ f-i16-gp-type
+  ((LD 0) (LDB 1) (LDW 2) (ADD 3))
+)
+
+
+(dnf  f-i16addcmpu7-type "short add / cmp immediate type" () 8 1)
+
+(define-normal-insn-enum i16addcmpu7-type
+  "short add / cmp immediate type"
+  () I16_ADDCMPU7_ f-i16addcmpu7-type
+  ((ADD 0) (CMP 1))
+)
+
+(define-pmacro (d16addr xop xformat xattrs xsemantics xfsemantics)
+  (
+    (dsai (.str xop "_s_abc") (.str xop "_s register - register")
+      (.str xop "$_S $R_a,$R_b,$R_c")
+      (+ OPM_SLDADDR xformat R_b R_c R_a)
+      xattrs
+      (nfsemantics nop xsemantics R_a R_b R_c)
+     )
+  )
+)
+
+(define-pmacro (d16addsubshi xop xformat xattrs xsemantics xfsemantics)
+  (
+    (dsai (.str xop "_s_cbu3") (.str xop "_s reg-reg-u3")
+      (.str xop "$_S $R_c,$R_b,$u3")
+      (+ OPM_SADDSUBSHI xformat R_b R_c u3)
+      xattrs
+      (nfsemantics nop xsemantics R_c R_b u3)
+     )
+  )
+)
+
+(define-pmacro (d16addh xop xformat xattrs xsemantics xfsemantics)
+  (
+    (dsai (.str xop "_s_mcah") (.str xop "_s high reg")
+      (.str xop "$_S $R_b,$R_b,$Rh")
+      (+ OPM_SMOVCMPADDH xformat R_b Rh)
+      (.splice (LIMM h) (.unsplice xattrs))
+      (nfsemantics limmh xsemantics R_b R_b Rh)
+     )
+  )
+)
+
+(define-pmacro (d16movcmph xop xformat xattrs xsemantics xdispose)
+  (
+    (dsai (.str xop "_s_mcah") (.str xop "_s high reg")
+      (.str xop "$_S $R_b,$Rh")
+      (+ OPM_SMOVCMPADDH xformat R_b Rh)
+      (.splice (LIMM h) (.unsplice xattrs))
+      (xdispose limmh xsemantics -1 R_b Rh)
+     )
+  )
+)
+
+; this differs from d16movcmph in that registers are swapped,
+; and there is no Rh immediate
+(define-pmacro (d16movhb xop xformat xattrs xsemantics xdispose)
+  (
+    (dsai (.str xop "_s_mcahb") (.str xop "_s high reg")
+      (.str xop "$_S $Rh,$R_b")
+      (+ OPM_SMOVCMPADDH xformat R_b Rh)
+      xattrs
+      (xdispose nop xsemantics -1 Rh R_b)
+     )
+  )
+)
+
+(define-pmacro (d16goi xop xformat xattrs xsemantics xfsemantics)
+  (
+    (dsai (.str xformat "_s_go") (.str xop "_s b,b,c")
+      (.str xop "$_S $R_b,$R_b,$R_c")
+      (+ OPM_SGO xformat R_b R_c)
+      xattrs
+      (nfsemantics nop xsemantics R_b R_b R_c)
+     )
+  )
+)
+
+(define-pmacro (d16g2oi xop xformat xattrs xsemantics xdispose)
+  (
+    (dsai (.str xop "_s_go") (.str xop "_s b,c")
+      (.str xop "$_S $R_b,$R_c")
+      (+ OPM_SGO xformat R_b R_c)
+      xattrs
+      (xdispose nop xsemantics - R_b R_c)
+     )
+  )
+)
+
+(define-pmacro (dsubs_ne xop xformat xattrs xsemantics xfsemantics)
+  (
+    (dsai (.str xop "_s_go_sub_ne") (.str xop "_s.ne b,b,b")
+      (.str xop "$_S $NE$R_b,$R_b,$R_b")
+      (+ OPM_SGO I16_GO_SOP xformat R_b)
+      xattrs
+      (if (eq zbit 0) (set R_b 0))
+     )
+  )
+)
+
+(define-normal-insn-enum i16shsubbimm
+  "shift / sub / bit immediate short insn w/ u5 type"
+  () I16_SHSUBBIMM_ f-op--c
+  ((ASL 0) (LSR 1) (ASR 2) (SUB 3) (BSET 4) (BCLR 5) (BMSK 6) (BTST 7))
+)
+
+(define-pmacro (d16shsubbimm xop xformat xattrs xsemantics xfsemantics)
+  (
+    (dsai (.str xop "_s_ssb") (.str xop "_s b,b,u5")
+      (.str xop "$_S $R_b,$R_b,$u5")
+      (+ OPM_SSHSUBBIMM R_b xformat u5)
+      xattrs
+      (nfsemantics nop xsemantics R_b R_b u5)
+     )
+  )
+)
+
+(define-pmacro (d16btst xop xformat xattrs xsemantics xdispose)
+  (
+    (dsai (.str xop "_s_ssb") (.str xop "_s b,u5")
+      (.str xop "$_S $R_b,$u5")
+      (+ OPM_SSHSUBBIMM R_b xformat u5)
+      xattrs
+      (xdispose nop xsemantics -1 R_b u5)
+     )
+  )
+)
+
+(define-pmacro (d16add-b-sp xop xformat xattrs xsemantics xfsemantics)
+  (
+    (dsai (.str xop "_s_absp") (.str xop "_s b,sp,u5x4")
+      (.str xop "$_S $R_b,$SP,$u5x4")
+      (+ OPM_SP R_b xformat u5x4)
+      xattrs
+      (nfsemantics nop xsemantics R_b SP u5x4)
+     )
+  )
+)
+
+(define-pmacro (d16addsub-sp-sp xop xformat xattrs xsemantics xfsemantics)
+  (
+    (dsai (.str xop "_s_asspsp") (.str xop "_s sp,sp,u5x4")
+      (.str xop "$_S $SP,$SP,$u5x4")
+      (+ OPM_SP I16_SP_ADDSUB xformat u5x4)
+      xattrs
+      (nfsemantics nop xsemantics SP SP u5x4)
+     )
+  )
+)
+
+(define-pmacro (d16gp_add xop xformat xattrs xsemantics xfsemantics)
+  (
+    (dsai (.str xop "_s_gp") (.str xop "_s r0,gp,s9x4")
+      (.str xop "$_S $R0,$GP,$s9x4")
+      (+ OPM_GP xformat s9x4)
+      xattrs
+      (nfsemantics nop xsemantics R0 GP s9x4)
+     )
+  )
+)
+
+(define-pmacro (d16movu8 xop xformat xattrs xsemantics xdispose)
+  (
+    (dsai (.str xop "_s_r_u7") (.str xop " register - 8 bit immediate")
+      (.str xop "$_S $R_b,$u7")
+      (+ xformat R_b u8)
+      xattrs
+      (xdispose nop xsemantics -1 R_b u8)
+     )
+  )
+)
+
+(define-pmacro (d16addu7 xop xformat xattrs xsemantics xfsemantics)
+  (
+    (dsai (.str xop "_s_r_u7") (.str xop " register - 7 bit immediate")
+      (.str xop "$_S $R_b,$R_b,$u7")
+      (+ OPM_SADDCMPU7 xformat R_b u7)
+      xattrs
+      (nfsemantics nop xsemantics R_b R_b u7)
+     )
+  )
+)
+
+(define-pmacro (d16cmpu7 xop xformat xattrs xsemantics xdispose)
+  (
+    (dsai (.str xop "_s_r_u7") (.str xop " register - 7 bit immediate")
+      (.str xop "$_S $R_b,$u7")
+      (+ OPM_SADDCMPU7 xformat R_b u7)
+      xattrs
+      (xdispose nop xsemantics -1 R_b u7)
+     )
+  )
+)
+
+(define-pmacro (splicelist listlist) 
+  (.subst (x sp) (xx .splice)
+    (.splice sp (.unsplice (.subst (x un) (xx .unsplice)
+			     (.map (.pmacro (e) (un e)) listlist)))))
+)
+; dmfi - define multi-format insn
+; xformlist is a list of lists in the form (format macro-name attributes)
+; the first form has to generate a begin.
+; Note that macro-name can not be at the start of the lists in xformlist,
+; lest the macros would be expanded too early.
+; attributes is at the end so that when cgen gains the ability to handle
+; variable-length lists in macros (.car / .cdr would be sufficient in this
+; case), this parameter can be made optional.
+
+; Operate on one element.  This expands to:
+;  <macro-name> <mnemonic> <format> <attributes> <semantics> <fsemantics>
+(define-pmacro (dmfie xxop xxform xxsemantics xxfsemantics)
+  ((.cadr3 xxform) xxop (.car3 xxform) (.caddr3 xxform) xxsemantics xxfsemantics))
+
+; ??? This could be a lot simpler if .pmacro would do proper argument binding.
+(define-pmacro (dmfi xop xform xsemantics xfsemantics)
+  (splicelist (.map (.pmacro (l) (.apply dmfie l))
+		    (.map (.apply .pmacro
+				   ((e) (xop e xsemantics xfsemantics)))
+			  xform)))
+)
+
+(dnf  f-buf "branch unconditional far tag " () 15 1)
+(define-normal-insn-enum i-buf
+  ""
+  () B_ f-buf
+  (
+   (cc 0) (uncond_far 1)
+  )
+)
+
+(define-normal-insn-enum i-blr
+  ""
+  () BLR_ f-buf
+  (
+   (BL 0) (BR 1)
+  )
+)
+
+(dnf  f-br "br RC / u6 tag " () 27 1)
+;(d2nf f-br "br RC / u6 tag " () 11 1)
+(define-normal-insn-enum i-br
+  ""
+  () BR_ f-br
+  (
+   (RC 0) (U6 1)
+  )
+)
+
+(dnf  f-bluf "branch & link unconditional far tag " () 14 1)
+(define-normal-insn-enum op-bl
+  ""
+  () BL_ f-bluf
+  (
+   (cc 0) (uncond_far 1)
+  )
+)
+
+; check that xmach-ext is enabled.
+; values: MPY, MUL, BSHIFT, ARITH, NORM, SWAP, DSP
+; ARITH is built into arc700.
+(define-pmacro (mach-ext xmach-ext semantics)
+; FIXME: check that xmach-ext is enabled.
+  (cond SI ((eq 0 1) (invalid-expr))
+	    (else semantics))
+)
+(define-pmacro (mach-ext-seq xxmach-ext locals semantics)
+  (if (mach-ext xxmach-ext (const 1))
+    (.splice sequence locals (.unsplice semantics)))
+)
+; Branch insns.
+
+(dsai b_s "branch short"
+  "b$i2cond $label10"
+  (+ i2cond OPM_B_S label10)
+  (RELAXABLE)
+  (if i2cond
+    (int-jump (set pc label10)))
+)
+
+(define-normal-insn-enum i-bcc_s
+  ""
+  () B_S_ f-cond-i2
+  (
+   (cc 3)
+  )
+)
+
+(dsai bcc_s "branch conditionally short"
+  "b$i3cond$_S $label7"
+  (+ i3cond OPM_B_S B_S_cc label7)
+  (RELAXABLE)
+  (if i3cond
+    (int-jump (set pc label7)))
+)
+
+(dnf  f-brscond    "brcc_s condition"      () 8 1)
+(define-hardware
+  (name h-RccS)
+  (type immediate BI)
+  (values keyword "" ((eq 0) (ne 1)))
+)
+(dnop RccS         "BRcc_s"     () h-RccS  f-brscond)
+
+(dsai brcc_s "branch on compare register with zero short"
+  "br$RccS$_S $R_b,0,$label8"
+  (+ OPM_BR_S R_b RccS label8)
+  (RELAXABLE)
+  (if (case BI RccS
+	((0) (eq R_b 0))
+	((1) (ne R_b 0))
+	(else (error BI "unreachable - put in because of parser error")))
+    (int-jump (set pc label8)))
+)
+
+(dDbranch daiQ bcc_l
+  ( "Branch Conditionally"
+    (.sstr "b$Qcondb$_L" delay-S " $label21")
+    (+ Qcondb delay-N OPM_B B_cc label21)
+    (RELAXED)
+    nop)
+  (set pc label21)
+  (delay-jump label21)
+)
+
+(dDbranch dnai b_l
+  ( "Branch Unconditional Far"
+    (.sstr "b$uncondb$_L" delay-S " $label25")
+    (+ delay-N OPM_B B_uncond_far label25 (f-res27 0))
+    (RELAXED))
+  (set pc label25)
+  (delay-jump label25)
+)
+
+(define-hardware
+  (name h-Rcc)
+  (type immediate SI)
+  (values keyword "" (m-brcond))
+)
+(dnop Rcc      "BRcc / BBIT Condition"      () h-Rcc   f-brcond)
+
+(define-pmacro (dbri-semantics xxxlimm xxxc jump)
+  (sequence ((SI condition) (SI B) (SI C))
+    (set condition Rcc)
+    (xxxlimm)
+    (set B RB)
+    (set C xxxc)
+    (if (case BI condition
+	  ((CONDBR_REQ) (eq B C))
+	  ((CONDBR_RNE) (ne B C))
+	  ((CONDBR_RLT) (lt B C))
+	  ((CONDBR_RGE) (ge B C))
+	  ((CONDBR_RLO) (ltu B C))
+	  ((CONDBR_RHS) (geu B C))
+	  ((CONDBR_BIT0) (eq (and B (sll 1 C)) 0))
+	  ((CONDBR_BIT1) (ne (and B (sll 1 C)) 0))
+	  (else (error BI "unreachable - put in because of parser error"))
+	)
+    jump)
+  )
+)
+
+; FIXME: Rcc syntax
+(define-pmacro (dbri xxlimm xxc xxattrs)
+  (dDbranch dnai (.sym brcc_ xxc)
+    ( "BRcc / BBIT"
+      (.sstr "b$Rcc" delay-S " $RB,$" xxc ",$label9")
+      (+ OPM_BLR RB BLR_BR xxc delay-N (.sym BR_ xxc) label9 Rcc) xxattrs)
+    (dbri-semantics xxlimm xxc (set pc label9))
+    (dbri-semantics xxlimm xxc (delay-jump label9))
+  )
+)
+
+(dbri limmBC RC ((LIMM BC))) (dbri nop U6 ())
+
+(dsai bl_s "branch and Link short"
+     "bl$uncondj$_S $label13a"
+     (+ OPM_BL_S label13a)
+     (RELAXABLE)
+     (int-jump (sequence ()
+               (set (reg h-cr 31) (add pc 2))
+               (set pc label13a)))
+)
+
+(dDbranch daiQ blcc
+  ( "Branch and Link Conditionally"
+    (.sstr "bl$Qcondj$_L" delay-S " $label21")
+    (+ Qcondj delay-N OPM_BLR BL_cc BLR_BL label21a)
+    (RELAXED)
+    nop)
+  (sequence ()
+    (set (reg h-cr 31) (add pc 4))
+    (set pc label21a))
+  (sequence ()
+    (set (reg h-cr 31) (add pc 8))
+    (delay-jump label21a))
+)
+
+(dDbranch dnai bl
+  ( "Branch and Link"
+    (.sstr "bl$uncondj$_L" delay-S " $label25a")
+    (+ delay-N OPM_BLR BL_uncond_far BLR_BL label25a (f-res27 0))
+    (RELAXED))
+  (sequence ()
+    (set (reg h-cr 31) (add pc 4))
+    (set pc label25a))
+  (sequence ((HI nword))
+    ; The return address depends on the length of the next opcode
+    ; (Long immediate is not allowed in delay slot.)
+    (set nword (mem HI (add pc 4)))
+    (if (and (and nword (sra nword 1)) #xa000)
+      (set (reg h-cr 31) (add pc 6))
+      (set (reg h-cr 31) (add pc 8)))
+    (delay-jump label25a))
+)
+
+(dnf  f-ldozzx  "load w/ offs: data size / ext" () 23 3)
+;(d2nf f-ldozzx  "load w/ offs: data size / ext" () 7 3)
+(dnf  f-ldr6zzx "load reg-reg: data size / ext" () 10 6)
+(dnf  f-stozzr  "store w/ offs: data size / reserved" () 29 3)
+;(d2nf f-stozz   "store w/ offs: data size"      () 13 2)
+(dnf  f-ldoaa   "load w/ offs addr write-back"  () 21 2)
+;(d2nf f-ldoaa   "load w/ offs addr write-back"  () 5 2)
+(dnf  f-ldraa   "load reg-reg addr write-back"  () 8 2)
+(dnf  f-stoaa   "store reg-reg addr write-back" () 27 2)
+;(d2nf f-stoaa   "store reg-reg addr write-back" () 11 2)
+(dnf  f-LDODi   "ld w/ offs Direct mem access"  () 20 1)
+;(d2nf f-LDODi   "ld w/ offs Direct mem access"  () 4 1)
+(dnf  f-LDRDi   "ld reg-reg Direct mem access"  () 16 1)
+;(d2nf f-LDRDi   "ld reg-reg Direct mem access"  () 0 1)
+(dnf  f-STODi   "st w/ offs Direct mem access"  () 26 1)
+;(d2nf f-STODi   "st w/ offs Direct mem access"  () 10 1)
+(dnop LDODi     "ld /w offs Direct mem access" () h-Di f-LDODi)
+(dnop LDRDi     "ld reg-reg Direct mem access" () h-Di f-LDRDi)
+(dnop STODi     "ld w/ offs Direct mem access" () h-Di f-STODi)
+(dnop EXDi      "ex Direct memory access"      () h-Di f-F)
+(dnop _AW      ".AW suffix"                    () h-_aw f-nil)
+
+(define-normal-insn-enum i-ldozz
+  ""
+  () LDO_LD f-ldozzx
+  (("" 0) (B 2) (BX 3) (W 4) (WX 5))
+)
+
+; This includes the 3 fixed (for load with offset) bits before zzx
+; that read '6'.
+(define-normal-insn-enum i-ldr6zzx
+  ""
+  () LDR_LD f-ldr6zzx
+  (("" 48) (B 50) (BX 51) (W 52) (WX 53))
+)
+
+(define-normal-insn-enum i-stozzr
+  ""
+  () STO_ST f-stozzr
+  (("" 0) (B 2) (W 4))
+)
+
+(define-normal-insn-enum i-ldoaa
+  ""
+  () LDOAA_ f-ldoaa
+  ((NO 0) (AW 1) (AB 2) (AS 3))
+)
+
+(define-normal-insn-enum i-ldraa
+  ""
+  () LDRAA_ f-ldraa
+  ((NO 0) (AW 1) (AB 2) (AS 3))
+)
+
+(define-normal-insn-enum i-stoaa
+  ""
+  () STOAA_ f-stoaa
+  ((NO 0) (AW 1) (AB 2) (AS 3))
+)
+
+(define-pmacro (ASscale__ offs) (sll offs 2))
+(define-pmacro (ASscale_w offs) (sll offs 1))
+(define-pmacro (ASscale_b offs) (invalid-expr))
+
+(define-pmacro (memsemantics xop s xA xB xC)
+  (sequence ((SI eaddr))
+	    (set eaddr (add xB xC))
+	    (.subst (A) (xA) s)
+   )
+)
+
+; ??? result when updating same register as written-back base for .AW / .AB
+; and as load destination is actually undefined.  Should we invoke
+; invalid-insn for that?
+(define-pmacro (memawsemantics xop s xA xB xC)
+  (sequence ((SI eaddr))
+	    (set eaddr (add xB xC))
+	    (set xB eaddr)
+	    (.subst (A) (xA) s)
+   )
+)
+
+(define-pmacro (memabsemantics xop s xA xB xC)
+  (sequence ((SI sum) (SI eaddr))
+	    (set sum (add xB xC))
+	    (set eaddr xB)
+	    (.subst (A) (xA) s)
+	    (set xB sum)
+   )
+)
+
+(define-pmacro (memassemantics xop s xA xB xC)
+  (sequence ((SI eaddr))
+	    (set eaddr
+		 (add xB ((.sym ASscale _ (.substring (.str xop  _) 2 3)) xC)))
+	    (.subst (A) (xA) s)
+   )
+)
+
+(define-pmacro (ddmemaa beglist xxname xxname1 xxprefix)
+  (define-pmacro (xxname xop xformat xattrs xsemantics xext)
+    (.splice (.unsplice beglist)
+      (xxname1 xop xformat (.sym xxprefix AA_NO) xattrs memsemantics
+	xsemantics "" xext)
+      (xxname1 xop xformat (.sym xxprefix AA_AW) xattrs memawsemantics
+	xsemantics $_AW xext)
+      (xxname1 xop xformat (.sym xxprefix AA_AB) xattrs memabsemantics
+	xsemantics .ab xext)
+      (xxname1 xop xformat (.sym xxprefix AA_AS) xattrs memassemantics
+	xsemantics .as xext)
+     )
+  )
+)
+
+(ddmemaa (begin) dldoi dldoi1 LDO)
+(ddmemaa ()      dldri dldri1 LDR)
+(ddmemaa (begin) dstoi dstoi1 STO)
+
+(define-pmacro (dldoi1 xop xformat aaformat xattrs addrsemantics xsemantics
+		xaa xext)
+  (dnai (.str xop xaa xext "_abs") (.str xop " with offset")
+    (.str xop xaa xext "$LDODi $RA,[$RB,$s9]")
+    (+ OPM_LD_S9 xformat aaformat LDODi RB RA s9)
+    (splicelist (((LIMM B)) xattrs))
+    (sequence () (limmB) (addrsemantics xop xsemantics RA RB s9))
+   )
+)
+
+(define-pmacro (dldri1 xop xformat aaformat xattrs addrsemantics xsemantics
+		xaa xext)
+  (dnai (.str xop xaa xext "_abc") (.str xop " register-register")
+    (.str xop xaa xext "$LDRDi $RA,[$RB,$RC]")
+    (+ OPM_GO xformat aaformat LDRDi RB RA RC)
+    (splicelist (((LIMM BC)) xattrs))
+    (sequence () (limmBC) (addrsemantics xop xsemantics RA RB RC))
+   )
+)
+
+(define-pmacro (dstoi1 xop xformat aaformat xattrs addrsemantics xsemantics
+		xaa xext)
+  (dnai (.str xop xaa xext "_abs") (.str xop " with offset")
+    (.str xop xaa xext "$STODi $RC,[$RB,$s9]")
+    (+ OPM_ST_S9 xformat aaformat LDODi RB RC s9)
+    (splicelist (((LIMM BC)) xattrs))
+    (sequence () (limmBC) (addrsemantics xop xsemantics RC RB s9))
+   )
+)
+
+(define-pmacro (d16ldr xop xformat xattrs xsemantics xext)
+  (
+    (dsai (.str xop "_s_abc") (.str xop "_s register - register")
+      (.str xop "$_S" xext " $R_a,[$R_b,$R_c]")
+      (+ OPM_SLDADDR xformat R_b R_c R_a)
+      xattrs
+      (memsemantics xop xsemantics R_a R_b R_c)
+     )
+  )
+)
+
+(define-pmacro (memopscale xop base)
+  (.sym base (.substring (.str xop _) 2 3)))
+
+(define-pmacro (d16memo xop xformat xattrs xsemantics xext)
+  (
+    (dsai (.str xop "_s" xext "_abu") (.str xop "_s with offset")
+      (.str xop "$_S" xext " $R_c,[$R_b,$" (memopscale xop sc_u5) "]")
+      (+ xformat R_b R_c (memopscale xop sc_u5))
+      xattrs
+      (memsemantics xop xsemantics R_c R_b (memopscale xop sc_u5))
+     )
+  )
+)
+
+(define-pmacro (d16memsp xop xformat xattrs xsemantics xext)
+  (
+    (dsai (.str xop "_s_absp") (.str xop "_s b,sp,u5x4")
+      (.str xop "$_S $R_b,[$SP,$u5x4]")
+      (+ OPM_SP R_b xformat u5x4)
+      xattrs
+      (memsemantics xop xsemantics R_b SP u5x4)
+     )
+  )
+)
+
+(define-pmacro (dmemgpreli xop xformat xattrs xsemantics xext)
+  (
+    (dsai (.str xop "_s_gprel") (.str xop "_s gprel")
+      (.str xop "$_S $R_b,[$GP,$" (memopscale xop sc_s9) "]")
+      (+ OPM_GP xformat (memopscale xop sc_s9))
+      xattrs
+      (memsemantics xop xsemantics R0 GP (memopscale xop sc_s9))
+     )
+  )
+)
+
+(define-pmacro (dmempcreli xop xformat xattrs xsemantics xext)
+  (
+    (dsai (.str xop "_s_pcrel") (.str xop "_s pcrel")
+      (.str xop "$_S $R_b,[$PCL,$u8x4]")
+      (+ xformat R_b u8x4)
+      xattrs
+      (memsemantics xop xsemantics R_b (and pc -4) u8x4)
+     )
+  )
+)
+
+(dmfi "ld"
+      ((LDO_LD dldoi (RELAXED))
+       (LDR_LD dldri (RELAXED))
+       (I16_LDADDR_LD d16ldr (RELAXABLE))
+       (OPM_LDO_S d16memo (RELAXABLE))
+       (I16_SP_LD d16memsp (RELAXABLE))
+       (I16_GP_LD dmemgpreli (RELAXABLE))
+       (OPM_LDPCREL dmempcreli (RELAXABLE)))
+      (set A (mem SI eaddr))
+      ""
+)
+
+(dmfi ldb
+      ((LDO_LDB dldoi (RELAXED))
+       (LDR_LDB dldri (RELAXED))
+       (I16_LDADDR_LDB d16ldr (RELAXABLE))
+       (OPM_LDOB_S d16memo (RELAXABLE))
+       (I16_SP_LDB d16memsp (RELAXABLE))
+       (I16_GP_LDB dmemgpreli (RELAXABLE)))
+      (set A (zext SI (mem QI eaddr)))
+      ""
+)
+
+(dmfi ldb
+      ((LDO_LDBX dldoi (RELAXED))
+       (LDR_LDBX dldri (RELAXED)))
+      (set A (ext SI (mem QI eaddr)))
+      ".x"
+)
+
+(dmfi ldw
+      ((LDO_LDW dldoi (RELAXED))
+       (LDR_LDW dldri (RELAXED))
+       (I16_LDADDR_LDW d16ldr (RELAXABLE))
+       (OPM_LDOW_S d16memo (RELAXABLE))
+       (I16_GP_LDW dmemgpreli (RELAXABLE)))
+      (set A (zext SI (mem HI eaddr)))
+      ""
+)
+
+(dmfi ldw
+      ((LDO_LDWX dldoi (RELAXED))
+       (LDR_LDWX dldri (RELAXED))
+       (OPM_LDOWX_S d16memo (RELAXABLE)))
+      (set A (ext SI (mem HI eaddr)))
+      ".x"
+)
+
+(dmfi "st"
+      ((STO_ST dstoi (RELAXED))
+       (OPM_STO_S d16memo (RELAXABLE))
+       (I16_SP_ST d16memsp (RELAXABLE)))
+      (set (mem SI eaddr) A)
+      ""
+)
+(dmfi stb
+      ((STO_STB dstoi (RELAXED))
+       (OPM_STOB_S d16memo (RELAXABLE))
+       (I16_SP_STB d16memsp(RELAXABLE)))
+      (set (mem QI eaddr) A)
+      ""
+)
+
+(dmfi stw
+      ((STO_STW dstoi (RELAXED))
+       (OPM_STOW_S d16memo (RELAXABLE)))
+      (set (mem HI eaddr) A)
+      ""
+)
+
+
+; general operations
+
+(dmfi add
+  ( (GO_OP_ADD dgoi (RELAXED))
+    (I16_LDADDR_ADD d16addr (RELAXABLE))
+    (I16_ADDSUBSHI_ADD d16addsubshi (RELAXABLE))
+    (I16_MOVCMPADDH_ADD d16addh (RELAXABLE))
+        (I16_SP_ADD d16add-b-sp (RELAXABLE))
+        (I16_SP_ADDSUB_ADD d16addsub-sp-sp (RELAXABLE))
+        (I16_GP_ADD d16gp_add (RELAXABLE))
+    (I16_ADDCMPU7_ADD d16addu7 (RELAXABLE)))
+  (add B C)
+  (sequence ()
+    (flagNZ)
+    (set vbit (add-oflag B C 0))
+    (set cbit (add-cflag B C 0))
+  )
+)
+
+(dgoi adc GO_OP_ADC () (addc B C cbit)
+  (sequence ()
+    (flagNZ)
+    (set vbit (add-oflag B C cbit))
+    (set cbit (add-cflag B C cbit))
+  )
+)
+
+(dmfi sub
+  ( (GO_OP_SUB dgoi (RELAXED))
+    (I16_ADDSUBSHI_SUB d16addsubshi (RELAXABLE))
+    (I16_GO_SUB d16goi (RELAXABLE))
+    (I16_GO_SOP_SUB_NE dsubs_ne (RELAXABLE))
+    (I16_SHSUBBIMM_SUB d16shsubbimm (RELAXABLE))
+    (I16_SP_ADDSUB_SUB d16addsub-sp-sp (RELAXABLE)))
+  (sub B C)
+  (sequence ()
+    (flagNZ)
+    (set vbit (sub-oflag B C 0))
+    (set cbit (sub-cflag B C 0))
+  )
+)
+
+(dgoi sbc GO_OP_SBC () (subc B C cbit)
+      (sequence ()
+	(flagNZ)
+	(set vbit (sub-oflag B C cbit))
+	(set cbit (sub-cflag B C cbit))
+       )
+)
+
+(dmfi and
+      ((GO_OP_AND dgoi (RELAXED))
+       (I16_GO_AND d16goi (RELAXABLE)))
+      (and B C)
+      (flagNZ)
+)
+
+(dmfi or
+      ((GO_OP_OR dgoi (RELAXED))
+       (I16_GO_OR d16goi (RELAXABLE)))
+      (or B C)
+      (flagNZ)
+)
+
+(dmfi bic
+      ((GO_OP_BIC dgoi (RELAXED))
+       (I16_GO_BIC d16goi (RELAXABLE)))
+      (and B (inv C))
+      (flagNZ)
+)
+
+(dmfi xor
+      ((GO_OP_XOR dgoi (RELAXED))
+       (I16_GO_XOR d16goi (RELAXABLE)))
+      (xor B C)
+      (flagNZ)
+)
+
+(dgoi max GO_OP_MAX () (cond SI ((gt B C) B) (else C))
+      (sequence ()
+	(flagNZ)
+	(set cbit (ge SI C B))
+	(set vbit (sub-oflag B C 0))
+       )
+)
+
+(dgoi min GO_OP_MIN () (cond SI ((lt B C) B) (else C))
+      (sequence ()
+	(flagNZ)
+	(set cbit (le SI C B))
+	(set vbit (sub-oflag B C 0))
+       )
+)
+
+(dmfi mov
+      ((GO_OP_MOV dgmov (RELAXED))
+       (I16_MOVCMPADDH_MOVbh d16movcmph (RELAXABLE))
+       (I16_MOVCMPADDH_MOVhb d16movhb (RELAXABLE))
+       (OPM_SMOVU8 d16movu8 (RELAXABLE)))
+      ()
+      movsemantics
+)
+
+(dmfi tst
+      ((GO_OP_TST dg2oi (RELAXED))
+       (I16_GO_TST d16g2oi (RELAXABLE)))
+      (and B C)
+      tstsemantics
+)
+
+(dmfi cmp
+      ((GO_OP_CMP dg2oi (RELAXED))
+       (I16_MOVCMPADDH_CMP d16movcmph (RELAXABLE))
+       (I16_ADDCMPU7_CMP d16cmpu7 (RELAXABLE)))
+      (sub B C)
+      cmpsemantics
+)
+
+(dg2oi rcmp GO_OP_RCMP (RELAXED) (sub C B) cmpsemantics)
+
+(dgoi rsub GO_OP_RSUB () (sub C B)
+      (sequence ()
+	(flagNZ)
+	(set vbit (sub-oflag C B 0))
+	(set cbit (sub-cflag C B 0))
+       )
+)
+
+(dmfi bset
+      ((GO_OP_BSET dgoi (RELAXED))
+       (I16_SHSUBBIMM_BSET d16shsubbimm (RELAXABLE)))
+      (or B (sll 1 (and C 31)))
+      (flagNZ)
+)
+
+(dmfi bclr
+      ((GO_OP_BCLR dgoi (RELAXED))
+       (I16_SHSUBBIMM_BCLR d16shsubbimm (RELAXABLE)))
+      (and B (inv (sll 1 (and C 31))))
+      (flagNZ)
+)
+
+(dmfi btst
+      ((GO_OP_BTST dg2oi (RELAXED))
+       (I16_SHSUBBIMM_BTST d16btst (RELAXABLE)))
+      (and B (sll 1 (and C 31)))
+      tstsemantics
+)
+
+(dgoi bxor GO_OP_BXOR () (xor B (sll 1 (and C 31)))
+      (flagNZ)
+)
+
+(dmfi bmsk
+      ((GO_OP_BMSK dgoi (RELAXED))
+       (I16_SHSUBBIMM_BMSK d16shsubbimm (RELAXABLE)))
+      (and B (sub (sll (sll USI 1 (and C 31)) 1) 1))
+      (flagNZ)
+)
+
+; define shift-add insn
+(define-pmacro (dshaddi xxn)
+  (dmfi (.sym add xxn)
+      (((.sym GO_OP_ADD xxn) dgoi (RELAXED))
+       ((.sym I16_GO_ADD xxn) d16goi (RELAXABLE)))
+      (add B (sll C xxn))
+      (sequence ((SI sC))
+	(set sC (sll C xxn))
+	(flagNZ)
+	(set vbit (add-oflag B sC 0))
+	(set cbit (add-cflag B sC 0))
+       )
+  )
+)
+
+(dshaddi 1) (dshaddi 2) (dshaddi 3)
+
+; define shift-sub insn
+(define-pmacro (dshsubi xxn)
+  (dgoi (.sym sub xxn)
+      (.sym GO_OP_SUB xxn) (RELAXED)
+      (sub B (sll C xxn))
+      (sequence ((SI sC))
+	(set sC (sll C xxn))
+	(flagNZ)
+	(set vbit (sub-oflag B sC 0))
+	(set cbit (sub-cflag B sC 0))
+       )
+  )
+)
+
+(dshsubi 1) (dshsubi 2) (dshsubi 3)
+
+(dgoi mpy GO_OP_MPY ()
+      (mach-ext MPY (mul B C))
+      (sequence ()
+	(flagNZ)
+	(set vbit (ne (ext DI result) (mul (ext DI B) (ext DI C)))))
+)
+
+(dgoi mpyh GO_OP_MPYH ()
+      (mach-ext MPY (subword SI (mul (ext DI B) (ext DI C)) 0))
+      (sequence () (flagNZ) (set vbit 0))
+)
+
+(dgoi mpyhu GO_OP_MPYHU ()
+      (mach-ext MPY (subword SI (mul (zext DI B) (zext DI C)) 0))
+      (sequence () (flagNZ) (set vbit 0))
+)
+
+(dgoi mpyu GO_OP_MPYU ()
+      (mach-ext MPY (mul B C))
+      (sequence ()
+	(flagNZ)
+	(set vbit (ne (zext DI result) (mul (zext DI B) (zext DI C)))))
+)
+
+(dmfi j
+      ((GO_OP_J djri (RELAXED))
+       (GO_OP_J djilink (RELAXED)))
+      (sequence ()
+	(case VOID f-op-Cj
+	  ; ilink1
+	  ((29) (if F (set (reg h-status32) (aux-status32_l1))
+		      (invalid-insn)))
+	  ; ilink2
+	  ((30) (if F (set (reg h-status32) (aux-status32_l2))
+		      (invalid-insn)))
+	  (else (if F (invalid-insn))))
+	(set pc C)
+       )
+      jsemantics
+)
+
+(dmfi j
+      ((GO_OP_J dji (RELAXED))
+       (I16_GO_SOP_J djsi (RELAXABLE))
+       (I16_GO_ZOP_J djsblink (RELAXABLE))
+       (I16_GO_ZOP_JEQ djsblinkeq (RELAXABLE))
+       (I16_GO_ZOP_JNE djsblinkne (RELAXABLE)))
+      (sequence ()
+	(if F (invalid-insn))
+	(set pc C)
+       )
+      jsemantics
+)
+
+(dmfi j
+      ((GO_OP_J_D djdi (RELAXED))
+       (I16_GO_SOP_J_D djsid (RELAXABLE))
+       (I16_GO_ZOP_J_D djsblinkd (RELAXABLE)))
+      (delay-jump C)
+      jdsemantics ; ??? should be jsemantics, but that exposes delay bug
+)
+
+(dji jl GO_OP_JL (RELAXED)
+      (sequence ()
+	(set pc C)
+	(set (reg h-cr 31) (add pc 4))
+       )
+      jsemantics
+)
+
+(dmfi jl
+      ((- dbegin -) (I16_GO_SOP_JL djsi (RELAXABLE)))
+      (sequence ()
+	(set pc C)
+	(set (reg h-cr 31) (add pc 2))
+       )
+      jsemantics
+)
+
+(dmfi jl
+      ((GO_OP_JL djri (RELAXED)))
+      (sequence ()
+	(set pc C)
+	(set (reg h-cr 31) (add pc (if SI (eq f-op-C 62) 8 4)))
+       )
+      jsemantics
+)
+
+(djdi jl GO_OP_JL_D (RELAXED)
+      (sequence ((HI nword))
+	; The return address depends on the length of the next opcode
+	; (Long immediate is not allowed in delay slot.)
+	(set nword (mem HI (add pc 4)))
+	(if (and (and nword (sra nword 1)) #xa000)
+	  (set (reg h-cr 31) (add pc 6))
+	  (set (reg h-cr 31) (add pc 8)))
+	(delay-jump C)
+       )
+      jdsemantics ; ??? should be jsemantics, but that exposes delay bug
+)
+
+(dmfi jl
+      ((- dbegin -) (I16_GO_SOP_JL_D djsid (RELAXABLE)))
+      (sequence ((HI nword))
+	; The return address depends on the length of the next opcode
+	; (Long immediate is not allowed in delay slot.)
+	(set nword (mem HI (add pc 2)))
+	(if (and (and nword (sra nword 1)) #xa000)
+	  (set (reg h-cr 31) (add pc 4))
+	  (set (reg h-cr 31) (add pc 6)))
+	(delay-jump C)
+       )
+      jdsemantics ; ??? should be jsemantics, but that exposes delay bug
+)
+
+(dlpcci lp GO_OP_LP (COND-CTI)
+  (sequence ()
+    (set (aux-lp_end) (add (and WI pc (const -4)) C))
+    (set (aux-lp_start) (add pc 4))
+   )
+  jsemantics
+)
+
+(dsfi flag GO_OP_FLAG ()
+  (sequence ()
+    ; Check processsor halt flag H.
+    (if (and C 1)
+	(c-code
+	  "sim_engine_halt (CPU_STATE (current_cpu), current_cpu, NULL, pc,\
+			    sim_exited, a5f_h_cr_get (current_cpu, 0));"))
+    (set (reg h-status32) C))
+  sfisemantics
+)
+
+(dlrsr lr GO_OP_LR ()
+  (set B (reg h-auxr C))
+  sfisemantics
+)
+
+; changing loop_end flushes scache, but to make flush effective, consider this
+; COND-CTI.
+(dlrsr sr GO_OP_SR (COND-CTI)
+  (set (reg h-auxr C) B)
+  sfisemantics
+)
+
+(dmfi asl
+  ( (GO_OP_SOP_ASL dgsoi (RELAXED))
+    (I16_GO_ASL d16goi (RELAXABLE)))
+  (add C C)
+  (sequence ()
+    (flagNZ)
+    (set vbit (add-oflag C C 0))
+    (set cbit (add-cflag C C 0))
+   )
+)
+
+(dmfi asr
+  ( (GO_OP_SOP_ASR dgsoi (RELAXED))
+    (I16_GO_ASR d16goi (RELAXABLE)))
+  (sra C 1)
+  (sequence ()
+    (flagNZ)
+    (set cbit (and C 1))
+   )
+)
+
+(dmfi lsr
+  ( (GO_OP_SOP_LSR dgsoi (RELAXED))
+    (I16_GO_LSR d16goi (RELAXABLE)))
+  (srl C 1)
+  (sequence ()
+    (flagNZ)
+    (set cbit (and C 1))
+   )
+)
+
+(dgsoi ror GO_OP_SOP_ROR ()
+  (or (srl C 1) (sll C 31))
+  (sequence ()
+    (flagNZ)
+    (set cbit (and C 1))
+   )
+)
+
+(dgsoi rrc GO_OP_SOP_RRC ()
+  (or (srl C 1) (sll (zext SI cbit) 31))
+  (sequence ()
+    (flagNZ)
+    (set cbit (and C 1))
+   )
+)
+
+; ??? immediate fields lack a mode, so we often have to cast a value to
+; have a defined mode.
+(define-pmacro (cast mode val) (sequence mode () val))
+
+; ??? problems with finding the right signedness appear to be more stubborn.
+(define-pmacro (really_cast mode val)
+(sequence mode ((mode res)) (set res val) res))
+
+(dmfi sexb
+  ( (GO_OP_SOP_SEXB dgsoi (RELAXED))
+    (I16_GO_SEXB d16goi (RELAXABLE)))
+  (ext SI (cast QI C))
+  (flagNZ)
+)
+
+(dmfi sexw
+  ( (GO_OP_SOP_SEXW dgsoi (RELAXED))
+    (I16_GO_SEXW d16goi (RELAXABLE)))
+  (ext SI (cast HI C))
+  (flagNZ)
+)
+
+(dmfi extb
+  ( (GO_OP_SOP_EXTB dgsoi (RELAXED))
+    (I16_GO_EXTB d16goi (RELAXABLE)))
+  (zext SI (cast QI C))
+  (flagNZ)
+)
+
+(dmfi extw
+  ( (GO_OP_SOP_EXTW dgsoi (RELAXED))
+    (I16_GO_EXTW d16goi (RELAXABLE)))
+  (zext SI (cast HI C))
+  (flagNZ)
+)
+
+(dmfi abs
+  ( (GO_OP_SOP_ABS dgsoi (RELAXED))
+    (I16_GO_ABS d16goi (RELAXABLE)))
+  (abs (really_cast SI C))
+  (sequence ()
+    (set zbit (zflag result))
+    (set cbit (nflag (cast SI C)))
+    (set vbit (eq C #x80000000))
+    (set nbit vbit)
+   )
+)
+
+(dmfi not
+  ( (GO_OP_SOP_NOT dgsoi (RELAXED))
+    (I16_GO_NOT d16goi (RELAXABLE)))
+  (inv C)
+  (flagNZ)
+)
+
+(dgsoi rlc GO_OP_SOP_RLC ()
+  (or (sll C 1) cbit)
+  (sequence ()
+    (flagNZ)
+    (set cbit (srl C 31))
+    ; ??? vbit undefined, should we do something pseudo-random?
+   )
+)
+
+(dex ex GO_OP_SOP_EX ((MACH arc700))
+  ; ??? A sequence with values, but without locals is generated syntactically
+  ; invalid if a form inside has no value.
+  (sequence SI ((SI dummy)) ; use dummy local to work around generator bug
+    (set (mem SI C) A)
+    (mem SI C)
+   )
+  (nop) ; F controls Direct (non-cached) memory access
+)
+
+; ??? need to define expansion of neg into rsub
+;(define-macro-insn
+;  (name macro-insn-name)
+;  (comment "description")
+;  (attrs attribute-list)
+;  (syntax "assembler syntax")
+;  (expansions expansion-spec)
+;)
+
+(dmfi neg
+  ((- dbegin -) (I16_GO_NEG d16goi ()))
+  (neg C)
+  (flagNZ)
+)
+
+(define-normal-insn-enum go-zop
+  "general zero-operand operations type"
+  ; ??? FIXME: using multi-ifields is broken, see:
+  ; http://sourceware.org/ml/cgen/2007-q1/msg00059.html
+  ;() GO_OP_ZOP_ f-op-B
+  () GO_OP_ZOP_ f-op--b
+  ((SLEEP 1) (SWI 2) (SYNC 3) (RTIE 4) (BRK 5))
+)
+
+; ??? unimplemented: sleep, sync, rtie
+(dnai
+  swi
+  "swi / trap0"
+  "swi" ; ??? create trap0 alias for arc700
+  (+ OPM_GO GO_OP_ZOP_SWI GO_TYPE_U6 GO_OP_SOP F0 GO_OP_SOP_ZOP (f-op-C 0)
+   (f-B-5-3 0) ; FIXME
+  )
+  ()
+  (int-jump (sequence ()
+    ; If a system call is simulated, r0..r2 and r8 are used,
+    ; and r0 is set to a new value.
+    ;(use (reg h-cr 0))
+    ;(use (reg h-cr 1))
+    ;(use (reg h-cr 2))
+    ;(use (reg h-cr 8))
+    (clobber (reg h-cr 0))
+    (set pc (c-call SI "arc_trap" pc 4 0))))
+)
+
+(dnf  f-trapnum    "trap number"           () 5 6)
+(dnop trapnum  "6 bit trap number"          () h-uint  f-trapnum)
+(dsai
+  trap_s
+  "trap"
+  "trap$_S $trapnum"
+  (+ OPM_SGO I16_GO_TRAP trapnum)
+  ()
+  (int-jump (sequence ()
+    (set pc (c-call SI "arc_trap" pc 2 trapnum))
+    ; If a system call is simulated, r0 is set to a new value.
+    (clobber (reg h-cr 0))))
+)
+
+(dnai
+  brk
+  "brk"
+  "brk"
+  (+ OPM_GO GO_OP_ZOP_BRK GO_TYPE_U6 GO_OP_SOP F0 GO_OP_SOP_ZOP (f-op-C 0)
+   (f-B-5-3 0)) ; FIXME
+  ()
+  (c-call "arc_breakpoint" pc 4))
+
+(dsai
+  brk_s
+  "brk_s"
+  "brk_s"
+  (+ OPM_SGO I16_GO_BRK (f-trapnum 63))
+  ()
+  (c-call "arc_breakpoint" pc 2))
+
+(define-normal-insn-enum x05-go-op
+  "general operations type"
+  () X05_ f-go-op
+  (
+   (ASL 0) (LSR 1) (ASR 2) (ROR 3) (MUL64 4) (MULU64 5) (ADDS 6) (SUBS 7)
+   (DIVAW 8) (ASLS 10) (ASRS 11) (ADDSDW 40) (SUBSDW 41) (SOP 47)
+   (CMACRDW 38) (MACDW 16) (MACFLW 52) (MACHFLW 55) (MACHLW 54) (MACHULW 53)
+   (MACLW 51) (MACRDW 18) (MACUDW 17) (MSUBDW 20) (MULDW 12) (MULFLW 50)
+   (MULHFLW 57) (MULHLW 56) (MULLW 49) (MULRDW 14) (MULUDW 13) (MULULW 48)
+  )
+)
+
+(define-pmacro (GO_BASE) OPM_X05)
+
+(dmfi asl
+  ( (X05_ASL dgoi (RELAXED))
+    (I16_ADDSUBSHI_ASL d16addsubshi (RELAXABLE))
+    (I16_SHSUBBIMM_ASL d16shsubbimm (RELAXABLE))
+    (I16_GO_ASLM d16goi (RELAXABLE))
+     )
+  (mach-ext BSHIFT (sll B (and C 31)))
+  (sequence ()
+    (flagNZ)
+    (set cbit (if BI (eq (and C 31) 0) 0 (and (srl B (sub 32 (and C 31))) 1)))
+   )
+)
+
+(dmfi lsr
+  ( (X05_LSR dgoi (RELAXED))
+    (I16_SHSUBBIMM_LSR d16shsubbimm (RELAXABLE))
+    (I16_GO_LSRM d16goi (RELAXABLE)))
+  (mach-ext BSHIFT (srl B (and C 31)))
+  (sequence ()
+    (flagNZ)
+    (set cbit (if BI (eq (and C 31) 0) 0 (and (srl B (sub (and C 31) 1)) 1)))
+   )
+)
+
+(dmfi asr
+  ( (X05_ASR dgoi (RELAXED))
+    (I16_ADDSUBSHI_ASR d16addsubshi (RELAXABLE))
+    (I16_SHSUBBIMM_ASR d16shsubbimm (RELAXABLE))
+    (I16_GO_ASRM d16goi (RELAXABLE)))
+  (mach-ext BSHIFT (sra B (and C 31)))
+  (sequence ()
+    (flagNZ)
+    (set cbit (if BI (eq (and C 31) 0) 0 (and (srl B (sub (and C 31) 1)) 1)))
+   )
+)
+
+(dgoi ror X05_ROR ()
+  (mach-ext BSHIFT (ror B (and C 31)))
+  (sequence ()
+    (flagNZ)
+    (set cbit (if BI (eq (and C 31) 0) 0 (and (srl B (sub (and C 31) 1)) 1)))
+   )
+)
+
+; ??? syntax should allow 0, prefix.
+(dmfi mul64
+  ( (X05_MUL64 dg2oi (RELAXED))
+    (I16_GO_MUL64 d16g2oi (RELAXABLE)))
+  (mach-ext-seq  MUL ((DI result))
+    ( (set result (mul (ext DI B) (ext DI C)))
+      (set (reg h-cr 57) (subword SI result 1))
+      (set (reg h-cr 58) (subword SI (srl result 16) 1))
+      (set (reg h-cr 59) (subword SI result 0))
+    )
+  )
+  sfisemantics
+)
+
+(dg2oi mulu64 X05_MULU64 ()
+  (mach-ext-seq MUL ((DI result))
+    ( (set result (mul (zext DI B) (zext DI C)))
+      (set (reg h-cr 57) (subword SI result 1))
+      (set (reg h-cr 58) (subword SI (srl result 16) 1))
+      (set (reg h-cr 59) (subword SI result 0))
+    )
+  )
+  sfisemantics
+)
+
+(define-pmacro (SImin) (add #x-7fffffff -1))
+
+(define-pmacro (sat32 tmp)
+  (sequence SI ()
+    (cond SI
+      ((gt tmp  #x7fffffff) (set cur_s1bit 1)  #x7fffffff)
+      ((lt tmp (SImin)) (set cur_s1bit 1) (SImin))
+      (else (set cur_s1bit 0) tmp)))
+)
+
+(define-pmacro (sat32op op B C)
+  (sequence SI ((DI tmp))
+    (set tmp (op (ext DI B) (ext DI C)))
+    (sat32 tmp))
+)
+
+(define-pmacro (sat16 val)
+  (sequence HI ((SI tmp))
+    (set tmp val)
+    (cond SI
+      ((gt tmp  #x7fff) (set cur_s1bit 1)  #x7fff)
+      ((lt tmp #x-8000) (set cur_s1bit 1) #x-8000)
+      (else tmp)))
+)
+
+(define-pmacro (sat_shift op_pos op_neg B C)
+  (sequence SI ((DI b))
+    (set b (ext DI B))
+    (set b
+	 (cond DI
+	   ((eq b 0) 0)
+	   ((gt C  31) (op_pos b 31))
+	   ((lt C -31) (op_neg b 31))
+	   ((ge C   0) (op_pos b C))
+	   (else  (op_neg B (neg C)))))
+    (sat32 b))
+)
+
+(define-pmacro (satdw op B C)
+  (sequence SI ((SI C_SI) (HI res1) (HI res2))
+    (set res2 (sat16 (op (subword HI B 1) (subword HI (cast SI C) 1))))
+    (set cur_s2bit cur_s1bit)
+    (set res1 (sat16 (op (subword HI B 0) (subword HI (cast SI C) 0))))
+    (or (sll res1 16) res2))
+)
+
+; saturating operations leave cbit alone, except for adds and subs,
+; which clear it
+(define-pmacro (flagNZVS)
+  (sequence ()
+    (flagNZ)
+    (set vbit cur_s1bit)
+    (cond (cur_s1bit (set s1bit 1) (set s2bit 1))))
+)
+
+(define-pmacro (flagNZVS1S2)
+  (sequence ()
+    (flagNZ)
+    (set vbit (or cur_s1bit cur_s2bit))
+    (if cur_s1bit (set s1bit 1))
+    (if cur_s2bit (set s2bit 1)))
+)
+
+(dgoi adds X05_ADDS ()
+  (mach-ext ARITH (sat32op add B C))
+  (sequence () (flagNZVS) (set cbit 0))
+)
+
+(dgoi subs X05_SUBS ()
+  (mach-ext ARITH (sat32op sub B C))
+  (sequence () (flagNZVS) (set cbit 0))
+)
+
+(d_divaw divaw X05_DIVAW ()
+  (mach-ext ARITH
+    (sequence SI ((USI tmp))
+      (set tmp (sll B 1))
+      (if SI (eq (and (sub SI tmp C) #x80000000) 0)
+	(add (sub tmp C) 1)
+	tmp)))
+  (nop)
+)
+
+(dgoi asls X05_ASLS ()
+  (mach-ext ARITH (sat_shift sll sra B (cast SI C)))
+  (flagNZVS)
+)
+
+(dgoi asrs X05_ASRS ()
+  (mach-ext ARITH (sat_shift sra sll B (cast SI C)))
+  (flagNZVS)
+)
+
+(dgoi addsdw X05_ADDSDW ()
+  (mach-ext ARITH (satdw add B C))
+  (flagNZVS1S2)
+)
+
+(dgoi subsdw X05_SUBSDW ()
+  (mach-ext ARITH (satdw sub B C))
+  (flagNZVS1S2)
+)
+
+(define-normal-insn-enum x05-sop-kind
+  "x06 extension single-operand operantion"
+  () X05_SOP_ f-op-A
+  (
+    (SWAP 0) (NORM 1) (SAT16 2) (RND16 3) (ABSSW 4) (ABSS 5) (NEGSW 6) (NEGS 7)
+    (NORMW 8) (ZOP 63)
+  )
+)
+
+(dgsoi swap X05_SOP_SWAP ()
+  (mach-ext ARITH (ror C 16))
+  (flagNZ)
+)
+
+(define-pmacro (arc-norm in)
+  (mach-ext NORM
+    (.splice sequence SI ((SI val) (SI bits))
+      (set val (if SI (ge in 0) in (inv in)))
+      (set bits 31)
+      (.unsplice (.map
+	(.pmacro (num)
+	  (cond ((ge val (sll 1 (sub (sll 1 num) 1)))
+		 (set val (srl val (sll 1 num)))
+		 (set bits (sub bits (sll 1 num))))))
+	(.iota 5 4 -1)))
+      bits))
+)
+
+(dgsoi norm X05_SOP_NORM ()
+  (arc-norm (cast SI C))
+  (sequence ()
+    (set nbit (nflag C))
+    (set zbit (zflag C)))
+)
+
+(dgsoi rnd16 X05_SOP_RND16 ()
+  (mach-ext ARITH (srl (sat32op add #x8000 C) 16))
+  (flagNZVS)
+)
+
+(dgsoi abssw X05_SOP_ABSSW ()
+  (mach-ext ARITH (sat16 (abs (ext SI (cast HI C)))))
+  (flagNZVS)
+)
+
+(dgsoi abss X05_SOP_ABSS ()
+  (mach-ext ARITH (if SI (ge (cast SI C) 0) C (sat32op sub 0 C)))
+  (flagNZVS)
+)
+
+(dgsoi negsw X05_SOP_NEGSW ()
+  (mach-ext ARITH (sat16 (ext SI (cast HI C))))
+  (flagNZVS)
+)
+
+(dgsoi negs X05_SOP_NEGS ()
+  (mach-ext ARITH (sat32op sub 0 C))
+  (flagNZVS)
+)
+
+(dgsoi normw X05_SOP_NORMW ()
+  (arc-norm (or (sll C 16) (and C #xffff)))
+  (flagNZ)
+)
+
+
+
+; ??? FIXME: Add macro-insn for 32 bit nop.
+(dsai nop_s "nop" "nop_s"
+  (+ OPM_SGO I16_GO_SOP I16_GO_SOP_ZOP I16_GO_ZOP_NOP)
+  ()
+  (nop)
+)
+
+(dsai unimp_s "unimp" "unimp_s"
+  (+ OPM_SGO I16_GO_SOP I16_GO_SOP_ZOP I16_GO_ZOP_UNIMP)
+  ()
+  (invalid-insn)
+)
+
+(define-normal-insn-enum pushpop-kind
+  ""
+  () PUSHPOP_ f-u5
+  ((B 1) (BLINK 17))
+)
+
+(define-normal-insn-enum pushpop-R_b
+  ""
+  () "" f-op--b
+  ((OP_B_0))
+)
+
+(dsai pop_s_b "pop" "pop$_S $R_b"
+  (+ OPM_SP I16_SP_POP R_b PUSHPOP_B)
+  ()
+  (sequence ()
+    (set R_b (mem SI SP))
+    (set SP (add SP 4)))
+)
+
+(dsai pop_s_blink "pop" "pop$_S $R31"
+  (+ OPM_SP I16_SP_POP OP_B_0 PUSHPOP_BLINK)
+  ()
+  (sequence ()
+    (set R31 (mem SI SP))
+    (set SP (add SP 4)))
+)
+
+(dsai push_s_b "push" "push$_S $R_b"
+  (+ OPM_SP I16_SP_PUSH R_b PUSHPOP_B)
+  ()
+  (sequence ()
+    (set SP (add SP -4))
+    (set (mem SI SP) R_b))
+)
+
+(dsai push_s_blink "push" "push$_S $R31"
+  (+ OPM_SP I16_SP_PUSH OP_B_0 PUSHPOP_BLINK)
+  ()
+  (sequence ()
+    (set SP (add SP -4))
+    (set (mem SI SP) R31))
+)
+
+(dgoi mullw X05_MULLW ()
+  (sequence SI ((DI tmp))
+    (set tmp (mach-ext DSP (mul (ext DI B) (ext DI (and C #xffff)))))
+    (set (reg h-cr 57) (subword SI tmp 1))
+    (set (reg h-cr 56) (subword SI tmp 0))
+    (sat32 tmp))
+  (flagNZVS)
+)
+
+(dgoi maclw X05_MACLW ()
+  (sequence SI ((DI old) (DI tmp) (SI SItmp))
+    (set old (add (sll (zext DI (reg h-cr 56)) 32) (zext DI (reg h-cr 57))))
+    (set tmp (mach-ext DSP (mul (ext DI B) (ext DI (and C #xffff)))))
+    (set vbit (not (srl (xor old tmp) 63)))
+    (set tmp (add old tmp))
+    (set vbit (and vbit (srl (xor old tmp) 63)))
+    (cond ((ne vbit 0) (set tmp (xor (sra old 63) (srl -1 1)))))
+    (set (reg h-cr 57) (subword SI tmp 1))
+    (set (reg h-cr 56) (subword SI tmp 0))
+    (set SItmp (sat32 tmp))
+    (set cur_s1bit (or cur_s1bit vbit))
+    SItmp)
+  (flagNZVS)
+)
+
+(dgoi machlw X05_MACHLW ()
+  (sequence SI ((DI old) (DI tmp))
+    (set old (add (sll (zext DI (reg h-cr 56)) 32) (zext DI (reg h-cr 57))))
+    (set tmp (mach-ext DSP (mul (ext DI B) (ext DI (and C #x-10000)))))
+    (set vbit (not (srl (xor old tmp) 63)))
+    (set tmp (add old tmp))
+    (set cur_s1bit (and vbit (xor old tmp)))
+    (cond (cur_s1bit (set tmp (xor (sra old 63) (srl -1 1)))))
+    (set (reg h-cr 57) (subword SI tmp 1))
+    (set (reg h-cr 56) (subword SI tmp 0))
+    (subword SI tmp 0))
+  (flagNZVS)
+)
+
+(dgoi mululw X05_MULULW ()
+  (sequence SI ((DI tmp))
+    (set tmp (mach-ext DSP (mul (zext DI B) (zext DI (and C #xffff)))))
+    (set (reg h-cr 57) (subword SI tmp 1))
+    (set (reg h-cr 56) (subword SI tmp 0))
+    (sat32 tmp))
+  (flagNZVS)
+)
+
+(dgoi machulw X05_MACHULW ()
+  (sequence SI ((DI old) (DI tmp))
+    (set old (add (sll (zext DI (reg h-cr 56)) 32) (zext DI (reg h-cr 57))))
+    (set tmp (mach-ext DSP (mul (zext DI B) (zext DI (and C #x-10000)))))
+    (set tmp (add old tmp))
+    (set cur_s1bit
+      (cond BI
+	((gtu old tmp)
+	 (sequence BI () (set tmp -1) 1))
+	(else 0)))
+    (set (reg h-cr 57) (subword SI tmp 1))
+    (set (reg h-cr 56) (subword SI tmp 0))
+    (subword SI tmp 0))
+  (flagNZVS)
+)
+
+(define-insn
+  (name current_loop_end)
+  (comment "pseudo insn for zero-overhead loop end")
+  (attrs)
+  ;(syntax xsyntax)
+  ; FIXME: ??? this should not have a format
+  (format (+ OPM_GO GO_TYPE_R_R GO_OP_SOP F0 GO_OP_SOP_PSEUDO RB_0 RC))
+  (semantics
+    (if (and (eq pc (aux-lp_end)) (not lbit))		; double-check lp_end
+      (sequence ()
+	(set (reg h-cr 60) (add (reg h-cr 60) -1))	; decrement lp_count
+	(if (reg h-cr 60)				; test lp_count
+	  (int-timer1 (aux-lp_start) 0
+	    (set pc (aux-lp_start))))			; jump to lp_start
+      )
+    )
+  )
+)
+
+; a zero-overhead loop end can't trigger at the start of a pbb.  If the
+; preceding instruction is a branch, we must put it in the same pbb,
+; thus postponing the branch decision till we see the loop end.
+(define-insn
+  (name current_loop_end_after_branch)
+  (comment "pseudo insn for zero-overhead loop end ending after branch")
+  (attrs)
+  ;(syntax xsyntax)
+  ; FIXME: ??? this should not have a format
+  (format (+ OPM_GO GO_TYPE_R_R GO_OP_SOP F0 GO_OP_SOP_PSEUDO RB_0 RC))
+  (semantics
+    (cond
+      ( (c-code SI "\n#ifdef SEM_IN_SWITCH\npbb_br_type != SEM_BRANCH_UNTAKEN\n#else\nCPU_PBB_BR_NPC (current_cpu) != SEM_BRANCH_UNTAKEN\n#endif\n")
+	(c-code "\n#ifdef SEM_IN_SWITCH\nnpc = pbb_br_npc; br_type = pbb_br_type;\n#else\nnpc = CPU_PBB_BR_NPC (current_cpu); br_type = CPU_PBB_BR_TYPE (current_cpu);\n#endif\n"))
+      ( (and (eq pc (aux-lp_end)) (not lbit))		; double-check lp_end
+	(sequence ()
+	  (set (reg h-cr 60) (add (reg h-cr 60) -1))	; decrement lp_count
+	  (if (reg h-cr 60)				; test lp_count
+	    (int-timer1 (aux-lp_start) 0
+	      (set pc (aux-lp_start))))			; jump to lp_start
+	)
+      )
+    )
+  )
+)
+
+; like current_loop_end_after_branch, but model arc600 idiosyncrasy:
+; decrement lp_count even if branch is taken.
+(define-insn
+  (name arc600_current_loop_end_after_branch)
+  (comment "pseudo insn for zero-overhead loop end ending after branch")
+  (attrs)
+  ;(syntax xsyntax)
+  ; FIXME: ??? this should not have a format
+  (format (+ OPM_GO GO_TYPE_R_R GO_OP_SOP F0 GO_OP_SOP_PSEUDO RB_0 RC))
+  (semantics
+    (cond
+      ( (c-code SI "\n#ifdef SEM_IN_SWITCH\npbb_br_type != SEM_BRANCH_UNTAKEN\n#else\nCPU_PBB_BR_NPC (current_cpu) != SEM_BRANCH_UNTAKEN\n#endif\n")
+	(sequence ()
+	  (c-code "\n#ifdef SEM_IN_SWITCH\nnpc = pbb_br_npc; br_type = pbb_br_type;\n#else\nnpc = CPU_PBB_BR_NPC (current_cpu); br_type = CPU_PBB_BR_TYPE (current_cpu);\n#endif\n")
+	  (set (reg h-cr 60) (add (reg h-cr 60) -1))))	; decrement lp_count
+      ( (and (eq pc (aux-lp_end)) (not lbit))		; double-check lp_end
+	(sequence ()
+	  (set (reg h-cr 60) (add (reg h-cr 60) -1))	; decrement lp_count
+	  (if (reg h-cr 60)				; test lp_count
+	    (int-timer1 (aux-lp_start) 0
+	      (set pc (aux-lp_start))))			; jump to lp_start
+	)
+      )
+    )
+  )
+)

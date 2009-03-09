@@ -19,6 +19,9 @@ $shell ${srccom}/gentvals.sh "" errno ${srcroot}/newlib/libc/include \
 $shell ${srccom}/gentvals.sh "" signal ${srcroot}/newlib/libc/include \
 	"signal.h sys/signal.h" 'SIG[A-Z0-9]*' "${cpp}"
 
+$shell ${srccom}/gentvals.sh "arc" open ${srcroot}/newlib/libc/include \
+	"../sys/arc/sys/fcntl.h" 'O_[A-Z0-9]*' "${cpp}"
+
 $shell ${srccom}/gentvals.sh "" open ${srcroot}/newlib/libc/include \
 	"fcntl.h sys/fcntl.h" 'O_[A-Z0-9]*' "${cpp}"
 
@@ -28,6 +31,10 @@ $shell ${srccom}/gentvals.sh "" open ${srcroot}/newlib/libc/include \
 # If you want to try to improve this, please do, but don't break anything.
 # Note that there is a standard syscall.h file (libgloss/syscall.h) now which
 # hopefully more targets can use.
+
+dir=libgloss/arc target=arc
+$shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
+	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
 
 dir=newlib/libc/sys/d10v/sys target=d10v
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \

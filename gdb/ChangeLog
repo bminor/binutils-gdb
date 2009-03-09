@@ -1,3 +1,8 @@
+2009-03-09  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* configure.tgt: Add arc case.
+	* config/arc: Old / new directory.
+
 2008-03-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Replace "Changes since GDB 6.7" into changes in GDB 6.8".

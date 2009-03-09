@@ -2761,6 +2761,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
       if (exec_bfd) 	/* No use without an exec file.  */
 	remote_check_symbols (symfile_objfile);
     }
+  observer_notify_inferior_created (&current_target, from_tty);
 }
 
 /* This takes a program previously attached to and detaches it.  After

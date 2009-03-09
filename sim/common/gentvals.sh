@@ -39,10 +39,12 @@ done
 
 if test -z "$target"
 then
+	echo "#ifndef NL_${type}_tgt_specific"
 	echo "#ifdef ${type}_defs"
 else
 	echo "#ifdef NL_TARGET_$target"
 	echo "#ifdef ${type}_defs"
+	echo "#define NL_${type}_tgt_specific"
 fi
 
 for f in $files
@@ -64,6 +66,7 @@ $cpp -I$dir tmpvals.h | grep DEFVAL | sed -e 's/DEFVAL//' -e 's/  / /'
 if test -z "$target"
 then
 	echo "/* end $type target macros */"
+	echo "#endif"
 	echo "#endif"
 else
 	echo "/* end $target $type target macros */"

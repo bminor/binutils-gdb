@@ -1,0 +1,193 @@
+# Makefile template for Configure for the arc simulator
+# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2003, 2004
+# Free Software Foundation, Inc.
+# Contributed by Cygnus Support.
+#
+# This file is part of GDB, the GNU debugger.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+## COMMON_PRE_CONFIG_FRAG
+
+ARC5_OBJS = arc5.o cpu5.o decode5.o sem5.o model5.o mloop5.o
+ARC6_OBJS = arc6.o cpu6.o decode6.o sem6.o model6.o mloop6.o
+ARC7_OBJS = arc7.o cpu7.o decode7.o sem7.o model7.o mloop7.o
+TRAPS_OBJ = @traps_obj@
+
+CONFIG_DEVICES = dv-sockser.o
+CONFIG_DEVICES =
+
+SIM_OBJS = \
+	$(SIM_NEW_COMMON_OBJS) \
+	sim-cpu.o \
+	sim-hload.o \
+	sim-hrw.o \
+	sim-model.o \
+	sim-reg.o \
+	cgen-utils.o cgen-trace.o cgen-scache.o \
+	cgen-run.o sim-reason.o sim-engine.o sim-stop.o \
+	sim-if.o arch.o \
+	$(ARC5_OBJS) \
+	$(ARC6_OBJS) \
+	$(ARC7_OBJS) \
+	$(TRAPS_OBJ) \
+	devices.o \
+	$(CONFIG_DEVICES)
+
+# Extra headers included by sim-main.h.
+SIM_EXTRA_DEPS = \
+	$(CGEN_INCLUDE_DEPS) \
+	arch.h cpuall.h arc-sim.h $(srcdir)/../../opcodes/arc-desc.h
+
+SIM_EXTRA_CFLAGS = @sim_extra_cflags@
+
+SIM_RUN_OBJS = nrun.o
+SIM_EXTRA_CLEAN = arc-clean
+
+# This selects the arc newlib/libgloss syscall definitions.
+NL_TARGET = -DNL_TARGET_arc
+
+## COMMON_POST_CONFIG_FRAG
+
+arch = arc
+
+sim-if.o: sim-if.c $(SIM_MAIN_DEPS) $(srcdir)/../common/sim-core.h
+
+arch.o: arch.c $(SIM_MAIN_DEPS)
+
+traps.o: traps.c targ-vals.h $(SIM_MAIN_DEPS)
+traps-linux.o: traps.c syscall.h targ-vals.h $(SIM_MAIN_DEPS)
+devices.o: devices.c $(SIM_MAIN_DEPS)
+
+# ARC objs
+
+ARC5_INCLUDE_DEPS = \
+	$(CGEN_MAIN_CPU_DEPS) \
+	cpu5.h decode5.h eng5.h
+
+arc5.o: arc5.c $(ARC5_INCLUDE_DEPS)
+
+# FIXME: Use of `mono' is wip.
+mloop5.c eng5.h: stamp-5mloop
+stamp-5mloop: $(srcdir)/../common/genmloop.sh mloop5.in Makefile
+	$(SHELL) $(srccom)/genmloop.sh \
+		-mono -fast -pbb -switch sem5-switch.c \
+		-cpu a5f -infile $(srcdir)/mloop5.in \
+		-outfile-suffix 5
+	$(SHELL) $(srcroot)/move-if-change eng5.hin eng5.h
+	$(SHELL) $(srcroot)/move-if-change mloop5.cin mloop5.c
+	touch stamp-5mloop
+mloop5.o: mloop5.c sem5-switch.c $(ARC5_INCLUDE_DEPS)
+
+cpu5.o: cpu5.c $(ARCBF_INCLUDE_DEPS)
+decode5.o: decode5.c $(ARCBF_INCLUDE_DEPS)
+sem5.o: sem5.c $(ARCBF_INCLUDE_DEPS)
+model5.o: model5.c $(ARCBF_INCLUDE_DEPS)
+
+# ARC600 objs
+
+ARC600F_INCLUDE_DEPS = \
+	$(CGEN_MAIN_CPU_DEPS) \
+	cpu6.h decode6.h eng6.h
+
+arc6.o: arc6.c $(ARC600F_INCLUDE_DEPS)
+
+# FIXME: Use of `mono' is wip.
+mloop6.c eng6.h: stamp-6mloop
+stamp-6mloop: $(srcdir)/../common/genmloop.sh mloop6.in Makefile
+	$(SHELL) $(srccom)/genmloop.sh \
+		-mono -fast -pbb -switch sem6-switch.c \
+		-cpu arc600f -infile $(srcdir)/mloop6.in \
+		-outfile-suffix 6
+	$(SHELL) $(srcroot)/move-if-change eng6.hin eng6.h
+	$(SHELL) $(srcroot)/move-if-change mloop6.cin mloop6.c
+	touch stamp-6mloop
+mloop6.o: mloop6.c sem6-switch.c $(ARC600F_INCLUDE_DEPS)
+
+cpu6.o: cpu6.c $(ARC600F_INCLUDE_DEPS)
+decode6.o: decode6.c $(ARC600F_INCLUDE_DEPS)
+sem6.o: sem6.c $(ARC600F_INCLUDE_DEPS)
+model6.o: model6.c $(ARC600F_INCLUDE_DEPS)
+
+# ARC700 objs
+
+ARC700F_INCLUDE_DEPS = \
+	$(CGEN_MAIN_CPU_DEPS) \
+	cpu7.h decode7.h eng7.h
+
+arc7.o: arc7.c $(ARC700F_INCLUDE_DEPS)
+
+# FIXME: Use of `mono' is wip.
+mloop7.c eng7.h: stamp-7mloop
+stamp-7mloop: $(srcdir)/../common/genmloop.sh mloop7.in Makefile
+	$(SHELL) $(srccom)/genmloop.sh \
+		-mono -fast -pbb -switch sem7-switch.c \
+		-cpu arc700f -infile $(srcdir)/mloop7.in \
+		-outfile-suffix 7
+	$(SHELL) $(srcroot)/move-if-change eng7.hin eng7.h
+	$(SHELL) $(srcroot)/move-if-change mloop7.cin mloop7.c
+	touch stamp-7mloop
+
+mloop7.o:  mloop7.c sem7-switch.c $(ARC700F_INCLUDE_DEPS)
+cpu7.o:    cpu7.c    $(ARC700F_INCLUDE_DEPS)
+decode7.o: decode7.c $(ARC700F_INCLUDE_DEPS)
+sem7.o:    sem7.c    $(ARC700F_INCLUDE_DEPS)
+model7.o:  model7.c  $(ARC700F_INCLUDE_DEPS)
+
+arc-clean:
+	rm -f mloop5.c eng5.h stamp-5mloop
+	rm -f mloop6.c eng6.h stamp-6mloop
+	rm -f mloop7.c eng7.h stamp-7mloop
+	rm -f stamp-arch stamp-5cpu stamp-6cpu stamp-7cpu
+	rm -f tmp-*
+
+# cgen support, enable with --enable-cgen-maint
+CGEN_MAINT = ; @true
+# The following line is commented in or out depending upon --enable-cgen-maint.
+@CGEN_MAINT@CGEN_MAINT =
+
+stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CGEN_CPU_DIR)/arc.cpu
+	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all \
+	  archfile=$(CGEN_CPU_DIR)/arc.cpu \
+	  FLAGS="with-scache with-profile=fn"
+	touch stamp-arch
+arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
+
+stamp-5cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DIR)/arc.cpu
+	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
+	  cpu=a5f mach=a5 SUFFIX=5 \
+	  archfile=$(CGEN_CPU_DIR)/arc.cpu \
+	  FLAGS="with-scache with-profile=fn" \
+	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
+	touch stamp-5cpu
+cpu5.h sem5.c sem5-switch.c model5.c decode5.c decode5.h: $(CGEN_MAINT) stamp-5cpu
+
+stamp-6cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DIR)/arc.cpu
+	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
+	  cpu=arc600f mach=arc600 SUFFIX=6 \
+	  archfile=$(CGEN_CPU_DIR)/arc.cpu \
+	  FLAGS="with-scache with-profile=fn" \
+	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
+	touch stamp-6cpu
+cpu6.h sem6.c sem6-switch.c model6.c decode6.c decode6.h: $(CGEN_MAINT) stamp-6cpu
+
+stamp-7cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DIR)/arc.cpu
+	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
+	  cpu=arc700f mach=arc700 SUFFIX=7 \
+	  archfile=$(CGEN_CPU_DIR)/arc.cpu \
+	  FLAGS="with-scache with-profile=fn" \
+	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
+	touch stamp-7cpu
+cpu7.h sem7.c sem7-switch.c model7.c decode7.c decode7.h: $(CGEN_MAINT) stamp-7cpu

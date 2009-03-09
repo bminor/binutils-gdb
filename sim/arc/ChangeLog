@@ -1,0 +1,227 @@
+2008-11-18  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sem5.c, sem6.c, sem7.c: Regenerate.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+
+2008-09-18  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sem5.c, sem6.c, sem7.c: Regenerate.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+
+	* sim-if.c (init_stack): Round memory up to multiple of 32 bytes.
+
+2008-09-16  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5,c, decode6,c, decode7.c, sem5.c, sem6.c, sem7.c: Regenerate.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+
+2008-09-13  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sem5.c, sem6.c, sem7.c: Regenerate.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+
+2008-09-12  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sem5.c, sem6.c, sem7.c: Regenerate.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+
+2008-09-12  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.c, decode6.c decode7.c, sem5.c, sem6.c, sem7.c: Regenerate.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+	* decode5.h, decode6.h, decode7.h: Likweise.
+	* model5.c, model6.c, model7.c: Likewise.
+
+2008-09-11  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.c, decode6.c decode7.c, sem5.c, sem6.c, sem7.c: Regenerate.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+	* decode5.h, decode6.h, decode7.h: Likweise.
+	* model5.c, model6.c, model7.c: Likewise.
+
+2008-07-14  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.c, decode6.c, decode7.c, sem5.c, sem6.c, sem7.c: Regenerate.
+	* decode5.h, decode6.h, decode7.h: : Likewise.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+	* cpu5.h, cpu6.h, cpu7.h, model5.c, model6.c, model7.c: Likewise.
+
+2008-06-19  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sim-if.c (init_stack): Round up memsize.
+	(sim_create_inferior): Pass pointer to argv array rather than
+	first element in r1.
+
+2008-03-28  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.c, decode6.c, decode7.c, sem5.c, sem6.c, sem7.c: Regenerate.
+	* decode5.h, decode6.h, decode7.h: : Likewise.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+	* model5.c, model6.c, model7.c: Likewise.
+	* mloop6.in (xextract-pbb): Model special ARC600 behaviour
+	for branches at loop end.
+
+2008-02-12  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* mloop5.in (xextract-pbb): Interpret at least one insn.
+	* mloop6.in (xextract-pbb): Likewise.
+	* mloop7.in (xextract-pbb): Likewise.
+	* sem5.c, sem6.c, sem7.c: Regenerate.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+
+2007-10-25  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.c, decode6.c, decode7.c: Regenerate.
+	* decode5.h, decode6.h, decode7.h: Likewise.
+	* sem5.c, sem6.c, sem7.c: Likewise.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+	* cpu5.h, cpu6.h, cpu7.h: Likewise.
+	* model5.c, model6.c, model7.c: Regenerate.
+	* traps.c (arc_breakpoint): New function.
+
+2007-10-18  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* mloop5.in (extract): Supply insn parameter twice to @cpu@_decode.
+	Fix logic that decodes delay slot insn length.
+	* loop6.in, mloop7.in: Likewise.
+	* decode5.c, decode6.c, decode7.c: Regenerate.
+	* decode5.h, decode6.h, decode7.h: Likewise.
+	* sem5.c, sem6.c, sem7.c: Likewise.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+	* cpu5.h, cpu6.h, cpu7.h: Likewise.
+
+2007-10-15  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* mloop7.in (xextract-pbb): Use current_loop_end_after_branch
+	when indicated.
+	* decode5.c, decode6.c, decode7.c: Regenerate.
+	* decode5.h, decode6.h, decode7.h: Likewise.
+	* sem5.c, sem6.c, sem7.c: Likewise.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+	* model5.c, model6.c, model7.c: Regenerate.
+
+	* sim-if.c (init_stack): If argv is zero, don't use it.
+
+2007-10-12  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* mloop-7.in (xextract-pbb): Fix zero-overhead loops for case when
+	branch precedes loop end.
+
+2007-10-04  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sem5.c, sem6.c, sem7.c: Regenerate.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+
+2007-10-01  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.c, decode6.c, decode7.c: Regenerate.
+	* sem5.c, sem6.c, sem7.c: Likewise.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+
+2007-09-24  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.c, decode6.c, decode7.c: Regenerate.
+	* decode5.h, decode6.h, decode7.h: Likewise.
+	* sem5.c, sem6.c, sem7.c: Likewise.
+	* sem-switch5.c, sem-switch6.c, sem-switch7.c: Likewise.
+	* cpu5.h, cpu6.h, cpu7.h, cpu5.c, cpu6.c, cpu7.c: Likewise.
+	* traps.c (arc_trap): Initialize s.arg4.
+	(arc_syscall): Fix tv_usec for TARGET_SYS_gettimeofday.
+	Add TARGET_SYS_setitimer and TARGET_SYS_profil cases.
+
+2007-09-07  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.c, decode6.c, decode7.c: Regenerate.
+	* decode5.h, decode6.h, decode7.h: Likewise.
+	* sem5.c, sem6.c, sem7.c: Likewise.
+	* sem-switch5.c, sem-switch6.c, sem-switch7.c: Likewise.
+	* cpu5.h, cpu6.h, cpu7.h, cpu5.c, cpu6.c, cpu7.c: Likewise.
+	* model5.c, model6.c, model7.c: Likewise.
+
+2007-08-23  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sem5.c, sem6.c, sem7.c: Regenerate.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+	* cpu5.h, cpu6.h, cpu7.h, cpu5.c, cpu6.c, cpu7.c: Likewise.
+
+2007-08-22  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sem5.c, sem6.c, sem7.c: Regenerate.
+        * sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+
+2007-08-22  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sem5.c, sem6.c, sem7.c: Regenerate.
+        * sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+
+2007-08-22  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sem5.c, sem6.c, sem7.c: Regenerate.
+        * sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+
+2007-08-22  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* cpu5.h, cpu6.h, cpu7.h: Regenerate.
+
+2007-08-21  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.c, decode6.c, decode7.c: Regenerate.
+	* sem5.c, sem6.c, sem7.c: Regenerate.
+	* sem-switch5.c, sem-switch6.c, sem-switch7.c: Regenerate.
+	* model5.c, model6.c, model7.c: Regenerate.
+
+2007-08-21  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sim-if.c (sim_open): Pass endianness obtained from bfd to
+	arc_cgen_cpu_open_1.
+
+2007-08-08  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.c, decode6.c, decode7.c: Regenerate.
+	* sem5.c, sem6.c, sem7.c: Likewise.
+	* sem5-switch.c, sem6-switch.c, sem7-switch.c: Likewise.
+	* decode5.h, decode6.h, decode7.h: Likewise.
+	* cpu5.h, cpu6.h, cpu7.h, model5.c, model6.c, model7.c: Likewise.
+
+2007-06-20  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sim-if.c (sim_open): Remove code to canonicalize bfd mach.
+
+2007-06-19  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.c, decode6.c, decode7.c: Regenerate.
+
+2007-05-15  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* decode5.h, decode6.h, decode7.h: Regenerate.
+	* model5.c, model6.c, model7.c: Likewise.
+	* sim-if.c (sim_open): Call sim_analyze_program before init_stack.
+	Canonicalize bfd mach.
+	* arc5.c (a5f_model_a5_u_exec): Rename to:
+	(a5f_model_A5_u_exec).
+	* arc6.c (arc600f_model_arc600_u_exec): Rename to:
+	(arc600f_model_ARC600_u_exec).
+	* arc7.c (arc700f_model_arc700_u_exec): Rename to:
+	(arc700f_model_ARC700_u_exec).
+
+2007-05-14  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* traps.c (arc_syscall): Use fdbad / fdmap for fstat.
+
+2007-05-02  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* traps.c: Include <sys/stat.h>,  <sys/time.h>, "gdb/target-io/arc.h".
+	(arc_trap): Try arc_syscall before cb_syscall.
+	(arc_syscall): Add stat, fstat and gettimeofday.
+
+2007-04-30  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* configure.ac, tconfig.in, Makefile.in, arc-sim.h: New files.
+	* mloop5.in, mloop6.in, mloop7.in, sim-main.h, devices.c: Likewise.
+	* sim-if.c, traps.c, arc5.c, arc6.c, arc7.c: Likewise.
+	* config.in, configure, arch.h, arch.c, decode5.h, decode6.h: Generate.
+	* decode7.h, decode5.c, decode6.c, decode7.c, sem5-switch.c: Likewise.
+	* sem6-switch.c, src/sim/arc/sem7-switch.c, sem5.c, sem6.c: Likewise.
+	* sem7.c, cpu5.h, cpu6.h, cpu7.h, cpuall.h, cpu5.c, cpu6.c: Likewise.
+	* cpu7.c, src/sim/arc/model5.c, model6.c, model7.c: Likewise.
+

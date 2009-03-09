@@ -92,8 +92,8 @@ static int os_close PARAMS ((host_callback *, int));
 static void os_vprintf_filtered PARAMS ((host_callback *, const char *, va_list));
 static void os_evprintf_filtered PARAMS ((host_callback *, const char *, va_list));
 static void os_error PARAMS ((host_callback *, const char *, ...));
-static int fdmap PARAMS ((host_callback *, int));
-static int fdbad PARAMS ((host_callback *, int));
+int fdmap PARAMS ((host_callback *, int));
+int fdbad PARAMS ((host_callback *, int));
 static int wrap PARAMS ((host_callback *, int));
 
 /* Set the callback copy of errno from what we see now.  */
@@ -110,7 +110,7 @@ wrap (p, val)
 /* Make sure the FD provided is ok.  If not, return non-zero
    and set errno. */
 
-static int 
+int 
 fdbad (p, fd)
      host_callback *p;
      int fd;
@@ -123,7 +123,7 @@ fdbad (p, fd)
   return 0;
 }
 
-static int 
+int 
 fdmap (p, fd)
      host_callback *p;
      int fd;

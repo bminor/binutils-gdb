@@ -1,0 +1,364 @@
+/* ARC opcode support.  -*- C -*-
+   Copyright 1998, 1999, 2000, 2001, 2004, 2005, 2007, 2008
+   Free Software Foundation, Inc.
+   This file is part of CGEN.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
+
+/* This file is an addendum to arc.cpu.  Heavy use of C code isn't
+   appropriate in .cpu files, so it resides here.  This especially applies
+   to assembly/disassembly where parsing/printing can be quite involved.
+   Such things aren't really part of the specification of the cpu, per se,
+   so .cpu files provide the general framework and .opc files handle the
+   nitty-gritty details as necessary.
+
+   Each section is delimited with start and end markers.
+
+   <arch>-opc.h additions use: "-- opc.h"
+   <arch>-opc.c additions use: "-- opc.c"
+   <arch>-asm.c additions use: "-- asm.c"
+   <arch>-dis.c additions use: "-- dis.c"
+   <arch>-ibd.h additions use: "-- ibd.h"  */
+
+   /* Copyright (C) 2000, 2001, 2004, 2005 Red Hat, Inc. */
+/* -- opc.h */
+
+#undef  CGEN_DIS_HASH_SIZE
+#define CGEN_DIS_HASH_SIZE 1024
+#undef  CGEN_DIS_HASH
+#define CGEN_DIS_HASH(buffer, value, big_p) \
+  arc_cgen_dis_hash (buffer, big_p)
+extern unsigned int arc_cgen_dis_hash (const char *, int);
+/* Override CGEN_INSN_BITSIZE for sim/common/cgen-trace.c .
+   insn extraction for simulation is fine with 32 bits, since we fetch long
+   immediates as part of the semantics if required, but for disassembly
+   we must make sure we read all the bits while we have the information how
+   to read them.  */
+#define CGEN_INSN_DISASM_BITSIZE(insn) 64
+extern char limm_str[];
+
+/* cgen can't generate correct decoders for variable-length insns,
+   so we have it generate a decoder that assumes all insns are 32 bit.
+   And even if the decoder generator bug were fixed, having the decoder
+   understand long immediates would be messy.
+   The simulator calculates instruction sizes as part of the semantics.
+   For disassembly, we redefine CGEN_EXTRACT_FN so that we can correct
+   the calculated instruction length.  */
+#undef CGEN_EXTRACT_FN
+#define CGEN_EXTRACT_FN(cd, insn) ARC_CGEN_EXTRACT_FN
+extern int arc_insn_length (unsigned long insn_value, const CGEN_INSN *insn,
+			   CGEN_EXTRACT_INFO *info, bfd_vma pc);
+static inline int
+ARC_CGEN_EXTRACT_FN (CGEN_CPU_DESC cd, const CGEN_INSN *insn,
+		     CGEN_EXTRACT_INFO *info, CGEN_INSN_INT insn_value,
+		     CGEN_FIELDS *fields, bfd_vma pc)
+{
+  static int initialized = 0;
+  /* ??? There is no suitable hook for one-time initialization.  */
+  if (!initialized)
+    {
+      static CGEN_KEYWORD_ENTRY arc_cgen_opval_limm_entry0 =
+	{ limm_str, 62, {0, {{{0, 0}}}}, 0, 0 };
+      static CGEN_KEYWORD_ENTRY arc_cgen_opval_limm_entry1 =
+	{ limm_str, 62, {0, {{{0, 0}}}}, 0, 0 };
+
+      cgen_keyword_add (&arc_cgen_opval_cr_names, &arc_cgen_opval_limm_entry0);
+      cgen_keyword_add (&arc_cgen_opval_h_noilink, &arc_cgen_opval_limm_entry1);
+      initialized = 1;
+    }
+  /* ??? sim/common/cgen-trace.c:sim_cgen_disassemble_insn uses its own
+     home-brewn instruction target-to-host conversion, which gets the
+     endianness wrong for ARC.  */
+  if (cd->endian == CGEN_ENDIAN_LITTLE)
+    insn_value = ((insn_value >> 16) & 0xffff) | (insn_value << 16);
+
+  /* First, do the normal extract handler call, but ignore its value.  */
+  ((cd)->extract_handlers[(insn)->opcode->handlers.extract]
+    (cd, insn, info, insn_value, fields, pc));
+  /* Now calculate the actual insn length, and extract any long immediate
+     if present.  */
+  return arc_insn_length (insn_value, insn, info, pc);
+}
+
+/* -- */
+
+/* -- opc.c */
+unsigned int
+arc_cgen_dis_hash (const char * buf, int big_p)
+{
+  const unsigned char *ubuf = (unsigned const char *) buf;
+  int b0 = ubuf[0], b1 = ubuf[1], w;
+
+  if (big_p)
+    w = (b0 << 8) + b1;
+  else
+    w = (b1 << 8) + b0;
+
+  switch (w >> 11)
+    {
+    case 0x01: /* branches */
+      return ((w >> 6) | w);
+    case 0x04: /* general operations */
+    case 0x05: case 0x06: case 0x07: /* 32 bit extension instructions */
+      return ((w >> 3) & 768) | (w & 255);
+    case 0x0c: /* .s load/add register-register */
+    case 0x0d: /* .s add/sub/shift register-immediate */
+    case 0x0e: /* .s mov/cmp/add with high register */
+      return ((w >> 6) & 992) | (w & 24);
+    case 0x0f: /* 16 bit general operations */
+      return ((w >> 6) & 992) | (w & 31);
+    case 0x17: /* .s shift/subtract/bit immediate */
+    case 0x18: /* .s stack-pointer based */
+      return ((w >> 6) & 992) | ((w >> 5) & 7);
+    case 0x19: /* load/add GP-relative */
+    case 0x1e: /* branch conditionally */
+      return ((w >> 6) & (992 | 24));
+    case 0x1c: /* add/cmp immediate */
+    case 0x1d: /* branch on compare register with zero */
+      return ((w >> 6) & (992 | 2));
+    default:
+      return ((w >> 6) & 992);
+    }
+}
+
+/* -- */
+
+/* -- asm.c */
+#if 0
+static const char * MISSING_CLOSING_PARENTHESIS = N_("missing `)'");
+
+/* Handle '#' prefixes (i.e. skip over them).  */
+
+static const char *
+parse_hash (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	    const char **strp,
+	    int opindex ATTRIBUTE_UNUSED,
+	    long *valuep ATTRIBUTE_UNUSED)
+{
+  if (**strp == '#')
+    ++*strp;
+  return NULL;
+}
+
+/* Handle shigh(), high().  */
+
+static const char *
+parse_hi16 (CGEN_CPU_DESC cd,
+	    const char **strp,
+	    int opindex,
+	    unsigned long *valuep)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+  bfd_vma value;
+
+  if (**strp == '#')
+    ++*strp;
+
+  if (strncasecmp (*strp, "high(", 5) == 0)
+    {
+      *strp += 5;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_M32R_HI16_ULO,
+				   & result_type, & value);
+      if (**strp != ')')
+	return MISSING_CLOSING_PARENTHESIS;
+      ++*strp;
+      if (errmsg == NULL
+  	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	{
+	  value >>= 16;
+	  value &= 0xffff;
+	}
+      *valuep = value;
+      return errmsg;
+    }
+  else if (strncasecmp (*strp, "shigh(", 6) == 0)
+    {
+      *strp += 6;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_M32R_HI16_SLO,
+ 				   & result_type, & value);
+      if (**strp != ')')
+	return MISSING_CLOSING_PARENTHESIS;
+      ++*strp;
+      if (errmsg == NULL
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+        {
+          value += 0x8000;
+          value >>= 16;
+	  value &= 0xffff;
+        }
+      *valuep = value;
+      return errmsg;
+    }
+
+  return cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+}
+
+/* Handle low() in a signed context.  Also handle sda().
+   The signedness of the value doesn't matter to low(), but this also
+   handles the case where low() isn't present.  */
+
+static const char *
+parse_slo16 (CGEN_CPU_DESC cd,
+	     const char ** strp,
+	     int opindex,
+	     long * valuep)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+  bfd_vma value;
+
+  if (**strp == '#')
+    ++*strp;
+
+  if (strncasecmp (*strp, "low(", 4) == 0)
+    {
+      *strp += 4;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_M32R_LO16,
+				   & result_type, & value);
+      if (**strp != ')')
+	return MISSING_CLOSING_PARENTHESIS;
+      ++*strp;
+      if (errmsg == NULL
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value = ((value & 0xffff) ^ 0x8000) - 0x8000;
+      *valuep = value;
+      return errmsg;
+    }
+
+  if (strncasecmp (*strp, "sda(", 4) == 0)
+    {
+      *strp += 4;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_M32R_SDA16,
+				   NULL, & value);
+      if (**strp != ')')
+	return MISSING_CLOSING_PARENTHESIS;
+      ++*strp;
+      *valuep = value;
+      return errmsg;
+    }
+
+  return cgen_parse_signed_integer (cd, strp, opindex, valuep);
+}
+
+/* Handle low() in an unsigned context.
+   The signedness of the value doesn't matter to low(), but this also
+   handles the case where low() isn't present.  */
+
+static const char *
+parse_ulo16 (CGEN_CPU_DESC cd,
+	     const char **strp,
+	     int opindex,
+	     unsigned long *valuep)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+  bfd_vma value;
+
+  if (**strp == '#')
+    ++*strp;
+
+  if (strncasecmp (*strp, "low(", 4) == 0)
+    {
+      *strp += 4;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_M32R_LO16,
+				   & result_type, & value);
+      if (**strp != ')')
+	return MISSING_CLOSING_PARENTHESIS;
+      ++*strp;
+      if (errmsg == NULL
+	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value &= 0xffff;
+      *valuep = value;
+      return errmsg;
+    }
+
+  return cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+}
+#endif
+
+/* -- */
+
+/* -- dis.c */
+char limm_str[11] = "0x";
+
+/* Read a long immediate and write it hexadecimally into limm_str.  */
+static void
+read_limm (CGEN_EXTRACT_INFO *ex_info, bfd_vma pc)
+{
+  unsigned char buf[2];
+  int i;
+  char *limmp = limm_str + 2;
+  disassemble_info *dis_info = (disassemble_info *) ex_info->dis_info;
+
+  for (i = 0; i < 2; i++, limmp +=4, pc += 2)
+    {
+      int status = (*dis_info->read_memory_func) (pc, buf, 2, dis_info);
+
+      if (status != 0)
+        (*dis_info->memory_error_func) (status, pc, dis_info);
+      sprintf (limmp, "%.4x",
+	       (unsigned) bfd_get_bits (buf, 16,
+					dis_info->endian == BFD_ENDIAN_BIG));
+    }
+}
+
+/* Return the actual instruction length, in bits, which depends on the size
+   of the opcode - 2 or 4 bytes - and the absence or presence of a (4 byte)
+   long immediate.
+   Also, if a long immediate is present, put its hexadecimal representation
+   into limm_str.
+   ??? cgen-opc.c:cgen_lookup_insn has a 'sanity' check of the length
+   that will fail if its input length differs from the result of
+   CGEN_EXTRACT_FN.  Need to check when this could trigger.  */
+int
+arc_insn_length (unsigned long insn_value, const CGEN_INSN *insn,
+		 CGEN_EXTRACT_INFO *info, bfd_vma pc)
+{
+  switch (CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_LIMM))
+    {
+    case LIMM_NONE:
+      return CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_SHORT_P) ? 16 : 32;
+    case LIMM_H:
+      {
+	/* This is a short insn; extract the actual opcode.  */
+	unsigned high = insn_value >> 16;
+
+        if ((high & 0xe7) != 0xc7)
+	  return 16;
+	read_limm (info, pc+2);
+	return 48;
+      }
+    case LIMM_B:
+      if ((insn_value & 0x07007000) != 0x06007000)
+	return 32;
+      break;
+    case LIMM_BC:
+      if ((insn_value & 0x07007000) == 0x06007000)
+	break;
+      /* Fall through.  */
+    case LIMM_C:
+      if ((insn_value & 0x00000fc0) != 0x00000f80)
+	return 32;
+      break;
+    default:
+      abort ();
+    }
+  read_limm (info, pc+4);
+  return 64;
+}
+
+/* -- */

@@ -1,0 +1,46 @@
+; SuperH SHcompact instruction set description.  -*- Scheme -*-
+; Copyright (C) 2006 Red Hat, Inc.
+; This file is part of CGEN.
+; See file COPYING.CGEN for details.
+
+; Syntax for "delay" is different for SID vs SIM.
+(define-pmacro (set-delay del targ src)
+  (delay del (set targ src)))
+
+; SIM does not use parallel insns to implement "delay".
+(define-pmacro (isa-parallel-insns n)
+  (parallel-insns 1)
+)
+
+; Not needed for the sim.
+(define-pmacro (save-delayed-pc disp)
+  (nop)
+)
+
+(define-pmacro (save-branch-prediction tra likely)
+  (nop)
+)
+
+(define-pmacro (save-branch-optimization likely)
+  (nop)
+)
+
+(define-pmacro (save-cfg-address address)
+  (nop)
+)
+
+; For making profiling calls and dynamic configuration.
+(define-pmacro (cg-profile caller callee)
+  (nop)
+)
+(define-pmacro (cg-profile-delay caller callee delay)
+  (nop)
+)
+(define-pmacro (notify-ret pr)
+  (nop)
+)
+; For dynamic configuration only.
+(define-pmacro (cg-profile-jump caller callee)
+  (nop)
+)
+

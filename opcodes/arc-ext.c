@@ -19,54 +19,144 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#include "sysdep.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "bfd.h"
 #include "arc-ext.h"
-#include "libiberty.h"
+#include "elf/arc.h"
 
-/* Extension structure  */
+#include "libiberty.h"
+#include "sysdep.h"
+
+/* extension structure */
 static struct arcExtMap arc_extension_map;
 
 /* Get the name of an extension instruction.  */
 
 const char *
-arcExtMap_instName(int opcode, int minor, int *flags)
+arcExtMap_instName (int opcode, int insn, int *flags)
 {
-    if (opcode == 3)
-      {
-	/* FIXME: ??? need to also check 0/1/2 in bit0 for (3f) brk/sleep/swi  */
-	if (minor < 0x09 || minor == 0x3f)
-	  return 0;
-	else
-	  opcode = 0x1f - 0x10 + minor - 0x09 + 1;
-      }
-    else
-      if (opcode < 0x10)
-	return 0;
-    else
-      opcode -= 0x10;
-    if (!arc_extension_map.instructions[opcode])
-      return 0;
-    *flags = arc_extension_map.instructions[opcode]->flags;
-    return arc_extension_map.instructions[opcode]->name;
+  /* Here the following tasks need to be done.  First of all, the opcode
+     stored in the Extension Map is the real opcode.  However, the subopcode
+     stored in the instruction to be disassembled is mangled.  We pass (in
+     minor opcode), the instruction word.  Here we will un-mangle it and get
+     the real subopcode which we can look for in the Extension Map.  This
+     function is used both for the ARCTangent and the ARCompact, so we would
+     also need some sort of a way to distinguish between the two
+     architectures.  This is because the ARCTangent does not do any of this
+     mangling so we have no issues there.  */
+
+  /* If P[22:23] is 0 or 2 then un-mangle using iiiiiI.  If it is 1 then use
+     iiiiIi.  Now, if P is 3 then check M[5:5] and if it is 0 then un-mangle
+     using iiiiiI else iiiiii.  */
+
+  unsigned char minor;
+  struct ExtInstruction *temp;
+
+  if (*flags != E_ARC_MACH_A4) /* ARCompact extension instructions.  */
+    {
+      /* 16-bit instructions.  */
+      if (0x08 <= opcode && opcode <= 0x0b)
+	{
+	  unsigned char I, b, c, i;
+
+	  I = (insn & 0xf800) >> 11;
+	  b = (insn & 0x0700) >> 8;
+	  c = (insn & 0x00e0) >> 5;
+	  i = (insn & 0x001f);
+
+	  if (i)
+	    minor = i;
+	  else
+	    minor = (c == 0x07) ? b : c;
+	}
+      /* 32-bit instructions.  */
+      else
+	{
+	  unsigned char P, M, I, A, B;
+
+	  P = (insn & 0x00c00000) >> 22;
+	  M = (insn & 0x00000020);
+	  I = (insn & 0x003f0000) >> 16;
+	  A = (insn & 0x0000003f);
+	  B = ((insn & 0x07000000) >> 24) | ((insn & 0x00007000) >> 9);
+
+	  if (I != 0x2f)
+	    {
+#ifndef UNMANGLED
+	      switch (P)
+		{
+		case 3:
+		  if (M)
+		    {
+		      minor = I;
+		      break;
+		    }
+		case 0:
+		case 2:
+		  minor = (I >> 1) | ((I & 0x1) << 5);
+		  break;
+		case 1:
+		  minor = (I >> 1) | (I & 0x1) | ((I & 0x2) << 4);
+		}
+#else
+	      minor = I;
+#endif
+	    }
+	  else
+	    {
+	      if (A != 0x3f)
+		minor = A;
+	      else
+		minor = B;
+	    }
+	}
+    }
+  else /* ARCTangent extension instructions.  */
+    minor = insn;
+
+  temp = arc_extension_map.instructions[INST_HASH (opcode, minor)];
+  while (temp)
+    {
+      if ((temp->major == opcode) && (temp->minor == minor))
+	{
+	  *flags = temp->flags;
+	  return temp->name;
+	}
+      temp = temp->next;
+    }
+
+  return NULL;
 }
 
-/* Get the name of an extension core register.  */
-
+/* get the name of an extension core register */
 const char *
-arcExtMap_coreRegName(int value)
+arcExtMap_coreRegName (int value)
 {
   if (value < 32)
     return 0;
-  return arc_extension_map.coreRegisters[value-32];
+  return arc_extension_map.coreRegisters[value-32].name;
 }
 
-/* Get the name of an extension condition code.  */
+enum ExtReadWrite
+arcExtMap_coreReadWrite (int value)
+{
+  if (value < 32)
+    return REG_INVALID;
+  return arc_extension_map.coreRegisters[value-32].rw;
+}
 
+#if 0
+struct ExtAuxRegister *
+arc_ExtMap_auxRegs ()
+{
+  return arc_extension_map.auxRegisters;
+}
+#endif
+
+/* Get the name of an extension condition code.  */
 const char *
-arcExtMap_condCodeName(int value)
+arcExtMap_condCodeName (int value)
 {
   if (value < 16)
     return 0;
@@ -76,83 +166,84 @@ arcExtMap_condCodeName(int value)
 /* Get the name of an extension aux register.  */
 
 const char *
-arcExtMap_auxRegName(long address)
+arcExtMap_auxRegName (long address)
 {
-  /* walk the list of aux reg names and find the name  */
+  /* Walk the list of aux reg names and find the name.  */
   struct ExtAuxRegister *r;
 
-  for (r = arc_extension_map.auxRegisters; r; r = r->next) {
-    if (r->address == address)
-      return (const char *) r->name;
-  }
+  for (r = arc_extension_map.auxRegisters; r; r = r->next)
+    {
+      if (r->address == address)
+	return (const char *)r->name;
+    }
   return 0;
 }
 
+#if 0
 /* Recursively free auxilliary register strcture pointers until
    the list is empty.  */
-
 static void
-clean_aux_registers(struct ExtAuxRegister *r)
+clean_aux_registers (struct ExtAuxRegister *r)
 {
   if (r -> next)
     {
-      clean_aux_registers( r->next);
-      free(r -> name);
-      free(r -> next);
-      r ->next = NULL;
+      clean_aux_registers (r->next);
+      free (r->name);
+      free (r->next);
+      r->next = NULL;
     }
   else
-    free(r -> name);
+    free (r->name);
 }
 
-/* Free memory that has been allocated for the extensions.  */
+/* Free memory that has been allocated for the extensions. */
 
 static void
-cleanup_ext_map(void)
+cleanup_ext_map (void)
 {
   struct ExtAuxRegister *r;
   struct ExtInstruction *insn;
   int i;
 
-  /* clean aux reg structure  */
+  /* Clean aux reg structure.  */
   r = arc_extension_map.auxRegisters;
   if (r)
     {
-      (clean_aux_registers(r));
-      free(r);
+      (clean_aux_registers (r));
+      free (r);
     }
 
-  /* clean instructions  */
-  for (i = 0; i < NUM_EXT_INST; i++)
+  /* Clean instructions.  */
+  for (i = INST_HASH_SIZE - 1; i >= 0; i--)
     {
-      insn = arc_extension_map.instructions[i];
-      if (insn)
-	free(insn->name);
+      for (insn = arc_extension_map.instructions[i]; insn ; insn = insn->next)
+	{
+	  free (insn->name);
+	  free (insn);
+	}
     }
 
-  /* clean core reg struct  */
+  /* Clean core reg struct.  */
   for (i = 0; i < NUM_EXT_CORE; i++)
     {
-      if (arc_extension_map.coreRegisters[i])
-	free(arc_extension_map.coreRegisters[i]);
+      if (arc_extension_map.coreRegisters[i].name)
+	free (arc_extension_map.coreRegisters[i].name);
     }
 
   for (i = 0; i < NUM_EXT_COND; i++) {
     if (arc_extension_map.condCodes[i])
-      free(arc_extension_map.condCodes[i]);
+      free (arc_extension_map.condCodes[i]);
   }
 
-  memset(&arc_extension_map, 0, sizeof(struct arcExtMap));
+  memset (&arc_extension_map, 0, sizeof (struct arcExtMap));
 }
+#endif
 
 int
-arcExtMap_add(void *base, unsigned long length)
+arcExtMap_add (void *base, unsigned long length)
 {
   unsigned char *block = base;
   unsigned char *p = block;
-
-  /* Clean up and reset everything if needed.  */
-  cleanup_ext_map();
 
   while (p && p < (block + length))
     {
@@ -169,94 +260,96 @@ arcExtMap_add(void *base, unsigned long length)
 	 For aux regs:
 	   p[2..5] = value
 	   p[6]+   = name
-	 (value is p[2]<<24|p[3]<<16|p[4]<<8|p[5])  */
-
+	     (value is p[2]<<24|p[3]<<16|p[4]<<8|p[5]) */
       if (p[0] == 0)
 	return -1;
 
       switch (p[1])
-	{
+	{ /* type */
 	case EXT_INSTRUCTION:
 	  {
-	    char opcode = p[2];
-	    char minor  = p[3];
-	    char * insn_name = (char *) xmalloc(( (int)*p-5) * sizeof(char));
-	    struct ExtInstruction * insn =
-	      (struct ExtInstruction *) xmalloc(sizeof(struct ExtInstruction));
+	    char *insn_name = xstrdup ((char *) (p+5));
+	    struct ExtInstruction *insn = XNEW (struct ExtInstruction);
+	    int major = p[2];
+	    int minor = p[3];
+	    struct ExtInstruction **bucket
+	      = &arc_extension_map.instructions[INST_HASH (major, minor)];
 
-	    if (opcode==3)
-	      opcode = 0x1f - 0x10 + minor - 0x09 + 1;
-	    else
-	      opcode -= 0x10;
-	    insn -> flags = (char) *(p+4);
-	    strcpy (insn_name, (char *) (p+5));
-	    insn -> name = insn_name;
-	    arc_extension_map.instructions[(int) opcode] = insn;
+	    insn->name  = insn_name;
+	    insn->major = major;
+	    insn->minor = minor;
+	    insn->flags = p[4];
+	    insn->next  = *bucket;
+	    *bucket = insn;
+	    break;
 	  }
-	  break;
-
 	case EXT_CORE_REGISTER:
 	  {
-	    char * core_name = (char *) xmalloc(((int)*p-3) * sizeof(char));
+	    unsigned char number = p[2];
+	    char *name = (char *) p+3;
 
-	    strcpy(core_name, (char *) (p+3));
-	    arc_extension_map.coreRegisters[p[2]-32] = core_name;
+	    arc_extension_map.coreRegisters[number-32].number = number;
+	    arc_extension_map.coreRegisters[number-32].rw = REG_READWRITE;
+	    arc_extension_map.coreRegisters[number-32].name = xstrdup (name);
+	    break;
 	  }
-	  break;
+	case EXT_LONG_CORE_REGISTER:
+	  {
+	    unsigned char number = p[2];
+	    char *name = (char *) p+7;
+	    enum ExtReadWrite rw = p[6];
 
+	    arc_extension_map.coreRegisters[number-32].number = number;
+	    arc_extension_map.coreRegisters[number-32].rw = rw;
+	    arc_extension_map.coreRegisters[number-32].name = xstrdup (name);
+	  }
 	case EXT_COND_CODE:
 	  {
-	    char * cc_name = (char *) xmalloc( ((int)*p-3) * sizeof(char));
-	    strcpy(cc_name, (char *) (p+3));
-	    arc_extension_map.condCodes[p[2]-16] = cc_name;
-	  }
-	  break;
+	    char *cc_name = xstrdup ((char *) (p+3));
 
+	    arc_extension_map.condCodes[p[2]-16] = cc_name;
+	    break;
+	  }
 	case EXT_AUX_REGISTER:
 	  {
-	    /* trickier -- need to store linked list to these  */
-	    struct ExtAuxRegister *newAuxRegister =
-	      (struct ExtAuxRegister *)malloc(sizeof(struct ExtAuxRegister));
-	    char * aux_name = (char *) xmalloc ( ((int)*p-6) * sizeof(char));
+	    /* trickier -- need to store linked list to these */
+	    struct ExtAuxRegister *newAuxRegister
+	      = XNEW (struct ExtAuxRegister);
+	    char *aux_name = xstrdup ((char *) (p+6));
 
-	    strcpy (aux_name, (char *) (p+6));
 	    newAuxRegister->name = aux_name;
 	    newAuxRegister->address = p[2]<<24 | p[3]<<16 | p[4]<<8  | p[5];
 	    newAuxRegister->next = arc_extension_map.auxRegisters;
 	    arc_extension_map.auxRegisters = newAuxRegister;
+	    break;
 	  }
-	  break;
-
 	default:
 	  return -1;
-
 	}
-      p += p[0]; /* move to next record  */
+      p += p[0]; /* move to next record */
     }
-
   return 0;
 }
 
-/* Load hw extension descibed in .extArcMap ELF section.  */
-
+/* Load extensions described in .arcextmap and .gnu.linkonce.arcextmap.* ELF
+   section.  */
 void
-build_ARC_extmap (text_bfd)
-  bfd *text_bfd;
+build_ARC_extmap (bfd *text_bfd)
 {
   char *arcExtMap;
   bfd_size_type count;
   asection *p;
 
   for (p = text_bfd->sections; p != NULL; p = p->next)
-    if (!strcmp (p->name, ".arcextmap"))
+    if (!strncmp (p->name,
+		  ".gnu.linkonce.arcextmap.",
+		  sizeof (".gnu.linkonce.arcextmap.")-1)
+	|| !strcmp (p->name,".arcextmap"))
       {
         count = bfd_get_section_size (p);
         arcExtMap = (char *) xmalloc (count);
         if (bfd_get_section_contents (text_bfd, p, (PTR) arcExtMap, 0, count))
-          {
-            arcExtMap_add ((PTR) arcExtMap, count);
-            break;
-          }
+	  arcExtMap_add ((PTR) arcExtMap, count);
         free ((PTR) arcExtMap);
       }
 }

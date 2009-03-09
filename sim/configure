@@ -272,6 +272,7 @@ PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 
 ac_unique_file="Makefile.in"
+ac_subdirs_all="$ac_subdirs_all arc"
 ac_subdirs_all="$ac_subdirs_all arm"
 ac_subdirs_all="$ac_subdirs_all cris"
 ac_subdirs_all="$ac_subdirs_all d10v"
@@ -3416,6 +3417,13 @@ if test "${enable_sim}" != no; then
    common=yes
    igen=no
    case "${target}" in
+       arc-*-*)
+
+
+subdirs="$subdirs arc"
+
+	   testsuite=yes
+	   ;;
        arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
 
 

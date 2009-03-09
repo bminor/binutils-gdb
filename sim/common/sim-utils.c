@@ -52,15 +52,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    Set by sim_resume.  */
 struct sim_state *current_state;
 
-/* Allocate zero filled memory with xmalloc - xmalloc aborts of the
+/* Allocate zero filled memory with xcalloc - xcalloc aborts if the
    allocation fails.  */
 
 void *
 zalloc (unsigned long size)
 {
-  void *memory = (void *) xmalloc (size);
-  memset (memory, 0, size);
-  return memory;
+  return xcalloc (1, size);
 }
 
 void
@@ -409,4 +407,76 @@ transfer_to_str (unsigned transfer)
     }
 }
 
+/* Functions to call from debugger.  */
+static void
+dump_hex (SIM_CPU *cpu, USI start, USI num)
+{
+  USI next_line = start;
 
+  while (num--)
+    {
+      if (start == next_line)
+	{
+	  printf ("\n%8x ", start);
+	  next_line = start + 16;
+	}
+      else
+	printf (" ");
+      printf ("%8x", GETMEMSI (cpu, 0, start));
+      start += 4;
+      if (start < 4)
+	break;
+    }
+  printf ("\n");
+  fflush (stdout);
+}
+
+static void
+dump_strn_1 (SIM_CPU *cpu, USI start, USI len, int end_char)
+{
+  USI next_line = start;
+  int c;
+
+  while (len--)
+    {
+      if (start == next_line)
+	{
+	  printf ("\n%8x ", start);
+	  next_line = start + 16;
+	}
+      else
+	printf (" ");
+      c = (char) GETMEMUQI (cpu, 0, start);
+      if (isgraph ((char) c))
+	printf (" %c", c);
+      else switch (c)
+	{
+	default:
+	  c = c & 0xff;
+	  printf ("%02x", c);
+	}
+      start += 1;
+      if (c == end_char)
+	break;
+    }
+  printf ("\n");
+  fflush (stdout);
+}
+
+static void
+dump_asc (SIM_CPU *cpu, USI start, USI len)
+{
+  dump_strn_1 (cpu, start, len, 32767);
+}
+
+static void
+dump_str (SIM_CPU *cpu, USI start)
+{
+  dump_strn_1 (cpu, start, -1, 0);
+}
+
+static void
+dump_strn (SIM_CPU *cpu, USI start, USI len)
+{
+  dump_strn_1 (cpu, start, len, 0);
+}
