@@ -1,3 +1,12 @@
+2009-03-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/9873:
+	* dwarf2read.c (dwarf_decode_macros): New variable `at_commandline'.
+	Move the variable `macinfo_type' out of the loop.  Create a new
+	processing pass before the current one to pre-create `current_file'.
+	New complaint on misplaced zero/non-zero definitions/includes.
+	Skip first DW_MACINFO_start_file with `at_commandline' set.
+
 2008-03-09  Vladimir Prus  <vladimir@codesourcery.com>
 
        * solib.c (reload_shared_libraries): Give

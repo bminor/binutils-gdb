@@ -9963,6 +9963,8 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 {
   gdb_byte *mac_ptr, *mac_end;
   struct macro_source_file *current_file = 0;
+  enum dwarf_macinfo_record_type macinfo_type;
+  int at_commandline;
 
   if (dwarf2_per_objfile->macinfo_buffer == NULL)
     {
@@ -9970,19 +9972,29 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
       return;
     }
 
+  /* First pass: Find the name of the base filename.
+     This filename is needed in order to process all macros whose definition
+     (or undefinition) comes from the command line.  These macros are defined
+     before the first DW_MACINFO_start_file entry, and yet still need to be
+     associated to the base file.
+
+     To determine the base file name, we scan the macro definitions until we
+     reach the first DW_MACINFO_start_file entry.  We then initialize
+     CURRENT_FILE accordingly so that any macro definition found before the
+     first DW_MACINFO_start_file can still be associated to the base file.  */
+
   mac_ptr = dwarf2_per_objfile->macinfo_buffer + offset;
   mac_end = dwarf2_per_objfile->macinfo_buffer
     + dwarf2_per_objfile->macinfo_size;
 
-  for (;;)
+  do
     {
-      enum dwarf_macinfo_record_type macinfo_type;
-
       /* Do we at least have room for a macinfo type byte?  */
       if (mac_ptr >= mac_end)
         {
-	  dwarf2_macros_too_long_complaint ();
-          return;
+	  /* Complaint is printed during the second pass as GDB will probably
+	     stop the first pass earlier upon finding DW_MACINFO_start_file.  */
+	  break;
         }
 
       macinfo_type = read_1_byte (abfd, mac_ptr);
@@ -9993,7 +10005,92 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
           /* A zero macinfo type indicates the end of the macro
              information.  */
         case 0:
-          return;
+	  break;
+
+	case DW_MACINFO_define:
+	case DW_MACINFO_undef:
+	  /* Only skip the data by MAC_PTR.  */
+	  {
+	    unsigned int bytes_read;
+
+	    read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
+	    read_string (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
+	  }
+	  break;
+
+	case DW_MACINFO_start_file:
+	  {
+	    unsigned int bytes_read;
+	    int line, file;
+
+	    line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
+	    file = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
+
+	    current_file = macro_start_file (file, line, current_file, comp_dir,
+					     lh, cu->objfile);
+	  }
+	  break;
+
+	case DW_MACINFO_end_file:
+	  /* No data to skip by MAC_PTR.  */
+	  break;
+
+	case DW_MACINFO_vendor_ext:
+	  /* Only skip the data by MAC_PTR.  */
+	  {
+	    unsigned int bytes_read;
+
+	    read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
+	    read_string (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
+	  }
+	  break;
+
+	default:
+	  break;
+	}
+    } while (macinfo_type != 0 && current_file == NULL);
+
+  /* Second pass: Process all entries.
+
+     Use the AT_COMMAND_LINE flag to determine whether we are still processing
+     command-line macro definitions/undefinitions.  This flag is unset when we
+     reach the first DW_MACINFO_start_file entry.  */
+
+  mac_ptr = dwarf2_per_objfile->macinfo_buffer + offset;
+
+  /* Determines if GDB is still before first DW_MACINFO_start_file.  If true
+     GDB is still reading the definitions from command line.  First
+     DW_MACINFO_start_file will need to be ignored as it was already executed
+     to create CURRENT_FILE for the main source holding also the command line
+     definitions.  On first met DW_MACINFO_start_file this flag is reset to
+     normally execute all the remaining DW_MACINFO_start_file macinfos.  */
+
+  at_commandline = 1;
+
+  do
+    {
+      /* Do we at least have room for a macinfo type byte?  */
+      if (mac_ptr >= mac_end)
+	{
+	  dwarf2_macros_too_long_complaint ();
+	  break;
+	}
+
+      macinfo_type = read_1_byte (abfd, mac_ptr);
+      mac_ptr++;
+
+      switch (macinfo_type)
+	{
+	  /* A zero macinfo type indicates the end of the macro
+	     information.  */
+	case 0:
+	  break;
 
         case DW_MACINFO_define:
         case DW_MACINFO_undef:
@@ -10008,19 +10105,31 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
             mac_ptr += bytes_read;
 
             if (! current_file)
+	      {
+		/* DWARF violation as no main source is present.  */
+		complaint (&symfile_complaints,
+			   _("debug info with no main source gives macro %s "
+			     "on line %d: %s"),
+			   macinfo_type ==
+			   DW_MACINFO_define ? _("definition") : macinfo_type ==
+			   DW_MACINFO_undef ? _("undefinition") :
+			   "something-or-other", line, body);
+		break;
+	      }
+	    if ((line == 0 && !at_commandline) || (line != 0 && at_commandline))
 	      complaint (&symfile_complaints,
-			 _("debug info gives macro %s outside of any file: %s"),
+			 _("debug info gives %s macro %s with %s line %d: %s"),
+			 at_commandline ? _("command-line") : _("in-file"),
 			 macinfo_type ==
-			 DW_MACINFO_define ? "definition" : macinfo_type ==
-			 DW_MACINFO_undef ? "undefinition" :
-			 "something-or-other", body);
-            else
-              {
-                if (macinfo_type == DW_MACINFO_define)
-                  parse_macro_definition (current_file, line, body);
-                else if (macinfo_type == DW_MACINFO_undef)
-                  macro_undef (current_file, line, body);
-              }
+			 DW_MACINFO_define ? _("definition") : macinfo_type ==
+			 DW_MACINFO_undef ? _("undefinition") :
+			 "something-or-other",
+			 line == 0 ? _("zero") : _("non-zero"), line, body);
+
+	    if (macinfo_type == DW_MACINFO_define)
+	      parse_macro_definition (current_file, line, body);
+	    else if (macinfo_type == DW_MACINFO_undef)
+	      macro_undef (current_file, line, body);
           }
           break;
 
@@ -10034,9 +10143,22 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
             file = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
             mac_ptr += bytes_read;
 
-            current_file = macro_start_file (file, line,
-                                             current_file, comp_dir,
-                                             lh, cu->objfile);
+	    if ((line == 0 && !at_commandline) || (line != 0 && at_commandline))
+	      complaint (&symfile_complaints,
+			 _("debug info gives source %d included "
+			   "from %s at %s line %d"),
+			 file, at_commandline ? _("command-line") : _("file"),
+			 line == 0 ? _("zero") : _("non-zero"), line);
+
+	    if (at_commandline)
+	      {
+		/* This DW_MACINFO_start_file was executed in the pass one.  */
+		at_commandline = 0;
+	      }
+	    else
+	      current_file = macro_start_file (file, line,
+					       current_file, comp_dir,
+					       lh, cu->objfile);
           }
           break;
 
@@ -10090,7 +10212,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
           }
           break;
         }
-    }
+    } while (macinfo_type != 0);
 }
 
 /* Check if the attribute's form is a DW_FORM_block*
