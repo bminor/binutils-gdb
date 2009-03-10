@@ -1,3 +1,12 @@
+2009-03-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-dis.c: Include "opintl.h".
+	(struct ppc_mopt, ppc_opts): New.
+	(ppc_parse_cpu): New function.
+	(powerpc_init_dialect): Use it.
+	(print_ppc_disassembler_options): Dump options from ppc_opts.
+	Internationalize message.
+
 2009-03-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

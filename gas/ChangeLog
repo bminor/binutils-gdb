@@ -1,3 +1,8 @@
+2009-03-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (parse_cpu): Delete.
+	(md_parse_option, ppc_machine): Use ppc_parse_cpu.
+
 2009-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/9915
