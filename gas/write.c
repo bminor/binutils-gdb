@@ -1671,18 +1671,22 @@ write_object_file (void)
 	    if (lie->added == 2)
 	      continue;
 	    /* Patch the jump table.  */
-	    /* This is the offset from ??? to table_ptr+0.  */
-	    to_addr = table_addr - S_GET_VALUE (lie->sub);
-#ifdef TC_CHECK_ADJUSTED_BROKEN_DOT_WORD
-	    TC_CHECK_ADJUSTED_BROKEN_DOT_WORD (to_addr, lie);
-#endif
-	    md_number_to_chars (lie->word_goes_here, to_addr, 2);
-	    for (untruth = lie->next_broken_word;
+	    for (untruth = (struct broken_word *) (fragP->fr_symbol);
 		 untruth && untruth->dispfrag == fragP;
 		 untruth = untruth->next_broken_word)
 	      {
 		if (untruth->use_jump == lie)
-		  md_number_to_chars (untruth->word_goes_here, to_addr, 2);
+		  {
+		    /* This is the offset from ??? to table_ptr+0.
+		       The target is the same for all users of this
+		       md_long_jump, but the "sub" bases (and hence the
+		       offsets) may be different.  */
+		    addressT to_word = table_addr - S_GET_VALUE (untruth->sub);
+#ifdef TC_CHECK_ADJUSTED_BROKEN_DOT_WORD
+		    TC_CHECK_ADJUSTED_BROKEN_DOT_WORD (to_word, untruth);
+#endif
+		    md_number_to_chars (untruth->word_goes_here, to_word, 2);
+		  }
 	      }
 
 	    /* Install the long jump.  */
@@ -2226,13 +2230,17 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 					     S_GET_NAME (lie->sub),
 					     buf);
 			    }
-			  lie->added = 1;
 			  if (fragP->fr_subtype == 0)
 			    {
 			      fragP->fr_subtype++;
 			      growth += md_short_jump_size;
 			    }
-			  for (untruth = lie->next_broken_word;
+
+			  /* Redirect *all* words of this table with the same
+			     target, lest we have to handle the case where the
+			     same target but with a offset that fits on this
+			     round overflows at the next relaxation round.  */
+			  for (untruth = (struct broken_word *) (fragP->fr_symbol);
 			       untruth && untruth->dispfrag == lie->dispfrag;
 			       untruth = untruth->next_broken_word)
 			    if ((symbol_get_frag (untruth->add)
@@ -2243,6 +2251,8 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 				untruth->added = 2;
 				untruth->use_jump = lie;
 			      }
+
+			  lie->added = 1;
 			  growth += md_long_jump_size;
 			}
 		    }

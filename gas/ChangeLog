@@ -1,3 +1,12 @@
+2009-03-10  Hans-Peter Nilsson  <hp@axis.com>
+
+	* write.c (write_object_file) [!WORKING_DOT_WORD]: When patching
+	the jump table for multiple overflowing entries with the same
+	target, handle base symbols being different.
+	(relax_segment) <case rs_broken_word, second loop>: Whenever a
+	single entry overflows, arrange to redirect all entries with the
+	same target.
+
 2009-03-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (parse_cpu): Delete.
