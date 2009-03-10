@@ -1,3 +1,7 @@
+2009-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/id.po: Updated Indonesian translation.
+
 2009-03-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-dis.c: Include "opintl.h".

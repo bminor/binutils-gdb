@@ -1,3 +1,7 @@
+2009-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: New Spanish translation.
+
 2009-03-06  Cary Coutant  <ccoutant@google.com>
 
 	* options.cc (parse_short_option): Keep dash_z from registering itself.
