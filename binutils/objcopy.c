@@ -1028,7 +1028,8 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	  used_in_reloc = TRUE;
 	}
       else if (relocatable			/* Relocatable file.  */
-	       && (flags & (BSF_GLOBAL | BSF_WEAK)) != 0)
+	       && ((flags & (BSF_GLOBAL | BSF_WEAK)) != 0
+		   || bfd_is_com_section (bfd_get_section (sym))))
 	keep = TRUE;
       else if (bfd_decode_symclass (sym) == 'I')
 	/* Global symbols in $idata sections need to be retained

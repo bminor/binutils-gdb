@@ -1,3 +1,10 @@
+2009-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/9933
+	* binutils-all/copy-4.d: New.
+
+	* binutils-all/objcopy.exp: Run copy-4.
+
 2009-03-03  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* config/hppa.sed: Fix spelling.
