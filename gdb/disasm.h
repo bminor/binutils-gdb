@@ -24,7 +24,6 @@ struct ui_file;
 
 extern void gdb_disassembly (struct ui_out *uiout,
 			     char *file_string,
-			     int line_num,
 			     int mixed_source_and_assembly,
 			     int how_many, CORE_ADDR low, CORE_ADDR high);
 

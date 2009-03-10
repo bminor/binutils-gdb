@@ -1,3 +1,11 @@
+2009-03-10  Hui Zhu  <teawater@gmail.com>
+
+	* disasm.c (gdb_disassembly): Remove unused argument
+	"line_num".
+	* disasm.h (gdb_disassembly): Ditto.
+	* cli/cli-cmds.c (print_disassembly): Ditto.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Ditto.
+
 2009-03-09  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* solib.c (solib_contains_address_p): New function.

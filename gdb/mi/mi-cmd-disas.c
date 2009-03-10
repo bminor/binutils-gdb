@@ -154,7 +154,6 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 
   gdb_disassembly (uiout,
   		   file_string,
-		   line_num,
 		   mixed_source_and_assembly, how_many, low, high);
 
 }

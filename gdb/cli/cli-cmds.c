@@ -905,7 +905,7 @@ print_disassembly (const char *name, CORE_ADDR low, CORE_ADDR high, int mixed)
         printf_filtered ("from %s to %s:\n", paddress (low), paddress (high));
 
       /* Dump the specified range.  */
-      gdb_disassembly (uiout, 0, 0, mixed, -1, low, high);
+      gdb_disassembly (uiout, 0, mixed, -1, low, high);
 
       printf_filtered ("End of assembler dump.\n");
       gdb_flush (gdb_stdout);
