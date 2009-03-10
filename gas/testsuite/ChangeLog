@@ -1,3 +1,8 @@
+2009-03-10  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-bkw4.d, gas/cris/rd-bkw4v32.d, gas/cris/rd-bkw4.s:
+	New test.
+
 2009-03-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/ppc/altivec_and_spe.d (objdump): Add -Maltivec.
