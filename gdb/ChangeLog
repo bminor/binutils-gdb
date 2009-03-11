@@ -1,3 +1,10 @@
+2009-03-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* breakpoint.c (bpstat_check_breakpoint_conditions): Use
+	value_mark and value_free_to_mark.
+	* objfiles.c (free_objfile): Call objfile_free_data before
+	freeing the BFD.
+
 2009-03-10  Hui Zhu  <teawater@gmail.com>
 
 	* disasm.c (gdb_disassembly): Remove unused argument

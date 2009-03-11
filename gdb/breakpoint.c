@@ -2882,6 +2882,13 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
       
       if (bl->cond && bl->owner->disposition != disp_del_at_next_stop)
 	{
+	  /* We use value_mark and value_free_to_mark because it could
+	     be a long time before we return to the command level and
+	     call free_all_values.  We can't call free_all_values
+	     because we might be in the middle of evaluating a
+	     function call.  */
+	  struct value *mark = value_mark ();
+
 	  /* Need to select the frame, with all that implies
 	     so that the conditions will have the right context.  */
 	  select_frame (get_current_frame ());
@@ -2890,7 +2897,7 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 			    "Error in testing breakpoint condition:\n",
 			    RETURN_MASK_ALL);
 	  /* FIXME-someday, should give breakpoint # */
-	  free_all_values ();
+	  value_free_to_mark (mark);
 	}
       if (bl->cond && value_is_zero)
 	{

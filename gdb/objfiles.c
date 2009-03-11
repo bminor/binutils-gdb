@@ -422,6 +422,9 @@ free_objfile (struct objfile *objfile)
       (*objfile->sf->sym_finish) (objfile);
     }
 
+  /* Discard any data modules have associated with the objfile.  */
+  objfile_free_data (objfile);
+
   /* We always close the bfd, unless the OBJF_KEEPBFD flag is set.  */
 
   if (objfile->obfd != NULL && !(objfile->flags & OBJF_KEEPBFD))
@@ -476,7 +479,6 @@ free_objfile (struct objfile *objfile)
 
   /* The last thing we do is free the objfile struct itself. */
 
-  objfile_free_data (objfile);
   if (objfile->name != NULL)
     {
       xfree (objfile->name);
