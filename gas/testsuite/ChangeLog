@@ -1,3 +1,10 @@
+2009-03-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-bkw5.d, gas/cris/rd-bkw5.s, gas/cris/rd-bkw5b.d,
+	gas/cris/rd-bkw5bpic.d, gas/cris/rd-bkw5bv32.d,
+	gas/cris/rd-bkw5bv32pic.d, gas/cris/rd-bkw5pic.d,
+	gas/cris/rd-bkw5v32.d, gas/cris/rd-bkw5v32pic.d: New tests.
+
 2009-03-10  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/rd-bkw4.d, gas/cris/rd-bkw4v32.d, gas/cris/rd-bkw4.s:
