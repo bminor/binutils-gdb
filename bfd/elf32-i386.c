@@ -955,7 +955,7 @@ elf_i386_check_tls_transition (bfd *abfd, asection *sec,
       type = bfd_get_8 (abfd, contents + offset - 2);
       if (r_type == R_386_TLS_GD)
 	{
-	  /* Check transition from LD access model.  Only
+	  /* Check transition from GD access model.  Only
 		leal foo@tlsgd(,%reg,1), %eax; call ___tls_get_addr
 		leal foo@tlsgd(%reg), %eax; call ___tls_get_addr; nop
 	     can transit to different access model.  */
