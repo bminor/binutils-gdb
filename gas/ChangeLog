@@ -1,3 +1,13 @@
+2009-03-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c (cris_create_short_jump): Remove prototype.
+	Rename, changing all callers, to...
+	(md_create_short_jump): Adjust head comment.  Assert
+	word-sized-branch distance for v32.  Bail out calling as_fatal for
+	compatibility mode here.
+	(md_create_long_jump): ...not here.
+	* config/tc-cris.h (md_create_short_jump): Do not define.
+
 2009-03-10  Hans-Peter Nilsson  <hp@axis.com>
 
 	* write.c (write_object_file) [!WORKING_DOT_WORD]: When patching

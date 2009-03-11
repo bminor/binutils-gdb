@@ -142,8 +142,6 @@ static int branch_disp (int);
 static void gen_cond_branch_32 (char *, char *, fragS *, symbolS *, symbolS *,
 				long int);
 static void cris_number_to_imm (char *, long, int, fixS *, segT);
-static void cris_create_short_jump (char *, addressT, addressT, fragS *,
-				    symbolS *);
 static void s_syntax (int);
 static void s_cris_file (int);
 static void s_cris_loc (int);
@@ -1023,14 +1021,10 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
 }
 
 /* Generate a short jump around a secondary jump table.
-   Used by md_create_long_jump.
+   Also called from md_create_long_jump, when sufficient.  */
 
-   This used to be md_create_short_jump, but is now called from
-   md_create_long_jump instead, when sufficient, since the sizes of the
-   jumps are the same for pre-v32.  */
-
-static void
-cris_create_short_jump (char *storep, addressT from_addr, addressT to_addr,
+void
+md_create_short_jump (char *storep, addressT from_addr, addressT to_addr,
 			fragS *fragP ATTRIBUTE_UNUSED,
 			symbolS *to_symbol ATTRIBUTE_UNUSED)
 {
@@ -1039,18 +1033,30 @@ cris_create_short_jump (char *storep, addressT from_addr, addressT to_addr,
   /* See md_create_long_jump about the comment on the "+ 2".  */
   long int max_minimal_minus_distance;
   long int max_minimal_plus_distance;
+  long int max_minus_distance;
+  long int max_plus_distance;
   int nop_opcode;
 
   if (cris_arch == arch_crisv32)
     {
       max_minimal_minus_distance = BRANCH_BB_V32 + 2;
       max_minimal_plus_distance = BRANCH_BF_V32 + 2;
+      max_minus_distance = BRANCH_WB_V32 + 2;
+      max_plus_distance = BRANCH_WF_V32 + 2;
       nop_opcode = NOP_OPCODE_V32;
     }
+  else if (cris_arch == arch_cris_common_v10_v32)
+    /* Bail out for compatibility mode.  (It seems it can be implemented,
+       perhaps with a 10-byte sequence: "move.d NNNN,$pc/$acr", "jump
+       $acr", "nop"; but doesn't seem worth it at the moment.)  */
+    as_fatal (_("Out-of-range .word offset handling\
+ is not implemented for .arch common_v10_v32"));
   else
     {
       max_minimal_minus_distance = BRANCH_BB + 2;
       max_minimal_plus_distance = BRANCH_BF + 2;
+      max_minus_distance = BRANCH_WB + 2;
+      max_plus_distance = BRANCH_WF + 2;
       nop_opcode = NOP_OPCODE;
     }
 
@@ -1070,7 +1076,8 @@ cris_create_short_jump (char *storep, addressT from_addr, addressT to_addr,
 	 a nop to keep disassembly sane.  */
       md_number_to_chars (storep + 4, nop_opcode, 2);
     }
-  else
+  else if (max_minus_distance <= distance
+	   && distance <= max_plus_distance)
     {
       /* Make it a "long" short jump: "BA (PC+)".  */
       md_number_to_chars (storep, BA_PC_INCR_OPCODE, 2);
@@ -1085,6 +1092,9 @@ cris_create_short_jump (char *storep, addressT from_addr, addressT to_addr,
       /* A nop for the delay slot.  */
       md_number_to_chars (storep + 4, nop_opcode, 2);
     }
+  else
+    as_bad_where (fragP->fr_file, fragP->fr_line,
+		  _(".word case-table handling failed: table too large"));
 }
 
 /* Generate a long jump in a secondary jump table.
@@ -1111,19 +1121,12 @@ md_create_long_jump (char *storep, addressT from_addr, addressT to_addr,
   long int max_short_plus_distance
     = cris_arch != arch_crisv32 ? BRANCH_WF + 3 : BRANCH_WF_V32 + 3;
 
-  /* Bail out for compatibility mode.  (It seems it can be implemented,
-     perhaps with a 10-byte sequence: "move.d NNNN,$pc/$acr", "jump
-     $acr", "nop"; but doesn't seem worth it at the moment.)  */
-  if (cris_arch == arch_cris_common_v10_v32)
-    as_fatal (_("Out-of-range .word offset handling\
- is not implemented for .arch common_v10_v32"));
-
   distance = to_addr - from_addr;
 
   if (max_short_minus_distance <= distance
       && distance <= max_short_plus_distance)
     /* Then make it a "short" long jump.  */
-    cris_create_short_jump (storep, from_addr, to_addr, fragP,
+    md_create_short_jump (storep, from_addr, to_addr, fragP,
 			    to_symbol);
   else
     {

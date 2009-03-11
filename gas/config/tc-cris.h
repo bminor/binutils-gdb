@@ -68,11 +68,6 @@ extern const char FLT_CHARS[];
 #define md_operand(x)
 
 #define md_number_to_chars number_to_chars_littleendian
-
-/* There's no use having different functions for this; the sizes are the
-   same.  Note that we can't #define md_short_jump_size here.  */
-#define md_create_short_jump md_create_long_jump
-
 extern const struct relax_type md_cris_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_cris_relax_table
 
