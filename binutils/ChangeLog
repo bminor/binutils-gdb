@@ -1,3 +1,12 @@
+2009-03-11  Chris Demetriou  <cgd@google.com>
+
+	* ar.c (deterministic): New global variable.
+	(main): Recognize new 'D' option, which enables 'deterministic mode'.
+	(usage): Document new 'D' option.
+	(write_archive): Set BFD_DETERMINISTIC_OUTPUT in output archive's
+	flags if deterministic mode was requested.
+	* doc/binutils.texi (ar): Document deterministic mode ('D' option).
+
 2009-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/9933

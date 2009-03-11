@@ -1,3 +1,16 @@
+2009-03-11  Chris Demetriou  <cgd@google.com>
+
+	* bfd.c (BFD_DETERMINISTIC_OUTPUT): New flag.
+	* bfd-in2.h: Regenerate.
+	* archive.c (bfd_ar_hdr_from_filesystem): If BFD_DETERMINISTIC_OUTPUT
+	flag is set, use 0 for uid, gid, and timestamp, and use 0644 for file
+	mode.
+	(bsd_write_armap): Likewise.
+	(_bfd_archive_bsd_update_armap_timestamp): If BFD_DETERMINISTIC_OUTPUT
+	flag is set, do nothing.
+	(coff_write_armap): If BFD_DETERMINISTIC_OUTPUT flag is set, use 0
+	for timestamp.
+
 2009-03-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf32-spu.c (find_function_stack_adjust): Handle sf instruction

@@ -1,3 +1,7 @@
+2009-03-11  Chris Demetriou  <cgd@google.com>
+
+	* binutils-all/ar.exp (deterministic_archive): New test.
+
 2009-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/9933

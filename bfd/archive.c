@@ -1652,6 +1652,16 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
       return NULL;
     }
 
+  /* If the caller requested that the BFD generate deterministic output,
+     fake values for modification time, UID, GID, and file mode.  */
+  if ((abfd->flags & BFD_DETERMINISTIC_OUTPUT) != 0)
+    {
+      status.st_mtime = 0;
+      status.st_uid = 0;
+      status.st_gid = 0;
+      status.st_mode = 0644;
+    }
+
   amt = sizeof (struct ar_hdr) + sizeof (struct areltdata);
   ared = bfd_zalloc (abfd, amt);
   if (ared == NULL)
@@ -2220,20 +2230,39 @@ bsd_write_armap (bfd *arch,
   unsigned int count;
   struct ar_hdr hdr;
   struct stat statbuf;
+  long uid, gid;
 
   firstreal = mapsize + elength + sizeof (struct ar_hdr) + SARMAG;
 
   stat (arch->filename, &statbuf);
+  if ((arch->flags & BFD_DETERMINISTIC_OUTPUT) == 0)
+    {
+      /* Remember the timestamp, to keep it holy.  But fudge it a little.  */
+      bfd_ardata (arch)->armap_timestamp = (statbuf.st_mtime
+                                            + ARMAP_TIME_OFFSET);
+      uid = getuid();
+      gid = getgid();
+    }
+  else
+    {
+      /* If deterministic, we use 0 as the timestamp in the map.
+         Some linkers may require that the archive filesystem modification
+         time is less than (or near to) the archive map timestamp.  Those
+         linkers should not be used with deterministic mode.  (GNU ld and
+         Gold do not have this restriction.)  */
+      bfd_ardata (arch)->armap_timestamp = 0;
+      uid = 0;
+      gid = 0;
+    }
+
   memset (&hdr, ' ', sizeof (struct ar_hdr));
   memcpy (hdr.ar_name, RANLIBMAG, strlen (RANLIBMAG));
-  /* Remember the timestamp, to keep it holy.  But fudge it a little.  */
-  bfd_ardata (arch)->armap_timestamp = statbuf.st_mtime + ARMAP_TIME_OFFSET;
   bfd_ardata (arch)->armap_datepos = (SARMAG
 				      + offsetof (struct ar_hdr, ar_date[0]));
   _bfd_ar_spacepad (hdr.ar_date, sizeof (hdr.ar_date), "%ld",
                     bfd_ardata (arch)->armap_timestamp);
-  _bfd_ar_spacepad (hdr.ar_uid, sizeof (hdr.ar_uid), "%ld", getuid ());
-  _bfd_ar_spacepad (hdr.ar_gid, sizeof (hdr.ar_gid), "%ld", getgid ());
+  _bfd_ar_spacepad (hdr.ar_uid, sizeof (hdr.ar_uid), "%ld", uid);
+  _bfd_ar_spacepad (hdr.ar_gid, sizeof (hdr.ar_gid), "%ld", gid);
   _bfd_ar_spacepad (hdr.ar_size, sizeof (hdr.ar_size), "%-10ld", mapsize);
   memcpy (hdr.ar_fmag, ARFMAG, 2);
   if (bfd_bwrite (&hdr, sizeof (struct ar_hdr), arch)
@@ -2300,6 +2329,10 @@ _bfd_archive_bsd_update_armap_timestamp (bfd *arch)
 {
   struct stat archstat;
   struct ar_hdr hdr;
+
+  /* If creating deterministic archives, just leave the timestamp as-is.  */
+  if ((arch->flags & BFD_DETERMINISTIC_OUTPUT) != 0)
+    return TRUE;
 
   /* Flush writes, get last-write timestamp from file, and compare it
      to the timestamp IN the file.  */
@@ -2385,7 +2418,8 @@ coff_write_armap (bfd *arch,
   _bfd_ar_spacepad (hdr.ar_size, sizeof (hdr.ar_size), "%-10ld",
                     mapsize);
   _bfd_ar_spacepad (hdr.ar_date, sizeof (hdr.ar_date), "%ld",
-                    time (NULL));
+                    ((arch->flags & BFD_DETERMINISTIC_OUTPUT) == 0
+                     ? time (NULL) : 0));
   /* This, at least, is what Intel coff sets the values to.  */
   _bfd_ar_spacepad (hdr.ar_uid, sizeof (hdr.ar_uid), "%ld", 0);
   _bfd_ar_spacepad (hdr.ar_gid, sizeof (hdr.ar_gid), "%ld", 0);
