@@ -1,3 +1,8 @@
+2009-03-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf32-spu.c (find_function_stack_adjust): Handle sf instruction
+	used to update stack pointer.
+
 2009-03-07  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	PR binutils/9921

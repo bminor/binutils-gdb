@@ -2133,6 +2133,19 @@ find_function_stack_adjust (asection *sec,
 	      return reg[rt];
 	    }
 	}
+      else if (buf[0] == 0x08 && (buf[1] & 0xe0) == 0 /* sf */)
+	{
+	  int rb = ((buf[1] & 0x1f) << 2) | ((buf[2] & 0xc0) >> 6);
+
+	  reg[rt] = reg[rb] - reg[ra];
+	  if (rt == 1)
+	    {
+	      if (reg[rt] > 0)
+		break;
+	      *sp_adjust = offset;
+	      return reg[rt];
+	    }
+	}
       else if ((buf[0] & 0xfc) == 0x40 /* il, ilh, ilhu, ila */)
 	{
 	  if (buf[0] >= 0x42 /* ila */)
