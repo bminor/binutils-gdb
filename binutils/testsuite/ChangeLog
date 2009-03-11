@@ -1,3 +1,8 @@
+2009-03-11  Joseph Myers  <joseph@codesourcery.com>
+
+	* binutils-all/objdump.W, binutils-all/objdump.s: Don't match
+	literal "tmpdir/" in expected output.
+
 2009-03-11  Chris Demetriou  <cgd@google.com>
 
 	* binutils-all/ar.exp (deterministic_archive): New test.

@@ -1,5 +1,5 @@
 
-tmpdir/dw2-compressed.o:     file format .*
+.*dw2-compressed.o:     file format .*
 
 Contents of the .debug_info section:
 
