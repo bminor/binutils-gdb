@@ -2015,6 +2015,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
           /* ... And are placed at the beginning (most-significant) bytes
              of the target.  */
           targ = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT - 1;
+          ntarg = targ + 1;
           break;
         default:
           accumSize = 0;
@@ -9597,11 +9598,55 @@ ada_is_modular_type (struct type *type)
           && TYPE_UNSIGNED (subranged_type));
 }
 
+/* Try to determine the lower and upper bounds of the given modular type
+   using the type name only.  Return non-zero and set L and U as the lower
+   and upper bounds (respectively) if successful.  */
+
+int
+ada_modulus_from_name (struct type *type, ULONGEST *modulus)
+{
+  char *name = ada_type_name (type);
+  char *suffix;
+  int k;
+  LONGEST U;
+
+  if (name == NULL)
+    return 0;
+
+  /* Discrete type bounds are encoded using an __XD suffix.  In our case,
+     we are looking for static bounds, which means an __XDLU suffix.
+     Moreover, we know that the lower bound of modular types is always
+     zero, so the actual suffix should start with "__XDLU_0__", and
+     then be followed by the upper bound value.  */
+  suffix = strstr (name, "__XDLU_0__");
+  if (suffix == NULL)
+    return 0;
+  k = 10;
+  if (!ada_scan_number (suffix, k, &U, NULL))
+    return 0;
+
+  *modulus = (ULONGEST) U + 1;
+  return 1;
+}
+
 /* Assuming ada_is_modular_type (TYPE), the modulus of TYPE.  */
 
 ULONGEST
-ada_modulus (struct type * type)
+ada_modulus (struct type *type)
 {
+  ULONGEST modulus;
+
+  /* Normally, the modulus of a modular type is equal to the value of
+     its upper bound + 1.  However, the upper bound is currently stored
+     as an int, which is not always big enough to hold the actual bound
+     value.  To workaround this, try to take advantage of the encoding
+     that GNAT uses with with discrete types.  To avoid some unnecessary
+     parsing, we do this only when the size of TYPE is greater than
+     the size of the field holding the bound.  */
+  if (TYPE_LENGTH (type) > sizeof (TYPE_HIGH_BOUND (type))
+      && ada_modulus_from_name (type, &modulus))
+    return modulus;
+
   return (ULONGEST) (unsigned int) TYPE_HIGH_BOUND (type) + 1;
 }
 

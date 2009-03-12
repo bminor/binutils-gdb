@@ -1,5 +1,16 @@
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
+	Fix crash printing packed record with packed array.
+
+	* ada-lang.c (ada_modulus_from_name): New function.
+	(ada_modulus): In the case where the type length is bigger than
+	the size of the type used to hold the bounds, try determining
+	the modulus from the type name.
+	(ada_value_primitive_packed_val): Fix bug in the computation of
+	ntarg causing an out-of-buffer invalid access.
+
+2009-03-12  Joel Brobecker  <brobecker@adacore.com>
+
 	Fix segfault when printing short_integer'last.
 
 	* ada-lang.c (ada_find_any_type): Search in the primitive types
