@@ -163,7 +163,6 @@ mi_gdb_test "34 next" \
 
 gdb_expect {
     -re "~\[^\r\n\]+\r\n" {
-        verbose -log "Hi there"
     }
 }
 
