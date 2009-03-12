@@ -1,3 +1,13 @@
+2009-03-12  Joel Brobecker  <brobecker@adacore.com>
+
+	Fix a build failure on AIX introduced after a change in the profile
+	of some of the "methods" in the target_ops structure.
+	* aix-thread.c: Add missing target_ops parameter throughout.
+
+	Implement Ada task switching on AIX.
+	* aix-thread.c (aix_thread_get_ada_task_ptid): New function.
+	(init_aix_thread_ops): Set aix_thread_ops.to_get_ada_task_ptid.
+
 2009-03-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* breakpoint.c (bpstat_check_breakpoint_conditions): Use

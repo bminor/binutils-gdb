@@ -958,7 +958,8 @@ aix_thread_detach (struct target_ops *ops, char *args, int from_tty)
    and all threads otherwise.  */
 
 static void
-aix_thread_resume (ptid_t ptid, int step, enum target_signal sig)
+aix_thread_resume (struct target_ops *ops,
+                   ptid_t ptid, int step, enum target_signal sig)
 {
   struct thread_info *thread;
   pthdb_tid_t tid[2];
@@ -967,7 +968,7 @@ aix_thread_resume (ptid_t ptid, int step, enum target_signal sig)
     {
       struct cleanup *cleanup = save_inferior_ptid ();
       inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-      base_target.to_resume (ptid, step, sig);
+      base_target.to_resume (ops, ptid, step, sig);
       do_cleanups (cleanup);
     }
   else
@@ -1276,13 +1277,14 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
    thread/process specified by inferior_ptid.  */
 
 static void
-aix_thread_fetch_registers (struct regcache *regcache, int regno)
+aix_thread_fetch_registers (struct target_ops *ops,
+                            struct regcache *regcache, int regno)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
 
   if (!PD_TID (inferior_ptid))
-    base_target.to_fetch_registers (regcache, regno);
+    base_target.to_fetch_registers (ops, regcache, regno);
   else
     {
       thread = find_thread_pid (inferior_ptid);
@@ -1615,13 +1617,14 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
    thread/process specified by inferior_ptid.  */
 
 static void
-aix_thread_store_registers (struct regcache *regcache, int regno)
+aix_thread_store_registers (struct target_ops *ops,
+                            struct regcache *regcache, int regno)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
 
   if (!PD_TID (inferior_ptid))
-    base_target.to_store_registers (regcache, regno);
+    base_target.to_store_registers (ops, regcache, regno);
   else
     {
       thread = find_thread_pid (inferior_ptid);
@@ -1678,10 +1681,10 @@ aix_thread_mourn_inferior (struct target_ops *ops)
 /* Return whether thread PID is still valid.  */
 
 static int
-aix_thread_thread_alive (ptid_t ptid)
+aix_thread_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   if (!PD_TID (ptid))
-    return base_target.to_thread_alive (ptid);
+    return base_target.to_thread_alive (ops, ptid);
 
   /* We update the thread list every time the child stops, so all
      valid threads should be in the thread list.  */
@@ -1768,6 +1771,12 @@ aix_thread_extra_thread_info (struct thread_info *thread)
   return ret;
 }
 
+static ptid_t
+aix_thread_get_ada_task_ptid (long lwp, long thread)
+{
+  return ptid_build (ptid_get_pid (inferior_ptid), 0, thread);
+}
+
 /* Initialize target aix_thread_ops.  */
 
 static void
@@ -1791,6 +1800,7 @@ init_aix_thread_ops (void)
   aix_thread_ops.to_thread_alive       = aix_thread_thread_alive;
   aix_thread_ops.to_pid_to_str         = aix_thread_pid_to_str;
   aix_thread_ops.to_extra_thread_info  = aix_thread_extra_thread_info;
+  aix_thread_ops.to_get_ada_task_ptid  = aix_thread_get_ada_task_ptid;
   aix_thread_ops.to_stratum            = thread_stratum;
   aix_thread_ops.to_magic              = OPS_MAGIC;
 }
