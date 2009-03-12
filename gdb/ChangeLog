@@ -1,3 +1,9 @@
+2009-03-12  Jerome Guitton  <guitton@adacore.com>
+
+	* xcoffread.c (process_linenos): Check if the line in the
+	include table refers to the main source file and, if so,
+	add them to the main subfile.
+
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
 	Fix a build failure on AIX introduced after a change in the profile

@@ -600,17 +600,32 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 		 start, 0, &main_source_baseline);
 	    }
 
-	  /* Have a new subfile for the include file.  */
+	  if (strcmp (inclTable[ii].name, last_source_file) == 0)
+	    {
+              /* The entry in the include table refers to the main source
+                 file. Add the lines to the main subfile.  */
 
-	  tmpSubfile = inclTable[ii].subfile =
-	    (struct subfile *) xmalloc (sizeof (struct subfile));
+	      main_source_baseline = inclTable[ii].funStartLine;
+	      enter_line_range
+		(&main_subfile, inclTable[ii].begin, inclTable[ii].end,
+		 start, 0, &main_source_baseline);
+	      inclTable[ii].subfile = &main_subfile;
+	    }
+	  else
+	    {
 
-	  memset (tmpSubfile, '\0', sizeof (struct subfile));
-	  firstLine = &(inclTable[ii].funStartLine);
+	      /* Have a new subfile for the include file.  */
 
-	  /* Enter include file's lines now.  */
-	  enter_line_range (tmpSubfile, inclTable[ii].begin,
-			    inclTable[ii].end, start, 0, firstLine);
+	      tmpSubfile = inclTable[ii].subfile =
+		(struct subfile *) xmalloc (sizeof (struct subfile));
+
+	      memset (tmpSubfile, '\0', sizeof (struct subfile));
+	      firstLine = &(inclTable[ii].funStartLine);
+
+	      /* Enter include file's lines now.  */
+	      enter_line_range (tmpSubfile, inclTable[ii].begin,
+				inclTable[ii].end, start, 0, firstLine);
+	    }
 
 	  if (offset <= inclTable[ii].end)
 	    offset = inclTable[ii].end + linesz;
@@ -656,7 +671,8 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 
   for (ii = 0; ii < inclIndx; ++ii)
     {
-      if ((inclTable[ii].subfile)->line_vector)		/* Useless if!!! FIXMEmgo */
+      if (inclTable[ii].subfile != ((struct subfile *) &main_subfile)
+          && (inclTable[ii].subfile)->line_vector)		/* Useless if!!! FIXMEmgo */
 	{
 	  struct linetable *lineTb, *lv;
 
