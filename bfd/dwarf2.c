@@ -417,48 +417,48 @@ read_section (bfd *           abfd,
   bfd_boolean section_is_compressed = FALSE;
 
   /* read_section is a noop if the section has already been read.  */
-  if (*section_buffer)
-    return TRUE;
-
-  msec = bfd_get_section_by_name (abfd, section_name);
-  if (! msec && compressed_section_name)
+  if (!*section_buffer)
     {
-      msec = bfd_get_section_by_name (abfd, compressed_section_name);
-      section_is_compressed = TRUE;
-    }
-  if (! msec)
-    {
-      (*_bfd_error_handler) (_("Dwarf Error: Can't find %s section."), section_name);
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
-
-  if (syms)
-    {
-      *section_size = msec->size;
-      *section_buffer
-	  = bfd_simple_get_relocated_section_contents (abfd, msec, NULL, syms);
-      if (! *section_buffer)
-	return FALSE;
-    }
-  else
-    {
-      *section_size = msec->rawsize ? msec->rawsize : msec->size;
-      *section_buffer = bfd_malloc (*section_size);
-      if (! *section_buffer)
-	return FALSE;
-      if (! bfd_get_section_contents (abfd, msec, *section_buffer,
-				      0, *section_size))
-	return FALSE;
-    }
-
-  if (section_is_compressed)
-    {
-      if (! bfd_uncompress_section_contents (section_buffer, section_size))
+      msec = bfd_get_section_by_name (abfd, section_name);
+      if (! msec && compressed_section_name)
 	{
-	  (*_bfd_error_handler) (_("Dwarf Error: unable to decompress %s section."), compressed_section_name);
+	  msec = bfd_get_section_by_name (abfd, compressed_section_name);
+	  section_is_compressed = TRUE;
+	}
+      if (! msec)
+	{
+	  (*_bfd_error_handler) (_("Dwarf Error: Can't find %s section."), section_name);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
+	}
+
+      if (syms)
+	{
+	  *section_size = msec->size;
+	  *section_buffer
+	      = bfd_simple_get_relocated_section_contents (abfd, msec, NULL, syms);
+	  if (! *section_buffer)
+	    return FALSE;
+	}
+      else
+	{
+	  *section_size = msec->rawsize ? msec->rawsize : msec->size;
+	  *section_buffer = bfd_malloc (*section_size);
+	  if (! *section_buffer)
+	    return FALSE;
+	  if (! bfd_get_section_contents (abfd, msec, *section_buffer,
+					  0, *section_size))
+	    return FALSE;
+	}
+
+      if (section_is_compressed)
+	{
+	  if (! bfd_uncompress_section_contents (section_buffer, section_size))
+	    {
+	      (*_bfd_error_handler) (_("Dwarf Error: unable to decompress %s section."), compressed_section_name);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
 	}
     }
 

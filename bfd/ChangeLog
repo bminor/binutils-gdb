@@ -1,3 +1,8 @@
+2009-03-12  Andrew Stubbs  <ams@codesourcery.com>
+
+	* dwarf2.c (read_section): Always check the offset, even when the
+	section has been read before.
+
 2009-03-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_tls_transition): Fix a typo in
