@@ -1007,11 +1007,14 @@ elf_i386_check_tls_transition (bfd *abfd, asection *sec,
 	return FALSE;
 
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+      /* Use strncmp to check ___tls_get_addr since ___tls_get_addr
+	 may be versioned.  */
       return (h != NULL
 	      && h->root.root.string != NULL
 	      && (ELF32_R_TYPE (rel[1].r_info) == R_386_PC32
 		  || ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32)
-	      && (strcmp (h->root.root.string, "___tls_get_addr") == 0));
+	      && (strncmp (h->root.root.string, "___tls_get_addr",
+			   15) == 0));
 
     case R_386_TLS_IE:
       /* Check transition from IE access model:

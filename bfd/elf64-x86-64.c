@@ -810,11 +810,14 @@ elf64_x86_64_check_tls_transition (bfd *abfd, asection *sec,
 	return FALSE;
 
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+      /* Use strncmp to check __tls_get_addr since __tls_get_addr
+	 may be versioned.  */ 
       return (h != NULL
 	      && h->root.root.string != NULL
 	      && (ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PC32
 		  || ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PLT32)
-	      && (strcmp (h->root.root.string, "__tls_get_addr") == 0));
+	      && (strncmp (h->root.root.string,
+			   "__tls_get_addr", 14) == 0));
 
     case R_X86_64_GOTTPOFF:
       /* Check transition from IE access model:

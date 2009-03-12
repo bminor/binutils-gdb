@@ -1,3 +1,12 @@
+2009-03-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/9938
+	* elf32-i386.c (elf_i386_check_tls_transition): Use strncmp
+	to check ___tls_get_addr.
+
+	* elf64-x86-64.c (elf64_x86_64_check_tls_transition): Use
+	strncmp to check __tls_get_addr.
+
 2009-03-12  Andrew Stubbs  <ams@codesourcery.com>
 
 	* dwarf2.c (read_section): Always check the offset, even when the
