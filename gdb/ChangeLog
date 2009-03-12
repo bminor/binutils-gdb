@@ -1,3 +1,12 @@
+2009-03-12  Jonas Maebe <jonas.maebe@elis.ugent.be>  (obvious change)
+
+	Fix a build failure on Darwin following some changes in
+	the profile of some target_ops methods.
+
+	* darwin-nat.c (darwin_kill_inferior): Add target_ops parameter
+	where missing.
+	(darwin_stop_inferior, darwin_detach): Likewise.
+
 2009-03-12  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Include token in ^running notification for CLI commands.

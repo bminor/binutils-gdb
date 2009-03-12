@@ -90,7 +90,7 @@ static void darwin_mourn_inferior (struct target_ops *ops);
 
 static int darwin_lookup_task (char *args, task_t * ptask, int *ppid);
 
-static void darwin_kill_inferior (void);
+static void darwin_kill_inferior (struct target_ops *ops);
 
 static void darwin_ptrace_me (void);
 
@@ -668,7 +668,7 @@ darwin_mourn_inferior (struct target_ops *ops)
 }
 
 static void
-darwin_stop_inferior (darwin_inferior *inf)
+darwin_stop_inferior (struct target_ops *ops, darwin_inferior *inf)
 {
   struct target_waitstatus wstatus;
   ptid_t ptid;
@@ -688,7 +688,7 @@ darwin_stop_inferior (darwin_inferior *inf)
   if (res != 0)
     warning (_("cannot kill: %s\n"), strerror (errno));
 
-  ptid = darwin_wait (inferior_ptid, &wstatus);
+  ptid = darwin_wait (ops, inferior_ptid, &wstatus);
   gdb_assert (wstatus.kind = TARGET_WAITKIND_STOPPED);
 }
 
@@ -706,7 +706,7 @@ darwin_kill_inferior (struct target_ops *ops)
   if (ptid_equal (inferior_ptid, null_ptid))
     return;
 
-  darwin_stop_inferior (darwin_inf);
+  darwin_stop_inferior (ops, darwin_inf);
 
   res = PTRACE (PT_KILL, darwin_inf->pid, 0, 0);
   gdb_assert (res == 0);
@@ -720,7 +720,7 @@ darwin_kill_inferior (struct target_ops *ops)
   kret = task_resume (darwin_inf->task);
   MACH_CHECK_ERROR (kret);
 
-  ptid = darwin_wait (inferior_ptid, &wstatus);
+  ptid = darwin_wait (ops, inferior_ptid, &wstatus);
 
   /* This double wait seems required...  */
   res = waitpid (darwin_inf->pid, &status, 0);
@@ -1011,7 +1011,7 @@ darwin_detach (struct target_ops *ops, char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
-  darwin_stop_inferior (darwin_inf);
+  darwin_stop_inferior (ops, darwin_inf);
 
   kret = darwin_restore_exception_ports (darwin_inf);
   MACH_CHECK_ERROR (kret);
