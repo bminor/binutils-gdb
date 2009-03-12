@@ -1,3 +1,9 @@
+2009-03-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-tasks.c (task_states,long_task_states): Add new states
+	Activating and Acceptor_Delay_Sleep.  Update the description
+	of state Acceptor_Sleep.
+
 2009-03-12  Jonas Maebe <jonas.maebe@elis.ugent.be>  (obvious change)
 
 	Fix a build failure on Darwin following some changes in
