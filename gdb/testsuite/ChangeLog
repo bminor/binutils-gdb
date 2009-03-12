@@ -1,3 +1,7 @@
+2009-03-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/tick_last_segv: New testcase.
+
 2009-03-12  Vladimir Prus  <vladimir@codesourcery.com>
 
         * gdb.mi/mi-cli.exp: Remove debug print.
