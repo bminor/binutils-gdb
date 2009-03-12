@@ -155,8 +155,24 @@ mi_execute_to "exec-continue" "breakpoint-hit" "main" "" ".*basics.c" \
     $line_main_hello { "" "disp=\"del\"" } \
     "-exec-continue to line $line_main_hello"
 
-mi_execute_to "exec-next" "end-stepping-range" "main" "" ".*basics.c" $line_main_return "" \
-    "-exec-next to line $line_main_return"
+# Test that the token is output even for CLI commands
+# Also test that *stopped includes frame information.
+mi_gdb_test "34 next" \
+    ".*34\\\^running.*\\*running,thread-id=\"all\"" \
+    "34 next: run"
+
+gdb_expect {
+    -re "~\[^\r\n\]+\r\n" {
+        verbose -log "Hi there"
+    }
+}
+
+# Note that the output does not include stop reason. This is fine.
+# The purpose of *stopped notification for CLI command is to make
+# sure that frontend knows that inferior is stopped, and knows where.
+# Supplementary information is not necessary.
+mi_expect_stop "" "main" "" ".*basics.c" $line_main_return "" \
+    "34 next: stop"
 
 mi_gdb_test "-interpreter-exec console \"list\"" \
   "\~\"$line_main_return\[\\\\t ]*callme \\(1\\);\\\\n\".*\\^done" \

@@ -1,5 +1,12 @@
 2009-03-12  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Include token in ^running notification for CLI commands.
+
+        * mi/mi-main.c (mi_execute_command): Set current_token here.
+        (mi_cmd_execute): Do not set current_token here.
+
+2009-03-12  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Fix MI timings.
 
         * mi/mi-main.c (mi_print_timing_maybe): New.

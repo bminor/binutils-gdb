@@ -1137,10 +1137,14 @@ mi_cmd_list_target_features (char *command, char **argv, int argc)
 static void
 captured_mi_execute_command (struct ui_out *uiout, void *data)
 {
+  struct cleanup *cleanup;
   struct mi_parse *context = (struct mi_parse *) data;
 
   if (do_timings)
     current_command_ts = context->cmd_start;
+
+  current_token = xstrdup (context->token);
+  cleanup = make_cleanup (free_current_contents, &current_token);
 
   running_result_record_printed = 0;
   switch (context->op)
@@ -1215,6 +1219,8 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
       }
 
     }
+
+  do_cleanups (cleanup);
 
   return;
 }
@@ -1310,10 +1316,9 @@ mi_cmd_execute (struct mi_parse *parse)
 {
   struct cleanup *cleanup;
   int i;
-  free_all_values ();
 
-  current_token = xstrdup (parse->token);
-  cleanup = make_cleanup (free_current_contents, &current_token);
+  free_all_values ();
+  cleanup = make_cleanup (null_cleanup, NULL);
 
   if (parse->frame != -1 && parse->thread == -1)
     error (_("Cannot specify --frame without --thread"));
