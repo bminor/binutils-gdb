@@ -362,6 +362,7 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
   fputs_unfiltered ("*stopped", raw_stdout);
   mi_out_put (mi_uiout, raw_stdout);
   mi_out_rewind (mi_uiout);
+  mi_print_timing_maybe ();
   fputs_unfiltered ("\n", raw_stdout);
   gdb_flush (raw_stdout);
 }

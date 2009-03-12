@@ -30,5 +30,7 @@ extern char *current_token;
 
 extern int running_result_record_printed;
 
+void mi_print_timing_maybe ();
+
 #endif
 
