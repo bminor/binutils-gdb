@@ -6535,11 +6535,16 @@ struct type *
 ada_find_any_type (const char *name)
 {
   struct symbol *sym = ada_find_any_symbol (name);
+  struct type *type = NULL;
 
   if (sym != NULL)
-    return SYMBOL_TYPE (sym);
+    type = SYMBOL_TYPE (sym);
 
-  return NULL;
+  if (type == NULL)
+    type = language_lookup_primitive_type_by_name
+      (language_def (language_ada), current_gdbarch, name);
+
+  return type;
 }
 
 /* Given NAME and an associated BLOCK, search all symbols for

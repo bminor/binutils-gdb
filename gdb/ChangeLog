@@ -1,5 +1,12 @@
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
+	Fix segfault when printing short_integer'last.
+
+	* ada-lang.c (ada_find_any_type): Search in the primitive types
+	if a symbol could not be found.
+
+2009-03-12  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-tasks.c (task_states,long_task_states): Add new states
 	Activating and Acceptor_Delay_Sleep.  Update the description
 	of state Acceptor_Sleep.
