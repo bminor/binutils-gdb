@@ -1,3 +1,11 @@
+2009-03-13  Nick Clifton  <nickc@redhat.com>
+
+	* lib/ld-lib.exp (run_dump_test): Add verbose to list of globals.
+	Replace call to verbose_eval with a test of verbose level.  If
+	greater than 2 always dump the contents of the dumpfile.  If equal
+	to 2 only dump the contents if the regexp diff failed.
+	(proc verbose_eval): Delete.
+
 2009-03-07  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* ld-elf/empty2.d: Remove xfail for hppa*-*-*.

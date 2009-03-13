@@ -629,7 +629,7 @@ proc run_dump_test { name } {
     global OBJDUMP NM AS OBJCOPY READELF LD
     global OBJDUMPFLAGS NMFLAGS ASFLAGS OBJCOPYFLAGS READELFFLAGS LDFLAGS
     global host_triplet runtests
-    global env
+    global env verbose
 
     if [string match "*/*" $name] {
 	set file $name
@@ -946,10 +946,10 @@ proc run_dump_test { name } {
 	return
     }
 
-    verbose_eval {[file_contents $dumpfile]} 3
+    if { $verbose > 2 } then { verbose "output is [file_contents $dumpfile]" 3 }
     if { [regexp_diff $dumpfile "${file}.d"] } then {
 	fail $testname
-	verbose "output is [file_contents $dumpfile]" 2
+	if { $verbose == 2 } then { verbose "output is [file_contents $dumpfile]" 2 }
 	return
     }
 
@@ -1272,12 +1272,6 @@ proc run_ld_link_tests { ldtests } {
 	    continue
 	}
     }
-}
-
-
-proc verbose_eval { expr { level 1 } } {
-    global verbose
-    if $verbose>$level then { eval verbose "$expr" $level }
 }
 
 # This definition is taken from an unreleased version of DejaGnu.  Once
