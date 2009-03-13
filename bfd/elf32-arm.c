@@ -9597,6 +9597,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   bfd_vma *local_got_offsets;
   struct elf32_arm_link_hash_table *htab;
   bfd_boolean needs_plt;
+  unsigned long nsyms;
 
   if (info->relocatable)
     return TRUE;
@@ -9620,7 +9621,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   symtab_hdr = & elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
-
+  nsyms = NUM_SHDR_ENTRIES (symtab_hdr);
+  
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
@@ -9633,14 +9635,18 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
       r_type = ELF32_R_TYPE (rel->r_info);
       r_type = arm_real_reloc_type (htab, r_type);
 
-      if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
+      if (r_symndx >= nsyms
+	  /* PR 9934: It is possible to have relocations that do not
+	     refer to symbols, thus it is also possible to have an
+	     object file containing relocations but no symbol table.  */
+	  && (r_symndx > 0 || nsyms > 0))
 	{
 	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"), abfd,
-				 r_symndx);
+				   r_symndx);
 	  return FALSE;
 	}
 
-      if (r_symndx < symtab_hdr->sh_info)
+      if (nsyms == 0 || r_symndx < symtab_hdr->sh_info)
         h = NULL;
       else
 	{

@@ -2202,7 +2202,7 @@ elf_link_read_relocs_from_section (bfd *abfd,
     return FALSE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  nsyms = symtab_hdr->sh_size / symtab_hdr->sh_entsize;
+  nsyms = NUM_SHDR_ENTRIES (symtab_hdr);
 
   bed = get_elf_backend_data (abfd);
 
@@ -2228,11 +2228,24 @@ elf_link_read_relocs_from_section (bfd *abfd,
       r_symndx = ELF32_R_SYM (irela->r_info);
       if (bed->s->arch_size == 64)
 	r_symndx >>= 24;
-      if ((size_t) r_symndx >= nsyms)
+      if (nsyms > 0)
+	{
+	  if ((size_t) r_symndx >= nsyms)
+	    {
+	      (*_bfd_error_handler)
+		(_("%B: bad reloc symbol index (0x%lx >= 0x%lx)"
+		   " for offset 0x%lx in section `%A'"),
+		 abfd, sec,
+		 (unsigned long) r_symndx, (unsigned long) nsyms, irela->r_offset);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	}
+      else if (r_symndx != 0)
 	{
 	  (*_bfd_error_handler)
-	    (_("%B: bad reloc symbol index (0x%lx >= 0x%lx)"
-	       " for offset 0x%lx in section `%A'"),
+	    (_("%B: non-zero symbol index (0x%lx) for offset 0x%lx in section `%A'"
+	       " when the object file has no symbol table"),
 	     abfd, sec,
 	     (unsigned long) r_symndx, (unsigned long) nsyms, irela->r_offset);
 	  bfd_set_error (bfd_error_bad_value);

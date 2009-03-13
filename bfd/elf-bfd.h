@@ -31,8 +31,11 @@
 
 /* The number of entries in a section is its size divided by the size
    of a single entry.  This is normally only applicable to reloc and
-   symbol table sections.  */
-#define NUM_SHDR_ENTRIES(shdr) ((shdr)->sh_size / (shdr)->sh_entsize)
+   symbol table sections.
+   PR 9934: It is possible to have relocations that do not refer to
+   symbols, thus it is also possible to have a relocation section in
+   an object file, but no symbol table.  */
+#define NUM_SHDR_ENTRIES(shdr) ((shdr)->sh_entsize > 0 ? (shdr)->sh_size / (shdr)->sh_entsize : 0)
 
 /* If size isn't specified as 64 or 32, NAME macro should fail.  */
 #ifndef NAME
