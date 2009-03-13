@@ -389,8 +389,8 @@ class Script_options
 // whether the function took over NEXT_BLOCKER.
 
 bool
-read_input_script(Workqueue*, const General_options&, Symbol_table*, Layout*,
-		  Dirsearch*, Input_objects*, Mapfile*, Input_group*,
+read_input_script(Workqueue*, Symbol_table*, Layout*, Dirsearch*,
+		  Input_objects*, Mapfile*, Input_group*,
 		  const Input_argument*, Input_file*,
 		  Task_token* next_blocker, bool* used_next_blocker);
 

@@ -434,7 +434,7 @@ class Input_file
   // Open the file.  If the open fails, this will report an error and
   // return false.
   bool
-  open(const General_options&, const Dirsearch&, const Task*);
+  open(const Dirsearch&, const Task*);
 
   // Return the name given by the user.  For -lc this will return "c".
   const char*
@@ -485,8 +485,7 @@ class Input_file
 
   // Open a binary file.
   bool
-  open_binary(const General_options&, const Task* task,
-	      const std::string& name);
+  open_binary(const Task* task, const std::string& name);
 
   // The argument from the command line.
   const Input_file_argument* input_argument_;

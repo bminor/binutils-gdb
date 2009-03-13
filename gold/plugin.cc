@@ -407,8 +407,7 @@ Plugin_manager::add_input_file(char *pathname)
   Input_argument* input_argument = new Input_argument(file);
   Task_token* next_blocker = new Task_token(true);
   next_blocker->add_blocker();
-  this->workqueue_->queue_soon(new Read_symbols(this->options_,
-                                                this->input_objects_,
+  this->workqueue_->queue_soon(new Read_symbols(this->input_objects_,
                                                 this->symtab_,
                                                 this->layout_,
                                                 this->dirpath_,

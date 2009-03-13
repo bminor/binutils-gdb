@@ -139,7 +139,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
     }
 
   Input_file* input_file = new Input_file(&this->input_argument_->file());
-  if (!input_file->open(this->options_, *this->dirpath_, this))
+  if (!input_file->open(*this->dirpath_, this))
     return false;
 
   // Read enough of the file to pick up the entire ELF header.
@@ -258,8 +258,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
   // read multiple scripts simultaneously, which could lead to
   // unpredictable changes to the General_options structure.
 
-  workqueue->queue_soon(new Read_script(this->options_,
-					this->symtab_,
+  workqueue->queue_soon(new Read_script(this->symtab_,
 					this->layout_,
 					this->dirpath_,
 					this->input_objects_,
@@ -296,8 +295,7 @@ Read_symbols::do_group(Workqueue* workqueue)
 
       Task_token* next_blocker = new Task_token(true);
       next_blocker->add_blocker();
-      workqueue->queue_soon(new Read_symbols(this->options_,
-					     this->input_objects_,
+      workqueue->queue_soon(new Read_symbols(this->input_objects_,
 					     this->symtab_, this->layout_,
 					     this->dirpath_, this->mapfile_,
 					     arg, input_group,
@@ -491,8 +489,8 @@ void
 Read_script::run(Workqueue* workqueue)
 {
   bool used_next_blocker;
-  if (!read_input_script(workqueue, this->options_, this->symtab_,
-			 this->layout_, this->dirpath_, this->input_objects_,
+  if (!read_input_script(workqueue, this->symtab_, this->layout_,
+			 this->dirpath_, this->input_objects_,
 			 this->mapfile_, this->input_group_,
 			 this->input_argument_, this->input_file_,
 			 this->next_blocker_, &used_next_blocker))

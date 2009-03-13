@@ -54,15 +54,15 @@ class Read_symbols : public Task
   // one has completed; it will be NULL for the first task.
   // NEXT_BLOCKER is used to block the next input file from adding
   // symbols.
-  Read_symbols(const General_options& options, Input_objects* input_objects,
-	       Symbol_table* symtab, Layout* layout, Dirsearch* dirpath,
-	       Mapfile* mapfile, const Input_argument* input_argument,
+  Read_symbols(Input_objects* input_objects, Symbol_table* symtab,
+	       Layout* layout, Dirsearch* dirpath, Mapfile* mapfile,
+	       const Input_argument* input_argument,
 	       Input_group* input_group, Task_token* this_blocker,
 	       Task_token* next_blocker)
-    : options_(options), input_objects_(input_objects), symtab_(symtab),
-      layout_(layout), dirpath_(dirpath), mapfile_(mapfile),
-      input_argument_(input_argument), input_group_(input_group),
-      this_blocker_(this_blocker), next_blocker_(next_blocker)
+    : input_objects_(input_objects), symtab_(symtab), layout_(layout),
+      dirpath_(dirpath), mapfile_(mapfile), input_argument_(input_argument),
+      input_group_(input_group), this_blocker_(this_blocker),
+      next_blocker_(next_blocker)
   { }
 
   ~Read_symbols();
@@ -90,7 +90,6 @@ class Read_symbols : public Task
   bool
   do_read_symbols(Workqueue*);
 
-  const General_options& options_;
   Input_objects* input_objects_;
   Symbol_table* symtab_;
   Layout* layout_;
@@ -230,13 +229,12 @@ class Finish_group : public Task
 class Read_script : public Task
 {
  public:
-  Read_script(const General_options& options, Symbol_table* symtab,
-	      Layout* layout, Dirsearch* dirpath, Input_objects* input_objects,
-	      Mapfile* mapfile, Input_group* input_group,
-	      const Input_argument* input_argument,
+  Read_script(Symbol_table* symtab, Layout* layout, Dirsearch* dirpath,
+	      Input_objects* input_objects, Mapfile* mapfile,
+	      Input_group* input_group, const Input_argument* input_argument,
 	      Input_file* input_file, Task_token* this_blocker,
 	      Task_token* next_blocker)
-    : options_(options), symtab_(symtab), layout_(layout), dirpath_(dirpath),
+    : symtab_(symtab), layout_(layout), dirpath_(dirpath),
       input_objects_(input_objects), mapfile_(mapfile),
       input_group_(input_group), input_argument_(input_argument),
       input_file_(input_file), this_blocker_(this_blocker),
@@ -260,7 +258,6 @@ class Read_script : public Task
   get_name() const;
 
  private:
-  const General_options& options_;
   Symbol_table* symtab_;
   Layout* layout_;
   Dirsearch* dirpath_;

@@ -1321,8 +1321,7 @@ class Parser_closure
 // as a script.  Return true if the file was handled.
 
 bool
-read_input_script(Workqueue* workqueue, const General_options& options,
-		  Symbol_table* symtab, Layout* layout,
+read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
 		  Dirsearch* dirsearch, Input_objects* input_objects,
 		  Mapfile* mapfile, Input_group* input_group,
 		  const Input_argument* input_argument,
@@ -1363,7 +1362,7 @@ read_input_script(Workqueue* workqueue, const General_options& options,
 	  nb = new Task_token(true);
 	  nb->add_blocker();
 	}
-      workqueue->queue_soon(new Read_symbols(options, input_objects, symtab,
+      workqueue->queue_soon(new Read_symbols(input_objects, symtab,
 					     layout, dirsearch, mapfile, &*p,
 					     input_group, this_blocker, nb));
       this_blocker = nb;
@@ -1398,7 +1397,7 @@ read_script_file(const char* filename, Command_line* cmdline,
     posdep.set_format_enum(General_options::OBJECT_FORMAT_ELF);
   Input_file_argument input_argument(filename, false, "", false, posdep);
   Input_file input_file(&input_argument);
-  if (!input_file.open(cmdline->options(), dirsearch, task))
+  if (!input_file.open(dirsearch, task))
     return false;
 
   std::string input_string;

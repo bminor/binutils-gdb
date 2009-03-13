@@ -766,8 +766,7 @@ Input_file::just_symbols() const
 // the file location, rather than the current directory.
 
 bool
-Input_file::open(const General_options& options, const Dirsearch& dirpath,
-		 const Task* task)
+Input_file::open(const Dirsearch& dirpath, const Task* task)
 {
   std::string name;
 
@@ -789,7 +788,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath,
       std::string n1("lib");
       n1 += this->input_argument_->name();
       std::string n2;
-      if (options.is_static()
+      if (parameters->options().is_static()
 	  || !this->input_argument_->options().Bdynamic())
 	n1 += ".a";
       else
@@ -845,7 +844,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath,
   else
     {
       gold_assert(format == General_options::OBJECT_FORMAT_BINARY);
-      ok = this->open_binary(options, task, name);
+      ok = this->open_binary(task, name);
     }
 
   if (!ok)
@@ -861,8 +860,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath,
 // Open a file for --format binary.
 
 bool
-Input_file::open_binary(const General_options&,
-			const Task* task, const std::string& name)
+Input_file::open_binary(const Task* task, const std::string& name)
 {
   // In order to open a binary file, we need machine code, size, and
   // endianness.  We may not have a valid target at this point, in

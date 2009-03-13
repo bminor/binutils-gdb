@@ -482,8 +482,7 @@ Archive::get_file_and_offset(off_t off, Input_objects* input_objects,
             new Input_file_argument(member_name->c_str(), false, "", false,
                                     parameters->options());
           *input_file = new Input_file(input_file_arg);
-          if (!(*input_file)->open(parameters->options(), *this->dirpath_,
-                                   this->task_))
+          if (!(*input_file)->open(*this->dirpath_, this->task_))
             return false;
           arch = new Archive(*member_name, *input_file, false, this->dirpath_,
                              this->task_);
@@ -502,8 +501,7 @@ Archive::get_file_and_offset(off_t off, Input_objects* input_objects,
       new Input_file_argument(member_name->c_str(), false, "", false,
                               this->input_file_->options());
   *input_file = new Input_file(input_file_arg);
-  if (!(*input_file)->open(parameters->options(), *this->dirpath_,
-                           this->task_))
+  if (!(*input_file)->open(*this->dirpath_, this->task_))
     return false;
 
   *memoff = 0;

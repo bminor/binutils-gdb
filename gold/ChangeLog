@@ -1,3 +1,15 @@
+2009-03-13  Ian Lance Taylor  <iant@google.com>
+
+	* fileread.cc (Input_file::open): Remove options parameter.
+	Change all callers.
+	(Input_file::open_binary): Likewise.
+	* script.cc (read_input_script): Likewise.
+	* readsyms.h (class Read_symbols): Remove options_ field.  Remove
+	options parameter from constructor.  Change all callers.
+	(class Read_script): Likewise.
+	* fileread.h (class Input_file): Update declarations.
+	* script.h (read_input_script): Update declaration.
+
 2009-03-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: New Spanish translation.
