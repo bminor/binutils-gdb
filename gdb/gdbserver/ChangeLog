@@ -1,3 +1,8 @@
+2009-03-13  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* Makefile.in, hostio-errno.c, errno.c, xtensa-xtregs.c: Change to
+	GPLv3, update license URL.
+
 2009-03-01  Doug Evans  <dje@google.com>
 
 	* Makefile.in (INCLUDE_CFLAGS): Add -I$(srcdir)/../common.
