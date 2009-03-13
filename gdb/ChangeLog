@@ -1,4 +1,4 @@
-2009-03-12  Jerome Guitton  <guitton@adacore.com>
+2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-tasks.c (ada_task_is_alive): Move up and make static.
 	* ada-lang.h (ada_task_is_alive): Remove declaration.
