@@ -1197,8 +1197,8 @@ lookup_symbol_in_language (const char *name, const struct block *block,
   char *demangled_name = NULL;
   const char *modified_name = NULL;
   const char *mangled_name = NULL;
-  int needtofreename = 0;
   struct symbol *returnval;
+  struct cleanup *cleanup = make_cleanup (null_cleanup, 0);
 
   modified_name = name;
 
@@ -1211,7 +1211,7 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 	{
 	  mangled_name = name;
 	  modified_name = demangled_name;
-	  needtofreename = 1;
+	  make_cleanup (xfree, demangled_name);
 	}
     }
   else if (lang == language_java)
@@ -1222,7 +1222,7 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 	{
 	  mangled_name = name;
 	  modified_name = demangled_name;
-	  needtofreename = 1;
+	  make_cleanup (xfree, demangled_name);
 	}
     }
 
@@ -1241,8 +1241,7 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 
   returnval = lookup_symbol_aux (modified_name, mangled_name, block,
 				 domain, lang, is_a_field_of_this);
-  if (needtofreename)
-    xfree (demangled_name);
+  do_cleanups (cleanup);
 
   return returnval;
 }

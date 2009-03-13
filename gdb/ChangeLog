@@ -1,3 +1,7 @@
+2009-03-13  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.c (lookup_symbol_in_language): Use a cleanup.
+
 2009-03-13  Doug Evans  <dje@google.com>
 
 	* exceptions.h: Clean up some comments on catch_exceptions usage.
