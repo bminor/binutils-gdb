@@ -417,25 +417,21 @@ throw_error (enum errors error, const char *fmt, ...)
   va_end (args);
 }
 
-/* Call FUNC() with args FUNC_UIOUT and FUNC_ARGS, catching any
-   errors.  Set FUNC_CAUGHT to an ``enum return_reason'' if the
-   function is aborted (using throw_exception() or zero if the
-   function returns normally.  Set FUNC_VAL to the value returned by
-   the function or 0 if the function was aborted.
+/* Call FUNC(UIOUT, FUNC_ARGS) but wrapped within an exception
+   handler.  If an exception (enum return_reason) is thrown using
+   throw_exception() than all cleanups installed since
+   catch_exceptions() was entered are invoked, the (-ve) exception
+   value is then returned by catch_exceptions.  If FUNC() returns
+   normally (with a positive or zero return value) then that value is
+   returned by catch_exceptions().  It is an internal_error() for
+   FUNC() to return a negative value.
+
+   See exceptions.h for further usage details.
 
    Must not be called with immediate_quit in effect (bad things might
    happen, say we got a signal in the middle of a memcpy to quit_return).
    This is an OK restriction; with very few exceptions immediate_quit can
-   be replaced by judicious use of QUIT.
-
-   MASK specifies what to catch; it is normally set to
-   RETURN_MASK_ALL, if for no other reason than that the code which
-   calls catch_errors might not be set up to deal with a quit which
-   isn't caught.  But if the code can deal with it, it generally
-   should be RETURN_MASK_ERROR, unless for some reason it is more
-   useful to abort only the portion of the operation inside the
-   catch_errors.  Note that quit should return to the command line
-   fairly quickly, even if some further processing is being done.  */
+   be replaced by judicious use of QUIT.  */
 
 /* MAYBE: cagney/1999-11-05: catch_errors() in conjunction with
    error() et.al. could maintain a set of flags that indicate the the
@@ -444,10 +440,6 @@ throw_error (enum errors error, const char *fmt, ...)
    to longjmperror()).  Prior to 1999-11-05 this wasn't possible as
    code also randomly used a SET_TOP_LEVEL macro that directly
    initialize the longjmp buffers. */
-
-/* MAYBE: cagney/1999-11-05: Should the catch_errors and cleanups code
-   be consolidated into a single file instead of being distributed
-   between utils.c and top.c? */
 
 int
 catch_exceptions (struct ui_out *uiout,
@@ -504,6 +496,8 @@ catch_exceptions_with_msg (struct ui_out *uiout,
     }
   return val;
 }
+
+/* This function is superseded by catch_exceptions().  */
 
 int
 catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,

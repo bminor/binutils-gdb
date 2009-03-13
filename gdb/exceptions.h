@@ -180,7 +180,7 @@ extern NORETURN void deprecated_throw_reason (enum return_reason reason) ATTR_NO
    throw_exception() than all cleanups installed since
    catch_exceptions() was entered are invoked, the (-ve) exception
    value is then returned by catch_exceptions.  If FUNC() returns
-   normally (with a postive or zero return value) then that value is
+   normally (with a positive or zero return value) then that value is
    returned by catch_exceptions().  It is an internal_error() for
    FUNC() to return a negative value.
 
@@ -194,10 +194,19 @@ extern NORETURN void deprecated_throw_reason (enum return_reason reason) ATTR_NO
    copy of the gdb error message.  This is used when a silent error is 
    issued and the caller wants to manually issue the error message.
 
+   MASK specifies what to catch; it is normally set to
+   RETURN_MASK_ALL, if for no other reason than that the code which
+   calls catch_errors might not be set up to deal with a quit which
+   isn't caught.  But if the code can deal with it, it generally
+   should be RETURN_MASK_ERROR, unless for some reason it is more
+   useful to abort only the portion of the operation inside the
+   catch_errors.  Note that quit should return to the command line
+   fairly quickly, even if some further processing is being done.
+
    FIXME; cagney/2001-08-13: The need to override the global UIOUT
    builder variable should just go away.
 
-   This function superseeds catch_errors().
+   This function supersedes catch_errors().
 
    This function uses SETJMP() and LONGJUMP().  */
 
@@ -228,7 +237,7 @@ extern struct gdb_exception catch_exception (struct ui_out *uiout,
    indication of the exact exception that it caught - quit_flag might
    help.
 
-   This function is superseeded by catch_exceptions().  */
+   This function is superseded by catch_exceptions().  */
 
 typedef int (catch_errors_ftype) (void *);
 extern int catch_errors (catch_errors_ftype *, void *, char *, return_mask);

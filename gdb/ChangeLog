@@ -1,3 +1,9 @@
+2009-03-13  Doug Evans  <dje@google.com>
+
+	* exceptions.h: Clean up some comments on catch_exceptions usage.
+	* exceptions.c: Ditto.  Plus mark catch_errors as superseded by
+	catch_exceptions.
+
 2009-02-17  Joel Brobecker  <brobecker@adacore.com>
 
 	The following patch helps getting rid of a warning inside solib-som.c.
