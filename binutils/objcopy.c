@@ -1396,6 +1396,9 @@ copy_object (bfd *ibfd, bfd *obfd)
       flags &= ~bfd_flags_to_clear;
       flags &= bfd_applicable_file_flags (obfd);
 
+      if (strip_symbols == STRIP_ALL)
+	flags &= ~HAS_RELOC;
+
       if (!bfd_set_start_address (obfd, start)
 	  || !bfd_set_file_flags (obfd, flags))
 	{
