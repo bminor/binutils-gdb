@@ -11013,7 +11013,7 @@ ada_language_arch_info (struct gdbarch *gdbarch,
   TYPE_NAME (lai->primitive_type_vector [ada_primitive_type_system_address])
     = "system__address";
 
-  lai->bool_type_symbol = "boolean";
+  lai->bool_type_symbol = NULL;
   lai->bool_type_default = builtin->builtin_bool;
 }
 

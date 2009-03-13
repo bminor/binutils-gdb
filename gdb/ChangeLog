@@ -1,3 +1,8 @@
+2009-03-12  Jerome Guitton  <guitton@adacore.com>
+
+	* language.c (lang_bool_type): Return a builtin bool type in the
+	Ada case.
+
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp) [OP_VAR_VALUE]: For tagged
