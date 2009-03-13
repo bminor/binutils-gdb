@@ -1,5 +1,9 @@
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/ptype_arith_binop.exp: New testcase.
+
+2009-03-12  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/mod_from_name: New testcase.
 
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
