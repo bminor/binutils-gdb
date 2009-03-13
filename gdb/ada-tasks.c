@@ -202,6 +202,15 @@ valid_task_id (int task_num)
           && task_num <= VEC_length (ada_task_info_s, task_list));
 }
 
+/* Return non-zero iff the task STATE corresponds to a non-terminated
+   task state.  */
+
+static int
+ada_task_is_alive (struct ada_task_info *task_info)
+{
+  return (task_info->state != Terminated);
+}
+
 /* Extract the contents of the value as a string whose length is LENGTH,
    and store the result in DEST.  */
 
@@ -660,15 +669,6 @@ ada_build_task_list (int warn_if_null)
     }
 
   return 1;
-}
-
-/* Return non-zero iff the task STATE corresponds to a non-terminated
-   task state.  */
-
-int
-ada_task_is_alive (struct ada_task_info *task_info)
-{
-  return (task_info->state != Terminated);
 }
 
 /* Print a one-line description of the task whose number is TASKNO.

@@ -226,8 +226,6 @@ struct ada_task_info
   CORE_ADDR caller_task;
 };
 
-int ada_task_is_alive (struct ada_task_info *task);
-
 /* Assuming V points to an array of S objects,  make sure that it contains at
    least M objects, updating V and S as necessary. */
 

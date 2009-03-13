@@ -1,5 +1,10 @@
 2009-03-12  Jerome Guitton  <guitton@adacore.com>
 
+	* ada-tasks.c (ada_task_is_alive): Move up and make static.
+	* ada-lang.h (ada_task_is_alive): Remove declaration.
+
+2009-03-12  Jerome Guitton  <guitton@adacore.com>
+
 	* ada-lang.c (ada_delta): Change the type of numerators and
 	denominators to DOUBLEST, as they may not fit into a long.
 	(scaling_factor): Ditto.
