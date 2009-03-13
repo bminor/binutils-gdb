@@ -822,7 +822,7 @@ done:
 
    Else, this functions returns 0, and FULL_PATHNAME is set to NULL.  */
 int
-source_full_path_of (char *filename, char **full_pathname)
+source_full_path_of (const char *filename, char **full_pathname)
 {
   int fd;
 

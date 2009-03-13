@@ -1,3 +1,10 @@
+2009-02-17  Joel Brobecker  <brobecker@adacore.com>
+
+	The following patch helps getting rid of a warning inside solib-som.c.
+
+	* source.c (source_full_path_of): Constify parameter filename.
+	* defs.h (source_full_path_of): Update declaration accordingly.
+
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp): Merge case BINOP_REM and

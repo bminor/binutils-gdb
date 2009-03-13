@@ -613,7 +613,7 @@ extern void print_address (CORE_ADDR, struct ui_file *);
 
 extern int openp (const char *, int, const char *, int, int, char **);
 
-extern int source_full_path_of (char *, char **);
+extern int source_full_path_of (const char *, char **);
 
 extern void mod_path (char *, char **);
 
