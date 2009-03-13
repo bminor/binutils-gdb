@@ -1,5 +1,11 @@
 2009-03-12  Jerome Guitton  <guitton@adacore.com>
 
+	* ada-lang.c (ada_delta): Change the type of numerators and
+	denominators to DOUBLEST, as they may not fit into a long.
+	(scaling_factor): Ditto.
+
+2009-03-12  Jerome Guitton  <guitton@adacore.com>
+
 	* language.c (lang_bool_type): Set lai->bool_type_symbol to NULL.
 
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>

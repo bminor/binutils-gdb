@@ -9296,12 +9296,16 @@ DOUBLEST
 ada_delta (struct type *type)
 {
   const char *encoding = fixed_type_info (type);
-  long num, den;
+  DOUBLEST num, den;
 
-  if (sscanf (encoding, "_%ld_%ld", &num, &den) < 2)
+  /* Strictly speaking, num and den are encoded as integer.  However,
+     they may not fit into a long, and they will have to be converted
+     to DOUBLEST anyway.  So scan them as DOUBLEST.  */
+  if (sscanf (encoding, "_%" DOUBLEST_SCAN_FORMAT "_%" DOUBLEST_SCAN_FORMAT,
+	      &num, &den) < 2)
     return -1.0;
   else
-    return (DOUBLEST) num / (DOUBLEST) den;
+    return num / den;
 }
 
 /* Assuming that ada_is_fixed_point_type (TYPE), return the scaling
@@ -9311,17 +9315,23 @@ static DOUBLEST
 scaling_factor (struct type *type)
 {
   const char *encoding = fixed_type_info (type);
-  unsigned long num0, den0, num1, den1;
+  DOUBLEST num0, den0, num1, den1;
   int n;
 
-  n = sscanf (encoding, "_%lu_%lu_%lu_%lu", &num0, &den0, &num1, &den1);
+  /* Strictly speaking, num's and den's are encoded as integer.  However,
+     they may not fit into a long, and they will have to be converted
+     to DOUBLEST anyway.  So scan them as DOUBLEST.  */
+  n = sscanf (encoding,
+	      "_%" DOUBLEST_SCAN_FORMAT "_%" DOUBLEST_SCAN_FORMAT
+	      "_%" DOUBLEST_SCAN_FORMAT "_%" DOUBLEST_SCAN_FORMAT,
+	      &num0, &den0, &num1, &den1);
 
   if (n < 2)
     return 1.0;
   else if (n == 4)
-    return (DOUBLEST) num1 / (DOUBLEST) den1;
+    return num1 / den1;
   else
-    return (DOUBLEST) num0 / (DOUBLEST) den0;
+    return num0 / den0;
 }
 
 
