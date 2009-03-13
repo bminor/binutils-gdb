@@ -8452,12 +8452,13 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case BINOP_MUL:
     case BINOP_DIV:
+    case BINOP_REM:
+    case BINOP_MOD:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS
-               && (op == BINOP_DIV || op == BINOP_REM || op == BINOP_MOD))
+      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
         {
           binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
           return value_zero (value_type (arg1), not_lval);
@@ -8472,21 +8473,6 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
           return ada_value_binop (arg1, arg2, op);
         }
-
-    case BINOP_REM:
-    case BINOP_MOD:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-        goto nosideret;
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS
-               && (op == BINOP_DIV || op == BINOP_REM || op == BINOP_MOD))
-        return value_zero (value_type (arg1), not_lval);
-      else
-	{
-	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-	  return ada_value_binop (arg1, arg2, op);
-	}
 
     case BINOP_EQUAL:
     case BINOP_NOTEQUAL:

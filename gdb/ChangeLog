@@ -1,5 +1,11 @@
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_evaluate_subexp): Merge case BINOP_REM and
+	BINOP_MOD cases with the handling of case BINOP_DIV and BINOP_MUL.
+	Remove useless op value checks when EVAL_AVOID_SIDE_EFFECTS.
+
+2009-03-12  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp) <BINOP_DIV>: make sure to
 	promote the operands when noside is EVAL_AVOID_SIDE_EFFECTS.
 
