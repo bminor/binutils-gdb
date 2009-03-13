@@ -8458,7 +8458,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS
                && (op == BINOP_DIV || op == BINOP_REM || op == BINOP_MOD))
-        return value_zero (value_type (arg1), not_lval);
+        {
+          binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+          return value_zero (value_type (arg1), not_lval);
+        }
       else
         {
           type = builtin_type (exp->gdbarch)->builtin_double;
