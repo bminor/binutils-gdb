@@ -1,5 +1,11 @@
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/ptype_arith_binop.exp: Remove some commented-out code
+	that was checked in by mistake. Remove loading of ada.exp, since
+	this is not necessary in this case.
+
+2009-03-12  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/ptype_arith_binop.exp: New testcase.
 
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
