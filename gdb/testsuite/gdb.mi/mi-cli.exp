@@ -140,7 +140,22 @@ mi_gdb_test "500-stack-select-frame 0" \
   {500\^done} \
   "-stack-select-frame 0"
 
-mi_execute_to "interpreter-exec console step" "" "callee4" "" ".*basics.c" "29" \
+# When a CLI command is entered in MI session, the respose is different in
+# sync and async modes. In sync mode normal_stop is called when current
+# interpreter is CLI. So:
+#   - print_stop_reason prints stop reason in CLI uiout, and we don't show it
+#     in MI
+#   - The stop position is printed, and appears in MI 'console' channel.
+#
+# In async mode the stop event is processed when we're back to MI interpreter,
+# so the stop reason is printed into MI uiout an.
+if {$async} {
+    set reason "end-stepping-range"
+} else {
+    set reason ""
+}
+
+mi_execute_to "interpreter-exec console step" $reason "callee4" "" ".*basics.c" "29" \
     "" "check *stopped from CLI command"
 
 # NOTE: cagney/2003-02-03: Not yet.
@@ -161,8 +176,10 @@ mi_gdb_test "34 next" \
     ".*34\\\^running.*\\*running,thread-id=\"all\"" \
     "34 next: run"
 
-gdb_expect {
-    -re "~\[^\r\n\]+\r\n" {
+if {!$async} {
+    gdb_expect {
+        -re "~\[^\r\n\]+\r\n" {
+        }
     }
 }
 
@@ -170,7 +187,7 @@ gdb_expect {
 # The purpose of *stopped notification for CLI command is to make
 # sure that frontend knows that inferior is stopped, and knows where.
 # Supplementary information is not necessary.
-mi_expect_stop "" "main" "" ".*basics.c" $line_main_return "" \
+mi_expect_stop "$reason" "main" "" ".*basics.c" $line_main_return "" \
     "34 next: stop"
 
 mi_gdb_test "-interpreter-exec console \"list\"" \

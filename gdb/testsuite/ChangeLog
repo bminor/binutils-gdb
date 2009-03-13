@@ -1,3 +1,8 @@
+2009-03-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-cli.exp: Adjust for output difference in
+        sync and async modes.
+
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/ptype_arith_binop.exp: Remove some commented-out code
