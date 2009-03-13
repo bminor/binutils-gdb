@@ -1,5 +1,11 @@
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_evaluate_subexp) [OP_VAR_VALUE]: For tagged
+	types, if we are unable to determine the actual symbol type
+	from its tag, then use the static approximation instead.
+
+2009-03-12  Joel Brobecker  <brobecker@adacore.com>
+
 	Fix crash printing packed record with packed array.
 
 	* ada-lang.c (ada_modulus_from_name): New function.

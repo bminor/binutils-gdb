@@ -8576,8 +8576,19 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                a fixed type would result in the loss of that type name,
                thus preventing us from printing the name of the ancestor
                type in the type description.  */
+            struct type *actual_type;
+
             arg1 = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_NORMAL);
-            return value_zero (type_from_tag (ada_value_tag (arg1)), not_lval);
+            actual_type = type_from_tag (ada_value_tag (arg1));
+            if (actual_type == NULL)
+              /* If, for some reason, we were unable to determine
+                 the actual type from the tag, then use the static
+                 approximation that we just computed as a fallback.
+                 This can happen if the debugging information is
+                 incomplete, for instance.  */
+              actual_type = type;
+
+            return value_zero (actual_type, not_lval);
           }
 
           *pos += 4;
