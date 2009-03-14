@@ -1,3 +1,10 @@
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* lib/ld-lib.exp (ar_simple_create): Add an "aropts" parameter.
+	(run_ld_link_tests): Treat the second list element as "ar" options
+	when creating an archive.  Don't run the linker in this case.
+	(run_cc_link_tests): Likewise.
+
 2009-03-13  Nick Clifton  <nickc@redhat.com>
 
 	* lib/ld-lib.exp (run_dump_test): Add verbose to list of globals.
