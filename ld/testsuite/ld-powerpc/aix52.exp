@@ -91,6 +91,12 @@ set aix52tests {
      "" {aix-core-sec-3.s}
      {{objdump -h aix-core-sec-3.hd}}
      "aix-core-sec-3.so"}
+
+    {"Glink test 1"
+     "-shared -bE:aix-glink-1.ex --unresolved-symbols=ignore-all"
+     "" {aix-glink-1.s}
+     {{objdump {-D -j.text -j.data} aix-glink-1-SIZE.dd}}
+     "aix-glink-1.so"}
 }
 
 foreach test $aix52tests {

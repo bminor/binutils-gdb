@@ -1845,19 +1845,16 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		  goto error_return;
 		}
 
-	      /* We identify all symbols which are called, so that we
-		 can create glue code for calls to functions imported
-		 from dynamic objects.  */
+	      /* We identify all function symbols that are the target
+		 of a relocation, so that we can create glue code for
+		 functions imported from dynamic objects.  */
  	      if (info->output_bfd->xvec == abfd->xvec
 		  && *rel_csect != bfd_und_section_ptr
-		  && (rel->r_type == R_BR
-		      || rel->r_type == R_RBR)
 		  && obj_xcoff_sym_hashes (abfd)[rel->r_symndx] != NULL)
 		{
 		  struct xcoff_link_hash_entry *h;
 
 		  h = obj_xcoff_sym_hashes (abfd)[rel->r_symndx];
-		  h->flags |= XCOFF_CALLED;
 		  /* If the symbol name starts with a period, it is
 		     the code of a function.  If the symbol is
 		     currently undefined, then add an undefined symbol
@@ -1890,11 +1887,12 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 			  hds = (struct xcoff_link_hash_entry *) bh;
 			}
 		      hds->flags |= XCOFF_DESCRIPTOR;
-		      BFD_ASSERT ((hds->flags & XCOFF_CALLED) == 0
-				  && (h->flags & XCOFF_DESCRIPTOR) == 0);
+		      BFD_ASSERT ((h->flags & XCOFF_DESCRIPTOR) == 0);
 		      hds->descriptor = h;
 		      h->descriptor = hds;
 		    }
+		  if (h->root.root.string[0] == '.')
+		    h->flags |= XCOFF_CALLED;
 		}
 	    }
 
@@ -2203,6 +2201,94 @@ _bfd_xcoff_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
     }
 }
 
+/* If symbol H has not been interpreted as a function descriptor,
+   see whether it should be.  Set up its descriptor information if so.  */
+
+static bfd_boolean
+xcoff_find_function (struct bfd_link_info *info,
+		     struct xcoff_link_hash_entry *h)
+{
+  if ((h->flags & XCOFF_DESCRIPTOR) == 0
+      && h->root.root.string[0] != '.')
+    {
+      char *fnname;
+      struct xcoff_link_hash_entry *hfn;
+      bfd_size_type amt;
+
+      amt = strlen (h->root.root.string) + 2;
+      fnname = bfd_malloc (amt);
+      if (fnname == NULL)
+	return FALSE;
+      fnname[0] = '.';
+      strcpy (fnname + 1, h->root.root.string);
+      hfn = xcoff_link_hash_lookup (xcoff_hash_table (info),
+				    fnname, FALSE, FALSE, TRUE);
+      free (fnname);
+      if (hfn != NULL
+	  && hfn->smclas == XMC_PR
+	  && (hfn->root.type == bfd_link_hash_defined
+	      || hfn->root.type == bfd_link_hash_defweak))
+	{
+	  h->flags |= XCOFF_DESCRIPTOR;
+	  h->descriptor = hfn;
+	  hfn->descriptor = h;
+	}
+    }
+  return TRUE;
+}
+
+/* H is an imported symbol.  Set the import module's path, file and member
+   to IMPATH, IMPFILE and IMPMEMBER respectively.  All three are null if
+   no specific import module is specified.  */
+
+static bfd_boolean
+xcoff_set_import_path (struct bfd_link_info *info,
+		       struct xcoff_link_hash_entry *h,
+		       const char *imppath, const char *impfile,
+		       const char *impmember)
+{
+  unsigned int c;
+  struct xcoff_import_file **pp;
+
+  /* We overload the ldindx field to hold the l_ifile value for this
+     symbol.  */
+  BFD_ASSERT (h->ldsym == NULL);
+  BFD_ASSERT ((h->flags & XCOFF_BUILT_LDSYM) == 0);
+  if (imppath == NULL)
+    h->ldindx = -1;
+  else
+    {
+      /* We start c at 1 because the first entry in the import list is
+	 reserved for the library search path.  */
+      for (pp = &xcoff_hash_table (info)->imports, c = 1;
+	   *pp != NULL;
+	   pp = &(*pp)->next, ++c)
+	{
+	  if (strcmp ((*pp)->path, imppath) == 0
+	      && strcmp ((*pp)->file, impfile) == 0
+	      && strcmp ((*pp)->member, impmember) == 0)
+	    break;
+	}
+
+      if (*pp == NULL)
+	{
+	  struct xcoff_import_file *n;
+	  bfd_size_type amt = sizeof (* n);
+
+	  n = bfd_alloc (info->output_bfd, amt);
+	  if (n == NULL)
+	    return FALSE;
+	  n->next = NULL;
+	  n->path = imppath;
+	  n->file = impfile;
+	  n->member = impmember;
+	  *pp = n;
+	}
+      h->ldindx = c;
+    }
+  return TRUE;
+}
+
 /* Mark a symbol as not being garbage, including the section in which
    it is defined.  */
 
@@ -2213,6 +2299,136 @@ xcoff_mark_symbol (struct bfd_link_info *info, struct xcoff_link_hash_entry *h)
     return TRUE;
 
   h->flags |= XCOFF_MARK;
+
+  /* If we're marking an undefined symbol, try find some way of
+     defining it.  */
+  if (!info->relocatable
+      && (h->flags & XCOFF_IMPORT) == 0
+      && (h->flags & XCOFF_DEF_REGULAR) == 0
+      && (h->root.type == bfd_link_hash_undefined
+	  || h->root.type == bfd_link_hash_undefweak))
+    {
+      /* First check whether this symbol can be interpreted as an
+	 undefined function descriptor for a defined function symbol.  */
+      if (!xcoff_find_function (info, h))
+	return FALSE;
+
+      if ((h->flags & XCOFF_DESCRIPTOR) != 0
+	  && (h->descriptor->root.type == bfd_link_hash_defined
+	      || h->descriptor->root.type == bfd_link_hash_defweak))
+	{
+	  /* This is a descriptor for a defined symbol, but the input
+	     objects have not defined the descriptor itself.  Fill in
+	     the definition automatically.
+
+	     Note that we do this even if we found a dynamic definition
+	     of H.  The local function definition logically overrides
+	     the dynamic one.  */
+	  asection *sec;
+
+	  sec = xcoff_hash_table (info)->descriptor_section;
+	  h->root.type = bfd_link_hash_defined;
+	  h->root.u.def.section = sec;
+	  h->root.u.def.value = sec->size;
+	  h->smclas = XMC_DS;
+	  h->flags |= XCOFF_DEF_REGULAR;
+
+	  /* The size of the function descriptor depends on whether this
+	     is xcoff32 (12) or xcoff64 (24).  */
+	  sec->size += bfd_xcoff_function_descriptor_size (sec->owner);
+
+	  /* A function descriptor uses two relocs: one for the
+	     associated code, and one for the TOC address.  */
+	  xcoff_hash_table (info)->ldrel_count += 2;
+	  sec->reloc_count += 2;
+
+	  /* Mark the function itself.  */
+	  if (!xcoff_mark_symbol (info, h->descriptor))
+	    return FALSE;
+
+	  /* We handle writing out the contents of the descriptor in
+	     xcoff_write_global_symbol.  */
+	}
+      else if ((h->flags & XCOFF_CALLED) != 0)
+	{
+	  /* This is a function symbol for which we need to create
+	     linkage code.  */
+	  asection *sec;
+	  struct xcoff_link_hash_entry *hds;
+
+	  /* Mark the descriptor (and its TOC section).  */
+	  hds = h->descriptor;
+	  BFD_ASSERT ((hds->root.type == bfd_link_hash_undefined
+		       || hds->root.type == bfd_link_hash_undefweak)
+		      && (hds->flags & XCOFF_DEF_REGULAR) == 0);
+	  if (!xcoff_mark_symbol (info, hds))
+	    return FALSE;
+
+	  /* Treat this symbol as undefined if the descriptor was.  */
+	  if ((hds->flags & XCOFF_WAS_UNDEFINED) != 0)
+	    h->flags |= XCOFF_WAS_UNDEFINED;
+
+	  /* Allocate room for the global linkage code itself.  */
+	  sec = xcoff_hash_table (info)->linkage_section;
+	  h->root.type = bfd_link_hash_defined;
+	  h->root.u.def.section = sec;
+	  h->root.u.def.value = sec->size;
+	  h->smclas = XMC_GL;
+	  h->flags |= XCOFF_DEF_REGULAR;
+	  sec->size += bfd_xcoff_glink_code_size (info->output_bfd);
+
+	  /* The global linkage code requires a TOC entry for the
+	     descriptor.  */
+	  if (hds->toc_section == NULL)
+	    {
+	      int byte_size;
+
+	      /* 32 vs 64
+		 xcoff32 uses 4 bytes in the toc.
+		 xcoff64 uses 8 bytes in the toc.  */
+	      if (bfd_xcoff_is_xcoff64 (info->output_bfd))
+		byte_size = 8;
+	      else if (bfd_xcoff_is_xcoff32 (info->output_bfd))
+		byte_size = 4;
+	      else
+		return FALSE;
+
+	      /* Allocate room in the fallback TOC section.  */
+	      hds->toc_section = xcoff_hash_table (info)->toc_section;
+	      hds->u.toc_offset = hds->toc_section->size;
+	      hds->toc_section->size += byte_size;
+	      if (!xcoff_mark (info, hds->toc_section))
+		return FALSE;
+
+	      /* Allocate room for a static and dynamic R_TOC
+		 relocation.  */
+	      ++xcoff_hash_table (info)->ldrel_count;
+	      ++hds->toc_section->reloc_count;
+
+	      /* Set the index to -2 to force this symbol to
+		 get written out.  */
+	      hds->indx = -2;
+	      hds->flags |= XCOFF_SET_TOC | XCOFF_LDREL;
+	    }
+	}
+      else if ((h->flags & XCOFF_DEF_DYNAMIC) == 0)
+	{
+	  /* Record that the symbol was undefined, then import it.
+	     -brtl links use a special fake import file.  */
+	  h->flags |= XCOFF_WAS_UNDEFINED | XCOFF_IMPORT;
+	  if (xcoff_hash_table (info)->rtld)
+	    {
+	      if (!xcoff_set_import_path (info, h, "", "..", ""))
+		return FALSE;
+	    }
+	  else
+	    {
+	      if (!xcoff_set_import_path (info, h, NULL, NULL, NULL))
+		return FALSE;
+	    }
+	}
+    }
+
   if (h->root.type == bfd_link_hash_defined
       || h->root.type == bfd_link_hash_defweak)
     {
@@ -2320,15 +2536,9 @@ xcoff_mark (struct bfd_link_info *info, asection *sec)
 		      || h->root.type == bfd_link_hash_defined
 		      || h->root.type == bfd_link_hash_defweak
 		      || h->root.type == bfd_link_hash_common
-		      || ((h->flags & XCOFF_CALLED) != 0
-			  && (h->root.type == bfd_link_hash_undefined
-			      || h->root.type == bfd_link_hash_undefweak)
-			  && h->root.root.string[0] == '.'
-			  && h->descriptor != NULL
-			  && ((h->descriptor->flags & XCOFF_DEF_DYNAMIC) != 0
-			      || ((h->descriptor->flags & XCOFF_IMPORT) != 0
-				  && (h->descriptor->flags
-				      & XCOFF_DEF_REGULAR) == 0))))
+		      /* We will always provide a local definition of
+			 function symbols.  */
+		      || (h->flags & XCOFF_CALLED) != 0)
 		    break;
 		  /* Fall through.  */
 		case R_POS:
@@ -2483,8 +2693,7 @@ bfd_xcoff_import_symbol (bfd *output_bfd,
 	      hds->root.u.undef.abfd = h->root.u.undef.abfd;
 	    }
 	  hds->flags |= XCOFF_DESCRIPTOR;
-	  BFD_ASSERT ((hds->flags & XCOFF_CALLED) == 0
-		      && (h->flags & XCOFF_DESCRIPTOR) == 0);
+	  BFD_ASSERT ((h->flags & XCOFF_DESCRIPTOR) == 0);
 	  hds->descriptor = h;
 	  h->descriptor = hds;
 	}
@@ -2516,46 +2725,8 @@ bfd_xcoff_import_symbol (bfd *output_bfd,
       h->root.u.def.value = val;
     }
 
-  /* We overload the ldindx field to hold the l_ifile value for this
-     symbol.  */
-  BFD_ASSERT (h->ldsym == NULL);
-  BFD_ASSERT ((h->flags & XCOFF_BUILT_LDSYM) == 0);
-  if (imppath == NULL)
-    h->ldindx = -1;
-  else
-    {
-      unsigned int c;
-      struct xcoff_import_file **pp;
-
-      /* We start c at 1 because the first entry in the import list is
-	 reserved for the library search path.  */
-      for (pp = &xcoff_hash_table (info)->imports, c = 1;
-	   *pp != NULL;
-	   pp = &(*pp)->next, ++c)
-	{
-	  if (strcmp ((*pp)->path, imppath) == 0
-	      && strcmp ((*pp)->file, impfile) == 0
-	      && strcmp ((*pp)->member, impmember) == 0)
-	    break;
-	}
-
-      if (*pp == NULL)
-	{
-	  struct xcoff_import_file *n;
-	  bfd_size_type amt = sizeof (* n);
-
-	  n = bfd_alloc (output_bfd, amt);
-	  if (n == NULL)
-	    return FALSE;
-	  n->next = NULL;
-	  n->path = imppath;
-	  n->file = impfile;
-	  n->member = impmember;
-	  *pp = n;
-	}
-
-      h->ldindx = c;
-    }
+  if (!xcoff_set_import_path (info, h, imppath, impfile, impmember))
+    return FALSE;
 
   return TRUE;
 }
@@ -2576,34 +2747,6 @@ bfd_xcoff_export_symbol (bfd *output_bfd,
 
   /* FIXME: I'm not at all sure what syscall is supposed to mean, so
      I'm just going to ignore it until somebody explains it.  */
-
-  /* See if this is a function descriptor.  It may be one even though
-     it is not so marked.  */
-  if ((h->flags & XCOFF_DESCRIPTOR) == 0
-      && h->root.root.string[0] != '.')
-    {
-      char *fnname;
-      struct xcoff_link_hash_entry *hfn;
-      bfd_size_type amt = strlen (h->root.root.string) + 2;
-
-      fnname = bfd_malloc (amt);
-      if (fnname == NULL)
-	return FALSE;
-      fnname[0] = '.';
-      strcpy (fnname + 1, h->root.root.string);
-      hfn = xcoff_link_hash_lookup (xcoff_hash_table (info),
-				    fnname, FALSE, FALSE, TRUE);
-      free (fnname);
-      if (hfn != NULL
-	  && hfn->smclas == XMC_PR
-	  && (hfn->root.type == bfd_link_hash_defined
-	      || hfn->root.type == bfd_link_hash_defweak))
-	{
-	  h->flags |= XCOFF_DESCRIPTOR;
-	  h->descriptor = hfn;
-	  hfn->descriptor = h;
-	}
-    }
 
   /* Make sure we don't garbage collect this symbol.  */
   if (! xcoff_mark_symbol (info, h))
@@ -2767,115 +2910,16 @@ xcoff_build_ldsyms (struct xcoff_link_hash_entry *h, void * p)
 	      != ldinfo->info->output_bfd->xvec)))
     h->flags |= XCOFF_MARK;
 
-  /* If this symbol is called and defined in a dynamic object, or it
-     is imported, then we need to set up global linkage code for it.
-     (Unless we did garbage collection and we didn't need this
-     symbol.)  */
-  if ((h->flags & XCOFF_CALLED) != 0
-      && (h->root.type == bfd_link_hash_undefined
-	  || h->root.type == bfd_link_hash_undefweak)
-      && h->root.root.string[0] == '.'
-      && h->descriptor != NULL
-      && ((h->descriptor->flags & XCOFF_DEF_DYNAMIC) != 0
-	  || ((h->descriptor->flags & XCOFF_IMPORT) != 0
-	      && (h->descriptor->flags & XCOFF_DEF_REGULAR) == 0))
-      && (! xcoff_hash_table (ldinfo->info)->gc
-	  || (h->flags & XCOFF_MARK) != 0))
-    {
-      asection *sec;
-      struct xcoff_link_hash_entry *hds;
-
-      sec = xcoff_hash_table (ldinfo->info)->linkage_section;
-      h->root.type = bfd_link_hash_defined;
-      h->root.u.def.section = sec;
-      h->root.u.def.value = sec->size;
-      h->smclas = XMC_GL;
-      h->flags |= XCOFF_DEF_REGULAR;
-      sec->size += bfd_xcoff_glink_code_size(ldinfo->output_bfd);
-
-      /* The global linkage code requires a TOC entry for the
-	 descriptor.  */
-      hds = h->descriptor;
-      BFD_ASSERT ((hds->root.type == bfd_link_hash_undefined
-		   || hds->root.type == bfd_link_hash_undefweak)
-		  && (hds->flags & XCOFF_DEF_REGULAR) == 0);
-      hds->flags |= XCOFF_MARK;
-      if (hds->toc_section == NULL)
-	{
-	  int byte_size;
-
-	  /* 32 vs 64
-	     xcoff32 uses 4 bytes in the toc.
-	     xcoff64 uses 8 bytes in the toc.  */
-	  if (bfd_xcoff_is_xcoff64 (ldinfo->output_bfd))
-	    byte_size = 8;
-	  else if (bfd_xcoff_is_xcoff32 (ldinfo->output_bfd))
-	    byte_size = 4;
-	  else
-	    return FALSE;
-
-	  hds->toc_section = xcoff_hash_table (ldinfo->info)->toc_section;
-	  hds->u.toc_offset = hds->toc_section->size;
-	  hds->toc_section->size += byte_size;
-	  ++xcoff_hash_table (ldinfo->info)->ldrel_count;
-	  ++hds->toc_section->reloc_count;
-	  hds->indx = -2;
-	  hds->flags |= XCOFF_SET_TOC | XCOFF_LDREL;
-
-	  /* We need to call xcoff_build_ldsyms recursively here,
-	     because we may already have passed hds on the traversal.  */
-	  xcoff_build_ldsyms (hds, p);
-	}
-    }
-
   /* If this symbol is exported, but not defined, we need to try to
      define it.  */
   if ((h->flags & XCOFF_EXPORT) != 0
-      && (h->flags & XCOFF_IMPORT) == 0
-      && (h->flags & XCOFF_DEF_REGULAR) == 0
-      && (h->flags & XCOFF_DEF_DYNAMIC) == 0
-      && (h->root.type == bfd_link_hash_undefined
-	  || h->root.type == bfd_link_hash_undefweak))
+      && (h->flags & XCOFF_WAS_UNDEFINED) != 0)
     {
-      if ((h->flags & XCOFF_DESCRIPTOR) != 0
-	  && (h->descriptor->root.type == bfd_link_hash_defined
-	      || h->descriptor->root.type == bfd_link_hash_defweak))
-	{
-	  asection *sec;
-
-	  /* This is an undefined function descriptor associated with
-	     a defined entry point.  We can build up a function
-	     descriptor ourselves.  Believe it or not, the AIX linker
-	     actually does this, and there are cases where we need to
-	     do it as well.  */
-	  sec = xcoff_hash_table (ldinfo->info)->descriptor_section;
-	  h->root.type = bfd_link_hash_defined;
-	  h->root.u.def.section = sec;
-	  h->root.u.def.value = sec->size;
-	  h->smclas = XMC_DS;
-	  h->flags |= XCOFF_DEF_REGULAR;
-
-	  /* The size of the function descriptor depends if this is an
-	     xcoff32 (12) or xcoff64 (24).  */
-	  sec->size +=
-	    bfd_xcoff_function_descriptor_size(ldinfo->output_bfd);
-
-	  /* A function descriptor uses two relocs: one for the
-	     associated code, and one for the TOC address.  */
-	  xcoff_hash_table (ldinfo->info)->ldrel_count += 2;
-	  sec->reloc_count += 2;
-
-	  /* We handle writing out the contents of the descriptor in
-	     xcoff_write_global_symbol.  */
-	}
-      else
-	{
-	  (*_bfd_error_handler)
-	    (_("warning: attempt to export undefined symbol `%s'"),
-	     h->root.root.string);
-	  h->ldsym = NULL;
-	  return TRUE;
-	}
+      (*_bfd_error_handler)
+	(_("warning: attempt to export undefined symbol `%s'"),
+	 h->root.root.string);
+      h->ldsym = NULL;
+      return TRUE;
     }
 
   /* If this is still a common symbol, and it wasn't garbage
@@ -3017,6 +3061,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 
   xcoff_hash_table (info)->file_align = file_align;
   xcoff_hash_table (info)->textro = textro;
+  xcoff_hash_table (info)->rtld = rtld;
 
   hentry = NULL;
   if (entry != NULL)
@@ -4318,7 +4363,6 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	    {
 	      struct xcoff_link_hash_entry *h = NULL;
 	      struct internal_ldrel ldrel;
-	      bfd_boolean quiet;
 
 	      *rel_hash = NULL;
 
@@ -4451,7 +4495,6 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		    }
 		}
 
-	      quiet = FALSE;
 	      switch (irel->r_type)
 		{
 		default:
@@ -4507,17 +4550,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		    }
 		  else
 		    {
-		      if (! finfo->info->relocatable
-			  && (h->flags & XCOFF_DEF_DYNAMIC) == 0
-			  && (h->flags & XCOFF_IMPORT) == 0)
-			{
-			  /* We already called the undefined_symbol
-			     callback for this relocation, in
-			     _bfd_ppc_xcoff_relocate_section.  Don't
-			     issue any more warnings.  */
-			  quiet = TRUE;
-			}
-		      if (h->ldindx < 0 && ! quiet)
+		      if (h->ldindx < 0)
 			{
 			  (*_bfd_error_handler)
 			    (_("%B: `%s' in loader reloc but not loader sym"),
@@ -4531,8 +4564,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		  ldrel.l_rtype = (irel->r_size << 8) | irel->r_type;
 		  ldrel.l_rsecnm = o->output_section->target_index;
 		  if (xcoff_hash_table (finfo->info)->textro
-		      && strcmp (o->output_section->name, ".text") == 0
-		      && ! quiet)
+		      && strcmp (o->output_section->name, ".text") == 0)
 		    {
 		      (*_bfd_error_handler)
 			(_("%B: loader reloc in read-only section %A"),

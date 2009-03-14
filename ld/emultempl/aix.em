@@ -379,11 +379,13 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
 
     case OPTION_ERNOTOK:
-      force_make_executable = FALSE;
+      link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
+      link_info.unresolved_syms_in_shared_libs = RM_GENERATE_ERROR;
       break;
 
     case OPTION_EROK:
-      force_make_executable = TRUE;
+      link_info.unresolved_syms_in_objects = RM_IGNORE;
+      link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
       break;
 
     case OPTION_EXPORT:

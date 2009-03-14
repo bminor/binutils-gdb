@@ -1,5 +1,35 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* coff-rs6000.c (xcoff_ppc_relocate_section): Report relocations
+	against undefined symbols if the symbol's XCOFF_WAS_UNDEFINED
+	flag is set.  Assert that all undefined symbols are either
+	imported or defined by a dynamic object.
+	* coff64-rs6000.c (xcoff64_ppc_relocate_section): Likewise.
+	* xcofflink.c (xcoff_link_add_symbols): Extend function-symbol
+	handling to all relocations.  Only set XCOFF_CALLED for function
+	symbols.
+	(xcoff_find_function): New function, split out from...
+	(bfd_xcoff_export_symbol) ...here.
+	(xcoff_set_import_path): New function, split out from...
+	(bfd_xcoff_import_symbol): ...here.  Remove assertion for old
+	meaning of XCOFF_CALLED.
+	(xcoff_mark_symbol): If we mark an undefined and unimported
+	symbol, find some way of defining it.  If the symbol is a function
+	descriptor, fill in its definition automatically.  If the symbol
+	is a function, mark its descriptor and allocate room for global
+	linkage code.  Otherwise mark the symbol as implicitly imported.
+	Move the code for creating function descriptors from...
+	(xcoff_build_ldsyms): ...here.  Use XCOFF_WAS_UNDEFINED to 
+	check for symbols that were implicitly defined.
+	(xcoff_mark): Don't count any dynamic relocations against
+	function symbols.
+	(bfd_xcoff_size_dynamic_sections): Save the rtld parameter
+	in the xcoff link info.
+	(xcoff_link_input_bfd): Remove handling of undefined and
+	unexported symbols.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* coff-rs6000.c (xcoff_reloc_type_br): Make the branch absolute
 	if the target is absolute.  Fix comment typo.
 	(xcoff_ppc_relocate_section): Remove FIXME.

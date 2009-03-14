@@ -3447,6 +3447,17 @@ xcoff_ppc_relocate_section (output_bfd, info, input_bfd,
 	    }
 	  else
 	    {
+	      if (info->unresolved_syms_in_objects != RM_IGNORE
+		  && (h->flags & XCOFF_WAS_UNDEFINED) != 0)
+		{
+		  if (! ((*info->callbacks->undefined_symbol)
+			 (info, h->root.root.string,
+			  input_bfd, input_section,
+			  rel->r_vaddr - input_section->vma,
+			  (info->unresolved_syms_in_objects
+			   == RM_GENERATE_ERROR))))
+		    return FALSE;
+		}
 	      if (h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak)
 		{
@@ -3462,17 +3473,11 @@ xcoff_ppc_relocate_section (output_bfd, info, input_bfd,
 			 + sec->output_offset);
 
 		}
-	      else if ((0 == (h->flags & (XCOFF_DEF_DYNAMIC | XCOFF_IMPORT)))
-		       && ! info->relocatable)
+	      else
 		{
-		  if (! ((*info->callbacks->undefined_symbol)
-			 (info, h->root.root.string, input_bfd, input_section,
-			  rel->r_vaddr - input_section->vma, TRUE)))
-		    return FALSE;
-
-		  /* Don't try to process the reloc.  It can't help, and
-		     it may generate another error.  */
-		  continue;
+		  BFD_ASSERT (info->relocatable
+			      || (h->flags & XCOFF_DEF_DYNAMIC) != 0
+			      || (h->flags & XCOFF_IMPORT) != 0);
 		}
 	    }
 	}
