@@ -3128,7 +3128,12 @@ xcoff_build_ldsyms (struct xcoff_link_hash_entry *h, void * p)
     }
 
   if ((h->flags & XCOFF_IMPORT) != 0)
-    h->ldsym->l_ifile = h->ldindx;
+    {
+      /* Give imported descriptors class XMC_DS rather than XMC_UA.  */
+      if ((h->flags & XCOFF_DESCRIPTOR) != 0)
+	h->smclas = XMC_DS;
+      h->ldsym->l_ifile = h->ldindx;
+    }
 
   /* The first 3 symbol table indices are reserved to indicate the
      data, text and bss sections.  */

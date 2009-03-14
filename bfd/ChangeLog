@@ -1,5 +1,10 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* xcofflink.c (xcoff_build_ldsyms): Give imported descriptors
+	class XMC_DS rather than XMC_UA.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* bfd-in.h (bfd_xcoff_size_dynamic_sections): Replace the
 	bfd_boolean export_defineds parameter with an unsigned int
 	auto_export_flags parameter.
