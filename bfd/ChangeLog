@@ -1,5 +1,23 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* libcoff-in.h (xcoff_tdata): Change debug_indices to a signed long.
+	* libcoff.h: Regenerate.
+	* xcofflink.c (xcoff_keep_symbol_p): New function, using the
+	"skip" logic from xcoff_link_input_bfd.
+	(bfd_xcoff_size_dynamic_sections): Explicitly skip dynamic
+	objects in a dynamic link, rather than checking whether csectpp
+	is null.  Always allocate debug_index for other objects,
+	and always go through the loop.  Update the type of debug_index
+	after the change above.  Read the auxillary csect information
+	and use xcoff_keep_symbol_p to decide whether a symbol should
+	be kept.  Set its debug_index to -2 if not.
+	(xcoff_link_input_bfd): Update the type of debug_index after
+	the change above and always expect it to be nonnull.  Use it to
+	test whether a symbol should be stripped, rather than making the
+	decision here.  Postpone all symbol creation to the second pass.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* xcofflink.c: (xcoff_mark_symbol): Mark the TOC section when
 	creating a descriptor.
 	(xcoff_sweep): Don't mark toc_section unless it's needed.

@@ -2981,6 +2981,104 @@ xcoff_build_ldsyms (struct xcoff_link_hash_entry *h, void * p)
 
   return TRUE;
 }
+
+/* INPUT_BFD includes XCOFF symbol ISYM, which is associated with linker
+   hash table entry H and csect CSECT.  AUX contains ISYM's auxillary
+   csect information, if any.  NAME is the function's name if the name
+   is stored in the .debug section, otherwise it is null.
+
+   Return 1 if we should include an appropriately-adjusted ISYM
+   in the output file, 0 if we should discard ISYM, or -1 if an
+   error occured.  */
+
+static int
+xcoff_keep_symbol_p (struct bfd_link_info *info, bfd *input_bfd,
+		     struct internal_syment *isym,
+		     union internal_auxent *aux,
+		     struct xcoff_link_hash_entry *h,
+		     asection *csect, const char *name)
+{
+  int smtyp;
+
+  /* If we are skipping this csect, we want to strip the symbol too.  */
+  if (csect == NULL)
+    return 0;
+
+  /* Likewise if we garbage-collected the csect.  */
+  if (xcoff_hash_table (info)->gc
+      && !bfd_is_abs_section (csect)
+      && !bfd_is_und_section (csect)
+      && (csect->flags & SEC_MARK) == 0)
+    return 0;
+
+  /* An XCOFF linker always removes C_STAT symbols.  */
+  if (isym->n_sclass == C_STAT)
+    return 0;
+
+  /* We generate the TOC anchor separately.  */
+  if (isym->n_sclass == C_HIDEXT
+      && aux->x_csect.x_smclas == XMC_TC0)
+    return 0;
+
+  /* If we are stripping all symbols, we want to discard this one.  */
+  if (info->strip == strip_all)
+    return 0;
+
+  /* We can ignore external references that were resolved by the link.  */
+  smtyp = SMTYP_SMTYP (aux->x_csect.x_smtyp);
+  if (isym->n_sclass == C_EXT
+      && smtyp == XTY_ER
+      && h->root.type != bfd_link_hash_undefined)
+    return 0;
+
+  /* We can ignore common symbols if they got defined somewhere else.  */
+  if (isym->n_sclass == C_EXT
+      && smtyp == XTY_CM
+      && (h->root.type != bfd_link_hash_common
+	  || h->root.u.c.p->section != csect)
+      && (h->root.type != bfd_link_hash_defined
+	  || h->root.u.def.section != csect))
+    return 0;
+
+  /* If we're discarding local symbols, check whether ISYM is local.  */
+  if (info->discard == discard_all
+      && isym->n_sclass != C_EXT
+      && (isym->n_sclass != C_HIDEXT || smtyp != XTY_SD))
+    return 0;
+
+  /* If we're stripping debugging symbols, check whether ISYM is one.  */
+  if (info->strip == strip_debugger
+      && isym->n_scnum == N_DEBUG)
+    return 0;
+
+  /* If we are stripping symbols based on name, check how ISYM's
+     name should be handled.  */
+  if (info->strip == strip_some
+      || info->discard == discard_l)
+    {
+      char buf[SYMNMLEN + 1];
+
+      if (name == NULL)
+	{
+	  name = _bfd_coff_internal_syment_name (input_bfd, isym, buf);
+	  if (name == NULL)
+	    return -1;
+	}
+
+      if (info->strip == strip_some
+	  && bfd_hash_lookup (info->keep_hash, name, FALSE, FALSE) == NULL)
+	return 0;
+
+      if (info->discard == discard_l
+	  && isym->n_sclass != C_EXT
+	  && (isym->n_sclass != C_HIDEXT || smtyp != XTY_SD)
+	  && bfd_is_local_label_name (input_bfd, name))
+	return 0;
+    }
+
+  return 1;
+}
+
 /* Build the .loader section.  This is called by the XCOFF linker
    emulation before_allocation routine.  We must set the size of the
    .loader section before the linker lays out the output file.
@@ -3288,97 +3386,134 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 	goto error_return;
     }
 
-  /* Now that we've done garbage collection, figure out the contents
-     of the .debug section.  */
+  /* Now that we've done garbage collection, decide which symbols to keep,
+     and figure out the contents of the .debug section.  */
   debug_strtab = xcoff_hash_table (info)->debug_strtab;
 
   for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
     {
       asection *subdeb;
       bfd_size_type symcount;
-      unsigned long *debug_index;
+      long *debug_index;
       asection **csectpp;
+      struct xcoff_link_hash_entry **sym_hash;
       bfd_byte *esym, *esymend;
       bfd_size_type symesz;
 
       if (sub->xvec != info->output_bfd->xvec)
 	continue;
-      subdeb = bfd_get_section_by_name (sub, ".debug");
-      if (subdeb == NULL || subdeb->size == 0)
-	continue;
 
-      if (info->strip == strip_all
-	  || info->strip == strip_debugger
-	  || info->discard == discard_all)
-	{
-	  subdeb->size = 0;
-	  continue;
-	}
+      if ((sub->flags & DYNAMIC) != 0
+	  && !info->static_link)
+	continue;
 
       if (! _bfd_coff_get_external_symbols (sub))
 	goto error_return;
 
       symcount = obj_raw_syment_count (sub);
-      debug_index = bfd_zalloc (sub, symcount * sizeof (unsigned long));
+      debug_index = bfd_zalloc (sub, symcount * sizeof (long));
       if (debug_index == NULL)
 	goto error_return;
       xcoff_data (sub)->debug_indices = debug_index;
 
-      /* Grab the contents of the .debug section.  We use malloc and
-	 copy the names into the debug stringtab, rather than
-	 bfd_alloc, because I expect that, when linking many files
-	 together, many of the strings will be the same.  Storing the
-	 strings in the hash table should save space in this case.  */
-      if (! bfd_malloc_and_get_section (sub, subdeb, &debug_contents))
-	goto error_return;
+      if (info->strip == strip_all
+	  || info->strip == strip_debugger
+	  || info->discard == discard_all)
+	/* We're stripping all debugging information, so there's no need
+	   to read SUB's .debug section.  */
+	subdeb = NULL;
+      else
+	{
+	  /* Grab the contents of SUB's .debug section, if any.  */
+	  subdeb = bfd_get_section_by_name (sub, ".debug");
+	  if (subdeb != NULL && subdeb->size > 0)
+	    {
+	      /* We use malloc and copy the names into the debug
+		 stringtab, rather than bfd_alloc, because I expect
+		 that, when linking many files together, many of the
+		 strings will be the same.  Storing the strings in the
+		 hash table should save space in this case.  */
+	      if (!bfd_malloc_and_get_section (sub, subdeb, &debug_contents))
+		goto error_return;
+	    }
+	}
 
       csectpp = xcoff_data (sub)->csects;
+      sym_hash = obj_xcoff_sym_hashes (sub);
+      symesz = bfd_coff_symesz (sub);
+      esym = (bfd_byte *) obj_coff_external_syms (sub);
+      esymend = esym + symcount * symesz;
 
-      /* Dynamic object do not have csectpp's.  */
-      if (NULL != csectpp)
+      while (esym < esymend)
 	{
-	  symesz = bfd_coff_symesz (sub);
-	  esym = (bfd_byte *) obj_coff_external_syms (sub);
-	  esymend = esym + symcount * symesz;
+	  struct internal_syment sym;
+	  union internal_auxent aux;
+	  const char *name;
+	  int keep_p;
 
-	  while (esym < esymend)
+	  bfd_coff_swap_sym_in (sub, esym, &sym);
+
+	  /* If this is a C_EXT or C_HIDEXT symbol, we need the csect
+	     information too.  */
+	  if (sym.n_sclass == C_EXT || sym.n_sclass == C_HIDEXT)
 	    {
-	      struct internal_syment sym;
+	      BFD_ASSERT (sym.n_numaux > 0);
+	      bfd_coff_swap_aux_in (sub, esym + symesz * sym.n_numaux,
+				    sym.n_type, sym.n_sclass,
+				    sym.n_numaux - 1, sym.n_numaux, &aux);
+	    }
 
-	      bfd_coff_swap_sym_in (sub, (void *) esym, (void *) &sym);
+	  /* If this symbol's name is stored in the debug section,
+	     get a pointer to it.  */
+	  if (debug_contents != NULL
+	      && sym._n._n_n._n_zeroes == 0
+	      && bfd_coff_symname_in_debug (sub, &sym))
+	    name = (const char *) debug_contents + sym._n._n_n._n_offset;
+	  else
+	    name = NULL;
 
-	      *debug_index = (unsigned long) -1;
+	  /* Decide whether to copy this symbol to the output file.  */
+	  keep_p = xcoff_keep_symbol_p (info, sub, &sym, &aux,
+					*sym_hash, *csectpp, name);
+	  if (keep_p < 0)
+	    return FALSE;
 
-	      if (sym._n._n_n._n_zeroes == 0
-		  && *csectpp != NULL
-		  && (! gc
-		      || bfd_is_abs_section (*csectpp)
-		      || bfd_is_und_section (*csectpp)
-		      || ((*csectpp)->flags & SEC_MARK) != 0)
-		  && bfd_coff_symname_in_debug (sub, &sym))
+	  if (!keep_p)
+	    /* Use a debug_index of -2 to record that a symbol should
+	       be stripped.  */
+	    *debug_index = -2;
+	  else
+	    {
+	      /* See whether we should store the symbol name in the
+		 output .debug section.  */
+	      if (name != NULL)
 		{
-		  char *name;
 		  bfd_size_type indx;
 
-		  name = (char *) debug_contents + sym._n._n_n._n_offset;
 		  indx = _bfd_stringtab_add (debug_strtab, name, TRUE, TRUE);
 		  if (indx == (bfd_size_type) -1)
 		    goto error_return;
 		  *debug_index = indx;
 		}
-
-	      esym += (sym.n_numaux + 1) * symesz;
-	      csectpp += sym.n_numaux + 1;
-	      debug_index += sym.n_numaux + 1;
+	      else
+		*debug_index = -1;
 	    }
+
+	  esym += (sym.n_numaux + 1) * symesz;
+	  csectpp += sym.n_numaux + 1;
+	  sym_hash += sym.n_numaux + 1;
+	  debug_index += sym.n_numaux + 1;
 	}
 
-      free (debug_contents);
-      debug_contents = NULL;
+      if (debug_contents)
+	{
+	  free (debug_contents);
+	  debug_contents = NULL;
 
-      /* Clear the size of subdeb, so that it is not included directly
-	 in the output file.  */
-      subdeb->size = 0;
+	  /* Clear the size of subdeb, so that it is not included directly
+	     in the output file.  */
+	  subdeb->size = 0;
+	}
 
       if (! info->keep_memory)
 	{
@@ -3455,7 +3590,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
   struct xcoff_link_hash_entry **sym_hash;
   struct internal_syment *isymp;
   asection **csectpp;
-  unsigned long *debug_index;
+  long *debug_index;
   long *indexp;
   unsigned long output_index;
   bfd_byte *outsym;
@@ -3495,6 +3630,9 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
   if (! _bfd_coff_get_external_symbols (input_bfd))
     return FALSE;
 
+  /* Make one pass over the symbols and assign indices to symbols that
+     we have decided to keep.  Also use create .loader symbol information
+     and update information in hash table entries.  */
   esym = (bfd_byte *) obj_coff_external_syms (input_bfd);
   esym_end = esym + obj_raw_syment_count (input_bfd) * isymesz;
   sym_hash = obj_xcoff_sym_hashes (input_bfd);
@@ -3503,16 +3641,10 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
   isymp = finfo->internal_syms;
   indexp = finfo->sym_indices;
   output_index = syment_base;
-  outsym = finfo->outsyms;
-  incls = 0;
-  oline = NULL;
-
   while (esym < esym_end)
     {
-      struct internal_syment isym;
       union internal_auxent aux;
       int smtyp = 0;
-      bfd_boolean skip;
       int add;
 
       bfd_coff_swap_sym_in (input_bfd, (void *) esym, (void *) isymp);
@@ -3531,17 +3663,11 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	  smtyp = SMTYP_SMTYP (aux.x_csect.x_smtyp);
 	}
 
-      /* Make a copy of *isymp so that the relocate_section function
-	 always sees the original values.  This is more reliable than
-	 always recomputing the symbol value even if we are stripping
-	 the symbol.  */
-      isym = *isymp;
-
       /* If this symbol is in the .loader section, swap out the
 	 .loader symbol information.  If this is an external symbol
 	 reference to a defined symbol, though, then wait until we get
 	 to the definition.  */
-      if (isym.n_sclass == C_EXT
+      if (isymp->n_sclass == C_EXT
 	  && *sym_hash != NULL
 	  && (*sym_hash)->ldsym != NULL
 	  && (smtyp != XTY_ER
@@ -3552,18 +3678,18 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 
 	  h = *sym_hash;
 	  ldsym = h->ldsym;
-	  if (isym.n_scnum > 0)
+	  if (isymp->n_scnum > 0)
 	    {
 	      ldsym->l_scnum = (*csectpp)->output_section->target_index;
-	      ldsym->l_value = (isym.n_value
+	      ldsym->l_value = (isymp->n_value
 				+ (*csectpp)->output_section->vma
 				+ (*csectpp)->output_offset
 				- (*csectpp)->vma);
 	    }
 	  else
 	    {
-	      ldsym->l_scnum = isym.n_scnum;
-	      ldsym->l_value = isym.n_value;
+	      ldsym->l_scnum = isymp->n_scnum;
+	      ldsym->l_value = isymp->n_value;
 	    }
 
 	  ldsym->l_smtype = smtyp;
@@ -3628,114 +3754,80 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	    }
 	}
 
-      *indexp = -1;
+      add = 1 + isymp->n_numaux;
 
-      skip = FALSE;
-      add = 1 + isym.n_numaux;
-
-      /* If we are skipping this csect, we want to skip this symbol.  */
-      if (*csectpp == NULL)
-	skip = TRUE;
-
-      /* If we garbage collected this csect, we want to skip this
-	 symbol.  */
-      if (! skip
-	  && xcoff_hash_table (finfo->info)->gc
-	  && !bfd_is_abs_section (*csectpp)
-	  && !bfd_is_und_section (*csectpp)
-	  && ((*csectpp)->flags & SEC_MARK) == 0)
-	skip = TRUE;
-
-      /* An XCOFF linker always skips C_STAT symbols.  */
-      if (! skip
-	  && isymp->n_sclass == C_STAT)
-	skip = TRUE;
-
-      /* We generate the TOC anchor separately.  */
-      if (! skip
-	  && isymp->n_sclass == C_HIDEXT
-	  && aux.x_csect.x_smclas == XMC_TC0)
-	skip = TRUE;
-
-      /* If we are stripping all symbols, we want to skip this one.  */
-      if (! skip
-	  && finfo->info->strip == strip_all)
-	skip = TRUE;
-
-      /* We can skip resolved external references.  */
-      if (! skip
-	  && isym.n_sclass == C_EXT
-	  && smtyp == XTY_ER
-	  && (*sym_hash)->root.type != bfd_link_hash_undefined)
-	skip = TRUE;
-
-      /* We can skip common symbols if they got defined somewhere
-	 else.  */
-      if (! skip
-	  && isym.n_sclass == C_EXT
-	  && smtyp == XTY_CM
-	  && ((*sym_hash)->root.type != bfd_link_hash_common
-	      || (*sym_hash)->root.u.c.p->section != *csectpp)
-	  && ((*sym_hash)->root.type != bfd_link_hash_defined
-	      || (*sym_hash)->root.u.def.section != *csectpp))
-	skip = TRUE;
-
-      /* Skip local symbols if we are discarding them.  */
-      if (! skip
-	  && finfo->info->discard == discard_all
-	  && isym.n_sclass != C_EXT
-	  && (isym.n_sclass != C_HIDEXT
-	      || smtyp != XTY_SD))
-	skip = TRUE;
-
-      /* If we stripping debugging symbols, and this is a debugging
-	 symbol, then skip it.  */
-      if (! skip
-	  && finfo->info->strip == strip_debugger
-	  && isym.n_scnum == N_DEBUG)
-	skip = TRUE;
-
-      /* If some symbols are stripped based on the name, work out the
-	 name and decide whether to skip this symbol.  We don't handle
-	 this correctly for symbols whose names are in the .debug
-	 section; to get it right we would need a new bfd_strtab_hash
-	 function to return the string given the index.  */
-      if (! skip
-	  && (finfo->info->strip == strip_some
-	      || finfo->info->discard == discard_l)
-	  && (debug_index == NULL || *debug_index == (unsigned long) -1))
+      if (*debug_index == -2)
+	/* We've decided to strip this symbol.  */
+	*indexp = -1;
+      else
 	{
-	  const char *name;
-	  char buf[SYMNMLEN + 1];
+	  /* Assign the next unused index to this symbol.  */
+	  *indexp = output_index;
 
-	  name = _bfd_coff_internal_syment_name (input_bfd, &isym, buf);
+	  if (isymp->n_sclass == C_EXT)
+	    {
+	      BFD_ASSERT (*sym_hash != NULL);
+	      (*sym_hash)->indx = output_index;
+	    }
 
-	  if (name == NULL)
-	    return FALSE;
+	  /* If this is a symbol in the TOC which we may have merged
+	     (class XMC_TC), remember the symbol index of the TOC
+	     symbol.  */
+	  if (isymp->n_sclass == C_HIDEXT
+	      && aux.x_csect.x_smclas == XMC_TC
+	      && *sym_hash != NULL)
+	    {
+	      BFD_ASSERT (((*sym_hash)->flags & XCOFF_SET_TOC) == 0);
+	      BFD_ASSERT ((*sym_hash)->toc_section != NULL);
+	      (*sym_hash)->u.toc_indx = output_index;
+	    }
 
-	  if ((finfo->info->strip == strip_some
-	       && (bfd_hash_lookup (finfo->info->keep_hash, name, FALSE,
-				    FALSE) == NULL))
-	      || (finfo->info->discard == discard_l
-		  && (isym.n_sclass != C_EXT
-		      && (isym.n_sclass != C_HIDEXT
-			  || smtyp != XTY_SD))
-		  && bfd_is_local_label_name (input_bfd, name)))
-	    skip = TRUE;
+	  output_index += add;
 	}
 
-      /* We now know whether we are to skip this symbol or not.  */
-      if (! skip)
-	{
-	  /* Adjust the symbol in order to output it.  */
+      esym += add * isymesz;
+      isymp += add;
+      csectpp += add;
+      sym_hash += add;
+      debug_index += add;
+      ++indexp;
+      for (--add; add > 0; --add)
+	*indexp++ = -1;
+    }
 
+  /* Now write out the symbols that we decided to keep.  */
+
+  esym = (bfd_byte *) obj_coff_external_syms (input_bfd);
+  esym_end = esym + obj_raw_syment_count (input_bfd) * isymesz;
+  isymp = finfo->internal_syms;
+  indexp = finfo->sym_indices;
+  csectpp = xcoff_data (input_bfd)->csects;
+  debug_index = xcoff_data (input_bfd)->debug_indices;
+  outsym = finfo->outsyms;
+  incls = 0;
+  oline = NULL;
+  while (esym < esym_end)
+    {
+      int add;
+
+      add = 1 + isymp->n_numaux;
+
+      if (*indexp < 0)
+	esym += add * isymesz;
+      else
+	{
+	  struct internal_syment isym;
+	  int i;
+
+	  /* Adjust the symbol in order to output it.  */
+	  isym = *isymp;
 	  if (isym._n._n_n._n_zeroes == 0
 	      && isym._n._n_n._n_offset != 0)
 	    {
 	      /* This symbol has a long name.  Enter it in the string
 		 table we are building.  If *debug_index != -1, the
 		 name has already been entered in the .debug section.  */
-	      if (debug_index != NULL && *debug_index != (unsigned long) -1)
+	      if (*debug_index >= 0)
 		isym._n._n_n._n_offset = *debug_index;
 	      else
 		{
@@ -3753,17 +3845,6 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		}
 	    }
 
-	  if (isym.n_sclass != C_BSTAT
-	      && isym.n_sclass != C_ESTAT
-	      && isym.n_sclass != C_DECL
-	      && isym.n_scnum > 0)
-	    {
-	      isym.n_scnum = (*csectpp)->output_section->target_index;
-	      isym.n_value += ((*csectpp)->output_section->vma
-			       + (*csectpp)->output_offset
-			       - (*csectpp)->vma);
-	    }
-
 	  /* The value of a C_FILE symbol is the symbol index of the
 	     next C_FILE symbol.  The value of the last C_FILE symbol
 	     is -1.  We try to get this right, below, just before we
@@ -3772,10 +3853,10 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	  if (isym.n_sclass == C_FILE)
 	    {
 	      if (finfo->last_file_index != -1
-		  && finfo->last_file.n_value != (bfd_vma) output_index)
+		  && finfo->last_file.n_value != (bfd_vma) *indexp)
 		{
 		  /* We must correct the value of the last C_FILE entry.  */
-		  finfo->last_file.n_value = output_index;
+		  finfo->last_file.n_value = *indexp;
 		  if ((bfd_size_type) finfo->last_file_index >= syment_base)
 		    {
 		      /* The last C_FILE symbol is in this input file.  */
@@ -3806,7 +3887,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		    }
 		}
 
-	      finfo->last_file_index = output_index;
+	      finfo->last_file_index = *indexp;
 	      finfo->last_file = isym;
 	    }
 
@@ -3819,84 +3900,12 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	      isym.n_value = finfo->line_filepos;
 	      ++incls;
 	    }
-
-	  /* Output the symbol.  */
-
-	  bfd_coff_swap_sym_out (output_bfd, (void *) &isym, (void *) outsym);
-
-	  *indexp = output_index;
-
-	  if (isym.n_sclass == C_EXT)
+	  /* The value of a C_BSTAT symbol is the symbol table
+	     index of the containing csect.  */
+	  else if (isym.n_sclass == C_BSTAT)
 	    {
-	      long indx;
-	      struct xcoff_link_hash_entry *h;
-
-	      indx = ((esym - (bfd_byte *) obj_coff_external_syms (input_bfd))
-		      / isymesz);
-	      h = obj_xcoff_sym_hashes (input_bfd)[indx];
-	      BFD_ASSERT (h != NULL);
-	      h->indx = output_index;
-	    }
-
-	  /* If this is a symbol in the TOC which we may have merged
-	     (class XMC_TC), remember the symbol index of the TOC
-	     symbol.  */
-	  if (isym.n_sclass == C_HIDEXT
-	      && aux.x_csect.x_smclas == XMC_TC
-	      && *sym_hash != NULL)
-	    {
-	      BFD_ASSERT (((*sym_hash)->flags & XCOFF_SET_TOC) == 0);
-	      BFD_ASSERT ((*sym_hash)->toc_section != NULL);
-	      (*sym_hash)->u.toc_indx = output_index;
-	    }
-
-	  output_index += add;
-	  outsym += add * osymesz;
-	}
-
-      esym += add * isymesz;
-      isymp += add;
-      csectpp += add;
-      sym_hash += add;
-      if (debug_index != NULL)
-	debug_index += add;
-      ++indexp;
-      for (--add; add > 0; --add)
-	*indexp++ = -1;
-    }
-
-  /* Fix up the aux entries and the C_BSTAT symbols.  This must be
-     done in a separate pass, because we don't know the correct symbol
-     indices until we have already decided which symbols we are going
-     to keep.  */
-
-  esym = (bfd_byte *) obj_coff_external_syms (input_bfd);
-  esym_end = esym + obj_raw_syment_count (input_bfd) * isymesz;
-  isymp = finfo->internal_syms;
-  indexp = finfo->sym_indices;
-  csectpp = xcoff_data (input_bfd)->csects;
-  outsym = finfo->outsyms;
-  while (esym < esym_end)
-    {
-      int add;
-
-      add = 1 + isymp->n_numaux;
-
-      if (*indexp < 0)
-	esym += add * isymesz;
-      else
-	{
-	  int i;
-
-	  if (isymp->n_sclass == C_BSTAT)
-	    {
-	      struct internal_syment isym;
-
 	      bfd_vma indx;
 
-	      /* The value of a C_BSTAT symbol is the symbol table
-		 index of the containing csect.  */
-	      bfd_coff_swap_sym_in (output_bfd, (void *) outsym, (void *) &isym);
 	      indx = isym.n_value;
 	      if (indx < obj_raw_syment_count (input_bfd))
 		{
@@ -3907,10 +3916,20 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		    isym.n_value = 0;
 		  else
 		    isym.n_value = symindx;
-		  bfd_coff_swap_sym_out (output_bfd, (void *) &isym,
-					 (void *) outsym);
 		}
 	    }
+	  else if (isym.n_sclass != C_ESTAT
+		   && isym.n_sclass != C_DECL
+		   && isym.n_scnum > 0)
+	    {
+	      isym.n_scnum = (*csectpp)->output_section->target_index;
+	      isym.n_value += ((*csectpp)->output_section->vma
+			       + (*csectpp)->output_offset
+			       - (*csectpp)->vma);
+	    }
+
+	  /* Output the symbol.  */
+	  bfd_coff_swap_sym_out (output_bfd, (void *) &isym, (void *) outsym);
 
 	  esym += isymesz;
 	  outsym += osymesz;
@@ -4185,6 +4204,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
       indexp += add;
       isymp += add;
       csectpp += add;
+      debug_index += add;
     }
 
   /* If we swapped out a C_FILE symbol, guess that the next C_FILE
