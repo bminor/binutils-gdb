@@ -1,5 +1,10 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* xcofflink.c (bfd_xcoff_import_symbol): Treat imported absolute
+	symbols as XMC_XO.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* libcoff-in.h (xcoff_tdata): Add a lineno_counts field.
 	* libcoff.h: Regenerate.
 	* xcofflink.c (xcoff_link_add_symbols): Record per-symbol

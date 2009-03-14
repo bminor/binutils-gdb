@@ -1,5 +1,11 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* ld-powerpc/aix-abs-branch-1.nd,
+	ld-powerpc/aix-abs-reloc-1.nd: New tests.
+	* ld-powerpc/aix52.exp: Run them.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* ld-powerpc/aix-lineno-1.s, ld-powerpc/aix-lineno-1.txt,
 	ld-powerpc/aix-lineno-1a.dd, ld-powerpc/aix-lineno-1a.nd,
 	ld-powerpc/aix-lineno-1b.dd, ld-powerpc/aix-lineno-1b.nd: New tests.

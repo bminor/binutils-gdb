@@ -2723,6 +2723,7 @@ bfd_xcoff_import_symbol (bfd *output_bfd,
       h->root.type = bfd_link_hash_defined;
       h->root.u.def.section = bfd_abs_section_ptr;
       h->root.u.def.value = val;
+      h->smclas = XMC_XO;
     }
 
   if (!xcoff_set_import_path (info, h, imppath, impfile, impmember))

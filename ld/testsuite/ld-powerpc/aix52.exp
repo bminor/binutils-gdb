@@ -72,13 +72,13 @@ set aix52tests {
     {"Absolute branch test 1"
      "-shared -bI:aix-abs-branch-1.im -bE:aix-abs-branch-1.ex"
      "" {aix-abs-branch-1.s}
-     {{objdump {-dR} aix-abs-branch-1.dd}}
+     {{objdump {-dR} aix-abs-branch-1.dd} {nm {} aix-abs-branch-1.nd}}
      "aix-abs-branch-1.so"}
 
     {"Relocations against absolute symbols 1"
      "-shared -bI:aix-abs-reloc-1.im -bE:aix-abs-reloc-1.ex"
      {} {aix-abs-reloc-1.s}
-     {{objdump -sRj.data aix-abs-reloc-1.od}}
+     {{objdump -sRj.data aix-abs-reloc-1.od} {nm {} aix-abs-reloc-1.nd}}
      "aix-abs-reloc-1.so"}
 
     {"Core sections test 1" "-shared -bE:aix-core-sec-1.ex"
