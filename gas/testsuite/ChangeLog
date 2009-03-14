@@ -1,5 +1,11 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* gas/ppc/textalign-xcoff-001.d: Expect the section VMAs to be
+	properly aligned.
+	* gas/ppc/textalign-xcoff-002.d: Likewise.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* gas/ppc/xcoff-branch-1.s, gas/ppc/xcoff-branch-1-32.d,
 	gas/ppc/xcoff-branch-1-64.d: New tests.
 	* gas/ppc/aix.exp: Run them.
