@@ -5741,18 +5741,19 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
      going to use the symbol value.  That means that if the reloc is
      fully resolved we want to use *valP since bfd_install_relocation is
      not being used.
-     However, if the reloc is not fully resolved we do not want to use
-     *valP, and must use fx_offset instead.  However, if the reloc
-     is PC relative, we do want to use *valP since it includes the
-     result of md_pcrel_from.  This is confusing.  */
+     However, if the reloc is not fully resolved we do not want to
+     use *valP, and must use fx_offset instead.  If the relocation
+     is PC-relative, we then need to re-apply md_pcrel_from_section
+     to this new relocation value.  */
   if (fixP->fx_addsy == (symbolS *) NULL)
     fixP->fx_done = 1;
 
-  else if (fixP->fx_pcrel)
-    ;
-
   else
-    value = fixP->fx_offset;
+    {
+      value = fixP->fx_offset;
+      if (fixP->fx_pcrel)
+	value -= md_pcrel_from_section (fixP, seg);
+    }
 #endif
 
   if (fixP->fx_subsy != (symbolS *) NULL)

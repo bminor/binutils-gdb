@@ -1,5 +1,11 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* config/tc-ppc.c (md_apply_fix): On COFF targets, always reread
+	"value" from fx_offset.  Manually resubtract md_pcrel_from_section
+	where necessary.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* configure.tgt: Extend AIX 5 behavior to AIX 6 and above.
 	* configure.in: Likewise.
 	* configure: Regenerate.
