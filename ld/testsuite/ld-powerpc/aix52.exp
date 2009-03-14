@@ -65,6 +65,12 @@ proc run_aix_test { size name ldopts asopts sources tools output } {
 }
 
 set aix52tests {
+    {"Relocations against absolute symbols 1"
+     "-shared -bI:aix-abs-reloc-1.im -bE:aix-abs-reloc-1.ex"
+     {} {aix-abs-reloc-1.s}
+     {{objdump -sRj.data aix-abs-reloc-1.od}}
+     "aix-abs-reloc-1.so"}
+
     {"Core sections test 1" "-shared -bE:aix-core-sec-1.ex"
      "" {aix-core-sec-1.s}
      {{objdump -h aix-core-sec-1.hd}}

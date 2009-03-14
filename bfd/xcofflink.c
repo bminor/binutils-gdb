@@ -2335,6 +2335,11 @@ xcoff_mark (struct bfd_link_info *info, asection *sec)
 		case R_NEG:
 		case R_RL:
 		case R_RLA:
+		  if (h != NULL
+		      && (h->root.type == bfd_link_hash_defined
+			  || h->root.type == bfd_link_hash_defweak)
+		      && bfd_is_abs_section (h->root.u.def.section))
+		    break;
 		  ++xcoff_hash_table (info)->ldrel_count;
 		  if (h != NULL)
 		    h->flags |= XCOFF_LDREL;
@@ -4460,6 +4465,11 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		case R_NEG:
 		case R_RL:
 		case R_RLA:
+		  if (h != NULL
+		      && (h->root.type == bfd_link_hash_defined
+			  || h->root.type == bfd_link_hash_defweak)
+		      && bfd_is_abs_section (h->root.u.def.section))
+		    break;
 		  /* This reloc needs to be copied into the .loader
 		     section.  */
 		  ldrel.l_vaddr = irel->r_vaddr;

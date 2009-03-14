@@ -1,5 +1,11 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* xcofflink.c (xcoff_mark, xcoff_link_input_bfd): Don't copy
+	R_POS and R_NEG relocations against absolute symbols to the
+	.loader section.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* coff64-rs6000.c (xcoff64_write_object_contents): Set the cputype
 	to 2 for bfd_mach_ppc_620.
 
