@@ -97,6 +97,11 @@ set aix52tests {
      "" {aix-glink-1.s}
      {{objdump {-D -j.text -j.data} aix-glink-1-SIZE.dd}}
      "aix-glink-1.so"}
+
+    {"TOC test 1" "-shared -bE:aix-toc-1.ex"
+     "" {aix-toc-1a.s aix-toc-1b.s}
+     {{objdump -dr aix-toc-1-SIZE.dd}}
+     "aix-toc-1.so"}
 }
 
 foreach test $aix52tests {

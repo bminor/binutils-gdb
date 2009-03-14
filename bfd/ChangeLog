@@ -1,5 +1,17 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* xcofflink.c: (xcoff_mark_symbol): Mark the TOC section when
+	creating a descriptor.
+	(xcoff_sweep): Don't mark toc_section unless it's needed.
+	(bfd_xcoff_size_dynamic_sections): Skip the toc_section
+	when marking every bfd.
+	(xcoff_link_input_bfd): Skip all TOC anchors.
+	(xcoff_toc_section_p, xcoff_find_tc0): New functions.
+	(_bfd_xcoff_bfd_final_link): Don't set the output bfd's TOC anchor
+	to -1; call xcoff_find_tc0 instead.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* libcoff-in.h (xcoff_section_tdata): Update commentary.
 	* libcoff.h: Regenerate.
 	* xcofflink.c (xcoff_link_add_symbols): Set the csect of XTY_ER

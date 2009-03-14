@@ -2331,6 +2331,11 @@ xcoff_mark_symbol (struct bfd_link_info *info, struct xcoff_link_hash_entry *h)
 	  if (!xcoff_mark_symbol (info, h->descriptor))
 	    return FALSE;
 
+	  /* Mark the TOC section, so that we get an anchor
+	     to relocate against.  */
+	  if (!xcoff_mark (info, xcoff_hash_table (info)->toc_section))
+	    return FALSE;
+
 	  /* We handle writing out the contents of the descriptor in
 	     xcoff_write_global_symbol.  */
 	}
@@ -2590,7 +2595,6 @@ xcoff_sweep (struct bfd_link_info *info)
 		  || o == xcoff_hash_table (info)->debug_section
 		  || o == xcoff_hash_table (info)->loader_section
 		  || o == xcoff_hash_table (info)->linkage_section
-		  || o == xcoff_hash_table (info)->toc_section
 		  || o == xcoff_hash_table (info)->descriptor_section
 		  || strcmp (o->name, ".debug") == 0)
 		o->flags |= SEC_MARK;
@@ -3126,7 +3130,12 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 
 	  for (o = sub->sections; o != NULL; o = o->next)
 	    {
-	      if ((o->flags & SEC_MARK) == 0)
+	      /* We shouldn't unconditionaly mark the TOC section.
+		 The output file should only have a TOC if either
+		 (a) one of the input files did or (b) we end up
+		 creating TOC references as part of the link process.  */
+	      if (o != xcoff_hash_table (info)->toc_section
+		  && (o->flags & SEC_MARK) == 0)
 		{
 		  if (! xcoff_mark (info, o))
 		    goto error_return;
@@ -3504,7 +3513,6 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
       union internal_auxent aux;
       int smtyp = 0;
       bfd_boolean skip;
-      bfd_boolean require;
       int add;
 
       bfd_coff_swap_sym_in (input_bfd, (void *) esym, (void *) isymp);
@@ -3623,7 +3631,6 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
       *indexp = -1;
 
       skip = FALSE;
-      require = FALSE;
       add = 1 + isym.n_numaux;
 
       /* If we are skipping this csect, we want to skip this symbol.  */
@@ -3644,75 +3651,11 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	  && isymp->n_sclass == C_STAT)
 	skip = TRUE;
 
-      /* We skip all but the first TOC anchor.  */
+      /* We generate the TOC anchor separately.  */
       if (! skip
 	  && isymp->n_sclass == C_HIDEXT
 	  && aux.x_csect.x_smclas == XMC_TC0)
-	{
-	  if (finfo->toc_symindx != -1)
-	    skip = TRUE;
-	  else
-	    {
-	      bfd_vma tocval, tocend;
-	      bfd *inp;
-
-	      tocval = ((*csectpp)->output_section->vma
-			+ (*csectpp)->output_offset
-			+ isym.n_value
-			- (*csectpp)->vma);
-
-	      /* We want to find out if tocval is a good value to use
-		 as the TOC anchor--that is, whether we can access all
-		 of the TOC using a 16 bit offset from tocval.  This
-		 test assumes that the TOC comes at the end of the
-		 output section, as it does in the default linker
-		 script.  */
-	      tocend = ((*csectpp)->output_section->vma
-			+ (*csectpp)->output_section->size);
-	      for (inp = finfo->info->input_bfds;
-		   inp != NULL;
-		   inp = inp->link_next)
-		{
-
-		  for (o = inp->sections; o != NULL; o = o->next)
-		    if (strcmp (o->name, ".tocbss") == 0)
-		      {
-			bfd_vma new_toc_end;
-			new_toc_end = (o->output_section->vma
-				       + o->output_offset
-				       + o->size);
-			if (new_toc_end > tocend)
-			  tocend = new_toc_end;
-		      }
-
-		}
-
-	      if (tocval + 0x10000 < tocend)
-		{
-		  (*_bfd_error_handler)
-		    (_("TOC overflow: 0x%lx > 0x10000; try -mminimal-toc when compiling"),
-		     (unsigned long) (tocend - tocval));
-		  bfd_set_error (bfd_error_file_too_big);
-		  return FALSE;
-		}
-
-	      if (tocval + 0x8000 < tocend)
-		{
-		  bfd_vma tocadd;
-
-		  tocadd = tocend - (tocval + 0x8000);
-		  tocval += tocadd;
-		  isym.n_value += tocadd;
-		}
-
-	      finfo->toc_symindx = output_index;
-	      xcoff_data (finfo->output_bfd)->toc = tocval;
-	      xcoff_data (finfo->output_bfd)->sntoc =
-		(*csectpp)->output_section->target_index;
-	      require = TRUE;
-
-	    }
-	}
+	skip = TRUE;
 
       /* If we are stripping all symbols, we want to skip this one.  */
       if (! skip
@@ -3780,12 +3723,6 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		  && bfd_is_local_label_name (input_bfd, name)))
 	    skip = TRUE;
 	}
-
-      /* We can not skip the first TOC anchor.  */
-      if (skip
-	  && require
-	  && finfo->info->strip != strip_all)
-	skip = FALSE;
 
       /* We now know whether we are to skip this symbol or not.  */
       if (! skip)
@@ -4614,6 +4551,144 @@ xcoff_sort_relocs (const void * p1, const void * p2)
     return -1;
   else
     return 0;
+}
+
+/* Return true if section SEC is a TOC section.  */
+
+static inline bfd_boolean
+xcoff_toc_section_p (asection *sec)
+{
+  const char *name;
+
+  name = sec->name;
+  if (name[0] == '.' && name[1] == 't')
+    {
+      if (name[2] == 'c')
+	{
+	  if (name[3] == '0' && name[4] == 0)
+	    return TRUE;
+	  if (name[3] == 0)
+	    return TRUE;
+	}
+      if (name[2] == 'd' && name[3] == 0)
+	return TRUE;
+    }
+  return FALSE;
+}
+
+/* See if the link requires a TOC (it usually does!).  If so, find a
+   good place to put the TOC anchor csect, and write out the associated
+   symbol.  */
+
+static bfd_boolean
+xcoff_find_tc0 (bfd *output_bfd, struct xcoff_final_link_info *finfo)
+{
+  bfd_vma toc_start, toc_end, start, end, best_address;
+  asection *sec;
+  bfd *input_bfd;
+  int section_index;
+  struct internal_syment irsym;
+  union internal_auxent iraux;
+  file_ptr pos;
+  size_t size;
+
+  /* Set [TOC_START, TOC_END) to the range of the TOC.  Record the
+     index of a csect at the beginning of the TOC.  */
+  toc_start = ~(bfd_vma) 0;
+  toc_end = 0;
+  section_index = -1;
+  for (input_bfd = finfo->info->input_bfds;
+       input_bfd != NULL;
+       input_bfd = input_bfd->link_next)
+    for (sec = input_bfd->sections; sec != NULL; sec = sec->next)
+      if ((sec->flags & SEC_MARK) != 0 && xcoff_toc_section_p (sec))
+	{
+	  start = sec->output_section->vma + sec->output_offset;
+	  if (toc_start > start)
+	    {
+	      toc_start = start;
+	      section_index = sec->output_section->target_index;
+	    }
+
+	  end = start + sec->size;
+	  if (toc_end < end)
+	    toc_end = end;
+	}
+
+  /* There's no need for a TC0 symbol if we don't have a TOC.  */
+  if (toc_end < toc_start)
+    {
+      xcoff_data (output_bfd)->toc = toc_start;
+      return TRUE;
+    }
+
+  if (toc_end - toc_start < 0x8000)
+    /* Every TOC csect can be accessed from TOC_START.  */
+    best_address = toc_start;
+  else
+    {
+      /* Find the lowest TOC csect that is still within range of TOC_END.  */
+      best_address = toc_end;
+      for (input_bfd = finfo->info->input_bfds;
+	   input_bfd != NULL;
+	   input_bfd = input_bfd->link_next)
+	for (sec = input_bfd->sections; sec != NULL; sec = sec->next)
+	  if ((sec->flags & SEC_MARK) != 0 && xcoff_toc_section_p (sec))
+	    {
+	      start = sec->output_section->vma + sec->output_offset;
+	      if (start < best_address
+		  && start + 0x8000 >= toc_end)
+		{
+		  best_address = start;
+		  section_index = sec->output_section->target_index;
+		}
+	    }
+
+      /* Make sure that the start of the TOC is also within range.  */
+      if (best_address > toc_start + 0x8000)
+	{
+	  (*_bfd_error_handler)
+	    (_("TOC overflow: 0x%lx > 0x10000; try -mminimal-toc "
+	       "when compiling"),
+	     (unsigned long) (toc_end - toc_start));
+	  bfd_set_error (bfd_error_file_too_big);
+	  return FALSE;
+	}
+    }
+
+  /* Record the chosen TOC value.  */
+  finfo->toc_symindx = obj_raw_syment_count (output_bfd);
+  xcoff_data (output_bfd)->toc = best_address;
+  xcoff_data (output_bfd)->sntoc = section_index;
+
+  /* Fill out the TC0 symbol.  */
+  if (!bfd_xcoff_put_symbol_name (output_bfd, finfo->strtab, &irsym, "TOC"))
+    return FALSE;
+  irsym.n_value = best_address;
+  irsym.n_scnum = section_index;
+  irsym.n_sclass = C_HIDEXT;
+  irsym.n_type = T_NULL;
+  irsym.n_numaux = 1;
+  bfd_coff_swap_sym_out (output_bfd, &irsym, finfo->outsyms);
+
+  /* Fill out the auxillary csect information.  */
+  memset (&iraux, 0, sizeof iraux);
+  iraux.x_csect.x_smtyp = XTY_SD;
+  iraux.x_csect.x_smclas = XMC_TC0;
+  iraux.x_csect.x_scnlen.l = 0;
+  bfd_coff_swap_aux_out (output_bfd, &iraux, T_NULL, C_HIDEXT, 0, 1,
+			 finfo->outsyms + bfd_coff_symesz (output_bfd));
+
+  /* Write the contents to the file.  */
+  pos = obj_sym_filepos (output_bfd);
+  pos += obj_raw_syment_count (output_bfd) * bfd_coff_symesz (output_bfd);
+  size = 2 * bfd_coff_symesz (output_bfd);
+  if (bfd_seek (output_bfd, pos, SEEK_SET) != 0
+      || bfd_bwrite (finfo->outsyms, size, output_bfd) != size)
+    return FALSE;
+  obj_raw_syment_count (output_bfd) += 2;
+
+  return TRUE;
 }
 
 /* Write out a non-XCOFF global symbol.  */
@@ -5692,7 +5767,10 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
     goto error_return;
 
   obj_raw_syment_count (abfd) = 0;
-  xcoff_data (abfd)->toc = (bfd_vma) -1;
+
+  /* Find a TOC symbol, if we need one.  */
+  if (!xcoff_find_tc0 (abfd, &finfo))
+    goto error_return;
 
   /* We now know the position of everything in the file, except that
      we don't know the size of the symbol table and therefore we don't

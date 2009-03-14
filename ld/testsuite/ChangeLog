@@ -1,5 +1,12 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* ld-powerpc/aix-toc-1.ex, ld-powerpc/aix-toc-1a.s,
+	ld-powerpc/aix-toc-1b.s, ld-powerpc/aix-toc-1-32.dd,
+	ld-powerpc/aix-toc-1-64.dd: New tests.
+	* ld-powerpc/aix52.exp: Run them.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* ld-powerpc/aix-glink-1.ex, ld-powerpc/aix-glink-1.s,
 	ld-powerpc/aix-glink-1-32.dd, ld-powerpc/aix-glink-1-64.dd,
 	ld-powerpc/aix-glink-1-32.d, ld-powerpc/aix-glink-1-64.d: New tests.
