@@ -1,5 +1,10 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* emultempl/aix.em (gld${EMULATION_NAME}_before_parse): Set
+	config.dynamic_link to TRUE.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* emultempl/aix.em (gld${EMULATION_NAME}_before_allocation): Mark
 	.text, .data and .bss output sections as SEC_KEEP.
 

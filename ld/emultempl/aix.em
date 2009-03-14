@@ -137,6 +137,7 @@ gld${EMULATION_NAME}_before_parse (void)
 {
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
 
+  config.dynamic_link = TRUE;
   config.has_shared = TRUE;
 
   /* The link_info.[init|fini]_functions are initialized in ld/lexsup.c.
