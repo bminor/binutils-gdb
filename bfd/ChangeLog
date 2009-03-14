@@ -1,5 +1,24 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* bfd-in.h (bfd_xcoff_size_dynamic_sections): Replace the
+	bfd_boolean export_defineds parameter with an unsigned int
+	auto_export_flags parameter.
+	* bfd-in2.h: Regenerate.
+	* xcofflink.c (xcoff_archive_contains_shared_object_p): New function,
+	split out from xcoff_build_ldsyms.
+	(xcoff_covered_by_expall_p): New function.
+	(xcoff_auto_export_p): New function, split out from xcoff_build_ldsyms
+	but with extra code to handle -bexpfull and -bexpall.
+	(xcoff_mark_auto_exports): New function.
+	(xcoff_build_ldsyms): Use xcoff_auto_export_p to decide whether
+	a function should be automatically exported.
+	(bfd_xcoff_size_dynamic_sections): Replace the export_defineds
+	parameter with an auto_export_flags parameter.  Update ldinfo
+	accordingly.  Use xcoff_mark_auto_exports to mark all automatically-
+	exported symbols.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* xcofflink.c (xcoff_mark_symbol_by_name): New function.
 	(bfd_xcoff_size_dynamic_sections): Use it to mark the entry,
 	init and fini functions.  Do garbage collection for objects

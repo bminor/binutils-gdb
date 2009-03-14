@@ -786,7 +786,7 @@ extern bfd_boolean bfd_xcoff_record_link_assignment
 extern bfd_boolean bfd_xcoff_size_dynamic_sections
   (bfd *, struct bfd_link_info *, const char *, const char *,
    unsigned long, unsigned long, unsigned long, bfd_boolean,
-   int, bfd_boolean, bfd_boolean, struct bfd_section **, bfd_boolean);
+   int, bfd_boolean, unsigned int, struct bfd_section **, bfd_boolean);
 extern bfd_boolean bfd_xcoff_link_generate_rtinit
   (bfd *, const char *, const char *, bfd_boolean);
 

@@ -108,6 +108,26 @@ set aix52tests {
       {nm -D aix-no-dup-syms-1-dso.dnd} {objdump -R aix-no-dup-syms-1-dso.drd}}
      "aix-no-dup-syms-1.so"}
 
+    {"Export test 1 (archive)" ""
+      "" {aix-export-1a.s}
+      {} "libaix-export-1.a"}
+
+    {"Export test 1 (object)" "-r"
+      "" {aix-export-1b.s}
+      {} "aix-export-1.o"}
+
+    {"Export test 1 (-bexpall)"
+     "-shared -bexpall tmpdir/aix-export-1.o -Ltmpdir -laix-export-1"
+     "" {}
+     {{objdump -dj.data aix-export-1-all.dd}}
+     "aix-export-1-all.so"}
+
+    {"Export test 1 (-bexpfull)"
+     "-shared -bexpfull tmpdir/aix-export-1.o -Ltmpdir -laix-export-1"
+     "" {}
+     {{objdump -dj.data aix-export-1-full.dd}}
+     "aix-export-1-full.so"}
+
     {"Garbage collection test 1"
      "-shared -binitfini:init_function:fini_function -bE:aix-gc-1.ex"
      "" {aix-gc-1.s}

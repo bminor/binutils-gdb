@@ -1,5 +1,11 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* ld-powerpc/aix-export-1-all.dd, ld-powerpc/aix-export-1-full.dd,
+	ld-powerpc/aix-export-1a.s, ld-powerpc/aix-export-1b.s: New tests.
+	* ld-powerpc/aix52.exp: Run them.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* ld-powerpc/aix-gc-1.s, ld-powerpc/aix-gc-1.ex,
 	ld-powerpc/aix-gc-1-32.dd, ld-powerpc/aix-gc-1-64.dd,
 	ld-powerpc/aix-weak-1-gcdso.dnd, ld-powerpc/aix-weak-1-gcdso.hd,

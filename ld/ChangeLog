@@ -1,5 +1,17 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* emultempl/aix.em (auto_export_flags): New variable.
+	(explicit_auto_export_flags): Likewise.
+	(OPTION_EXPALL, OPTION_EXPFULL): New enum values.
+	(OPTION_NOEXPALL, OPTION_NOEXPFULL): Likewise.
+	(gld${EMULATION_NAME}_add_options): Add -bexpall, -bexpfull,
+	-bnoexpall and -bnoexpfull.
+	(gld${EMULATION_NAME}_handle_option): Handle them.
+	(gld${EMULATION_NAME}_before_allocation): Update the call to
+	bfd_size_dynamic_sections.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* emultempl/aix.em (gld${EMULATION_NAME}_handle_option): Make
 	-berok and -bernotok control link_info.unresolved_syms_in_objects
 	and link_info.unresolved_syms_in_shared_libs instead of

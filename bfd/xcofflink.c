@@ -2313,6 +2313,97 @@ xcoff_set_import_path (struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Return true if the given bfd contains at least one shared object.  */
+
+static bfd_boolean
+xcoff_archive_contains_shared_object_p (bfd *archive)
+{
+  bfd *member;
+
+  member = bfd_openr_next_archived_file (archive, NULL);
+  while (member != NULL && (member->flags & DYNAMIC) == 0)
+    member = bfd_openr_next_archived_file (archive, member);
+  return member != NULL;
+}
+
+/* Symbol H qualifies for export by -bexpfull.  Return true if it also
+   qualifies for export by -bexpall.  */
+
+static bfd_boolean
+xcoff_covered_by_expall_p (struct xcoff_link_hash_entry *h)
+{
+  /* Exclude symbols beginning with '_'.  */
+  if (h->root.root.string[0] == '_')
+    return FALSE;
+
+  /* Exclude archive members that would otherwise be unreferenced.  */
+  if ((h->flags & XCOFF_MARK) == 0
+      && (h->root.type == bfd_link_hash_defined
+	  || h->root.type == bfd_link_hash_defweak)
+      && h->root.u.def.section->owner != NULL
+      && h->root.u.def.section->owner->my_archive != NULL)
+    return FALSE;
+
+  return TRUE;
+}
+
+/* Return true if symbol H qualifies for the forms of automatic export
+   specified by AUTO_EXPORT_FLAGS.  */
+
+static bfd_boolean
+xcoff_auto_export_p (struct xcoff_link_hash_entry *h,
+		     unsigned int auto_export_flags)
+{
+  /* Don't automatically export things that were explicitly exported.  */
+  if ((h->flags & XCOFF_EXPORT) != 0)
+    return FALSE;
+
+  /* Don't export things that we don't define.  */
+  if ((h->flags & XCOFF_DEF_REGULAR) == 0)
+    return FALSE;
+
+  /* Don't export functions; export their descriptors instead.  */
+  if (h->root.root.string[0] == '.')
+    return FALSE;
+
+  /* We don't export a symbol which is being defined by an object
+     included from an archive which contains a shared object.  The
+     rationale is that if an archive contains both an unshared and
+     a shared object, then there must be some reason that the
+     unshared object is unshared, and we don't want to start
+     providing a shared version of it.  In particular, this solves
+     a bug involving the _savefNN set of functions.  gcc will call
+     those functions without providing a slot to restore the TOC,
+     so it is essential that these functions be linked in directly
+     and not from a shared object, which means that a shared
+     object which also happens to link them in must not export
+     them.  This is confusing, but I haven't been able to think of
+     a different approach.  Note that the symbols can, of course,
+     be exported explicitly.  */
+  if (h->root.type == bfd_link_hash_defined
+      || h->root.type == bfd_link_hash_defweak)
+    {
+      bfd *owner;
+
+      owner = h->root.u.def.section->owner;
+      if (owner != NULL
+	  && owner->my_archive != NULL
+	  && xcoff_archive_contains_shared_object_p (owner->my_archive))
+	return FALSE;
+    }
+
+  /* Otherwise, all symbols are exported by -bexpfull.  */
+  if ((auto_export_flags & XCOFF_EXPFULL) != 0)
+    return TRUE;
+
+  /* Despite its name, -bexpall exports most but not all symbols.  */
+  if ((auto_export_flags & XCOFF_EXPALL) != 0
+      && xcoff_covered_by_expall_p (h))
+    return TRUE;
+
+  return FALSE;
+}
+
 /* Mark a symbol as not being garbage, including the section in which
    it is defined.  */
 
@@ -2878,6 +2969,24 @@ bfd_xcoff_record_link_assignment (bfd *output_bfd,
   return TRUE;
 }
 
+/* An xcoff_link_hash_traverse callback for which DATA points to an
+   xcoff_loader_info.  Mark all symbols that should be automatically
+   exported.  */
+
+static bfd_boolean
+xcoff_mark_auto_exports (struct xcoff_link_hash_entry *h, void *data)
+{
+  struct xcoff_loader_info *ldinfo;
+
+  ldinfo = (struct xcoff_loader_info *) data;
+  if (xcoff_auto_export_p (h, ldinfo->auto_export_flags))
+    {
+      if (!xcoff_mark_symbol (ldinfo->info, h))
+	ldinfo->failed = TRUE;
+    }
+  return TRUE;
+}
+
 /* Add a symbol to the .loader symbols, if necessary.  */
 
 /* INPUT_BFD has an external symbol associated with hash table entry H
@@ -2939,50 +3048,8 @@ xcoff_build_ldsyms (struct xcoff_link_hash_entry *h, void * p)
   /* If all defined symbols should be exported, mark them now.  We
      don't want to export the actual functions, just the function
      descriptors.  */
-  if (ldinfo->export_defineds
-      && (h->flags & XCOFF_DEF_REGULAR) != 0
-      && h->root.root.string[0] != '.')
-    {
-      bfd_boolean export;
-
-      /* We don't export a symbol which is being defined by an object
-	 included from an archive which contains a shared object.  The
-	 rationale is that if an archive contains both an unshared and
-	 a shared object, then there must be some reason that the
-	 unshared object is unshared, and we don't want to start
-	 providing a shared version of it.  In particular, this solves
-	 a bug involving the _savefNN set of functions.  gcc will call
-	 those functions without providing a slot to restore the TOC,
-	 so it is essential that these functions be linked in directly
-	 and not from a shared object, which means that a shared
-	 object which also happens to link them in must not export
-	 them.  This is confusing, but I haven't been able to think of
-	 a different approach.  Note that the symbols can, of course,
-	 be exported explicitly.  */
-      export = TRUE;
-      if ((h->root.type == bfd_link_hash_defined
-	   || h->root.type == bfd_link_hash_defweak)
-	  && h->root.u.def.section->owner != NULL
-	  && h->root.u.def.section->owner->my_archive != NULL)
-	{
-	  bfd *arbfd, *member;
-
-	  arbfd = h->root.u.def.section->owner->my_archive;
-	  member = bfd_openr_next_archived_file (arbfd, NULL);
-	  while (member != NULL)
-	    {
-	      if ((member->flags & DYNAMIC) != 0)
-		{
-		  export = FALSE;
-		  break;
-		}
-	      member = bfd_openr_next_archived_file (arbfd, member);
-	    }
-	}
-
-      if (export)
-	h->flags |= XCOFF_EXPORT;
-    }
+  if (xcoff_auto_export_p (h, ldinfo->auto_export_flags))
+    h->flags |= XCOFF_EXPORT;
 
   /* We don't want to garbage collect symbols which are not defined in
      XCOFF files.  This is a convenient place to mark them.  */
@@ -3181,10 +3248,9 @@ xcoff_keep_symbol_p (struct bfd_link_info *info, bfd *input_bfd,
    -bmaxdata linker option).  GC is whether to do garbage collection
    (the -bgc linker option).  MODTYPE is the module type (the
    -bmodtype linker option).  TEXTRO is whether the text section must
-   be read only (the -btextro linker option).  EXPORT_DEFINEDS is
-   whether all defined symbols should be exported (the -unix linker
-   option).  SPECIAL_SECTIONS is set by this routine to csects with
-   magic names like _end.  */
+   be read only (the -btextro linker option).  AUTO_EXPORT_FLAGS
+   is a mask of XCOFF_EXPALL and XCOFF_EXPFULL.  SPECIAL_SECTIONS
+   is set by this routine to csects with magic names like _end.  */
 
 bfd_boolean
 bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
@@ -3197,7 +3263,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 				 bfd_boolean gc,
 				 int modtype,
 				 bfd_boolean textro,
-				 bfd_boolean export_defineds,
+				 unsigned int auto_export_flags,
 				 asection **special_sections,
 				 bfd_boolean rtld)
 {
@@ -3225,7 +3291,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
   ldinfo.failed = FALSE;
   ldinfo.output_bfd = output_bfd;
   ldinfo.info = info;
-  ldinfo.export_defineds = export_defineds;
+  ldinfo.auto_export_flags = auto_export_flags;
   ldinfo.ldsym_count = 0;
   ldinfo.string_size = 0;
   ldinfo.strings = NULL;
@@ -3328,6 +3394,13 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
       if (info->fini_function != NULL
 	  && !xcoff_mark_symbol_by_name (info, info->fini_function, 0))
 	goto error_return;
+      if (auto_export_flags != 0)
+	{
+	  xcoff_link_hash_traverse (xcoff_hash_table (info),
+				    xcoff_mark_auto_exports, &ldinfo);
+	  if (ldinfo.failed)
+	    goto error_return;
+	}
       xcoff_sweep (info);
       xcoff_hash_table (info)->gc = TRUE;
     }

@@ -84,6 +84,14 @@ static unsigned short modtype = ('1' << 8) | 'L';
    permitted).  */
 static int textro;
 
+/* A mask of XCOFF_EXPALL and XCOFF_EXPFULL flags, as set by their
+   associated -b and -bno options.  */
+static unsigned int auto_export_flags;
+
+/* A mask of auto_export_flags bits that were explicitly set on the
+   command line.  */
+static unsigned int explicit_auto_export_flags;
+
 /* Whether to implement Unix like linker semantics.  */
 static int unix_ld;
 
@@ -156,6 +164,8 @@ enum
     OPTION_AUTOIMP,
     OPTION_ERNOTOK,
     OPTION_EROK,
+    OPTION_EXPALL,
+    OPTION_EXPFULL,
     OPTION_EXPORT,
     OPTION_IMPORT,
     OPTION_INITFINI,
@@ -164,6 +174,8 @@ enum
     OPTION_MAXSTACK,
     OPTION_MODTYPE,
     OPTION_NOAUTOIMP,
+    OPTION_NOEXPALL,
+    OPTION_NOEXPFULL,
     OPTION_NOSTRCMPCT,
     OPTION_PD,
     OPTION_PT,
@@ -201,6 +213,8 @@ gld${EMULATION_NAME}_add_options
     {"bernotok", no_argument, NULL, OPTION_ERNOTOK},
     {"berok", no_argument, NULL, OPTION_EROK},
     {"berrmsg", no_argument, NULL, OPTION_IGNORE},
+    {"bexpall", no_argument, NULL, OPTION_EXPALL},
+    {"bexpfull", no_argument, NULL, OPTION_EXPFULL},
     {"bexport", required_argument, NULL, OPTION_EXPORT},
     {"bf", no_argument, NULL, OPTION_ERNOTOK},
     {"bgc", no_argument, &gc, 1},
@@ -216,6 +230,8 @@ gld${EMULATION_NAME}_add_options
     {"bM", required_argument, NULL, OPTION_MODTYPE},
     {"bmodtype", required_argument, NULL, OPTION_MODTYPE},
     {"bnoautoimp", no_argument, NULL, OPTION_NOAUTOIMP},
+    {"bnoexpall", no_argument, NULL, OPTION_NOEXPALL},
+    {"bnoexpfull", no_argument, NULL, OPTION_NOEXPFULL},
     {"bnodelcsect", no_argument, NULL, OPTION_IGNORE},
     {"bnoentry", no_argument, NULL, OPTION_IGNORE},
     {"bnogc", no_argument, &gc, 0},
@@ -388,6 +404,16 @@ gld${EMULATION_NAME}_handle_option (int optc)
       link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
       break;
 
+    case OPTION_EXPALL:
+      auto_export_flags |= XCOFF_EXPALL;
+      explicit_auto_export_flags |= XCOFF_EXPALL;
+      break;
+
+    case OPTION_EXPFULL:
+      auto_export_flags |= XCOFF_EXPFULL;
+      explicit_auto_export_flags |= XCOFF_EXPFULL;
+      break;
+
     case OPTION_EXPORT:
       gld${EMULATION_NAME}_read_file (optarg, FALSE);
       break;
@@ -442,6 +468,16 @@ gld${EMULATION_NAME}_handle_option (int optc)
 
     case OPTION_NOAUTOIMP:
       link_info.static_link = TRUE;
+      break;
+
+    case OPTION_NOEXPALL:
+      auto_export_flags &= ~XCOFF_EXPALL;
+      explicit_auto_export_flags |= XCOFF_EXPALL;
+      break;
+
+    case OPTION_NOEXPFULL:
+      auto_export_flags &= ~XCOFF_EXPFULL;
+      explicit_auto_export_flags |= XCOFF_EXPFULL;
       break;
 
     case OPTION_NOSTRCMPCT:
@@ -624,7 +660,7 @@ gld${EMULATION_NAME}_before_allocation (void)
     ".data",
     ".bss"
   };
-  unsigned int i;
+  unsigned int i, flags;
 
   /* Handle the import and export files, if any.  */
   for (fl = import_files; fl != NULL; fl = fl->next)
@@ -710,11 +746,16 @@ gld${EMULATION_NAME}_before_allocation (void)
 	}
     }
 
+  /* Default to -bexpfull for SVR4-like semantics.  */
+  flags = (unix_ld ? XCOFF_EXPFULL : 0);
+  flags &= ~explicit_auto_export_flags;
+  flags |= auto_export_flags;
+
   /* Let the XCOFF backend set up the .loader section.  */
   if (!bfd_xcoff_size_dynamic_sections
       (link_info.output_bfd, &link_info, libpath, entry_symbol.name, file_align,
        maxstack, maxdata, gc && !unix_ld ? TRUE : FALSE,
-       modtype,	textro ? TRUE : FALSE, unix_ld, special_sections,
+       modtype, textro ? TRUE : FALSE, flags, special_sections,
        rtld ? TRUE : FALSE))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
