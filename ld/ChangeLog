@@ -1,3 +1,29 @@
+2009-03-14  Dave Korn  <dave.korn.cygwin@gmail.com>
+            Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* emultmpl/pe.em (pe_dll_characteristics): New variable.
+	(OPTION_DYNAMIC_BASE, OPTION_FORCE_INTEGRITY, OPTION_NX_COMPAT,
+	OPTION_NO_ISOLATION. OPTION_NO_SEH, OPTION_NO_BIND,
+	OPTION_WDM_DRIVER, OPTION_TERMINAL_SERVER_AWARE):
+	New macros for options to set DllCharacteristics flag bits.
+	(gld${EMULATION_NAME}_add_options): Add dynamicbase, forceinteg,
+	nxcompat, no-isolation, no-seh, no-bind, wdmdriver, tsaware options.
+	(init): Add DllCharacteristics field.
+	(gld_${EMULATION_NAME}_list_options): List new options.
+	(gld${EMULATION_NAME}_handle_option): Handle new options.
+	* emultmpl/pep.em (pe_dll_characteristics): New variable.
+	(OPTION_DYNAMIC_BASE, OPTION_FORCE_INTEGRITY, OPTION_NX_COMPAT,
+	OPTION_NO_ISOLATION. OPTION_NO_SEH, OPTION_NO_BIND,
+	OPTION_WDM_DRIVER, OPTION_TERMINAL_SERVER_AWARE):
+	New macros for options to set DllCharacteristics flags.
+	(gld${EMULATION_NAME}_add_options): Add dynamicbase, forceinteg,
+	nxcompat,no-isolation, no-seh, no-bind, wdmdriver, tsaware options.
+	(init): Add DllCharacteristics field.
+	(gld_${EMULATION_NAME}_list_options): List new options.
+	(gld${EMULATION_NAME}_handle_option): Handle new options.
+	* ldtexinfo : Document dynamicbase, forceinteg,	nxcompat,
+	no-isolation, no-seh, no-bind, wdmdriver, tsaware options.
+
 2009-03-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

@@ -2488,6 +2488,46 @@ the subsystem version also.  Numeric values are also accepted for
 @var{which}.
 [This option is specific to the i386 PE targeted port of the linker]
 
+The following options set flags in the @code{DllCharacteristics} field
+of the PE file header:
+[These options are specific to PE targeted ports of the linker]
+
+@kindex --dynamicbase
+@item --dynamicbase
+The image base address may be relocated using address space layout
+randomization (ASLR).  This feature was introduced with MS Windows
+Vista for i386 PE targets.
+
+@kindex --forceinteg
+@item --forceinteg
+Code integrity checks are enforced.
+
+@kindex --nxcompat
+@item --nxcompat
+The image is compatible with the Data Execution Prevention.
+This feature was introduced with MS Windows XP SP2 for i386 PE targets.
+
+@kindex --no-isolation
+@item --no-isolation
+Although the image understands isolation, do not isolate the image.
+
+@kindex --no-seh
+@item --no-seh
+The image does not use SEH. No SE handler may be called from
+this image.
+
+@kindex --no-bind
+@item --no-bind
+Do not bind this image.
+
+@kindex --wdmdriver
+@item --wdmdriver
+The driver uses the MS Windows Driver Model.
+ 
+@kindex --tsaware
+@item --tsaware
+The image is Terminal Server aware.
+
 @end table
 
 @c man end

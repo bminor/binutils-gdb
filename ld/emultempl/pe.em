@@ -126,6 +126,7 @@ static flagword real_flags = 0;
 static int support_old_code = 0;
 static char * thumb_entry_symbol = NULL;
 static lang_assignment_statement_type *image_base_statement = 0;
+static unsigned short pe_dll_characteristics = 0;
 
 #ifdef DLL_SUPPORT
 static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable.  */
@@ -229,6 +230,15 @@ fragment <<EOF
 					(OPTION_USE_NUL_PREFIXED_IMPORT_TABLES + 1)
 #define OPTION_DISABLE_LONG_SECTION_NAMES \
 					(OPTION_ENABLE_LONG_SECTION_NAMES + 1)
+/* DLLCharacteristics flags */
+#define OPTION_DYNAMIC_BASE		(OPTION_DISABLE_LONG_SECTION_NAMES + 1)
+#define OPTION_FORCE_INTEGRITY		(OPTION_DYNAMIC_BASE + 1)
+#define OPTION_NX_COMPAT		(OPTION_FORCE_INTEGRITY + 1)
+#define OPTION_NO_ISOLATION		(OPTION_NX_COMPAT + 1) 
+#define OPTION_NO_SEH			(OPTION_NO_ISOLATION + 1)
+#define OPTION_NO_BIND			(OPTION_NO_SEH + 1)
+#define OPTION_WDM_DRIVER		(OPTION_NO_BIND + 1)
+#define OPTION_TERMINAL_SERVER_AWARE	(OPTION_WDM_DRIVER + 1)
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -290,6 +300,14 @@ gld${EMULATION_NAME}_add_options
     {"large-address-aware", no_argument, NULL, OPTION_LARGE_ADDRESS_AWARE},
     {"enable-long-section-names", no_argument, NULL, OPTION_ENABLE_LONG_SECTION_NAMES},
     {"disable-long-section-names", no_argument, NULL, OPTION_DISABLE_LONG_SECTION_NAMES},
+    {"dynamicbase",no_argument, NULL, OPTION_DYNAMIC_BASE},
+    {"forceinteg", no_argument, NULL, OPTION_FORCE_INTEGRITY},
+    {"nxcompat", no_argument, NULL, OPTION_NX_COMPAT},
+    {"no-isolation", no_argument, NULL, OPTION_NO_ISOLATION},
+    {"no-seh", no_argument, NULL, OPTION_NO_SEH},
+    {"no-bind", no_argument, NULL, OPTION_NO_BIND},
+    {"wdmdriver", no_argument, NULL, OPTION_WDM_DRIVER},
+    {"tsaware", no_argument, NULL, OPTION_TERMINAL_SERVER_AWARE},
     {NULL, no_argument, NULL, 0}
   };
 
@@ -339,6 +357,7 @@ static definfo init[] =
   D(SizeOfHeapReserve,"__size_of_heap_reserve__", 0x100000),
   D(SizeOfHeapCommit,"__size_of_heap_commit__", 0x1000),
   D(LoaderFlags,"__loader_flags__", 0x0),
+  D(DllCharacteristics, "__dll_characteristics__", 0x0), 
   { NULL, 0, 0, NULL, 0 }
 };
 
@@ -401,6 +420,16 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
                                        executable image files\n"));
   fprintf (file, _("  --disable-long-section-names       Never use long COFF section names, even\n\
                                        in object files\n"));
+  fprintf (file, _("  --dynamicbase			 Image base address may be relocated using\n\
+				       address space layout randomization (ASLR)\n"));
+  fprintf (file, _("  --forceinteg		 Code integrity checks are enforced\n"));
+  fprintf (file, _("  --nxcompat		 Image is compatible with data execution prevention\n"));
+  fprintf (file, _("  --no-isolation		 Image understands isolation but do not isolate the image\n"));
+  fprintf (file, _("  --no-seh			 Image does not use SEH. No SE handler may\n\
+				       be called in this image\n"));
+  fprintf (file, _("  --no-bind			 Do not bind this image\n"));
+  fprintf (file, _("  --wdmdriver		 Driver uses the WDM model\n"));
+  fprintf (file, _("  --tsaware       		 Image is Terminal Server aware\n"));
 }
 
 
@@ -707,7 +736,36 @@ gld${EMULATION_NAME}_handle_option (int optc)
     case OPTION_DISABLE_LONG_SECTION_NAMES:
       pe_use_coff_long_section_names = 0;
       break;
+/*  Get DLLCharacteristics bits  */
+    case OPTION_DYNAMIC_BASE:
+      pe_dll_characteristics |= IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE;
+      break;
+    case OPTION_FORCE_INTEGRITY:
+      pe_dll_characteristics |= IMAGE_DLL_CHARACTERISTICS_FORCE_INTEGRITY;
+      break;
+    case OPTION_NX_COMPAT:
+      pe_dll_characteristics |= IMAGE_DLL_CHARACTERISTICS_NX_COMPAT;
+      break;
+    case OPTION_NO_ISOLATION:
+      pe_dll_characteristics |= IMAGE_DLLCHARACTERISTICS_NO_ISOLATION;
+      break;
+    case OPTION_NO_SEH:
+      pe_dll_characteristics |= IMAGE_DLLCHARACTERISTICS_NO_SEH;
+      break;
+    case OPTION_NO_BIND:
+      pe_dll_characteristics |= IMAGE_DLLCHARACTERISTICS_NO_BIND;
+      break;
+    case OPTION_WDM_DRIVER:
+      pe_dll_characteristics |= IMAGE_DLLCHARACTERISTICS_WDM_DRIVER;
+      break;
+    case OPTION_TERMINAL_SERVER_AWARE:
+      pe_dll_characteristics |= IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE;
+      break;
     }
+
+  /*  Set DLLCharacteristics bits  */
+  set_pe_name ("__dll_characteristics__", pe_dll_characteristics);
+
   return TRUE;
 }
 
