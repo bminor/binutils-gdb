@@ -1,5 +1,22 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* libcoff-in.h (xcoff_tdata): Add a lineno_counts field.
+	* libcoff.h: Regenerate.
+	* xcofflink.c (xcoff_link_add_symbols): Record per-symbol
+	line-number counts in the bfd's lineno_counts field.
+	Don't keep per-csect line-number counts.
+	(xcoff_sweep): Don't update per-csect line-number counts.
+	(bfd_xcoff_size_dynamic_sections): Count the number of line-number
+	entries in each output section.
+	(xcoff_link_input_bfd): Get the number of line numbers from
+	the bfd's lineno_counts field, rather than recalculating it
+	from scratch.  Fix the range check when updating C_BINCL and
+	C_EINCL symbols.
+	(_bfd_xcoff_bfd_final_link): Don't count the output line numbers
+	here.  Don't expect csects to have line-number counts.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* libcoff-in.h (xcoff_tdata): Change debug_indices to a signed long.
 	* libcoff.h: Regenerate.
 	* xcofflink.c (xcoff_keep_symbol_p): New function, using the

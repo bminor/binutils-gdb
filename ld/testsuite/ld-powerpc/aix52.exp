@@ -64,6 +64,10 @@ proc run_aix_test { size name ldopts asopts sources tools output } {
 				 $output]]
 }
 
+foreach file { "aix-lineno-1.txt" } {
+    remote_upload host "$srcdir/$subdir/$file" "tmpdir/$file"
+}
+
 set aix52tests {
     {"Absolute branch test 1"
      "-shared -bI:aix-abs-branch-1.im -bE:aix-abs-branch-1.ex"
@@ -97,6 +101,16 @@ set aix52tests {
      "" {aix-glink-1.s}
      {{objdump {-D -j.text -j.data} aix-glink-1-SIZE.dd}}
      "aix-glink-1.so"}
+
+    {"Line number test 1 (no discards)" "-e.main"
+     "" {aix-lineno-1.s}
+     {{objdump -dS aix-lineno-1a.dd} {nm {} aix-lineno-1a.nd}}
+     "aix-lineno-1a.exe"}
+
+    {"Line number test 1 (discard locals)" "-e.main -x"
+     "" {aix-lineno-1.s}
+     {{objdump -dS aix-lineno-1b.dd} {nm {} aix-lineno-1b.nd}}
+     "aix-lineno-1b.exe"}
 
     {"TOC test 1" "-shared -bE:aix-toc-1.ex"
      "" {aix-toc-1a.s aix-toc-1b.s}

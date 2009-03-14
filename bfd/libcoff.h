@@ -170,6 +170,7 @@ struct xcoff_tdata
   /* Used by the XCOFF backend linker.  */
   asection **csects;
   long *debug_indices;
+  unsigned int *lineno_counts;
   unsigned int import_file_id;
 };
 

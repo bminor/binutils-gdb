@@ -1,5 +1,12 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* ld-powerpc/aix-lineno-1.s, ld-powerpc/aix-lineno-1.txt,
+	ld-powerpc/aix-lineno-1a.dd, ld-powerpc/aix-lineno-1a.nd,
+	ld-powerpc/aix-lineno-1b.dd, ld-powerpc/aix-lineno-1b.nd: New tests.
+	* ld-powerpc/aix52.exp: Run them.  Copy aix-lineno-1.txt to tmpdir.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* ld-powerpc/aix-toc-1.ex, ld-powerpc/aix-toc-1a.s,
 	ld-powerpc/aix-toc-1b.s, ld-powerpc/aix-toc-1-32.dd,
 	ld-powerpc/aix-toc-1-64.dd: New tests.

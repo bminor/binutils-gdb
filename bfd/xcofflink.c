@@ -947,6 +947,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
   bfd_size_type symcount;
   struct xcoff_link_hash_entry **sym_hash;
   asection **csect_cache;
+  unsigned int *lineno_counts;
   bfd_size_type linesz;
   asection *o;
   asection *last_real;
@@ -1012,6 +1013,15 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
   if (csect_cache == NULL && symcount != 0)
     goto error_return;
   xcoff_data (abfd)->csects = csect_cache;
+
+  /* We garbage-collect line-number information on a symbol-by-symbol
+     basis, so we need to have quick access to the number of entries
+     per symbol.  */
+  amt = symcount * sizeof (unsigned int);
+  lineno_counts = bfd_zalloc (abfd, amt);
+  if (lineno_counts == NULL && symcount != 0)
+    goto error_return;
+  xcoff_data (abfd)->lineno_counts = lineno_counts;
 
   /* While splitting sections into csects, we need to assign the
      relocs correctly.  The relocs and the csects must both be in
@@ -1104,6 +1114,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  esym += (sym.n_numaux + 1) * symesz;
 	  sym_hash += sym.n_numaux + 1;
 	  csect_cache += sym.n_numaux + 1;
+	  lineno_counts += sym.n_numaux + 1;
 
 	  continue;
 	}
@@ -1174,7 +1185,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 			  if (lin.l_lnno == 0)
 			    break;
 			}
-		      csect->lineno_count += (linp - linpstart) / linesz;
+		      *lineno_counts = (linp - linpstart) / linesz;
 		      /* The setting of line_filepos will only be
 			 useful if all the line number entries for a
 			 csect are contiguous; this only matters for
@@ -1795,6 +1806,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
       esym += (sym.n_numaux + 1) * symesz;
       sym_hash += sym.n_numaux + 1;
       csect_cache += sym.n_numaux + 1;
+      lineno_counts += sym.n_numaux + 1;
     }
 
   BFD_ASSERT (last_real == NULL || last_real->next == first_csect);
@@ -2602,7 +2614,6 @@ xcoff_sweep (struct bfd_link_info *info)
 		{
 		  o->size = 0;
 		  o->reloc_count = 0;
-		  o->lineno_count = 0;
 		}
 	    }
 	}
@@ -3396,6 +3407,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
       bfd_size_type symcount;
       long *debug_index;
       asection **csectpp;
+      unsigned int *lineno_counts;
       struct xcoff_link_hash_entry **sym_hash;
       bfd_byte *esym, *esymend;
       bfd_size_type symesz;
@@ -3439,6 +3451,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 	}
 
       csectpp = xcoff_data (sub)->csects;
+      lineno_counts = xcoff_data (sub)->lineno_counts;
       sym_hash = obj_xcoff_sym_hashes (sub);
       symesz = bfd_coff_symesz (sub);
       esym = (bfd_byte *) obj_coff_external_syms (sub);
@@ -3448,6 +3461,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 	{
 	  struct internal_syment sym;
 	  union internal_auxent aux;
+	  asection *csect;
 	  const char *name;
 	  int keep_p;
 
@@ -3473,8 +3487,9 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 	    name = NULL;
 
 	  /* Decide whether to copy this symbol to the output file.  */
+	  csect = *csectpp;
 	  keep_p = xcoff_keep_symbol_p (info, sub, &sym, &aux,
-					*sym_hash, *csectpp, name);
+					*sym_hash, csect, name);
 	  if (keep_p < 0)
 	    return FALSE;
 
@@ -3497,11 +3512,14 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 		}
 	      else
 		*debug_index = -1;
+	      if (*lineno_counts > 0)
+		csect->output_section->lineno_count += *lineno_counts;
 	    }
 
 	  esym += (sym.n_numaux + 1) * symesz;
 	  csectpp += sym.n_numaux + 1;
 	  sym_hash += sym.n_numaux + 1;
+	  lineno_counts += sym.n_numaux + 1;
 	  debug_index += sym.n_numaux + 1;
 	}
 
@@ -3590,6 +3608,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
   struct xcoff_link_hash_entry **sym_hash;
   struct internal_syment *isymp;
   asection **csectpp;
+  unsigned int *lineno_counts;
   long *debug_index;
   long *indexp;
   unsigned long output_index;
@@ -3802,6 +3821,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
   isymp = finfo->internal_syms;
   indexp = finfo->sym_indices;
   csectpp = xcoff_data (input_bfd)->csects;
+  lineno_counts = xcoff_data (input_bfd)->lineno_counts;
   debug_index = xcoff_data (input_bfd)->debug_indices;
   outsym = finfo->outsyms;
   incls = 0;
@@ -4056,8 +4076,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		  && ISFCN (isymp->n_type)
 		  && aux.x_sym.x_fcnary.x_fcn.x_lnnoptr != 0)
 		{
-		  if (finfo->info->strip != strip_none
-		      && finfo->info->strip != strip_some)
+		  if (*lineno_counts == 0)
 		    aux.x_sym.x_fcnary.x_fcn.x_lnnoptr = 0;
 		  else
 		    {
@@ -4065,14 +4084,21 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		      unsigned int enc_count;
 		      bfd_signed_vma linoff;
 		      struct internal_lineno lin;
+		      bfd_byte *linp;
+		      bfd_byte *linpend;
+		      bfd_vma offset;
+		      file_ptr pos;
+		      bfd_size_type amt;
 
+		      /* Read in the enclosing section's line-number
+			 information, if we haven't already.  */
 		      o = *csectpp;
 		      enclosing = xcoff_section_data (abfd, o)->enclosing;
 		      enc_count = xcoff_section_data (abfd, o)->lineno_count;
 		      if (oline != enclosing)
 			{
-			  file_ptr pos = enclosing->line_filepos;
-			  bfd_size_type amt = linesz * enc_count;
+			  pos = enclosing->line_filepos;
+			  amt = linesz * enc_count;
 			  if (bfd_seek (input_bfd, pos, SEEK_SET) != 0
 			      || (bfd_bread (finfo->linenos, amt, input_bfd)
 				  != amt))
@@ -4080,114 +4106,83 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 			  oline = enclosing;
 			}
 
+		      /* Copy across the first entry, adjusting its
+			 symbol index.  */
 		      linoff = (aux.x_sym.x_fcnary.x_fcn.x_lnnoptr
 				- enclosing->line_filepos);
+		      linp = finfo->linenos + linoff;
+		      bfd_coff_swap_lineno_in (input_bfd, linp, &lin);
+		      lin.l_addr.l_symndx = *indexp;
+		      bfd_coff_swap_lineno_out (output_bfd, &lin, linp);
+		      linp += linesz;
 
-		      bfd_coff_swap_lineno_in (input_bfd,
-					       (void *) (finfo->linenos + linoff),
-					       (void *) &lin);
-		      if (lin.l_lnno != 0
-			  || ((bfd_size_type) lin.l_addr.l_symndx
-			      != ((esym
-				   - isymesz
-				   - ((bfd_byte *)
-				      obj_coff_external_syms (input_bfd)))
-				  / isymesz)))
-			aux.x_sym.x_fcnary.x_fcn.x_lnnoptr = 0;
-		      else
+		      /* Copy the other entries, adjusting their addresses.  */
+		      linpend = linp + *lineno_counts * linesz;
+		      offset = (o->output_section->vma
+				+ o->output_offset
+				- o->vma);
+		      for (; linp < linpend; linp += linesz)
 			{
-			  bfd_byte *linpend, *linp;
-			  bfd_vma offset;
-			  bfd_size_type count;
+			  bfd_coff_swap_lineno_in (input_bfd, linp, &lin);
+			  lin.l_addr.l_paddr += offset;
+			  bfd_coff_swap_lineno_out (output_bfd, &lin, linp);
+			}
 
-			  lin.l_addr.l_symndx = *indexp;
-			  bfd_coff_swap_lineno_out (output_bfd, (void *) &lin,
-						    (void *) (finfo->linenos
-							   + linoff));
-
-			  linpend = (finfo->linenos
-				     + enc_count * linesz);
-			  offset = (o->output_section->vma
-				    + o->output_offset
-				    - o->vma);
-			  for (linp = finfo->linenos + linoff + linesz;
-			       linp < linpend;
-			       linp += linesz)
-			    {
-			      bfd_coff_swap_lineno_in (input_bfd, (void *) linp,
-						       (void *) &lin);
-			      if (lin.l_lnno == 0)
-				break;
-			      lin.l_addr.l_paddr += offset;
-			      bfd_coff_swap_lineno_out (output_bfd,
-							(void *) &lin,
-							(void *) linp);
-			    }
-
-			  count = (linp - (finfo->linenos + linoff)) / linesz;
-
-			  aux.x_sym.x_fcnary.x_fcn.x_lnnoptr =
-			    (o->output_section->line_filepos
+		      /* Write out the entries we've just processed.  */
+		      pos = (o->output_section->line_filepos
 			     + o->output_section->lineno_count * linesz);
+		      amt = linesz * *lineno_counts;
+		      if (bfd_seek (output_bfd, pos, SEEK_SET) != 0
+			  || bfd_bwrite (finfo->linenos + linoff,
+					 amt, output_bfd) != amt)
+			return FALSE;
+		      o->output_section->lineno_count += *lineno_counts;
 
-			  if (bfd_seek (output_bfd,
-					aux.x_sym.x_fcnary.x_fcn.x_lnnoptr,
-					SEEK_SET) != 0
-			      || (bfd_bwrite (finfo->linenos + linoff,
-					     linesz * count, output_bfd)
-				  != linesz * count))
-			    return FALSE;
+		      /* Record the offset of the symbol's line numbers
+			 in the output file.  */
+		      aux.x_sym.x_fcnary.x_fcn.x_lnnoptr = pos;
 
-			  o->output_section->lineno_count += count;
+		      if (incls > 0)
+			{
+			  struct internal_syment *iisp, *iispend;
+			  long *iindp;
+			  bfd_byte *oos;
+			  bfd_vma range_start, range_end;
+			  int iiadd;
 
-			  if (incls > 0)
+			  /* Update any C_BINCL or C_EINCL symbols
+			     that refer to a line number in the
+			     range we just output.  */
+			  iisp = finfo->internal_syms;
+			  iispend = iisp + obj_raw_syment_count (input_bfd);
+			  iindp = finfo->sym_indices;
+			  oos = finfo->outsyms;
+			  range_start = enclosing->line_filepos + linoff;
+			  range_end = range_start + *lineno_counts * linesz;
+			  while (iisp < iispend)
 			    {
-			      struct internal_syment *iisp, *iispend;
-			      long *iindp;
-			      bfd_byte *oos;
-			      int iiadd;
-
-			      /* Update any C_BINCL or C_EINCL symbols
-				 that refer to a line number in the
-				 range we just output.  */
-			      iisp = finfo->internal_syms;
-			      iispend = (iisp
-					 + obj_raw_syment_count (input_bfd));
-			      iindp = finfo->sym_indices;
-			      oos = finfo->outsyms;
-			      while (iisp < iispend)
+			      if (*iindp >= 0
+				  && (iisp->n_sclass == C_BINCL
+				      || iisp->n_sclass == C_EINCL)
+				  && iisp->n_value >= range_start
+				  && iisp->n_value < range_end)
 				{
-				  if (*iindp >= 0
-				      && (iisp->n_sclass == C_BINCL
-					  || iisp->n_sclass == C_EINCL)
-				      && ((bfd_size_type) iisp->n_value
-					  >= (bfd_size_type)(enclosing->line_filepos + linoff))
-				      && ((bfd_size_type) iisp->n_value
-					  < (enclosing->line_filepos
-					     + enc_count * linesz)))
-				    {
-				      struct internal_syment iis;
+				  struct internal_syment iis;
 
-				      bfd_coff_swap_sym_in (output_bfd,
-							    (void *) oos,
-							    (void *) &iis);
-				      iis.n_value =
-					(iisp->n_value
-					 - enclosing->line_filepos
-					 - linoff
-					 + aux.x_sym.x_fcnary.x_fcn.x_lnnoptr);
-				      bfd_coff_swap_sym_out (output_bfd,
-							     (void *) &iis,
-							     (void *) oos);
-				      --incls;
-				    }
-
-				  iiadd = 1 + iisp->n_numaux;
-				  if (*iindp >= 0)
-				    oos += iiadd * osymesz;
-				  iisp += iiadd;
-				  iindp += iiadd;
+				  bfd_coff_swap_sym_in (output_bfd, oos, &iis);
+				  iis.n_value = (iisp->n_value
+						 - range_start
+						 + pos);
+				  bfd_coff_swap_sym_out (output_bfd,
+							 &iis, oos);
+				  --incls;
 				}
+
+			      iiadd = 1 + iisp->n_numaux;
+			      if (*iindp >= 0)
+				oos += iiadd * osymesz;
+			      iisp += iiadd;
+			      iindp += iiadd;
 			    }
 			}
 		    }
@@ -4204,6 +4199,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
       indexp += add;
       isymp += add;
       csectpp += add;
+      lineno_counts += add;
       debug_index += add;
     }
 
@@ -5498,15 +5494,15 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   if (finfo.strtab == NULL)
     goto error_return;
 
-  /* Count the line number and relocation entries required for the
-     output file.  Determine a few maximum sizes.  */
+  /* Count the relocation entries required for the output file.
+     (We've already counted the line numbers.)  Determine a few
+     maximum sizes.  */
   max_contents_size = 0;
   max_lineno_count = 0;
   max_reloc_count = 0;
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       o->reloc_count = 0;
-      o->lineno_count = 0;
       for (p = o->map_head.link_order; p != NULL; p = p->next)
 	{
 	  if (p->type == bfd_indirect_link_order)
@@ -5521,18 +5517,12 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 		 the linker has decided to not include.  */
 	      sec->linker_mark = TRUE;
 
-	      if (info->strip == strip_none
-		  || info->strip == strip_some)
-		o->lineno_count += sec->lineno_count;
-
 	      o->reloc_count += sec->reloc_count;
 
 	      if (sec->rawsize > max_contents_size)
 		max_contents_size = sec->rawsize;
 	      if (sec->size > max_contents_size)
 		max_contents_size = sec->size;
-	      if (sec->lineno_count > max_lineno_count)
-		max_lineno_count = sec->lineno_count;
 	      if (coff_section_data (sec->owner, sec) != NULL
 		  && xcoff_section_data (sec->owner, sec) != NULL
 		  && (xcoff_section_data (sec->owner, sec)->lineno_count
