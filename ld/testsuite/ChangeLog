@@ -1,5 +1,27 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* ld-powerpc/aix-glink-2a.s, ld-powerpc/aix-glink-2a.ex,
+	ld-powerpc/aix-glink-2b.s, ld-powerpc/aix-glink-2c.s,
+	ld-powerpc/aix-glink-2c.ex, ld-powerpc/aix-glink-2d.s,
+	ld-powerpc/aix-glink-2-32.dd, ld-powerpc/aix-glink-2-64.dd,
+	ld-powerpc/aix-weak-1a.s, ld-powerpc/aix-weak-1b.s,
+	ld-powerpc/aix-weak-1-rel.hd, ld-powerpc/aix-weak-1-rel.nd,
+	ld-powerpc/aix-weak-1-dso.hd, ld-powerpc/aix-weak-1-dso.nd,
+	ld-powerpc/aix-weak-1-dso.dnd, ld-powerpc/aix-weak-1.ex,
+	ld-powerpc/aix-weak-2a.s, ld-powerpc/aix-weak-2a.ex,
+	ld-powerpc/aix-weak-2a.nd, ld-powerpc/aix-weak-2b.s,
+	ld-powerpc/aix-weak-2b.nd, ld-powerpc/aix-weak-2c.s,
+	ld-powerpc/aix-weak-2c.ex, ld-powerpc/aix-weak-2c.nd,
+	ld-powerpc/aix-weak-2c.od, ld-powerpc/aix-weak-3a.s,
+	ld-powerpc/aix-weak-3a.ex, ld-powerpc/aix-weak-3b.s,
+	ld-powerpc/aix-weak-3b.ex, ld-powerpc/aix-weak-3-32.d,
+	ld-powerpc/aix-weak-3-32.dd, ld-powerpc/aix-weak-3-64.d,
+	ld-powerpc/aix-weak-3-64.dd: New tests.
+	* ld-powerpc/aix52.exp: Run them.  Replace tmp/aix-* with
+	tmp/aix64-* in 64-bit ld options.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* ld-powerpc/aix-no-dup-syms-1a.s, ld-powerpc/aix-no-dup-syms-1b.s,
 	ld-powerpc/aix-no-dup-syms-1.ex, ld-powerpc/aix-no-dup-syms-1.im,
 	ld-powerpc/aix-no-dup-syms-1-dso.dnd,

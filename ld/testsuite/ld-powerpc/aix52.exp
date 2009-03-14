@@ -124,6 +124,64 @@ set aix52tests {
      {{objdump -dS aix-lineno-1b.dd} {nm {} aix-lineno-1b.nd}}
      "aix-lineno-1b.exe"}
 
+    {"Glink test 2 (part a)" "-shared -bE:aix-glink-2a.ex"
+     "" {aix-glink-2a.s}
+     {}
+     "aix-glink-2a.so"}
+
+    {"Glink test 2 (part b)" "-r"
+     "" {aix-glink-2b.s}
+     {}
+     "aix-glink-2b.ro"}
+
+    {"Glink test 2 (part c)" "-shared -bE:aix-glink-2c.ex"
+     "" {aix-glink-2c.s}
+     {}
+     "aix-glink-2c.so"}
+
+    {"Glink test 2"
+     "-e.main tmpdir/aix-glink-2a.so tmpdir/aix-glink-2b.ro tmpdir/aix-glink-2c.so"
+     "" {aix-glink-2d.s}
+     {{objdump -d aix-glink-2-SIZE.dd}}
+     "aix-glink-2"}
+
+    {"Weak test 1 (rel)" "-r"
+     "" {aix-weak-1a.s aix-weak-1b.s}
+     {{nm {} aix-weak-1-rel.nd} {objdump -h aix-weak-1-rel.hd}}
+     "aix-weak-1.o"}
+
+    {"Weak test 1 (shared, nogc)" "-shared -bE:aix-weak-1.ex -bnogc"
+     "" {aix-weak-1a.s aix-weak-1b.s}
+     {{nm {} aix-weak-1-dso.nd} {objdump -h aix-weak-1-dso.hd}
+      {nm -D aix-weak-1-dso.dnd}}
+     "aix-weak-1-nogc.so"}
+
+    {"Weak test 2 (library 1)" "-shared -bE:aix-weak-2a.ex"
+     "" {aix-weak-2a.s}
+     {{nm -D aix-weak-2a.nd}}
+     "aix-weak-2a.so"}
+
+    {"Weak test 2 (library 2)" "-shared -bE:aix-weak-2a.ex"
+     "" {aix-weak-2b.s}
+     {{nm -D aix-weak-2b.nd}}
+     "aix-weak-2b.so"}
+
+    {"Weak test 2 (main library)"
+     "-shared -bE:aix-weak-2c.ex tmpdir/aix-weak-2a.so tmpdir/aix-weak-2b.so"
+     "" {aix-weak-2c.s}
+     {{nm {} aix-weak-2c.nd} {objdump {-sj.data -R} aix-weak-2c.od}}
+     "aix-weak-2c.so"}
+
+    {"Weak test 3 (library)" "-shared -bE:aix-weak-3a.ex"
+     "" {aix-weak-3a.s}
+     {}
+     "aix-weak-3a.so"}
+
+    {"Weak test 3 (main, dynamic)" "-e.main tmpdir/aix-weak-3a.so"
+     "" {aix-weak-3b.s}
+     {{objdump -Dzrj.data aix-weak-3-SIZE.dd}}
+     "aix-weak-3"}
+
     {"TOC test 1" "-shared -bE:aix-toc-1.ex"
      "" {aix-toc-1a.s aix-toc-1b.s}
      {{objdump -dr aix-toc-1-SIZE.dd}}
@@ -136,3 +194,6 @@ foreach test $aix52tests {
 	run_aix_test 64 $name $ldopts $asopts $sources $tools $output
     }
 }
+
+run_dump_test "aix-weak-3-32"
+run_dump_test "aix-weak-3-64"

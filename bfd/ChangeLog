@@ -1,5 +1,39 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* coffcode.h (coff_pointerize_aux_hook): Update CSECT_SYM_P to
+	check whether a symbol has csect information.
+	(coff_print_aux): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_swap_aux_in): Handle auxillary csect
+	information for C_AIX_WEAKEXT too.
+	(_bfd_xcoff_swap_aux_out): Likewise.
+	(xcoff_reloc_type_br): Handle defweak symbols too.
+	* coff64-rs6000.c (_bfd_xcoff64_swap_aux_in): Handle auxillary csect
+	information for C_AIX_WEAKEXT too.
+	(_bfd_xcoff64_swap_aux_out): Likewise.
+	(xcoff64_reloc_type_br): Handle defweak symbols too.
+	* coffgen.c (coff_print_symbol): Handle auxillary function
+	information for C_AIX_WEAKEXT too.
+	* xcofflink.c (_bfd_xcoff_canonicalize_dynamic_symtab): Set BSF_WEAK
+	instead of BSF_GLOBAL if the L_WEAK flag is set.
+	(xcoff_dynamic_definition_p): New function.
+	(xcoff_link_add_dynamic_symbols): Use it to decide whether ldsym
+	defines h.  Don't change h if ldsym isn't the definition.  Otherwise,
+	always take the symbol class from the ldsym.  Use weak bfd symbol
+	types for weak ldsyms.
+	(xcoff_link_add_symbols): Use CSECT_SYM_P and EXTERN_SYM_P.
+	Fix the check for whether a definition is from a shared object.
+	Allow redefinitions of weak symbols.
+	(xcoff_link_check_ar_symbols): Use EXTERN_SYM_P.
+	(xcoff_keep_symbol_p): Likewise.
+	(bfd_xcoff_size_dynamic_sections): Use CSECT_SYM_P.
+	(xcoff_link_input_bfd): Use CSECT_SYM_P and EXTERN_SYM_P.
+	Add .loader entries for C_AIX_WEAKEXT as well as C_EXT symbols,
+	but mark them as L_WEAK.
+	(xcoff_write_global_symbol): Treat weak symbols as C_AIX_WEAKEXT
+	instead of C_EXT if C_AIX_WEAKEXT == C_WEAKEXT.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* xcofflink.c (xcoff_mark): When walking the relocations,
 	only mark the target symbol or the target section, not both.
 	(xcoff_final_definition_p): New function.

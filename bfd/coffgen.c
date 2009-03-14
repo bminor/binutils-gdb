@@ -2006,6 +2006,7 @@ coff_print_symbol (bfd *abfd,
 		    }
 		    /* Otherwise fall through.  */
 		case C_EXT:
+		case C_AIX_WEAKEXT:
 		  if (ISFCN (combined->u.syment.n_type))
 		    {
 		      long next, llnos;

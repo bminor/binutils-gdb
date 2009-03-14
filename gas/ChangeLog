@@ -1,5 +1,10 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* config/tc-ppc.c (ppc_frob_symbol): Add csect information for
+	C_AIX_WEAKEXT too.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* config/tc-ppc.c (md_apply_fix): On COFF targets, always reread
 	"value" from fx_offset.  Manually resubtract md_pcrel_from_section
 	where necessary.

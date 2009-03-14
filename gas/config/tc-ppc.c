@@ -5170,6 +5170,7 @@ ppc_frob_symbol (symbolS *sym)
     S_SET_STORAGE_CLASS (sym, C_HIDEXT);
 
   if (S_GET_STORAGE_CLASS (sym) == C_EXT
+      || S_GET_STORAGE_CLASS (sym) == C_AIX_WEAKEXT
       || S_GET_STORAGE_CLASS (sym) == C_HIDEXT)
     {
       int i;

@@ -258,7 +258,12 @@ _bfd_xcoff_canonicalize_dynamic_symtab (bfd *abfd, asymbol **psyms)
 
       symbuf->symbol.flags = BSF_NO_FLAGS;
       if ((ldsym.l_smtype & L_EXPORT) != 0)
-	symbuf->symbol.flags |= BSF_GLOBAL;
+	{
+	  if ((ldsym.l_smtype & L_WEAK) != 0)
+	    symbuf->symbol.flags |= BSF_WEAK;
+	  else
+	    symbuf->symbol.flags |= BSF_GLOBAL;
+	}
 
       /* FIXME: We have no way to record the other information stored
 	 with the loader symbol.  */
@@ -540,6 +545,36 @@ xcoff_read_internal_relocs (bfd *abfd,
 					 require_internal, internal_relocs);
 }
 
+/* H is the bfd symbol associated with exported .loader symbol LDSYM.
+   Return true if LDSYM defines H.  */
+
+static bfd_boolean
+xcoff_dynamic_definition_p (struct xcoff_link_hash_entry *h,
+			    struct internal_ldsym *ldsym)
+{
+  /* If we didn't know about H before processing LDSYM, LDSYM
+     definitely defines H.  */
+  if (h->root.type == bfd_link_hash_new)
+    return TRUE;
+
+  /* If H is currently a weak dynamic symbol, and if LDSYM is a strong
+     dynamic symbol, LDSYM trumps the current definition of H.  */
+  if ((ldsym->l_smtype & L_WEAK) == 0
+      && (h->flags & XCOFF_DEF_DYNAMIC) != 0
+      && (h->flags & XCOFF_DEF_REGULAR) == 0
+      && (h->root.type == bfd_link_hash_defweak
+	  || h->root.type == bfd_link_hash_undefweak))
+    return TRUE;
+
+  /* If H is currently undefined, LDSYM defines it.  */
+  if ((h->flags & XCOFF_DEF_DYNAMIC) == 0
+      && (h->root.type == bfd_link_hash_undefined
+	  || h->root.type == bfd_link_hash_undefweak))
+    return TRUE;
+
+  return FALSE;
+}
+
 /* This function is used to add symbols from a dynamic object to the
    global symbol table.  */
 
@@ -638,42 +673,32 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
       if (h == NULL)
 	return FALSE;
 
+      if (!xcoff_dynamic_definition_p (h, &ldsym))
+	continue;
+
       h->flags |= XCOFF_DEF_DYNAMIC;
-
-      /* If the symbol is undefined, and the BFD it was found in is
-	 not a dynamic object, change the BFD to this dynamic object,
-	 so that we can get the correct import file ID.  */
-      if ((h->root.type == bfd_link_hash_undefined
-	   || h->root.type == bfd_link_hash_undefweak)
-	  && (h->root.u.undef.abfd == NULL
-	      || (h->root.u.undef.abfd->flags & DYNAMIC) == 0))
-	h->root.u.undef.abfd = abfd;
-
-      if (h->root.type == bfd_link_hash_new)
-	{
-	  h->root.type = bfd_link_hash_undefined;
-	  h->root.u.undef.abfd = abfd;
-	  /* We do not want to add this to the undefined symbol list.  */
-	}
-
-      if (h->smclas == XMC_UA
-	  || h->root.type == bfd_link_hash_undefined
-	  || h->root.type == bfd_link_hash_undefweak)
-	h->smclas = ldsym.l_smclas;
-
-      /* Unless this is an XMC_XO symbol, we don't bother to actually
-	 define it, since we don't have a section to put it in anyhow.
-	 Instead, the relocation routines handle the DEF_DYNAMIC flag
-	 correctly.  */
-
-      if (h->smclas == XMC_XO
-	  && (h->root.type == bfd_link_hash_undefined
-	      || h->root.type == bfd_link_hash_undefweak))
+      h->smclas = ldsym.l_smclas;
+      if (h->smclas == XMC_XO)
 	{
 	  /* This symbol has an absolute value.  */
-	  h->root.type = bfd_link_hash_defined;
+	  if ((ldsym.l_smtype & L_WEAK) != 0)
+	    h->root.type = bfd_link_hash_defweak;
+	  else
+	    h->root.type = bfd_link_hash_defined;
 	  h->root.u.def.section = bfd_abs_section_ptr;
 	  h->root.u.def.value = ldsym.l_value;
+	}
+      else
+	{
+	  /* Otherwise, we don't bother to actually define the symbol,
+	     since we don't have a section to put it in anyhow.
+	     We assume instead that an undefined XCOFF_DEF_DYNAMIC symbol
+	     should be imported from the symbol's undef.abfd.  */
+	  if ((ldsym.l_smtype & L_WEAK) != 0)
+	    h->root.type = bfd_link_hash_undefweak;
+	  else
+	    h->root.type = bfd_link_hash_undefined;
+	  h->root.u.undef.abfd = abfd;
 	}
 
       /* If this symbol defines a function descriptor, then it
@@ -701,33 +726,30 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
 	      if (hds == NULL)
 		return FALSE;
 
-	      if (hds->root.type == bfd_link_hash_new)
-		{
-		  hds->root.type = bfd_link_hash_undefined;
-		  hds->root.u.undef.abfd = abfd;
-		  /* We do not want to add this to the undefined
-		     symbol list.  */
-		}
-
 	      hds->descriptor = h;
 	      h->descriptor = hds;
 	    }
 
-	  hds->flags |= XCOFF_DEF_DYNAMIC;
-	  if (hds->smclas == XMC_UA)
-	    hds->smclas = XMC_PR;
-
-	  /* An absolute symbol appears to actually define code, not a
-	     function descriptor.  This is how some math functions are
-	     implemented on AIX 4.1.  */
-	  if (h->smclas == XMC_XO
-	      && (hds->root.type == bfd_link_hash_undefined
-		  || hds->root.type == bfd_link_hash_undefweak))
+	  if (xcoff_dynamic_definition_p (hds, &ldsym))
 	    {
-	      hds->smclas = XMC_XO;
-	      hds->root.type = bfd_link_hash_defined;
-	      hds->root.u.def.section = bfd_abs_section_ptr;
-	      hds->root.u.def.value = ldsym.l_value;
+	      hds->root.type = h->root.type;
+	      hds->flags |= XCOFF_DEF_DYNAMIC;
+	      if (h->smclas == XMC_XO)
+		{
+		  /* An absolute symbol appears to actually define code, not a
+		     function descriptor.  This is how some math functions are
+		     implemented on AIX 4.1.  */
+		  hds->smclas = XMC_XO;
+		  hds->root.u.def.section = bfd_abs_section_ptr;
+		  hds->root.u.def.value = ldsym.l_value;
+		}
+	      else
+		{
+		  hds->smclas = XMC_PR;
+		  hds->root.u.undef.abfd = abfd;
+		  /* We do not want to add this to the undefined
+		     symbol list.  */
+		}
 	    }
 	}
     }
@@ -1087,7 +1109,6 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
       const char *name;
       char buf[SYMNMLEN + 1];
       int smtyp;
-      flagword flags;
       asection *section;
       bfd_vma value;
       struct xcoff_link_hash_entry *set_toc;
@@ -1096,7 +1117,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 
       /* In this pass we are only interested in symbols with csect
 	 information.  */
-      if (sym.n_sclass != C_EXT && sym.n_sclass != C_HIDEXT)
+      if (!CSECT_SYM_P (sym.n_sclass))
 	{
 	  /* Set csect_cache,
 	     Normally csect is a .pr, .rw  etc. created in the loop
@@ -1216,7 +1237,6 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 
       smtyp = SMTYP_SMTYP (aux.x_csect.x_smtyp);
 
-      flags = BSF_GLOBAL;
       section = NULL;
       value = 0;
       set_toc = NULL;
@@ -1327,7 +1347,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		  erelsym = ((bfd_byte *) obj_coff_external_syms (abfd)
 			     + rel->r_symndx * symesz);
 		  bfd_coff_swap_sym_in (abfd, (void *) erelsym, (void *) &relsym);
-		  if (relsym.n_sclass == C_EXT)
+		  if (EXTERN_SYM_P (relsym.n_sclass))
 		    {
 		      const char *relname;
 		      char relbuf[SYMNMLEN + 1];
@@ -1482,9 +1502,9 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    if (first_csect == NULL)
 	      first_csect = csect;
 
-	    /* If this symbol is C_EXT, we treat it as starting at the
+	    /* If this symbol is external, we treat it as starting at the
 	       beginning of the newly created section.  */
-	    if (sym.n_sclass == C_EXT)
+	    if (EXTERN_SYM_P (sym.n_sclass))
 	      {
 		section = csect;
 		value = 0;
@@ -1573,7 +1593,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (first_csect == NULL)
 	    first_csect = csect;
 
-	  if (sym.n_sclass == C_EXT)
+	  if (EXTERN_SYM_P (sym.n_sclass))
 	    {
 	      csect->flags |= SEC_IS_COMMON;
 	      csect->size = 0;
@@ -1614,9 +1634,10 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
       /* Now we have enough information to add the symbol to the
 	 linker hash table.  */
 
-      if (sym.n_sclass == C_EXT)
+      if (EXTERN_SYM_P (sym.n_sclass))
 	{
 	  bfd_boolean copy;
+	  flagword flags;
 
 	  BFD_ASSERT (section != NULL);
 
@@ -1687,8 +1708,8 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		      section = bfd_und_section_ptr;
 		      value = 0;
 		    }
-		  else if (((*sym_hash)->root.u.def.section->owner->flags
-			    & DYNAMIC) != 0)
+		  else if (((*sym_hash)->flags & XCOFF_DEF_REGULAR) == 0
+			   && ((*sym_hash)->flags & XCOFF_DEF_DYNAMIC) != 0)
 		    {
 		      /* The existing symbol is from a shared library.
 			 Replace it.  */
@@ -1703,6 +1724,12 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 			 comment above.  */
 		      section = bfd_und_section_ptr;
 		      value = 0;
+		    }
+		  else if (sym.n_sclass == C_AIX_WEAKEXT
+			   || (*sym_hash)->root.type == bfd_link_hash_defweak)
+		    {
+		      /* At least one of the definitions is weak.
+			 Allow the normal rules to take effect.  */
 		    }
 		  else if ((*sym_hash)->root.u.undef.next != NULL
 			   || info->hash->undefs_tail == &(*sym_hash)->root)
@@ -1723,8 +1750,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		    }
 		}
 	      else if (((*sym_hash)->flags & XCOFF_MULTIPLY_DEFINED) != 0
-		       && ((*sym_hash)->root.type == bfd_link_hash_defined
-			   || (*sym_hash)->root.type == bfd_link_hash_defweak)
+		       && (*sym_hash)->root.type == bfd_link_hash_defined
 		       && (bfd_is_und_section (section)
 			   || bfd_is_com_section (section)))
 		{
@@ -1759,6 +1785,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	     a second time from the csects.  */
 	  BFD_ASSERT (last_real->next == first_csect);
 	  last_real->next = NULL;
+	  flags = (sym.n_sclass == C_EXT ? BSF_GLOBAL : BSF_WEAK);
 	  if (! (_bfd_generic_link_add_one_symbol
 		 (info, abfd, name, flags, section, value,
 		  NULL, copy, TRUE,
@@ -2073,7 +2100,7 @@ xcoff_link_check_ar_symbols (bfd *abfd,
 
       bfd_coff_swap_sym_in (abfd, (void *) esym, (void *) &sym);
 
-      if (sym.n_sclass == C_EXT && sym.n_scnum != N_UNDEF)
+      if (EXTERN_SYM_P (sym.n_sclass) && sym.n_scnum != N_UNDEF)
 	{
 	  const char *name;
 	  char buf[SYMNMLEN + 1];
@@ -3070,7 +3097,7 @@ xcoff_keep_symbol_p (struct bfd_link_info *info, bfd *input_bfd,
     return 0;
 
   /* Discard symbols that are defined elsewhere.  */
-  if (isym->n_sclass == C_EXT)
+  if (EXTERN_SYM_P (isym->n_sclass))
     {
       if ((h->flags & XCOFF_ALLOCATED) != 0)
 	return 0;
@@ -3081,7 +3108,7 @@ xcoff_keep_symbol_p (struct bfd_link_info *info, bfd *input_bfd,
   /* If we're discarding local symbols, check whether ISYM is local.  */
   smtyp = SMTYP_SMTYP (aux->x_csect.x_smtyp);
   if (info->discard == discard_all
-      && isym->n_sclass != C_EXT
+      && !EXTERN_SYM_P (isym->n_sclass)
       && (isym->n_sclass != C_HIDEXT || smtyp != XTY_SD))
     return 0;
 
@@ -3109,7 +3136,7 @@ xcoff_keep_symbol_p (struct bfd_link_info *info, bfd *input_bfd,
 	return 0;
 
       if (info->discard == discard_l
-	  && isym->n_sclass != C_EXT
+	  && !EXTERN_SYM_P (isym->n_sclass)
 	  && (isym->n_sclass != C_HIDEXT || smtyp != XTY_SD)
 	  && bfd_is_local_label_name (input_bfd, name))
 	return 0;
@@ -3495,9 +3522,8 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 
 	  bfd_coff_swap_sym_in (sub, esym, &sym);
 
-	  /* If this is a C_EXT or C_HIDEXT symbol, we need the csect
-	     information too.  */
-	  if (sym.n_sclass == C_EXT || sym.n_sclass == C_HIDEXT)
+	  /* Read in the csect information, if any.  */
+	  if (CSECT_SYM_P (sym.n_sclass))
 	    {
 	      BFD_ASSERT (sym.n_numaux > 0);
 	      bfd_coff_swap_aux_in (sub, esym + symesz * sym.n_numaux,
@@ -3698,9 +3724,8 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 
       bfd_coff_swap_sym_in (input_bfd, (void *) esym, (void *) isymp);
 
-      /* If this is a C_EXT or C_HIDEXT symbol, we need the csect
-	 information.  */
-      if (isymp->n_sclass == C_EXT || isymp->n_sclass == C_HIDEXT)
+      /* Read in the csect information, if any.  */
+      if (CSECT_SYM_P (isymp->n_sclass))
 	{
 	  BFD_ASSERT (isymp->n_numaux > 0);
 	  bfd_coff_swap_aux_in (input_bfd,
@@ -3716,7 +3741,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	 .loader symbol information.  If this is an external symbol
 	 reference to a defined symbol, though, then wait until we get
 	 to the definition.  */
-      if (isymp->n_sclass == C_EXT
+      if (EXTERN_SYM_P (isymp->n_sclass)
 	  && *sym_hash != NULL
 	  && (*sym_hash)->ldsym != NULL
 	  && xcoff_final_definition_p (input_bfd, *sym_hash, *csectpp))
@@ -3751,6 +3776,8 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	    ldsym->l_smtype |= L_EXPORT;
 	  if ((h->flags & XCOFF_ENTRY) != 0)
 	    ldsym->l_smtype |= L_ENTRY;
+	  if (isymp->n_sclass == C_AIX_WEAKEXT)
+	    ldsym->l_smtype |= L_WEAK;
 
 	  ldsym->l_smclas = aux.x_csect.x_smclas;
 
@@ -3812,7 +3839,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	  /* Assign the next unused index to this symbol.  */
 	  *indexp = output_index;
 
-	  if (isymp->n_sclass == C_EXT)
+	  if (EXTERN_SYM_P (isymp->n_sclass))
 	    {
 	      BFD_ASSERT (*sym_hash != NULL);
 	      (*sym_hash)->indx = output_index;
@@ -4018,8 +4045,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		      aux.x_file.x_n.x_offset = STRING_SIZE_SIZE + indx;
 		    }
 		}
-	      else if ((isymp->n_sclass == C_EXT
-			|| isymp->n_sclass == C_HIDEXT)
+	      else if (CSECT_SYM_P (isymp->n_sclass)
 		       && i + 1 == isymp->n_numaux)
 		{
 
@@ -4098,8 +4124,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	      /* Copy over the line numbers, unless we are stripping
 		 them.  We do this on a symbol by symbol basis in
 		 order to more easily handle garbage collection.  */
-	      if ((isymp->n_sclass == C_EXT
-		   || isymp->n_sclass == C_HIDEXT)
+	      if (CSECT_SYM_P (isymp->n_sclass)
 		  && i == 0
 		  && isymp->n_numaux > 1
 		  && ISFCN (isymp->n_type)
@@ -5194,7 +5219,11 @@ xcoff_write_global_symbol (struct xcoff_link_hash_entry *h, void * inf)
     {
       isym.n_value = 0;
       isym.n_scnum = N_UNDEF;
-      isym.n_sclass = C_EXT;
+      if (h->root.type == bfd_link_hash_undefweak
+	  && C_WEAKEXT == C_AIX_WEAKEXT)
+	isym.n_sclass = C_WEAKEXT;
+      else
+	isym.n_sclass = C_EXT;
       aux.x_csect.x_smtyp = XTY_ER;
     }
   else if ((h->root.type == bfd_link_hash_defined
@@ -5204,7 +5233,11 @@ xcoff_write_global_symbol (struct xcoff_link_hash_entry *h, void * inf)
       BFD_ASSERT (bfd_is_abs_section (h->root.u.def.section));
       isym.n_value = h->root.u.def.value;
       isym.n_scnum = N_UNDEF;
-      isym.n_sclass = C_EXT;
+      if (h->root.type == bfd_link_hash_undefweak
+	  && C_WEAKEXT == C_AIX_WEAKEXT)
+	isym.n_sclass = C_WEAKEXT;
+      else
+	isym.n_sclass = C_EXT;
       aux.x_csect.x_smtyp = XTY_ER;
     }
   else if (h->root.type == bfd_link_hash_defined
@@ -5266,7 +5299,11 @@ xcoff_write_global_symbol (struct xcoff_link_hash_entry *h, void * inf)
       /* We just output an SD symbol.  Now output an LD symbol.  */
       h->indx += 2;
 
-      isym.n_sclass = C_EXT;
+      if (h->root.type == bfd_link_hash_undefweak
+	  && C_WEAKEXT == C_AIX_WEAKEXT)
+	isym.n_sclass = C_WEAKEXT;
+      else
+	isym.n_sclass = C_EXT;
       bfd_coff_swap_sym_out (output_bfd, (void *) &isym, (void *) outsym);
       outsym += bfd_coff_symesz (output_bfd);
 

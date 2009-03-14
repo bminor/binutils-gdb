@@ -422,6 +422,7 @@ _bfd_xcoff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
 
       /* RS/6000 "csect" auxents */
     case C_EXT:
+    case C_AIX_WEAKEXT:
     case C_HIDEXT:
       if (indx + 1 == numaux)
 	{
@@ -531,6 +532,7 @@ _bfd_xcoff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
 
       /* RS/6000 "csect" auxents */
     case C_EXT:
+    case C_AIX_WEAKEXT:
     case C_HIDEXT:
       if (indx + 1 == numaux)
 	{
@@ -2963,7 +2965,8 @@ xcoff_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto,
      going to global linkage code, we can replace the load with a
      cror.  */
   if (NULL != h
-      && bfd_link_hash_defined == h->root.type
+      && (bfd_link_hash_defined == h->root.type
+	  || bfd_link_hash_defweak == h->root.type)
       && section_offset + 8 <= input_section->size)
     {
       bfd_byte *pnext;
@@ -3008,7 +3011,8 @@ xcoff_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto,
   howto->dst_mask = howto->src_mask;
 
   if (h != NULL
-      && h->root.type == bfd_link_hash_defined
+      && (h->root.type == bfd_link_hash_defined
+	  || h->root.type == bfd_link_hash_defweak)
       && bfd_is_abs_section (h->root.u.def.section)
       && section_offset + 4 <= input_section->size)
     {
