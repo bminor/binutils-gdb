@@ -1,5 +1,14 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* ld-powerpc/aix-core-sec-1.s, ld-powerpc/aix-core-sec-1.ex,
+	ld-powerpc/aix-core-sec-1.hd, ld-powerpc/aix-core-sec-2.s,
+	ld-powerpc/aix-core-sec-2.ex, ld-powerpc/aix-core-sec-2.hd,
+	ld-powerpc/aix-core-sec-3.s, ld-powerpc/aix-core-sec-3.ex,
+	ld-powerpc/aix-core-sec-3.hd: New tests.
+	* ld-powerpc/aix52.exp: New harness.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* lib/ld-lib.exp (ar_simple_create): Add an "aropts" parameter.
 	(run_ld_link_tests): Treat the second list element as "ar" options
 	when creating an archive.  Don't run the linker in this case.

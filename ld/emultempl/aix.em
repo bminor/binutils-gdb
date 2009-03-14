@@ -616,7 +616,12 @@ gld${EMULATION_NAME}_before_allocation (void)
   struct export_symbol_list *el;
   char *libpath;
   asection *special_sections[XCOFF_NUMBER_OF_SPECIAL_SECTIONS];
-  int i;
+  static const char *const must_keep_sections[] = {
+    ".text",
+    ".data",
+    ".bss"
+  };
+  unsigned int i;
 
   /* Handle the import and export files, if any.  */
   for (fl = import_files; fl != NULL; fl = fl->next)
@@ -823,6 +828,22 @@ gld${EMULATION_NAME}_before_allocation (void)
 				 &is->header.next);
 	}
     }
+
+  /* Executables and shared objects must always have .text, .data
+     and .bss output sections, so that the header can refer to them.
+     The kernel refuses to load objects that have missing sections.  */
+  if (!link_info.relocatable)
+    for (i = 0; i < ARRAY_SIZE (must_keep_sections); i++)
+      {
+	asection *sec;
+
+	sec = bfd_get_section_by_name (link_info.output_bfd,
+				       must_keep_sections[i]);
+	if (sec == NULL)
+	  einfo ("%P: can't find required output section %s\n", must_keep_sections[i]);
+	else
+	  sec->flags |= SEC_KEEP;
+      }
 
   before_allocation_default ();
 }

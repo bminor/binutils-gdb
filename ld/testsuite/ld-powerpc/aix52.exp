@@ -1,0 +1,89 @@
+# Expect script for AIX 5.2+ tests
+#   Copyright 2009 Free Software Foundation
+#
+# This file is part of the GNU Binutils.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+# MA 02110-1301, USA.
+#
+
+if { ![istarget "powerpc*-*-aix\[5-9\]*"]
+     || [istarget "powerpc*-*-aix5.\[01\]*"] } {
+    return
+}
+
+# Run a run_link_tests-style test for AIX.  SIZE selects the target size
+# (32 or 64).  The other arguments are elements of a run_link_tests test.
+#
+# Make the following changes before running the test:
+#
+#    - Mention SIZE in the test name.
+#    - Add "-aSIZE --defsym size=SIZE" to the assembler options.
+#    - Add the source directory to any "-bI:" and "-bE:" linker options.
+#    - Add "-bSIZE" to the linker options.
+#    - Add "-XSIZE" to the archiver options.
+#    - Replace "SIZE" with SIZE in TOOLS.
+#    - When testing 64-bit targets:
+#      - Turn tmpdir/aix-* into tmpdir/aix64-*.
+#      - Turn tmpdir/libaix-* into tmpdir/libaix64-*.
+#      - Turn -laix* into -laix64*, to compensate for the above.
+proc run_aix_test { size name ldopts asopts sources tools output } {
+    global srcdir subdir
+
+    if { $size == 64 } {
+	regsub -all {tmpdir/aix-} $ldopts {tmpdir/aix64-} ldopts
+	regsub {^aix} $output {aix64} output
+
+	regsub -all -- {-laix-} $ldopts {-laix64-} ldopts
+	regsub {^libaix} $output {libaix64} output
+    }
+    if { [regexp {.a$} $output] } {
+	append ldopts " -X$size"
+    } else {
+	regsub -all {(-b[IE]):} $ldopts "\\1:$srcdir/$subdir/" ldopts
+	append ldopts " -b$size"
+    }
+    regsub -all {SIZE} $tools $size tools
+    run_ld_link_tests [list [list "$name ($size-bit)" \
+				 $ldopts \
+				 "$asopts -a$size --defsym size=$size" \
+				 $sources \
+				 $tools \
+				 $output]]
+}
+
+set aix52tests {
+    {"Core sections test 1" "-shared -bE:aix-core-sec-1.ex"
+     "" {aix-core-sec-1.s}
+     {{objdump -h aix-core-sec-1.hd}}
+     "aix-core-sec-1.so"}
+
+    {"Core sections test 2" "-shared -bE:aix-core-sec-2.ex"
+     "" {aix-core-sec-2.s}
+     {{objdump -h aix-core-sec-2.hd}}
+     "aix-core-sec-2.so"}
+
+    {"Core sections test 3" "-shared -bE:aix-core-sec-3.ex"
+     "" {aix-core-sec-3.s}
+     {{objdump -h aix-core-sec-3.hd}}
+     "aix-core-sec-3.so"}
+}
+
+foreach test $aix52tests {
+    foreach { name ldopts asopts sources tools output } $test {
+	run_aix_test 32 $name $ldopts $asopts $sources $tools $output
+	run_aix_test 64 $name $ldopts $asopts $sources $tools $output
+    }
+}
