@@ -1,5 +1,17 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* ld-powerpc/aix-no-dup-syms-1a.s, ld-powerpc/aix-no-dup-syms-1b.s,
+	ld-powerpc/aix-no-dup-syms-1.ex, ld-powerpc/aix-no-dup-syms-1.im,
+	ld-powerpc/aix-no-dup-syms-1-dso.dnd,
+	ld-powerpc/aix-no-dup-syms-1-dso.drd,
+	ld-powerpc/aix-no-dup-syms-1-dso.nd,
+	ld-powerpc/aix-no-dup-syms-1-dso.rd,
+	ld-powerpc/aix-no-dup-syms-1-rel.nd,
+	ld-powerpc/aix-no-dup-syms-1-rel.rd: New tests.
+	* ld-powerpc/aix52.exp: Run them.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* ld-powerpc/aix-abs-branch-1.nd,
 	ld-powerpc/aix-abs-reloc-1.nd: New tests.
 	* ld-powerpc/aix52.exp: Run them.

@@ -96,6 +96,18 @@ set aix52tests {
      {{objdump -h aix-core-sec-3.hd}}
      "aix-core-sec-3.so"}
 
+    {"Duplicate symbol check 1 (rel)" "-r"
+     "" {aix-no-dup-syms-1a.s aix-no-dup-syms-1b.s}
+     {{nm {} aix-no-dup-syms-1-rel.nd} {objdump -r aix-no-dup-syms-1-rel.rd}}
+     "aix-no-dup-syms-1.o"}
+
+    {"Duplicate symbol check 1 (shared)"
+     "-shared --allow-multiple-definition -bI:aix-no-dup-syms-1.im -bE:aix-no-dup-syms-1.ex"
+     "" {aix-no-dup-syms-1a.s aix-no-dup-syms-1b.s}
+     {{nm {} aix-no-dup-syms-1-dso.nd} {objdump -r aix-no-dup-syms-1-dso.rd}
+      {nm -D aix-no-dup-syms-1-dso.dnd} {objdump -R aix-no-dup-syms-1-dso.drd}}
+     "aix-no-dup-syms-1.so"}
+
     {"Glink test 1"
      "-shared -bE:aix-glink-1.ex --unresolved-symbols=ignore-all"
      "" {aix-glink-1.s}

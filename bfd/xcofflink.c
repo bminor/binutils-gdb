@@ -2504,7 +2504,6 @@ xcoff_mark (struct bfd_link_info *info, asection *sec)
 	  relend = rel + sec->reloc_count;
 	  for (; rel < relend; rel++)
 	    {
-	      asection *rsec;
 	      struct xcoff_link_hash_entry *h;
 
 	      if ((unsigned int) rel->r_symndx
@@ -2512,21 +2511,25 @@ xcoff_mark (struct bfd_link_info *info, asection *sec)
 		continue;
 
 	      h = obj_xcoff_sym_hashes (sec->owner)[rel->r_symndx];
-	      if (h != NULL
-		  && (h->flags & XCOFF_MARK) == 0)
+	      if (h != NULL)
 		{
-		  if (! xcoff_mark_symbol (info, h))
-		    return FALSE;
+		  if ((h->flags & XCOFF_MARK) == 0)
+		    {
+		      if (!xcoff_mark_symbol (info, h))
+			return FALSE;
+		    }
 		}
-
-	      rsec = xcoff_data (sec->owner)->csects[rel->r_symndx];
-	      if (rsec != NULL
-		  && !bfd_is_und_section (rsec)
-		  && !bfd_is_abs_section (rsec)
-		  && (rsec->flags & SEC_MARK) == 0)
+	      else
 		{
-		  if (! xcoff_mark (info, rsec))
-		    return FALSE;
+		  asection *rsec;
+
+		  rsec = xcoff_data (sec->owner)->csects[rel->r_symndx];
+		  if (rsec != NULL
+		      && (rsec->flags & SEC_MARK) == 0)
+		    {
+		      if (!xcoff_mark (info, rsec))
+			return FALSE;
+		    }
 		}
 
 	      /* See if this reloc needs to be copied into the .loader
@@ -2826,6 +2829,36 @@ bfd_xcoff_record_link_assignment (bfd *output_bfd,
 
 /* Add a symbol to the .loader symbols, if necessary.  */
 
+/* INPUT_BFD has an external symbol associated with hash table entry H
+   and csect CSECT.   Return true if INPUT_BFD defines H.  */
+
+static bfd_boolean
+xcoff_final_definition_p (bfd *input_bfd, struct xcoff_link_hash_entry *h,
+			  asection *csect)
+{
+  switch (h->root.type)
+    {
+    case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
+      /* No input bfd owns absolute symbols.  They are written by
+	 xcoff_write_global_symbol instead.  */
+      return (!bfd_is_abs_section (csect)
+	      && h->root.u.def.section == csect);
+
+    case bfd_link_hash_common:
+      return h->root.u.c.p->section->owner == input_bfd;
+
+    case bfd_link_hash_undefined:
+    case bfd_link_hash_undefweak:
+      /* We can't treat undef.abfd as the owner because that bfd
+	 might be a dynamic object.  Allow any bfd to claim it.  */
+      return TRUE;
+
+    default:
+      abort ();
+    }
+}
+
 static bfd_boolean
 xcoff_build_ldsyms (struct xcoff_link_hash_entry *h, void * p)
 {
@@ -3036,23 +3069,17 @@ xcoff_keep_symbol_p (struct bfd_link_info *info, bfd *input_bfd,
   if (info->strip == strip_all)
     return 0;
 
-  /* We can ignore external references that were resolved by the link.  */
-  smtyp = SMTYP_SMTYP (aux->x_csect.x_smtyp);
-  if (isym->n_sclass == C_EXT
-      && smtyp == XTY_ER
-      && h->root.type != bfd_link_hash_undefined)
-    return 0;
-
-  /* We can ignore common symbols if they got defined somewhere else.  */
-  if (isym->n_sclass == C_EXT
-      && smtyp == XTY_CM
-      && (h->root.type != bfd_link_hash_common
-	  || h->root.u.c.p->section != csect)
-      && (h->root.type != bfd_link_hash_defined
-	  || h->root.u.def.section != csect))
-    return 0;
+  /* Discard symbols that are defined elsewhere.  */
+  if (isym->n_sclass == C_EXT)
+    {
+      if ((h->flags & XCOFF_ALLOCATED) != 0)
+	return 0;
+      if (!xcoff_final_definition_p (input_bfd, h, csect))
+	return 0;
+    }
 
   /* If we're discarding local symbols, check whether ISYM is local.  */
+  smtyp = SMTYP_SMTYP (aux->x_csect.x_smtyp);
   if (info->discard == discard_all
       && isym->n_sclass != C_EXT
       && (isym->n_sclass != C_HIDEXT || smtyp != XTY_SD))
@@ -3513,6 +3540,8 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 		}
 	      else
 		*debug_index = -1;
+	      if (*sym_hash != 0)
+		(*sym_hash)->flags |= XCOFF_ALLOCATED;
 	      if (*lineno_counts > 0)
 		csect->output_section->lineno_count += *lineno_counts;
 	    }
@@ -3690,8 +3719,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
       if (isymp->n_sclass == C_EXT
 	  && *sym_hash != NULL
 	  && (*sym_hash)->ldsym != NULL
-	  && (smtyp != XTY_ER
-	      || (*sym_hash)->root.type == bfd_link_hash_undefined))
+	  && xcoff_final_definition_p (input_bfd, *sym_hash, *csectpp))
 	{
 	  struct xcoff_link_hash_entry *h;
 	  struct internal_ldsym *ldsym;

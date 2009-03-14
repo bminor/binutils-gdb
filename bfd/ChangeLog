@@ -1,5 +1,18 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* xcofflink.c (xcoff_mark): When walking the relocations,
+	only mark the target symbol or the target section, not both.
+	(xcoff_final_definition_p): New function.
+	(xcoff_keep_symbol_p): Use it to check whether an external XCOFF
+	symbol is a valid definition of the associated output symbol.
+	Use XCOFF_ALLOCATED to stop the same hash table entry having
+	two output symbols.
+	(bfd_xcoff_size_dynamic_sections): Set XCOFF_ALLOCATED when
+	keeping a symbol.
+	(xcoff_link_input_bfd): Use xcoff_final_definition_p.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* xcofflink.c (bfd_xcoff_import_symbol): Treat imported absolute
 	symbols as XMC_XO.
 
