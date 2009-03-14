@@ -1092,17 +1092,9 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	     Normally csect is a .pr, .rw  etc. created in the loop
 	     If C_FILE or first time, handle special
 
-	     Advance esym, sym_hash, csect_hash ptr's
-	     Keep track of the last_symndx for the current file.  */
-	  if (sym.n_sclass == C_FILE && csect != NULL)
-	    {
-	      xcoff_section_data (abfd, csect)->last_symndx =
-		((esym
-		  - (bfd_byte *) obj_coff_external_syms (abfd))
-		 / symesz);
-	      csect = NULL;
-	    }
-
+	     Advance esym, sym_hash, csect_hash ptrs.  */
+	  if (sym.n_sclass == C_FILE)
+	    csect = NULL;
 	  if (csect != NULL)
 	    *csect_cache = csect;
 	  else if (first_csect == NULL || sym.n_sclass == C_FILE)
@@ -1253,13 +1245,6 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  break;
 
 	case XTY_SD:
-	  /* This is a csect definition.  */
-	  if (csect != NULL)
-	    {
-	      xcoff_section_data (abfd, csect)->last_symndx =
-		((esym - (bfd_byte *) obj_coff_external_syms (abfd)) / symesz);
-	    }
-
 	  csect = NULL;
 	  csect_index = -(unsigned) 1;
 
@@ -1541,14 +1526,6 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	     named .tocbss, and rely on the linker script to put that
 	     in the TOC area.  */
 
-	  if (csect != NULL)
-	    {
-	      xcoff_section_data (abfd, csect)->last_symndx =
-		((esym
-		  - (bfd_byte *) obj_coff_external_syms (abfd))
-		 / symesz);
-	    }
-
 	  if (aux.x_csect.x_smclas == XMC_TD)
 	    {
 	      /* The linker script puts the .td section in the data
@@ -1805,7 +1782,15 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    }
 	}
 
-      *csect_cache = csect;
+      if (smtyp == XTY_ER)
+	*csect_cache = section;
+      else
+	{
+	  *csect_cache = csect;
+	  if (csect != NULL)
+	    xcoff_section_data (abfd, csect)->last_symndx
+	      = (esym - (bfd_byte *) obj_coff_external_syms (abfd)) / symesz;
+	}
 
       esym += (sym.n_numaux + 1) * symesz;
       sym_hash += sym.n_numaux + 1;
@@ -2472,26 +2457,24 @@ xcoff_mark (struct bfd_link_info *info, asection *sec)
       && coff_section_data (sec->owner, sec) != NULL
       && xcoff_section_data (sec->owner, sec) != NULL)
     {
-      struct xcoff_link_hash_entry **hp, **hpend;
+      struct xcoff_link_hash_entry **syms;
       struct internal_reloc *rel, *relend;
+      asection **csects;
+      unsigned long i, first, last;
 
       /* Mark all the symbols in this section.  */
-      hp = (obj_xcoff_sym_hashes (sec->owner)
-	    + xcoff_section_data (sec->owner, sec)->first_symndx);
-      hpend = (obj_xcoff_sym_hashes (sec->owner)
-	       + xcoff_section_data (sec->owner, sec)->last_symndx);
-      for (; hp < hpend; hp++)
-	{
-	  struct xcoff_link_hash_entry *h;
-
-	  h = *hp;
-	  if (h != NULL
-	      && (h->flags & XCOFF_MARK) == 0)
-	    {
-	      if (! xcoff_mark_symbol (info, h))
-		return FALSE;
-	    }
-	}
+      syms = obj_xcoff_sym_hashes (sec->owner);
+      csects = xcoff_data (sec->owner)->csects;
+      first = xcoff_section_data (sec->owner, sec)->first_symndx;
+      last = xcoff_section_data (sec->owner, sec)->last_symndx;
+      for (i = first; i <= last; i++)
+	if (csects[i] == sec
+	    && syms[i] != NULL
+	    && (syms[i]->flags & XCOFF_MARK) == 0)
+	  {
+	    if (!xcoff_mark_symbol (info, syms[i]))
+	      return FALSE;
+	  }
 
       /* Look through the section relocs.  */
       if ((sec->flags & SEC_RELOC) != 0
@@ -2521,6 +2504,8 @@ xcoff_mark (struct bfd_link_info *info, asection *sec)
 
 	      rsec = xcoff_data (sec->owner)->csects[rel->r_symndx];
 	      if (rsec != NULL
+		  && !bfd_is_und_section (rsec)
+		  && !bfd_is_abs_section (rsec)
 		  && (rsec->flags & SEC_MARK) == 0)
 		{
 		  if (! xcoff_mark (info, rsec))
@@ -3358,8 +3343,9 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 	      if (sym._n._n_n._n_zeroes == 0
 		  && *csectpp != NULL
 		  && (! gc
-		      || ((*csectpp)->flags & SEC_MARK) != 0
-		      || *csectpp == bfd_abs_section_ptr)
+		      || bfd_is_abs_section (*csectpp)
+		      || bfd_is_und_section (*csectpp)
+		      || ((*csectpp)->flags & SEC_MARK) != 0)
 		  && bfd_coff_symname_in_debug (sub, &sym))
 		{
 		  char *name;
@@ -3648,8 +3634,9 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	 symbol.  */
       if (! skip
 	  && xcoff_hash_table (finfo->info)->gc
-	  && ((*csectpp)->flags & SEC_MARK) == 0
-	  && *csectpp != bfd_abs_section_ptr)
+	  && !bfd_is_abs_section (*csectpp)
+	  && !bfd_is_und_section (*csectpp)
+	  && ((*csectpp)->flags & SEC_MARK) == 0)
 	skip = TRUE;
 
       /* An XCOFF linker always skips C_STAT symbols.  */

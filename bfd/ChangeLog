@@ -1,5 +1,20 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* libcoff-in.h (xcoff_section_tdata): Update commentary.
+	* libcoff.h: Regenerate.
+	* xcofflink.c (xcoff_link_add_symbols): Set the csect of XTY_ER
+	symbols to bfd_und_section_ptr or bfd_abs_section_ptr, rather than
+	the previous symbol's csect.  Treat last_symndx as an inclusive value
+	and simplify its handling.
+	(xcoff_mark): Treat last_symndx as an inclusive value.  Only mark
+	symbols with the right csect.  Don't mark rsec when processing
+	relocations against undefined or absolute sections.  
+	(bfd_xcoff_size_dynamic_sections): Don't check the SEC_MARK flag
+	of bfd_und_section_ptr.
+	(xcoff_link_input_bfd): Likewise.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* coff-rs6000.c (xcoff_ppc_relocate_section): Report relocations
 	against undefined symbols if the symbol's XCOFF_WAS_UNDEFINED
 	flag is set.  Assert that all undefined symbols are either
