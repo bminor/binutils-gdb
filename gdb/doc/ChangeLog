@@ -1,3 +1,8 @@
+2009-03-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Remote Configuration): Document query-attached.
+        (General Query Packets): Document qAttached.
+
 2009-03-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Background Execution): Better describe the set

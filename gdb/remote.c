@@ -992,6 +992,7 @@ enum {
   PACKET_vKill,
   PACKET_qXfer_siginfo_read,
   PACKET_qXfer_siginfo_write,
+  PACKET_qAttached,
   PACKET_MAX
 };
 
@@ -1118,17 +1119,65 @@ static ptid_t any_thread_ptid;
 static ptid_t general_thread;
 static ptid_t continue_thread;
 
+/* Find out if the stub attached to PID (and hence GDB should offer to
+   detach instead of killing it when bailing out).  */
+
+static int
+remote_query_attached (int pid)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  if (remote_protocol_packets[PACKET_qAttached].support == PACKET_DISABLE)
+    return 0;
+
+  if (remote_multi_process_p (rs))
+    sprintf (rs->buf, "qAttached:%x", pid);
+  else
+    sprintf (rs->buf, "qAttached");
+
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  switch (packet_ok (rs->buf,
+		     &remote_protocol_packets[PACKET_qAttached]) == PACKET_OK)
+    {
+    case PACKET_OK:
+      if (strcmp (rs->buf, "1") == 0)
+	return 1;
+      break;
+    case PACKET_ERROR:
+      warning (_("Remote failure reply: %s"), rs->buf);
+      break;
+    case PACKET_UNKNOWN:
+      break;
+    }
+
+  return 0;
+}
+
 /* Add PID to GDB's inferior table.  Since we can be connected to a
    remote system before before knowing about any inferior, mark the
-   target with execution when we find the first inferior.  */
+   target with execution when we find the first inferior.  If ATTACHED
+   is 1, then we had just attached to this inferior.  If it is 0, then
+   we just created this inferior.  If it is -1, then try querying the
+   remote stub to find out if it had attached to the inferior or
+   not.  */
 
 static struct inferior *
-remote_add_inferior (int pid)
+remote_add_inferior (int pid, int attached)
 {
   struct remote_state *rs = get_remote_state ();
   struct inferior *inf;
 
+  /* Check whether this process we're learning about is to be
+     considered attached, or if is to be considered to have been
+     spawned by the stub.  */
+  if (attached == -1)
+    attached = remote_query_attached (pid);
+
   inf = add_inferior (pid);
+
+  inf->attach_flag = attached;
 
   /* This may be the first inferior we hear about.  */
   if (!target_has_execution)
@@ -1207,7 +1256,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 	 may not know about it yet.  Add it before adding its child
 	 thread, so notifications are emitted in a sensible order.  */
       if (!in_inferior_list (ptid_get_pid (currthread)))
-	inf = remote_add_inferior (ptid_get_pid (currthread));
+	inf = remote_add_inferior (ptid_get_pid (currthread), -1);
 
       /* This is really a new thread.  Add it.  */
       remote_add_thread (currthread, running);
@@ -2665,7 +2714,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       /* Now, if we have thread information, update inferior_ptid.  */
       inferior_ptid = remote_current_thread (inferior_ptid);
 
-      remote_add_inferior (ptid_get_pid (inferior_ptid));
+      remote_add_inferior (ptid_get_pid (inferior_ptid), -1);
 
       /* Always add the main thread.  */
       add_thread_silent (inferior_ptid);
@@ -3390,7 +3439,6 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
   int pid;
   char *dummy;
   char *wait_status = NULL;
-  struct inferior *inf;
 
   if (!args)
     error_no_arg (_("process-id to attach"));
@@ -3436,8 +3484,7 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
   /* Now, if we have thread information, update inferior_ptid.  */
   inferior_ptid = remote_current_thread (inferior_ptid);
 
-  inf = remote_add_inferior (pid);
-  inf->attach_flag = 1;
+  remote_add_inferior (pid, 1);
 
   if (non_stop)
     /* Get list of threads.  */
@@ -6761,7 +6808,7 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
   /* Now, if we have thread information, update inferior_ptid.  */
   inferior_ptid = remote_current_thread (inferior_ptid);
 
-  remote_add_inferior (ptid_get_pid (inferior_ptid));
+  remote_add_inferior (ptid_get_pid (inferior_ptid), 0);
   add_thread_silent (inferior_ptid);
 
   /* Get updated offsets, if the stub uses qOffsets.  */
@@ -9160,6 +9207,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vKill],
 			 "vKill", "kill", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qAttached],
+			 "qAttached", "query-attached", 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

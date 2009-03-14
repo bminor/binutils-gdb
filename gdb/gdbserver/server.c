@@ -1040,6 +1040,13 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       return;
     }
 
+  if (strcmp (own_buf, "qAttached") == 0)
+    {
+      require_running (own_buf);
+      strcpy (own_buf, attached ? "1" : "0");
+      return;
+    }
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;

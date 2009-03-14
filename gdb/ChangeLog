@@ -1,3 +1,17 @@
+2009-03-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (PACKET_qAttached): New.
+	(remote_query_attached): New.
+	(remote_add_inferior): Add new `attached' argument.  Handle it.
+	(remote_notice_new_inferior, remote_start_remote): Adjust to pass
+	-1 to remote_add_inferior in new parameter.
+	(extended_remote_attach_1): Adjust to pass 1 to
+	remote_add_inferior in the new parameter.
+	(extended_remote_create_inferior_1): Adjust to pass 0 to
+	remote_add_inferior in the new parameter.
+	(_initialize_remote): Add "set/show remote query-attached-packet"
+	commands.
+
 2009-03-13  Tom Tromey  <tromey@redhat.com>
 
 	* symtab.c (lookup_symbol_in_language): Use a cleanup.

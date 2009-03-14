@@ -14425,6 +14425,10 @@ are:
 @item @code{osdata}
 @tab @code{qXfer:osdata:read}
 @tab @code{info os}
+
+@item @code{query-attached}
+@tab @code{qAttached}
+@tab Querying remote process attach state.
 @end multitable
 
 @node Remote Stub
@@ -27305,6 +27309,30 @@ Requests of this form may be added in the future.  When a stub does
 not recognize the @var{object} keyword, or its support for
 @var{object} does not recognize the @var{operation} keyword, the stub
 must respond with an empty packet.
+
+@item qAttached:@var{pid}
+@cindex query attached, remote request
+@cindex @samp{qAttached} packet
+Return an indication of whether the remote server attached to an
+existing process or created a new process.  When the multiprocess
+protocol extensions are supported (@pxref{multiprocess extensions}),
+@var{pid} is an integer in hexadecimal format identifying the target
+process.  Otherwise, @value{GDBN} will omit the @var{pid} field and
+the query packet will be simplified as @samp{qAttached}.
+
+This query is used, for example, to know whether the remote process
+should be detached or killed when a @value{GDBN} session is ended with
+the @code{quit} command.
+
+Reply:
+@table @samp
+@item 1
+The remote server attached to an existing process.
+@item 0
+The remote server created a new process.
+@item E @var{NN}
+A badly formed request or an error was encountered.
+@end table
 
 @end table
 
