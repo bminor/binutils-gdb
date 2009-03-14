@@ -43,7 +43,7 @@ Sized_object_test(const unsigned char* test_file, unsigned int test_file_size,
   const Task* task = reinterpret_cast<const Task*>(-1);
   Input_file input_file(task, "test.o", test_file, test_file_size);
   Object* object = make_elf_object("test.o", &input_file, 0,
-				   test_file, test_file_size);
+				   test_file, test_file_size, NULL);
   CHECK(object->name() == "test.o");
   CHECK(!object->is_dynamic());
   CHECK(object->target() == target_test_pointer);

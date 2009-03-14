@@ -245,6 +245,19 @@ file_cmd:
 	| INPUT '(' input_list ')'
         | OPTION '(' string ')'
 	    { script_parse_option(closure, $3.value, $3.length); }
+	| OUTPUT_FORMAT '(' string ')'
+	    {
+	      if (!script_check_output_format(closure, $3.value, $3.length,
+					      NULL, 0, NULL, 0))
+		YYABORT;
+	    }
+	| OUTPUT_FORMAT '(' string ',' string ',' string ')'
+	    {
+	      if (!script_check_output_format(closure, $3.value, $3.length,
+					      $5.value, $5.length,
+					      $7.value, $7.length))
+		YYABORT;
+	    }
 	| PHDRS '{' phdrs_defs '}'
 	| SEARCH_DIR '(' string ')'
 	    { script_add_search_dir(closure, $3.value, $3.length); }
@@ -266,9 +279,7 @@ file_cmd:
    these is more-or-less OK since most scripts simply explicitly
    choose the default.  */
 ignore_cmd:
-	  OUTPUT_FORMAT '(' string ')'
-	| OUTPUT_FORMAT '(' string ',' string ',' string ')'
-	| OUTPUT_ARCH '(' string ')'
+	  OUTPUT_ARCH '(' string ')'
 	;
 
 /* A list of input file names.  */

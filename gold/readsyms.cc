@@ -90,6 +90,44 @@ Read_symbols::~Read_symbols()
   // Add_symbols task.
 }
 
+// If appropriate, issue a warning about skipping an incompatible
+// file.
+
+void
+Read_symbols::incompatible_warning(const Input_argument* input_argument,
+				   const Input_file* input_file)
+{
+  if (parameters->options().warn_search_mismatch())
+    gold_warning("skipping incompatible %s while searching for %s",
+		 input_file->filename().c_str(),
+		 input_argument->file().name());
+}
+
+// Requeue a Read_symbols task to search for the next object with the
+// same name.
+
+void
+Read_symbols::requeue(Workqueue* workqueue, Input_objects* input_objects,
+		      Symbol_table* symtab, Layout* layout, Dirsearch* dirpath,
+		      int dirindex, Mapfile* mapfile,
+		      const Input_argument* input_argument,
+		      Input_group* input_group, Task_token* next_blocker)
+{
+  // Bump the directory search index.
+  ++dirindex;
+
+  // We don't need to worry about this_blocker, since we already
+  // reached it.  However, we are removing the blocker on next_blocker
+  // because the calling task is completing.  So we need to add a new
+  // blocker.  Since next_blocker may be shared by several tasks, we
+  // need to increment the count with the workqueue lock held.
+  workqueue->add_blocker(next_blocker);
+
+  workqueue->queue(new Read_symbols(input_objects, symtab, layout, dirpath,
+				    dirindex, mapfile, input_argument,
+				    input_group, NULL, next_blocker));
+}
+
 // Return whether a Read_symbols task is runnable.  We can read an
 // ordinary input file immediately.  For an archive specified using
 // -l, we have to wait until the search path is complete.
@@ -139,7 +177,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
     }
 
   Input_file* input_file = new Input_file(&this->input_argument_->file());
-  if (!input_file->open(*this->dirpath_, this))
+  if (!input_file->open(*this->dirpath_, this, &this->dirindex_))
     return false;
 
   // Read enough of the file to pick up the entire ELF header.
@@ -171,7 +209,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 	  Archive* arch = new Archive(this->input_argument_->file().name(),
 				      input_file, is_thin_archive,
 				      this->dirpath_, this);
-	  arch->setup(this->input_objects_);
+	  arch->setup();
 	  
 	  // Unlock the archive so it can be used in the next task.
 	  arch->unlock(this);
@@ -179,7 +217,10 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 	  workqueue->queue_next(new Add_archive_symbols(this->symtab_,
 							this->layout_,
 							this->input_objects_,
+							this->dirpath_,
+							this->dirindex_,
 							this->mapfile_,
+							this->input_argument_,
 							arch,
 							this->input_group_,
 							this->this_blocker_,
@@ -203,7 +244,13 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
           workqueue->queue_next(new Add_symbols(this->input_objects_,
                                                 this->symtab_,
                                                 this->layout_,
-                                                obj, NULL,
+						this->dirpath_,
+						this->dirindex_,
+						this->mapfile_,
+						this->input_argument_,
+						this->input_group_,
+                                                obj,
+						NULL,
                                                 this->this_blocker_,
                                                 this->next_blocker_));
           return true;
@@ -221,10 +268,24 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 	{
 	  // This is an ELF object.
 
+	  bool unconfigured;
 	  Object* obj = make_elf_object(input_file->filename(),
-					input_file, 0, ehdr, read_size);
+					input_file, 0, ehdr, read_size,
+					&unconfigured);
 	  if (obj == NULL)
-	    return false;
+	    {
+	      if (unconfigured && input_file->will_search_for())
+		{
+		  Read_symbols::incompatible_warning(this->input_argument_,
+						     input_file);
+		  input_file->file().release();
+		  input_file->file().unlock(this);
+		  delete input_file;
+		  ++this->dirindex_;
+		  return this->do_read_symbols(workqueue);
+		}
+	      return false;
+	    }
 
 	  Read_symbols_data* sd = new Read_symbols_data;
 	  obj->read_symbols(sd);
@@ -244,7 +305,13 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 
 	  workqueue->queue_next(new Add_symbols(this->input_objects_,
 						this->symtab_, this->layout_,
-						obj, sd,
+						this->dirpath_,
+						this->dirindex_,
+						this->mapfile_,
+						this->input_argument_,
+						this->input_group_,
+						obj,
+						sd,
 						this->this_blocker_,
 						this->next_blocker_));
 
@@ -261,6 +328,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
   workqueue->queue_soon(new Read_script(this->symtab_,
 					this->layout_,
 					this->dirpath_,
+					this->dirindex_,
 					this->input_objects_,
 					this->mapfile_,
 					this->input_group_,
@@ -297,8 +365,8 @@ Read_symbols::do_group(Workqueue* workqueue)
       next_blocker->add_blocker();
       workqueue->queue_soon(new Read_symbols(this->input_objects_,
 					     this->symtab_, this->layout_,
-					     this->dirpath_, this->mapfile_,
-					     arg, input_group,
+					     this->dirpath_, this->dirindex_,
+					     this->mapfile_, arg, input_group,
 					     this_blocker, next_blocker));
       this_blocker = next_blocker;
     }
@@ -376,7 +444,7 @@ Add_symbols::locks(Task_locker* tl)
 // Add the symbols in the object to the symbol table.
 
 void
-Add_symbols::run(Workqueue*)
+Add_symbols::run(Workqueue* workqueue)
 {
   Pluginobj* pluginobj = this->object_->pluginobj();
   if (pluginobj != NULL)
@@ -385,9 +453,23 @@ Add_symbols::run(Workqueue*)
       return;
     }
 
-  if (!this->input_objects_->add_object(this->object_))
+  // If this file has an incompatible format, try for another file
+  // with the same name.
+  if (this->object_->searched_for()
+      && !parameters->is_compatible_target(this->object_->target()))
     {
-      // FIXME: We need to close the descriptor here.
+      Read_symbols::incompatible_warning(this->input_argument_,
+					 this->object_->input_file());
+      Read_symbols::requeue(workqueue, this->input_objects_, this->symtab_,
+			    this->layout_, this->dirpath_, this->dirindex_,
+			    this->mapfile_, this->input_argument_,
+			    this->input_group_, this->next_blocker_);
+      this->object_->release();
+      delete this->object_;
+    }
+  else if (!this->input_objects_->add_object(this->object_))
+    {
+      this->object_->release();
       delete this->object_;
     }
   else
@@ -490,7 +572,7 @@ Read_script::run(Workqueue* workqueue)
 {
   bool used_next_blocker;
   if (!read_input_script(workqueue, this->symtab_, this->layout_,
-			 this->dirpath_, this->input_objects_,
+			 this->dirpath_, this->dirindex_, this->input_objects_,
 			 this->mapfile_, this->input_group_,
 			 this->input_argument_, this->input_file_,
 			 this->next_blocker_, &used_next_blocker))

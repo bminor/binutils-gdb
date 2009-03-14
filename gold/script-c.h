@@ -245,6 +245,13 @@ script_set_common_allocation(void* closure, int);
 extern void
 script_parse_option(void* closure, const char*, size_t);
 
+/* Called by the bison parser to handle OUTPUT_FORMAT.  This return 0
+   if the parse should be aborted.  */
+
+extern int
+script_check_output_format(void* closure, const char*, size_t,
+			   const char*, size_t, const char*, size_t);
+
 /* Called by the bison parser to handle SEARCH_DIR.  */
 
 extern void

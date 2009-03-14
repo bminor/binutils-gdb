@@ -97,6 +97,16 @@ Parameters::default_target() const
   return *target;
 }
 
+// Return whether TARGET is compatible with the target we are using.
+
+bool
+Parameters::is_compatible_target(const Target* target) const
+{
+  if (this->target_ == NULL)
+    return true;
+  return target == this->target_;
+}
+
 Parameters::Target_size_endianness
 Parameters::size_and_endianness() const
 {

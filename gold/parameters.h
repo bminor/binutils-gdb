@@ -103,6 +103,10 @@ class Parameters
   const Target&
   default_target() const;
 
+  // Return true if TARGET is compatible with the current target.
+  bool
+  is_compatible_target(const Target*) const;
+
   bool
   doing_static_link() const
   {

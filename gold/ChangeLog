@@ -1,5 +1,80 @@
 2009-03-13  Ian Lance Taylor  <iant@google.com>
 
+	* readsyms.cc (Read_symbols::incompatible_warning): New function.
+	(Read_symbols::requeue): New function.
+	(Read_symbols::do_read_symbols): If make_elf_object fails because
+	the target type is not configured, and the file was searched for,
+	issue a warning and retry with the next directory.
+	(Add_symbols::run): If the file has an incompatible format, and
+	it was searched for, requeue the Read_symbols task.  On error,
+	release the object.
+	* readsyms.h (class Read_symbols): Add dirindex_ field.  Add
+	dirindex parameter to constructor.  Change all callers.  Declare
+	incompatible_warning and requeue.
+	(class Add_symbols): Add dirpath_, dirindex_, mapfile_,
+	input_argument_ and input_group_ fields.  Add them to
+	constructor.  Change all callers.
+	(class Read_script): Add dirindex_ field.  Add it to constructor.
+	Change all callers.
+	* archive.cc (Archive::setup): Remove input_objects parameter.
+	Change all callers.
+	(Archive::get_file_and_offset): Likewise.
+	(Archive::read_all_symbols): Likewise.
+	(Archive::read_symbols): Likewise.
+	(Archive::get_elf_object_for_member): Remove input_objects
+	parameter.  Add punconfigured parameter.  Change all callers.
+	(Archive::add_symbols): Change return type to bool.  Check return
+	value of include_member.
+	(Archive::include_all_members): Likewise.
+	(Archive::include_member): Change return type to bool.  Return
+	false if first included object has incompatible target.  Set
+	included_member_ field.
+	(Add_archive_symbols::run): If add_symbols returns false, requeue
+	Read_symbols task.
+	* archive.h (class Archive): Add included_member_ field.
+	Initialize it in constructor.  Add input_file and searched_for
+	methods.  Update declarations.
+	(class Add_archive_symbols): Add dirpath_, dirindex_, and
+	input_argument_ fields.  Add them to constructor.  Change all
+	callers.
+	* script.cc: Include "target-select.h".
+	(class Parser_closure): Add skip_on_incompatible_target_ and
+	found_incompatible_target_ fields.  Add
+	skip_on_incompatible_target parameter to constructor.  Change all
+	callers.  Add methods skip_on_incompatible_target,
+	clear_skip_on_incompatible_target, found_incompatible_target, and
+	set_found_incompatible_target.
+	(read_input_script): Add dirindex parameter.  Change all callers.
+	If parser finds an incompatible target, requeue Read_symbols
+	task.
+	(script_set_symbol): Clear skip_on_incompatible_target in
+	closure.
+	(script_add_assertion, script_parse_option): Likewise.
+	(script_start_sections, script_add_phdr): Likewise.
+	(script_check_output_format): New function.
+	* script.h (read_input_script): Update declaration.
+	* script-c.h (script_check_output_format): Declare.
+	* yyscript.y (file_cmd): Handle OUTPUT_FORMAT.
+	(ignore_cmd): Remove OUTPUT_FORMAT.
+	* fileread.cc (Input_file::Input_file): Add explicit this.
+	(Input_file::will_search_for): New function.
+	(Input_file::open): Add pindex parameter.  Change all callers.
+	* fileread.h (class Input_file): Add input_file_argument method.
+	Declare will_search_for.  Update declarations.
+	* object.cc (make_elf_object): Add punconfigured parameter.
+	Change all callers.
+	* object.h (class Object): Make input_file public.  Add
+	searched_for method.
+	(make_elf_object): Update declaration.
+	* dirsearch.cc (Dirsearch::find): Add pindex parameter.  Use it to
+	restart search.
+	* dirsearch.h (class Dirsearch): Update declaration.
+	* options.h (class General_options): Add --warn-search-mismatch.
+	* parameters.cc (Parameters::is_compatible_target): New function.
+	* parameters.h (class Parameters): Declare is_compatible_target.
+	* workqueue.cc (Workqueue::add_blocker): New function.
+	* workqueue.h (class Workqueue): Declare add_blocker.
+
 	* fileread.cc (Input_file::open): Remove options parameter.
 	Change all callers.
 	(Input_file::open_binary): Likewise.

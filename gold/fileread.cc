@@ -718,7 +718,7 @@ Input_file::Input_file(const Task* task, const char* name,
   this->input_argument_ =
     new Input_file_argument(name, false, "", false,
 			    Position_dependent_options());
-  bool ok = file_.open(task, name, contents, size);
+  bool ok = this->file_.open(task, name, contents, size);
   gold_assert(ok);
 }
 
@@ -756,6 +756,17 @@ Input_file::just_symbols() const
   return this->input_argument_->just_symbols();
 }
 
+// Return whether this is a file that we will search for in the list
+// of directories.
+
+bool
+Input_file::will_search_for() const
+{
+  return (!IS_ABSOLUTE_PATH(this->input_argument_->name())
+	  && (this->input_argument_->is_lib()
+	      || this->input_argument_->extra_search_path() != NULL));
+}
+
 // Open the file.
 
 // If the filename is not absolute, we assume it is in the current
@@ -766,14 +777,14 @@ Input_file::just_symbols() const
 // the file location, rather than the current directory.
 
 bool
-Input_file::open(const Dirsearch& dirpath, const Task* task)
+Input_file::open(const Dirsearch& dirpath, const Task* task, int *pindex)
 {
   std::string name;
 
   // Case 1: name is an absolute file, just try to open it
   // Case 2: name is relative but is_lib is false and extra_search_path
   //         is empty
-  if (IS_ABSOLUTE_PATH (this->input_argument_->name())
+  if (IS_ABSOLUTE_PATH(this->input_argument_->name())
       || (!this->input_argument_->is_lib()
 	  && this->input_argument_->extra_search_path() == NULL))
     {
@@ -796,7 +807,7 @@ Input_file::open(const Dirsearch& dirpath, const Task* task)
 	  n2 = n1 + ".a";
 	  n1 += ".so";
 	}
-      name = dirpath.find(n1, n2, &this->is_in_sysroot_);
+      name = dirpath.find(n1, n2, &this->is_in_sysroot_, pindex);
       if (name.empty())
 	{
 	  gold_error(_("cannot find -l%s"),
@@ -819,17 +830,21 @@ Input_file::open(const Dirsearch& dirpath, const Task* task)
         name += '/';
       name += this->input_argument_->name();
       struct stat dummy_stat;
-      if (::stat(name.c_str(), &dummy_stat) < 0)
+      if (*pindex > 0 || ::stat(name.c_str(), &dummy_stat) < 0)
         {
           // extra_search_path failed, so check the normal search-path.
+	  int index = *pindex;
+	  if (index > 0)
+	    --index;
           name = dirpath.find(this->input_argument_->name(), "",
-			      &this->is_in_sysroot_);
+			      &this->is_in_sysroot_, &index);
           if (name.empty())
             {
               gold_error(_("cannot find %s"),
 			 this->input_argument_->name());
 	      return false;
             }
+	  *pindex = index + 1;
         }
       this->found_name_ = this->input_argument_->name();
     }

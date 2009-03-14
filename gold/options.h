@@ -854,6 +854,10 @@ class General_options
   DEFINE_special(version_script, options::TWO_DASHES, '\0',
                  N_("Read version script"), N_("FILE"));
 
+  DEFINE_bool(warn_search_mismatch, options::TWO_DASHES, '\0', true,
+	      N_("Warn when skipping an incompatible library"),
+	      N_("Don't warn when skipping an incompatible library"));
+
   DEFINE_bool(whole_archive, options::TWO_DASHES, '\0', false,
               N_("Include all archive contents"),
               N_("Include only needed archive contents"));

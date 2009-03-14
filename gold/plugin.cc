@@ -411,6 +411,7 @@ Plugin_manager::add_input_file(char *pathname)
                                                 this->symtab_,
                                                 this->layout_,
                                                 this->dirpath_,
+						0,
                                                 this->mapfile_,
                                                 input_argument,
                                                 NULL,

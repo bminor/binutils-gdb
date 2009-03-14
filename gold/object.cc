@@ -2104,8 +2104,12 @@ namespace gold
 
 Object*
 make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
-		const unsigned char* p, section_offset_type bytes)
+		const unsigned char* p, section_offset_type bytes,
+		bool* punconfigured)
 {
+  if (punconfigured != NULL)
+    *punconfigured = false;
+
   if (bytes < elfcpp::EI_NIDENT)
     {
       gold_error(_("%s: ELF file too short"), name.c_str());
@@ -2164,9 +2168,12 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 	  return make_elf_sized_object<32, true>(name, input_file,
 						 offset, ehdr);
 #else
-          gold_error(_("%s: not configured to support "
-		       "32-bit big-endian object"),
-		     name.c_str());
+	  if (punconfigured != NULL)
+	    *punconfigured = true;
+	  else
+	    gold_error(_("%s: not configured to support "
+			 "32-bit big-endian object"),
+		       name.c_str());
 	  return NULL;
 #endif
 	}
@@ -2177,9 +2184,12 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 	  return make_elf_sized_object<32, false>(name, input_file,
 						  offset, ehdr);
 #else
-          gold_error(_("%s: not configured to support "
-		       "32-bit little-endian object"),
-		     name.c_str());
+	  if (punconfigured != NULL)
+	    *punconfigured = true;
+	  else
+	    gold_error(_("%s: not configured to support "
+			 "32-bit little-endian object"),
+		       name.c_str());
 	  return NULL;
 #endif
 	}
@@ -2198,9 +2208,12 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 	  return make_elf_sized_object<64, true>(name, input_file,
 						 offset, ehdr);
 #else
-          gold_error(_("%s: not configured to support "
-		       "64-bit big-endian object"),
-		     name.c_str());
+	  if (punconfigured != NULL)
+	    *punconfigured = true;
+	  else
+	    gold_error(_("%s: not configured to support "
+			 "64-bit big-endian object"),
+		       name.c_str());
 	  return NULL;
 #endif
 	}
@@ -2211,9 +2224,12 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 	  return make_elf_sized_object<64, false>(name, input_file,
 						  offset, ehdr);
 #else
-          gold_error(_("%s: not configured to support "
-		       "64-bit little-endian object"),
-		     name.c_str());
+	  if (punconfigured != NULL)
+	    *punconfigured = true;
+	  else
+	    gold_error(_("%s: not configured to support "
+			 "64-bit little-endian object"),
+		       name.c_str());
 	  return NULL;
 #endif
 	}

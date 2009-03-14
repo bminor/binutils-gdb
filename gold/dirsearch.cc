@@ -220,6 +220,8 @@ Dir_cache_task::run(gold::Workqueue*)
 namespace gold
 {
 
+// Initialize.
+
 void
 Dirsearch::initialize(Workqueue* workqueue,
 		      const General_options::Dir_list* directories)
@@ -236,25 +238,28 @@ Dirsearch::initialize(Workqueue* workqueue,
     }
 }
 
-// NOTE: we only log failed file-lookup attempts here.  Successfully
-// lookups will eventually get logged in File_read::open.
+// Search for a file.  NOTE: we only log failed file-lookup attempts
+// here.  Successfully lookups will eventually get logged in
+// File_read::open.
 
 std::string
 Dirsearch::find(const std::string& n1, const std::string& n2,
-		bool *is_in_sysroot) const
+		bool* is_in_sysroot, int* pindex) const
 {
   gold_assert(!this->token_.is_blocked());
+  gold_assert(*pindex >= 0);
 
-  for (General_options::Dir_list::const_iterator p =
-	 this->directories_->begin();
-       p != this->directories_->end();
-       ++p)
+  for (unsigned int i = static_cast<unsigned int>(*pindex);
+       i < this->directories_->size();
+       ++i)
     {
+      const Search_directory* p = &this->directories_->at(i);
       Dir_cache* pdc = caches->lookup(p->name().c_str());
       gold_assert(pdc != NULL);
       if (pdc->find(n1))
 	{
 	  *is_in_sysroot = p->is_in_sysroot();
+	  *pindex = i;
 	  return p->name() + '/' + n1;
 	}
       else
@@ -266,6 +271,7 @@ Dirsearch::find(const std::string& n1, const std::string& n2,
           if (pdc->find(n2))
             {
               *is_in_sysroot = p->is_in_sysroot();
+	      *pindex = i;
               return p->name() + '/' + n2;
             }
           else
@@ -274,6 +280,7 @@ Dirsearch::find(const std::string& n1, const std::string& n2,
 	}
     }
 
+  *pindex = -2;
   return std::string();
 }
 

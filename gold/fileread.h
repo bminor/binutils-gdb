@@ -431,10 +431,23 @@ class Input_file
   Input_file(const Task*, const char* name, const unsigned char* contents,
 	     off_t size);
 
-  // Open the file.  If the open fails, this will report an error and
-  // return false.
+  // Return the command line argument.
+  const Input_file_argument*
+  input_file_argument() const
+  { return this->input_argument_; }
+
+  // Return whether this is a file that we will search for in the list
+  // of directories.
   bool
-  open(const Dirsearch&, const Task*);
+  will_search_for() const;
+
+  // Open the file.  If the open fails, this will report an error and
+  // return false.  If there is a search, it starts at directory
+  // *PINDEX.  *PINDEX should be initialized to zero.  It may be
+  // restarted to find the next file with a matching name by
+  // incrementing the result and calling this again.
+  bool
+  open(const Dirsearch&, const Task*, int *pindex);
 
   // Return the name given by the user.  For -lc this will return "c".
   const char*

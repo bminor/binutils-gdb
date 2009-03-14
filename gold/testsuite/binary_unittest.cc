@@ -67,7 +67,7 @@ Sized_binary_test(Target* target)
 			binary.converted_size());
   Object* object = make_elf_object("test.o", &input_file, 0,
 				   binary.converted_data(),
-				   binary.converted_size());
+				   binary.converted_size(), NULL);
   CHECK(object != NULL);
   if (object == NULL)
     return false;

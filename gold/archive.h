@@ -33,6 +33,7 @@ namespace gold
 {
 
 class Task;
+class Input_argument;
 class Input_file;
 class Input_objects;
 class Input_group;
@@ -51,8 +52,8 @@ class Archive
           bool is_thin_archive, Dirsearch* dirpath, Task* task)
     : name_(name), input_file_(input_file), armap_(), armap_names_(),
       extended_names_(), armap_checked_(), seen_offsets_(), members_(),
-      is_thin_archive_(is_thin_archive), nested_archives_(),
-      dirpath_(dirpath), task_(task), num_members_(0)
+      is_thin_archive_(is_thin_archive), included_member_(false),
+      nested_archives_(), dirpath_(dirpath), task_(task), num_members_(0)
   { }
 
   // The length of the magic string at the start of an archive.
@@ -72,6 +73,11 @@ class Archive
   name() const
   { return this->name_; }
 
+  // The input file.
+  const Input_file*
+  input_file() const
+  { return this->input_file_; }
+
   // The file name.
   const std::string&
   filename() const
@@ -79,7 +85,7 @@ class Archive
 
   // Set up the archive: read the symbol map.
   void
-  setup(Input_objects*);
+  setup();
 
   // Get a reference to the underlying file.
   File_read&
@@ -131,7 +137,7 @@ class Archive
 
   // Select members from the archive as needed and add them to the
   // link.
-  void
+  bool
   add_symbols(Symbol_table*, Layout*, Input_objects*, Mapfile*);
 
   // Dump statistical information to stderr.
@@ -182,32 +188,35 @@ class Archive
   // within that file (0 if not a nested archive), and *MEMBER_NAME
   // to the name of the archive member.  Return TRUE on success.
   bool
-  get_file_and_offset(off_t off, Input_objects* input_objects,
-                      Input_file** input_file, off_t* memoff,
+  get_file_and_offset(off_t off, Input_file** input_file, off_t* memoff,
                       off_t* memsize, std::string* member_name);
 
-  // Return an ELF object for the member at offset OFF.  Set *MEMBER_NAME to
-  // the name of the member.
+  // Return an ELF object for the member at offset OFF.
   Object*
-  get_elf_object_for_member(off_t off, Input_objects* input_objects);
+  get_elf_object_for_member(off_t off, bool*);
 
   // Read the symbols from all the archive members in the link.
   void
-  read_all_symbols(Input_objects* input_objects);
+  read_all_symbols();
 
   // Read the symbols from an archive member in the link.  OFF is the file
   // offset of the member header.
   void
-  read_symbols(Input_objects* input_objects, off_t off);
+  read_symbols(off_t off);
 
   // Include all the archive members in the link.
-  void
+  bool
   include_all_members(Symbol_table*, Layout*, Input_objects*, Mapfile*);
 
   // Include an archive member in the link.
-  void
+  bool
   include_member(Symbol_table*, Layout*, Input_objects*, off_t off,
 		 Mapfile*, Symbol*, const char* why);
+
+  // Return whether we found this archive by searching a directory.
+  bool
+  searched_for() const
+  { return this->input_file_->will_search_for(); }
 
   // Iterate over archive members.
   class const_iterator;
@@ -274,6 +283,8 @@ class Archive
   std::map<off_t, Archive_member> members_;
   // True if this is a thin archive.
   const bool is_thin_archive_;
+  // True if we have included at least one object from this archive.
+  bool included_member_;
   // Table of nested archives, indexed by filename.
   Nested_archive_table nested_archives_;
   // The directory search path.
@@ -291,13 +302,17 @@ class Add_archive_symbols : public Task
 {
  public:
   Add_archive_symbols(Symbol_table* symtab, Layout* layout,
-		      Input_objects* input_objects, Mapfile* mapfile,
+		      Input_objects* input_objects, Dirsearch* dirpath,
+		      int dirindex, Mapfile* mapfile,
+		      const Input_argument* input_argument,
 		      Archive* archive, Input_group* input_group,
 		      Task_token* this_blocker,
 		      Task_token* next_blocker)
     : symtab_(symtab), layout_(layout), input_objects_(input_objects),
-      mapfile_(mapfile), archive_(archive), input_group_(input_group),
-      this_blocker_(this_blocker), next_blocker_(next_blocker)
+      dirpath_(dirpath), dirindex_(dirindex), mapfile_(mapfile),
+      input_argument_(input_argument), archive_(archive),
+      input_group_(input_group), this_blocker_(this_blocker),
+      next_blocker_(next_blocker)
   { }
 
   ~Add_archive_symbols();
@@ -325,7 +340,10 @@ class Add_archive_symbols : public Task
   Symbol_table* symtab_;
   Layout* layout_;
   Input_objects* input_objects_;
+  Dirsearch* dirpath_;
+  int dirindex_;
   Mapfile* mapfile_;
+  const Input_argument* input_argument_;
   Archive* archive_;
   Input_group* input_group_;
   Task_token* this_blocker_;

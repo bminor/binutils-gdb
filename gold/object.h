@@ -227,6 +227,15 @@ class Object
   target() const
   { return this->target_; }
 
+  // Get the file.  We pass on const-ness.
+  Input_file*
+  input_file()
+  { return this->input_file_; }
+
+  const Input_file*
+  input_file() const
+  { return this->input_file_; }
+
   // Lock the underlying file.
   void
   lock(const Task* t)
@@ -449,6 +458,11 @@ class Object
   is_in_system_directory() const
   { return this->input_file()->is_in_system_directory(); }
 
+  // Return whether we found this object by searching a directory.
+  bool
+  searched_for() const
+  { return this->input_file()->will_search_for(); }
+
  protected:
   // Returns NULL for Objects that are not plugin objects.  This method
   // is overridden in the Pluginobj class.
@@ -513,15 +527,6 @@ class Object
   // Implement get_global_symbol_counts--implemented by child class.
   virtual void
   do_get_global_symbol_counts(const Symbol_table*, size_t*, size_t*) const = 0;
-
-  // Get the file.  We pass on const-ness.
-  Input_file*
-  input_file()
-  { return this->input_file_; }
-
-  const Input_file*
-  input_file() const
-  { return this->input_file_; }
 
   // Set the target.
   void
@@ -1917,12 +1922,15 @@ struct Relocate_info
 };
 
 // Return an Object appropriate for the input file.  P is BYTES long,
-// and holds the ELF header.
+// and holds the ELF header.  If PUNCONFIGURED is not NULL, then if
+// this sees an object the linker is not configured to support, it
+// sets *PUNCONFIGURED to true and returns NULL without giving an
+// error message.
 
 extern Object*
 make_elf_object(const std::string& name, Input_file*,
 		off_t offset, const unsigned char* p,
-		section_offset_type bytes);
+		section_offset_type bytes, bool* punconfigured);
 
 } // end namespace gold
 

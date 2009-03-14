@@ -494,4 +494,13 @@ Workqueue::set_thread_count(int threads)
   this->condvar_.broadcast();
 }
 
+// Add a new blocker to an existing Task_token.
+
+void
+Workqueue::add_blocker(Task_token* token)
+{
+  Hold_lock hl(this->lock_);
+  token->add_blocker();
+}
+
 } // End namespace gold.

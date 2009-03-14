@@ -55,17 +55,29 @@ class Read_symbols : public Task
   // NEXT_BLOCKER is used to block the next input file from adding
   // symbols.
   Read_symbols(Input_objects* input_objects, Symbol_table* symtab,
-	       Layout* layout, Dirsearch* dirpath, Mapfile* mapfile,
-	       const Input_argument* input_argument,
+	       Layout* layout, Dirsearch* dirpath, int dirindex,
+	       Mapfile* mapfile, const Input_argument* input_argument,
 	       Input_group* input_group, Task_token* this_blocker,
 	       Task_token* next_blocker)
     : input_objects_(input_objects), symtab_(symtab), layout_(layout),
-      dirpath_(dirpath), mapfile_(mapfile), input_argument_(input_argument),
-      input_group_(input_group), this_blocker_(this_blocker),
-      next_blocker_(next_blocker)
+      dirpath_(dirpath), dirindex_(dirindex), mapfile_(mapfile),
+      input_argument_(input_argument), input_group_(input_group),
+      this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
 
   ~Read_symbols();
+
+  // If appropriate, issue a warning about skipping an incompatible
+  // object.
+  static void
+  incompatible_warning(const Input_argument*, const Input_file*);
+
+  // Requeue a Read_symbols task to search for the next object with
+  // the same name.
+  static void
+  requeue(Workqueue*, Input_objects*, Symbol_table*, Layout*, Dirsearch*,
+	  int dirindex, Mapfile*, const Input_argument*, Input_group*,
+	  Task_token* next_blocker);
 
   // The standard Task methods.
 
@@ -94,6 +106,7 @@ class Read_symbols : public Task
   Symbol_table* symtab_;
   Layout* layout_;
   Dirsearch* dirpath_;
+  int dirindex_;
   Mapfile* mapfile_;
   const Input_argument* input_argument_;
   Input_group* input_group_;
@@ -112,10 +125,14 @@ class Add_symbols : public Task
   // one for the previous input file.  NEXT_BLOCKER is used to prevent
   // the next task from running.
   Add_symbols(Input_objects* input_objects, Symbol_table* symtab,
-	      Layout* layout, Object* object,
+	      Layout* layout, Dirsearch* dirpath, int dirindex,
+	      Mapfile* mapfile, const Input_argument* input_argument,
+	      Input_group* input_group, Object* object,
 	      Read_symbols_data* sd, Task_token* this_blocker,
 	      Task_token* next_blocker)
     : input_objects_(input_objects), symtab_(symtab), layout_(layout),
+      dirpath_(dirpath), dirindex_(dirindex), mapfile_(mapfile),
+      input_argument_(input_argument), input_group_(input_group),
       object_(object), sd_(sd), this_blocker_(this_blocker),
       next_blocker_(next_blocker)
   { }
@@ -141,6 +158,11 @@ private:
   Input_objects* input_objects_;
   Symbol_table* symtab_;
   Layout* layout_;
+  Dirsearch* dirpath_;
+  int dirindex_;
+  Mapfile* mapfile_;
+  const Input_argument* input_argument_;
+  Input_group* input_group_;
   Object* object_;
   Read_symbols_data* sd_;
   Task_token* this_blocker_;
@@ -230,11 +252,11 @@ class Read_script : public Task
 {
  public:
   Read_script(Symbol_table* symtab, Layout* layout, Dirsearch* dirpath,
-	      Input_objects* input_objects, Mapfile* mapfile,
+	      int dirindex, Input_objects* input_objects, Mapfile* mapfile,
 	      Input_group* input_group, const Input_argument* input_argument,
 	      Input_file* input_file, Task_token* this_blocker,
 	      Task_token* next_blocker)
-    : symtab_(symtab), layout_(layout), dirpath_(dirpath),
+    : symtab_(symtab), layout_(layout), dirpath_(dirpath), dirindex_(dirindex),
       input_objects_(input_objects), mapfile_(mapfile),
       input_group_(input_group), input_argument_(input_argument),
       input_file_(input_file), this_blocker_(this_blocker),
@@ -261,6 +283,7 @@ class Read_script : public Task
   Symbol_table* symtab_;
   Layout* layout_;
   Dirsearch* dirpath_;
+  int dirindex_;
   Input_objects* input_objects_;
   Mapfile* mapfile_;
   Input_group* input_group_;
