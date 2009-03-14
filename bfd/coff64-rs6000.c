@@ -1048,6 +1048,8 @@ xcoff64_write_object_contents (abfd)
 	    case bfd_arch_powerpc:
 	      if (bfd_get_mach (abfd) == bfd_mach_ppc)
 		internal_a.o_cputype = 3;
+	      else if (bfd_get_mach (abfd) == bfd_mach_ppc_620)
+		internal_a.o_cputype = 2;
 	      else
 		internal_a.o_cputype = 1;
 	      break;

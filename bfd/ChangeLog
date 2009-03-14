@@ -1,5 +1,10 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* coff64-rs6000.c (xcoff64_write_object_contents): Set the cputype
+	to 2 for bfd_mach_ppc_620.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* config.bfd: Treat AIX 6+ in the same way as AIX 5.
 	* configure.in: Likewise.
 	* configure: Regenerate.
