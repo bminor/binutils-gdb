@@ -2149,6 +2149,9 @@ xcoff_link_check_archive_element (bfd *abfd,
 				  struct bfd_link_info *info,
 				  bfd_boolean *pneeded)
 {
+  bfd_boolean keep_syms_p;
+
+  keep_syms_p = (obj_coff_external_syms (abfd) != NULL);
   if (! _bfd_coff_get_external_symbols (abfd))
     return FALSE;
 
@@ -2159,9 +2162,11 @@ xcoff_link_check_archive_element (bfd *abfd,
     {
       if (! xcoff_link_add_symbols (abfd, info))
 	return FALSE;
+      if (info->keep_memory)
+	keep_syms_p = TRUE;
     }
 
-  if (! info->keep_memory || ! *pneeded)
+  if (!keep_syms_p)
     {
       if (! _bfd_coff_free_symbols (abfd))
 	return FALSE;

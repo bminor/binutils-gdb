@@ -1,5 +1,10 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* xcofflink.c (xcoff_link_check_archive_element): Only free the
+	symbol table if it was created by the current call.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* xcofflink.c (xcoff_build_ldsyms): Give imported descriptors
 	class XMC_DS rather than XMC_UA.
 
