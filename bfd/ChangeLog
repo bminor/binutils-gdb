@@ -1,3 +1,9 @@
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* config.bfd: Treat AIX 6+ in the same way as AIX 5.
+	* configure.in: Likewise.
+	* configure: Regenerate.
+
 2009-03-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/9945

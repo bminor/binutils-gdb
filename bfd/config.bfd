@@ -1081,14 +1081,14 @@ case "${targ}" in
     want64=true
     ;;
 #endif
-  powerpc-*-aix5*)
+  powerpc-*-aix[5-9]*)
     targ_cflags=-DAIX_WEAK_SUPPORT
     targ_defvec=rs6000coff_vec
     targ_selvecs="aix5coff64_vec"
     want64=true
     ;;
 #ifdef BFD64
-  powerpc64-*-aix5*)
+  powerpc64-*-aix[5-9]*)
     targ_cflags=-DAIX_WEAK_SUPPORT
     targ_defvec=aix5coff64_vec
     targ_selvecs="rs6000coff_vec"

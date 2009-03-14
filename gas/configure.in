@@ -143,7 +143,9 @@ for this_target in $target $canon_targets ; do
 	AC_MSG_ERROR(Unknown vendor for mips-bsd configuration.)
 	;;
 
-      ppc-*-aix5.*)
+changequote(,)dnl
+      ppc-*-aix[5-9].*)
+changequote([,])dnl
 	AC_DEFINE(AIX_WEAK_SUPPORT, 1,
 		  [Define if using AIX 5.2 value for C_WEAKEXT.])
 	;;

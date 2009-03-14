@@ -1,3 +1,9 @@
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* configure.tgt: Extend AIX 5 behavior to AIX 6 and above.
+	* configure.in: Likewise.
+	* configure: Regenerate.
+
 2009-03-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/9945

@@ -1,3 +1,7 @@
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* configure.tgt: Extend AIX 5 behavior to AIX 6 and above.
+
 2009-03-14  Dave Korn  <dave.korn.cygwin@gmail.com>
             Danny Smith  <dannysmith@users.sourceforge.net>
 

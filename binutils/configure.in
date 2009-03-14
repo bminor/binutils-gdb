@@ -330,7 +330,9 @@ changequote(,)dnl
 	powerpc*-aix5.[01])
 changequote([,])dnl
 	  ;;
-	powerpc*-aix5.*)
+changequote(,)dnl
+	powerpc*-aix[5-9].*)
+changequote([,])dnl
 	  OBJDUMP_DEFS="-DAIX_WEAK_SUPPORT"
 	  ;;
 	powerpc*-*-pe* | powerpc*-*-cygwin*)

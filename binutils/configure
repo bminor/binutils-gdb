@@ -16159,7 +16159,7 @@ do
 	  ;;
 	powerpc*-aix5.[01])
 	  ;;
-	powerpc*-aix5.*)
+	powerpc*-aix[5-9].*)
 	  OBJDUMP_DEFS="-DAIX_WEAK_SUPPORT"
 	  ;;
 	powerpc*-*-pe* | powerpc*-*-cygwin*)

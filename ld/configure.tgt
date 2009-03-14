@@ -487,12 +487,12 @@ powerpc-*-netware*)	targ_emul=ppcnw ;;
 powerpcle-*-pe)         targ_emul=ppcpe ;;
 powerpcle-*-winnt*)     targ_emul=ppcpe ;;
 powerpcle-*-cygwin*)    targ_emul=ppcpe ;;
-powerpc-*-aix5*)	targ_emul=aix5ppc ;;
+powerpc-*-aix[5-9]*)	targ_emul=aix5ppc ;;
 powerpc-*-aix*)		targ_emul=aixppc ;;
 powerpc-*-beos*)	targ_emul=aixppc ;;
 powerpc-*-windiss*)	targ_emul=elf32ppcwindiss ;;
 powerpc-*-lynxos*)	targ_emul=ppclynx ;;
-rs6000-*-aix5*)		targ_emul=aix5rs6 ;;
+rs6000-*-aix[5-9]*)	targ_emul=aix5rs6 ;;
 rs6000-*-aix*)		targ_emul=aixrs6
 			;;
 s390x-*-linux*)         targ_emul=elf64_s390

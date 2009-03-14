@@ -12050,7 +12050,7 @@ echo "$as_me: error: Unknown vendor for mips-bsd configuration." >&2;}
    { (exit 1); exit 1; }; }
 	;;
 
-      ppc-*-aix5.*)
+      ppc-*-aix[5-9].*)
 
 cat >>confdefs.h <<\_ACEOF
 #define AIX_WEAK_SUPPORT 1
