@@ -1117,11 +1117,13 @@ xcoff64_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto,
      bfd_byte *contents;
 {
   struct xcoff_link_hash_entry *h;
+  bfd_vma section_offset;
 
   if (0 > rel->r_symndx)
     return FALSE;
 
   h = obj_xcoff_sym_hashes (input_bfd)[rel->r_symndx];
+  section_offset = rel->r_vaddr - input_section->vma;
 
   /* If we see an R_BR or R_RBR reloc which is jumping to global
      linkage code, and it is followed by an appropriate cror nop
@@ -1132,12 +1134,12 @@ xcoff64_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto,
      cror.  */
   if (NULL != h
       && bfd_link_hash_defined == h->root.type
-      && rel->r_vaddr - input_section->vma + 8 <= input_section->size)
+      && section_offset + 8 <= input_section->size)
     {
       bfd_byte *pnext;
       unsigned long next;
 
-      pnext = contents + (rel->r_vaddr - input_section->vma) + 4;
+      pnext = contents + section_offset + 4;
       next = bfd_get_32 (input_bfd, pnext);
 
       /* The _ptrgl function is magic.  It is used by the AIX compiler to call
@@ -1166,16 +1168,41 @@ xcoff64_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto,
       howto->complain_on_overflow = complain_overflow_dont;
     }
 
-  howto->pc_relative = TRUE;
+  /* The original PC-relative relocation is biased by -r_vaddr, so adding
+     the value below will give the absolute target address.  */
+  *relocation = val + addend + rel->r_vaddr;
+
   howto->src_mask &= ~3;
   howto->dst_mask = howto->src_mask;
 
-  /* A PC relative reloc includes the section address.  */
-  addend += input_section->vma;
+  if (h != NULL
+      && h->root.type == bfd_link_hash_defined
+      && bfd_is_abs_section (h->root.u.def.section)
+      && section_offset + 4 <= input_section->size)
+    {
+      bfd_byte *ptr;
+      bfd_vma insn;
 
-  *relocation = val + addend;
-  *relocation -= (input_section->output_section->vma
-		  + input_section->output_offset);
+      /* Turn the relative branch into an absolute one by setting the
+	 AA bit.  */
+      ptr = contents + section_offset;
+      insn = bfd_get_32 (input_bfd, ptr);
+      insn |= 2;
+      bfd_put_32 (input_bfd, insn, ptr);
+
+      /* Make the howto absolute too.  */
+      howto->pc_relative = FALSE;
+      howto->complain_on_overflow = complain_overflow_bitfield;
+    }
+  else
+    {
+      /* Use a PC-relative howto and subtract the instruction's address
+	 from the target address we calculated above.  */
+      howto->pc_relative = TRUE;
+      *relocation -= (input_section->output_section->vma
+		      + input_section->output_offset
+		      + section_offset);
+    }
   return TRUE;
 }
 

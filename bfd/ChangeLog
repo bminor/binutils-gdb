@@ -1,5 +1,13 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* coff-rs6000.c (xcoff_reloc_type_br): Make the branch absolute
+	if the target is absolute.  Fix comment typo.
+	(xcoff_ppc_relocate_section): Remove FIXME.
+	* coff64-rs6000.c (xcoff64_reloc_type_br): Make the branch absolute
+	if the target is absolute.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* xcofflink.c (xcoff_mark, xcoff_link_input_bfd): Don't copy
 	R_POS and R_NEG relocations against absolute symbols to the
 	.loader section.

@@ -1,5 +1,12 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* ld-powerpc/aix-abs-branch-1.im, ld-powerpc/aix-abs-branch-1.ex,
+	ld-powerpc/aix-abs-branch-1.s,
+	ld-powerpc/aix-abs-branch-1.dd: New test.
+	* ld-powerpc/aix52.exp: Run it.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* ld-powerpc/aix-abs-reloc-1.ex, ld-powerpc/aix-abs-reloc-1.im,
 	ld-powerpc/aix-abs-reloc-1.od, ld-powerpc/aix-abs-reloc-1.s: New test.
 	* ld-powerpc/aix52.exp: Run it.
