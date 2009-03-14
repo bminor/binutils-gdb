@@ -1,3 +1,11 @@
+2009-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix a racy FAIL.
+	* gdb.base/multi-forks.exp (continue_to_exit_bp_loc): New function with
+	code from `follow parent, print pids'.
+	(`follow child, print pids', `follow parent, print pids'): Call it.
+	Replace `gdb_test "break..."' by gdb_breakpoint.
+
 2009-03-13  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-cli.exp: Adjust for output difference in
