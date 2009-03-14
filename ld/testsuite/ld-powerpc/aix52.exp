@@ -108,6 +108,12 @@ set aix52tests {
       {nm -D aix-no-dup-syms-1-dso.dnd} {objdump -R aix-no-dup-syms-1-dso.drd}}
      "aix-no-dup-syms-1.so"}
 
+    {"Garbage collection test 1"
+     "-shared -binitfini:init_function:fini_function -bE:aix-gc-1.ex"
+     "" {aix-gc-1.s}
+     {{objdump {-dz -j.text -j.data} aix-gc-1-SIZE.dd}}
+     "aix-gc-1.so"}
+
     {"Glink test 1"
      "-shared -bE:aix-glink-1.ex --unresolved-symbols=ignore-all"
      "" {aix-glink-1.s}
@@ -155,6 +161,12 @@ set aix52tests {
      {{nm {} aix-weak-1-dso.nd} {objdump -h aix-weak-1-dso.hd}
       {nm -D aix-weak-1-dso.dnd}}
      "aix-weak-1-nogc.so"}
+
+    {"Weak test 1 (shared, gc)" "-shared -bE:aix-weak-1.ex"
+     "" {aix-weak-1a.s aix-weak-1b.s}
+     {{nm {} aix-weak-1-gcdso.nd} {objdump -h aix-weak-1-gcdso.hd}
+      {nm -D aix-weak-1-gcdso.dnd}}
+     "aix-weak-1-gc.so"}
 
     {"Weak test 2 (library 1)" "-shared -bE:aix-weak-2a.ex"
      "" {aix-weak-2a.s}

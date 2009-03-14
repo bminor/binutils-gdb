@@ -2482,6 +2482,30 @@ xcoff_mark_symbol (struct bfd_link_info *info, struct xcoff_link_hash_entry *h)
   return TRUE;
 }
 
+/* Look for a symbol called NAME.  If the symbol is defined, mark it.
+   If the symbol exists, set FLAGS.  */
+
+static bfd_boolean
+xcoff_mark_symbol_by_name (struct bfd_link_info *info,
+			   const char *name, unsigned int flags)
+{
+  struct xcoff_link_hash_entry *h;
+
+  h = xcoff_link_hash_lookup (xcoff_hash_table (info), name,
+			      FALSE, FALSE, TRUE);
+  if (h != NULL)
+    {
+      h->flags |= flags;
+      if (h->root.type == bfd_link_hash_defined
+	  || h->root.type == bfd_link_hash_defweak)
+	{
+	  if (!xcoff_mark (info, h->root.u.def.section))
+	    return FALSE;
+	}
+    }
+  return TRUE;
+}
+
 /* The mark phase of garbage collection.  For a given section, mark
    it, and all the sections which define symbols to which it refers.
    Because this function needs to look at the relocs, we also count
@@ -3177,7 +3201,6 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 				 asection **special_sections,
 				 bfd_boolean rtld)
 {
-  struct xcoff_link_hash_entry *hentry;
   asection *lsec;
   struct xcoff_loader_info ldinfo;
   int i;
@@ -3215,15 +3238,6 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
   xcoff_hash_table (info)->file_align = file_align;
   xcoff_hash_table (info)->textro = textro;
   xcoff_hash_table (info)->rtld = rtld;
-
-  hentry = NULL;
-  if (entry != NULL)
-    {
-      hentry = xcoff_link_hash_lookup (xcoff_hash_table (info), entry,
-				       FALSE, FALSE, TRUE);
-      if (hentry != NULL)
-	hentry->flags |= XCOFF_ENTRY;
-    }
 
   /* __rtinit */
   if (info->init_function || info->fini_function || rtld)
@@ -3277,11 +3291,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
     }
 
   /* Garbage collect unused sections.  */
-  if (info->relocatable
-      || ! gc
-      || hentry == NULL
-      || (hentry->root.type != bfd_link_hash_defined
-	  && hentry->root.type != bfd_link_hash_defweak))
+  if (info->relocatable || !gc)
     {
       gc = FALSE;
       xcoff_hash_table (info)->gc = FALSE;
@@ -3309,7 +3319,14 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
     }
   else
     {
-      if (! xcoff_mark (info, hentry->root.u.def.section))
+      if (entry != NULL
+	  && !xcoff_mark_symbol_by_name (info, entry, XCOFF_ENTRY))
+	goto error_return;
+      if (info->init_function != NULL
+	  && !xcoff_mark_symbol_by_name (info, info->init_function, 0))
+	goto error_return;
+      if (info->fini_function != NULL
+	  && !xcoff_mark_symbol_by_name (info, info->fini_function, 0))
 	goto error_return;
       xcoff_sweep (info);
       xcoff_hash_table (info)->gc = TRUE;

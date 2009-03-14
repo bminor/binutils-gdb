@@ -1,5 +1,12 @@
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* xcofflink.c (xcoff_mark_symbol_by_name): New function.
+	(bfd_xcoff_size_dynamic_sections): Use it to mark the entry,
+	init and fini functions.  Do garbage collection for objects
+	without an entry point too.
+
+2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* coffcode.h (coff_pointerize_aux_hook): Update CSECT_SYM_P to
 	check whether a symbol has csect information.
 	(coff_print_aux): Likewise.
