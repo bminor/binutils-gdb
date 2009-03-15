@@ -1,3 +1,7 @@
+2009-03-15  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-auto-import/auto-import.exp:  Add missing dll entrypoint.
+
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* ld-powerpc/aix-export-1-all.dd, ld-powerpc/aix-export-1-full.dd,
