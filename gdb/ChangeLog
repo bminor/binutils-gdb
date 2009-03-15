@@ -1,5 +1,13 @@
 2009-03-15  Joel Brobecker  <brobecker@adacore.com>
 
+	Fix an error happening while loading symbols from a core file
+	(on AIX).
+
+	* rs6000-nat.c (xcoff_relocate_symtab): Use target_has_execution
+	to detect whether we're debugging a core file or not.
+
+2009-03-15  Joel Brobecker  <brobecker@adacore.com>
+
 	Modernize the aix-thread later by getting rid of the base_target
 	global.  This brings back to life the AIX port which was otherwise
 	crashing all the time.

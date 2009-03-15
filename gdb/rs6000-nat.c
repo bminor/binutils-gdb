@@ -1036,7 +1036,8 @@ xcoff_relocate_symtab (unsigned int pid)
   int ldisize = arch64 ? sizeof (ldi->l64) : sizeof (ldi->l32);
   int size;
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  /* Nothing to do if we are debugging a core file.  */
+  if (!target_has_execution)
     return;
 
   do
