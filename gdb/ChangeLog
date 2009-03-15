@@ -1,3 +1,19 @@
+2009-03-15  Joel Brobecker  <brobecker@adacore.com>
+
+	Modernize the aix-thread later by getting rid of the base_target
+	global.  This brings back to life the AIX port which was otherwise
+	crashing all the time.
+
+	* aix-thread.c (base_target): Delete.
+	(pd_enable): Do not set base_target.
+	(aix_thread_attach): Use find_target_beneath instead of base_target.
+	(aix_thread_detach, aix_thread_resume, aix_thread_wait)
+	(aix_thread_fetch_registers, aix_thread_store_registers),
+	(aix_thread_xfer_partial, aix_thread_mourn_inferior)
+	(aix_thread_thread_alive, aix_thread_pid_to_str): Likewise.
+	(aix_thread_kill): Delete. Does not seem necessary.
+	(init_aix_thread_ops): Do not set aix_thread_ops.to_kill.
+
 2009-03-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* stack.c (return_command <retval_exp>): New variables retval_expr
