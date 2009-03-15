@@ -1330,7 +1330,7 @@ build_stub (struct bfd_link_info *info,
 
       bfd_put_32 (sec->owner, dest_ovl - 1,
 		  sec->contents + sec->size + 0);
-      set_id = (dest_ovl - 1) >> htab->num_lines_log2;
+      set_id = ((dest_ovl - 1) >> htab->num_lines_log2) + 1;
       bfd_put_32 (sec->owner, (set_id << 18) | (dest & 0x3ffff),
 		  sec->contents + sec->size + 4);
       bfd_put_32 (sec->owner, (lrlive << 29) | (g->br_addr & 0x3ffff),
@@ -4768,9 +4768,9 @@ spu_elf_relocate_section (bfd *output_bfd,
 	      unsigned int ovl = overlay_index (sec);
 	      if (ovl != 0)
 		{
-		  unsigned int set_id = (ovl - 1) >> htab->num_lines_log2;
+		  unsigned int set_id = ((ovl - 1) >> htab->num_lines_log2) + 1;
 		  relocation += set_id << 18;
-		  overlay_encoded = set_id != 0;
+		  overlay_encoded = TRUE;
 		}
 	    }
 	}

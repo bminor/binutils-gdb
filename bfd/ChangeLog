@@ -1,3 +1,8 @@
+2009-03-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (build_stub): Correct icache set_id.
+	(spu_elf_relocate_section): Likewise.
+
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* xcofflink.c (xcoff_link_check_archive_element): Only free the
