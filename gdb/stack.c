@@ -1796,18 +1796,27 @@ return_command (char *retval_exp, int from_tty)
      message.  */
   if (retval_exp)
     {
+      struct expression *retval_expr = parse_expression (retval_exp);
+      struct cleanup *old_chain = make_cleanup (xfree, retval_expr);
       struct type *return_type = NULL;
 
       /* Compute the return value.  Should the computation fail, this
          call throws an error.  */
-      return_value = parse_and_eval (retval_exp);
+      return_value = evaluate_expression (retval_expr);
 
       /* Cast return value to the return type of the function.  Should
          the cast fail, this call throws an error.  */
       if (thisfun != NULL)
 	return_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (thisfun));
       if (return_type == NULL)
-	return_type = builtin_type (get_frame_arch (thisframe))->builtin_int;
+      	{
+	  if (retval_expr->elts[0].opcode != UNOP_CAST)
+	    error (_("Return value type not available for selected "
+		     "stack frame.\n"
+		     "Please use an explicit cast of the value to return."));
+	  return_type = value_type (return_value);
+	}
+      do_cleanups (old_chain);
       CHECK_TYPEDEF (return_type);
       return_value = value_cast (return_type, return_value);
 

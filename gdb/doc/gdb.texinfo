@@ -12494,6 +12494,53 @@ returned.  In contrast, the @code{finish} command (@pxref{Continuing
 and Stepping, ,Continuing and Stepping}) resumes execution until the
 selected stack frame returns naturally.
 
+@value{GDBN} needs to know how the @var{expression} argument should be set for
+the inferior.  The concrete registers assignment depends on the OS ABI and the
+type being returned by the selected stack frame.  For example it is common for
+OS ABI to return floating point values in FPU registers while integer values in
+CPU registers.  Still some ABIs return even floating point values in CPU
+registers.  Larger integer widths (such as @code{long long int}) also have
+specific placement rules.  @value{GDBN} already knows the OS ABI from its
+current target so it needs to find out also the type being returned to make the
+assignment into the right register(s).
+
+Normally, the selected stack frame has debug info.  @value{GDBN} will always
+use the debug info instead of the implicit type of @var{expression} when the
+debug info is available.  For example, if you type @kbd{return -1}, and the
+function in the current stack frame is declared to return a @code{long long
+int}, @value{GDBN} transparently converts the implicit @code{int} value of -1
+into a @code{long long int}:
+
+@smallexample
+Breakpoint 1, func () at gdb.base/return-nodebug.c:29
+29        return 31;
+(@value{GDBP}) return -1
+Make func return now? (y or n) y
+#0  0x004004f6 in main () at gdb.base/return-nodebug.c:43
+43        printf ("result=%lld\n", func ());
+(@value{GDBP})
+@end smallexample
+
+However, if the selected stack frame does not have a debug info, e.g., if the
+function was compiled without debug info, @value{GDBN} has to find out the type
+to return from user.  Specifying a different type by mistake may set the value
+in different inferior registers than the caller code expects.  For example,
+typing @kbd{return -1} with its implicit type @code{int} would set only a part
+of a @code{long long int} result for a debug info less function (on 32-bit
+architectures).  Therefore the user is required to specify the return type by
+an appropriate cast explicitly:
+
+@smallexample
+Breakpoint 2, 0x0040050b in func ()
+(@value{GDBP}) return -1
+Return value type not available for selected stack frame.
+Please use an explicit cast of the value to return.
+(@value{GDBP}) return (long long int) -1
+Make selected stack frame return now? (y or n) y
+#0  0x00400526 in main ()
+(@value{GDBP})
+@end smallexample
+
 @node Calling
 @section Calling Program Functions
 

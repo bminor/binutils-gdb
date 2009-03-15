@@ -1,3 +1,7 @@
+2009-03-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/return-nodebug.exp, gdb.base/return-nodebug.c: New.
+
 2009-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix a racy FAIL.
@@ -9,7 +13,7 @@
 2009-03-13  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-cli.exp: Adjust for output difference in
-        sync and async modes.
+	sync and async modes.
 
 2009-03-12  Joel Brobecker  <brobecker@adacore.com>
 
@@ -31,19 +35,19 @@
 
 2009-03-12  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * gdb.mi/mi-cli.exp: Remove debug print.
+	* gdb.mi/mi-cli.exp: Remove debug print.
 
 2009-03-12  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * gdb.mi/mi-cli.exp: Verify that CLI commands that run inferior
-        include the token in ^running and frame info in *stopped.
+	* gdb.mi/mi-cli.exp: Verify that CLI commands that run inferior
+	include the token in ^running and frame info in *stopped.
 
 2009-03-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* solib-display.exp: New file.
 	* solib-display-main.c: New file.
 	* solib-display-lib.c: New file.
-	
+
 2009-03-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.arch/i386-permbkpt.S, gdb.arch/i386-permbkpt.exp: New.

@@ -1,3 +1,10 @@
+2009-03-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* stack.c (return_command <retval_exp>): New variables retval_expr
+	and old_chain.  Inline parse_and_eval to initialize retval_expr.  Check
+	RETVAL_EXPR for UNOP_CAST and set RETURN_TYPE to the RETURN_VALUE type
+	if RETURN_TYPE is NULL.
+
 2009-03-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (PACKET_qAttached): New.
