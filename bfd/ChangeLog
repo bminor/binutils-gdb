@@ -1,3 +1,11 @@
+2009-03-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf32-spu.c (spu_elf_check_vma): Do not reset auto_overlay
+	parameter just because fixed sections fit into local store.
+	(spu_elf_auto_overlay): Do not declare as "noreturn".  Skip
+	generating overlays if fixed sections plus reserved stack
+	and heap space fit into local store.
+
 2009-03-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (build_stub): Correct icache set_id.

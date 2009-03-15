@@ -2062,9 +2062,6 @@ spu_elf_check_vma (struct bfd_link_info *info)
 		|| m->sections[i]->vma + m->sections[i]->size - 1 > hi))
 	  return m->sections[i];
 
-  /* No need for overlays if it all fits.  */
-  if (htab->params->ovly_flavour != ovly_soft_icache)
-    htab->params->auto_overlay = 0;
   return NULL;
 }
 
@@ -4035,9 +4032,6 @@ print_one_overlay_section (FILE *script,
 
 /* Handle --auto-overlay.  */
 
-static void spu_elf_auto_overlay (struct bfd_link_info *)
-     ATTRIBUTE_NORETURN;
-
 static void
 spu_elf_auto_overlay (struct bfd_link_info *info)
 {
@@ -4079,11 +4073,30 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
   if (!build_call_tree (info))
     goto err_exit;
 
+  htab = spu_hash_table (info);
+  if (htab->reserved == 0)
+    {
+      struct _sum_stack_param sum_stack_param;
+
+      sum_stack_param.emit_stack_syms = 0;
+      sum_stack_param.overall_stack = 0;
+      if (!for_each_node (sum_stack, info, &sum_stack_param, TRUE))
+	goto err_exit;
+      htab->reserved = sum_stack_param.overall_stack + htab->extra_stack_space;
+    }
+
+  /* No need for overlays if everything already fits.  */
+  if (fixed_size + htab->reserved <= htab->local_store
+      && htab->params->ovly_flavour != ovly_soft_icache)
+    {
+      htab->params->auto_overlay = 0;
+      return;
+    }
+
   uos_param.exclude_input_section = 0;
   uos_param.exclude_output_section
     = bfd_get_section_by_name (info->output_bfd, ".interrupt");
 
-  htab = spu_hash_table (info);
   ovly_mgr_entry = "__ovly_load";
   if (htab->params->ovly_flavour == ovly_soft_icache)
     ovly_mgr_entry = "__icache_br_handler";
@@ -4186,16 +4199,6 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
     }
   free (bfd_arr);
 
-  if (htab->reserved == 0)
-    {
-      struct _sum_stack_param sum_stack_param;
-
-      sum_stack_param.emit_stack_syms = 0;
-      sum_stack_param.overall_stack = 0;
-      if (!for_each_node (sum_stack, info, &sum_stack_param, TRUE))
-	goto err_exit;
-      htab->reserved = sum_stack_param.overall_stack + htab->extra_stack_space;
-    }
   fixed_size += htab->reserved;
   fixed_size += htab->non_ovly_stub * ovl_stub_size (htab->params->ovly_flavour);
   if (fixed_size + mos_param.max_overlay_size <= htab->local_store)
