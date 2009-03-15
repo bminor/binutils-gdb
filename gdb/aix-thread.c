@@ -1676,7 +1676,7 @@ aix_thread_mourn_inferior (struct target_ops *ops)
 static int
 aix_thread_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
-  struct target_ops *beneath = find_target_beneath (&current_target);
+  struct target_ops *beneath = find_target_beneath (ops);
 
   if (!PD_TID (ptid))
     return beneath->to_thread_alive (beneath, ptid);
@@ -1693,7 +1693,7 @@ static char *
 aix_thread_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char *ret = NULL;
-  struct target_ops *beneath = find_target_beneath (&current_target);
+  struct target_ops *beneath = find_target_beneath (ops);
 
   if (!PD_TID (ptid))
     return beneath->to_pid_to_str (beneath, ptid);

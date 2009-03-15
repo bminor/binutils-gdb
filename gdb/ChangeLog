@@ -1,5 +1,12 @@
 2009-03-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* aix-thread.c (aix_thread_thread_alive, aix_thread_pid_to_str):
+	Use the ops parameter to get to the target beneath, rather than
+	using the current_target global.  Using the current_target global
+	was an unintended accident.
+
+2009-03-15  Joel Brobecker  <brobecker@adacore.com>
+
 	Fix an error happening while loading symbols from a core file
 	(on AIX).
 
