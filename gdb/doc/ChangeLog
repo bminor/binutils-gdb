@@ -1,3 +1,7 @@
+2009-03-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.texinfo (Commands In Python): Remove tindex entries.
+
 2009-03-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Returning): New description for missing debug info.

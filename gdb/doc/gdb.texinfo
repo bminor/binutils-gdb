@@ -18378,8 +18378,6 @@ argument to Python's @code{string.decode} method.
 
 @cindex commands in python
 @cindex python commands
-@tindex Command
-@tindex gdb.Command
 You can implement new @value{GDBN} CLI commands in Python.  A CLI
 command is implemented using an instance of the @code{gdb.Command}
 class, most commonly using a subclass.
