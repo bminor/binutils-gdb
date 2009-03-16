@@ -591,7 +591,8 @@ go32_kill_inferior (void)
 }
 
 static void
-go32_create_inferior (char *exec_file, char *args, char **env, int from_tty)
+go32_create_inferior (struct target_ops *ops, char *exec_file,
+		      char *args, char **env, int from_tty)
 {
   extern char **environ;
   jmp_buf start_state;
