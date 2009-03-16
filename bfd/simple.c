@@ -210,7 +210,8 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   data = NULL;
   if (outbuf == NULL)
     {
-      data = bfd_malloc (sec->size);
+      bfd_size_type amt = sec->rawsize > sec->size ? sec->rawsize : sec->size;
+      data = bfd_malloc (amt);
       if (data == NULL)
 	return NULL;
       outbuf = data;

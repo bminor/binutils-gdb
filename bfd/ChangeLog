@@ -1,3 +1,8 @@
+2009-03-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* simple.c (bfd_simple_get_relocated_section_contents): Use larger
+	of rawsize and size for buffer.
+
 2009-03-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf32-spu.c (spu_elf_check_vma): Do not reset auto_overlay
