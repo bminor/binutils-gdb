@@ -1,5 +1,11 @@
 2009-03-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* remote-mips.c (mips_load): Replace call to regcache_set_valid_p,
+	which is undefined, by call to regcache_invalidate, which should
+	do what the original author wanted to do.
+
+2009-03-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* remote-mips.c (mips_mourn_inferior): Add missing ops parameter.
 	(mips_create_inferior): Likewise.
 

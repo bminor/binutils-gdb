@@ -3276,9 +3276,9 @@ mips_load (char *file, int from_tty)
          to a different value than GDB thinks it has. The following ensures
          that the write_pc() WILL update the PC value: */
       struct regcache *regcache = get_current_regcache ();
-      regcache_set_valid_p (regcache,
-			    gdbarch_pc_regnum (get_regcache_arch (regcache)),
-					       0);
+
+      regcache_invalidate (regcache,
+			   gdbarch_pc_regnum (get_regcache_arch (regcache)));
     }
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
