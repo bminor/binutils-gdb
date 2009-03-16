@@ -1,3 +1,7 @@
+2009-03-16  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.tgt: Add handling for x86_64-darwin.
+
 2009-03-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* auxv.c (fprint_target_auxv): New TAG for AT_RANDOM.

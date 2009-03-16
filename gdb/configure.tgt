@@ -145,7 +145,7 @@ hppa*-*-*)
 	gdb_target_obs="hppa-tdep.o"
 	;;
 
-i[34567]86-*-darwin*)
+i[34567]86-*-darwin* | x86_64-*-darwin*)
 	# Target: Darwin/i386
 	gdb_target_obs="amd64-tdep.o i386-tdep.o i387-tdep.o \
 			i386-darwin-tdep.o solib.o solib-darwin.o"
