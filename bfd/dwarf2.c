@@ -432,9 +432,9 @@ read_section (bfd *           abfd,
 	  return FALSE;
 	}
 
+      *section_size = msec->rawsize ? msec->rawsize : msec->size;
       if (syms)
 	{
-	  *section_size = msec->size;
 	  *section_buffer
 	      = bfd_simple_get_relocated_section_contents (abfd, msec, NULL, syms);
 	  if (! *section_buffer)
@@ -442,7 +442,6 @@ read_section (bfd *           abfd,
 	}
       else
 	{
-	  *section_size = msec->rawsize ? msec->rawsize : msec->size;
 	  *section_buffer = bfd_malloc (*section_size);
 	  if (! *section_buffer)
 	    return FALSE;
