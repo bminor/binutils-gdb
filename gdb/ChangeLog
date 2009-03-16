@@ -1,3 +1,7 @@
+2009-03-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* auxv.c (fprint_target_auxv): New TAG for AT_RANDOM.
+
 2009-03-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* aix-thread.c (aix_thread_thread_alive, aix_thread_pid_to_str):

@@ -205,6 +205,7 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 	  TAG (AT_UCACHEBSIZE, _("Unified cache block size"), dec);
 	  TAG (AT_IGNOREPPC, _("Entry should be ignored"), dec);
 	  TAG (AT_BASE_PLATFORM, _("String identifying base platform"), str);
+	  TAG (AT_RANDOM, _("Address of 16 random bytes"), hex);
 	  TAG (AT_EXECFN, _("File name of executable"), str);
 	  TAG (AT_SECURE, _("Boolean, was exec setuid-like?"), dec);
 	  TAG (AT_SYSINFO, _("Special system info/entry points"), hex);
