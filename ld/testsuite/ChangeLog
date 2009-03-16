@@ -1,3 +1,8 @@
+2009-03-16  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-bootstrap/bootstrap.exp:  Also pass '-liconv' to linker when
+	linking statically on Cygwin, necessitated by '-lintl'.
+
 2009-03-15  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-auto-import/auto-import.exp:  Add missing dll entrypoint.

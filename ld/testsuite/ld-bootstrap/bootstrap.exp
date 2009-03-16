@@ -83,13 +83,21 @@ foreach flags {"" "strip" "--static" "--traditional-format"
 	}
     }
 
+    # On Cygwin, -lintl may require -liconv when linking statically.
+    set extralibs ""
+    if { [istarget "*-*-cygwin*"]} {
+	if {"$flags" == "--static"} {
+	    set extralibs "-liconv"
+	}
+    }
+
     # On Irix 5, linking with --static only works if all the files are
     # compiled using -non_shared.
     if {"$flags" == "--static"} {
 	setup_xfail "mips*-*-irix5*"
     }
 
-    if ![ld_link $ld tmpdir/ld1 "$flags tmpdir/ld-partial.o $BFDLIB $LIBIBERTY"] {
+    if ![ld_link $ld tmpdir/ld1 "$flags tmpdir/ld-partial.o $BFDLIB $LIBIBERTY $extralibs"] {
 	fail $testname
 	continue
     }
@@ -104,12 +112,12 @@ foreach flags {"" "strip" "--static" "--traditional-format"
 	}
     }
 
-    if ![ld_link tmpdir/ld1 tmpdir/ld2 "$flags $OFILES $BFDLIB $LIBIBERTY"] {
+    if ![ld_link tmpdir/ld1 tmpdir/ld2 "$flags $OFILES $BFDLIB $LIBIBERTY $extralibs"] {
 	fail $testname
 	continue
     }
 
-    if ![ld_link tmpdir/ld2 tmpdir/ld3 "$flags $OFILES $BFDLIB $LIBIBERTY"] {
+    if ![ld_link tmpdir/ld2 tmpdir/ld3 "$flags $OFILES $BFDLIB $LIBIBERTY $extralibs"] {
 	fail $testname
 	continue
     }
