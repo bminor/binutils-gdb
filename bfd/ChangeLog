@@ -1,3 +1,7 @@
+2009-03-16  Andrew Stubbs  <ams@codesourcery.com>
+
+	* dwarf2.c (read_section): Always use rawsize, if available.
+
 2009-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* simple.c (bfd_simple_get_relocated_section_contents): Use larger
