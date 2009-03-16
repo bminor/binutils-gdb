@@ -102,7 +102,7 @@ static int mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 
 static void mips_files_info (struct target_ops *ignore);
 
-static void mips_mourn_inferior (void);
+static void mips_mourn_inferior (struct target_ops *ops);
 
 static int pmon_makeb64 (unsigned long v, char *p, int n, int *chksum);
 
@@ -2182,7 +2182,8 @@ Give up (and stop debugging it)? ")))
 /* Start running on the target board.  */
 
 static void
-mips_create_inferior (char *execfile, char *args, char **env, int from_tty)
+mips_create_inferior (struct target_ops *ops, char *execfile,
+		      char *args, char **env, int from_tty)
 {
   CORE_ADDR entry_pt;
 
@@ -2209,7 +2210,7 @@ Can't pass arguments to remote MIPS board; arguments ignored.");
 /* Clean up after a process.  Actually nothing to do.  */
 
 static void
-mips_mourn_inferior (void)
+mips_mourn_inferior (struct target_ops *ops)
 {
   if (current_ops != NULL)
     unpush_target (current_ops);

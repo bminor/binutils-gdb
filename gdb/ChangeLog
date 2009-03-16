@@ -1,5 +1,10 @@
 2009-03-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* remote-mips.c (mips_mourn_inferior): Add missing ops parameter.
+	(mips_create_inferior): Likewise.
+
+2009-03-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* go32-nat.c (go32_create_inferior): Add missing ops parameter.
 
 2009-03-16  Joel Brobecker  <brobecker@adacore.com>
