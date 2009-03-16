@@ -1,3 +1,8 @@
+2009-03-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* darwin-nat.c (darwin_resume): Fix a compiler warning when
+	building on x86_64-darwin.
+
 2009-03-16  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.tgt: Add handling for x86_64-darwin.

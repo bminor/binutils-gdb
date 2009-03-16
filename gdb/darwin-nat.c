@@ -367,7 +367,7 @@ darwin_resume (struct target_ops *ops,
 	    {
 	      int nsignal = target_signal_to_host (signal);
 	      res = PTRACE (PT_THUPDATE, pid,
-				   (void *)exc_msg.thread_port, nsignal);
+			    (void *)(uintptr_t)exc_msg.thread_port, nsignal);
 	      if (res < 0)
 		printf_unfiltered (_("ptrace THUP: res=%d\n"), res);
 	    }
