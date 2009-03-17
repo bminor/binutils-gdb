@@ -1,3 +1,8 @@
+2009-03-17  Doug Evans  <dje@google.com>
+
+	* amd64-linux-nat.c (si_timerid,si_overrun): Provide definition for
+	glibc 2.3.2 and earlier.
+
 2009-03-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* frame.c (get_prev_frame_1): Do not perform the inner_frame

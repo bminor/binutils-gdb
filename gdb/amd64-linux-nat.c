@@ -501,6 +501,15 @@ typedef struct compat_siginfo
 #define cpt_si_band _sifields._sigpoll._band
 #define cpt_si_fd _sifields._sigpoll._fd
 
+/* glibc at least up to 2.3.2 doesn't have si_timerid, si_overrun.
+   In their place is si_timer1,si_timer2.  */
+#ifndef si_timerid
+#define si_timerid si_timer1
+#endif
+#ifndef si_overrun
+#define si_overrun si_timer2
+#endif
+
 static void
 compat_siginfo_from_siginfo (compat_siginfo_t *to, siginfo_t *from)
 {
