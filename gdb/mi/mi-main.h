@@ -26,11 +26,11 @@ extern void mi_load_progress (const char *section_name,
 			      unsigned long total_sent,
 			      unsigned long grand_total);
 
+extern void mi_print_timing_maybe (void);
+
 extern char *current_token;
 
 extern int running_result_record_printed;
-
-void mi_print_timing_maybe ();
 
 #endif
 

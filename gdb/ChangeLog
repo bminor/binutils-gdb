@@ -1,3 +1,8 @@
+2009-03-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* mi/mi-main.h (mi_print_timing_maybe): Add strict prototype,
+	declare as extern.
+
 2009-03-17  Hui Zhu  <teawater@gmail.com>
 
 	* stack.c: Include valprint.h.
