@@ -1,3 +1,15 @@
+2009-03-17  Ian Lance Taylor  <iant@google.com>
+
+	* configure.ac: Check for chsize and posix_fallocate.  Replace
+	ftruncate.
+	* ftruncate.c: New file, from gnulib.
+	* output.cc (posix_fallocate): Define dummy version if not
+	HAVE_POSIX_FALLOCATE.
+	(Output_file::map): Call posix_fallocate rather than lseek and
+	write.
+	* gold.h (ftruncate): Declare if not HAVE_FTRUNCATE.
+	* configure, Makefile.in, config.in: Rebuild.
+
 2009-03-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	
 	* layout.h (Layout::create_note): Add section_name parameter.

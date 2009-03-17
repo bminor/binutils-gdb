@@ -45,6 +45,18 @@
 # define MAP_ANONYMOUS  MAP_ANON
 #endif
 
+#ifndef HAVE_POSIX_FALLOCATE
+// A dummy, non general, version of posix_fallocate.  Here we just set
+// the file size and hope that there is enough disk space.  FIXME: We
+// could allocate disk space by walking block by block and writing a
+// zero byte into each block.
+static int
+posix_fallocate(int o, off_t offset, off_t len)
+{
+  return ftruncate(o, offset + len);
+}
+#endif // !defined(HAVE_POSIX_FALLOCATE)
+
 namespace gold
 {
 
@@ -3388,12 +3400,16 @@ Output_file::map()
     }
   else
     {
-      // Write out one byte to make the file the right size.
-      if (::lseek(o, this->file_size_ - 1, SEEK_SET) < 0)
-        gold_fatal(_("%s: lseek: %s"), this->name_, strerror(errno));
-      char b = 0;
-      if (::write(o, &b, 1) != 1)
-        gold_fatal(_("%s: write: %s"), this->name_, strerror(errno));
+      // Ensure that we have disk space available for the file.  If we
+      // don't do this, it is possible that we will call munmap,
+      // close, and exit with dirty buffers still in the cache with no
+      // assigned disk blocks.  If the disk is out of space at that
+      // point, the output file will wind up incomplete, but we will
+      // have already exited.  The alternative to fallocate would be
+      // to use fdatasync, but that would be a more significant
+      // performance hit.
+      if (::posix_fallocate(o, 0, this->file_size_) < 0)
+	gold_fatal(_("%s: %s"), this->name_, strerror(errno));
 
       // Map the file into memory.
       this->map_is_anonymous_ = false;

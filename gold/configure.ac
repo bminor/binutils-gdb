@@ -307,7 +307,8 @@ dnl host dependent.  If build == host, we can check getconf LFS_CFLAGS.
 LFS_CFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 AC_SUBST(LFS_CFLAGS)
 
-AC_REPLACE_FUNCS(pread)
+AC_CHECK_FUNCS(chsize)
+AC_REPLACE_FUNCS(pread ftruncate)
 
 # Link in zlib if we can.  This allows us to write compressed sections.
 AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
@@ -318,7 +319,7 @@ AC_LANG_PUSH(C++)
 AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)
 AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
 AC_CHECK_HEADERS(byteswap.h)
-AC_CHECK_FUNCS(mallinfo)
+AC_CHECK_FUNCS(mallinfo posix_fallocate)
 
 # gcc 4.3.0 doesn't recognize the printf attribute on a template
 # function.  Check for that.  This is gcc bug 35546.  This test can

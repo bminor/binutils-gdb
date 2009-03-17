@@ -121,6 +121,10 @@ struct hash<T*>
 extern "C" ssize_t pread(int, void*, size_t, off_t);
 #endif
 
+#ifndef HAVE_FTRUNCATE
+extern "C" int ftruncate(int, off_t);
+#endif
+
 namespace gold
 {
 
