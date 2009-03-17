@@ -4239,10 +4239,10 @@ normal_stop (void)
   if (target_has_execution)
     {
       if (!non_stop)
-	old_chain = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
+	make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
       else if (last.kind != TARGET_WAITKIND_SIGNALLED
 	       && last.kind != TARGET_WAITKIND_EXITED)
-	old_chain = make_cleanup (finish_thread_state_cleanup, &inferior_ptid);
+	make_cleanup (finish_thread_state_cleanup, &inferior_ptid);
     }
 
   /* In non-stop mode, we don't want GDB to switch threads behind the

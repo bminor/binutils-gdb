@@ -1,3 +1,7 @@
+2009-03-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (normal_stop): Don't overwrite old_chain.
+
 2009-03-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* remote-mips.c (mips_load): Replace call to regcache_set_valid_p,
