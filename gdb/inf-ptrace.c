@@ -320,7 +320,7 @@ inf_ptrace_detach (struct target_ops *ops, char *args, int from_tty)
 /* Kill the inferior.  */
 
 static void
-inf_ptrace_kill (void)
+inf_ptrace_kill (struct target_ops *ops)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   int status;

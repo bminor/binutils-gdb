@@ -123,7 +123,7 @@ static void procfs_fetch_registers (struct target_ops *,
 static void procfs_store_registers (struct target_ops *,
 				    struct regcache *, int);
 static void procfs_notice_signals (ptid_t);
-static void procfs_kill_inferior (void);
+static void procfs_kill_inferior (struct target_ops *ops);
 static void procfs_mourn_inferior (struct target_ops *ops);
 static void procfs_create_inferior (struct target_ops *, char *, 
 				    char *, char **, int);
@@ -4764,7 +4764,7 @@ unconditionally_kill_inferior (procinfo *pi)
  */
 
 static void
-procfs_kill_inferior (void)
+procfs_kill_inferior (struct target_ops *ops)
 {
   if (!ptid_equal (inferior_ptid, null_ptid)) /* ? */
     {

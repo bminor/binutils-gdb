@@ -136,8 +136,6 @@ static void debug_to_terminal_ours (void);
 
 static void debug_to_terminal_info (char *, int);
 
-static void debug_to_kill (void);
-
 static void debug_to_load (char *, int);
 
 static int debug_to_lookup_symbol (char *, CORE_ADDR *);
@@ -254,6 +252,24 @@ information on the arguments for a particular protocol, type\n\
 void
 target_ignore (void)
 {
+}
+
+void
+target_kill (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_kill != NULL)
+      {
+	if (targetdebug)
+	  fprintf_unfiltered (gdb_stdlog, "target_kill ()\n");
+
+        t->to_kill (t);
+	return;
+      }
+
+  noprocess ();
 }
 
 void
@@ -430,7 +446,7 @@ update_current_target (void)
       INHERIT (to_terminal_ours, t);
       INHERIT (to_terminal_save_ours, t);
       INHERIT (to_terminal_info, t);
-      INHERIT (to_kill, t);
+      /* Do not inherit to_kill.  */
       INHERIT (to_load, t);
       INHERIT (to_lookup_symbol, t);
       /* Do no inherit to_create_inferior.  */
@@ -556,9 +572,6 @@ update_current_target (void)
 	    target_ignore);
   de_fault (to_terminal_info,
 	    default_terminal_info);
-  de_fault (to_kill,
-	    (void (*) (void))
-	    noprocess);
   de_fault (to_load,
 	    (void (*) (char *, int))
 	    tcomplain);
@@ -3025,14 +3038,6 @@ debug_to_terminal_info (char *arg, int from_tty)
 }
 
 static void
-debug_to_kill (void)
-{
-  debug_target.to_kill ();
-
-  fprintf_unfiltered (gdb_stdlog, "target_kill ()\n");
-}
-
-static void
 debug_to_load (char *args, int from_tty)
 {
   debug_target.to_load (args, from_tty);
@@ -3227,7 +3232,6 @@ setup_target_debug (void)
   current_target.to_terminal_ours = debug_to_terminal_ours;
   current_target.to_terminal_save_ours = debug_to_terminal_save_ours;
   current_target.to_terminal_info = debug_to_terminal_info;
-  current_target.to_kill = debug_to_kill;
   current_target.to_load = debug_to_load;
   current_target.to_lookup_symbol = debug_to_lookup_symbol;
   current_target.to_post_startup_inferior = debug_to_post_startup_inferior;

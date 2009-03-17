@@ -3167,7 +3167,7 @@ kill_wait_callback (struct lwp_info *lp, void *data)
 }
 
 static void
-linux_nat_kill (void)
+linux_nat_kill (struct target_ops *ops)
 {
   struct target_waitstatus last;
   ptid_t last_ptid;

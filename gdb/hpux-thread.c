@@ -426,9 +426,9 @@ hpux_thread_files_info (struct target_ops *ignore)
 }
 
 static void
-hpux_thread_kill_inferior (void)
+hpux_thread_kill_inferior (struct target_ops *ops)
 {
-  deprecated_child_ops.to_kill ();
+  deprecated_child_ops.to_kill (&deprecated_child_ops);
 }
 
 static void

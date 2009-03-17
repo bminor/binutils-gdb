@@ -378,7 +378,7 @@ struct target_ops
     void (*to_terminal_ours) (void);
     void (*to_terminal_save_ours) (void);
     void (*to_terminal_info) (char *, int);
-    void (*to_kill) (void);
+    void (*to_kill) (struct target_ops *);
     void (*to_load) (char *, int);
     int (*to_lookup_symbol) (char *, CORE_ADDR *);
     void (*to_create_inferior) (struct target_ops *, 
@@ -790,8 +790,7 @@ extern void print_section_info (struct target_ops *, bfd *);
 
 /* Kill the inferior process.   Make it go away.  */
 
-#define target_kill() \
-     (*current_target.to_kill) ()
+extern void target_kill (void);
 
 /* Load an executable file into the target process.  This is expected
    to not only bring new code into the target process, but also to

@@ -72,7 +72,7 @@ static void gdb_os_evprintf_filtered (host_callback *, const char *, va_list);
 
 static void gdb_os_error (host_callback *, const char *, ...) ATTR_NORETURN;
 
-static void gdbsim_kill (void);
+static void gdbsim_kill (struct target_ops *);
 
 static void gdbsim_load (char *prog, int fromtty);
 
@@ -378,7 +378,7 @@ gdbsim_store_register (struct target_ops *ops,
    and releasing other resources acquired by the simulated program.  */
 
 static void
-gdbsim_kill (void)
+gdbsim_kill (struct target_ops *ops)
 {
   if (remote_debug)
     printf_filtered ("gdbsim_kill\n");
@@ -451,7 +451,7 @@ gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
 		     args);
 
   if (ptid_equal (inferior_ptid, remote_sim_ptid))
-    gdbsim_kill ();
+    gdbsim_kill (target);
   remove_breakpoints ();
   init_wait_for_inferior ();
 

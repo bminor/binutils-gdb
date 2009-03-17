@@ -111,7 +111,7 @@ static void remote_send (char **buf, long *sizeof_buf_p);
 
 static int readchar (int timeout);
 
-static void remote_kill (void);
+static void remote_kill (struct target_ops *ops);
 
 static int tohex (int nib);
 
@@ -6528,7 +6528,7 @@ getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever)
 
 
 static void
-remote_kill (void)
+remote_kill (struct target_ops *ops)
 {
   /* Use catch_errors so the user can quit from gdb even when we
      aren't on speaking terms with the remote system.  */
@@ -6560,7 +6560,7 @@ remote_vkill (int pid, struct remote_state *rs)
 }
 
 static void
-extended_remote_kill (void)
+extended_remote_kill (struct target_ops *ops)
 {
   int res;
   int pid = ptid_get_pid (inferior_ptid);

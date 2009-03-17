@@ -2030,7 +2030,7 @@ gnu_resume (struct target_ops *ops,
 
 
 static void
-gnu_kill_inferior (void)
+gnu_kill_inferior (struct target_ops *ops)
 {
   struct proc *task = gnu_current_inf->task;
   if (task)

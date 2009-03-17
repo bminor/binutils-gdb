@@ -1112,7 +1112,7 @@ m32r_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 }
 
 static void
-m32r_kill (void)
+m32r_kill (struct target_ops *ops)
 {
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_kill()\n");

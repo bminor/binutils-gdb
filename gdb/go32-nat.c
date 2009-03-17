@@ -184,7 +184,7 @@ static int go32_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 			     struct target_ops *target);
 static void go32_files_info (struct target_ops *target);
 static void go32_stop (ptid_t);
-static void go32_kill_inferior (void);
+static void go32_kill_inferior (struct target_ops *ops);
 static void go32_create_inferior (struct target_ops *ops, char *exec_file,
 				  char *args, char **env, int from_tty);
 static void go32_mourn_inferior (struct target_ops *ops);
@@ -580,7 +580,7 @@ go32_stop (ptid_t ptid)
 }
 
 static void
-go32_kill_inferior (void)
+go32_kill_inferior (struct target_ops *ops)
 {
   redir_cmdline_delete (&child_cmd);
   resume_signal = -1;
@@ -608,7 +608,7 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
   if (prog_has_started)
     {
       go32_stop (inferior_ptid);
-      go32_kill_inferior ();
+      go32_kill_inferior (ops);
     }
   resume_signal = -1;
   resume_is_step = 0;
@@ -691,7 +691,7 @@ go32_mourn_inferior (struct target_ops *ops)
      at all times, but it doesn't, probably under an assumption that
      the OS cleans up when the debuggee exits.  */
   i386_cleanup_dregs ();
-  go32_kill_inferior ();
+  go32_kill_inferior (ops);
   generic_mourn_inferior ();
 }
 

@@ -1991,7 +1991,7 @@ monitor_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 }
 
 static void
-monitor_kill (void)
+monitor_kill (struct target_ops *ops)
 {
   return;			/* ignore attempts to kill target system */
 }

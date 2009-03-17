@@ -1120,7 +1120,7 @@ procfs_stop (ptid_t ptid)
 }
 
 static void
-procfs_kill_inferior (void)
+procfs_kill_inferior (struct target_ops *ops)
 {
   target_mourn_inferior ();
 }

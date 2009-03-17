@@ -2129,7 +2129,7 @@ mips_files_info (struct target_ops *ignore)
    right port, we could interrupt the process with a break signal.  */
 
 static void
-mips_kill (void)
+mips_kill (struct target_ops *ops)
 {
   if (!mips_wait_flag)
     return;
@@ -3276,7 +3276,6 @@ mips_load (char *file, int from_tty)
          to a different value than GDB thinks it has. The following ensures
          that the write_pc() WILL update the PC value: */
       struct regcache *regcache = get_current_regcache ();
-
       regcache_invalidate (regcache,
 			   gdbarch_pc_regnum (get_regcache_arch (regcache)));
     }

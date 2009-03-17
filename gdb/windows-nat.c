@@ -114,7 +114,7 @@ static int debug_registers_used;
 
 static void windows_stop (ptid_t);
 static int windows_thread_alive (struct target_ops *, ptid_t);
-static void windows_kill_inferior (void);
+static void windows_kill_inferior (struct target_ops *);
 
 static enum target_signal last_sig = TARGET_SIGNAL_0;
 /* Set if a signal was received from the debugged process */
@@ -1493,7 +1493,7 @@ windows_wait (struct target_ops *ops,
 	    detach = deprecated_ui_loop_hook (0);
 
 	  if (detach)
-	    windows_kill_inferior ();
+	    windows_kill_inferior (ops);
 	}
     }
 }
@@ -2014,7 +2014,7 @@ windows_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
 }
 
 static void
-windows_kill_inferior (void)
+windows_kill_inferior (struct target_ops *ops)
 {
   CHECK (TerminateProcess (current_process_handle, 0));
 

@@ -814,7 +814,7 @@ inf_ttrace_detach (struct target_ops *ops, char *args, int from_tty)
 }
 
 static void
-inf_ttrace_kill (void)
+inf_ttrace_kill (struct target_ops *ops)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
 

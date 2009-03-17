@@ -1,3 +1,20 @@
+2009-03-17  Joel Brobecker  <brobecker@adacore.com>
+
+	Add a target_ops parameter to the to_kill method in struct target_ops.
+
+	* target.h (struct target_ops): Add a "target_ops *" parameter to
+	method to_kill.
+	(target_kill): Remove macro. Add declaration.
+	* target.c (debug_to_kill): Delete, no longer necessary.
+	(target_kill): New function.
+	(update_current_target):  Stop inheriting the to_kill method.
+	Do not de_fault it to no_process either.
+	(setup_target_debug): Do not set current_target.to_kill.
+	* gnu-nat.c, go32-nat.c, hpux-thread.c, inf-ptrace.c, inf-ttrace.c,
+	linux-nat.c, monitor.c, nto-procfs.c, procfs.c, remote-m32r-sdi.c,
+	remote-mips.c, remote-sim.c, remote.c, windows-nat.c: Update
+	accordingly.
+
 2009-03-17  Doug Evans  <dje@google.com>
 
 	* amd64-linux-nat.c (si_timerid,si_overrun): Provide definition for
