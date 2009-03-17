@@ -28,8 +28,19 @@
 #include <unistd.h>
 
 #include "parameters.h"
+#include "options.h"
 #include "gold-threads.h"
 #include "descriptors.h"
+
+// Very old systems may not define FD_CLOEXEC.
+#ifndef FD_CLOEXEC
+#define FD_CLOEXEC 1
+#endif
+
+// O_CLOEXEC is only available on newer systems.
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
 
 namespace gold
 {
@@ -87,6 +98,10 @@ Descriptors::open(int descriptor, const char* name, int flags, int mode)
 
   while (true)
     {
+      // We always want to set the close-on-exec flag; we don't
+      // require callers to pass it.
+      flags |= O_CLOEXEC;
+
       int new_descriptor = ::open(name, flags, mode);
       if (new_descriptor < 0
 	  && errno != ENFILE
@@ -109,24 +124,35 @@ Descriptors::open(int descriptor, const char* name, int flags, int mode)
 
       if (new_descriptor >= 0)
 	{
-	  Hold_optional_lock hl(this->lock_);
+	  // If we have any plugins, we really do need to set the
+	  // close-on-exec flag, even if O_CLOEXEC is not defined.
+	  // FIXME: In some cases O_CLOEXEC may be defined in the
+	  // header file but not supported by the kernel.
+	  // Unfortunately there doesn't seem to be any obvious way to
+	  // detect that, as unknown flags passed to open are ignored.
+	  if (O_CLOEXEC == 0 && parameters->options().has_plugins())
+	    fcntl(new_descriptor, F_SETFD, FD_CLOEXEC);
 
-	  if (static_cast<size_t>(new_descriptor)
-	      >= this->open_descriptors_.size())
-	    this->open_descriptors_.resize(new_descriptor + 64);
+	  {
+	    Hold_optional_lock hl(this->lock_);
 
-	  Open_descriptor* pod = &this->open_descriptors_[new_descriptor];
-	  pod->name = name;
-	  pod->stack_next = -1;
-	  pod->inuse = true;
-	  pod->is_write = (flags & O_ACCMODE) != O_RDONLY;
-	  pod->is_on_stack = false;
+	    if (static_cast<size_t>(new_descriptor)
+		>= this->open_descriptors_.size())
+	      this->open_descriptors_.resize(new_descriptor + 64);
 
-	  ++this->current_;
-	  if (this->current_ >= this->limit_)
-	    this->close_some_descriptor();
+	    Open_descriptor* pod = &this->open_descriptors_[new_descriptor];
+	    pod->name = name;
+	    pod->stack_next = -1;
+	    pod->inuse = true;
+	    pod->is_write = (flags & O_ACCMODE) != O_RDONLY;
+	    pod->is_on_stack = false;
 
-	  return new_descriptor;
+	    ++this->current_;
+	    if (this->current_ >= this->limit_)
+	      this->close_some_descriptor();
+
+	    return new_descriptor;
+	  }
 	}
 
       // We ran out of file descriptors.

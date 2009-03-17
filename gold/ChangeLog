@@ -1,5 +1,11 @@
 2009-03-17  Ian Lance Taylor  <iant@google.com>
 
+	* descriptors.cc: Include "options.h".
+	(FD_CLOEXEC, O_CLOEXEC): Define if not defined.
+	(Descriptors::open): Always use O_CLOEXEC when opening a new
+	descriptor.  If we have a plugin, and O_CLOEXEC was not defined,
+	then set FD_CLOEXEC.
+
 	* sparc.cc (class Target_sparc): Add has_got_section.
 	(Target_sparc::Scan::global): If we see _GLOBAL_OFFSET_TABLE_,
 	make sure we have a GOT section.
