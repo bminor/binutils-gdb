@@ -5910,7 +5910,9 @@ directories in one command.
 
 You can use the command @code{info line} to map source lines to program
 addresses (and vice versa), and the command @code{disassemble} to display
-a range of addresses as machine instructions.  When run under @sc{gnu} Emacs
+a range of addresses as machine instructions.  You can use the command
+@code{set disassemble-next-line} to set whether to disassemble next
+source line when execution stops.  When run under @sc{gnu} Emacs
 mode, the @code{info line} command causes the arrow to point to the
 line specified.  Also, @code{info line} prints addresses in symbolic form as
 well as hex.
@@ -6038,6 +6040,19 @@ assemblers for x86-based targets.
 @kindex show disassembly-flavor
 @item show disassembly-flavor
 Show the current setting of the disassembly flavor.
+@end table
+
+@table @code
+@kindex set disassemble-next-line
+@kindex show disassemble-next-line
+@item set disassemble-next-line
+@itemx show disassemble-next-line
+Control whether or not @value{GDBN} will disassemble next source line
+when execution stops.  If ON, GDB will display disassembly of the next
+source line when execution of the program being debugged stops.
+If AUTO (which is the default) or the next source line cannot be
+ascertained, display disassembly of the next instruction
+instead.
 @end table
 
 
