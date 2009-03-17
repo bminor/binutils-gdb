@@ -1821,7 +1821,7 @@
 	(HFILES_NO_SRCDIR): Add windows-tdep.h.
 	(ALLDEPFILES): Add windows-tdep.c.
 
-2009-01-11  Christ Faylor  <me.gdb@cgf.cx>
+2009-01-11  Chris Faylor  <me.gdb@cgf.cx>
 
 	* win32-nat.h: Delete.
 	* windows-nat.h: Rename from win32-nat.h.
