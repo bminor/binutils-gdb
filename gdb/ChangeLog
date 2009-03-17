@@ -1,6 +1,6 @@
 2009-03-17  Hui Zhu  <teawater@gmail.com>
 
-	*stack.c: Include valprint.h.
+	* stack.c: Include valprint.h.
 	(disassemble_next_line): New enum.
 	(show_disassemble_next_line): New function.  Show the current
 	value of disassemble-next-line.
