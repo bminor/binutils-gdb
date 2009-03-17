@@ -1,3 +1,11 @@
+2009-03-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in: Invoke ACX_PROG_CMP_IGNORE_INITIAL.
+	* Makefile.am (check-DEJAGNU): Set DO_COMPARE.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* emultempl/aix.em (auto_export_flags): New variable.

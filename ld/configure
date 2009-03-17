@@ -458,7 +458,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE use_sysroot TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE WARN_CFLAGS NO_WERROR CPP EGREP LIBTOOL SED FGREP GREP LD DUMPBIN ac_ct_DUMPBIN NM LN_S OBJDUMP ac_ct_OBJDUMP AR ac_ct_AR RANLIB ac_ct_RANLIB lt_ECHO DSYMUTIL ac_ct_DSYMUTIL NMEDIT ac_ct_NMEDIT LIPO ac_ct_LIPO OTOOL ac_ct_OTOOL OTOOL64 ac_ct_OTOOL64 USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE YACC LEX LEXLIB LEX_OUTPUT_ROOT MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT GENINSRC_NEVER_TRUE GENINSRC_NEVER_FALSE HDEFINES HOSTING_CRT0 HOSTING_LIBS NATIVE_LIB_DIRS STRINGIFY EMUL EMULATION_OFILES EMUL_EXTRA_OFILES LIB_PATH EMULATION_LIBPATH TESTBFDLIB datarootdir docdir htmldir pdfdir LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE use_sysroot TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE WARN_CFLAGS NO_WERROR CPP EGREP LIBTOOL SED FGREP GREP LD DUMPBIN ac_ct_DUMPBIN NM LN_S OBJDUMP ac_ct_OBJDUMP AR ac_ct_AR RANLIB ac_ct_RANLIB lt_ECHO DSYMUTIL ac_ct_DSYMUTIL NMEDIT ac_ct_NMEDIT LIPO ac_ct_LIPO OTOOL ac_ct_OTOOL OTOOL64 ac_ct_OTOOL64 USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE YACC LEX LEXLIB LEX_OUTPUT_ROOT MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT GENINSRC_NEVER_TRUE GENINSRC_NEVER_FALSE do_compare HDEFINES HOSTING_CRT0 HOSTING_LIBS NATIVE_LIB_DIRS STRINGIFY EMUL EMULATION_OFILES EMUL_EXTRA_OFILES LIB_PATH EMULATION_LIBPATH TESTBFDLIB datarootdir docdir htmldir pdfdir LIBOBJS LTLIBOBJS'
 ac_subst_files='TDIRS'
 ac_pwd=`pwd`
 
@@ -12635,6 +12635,36 @@ else
   GENINSRC_NEVER_FALSE=
 fi
 
+echo "$as_me:$LINENO: checking how to compare bootstrapped objects" >&5
+echo $ECHO_N "checking how to compare bootstrapped objects... $ECHO_C" >&6
+if test "${gcc_cv_prog_cmp_skip+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+   echo abfoo >t1
+  echo cdfoo >t2
+  gcc_cv_prog_cmp_skip='tail +16c $$f1 > tmp-foo1; tail +16c $$f2 > tmp-foo2; cmp tmp-foo1 tmp-foo2'
+  if cmp t1 t2 2 2 > /dev/null 2>&1; then
+    if cmp t1 t2 1 1 > /dev/null 2>&1; then
+      :
+    else
+      gcc_cv_prog_cmp_skip='cmp $$f1 $$f2 16 16'
+    fi
+  fi
+  if cmp --ignore-initial=2 t1 t2 > /dev/null 2>&1; then
+    if cmp --ignore-initial=1 t1 t2 > /dev/null 2>&1; then
+      :
+    else
+      gcc_cv_prog_cmp_skip='cmp --ignore-initial=16 $$f1 $$f2'
+    fi
+  fi
+  rm t1 t2
+
+fi
+echo "$as_me:$LINENO: result: $gcc_cv_prog_cmp_skip" >&5
+echo "${ECHO_T}$gcc_cv_prog_cmp_skip" >&6
+do_compare="$gcc_cv_prog_cmp_skip"
+
+
 
 . ${srcdir}/configure.host
 
@@ -15583,6 +15613,7 @@ s,@MAINTAINER_MODE_FALSE@,$MAINTAINER_MODE_FALSE,;t t
 s,@MAINT@,$MAINT,;t t
 s,@GENINSRC_NEVER_TRUE@,$GENINSRC_NEVER_TRUE,;t t
 s,@GENINSRC_NEVER_FALSE@,$GENINSRC_NEVER_FALSE,;t t
+s,@do_compare@,$do_compare,;t t
 s,@HDEFINES@,$HDEFINES,;t t
 s,@HOSTING_CRT0@,$HOSTING_CRT0,;t t
 s,@HOSTING_LIBS@,$HOSTING_LIBS,;t t

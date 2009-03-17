@@ -145,8 +145,6 @@ foreach flags {"" "strip" "--static" "--traditional-format"
 	}
     }
 
-    send_log "compare (tail of) tmpdir/ld2 tmpdir/ld3\n"
-    verbose  "compare (tail of) tmpdir/ld2 tmpdir/ld3"
     if {[istarget "*-*-pe"]
 	|| [istarget "*-*-wince"]
 	|| [istarget "*-*-cygwin*"]
@@ -155,19 +153,19 @@ foreach flags {"" "strip" "--static" "--traditional-format"
 	|| [istarget "*-*-interix*"]
 	|| [istarget "*-*-beospe*"]
 	|| [istarget "*-*-netbsdpe*"]} {
-        # Trim off the date present in PE binaries by only looking
-        #   at the ends of the files
-        # Although this works, a way to set the date would be better.
-        # Removing or zeroing the date stamp in the binary produced by
-        # the linker is not possible as it is required by the target OS.
-        exec tail +140 tmpdir/ld2 >tmpdir/ld2tail
-        exec tail +140 tmpdir/ld3 >tmpdir/ld3tail
-        catch "exec cmp tmpdir/ld2tail tmpdir/ld3tail" exec_output
-        exec rm tmpdir/ld2tail tmpdir/ld3tail
+	# Trim off the date present in PE binaries by only looking
+	#   at the ends of the files
+	# Although this works, a way to set the date would be better.
+	# Removing or zeroing the date stamp in the binary produced by
+	# the linker is not possible as it is required by the target OS.
+	set do_compare [string map {16 220 f1 tmpdir/ld2 f2 tmpdir/ld3 tmp-foo1 tmpdir/ld2tail tmp-foo2 tmpdir/ld3tail} $DO_COMPARE]
+	send_log "$do_compare\n"
+	verbose  "$do_compare"
+	catch "exec sh -c [list $do_compare]" exec_output
     } else {
-        send_log "cmp tmpdir/ld2 tmpdir/ld3\n"
-        verbose  "cmp tmpdir/ld2 tmpdir/ld3"
-        catch "exec cmp tmpdir/ld2 tmpdir/ld3" exec_output
+	send_log "cmp tmpdir/ld2 tmpdir/ld3\n"
+	verbose  "cmp tmpdir/ld2 tmpdir/ld3"
+	catch "exec cmp tmpdir/ld2 tmpdir/ld3" exec_output
     }
     set exec_output [prune_warnings $exec_output]
 
@@ -182,4 +180,4 @@ foreach flags {"" "strip" "--static" "--traditional-format"
 }
 
 catch "exec rm -f tmpdir/ld-partial.o tmpdir/ld1 tmpdir/ld2 tmpdir/ld3" status
-catch "exec rm -f tmpdir/ld1tail tmpdir/ld2tail tmpdir/ld3tail" status
+catch "exec rm -f tmpdir/ld2tail tmpdir/ld3tail" status
