@@ -45,6 +45,7 @@
 #include "valprint.h"
 #include "gdbthread.h"
 #include "cp-support.h"
+#include "disasm.h"
 
 #include "gdb_assert.h"
 #include <ctype.h>
@@ -456,6 +457,58 @@ set_current_sal_from_frame (struct frame_info *frame, int center)
     }
 }
 
+/* If ON, GDB will display disassembly of the next source line when
+   execution of the program being debugged stops.
+   If AUTO (which is the default) or the next source line cannot be
+   ascertained, display disassembly of the next instruction
+   instead.  */
+
+static enum auto_boolean disassemble_next_line;
+
+static void
+show_disassemble_next_line (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c,
+				 const char *value)
+{
+  fprintf_filtered (file, _("\
+Debugger's willingness to use disassemble-next-line is %s.\n"),
+                    value);
+}
+
+/* Show assembly codes; stub for catch_errors.  */
+
+struct gdb_disassembly_stub_args
+{
+  int how_many;
+  CORE_ADDR low;
+  CORE_ADDR high;
+};
+
+static void
+gdb_disassembly_stub (void *args)
+{
+  struct gdb_disassembly_stub_args *p = args;
+  gdb_disassembly (uiout, 0, 0, p->how_many, p->low, p->high);
+}
+
+/* Use TRY_CATCH to catch the exception from the gdb_disassembly
+   because it will be broken by filter sometime.  */
+
+static void
+do_gdb_disassembly (int how_many, CORE_ADDR low, CORE_ADDR high)
+{
+  volatile struct gdb_exception exception;
+  struct gdb_disassembly_stub_args args;
+
+  args.how_many = how_many;
+  args.low = low;
+  args.high = high;
+  TRY_CATCH (exception, RETURN_MASK_ALL)
+    {
+      gdb_disassembly_stub (&args);
+    }
+}
+
 /* Print information about frame FRAME.  The output is format according
    to PRINT_LEVEL and PRINT_WHAT and PRINT ARGS.  The meaning of
    PRINT_WHAT is:
@@ -533,6 +586,13 @@ print_frame_info (struct frame_info *frame, int print_level,
 
   source_print = (print_what == SRC_LINE || print_what == SRC_AND_LOC);
 
+  /* If disassemble-next-line is set to auto or on and doesn't have
+     the line debug messages for $pc, output the next instruction.  */
+  if ((disassemble_next_line == AUTO_BOOLEAN_AUTO
+       || disassemble_next_line == AUTO_BOOLEAN_TRUE)
+      && source_print && !sal.symtab)
+    do_gdb_disassembly (1, get_frame_pc (frame), get_frame_pc (frame) + 1);
+
   if (source_print && sal.symtab)
     {
       int done = 0;
@@ -569,6 +629,11 @@ print_frame_info (struct frame_info *frame, int print_level,
 	      print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
 	    }
 	}
+
+      /* If disassemble-next-line is set to on and there is line debug
+         messages, output assembly codes for next line.  */
+      if (disassemble_next_line == AUTO_BOOLEAN_TRUE)
+	do_gdb_disassembly (-1, get_frame_pc (frame), sal.end);
     }
 
   if (print_what != LOCATION)
@@ -2070,6 +2135,20 @@ Usage: func <name>\n"));
 			_("Set printing of non-scalar frame arguments"),
 			_("Show printing of non-scalar frame arguments"),
 			NULL, NULL, NULL, &setprintlist, &showprintlist);
+
+  add_setshow_auto_boolean_cmd ("disassemble-next-line", class_stack,
+			        &disassemble_next_line, _("\
+Set whether to disassemble next source line when execution stops."), _("\
+Show whether to disassemble next source line when execution stops."), _("\
+If ON, GDB will display disassembly of the next source line when\n\
+execution of the program being debugged stops.\n\
+If AUTO (which is the default) or the next source line cannot be\n\
+ascertained, display disassembly of the next instruction\n\
+instead."),
+			        NULL,
+			        show_disassemble_next_line,
+			        &setlist, &showlist);
+  disassemble_next_line = AUTO_BOOLEAN_AUTO;
 
 #if 0
   add_cmd ("backtrace-limit", class_stack, set_backtrace_limit_command, _(\

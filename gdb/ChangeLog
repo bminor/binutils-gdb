@@ -1,3 +1,27 @@
+2009-03-17  Hui Zhu  <teawater@gmail.com>
+
+	*stack.c: Include valprint.h.
+	(disassemble_next_line): New enum.
+	(show_disassemble_next_line): New function.  Show the current
+	value of disassemble-next-line.
+	(gdb_disassembly_stub_args): New struct for argument passing
+	between function do_gdb_disassembly and function
+	gdb_disassembly_stub.
+	(gdb_disassembly_stub): New function.  Helper for
+	gdb_disassembly.
+	(do_gdb_disassembly): New function.  Use TRY_CATCH to catch
+	the exception from the gdb_disassembly because it will be
+	broken by filter sometime.
+	(print_frame_info): If disassemble-next-line is set to auto
+	or on and doesn't have the line debug messages for $pc,
+	output the next instruction.
+	If disassemble-next-line is set to on and there is line debug
+	messages, output assembly codes for next line.
+	(_initialize_stack): Make the "set disassemble-next-line"
+	command an auto-boolean command.  Change its class to
+	class_stack.  Place it in the top level set list.  Extend help
+	to describe the auto mode.
+
 2009-03-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (normal_stop): Don't overwrite old_chain.
