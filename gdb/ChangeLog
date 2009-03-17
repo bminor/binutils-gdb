@@ -1,3 +1,9 @@
+2009-03-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* frame.c (get_prev_frame_1): Do not perform the inner_frame
+	sanity check if this_frame is not NORMAL.
+	(frame_id_inner): Update the description of this function.
+
 2009-03-17  Hui Zhu  <teawater@gmail.com>
 
 	* stack.c: Change the introduce of "disassemble-next-line".

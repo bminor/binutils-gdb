@@ -376,23 +376,29 @@ frame_id_eq (struct frame_id l, struct frame_id r)
    to sigaltstack).
 
    However, it can be used as safety net to discover invalid frame
-   IDs in certain circumstances.
+   IDs in certain circumstances. Assuming that NEXT is the immediate
+   inner frame to THIS and that NEXT and THIS are both NORMAL frames:
 
-   * If frame NEXT is the immediate inner frame to THIS, and NEXT
-     is a NORMAL frame, then the stack address of NEXT must be
-     inner-than-or-equal to the stack address of THIS.
+   * The stack address of NEXT must be inner-than-or-equal to the stack
+     address of THIS.
 
      Therefore, if frame_id_inner (THIS, NEXT) holds, some unwind
      error has occurred.
 
-   * If frame NEXT is the immediate inner frame to THIS, and NEXT
-     is a NORMAL frame, and NEXT and THIS have different stack
-     addresses, no other frame in the frame chain may have a stack
-     address in between.
+   * If NEXT and THIS have different stack addresses, no other frame
+     in the frame chain may have a stack address in between.
 
      Therefore, if frame_id_inner (TEST, THIS) holds, but
      frame_id_inner (TEST, NEXT) does not hold, TEST cannot refer
-     to a valid frame in the frame chain.   */
+     to a valid frame in the frame chain.
+
+   The sanity checks above cannot be performed when a SIGTRAMP frame
+   is involved, because signal handlers might be executed on a different
+   stack than the stack used by the routine that caused the signal
+   to be raised.  This can happen for instance when a thread exceeds
+   its maximum stack size. In this case, certain compilers implement
+   a stack overflow strategy that cause the handler to be run on a
+   different stack.  */
 
 static int
 frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
@@ -1274,9 +1280,10 @@ get_prev_frame_1 (struct frame_info *this_frame)
 
   /* Check that this frame's ID isn't inner to (younger, below, next)
      the next frame.  This happens when a frame unwind goes backwards.
-     This check is valid only if the next frame is NORMAL.  See the
-     comment at frame_id_inner for details.  */
-  if (this_frame->next->unwind->type == NORMAL_FRAME
+     This check is valid only if this frame and the next frame are NORMAL.
+     See the comment at frame_id_inner for details.  */
+  if (get_frame_type (this_frame) == NORMAL_FRAME
+      && this_frame->next->unwind->type == NORMAL_FRAME
       && frame_id_inner (get_frame_arch (this_frame->next), this_id,
 			 get_frame_id (this_frame->next)))
     {
