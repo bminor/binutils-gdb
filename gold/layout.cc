@@ -1327,7 +1327,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 // *TRAILING_PADDING to the number of trailing zero bytes required.
 
 Output_section*
-Layout::create_note(const char* name, int note_type, size_t descsz,
+Layout::create_note(const char* name, int note_type,
+		    const char* section_name, size_t descsz,
 		    bool allocate, size_t* trailing_padding)
 {
   // Authorities all agree that the values in a .note field should
@@ -1394,7 +1395,7 @@ Layout::create_note(const char* name, int note_type, size_t descsz,
 
   memcpy(buffer + 3 * (size / 8), name, namesz);
 
-  const char* note_name = this->namepool_.add(".note", false, NULL);
+  const char *note_name = this->namepool_.add(section_name, false, NULL);
   elfcpp::Elf_Xword flags = 0;
   if (allocate)
     flags = elfcpp::SHF_ALLOC;
@@ -1424,7 +1425,8 @@ Layout::create_gold_note()
 
   size_t trailing_padding;
   Output_section *os = this->create_note("GNU", elfcpp::NT_GNU_GOLD_VERSION,
-					 desc.size(), false, &trailing_padding);
+					 ".note.gnu.gold-version", desc.size(),
+					 false, &trailing_padding);
 
   Output_section_data* posd = new Output_data_const(desc, 4);
   os->add_output_section_data(posd);
@@ -1556,7 +1558,8 @@ Layout::create_build_id()
   // Create the note.
   size_t trailing_padding;
   Output_section* os = this->create_note("GNU", elfcpp::NT_GNU_BUILD_ID,
-					 descsz, true, &trailing_padding);
+					 ".note.gnu.build-id", descsz, true,
+					 &trailing_padding);
 
   if (!desc.empty())
     {

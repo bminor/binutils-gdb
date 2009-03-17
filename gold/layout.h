@@ -456,12 +456,12 @@ class Layout
   };
   typedef std::vector<Group_signature> Group_signatures;
 
-  // Create a .note section, filling in the header.
+  // Create a note section, filling in the header.
   Output_section*
-  create_note(const char* name, int note_type, size_t descsz,
-	      bool allocate, size_t* trailing_padding);
+  create_note(const char* name, int note_type, const char *section_name,
+	      size_t descsz, bool allocate, size_t* trailing_padding);
 
-  // Create a .note section for gold.
+  // Create a note section for gold version.
   void
   create_gold_note();
 

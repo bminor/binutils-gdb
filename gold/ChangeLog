@@ -1,3 +1,9 @@
+2009-03-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
+	
+	* layout.h (Layout::create_note): Add section_name parameter.
+	* layout.cc (Layout::create_note): Likewise.
+	(Layout::create_build_id, Layout::create_gold_note): Fix callers.
+	
 2009-03-17  Ian Lance Taylor  <iant@google.com>
 
 	* descriptors.cc: Include "options.h".
