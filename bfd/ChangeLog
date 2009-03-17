@@ -1,3 +1,7 @@
+2009-03-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_check_relocs): Correct symbian_p test.
+
 2009-03-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.h (struct spu_elf_params): ovly_flavour now only 1 bit.
