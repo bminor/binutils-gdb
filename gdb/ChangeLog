@@ -1,3 +1,7 @@
+2009-03-17  Hui Zhu  <teawater@gmail.com>
+
+	* stack.c: Change the introduce of "disassemble-next-line".
+
 2009-03-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* mi/mi-main.h (mi_print_timing_maybe): Add strict prototype,

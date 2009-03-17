@@ -459,9 +459,9 @@ set_current_sal_from_frame (struct frame_info *frame, int center)
 
 /* If ON, GDB will display disassembly of the next source line when
    execution of the program being debugged stops.
-   If AUTO (which is the default) or the next source line cannot be
-   ascertained, display disassembly of the next instruction
-   instead.  */
+   If AUTO (which is the default), or there's no line info to determine
+   the source line of the next instruction, display disassembly of next
+   instruction instead.  */
 
 static enum auto_boolean disassemble_next_line;
 
@@ -2142,9 +2142,9 @@ Set whether to disassemble next source line when execution stops."), _("\
 Show whether to disassemble next source line when execution stops."), _("\
 If ON, GDB will display disassembly of the next source line when\n\
 execution of the program being debugged stops.\n\
-If AUTO (which is the default) or the next source line cannot be\n\
-ascertained, display disassembly of the next instruction\n\
-instead."),
+If AUTO (which is the default), or there's no line info to determine\n\
+the source line of the next instruction, display disassembly of next\n\
+instruction instead."),
 			        NULL,
 			        show_disassemble_next_line,
 			        &setlist, &showlist);
