@@ -99,15 +99,15 @@ ps_err_e
 ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
 {
 #ifdef HAVE_REGSETS
-  struct process_info *process;
+  struct lwp_info *lwp;
   struct thread_info *reg_inferior, *save_inferior;
 
-  process = (struct process_info *) find_inferior_id (&all_processes,
-						      lwpid);
-  if (process == NULL)
+  lwp = (struct lwp_info *) find_inferior_id (&all_lwps,
+					      lwpid);
+  if (lwp == NULL)
     return PS_ERR;
 
-  reg_inferior = get_process_thread (process);
+  reg_inferior = get_lwp_thread (lwp);
   save_inferior = current_inferior;
   current_inferior = reg_inferior;
 

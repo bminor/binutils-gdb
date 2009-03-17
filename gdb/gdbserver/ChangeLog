@@ -1,3 +1,51 @@
+2009-03-17  Pedro Alves  <pedro@codesourcery.com>
+
+	Rename "process" to "lwp" throughout.
+
+	* linux-low.c (all_processes): Rename to...
+	(all_lwps): ... this.
+	(inferior_pid, handle_extended_wait, get_stop_pc): Adjust.
+	(add_process): Rename to ...
+	(add_lwp): ... this.  Adjust.
+	(linux_create_inferior): Adjust.
+	(linux_attach_lwp): Adjust.
+	(linux_attach): Adjust.
+	(linux_kill_one_process): Rename to ...
+	(linux_kill_one_lwp): ... this.  Adjust.
+	(linux_kill): Adjust.
+	(linux_detach_one_process): Rename to ...
+	(linux_detach_one_lwp): ... this.  Adjust.
+	(linux_detach): Adjust.
+	(check_removed_breakpoint): Adjust.
+	(status_pending_p): Adjust.
+	(linux_wait_for_process): Rename to ...
+	(linux_wait_for_lwp): ... this.  Adjust.
+	(linux_wait_for_event): Adjust.
+	(send_sigstop): Adjust.
+	(wait_for_sigstop): Adjust.
+	(stop_all_processes): Rename to ...
+	(stop_all_lwps): ... this.
+	(linux_resume_one_process): Rename to ...
+	(linux_resume_one_lwp): ... this.  Adjust.
+	(linux_set_resume_request, linux_continue_one_thread)
+	(linux_queue_one_thread, resume_status_pending_p)
+	(usr_store_inferior_registers, regsets_store_inferior_registers)
+	(linux_request_interrupt, linux_read_offsets, linux_xfer_siginfo):
+	Adjust.
+	* linux-low.h (get_process): Rename to ...
+	(get_lwp): ... this.  Adjust.
+	(get_thread_process): Rename to ...
+	(get_thread_lwp): ... this.  Adjust.
+	(get_process_thread): Rename to ...
+	(get_lwp_thread): ... this.  Adjust.
+	(struct process_info): Rename to ...
+	(struct lwp_info): ... this.
+	(all_processes): Rename to ...
+	(all_lwps): ... this.
+	* proc-service.c (ps_lgetregs): Adjust.
+	* thread-db.c (thread_db_create_event, find_one_thread)
+	(maybe_attach_thread, thread_db_get_tls_address): Adjust.
+
 2009-03-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.c (handle_query): Handle "qAttached".

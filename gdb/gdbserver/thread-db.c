@@ -136,7 +136,7 @@ thread_db_create_event (CORE_ADDR where)
 {
   td_event_msg_t msg;
   td_err_e err;
-  struct process_info *process;
+  struct lwp_info *lwp;
 
   if (debug_threads)
     fprintf (stderr, "Thread creation event.\n");
@@ -153,9 +153,9 @@ thread_db_create_event (CORE_ADDR where)
   /* If we do not know about the main thread yet, this would be a good time to
      find it.  We need to do this to pick up the main thread before any newly
      created threads.  */
-  process = get_thread_process (current_inferior);
-  if (process->thread_known == 0)
-    find_one_thread (process->lwpid);
+  lwp = get_thread_lwp (current_inferior);
+  if (lwp->thread_known == 0)
+    find_one_thread (lwp->lwpid);
 
   /* msg.event == TD_EVENT_CREATE */
 
@@ -237,15 +237,15 @@ find_one_thread (int lwpid)
   td_thrinfo_t ti;
   td_err_e err;
   struct thread_info *inferior;
-  struct process_info *process;
+  struct lwp_info *lwp;
 
   inferior = (struct thread_info *) find_inferior_id (&all_threads, lwpid);
-  process = get_thread_process (inferior);
-  if (process->thread_known)
+  lwp = get_thread_lwp (inferior);
+  if (lwp->thread_known)
     return 1;
 
   /* Get information about this thread.  */
-  err = td_ta_map_lwp2thr (thread_agent, process->lwpid, &th);
+  err = td_ta_map_lwp2thr (thread_agent, lwp->lwpid, &th);
   if (err != TD_OK)
     error ("Cannot get thread handle for LWP %d: %s",
 	   lwpid, thread_db_err_str (err));
@@ -259,10 +259,10 @@ find_one_thread (int lwpid)
     fprintf (stderr, "Found thread %ld (LWP %d)\n",
 	     ti.ti_tid, ti.ti_lid);
 
-  if (process->lwpid != ti.ti_lid)
+  if (lwp->lwpid != ti.ti_lid)
     {
       warning ("PID mismatch!  Expected %ld, got %ld",
-	       (long) process->lwpid, (long) ti.ti_lid);
+	       (long) lwp->lwpid, (long) ti.ti_lid);
       return 0;
     }
 
@@ -279,8 +279,8 @@ find_one_thread (int lwpid)
   if (ti.ti_tid == 0)
     return 0;
 
-  process->thread_known = 1;
-  process->th = th;
+  lwp->thread_known = 1;
+  lwp->th = th;
 
   return 1;
 }
@@ -290,7 +290,7 @@ maybe_attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
 {
   td_err_e err;
   struct thread_info *inferior;
-  struct process_info *process;
+  struct lwp_info *lwp;
 
   inferior = (struct thread_info *) find_inferior_id (&all_threads,
 						      ti_p->ti_lid);
@@ -310,10 +310,10 @@ maybe_attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
       return;
     }
 
-  process = inferior_target_data (inferior);
+  lwp = inferior_target_data (inferior);
 
-  process->thread_known = 1;
-  process->th = *th_p;
+  lwp->thread_known = 1;
+  lwp->th = *th_p;
 
   if (thread_db_use_events)
     {
@@ -384,18 +384,18 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 #if HAVE_TD_THR_TLS_GET_ADDR
   psaddr_t addr;
   td_err_e err;
-  struct process_info *process;
+  struct lwp_info *lwp;
 
-  process = get_thread_process (thread);
-  if (!process->thread_known)
-    find_one_thread (process->lwpid);
-  if (!process->thread_known)
+  lwp = get_thread_lwp (thread);
+  if (!lwp->thread_known)
+    find_one_thread (lwp->lwpid);
+  if (!lwp->thread_known)
     return TD_NOTHR;
 
   /* Note the cast through uintptr_t: this interface only works if
      a target address fits in a psaddr_t, which is a host pointer.
      So a 32-bit debugger can not access 64-bit TLS through this.  */
-  err = td_thr_tls_get_addr (&process->th, (psaddr_t) (uintptr_t) load_module,
+  err = td_thr_tls_get_addr (&lwp->th, (psaddr_t) (uintptr_t) load_module,
 			     offset, &addr);
   if (err == TD_OK)
     {

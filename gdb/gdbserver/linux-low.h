@@ -78,13 +78,13 @@ struct linux_target_ops
 
 extern struct linux_target_ops the_low_target;
 
-#define get_process(inf) ((struct process_info *)(inf))
-#define get_thread_process(thr) (get_process (inferior_target_data (thr)))
-#define get_process_thread(proc) ((struct thread_info *) \
-				  find_inferior_id (&all_threads, \
-				  get_process (proc)->lwpid))
+#define get_lwp(inf) ((struct lwp_info *)(inf))
+#define get_thread_lwp(thr) (get_lwp (inferior_target_data (thr)))
+#define get_lwp_thread(proc) ((struct thread_info *)			\
+			      find_inferior_id (&all_threads,		\
+						get_lwp (proc)->lwpid))
 
-struct process_info
+struct lwp_info
 {
   struct inferior_list_entry head;
   unsigned long lwpid;
@@ -126,7 +126,7 @@ struct process_info
   struct pending_signals *pending_signals;
 
   /* A link used when resuming.  It is initialized from the resume request,
-     and then processed and cleared in linux_resume_one_process.  */
+     and then processed and cleared in linux_resume_one_lwp.  */
 
   struct thread_resume *resume;
 
@@ -138,7 +138,7 @@ struct process_info
 #endif
 };
 
-extern struct inferior_list all_processes;
+extern struct inferior_list all_lwps;
 
 void linux_attach_lwp (unsigned long pid);
 
