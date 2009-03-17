@@ -37,11 +37,12 @@ static struct spu_elf_params params =
   &spu_elf_load_ovl_mgr,
   &spu_elf_open_overlay_script,
   &spu_elf_relink,
-  0, ovly_normal, 0, 0, 0, 0, 0, 0,
+  0, ovly_normal, 0, 0, 0, 0, 0, 0, 0,
   0, 0x3ffff,
   1, 0, 16, 0, 0, 2000
 };
-  
+
+static unsigned int no_overlays = 0;  
 static unsigned int num_lines_set = 0;
 static unsigned int line_size_set = 0;
 static char *auto_overlay_file = 0;
@@ -263,7 +264,7 @@ spu_before_allocation (void)
 {
   if (is_spu_target ()
       && !link_info.relocatable
-      && params.ovly_flavour != ovly_none)
+      && !no_overlays)
     {
       /* Size the sections.  This is premature, but we need to know the
 	 rough layout so that overlays can be found.  */
@@ -584,7 +585,8 @@ fi
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_SPU_PLUGIN		301
 #define OPTION_SPU_NO_OVERLAYS		(OPTION_SPU_PLUGIN + 1)
-#define OPTION_SPU_STUB_SYMS		(OPTION_SPU_NO_OVERLAYS + 1)
+#define OPTION_SPU_COMPACT_STUBS	(OPTION_SPU_NO_OVERLAYS + 1)
+#define OPTION_SPU_STUB_SYMS		(OPTION_SPU_COMPACT_STUBS + 1)
 #define OPTION_SPU_NON_OVERLAY_STUBS	(OPTION_SPU_STUB_SYMS + 1)
 #define OPTION_SPU_LOCAL_STORE		(OPTION_SPU_NON_OVERLAY_STUBS + 1)
 #define OPTION_SPU_STACK_ANALYSIS	(OPTION_SPU_LOCAL_STORE + 1)
@@ -611,6 +613,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "line-size", required_argument, NULL, OPTION_SPU_LINE_SIZE },
   { "non-ia-text", no_argument, NULL, OPTION_SPU_NON_IA_TEXT },
   { "no-overlays", no_argument, NULL, OPTION_SPU_NO_OVERLAYS },
+  { "compact-stubs", no_argument, NULL, OPTION_SPU_COMPACT_STUBS },
   { "emit-stub-syms", no_argument, NULL, OPTION_SPU_STUB_SYMS },
   { "extra-overlay-stubs", no_argument, NULL, OPTION_SPU_NON_OVERLAY_STUBS },
   { "local-store", required_argument, NULL, OPTION_SPU_LOCAL_STORE },
@@ -631,6 +634,7 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
   --plugin                    Make SPU plugin.\n\
   --no-overlays               No overlay handling.\n\
+  --compact-stubs             Use smaller and possibly slower call stubs.\n\
   --emit-stub-syms            Add symbols on overlay call stubs.\n\
   --extra-overlay-stubs       Add stubs on all calls out of overlay regions.\n\
   --local-store=lo:hi         Valid address range.\n\
@@ -662,7 +666,11 @@ PARSE_AND_LIST_ARGS_CASES='
       break;
 
     case OPTION_SPU_NO_OVERLAYS:
-      params.ovly_flavour = ovly_none;
+      no_overlays = 1;
+      break;
+
+    case OPTION_SPU_COMPACT_STUBS:
+      params.compact_stub = 1;
       break;
 
     case OPTION_SPU_STUB_SYMS:

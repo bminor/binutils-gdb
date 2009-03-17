@@ -1,5 +1,17 @@
 2009-03-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/spu_icache.S: Add new entry to dummy handler.
+	* emultempl/spu_icache.o_c: Regenerate.
+	* emultempl/spuelf.em (params): Init new field.
+	(no_overlays): New static var.
+	(spu_before_allocation): Use it.
+	(OPTION_SPU_COMPACT_STUBS): Define.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add compact-stubs.
+	(PARSE_AND_LIST_ARGS_CASES): Handle compact-stubs.  Adjust no-overlays
+	handling.
+
+2009-03-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* configure.host (HOSTING_LIBS): Two dollars on shell variable
 	expansion to suit make.
 

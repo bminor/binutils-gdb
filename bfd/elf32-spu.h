@@ -35,7 +35,8 @@ struct spu_elf_params
 #define OVERLAY_RODATA 4
 
   /* Type of overlays, enum _ovly_flavour.  */
-  unsigned int ovly_flavour : 2;
+  unsigned int ovly_flavour : 1;
+  unsigned int compact_stub : 1;
 
   /* Set if we should emit symbols for stubs.  */
   unsigned int emit_stub_syms : 1;
@@ -98,10 +99,8 @@ struct _spu_elf_section_data
 
 enum _ovly_flavour
 {
-  ovly_compact,
   ovly_normal,
-  ovly_soft_icache,
-  ovly_none
+  ovly_soft_icache
 };
 
 struct _ovl_stream

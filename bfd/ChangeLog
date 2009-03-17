@@ -1,3 +1,22 @@
+2009-03-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.h (struct spu_elf_params): ovly_flavour now only 1 bit.
+	Add compact_stub.
+	(emum _ovly_flavour): Delete ovly_compact, ovly_none.
+	* elf32-spu.c (struct spu_link_hash_table): Replace ovly_load and
+	ovly_return fields with ovly_entry[2].  Adjust all users.
+	(spu_elf_find_overlays): Set ovly_entry[1] from __icache_call_handler
+	when soft-icache.
+	(spu_elf_build_stubs): Likewise.
+	(ovl_stub_size): Change arg to spu_elf_params pointer.  Adjust for
+	ovly_flavour changes.  Update all callers.
+	(ovl_stub_size_log2): New function.
+	(build_stub): Handle compact icache stubs.  Use different manager
+	entry point for stubs in non-icache area.
+	(spu_elf_size_stubs): Don't allocate space for indirect branch
+	descriptors.
+	(spu_elf_build_stubs): And don't built them.
+
 2009-03-16  Andrew Stubbs  <ams@codesourcery.com>
 
 	* dwarf2.c (read_section): Always use rawsize, if available.
