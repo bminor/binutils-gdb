@@ -1,5 +1,15 @@
 2009-03-17  Ian Lance Taylor  <iant@google.com>
 
+	* sparc.cc (class Target_sparc): Add has_got_section.
+	(Target_sparc::Scan::global): If we see _GLOBAL_OFFSET_TABLE_,
+	make sure we have a GOT section.
+
+	* sparc.cc (optimize_tls_reloc): Recognize R_SPARC_TLS_IE_ADD.
+	(Target_sparc::Scan::local): Likewise.
+	(Target_sparc::Scan::global): Likewise.
+	(Target_sparc::Relocate::relocate): Likewise.
+	(Target_sparc::Relocate::relocate_tls): Likewise.
+
 	* symtab.cc (Symbol_table::define_default_version): New function,
 	broken out of add_from_object.
 	(Symbol_table::add_from_object): Call define_default_version.

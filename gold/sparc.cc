@@ -155,6 +155,11 @@ class Target_sparc : public Sized_target<size, big_endian>
     return strcmp(sym->name(), "___tls_get_addr") == 0;
   }
 
+  // Return whether there is a GOT section.
+  bool
+  has_got_section() const
+  { return this->got_ != NULL; }
+
   // Return the size of the GOT section.
   section_size_type
   got_size()
@@ -1455,6 +1460,7 @@ optimize_tls_reloc(bool is_final, int r_type)
     case elfcpp::R_SPARC_TLS_IE_LO10:
     case elfcpp::R_SPARC_TLS_IE_LD:
     case elfcpp::R_SPARC_TLS_IE_LDX:
+    case elfcpp::R_SPARC_TLS_IE_ADD:
       // These are Initial-Exec relocs which get the thread offset
       // from the GOT.  If we know that we are linking against the
       // local symbol, we can switch to Local-Exec, which links the
@@ -1744,6 +1750,7 @@ Target_sparc<size, big_endian>::Scan::local(
     case elfcpp::R_SPARC_TLS_IE_LO10:
     case elfcpp::R_SPARC_TLS_IE_LD:
     case elfcpp::R_SPARC_TLS_IE_LDX:
+    case elfcpp::R_SPARC_TLS_IE_ADD:
     case elfcpp::R_SPARC_TLS_LE_HIX22:	// Local-exec
     case elfcpp::R_SPARC_TLS_LE_LOX10:
       {
@@ -1810,6 +1817,7 @@ Target_sparc<size, big_endian>::Scan::local(
 	  case elfcpp::R_SPARC_TLS_IE_LO10:
 	  case elfcpp::R_SPARC_TLS_IE_LD:
 	  case elfcpp::R_SPARC_TLS_IE_LDX:
+	  case elfcpp::R_SPARC_TLS_IE_ADD:
 	    layout->set_has_static_tls();
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
@@ -1906,6 +1914,13 @@ Target_sparc<size, big_endian>::Scan::global(
 				Symbol* gsym)
 {
   unsigned int orig_r_type = r_type;
+
+  // A reference to _GLOBAL_OFFSET_TABLE_ implies that we need a got
+  // section.  We check here to avoid creating a dynamic reloc against
+  // _GLOBAL_OFFSET_TABLE_.
+  if (!target->has_got_section()
+      && strcmp(gsym->name(), "_GLOBAL_OFFSET_TABLE_") == 0)
+    target->got_section(symtab, layout);
 
   r_type &= 0xff;
   switch (r_type)
@@ -2105,6 +2120,7 @@ Target_sparc<size, big_endian>::Scan::global(
     case elfcpp::R_SPARC_TLS_IE_LO10:
     case elfcpp::R_SPARC_TLS_IE_LD:
     case elfcpp::R_SPARC_TLS_IE_LDX:
+    case elfcpp::R_SPARC_TLS_IE_ADD:
       {
 	const bool is_final = gsym->final_value_is_known();
 	const tls::Tls_optimization optimized_type
@@ -2187,6 +2203,7 @@ Target_sparc<size, big_endian>::Scan::global(
 	  case elfcpp::R_SPARC_TLS_IE_LO10:
 	  case elfcpp::R_SPARC_TLS_IE_LD:
 	  case elfcpp::R_SPARC_TLS_IE_LDX:
+	  case elfcpp::R_SPARC_TLS_IE_ADD:
 	    layout->set_has_static_tls();
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
@@ -2460,8 +2477,8 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 
     case elfcpp::R_SPARC_32:
       if (!parameters->options().output_is_position_independent())
-	      Relocate_functions<size, big_endian>::rela32(view, object,
-							   psymval, addend);
+	Relocate_functions<size, big_endian>::rela32(view, object,
+						     psymval, addend);
       break;
 
     case elfcpp::R_SPARC_DISP8:
@@ -2670,6 +2687,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_SPARC_TLS_IE_LO10:
     case elfcpp::R_SPARC_TLS_IE_LD:
     case elfcpp::R_SPARC_TLS_IE_LDX:
+    case elfcpp::R_SPARC_TLS_IE_ADD:
     case elfcpp::R_SPARC_TLS_LE_HIX22:
     case elfcpp::R_SPARC_TLS_LE_LOX10:
       this->relocate_tls(relinfo, target, relnum, rela,
@@ -3047,6 +3065,12 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
       gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			     _("unsupported reloc %u"),
 			     r_type);
+      break;
+
+    case elfcpp::R_SPARC_TLS_IE_ADD:
+      // This seems to be mainly so that we can find the addition
+      // instruction if there is one.  There doesn't seem to be any
+      // actual relocation to apply.
       break;
 
     case elfcpp::R_SPARC_TLS_LE_HIX22:
