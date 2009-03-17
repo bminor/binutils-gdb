@@ -1,5 +1,10 @@
 2009-03-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/default.exp (get_link_files): Replace double dollars with
+	single dollars.
+
+2009-03-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld-bootstrap/bootstrap.exp: Use DO_COMPARE.  Remove unnecessary
 	cleanup and log output.
 
