@@ -1,5 +1,9 @@
 2009-03-17  Hui Zhu  <teawater@gmail.com>
 
+	* gdb.texinfo: Change the introduce of "disassemble-next-line".
+
+2009-03-17  Hui Zhu  <teawater@gmail.com>
+
 	* gdb.texinfo: Add documentation for disassemble-next-line.
 
 2009-03-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
