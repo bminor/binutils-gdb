@@ -1,3 +1,19 @@
+2009-03-17  Ian Lance Taylor  <iant@google.com>
+
+	* symtab.cc (Symbol_table::define_default_version): New function,
+	broken out of add_from_object.
+	(Symbol_table::add_from_object): Call define_default_version.
+	(Symbol_table::define_special_symbol): Add resolve_oldsym
+	parameter.  Change all callers.  If the version for a symbol comes
+	from a version script, resolve it with the symbol with the same
+	name with no version.  Also add the symbol without a version if
+	appropriate.
+	(do_define_in_output_data): If resolving with oldsym, don't delete
+	sym.
+	(do_define_in_output_segment): Likewise.
+	(do_define_as_constant): Likewise.
+	* symtab.h (class Symbol_table): Update declarations.
+
 2009-03-13  Ian Lance Taylor  <iant@google.com>
 
 	* readsyms.cc (Read_symbols::incompatible_warning): New function.

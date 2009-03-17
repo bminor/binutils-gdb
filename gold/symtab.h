@@ -1367,6 +1367,25 @@ class Symbol_table
   // The type of the list of common symbols.
   typedef std::vector<Symbol*> Commons_type;
 
+  // The type of the symbol hash table.
+
+  typedef std::pair<Stringpool::Key, Stringpool::Key> Symbol_table_key;
+
+  struct Symbol_table_hash
+  {
+    size_t
+    operator()(const Symbol_table_key&) const;
+  };
+
+  struct Symbol_table_eq
+  {
+    bool
+    operator()(const Symbol_table_key&, const Symbol_table_key&) const;
+  };
+
+  typedef Unordered_map<Symbol_table_key, Symbol*, Symbol_table_hash,
+			Symbol_table_eq> Symbol_table_type;
+
   // Make FROM a forwarder symbol to TO.
   void
   make_forwarder(Symbol* from, Symbol* to);
@@ -1379,6 +1398,12 @@ class Symbol_table
 		  bool def, const elfcpp::Sym<size, big_endian>& sym,
 		  unsigned int st_shndx, bool is_ordinary,
 		  unsigned int orig_st_shndx);
+
+  // Define a default symbol.
+  template<int size, bool big_endian>
+  void
+  define_default_version(Sized_symbol<size>*, bool,
+			 Symbol_table_type::iterator);
 
   // Resolve symbols.
   template<int size, bool big_endian>
@@ -1435,7 +1460,8 @@ class Symbol_table
   template<int size, bool big_endian>
   Sized_symbol<size>*
   define_special_symbol(const char** pname, const char** pversion,
-			bool only_if_ref, Sized_symbol<size>** poldsym);
+			bool only_if_ref, Sized_symbol<size>** poldsym,
+			bool* resolve_oldsym);
 
   // Define a symbol in an Output_data, sized version.
   template<int size>
@@ -1530,25 +1556,6 @@ class Symbol_table
   void
   sized_write_section_symbol(const Output_section*, Output_symtab_xindex*,
 			     Output_file*, off_t) const;
-
-  // The type of the symbol hash table.
-
-  typedef std::pair<Stringpool::Key, Stringpool::Key> Symbol_table_key;
-
-  struct Symbol_table_hash
-  {
-    size_t
-    operator()(const Symbol_table_key&) const;
-  };
-
-  struct Symbol_table_eq
-  {
-    bool
-    operator()(const Symbol_table_key&, const Symbol_table_key&) const;
-  };
-
-  typedef Unordered_map<Symbol_table_key, Symbol*, Symbol_table_hash,
-			Symbol_table_eq> Symbol_table_type;
 
   // The type of the list of symbols which have been forced local.
   typedef std::vector<Symbol*> Forced_locals;

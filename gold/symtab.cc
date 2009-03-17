@@ -713,6 +713,82 @@ Symbol_table::wrap_symbol(Object* object, const char* name,
   return name;
 }
 
+// This is called when we see a symbol NAME/VERSION, and the symbol
+// already exists in the symbol table, and VERSION is marked as being
+// the default version.  SYM is the NAME/VERSION symbol we just added.
+// DEFAULT_IS_NEW is true if this is the first time we have seen the
+// symbol NAME/NULL.  PDEF points to the entry for NAME/NULL.
+
+template<int size, bool big_endian>
+void
+Symbol_table::define_default_version(Sized_symbol<size>* sym,
+				     bool default_is_new,
+				     Symbol_table_type::iterator pdef)
+{
+  if (default_is_new)
+    {
+      // This is the first time we have seen NAME/NULL.  Make
+      // NAME/NULL point to NAME/VERSION, and mark SYM as the default
+      // version.
+      pdef->second = sym;
+      sym->set_is_default();
+    }
+  else if (pdef->second == sym)
+    {
+      // NAME/NULL already points to NAME/VERSION.  Don't mark the
+      // symbol as the default if it is not already the default.
+    }
+  else
+    {
+      // This is the unfortunate case where we already have entries
+      // for both NAME/VERSION and NAME/NULL.  We now see a symbol
+      // NAME/VERSION where VERSION is the default version.  We have
+      // already resolved this new symbol with the existing
+      // NAME/VERSION symbol.
+
+      // It's possible that NAME/NULL and NAME/VERSION are both
+      // defined in regular objects.  This can only happen if one
+      // object file defines foo and another defines foo@@ver.  This
+      // is somewhat obscure, but we call it a multiple definition
+      // error.
+
+      // It's possible that NAME/NULL actually has a version, in which
+      // case it won't be the same as VERSION.  This happens with
+      // ver_test_7.so in the testsuite for the symbol t2_2.  We see
+      // t2_2@@VER2, so we define both t2_2/VER2 and t2_2/NULL.  We
+      // then see an unadorned t2_2 in an object file and give it
+      // version VER1 from the version script.  This looks like a
+      // default definition for VER1, so it looks like we should merge
+      // t2_2/NULL with t2_2/VER1.  That doesn't make sense, but it's
+      // not obvious that this is an error, either.  So we just punt.
+
+      // If one of the symbols has non-default visibility, and the
+      // other is defined in a shared object, then they are different
+      // symbols.
+
+      // Otherwise, we just resolve the symbols as though they were
+      // the same.
+
+      if (pdef->second->version() != NULL)
+	gold_assert(pdef->second->version() != sym->version());
+      else if (sym->visibility() != elfcpp::STV_DEFAULT
+	       && pdef->second->is_from_dynobj())
+	;
+      else if (pdef->second->visibility() != elfcpp::STV_DEFAULT
+	       && sym->is_from_dynobj())
+	;
+      else
+	{
+	  const Sized_symbol<size>* symdef;
+	  symdef = this->get_sized_symbol<size>(pdef->second);
+	  Symbol_table::resolve<size, big_endian>(sym, symdef);
+	  this->make_forwarder(pdef->second, sym);
+	  pdef->second = sym;
+	  sym->set_is_default();
+	}
+    }
+}
+
 // Add one symbol from OBJECT to the symbol table.  NAME is symbol
 // name and VERSION is the version; both are canonicalized.  DEF is
 // whether this is the default version.  ST_SHNDX is the symbol's
@@ -822,69 +898,8 @@ Symbol_table::add_from_object(Object* object,
         this->gc_mark_dyn_syms(ret);
 
       if (def)
-	{
-	  if (insdef.second)
-	    {
-	      // This is the first time we have seen NAME/NULL.  Make
-	      // NAME/NULL point to NAME/VERSION.
-	      insdef.first->second = ret;
-	    }
-	  else if (insdef.first->second != ret)
-	    {
-	      // This is the unfortunate case where we already have
-	      // entries for both NAME/VERSION and NAME/NULL.  We now
-	      // see a symbol NAME/VERSION where VERSION is the
-	      // default version.  We have already resolved this new
-	      // symbol with the existing NAME/VERSION symbol.
-
-	      // It's possible that NAME/NULL and NAME/VERSION are
-	      // both defined in regular objects.  This can only
-	      // happen if one object file defines foo and another
-	      // defines foo@@ver.  This is somewhat obscure, but we
-	      // call it a multiple definition error.
-
-	      // It's possible that NAME/NULL actually has a version,
-	      // in which case it won't be the same as VERSION.  This
-	      // happens with ver_test_7.so in the testsuite for the
-	      // symbol t2_2.  We see t2_2@@VER2, so we define both
-	      // t2_2/VER2 and t2_2/NULL.  We then see an unadorned
-	      // t2_2 in an object file and give it version VER1 from
-	      // the version script.  This looks like a default
-	      // definition for VER1, so it looks like we should merge
-	      // t2_2/NULL with t2_2/VER1.  That doesn't make sense,
-	      // but it's not obvious that this is an error, either.
-	      // So we just punt.
-
-	      // If one of the symbols has non-default visibility, and
-	      // the other is defined in a shared object, then they
-	      // are different symbols.
-
-	      // Otherwise, we just resolve the symbols as though they
-	      // were the same.
-
-	      if (insdef.first->second->version() != NULL)
-		{
-		  gold_assert(insdef.first->second->version() != version);
-		  def = false;
-		}
-	      else if (ret->visibility() != elfcpp::STV_DEFAULT
-		  && insdef.first->second->is_from_dynobj())
-		def = false;
-	      else if (insdef.first->second->visibility() != elfcpp::STV_DEFAULT
-		       && ret->is_from_dynobj())
-		def = false;
-	      else
-		{
-		  const Sized_symbol<size>* sym2;
-		  sym2 = this->get_sized_symbol<size>(insdef.first->second);
-		  Symbol_table::resolve<size, big_endian>(ret, sym2);
-		  this->make_forwarder(insdef.first->second, ret);
-		  insdef.first->second = ret;
-		}
-	    }
-	  else
-	    def = false;
-	}
+	this->define_default_version<size, big_endian>(ret, insdef.second,
+						       insdef.first);
     }
   else
     {
@@ -946,6 +961,9 @@ Symbol_table::add_from_object(Object* object,
 	      insdef.first->second = ret;
 	    }
 	}
+
+      if (def)
+	ret->set_is_default();
     }
 
   // Record every time we see a new undefined symbol, to speed up
@@ -972,8 +990,6 @@ Symbol_table::add_from_object(Object* object,
       && !parameters->options().relocatable())
     this->force_local(ret);
 
-  if (def)
-    ret->set_is_default();
   return ret;
 }
 
@@ -1477,39 +1493,55 @@ Symbol_table::record_weak_aliases(std::vector<Sized_symbol<size>*>* symbols)
 // Create and return a specially defined symbol.  If ONLY_IF_REF is
 // true, then only create the symbol if there is a reference to it.
 // If this does not return NULL, it sets *POLDSYM to the existing
-// symbol if there is one.  This canonicalizes *PNAME and *PVERSION.
+// symbol if there is one.  This sets *RESOLVE_OLDSYM if we should
+// resolve the newly created symbol to the old one.  This
+// canonicalizes *PNAME and *PVERSION.
 
 template<int size, bool big_endian>
 Sized_symbol<size>*
 Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 				    bool only_if_ref,
-                                    Sized_symbol<size>** poldsym)
+                                    Sized_symbol<size>** poldsym,
+				    bool *resolve_oldsym)
 {
-  Symbol* oldsym;
-  Sized_symbol<size>* sym;
-  bool add_to_table = false;
-  typename Symbol_table_type::iterator add_loc = this->table_.end();
+  *resolve_oldsym = false;
 
   // If the caller didn't give us a version, see if we get one from
   // the version script.
   std::string v;
+  bool is_default_version = false;
   if (*pversion == NULL)
     {
       if (this->version_script_.get_symbol_version(*pname, &v))
 	{
 	  if (!v.empty())
 	    *pversion = v.c_str();
+
+	  // If we get the version from a version script, then we are
+	  // also the default version.
+	  is_default_version = true;
 	}
     }
+
+  Symbol* oldsym;
+  Sized_symbol<size>* sym;
+
+  bool add_to_table = false;
+  typename Symbol_table_type::iterator add_loc = this->table_.end();
+  bool add_def_to_table = false;
+  typename Symbol_table_type::iterator add_def_loc = this->table_.end();
 
   if (only_if_ref)
     {
       oldsym = this->lookup(*pname, *pversion);
+      if (oldsym == NULL && is_default_version)
+	oldsym = this->lookup(*pname, NULL);
       if (oldsym == NULL || !oldsym->is_undefined())
 	return NULL;
 
       *pname = oldsym->name();
-      *pversion = oldsym->version();
+      if (!is_default_version)
+	*pversion = oldsym->version();
     }
   else
     {
@@ -1527,19 +1559,56 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 							  version_key),
 					   snull));
 
+      std::pair<typename Symbol_table_type::iterator, bool> insdef =
+	std::make_pair(this->table_.end(), false);
+      if (is_default_version)
+	{
+	  const Stringpool::Key vnull = 0;
+	  insdef = this->table_.insert(std::make_pair(std::make_pair(name_key,
+								     vnull),
+						      snull));
+	}
+
       if (!ins.second)
 	{
 	  // We already have a symbol table entry for NAME/VERSION.
 	  oldsym = ins.first->second;
 	  gold_assert(oldsym != NULL);
+
+	  if (is_default_version)
+	    {
+	      Sized_symbol<size>* soldsym =
+		this->get_sized_symbol<size>(oldsym);
+	      this->define_default_version<size, big_endian>(soldsym,
+							     insdef.second,
+							     insdef.first);
+	    }
 	}
       else
 	{
 	  // We haven't seen this symbol before.
 	  gold_assert(ins.first->second == NULL);
-          add_to_table = true;
-          add_loc = ins.first;
-	  oldsym = NULL;
+
+	  add_to_table = true;
+	  add_loc = ins.first;
+
+	  if (is_default_version && !insdef.second)
+	    {
+	      // We are adding NAME/VERSION, and it is the default
+	      // version.  We already have an entry for NAME/NULL.
+	      oldsym = insdef.first->second;
+	      *resolve_oldsym = true;
+	    }
+	  else
+	    {
+	      oldsym = NULL;
+
+	      if (is_default_version)
+		{
+		  add_def_to_table = true;
+		  add_def_loc = insdef.first;
+		}
+	    }
 	}
     }
 
@@ -1562,6 +1631,9 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
     add_loc->second = sym;
   else
     gold_assert(oldsym != NULL);
+
+  if (add_def_to_table)
+    add_def_loc->second = sym;
 
   *poldsym = this->get_sized_symbol<size>(oldsym);
 
@@ -1630,12 +1702,14 @@ Symbol_table::do_define_in_output_data(
 {
   Sized_symbol<size>* sym;
   Sized_symbol<size>* oldsym;
+  bool resolve_oldsym;
 
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol<size, true>(&name, &version,
-						    only_if_ref, &oldsym);
+						    only_if_ref, &oldsym,
+						    &resolve_oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1644,7 +1718,8 @@ Symbol_table::do_define_in_output_data(
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol<size, false>(&name, &version,
-						     only_if_ref, &oldsym);
+						     only_if_ref, &oldsym,
+						     &resolve_oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1668,8 +1743,14 @@ Symbol_table::do_define_in_output_data(
 
   if (Symbol_table::should_override_with_special(oldsym))
     this->override_with_special(oldsym, sym);
-  delete sym;
-  return oldsym;
+
+  if (resolve_oldsym)
+    return sym;
+  else
+    {
+      delete sym;
+      return oldsym;
+    }
 }
 
 // Define a symbol based on an Output_segment.
@@ -1731,12 +1812,14 @@ Symbol_table::do_define_in_output_segment(
 {
   Sized_symbol<size>* sym;
   Sized_symbol<size>* oldsym;
+  bool resolve_oldsym;
 
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol<size, true>(&name, &version,
-						    only_if_ref, &oldsym);
+						    only_if_ref, &oldsym,
+						    &resolve_oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1745,7 +1828,8 @@ Symbol_table::do_define_in_output_segment(
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol<size, false>(&name, &version,
-						     only_if_ref, &oldsym);
+						     only_if_ref, &oldsym,
+						     &resolve_oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1769,8 +1853,14 @@ Symbol_table::do_define_in_output_segment(
 
   if (Symbol_table::should_override_with_special(oldsym))
     this->override_with_special(oldsym, sym);
-  delete sym;
-  return oldsym;
+
+  if (resolve_oldsym)
+    return sym;
+  else
+    {
+      delete sym;
+      return oldsym;
+    }
 }
 
 // Define a special symbol with a constant value.  It is a multiple
@@ -1832,12 +1922,14 @@ Symbol_table::do_define_as_constant(
 {
   Sized_symbol<size>* sym;
   Sized_symbol<size>* oldsym;
+  bool resolve_oldsym;
 
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol<size, true>(&name, &version,
-						    only_if_ref, &oldsym);
+						    only_if_ref, &oldsym,
+						    &resolve_oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1846,7 +1938,8 @@ Symbol_table::do_define_as_constant(
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol<size, false>(&name, &version,
-						     only_if_ref, &oldsym);
+						     only_if_ref, &oldsym,
+						     &resolve_oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1876,8 +1969,14 @@ Symbol_table::do_define_as_constant(
 
   if (force_override || Symbol_table::should_override_with_special(oldsym))
     this->override_with_special(oldsym, sym);
-  delete sym;
-  return oldsym;
+
+  if (resolve_oldsym)
+    return sym;
+  else
+    {
+      delete sym;
+      return oldsym;
+    }
 }
 
 // Define a set of symbols in output sections.
@@ -2041,11 +2140,13 @@ Symbol_table::do_add_undefined_symbols_from_command_line()
 
       Sized_symbol<size>* sym;
       Sized_symbol<size>* oldsym;
+      bool resolve_oldsym;
       if (parameters->target().is_big_endian())
 	{
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
 	  sym = this->define_special_symbol<size, true>(&name, &version,
-							false, &oldsym);
+							false, &oldsym,
+							&resolve_oldsym);
 #else
 	  gold_unreachable();
 #endif
@@ -2054,7 +2155,8 @@ Symbol_table::do_add_undefined_symbols_from_command_line()
 	{
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
 	  sym = this->define_special_symbol<size, false>(&name, &version,
-							 false, &oldsym);
+							 false, &oldsym,
+							 &resolve_oldsym);
 #else
 	  gold_unreachable();
 #endif
