@@ -1,5 +1,6 @@
 2009-03-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* vms-hdr.c: Don't include alloca.h.
 	* elf32-m68hc1x.c: Include alloca-conf.h.
 	* xsym.c: Likewise.
 	* elf64-hppa.c: Likewise.  Remove existing #if's handling alloca.

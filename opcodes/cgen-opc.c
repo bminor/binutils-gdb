@@ -1,6 +1,6 @@
 /* CGEN generic opcode support.
 
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2005, 2007
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2005, 2007, 2009
    Free Software Foundation, Inc.
 
    This file is part of libopcodes.
@@ -19,6 +19,7 @@
    with this program; if not, write to the Free Software Foundation, Inc.,
    51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
+#include "alloca-conf.h"
 #include "sysdep.h"
 #include <stdio.h>
 #include "ansidecl.h"
@@ -27,10 +28,6 @@
 #include "bfd.h"
 #include "symcat.h"
 #include "opcode/cgen.h"
-
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
 
 static unsigned int hash_keyword_name
   (const CGEN_KEYWORD *, const char *, int);

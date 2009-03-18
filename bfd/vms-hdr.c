@@ -52,10 +52,6 @@
 
 #include "vms.h"
 
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
-
 static struct module *new_module (bfd *);
 static void parse_module
   (bfd *, struct module *, unsigned char *, unsigned int);

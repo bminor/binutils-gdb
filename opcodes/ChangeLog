@@ -1,5 +1,6 @@
 2009-03-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* cgen-opc.c: Include alloca-conf.h rather than alloca.h.
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 	* openrisc-opc.c: Regenerate.

@@ -1280,9 +1280,10 @@ cgen-bitset.lo: cgen-bitset.c $(INCDIR)/libiberty.h \
 cgen-dis.lo: cgen-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h \
   $(INCDIR)/opcode/cgen-bitset.h
-cgen-opc.lo: cgen-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(BFD_H) \
-  $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h $(INCDIR)/opcode/cgen-bitset.h
+cgen-opc.lo: cgen-opc.c $(INCDIR)/alloca-conf.h config.h \
+  sysdep.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/safe-ctype.h $(BFD_H) $(INCDIR)/symcat.h \
+  $(INCDIR)/opcode/cgen.h $(INCDIR)/opcode/cgen-bitset.h
 cr16-dis.lo: cr16-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
   $(INCDIR)/opcode/cr16.h $(INCDIR)/libiberty.h
