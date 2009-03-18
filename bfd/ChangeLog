@@ -1,3 +1,9 @@
+2009-03-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* elf.c (elfcore_grok_openbsd_procinfo) 
+	(elfcore_grok_openbsd_note): New functions.
+	(elf_parse_notes): Handle notes from OpenBSD ELF core files.
+
 2009-03-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* vms-hdr.c: Don't include alloca.h.
