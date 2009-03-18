@@ -1,3 +1,7 @@
+2009-03-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.base/solib-display.exp: Disable test for remote targers.
+
 2009-03-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/return-nodebug.exp, gdb.base/return-nodebug.c: New.

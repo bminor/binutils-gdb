@@ -28,7 +28,7 @@
 # (and thus aren't affected by shared library unloading) are not
 # disabled prematurely.
 
-if [skip_shlib_tests] then {
+if { [skip_shlib_tests] || [is_remote target] } {
     return 0
 }
 
