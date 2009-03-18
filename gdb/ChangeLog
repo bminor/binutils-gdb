@@ -1,5 +1,11 @@
 2009-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote.c (remote_close): Don't call generic_mourn_inferior.
+	(remote_mourn_1): Call generic_mourn_inferior after closing the
+	target.
+
+2009-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote.c (remote_start_remote): Add missing call to
 	init_wait_for_inferior in non-stop mode.
 

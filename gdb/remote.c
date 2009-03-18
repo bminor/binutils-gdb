@@ -2398,8 +2398,6 @@ remote_close (int quitting)
     delete_async_event_handler (&remote_async_inferior_event_token);
   if (remote_async_get_pending_events_token)
     delete_async_event_handler (&remote_async_get_pending_events_token);
-
-  generic_mourn_inferior ();
 }
 
 /* Query the remote side for the text, data and bss offsets.  */
@@ -6604,7 +6602,8 @@ remote_mourn_1 (struct target_ops *target)
 {
   unpush_target (target);
 
-  /* remote_close takes care of cleaning up.  */
+  /* remote_close takes care of doing most of the clean up.  */
+  generic_mourn_inferior ();
 }
 
 static int
