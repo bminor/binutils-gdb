@@ -15,21 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern TYPE func (void);
-
-static void
-marker (void)
+TYPE
+func (void)
 {
-}
-
-TYPE t;
-
-int
-main (void)
-{
-  t = func ();
-
-  marker ();
-
-  return 0;
+  return 31;
 }

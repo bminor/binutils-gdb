@@ -34,28 +34,44 @@ proc do_test {type} {
 		 "return from function with no debug info with a cast"	\
 		 "Make selected stack frame return now\\? \\(y or n\\) " "y"
 
+	gdb_test "advance marker" "marker \\(.*" \
+		 "advance to marker"
+
 	# And if it returned the full width of the result.
-	gdb_test "adv marker" "\r\nresult=-1\r\n.* in marker \\(.*" \
-		 "full width of the returned result"
+	gdb_test "print /d t" " = -1" "full width of the returned result"
     }
 
     set pf_prefix $old_prefix
 }
 
-foreach case {{{signed char} %d (int)}	\
-	      {{short}       %d (int)}	\
-	      {{int}         %d}	\
-	      {{long}        %ld}	\
-	      {{long long}   %lld}}	{
-    set type [lindex $case 0]
-    set format [lindex $case 1]
-    set cast [lindex $case 2]
-
+foreach type {{signed char} {short} {int} {long} {long long}} {
     set typeesc [string map {{ } {\ }} $type]
     set typenospace [string map {{ } -} $type]
 
-    if {[prepare_for_testing return-nodebug.exp "return-nodebug-$typenospace" "return-nodebug.c" \
-	 [list "additional_flags=-DFORMAT=\"$format\" -DTYPE=$typeesc -DCAST=$cast"]] == 0} {
-	do_test $type
+    set testfile "return-nodebug"
+    set srcfile ${testfile}.c
+    set srcfile1 ${testfile}1.c
+    set binfile ${objdir}/${subdir}/${testfile}-${typenospace}
+
+    set additional_flags "additional_flags=-DTYPE=$typeesc"
+
+    if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object [list debug $additional_flags]] != "" } {
+	continue
     }
+
+    # This one is compiled without debug info.
+    if { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object [list $additional_flags]] != "" } {
+	continue
+    }
+
+    if { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug}] != "" } {
+	continue
+    }
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load ${binfile}
+
+    do_test $type
 }

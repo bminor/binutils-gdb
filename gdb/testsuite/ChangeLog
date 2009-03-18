@@ -1,3 +1,17 @@
+2009-03-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* return-nodebug.c: Don't include stdio.h.
+	(init): Delete.
+	(func): Delete definition and provide extern declaration.
+	(t): New.
+	(main): Don't call printf.  Call func and store its result in t.
+	* return-nodebug1.c: New.
+	* return-nodebug.exp: Don't expect stdio output.  Instead, print
+	the global variable t.  Drop printf formatters and cast types from
+	foreach loop.  Don't use prepare_for_testing.  Compile
+	return-nodebug.c and return-nodebug1.c in separate steps.  Don't
+	define FORMAT or CAST.
+
 2009-03-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.base/solib-display.exp: Disable test for remote targers.
