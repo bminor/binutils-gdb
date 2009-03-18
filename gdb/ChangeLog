@@ -1,5 +1,9 @@
 2009-03-18  Doug Evans  <dje@google.com>
 
+	* linux-nat.c (linux_nat_find_memory_regions): Result of PIDGET is an
+	int, not a long long.
+	(linux_nat_info_proc_cmd): Store pid in long instead of long long.
+
 	* expprint.c (dump_raw_expression): Print note if non-NULL.
 
 	* printcmd.c (display_uses_solib_p): Redo loop, scan element list

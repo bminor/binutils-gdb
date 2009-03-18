@@ -3454,7 +3454,7 @@ linux_nat_find_memory_regions (int (*func) (CORE_ADDR,
 					    unsigned long,
 					    int, int, int, void *), void *obfd)
 {
-  long long pid = PIDGET (inferior_ptid);
+  int pid = PIDGET (inferior_ptid);
   char mapsfilename[MAXPATHLEN];
   FILE *mapsfile;
   long long addr, endaddr, size, offset, inode;
@@ -3464,7 +3464,7 @@ linux_nat_find_memory_regions (int (*func) (CORE_ADDR,
   struct cleanup *cleanup;
 
   /* Compose the filename for the /proc memory map, and open it.  */
-  sprintf (mapsfilename, "/proc/%lld/maps", pid);
+  sprintf (mapsfilename, "/proc/%d/maps", pid);
   if ((mapsfile = fopen (mapsfilename, "r")) == NULL)
     error (_("Could not open %s."), mapsfilename);
   cleanup = make_cleanup_fclose (mapsfile);
@@ -3717,7 +3717,9 @@ linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
 static void
 linux_nat_info_proc_cmd (char *args, int from_tty)
 {
-  long long pid = PIDGET (inferior_ptid);
+  /* A long is used for pid instead of an int to avoid a loss of precision
+     compiler warning from the output of strtoul.  */
+  long pid = PIDGET (inferior_ptid);
   FILE *procfile;
   char **argv = NULL;
   char buffer[MAXPATHLEN];
@@ -3781,14 +3783,14 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
   if (pid == 0)
     error (_("No current process: you must name one."));
 
-  sprintf (fname1, "/proc/%lld", pid);
+  sprintf (fname1, "/proc/%ld", pid);
   if (stat (fname1, &dummy) != 0)
     error (_("No /proc directory: '%s'"), fname1);
 
-  printf_filtered (_("process %lld\n"), pid);
+  printf_filtered (_("process %ld\n"), pid);
   if (cmdline_f || all)
     {
-      sprintf (fname1, "/proc/%lld/cmdline", pid);
+      sprintf (fname1, "/proc/%ld/cmdline", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
 	{
 	  struct cleanup *cleanup = make_cleanup_fclose (procfile);
@@ -3803,7 +3805,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
     }
   if (cwd_f || all)
     {
-      sprintf (fname1, "/proc/%lld/cwd", pid);
+      sprintf (fname1, "/proc/%ld/cwd", pid);
       memset (fname2, 0, sizeof (fname2));
       if (readlink (fname1, fname2, sizeof (fname2)) > 0)
 	printf_filtered ("cwd = '%s'\n", fname2);
@@ -3812,7 +3814,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
     }
   if (exe_f || all)
     {
-      sprintf (fname1, "/proc/%lld/exe", pid);
+      sprintf (fname1, "/proc/%ld/exe", pid);
       memset (fname2, 0, sizeof (fname2));
       if (readlink (fname1, fname2, sizeof (fname2)) > 0)
 	printf_filtered ("exe = '%s'\n", fname2);
@@ -3821,7 +3823,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
     }
   if (mappings_f || all)
     {
-      sprintf (fname1, "/proc/%lld/maps", pid);
+      sprintf (fname1, "/proc/%ld/maps", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
 	{
 	  long long addr, endaddr, size, offset, inode;
@@ -3883,7 +3885,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
     }
   if (status_f || all)
     {
-      sprintf (fname1, "/proc/%lld/status", pid);
+      sprintf (fname1, "/proc/%ld/status", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
 	{
 	  struct cleanup *cleanup = make_cleanup_fclose (procfile);
@@ -3896,7 +3898,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
     }
   if (stat_f || all)
     {
-      sprintf (fname1, "/proc/%lld/stat", pid);
+      sprintf (fname1, "/proc/%ld/stat", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
 	{
 	  int itmp;
