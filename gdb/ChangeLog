@@ -1,5 +1,7 @@
 2009-03-18  Doug Evans  <dje@google.com>
 
+	* expprint.c (dump_raw_expression): Print note if non-NULL.
+
 	* printcmd.c (display_uses_solib_p): Redo loop, scan element list
 	backwards.
 

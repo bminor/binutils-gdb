@@ -802,6 +802,9 @@ op_name_standard (enum exp_opcode opcode)
     }
 }
 
+/* Print a raw dump of expression EXP to STREAM.
+   NOTE, if non-NULL, is printed as extra explanatory text.  */
+
 void
 dump_raw_expression (struct expression *exp, struct ui_file *stream,
 		     char *note)
@@ -813,7 +816,9 @@ dump_raw_expression (struct expression *exp, struct ui_file *stream,
 
   fprintf_filtered (stream, "Dump of expression @ ");
   gdb_print_host_address (exp, stream);
-  fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %ld bytes each.\n",
+  if (note)
+    fprintf_filtered (stream, ", %s:", note);
+  fprintf_filtered (stream, "\n\tLanguage %s, %d elements, %ld bytes each.\n",
 		    exp->language_defn->la_name, exp->nelts,
 		    (long) sizeof (union exp_element));
   fprintf_filtered (stream, "\t%5s  %20s  %16s  %s\n", "Index", "Opcode",
