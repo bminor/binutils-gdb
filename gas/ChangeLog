@@ -1,3 +1,9 @@
+2009-03-18  Andrew Stubbs  <ams@codesourcery.com>
+
+	* config/tc-arm.c (md_apply_fix): Check BFD_RELOC_ARM_IMMEDIATE and
+	BFD_RELOC_ARM_ADRL_IMMEDIATE value is in the correct section.
+	Check BFD_RELOC_ARM_ADRL_IMMEDIATE has a defined symbol.
+
 2009-03-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* as.h: Include alloca-conf.h instead of config.h and remove

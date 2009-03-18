@@ -18537,6 +18537,15 @@ md_apply_fix (fixS *	fixP,
 	  break;
 	}
 
+      if (fixP->fx_addsy
+	  && S_GET_SEGMENT (fixP->fx_addsy) != seg)
+	{
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("symbol %s is in a different section"),
+			S_GET_NAME (fixP->fx_addsy));
+	  break;
+	}
+
       newimm = encode_arm_immediate (value);
       temp = md_chars_to_number (buf, INSN_SIZE);
 
@@ -18559,6 +18568,24 @@ md_apply_fix (fixS *	fixP,
       {
 	unsigned int highpart = 0;
 	unsigned int newinsn  = 0xe1a00000; /* nop.  */
+
+	if (fixP->fx_addsy
+	    && ! S_IS_DEFINED (fixP->fx_addsy))
+	  {
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("undefined symbol %s used as an immediate value"),
+			  S_GET_NAME (fixP->fx_addsy));
+	    break;
+	  }
+
+	if (fixP->fx_addsy
+	    && S_GET_SEGMENT (fixP->fx_addsy) != seg)
+	  {
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("symbol %s is in a different section"),
+			  S_GET_NAME (fixP->fx_addsy));
+	    break;
+	  }
 
 	newimm = encode_arm_immediate (value);
 	temp = md_chars_to_number (buf, INSN_SIZE);

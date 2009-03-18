@@ -1,3 +1,9 @@
+2009-03-18  Andrew Stubbs  <ams@codesourcery.com>
+
+	* gas/arm/adr-invalid.d: New file.
+	* gas/arm/adr-invalid.l: New file.
+	* gas/arm/adr-invalid.s: New file.
+
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* gas/ppc/textalign-xcoff-001.d: Expect the section VMAs to be
