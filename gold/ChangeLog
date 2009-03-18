@@ -1,5 +1,13 @@
 2009-03-17  Ian Lance Taylor  <iant@google.com>
 
+	* archive.cc (Archive::add_symbols): Check for a version attached
+	to the symbol name in the archive map.
+	* testsuite/Makefile.am (check_PROGRAMS): Add ver_test_11.
+	(ver_test_11_SOURCES, ver_test_11_DEPENDENCIES): Define.
+	(ver_test_11_LDFLAGS, ver_test_11_LDADD): Define.
+	(ver_test_11.a): New target.
+	* testsuite/Makefile.in: Rebuild.
+
 	* configure.ac: Check for chsize and posix_fallocate.  Replace
 	ftruncate.
 	* ftruncate.c: New file, from gnulib.

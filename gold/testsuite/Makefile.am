@@ -819,6 +819,14 @@ ver_test_10.syms: ver_test_10.so
 ver_test_10.so: gcctestdir/ld ver_test_2.o ver_test_10.script
 	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_10.script ver_test_2.o
 
+check_PROGRAMS += ver_test_11
+ver_test_11_SOURCES = ver_test_main_2.cc
+ver_test_11_DEPENDENCIES = gcctestdir/ld ver_test_11.a
+ver_test_11_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+ver_test_11_LDADD = ver_test_11.a
+ver_test_11.a: ver_test_1.o ver_test_2.o ver_test_4.o
+	$(TEST_AR) rc $@ $^
+
 check_PROGRAMS += protected_1
 protected_1_SOURCES = \
 	protected_main_1.cc protected_main_2.cc protected_main_3.cc

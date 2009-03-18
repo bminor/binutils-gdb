@@ -635,6 +635,8 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
   // Track which symbols in the symbol table we've already found to be
   // defined.
 
+  char* tmpbuf = NULL;
+  size_t tmpbuflen = 0;
   bool added_new_object;
   do
     {
@@ -658,7 +660,40 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 
 	  const char* sym_name = (this->armap_names_.data()
 				  + this->armap_[i].name_offset);
-	  Symbol* sym = symtab->lookup(sym_name);
+
+	  // In an object file, and therefore in an archive map, an
+	  // '@' in the name separates the symbol name from the
+	  // version name.  If there are two '@' characters, this is
+	  // the default version.
+	  const char* ver = strchr(sym_name, '@');
+	  bool def = false;
+	  if (ver != NULL)
+	    {
+	      size_t symlen = ver - sym_name;
+	      if (symlen + 1 > tmpbuflen)
+		{
+		  tmpbuf = static_cast<char*>(realloc(tmpbuf, symlen + 1));
+		  tmpbuflen = symlen + 1;
+		}
+	      memcpy(tmpbuf, sym_name, symlen);
+	      tmpbuf[symlen] = '\0';
+	      sym_name = tmpbuf;
+
+	      ++ver;
+	      if (*ver == '@')
+		{
+		  ++ver;
+		  def = true;
+		}
+	    }
+
+	  Symbol* sym = symtab->lookup(sym_name, ver);
+	  if (def
+	      && (sym == NULL
+		  || !sym->is_undefined()
+		  || sym->binding() == elfcpp::STB_WEAK))
+	    sym = symtab->lookup(sym_name, NULL);
+
 	  if (sym == NULL)
 	    {
 	      // Check whether the symbol was named in a -u option.
@@ -687,12 +722,19 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 	  if (!this->include_member(symtab, layout, input_objects,
 				    last_seen_offset, mapfile, sym,
 				    why.c_str()))
-	    return false;
+	    {
+	      if (tmpbuf != NULL)
+		free(tmpbuf);
+	      return false;
+	    }
 
 	  added_new_object = true;
 	}
     }
   while (added_new_object);
+
+  if (tmpbuf != NULL)
+    free(tmpbuf);
 
   input_objects->archive_stop(this);
 
