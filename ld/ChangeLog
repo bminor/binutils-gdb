@@ -1,3 +1,8 @@
+2009-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6766
+	* lexsup.c (parse_args): Call ldlang_add_undef for -e.
+
 2009-03-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.h: Remove alloca handling.

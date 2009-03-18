@@ -1,3 +1,16 @@
+2009-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6766
+	* ld-undefined/dummy.s: New.
+	* ld-undefined/entry-1.d: Likewise.
+	* ld-undefined/entry-2.d: Likewise.
+	* ld-undefined/entry-3.d: Likewise.
+	* ld-undefined/entry-4.d: Likewise.
+	* ld-undefined/entry-5.d: Likewise.
+	* ld-undefined/entry-6.d: Likewise.
+	* ld-undefined/entry.exp: Likewise.
+	* ld-undefined/entry.s: Likewise.
+
 2009-03-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/icache1.d: Update for fixed set_id, new manager entry, and
