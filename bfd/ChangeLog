@@ -1,3 +1,12 @@
+2009-03-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-m68hc1x.c: Include alloca-conf.h.
+	* xsym.c: Likewise.
+	* elf64-hppa.c: Likewise.  Remove existing #if's handling alloca.
+	* som.c: Likewise.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2009-03-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_check_relocs): Correct symbian_p test.

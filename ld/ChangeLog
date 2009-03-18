@@ -1,3 +1,7 @@
+2009-03-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.h: Remove alloca handling.
+
 2009-03-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/spu_icache.S: Add new entry to dummy handler.

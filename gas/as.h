@@ -1,6 +1,6 @@
 /* as.h - global header file
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -36,36 +36,7 @@
   	COMMON as "".
    If TEST is #defined, then we are testing a module: #define COMMON as "".  */
 
-#include "config.h"
-
-/* This is the code recommended in the autoconf documentation, almost
-   verbatim.  If it doesn't work for you, let me know, and notify
-   djm@gnu.ai.mit.edu as well.  */
-/* Added void* version for STDC case.  This is to be compatible with
-   the declaration in bison.simple, used for m68k operand parsing.
-   --KR 1995.08.08 */
-/* Force void* decl for hpux.  This is what Bison uses.  --KR 1995.08.16 */
-
-#ifndef __GNUC__
-# if HAVE_ALLOCA_H
-#  include <alloca.h>
-# else
-#  ifdef _AIX
-/* Indented so that pre-ansi C compilers will ignore it, rather than
-   choke on it.  Some versions of AIX require this to be the first
-   thing in the file.  */
- #pragma alloca
-#  else
-#   ifndef alloca /* predefined by HP cc +Olibcalls */
-#    if !defined (__STDC__) && !defined (__hpux)
-extern char *alloca ();
-#    else
-extern void *alloca ();
-#    endif /* __STDC__, __hpux */
-#   endif /* alloca */
-#  endif /* _AIX */
-# endif /* HAVE_ALLOCA_H */
-#endif /* __GNUC__ */
+#include "alloca-conf.h"
 
 /* Prefer varargs for non-ANSI compiler, since some will barf if the
    ellipsis definition is used with a no-arguments declaration.  */

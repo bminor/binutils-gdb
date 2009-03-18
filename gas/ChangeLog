@@ -1,3 +1,10 @@
+2009-03-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* as.h: Include alloca-conf.h instead of config.h and remove
+	existing #if's handling alloca.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2009-03-14  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* config/tc-ppc.c (ppc_frob_symbol): Add csect information for
