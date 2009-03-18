@@ -1,3 +1,8 @@
+2009-03-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (bpstat_should_step): Only consider software
+	watchpoints that have a location.
+
 2009-03-17  Joel Brobecker  <brobecker@adacore.com>
 
 	Add a target_ops parameter to the to_kill method in struct target_ops.
