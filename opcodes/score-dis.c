@@ -25,7 +25,6 @@
 #include "sysdep.h"
 #include "dis-asm.h"
 #define DEFINE_TABLE
-/*****************************************************************************/
 #include "opintl.h"
 #include "bfd.h"
 
@@ -34,7 +33,7 @@
 #include "elf/internal.h"
 #include "elf/score.h"
 
-/*****************************************************************************/
+#ifdef BFD64
 /* s3_s7: opcodes and export prototypes.  */
 extern int 
 s7_print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little);
@@ -475,7 +474,7 @@ static struct score_opcode score_opcodes[] =
   {0x00000026, 0x3e0003ff, "xor\t\t%20-24r, %15-19r, %10-14r"},
   {0x00000027, 0x3e0003ff, "xor.c\t\t%20-24r, %15-19r, %10-14r"},
 };
-/*****************************************************************************/
+
 
 #ifndef streq
 #define streq(a,b)    (strcmp ((a), (b)) == 0)
@@ -520,7 +519,7 @@ print_insn_score48 (struct disassemble_info *info, bfd_vma given)
 
   for (insn = score_opcodes; insn->assembler; insn++)
     {
-      /* using insn->mask &0xff00000000 to distinguish 48/32 bit */
+      /* Using insn->mask &0xff00000000 to distinguish 48/32 bit.  */
       if (((insn->mask & 0xff0000000000LL)!=0) && (given & insn->mask) == insn->value)
         {
            info->bytes_per_chunk = 2;
@@ -664,7 +663,7 @@ print_insn_score48 (struct disassemble_info *info, bfd_vma given)
   func (stream, _("<illegal instruction>"));
   return 6;
 #endif
-
+  
   abort ();
 }
 
@@ -675,7 +674,7 @@ print_insn_score32 (bfd_vma pc, struct disassemble_info *info, long given)
 {
   struct score_opcode *insn;
   void *stream = info->stream;
-   int  rb_equal_zero=1;
+  int  rb_equal_zero=1;
   fprintf_ftype func = info->fprintf_func;
 
   for (insn = score_opcodes; insn->assembler; insn++)
@@ -1033,6 +1032,7 @@ print_insn_score16 (bfd_vma pc, struct disassemble_info *info, long given)
   func (stream, _("<illegal instruction>"));
   return 2;
 #endif
+  
   /* No match.  */
   abort ();
 }
@@ -1044,11 +1044,11 @@ s3_print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 {
   unsigned char b[6];
   bfd_vma  given,given_h , given_l, given_16, given_32, given_48;
-
   bfd_vma ridparity;
   int status;
   void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
+
   info->display_endian = little ? BFD_ENDIAN_LITTLE : BFD_ENDIAN_BIG;
   info->bytes_per_chunk = 2;
   status = info->read_memory_func (pc, (bfd_byte *) & b[0], 4, info);
@@ -1075,7 +1075,7 @@ s3_print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
   /* Set given_16.  */
   given_16 = given;
 
-  /* judge if now is insn_16_p */
+  /* Judge if now is insn_16_p.  */
   if ((given & 0x8000)==0)
     return  print_insn_score16 (pc, info, given);
 
@@ -1093,7 +1093,7 @@ s3_print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       /* Set given_32.  */
       given_32 = given;
 
-      /* judge if now is insn_32 */
+      /* Judge if now is insn_32.  */
       if ((given &0x80008000)==0x80000000)
         {
           /* Get rid of parity.  */
@@ -1104,7 +1104,7 @@ s3_print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
         }
     }
 
-  /* the insn is 48 bit */
+  /* The insn is 48 bit.  */
   status = info->read_memory_func (pc, (bfd_byte *) & b[0], 6, info);
   if (status != 0)
     {
@@ -1140,7 +1140,6 @@ s3_print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       }
 
     /* Check 0x800080008000, 0x80008000, 0x8000.  */
-
     if ((given_48 & 0x800080008000LL) != 0x800080000000LL)
       {
 #if (SCORE_SIMULATOR_ACTIVE)
@@ -1194,3 +1193,18 @@ print_insn_little_score (bfd_vma pc, struct disassemble_info *info)
   else
     return s7_print_insn (pc, info, TRUE);
 }
+#else /* not BFD64 */
+int
+print_insn_big_score (bfd_vma pc ATTRIBUTE_UNUSED,
+		      struct disassemble_info * info ATTRIBUTE_UNUSED)
+{
+  abort ();
+}
+
+int
+print_insn_little_score (bfd_vma pc ATTRIBUTE_UNUSED,
+			 struct disassemble_info * info ATTRIBUTE_UNUSED)
+{
+  abort ();
+}
+#endif 

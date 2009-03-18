@@ -288,8 +288,6 @@ BFD32_BACKENDS = \
 	elf32-pj.lo \
 	elf32-ppc.lo \
 	elf32-s390.lo \
-	elf32-score.lo \
-	elf32-score7.lo \
 	elf32-sh.lo \
 	elf32-sh-symbian.lo \
 	elf32-sh64.lo \
@@ -474,8 +472,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-sh64.c \
 	elf32-sh64-com.c \
 	elf32-s390.c \
-	elf32-score.c \
-	elf32-score7.c \
 	elf32-sh.c \
 	elf32-sh-symbian.c \
 	elfxx-sparc.c \
@@ -588,6 +584,8 @@ BFD64_BACKENDS = \
 	elfn32-mips.lo \
 	elf64-mips.lo \
 	elf64-mmix.lo \
+	elf32-score.lo \
+	elf32-score7.lo \
 	elf64-sh64.lo \
 	elf64-ppc.lo \
 	elf64-s390.lo \
@@ -623,6 +621,8 @@ BFD64_BACKENDS_CFILES = \
 	elf64-mmix.c \
 	elf64-ppc.c \
 	elf64-s390.c \
+	elf32-score.c \
+	elf32-score7.c \
 	elf64-sh64.c \
 	elf64-sparc.c \
 	elf64.c \
