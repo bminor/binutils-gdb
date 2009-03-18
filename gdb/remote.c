@@ -2802,6 +2802,8 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       /* In non-stop mode, any cached wait status will be stored in
 	 the stop reply queue.  */
       gdb_assert (wait_status == NULL);
+
+      init_wait_for_inferior ();
     }
 
   /* If we connected to a live target, do some additional setup.  */

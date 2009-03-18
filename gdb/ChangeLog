@@ -1,5 +1,10 @@
 2009-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote.c (remote_start_remote): Add missing call to
+	init_wait_for_inferior in non-stop mode.
+
+2009-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (bpstat_should_step): Only consider software
 	watchpoints that have a location.
 
