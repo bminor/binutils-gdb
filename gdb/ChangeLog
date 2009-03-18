@@ -1,3 +1,24 @@
+2009-03-18  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* Makefile.in: Update license to GPLv3.
+	* ada-exp.y: Update license to GPLv3.
+	* ada-lex.l: Update license to GPLv3.
+	* c-exp.y: Update license to GPLv3.
+	* cp-name-parser.y: Update license to GPLv3.
+	* darwin-nat-info.c: Update license to GPLv3.
+	* f-exp.y: Update license to GPLv3.
+	* gdb_thread_db.h: Update license to GPLv3.
+	* hppanbsd-nat.c: Update license to GPLv3.
+	* hppanbsd-tdep.c: Update license to GPLv3.
+	* hppaobsd-tdep.c: Update license to GPLv3.
+	* jv-exp.y: Update license to GPLv3.
+	* m2-exp.y: Update license to GPLv3.
+	* objc-exp.y: Update license to GPLv3.
+	* p-exp.y: Update license to GPLv3.
+	* reply_mig_hack.awk: Update license to GPLv3.
+	* reverse.c: Update license to GPLv3.
+	* xtensa-xtregs.c: Update license to GPLv3.
+
 2009-03-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_close): Don't call generic_mourn_inferior.
@@ -145,6 +166,7 @@
 	RETVAL_EXPR for UNOP_CAST and set RETURN_TYPE to the RETURN_VALUE type
 	if RETURN_TYPE is NULL.
 
+>>>>>>> 1.10280
 2009-03-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (PACKET_qAttached): New.
