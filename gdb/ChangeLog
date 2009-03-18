@@ -1,3 +1,8 @@
+2009-03-18  Doug Evans  <dje@google.com>
+
+	* printcmd.c (display_uses_solib_p): Redo loop, scan element list
+	backwards.
+
 2009-03-18  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* Makefile.in: Update license to GPLv3.

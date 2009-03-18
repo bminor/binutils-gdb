@@ -1763,18 +1763,23 @@ static int
 display_uses_solib_p (const struct display *d,
 		      const struct so_list *solib)
 {
-  int i;
+  int endpos;
   struct expression *const exp = d->exp;
+  const union exp_element *const elts = exp->elts;
 
   if (d->block != NULL
       && solib_contains_address_p (solib, d->block->startaddr))
     return 1;
 
-  for (i = 0; i < exp->nelts; )
+  for (endpos = exp->nelts; endpos > 0; )
     {
-      int args, oplen = 0;
-      const union exp_element *const elts = exp->elts;
+      int i, args, oplen = 0;
 
+      exp->language_defn->la_exp_desc->operator_length (exp, endpos,
+							&oplen, &args);
+      gdb_assert (oplen > 0);
+
+      i = endpos - oplen;
       if (elts[i].opcode == OP_VAR_VALUE)
 	{
 	  const struct block *const block = elts[i + 1].block;
@@ -1789,11 +1794,9 @@ display_uses_solib_p (const struct display *d,
 	  if (section && section->objfile == solib->objfile)
 	    return 1;
 	}
-      exp->language_defn->la_exp_desc->operator_length (exp, i + 1,
-							&oplen, &args);
-      gdb_assert (oplen > 0);
-      i += oplen;
+      endpos -= oplen;
     }
+
   return 0;
 }
 
