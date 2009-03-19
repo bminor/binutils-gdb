@@ -130,7 +130,9 @@ Descriptors::open(int descriptor, const char* name, int flags, int mode)
 	  // header file but not supported by the kernel.
 	  // Unfortunately there doesn't seem to be any obvious way to
 	  // detect that, as unknown flags passed to open are ignored.
-	  if (O_CLOEXEC == 0 && parameters->options().has_plugins())
+	  if (O_CLOEXEC == 0
+	      && parameters->options_valid()
+	      && parameters->options().has_plugins())
 	    fcntl(new_descriptor, F_SETFD, FD_CLOEXEC);
 
 	  {
