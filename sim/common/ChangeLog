@@ -1,3 +1,8 @@
+2009-03-19  J"orn Rennecke  <joern.rennecke@arc.com>  (tiny change)
+
+	Speed up simulator startup:
+	* sim-utils.c (zalloc): Use xcalloc.
+
 2009-01-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cgen-ops.h (ADDQI, SUBQI, MULQI, NEGQI, ABSQI, ADDHI, SUBHI)
