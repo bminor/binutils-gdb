@@ -1,3 +1,8 @@
+2009-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (debug_apply_relocations): Allow relocations
+	against function symbols.
+
 2009-03-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* sysdep.h: Include alloca-conf.h instead of config.h and remove

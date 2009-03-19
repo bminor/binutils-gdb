@@ -8394,6 +8394,9 @@ debug_apply_relocations (void * file,
 		 Gcc -feliminate-dwarf2-dups may generate symbols
 		 without type for debug info.  */
 	      && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
+	      /* Icc generates relocations against function symbols
+		 instead of local labels.  */
+	      && ELF_ST_TYPE (sym->st_info) != STT_FUNC
 	      /* Relocations against object symbols can happen,
 		 eg when referencing a global array.  For an
 		 example of this see the _clz.o binary in libgcc.a.  */
