@@ -603,9 +603,10 @@ sort_sections (const void *a, const void *b)
   return (*s1)->index - (*s2)->index;
 }
 
-/* Identify overlays in the output bfd, and number them.  */
+/* Identify overlays in the output bfd, and number them.
+   Returns 0 on error, 1 if no overlays, 2 if overlays.  */
 
-bfd_boolean
+int
 spu_elf_find_overlays (struct bfd_link_info *info)
 {
   struct spu_link_hash_table *htab = spu_hash_table (info);
@@ -613,15 +614,18 @@ spu_elf_find_overlays (struct bfd_link_info *info)
   unsigned int i, n, ovl_index, num_buf;
   asection *s;
   bfd_vma ovl_end;
-  const char *ovly_mgr_entry;
+  static const char *const entry_names[2][2] = {
+    { "__ovly_load", "__icache_br_handler" },
+    { "__ovly_return", "__icache_call_handler" }
+  };
 
   if (info->output_bfd->section_count < 2)
-    return FALSE;
+    return 1;
 
   alloc_sec
     = bfd_malloc (info->output_bfd->section_count * sizeof (*alloc_sec));
   if (alloc_sec == NULL)
-    return FALSE;
+    return 0;
 
   /* Pick out all the alloced sections.  */
   for (n = 0, s = info->output_bfd->sections; s != NULL; s = s->next)
@@ -633,7 +637,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
   if (n == 0)
     {
       free (alloc_sec);
-      return FALSE;
+      return 1;
     }
 
   /* Sort them by vma.  */
@@ -685,7 +689,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 					    "does not start on a cache line.\n"),
 					  s);
 		  bfd_set_error (bfd_error_bad_value);
-		  return FALSE;
+		  return 0;
 		}
 	      else if (s->size > htab->params->line_size)
 		{
@@ -693,7 +697,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 					    "is larger than a cache line.\n"),
 					  s);
 		  bfd_set_error (bfd_error_bad_value);
-		  return FALSE;
+		  return 0;
 		}
 
 	      alloc_sec[ovl_index++] = s;
@@ -713,7 +717,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 					"is not in cache area.\n"),
 				      alloc_sec[i-1]);
 	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
+	      return 0;
 	    }
 	  else
 	    ovl_end = s->vma + s->size;
@@ -754,7 +758,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 						"same address.\n"),
 					      s0, s);
 		      bfd_set_error (bfd_error_bad_value);
-		      return FALSE;
+		      return 0;
 		    }
 		  if (ovl_end < s->vma + s->size)
 		    ovl_end = s->vma + s->size;
@@ -768,17 +772,31 @@ spu_elf_find_overlays (struct bfd_link_info *info)
   htab->num_overlays = ovl_index;
   htab->num_buf = num_buf;
   htab->ovl_sec = alloc_sec;
-  ovly_mgr_entry = "__ovly_load";
-  if (htab->params->ovly_flavour == ovly_soft_icache)
-    ovly_mgr_entry = "__icache_br_handler";
-  htab->ovly_entry[0] = elf_link_hash_lookup (&htab->elf, ovly_mgr_entry,
-					      FALSE, FALSE, FALSE);
-  ovly_mgr_entry = "__ovly_return";
-  if (htab->params->ovly_flavour == ovly_soft_icache)
-    ovly_mgr_entry = "__icache_call_handler";
-  htab->ovly_entry[1] = elf_link_hash_lookup (&htab->elf, ovly_mgr_entry,
-					      FALSE, FALSE, FALSE);
-  return ovl_index != 0;
+
+  if (ovl_index == 0)
+    return 1;
+
+  for (i = 0; i < 2; i++)
+    {
+      const char *name;
+      struct elf_link_hash_entry *h;
+
+      name = entry_names[i][htab->params->ovly_flavour];
+      h = elf_link_hash_lookup (&htab->elf, name, TRUE, FALSE, FALSE);
+      if (h == NULL)
+	return 0;
+
+      if (h->root.type == bfd_link_hash_new)
+	{
+	  h->root.type = bfd_link_hash_undefined;
+	  h->ref_regular = 1;
+	  h->ref_regular_nonweak = 1;
+	  h->non_elf = 0;
+	}
+      htab->ovly_entry[i] = h;
+    }
+
+  return 2;
 }
 
 /* Non-zero to use bra in overlay stubs rather than br.  */
@@ -897,7 +915,7 @@ needs_ovl_stub (struct elf_link_hash_entry *h,
   if (h != NULL)
     {
       /* Ensure no stubs for user supplied overlay manager syms.  */
-      if (h == htab->ovly_entry[0]|| h == htab->ovly_entry[1])
+      if (h == htab->ovly_entry[0] || h == htab->ovly_entry[1])
 	return ret;
 
       /* setjmp always goes via an overlay stub, because then the return
@@ -1863,54 +1881,26 @@ spu_elf_build_stubs (struct bfd_link_info *info)
 	htab->stub_sec[i]->size = 0;
       }
 
-  h = htab->ovly_entry[0];
-  if (h == NULL)
+  for (i = 0; i < 2; i++)
     {
-      const char *ovly_mgr_entry = "__ovly_load";
+      h = htab->ovly_entry[i];
+      BFD_ASSERT (h != NULL);
 
-      if (htab->params->ovly_flavour == ovly_soft_icache)
-	ovly_mgr_entry = "__icache_br_handler";
-      h = elf_link_hash_lookup (&htab->elf, ovly_mgr_entry,
-				FALSE, FALSE, FALSE);
-      htab->ovly_entry[0] = h;
-    }
-  BFD_ASSERT (h != NULL
-	      && (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
-	      && h->def_regular);
-
-  s = h->root.u.def.section->output_section;
-  if (spu_elf_section_data (s)->u.o.ovl_index)
-    {
-      (*_bfd_error_handler) (_("%s in overlay section"),
-			     h->root.root.string);
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
-
-  h = htab->ovly_entry[1];
-  if (h == NULL)
-    {
-      const char *ovly_mgr_entry = "__ovly_return";
-
-      if (htab->params->ovly_flavour == ovly_soft_icache)
-	ovly_mgr_entry = "__icache_call_handler";
-      h = elf_link_hash_lookup (&htab->elf, ovly_mgr_entry,
-				FALSE, FALSE, FALSE);
-      htab->ovly_entry[1] = h;
-    }
-  BFD_ASSERT (h != NULL
-	      && (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
-	      && h->def_regular);
-
-  s = h->root.u.def.section->output_section;
-  if (spu_elf_section_data (s)->u.o.ovl_index)
-    {
-      (*_bfd_error_handler) (_("%s in overlay section"),
-			     h->root.root.string);
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      if ((h->root.type == bfd_link_hash_defined
+	   || h->root.type == bfd_link_hash_defweak)
+	  && h->def_regular)
+	{
+	  s = h->root.u.def.section->output_section;
+	  if (spu_elf_section_data (s)->u.o.ovl_index)
+	    {
+	      (*_bfd_error_handler) (_("%s in overlay section"),
+				     h->root.root.string);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	}
+      else
+	BFD_ASSERT (0);
     }
 
   /* Fill in all the stubs.  */
@@ -5185,7 +5175,7 @@ spu_elf_modify_program_headers (bfd *abfd, struct bfd_link_info *info)
 #define elf_backend_can_gc_sections	1
 
 #define bfd_elf32_bfd_reloc_type_lookup		spu_elf_reloc_type_lookup
-#define bfd_elf32_bfd_reloc_name_lookup	spu_elf_reloc_name_lookup
+#define bfd_elf32_bfd_reloc_name_lookup		spu_elf_reloc_name_lookup
 #define elf_info_to_howto			spu_elf_info_to_howto
 #define elf_backend_count_relocs		spu_elf_count_relocs
 #define elf_backend_relocate_section		spu_elf_relocate_section

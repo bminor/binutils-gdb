@@ -1,3 +1,12 @@
+2009-03-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_find_overlays): Separate error return from
+	"no overlays" return.  If there are overlays, create overlay
+	manager entry symbols here, so that..
+	(spu_elf_build_stubs): ..we don't need to set them up here.
+	Simplify entry symbol tests.
+	* elf32-spu.h (spu_elf_find_overlays): Update prototype.
+
 2009-03-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* elf.c (elfcore_grok_openbsd_procinfo) 

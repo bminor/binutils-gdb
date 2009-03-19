@@ -266,6 +266,8 @@ spu_before_allocation (void)
       && !link_info.relocatable
       && !no_overlays)
     {
+      int ret;
+
       /* Size the sections.  This is premature, but we need to know the
 	 rough layout so that overlays can be found.  */
       expld.phase = lang_mark_phase_enum;
@@ -273,9 +275,11 @@ spu_before_allocation (void)
       one_lang_size_sections_pass (NULL, TRUE);
 
       /* Find overlays by inspecting section vmas.  */
-      if (spu_elf_find_overlays (&link_info))
+      ret = spu_elf_find_overlays (&link_info);
+      if (ret == 0)
+	einfo ("%X%P: can not find overlays: %E\n");
+      else if (ret == 2)
 	{
-	  int ret;
 	  lang_output_section_statement_type *os;
 
 	  if (params.auto_overlay != 0)

@@ -1,3 +1,8 @@
+2009-03-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spuelf.em (spu_before_allocation): Report errors from
+	spu_elf_find_overlays.
+
 2009-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/6766

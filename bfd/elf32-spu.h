@@ -114,6 +114,6 @@ extern void spu_elf_plugin (int);
 extern bfd_boolean spu_elf_open_builtin_lib (bfd **,
 					     const struct _ovl_stream *);
 extern bfd_boolean spu_elf_create_sections (struct bfd_link_info *);
-extern bfd_boolean spu_elf_find_overlays (struct bfd_link_info *);
+extern int spu_elf_find_overlays (struct bfd_link_info *);
 extern int spu_elf_size_stubs (struct bfd_link_info *);
 extern asection *spu_elf_check_vma (struct bfd_link_info *);
