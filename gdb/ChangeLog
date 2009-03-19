@@ -1,3 +1,9 @@
+2009-03-19  Tom Tromey  <tromey@redhat.com>
+
+	* utils.c (do_obstack_free): New function.
+	(make_cleanup_obstack_free): Likewise.
+	* defs.h (make_cleanup_obstack_free): Declare.
+
 2009-03-18  Doug Evans  <dje@google.com>
 
 	* linux-nat.c (linux_nat_find_memory_regions): Result of PIDGET is an

@@ -271,6 +271,23 @@ make_cleanup_fclose (FILE *file)
   return make_cleanup (do_fclose_cleanup, file);
 }
 
+/* Helper function which does the work for make_cleanup_obstack_free.  */
+
+static void
+do_obstack_free (void *arg)
+{
+  struct obstack *ob = arg;
+  obstack_free (ob, NULL);
+}
+
+/* Return a new cleanup that frees OBSTACK.  */
+
+struct cleanup *
+make_cleanup_obstack_free (struct obstack *obstack)
+{
+  return make_cleanup (do_obstack_free, obstack);
+}
+
 static void
 do_ui_file_delete (void *arg)
 {
