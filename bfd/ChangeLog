@@ -1,3 +1,8 @@
+2009-03-19  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* elf32-hppa.c (final_link_relocate): Cast bfd_vma values to long
+	for format string.
+
 2009-03-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_find_overlays): Separate error return from
@@ -9,7 +14,7 @@
 
 2009-03-18  Mark Kettenis  <kettenis@gnu.org>
 
-	* elf.c (elfcore_grok_openbsd_procinfo) 
+	* elf.c (elfcore_grok_openbsd_procinfo)
 	(elfcore_grok_openbsd_note): New functions.
 	(elf_parse_notes): Handle notes from OpenBSD ELF core files.
 
@@ -213,7 +218,7 @@
 	and simplify its handling.
 	(xcoff_mark): Treat last_symndx as an inclusive value.  Only mark
 	symbols with the right csect.  Don't mark rsec when processing
-	relocations against undefined or absolute sections.  
+	relocations against undefined or absolute sections.
 	(bfd_xcoff_size_dynamic_sections): Don't check the SEC_MARK flag
 	of bfd_und_section_ptr.
 	(xcoff_link_input_bfd): Likewise.
@@ -239,7 +244,7 @@
 	is a function, mark its descriptor and allocate room for global
 	linkage code.  Otherwise mark the symbol as implicitly imported.
 	Move the code for creating function descriptors from...
-	(xcoff_build_ldsyms): ...here.  Use XCOFF_WAS_UNDEFINED to 
+	(xcoff_build_ldsyms): ...here.  Use XCOFF_WAS_UNDEFINED to
 	check for symbols that were implicitly defined.
 	(xcoff_mark): Don't count any dynamic relocations against
 	function symbols.
@@ -962,11 +967,11 @@
 2009-02-03  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* configure.in: AC_SUBST pdfdir.
-	* Makefile.am: Add install-pdf, install-pdf-am 
+	* Makefile.am: Add install-pdf, install-pdf-am
 	and install-pdf-recursive targets. Define pdfdir.
 	* doc/Makefile.am: Define pdf__strip_dir. Add
 	install-pdf and install-pdf-am targets.
-	* po/Make-in: Add install-pdf target. 
+	* po/Make-in: Add install-pdf target.
 	* configure: Regenerate.
 	* Makefile.in: Regenerate
 	* doc/Makefile.in: Regenerate.
@@ -1009,7 +1014,7 @@
 	update.
 	(elf_m68k_remove_got_entry_type): Update.
 	(elf_m68k_install_rela, dtpoff_base, tpoff): New static functions.
-	(elf_m68k_check_relocs): Handle TLS relocations.  Remove unnecessary 
+	(elf_m68k_check_relocs): Handle TLS relocations.  Remove unnecessary
 	update of sgot->size and srelgot->size.
 	(elf_m68k_gc_sweep_hook): Update.
 	(elf_m68k_install_rela, dtpoff_base, tpoff): New static functions.
@@ -1053,8 +1058,8 @@
 	high_pc in order to properly sign-extend VMAs.
 
 2009-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
-            Mark Shinwell  <shinwell@codesourcery.com>
-            Catherine Moore  <clm@codesourcery.com>
+	    Mark Shinwell  <shinwell@codesourcery.com>
+	    Catherine Moore  <clm@codesourcery.com>
 
 	* elf-attrs.c, elflink.c, elfxx-mips.c: Correct typos in comments.
 

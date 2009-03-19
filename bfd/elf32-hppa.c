@@ -1,6 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    Original code by
@@ -3411,7 +3411,7 @@ final_link_relocate (asection *input_section,
 	      (_("%B(%A+0x%lx): %s fixup for insn 0x%x is not supported in a non-shared link"),
 	       input_bfd,
 	       input_section,
-	       offset,
+	       (long) offset,
 	       howto->name,
 	       insn);
 	}
@@ -3575,7 +3575,7 @@ final_link_relocate (asection *input_section,
 	(_("%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"),
 	 input_bfd,
 	 input_section,
-	 offset,
+	 (long) offset,
 	 hsh->bh_root.string);
       bfd_set_error (bfd_error_bad_value);
       return bfd_reloc_notsupported;
