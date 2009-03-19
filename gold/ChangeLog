@@ -1,3 +1,8 @@
+2009-03-19  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* layout.cc (Layout::output_section_name): Preserve names
+	of '.note.' sections.
+	
 2009-03-19  Ian Lance Taylor  <iant@google.com>
 
 	* descriptors.cc (Descriptors::open): Check that the options are

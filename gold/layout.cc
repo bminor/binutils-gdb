@@ -2899,6 +2899,9 @@ Layout::output_section_name(const char* name, size_t* plen)
   // initial '.', we use the name unchanged (i.e., "mysection" and
   // ".text" are unchanged).
 
+  // If the name starts with '.note', we keep it unchanged (e.g. to
+  // avoid truncating '.note.ABI-tag' to '.note').
+
   // If the name starts with ".data.rel.ro.local" we use
   // ".data.rel.ro.local".
 
@@ -2913,6 +2916,8 @@ Layout::output_section_name(const char* name, size_t* plen)
   ++s;
   const char* sdot = strchr(s, '.');
   if (sdot == NULL)
+    return name;
+  if (strncmp(name, ".note.", 6) == 0)
     return name;
 
   const char* const data_rel_ro_local = ".data.rel.ro.local";
