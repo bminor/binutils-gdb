@@ -1,6 +1,6 @@
 // script-sections.h -- linker script SECTIONS for gold   -*- C++ -*-
 
-// Copyright 2008 Free Software Foundation, Inc.
+// Copyright 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -26,6 +26,7 @@
 #define GOLD_SCRIPT_SECTIONS_H
 
 #include <cstdio>
+#include <list>
 #include <vector>
 
 namespace gold
@@ -41,9 +42,15 @@ class Output_data;
 class Output_section_definition;
 class Output_section;
 class Output_segment;
+class Orphan_section_placement;
 
 class Script_sections
 {
+ private:
+  // This is a list, not a vector, because we insert orphan sections
+  // in the middle.
+  typedef std::list<Sections_element*> Sections_elements;
+
  public:
   Script_sections();
 
@@ -184,9 +191,10 @@ class Script_sections
   void
   print(FILE*) const;
 
- private:
-  typedef std::vector<Sections_element*> Sections_elements;
+  // Used for orphan sections.
+  typedef Sections_elements::iterator Elements_iterator;
 
+ private:
   typedef std::vector<Phdrs_element*> Phdrs_elements;
 
   // Create segments.
@@ -232,9 +240,13 @@ class Script_sections
   Output_section_definition* output_section_;
   // The list of program headers in the PHDRS clause.
   Phdrs_elements* phdrs_elements_;
-  // The index of the next Sections_element when we see
+  // Where to put orphan sections.
+  Orphan_section_placement* orphan_section_placement_;
+  // A pointer to the last Sections_element when we see
   // DATA_SEGMENT_ALIGN.
-  size_t data_segment_align_index_;
+  Sections_elements::iterator data_segment_align_start_;
+  // Whether we have seen DATA_SEGMENT_ALIGN.
+  bool saw_data_segment_align_;
   // Whether we have seen DATA_SEGMENT_RELRO_END.
   bool saw_relro_end_;
 };

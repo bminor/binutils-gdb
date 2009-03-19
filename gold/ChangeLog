@@ -1,3 +1,26 @@
+2009-03-18  Ian Lance Taylor  <iant@google.com>
+
+	* script-sections.h: Include <list>.
+	(class Script_sections): Change Sections_elements from std::vector
+	to std::list.  Typedef public Elements_iterator.  Add
+	orphan_section_placement_, data_segment_align_start_, and
+	saw_data_segment_align_ fields.  Remove data_segment_align_index_
+	field.
+	* script-sections.cc (class Orphan_section_placement): New class.
+	(class Sections_element): Add virtual functions is_relro and
+	orphan_section_init.  Remove virtual function place_orphan_here.
+	(class Output_section_definition): Add is_relro and
+	orphan_section_init.  Remove place_orphan_here.
+	(class Orphan_output_section): Likewise.
+	(Script_sections::Script_sections): Update for field changes.
+	(Script_sections::data_segment_align): Set saw_data_segment_align_
+	and data_segment_align_start_, not data_segment_align_index.
+	(Script_sections::data_segment_relro_end): Check
+	saw_data_segment_align_.  Use data_segment_align_start_ rather
+	than data_segment_align_index_.
+	(Script_sections::place_orphan): Rewrite to use
+	Orphan_section_placement.
+
 2009-03-17  Ian Lance Taylor  <iant@google.com>
 
 	* archive.cc (Archive::add_symbols): Check for a version attached
