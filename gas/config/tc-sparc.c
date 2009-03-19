@@ -542,6 +542,10 @@ md_parse_option (int c, char *arg)
 	  as_fatal (_("No compiled in support for %d bit object file format"),
 		    sparc_arch_size);
 	free (list);
+
+	if (sparc_arch_size == 64
+	    && max_architecture < SPARC_OPCODE_ARCH_V9)
+	  max_architecture = SPARC_OPCODE_ARCH_V9;
       }
       break;
 

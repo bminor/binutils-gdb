@@ -1,3 +1,8 @@
+2009-03-19  David S. Miller  <davem@davemloft.net>
+
+	* config/tc-sparc.c (md_parse_option): If the user gives
+	us '--64' make sure max_architecture is at least V9.
+
 2009-03-18  Andrew Stubbs  <ams@codesourcery.com>
 
 	* config/tc-arm.c (md_apply_fix): Check BFD_RELOC_ARM_IMMEDIATE and
