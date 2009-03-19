@@ -343,6 +343,10 @@ CODE_FRAGMENT
 .     TMS320C54X only.  *}
 .#define SEC_TIC54X_CLINK 0x20000000
 .
+.  {* Indicate that section has the no read flag set. This happens
+.     when memory read flag isn't set. *}
+.#define SEC_COFF_NOREAD 0x40000000
+.
 .  {*  End of section flags.  *}
 .
 .  {* Some internal packed boolean fields.  *}

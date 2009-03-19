@@ -1,3 +1,13 @@
+2009-03-19  Kai Tietz  <kai.tietz@onevision.com>
+
+	* bfd-in2.h: Regenerated.
+	* coffcode.h (sec_to_styp_flags): For pe-coff add SEC_READONLY
+	for debugging sections and map memory read/write dependent on
+	SEC_COFF_NOREAD.
+	(styp_to_sec_flags): Set SEC_COFF_NOREAD for sections
+	without memory read flags set.
+	* section.c: Add SEC_COFF_NOREAD to section flags.
+
 2009-03-19  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* elf32-hppa.c (final_link_relocate): Cast bfd_vma values to long
