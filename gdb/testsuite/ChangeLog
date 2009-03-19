@@ -1,3 +1,9 @@
+2009-03-19  Jerome Guitton  <guitton@adacore.com>
+
+	* gdb.ada/fixed_points/fixed_points.adb: Add a test on overprecise
+	deltas.
+	* gdb.ada/fixed_points.exp: Ditto.
+
 2009-03-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* return-nodebug.c: Don't include stdio.h.

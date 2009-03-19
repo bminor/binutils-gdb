@@ -37,6 +37,8 @@ gdb_load ${binfile}
 set bp_location [gdb_get_line_number "Set breakpoint here" ${testdir}/fixed_points.adb]
 runto "fixed_points.adb:$bp_location"
 
+# Fixed point subtypes:
+
 gdb_test "print base_object" \
          "= -50" \
          "p on a fixed point type"
@@ -48,3 +50,11 @@ gdb_test "print subtype_object" \
 gdb_test "print new_type_object" \
          "= -50" \
          "p on a new fixed point type"
+
+# Overprecise delta:
+
+gdb_test "print Overprecise_Object" \
+         "= 0.13579135791"
+
+gdb_test "ptype Overprecise_Object" \
+         "= delta 0.135791"
