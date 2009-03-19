@@ -1,3 +1,8 @@
+2009-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (debug_apply_relocations): Check relocations
+	against STT_SECTION symbol.
+
 2009-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (debug_apply_relocations): Allow relocations

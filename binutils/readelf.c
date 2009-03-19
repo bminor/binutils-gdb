@@ -8387,20 +8387,20 @@ debug_apply_relocations (void * file,
 	  sym = symtab + get_reloc_symindex (rp->r_info);
 
 	  /* If the reloc has a symbol associated with it,
-	     make sure that it is of an appropriate type.  */
+	     make sure that it is of an appropriate type.
+
+	     Relocations against symbols without type can happen.
+	     Gcc -feliminate-dwarf2-dups may generate symbols
+	     without type for debug info.
+
+	     Icc generates relocations against function symbols
+	     instead of local labels.
+
+	     Relocations against object symbols can happen, eg when
+	     referencing a global array.  For an example of this see
+	     the _clz.o binary in libgcc.a.  */
 	  if (sym != symtab
-	      && ELF_ST_TYPE (sym->st_info) != STT_SECTION
-	      /* Relocations against symbols without type can happen.
-		 Gcc -feliminate-dwarf2-dups may generate symbols
-		 without type for debug info.  */
-	      && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
-	      /* Icc generates relocations against function symbols
-		 instead of local labels.  */
-	      && ELF_ST_TYPE (sym->st_info) != STT_FUNC
-	      /* Relocations against object symbols can happen,
-		 eg when referencing a global array.  For an
-		 example of this see the _clz.o binary in libgcc.a.  */
-	      && ELF_ST_TYPE (sym->st_info) != STT_OBJECT)
+	      && ELF_ST_TYPE (sym->st_info) > STT_SECTION)
 	    {
 	      warn (_("skipping unexpected symbol type %s in %ld'th relocation in section %s\n"),
 		    get_symbol_type (ELF_ST_TYPE (sym->st_info)),
