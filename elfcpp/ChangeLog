@@ -1,3 +1,7 @@
+2009-03-20  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* elfcpp.h (SHT_GNU_INCREMENTAL_INPUTS): Define.
+
 2009-03-01  Ian Lance Taylor  <iant@google.com>
 
 	* elfcpp_swap.h: #include "config.h".  Only #include <byteswap.h>

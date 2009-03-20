@@ -51,6 +51,7 @@ CCFILES = \
         gc.cc \
 	gold.cc \
 	gold-threads.cc \
+	incremental.cc \
 	layout.cc \
 	mapfile.cc \
 	merge.cc \

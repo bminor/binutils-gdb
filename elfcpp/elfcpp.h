@@ -4,7 +4,7 @@
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of elfcpp.
-   
+
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Library General Public License
 // as published by the Free Software Foundation; either version 2, or
@@ -351,6 +351,8 @@ enum SHT
   SHT_LOUSER = 0x80000000,
   SHT_HIUSER = 0xffffffff,
   // The remaining values are not in the standard.
+  // Incremental build data.
+  SHT_GNU_INCREMENTAL_INPUTS = 0x6fff4700,
   // Object attributes.
   SHT_GNU_ATTRIBUTES = 0x6ffffff5,
   // GNU style dynamic hash table.
@@ -934,7 +936,7 @@ class Ehdr_write
   void
   put_e_type(Elf_Half v)
   { this->p_->e_type = Convert<16, big_endian>::convert_host(v); }
-  
+
   void
   put_e_machine(Elf_Half v)
   { this->p_->e_machine = Convert<16, big_endian>::convert_host(v); }

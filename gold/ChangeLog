@@ -1,3 +1,9 @@
+2009-03-20  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* incremental.cc: New file.
+	* Makefile.am (CCFILES): Add incremental.cc.
+	* Makefile.in: Rebuild.
+
 2009-03-19  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* layout.cc (Layout::output_section_name): Preserve names
