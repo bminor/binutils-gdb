@@ -1228,7 +1228,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		    && ELF64_R_TYPE (rel->r_info) != R_390_PC32DBL
 		    && ELF64_R_TYPE (rel->r_info) != R_390_PC64)
 		   || (h != NULL
-		       && (! info->symbolic
+		       && (! SYMBOLIC_BIND (info, h)
 			   || h->root.type == bfd_link_hash_defweak
 			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
@@ -1541,11 +1541,9 @@ elf_s390_adjust_dynamic_symbol (info, h)
       || h->needs_plt)
     {
       if (h->plt.refcount <= 0
-	  || (! info->shared
-	      && !h->def_dynamic
-	      && !h->ref_dynamic
-	      && h->root.type != bfd_link_hash_undefweak
-	      && h->root.type != bfd_link_hash_undefined))
+	  || SYMBOL_CALLS_LOCAL (info, h)
+	  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      && h->root.type == bfd_link_hash_undefweak))
 	{
 	  /* This case can occur if we saw a PLT32 reloc in an input
 	     file, but the symbol was never referred to by a dynamic
@@ -1684,9 +1682,7 @@ allocate_dynrelocs (h, inf)
   htab = elf_s390_hash_table (info);
 
   if (htab->elf.dynamic_sections_created
-      && h->plt.refcount > 0
-      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	  || h->root.type != bfd_link_hash_undefweak))
+      && h->plt.refcount > 0)
     {
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -1815,7 +1811,7 @@ allocate_dynrelocs (h, inf)
 
   if (info->shared)
     {
-      if (SYMBOL_REFERENCES_LOCAL (info, h))
+      if (SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  struct elf_s390_dyn_relocs **pp;
 
@@ -2340,10 +2336,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      dyn = htab->elf.dynamic_sections_created;
 	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		  || (info->shared
-		      && (info->symbolic
-			  || h->dynindx == -1
-			  || h->forced_local)
-		      && h->def_regular)
+		      && SYMBOL_REFERENCES_LOCAL (info, h))
 		  || (ELF_ST_VISIBILITY (h->other)
 		      && h->root.type == bfd_link_hash_undefweak))
 		{
@@ -2519,8 +2512,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		    && r_type != R_390_PC32
 		    && r_type != R_390_PC32DBL
 		    && r_type != R_390_PC64)
-		   || (h != NULL
-		       && !SYMBOL_REFERENCES_LOCAL (info, h))))
+		   || !SYMBOL_CALLS_LOCAL (info, h)))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL
@@ -2563,7 +2555,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 			   || r_type == R_390_PC32DBL
 			   || r_type == R_390_PC64
 			   || !info->shared
-			   || !info->symbolic
+			   || !SYMBOLIC_BIND (info, h)
 			   || !h->def_regular))
 		{
 		  outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
@@ -3168,11 +3160,10 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 The entry in the global offset table will already have been
 	 initialized in the relocate_section function.  */
       if (info->shared
-	  && (info->symbolic
-	      || h->dynindx == -1
-	      || h->forced_local)
-	  && h->def_regular)
+	  && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
+	  if (!h->def_regular)
+	    return FALSE;
 	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  rela.r_info = ELF64_R_INFO (0, R_390_RELATIVE);
 	  rela.r_addend = (h->root.u.def.value

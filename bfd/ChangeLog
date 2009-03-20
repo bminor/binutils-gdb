@@ -1,3 +1,18 @@
+2009-03-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+	    Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* elf32-s390.c (elf_s390_check_relocs): Use the SYMBOL_*
+        macros for visibilty and locality checks.
+	(elf_s390_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(elf_s390_relocate_section): Likewise.
+	(elf_s390_finish_dynamic_symbol): Likewise.
+	* elf64-s390.c (elf_s390_check_relocs): Likewise.
+	(elf_s390_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(elf_s390_relocate_section): Likewise.
+	(elf_s390_finish_dynamic_symbol): Likewise.
+
 2009-03-19  Kai Tietz  <kai.tietz@onevision.com>
 
 	* bfd-in2.h: Regenerated.
