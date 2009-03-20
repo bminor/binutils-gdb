@@ -1,3 +1,11 @@
+2009-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/9970
+	* ld-pie/pie.exp: Use -fpie to compile.  Run *.d tests.
+
+	* ld-pie/start.d: New.
+	* ld-pie/start.s: Likewise.
+
 2009-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/6766

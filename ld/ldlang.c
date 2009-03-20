@@ -5417,7 +5417,7 @@ lang_end (void)
   bfd_boolean warn;
 
   if ((link_info.relocatable && !link_info.gc_sections)
-      || link_info.shared)
+      || (link_info.shared && !link_info.executable))
     warn = entry_from_cmdline;
   else
     warn = TRUE;
