@@ -187,7 +187,8 @@ taloop:
       if (SCM_ICHRP (svalue))
 	{
 	  svalue = SCM_ICHR (svalue);
-	  scm_printchar (svalue, stream);
+	  scm_printchar (svalue, builtin_type (current_gdbarch)->builtin_char,
+			 stream);
 	  break;
 	}
       else if (SCM_IFLAGP (svalue)

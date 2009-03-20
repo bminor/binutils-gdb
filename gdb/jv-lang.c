@@ -61,7 +61,8 @@ static char *get_java_utf8_name (struct obstack *obstack, struct value *name);
 static int java_class_is_primitive (struct value *clas);
 static struct value *java_value_string (char *ptr, int len);
 
-static void java_emit_char (int c, struct ui_file * stream, int quoter);
+static void java_emit_char (int c, struct type *type,
+			    struct ui_file * stream, int quoter);
 
 static char *java_class_name_from_physname (const char *physname);
 
@@ -796,7 +797,7 @@ java_value_string (char *ptr, int len)
    characters and strings is language specific. */
 
 static void
-java_emit_char (int c, struct ui_file *stream, int quoter)
+java_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
 {
   switch (c)
     {

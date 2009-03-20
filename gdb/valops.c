@@ -1352,6 +1352,24 @@ value_array (int lowbound, int highbound, struct value **elemvec)
   return val;
 }
 
+struct value *
+value_typed_string (char *ptr, int len, struct type *char_type)
+{
+  struct value *val;
+  int lowbound = current_language->string_lower_bound;
+  int highbound = len / TYPE_LENGTH (char_type);
+  struct type *rangetype = create_range_type ((struct type *) NULL,
+					      builtin_type_int32,
+					      lowbound, 
+					      highbound + lowbound - 1);
+  struct type *stringtype
+    = create_array_type ((struct type *) NULL, char_type, rangetype);
+
+  val = allocate_value (stringtype);
+  memcpy (value_contents_raw (val), ptr, len);
+  return val;
+}
+
 /* Create a value for a string constant by allocating space in the
    inferior, copying the data into that space, and returning the
    address with type TYPE_CODE_STRING.  PTR points to the string

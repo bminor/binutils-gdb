@@ -165,6 +165,8 @@ INTL_CFLAGS = @INCINTL@
 
 # Where is the ICONV library?  This can be empty if libc has iconv.
 LIBICONV = @LIBICONV@
+LIBICONV_INCLUDE = @LIBICONV_INCLUDE@
+LIBICONV_LIBDIR = @LIBICONV_LIBDIR@
 
 # Did the user give us a --with-sysroot option?
 TARGET_SYSTEM_ROOT = @TARGET_SYSTEM_ROOT@
@@ -388,7 +390,8 @@ INTERNAL_CFLAGS_BASE = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
-	$(INTL_CFLAGS) $(INCGNU) $(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS)
+	$(INTL_CFLAGS) $(INCGNU) $(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS) \
+	$(LIBICONV_INCLUDE)
 INTERNAL_WARN_CFLAGS = $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
@@ -400,7 +403,7 @@ LDFLAGS = @LDFLAGS@
 # I think it's perfectly reasonable for a user to set -pg in CFLAGS
 # and have it work; that's why CFLAGS is here.
 # PROFILE_CFLAGS is _not_ included, however, because we use monstartup.
-INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS)
+INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS) $(LIBICONV_LIBDIR)
 
 # If your system is missing alloca(), or, more likely, it's there but
 # it doesn't work, then refer to libiberty.

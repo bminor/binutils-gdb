@@ -48,12 +48,13 @@ extern void pascal_type_print_method_args (char *, char *,
 /* These are in p-lang.c: */
 
 extern int 
-  is_pascal_string_type (struct type *, int *, int *, int *, int *, char **);
+  is_pascal_string_type (struct type *, int *, int *, int *,
+			 struct type **, char **);
 
-extern void pascal_printchar (int, struct ui_file *);
+extern void pascal_printchar (int, struct type *, struct ui_file *);
 
-extern void pascal_printstr (struct ui_file *, const gdb_byte *,
-			     unsigned int, int, int,
+extern void pascal_printstr (struct ui_file *, struct type *, const gdb_byte *,
+			     unsigned int, int,
 			     const struct value_print_options *);
 
 extern struct type **const (pascal_builtin_types[]);

@@ -69,6 +69,22 @@ struct stoken
     int length;
   };
 
+struct typed_stoken
+  {
+    /* A language-specific type field.  */
+    int type;
+    /* Pointer to first byte of char-string or first bit of bit-string */
+    char *ptr;
+    /* Length of string in bytes for char-string or bits for bit-string */
+    int length;
+  };
+
+struct stoken_vector
+  {
+    int len;
+    struct typed_stoken *tokens;
+  };
+
 struct ttype
   {
     struct stoken stoken;
@@ -129,6 +145,8 @@ extern void write_exp_elt_type (struct type *);
 extern void write_exp_elt_intern (struct internalvar *);
 
 extern void write_exp_string (struct stoken);
+
+void write_exp_string_vector (int type, struct stoken_vector *vec);
 
 extern void write_exp_bitstring (struct stoken);
 

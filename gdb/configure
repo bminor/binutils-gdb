@@ -314,7 +314,7 @@ ac_subdirs_all="$ac_subdirs_all doc testsuite"
 ac_subdirs_all="$ac_subdirs_all gdbtk"
 ac_subdirs_all="$ac_subdirs_all multi-ice"
 ac_subdirs_all="$ac_subdirs_all gdbserver"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP RANLIB ac_ct_RANLIB build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os am__leading_dot DEPDIR CCDEPMODE MAKE GMAKE_TRUE GMAKE_FALSE SET_MAKE USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT localedir GL_COND_LIBTOOL_TRUE GL_COND_LIBTOOL_FALSE GNULIB_MEMMEM GNULIB_MEMPCPY GNULIB_MEMRCHR GNULIB_STPCPY GNULIB_STPNCPY GNULIB_STRCHRNUL GNULIB_STRDUP GNULIB_STRNDUP GNULIB_STRNLEN GNULIB_STRPBRK GNULIB_STRSEP GNULIB_STRSTR GNULIB_STRCASESTR GNULIB_STRTOK_R GNULIB_MBSLEN GNULIB_MBSNLEN GNULIB_MBSCHR GNULIB_MBSRCHR GNULIB_MBSSTR GNULIB_MBSCASECMP GNULIB_MBSNCASECMP GNULIB_MBSPCASECMP GNULIB_MBSCASESTR GNULIB_MBSCSPN GNULIB_MBSPBRK GNULIB_MBSSPN GNULIB_MBSSEP GNULIB_MBSTOK_R GNULIB_STRERROR GNULIB_STRSIGNAL HAVE_DECL_MEMMEM HAVE_MEMPCPY HAVE_DECL_MEMRCHR HAVE_STPCPY HAVE_STPNCPY HAVE_STRCHRNUL HAVE_DECL_STRDUP HAVE_STRNDUP HAVE_DECL_STRNDUP HAVE_DECL_STRNLEN HAVE_STRPBRK HAVE_STRSEP HAVE_STRCASESTR HAVE_DECL_STRTOK_R HAVE_DECL_STRERROR HAVE_DECL_STRSIGNAL REPLACE_STRERROR REPLACE_STRSIGNAL REPLACE_MEMMEM REPLACE_STRCASESTR REPLACE_STRSTR HAVE_LONG_LONG_INT HAVE_UNSIGNED_LONG_LONG_INT HAVE_INTTYPES_H HAVE_SYS_TYPES_H INCLUDE_NEXT NEXT_STDINT_H HAVE_STDINT_H HAVE_SYS_INTTYPES_H HAVE_SYS_BITYPES_H BITSIZEOF_PTRDIFF_T BITSIZEOF_SIG_ATOMIC_T BITSIZEOF_SIZE_T BITSIZEOF_WCHAR_T BITSIZEOF_WINT_T HAVE_SIGNED_SIG_ATOMIC_T HAVE_SIGNED_WCHAR_T HAVE_SIGNED_WINT_T PTRDIFF_T_SUFFIX SIG_ATOMIC_T_SUFFIX SIZE_T_SUFFIX WCHAR_T_SUFFIX WINT_T_SUFFIX STDINT_H NEXT_STRING_H GNULIB_WCWIDTH HAVE_DECL_WCWIDTH REPLACE_WCWIDTH WCHAR_H HAVE_WCHAR_H NEXT_WCHAR_H LIBGNU_LIBDEPS LIBGNU_LTLIBDEPS GNULIB_STDINT_H PACKAGE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK AMTAR am__tar am__untar am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH am__fastdepCC_TRUE am__fastdepCC_FALSE subdirs TARGET_OBS PKGVERSION REPORT_BUGS_TO REPORT_BUGS_TEXI LN_S YACC AR ac_ct_AR DLLTOOL ac_ct_DLLTOOL WINDRES ac_ct_WINDRES MIG ac_ct_MIG READLINE READLINE_DEPS READLINE_CFLAGS HAVE_LIBEXPAT LIBEXPAT LTLIBEXPAT PYTHON_CFLAGS ALLOCA CONFIG_LDFLAGS TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE WARN_CFLAGS WERROR_CFLAGS SER_HARDWIRE WIN32LIBS LIBGUI GUI_CFLAGS_X WIN32LDAPP TCL_VERSION TCL_PATCH_LEVEL TCL_BIN_DIR TCL_SRC_DIR TCL_LIB_FILE TCL_LIB_FLAG TCL_LIB_SPEC TCL_STUB_LIB_FILE TCL_STUB_LIB_FLAG TCL_STUB_LIB_SPEC TCL_INCLUDE TCL_LIBRARY TCL_DEPS TK_VERSION TK_BIN_DIR TK_SRC_DIR TK_LIB_FILE TK_LIB_FLAG TK_LIB_SPEC TK_STUB_LIB_FILE TK_STUB_LIB_FLAG TK_STUB_LIB_SPEC TK_INCLUDE TK_LIBRARY TK_DEPS TK_XINCLUDES X_CFLAGS X_LDFLAGS X_LIBS GDBTKLIBS GDBTK_CFLAGS GDBTK_SRC_DIR SIM SIM_OBS ENABLE_CFLAGS PROFILE_CFLAGS CONFIG_OBS CONFIG_DEPS CONFIG_SRCS CONFIG_ALL CONFIG_CLEAN CONFIG_INSTALL CONFIG_UNINSTALL target_subdir frags nm_h LIBICONV LIBOBJS LTLIBOBJS gl_LIBOBJS gl_LTLIBOBJS gltests_LIBOBJS gltests_LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP RANLIB ac_ct_RANLIB build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os am__leading_dot DEPDIR CCDEPMODE MAKE GMAKE_TRUE GMAKE_FALSE SET_MAKE USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT localedir GL_COND_LIBTOOL_TRUE GL_COND_LIBTOOL_FALSE GNULIB_MEMMEM GNULIB_MEMPCPY GNULIB_MEMRCHR GNULIB_STPCPY GNULIB_STPNCPY GNULIB_STRCHRNUL GNULIB_STRDUP GNULIB_STRNDUP GNULIB_STRNLEN GNULIB_STRPBRK GNULIB_STRSEP GNULIB_STRSTR GNULIB_STRCASESTR GNULIB_STRTOK_R GNULIB_MBSLEN GNULIB_MBSNLEN GNULIB_MBSCHR GNULIB_MBSRCHR GNULIB_MBSSTR GNULIB_MBSCASECMP GNULIB_MBSNCASECMP GNULIB_MBSPCASECMP GNULIB_MBSCASESTR GNULIB_MBSCSPN GNULIB_MBSPBRK GNULIB_MBSSPN GNULIB_MBSSEP GNULIB_MBSTOK_R GNULIB_STRERROR GNULIB_STRSIGNAL HAVE_DECL_MEMMEM HAVE_MEMPCPY HAVE_DECL_MEMRCHR HAVE_STPCPY HAVE_STPNCPY HAVE_STRCHRNUL HAVE_DECL_STRDUP HAVE_STRNDUP HAVE_DECL_STRNDUP HAVE_DECL_STRNLEN HAVE_STRPBRK HAVE_STRSEP HAVE_STRCASESTR HAVE_DECL_STRTOK_R HAVE_DECL_STRERROR HAVE_DECL_STRSIGNAL REPLACE_STRERROR REPLACE_STRSIGNAL REPLACE_MEMMEM REPLACE_STRCASESTR REPLACE_STRSTR HAVE_LONG_LONG_INT HAVE_UNSIGNED_LONG_LONG_INT HAVE_INTTYPES_H HAVE_SYS_TYPES_H INCLUDE_NEXT NEXT_STDINT_H HAVE_STDINT_H HAVE_SYS_INTTYPES_H HAVE_SYS_BITYPES_H BITSIZEOF_PTRDIFF_T BITSIZEOF_SIG_ATOMIC_T BITSIZEOF_SIZE_T BITSIZEOF_WCHAR_T BITSIZEOF_WINT_T HAVE_SIGNED_SIG_ATOMIC_T HAVE_SIGNED_WCHAR_T HAVE_SIGNED_WINT_T PTRDIFF_T_SUFFIX SIG_ATOMIC_T_SUFFIX SIZE_T_SUFFIX WCHAR_T_SUFFIX WINT_T_SUFFIX STDINT_H NEXT_STRING_H GNULIB_WCWIDTH HAVE_DECL_WCWIDTH REPLACE_WCWIDTH WCHAR_H HAVE_WCHAR_H NEXT_WCHAR_H LIBGNU_LIBDEPS LIBGNU_LTLIBDEPS GNULIB_STDINT_H PACKAGE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK AMTAR am__tar am__untar am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH am__fastdepCC_TRUE am__fastdepCC_FALSE subdirs TARGET_OBS PKGVERSION REPORT_BUGS_TO REPORT_BUGS_TEXI LN_S YACC AR ac_ct_AR DLLTOOL ac_ct_DLLTOOL WINDRES ac_ct_WINDRES MIG ac_ct_MIG LIBICONV LIBICONV_INCLUDE LIBICONV_LIBDIR READLINE READLINE_DEPS READLINE_CFLAGS HAVE_LIBEXPAT LIBEXPAT LTLIBEXPAT PYTHON_CFLAGS ALLOCA CONFIG_LDFLAGS TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE WARN_CFLAGS WERROR_CFLAGS SER_HARDWIRE WIN32LIBS LIBGUI GUI_CFLAGS_X WIN32LDAPP TCL_VERSION TCL_PATCH_LEVEL TCL_BIN_DIR TCL_SRC_DIR TCL_LIB_FILE TCL_LIB_FLAG TCL_LIB_SPEC TCL_STUB_LIB_FILE TCL_STUB_LIB_FLAG TCL_STUB_LIB_SPEC TCL_INCLUDE TCL_LIBRARY TCL_DEPS TK_VERSION TK_BIN_DIR TK_SRC_DIR TK_LIB_FILE TK_LIB_FLAG TK_LIB_SPEC TK_STUB_LIB_FILE TK_STUB_LIB_FLAG TK_STUB_LIB_SPEC TK_INCLUDE TK_LIBRARY TK_DEPS TK_XINCLUDES X_CFLAGS X_LDFLAGS X_LIBS GDBTKLIBS GDBTK_CFLAGS GDBTK_SRC_DIR SIM SIM_OBS ENABLE_CFLAGS PROFILE_CFLAGS CONFIG_OBS CONFIG_DEPS CONFIG_SRCS CONFIG_ALL CONFIG_CLEAN CONFIG_INSTALL CONFIG_UNINSTALL target_subdir frags nm_h LIBOBJS LTLIBOBJS gl_LIBOBJS gl_LTLIBOBJS gltests_LIBOBJS gltests_LTLIBOBJS'
 ac_subst_files='host_makefile_frag'
 ac_pwd=`pwd`
 
@@ -885,6 +885,7 @@ Optional Packages:
   --with-libunwind            Use libunwind frame unwinding support
   --with-pkgversion=PKG   Use PKG in the version string in place of "GDB"
   --with-bugurl=URL       Direct users to URL to report a bug
+  --with-libiconv-prefix=DIR  search for libiconv in DIR/include and DIR/lib
   --with-system-readline  use installed readline library
   --with-expat            include expat support (auto/yes/no)
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
@@ -899,7 +900,6 @@ Optional Packages:
   --with-tcl              directory containing tcl configuration (tclConfig.sh)
   --with-tk               directory containing tk configuration (tkConfig.sh)
   --with-x                use the X Window System
-  --with-libiconv-prefix=DIR  search for libiconv in DIR/include and DIR/lib
 
 Some influential environment variables:
   CC          C compiler command
@@ -9989,6 +9989,296 @@ if test "$ac_cv_search_dlgetmodinfo" != no; then
 fi
 
 
+
+
+
+# Check whether --with-libiconv-prefix or --without-libiconv-prefix was given.
+if test "${with_libiconv_prefix+set}" = set; then
+  withval="$with_libiconv_prefix"
+
+    for dir in `echo "$withval" | tr : ' '`; do
+      if test -d $dir/include; then LIBICONV_INCLUDE="-I$dir/include"; CPPFLAGS="$CPPFLAGS -I$dir/include"; fi
+      if test -d $dir/lib; then LIBICONV_LIBDIR="-L$dir/lib"; LDFLAGS="$LDFLAGS -L$dir/lib"; fi
+    done
+
+fi;
+
+  BUILD_LIBICONV_LIBDIR="-L../libiconv/lib/.libs -L../libiconv/lib/_libs"
+  BUILD_LIBICONV_INCLUDE="-I../libiconv/include"
+
+  echo "$as_me:$LINENO: checking for iconv" >&5
+echo $ECHO_N "checking for iconv... $ECHO_C" >&6
+if test "${am_cv_func_iconv+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+    am_cv_func_iconv="no, consider installing GNU libiconv"
+    am_cv_lib_iconv=no
+    am_cv_use_build_libiconv=no
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <stdlib.h>
+#include <iconv.h>
+int
+main ()
+{
+iconv_t cd = iconv_open("","");
+       iconv(cd,NULL,NULL,NULL,NULL);
+       iconv_close(cd);
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  am_cv_func_iconv=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+    if test "$am_cv_func_iconv" != yes; then
+      am_save_LIBS="$LIBS"
+      LIBS="$LIBS -liconv"
+      cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <stdlib.h>
+#include <iconv.h>
+int
+main ()
+{
+iconv_t cd = iconv_open("","");
+         iconv(cd,NULL,NULL,NULL,NULL);
+         iconv_close(cd);
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  am_cv_lib_iconv=yes
+        am_cv_func_iconv=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+      LIBS="$am_save_LIBS"
+    fi
+    # Look for libiconv in the build tree.
+    if test "$am_cv_func_iconv" != yes && test -d ../libiconv; then
+      am_save_LIBS="$LIBS"
+      am_save_CPPFLAGS="$CPPFLAGS"
+      LIBS="$LIBS $BUILD_LIBICONV_LIBDIR -liconv"
+      CPPFLAGS="$CPPFLAGS $BUILD_LIBICONV_INCLUDE"
+      cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <stdlib.h>
+#include <iconv.h>
+int
+main ()
+{
+iconv_t cd = iconv_open("","");
+         iconv(cd,NULL,NULL,NULL,NULL);
+         iconv_close(cd);
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  am_cv_lib_iconv=yes
+        am_cv_func_iconv=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+      LIBS="$am_save_LIBS"
+      if test "$am_cv_func_iconv" = "yes"; then
+         am_cv_use_build_libiconv=yes
+      else
+      	 CPPFLAGS="$am_save_CPPFLAGS"
+      fi
+    fi
+
+fi
+echo "$as_me:$LINENO: result: $am_cv_func_iconv" >&5
+echo "${ECHO_T}$am_cv_func_iconv" >&6
+  if test "$am_cv_func_iconv" = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_ICONV 1
+_ACEOF
+
+    echo "$as_me:$LINENO: checking for iconv declaration" >&5
+echo $ECHO_N "checking for iconv declaration... $ECHO_C" >&6
+    if test "${am_cv_proto_iconv+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+      cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#include <stdlib.h>
+#include <iconv.h>
+extern
+#ifdef __cplusplus
+"C"
+#endif
+#if defined(__STDC__) || defined(__cplusplus)
+size_t iconv (iconv_t cd, char * *inbuf, size_t *inbytesleft, char * *outbuf, size_t *outbytesleft);
+#else
+size_t iconv();
+#endif
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  am_cv_proto_iconv_arg1=""
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+am_cv_proto_iconv_arg1="const"
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+      am_cv_proto_iconv="extern size_t iconv (iconv_t cd, $am_cv_proto_iconv_arg1 char * *inbuf, size_t *inbytesleft, char * *outbuf, size_t *outbytesleft);"
+fi
+
+    am_cv_proto_iconv=`echo "$am_cv_proto_iconv" | tr -s ' ' | sed -e 's/( /(/'`
+    echo "$as_me:$LINENO: result: ${ac_t:-
+         }$am_cv_proto_iconv" >&5
+echo "${ECHO_T}${ac_t:-
+         }$am_cv_proto_iconv" >&6
+
+cat >>confdefs.h <<_ACEOF
+#define ICONV_CONST $am_cv_proto_iconv_arg1
+_ACEOF
+
+  fi
+  LIBICONV=
+  if test "$am_cv_lib_iconv" = yes; then
+    LIBICONV="-liconv"
+  fi
+  if test "$am_cv_use_build_libiconv" = yes; then
+    LIBICONV_LIBDIR="$BUILD_LIBICONV_LIBDIR"
+    LIBICONV_INCLUDE="$BUILD_LIBICONV_INCLUDE"
+  fi
+
+
+
+
+
 # On alpha-osf, it appears that libtermcap and libcurses are not compatible.
 # There is a very specific comment in /usr/include/curses.h explaining that
 # termcap routines built into libcurses must not be used.
@@ -15445,10 +15735,11 @@ fi
 
 
 
+
 for ac_func in canonicalize_file_name realpath getrusage getuid \
                 getgid poll pread64 sbrk setpgid setpgrp setsid \
 		sigaction sigprocmask sigsetmask socketpair syscall \
-		ttrace wborder setlocale
+		ttrace wborder setlocale iconvlist
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -15548,6 +15839,70 @@ _ACEOF
 
 fi
 done
+
+
+  echo "$as_me:$LINENO: checking for nl_langinfo and CODESET" >&5
+echo $ECHO_N "checking for nl_langinfo and CODESET... $ECHO_C" >&6
+if test "${am_cv_langinfo_codeset+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <langinfo.h>
+int
+main ()
+{
+char* cs = nl_langinfo(CODESET);
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  am_cv_langinfo_codeset=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+am_cv_langinfo_codeset=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+
+fi
+echo "$as_me:$LINENO: result: $am_cv_langinfo_codeset" >&5
+echo "${ECHO_T}$am_cv_langinfo_codeset" >&6
+  if test $am_cv_langinfo_codeset = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LANGINFO_CODESET 1
+_ACEOF
+
+  fi
 
 
 # Check the return and argument types of ptrace.  No canned test for
@@ -20776,228 +21131,9 @@ done
 
 
 
-
 cat >>confdefs.h <<\_ACEOF
-#define GDB_DEFAULT_HOST_CHARSET "ISO-8859-1"
+#define GDB_DEFAULT_HOST_CHARSET "UTF-8"
 _ACEOF
-
-
-
-
-
-# Check whether --with-libiconv-prefix or --without-libiconv-prefix was given.
-if test "${with_libiconv_prefix+set}" = set; then
-  withval="$with_libiconv_prefix"
-
-    for dir in `echo "$withval" | tr : ' '`; do
-      if test -d $dir/include; then CPPFLAGS="$CPPFLAGS -I$dir/include"; fi
-      if test -d $dir/lib; then LDFLAGS="$LDFLAGS -L$dir/lib"; fi
-    done
-
-fi;
-
-  echo "$as_me:$LINENO: checking for iconv" >&5
-echo $ECHO_N "checking for iconv... $ECHO_C" >&6
-if test "${am_cv_func_iconv+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-
-    am_cv_func_iconv="no, consider installing GNU libiconv"
-    am_cv_lib_iconv=no
-    cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <stdlib.h>
-#include <iconv.h>
-int
-main ()
-{
-iconv_t cd = iconv_open("","");
-       iconv(cd,NULL,NULL,NULL,NULL);
-       iconv_close(cd);
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  am_cv_func_iconv=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-    if test "$am_cv_func_iconv" != yes; then
-      am_save_LIBS="$LIBS"
-      LIBS="$LIBS -liconv"
-      cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <stdlib.h>
-#include <iconv.h>
-int
-main ()
-{
-iconv_t cd = iconv_open("","");
-         iconv(cd,NULL,NULL,NULL,NULL);
-         iconv_close(cd);
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  am_cv_lib_iconv=yes
-        am_cv_func_iconv=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-      LIBS="$am_save_LIBS"
-    fi
-
-fi
-echo "$as_me:$LINENO: result: $am_cv_func_iconv" >&5
-echo "${ECHO_T}$am_cv_func_iconv" >&6
-  if test "$am_cv_func_iconv" = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_ICONV 1
-_ACEOF
-
-    echo "$as_me:$LINENO: checking for iconv declaration" >&5
-echo $ECHO_N "checking for iconv declaration... $ECHO_C" >&6
-    if test "${am_cv_proto_iconv+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-
-      cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#include <stdlib.h>
-#include <iconv.h>
-extern
-#ifdef __cplusplus
-"C"
-#endif
-#if defined(__STDC__) || defined(__cplusplus)
-size_t iconv (iconv_t cd, char * *inbuf, size_t *inbytesleft, char * *outbuf, size_t *outbytesleft);
-#else
-size_t iconv();
-#endif
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  am_cv_proto_iconv_arg1=""
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-am_cv_proto_iconv_arg1="const"
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-      am_cv_proto_iconv="extern size_t iconv (iconv_t cd, $am_cv_proto_iconv_arg1 char * *inbuf, size_t *inbytesleft, char * *outbuf, size_t *outbytesleft);"
-fi
-
-    am_cv_proto_iconv=`echo "$am_cv_proto_iconv" | tr -s ' ' | sed -e 's/( /(/'`
-    echo "$as_me:$LINENO: result: ${ac_t:-
-         }$am_cv_proto_iconv" >&5
-echo "${ECHO_T}${ac_t:-
-         }$am_cv_proto_iconv" >&6
-
-cat >>confdefs.h <<_ACEOF
-#define ICONV_CONST $am_cv_proto_iconv_arg1
-_ACEOF
-
-  fi
-  LIBICONV=
-  if test "$am_cv_lib_iconv" = yes; then
-    LIBICONV="-liconv"
-  fi
-
 
 
                               ac_config_files="$ac_config_files Makefile .gdbinit:gdbinit.in gnulib/Makefile"
@@ -21880,6 +22016,9 @@ s,@WINDRES@,$WINDRES,;t t
 s,@ac_ct_WINDRES@,$ac_ct_WINDRES,;t t
 s,@MIG@,$MIG,;t t
 s,@ac_ct_MIG@,$ac_ct_MIG,;t t
+s,@LIBICONV@,$LIBICONV,;t t
+s,@LIBICONV_INCLUDE@,$LIBICONV_INCLUDE,;t t
+s,@LIBICONV_LIBDIR@,$LIBICONV_LIBDIR,;t t
 s,@READLINE@,$READLINE,;t t
 s,@READLINE_DEPS@,$READLINE_DEPS,;t t
 s,@READLINE_CFLAGS@,$READLINE_CFLAGS,;t t
@@ -21944,7 +22083,6 @@ s,@CONFIG_UNINSTALL@,$CONFIG_UNINSTALL,;t t
 s,@target_subdir@,$target_subdir,;t t
 s,@frags@,$frags,;t t
 s,@nm_h@,$nm_h,;t t
-s,@LIBICONV@,$LIBICONV,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 s,@gl_LIBOBJS@,$gl_LIBOBJS,;t t

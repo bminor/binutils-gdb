@@ -23,6 +23,7 @@
 #include "macrotab.h"
 #include "macroexp.h"
 #include "gdb_assert.h"
+#include "c-lang.h"
 
 
 
@@ -320,14 +321,17 @@ get_character_constant (struct macro_buffer *tok, char *p, char *end)
      way GDB's C/C++ lexer does.  So we call parse_escape in utils.c
      to handle escape sequences.  */
   if ((p + 1 <= end && *p == '\'')
-      || (p + 2 <= end && p[0] == 'L' && p[1] == '\''))
+      || (p + 2 <= end
+	  && (p[0] == 'L' || p[0] == 'u' || p[0] == 'U')
+	  && p[1] == '\''))
     {
       char *tok_start = p;
       char *body_start;
+      int char_count = 0;
 
       if (*p == '\'')
         p++;
-      else if (*p == 'L')
+      else if (*p == 'L' || *p == 'u' || *p == 'U')
         p += 2;
       else
         gdb_assert (0);
@@ -339,7 +343,7 @@ get_character_constant (struct macro_buffer *tok, char *p, char *end)
             error (_("Unmatched single quote."));
           else if (*p == '\'')
             {
-              if (p == body_start)
+              if (!char_count)
                 error (_("A character constant must contain at least one "
                        "character."));
               p++;
@@ -348,10 +352,13 @@ get_character_constant (struct macro_buffer *tok, char *p, char *end)
           else if (*p == '\\')
             {
               p++;
-              parse_escape (&p);
+	      char_count += c_parse_escape (&p, NULL);
             }
           else
-            p++;
+	    {
+	      p++;
+	      char_count++;
+	    }
         }
 
       set_token (tok, tok_start, p);
@@ -370,16 +377,16 @@ static int
 get_string_literal (struct macro_buffer *tok, char *p, char *end)
 {
   if ((p + 1 <= end
-       && *p == '\"')
+       && *p == '"')
       || (p + 2 <= end
-          && p[0] == 'L'
-          && p[1] == '\"'))
+          && (p[0] == 'L' || p[0] == 'u' || p[0] == 'U')
+          && p[1] == '"'))
     {
       char *tok_start = p;
 
-      if (*p == '\"')
+      if (*p == '"')
         p++;
-      else if (*p == 'L')
+      else if (*p == 'L' || *p == 'u' || *p == 'U')
         p += 2;
       else
         gdb_assert (0);
@@ -388,7 +395,7 @@ get_string_literal (struct macro_buffer *tok, char *p, char *end)
         {
           if (p >= end)
             error (_("Unterminated string in expression."));
-          else if (*p == '\"')
+          else if (*p == '"')
             {
               p++;
               break;
@@ -399,7 +406,7 @@ get_string_literal (struct macro_buffer *tok, char *p, char *end)
           else if (*p == '\\')
             {
               p++;
-              parse_escape (&p);
+              c_parse_escape (&p, NULL);
             }
           else
             p++;

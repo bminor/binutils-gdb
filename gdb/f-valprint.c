@@ -256,7 +256,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     {
     case TYPE_CODE_STRING:
       f77_get_dynamic_length_of_aggregate (type);
-      LA_PRINT_STRING (stream, valaddr, TYPE_LENGTH (type), 1, 0, options);
+      LA_PRINT_STRING (stream, builtin_type (current_gdbarch)->builtin_char,
+		       valaddr, TYPE_LENGTH (type), 0, options);
       break;
 
     case TYPE_CODE_ARRAY:
@@ -293,7 +294,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && (options->format == 0 || options->format == 's')
 	      && addr != 0)
-	    i = val_print_string (addr, -1, TYPE_LENGTH (elttype), stream,
+	    i = val_print_string (TYPE_TARGET_TYPE (type), addr, -1, stream,
 				  options);
 
 	  /* Return number of characters printed, including the terminating
@@ -365,7 +366,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    {
 	      fputs_filtered (" ", stream);
 	      LA_PRINT_CHAR ((unsigned char) unpack_long (type, valaddr),
-			     stream);
+			     type, stream);
 	    }
 	}
       break;

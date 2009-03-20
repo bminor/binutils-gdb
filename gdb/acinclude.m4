@@ -29,6 +29,9 @@ sinclude([../config/depstand.m4])
 dnl For AM_LC_MESSAGES
 sinclude([../config/lcmessage.m4])
 
+dnl For AM_LANGINFO_CODESET.
+sinclude([../config/codeset.m4])
+
 #
 # Sometimes the native compiler is a bogus stub for gcc or /usr/ucb/cc. This
 # makes configure think it's cross compiling. If --target wasn't used, then
@@ -174,14 +177,18 @@ AC_DEFUN([AM_ICONV],
   AC_ARG_WITH([libiconv-prefix],
 [  --with-libiconv-prefix=DIR  search for libiconv in DIR/include and DIR/lib], [
     for dir in `echo "$withval" | tr : ' '`; do
-      if test -d $dir/include; then CPPFLAGS="$CPPFLAGS -I$dir/include"; fi
-      if test -d $dir/lib; then LDFLAGS="$LDFLAGS -L$dir/lib"; fi
+      if test -d $dir/include; then LIBICONV_INCLUDE="-I$dir/include"; CPPFLAGS="$CPPFLAGS -I$dir/include"; fi
+      if test -d $dir/lib; then LIBICONV_LIBDIR="-L$dir/lib"; LDFLAGS="$LDFLAGS -L$dir/lib"; fi
     done
    ])
+
+  BUILD_LIBICONV_LIBDIR="-L../libiconv/lib/.libs -L../libiconv/lib/_libs"
+  BUILD_LIBICONV_INCLUDE="-I../libiconv/include"
 
   AC_CACHE_CHECK(for iconv, am_cv_func_iconv, [
     am_cv_func_iconv="no, consider installing GNU libiconv"
     am_cv_lib_iconv=no
+    am_cv_use_build_libiconv=no
     AC_TRY_LINK([#include <stdlib.h>
 #include <iconv.h>],
       [iconv_t cd = iconv_open("","");
@@ -199,6 +206,26 @@ AC_DEFUN([AM_ICONV],
         am_cv_lib_iconv=yes
         am_cv_func_iconv=yes)
       LIBS="$am_save_LIBS"
+    fi
+    # Look for libiconv in the build tree.
+    if test "$am_cv_func_iconv" != yes && test -d ../libiconv; then
+      am_save_LIBS="$LIBS"
+      am_save_CPPFLAGS="$CPPFLAGS"
+      LIBS="$LIBS $BUILD_LIBICONV_LIBDIR -liconv"
+      CPPFLAGS="$CPPFLAGS $BUILD_LIBICONV_INCLUDE"
+      AC_TRY_LINK([#include <stdlib.h>
+#include <iconv.h>],
+        [iconv_t cd = iconv_open("","");
+         iconv(cd,NULL,NULL,NULL,NULL);
+         iconv_close(cd);],
+        am_cv_lib_iconv=yes
+        am_cv_func_iconv=yes)
+      LIBS="$am_save_LIBS"
+      if test "$am_cv_func_iconv" = "yes"; then
+         am_cv_use_build_libiconv=yes
+      else
+      	 CPPFLAGS="$am_save_CPPFLAGS"
+      fi
     fi
   ])
   if test "$am_cv_func_iconv" = yes; then
@@ -229,7 +256,13 @@ size_t iconv();
   if test "$am_cv_lib_iconv" = yes; then
     LIBICONV="-liconv"
   fi
+  if test "$am_cv_use_build_libiconv" = yes; then
+    LIBICONV_LIBDIR="$BUILD_LIBICONV_LIBDIR"
+    LIBICONV_INCLUDE="$BUILD_LIBICONV_INCLUDE"
+  fi
   AC_SUBST(LIBICONV)
+  AC_SUBST(LIBICONV_INCLUDE)
+  AC_SUBST(LIBICONV_LIBDIR)
 ])
 
 dnl written by Guido Draheim <guidod@gmx.de>, original by Alexandre Oliva 

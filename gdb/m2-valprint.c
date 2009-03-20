@@ -237,7 +237,8 @@ print_unpacked_pointer (struct type *type,
       && TYPE_CODE (elttype) == TYPE_CODE_INT
       && (options->format == 0 || options->format == 's')
       && addr != 0)
-    return val_print_string (addr, -1, TYPE_LENGTH (elttype), stream, options);
+    return val_print_string (TYPE_TARGET_TYPE (type), addr, -1,
+			     stream, options);
   
   return 0;
 }
@@ -294,7 +295,7 @@ m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
 	   || ((current_language->la_language == language_m2)
 	       && (TYPE_CODE (type) == TYPE_CODE_CHAR)))
 	  && (options->format == 0 || options->format == 's'))
-	val_print_string (address, len+1, eltlen, stream, options);
+	val_print_string (type, address, len+1, stream, options);
       else
 	{
 	  fprintf_filtered (stream, "{");
@@ -359,7 +360,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 		  len = temp_len;
 		}
 
-	      LA_PRINT_STRING (stream, valaddr + embedded_offset, len, 1, 0,
+	      LA_PRINT_STRING (stream, TYPE_TARGET_TYPE (type),
+			       valaddr + embedded_offset, len, 0,
 			       options);
 	      i = len;
 	    }
@@ -547,7 +549,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  else
 	    fprintf_filtered (stream, "%d", (int) val);
 	  fputs_filtered (" ", stream);
-	  LA_PRINT_CHAR ((unsigned char) val, stream);
+	  LA_PRINT_CHAR ((unsigned char) val, type, stream);
 	}
       break;
 

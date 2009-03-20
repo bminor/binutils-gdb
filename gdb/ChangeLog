@@ -1,4 +1,218 @@
 2009-03-20  Tom Tromey  <tromey@redhat.com>
+	    Julian Brown  <julian@codesourcery.com>
+
+	PR i18n/7220, PR i18n/7821, PR exp/8815, PR exp/9103,
+	PR i18n/9401, PR exp/9613:
+	* NEWS: Update
+	* value.h (value_typed_string): Declare.
+	(val_print_string): Update.
+	* valprint.h (print_char_chars): Update.
+	* valprint.c (print_char_chars): Add type argument.  Update.
+	(val_print_string): Likewise.
+	* valops.c (value_typed_string): New function.
+	* utils.c (host_char_to_target): New function.
+	(parse_escape): Use host_char_to_target, host_hex_value.  Update.
+	Remove '^' case.
+	(no_control_char_error): Remove.
+	* typeprint.c (print_type_scalar): Update.
+	* scm-valprint.c (scm_scmval_print): Update.
+	* scm-lang.h (scm_printchar, scm_printstr): Update.
+	* scm-lang.c (scm_printchar): Add type argument.
+	(scm_printstr): Likewise.
+	* printcmd.c (print_formatted): Update.
+	(print_scalar_formatted): Update.
+	(printf_command) <wide_string_arg, wide_char_arg>: New constants.
+	Handle '%lc' and '%ls'.
+	* parser-defs.h (struct typed_stoken): New type.
+	(struct stoken_vector): Likewise.
+	(write_exp_string_vector): Declare.
+	* parse.c (write_exp_string_vector): New function.
+	* p-valprint.c (pascal_val_print): Update.
+	* p-lang.h (is_pascal_string_type, pascal_printchar,
+	pascal_printstr): Update.
+	* p-lang.c (is_pascal_string_type): Remove 'char_size' argument.
+	Add 'char_type' argument.
+	(pascal_emit_char): Add type argument.
+	(pascal_printchar): Likewise.
+	(pascal_printstr): Likewise.
+	* objc-lang.c (objc_emit_char): Add type argument.
+	(objc_printchar): Likewise.
+	(objc_printstr): Likewise.
+	* macroexp.c (get_character_constant): Handle unicode characters.
+	Use c_parse_escape.
+	(get_string_literal): Handle unicode strings.  Use
+	c_parse_escape.
+	* m2-valprint.c (print_unpacked_pointer): Update.
+	(m2_print_array_contents): Update.
+	(m2_val_print): Update.
+	* m2-lang.c (m2_emit_char): Add type argument.
+	(m2_printchar): Likewise.
+	(m2_printstr): Likewise.
+	* language.h (struct language_defn) <la_printchar>: Add type
+	argument.
+	<la_printstr, la_emitchar>: Likewise.
+	(LA_PRINT_CHAR): Likewise.
+	(LA_PRINT_STRING): Likewise.
+	(LA_EMIT_CHAR): Likewise.
+	* language.c (unk_lang_emit_char): Add type argument.
+	(unk_lang_printchar): Likewise.
+	(unk_lang_printstr): Likewise.
+	* jv-valprint.c (java_val_print): Update.
+	* jv-lang.c (java_emit_char): Add type argument.
+	* f-valprint.c (f_val_print): Update.
+	* f-lang.c (f_emit_char): Add type argument.
+	(f_printchar): Likewise.
+	(f_printstr): Likewise.
+	* expprint.c (print_subexp_standard): Update.
+	* charset.h (target_wide_charset): Declare.
+	(c_target_char_has_backslash_escape, c_parse_backslash,
+	host_char_print_literally, host_char_to_target,
+	target_char_to_host, target_char_to_control_char): Remove.
+	(enum transliterations): New type.
+	(convert_between_encodings): Declare.
+	(HOST_ESCAPE_CHAR): New define.
+	(host_letter_to_control_character, host_hex_value): Declare.
+	(enum wchar_iterate_result): New enum.
+	(struct wchar_iterator): Declare.
+	(make_wchar_iterator, make_cleanup_wchar_iterator, wchar_iterator,
+	wchar_push_back): Declare.
+	* charset-list.h: New file.
+	* c-valprint.c (textual_name): New function.
+	(textual_element_type): Handle wide character types.
+	(c_val_print): Pass original type to textual_element_type.  Handle
+	wide character types.
+	(c_value_print): Use textual_element_type.  Pass original type of
+	value to val_print.
+	* c-lang.h (enum c_string_type): New type.
+	(c_printchar, c_printstr): Update.
+	* c-lang.c (classify_type): New function.
+	(print_wchar): Likewise.
+	(c_emit_char): Add type argument.  Handle wide characters.
+	(c_printchar): Likewise.
+	(c_printstr): Add type argument.  Handle wide and multibyte
+	character sets.
+	(convert_ucn): New function.
+	(emit_numeric_character): Likewise.
+	(convert_octal): Likewise.
+	(convert_hex): Likewise.
+	(ADVANCE): New macro.
+	(convert_escape): New function.
+	(parse_one_string): Likewise.
+	(evaluate_subexp_c): Likewise.
+	(exp_descriptor_c): New global.
+	(c_language_defn): Use exp_descriptor_c.
+	(cplus_language_defn): Likewise.
+	(asm_language_defn): Likewise.
+	(minimal_language_defn): Likewise.
+	(charset_for_string_type): New function.
+	* c-exp.y (%union): Add 'svec' and 'tsval'.
+	(CHAR): New token.
+	(exp): Add CHAR production.
+	(string_exp): Rewrite.
+	(exp) <string_exp>: Rewrite.
+	(tempbuf): Now global.
+	(tempbuf_init): New global.
+	(parse_string_or_char): New function.
+	(yylex) <tempbuf>: Now global.
+	<tokptr, tempbufindex, tempbufsize, token_string, class_prefix>:
+	Remove.
+	Handle 'u', 'U', and 'L' prefixes.  Call parse_string_or_char.
+	(c_parse_escape): New function.
+	* auxv.c (fprint_target_auxv): Update.
+	* ada-valprint.c (ada_emit_char): Add type argument.
+	(ada_printchar): Likewise.
+	(ada_print_scalar): Update.
+	(printstr): Add type argument.  Update calls to ada_emit_char.
+	(ada_printstr): Add type argument.
+	(ada_val_print_array): Update.
+	(ada_val_print_1): Likewise.
+	* ada-lang.c (emit_char): Add type argument.
+	* ada-lang.h (ada_emit_char, ada_printchar, ada_printstr): Add
+	type arguments.
+	* gdb_locale.h: Include langinfo.h.
+	* charset.c (_initialize_charset): Set default host charset from
+	the locale.  Don't register charsets.  Add target-wide-charset
+	commands.  Call find_charset_names.
+	(struct charset, struct translation): Remove.
+	(GDB_DEFAULT_HOST_CHARSET): Remove.
+	(GDB_DEFAULT_TARGET_WIDE_CHARSET): New define.
+	(target_wide_charset_name): New global.
+	(show_host_charset_name): Handle "auto".
+	(show_target_wide_charset_name): New function.
+	(host_charset_enum, target_charset_enum): Remove.
+	(charset_enum): New global.
+	(all_charsets, register_charset, lookup_charset, all_translations,
+	register_translation, lookup_translation): Remove.
+	(simple_charset, ascii_print_literally, ascii_to_control): Remove.
+	(iso_8859_print_literally, iso_8859_to_control,
+	iso_8859_family_charset): Remove.
+	(ebcdic_print_literally, ebcdic_to_control,
+	ebcdic_family_charset): Remove.
+	(struct cached_iconv, check_iconv_cache, cached_iconv_convert,
+	register_iconv_charsets): Remove.
+	(target_wide_charset_be_name, target_wide_charset_le_name): New
+	globals.
+	(identity_either_char_to_other): Remove.
+	(set_be_le_names, validate): New functions.
+	(backslashable, backslashed, represented): Remove.
+	(default_c_target_char_has_backslash_escape): Remove.
+	(default_c_parse_backslash, iconv_convert): Remove.
+	(ascii_to_iso_8859_1_table, ascii_to_ebcdic_us_table,
+	ascii_to_ibm1047_table, iso_8859_1_to_ascii_table,
+	iso_8859_1_to_ebcdic_us_table, iso_8859_1_to_ibm1047_table,
+	ebcdic_us_to_ascii_table, ebcdic_us_to_iso_8859_1_table,
+	ebcdic_us_to_ibm1047_table, ibm1047_to_ascii_table,
+	ibm1047_to_iso_8859_1_table, ibm1047_to_ebcdic_us_table): Remove.
+	(table_convert_char, table_translation, simple_table_translation):
+	Remove.
+	(current_host_charset, current_target_charset,
+	c_target_char_has_backslash_escape_func,
+	c_target_char_has_backslash_escape_baton): Remove.
+	(c_parse_backslash_func, c_parse_backslash_baton): Remove.
+	(host_char_to_target_func, host_char_to_target_baton): Remove.
+	(target_char_to_host_func, target_char_to_host_baton): Remove.
+	(cached_iconv_host_to_target, cached_iconv_target_to_host):
+	Remove.
+	(lookup_charset_or_error, check_valid_host_charset): Remove.
+	(set_host_and_target_charsets): Remove.
+	(set_host_charset, set_target_charset): Remove.
+	(set_host_charset_sfunc, set_target_charset_sfunc): Rewrite.
+	(set_target_wide_charset_sfunc): New function.
+	(show_charset): Print target wide character set.
+	(host_charset, target_charset): Rewrite.
+	(target_wide_charset): New function.
+	(c_target_char_has_backslash_escape): Remove.
+	(c_parse_backslash): Remove.
+	(host_letter_to_control_character): New function.
+	(host_char_print_literally): Remove.
+	(host_hex_value): New function.
+	(target_char_to_control_char): Remove.
+	(cleanup_iconv): New function.
+	(convert_between_encodings): New function.
+	(target_char_to_host): Remove.
+	(struct wchar_iterator): Define.
+	(make_wchar_iterator, make_cleanup_wchar_iterator, wchar_iterator,
+	wchar_push_back): New functions.
+	(do_cleanup_iterator): New function.
+	(char_ptr): New typedef.
+	(charsets): New global.
+	(add_one, find_charset_names): New functions.
+	(default_charset_names): New global.
+	(auto_host_charset_name): Likewise.
+	* aclocal.m4, config.in, configure: Rebuild.
+	* configure.ac: Call AM_LANGINFO_CODESET.
+	(GDB_DEFAULT_HOST_CHARSET): Default to UTF-8.
+	(AM_ICONV): Invoke earlier.
+	* acinclude.m4: Include codeset.m4.  Subst LIBICONV_INCLUDE and
+	LIBICONV_LIBDIR.  Check for libiconv in build tree.
+	* Makefile.in (LIBICONV_LIBDIR, LIBICONV_INCLUDE): New macros.
+	(INTERNAL_CFLAGS_BASE): Add LIBICONV_INCLUDE.
+	(INTERNAL_LDFLAGS): Add LIBICONV_LIBDIR.
+	* gdb_obstack.h (obstack_grow_wstr): New define.
+        * gdb_wchar.h: New file.
+        * defs.h: Include it.
+
+2009-03-20  Tom Tromey  <tromey@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (process_die): Handle DW_TAG_typedef.

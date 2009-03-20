@@ -59,7 +59,7 @@ extern void scm_scmval_print (LONGEST, struct ui_file *, int,
 
 extern int is_scmvalue_type (struct type *);
 
-extern void scm_printchar (int, struct ui_file *);
+extern void scm_printchar (int, struct type *, struct ui_file *);
 
 extern struct value *scm_evaluate_string (char *, int);
 

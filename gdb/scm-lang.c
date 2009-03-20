@@ -43,14 +43,14 @@ static int in_eval_c (void);
 struct type *builtin_type_scm;
 
 void
-scm_printchar (int c, struct ui_file *stream)
+scm_printchar (int c, struct type *type, struct ui_file *stream)
 {
   fprintf_filtered (stream, "#\\%c", c);
 }
 
 static void
-scm_printstr (struct ui_file *stream, const gdb_byte *string,
-	      unsigned int length, int width, int force_ellipses,
+scm_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
+	      unsigned int length, int force_ellipses,
 	      const struct value_print_options *options)
 {
   fprintf_filtered (stream, "\"%s\"", string);

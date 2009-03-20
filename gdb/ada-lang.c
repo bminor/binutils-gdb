@@ -11022,9 +11022,9 @@ ada_language_arch_info (struct gdbarch *gdbarch,
 /* Not really used, but needed in the ada_language_defn.  */
 
 static void
-emit_char (int c, struct ui_file *stream, int quoter)
+emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
 {
-  ada_emit_char (c, stream, quoter, 1);
+  ada_emit_char (c, type, stream, quoter, 1);
 }
 
 static int

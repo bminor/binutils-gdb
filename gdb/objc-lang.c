@@ -280,7 +280,7 @@ objc_demangle (const char *mangled, int options)
    for printing characters and strings is language specific.  */
 
 static void
-objc_emit_char (int c, struct ui_file *stream, int quoter)
+objc_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
 {
 
   c &= 0xFF;			/* Avoid sign bit follies.  */
@@ -326,10 +326,10 @@ objc_emit_char (int c, struct ui_file *stream, int quoter)
 }
 
 static void
-objc_printchar (int c, struct ui_file *stream)
+objc_printchar (int c, struct type *type, struct ui_file *stream)
 {
   fputs_filtered ("'", stream);
-  objc_emit_char (c, stream, '\'');
+  objc_emit_char (c, type, stream, '\'');
   fputs_filtered ("'", stream);
 }
 
@@ -340,14 +340,16 @@ objc_printchar (int c, struct ui_file *stream)
    FORCE_ELLIPSES.  */
 
 static void
-objc_printstr (struct ui_file *stream, const gdb_byte *string, 
-	       unsigned int length, int width, int force_ellipses,
+objc_printstr (struct ui_file *stream, struct type *type,
+	       const gdb_byte *string, unsigned int length,
+	       int force_ellipses,
 	       const struct value_print_options *options)
 {
   unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
+  int width = TYPE_LENGTH (type);
 
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in
@@ -395,7 +397,7 @@ objc_printstr (struct ui_file *stream, const gdb_byte *string,
 		fputs_filtered ("\", ", stream);
 	      in_quotes = 0;
 	    }
-	  objc_printchar (string[i], stream);
+	  objc_printchar (string[i], type, stream);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  i = rep1 - 1;
 	  things_printed += options->repeat_count_threshold;
@@ -411,7 +413,7 @@ objc_printstr (struct ui_file *stream, const gdb_byte *string,
 		fputs_filtered ("\"", stream);
 	      in_quotes = 1;
 	    }
-	  objc_emit_char (string[i], stream, '"');
+	  objc_emit_char (string[i], type, stream, '"');
 	  ++things_printed;
 	}
     }

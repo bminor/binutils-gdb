@@ -1,6 +1,6 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
 dnl Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-dnl 2005, 2006, 2007, 2008
+dnl 2005, 2006, 2007, 2008, 2009
 dnl Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
@@ -430,6 +430,8 @@ AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
 # On HP/UX we may need libxpdl for dlgetmodinfo (used by solib-pa64.c).
 AC_SEARCH_LIBS(dlgetmodinfo, [dl xpdl])
 
+AM_ICONV
+
 # On alpha-osf, it appears that libtermcap and libcurses are not compatible.
 # There is a very specific comment in /usr/include/curses.h explaining that
 # termcap routines built into libcurses must not be used.
@@ -776,7 +778,8 @@ AC_FUNC_VFORK
 AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid \
                 getgid poll pread64 sbrk setpgid setpgrp setsid \
 		sigaction sigprocmask sigsetmask socketpair syscall \
-		ttrace wborder setlocale])
+		ttrace wborder setlocale iconvlist])
+AM_LANGINFO_CODESET
 
 # Check the return and argument types of ptrace.  No canned test for
 # this, so roll our own.
@@ -1930,16 +1933,9 @@ dnl Check for exe extension set on certain hosts (e.g. Win32)
 AC_EXEEXT
 
 dnl  Detect the character set used by this host.
-
-dnl  At the moment, we just assume it's ISO-8859-1 (which is a
-dnl  superset of ASCII containing the characters needed for French,
-dnl  German, Spanish, Italian, and possibly others), but if were
-dnl  *were* to support any host character sets other than ISO-8859-1,
-dnl  here's where we'd detect it.
-AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "ISO-8859-1",
+dnl  At the moment, we just assume it's UTF-8.
+AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
           [Define to be a string naming the default host character set.])
-
-AM_ICONV
 
 AC_OUTPUT(Makefile .gdbinit:gdbinit.in gnulib/Makefile,
 [

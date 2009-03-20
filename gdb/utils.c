@@ -1571,21 +1571,33 @@ query (const char *ctlstr, ...)
   va_end (args);
 }
 
-/* Print an error message saying that we couldn't make sense of a
-   \^mumble sequence in a string or character constant.  START and END
-   indicate a substring of some larger string that contains the
-   erroneous backslash sequence, missing the initial backslash.  */
-static NORETURN int
-no_control_char_error (const char *start, const char *end)
+/* A helper for parse_escape that converts a host character to a
+   target character.  C is the host character.  If conversion is
+   possible, then the target character is stored in *TARGET_C and the
+   function returns 1.  Otherwise, the function returns 0.  */
+
+static int
+host_char_to_target (int c, int *target_c)
 {
-  int len = end - start;
-  char *copy = alloca (end - start + 1);
+  struct obstack host_data;
+  char the_char = c;
+  struct cleanup *cleanups;
+  int result = 0;
 
-  memcpy (copy, start, len);
-  copy[len] = '\0';
+  obstack_init (&host_data);
+  cleanups = make_cleanup_obstack_free (&host_data);
 
-  error (_("There is no control character `\\%s' in the `%s' character set."),
-	 copy, target_charset ());
+  convert_between_encodings (target_charset (), host_charset (),
+			     &the_char, 1, 1, &host_data, translit_none);
+
+  if (obstack_object_size (&host_data) == 1)
+    {
+      result = 1;
+      *target_c = *(char *) obstack_base (&host_data);
+    }
+
+  do_cleanups (cleanups);
+  return result;
 }
 
 /* Parse a C escape sequence.  STRING_PTR points to a variable
@@ -1608,53 +1620,13 @@ parse_escape (char **string_ptr)
 {
   int target_char;
   int c = *(*string_ptr)++;
-  if (c_parse_backslash (c, &target_char))
-    return target_char;
-  else
-    switch (c)
-      {
+  switch (c)
+    {
       case '\n':
 	return -2;
       case 0:
 	(*string_ptr)--;
 	return 0;
-      case '^':
-	{
-	  /* Remember where this escape sequence started, for reporting
-	     errors.  */
-	  char *sequence_start_pos = *string_ptr - 1;
-
-	  c = *(*string_ptr)++;
-
-	  if (c == '?')
-	    {
-	      /* XXXCHARSET: What is `delete' in the host character set?  */
-	      c = 0177;
-
-	      if (!host_char_to_target (c, &target_char))
-		error (_("There is no character corresponding to `Delete' "
-		       "in the target character set `%s'."), host_charset ());
-
-	      return target_char;
-	    }
-	  else if (c == '\\')
-	    target_char = parse_escape (string_ptr);
-	  else
-	    {
-	      if (!host_char_to_target (c, &target_char))
-		no_control_char_error (sequence_start_pos, *string_ptr);
-	    }
-
-	  /* Now target_char is something like `c', and we want to find
-	     its control-character equivalent.  */
-	  if (!target_char_to_control_char (target_char, &target_char))
-	    no_control_char_error (sequence_start_pos, *string_ptr);
-
-	  return target_char;
-	}
-
-	/* XXXCHARSET: we need to use isdigit and value-of-digit
-	   methods of the host character set here.  */
 
       case '0':
       case '1':
@@ -1665,16 +1637,16 @@ parse_escape (char **string_ptr)
       case '6':
       case '7':
 	{
-	  int i = c - '0';
+	  int i = host_hex_value (c);
 	  int count = 0;
 	  while (++count < 3)
 	    {
 	      c = (**string_ptr);
-	      if (c >= '0' && c <= '7')
+	      if (isdigit (c) && c != '8' && c != '9')
 		{
 		  (*string_ptr)++;
 		  i *= 8;
-		  i += c - '0';
+		  i += host_hex_value (c);
 		}
 	      else
 		{
@@ -1683,14 +1655,39 @@ parse_escape (char **string_ptr)
 	    }
 	  return i;
 	}
-      default:
-	if (!host_char_to_target (c, &target_char))
-	  error
-	    ("The escape sequence `\%c' is equivalent to plain `%c', which"
-	     " has no equivalent\n" "in the `%s' character set.", c, c,
-	     target_charset ());
-	return target_char;
-      }
+
+    case 'a':
+      c = '\a';
+      break;
+    case 'b':
+      c = '\b';
+      break;
+    case 'f':
+      c = '\f';
+      break;
+    case 'n':
+      c = '\n';
+      break;
+    case 'r':
+      c = '\r';
+      break;
+    case 't':
+      c = '\t';
+      break;
+    case 'v':
+      c = '\v';
+      break;
+
+    default:
+      break;
+    }
+
+  if (!host_char_to_target (c, &target_char))
+    error
+      ("The escape sequence `\%c' is equivalent to plain `%c', which"
+       " has no equivalent\n" "in the `%s' character set.", c, c,
+       target_charset ());
+  return target_char;
 }
 
 /* Print the character C on STREAM as part of the contents of a literal

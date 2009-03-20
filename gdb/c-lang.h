@@ -29,9 +29,38 @@ struct language_arch_info;
 #include "macroexp.h"
 
 
-extern int c_parse (void);	/* Defined in c-exp.y */
+/* The various kinds of C string and character.  Note that these
+   values are chosen so that they may be or'd together in certain
+   ways.  */
+enum c_string_type
+  {
+    /* An ordinary string: "value".  */
+    C_STRING = 0,
+    /* A wide string: L"value".  */
+    C_WIDE_STRING = 1,
+    /* A 16-bit Unicode string: u"value".  */
+    C_STRING_16 = 2,
+    /* A 32-bit Unicode string: U"value".  */
+    C_STRING_32 = 3,
+    /* An ordinary char: 'v'.  This can also be or'd with one of the
+       above to form the corresponding CHAR value from a STRING
+       value.  */
+    C_CHAR = 4,
+    /* A wide char: L'v'.  */
+    C_WIDE_CHAR = 5,
+    /* A 16-bit Unicode char: u'v'.  */
+    C_CHAR_16 = 6,
+    /* A 32-bit Unicode char: U'v'.  */
+    C_CHAR_32 = 7
+  };
 
-extern void c_error (char *);	/* Defined in c-exp.y */
+/* Defined in c-exp.y.  */
+
+extern int c_parse (void);
+
+extern void c_error (char *);
+
+extern int c_parse_escape (char **, struct obstack *);
 
 /* Defined in c-typeprint.c */
 extern void c_print_type (struct type *, char *, struct ui_file *, int,
@@ -48,10 +77,10 @@ extern int c_value_print (struct value *, struct ui_file *,
 
 /* These are in c-lang.c: */
 
-extern void c_printchar (int, struct ui_file *);
+extern void c_printchar (int, struct type *, struct ui_file *);
 
-extern void c_printstr (struct ui_file * stream, const gdb_byte *string,
-			unsigned int length, int width,
+extern void c_printstr (struct ui_file * stream, struct type *elttype,
+			const gdb_byte *string, unsigned int length,
 			int force_ellipses,
 			const struct value_print_options *options);
 

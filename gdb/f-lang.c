@@ -70,8 +70,9 @@ static SAVED_F77_COMMON_PTR allocate_saved_f77_common_node (void);
 static void patch_common_entries (SAVED_F77_COMMON_PTR, CORE_ADDR, int);
 #endif
 
-static void f_printchar (int c, struct ui_file * stream);
-static void f_emit_char (int c, struct ui_file * stream, int quoter);
+static void f_printchar (int c, struct type *type, struct ui_file * stream);
+static void f_emit_char (int c, struct type *type,
+			 struct ui_file * stream, int quoter);
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
@@ -80,7 +81,7 @@ static void f_emit_char (int c, struct ui_file * stream, int quoter);
    be replaced with a true F77 version.  */
 
 static void
-f_emit_char (int c, struct ui_file *stream, int quoter)
+f_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
 {
   c &= 0xFF;			/* Avoid sign bit follies */
 
@@ -126,10 +127,10 @@ f_emit_char (int c, struct ui_file *stream, int quoter)
    be replaced with a true F77version. */
 
 static void
-f_printchar (int c, struct ui_file *stream)
+f_printchar (int c, struct type *type, struct ui_file *stream)
 {
   fputs_filtered ("'", stream);
-  LA_EMIT_CHAR (c, stream, '\'');
+  LA_EMIT_CHAR (c, type, stream, '\'');
   fputs_filtered ("'", stream);
 }
 
@@ -141,14 +142,15 @@ f_printchar (int c, struct ui_file *stream)
    be replaced with a true F77 version. */
 
 static void
-f_printstr (struct ui_file *stream, const gdb_byte *string,
-	    unsigned int length, int width, int force_ellipses,
+f_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
+	    unsigned int length, int force_ellipses,
 	    const struct value_print_options *options)
 {
   unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
+  int width = TYPE_LENGTH (type);
 
   if (length == 0)
     {
@@ -190,7 +192,7 @@ f_printstr (struct ui_file *stream, const gdb_byte *string,
 		fputs_filtered ("', ", stream);
 	      in_quotes = 0;
 	    }
-	  f_printchar (string[i], stream);
+	  f_printchar (string[i], type, stream);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  i = rep1 - 1;
 	  things_printed += options->repeat_count_threshold;
@@ -206,7 +208,7 @@ f_printstr (struct ui_file *stream, const gdb_byte *string,
 		fputs_filtered ("'", stream);
 	      in_quotes = 1;
 	    }
-	  LA_EMIT_CHAR (string[i], stream, '"');
+	  LA_EMIT_CHAR (string[i], type, stream, '"');
 	  ++things_printed;
 	}
     }

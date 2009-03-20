@@ -61,6 +61,8 @@
 
 #include "gdb_locale.h"
 
+#include "gdb_wchar.h"
+
 /* For ``enum target_signal''.  */
 #include "gdb/signals.h"
 

@@ -65,9 +65,11 @@ static void set_check (char *, int);
 
 static void set_type_range_case (void);
 
-static void unk_lang_emit_char (int c, struct ui_file *stream, int quoter);
+static void unk_lang_emit_char (int c, struct type *type,
+				struct ui_file *stream, int quoter);
 
-static void unk_lang_printchar (int c, struct ui_file *stream);
+static void unk_lang_printchar (int c, struct type *type,
+				struct ui_file *stream);
 
 static void unk_lang_print_type (struct type *, char *, struct ui_file *,
 				 int, int);
@@ -1065,20 +1067,22 @@ unk_lang_error (char *msg)
 }
 
 static void
-unk_lang_emit_char (int c, struct ui_file *stream, int quoter)
+unk_lang_emit_char (int c, struct type *type, struct ui_file *stream,
+		    int quoter)
 {
   error (_("internal error - unimplemented function unk_lang_emit_char called."));
 }
 
 static void
-unk_lang_printchar (int c, struct ui_file *stream)
+unk_lang_printchar (int c, struct type *type, struct ui_file *stream)
 {
   error (_("internal error - unimplemented function unk_lang_printchar called."));
 }
 
 static void
-unk_lang_printstr (struct ui_file *stream, const gdb_byte *string,
-		   unsigned int length, int width, int force_ellipses,
+unk_lang_printstr (struct ui_file *stream, struct type *type,
+		   const gdb_byte *string, unsigned int length,
+		   int force_ellipses,
 		   const struct value_print_options *options)
 {
   error (_("internal error - unimplemented function unk_lang_printstr called."));

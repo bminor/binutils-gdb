@@ -141,6 +141,7 @@ void yyerror (char *);
     struct symbol *sym;
     struct type *tval;
     struct stoken sval;
+    struct typed_stoken tsval;
     struct ttype tsym;
     struct symtoken ssym;
     int voidval;
@@ -148,6 +149,7 @@ void yyerror (char *);
     enum exp_opcode opcode;
     struct internalvar *ivar;
 
+    struct stoken_vector svec;
     struct type **tvec;
     int *ivec;
   }
@@ -180,11 +182,13 @@ static int parse_number (char *, int, int, YYSTYPE *);
    Contexts where this distinction is not important can use the
    nonterminal "name", which matches either NAME or TYPENAME.  */
 
-%token <sval> STRING
+%token <tsval> STRING
+%token <tsval> CHAR
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence. */
 %token <voidval> COMPLETE
 %token <tsym> TYPENAME
-%type <sval> name string_exp
+%type <sval> name
+%type <svec> string_exp
 %type <ssym> name_not_typename
 %type <tsym> typename
 
@@ -522,6 +526,15 @@ exp	:	INT
 			  write_exp_elt_opcode (OP_LONG); }
 	;
 
+exp	:	CHAR
+			{
+			  struct stoken_vector vec;
+			  vec.len = 1;
+			  vec.tokens = &$1;
+			  write_exp_string_vector ($1.type, &vec);
+			}
+	;
+
 exp	:	NAME_OR_INT
 			{ YYSTYPE val;
 			  parse_number ($1.stoken.ptr, $1.stoken.length, 0, &val);
@@ -570,48 +583,64 @@ string_exp:
 			     string.  Note that we follow the
 			     NUL-termination convention of the
 			     lexer.  */
-			  $$.length = $1.length;
-			  $$.ptr = malloc ($1.length + 1);
-			  memcpy ($$.ptr, $1.ptr, $1.length + 1);
+			  struct typed_stoken *vec = XNEW (struct typed_stoken);
+			  $$.len = 1;
+			  $$.tokens = vec;
+
+			  vec->type = $1.type;
+			  vec->length = $1.length;
+			  vec->ptr = malloc ($1.length + 1);
+			  memcpy (vec->ptr, $1.ptr, $1.length + 1);
 			}
 
 	|	string_exp STRING
 			{
 			  /* Note that we NUL-terminate here, but just
 			     for convenience.  */
-			  struct stoken t;
-			  t.length = $1.length + $2.length;
-			  t.ptr = malloc (t.length + 1);
-			  memcpy (t.ptr, $1.ptr, $1.length);
-			  memcpy (t.ptr + $1.length, $2.ptr, $2.length + 1);
-			  free ($1.ptr);
-			  $$ = t;
+			  char *p;
+			  ++$$.len;
+			  $$.tokens = realloc ($$.tokens,
+					       $$.len * sizeof (struct typed_stoken));
+
+			  p = malloc ($2.length + 1);
+			  memcpy (p, $2.ptr, $2.length + 1);
+
+			  $$.tokens[$$.len - 1].type = $2.type;
+			  $$.tokens[$$.len - 1].length = $2.length;
+			  $$.tokens[$$.len - 1].ptr = p;
 			}
 		;
 
 exp	:	string_exp
-			{ /* C strings are converted into array constants with
-			     an explicit null byte added at the end.  Thus
-			     the array upper bound is the string length.
-			     There is no such thing in C as a completely empty
-			     string. */
-			  char *sp = $1.ptr; int count = $1.length;
-			  while (count-- > 0)
+			{
+			  int i;
+			  enum c_string_type type = C_STRING;
+
+			  for (i = 0; i < $1.len; ++i)
 			    {
-			      write_exp_elt_opcode (OP_LONG);
-			      write_exp_elt_type (parse_type->builtin_char);
-			      write_exp_elt_longcst ((LONGEST)(*sp++));
-			      write_exp_elt_opcode (OP_LONG);
+			      switch ($1.tokens[i].type)
+				{
+				case C_STRING:
+				  break;
+				case C_WIDE_STRING:
+				case C_STRING_16:
+				case C_STRING_32:
+				  if (type != C_STRING
+				      && type != $1.tokens[i].type)
+				    error ("Undefined string concatenation.");
+				  type = $1.tokens[i].type;
+				  break;
+				default:
+				  /* internal error */
+				  internal_error (__FILE__, __LINE__,
+						  "unrecognized type in string concatenation");
+				}
 			    }
-			  write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (parse_type->builtin_char);
-			  write_exp_elt_longcst ((LONGEST)'\0');
-			  write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_opcode (OP_ARRAY);
-			  write_exp_elt_longcst ((LONGEST) 0);
-			  write_exp_elt_longcst ((LONGEST) ($1.length));
-			  write_exp_elt_opcode (OP_ARRAY);
-			  free ($1.ptr);
+
+			  write_exp_string_vector (type, &$1);
+			  for (i = 0; i < $1.len; ++i)
+			    free ($1.tokens[i].ptr);
+			  free ($1.tokens);
 			}
 	;
 
@@ -1359,6 +1388,263 @@ parse_number (p, len, parsed_float, putithere)
    return INT;
 }
 
+/* Temporary obstack used for holding strings.  */
+static struct obstack tempbuf;
+static int tempbuf_init;
+
+/* Parse a C escape sequence.  The initial backslash of the sequence
+   is at (*PTR)[-1].  *PTR will be updated to point to just after the
+   last character of the sequence.  If OUTPUT is not NULL, the
+   translated form of the escape sequence will be written there.  If
+   OUTPUT is NULL, no output is written and the call will only affect
+   *PTR.  If an escape sequence is expressed in target bytes, then the
+   entire sequence will simply be copied to OUTPUT.  Return 1 if any
+   character was emitted, 0 otherwise.  */
+
+int
+c_parse_escape (char **ptr, struct obstack *output)
+{
+  char *tokptr = *ptr;
+  int result = 1;
+
+  /* Some escape sequences undergo character set conversion.  Those we
+     translate here.  */
+  switch (*tokptr)
+    {
+      /* Hex escapes do not undergo character set conversion, so keep
+	 the escape sequence for later.  */
+    case 'x':
+      if (output)
+	obstack_grow_str (output, "\\x");
+      ++tokptr;
+      if (!isxdigit (*tokptr))
+	error (_("\\x escape without a following hex digit"));
+      while (isxdigit (*tokptr))
+	{
+	  if (output)
+	    obstack_1grow (output, *tokptr);
+	  ++tokptr;
+	}
+      break;
+
+      /* Octal escapes do not undergo character set conversion, so
+	 keep the escape sequence for later.  */
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+      if (output)
+	obstack_grow_str (output, "\\");
+      while (isdigit (*tokptr) && *tokptr != '8' && *tokptr != '9')
+	{
+	  if (output)
+	    obstack_1grow (output, *tokptr);
+	  ++tokptr;
+	}
+      break;
+
+      /* We handle UCNs later.  We could handle them here, but that
+	 would mean a spurious error in the case where the UCN could
+	 be converted to the target charset but not the host
+	 charset.  */
+    case 'u':
+    case 'U':
+      {
+	char c = *tokptr;
+	int i, len = c == 'U' ? 8 : 4;
+	if (output)
+	  {
+	    obstack_1grow (output, '\\');
+	    obstack_1grow (output, *tokptr);
+	  }
+	++tokptr;
+	if (!isxdigit (*tokptr))
+	  error (_("\\%c escape without a following hex digit"), c);
+	for (i = 0; i < len && isxdigit (*tokptr); ++i)
+	  {
+	    if (output)
+	      obstack_1grow (output, *tokptr);
+	    ++tokptr;
+	  }
+      }
+      break;
+
+      /* We must pass backslash through so that it does not
+	 cause quoting during the second expansion.  */
+    case '\\':
+      if (output)
+	obstack_grow_str (output, "\\\\");
+      ++tokptr;
+      break;
+
+      /* Escapes which undergo conversion.  */
+    case 'a':
+      if (output)
+	obstack_1grow (output, '\a');
+      ++tokptr;
+      break;
+    case 'b':
+      if (output)
+	obstack_1grow (output, '\b');
+      ++tokptr;
+      break;
+    case 'f':
+      if (output)
+	obstack_1grow (output, '\f');
+      ++tokptr;
+      break;
+    case 'n':
+      if (output)
+	obstack_1grow (output, '\n');
+      ++tokptr;
+      break;
+    case 'r':
+      if (output)
+	obstack_1grow (output, '\r');
+      ++tokptr;
+      break;
+    case 't':
+      if (output)
+	obstack_1grow (output, '\t');
+      ++tokptr;
+      break;
+    case 'v':
+      if (output)
+	obstack_1grow (output, '\v');
+      ++tokptr;
+      break;
+
+      /* GCC extension.  */
+    case 'e':
+      if (output)
+	obstack_1grow (output, HOST_ESCAPE_CHAR);
+      ++tokptr;
+      break;
+
+      /* Backslash-newline expands to nothing at all.  */
+    case '\n':
+      ++tokptr;
+      result = 0;
+      break;
+
+      /* A few escapes just expand to the character itself.  */
+    case '\'':
+    case '\"':
+    case '?':
+      /* GCC extensions.  */
+    case '(':
+    case '{':
+    case '[':
+    case '%':
+      /* Unrecognized escapes turn into the character itself.  */
+    default:
+      if (output)
+	obstack_1grow (output, *tokptr);
+      ++tokptr;
+      break;
+    }
+  *ptr = tokptr;
+  return result;
+}
+
+/* Parse a string or character literal from TOKPTR.  The string or
+   character may be wide or unicode.  *OUTPTR is set to just after the
+   end of the literal in the input string.  The resulting token is
+   stored in VALUE.  This returns a token value, either STRING or
+   CHAR, depending on what was parsed.  *HOST_CHARS is set to the
+   number of host characters in the literal.  */
+static int
+parse_string_or_char (char *tokptr, char **outptr, struct typed_stoken *value,
+		      int *host_chars)
+{
+  int quote, i;
+  enum c_string_type type;
+
+  /* Build the gdb internal form of the input string in tempbuf.  Note
+     that the buffer is null byte terminated *only* for the
+     convenience of debugging gdb itself and printing the buffer
+     contents when the buffer contains no embedded nulls.  Gdb does
+     not depend upon the buffer being null byte terminated, it uses
+     the length string instead.  This allows gdb to handle C strings
+     (as well as strings in other languages) with embedded null
+     bytes */
+
+  if (!tempbuf_init)
+    tempbuf_init = 1;
+  else
+    obstack_free (&tempbuf, NULL);
+  obstack_init (&tempbuf);
+
+  /* Record the string type.  */
+  if (*tokptr == 'L')
+    {
+      type = C_WIDE_STRING;
+      ++tokptr;
+    }
+  else if (*tokptr == 'u')
+    {
+      type = C_STRING_16;
+      ++tokptr;
+    }
+  else if (*tokptr == 'U')
+    {
+      type = C_STRING_32;
+      ++tokptr;
+    }
+  else
+    type = C_STRING;
+
+  /* Skip the quote.  */
+  quote = *tokptr;
+  if (quote == '\'')
+    type |= C_CHAR;
+  ++tokptr;
+
+  *host_chars = 0;
+
+  while (*tokptr)
+    {
+      char c = *tokptr;
+      if (c == '\\')
+	{
+	  ++tokptr;
+	  *host_chars += c_parse_escape (&tokptr, &tempbuf);
+	}
+      else if (c == quote)
+	break;
+      else
+	{
+	  obstack_1grow (&tempbuf, c);
+	  ++tokptr;
+	  /* FIXME: this does the wrong thing with multi-byte host
+	     characters.  We could use mbrlen here, but that would
+	     make "set host-charset" a bit less useful.  */
+	  ++*host_chars;
+	}
+    }
+
+  if (*tokptr != quote)
+    {
+      if (quote == '"')
+	error ("Unterminated string in expression.");
+      else
+	error ("Unmatched single quote.");
+    }
+  ++tokptr;
+
+  value->type = type;
+  value->ptr = obstack_base (&tempbuf);
+  value->length = obstack_object_size (&tempbuf);
+
+  *outptr = tokptr;
+
+  return quote == '"' ? STRING : CHAR;
+}
+
 struct token
 {
   char *operator;
@@ -1528,12 +1814,6 @@ yylex ()
   int namelen;
   unsigned int i;
   char *tokstart;
-  char *tokptr;
-  int tempbufindex;
-  static char *tempbuf;
-  static int tempbufsize;
-  char * token_string = NULL;
-  int class_prefix = 0;
   int saw_structop = last_was_structop;
   char *copy;
 
@@ -1604,46 +1884,6 @@ yylex ()
     case '\n':
       lexptr++;
       goto retry;
-
-    case '\'':
-      /* We either have a character constant ('0' or '\177' for example)
-	 or we have a quoted symbol reference ('foo(int,int)' in C++
-	 for example). */
-      lexptr++;
-      c = *lexptr++;
-      if (c == '\\')
-	c = parse_escape (&lexptr);
-      else if (c == '\'')
-	error ("Empty character constant.");
-      else if (! host_char_to_target (c, &c))
-        {
-          int toklen = lexptr - tokstart + 1;
-          char *tok = alloca (toklen + 1);
-          memcpy (tok, tokstart, toklen);
-          tok[toklen] = '\0';
-          error ("There is no character corresponding to %s in the target "
-                 "character set `%s'.", tok, target_charset ());
-        }
-
-      yylval.typed_val_int.val = c;
-      yylval.typed_val_int.type = parse_type->builtin_char;
-
-      c = *lexptr++;
-      if (c != '\'')
-	{
-	  namelen = skip_quoted (tokstart) - tokstart;
-	  if (namelen > 2)
-	    {
-	      lexptr = tokstart + namelen;
-	      if (lexptr[-1] != '\'')
-		error ("Unmatched single quote.");
-	      namelen -= 2;
-	      tokstart++;
-	      goto tryname;
-	    }
-	  error ("Invalid character constant.");
-	}
-      return INT;
 
     case '(':
       paren_depth++;
@@ -1762,70 +2002,33 @@ yylex ()
       lexptr++;
       return c;
 
+    case 'L':
+    case 'u':
+    case 'U':
+      if (tokstart[1] != '"' && tokstart[1] != '\'')
+	break;
+      /* Fall through.  */
+    case '\'':
     case '"':
-
-      /* Build the gdb internal form of the input string in tempbuf,
-	 translating any standard C escape forms seen.  Note that the
-	 buffer is null byte terminated *only* for the convenience of
-	 debugging gdb itself and printing the buffer contents when
-	 the buffer contains no embedded nulls.  Gdb does not depend
-	 upon the buffer being null byte terminated, it uses the length
-	 string instead.  This allows gdb to handle C strings (as well
-	 as strings in other languages) with embedded null bytes */
-
-      tokptr = ++tokstart;
-      tempbufindex = 0;
-
-      do {
-        char *char_start_pos = tokptr;
-
-	/* Grow the static temp buffer if necessary, including allocating
-	   the first one on demand. */
-	if (tempbufindex + 1 >= tempbufsize)
+      {
+	int host_len;
+	int result = parse_string_or_char (tokstart, &lexptr, &yylval.tsval,
+					   &host_len);
+	if (result == CHAR)
 	  {
-	    tempbuf = (char *) realloc (tempbuf, tempbufsize += 64);
-	  }
-	switch (*tokptr)
-	  {
-	  case '\0':
-	  case '"':
-	    /* Do nothing, loop will terminate. */
-	    break;
-	  case '\\':
-	    tokptr++;
-	    c = parse_escape (&tokptr);
-	    if (c == -1)
+	    if (host_len == 0)
+	      error ("Empty character constant.");
+	    else if (host_len > 2 && c == '\'')
 	      {
-		continue;
+		++tokstart;
+		namelen = lexptr - tokstart - 1;
+		goto tryname;
 	      }
-	    tempbuf[tempbufindex++] = c;
-	    break;
-	  default:
-	    c = *tokptr++;
-            if (! host_char_to_target (c, &c))
-              {
-                int len = tokptr - char_start_pos;
-                char *copy = alloca (len + 1);
-                memcpy (copy, char_start_pos, len);
-                copy[len] = '\0';
-
-                error ("There is no character corresponding to `%s' "
-                       "in the target character set `%s'.",
-                       copy, target_charset ());
-              }
-            tempbuf[tempbufindex++] = c;
-	    break;
+	    else if (host_len > 1)
+	      error ("Invalid character constant.");
 	  }
-      } while ((*tokptr != '"') && (*tokptr != '\0'));
-      if (*tokptr++ != '"')
-	{
-	  error ("Unterminated string in expression.");
-	}
-      tempbuf[tempbufindex] = '\0';	/* See note above */
-      yylval.sval.ptr = tempbuf;
-      yylval.sval.length = tempbufindex;
-      lexptr = tokptr;
-      return (STRING);
+	return result;
+      }
     }
 
   if (!(c == '_' || c == '$'

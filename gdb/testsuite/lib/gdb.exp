@@ -1162,8 +1162,11 @@ proc default_gdb_start { } {
     global gdb_prompt
     global timeout
     global gdb_spawn_id;
+    global env
 
     gdb_stop_suppressing_tests;
+
+    set env(LC_CTYPE) C
 
     verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 

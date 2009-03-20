@@ -48,6 +48,7 @@
 #include "solist.h"
 #include "solib.h"
 #include "parser-defs.h"
+#include "charset.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et.al.   */
@@ -276,10 +277,13 @@ print_formatted (struct value *val, int size,
       switch (options->format)
 	{
 	case 's':
-	  /* FIXME: Need to handle wchar_t's here... */
-	  next_address = VALUE_ADDRESS (val)
-	    + val_print_string (VALUE_ADDRESS (val), -1, 1, stream,
-				options);
+	  {
+	    struct type *elttype = value_type (val);
+	    next_address = (VALUE_ADDRESS (val)
+			    + val_print_string (elttype,
+						VALUE_ADDRESS (val), -1,
+						stream, options));
+	  }
 	  return;
 
 	case 'i':
@@ -374,7 +378,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
 	  print_hex_chars (stream, valaddr, len, byte_order);
 	  return;
 	case 'c':
-	  print_char_chars (stream, valaddr, len, byte_order);
+	  print_char_chars (stream, type, valaddr, len, byte_order);
 	  return;
 	default:
 	  break;
@@ -1958,7 +1962,8 @@ printf_command (char *arg, int from_tty)
 
     enum argclass
       {
-	int_arg, long_arg, long_long_arg, ptr_arg, string_arg,
+	int_arg, long_arg, long_long_arg, ptr_arg,
+	string_arg, wide_string_arg, wide_char_arg,
 	double_arg, long_double_arg, decfloat_arg
       };
     enum argclass *argclass;
@@ -2090,8 +2095,8 @@ printf_command (char *arg, int from_tty)
 	      break;
 
 	    case 'c':
-	      this_argclass = int_arg;
-	      if (lcount || seen_h || seen_big_l)
+	      this_argclass = lcount == 0 ? int_arg : wide_char_arg;
+	      if (lcount > 1 || seen_h || seen_big_l)
 		bad = 1;
 	      if (seen_prec || seen_zero || seen_space || seen_plus)
 		bad = 1;
@@ -2106,8 +2111,8 @@ printf_command (char *arg, int from_tty)
 	      break;
 
 	    case 's':
-	      this_argclass = string_arg;
-	      if (lcount || seen_h || seen_big_l)
+	      this_argclass = lcount == 0 ? string_arg : wide_string_arg;
+	      if (lcount > 1 || seen_h || seen_big_l)
 		bad = 1;
 	      if (seen_zero || seen_space || seen_plus)
 		bad = 1;
@@ -2158,6 +2163,15 @@ printf_command (char *arg, int from_tty)
 	      current_substring[length_before_ll + 3] =
 		last_arg[length_before_ll + lcount];
 	      current_substring += length_before_ll + 4;
+	    }
+	  else if (this_argclass == wide_string_arg
+		   || this_argclass == wide_char_arg)
+	    {
+	      /* Convert %ls or %lc to %s.  */
+	      int length_before_ls = f - last_arg - 2;
+	      strncpy (current_substring, last_arg, length_before_ls);
+	      strcpy (current_substring + length_before_ls, "s");
+	      current_substring += length_before_ls + 2;
 	    }
 	  else
 	    {
@@ -2221,6 +2235,76 @@ printf_command (char *arg, int from_tty)
 	      str[j] = 0;
 
 	      printf_filtered (current_substring, (char *) str);
+	    }
+	    break;
+	  case wide_string_arg:
+	    {
+	      gdb_byte *str;
+	      CORE_ADDR tem;
+	      int j;
+	      struct type *wctype = lookup_typename ("wchar_t", NULL, 0);
+	      int wcwidth = TYPE_LENGTH (wctype);
+	      gdb_byte *buf = alloca (wcwidth);
+	      struct obstack output;
+	      struct cleanup *inner_cleanup;
+
+	      tem = value_as_address (val_args[i]);
+
+	      /* This is a %s argument.  Find the length of the string.  */
+	      for (j = 0;; j += wcwidth)
+		{
+		  QUIT;
+		  read_memory (tem + j, buf, wcwidth);
+		  if (extract_unsigned_integer (buf, wcwidth) == 0)
+		    break;
+		}
+
+	      /* Copy the string contents into a string inside GDB.  */
+	      str = (gdb_byte *) alloca (j + wcwidth);
+	      if (j != 0)
+		read_memory (tem, str, j);
+	      memset (&str[j], 0, wcwidth);
+
+	      obstack_init (&output);
+	      inner_cleanup = make_cleanup_obstack_free (&output);
+
+	      convert_between_encodings (target_wide_charset (),
+					 host_charset (),
+					 str, j, wcwidth,
+					 &output, translit_char);
+	      obstack_grow_str0 (&output, "");
+
+	      printf_filtered (current_substring, obstack_base (&output));
+	      do_cleanups (inner_cleanup);
+	    }
+	    break;
+	  case wide_char_arg:
+	    {
+	      struct type *wctype = lookup_typename ("wchar_t", NULL, 0);
+	      struct type *valtype;
+	      struct obstack output;
+	      struct cleanup *inner_cleanup;
+	      const gdb_byte *bytes;
+
+	      valtype = value_type (val_args[i]);
+	      if (TYPE_LENGTH (valtype) != TYPE_LENGTH (wctype)
+		  || TYPE_CODE (valtype) != TYPE_CODE_INT)
+		error (_("expected wchar_t argument for %%lc"));
+
+	      bytes = value_contents (val_args[i]);
+
+	      obstack_init (&output);
+	      inner_cleanup = make_cleanup_obstack_free (&output);
+
+	      convert_between_encodings (target_wide_charset (),
+					 host_charset (),
+					 bytes, TYPE_LENGTH (valtype),
+					 TYPE_LENGTH (valtype),
+					 &output, translit_char);
+	      obstack_grow_str0 (&output, "");
+
+	      printf_filtered (current_substring, obstack_base (&output));
+	      do_cleanups (inner_cleanup);
 	    }
 	    break;
 	  case double_arg:

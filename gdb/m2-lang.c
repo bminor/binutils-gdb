@@ -29,8 +29,8 @@
 #include "valprint.h"
 
 extern void _initialize_m2_language (void);
-static void m2_printchar (int, struct ui_file *);
-static void m2_emit_char (int, struct ui_file *, int);
+static void m2_printchar (int, struct type *, struct ui_file *);
+static void m2_emit_char (int, struct type *, struct ui_file *, int);
 
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
@@ -39,7 +39,7 @@ static void m2_emit_char (int, struct ui_file *, int);
    be replaced with a true Modula version.  */
 
 static void
-m2_emit_char (int c, struct ui_file *stream, int quoter)
+m2_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
 {
 
   c &= 0xFF;			/* Avoid sign bit follies */
@@ -88,10 +88,10 @@ m2_emit_char (int c, struct ui_file *stream, int quoter)
    be replaced with a true Modula version.  */
 
 static void
-m2_printchar (int c, struct ui_file *stream)
+m2_printchar (int c, struct type *type, struct ui_file *stream)
 {
   fputs_filtered ("'", stream);
-  LA_EMIT_CHAR (c, stream, '\'');
+  LA_EMIT_CHAR (c, type, stream, '\'');
   fputs_filtered ("'", stream);
 }
 
@@ -103,14 +103,15 @@ m2_printchar (int c, struct ui_file *stream)
    be replaced with a true Modula version.  */
 
 static void
-m2_printstr (struct ui_file *stream, const gdb_byte *string,
-	     unsigned int length, int width, int force_ellipses,
+m2_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
+	     unsigned int length, int force_ellipses,
 	     const struct value_print_options *options)
 {
   unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
+  int width = TYPE_LENGTH (type);
 
   if (length == 0)
     {
@@ -152,7 +153,7 @@ m2_printstr (struct ui_file *stream, const gdb_byte *string,
 		fputs_filtered ("\", ", stream);
 	      in_quotes = 0;
 	    }
-	  m2_printchar (string[i], stream);
+	  m2_printchar (string[i], type, stream);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  i = rep1 - 1;
 	  things_printed += options->repeat_count_threshold;
@@ -168,7 +169,7 @@ m2_printstr (struct ui_file *stream, const gdb_byte *string,
 		fputs_filtered ("\"", stream);
 	      in_quotes = 1;
 	    }
-	  LA_EMIT_CHAR (string[i], stream, '"');
+	  LA_EMIT_CHAR (string[i], type, stream, '"');
 	  ++things_printed;
 	}
     }

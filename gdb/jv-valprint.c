@@ -230,7 +230,7 @@ java_value_print (struct value *val, struct ui_file *stream,
 
       value_free_to_mark (mark);	/* Release unnecessary values */
 
-      val_print_string (data + boffset, count, 2, stream, options);
+      val_print_string (java_char_type, data + boffset, count, stream, options);
 
       return 0;
     }
@@ -520,7 +520,7 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 	       || (TYPE_CODE (type) == TYPE_CODE_INT
 		   && TYPE_LENGTH (type) == 2
 		   && strcmp (TYPE_NAME (type), "char") == 0))
-	LA_PRINT_CHAR ((int) unpack_long (type, valaddr), stream);
+	LA_PRINT_CHAR ((int) unpack_long (type, valaddr), type, stream);
       else
 	val_print_type_code_int (type, valaddr, stream);
       break;

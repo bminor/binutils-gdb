@@ -388,6 +388,8 @@ extern struct value *value_mark (void);
 
 extern void value_free_to_mark (struct value *mark);
 
+extern struct value *value_typed_string (char *ptr, int len,
+					 struct type *char_type);
 extern struct value *value_string (char *ptr, int len);
 extern struct value *value_bitstring (char *ptr, int len);
 
@@ -619,7 +621,7 @@ extern int common_val_print (struct value *val,
 			     const struct value_print_options *options,
 			     const struct language_defn *language);
 
-extern int val_print_string (CORE_ADDR addr, int len, int width,
+extern int val_print_string (struct type *elttype, CORE_ADDR addr, int len,
 			     struct ui_file *stream,
 			     const struct value_print_options *options);
 

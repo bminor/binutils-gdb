@@ -41,4 +41,8 @@
 # define N_(String) (String)
 #endif
 
+#ifdef HAVE_LANGINFO_CODESET
+#include <langinfo.h>
+#endif
+
 #endif /* GDB_LOCALE_H */

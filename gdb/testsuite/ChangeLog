@@ -1,3 +1,28 @@
+2009-03-20  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/store.exp: Update for change to escape output.
+	* gdb.base/callfuncs.exp (fetch_all_registers): Update for change
+	to escape output.
+	* gdb.base/pointers.exp: Update for change to escape output.
+	* gdb.base/long_long.exp (gdb_test_long_long): Update for change
+	to escape output.
+	* gdb.base/constvars.exp (do_constvar_tests): Update for change to
+	escape output.
+	* gdb.base/call-rt-st.exp (print_struct_call): Update for change
+	to escape output.
+	* gdb.cp/ref-types.exp (gdb_start_again): Update for change to
+	escape output.
+	* gdb.base/setvar.exp: Update for change to escape output.
+	* lib/gdb.exp (default_gdb_start): Set LC_CTYPE to C.
+	* gdb.base/printcmds.exp (test_print_all_chars): Update for change
+	to escape output.
+	(test_print_string_constants): Likewise.
+	* gdb.base/charset.exp (valid_host_charset): Check size of
+	wchar_t.  Handle UCS-2 and UCS-4.  Add tests for wide and unicode
+	cases.  Handle "auto"-related output.
+	* gdb.base/charset.c (char16_t, char32_t): New typedefs.
+	(uvar, Uvar): New globals.
+
 2009-03-19  Jerome Guitton  <guitton@adacore.com>
 
 	* gdb.ada/fixed_points/fixed_points.adb: Add a test on overprecise

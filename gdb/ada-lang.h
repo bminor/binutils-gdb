@@ -255,12 +255,12 @@ extern int ada_value_print (struct value *, struct ui_file *,
 
                                 /* Defined in ada-lang.c */
 
-extern void ada_emit_char (int, struct ui_file *, int, int);
+extern void ada_emit_char (int, struct type *, struct ui_file *, int, int);
 
-extern void ada_printchar (int, struct ui_file *);
+extern void ada_printchar (int, struct type *, struct ui_file *);
 
-extern void ada_printstr (struct ui_file *, const gdb_byte *,
-			  unsigned int, int, int,
+extern void ada_printstr (struct ui_file *, struct type *, const gdb_byte *,
+			  unsigned int, int,
 			  const struct value_print_options *);
 
 struct value *ada_convert_actual (struct value *actual,

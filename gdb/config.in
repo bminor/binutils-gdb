@@ -169,11 +169,17 @@
 /* Define if you have the iconv() function. */
 #undef HAVE_ICONV
 
+/* Define to 1 if you have the `iconvlist' function. */
+#undef HAVE_ICONVLIST
+
 /* Define if your compiler supports the #include_next directive. */
 #undef HAVE_INCLUDE_NEXT
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
+#undef HAVE_LANGINFO_CODESET
 
 /* Define if your <locale.h> file defines LC_MESSAGES. */
 #undef HAVE_LC_MESSAGES

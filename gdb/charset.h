@@ -19,89 +19,129 @@
 #ifndef CHARSET_H
 #define CHARSET_H
 
-
 /* If the target program uses a different character set than the host,
    GDB has some support for translating between the two; GDB converts
    characters and strings to the host character set before displaying
    them, and converts characters and strings appearing in expressions
    entered by the user to the target character set.
 
-   At the moment, GDB only supports single-byte, stateless character
-   sets.  This includes the ISO-8859 family (ASCII extended with
-   accented characters, and (I think) Cyrillic, for European
-   languages), and the EBCDIC family (used on IBM's mainframes).
-   Unfortunately, it excludes many Asian scripts, the fixed- and
-   variable-width Unicode encodings, and other desireable things.
-   Patches are welcome!  (For example, it would be nice if the Java
-   string support could simply get absorbed into some more general
-   multi-byte encoding support.)
-
-   Furthermore, GDB's code pretty much assumes that the host character
-   set is some superset of ASCII; there are plenty if ('0' + n)
-   expressions and the like.
-
-   When the `iconv' library routine supports a character set meeting
-   the requirements above, it's easy to plug an entry into GDB's table
-   that uses iconv to handle the details.  */
+   GDB's code pretty much assumes that the host character set is some
+   superset of ASCII; there are plenty if ('0' + n) expressions and
+   the like.  */
 
 /* Return the name of the current host/target character set.  The
    result is owned by the charset module; the caller should not free
    it.  */
 const char *host_charset (void);
 const char *target_charset (void);
+const char *target_wide_charset (void);
 
-/* In general, the set of C backslash escapes (\n, \f) is specific to
-   the character set.  Not all character sets will have form feed
-   characters, for example.
+/* These values are used to specify the type of transliteration done
+   by convert_between_encodings.  */
+enum transliterations
+  {
+    /* Error on failure to convert.  */
+    translit_none,
+    /* Transliterate to host char.  */
+    translit_char
+  };
 
-   The following functions allow GDB to parse and print control
-   characters in a character-set-independent way.  They are both
-   language-specific (to C and C++) and character-set-specific.
-   Putting them here is a compromise.  */
+/* Convert between two encodings.
 
-
-/* If the target character TARGET_CHAR have a backslash escape in the
-   C language (i.e., a character like 'n' or 't'), return the host
-   character string that should follow the backslash.  Otherwise,
-   return zero.
-
-   When this function returns non-zero, the string it returns is
-   statically allocated; the caller is not responsible for freeing it.  */
-const char *c_target_char_has_backslash_escape (int target_char);
-
-
-/* If the host character HOST_CHAR is a valid backslash escape in the
-   C language for the target character set, return non-zero, and set
-   *TARGET_CHAR to the target character the backslash escape represents.
-   Otherwise, return zero.  */
-int c_parse_backslash (int host_char, int *target_char);
-
-
-/* Return non-zero if the host character HOST_CHAR can be printed
-   literally --- that is, if it can be readably printed as itself in a
-   character or string constant.  Return zero if it should be printed
-   using some kind of numeric escape, like '\031' in C, '^(25)' in
-   Chill, or #25 in Pascal.  */
-int host_char_print_literally (int host_char);
+   FROM is the name of the source encoding.
+   TO is the name of the target encoding.
+   BYTES holds the bytes to convert; this is assumed to be characters
+   in the target encoding.
+   NUM_BYTES is the number of bytes.
+   WIDTH is the width of a character from the FROM charset, in bytes.
+   For a variable width encoding, WIDTH should be the size of a "base
+   character".
+   OUTPUT is an obstack where the converted data is written.  The
+   caller is responsible for initializing the obstack, and for
+   destroying the obstack should an error occur.
+   TRANSLIT specifies how invalid conversions should be handled.  */
+void convert_between_encodings (const char *from, const char *to,
+				const gdb_byte *bytes, unsigned int num_bytes,
+				int width, struct obstack *output,
+				enum transliterations translit);
 
 
-/* If the host character HOST_CHAR has an equivalent in the target
-   character set, set *TARGET_CHAR to that equivalent, and return
-   non-zero.  Otherwise, return zero.  */
-int host_char_to_target (int host_char, int *target_char);
+/* These values are used by wchar_iterate to report errors.  */
+enum wchar_iterate_result
+  {
+    /* Ordinary return.  */
+    wchar_iterate_ok,
+    /* Invalid input sequence.  */
+    wchar_iterate_invalid,
+    /* Incomplete input sequence at the end of the input.  */
+    wchar_iterate_incomplete,
+    /* EOF.  */
+    wchar_iterate_eof
+  };
 
+/* Declaration of the opaque wchar iterator type.  */
+struct wchar_iterator;
 
-/* If the target character TARGET_CHAR has an equivalent in the host
-   character set, set *HOST_CHAR to that equivalent, and return
-   non-zero.  Otherwise, return zero.  */
-int target_char_to_host (int target_char, int *host_char);
+/* Create a new character iterator which returns wchar_t's.  INPUT is
+   the input buffer.  BYTES is the number of bytes in the input
+   buffer.  CHARSET is the name of the character set in which INPUT is
+   encoded.  WIDTH is the number of bytes in a base character of
+   CHARSET.
+   
+   This function either returns a new character set iterator, or calls
+   error.  The result can be freed using a cleanup; see
+   make_cleanup_wchar_iterator.  */
+struct wchar_iterator *make_wchar_iterator (const gdb_byte *input, size_t bytes,
+					    const char *charset,
+					    size_t width);
 
+/* Return a new cleanup suitable for destroying the wchar iterator
+   ITER.  */
+struct cleanup *make_cleanup_wchar_iterator (struct wchar_iterator *iter);
 
-/* If the target character TARGET_CHAR has a corresponding control
-   character (also in the target character set), set *TARGET_CTRL_CHAR
-   to the control character, and return non-zero.  Otherwise, return
-   zero.  */
-int target_char_to_control_char (int target_char, int *target_ctrl_char);
+/* Perform a single iteration of a wchar_t iterator.
+   
+   Returns the number of characters converted.  A negative result
+   means that EOF has been reached.  A positive result indicates the
+   number of valid wchar_ts in the result; *OUT_CHARS is updated to
+   point to the first valid character.
 
+   In all cases aside from EOF, *PTR is set to point to the first
+   converted target byte.  *LEN is set to the number of bytes
+   converted.
+
+   A zero result means one of several unusual results.  *OUT_RESULT is
+   set to indicate the type of un-ordinary return.
+
+   wchar_iterate_invalid means that an invalid input character was
+   seen.  The iterator is advanced by WIDTH (the argument to
+   make_wchar_iterator) bytes.
+
+   wchar_iterate_incomplete means that an incomplete character was
+   seen at the end of the input sequence.
+   
+   wchar_iterate_eof means that all bytes were successfully
+   converted.  The other output arguments are not set.  */
+int wchar_iterate (struct wchar_iterator *iter,
+		   enum wchar_iterate_result *out_result,
+		   gdb_wchar_t **out_chars,
+		   const gdb_byte **ptr, size_t *len);
+
+
+
+/* GDB needs to know a few details of its execution character set.
+   This knowledge is isolated here and in charset.c.  */
+
+/* The escape character.  */
+#define HOST_ESCAPE_CHAR 27
+
+/* Convert a letter, like 'c', to its corresponding control
+   character.  */
+char host_letter_to_control_character (char c);
+
+/* Convert a hex digit character to its numeric value.  E.g., 'f' is
+   converted to 15.  This function assumes that C is a valid hex
+   digit.  Both upper- and lower-case letters are recognized.  */
+int host_hex_value (char c);
 
 #endif /* CHARSET_H */

@@ -20,11 +20,6 @@
    Please email any bugs, comments, and/or additions to this file to:
    bug-gdb@gnu.org  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-
 /* X_string is a null-terminated string in the X charset whose
    elements are as follows.  X should be the name the `set charset'
    command uses for the character set, in lower-case, with any
@@ -54,6 +49,21 @@ char iso_8859_1_string[NUM_CHARS];
 char ebcdic_us_string[NUM_CHARS];
 char ibm1047_string[NUM_CHARS];
 
+/* We make a phony wchar_t and then pretend that this platform uses
+   UCS-4 (or UCS-2, depending on the size -- same difference for the
+   purposes of this test).  */
+typedef unsigned int wchar_t;
+wchar_t ucs_4_string[NUM_CHARS];
+
+/* We also define a couple phony types for testing the u'' and U''
+   support.  It is ok if these have the wrong size on some platforms
+   -- the test case will skip the tests in that case.  */
+typedef unsigned short char16_t;
+typedef unsigned int char32_t;
+
+/* Make sure to use the typedefs.  */
+char16_t uvar;
+char32_t Uvar;
 
 void
 init_string (char string[],
@@ -62,7 +72,10 @@ init_string (char string[],
              char line_feed, char carriage_return, char horizontal_tab,
              char vertical_tab, char cent, char misc_ctrl)
 {
-  memset (string, x, NUM_CHARS);
+  int i;
+
+  for (i = 0; i < NUM_CHARS; ++i)
+    string[i] = x;
   string[0] = alert;
   string[1] = backspace;
   string[2] = form_feed;
@@ -85,13 +98,21 @@ fill_run (char string[], int start, int len, int first)
 }
 
 
+void
+init_ucs4 ()
+{
+  int i;
+
+  for (i = 0; i < NUM_CHARS; ++i)
+    ucs_4_string[i] = iso_8859_1_string[i] & 0xff;
+}
+
 int main ()
 {
 #ifdef usestubs
   set_debug_traps();
   breakpoint();
 #endif
-  (void) malloc (1);
   /* Initialize ascii_string.  */
   init_string (ascii_string,
                120,
@@ -146,5 +167,7 @@ int main ()
   /* The digits, at least, are contiguous.  */
   fill_run (ibm1047_string, 59, 10, 240);
 
-  puts ("All set!");            /* all strings initialized */
+  init_ucs4 ();
+
+  return 0;            /* all strings initialized */
 }

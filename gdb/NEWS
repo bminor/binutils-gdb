@@ -3,6 +3,15 @@
 
 *** Changes since GDB 6.8
 
+* GDB now has support for multi-byte and wide character sets on the
+target.  Strings whose character type is wchar_t, char16_t, or
+char32_t are now correctly printed.  GDB supports wide- and unicode-
+literals in C, that is, L'x', L"string", u'x', u"string", U'x', and
+U"string" syntax.  And, GDB allows the "%ls" and "%lc" formats in
+`printf'.  This feature requires iconv to work properly; if your
+system does not have a working iconv, GDB can use GNU libiconv.  See
+the installation instructions for more information.
+
 * GDB now supports automatic retrieval of shared library files from
 remote targets.  To use this feature, specify a system root that begins
 with the `remote:' prefix, either via the `set sysroot' command or via
@@ -181,6 +190,11 @@ set target-async
   In this case, it's possible to resume target in the background, and interact
   with GDB while the target is running.  "show target-async" displays the
   current state of asynchronous execution of the target.
+
+set target-wide-charset
+show target-wide-charset
+  The target-wide-charset is the name of the character set that GDB
+  uses when printing characters whose type is wchar_t.
 
 set tcp auto-retry (on|off)
 show tcp auto-retry

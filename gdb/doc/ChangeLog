@@ -1,3 +1,9 @@
+2009-03-20  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Character Sets): Remove obsolete text.  Document
+	set target-wide-charset.
+	(Requirements): Mention iconv.
+
 2009-03-17  Hui Zhu  <teawater@gmail.com>
 
 	* gdb.texinfo: Change the introduce of "disassemble-next-line".

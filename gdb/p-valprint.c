@@ -61,7 +61,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
   struct type *elttype;
   unsigned eltlen;
   int length_pos, length_size, string_pos;
-  int char_size;
+  struct type *char_type;
   LONGEST val;
   CORE_ADDR addr;
 
@@ -100,8 +100,9 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 		  len = temp_len;
 		}
 
-	      LA_PRINT_STRING (stream, valaddr + embedded_offset, len, 
-			       eltlen, 0, options);
+	      LA_PRINT_STRING (stream, TYPE_TARGET_TYPE (type),
+			       valaddr + embedded_offset, len, 0,
+			       options);
 	      i = len;
 	    }
 	  else
@@ -175,8 +176,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	      && addr != 0)
 	    {
 	      /* no wide string yet */
-	      i = val_print_string (addr, -1, TYPE_LENGTH (elttype), stream, 
-		    options);
+	      i = val_print_string (elttype, addr, -1, stream, options);
 	    }
 	  /* also for pointers to pascal strings */
 	  /* Note: this is Free Pascal specific:
@@ -184,7 +184,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	     Pascal strings are mapped to records
 	     with lowercase names PM  */
           if (is_pascal_string_type (elttype, &length_pos, &length_size,
-                                     &string_pos, &char_size, NULL)
+                                     &string_pos, &char_type, NULL)
 	      && addr != 0)
 	    {
 	      ULONGEST string_length;
@@ -193,7 +193,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
               read_memory (addr + length_pos, buffer, length_size);
 	      string_length = extract_unsigned_integer (buffer, length_size);
               xfree (buffer);
-              i = val_print_string (addr + string_pos, string_length, char_size, stream, options);
+              i = val_print_string (char_type ,addr + string_pos, string_length, stream, options);
 	    }
 	  else if (pascal_object_is_vtbl_member (type))
 	    {
@@ -298,10 +298,10 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
       else
 	{
           if (is_pascal_string_type (type, &length_pos, &length_size,
-                                     &string_pos, &char_size, NULL))
+                                     &string_pos, &char_type, NULL))
 	    {
 	      len = extract_unsigned_integer (valaddr + embedded_offset + length_pos, length_size);
-	      LA_PRINT_STRING (stream, valaddr + embedded_offset + string_pos, len, char_size, 0, options);
+	      LA_PRINT_STRING (stream, char_type, valaddr + embedded_offset + string_pos, len, 0, options);
 	    }
 	  else
 	    pascal_object_print_value_fields (type, valaddr + embedded_offset, address, stream,
@@ -426,7 +426,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  else
 	    fprintf_filtered (stream, "%d", (int) val);
 	  fputs_filtered (" ", stream);
-	  LA_PRINT_CHAR ((unsigned char) val, stream);
+	  LA_PRINT_CHAR ((unsigned char) val, type, stream);
 	}
       break;
 

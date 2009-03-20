@@ -45,4 +45,7 @@
 #define obstack_grow_str0(OBSTACK,STRING) \
   obstack_grow0 (OBSTACK, STRING, strlen (STRING))
 
+#define obstack_grow_wstr(OBSTACK, WSTRING) \
+  obstack_grow (OBSTACK, WSTRING, sizeof (gdb_wchar_t) * gdb_wcslen (WSTRING))
+
 #endif

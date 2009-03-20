@@ -7959,13 +7959,17 @@ support:
 @table @code
 @item set target-charset @var{charset}
 @kindex set target-charset
-Set the current target character set to @var{charset}.  We list the
-character set names @value{GDBN} recognizes below, but if you type
-@code{set target-charset} followed by @key{TAB}@key{TAB}, @value{GDBN} will
-list the target character sets it supports.
-@end table
+Set the current target character set to @var{charset}.  If you type
+@code{set target-charset} followed by @key{TAB}@key{TAB}, @value{GDBN}
+will list the target character sets it supports.
 
-@table @code
+@item set target-wide-charset @var{charset}
+@kindex set target-wide-charset
+Set the current target wide character set to @var{charset}.  The
+target wide character set is the character set used by @code{wchar_t}.
+If you type @code{set target-charset} followed by @key{TAB}@key{TAB},
+@value{GDBN} will list the target character sets it supports.
+
 @item set host-charset @var{charset}
 @kindex set host-charset
 Set the current host character set to @var{charset}.
@@ -7975,10 +7979,9 @@ system it is running on; you can override that default using the
 @code{set host-charset} command.
 
 @value{GDBN} can only use certain character sets as its host character
-set.  We list the character set names @value{GDBN} recognizes below, and
-indicate which can be host character sets, but if you type
-@code{set target-charset} followed by @key{TAB}@key{TAB}, @value{GDBN} will
-list the host character sets it supports.
+set.  If you type @code{set target-charset} followed by
+@key{TAB}@key{TAB}, @value{GDBN} will list the host character sets it
+supports.
 
 @item set charset @var{charset}
 @kindex set charset
@@ -8001,37 +8004,6 @@ Show the name of the current host charset.
 Show the name of the current target charset.
 
 @end table
-
-@value{GDBN} currently includes support for the following character
-sets:
-
-@table @code
-
-@item ASCII
-@cindex ASCII character set
-Seven-bit U.S. @sc{ascii}.  @value{GDBN} can use this as its host
-character set.
-
-@item ISO-8859-1
-@cindex ISO 8859-1 character set
-@cindex ISO Latin 1 character set
-The ISO Latin 1 character set.  This extends @sc{ascii} with accented
-characters needed for French, German, and Spanish.  @value{GDBN} can use
-this as its host character set.
-
-@item EBCDIC-US
-@itemx IBM1047
-@cindex EBCDIC character set
-@cindex IBM1047 character set
-Variants of the @sc{ebcdic} character set, used on some of IBM's
-mainframe operating systems.  (@sc{gnu}/Linux on the S/390 uses U.S. @sc{ascii}.)
-@value{GDBN} cannot use these as its host character set.
-
-@end table
-
-Note that these are all single-byte character sets.  More work inside
-@value{GDBN} is needed to support multi-byte or variable-width character
-encodings, like the UTF-8 and UCS-2 encodings of Unicode.
 
 Here is an example of @value{GDBN}'s character set support in action.
 Assume that the following source code has been placed in the file
@@ -24826,6 +24798,24 @@ The @samp{zlib} library is likely included with your operating system
 distribution; if it is not, you can get the latest version from
 @url{http://zlib.net}.
 
+@item iconv
+@value{GDBN}'s features related to character sets (@pxref{Character
+Sets}) require a functioning @code{iconv} implementation.  If you are
+on a GNU system, then this is provided by the GNU C Library.  Some
+other systems also provide a working @code{iconv}.
+
+On systems with @code{iconv}, you can install GNU Libiconv.  If you
+have previously installed Libiconv, you can use the
+@option{--with-libiconv-prefix} option to configure.
+
+@value{GDBN}'s top-level @file{configure} and @file{Makefile} will
+arrange to build Libiconv if a directory named @file{libiconv} appears
+in the top-most source directory.  If Libiconv is built this way, and
+if the operating system does not provide a suitable @code{iconv}
+implementation, then the just-built library will automatically be used
+by @value{GDBN}.  One easy way to set this up is to download GNU
+Libiconv, unpack it, and then rename the directory holding the
+Libiconv source code to @samp{libiconv}.
 @end table
 
 @node Running Configure
