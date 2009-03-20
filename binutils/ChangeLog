@@ -1,5 +1,12 @@
 2009-03-19  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* dwarf.c (dwarf_regnames): Moved before frame_need_space.
+	(dwarf_regnames_count): Likewise.
+	(frame_need_space): Return int.
+	(display_debug_frames): Check invalid registers.
+
+2009-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* readelf.c (debug_apply_relocations): Check relocations
 	against STT_SECTION symbol.
 
