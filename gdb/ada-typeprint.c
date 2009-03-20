@@ -357,16 +357,17 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
   bitsize = 0;
   fprintf_filtered (stream, "array (");
 
+  if (type == NULL)
+    {
+      fprintf_filtered (stream, _("<undecipherable array type>"));
+      return;
+    }
+
   n_indices = -1;
   if (show < 0)
     fprintf_filtered (stream, "...");
   else
     {
-      if (type == NULL)
-        {
-          fprintf_filtered (stream, _("<undecipherable array type>"));
-          return;
-        }
       if (ada_is_simple_array_type (type))
 	{
 	  struct type *range_desc_type =

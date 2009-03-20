@@ -2475,7 +2475,17 @@ evaluate_subexp_standard (struct type *expect_type,
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-        return allocate_value (exp->elts[pc + 1].type);
+	{
+	  struct type *type = exp->elts[pc + 1].type;
+	  /* If this is a typedef, then find its immediate target.  We
+	     use check_typedef to resolve stubs, but we ignore its
+	     result because we do not want to dig past all
+	     typedefs.  */
+	  check_typedef (type);
+	  if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+	    type = TYPE_TARGET_TYPE (type);
+	  return allocate_value (type);
+	}
       else
         error (_("Attempt to use a type name as an expression"));
 

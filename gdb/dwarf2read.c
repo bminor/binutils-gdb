@@ -2849,6 +2849,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
 
     case DW_TAG_base_type:
     case DW_TAG_subrange_type:
+    case DW_TAG_typedef:
       /* Add a typedef symbol for the type definition, if it has a
          DW_AT_name.  */
       new_symbol (die, read_type_die (die, cu), cu);

@@ -1783,6 +1783,7 @@ decode_packed_array_type (struct type *type)
       return NULL;
     }
   shadow_type = SYMBOL_TYPE (sym);
+  CHECK_TYPEDEF (shadow_type);
 
   if (TYPE_CODE (shadow_type) != TYPE_CODE_ARRAY)
     {

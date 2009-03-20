@@ -1,3 +1,14 @@
+2009-03-20  Tom Tromey  <tromey@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (process_die): Handle DW_TAG_typedef.
+	* eval.c (evaluate_subexp_standard) <OP_TYPE>: Strip a single
+	typedef.
+	* ada-lang.c (decode_packed_array_type): Call CHECK_TYPEDEF on the
+	SYMBOL_TYPE result.
+	* ada-typeprint.c (print_array_type): Do the NULL check
+	unconditionally.
+
 2009-03-19  Tom Tromey  <tromey@redhat.com>
 
 	* utils.c (do_obstack_free): New function.
