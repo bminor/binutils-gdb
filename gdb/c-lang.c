@@ -917,6 +917,10 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	  default:
 	    internal_error (__FILE__, __LINE__, "unhandled c_string_type");
 	  }
+
+	/* Ensure TYPE_LENGTH is valid for TYPE.  */
+	check_typedef (type);
+
 	dest_charset = charset_for_string_type (dest_type);
 
 	++*pos;

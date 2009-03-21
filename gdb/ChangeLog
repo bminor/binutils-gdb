@@ -1,4 +1,8 @@
 2009-03-20  Tom Tromey  <tromey@redhat.com>
+
+	* c-lang.c (evaluate_subexp_c): Call check_typedef.
+
+2009-03-20  Tom Tromey  <tromey@redhat.com>
 	    Julian Brown  <julian@codesourcery.com>
 
 	PR i18n/7220, PR i18n/7821, PR exp/8815, PR exp/9103,
