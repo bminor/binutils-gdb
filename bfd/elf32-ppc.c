@@ -2328,26 +2328,17 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 }
 
 static bfd_boolean
-is_pic_glink_stub (bfd *abfd, asection *glink, bfd_vma off)
+is_nonpic_glink_stub (bfd *abfd, asection *glink, bfd_vma off)
 {
-  bfd_byte buf[16];
-  unsigned int insn;
+  bfd_byte buf[GLINK_ENTRY_SIZE];
 
-  if (!bfd_get_section_contents (abfd, glink, buf, off, 16))
+  if (!bfd_get_section_contents (abfd, glink, buf, off, GLINK_ENTRY_SIZE))
     return FALSE;
 
-  insn = bfd_get_32 (abfd, buf);
-  if ((insn & 0xffff0000) == LWZ_11_30
-      && bfd_get_32 (abfd, buf + 4) == MTCTR_11
-      && bfd_get_32 (abfd, buf + 8) == BCTR)
-    return TRUE;
-
-  if ((insn & 0xffff0000) == ADDIS_11_30
-      && (bfd_get_32 (abfd, buf + 4) & 0xffff0000) == LWZ_11_11
-      && bfd_get_32 (abfd, buf + 8) == MTCTR_11
-      && bfd_get_32 (abfd, buf + 12) == BCTR)
-    return TRUE;
-  return FALSE;
+  return ((bfd_get_32 (abfd, buf + 0) & 0xffff0000) == LIS_11
+	  && (bfd_get_32 (abfd, buf + 4) & 0xffff0000) == LWZ_11_11
+	  && bfd_get_32 (abfd, buf + 8) == MTCTR_11
+	  && bfd_get_32 (abfd, buf + 12) == BCTR);
 }
 
 static bfd_boolean
@@ -2484,10 +2475,8 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
      multiple stubs for each plt entry.  If that is the case then
      there is no way to associate stubs with their plt entries short
      of figuring out the GOT pointer value used in the stub.  */
-  if (!bfd_get_section_contents (abfd, glink, buf,
-				 stub_vma - glink->vma, 4)
-      || ((bfd_get_32 (abfd, buf) & 0xffff0000) != LIS_11
-	  && is_pic_glink_stub (abfd, glink, stub_vma - glink->vma - 16)))
+  if (!is_nonpic_glink_stub (abfd, glink,
+			     glink_vma - GLINK_ENTRY_SIZE - glink->vma))
     return 0;
 
   slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
@@ -2722,7 +2711,7 @@ struct ppc_elf_link_hash_table
     bfd_vma offset;
   } tlsld_got;
 
-  /* Offset of PltResolve function in glink.  */
+  /* Offset of branch table to PltResolve function in glink.  */
   bfd_vma glink_pltresolve;
 
   /* Size of reserved GOT entries.  */

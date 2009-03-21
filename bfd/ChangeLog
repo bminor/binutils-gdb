@@ -1,3 +1,11 @@
+2009-03-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (is_pic_glink_stub): Delete.
+	(is_nonpic_glink_stub): New function.
+	(ppc_elf_get_synthetic_symtab): Check for last non-pic stub rather
+	than first pic one.
+	(struct ppc_elf_link_hash_table <glink_pltresolve>): Comment fix.
+
 2009-03-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 	    Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
