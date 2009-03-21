@@ -19,6 +19,7 @@
 	* stack_frame.pdf: Version of image for PDF output.
 	* stack_frame.png: Version of image for HTML output and for Emacs.
 	* stack_frame.txt: Version of image for Info output.
+	* stack_frame.eps: Version of image for TeX DVI output.
 
 2009-03-21  Eli Zaretskii  <eliz@gnu.org>
 
