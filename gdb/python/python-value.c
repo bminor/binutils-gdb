@@ -143,10 +143,11 @@ valpy_address (PyObject *self, PyObject *args)
   return value_to_value_object (res_val);
 }
 
-/* Return Unicode string with value contents (assumed to be encoded in the
-   target's charset).  */
+/* Implementation of gdb.Value.string ([encoding] [, errors]) -> string
+   Return Unicode string with value contents.  If ENCODING is not given,
+   the string is assumed to be encoded in the target's charset.  */
 static PyObject *
-valpy_string (PyObject *self, PyObject *args)
+valpy_string (PyObject *self, PyObject *args, PyObject *kw)
 {
   int length, ret = 0;
   gdb_byte *buffer;
@@ -157,8 +158,10 @@ valpy_string (PyObject *self, PyObject *args)
   const char *errors = NULL;
   const char *user_encoding = NULL;
   const char *la_encoding = NULL;
+  static char *keywords[] = { "encoding", "errors" };
 
-  if (!PyArg_ParseTuple (args, "|ss", &user_encoding, &errors))
+  if (!PyArg_ParseTupleAndKeywords (args, kw, "|ss", keywords,
+				    &user_encoding, &errors))
     return NULL;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
@@ -306,11 +309,11 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 	 a gdb.Value object and need to convert it from python as well.  */
       arg1 = convert_value_from_python (self);
       if (arg1 == NULL)
-	return NULL;
+	break;
 
       arg2 = convert_value_from_python (other);
       if (arg2 == NULL)
-	return NULL;
+	break;
 
       switch (opcode)
 	{
@@ -387,7 +390,7 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  return value_to_value_object (res_val);
+  return res_val ? value_to_value_object (res_val) : NULL;
 }
 
 static PyObject *
@@ -774,7 +777,7 @@ convert_value_from_python (PyObject *obj)
 	    }
 	}
       else if (PyObject_TypeCheck (obj, &value_object_type))
-	value = ((value_object *) obj)->value;
+	value = value_copy (((value_object *) obj)->value);
       else
 	PyErr_Format (PyExc_TypeError, _("Could not convert Python object: %s"),
 		      PyString_AsString (PyObject_Str (obj)));
@@ -825,8 +828,9 @@ gdbpy_initialize_values (void)
 static PyMethodDef value_object_methods[] = {
   { "address", valpy_address, METH_NOARGS, "Return the address of the value." },
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
-  { "string", valpy_string, METH_VARARGS,
-    "Return Unicode string representation of the value." },
+  { "string", (PyCFunction) valpy_string, METH_VARARGS | METH_KEYWORDS,
+    "string ([encoding] [, errors]) -> string\n\
+Return Unicode string representation of the value." },
   {NULL}  /* Sentinel */
 };
 

@@ -1,3 +1,24 @@
+2009-03-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Jim Blandy  <jimb@red-bean.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	Miscellaneous fixes to the Python code.
+	* python/python-cmd.c (cmdpy_init): Accept keyword
+	arguments.
+	* python/python-value.c (valpy_string): Accept keyword
+	arguments.
+	(valpy_binop): Use `break' to exit from the TRY_CATCH block.
+	Do not call value_to_value_object on NULL RES_VAL.
+	(value_object_methods): Change `string' entry to also accept
+	keyword arguments.
+	(convert_value_from_python): Return a copy of the value if obj is
+	a gdb.Value object.
+	(value_object_methods): Mark the `string' method as accepting
+	keywords, and show method "prototype" in the doc string.
+	* python/python.c (get_parameter): Don't return inside a
+	TRY_CATCH.
+
 2009-03-20  Tom Tromey  <tromey@redhat.com>
 
 	Add support for convenience functions in Python.

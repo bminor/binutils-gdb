@@ -63,3 +63,17 @@ gdb_py_test_multiple "input convenience function" \
   "end" ""
 
 gdb_test "print \$test_func (\"ugh\")" "= \"test_func output, arg = ugh\"" "call function"
+
+# Test returning a gdb.Value from the function. This segfaulted GDB at one point.
+
+gdb_py_test_multiple "input value-returning convenience function" \
+  "python" "" \
+  "class Double (gdb.Function):" "" \
+  "  def __init__ (self):" "" \
+  "    super (Double, self).__init__ (\"double\")" "" \
+  "  def invoke (self, n):" "" \
+  "    return n*2" "" \
+  "Double ()" "" \
+  "end" ""
+
+gdb_test "print \$double (1)" "= 2" "call value-returning function"

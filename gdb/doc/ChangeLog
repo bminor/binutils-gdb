@@ -1,3 +1,10 @@
+2009-03-21  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.texinfo (Values From Inferior): Fix optional arguments
+	markup.
+	(Commands In Python): Adjust argument names of gdb.Command.__init__
+	to what the function accepts as keywords.
+
 2008-03-20  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Convenience Vars): Document convenience functions.

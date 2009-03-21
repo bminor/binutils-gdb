@@ -92,6 +92,32 @@ gdb_py_test_multiple "input subcommand" \
 
 gdb_test "prefix_cmd subcmd ugh" "subcmd output, arg = ugh" "call subcmd"
 
+# Test prefix command using keyword arguments.
+
+gdb_py_test_multiple "input prefix command, keyword arguments" \
+  "python" "" \
+  "class prefix_cmd2 (gdb.Command):" "" \
+  "  def __init__ (self):" "" \
+  "    super (prefix_cmd2, self).__init__ (\"prefix_cmd2\", gdb.COMMAND_OBSCURE, prefix = True, completer_class = gdb.COMPLETE_FILENAME)" "" \
+  "  def invoke (self, arg, from_tty):" "" \
+  "    print \"prefix_cmd2 output, arg = %s\" % arg" "" \
+  "prefix_cmd2 ()" "" \
+  "end" ""
+
+gdb_test "prefix_cmd2 argh" "prefix_cmd2 output, arg = argh" "call prefix command, keyword arguments"
+
+gdb_py_test_multiple "input subcommand under prefix_cmd2" \
+  "python" "" \
+  "class subcmd (gdb.Command):" "" \
+  "  def __init__ (self):" "" \
+  "    super (subcmd, self).__init__ (\"prefix_cmd2 subcmd\", gdb.COMMAND_OBSCURE)" "" \
+  "  def invoke (self, arg, from_tty):" "" \
+  "    print \"subcmd output, arg = %s\" % arg" "" \
+  "subcmd ()" "" \
+  "end" ""
+
+gdb_test "prefix_cmd2 subcmd ugh" "subcmd output, arg = ugh" "call subcmd under prefix_cmd2"
+
 # Test a subcommand in an existing GDB prefix.
 
 gdb_py_test_multiple "input new subcommand" \

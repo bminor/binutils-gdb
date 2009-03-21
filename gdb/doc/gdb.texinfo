@@ -18348,7 +18348,7 @@ The result @code{bar} will be a @code{gdb.Value} object holding the
 value pointed to by @code{foo}.
 @end defmethod
 
-@defmethod Value string @r{[}encoding @r{[}errors@r{]}@r{]}
+@defmethod Value string @r{[}encoding@r{]} @r{[}errors@r{]}
 If this @code{gdb.Value} represents a string, then this method
 converts the contents to a Python string.  Otherwise, this method will
 throw an exception.
@@ -18384,7 +18384,7 @@ You can implement new @value{GDBN} CLI commands in Python.  A CLI
 command is implemented using an instance of the @code{gdb.Command}
 class, most commonly using a subclass.
 
-@defmethod Command __init__ name @var{command-class} @r{[}@var{completer-class} @var{prefix}@r{]}
+@defmethod Command __init__ name @var{command_class} @r{[}@var{completer_class}@r{]} @r{[}@var{prefix}@r{]}
 The object initializer for @code{Command} registers the new command
 with @value{GDBN}.  This initializer is normally invoked from the
 subclass' own @code{__init__} method.
@@ -18396,11 +18396,11 @@ an exception is raised.
 
 There is no support for multi-line commands.
 
-@var{command-class} should be one of the @samp{COMMAND_} constants
+@var{command_class} should be one of the @samp{COMMAND_} constants
 defined below.  This argument tells @value{GDBN} how to categorize the
 new command in the help system.
 
-@var{completer-class} is an optional argument.  If given, it should be
+@var{completer_class} is an optional argument.  If given, it should be
 one of the @samp{COMPLETE_} constants defined below.  This argument
 tells @value{GDBN} how to perform completion for this command.  If not
 given, @value{GDBN} will attempt to complete using the object's

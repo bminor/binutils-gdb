@@ -1,3 +1,9 @@
+2009-03-21  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.python/python-cmd.exp: Add tests for keyword arguments.
+	* gdb.python/python-function.exp: Add test for function returning
+	a GDB value.
+
 2009-03-20  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.python/python-function.exp: New file.

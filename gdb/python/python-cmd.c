@@ -336,16 +336,16 @@ parse_command_name (char *text, struct cmd_list_element ***base_list)
 
 /* Object initializer; sets up gdb-side structures for command.
 
-   Use: __init__(NAME, CMDCLASS, [COMPLETERCLASS, [PREFIX]]).
+   Use: __init__(NAME, COMMAND_CLASS [, COMPLETER_CLASS][, PREFIX]]).
 
    NAME is the name of the command.  It may consist of multiple words,
    in which case the final word is the name of the new command, and
    earlier words must be prefix commands.
 
-   CMDCLASS is the kind of command.  It should be one of the COMMAND_*
+   COMMAND_CLASS is the kind of command.  It should be one of the COMMAND_*
    constants defined in the gdb module.
 
-   COMPLETERCLASS is the kind of completer.  If not given, the
+   COMPLETER_CLASS is the kind of completer.  If not given, the
    "complete" method will be used.  Otherwise, it should be one of the
    COMPLETE_* constants defined in the gdb module.
 
@@ -356,7 +356,7 @@ parse_command_name (char *text, struct cmd_list_element ***base_list)
    
 */
 static int
-cmdpy_init (PyObject *self, PyObject *args, PyObject *kwds)
+cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 {
   cmdpy_object *obj = (cmdpy_object *) self;
   char *name;
@@ -366,6 +366,8 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   volatile struct gdb_exception except;
   struct cmd_list_element **cmd_list;
   char *cmd_name, *pfx_name;
+  static char *keywords[] = { "name", "command_class", "completer_class",
+			      "prefix", NULL };
   PyObject *is_prefix = NULL;
   int cmp;
 
@@ -378,7 +380,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kwds)
       return -1;
     }
 
-  if (! PyArg_ParseTuple (args, "si|iO", &name, &cmdtype,
+  if (! PyArg_ParseTupleAndKeywords (args, kw, "si|iO", keywords, &name, &cmdtype,
 			  &completetype, &is_prefix))
     return -1;
 
