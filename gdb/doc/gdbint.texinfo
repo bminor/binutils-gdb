@@ -68,7 +68,7 @@ includes description of @value{GDBN}'s key algorithms and operations, as well
 as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 
 @menu
-* Requirements::
+* Summary::
 * Overall Structure::
 * Algorithms::
 * User Interface::
@@ -96,9 +96,16 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 * Index::
 @end menu
 
-@node Requirements
+@node Summary
+@chapter Summary
 
-@chapter Requirements
+@menu
+* Requirements::
+* Contributors::
+@end menu
+
+@node Requirements
+@section Requirements
 @cindex requirements for @value{GDBN}
 
 Before diving into the internals, you should understand the formal
@@ -132,6 +139,41 @@ heard reports of programs approaching 1 gigabyte in size.
 @value{GDBN} should be able to run everywhere.  No other debugger is
 available for even half as many configurations as @value{GDBN}
 supports.
+
+@node Contributors
+@section Contributors
+
+The first edition of this document was written by John Gilmore of
+Cygnus Solutions. The current second edition was written by Stan Shebs
+of Cygnus Solutions, who continues to update the manual.
+
+Over the years, many others have made additions and changes to this
+document. This section attempts to record the significant contributors
+to that effort. One of the virtues of free software is that everyone
+is free to contribute to it; with regret, we cannot actually
+acknowledge everyone here.
+
+@quotation
+@emph{Plea:} This section has only been added relatively recently (four
+years after publication of the second edition). Additions to this
+section are particularly welcome.  If you or your friends (or enemies,
+to be evenhanded) have been unfairly omitted from this list, we would
+like to add your names!
+@end quotation
+
+A document such as this relies on being kept up to date by numerous
+small updates by contributing engineers as they make changes to the
+code base. The file @file{ChangeLog} in the @value{GDBN} distribution
+approximates a blow-by-blow account. The most prolific contributors to
+this important, but low profile task are Andrew Cagney (responsible
+for over half the entries), Daniel Jacobowitz, Mark Kettenis, Jim
+Blandy and Eli Zaretskii.
+
+Eli Zaretskii and Daniel Jacobowitz wrote the sections documenting
+watchpoints.
+
+Jeremy Bennett updated the sections on initializing a new architecture
+and register representation, and added the section on Frame Interpretation.
 
 
 @node Overall Structure
@@ -1088,6 +1130,7 @@ replacement (if one exists). Note that the replacement string passed to
 @code{deprecate_cmd} should be the full name of the command, i.e., the
 entire string the user should type at the command line.
 
+@anchor{UI-Independent Output}
 @section UI-Independent Output---the @code{ui_out} Functions
 @c This section is based on the documentation written by Fernando
 @c Nasser <fnasser@redhat.com>.
@@ -1294,7 +1337,7 @@ one call to @code{ui_out_tuple_end} for each call to
 be signaled.
 @end deftypefun
 
-@deftypefun struct cleanup *make_cleanup_ui_out_tuple_begin_end (struct ui_out *@var{uiout}, const char *@var{id})
+@deftypefun {struct cleanup *} make_cleanup_ui_out_tuple_begin_end (struct ui_out *@var{uiout}, const char *@var{id})
 This function first opens the tuple and then establishes a cleanup
 (@pxref{Coding, Cleanups}) to close the tuple.  It provides a convenient
 and correct implementation of the non-portable@footnote{The function
@@ -1321,7 +1364,7 @@ one call to @code{ui_out_list_end} for each call to
 be signaled.
 @end deftypefun
 
-@deftypefun struct cleanup *make_cleanup_ui_out_list_begin_end (struct ui_out *@var{uiout}, const char *@var{id})
+@deftypefun {struct cleanup *} make_cleanup_ui_out_list_begin_end (struct ui_out *@var{uiout}, const char *@var{id})
 Similar to @code{make_cleanup_ui_out_tuple_begin_end}, this function
 opens a list and then establishes cleanup (@pxref{Coding, Cleanups})
 that will close the list.
@@ -1386,7 +1429,7 @@ constructed.  When the @code{ui_stream} object is no longer needed,
 you should destroy it and free its memory by calling
 @code{ui_out_stream_delete}.
 
-@deftypefun struct ui_stream *ui_out_stream_new (struct ui_out *@var{uiout})
+@deftypefun {struct ui_stream *} ui_out_stream_new (struct ui_out *@var{uiout})
 This function creates a new @code{ui_stream} object which uses the
 same output methods as the @code{ui_out} object whose pointer is
 passed in @var{uiout}.  It returns a pointer to the newly created
@@ -1765,7 +1808,7 @@ obtain various status values from @value{GDBN}.
 Since @code{libgdb} could have multiple clients (e.g., a GUI supporting
 the existing @value{GDBN} CLI), those clients must co-operate when
 controlling @code{libgdb}.  In particular, a client must ensure that
-@code{libgdb} is idle (i.e. no other client is using @code{libgdb})
+@code{libgdb} is idle (i.e.@: no other client is using @code{libgdb})
 before responding to a @file{gdb-event} by making a query.
 
 @section CLI support
@@ -1820,7 +1863,7 @@ when doing any queries.
 @c There could be an entire section on the event-loop
 @file{event-loop}, currently non-re-entrant, provides a simple event
 loop.  A client would need to either plug its self into this loop or,
-implement a new event-loop that GDB would use.
+implement a new event-loop that @value{GDBN} would use.
 
 The event-loop will eventually be made re-entrant.  This is so that
 @value{GDBN} can better handle the problem of some commands blocking
@@ -1956,7 +1999,7 @@ frame itself?
 @cindex sentinel frame
 @findex get_frame_type
 @vindex SENTINEL_FRAME
-To answer this question, GDB has the @dfn{sentinel} frame, the
+To answer this question, @value{GDBN} has the @dfn{sentinel} frame, the
 ``-1st'' frame.  Unwinding registers from the sentinel frame gives you
 the current values of the youngest real frame's registers.  If @var{f}
 is a sentinel frame, then @code{get_frame_type (@var{f}) @equiv{}
@@ -2785,12 +2828,10 @@ using the Bourne shell script @file{gdbarch.sh}.
 * Registers and Memory::
 * Pointers and Addresses::
 * Address Classes::
-* Raw and Virtual Registers::
-* Register and Memory Data::
+* Register Representation::
 * Frame Interpretation::
 * Inferior Call Setup::
-* Compiler Characteristics::
-* Target Conditionals::
+* Defining Other Architecture Features::
 * Adding a New Target::
 @end menu
 
@@ -2913,7 +2954,7 @@ AIX.
 
 Here are the functions that make up the OS ABI framework:
 
-@deftypefun const char *gdbarch_osabi_name (enum gdb_osabi @var{osabi})
+@deftypefun {const char *} gdbarch_osabi_name (enum gdb_osabi @var{osabi})
 Return the name of the OS ABI corresponding to @var{osabi}.
 @end deftypefun
 
@@ -2933,7 +2974,7 @@ be generic, and is allowed to examine @var{flavour}-flavoured files for
 any architecture.
 @end deftypefun
 
-@deftypefun enum gdb_osabi gdbarch_lookup_osabi (bfd *@var{abfd})
+@deftypefun {enum gdb_osabi} gdbarch_lookup_osabi (bfd *@var{abfd})
 Examine the file described by @var{abfd} to determine its OS ABI.
 The value @code{GDB_OSABI_UNKNOWN} is returned if the OS ABI cannot
 be determined.
@@ -2957,14 +2998,69 @@ from the note.  This function should be called via
 @node Initialize New Architecture
 @section Initializing a New Architecture
 
-Each @code{gdbarch} is associated with a single @sc{bfd} architecture,
-via a @code{bfd_arch_@var{arch}} constant.  The @code{gdbarch} is
-registered by a call to @code{register_gdbarch_init}, usually from
-the file's @code{_initialize_@var{filename}} routine, which will
-be automatically called during @value{GDBN} startup.  The arguments
-are a @sc{bfd} architecture constant and an initialization function.
+@menu
+* How an Architecture is Represented::
+* Looking Up an Existing Architecture::
+* Creating a New Architecture::
+@end menu
 
-The initialization function has this type:
+@node How an Architecture is Represented
+@subsection How an Architecture is Represented
+@cindex architecture representation
+@cindex representation of architecture
+
+Each @code{gdbarch} is associated with a single @sc{bfd} architecture,
+via a @code{bfd_arch_@var{arch}} in the @code{bfd_architecture}
+enumeration.  The @code{gdbarch} is registered by a call to
+@code{register_gdbarch_init}, usually from the file's
+@code{_initialize_@var{filename}} routine, which will be automatically
+called during @value{GDBN} startup.  The arguments are a @sc{bfd}
+architecture constant and an initialization function.
+
+@findex _initialize_@var{arch}_tdep
+@cindex @file{@var{arch}-tdep.c}
+A @value{GDBN} description for a new architecture, @var{arch} is created by
+defining a global function @code{_initialize_@var{arch}_tdep}, by
+convention in the source file @file{@var{arch}-tdep.c}.  For example,
+in the case of the OpenRISC 1000, this function is called
+@code{_initialize_or1k_tdep} and is found in the file
+@file{or1k-tdep.c}.
+
+@cindex @file{configure.tgt}
+@cindex @code{gdbarch}
+@findex gdbarch_register
+The resulting object files containing the implementation of the
+@code{_initialize_@var{arch}_tdep} function are specified in the @value{GDBN}
+@file{configure.tgt} file, which includes a large case statement
+pattern matching against the @code{--target} option of the
+@code{configure} script.  The new @code{struct gdbarch} is created
+within the @code{_initialize_@var{arch}_tdep} function by calling
+@code{gdbarch_register}:
+
+@smallexample
+void gdbarch_register (enum bfd_architecture    @var{architecture},
+                       gdbarch_init_ftype      *@var{init_func},
+                       gdbarch_dump_tdep_ftype *@var{tdep_dump_func});
+@end smallexample
+
+The @var{architecture} will identify the unique @sc{bfd} to be
+associated with this @code{gdbarch}.  The @var{init_func} funciton is
+called to create and return the new @code{struct gdbarch}.  The
+@var{tdep_dump_func} function will dump the target specific details
+associated with this architecture.
+
+For example the function @code{_initialize_or1k_tdep} creates its
+architecture for 32-bit OpenRISC 1000 architectures by calling:
+
+@smallexample
+gdbarch_register (bfd_arch_or32, or1k_gdbarch_init, or1k_dump_tdep);
+@end smallexample
+
+@node Looking Up an Existing Architecture
+@subsection Looking Up an Existing Architecture
+@cindex @code{gdbarch} lookup
+
+The initialization function has this prototype:
 
 @smallexample
 static struct gdbarch *
@@ -2983,12 +3079,106 @@ search through @var{arches} for an exact match to @var{info}, and
 return one if found.  Lastly, if no exact match was found, it should
 create a new architecture based on @var{info} and return it.
 
+@findex gdbarch_list_lookup_by_info
+@cindex @code{gdbarch_info}
+The lookup is done using @code{gdbarch_list_lookup_by_info}.  It is
+passed the list of existing architectures, @var{arches}, and the
+@code{struct gdbarch_info}, @var{info}, and returns the first matching
+architecture it finds, or @code{NULL} if none are found.  If an
+architecture is found it can be returned as the result from the
+initialization function, otherwise a new @code{struct gdbach} will need
+to be created.
+
+The struct gdbarch_info has the following components:
+
+@smallexample
+struct gdbarch_info
+@{
+   const struct bfd_arch_info *bfd_arch_info;
+   int                         byte_order;
+   bfd                        *abfd;
+   struct gdbarch_tdep_info   *tdep_info;
+   enum gdb_osabi              osabi;
+   const struct target_desc   *target_desc;
+@};
+@end smallexample
+
+@vindex bfd_arch_info
+The @code{bfd_arch_info} member holds the key details about the
+architecture.  The @code{byte_order} member is a value in an
+enumeration indicating the endianism.  The @code{abfd} member is a
+pointer to the full @sc{bfd}, the @code{tdep_info} member is
+additional custom target specific information, @code{osabi} identifies
+which (if any) of a number of operating specific ABIs are used by this
+architecture and the @code{target_desc} member is a set of name-value
+pairs with information about register usage in this target.
+
+When the @code{struct gdbarch} initialization function is called, not
+all the fields are provided---only those which can be deduced from the
+@sc{bfd}.  The @code{struct gdbarch_info}, @var{info} is used as a
+look-up key with the list of existing architectures, @var{arches} to
+see if a suitable architecture already exists.  The @var{tdep_info},
+@var{osabi} and @var{target_desc} fields may be added before this
+lookup to refine the search.
+
 Only information in @var{info} should be used to choose the new
 architecture.  Historically, @var{info} could be sparse, and
 defaults would be collected from the first element on @var{arches}.
 However, @value{GDBN} now fills in @var{info} more thoroughly,
 so new @code{gdbarch} initialization functions should not take
 defaults from @var{arches}.
+
+@node Creating a New Architecture
+@subsection Creating a New Architecture
+@cindex @code{struct gdbarch} creation
+
+@findex gdbarch_alloc
+@cindex @code{gdbarch_tdep} when allocating new @code{gdbarch}
+If no architecture is found, then a new architecture must be created,
+by calling @code{gdbarch_alloc} using the supplied @code{@w{struct
+gdbarch_info}} and any additional custom target specific
+information in a @code{struct gdbarch_tdep}.  The prototype for
+@code{gdbarch_alloc} is:
+
+@smallexample
+struct gdbarch *gdbarch_alloc (const struct gdbarch_info *@var{info},
+                               struct gdbarch_tdep       *@var{tdep}); 
+@end smallexample
+
+@cindex @code{set_gdbarch} functions
+@cindex @code{gdbarch} accessor functions
+The newly created struct gdbarch must then be populated.  Although
+there are default values, in most cases they are not what is
+required.
+
+For each element, @var{X}, there is are a pair of corresponding accessor
+functions, one to set the value of that element,
+@code{set_gdbarch_@var{X}}, the second to either get the value of an
+element (if it is a variable) or to apply the element (if it is a
+function), @code{gdbarch_@var{X}}.  Note that both accessor functions
+take a pointer to the @code{@w{struct gdbarch}} as first
+argument.  Populating the new @code{gdbarch} should use the
+@code{set_gdbarch} functions.
+
+The following sections identify the main elements that should be set
+in this way.  This is not the complete list, but represents the
+functions and elements that must commonly be specified for a new
+architecture.  Many of the functions and variables are described in the
+header file @file{gdbarch.h}.
+
+This is the main work in defining a new architecture.  Implementing the
+set of functions to populate the @code{struct gdbarch}.
+
+@cindex @code{gdbarch_tdep} definition
+@code{struct gdbarch_tdep} is not defined within @value{GDBN}---it is up
+to the user to define this struct if it is needed to hold custom target
+information that is not covered by the standard @code{@w{struct
+gdbarch}}. For example with the OpenRISC 1000 architecture it is used to
+hold the number of matchpoints available in the target (along with other
+information).
+
+If there is no additional target specific information, it can be set to
+@code{NULL}.
 
 @node Registers and Memory
 @section Registers and Memory
@@ -3162,7 +3352,7 @@ This function is normally called from within a symbol reader.  See
 @file{dwarf2read.c}.
 @end deftypefun
 
-@deftypefun char *gdbarch_address_class_type_flags_to_name (struct gdbarch *@var{current_gdbarch}, int @var{type_flags})
+@deftypefun {char *} gdbarch_address_class_type_flags_to_name (struct gdbarch *@var{current_gdbarch}, int @var{type_flags})
 Given the type flags representing an address class qualifier, return
 its name.
 @end deftypefun
@@ -3216,9 +3406,10 @@ somearch_address_class_name_to_type_flags (char *name,
 @end smallexample
 
 The qualifier @code{@@short} is used in @value{GDBN}'s type expressions
-to indicate the presence of one of these "short" pointers.  E.g, if
-the debug information indicates that @code{short_ptr_var} is one of these
-short pointers, @value{GDBN} might show the following behavior:
+to indicate the presence of one of these ``short'' pointers.  For
+example if the debug information indicates that @code{short_ptr_var} is
+one of these short pointers, @value{GDBN} might show the following
+behavior:
 
 @smallexample
 (gdb) ptype short_ptr_var
@@ -3226,114 +3417,288 @@ type = int * @@short
 @end smallexample
 
 
-@node Raw and Virtual Registers
-@section Raw and Virtual Register Representations
+@node Register Representation
+@section Register Representation
+
+@menu
+* Raw and Cooked Registers::
+* Register Architecture Functions & Variables::
+* Register Information Functions::
+* Register and Memory Data::
+* Register Caching::
+@end menu
+
+@node Raw and Cooked Registers
+@subsection Raw and Cooked Registers
 @cindex raw register representation
-@cindex virtual register representation
-@cindex representations, raw and virtual registers
+@cindex cooked register representation
+@cindex representations, raw and cooked registers
 
-@emph{Maintainer note: This section is pretty much obsolete.  The
-functionality described here has largely been replaced by
-pseudo-registers and the mechanisms described in @ref{Register and
+@value{GDBN} considers registers to be a set with members numbered
+linearly from 0 upwards.  The first part of that set corresponds to real
+physical registers, the second part to any @dfn{pseudo-registers}.
+Pseudo-registers have no independent physical existence, but are useful
+representations of information within the architecture.  For example the
+OpenRISC 1000 architecture has up to 32 general purpose registers, which
+are typically represented as 32-bit (or 64-bit) integers.  However the
+GPRs are also used as operands to the floating point operations, and it
+could be convenient to define a set of pseudo-registers, to show the
+GPRs represented as floating point values.
+
+For any architecture, the implementer will decide on a mapping from
+hardware to @value{GDBN} register numbers.  The registers corresponding to real
+hardware are referred to as @dfn{raw} registers, the remaining registers are
+@dfn{pseudo-registers}.  The total register set (raw and pseudo) is called
+the @dfn{cooked} register set.
+
+
+@node Register Architecture Functions & Variables
+@subsection Functions and Variables Specifying the Register Architecture
+@cindex @code{gdbarch} register architecture functions
+
+These @code{struct gdbarch} functions and variables specify the number
+and type of registers in the architecture.
+
+@deftypefn {Architecture Function} CORE_ADDR read_pc (struct regcache *@var{regcache})
+@end deftypefn
+@deftypefn {Architecture Function} void write_pc (struct regcache *@var{regcache}, CORE_ADDR @var{val})
+
+Read or write the program counter.  The default value of both
+functions is @code{NULL} (no function available).  If the program
+counter is just an ordinary register, it can be specified in
+@code{struct gdbarch} instead (see @code{pc_regnum} below) and it will
+be read or written using the standard routines to access registers.  This
+function need only be specified if the program counter is not an
+ordinary register.
+
+Any register information can be obtained using the supplied register
+cache, @var{regcache}.  @xref{Register Caching, , Register Caching}.
+
+@end deftypefn
+
+@deftypefn {Architecture Function} void pseudo_register_read (struct gdbarch *@var{gdbarch}, struct regcache *@var{regcache}, int @var{regnum}, const gdb_byte *@var{buf})
+@end deftypefn
+@deftypefn {Architecture Function} void pseudo_register_write (struct gdbarch *@var{gdbarch}, struct regcache *@var{regcache}, int @var{regnum}, const gdb_byte *@var{buf})
+
+These functions should be defined if there are any pseudo-registers.
+The default value is @code{NULL}.  @var{regnum} is the number of the
+register to read or write (which will be a @dfn{cooked} register
+number) and @var{buf} is the buffer where the value read will be
+placed, or from which the value to be written will be taken.  The
+value in the buffer may be converted to or from a signed or unsigned
+integral value using one of the utility functions (@pxref{Register and
 Memory Data, , Using Different Register and Memory Data
-Representations}.  See also @uref{http://www.gnu.org/software/gdb/bugs/,
-Bug Tracking Database} and
-@uref{http://sources.redhat.com/gdb/current/ari/, ARI Index} for more
-up-to-date information.}
+Representations}).
 
-Some architectures use one representation for a value when it lives in a
-register, but use a different representation when it lives in memory.
-In @value{GDBN}'s terminology, the @dfn{raw} representation is the one used in
-the target registers, and the @dfn{virtual} representation is the one
-used in memory, and within @value{GDBN} @code{struct value} objects.
+The access should be for the specified architecture,
+@var{gdbarch}.  Any register information can be obtained using the
+supplied register cache, @var{regcache}.  @xref{Register Caching, ,
+Register Caching}.
 
-@emph{Maintainer note: Notice that the same mechanism is being used to
-both convert a register to a @code{struct value} and alternative
-register forms.}
-
-For almost all data types on almost all architectures, the virtual and
-raw representations are identical, and no special handling is needed.
-However, they do occasionally differ.  For example:
-
-@itemize @bullet
-@item
-The x86 architecture supports an 80-bit @code{long double} type.  However, when
-we store those values in memory, they occupy twelve bytes: the
-floating-point number occupies the first ten, and the final two bytes
-are unused.  This keeps the values aligned on four-byte boundaries,
-allowing more efficient access.  Thus, the x86 80-bit floating-point
-type is the raw representation, and the twelve-byte loosely-packed
-arrangement is the virtual representation.
-
-@item
-Some 64-bit MIPS targets present 32-bit registers to @value{GDBN} as 64-bit
-registers, with garbage in their upper bits.  @value{GDBN} ignores the top 32
-bits.  Thus, the 64-bit form, with garbage in the upper 32 bits, is the
-raw representation, and the trimmed 32-bit representation is the
-virtual representation.
-@end itemize
-
-In general, the raw representation is determined by the architecture, or
-@value{GDBN}'s interface to the architecture, while the virtual representation
-can be chosen for @value{GDBN}'s convenience.  @value{GDBN}'s register file,
-@code{registers}, holds the register contents in raw format, and the
-@value{GDBN} remote protocol transmits register values in raw format.
-
-Your architecture may define the following macros to request
-conversions between the raw and virtual format:
-
-@deftypefn {Target Macro} int REGISTER_CONVERTIBLE (int @var{reg})
-Return non-zero if register number @var{reg}'s value needs different raw
-and virtual formats.
-
-You should not use @code{REGISTER_CONVERT_TO_VIRTUAL} for a register
-unless this macro returns a non-zero value for that register.
 @end deftypefn
 
-@deftypefn {Target Macro} void REGISTER_CONVERT_TO_VIRTUAL (int @var{reg}, struct type *@var{type}, char *@var{from}, char *@var{to})
-Convert the value of register number @var{reg} to @var{type}, which
-should always be @code{gdbarch_register_type (@var{reg})}.  The buffer
-at @var{from} holds the register's value in raw format; the macro should
-convert the value to virtual format, and place it at @var{to}.
+@deftypevr {Architecture Variable} int sp_regnum
+@vindex sp_regnum
+@cindex stack pointer
+@cindex @kbd{$sp}
 
-Note that @code{REGISTER_CONVERT_TO_VIRTUAL} and
-@code{REGISTER_CONVERT_TO_RAW} take their @var{reg} and @var{type}
-arguments in different orders.
+This specifies the register holding the stack pointer, which may be a
+raw or pseudo-register.  It defaults to -1 (not defined), but it is an
+error for it not to be defined.
 
-You should only use @code{REGISTER_CONVERT_TO_VIRTUAL} with registers
-for which the @code{REGISTER_CONVERTIBLE} macro returns a non-zero
-value.
+The value of the stack pointer register can be accessed withing
+@value{GDBN} as the variable @kbd{$sp}.
+
+@end deftypevr
+
+@deftypevr {Architecture Variable} int pc_regnum
+@vindex pc_regnum
+@cindex program counter
+@cindex @kbd{$pc}
+
+This specifies the register holding the program counter, which may be a
+raw or pseudo-register.  It defaults to -1 (not defined).  If
+@code{pc_regnum} is not defined, then the functions @code{read_pc} and
+@code{write_pc} (see above) must be defined.
+
+The value of the program counter (whether defined as a register, or
+through @code{read_pc} and @code{write_pc}) can be accessed withing
+@value{GDBN} as the variable @kbd{$pc}.
+
+@end deftypevr
+
+@deftypevr {Architecture Variable} int ps_regnum
+@vindex ps_regnum
+@cindex processor status register
+@cindex status register
+@cindex @kbd{$ps}
+
+This specifies the register holding the processor status (often called
+the status register), which may be a raw or pseudo-register.  It
+defaults to -1 (not defined).
+
+If defined, the value of this register can be accessed withing
+@value{GDBN} as the variable @kbd{$ps}.
+
+@end deftypevr
+
+@deftypevr {Architecture Variable} int fp0_regnum
+@vindex fp0_regnum
+@cindex first floating point register
+
+This specifies the first floating point register.  It defaults to
+0.  @code{fp0_regnum} is not needed unless the target offers support
+for floating point.
+
+@end deftypevr
+
+@node Register Information Functions
+@subsection Functions Giving Register Information
+@cindex @code{gdbarch} register information functions
+
+These functions return information about registers.
+
+@deftypefn {Architecture Function} {const char *} register_name (struct gdbarch *@var{gdbarch}, int @var{regnum})
+
+This function should convert a register number (raw or pseudo) to a
+register name (as a C @code{const char *}).  This is used both to
+determine the name of a register for output and to work out the meaning
+of any register names used as input.  The function may also return
+@code{NULL}, to indicate that @var{regnum} is not a valid register.
+
+For example with the OpenRISC 1000, @value{GDBN} registers 0-31 are the
+General Purpose Registers, register 32 is the program counter and
+register 33 is the supervision register (i.e.@: the processor status
+register), which map to the strings @code{"gpr00"} through
+@code{"gpr31"}, @code{"pc"} and @code{"sr"} respectively. This means
+that the @value{GDBN} command @kbd{print $gpr5} should print the value of
+the OR1K general purpose register 5@footnote{
+@cindex frame pointer
+@cindex @kbd{$fp}
+Historically, @value{GDBN} always had a concept of a frame pointer
+register, which could be accessed via the @value{GDBN} variable,
+@kbd{$fp}.  That concept is now deprecated, recognizing that not all
+architectures have a frame pointer.  However if an architecture does
+have a frame pointer register, and defines a register or
+pseudo-register with the name @code{"fp"}, then that register will be
+used as the value of the @kbd{$fp} variable.}.
+
+The default value for this function is @code{NULL}, meaning
+undefined. It should always be defined.
+
+The access should be for the specified architecture, @var{gdbarch}.
+
 @end deftypefn
 
-@deftypefn {Target Macro} void REGISTER_CONVERT_TO_RAW (struct type *@var{type}, int @var{reg}, char *@var{from}, char *@var{to})
-Convert the value of register number @var{reg} to @var{type}, which
-should always be @code{gdbarch_register_type (@var{reg})}.  The buffer
-at @var{from} holds the register's value in raw format; the macro should
-convert the value to virtual format, and place it at @var{to}.
+@deftypefn {Architecture Function} {struct type *} register_type (struct gdbarch *@var{gdbarch}, int @var{regnum})
 
-Note that REGISTER_CONVERT_TO_VIRTUAL and REGISTER_CONVERT_TO_RAW take
-their @var{reg} and @var{type} arguments in different orders.
+Given a register number, this function identifies the type of data it
+may be holding, specified as a @code{struct type}.  @value{GDBN} allows
+creation of arbitrary types, but a number of built in types are
+provided (@code{builtin_type_void}, @code{builtin_type_int32} etc),
+together with functions to derive types from these.
+
+Typically the program counter will have a type of ``pointer to
+function'' (it points to code), the frame pointer and stack pointer
+will have types of ``pointer to void'' (they point to data on the stack)
+and all other integer registers will have a type of 32-bit integer or
+64-bit integer.
+
+This information guides the formatting when displaying register
+information.  The default value is @code{NULL} meaning no information is
+available to guide formatting when displaying registers.
+
 @end deftypefn
 
+@deftypefn {Architecture Function} void print_registers_info (struct gdbarch *@var{gdbarch}, struct ui_file *@var{file}, struct frame_info *@var{frame}, int @var{regnum}, int @var{all})
+
+Define this function to print out one or all of the registers for the
+@value{GDBN} @kbd{info registers} command.  The default value is the
+function @code{default_print_registers_info}, which uses the register
+type information (see @code{register_type} above) to determine how each
+register should be printed.  Define a custom version of this function
+for fuller control over how the registers are displayed.
+
+The access should be for the specified architecture, @var{gdbarch},
+with output to the the file specified by the User Interface
+Independent Output file handle, @var{file} (@pxref{UI-Independent
+Output, , UI-Independent Output---the @code{ui_out}
+Functions}).
+
+The registers should show their values in the frame specified by
+@var{frame}.  If @var{regnum} is -1 and @var{all} is zero, then all
+the ``significant'' registers should be shown (the implementer should
+decide which registers are ``significant''). Otherwise only the value of
+the register specified by @var{regnum} should be output.  If
+@var{regnum} is -1 and @var{all} is non-zero (true), then the value of
+all registers should be shown.
+
+By default @code{default_print_registers_info} prints one register per
+line, and if @var{all} is zero omits floating-point registers.
+
+@end deftypefn
+
+@deftypefn {Architecture Function} void print_float_info (struct gdbarch *@var{gdbarch}, struct ui_file *@var{file}, struct frame_info *@var{frame}, const char *@var{args})
+
+Define this function to provide output about the floating point unit and
+registers for the @value{GDBN} @kbd{info float} command respectively.
+The default value is @code{NULL} (not defined), meaning no information
+will be provided.
+
+The @var{gdbarch} and @var{file} and @var{frame} arguments have the same
+meaning as in the @code{print_registers_info} function above. The string
+@var{args} contains any supplementary arguments to the @kbd{info float}
+command.
+
+Define this function if the target supports floating point operations.
+
+@end deftypefn
+
+@deftypefn {Architecture Function} void print_vector_info (struct gdbarch *@var{gdbarch}, struct ui_file *@var{file}, struct frame_info *@var{frame}, const char *@var{args})
+
+Define this function to provide output about the vector unit and
+registers for the @value{GDBN} @kbd{info vector} command respectively.
+The default value is @code{NULL} (not defined), meaning no information
+will be provided.
+
+The @var{gdbarch}, @var{file} and @var{frame} arguments have the
+same meaning as in the @code{print_registers_info} function above.  The
+string @var{args} contains any supplementary arguments to the @kbd{info
+vector} command.
+
+Define this function if the target supports vector operations.
+
+@end deftypefn
+
+@deftypefn {Architecture Function} int register_reggroup_p (struct gdbarch *@var{gdbarch}, int @var{regnum}, struct reggroup *@var{group})
+
+@value{GDBN} groups registers into different categories (general,
+vector, floating point etc).  This function, given a register,
+@var{regnum}, and group, @var{group}, returns 1 (true) if the register
+is in the group and 0 (false) otherwise.
+
+The information should be for the specified architecture,
+@var{gdbarch}
+
+The default value is the function @code{default_register_reggroup_p}
+which will do a reasonable job based on the type of the register (see
+the function @code{register_type} above), with groups for general
+purpose registers, floating point registers, vector registers and raw
+(i.e not pseudo) registers.
+
+@end deftypefn
 
 @node Register and Memory Data
-@section Using Different Register and Memory Data Representations
+@subsection Using Different Register and Memory Data Representations
 @cindex register representation
 @cindex memory representation
 @cindex representations, register and memory
 @cindex register data formats, converting
 @cindex @code{struct value}, converting register contents to
 
-@emph{Maintainer's note: The way GDB manipulates registers is undergoing
-significant change.  Many of the macros and functions referred to in this
-section are likely to be subject to further revision.  See
-@uref{http://sources.redhat.com/gdb/current/ari/, A.R. Index} and
-@uref{http://www.gnu.org/software/gdb/bugs, Bug Tracking Database} for
-further information.  cagney/2002-05-06.}
-
-Some architectures can represent a data object in a register using a
-form that is different to the objects more normal memory representation.
-For example:
+Some architectures have different representations of data objects,
+depending whether the object is held in a register or memory.  For
+example:
 
 @itemize @bullet
 
@@ -3343,8 +3708,8 @@ floating-point registers.
 
 @item
 The x86 architecture supports 80-bit floating-point registers.  The
-@code{long double} data type occupies 96 bits in memory but only 80 bits
-when stored in a register.
+@code{long double} data type occupies 96 bits in memory but only 80
+bits when stored in a register.
 
 @end itemize
 
@@ -3355,59 +3720,712 @@ Interface.
 
 For almost all data types on almost all architectures, the two
 representations are identical, and no special handling is needed.
-However, they do occasionally differ.  Your architecture may define the
-following macros to request conversions between the register and memory
-representations of a data type:
+However, they do occasionally differ.  An architecture may define the
+following @code{struct gdbarch} functions to request conversions
+between the register and memory representations of a data type:
 
-@deftypefun int gdbarch_convert_register_p (struct gdbarch *@var{gdbarch}, int @var{reg})
-Return non-zero if the representation of a data value stored in this
-register may be different to the representation of that same data value
-when stored in memory.
+@deftypefn {Architecture Function} int gdbarch_convert_register_p (struct gdbarch *@var{gdbarch}, int @var{reg})
 
-When non-zero, the macros @code{gdbarch_register_to_value} and
-@code{value_to_register} are used to perform any necessary conversion.
+Return non-zero (true) if the representation of a data value stored in
+this register may be different to the representation of that same data
+value when stored in memory.  The default value is @code{NULL}
+(undefined).
 
-This function should return zero for the register's native type, when
-no conversion is necessary.
-@end deftypefun
+If this function is defined and returns non-zero, the @code{struct
+gdbarch} functions @code{gdbarch_register_to_value} and
+@code{gdbarch_value_to_register} (see below) should be used to perform
+any necessary conversion.
 
-@deftypefun void gdbarch_register_to_value (struct gdbarch *@var{gdbarch}, int @var{reg}, struct type *@var{type}, char *@var{from}, char *@var{to})
-Convert the value of register number @var{reg} to a data object of type
-@var{type}.  The buffer at @var{from} holds the register's value in raw
-format; the converted value should be placed in the buffer at @var{to}.
+If defined, this function should return zero for the register's native
+type, when no conversion is necessary.
+@end deftypefn
 
-Note that @code{gdbarch_register_to_value} and @code{gdbarch_value_to_register}
-take their @var{reg} and @var{type} arguments in different orders.
+@deftypefn {Architecture Function} void gdbarch_register_to_value (struct gdbarch *@var{gdbarch}, int @var{reg}, struct type *@var{type}, char *@var{from}, char *@var{to})
 
-You should only use @code{gdbarch_register_to_value} with registers for which
-the @code{gdbarch_convert_register_p} function returns a non-zero value.
-@end deftypefun
+Convert the value of register number @var{reg} to a data object of
+type @var{type}.  The buffer at @var{from} holds the register's value
+in raw format; the converted value should be placed in the buffer at
+@var{to}.
 
-@deftypefun void gdbarch_value_to_register (struct gdbarch *@var{gdbarch}, struct type *@var{type}, int @var{reg}, char *@var{from}, char *@var{to})
+@quotation
+@emph{Note:} @code{gdbarch_register_to_value} and
+@code{gdbarch_value_to_register} take their @var{reg} and @var{type}
+arguments in different orders.
+@end quotation
+
+@code{gdbarch_register_to_value} should only be used with registers
+for which the @code{gdbarch_convert_register_p} function returns a
+non-zero value.
+
+@end deftypefn
+
+@deftypefn {Architecture Function} void gdbarch_value_to_register (struct gdbarch *@var{gdbarch}, struct type *@var{type}, int @var{reg}, char *@var{from}, char *@var{to})
+
 Convert a data value of type @var{type} to register number @var{reg}'
 raw format.
 
-Note that @code{gdbarch_register_to_value} and @code{gdbarch_value_to_register}
-take their @var{reg} and @var{type} arguments in different orders.
+@quotation
+@emph{Note:} @code{gdbarch_register_to_value} and
+@code{gdbarch_value_to_register} take their @var{reg} and @var{type}
+arguments in different orders.
+@end quotation
 
-You should only use @code{gdbarch_value_to_register} with registers for which
-the @code{gdbarch_convert_register_p} function returns a non-zero value.
-@end deftypefun
+@code{gdbarch_value_to_register} should only be used with registers
+for which the @code{gdbarch_convert_register_p} function returns a
+non-zero value.
+
+@end deftypefn
+
+@node Register Caching
+@subsection Register Caching
+@cindex register caching
+
+Caching of registers is used, so that the target does not need to be
+accessed and reanalyzed multiple times for each register in
+circumstances where the register value cannot have changed.
+
+@cindex @code{struct regcache}
+@value{GDBN} provides @code{struct regcache}, associated with a
+particular @code{struct gdbarch} to hold the cached values of the raw
+registers.  A set of functions is provided to access both the raw
+registers (with @code{raw} in their name) and the full set of cooked
+registers (with @code{cooked} in their name).  Functions are provided
+to ensure the register cache is kept synchronized with the values of
+the actual registers in the target.
+
+Accessing registers through the @code{struct regcache} routines will
+ensure that the appropriate @code{struct gdbarch} functions are called
+when necessary to access the underlying target architecture.  In general
+users should use the @dfn{cooked} functions, since these will map to the
+@dfn{raw} functions automatically as appropriate.
+
+@findex regcache_cooked_read
+@findex regcache_cooked_write
+@cindex @code{gdb_byte}
+@findex regcache_cooked_read_signed
+@findex regcache_cooked_read_unsigned
+@findex regcache_cooked_write_signed
+@findex regcache_cooked_write_unsigned
+The two key functions are @code{regcache_cooked_read} and
+@code{regcache_cooked_write} which read or write a register from or to
+a byte buffer (type @code{gdb_byte *}).  For convenience the wrapper
+functions @code{regcache_cooked_read_signed},
+@code{regcache_cooked_read_unsigned},
+@code{regcache_cooked_write_signed} and
+@code{regcache_cooked_write_unsigned} are provided, which read or
+write the value using the buffer and convert to or from an integral
+value as appropriate.
 
 @node Frame Interpretation
 @section Frame Interpretation
 
+@menu
+* All About Stack Frames::
+* Frame Handling Terminology::
+* Prologue Caches::
+* Functions and Variable to Analyze Frames::
+* Functions to Access Frame Data::
+* Analyzing Stacks---Frame Sniffers::
+@end menu
+
+@node All About Stack Frames
+@subsection All About Stack Frames
+
+@value{GDBN} needs to understand the stack on which local (automatic)
+variables are stored.  The area of the stack containing all the local
+variables for a function invocation is known as the @dfn{stack frame}
+for that function (or colloquially just as the @dfn{frame}).  In turn the
+function that called the function will have its stack frame, and so on
+back through the chain of functions that have been called.
+
+Almost all architectures have one register dedicated to point to the
+end of the stack (the @dfn{stack pointer}).  Many have a second register
+which points to the start of the currently active stack frame (the
+@dfn{frame pointer}).  The specific arrangements for an architecture are
+a key part of the ABI.
+
+A diagram helps to explain this.  Here is a simple program to compute
+factorials:
+
+@smallexample
+#include <stdio.h>
+int fact (int n)
+@{
+  if (0 == n)
+    @{
+      return 1;
+    @}
+  else
+    @{
+      return n * fact (n - 1);
+    @}
+@}
+
+main ()
+@{
+  int i;
+
+  for (i = 0; i < 10; i++)
+    @{
+      int   f = fact (i);
+      printf ("%d! = %d\n", i, f);
+    @}
+@}
+@end smallexample
+
+Consider the state of the stack when the code reaches line 6 after the
+main program has called @code{fact@w{ }(3)}.  The chain of function
+calls will be @code{main ()}, @code{fact@w{ }(3)}, @code{fact@w{
+}(2)}, @code{@w{fact (1)}} and @code{fact@w{ }(0)}.
+
+In this illustration the stack is falling (as used for example by the
+OpenRISC 1000 ABI).  The stack pointer (SP) is at the end of the stack
+(lowest address) and the frame pointer (FP) is at the highest address
+in the current stack frame.  The following diagram shows how the stack
+looks.
+
+@center @image{stack_frame,14cm}
+
+In each stack frame, offset 0 from the stack pointer is the frame
+pointer of the previous frame and offset 4 (this is illustrating a
+32-bit architecture) from the stack pointer is the return address.
+Local variables are indexed from the frame pointer, with negative
+indexes.  In the function @code{fact}, offset -4 from the frame
+pointer is the argument @var{n}.  In the @code{main} function, offset
+-4 from the frame pointer is the local variable @var{i} and offset -8
+from the frame pointer is the local variable @var{f}@footnote{This is
+a simplified example for illustrative purposes only.  Good optimizing
+compilers would not put anything on the stack for such simple
+functions.  Indeed they might eliminate the recursion and use of the
+stack entirely!}.
+
+It is very easy to get confused when examining stacks.  @value{GDBN}
+has terminology it uses rigorously throughout.  The stack frame of the
+function currently executing, or where execution stopped is numbered
+zero.  In this example frame #0 is the stack frame of the call to
+@code{fact@w{ }(0)}.  The stack frame of its calling function
+(@code{fact@w{ }(1)} in this case) is numbered #1 and so on back
+through the chain of calls.
+
+The main @value{GDBN} data structure describing frames is
+ @code{@w{struct frame_info}}.  It is not used directly, but only via
+its accessor functions.  @code{frame_info} includes information about
+the registers in the frame and a pointer to the code of the function
+with which the frame is associated.  The entire stack is represented as
+a linked list of @code{frame_info} structs.
+
+@node Frame Handling Terminology
+@subsection Frame Handling Terminology
+
+It is easy to get confused when referencing stack frames.  @value{GDBN}
+uses some precise terminology.
+
+@itemize @bullet
+
+@item
+@cindex THIS frame
+@cindex stack frame, definition of THIS frame
+@cindex frame, definition of THIS frame
+@dfn{THIS} frame is the frame currently under consideration.
+
+@item
+@cindex NEXT frame
+@cindex stack frame, definition of NEXT frame
+@cindex frame, definition of NEXT frame
+The @dfn{NEXT} frame, also sometimes called the inner or newer frame is the
+frame of the function called by the function of THIS frame.
+
+@item
+@cindex PREVIOUS frame
+@cindex stack frame, definition of PREVIOUS frame
+@cindex frame, definition of PREVIOUS frame
+The @dfn{PREVIOUS} frame, also sometimes called the outer or older frame is
+the frame of the function which called the function of THIS frame.
+
+@end itemize
+
+So in the example in the previous section (@pxref{All About Stack
+Frames, , All About Stack Frames}), if THIS frame is #3 (the call to
+@code{fact@w{ }(3)}), the NEXT frame is frame #2 (the call to
+@code{fact@w{ }(2)}) and the PREVIOUS frame is frame #4 (the call to
+@code{main@w{ }()}).
+
+@cindex innermost frame
+@cindex stack frame, definition of innermost frame
+@cindex frame, definition of innermost frame
+The @dfn{innermost} frame is the frame of the current executing
+function, or where the program stopped, in this example, in the middle
+of the call to @code{@w{fact (0))}}.  It is always numbered frame #0.
+
+@cindex base of a frame
+@cindex stack frame, definition of base of a frame
+@cindex frame, definition of base of a frame
+The @dfn{base} of a frame is the address immediately before the start
+of the NEXT frame.  For a stack which grows down in memory (a
+@dfn{falling} stack) this will be the lowest address and for a stack
+which grows up in memory (a @dfn{rising} stack) this will be the
+highest address in the frame.
+
+@value{GDBN} functions to analyze the stack are typically given a
+pointer to the NEXT frame to determine information about THIS
+frame.  Information about THIS frame includes data on where the
+registers of the PREVIOUS frame are stored in this stack frame.  In
+this example the frame pointer of the PREVIOUS frame is stored at
+offset 0 from the stack pointer of THIS frame.
+
+@cindex unwinding
+@cindex stack frame, definition of unwinding
+@cindex frame, definition of unwinding
+The process whereby a function is given a pointer to the NEXT
+frame to work out information about THIS frame is referred to as
+@dfn{unwinding}.  The @value{GDBN} functions involved in this typically
+include unwind in their name.
+
+@cindex sniffing
+@cindex stack frame, definition of sniffing
+@cindex frame, definition of sniffing
+The process of analyzing a target to determine the information that
+should go in struct frame_info is called @dfn{sniffing}.  The functions
+that carry this out are called sniffers and typically include sniffer
+in their name.  More than one sniffer may be required to extract all
+the information for a particular frame.
+
+@cindex sentinel frame
+@cindex stack frame, definition of sentinel frame
+@cindex frame, definition of sentinel frame
+Because so many functions work using the NEXT frame, there is an issue
+about addressing the innermost frame---it has no NEXT frame.  To solve
+this @value{GDBN} creates a dummy frame #-1, known as the
+@dfn{sentinel} frame.
+
+@node Prologue Caches
+@subsection Prologue Caches
+
+@cindex function prologue
+@cindex prologue of a function
+All the frame sniffing functions typically examine the code at the
+start of the corresponding function, to determine the state of
+registers.  The ABI will save old values and set new values of key
+registers at the start of each function in what is known as the
+function @dfn{prologue}.
+
+@cindex prologue cache
+For any particular stack frame this data does not change, so all the
+standard unwinding functions, in addition to receiving a pointer to
+the NEXT frame as their first argument, receive a pointer to a
+@dfn{prologue cache} as their second argument.  This can be used to store
+values associated with a particular frame, for reuse on subsequent
+calls involving the same frame.
+
+It is up to the user to define the structure used (it is a
+@code{void@w{ }*} pointer) and arrange allocation and deallocation of
+storage.  However for general use, @value{GDBN} provides
+@code{@w{struct trad_frame_cache}}, with a set of accessor
+routines.  This structure holds the stack and code address of
+THIS frame, the base address of the frame, a pointer to the
+struct @code{frame_info} for the NEXT frame and details of
+where the registers of the PREVIOUS frame may be found in THIS
+frame.
+
+Typically the first time any sniffer function is called with NEXT
+frame, the prologue sniffer for THIS frame will be @code{NULL}.  The
+sniffer will analyze the frame, allocate a prologue cache structure
+and populate it.  Subsequent calls using the same NEXT frame will
+pass in this prologue cache, so the data can be returned with no
+additional analysis.
+
+@node Functions and Variable to Analyze Frames
+@subsection Functions and Variable to Analyze Frames
+
+These struct @code{gdbarch} functions and variable should be defined
+to provide analysis of the stack frame and allow it to be adjusted as
+required.
+
+@deftypefn {Architecture Function} CORE_ADDR skip_prologue (struct gdbarch *@var{gdbarch}, CORE_ADDR @var{pc})
+
+The prologue of a function is the code at the beginning of the
+function which sets up the stack frame, saves the return address
+etc.  The code representing the behavior of the function starts after
+the prologue.
+
+This function skips past the prologue of a function if the program
+counter, @var{pc}, is within the prologue of a function.  The result is
+the program counter immediately after the prologue.  With modern
+optimizing compilers, this may be a far from trivial exercise.  However
+the required information may be within the binary as DWARF2 debugging
+information, making the job much easier.
+
+The default value is @code{NULL} (not defined).  This function should always
+be provided, but can take advantage of DWARF2 debugging information,
+if that is available.
+
+@end deftypefn
+
+@deftypefn {Architecture Function} int inner_than (CORE_ADDR @var{lhs}, CORE_ADDR @var{rhs})
+@findex core_addr_lessthan
+@findex core_addr_greaterthan
+
+Given two frame or stack pointers, return non-zero (true) if the first
+represents the @dfn{inner} stack frame and 0 (false) otherwise.  This
+is used to determine whether the target has a stack which grows up in
+memory (rising stack) or grows down in memory (falling stack).
+@xref{All About Stack Frames, , All About Stack Frames}, for an
+explanation of @dfn{inner} frames.
+
+The default value of this function is @code{NULL} and it should always
+be defined.  However for almost all architectures one of the built-in
+functions can be used: @code{core_addr_lessthan} (for stacks growing
+down in memory) or @code{core_addr_greaterthan} (for stacks growing up
+in memory).
+
+@end deftypefn
+
+@anchor{frame_align}
+@deftypefn {Architecture Function} CORE_ADDR frame_align (struct gdbarch *@var{gdbarch}, CORE_ADDR @var{address})
+@findex align_down
+@findex align_up
+
+The architecture may have constraints on how its frames are
+aligned.  For example the OpenRISC 1000 ABI requires stack frames to be
+double-word aligned, but 32-bit versions of the architecture allocate
+single-word values to the stack.  Thus extra padding may be needed at
+the end of a stack frame.
+
+Given a proposed address for the stack pointer, this function
+returns a suitably aligned address (by expanding the stack frame).
+
+The default value is @code{NULL} (undefined).  This function should be defined
+for any architecture where it is possible the stack could become
+misaligned.  The utility functions @code{align_down} (for falling
+stacks) and @code{align_up} (for rising stacks) will facilitate the
+implementation of this function.
+
+@end deftypefn
+
+@deftypevr {Architecture Variable} int frame_red_zone_size
+
+Some ABIs reserve space beyond the end of the stack for use by leaf
+functions without prologue or epilogue or by exception handlers (for
+example the OpenRISC 1000).
+
+This is known as a @dfn{red zone} (AMD terminology).  The @sc{amd64}
+(nee x86-64) ABI documentation refers to the @dfn{red zone} when
+describing this scratch area.
+
+The default value is 0.  Set this field if the architecture has such a
+red zone.  The value must be aligned as required by the ABI (see
+@code{frame_align} above for an explanation of stack frame alignment).
+
+@end deftypevr
+
+@node Functions to Access Frame Data
+@subsection Functions to Access Frame Data
+
+These functions provide access to key registers and arguments in the
+stack frame.
+
+@deftypefn {Architecture Function} CORE_ADDR unwind_pc (struct gdbarch *@var{gdbarch}, struct frame_info *@var{next_frame})
+
+This function is given a pointer to the NEXT stack frame (@pxref{All
+About Stack Frames, , All About Stack Frames}, for how frames are
+represented) and returns the value of the program counter in the
+PREVIOUS frame (i.e.@: the frame of the function that called THIS
+one).  This is commonly referred to as the @dfn{return address}.
+
+The implementation, which must be frame agnostic (work with any frame),
+is typically no more than:
+
+@smallexample
+ULONGEST pc;
+pc = frame_unwind_register_unsigned (next_frame, @var{ARCH}_PC_REGNUM);
+return gdbarch_addr_bits_remove (gdbarch, pc);
+@end smallexample
+
+@end deftypefn
+
+@deftypefn {Architecture Function} CORE_ADDR unwind_sp (struct gdbarch *@var{gdbarch}, struct frame_info *@var{next_frame})
+
+This function is given a pointer to the NEXT stack frame
+(@pxref{All About Stack Frames, , All About Stack Frames} for how
+frames are represented) and returns the value of the stack pointer in
+the PREVIOUS frame (i.e.@: the frame of the function that called
+THIS one).
+
+The implementation, which must be frame agnostic (work with any frame),
+is typically no more than:
+
+@smallexample
+ULONGEST sp;
+sp = frame_unwind_register_unsigned (next_frame, @var{ARCH}_SP_REGNUM);
+return gdbarch_addr_bits_remove (gdbarch, sp);
+@end smallexample
+
+@end deftypefn
+
+@deftypefn {Architecture Function} int frame_num_args (struct gdbarch *@var{gdbarch}, struct frame_info *@var{this_frame})
+
+This function is given a pointer to THIS stack frame (@pxref{All
+About Stack Frames, , All About Stack Frames} for how frames are
+represented), and returns the number of arguments that are being
+passed, or -1 if not known.
+
+The default value is @code{NULL} (undefined), in which case the number of
+arguments passed on any stack frame is always unknown.  For many
+architectures this will be a suitable default.
+
+@end deftypefn
+
+@node Analyzing Stacks---Frame Sniffers
+@subsection Analyzing Stacks---Frame Sniffers
+
+When a program stops, @value{GDBN} needs to construct the chain of
+struct @code{frame_info} representing the state of the stack using
+appropriate @dfn{sniffers}.
+
+Each architecture requires appropriate sniffers, but they do not form
+entries in @code{@w{struct gdbarch}}, since more than one sniffer may
+be required and a sniffer may be suitable for more than one
+@code{@w{struct gdbarch}}.  Instead sniffers are associated with
+architectures using the following functions.
+
+@itemize @bullet
+
+@item
+@findex frame_unwind_append_sniffer
+@code{frame_unwind_append_sniffer} is used to add a new sniffer to
+analyze THIS frame when given a pointer to the NEXT frame.
+
+@item
+@findex frame_base_append_sniffer
+@code{frame_base_append_sniffer} is used to add a new sniffer
+which can determine information about the base of a stack frame.
+
+@item
+@findex frame_base_set_default
+@code{frame_base_set_default} is used to specify the default base
+sniffer.
+
+@end itemize
+
+These functions all take a reference to @code{@w{struct gdbarch}}, so
+they are associated with a specific architecture.  They are usually
+called in the @code{gdbarch} initialization function, after the
+@code{gdbarch} struct has been set up.  Unless a default has been set, the
+most recently appended sniffer will be tried first.
+
+The main frame unwinding sniffer (as set by
+@code{frame_unwind_append_sniffer)} returns a structure specifying
+a set of sniffing functions:
+
+@cindex @code{frame_unwind}
+@smallexample
+struct frame_unwind
+@{
+   enum frame_type            type;
+   frame_this_id_ftype       *this_id;
+   frame_prev_register_ftype *prev_register;
+   const struct frame_data   *unwind_data;
+   frame_sniffer_ftype       *sniffer;
+   frame_prev_pc_ftype       *prev_pc;
+   frame_dealloc_cache_ftype *dealloc_cache;
+@};
+@end smallexample
+
+The @code{type} field indicates the type of frame this sniffer can
+handle: normal, dummy (@pxref{Functions Creating Dummy Frames, ,
+Functions Creating Dummy Frames}), signal handler or sentinel.  Signal
+handlers sometimes have their own simplified stack structure for
+efficiency, so may need their own handlers.
+
+The @code{unwind_data} field holds additional information which may be
+relevant to particular types of frame.  For example it may hold
+additional information for signal handler frames.
+
+The remaining fields define functions that yield different types of
+information when given a pointer to the NEXT stack frame.  Not all
+functions need be provided.  If an entry is @code{NULL}, the next sniffer will
+be tried instead.
+
+@itemize @bullet
+
+@item
+@code{this_id} determines the stack pointer and function (code
+entry point) for THIS stack frame.
+
+@item
+@code{prev_register} determines where the values of registers for
+the PREVIOUS stack frame are stored in THIS stack frame.
+
+@item
+@code{sniffer} takes a look at THIS frame's registers to
+determine if this is the appropriate unwinder.
+
+@item
+@code{prev_pc} determines the program counter for THIS
+frame.  Only needed if the program counter is not an ordinary register
+(@pxref{Register Architecture Functions & Variables,
+, Functions and Variables Specifying the Register Architecture}).
+
+@item
+@code{dealloc_cache} frees any additional memory associated with
+the prologue cache for this frame (@pxref{Prologue Caches, , Prologue
+Caches}).
+
+@end itemize
+
+In general it is only the @code{this_id} and @code{prev_register}
+fields that need be defined for custom sniffers.
+
+The frame base sniffer is much simpler.  It is a @code{@w{struct
+frame_base}}, which refers to the corresponding @code{frame_unwind}
+struct and whose fields refer to functions yielding various addresses
+within the frame.
+
+@cindex @code{frame_base}
+@smallexample
+struct frame_base
+@{
+   const struct frame_unwind *unwind;
+   frame_this_base_ftype     *this_base;
+   frame_this_locals_ftype   *this_locals;
+   frame_this_args_ftype     *this_args;
+@};
+@end smallexample
+
+All the functions referred to take a pointer to the NEXT frame as
+argument. The function referred to by @code{this_base} returns the
+base address of THIS frame, the function referred to by
+@code{this_locals} returns the base address of local variables in THIS
+frame and the function referred to by @code{this_args} returns the
+base address of the function arguments in this frame.
+
+As described above, the base address of a frame is the address
+immediately before the start of the NEXT frame.  For a falling
+stack, this is the lowest address in the frame and for a rising stack
+it is the highest address in the frame.  For most architectures the
+same address is also the base address for local variables and
+arguments, in which case the same function can be used for all three
+entries@footnote{It is worth noting that if it cannot be determined in any
+other way (for example by there being a register with the name
+@code{"fp"}), then the result of the @code{this_base} function will be
+used as the value of the frame pointer variable @kbd{$fp} in
+@value{GDBN}.  This is very often not correct (for example with the
+OpenRISC 1000, this value is the stack pointer, @kbd{$sp}).  In this
+case a register (raw or pseudo) with the name @code{"fp"} should be
+defined.  It will be used in preference as the value of @kbd{$fp}.}.
+
 @node Inferior Call Setup
 @section Inferior Call Setup
+@cindex calls to the inferior
 
-@node Compiler Characteristics
-@section Compiler Characteristics
+@menu
+* About Dummy Frames::
+* Functions Creating Dummy Frames::
+@end menu
 
-@node Target Conditionals
-@section Target Conditionals
+@node About Dummy Frames
+@subsection About Dummy Frames
+@cindex dummy frames
 
-This section describes the macros and functions that you can use to define the
-target machine.
+@value{GDBN} can call functions in the target code (for example by
+using the @kbd{call} or @kbd{print} commands).  These functions may be
+breakpointed, and it is essential that if a function does hit a
+breakpoint, commands like @kbd{backtrace} work correctly.
+
+This is achieved by making the stack look as though the function had
+been called from the point where @value{GDBN} had previously stopped.
+This requires that @value{GDBN} can set up stack frames appropriate for
+such function calls.
+
+@node Functions Creating Dummy Frames
+@subsection Functions Creating Dummy Frames
+
+The following functions provide the functionality to set up such
+@dfn{dummy} stack frames.
+
+@deftypefn {Architecture Function} CORE_ADDR push_dummy_call (struct gdbarch *@var{gdbarch}, struct value *@var{function}, struct regcache *@var{regcache}, CORE_ADDR @var{bp_addr}, int  @var{nargs}, struct value **@var{args}, CORE_ADDR @var{sp}, int  @var{struct_return}, CORE_ADDR @var{struct_addr})
+
+This function sets up a dummy stack frame for the function about to be
+called.  @code{push_dummy_call} is given the arguments to be passed
+and must copy them into registers or push them on to the stack as
+appropriate for the ABI.
+
+@var{function} is a pointer to the function
+that will be called and @var{regcache} the register cache from which
+values should be obtained.  @var{bp_addr} is the address to which the
+function should return (which is breakpointed, so @value{GDBN} can
+regain control, hence the name).  @var{nargs} is the number of
+arguments to pass and @var{args} an array containing the argument
+values.  @var{struct_return} is non-zero (true) if the function returns
+a structure, and if so @var{struct_addr} is the address in which the
+structure should be returned.
+
+ After calling this function, @value{GDBN} will pass control to the
+target at the address of the function, which will find the stack and
+registers set up just as expected.
+
+The default value of this function is @code{NULL} (undefined).  If the
+function is not defined, then @value{GDBN} will not allow the user to
+call functions within the target being debugged.
+
+@end deftypefn
+
+@deftypefn {Architecture Function} {struct frame_id} unwind_dummy_id (struct gdbarch *@var{gdbarch}, struct frame_info *@var{next_frame}) 
+
+This is the inverse of @code{push_dummy_call} which restores the stack
+pointer and program counter after a call to evaluate a function using
+a dummy stack frame.  The result is a @code{@w{struct frame_id}}, which
+contains the value of the stack pointer and program counter to be
+used.
+
+The NEXT frame pointer is provided as argument,
+@var{next_frame}.  THIS frame is the frame of the dummy function,
+which can be unwound, to yield the required stack pointer and program
+counter from the PREVIOUS frame.
+
+The default value is @code{NULL} (undefined).  If @code{push_dummy_call} is
+defined, then this function should also be defined.
+
+@end deftypefn
+
+@deftypefn {Architecture Function} CORE_ADDR push_dummy_code (struct gdbarch *@var{gdbarch}, CORE_ADDR @var{sp}, CORE_ADDR @var{funaddr}, struct value **@var{args}, int  @var{nargs}, struct type *@var{value_type}, CORE_ADDR *@var{real_pc}, CORE_ADDR *@var{bp_addr}, struct regcache *@var{regcache})
+
+If this function is not defined (its default value is @code{NULL}), a dummy
+call will use the entry point of the currently loaded code on the
+target as its return address.  A temporary breakpoint will be set
+there, so the location must be writable and have room for a
+breakpoint.
+
+It is possible that this default is not suitable.  It might not be
+writable (in ROM possibly), or the ABI might require code to be
+executed on return from a call to unwind the stack before the
+breakpoint is encountered.
+
+If either of these is the case, then push_dummy_code should be defined
+to push an instruction sequence onto the end of the stack to which the
+dummy call should return.
+
+The arguments are essentially the same as those to
+@code{push_dummy_call}.  However the function is provided with the
+type of the function result, @var{value_type}, @var{bp_addr} is used
+to return a value (the address at which the breakpoint instruction
+should be inserted) and @var{real pc} is used to specify the resume
+address when starting the call sequence.  The function should return
+the updated innermost stack address.
+
+@quotation
+@emph{Note:} This does require that code in the stack can be executed.
+Some Harvard architectures may not allow this.
+@end quotation
+
+@end deftypefn
+
+@node Defining Other Architecture Features 
+@section Defining Other Architecture Features 
+
+This section describes other functions and values in @code{gdbarch},
+together with some useful macros, that you can use to define the
+target architecture.
 
 @table @code
 
@@ -3490,7 +4508,7 @@ original type, rather than the promoted type.
 @item gdbarch_bits_big_endian (@var{gdbarch})
 @findex gdbarch_bits_big_endian
 This is used if the numbering of bits in the targets does @strong{not} match
-the endianness of the target byte order.  A value of 1 means that the bits
+the endianism of the target byte order.  A value of 1 means that the bits
 are numbered in a big-endian bit order, 0 means little-endian.
 
 @item set_gdbarch_bits_big_endian (@var{gdbarch}, @var{bits_big_endian})
@@ -3633,29 +4651,6 @@ program encounters a breakpoint.  This is often the number of bytes in
 If defined, this should evaluate to 1 if @var{addr} is in a shared
 library in which breakpoints cannot be set and so should be disabled.
 
-@item void gdbarch_print_float_info (@var{gdbarch}, @var{file}, @var{frame}, @var{args})
-@findex gdbarch_print_float_info
-If defined, then the @samp{info float} command will print information about
-the processor's floating point unit.
-
-@item void gdbarch_print_registers_info (@var{gdbarch}, @var{frame}, @var{regnum}, @var{all})
-@findex gdbarch_print_registers_info
-If defined, pretty print the value of the register @var{regnum} for the
-specified @var{frame}.  If the value of @var{regnum} is -1, pretty print
-either all registers (@var{all} is non zero) or a select subset of
-registers (@var{all} is zero).
-
-The default method prints one register per line, and if @var{all} is
-zero omits floating-point registers.
-
-@item int gdbarch_print_vector_info (@var{gdbarch}, @var{file}, @var{frame}, @var{args})
-@findex gdbarch_print_vector_info
-If defined, then the @samp{info vector} command will call this function
-to print information about the processor's vector unit.
-
-By default, the @samp{info vector} command will print all vector
-registers (the register's type having the vector attribute).
-
 @item int gdbarch_dwarf2_reg_to_regnum (@var{gdbarch}, @var{dwarf2_regnr})
 @findex gdbarch_dwarf2_reg_to_regnum
 Convert DWARF2 register number @var{dwarf2_regnr} into @value{GDBN} regnum.
@@ -3665,83 +4660,6 @@ If not defined, no conversion will be performed.
 @findex gdbarch_ecoff_reg_to_regnum
 Convert ECOFF register number  @var{ecoff_regnr} into @value{GDBN} regnum.  If
 not defined, no conversion will be performed.
-
-@item CORE_ADDR frame_align (@var{gdbarch}, @var{address})
-@anchor{frame_align}
-@findex frame_align
-Define this to adjust @var{address} so that it meets the alignment
-requirements for the start of a new stack frame.  A stack frame's
-alignment requirements are typically stronger than a target processors
-stack alignment requirements.
-
-This function is used to ensure that, when creating a dummy frame, both
-the initial stack pointer and (if needed) the address of the return
-value are correctly aligned.
-
-This function always adjusts the address in the direction of stack
-growth.
-
-By default, no frame based stack alignment is performed.
-
-@item int gdbarch_frame_red_zone_size (@var{gdbarch})
-@findex gdbarch_frame_red_zone_size
-The number of bytes, beyond the innermost-stack-address, reserved by the
-@sc{abi}.  A function is permitted to use this scratch area (instead of
-allocating extra stack space).
-
-When performing an inferior function call, to ensure that it does not
-modify this area, @value{GDBN} adjusts the innermost-stack-address by
-@var{gdbarch_frame_red_zone_size} bytes before pushing parameters onto the
-stack.
-
-By default, zero bytes are allocated.  The value must be aligned
-(@pxref{frame_align}).
-
-The @sc{amd64} (nee x86-64) @sc{abi} documentation refers to the
-@emph{red zone} when describing this scratch area.
-@cindex red zone
-
-@code{FRAME_FIND_SAVED_REGS} is deprecated.
-
-@item int gdbarch_frame_num_args (@var{gdbarch}, @var{frame})
-@findex gdbarch_frame_num_args
-For the frame described by @var{frame} return the number of arguments that
-are being passed.  If the number of arguments is not known, return
-@code{-1}.
-
-@item CORE_ADDR gdbarch_unwind_pc (@var{next_frame})
-@findex gdbarch_unwind_pc
-@anchor{gdbarch_unwind_pc} Return the instruction address, in
-@var{next_frame}'s caller, at which execution will resume after
-@var{next_frame} returns.  This is commonly referred to as the return address.
-
-The implementation, which must be frame agnostic (work with any frame),
-is typically no more than:
-
-@smallexample
-ULONGEST pc;
-pc = frame_unwind_register_unsigned (next_frame, S390_PC_REGNUM);
-return gdbarch_addr_bits_remove (gdbarch, pc);
-@end smallexample
-
-@noindent
-
-@item CORE_ADDR gdbarch_unwind_sp (@var{gdbarch}, @var{next_frame})
-@findex gdbarch_unwind_sp
-@anchor{gdbarch_unwind_sp} Return the frame's inner most stack address.  This is
-commonly referred to as the frame's @dfn{stack pointer}.
-
-The implementation, which must be frame agnostic (work with any frame),
-is typically no more than:
-
-@smallexample
-ULONGEST sp;
-sp = frame_unwind_register_unsigned (next_frame, S390_SP_REGNUM);
-return gdbarch_addr_bits_remove (gdbarch, sp);
-@end smallexample
-
-@noindent
-@xref{TARGET_READ_SP}, which this method replaces.
 
 @item GCC_COMPILED_FLAG_SYMBOL
 @itemx GCC2_COMPILED_FLAG_SYMBOL
@@ -3759,7 +4677,7 @@ will jump to, assuming that we have just stopped at a @code{longjmp}
 breakpoint.  It takes a @code{CORE_ADDR *} as argument, and stores the
 target PC value through this pointer.  It examines the current state
 of the machine as needed, typically by using a manually-determined
-offset into the @code{jmp_buf}. (While we might like to get the offset
+offset into the @code{jmp_buf}.  (While we might like to get the offset
 from the target's @file{jmpbuf.h}, that header file cannot be assumed
 to be available when building a cross-debugger.)
 
@@ -3773,13 +4691,6 @@ repenting at leisure.
 @item I386_USE_GENERIC_WATCHPOINTS
 An x86-based target can define this to use the generic x86 watchpoint
 support; see @ref{Algorithms, I386_USE_GENERIC_WATCHPOINTS}.
-
-@item int gdbarch_inner_than (@var{gdbarch}, @var{lhs}, @var{rhs})
-@findex gdbarch_inner_than
-Returns non-zero if stack address @var{lhs} is inner than (nearer to the
-stack top) stack address @var{rhs}.  Let the function return 
-@w{@code{lhs < rhs}} if the target's stack grows downward in memory, or
-@w{@code{lhs > rsh}} if the stack grows upward.
 
 @item gdbarch_in_function_epilogue_p (@var{gdbarch}, @var{addr})
 @findex gdbarch_in_function_epilogue_p
@@ -3842,34 +4753,6 @@ Convert the raw contents of register @var{regnum} into a value of type
 @var{type}.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
 
-@item register_reggroup_p (@var{gdbarch}, @var{regnum}, @var{reggroup})
-@findex register_reggroup_p
-@cindex register groups
-Return non-zero if register @var{regnum} is a member of the register
-group @var{reggroup}.
-
-By default, registers are grouped as follows:
-
-@table @code
-@item float_reggroup
-Any register with a valid name and a floating-point type.
-@item vector_reggroup
-Any register with a valid name and a vector type.
-@item general_reggroup
-Any register with a valid name and a type other than vector or
-floating-point.  @samp{float_reggroup}.
-@item save_reggroup
-@itemx restore_reggroup
-@itemx all_reggroup
-Any register with a valid name.
-@end table
-
-@item struct type *register_type (@var{gdbarch}, @var{reg})
-@findex register_type
-If defined, return the type of register @var{reg}.
-@xref{Target Architecture Definition, , Raw and Virtual Register
-Representations}.
-
 @item REGISTER_CONVERT_TO_VIRTUAL(@var{reg}, @var{type}, @var{from}, @var{to})
 @findex REGISTER_CONVERT_TO_VIRTUAL
 Convert the value of register @var{reg} from its raw form to its virtual
@@ -3896,7 +4779,7 @@ mechanism.  The macro @code{SOFTWARE_SINGLE_STEP} must also be defined.
 @findex SOFTWARE_SINGLE_STEP
 A function that inserts or removes (depending on
 @var{insert_breakpoints_p}) breakpoints at each possible destinations of
-the next instruction. See @file{sparc-tdep.c} and @file{rs6000-tdep.c}
+the next instruction.  See @file{sparc-tdep.c} and @file{rs6000-tdep.c}
 for examples.
 
 @item set_gdbarch_sofun_address_maybe_missing (@var{gdbarch}, @var{set})
@@ -3931,14 +4814,6 @@ that carries the address.
 guess the starting and ending addresses of the compilation unit from them.
 @end itemize
 
-@item int gdbarch_pc_regnum (@var{gdbarch})
-@findex gdbarch_pc_regnum
-If the program counter is kept in a register, then let this function return
-the number (greater than or equal to zero) of that register.
-
-This should only need to be defined if @code{gdbarch_read_pc} and
-@code{gdbarch_write_pc} are not defined.
-
 @item int gdbarch_stabs_argument_has_addr (@var{gdbarch}, @var{type})
 @findex gdbarch_stabs_argument_has_addr
 @anchor{gdbarch_stabs_argument_has_addr} Define this function to return
@@ -3948,12 +4823,6 @@ instead of value.
 @item PROCESS_LINENUMBER_HOOK
 @findex PROCESS_LINENUMBER_HOOK
 A hook defined for XCOFF reading.
-
-@item gdbarch_ps_regnum (@var{gdbarch}
-@findex gdbarch_ps_regnum
-If defined, this function returns the number of the processor status
-register.
-(This definition is only used in generic code when parsing "$ps".)
 
 @item CORE_ADDR gdbarch_push_dummy_call (@var{gdbarch}, @var{function}, @var{regcache}, @var{bp_addr}, @var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
 @findex gdbarch_push_dummy_call
@@ -3982,11 +4851,6 @@ By default, the stack is grown sufficient to hold a frame-aligned
 reserved for that breakpoint, and @var{real_pc} set to @var{funaddr}.
 
 This method replaces @w{@code{gdbarch_call_dummy_location (@var{gdbarch})}}.
-
-@item const char *gdbarch_register_name (@var{gdbarch}, @var{regnr})
-@findex gdbarch_register_name
-Return the name of register @var{regnr} as a string.  May return @code{NULL}
-to indicate that @var{regnr} is not a valid register.
 
 @item int gdbarch_sdb_reg_to_regnum (@var{gdbarch}, @var{sdb_regnr})
 @findex gdbarch_sdb_reg_to_regnum
@@ -4043,22 +4907,11 @@ processor's state so that execution will resume just after the breakpoint.
 This function does the right thing even when the breakpoint is in the delay slot
 of a branch or jump.
 
-@item CORE_ADDR gdbarch_skip_prologue (@var{gdbarch}, @var{ip})
-@findex gdbarch_skip_prologue
-A function that returns the address of the ``real'' code beyond the
-function entry prologue found at @var{ip}.
-
 @item CORE_ADDR gdbarch_skip_trampoline_code (@var{gdbarch}, @var{frame}, @var{pc})
 @findex gdbarch_skip_trampoline_code
 If the target machine has trampoline code that sits between callers and
 the functions being called, then define this function to return a new PC
 that is at the start of the real function.
-
-@item int gdbarch_sp_regnum (@var{gdbarch})
-@findex gdbarch_sp_regnum
-If the stack-pointer is kept in a register, then use this function to return
-the number (greater than or equal to zero) of that register, or -1 if
-there is no such register.
 
 @item int gdbarch_deprecated_fp_regnum (@var{gdbarch})
 @findex gdbarch_deprecated_fp_regnum
@@ -4125,30 +4978,6 @@ Number of bits in a pointer; defaults to
 @findex gdbarch_short_bit
 Number of bits in a short integer; defaults to @w{@code{2 * TARGET_CHAR_BIT}}.
 
-@item  CORE_ADDR gdbarch_read_pc (@var{gdbarch}, @var{regcache})
-@findex gdbarch_read_pc
-@itemx gdbarch_write_pc (@var{gdbarch}, @var{regcache}, @var{val})
-@findex gdbarch_write_pc
-@anchor{gdbarch_write_pc}
-@itemx TARGET_READ_SP
-@findex TARGET_READ_SP
-@itemx TARGET_READ_FP
-@findex TARGET_READ_FP
-@findex gdbarch_read_pc
-@findex gdbarch_write_pc
-@findex read_sp
-@findex read_fp
-@anchor{TARGET_READ_SP} These change the behavior of @code{gdbarch_read_pc},
-@code{gdbarch_write_pc}, and @code{read_sp}.  For most targets, these may be
-left undefined.  @value{GDBN} will call the read and write register
-functions with the relevant @code{_REGNUM} argument.
-
-These macros and functions are useful when a target keeps one of these
-registers in a hard to get at place; for example, part in a segment register
-and part in an ordinary register.
-
-@xref{gdbarch_unwind_sp}, which replaces @code{TARGET_READ_SP}.
-
 @item void gdbarch_virtual_frame_pointer (@var{gdbarch}, @var{pc}, @var{frame_regnum}, @var{frame_offset})
 @findex gdbarch_virtual_frame_pointer
 Returns a @code{(@var{register}, @var{offset})} pair representing the virtual
@@ -4157,8 +4986,8 @@ pointers are not used, a default definition simply returns
 @code{gdbarch_deprecated_fp_regnum} (or @code{gdbarch_sp_regnum}, if
 no frame pointer is defined), with an offset of zero.
 
-@c need to explain virtual frame pointers, they are recorded in agent expressions
-@c for tracepoints
+@c need to explain virtual frame pointers, they are recorded in agent
+@c expressions for tracepoints
 
 @item TARGET_HAS_HARDWARE_WATCHPOINTS
 If non-zero, the target has support for hardware-assisted
@@ -4227,6 +5056,51 @@ targets that use the same processor architecture.
 @file{gdb/config/@var{arch}/tm-@var{ttt}.h},
 @file{gdb/config/@var{arch}/tm-@var{arch}.h}, and
 @file{config/tm-@var{os}.h} are no longer used.)
+
+@findex _initialize_@var{arch}_tdep
+A @value{GDBN} description for a new architecture, arch is created by
+defining a global function @code{_initialize_@var{arch}_tdep}, by
+convention in the source file @file{@var{arch}-tdep.c}.  For
+example, in the case of the OpenRISC 1000, this function is called
+@code{_initialize_or1k_tdep} and is found in the file
+@file{or1k-tdep.c}.
+
+The object file resulting from compiling this source file, which will
+contain the implementation of the
+@code{_initialize_@var{arch}_tdep} function is specified in the
+@value{GDBN} @file{configure.tgt} file, which includes a large case
+statement pattern matching against the @code{--target} option of the
+@kbd{configure} script.
+
+@quotation
+@emph{Note:} If the architecture requires multiple source files, the
+corresponding binaries should be included in
+@file{configure.tgt}. However if there are header files, the
+dependencies on these will not be picked up from the entries in
+@file{configure.tgt}. The @file{Makefile.in} file will need extending to
+show these dependencies.
+@end quotation
+
+@findex gdbarch_register
+A new struct gdbarch, defining the new architecture, is created within
+the @code{_initialize_@var{arch}_tdep} function by calling
+@code{gdbarch_register}:
+
+@smallexample
+void gdbarch_register (enum bfd_architecture    architecture,
+                       gdbarch_init_ftype      *init_func,
+                       gdbarch_dump_tdep_ftype *tdep_dump_func);
+@end smallexample
+
+This function has been described fully in an earlier
+section.  @xref{How an Architecture is Represented, , How an
+Architecture is Represented}.
+
+The new @code{@w{struct gdbarch}} should contain implementations of
+the necessary functions (described in the previous sections) to
+describe the basic layout of the target machine's processor chip
+(registers, stack, etc.).  It can be shared among many targets that use
+the same processor architecture.
 
 @node Target Descriptions
 @chapter Target Descriptions
@@ -4419,12 +5293,12 @@ Both executables and core files have target vectors.
 
 @subsection Standard Protocol and Remote Stubs
 
-@value{GDBN}'s file @file{remote.c} talks a serial protocol to code
-that runs in the target system.  @value{GDBN} provides several sample
+@value{GDBN}'s file @file{remote.c} talks a serial protocol to code that
+runs in the target system.  @value{GDBN} provides several sample
 @dfn{stubs} that can be integrated into target programs or operating
-systems for this purpose; they are named @file{@var{cpu}-stub.c}. Many
+systems for this purpose; they are named @file{@var{cpu}-stub.c}.  Many
 operating systems, embedded targets, emulators, and simulators already
-have a GDB stub built into them, and maintenance of the remote
+have a @value{GDBN} stub built into them, and maintenance of the remote
 protocol must be careful to preserve compatibility.
 
 The @value{GDBN} user's manual describes how to put such a stub into
@@ -4627,7 +5501,7 @@ definition in @file{procfs.c}.
 @item SOLIB_ADD (@var{filename}, @var{from_tty}, @var{targ}, @var{readsyms})
 @findex SOLIB_ADD
 Define this to expand into an expression that will cause the symbols in
-@var{filename} to be added to @value{GDBN}'s symbol table. If
+@var{filename} to be added to @value{GDBN}'s symbol table.  If
 @var{readsyms} is zero symbols are not read but any necessary low level
 processing for @var{filename} is still done.
 
@@ -4836,7 +5710,7 @@ is the last allocation), use a negative number for reservation.  You
 can also create a vector of a specific size from the get go.
 
 You should prefer the push and pop operations, as they append and
-remove from the end of the vector. If you need to remove several items
+remove from the end of the vector.  If you need to remove several items
 in one go, use the truncate operation.  The insert and remove
 operations allow you to change elements in the middle of the vector.
 There are two remove operations, one which preserves the element
@@ -5074,15 +5948,15 @@ architecture object.
 
 A module registers one or more per-architecture data-pointers using:
 
-@deftypefun struct gdbarch_data *gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *@var{pre_init})
+@deftypefn {Architecture Function} {struct gdbarch_data *} gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *@var{pre_init})
 @var{pre_init} is used to, on-demand, allocate an initial value for a
 per-architecture data-pointer using the architecture's obstack (passed
 in as a parameter).  Since @var{pre_init} can be called during
 architecture creation, it is not parameterized with the architecture.
 and must not call modules that use per-architecture data.
-@end deftypefun
+@end deftypefn
 
-@deftypefun struct gdbarch_data *gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *@var{post_init})
+@deftypefn {Architecture Function} {struct gdbarch_data *} gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *@var{post_init})
 @var{post_init} is used to obtain an initial value for a
 per-architecture data-pointer @emph{after}.  Since @var{post_init} is
 always called after architecture creation, it both receives the fully
@@ -5090,21 +5964,21 @@ initialized architecture and is free to call modules that use
 per-architecture data (care needs to be taken to ensure that those
 other modules do not try to call back to this module as that will
 create in cycles in the initialization call graph).
-@end deftypefun
+@end deftypefn
 
 These functions return a @code{struct gdbarch_data} that is used to
 identify the per-architecture data-pointer added for that module.
 
 The per-architecture data-pointer is accessed using the function:
 
-@deftypefun void *gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *@var{data_handle})
+@deftypefn {Architecture Function} {void *} gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *@var{data_handle})
 Given the architecture @var{arch} and module data handle
 @var{data_handle} (returned by @code{gdbarch_data_register_pre_init}
 or @code{gdbarch_data_register_post_init}), this function returns the
 current value of the per-architecture data-pointer.  If the data
 pointer is @code{NULL}, it is first initialized by calling the
 corresponding @var{pre_init} or @var{post_init} method.
-@end deftypefun
+@end deftypefn
 
 The examples below assume the following definitions:
 
@@ -5140,7 +6014,7 @@ set_gdbarch_nozel (struct gdbarch *gdbarch, int total)
 @}
 @end smallexample
 
-A module can on-demand create architecture dependant data structures
+A module can on-demand create architecture dependent data structures
 using @code{post_init}.
 
 In the below, the nozel's total is computed on-demand by
@@ -5446,7 +6320,7 @@ error and issued an @code{internal_error}.}
 @subsection File Names
 
 Any file used when building the core of @value{GDBN} must be in lower
-case. Any file used when building the core of @value{GDBN} must be 8.3
+case.  Any file used when building the core of @value{GDBN} must be 8.3
 unique.  These requirements apply to both source and generated files.
 
 @emph{Pragmatics: The core of @value{GDBN} must be buildable on many
@@ -5649,59 +6523,54 @@ messages.  Use @code{fprintf_unfiltered(gdb_stdlog, ...}.  Do not use
 @cindex porting to new machines
 
 Most of the work in making @value{GDBN} compile on a new machine is in
-specifying the configuration of the machine.  This is done in a
-dizzying variety of header files and configuration scripts, which we
-hope to make more sensible soon.  Let's say your new host is called an
-@var{xyz} (e.g.,  @samp{sun4}), and its full three-part configuration
-name is @code{@var{arch}-@var{xvend}-@var{xos}} (e.g.,
-@samp{sparc-sun-sunos4}).  In particular:
+specifying the configuration of the machine.  Porting a new
+architecture to @value{GDBN} can be broken into a number of steps.
 
 @itemize @bullet
-@item
-In the top level directory, edit @file{config.sub} and add @var{arch},
-@var{xvend}, and @var{xos} to the lists of supported architectures,
-vendors, and operating systems near the bottom of the file.  Also, add
-@var{xyz} as an alias that maps to
-@code{@var{arch}-@var{xvend}-@var{xos}}.  You can test your changes by
-running
-
-@smallexample
-./config.sub @var{xyz}
-@end smallexample
-
-@noindent
-and
-
-@smallexample
-./config.sub @code{@var{arch}-@var{xvend}-@var{xos}}
-@end smallexample
-
-@noindent
-which should both respond with @code{@var{arch}-@var{xvend}-@var{xos}}
-and no error messages.
-
-@noindent
-You need to port BFD, if that hasn't been done already.  Porting BFD is
-beyond the scope of this manual.
 
 @item
-To configure @value{GDBN} itself, edit @file{gdb/configure.host} to recognize
-your system and set @code{gdb_host} to @var{xyz}, and (unless your
-desired target is already available) also edit @file{gdb/configure.tgt},
-setting @code{gdb_target} to something appropriate (for instance,
-@var{xyz}).
-
-@emph{Maintainer's note: Work in progress.  The file
-@file{gdb/configure.host} originally needed to be modified when either a
-new native target or a new host machine was being added to @value{GDBN}.
-Recent changes have removed this requirement.  The file now only needs
-to be modified when adding a new native configuration.  This will likely
-changed again in the future.}
+Ensure a @sc{bfd} exists for executables of the target architecture in
+the @file{bfd} directory.  If one does not exist, create one by
+modifying an existing similar one.
 
 @item
-Finally, you'll need to specify and define @value{GDBN}'s host-, native-, and
-target-dependent @file{.h} and @file{.c} files used for your
-configuration.
+Implement a disassembler for the target architecture in the @file{opcodes}
+directory.
+
+@item
+Define the target architecture in the @file{gdb} directory
+(@pxref{Adding a New Target, , Adding a New Target}).  Add the pattern
+for the new target to @file{configure.tgt} with the names of the files
+that contain the code.  By convention the target architecture
+definition for an architecture @var{arch} is placed in
+@file{@var{arch}-tdep.c}.
+
+Within @file{@var{arch}-tdep.c} define the function
+@code{_initialize_@var{arch}_tdep} which calls
+@code{gdbarch_register} to create the new @code{@w{struct
+gdbarch}} for the architecture.
+
+@item
+If a new remote target is needed, consider adding a new remote target
+by defining a function
+@code{_initialize_remote_@var{arch}}.  However if at all possible
+use the @value{GDBN} @emph{Remote Serial Protocol} for this and implement
+the server side protocol independently with the target.
+
+@item
+If desired implement a simulator in the @file{sim} directory.  This
+should create the library @file{libsim.a} implementing the interface
+in @file{remote-sim.h} (found in the @file{include} directory).
+
+@item
+Build and test.  If desired, lobby the @sc{gdb} steering group to
+have the new port included in the main distribution!
+
+@item
+Add a description of the new architecture to the main @value{GDBN} user
+guide (@pxref{Configuration Specific Information, , Configuration
+Specific Information, gdb, Debugging with @value{GDBN}}).
+
 @end itemize
 
 @node Versions and Branches
@@ -6271,7 +7140,7 @@ Notes:
 @item
 Check the @code{autoconf} version carefully.  You want to be using the
 version taken from the @file{binutils} snapshot directory, which can be
-found at @uref{ftp://sources.redhat.com/pub/binutils/}. It is very
+found at @uref{ftp://sources.redhat.com/pub/binutils/}.  It is very
 unlikely that a system installed version of @code{autoconf} (e.g.,
 @file{/usr/bin/autoconf}) is correct.
 @end itemize
@@ -6497,7 +7366,7 @@ $  cp *.bz2 *.gz ~ftp/pub/gdb/releases
 
 @noindent
 Clean up the releases directory so that only the most recent releases
-are available (e.g. keep 5.2 and 5.2.1 but remove 5.1):
+are available (e.g.@: keep 5.2 and 5.2.1 but remove 5.1):
 
 @smallexample
 $  cd ~ftp/pub/gdb/releases

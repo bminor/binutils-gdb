@@ -1,3 +1,25 @@
+2009-03-21  Jeremy Bennett  <jeremy.bennett@embecosm.com>
+
+	* gdbint.texinfo (everywhere): Use braces {} in @deftypeXX type
+	field throughout to handle types with spaces in them.  Fix typos
+	found by aspell.
+	(Summary, Requirements, Contributors): New first chapter,
+	"Summary" added, old Requirements section moved there, and new
+	section, "Contributors" added.
+	(Initializing a New Architecture, Register Representation)
+	(Frame Interpretation, Inferior Call Setup, Adding a New Target)
+	(Porting gdb): These sections extended and updated.
+	(Compiler Characteristics): This section (empty) deleted.
+	(Defining Other Architecture Features): This section renamed and
+	duplicate material removed from (formerly "Target Conditionals").
+	Use braces {} in @deftypeXX type field throughout to handle types
+	with spaces in them. Typos found by aspell fixed.
+
+	* stack_frame.svg: New file, source of image for gdbint.texinfo.
+	* stack_frame.pdf: Version of image for PDF output.
+	* stack_frame.png: Version of image for HTML output and for Emacs.
+	* stack_frame.txt: Version of image for Info output.
+
 2009-03-21  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Character Sets): Fix last change.
