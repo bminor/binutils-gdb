@@ -1,3 +1,9 @@
+2008-03-20  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Convenience Vars): Document convenience functions.
+	(Functions In Python): New node.
+	(Python API): Update.
+
 2009-03-20  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Character Sets): Remove obsolete text.  Document

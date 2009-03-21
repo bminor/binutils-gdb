@@ -306,7 +306,7 @@ write_exp_elt_intern (struct internalvar *expelt)
    strings with embedded null bytes, as is required for some languages.
 
    Don't be fooled by the fact that the string is null byte terminated,
-   this is strictly for the convenience of debugging gdb itself.  Gdb
+   this is strictly for the convenience of debugging gdb itself.
    Gdb does not depend up the string being null terminated, since the
    actual length is recorded in expression elements at each end of the
    string.  The null byte is taken into consideration when computing how

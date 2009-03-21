@@ -413,6 +413,7 @@ Enables or disables printing of Python stack traces."),
 
   gdbpy_initialize_values ();
   gdbpy_initialize_commands ();
+  gdbpy_initialize_functions ();
 
   PyRun_SimpleString ("import gdb");
 

@@ -37,12 +37,30 @@
 #include "dfp.h"
 #include "objfiles.h"
 #include "valprint.h"
+#include "cli/cli-decode.h"
 
 #include "python/python.h"
 
 /* Prototypes for exported functions. */
 
 void _initialize_values (void);
+
+/* Definition of a user function.  */
+struct internal_function
+{
+  /* The name of the function.  It is a bit odd to have this in the
+     function itself -- the user might use a differently-named
+     convenience variable to hold the function.  */
+  char *name;
+
+  /* The handler.  */
+  internal_function_fn handler;
+
+  /* User data for the handler.  */
+  void *cookie;
+};
+
+static struct cmd_list_element *functionlist;
 
 struct value
 {
@@ -203,6 +221,10 @@ struct value_history_chunk
 static struct value_history_chunk *value_history_chain;
 
 static int value_history_count;	/* Abs number of last entry stored */
+
+/* The type of internal functions.  */
+
+static struct type *internal_fn_type;
 
 /* List of all value objects currently allocated
    (except for those released by calls to release_value)
@@ -878,7 +900,7 @@ init_if_undefined_command (char* args, int from_tty)
    the return value is NULL.  */
 
 struct internalvar *
-lookup_only_internalvar (char *name)
+lookup_only_internalvar (const char *name)
 {
   struct internalvar *var;
 
@@ -894,7 +916,7 @@ lookup_only_internalvar (char *name)
    NAME should not normally include a dollar sign.  */
 
 struct internalvar *
-create_internalvar (char *name)
+create_internalvar (const char *name)
 {
   struct internalvar *var;
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
@@ -902,6 +924,7 @@ create_internalvar (char *name)
   var->value = allocate_value (builtin_type_void);
   var->endian = gdbarch_byte_order (current_gdbarch);
   var->make_value = NULL;
+  var->canonical = 0;
   release_value (var->value);
   var->next = internalvars;
   internalvars = var;
@@ -934,7 +957,7 @@ create_internalvar_type_lazy (char *name, internalvar_make_value fun)
    one is created, with a void value.  */
 
 struct internalvar *
-lookup_internalvar (char *name)
+lookup_internalvar (const char *name)
 {
   struct internalvar *var;
 
@@ -1031,6 +1054,9 @@ set_internalvar (struct internalvar *var, struct value *val)
 {
   struct value *newval;
 
+  if (var->canonical)
+    error (_("Cannot overwrite convenience function %s"), var->name);
+
   newval = value_copy (val);
   newval->modifiable = 1;
 
@@ -1042,7 +1068,7 @@ set_internalvar (struct internalvar *var, struct value *val)
 
   /* Begin code which must not call error().  If var->value points to
      something free'd, an error() obviously leaves a dangling pointer.
-     But we also get a danling pointer if var->value points to
+     But we also get a dangling pointer if var->value points to
      something in the value chain (i.e., before release_value is
      called), because after the error free_all_values will get called before
      long.  */
@@ -1057,6 +1083,76 @@ char *
 internalvar_name (struct internalvar *var)
 {
   return var->name;
+}
+
+static struct value *
+value_create_internal_function (const char *name,
+				internal_function_fn handler,
+				void *cookie)
+{
+  struct value *result = allocate_value (internal_fn_type);
+  gdb_byte *addr = value_contents_writeable (result);
+  struct internal_function **fnp = (struct internal_function **) addr;
+  struct internal_function *ifn = XNEW (struct internal_function);
+  ifn->name = xstrdup (name);
+  ifn->handler = handler;
+  ifn->cookie = cookie;
+  *fnp = ifn;
+  return result;
+}
+
+char *
+value_internal_function_name (struct value *val)
+{
+  gdb_byte *addr = value_contents_writeable (val);
+  struct internal_function *ifn = * (struct internal_function **) addr;
+  return ifn->name;
+}
+
+struct value *
+call_internal_function (struct value *func, int argc, struct value **argv)
+{
+  gdb_byte *addr = value_contents_writeable (func);
+  struct internal_function *ifn = * (struct internal_function **) addr;
+  return (*ifn->handler) (ifn->cookie, argc, argv);
+}
+
+/* The 'function' command.  This does nothing -- it is just a
+   placeholder to let "help function NAME" work.  This is also used as
+   the implementation of the sub-command that is created when
+   registering an internal function.  */
+static void
+function_command (char *command, int from_tty)
+{
+  /* Do nothing.  */
+}
+
+/* Clean up if an internal function's command is destroyed.  */
+static void
+function_destroyer (struct cmd_list_element *self, void *ignore)
+{
+  xfree (self->name);
+  xfree (self->doc);
+}
+
+/* Add a new internal function.  NAME is the name of the function; DOC
+   is a documentation string describing the function.  HANDLER is
+   called when the function is invoked.  COOKIE is an arbitrary
+   pointer which is passed to HANDLER and is intended for "user
+   data".  */
+void
+add_internal_function (const char *name, const char *doc,
+		       internal_function_fn handler, void *cookie)
+{
+  struct cmd_list_element *cmd;
+  struct internalvar *var = lookup_internalvar (name);
+  struct value *fnval = value_create_internal_function (name, handler, cookie);
+  set_internalvar (var, fnval);
+  var->canonical = 1;
+
+  cmd = add_cmd (xstrdup (name), no_class, function_command, (char *) doc,
+		 &functionlist);
+  cmd->destroyer = function_destroyer;
 }
 
 /* Update VALUE before discarding OBJFILE.  COPIED_TYPES is used to
@@ -1944,4 +2040,13 @@ init-if-undefined VARIABLE = EXPRESSION\n\
 Set an internal VARIABLE to the result of the EXPRESSION if it does not\n\
 exist or does not contain a value.  The EXPRESSION is not evaluated if the\n\
 VARIABLE is already initialized."));
+
+  add_prefix_cmd ("function", no_class, function_command, _("\
+Placeholder command for showing help on convenience functions."),
+		  &functionlist, "function ", 0, &cmdlist);
+
+  internal_fn_type = alloc_type (NULL);
+  TYPE_CODE (internal_fn_type) = TYPE_CODE_INTERNAL_FUNCTION;
+  TYPE_LENGTH (internal_fn_type) = sizeof (struct internal_function *);
+  TYPE_NAME (internal_fn_type) = "<internal function>";
 }

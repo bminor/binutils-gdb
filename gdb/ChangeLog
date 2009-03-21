@@ -1,5 +1,42 @@
 2009-03-20  Tom Tromey  <tromey@redhat.com>
 
+	Add support for convenience functions in Python.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add python-function.o.
+	(SUBDIR_PYTHON_SRCS): Add python-function.c.
+	(python-function.o): New target.
+	* eval.c: Include "python/python.h" and <ctype.h>.
+	(evaluate_subexp_standard): Handle values of type
+	TYPE_CODE_INTERNAL_FUNCTION.
+	* gdbtypes.h (type_code): Add TYPE_CODE_INTERNAL_FUNCTION.
+	* parse.c (write_exp_string): Remove duplicate word in comment.
+	* python/python-function.c: New file.
+	* python/python-internal.h (gdbpy_initialize_functions): Add
+	prototype.
+	* python/python.c (_initialize_python): Call
+	gdbpy_initialize_functions.
+	* valprint.c (value_check_printable): Handle values of type
+	TYPE_CODE_INTERNAL_FUNCTION.
+	* value.c: Include "cli/cli-decode.h".
+	(internal_function): New struct.
+	(functionlist, internal_fn_type): New static variables.
+	(lookup_only_internalvar,
+	lookup_internalvar): Add const qualifier to name argument.
+	(create_internalvar): Likewise.  Initialize new field.
+	(set_internal_var): Fix typo in comment.  Don't allow assignment
+	to canonical variable.
+	(value_create_internal_function, value_internal_function_name,
+	call_internal_function, function_command, function_destroyer,
+	add_internal_function): New functions.
+	(_initialize_values): Create `function' placeholder command.
+	Initialize internal_fn_type.
+	* value.h (lookup_only_internalvar, create_internalvar,
+	lookup_internalvar): Add const qualifier to name argument.
+	(internal_function_fn, add_internal_function, call_internal_function,
+	value_internal_function_name): Add prototypes.
+	(struct internalvar) <canonical>: New field.
+
+2009-03-20  Tom Tromey  <tromey@redhat.com>
+
 	* c-lang.c (evaluate_subexp_c): Call check_typedef.
 
 2009-03-20  Tom Tromey  <tromey@redhat.com>

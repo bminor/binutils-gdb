@@ -314,6 +314,9 @@ struct internalvar
   struct value *value;
   internalvar_make_value make_value;
   int endian;
+  /* True if this internalvar is the canonical name for a convenience
+     function.  */
+  int canonical;
 };
 
 
@@ -535,14 +538,14 @@ extern void set_internalvar_component (struct internalvar *var,
 				       int bitpos, int bitsize,
 				       struct value *newvalue);
 
-extern struct internalvar *lookup_only_internalvar (char *name);
+extern struct internalvar *lookup_only_internalvar (const char *name);
 
-extern struct internalvar *create_internalvar (char *name);
+extern struct internalvar *create_internalvar (const char *name);
 
 extern struct internalvar *
   create_internalvar_type_lazy (char *name, internalvar_make_value fun);
 
-extern struct internalvar *lookup_internalvar (char *name);
+extern struct internalvar *lookup_internalvar (const char *name);
 
 extern int value_equal (struct value *arg1, struct value *arg2);
 
@@ -661,4 +664,20 @@ extern struct value *value_allocate_space_in_inferior (int);
 extern struct value *value_of_local (const char *name, int complain);
 
 extern struct value * value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound);
+
+/* User function handler.  */
+
+typedef struct value *(*internal_function_fn) (void *cookie,
+					       int argc,
+					       struct value **argv);
+
+void add_internal_function (const char *name, const char *doc,
+			    internal_function_fn handler,
+			    void *cookie);
+
+struct value *call_internal_function (struct value *function,
+				      int argc, struct value **argv);
+
+char *value_internal_function_name (struct value *);
+
 #endif /* !defined (VALUE_H) */

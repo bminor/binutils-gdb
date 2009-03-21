@@ -287,6 +287,13 @@ value_check_printable (struct value *val, struct ui_file *stream)
       return 0;
     }
 
+  if (TYPE_CODE (value_type (val)) == TYPE_CODE_INTERNAL_FUNCTION)
+    {
+      fprintf_filtered (stream, _("<internal function %s>"),
+			value_internal_function_name (val));
+      return 0;
+    }
+
   return 1;
 }
 

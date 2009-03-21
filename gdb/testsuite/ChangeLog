@@ -1,3 +1,7 @@
+2009-03-20  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.python/python-function.exp: New file.
+
 2009-03-20  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/store.exp: Update for change to escape output.

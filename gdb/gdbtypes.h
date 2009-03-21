@@ -134,7 +134,10 @@ enum type_code
 
     TYPE_CODE_NAMESPACE,	/* C++ namespace.  */
 
-    TYPE_CODE_DECFLOAT		/* Decimal floating point.  */
+    TYPE_CODE_DECFLOAT,		/* Decimal floating point.  */
+
+    /* Internal function type.  */
+    TYPE_CODE_INTERNAL_FUNCTION
   };
 
 /* For now allow source to use TYPE_CODE_CLASS for C++ classes, as an

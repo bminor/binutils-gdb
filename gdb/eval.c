@@ -40,8 +40,11 @@
 #include "regcache.h"
 #include "user-regs.h"
 #include "valprint.h"
+#include "python/python.h"
 
 #include "gdb_assert.h"
+
+#include <ctype.h>
 
 /* This is defined in valops.c */
 extern int overload_resolution;
@@ -1512,6 +1515,9 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else
 	    error (_("Expression of type other than \"Function returning ...\" used as function"));
 	}
+      if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_INTERNAL_FUNCTION)
+	return call_internal_function (argvec[0], nargs, argvec + 1);
+
       return call_function_by_hand (argvec[0], nargs, argvec + 1);
       /* pai: FIXME save value from call_function_by_hand, then adjust pc by adjust_fn_pc if +ve  */
 
