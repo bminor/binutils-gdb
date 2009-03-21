@@ -1,3 +1,7 @@
+2009-03-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Character Sets): Fix last change.
+
 2009-03-21  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.texinfo (Values From Inferior): Fix optional arguments

@@ -7973,16 +7973,9 @@ support:
 @table @code
 @item set target-charset @var{charset}
 @kindex set target-charset
-Set the current target character set to @var{charset}.  If you type
-@code{set target-charset} followed by @key{TAB}@key{TAB}, @value{GDBN}
-will list the target character sets it supports.
-
-@item set target-wide-charset @var{charset}
-@kindex set target-wide-charset
-Set the current target wide character set to @var{charset}.  The
-target wide character set is the character set used by @code{wchar_t}.
-If you type @code{set target-charset} followed by @key{TAB}@key{TAB},
-@value{GDBN} will list the target character sets it supports.
+Set the current target character set to @var{charset}.  To display the
+list of supported target character sets, type
+@kbd{@w{set target-charset @key{TAB}@key{TAB}}}.
 
 @item set host-charset @var{charset}
 @kindex set host-charset
@@ -7993,30 +7986,38 @@ system it is running on; you can override that default using the
 @code{set host-charset} command.
 
 @value{GDBN} can only use certain character sets as its host character
-set.  If you type @code{set target-charset} followed by
-@key{TAB}@key{TAB}, @value{GDBN} will list the host character sets it
-supports.
+set.  If you type @kbd{@w{set target-charset @key{TAB}@key{TAB}}},
+@value{GDBN} will list the host character sets it supports.
 
 @item set charset @var{charset}
 @kindex set charset
 Set the current host and target character sets to @var{charset}.  As
-above, if you type @code{set charset} followed by @key{TAB}@key{TAB},
-@value{GDBN} will list the name of the character sets that can be used
+above, if you type @kbd{@w{set charset @key{TAB}@key{TAB}}},
+@value{GDBN} will list the names of the character sets that can be used
 for both host and target.
-
 
 @item show charset
 @kindex show charset
-Show the names of the current host and target charsets.
+Show the names of the current host and target character sets.
 
-@itemx show host-charset
+@item show host-charset
 @kindex show host-charset
-Show the name of the current host charset.
+Show the name of the current host character set.
 
-@itemx show target-charset
+@item show target-charset
 @kindex show target-charset
-Show the name of the current target charset.
+Show the name of the current target character set.
 
+@item set target-wide-charset @var{charset}
+@kindex set target-wide-charset
+Set the current target's wide character set to @var{charset}.  This is
+the character set used by the target's @code{wchar_t} type.  To
+display the list of supported wide character sets, type
+@kbd{@w{set target-wide-charset @key{TAB}@key{TAB}}}.
+
+@item show target-wide-charset
+@kindex show target-wide-charset
+Show the name of the current target's wide character set.
 @end table
 
 Here is an example of @value{GDBN}'s character set support in action.
