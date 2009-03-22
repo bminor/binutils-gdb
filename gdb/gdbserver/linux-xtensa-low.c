@@ -33,7 +33,7 @@ enum regnum {
 	R_LBEG,	R_LEND,	R_LCOUNT,
 	R_SAR,
 	R_WS, R_WB,
-	R_A0 = 64 
+	R_A0 = 64
 };
 
 static void

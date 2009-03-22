@@ -1,5 +1,16 @@
 2009-03-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* i387-fp.c, linux-arm-low.c, linux-cris-low.c,
+	linux-crisv32-low.c, linux-i386-low.c, linux-low.c,
+	linux-mips-low.c, linux-s390-low.c, linux-sparc-low.c,
+	linux-x86-64-low.c, linux-xtensa-low.c, proc-service.c,
+	regcache.c, remote-utils.c, server.c, spu-low.c, target.h,
+	thread-db.c, win32-low.c, xtensa-xtregs.c, gdbreplay.c,
+	Makefile.in, configure.ac: Fix whitespace throughout.
+	* configure: Regenerate.
+
+2009-03-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* inferiors.c (find_inferior): Make it safe for the callback
 	function to delete the currently iterated inferior.
 

@@ -45,7 +45,7 @@ void init_registers_i386_linux (void);
 
 /* Mapping between the general-purpose registers in `struct user'
    format and GDB's register array layout.  */
-static int i386_regmap[] = 
+static int i386_regmap[] =
 {
   EAX * 4, ECX * 4, EDX * 4, EBX * 4,
   UESP * 4, EBP * 4, ESI * 4, EDI * 4,
@@ -56,7 +56,7 @@ static int i386_regmap[] =
 /* Called by libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle *ph, 
+ps_get_thread_area (const struct ps_prochandle *ph,
 		    lwpid_t lwpid, int idx, void **base)
 {
   unsigned int desc[4];

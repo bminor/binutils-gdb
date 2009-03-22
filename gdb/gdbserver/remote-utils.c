@@ -256,7 +256,7 @@ remote_open (char *name)
 		  (char *) &tmp, sizeof (tmp));
 
       /* Tell TCP not to delay small packets.  This greatly speeds up
-         interactive response. */
+	 interactive response. */
       tmp = 1;
       setsockopt (remote_desc, IPPROTO_TCP, TCP_NODELAY,
 		  (char *) &tmp, sizeof (tmp));
@@ -272,8 +272,8 @@ remote_open (char *name)
 #endif
 
       /* Convert IP address to string.  */
-      fprintf (stderr, "Remote debugging from host %s\n", 
-         inet_ntoa (sockaddr.sin_addr));
+      fprintf (stderr, "Remote debugging from host %s\n",
+	       inet_ntoa (sockaddr.sin_addr));
 
       transport_is_reliable = 1;
     }
@@ -319,11 +319,11 @@ unhexify (char *bin, const char *hex, int count)
   for (i = 0; i < count; i++)
     {
       if (hex[0] == 0 || hex[1] == 0)
-        {
-          /* Hex string is short, or of uneven length.
-             Return the count that has been converted so far. */
-          return i;
-        }
+	{
+	  /* Hex string is short, or of uneven length.
+	     Return the count that has been converted so far. */
+	  return i;
+	}
       *bin++ = fromhex (hex[0]) * 16 + fromhex (hex[1]);
       hex += 2;
     }
@@ -1198,7 +1198,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
       if (len < 0)
 	return -1;
     }
-  
+
   if (strncmp (own_buf, "qSymbol:", strlen ("qSymbol:")) != 0)
     {
       warning ("Malformed response to qSymbol, ignoring: %s\n", own_buf);
@@ -1368,21 +1368,21 @@ buffer_xml_printf (struct buffer *buffer, const char *format, ...)
     {
       if (percent)
        {
-         switch (*f)
-           {
-           case 's':
-             {
-               char *p;
-               char *a = va_arg (ap, char *);
-               buffer_grow (buffer, prev, f - prev - 1);
-               p = xml_escape_text (a);
-               buffer_grow_str (buffer, p);
-               free (p);
-               prev = f + 1;
-             }
-             break;
-           }
-         percent = 0;
+	 switch (*f)
+	   {
+	   case 's':
+	     {
+	       char *p;
+	       char *a = va_arg (ap, char *);
+	       buffer_grow (buffer, prev, f - prev - 1);
+	       p = xml_escape_text (a);
+	       buffer_grow_str (buffer, p);
+	       free (p);
+	       prev = f + 1;
+	     }
+	     break;
+	   }
+	 percent = 0;
        }
       else if (*f == '%')
        percent = 1;

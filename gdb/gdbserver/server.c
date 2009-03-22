@@ -331,7 +331,7 @@ monitor_show_help (void)
 {
   monitor_output ("The following monitor commands are supported:\n");
   monitor_output ("  set debug <0|1>\n");
-  monitor_output ("    Enable general debugging messages\n");  
+  monitor_output ("    Enable general debugging messages\n");
   monitor_output ("  set remote-debug <0|1>\n");
   monitor_output ("    Enable remote protocol debugging messages\n");
   monitor_output ("  exit\n");
@@ -523,7 +523,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	{
 	  require_running (own_buf);
 	  thread_ptr = all_threads.head;
-	  sprintf (own_buf, "m%x", thread_to_gdb_id ((struct thread_info *)thread_ptr));
+	  sprintf (own_buf, "m%x",
+		   thread_to_gdb_id ((struct thread_info *)thread_ptr));
 	  thread_ptr = thread_ptr->next;
 	  return;
 	}
@@ -533,7 +534,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  require_running (own_buf);
 	  if (thread_ptr != NULL)
 	    {
-	      sprintf (own_buf, "m%x", thread_to_gdb_id ((struct thread_info *)thread_ptr));
+	      sprintf (own_buf, "m%x",
+		       thread_to_gdb_id ((struct thread_info *)thread_ptr));
 	      thread_ptr = thread_ptr->next;
 	      return;
 	    }
@@ -556,7 +558,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		 (long)text, (long)data, (long)data);
       else
 	write_enn (own_buf);
-      
+
       return;
     }
 
@@ -577,15 +579,15 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	len = PBUFSIZ - 2;
       spu_buf = malloc (len + 1);
       if (!spu_buf)
-        return;
+	return;
 
       n = (*the_target->qxfer_spu) (annex, spu_buf, NULL, ofs, len + 1);
-      if (n < 0) 
+      if (n < 0)
 	write_enn (own_buf);
       else if (n > len)
 	*new_packet_len_p = write_qxfer_response
 			      (own_buf, spu_buf, len, 1);
-      else 
+      else
 	*new_packet_len_p = write_qxfer_response
 			      (own_buf, spu_buf, n, 0);
 
@@ -606,7 +608,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       strcpy (own_buf, "E00");
       spu_buf = malloc (packet_len - 15);
       if (!spu_buf)
-        return;
+	return;
       if (decode_xfer_write (own_buf + 16, packet_len - 16, &annex,
 			     &ofs, &len, spu_buf) < 0)
 	{
@@ -614,7 +616,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  return;
 	}
 
-      n = (*the_target->qxfer_spu) 
+      n = (*the_target->qxfer_spu)
 	(annex, NULL, (unsigned const char *)spu_buf, ofs, len);
       if (n < 0)
 	write_enn (own_buf);
@@ -794,17 +796,15 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
        len = PBUFSIZ - 2;
       workbuf = malloc (len + 1);
       if (!workbuf)
-        return;
+	return;
 
       n = (*the_target->qxfer_osdata) (annex, workbuf, NULL, ofs, len + 1);
       if (n < 0)
        write_enn (own_buf);
       else if (n > len)
-       *new_packet_len_p = write_qxfer_response
-                             (own_buf, workbuf, len, 1);
+       *new_packet_len_p = write_qxfer_response (own_buf, workbuf, len, 1);
       else
-       *new_packet_len_p = write_qxfer_response
-                             (own_buf, workbuf, n, 0);
+       *new_packet_len_p = write_qxfer_response (own_buf, workbuf, n, 0);
 
       free (workbuf);
       return;
@@ -835,7 +835,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	len = PBUFSIZ - 2;
       data = malloc (len + 1);
       if (!data)
-        return;
+	return;
       n = (*the_target->qxfer_siginfo) (annex, data, NULL, ofs, len + 1);
       if (n < 0)
 	write_enn (own_buf);
@@ -862,7 +862,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       strcpy (own_buf, "E00");
       data = malloc (packet_len - 19);
       if (!data)
-        return;
+	return;
       if (decode_xfer_write (own_buf + 20, packet_len - 20, &annex,
 			     &ofs, &len, data) < 0)
 	{
@@ -910,7 +910,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	strcat (own_buf, ";QStartNoAckMode+");
 
       if (the_target->qxfer_osdata != NULL)
-        strcat (own_buf, ";qXfer:osdata:read+");
+	strcat (own_buf, ";qXfer:osdata:read+");
 
       return;
     }
@@ -1254,7 +1254,7 @@ handle_v_run (char *own_buf, char *status, int *signal)
 	  /* FIXME: new_argv memory leak */
 	  write_enn (own_buf);
 	  return 0;
-	}	  
+	}
     }
 
   /* Free the old argv and install the new one.  */
@@ -1898,7 +1898,7 @@ main (int argc, char *argv[])
 	      response_needed = 0;
 
 	      /* Restarting the inferior is only supported in the
-	         extended protocol.  */
+		 extended protocol.  */
 	      if (extended_protocol)
 		{
 		  if (target_running ())
@@ -1931,8 +1931,8 @@ main (int argc, char *argv[])
 
 	    default:
 	      /* It is a request we don't understand.  Respond with an
-	         empty packet so that gdb knows that we don't support this
-	         request.  */
+		 empty packet so that gdb knows that we don't support this
+		 request.  */
 	      own_buf[0] = '\0';
 	      break;
 	    }

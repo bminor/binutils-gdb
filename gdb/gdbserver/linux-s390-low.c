@@ -225,4 +225,3 @@ struct linux_target_ops the_low_target = {
   s390_collect_ptrace_register,
   s390_supply_ptrace_register,
 };
-

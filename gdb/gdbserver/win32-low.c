@@ -458,15 +458,15 @@ create_process (const char *program, char *args,
   mbstowcs (wargs, args, argslen + 1);
 
   ret = CreateProcessW (wprogram, /* image name */
-                        wargs,    /* command line */
-                        NULL,     /* security, not supported */
-                        NULL,     /* thread, not supported */
-                        FALSE,    /* inherit handles, not supported */
-                        flags,    /* start flags */
-                        NULL,     /* environment, not supported */
-                        NULL,     /* current directory, not supported */
-                        NULL,     /* start info, not supported */
-                        pi);      /* proc info */
+			wargs,    /* command line */
+			NULL,     /* security, not supported */
+			NULL,     /* thread, not supported */
+			FALSE,    /* inherit handles, not supported */
+			flags,    /* start flags */
+			NULL,     /* environment, not supported */
+			NULL,     /* current directory, not supported */
+			NULL,     /* start info, not supported */
+			pi);      /* proc info */
 #else
   STARTUPINFOA si = { sizeof (STARTUPINFOA) };
 
@@ -537,7 +537,7 @@ win32_create_inferior (char *program, char **program_args)
   for (argc = 1; program_args[argc]; argc++)
     {
       /* FIXME: Can we do better about quoting?  How does Cygwin
-         handle this?  */
+	 handle this?  */
       strcat (args, " ");
       strcat (args, program_args[argc]);
     }
@@ -609,7 +609,7 @@ win32_attach (unsigned long pid)
 	    DebugSetProcessKillOnExit (FALSE);
 
 	  /* win32_wait needs to know we're attaching.  */
- 	  attaching = 1;
+	  attaching = 1;
 	  do_initial_child_stuff (h, pid);
 	  return 0;
 	}
@@ -642,7 +642,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
   if (current_event.u.DebugString.fUnicode)
     {
       /* The event tells us how many bytes, not chars, even
-         in Unicode.  */
+	 in Unicode.  */
       WCHAR buffer[(READ_BUFFER_LEN + 1) / sizeof (WCHAR)] = { 0 };
       if (read_inferior_memory (addr, (unsigned char *) buffer, nbytes) != 0)
 	return;
@@ -695,9 +695,9 @@ win32_kill (void)
 	break;
       else if (current_event.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT)
 	{
-  	  struct target_waitstatus our_status = { 0 };
+	  struct target_waitstatus our_status = { 0 };
 	  handle_output_debug_string (&our_status);
-  	}
+	}
     }
 
   win32_clear_inferiors ();
@@ -1242,7 +1242,7 @@ handle_exception (struct target_waitstatus *ourstatus)
 #ifdef _WIN32_WCE
       /* Remove the initial breakpoint.  */
       check_breakpoints ((CORE_ADDR) (long) current_event
-                         .u.Exception.ExceptionRecord.ExceptionAddress);
+			 .u.Exception.ExceptionRecord.ExceptionAddress);
 #endif
       break;
     case DBG_CONTROL_C:
@@ -1354,37 +1354,37 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
   if (attaching)
     {
       /* WinCE doesn't set an initial breakpoint automatically.  To
- 	 stop the inferior, we flush all currently pending debug
- 	 events -- the thread list and the dll list are always
- 	 reported immediatelly without delay, then, we suspend all
- 	 threads and pretend we saw a trap at the current PC of the
- 	 main thread.
+	 stop the inferior, we flush all currently pending debug
+	 events -- the thread list and the dll list are always
+	 reported immediatelly without delay, then, we suspend all
+	 threads and pretend we saw a trap at the current PC of the
+	 main thread.
 
- 	 Contrary to desktop Windows, Windows CE *does* report the dll
- 	 names on LOAD_DLL_DEBUG_EVENTs resulting from a
- 	 DebugActiveProcess call.  This limits the way we can detect
- 	 if all the dlls have already been reported.  If we get a real
- 	 debug event before leaving attaching, the worst that will
- 	 happen is the user will see a spurious breakpoint.  */
+	 Contrary to desktop Windows, Windows CE *does* report the dll
+	 names on LOAD_DLL_DEBUG_EVENTs resulting from a
+	 DebugActiveProcess call.  This limits the way we can detect
+	 if all the dlls have already been reported.  If we get a real
+	 debug event before leaving attaching, the worst that will
+	 happen is the user will see a spurious breakpoint.  */
 
       current_event.dwDebugEventCode = 0;
       if (!WaitForDebugEvent (&current_event, 0))
- 	{
- 	  OUTMSG2(("no attach events left\n"));
- 	  fake_breakpoint_event ();
- 	  attaching = 0;
- 	}
+	{
+	  OUTMSG2(("no attach events left\n"));
+	  fake_breakpoint_event ();
+	  attaching = 0;
+	}
       else
- 	OUTMSG2(("got attach event\n"));
+	OUTMSG2(("got attach event\n"));
     }
   else
 #endif
     {
       /* Keep the wait time low enough for confortable remote
- 	 interruption, but high enough so gdbserver doesn't become a
- 	 bottleneck.  */
+	 interruption, but high enough so gdbserver doesn't become a
+	 bottleneck.  */
       if (!WaitForDebugEvent (&current_event, 250))
- 	return 0;
+	return 0;
     }
 
  gotevent:
@@ -1537,7 +1537,7 @@ win32_wait (char *status)
 	  win32_clear_inferiors ();
 	  return our_status.value.integer;
 	case TARGET_WAITKIND_STOPPED:
- 	case TARGET_WAITKIND_LOADED:
+	case TARGET_WAITKIND_LOADED:
 	  OUTMSG2 (("Child Stopped with signal = %d \n",
 		    our_status.value.sig));
 
@@ -1555,11 +1555,11 @@ win32_wait (char *status)
 	    }
 
 	  return our_status.value.sig;
- 	default:
+	default:
 	  OUTMSG (("Ignoring unknown internal event, %d\n", our_status.kind));
- 	  /* fall-through */
- 	case TARGET_WAITKIND_SPURIOUS:
- 	case TARGET_WAITKIND_EXECD:
+	  /* fall-through */
+	case TARGET_WAITKIND_SPURIOUS:
+	case TARGET_WAITKIND_EXECD:
 	  /* do nothing, just continue */
 	  child_continue (DBG_CONTINUE, -1);
 	  break;

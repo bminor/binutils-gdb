@@ -33,7 +33,7 @@
 /* Some older glibc versions do not define this.  */
 #ifndef __WNOTHREAD
 #define __WNOTHREAD     0x20000000      /* Don't wait on children of other
-				           threads in this group */
+					   threads in this group */
 #endif
 
 #define PTRACE_TYPE_RET long
@@ -90,7 +90,7 @@ fetch_ppc_register (int regno)
 
   errno = 0;
   res = ptrace (PT_READ_U, tid,
-	 	(PTRACE_TYPE_ARG3) (regno * sizeof (PTRACE_TYPE_RET)), 0);
+		(PTRACE_TYPE_ARG3) (regno * sizeof (PTRACE_TYPE_RET)), 0);
   if (errno != 0)
     {
       char mess[128];
@@ -190,7 +190,7 @@ store_ppc_memory (CORE_ADDR memaddr, char *myaddr, int len)
       return ret;
 
   memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_TYPE_RET) - 1)),
-          myaddr, len);
+	  myaddr, len);
 
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_TYPE_RET))
     if ((ret = store_ppc_memory_1 (tid, addr, buffer[i])) != 0)
@@ -203,7 +203,7 @@ store_ppc_memory (CORE_ADDR memaddr, char *myaddr, int len)
 /* If the PPU thread is currently stopped on a spu_run system call,
    return to FD and ADDR the file handle and NPC parameter address
    used with the system call.  Return non-zero if successful.  */
-static int 
+static int
 parse_spufs_run (int *fd, CORE_ADDR *addr)
 {
   char buf[4];

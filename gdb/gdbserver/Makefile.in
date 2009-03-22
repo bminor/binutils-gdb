@@ -8,12 +8,12 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -57,7 +57,7 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 # It is also possible that you will need to add -I/usr/include/sys to the
-# CFLAGS section if your system doesn't have fcntl.h in /usr/include (which 
+# CFLAGS section if your system doesn't have fcntl.h in /usr/include (which
 # is where it should be according to Posix).
 
 # Set this up with gcc if you have gnu ld and the loader will print out
@@ -122,7 +122,7 @@ DEPFILES = @GDBSERVER_DEPFILES@
 LIBOBJS = @LIBOBJS@
 
 SOURCES = $(SFILES)
-TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS} 
+TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
 OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o version.o \
@@ -146,12 +146,12 @@ XML_BUILTIN = @srv_xmlbuiltin@
 all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT)
 
 # Traditionally "install" depends on "all".  But it may be useful
-# not to; for example, if the user has made some trivial change to a 
+# not to; for example, if the user has made some trivial change to a
 # source file and doesn't care about rebuilding or just wants to save the
 # time it takes for make to check that all is up to date.
 # install-only is intended to address that need.
 install: all install-only
-install-only: 
+install-only:
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir); \

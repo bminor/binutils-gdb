@@ -38,7 +38,7 @@ static int cris_regmap[] = {
   -1, 17*4, -1, 16*4,
   -1, -1, -1, 18*4,
   -1, 17*4, -1, -1
-  
+
 };
 
 static int
@@ -46,7 +46,7 @@ cris_cannot_store_register (int regno)
 {
   if (cris_regmap[regno] == -1)
     return 1;
-  
+
   return (regno >= cris_num_regs);
 }
 

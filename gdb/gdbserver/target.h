@@ -147,7 +147,7 @@ struct target_ops
 		    unsigned int len);
 
   /* Insert and remove a hardware watchpoint.
-     Returns 0 on success, -1 on failure and 1 on unsupported.  
+     Returns 0 on success, -1 on failure and 1 on unsupported.
      The type is coded as follows:
        2 = write watchpoint
        3 = read watchpoint
@@ -161,7 +161,7 @@ struct target_ops
 
   int (*stopped_by_watchpoint) (void);
 
-  /* Returns the address associated with the watchpoint that hit, if any;  
+  /* Returns the address associated with the watchpoint that hit, if any;
      returns 0 otherwise.  */
 
   CORE_ADDR (*stopped_data_address) (void);
@@ -169,7 +169,7 @@ struct target_ops
   /* Reports the text, data offsets of the executable.  This is
      needed for uclinux where the executable is relocated during load
      time.  */
-  
+
   int (*read_offsets) (CORE_ADDR *text, CORE_ADDR *data);
 
   /* Fetch the address associated with a specific thread local storage
@@ -191,7 +191,7 @@ struct target_ops
 
   /* Read/Write OS data using qXfer packets.  */
   int (*qxfer_osdata) (const char *annex, unsigned char *readbuf,
-		       unsigned const char *writebuf, CORE_ADDR offset, 
+		       unsigned const char *writebuf, CORE_ADDR offset,
 		       int len);
 
   /* Read/Write extra signal info.  */

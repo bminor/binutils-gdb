@@ -196,7 +196,7 @@ thread_db_enable_reporting ()
   if (err != TD_OK)
     {
       warning ("Unable to set global thread event mask: %s",
-               thread_db_err_str (err));
+	       thread_db_err_str (err));
       return 0;
     }
 

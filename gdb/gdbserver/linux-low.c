@@ -340,25 +340,25 @@ linux_attach_lwp (unsigned long pid)
      There are several cases to consider here:
 
      1) gdbserver has already attached to the process and is being notified
-        of a new thread that is being created.
-        In this case we should ignore that SIGSTOP and resume the process.
-        This is handled below by setting stop_expected = 1.
+	of a new thread that is being created.
+	In this case we should ignore that SIGSTOP and resume the process.
+	This is handled below by setting stop_expected = 1.
 
      2) This is the first thread (the process thread), and we're attaching
-        to it via attach_inferior.
-        In this case we want the process thread to stop.
-        This is handled by having linux_attach clear stop_expected after
-        we return.
-        ??? If the process already has several threads we leave the other
-        threads running.
+	to it via attach_inferior.
+	In this case we want the process thread to stop.
+	This is handled by having linux_attach clear stop_expected after
+	we return.
+	??? If the process already has several threads we leave the other
+	threads running.
 
      3) GDB is connecting to gdbserver and is requesting an enumeration of all
-        existing threads.
-        In this case we want the thread to stop.
-        FIXME: This case is currently not properly handled.
-        We should wait for the SIGSTOP but don't.  Things work apparently
-        because enough time passes between when we ptrace (ATTACH) and when
-        gdb makes the next ptrace call on the thread.
+	existing threads.
+	In this case we want the thread to stop.
+	FIXME: This case is currently not properly handled.
+	We should wait for the SIGSTOP but don't.  Things work apparently
+	because enough time passes between when we ptrace (ATTACH) and when
+	gdb makes the next ptrace call on the thread.
 
      On the other hand, if we are currently trying to stop all threads, we
      should treat the new thread as if we had sent it a SIGSTOP.  This works
@@ -900,11 +900,11 @@ linux_wait_for_event (struct thread_info *child)
 
       /* If we were single-stepping, we definitely want to report the
 	 SIGTRAP.  The single-step operation has completed, so also
-         clear the stepping flag; in general this does not matter,
+	 clear the stepping flag; in general this does not matter,
 	 because the SIGTRAP will be reported to the client, which
 	 will give us a new action for this thread, but clear it for
 	 consistency anyway.  It's safe to clear the stepping flag
-         because the only consumer of get_stop_pc () after this point
+	 because the only consumer of get_stop_pc () after this point
 	 is check_removed_breakpoint, and pending_is_breakpoint is not
 	 set.  It might be wiser to use a step_completed flag instead.  */
       if (event_child->stepping)
@@ -989,7 +989,8 @@ retry:
     {
       if (WIFEXITED (w))
 	{
-	  fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
+	  fprintf (stderr, "\nChild exited with retcode = %x \n",
+		   WEXITSTATUS (w));
 	  *status = 'W';
 	  clear_inferiors ();
 	  free (all_lwps.head);
@@ -998,7 +999,8 @@ retry:
 	}
       else if (!WIFSTOPPED (w))
 	{
-	  fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
+	  fprintf (stderr, "\nChild terminated with signal = %x \n",
+		   WTERMSIG (w));
 	  *status = 'X';
 	  clear_inferiors ();
 	  free (all_lwps.head);
@@ -1031,7 +1033,7 @@ kill_lwp (unsigned long lwpid, int signo)
     {
       int ret = syscall (SYS_tkill, lwpid, signo);
       if (errno != ENOSYS)
-        return ret;
+	return ret;
       errno = 0;
       tkill_failed = 1;
     }
@@ -1160,8 +1162,8 @@ linux_resume_one_lwp (struct inferior_list_entry *entry,
   current_inferior = get_lwp_thread (lwp);
 
   if (debug_threads)
-    fprintf (stderr, "Resuming lwp %ld (%s, signal %d, stop %s)\n", inferior_pid,
-	     step ? "step" : "continue", signal,
+    fprintf (stderr, "Resuming lwp %ld (%s, signal %d, stop %s)\n",
+	     inferior_pid, step ? "step" : "continue", signal,
 	     lwp->stop_expected ? "expected" : "not expected");
 
   /* This bit needs some thinking about.  If we get a signal that
@@ -1423,8 +1425,8 @@ fetch_register (int regno)
   regaddr = register_addr (regno);
   if (regaddr == -1)
     return;
-  size = (register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
-         & - sizeof (PTRACE_XFER_TYPE);
+  size = ((register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
+	  & - sizeof (PTRACE_XFER_TYPE));
   buf = alloca (size);
   for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
     {
@@ -1502,9 +1504,10 @@ usr_store_inferior_registers (int regno)
 		  *(PTRACE_XFER_TYPE *) (buf + i));
 	  if (errno != 0)
 	    {
-	      /* At this point, ESRCH should mean the process is already gone, 
-		 in which case we simply ignore attempts to change its registers.
-		 See also the related comment in linux_resume_one_lwp.  */
+	      /* At this point, ESRCH should mean the process is
+		 already gone, in which case we simply ignore attempts
+		 to change its registers.  See also the related
+		 comment in linux_resume_one_lwp.  */
 	      if (errno == ESRCH)
 		return;
 
@@ -1621,9 +1624,9 @@ regsets_store_inferior_registers ()
 
 	  /* Only now do we write the register set.  */
 #ifndef __sparc__
-          res = ptrace (regset->set_request, inferior_pid, 0, buf);
+	  res = ptrace (regset->set_request, inferior_pid, 0, buf);
 #else
-          res = ptrace (regset->set_request, inferior_pid, buf, 0);
+	  res = ptrace (regset->set_request, inferior_pid, buf, 0);
 #endif
 	}
 
@@ -1638,9 +1641,10 @@ regsets_store_inferior_registers ()
 	    }
 	  else if (errno == ESRCH)
 	    {
-	      /* At this point, ESRCH should mean the process is already gone, 
-		 in which case we simply ignore attempts to change its registers.
-		 See also the related comment in linux_resume_one_lwp.  */
+	      /* At this point, ESRCH should mean the process is
+		 already gone, in which case we simply ignore attempts
+		 to change its registers.  See also the related
+		 comment in linux_resume_one_lwp.  */
 	      return 0;
 	    }
 	  else
@@ -1740,13 +1744,16 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      buffer[i] = ptrace (PTRACE_PEEKTEXT, inferior_pid, (PTRACE_ARG3_TYPE) addr, 0);
+      buffer[i] = ptrace (PTRACE_PEEKTEXT, inferior_pid,
+			  (PTRACE_ARG3_TYPE) addr, 0);
       if (errno)
 	return errno;
     }
 
   /* Copy appropriate bytes out of the buffer.  */
-  memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)), len);
+  memcpy (myaddr,
+	  (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
+	  len);
 
   return 0;
 }
@@ -2059,17 +2066,17 @@ linux_read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
   if (errno == 0)
     {
       /* Both text and data offsets produced at compile-time (and so
-         used by gdb) are relative to the beginning of the program,
-         with the data segment immediately following the text segment.
-         However, the actual runtime layout in memory may put the data
-         somewhere else, so when we send gdb a data base-address, we
-         use the real data base address and subtract the compile-time
-         data base-address from it (which is just the length of the
-         text segment).  BSS immediately follows data in both
-         cases.  */
+	 used by gdb) are relative to the beginning of the program,
+	 with the data segment immediately following the text segment.
+	 However, the actual runtime layout in memory may put the data
+	 somewhere else, so when we send gdb a data base-address, we
+	 use the real data base address and subtract the compile-time
+	 data base-address from it (which is just the length of the
+	 text segment).  BSS immediately follows data in both
+	 cases.  */
       *text_p = text;
       *data_p = data - (text_end - text);
-      
+
       return 1;
     }
 #endif
@@ -2079,8 +2086,8 @@ linux_read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
 
 static int
 linux_qxfer_osdata (const char *annex,
-                   unsigned char *readbuf, unsigned const char *writebuf,
-                   CORE_ADDR offset, int len)
+		    unsigned char *readbuf, unsigned const char *writebuf,
+		    CORE_ADDR offset, int len)
 {
   /* We make the process list snapshot when the object starts to be
      read.  */
@@ -2108,40 +2115,40 @@ linux_qxfer_osdata (const char *annex,
       dirp = opendir ("/proc");
       if (dirp)
        {
-         struct dirent *dp;
-         while ((dp = readdir (dirp)) != NULL)
-           {
-             struct stat statbuf;
-             char procentry[sizeof ("/proc/4294967295")];
+	 struct dirent *dp;
+	 while ((dp = readdir (dirp)) != NULL)
+	   {
+	     struct stat statbuf;
+	     char procentry[sizeof ("/proc/4294967295")];
 
-             if (!isdigit (dp->d_name[0])
-                 || strlen (dp->d_name) > sizeof ("4294967295") - 1)
-               continue;
+	     if (!isdigit (dp->d_name[0])
+		 || strlen (dp->d_name) > sizeof ("4294967295") - 1)
+	       continue;
 
-             sprintf (procentry, "/proc/%s", dp->d_name);
-             if (stat (procentry, &statbuf) == 0
-                 && S_ISDIR (statbuf.st_mode))
-               {
-                 char pathname[128];
-                 FILE *f;
-                 char cmd[MAXPATHLEN + 1];
-                 struct passwd *entry;
+	     sprintf (procentry, "/proc/%s", dp->d_name);
+	     if (stat (procentry, &statbuf) == 0
+		 && S_ISDIR (statbuf.st_mode))
+	       {
+		 char pathname[128];
+		 FILE *f;
+		 char cmd[MAXPATHLEN + 1];
+		 struct passwd *entry;
 
-                 sprintf (pathname, "/proc/%s/cmdline", dp->d_name);
-                 entry = getpwuid (statbuf.st_uid);
+		 sprintf (pathname, "/proc/%s/cmdline", dp->d_name);
+		 entry = getpwuid (statbuf.st_uid);
 
-                 if ((f = fopen (pathname, "r")) != NULL)
-                   {
-                     size_t len = fread (cmd, 1, sizeof (cmd) - 1, f);
-                     if (len > 0)
-                       {
-                         int i;
-                         for (i = 0; i < len; i++)
-                           if (cmd[i] == '\0')
-                             cmd[i] = ' ';
-                         cmd[len] = '\0';
+		 if ((f = fopen (pathname, "r")) != NULL)
+		   {
+		     size_t len = fread (cmd, 1, sizeof (cmd) - 1, f);
+		     if (len > 0)
+		       {
+			 int i;
+			 for (i = 0; i < len; i++)
+			   if (cmd[i] == '\0')
+			     cmd[i] = ' ';
+			 cmd[len] = '\0';
 
-                         buffer_xml_printf (
+			 buffer_xml_printf (
 			   &buffer,
 			   "<item>"
 			   "<column name=\"pid\">%s</column>"
@@ -2151,13 +2158,13 @@ linux_qxfer_osdata (const char *annex,
 			   dp->d_name,
 			   entry ? entry->pw_name : "?",
 			   cmd);
-                       }
-                     fclose (f);
-                   }
-               }
-           }
+		       }
+		     fclose (f);
+		   }
+	       }
+	   }
 
-         closedir (dirp);
+	 closedir (dirp);
        }
       buffer_grow_str0 (&buffer, "</osdata>\n");
       buf = buffer_finish (&buffer);

@@ -35,4 +35,3 @@ const xtensa_regtable_t  xtensa_regmap_table[] = {
   {   44, 176,   0,   0,  4, -1, 0x020c, "scompare1" },
   { 0 }
 };
-

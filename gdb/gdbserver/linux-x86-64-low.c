@@ -50,7 +50,7 @@ static int x86_64_regmap[] = {
   RSI * 8, RDI * 8, RBP * 8, RSP * 8,
   R8 * 8, R9 * 8, R10 * 8, R11 * 8,
   R12 * 8, R13 * 8, R14 * 8, R15 * 8,
-  RIP * 8, EFLAGS * 8, CS * 8, SS * 8, 
+  RIP * 8, EFLAGS * 8, CS * 8, SS * 8,
   DS * 8, ES * 8, FS * 8, GS * 8,
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
@@ -65,7 +65,7 @@ static int x86_64_regmap[] = {
 
 ps_err_e
 ps_get_thread_area (const struct ps_prochandle *ph,
-                    lwpid_t lwpid, int idx, void **base)
+		    lwpid_t lwpid, int idx, void **base)
 {
   switch (idx)
     {
@@ -127,7 +127,7 @@ struct regset_info target_regsets[] = {
 
 static const unsigned char x86_64_breakpoint[] = { 0xCC };
 #define x86_64_breakpoint_len 1
-                
+
 extern int debug_threads;
 
 static CORE_ADDR
@@ -170,9 +170,9 @@ struct linux_target_ops the_low_target = {
   NULL,
   x86_64_get_pc,
   x86_64_set_pc,
-  x86_64_breakpoint,  
+  x86_64_breakpoint,
   x86_64_breakpoint_len,
-  NULL,                                 
+  NULL,
   1,
   x86_64_breakpoint_at,
   NULL,

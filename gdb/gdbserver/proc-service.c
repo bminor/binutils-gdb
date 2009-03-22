@@ -159,5 +159,3 @@ ps_getpid (gdb_ps_prochandle_t ph)
 {
   return ph->pid;
 }
-
-

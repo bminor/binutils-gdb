@@ -124,7 +124,7 @@ i387_fsave_to_cache (const void *buf)
 
   supply_register_by_name ("fioff", &fp->fioff);
   supply_register_by_name ("fooff", &fp->fooff);
-  
+
   /* Some registers are 16-bit.  */
   val = fp->fctrl & 0xFFFF;
   supply_register_by_name ("fctrl", &val);
@@ -163,7 +163,7 @@ i387_cache_to_fxsave (void *buf)
   collect_register_by_name ("fioff", &fp->fioff);
   collect_register_by_name ("fooff", &fp->fooff);
   collect_register_by_name ("mxcsr", &fp->mxcsr);
-  
+
   /* This one's 11 bits... */
   collect_register_by_name ("fop", &val2);
   fp->fop = (val2 & 0x7FF) | (fp->fop & 0xF800);
@@ -207,7 +207,7 @@ i387_ftag (struct i387_fxsave *fp, int regno)
   exponent = (((raw[9] & 0x7f) << 8) | raw[8]);
   fraction[0] = ((raw[3] << 24) | (raw[2] << 16) | (raw[1] << 8) | raw[0]);
   fraction[1] = (((raw[7] & 0x7f) << 24) | (raw[6] << 16)
-                 | (raw[5] << 8) | raw[4]);
+		 | (raw[5] << 8) | raw[4]);
 
   if (exponent == 0x7fff)
     {
@@ -217,28 +217,28 @@ i387_ftag (struct i387_fxsave *fp, int regno)
   else if (exponent == 0x0000)
     {
       if (fraction[0] == 0x0000 && fraction[1] == 0x0000 && !integer)
-        {
-          /* Zero.  */
-          return (1);
-        }
+	{
+	  /* Zero.  */
+	  return (1);
+	}
       else
-        {
-          /* Special.  */
-          return (2);
-        }
+	{
+	  /* Special.  */
+	  return (2);
+	}
     }
   else
     {
       if (integer)
-        {
-          /* Valid.  */
-          return (0);
-        }
+	{
+	  /* Valid.  */
+	  return (0);
+	}
       else
-        {
-          /* Special.  */
-          return (2);
-        }
+	{
+	  /* Special.  */
+	  return (2);
+	}
     }
 }
 
@@ -259,7 +259,7 @@ i387_fxsave_to_cache (const void *buf)
   supply_register_by_name ("fioff", &fp->fioff);
   supply_register_by_name ("fooff", &fp->fooff);
   supply_register_by_name ("mxcsr", &fp->mxcsr);
-  
+
   /* Some registers are 16-bit.  */
   val = fp->fctrl & 0xFFFF;
   supply_register_by_name ("fctrl", &val);
