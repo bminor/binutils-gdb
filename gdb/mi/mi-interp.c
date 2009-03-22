@@ -370,6 +370,17 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 static void
 mi_on_resume (ptid_t ptid)
 {
+  struct thread_info *tp = NULL;
+
+  if (ptid_equal (ptid, minus_one_ptid))
+    tp = inferior_thread ();
+  else
+    tp = find_thread_pid (ptid);
+
+  /* Suppress output while calling an inferior function.  */
+  if (tp->in_infcall)
+    return;
+
   /* To cater for older frontends, emit ^running, but do it only once
      per each command.  We do it here, since at this point we know
      that the target was successfully resumed, and in non-async mode,

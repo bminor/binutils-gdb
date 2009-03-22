@@ -330,9 +330,11 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
 {
   volatile struct gdb_exception e;
   int saved_async = 0;
-  int saved_suppress_resume_observer = suppress_resume_observer;
+  int saved_in_infcall = call_thread->in_infcall;
   ptid_t call_thread_ptid = call_thread->ptid;
   char *saved_target_shortname = xstrdup (target_shortname);
+
+  call_thread->in_infcall = 1;
 
   clear_proceed_status ();
 
@@ -342,17 +344,12 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
   if (target_can_async_p ())
     saved_async = target_async_mask (0);
 
-  suppress_resume_observer = 1;
-
   TRY_CATCH (e, RETURN_MASK_ALL)
     proceed (real_pc, TARGET_SIGNAL_0, 0);
 
-  /* At this point the current thread may have changed.
-     CALL_THREAD is no longer usable as its thread may have exited.
-     Set it to NULL to prevent its further use.  */
-  call_thread = NULL;
-
-  suppress_resume_observer = saved_suppress_resume_observer;
+  /* At this point the current thread may have changed.  Refresh
+     CALL_THREAD as it could be invalid if its thread has exited.  */
+  call_thread = find_thread_pid (call_thread_ptid);
 
   /* Don't restore the async mask if the target has changed,
      saved_async is for the original target.  */
@@ -369,10 +366,12 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
      of error out of resume()), then we wouldn't need this.  */
   if (e.reason < 0)
     {
-      struct thread_info *tp = find_thread_pid (call_thread_ptid);
-      if (tp != NULL)
-	breakpoint_auto_delete (tp->stop_bpstat);
+      if (call_thread != NULL)
+	breakpoint_auto_delete (call_thread->stop_bpstat);
     }
+
+  if (call_thread != NULL)
+    call_thread->in_infcall = saved_in_infcall;
 
   xfree (saved_target_shortname);
 

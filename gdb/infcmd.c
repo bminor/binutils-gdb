@@ -166,9 +166,6 @@ int stopped_by_random_signal;
    in format described in environ.h.  */
 
 struct gdb_environ *inferior_environ;
-
-/* When set, no calls to target_resumed observer will be made.  */
-int suppress_resume_observer = 0;
 
 /* Accessor routines. */
 

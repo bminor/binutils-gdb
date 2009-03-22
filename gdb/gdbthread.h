@@ -152,6 +152,10 @@ struct thread_info
      or a similar situation when stop_registers should be saved.  */
   int proceed_to_finish;
 
+  /* Nonzero if the thread is being proceeded for an inferior function
+     call.  */
+  int in_infcall;
+
   enum step_over_calls_kind step_over_calls;
 
   /* Nonzero if stopped due to a step command.  */

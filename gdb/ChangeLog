@@ -1,5 +1,21 @@
 2009-03-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdbthread.h (struct thread_info): Add in_infcall member.
+	* infcall.c (run_inferior_call): Save, set and restore in_infcall.
+	Remove reverences to suppress_resume_observer.  Refresh
+	`call_thread' after returning from `proceed'.
+	* infcmd.c (suppress_resume_observer): Delete.
+	* inferior.h (suppress_resume_observer): Delete declaration.
+	* mi/mi-interp.c (mi_on_resume): Suppress output while calling an
+	inferior function.
+	* thread.c (set_running): Remove references to
+	suppress_resume_observer.
+	* infrun.c (struct inferior_status): Add in_infcall member.
+	(save_inferior_status): Save it.
+	(restore_inferior_status): Restore it.
+
+2009-03-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* infcall.c (run_inferior_call): Remove references to
 	suppress_stop_observer.
 	* infcmd.c (suppress_stop_observer): Delete.

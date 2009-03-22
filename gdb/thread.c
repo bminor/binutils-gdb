@@ -509,8 +509,8 @@ set_running (ptid_t ptid, int running)
   	    any_started = 1;
  	  tp->state_ = running ? THREAD_RUNNING : THREAD_STOPPED;
 	}
-      if (any_started && !suppress_resume_observer)
-	observer_notify_target_resumed (ptid);      
+      if (any_started)
+	observer_notify_target_resumed (ptid);
     }
   else
     {
@@ -521,7 +521,7 @@ set_running (ptid_t ptid, int running)
       if (running && tp->state_ == THREAD_STOPPED)
  	started = 1;
       tp->state_ = running ? THREAD_RUNNING : THREAD_STOPPED;
-      if (started && !suppress_resume_observer)
+      if (started)
   	observer_notify_target_resumed (ptid);
     }
 }
