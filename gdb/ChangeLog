@@ -1,3 +1,8 @@
+2009-03-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* symfile.c (symfile_relocate_debug_section): Remove check for
+	SEC_DEBUGGING.
+
 2009-03-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Jim Blandy  <jimb@red-bean.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>

@@ -3940,16 +3940,17 @@ symfile_dummy_outputs (bfd *abfd, asection *sectp, void *dummy)
    one affected platform is PowerPC GNU/Linux, although it depends on
    the version of the linker in use).  Also, ELF object files naturally
    have unresolved relocations for their debug sections.  We need to apply
-   the relocations in order to get the locations of symbols correct.  */
+   the relocations in order to get the locations of symbols correct.
+   Another example that may require relocation processing, is the
+   DWARF-2 .eh_frame section in .o files, although it isn't strictly a
+   debug section.  */
 
 bfd_byte *
 symfile_relocate_debug_section (bfd *abfd, asection *sectp, bfd_byte *buf)
 {
-  /* We're only interested in debugging sections with relocation
+  /* We're only interested in sections with relocation
      information.  */
   if ((sectp->flags & SEC_RELOC) == 0)
-    return NULL;
-  if ((sectp->flags & SEC_DEBUGGING) == 0)
     return NULL;
 
   /* We will handle section offsets properly elsewhere, so relocate as if
