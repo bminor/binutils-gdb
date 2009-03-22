@@ -1,3 +1,36 @@
+2009-03-22  Christopher Faylor  <me+cygwin@cgf.cx>
+
+	* windows-nat.c (DebugActiveProcessStop): Implement macro wraparound
+	for dynamically loaded function.
+	(DebugBreakProcess): Ditto.
+	(DebugSetProcessKillOnExit): Ditto.
+	(EnumProcessModules): Ditto.
+	(GetModuleFileNameExA): Ditto.
+	(GetModuleInformation): Ditto.
+	(DebugActiveProcessStop): Rename and define placeholder for address of
+	dynamically loaded function.  for dynamically loaded function.
+	(DebugBreakProcess): Ditto.
+	(DebugSetProcessKillOnExit): Ditto.
+	(EnumProcessModules): Ditto.
+	(GetModuleFileNameExA): Ditto.
+	(GetModuleInformation): Ditto.
+	(psapi_loaded): Delete.
+	(get_module_name): Don't check psapi_loaded, just rely on the fact that
+	dynamically loaded functions will return failure if they weren't
+	previously found.
+	(has_detach_ability): Delete.
+	(windows_attach): Remove call to has_detach_ability ().  Just rely on
+	functions being callable.
+	(bad_DebugActiveProcessStop): Define.
+	(bad_DebugBreakProcess): Ditto.
+	(bad_DebugSetProcessKillOnExit): Ditto.
+	(bad_EnumProcessModules): Ditto.
+	(bad_GetModuleFileNameExA): Ditto.
+	(bad_GetModuleInformation): Ditto.
+	(_initialize_loadable): Rename from _initialize_psapi.  Initialize all
+	dynamic storage here, setting nonexistent functions to dummy static
+	functions which always return error.
+
 2009-03-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* mi/mi-interp.c (mi_interpreter_init): Attach mi_about_to_proceed

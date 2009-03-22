@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <imagehlp.h>
+#include <psapi.h>
 #ifdef __CYGWIN__
 #include <sys/cygwin.h>
 #endif
@@ -63,6 +64,28 @@
 #include "windows-tdep.h"
 #include "windows-nat.h"
 
+#define DebugActiveProcessStop		dyn_DebugActiveProcessStop
+#define DebugBreakProcess		dyn_DebugBreakProcess
+#define DebugSetProcessKillOnExit	dyn_DebugSetProcessKillOnExit
+#define EnumProcessModules		dyn_EnumProcessModules
+#define GetModuleFileNameExA		dyn_GetModuleFileNameExA
+#define GetModuleInformation		dyn_GetModuleInformation
+
+/* Since Windows XP, detaching from a process is supported by Windows.
+   The following code tries loading the appropriate functions dynamically.
+   If loading these functions succeeds use them to actually detach from
+   the inferior process, otherwise behave as usual, pretending that
+   detach has worked. */
+static BOOL WINAPI (*DebugActiveProcessStop) (DWORD);
+static BOOL WINAPI (*DebugBreakProcess) (HANDLE);
+static BOOL WINAPI (*DebugSetProcessKillOnExit) (BOOL);
+static BOOL WINAPI (*EnumProcessModules) (HANDLE, HMODULE *, DWORD,
+					  LPDWORD);
+static DWORD WINAPI (*GetModuleFileNameExA) (HANDLE, HMODULE, LPSTR,
+					    DWORD);
+static BOOL WINAPI (*GetModuleInformation) (HANDLE, HMODULE, LPMODULEINFO,
+					    DWORD);
+
 static struct target_ops windows_ops;
 
 #ifdef __CYGWIN__
@@ -84,7 +107,6 @@ enum
     CONTEXT_DEBUGGER = (CONTEXT_FULL | CONTEXT_FLOATING_POINT)
   };
 #endif
-#include <psapi.h>
 
 #ifndef CONTEXT_EXTENDED_REGISTERS
 /* This macro is only defined on ia32.  It only makes sense on this target,
@@ -366,7 +388,7 @@ do_windows_fetch_inferior_registers (struct regcache *regcache, int r)
 	  thread_info *th = current_thread;
 	  th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
 	  GetThreadContext (th->h, &th->context);
-	  /* Copy dr values from that thread. 
+	  /* Copy dr values from that thread.
 	     But only if there were not modified since last stop. PR gdb/2388 */
 	  if (!debug_registers_changed)
 	    {
@@ -438,14 +460,6 @@ windows_store_inferior_registers (struct target_ops *ops,
     do_windows_store_inferior_registers (regcache, r);
 }
 
-static int psapi_loaded = 0;
-static BOOL WINAPI (*psapi_EnumProcessModules) (HANDLE, HMODULE *, DWORD,
-						LPDWORD);
-static BOOL WINAPI (*psapi_GetModuleInformation) (HANDLE, HMODULE, LPMODULEINFO,
-						  DWORD);
-static DWORD WINAPI (*psapi_GetModuleFileNameExA) (HANDLE, HMODULE, LPSTR,
-						   DWORD);
-
 /* Get the name of a given module at at given base address.  If base_address
    is zero return the first loaded module (which is always the name of the
    executable).  */
@@ -465,15 +479,10 @@ get_module_name (LPVOID base_address, char *dll_name_ret)
   char *pathbuf = dll_name_ret;	/* Just copy directly to passed-in arg */
 #endif
 
-  /* If psapi_loaded < 0 either psapi.dll is not available or it does not contain
-     the needed functions. */
-  if (psapi_loaded <= 0)
-    goto failed;
-
   cbNeeded = 0;
   /* Find size of buffer needed to handle list of modules loaded in inferior */
-  if (!psapi_EnumProcessModules (current_process_handle, DllHandle,
-				 sizeof (HMODULE), &cbNeeded) || !cbNeeded)
+  if (!EnumProcessModules (current_process_handle, DllHandle,
+			   sizeof (HMODULE), &cbNeeded) || !cbNeeded)
     goto failed;
 
   /* Allocate correct amount of space for module list */
@@ -482,22 +491,22 @@ get_module_name (LPVOID base_address, char *dll_name_ret)
     goto failed;
 
   /* Get the list of modules */
-  if (!psapi_EnumProcessModules (current_process_handle, DllHandle, cbNeeded,
+  if (!EnumProcessModules (current_process_handle, DllHandle, cbNeeded,
 				 &cbNeeded))
     goto failed;
 
   for (i = 0; i < (int) (cbNeeded / sizeof (HMODULE)); i++)
     {
       /* Get information on this module */
-      if (!psapi_GetModuleInformation (current_process_handle, DllHandle[i],
-				       &mi, sizeof (mi)))
+      if (!GetModuleInformation (current_process_handle, DllHandle[i],
+				 &mi, sizeof (mi)))
 	error (_("Can't get module info"));
 
       if (!base_address || mi.lpBaseOfDll == base_address)
 	{
 	  /* Try to find the name of the given module */
-	  len = psapi_GetModuleFileNameExA (current_process_handle,
-					    DllHandle[i], pathbuf, MAX_PATH);
+	  len = GetModuleFileNameExA (current_process_handle,
+				      DllHandle[i], pathbuf, MAX_PATH);
 	  if (len == 0)
 	    error (_("Error getting dll name: %u."), (unsigned) GetLastError ());
 #ifdef __CYGWIN__
@@ -976,7 +985,7 @@ info_w32_command (char *args, int from_tty)
 
 #define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
   printf_unfiltered ("gdb: Target exception %s at %p\n", x, \
-          current_event.u.Exception.ExceptionRecord.ExceptionAddress)
+		     current_event.u.Exception.ExceptionRecord.ExceptionAddress)
 
 static int
 handle_exception (struct target_waitstatus *ourstatus)
@@ -1089,7 +1098,7 @@ handle_exception (struct target_waitstatus *ourstatus)
 	return -1;
       printf_unfiltered ("gdb: unknown target exception 0x%08lx at %p\n",
 		    current_event.u.Exception.ExceptionRecord.ExceptionCode,
-	        current_event.u.Exception.ExceptionRecord.ExceptionAddress);
+		    current_event.u.Exception.ExceptionRecord.ExceptionAddress);
       ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
       break;
     }
@@ -1465,20 +1474,20 @@ windows_wait (struct target_ops *ops,
   while (1)
     {
       int retval;
-      
+
       /* Ignore CTRL+C signals while waiting for a debug event.
-         FIXME: brobecker/2008-05-20: When the user presses CTRL+C while
-         the inferior is running, both the inferior and GDB receive the
-         associated signal.  If the inferior receives the signal first
-         and the delay until GDB receives that signal is sufficiently long,
-         GDB can sometimes receive the SIGINT after we have unblocked
-         the CTRL+C handler.  This would lead to the debugger to stop
-         prematurely while handling the new-thread event that comes
-         with the handling of the SIGINT inside the inferior, and then
-         stop again immediately when the user tries to resume the execution
-         in the inferior.  This is a classic race, and it would be nice
-         to find a better solution to that problem.  But in the meantime,
-         the current approach already greatly mitigate this issue.  */
+	 FIXME: brobecker/2008-05-20: When the user presses CTRL+C while
+	 the inferior is running, both the inferior and GDB receive the
+	 associated signal.  If the inferior receives the signal first
+	 and the delay until GDB receives that signal is sufficiently long,
+	 GDB can sometimes receive the SIGINT after we have unblocked
+	 the CTRL+C handler.  This would lead to the debugger to stop
+	 prematurely while handling the new-thread event that comes
+	 with the handling of the SIGINT inside the inferior, and then
+	 stop again immediately when the user tries to resume the execution
+	 in the inferior.  This is a classic race, and it would be nice
+	 to find a better solution to that problem.  But in the meantime,
+	 the current approach already greatly mitigate this issue.  */
       SetConsoleCtrlHandler (NULL, TRUE);
       retval = get_windows_debug_event (ops, pid, ourstatus);
       SetConsoleCtrlHandler (NULL, FALSE);
@@ -1554,36 +1563,6 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
   return;
 }
 
-/* Since Windows XP, detaching from a process is supported by Windows.
-   The following code tries loading the appropriate functions dynamically.
-   If loading these functions succeeds use them to actually detach from
-   the inferior process, otherwise behave as usual, pretending that
-   detach has worked. */
-static BOOL WINAPI (*kernel32_DebugSetProcessKillOnExit)(BOOL);
-static BOOL WINAPI (*kernel32_DebugActiveProcessStop)(DWORD);
-
-static int
-has_detach_ability (void)
-{
-  static HMODULE kernel32 = NULL;
-
-  if (!kernel32)
-    kernel32 = LoadLibrary ("kernel32.dll");
-  if (kernel32)
-    {
-      if (!kernel32_DebugSetProcessKillOnExit)
-	kernel32_DebugSetProcessKillOnExit =
-	  (void *) GetProcAddress (kernel32, "DebugSetProcessKillOnExit");
-      if (!kernel32_DebugActiveProcessStop)
-	kernel32_DebugActiveProcessStop =
-	  (void *) GetProcAddress (kernel32, "DebugActiveProcessStop");
-      if (kernel32_DebugSetProcessKillOnExit
-	  && kernel32_DebugActiveProcessStop)
-	return 1;
-    }
-  return 0;
-}
-
 /* Try to set or remove a user privilege to the current process.  Return -1
    if that fails, the previous setting of that privilege otherwise.
 
@@ -1614,13 +1593,13 @@ set_process_privilege (const char *privilege, BOOL enable)
 	goto out;
       if (!OpenProcessToken)
 	OpenProcessToken =
-          (void *) GetProcAddress (advapi32, "OpenProcessToken");
+	  (void *) GetProcAddress (advapi32, "OpenProcessToken");
       if (!LookupPrivilegeValue)
 	LookupPrivilegeValue =
-          (void *) GetProcAddress (advapi32, "LookupPrivilegeValueA");
+	  (void *) GetProcAddress (advapi32, "LookupPrivilegeValueA");
       if (!AdjustTokenPrivileges)
 	AdjustTokenPrivileges =
-          (void *) GetProcAddress (advapi32, "AdjustTokenPrivileges");
+	  (void *) GetProcAddress (advapi32, "AdjustTokenPrivileges");
       if (!OpenProcessToken || !LookupPrivilegeValue || !AdjustTokenPrivileges)
 	{
 	  advapi32 = NULL;
@@ -1698,8 +1677,7 @@ windows_attach (struct target_ops *ops, char *args, int from_tty)
   if (!ok)
     error (_("Can't attach to process."));
 
-  if (has_detach_ability ())
-    kernel32_DebugSetProcessKillOnExit (FALSE);
+  DebugSetProcessKillOnExit (FALSE);
 
   if (from_tty)
     {
@@ -1724,19 +1702,17 @@ windows_detach (struct target_ops *ops, char *args, int from_tty)
 {
   int detached = 1;
 
-  if (has_detach_ability ())
-    {
-      ptid_t ptid = {-1};
-      windows_resume (ops, ptid, 0, TARGET_SIGNAL_0);
+  ptid_t ptid = {-1};
+  windows_resume (ops, ptid, 0, TARGET_SIGNAL_0);
 
-      if (!kernel32_DebugActiveProcessStop (current_event.dwProcessId))
-	{
-	  error (_("Can't detach process %lu (error %lu)"),
-		 current_event.dwProcessId, GetLastError ());
-	  detached = 0;
-	}
-      kernel32_DebugSetProcessKillOnExit (FALSE);
+  if (!DebugActiveProcessStop (current_event.dwProcessId))
+    {
+      error (_("Can't detach process %lu (error %lu)"),
+	     current_event.dwProcessId, GetLastError ());
+      detached = 0;
     }
+  DebugSetProcessKillOnExit (FALSE);
+
   if (detached && from_tty)
     {
       char *exec_file = get_exec_file (0);
@@ -1994,18 +1970,18 @@ windows_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
     {
       DEBUG_MEM (("gdb: write target memory, %d bytes at 0x%08lx\n",
 		  len, (DWORD) (uintptr_t) memaddr));
-      if (!WriteProcessMemory (current_process_handle, 
+      if (!WriteProcessMemory (current_process_handle,
 			       (LPVOID) (uintptr_t) memaddr, our,
 			       len, &done))
 	done = 0;
-      FlushInstructionCache (current_process_handle, 
+      FlushInstructionCache (current_process_handle,
 			     (LPCVOID) (uintptr_t) memaddr, len);
     }
   else
     {
       DEBUG_MEM (("gdb: read target memory, %d bytes at 0x%08lx\n",
 		  len, (DWORD) (uintptr_t) memaddr));
-      if (!ReadProcessMemory (current_process_handle, 
+      if (!ReadProcessMemory (current_process_handle,
 			      (LPCVOID) (uintptr_t) memaddr, our,
 			      len, &done))
 	done = 0;
@@ -2343,33 +2319,89 @@ _initialize_check_for_gdb_ini (void)
     }
 }
 
-void
-_initialize_psapi (void)
+/* Define dummy functions which always return error for the rare cases where
+   these functions could not be found. */
+static BOOL WINAPI
+bad_DebugActiveProcessStop (DWORD w)
 {
-  /* Load optional functions used for retrieving filename information
-     associated with the currently debugged process or its dlls. */
-  if (!psapi_loaded)
+  return FALSE;
+}
+static BOOL WINAPI
+bad_DebugBreakProcess (HANDLE w)
+{
+  return FALSE;
+}
+static BOOL WINAPI
+bad_DebugSetProcessKillOnExit (BOOL w)
+{
+  return FALSE;
+}
+static BOOL WINAPI
+bad_EnumProcessModules (HANDLE w, HMODULE *x, DWORD y, LPDWORD z)
+{
+  return FALSE;
+}
+static DWORD WINAPI
+bad_GetModuleFileNameExA (HANDLE w, HMODULE x, LPSTR y, DWORD z)
+{
+  return 0;
+}
+static BOOL WINAPI
+bad_GetModuleInformation (HANDLE w, HMODULE x, LPMODULEINFO y, DWORD z)
+{
+  return FALSE;
+}
+
+/* Load any functions which may not be available in ancient versions
+   of Windows. */
+void
+_initialize_loadable (void)
+{
+  HMODULE hm = NULL;
+
+  hm = LoadLibrary ("kernel32.dll");
+  if (hm)
     {
-      HMODULE psapi_module_handle;
-
-      psapi_loaded = -1;
-
-      psapi_module_handle = LoadLibrary ("psapi.dll");
-      if (psapi_module_handle)
-	{
-	  psapi_EnumProcessModules = (void *) GetProcAddress (psapi_module_handle, "EnumProcessModules");
-	  psapi_GetModuleInformation = (void *) GetProcAddress (psapi_module_handle, "GetModuleInformation");
-	  psapi_GetModuleFileNameExA = (void *) GetProcAddress (psapi_module_handle, "GetModuleFileNameExA");
-
-	  if (psapi_EnumProcessModules != NULL
-	      && psapi_GetModuleInformation != NULL
-	      && psapi_GetModuleFileNameExA != NULL)
-	    psapi_loaded = 1;
-	}
+      dyn_DebugActiveProcessStop = (void *)
+	GetProcAddress (hm, "DebugActiveProcessStop");
+      dyn_DebugBreakProcess = (void *)
+	GetProcAddress (hm, "DebugBreakProcess");
+      dyn_DebugSetProcessKillOnExit = (void *)
+	GetProcAddress (hm, "DebugSetProcessKillOnExit");
     }
 
-  /* This will probably fail on Windows 9x/Me.  Let the user know that we're
-     missing some functionality. */
-  if (psapi_loaded < 0)
-    warning(_("cannot automatically find executable file or library to read symbols.  Use \"file\" or \"dll\" command to load executable/libraries directly."));
+  /* Set variables to dummy versions of these processes if the function
+     wasn't found in kernel32.dll. */
+  if (!dyn_DebugBreakProcess)
+    dyn_DebugBreakProcess = bad_DebugBreakProcess;
+  if (!dyn_DebugActiveProcessStop || !dyn_DebugSetProcessKillOnExit)
+    {
+      dyn_DebugActiveProcessStop = bad_DebugActiveProcessStop;
+      dyn_DebugSetProcessKillOnExit = bad_DebugSetProcessKillOnExit;
+    }
+
+  /* Load optional functions used for retrieving filename information
+     associated with the currently debugged process or its dlls. */
+  hm = LoadLibrary ("psapi.dll");
+  if (hm)
+    {
+      dyn_EnumProcessModules = (void *)
+	GetProcAddress (hm, "EnumProcessModules");
+      dyn_GetModuleInformation = (void *)
+	GetProcAddress (hm, "GetModuleInformation");
+      dyn_GetModuleFileNameExA = (void *)
+	GetProcAddress (hm, "GetModuleFileNameExA");
+    }
+
+  if (!dyn_EnumProcessModules || !dyn_GetModuleInformation || !dyn_GetModuleFileNameExA)
+    {
+      /* Set variables to dummy versions of these processes if the function
+	 wasn't found in psapi.dll. */
+      dyn_EnumProcessModules = bad_EnumProcessModules;
+      dyn_GetModuleInformation = bad_GetModuleInformation;
+      dyn_GetModuleFileNameExA = bad_GetModuleFileNameExA;
+      /* This will probably fail on Windows 9x/Me.  Let the user know that we're
+	 missing some functionality. */
+      warning(_("cannot automatically find executable file or library to read symbols.  Use \"file\" or \"dll\" command to load executable/libraries directly."));
+    }
 }
