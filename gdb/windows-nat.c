@@ -64,18 +64,18 @@
 #include "windows-tdep.h"
 #include "windows-nat.h"
 
+#define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
 #define DebugActiveProcessStop		dyn_DebugActiveProcessStop
 #define DebugBreakProcess		dyn_DebugBreakProcess
 #define DebugSetProcessKillOnExit	dyn_DebugSetProcessKillOnExit
 #define EnumProcessModules		dyn_EnumProcessModules
 #define GetModuleFileNameExA		dyn_GetModuleFileNameExA
 #define GetModuleInformation		dyn_GetModuleInformation
+#define LookupPrivilegeValueA		dyn_LookupPrivilegeValueA
+#define OpenProcessToken		dyn_OpenProcessToken
 
-/* Since Windows XP, detaching from a process is supported by Windows.
-   The following code tries loading the appropriate functions dynamically.
-   If loading these functions succeeds use them to actually detach from
-   the inferior process, otherwise behave as usual, pretending that
-   detach has worked. */
+static BOOL WINAPI (*AdjustTokenPrivileges)(HANDLE, BOOL, PTOKEN_PRIVILEGES,
+					    DWORD, PTOKEN_PRIVILEGES, PDWORD);
 static BOOL WINAPI (*DebugActiveProcessStop) (DWORD);
 static BOOL WINAPI (*DebugBreakProcess) (HANDLE);
 static BOOL WINAPI (*DebugSetProcessKillOnExit) (BOOL);
@@ -85,6 +85,8 @@ static DWORD WINAPI (*GetModuleFileNameExA) (HANDLE, HMODULE, LPSTR,
 					    DWORD);
 static BOOL WINAPI (*GetModuleInformation) (HANDLE, HMODULE, LPMODULEINFO,
 					    DWORD);
+static BOOL WINAPI (*LookupPrivilegeValueA)(LPCSTR, LPCSTR, PLUID);
+static BOOL WINAPI (*OpenProcessToken)(HANDLE, DWORD, PHANDLE);
 
 static struct target_ops windows_ops;
 
@@ -1610,47 +1612,18 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
 static int
 set_process_privilege (const char *privilege, BOOL enable)
 {
-  static HMODULE advapi32 = NULL;
-  static BOOL WINAPI (*OpenProcessToken)(HANDLE, DWORD, PHANDLE);
-  static BOOL WINAPI (*LookupPrivilegeValue)(LPCSTR, LPCSTR, PLUID);
-  static BOOL WINAPI (*AdjustTokenPrivileges)(HANDLE, BOOL, PTOKEN_PRIVILEGES,
-					      DWORD, PTOKEN_PRIVILEGES, PDWORD);
-
   HANDLE token_hdl = NULL;
   LUID restore_priv;
   TOKEN_PRIVILEGES new_priv, orig_priv;
   int ret = -1;
   DWORD size;
 
-  if (GetVersion () >= 0x80000000)  /* No security availbale on 9x/Me */
-    return 0;
-
-  if (!advapi32)
-    {
-      if (!(advapi32 = LoadLibrary ("advapi32.dll")))
-	goto out;
-      if (!OpenProcessToken)
-	OpenProcessToken =
-	  (void *) GetProcAddress (advapi32, "OpenProcessToken");
-      if (!LookupPrivilegeValue)
-	LookupPrivilegeValue =
-	  (void *) GetProcAddress (advapi32, "LookupPrivilegeValueA");
-      if (!AdjustTokenPrivileges)
-	AdjustTokenPrivileges =
-	  (void *) GetProcAddress (advapi32, "AdjustTokenPrivileges");
-      if (!OpenProcessToken || !LookupPrivilegeValue || !AdjustTokenPrivileges)
-	{
-	  advapi32 = NULL;
-	  goto out;
-	}
-    }
-
   if (!OpenProcessToken (GetCurrentProcess (),
 			 TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES,
 			 &token_hdl))
     goto out;
 
-  if (!LookupPrivilegeValue (NULL, privilege, &restore_priv))
+  if (!LookupPrivilegeValueA (NULL, privilege, &restore_priv))
     goto out;
 
   new_priv.PrivilegeCount = 1;
@@ -2390,6 +2363,12 @@ bad_GetModuleInformation (HANDLE w, HMODULE x, LPMODULEINFO y, DWORD z)
   return FALSE;
 }
 
+static BOOL WINAPI
+bad_OpenProcessToken (HANDLE w, DWORD x, PHANDLE y)
+{
+  return FALSE;
+}
+
 /* Load any functions which may not be available in ancient versions
    of Windows. */
 void
@@ -2440,6 +2419,21 @@ _initialize_loadable (void)
       dyn_GetModuleFileNameExA = bad_GetModuleFileNameExA;
       /* This will probably fail on Windows 9x/Me.  Let the user know that we're
 	 missing some functionality. */
-      warning(_("cannot automatically find executable file or library to read symbols.  Use \"file\" or \"dll\" command to load executable/libraries directly."));
+      warning(_("cannot automatically find executable file or library to read symbols.\nUse \"file\" or \"dll\" command to load executable/libraries directly."));
+    }
+
+  hm = LoadLibrary ("advapi32.dll");
+  if (hm)
+    {
+      dyn_OpenProcessToken = (void *)
+	GetProcAddress (hm, "OpenProcessToken");
+      dyn_LookupPrivilegeValueA = (void *)
+	GetProcAddress (hm, "LookupPrivilegeValueA");
+      dyn_AdjustTokenPrivileges = (void *)
+	GetProcAddress (hm, "AdjustTokenPrivileges");
+      /* Only need to set one of these since if OpenProcessToken fails nothing
+	 else is needed. */
+      if (!dyn_OpenProcessToken || !dyn_LookupPrivilegeValueA || !dyn_AdjustTokenPrivileges)
+	dyn_OpenProcessToken = bad_OpenProcessToken;
     }
 }

@@ -1,3 +1,19 @@
+2009-03-22  Christopher Faylor  <me+cygwin@cgf.cx>
+
+	* windows-nat.c (AdjustTokenPrivileges): Implement macro wraparound for
+	dynamically loaded function.
+	(LookupPrivilegeValueA): Ditto.
+	(OpenProcessToken): Ditto.
+	(AdjustTokenPrivileges): Rename and define placeholder for address of
+        dynamically loaded function.
+	(LookupPrivilegeValueA): Ditto.
+	(OpenProcessToken): Ditto.
+	(set_process_privilege): Remove check for loaded functions.
+	(bad_OpenProcessToken): Define.
+	(_initialize_loadable): Load token functions from advapi here, setting
+	OpenProcessToken function to a dummy static function which always return
+	error if OS doesn't support this functionality.
+
 2009-03-22   Nicolas Roche  <roche@adacore.com>
 	     Christopher Faylor <me+cygwin@cgf.cx>
 
@@ -15,7 +31,7 @@
 	(GetModuleFileNameExA): Ditto.
 	(GetModuleInformation): Ditto.
 	(DebugActiveProcessStop): Rename and define placeholder for address of
-	dynamically loaded function.  for dynamically loaded function.
+	dynamically loaded function.
 	(DebugBreakProcess): Ditto.
 	(DebugSetProcessKillOnExit): Ditto.
 	(EnumProcessModules): Ditto.
