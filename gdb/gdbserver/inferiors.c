@@ -180,9 +180,12 @@ find_inferior (struct inferior_list *list,
 
   while (inf != NULL)
     {
+      struct inferior_list_entry *next;
+
+      next = inf->next;
       if ((*func) (inf, arg))
 	return inf;
-      inf = inf->next;
+      inf = next;
     }
 
   return NULL;
