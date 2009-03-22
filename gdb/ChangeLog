@@ -1,5 +1,20 @@
 2009-03-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* infcall.c (run_inferior_call): Remove references to
+	suppress_stop_observer.
+	* infcmd.c (suppress_stop_observer): Delete.
+	(finish_command_continuation): Remove NOTE.  Don't clear
+	suppress_stop_observer anymore.
+	(finish_command_continuation_free_arg): Likewise.
+	(finish_forward): Remove references to suppress_stop_observer.
+	Call normal_stop observer if we haven't already.
+	* inferior.h (suppress_stop_observer): Delete.
+	* infrun.c (normal_stop): When deciding to suppress the
+	normal_stop observer, check for proceed_to_finish instead of
+	suppress_stop_observer.
+
+2009-03-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* symfile.c (symfile_relocate_debug_section): Remove check for
 	SEC_DEBUGGING.
 

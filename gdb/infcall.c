@@ -331,7 +331,6 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
   volatile struct gdb_exception e;
   int saved_async = 0;
   int saved_suppress_resume_observer = suppress_resume_observer;
-  int saved_suppress_stop_observer = suppress_stop_observer;
   ptid_t call_thread_ptid = call_thread->ptid;
   char *saved_target_shortname = xstrdup (target_shortname);
 
@@ -344,7 +343,6 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
     saved_async = target_async_mask (0);
 
   suppress_resume_observer = 1;
-  suppress_stop_observer = 1;
 
   TRY_CATCH (e, RETURN_MASK_ALL)
     proceed (real_pc, TARGET_SIGNAL_0, 0);
@@ -355,7 +353,6 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
   call_thread = NULL;
 
   suppress_resume_observer = saved_suppress_resume_observer;
-  suppress_stop_observer = saved_suppress_stop_observer;
 
   /* Don't restore the async mask if the target has changed,
      saved_async is for the original target.  */

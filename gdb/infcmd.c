@@ -169,8 +169,6 @@ struct gdb_environ *inferior_environ;
 
 /* When set, no calls to target_resumed observer will be made.  */
 int suppress_resume_observer = 0;
-/* When set, normal_stop will not call the normal_stop observer.  */
-int suppress_stop_observer = 0;
 
 /* Accessor routines. */
 
@@ -1346,13 +1344,16 @@ static void
 finish_command_continuation (void *arg)
 {
   struct finish_command_continuation_args *a = arg;
-
+  struct thread_info *tp = NULL;
   bpstat bs = NULL;
 
   if (!ptid_equal (inferior_ptid, null_ptid)
       && target_has_execution
       && is_stopped (inferior_ptid))
-    bs = inferior_thread ()->stop_bpstat;
+    {
+      tp = inferior_thread ();
+      bs = tp->stop_bpstat;
+    }
 
   if (bpstat_find_breakpoint (bs, a->breakpoint) != NULL
       && a->function != NULL)
@@ -1369,22 +1370,15 @@ finish_command_continuation (void *arg)
     }
 
   /* We suppress normal call of normal_stop observer and do it here so
-     that that *stopped notification includes the return value.  */
-  /* NOTE: This is broken in non-stop mode.  There is no guarantee the
-     next stop will be in the same thread that we started doing a
-     finish on.  This suppressing (or some other replacement means)
-     should be a thread property.  */
-  observer_notify_normal_stop (bs, 1 /* print frame */);
-  suppress_stop_observer = 0;
+     that the *stopped notification includes the return value.  */
+  if (bs != NULL && tp->proceed_to_finish)
+    observer_notify_normal_stop (bs, 1 /* print frame */);
   delete_breakpoint (a->breakpoint);
 }
 
 static void
 finish_command_continuation_free_arg (void *arg)
 {
-  /* NOTE: See finish_command_continuation.  This would go away, if
-     this suppressing is made a thread property.  */
-  suppress_stop_observer = 0;
   xfree (arg);
 }
 
@@ -1469,8 +1463,6 @@ finish_forward (struct symbol *function, struct frame_info *frame)
   old_chain = make_cleanup_delete_breakpoint (breakpoint);
 
   tp->proceed_to_finish = 1;    /* We want stop_registers, please...  */
-  make_cleanup_restore_integer (&suppress_stop_observer);
-  suppress_stop_observer = 1;
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
   cargs = xmalloc (sizeof (*cargs));

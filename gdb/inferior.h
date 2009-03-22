@@ -368,10 +368,6 @@ extern int debug_displaced;
 void displaced_step_dump_bytes (struct ui_file *file,
                                 const gdb_byte *buf, size_t len);
 
-
-/* When set, normal_stop will not call the normal_stop observer.  */
-extern int suppress_stop_observer;
-
 /* When set, no calls to target_resumed observer will be made.  */
 extern int suppress_resume_observer;
 

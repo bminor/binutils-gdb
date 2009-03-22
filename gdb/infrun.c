@@ -4433,11 +4433,25 @@ Further execution is probably impossible.\n"));
 
 done:
   annotate_stopped ();
-  if (!suppress_stop_observer
-      && !(target_has_execution
-	   && last.kind != TARGET_WAITKIND_SIGNALLED
-	   && last.kind != TARGET_WAITKIND_EXITED
-	   && inferior_thread ()->step_multi))
+
+  /* Suppress the stop observer if we're in the middle of:
+
+     - a step n (n > 1), as there still more steps to be done.
+
+     - a "finish" command, as the observer will be called in
+       finish_command_continuation, so it can include the inferior
+       function's return value.
+
+     - calling an inferior function, as we pretend we inferior didn't
+       run at all.  The return value of the call is handled by the
+       expression evaluator, through call_function_by_hand.  */
+
+  if (!target_has_execution
+      || last.kind == TARGET_WAITKIND_SIGNALLED
+      || last.kind == TARGET_WAITKIND_EXITED
+      || (!inferior_thread ()->step_multi
+	  && !(inferior_thread ()->stop_bpstat
+	       && inferior_thread ()->proceed_to_finish)))
     {
       if (!ptid_equal (inferior_ptid, null_ptid))
 	observer_notify_normal_stop (inferior_thread ()->stop_bpstat,
