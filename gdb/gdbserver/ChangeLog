@@ -1,3 +1,8 @@
+2009-03-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* Makefile.in (linuw_low_h): Move higher.
+	(thread-db.o): Depend on $(linux_low_h).
+
 2009-03-17  Pedro Alves  <pedro@codesourcery.com>
 
 	Rename "process" to "lwp" throughout.

@@ -265,6 +265,8 @@ regcache_h = $(srcdir)/regcache.h
 server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 		$(srcdir)/mem-break.h $(srcdir)/../common/gdb_signals.h
 
+linux_low_h = $(srcdir)/linux-low.h
+
 hostio.o: hostio.c $(server_h)
 hostio-errno.o: hostio-errno.c $(server_h)
 inferiors.o: inferiors.c $(server_h)
@@ -274,7 +276,7 @@ regcache.o: regcache.c $(server_h) $(regdef_h)
 remote-utils.o: remote-utils.c terminal.h $(server_h)
 server.o: server.c $(server_h)
 target.o: target.c $(server_h)
-thread-db.o: thread-db.c $(server_h) $(gdb_proc_service_h)
+thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h)
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
 
@@ -285,8 +287,6 @@ memmem.o: ../gnulib/memmem.c
 	$(CC) -o memmem.o -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 i387-fp.o: i387-fp.c $(server_h)
-
-linux_low_h = $(srcdir)/linux-low.h
 
 linux-low.o: linux-low.c $(linux_low_h) $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< @USE_THREAD_DB@
