@@ -1,5 +1,26 @@
 2009-03-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* mi/mi-interp.c (mi_interpreter_init): Attach mi_about_to_proceed
+	to the about_to_proceed observer notification.
+	(mi_about_to_proceed): New.
+	(mi_on_resume): Only output ^running and the prompt here if the
+	target was proceeded.
+	* breakpoint.c (breakpoint_proceeded): New static.
+	(breakpoint_about_to_proceed): New.
+	(_initialize_breakpoints): Attach breakpoint_about_to_proceed to
+	the about_to_proceed observer notification.
+	* inferior.h (breakpoint_proceeded): Delete declaration.
+	* infrun.c (clear_proceed_status): Don't set breakpoint_proceeded.
+	Notify the about_to_proceed observers.
+	(struct inferior_status): Delete breakpoint_proceeded member.
+	(save_inferior_status): Don't save it.
+	(restore_inferior_status): Don't restore it.
+	* mi-main.h (mi_proceeded): Declare.
+	* mi/mi-main.c (mi_cmd_execute): Clear mi_proceeded before running
+	a command.
+
+2009-03-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdbthread.h (struct thread_info): Add in_infcall member.
 	* infcall.c (run_inferior_call): Save, set and restore in_infcall.
 	Remove reverences to suppress_resume_observer.  Refresh

@@ -191,6 +191,11 @@ static int is_hardware_watchpoint (struct breakpoint *bpt);
 
 static void insert_breakpoint_locations (void);
 
+/* Flag indicating that a command has proceeded the inferior past the
+   current breakpoint.  */
+
+static int breakpoint_proceeded;
+
 static const char *
 bpdisp_text (enum bpdisp disp)
 {
@@ -2081,6 +2086,26 @@ bpstat_clear_actions (bpstat bs)
 	  bs->old_val = NULL;
 	}
     }
+}
+
+/* Called when a command is about to proceed the inferior.  */
+
+static void
+breakpoint_about_to_proceed (void)
+{
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    {
+      struct thread_info *tp = inferior_thread ();
+
+      /* Allow inferior function calls in breakpoint commands to not
+	 interrupt the command list.  When the call finishes
+	 successfully, the inferior will be standing at the same
+	 breakpoint as if nothing happened.  */
+      if (tp->in_infcall)
+	return;
+    }
+
+  breakpoint_proceeded = 1;
 }
 
 /* Stub for cleaning up our state if we error-out of a breakpoint command */
@@ -8498,4 +8523,6 @@ inferior in all-stop mode, gdb behaves as if always-inserted mode is off."),
 			   &breakpoint_show_cmdlist);
   
   automatic_hardware_breakpoints = 1;
+
+  observer_attach_about_to_proceed (breakpoint_about_to_proceed);
 }

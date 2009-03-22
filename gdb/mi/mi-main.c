@@ -78,6 +78,10 @@ static int do_timings = 0;
 char *current_token;
 int running_result_record_printed = 1;
 
+/* Flag indicating that the target has proceeded since the last
+   command was issued.  */
+int mi_proceeded;
+
 extern void _initialize_mi_main (void);
 static void mi_cmd_execute (struct mi_parse *parse);
 
@@ -1147,6 +1151,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
   cleanup = make_cleanup (free_current_contents, &current_token);
 
   running_result_record_printed = 0;
+  mi_proceeded = 0;
   switch (context->op)
     {
     case MI_COMMAND:

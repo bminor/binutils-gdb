@@ -287,11 +287,6 @@ extern void notice_new_inferior (ptid_t, int, int);
 
 extern CORE_ADDR stop_pc;
 
-/* Flag indicating that a command has proceeded the inferior past the
-   current breakpoint.  */
-
-extern int breakpoint_proceeded;
-
 /* Nonzero if stopped due to completion of a stack dummy routine.  */
 
 extern int stop_stack_dummy;

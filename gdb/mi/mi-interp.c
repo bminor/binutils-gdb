@@ -61,6 +61,7 @@ static void mi_inferior_exit (int pid);
 static void mi_on_resume (ptid_t ptid);
 static void mi_solib_loaded (struct so_list *solib);
 static void mi_solib_unloaded (struct so_list *solib);
+static void mi_about_to_proceed (void);
 
 static void *
 mi_interpreter_init (int top_level)
@@ -91,6 +92,7 @@ mi_interpreter_init (int top_level)
       observer_attach_target_resumed (mi_on_resume);
       observer_attach_solib_loaded (mi_solib_loaded);
       observer_attach_solib_unloaded (mi_solib_unloaded);
+      observer_attach_about_to_proceed (mi_about_to_proceed);
     }
 
   return mi;
@@ -368,6 +370,21 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 }
 
 static void
+mi_about_to_proceed (void)
+{
+  /* Suppress output while calling an inferior function.  */
+
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    {
+      struct thread_info *tp = inferior_thread ();
+      if (tp->in_infcall)
+	return;
+    }
+
+  mi_proceeded = 1;
+}
+
+static void
 mi_on_resume (ptid_t ptid)
 {
   struct thread_info *tp = NULL;
@@ -389,7 +406,7 @@ mi_on_resume (ptid_t ptid)
      will make it impossible for frontend to know what's going on.
 
      In future (MI3), we'll be outputting "^done" here.  */
-  if (!running_result_record_printed)
+  if (!running_result_record_printed && mi_proceeded)
     {
       if (current_token)
 	fputs_unfiltered (current_token, raw_stdout);
@@ -411,7 +428,7 @@ mi_on_resume (ptid_t ptid)
       fprintf_unfiltered (raw_stdout, "*running,thread-id=\"%d\"\n", ti->num);
     }
 
-  if (!running_result_record_printed)
+  if (!running_result_record_printed && mi_proceeded)
     {
       running_result_record_printed = 1;
       /* This is what gdb used to do historically -- printing prompt even if

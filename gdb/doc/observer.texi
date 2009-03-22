@@ -151,6 +151,10 @@ The target was resumed.  The @var{ptid} parameter specifies which
 thread was resume, and may be RESUME_ALL if all threads are resumed.
 @end deftypefun
 
+@deftypefun void about_to_proceed (void)
+The target is about to be proceeded.
+@end deftypefun
+
 @deftypefun void breakpoint_created (int @var{bpnum})
 A new breakpoint has been created.  The argument @var{bpnum} is the
 number of the newly-created breakpoint.

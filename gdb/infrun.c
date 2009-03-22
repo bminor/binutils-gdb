@@ -1230,7 +1230,8 @@ clear_proceed_status (void)
     }
 
   stop_after_trap = 0;
-  breakpoint_proceeded = 1;	/* We're about to proceed... */
+
+  observer_notify_about_to_proceed ();
 
   if (stop_registers)
     {
@@ -5007,7 +5008,6 @@ struct inferior_status
   /* ID if the selected frame when the inferior function call was made.  */
   struct frame_id selected_frame_id;
 
-  int breakpoint_proceeded;
   int proceed_to_finish;
   int in_infcall;
 };
@@ -5038,7 +5038,6 @@ save_inferior_status (void)
      called.  */
   inf_status->stop_bpstat = tp->stop_bpstat;
   tp->stop_bpstat = bpstat_copy (tp->stop_bpstat);
-  inf_status->breakpoint_proceeded = breakpoint_proceeded;
   inf_status->proceed_to_finish = tp->proceed_to_finish;
   inf_status->in_infcall = tp->in_infcall;
 
@@ -5089,7 +5088,6 @@ restore_inferior_status (struct inferior_status *inf_status)
   bpstat_clear (&tp->stop_bpstat);
   tp->stop_bpstat = inf_status->stop_bpstat;
   inf_status->stop_bpstat = NULL;
-  breakpoint_proceeded = inf_status->breakpoint_proceeded;
   tp->proceed_to_finish = inf_status->proceed_to_finish;
   tp->in_infcall = inf_status->in_infcall;
 

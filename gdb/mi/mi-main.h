@@ -31,6 +31,7 @@ extern void mi_print_timing_maybe (void);
 extern char *current_token;
 
 extern int running_result_record_printed;
+extern int mi_proceeded;
 
 #endif
 

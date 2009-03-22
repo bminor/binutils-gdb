@@ -1,3 +1,7 @@
+2009-03-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* observer.texi (about_to_proceed): New.
+
 2009-03-21  Jeremy Bennett  <jeremy.bennett@embecosm.com>
 
 	* gdbint.texinfo (everywhere): Use braces {} in @deftypeXX type
