@@ -249,15 +249,17 @@ proc fetch_all_registers {test} {
 
     set all_registers_lines {}
     set bad -1
+    # Former trailing `\[\r\n\]+' may eat just \r leaving \n in the buffer
+    # corrupting the next matches.
     if {[gdb_test_multiple "info all-registers" $test {
-	-re "info all-registers\[\r\n\]+" {
+	-re "info all-registers\r\n" {
 	    exp_continue
 	}
 	-ex "The program has no registers now" {
 	    set bad 1
 	    exp_continue
 	}
-	-re "^bspstore\[ \t\]+\[^\r\n\]+\[\r\n\]+" {
+	-re "^bspstore\[ \t\]+\[^\r\n\]+\r\n" {
 	    if [istarget "ia64-*-*"] {
 		# Filter out bspstore which is specially tied to bsp,
 		# giving spurious differences.
@@ -266,14 +268,14 @@ proc fetch_all_registers {test} {
 	    }
 	    exp_continue
 	}
-	-re "^\[^ \t\]+\[ \t\]+\[^\r\n\]+\[\r\n\]+" {
+	-re "^\[^ \t\]+\[ \t\]+\[^\r\n\]+\r\n" {
 	    lappend all_registers_lines $expect_out(0,string)
 	    exp_continue
 	}
-	-re ".*$gdb_prompt $" {
+	-re "$gdb_prompt $" {
 	    incr bad
 	}
-	-re "^\[^\r\n\]+\[\r\n\]+" {
+	-re "^\[^\r\n\]+\r\n" {
 	    if {!$bad} {
 		warning "Unrecognized output: $expect_out(0,string)"
 		set bad 1

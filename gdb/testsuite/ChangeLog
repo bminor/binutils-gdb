@@ -1,3 +1,9 @@
+2009-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix a racy FAIL.
+	* gdb.base/auxv.exp (fetch_auxv): Fix trailing newlines consumption.
+	* gdb.base/callfuncs.exp (fetch_all_registers): Likewise.
+
 2009-03-21  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.python/python-cmd.exp: Add tests for keyword arguments.

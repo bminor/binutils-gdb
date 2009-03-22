@@ -78,8 +78,10 @@ proc fetch_auxv {test} {
 
     set auxv_lines {}
     set bad -1
+    # Former trailing `\[\r\n\]+' may eat just \r leaving \n in the buffer
+    # corrupting the next matches.
     if {[gdb_test_multiple "info auxv" $test {
-	-re "info auxv\[\r\n\]+" {
+	-re "info auxv\r\n" {
 	    exp_continue
 	}
 	-ex "The program has no auxiliary information now" {
@@ -94,20 +96,20 @@ proc fetch_auxv {test} {
 	    set bad 1
 	    exp_continue
 	}
-	-re "^\[0-9\]+\[ \t\]+(AT_\[^ \t\]+)\[^\r\n\]+\[\r\n\]+" {
+	-re "^\[0-9\]+\[ \t\]+(AT_\[^ \t\]+)\[^\r\n\]+\r\n" {
 	    lappend auxv_lines $expect_out(0,string)
 	    exp_continue
 	}
-	-re "^\[0-9\]+\[ \t\]+\\?\\?\\?\[^\r\n\]+\[\r\n\]+" {
+	-re "^\[0-9\]+\[ \t\]+\\?\\?\\?\[^\r\n\]+\r\n" {
 	    warning "Unrecognized tag value: $expect_out(0,string)"
 	    set bad 1
 	    lappend auxv_lines $expect_out(0,string)
 	    exp_continue
 	}
-	-re ".*$gdb_prompt $" {
+	-re "$gdb_prompt $" {
 	    incr bad
 	}
-	-re "^\[^\r\n\]+\[\r\n\]+" {
+	-re "^\[^\r\n\]+\r\n" {
 	    if {!$bad} {
 		warning "Unrecognized output: $expect_out(0,string)"
 		set bad 1
