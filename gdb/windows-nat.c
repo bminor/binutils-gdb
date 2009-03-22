@@ -1267,9 +1267,34 @@ windows_resume (struct target_ops *ops,
     windows_continue (continue_status, ptid_get_tid (ptid));
 }
 
+/* Ctrl-C handler used when the inferior is not run in the same console.  The
+   handler is in charge of interrupting the inferior using DebugBreakProcess.
+   Note that this function is not available prior to Windows XP.  In this case
+   we emit a warning.  */
+BOOL WINAPI
+ctrl_c_handler (DWORD event_type)
+{
+  const int attach_flag = current_inferior ()->attach_flag;
+
+  /* Only handle Ctrl-C event.  Ignore others.  */
+  if (event_type != CTRL_C_EVENT)
+    return FALSE;
+
+  /* If the inferior and the debugger share the same console, do nothing as
+     the inferior has also received the Ctrl-C event.  */
+  if (!new_console && !attach_flag)
+    return TRUE;
+
+  if (!DebugBreakProcess (current_process_handle))
+    warning (_("\
+Could not interrupt program.  Press Ctrl-c in the program console."));
+
+  /* Return true to tell that Ctrl-C has been handled.  */
+  return TRUE;
+}
+
 /* Get the next event from the child.  Return 1 if the event requires
-   handling by WFI (or whatever).
- */
+   handling by WFI (or whatever).  */
 static int
 get_windows_debug_event (struct target_ops *ops,
 			 int pid, struct target_waitstatus *ourstatus)
@@ -1346,13 +1371,13 @@ get_windows_debug_event (struct target_ops *ops,
 
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
       if (main_thread_id)
- 	windows_delete_thread (ptid_build (current_event.dwProcessId, 0,
-					 main_thread_id));
+	windows_delete_thread (ptid_build (current_event.dwProcessId, 0,
+					   main_thread_id));
       main_thread_id = current_event.dwThreadId;
       /* Add the main thread */
       th = windows_add_thread (ptid_build (current_event.dwProcessId, 0,
-					 current_event.dwThreadId),
-			     current_event.u.CreateProcessInfo.hThread);
+					   current_event.dwThreadId),
+			       current_event.u.CreateProcessInfo.hThread);
       retval = current_event.dwThreadId;
       break;
 
@@ -1475,22 +1500,35 @@ windows_wait (struct target_ops *ops,
     {
       int retval;
 
-      /* Ignore CTRL+C signals while waiting for a debug event.
-	 FIXME: brobecker/2008-05-20: When the user presses CTRL+C while
-	 the inferior is running, both the inferior and GDB receive the
-	 associated signal.  If the inferior receives the signal first
-	 and the delay until GDB receives that signal is sufficiently long,
-	 GDB can sometimes receive the SIGINT after we have unblocked
-	 the CTRL+C handler.  This would lead to the debugger to stop
-	 prematurely while handling the new-thread event that comes
-	 with the handling of the SIGINT inside the inferior, and then
-	 stop again immediately when the user tries to resume the execution
-	 in the inferior.  This is a classic race, and it would be nice
-	 to find a better solution to that problem.  But in the meantime,
-	 the current approach already greatly mitigate this issue.  */
-      SetConsoleCtrlHandler (NULL, TRUE);
+      /* If the user presses Ctrl-c while the debugger is waiting
+	 for an event, he expects the debugger to interrupt his program
+	 and to get the prompt back.  There are two possible situations:
+
+	   - The debugger and the program do not share the console, in
+	     which case the Ctrl-c event only reached the debugger.
+	     In that case, the ctrl_c handler will take care of interrupting
+	     the inferior. Note that this case is working starting with
+	     Windows XP. For Windows 2000, Ctrl-C should be pressed in the
+	     inferior console.
+
+	   - The debugger and the program share the same console, in which
+	     case both debugger and inferior will receive the Ctrl-c event.
+	     In that case the ctrl_c handler will ignore the event, as the
+	     Ctrl-c event generated inside the inferior will trigger the
+	     expected debug event.
+
+	     FIXME: brobecker/2008-05-20: If the inferior receives the
+	     signal first and the delay until GDB receives that signal
+	     is sufficiently long, GDB can sometimes receive the SIGINT
+	     after we have unblocked the CTRL+C handler.  This would
+	     lead to the debugger stopping prematurely while handling
+	     the new-thread event that comes with the handling of the SIGINT
+	     inside the inferior, and then stop again immediately when
+	     the user tries to resume the execution in the inferior.
+	     This is a classic race that we should try to fix one day.  */
+      SetConsoleCtrlHandler (&ctrl_c_handler, TRUE);
       retval = get_windows_debug_event (ops, pid, ourstatus);
-      SetConsoleCtrlHandler (NULL, FALSE);
+      SetConsoleCtrlHandler (&ctrl_c_handler, FALSE);
 
       if (retval)
 	return ptid_build (current_event.dwProcessId, 0, retval);

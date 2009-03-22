@@ -1,3 +1,10 @@
+2009-03-22   Nicolas Roche  <roche@adacore.com>
+	     Christopher Faylor <me+cygwin@cgf.cx>
+
+	* win32-nat.c (ctrl_c_handler): New function.
+	(win32_wait): Register ctrl_c_handler as Ctrl-C handler if the inferior
+	is run in a separate console.
+
 2009-03-22  Christopher Faylor  <me+cygwin@cgf.cx>
 
 	* windows-nat.c (DebugActiveProcessStop): Implement macro wraparound
