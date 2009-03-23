@@ -86,6 +86,9 @@
 #undef iconv
 #undef iconv_close
 
+#undef ICONV_CONST
+#define ICONV_CONST const
+
 iconv_t
 iconv_open (const char *to, const char *from)
 {
@@ -109,7 +112,7 @@ iconv_close (iconv_t arg)
 }
 
 size_t
-iconv (iconv_t ucs_flag, char **inbuf, size_t *inbytesleft,
+iconv (iconv_t ucs_flag, const char **inbuf, size_t *inbytesleft,
        char **outbuf, size_t *outbytesleft)
 {
   if (ucs_flag)
@@ -440,7 +443,7 @@ convert_between_encodings (const char *from, const char *to,
       outp = obstack_base (output) + old_size;
       outleft = space_request;
 
-      r = iconv (desc, &inp, &inleft, &outp, &outleft);
+      r = iconv (desc, (ICONV_CONST char **) &inp, &inleft, &outp, &outleft);
 
       /* Now make sure that the object on the obstack only includes
 	 bytes we have converted.  */
@@ -580,7 +583,8 @@ wchar_iterate (struct wchar_iterator *iter,
       size_t num;
       gdb_wchar_t result;
 
-      size_t r = iconv (iter->desc, (char **) &iter->input, &iter->bytes,
+      size_t r = iconv (iter->desc,
+			(ICONV_CONST char **) &iter->input, &iter->bytes,
 			&outptr, &out_avail);
       if (r == (size_t) -1)
 	{

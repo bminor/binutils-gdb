@@ -1,3 +1,10 @@
+2009-03-23  Tom Tromey  <tromey@redhat.com>
+
+	* charset.c (ICONV_CONST) <PHONY_ICONV>: Define.
+	(iconv): Make 'inbuf' argument const.
+	(convert_between_encodings): Use ICONV_CONST.
+	(wchar_iterate): Likewise.
+
 2009-03-22  Christopher Faylor  <me+cygwin@cgf.cx>
 
 	* windows-nat.c (AdjustTokenPrivileges): Implement macro wraparound for
