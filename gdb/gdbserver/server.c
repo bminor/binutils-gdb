@@ -574,7 +574,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       require_running (own_buf);
       strcpy (own_buf, "E00");
       if (decode_xfer_read (own_buf + 15, &annex, &ofs, &len) < 0)
-	  return;
+	return;
       if (len > PBUFSIZ - 2)
 	len = PBUFSIZ - 2;
       spu_buf = malloc (len + 1);
@@ -585,11 +585,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (n < 0)
 	write_enn (own_buf);
       else if (n > len)
-	*new_packet_len_p = write_qxfer_response
-			      (own_buf, spu_buf, len, 1);
+	*new_packet_len_p = write_qxfer_response (own_buf, spu_buf, len, 1);
       else
-	*new_packet_len_p = write_qxfer_response
-			      (own_buf, spu_buf, n, 0);
+	*new_packet_len_p = write_qxfer_response (own_buf, spu_buf, n, 0);
 
       free (spu_buf);
       return;
@@ -791,20 +789,20 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       strcpy (own_buf, "E00");
       if (decode_xfer_read (own_buf + 18, &annex, &ofs, &len) < 0)
-       return;
+	return;
       if (len > PBUFSIZ - 2)
-       len = PBUFSIZ - 2;
+	len = PBUFSIZ - 2;
       workbuf = malloc (len + 1);
       if (!workbuf)
 	return;
 
       n = (*the_target->qxfer_osdata) (annex, workbuf, NULL, ofs, len + 1);
       if (n < 0)
-       write_enn (own_buf);
+	write_enn (own_buf);
       else if (n > len)
-       *new_packet_len_p = write_qxfer_response (own_buf, workbuf, len, 1);
+	*new_packet_len_p = write_qxfer_response (own_buf, workbuf, len, 1);
       else
-       *new_packet_len_p = write_qxfer_response (own_buf, workbuf, n, 0);
+	*new_packet_len_p = write_qxfer_response (own_buf, workbuf, n, 0);
 
       free (workbuf);
       return;

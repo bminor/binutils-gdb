@@ -1,3 +1,7 @@
+2009-03-23  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (handle_query) Whitespace and formatting.
+
 2009-03-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* i387-fp.c, linux-arm-low.c, linux-cris-low.c,
