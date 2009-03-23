@@ -1,3 +1,8 @@
+2009-03-23  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_uninit>: Fix typo in
+	error message.
+
 2009-03-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* breakpoint.c (disable_breakpoints_in_unloaded_shlib): Use

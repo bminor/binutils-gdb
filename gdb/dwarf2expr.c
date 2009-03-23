@@ -746,7 +746,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_GNU_uninit:
 	  if (op_ptr != op_end)
-	    error (_("DWARF-2 expression error: DW_OP_GNU_unint must always "
+	    error (_("DWARF-2 expression error: DW_OP_GNU_uninit must always "
 		   "be the very last op."));
 
 	  ctx->initialized = 0;
