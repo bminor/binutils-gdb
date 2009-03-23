@@ -2689,7 +2689,6 @@ get_opd_info (asection * sec)
 }
 
 /* Parameters for the qsort hook.  */
-static asection *synthetic_opd;
 static bfd_boolean synthetic_relocatable;
 
 /* qsort comparison function for ppc64_elf_get_synthetic_symtab.  */
@@ -2707,9 +2706,11 @@ compare_symbols (const void *ap, const void *bp)
     return 1;
 
   /* then .opd symbols.  */
-  if (a->section == synthetic_opd && b->section != synthetic_opd)
+  if (strcmp (a->section->name, ".opd") == 0
+      && strcmp (b->section->name, ".opd") != 0)
     return -1;
-  if (a->section != synthetic_opd && b->section == synthetic_opd)
+  if (strcmp (a->section->name, ".opd") != 0
+      && strcmp (b->section->name, ".opd") == 0)
     return 1;
 
   /* then other code symbols.  */
@@ -2863,7 +2864,6 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
   else
     memcpy (syms, static_syms, (symcount + 1) * sizeof (*syms));
 
-  synthetic_opd = opd;
   synthetic_relocatable = relocatable;
   qsort (syms, symcount, sizeof (*syms), compare_symbols);
 
@@ -2881,7 +2881,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
     }
 
   i = 0;
-  if (syms[i]->section == opd)
+  if (strcmp (syms[i]->section->name, ".opd") == 0)
     ++i;
   codesecsym = i;
 
@@ -2898,7 +2898,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
   secsymend = i;
 
   for (; i < symcount; ++i)
-    if (syms[i]->section != opd)
+    if (strcmp (syms[i]->section->name, ".opd") != 0)
       break;
   opdsymend = i;
 
