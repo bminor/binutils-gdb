@@ -1,3 +1,9 @@
+2009-03-23  Ian Lance Taylor  <iant@google.com>
+
+	* merge.cc (do_add_input_section): Correct pend value.  Change
+	message about last entry not being null terminated from error to
+	warning.
+
 2009-03-20  Mikolaj Zalewski  <mikolajz@google.com>
 
 	* incremental.cc: New file.

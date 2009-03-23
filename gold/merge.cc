@@ -465,7 +465,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
   const unsigned char* pdata = object->section_contents(shndx, &len, false);
 
   const Char_type* p = reinterpret_cast<const Char_type*>(pdata);
-  const Char_type* pend = p + len;
+  const Char_type* pend = p + len / sizeof(Char_type);
 
   if (len % sizeof(Char_type) != 0)
     {
@@ -485,8 +485,10 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 	{
 	  if (pl >= pend)
 	    {
-	      object->error(_("entry in mergeable string section "
-			      "not null terminated"));
+	      gold_warning(_("%s: last entry in mergeable string section '%s' "
+			     "not null terminated"),
+			   object->name().c_str(),
+			   object->section_name(shndx).c_str());
 	      break;
 	    }
 	}
