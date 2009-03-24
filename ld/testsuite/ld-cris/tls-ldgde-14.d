@@ -42,8 +42,8 @@ Contents of section \.tdata:
 #...
 Contents of section \.got:
  82138 00000000 00000000 00000000 01000000  .*
- 82148 00000000 01000000 f0ffffff 01000000  .*
- 82158 f4ffffff                             .*
+ 82148 00000000 01000000 80000000 01000000  .*
+ 82158 84000000   .*
 
 Disassembly of section \.text:
 

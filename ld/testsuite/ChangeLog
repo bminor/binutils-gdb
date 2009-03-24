@@ -1,3 +1,13 @@
+2009-03-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/tls-e-20.d, ld-cris/tls-e-20a.d, ld-cris/tls-e-21.d,
+	ld-cris/tls-e-80.d, ld-cris/tls-gd-3.d, ld-cris/tls-gd-3h.d,
+	ld-cris/tls-global-74.d, ld-cris/tls-ldgde-14.d,
+	ld-cris/tls-ldgde-15.d, ld-cris/tls-legd-16.d,
+	ld-cris/tls-legd-17.d, ld-cris/tls-local-57.d,
+	ld-cris/tls-local-58.d, ld-cris/tls-local-59.d: Adjust for BFD
+	change in link-time known GOT contents for GD relocations.
+
 2009-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/9970

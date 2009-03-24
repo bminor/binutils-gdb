@@ -39,7 +39,7 @@ Contents of section \.text:
 #...
 Contents of section \.got:
  82144 0+ 0+ 0+ 010+  .*
- 82154 f0ffffff 010+ f4ffffff  .*
+ 82154 80+ 010+ 840+   .*
 
 Disassembly of section \.text:
 

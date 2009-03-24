@@ -20,4 +20,4 @@ Contents of section .text:
 #...
 Contents of section \.got:
  82124 0+ 0+ 0+ 010+  .*
- 82134 80ffffff  .*
+ 82134 040+   .*

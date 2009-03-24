@@ -39,7 +39,7 @@ Contents of section \.text:
 #...
 Contents of section \.got:
  8213c 0+ 0+ 0+ 010+  .*
- 8214c f0ffffff 010+ f4ffffff  .*
+ 8214c 80+ 010+ 840+   .*
 
 Disassembly of section \.text:
 

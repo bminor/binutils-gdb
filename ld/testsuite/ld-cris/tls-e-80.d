@@ -64,7 +64,7 @@ Contents of section \.tdata:
  820c0 28000000 2a000000 29000000 2a000000  .*
 Contents of section \.got:
  820d0 00000000 00000000 00000000 01000000  .*
- 820e0 00000000 b0ffffff 01000000 b0ffffff  .*
+ 820e0 00000000 b0ffffff 01000000 00000000  .*
 
 Disassembly of section \.text:
 
