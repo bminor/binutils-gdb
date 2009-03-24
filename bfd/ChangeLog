@@ -1,3 +1,9 @@
+2009-03-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_32_GD>
+	<R_CRIS_16_GOT_GD, R_CRIS_32_GOT_GD>: Don't include the TLS size
+	when emitting a known TP offset in the GOT.
+
 2009-03-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (synthetic_opd): Delete.

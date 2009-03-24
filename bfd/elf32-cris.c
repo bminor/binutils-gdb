@@ -1735,9 +1735,8 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      bfd_vma off;
 
 	      /* The symbol is defined in the program, so just write
-		 (1, -prog_tls_size+known_tpoffset) into the GOT.  */
+		 (1, known_tpoffset) into the GOT.  */
 	      relocation -= elf_hash_table (info)->tls_sec->vma;
-	      relocation -= elf_hash_table (info)->tls_size;
 
 	      if (h != NULL)
 		{
