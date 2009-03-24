@@ -23,7 +23,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 
-const bfd_arch_info_type bfd_x86_64_arch_intel_syntax =
+static const bfd_arch_info_type bfd_x86_64_arch_intel_syntax =
 {
   64, /* 64 bits in a word */
   64, /* 64 bits in an address */
@@ -39,7 +39,7 @@ const bfd_arch_info_type bfd_x86_64_arch_intel_syntax =
   0
 };
 
-const bfd_arch_info_type bfd_i386_arch_intel_syntax =
+static const bfd_arch_info_type bfd_i386_arch_intel_syntax =
 {
   32,	/* 32 bits in a word */
   32,	/* 32 bits in an address */
@@ -55,7 +55,7 @@ const bfd_arch_info_type bfd_i386_arch_intel_syntax =
   &bfd_x86_64_arch_intel_syntax
 };
 
-const bfd_arch_info_type i8086_arch =
+static const bfd_arch_info_type i8086_arch =
 {
   32,	/* 32 bits in a word */
   32,	/* 32 bits in an address (well, not really) */
@@ -71,7 +71,7 @@ const bfd_arch_info_type i8086_arch =
   &bfd_i386_arch_intel_syntax
 };
 
-const bfd_arch_info_type bfd_x86_64_arch =
+static const bfd_arch_info_type bfd_x86_64_arch =
 {
   64, /* 32 bits in a word */
   64, /* 32 bits in an address */

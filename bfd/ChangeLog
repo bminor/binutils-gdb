@@ -1,3 +1,10 @@
+2009-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* cpu-i386.c (bfd_x86_64_arch_intel_syntax): Make it static.
+	(bfd_i386_arch_intel_syntax): Likewise.
+	(i8086_arch): Likewise.
+	(bfd_x86_64_arch): Likewise.
+
 2009-03-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section): <case
