@@ -1,5 +1,29 @@
 2009-03-23  Ian Lance Taylor  <iant@google.com>
 
+	* freebsd.h: New file.
+	* i386.cc: Include "freebsd.h".
+	(Target_i386): Derive from Target_freebsd rather than
+	Sized_target.
+	(Target_selector_i386): Derive from Target_selector_freebsd rather
+	than Target_selector.
+	* x86_64.cc: Include "freebsd.h".
+	(Target_x86_64): Derive from Target_freebsd rather than
+	Sized_target.
+	(Target_selector_x86_64): Derive from Target_selector_freebsd
+	rather than Target_selector.
+	* target.h (class Target): Add adjust_elf_header and
+	do_adjust_elf_header.
+	* output.cc (Output_file_header:: do_sized_write): Call target
+	adjust_elf_header routine.
+	* configure.tgt: Set targ_osabi.
+	* configure.ac: Define GOLD_DEFAULT_OSABI.
+	* parameters.cc (Parameters::default_target): Pass
+	GOLD_DEFAULT_OSABI to select_target.
+	* target-select.h (class Target_selector): Make instantiate_target
+	protected rather than private.
+	* Makefile.am (HFILES): Add freebsd.h.
+	* configure, Makefile.in, config.in: Rebuild.
+
 	* merge.cc (do_add_input_section): Correct pend value.  Change
 	message about last entry not being null terminated from error to
 	warning.

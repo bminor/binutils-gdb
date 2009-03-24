@@ -432,7 +432,6 @@ Output_file_header::do_sized_write(Output_file* of)
 			      ? elfcpp::ELFDATA2MSB
 			      : elfcpp::ELFDATA2LSB);
   e_ident[elfcpp::EI_VERSION] = elfcpp::EV_CURRENT;
-  // FIXME: Some targets may need to set EI_OSABI and EI_ABIVERSION.
   oehdr.put_e_ident(e_ident);
 
   elfcpp::ET e_type;
@@ -488,6 +487,10 @@ Output_file_header::do_sized_write(Output_file* of)
     oehdr.put_e_shstrndx(this->shstrtab_->out_shndx());
   else
     oehdr.put_e_shstrndx(elfcpp::SHN_XINDEX);
+
+  // Let the target adjust the ELF header, e.g., to set EI_OSABI in
+  // the e_ident field.
+  parameters->target().adjust_elf_header(view, ehdr_size);
 
   of->write_output_view(0, ehdr_size, view);
 }

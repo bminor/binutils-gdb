@@ -37,6 +37,7 @@
 #include "target-reloc.h"
 #include "target-select.h"
 #include "tls.h"
+#include "freebsd.h"
 
 namespace
 {
@@ -52,7 +53,7 @@ class Output_data_plt_x86_64;
 //   http://people.redhat.com/drepper/tls.pdf
 //   http://www.lsd.ic.unicamp.br/~oliva/writeups/TLS/RFC-TLSDESC-x86.txt
 
-class Target_x86_64 : public Sized_target<64, false>
+class Target_x86_64 : public Target_freebsd<64, false>
 {
  public:
   // In the x86_64 ABI (p 68), it says "The AMD64 ABI architectures
@@ -60,7 +61,7 @@ class Target_x86_64 : public Sized_target<64, false>
   typedef Output_data_reloc<elfcpp::SHT_RELA, true, 64, false> Reloc_section;
 
   Target_x86_64()
-    : Sized_target<64, false>(&x86_64_info),
+    : Target_freebsd<64, false>(&x86_64_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rela_dyn_(NULL),
       copy_relocs_(elfcpp::R_X86_64_COPY), dynbss_(NULL),
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
@@ -2648,16 +2649,18 @@ Target_x86_64::do_code_fill(section_size_type length) const
 
 // The selector for x86_64 object files.
 
-class Target_selector_x86_64 : public Target_selector
+class Target_selector_x86_64 : public Target_selector_freebsd
 {
 public:
   Target_selector_x86_64()
-    : Target_selector(elfcpp::EM_X86_64, 64, false, "elf64-x86-64")
+    : Target_selector_freebsd(elfcpp::EM_X86_64, 64, false, "elf64-x86-64",
+			      "elf64-x86-64-freebsd")
   { }
 
   Target*
   do_instantiate_target()
   { return new Target_x86_64(); }
+
 };
 
 Target_selector_x86_64 target_selector_x86_64;

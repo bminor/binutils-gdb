@@ -88,6 +88,7 @@ HFILES = \
 	ehframe.h \
 	errors.h \
 	fileread.h \
+	freebsd.h \
         gc.h \
 	gold.h \
 	gold-threads.h \

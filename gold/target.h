@@ -167,6 +167,12 @@ class Target
   is_defined_by_abi(const Symbol* sym) const
   { return this->do_is_defined_by_abi(sym); }
 
+  // Adjust the output file header before it is written out.  VIEW
+  // points to the header in external form.  LEN is the length.
+  void
+  adjust_elf_header(unsigned char* view, int len) const
+  { return this->do_adjust_elf_header(view, len); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -224,6 +230,14 @@ class Target
   virtual bool
   do_is_defined_by_abi(const Symbol*) const
   { return false; }
+
+  // Adjust the output file header before it is written out.  VIEW
+  // points to the header in external form.  LEN is the length, and
+  // will be one of the values of elfcpp::Elf_sizes<size>::ehdr_size.
+  // By default, we do nothing.
+  virtual void
+  do_adjust_elf_header(unsigned char*, int) const
+  { }
 
  private:
   Target(const Target&);

@@ -37,6 +37,7 @@
 #include "target-reloc.h"
 #include "target-select.h"
 #include "tls.h"
+#include "freebsd.h"
 
 namespace
 {
@@ -50,13 +51,13 @@ class Output_data_plt_i386;
 //   http://people.redhat.com/drepper/tls.pdf
 //   http://www.lsd.ic.unicamp.br/~oliva/writeups/TLS/RFC-TLSDESC-x86.txt
 
-class Target_i386 : public Sized_target<32, false>
+class Target_i386 : public Target_freebsd<32, false>
 {
  public:
   typedef Output_data_reloc<elfcpp::SHT_REL, true, 32, false> Reloc_section;
 
   Target_i386()
-    : Sized_target<32, false>(&i386_info),
+    : Target_freebsd<32, false>(&i386_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
       copy_relocs_(elfcpp::R_386_COPY), dynbss_(NULL),
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
@@ -2659,11 +2660,12 @@ Target_i386::do_code_fill(section_size_type length) const
 
 // The selector for i386 object files.
 
-class Target_selector_i386 : public Target_selector
+class Target_selector_i386 : public Target_selector_freebsd
 {
 public:
   Target_selector_i386()
-    : Target_selector(elfcpp::EM_386, 32, false, "elf32-i386")
+    : Target_selector_freebsd(elfcpp::EM_386, 32, false,
+			      "elf32-i386", "elf32-i386-freebsd")
   { }
 
   Target*

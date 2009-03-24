@@ -106,10 +106,10 @@ class Target_selector
   virtual Target*
   do_instantiate_target() = 0;
 
-  // Recognize an object file given a machine code, size, and
-  // endianness.  When this is called we already know that they match
-  // the machine_, size_, and is_big_endian_ fields.  The child class
-  // may implement a different version of this to do additional
+  // Recognize an object file given a machine code, OSABI code, and
+  // ELF version value.  When this is called we already know that they
+  // match the machine_, size_, and is_big_endian_ fields.  The child
+  // class may implement a different version of this to do additional
   // checks, or to check for multiple machine codes if the machine_
   // field is EM_NONE.
   virtual Target*
@@ -134,7 +134,6 @@ class Target_selector
     names->push_back(this->bfd_name_);
   }
 
- private:
   // Instantiate the target and return it.
   Target*
   instantiate_target()
@@ -144,6 +143,7 @@ class Target_selector
     return this->instantiated_target_;
   }
 
+ private:
   // ELF machine code.
   const int machine_;
   // Target size--32 or 64.

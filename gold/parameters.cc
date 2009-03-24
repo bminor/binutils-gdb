@@ -92,7 +92,8 @@ Parameters::default_target() const
   const Target* target = select_target(elfcpp::GOLD_DEFAULT_MACHINE,
                                        GOLD_DEFAULT_SIZE,
                                        GOLD_DEFAULT_BIG_ENDIAN,
-                                       0, 0);
+				       elfcpp::GOLD_DEFAULT_OSABI,
+				       0);
   gold_assert(target != NULL);
   return *target;
 }

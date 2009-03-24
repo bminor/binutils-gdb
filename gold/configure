@@ -2030,6 +2030,7 @@ all_targets=
 default_machine=
 default_size=
 default_big_endian=
+default_osabi=ELFOSABI_NONE
 targ_32_little=
 targ_32_big=
 targ_64_little=
@@ -2078,6 +2079,7 @@ echo "$as_me: error: \"unsupported target $targ\"" >&2;}
         default_machine=$targ_machine
 	default_size=$targ_size
 	default_big_endian=$targ_big_endian
+	default_osabi=$targ_osabi
       fi
     fi
   fi
@@ -2132,6 +2134,11 @@ _ACEOF
 
 cat >>confdefs.h <<_ACEOF
 #define GOLD_DEFAULT_BIG_ENDIAN $default_big_endian
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define GOLD_DEFAULT_OSABI $default_osabi
 _ACEOF
 
 

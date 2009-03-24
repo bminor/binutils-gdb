@@ -103,6 +103,7 @@ all_targets=
 default_machine=
 default_size=
 default_big_endian=
+default_osabi=ELFOSABI_NONE
 targ_32_little=
 targ_32_big=
 targ_64_little=
@@ -149,6 +150,7 @@ for targ in $target $canon_targets; do
         default_machine=$targ_machine
 	default_size=$targ_size
 	default_big_endian=$targ_big_endian
+	default_osabi=$targ_osabi
       fi
     fi
   fi
@@ -184,6 +186,8 @@ AC_DEFINE_UNQUOTED(GOLD_DEFAULT_SIZE, $default_size,
 		   [Default size (32 or 64)])
 AC_DEFINE_UNQUOTED(GOLD_DEFAULT_BIG_ENDIAN, $default_big_endian,
 		   [Default big endian (true or false)])
+AC_DEFINE_UNQUOTED(GOLD_DEFAULT_OSABI, $default_osabi,
+		   [Default OSABI code])
 
 AC_PROG_CC
 AC_PROG_CXX
