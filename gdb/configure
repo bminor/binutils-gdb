@@ -8125,8 +8125,9 @@ if test "${with_curses+set}" = set; then
   opt_curses=$withval
 fi;
 
+prefer_curses=no
 if test "$opt_curses" = "yes"; then
-	prefer_curses=yes
+  prefer_curses=yes
 fi
 
 # Profiling support.

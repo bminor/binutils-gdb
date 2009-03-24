@@ -334,8 +334,9 @@ fi
 opt_curses=no
 AC_ARG_WITH(curses, AC_HELP_STRING([--with-curses], [use the curses library instead of the termcap library]), opt_curses=$withval)
 
+prefer_curses=no
 if test "$opt_curses" = "yes"; then
-	prefer_curses=yes
+  prefer_curses=yes
 fi
 
 # Profiling support.
