@@ -1,3 +1,10 @@
+2009-03-24  Elliott Hughes  <enh@google.com>
+
+	* output.cc (Output_file::map_anonymous): Define.
+	(Output_file::map): Use map_anonymous.  If the regular mmap fails,
+	try an anonymous one.  Report the size if the mmap fails.
+	* output.h (class Output_file): Declare map_anonymous.
+
 2009-03-24  Ian Lance Taylor  <iant@google.com>
 
 	* target-select.cc (instantiate_target): Don't acquire the lock if

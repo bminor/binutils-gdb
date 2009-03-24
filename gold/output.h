@@ -3115,9 +3115,13 @@ class Output_file
   { }
 
  private:
-  // Map the file into memory and return a pointer to the map.
+  // Map the file into memory.
   void
   map();
+
+  // Allocate anonymous memory for the file.
+  void*
+  map_anonymous();
 
   // Unmap the file from memory (and flush to disk buffers).
   void

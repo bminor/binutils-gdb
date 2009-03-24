@@ -3380,6 +3380,17 @@ Output_file::resize(off_t file_size)
     }
 }
 
+// Map a block of memory which will later be written to the file.
+// Return a pointer to the memory.
+
+void*
+Output_file::map_anonymous()
+{
+  this->map_is_anonymous_ = true;
+  return ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
+		MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+}
+
 // Map the file into memory.
 
 void
@@ -3396,11 +3407,7 @@ Output_file::map()
       || ::fstat(o, &statbuf) != 0
       || !S_ISREG(statbuf.st_mode)
       || this->is_temporary_)
-    {
-      this->map_is_anonymous_ = true;
-      base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
-                    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    }
+    base = this->map_anonymous();
   else
     {
       // Ensure that we have disk space available for the file.  If we
@@ -3418,9 +3425,19 @@ Output_file::map()
       this->map_is_anonymous_ = false;
       base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
                     MAP_SHARED, o, 0);
+
+      // The mmap call might fail because of file system issues: the
+      // file system might not support mmap at all, or it might not
+      // support mmap with PROT_WRITE.  I'm not sure which errno
+      // values we will see in all cases, so if the mmap fails for any
+      // reason try for an anonymous map.
+      if (base == MAP_FAILED)
+	base = this->map_anonymous();
     }
   if (base == MAP_FAILED)
-    gold_fatal(_("%s: mmap: %s"), this->name_, strerror(errno));
+    gold_fatal(_("%s: mmap: failed to allocate %lu bytes for output file: %s"),
+	       this->name_, static_cast<unsigned long>(this->file_size_),
+	       strerror(errno));
   this->base_ = static_cast<unsigned char*>(base);
 }
 
