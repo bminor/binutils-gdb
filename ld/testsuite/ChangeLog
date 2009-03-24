@@ -1,5 +1,9 @@
 2009-03-24  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-cris/tls-commx.s, ld-cris/tls-dso-dtpoffd2.d,
+	ld-cris/tls-dso-dtpoffd4.d, ld-cris/tls-dtpoffdx.s,
+	ld-cris/tls-e-dtpoffd1.d: New tests.
+
 	* ld-cris/tls-e-20.d, ld-cris/tls-e-20a.d, ld-cris/tls-e-21.d,
 	ld-cris/tls-e-80.d, ld-cris/tls-gd-3.d, ld-cris/tls-gd-3h.d,
 	ld-cris/tls-global-74.d, ld-cris/tls-ldgde-14.d,
