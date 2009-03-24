@@ -9010,7 +9010,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case OP_ATR_MODULUS:
       {
-        struct type *type_arg = exp->elts[pc + 2].type;
+        struct type *type_arg = check_typedef (exp->elts[pc + 2].type);
         evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
 
         if (noside == EVAL_SKIP)

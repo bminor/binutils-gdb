@@ -1,5 +1,11 @@
 2009-03-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_evaluate_subexp) [OP_ATR_MODULUS]: Use check_typdef
+	to make sure we try to get the modulus of the actual type, not the
+	associated typedef.
+
+2009-03-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp): [OP_ATR_FIRST, OP_ATR_LAST]
 	[OP_ATR_LENGTH]: When using the attribute on a type, make sure
 	to get the real type, not the associated typedef.
