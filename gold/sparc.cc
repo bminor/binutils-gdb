@@ -3240,8 +3240,6 @@ public:
 		      (size == 64 ? "elf64-sparc" : "elf32-sparc"))
   { }
 
-  Target* instantiated_target_;
-
   Target* do_recognize(int machine, int, int)
   {
     switch (size)
@@ -3261,15 +3259,11 @@ public:
 	return NULL;
       }
 
-    return do_instantiate_target();
+    return this->instantiate_target();
   }
 
   Target* do_instantiate_target()
-  {
-    if (this->instantiated_target_ == NULL)
-      this->instantiated_target_ = new Target_sparc<size, big_endian>();
-    return this->instantiated_target_;
-  }
+  { return new Target_sparc<size, big_endian>(); }
 };
 
 Target_selector_sparc<32, true> target_selector_sparc32;

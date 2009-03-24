@@ -116,6 +116,8 @@ class Errors
   // This class can be accessed from multiple threads.  This lock is
   // used to control access to the data structures.
   Lock* lock_;
+  // Used to initialize the lock_ field exactly once.
+  Initialize_lock initialize_lock_;
   // Numbers of errors reported.
   int error_count_;
   // Number of warnings reported.

@@ -39,8 +39,8 @@ namespace gold
 const int Errors::max_undefined_error_report;
 
 Errors::Errors(const char* program_name)
-  : program_name_(program_name), lock_(NULL), error_count_(0),
-    warning_count_(0), undefined_symbols_()
+  : program_name_(program_name), lock_(NULL), initialize_lock_(&this->lock_),
+    error_count_(0), warning_count_(0), undefined_symbols_()
 {
 }
 
@@ -53,9 +53,7 @@ Errors::Errors(const char* program_name)
 bool
 Errors::initialize_lock()
 {
-  if (this->lock_ == NULL && parameters->options_valid())
-    this->lock_ = new Lock;
-  return this->lock_ != NULL;
+  return this->initialize_lock_.initialize();
 }
 
 // Increment a counter, holding the lock if available.

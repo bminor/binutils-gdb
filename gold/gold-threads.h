@@ -35,6 +35,7 @@ namespace gold
 {
 
 class Condvar;
+class Initialize_lock_once;
 
 // The interface for the implementation of a Lock.
 
@@ -188,6 +189,33 @@ class Condvar
 
   Lock& lock_;
   Condvar_impl* condvar_;
+};
+
+// A class used to initialize a lock exactly once, after the options
+// have been read.  This is needed because the implementation of locks
+// depends on whether we've seen the --threads option.  Before the
+// options have been read, we know we are single-threaded, so we can
+// get by without using a lock.  This class should be an instance
+// variable of the class which has a lock which needs to be
+// initialized.
+
+class Initialize_lock
+{
+ public:
+  // The class which uses this will have a pointer to a lock.  This
+  // must be constructed with a pointer to that pointer.
+  Initialize_lock(Lock** pplock);
+
+  // Initialize the lock.  Return true if the lock is now initialized,
+  // false if it is not (because the options have not yet been read).
+  bool
+  initialize();
+
+ private:
+  // A pointer to the lock pointer which must be initialized.
+  Lock** const pplock_;
+  // If needed, a pointer to a pthread_once_t structure.
+  Initialize_lock_once* once_;
 };
 
 } // End namespace gold.

@@ -276,4 +276,128 @@ Condvar::~Condvar()
   delete this->condvar_;
 }
 
+#ifdef ENABLE_THREADS
+
+// Class Initialize_lock_once.  This exists to hold a pthread_once_t
+// structure for Initialize_lock.
+
+class Initialize_lock_once
+{
+ public:
+  Initialize_lock_once()
+    : once_(PTHREAD_ONCE_INIT)
+  { }
+
+  // Return a pointer to the pthread_once_t variable.
+  pthread_once_t*
+  once_control()
+  { return &this->once_; }
+
+ private:
+  pthread_once_t once_;
+};
+
+#endif // !defined(ENABLE_THREADS)
+
+#ifdef ENABLE_THREADS
+
+// A single lock which controls access to initialize_lock_pointer.
+// This is used because we can't pass parameters to functions passed
+// to pthread_once.
+
+static pthread_mutex_t initialize_lock_control = PTHREAD_MUTEX_INITIALIZER;
+
+// A pointer to a pointer to the lock which we need to initialize
+// once.  Access to this is controlled by initialize_lock_pointer.
+
+static Lock** initialize_lock_pointer;
+
+// A routine passed to pthread_once which initializes the lock which
+// initialize_lock_pointer points to.
+
+extern "C"
+{
+
+static void
+initialize_lock_once()
+{
+  *initialize_lock_pointer = new Lock();
+}
+
+}
+
+#endif // !defined(ENABLE_THREADS)
+
+// Class Initialize_lock.
+
+Initialize_lock::Initialize_lock(Lock** pplock)
+  : pplock_(pplock)
+{
+#ifndef ENABLE_THREADS
+  this->once_ = NULL;
+#else
+  this->once_ = new Initialize_lock_once();
+#endif
+}
+
+// Initialize the lock.
+
+bool
+Initialize_lock::initialize()
+{
+  // If the lock has already been initialized, we don't need to do
+  // anything.  Note that this assumes that the pointer value will be
+  // set completely or not at all.  I hope this is always safe.  We
+  // want to do this for efficiency.
+  if (*this->pplock_ != NULL)
+    return true;
+
+  // We can't initialize the lock until we have read the options.
+  if (!parameters->options_valid())
+    return false;
+
+  // If the user did not use --threads, then we can initialize
+  // directly.
+  if (!parameters->options().threads())
+    {
+      *this->pplock_ = new Lock();
+      return true;
+    }
+
+#ifndef ENABLE_THREADS
+
+  // If there is no threads support, we don't need to use
+  // pthread_once.
+  *this->pplock_ = new Lock();
+
+#else // !defined(ENABLE_THREADS)
+
+  // Since we can't pass parameters to routines called by
+  // pthread_once, we use a static variable: initialize_lock_pointer.
+  // That in turns means that we need to use a mutex to control access
+  // to initialize_lock_pointer.
+
+  int err = pthread_mutex_lock(&initialize_lock_control);
+  if (err != 0)
+    gold_fatal(_("pthread_mutex_lock failed: %s"), strerror(err));
+
+  initialize_lock_pointer = this->pplock_;
+
+  err = pthread_once(this->once_->once_control(), initialize_lock_once);
+  if (err != 0)
+    gold_fatal(_("pthread_once failed: %s"), strerror(err));
+
+  initialize_lock_pointer = NULL;
+
+  err = pthread_mutex_unlock(&initialize_lock_control);
+  if (err != 0)
+    gold_fatal(_("pthread_mutex_unlock failed: %s"), strerror(err));
+
+  gold_assert(*this->pplock_ != NULL);
+
+#endif // !defined(ENABLE_THREADS)
+
+  return true;
+}
+
 } // End namespace gold.

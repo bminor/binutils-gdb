@@ -25,6 +25,8 @@
 
 #include <vector>
 
+#include "gold-threads.h"
+
 namespace gold
 {
 
@@ -136,12 +138,7 @@ class Target_selector
 
   // Instantiate the target and return it.
   Target*
-  instantiate_target()
-  {
-    if (this->instantiated_target_ == NULL)
-      this->instantiated_target_ = this->do_instantiate_target();
-    return this->instantiated_target_;
-  }
+  instantiate_target();
 
  private:
   // ELF machine code.
@@ -157,6 +154,11 @@ class Target_selector
   // The singleton Target structure--this points to an instance of the
   // real implementation.
   Target* instantiated_target_;
+  // Lock to make sure that we don't instantiate the target more than
+  // once.
+  Lock* lock_;
+  // We only want to initialize the lock_ pointer once.
+  Initialize_lock initialize_lock_;
 };
 
 // Select the target for an ELF file.

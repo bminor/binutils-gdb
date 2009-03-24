@@ -25,10 +25,10 @@
 
 #include <vector>
 
+#include "gold-threads.h"
+
 namespace gold
 {
-
-class Lock;
 
 // This class manages file descriptors for gold.
 
@@ -78,6 +78,8 @@ class Descriptors
 
   // We need to lock before accessing any fields.
   Lock* lock_;
+  // Used to initialize the lock_ field exactly once.
+  Initialize_lock initialize_lock_;
   // Information for descriptors.
   std::vector<Open_descriptor> open_descriptors_;
   // Top of stack.

@@ -1,5 +1,32 @@
 2009-03-23  Ian Lance Taylor  <iant@google.com>
 
+	* gold-threads.h (class Initialize_lock): Define.
+	* gold-threads.cc (class Initialize_lock_once): Define.
+	(initialize_lock_control): New static variable.
+	(initialize_lock_pointer): New static variable.
+	(initialize_lock_once): New static function.
+	(Initialize_lock::Initialize_lock): Define.
+	(Initialize_lock::initialize): Define.
+	* target-select.h: Include "gold-threads.h".
+	(class Target_selector): Add lock_ and initialize_lock_ fields.
+	Don't define instantiate_target, just declare it.
+	* target-select.cc (Target_selector::Target_selector): Initialize
+	new fields.
+	(Target_selector::instantiate_target): Define.
+	* descriptors.h: Include "gold-threads.h".
+	(class Descriptors): Add initialize_lock_ field.
+	* descriptors.cc (Descriptors::Descriptors): Initialize new
+	field.
+	(Descriptors::open): Use initialize_lock_ field
+	* errors.h (class Errors): Add initialize_lock_ field.
+	* errors.cc (Errors::Errors): Initialize new field.
+	(Errors::initialize_lock): Use initialize_lock_ field.
+	* powerpc.cc (class Target_selector_powerpc): Remove
+	instantiated_target_ field.  In do_recognize call
+	instantiate_target rather than do_instantiate_target.  In
+	do_instantiate_target just allocate a new target.
+	* sparc.cc (class Target_selector_sparc): Likewise.
+
 	* freebsd.h: New file.
 	* i386.cc: Include "freebsd.h".
 	(Target_i386): Derive from Target_freebsd rather than

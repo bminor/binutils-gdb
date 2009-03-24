@@ -51,8 +51,8 @@ namespace gold
 // adjusted downward if we run out of file descriptors.
 
 Descriptors::Descriptors()
-  : lock_(NULL), open_descriptors_(), stack_top_(-1), current_(0),
-    limit_(8192 - 16)
+  : lock_(NULL), initialize_lock_(&this->lock_), open_descriptors_(),
+    stack_top_(-1), current_(0), limit_(8192 - 16)
 {
   this->open_descriptors_.reserve(128);
 }
@@ -66,13 +66,9 @@ Descriptors::open(int descriptor, const char* name, int flags, int mode)
   // initialize a Lock until we have parsed the options to find out
   // whether we are running with threads.  We can be called before
   // options are valid when reading a linker script.
-  if (this->lock_ == NULL)
-    {
-      if (parameters->options_valid())
-	this->lock_ = new Lock();
-      else
-	gold_assert(descriptor < 0);
-    }
+  bool lock_initialized = this->initialize_lock_.initialize();
+
+  gold_assert(lock_initialized || descriptor < 0);
 
   if (descriptor >= 0)
     {

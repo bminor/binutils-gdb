@@ -46,11 +46,25 @@ namespace gold
 Target_selector::Target_selector(int machine, int size, bool is_big_endian,
 				 const char* bfd_name)
   : machine_(machine), size_(size), is_big_endian_(is_big_endian),
-    bfd_name_(bfd_name), instantiated_target_(NULL)
+    bfd_name_(bfd_name), instantiated_target_(NULL), lock_(NULL),
+    initialize_lock_(&this->lock_)
     
 {
   this->next_ = target_selectors;
   target_selectors = this;
+}
+
+// Instantiate the target and return it.  Use a lock to avoid
+// instantiating two instances of the same target.
+
+Target*
+Target_selector::instantiate_target()
+{
+  this->initialize_lock_.initialize();
+  Hold_optional_lock hl(this->lock_);
+  if (this->instantiated_target_ == NULL)
+    this->instantiated_target_ = this->do_instantiate_target();
+  return this->instantiated_target_;
 }
 
 // Find the target for an ELF file.
