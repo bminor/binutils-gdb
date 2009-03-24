@@ -1,5 +1,15 @@
 2009-03-23  Joel Brobecker  <brobecker@adacore.com>
 
+	Add gdb_usleep as a portable version of sleep based on gdb_select.
+	* gdb_usleep.h, gdb_usleep.c: New files.
+	* Makefile.in (SFILES): Add gdb_usleep.c.
+	(HFILES_NO_SRCDIR): Add gdb_usleep.h.
+	(COMMON_OBS): Add gdb_usleep.o.
+	* ser-unix.c (hardwire_send_break): Replace call to gdb_select
+	by call to gdb_usleep.
+
+2009-03-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* buildsym.c (end_symtab): If we ignore the subfiles, then
 	unlink the associated symtabs if they were already allocated.
 
