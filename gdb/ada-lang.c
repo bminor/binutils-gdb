@@ -8872,7 +8872,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           {
             evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
             arg1 = NULL;
-            type_arg = exp->elts[pc + 2].type;
+            type_arg = check_typedef (exp->elts[pc + 2].type);
           }
         else
           {
