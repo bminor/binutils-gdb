@@ -411,25 +411,28 @@ field_name_match (const char *field_name, const char *target)
 }
 
 
-/* Assuming TYPE is a TYPE_CODE_STRUCT, find the field whose name matches
-   FIELD_NAME, and return its index.  This function also handles fields
-   whose name have ___ suffixes because the compiler sometimes alters
-   their name by adding such a suffix to represent fields with certain
-   constraints.  If the field could not be found, return a negative
-   number if MAYBE_MISSING is set.  Otherwise raise an error.  */
+/* Assuming TYPE is a TYPE_CODE_STRUCT or a TYPE_CODE_TYPDEF to
+   a TYPE_CODE_STRUCT, find the field whose name matches FIELD_NAME,
+   and return its index.  This function also handles fields whose name
+   have ___ suffixes because the compiler sometimes alters their name
+   by adding such a suffix to represent fields with certain constraints.
+   If the field could not be found, return a negative number if
+   MAYBE_MISSING is set.  Otherwise raise an error.  */
 
 int
 ada_get_field_index (const struct type *type, const char *field_name,
                      int maybe_missing)
 {
   int fieldno;
-  for (fieldno = 0; fieldno < TYPE_NFIELDS (type); fieldno++)
-    if (field_name_match (TYPE_FIELD_NAME (type, fieldno), field_name))
+  struct type *struct_type = check_typedef ((struct type *) type);
+
+  for (fieldno = 0; fieldno < TYPE_NFIELDS (struct_type); fieldno++)
+    if (field_name_match (TYPE_FIELD_NAME (struct_type, fieldno), field_name))
       return fieldno;
 
   if (!maybe_missing)
     error (_("Unable to find field %s in struct %s.  Aborting"),
-           field_name, TYPE_NAME (type));
+           field_name, TYPE_NAME (struct_type));
 
   return -1;
 }

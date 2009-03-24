@@ -1,5 +1,10 @@
 2009-03-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_get_field_index): Add handling of the case
+	when TYPE is a typedef of a struct.
+
+2009-03-23  Joel Brobecker  <brobecker@adacore.com>
+
 	Add gdb_usleep as a portable version of sleep based on gdb_select.
 	* gdb_usleep.h, gdb_usleep.c: New files.
 	* Makefile.in (SFILES): Add gdb_usleep.c.
