@@ -242,7 +242,7 @@ darwin_ptrace (const char *name,
 
   inferior_debug (2, _("ptrace (%s, %d, 0x%x, %d): %d (%s)\n"),
                   name, pid, arg3, arg4, ret,
-                  (ret != 0) ? strerror (errno) : _("no error"));
+                  (ret != 0) ? safe_strerror (errno) : _("no error"));
   return ret;
 }
 
@@ -686,7 +686,7 @@ darwin_stop_inferior (struct target_ops *ops, darwin_inferior *inf)
 
   res = kill (inf->pid, SIGSTOP);
   if (res != 0)
-    warning (_("cannot kill: %s\n"), strerror (errno));
+    warning (_("cannot kill: %s\n"), safe_strerror (errno));
 
   ptid = darwin_wait (ops, inferior_ptid, &wstatus);
   gdb_assert (wstatus.kind = TARGET_WAITKIND_STOPPED);
@@ -964,7 +964,7 @@ darwin_attach (struct target_ops *ops, char *args, int from_tty)
   res = PTRACE (PT_ATTACHEXC, pid, 0, 0);
   if (res != 0)
     error (_("Unable to attach to process-id %d: %s (%d)"),
-	   pid, strerror (errno), errno);
+	   pid, safe_strerror (errno), errno);
 
   inf = add_inferior (pid);
   inf->attach_flag = 1;
@@ -1028,7 +1028,7 @@ darwin_detach (struct target_ops *ops, char *args, int from_tty)
   res = PTRACE (PT_DETACH, darwin_inf->pid, 0, 0);
   if (res != 0)
     printf_unfiltered (_("Unable to detach from process-id %d: %s (%d)"),
-		       darwin_inf->pid, strerror (errno), errno);
+		       darwin_inf->pid, safe_strerror (errno), errno);
 
   msg_state = NO_MESSAGE;
 
