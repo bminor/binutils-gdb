@@ -2654,7 +2654,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 
     case UNOP_QUAL:
       *pos += 3;
-      resolve_subexp (expp, pos, 1, exp->elts[pc + 1].type);
+      resolve_subexp (expp, pos, 1, check_typedef (exp->elts[pc + 1].type));
       break;
 
     case OP_ATR_MODULUS:

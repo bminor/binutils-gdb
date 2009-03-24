@@ -1,5 +1,10 @@
 2009-03-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (resolve_subexp) [UNOP_QUAL]: Resolve typedefs before
+	trying to resolve the type qualification.
+
+2009-03-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp) [UNOP_IN_RANGE]: make sure
 	we try to apply the attribute on the real type, rather than
 	its associated typedef.
