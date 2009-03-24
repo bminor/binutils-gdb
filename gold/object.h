@@ -1921,6 +1921,14 @@ struct Relocate_info
   location(size_t relnum, off_t reloffset) const;
 };
 
+// Return whether INPUT_FILE contains an ELF object start at file
+// offset OFFSET.  This sets *START to point to a view of the start of
+// the file.  It sets *READ_SIZE to the number of bytes in the view.
+
+extern bool
+is_elf_object(Input_file* input_file, off_t offset,
+	      const unsigned char** start, int *read_size);
+
 // Return an Object appropriate for the input file.  P is BYTES long,
 // and holds the ELF header.  If PUNCONFIGURED is not NULL, then if
 // this sees an object the linker is not configured to support, it

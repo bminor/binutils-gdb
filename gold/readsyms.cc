@@ -191,12 +191,9 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
       return false;
     }
 
-  int read_size = elfcpp::Elf_sizes<64>::ehdr_size;
-  if (filesize < read_size)
-    read_size = filesize;
-
-  const unsigned char* ehdr = input_file->file().get_view(0, 0, read_size,
-							  true, false);
+  const unsigned char* ehdr;
+  int read_size;
+  bool is_elf = is_elf_object(input_file, 0, &ehdr, &read_size);
 
   if (read_size >= Archive::sarmag)
     {
@@ -257,66 +254,58 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
         }
     }
 
-  if (read_size >= 4)
+  if (is_elf)
     {
-      static unsigned char elfmagic[4] =
-	{
-	  elfcpp::ELFMAG0, elfcpp::ELFMAG1,
-	  elfcpp::ELFMAG2, elfcpp::ELFMAG3
-	};
-      if (memcmp(ehdr, elfmagic, 4) == 0)
-	{
-	  // This is an ELF object.
+      // This is an ELF object.
 
-	  bool unconfigured;
-	  Object* obj = make_elf_object(input_file->filename(),
-					input_file, 0, ehdr, read_size,
-					&unconfigured);
-	  if (obj == NULL)
+      bool unconfigured;
+      Object* obj = make_elf_object(input_file->filename(),
+				    input_file, 0, ehdr, read_size,
+				    &unconfigured);
+      if (obj == NULL)
+	{
+	  if (unconfigured && input_file->will_search_for())
 	    {
-	      if (unconfigured && input_file->will_search_for())
-		{
-		  Read_symbols::incompatible_warning(this->input_argument_,
-						     input_file);
-		  input_file->file().release();
-		  input_file->file().unlock(this);
-		  delete input_file;
-		  ++this->dirindex_;
-		  return this->do_read_symbols(workqueue);
-		}
-	      return false;
+	      Read_symbols::incompatible_warning(this->input_argument_,
+						 input_file);
+	      input_file->file().release();
+	      input_file->file().unlock(this);
+	      delete input_file;
+	      ++this->dirindex_;
+	      return this->do_read_symbols(workqueue);
 	    }
-
-	  Read_symbols_data* sd = new Read_symbols_data;
-	  obj->read_symbols(sd);
-
-	  // Opening the file locked it, so now we need to unlock it.
-	  // We need to unlock it before queuing the Add_symbols task,
-	  // because the workqueue doesn't know about our lock on the
-	  // file.  If we queue the Add_symbols task first, it will be
-	  // stuck on the end of the file lock, but since the
-	  // workqueue doesn't know about that lock, it will never
-	  // release the Add_symbols task.
-
-	  input_file->file().unlock(this);
-
-	  // We use queue_next because everything is cached for this
-	  // task to run right away if possible.
-
-	  workqueue->queue_next(new Add_symbols(this->input_objects_,
-						this->symtab_, this->layout_,
-						this->dirpath_,
-						this->dirindex_,
-						this->mapfile_,
-						this->input_argument_,
-						this->input_group_,
-						obj,
-						sd,
-						this->this_blocker_,
-						this->next_blocker_));
-
-	  return true;
+	  return false;
 	}
+
+      Read_symbols_data* sd = new Read_symbols_data;
+      obj->read_symbols(sd);
+
+      // Opening the file locked it, so now we need to unlock it.  We
+      // need to unlock it before queuing the Add_symbols task,
+      // because the workqueue doesn't know about our lock on the
+      // file.  If we queue the Add_symbols task first, it will be
+      // stuck on the end of the file lock, but since the workqueue
+      // doesn't know about that lock, it will never release the
+      // Add_symbols task.
+
+      input_file->file().unlock(this);
+
+      // We use queue_next because everything is cached for this
+      // task to run right away if possible.
+
+      workqueue->queue_next(new Add_symbols(this->input_objects_,
+					    this->symtab_, this->layout_,
+					    this->dirpath_,
+					    this->dirindex_,
+					    this->mapfile_,
+					    this->input_argument_,
+					    this->input_group_,
+					    obj,
+					    sd,
+					    this->this_blocker_,
+					    this->next_blocker_));
+
+      return true;
     }
 
   // Queue up a task to try to parse this file as a script.  We use a

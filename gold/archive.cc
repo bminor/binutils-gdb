@@ -540,27 +540,9 @@ Archive::get_elf_object_for_member(off_t off, bool* punconfigured)
         }
     }
 
-  off_t filesize = input_file->file().filesize();
-  int read_size = elfcpp::Elf_sizes<64>::ehdr_size;
-  if (filesize - memoff < read_size)
-    read_size = filesize - memoff;
-
-  if (read_size < 4)
-    {
-      gold_error(_("%s: member at %zu is not an ELF object"),
-		 this->name().c_str(), static_cast<size_t>(off));
-      return NULL;
-    }
-
-  const unsigned char* ehdr = input_file->file().get_view(memoff, 0, read_size,
-							  true, false);
-
-  static unsigned char elfmagic[4] =
-    {
-      elfcpp::ELFMAG0, elfcpp::ELFMAG1,
-      elfcpp::ELFMAG2, elfcpp::ELFMAG3
-    };
-  if (memcmp(ehdr, elfmagic, 4) != 0)
+  const unsigned char* ehdr;
+  int read_size;
+  if (!is_elf_object(input_file, memoff, &ehdr, &read_size))
     {
       gold_error(_("%s: member at %zu is not an ELF object"),
 		 this->name().c_str(), static_cast<size_t>(off));

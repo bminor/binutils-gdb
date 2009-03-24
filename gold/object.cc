@@ -2100,6 +2100,33 @@ make_elf_sized_object(const std::string& name, Input_file* input_file,
 namespace gold
 {
 
+// Return whether INPUT_FILE is an ELF object.
+
+bool
+is_elf_object(Input_file* input_file, off_t offset,
+	      const unsigned char** start, int *read_size)
+{
+  off_t filesize = input_file->file().filesize();
+  int want = elfcpp::Elf_sizes<64>::ehdr_size;
+  if (filesize - offset < want)
+    want = filesize - offset;
+
+  const unsigned char* p = input_file->file().get_view(offset, 0, want,
+						       true, false);
+  *start = p;
+  *read_size = want;
+
+  if (want < 4)
+    return false;
+
+  static unsigned char elfmagic[4] =
+    {
+      elfcpp::ELFMAG0, elfcpp::ELFMAG1,
+      elfcpp::ELFMAG2, elfcpp::ELFMAG3
+    };
+  return memcmp(p, elfmagic, 4) == 0;
+}
+
 // Read an ELF file and return the appropriate instance of Object.
 
 Object*
