@@ -338,13 +338,18 @@ listing_newline (char *ps)
 	  char *copy;
 	  int len;
 	  int seen_quote = 0;
+	  int seen_slash = 0;
 
 	  for (copy = input_line_pointer - 1;
 	       *copy && (seen_quote
-			 || (! is_end_of_line [(unsigned char) *copy]));
+			 || is_end_of_line [(unsigned char) *copy] != 1);
 	       copy++)
-	    if (*copy == '"' && copy[-1] != '\\')
-	      seen_quote = ! seen_quote;
+	    {
+	      if (*copy == '\\')
+		seen_slash = ! seen_slash;
+	      else if (*copy == '"' && seen_slash)
+		seen_quote = ! seen_quote;
+	    }
 
 	  len = (copy - input_line_pointer) + 2;
 

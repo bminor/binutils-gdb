@@ -125,7 +125,8 @@ char lex_type[256] = {
 };
 
 /* In: a character.
-   Out: 1 if this character ends a line.  */
+   Out: 1 if this character ends a line.
+	2 if this character is a line separator.  */
 char is_end_of_line[256] = {
 #ifdef CR_EOL
   1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0,	/* @abcdefghijklmno */
@@ -239,7 +240,7 @@ read_begin (void)
 
   /* Use machine dependent syntax.  */
   for (p = line_separator_chars; *p; p++)
-    is_end_of_line[(unsigned char) *p] = 1;
+    is_end_of_line[(unsigned char) *p] = 2;
   /* Use more.  FIXME-SOMEDAY.  */
 
   if (flag_mri)
