@@ -1118,6 +1118,32 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 
 	  symtab->primary = 0;
 	}
+      else
+        {
+          if (subfile->symtab)
+            {
+              /* Since we are ignoring that subfile, we also need
+                 to unlink the associated empty symtab that we created.
+                 Otherwise, we can into trouble because various parts
+                 such as the block-vector are uninitialized whereas
+                 the rest of the code assumes that they are.
+                 
+                 We can only unlink the symtab because it was allocated
+                 on the objfile obstack.  */
+              struct symtab *s;
+
+              if (objfile->symtabs == subfile->symtab)
+                objfile->symtabs = objfile->symtabs->next;
+              else
+                ALL_OBJFILE_SYMTABS (objfile, s)
+                  if (s->next == subfile->symtab)
+                    {
+                      s->next = s->next->next;
+                      break;
+                    }
+              subfile->symtab = NULL;
+            }
+        }
       if (subfile->name != NULL)
 	{
 	  xfree ((void *) subfile->name);

@@ -1,3 +1,8 @@
+2009-03-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* buildsym.c (end_symtab): If we ignore the subfiles, then
+	unlink the associated symtabs if they were already allocated.
+
 2009-03-23  Jerome Guitton  <guitton@adacore.com>
 
 	Provide a way to force building of GDB with libcurses.
