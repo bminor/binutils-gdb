@@ -1207,6 +1207,7 @@ get_symbol_field_type (struct symbol *sym, char *encoded_field_name)
 
   if (type == NULL || field_name == NULL)
     return NULL;
+  type = check_typedef (type);
 
   while (field_name[0] != '\0')
     {

@@ -1,5 +1,10 @@
 2009-03-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-exp.y (get_symbol_field_type): Make sure to resolve typedefs
+	before looking up the fields inside our struct type.
+
+2009-03-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (resolve_subexp) [UNOP_QUAL]: Resolve typedefs before
 	trying to resolve the type qualification.
 
