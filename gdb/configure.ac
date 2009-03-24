@@ -467,7 +467,7 @@ case $host_os in
 esac
 
 # For the TUI, we need enhanced curses functionality.
-if test x"$enable_tui" = xyes; then
+if test x"$enable_tui" != xno; then
   prefer_curses=yes
 fi
 

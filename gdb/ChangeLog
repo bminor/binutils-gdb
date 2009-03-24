@@ -1,3 +1,8 @@
+2009-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.ac: Enable $PREFER_CURSES even with default $ENABLE_TUI.
+	* configure: Regenerated.
+
 2009-03-24  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	ARI fix: "strerror" rule.

@@ -10323,7 +10323,7 @@ echo "$as_me: error: Building GDB with TUI mode is not supported on this host" >
 esac
 
 # For the TUI, we need enhanced curses functionality.
-if test x"$enable_tui" = xyes; then
+if test x"$enable_tui" != xno; then
   prefer_curses=yes
 fi
 
