@@ -1,3 +1,9 @@
+2009-03-23  Jerome Guitton  <guitton@adacore.com>
+
+	Provide a way to force building of GDB with libcurses.
+	* configure.ac: Add --with-curses.
+	* configure: Regenerated.
+
 2009-03-23  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_uninit>: Fix typo in

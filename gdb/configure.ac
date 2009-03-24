@@ -331,6 +331,13 @@ if test x"$enable_libunwind" = xyes; then
   CONFIG_SRCS="$CONFIG_SRCS libunwind-frame.c"
 fi
 
+opt_curses=no
+AC_ARG_WITH(curses, AC_HELP_STRING([--with-curses], [use the curses library instead of the termcap library]), opt_curses=$withval)
+
+if test "$opt_curses" = "yes"; then
+	prefer_curses=yes
+fi
+
 # Profiling support.
 AC_ARG_ENABLE(profiling,
 [  --enable-profiling      enable profiling of GDB],
@@ -459,22 +466,32 @@ case $host_os in
     ;;
 esac
 
+# For the TUI, we need enhanced curses functionality.
+if test x"$enable_tui" = xyes; then
+  prefer_curses=yes
+fi
+
+curses_found=no
+if test x"$prefer_curses" = xyes; then
+  # FIXME: kettenis/20040905: We prefer ncurses over the vendor-supplied
+  # curses library because the latter might not provide all the
+  # functionality we need.  However, this leads to problems on systems
+  # where the linker searches /usr/local/lib, but the compiler doesn't
+  # search /usr/local/include, if ncurses is installed in /usr/local.  A
+  # default installation of ncurses on alpha*-dec-osf* will lead to such
+  # a situation.
+  AC_SEARCH_LIBS(waddstr, [ncurses cursesX curses])
+
+  if test "$ac_cv_search_waddstr" != no; then
+    curses_found=yes
+  fi
+fi
+
 # Check whether we should enable the TUI, but only do so if we really
 # can.
 if test x"$enable_tui" != xno; then
   if test -d $srcdir/tui; then
-    # For the TUI, we need enhanced curses functionality.
-    #
-    # FIXME: kettenis/20040905: We prefer ncurses over the vendor-supplied
-    # curses library because the latter might not provide all the
-    # functionality we need.  However, this leads to problems on systems
-    # where the linker searches /usr/local/lib, but the compiler doesn't
-    # search /usr/local/include, if ncurses is installed in /usr/local.  A
-    # default installation of ncurses on alpha*-dec-osf* will lead to such
-    # a situation.
-    AC_SEARCH_LIBS(waddstr, [ncurses cursesX curses])
-
-    if test "$ac_cv_search_waddstr" != no; then
+    if test "$curses_found" != no; then
       CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
       CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
       CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
