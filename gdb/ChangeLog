@@ -5,7 +5,7 @@
 
 2009-03-23  Joel Brobecker  <brobecker@adacore.com>
 
-	Add gdb_usleep as a portable version of sleep based on gdb_select.
+	Add gdb_usleep as a portable version of usleep based on gdb_select.
 	* gdb_usleep.h, gdb_usleep.c: New files.
 	* Makefile.in (SFILES): Add gdb_usleep.c.
 	(HFILES_NO_SRCDIR): Add gdb_usleep.h.
