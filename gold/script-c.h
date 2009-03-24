@@ -211,6 +211,12 @@ yylex(YYSTYPE*, void* closure);
 extern void
 yyerror(void* closure, const char*);
 
+/* Called by the bison parser to add an external symbol (a symbol in
+   an EXTERN declaration) to the link.  */
+
+extern void
+script_add_extern(void* closure, const char*, size_t);
+
 /* Called by the bison parser to add a file to the link.  */
 
 extern void

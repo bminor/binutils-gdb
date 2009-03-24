@@ -234,7 +234,8 @@ linker_script:
 
 /* A command which may appear at top level of a linker script.  */
 file_cmd:
-	  FORCE_COMMON_ALLOCATION
+	  EXTERN '(' extern_name_list ')'
+	| FORCE_COMMON_ALLOCATION
 	    { script_set_common_allocation(closure, 1); }
 	| GROUP
 	    { script_start_group(closure); }
@@ -280,6 +281,25 @@ file_cmd:
    choose the default.  */
 ignore_cmd:
 	  OUTPUT_ARCH '(' string ')'
+	;
+
+/* A list of external undefined symbols.  We put the lexer into
+   expression mode so that commas separate names; this is what the GNU
+   linker does.  */
+
+extern_name_list:
+	    { script_push_lex_into_expression_mode(closure); }
+	  extern_name_list_body
+	    { script_pop_lex_mode(closure); }
+	;
+
+extern_name_list_body:
+	  string
+	    { script_add_extern(closure, $1.value, $1.length); }
+	| extern_name_list_body string
+	    { script_add_extern(closure, $2.value, $2.length); }
+	| extern_name_list_body ',' string
+	    { script_add_extern(closure, $3.value, $3.length); }
 	;
 
 /* A list of input file names.  */

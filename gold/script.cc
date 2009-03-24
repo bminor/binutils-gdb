@@ -2119,6 +2119,19 @@ yyerror(void* closurev, const char* message)
 	     closure->charpos(), message);
 }
 
+// Called by the bison parser to add an external symbol to the link.
+
+extern "C" void
+script_add_extern(void* closurev, const char* name, size_t length)
+{
+  // We treat exactly like -u NAME.  FIXME: If it seems useful, we
+  // could handle this after the command line has been read, by adding
+  // entries to the symbol table directly.
+  std::string arg("--undefined=");
+  arg.append(name, length);
+  script_parse_option(closurev, arg.c_str(), arg.size());
+}
+
 // Called by the bison parser to add a file to the link.
 
 extern "C" void

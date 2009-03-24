@@ -1,3 +1,10 @@
+2009-03-24  Ian Lance Taylor  <iant@google.com>
+
+	* yyscript.y (file_cmd): Recognize EXTERN.
+	(extern_name_list, extern_name_list_body): New nonterminals.
+	* script.cc (script_add_extern): Define.
+	* script-c.h (script_add_extern): Declare.
+
 2009-03-24  Rafael Avila de Espindola  <espindola@google.com>
 
 	* object.cc (is_elf_object): Define.
