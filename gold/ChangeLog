@@ -1,3 +1,8 @@
+2009-03-24  Ian Lance Taylor  <iant@google.com>
+
+	* target-select.cc (instantiate_target): Don't acquire the lock if
+	the instantiated_target_ field has already been set.
+
 2009-03-23  Ian Lance Taylor  <iant@google.com>
 
 	* gold-threads.h (class Initialize_lock): Define.

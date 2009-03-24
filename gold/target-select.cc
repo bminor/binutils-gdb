@@ -60,10 +60,15 @@ Target_selector::Target_selector(int machine, int size, bool is_big_endian,
 Target*
 Target_selector::instantiate_target()
 {
-  this->initialize_lock_.initialize();
-  Hold_optional_lock hl(this->lock_);
+  // We assume that the pointer will either be written entirely or not
+  // at all.
   if (this->instantiated_target_ == NULL)
-    this->instantiated_target_ = this->do_instantiate_target();
+    {
+      this->initialize_lock_.initialize();
+      Hold_optional_lock hl(this->lock_);
+      if (this->instantiated_target_ == NULL)
+	this->instantiated_target_ = this->do_instantiate_target();
+    }
   return this->instantiated_target_;
 }
 

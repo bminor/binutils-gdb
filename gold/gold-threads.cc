@@ -308,7 +308,7 @@ class Initialize_lock_once
 static pthread_mutex_t initialize_lock_control = PTHREAD_MUTEX_INITIALIZER;
 
 // A pointer to a pointer to the lock which we need to initialize
-// once.  Access to this is controlled by initialize_lock_pointer.
+// once.  Access to this is controlled by initialize_lock_control.
 
 static Lock** initialize_lock_pointer;
 
