@@ -1,5 +1,11 @@
 2009-03-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_evaluate_subexp) [UNOP_IN_RANGE]: make sure
+	we try to apply the attribute on the real type, rather than
+	its associated typedef.
+
+2009-03-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp) [OP_ATR_MODULUS]: Use check_typdef
 	to make sure we try to get the modulus of the actual type, not the
 	associated typedef.

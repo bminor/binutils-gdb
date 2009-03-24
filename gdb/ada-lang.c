@@ -8786,7 +8786,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case UNOP_IN_RANGE:
       (*pos) += 2;
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      type = exp->elts[pc + 1].type;
+      type = check_typedef (exp->elts[pc + 1].type);
 
       if (noside == EVAL_SKIP)
         goto nosideret;
