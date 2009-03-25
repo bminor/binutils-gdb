@@ -28,7 +28,7 @@
 #define PPC_FEATURE_HAS_VSX		0x00000080
 #define PPC_FEATURE_HAS_ALTIVEC         0x10000000
 #define PPC_FEATURE_HAS_SPE             0x00800000
-#define PPC_FEATURE_ARCH_2_05           0x00001000
+#define PPC_FEATURE_HAS_DFP             0x00000400
 
 static unsigned long ppc_hwcap;
 
@@ -274,14 +274,21 @@ ppc_arch_setup (void)
       ppc_get_hwcap (&ppc_hwcap);
       if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
 	{
-	  if (ppc_hwcap & PPC_FEATURE_ARCH_2_05)
+	  /* Power ISA 2.05 (implemented by Power 6 and newer processors)
+	     increases the FPSCR from 32 bits to 64 bits. Even though Power 7
+	     supports this ISA version, it doesn't have PPC_FEATURE_ARCH_2_05
+	     set, only PPC_FEATURE_ARCH_2_06.  Since for now the only bits
+	     used in the higher half of the register are for Decimal Floating
+	     Point, we check if that feature is available to decide the size
+	     of the FPSCR.  */
+	  if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
 	    init_registers_powerpc_isa205_vsx64l ();
 	  else
 	    init_registers_powerpc_vsx64l ();
 	}
       else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
 	{
-	  if (ppc_hwcap & PPC_FEATURE_ARCH_2_05)
+	  if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
 	    init_registers_powerpc_isa205_altivec64l ();
 	  else
 	    init_registers_powerpc_altivec64l ();
@@ -297,14 +304,14 @@ ppc_arch_setup (void)
   ppc_get_hwcap (&ppc_hwcap);
   if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
     {
-      if (ppc_hwcap & PPC_FEATURE_ARCH_2_05)
+      if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
 	init_registers_powerpc_isa205_vsx32l ();
       else
 	init_registers_powerpc_vsx32l ();
     }
   else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
     {
-      if (ppc_hwcap & PPC_FEATURE_ARCH_2_05)
+      if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
 	init_registers_powerpc_isa205_altivec32l ();
       else
 	init_registers_powerpc_altivec32l ();

@@ -63,8 +63,8 @@
 #ifndef PPC_FEATURE_BOOKE
 #define PPC_FEATURE_BOOKE 0x00008000
 #endif
-#ifndef PPC_FEATURE_ARCH_2_05
-#define PPC_FEATURE_ARCH_2_05	0x00001000 /* ISA 2.05 */
+#ifndef PPC_FEATURE_HAS_DFP
+#define PPC_FEATURE_HAS_DFP	0x00000400  /* Decimal Floating Point.  */
 #endif
 
 /* Glibc's headers don't define PTRACE_GETVRREGS so we cannot use a
@@ -1290,7 +1290,13 @@ ppc_linux_read_description (struct target_ops *ops)
 	perror_with_name (_("Unable to fetch AltiVec registers"));
     }
 
-  if (ppc_linux_get_hwcap () & PPC_FEATURE_ARCH_2_05)
+  /* Power ISA 2.05 (implemented by Power 6 and newer processors) increases
+     the FPSCR from 32 bits to 64 bits. Even though Power 7 supports this
+     ISA version, it doesn't have PPC_FEATURE_ARCH_2_05 set, only
+     PPC_FEATURE_ARCH_2_06.  Since for now the only bits used in the higher
+     half of the register are for Decimal Floating Point, we check if that
+     feature is available to decide the size of the FPSCR.  */
+  if (ppc_linux_get_hwcap () & PPC_FEATURE_HAS_DFP)
     isa205 = 1;
 
   /* Check for 64-bit inferior process.  This is the case when the host is

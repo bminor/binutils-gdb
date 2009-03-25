@@ -1,3 +1,11 @@
+2009-03-25  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Fix size of FPSCR in Power 7 processors.
+	* ppc-linux-nat.c (PPC_FEATURE_ARCH_2_05): Remove #define.
+	(PPC_FEATURE_HAS_DFP): New #define.
+	(ppc_linux_read_description): Check for DFP feature instead of
+	ISA 2.05 to decide on size of the FPSCR.
+
 2009-03-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* mn10300-tdep.c (trad-frame.h): Don't include.

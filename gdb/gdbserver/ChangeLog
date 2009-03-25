@@ -1,3 +1,11 @@
+2009-03-25  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Fix size of FPSCR in Power 7 processors.
+	* linux-ppc-low.c (PPC_FEATURE_ARCH_2_05): Remove #define.
+	(PPC_FEATURE_HAS_DFP): New #define.
+	(ppc_arch_setup): Check for DFP feature instead of ISA 2.05 to decide on
+	size of the FPSCR.
+
 2009-03-23  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.c (handle_query) Whitespace and formatting.
