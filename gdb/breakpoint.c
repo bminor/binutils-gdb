@@ -1893,28 +1893,39 @@ int
 breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
 {
   const struct bp_location *bpt;
-  int thread;
-
-  thread = pid_to_thread_id (ptid);
-
+  /* The thread ID associated to PTID, computed lazily.  */
+  int thread = -1;
+  
   ALL_BP_LOCATIONS (bpt)
     {
       if (bpt->loc_type != bp_loc_software_breakpoint
 	  && bpt->loc_type != bp_loc_hardware_breakpoint)
 	continue;
 
-      if ((breakpoint_enabled (bpt->owner)
-	   || bpt->owner->enable_state == bp_permanent)
-	  && bpt->address == pc
-	  && (bpt->owner->thread == -1 || bpt->owner->thread == thread))
+      if (!breakpoint_enabled (bpt->owner)
+	  && bpt->owner->enable_state != bp_permanent)
+	continue;
+
+      if (bpt->address != pc)
+	continue;
+
+      if (bpt->owner->thread != -1)
 	{
-	  if (overlay_debugging 
-	      && section_is_overlay (bpt->section) 
-	      && !section_is_mapped (bpt->section))
-	    continue;		/* unmapped overlay -- can't be a match */
-	  else
-	    return 1;
+	  /* This is a thread-specific breakpoint.  Check that ptid
+	     matches that thread.  If thread hasn't been computed yet,
+	     it is now time to do so.  */
+	  if (thread == -1)
+	    thread = pid_to_thread_id (ptid);
+	  if (bpt->owner->thread != thread)
+	    continue;
 	}
+
+      if (overlay_debugging 
+	  && section_is_overlay (bpt->section) 
+	  && !section_is_mapped (bpt->section))
+	continue;	    /* unmapped overlay -- can't be a match */
+
+      return 1;
     }
 
   return 0;

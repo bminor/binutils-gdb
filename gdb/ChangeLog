@@ -1,3 +1,8 @@
+2009-03-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (breakpoint_thread_match): Split a large condition
+	into several smaller conditions.  No behavior change.
+
 2009-03-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (infrun_thread_thread_exit): New.
