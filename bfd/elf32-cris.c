@@ -1733,7 +1733,8 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      return FALSE;
 	    }
 
-	  if (!info->shared && (h == NULL || h->def_regular))
+	  if (!info->shared
+	      && (h == NULL || h->def_regular || ELF_COMMON_DEF_P (h)))
 	    {
 	      /* Known contents of the GOT.  */
 	      bfd_vma off;
@@ -2000,7 +2001,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if (h != NULL
 	      && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	      && !h->def_regular
+	      && !(h->def_regular || ELF_COMMON_DEF_P (h))
 	      /* If it's undefined, then an error message has already
 		 been emitted.  */
 	      && h->root.type != bfd_link_hash_undefined)
