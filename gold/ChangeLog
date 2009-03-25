@@ -1,3 +1,9 @@
+2009-03-24  Cary Coutant  <ccoutant@google.com>
+
+	* symtab.h (needs_plt_entry): Check for unsatisfied reference from
+	an executable.
+	(needs_dynamic_reloc): Likewise.
+
 2009-03-24  Ian Lance Taylor  <iant@google.com>
 
 	* yyscript.y (file_cmd): Recognize EXTERN.

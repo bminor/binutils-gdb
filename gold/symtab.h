@@ -530,6 +530,10 @@ class Symbol
   bool
   needs_plt_entry() const
   {
+    // An undefined symbol from an executable does not need a PLT entry.
+    if (this->is_undefined() && !parameters->options().shared())
+      return false;
+
     return (!parameters->doing_static_link()
             && this->type() == elfcpp::STT_FUNC
             && (this->is_from_dynobj()
@@ -561,10 +565,10 @@ class Symbol
     if (parameters->doing_static_link())
       return false;
 
-    // A reference to a weak undefined symbol from an executable should be
+    // A reference to an undefined symbol from an executable should be
     // statically resolved to 0, and does not need a dynamic relocation.
     // This matches gnu ld behavior.
-    if (this->is_weak_undefined() && !parameters->options().shared())
+    if (this->is_undefined() && !parameters->options().shared())
       return false;
 
     // A reference to an absolute symbol does not need a dynamic relocation.
