@@ -1,3 +1,25 @@
+2009-03-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (trad-frame.h): Don't include.
+	(prologue-value.h): Include.
+	(mn10300_frame_unwind_cache, set_reg_offsets): Delete.
+	(struct mn10300_prologue): Define.
+	(push_reg, translate_rreg, check_for_saved): New functions.
+	(mn10300_analyze_prologue): Rewrite, using prologue-value
+	machinery.  Handle more instructions than before.  Permit
+	instructions to occur in any order.
+	(mn10300_skip_prologue): Find the extents of the function
+	in question; mn10300_analyze_prologue no longer does this.
+	(mn10300_analyze_frame_prologue): New function.
+	(mn10300_frame_base): New function.
+	(mn10300_frame_this_id): Rewrite, no longer using trad-frame
+	implementation.
+	(mn10300_frame_prev_register): Likewise.
+	(mn10300_frame_base_address, mn10300_frame_base struct): Delete.
+	(mn10300_unwind_pc, mn10300_unwind_sp): Rename `next_frame' to
+	`this_frame'.
+	(mn10300_frame_unwind_init): Don't call frame_base_set_default().
+
 2009-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Fix completer problem for filename completion on the first try.
