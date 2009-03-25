@@ -1,3 +1,7 @@
+2009-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.base/completion.exp: Add a test for directory completion.
+
 2009-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix a racy FAIL.
