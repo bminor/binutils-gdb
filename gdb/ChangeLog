@@ -1,3 +1,17 @@
+2009-03-24  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* configure, config.in: Rebuild.
+	* configure.ac: Check for libiconvlist.
+	* charset.c: Check HAVE_LIBICONVLIST.
+	* acinclude.m4 (AM_ICONV): Don't subst LIBICONV, LIBICONV_INCLUDE,
+	LIBICONV_LIBDIR.  Update CPPFLAGS and LIBS.
+	* Makefile.in (LIBICONV, LIBICONV_INCLUDE, LIBICONV_LIBDIR):
+	Remove.
+	(INTERNAL_CFLAGS_BASE): Update.
+	(INTERNAL_LDFLAGS): Update.
+	(CLIBS): Update.
+
 2009-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* configure.ac: Initialize the variable $PREFER_CURSES.

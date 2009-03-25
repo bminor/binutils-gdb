@@ -221,13 +221,19 @@ AC_DEFUN([AM_ICONV],
         am_cv_lib_iconv=yes
         am_cv_func_iconv=yes)
       LIBS="$am_save_LIBS"
-      if test "$am_cv_func_iconv" = "yes"; then
-         am_cv_use_build_libiconv=yes
-      else
-      	 CPPFLAGS="$am_save_CPPFLAGS"
-      fi
+      CPPFLAGS="$am_save_CPPFLAGS"
     fi
   ])
+  LIBICONV=
+  if test "$am_cv_lib_iconv" = yes; then
+    LIBICONV="-liconv"
+  fi
+  if test "$am_cv_use_build_libiconv" = yes; then
+    LIBICONV_LIBDIR="$BUILD_LIBICONV_LIBDIR"
+    LIBICONV_INCLUDE="$BUILD_LIBICONV_INCLUDE"
+  fi
+  CPPFLAGS="$CPPFLAGS $LIBICONV_INCLUDE"
+  LIBS="$LIBS $LIBICONV_LIBDIR $LIBICONV"
   if test "$am_cv_func_iconv" = yes; then
     AC_DEFINE(HAVE_ICONV, 1, [Define if you have the iconv() function.])
     AC_MSG_CHECKING([for iconv declaration])
@@ -252,17 +258,6 @@ size_t iconv();
     AC_DEFINE_UNQUOTED(ICONV_CONST, $am_cv_proto_iconv_arg1,
       [Define as const if the declaration of iconv() needs const.])
   fi
-  LIBICONV=
-  if test "$am_cv_lib_iconv" = yes; then
-    LIBICONV="-liconv"
-  fi
-  if test "$am_cv_use_build_libiconv" = yes; then
-    LIBICONV_LIBDIR="$BUILD_LIBICONV_LIBDIR"
-    LIBICONV_INCLUDE="$BUILD_LIBICONV_INCLUDE"
-  fi
-  AC_SUBST(LIBICONV)
-  AC_SUBST(LIBICONV_INCLUDE)
-  AC_SUBST(LIBICONV_LIBDIR)
 ])
 
 dnl written by Guido Draheim <guidod@gmx.de>, original by Alexandre Oliva 

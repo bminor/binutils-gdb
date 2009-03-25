@@ -664,7 +664,13 @@ find_charset_names (void)
 }
 
 #else /* PHONY_ICONV */
-#ifdef HAVE_ICONVLIST
+
+/* Sometimes, libiconv redefines iconvlist as libiconvlist -- but
+   provides different symbols in the static and dynamic libraries.
+   So, configure may see libiconvlist but not iconvlist.  But, calling
+   iconvlist is the right thing to do and will work.  Hence we do a
+   check here but unconditionally call iconvlist below.  */
+#if defined (HAVE_ICONVLIST) || defined (HAVE_LIBICONVLIST)
 
 /* A helper function that adds some character sets to the vector of
    all character sets.  This is a callback function for iconvlist.  */
@@ -723,7 +729,7 @@ find_charset_names (void)
   VEC_safe_push (char_ptr, charsets, NULL);
 }
 
-#endif /* HAVE_ICONVLIST */
+#endif /* HAVE_ICONVLIST || HAVE_LIBICONVLIST */
 #endif /* PHONY_ICONV */
 
 void
