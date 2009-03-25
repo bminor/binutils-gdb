@@ -1,3 +1,8 @@
+2009-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	ARI fix: "xasprintf" rule.
+	* printcmd.c (sym_info): Replace xasprintf by xstrprintf.
+
 2009-03-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_start_remote): In non-stop mode, call

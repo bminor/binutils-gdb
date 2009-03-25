@@ -1036,9 +1036,9 @@ sym_info (char *arg, int from_tty)
 	/* Don't print the offset if it is zero.
 	   We assume there's no need to handle i18n of "sym + offset".  */
 	if (offset)
-	  xasprintf (&loc_string, "%s + %u", msym_name, offset);
+	  loc_string = xstrprintf ("%s + %u", msym_name, offset);
 	else
-	  xasprintf (&loc_string, "%s", msym_name);
+	  loc_string = xstrprintf ("%s", msym_name);
 
 	/* Use a cleanup to free loc_string in case the user quits
 	   a pagination request inside printf_filtered.  */
