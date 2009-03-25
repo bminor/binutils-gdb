@@ -131,6 +131,11 @@ proc valid_host_charset {charset} {
     return [expr {[info exists charsets($charset)] && $charsets($charset)}]
 }
 
+proc valid_target_charset {charset} {
+    global charsets
+    return [info exists charsets($charset)]
+}
+
 send_gdb "set host-charset\n"
 gdb_expect {
     -re "Requires an argument. Valid arguments are (\[^ \t\n\r,.\]*)" {
@@ -238,6 +243,9 @@ foreach host_charset $charset_subset {
         # Now try setting every possible target character set,
         # given that host charset.
         foreach target_charset $charset_subset {
+	    if {![valid_target_charset $target_charset]} {
+		continue
+	    }
             set testname "try `set target-charset $target_charset'"
             send_gdb "set target-charset $target_charset\n"
             gdb_expect {
@@ -376,6 +384,10 @@ if {$wchar_size == 2} {
 
 gdb_test "set host-charset ASCII" ""
 foreach target_charset $charset_subset {
+    if {![valid_target_charset $target_charset]} {
+	continue
+    }
+
     if {$target_charset == "UCS-4" || $target_charset == "UCS-2"} {
 	set param target-wide-charset
 	set L L

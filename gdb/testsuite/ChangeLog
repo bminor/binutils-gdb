@@ -1,3 +1,8 @@
+2009-03-25  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/charset.exp (valid_target_charset): New proc.
+	Use it to skip tests on invalid charsets.
+
 2009-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.base/completion.exp: Add a test for directory completion.
