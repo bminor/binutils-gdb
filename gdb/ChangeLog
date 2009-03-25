@@ -1,3 +1,8 @@
+2009-03-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_start_remote): In non-stop mode, call
+	init_wait_for_inferior before adding threads and inferiors.
+
 2009-03-25  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (breakpoint_thread_match): Split a large condition

@@ -2740,6 +2740,13 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
     }
   else
     {
+      /* Clear WFI global state.  Do this before finding about new
+	 threads and inferiors, and setting the current inferior.
+	 Otherwise we would clear the proceed status of the current
+	 inferior when we want its stop_soon state to be preserved
+	 (see notice_new_inferior).  */
+      init_wait_for_inferior ();
+
       /* In non-stop, we will either get an "OK", meaning that there
 	 are no stopped threads at this time; or, a regular stop
 	 reply.  In the latter case, there may be more than one thread
@@ -2800,8 +2807,6 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       /* In non-stop mode, any cached wait status will be stored in
 	 the stop reply queue.  */
       gdb_assert (wait_status == NULL);
-
-      init_wait_for_inferior ();
     }
 
   /* If we connected to a live target, do some additional setup.  */
