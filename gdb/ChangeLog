@@ -1,3 +1,37 @@
+2009-03-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (normal_stop): Use has_stack_frames instead of
+	target_has_stack.
+	* mi/mi-main.c (mi_execute_command): Avoid calling inferior_thread
+	when there is no thread selected.
+	(mi_cmd_execute): Don't special case commands that can run without
+	a valid selected thread.
+	* top.c (execute_command): Don't special case commands that can
+	run without a valid selected thread.  Use has_stack_frames.
+	* infcmd.c (ensure_valid_thread): New.
+	(continue_1, step_1, jump_command, signal_command): Use it.
+	(detach_command): Error out if there's no selected thread/inferior.
+	* thread.c (print_thread_info): Allow having no thread selected.
+	(switch_to_thread): Don't read the PC if there is no current thread.
+	(do_restore_current_thread_cleanup): Don't record the current
+	frame if there is no current thread.
+	(make_cleanup_restore_current_thread): Don't read frame info if
+	there is no selected thread.
+	(_initialize_thread): Don't mark commands as
+	"no_selected_thread_ok".
+	* frame.c (get_current_frame): Error out if there is no valid
+	selected thread.
+	(has_stack_frames): Return false if there is no valid
+	selected thread.
+	* cli/cli-cmds.c (init_cli_cmds): Don't mark commands as
+	"no_selected_thread_ok".
+	* cli/cli-decode.c (set_cmd_no_selected_thread_ok)
+	(get_cmd_no_selected_thread_ok): Delete.
+	* cli/cli-decode.h (CMD_NO_SELECTED_THREAD_OK): Delete.
+	(set_cmd_no_selected_thread_ok, get_cmd_no_selected_thread_ok):
+	Delete declaration.
+	* stack.c (get_selected_block): Use has_stack_frames.
+
 2009-03-25  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	Fix size of FPSCR in Power 7 processors.

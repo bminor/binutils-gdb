@@ -112,18 +112,6 @@ get_cmd_context (struct cmd_list_element *cmd)
   return cmd->context;
 }
 
-void
-set_cmd_no_selected_thread_ok (struct cmd_list_element *cmd)
-{
-  cmd->flags |= CMD_NO_SELECTED_THREAD_OK;
-}
-
-int
-get_cmd_no_selected_thread_ok (struct cmd_list_element *cmd)
-{
-  return cmd->flags & CMD_NO_SELECTED_THREAD_OK;
-}
-
 enum cmd_types
 cmd_type (struct cmd_list_element *cmd)
 {

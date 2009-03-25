@@ -6606,19 +6606,6 @@ remote_mourn_1 (struct target_ops *target)
   generic_mourn_inferior ();
 }
 
-static int
-select_new_thread_callback (struct thread_info *th, void* data)
-{
-  if (!is_exited (th->ptid))
-    {
-      switch_to_thread (th->ptid);
-      printf_filtered (_("[Switching to %s]\n"),
-		       target_pid_to_str (inferior_ptid));
-      return 1;
-    }
-  return 0;
-}
-
 static void
 extended_remote_mourn_1 (struct target_ops *target)
 {
@@ -6662,16 +6649,7 @@ extended_remote_mourn_1 (struct target_ops *target)
   /* Call common code to mark the inferior as not running.	*/
   generic_mourn_inferior ();
 
-  if (have_inferiors ())
-    {
-      extern void nullify_last_target_wait_ptid ();
-      /* Multi-process case.  The current process has exited, but
-	 there are other processes to debug.  Switch to the first
-	 available.  */
-      iterate_over_threads (select_new_thread_callback, NULL);
-      nullify_last_target_wait_ptid ();
-    }
-  else
+  if (!have_inferiors ())
     {
       if (!remote_multi_process_p (rs))
 	{

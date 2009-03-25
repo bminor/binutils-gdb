@@ -400,14 +400,6 @@ execute_command (char *p, int from_tty)
 
       c = lookup_cmd (&p, cmdlist, "", 0, 1);
 
-      /* If the selected thread has terminated, we allow only a
-	 limited set of commands.  */
-      if (target_can_async_p ()
-	  && is_exited (inferior_ptid)
-	  && !get_cmd_no_selected_thread_ok (c))
-	error (_("\
-Cannot execute this command without a live selected thread.  See `help thread'."));
-
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;
 
@@ -469,7 +461,7 @@ Cannot execute this command without a live selected thread.  See `help thread'."
   /* FIXME:  This should be cacheing the frame and only running when
      the frame changes.  */
 
-  if (target_has_stack && is_stopped (inferior_ptid))
+  if (has_stack_frames ())
     {
       flang = get_frame_language ();
       if (!warned

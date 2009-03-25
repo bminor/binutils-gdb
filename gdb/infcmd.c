@@ -617,6 +617,15 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
 }
 
 void
+ensure_valid_thread (void)
+{
+  if (ptid_equal (inferior_ptid, null_ptid)
+      || is_exited (inferior_ptid))
+    error (_("\
+Cannot execute this command without a live selected thread."));
+}
+
+void
 continue_1 (int all_threads)
 {
   ERROR_NO_INFERIOR;
@@ -637,6 +646,7 @@ continue_1 (int all_threads)
     }
   else
     {
+      ensure_valid_thread ();
       ensure_not_running ();
       clear_proceed_status ();
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
@@ -781,6 +791,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
   int thread = -1;
 
   ERROR_NO_INFERIOR;
+  ensure_valid_thread ();
   ensure_not_running ();
 
   if (count_string)
@@ -991,6 +1002,7 @@ jump_command (char *arg, int from_tty)
   int async_exec = 0;
 
   ERROR_NO_INFERIOR;
+  ensure_valid_thread ();
   ensure_not_running ();
 
   /* Find out whether we must run in the background. */
@@ -1092,6 +1104,7 @@ signal_command (char *signum_exp, int from_tty)
 
   dont_repeat ();		/* Too dangerous.  */
   ERROR_NO_INFERIOR;
+  ensure_valid_thread ();
   ensure_not_running ();
 
   /* Find out whether we must run in the background.  */
@@ -2383,6 +2396,10 @@ void
 detach_command (char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart.  */
+
+  if (ptid_equal (inferior_ptid, null_ptid))
+    error (_("The program is not being run."));
+
   target_detach (args, from_tty);
 
   /* If the solist is global across inferiors, don't clear it when we

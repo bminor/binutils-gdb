@@ -1284,21 +1284,23 @@ mi_execute_command (char *cmd, int from_tty)
 	  && strcmp (command->command, "thread-select") != 0)
 	{
 	  struct mi_interp *mi = top_level_interpreter_data ();
-	  struct thread_info *ti = inferior_thread ();
-	  int report_change;
+	  int report_change = 0;
 
 	  if (command->thread == -1)
 	    {
-	      report_change = !ptid_equal (previous_ptid, null_ptid)
-		&& !ptid_equal (inferior_ptid, previous_ptid);
+	      report_change = (!ptid_equal (previous_ptid, null_ptid)
+			       && !ptid_equal (inferior_ptid, previous_ptid)
+			       && !ptid_equal (inferior_ptid, null_ptid));
 	    }
-	  else
+	  else if (!ptid_equal (inferior_ptid, null_ptid))
 	    {
+	      struct thread_info *ti = inferior_thread ();
 	      report_change = (ti->num != command->thread);
 	    }
 
 	  if (report_change)
 	    {     
+	      struct thread_info *ti = inferior_thread ();
 	      target_terminal_ours ();
 	      fprintf_unfiltered (mi->event_channel, 
 				  "thread-selected,id=\"%d\"",
@@ -1353,28 +1355,7 @@ mi_cmd_execute (struct mi_parse *parse)
     }
 
   if (parse->cmd->argv_func != NULL)
-    {
-      if (target_can_async_p ()
-	  && target_has_execution
-	  && is_exited (inferior_ptid)
-	  && (strcmp (parse->command, "thread-info") != 0
-	      && strcmp (parse->command, "thread-list-ids") != 0
-	      && strcmp (parse->command, "thread-select") != 0
-	      && strcmp (parse->command, "list-thread-groups") != 0))
-	{
-	  struct ui_file *stb;
-	  stb = mem_fileopen ();
-
-	  fputs_unfiltered ("Cannot execute command ", stb);
-	  fputstr_unfiltered (parse->command, '"', stb);
-	  fputs_unfiltered (" without a selected thread", stb);
-
-	  make_cleanup_ui_file_delete (stb);
-	  error_stream (stb);
-	}
-
-      parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
-    }
+    parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
   else if (parse->cmd->cli.cmd != 0)
     {
       /* FIXME: DELETE THIS. */

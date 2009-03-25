@@ -4302,7 +4302,7 @@ Further execution is probably impossible.\n"));
   /* Set the current source location.  This will also happen if we
      display the frame below, but the current SAL will be incorrect
      during a user hook-stop function.  */
-  if (target_has_stack && !stop_stack_dummy)
+  if (has_stack_frames () && !stop_stack_dummy)
     set_current_sal_from_frame (get_current_frame (), 1);
 
   /* Let the user/frontend see the threads as stopped.  */
@@ -4314,7 +4314,7 @@ Further execution is probably impossible.\n"));
     catch_errors (hook_stop_stub, stop_command,
 		  "Error while running hook_stop:\n", RETURN_MASK_ALL);
 
-  if (!target_has_stack)
+  if (!has_stack_frames ())
     goto done;
 
   if (last.kind == TARGET_WAITKIND_SIGNALLED

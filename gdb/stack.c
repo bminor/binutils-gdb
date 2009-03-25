@@ -1694,13 +1694,7 @@ select_and_print_frame (struct frame_info *frame)
 struct block *
 get_selected_block (CORE_ADDR *addr_in_block)
 {
-  if (!target_has_stack)
-    return 0;
-
-  if (is_exited (inferior_ptid))
-    return 0;
-
-  if (is_executing (inferior_ptid))
+  if (!has_stack_frames ())
     return 0;
 
   return get_frame_block (get_selected_frame (NULL), addr_in_block);

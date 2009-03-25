@@ -980,6 +980,10 @@ get_current_frame (void)
     error (_("No stack."));
   if (!target_has_memory)
     error (_("No memory."));
+  if (ptid_equal (inferior_ptid, null_ptid))
+    error (_("No selected thread."));
+  if (is_exited (inferior_ptid))
+    error (_("Invalid selected thread."));
   if (is_executing (inferior_ptid))
     error (_("Target is executing."));
 
@@ -1009,8 +1013,15 @@ has_stack_frames (void)
   if (!target_has_registers || !target_has_stack || !target_has_memory)
     return 0;
 
-  /* If the current thread is executing, don't try to read from
-     it.  */
+  /* No current inferior, no frame.  */
+  if (ptid_equal (inferior_ptid, null_ptid))
+    return 0;
+
+  /* Don't try to read from a dead thread.  */
+  if (is_exited (inferior_ptid))
+    return 0;
+
+  /* ... or from a spinning thread.  */
   if (is_executing (inferior_ptid))
     return 0;
 
