@@ -3205,7 +3205,8 @@ process_file_header (void)
       if (section_headers != NULL
 	  && elf_header.e_shstrndx == (SHN_XINDEX & 0xffff))
 	printf (" (%u)", section_headers[0].sh_link);
-      else if (elf_header.e_shstrndx >= elf_header.e_shnum)
+      else if (elf_header.e_shstrndx != SHN_UNDEF
+	       && elf_header.e_shstrndx >= elf_header.e_shnum)
 	printf (" <corrupt: out of range>");
       putc ('\n', stdout);
     }
