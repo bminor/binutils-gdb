@@ -1,5 +1,23 @@
 2009-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	Fix completer problem for filename completion on the first try.
+
+	* gdb/completer.h (gdb_completion_word_break_characters): New function.
+	* gdb/completer.c: Include gdb_assert.h.
+	(complete_line_internal_reason): New enum.
+	(complete_line_internal): Change last argument type to
+	complete_line_internal_reason.
+	Modify function to handle the different complete_line_internal_reason
+	argument values.
+	(complete_line): Adapt to change in complete_line_internal.
+	(command_completer): Ditto.
+	(gdb_completion_word_break_characters): Implement new function.
+	* top.c (init_main): Set  rl_completion_word_break_hook to
+	gdb_completion_word_break_characters.
+	
+
+2009-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	ARI fix: "strlen d_name" rule.
 	* linux-nat.c (linux_nat_xfer_osdata): Use NAMELEN macro.
 

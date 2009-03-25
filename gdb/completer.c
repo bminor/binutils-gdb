@@ -22,6 +22,7 @@
 #include "expression.h"
 #include "filenames.h"		/* For DOSish file names.  */
 #include "language.h"
+#include "gdb_assert.h"
 
 #include "cli/cli-decode.h"
 
@@ -481,24 +482,45 @@ expression_completer (struct cmd_list_element *ignore, char *text, char *word)
    "file ../gdb.stabs/we" "ird" (needs to not break word at slash)
  */
 
-/* Generate completions all at once.  Returns a NULL-terminated array
-   of strings.  Both the array and each element are allocated with
-   xmalloc.  It can also return NULL if there are no completions.
+typedef enum
+{
+  handle_brkchars,
+  handle_completions,
+  handle_help
+}
+complete_line_internal_reason;
+
+
+/* Internal function used to handle completions.
+
 
    TEXT is the caller's idea of the "word" we are looking at.
 
    LINE_BUFFER is available to be looked at; it contains the entire text
    of the line.  POINT is the offset in that line of the cursor.  You
    should pretend that the line ends at POINT.
-   
-   FOR_HELP is true when completing a 'help' command.  In this case,
+
+   REASON is of type complete_line_internal_reason.
+
+   If REASON is handle_brkchars:
+   Preliminary phase, called by gdb_completion_word_break_characters function,
+   is used to determine the correct set of chars that are word delimiters
+   depending on the current command in line_buffer.
+   No completion list should be generated; the return value should be NULL.
+   This is checked by an assertion in that function.
+
+   If REASON is handle_completions:
+   Main phase, called by complete_line function, is used to get the list
+   of posible completions.
+
+   If REASON is handle_help:
+   Special case when completing a 'help' command.  In this case,
    once sub-command completions are exhausted, we simply return NULL.
-   When FOR_HELP is false, we will call a sub-command's completion
-   function.  */
+ */
 
 static char **
 complete_line_internal (const char *text, char *line_buffer, int point,
-			int for_help)
+			complete_line_internal_reason reason)
 {
   char **list = NULL;
   char *tmp_command, *p;
@@ -512,7 +534,6 @@ complete_line_internal (const char *text, char *line_buffer, int point,
      functions, which can be any string) then we will switch to the
      special word break set for command strings, which leaves out the
      '-' character used in some commands.  */
-
   rl_completer_word_break_characters =
     current_language->la_word_break_characters();
 
@@ -575,12 +596,14 @@ complete_line_internal (const char *text, char *line_buffer, int point,
 	     This we can deal with.  */
 	  if (result_list)
 	    {
-	      list = complete_on_cmdlist (*result_list->prefixlist, p,
-					  word);
+	      if (reason != handle_brkchars)
+		list = complete_on_cmdlist (*result_list->prefixlist, p,
+					    word);
 	    }
 	  else
 	    {
-	      list = complete_on_cmdlist (cmdlist, p, word);
+	      if (reason != handle_brkchars)
+		list = complete_on_cmdlist (cmdlist, p, word);
 	    }
 	  /* Ensure that readline does the right thing with respect to
 	     inserting quotes.  */
@@ -604,18 +627,20 @@ complete_line_internal (const char *text, char *line_buffer, int point,
 		{
 		  /* It is a prefix command; what comes after it is
 		     a subcommand (e.g. "info ").  */
-		  list = complete_on_cmdlist (*c->prefixlist, p, word);
+		  if (reason != handle_brkchars)
+		    list = complete_on_cmdlist (*c->prefixlist, p, word);
 
 		  /* Ensure that readline does the right thing
 		     with respect to inserting quotes.  */
 		  rl_completer_word_break_characters =
 		    gdb_completer_command_word_break_characters;
 		}
-	      else if (for_help)
+	      else if (reason == handle_help)
 		list = NULL;
 	      else if (c->enums)
 		{
-		  list = complete_on_enum (c->enums, p, word);
+		  if (reason != handle_brkchars)
+		    list = complete_on_enum (c->enums, p, word);
 		  rl_completer_word_break_characters =
 		    gdb_completer_command_word_break_characters;
 		}
@@ -651,7 +676,8 @@ complete_line_internal (const char *text, char *line_buffer, int point,
 			   p--)
 			;
 		    }
-		  list = (*c->completer) (c, p, word);
+		  if (reason != handle_brkchars)
+		    list = (*c->completer) (c, p, word);
 		}
 	    }
 	  else
@@ -672,7 +698,8 @@ complete_line_internal (const char *text, char *line_buffer, int point,
 		    break;
 		}
 
-	      list = complete_on_cmdlist (result_list, q, word);
+	      if (reason != handle_brkchars)
+		list = complete_on_cmdlist (result_list, q, word);
 
 	      /* Ensure that readline does the right thing
 		 with respect to inserting quotes.  */
@@ -680,7 +707,7 @@ complete_line_internal (const char *text, char *line_buffer, int point,
 		gdb_completer_command_word_break_characters;
 	    }
 	}
-      else if (for_help)
+      else if (reason == handle_help)
 	list = NULL;
       else
 	{
@@ -694,7 +721,8 @@ complete_line_internal (const char *text, char *line_buffer, int point,
 	    }
 	  else if (c->enums)
 	    {
-	      list = complete_on_enum (c->enums, p, word);
+	      if (reason != handle_brkchars)
+		list = complete_on_enum (c->enums, p, word);
 	    }
 	  else
 	    {
@@ -719,27 +747,50 @@ complete_line_internal (const char *text, char *line_buffer, int point,
 		       p--)
 		    ;
 		}
-	      list = (*c->completer) (c, p, word);
+	      if (reason != handle_brkchars)
+		list = (*c->completer) (c, p, word);
 	    }
 	}
     }
 
   return list;
 }
+/* Generate completions all at once.  Returns a NULL-terminated array
+   of strings.  Both the array and each element are allocated with
+   xmalloc.  It can also return NULL if there are no completions.
 
-/* Like complete_line_internal, but always passes 0 for FOR_HELP.  */
+   TEXT is the caller's idea of the "word" we are looking at.
+
+   LINE_BUFFER is available to be looked at; it contains the entire text
+   of the line.
+
+   POINT is the offset in that line of the cursor.  You
+   should pretend that the line ends at POINT.  */
 
 char **
 complete_line (const char *text, char *line_buffer, int point)
 {
-  return complete_line_internal (text, line_buffer, point, 0);
+  return complete_line_internal (text, line_buffer, point, handle_completions);
 }
 
 /* Complete on command names.  Used by "help".  */
 char **
 command_completer (struct cmd_list_element *ignore, char *text, char *word)
 {
-  return complete_line_internal (word, text, strlen (text), 1);
+  return complete_line_internal (word, text, strlen (text), handle_help);
+}
+
+/* Get the list of chars that are considered as word breaks
+   for the current command.  */
+
+char *
+gdb_completion_word_break_characters (void)
+{
+  char ** list;
+  list = complete_line_internal (rl_line_buffer, rl_line_buffer, rl_point,
+				 handle_brkchars);
+  gdb_assert (list == NULL);
+  return rl_completer_word_break_characters;
 }
 
 /* Generate completions one by one for the completer.  Each time we are

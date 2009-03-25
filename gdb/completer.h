@@ -33,6 +33,8 @@ extern char **command_completer (struct cmd_list_element *, char *, char *);
 
 extern char *get_gdb_completer_quote_characters (void);
 
+extern char *gdb_completion_word_break_characters (void);
+
 /* Exported to linespec.c */
 
 extern char *skip_quoted_chars (char *, char *, char *);
