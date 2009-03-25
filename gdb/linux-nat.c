@@ -4163,7 +4163,7 @@ linux_nat_xfer_osdata (struct target_ops *ops, enum target_object object,
              char procentry[sizeof ("/proc/4294967295")];
 
              if (!isdigit (dp->d_name[0])
-                 || strlen (dp->d_name) > sizeof ("4294967295") - 1)
+                 || NAMELEN (dp) > sizeof ("4294967295") - 1)
                continue;
 
              sprintf (procentry, "/proc/%s", dp->d_name);
