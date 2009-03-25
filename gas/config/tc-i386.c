@@ -3145,7 +3145,8 @@ check_suffix:
   if (supported != CPU_FLAGS_PERFECT_MATCH)
     {
       as_bad (_("`%s' is not supported on `%s%s'"),
-	      current_templates->start->name, cpu_arch_name,
+	      current_templates->start->name, 
+	      cpu_arch_name ? cpu_arch_name : default_arch,
 	      cpu_sub_arch_name ? cpu_sub_arch_name : "");
       return NULL;
     }
