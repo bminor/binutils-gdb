@@ -1,3 +1,8 @@
+2009-03-25  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* elf32-crx.c (crx_elf_howto_table): Zero the src_mask field of
+	the reloc descriptions.
+
 2009-03-25  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_32_GD>
