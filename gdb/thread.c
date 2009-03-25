@@ -247,8 +247,7 @@ delete_thread_1 (ptid_t ptid, int silent)
     {
       if (tp->state_ != THREAD_EXITED)
 	{
-	  if (!silent)
-	    observer_notify_thread_exit (tp);
+	  observer_notify_thread_exit (tp, silent);
 
 	  /* Tag it as exited.  */
 	  tp->state_ = THREAD_EXITED;
@@ -267,8 +266,8 @@ delete_thread_1 (ptid_t ptid, int silent)
     thread_list = tp->next;
 
   /* Notify thread exit, but only if we haven't already.  */
-  if (!silent && tp->state_ != THREAD_EXITED)
-    observer_notify_thread_exit (tp);
+  if (tp->state_ != THREAD_EXITED)
+    observer_notify_thread_exit (tp, silent);
 
   free_thread (tp);
 }

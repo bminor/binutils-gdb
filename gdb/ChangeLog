@@ -1,3 +1,12 @@
+2000-03-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (infrun_thread_thread_exit): New.
+	(_initialize_infrun): Attach it to the thread_exit observer.
+	* thread.c (delete_thread_1): Always call the observer, passing it
+	the silent flag.
+	* mi/mi-interp.c (mi_thread_exit): Add "silent" parameter.  If
+	SILENT, return immediately.
+
 2009-03-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (normal_stop): Use has_stack_frames instead of

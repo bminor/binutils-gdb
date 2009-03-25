@@ -1,3 +1,7 @@
+2009-03-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* observer.texi (thread_exit): Add "silent" parameter.
+
 2009-03-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* observer.texi (about_to_proceed): New.

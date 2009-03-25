@@ -1691,6 +1691,15 @@ infrun_thread_stop_requested (ptid_t ptid)
   iterate_over_threads (infrun_thread_stop_requested_callback, &ptid);
 }
 
+void nullify_last_target_wait_ptid (void);
+
+static void
+infrun_thread_thread_exit (struct thread_info *tp, int silent)
+{
+  if (ptid_equal (target_last_wait_ptid, tp->ptid))
+    nullify_last_target_wait_ptid ();
+}
+
 /* Callback for iterate_over_threads.  */
 
 static int
@@ -5575,6 +5584,7 @@ Options are 'forward' or 'reverse'."),
 
   observer_attach_thread_ptid_changed (infrun_thread_ptid_changed);
   observer_attach_thread_stop_requested (infrun_thread_stop_requested);
+  observer_attach_thread_exit (infrun_thread_thread_exit);
 
   /* Explicitly create without lookup, since that tries to create a
      value with a void typed value, and when we get here, gdbarch

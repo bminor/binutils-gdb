@@ -55,7 +55,7 @@ static void mi_remove_notify_hooks (void);
 static void mi_on_normal_stop (struct bpstats *bs, int print_frame);
 
 static void mi_new_thread (struct thread_info *t);
-static void mi_thread_exit (struct thread_info *t);
+static void mi_thread_exit (struct thread_info *t, int silent);
 static void mi_new_inferior (int pid);
 static void mi_inferior_exit (int pid);
 static void mi_on_resume (ptid_t ptid);
@@ -293,9 +293,14 @@ mi_new_thread (struct thread_info *t)
 }
 
 static void
-mi_thread_exit (struct thread_info *t)
+mi_thread_exit (struct thread_info *t, int silent)
 {
-  struct mi_interp *mi = top_level_interpreter_data ();
+  struct mi_interp *mi;
+
+  if (silent)
+    return;
+
+  mi = top_level_interpreter_data ();
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel, 
 		      "thread-exited,id=\"%d\",group-id=\"%d\"", 
