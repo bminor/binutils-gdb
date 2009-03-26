@@ -13,11 +13,11 @@
 Disassembly of section .text:
 0+000 <[^>]*> e3a00000 ?	mov	r0, #0	; 0x0
 0+004 <[^>]*> e1a01002 ?	mov	r1, r2
-0+008 <[^>]*> e1a03184 ?	mov	r3, r4, lsl #3
-0+00c <[^>]*> e1a05736 ?	mov	r5, r6, lsr r7
-0+010 <[^>]*> e1a08a59 ?	mov	r8, r9, asr sl
-0+014 <[^>]*> e1a0bd1c ?	mov	fp, ip, lsl sp
-0+018 <[^>]*> e1a0e06f ?	mov	lr, pc, rrx
+0+008 <[^>]*> e1a03184 ?	lsl	r3, r4, #3
+0+00c <[^>]*> e1a05736 ?	lsr	r5, r6, r7
+0+010 <[^>]*> e1a08a59 ?	asr	r8, r9, sl
+0+014 <[^>]*> e1a0bd1c ?	lsl	fp, ip, sp
+0+018 <[^>]*> e1a0e06f ?	rrx	lr, pc
 0+01c <[^>]*> e1a01002 ?	mov	r1, r2
 0+020 <[^>]*> 01a02003 ?	moveq	r2, r3
 0+024 <[^>]*> 11a04005 ?	movne	r4, r5
@@ -30,7 +30,7 @@ Disassembly of section .text:
 0+040 <[^>]*> 41a03006 ?	movmi	r3, r6
 0+044 <[^>]*> 51a07009 ?	movpl	r7, r9
 0+048 <[^>]*> 61a01008 ?	movvs	r1, r8
-0+04c <[^>]*> 71a09fa1 ?	movvc	r9, r1, lsr #31
+0+04c <[^>]*> 71a09fa1 ?	lsrvc	r9, r1, #31
 0+050 <[^>]*> 81a0800f ?	movhi	r8, pc
 0+054 <[^>]*> 91a0f00e ?	movls	pc, lr
 0+058 <[^>]*> 21a09008 ?	movcs	r9, r8
@@ -171,35 +171,35 @@ Disassembly of section .text:
 [		]*268:.*_wibble.*
 0+26c <[^>]*> da000000 ?	ble	0.* <[^>]*>
 [		]*26c:.*testerfunc.*
-0+270 <[^>]*> e1a01102 ?	mov	r1, r2, lsl #2
+0+270 <[^>]*> e1a01102 ?	lsl	r1, r2, #2
 0+274 <[^>]*> e1a01002 ?	mov	r1, r2
-0+278 <[^>]*> e1a01f82 ?	mov	r1, r2, lsl #31
-0+27c <[^>]*> e1a01312 ?	mov	r1, r2, lsl r3
-0+280 <[^>]*> e1a01122 ?	mov	r1, r2, lsr #2
-0+284 <[^>]*> e1a01fa2 ?	mov	r1, r2, lsr #31
-0+288 <[^>]*> e1a01022 ?	mov	r1, r2, lsr #32
-0+28c <[^>]*> e1a01332 ?	mov	r1, r2, lsr r3
-0+290 <[^>]*> e1a01142 ?	mov	r1, r2, asr #2
-0+294 <[^>]*> e1a01fc2 ?	mov	r1, r2, asr #31
-0+298 <[^>]*> e1a01042 ?	mov	r1, r2, asr #32
-0+29c <[^>]*> e1a01352 ?	mov	r1, r2, asr r3
-0+2a0 <[^>]*> e1a01162 ?	mov	r1, r2, ror #2
-0+2a4 <[^>]*> e1a01fe2 ?	mov	r1, r2, ror #31
-0+2a8 <[^>]*> e1a01372 ?	mov	r1, r2, ror r3
-0+2ac <[^>]*> e1a01062 ?	mov	r1, r2, rrx
-0+2b0 <[^>]*> e1a01102 ?	mov	r1, r2, lsl #2
+0+278 <[^>]*> e1a01f82 ?	lsl	r1, r2, #31
+0+27c <[^>]*> e1a01312 ?	lsl	r1, r2, r3
+0+280 <[^>]*> e1a01122 ?	lsr	r1, r2, #2
+0+284 <[^>]*> e1a01fa2 ?	lsr	r1, r2, #31
+0+288 <[^>]*> e1a01022 ?	lsr	r1, r2, #32
+0+28c <[^>]*> e1a01332 ?	lsr	r1, r2, r3
+0+290 <[^>]*> e1a01142 ?	asr	r1, r2, #2
+0+294 <[^>]*> e1a01fc2 ?	asr	r1, r2, #31
+0+298 <[^>]*> e1a01042 ?	asr	r1, r2, #32
+0+29c <[^>]*> e1a01352 ?	asr	r1, r2, r3
+0+2a0 <[^>]*> e1a01162 ?	ror	r1, r2, #2
+0+2a4 <[^>]*> e1a01fe2 ?	ror	r1, r2, #31
+0+2a8 <[^>]*> e1a01372 ?	ror	r1, r2, r3
+0+2ac <[^>]*> e1a01062 ?	rrx	r1, r2
+0+2b0 <[^>]*> e1a01102 ?	lsl	r1, r2, #2
 0+2b4 <[^>]*> e1a01002 ?	mov	r1, r2
-0+2b8 <[^>]*> e1a01f82 ?	mov	r1, r2, lsl #31
-0+2bc <[^>]*> e1a01312 ?	mov	r1, r2, lsl r3
-0+2c0 <[^>]*> e1a01122 ?	mov	r1, r2, lsr #2
-0+2c4 <[^>]*> e1a01fa2 ?	mov	r1, r2, lsr #31
-0+2c8 <[^>]*> e1a01022 ?	mov	r1, r2, lsr #32
-0+2cc <[^>]*> e1a01332 ?	mov	r1, r2, lsr r3
-0+2d0 <[^>]*> e1a01142 ?	mov	r1, r2, asr #2
-0+2d4 <[^>]*> e1a01fc2 ?	mov	r1, r2, asr #31
-0+2d8 <[^>]*> e1a01042 ?	mov	r1, r2, asr #32
-0+2dc <[^>]*> e1a01352 ?	mov	r1, r2, asr r3
-0+2e0 <[^>]*> e1a01162 ?	mov	r1, r2, ror #2
-0+2e4 <[^>]*> e1a01fe2 ?	mov	r1, r2, ror #31
-0+2e8 <[^>]*> e1a01372 ?	mov	r1, r2, ror r3
-0+2ec <[^>]*> e1a01062 ?	mov	r1, r2, rrx
+0+2b8 <[^>]*> e1a01f82 ?	lsl	r1, r2, #31
+0+2bc <[^>]*> e1a01312 ?	lsl	r1, r2, r3
+0+2c0 <[^>]*> e1a01122 ?	lsr	r1, r2, #2
+0+2c4 <[^>]*> e1a01fa2 ?	lsr	r1, r2, #31
+0+2c8 <[^>]*> e1a01022 ?	lsr	r1, r2, #32
+0+2cc <[^>]*> e1a01332 ?	lsr	r1, r2, r3
+0+2d0 <[^>]*> e1a01142 ?	asr	r1, r2, #2
+0+2d4 <[^>]*> e1a01fc2 ?	asr	r1, r2, #31
+0+2d8 <[^>]*> e1a01042 ?	asr	r1, r2, #32
+0+2dc <[^>]*> e1a01352 ?	asr	r1, r2, r3
+0+2e0 <[^>]*> e1a01162 ?	ror	r1, r2, #2
+0+2e4 <[^>]*> e1a01fe2 ?	ror	r1, r2, #31
+0+2e8 <[^>]*> e1a01372 ?	ror	r1, r2, r3
+0+2ec <[^>]*> e1a01062 ?	rrx	r1, r2
