@@ -1185,7 +1185,10 @@ extern struct type *lookup_signed_typename (char *);
 
 extern struct type *check_typedef (struct type *);
 
-#define CHECK_TYPEDEF(TYPE) (TYPE) = check_typedef (TYPE)
+#define CHECK_TYPEDEF(TYPE)			\
+  do {						\
+    (TYPE) = check_typedef (TYPE);		\
+  } while (0)
 
 extern void check_stub_method_group (struct type *, int);
 

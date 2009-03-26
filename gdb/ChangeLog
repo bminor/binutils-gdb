@@ -1,5 +1,10 @@
 2009-03-25  Tom Tromey  <tromey@redhat.com>
 
+	* gdbtypes.h (CHECK_TYPEDEF): Don't yield a value.
+	* stack.c (print_this_frame_argument_p): Use check_typedef.
+
+2009-03-25  Tom Tromey  <tromey@redhat.com>
+
 	* configure: Rebuild.
 	* acinclude.m4 (AM_ICONV): Set am_cv_use_build_libiconv.
 	Rearrange flags setting.  Add comments.
