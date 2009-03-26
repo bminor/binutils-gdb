@@ -72,7 +72,7 @@ enum thread_state
   THREAD_EXITED,
 };
 
-extern struct thread_info*
+struct thread_info*
 inferior_thread (void)
 {
   struct thread_info *tp = find_thread_pid (inferior_ptid);

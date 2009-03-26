@@ -1,3 +1,7 @@
+2009-03-26  Doug Evans  <dje@google.com>
+
+	* thread.c (inferior_thread) Remove "extern" in definition.
+
 2009-03-26  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	Add gdb.Value.is_optimized_out attribute.
