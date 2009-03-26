@@ -1,3 +1,9 @@
+2009-03-25  Tom Tromey  <tromey@redhat.com>
+
+	* configure: Rebuild.
+	* acinclude.m4 (AM_ICONV): Set am_cv_use_build_libiconv.
+	Rearrange flags setting.  Add comments.
+
 2009-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* config/i386/nm-i386.h: Remove code within

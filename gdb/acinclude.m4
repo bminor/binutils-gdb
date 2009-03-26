@@ -177,8 +177,8 @@ AC_DEFUN([AM_ICONV],
   AC_ARG_WITH([libiconv-prefix],
 [  --with-libiconv-prefix=DIR  search for libiconv in DIR/include and DIR/lib], [
     for dir in `echo "$withval" | tr : ' '`; do
-      if test -d $dir/include; then LIBICONV_INCLUDE="-I$dir/include"; CPPFLAGS="$CPPFLAGS -I$dir/include"; fi
-      if test -d $dir/lib; then LIBICONV_LIBDIR="-L$dir/lib"; LDFLAGS="$LDFLAGS -L$dir/lib"; fi
+      if test -d $dir/include; then LIBICONV_INCLUDE="-I$dir/include"; fi
+      if test -d $dir/lib; then LIBICONV_LIBDIR="-L$dir/lib"; fi
     done
    ])
 
@@ -189,30 +189,24 @@ AC_DEFUN([AM_ICONV],
     am_cv_func_iconv="no, consider installing GNU libiconv"
     am_cv_lib_iconv=no
     am_cv_use_build_libiconv=no
+    # First, try to find iconv in libc.
     AC_TRY_LINK([#include <stdlib.h>
 #include <iconv.h>],
       [iconv_t cd = iconv_open("","");
        iconv(cd,NULL,NULL,NULL,NULL);
        iconv_close(cd);],
       am_cv_func_iconv=yes)
+
+    # If iconv was not in libc, try -liconv.  In this case, arrange to
+    # look in the libiconv prefix, if it was specified by the user.
     if test "$am_cv_func_iconv" != yes; then
-      am_save_LIBS="$LIBS"
-      LIBS="$LIBS -liconv"
-      AC_TRY_LINK([#include <stdlib.h>
-#include <iconv.h>],
-        [iconv_t cd = iconv_open("","");
-         iconv(cd,NULL,NULL,NULL,NULL);
-         iconv_close(cd);],
-        am_cv_lib_iconv=yes
-        am_cv_func_iconv=yes)
-      LIBS="$am_save_LIBS"
-    fi
-    # Look for libiconv in the build tree.
-    if test "$am_cv_func_iconv" != yes && test -d ../libiconv; then
-      am_save_LIBS="$LIBS"
       am_save_CPPFLAGS="$CPPFLAGS"
-      LIBS="$LIBS $BUILD_LIBICONV_LIBDIR -liconv"
-      CPPFLAGS="$CPPFLAGS $BUILD_LIBICONV_INCLUDE"
+      am_save_LIBS="$LIBS"
+      if test -n "$LIBICONV_INCLUDE"; then
+        CPPFLAGS="$CPPFLAGS $LIBICONV_INCLUDE"
+        LIBS="$LIBS $LIBICONV_LIBDIR"
+      fi
+      LIBS="$LIBS -liconv"
       AC_TRY_LINK([#include <stdlib.h>
 #include <iconv.h>],
         [iconv_t cd = iconv_open("","");
@@ -223,10 +217,34 @@ AC_DEFUN([AM_ICONV],
       LIBS="$am_save_LIBS"
       CPPFLAGS="$am_save_CPPFLAGS"
     fi
+
+    # If that didn't work, try to find libiconv in the build tree.
+    if test "$am_cv_func_iconv" != yes && test -d ../libiconv; then
+      am_save_LIBS="$LIBS"
+      am_save_CPPFLAGS="$CPPFLAGS"
+      LIBS="$LIBS $BUILD_LIBICONV_LIBDIR -liconv"
+      CPPFLAGS="$CPPFLAGS $BUILD_LIBICONV_INCLUDE"
+      AC_TRY_LINK([#include <stdlib.h>
+#include <iconv.h>],
+        [iconv_t cd = iconv_open("","");
+         iconv(cd,NULL,NULL,NULL,NULL);
+         iconv_close(cd);],
+	am_cv_use_build_libiconv=yes
+        am_cv_lib_iconv=yes
+        am_cv_func_iconv=yes)
+      LIBS="$am_save_LIBS"
+      CPPFLAGS="$am_save_CPPFLAGS"
+    fi
   ])
+
+  # Set the various flags based on the cache variables.  We can't rely
+  # on the flags to remain set from the above code, due to caching.
   LIBICONV=
   if test "$am_cv_lib_iconv" = yes; then
     LIBICONV="-liconv"
+  else
+    LIBICONV_LIBDIR=
+    LIBICONV_INCLUDE=
   fi
   if test "$am_cv_use_build_libiconv" = yes; then
     LIBICONV_LIBDIR="$BUILD_LIBICONV_LIBDIR"
@@ -234,6 +252,7 @@ AC_DEFUN([AM_ICONV],
   fi
   CPPFLAGS="$CPPFLAGS $LIBICONV_INCLUDE"
   LIBS="$LIBS $LIBICONV_LIBDIR $LIBICONV"
+
   if test "$am_cv_func_iconv" = yes; then
     AC_DEFINE(HAVE_ICONV, 1, [Define if you have the iconv() function.])
     AC_MSG_CHECKING([for iconv declaration])
