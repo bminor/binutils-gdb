@@ -4683,13 +4683,11 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	      p->p_align = 1;
 	      p->p_flags = (lp->p_flags & ~PF_W);
 	    }
-	  else if (link_info != NULL)
+	  else
 	    {
 	      memset (p, 0, sizeof *p);
 	      p->p_type = PT_NULL;
 	    }
-	  else
-	    abort ();
 	}
       else if (m->count != 0)
 	{
@@ -5838,14 +5836,13 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_align_valid = 1;
       map->p_vaddr_offset = 0;
 
-      if (map->p_type == PT_GNU_RELRO
-	  && segment->p_filesz == segment->p_memsz)
+      if (map->p_type == PT_GNU_RELRO)
 	{
 	  /* The PT_GNU_RELRO segment may contain the first a few
 	     bytes in the .got.plt section even if the whole .got.plt
 	     section isn't in the PT_GNU_RELRO segment.  We won't
 	     change the size of the PT_GNU_RELRO segment.  */
-	  map->p_size = segment->p_filesz;
+	  map->p_size = segment->p_memsz;
 	  map->p_size_valid = 1;
 	}
 
