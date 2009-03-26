@@ -1,3 +1,9 @@
+2009-03-26  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 10005
+	* config/tc-i386.c (reloc): Don't abort on lack of required
+	reloc type.
+
 2009-03-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (parse_insn): Use default_arch on unsupported

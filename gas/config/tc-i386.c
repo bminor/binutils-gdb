@@ -2433,8 +2433,7 @@ reloc (unsigned int size,
 	      sign > 0 ? "signed" : "unsigned", size);
     }
 
-  abort ();
-  return BFD_RELOC_NONE;
+  return NO_RELOC;
 }
 
 /* Here we decide which fixups can be adjusted to make them relative to
