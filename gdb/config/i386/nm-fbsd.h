@@ -23,7 +23,6 @@
 
 #ifdef HAVE_PT_GETDBREGS
 #define I386_USE_GENERIC_WATCHPOINTS
-#define I386_WATCHPOINTS_IN_TARGET_VECTOR
 #endif
 
 #include "i386/nm-i386.h"

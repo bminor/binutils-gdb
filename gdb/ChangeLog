@@ -1,5 +1,17 @@
 2009-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* config/i386/nm-i386.h: Remove code within
+	I386_WATCHPOINTS_IN_TARGET_VECTOR conditional.
+	* config/i386/nm-cygwin.h: Remove I386_WATCHPOINTS_IN_TARGET_VECTOR
+	macro.
+	* config/i386/nm-cygwin64.h: Ditto.
+	* config/i386/nm-fbsd.h: Ditto.
+	* config/i386/nm-go32.h: Ditto.
+	* config/i386/nm-linux.h: Ditto.
+	* config/i386/nm-linux64.h: Ditto.
+
+2009-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	ARI fix: "xasprintf" rule.
 	* printcmd.c (sym_info): Replace xasprintf by xstrprintf.
 
