@@ -24,25 +24,109 @@ if {![istarget *-*-linux*]
     return 0  
 }
 
-set testfile "dw2-noloc"
-set srcfile ${testfile}.S
-set binfile ${objdir}/${subdir}/${testfile}.x
-
-if  { [gdb_compile "${srcdir}/${subdir}/main.c" "main.o" object {debug}] != "" } {
+if { [prepare_for_testing dw2-noloc.exp "dw2-noloc" {dw2-noloc-main.c dw2-noloc.S} {nodebug}] } {
     return -1
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${testfile}.o" object {nodebug}] != "" } {
+# Symbols have the form: {file,main}_loc{addr,empty,no}_{,un}resolvable
+# file: Symbol DIE is placed in DW_TAG_compile_unit.
+# main: Symbol DIE is placed in DW_TAG_subprogram.
+# locaddr: DW_AT_location is using DW_FORM_block DW_OP_addr <addr>.
+# locempty: DW_AT_location has zero DW_FORM_block size.
+# locno: DW_AT_location is not present.
+# resolvable: .symtab entry exists for this symbol name.
+# unresolvable: .symtab entry does not exist for this symbol name.
+# DW_AT_declaration is not present in any of these DIEs.
+
+proc file_symbols {type} {
+    global pf_prefix
+    set old_prefix $pf_prefix
+    lappend pf_prefix "$type:"
+
+    global gdb_prompt
+
+    gdb_test "print file_locaddr_resolvable" "= 1234567890"
+    gdb_test "ptype file_locaddr_resolvable" "type = int"
+
+    gdb_test "print file_locaddr_unresolvable" "= 1234567890"
+    gdb_test "ptype file_locaddr_unresolvable" "type = int"
+
+    gdb_test "print file_locempty_resolvable" "= <value optimized out>"
+    gdb_test "ptype file_locempty_resolvable" "type = int"
+
+    gdb_test "print file_locempty_unresolvable" "= <value optimized out>"
+    gdb_test "ptype file_locempty_unresolvable" "type = int"
+
+    gdb_test "print file_locno_resolvable" "= <value optimized out>"
+    gdb_test "ptype file_locno_resolvable" "type = int"
+
+    gdb_test "print file_locno_unresolvable" "= <value optimized out>"
+    gdb_test "ptype file_locno_unresolvable" "type = int"
+
+    gdb_test "print file_extern_locaddr_resolvable" "= 1234567890"
+    gdb_test "ptype file_extern_locaddr_resolvable" "type = int"
+
+    gdb_test "print file_extern_locaddr_unresolvable" "= 1234567890"
+    gdb_test "ptype file_extern_locaddr_unresolvable" "type = int"
+
+    gdb_test "print file_extern_locempty_resolvable" "= <value optimized out>"
+    gdb_test "ptype file_extern_locempty_resolvable" "type = int"
+
+    gdb_test "print file_extern_locempty_unresolvable" "= <value optimized out>"
+    gdb_test "ptype file_extern_locempty_unresolvable" "type = int"
+
+    gdb_test "print file_extern_locno_resolvable" "= 1234567890"
+    gdb_test "ptype file_extern_locno_resolvable" "type = int"
+
+    # `print file_extern_locno_unresolvable' currently prints
+    # Address of symbol "file_extern_locno_unresolvable" is unknown.
+    # As DW_AT_declaration is not present in this DIE
+    # it should print <value optimized out>.  As usefulness of such DIE is not
+    # clear its resolution is not being tested.
+
+    set pf_prefix $old_prefix
+}
+
+file_symbols no-run
+
+if ![runto_main] {
     return -1
 }
 
-if  { [gdb_compile "${testfile}.o main.o" "${binfile}" executable {debug}] != "" } {
-    return -1
-}
+file_symbols in-main
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
-gdb_test "print noloc" "Address of symbol \"noloc\" is unknown." "print noloc"
+gdb_test "print main_local_locaddr_resolvable" "= 1234567890"
+gdb_test "ptype main_local_locaddr_resolvable" "type = int"
+
+gdb_test "print main_local_locaddr_unresolvable" "= 1234567890"
+gdb_test "ptype main_local_locaddr_unresolvable" "type = int"
+
+gdb_test "print main_local_locempty_resolvable" "= <value optimized out>"
+gdb_test "ptype main_local_locempty_resolvable" "type = int"
+
+gdb_test "print main_local_locempty_unresolvable" "= <value optimized out>"
+gdb_test "ptype main_local_locempty_unresolvable" "type = int"
+
+gdb_test "print main_local_locno_resolvable" "= <value optimized out>"
+gdb_test "ptype main_local_locno_resolvable" "type = int"
+
+gdb_test "print main_local_locno_unresolvable" "= <value optimized out>"
+gdb_test "ptype main_local_locno_unresolvable" "type = int"
+
+gdb_test "print main_extern_locaddr_resolvable" "= 1234567890"
+gdb_test "ptype main_extern_locaddr_resolvable" "type = int"
+
+gdb_test "print main_extern_locaddr_unresolvable" "= 1234567890"
+gdb_test "ptype main_extern_locaddr_unresolvable" "type = int"
+
+gdb_test "print main_extern_locempty_resolvable" "= <value optimized out>"
+gdb_test "ptype main_extern_locempty_resolvable" "type = int"
+
+gdb_test "print main_extern_locempty_unresolvable" "= <value optimized out>"
+gdb_test "ptype main_extern_locempty_unresolvable" "type = int"
+
+gdb_test "print main_extern_locno_resolvable" "= 1234567890"
+gdb_test "ptype main_extern_locno_resolvable" "type = int"
+
+# For `main_extern_locno_unresolvable' see `file_extern_locno_unresolvable'.

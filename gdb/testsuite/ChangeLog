@@ -1,3 +1,17 @@
+2009-03-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-noloc-main.c: New file.
+	* gdb.dwarf2/dw2-noloc.S: New symbols matrix.
+	(.text): Remove.
+	(.data): New.
+	(DW_AT_stmt_list, .debug_line, DW_AT_frame_base): Remove.
+	(DW_AT_low_pc, DW_AT_high_pc): Reference `dw2-noloc-main.c'.
+	(DW_TAG_subprogram func_cu1, noloc): Remove.
+	(main): New.
+	* gdb.dwarf2/dw2-noloc.exp: Use prepare_for_testing, compile also
+	`dw2-noloc-main.c'.  Test the new DIEs from `dw2-noloc.S'.
+	(file_symbols): New procedure.
+
 2009-03-25  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/charset.exp (valid_target_charset): New proc.

@@ -1,3 +1,10 @@
+2009-03-26  Joel Brobecker  <brobecker@adacore.com>
+
+	Recognize missing DW_AT_location as <value optimized out>.
+	* dwarf2read.c
+	(new_symbol <DW_TAG_variable> <!DW_AT_location> <!DW_AT_external>):
+	Call add_symbol_to_list.
+
 2009-03-25  Tom Tromey  <tromey@redhat.com>
 
 	* gdbtypes.h (CHECK_TYPEDEF): Don't yield a value.

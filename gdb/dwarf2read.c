@@ -7659,6 +7659,12 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 		  SYMBOL_CLASS (sym) = LOC_UNRESOLVED;
 		  add_symbol_to_list (sym, &global_symbols);
 		}
+	      else if (!die_is_declaration (die, cu))
+		{
+		  /* Use the default LOC_OPTIMIZED_OUT class.  */
+		  gdb_assert (SYMBOL_CLASS (sym) == LOC_OPTIMIZED_OUT);
+		  add_symbol_to_list (sym, cu->list_in_scope);
+		}
 	    }
 	  break;
 	case DW_TAG_formal_parameter:
