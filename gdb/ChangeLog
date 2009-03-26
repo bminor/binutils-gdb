@@ -1,3 +1,8 @@
+2009-03-26  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (resolve_sal_pc): Preserve original line number
+	when skipping prologue.
+
 2009-03-26  Doug Evans  <dje@google.com>
 
 	* thread.c (inferior_thread) Remove "extern" in definition.

@@ -1,3 +1,12 @@
+2009-03-26  Tom Tromey  <tromey@redhat.com>
+
+	Update for change to prologue skipping:
+	* gdb.mi/mi2-simplerun.exp: Update.
+	* gdb.mi/mi2-break.exp: Update.
+	* gdb.mi/mi-simplerun.exp: Update.
+	* gdb.mi/mi-break.exp: Update.
+	* gdb.base/ending-run.exp: Update.
+
 2009-03-26  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.python/python-value.exp (test_value_in_inferior): Test

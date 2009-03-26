@@ -85,11 +85,11 @@ proc test_tbreak_creation_and_listing {} {
     mi_create_breakpoint "-t basics.c:callee2" 2 del callee2 ".*basics.c" $line_callee2_body $hex \
              "insert temp breakpoint at basics.c:callee2"
 
-    mi_create_breakpoint "-t basics.c:$line_callee3_head" 3 del callee3 ".*basics.c" $line_callee3_body $hex \
+    mi_create_breakpoint "-t basics.c:$line_callee3_head" 3 del callee3 ".*basics.c" $line_callee3_head $hex \
              "insert temp breakpoint at basics.c:\$line_callee3_head"
 
     # Getting the quoting right is tricky.  That is "\"<file>\":$line_callee4_head"
-    mi_create_breakpoint "-t \"\\\"${srcfile}\\\":$line_callee4_head\"" 4 del callee4 ".*basics.c" $line_callee4_body $hex \
+    mi_create_breakpoint "-t \"\\\"${srcfile}\\\":$line_callee4_head\"" 4 del callee4 ".*basics.c" $line_callee4_head $hex \
              "insert temp breakpoint at \"<fullfilename>\":\$line_callee4_head"
 
     mi_gdb_test "666-break-list" \

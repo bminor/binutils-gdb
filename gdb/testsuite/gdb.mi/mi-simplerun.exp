@@ -74,10 +74,10 @@ proc test_breakpoints_creation_and_listing {} {
     mi_create_breakpoint "basics.c:callee2" 2 keep callee2 ".*basics.c" $line_callee2_body $hex \
              "insert breakpoint at basics.c:callee2"
 
-    mi_create_breakpoint "basics.c:$line_callee3_head" 3 keep callee3 ".*basics.c" $line_callee3_body $hex \
+    mi_create_breakpoint "basics.c:$line_callee3_head" 3 keep callee3 ".*basics.c" $line_callee3_head $hex \
              "insert breakpoint at basics.c:\$line_callee3_head"
 
-    mi_create_breakpoint "\"\\\"${srcfile}\\\":$line_callee4_head\"" 4 keep callee4 ".*basics.c" $line_callee4_body $hex \
+    mi_create_breakpoint "\"\\\"${srcfile}\\\":$line_callee4_head\"" 4 keep callee4 ".*basics.c" $line_callee4_head $hex \
              "insert breakpoint at \"<fullfilename>\":\$line_callee4_head"
 
     mi_gdb_test "204-break-list" \

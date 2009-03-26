@@ -69,7 +69,7 @@ gdb_expect {
 gdb_test "b ending-run.c:1" ".*Breakpoint.*4.*"
 gdb_test "b ending-run.c:14" ".*Note.*also.*Breakpoint.*5.*" "b ending-run.c:14, two"
 gdb_test "cle ending-run.c:14" \
-	".*Deleted breakpoints 4 5.*" "Cleared 2 by line"
+	".*Deleted breakpoint 5.*" "Cleared 2 by line"
 
 send_gdb "inf line ending-run.c:14\n"
 gdb_expect {
@@ -77,7 +77,7 @@ gdb_expect {
         set line_nine $expect_out(1,string)
         gdb_test "b ending-run.c:14" ".*Breakpoint 6.*ending-run.c, line 14.*"
         gdb_test "b *$line_nine" ".*Note.*also.*Breakpoint 7.*" "Breakpoint 7 at *ending-run.c:14"
-        gdb_test "cle" ".*Deleted breakpoints 6 7.*" "Clear 2 by default"
+        gdb_test "cle" ".*Deleted breakpoints 4 6 7.*" "Clear 2 by default"
     }
     -re ".*$gdb_prompt $" {
         fail "need to fix test for new compile outcome"

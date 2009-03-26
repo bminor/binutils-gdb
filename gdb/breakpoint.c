@@ -5765,7 +5765,12 @@ resolve_sal_pc (struct symtab_and_line *sal)
       /* If this SAL corresponds to a breakpoint inserted using
          a line number, then skip the function prologue if necessary.  */
       if (sal->explicit_line)
-        skip_prologue_sal (sal);
+	{
+	  /* Preserve the original line number.  */
+	  int saved_line = sal->line;
+	  skip_prologue_sal (sal);
+	  sal->line = saved_line;
+	}
     }
 
   if (sal->section == 0 && sal->symtab != NULL)
