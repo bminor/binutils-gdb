@@ -225,6 +225,9 @@ proc test_value_in_inferior {} {
 
   # Check that the dereferenced value is sane
   gdb_test "python print arg0" "0x.*$testfile\"" "verify dereferenced value"
+
+  # Smoke-test is_optimized_out attribute
+  gdb_test "python print 'result =', arg0.is_optimized_out" "= False" "Test is_optimized_out attribute"
 }
 
 

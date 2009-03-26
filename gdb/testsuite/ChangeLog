@@ -1,3 +1,8 @@
+2009-03-26  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.python/python-value.exp (test_value_in_inferior): Test
+	gdb.Value.is_optimized_out attribute.
+
 2009-03-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-noloc-main.c: New file.

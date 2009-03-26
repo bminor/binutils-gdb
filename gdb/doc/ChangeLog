@@ -1,3 +1,8 @@
+2009-03-26  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.texinfo (Values From Inferior): Document is_optimized_out
+	attribute.
+
 2009-03-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* observer.texi (thread_exit): Add "silent" parameter.

@@ -1,3 +1,11 @@
+2009-03-26  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Add gdb.Value.is_optimized_out attribute.
+	* python/python-value.c (valpy_get_is_optimized_out): New
+	function.
+	(value_object_getset): New variable.
+	(value_object_type): Initialize tp_getset element.
+
 2009-03-26  Joel Brobecker  <brobecker@adacore.com>
 
 	Recognize missing DW_AT_location as <value optimized out>.

@@ -18325,13 +18325,23 @@ bar = some_val['foo']
 
 Again, @code{bar} will also be a @code{gdb.Value} object.
 
-For pointer data types, @code{gdb.Value} provides a method for
-dereferencing the pointer to obtain the object it points to.
+The following attribute is provided:
 
+@table @code
+@cindex optimized out value in Python
+@defmethod Value is_optimized_out
+This read-only boolean attribute is true if the compiler optimized out
+this value, thus it is not available for fetching from the inferior.
+@end defmethod
+@end table
+
+The following methods are provided:
+
+@table @code
 @defmethod Value dereference
-This method returns a new @code{gdb.Value} object whose contents is
-the object pointed to by the pointer.  For example, if @code{foo} is
-a C pointer to an @code{int}, declared in your C program as
+For pointer data types, this method returns a new @code{gdb.Value} object
+whose contents is the object pointed to by the pointer.  For example, if
+@code{foo} is a C pointer to an @code{int}, declared in your C program as
 
 @smallexample
 int *foo;
@@ -18375,6 +18385,7 @@ will be used, if the current language is able to supply one.
 The optional @var{errors} argument is the same as the corresponding
 argument to Python's @code{string.decode} method.
 @end defmethod
+@end table
 
 @node Commands In Python
 @subsubsection Commands In Python

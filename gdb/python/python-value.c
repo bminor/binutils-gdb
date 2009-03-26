@@ -272,6 +272,18 @@ valpy_str (PyObject *self)
   return result;
 }
 
+/* Implements gdb.Value.is_optimized_out.  */
+static PyObject *
+valpy_get_is_optimized_out (PyObject *self, void *closure)
+{
+  struct value *value = ((value_object *) self)->value;
+
+  if (value_optimized_out (value))
+    Py_RETURN_TRUE;
+
+  Py_RETURN_FALSE;
+}
+
 enum valpy_opcode
 {
   VALPY_ADD,
@@ -825,6 +837,13 @@ gdbpy_initialize_values (void)
   values_in_python = NULL;
 }
 
+static PyGetSetDef value_object_getset[] = {
+  { "is_optimized_out", valpy_get_is_optimized_out, NULL,
+    "Boolean telling whether the value is optimized out (i.e., not available).",
+    NULL },
+  {NULL}  /* Sentinel */
+};
+
 static PyMethodDef value_object_methods[] = {
   { "address", valpy_address, METH_NOARGS, "Return the address of the value." },
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
@@ -897,7 +916,7 @@ PyTypeObject value_object_type = {
   0,				  /* tp_iternext */
   value_object_methods,		  /* tp_methods */
   0,				  /* tp_members */
-  0,				  /* tp_getset */
+  value_object_getset,		  /* tp_getset */
   0,				  /* tp_base */
   0,				  /* tp_dict */
   0,				  /* tp_descr_get */
