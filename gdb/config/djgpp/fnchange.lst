@@ -487,6 +487,7 @@
 @V@/opcodes/xstormy16-opc.h @V@/opcodes/xst16opc.h
 @V@/readline/config.h.bot @V@/readline/config.h-bot
 @V@/readline/config.h.in @V@/readline/config.h-in
+@V@/readline/examples/rlfe/config.h.in @V@/readline/examples/rlfe/config.h-in
 @V@/sim/frv/profile-fr400.c @V@/sim/frv/fr400-profile.c
 @V@/sim/cris/semcrisv10f-switch.c @V@/sim/cris/scrisv10f.c
 @V@/sim/cris/semcrisv32f-switch.c @V@/sim/cris/scrisv32f.c
