@@ -1094,6 +1094,7 @@ Target_powerpc<size, big_endian>::Scan::check_non_pic(Relobj* object,
   // error per object file.
   if (this->issued_non_pic_error_)
     return;
+  gold_assert(parameters->options().output_is_position_independent());
   object->error(_("requires unsupported dynamic reloc; "
 		  "recompile with -fPIC"));
   this->issued_non_pic_error_ = true;

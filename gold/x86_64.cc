@@ -974,6 +974,7 @@ Target_x86_64::Scan::check_non_pic(Relobj* object, unsigned int r_type)
       // error per object file.
       if (this->issued_non_pic_error_)
         return;
+      gold_assert(parameters->options().output_is_position_independent());
       object->error(_("requires unsupported dynamic reloc; "
                       "recompile with -fPIC"));
       this->issued_non_pic_error_ = true;

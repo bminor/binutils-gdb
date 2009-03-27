@@ -1,3 +1,10 @@
+2009-03-27  Cary Coutant  <ccoutant@google.com>
+
+	* powerpc.cc (Target_powerpc::check_non_pic): Assert that output is
+	position independent.
+	* sparc.cc (Target_sparc::check_non_pic): Likewise.
+	* x86_64.cc (Target_x86_64::check_non_pic): Likewise.
+
 2009-03-24  Cary Coutant  <ccoutant@google.com>
 
 	* symtab.h (needs_plt_entry): Check for unsatisfied reference from
@@ -17,7 +24,7 @@
 	* object.h (is_elf_object): Declare.
 	* archive.cc (Archive::get_elf_object_for_member): Call
 	is_elf_object.
-	* readsymc.cc (Read_symbols::do_read_symbols): Likewise.
+	* readsyms.cc (Read_symbols::do_read_symbols): Likewise.
 
 2009-03-24  Elliott Hughes  <enh@google.com>
 
