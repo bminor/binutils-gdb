@@ -125,6 +125,11 @@ extern "C" ssize_t pread(int, void*, size_t, off_t);
 extern "C" int ftruncate(int, off_t);
 #endif
 
+#ifndef HAVE_MREMAP
+#define MREMAP_MAYMOVE 1
+extern "C" void *mremap (void *, size_t, size_t, int, ...);
+#endif
+
 namespace gold
 {
 

@@ -312,7 +312,7 @@ LFS_CFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 AC_SUBST(LFS_CFLAGS)
 
 AC_CHECK_FUNCS(chsize)
-AC_REPLACE_FUNCS(pread ftruncate)
+AC_REPLACE_FUNCS(pread ftruncate mremap)
 
 # Link in zlib if we can.  This allows us to write compressed sections.
 AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
