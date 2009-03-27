@@ -1,3 +1,7 @@
+2009-03-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* config/djgpp/fnchange.lst: Update to fix ARI-reported problems.
+
 2009-03-26  Doug Evans  <dje@google.com>
 
 	* thread.c (do_restore_current_thread_cleanup): Redo test for
