@@ -1436,6 +1436,16 @@ bfd_get_section_contents (bfd *abfd,
 
   if ((section->flags & SEC_IN_MEMORY) != 0)
     {
+      if (section->contents == NULL)
+	{
+	  /* This can happen because of errors earlier on in the linking process.
+	     We do not want to seg-fault here, so clear the flag and return an
+	     error code.  */
+	  section->flags &= ~ SEC_IN_MEMORY;
+	  bfd_set_error (bfd_error_invalid_operation);
+	  return FALSE;
+	}
+      
       memcpy (location, section->contents + offset, (size_t) count);
       return TRUE;
     }
