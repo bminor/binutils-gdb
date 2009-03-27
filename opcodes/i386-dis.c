@@ -10044,8 +10044,7 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       break;
 
     default:
-      oappend (INTERNAL_DISASSEMBLER_ERROR);
-      return NULL;
+      abort ();
     }
 
   if (dp->name != NULL)

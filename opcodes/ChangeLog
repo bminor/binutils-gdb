@@ -1,3 +1,7 @@
+2009-03-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (get_valid_dis386): Abort on unhandled table.
+
 2009-03-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* cgen-opc.c: Include alloca-conf.h rather than alloca.h.
