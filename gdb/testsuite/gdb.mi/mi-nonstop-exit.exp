@@ -1,0 +1,106 @@
+# Copyright 2009
+# Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This only works with native configurations
+if {![isnative]} {
+  return
+}
+
+load_lib mi-support.exp
+set MIFLAGS "-i=mi"
+
+gdb_exit
+if {[mi_gdb_start]} {
+    continue
+}
+
+#
+# Start here
+#
+set testfile "non-stop-exit"
+set srcfile "$testfile.c"
+set binfile "$objdir/$subdir/mi-$testfile"
+
+set options [list debug incdir=$objdir]
+if {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $options] != "" } {
+    return -1
+}
+
+mi_gdb_reinitialize_dir $srcdir/$subdir
+mi_gdb_load $binfile
+
+set supported 0
+send_gdb "-gdb-show non-stop\n"
+gdb_expect {
+    -re ".*\\^done,value=\"off\",supported=\"(\[^\"\]+)\"\r\n$mi_gdb_prompt$" {
+        if { $expect_out(1,string) == "1" } {
+            set supported 1
+        }
+    }
+    -re ".$mi_gdb_prompt$" {
+    }
+}
+
+mi_gdb_test "-gdb-set non-stop 1" ".*"
+mi_gdb_test "-gdb-set target-async 1" ".*"
+detect_async
+
+mi_gdb_test "200-break-insert -t main" ".*"
+
+set created "=thread-created,id=\"$decimal\"\r\n"
+set running "\\*running,thread-id=\"$decimal\"\r\n"
+
+set notifs "($created)*($running)*($library_loaded_re)*"
+
+# Note: presently, we skip this test on non-native targets,
+# so 'run' is OK.  As soon as we start to run this on remote
+# target, the logic from mi_run_cmd will have to be refactored.
+send_gdb "-exec-run\n"
+gdb_expect {
+    -re "\\^running\r\n$notifs$mi_gdb_prompt" {
+    }
+    -re "\\^error,msg=\"The target does not support running in non-stop mode.\"" {
+        verbose -log "Non-stop mode not supported, skipping all tests"
+        return
+    }
+    -re "\r\n$mi_gdb_prompt" {
+        perror "Cannot start target (unknown output after running)"
+        return -1
+    }
+    timeout {
+        perror "Cannot start target (timeout)"
+        return -1
+    }
+}
+mi_expect_stop "breakpoint-hit" main ".*" ".*" "\[0-9\]+" { "" "disp=\"del\"" } "run to main"
+
+mi_send_resuming_command "exec-continue" "continue"
+
+mi_expect_stop "exited-normally" "" "" "" "" "" "finished exec continue"
+
+# Run the program again.
+
+mi_gdb_test "200-break-insert -t main" ".*"
+
+mi_send_resuming_command "exec-run" "run (2)"
+
+mi_expect_stop "breakpoint-hit" main ".*" ".*" "\[0-9\]+" { "" "disp=\"del\"" } "run to main (2)"
+
+mi_send_resuming_command "exec-continue" "continue (2)"
+
+mi_expect_stop "exited-normally" "" "" "" "" "" "finished exec continue (2)"
+
+mi_gdb_exit

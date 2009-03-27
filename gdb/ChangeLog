@@ -1,3 +1,8 @@
+2009-03-26  Doug Evans  <dje@google.com>
+
+	* thread.c (do_restore_current_thread_cleanup): Redo test for
+	whether to restore old->inferior_ptid.
+
 2009-03-26  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (resolve_sal_pc): Preserve original line number

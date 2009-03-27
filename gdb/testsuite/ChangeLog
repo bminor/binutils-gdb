@@ -1,3 +1,8 @@
+2009-03-26  Doug Evans  <dje@google.com>
+
+	* gdb.mi/mi-nonstop-exit.exp: New file.
+	* gdb.mi/non-stop-exit.c: New file.
+
 2009-03-26  Tom Tromey  <tromey@redhat.com>
 
 	Update for change to prologue skipping:

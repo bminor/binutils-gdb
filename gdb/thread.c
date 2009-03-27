@@ -924,11 +924,10 @@ do_restore_current_thread_cleanup (void *arg)
      then don't revert back to it, but instead simply drop back to no
      thread selected.  */
   if (tp
-      && is_exited (tp->ptid)
-      && find_inferior_pid (ptid_get_pid (tp->ptid)) == NULL)
-    restore_current_thread (null_ptid);
-  else
+      && find_inferior_pid (ptid_get_pid (tp->ptid)) != NULL)
     restore_current_thread (old->inferior_ptid);
+  else
+    restore_current_thread (null_ptid);
 
   /* The running state of the originally selected thread may have
      changed, so we have to recheck it here.  */
