@@ -2242,15 +2242,12 @@ is considered a comment and is ignored.  The line comment character is
 @ifset PPC
 @samp{#} for Motorola PowerPC;
 @end ifset
-<<<<<<< as.texinfo
-@ifset SCORE
-@samp{#} for the Sunplus SCORE;
-@end ifset
-=======
 @ifset S390
 @samp{#} for IBM S/390;
 @end ifset
->>>>>>> 1.196
+@ifset SCORE
+@samp{#} for the Sunplus SCORE;
+@end ifset
 @ifset SH
 @samp{!} for the Renesas / SuperH SH;
 @end ifset
@@ -6765,15 +6762,12 @@ subject, see the hardware manufacturer's manual.
 @ifset PPC
 * PPC-Dependent::               PowerPC Dependent Features
 @end ifset
-<<<<<<< as.texinfo
-@ifset SCORE
-* SCORE-Dependent::             SCORE Dependent Features
-@end ifset
-=======
 @ifset S390
 * S/390-Dependent::             IBM S/390 Dependent Features
 @end ifset
->>>>>>> 1.196
+@ifset SCORE
+* SCORE-Dependent::             SCORE Dependent Features
+@end ifset
 @ifset SPARC
 * Sparc-Dependent::             SPARC Dependent Features
 @end ifset
@@ -6942,17 +6936,14 @@ family.
 @include c-ppc.texi
 @end ifset
 
-<<<<<<< as.texinfo
-@ifset SCORE
-@include c-score.texi
-@end ifset
-
-=======
 @ifset S390
 @include c-s390.texi
 @end ifset
 
->>>>>>> 1.196
+@ifset SCORE
+@include c-score.texi
+@end ifset
+
 @ifset SH
 @include c-sh.texi
 @include c-sh64.texi
