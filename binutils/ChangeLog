@@ -1,3 +1,8 @@
+2009-03-27  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (display_debug_ranges): Add the base address to the
+	displayed values for 'Begin' and 'End'. 
+
 2009-03-25  Ryan Mansfield  <rmansfield@qnx.com>
 
 	* readelf.c (process_file_header): Don't report a corrupt string

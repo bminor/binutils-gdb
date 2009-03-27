@@ -3576,16 +3576,18 @@ display_debug_ranges (struct dwarf_section *section,
 		  break;
 		}
 
-	      print_dwarf_vma (begin, pointer_size);
-	      print_dwarf_vma (end, pointer_size);
-
 	      /* Check base address specifiers.  */
 	      if (begin == (dwarf_vma) -1 && end != (dwarf_vma) -1)
 		{
 		  base_address = end;
+		  print_dwarf_vma (begin, pointer_size);
+		  print_dwarf_vma (end, pointer_size);
 		  printf ("(base address)\n");
 		  continue;
 		}
+
+	      print_dwarf_vma (begin + base_address, pointer_size);
+	      print_dwarf_vma (end + base_address, pointer_size);
 
 	      if (begin == end)
 		fputs (_("(start == end)"), stdout);
