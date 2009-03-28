@@ -1,5 +1,11 @@
 2009-03-28  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote.c (remote_stop_ns): If multi-process extensions are off,
+	and GDB is requesting the whole process to stop, sent "vCont;t",
+	not "vCont;t:-1"
+
+2009-03-28  Pedro Alves  <pedro@codesourcery.com>
+
 	* inf-loop.c (inferior_event_handler): Avoid calling is_running on
 	null inferior_ptid.
 

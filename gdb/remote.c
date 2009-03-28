@@ -3945,13 +3945,13 @@ remote_stop_ns (ptid_t ptid)
   if (!rs->support_vCont_t)
     error (_("Remote server does not support stopping threads"));
 
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid_equal (ptid, minus_one_ptid)
+      || (!remote_multi_process_p (rs) && ptid_is_pid (ptid)))
     p += xsnprintf (p, endp - p, "vCont;t");
   else
     {
       ptid_t nptid;
 
-      /* Step inferior_ptid.  */
       p += xsnprintf (p, endp - p, "vCont;t:");
 
       if (ptid_is_pid (ptid))
