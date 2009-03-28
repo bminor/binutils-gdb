@@ -1,3 +1,8 @@
+2009-03-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* inf-loop.c (inferior_event_handler): Avoid calling is_running on
+	null inferior_ptid.
+
 2009-03-27  Eli Zaretskii  <eliz@gnu.org>
 
 	* config/djgpp/fnchange.lst: Update to fix ARI-reported problems.

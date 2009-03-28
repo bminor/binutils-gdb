@@ -131,7 +131,10 @@ inferior_event_handler (enum inferior_event_type event_type,
 	  bpstat_do_actions ();
 	}
 
-      if (!was_sync && !is_running (inferior_ptid) && exec_done_display_p)
+      if (!was_sync
+	  && exec_done_display_p
+	  && (ptid_equal (inferior_ptid, null_ptid)
+	      || !is_running (inferior_ptid)))
 	printf_unfiltered (_("completed.\n"));
       break;
 
