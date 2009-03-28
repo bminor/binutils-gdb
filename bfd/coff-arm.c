@@ -2208,7 +2208,7 @@ coff_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 	    {
 	      _bfd_error_handler
 		/* xgettext: c-format */
-		(_("ERROR: %B is compiled for APCS-%d, whereas %B is compiled for APCS-%d"),
+		(_("error: %B is compiled for APCS-%d, whereas %B is compiled for APCS-%d"),
 		 ibfd, obfd,
 		 APCS_26_FLAG (ibfd) ? 26 : 32,
 		 APCS_26_FLAG (obfd) ? 26 : 32
@@ -2224,10 +2224,10 @@ coff_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 
 	      if (APCS_FLOAT_FLAG (ibfd))
 		/* xgettext: c-format */
-		msg = _("ERROR: %B passes floats in float registers, whereas %B passes them in integer registers");
+		msg = _("error: %B passes floats in float registers, whereas %B passes them in integer registers");
 	      else
 		/* xgettext: c-format */
-		msg = _("ERROR: %B passes floats in integer registers, whereas %B passes them in float registers");
+		msg = _("error: %B passes floats in integer registers, whereas %B passes them in float registers");
 
 	      _bfd_error_handler (msg, ibfd, obfd);
 
@@ -2241,10 +2241,10 @@ coff_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 
 	      if (PIC_FLAG (ibfd))
 		/* xgettext: c-format */
-		msg = _("ERROR: %B is compiled as position independent code, whereas target %B is absolute position");
+		msg = _("error: %B is compiled as position independent code, whereas target %B is absolute position");
 	      else
 		/* xgettext: c-format */
-		msg = _("ERROR: %B is compiled as absolute position code, whereas target %B is position independent");
+		msg = _("error: %B is compiled as absolute position code, whereas target %B is position independent");
 	      _bfd_error_handler (msg, ibfd, obfd);
 
 	      bfd_set_error (bfd_error_wrong_format);

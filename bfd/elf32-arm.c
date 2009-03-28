@@ -8516,7 +8516,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
 
   if (oldtag >= MAX_TAG_CPU_ARCH || newtag >= MAX_TAG_CPU_ARCH)
     {
-      _bfd_error_handler (_("ERROR: %B: Unknown CPU architecture"), ibfd);
+      _bfd_error_handler (_("error: %B: Unknown CPU architecture"), ibfd);
       return -1;
     }
 
@@ -8554,7 +8554,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
 
   if (result == -1)
     {
-      _bfd_error_handler (_("ERROR: %B: Conflicting CPU architectures %d/%d"),
+      _bfd_error_handler (_("error: %B: Conflicting CPU architectures %d/%d"),
 			  ibfd, oldtag, newtag);
       return -1;
     }
@@ -8605,7 +8605,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
       else if (in_attr[Tag_ABI_FP_number_model].i != 0)
 	{
 	  _bfd_error_handler
-	    (_("ERROR: %B uses VFP register arguments, %B does not"),
+	    (_("error: %B uses VFP register arguments, %B does not"),
 	     ibfd, obfd);
 	  result = FALSE;
 	}
@@ -8721,7 +8721,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		 binaries in the toolchain have had the attributes set
 		 properly.
 	      _bfd_error_handler
-		(_("ERROR: %B: 8-byte data alignment conflicts with %B"),
+		(_("error: %B: 8-byte data alignment conflicts with %B"),
 		 obfd, ibfd);
 	      result = FALSE; */
 	    }
@@ -8755,7 +8755,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	      else
 		{
 		  _bfd_error_handler
-		    (_("ERROR: %B: Conflicting architecture profiles %c/%c"),
+		    (_("error: %B: Conflicting architecture profiles %c/%c"),
 		     ibfd,
 		     in_attr[i].i ? in_attr[i].i : '0',
 		     out_attr[i].i ? out_attr[i].i : '0');
@@ -8788,7 +8788,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	      && in_attr[i].i != AEABI_R9_unused)
 	    {
 	      _bfd_error_handler
-		(_("ERROR: %B: Conflicting use of R9"), ibfd);
+		(_("error: %B: Conflicting use of R9"), ibfd);
 	      result = FALSE;
 	    }
 	  if (out_attr[i].i == AEABI_R9_unused)
@@ -8800,7 +8800,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	      && out_attr[Tag_ABI_PCS_R9_use].i != AEABI_R9_unused)
 	    {
 	      _bfd_error_handler
-		(_("ERROR: %B: SB relative addressing conflicts with use of R9"),
+		(_("error: %B: SB relative addressing conflicts with use of R9"),
 		 ibfd);
 	      result = FALSE;
 	    }
@@ -8856,7 +8856,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	  if (in_attr[i].i != out_attr[i].i)
 	    {
 	      _bfd_error_handler
-		(_("ERROR: %B uses iWMMXt register arguments, %B does not"),
+		(_("error: %B uses iWMMXt register arguments, %B does not"),
 		 ibfd, obfd);
 	      result = FALSE;
 	    }
@@ -8878,7 +8878,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	      if (in_attr[i].i != out_attr[i].i)
 		{
 		  _bfd_error_handler
-		    (_("ERROR: fp16 format mismatch between %B and %B"),
+		    (_("error: fp16 format mismatch between %B and %B"),
 		     ibfd, obfd);
 		  result = FALSE;
 		}
@@ -9082,7 +9082,7 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
       && !(ibfd->flags & DYNAMIC)
       && (in_flags & EF_ARM_BE8))
     {
-      _bfd_error_handler (_("ERROR: %B is already in final BE8 format"),
+      _bfd_error_handler (_("error: %B is already in final BE8 format"),
 			  ibfd);
       return FALSE;
     }
@@ -9158,7 +9158,7 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 				      EF_ARM_EABI_VERSION (out_flags)))
     {
       _bfd_error_handler
-	(_("ERROR: Source object %B has EABI version %d, but target %B has EABI version %d"),
+	(_("error: Source object %B has EABI version %d, but target %B has EABI version %d"),
 	 ibfd, obfd,
 	 (in_flags & EF_ARM_EABIMASK) >> 24,
 	 (out_flags & EF_ARM_EABIMASK) >> 24);
@@ -9174,7 +9174,7 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
       if ((in_flags & EF_ARM_APCS_26) != (out_flags & EF_ARM_APCS_26))
 	{
 	  _bfd_error_handler
-	    (_("ERROR: %B is compiled for APCS-%d, whereas target %B uses APCS-%d"),
+	    (_("error: %B is compiled for APCS-%d, whereas target %B uses APCS-%d"),
 	     ibfd, obfd,
 	     in_flags & EF_ARM_APCS_26 ? 26 : 32,
 	     out_flags & EF_ARM_APCS_26 ? 26 : 32);
@@ -9185,11 +9185,11 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 	{
 	  if (in_flags & EF_ARM_APCS_FLOAT)
 	    _bfd_error_handler
-	      (_("ERROR: %B passes floats in float registers, whereas %B passes them in integer registers"),
+	      (_("error: %B passes floats in float registers, whereas %B passes them in integer registers"),
 	       ibfd, obfd);
 	  else
 	    _bfd_error_handler
-	      (_("ERROR: %B passes floats in integer registers, whereas %B passes them in float registers"),
+	      (_("error: %B passes floats in integer registers, whereas %B passes them in float registers"),
 	       ibfd, obfd);
 
 	  flags_compatible = FALSE;
@@ -9199,11 +9199,11 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 	{
 	  if (in_flags & EF_ARM_VFP_FLOAT)
 	    _bfd_error_handler
-	      (_("ERROR: %B uses VFP instructions, whereas %B does not"),
+	      (_("error: %B uses VFP instructions, whereas %B does not"),
 	       ibfd, obfd);
 	  else
 	    _bfd_error_handler
-	      (_("ERROR: %B uses FPA instructions, whereas %B does not"),
+	      (_("error: %B uses FPA instructions, whereas %B does not"),
 	       ibfd, obfd);
 
 	  flags_compatible = FALSE;
@@ -9213,11 +9213,11 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 	{
 	  if (in_flags & EF_ARM_MAVERICK_FLOAT)
 	    _bfd_error_handler
-	      (_("ERROR: %B uses Maverick instructions, whereas %B does not"),
+	      (_("error: %B uses Maverick instructions, whereas %B does not"),
 	       ibfd, obfd);
 	  else
 	    _bfd_error_handler
-	      (_("ERROR: %B does not use Maverick instructions, whereas %B does"),
+	      (_("error: %B does not use Maverick instructions, whereas %B does"),
 	       ibfd, obfd);
 
 	  flags_compatible = FALSE;
@@ -9236,11 +9236,11 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 	    {
 	      if (in_flags & EF_ARM_SOFT_FLOAT)
 		_bfd_error_handler
-		  (_("ERROR: %B uses software FP, whereas %B uses hardware FP"),
+		  (_("error: %B uses software FP, whereas %B uses hardware FP"),
 		   ibfd, obfd);
 	      else
 		_bfd_error_handler
-		  (_("ERROR: %B uses hardware FP, whereas %B uses software FP"),
+		  (_("error: %B uses hardware FP, whereas %B uses software FP"),
 		   ibfd, obfd);
 
 	      flags_compatible = FALSE;

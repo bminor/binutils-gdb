@@ -1,3 +1,13 @@
+2009-03-28  Mark Mitchell  <mark@codesourcery.com>
+
+	* coff-arm.c (coff_arm_merge_private_bfd_data): Use "error:", not
+	"ERROR:", in error messages.
+	* cpu-arm.c (bfd_arm_merge_machines): Likewise.
+	* elf-attrs.c (_bfd_elf_merge_object_attributes): Likewise.
+	* elf32-arm.c (tag_cpu_arch_combine): Likewise.
+	(elf32_arm_merge_eabi_attributes): Likewise.
+	(elf32_arm_merge_private_bfd_data): Likewise.
+
 2009-03-27  Nick Clifton  <nickc@redhat.com>
 
 	* section.c (bfd_get_section_contents): Detect and handle the case
