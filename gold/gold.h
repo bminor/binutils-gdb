@@ -127,7 +127,11 @@ extern "C" int ftruncate(int, off_t);
 
 #ifndef HAVE_MREMAP
 #define MREMAP_MAYMOVE 1
-extern "C" void *mremap (void *, size_t, size_t, int, ...);
+extern "C" void *mremap(void *, size_t, size_t, int, ...);
+#endif
+
+#ifndef HAVE_FFSLL
+extern "C" int ffsll(long long);
 #endif
 
 namespace gold

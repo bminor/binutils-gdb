@@ -40,6 +40,8 @@
 # define MAP_ANONYMOUS MAP_ANON
 #endif
 
+extern void *mremap (void *, size_t, size_t, int, ...);
+
 void *
 mremap (void *old_address, size_t old_size, size_t new_size,
 	int flags ATTRIBUTE_UNUSED, ...)

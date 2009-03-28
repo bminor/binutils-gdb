@@ -1,5 +1,13 @@
 2009-03-27  Ian Lance Taylor  <iant@google.com>
 
+	* ffsll.c: New file.
+	* configure.ac: Call AC_REPLACE_FUNCS on ffsll.
+	* gold.h (ffsll): Declare if HAVE_FFSLL is not defined.
+	* ftruncate.c (ftruncate): Declare before definition.
+	* mremap.c (mremap): Likewise.
+	* pread.c (pread): Likewise.
+	* configure, Makefile.in, config.in: Rebuild.
+
 	* mremap.c: New file.
 	* configure.ac: Call AC_REPLACE_FUNCS on mremap.
 	* gold.h (MREMAP_MAYMOVE): Define if HAVE_MREMAP is not defined.

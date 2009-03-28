@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
+extern int ftruncate (int, off_t);
+
 #ifdef F_CHSIZE
 
 int

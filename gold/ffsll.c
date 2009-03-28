@@ -1,6 +1,6 @@
-/* pread.c -- version of pread for gold.  */
+/* ffsll.c -- version of ffsll for gold.  */
 
-/* Copyright 2006, 2007 Free Software Foundation, Inc.
+/* Copyright 2009 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <iant@google.com>.
 
    This file is part of gold.
@@ -20,22 +20,24 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-/* This file implements pread for systems which don't have it.  This
-   file is only compiled if pread is not present on the system.  This
-   is not an exact version of pread, as it does not preserve the
-   current file offset.  */
-
 #include "config.h"
 
-#include <sys/types.h>
-#include <unistd.h>
+#include <string.h>
 
-extern ssize_t pread (int, void *, size_t, off_t);
+extern int ffsll (long long);
 
-ssize_t
-pread (int fd, void *buf, size_t count, off_t offset)
+/* This file implements ffsll for systems which don't have it.  We use
+   ffsll if possible because gcc supports it as a builtin which will
+   use a machine instruction if there is one.  */
+
+int
+ffsll (long long arg)
 {
-  if (lseek(fd, offset, SEEK_SET) != offset)
-    return -1;
-  return read(fd, buf, count);
+  unsigned long long i;
+  int ret;
+
+  ret = 0;
+  for (i = (unsigned long long) arg; i != 0; i >>= 1)
+    ++ret;
+  return ret;
 }
