@@ -1,3 +1,8 @@
+2009-03-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (mn10300_gdbarch_init): For mn10300, by default,
+	`char' is unsigned.
+
 2009-03-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_stop_ns): If multi-process extensions are off,
