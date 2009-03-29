@@ -1,5 +1,14 @@
 2009-03-29  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
+	Remove unused value_object attribute `owned_by_gdb'.
+	* python/python-value.c (value_object): Remove owned_by_gdb
+	attribute.
+	(valpy_dealloc): Remove reference to self->owned_by_gdb.
+	(valpy_new): Likewise.
+	(value_to_value_object): Likewise.
+
+2009-03-29  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
 	Change gdb.Value.address from a method to an attribute.
 	* python/python-value.c (value_object): Add `address' element.
 	(valpy_dealloc): Decrement reference to self->address if set.
