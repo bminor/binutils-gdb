@@ -1,3 +1,7 @@
+2009-03-29  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* gdb.arch/powerpc-prologue.exp: Update for disassemble-next-line.
+
 2009-03-26  Doug Evans  <dje@google.com>
 
 	* gdb.mi/mi-nonstop-exit.exp: New file.
@@ -168,7 +172,7 @@
 2009-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.pascal/floats.exp: Accept approximate results everywhere.
-	
+
 2009-02-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-nonstop.exp (notifs): Adjust for library
@@ -198,10 +202,10 @@
 
 2009-02-14  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * lib/mi-support.exp (mi_expect_stop): Adjust the order of fields.
-        (mi_expect_interrupt): Likewise.
-        * gdb.mi/mi-cli.exp: Check that "step" results in proper *stopped
-        response.
+	* lib/mi-support.exp (mi_expect_stop): Adjust the order of fields.
+	(mi_expect_interrupt): Likewise.
+	* gdb.mi/mi-cli.exp: Check that "step" results in proper *stopped
+	response.
 
 2009-02-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 

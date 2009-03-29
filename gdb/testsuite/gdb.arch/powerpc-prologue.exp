@@ -50,7 +50,7 @@ if ![runto_main] then {
 # Testcase for PIC prologue.
 
 gdb_breakpoint "gdb2029_marker"
-gdb_test "continue" "Breakpoint $decimal, $hex in gdb2029_marker \\(\\)" \
+gdb_test "continue" "Breakpoint $decimal, $hex in gdb2029_marker \\(\\).*" \
 	"continue to PIC"
 
 gdb_test "backtrace 10" \
@@ -70,7 +70,7 @@ gdb_test "info frame" \
 # Testcase for scheduled prologue.
 
 gdb_breakpoint "optimized_1_marker"
-gdb_test "continue" "Breakpoint $decimal, $hex in optimized_1_marker \\(\\)" \
+gdb_test "continue" "Breakpoint $decimal, $hex in optimized_1_marker \\(\\).*" \
 	"continue to optimized"
 
 gdb_test "backtrace 10" \
