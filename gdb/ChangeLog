@@ -1,3 +1,16 @@
+2009-03-29  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Change gdb.Value.address from a method to an attribute.
+	* python/python-value.c (value_object): Add `address' element.
+	(valpy_dealloc): Decrement reference to self->address if set.
+	(valpy_new): Initialize val_obj->address.
+	(valpy_address): Rename to ...
+	(valpy_get_address): ... this.  Change signature from method to
+	attribute.  Update self->address if not set.
+	(value_to_value_object): Initialize val_obj->address.
+	(value_object_getset): Add `address' element.
+	(value_object_methods): Remove `address' element.
+
 2009-03-29  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* observer.sh: Set LANG/LC_ALL to C, not c.

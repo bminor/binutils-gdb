@@ -59,6 +59,7 @@ typedef struct {
   PyObject_HEAD
   struct value *value;
   int owned_by_gdb;
+  PyObject *address;
 } value_object;
 
 /* Called by the Python interpreter when deallocating a value object.  */
@@ -71,6 +72,13 @@ valpy_dealloc (PyObject *obj)
 
   if (!self->owned_by_gdb)
     value_free (self->value);
+
+  if (self->address)
+    /* Use braces to appease gcc warning.  *sigh*  */
+    {
+      Py_DECREF (self->address);
+    }
+
   self->ob_type->tp_free (self);
 }
 
@@ -105,6 +113,7 @@ valpy_new (PyTypeObject *subtype, PyObject *args, PyObject *keywords)
 
   value_obj->value = value;
   value_obj->owned_by_gdb = 0;
+  value_obj->address = NULL;
   release_value (value);
   value_prepend_to_list (&values_in_python, value);
 
@@ -129,18 +138,30 @@ valpy_dereference (PyObject *self, PyObject *args)
 
 /* Return "&value".  */
 static PyObject *
-valpy_address (PyObject *self, PyObject *args)
+valpy_get_address (PyObject *self, void *closure)
 {
   struct value *res_val = NULL;	  /* Initialize to appease gcc warning.  */
+  value_object *val_obj = (value_object *) self;
   volatile struct gdb_exception except;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
+  if (!val_obj->address)
     {
-      res_val = value_addr (((value_object *) self)->value);
+      TRY_CATCH (except, RETURN_MASK_ALL)
+	{
+	  res_val = value_addr (val_obj->value);
+	}
+      if (except.reason < 0)
+	{
+	  val_obj->address = Py_None;
+	  Py_INCREF (Py_None);
+	}
+      else
+	val_obj->address = value_to_value_object (res_val);
     }
-  GDB_PY_HANDLE_EXCEPTION (except);
 
-  return value_to_value_object (res_val);
+  Py_INCREF (val_obj->address);
+
+  return val_obj->address;
 }
 
 /* Implementation of gdb.Value.string ([encoding] [, errors]) -> string
@@ -726,6 +747,7 @@ value_to_value_object (struct value *val)
     {
       val_obj->value = val;
       val_obj->owned_by_gdb = 0;
+      val_obj->address = NULL;
       release_value (val);
       value_prepend_to_list (&values_in_python, val);
     }
@@ -838,6 +860,8 @@ gdbpy_initialize_values (void)
 }
 
 static PyGetSetDef value_object_getset[] = {
+  { "address", valpy_get_address, NULL, "The address of the value.",
+    NULL },
   { "is_optimized_out", valpy_get_is_optimized_out, NULL,
     "Boolean telling whether the value is optimized out (i.e., not available).",
     NULL },
@@ -845,7 +869,6 @@ static PyGetSetDef value_object_getset[] = {
 };
 
 static PyMethodDef value_object_methods[] = {
-  { "address", valpy_address, METH_NOARGS, "Return the address of the value." },
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
   { "string", (PyCFunction) valpy_string, METH_VARARGS | METH_KEYWORDS,
     "string ([encoding] [, errors]) -> string\n\

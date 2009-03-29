@@ -1,3 +1,8 @@
+2009-03-29  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.python/python-value.exp: Add tests for the address
+	attribute.
+
 2009-03-29  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* gdb.arch/powerpc-prologue.exp: Update for disassemble-next-line.

@@ -1,3 +1,8 @@
+2009-03-29  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.texinfo (Values From Inferior): Change gdb.Value.address
+	from a method to an attribute.
+
 2009-03-26  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.texinfo (Values From Inferior): Document is_optimized_out

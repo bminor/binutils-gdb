@@ -18325,9 +18325,15 @@ bar = some_val['foo']
 
 Again, @code{bar} will also be a @code{gdb.Value} object.
 
-The following attribute is provided:
+The following attributes are provided:
 
 @table @code
+@defmethod Value address
+If this object is addressable, this read-only attribute holds a
+@code{gdb.Value} object representing the address.  Otherwise,
+this attribute holds @code{None}.
+@end defmethod
+
 @cindex optimized out value in Python
 @defmethod Value is_optimized_out
 This read-only boolean attribute is true if the compiler optimized out

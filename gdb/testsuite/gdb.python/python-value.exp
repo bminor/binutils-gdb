@@ -70,6 +70,9 @@ proc test_value_creation {} {
   gdb_py_test_silent_cmd "python a = gdb.Value (u'unicode test')" "create unicode value" 1
   gdb_test "python print a" "\"unicode test\"" "print Unicode string"
   gdb_test "python print a.__class__" "<type 'gdb.Value'>" "verify type of unicode string"
+
+  # Test address attribute is None in a non-addressable value
+  gdb_test "python print 'result =', i.address" "= None" "Test address attribute in non-addressable value"
 }
 
 proc test_value_numeric_ops {} {
@@ -228,6 +231,9 @@ proc test_value_in_inferior {} {
 
   # Smoke-test is_optimized_out attribute
   gdb_test "python print 'result =', arg0.is_optimized_out" "= False" "Test is_optimized_out attribute"
+
+  # Test address attribute
+  gdb_test "python print 'result =', arg0.address" "= 0x\[\[:xdigit:\]\]+" "Test address attribute"
 }
 
 
