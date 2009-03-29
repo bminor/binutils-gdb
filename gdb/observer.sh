@@ -2,8 +2,8 @@
 
 # Make certain that the script is not running in an internationalized
 # environment.
-LANG=c ; export LANG
-LC_ALL=c ; export LC_ALL
+LANG=C ; export LANG
+LC_ALL=C ; export LC_ALL
 
 if test $# -ne 3
 then
