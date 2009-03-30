@@ -1,3 +1,7 @@
+2009-03-30  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* MAINTAINERS: Add self.
+
 2009-03-27  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (display_debug_ranges): Add the base address to the

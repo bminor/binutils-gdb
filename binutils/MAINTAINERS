@@ -41,6 +41,7 @@ repository without obtaining approval first:
   Alan Modra <amodra@bigpond.net.au>
   Michael Meissner <gnu@the-meissners.org>
   Daniel Jacobowitz <dan@debian.org>
+  Richard Sandiford <rdsandiford@googlemail.com>
 
       --------- Maintainers ---------
 
@@ -114,6 +115,7 @@ responsibility among the other maintainers.
   x86_64	   Jan Hubicka <jh@suse.cz>
   x86_64	   Andreas Jaeger <aj@suse.de>
   x86_64	   H.J. Lu <hjl.tools@gmail.com>
+  XCOFF 	   Richard Sandiford <r.sandiford@uk.ibm.com>
   Xtensa	   Sterling Augustine <sterling@tensilica.com> 
   z80		   Arnold Metselaar <arnold.metselaar@planet.nl>
   z8k		   Christian Groessler <chris@groessler.org>
