@@ -1,3 +1,8 @@
+2009-03-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.texinfo (Frames in Python): New node.
+	(Python API): Update.
+
 2009-03-29  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.texinfo (Values From Inferior): Change gdb.Value.address

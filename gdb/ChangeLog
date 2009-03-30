@@ -1,3 +1,21 @@
+2009-03-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Expose frames to Python.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add python-frame.o.
+	(SUBDIR_PYTHON_SRCS): Add python-frame.c.
+	(python-frame.o): New target.
+	* python/python-frame.c: New file.
+	* python/python-internal.h (gdbpy_frames, gdbpy_newest_frame,
+	gdbpy_frame_stop_reason_string, gdbpy_selected_frame,
+	gdbpy_initialize_frames): New prototypes.
+	* python/python.c (_initialize_python): Call gdbpy_initialize_frames.
+	(GdbMethods): Add `selected_frame' and `frame_stop_reason_string'
+	entries.
+	* stack.c (find_frame_funname): New function, factored out of
+	print_frame.
+	(print_frame): Call find_frame_funname.
+	* stack.h (find_frame_funname): Add prototype.
+
 2009-03-29  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	Remove unused value_object attribute `owned_by_gdb'.

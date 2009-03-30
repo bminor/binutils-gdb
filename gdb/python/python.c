@@ -411,6 +411,7 @@ Enables or disables printing of Python stack traces."),
   PyModule_AddStringConstant (gdb_module, "TARGET_CONFIG", (char*) target_name);
 
   gdbpy_initialize_values ();
+  gdbpy_initialize_frames ();
   gdbpy_initialize_commands ();
   gdbpy_initialize_functions ();
 
@@ -463,6 +464,13 @@ static PyMethodDef GdbMethods[] =
     "Execute a gdb command" },
   { "get_parameter", get_parameter, METH_VARARGS,
     "Return a gdb parameter's value" },
+
+  { "selected_frame", gdbpy_selected_frame, METH_NOARGS,
+    "selected_frame () -> gdb.Frame.\n\
+Return the selected frame object." },
+  { "frame_stop_reason_string", gdbpy_frame_stop_reason_string, METH_VARARGS,
+    "stop_reason_string (Integer) -> String.\n\
+Return a string explaining unwind stop reason." },
 
   { "write", gdbpy_write, METH_VARARGS,
     "Write a string using gdb's filtered stream." },

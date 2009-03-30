@@ -64,12 +64,15 @@ extern PyObject *gdb_module;
 extern PyTypeObject value_object_type;
 
 PyObject *gdbpy_history (PyObject *self, PyObject *args);
+PyObject *gdbpy_frame_stop_reason_string (PyObject *, PyObject *);
+PyObject *gdbpy_selected_frame (PyObject *self, PyObject *args);
 
 PyObject *value_to_value_object (struct value *v);
 
 struct value *convert_value_from_python (PyObject *obj);
 
 void gdbpy_initialize_values (void);
+void gdbpy_initialize_frames (void);
 void gdbpy_initialize_commands (void);
 void gdbpy_initialize_functions (void);
 

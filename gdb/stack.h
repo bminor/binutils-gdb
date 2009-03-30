@@ -22,4 +22,9 @@
 
 void select_frame_command (char *level_exp, int from_tty);
 
+/* Attempt to obtain the FUNNAME and FUNLANG of the function corresponding
+   to FRAME.  */
+void find_frame_funname (struct frame_info *frame, char **funname,
+			 enum language *funlang);
+
 #endif /* #ifndef STACK_H */

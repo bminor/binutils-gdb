@@ -18194,6 +18194,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Values From Inferior::
 * Commands In Python::          Implementing new commands in Python.
 * Functions In Python::         Writing new convenience functions.
+* Frames In Python::            Acessing inferior stack frames from Python.
 @end menu
 
 @node Basic Python
@@ -18703,6 +18704,84 @@ The last line instantiates the class, and is necessary to trigger the
 registration of the function with @value{GDBN}.  Depending on how the
 Python code is read into @value{GDBN}, you may need to import the
 @code{gdb} module explicitly.
+
+@node Frames In Python
+@subsubsection Acessing inferior stack frames from Python.
+
+@cindex frames in python
+When the debugged program stops, @value{GDBN} is able to analyze its call
+stack (@pxref{Frames,,Stack frames}).  The @code{gdb.Frame} class
+represents a frame in the stack.  A @code{gdb.Frame} object is only valid
+while its corresponding frame exists in the inferior's stack.  If you try
+to use an invalid frame object, @value{GDBN} will throw a @code{RuntimeError}
+exception.
+
+Two @code{gdb.Frame} objects can be compared for equality with the @code{==}
+operator, like:
+
+@smallexample
+(@value{GDBP}) python print gdb.newest_frame() == gdb.selected_frame ()
+True
+@end smallexample
+
+The following frame-related functions are available in the @code{gdb} module:
+
+@findex gdb.selected_frame
+@defun selected_frame
+Return the selected frame object.  (@pxref{Selection,,Selecting a Frame}).
+@end defun
+
+@defun frame_stop_reason_string reason
+Return a string explaining the reason why @value{GDBN} stopped unwinding
+frames, as expressed by the given @var{reason} code (an integer, see the
+@code{unwind_stop_reason} method further down in this section).
+@end defun
+
+A @code{gdb.Frame} object has the following methods:
+
+@table @code
+@defmethod Frame is_valid
+Returns true if the @code{gdb.Frame} object is valid, false if not.
+A frame object can become invalid if the frame it refers to doesn't
+exist anymore in the inferior.  All @code{gdb.Frame} methods will throw
+an exception if it is invalid at the time the method is called.
+@end defmethod
+
+@defmethod Frame name
+Returns the function name of the frame, or @code{None} if it can't be
+obtained.
+@end defmethod
+
+@defmethod Frame type
+Returns the type of the frame.  The value can be one of
+@code{gdb.NORMAL_FRAME}, @code{gdb.DUMMY_FRAME}, @code{gdb.SIGTRAMP_FRAME}
+or @code{gdb.SENTINEL_FRAME}.
+@end defmethod
+
+@defmethod Frame unwind_stop_reason
+Return an integer representing the reason why it's not possible to find
+more frames toward the outermost frame.  Use
+@code{gdb.frame_stop_reason_string} to convert the value returned by this
+function to a string.
+@end defmethod
+
+@defmethod Frame pc
+Returns the frame's resume address.
+@end defmethod
+
+@defmethod Frame older
+Return the frame that called this frame.
+@end defmethod
+
+@defmethod Frame newer
+Return the frame called by this frame.
+@end defmethod
+
+@defmethod Frame read_var variable
+Return the value of the given variable in this frame.  @var{variable} must
+be a string.
+@end defmethod
+@end table
 
 @node Interpreters
 @chapter Command Interpreters

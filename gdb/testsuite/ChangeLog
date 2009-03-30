@@ -1,3 +1,8 @@
+2009-03-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.python/python-frame.c: New file.
+	* gdb.python/python-frame.exp: New file.
+
 2009-03-29  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.python/python-value.exp: Add tests for the address
