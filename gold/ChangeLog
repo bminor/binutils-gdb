@@ -1,3 +1,7 @@
+2009-03-30  Ian Lance Taylor  <iant@google.com>
+
+	* ffsll.c (ffsll): Correct implementation.
+
 2009-03-27  Ian Lance Taylor  <iant@google.com>
 
 	* ffsll.c: New file.

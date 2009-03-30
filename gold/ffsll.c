@@ -36,8 +36,13 @@ ffsll (long long arg)
   unsigned long long i;
   int ret;
 
-  ret = 0;
-  for (i = (unsigned long long) arg; i != 0; i >>= 1)
-    ++ret;
+  if (arg == 0)
+    ret = 0;
+  else
+    {
+      ret = 1;
+      for (i = (unsigned long long) arg; (i & 1) == 0; i >>= 1)
+	++ret;
+    }
   return ret;
 }
