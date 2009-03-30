@@ -1,3 +1,7 @@
+2009-03-30  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/arm/mapsecs.d, gas/arm/mapsecs.s: New.
+
 2009-03-26  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* gas/arm/wince_inst.d: Convert to unified syntax.

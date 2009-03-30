@@ -4041,7 +4041,9 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	     for a preceeding one.  */
 	  for (; n >= 0; n--)
 	    {
-	      if (get_sym_code_type (info, n, &type))
+	      if ((info->section == NULL
+		   || info->section == info->symtab[n]->section)
+		  && get_sym_code_type (info, n, &type))
 		{
 		  last_sym = n;
 		  found = TRUE;

@@ -1,3 +1,8 @@
+2009-03-30  Joseph Myers  <joseph@codesourcery.com>
+
+	* arm-dis.c (print_insn): Also check section matches in backwards
+	search for mapping symbol.
+
 2009-03-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (get_valid_dis386): Abort on unhandled table.
