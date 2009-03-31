@@ -589,6 +589,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
   int deftype;
   int synonym = 0;
   int i;
+  char *new_name = NULL;
 
   /* We would like to eliminate nameless symbols, but keep their types.
      E.g. stab entry ":t10=*2" should produce a type 10, which is a pointer
@@ -683,9 +684,21 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
     {
     normal:
       SYMBOL_LANGUAGE (sym) = current_subfile->language;
-      SYMBOL_SET_NAMES (sym, string, p - string, objfile);
       if (SYMBOL_LANGUAGE (sym) == language_cplus)
-	cp_scan_for_anonymous_namespaces (sym);
+	{
+	  char *name = alloca (p - string + 1);
+	  memcpy (name, string, p - string);
+	  name[p - string] = '\0';
+	  new_name = cp_canonicalize_string (name);
+	  cp_scan_for_anonymous_namespaces (sym);
+	}
+      if (new_name != NULL)
+	{
+	  SYMBOL_SET_NAMES (sym, new_name, strlen (new_name), objfile);
+	  xfree (new_name);
+	}
+      else
+	SYMBOL_SET_NAMES (sym, string, p - string, objfile);
     }
   p++;
 
@@ -1519,18 +1532,35 @@ again:
 	      if (*p != ':')
 		return error_type (pp, objfile);
 	    }
-	  to = type_name =
-	    (char *) obstack_alloc (&objfile->objfile_obstack, p - *pp + 1);
+	  type_name = NULL;
+	  if (current_subfile->language == language_cplus)
+	    {
+	      char *new_name, *name = alloca (p - *pp + 1);
+	      memcpy (name, *pp, p - *pp);
+	      name[p - *pp] = '\0';
+	      new_name = cp_canonicalize_string (name);
+	      if (new_name != NULL)
+		{
+		  type_name = obsavestring (new_name, strlen (new_name),
+					    &objfile->objfile_obstack);
+		  xfree (new_name);
+		}
+	    }
+	  if (type_name == NULL)
+	    {
+	      to = type_name =
+		(char *) obstack_alloc (&objfile->objfile_obstack, p - *pp + 1);
 
-	  /* Copy the name.  */
-	  from = *pp + 1;
-	  while (from < p)
-	    *to++ = *from++;
-	  *to = '\0';
+	      /* Copy the name.  */
+	      from = *pp + 1;
+	      while (from < p)
+		*to++ = *from++;
+	      *to = '\0';
+	    }
 
 	  /* Set the pointer ahead of the name which we just read, and
 	     the colon.  */
-	  *pp = from + 1;
+	  *pp = p + 1;
 	}
 
         /* If this type has already been declared, then reuse the same

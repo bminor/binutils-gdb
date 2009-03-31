@@ -48,6 +48,8 @@
 #include "value.h"
 #include "cp-abi.h"
 #include "target.h"
+#include "cp-support.h"
+#include "language.h"
 
 /* Accumulate the minimal symbols for each objfile in bunches of BUNCH_SIZE.
    At the end, copy them all into one newly allocated location on an objfile's
@@ -187,11 +189,26 @@ lookup_minimal_symbol (const char *name, const char *sfile,
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
   unsigned int dem_hash = msymbol_hash_iw (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
+  int needtofreename = 0;
+  const char *modified_name;
+
   if (sfile != NULL)
     {
       char *p = strrchr (sfile, '/');
       if (p != NULL)
 	sfile = p + 1;
+    }
+
+  /* For C++, canonicalize the input name. */
+  modified_name = name;
+  if (current_language->la_language == language_cplus)
+    {
+      char *cname = cp_canonicalize_string (name);
+      if (cname)
+	{
+	  modified_name = cname;
+	  needtofreename = 1;
+	}
     }
 
   for (objfile = object_files;
@@ -218,9 +235,16 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 		  int match;
 
 		  if (pass == 1)
-		    match = strcmp (SYMBOL_LINKAGE_NAME (msymbol), name) == 0;
+		    {
+		      match = strcmp (SYMBOL_LINKAGE_NAME (msymbol),
+				      modified_name) == 0;
+		    }
 		  else
-		    match = SYMBOL_MATCHES_SEARCH_NAME (msymbol, name);
+		    {
+		      match = SYMBOL_MATCHES_SEARCH_NAME (msymbol,
+							  modified_name);
+		    }
+
 		  if (match)
 		    {
                     switch (MSYMBOL_TYPE (msymbol))
@@ -259,6 +283,10 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	    }
 	}
     }
+
+  if (needtofreename)
+    xfree ((void *) modified_name);
+
   /* External symbols are best.  */
   if (found_symbol)
     return found_symbol;

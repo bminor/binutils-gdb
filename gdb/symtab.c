@@ -55,6 +55,7 @@
 #include "gdb_stat.h"
 #include <ctype.h>
 #include "cp-abi.h"
+#include "cp-support.h"
 #include "observer.h"
 #include "gdb_assert.h"
 #include "solist.h"
@@ -1212,6 +1213,17 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 	  mangled_name = name;
 	  modified_name = demangled_name;
 	  make_cleanup (xfree, demangled_name);
+	}
+      else
+	{
+	  /* If we were given a non-mangled name, canonicalize it
+	     according to the language (so far only for C++).  */
+	  demangled_name = cp_canonicalize_string (name);
+	  if (demangled_name)
+	    {
+	      modified_name = demangled_name;
+	      make_cleanup (xfree, demangled_name);
+	    }
 	}
     }
   else if (lang == language_java)

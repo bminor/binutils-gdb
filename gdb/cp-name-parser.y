@@ -499,7 +499,7 @@ operator	:	OPERATOR NEW
 		|	OPERATOR ARROW
 			{ $$ = make_operator ("->", 2); }
 		|	OPERATOR '(' ')'
-			{ $$ = make_operator ("()", 0); }
+			{ $$ = make_operator ("()", 2); }
 		|	OPERATOR '[' ']'
 			{ $$ = make_operator ("[]", 2); }
 		;

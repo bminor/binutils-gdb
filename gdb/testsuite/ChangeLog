@@ -1,3 +1,14 @@
+2009-03-31  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/931
+	* gdb.cp/gdb1355.exp (f_li, f_lui, f_si, f_sui): Allow canonical
+	output.
+	* gdb.cp/templates.exp: Allow canonical output.  Remove KFAILs
+	for gdb/931.
+	* dw2-strp.S (DW_AT_language): Change to C++.
+	(DW_TAG_variable (name ""), Abbrev code 7, .Lemptyname): New.
+
 2009-03-31  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/tasks: New testcase.

@@ -329,13 +329,11 @@ gdb_expect {
 
 send_gdb "print Foo<volatile char *>::foo\n"   
 gdb_expect {   
-    -re "\\$\[0-9\]* = \\{.*char \\*\\((class |)Foo<volatile char ?\\*> \\*(| const), int, .*char \\*\\)\\} $hex <Foo<.*char.*\\*>::foo\\(int, .*char.*\\*\\)>\r\n$gdb_prompt $" { pass "print Foo<volatile char *>::foo" }
+    -re "\\$\[0-9\]* = \\{.*char \\*\\((class |)Foo<(volatile char|char volatile) ?\\*> \\*(| const), int, .*char \\*\\)\\} $hex <Foo<.*char.*\\*>::foo\\(int, .*char.*\\*\\)>\r\n$gdb_prompt $" { pass "print Foo<volatile char *>::foo" }
     -re "No symbol \"Foo<volatile char \\*>\" in current context.\r\n$gdb_prompt $"
     {
-	# This used to be a kfail gdb/33.  That problem has been
-	# fixed, but now gdb/931 and gdb/1512 are rearing their ugly
-	# heads.
-	kfail "gdb/931" "print Foo<volatile char *>::foo"
+	# This used to be a kfail gdb/33 and then kfail gdb/931.
+	fail "print Foo<volatile char *>::foo"
     }
     -re "$gdb_prompt $"                     { fail "print Foo<volatile char *>::foo" }
     timeout                             { fail "(timeout) print Foo<volatile char *>::foo" }
@@ -343,13 +341,11 @@ gdb_expect {
 
 send_gdb "print Foo<volatile char*>::foo\n"   
 gdb_expect {   
-    -re "\\$\[0-9\]* = \\{.*char \\*\\((class |)Foo<volatile char ?\\*> \\*(| const), int, .*char \\*\\)\\} $hex <Foo<.*char.*\\*>::foo\\(int, .*char.*\\*\\)>\r\n$gdb_prompt $" { pass "print Foo<volatile char*>::foo" }
+    -re "\\$\[0-9\]* = \\{.*char \\*\\((class |)Foo<(volatile char|char volatile) ?\\*> \\*(| const), int, .*char \\*\\)\\} $hex <Foo<.*char.*\\*>::foo\\(int, .*char.*\\*\\)>\r\n$gdb_prompt $" { pass "print Foo<volatile char*>::foo" }
     -re "No symbol \"Foo<volatile char\\*>\" in current context.\r\n$gdb_prompt $"
     {
-	# This used to be a kfail gdb/33.  That problem has been
-	# fixed, but now gdb/931 and gdb/1512 are rearing their ugly
-	# heads.
-	kfail "gdb/931" "print Foo<volatile char*>::foo"
+	# This used to be a kfail gdb/33 and then kfail gdb/931.
+	fail "print Foo<volatile char*>::foo"
     }
     -re "$gdb_prompt $"                     { fail "print Foo<volatile char*>::foo" }
     timeout                             { fail "(timeout) print Foo<volatile char*>::foo" }
@@ -459,7 +455,7 @@ send_gdb "ptype quxint\n"
 gdb_expect {   
    -re "type = class Qux<int, ?& ?string> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*.*int qux\\(int, int\\);\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
    -re "type = class Qux<int, ?& ?string> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int qux\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
-   -re "type = class Qux<int, ?\\(char ?\\*\\)\\(& ?string\\)> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int qux\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
+   -re "type = class Qux<int, ?\\(char ?\\*\\)\\(& ?\\(?string\\)?\\)> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int qux\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" { pass "ptype quxint" }
    -re "type = class Qux<int, ?& ?\\(string\\)> \\{\r\n\[ \t\]*public:\r\n\[ \t\]*int x;\r\n\[ \t\]*int t;\r\n\r\n\[ \t\]*int qux\\(int, int\\);.*\r\n\\}\r\n$gdb_prompt $" {
        kfail "gdb/1512" "ptype quxint"
    }

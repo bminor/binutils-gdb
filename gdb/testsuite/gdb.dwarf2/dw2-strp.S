@@ -28,7 +28,8 @@
 	/* CU die */
 	.uleb128	1			/* Abbrev: DW_TAG_compile_unit */
 	.4byte		.Lproducer		/* DW_AT_producer */
-	.byte		1			/* DW_AT_language (C) */
+	/* Use C++ to exploit a bug in parsing DW_AT_name "".  */
+	.byte		4			/* DW_AT_language (C++) -  */
 
 .Larray_type:
 	.uleb128	2			/* Abbrev: DW_TAG_array_type */
@@ -60,6 +61,10 @@
 .Lconst_type:
 	.uleb128	6			/* Abbrev: DW_TAG_const_type */
 	.4byte		.Larray_type-.Lcu1_begin/* DW_AT_type */
+
+	.uleb128	7			/* Abbrev: DW_TAG_variable (name "") */
+	.4byte		.Lemptyname		/* DW_AT_name */
+
 	.byte		0			/* End of children of CU */
 .Lcu1_end:
 
@@ -126,6 +131,15 @@
 	.uleb128	0x13			/* DW_FORM_ref4 */
 	.byte		0x0			/* Terminator */
 	.byte		0x0			/* Terminator */
+
+	.uleb128	7			/* Abbrev code */
+	.uleb128	0x34			/* DW_TAG_variable */
+	.byte		0x0			/* DW_children_no */
+	.uleb128	0x3			/* DW_AT_name */
+	.uleb128	0xe			/* DW_FORM_strp */
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */
+
 	.byte		0x0			/* Terminator */
 
 /* String table */
@@ -140,3 +154,5 @@
 	.string		"a_string"
 .Lvarcontents:
 	.string		"hello world!\n"
+.Lemptyname:
+	.string		""

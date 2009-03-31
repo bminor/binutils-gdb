@@ -1,3 +1,25 @@
+2009-03-31  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Keith Seitz  <keiths@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/6817
+	* Makefile.in (dbxread.o): Update.
+	* dbxread.c (read_dbx_symtab): Use cp_canonicalize_string.
+	* dwarf2read.c (GDB_FORM_cached_string): New.
+	(read_partial_die): Use dwarf2_canonicalize_name.
+	(dwarf2_linkage_name): Use dwarf2_name.
+	(dwarf2_canonicalize_name): New.
+	(dwarf2_name): Use dwarf2_canonicalize_name.
+	(dwarf_form_name, dump_die): Handle GDB_FORM_cached_string.
+	* stabsread.c (define_symbol, read_type): Use cp_canonicalize_string.
+	* symtab.c (lookup_symbol_in_language): Canonicalize input before
+	searching.
+	* cp-name-parser.y: operator() requires two parameters,
+	according to libiberty.
+	* minsyms.c (lookup_minimal_symbol): Canonicalize input
+	before searching.
+	* NEWS: Update.
+
 2009-03-31  Joel Brobecker  <brobecker@adacore.com>
 
 	Provide support for (Ada) task-specific breakpoints.

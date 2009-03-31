@@ -93,6 +93,19 @@ have also been fixed.
 From the user's standpoint, all unqualified instances of True and False
 are treated as the standard definitions, regardless of context.
 
+* GDB now parses C++ symbol and type names more flexibly.  For
+example, given:
+
+   template<typename T> class C { };
+   C<char const *> c;
+
+GDB will now correctly handle all of:
+
+   ptype C<char const *>
+   ptype C<char const*>
+   ptype C<const char *>
+   ptype C<const char*>
+
 * New features in the GDB remote stub, gdbserver
 
   - The "--wrapper" command-line argument tells gdbserver to use a

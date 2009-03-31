@@ -523,6 +523,15 @@ struct attr_abbrev
     ENUM_BITFIELD(dwarf_form) form : 16;
   };
 
+/* Additional GDB-specific attribute forms.  */
+enum
+  {
+    /* A string which has been updated to GDB's internal
+       representation (e.g. converted to canonical form) and does not
+       need to be updated again.  */
+    GDB_FORM_cached_string = 0xff
+  };
+
 /* Attributes have a name and a value */
 struct attribute
   {
@@ -992,6 +1001,9 @@ static struct die_info *read_die_and_siblings (gdb_byte *info_ptr, bfd *abfd,
 static void process_die (struct die_info *, struct dwarf2_cu *);
 
 static char *dwarf2_linkage_name (struct die_info *, struct dwarf2_cu *);
+
+static char *dwarf2_canonicalize_name (char *, struct dwarf2_cu *,
+				       struct obstack *);
 
 static char *dwarf2_name (struct die_info *die, struct dwarf2_cu *);
 
@@ -5946,10 +5958,23 @@ read_partial_die (struct partial_die_info *part_die,
       switch (attr.name)
 	{
 	case DW_AT_name:
-
-	  /* Prefer DW_AT_MIPS_linkage_name over DW_AT_name.  */
-	  if (part_die->name == NULL)
-	    part_die->name = DW_STRING (&attr);
+	  switch (part_die->tag)
+	    {
+	    case DW_TAG_compile_unit:
+	      /* Compilation units have a DW_AT_name that is a filename, not
+		 a source language identifier.  */
+	    case DW_TAG_enumeration_type:
+	    case DW_TAG_enumerator:
+	      /* These tags always have simple identifiers already; no need
+		 to canonicalize them.  */
+	      part_die->name = DW_STRING (&attr);
+	      break;
+	    default:
+	      part_die->name
+		= dwarf2_canonicalize_name (DW_STRING (&attr), cu,
+					    &cu->comp_unit_obstack);
+	      break;
+	    }
 	  break;
 	case DW_AT_comp_dir:
 	  if (part_die->dirname == NULL)
@@ -8199,10 +8224,29 @@ dwarf2_linkage_name (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
   if (attr && DW_STRING (attr))
     return DW_STRING (attr);
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr && DW_STRING (attr))
-    return DW_STRING (attr);
-  return NULL;
+  return dwarf2_name (die, cu);
+}
+
+/* Get name of a die, return NULL if not found.  */
+
+static char *
+dwarf2_canonicalize_name (char *name, struct dwarf2_cu *cu,
+			  struct obstack *obstack)
+{
+  if (name && cu->language == language_cplus)
+    {
+      char *canon_name = cp_canonicalize_string (name);
+
+      if (canon_name != NULL)
+	{
+	  if (strcmp (canon_name, name) != 0)
+	    name = obsavestring (canon_name, strlen (canon_name),
+				 obstack);
+	  xfree (canon_name);
+	}
+    }
+
+  return name;
 }
 
 /* Get name of a die, return NULL if not found.  */
@@ -8213,9 +8257,29 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
 
   attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr && DW_STRING (attr))
-    return DW_STRING (attr);
-  return NULL;
+  if (!attr || !DW_STRING (attr))
+    return NULL;
+
+  switch (die->tag)
+    {
+    case DW_TAG_compile_unit:
+      /* Compilation units have a DW_AT_name that is a filename, not
+	 a source language identifier.  */
+    case DW_TAG_enumeration_type:
+    case DW_TAG_enumerator:
+      /* These tags always have simple identifiers already; no need
+	 to canonicalize them.  */
+      return DW_STRING (attr);
+    default:
+      if (attr->form != GDB_FORM_cached_string)
+	{
+	  DW_STRING (attr)
+	    = dwarf2_canonicalize_name (DW_STRING (attr), cu,
+					&cu->objfile->objfile_obstack);
+	  attr->form = GDB_FORM_cached_string;
+	}
+      return DW_STRING (attr);
+    }
 }
 
 /* Return the die that this die in an extension of, or NULL if there
@@ -8710,6 +8774,8 @@ dwarf_form_name (unsigned form)
       return "DW_FORM_ref_udata";
     case DW_FORM_indirect:
       return "DW_FORM_indirect";
+    case GDB_FORM_cached_string:
+      return "GDB_FORM_cached_string";
     default:
       return "DW_FORM_<unknown>";
     }
@@ -9255,6 +9321,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  break;
 	case DW_FORM_string:
 	case DW_FORM_strp:
+	case GDB_FORM_cached_string:
 	  fprintf_unfiltered (f, "string: \"%s\"",
 		   DW_STRING (&die->attrs[i])
 		   ? DW_STRING (&die->attrs[i]) : "");
