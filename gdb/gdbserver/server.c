@@ -1959,6 +1959,7 @@ main (int argc, char *argv[])
 	      else
 		{
 		  fprintf (stderr, "GDBserver exiting\n");
+		  remote_close ();
 		  exit (0);
 		}
 	    }
