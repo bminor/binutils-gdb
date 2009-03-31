@@ -711,9 +711,6 @@ short_task_info (int taskno)
   else if (task_info->state == Entry_Caller_Sleep && task_info->called_task)
     printf_filtered (_(" Waiting on RV with %-3d"),
                      get_task_number_from_id (task_info->called_task));
-  else if (task_info->state == Runnable && active_task_p)
-    /* Replace "Runnable" by "Running" since this is the active task.  */
-    printf_filtered (" %-22s", _("Running"));
   else
     printf_filtered (" %-22s", _(task_states[task_info->state]));
 

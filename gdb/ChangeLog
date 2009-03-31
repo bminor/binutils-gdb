@@ -1,3 +1,7 @@
+2009-03-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-tasks.c (short_task_info): Eliminate the "Running" task state.
+
 2009-03-31  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_notice_new_inferior): Use ptid_is_pid.  Check
