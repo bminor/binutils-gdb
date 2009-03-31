@@ -8555,12 +8555,12 @@ This chapter describes the tracepoint commands and features.
 @section Commands to Set Tracepoints
 
 Before running such a @dfn{trace experiment}, an arbitrary number of
-tracepoints can be set.  Like a breakpoint (@pxref{Set Breaks}), a
-tracepoint has a number assigned to it by @value{GDBN}.  Like with
-breakpoints, tracepoint numbers are successive integers starting from
-one.  Many of the commands associated with tracepoints take the
-tracepoint number as their argument, to identify which tracepoint to
-work on.
+tracepoints can be set.  A tracepoint is actually a special type of
+breakpoint (@pxref{Set Breaks}), so you can manipulate it using
+standard breakpoint commands.  For instance, as with breakpoints,
+tracepoint numbers are successive integers starting from one, and many
+of the commands associated with tracepoints take the tracepoint number
+as their argument, to identify which tracepoint to work on.
 
 For each tracepoint, you can specify, in advance, some arbitrary set
 of data that you want the target to collect in the trace buffer when
@@ -8568,6 +8568,11 @@ it hits that tracepoint.  The collected data can include registers,
 local variables, or global data.  Later, you can use @value{GDBN}
 commands to examine the values these data had at the time the
 tracepoint was hit.
+
+Tracepoints do not support every breakpoint feature.  Conditional
+expressions and ignore counts on tracepoints have no effect, and
+tracepoints cannot run @value{GDBN} commands when they are
+hit.  Tracepoints may not be thread-specific either.
 
 This section describes commands to set tracepoints and associated
 conditions and actions.
@@ -8587,16 +8592,16 @@ conditions and actions.
 @table @code
 @cindex set tracepoint
 @kindex trace
-@item trace
+@item trace @var{location}
 The @code{trace} command is very similar to the @code{break} command.
-Its argument can be a source line, a function name, or an address in
-the target program.  @xref{Set Breaks}.  The @code{trace} command
-defines a tracepoint, which is a point in the target program where the
-debugger will briefly stop, collect some data, and then allow the
-program to continue.  Setting a tracepoint or changing its commands
-doesn't take effect until the next @code{tstart} command; thus, you
-cannot change the tracepoint attributes once a trace experiment is
-running.
+Its argument @var{location} can be a source line, a function name, or
+an address in the target program.  @xref{Specify Location}.  The
+@code{trace} command defines a tracepoint, which is a point in the
+target program where the debugger will briefly stop, collect some
+data, and then allow the program to continue.  Setting a tracepoint or
+changing its actions doesn't take effect until the next @code{tstart}
+command, and once a trace experiment is running, further changes will
+not have any effect until the next trace experiment starts.
 
 Here are some examples of using the @code{trace} command:
 
@@ -8626,7 +8631,8 @@ of the most recently set tracepoint.
 @cindex tracepoint deletion
 @item delete tracepoint @r{[}@var{num}@r{]}
 Permanently delete one or more tracepoints.  With no argument, the
-default is to delete all tracepoints.
+default is to delete all tracepoints.  Note that the regular
+@code{delete} command can remove tracepoints also.
 
 Examples:
 
@@ -8642,6 +8648,8 @@ You can abbreviate this command as @code{del tr}.
 
 @node Enable and Disable Tracepoints
 @subsection Enable and Disable Tracepoints
+
+These commands are deprecated; they are equivalent to plain @code{disable} and @code{enable}.
 
 @table @code
 @kindex disable tracepoint
@@ -8796,34 +8804,36 @@ You may abbreviate @code{while-stepping} as @code{ws} or
 @kindex info tp
 @cindex information about tracepoints
 @item info tracepoints @r{[}@var{num}@r{]}
-Display information about the tracepoint @var{num}.  If you don't specify
-a tracepoint number, displays information about all the tracepoints
-defined so far.  For each tracepoint, the following information is
-shown:
+Display information about the tracepoint @var{num}.  If you don't
+specify a tracepoint number, displays information about all the
+tracepoints defined so far.  The format is similar to that used for
+@code{info breakpoints}; in fact, @code{info tracepoints} is the same
+command, simply restricting itself to tracepoints.
+
+A tracepoint's listing may include additional information specific to
+tracing:
 
 @itemize @bullet
-@item
-its number
-@item
-whether it is enabled or disabled
-@item
-its address
 @item
 its passcount as given by the @code{passcount @var{n}} command
 @item
 its step count as given by the @code{while-stepping @var{n}} command
 @item
-where in the source files is the tracepoint set
-@item
-its action list as given by the @code{actions} command
+its action list as given by the @code{actions} command.  The actions
+are prefixed with an @samp{A} so as to distinguish them from commands.
 @end itemize
 
 @smallexample
 (@value{GDBP}) @b{info trace}
-Num Enb Address    PassC StepC What
-1   y   0x002117c4 0     0     <gdb_asm>
-2   y   0x0020dc64 0     0     in g_test at g_test.c:1375
-3   y   0x0020b1f4 0     0     in get_data at ../foo.c:41
+Num     Type           Disp Enb Address    What
+1       tracepoint     keep y   0x0804ab57 in foo() at main.cxx:7
+        pass count 1200 
+        step count 20 
+      A while-stepping 20
+      A collect globfoo, $regs
+      A end
+      A collect globfoo2
+      A end
 (@value{GDBP})
 @end smallexample
 

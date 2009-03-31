@@ -87,6 +87,7 @@ gdb_test "info trace" "No tracepoints.*" \
 
 # 1.3 trace line in invalid source file
 gdb_delete_tracepoints
+gdb_test "set breakpoint pending off" ""
 gdb_test "trace NoSuChFiLe.c:1" "No source file named NoSuChFiLe.c." \
 	"1.3a: trace invalid source file"
 gdb_test "info trace" "No tracepoints.*" \
@@ -145,7 +146,7 @@ gdb_test "info trace" "$c_test_addr.*in gdb_recursion_test.*:$baseline" \
 # no address is invalid
 
 # 1.9 trace no arguments
-gdb_test "trace" "trace command requires an argument" \
+gdb_test "trace" "No default breakpoint address now." \
 	"1.9: trace <no arguments>"
 
 # 1.10 set large number of tracepoints

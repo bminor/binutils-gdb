@@ -1,3 +1,13 @@
+2009-03-30  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.trace/actions.exp: Update to match new info trace format.
+	* gdb.trace/deltrace.exp: Ditto.
+	* gdb.trace/infotrace.exp: Ditto.
+	* gdb.trace/passcount.exp: Ditto.
+	* gdb.trace/save-trace.exp: Ditto.
+	* gdb.trace/while-stepping.exp: Ditto.
+	* gdb.trace/tracecmd.exp: Ditto, plus don't allow pending option.
+
 2009-03-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.python/python-frame.c: New file.

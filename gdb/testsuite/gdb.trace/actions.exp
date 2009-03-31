@@ -90,43 +90,46 @@ gdb_trace_setactions "5.1b: set actions for first tracepoint" \
 	"$trcpt1" \
 	"collect gdb_char_test" "^$"
 
-send_gdb "info tracepoints\n"
-gdb_expect {
-    -re "Actions for.* $trcpt1:.*collect gdb_char_test.*$gdb_prompt $" {
-	pass "5.1c: verify actions set for first tracepoint"
-    }
-    -re "$gdb_prompt $" {
-	fail "5.1c: verify actions set for first tracepoint"
-    }
-}
+gdb_test "info tracepoints" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+collect gdb_char_test.
+\[\t \]+A\[\t \]+end.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+" \
+		"5.1c: verify actions set for first tracepoint"
 
 gdb_trace_setactions "5.1d: set actions for second tracepoint" \
 	"$trcpt2" \
 	"collect gdb_short_test" "^$"
 
-send_gdb "info tracepoints\n"
-gdb_expect {
-    -re "Actions for.* $trcpt2:.*collect gdb_short_test.*$gdb_prompt $" {
-	pass "5.1e: verify actions set for second tracepoint"
-    }
-    -re "$gdb_prompt $" {
-	fail "5.1e: verify actions set for second tracepoint"
-    }
-}
+gdb_test "info tracepoints" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+collect gdb_char_test.
+\[\t \]+A\[\t \]+end.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+collect gdb_short_test.
+\[\t \]+A\[\t \]+end.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+" \
+		"5.1e: verify actions set for second tracepoint"
 
 gdb_trace_setactions "5.2a: set actions for last (default) tracepoint" \
 	"" \
 	"collect gdb_long_test" "^$"
 
-send_gdb "info tracepoints\n"
-gdb_expect {
-    -re "Actions for.* $trcpt3:.*collect gdb_long_test.*$gdb_prompt $" {
-	pass "5.2b: verify actions set for last (default) tracepoint"
-    }
-    -re "$gdb_prompt $" {
-	fail "5.2b: verify actions set for last (default) tracepoint"
-    }
-}
+gdb_test "info tracepoints" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+collect gdb_char_test.
+\[\t \]+A\[\t \]+end.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+collect gdb_short_test.
+\[\t \]+A\[\t \]+end.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+collect gdb_long_test.
+\[\t \]+A\[\t \]+end." \
+		"5.1e: verify actions set for second tracepoint"
 
 # 5.3 replace actions set earlier
 
@@ -134,15 +137,18 @@ gdb_trace_setactions "5.3a: reset actions for first tracepoint" \
 	"$trcpt1" \
 	"collect gdb_struct1_test" "^$"
 
-send_gdb "info tracepoints\n"
-gdb_expect {
-    -re "Actions for.* $trcpt1:.*collect gdb_struct1_test.*$gdb_prompt $" {
-	pass "5.3b: verify actions set for first tracepoint"
-    }
-    -re "$gdb_prompt $" {
-	fail "5.3b: verify actions set for first tracepoint"
-    }
-}
+gdb_test "info tracepoints" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+collect gdb_struct1_test.
+\[\t \]+A\[\t \]+end.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+collect gdb_short_test.
+\[\t \]+A\[\t \]+end.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+collect gdb_long_test.
+\[\t \]+A\[\t \]+end." \
+		"5.3b: verify actions set for first tracepoint"
 
 #
 # test end command (all by itself)

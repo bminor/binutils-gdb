@@ -1,3 +1,78 @@
+2009-03-30  Stan Shebs  <stan@codesourcery.com>
+
+	Make tracepoints into a type of breakpoint.
+	* breakpoint.h (enum bptype): Add bp_tracepoint.
+	(struct breakpoint): Add fields step_count, pass_count, actions.
+	(get_tracepoint, get_tracepoint_by_number): Declare.
+	(all_tracepoints): Declare.
+	* breakpoint.c: Include tracepoint.h, readline.h.
+	(ALL_TRACEPOINTS): Move here from tracepoint.c.
+	(tracepoint_count): Ditto.
+	(should_be_inserted): GDB does not insert tracepoints itself.
+	(print_it_typical): Add tracepoint case.
+	(bpstat_what): Ditto.
+	(print_one_breakpoint_location): Ditto, and add printing for
+	pass count, step count, and action list.
+	(user_settable_breakpoint): Add tracepoint case.
+	(allocate_bp_location): Ditto.
+	(set_breakpoint_location_function): Ditto.
+	(disable_breakpoints_in_shlibs): Ditto.
+	(mention): Ditto.
+	(break_command_really): Add argument traceflag, use to choose
+	basic breakpoint type.
+	(break_command_1): Pass extra argument.
+	(set_breakpoint, handle_gnu_v3_exceptions): Ditto.
+	(breakpoint_re_set_one): Add tracepoint case.
+	(disable_command, enable_command): Ditto.
+	(set_tracepoint_count): Move here from tracepoint.c.
+	(trace_command): Move here from tracepoint.c and use
+	break_command_really.
+	(tracepoints_info): Move here from tracepoint.c and call
+	breakpoints_info.
+	(enable_trace_command): Move here from tracepoint.c and call
+	enable_command.
+	(disable_trace_command): Move here from tracepoint.c and call
+	disable_command.
+	(delete_trace_command): Move here from tracepoint.c and call
+	delete_breakpoint.
+	(trace_pass_command): Move here from tracepoint.c.
+	(get_tracepoint_by_number): Ditto.
+	(tracepoint_save_command): Ditto.
+	(get_tracepoint): New function.
+	(all_tracepoints): New function.
+	(_initialize_breakpoint): Move tracepoint init from tracepoint.c,
+	deprecate "enable trace" and "disable trace" commands.
+	* tracepoint.h (struct tracepoint): Remove.
+	(tracepoint_chain): Remove decl.
+	(deprecated_create_tracepoint_hook): Remove decl.
+	(deprecated_delete_tracepoint_hook): Remove decl.
+	(deprecated_modify_tracepoint_hook): Remove decl.
+	(ALL_TRACEPOINTS, ALL_TRACEPOINTS_SAFE): Remove.
+	(free_actions): Update signature.
+	(validate_actionline): Update signature.
+	(end_actions_pseudocommand): Declare.
+	(while_stepping_pseudocommand): Declare.
+	* tracepoint.c: Include breakpoint.h.
+	(tracepoint_chain, tracepoint_count): Remove.
+	(free_actions, make_cleanup_free_actions): Update signature.
+	(trace_command, set_raw_tracepoint): Remove.
+	(trace_mention): Remove.
+	(tracepoints_info): Remove.
+	(tracepoint_operation, map_args_over_tracepoints): Remove.
+	(get_tracepoint_by_number): Remove.
+	(enable_trace_command, disable_trace_command): Remove.
+	(delete_trace_command, trace_pass_command): Remove.
+	(trace_actions_command, read_actions): Update signature.
+	(validate_actionline): Update signature, use bp loc.
+	(encode_actions): Ditto.
+	(download_tracepoint): New function, body of trace_start_command.
+	(trace_start_command): Call it, use all_tracepoints.
+	(tracepoint_save_command): Remove.
+	(tracepoint_dump_command): Use get_tracepoint.
+	(end_actions_pseudocommand): Make globally visible.
+	(while_stepping_pseudocommand): Ditto.
+	(_initialize_tracepoint): Move command definitions to breakpoint.c.
+
 2009-03-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	Expose frames to Python.

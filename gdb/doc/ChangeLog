@@ -1,3 +1,10 @@
+2009-03-30  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.texinfo (Tracepoints): Describe tracepoints as a
+	special case of breakpoints.
+	(Enable and Disable Tracepoints): Mention deprecation.
+	(Listing Tracepoints): Update description and example.
+
 2009-03-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.texinfo (Frames in Python): New node.

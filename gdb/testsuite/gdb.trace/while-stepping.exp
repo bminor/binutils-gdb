@@ -61,7 +61,8 @@ if { $trcpt1 <= 0 } then {
 # 5.12 basic while-stepping command (collect regs)
 
 gdb_test "info tracepoints" \
-	"Num Enb Address\[ \]+PassC StepC What.*$trcpt1.*0x.*\[\t \]+\[0-9\]+\[\t \]+0\[\t \]+.*in gdb_c_test.*" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+" \
 	"5.12: set a tracepoint, stepcount is zero"
 
 set stepcount 12
@@ -73,11 +74,13 @@ gdb_trace_setactions "5.12: set stepcount to $stepcount" \
 	"end" ""
 
 gdb_test "info tracepoints" \
-    "Num Enb Address\[ \]+PassC StepC What.*$trcpt1.*0x.*\[\t \]+\[0-9\]+\[\t \]+$stepcount\[\t \]+.*in gdb_c_test.*" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
+\[\t \]+step count 12 .*" \
 	"5.12: confirm stepcount set to $stepcount"
 
 gdb_test "info tracepoints" \
-    "Num Enb Address\[ \]+PassC StepC What.*
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 .*while-stepping $stepcount.*" \
 	"5.12: info trace shows \"while-stepping\""
 
@@ -108,6 +111,10 @@ gdb_trace_setactions "5.16: step without collecting anything" \
 	"end" ""
 
 gdb_test "info tracepoints" \
-	".*$trcpt1.*0x.*\[\t \]+\[0-9\]+\[\t \]+$stepcount\[\t \]+.*in gdb_c_test.*\[ \t\]+Actions for tracepoint $trcpt1:.*\[ \t\]+while-stepping $stepcount.*\[ \t\]+end.*\[ \t\]+end.*" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
+.*while-stepping $stepcount.*
+.*end.*
+.*end.*" \
 	"5.16: confirm actions, step without collecting anything"
 

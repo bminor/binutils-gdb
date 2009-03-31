@@ -111,6 +111,8 @@ enum bptype
     bp_overlay_event, 
 
     bp_catchpoint,
+
+    bp_tracepoint,
   };
 
 /* States of enablement of breakpoint. */
@@ -449,6 +451,17 @@ struct breakpoint
        no location initially so had no context to parse
        the condition in.  */
     int condition_not_parsed;
+
+    /* Number of times this tracepoint should single-step 
+       and collect additional data.  */
+    long step_count;
+
+    /* Number of times this tracepoint should be hit before 
+       disabling/ending.  */
+    int pass_count;
+
+    /* Chain of action lines to execute when this tracepoint is hit.  */
+    struct action_line *actions;
   };
 
 typedef struct breakpoint *breakpoint_p;
@@ -859,5 +872,16 @@ extern void breakpoint_retire_moribund (void);
 
 /* Tell a breakpoint to be quiet.  */
 extern void make_breakpoint_silent (struct breakpoint *);
+
+/* Return a tracepoint with the given number if found.  */
+extern struct breakpoint *get_tracepoint (int num);
+
+/* Find a tracepoint by parsing a number in the supplied string.  */
+extern struct breakpoint *get_tracepoint_by_number (char **arg, int multi_p,
+						    int optional_p);
+
+/* Return a vector of all tracepoints currently defined.  The vector
+   is newly allocated; the caller should free when done with it.  */
+extern VEC(breakpoint_p) *all_tracepoints (void);
 
 #endif /* !defined (BREAKPOINT_H) */

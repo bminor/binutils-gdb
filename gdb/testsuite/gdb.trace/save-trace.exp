@@ -96,13 +96,10 @@ proc gdb_verify_tracepoints { testname } {
     set result "pass";
     send_gdb "info tracepoints\n";
     gdb_expect 10 {
-	-re "y\[\t \]+0x\[0-9a-fA-F\]+\[\t \]+(\[0-9\]+)\[\t \]+(\[0-9\]+)\[\t \]+in gdb_recursion_test\[^\r\n\]+" {
-	    if { $expect_out(1,string) != $expect_out(2,string) } {
-		#set result "fail";
-	    }
-	    if { $expect_out(1,string) != $ourstate } {
-		set result "fail";
-	    }
+	-re "\[0-9\]+\[\t \]+tracepoint\[\t \]+keep y\[\t \]+0x\[0-9a-fA-F\]+ in gdb_recursion_test\[^\r\n\]+" {
+#	    if { $expect_out(1,string) != $ourstate } {
+#		set result "fail";
+#	    }
 	    incr ourstate;
 	    exp_continue;
 	}

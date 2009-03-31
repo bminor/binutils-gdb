@@ -61,21 +61,25 @@ if { $c_test_num <= 0 || $asm_test_num <= 0 } then {
 
 # 2.1 info tracepoints (all)
 gdb_test "info tracepoints" \
-    "Num Enb Address\[ \]+PassC StepC What.*$c_test_num\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_c_test.*$asm_test_num\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*gdb_asm_test.*" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+." \
     "2.1: info tracepoints (all)"
 
 # 2.2 info tracepoint (specific)
 gdb_test "info tracepoint $c_test_num" \
-    "$c_test_num\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*in gdb_c_test.*" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+." \
     "2.2a: info tracepoint $c_test_num (gdb_c_test)"
 
 gdb_test "info tracepoint $asm_test_num" \
-    "$asm_test_num\[\t \]+y\[\t \]+0x\[0-9a-fA-F\]+.*gdb_asm_test.*" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+." \
     "2.2b: info tracepoint $asm_test_num (gdb_asm_test)"
 
 # 2.3 info tracepoint (invalid tracepoint number)
 gdb_test "info tracepoint [expr $c_test_num + $asm_test_num]" \
-    "No tracepoint number [expr $c_test_num + $asm_test_num]." \
+    "No breakpoint or watchpoint number [expr $c_test_num + $asm_test_num]." \
     "2.3: info tracepoint (invalid tracepoint number)"
 
 # 2.4 info tracepoints (list of numbers)
