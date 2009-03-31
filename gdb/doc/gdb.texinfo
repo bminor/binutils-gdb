@@ -3051,6 +3051,11 @@ C@t{++}, a function name may refer to more than one possible place to break.
 @xref{Ambiguous Expressions,,Ambiguous Expressions}, for a discussion of
 that situation.
 
+It is also possible to insert a breakpoint that will stop the program
+only if a specific thread or a specific task hits that breakpoint.
+@xref{Thread-Specific Breakpoints} and @ref{Ada Tasks} for more
+information about this feature.
+
 @item break
 When called without any arguments, @code{break} sets a breakpoint at
 the next instruction to be executed in the selected stack frame
@@ -11750,6 +11755,58 @@ from the current task to the given task.
 #4  0x804aacc in un () at un.adb:5
 @end smallexample
 
+@item break @var{linespec} task @var{taskno}
+@itemx break @var{linespec} task @var{taskno} if @dots{}
+@cindex breakpoints and tasks, in Ada
+@cindex task breakpoints, in Ada
+@kindex break @dots{} task @var{taskno}@r{ (Ada)}
+These commands are like the @code{break @dots{} thread @dots{}}
+command (@pxref{Thread Stops}).
+@var{linespec} specifies source lines, as described
+in @ref{Specify Location}.
+
+Use the qualifier @samp{task @var{taskno}} with a breakpoint command
+to specify that you only want @value{GDBN} to stop the program when a
+particular Ada task reaches this breakpoint.  @var{taskno} is one of the
+numeric task identifiers assigned by @value{GDBN}, shown in the first
+column of the @samp{info tasks} display.
+
+If you do not specify @samp{task @var{taskno}} when you set a
+breakpoint, the breakpoint applies to @emph{all} tasks of your
+program.
+
+You can use the @code{task} qualifier on conditional breakpoints as
+well; in this case, place @samp{task @var{taskno}} before the
+breakpoint condition (before the @code{if}).
+
+For example,
+
+@smallexample
+@iftex
+@leftskip=0.5cm
+@end iftex
+(@value{GDBP}) info tasks
+  ID       TID P-ID Pri State                 Name
+   1 140022020   0   15 Child Activation Wait main_task
+   2 140045060   1   15 Accept/Select Wait    t2
+   3 140044840   1   15 Runnable              t1
+*  4 140056040   1   15 Runnable              t3
+(@value{GDBP}) b 15 task 2
+Breakpoint 5 at 0x120044cb0: file test_task_debug.adb, line 15.
+(@value{GDBP}) cont
+Continuing.
+task # 1 running
+task # 2 running
+
+Breakpoint 5, test_task_debug () at test_task_debug.adb:15
+15               flush;
+(@value{GDBP}) info tasks
+  ID       TID P-ID Pri State                 Name
+   1 140022020   0   15 Child Activation Wait main_task
+*  2 140045060   1   15 Runnable              t2
+   3 140044840   1   15 Runnable              t1
+   4 140056040   1   15 Delay Sleep           t3
+@end smallexample
 @end table
 
 @node Ada Tasks and Core Files

@@ -1,5 +1,12 @@
 2009-03-31  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.texinfo (Ada Tasks): Add documentation about task-specific
+	breakpoints.
+	(Set Breaks): Add reference to thread-specific and task-specific
+	breakpoints.
+
+2009-03-31  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.texinfo (Ada Tasks): Remove the documentation about
 	the "Running" state, as this state has been eliminated.
 	Now all runnable tasks are shown as "Runnable".
