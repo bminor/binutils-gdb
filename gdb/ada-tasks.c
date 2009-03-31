@@ -160,7 +160,7 @@ static int stale_task_list_p = 1;
 /* Return the task number of the task whose ptid is PTID, or zero
    if the task could not be found.  */
 
-static int
+int
 ada_get_task_number (ptid_t ptid)
 {
   int i;

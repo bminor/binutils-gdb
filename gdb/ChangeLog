@@ -1,5 +1,22 @@
 2009-03-31  Joel Brobecker  <brobecker@adacore.com>
 
+	Provide support for (Ada) task-specific breakpoints.
+
+	* ada-lang.h (ada_get_task_number): Add declaration.
+	(breakpoint_ada_task_match): Delete declaration.
+	* ada-tasks.c (ada_get_task_number): Make non-static.
+	* breakpoint.h (struct breakpoint): Add field "task".
+	* breakpoint.c (print_one_breakpoint_location): Add handling of
+	task-specific breakpoints.
+	(create_breakpoint, create_breakpoints, find_condition_and_thread):
+	New parameter "task".
+	(break_command_really): Update calls to find_condition_and_thread
+	and create_breakpoints.
+	(breakpoint_re_set_one): Update call to find_condition_and_thread.
+	Set b->task.
+
+2009-03-31  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-tasks.c (short_task_info): Eliminate the "Running" task state.
 
 2009-03-31  Pedro Alves  <pedro@codesourcery.com>

@@ -1926,8 +1926,9 @@ int
 breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
 {
   const struct bp_location *bpt;
-  /* The thread ID associated to PTID, computed lazily.  */
+  /* The thread and task IDs associated to PTID, computed lazily.  */
   int thread = -1;
+  int task = 0;
   
   ALL_BP_LOCATIONS (bpt)
     {
@@ -1952,6 +1953,17 @@ breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
 	  if (bpt->owner->thread != thread)
 	    continue;
 	}
+
+      if (bpt->owner->task != 0)
+        {
+	  /* This is a task-specific breakpoint.  Check that ptid
+	     matches that task.  If task hasn't been computed yet,
+	     it is now time to do so.  */
+	  if (task == 0)
+	    task = ada_get_task_number (ptid);
+	  if (bpt->owner->task != task)
+	    continue;
+        }
 
       if (overlay_debugging 
 	  && section_is_overlay (bpt->section) 
@@ -3610,12 +3622,20 @@ print_one_breakpoint_location (struct breakpoint *b,
 	break;
       }
 
-  if (!part_of_multiple && b->thread != -1)
+  if (!part_of_multiple)
     {
-      /* FIXME: This seems to be redundant and lost here; see the
-	 "stop only in" line a little further down. */
-      ui_out_text (uiout, " thread ");
-      ui_out_field_int (uiout, "thread", b->thread);
+      if (b->thread != -1)
+	{
+	  /* FIXME: This seems to be redundant and lost here; see the
+	     "stop only in" line a little further down. */
+	  ui_out_text (uiout, " thread ");
+	  ui_out_field_int (uiout, "thread", b->thread);
+	}
+      else if (b->task != 0)
+	{
+	  ui_out_text (uiout, " task ");
+	  ui_out_field_int (uiout, "task", b->task);
+	}
     }
   
   ui_out_text (uiout, "\n");
@@ -5213,7 +5233,7 @@ static void
 create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
 		   char *cond_string,
 		   enum bptype type, enum bpdisp disposition,
-		   int thread, int ignore_count, 
+		   int thread, int task, int ignore_count, 
 		   struct breakpoint_ops *ops, int from_tty, int enabled)
 {
   struct breakpoint *b = NULL;
@@ -5245,6 +5265,7 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
 	  set_breakpoint_count (breakpoint_count + 1);
 	  b->number = breakpoint_count;
 	  b->thread = thread;
+	  b->task = task;
   
 	  b->cond_string = cond_string;
 	  b->ignore_count = ignore_count;
@@ -5423,7 +5444,7 @@ static void
 create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 		    char *cond_string,
 		    enum bptype type, enum bpdisp disposition,
-		    int thread, int ignore_count, 
+		    int thread, int task, int ignore_count, 
 		    struct breakpoint_ops *ops, int from_tty,
 		    int enabled)
 {
@@ -5435,7 +5456,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 
       create_breakpoint (expanded, addr_string[i],
 			 cond_string, type, disposition,
-			 thread, ignore_count, ops, from_tty, enabled);
+			 thread, task, ignore_count, ops, from_tty, enabled);
     }
 
   update_global_location_list (1);
@@ -5542,7 +5563,7 @@ do_captured_parse_breakpoint (struct ui_out *ui, void *data)
    If no thread is found, *THREAD is set to -1.  */
 static void 
 find_condition_and_thread (char *tok, CORE_ADDR pc, 
-			   char **cond_string, int *thread)
+			   char **cond_string, int *thread, int *task)
 {
   *cond_string = NULL;
   *thread = -1;
@@ -5585,6 +5606,18 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
 	  if (!valid_thread_id (*thread))
 	    error (_("Unknown thread %d."), *thread);
 	}
+      else if (toklen >= 1 && strncmp (tok, "task", toklen) == 0)
+	{
+	  char *tmptok;
+
+	  tok = end_tok + 1;
+	  tmptok = tok;
+	  *task = strtol (tok, &tok, 0);
+	  if (tok == tmptok)
+	    error (_("Junk after task keyword."));
+	  if (!valid_task_id (*task))
+	    error (_("Unknown task %d\n"), *task);
+	}
       else
 	error (_("Junk at end of arguments."));
     }
@@ -5624,6 +5657,7 @@ break_command_really (char *arg, char *cond_string, int thread,
   int pending = 0;
   int not_found = 0;
   enum bptype type_wanted;
+  int task = 0;
 
   sals.sals = NULL;
   sals.nelts = 0;
@@ -5729,7 +5763,8 @@ break_command_really (char *arg, char *cond_string, int thread,
                re-parse it in context of each sal.  */
             cond_string = NULL;
             thread = -1;
-            find_condition_and_thread (arg, sals.sals[0].pc, &cond_string, &thread);
+            find_condition_and_thread (arg, sals.sals[0].pc, &cond_string,
+                                       &thread, &task);
             if (cond_string)
                 make_cleanup (xfree, cond_string);
         }
@@ -5744,7 +5779,7 @@ break_command_really (char *arg, char *cond_string, int thread,
         }
       create_breakpoints (sals, addr_string, cond_string, type_wanted,
 			  tempflag ? disp_del : disp_donttouch,
-			  thread, ignore_count, ops, from_tty, enabled);
+			  thread, task, ignore_count, ops, from_tty, enabled);
     }
   else
     {
@@ -7587,11 +7622,14 @@ breakpoint_re_set_one (void *bint)
 	{
 	  char *cond_string = 0;
 	  int thread = -1;
+	  int task = 0;
+
 	  find_condition_and_thread (s, sals.sals[0].pc, 
-				     &cond_string, &thread);
+				     &cond_string, &thread, &task);
 	  if (cond_string)
 	    b->cond_string = cond_string;
 	  b->thread = thread;
+	  b->task = task;
 	  b->condition_not_parsed = 0;
 	}
       expanded = expand_line_sal_maybe (sals.sals[0]);

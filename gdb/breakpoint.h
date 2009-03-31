@@ -425,8 +425,11 @@ struct breakpoint
        hardware.  */
     enum watchpoint_triggered watchpoint_triggered;
 
-    /* Thread number for thread-specific breakpoint, or -1 if don't care */
+    /* Thread number for thread-specific breakpoint, or -1 if don't care.  */
     int thread;
+
+    /* Ada task number for task-specific breakpoint, or 0 if don't care.  */
+    int task;
 
     /* Count of the number of times this breakpoint was taken, dumped
        with the info, but not used for anything else.  Useful for
