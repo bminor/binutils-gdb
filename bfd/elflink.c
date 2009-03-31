@@ -9329,7 +9329,8 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 					       sym, *ps);
 		}
 
-	      if (s_type == STT_RELC || s_type == STT_SRELC)
+	      if ((s_type == STT_RELC || s_type == STT_SRELC)
+		  && !finfo->info->relocatable)
 		{
 		  bfd_vma val;
 		  bfd_vma dot = (rel->r_offset

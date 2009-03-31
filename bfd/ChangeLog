@@ -1,3 +1,8 @@
+2009-03-30  DJ Delorie  <dj@redhat.com>
+
+	* elflink.c (elf_link_input_bfd): Don't try to resolve complex
+	relocs when doing a relocatable link.
+
 2009-03-28  Mark Mitchell  <mark@codesourcery.com>
 
 	* coff-arm.c (coff_arm_merge_private_bfd_data): Use "error:", not
