@@ -1041,7 +1041,6 @@
 	RETVAL_EXPR for UNOP_CAST and set RETURN_TYPE to the RETURN_VALUE type
 	if RETURN_TYPE is NULL.
 
->>>>>>> 1.10280
 2009-03-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (PACKET_qAttached): New.
