@@ -1,3 +1,14 @@
+2009-03-31  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_notice_new_inferior): Use ptid_is_pid.  Check
+	if the thread's ptid without a thread id field is in the list
+	before calling thread_change_ptid.
+	(extended_remote_attach_1): In non-stop mode, do not rely on
+	querying the current thread, instead, query the thread list, and
+	select the first thread of the process.
+	* gdbthread.h (first_thread_of_process): Declare.
+	* thread.c (first_thread_of_process): Define.
+
 2009-03-30  Stan Shebs  <stan@codesourcery.com>
 
 	Make tracepoints into a type of breakpoint.

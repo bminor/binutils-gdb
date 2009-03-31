@@ -1228,15 +1228,23 @@ remote_notice_new_inferior (ptid_t currthread, int running)
   if (!in_thread_list (currthread))
     {
       struct inferior *inf = NULL;
+      int pid = ptid_get_pid (currthread);
 
-      if (ptid_equal (pid_to_ptid (ptid_get_pid (currthread)), inferior_ptid))
+      if (ptid_is_pid (inferior_ptid)
+	  && pid == ptid_get_pid (inferior_ptid))
 	{
 	  /* inferior_ptid has no thread member yet.  This can happen
 	     with the vAttach -> remote_wait,"TAAthread:" path if the
 	     stub doesn't support qC.  This is the first stop reported
 	     after an attach, so this is the main thread.  Update the
 	     ptid in the thread list.  */
-  	  thread_change_ptid (inferior_ptid, currthread);
+	  if (in_thread_list (pid_to_ptid (pid)))
+	    thread_change_ptid (inferior_ptid, currthread);
+	  else
+	    {
+	      remote_add_thread (currthread, running);
+	      inferior_ptid = currthread;
+	    }
  	  return;
 	}
 
@@ -3484,19 +3492,34 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
     error (_("Attaching to %s failed"),
 	   target_pid_to_str (pid_to_ptid (pid)));
 
-  inferior_ptid = pid_to_ptid (pid);
-
-  /* Now, if we have thread information, update inferior_ptid.  */
-  inferior_ptid = remote_current_thread (inferior_ptid);
-
   remote_add_inferior (pid, 1);
 
+  inferior_ptid = pid_to_ptid (pid);
+
   if (non_stop)
-    /* Get list of threads.  */
-    remote_threads_info (target);
+    {
+      struct thread_info *thread;
+
+      /* Get list of threads.  */
+      remote_threads_info (target);
+
+      thread = first_thread_of_process (pid);
+      if (thread)
+	inferior_ptid = thread->ptid;
+      else
+	inferior_ptid = pid_to_ptid (pid);
+
+      /* Invalidate our notion of the remote current thread.  */
+      record_currthread (minus_one_ptid);
+    }
   else
-    /* Add the main thread to the thread list.  */
-    add_thread_silent (inferior_ptid);
+    {
+      /* Now, if we have thread information, update inferior_ptid.  */
+      inferior_ptid = remote_current_thread (inferior_ptid);
+
+      /* Add the main thread to the thread list.  */
+      add_thread_silent (inferior_ptid);
+    }
 
   /* Next, if the target can specify a description, read it.  We do
      this before anything involving memory or registers.  */

@@ -229,6 +229,10 @@ extern struct thread_info *find_thread_pid (ptid_t ptid);
 /* Find thread by GDB user-visible thread number.  */
 struct thread_info *find_thread_id (int num);
 
+/* Finds the first thread of the inferior given by PID.  If PID is -1,
+   returns the first thread in the list.  */
+struct thread_info *first_thread_of_process (int pid);
+
 /* Change the ptid of thread OLD_PTID to NEW_PTID.  */
 void thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid);
 

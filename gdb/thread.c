@@ -401,6 +401,22 @@ in_thread_list (ptid_t ptid)
   return 0;			/* Never heard of 'im */
 }
 
+/* Finds the first thread of the inferior given by PID.  If PID is -1,
+   return the first thread in the list.  */
+
+struct thread_info *
+first_thread_of_process (int pid)
+{
+  struct thread_info *tp, *ret = NULL;
+
+  for (tp = thread_list; tp; tp = tp->next)
+    if (pid == -1 || ptid_get_pid (tp->ptid) == pid)
+      if (ret == NULL || tp->num < ret->num)
+	ret = tp;
+
+  return ret;
+}
+
 /* Print a list of thread ids currently known, and the total number of
    threads. To be used from within catch_errors. */
 static int
