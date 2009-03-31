@@ -11614,7 +11614,7 @@ This command shows a list of current Ada tasks, as in the following example:
    1   8088000   0   15 Child Activation Wait main_task
    2   80a4000   1   15 Accept Statement      b
    3   809a800   1   15 Child Activation Wait a
-*  4   80ae800   3   15 Running               c
+*  4   80ae800   3   15 Runnable              c
 
 @end smallexample
 
@@ -11642,9 +11642,6 @@ Current state of the task.
 @item Unactivated
 The task has been created but has not been activated.  It cannot be
 executing.
-
-@item Running
-The task currently running.
 
 @item Runnable
 The task is not blocked for any reason known to Ada.  (It may be waiting
@@ -11701,7 +11698,7 @@ the following example:
 (@value{GDBP}) info tasks
   ID       TID P-ID Pri State                  Name
    1   8077880    0  15 Child Activation Wait  main_task
-*  2   807c468    1  15 Running                task_1
+*  2   807c468    1  15 Runnable               task_1
 (@value{GDBP}) info task 2
 Ada Task: 0x807c468
 Name: task_1
@@ -11723,7 +11720,7 @@ This command prints the ID of the current task.
 (@value{GDBP}) info tasks
   ID       TID P-ID Pri State                  Name
    1   8077870    0  15 Child Activation Wait  main_task
-*  2   807c458    1  15 Running                t
+*  2   807c458    1  15 Runnable               t
 (@value{GDBP}) task
 [Current task is 2]
 @end smallexample
@@ -11741,7 +11738,7 @@ from the current task to the given task.
 (@value{GDBP}) info tasks
   ID       TID P-ID Pri State                  Name
    1   8077870    0  15 Child Activation Wait  main_task
-*  2   807c458    1  15 Running                t
+*  2   807c458    1  15 Runnable               t
 (@value{GDBP}) task 1
 [Switching to task 1]
 #0  0x8067726 in pthread_cond_wait ()

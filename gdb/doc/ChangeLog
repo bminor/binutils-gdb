@@ -1,3 +1,9 @@
+2009-03-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Ada Tasks): Remove the documentation about
+	the "Running" state, as this state has been eliminated.
+	Now all runnable tasks are shown as "Runnable".
+
 2009-03-30  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Tracepoints): Describe tracepoints as a
