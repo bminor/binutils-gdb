@@ -1,3 +1,7 @@
+2009-03-31  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* doc/internals.texi:  Fix trivial syntax errors.
+
 2009-03-26  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 10005
