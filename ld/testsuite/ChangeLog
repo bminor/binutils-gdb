@@ -1,3 +1,11 @@
+2009-04-01  Christophe Lyon  <christophe.lyon@st.com>
+
+	* ld-arm/arm-elf.exp: BE8 tests expect the same output as the
+	default ones.
+	* ld-arm/arm-be8.d: Print opcodes in little endian.
+	* ld-arm/farcall-thumb-arm-be8.d: Removed useless expected result.
+	* ld-arm/farcall-arm-arm-be8.d: Likewise.
+
 2009-03-25  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/tls-e-dtpoffd3.d, ld-cris/tls-e-tpoffcomm1.d,

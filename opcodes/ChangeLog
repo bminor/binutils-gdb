@@ -1,3 +1,7 @@
+2009-04-01  Christophe Lyon  <christophe.lyon@st.com>
+
+	* arm-dis.c (print_insn): Print BE8 opcodes in little endianness.
+
 2009-03-30  Joseph Myers  <joseph@codesourcery.com>
 
 	* arm-dis.c (print_insn): Also check section matches in backwards
