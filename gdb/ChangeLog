@@ -1,3 +1,8 @@
+2009-04-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (append_resumption): New.
+	(remote_vcont_resume): Use it.
+
 2009-04-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* windows-nat.c (+windows_get_ada_task_ptid): New function.

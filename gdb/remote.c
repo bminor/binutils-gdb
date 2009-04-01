@@ -3672,6 +3672,50 @@ remote_vcont_probe (struct remote_state *rs)
   packet_ok (buf, &remote_protocol_packets[PACKET_vCont]);
 }
 
+/* Helper function for building "vCont" resumptions.  Write a
+   resumption to P.  ENDP points to one-passed-the-end of the buffer
+   we're allowed to write to.  Returns BUF+CHARACTERS_WRITTEN.  The
+   thread to be resumed is PTID; STEP and SIGGNAL indicate whether the
+   resumed thread should be single-stepped and/or signalled.  If PTID
+   equals minus_one_ptid, then all threads are resumed; if PTID
+   represents a process, then all threads of the process are resumed;
+   the thread to be stepped and/or signalled is given in the global
+   INFERIOR_PTID.  */
+
+static char *
+append_resumption (char *p, char *endp,
+		   ptid_t ptid, int step, enum target_signal siggnal)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  if (step && siggnal != TARGET_SIGNAL_0)
+    p += xsnprintf (p, endp - p, ";S%02x", siggnal);
+  else if (step)
+    p += xsnprintf (p, endp - p, ";s");
+  else if (siggnal != TARGET_SIGNAL_0)
+    p += xsnprintf (p, endp - p, ";C%02x", siggnal);
+  else
+    p += xsnprintf (p, endp - p, ";c");
+
+  if (remote_multi_process_p (rs) && ptid_is_pid (ptid))
+    {
+      ptid_t nptid;
+
+      /* All (-1) threads of process.  */
+      nptid = ptid_build (ptid_get_pid (ptid), 0, -1);
+
+      p += xsnprintf (p, endp - p, ":");
+      p = write_ptid (p, endp, nptid);
+    }
+  else if (!ptid_equal (ptid, minus_one_ptid))
+    {
+      p += xsnprintf (p, endp - p, ":");
+      p = write_ptid (p, endp, ptid);
+    }
+
+  return p;
+}
+
 /* Resume the remote inferior by using a "vCont" packet.  The thread
    to be resumed is PTID; STEP and SIGGNAL indicate whether the
    resumed thread should be single-stepped and/or signalled.  If PTID
@@ -3702,78 +3746,35 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
      about overflowing BUF.  Should there be a generic
      "multi-part-packet" packet?  */
 
+  p += xsnprintf (p, endp - p, "vCont");
+
   if (ptid_equal (ptid, magic_null_ptid))
     {
       /* MAGIC_NULL_PTID means that we don't have any active threads,
 	 so we don't have any TID numbers the inferior will
 	 understand.  Make sure to only send forms that do not specify
 	 a TID.  */
-      if (step && siggnal != TARGET_SIGNAL_0)
-	xsnprintf (p, endp - p, "vCont;S%02x", siggnal);
-      else if (step)
-	xsnprintf (p, endp - p, "vCont;s");
-      else if (siggnal != TARGET_SIGNAL_0)
-	xsnprintf (p, endp - p, "vCont;C%02x", siggnal);
-      else
-	xsnprintf (p, endp - p, "vCont;c");
+      p = append_resumption (p, endp, minus_one_ptid, step, siggnal);
     }
-  else if (ptid_equal (ptid, minus_one_ptid))
+  else if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
     {
-      /* Resume all threads, with preference for INFERIOR_PTID.  */
-      if (step && siggnal != TARGET_SIGNAL_0)
+      /* Resume all threads (of all processes, or of a single
+	 process), with preference for INFERIOR_PTID.  This assumes
+	 inferior_ptid belongs to the set of all threads we are about
+	 to resume.  */
+      if (step || siggnal != TARGET_SIGNAL_0)
 	{
-	  /* Step inferior_ptid with signal.  */
-	  p += xsnprintf (p, endp - p, "vCont;S%02x:", siggnal);
-	  p = write_ptid (p, endp, inferior_ptid);
-	  /* And continue others.  */
-	  p += xsnprintf (p, endp - p, ";c");
+	  /* Step inferior_ptid, with or without signal.  */
+	  p = append_resumption (p, endp, inferior_ptid, step, siggnal);
 	}
-      else if (step)
-	{
-	  /* Step inferior_ptid.  */
-	  p += xsnprintf (p, endp - p, "vCont;s:");
-	  p = write_ptid (p, endp, inferior_ptid);
-	  /* And continue others.  */
-	  p += xsnprintf (p, endp - p, ";c");
-	}
-      else if (siggnal != TARGET_SIGNAL_0)
-	{
-	  /* Continue inferior_ptid with signal.  */
-	  p += xsnprintf (p, endp - p, "vCont;C%02x:", siggnal);
-	  p = write_ptid (p, endp, inferior_ptid);
-	  /* And continue others.  */
-	  p += xsnprintf (p, endp - p, ";c");
-	}
-      else
-	xsnprintf (p, endp - p, "vCont;c");
+
+      /* And continue others without a signal.  */
+      p = append_resumption (p, endp, ptid, /*step=*/ 0, TARGET_SIGNAL_0);
     }
   else
     {
       /* Scheduler locking; resume only PTID.  */
-      if (step && siggnal != TARGET_SIGNAL_0)
-	{
-	  /* Step ptid with signal.  */
-	  p += xsnprintf (p, endp - p, "vCont;S%02x:", siggnal);
-	  p = write_ptid (p, endp, ptid);
-	}
-      else if (step)
-	{
-	  /* Step ptid.  */
-	  p += xsnprintf (p, endp - p, "vCont;s:");
-	  p = write_ptid (p, endp, ptid);
-	}
-      else if (siggnal != TARGET_SIGNAL_0)
-	{
-	  /* Continue ptid with signal.  */
-	  p += xsnprintf (p, endp - p, "vCont;C%02x:", siggnal);
-	  p = write_ptid (p, endp, ptid);
-	}
-      else
-	{
-	  /* Continue ptid.  */
-	  p += xsnprintf (p, endp - p, "vCont;c:");
-	  p = write_ptid (p, endp, ptid);
-	}
+      p = append_resumption (p, endp, ptid, step, siggnal);
     }
 
   gdb_assert (strlen (rs->buf) < get_remote_packet_size ());
