@@ -4268,14 +4268,13 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		      bfd_coff_swap_lineno_in (input_bfd, linp, &lin);
 		      lin.l_addr.l_symndx = *indexp;
 		      bfd_coff_swap_lineno_out (output_bfd, &lin, linp);
-		      linp += linesz;
 
 		      /* Copy the other entries, adjusting their addresses.  */
 		      linpend = linp + *lineno_counts * linesz;
 		      offset = (o->output_section->vma
 				+ o->output_offset
 				- o->vma);
-		      for (; linp < linpend; linp += linesz)
+		      for (linp += linesz; linp < linpend; linp += linesz)
 			{
 			  bfd_coff_swap_lineno_in (input_bfd, linp, &lin);
 			  lin.l_addr.l_paddr += offset;
