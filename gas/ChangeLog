@@ -1,3 +1,13 @@
+2009-04-01  Nick Clifton  <nickc@redhat.com>
+
+	* Import this patch:
+
+	2008-11-14  Peter Jansen  <pwjansen@yahoo.com>
+
+	PR 7026
+	* config/tc-arm.c: Ensure that all uses of as_bad have a
+	formatting string.
+
 2009-03-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (md_assemble): APUinfo only for e500.
