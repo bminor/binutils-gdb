@@ -1,5 +1,16 @@
 2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* xcofflink.c (xcoff_archive_info): Add contains_shared_object_p
+	and know_contains_shared_object_p.
+	(xcoff_archive_contains_shared_object_p): Add an "info" parameter.
+	Cache the result in the archive_info table.
+	(xcoff_auto_export_p): Add an "info" parameter and update the
+	call to xcoff_archive_contains_shared_object_p.
+	(xcoff_mark_auto_exports): Update accordingly.
+	(xcoff_post_gc_symbol): Likewise.
+
+2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* xcofflink.c (bfd_link_input_bfd): Treat __rtinit as C_HIDEXT
 	rather than C_EXT.
 

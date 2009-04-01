@@ -86,6 +86,12 @@ struct xcoff_archive_info
      this archive in the .loader section.  */
   const char *imppath;
   const char *impfile;
+
+  /* True if the archive contains a dynamic object.  */
+  unsigned int contains_shared_object_p : 1;
+
+  /* True if the previous field is valid.  */
+  unsigned int know_contains_shared_object_p : 1;
 };
 
 struct xcoff_link_hash_table
@@ -2504,14 +2510,23 @@ xcoff_find_function (struct bfd_link_info *info,
 /* Return true if the given bfd contains at least one shared object.  */
 
 static bfd_boolean
-xcoff_archive_contains_shared_object_p (bfd *archive)
+xcoff_archive_contains_shared_object_p (struct bfd_link_info *info,
+					bfd *archive)
 {
+  struct xcoff_archive_info *archive_info;
   bfd *member;
 
-  member = bfd_openr_next_archived_file (archive, NULL);
-  while (member != NULL && (member->flags & DYNAMIC) == 0)
-    member = bfd_openr_next_archived_file (archive, member);
-  return member != NULL;
+  archive_info = xcoff_get_archive_info (info, archive);
+  if (!archive_info->know_contains_shared_object_p)
+    {
+      member = bfd_openr_next_archived_file (archive, NULL);
+      while (member != NULL && (member->flags & DYNAMIC) == 0)
+	member = bfd_openr_next_archived_file (archive, member);
+
+      archive_info->contains_shared_object_p = (member != NULL);
+      archive_info->know_contains_shared_object_p = 1;
+    }
+  return archive_info->contains_shared_object_p;
 }
 
 /* Symbol H qualifies for export by -bexpfull.  Return true if it also
@@ -2539,7 +2554,8 @@ xcoff_covered_by_expall_p (struct xcoff_link_hash_entry *h)
    specified by AUTO_EXPORT_FLAGS.  */
 
 static bfd_boolean
-xcoff_auto_export_p (struct xcoff_link_hash_entry *h,
+xcoff_auto_export_p (struct bfd_link_info *info,
+		     struct xcoff_link_hash_entry *h,
 		     unsigned int auto_export_flags)
 {
   /* Don't automatically export things that were explicitly exported.  */
@@ -2576,7 +2592,7 @@ xcoff_auto_export_p (struct xcoff_link_hash_entry *h,
       owner = h->root.u.def.section->owner;
       if (owner != NULL
 	  && owner->my_archive != NULL
-	  && xcoff_archive_contains_shared_object_p (owner->my_archive))
+	  && xcoff_archive_contains_shared_object_p (info, owner->my_archive))
 	return FALSE;
     }
 
@@ -3196,7 +3212,7 @@ xcoff_mark_auto_exports (struct xcoff_link_hash_entry *h, void *data)
   struct xcoff_loader_info *ldinfo;
 
   ldinfo = (struct xcoff_loader_info *) data;
-  if (xcoff_auto_export_p (h, ldinfo->auto_export_flags))
+  if (xcoff_auto_export_p (ldinfo->info, h, ldinfo->auto_export_flags))
     {
       if (!xcoff_mark_symbol (ldinfo->info, h))
 	ldinfo->failed = TRUE;
@@ -3355,7 +3371,7 @@ xcoff_post_gc_symbol (struct xcoff_link_hash_entry *h, void * p)
 
   if (xcoff_hash_table (ldinfo->info)->loader_section)
     {
-      if (xcoff_auto_export_p (h, ldinfo->auto_export_flags))
+      if (xcoff_auto_export_p (ldinfo->info, h, ldinfo->auto_export_flags))
 	h->flags |= XCOFF_EXPORT;
 
       if (!xcoff_build_ldsym (ldinfo, h))
