@@ -1,3 +1,9 @@
+2009-04-01  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* config/tc-arm.c (arm_validate_fix): Define only for OBJ_COFF.
+	(find_real_start): Likewise.
+	* config/tc-arm.h (TC_VALIDATE_FIX): Likewise
+
 2009-04-01  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-arm.c (do_nop): Generate v6k nops whenever possible.

@@ -2417,6 +2417,7 @@ mapping_state (enum mstate state)
 
 /* Find the real, Thumb encoded start of a Thumb function.  */
 
+#ifdef OBJ_COFF
 static symbolS *
 find_real_start (symbolS * symbolP)
 {
@@ -2449,6 +2450,7 @@ find_real_start (symbolS * symbolP)
 
   return new_target;
 }
+#endif
 
 static void
 opcode_select (int width)
@@ -9082,6 +9084,7 @@ do_t_branch23 (void)
   inst.reloc.type   = BFD_RELOC_THUMB_PCREL_BRANCH23;
   inst.reloc.pc_rel = 1;
 
+#if defined(OBJ_COFF)
   /* If the destination of the branch is a defined symbol which does not have
      the THUMB_FUNC attribute, then we must be calling a function which has
      the (interfacearm) attribute.  We look for the Thumb entry point to that
@@ -9092,6 +9095,7 @@ do_t_branch23 (void)
       && ! THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
     inst.reloc.exp.X_add_symbol =
       find_real_start (inst.reloc.exp.X_add_symbol);
+#endif
 }
 
 static void
@@ -19933,7 +19937,7 @@ cons_fix_new_arm (fragS *	frag,
   fix_new_exp (frag, where, (int) size, exp, pcrel, type);
 }
 
-#if defined OBJ_COFF || defined OBJ_ELF
+#if defined (OBJ_COFF)
 void
 arm_validate_fix (fixS * fixP)
 {

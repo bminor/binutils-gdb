@@ -249,8 +249,10 @@ struct arm_segment_info_type
 # define tc_fix_adjustable(FIX) 		arm_fix_adjustable (FIX)
 /* Values passed to md_apply_fix don't include the symbol value.  */
 # define MD_APPLY_SYM_VALUE(FIX) 		0
-# define TC_VALIDATE_FIX(FIX, SEGTYPE, LABEL)	arm_validate_fix (FIX)
+#endif
 
+#ifdef OBJ_COFF
+# define TC_VALIDATE_FIX(FIX, SEGTYPE, LABEL)	arm_validate_fix (FIX)
 #endif
 
 #define MD_PCREL_FROM_SECTION(F,S) md_pcrel_from_section(F,S)
