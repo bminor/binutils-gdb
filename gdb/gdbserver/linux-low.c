@@ -122,6 +122,7 @@ static int linux_wait_for_event (struct thread_info *child);
 static int check_removed_breakpoint (struct lwp_info *event_child);
 static void *add_lwp (unsigned long pid);
 static int my_waitpid (int pid, int *status, int flags);
+static int linux_stopped_by_watchpoint (void);
 
 struct pending_signals
 {
@@ -899,19 +900,11 @@ linux_wait_for_event (struct thread_info *child)
 	fprintf (stderr, "Hit a non-gdbserver breakpoint.\n");
 
       /* If we were single-stepping, we definitely want to report the
-	 SIGTRAP.  The single-step operation has completed, so also
-	 clear the stepping flag; in general this does not matter,
-	 because the SIGTRAP will be reported to the client, which
-	 will give us a new action for this thread, but clear it for
-	 consistency anyway.  It's safe to clear the stepping flag
-	 because the only consumer of get_stop_pc () after this point
-	 is check_removed_breakpoint, and pending_is_breakpoint is not
-	 set.  It might be wiser to use a step_completed flag instead.  */
+	 SIGTRAP.  Although the single-step operation has completed,
+	 do not clear clear the stepping flag yet; we need to check it
+	 in wait_for_sigstop.  */
       if (event_child->stepping)
-	{
-	  event_child->stepping = 0;
-	  return wstat;
-	}
+	return wstat;
 
       /* A SIGTRAP that we can't explain.  It may have been a breakpoint.
 	 Check if it is a breakpoint, and if so mark the process information
@@ -1097,8 +1090,24 @@ wait_for_sigstop (struct inferior_list_entry *entry)
       if (debug_threads)
 	fprintf (stderr, "LWP %ld stopped with non-sigstop status %06x\n",
 		 lwp->lwpid, wstat);
-      lwp->status_pending_p = 1;
-      lwp->status_pending = wstat;
+
+      /* Do not leave a pending single-step finish to be reported to
+	 the client.  The client will give us a new action for this
+	 thread, possibly a continue request --- otherwise, the client
+	 would consider this pending SIGTRAP reported later a spurious
+	 signal.  */
+      if (WSTOPSIG (wstat) == SIGTRAP
+	  && lwp->stepping
+	  && !linux_stopped_by_watchpoint ())
+	{
+	  if (debug_threads)
+	    fprintf (stderr, "  single-step SIGTRAP ignored\n");
+	}
+      else
+	{
+	  lwp->status_pending_p = 1;
+	  lwp->status_pending = wstat;
+	}
       lwp->stop_expected = 1;
     }
 
@@ -1283,8 +1292,10 @@ linux_continue_one_thread (struct inferior_list_entry *entry)
   if (lwp->resume->leave_stopped)
     return;
 
-  if (lwp->resume->thread == -1)
-    step = lwp->stepping || lwp->resume->step;
+  if (lwp->resume->thread == -1
+      && lwp->stepping
+      && lwp->pending_is_breakpoint)
+    step = 1;
   else
     step = lwp->resume->step;
 

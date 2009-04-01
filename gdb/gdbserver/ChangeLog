@@ -1,3 +1,12 @@
+2009-04-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_wait_for_event): Don't clear the `stepping'
+	flag.
+	(wait_for_sigstop): Don't leave a finished single-step SIGTRAP
+	pending.
+	(linux_continue_one_thread): Only preserve the stepping flag if
+	there's a pending breakpoint.
+
 2009-03-31  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.c (main): After the inferior having exited, call
