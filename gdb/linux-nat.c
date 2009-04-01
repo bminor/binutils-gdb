@@ -2632,7 +2632,7 @@ linux_nat_filter_event (int lwpid, int status, int options)
 	 if they have exited we can determine whether this signal
 	 should be ignored or whether it means the end of the debugged
 	 application, regardless of which threading model is being
-	 used.	*/
+	 used.  */
       if (GET_PID (lp->ptid) == GET_LWP (lp->ptid))
 	{
 	  lp->stopped = 1;

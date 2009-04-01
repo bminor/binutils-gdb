@@ -1,5 +1,9 @@
 2009-04-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* linux-nat.c (linux_nat_filter_event): Minor comment reformatting.
+
+2009-04-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* linux-nat.c (linux_nat_filter_events): Do not delete the lwp if
 	this is the last one.
 
