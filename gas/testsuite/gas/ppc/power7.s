@@ -104,3 +104,5 @@ power7:
 	frsqrtes  14,15
 	frsqrtes. 14,15
 	isel	  2,3,4,28
+	ori	  2,2,0
+	.p2align 4,,15

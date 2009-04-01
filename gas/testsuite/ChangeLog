@@ -1,3 +1,10 @@
+2009-03-31  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/power7.d ("ori", ".p2align"): Add tests for group ending nop.
+	* gas/ppc/power7.s: Likewise.
+	* gas/ppc/power6.d: Likewise.
+	* gas/ppc/power6.s: Likewise.
+
 2009-03-30  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/arm/mapsecs.d, gas/arm/mapsecs.s: New.

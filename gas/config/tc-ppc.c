@@ -5687,13 +5687,14 @@ ppc_handle_align (struct frag *fragP)
       fragP->fr_var = 4;
       md_number_to_chars (dest, 0x60000000, 4);
 
-      if ((ppc_cpu & PPC_OPCODE_POWER6) != 0)
+      if ((ppc_cpu & PPC_OPCODE_POWER6) != 0
+	  || (ppc_cpu & PPC_OPCODE_POWER7) != 0)
 	{
-	  /* For power6, we want the last nop to be a group terminating
-	     one, "ori 1,1,0".  Do this by inserting an rs_fill frag
-	     immediately after this one, with its address set to the last
-	     nop location.  This will automatically reduce the number of
-	     nops in the current frag by one.  */
+	  /* For power6 and power7, we want the last nop to be a group
+	     terminating one.  Do this by inserting an rs_fill frag immediately
+	     after this one, with its address set to the last nop location.
+	     This will automatically reduce the number of nops in the current
+	     frag by one.  */
 	  if (count > 4)
 	    {
 	      struct frag *group_nop = xmalloc (SIZEOF_STRUCT_FRAG + 4);
@@ -5707,7 +5708,12 @@ ppc_handle_align (struct frag *fragP)
 	      dest = group_nop->fr_literal;
 	    }
 
-	  md_number_to_chars (dest, 0x60210000, 4);
+	  if ((ppc_cpu & PPC_OPCODE_POWER7) != 0)
+	    /* power7 group terminating nop: "ori 2,2,0".  */
+	    md_number_to_chars (dest, 0x60420000, 4);
+	  else
+	    /* power6 group terminating nop: "ori 1,1,0".  */
+	    md_number_to_chars (dest, 0x60210000, 4);
 	}
     }
 }

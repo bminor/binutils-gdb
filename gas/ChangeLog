@@ -1,3 +1,7 @@
+2009-03-31  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (ppc_handle_align): Handle power7's group ending nop.
+
 2009-03-31  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* doc/internals.texi:  Fix trivial syntax errors.

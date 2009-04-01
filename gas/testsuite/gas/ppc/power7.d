@@ -111,3 +111,7 @@ Disassembly of section \.text:
  194:	ed c0 78 34 	frsqrtes f14,f15
  198:	ed c0 78 35 	frsqrtes\. f14,f15
  19c:	7c 43 27 1e 	isel    r2,r3,r4,28
+ 1a0:	60 42 00 00 	ori     r2,r2,0
+ 1a4:	60 00 00 00 	nop
+ 1a8:	60 00 00 00 	nop
+ 1ac:	60 42 00 00 	ori     r2,r2,0
