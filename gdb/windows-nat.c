@@ -2115,6 +2115,12 @@ windows_xfer_partial (struct target_ops *ops, enum target_object object,
     }
 }
 
+static ptid_t
+windows_get_ada_task_ptid (long lwp, long thread)
+{
+  return ptid_build (ptid_get_pid (inferior_ptid), 0, lwp);
+}
+
 static void
 init_windows_ops (void)
 {
@@ -2156,6 +2162,7 @@ init_windows_ops (void)
   windows_ops.to_has_registers = 1;
   windows_ops.to_has_execution = 1;
   windows_ops.to_pid_to_exec_file = windows_pid_to_exec_file;
+  windows_ops.to_get_ada_task_ptid = windows_get_ada_task_ptid;
   i386_use_watchpoints (&windows_ops);
 
   windows_ops.to_magic = OPS_MAGIC;
