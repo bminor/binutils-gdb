@@ -2623,16 +2623,16 @@ linux_nat_filter_event (int lwpid, int status, int options)
   /* Check if the thread has exited.  */
   if ((WIFEXITED (status) || WIFSIGNALED (status)) && num_lwps > 1)
     {
-      /* If this is the main thread, we must stop all threads and
-	 verify if they are still alive.  This is because in the nptl
-	 thread model, there is no signal issued for exiting LWPs
+      /* If this is the main thread, we must stop all threads and verify
+	 if they are still alive.  This is because in the nptl thread model
+	 on Linux 2.4, there is no signal issued for exiting LWPs
 	 other than the main thread.  We only get the main thread exit
 	 signal once all child threads have already exited.  If we
 	 stop all the threads and use the stop_wait_callback to check
 	 if they have exited we can determine whether this signal
 	 should be ignored or whether it means the end of the debugged
 	 application, regardless of which threading model is being
-	 used.  */
+	 used.	*/
       if (GET_PID (lp->ptid) == GET_LWP (lp->ptid))
 	{
 	  lp->stopped = 1;
@@ -2644,13 +2644,14 @@ linux_nat_filter_event (int lwpid, int status, int options)
 			    "LLW: %s exited.\n",
 			    target_pid_to_str (lp->ptid));
 
-      exit_lwp (lp);
-
-      /* If there is at least one more LWP, then the exit signal was
-	 not the end of the debugged application and should be
-	 ignored.  */
-      if (num_lwps > 0)
-	return NULL;
+      if (num_lwps > 1)
+       {
+	 /* If there is at least one more LWP, then the exit signal
+	    was not the end of the debugged application and should be
+	    ignored.  */
+	 exit_lwp (lp);
+	 return NULL;
+       }
     }
 
   /* Check if the current LWP has previously exited.  In the nptl
