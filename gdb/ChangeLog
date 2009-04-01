@@ -1,3 +1,9 @@
+2009-04-01  Joel Brobecker  <brobecker@adacore.com>
+
+	Change the default value for "set print frame-arguments" to scalars.
+
+	* stack.c (print_frame_arguments): Set initial value to "scalars".
+
 2009-04-01  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* mips-tdep.c (mips_numeric_register_alieses): New definition.

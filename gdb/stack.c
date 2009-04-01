@@ -58,7 +58,7 @@ void (*deprecated_selected_frame_level_changed_hook) (int);
 
 static const char *print_frame_arguments_choices[] =
   {"all", "scalars", "none", NULL};
-static const char *print_frame_arguments = "all";
+static const char *print_frame_arguments = "scalars";
 
 /* Prototypes for local functions. */
 
