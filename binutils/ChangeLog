@@ -1,3 +1,11 @@
+2009-04-01  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* dlltool.c (set_dll_name_from_def):  Accept new second arg that
+	indicates if we are building DLL or EXE, and use it to add a
+	default suffix to the output filename when none is already present.
+	(def_name):  Indicate we are building an EXE when calling it.
+	(def_library):  Indicate we are building a DLL when calling it.
+
 2009-04-01  Jari Aalto  <jari.aalto@cante.net>
 
 	PR 9972

@@ -1,3 +1,11 @@
+2009-04-01  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-cygwin/exe-export.exp:  Add "-lkernel32" when linking test exe.
+	* ld-cygwin/testexe.c (testexe_main):  Indicate whether global_a
+	was set to correct final value using error return status.
+	(testexe_dummy):  Dummy function calls an import from kernel32.dll
+	to ensure it is mapped into the process space at runtime.
+
 2009-04-01  Christophe Lyon  <christophe.lyon@st.com>
 
 	* ld-arm/arm-elf.exp: BE8 tests expect the same output as the

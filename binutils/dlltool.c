@@ -782,7 +782,7 @@ static void fill_ordinals (export_type **);
 static void mangle_defs (void);
 static void usage (FILE *, int);
 static void inform (const char *, ...) ATTRIBUTE_PRINTF_1;
-static void set_dll_name_from_def (const char *);
+static void set_dll_name_from_def (const char *name, char is_dll);
 
 static char *
 prefix_encode (char *start, unsigned code)
@@ -1001,13 +1001,22 @@ def_exports (const char *name, const char *internal_name, int ordinal,
 }
 
 static void
-set_dll_name_from_def (const char * name)
+set_dll_name_from_def (const char *name, char is_dll)
 {
-  const char* image_basename = lbasename (name);
+  const char *image_basename = lbasename (name);
   if (image_basename != name)
     non_fatal (_("%s: Path components stripped from image name, '%s'."),
 	      def_file, name);
-  dll_name = xstrdup (image_basename);
+  /* Append the default suffix, if none specified.  */ 
+  if (strchr (image_basename, '.') == 0)
+    {
+      const char * suffix = is_dll ? ".dll" : ".exe";
+
+      dll_name = xmalloc (strlen (image_basename) + strlen (suffix) + 1);
+      sprintf (dll_name, "%s%s", image_basename, suffix);
+    }
+  else
+    dll_name = xstrdup (image_basename);
 }
 
 void
@@ -1021,8 +1030,8 @@ def_name (const char *name, int base)
 
   /* If --dllname not provided, use the one in the DEF file.
      FIXME: Is this appropriate for executables?  */
-  if (! dll_name)
-    set_dll_name_from_def (name);
+  if (!dll_name)
+    set_dll_name_from_def (name, 0);
   d_is_exe = 1;
 }
 
@@ -1036,8 +1045,8 @@ def_library (const char *name, int base)
     non_fatal (_("Can't have LIBRARY and NAME"));
 
   /* If --dllname not provided, use the one in the DEF file.  */
-  if (! dll_name)
-    set_dll_name_from_def (name);
+  if (!dll_name)
+    set_dll_name_from_def (name, 1);
   d_is_dll = 1;
 }
 

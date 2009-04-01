@@ -119,7 +119,7 @@ if ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/testexe.c $tmpdir/testexe.o] {
     return
 }
 
-if ![ld_special_link "$CC $LDFLAGS $MYLDFLAGS -e _testexe_main@16" $tmpdir/testexe.exe "$tmpdir/testexe.o $srcdir/$subdir/testexe.def $tmpdir/testdll.lib"] {
+if ![ld_special_link "$CC $LDFLAGS $MYLDFLAGS -e _testexe_main@16" $tmpdir/testexe.exe "$tmpdir/testexe.o $srcdir/$subdir/testexe.def $tmpdir/testdll.lib -lkernel32"] {
     fail "linking executable"
     return
 } 
