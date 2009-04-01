@@ -371,8 +371,8 @@ spu_resume (struct thread_resume *resume_info, size_t n)
 }
 
 /* Wait for process, returns status.  */
-static unsigned char
-spu_wait (char *status)
+static unsigned long
+spu_wait (struct target_waitstatus *ourstatus)
 {
   int tid = current_tid;
   int w;
@@ -407,31 +407,37 @@ spu_wait (char *status)
 	}
     }
 
+  ret = current_tid;
+
   if (WIFEXITED (w))
     {
       fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
-      *status = 'W';
+      ourstatus->kind =  TARGET_WAITKIND_EXITED;
+      ourstatus->value.integer = WEXITSTATUS (w);
       clear_inferiors ();
-      return ((unsigned char) WEXITSTATUS (w));
+      return ret;
     }
   else if (!WIFSTOPPED (w))
     {
       fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
-      *status = 'X';
+      ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+      ourstatus->value.sig = target_signal_from_host (WTERMSIG (w));
       clear_inferiors ();
-      return ((unsigned char) WTERMSIG (w));
+      return ret;
     }
 
   /* After attach, we may have received a SIGSTOP.  Do not return this
      as signal to GDB, or else it will try to continue with SIGSTOP ...  */
   if (!server_waiting)
     {
-      *status = 'T';
-      return 0;
+      ourstatus->kind = TARGET_WAITKIND_STOPPED;
+      ourstatus->value.sig = TARGET_SIGNAL_0;
+      return ret;
     }
 
-  *status = 'T';
-  return ((unsigned char) WSTOPSIG (w));
+  ourstatus->kind = TARGET_WAITKIND_STOPPED;
+  ourstatus->value.sig = target_signal_from_host (WSTOPSIG (w));
+  return ret;
 }
 
 /* Fetch inferior registers.  */

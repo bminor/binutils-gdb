@@ -929,11 +929,12 @@ linux_wait_for_event (struct thread_info *child)
 
 /* Wait for process, returns status.  */
 
-static unsigned char
-linux_wait (char *status)
+static unsigned long
+linux_wait (struct target_waitstatus *ourstatus)
 {
   int w;
   struct thread_info *child = NULL;
+  struct lwp_info *lwp;
 
 retry:
   /* If we were only supposed to resume one thread, only wait for
@@ -966,6 +967,8 @@ retry:
       must_set_ptrace_flags = 0;
     }
 
+  lwp = get_thread_lwp (current_inferior);
+
   /* If we are waiting for a particular child, and it exited,
      linux_wait_for_event will return its exit status.  Similarly if
      the last child exited.  If this is not the last child, however,
@@ -980,25 +983,34 @@ retry:
 
   if (all_threads.head == all_threads.tail)
     {
+      int pid = pid_of (lwp);
       if (WIFEXITED (w))
 	{
-	  fprintf (stderr, "\nChild exited with retcode = %x \n",
-		   WEXITSTATUS (w));
-	  *status = 'W';
+	  if (debug_threads)
+	    fprintf (stderr, "\nChild exited with retcode = %x \n",
+		     WEXITSTATUS (w));
+
+	  ourstatus->kind = TARGET_WAITKIND_EXITED;
+	  ourstatus->value.integer = WEXITSTATUS (w);
 	  clear_inferiors ();
 	  free (all_lwps.head);
 	  all_lwps.head = all_lwps.tail = NULL;
-	  return WEXITSTATUS (w);
+
+	  return pid;
 	}
       else if (!WIFSTOPPED (w))
 	{
-	  fprintf (stderr, "\nChild terminated with signal = %x \n",
-		   WTERMSIG (w));
-	  *status = 'X';
+	  if (debug_threads)
+	    fprintf (stderr, "\nChild terminated with signal = %x \n",
+		     WTERMSIG (w));
+
+	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+	  ourstatus->value.sig = target_signal_from_host (WTERMSIG (w));
 	  clear_inferiors ();
 	  free (all_lwps.head);
 	  all_lwps.head = all_lwps.tail = NULL;
-	  return target_signal_from_host (WTERMSIG (w));
+
+	  return pid;
 	}
     }
   else
@@ -1007,8 +1019,10 @@ retry:
 	goto retry;
     }
 
-  *status = 'T';
-  return target_signal_from_host (WSTOPSIG (w));
+  ourstatus->kind = TARGET_WAITKIND_STOPPED;
+  ourstatus->value.sig = target_signal_from_host (WSTOPSIG (w));
+
+  return lwp->lwpid;
 }
 
 /* Send a signal to an LWP.  For LinuxThreads, kill is enough; however, if

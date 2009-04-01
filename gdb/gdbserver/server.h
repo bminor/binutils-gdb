@@ -160,8 +160,7 @@ void unloaded_dll (const char *name, CORE_ADDR base_addr);
 extern unsigned long cont_thread;
 extern unsigned long general_thread;
 extern unsigned long step_thread;
-extern unsigned long thread_from_wait;
-extern unsigned long old_thread_from_wait;
+
 extern int server_waiting;
 extern int debug_threads;
 extern int pass_signals[];
@@ -201,7 +200,8 @@ void convert_ascii_to_int (char *from, unsigned char *to, int n);
 void convert_int_to_ascii (unsigned char *from, char *to, int n);
 void new_thread_notify (int id);
 void dead_thread_notify (int id);
-void prepare_resume_reply (char *buf, char status, unsigned char sig);
+void prepare_resume_reply (char *buf, unsigned long thread_id,
+			   struct target_waitstatus *status);
 
 const char *decode_address_to_semicolon (CORE_ADDR *addrp, const char *start);
 void decode_address (CORE_ADDR *addrp, const char *start, int len);

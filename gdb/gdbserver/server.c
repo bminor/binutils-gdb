@@ -35,8 +35,7 @@
 unsigned long cont_thread;
 unsigned long general_thread;
 unsigned long step_thread;
-unsigned long thread_from_wait;
-unsigned long old_thread_from_wait;
+
 int server_waiting;
 
 static int extended_protocol;
@@ -87,6 +86,10 @@ int disable_packet_Tthread;
 int disable_packet_qC;
 int disable_packet_qfThreadInfo;
 
+/* Last status reported to GDB.  */
+static struct target_waitstatus last_status;
+static unsigned long last_ptid;
+
 static int
 target_running (void)
 {
@@ -94,7 +97,7 @@ target_running (void)
 }
 
 static int
-start_inferior (char **argv, char *statusptr)
+start_inferior (char **argv)
 {
   char **new_argv = argv;
   attached = 0;
@@ -141,36 +144,38 @@ start_inferior (char **argv, char *statusptr)
   if (wrapper_argv != NULL)
     {
       struct thread_resume resume_info;
-      int sig;
+      unsigned long ptid;
 
       resume_info.thread = -1;
       resume_info.step = 0;
       resume_info.sig = 0;
 
-      sig = mywait (statusptr, 0);
-      if (*statusptr != 'T')
-	return sig;
+      ptid = mywait (&last_status, 0);
+      if (last_status.kind != TARGET_WAITKIND_STOPPED)
+	return signal_pid;
 
       do
 	{
 	  (*the_target->resume) (&resume_info, 1);
 
-	  sig = mywait (statusptr, 0);
-	  if (*statusptr != 'T')
-	    return sig;
+ 	  mywait (&last_status, 0);
+	  if (last_status.kind != TARGET_WAITKIND_STOPPED)
+	    return signal_pid;
 	}
-      while (sig != TARGET_SIGNAL_TRAP);
+      while (last_status.value.sig != TARGET_SIGNAL_TRAP);
 
-      return sig;
+      return signal_pid;
     }
 
-  /* Wait till we are at 1st instruction in program, return signal
-     number (assuming success).  */
-  return mywait (statusptr, 0);
+  /* Wait till we are at 1st instruction in program, return new pid
+     (assuming success).  */
+  last_ptid = mywait (&last_status, 0);
+
+  return signal_pid;
 }
 
 static int
-attach_inferior (int pid, char *statusptr, int *sigptr)
+attach_inferior (int pid)
 {
   /* myattach should return -1 if attaching is unsupported,
      0 if it succeeded, and call error() otherwise.  */
@@ -188,13 +193,14 @@ attach_inferior (int pid, char *statusptr, int *sigptr)
      whichever we were told to attach to.  */
   signal_pid = pid;
 
-  *sigptr = mywait (statusptr, 0);
+  last_ptid = mywait (&last_status, 0);
 
   /* GDB knows to ignore the first SIGSTOP after attaching to a running
      process using the "attach" command, but this is different; it's
      just using "target remote".  Pretend it's just starting up.  */
-  if (*statusptr == 'T' && *sigptr == TARGET_SIGNAL_STOP)
-    *sigptr = TARGET_SIGNAL_TRAP;
+  if (last_status.kind == TARGET_WAITKIND_STOPPED
+      && last_status.value.sig == TARGET_SIGNAL_STOP)
+    last_status.value.sig = TARGET_SIGNAL_TRAP;
 
   return 0;
 }
@@ -917,8 +923,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       && strncmp ("qGetTLSAddr:", own_buf, 12) == 0)
     {
       char *p = own_buf + 12;
-      CORE_ADDR parts[3], address = 0;
+      CORE_ADDR parts[2], address = 0;
       int i, err;
+      unsigned long ptid;
 
       require_running (own_buf);
 
@@ -942,7 +949,10 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	      p2 = NULL;
 	    }
 
-	  decode_address (&parts[i], p, len);
+	  if (i == 0)
+	    ptid = strtoul (p, NULL, 16);
+	  else
+	    decode_address (&parts[i - 1], p, len);
 	  p = p2;
 	}
 
@@ -950,12 +960,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	err = 1;
       else
 	{
-	  struct thread_info *thread = gdb_id_to_thread (parts[0]);
+	  struct thread_info *thread = gdb_id_to_thread (ptid);
 
 	  if (thread == NULL)
 	    err = 2;
 	  else
-	    err = the_target->get_tls_address (thread, parts[1], parts[2],
+	    err = the_target->get_tls_address (thread, parts[0], parts[1],
 					       &address);
 	}
 
@@ -1051,7 +1061,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
 /* Parse vCont packets.  */
 void
-handle_v_cont (char *own_buf, char *status, int *signal)
+handle_v_cont (char *own_buf)
 {
   char *p, *q;
   int n = 0, i = 0;
@@ -1146,8 +1156,8 @@ handle_v_cont (char *own_buf, char *status, int *signal)
 
   free (resume_info);
 
-  *signal = mywait (status, 1);
-  prepare_resume_reply (own_buf, *status, *signal);
+  last_ptid = mywait (&last_status, 1);
+  prepare_resume_reply (own_buf, last_ptid, &last_status);
   disable_async_io ();
   return;
 
@@ -1159,19 +1169,19 @@ err:
 
 /* Attach to a new program.  Return 1 if successful, 0 if failure.  */
 int
-handle_v_attach (char *own_buf, char *status, int *signal)
+handle_v_attach (char *own_buf)
 {
   int pid;
 
   pid = strtol (own_buf + 8, NULL, 16);
-  if (pid != 0 && attach_inferior (pid, status, signal) == 0)
+  if (pid != 0 && attach_inferior (pid) == 0)
     {
       /* Don't report shared library events after attaching, even if
 	 some libraries are preloaded.  GDB will always poll the
 	 library list.  Avoids the "stopped by shared library event"
 	 notice on the GDB side.  */
       dlls_changed = 0;
-      prepare_resume_reply (own_buf, *status, *signal);
+      prepare_resume_reply (own_buf, last_ptid, &last_status);
       return 1;
     }
   else
@@ -1183,7 +1193,7 @@ handle_v_attach (char *own_buf, char *status, int *signal)
 
 /* Run a new program.  Return 1 if successful, 0 if failure.  */
 static int
-handle_v_run (char *own_buf, char *status, int *signal)
+handle_v_run (char *own_buf)
 {
   char *p, *next_p, **new_argv;
   int i, new_argc;
@@ -1250,10 +1260,10 @@ handle_v_run (char *own_buf, char *status, int *signal)
   freeargv (program_argv);
   program_argv = new_argv;
 
-  *signal = start_inferior (program_argv, status);
-  if (*status == 'T')
+  start_inferior (program_argv);
+  if (last_status.kind == TARGET_WAITKIND_STOPPED)
     {
-      prepare_resume_reply (own_buf, *status, *signal);
+      prepare_resume_reply (own_buf, last_ptid, &last_status);
       return 1;
     }
   else
@@ -1265,15 +1275,14 @@ handle_v_run (char *own_buf, char *status, int *signal)
 
 /* Handle all of the extended 'v' packets.  */
 void
-handle_v_requests (char *own_buf, char *status, int *signal,
-		   int packet_len, int *new_packet_len)
+handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
 {
   if (!disable_packet_vCont)
     {
       if (strncmp (own_buf, "vCont;", 6) == 0)
 	{
 	  require_running (own_buf);
-	  handle_v_cont (own_buf, status, signal);
+	  handle_v_cont (own_buf);
 	  return;
 	}
 
@@ -1296,7 +1305,7 @@ handle_v_requests (char *own_buf, char *status, int *signal,
 	  write_enn (own_buf);
 	  return;
 	}
-      handle_v_attach (own_buf, status, signal);
+      handle_v_attach (own_buf);
       return;
     }
 
@@ -1308,7 +1317,7 @@ handle_v_requests (char *own_buf, char *status, int *signal,
 	  write_enn (own_buf);
 	  return;
 	}
-      handle_v_run (own_buf, status, signal);
+      handle_v_run (own_buf);
       return;
     }
 
@@ -1319,11 +1328,10 @@ handle_v_requests (char *own_buf, char *status, int *signal,
 }
 
 void
-myresume (char *own_buf, int step, int *signalp, char *statusp)
+myresume (char *own_buf, int step, int sig)
 {
   struct thread_resume resume_info[2];
   int n = 0;
-  int sig = *signalp;
   int valid_cont_thread;
 
   set_desired_inferior (0);
@@ -1349,9 +1357,21 @@ myresume (char *own_buf, int step, int *signalp, char *statusp)
 
   enable_async_io ();
   (*the_target->resume) (resume_info, n);
-  *signalp = mywait (statusp, 1);
-  prepare_resume_reply (own_buf, *statusp, *signalp);
+  last_ptid = mywait (&last_status, 1);
+  prepare_resume_reply (own_buf, last_ptid, &last_status);
   disable_async_io ();
+}
+
+/* Status handler for the '?' packet.  */
+
+static void
+handle_status (char *own_buf)
+{
+  if (all_threads.head)
+    prepare_resume_reply (own_buf,
+			  all_threads.head->id, &last_status);
+  else
+    strcpy (own_buf, "W00");
 }
 
 static void
@@ -1406,7 +1426,7 @@ gdbserver_show_disableable (FILE *stream)
 int
 main (int argc, char *argv[])
 {
-  char ch, status, *own_buf;
+  char ch, *own_buf;
   unsigned char *mem_buf;
   int i = 0;
   int signal;
@@ -1563,7 +1583,7 @@ main (int argc, char *argv[])
       program_argv[i] = NULL;
 
       /* Wait till we are at first instruction in program.  */
-      signal = start_inferior (program_argv, &status);
+      start_inferior (program_argv);
 
       /* We are now (hopefully) stopped at the first instruction of
 	 the target process.  This assumes that the target process was
@@ -1571,15 +1591,16 @@ main (int argc, char *argv[])
     }
   else if (pid != 0)
     {
-      if (attach_inferior (pid, &status, &signal) == -1)
+      if (attach_inferior (pid) == -1)
 	error ("Attaching not supported on this target");
 
       /* Otherwise succeeded.  */
     }
   else
     {
-      status = 'W';
-      signal = 0;
+      last_status.kind = TARGET_WAITKIND_EXITED;
+      last_status.value.integer = 0;
+      last_ptid = -1;
     }
 
   /* Don't report shared library events on the initial connection,
@@ -1594,7 +1615,8 @@ main (int argc, char *argv[])
       exit (1);
     }
 
-  if (status == 'W' || status == 'X')
+  if (last_status.kind == TARGET_WAITKIND_EXITED
+      || last_status.kind == TARGET_WAITKIND_SIGNALLED)
     was_running = 0;
   else
     was_running = 1;
@@ -1656,8 +1678,9 @@ main (int argc, char *argv[])
 		  if (extended_protocol)
 		    {
 		      /* Treat this like a normal program exit.  */
-		      signal = 0;
-		      status = 'W';
+		      last_status.kind = TARGET_WAITKIND_EXITED;
+		      last_status.value.integer = 0;
+		      last_ptid = signal_pid;
 		    }
 		  else
 		    {
@@ -1679,7 +1702,7 @@ main (int argc, char *argv[])
 	      write_ok (own_buf);
 	      break;
 	    case '?':
-	      prepare_resume_reply (own_buf, status, signal);
+	      handle_status (own_buf);
 	      break;
 	    case 'H':
 	      if (own_buf[1] == 'c' || own_buf[1] == 'g' || own_buf[1] == 's')
@@ -1762,7 +1785,7 @@ main (int argc, char *argv[])
 		signal = target_signal_to_host (sig);
 	      else
 		signal = 0;
-	      myresume (own_buf, 0, &signal, &status);
+	      myresume (own_buf, 0, signal);
 	      break;
 	    case 'S':
 	      require_running (own_buf);
@@ -1771,17 +1794,17 @@ main (int argc, char *argv[])
 		signal = target_signal_to_host (sig);
 	      else
 		signal = 0;
-	      myresume (own_buf, 1, &signal, &status);
+	      myresume (own_buf, 1, signal);
 	      break;
 	    case 'c':
 	      require_running (own_buf);
 	      signal = 0;
-	      myresume (own_buf, 0, &signal, &status);
+	      myresume (own_buf, 0, signal);
 	      break;
 	    case 's':
 	      require_running (own_buf);
 	      signal = 0;
-	      myresume (own_buf, 1, &signal, &status);
+	      myresume (own_buf, 1, signal);
 	      break;
 	    case 'Z':
 	      {
@@ -1860,8 +1883,8 @@ main (int argc, char *argv[])
 		 instead.  */
 	      if (extended_protocol)
 		{
-		  status = 'X';
-		  signal = TARGET_SIGNAL_KILL;
+		  last_status.kind = TARGET_WAITKIND_EXITED;
+		  last_status.value.sig = TARGET_SIGNAL_KILL;
 		  was_running = 0;
 		  goto restart;
 		}
@@ -1902,11 +1925,11 @@ main (int argc, char *argv[])
 
 		  /* Wait till we are at 1st instruction in prog.  */
 		  if (program_argv != NULL)
-		    signal = start_inferior (program_argv, &status);
+		    start_inferior (program_argv);
 		  else
 		    {
-		      status = 'X';
-		      signal = TARGET_SIGNAL_KILL;
+		      last_status.kind = TARGET_WAITKIND_EXITED;
+		      last_status.value.sig = TARGET_SIGNAL_KILL;
 		    }
 		  goto restart;
 		}
@@ -1920,8 +1943,7 @@ main (int argc, char *argv[])
 		}
 	    case 'v':
 	      /* Extended (long) request.  */
-	      handle_v_requests (own_buf, &status, &signal,
-				 packet_len, &new_packet_len);
+	      handle_v_requests (own_buf, packet_len, &new_packet_len);
 	      break;
 
 	    default:
@@ -1939,17 +1961,20 @@ main (int argc, char *argv[])
 
 	  response_needed = 0;
 
-	  if (was_running && (status == 'W' || status == 'X'))
+	  if (was_running
+	      && (last_status.kind == TARGET_WAITKIND_EXITED
+		  || last_status.kind == TARGET_WAITKIND_SIGNALLED))
 	    {
 	      was_running = 0;
 
-	      if (status == 'W')
+	      if (last_status.kind == TARGET_WAITKIND_EXITED)
 		fprintf (stderr,
-			 "\nChild exited with status %d\n", signal);
-	      if (status == 'X')
+			 "\nChild exited with status %d\n",
+			 last_status.value.integer);
+	      else if (last_status.kind == TARGET_WAITKIND_SIGNALLED)
 		fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
-			 target_signal_to_host (signal),
-			 target_signal_to_name (signal));
+			 target_signal_to_host (last_status.value.sig),
+			 target_signal_to_name (last_status.value.sig));
 
 	      if (extended_protocol)
 		goto restart;
@@ -1961,7 +1986,8 @@ main (int argc, char *argv[])
 		}
 	    }
 
-	  if (status != 'W' && status != 'X')
+	  if (last_status.kind != TARGET_WAITKIND_EXITED
+	      && last_status.kind != TARGET_WAITKIND_SIGNALLED)
 	    was_running = 1;
 	}
 

@@ -241,45 +241,6 @@ child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
   return done;
 }
 
-/* Generally, what has the program done?  */
-enum target_waitkind
-{
-  /* The program has exited.  The exit status is in value.integer.  */
-  TARGET_WAITKIND_EXITED,
-
-  /* The program has stopped with a signal.  Which signal is in
-     value.sig.  */
-  TARGET_WAITKIND_STOPPED,
-
-  /* The program is letting us know that it dynamically loaded
-     or unloaded something.  */
-  TARGET_WAITKIND_LOADED,
-
-  /* The program has exec'ed a new executable file.  The new file's
-     pathname is pointed to by value.execd_pathname.  */
-  TARGET_WAITKIND_EXECD,
-
-  /* Nothing interesting happened, but we stopped anyway.  We take the
-     chance to check if GDB requested an interrupt.  */
-  TARGET_WAITKIND_SPURIOUS,
-};
-
-struct target_waitstatus
-{
-  enum target_waitkind kind;
-
-  /* Forked child pid, execd pathname, exit status or signal number.  */
-  union
-  {
-    int integer;
-    enum target_signal sig;
-    int related_pid;
-    char *execd_pathname;
-    int syscall_id;
-  }
-  value;
-};
-
 /* Clear out any old thread list and reinitialize it to a pristine
    state. */
 static void
@@ -1514,37 +1475,30 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 /* Wait for the inferior process to change state.
    STATUS will be filled in with a response code to send to GDB.
    Returns the signal which caused the process to stop. */
-static unsigned char
-win32_wait (char *status)
+static unsigned long
+win32_wait (struct target_waitstatus *ourstatus)
 {
-  struct target_waitstatus our_status;
-
-  *status = 'T';
-
   while (1)
     {
-      if (!get_child_debug_event (&our_status))
+      if (!get_child_debug_event (ourstatus))
 	continue;
 
-      switch (our_status.kind)
+      switch (ourstatus->kind)
 	{
 	case TARGET_WAITKIND_EXITED:
 	  OUTMSG2 (("Child exited with retcode = %x\n",
-		    our_status.value.integer));
+		    ourstatus->value.integer));
 
-	  *status = 'W';
 	  win32_clear_inferiors ();
-	  return our_status.value.integer;
+	  return current_event.dwProcessId;
 	case TARGET_WAITKIND_STOPPED:
 	case TARGET_WAITKIND_LOADED:
 	  OUTMSG2 (("Child Stopped with signal = %d \n",
 		    our_status.value.sig));
 
-	  *status = 'T';
-
 	  child_fetch_inferior_registers (-1);
 
-	  if (our_status.kind == TARGET_WAITKIND_LOADED
+	  if (ourstatus->kind == TARGET_WAITKIND_LOADED
 	      && !server_waiting)
 	    {
 	      /* When gdb connects, we want to be stopped at the
@@ -1553,9 +1507,14 @@ win32_wait (char *status)
 	      break;
 	    }
 
-	  return our_status.value.sig;
+	  /* We don't expose _LOADED events to gdbserver core.  See
+	     the `dlls_changed' global.  */
+	  if (ourstatus->kind == TARGET_WAITKIND_LOADED)
+	    ourstatus->kind = TARGET_WAITKIND_STOPPED;
+
+	  return current_event.dwThreadId;
 	default:
-	  OUTMSG (("Ignoring unknown internal event, %d\n", our_status.kind));
+	  OUTMSG (("Ignoring unknown internal event, %d\n", ourstatus->kind));
 	  /* fall-through */
 	case TARGET_WAITKIND_SPURIOUS:
 	case TARGET_WAITKIND_EXECD:

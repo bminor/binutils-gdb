@@ -20,6 +20,7 @@
 
 #include "server.h"
 #include "terminal.h"
+#include "target.h"
 #include <stdio.h>
 #include <string.h>
 #if HAVE_SYS_IOCTL_H
@@ -933,88 +934,98 @@ dead_thread_notify (int id)
 }
 
 void
-prepare_resume_reply (char *buf, char status, unsigned char sig)
+prepare_resume_reply (char *buf, unsigned long ptid,
+		      struct target_waitstatus *status)
 {
-  int nib;
+  if (debug_threads)
+    fprintf (stderr, "Writing resume reply for %lu:%d\n\n",
+	     ptid, status->kind);
 
-  *buf++ = status;
-
-  nib = ((sig & 0xf0) >> 4);
-  *buf++ = tohex (nib);
-  nib = sig & 0x0f;
-  *buf++ = tohex (nib);
-
-  if (status == 'T')
+  switch (status->kind)
     {
-      const char **regp = gdbserver_expedite_regs;
+    case TARGET_WAITKIND_STOPPED:
+      {
+	struct thread_info *saved_inferior;
+	const char **regp;
 
-      if (the_target->stopped_by_watchpoint != NULL
-	  && (*the_target->stopped_by_watchpoint) ())
-	{
-	  CORE_ADDR addr;
-	  int i;
+	sprintf (buf, "T%02x", status->value.sig);
+	buf += strlen (buf);
 
-	  strncpy (buf, "watch:", 6);
-	  buf += 6;
+	regp = gdbserver_expedite_regs;
 
-	  addr = (*the_target->stopped_data_address) ();
+	saved_inferior = current_inferior;
 
-	  /* Convert each byte of the address into two hexadecimal chars.
-	     Note that we take sizeof (void *) instead of sizeof (addr);
-	     this is to avoid sending a 64-bit address to a 32-bit GDB.  */
-	  for (i = sizeof (void *) * 2; i > 0; i--)
-	    {
+	current_inferior = gdb_id_to_thread (ptid);
+
+	if (the_target->stopped_by_watchpoint != NULL
+	    && (*the_target->stopped_by_watchpoint) ())
+	  {
+	    CORE_ADDR addr;
+	    int i;
+
+	    strncpy (buf, "watch:", 6);
+	    buf += 6;
+
+	    addr = (*the_target->stopped_data_address) ();
+
+	    /* Convert each byte of the address into two hexadecimal
+	       chars.  Note that we take sizeof (void *) instead of
+	       sizeof (addr); this is to avoid sending a 64-bit
+	       address to a 32-bit GDB.  */
+	    for (i = sizeof (void *) * 2; i > 0; i--)
 	      *buf++ = tohex ((addr >> (i - 1) * 4) & 0xf);
-	    }
-	  *buf++ = ';';
-	}
+	    *buf++ = ';';
+	  }
 
-      while (*regp)
-	{
-	  buf = outreg (find_regno (*regp), buf);
-	  regp ++;
-	}
+	while (*regp)
+	  {
+	    buf = outreg (find_regno (*regp), buf);
+	    regp ++;
+	  }
 
-      /* Formerly, if the debugger had not used any thread features we would not
-	 burden it with a thread status response.  This was for the benefit of
-	 GDB 4.13 and older.  However, in recent GDB versions the check
-	 (``if (cont_thread != 0)'') does not have the desired effect because of
-	 sillyness in the way that the remote protocol handles specifying a thread.
-	 Since thread support relies on qSymbol support anyway, assume GDB can handle
-	 threads.  */
+	/* Formerly, if the debugger had not used any thread features
+	   we would not burden it with a thread status response.  This
+	   was for the benefit of GDB 4.13 and older.  However, in
+	   recent GDB versions the check (``if (cont_thread != 0)'')
+	   does not have the desired effect because of sillyness in
+	   the way that the remote protocol handles specifying a
+	   thread.  Since thread support relies on qSymbol support
+	   anyway, assume GDB can handle threads.  */
 
-      if (using_threads && !disable_packet_Tthread)
-	{
-	  unsigned int gdb_id_from_wait;
+	if (using_threads && !disable_packet_Tthread)
+	  {
+	    /* This if (1) ought to be unnecessary.  But remote_wait
+	       in GDB will claim this event belongs to inferior_ptid
+	       if we do not specify a thread, and there's no way for
+	       gdbserver to know what inferior_ptid is.  */
+	    if (1 || general_thread != ptid)
+	      {
+		general_thread = ptid;
+		sprintf (buf, "thread:%lx;", ptid);
+		buf += strlen (buf);
+	      }
+	  }
 
-	  /* FIXME right place to set this? */
-	  thread_from_wait = ((struct inferior_list_entry *)current_inferior)->id;
-	  gdb_id_from_wait = thread_to_gdb_id (current_inferior);
+	if (dlls_changed)
+	  {
+	    strcpy (buf, "library:;");
+	    buf += strlen (buf);
+	    dlls_changed = 0;
+	  }
 
-	  if (debug_threads)
-	    fprintf (stderr, "Writing resume reply for %ld\n\n", thread_from_wait);
-	  /* This if (1) ought to be unnecessary.  But remote_wait in GDB
-	     will claim this event belongs to inferior_ptid if we do not
-	     specify a thread, and there's no way for gdbserver to know
-	     what inferior_ptid is.  */
-	  if (1 || old_thread_from_wait != thread_from_wait)
-	    {
-	      general_thread = thread_from_wait;
-	      sprintf (buf, "thread:%x;", gdb_id_from_wait);
-	      buf += strlen (buf);
-	      old_thread_from_wait = thread_from_wait;
-	    }
-	}
-
-      if (dlls_changed)
-	{
-	  strcpy (buf, "library:;");
-	  buf += strlen (buf);
-	  dlls_changed = 0;
-	}
+	current_inferior = saved_inferior;
+      }
+      break;
+    case TARGET_WAITKIND_EXITED:
+      sprintf (buf, "W%02x", status->value.integer);
+      break;
+    case TARGET_WAITKIND_SIGNALLED:
+      sprintf (buf, "X%02x", status->value.sig);
+      break;
+    default:
+      error ("unhandled waitkind");
+      break;
     }
-  /* For W and X, we're done.  */
-  *buf++ = 0;
 }
 
 void

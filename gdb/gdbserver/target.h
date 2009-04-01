@@ -38,6 +38,53 @@ struct thread_resume
   int sig;
 };
 
+/* Generally, what has the program done?  */
+enum target_waitkind
+  {
+    /* The program has exited.  The exit status is in
+       value.integer.  */
+    TARGET_WAITKIND_EXITED,
+
+    /* The program has stopped with a signal.  Which signal is in
+       value.sig.  */
+    TARGET_WAITKIND_STOPPED,
+
+    /* The program has terminated with a signal.  Which signal is in
+       value.sig.  */
+    TARGET_WAITKIND_SIGNALLED,
+
+    /* The program is letting us know that it dynamically loaded
+       something.  */
+    TARGET_WAITKIND_LOADED,
+
+    /* The program has exec'ed a new executable file.  The new file's
+       pathname is pointed to by value.execd_pathname.  */
+    TARGET_WAITKIND_EXECD,
+
+    /* Nothing of interest to GDB happened, but we stopped anyway.  */
+    TARGET_WAITKIND_SPURIOUS,
+
+    /* An event has occurred, but we should wait again.  In this case,
+       we want to go back to the event loop and wait there for another
+       event from the inferior.  */
+    TARGET_WAITKIND_IGNORE
+  };
+
+struct target_waitstatus
+  {
+    enum target_waitkind kind;
+
+    /* Forked child pid, execd pathname, exit status or signal number.  */
+    union
+      {
+	int integer;
+	enum target_signal sig;
+	unsigned long related_pid;
+	char *execd_pathname;
+      }
+    value;
+  };
+
 struct target_ops
 {
   /* Start a new process.
@@ -82,15 +129,10 @@ struct target_ops
 
   void (*resume) (struct thread_resume *resume_info, size_t n);
 
-  /* Wait for the inferior process to change state.
+  /* Wait for the inferior process or thread to change state.  Store
+     status through argument pointer STATUS.  */
 
-     STATUS will be filled in with a response code to send to GDB.
-
-     Returns the signal which caused the process to stop, in the
-     remote protocol numbering (e.g. TARGET_SIGNAL_STOP), or the
-     exit code as an integer if *STATUS is 'W'.  */
-
-  unsigned char (*wait) (char *status);
+  unsigned long (*wait) (struct target_waitstatus *status);
 
   /* Fetch registers from the inferior process.
 
@@ -225,7 +267,7 @@ void set_target_ops (struct target_ops *);
 #define join_inferior() \
   (*the_target->join) ()
 
-unsigned char mywait (char *statusp, int connected_wait);
+unsigned long mywait (struct target_waitstatus *ourstatus, int connected_wait);
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 

@@ -88,15 +88,15 @@ write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
   return res;
 }
 
-unsigned char
-mywait (char *statusp, int connected_wait)
+unsigned long
+mywait (struct target_waitstatus *ourstatus, int connected_wait)
 {
-  unsigned char ret;
+  unsigned long ret;
 
   if (connected_wait)
     server_waiting = 1;
 
-  ret = (*the_target->wait) (statusp);
+  ret = (*the_target->wait) (ourstatus);
 
   if (connected_wait)
     server_waiting = 0;

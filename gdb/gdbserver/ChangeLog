@@ -1,5 +1,44 @@
 2009-04-01  Pedro Alves  <pedro@codesourcery.com>
 
+	Decouple target code from remote protocol.
+
+	* target.h (enum target_waitkind): New.
+	(struct target_waitstatus): New.
+	(struct target_ops) <wait>: Return an unsigned long.  Take a
+	target_waitstatus pointer instead of a char pointer.
+	(mywait): Likewise.
+	* target.c (mywait): Change prototype to return an unsigned long.
+	Take a target_waitstatus pointer instead of a char pointer.  Adjust.
+	* server.h (thread_from_wait, old_thread_from_wait): Delete
+	declarations.
+	(prepare_resume_reply): Change prototype to take a
+	target_waitstatus.
+	* server.c (thread_from_wait, old_thread_from_wait): Delete.
+	(last_status, last_ptid): New.
+	(start_inferior): Remove "statusptr" argument.  Adjust.  Return a
+	pid instead of a signal.
+	(attach_inferior): Remove "status" and "signal" parameters.
+	Adjust.
+	(handle_query): For qGetTLSAddr, parse the thread id with strtol,
+	not as an address.
+	(handle_v_cont, handle_v_attach, handle_v_run, handle_v_kill)
+	(handle_v_requests, myresume): Remove "status" and "signal"
+	parameters.  Adjust.
+	(handle_status): New.
+	(main): Delete local `status'.  Adjust.
+	* remote-utils.c: Include target.h.
+	(prepare_resume_reply): Change prototype to take a
+	target_waitstatus.  Adjust.
+
+	* linux-low.c (linux_wait): Adjust to new target_ops->wait
+	interface.
+	* spu-low.c (spu_wait): Adjust.
+	* win32-low.c (enum target_waitkind, struct target_waitstatus):
+	Delete.
+	(win32_wait): Adjust.
+
+2009-04-01  Pedro Alves  <pedro@codesourcery.com>
+
 	* target.h (struct thread_resume): Delete leave_stopped member.
 	(struct target_ops): Add a `n' argument to the `resume' callback.
 	* server.c (start_inferior): Adjust.
