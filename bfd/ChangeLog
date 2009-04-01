@@ -1,5 +1,22 @@
 2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* coff-rs6000.c (member_layout): New structure.
+	(archive_iterator): Likewise.
+	(member_layout_init): New function.
+	(archive_iterator_begin): Likewise.
+	(archive_iterator_next): Likewise.
+	(xcoff_write_armap_old): Use the new iterator functions.
+	(do_shared_object_padding): Delete.
+	(xcoff_write_armap_big): Use the new iterator functions.  Simplify
+	handling of arch_info.
+	(xcoff_write_archive_contents_old): Allocate arelt_data in the
+	first loop rather than the second.  Allocate a member header if
+	there isn't one, then work out the stat information and length
+	in the first loop too.  Use the new iterators for the second loop.
+	(xcoff_write_archive_contents_big): Likewise.
+
+2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* bfd-in.h (bfd_xcoff_split_import_path): Declare.
 	(bfd_xcoff_set_archive_import_path): Likewise.
 	* bfd-in2.h: Regenerate.

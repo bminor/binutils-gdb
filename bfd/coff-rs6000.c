@@ -180,8 +180,6 @@ static bfd_boolean do_pad
   PARAMS ((bfd *, unsigned int));
 static bfd_boolean do_copy
   PARAMS ((bfd *, bfd *));
-static bfd_boolean do_shared_object_padding
-  PARAMS ((bfd *, bfd *, file_ptr *, int));
 
 /* Relocation functions */
 static bfd_boolean xcoff_reloc_type_br
@@ -237,6 +235,119 @@ bfd_boolean (*xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW])
   xcoff_complain_overflow_signed_func,
   xcoff_complain_overflow_unsigned_func,
 };
+
+/* Information about one member of an archive.  */
+struct member_layout {
+  /* The archive member that this structure describes.  */
+  bfd *member;
+
+  /* The number of bytes of padding that must be inserted before the
+     start of the member in order to ensure that the section contents
+     are correctly aligned.  */
+  unsigned int leading_padding;
+
+  /* The offset of MEMBER from the start of the archive (i.e. the end
+     of the leading padding).  */
+  file_ptr offset;
+
+  /* The normalized name of MEMBER.  */
+  const char *name;
+
+  /* The length of NAME, without padding.  */
+  bfd_size_type namlen;
+
+  /* The length of NAME, with padding.  */
+  bfd_size_type padded_namlen;
+
+  /* The size of MEMBER's header, including the name and magic sequence.  */
+  bfd_size_type header_size;
+
+  /* The size of the MEMBER's contents.  */
+  bfd_size_type contents_size;
+
+  /* The number of bytes of padding that must be inserted after MEMBER
+     in order to preserve even alignment.  */
+  bfd_size_type trailing_padding;
+};
+
+/* A structure used for iterating over the members of an archive.  */
+struct archive_iterator {
+  /* The archive itself.  */
+  bfd *archive;
+
+  /* Information about the current archive member.  */
+  struct member_layout current;
+
+  /* Information about the next archive member.  MEMBER is null if there
+     are no more archive members, in which case OFFSET is the offset of
+     the first unused byte.  */
+  struct member_layout next;
+};
+
+/* Initialize INFO so that it describes member MEMBER of archive ARCHIVE.
+   OFFSET is the even-padded offset of MEMBER, not including any leading
+   padding needed for section alignment.  */
+
+static void
+member_layout_init (struct member_layout *info, bfd *archive,
+		    bfd *member, file_ptr offset)
+{
+  info->member = member;
+  info->leading_padding = 0;
+  if (member)
+    {
+      info->name = normalize_filename (member);
+      info->namlen = strlen (info->name);
+      info->padded_namlen = info->namlen + (info->namlen & 1);
+      if (xcoff_big_format_p (archive))
+	info->header_size = SIZEOF_AR_HDR_BIG;
+      else
+	info->header_size = SIZEOF_AR_HDR;
+      info->header_size += info->padded_namlen + SXCOFFARFMAG;
+      info->contents_size = arelt_size (member);
+      info->trailing_padding = info->contents_size & 1;
+
+      if (bfd_check_format (member, bfd_object)
+	  && bfd_get_flavour (member) == bfd_target_xcoff_flavour
+	  && (member->flags & DYNAMIC) != 0)
+	info->leading_padding
+	  = (-(offset + info->header_size)
+	     & ((1 << bfd_xcoff_text_align_power (member)) - 1));
+    }
+  info->offset = offset + info->leading_padding;
+}
+
+/* Set up ITERATOR to iterate through archive ARCHIVE.  */
+
+static void
+archive_iterator_begin (struct archive_iterator *iterator,
+			bfd *archive)
+{
+  iterator->archive = archive;
+  member_layout_init (&iterator->next, archive, archive->archive_head,
+		      xcoff_big_format_p (archive)
+		      ? SIZEOF_AR_FILE_HDR_BIG
+		      : SIZEOF_AR_FILE_HDR);
+}
+
+/* Make ITERATOR visit the first unvisited archive member.  Return true
+   on success; return false if all members have been visited.  */
+
+static bfd_boolean
+archive_iterator_next (struct archive_iterator *iterator)
+{
+  if (!iterator->next.member)
+    return FALSE;
+
+  iterator->current = iterator->next;
+  member_layout_init (&iterator->next, iterator->archive,
+		      iterator->current.member->archive_next,
+		      iterator->current.offset
+		      + iterator->current.header_size
+		      + iterator->current.contents_size
+		      + iterator->current.trailing_padding);
+  return TRUE;
+}
 
 /* We use our own tdata type.  Its first field is the COFF tdata type,
    so the COFF routines are compatible.  */
@@ -1603,11 +1714,10 @@ xcoff_write_armap_old (abfd, elength, map, orl_count, stridx)
      unsigned int orl_count;
      int stridx;
 {
+  struct archive_iterator iterator;
   struct xcoff_ar_hdr hdr;
   char *p;
   unsigned char buf[4];
-  bfd *sub;
-  file_ptr fileoff;
   unsigned int i;
 
   memset (&hdr, 0, sizeof hdr);
@@ -1635,29 +1745,16 @@ xcoff_write_armap_old (abfd, elength, map, orl_count, stridx)
   if (bfd_bwrite (buf, (bfd_size_type) 4, abfd) != 4)
     return FALSE;
 
-  sub = abfd->archive_head;
-  fileoff = SIZEOF_AR_FILE_HDR;
   i = 0;
-  while (sub != NULL && i < orl_count)
-    {
-      size_t namlen;
-
-      while (map[i].u.abfd == sub)
-	{
-	  H_PUT_32 (abfd, fileoff, buf);
-	  if (bfd_bwrite (buf, (bfd_size_type) 4, abfd) != 4)
-	    return FALSE;
-	  ++i;
-	}
-      namlen = strlen (normalize_filename (sub));
-      namlen = (namlen + 1) &~ (size_t) 1;
-      fileoff += (SIZEOF_AR_HDR
-		  + namlen
-		  + SXCOFFARFMAG
-		  + arelt_size (sub));
-      fileoff = (fileoff + 1) &~ 1;
-      sub = sub->archive_next;
-    }
+  archive_iterator_begin (&iterator, abfd);
+  while (i < orl_count && archive_iterator_next (&iterator))
+    while (map[i].u.abfd == iterator.current.member)
+      {
+	H_PUT_32 (abfd, iterator.current.offset, buf);
+	if (bfd_bwrite (buf, (bfd_size_type) 4, abfd) != 4)
+	  return FALSE;
+	++i;
+      }
 
   for (i = 0; i < orl_count; i++)
     {
@@ -1759,34 +1856,6 @@ do_copy (out_bfd, in_bfd)
 }
 
 static bfd_boolean
-do_shared_object_padding (out_bfd, in_bfd, offset, ar_header_size)
-     bfd *out_bfd;
-     bfd *in_bfd;
-     file_ptr *offset;
-     int ar_header_size;
-{
-  if (bfd_check_format (in_bfd, bfd_object)
-      && bfd_get_flavour (in_bfd) == bfd_target_xcoff_flavour
-      && (in_bfd->flags & DYNAMIC) != 0)
-    {
-      bfd_size_type pad = 0;
-      int text_align_power;
-
-      text_align_power = bfd_xcoff_text_align_power (in_bfd);
-
-      pad = 1 << text_align_power;
-      pad -= (*offset + ar_header_size) & (pad - 1);
-
-      if (! do_pad (out_bfd, pad))
-	return FALSE;
-
-      *offset += pad;
-    }
-
-  return TRUE;
-}
-
-static bfd_boolean
 xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
      bfd *abfd;
      unsigned int elength ATTRIBUTE_UNUSED;
@@ -1794,9 +1863,10 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
      unsigned int orl_count;
      int stridx;
 {
+  struct archive_iterator iterator;
   struct xcoff_ar_file_hdr_big *fhdr;
   bfd_vma i, sym_32, sym_64, str_32, str_64;
-  const bfd_arch_info_type *arch_info = NULL;
+  const bfd_arch_info_type *arch_info;
   bfd *current_bfd;
   size_t string_length;
   file_ptr nextoff, prevoff;
@@ -1805,16 +1875,15 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
      from 32-bit objects and which from 64-bit ones.  */
   sym_32 = sym_64 = str_32 = str_64 = 0;
 
-  current_bfd = abfd->archive_head;
-  if (current_bfd != NULL)
-    arch_info = bfd_get_arch_info (current_bfd);
-    i = 0;
-    while (current_bfd != NULL && i < orl_count)
+  i = 0;
+  for (current_bfd = abfd->archive_head;
+       current_bfd != NULL && i < orl_count;
+       current_bfd = current_bfd->archive_next)
     {
+      arch_info = bfd_get_arch_info (current_bfd);
       while (map[i].u.abfd == current_bfd)
 	{
 	  string_length = strlen (*map[i].name) + 1;
-
 	  if (arch_info->bits_per_address == 64)
 	    {
 	      sym_64++;
@@ -1827,9 +1896,6 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 	    }
 	  i++;
 	}
-      current_bfd = current_bfd->archive_next;
-      if (current_bfd != NULL)
-	arch_info = bfd_get_arch_info (current_bfd);
     }
 
   /* A quick sanity check... */
@@ -1871,7 +1937,6 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
       struct xcoff_ar_hdr_big *hdr;
       char *symbol_table;
       char *st;
-      file_ptr fileoff;
 
       bfd_vma symbol_table_size =
 	SIZEOF_AR_HDR_BIG
@@ -1908,41 +1973,29 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
       st += 8;
 
       /* loop over the 32 bit offsets */
-      current_bfd = abfd->archive_head;
-      if (current_bfd != NULL)
-	arch_info = bfd_get_arch_info (current_bfd);
-      fileoff = SIZEOF_AR_FILE_HDR_BIG;
       i = 0;
-      while (current_bfd != NULL && i < orl_count)
+      archive_iterator_begin (&iterator, abfd);
+      while (i < orl_count && archive_iterator_next (&iterator))
 	{
-	  while (map[i].u.abfd == current_bfd)
+	  arch_info = bfd_get_arch_info (iterator.current.member);
+	  while (map[i].u.abfd == iterator.current.member)
 	    {
 	      if (arch_info->bits_per_address == 32)
 		{
-		  bfd_h_put_64 (abfd, fileoff, st);
+		  bfd_h_put_64 (abfd, iterator.current.offset, st);
 		  st += 8;
 		}
 	      i++;
 	    }
-	  string_length = strlen (normalize_filename (current_bfd));
-	  string_length += string_length & 1;
-	  fileoff += (SIZEOF_AR_HDR_BIG
-		      + string_length
-		      + SXCOFFARFMAG
-		      + arelt_size (current_bfd));
-	  fileoff += fileoff & 1;
-	  current_bfd = current_bfd->archive_next;
-	  if (current_bfd != NULL)
-	    arch_info = bfd_get_arch_info (current_bfd);
 	}
 
       /* loop over the 32 bit symbol names */
-      current_bfd = abfd->archive_head;
-      if (current_bfd != NULL)
-	arch_info = bfd_get_arch_info (current_bfd);
       i = 0;
-      while (current_bfd != NULL && i < orl_count)
+      for (current_bfd = abfd->archive_head;
+	   current_bfd != NULL && i < orl_count;
+	   current_bfd = current_bfd->archive_next)
 	{
+	  arch_info = bfd_get_arch_info (current_bfd);
 	  while (map[i].u.abfd == current_bfd)
 	    {
 	      if (arch_info->bits_per_address == 32)
@@ -1952,9 +2005,6 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 		}
 	      i++;
 	    }
-	  current_bfd = current_bfd->archive_next;
-	  if (current_bfd != NULL)
-	    arch_info = bfd_get_arch_info (current_bfd);
 	}
 
       bfd_bwrite (symbol_table, symbol_table_size, abfd);
@@ -1972,7 +2022,6 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
       struct xcoff_ar_hdr_big *hdr;
       char *symbol_table;
       char *st;
-      file_ptr fileoff;
 
       bfd_vma symbol_table_size =
 	SIZEOF_AR_HDR_BIG
@@ -2004,41 +2053,29 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
       st += 8;
 
       /* loop over the 64 bit offsets */
-      current_bfd = abfd->archive_head;
-      if (current_bfd != NULL)
-	arch_info = bfd_get_arch_info (current_bfd);
-      fileoff = SIZEOF_AR_FILE_HDR_BIG;
       i = 0;
-      while (current_bfd != NULL && i < orl_count)
+      archive_iterator_begin (&iterator, abfd);
+      while (i < orl_count && archive_iterator_next (&iterator))
 	{
-	  while (map[i].u.abfd == current_bfd)
+	  arch_info = bfd_get_arch_info (iterator.current.member);
+	  while (map[i].u.abfd == iterator.current.member)
 	    {
 	      if (arch_info->bits_per_address == 64)
 		{
-		  bfd_h_put_64 (abfd, fileoff, st);
+		  bfd_h_put_64 (abfd, iterator.current.offset, st);
 		  st += 8;
 		}
 	      i++;
 	    }
-	  string_length = strlen (normalize_filename (current_bfd));
-	  string_length += string_length & 1;
-	  fileoff += (SIZEOF_AR_HDR_BIG
-		      + string_length
-		      + SXCOFFARFMAG
-		      + arelt_size (current_bfd));
-	  fileoff += fileoff & 1;
-	  current_bfd = current_bfd->archive_next;
-	  if (current_bfd != NULL)
-	    arch_info = bfd_get_arch_info (current_bfd);
 	}
 
       /* loop over the 64 bit symbol names */
-      current_bfd = abfd->archive_head;
-      if (current_bfd != NULL)
-	arch_info = bfd_get_arch_info (current_bfd);
       i = 0;
-      while (current_bfd != NULL && i < orl_count)
+      for (current_bfd = abfd->archive_head;
+	   current_bfd != NULL && i < orl_count;
+	   current_bfd = current_bfd->archive_next)
 	{
+	  arch_info = bfd_get_arch_info (current_bfd);
 	  while (map[i].u.abfd == current_bfd)
 	    {
 	      if (arch_info->bits_per_address == 64)
@@ -2048,9 +2085,6 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 		}
 	      i++;
 	    }
-	  current_bfd = current_bfd->archive_next;
-	  if (current_bfd != NULL)
-	    arch_info = bfd_get_arch_info (current_bfd);
 	}
 
       bfd_bwrite (symbol_table, symbol_table_size, abfd);
@@ -2086,6 +2120,7 @@ static bfd_boolean
 xcoff_write_archive_contents_old (abfd)
      bfd *abfd;
 {
+  struct archive_iterator iterator;
   struct xcoff_ar_file_hdr fhdr;
   bfd_size_type count;
   bfd_size_type total_namlen;
@@ -2111,6 +2146,36 @@ xcoff_write_archive_contents_old (abfd)
     {
       ++count;
       total_namlen += strlen (normalize_filename (sub)) + 1;
+      if (sub->arelt_data == NULL)
+	{
+	  sub->arelt_data = bfd_zalloc (sub, sizeof (struct areltdata));
+	  if (sub->arelt_data == NULL)
+	    return FALSE;
+	}
+      if (arch_xhdr (sub) == NULL)
+	{
+	  struct xcoff_ar_hdr *ahdrp;
+	  struct stat s;
+
+	  if (stat (bfd_get_filename (sub), &s) != 0)
+	    {
+	      bfd_set_error (bfd_error_system_call);
+	      return FALSE;
+	    }
+
+	  ahdrp = bfd_zalloc (sub, sizeof (*ahdrp));
+	  if (ahdrp == NULL)
+	    return FALSE;
+
+	  sprintf (ahdrp->size, "%ld", (long) s.st_size);
+	  sprintf (ahdrp->date, "%ld", (long) s.st_mtime);
+	  sprintf (ahdrp->uid, "%ld", (long) s.st_uid);
+	  sprintf (ahdrp->gid, "%ld", (long) s.st_gid);
+	  sprintf (ahdrp->mode, "%o", (unsigned int) s.st_mode);
+
+	  arch_eltdata (sub)->arch_header = (char *) ahdrp;
+	  arch_eltdata (sub)->parsed_size = s.st_size;
+	}
     }
   offsets = (file_ptr *) bfd_alloc (abfd, count * sizeof (file_ptr));
   if (offsets == NULL)
@@ -2122,107 +2187,51 @@ xcoff_write_archive_contents_old (abfd)
   makemap = bfd_has_map (abfd);
   hasobjects = FALSE;
   prevoff = 0;
-  nextoff = SIZEOF_AR_FILE_HDR;
-  for (sub = abfd->archive_head, i = 0;
-       sub != NULL;
-       sub = sub->archive_next, i++)
+  for (archive_iterator_begin (&iterator, abfd), i = 0;
+       archive_iterator_next (&iterator);
+       i++)
     {
-      const char *name;
       bfd_size_type namlen;
       struct xcoff_ar_hdr *ahdrp;
-      bfd_size_type remaining;
 
       if (makemap && ! hasobjects)
 	{
-	  if (bfd_check_format (sub, bfd_object))
+	  if (bfd_check_format (iterator.current.member, bfd_object))
 	    hasobjects = TRUE;
 	}
 
-      name = normalize_filename (sub);
-      namlen = strlen (name);
-
-      if (sub->arelt_data != NULL)
-	ahdrp = arch_xhdr (sub);
-      else
-	ahdrp = NULL;
-
-      if (ahdrp == NULL)
-	{
-	  struct stat s;
-
-	  memset (&ahdr, 0, sizeof ahdr);
-	  ahdrp = &ahdr;
-	  if (stat (bfd_get_filename (sub), &s) != 0)
-	    {
-	      bfd_set_error (bfd_error_system_call);
-	      return FALSE;
-	    }
-
-	  sprintf (ahdrp->size, "%ld", (long) s.st_size);
-	  sprintf (ahdrp->date, "%ld", (long) s.st_mtime);
-	  sprintf (ahdrp->uid, "%ld", (long) s.st_uid);
-	  sprintf (ahdrp->gid, "%ld", (long) s.st_gid);
-	  sprintf (ahdrp->mode, "%o", (unsigned int) s.st_mode);
-
-	  if (sub->arelt_data == NULL)
-	    {
-	      size = sizeof (struct areltdata);
-	      sub->arelt_data = bfd_alloc (sub, size);
-	      if (sub->arelt_data == NULL)
-		return FALSE;
-	    }
-
-	  arch_eltdata (sub)->parsed_size = s.st_size;
-	}
-
+      ahdrp = arch_xhdr (iterator.current.member);
       sprintf (ahdrp->prevoff, "%ld", (long) prevoff);
-      sprintf (ahdrp->namlen, "%ld", (long) namlen);
-
-      /* If the length of the name is odd, we write out the null byte
-	 after the name as well.  */
-      namlen = (namlen + 1) &~ (bfd_size_type) 1;
-
-      remaining = arelt_size (sub);
-      size = (SIZEOF_AR_HDR
-	      + namlen
-	      + SXCOFFARFMAG
-	      + remaining);
-
-      BFD_ASSERT (nextoff == bfd_tell (abfd));
-
-      offsets[i] = nextoff;
-
-      prevoff = nextoff;
-      nextoff += size + (size & 1);
-
-      sprintf (ahdrp->nextoff, "%ld", (long) nextoff);
+      sprintf (ahdrp->namlen, "%ld", (long) iterator.current.namlen);
+      sprintf (ahdrp->nextoff, "%ld", (long) iterator.next.offset);
 
       /* We need spaces, not null bytes, in the header.  */
       for (p = (char *) ahdrp; p < (char *) ahdrp + SIZEOF_AR_HDR; p++)
 	if (*p == '\0')
 	  *p = ' ';
 
-      if ((bfd_bwrite ((PTR) ahdrp, (bfd_size_type) SIZEOF_AR_HDR, abfd)
-	   != SIZEOF_AR_HDR)
-	  || bfd_bwrite ((PTR) name, namlen, abfd) != namlen
-	  || bfd_bwrite ((PTR) XCOFFARFMAG, (bfd_size_type) SXCOFFARFMAG,
-			 abfd) != SXCOFFARFMAG)
+      if (!do_pad (abfd, iterator.current.leading_padding))
 	return FALSE;
 
-      if (bfd_seek (sub, (file_ptr) 0, SEEK_SET) != 0)
+      BFD_ASSERT (iterator.current.offset == bfd_tell (abfd));
+      namlen = iterator.current.padded_namlen;
+      if (bfd_bwrite (ahdrp, SIZEOF_AR_HDR, abfd) != SIZEOF_AR_HDR
+	  || bfd_bwrite (iterator.current.name, namlen, abfd) != namlen
+	  || bfd_bwrite (XCOFFARFMAG, SXCOFFARFMAG, abfd) != SXCOFFARFMAG
+	  || bfd_seek (iterator.current.member, 0, SEEK_SET) != 0
+	  || !do_copy (abfd, iterator.current.member)
+	  || !do_pad (abfd, iterator.current.trailing_padding))
 	return FALSE;
 
-      if (! do_copy (abfd, sub))
-	return FALSE;
-
-      if (! do_pad (abfd, size & 1))
-	return FALSE;
+      offsets[i] = iterator.current.offset;
+      prevoff = iterator.current.offset;
     }
 
   sprintf (fhdr.lastmemoff, "%ld", (long) prevoff);
 
   /* Write out the member table.  */
 
+  nextoff = iterator.next.offset;
   BFD_ASSERT (nextoff == bfd_tell (abfd));
   sprintf (fhdr.memoff, "%ld", (long) nextoff);
 
@@ -2327,10 +2336,11 @@ xcoff_write_archive_contents_big (abfd)
   file_ptr prevoff, nextoff;
   bfd *current_bfd;
   size_t i;
-  struct xcoff_ar_hdr_big *hdr, ahdr;
+  struct xcoff_ar_hdr_big *hdr;
   bfd_size_type size;
   char *member_table, *mt;
   bfd_vma member_table_size;
+  struct archive_iterator iterator;
 
   memset (&fhdr, 0, SIZEOF_AR_FILE_HDR_BIG);
   memcpy (fhdr.magic, XCOFFARMAGBIG, SXCOFFARMAG);
@@ -2351,6 +2361,42 @@ xcoff_write_archive_contents_big (abfd)
 	  && ! hasobjects
 	  && bfd_check_format (current_bfd, bfd_object))
 	hasobjects = TRUE;
+
+      if (current_bfd->arelt_data == NULL)
+	{
+	  size = sizeof (struct areltdata);
+	  current_bfd->arelt_data = bfd_zalloc (current_bfd, size);
+	  if (current_bfd->arelt_data == NULL)
+	    return FALSE;
+	}
+
+      if (arch_xhdr_big (current_bfd) == NULL)
+	{
+	  struct xcoff_ar_hdr_big *ahdrp;
+	  struct stat s;
+
+	  /* XXX This should actually be a call to stat64 (at least on
+	     32-bit machines).
+	     XXX This call will fail if the original object is not found.  */
+	  if (stat (bfd_get_filename (current_bfd), &s) != 0)
+	    {
+	      bfd_set_error (bfd_error_system_call);
+	      return FALSE;
+	    }
+
+	  ahdrp = bfd_zalloc (current_bfd, sizeof (*ahdrp));
+	  if (ahdrp == NULL)
+	    return FALSE;
+
+	  PRINT20 (ahdrp->size, s.st_size);
+	  PRINT12 (ahdrp->date, s.st_mtime);
+	  PRINT12 (ahdrp->uid,  s.st_uid);
+	  PRINT12 (ahdrp->gid,  s.st_gid);
+	  PRINT12_OCTAL (ahdrp->mode, s.st_mode);
+
+	  arch_eltdata (current_bfd)->arch_header = (char *) ahdrp;
+	  arch_eltdata (current_bfd)->parsed_size = s.st_size;
+	}
     }
 
   offsets = NULL;
@@ -2362,100 +2408,33 @@ xcoff_write_archive_contents_big (abfd)
     }
 
   prevoff = 0;
-  nextoff = SIZEOF_AR_FILE_HDR_BIG;
-  for (current_bfd = abfd->archive_head, i = 0;
-       current_bfd != NULL;
-       current_bfd = current_bfd->archive_next, i++)
+  for (archive_iterator_begin (&iterator, abfd), i = 0;
+       archive_iterator_next (&iterator);
+       i++)
     {
-      const char *name;
       bfd_size_type namlen;
       struct xcoff_ar_hdr_big *ahdrp;
-      bfd_size_type remaining;
 
-      name = normalize_filename (current_bfd);
-      namlen = strlen (name);
-
-      if (current_bfd->arelt_data != NULL)
-	ahdrp = arch_xhdr_big (current_bfd);
-      else
-	ahdrp = NULL;
-
-      if (ahdrp == NULL)
-	{
-	  struct stat s;
-
-	  ahdrp = &ahdr;
-	  /* XXX This should actually be a call to stat64 (at least on
-	     32-bit machines).
-	     XXX This call will fail if the original object is not found.  */
-	  if (stat (bfd_get_filename (current_bfd), &s) != 0)
-	    {
-	      bfd_set_error (bfd_error_system_call);
-	      return FALSE;
-	    }
-
-	  PRINT20 (ahdrp->size, s.st_size);
-	  PRINT12 (ahdrp->date, s.st_mtime);
-	  PRINT12 (ahdrp->uid,  s.st_uid);
-	  PRINT12 (ahdrp->gid,  s.st_gid);
-	  PRINT12_OCTAL (ahdrp->mode, s.st_mode);
-
-	  if (current_bfd->arelt_data == NULL)
-	    {
-	      size = sizeof (struct areltdata);
-	      current_bfd->arelt_data = bfd_alloc (current_bfd, size);
-	      if (current_bfd->arelt_data == NULL)
-		return FALSE;
-	    }
-
-	  arch_eltdata (current_bfd)->parsed_size = s.st_size;
-	}
-
+      ahdrp = arch_xhdr_big (iterator.current.member);
       PRINT20 (ahdrp->prevoff, prevoff);
-      PRINT4 (ahdrp->namlen, namlen);
+      PRINT4 (ahdrp->namlen, iterator.current.namlen);
+      PRINT20 (ahdrp->nextoff, iterator.next.offset);
 
-      /* If the length of the name is odd, we write out the null byte
-	 after the name as well.  */
-      namlen = (namlen + 1) &~ (bfd_size_type) 1;
-
-      remaining = arelt_size (current_bfd);
-      size = (SIZEOF_AR_HDR_BIG
-	      + namlen
-	      + SXCOFFARFMAG
-	      + remaining);
-
-      BFD_ASSERT (nextoff == bfd_tell (abfd));
-
-      /* Check for xcoff shared objects.
-	 Their text section needs to be aligned wrt the archive file position.
-	 This requires extra padding before the archive header.  */
-      if (! do_shared_object_padding (abfd, current_bfd, & nextoff,
-				      SIZEOF_AR_HDR_BIG + namlen
-				      + SXCOFFARFMAG))
+      if (!do_pad (abfd, iterator.current.leading_padding))
 	return FALSE;
 
-      offsets[i] = nextoff;
-
-      prevoff = nextoff;
-      nextoff += size + (size & 1);
-
-      PRINT20 (ahdrp->nextoff, nextoff);
-
-      if ((bfd_bwrite ((PTR) ahdrp, (bfd_size_type) SIZEOF_AR_HDR_BIG, abfd)
-	   != SIZEOF_AR_HDR_BIG)
-	  || bfd_bwrite ((PTR) name, (bfd_size_type) namlen, abfd) != namlen
-	  || (bfd_bwrite ((PTR) XCOFFARFMAG, (bfd_size_type) SXCOFFARFMAG,
-			  abfd) != SXCOFFARFMAG))
+      BFD_ASSERT (iterator.current.offset == bfd_tell (abfd));
+      namlen = iterator.current.padded_namlen;
+      if (bfd_bwrite (ahdrp, SIZEOF_AR_HDR_BIG, abfd) != SIZEOF_AR_HDR_BIG
+	  || bfd_bwrite (iterator.current.name, namlen, abfd) != namlen
+	  || bfd_bwrite (XCOFFARFMAG, SXCOFFARFMAG, abfd) != SXCOFFARFMAG
+	  || bfd_seek (iterator.current.member, 0, SEEK_SET) != 0
+	  || !do_copy (abfd, iterator.current.member)
+	  || !do_pad (abfd, iterator.current.trailing_padding))
 	return FALSE;
 
-      if (bfd_seek (current_bfd, (file_ptr) 0, SEEK_SET) != 0)
-	return FALSE;
-
-      if (! do_copy (abfd, current_bfd))
-	return FALSE;
-
-      if (! do_pad (abfd, size & 1))
-	return FALSE;
+      offsets[i] = iterator.current.offset;
+      prevoff = iterator.current.offset;
     }
 
   if (count)
@@ -2485,6 +2464,7 @@ xcoff_write_archive_contents_big (abfd)
      ??			      pad to even bytes.
    */
 
+  nextoff = iterator.next.offset;
   BFD_ASSERT (nextoff == bfd_tell (abfd));
 
   member_table_size = (SIZEOF_AR_HDR_BIG
