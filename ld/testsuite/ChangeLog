@@ -1,3 +1,13 @@
+2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* ld-powerpc/aix-gc-1.nd: New test.
+	* ld-powerpc/aix52.exp: Run it.
+
+2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* ld-powerpc/aix-rel-1.s, ld-powerpc/aix-rel-1.od: New test.
+	* ld-powerpc/aix52.exp: Run it.
+
 2009-04-01  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-cygwin/exe-export.exp:  Add "-lkernel32" when linking test exe.

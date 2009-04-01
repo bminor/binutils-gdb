@@ -131,7 +131,8 @@ set aix52tests {
     {"Garbage collection test 1"
      "-shared -binitfini:init_function:fini_function -bE:aix-gc-1.ex"
      "" {aix-gc-1.s}
-     {{objdump {-dz -j.text -j.data} aix-gc-1-SIZE.dd}}
+     {{objdump {-dz -j.text -j.data} aix-gc-1-SIZE.dd}
+      {nm {} aix-gc-1.nd}}
      "aix-gc-1.so"}
 
     {"Glink test 1"

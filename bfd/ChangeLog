@@ -1,5 +1,10 @@
 2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* xcofflink.c (bfd_link_input_bfd): Treat __rtinit as C_HIDEXT
+	rather than C_EXT.
+
+2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* coff-rs6000.c (member_layout): New structure.
 	(archive_iterator): Likewise.
 	(member_layout_init): New function.

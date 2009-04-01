@@ -4289,6 +4289,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 
   esym = (bfd_byte *) obj_coff_external_syms (input_bfd);
   esym_end = esym + obj_raw_syment_count (input_bfd) * isymesz;
+  sym_hash = obj_xcoff_sym_hashes (input_bfd);
   isymp = finfo->internal_syms;
   indexp = finfo->sym_indices;
   csectpp = xcoff_data (input_bfd)->csects;
@@ -4335,6 +4336,16 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 		  isym._n._n_n._n_offset = STRING_SIZE_SIZE + indx;
 		}
 	    }
+
+	  /* Make __rtinit C_HIDEXT rather than C_EXT.  This avoids
+	     multiple definition problems when linking a shared object
+	     statically.  (The native linker doesn't enter __rtinit into
+	     the normal table at all, but having a local symbol can make
+	     the objdump output easier to read.)  */
+	  if (isym.n_sclass == C_EXT
+	      && *sym_hash
+	      && ((*sym_hash)->flags & XCOFF_RTINIT) != 0)
+	    isym.n_sclass = C_HIDEXT;
 
 	  /* The value of a C_FILE symbol is the symbol index of the
 	     next C_FILE symbol.  The value of the last C_FILE symbol
@@ -4664,6 +4675,7 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *finfo,
 	    }
 	}
 
+      sym_hash += add;
       indexp += add;
       isymp += add;
       csectpp += add;
