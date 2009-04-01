@@ -39,6 +39,8 @@ if ![runto call_me] then {
   return
 } 
 
+gdb_test "set print frame-arguments all" ""
+
 set expected_d "\\(one => 1, two => 2, three => 3, four => 4, five => 5, six => 6\\)"
 gdb_test "frame" \
          "#0\[ \t\]*pck\\.call_me \\(d=${expected_d}\\).*"  \

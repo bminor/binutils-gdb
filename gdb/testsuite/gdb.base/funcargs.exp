@@ -1194,6 +1194,8 @@ gdb_expect {
 
 # Perform tests
 
+gdb_test "set print frame-arguments all" ""
+
 integral_args
 funcargs_reload
 unsigned_integral_args

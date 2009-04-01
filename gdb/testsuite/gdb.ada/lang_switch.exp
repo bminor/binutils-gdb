@@ -41,6 +41,8 @@ gdb_load ${binfile}
 set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.c]
 runto "foo.c:$bp_location"
 
+gdb_test "set print frame-arguments all" ""
+
 # Make sure that the language is switched to Ada for the second frame
 # by checking the string parameter.
 gdb_test "bt" \
