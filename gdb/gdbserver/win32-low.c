@@ -90,7 +90,7 @@ typedef BOOL WINAPI (*winapi_DebugSetProcessKillOnExit) (BOOL KillOnExit);
 typedef BOOL WINAPI (*winapi_DebugBreakProcess) (HANDLE);
 typedef BOOL WINAPI (*winapi_GenerateConsoleCtrlEvent) (DWORD, DWORD);
 
-static void win32_resume (struct thread_resume *resume_info);
+static void win32_resume (struct thread_resume *resume_info, size_t n);
 
 /* Get the thread ID from the current selected inferior (the current
    thread).  */
@@ -726,8 +726,7 @@ win32_detach (void)
     resume.thread = -1;
     resume.step = 0;
     resume.sig = 0;
-    resume.leave_stopped = 0;
-    win32_resume (&resume);
+    win32_resume (&resume, 1);
   }
 
   if (!DebugActiveProcessStop (current_process_id))
@@ -771,7 +770,7 @@ win32_thread_alive (unsigned long tid)
 /* Resume the inferior process.  RESUME_INFO describes how we want
    to resume.  */
 static void
-win32_resume (struct thread_resume *resume_info)
+win32_resume (struct thread_resume *resume_info, size_t n)
 {
   DWORD tid;
   enum target_signal sig;
@@ -782,9 +781,9 @@ win32_resume (struct thread_resume *resume_info)
   /* This handles the very limited set of resume packets that GDB can
      currently produce.  */
 
-  if (resume_info[0].thread == -1)
+  if (n == 1 && resume_info[0].thread == -1)
     tid = -1;
-  else if (resume_info[1].thread == -1 && !resume_info[1].leave_stopped)
+  else if (n > 1)
     tid = -1;
   else
     /* Yes, we're ignoring resume_info[0].thread.  It'd be tricky to make

@@ -146,7 +146,6 @@ start_inferior (char **argv, char *statusptr)
       resume_info.thread = -1;
       resume_info.step = 0;
       resume_info.sig = 0;
-      resume_info.leave_stopped = 0;
 
       sig = mywait (statusptr, 0);
       if (*statusptr != 'T')
@@ -154,7 +153,7 @@ start_inferior (char **argv, char *statusptr)
 
       do
 	{
-	  (*the_target->resume) (&resume_info);
+	  (*the_target->resume) (&resume_info, 1);
 
 	  sig = mywait (statusptr, 0);
 	  if (*statusptr != 'T')
@@ -1056,7 +1055,8 @@ handle_v_cont (char *own_buf, char *status, int *signal)
 {
   char *p, *q;
   int n = 0, i = 0;
-  struct thread_resume *resume_info, default_action;
+  struct thread_resume *resume_info;
+  struct thread_resume default_action = {0};
 
   /* Count the number of semicolons in the packet.  There should be one
      for every action.  */
@@ -1067,25 +1067,15 @@ handle_v_cont (char *own_buf, char *status, int *signal)
       p++;
       p = strchr (p, ';');
     }
-  /* Allocate room for one extra action, for the default remain-stopped
-     behavior; if no default action is in the list, we'll need the extra
-     slot.  */
-  resume_info = malloc ((n + 1) * sizeof (resume_info[0]));
+
+  resume_info = malloc (n * sizeof (resume_info[0]));
   if (resume_info == NULL)
     goto err;
 
-  default_action.thread = -1;
-  default_action.leave_stopped = 1;
-  default_action.step = 0;
-  default_action.sig = 0;
-
   p = &own_buf[5];
-  i = 0;
   while (*p)
     {
       p++;
-
-      resume_info[i].leave_stopped = 0;
 
       if (p[0] == 's' || p[0] == 'S')
 	resume_info[i].step = 1;
@@ -1141,7 +1131,8 @@ handle_v_cont (char *own_buf, char *status, int *signal)
 	}
     }
 
-  resume_info[i] = default_action;
+  if (i < n)
+    resume_info[i] = default_action;
 
   /* Still used in occasional places in the backend.  */
   if (n == 1 && resume_info[0].thread != -1)
@@ -1151,7 +1142,7 @@ handle_v_cont (char *own_buf, char *status, int *signal)
   set_desired_inferior (0);
 
   enable_async_io ();
-  (*the_target->resume) (resume_info);
+  (*the_target->resume) (resume_info, n);
 
   free (resume_info);
 
@@ -1333,25 +1324,31 @@ myresume (char *own_buf, int step, int *signalp, char *statusp)
   struct thread_resume resume_info[2];
   int n = 0;
   int sig = *signalp;
+  int valid_cont_thread;
 
   set_desired_inferior (0);
 
-  if (step || sig || (cont_thread != 0 && cont_thread != -1))
+  valid_cont_thread = (cont_thread != 0 && cont_thread != -1);
+
+  if (step || sig || valid_cont_thread)
     {
       resume_info[0].thread
 	= ((struct inferior_list_entry *) current_inferior)->id;
       resume_info[0].step = step;
       resume_info[0].sig = sig;
-      resume_info[0].leave_stopped = 0;
       n++;
     }
-  resume_info[n].thread = -1;
-  resume_info[n].step = 0;
-  resume_info[n].sig = 0;
-  resume_info[n].leave_stopped = (cont_thread != 0 && cont_thread != -1);
+
+  if (!valid_cont_thread)
+    {
+      resume_info[n].thread = -1;
+      resume_info[n].step = 0;
+      resume_info[n].sig = 0;
+      n++;
+    }
 
   enable_async_io ();
-  (*the_target->resume) (resume_info);
+  (*the_target->resume) (resume_info, n);
   *signalp = mywait (statusp, 1);
   prepare_resume_reply (own_buf, *statusp, *signalp);
   disable_async_io ();

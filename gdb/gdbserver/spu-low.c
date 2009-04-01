@@ -345,24 +345,27 @@ spu_thread_alive (unsigned long tid)
 
 /* Resume process.  */
 static void
-spu_resume (struct thread_resume *resume_info)
+spu_resume (struct thread_resume *resume_info, size_t n)
 {
-  while (resume_info->thread != -1
-	 && resume_info->thread != current_tid)
-    resume_info++;
+  size_t i;
 
-  if (resume_info->leave_stopped)
+  for (i = 0; i < n; i++)
+    if (resume_info[i].thread == -1
+	|| resume_info[i].thread == current_tid)
+      break;
+
+  if (i == n)
     return;
 
   /* We don't support hardware single-stepping right now, assume
      GDB knows to use software single-stepping.  */
-  if (resume_info->step)
+  if (resume_info[i].step)
     fprintf (stderr, "Hardware single-step not supported.\n");
 
   regcache_invalidate ();
 
   errno = 0;
-  ptrace (PTRACE_CONT, current_tid, 0, resume_info->sig);
+  ptrace (PTRACE_CONT, current_tid, 0, resume_info[i].sig);
   if (errno)
     perror_with_name ("ptrace");
 }

@@ -1,5 +1,25 @@
 2009-04-01  Pedro Alves  <pedro@codesourcery.com>
 
+	* target.h (struct thread_resume): Delete leave_stopped member.
+	(struct target_ops): Add a `n' argument to the `resume' callback.
+	* server.c (start_inferior): Adjust.
+	(handle_v_cont, myresume): Adjust.
+	* linux-low.c (check_removed_breakpoint): Adjust to resume
+	interface change, and to removed leave_stopped field.
+	(resume_ptr): Delete.
+	(struct thread_resume_array): New.
+	(linux_set_resume_request): Add new `arg' parameter.  Adjust to
+	resume interface change.
+	(linux_continue_one_thread, linux_queue_one_thread)
+	(resume_status_pending_p): Check if the resume field is NULL
+	instead of checking the leave_stopped member.
+	(linux_resume): Adjust to the target resume interface change.
+	* spu-low.c (spu_resume): Adjust to the target resume interface
+	change.
+	* win32-low.c (win32_detach, win32_resume): Ditto.
+
+2009-04-01  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-low.c (linux_wait_for_event): Don't clear the `stepping'
 	flag.
 	(wait_for_sigstop): Don't leave a finished single-step SIGTRAP

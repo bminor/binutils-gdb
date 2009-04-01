@@ -116,7 +116,7 @@ static int new_inferior;
 
 static void linux_resume_one_lwp (struct inferior_list_entry *entry,
 				  int step, int signal, siginfo_t *info);
-static void linux_resume (struct thread_resume *resume_info);
+static void linux_resume (struct thread_resume *resume_info, size_t n);
 static void stop_all_lwps (void);
 static int linux_wait_for_event (struct thread_info *child);
 static int check_removed_breakpoint (struct lwp_info *event_child);
@@ -952,8 +952,8 @@ retry:
 	{
 	  struct thread_resume resume_info;
 	  resume_info.thread = -1;
-	  resume_info.step = resume_info.sig = resume_info.leave_stopped = 0;
-	  linux_resume (&resume_info);
+	  resume_info.step = resume_info.sig = 0;
+	  linux_resume (&resume_info, 1);
 	}
     }
 
@@ -1247,7 +1247,11 @@ linux_resume_one_lwp (struct inferior_list_entry *entry,
     }
 }
 
-static struct thread_resume *resume_ptr;
+struct thread_resume_array
+{
+  struct thread_resume *resume;
+  size_t n;
+};
 
 /* This function is called once per thread.  We look up the thread
    in RESUME_PTR, and mark the thread with a pointer to the appropriate
@@ -1256,21 +1260,29 @@ static struct thread_resume *resume_ptr;
    This algorithm is O(threads * resume elements), but resume elements
    is small (and will remain small at least until GDB supports thread
    suspension).  */
-static void
-linux_set_resume_request (struct inferior_list_entry *entry)
+static int
+linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
 {
   struct lwp_info *lwp;
   struct thread_info *thread;
   int ndx;
+  struct thread_resume_array *r;
 
   thread = (struct thread_info *) entry;
   lwp = get_thread_lwp (thread);
+  r = arg;
 
-  ndx = 0;
-  while (resume_ptr[ndx].thread != -1 && resume_ptr[ndx].thread != entry->id)
-    ndx++;
+  for (ndx = 0; ndx < r->n; ndx++)
+    if (r->resume[ndx].thread == -1 || r->resume[ndx].thread == entry->id)
+      {
+	lwp->resume = &r->resume[ndx];
+	return 0;
+      }
 
-  lwp->resume = &resume_ptr[ndx];
+  /* No resume action for this thread.  */
+  lwp->resume = NULL;
+
+  return 0;
 }
 
 /* This function is called once per thread.  We check the thread's resume
@@ -1289,7 +1301,7 @@ linux_continue_one_thread (struct inferior_list_entry *entry)
   thread = (struct thread_info *) entry;
   lwp = get_thread_lwp (thread);
 
-  if (lwp->resume->leave_stopped)
+  if (lwp->resume == NULL)
     return;
 
   if (lwp->resume->thread == -1
@@ -1320,7 +1332,7 @@ linux_queue_one_thread (struct inferior_list_entry *entry)
   thread = (struct thread_info *) entry;
   lwp = get_thread_lwp (thread);
 
-  if (lwp->resume->leave_stopped)
+  if (lwp->resume == NULL)
     return;
 
   /* If we have a new signal, enqueue the signal.  */
@@ -1354,7 +1366,7 @@ resume_status_pending_p (struct inferior_list_entry *entry, void *flag_p)
 
   /* Processes which will not be resumed are not interesting, because
      we might not wait for them next time through linux_wait.  */
-  if (lwp->resume->leave_stopped)
+  if (lwp->resume == NULL)
     return 0;
 
   /* If this thread has a removed breakpoint, we won't have any
@@ -1375,14 +1387,12 @@ resume_status_pending_p (struct inferior_list_entry *entry, void *flag_p)
 }
 
 static void
-linux_resume (struct thread_resume *resume_info)
+linux_resume (struct thread_resume *resume_info, size_t n)
 {
   int pending_flag;
+  struct thread_resume_array array = { resume_info, n };
 
-  /* Yes, the use of a global here is rather ugly.  */
-  resume_ptr = resume_info;
-
-  for_each_inferior (&all_threads, linux_set_resume_request);
+  find_inferior (&all_threads, linux_set_resume_request, &array);
 
   /* If there is a thread which would otherwise be resumed, which
      has a pending status, then don't resume any threads - we can just

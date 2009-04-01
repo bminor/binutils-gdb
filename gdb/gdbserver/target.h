@@ -22,17 +22,14 @@
 #ifndef TARGET_H
 #define TARGET_H
 
-/* This structure describes how to resume a particular thread (or
-   all threads) based on the client's request.  If thread is -1, then
-   this entry applies to all threads.  These are generally passed around
-   as an array, and terminated by a thread == -1 entry.  */
+/* This structure describes how to resume a particular thread (or all
+   threads) based on the client's request.  If thread is -1, then this
+   entry applies to all threads.  These are passed around as an
+   array.  */
 
 struct thread_resume
 {
   unsigned long thread;
-
-  /* If non-zero, leave this thread stopped.  */
-  int leave_stopped;
 
   /* If non-zero, we want to single-step.  */
   int step;
@@ -83,7 +80,7 @@ struct target_ops
 
   /* Resume the inferior process.  */
 
-  void (*resume) (struct thread_resume *resume_info);
+  void (*resume) (struct thread_resume *resume_info, size_t n);
 
   /* Wait for the inferior process to change state.
 
