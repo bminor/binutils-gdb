@@ -1,3 +1,9 @@
+2009-04-01  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* mips-tdep.c (mips_numeric_register_alieses): New definition.
+	(mips_gdbarch_init): Add user registers from 
+	mips_numeric_register_aliases.
+
 2009-04-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* linux-nat.c (linux_nat_filter_event): Minor comment reformatting.
