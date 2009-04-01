@@ -3525,7 +3525,6 @@ group_sections (struct elf32_arm_link_hash_table *htab,
     {
       asection *tail = *list;
       asection *head;
-      asection *tp;
 
       if (tail == bfd_abs_section_ptr)
 	continue;
@@ -3535,38 +3534,35 @@ group_sections (struct elf32_arm_link_hash_table *htab,
 	 section may be required for an interrupt vector in bare metal
 	 code.  */
 #define NEXT_SEC PREV_SEC
-      head = tail;
-      tp = NULL;
-      for (;;)
-	{
-	  asection *h = PREV_SEC (head);
-	  NEXT_SEC (head) = tp;
-	  if (h == NULL)
-	    break;
-	  tp = head;
-	  head = h;
-	}
+      head = NULL;
+      while (tail != NULL)
+        {
+          /* Pop from tail.  */
+          asection *item = tail;
+          tail = PREV_SEC (item);
+
+          /* Push on head.  */
+          NEXT_SEC (item) = head;
+          head = item;
+        }
 
       while (head != NULL)
 	{
 	  asection *curr;
 	  asection *next;
-	  bfd_size_type total;
+	  bfd_vma stub_group_start = head->output_offset;
+	  bfd_vma end_of_next;
 
 	  curr = head;
-	  total = 0;
-	  while ((next = NEXT_SEC (curr)) != NULL)
+	  while (NEXT_SEC (curr) != NULL)
 	    {
-	      if ( (total + next->output_offset - curr->output_offset
-		    + next->size)
-		   < stub_group_size )
-		{
-		  total += next->output_offset - curr->output_offset;
-		}
-	      else
+	      next = NEXT_SEC (curr);
+	      end_of_next = next->output_offset + next->size;
+	      if (end_of_next - stub_group_start >= stub_group_size)
+		/* End of NEXT is too far from start, so stop.  */
 		break;
-
-	    curr = next;
+	      /* Add NEXT to the group.  */
+	      curr = next;
 	    }
 
 	  /* OK, the size from the start to the start of CURR is less
@@ -3588,18 +3584,15 @@ group_sections (struct elf32_arm_link_hash_table *htab,
 	     bytes after the stub section can be handled by it too.  */
 	  if (!stubs_always_after_branch)
 	    {
-	      total = head->size;
+	      stub_group_start = curr->output_offset + curr->size;
+
 	      while (next != NULL)
 		{
-		  if ( (total + next->output_offset - head->output_offset
-			+ next->size)
-		       < stub_group_size )
-		    {
-		      total += next->output_offset - head->output_offset;
-		    }
-		  else
+		  end_of_next = next->output_offset + next->size;
+		  if (end_of_next - stub_group_start >= stub_group_size)
+		    /* End of NEXT is too far from stubs, so stop.  */
 		    break;
-
+		  /* Add NEXT to the stub group.  */
 		  head = next;
 		  next = NEXT_SEC (head);
 		  htab->stub_group[head->id].link_sec = curr;
