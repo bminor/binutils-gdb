@@ -1,6 +1,7 @@
 /* strings -- print the strings of printable characters in files
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -53,6 +54,7 @@
    -h		Print the usage message on the standard output.
 
    --version
+   -V
    -v		Print the program version number.
 
    Written by Richard Stallman <rms@gnu.ai.mit.edu>
@@ -663,7 +665,7 @@ usage (FILE *stream, int status)
                             s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n\
   @<file>                   Read options from <file>\n\
   -h --help                 Display this information\n\
-  -v --version              Print the program's version number\n"));
+  -v -V --version           Print the program's version number\n"));
   list_supported_targets (program_name, stream);
   if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);

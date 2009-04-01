@@ -2318,7 +2318,7 @@ ar(1), objdump(1), readelf(1), and the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS strings
-strings [@option{-afov}] [@option{-}@var{min-len}]
+strings [@option{-afovV}] [@option{-}@var{min-len}]
         [@option{-n} @var{min-len}] [@option{--bytes=}@var{min-len}]
         [@option{-t} @var{radix}] [@option{--radix=}@var{radix}]
         [@option{-e} @var{encoding}] [@option{--encoding=}@var{encoding}]
@@ -2392,6 +2392,7 @@ Specify an object code format other than your system's default format.
 @xref{Target Selection}, for more information.
 
 @item -v
+@itemx -V
 @itemx --version
 Print the program version number on the standard output and exit.
 @end table

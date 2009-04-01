@@ -1,3 +1,10 @@
+2009-04-01  Jari Aalto  <jari.aalto@cante.net>
+
+	PR 9972
+	* doc/binutils.texi (strings): Document the -V alias for the
+	--version option.
+	* strings.c (usage): Likewise.
+
 2009-03-31  Nick Clifton  <nickc@redhat.com>
 
 	PR 9992
