@@ -685,7 +685,7 @@ win32_detach (void)
   {
     struct thread_resume resume;
     resume.thread = -1;
-    resume.step = 0;
+    resume.kind = resume_continue;
     resume.sig = 0;
     win32_resume (&resume, 1);
   }
@@ -754,7 +754,7 @@ win32_resume (struct thread_resume *resume_info, size_t n)
   if (resume_info[0].thread != -1)
     {
       sig = resume_info[0].sig;
-      step = resume_info[0].step;
+      step = resume_info[0].kind == resume_step;
     }
   else
     {
@@ -1476,7 +1476,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
    STATUS will be filled in with a response code to send to GDB.
    Returns the signal which caused the process to stop. */
 static unsigned long
-win32_wait (struct target_waitstatus *ourstatus)
+win32_wait (struct target_waitstatus *ourstatus, int options)
 {
   while (1)
     {

@@ -78,16 +78,18 @@ struct linux_target_ops
 
 extern struct linux_target_ops the_low_target;
 
+#define pid_of(proc) ((proc)->head.id)
+#define lwpid_of(proc) ((proc)->head.id)
+
 #define get_lwp(inf) ((struct lwp_info *)(inf))
 #define get_thread_lwp(thr) (get_lwp (inferior_target_data (thr)))
 #define get_lwp_thread(proc) ((struct thread_info *)			\
 			      find_inferior_id (&all_threads,		\
-						get_lwp (proc)->lwpid))
+						lwpid_of (get_lwp (proc))))
 
 struct lwp_info
 {
   struct inferior_list_entry head;
-  unsigned long lwpid;
 
   /* If this flag is set, the next SIGSTOP will be ignored (the
      process will be immediately resumed).  This means that either we
@@ -97,11 +99,14 @@ struct lwp_info
      yet.  */
   int stop_expected;
 
-  /* If this flag is set, the process is known to be stopped right now (stop
+  /* True if this thread was suspended (with vCont;t).  */
+  int suspended;
+
+  /* If this flag is set, the lwp is known to be stopped right now (stop
      event already received in a wait()).  */
   int stopped;
 
-  /* When stopped is set, the last wait status recorded for this process.  */
+  /* When stopped is set, the last wait status recorded for this lwp.  */
   int last_status;
 
   /* If this flag is set, STATUS_PENDING is a waitstatus that has not yet

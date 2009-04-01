@@ -172,6 +172,24 @@ extern int disable_packet_Tthread;
 extern int disable_packet_qC;
 extern int disable_packet_qfThreadInfo;
 
+extern int non_stop;
+
+/* Functions from event-loop.c.  */
+typedef void *gdb_client_data;
+typedef void (handler_func) (int, gdb_client_data);
+
+extern void delete_file_handler (int fd);
+extern void add_file_handler (int fd, handler_func *proc,
+			      gdb_client_data client_data);
+
+extern void start_event_loop (void);
+
+/* Functions from server.c.  */
+extern void handle_serial_event (int err, gdb_client_data client_data);
+extern void handle_target_event (int err, gdb_client_data client_data);
+
+extern void push_event (unsigned long ptid, struct target_waitstatus *status);
+
 /* Functions from hostio.c.  */
 extern int handle_vFile (char *, int, int *);
 
@@ -187,6 +205,7 @@ extern int transport_is_reliable;
 
 int putpkt (char *buf);
 int putpkt_binary (char *buf, int len);
+int putpkt_notif (char *buf);
 int getpkt (char *buf);
 void remote_open (char *name);
 void remote_close (void);

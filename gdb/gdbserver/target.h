@@ -22,6 +22,20 @@
 #ifndef TARGET_H
 #define TARGET_H
 
+/* Ways to "resume" a thread.  */
+
+enum resume_kind
+{
+  /* Thread should continue.  */
+  resume_continue,
+
+  /* Thread should single-step.  */
+  resume_step,
+
+  /* Thread should be stopped.  */
+  resume_stop
+};
+
 /* This structure describes how to resume a particular thread (or all
    threads) based on the client's request.  If thread is -1, then this
    entry applies to all threads.  These are passed around as an
@@ -31,10 +45,13 @@ struct thread_resume
 {
   unsigned long thread;
 
-  /* If non-zero, we want to single-step.  */
-  int step;
+  /* How to "resume".  */
+  enum resume_kind kind;
 
-  /* If non-zero, send this signal when we resume.  */
+  /* If non-zero, send this signal when we resume, or to stop the
+     thread.  If stopping a thread, and this is 0, the target should
+     stop the thread however it best decides to (e.g., SIGSTOP on
+     linux; SuspendThread on win32).  */
   int sig;
 };
 
@@ -85,6 +102,10 @@ struct target_waitstatus
     value;
   };
 
+/* Options that can be passed to target_ops->wait.  */
+
+#define TARGET_WNOHANG 1
+
 struct target_ops
 {
   /* Start a new process.
@@ -132,7 +153,7 @@ struct target_ops
   /* Wait for the inferior process or thread to change state.  Store
      status through argument pointer STATUS.  */
 
-  unsigned long (*wait) (struct target_waitstatus *status);
+  unsigned long (*wait) (struct target_waitstatus *status, int options);
 
   /* Fetch registers from the inferior process.
 
@@ -237,6 +258,16 @@ struct target_ops
   int (*qxfer_siginfo) (const char *annex, unsigned char *readbuf,
 			unsigned const char *writebuf,
 			CORE_ADDR offset, int len);
+
+  int (*supports_non_stop) (void);
+
+  /* Enables async target events.  Returns the previous enable
+     state.  */
+  int (*async) (int enable);
+
+  /* Switch to non-stop (1) or all-stop (0) mode.  Return 0 on
+     success, -1 otherwise.  */
+  int (*start_non_stop) (int);
 };
 
 extern struct target_ops *the_target;
@@ -267,7 +298,18 @@ void set_target_ops (struct target_ops *);
 #define join_inferior() \
   (*the_target->join) ()
 
-unsigned long mywait (struct target_waitstatus *ourstatus, int connected_wait);
+#define target_supports_non_stop() \
+  (the_target->supports_non_stop ? (*the_target->supports_non_stop ) () : 0)
+
+#define target_async(enable) \
+  (the_target->async ? (*the_target->async) (enable) : 0)
+
+/* Start non-stop mode, returns 0 on success, -1 on failure.   */
+
+int start_non_stop (int nonstop);
+
+unsigned long mywait (struct target_waitstatus *ourstatus, int options,
+		      int connected_wait);
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 

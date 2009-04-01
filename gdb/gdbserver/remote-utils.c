@@ -286,11 +286,16 @@ remote_open (char *name)
   fcntl (remote_desc, F_SETOWN, getpid ());
 #endif
 #endif
+
+  /* Register the event loop handler.  */
+  add_file_handler (remote_desc, handle_serial_event, NULL);
 }
 
 void
 remote_close (void)
 {
+  delete_file_handler (remote_desc);
+
 #ifdef USE_WIN32API
   closesocket (remote_desc);
 #else
@@ -522,8 +527,8 @@ try_rle (char *buf, int remaining, unsigned char *csum, char **p)
    The data of the packet is in BUF, and the length of the
    packet is in CNT.  Returns >= 0 on success, -1 otherwise.  */
 
-int
-putpkt_binary (char *buf, int cnt)
+static int
+putpkt_binary_1 (char *buf, int cnt, int is_notif)
 {
   int i;
   unsigned char csum = 0;
@@ -537,7 +542,10 @@ putpkt_binary (char *buf, int cnt)
      and giving it a checksum.  */
 
   p = buf2;
-  *p++ = '$';
+  if (is_notif)
+    *p++ = '%';
+  else
+    *p++ = '$';
 
   for (i = 0; i < cnt;)
     i += try_rle (buf + i, cnt - i, &csum, &p);
@@ -561,12 +569,15 @@ putpkt_binary (char *buf, int cnt)
 	  return -1;
 	}
 
-      if (noack_mode)
+      if (noack_mode || is_notif)
 	{
 	  /* Don't expect an ack then.  */
 	  if (remote_debug)
 	    {
-	      fprintf (stderr, "putpkt (\"%s\"); [noack mode]\n", buf2);
+	      if (is_notif)
+		fprintf (stderr, "putpkt (\"%s\"); [notif]\n", buf2);
+	      else
+		fprintf (stderr, "putpkt (\"%s\"); [noack mode]\n", buf2);
 	      fflush (stderr);
 	    }
 	  break;
@@ -605,6 +616,12 @@ putpkt_binary (char *buf, int cnt)
   return 1;			/* Success! */
 }
 
+int
+putpkt_binary (char *buf, int cnt)
+{
+  return putpkt_binary_1 (buf, cnt, 0);
+}
+
 /* Send a packet to the remote machine, with error checking.  The data
    of the packet is in BUF, and the packet should be a NUL-terminated
    string.  Returns >= 0 on success, -1 otherwise.  */
@@ -613,6 +630,12 @@ int
 putpkt (char *buf)
 {
   return putpkt_binary (buf, strlen (buf));
+}
+
+int
+putpkt_notif (char *buf)
+{
+  return putpkt_binary_1 (buf, strlen (buf), 1);
 }
 
 /* Come here when we get an input interrupt from the remote side.  This
@@ -1000,7 +1023,10 @@ prepare_resume_reply (char *buf, unsigned long ptid,
 	       gdbserver to know what inferior_ptid is.  */
 	    if (1 || general_thread != ptid)
 	      {
-		general_thread = ptid;
+		/* In non-stop, don't change the general thread behind
+		   GDB's back.  */
+		if (!non_stop)
+		  general_thread = ptid;
 		sprintf (buf, "thread:%lx;", ptid);
 		buf += strlen (buf);
 	      }

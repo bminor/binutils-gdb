@@ -359,7 +359,7 @@ spu_resume (struct thread_resume *resume_info, size_t n)
 
   /* We don't support hardware single-stepping right now, assume
      GDB knows to use software single-stepping.  */
-  if (resume_info[i].step)
+  if (resume_info[i].kind == resume_step)
     fprintf (stderr, "Hardware single-step not supported.\n");
 
   regcache_invalidate ();
@@ -372,7 +372,7 @@ spu_resume (struct thread_resume *resume_info, size_t n)
 
 /* Wait for process, returns status.  */
 static unsigned long
-spu_wait (struct target_waitstatus *ourstatus)
+spu_wait (struct target_waitstatus *ourstatus, int options)
 {
   int tid = current_tid;
   int w;

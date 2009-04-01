@@ -89,19 +89,46 @@ write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 }
 
 unsigned long
-mywait (struct target_waitstatus *ourstatus, int connected_wait)
+mywait (struct target_waitstatus *ourstatus, int options,
+	int connected_wait)
 {
   unsigned long ret;
 
   if (connected_wait)
     server_waiting = 1;
 
-  ret = (*the_target->wait) (ourstatus);
+  ret = (*the_target->wait) (ourstatus, options);
+
+  if (ourstatus->kind == TARGET_WAITKIND_EXITED
+      || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
+    {
+      if (ourstatus->kind == TARGET_WAITKIND_EXITED)
+	fprintf (stderr,
+		 "\nChild exited with status %d\n", ourstatus->value.sig);
+      if (ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
+	fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
+		 target_signal_to_host (ourstatus->value.sig),
+		 target_signal_to_name (ourstatus->value.sig));
+    }
 
   if (connected_wait)
     server_waiting = 0;
 
   return ret;
+}
+
+int
+start_non_stop (int nonstop)
+{
+  if (the_target->start_non_stop == NULL)
+    {
+      if (nonstop)
+	return -1;
+      else
+	return 0;
+    }
+
+  return (*the_target->start_non_stop) (nonstop);
 }
 
 void

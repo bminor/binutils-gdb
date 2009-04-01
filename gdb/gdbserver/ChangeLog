@@ -1,5 +1,128 @@
 2009-04-01  Pedro Alves  <pedro@codesourcery.com>
 
+	Non-stop mode support.
+
+	* server.h (non_stop): Declare.
+	(gdb_client_data, handler_func): Declare.
+	(delete_file_handler, add_file_handler, start_event_loop):
+	Declare.
+	(handle_serial_event, handle_target_event, push_event)
+	(putpkt_notif): Declare.
+	* target.h (enum resume_kind): New.
+	(struct thread_resume): Replace `step' field by `kind' field.
+	(TARGET_WNOHANG): Define.
+	(struct target_ops) <wait>: Add `options' argument.
+	<supports_non_stop, async, start_non_stop>: New fields.
+	(target_supports_non_stop, target_async): New.
+	(start_non_stop): Declare.
+	(mywait): Add `options' argument.
+	* target.c (mywait): Add `options' argument.  Print child exit
+	notifications here.
+	(start_non_stop): New.
+	* server.c (non_stop, own_buf, mem_buf): New globals.
+	(struct vstop_notif): New.
+	(notif_queue): New global.
+	(queue_stop_reply, push_event, discard_queued_stop_replies)
+	(send_next_stop_reply): New.
+	(start_inferior): Adjust to use resume_kind.  Adjust to mywait
+	interface changes.
+	(attach_inferior): In non-stop mode, don't wait for the target
+	here.
+	(handle_general_set): Handle QNonStop.
+	(handle_query): When handling qC, return the current general
+	thread, instead of the first thread of the list.
+	(handle_query): If the backend supports non-stop mode, include
+	QNonStop+ in the qSupported query response.
+	(handle_v_cont): Adjust to use resume_kind.  Handle resume_stop
+	and non-stop mode.
+	(handle_v_attach, handle_v_run): Handle non-stop mode.
+	(handle_v_stopped): New.
+	(handle_v_requests): Report support for vCont;t.  Handle vStopped.
+	(myresume): Adjust to use resume_kind.  Handle non-stop.
+	(queue_stop_reply_callback): New.
+	(handle_status): Handle non-stop mode.
+	(main): Clear non_stop flag on reconnection.  Use the event-loop.
+	Refactor serial protocol handling from here ...
+	(process_serial_event): ... to this new function.  When GDB
+	selects any thread, select one here.  In non-stop mode, wait until
+	GDB acks all pending events before exiting.
+	(handle_serial_event, handle_target_event): New.
+	* remote-utils.c (remote_open): Install remote_desc in the event
+	loop.
+	(remote_close): Remove remote_desc from the event loop.
+	(putpkt_binary): Rename to...
+	(putpkt_binary_1): ... this.  Add `is_notic' argument.  Handle it.
+	(putpkt_binary): New as wrapper around putpkt_binary_1.
+	(putpkt_notif): New.
+	(prepare_resume_reply): In non-stop mode, don't change the
+	general_thread.
+	* event-loop.c: New.
+	* Makefile.in (OBJ): Add event-loop.o.
+	(event-loop.o): New rule.
+
+	* linux-low.h (pid_of): Moved here.
+	(lwpid_of): New.
+	(get_lwp_thread): Use lwpid_of.
+	(struct lwp_info): Delete `lwpid' field.  Add `suspended' field.
+	* linux-low.c (pid_of): Delete.
+	(inferior_pid): Use lwpid_of.
+	(linux_event_pipe): New.
+	(target_is_async_p): New.
+	(delete_lwp): New.
+	(handle_extended_wait): Use lwpid_of.
+	(add_lwp): Don't set lwpid field.
+	(linux_attach_lwp): Adjust debug output.  Use lwpid_of.
+	(linux_kill_one_lwp): If killing a running lwp, stop it first.
+	Use lwpid_of.  Adjust to linux_wait_for_event interface changes.
+	(linux_detach_one_lwp): If detaching from a running lwp, stop it
+	first.  Adjust to linux_wait_for_event interface changes.  Use
+	lwpid_of.
+	(linux_detach): Don't delete the main lwp here.
+	(linux_join): Use my_waitpid.  Avoid signal_pid.  Use lwpid_of.
+	(status_pending_p): Don't consider explicitly suspended lwps.
+	(linux_wait_for_lwp): Take an integer pid instead of a lwp_info
+	pointer.  Add OPTIONS argument.  Change return type to int.  Use
+	my_waitpid instead of sleeping.  Handle WNOHANG.  Use lwpid_of.
+	(linux_wait_for_event): Take an integer pid instead of a lwp_info
+	pointer.  Add status pointer argument.  Return a pid instead of a
+	status.  Use lwpid_of.  Adjust to linux_wait_for_lwp interface
+	changes.  In non-stop mode, don't switch to a random thread.
+	(linux_wait): Rename to...
+	(linux_wait_1): ... this.  Add target_options argument, and handle
+	it.  Adjust to use resume_kind.  Use lwpid_of.  In non-stop mode,
+	don't handle the continue thread.  Handle TARGET_WNOHANG.  Merge
+	clean exit and signal exit code.  Don't stop all threads in
+	non-stop mode.  In all-stop mode, only stop all threads when
+	reporting a stop to GDB.  Handle explicit thread stop requests.
+	(async_file_flush, async_file_mark): New.
+	(linux_wait): New.
+	(send_sigstop): Use lwpid_of.
+	(wait_for_sigstop): Use lwpid_of.  Adjust to linux_wait_for_event
+	interface changes.  In non-stop mode, don't switch to a random
+	thread.
+	(linux_resume_one_lwp): Use lwpid_of.
+	(linux_continue_one_thread, linux_queue_one_thread): Merge into ...
+	(linux_resume_one_thread): ... this.  Handle resume_stop.  In
+	non-stop mode, don't look for pending flag in all threads.
+	(resume_status_pending_p): Don't consider explicitly suspended
+	threads.
+	(my_waitpid): Reimplement.  Emulate __WALL.
+	(linux_request_interrupt, linux_read_offsets, linux_xfer_siginfo):
+	Use lwpid_of.
+	(sigchld_handler, linux_supports_non_stop, linux_async)
+	(linux_start_non_stop): New.
+	(linux_target_ops): Register linux_supports_non_stop, linux_async
+	and linux_start_non_stop.
+	(initialize_low): Install SIGCHLD handler.
+	* thread-db.c (thread_db_create_event, find_one_thread)
+	(thread_db_get_tls_address): Use lwpid_of.
+	* win32-low.c (win32_detach): Adjust to use resume_kind.
+	(win32_wait): Add `options' argument.
+	* spu-low.c (spu_resume): Adjust to use resume_kind.
+	(spu_wait): Add `options' argument.
+
+2009-04-01  Pedro Alves  <pedro@codesourcery.com>
+
 	Decouple target code from remote protocol.
 
 	* target.h (enum target_waitkind): New.

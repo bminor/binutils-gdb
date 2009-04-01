@@ -155,7 +155,7 @@ thread_db_create_event (CORE_ADDR where)
      created threads.  */
   lwp = get_thread_lwp (current_inferior);
   if (lwp->thread_known == 0)
-    find_one_thread (lwp->lwpid);
+    find_one_thread (lwpid_of (lwp));
 
   /* msg.event == TD_EVENT_CREATE */
 
@@ -245,7 +245,7 @@ find_one_thread (int lwpid)
     return 1;
 
   /* Get information about this thread.  */
-  err = td_ta_map_lwp2thr (thread_agent, lwp->lwpid, &th);
+  err = td_ta_map_lwp2thr (thread_agent, lwpid_of (lwp), &th);
   if (err != TD_OK)
     error ("Cannot get thread handle for LWP %d: %s",
 	   lwpid, thread_db_err_str (err));
@@ -259,10 +259,10 @@ find_one_thread (int lwpid)
     fprintf (stderr, "Found thread %ld (LWP %d)\n",
 	     ti.ti_tid, ti.ti_lid);
 
-  if (lwp->lwpid != ti.ti_lid)
+  if (lwpid_of (lwp) != ti.ti_lid)
     {
       warning ("PID mismatch!  Expected %ld, got %ld",
-	       (long) lwp->lwpid, (long) ti.ti_lid);
+	       (long) lwpid_of (lwp), (long) ti.ti_lid);
       return 0;
     }
 
@@ -388,7 +388,7 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 
   lwp = get_thread_lwp (thread);
   if (!lwp->thread_known)
-    find_one_thread (lwp->lwpid);
+    find_one_thread (lwpid_of (lwp));
   if (!lwp->thread_known)
     return TD_NOTHR;
 
