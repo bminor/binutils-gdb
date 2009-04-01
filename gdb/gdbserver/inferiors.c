@@ -30,11 +30,87 @@ struct thread_info
   unsigned int gdb_id;
 };
 
+struct inferior_list all_processes;
 struct inferior_list all_threads;
 struct inferior_list all_dlls;
 int dlls_changed;
 
 struct thread_info *current_inferior;
+
+
+/* Oft used ptids */
+ptid_t null_ptid;
+ptid_t minus_one_ptid;
+
+/* Create a ptid given the necessary PID, LWP, and TID components.  */
+
+ptid_t
+ptid_build (int pid, long lwp, long tid)
+{
+  ptid_t ptid;
+
+  ptid.pid = pid;
+  ptid.lwp = lwp;
+  ptid.tid = tid;
+  return ptid;
+}
+
+/* Create a ptid from just a pid.  */
+
+ptid_t
+pid_to_ptid (int pid)
+{
+  return ptid_build (pid, 0, 0);
+}
+
+/* Fetch the pid (process id) component from a ptid.  */
+
+int
+ptid_get_pid (ptid_t ptid)
+{
+  return ptid.pid;
+}
+
+/* Fetch the lwp (lightweight process) component from a ptid.  */
+
+long
+ptid_get_lwp (ptid_t ptid)
+{
+  return ptid.lwp;
+}
+
+/* Fetch the tid (thread id) component from a ptid.  */
+
+long
+ptid_get_tid (ptid_t ptid)
+{
+  return ptid.tid;
+}
+
+/* ptid_equal() is used to test equality of two ptids.  */
+
+int
+ptid_equal (ptid_t ptid1, ptid_t ptid2)
+{
+  return (ptid1.pid == ptid2.pid
+	  && ptid1.lwp == ptid2.lwp
+	  && ptid1.tid == ptid2.tid);
+}
+
+/* Return true if this ptid represents a process.  */
+
+int
+ptid_is_pid (ptid_t ptid)
+{
+  if (ptid_equal (minus_one_ptid, ptid))
+    return 0;
+  if (ptid_equal (null_ptid, ptid))
+    return 0;
+
+  return (ptid_get_pid (ptid) != 0
+	  && ptid_get_lwp (ptid) == 0
+	  && ptid_get_tid (ptid) == 0);
+}
 
 #define get_thread(inf) ((struct thread_info *)(inf))
 #define get_dll(inf) ((struct dll_info *)(inf))
@@ -93,7 +169,7 @@ remove_inferior (struct inferior_list *list,
 }
 
 void
-add_thread (unsigned long thread_id, void *target_data, unsigned int gdb_id)
+add_thread (ptid_t thread_id, void *target_data)
 {
   struct thread_info *new_thread = xmalloc (sizeof (*new_thread));
 
@@ -108,40 +184,38 @@ add_thread (unsigned long thread_id, void *target_data, unsigned int gdb_id)
 
   new_thread->target_data = target_data;
   set_inferior_regcache_data (new_thread, new_register_cache ());
-  new_thread->gdb_id = gdb_id;
 }
 
-unsigned int
-thread_id_to_gdb_id (unsigned long thread_id)
+ptid_t
+thread_id_to_gdb_id (ptid_t thread_id)
 {
   struct inferior_list_entry *inf = all_threads.head;
 
   while (inf != NULL)
     {
-      struct thread_info *thread = get_thread (inf);
-      if (inf->id == thread_id)
-	return thread->gdb_id;
+      if (ptid_equal (inf->id, thread_id))
+	return thread_id;
       inf = inf->next;
     }
 
-  return 0;
+  return null_ptid;
 }
 
-unsigned int
+ptid_t
 thread_to_gdb_id (struct thread_info *thread)
 {
-  return thread->gdb_id;
+  return thread->entry.id;
 }
 
 struct thread_info *
-gdb_id_to_thread (unsigned int gdb_id)
+find_thread_pid (ptid_t ptid)
 {
   struct inferior_list_entry *inf = all_threads.head;
 
   while (inf != NULL)
     {
       struct thread_info *thread = get_thread (inf);
-      if (thread->gdb_id == gdb_id)
+      if (ptid_equal (thread->entry.id, ptid))
 	return thread;
       inf = inf->next;
     }
@@ -149,12 +223,12 @@ gdb_id_to_thread (unsigned int gdb_id)
   return NULL;
 }
 
-unsigned long
-gdb_id_to_thread_id (unsigned int gdb_id)
+ptid_t
+gdb_id_to_thread_id (ptid_t gdb_id)
 {
-  struct thread_info *thread = gdb_id_to_thread (gdb_id);
+  struct thread_info *thread = find_thread_pid (gdb_id);
 
-  return thread ? thread->entry.id : 0;
+  return thread ? thread->entry.id : null_ptid;
 }
 
 static void
@@ -192,13 +266,13 @@ find_inferior (struct inferior_list *list,
 }
 
 struct inferior_list_entry *
-find_inferior_id (struct inferior_list *list, unsigned long id)
+find_inferior_id (struct inferior_list *list, ptid_t id)
 {
   struct inferior_list_entry *inf = list->head;
 
   while (inf != NULL)
     {
-      if (inf->id == id)
+      if (ptid_equal (inf->id, id))
 	return inf;
       inf = inf->next;
     }
@@ -267,7 +341,7 @@ loaded_dll (const char *name, CORE_ADDR base_addr)
   struct dll_info *new_dll = xmalloc (sizeof (*new_dll));
   memset (new_dll, 0, sizeof (*new_dll));
 
-  new_dll->entry.id = -1;
+  new_dll->entry.id = minus_one_ptid;
 
   new_dll->name = xstrdup (name);
   new_dll->base_addr = base_addr;
@@ -318,7 +392,7 @@ add_pid_to_list (struct inferior_list *list, unsigned long pid)
   struct inferior_list_entry *new_entry;
 
   new_entry = xmalloc (sizeof (struct inferior_list_entry));
-  new_entry->id = pid;
+  new_entry->id = pid_to_ptid (pid);
   add_inferior_to_list (list, new_entry);
 }
 
@@ -327,7 +401,7 @@ pull_pid_from_list (struct inferior_list *list, unsigned long pid)
 {
   struct inferior_list_entry *new_entry;
 
-  new_entry = find_inferior_id (list, pid);
+  new_entry = find_inferior_id (list, pid_to_ptid (pid));
   if (new_entry == NULL)
     return 0;
   else
@@ -336,4 +410,57 @@ pull_pid_from_list (struct inferior_list *list, unsigned long pid)
       free (new_entry);
       return 1;
     }
+}
+
+struct process_info *
+add_process (int pid, int attached)
+{
+  struct process_info *process;
+
+  process = xcalloc (1, sizeof (*process));
+
+  process->head.id = pid_to_ptid (pid);
+  process->attached = attached;
+
+  add_inferior_to_list (&all_processes, &process->head);
+
+  return process;
+}
+
+void
+remove_process (struct process_info *process)
+{
+  clear_symbol_cache (&process->symbol_cache);
+  free_all_breakpoints (process);
+  remove_inferior (&all_processes, &process->head);
+}
+
+struct process_info *
+find_process_pid (int pid)
+{
+  return (struct process_info *)
+    find_inferior_id (&all_processes, pid_to_ptid (pid));
+}
+
+static struct process_info *
+get_thread_process (struct thread_info *thread)
+{
+  int pid = ptid_get_pid (thread->entry.id);
+  return find_process_pid (pid);
+}
+
+struct process_info *
+current_process (void)
+{
+  if (current_inferior == NULL)
+    fatal ("Current inferior requested, but current_inferior is NULL\n");
+
+  return get_thread_process (current_inferior);
+}
+
+void
+initialize_inferiors (void)
+{
+  null_ptid = ptid_build (0, 0, 0);
+  minus_one_ptid = ptid_build (-1, 0, 0);
 }

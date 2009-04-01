@@ -66,8 +66,8 @@ typedef elf_gregset_t prgregset_t;
 /* Structure that identifies the target process.  */
 struct ps_prochandle
 {
-  /* The process id is all we need.  */
-  pid_t pid;
+  /* We don't need to track anything.  All context is served from the
+     current inferior.  */
 };
 
 #endif /* gdb_proc_service.h */

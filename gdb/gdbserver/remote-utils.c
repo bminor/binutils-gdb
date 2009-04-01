@@ -79,17 +79,10 @@ typedef int socklen_t;
 /* A cache entry for a successfully looked-up symbol.  */
 struct sym_cache
 {
-  const char *name;
+  char *name;
   CORE_ADDR addr;
   struct sym_cache *next;
 };
-
-/* The symbol cache.  */
-static struct sym_cache *symbol_cache;
-
-/* If this flag has been set, assume cache misses are
-   failures.  */
-int all_symbols_looked_up;
 
 int remote_debug = 0;
 struct ui_file *gdb_stdlog;
@@ -317,6 +310,29 @@ fromhex (int a)
   return 0;
 }
 
+static const char hexchars[] = "0123456789abcdef";
+
+static int
+ishex (int ch, int *val)
+{
+  if ((ch >= 'a') && (ch <= 'f'))
+    {
+      *val = ch - 'a' + 10;
+      return 1;
+    }
+  if ((ch >= 'A') && (ch <= 'F'))
+    {
+      *val = ch - 'A' + 10;
+      return 1;
+    }
+  if ((ch >= '0') && (ch <= '9'))
+    {
+      *val = ch - '0';
+      return 1;
+    }
+  return 0;
+}
+
 int
 unhexify (char *bin, const char *hex, int count)
 {
@@ -521,6 +537,103 @@ try_rle (char *buf, int remaining, unsigned char *csum, char **p)
   *(*p)++ = n + 29;
 
   return n + 1;
+}
+
+char *
+unpack_varlen_hex (char *buff,	/* packet to parse */
+		   ULONGEST *result)
+{
+  int nibble;
+  ULONGEST retval = 0;
+
+  while (ishex (*buff, &nibble))
+    {
+      buff++;
+      retval = retval << 4;
+      retval |= nibble & 0x0f;
+    }
+  *result = retval;
+  return buff;
+}
+
+/* Write a PTID to BUF.  Returns BUF+CHARACTERS_WRITTEN.  */
+
+char *
+write_ptid (char *buf, ptid_t ptid)
+{
+  int pid, tid;
+
+  if (multi_process)
+    {
+      pid = ptid_get_pid (ptid);
+      if (pid < 0)
+	buf += sprintf (buf, "p-%x.", -pid);
+      else
+	buf += sprintf (buf, "p%x.", pid);
+    }
+  tid = ptid_get_lwp (ptid);
+  if (tid < 0)
+    buf += sprintf (buf, "-%x", -tid);
+  else
+    buf += sprintf (buf, "%x", tid);
+
+  return buf;
+}
+
+ULONGEST
+hex_or_minus_one (char *buf, char **obuf)
+{
+  ULONGEST ret;
+
+  if (strncmp (buf, "-1", 2) == 0)
+    {
+      ret = (ULONGEST) -1;
+      buf += 2;
+    }
+  else
+    buf = unpack_varlen_hex (buf, &ret);
+
+  if (obuf)
+    *obuf = buf;
+
+  return ret;
+}
+
+/* Extract a PTID from BUF.  If non-null, OBUF is set to the to one
+   passed the last parsed char.  Returns null_ptid on error.  */
+ptid_t
+read_ptid (char *buf, char **obuf)
+{
+  char *p = buf;
+  char *pp;
+  ULONGEST pid = 0, tid = 0;
+
+  if (*p == 'p')
+    {
+      /* Multi-process ptid.  */
+      pp = unpack_varlen_hex (p + 1, &pid);
+      if (*pp != '.')
+	error ("invalid remote ptid: %s\n", p);
+
+      p = pp + 1;
+
+      tid = hex_or_minus_one (p, &pp);
+
+      if (obuf)
+	*obuf = pp;
+      return ptid_build (pid, tid, 0);
+    }
+
+  /* No multi-process.  Just a tid.  */
+  tid = hex_or_minus_one (p, &pp);
+
+  /* Since the stub is not sending a process id, then default to
+     what's in the current inferior.  */
+  pid = ptid_get_pid (((struct inferior_list_entry *) current_inferior)->id);
+
+  if (obuf)
+    *obuf = pp;
+  return ptid_build (pid, tid, 0);
 }
 
 /* Send a packet to the remote machine, with error checking.
@@ -957,12 +1070,12 @@ dead_thread_notify (int id)
 }
 
 void
-prepare_resume_reply (char *buf, unsigned long ptid,
+prepare_resume_reply (char *buf, ptid_t ptid,
 		      struct target_waitstatus *status)
 {
   if (debug_threads)
-    fprintf (stderr, "Writing resume reply for %lu:%d\n\n",
-	     ptid, status->kind);
+    fprintf (stderr, "Writing resume reply for %s:%d\n\n",
+	     target_pid_to_str (ptid), status->kind);
 
   switch (status->kind)
     {
@@ -978,7 +1091,7 @@ prepare_resume_reply (char *buf, unsigned long ptid,
 
 	saved_inferior = current_inferior;
 
-	current_inferior = gdb_id_to_thread (ptid);
+	current_inferior = find_thread_pid (ptid);
 
 	if (the_target->stopped_by_watchpoint != NULL
 	    && (*the_target->stopped_by_watchpoint) ())
@@ -1021,13 +1134,16 @@ prepare_resume_reply (char *buf, unsigned long ptid,
 	       in GDB will claim this event belongs to inferior_ptid
 	       if we do not specify a thread, and there's no way for
 	       gdbserver to know what inferior_ptid is.  */
-	    if (1 || general_thread != ptid)
+	    if (1 || !ptid_equal (general_thread, ptid))
 	      {
 		/* In non-stop, don't change the general thread behind
 		   GDB's back.  */
 		if (!non_stop)
 		  general_thread = ptid;
-		sprintf (buf, "thread:%lx;", ptid);
+		sprintf (buf, "thread:");
+		buf += strlen (buf);
+		buf = write_ptid (buf, ptid);
+		strcat (buf, ";");
 		buf += strlen (buf);
 	      }
 	  }
@@ -1043,10 +1159,18 @@ prepare_resume_reply (char *buf, unsigned long ptid,
       }
       break;
     case TARGET_WAITKIND_EXITED:
-      sprintf (buf, "W%02x", status->value.integer);
+      if (multi_process)
+	sprintf (buf, "W%x;process:%x",
+		 status->value.integer, ptid_get_pid (ptid));
+      else
+	sprintf (buf, "W%02x", status->value.integer);
       break;
     case TARGET_WAITKIND_SIGNALLED:
-      sprintf (buf, "X%02x", status->value.sig);
+      if (multi_process)
+	sprintf (buf, "X%x;process:%x",
+		 status->value.sig, ptid_get_pid (ptid));
+      else
+	sprintf (buf, "X%02x", status->value.sig);
       break;
     default:
       error ("unhandled waitkind");
@@ -1174,6 +1298,31 @@ decode_search_memory_packet (const char *buf, int packet_len,
   return 0;
 }
 
+static void
+free_sym_cache (struct sym_cache *sym)
+{
+  if (sym != NULL)
+    {
+      free (sym->name);
+      free (sym);
+    }
+}
+
+void
+clear_symbol_cache (struct sym_cache **symcache_p)
+{
+  struct sym_cache *sym, *next;
+
+  /* Check the cache first.  */
+  for (sym = *symcache_p; sym; sym = next)
+    {
+      next = sym->next;
+      free_sym_cache (sym);
+    }
+
+  *symcache_p = NULL;
+}
+
 /* Ask GDB for the address of NAME, and return it in ADDRP if found.
    Returns 1 if the symbol is found, 0 if it is not, -1 on error.  */
 
@@ -1183,9 +1332,12 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
   char own_buf[266], *p, *q;
   int len;
   struct sym_cache *sym;
+  struct process_info *proc;
+
+  proc = current_process ();
 
   /* Check the cache first.  */
-  for (sym = symbol_cache; sym; sym = sym->next)
+  for (sym = proc->symbol_cache; sym; sym = sym->next)
     if (strcmp (name, sym->name) == 0)
       {
 	*addrp = sym->addr;
@@ -1197,7 +1349,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
      in any libraries loaded after that point, only in symbols in
      libpthread.so.  It might not be an appropriate time to look
      up a symbol, e.g. while we're trying to fetch registers.  */
-  if (all_symbols_looked_up)
+  if (proc->all_symbols_looked_up)
     return 0;
 
   /* Send the request.  */
@@ -1257,8 +1409,8 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
   sym = xmalloc (sizeof (*sym));
   sym->name = xstrdup (name);
   sym->addr = *addrp;
-  sym->next = symbol_cache;
-  symbol_cache = sym;
+  sym->next = proc->symbol_cache;
+  proc->symbol_cache = sym;
 
   return 1;
 }

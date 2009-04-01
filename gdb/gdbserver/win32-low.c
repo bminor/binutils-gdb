@@ -94,11 +94,17 @@ static void win32_resume (struct thread_resume *resume_info, size_t n);
 
 /* Get the thread ID from the current selected inferior (the current
    thread).  */
-static DWORD
-current_inferior_tid (void)
+static ptid_t
+current_inferior_ptid (void)
 {
-  win32_thread_info *th = inferior_target_data (current_inferior);
-  return th->tid;
+  return ((struct inferior_list_entry*) current_inferior)->id;
+}
+
+/* The current debug event from WaitForDebugEvent.  */
+static ptid_t
+debug_event_ptid (DEBUG_EVENT *event)
+{
+  return ptid_build (event->dwProcessId, event->dwThreadId, 0);
 }
 
 /* Get the thread context of the thread associated with TH.  */
@@ -137,12 +143,12 @@ win32_set_thread_context (win32_thread_info *th)
 /* Find a thread record given a thread id.  If GET_CONTEXT is set then
    also retrieve the context for this thread.  */
 static win32_thread_info *
-thread_rec (DWORD id, int get_context)
+thread_rec (ptid_t ptid, int get_context)
 {
   struct thread_info *thread;
   win32_thread_info *th;
 
-  thread = (struct thread_info *) find_inferior_id (&all_threads, id);
+  thread = (struct thread_info *) find_inferior_id (&all_threads, ptid);
   if (thread == NULL)
     return NULL;
 
@@ -169,20 +175,21 @@ thread_rec (DWORD id, int get_context)
 
 /* Add a thread to the thread list.  */
 static win32_thread_info *
-child_add_thread (DWORD tid, HANDLE h)
+child_add_thread (DWORD pid, DWORD tid, HANDLE h)
 {
   win32_thread_info *th;
+  ptid_t ptid = ptid_build (pid, tid, 0);
 
-  if ((th = thread_rec (tid, FALSE)))
+  if ((th = thread_rec (ptid, FALSE)))
     return th;
 
   th = xcalloc (1, sizeof (*th));
   th->tid = tid;
   th->h = h;
 
-  add_thread (tid, th, (unsigned int) tid);
+  add_thread (ptid, th);
   set_inferior_regcache_data ((struct thread_info *)
-			      find_inferior_id (&all_threads, tid),
+			      find_inferior_id (&all_threads, ptid),
 			      new_register_cache ());
 
   if (the_low_target.thread_added != NULL)
@@ -204,15 +211,17 @@ delete_thread_info (struct inferior_list_entry *thread)
 
 /* Delete a thread from the list of threads.  */
 static void
-child_delete_thread (DWORD id)
+child_delete_thread (DWORD pid, DWORD tid)
 {
   struct inferior_list_entry *thread;
+  ptid_t ptid;
 
   /* If the last thread is exiting, just return.  */
   if (all_threads.head == all_threads.tail)
     return;
 
-  thread = find_inferior_id (&all_threads, id);
+  ptid = ptid_build (pid, tid, 0);
+  thread = find_inferior_id (&all_threads, ptid);
   if (thread == NULL)
     return;
 
@@ -250,7 +259,7 @@ child_init_thread_list (void)
 }
 
 static void
-do_initial_child_stuff (HANDLE proch, DWORD pid)
+do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 {
   last_sig = TARGET_SIGNAL_0;
 
@@ -263,6 +272,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid)
 
   memset (&current_event, 0, sizeof (current_event));
 
+  add_process (pid, attached);
   child_init_thread_list ();
 
   if (the_low_target.initial_stuff != NULL)
@@ -320,7 +330,7 @@ static void
 child_fetch_inferior_registers (int r)
 {
   int regno;
-  win32_thread_info *th = thread_rec (current_inferior_tid (), TRUE);
+  win32_thread_info *th = thread_rec (current_inferior_ptid (), TRUE);
   if (r == -1 || r == 0 || r > NUM_REGS)
     child_fetch_inferior_registers (NUM_REGS);
   else
@@ -334,7 +344,7 @@ static void
 child_store_inferior_registers (int r)
 {
   int regno;
-  win32_thread_info *th = thread_rec (current_inferior_tid (), TRUE);
+  win32_thread_info *th = thread_rec (current_inferior_ptid (), TRUE);
   if (r == -1 || r == 0 || r > NUM_REGS)
     child_store_inferior_registers (NUM_REGS);
   else
@@ -540,7 +550,7 @@ win32_create_inferior (char *program, char **program_args)
   CloseHandle (pi.hThread);
 #endif
 
-  do_initial_child_stuff (pi.hProcess, pi.dwProcessId);
+  do_initial_child_stuff (pi.hProcess, pi.dwProcessId, 0);
 
   return current_process_id;
 }
@@ -571,7 +581,7 @@ win32_attach (unsigned long pid)
 
 	  /* win32_wait needs to know we're attaching.  */
 	  attaching = 1;
-	  do_initial_child_stuff (h, pid);
+	  do_initial_child_stuff (h, pid, 1);
 	  return 0;
 	}
 
@@ -639,11 +649,13 @@ win32_clear_inferiors (void)
 }
 
 /* Kill all inferiors.  */
-static void
-win32_kill (void)
+static int
+win32_kill (int pid)
 {
+  struct process_info *process;
+
   if (current_process_handle == NULL)
-    return;
+    return -1;
 
   TerminateProcess (current_process_handle, 0);
   for (;;)
@@ -662,12 +674,17 @@ win32_kill (void)
     }
 
   win32_clear_inferiors ();
+
+  process = find_process_pid (pid);
+  remove_process (process);
+  return 0;
 }
 
-/* Detach from all inferiors.  */
+/* Detach from inferior PID.  */
 static int
-win32_detach (void)
+win32_detach (int pid)
 {
+  struct process_info *process;
   winapi_DebugActiveProcessStop DebugActiveProcessStop = NULL;
   winapi_DebugSetProcessKillOnExit DebugSetProcessKillOnExit = NULL;
 #ifdef _WIN32_WCE
@@ -684,7 +701,7 @@ win32_detach (void)
 
   {
     struct thread_resume resume;
-    resume.thread = -1;
+    resume.thread = minus_one_ptid;
     resume.kind = resume_continue;
     resume.sig = 0;
     win32_resume (&resume, 1);
@@ -694,6 +711,8 @@ win32_detach (void)
     return -1;
 
   DebugSetProcessKillOnExit (FALSE);
+  process = find_process_pid (pid);
+  remove_process (process);
 
   win32_clear_inferiors ();
   return 0;
@@ -701,11 +720,9 @@ win32_detach (void)
 
 /* Wait for inferiors to end.  */
 static void
-win32_join (void)
+win32_join (int pid)
 {
-  extern unsigned long signal_pid;
-
-  HANDLE h = OpenProcess (PROCESS_ALL_ACCESS, FALSE, signal_pid);
+  HANDLE h = OpenProcess (PROCESS_ALL_ACCESS, FALSE, pid);
   if (h != NULL)
     {
       WaitForSingleObject (h, INFINITE);
@@ -715,13 +732,13 @@ win32_join (void)
 
 /* Return 1 iff the thread with thread ID TID is alive.  */
 static int
-win32_thread_alive (unsigned long tid)
+win32_thread_alive (ptid_t ptid)
 {
   int res;
 
   /* Our thread list is reliable; don't bother to poll target
      threads.  */
-  if (find_inferior_id (&all_threads, tid) != NULL)
+  if (find_inferior_id (&all_threads, ptid) != NULL)
     res = 1;
   else
     res = 0;
@@ -738,11 +755,12 @@ win32_resume (struct thread_resume *resume_info, size_t n)
   int step;
   win32_thread_info *th;
   DWORD continue_status = DBG_CONTINUE;
+  ptid_t ptid;
 
   /* This handles the very limited set of resume packets that GDB can
      currently produce.  */
 
-  if (n == 1 && resume_info[0].thread == -1)
+  if (n == 1 && ptid_equal (resume_info[0].thread, minus_one_ptid))
     tid = -1;
   else if (n > 1)
     tid = -1;
@@ -751,7 +769,7 @@ win32_resume (struct thread_resume *resume_info, size_t n)
        the Windows resume code do the right thing for thread switching.  */
     tid = current_event.dwThreadId;
 
-  if (resume_info[0].thread != -1)
+  if (!ptid_equal (resume_info[0].thread, minus_one_ptid))
     {
       sig = resume_info[0].sig;
       step = resume_info[0].kind == resume_step;
@@ -777,7 +795,8 @@ win32_resume (struct thread_resume *resume_info, size_t n)
   last_sig = TARGET_SIGNAL_0;
 
   /* Get context for the currently selected thread.  */
-  th = thread_rec (current_event.dwThreadId, FALSE);
+  ptid = debug_event_ptid (&current_event);
+  th = thread_rec (ptid, FALSE);
   if (th)
     {
       if (th->context.ContextFlags)
@@ -1295,6 +1314,8 @@ auto_delete_breakpoint (CORE_ADDR stop_pc)
 static int
 get_child_debug_event (struct target_waitstatus *ourstatus)
 {
+  ptid_t ptid;
+
   last_sig = TARGET_SIGNAL_0;
   ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 
@@ -1349,9 +1370,9 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 
  gotevent:
 
+  ptid = debug_event_ptid (&current_event);
   current_inferior =
-    (struct thread_info *) find_inferior_id (&all_threads,
-					     current_event.dwThreadId);
+    (struct thread_info *) find_inferior_id (&all_threads, ptid);
 
   switch (current_event.dwDebugEventCode)
     {
@@ -1362,8 +1383,9 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		(unsigned) current_event.dwThreadId));
 
       /* Record the existence of this thread.  */
-      child_add_thread (current_event.dwThreadId,
-			     current_event.u.CreateThread.hThread);
+      child_add_thread (current_event.dwProcessId,
+			current_event.dwThreadId,
+			current_event.u.CreateThread.hThread);
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
@@ -1371,7 +1393,8 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		"for pid=%d tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
-      child_delete_thread (current_event.dwThreadId);
+      child_delete_thread (current_event.dwProcessId,
+			   current_event.dwThreadId);
       break;
 
     case CREATE_PROCESS_DEBUG_EVENT:
@@ -1388,10 +1411,11 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
       ourstatus->value.execd_pathname = "Main executable";
 
       /* Add the main thread.  */
-      child_add_thread (main_thread_id,
+      child_add_thread (current_event.dwProcessId,
+			main_thread_id,
 			current_event.u.CreateProcessInfo.hThread);
 
-      ourstatus->value.related_pid = current_event.dwThreadId;
+      ourstatus->value.related_pid = debug_event_ptid (&current_event);
 #ifdef _WIN32_WCE
       if (!attaching)
 	{
@@ -1467,17 +1491,18 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
     }
 
   current_inferior =
-    (struct thread_info *) find_inferior_id (&all_threads,
-					     current_event.dwThreadId);
+    (struct thread_info *) find_inferior_id (&all_threads, ptid);
   return 1;
 }
 
 /* Wait for the inferior process to change state.
    STATUS will be filled in with a response code to send to GDB.
    Returns the signal which caused the process to stop. */
-static unsigned long
-win32_wait (struct target_waitstatus *ourstatus, int options)
+static ptid_t
+win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
+  struct process_info *process;
+
   while (1)
     {
       if (!get_child_debug_event (ourstatus))
@@ -1489,8 +1514,10 @@ win32_wait (struct target_waitstatus *ourstatus, int options)
 	  OUTMSG2 (("Child exited with retcode = %x\n",
 		    ourstatus->value.integer));
 
+	  process = find_process_pid (current_process_id);
+	  remove_process (process);
 	  win32_clear_inferiors ();
-	  return current_event.dwProcessId;
+	  return pid_to_ptid (current_event.dwProcessId);
 	case TARGET_WAITKIND_STOPPED:
 	case TARGET_WAITKIND_LOADED:
 	  OUTMSG2 (("Child Stopped with signal = %d \n",
@@ -1512,7 +1539,7 @@ win32_wait (struct target_waitstatus *ourstatus, int options)
 	  if (ourstatus->kind == TARGET_WAITKIND_LOADED)
 	    ourstatus->kind = TARGET_WAITKIND_STOPPED;
 
-	  return current_event.dwThreadId;
+	  return debug_event_ptid (&current_event);
 	default:
 	  OUTMSG (("Ignoring unknown internal event, %d\n", ourstatus->kind));
 	  /* fall-through */

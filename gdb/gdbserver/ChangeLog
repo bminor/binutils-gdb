@@ -1,5 +1,208 @@
 2009-04-01  Pedro Alves  <pedro@codesourcery.com>
 
+	Implement the multiprocess extensions, and add linux multiprocess
+	support.
+
+	* server.h (ULONGEST): Declare.
+	(struct ptid, ptid_t): New.
+	(minus_one_ptid, null_ptid): Declare.
+	(ptid_build, pid_to_ptid, ptid_get_pid, ptid_get_lwp)
+	(ptid_get_tid, ptid_equal, ptid_is_pid): Declare.
+	(struct inferior_list_entry): Change `id' type from unsigned from
+	to ptid_t.
+	(struct sym_cache, struct breakpoint, struct
+	process_info_private): Forward declare.
+	(struct process_info): Declare.
+	(current_process): Declare.
+	(all_processes): Declare.
+	(initialize_inferiors): Declare.
+	(add_thread): Adjust to use ptid_t.
+	(thread_id_to_gdb_id, thread_to_gdb_id, gdb_id_to_thread_id): Ditto.
+	(add_process, remove_process, find_thread_pid): Declare.
+	(find_inferior_id): Adjust to use ptid_t.
+	(cont_thread, general_thread, step_thread): Change type to ptid_t.
+	(multi_process): Declare.
+	(push_event): Adjust to use ptid_t.
+	(read_ptid, write_ptid): Declare.
+	(prepare_resume_reply): Adjust to use ptid_t.
+	(clear_symbol_cache): Declare.
+	* inferiors.c (all_processes): New.
+	(null_ptid, minus_one_ptid): New.
+	(ptid_build, pid_to_ptid, ptid_get_pid, ptid_get_lwp)
+	(ptid_get_tid, ptid_equal, ptid_is_pid): New.
+	(add_thread): Change unsigned long to ptid.  Remove gdb_id
+	parameter.  Adjust.
+	(thread_id_to_gdb_id, thread_to_gdb_id): Change unsigned long to ptid.
+	(gdb_id_to_thread): Rename to ...
+	(find_thread_pid): ... this.  Change unsigned long to ptid.
+	(gdb_id_to_thread_id, find_inferior_id): Change unsigned long to ptid.
+	(loaded_dll, pull_pid_from_list): Adjust.
+	(add_process, remove_process, find_process_pid)
+	(get_thread_process, current_process, initialize_inferiors): New.
+	* target.h (struct thread_resume) <thread>: Change type to ptid_t.
+	(struct target_waitstatus) <related_pid>: Ditto.
+	(struct target_ops) <kill, detach>: Add `pid' argument.  Change
+	return type to int.
+	(struct target_ops) <join>: Add `pid' argument.
+	(struct target_ops) <thread_alive>: Change pid's type to ptid_t.
+	(struct target_ops) <wait>: Add `ptid' field.  Change return type
+	to ptid.
+	(kill_inferior, detach_inferior, join_inferior): Add `pid' argument.
+	(mywait): Add `ptid' argument.  Change return type to ptid_t.
+	(target_pid_to_str): Declare.
+	* target.c (set_desired_inferior): Adjust to use ptids.
+	(mywait): Add new `ptid' argument.  Adjust.
+	(target_pid_to_str): New.
+	* mem-break.h (free_all_breakpoints): Declare.
+	* mem-break.c (breakpoints): Delelete.
+	(set_breakpoint_at, delete_breakpoint, find_breakpoint_at)
+	(check_mem_read, check_mem_write, delete_all_breakpoints): Adjust
+	to use per-process breakpoint list.
+	(free_all_breakpoints): New.
+	* remote-utils.c (struct sym_cache) <name>: Drop `const'.
+	(symbol_cache, all_symbols_looked_up): Delete.
+	(hexchars): New.
+	(ishex, unpack_varlen_hex, write_ptid, hex_or_minus_one,
+	read_ptid): New.
+	(prepare_resume_reply): Change ptid argument's type from unsigned
+	long to ptid_t.  Adjust.  Implement W;process and X;process.
+	(free_sym_cache, clear_symbol_cache): New.
+	(look_up_one_symbol): Adjust to per-process symbol cache.  *
+	* server.c (cont_thread, general_thread, step_thread): Change type
+	to ptid_t.
+	(attached): Delete.
+	(multi_process): New.
+	(last_ptid): Change type to ptid_t.
+	(struct vstop_notif) <ptid>: Change type to ptid_t.
+	(queue_stop_reply, push_event): Change `ptid' argument's type to
+	ptid_t.
+	(discard_queued_stop_replies): Add `pid' argument.
+	(start_inferior): Adjust to use ptids.  Adjust to mywait interface
+	changes.  Don't reference the `attached' global.
+	(attach_inferior): Adjust to mywait interface changes.
+	(handle_query): Adjust to use ptids.  Parse GDB's qSupported
+	features.  Handle and report "multiprocess+".  Handle
+	"qAttached:PID".
+	(handle_v_cont): Adjust to use ptids.  Adjust to mywait interface
+	changes.
+	(handle_v_kill): New.
+	(handle_v_stopped): Adjust to use target_pid_to_str.
+	(handle_v_requests): Allow multiple attaches and runs when
+	multiprocess extensions are in effect.  Handle "vKill".
+	(myresume): Adjust to use ptids.
+	(queue_stop_reply_callback): Add `arg' parameter.  Handle it.
+	(handle_status): Adjust to discard_queued_stop_replies interface
+	change.
+	(first_thread_of, kill_inferior_callback)
+	(detach_or_kill_inferior_callback, join_inferiors_callback): New.
+	(main): Call initialize_inferiors.  Adjust to use ptids, killing
+	and detaching from all inferiors.  Handle multiprocess packet
+	variants.
+	* linux-low.h: Include gdb_proc_service.h.
+	(struct process_info_private): New.
+	(struct linux_target_ops) <pid_of>: Use ptid_get_pid.
+	<lwpid_of>: Use ptid_get_lwp.
+	(get_lwp_thread): Adjust.
+	(struct lwp_info): Add `dead' member.
+	(find_lwp_pid): Declare.
+	* linux-low.c (thread_db_active): Delete.
+	(new_inferior): Adjust comment.
+	(inferior_pid): Delete.
+	(linux_add_process): New.
+	(handle_extended_wait): Adjust.
+	(add_lwp): Change unsigned long to ptid.
+	(linux_create_inferior): Add process to processes table.  Adjust
+	to use ptids.  Don't set new_inferior here.
+	(linux_attach_lwp): Rename to ...
+	(linux_attach_lwp_1): ... this.  Add `initial' argument.  Handle
+	it.  Adjust to use ptids.
+	(linux_attach_lwp): New.
+	(linux_attach): Add process to processes table.  Don't set
+	new_inferior here.
+	(struct counter): New.
+	(second_thread_of_pid_p, last_thread_of_process_p): New.
+	(linux_kill_one_lwp): Add `args' parameter.  Handle it.  Adjust to
+	multiple processes.
+	(linux_kill): Add `pid' argument.  Handle it.  Adjust to multiple
+	processes.  Remove process from process table.
+	(linux_detach_one_lwp): Add `args' parameter.  Handle it.  Adjust
+	to multiple processes.
+	(any_thread_of): New.
+	(linux_detach): Add `pid' argument, and handle it.  Remove process
+	from processes table.
+	(linux_join): Add `pid' argument.  Handle it.
+	(linux_thread_alive): Change unsighed long argument to ptid_t.
+	Consider dead lwps as not being alive.
+	(status_pending_p): Rename `dummy' argument to `arg'.  Filter out
+	threads we're not interested in.
+	(same_lwp, find_lwp_pid): New.
+	(linux_wait_for_lwp): Change `pid' argument's type from int to
+	ptid_t.  Adjust.
+	(linux_wait_for_event): Rename to ...
+	(linux_wait_for_event_1): ... this.  Change `pid' argument's type
+	from int to ptid_t.  Adjust.
+	(linux_wait_for_event): New.
+	(linux_wait_1): Add `ptid' argument.  Change return type to
+	ptid_t.  Adjust.  Use last_thread_of_process_p.  Remove processes
+	that exit from the process table.
+	(linux_wait): Add `ptid' argument.  Change return type to ptid_t.
+	Adjust.
+	(mark_lwp_dead): New.
+	(wait_for_sigstop): Adjust to use ptids.  If a process exits while
+	stopping all threads, mark its main lwp as dead.
+	(linux_set_resume_request, linux_resume_one_thread): Adjust to use
+	ptids.
+	(fetch_register, usr_store_inferior_registers)
+	(regsets_fetch_inferior_registers)
+	(regsets_store_inferior_registers, linux_read_memory)
+	(linux_write_memory): Inline `inferior_pid'.
+	(linux_look_up_symbols): Adjust to use per-process
+	`thread_db_active'.
+	(linux_request_interrupt): Adjust to use ptids.
+	(linux_read_auxv): Inline `inferior_pid'.
+	(initialize_low): Don't reference thread_db_active.
+	* gdb_proc_service.h (struct ps_prochandle) <pid>: Remove.
+	* proc-service.c (ps_lgetregs): Use find_lwp_pid.
+	(ps_getpid): Return the pid of the current inferior.
+	* thread-db.c (proc_handle, thread_agent): Delete.
+	(thread_db_create_event, thread_db_enable_reporting): Adjust to
+	per-process data.
+	(find_one_thread): Change argument type to ptid_t.  Adjust to
+	per-process data.
+	(maybe_attach_thread): Adjust to per-process data and ptids.
+	(thread_db_find_new_threads): Ditto.
+	(thread_db_init): Ditto.
+	* spu-low.c (spu_create_inferior, spu_attach): Add process to
+	processes table.  Adjust to use ptids.
+	(spu_kill, spu_detach): Adjust interface.  Remove process from
+	processes table.
+	(spu_join, spu_thread_alive): Adjust interface.
+	(spu_wait): Adjust interface.  Remove process from processes
+	table.  Adjust to use ptids.
+	* win32-low.c (current_inferior_tid): Delete.
+	(current_inferior_ptid): New.
+	(debug_event_ptid): New.
+	(thread_rec): Take a ptid.  Adjust.
+	(child_add_thread): Add `pid' argument.  Adjust to use ptids.
+	(child_delete_thread): Ditto.
+	(do_initial_child_stuff): Add `attached' argument.  Add process to
+	processes table.
+	(child_fetch_inferior_registers, child_store_inferior_registers):
+	Adjust.
+	(win32_create_inferior): Pass 0 to do_initial_child_stuff.
+	(win32_attach): Pass 1 to do_initial_child_stuff.
+	(win32_kill): Adjust interface.  Remove process from processes
+	table.
+	(win32_detach): Ditto.
+	(win32_join): Adjust interface.
+	(win32_thread_alive): Take a ptid.
+	(win32_resume): Adjust to use ptids.
+	(get_child_debug_event): Ditto.
+	(win32_wait): Adjust interface.  Remove exiting process from
+	processes table.
+
+2009-04-01  Pedro Alves  <pedro@codesourcery.com>
+
 	Non-stop mode support.
 
 	* server.h (non_stop): Declare.

@@ -102,8 +102,7 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
   struct lwp_info *lwp;
   struct thread_info *reg_inferior, *save_inferior;
 
-  lwp = (struct lwp_info *) find_inferior_id (&all_lwps,
-					      lwpid);
+  lwp = find_lwp_pid (pid_to_ptid (lwpid));
   if (lwp == NULL)
     return PS_ERR;
 
@@ -157,5 +156,5 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, void *fpregset)
 pid_t
 ps_getpid (gdb_ps_prochandle_t ph)
 {
-  return ph->pid;
+  return pid_of (get_thread_lwp (current_inferior));
 }

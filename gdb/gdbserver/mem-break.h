@@ -75,4 +75,9 @@ void set_breakpoint_data (const unsigned char *bp_data, int bp_len);
 
 void delete_all_breakpoints (void);
 
+/* Delete all breakpoints, but do not try to un-insert them from the
+   inferior.  */
+
+void free_all_breakpoints (struct process_info *proc);
+
 #endif /* MEM_BREAK_H */

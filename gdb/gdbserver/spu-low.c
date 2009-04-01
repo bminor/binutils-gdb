@@ -268,6 +268,7 @@ static int
 spu_create_inferior (char *program, char **allargs)
 {
   int pid;
+  ptid_t ptid;
 
   pid = fork ();
   if (pid < 0)
@@ -289,7 +290,10 @@ spu_create_inferior (char *program, char **allargs)
       _exit (0177);
     }
 
-  add_thread (pid, NULL, pid);
+  add_process (pid, 0);
+
+  ptid = ptid_build (pid, pid, 0);
+  add_thread (ptid, NULL);
   return pid;
 }
 
@@ -297,6 +301,8 @@ spu_create_inferior (char *program, char **allargs)
 int
 spu_attach (unsigned long  pid)
 {
+  ptid_t ptid;
+
   if (ptrace (PTRACE_ATTACH, pid, 0, 0) != 0)
     {
       fprintf (stderr, "Cannot attach to process %ld: %s (%d)\n", pid,
@@ -305,27 +311,32 @@ spu_attach (unsigned long  pid)
       _exit (0177);
     }
 
-  add_thread (pid, NULL, pid);
+  add_process (pid, 1);
+  ptid = ptid_build (pid, pid, 0);
+  add_thread (ptid, NULL);
   return 0;
 }
 
 /* Kill the inferior process.  */
-static void
-spu_kill (void)
+static int
+spu_kill (int)
 {
   ptrace (PTRACE_KILL, current_tid, 0, 0);
+  remove_process (pid);
+  return 0;
 }
 
 /* Detach from inferior process.  */
 static int
-spu_detach (void)
+spu_detach (int pid)
 {
   ptrace (PTRACE_DETACH, current_tid, 0, 0);
+  remove_process (pid);
   return 0;
 }
 
 static void
-spu_join (void)
+spu_join (int pid)
 {
   int status, ret;
 
@@ -338,9 +349,9 @@ spu_join (void)
 
 /* Return nonzero if the given thread is still alive.  */
 static int
-spu_thread_alive (unsigned long tid)
+spu_thread_alive (ptid_t ptid)
 {
-  return tid == current_tid;
+  return ptid_get_lwp (ptid) == current_tid;
 }
 
 /* Resume process.  */
@@ -350,8 +361,8 @@ spu_resume (struct thread_resume *resume_info, size_t n)
   size_t i;
 
   for (i = 0; i < n; i++)
-    if (resume_info[i].thread == -1
-	|| resume_info[i].thread == current_tid)
+    if (ptid_equal (resume_info[i].thread, minus_one_ptid)
+	|| ptid_get_lwp (resume_info[i].thread) == current_tid)
       break;
 
   if (i == n)
@@ -371,8 +382,8 @@ spu_resume (struct thread_resume *resume_info, size_t n)
 }
 
 /* Wait for process, returns status.  */
-static unsigned long
-spu_wait (struct target_waitstatus *ourstatus, int options)
+static ptid_t
+spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
   int tid = current_tid;
   int w;
@@ -415,7 +426,8 @@ spu_wait (struct target_waitstatus *ourstatus, int options)
       ourstatus->kind =  TARGET_WAITKIND_EXITED;
       ourstatus->value.integer = WEXITSTATUS (w);
       clear_inferiors ();
-      return ret;
+      remove_process (ret);
+      return pid_to_ptid (ret);
     }
   else if (!WIFSTOPPED (w))
     {
@@ -423,7 +435,8 @@ spu_wait (struct target_waitstatus *ourstatus, int options)
       ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
       ourstatus->value.sig = target_signal_from_host (WTERMSIG (w));
       clear_inferiors ();
-      return ret;
+      remove_process (ret);
+      return pid_to_ptid (ret);
     }
 
   /* After attach, we may have received a SIGSTOP.  Do not return this
@@ -432,12 +445,12 @@ spu_wait (struct target_waitstatus *ourstatus, int options)
     {
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
       ourstatus->value.sig = TARGET_SIGNAL_0;
-      return ret;
+      return ptid_build (ret, ret, 0);
     }
 
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
   ourstatus->value.sig = target_signal_from_host (WSTOPSIG (w));
-  return ret;
+  return ptid_build (ret, ret, 0);
 }
 
 /* Fetch inferior registers.  */

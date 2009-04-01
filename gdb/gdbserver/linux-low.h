@@ -21,6 +21,8 @@
 #include <thread_db.h>
 #endif
 
+#include "gdb_proc_service.h"
+
 #ifdef HAVE_LINUX_REGSETS
 typedef void (*regset_fill_func) (void *);
 typedef void (*regset_store_func) (const void *);
@@ -40,6 +42,19 @@ struct regset_info
 };
 extern struct regset_info target_regsets[];
 #endif
+
+struct process_info_private
+{
+  /* True if this process has loaded thread_db, and it is active.  */
+  int thread_db_active;
+
+  /* Structure that identifies the child process for the
+     <proc_service.h> interface.  */
+  struct ps_prochandle proc_handle;
+
+  /* Connection to the libthread_db library.  */
+  td_thragent_t *thread_agent;
+};
 
 struct linux_target_ops
 {
@@ -78,14 +93,14 @@ struct linux_target_ops
 
 extern struct linux_target_ops the_low_target;
 
-#define pid_of(proc) ((proc)->head.id)
-#define lwpid_of(proc) ((proc)->head.id)
+#define pid_of(proc) ptid_get_pid ((proc)->head.id)
+#define lwpid_of(proc) ptid_get_lwp ((proc)->head.id)
 
 #define get_lwp(inf) ((struct lwp_info *)(inf))
 #define get_thread_lwp(thr) (get_lwp (inferior_target_data (thr)))
 #define get_lwp_thread(proc) ((struct thread_info *)			\
 			      find_inferior_id (&all_threads,		\
-						lwpid_of (get_lwp (proc))))
+						get_lwp (proc)->head.id))
 
 struct lwp_info
 {
@@ -105,6 +120,11 @@ struct lwp_info
   /* If this flag is set, the lwp is known to be stopped right now (stop
      event already received in a wait()).  */
   int stopped;
+
+  /* If this flag is set, the lwp is known to be dead already (exit
+     event already received in a wait(), and is cached in
+     status_pending).  */
+  int dead;
 
   /* When stopped is set, the last wait status recorded for this lwp.  */
   int last_status;
@@ -150,3 +170,5 @@ void linux_attach_lwp (unsigned long pid);
 int thread_db_init (int use_events);
 int thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 			       CORE_ADDR load_module, CORE_ADDR *address);
+
+struct lwp_info *find_lwp_pid (ptid_t ptid);

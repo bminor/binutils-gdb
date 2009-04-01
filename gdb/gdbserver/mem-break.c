@@ -46,11 +46,10 @@ struct breakpoint
   int (*handler) (CORE_ADDR);
 };
 
-struct breakpoint *breakpoints;
-
 void
 set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
 {
+  struct process_info *proc = current_process ();
   struct breakpoint *bp;
 
   if (breakpoint_data == NULL)
@@ -67,24 +66,25 @@ set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
   bp->pc = where;
   bp->handler = handler;
 
-  bp->next = breakpoints;
-  breakpoints = bp;
+  bp->next = proc->breakpoints;
+  proc->breakpoints = bp;
 }
 
 static void
 delete_breakpoint (struct breakpoint *bp)
 {
+  struct process_info *proc = current_process ();
   struct breakpoint *cur;
 
-  if (breakpoints == bp)
+  if (proc->breakpoints == bp)
     {
-      breakpoints = bp->next;
+      proc->breakpoints = bp->next;
       (*the_target->write_memory) (bp->pc, bp->old_data,
 				   breakpoint_len);
       free (bp);
       return;
     }
-  cur = breakpoints;
+  cur = proc->breakpoints;
   while (cur->next)
     {
       if (cur->next == bp)
@@ -102,7 +102,8 @@ delete_breakpoint (struct breakpoint *bp)
 static struct breakpoint *
 find_breakpoint_at (CORE_ADDR where)
 {
-  struct breakpoint *bp = breakpoints;
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp = proc->breakpoints;
 
   while (bp != NULL)
     {
@@ -225,7 +226,8 @@ set_breakpoint_data (const unsigned char *bp_data, int bp_len)
 void
 check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 {
-  struct breakpoint *bp = breakpoints;
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp = proc->breakpoints;
   CORE_ADDR mem_end = mem_addr + mem_len;
 
   for (; bp != NULL; bp = bp->next)
@@ -258,7 +260,8 @@ check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 void
 check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 {
-  struct breakpoint *bp = breakpoints;
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp = proc->breakpoints;
   CORE_ADDR mem_end = mem_addr + mem_len;
 
   for (; bp != NULL; bp = bp->next)
@@ -290,11 +293,29 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
     }
 }
 
-/* Delete all breakpoints.  */
+/* Delete all breakpoints, and un-insert them from the inferior.  */
 
 void
 delete_all_breakpoints (void)
 {
-  while (breakpoints)
-    delete_breakpoint (breakpoints);
+  struct process_info *proc = current_process ();
+
+  while (proc->breakpoints)
+    delete_breakpoint (proc->breakpoints);
+}
+
+/* Release all breakpoints, but do not try to un-insert them from the
+   inferior.  */
+
+void
+free_all_breakpoints (struct process_info *proc)
+{
+  struct breakpoint *bp;
+
+  while (proc->breakpoints)
+    {
+      bp = proc->breakpoints;
+      proc->breakpoints = bp->next;
+      free (bp);
+    }
 }
