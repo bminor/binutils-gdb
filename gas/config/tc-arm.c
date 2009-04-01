@@ -7316,11 +7316,14 @@ do_mull (void)
 static void
 do_nop (void)
 {
-  if (inst.operands[0].present)
+  if (inst.operands[0].present
+      || ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6k))
     {
       /* Architectural NOP hints are CPSR sets with no bits selected.  */
       inst.instruction &= 0xf0000000;
-      inst.instruction |= 0x0320f000 + inst.operands[0].imm;
+      inst.instruction |= 0x0320f000;
+      if (inst.operands[0].present)
+	inst.instruction |= inst.operands[0].imm;
     }
 }
 
@@ -17580,14 +17583,38 @@ md_section_align (segT	 segment ATTRIBUTE_UNUSED,
 void
 arm_handle_align (fragS * fragP)
 {
-  static char const arm_noop[4] = { 0x00, 0x00, 0xa0, 0xe1 };
-  static char const thumb_noop[2] = { 0xc0, 0x46 };
-  static char const arm_bigend_noop[4] = { 0xe1, 0xa0, 0x00, 0x00 };
-  static char const thumb_bigend_noop[2] = { 0x46, 0xc0 };
-
-  int bytes, fix, noop_size;
+  static char const arm_noop[2][2][4] =
+    {
+      {  /* ARMv1 */
+	{0x00, 0x00, 0xa0, 0xe1},  /* LE */
+	{0xe1, 0xa0, 0x00, 0x00},  /* BE */
+      },
+      {  /* ARMv6k */
+	{0x00, 0xf0, 0x20, 0xe3},  /* LE */
+	{0xe3, 0x20, 0xf0, 0x00},  /* BE */
+      },
+    };
+  static char const thumb_noop[2][2][2] =
+    {
+      {  /* Thumb-1 */
+	{0xc0, 0x46},  /* LE */
+	{0x46, 0xc0},  /* BE */
+      },
+      {  /* Thumb-2 */
+	{0x00, 0xbf},  /* LE */
+	{0xbf, 0x00}   /* BE */
+      }
+    };
+  static char const wide_thumb_noop[2][4] =
+    {  /* Wide Thumb-2 */
+      {0xaf, 0xf3, 0x00, 0x80},  /* LE */
+      {0xf3, 0xaf, 0x80, 0x00},  /* BE */
+    };
+  
+  unsigned bytes, fix, noop_size;
   char * p;
   const char * noop;
+  const char *narrow_noop = NULL;
 
   if (fragP->fr_type != rs_align_code)
     return;
@@ -17603,27 +17630,45 @@ arm_handle_align (fragS * fragP)
 
   if (fragP->tc_frag_data & (~ MODE_RECORDED))
     {
-      if (target_big_endian)
-	noop = thumb_bigend_noop;
+      if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6t2))
+	{
+	  narrow_noop = thumb_noop[1][target_big_endian];
+	  noop = wide_thumb_noop[target_big_endian];
+	}
       else
-	noop = thumb_noop;
-      noop_size = sizeof (thumb_noop);
+	noop = thumb_noop[0][target_big_endian];
+      noop_size = 2;
     }
   else
     {
-      if (target_big_endian)
-	noop = arm_bigend_noop;
-      else
-	noop = arm_noop;
-      noop_size = sizeof (arm_noop);
+      noop = arm_noop[ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6k) != 0]
+		     [target_big_endian];
+      noop_size = 4;
     }
-
+  
+  fragP->fr_var = noop_size;
+  
   if (bytes & (noop_size - 1))
     {
       fix = bytes & (noop_size - 1);
       memset (p, 0, fix);
       p += fix;
       bytes -= fix;
+    }
+
+  if (narrow_noop)
+    {
+      if (bytes & noop_size)
+	{
+	  /* Insert a narrow noop.  */
+	  memcpy (p, narrow_noop, noop_size);
+	  p += noop_size;
+	  bytes -= noop_size;
+	  fix += noop_size;
+	}
+
+      /* Use wide noops for the remainder */
+      noop_size = 4;
     }
 
   while (bytes >= noop_size)
@@ -17635,7 +17680,6 @@ arm_handle_align (fragS * fragP)
     }
 
   fragP->fr_fix += fix;
-  fragP->fr_var = noop_size;
 }
 
 /* Called from md_do_align.  Used to create an alignment

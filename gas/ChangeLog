@@ -1,3 +1,9 @@
+2009-04-01  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-arm.c (do_nop): Generate v6k nops whenever possible.
+	(arm_handle_align): Generate v6k ARM, thumb2 wide & narrow nops
+	whenever possible.
+
 2009-03-31  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (ppc_handle_align): Handle power7's group ending nop.

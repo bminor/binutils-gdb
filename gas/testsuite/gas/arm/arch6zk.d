@@ -26,7 +26,4 @@ Disassembly of section .text:
 0+048 <[^>]*> e320f001 ?	yield
 0+04c <[^>]*> e16ec371 ?	smc	60465
 0+050 <[^>]*> 11613c7e ?	smcne	5070
-0+054 <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
-0+058 <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
-0+05c <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
-
+#...

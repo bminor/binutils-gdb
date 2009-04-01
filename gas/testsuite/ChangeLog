@@ -1,3 +1,9 @@
+2009-04-01  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/arm/align.s, gas/arm/align.d: New.
+	* gas/arm/thumb32.d, gas/arm/arch6zk.d, gas/arm/arch6zk.s,
+	arm/thumb2_relax.d: Adjust for align changes.
+
 2009-03-31  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/power7.d ("ori", ".p2align"): Add tests for group ending nop.
