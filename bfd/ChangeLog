@@ -1,3 +1,32 @@
+2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* xcofflink.c (xcoff_link_hash_table): Moved from include/coff/xcoff.h.
+
+2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* xcofflink.c (xcoff_link_create_extra_sections): Don't create
+	a .loader section for relocatable links.
+	(xcoff_need_ldrel_p): New function.
+	(xcoff_mark): Use it.
+	(bfd_xcoff_link_count_reloc): Only count loader relocs if there's
+	a loader section.
+	(xcoff_build_ldsym): New function, split out from...
+	(xcoff_build_ldsyms): ...here.  Rename to...
+	(xcoff_post_gc_symbol): ...this.  Only export symbols, and only
+	call xcoff_build_ldsym, if there's a loader section.
+	(xcoff_build_loader_section): New function, extracted verbatim from...
+	(bfd_xcoff_size_dynamic_sections): ...here.  Only call it if
+	there's a loader section.  Only add an __rtinit loader symbol
+	if there's a loader section.  Update after above name change.
+	(xcoff_symbol_section, xcoff_create_ldrel): New functions.
+	(bfd_link_input_bfd): Use xcoff_need_ldrel_p, xcoff_symbol_section
+	and xcoff_create_ldrel.
+	(xcoff_write_global_symbol): Use xcoff_create_ldrel.
+	(xcoff_reloc_link_order): Likewise, but only call it if there's
+	a loader section.  Use xcoff_symbol_section.
+	(_bfd_xcoff_bfd_final_link): Only use fdinfo.ldrel and fdinfo.ldsym
+	if there's a loader section.
+
 2009-04-01  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* xcofflink.c (bfd_link_input_bfd): Fix buffer overrun.
