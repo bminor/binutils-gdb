@@ -765,6 +765,10 @@ extern bfd_boolean bfd_get_file_window
 
 /* XCOFF support routines for the linker.  */
 
+extern bfd_boolean bfd_xcoff_split_import_path
+  (bfd *, const char *, const char **, const char **);
+extern bfd_boolean bfd_xcoff_set_archive_import_path
+  (struct bfd_link_info *, bfd *, const char *);
 extern bfd_boolean bfd_xcoff_link_record_set
   (bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *, bfd_size_type);
 extern bfd_boolean bfd_xcoff_import_symbol

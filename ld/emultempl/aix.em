@@ -1096,32 +1096,18 @@ gld${EMULATION_NAME}_read_file (const char *filename, bfd_boolean import)
 	  else
 	    {
 	      char cs;
-	      char *file;
+	      char *start;
 
 	      (void) obstack_finish (o);
 	      keep = TRUE;
-	      imppath = s;
-	      file = NULL;
+	      start = s;
 	      while (!ISSPACE (*s) && *s != '(' && *s != '\0')
-		{
-		  if (*s == '/')
-		    file = s + 1;
-		  ++s;
-		}
-	      if (file != NULL)
-		{
-		  file[-1] = '\0';
-		  impfile = file;
-		  if (imppath == file - 1)
-		    imppath = "/";
-		}
-	      else
-		{
-		  impfile = imppath;
-		  imppath = "";
-		}
+		++s;
 	      cs = *s;
 	      *s = '\0';
+	      if (!bfd_xcoff_split_import_path (link_info.output_bfd,
+						start, &imppath, &impfile))
+		einfo ("%F%P: Could not parse import path: %E\n");
 	      while (ISSPACE (cs))
 		{
 		  ++s;
@@ -1433,6 +1419,31 @@ gld${EMULATION_NAME}_set_output_arch (void)
   ldfile_output_machine_name = bfd_printable_name (link_info.output_bfd);
 }
 
+static bfd_boolean
+gld${EMULATION_NAME}_open_dynamic_archive (const char *arch,
+					   search_dirs_type *search,
+					   lang_input_statement_type *entry)
+{
+  const char *filename;
+  char *path;
+
+  if (!entry->is_archive)
+    return FALSE;
+
+  filename = entry->filename;
+  path = concat (search->name, "/lib", entry->filename, arch, ".a", NULL);
+  if (!ldfile_try_open_bfd (path, entry))
+    {
+      free (path);
+      return FALSE;
+    }
+  /* Don't include the searched directory in the import path.  */
+  bfd_xcoff_set_archive_import_path (&link_info, entry->the_bfd,
+				     path + strlen (search->name) + 1);
+  entry->filename = path;
+  return TRUE;
+}
+
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   gld${EMULATION_NAME}_before_parse,
   syslib_default,
@@ -1448,7 +1459,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   "${OUTPUT_FORMAT}",
   finish_default,
   gld${EMULATION_NAME}_create_output_section_statements,
-  0,				/* open_dynamic_archive */
+  gld${EMULATION_NAME}_open_dynamic_archive,
   0,				/* place_orphan */
   0,				/* set_symbols */
   gld${EMULATION_NAME}_parse_args,

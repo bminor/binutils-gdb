@@ -28,6 +28,7 @@
 #include "coff/xcoff.h"
 #include "libcoff.h"
 #include "libxcoff.h"
+#include "libiberty.h"
 
 /* This file holds the XCOFF linker code.  */
 
@@ -73,6 +74,18 @@ struct xcoff_link_section_info
     struct xcoff_link_hash_entry *h;
     struct internal_reloc *rel;
   } *toc_rel_hashes;
+};
+
+/* Information that the XCOFF linker collects about an archive.  */
+struct xcoff_archive_info
+{
+  /* The archive described by this entry.  */
+  bfd *archive;
+
+  /* The import path and import filename to use when referring to
+     this archive in the .loader section.  */
+  const char *imppath;
+  const char *impfile;
 };
 
 struct xcoff_link_hash_table
@@ -131,6 +144,9 @@ struct xcoff_link_hash_table
     bfd_size_type size;
   } 
   *size_list;
+
+  /* Information about archives.  */
+  htab_t archive_info;
 
   /* Magic sections: _text, _etext, _data, _edata, _end, end. */
   asection *special_sections[XCOFF_NUMBER_OF_SPECIAL_SECTIONS];
@@ -464,6 +480,56 @@ _bfd_xcoff_canonicalize_dynamic_reloc (bfd *abfd,
   return ldhdr.l_nreloc;
 }
 
+/* Hash functions for xcoff_link_hash_table's archive_info.  */
+
+static hashval_t
+xcoff_archive_info_hash (const void *data)
+{
+  const struct xcoff_archive_info *info;
+
+  info = (const struct xcoff_archive_info *) data;
+  return htab_hash_pointer (info->archive);
+}
+
+static int
+xcoff_archive_info_eq (const void *data1, const void *data2)
+{
+  const struct xcoff_archive_info *info1;
+  const struct xcoff_archive_info *info2;
+
+  info1 = (const struct xcoff_archive_info *) data1;
+  info2 = (const struct xcoff_archive_info *) data2;
+  return info1->archive == info2->archive;
+}
+
+/* Return information about archive ARCHIVE.  Return NULL on error.  */
+
+static struct xcoff_archive_info *
+xcoff_get_archive_info (struct bfd_link_info *info, bfd *archive)
+{
+  struct xcoff_link_hash_table *htab;
+  struct xcoff_archive_info *entryp, entry;
+  void **slot;
+
+  htab = xcoff_hash_table (info);
+  entry.archive = archive;
+  slot = htab_find_slot (htab->archive_info, &entry, INSERT);
+  if (!slot)
+    return NULL;
+
+  entryp = *slot;
+  if (!entryp)
+    {
+      entryp = bfd_zalloc (archive, sizeof (entry));
+      if (!entryp)
+	return NULL;
+
+      entryp->archive = archive;
+      *slot = entryp;
+    }
+  return entryp;
+}
+
 /* Routine to create an entry in an XCOFF link hash table.  */
 
 static struct bfd_hash_entry *
@@ -530,6 +596,8 @@ _bfd_xcoff_bfd_link_hash_table_create (bfd *abfd)
   ret->file_align = 0;
   ret->textro = FALSE;
   ret->gc = FALSE;
+  ret->archive_info = htab_create (37, xcoff_archive_info_hash,
+				   xcoff_archive_info_eq, NULL);
   memset (ret->special_sections, 0, sizeof ret->special_sections);
 
   /* The linker will always generate a full a.out header.  We need to
@@ -606,6 +674,109 @@ xcoff_read_internal_relocs (bfd *abfd,
 					 require_internal, internal_relocs);
 }
 
+/* Split FILENAME into an import path and an import filename,
+   storing them in *IMPPATH and *IMPFILE respectively.  */
+
+bfd_boolean
+bfd_xcoff_split_import_path (bfd *abfd, const char *filename,
+			     const char **imppath, const char **impfile)
+{
+  const char *basename;
+  size_t length;
+  char *path;
+
+  basename = lbasename (filename);
+  length = basename - filename;
+  if (length == 0)
+    /* The filename has no directory component, so use an empty path.  */
+    *imppath = "";
+  else if (length == 1)
+    /* The filename is in the root directory.  */
+    *imppath = "/";
+  else
+    {
+      /* Extract the (non-empty) directory part.  Note that we don't
+	 need to strip duplicate directory separators from any part
+	 of the string; the native linker doesn't do that either.  */
+      path = bfd_alloc (abfd, length);
+      if (path == NULL)
+	return FALSE;
+      memcpy (path, filename, length - 1);
+      path[length - 1] = 0;
+      *imppath = path;
+    }
+  *impfile = basename;
+  return TRUE;
+}
+
+/* Set ARCHIVE's import path as though its filename had been given
+   as FILENAME.  */
+
+bfd_boolean
+bfd_xcoff_set_archive_import_path (struct bfd_link_info *info,
+				   bfd *archive, const char *filename)
+{
+  struct xcoff_archive_info *archive_info;
+
+  archive_info = xcoff_get_archive_info (info, archive);
+  return (archive_info != NULL
+	  && bfd_xcoff_split_import_path (archive, filename,
+					  &archive_info->imppath,
+					  &archive_info->impfile));
+}
+
+/* H is an imported symbol.  Set the import module's path, file and member
+   to IMPATH, IMPFILE and IMPMEMBER respectively.  All three are null if
+   no specific import module is specified.  */
+
+static bfd_boolean
+xcoff_set_import_path (struct bfd_link_info *info,
+		       struct xcoff_link_hash_entry *h,
+		       const char *imppath, const char *impfile,
+		       const char *impmember)
+{
+  unsigned int c;
+  struct xcoff_import_file **pp;
+
+  /* We overload the ldindx field to hold the l_ifile value for this
+     symbol.  */
+  BFD_ASSERT (h->ldsym == NULL);
+  BFD_ASSERT ((h->flags & XCOFF_BUILT_LDSYM) == 0);
+  if (imppath == NULL)
+    h->ldindx = -1;
+  else
+    {
+      /* We start c at 1 because the first entry in the import list is
+	 reserved for the library search path.  */
+      for (pp = &xcoff_hash_table (info)->imports, c = 1;
+	   *pp != NULL;
+	   pp = &(*pp)->next, ++c)
+	{
+	  if (strcmp ((*pp)->path, imppath) == 0
+	      && strcmp ((*pp)->file, impfile) == 0
+	      && strcmp ((*pp)->member, impmember) == 0)
+	    break;
+	}
+
+      if (*pp == NULL)
+	{
+	  struct xcoff_import_file *n;
+	  bfd_size_type amt = sizeof (* n);
+
+	  n = bfd_alloc (info->output_bfd, amt);
+	  if (n == NULL)
+	    return FALSE;
+	  n->next = NULL;
+	  n->path = imppath;
+	  n->file = impfile;
+	  n->member = impmember;
+	  *pp = n;
+	}
+      h->ldindx = c;
+    }
+  return TRUE;
+}
+
 /* H is the bfd symbol associated with exported .loader symbol LDSYM.
    Return true if LDSYM defines H.  */
 
@@ -648,9 +819,6 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
   const char *strings;
   bfd_byte *elsym, *elsymend;
   struct xcoff_import_file *n;
-  const char *bname;
-  const char *mname;
-  const char *s;
   unsigned int c;
   struct xcoff_import_file **pp;
 
@@ -827,25 +995,30 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
   n->next = NULL;
 
-  /* For some reason, the path entry in the import file list for a
-     shared object appears to always be empty.  The file name is the
-     base name.  */
-  n->path = "";
   if (abfd->my_archive == NULL)
     {
-      bname = bfd_get_filename (abfd);
-      mname = "";
+      if (!bfd_xcoff_split_import_path (abfd, abfd->filename,
+					&n->path, &n->file))
+	return FALSE;
+      n->member = "";
     }
   else
     {
-      bname = bfd_get_filename (abfd->my_archive);
-      mname = bfd_get_filename (abfd);
+      struct xcoff_archive_info *archive_info;
+
+      archive_info = xcoff_get_archive_info (info, abfd->my_archive);
+      if (!archive_info->impfile)
+	{
+	  if (!bfd_xcoff_split_import_path (archive_info->archive,
+					    archive_info->archive->filename,
+					    &archive_info->imppath,
+					    &archive_info->impfile))
+	    return FALSE;
+	}
+      n->path = archive_info->imppath;
+      n->file = archive_info->impfile;
+      n->member = bfd_get_filename (abfd);
     }
-  s = strrchr (bname, '/');
-  if (s != NULL)
-    bname = s + 1;
-  n->file = bname;
-  n->member = mname;
 
   /* We start c at 1 because the first import file number is reserved
      for LIBPATH.  */
@@ -2324,58 +2497,6 @@ xcoff_find_function (struct bfd_link_info *info,
 	  h->descriptor = hfn;
 	  hfn->descriptor = h;
 	}
-    }
-  return TRUE;
-}
-
-/* H is an imported symbol.  Set the import module's path, file and member
-   to IMPATH, IMPFILE and IMPMEMBER respectively.  All three are null if
-   no specific import module is specified.  */
-
-static bfd_boolean
-xcoff_set_import_path (struct bfd_link_info *info,
-		       struct xcoff_link_hash_entry *h,
-		       const char *imppath, const char *impfile,
-		       const char *impmember)
-{
-  unsigned int c;
-  struct xcoff_import_file **pp;
-
-  /* We overload the ldindx field to hold the l_ifile value for this
-     symbol.  */
-  BFD_ASSERT (h->ldsym == NULL);
-  BFD_ASSERT ((h->flags & XCOFF_BUILT_LDSYM) == 0);
-  if (imppath == NULL)
-    h->ldindx = -1;
-  else
-    {
-      /* We start c at 1 because the first entry in the import list is
-	 reserved for the library search path.  */
-      for (pp = &xcoff_hash_table (info)->imports, c = 1;
-	   *pp != NULL;
-	   pp = &(*pp)->next, ++c)
-	{
-	  if (strcmp ((*pp)->path, imppath) == 0
-	      && strcmp ((*pp)->file, impfile) == 0
-	      && strcmp ((*pp)->member, impmember) == 0)
-	    break;
-	}
-
-      if (*pp == NULL)
-	{
-	  struct xcoff_import_file *n;
-	  bfd_size_type amt = sizeof (* n);
-
-	  n = bfd_alloc (info->output_bfd, amt);
-	  if (n == NULL)
-	    return FALSE;
-	  n->next = NULL;
-	  n->path = imppath;
-	  n->file = impfile;
-	  n->member = impmember;
-	  *pp = n;
-	}
-      h->ldindx = c;
     }
   return TRUE;
 }

@@ -1,5 +1,27 @@
 2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
+	* bfd-in.h (bfd_xcoff_split_import_path): Declare.
+	(bfd_xcoff_set_archive_import_path): Likewise.
+	* bfd-in2.h: Regenerate.
+	* xcofflink.c: Include libiberty.h.
+	(xcoff_archive_info): New structure.
+	(xcoff_archive_info_hash): New function.
+	(xcoff_archive_info_eq): Likewise.
+	(xcoff_get_archive_info): Likewise.
+	(_bfd_xcoff_bfd_link_hash_table_create): Initialize archive_info.
+	(bfd_xcoff_split_import_path): New function.
+	(bfd_xcoff_set_archive_import_path): Likewise.
+	(xcoff_set_import_path): Move earlier in file.
+	(xcoff_link_add_dynamic_symbols): Set the import path of a non-archive
+	object to the the directory part of the bfd's filename.  Get the
+	import path and filename of an archive object from the archive's
+	xcoff_tdata, initializing it if necessary.  Update use of
+	import_file_id.
+	(bfd_link_input_bfd): Update use of import_file_id.
+	(xcoff_write_global_symbol): Likewise.
+
+2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
 	* xcofflink.c (xcoff_link_hash_table): Moved from include/coff/xcoff.h.
 
 2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>

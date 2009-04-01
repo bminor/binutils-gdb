@@ -1,3 +1,9 @@
+2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* emultempl/aix.em (gld${EMULATION_NAME}_open_dynamic_archive): New
+	function.
+	(ld_${EMULATION_NAME}_emulation): Use it.
+
 2009-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/9970
