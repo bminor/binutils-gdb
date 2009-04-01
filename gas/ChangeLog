@@ -1,3 +1,7 @@
+2009-04-01  Sterling Augustine  <sterling@jaw.hq.tensilica.com>
+
+	* config/tc-xtensa.c (parse_arguments): call demand_empty_rest_of_line
+
 2009-04-01  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* config/tc-arm.c (arm_validate_fix): Define only for OBJ_COFF.

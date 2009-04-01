@@ -2046,6 +2046,7 @@ parse_arguments (TInsn *insn, int num_args, char **arg_strings)
 
 	  last_tok = tok;
 	  last_opnd_cnt = opnd_cnt;
+	  demand_empty_rest_of_line ();
 
 	  do
 	    {
