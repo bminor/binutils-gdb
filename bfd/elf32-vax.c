@@ -599,8 +599,10 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
       switch (ELF32_R_TYPE (rel->r_info))
 	{
 	case R_VAX_GOT32:
-	  if (h != NULL
-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	  BFD_ASSERT (h != NULL);
+	  if (h->forced_local
+	      || h == elf_hash_table (info)->hgot
+	      || h == elf_hash_table (info)->hplt)
 	    break;
 
 	  /* This symbol requires a global offset table entry.  */
@@ -654,10 +656,11 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		  h->got.refcount++;
 		  if (eh->got_addend != (bfd_vma) rel->r_addend)
 		    (*_bfd_error_handler)
-		      (_("%s: warning: GOT addend of %ld to `%s' does not match previous GOT addend of %ld"),
-			      bfd_get_filename (abfd), rel->r_addend,
-			      h->root.root.string,
-			      eh->got_addend);
+		      (_("%s: warning: GOT addend of %ld to `%s' does"
+			 " not match previous GOT addend of %ld"),
+			 bfd_get_filename (abfd), rel->r_addend,
+			 h->root.root.string,
+			 eh->got_addend);
 
 		}
 	    }
@@ -673,8 +676,9 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
 	  /* If this is a local symbol, we resolve it directly without
 	     creating a procedure linkage table entry.  */
-	  if (h == NULL)
-	    continue;
+	  BFD_ASSERT (h != NULL);
+	  if (h->forced_local)
+	    break;
 
 	  h->needs_plt = 1;
 	  if (h->plt.refcount == -1)
@@ -702,7 +706,7 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		&& (!info->symbolic
 		    || !h->def_regular)))
 	    {
-	      if (h != NULL)
+	      if (h != NULL && !h->forced_local)
 		{
 		  /* Make sure a plt entry is created for this symbol if
 		     it turns out to be a function defined by a dynamic
@@ -714,6 +718,9 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		}
 	      break;
 	    }
+	  if (h != NULL && h->forced_local)
+	    break;
+
 	  /* Fall through.  */
 	case R_VAX_8:
 	case R_VAX_16:
@@ -1305,7 +1312,8 @@ elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, PTR infoptr)
   srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
 
   if (!elf_hash_table (info)->dynamic_sections_created
-      || (info->shared && info->symbolic))
+      || (info->shared && info->symbolic)
+      || h->forced_local)
     {
       h->got.refcount = 0;
       h->got.offset = (bfd_vma) -1;
@@ -1409,10 +1417,11 @@ elf_vax_relocate_section (bfd *output_bfd,
 	      || h->root.type == bfd_link_hash_defweak)
 	      && ((r_type == R_VAX_PLT32
 		   && h->plt.offset != (bfd_vma) -1
+		   && !h->forced_local
 		   && elf_hash_table (info)->dynamic_sections_created)
 		  || (r_type == R_VAX_GOT32
-		      && strcmp (h->root.root.string,
-				 "_GLOBAL_OFFSET_TABLE_") != 0
+		      && h->got.offset != (bfd_vma) -1
+		      && !h->forced_local
 		      && elf_hash_table (info)->dynamic_sections_created
 		      && (! info->shared
 			  || (! info->symbolic && h->dynindx != -1)
@@ -1430,10 +1439,7 @@ elf_vax_relocate_section (bfd *output_bfd,
 			      && h->def_dynamic))
 		      && (r_type == R_VAX_8
 			  || r_type == R_VAX_16
-			  || r_type == R_VAX_32
-			  || r_type == R_VAX_PC8
-			  || r_type == R_VAX_PC16
-			  || r_type == R_VAX_PC32))))
+			  || r_type == R_VAX_32))))
 	    /* In these cases, we don't need the relocation
 	       value.  We check specially because in some
 	       obscure cases sec->output_section will be NULL.  */
@@ -1459,7 +1465,7 @@ elf_vax_relocate_section (bfd *output_bfd,
 	case R_VAX_GOT32:
 	  /* Relocation is to the address of the entry for this symbol
 	     in the global offset table.  */
-	  if (h == NULL || h->got.offset == (bfd_vma) -1)
+	  if (h == NULL || h->got.offset == (bfd_vma) -1 || h->forced_local)
 	    break;
 
 	  /* Relocation is the offset of the entry for this symbol in
@@ -1521,7 +1527,7 @@ elf_vax_relocate_section (bfd *output_bfd,
 
 	  /* Resolve a PLTxx reloc against a local symbol directly,
 	     without using the procedure linkage table.  */
-	  if (h == NULL)
+	  if (h == NULL || h->forced_local)
 	    break;
 
 	  if (h->plt.offset == (bfd_vma) -1
@@ -1575,7 +1581,7 @@ elf_vax_relocate_section (bfd *output_bfd,
 	case R_VAX_PC8:
 	case R_VAX_PC16:
 	case R_VAX_PC32:
-	  if (h == NULL)
+	  if (h == NULL || h->forced_local)
 	    break;
 	  /* Fall through.  */
 	case R_VAX_8:

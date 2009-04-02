@@ -1,3 +1,10 @@
+2009-04-01  Matt Thomas  <matt@netbsd.org>
+
+	* elf32-vax.c (elf_vax_check_relocs): Do not put relocations against
+	hidden symbols into the GOT or PLT.GOT.
+	(elf_vax_relocate_section): Do not emit a PCREL reloc 
+	into a shared object if it is against a hidden symbol.
+
 2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* xcofflink.c (xcoff_archive_info): Add contains_shared_object_p
