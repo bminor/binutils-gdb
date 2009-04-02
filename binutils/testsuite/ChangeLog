@@ -1,3 +1,10 @@
+2009-04-02  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* inutils-all/objcopy.exp (strip_executable):  Delete remote dest
+	file before downloading.
+	(strip_executable_with_saving_a_symbol):  Likewise.
+	(keep_debug_symbols_and_test_copy):  Likewise.
+
 2009-03-11  Joseph Myers  <joseph@codesourcery.com>
 
 	* binutils-all/objdump.W, binutils-all/objdump.s: Don't match

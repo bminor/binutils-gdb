@@ -611,6 +611,7 @@ proc strip_executable { prog flags test } {
     global NMFLAGS
     global host_triplet
 
+    remote_file build delete tmpdir/striprog
     remote_download build tmpdir/copyprog tmpdir/striprog
     if [is_remote host] {
 	set copyfile [remote_download host tmpdir/striprog]
@@ -653,6 +654,7 @@ proc strip_executable_with_saving_a_symbol { prog flags test } {
     global NMFLAGS
     global host_triplet
 
+    remote_file build delete tmpdir/striprog
     remote_download build tmpdir/copyprog tmpdir/striprog
     if [is_remote host] {
 	set copyfile [remote_download host tmpdir/striprog]
@@ -704,6 +706,7 @@ proc keep_debug_symbols_and_test_copy { prog1 flags1 test1 prog2 flags2 test2 } 
     global NM
     global NMFLAGS
 
+    remote_file build delete tmpdir/striprog
     remote_download build tmpdir/copyprog tmpdir/striprog
     if [is_remote host] {
 	set copyfile [remote_download host tmpdir/striprog]
