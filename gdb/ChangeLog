@@ -1,3 +1,9 @@
+2009-04-02  Keith Seitz  <keiths@redhat.com>
+
+	* stabsread.c (read_member_functions): GCC may emit an extra space
+	at the end of the names "__base_ctor" and "__base_dtor"; so ignore
+	whitespace when looking for these functions.
+
 2009-04-01  Joel Brobecker  <brobecker@adacore.com>
 
 	Change the default value for "set print frame-arguments" to scalars.

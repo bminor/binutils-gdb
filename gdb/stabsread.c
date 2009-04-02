@@ -2438,8 +2438,8 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 
       /* Skip GCC 3.X member functions which are duplicates of the callable
 	 constructor/destructor.  */
-      if (strcmp (main_fn_name, "__base_ctor") == 0
-	  || strcmp (main_fn_name, "__base_dtor") == 0
+      if (strcmp_iw (main_fn_name, "__base_ctor ") == 0
+	  || strcmp_iw (main_fn_name, "__base_dtor ") == 0
 	  || strcmp (main_fn_name, "__deleting_dtor") == 0)
 	{
 	  xfree (main_fn_name);
