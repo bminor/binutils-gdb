@@ -1,3 +1,9 @@
+2009-04-01  Matt Thomas	<matt@netbsd.org>
+
+	* config/tc-vax.c (synthetic_votstrs): add "jbbcci" and "jbbssi"
+	(md_assemble): emit symbol name when used as immediate in PIC mode.
+	(md_assemble): fix LP64 bug (use sizeof (valueT) instead 4).
+
 2009-04-01  Sterling Augustine  <sterling@jaw.hq.tensilica.com>
 
 	* config/tc-xtensa.c (parse_arguments): call demand_empty_rest_of_line

@@ -852,6 +852,8 @@ static const struct vot
   {"jbcs",	{"rlvbb?", 0x800000e3}},
   {"jbsc",	{"rlvbb?", 0x800000e4}},
   {"jbcc",	{"rlvbb?", 0x800000e5}},
+  {"jbssi",	{"rlvbb?", 0x800000e6}},
+  {"jbcci",	{"rlvbb?", 0x800000e7}},
   {"jlbs",	{"rlb?", 0x800000e8}},
   {"jlbc",	{"rlb?", 0x800000e9}},
 
@@ -3152,7 +3154,8 @@ md_assemble (char *instruction_string)
 			  if (flag_want_pic && operandP->vop_mode == 8
 				&& this_add_symbol != NULL)
 			    {
-			      as_warn (_("Symbol used as immediate operand in PIC mode."));
+			      as_warn (_("Symbol %s used as immediate operand in PIC mode."),
+				       S_GET_NAME (this_add_symbol));
 			    }
 #endif
 			  p[0] = (operandP->vop_mode << 4) | 0xF;
@@ -3168,7 +3171,8 @@ md_assemble (char *instruction_string)
 						  min (sizeof (valueT),
 						       (size_t) nbytes));
 			      if ((size_t) nbytes > sizeof (valueT))
-				memset (p + 5, '\0', nbytes - sizeof (valueT));
+				memset (p + 1 + sizeof (valueT),
+				        '\0', nbytes - sizeof (valueT));
 			    }
 			  else
 			    {
