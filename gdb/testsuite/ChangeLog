@@ -1,3 +1,19 @@
+2009-04-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.mi/mi-nonstop.exp: Don't check isnative.  Use
+	mi_run_to_main.  Skip thread exit test on remote targets.
+	* gdb.mi/mi-nsintrall.exp: Don't check isnative.  Use
+	mi_run_to_main.
+	* gdb.mi/mi-nsmoribund.exp: Don't check isnative.  Use
+	mi_run_to_main.
+	* lib/mi-support.exp (mi_gdb_target_cmd): Remove trailing anchor
+	when expecting ^connected.  Detect when the target doesn't support
+	non-stop mode.
+	(mi_run_cmd): Detect if non-stop mode was requested by isn't
+	supported.  Return -1 on error, 0 on success.
+	(mi_runto_helper): Don't expect a stop if mi_run_cmd failed.
+	(mi_runto): Return mi_runto_helper's result explicitly.
+
 2009-04-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/pending-step.c, gdb.threads/pending-step.exp: New.

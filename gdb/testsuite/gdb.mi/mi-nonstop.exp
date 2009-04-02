@@ -14,11 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This only works with native configurations
-if {![isnative]} {
-  return
-}
-
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
@@ -46,9 +41,9 @@ set supported 0
 send_gdb "-gdb-show non-stop\n"
 gdb_expect {
     -re ".*\\^done,value=\"off\",supported=\"(\[^\"\]+)\"\r\n$mi_gdb_prompt$" {
-        if { $expect_out(1,string) == "1" } {
-            set supported 1
-        }
+	if { $expect_out(1,string) == "1" } {
+	    set supported 1
+	}
     }
     -re ".$mi_gdb_prompt$" {
     }
@@ -58,34 +53,10 @@ mi_gdb_test "-gdb-set non-stop 1" ".*"
 mi_gdb_test "-gdb-set target-async 1" ".*"
 detect_async
 
-mi_gdb_test "200-break-insert -t main" ".*"
-
-set created "=thread-created,id=\"$decimal\"\r\n"
-set running "\\*running,thread-id=\"$decimal\"\r\n"
-
-set notifs "($created)*($running)*($library_loaded_re)*"
-
-# Note: presently, we skip this test on non-native targets,
-# so 'run' is OK.  As soon as we start to run this on remote
-# target, the logic from mi_run_cmd will have to be refactored.
-send_gdb "-exec-run\n"
-gdb_expect {
-    -re "\\^running\r\n$notifs$mi_gdb_prompt" {
-    }
-    -re "\\^error,msg=\"The target does not support running in non-stop mode.\"" {
-        verbose -log "Non-stop mode not supported, skipping all tests"
-        return
-    }
-    -re "\r\n$mi_gdb_prompt" {
-        perror "Cannot start target (unknown output after running)"
-        return -1
-    }
-    timeout {
-        perror "Cannot start target (timeout)"
-        return -1
-    }
+if { [mi_run_to_main] < 0 } {
+    perror "mi-nonstop.exp tests suppressed"
+    continue
 }
-mi_expect_stop "breakpoint-hit" main ".*" ".*" "\[0-9\]+" { "" "disp=\"del\"" } "run to main"
 
 mi_create_breakpoint break_at_me 2 keep break_at_me .* .* .* "breakpoint at marker"
 
@@ -114,13 +85,13 @@ mi_varobj_update * {I_W1 I_W0} "update varobj, 1"
 mi_check_varobj_value I_W0 1 "check varobj, w0, 1"
 mi_check_varobj_value I_W1 1 "check varobj, w1, 1"
 
-send_gdb "-exec-interrupt --thread 1\n" 
+send_gdb "-exec-interrupt --thread 1\n"
 gdb_expect {
     -re "\\^done\r\n$mi_gdb_prompt\\*stopped\[^\r\n\]+\r\n$" {
-        pass "interrupted"
+	pass "interrupted"
     }
     timeout {
-        fail "interrupted (timeout)"
+	fail "interrupted (timeout)"
     }
 }
 # The interrupt command sends SIGINT to the target, and therefore the
@@ -132,10 +103,10 @@ mi_check_thread_states {"stopped" "stopped" "stopped"} "thread state, stop 4"
 send_gdb "-exec-continue --all\n"
 gdb_expect {
     -re ".*\\*running,thread-id=\"3\"\r\n\\*running,thread-id=\"2\"\r\n\\*running,thread-id=\"1\"\r\n$mi_gdb_prompt" {
-        pass "resume all"
+	pass "resume all"
     }
     timeout {
-        fail "resume all (timeout)"
+	fail "resume all (timeout)"
     }
 }
 
@@ -172,12 +143,20 @@ mi_gdb_test "-stack-list-frames --thread 3" \
 mi_gdb_test "-thread-select 2" "\\^done.*" "select first worker thread"
 # Since thread 2 is running, we need to set variable via another thread.
 mi_gdb_test "-gdb-set --thread 3 variable exit_first_thread=1" ".*\\^done" "ask the second thread to exit"
-gdb_expect {
-    -re ".*=thread-exited,id=\"2\",group-id=\"\[0-9\]+\"\r\n$" {
-        pass "wait for thread exit"
-    }
-    timeout {
-        fail "wait for thread exit (timeout)"
+
+set test "wait for thread exit"
+if { [is_remote target] } {
+    # The remote protocol doesn't have support for thread exit
+    # notifications.
+    unsupported $test
+} else {
+    gdb_expect {
+	-re ".*=thread-exited,id=\"2\",group-id=\"\[0-9\]+\"\r\n$" {
+	    pass $test
+	}
+	timeout {
+	    fail "$test (timeout)"
+	}
     }
 }
 
@@ -186,6 +165,4 @@ mi_gdb_test "-stack-list-frames --thread 3" \
     "\\^done,stack=\\\[frame={level=\"0\",addr=\".*\",func=\"break_at_me\".*" \
     "stacktrace of stopped thread"
 
-    
 mi_gdb_exit
-

@@ -333,7 +333,7 @@ proc mi_gdb_target_cmd { targetname serialport } {
     for {set i 1} {$i <= 3} {incr i} {
 	send_gdb "47-target-select $targetname $serialport\n"
 	gdb_expect 60 {
-	    -re "47\\^connected.*$mi_gdb_prompt$" {
+	    -re "47\\^connected.*$mi_gdb_prompt" {
 		verbose "Set target to $targetname";
 		return 0;
 	    }
@@ -364,6 +364,10 @@ proc mi_gdb_target_cmd { targetname serialport } {
 		verbose "Connection refused by remote target.  Pausing, and trying again."
 		sleep 5
 		continue
+	    }
+	    -re "Non-stop mode requested, but remote does not support non-stop.*$mi_gdb_prompt" {
+		unsupported "Non-stop mode not supported"
+		return 1
 	    }
 	    -re "Timeout reading from remote system.*$mi_gdb_prompt$" {
 		verbose "Got timeout error from gdb.";
@@ -787,13 +791,13 @@ proc mi_run_cmd {args} {
 	    -re "$mi_gdb_prompt$" { }
 	    default {
 		perror "gdb_init_command for target failed";
-		return;
+		return -1;
 	    }
 	}
     }
 
     if { [mi_gdb_target_load] < 0 } {
-	return
+	return -1
     }
 
     if [target_info exists use_gdb_stub] {
@@ -803,7 +807,7 @@ proc mi_run_cmd {args} {
 		-re "220\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\r\n$mi_gdb_prompt" {}
 		default {}
 	    }
-	    return;
+	    return 0;
 	}
 
 	if [target_info exists gdb,start_symbol] {
@@ -816,19 +820,25 @@ proc mi_run_cmd {args} {
 	# to better handle RUN.
 	send_gdb  "jump *$start\n"
 	warning "Using CLI jump command, expect run-to-main FAIL"
-	return
+	return 0
     }
 
     send_gdb "220-exec-run $args\n"
     gdb_expect {
 	-re "220\\^running\r\n(\\*running,thread-id=\"\[^\"\]+\"\r\n|=thread-created,id=\"1\",group-id=\"\[0-9\]+\"\r\n)*(${library_loaded_re})*(${thread_selected_re})?${mi_gdb_prompt}" {
 	}
+	-re "\\^error,msg=\"The target does not support running in non-stop mode.\"" {
+	    unsupported "Non-stop mode not supported"
+	    return -1
+	}
 	timeout {
 	    perror "Unable to start target"
-	    return
+	    return -1
 	}
     }
     # NOTE: Shortly after this there will be a ``000*stopped,...(gdb)''
+
+    return 0
 }
 
 #
@@ -884,7 +894,9 @@ proc mi_runto_helper {func run_or_continue} {
   }
 
   if {$run_or_continue == "run"} {
-      mi_run_cmd
+      if { [mi_run_cmd] < 0 } {
+	  return -1
+      }
   } else {
       mi_send_resuming_command "exec-continue" "$test"
   }
@@ -893,7 +905,7 @@ proc mi_runto_helper {func run_or_continue} {
 }
 
 proc mi_runto {func} {
-    mi_runto_helper $func "run"
+    return [mi_runto_helper $func "run"]
 }
 
 # Next to the next statement
