@@ -1,5 +1,9 @@
 2009-04-02  Dave Korn  <dave.korn.cygwin@gmail.com>
 
+	* ld-pe/export_dynamic_warning.d (#warning):  Fix regex pattern.
+
+2009-04-02  Dave Korn  <dave.korn.cygwin@gmail.com>
+
 	PR ld/6744
 	* ld-pe/export_dynamic_warning.d:  New test control file.
 	* ld-pe/export_dynamic_warning.s:  New test source file.
