@@ -75,6 +75,8 @@
 #define Unordered_set std::tr1::unordered_set
 #define Unordered_map std::tr1::unordered_map
 
+#define reserve_unordered_map(map, n) ((map)->rehash(n))
+
 #elif defined(HAVE_EXT_HASH_MAP) && defined(HAVE_EXT_HASH_SET)
 
 #include <ext/hash_map>
@@ -105,6 +107,8 @@ struct hash<T*>
 
 }
 
+#define reserve_unordered_map(map, n) ((map)->resize(n))
+
 #else
 
 // The fallback is to just use set and map.
@@ -114,6 +118,8 @@ struct hash<T*>
 
 #define Unordered_set std::set
 #define Unordered_map std::map
+
+#define reserve_unordered_map(map, n)
 
 #endif
 

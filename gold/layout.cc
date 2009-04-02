@@ -86,8 +86,8 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
 
 // Layout methods.
 
-Layout::Layout(const General_options& options, Script_options* script_options)
-  : options_(options),
+Layout::Layout(int number_of_input_files, Script_options* script_options)
+  : number_of_input_files_(number_of_input_files),
     script_options_(script_options),
     namepool_(),
     sympool_(),
@@ -97,7 +97,6 @@ Layout::Layout(const General_options& options, Script_options* script_options)
     segment_list_(),
     section_list_(),
     unattached_section_list_(),
-    sections_are_attached_(false),
     special_output_list_(),
     section_headers_(NULL),
     tls_segment_(NULL),
@@ -117,11 +116,13 @@ Layout::Layout(const General_options& options, Script_options* script_options)
     debug_info_(NULL),
     group_signatures_(),
     output_file_size_(-1),
+    sections_are_attached_(false),
     input_requires_executable_stack_(false),
     input_with_gnu_stack_note_(false),
     input_without_gnu_stack_note_(false),
     has_static_tls_(false),
-    any_postprocessing_sections_(false)
+    any_postprocessing_sections_(false),
+    resized_signatures_(false)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -581,6 +582,10 @@ Layout::layout_group(Symbol_table* symtab,
     os->set_info_symndx(sym);
   else
     {
+      // Reserve some space to minimize reallocations.
+      if (this->group_signatures_.empty())
+	this->group_signatures_.reserve(this->number_of_input_files_ * 16);
+
       // We will wind up using a symbol whose name is the signature.
       // So just put the signature in the symbol name pool to save it.
       signature = symtab->canonicalize_name(signature);
@@ -631,7 +636,7 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
       this->eh_frame_section_ = os;
       this->eh_frame_data_ = new Eh_frame();
 
-      if (this->options_.eh_frame_hdr())
+      if (parameters->options().eh_frame_hdr())
 	{
 	  Output_section* hdr_os =
 	    this->choose_output_section(NULL,
@@ -751,12 +756,13 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 {
   Output_section* os;
   if ((flags & elfcpp::SHF_ALLOC) == 0
-      && strcmp(this->options_.compress_debug_sections(), "none") != 0
+      && strcmp(parameters->options().compress_debug_sections(), "none") != 0
       && is_compressible_debug_section(name))
-    os = new Output_compressed_section(&this->options_, name, type, flags);
+    os = new Output_compressed_section(&parameters->options(), name, type,
+				       flags);
 
   else if ((flags & elfcpp::SHF_ALLOC) == 0
-           && this->options_.strip_debug_non_line()
+           && parameters->options().strip_debug_non_line()
            && strcmp(".debug_abbrev", name) == 0)
     {
       os = this->debug_abbrev_ = new Output_reduced_debug_abbrev_section(
@@ -765,7 +771,7 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
         this->debug_info_->set_abbreviations(this->debug_abbrev_);
     }
   else if ((flags & elfcpp::SHF_ALLOC) == 0
-           && this->options_.strip_debug_non_line()
+           && parameters->options().strip_debug_non_line()
            && strcmp(".debug_info", name) == 0)
     {
       os = this->debug_info_ = new Output_reduced_debug_info_section(
@@ -877,7 +883,7 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
         {
           // If -Tbss was specified, we need to separate the data
           // and BSS segments.
-          if (this->options_.user_set_Tbss())
+          if (parameters->options().user_set_Tbss())
             {
               if ((os->type() == elfcpp::SHT_NOBITS)
                   == (*p)->has_any_data_sections())
@@ -1220,7 +1226,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   else
     load_seg = this->find_first_load_seg();
 
-  if (this->options_.oformat_enum() != General_options::OBJECT_FORMAT_ELF)
+  if (parameters->options().oformat_enum()
+      != General_options::OBJECT_FORMAT_ELF)
     load_seg = NULL;
 
   gold_assert(phdr_seg == NULL || load_seg != NULL);
@@ -1241,7 +1248,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // Lay out the file header.
   Output_file_header* file_header;
   file_header = new Output_file_header(target, symtab, segment_headers,
-				       this->options_.entry());
+				       parameters->options().entry());
   if (load_seg != NULL)
     load_seg->add_initial_output_data(file_header);
 
@@ -1454,8 +1461,8 @@ void
 Layout::create_executable_stack_info(const Target* target)
 {
   bool is_stack_executable;
-  if (this->options_.is_execstack_set())
-    is_stack_executable = this->options_.is_stack_executable();
+  if (parameters->options().is_execstack_set())
+    is_stack_executable = parameters->options().is_stack_executable();
   else if (!this->input_with_gnu_stack_note_)
     return;
   else
@@ -1717,8 +1724,8 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
   // Find the PT_LOAD segments, and set their addresses and offsets
   // and their section's addresses and offsets.
   uint64_t addr;
-  if (this->options_.user_set_Ttext())
-    addr = this->options_.Ttext();
+  if (parameters->options().user_set_Ttext())
+    addr = parameters->options().Ttext();
   else if (parameters->options().shared())
     addr = 0;
   else
@@ -1761,19 +1768,19 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	      // the physical address.
 	      addr = (*p)->paddr();
 	    }
-	  else if (this->options_.user_set_Tdata()
+	  else if (parameters->options().user_set_Tdata()
 		   && ((*p)->flags() & elfcpp::PF_W) != 0
-		   && (!this->options_.user_set_Tbss()
+		   && (!parameters->options().user_set_Tbss()
 		       || (*p)->has_any_data_sections()))
 	    {
-	      addr = this->options_.Tdata();
+	      addr = parameters->options().Tdata();
 	      are_addresses_set = true;
 	    }
-	  else if (this->options_.user_set_Tbss()
+	  else if (parameters->options().user_set_Tbss()
 		   && ((*p)->flags() & elfcpp::PF_W) != 0
 		   && !(*p)->has_any_data_sections())
 	    {
-	      addr = this->options_.Tbss();
+	      addr = parameters->options().Tbss();
 	      are_addresses_set = true;
 	    }
 
@@ -2616,7 +2623,7 @@ Layout::sized_create_version_sections(
 void
 Layout::create_interp(const Target* target)
 {
-  const char* interp = this->options_.dynamic_linker();
+  const char* interp = parameters->options().dynamic_linker();
   if (interp == NULL)
     {
       interp = target->dynamic_linker();
@@ -2668,7 +2675,7 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
 
   if (parameters->options().shared())
     {
-      const char* soname = this->options_.soname();
+      const char* soname = parameters->options().soname();
       if (soname != NULL)
 	odyn->add_string(elfcpp::DT_SONAME, soname);
     }
@@ -2685,7 +2692,7 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
   // FIXME: Support DT_INIT_ARRAY and DT_FINI_ARRAY.
 
   // Add a DT_RPATH entry if needed.
-  const General_options::Dir_list& rpath(this->options_.rpath());
+  const General_options::Dir_list& rpath(parameters->options().rpath());
   if (!rpath.empty())
     {
       std::string rpath_val;
@@ -2948,10 +2955,21 @@ Layout::output_section_name(const char* name, size_t* plen)
 // CANDIDATE.
 
 bool
-Layout::find_or_add_kept_section(const std::string name,
+Layout::find_or_add_kept_section(const std::string& name,
                                  Kept_section* candidate,
                                  Kept_section** kept_section)
 {
+  // It's normal to see a couple of entries here, for the x86 thunk
+  // sections.  If we see more than a few, we're linking a C++
+  // program, and we resize to get more space to minimize rehashing.
+  if (this->signatures_.size() > 4
+      && !this->resized_signatures_)
+    {
+      reserve_unordered_map(&this->signatures_,
+			    this->number_of_input_files_ * 64);
+      this->resized_signatures_ = true;
+    }
+
   std::pair<Signatures::iterator, bool> ins(
     this->signatures_.insert(std::make_pair(name, *candidate)));
 
@@ -3188,7 +3206,7 @@ Layout::write_build_id(Output_file* of) const
 void
 Layout::write_binary(Output_file* in) const
 {
-  gold_assert(this->options_.oformat_enum()
+  gold_assert(parameters->options().oformat_enum()
 	      == General_options::OBJECT_FORMAT_BINARY);
 
   // Get the size of the binary file.

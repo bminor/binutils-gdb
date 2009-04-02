@@ -216,7 +216,8 @@ main(int argc, char** argv)
     symtab.set_gc(&gc);
 
   // The layout object.
-  Layout layout(command_line.options(), &command_line.script_options());
+  Layout layout(command_line.number_of_input_files(),
+		&command_line.script_options());
 
   // Get the search path from the -L options.
   Dirsearch search_path;

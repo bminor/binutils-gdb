@@ -1,3 +1,28 @@
+2009-04-01  Ian Lance Taylor  <iant@google.com>
+	    Mikolaj Zalewski  <mikolajz@google.com>
+
+	* gold.h (reserve_unordered_map): Define, three versions, one for
+	each version of Unordered_map.
+	* layout.cc (Layout::Layout): Remove options parameter.  Add
+	number_of_input_files parameter.  Don't initialize options_.
+	Initialize number_of_input_files_ and resized_signatures_.  Move
+	sections_are_attached_.
+	(Layout::layout_group): Reserve space for group_signatures_.
+	(Layout::find_or_add_kept_section): Change name parameter to be a
+	reference.  Resize signatures_ map when it gets large enough.
+	(Layout::layout_eh_frame): Use parameters->options() instead of
+	this->options_.
+	(Layout::make_output_section): Likewise.
+	(Layout::attach_allocated_section_to_segment): Likewise.
+	(Layout::finalize, Layout::create_executable_stack): Likewise.
+	(Layout::set_segment_offsets, Layout::create_interp): Likewise.
+	(Layout::finish_dynamic_section, Layout::write_binary): Likewise.
+	* layout.h (class Layout): Update declarations.  Remove options_
+	field.  Add number_of_input_files_ and resized_signatures_
+	fields.  Move sections_are_attached_ field.
+	* main.cc (main): Pass number of input files to Layout
+	constructor.  Don't pass options.
+
 2009-03-30  Ian Lance Taylor  <iant@google.com>
 
 	* ffsll.c (ffsll): Correct implementation.

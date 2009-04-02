@@ -125,7 +125,7 @@ struct Kept_section
 class Layout
 {
  public:
-  Layout(const General_options& options, Script_options*);
+  Layout(int number_of_input_files, Script_options*);
 
   // Given an input section SHNDX, named NAME, with data in SHDR, from
   // the object file OBJECT, return the output section where this
@@ -271,7 +271,7 @@ class Layout
   // CANDIDATE->GROUP_ being false, KEPT_SECTION can point back to
   // CANDIDATE.
   bool
-  find_or_add_kept_section(const std::string name,
+  find_or_add_kept_section(const std::string& name,
                            Kept_section* candidate,
                            Kept_section** kept_section);
 
@@ -640,8 +640,8 @@ class Layout
     { return Layout::segment_precedes(seg1, seg2); }
   };
 
-  // A reference to the options on the command line.
-  const General_options& options_;
+  // The number of input files, for sizing tables.
+  int number_of_input_files_;
   // Information set by scripts or by command line options.
   Script_options* script_options_;
   // The output section names.
@@ -661,8 +661,6 @@ class Layout
   // The list of output sections which are not attached to any output
   // segment.
   Section_list unattached_section_list_;
-  // Whether we have attached the sections to the segments.
-  bool sections_are_attached_;
   // The list of unattached Output_data objects which require special
   // handling because they are not Output_sections.
   Data_list special_output_list_;
@@ -702,6 +700,8 @@ class Layout
   Group_signatures group_signatures_;
   // The size of the output file.
   off_t output_file_size_;
+  // Whether we have attached the sections to the segments.
+  bool sections_are_attached_;
   // Whether we have seen an object file marked to require an
   // executable stack.
   bool input_requires_executable_stack_;
@@ -715,6 +715,8 @@ class Layout
   bool has_static_tls_;
   // Whether any sections require postprocessing.
   bool any_postprocessing_sections_;
+  // Whether we have resized the signatures_ hash table.
+  bool resized_signatures_;
 };
 
 // This task handles writing out data in output sections which is not
