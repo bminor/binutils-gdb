@@ -226,15 +226,12 @@ powerpc_init_dialect (struct disassemble_info *info)
       arg = end;
     }
 
-  if ((dialect & ~(PPC_OPCODE_ANY | PPC_OPCODE_32 | PPC_OPCODE_64)) == 0)
+  if ((dialect & ~(PPC_OPCODE_32 | PPC_OPCODE_64)) == 0)
     {
-      if ((dialect & (PPC_OPCODE_32 | PPC_OPCODE_64)) == 0)
-	{
-	  if (info->mach == bfd_mach_ppc64)
-	    dialect |= PPC_OPCODE_64;
-	  else
-	    dialect |= PPC_OPCODE_32;
-	}
+      if (info->mach == bfd_mach_ppc64)
+	dialect |= PPC_OPCODE_64;
+      else
+	dialect |= PPC_OPCODE_32;
       /* Choose a reasonable default.  */
       dialect |= (PPC_OPCODE_PPC | PPC_OPCODE_COMMON | PPC_OPCODE_CLASSIC
 		  | PPC_OPCODE_601 | PPC_OPCODE_ALTIVEC);
@@ -338,6 +335,7 @@ print_insn_powerpc (bfd_vma memaddr,
   const struct powerpc_opcode *opcode;
   const struct powerpc_opcode *opcode_end;
   unsigned long op;
+  ppc_cpu_t dialect_orig = dialect;
 
   status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status != 0)
@@ -376,7 +374,7 @@ print_insn_powerpc (bfd_vma memaddr,
 
       if ((insn & opcode->mask) != opcode->opcode
 	  || (opcode->flags & dialect) == 0
-	  || (opcode->deprecated & dialect) != 0)
+	  || (opcode->deprecated & dialect_orig) != 0)
 	continue;
 
       /* Make two passes over the operands.  First see if any of them
@@ -447,16 +445,14 @@ print_insn_powerpc (bfd_vma memaddr,
 	    (*info->print_address_func) (memaddr + value, info);
 	  else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
 	    (*info->print_address_func) ((bfd_vma) value & 0xffffffff, info);
-	  else if ((operand->flags & PPC_OPERAND_CR) == 0
-		   || (dialect & PPC_OPCODE_PPC) == 0)
-	    (*info->fprintf_func) (info->stream, "%ld", value);
 	  else if ((operand->flags & PPC_OPERAND_FSL) != 0) 
 	    (*info->fprintf_func) (info->stream, "fsl%ld", value);
 	  else if ((operand->flags & PPC_OPERAND_FCR) != 0)
 	    (*info->fprintf_func) (info->stream, "fcr%ld", value);
 	  else if ((operand->flags & PPC_OPERAND_UDI) != 0)
 	    (*info->fprintf_func) (info->stream, "%ld", value);
-	  else
+	  else if ((operand->flags & PPC_OPERAND_CR) != 0
+		   && (dialect & PPC_OPCODE_PPC) != 0)
 	    {
 	      if (operand->bitm == 7)
 		(*info->fprintf_func) (info->stream, "cr%ld", value);
@@ -473,6 +469,8 @@ print_insn_powerpc (bfd_vma memaddr,
 		  (*info->fprintf_func) (info->stream, "%s", cbnames[cc]);
 		}
 	    }
+	  else
+	    (*info->fprintf_func) (info->stream, "%ld", value);
 
 	  if (need_paren)
 	    {

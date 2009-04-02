@@ -1,3 +1,16 @@
+2009-04-02  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (powerpc_init_dialect): Do not choose a default dialect
+	due to -many/-Many.
+	(print_insn_powerpc): Make sure we only deprecate instructions using
+	the original dialect and not a modified dialect due to -Many handling.
+	Move the handling of the condition register and default operands to
+	the end of the if/else if/else chain.
+	* ppc-opc.c (powerpc_opcodes): Reorder the opcode table so that
+	instructions from newer processors are listed before older ones.
+	<"icblce", "sync", "eieio", "tlbld">: Deprecate for processors
+	that have instructions with conflicting opcodes.
+
 2009-04-01  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes) <"dcbzl">: Merge the POWER4 and
