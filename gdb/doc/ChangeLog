@@ -1,5 +1,12 @@
 2009-04-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.texinfo (Backtrace): Add a parameter in frame 1 of the first
+	example, and add a small explanation about it.
+	(Print Settings): Change the documentation of the "set print
+	frame-arguments" to reflect the fact that the default is now "scalars".
+
+2009-04-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.texinfo (Print Settings): Add kindex for command "set
 	print frame-arguments".
 

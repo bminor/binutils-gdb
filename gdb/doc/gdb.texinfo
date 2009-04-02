@@ -5179,7 +5179,7 @@ Here is an example of a backtrace.  It was made with the command
 @group
 #0  m4_traceon (obs=0x24eb0, argc=1, argv=0x2b8c8)
     at builtin.c:993
-#1  0x6e38 in expand_macro (sym=0x2b600) at macro.c:242
+#1  0x6e38 in expand_macro (sym=0x2b600, data=...) at macro.c:242
 #2  0x6840 in expand_token (obs=0x0, t=177664, td=0xf7fffb08)
     at macro.c:71
 (More stack frames follow...)
@@ -5190,6 +5190,13 @@ Here is an example of a backtrace.  It was made with the command
 The display for frame zero does not begin with a program counter
 value, indicating that your program has stopped at the beginning of the
 code for line @code{993} of @code{builtin.c}.
+
+@noindent
+The value of parameter @code{data} in frame 1 has been replaced by
+@code{@dots{}}.  By default, @value{GDBN} prints the value of a parameter
+only if it is a scalar (integer, pointer, enumeration, etc).  See command
+@kbd{set print frame-arguments} in @ref{Print Settings} for more details
+on how to configure the way function parameter values are printed.
 
 @cindex value optimized out, in backtrace
 @cindex function call arguments, optimized out
@@ -6984,12 +6991,13 @@ values are:
 
 @table @code
 @item all
-The values of all arguments are printed.  This is the default.
+The values of all arguments are printed.
 
 @item scalars
 Print the value of an argument only if it is a scalar.  The value of more
 complex arguments such as arrays, structures, unions, etc, is replaced
-by @code{@dots{}}.  Here is an example where only scalar arguments are shown:
+by @code{@dots{}}.  This is the default.  Here is an example where
+only scalar arguments are shown:
 
 @smallexample
 #1  0x08048361 in call_me (i=3, s=@dots{}, ss=0xbf8d508c, u=@dots{}, e=green)
@@ -7006,14 +7014,16 @@ is replaced by @code{@dots{}}.  In this case, the example above now becomes:
 @end smallexample
 @end table
 
-By default, all argument values are always printed.  But this command
-can be useful in several cases.  For instance, it can be used to reduce
-the amount of information printed in each frame, making the backtrace
-more readable.  Also, this command can be used to improve performance
-when displaying Ada frames, because the computation of large arguments
-can sometimes be CPU-intensive, especiallly in large applications.
-Setting @code{print frame-arguments} to @code{scalars} or @code{none}
-avoids this computation, thus speeding up the display of each Ada frame.
+By default, only scalar arguments are printed.  This command can be used
+to configure the debugger to print the value of all arguments, regardless
+of their type.  However, it is often advantageous to not print the value
+of more complex parameters.  For instance, it reduces the amount of
+information printed in each frame, making the backtrace more readable.
+Also, it improves performance when displaying Ada frames, because
+the computation of large arguments can sometimes be CPU-intensive,
+especially in large applications.  Setting @code{print frame-arguments}
+to @code{scalars} (the default) or @code{none} avoids this computation,
+thus speeding up the display of each Ada frame.
 
 @item show print frame-arguments
 Show how the value of arguments should be displayed when printing a frame.
