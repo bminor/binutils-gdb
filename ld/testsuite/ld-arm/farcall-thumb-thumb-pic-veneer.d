@@ -8,13 +8,13 @@ Disassembly of section .text:
 	...
 
 00001008 <__bar_veneer>:
-    1008:	b401      	push	{r0}
-    100a:	4802      	ldr	r0, \[pc, #8\]	\(1014 <__bar_veneer\+0xc>\)
-    100c:	46fc      	mov	ip, pc
-    100e:	4484      	add	ip, r0
-    1010:	bc01      	pop	{r0}
-    1012:	4760      	bx	ip
-    1014:	02000005 	.word	0x02000005
+    1008:	4778      	bx	pc
+    100a:	46c0      	nop			\(mov r8, r8\)
+    100c:	e59fc004 	ldr	ip, \[pc, #4\]	; 1018 <__bar_veneer\+0x10>
+    1010:	e08fc00c 	add	ip, pc, ip
+    1014:	e12fff1c 	bx	ip
+    1018:	01fffffd 	.word	0x01fffffd
+    101c:	00000000 	.word	0x00000000
 
 Disassembly of section .foo:
 

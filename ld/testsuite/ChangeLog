@@ -1,3 +1,9 @@
+2009-04-02  Christophe Lyon  <christophe.lyon@st.com>
+
+	* ld-arm/farcall-thumb-thumb-pic-veneer.d: Update expected
+	results.
+	* ld-arm/farcall-thumb-thumb.d: Likewise.
+
 2009-04-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 9987
