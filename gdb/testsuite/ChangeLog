@@ -1,5 +1,10 @@
 2009-04-02  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.mi/mi-nonstop-exit.exp: Don't check isnative.  Use
+	mi_run_to_main.
+
+2009-04-02  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.mi/mi-nonstop.exp: Don't check isnative.  Use
 	mi_run_to_main.  Skip thread exit test on remote targets.
 	* gdb.mi/mi-nsintrall.exp: Don't check isnative.  Use
