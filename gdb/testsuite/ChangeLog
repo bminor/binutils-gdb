@@ -1,3 +1,8 @@
+2009-04-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.server/ext-attach.exp: Expect an optional process id after
+	"Detached from remote process".
+
 2009-04-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-unresolved-main.c, gdb.dwarf2/dw2-unresolved.S,

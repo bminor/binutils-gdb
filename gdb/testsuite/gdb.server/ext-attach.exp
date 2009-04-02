@@ -66,7 +66,7 @@ gdb_test "attach $testpid" "Attached to.*" \
     "attach to remote program 1"
 gdb_test "backtrace" ".*main.*" "backtrace 1"
 
-gdb_test "detach" "Detached from remote process\\."
+gdb_test "detach" "Detached from remote process.*\\."
 gdb_test "backtrace" "No stack\\." "backtrace with no program"
 
 gdb_test "attach $testpid" "Attached to.*" \
