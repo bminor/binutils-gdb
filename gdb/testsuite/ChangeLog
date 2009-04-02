@@ -1,3 +1,8 @@
+2009-04-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-unresolved-main.c, gdb.dwarf2/dw2-unresolved.S,
+	gdb.dwarf2/dw2-unresolved.exp: New.
+
 2009-04-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.mi/mi-nonstop-exit.exp: Don't check isnative.  Use

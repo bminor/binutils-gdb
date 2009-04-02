@@ -7682,7 +7682,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 		  && dwarf2_attr (die, DW_AT_type, cu) != NULL)
 		{
 		  SYMBOL_CLASS (sym) = LOC_UNRESOLVED;
-		  add_symbol_to_list (sym, &global_symbols);
+		  add_symbol_to_list (sym, cu->list_in_scope);
 		}
 	      else if (!die_is_declaration (die, cu))
 		{

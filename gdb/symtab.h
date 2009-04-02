@@ -472,7 +472,13 @@ enum address_class
      in another object file or runtime common storage.
      The linker might even remove the minimal symbol if the global
      symbol is never referenced, in which case the symbol remains
-     unresolved.  */
+     unresolved.
+     
+     GDB would normally find the symbol in the minimal symbol table if it will
+     not find it in the full symbol table.  But a reference to an external
+     symbol in a local block shadowing other definition requires full symbol
+     without possibly having its address available for LOC_STATIC.  Testcase
+     is provided as `gdb.dwarf2/dw2-unresolved.exp'.  */
 
   LOC_UNRESOLVED,
 

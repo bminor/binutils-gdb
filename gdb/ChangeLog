@@ -1,3 +1,10 @@
+2009-04-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c
+	(new_symbol <DW_TAG_variable> <!DW_AT_location> <DW_AT_external>):
+	Create the symbol in local scope.
+	* symtab.h (cu->list_in_scope <LOC_UNRESOLVED>): New comment part.
+
 2009-04-02  Keith Seitz  <keiths@redhat.com>
 
 	* stabsread.c (read_member_functions): GCC may emit an extra space
