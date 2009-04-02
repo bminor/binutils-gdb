@@ -6973,6 +6973,7 @@ Display the number of elements of a large array that @value{GDBN} will print.
 If the number is 0, then the printing is unlimited.
 
 @item set print frame-arguments @var{value}
+@kindex set print frame-arguments
 @cindex printing frame argument values
 @cindex print all frame argument values
 @cindex print frame argument values for scalars only
