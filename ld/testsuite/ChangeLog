@@ -1,3 +1,9 @@
+2009-04-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 9987
+	* lib/ld-lib.exp (check_gc_sections_available): Do not run garbage
+	collection tests for cygwin targets.
+
 2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* ld-powerpc/aix-gc-1.nd: New test.
