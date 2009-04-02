@@ -1,3 +1,11 @@
+2009-04-02  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	PR ld/6744
+	* ld.texinfo (--export-dynamic):  Mention --export-all-symbols.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_parse):  Issue
+	warning if --export-dynamic was passed on command-line.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_after_parse):  Likewise.
+
 2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* emultempl/aix.em (gld${EMULATION_NAME}_open_dynamic_archive): New

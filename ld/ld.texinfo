@@ -510,6 +510,10 @@ You can also use the dynamic list to control what symbols should
 be added to the dynamic symbol table if the output format supports it.
 See the description of @samp{--dynamic-list}.
 
+Note that this option is specific to ELF targeted ports.  PE targets
+support a similar function to export all symbols from a DLL or EXE; see
+the description of @samp{--export-all-symbols} below.
+
 @ifclear SingleFormat
 @cindex big-endian objects
 @cindex endianness

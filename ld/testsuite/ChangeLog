@@ -1,3 +1,10 @@
+2009-04-02  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	PR ld/6744
+	* ld-pe/export_dynamic_warning.d:  New test control file.
+	* ld-pe/export_dynamic_warning.s:  New test source file.
+	* ld-pe/pe.exp:  Also run export_dynamic_warning dump test.
+
 2009-04-02  Christophe Lyon  <christophe.lyon@st.com>
 
 	* ld-arm/farcall-thumb-thumb-pic-veneer.d: Update expected

@@ -824,6 +824,12 @@ gld_${EMULATION_NAME}_after_parse (void)
 
   if (! link_info.relocatable && entry_symbol.name != NULL)
     ldlang_add_undef (entry_symbol.name);
+
+  /* PR ld/6744:  Warn the user if they have used an ELF-only
+     option hoping it will work on PE+.  */
+  if (link_info.export_dynamic)
+    einfo (_("%P: warning: --export-dynamic is not supported for PE+ "
+      "targets, did you mean --export-all-symbols?\n"));
 }
 
 /* pep-dll.c directly accesses pep_data_import_dll,

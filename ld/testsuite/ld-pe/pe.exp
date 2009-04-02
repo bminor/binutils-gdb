@@ -49,3 +49,4 @@ if {[istarget x86_64-*-mingw*] } {
 run_ld_link_tests $pe_tests
 
 run_dump_test "image_size"
+run_dump_test "export_dynamic_warning"
