@@ -1,3 +1,9 @@
+2009-04-02  Daniel Gutson <dgutson@codesourcery.com>
+
+	* config/tc-arm.c (arm_cpus): Add entry for ARM Cortex-M0.
+	* doc/c-arm.texi: Added codes for processors ARM Cortex-M0 and
+	Cortex-M1.
+
 2009-04-01  Matt Thomas	<matt@netbsd.org>
 
 	* config/tc-vax.c (synthetic_votstrs): add "jbbcci" and "jbbssi"
