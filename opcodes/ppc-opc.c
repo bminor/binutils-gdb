@@ -4725,8 +4725,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"dcbzep",	XRT(31,1023,0),	XRT_MASK,    E500MC,	PPCNONE,	{RA, RB}},
 
-{"dcbzl",	XOPL(31,1014,1), XRT_MASK,   POWER4,	PPCNONE,	{RA, RB}},
-{"dcbzl",	XOPL(31,1014,1), XRT_MASK,   PPCCOM|E500MC,POWER4,	{RA, RB}},
+{"dcbzl",	XOPL(31,1014,1), XRT_MASK, POWER4|E500MC, PPCNONE,	{RA, RB}},
 
 {"cctpl",	0x7c210b78,	0xffffffff,  CELL,	PPCNONE,	{0}},
 {"cctpm",	0x7c421378,	0xffffffff,  CELL,	PPCNONE,	{0}},

@@ -1,3 +1,8 @@
+2009-04-01  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <"dcbzl">: Merge the POWER4 and
+	E500MC entries.
+
 2009-04-01  Christophe Lyon  <christophe.lyon@st.com>
 
 	* arm-dis.c (print_insn): Print BE8 opcodes in little endianness.
