@@ -1985,6 +1985,7 @@ usr_store_inferior_registers (int regno)
   CORE_ADDR regaddr;
   int i, size;
   char *buf;
+  int pid;
 
   if (regno >= 0)
     {

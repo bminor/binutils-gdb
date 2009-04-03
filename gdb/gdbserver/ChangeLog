@@ -1,3 +1,8 @@
+2009-04-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (usr_store_inferior_registers): Declare local `pid'
+	variable.
+
 2009-04-01  Pedro Alves  <pedro@codesourcery.com>
 
 	Implement the multiprocess extensions, and add linux multiprocess
