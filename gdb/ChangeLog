@@ -1,4 +1,11 @@
-2009-04-93  Ulrich Weigand  <uweigand@de.ibm.com>
+2009-04-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_target_wordsize): New function.
+	(ppc_linux_auxv_parse): New function.
+	(ppc_linux_read_description): Use ppc_linux_target_wordsize.
+	(_initialize_ppc_linux_nat): Install ppc_linux_auxv_parse.
+
+2009-04-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-linux-nat.c (spu_bfd_open): Set filename of in-memory
 	BFD to contents of SPU name note.

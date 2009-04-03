@@ -1240,6 +1240,51 @@ fill_fpregset (const struct regcache *regcache,
 			fpregsetp, sizeof (*fpregsetp));
 }
 
+static int
+ppc_linux_target_wordsize (void)
+{
+  int wordsize = 4;
+
+  /* Check for 64-bit inferior process.  This is the case when the host is
+     64-bit, and in addition the top bit of the MSR register is set.  */
+#ifdef __powerpc64__
+  long msr;
+
+  int tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid);
+
+  errno = 0;
+  msr = (long) ptrace (PTRACE_PEEKUSER, tid, PT_MSR * 8, 0);
+  if (errno == 0 && msr < 0)
+    wordsize = 8;
+#endif
+
+  return wordsize;
+}
+
+static int
+ppc_linux_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
+                      gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+{
+  int sizeof_auxv_field = ppc_linux_target_wordsize ();
+  gdb_byte *ptr = *readptr;
+
+  if (endptr == ptr)
+    return 0;
+
+  if (endptr - ptr < sizeof_auxv_field * 2)
+    return -1;
+
+  *typep = extract_unsigned_integer (ptr, sizeof_auxv_field);
+  ptr += sizeof_auxv_field;
+  *valp = extract_unsigned_integer (ptr, sizeof_auxv_field);
+  ptr += sizeof_auxv_field;
+
+  *readptr = ptr;
+  return 1;
+}
+
 static const struct target_desc *
 ppc_linux_read_description (struct target_ops *ops)
 {
@@ -1299,24 +1344,15 @@ ppc_linux_read_description (struct target_ops *ops)
   if (ppc_linux_get_hwcap () & PPC_FEATURE_HAS_DFP)
     isa205 = 1;
 
-  /* Check for 64-bit inferior process.  This is the case when the host is
-     64-bit, and in addition the top bit of the MSR register is set.  */
-#ifdef __powerpc64__
-  {
-    long msr;
-    errno = 0;
-    msr = (long) ptrace (PTRACE_PEEKUSER, tid, PT_MSR * 8, 0);
-    if (errno == 0 && msr < 0)
-      {
-	if (vsx)
-	  return isa205? tdesc_powerpc_isa205_vsx64l : tdesc_powerpc_vsx64l;
-	else if (altivec)
-	  return isa205? tdesc_powerpc_isa205_altivec64l : tdesc_powerpc_altivec64l;
+  if (ppc_linux_target_wordsize () == 8)
+    {
+      if (vsx)
+	return isa205? tdesc_powerpc_isa205_vsx64l : tdesc_powerpc_vsx64l;
+      else if (altivec)
+	return isa205? tdesc_powerpc_isa205_altivec64l : tdesc_powerpc_altivec64l;
 
-	return isa205? tdesc_powerpc_isa205_64l : tdesc_powerpc_64l;
-      }
-  }
-#endif
+      return isa205? tdesc_powerpc_isa205_64l : tdesc_powerpc_64l;
+    }
 
   if (vsx)
     return isa205? tdesc_powerpc_isa205_vsx32l : tdesc_powerpc_vsx32l;
@@ -1350,6 +1386,7 @@ _initialize_ppc_linux_nat (void)
   t->to_watchpoint_addr_within_range = ppc_linux_watchpoint_addr_within_range;
 
   t->to_read_description = ppc_linux_read_description;
+  t->to_auxv_parse = ppc_linux_auxv_parse;
 
   /* Register the target.  */
   linux_nat_add_target (t);
