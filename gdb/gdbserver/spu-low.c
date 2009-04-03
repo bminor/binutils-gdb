@@ -52,7 +52,7 @@
 #define NR_spu_run	0x0116
 
 /* Get current thread ID (Linux task ID).  */
-#define current_tid ((struct inferior_list_entry *)current_inferior)->id
+#define current_ptid ((struct inferior_list_entry *)current_inferior)->id
 
 /* These are used in remote-utils.c.  */
 int using_threads = 0;
@@ -67,7 +67,7 @@ fetch_ppc_register (int regno)
 {
   PTRACE_TYPE_RET res;
 
-  int tid = current_tid;
+  int tid = ptid_get_lwp (current_ptid);
 
 #ifndef __powerpc64__
   /* If running as a 32-bit process on a 64-bit system, we attempt
@@ -150,7 +150,7 @@ fetch_ppc_memory (CORE_ADDR memaddr, char *myaddr, int len)
 	       / sizeof (PTRACE_TYPE_RET));
   PTRACE_TYPE_RET *buffer;
 
-  int tid = current_tid;
+  int tid = ptid_get_lwp (current_ptid);
 
   buffer = (PTRACE_TYPE_RET *) alloca (count * sizeof (PTRACE_TYPE_RET));
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_TYPE_RET))
@@ -175,7 +175,7 @@ store_ppc_memory (CORE_ADDR memaddr, char *myaddr, int len)
 	       / sizeof (PTRACE_TYPE_RET));
   PTRACE_TYPE_RET *buffer;
 
-  int tid = current_tid;
+  int tid = ptid_get_lwp (current_ptid);
 
   buffer = (PTRACE_TYPE_RET *) alloca (count * sizeof (PTRACE_TYPE_RET));
 
@@ -240,7 +240,7 @@ spu_proc_xfer_spu (const char *annex, unsigned char *readbuf,
   if (!annex)
     return 0;
 
-  sprintf (buf, "/proc/%ld/fd/%s", current_tid, annex);
+  sprintf (buf, "/proc/%ld/fd/%s", ptid_get_lwp (current_ptid), annex);
   fd = open (buf, writebuf? O_WRONLY : O_RDONLY);
   if (fd <= 0)
     return -1;
@@ -319,10 +319,14 @@ spu_attach (unsigned long  pid)
 
 /* Kill the inferior process.  */
 static int
-spu_kill (int)
+spu_kill (int pid)
 {
-  ptrace (PTRACE_KILL, current_tid, 0, 0);
-  remove_process (pid);
+  struct process_info *process = find_process_pid (pid);
+  if (process == NULL)
+    return -1;
+
+  ptrace (PTRACE_KILL, pid, 0, 0);
+  remove_process (process);
   return 0;
 }
 
@@ -330,8 +334,12 @@ spu_kill (int)
 static int
 spu_detach (int pid)
 {
-  ptrace (PTRACE_DETACH, current_tid, 0, 0);
-  remove_process (pid);
+  struct process_info *process = find_process_pid (pid);
+  if (process == NULL)
+    return -1;
+
+  ptrace (PTRACE_DETACH, pid, 0, 0);
+  remove_process (process);
   return 0;
 }
 
@@ -339,9 +347,14 @@ static void
 spu_join (int pid)
 {
   int status, ret;
+  struct process_info *process;
+
+  process = find_process_pid (pid);
+  if (process == NULL)
+    return;
 
   do {
-    ret = waitpid (current_tid, &status, 0);
+    ret = waitpid (pid, &status, 0);
     if (WIFEXITED (status) || WIFSIGNALED (status))
       break;
   } while (ret != -1 || errno != ECHILD);
@@ -351,7 +364,7 @@ spu_join (int pid)
 static int
 spu_thread_alive (ptid_t ptid)
 {
-  return ptid_get_lwp (ptid) == current_tid;
+  return ptid_equal (ptid, current_ptid);
 }
 
 /* Resume process.  */
@@ -362,7 +375,7 @@ spu_resume (struct thread_resume *resume_info, size_t n)
 
   for (i = 0; i < n; i++)
     if (ptid_equal (resume_info[i].thread, minus_one_ptid)
-	|| ptid_get_lwp (resume_info[i].thread) == current_tid)
+	|| ptid_equal (resume_info[i].thread, current_ptid))
       break;
 
   if (i == n)
@@ -376,7 +389,7 @@ spu_resume (struct thread_resume *resume_info, size_t n)
   regcache_invalidate ();
 
   errno = 0;
-  ptrace (PTRACE_CONT, current_tid, 0, resume_info[i].sig);
+  ptrace (PTRACE_CONT, ptid_get_lwp (current_ptid), 0, resume_info[i].sig);
   if (errno)
     perror_with_name ("ptrace");
 }
@@ -385,13 +398,13 @@ spu_resume (struct thread_resume *resume_info, size_t n)
 static ptid_t
 spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
-  int tid = current_tid;
+  int pid = ptid_get_pid (ptid);
   int w;
   int ret;
 
   while (1)
     {
-      ret = waitpid (tid, &w, WNOHANG | __WALL | __WNOTHREAD);
+      ret = waitpid (pid, &w, WNOHANG | __WALL | __WNOTHREAD);
 
       if (ret == -1)
 	{
@@ -413,12 +426,10 @@ spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 
       while (!parse_spufs_run (&fd, &addr))
 	{
-	  ptrace (PT_SYSCALL, tid, (PTRACE_TYPE_ARG3) 0, 0);
-	  waitpid (tid, NULL, __WALL | __WNOTHREAD);
+	  ptrace (PT_SYSCALL, pid, (PTRACE_TYPE_ARG3) 0, 0);
+	  waitpid (pid, NULL, __WALL | __WNOTHREAD);
 	}
     }
-
-  ret = current_tid;
 
   if (WIFEXITED (w))
     {
@@ -426,7 +437,7 @@ spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
       ourstatus->kind =  TARGET_WAITKIND_EXITED;
       ourstatus->value.integer = WEXITSTATUS (w);
       clear_inferiors ();
-      remove_process (ret);
+      remove_process (find_process_pid (ret));
       return pid_to_ptid (ret);
     }
   else if (!WIFSTOPPED (w))
@@ -435,7 +446,7 @@ spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
       ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
       ourstatus->value.sig = target_signal_from_host (WTERMSIG (w));
       clear_inferiors ();
-      remove_process (ret);
+      remove_process (find_process_pid (ret));
       return pid_to_ptid (ret);
     }
 
@@ -582,7 +593,7 @@ spu_look_up_symbols (void)
 static void
 spu_request_interrupt (void)
 {
-  syscall (SYS_tkill, current_tid, SIGINT);
+  syscall (SYS_tkill, ptid_get_lwp (current_ptid), SIGINT);
 }
 
 static struct target_ops spu_target_ops = {

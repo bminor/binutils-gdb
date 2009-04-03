@@ -1118,6 +1118,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    buf = outreg (find_regno (*regp), buf);
 	    regp ++;
 	  }
+	*buf = '\0';
 
 	/* Formerly, if the debugger had not used any thread features
 	   we would not burden it with a thread status response.  This

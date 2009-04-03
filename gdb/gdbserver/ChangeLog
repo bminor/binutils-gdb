@@ -1,3 +1,17 @@
+2009-04-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* remote-utils.c (prepare_resume_reply): Null-terminate packet.
+	* spu-low.c (current_tid): Rename to ...
+	(current_ptid): ... this.
+	(fetch_ppc_register, fetch_ppc_memory, store_ppc_memory,
+	spu_proc_xfer_spu, spu_resume, spu_request_interrupt): Use
+	ptid_get_lwp (current_ptid) instead of current_tid.
+	(spu_kill, spu_detach, spu_join, spu_wait): Use pid argument
+	instead of current_tid.  Use find_process_pid to verify pid
+	argument is valid.  Pass proper argument to remove_process.
+	(spu_thread_alive): Compare current_ptid instead of current_tid.
+	(spu_resume): Likewise.
+
 2009-04-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-low.c (usr_store_inferior_registers): Declare local `pid'
