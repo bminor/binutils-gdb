@@ -10015,12 +10015,7 @@ relax_property_section (bfd *abfd,
 	  if (remove_this_rel)
 	    {
 	      offset_rel->r_info = ELF32_R_INFO (0, R_XTENSA_NONE);
-	      /* In case this is the last entry, move the relocation offset
-		 to the previous entry, if there is one.  */
-	      if (offset_rel->r_offset >= bytes_to_remove)
-		offset_rel->r_offset -= bytes_to_remove;
-	      else
-		offset_rel->r_offset = 0;
+	      offset_rel->r_offset = 0;
 	    }
 
 	  if (bytes_to_remove != 0)
