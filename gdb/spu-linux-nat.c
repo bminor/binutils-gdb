@@ -308,6 +308,7 @@ static bfd *
 spu_bfd_open (ULONGEST addr)
 {
   struct bfd *nbfd;
+  asection *spu_name;
 
   ULONGEST *open_closure = xmalloc (sizeof (ULONGEST));
   *open_closure = addr;
@@ -323,6 +324,22 @@ spu_bfd_open (ULONGEST addr)
     {
       bfd_close (nbfd);
       return NULL;
+    }
+
+  /* Retrieve SPU name note and update BFD name.  */
+  spu_name = bfd_get_section_by_name (nbfd, ".note.spu_name");
+  if (spu_name)
+    {
+      int sect_size = bfd_section_size (nbfd, spu_name);
+      if (sect_size > 20)
+	{
+	  char *buf = alloca (sect_size - 20 + 1);
+	  bfd_get_section_contents (nbfd, spu_name, buf, 20, sect_size - 20);
+	  buf[sect_size - 20] = '\0';
+
+	  xfree ((char *)nbfd->filename);
+	  nbfd->filename = xstrdup (buf);
+	}
     }
 
   return nbfd;
@@ -355,7 +372,7 @@ spu_symbol_file_add_from_memory (int inferior_fd)
   /* Open BFD representing SPE executable and read its symbols.  */
   nbfd = spu_bfd_open (addr);
   if (nbfd)
-    symbol_file_add_from_bfd (nbfd, 0, NULL, 1, 0);
+    symbol_file_add_from_bfd (nbfd, 1, NULL, 1, 0);
 }
 
 

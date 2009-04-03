@@ -1,3 +1,10 @@
+2009-04-93  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-linux-nat.c (spu_bfd_open): Set filename of in-memory
+	BFD to contents of SPU name note.
+	(spu_symbol_file_add_from_memory): Call symbol_file_add_from_bfd
+	with "from_tty" argument 1 instead of 0.
+
 2009-04-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c
