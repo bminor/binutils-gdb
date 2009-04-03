@@ -1,6 +1,6 @@
-	.text
+	.section .text
 	.long 0x12345678
-	.data
+	.section .data
 	.long 0x9abcdef0
-	.bss
+	.section .bss
 	.long 0

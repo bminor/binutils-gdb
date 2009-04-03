@@ -1,3 +1,7 @@
+2009-04-03  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/rgn-at.s: Use explicit .section pseudos.
+
 2009-04-03  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-pe/image_size.d (#target):  Also run test on Cygwin and x86_64
