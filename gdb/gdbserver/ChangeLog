@@ -1,5 +1,14 @@
 2009-04-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* inferiors.c (get_thread_process): Make global.
+	* server.h (get_thread_process): Add prototype.
+	* thread-db.c (find_one_thread): Use get_thread_process
+	instead of current_process.
+	(thread_db_get_tls_address): Do not crash if called when
+	thread layer is not yet initialized.
+
+2009-04-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* remote-utils.c (prepare_resume_reply): Null-terminate packet.
 	* spu-low.c (current_tid): Rename to ...
 	(current_ptid): ... this.

@@ -233,7 +233,7 @@ find_one_thread (ptid_t ptid)
   td_err_e err;
   struct thread_info *inferior;
   struct lwp_info *lwp;
-  struct process_info_private *proc = current_process()->private;
+  struct process_info_private *proc;
   int lwpid = ptid_get_lwp (ptid);
 
   inferior = (struct thread_info *) find_inferior_id (&all_threads, ptid);
@@ -242,6 +242,7 @@ find_one_thread (ptid_t ptid)
     return 1;
 
   /* Get information about this thread.  */
+  proc = get_thread_process (inferior)->private;
   err = td_ta_map_lwp2thr (proc->thread_agent, lwpid, &th);
   if (err != TD_OK)
     error ("Cannot get thread handle for LWP %d: %s",
@@ -381,6 +382,10 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
   td_err_e err;
   struct lwp_info *lwp;
   struct thread_info *saved_inferior;
+
+  /* If the thread layer is not (yet) initialized, fail.  */
+  if (!get_thread_process (thread)->all_symbols_looked_up)
+    return TD_ERR;
 
   lwp = get_thread_lwp (thread);
   if (!lwp->thread_known)

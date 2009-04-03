@@ -201,6 +201,7 @@ struct process_info
    no current thread selected.  */
 
 struct process_info *current_process (void);
+struct process_info *get_thread_process (struct thread_info *);
 
 #include "regcache.h"
 #include "gdb/signals.h"

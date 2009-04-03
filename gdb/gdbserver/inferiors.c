@@ -442,7 +442,7 @@ find_process_pid (int pid)
     find_inferior_id (&all_processes, pid_to_ptid (pid));
 }
 
-static struct process_info *
+struct process_info *
 get_thread_process (struct thread_info *thread)
 {
   int pid = ptid_get_pid (thread->entry.id);
