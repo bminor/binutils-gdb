@@ -1,3 +1,13 @@
+2009-04-03  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Eliminate some sleep usage.
+
+        * gdb.mi/basics.c (do_nothing): New.
+        (main): Use do_nothing instead of printf, so that
+        not to introduce race condition between output of
+        inferiour and output of gdb. Do not use sleep as it
+        is not generally available on embedded targets.
+
 2009-04-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.server/ext-attach.exp: Expect an optional process id after
