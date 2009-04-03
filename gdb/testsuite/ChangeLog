@@ -1,3 +1,8 @@
+2009-04-03  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/attach.exp: Re-enable for spu*-*-* targets.
+	* gdb.server/ext-attach.exp: Likewise.
+
 2009-04-03  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Eliminate some sleep usage.

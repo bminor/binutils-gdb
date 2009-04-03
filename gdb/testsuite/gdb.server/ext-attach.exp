@@ -27,11 +27,6 @@ if { [skip_gdbserver_tests] } {
     return 0
 }
 
-# On SPU, this test currently fails because "sleep" is not supported.
-if { [istarget "spu*-*-*"] } {
-	return 0
-}
-
 # We need to use TCL's exec to get the pid.
 if [is_remote target] then {
     return 0

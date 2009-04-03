@@ -32,11 +32,6 @@ if { [istarget "hppa*-*-hpux*"] } {
     return 0
 }
 
-# On SPU, this test currently fails because "sleep" is not supported.
-if { [istarget "spu*-*-*"] } {
-	return 0
-}
-
 # are we on a target board
 if [is_remote target] then {
     return 0
