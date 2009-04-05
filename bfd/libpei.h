@@ -393,4 +393,5 @@ bfd_boolean _bfd_pe_print_ce_compressed_pdata (bfd *, void *);
 bfd_boolean _bfd_pe64_print_ce_compressed_pdata (bfd *, void *);
 bfd_boolean _bfd_pex64_print_ce_compressed_pdata (bfd *, void *);
 bfd_boolean _bfd_pep_print_ce_compressed_pdata (bfd *, void *);
+bfd_boolean _bfd_pep_print_x64_pdata (bfd *, void *);
 

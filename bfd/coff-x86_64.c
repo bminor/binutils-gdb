@@ -711,9 +711,8 @@ coff_amd64_is_local_label_name (bfd *abfd, const char *name)
 
 #endif /* TARGET_UNDERSCORE */
 
-#ifndef bfd_pe_print_pdata
-#define bfd_pe_print_pdata	NULL
-#endif
+#undef  bfd_pe_print_pdata
+#define bfd_pe_print_pdata   _bfd_pep_print_x64_pdata
 
 #include "coffcode.h"
 
