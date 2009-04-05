@@ -141,9 +141,9 @@ sparc64nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   /* The following is true for NetBSD 1.6.2:
 
-     The pcb contains %sp and %pc, %psr and %wim.  From this information
-     we reconstruct the register state as it would look when we just
-     returned from cpu_switch().  */
+     The pcb contains %sp and %pc, %pstate and %cwp.  From this
+     information we reconstruct the register state as it would look
+     when we just returned from cpu_switch().  */
 
   /* The stack pointer shouldn't be zero.  */
   if (pcb->pcb_sp == 0)
@@ -154,7 +154,6 @@ sparc64nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   if (pcb->pcb_pc == 0)
       read_memory(pcb->pcb_sp + BIAS - 176 + (11 * 8), 
 		  (gdb_byte *)&pcb->pcb_pc, sizeof pcb->pcb_pc);
-
 
   regcache_raw_supply (regcache, SPARC_SP_REGNUM, &pcb->pcb_sp);
   regcache_raw_supply (regcache, SPARC64_PC_REGNUM, &pcb->pcb_pc);
