@@ -552,7 +552,7 @@ ldfile_find_command_file (const char *name, const char *extend,
 			  bfd_boolean default_only)
 {
   search_dirs_type *search;
-  FILE *result;
+  FILE *result = NULL;
   char *buffer;
   static search_dirs_type *script_search;
 

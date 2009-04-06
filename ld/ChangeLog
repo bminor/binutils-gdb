@@ -1,5 +1,9 @@
 2009-04-06  Kazu Hirata  <kazu@codesourcery.com>
 
+	* ldfile.c (ldfile_find_command_file): Initialize result.
+
+2009-04-06  Kazu Hirata  <kazu@codesourcery.com>
+
 	* ld.texinfo (-L): Mention that -L options do not affect how ld
 	searches for a linker script unless -T option is specified.
 	* ldfile.c (ldfile_find_command_file): Append the path obtained
