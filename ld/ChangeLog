@@ -1,3 +1,16 @@
+2009-04-06  Kazu Hirata  <kazu@codesourcery.com>
+
+	* ld.texinfo (-L): Mention that -L options do not affect how ld
+	searches for a linker script unless -T option is specified.
+	* ldfile.c (ldfile_find_command_file): Append the path obtained
+	from the program name to the search path instead of
+	prepending. Add a new parameter "default_only". Restrict the
+	search to the default script location if the new parameter is
+	true.
+	(ldfile_open_command_file_1): New.
+	(ldfile_open_command_file): Call ldfile_open_command_file_1.
+	(ldfile_open_default_command_file): New.
+
 2009-04-03  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldlang.c (lang_leave_output_section_statement): Set lma_region

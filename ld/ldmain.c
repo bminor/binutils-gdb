@@ -376,7 +376,7 @@ main (int argc, char **argv)
       char *s = ldemul_get_script (&isfile);
 
       if (isfile)
-	ldfile_open_command_file (s);
+	ldfile_open_default_command_file (s);
       else
 	{
 	  lex_string = s;

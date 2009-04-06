@@ -673,7 +673,9 @@ option any number of times.  The directories are searched in the order
 in which they are specified on the command line.  Directories specified
 on the command line are searched before the default directories.  All
 @option{-L} options apply to all @option{-l} options, regardless of the
-order in which the options appear.
+order in which the options appear.  @option{-L} options do not affect
+how @command{ld} searches for a linker script unless @option{-T}
+option is specified.
 
 If @var{searchdir} begins with @code{=}, then the @code{=} will be replaced
 by the @dfn{sysroot prefix}, a path specified when the linker is configured.

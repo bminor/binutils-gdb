@@ -542,22 +542,27 @@ find_scripts_dir (void)
   return NULL;
 }
 
-/* Try to open NAME; if that fails, look for it in the default script
-   directory, then in any directories specified with -L, without and
-   with EXTEND appended.  */
+/* If DEFAULT_ONLY is false, try to open NAME; if that fails, look for
+   it in directories specified with -L, then in the default script
+   directory, without and with EXTEND appended.  If DEFAULT_ONLY is
+   true, the search is restricted to the default script location.  */
 
 static FILE *
-ldfile_find_command_file (const char *name, const char *extend)
+ldfile_find_command_file (const char *name, const char *extend,
+			  bfd_boolean default_only)
 {
   search_dirs_type *search;
   FILE *result;
   char *buffer;
   static search_dirs_type *script_search;
 
-  /* First try raw name.  */
-  result = try_open (name, "");
-  if (result != NULL)
-    return result;
+  if (!default_only)
+    {
+      /* First try raw name.  */
+      result = try_open (name, "");
+      if (result != NULL)
+	return result;
+    }
 
   if (!script_search)
     {
@@ -569,16 +574,17 @@ ldfile_find_command_file (const char *name, const char *extend)
 	  ldfile_add_library_path (script_dir, TRUE);
 	  search_tail_ptr = save_tail_ptr;
 	}
-      if (!script_search)
-	script_search = search_head;
-      else
-	script_search->next = search_head;
     }
 
-  /* Try now prefixes.  */
-  for (search = script_search; search != NULL; search = search->next)
-    {
+  /* Temporarily append script_search to the path list so that the
+     paths specified with -L will be searched first.  */
+  *search_tail_ptr = script_search;
 
+  /* Try now prefixes.  */
+  for (search = default_only ? script_search : search_head;
+       search != NULL;
+       search = search->next)
+    {
       buffer = concat (search->name, slash, name, (const char *) NULL);
       result = try_open (buffer, extend);
       free (buffer);
@@ -586,14 +592,19 @@ ldfile_find_command_file (const char *name, const char *extend)
 	break;
     }
 
+  /* Restore the original path list.  */
+  *search_tail_ptr = NULL;
+
   return result;
 }
 
-void
-ldfile_open_command_file (const char *name)
+/* Open command file NAME.  */
+
+static void
+ldfile_open_command_file_1 (const char *name, bfd_boolean default_only)
 {
   FILE *ldlex_input_stack;
-  ldlex_input_stack = ldfile_find_command_file (name, "");
+  ldlex_input_stack = ldfile_find_command_file (name, "", default_only);
 
   if (ldlex_input_stack == NULL)
     {
@@ -607,6 +618,23 @@ ldfile_open_command_file (const char *name)
   lineno = 1;
 
   saved_script_handle = ldlex_input_stack;
+}
+
+/* Open command file NAME in the current directory, -L directories,
+   the default script location, in that order.  */
+
+void
+ldfile_open_command_file (const char *name)
+{
+  ldfile_open_command_file_1 (name, FALSE);
+}
+
+/* Open command file NAME at the default script location.  */
+
+void
+ldfile_open_default_command_file (const char *name)
+{
+  ldfile_open_command_file_1 (name, TRUE);
 }
 
 void
