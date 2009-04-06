@@ -1895,9 +1895,10 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
 #undef PDATA_ROW_SIZE
 }
 
+#ifdef COFF_WITH_pex64
 /* The PE+ x64 variant.  */
 bfd_boolean
-_bfd_pep_print_x64_pdata (bfd *abfd, void *vfile)
+_bfd_pex64_print_pdata (bfd *abfd, void *vfile)
 {
 # define PDATA_ROW_SIZE	(3 * 4)
   FILE *file = (FILE *) vfile;
@@ -1974,6 +1975,7 @@ _bfd_pep_print_x64_pdata (bfd *abfd, void *vfile)
   return TRUE;
 #undef PDATA_ROW_SIZE
 }
+#endif
 
 #define IMAGE_REL_BASED_HIGHADJ 4
 static const char * const tbl[] =
