@@ -1155,17 +1155,17 @@ symbol_file_clear (int from_tty)
 		    symfile_objfile->name)
 	  : !query (_("Discard symbol table? "))))
     error (_("Not confirmed."));
-    free_all_objfiles ();
 
-    /* solib descriptors may have handles to objfiles.  Since their
-       storage has just been released, we'd better wipe the solib
-       descriptors as well.
-     */
-    no_shared_libraries (NULL, from_tty);
+  free_all_objfiles ();
 
-    symfile_objfile = NULL;
-    if (from_tty)
-      printf_unfiltered (_("No symbol file now.\n"));
+  /* solib descriptors may have handles to objfiles.  Since their
+     storage has just been released, we'd better wipe the solib
+     descriptors as well.  */
+  no_shared_libraries (NULL, from_tty);
+
+  symfile_objfile = NULL;
+  if (from_tty)
+    printf_unfiltered (_("No symbol file now.\n"));
 }
 
 struct build_id

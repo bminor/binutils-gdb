@@ -1,3 +1,7 @@
+2009-04-07  Doug Evans  <dje@google.com>
+
+	* symfile.c (symbol_file_clear): Fix indentation.
+
 2009-04-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64nbsd-nat.c (sparc64nbsd_supply_pcb): Fix comment.
