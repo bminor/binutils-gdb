@@ -299,7 +299,7 @@ struct h8_op
 static void clever_message (const struct h8_instruction *, struct h8_op *);
 static void fix_operand_size (struct h8_op *, int);
 static void build_bytes (const struct h8_instruction *, struct h8_op *);
-static void do_a_fix_imm (int, int, struct h8_op *, int);
+static void do_a_fix_imm (int, int, struct h8_op *, int, const struct h8_instruction *);
 static void check_operand (struct h8_op *, unsigned int, char *);
 static const struct h8_instruction * get_specific (const struct h8_instruction *, struct h8_op *, int) ;
 static char *get_operands (unsigned, char *, struct h8_op *);
@@ -1273,7 +1273,7 @@ check_operand (struct h8_op *operand, unsigned int width, char *string)
      (may relax into an 8bit absolute address).  */
 
 static void
-do_a_fix_imm (int offset, int nibble, struct h8_op *operand, int relaxmode)
+do_a_fix_imm (int offset, int nibble, struct h8_op *operand, int relaxmode, const struct h8_instruction *this_try)
 {
   int idx;
   int size;
@@ -1313,6 +1313,17 @@ do_a_fix_imm (int offset, int nibble, struct h8_op *operand, int relaxmode)
 	  check_operand (operand, 0xffff, t);
 	  bytes[0] |= operand->exp.X_add_number >> 8;
 	  bytes[1] |= operand->exp.X_add_number >> 0;
+#ifdef OBJ_ELF
+	  /* MOVA needs both relocs to relax the second operand properly.  */
+	  if (relaxmode != 0
+	      && (OP_KIND(this_try->opcode->how) == O_MOVAB
+		  || OP_KIND(this_try->opcode->how) == O_MOVAW
+		  || OP_KIND(this_try->opcode->how) == O_MOVAL))
+	    {
+	      idx = BFD_RELOC_16;
+	      fix_new_exp (frag_now, offset, 2, &operand->exp, 0, idx);
+	    }
+#endif
 	  break;
 	case L_24:
 	  check_operand (operand, 0xffffff, t);
@@ -1576,12 +1587,14 @@ build_bytes (const struct h8_instruction *this_try, struct h8_op *operand)
 
       if (x_mode == IMM || x_mode == DISP)
 	do_a_fix_imm (output - frag_now->fr_literal + op_at[i] / 2,
-		      op_at[i] & 1, operand + i, (x & MEMRELAX) != 0);
+		      op_at[i] & 1, operand + i, (x & MEMRELAX) != 0,
+		      this_try);
 
       else if (x_mode == ABS)
 	do_a_fix_imm (output - frag_now->fr_literal + op_at[i] / 2,
 		      op_at[i] & 1, operand + i,
-		      (x & MEMRELAX) ? movb + 1 : 0);
+		      (x & MEMRELAX) ? movb + 1 : 0,
+		      this_try);
 
       else if (x_mode == PCREL)
 	{

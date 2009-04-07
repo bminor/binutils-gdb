@@ -1,3 +1,7 @@
+2009-04-06  DJ Delorie  <dj@redhat.com>
+
+	* elf32-h8300.c (elf32_h8_relax_section): Relax MOVA opcodes.
+
 2009-04-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coff-x86_64.c (bfd_pe_print_pdata): Defined to

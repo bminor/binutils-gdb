@@ -1,3 +1,9 @@
+2009-04-06  DJ Delorie  <dj@redhat.com>
+
+	* tc-h8300.c (do_a_fix_imm): Pass the insn, force relocs for MOVA
+	immediates.
+	(build_bytes): Pass insn to do_a_fix_imm.
+
 2009-04-02  Daniel Gutson <dgutson@codesourcery.com>
 
 	* config/tc-arm.c (arm_cpus): Add entry for ARM Cortex-M0.

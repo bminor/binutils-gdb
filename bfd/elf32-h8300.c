@@ -722,6 +722,13 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
     {
       bfd_vma symval;
 
+      {
+	arelent bfd_reloc;
+	reloc_howto_type *h;
+
+	elf32_h8_info_to_howto (abfd, &bfd_reloc, irel);
+	h = bfd_reloc.howto;
+      }
       /* Keep track of the previous reloc so that we can delete
 	 some long jumps created by the compiler.  */
       if (irel != internal_relocs)
@@ -994,7 +1001,8 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 		  /* This is bsr.  */
 		  bfd_put_8 (abfd, 0x55, contents + irel->r_offset - 2);
 		else
-		  abort ();
+		  /* Might be MOVSD.  */
+		  break;
 
 		/* Fix the relocation's type.  */
 		irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
@@ -1207,12 +1215,95 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 	    if (value <= 0x7fff || value >= 0xffff8000u)
 	      {
 		unsigned char code;
+		unsigned char op0, op1, op2, op3;
+		unsigned char *op_ptr;
 
 		/* Note that we've changed the relocs, section contents,
 		   etc.  */
 		elf_section_data (sec)->relocs = internal_relocs;
 		elf_section_data (sec)->this_hdr.contents = contents;
 		symtab_hdr->contents = (unsigned char *) isymbuf;
+
+		if (irel->r_offset >= 4)
+		  {
+		    /* Check for 4-byte MOVA relaxation.  */
+		    int second_reloc = 0;
+
+		    op_ptr = contents + irel->r_offset - 4;
+
+		    if (last_reloc)
+		      {
+			arelent bfd_reloc;
+			reloc_howto_type *h;
+			bfd_vma last_reloc_size;
+
+			elf32_h8_info_to_howto (abfd, &bfd_reloc, last_reloc);
+			h = bfd_reloc.howto;
+			last_reloc_size = 1 << h->size;
+			if (last_reloc->r_offset + last_reloc_size
+			    == irel->r_offset)
+			  {
+			    op_ptr -= last_reloc_size;
+			    second_reloc = 1;
+			  }
+		      }
+		    if (irel < irelend)
+		      {
+			Elf_Internal_Rela *next_reloc = irel + 1;
+			arelent bfd_reloc;
+			reloc_howto_type *h;
+			bfd_vma next_reloc_size;
+
+			elf32_h8_info_to_howto (abfd, &bfd_reloc, next_reloc);
+			h = bfd_reloc.howto;
+			next_reloc_size = 1 << h->size;
+			if (next_reloc->r_offset + next_reloc_size
+			    == irel->r_offset)
+			  {
+			    op_ptr -= next_reloc_size;
+			    second_reloc = 1;
+			  }
+		      }
+
+		    op0 = bfd_get_8 (abfd, op_ptr + 0);
+		    op1 = bfd_get_8 (abfd, op_ptr + 1);
+		    op2 = bfd_get_8 (abfd, op_ptr + 2);
+		    op3 = bfd_get_8 (abfd, op_ptr + 3);
+
+		    if (op0 == 0x01
+			&& (op1 & 0xdf) == 0x5f
+			&& (op2 & 0x40) == 0x40
+			&& (op3 & 0x80) == 0x80)
+		      {
+			if ((op2 & 0x08) == 0)
+			  second_reloc = 1;
+
+			if (second_reloc)
+			  {
+			    op3 &= ~0x08;
+			    bfd_put_8 (abfd, op3, op_ptr + 3);
+			  }
+			else
+			  {
+			    op2 &= ~0x08;
+			    bfd_put_8 (abfd, op2, op_ptr + 2);
+			  }
+			goto r_h8_dir32a16_common;
+		      }
+		  }
+
+		/* Now check for short version of MOVA.  */
+		op_ptr = contents + irel->r_offset - 2;
+		op0 = bfd_get_8 (abfd, op_ptr + 0);
+		op1 = bfd_get_8 (abfd, op_ptr + 1);
+
+		if (op0 == 0x7a
+		    && (op1 & 0x88) == 0x80)
+		  {
+		    op1 |= 0x08;
+		    bfd_put_8 (abfd, op1, op_ptr + 1);
+		    goto r_h8_dir32a16_common;
+		  }
 
 		/* Get the opcode.  */
 		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
@@ -1224,6 +1315,7 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 
 		bfd_put_8 (abfd, code, contents + irel->r_offset - 1);
 
+	      r_h8_dir32a16_common:
 		/* Fix the relocation's type.  */
 		irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 					     R_H8_DIR16);
