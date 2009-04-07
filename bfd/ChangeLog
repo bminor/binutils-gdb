@@ -1,3 +1,9 @@
+2009-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_section_already_linked): Add `\n' for
+	info->callbacks->einfo.
+	* linker.c (_bfd_generic_section_already_linked): Likewise.
+
 2009-04-06  DJ Delorie  <dj@redhat.com>
 
 	* elf32-h8300.c (elf32_h8_relax_section): Relax MOVA opcodes.

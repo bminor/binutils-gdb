@@ -3095,7 +3095,7 @@ _bfd_generic_section_already_linked (bfd *abfd, asection *sec,
 
   /* This is the first section with this name.  Record it.  */
   if (! bfd_section_already_linked_table_insert (already_linked_list, sec))
-    info->callbacks->einfo (_("%F%P: already_linked_table: %E"));
+    info->callbacks->einfo (_("%F%P: already_linked_table: %E\n"));
 }
 
 /* Convert symbols in excluded output sections to use a kept section.  */
