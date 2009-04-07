@@ -1,3 +1,9 @@
+2009-04-07  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (Output Section Address): Note that specifying an
+	address for an output section will only change the location
+	counter if the output section is used.
+
 2009-04-06  Kazu Hirata  <kazu@codesourcery.com>
 
 	* ldfile.c (ldfile_find_command_file): Initialize result.
