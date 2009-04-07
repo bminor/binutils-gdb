@@ -1,3 +1,9 @@
+2009-04-07  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <"tlbilxlpid", "tlbilxpid", "tlbilxva",
+	"tlbilx">: Use secondary opcode "18" as per the ISA 2.06 documentation.
+	Reorder entries so the extended mnemonics are listed before tlbilx.
+
 2009-04-02  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-dis.c (powerpc_init_dialect): Do not choose a default dialect

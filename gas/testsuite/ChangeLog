@@ -1,3 +1,7 @@
+2009-04-07  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/e500mc.d: Update to match extended mnemonics.
+
 2009-04-01  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/arm/align.s, gas/arm/align.d: New.

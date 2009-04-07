@@ -3464,6 +3464,11 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"isellt",	X(31,15),	X_MASK,      PPCISEL,	PPCNONE,	{RT, RA, RB}},
 
+{"tlbilxlpid",	XTO(31,18,0),	XTO_MASK,    E500MC,	PPCNONE,	{0}},
+{"tlbilxpid",	XTO(31,18,1),	XTO_MASK,    E500MC,	PPCNONE,	{0}},
+{"tlbilxva",	XTO(31,18,3),	XTO_MASK,    E500MC,	PPCNONE,	{RA0, RB}},
+{"tlbilx",	X(31,18),	X_MASK,      E500MC,	PPCNONE,	{T, RA0, RB}},
+
 {"mfcr",	XFXM(31,19,0,0), XFXFXM_MASK, POWER4,	PPCNONE,	{RT, FXM4}},
 {"mfcr",	XFXM(31,19,0,0), XRARB_MASK, COM,	POWER4,		{RT}},
 {"mfocrf",	XFXM(31,19,0,1), XFXFXM_MASK, COM,	PPCNONE,	{RT, FXM}},
@@ -4551,10 +4556,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"lxvw4x",	X(31,780),	XX1_MASK,    PPCVSX,	PPCNONE,	{XT6, RA, RB}},
 
 {"tlbivax",	X(31,786),	XRT_MASK,    BOOKE,	PPCNONE,	{RA, RB}},
-{"tlbilx",	X(31,787),	X_MASK,      E500MC,	PPCNONE,	{T, RA0, RB}},
-{"tlbilxlpid",	XTO(31,787,0),	XTO_MASK,    E500MC,	PPCNONE,	{0}},
-{"tlbilxpid",	XTO(31,787,1),	XTO_MASK,    E500MC,	PPCNONE,	{0}},
-{"tlbilxva",	XTO(31,787,3),	XTO_MASK,    E500MC,	PPCNONE,	{RA0, RB}},
 
 {"lwzcix",	X(31,789),	X_MASK,      POWER6,	PPCNONE,	{RT, RA0, RB}},
 
