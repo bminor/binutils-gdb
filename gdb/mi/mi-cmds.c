@@ -61,6 +61,7 @@ struct mi_cmd mi_cmds[] =
   { "exec-arguments", { "set args", 1 }, NULL },
   { "exec-continue", { NULL, 0 }, mi_cmd_exec_continue},
   { "exec-finish", { NULL, 0 }, mi_cmd_exec_finish},
+  { "exec-jump", { NULL, 0 }, mi_cmd_exec_jump},
   { "exec-interrupt", { NULL, 0 }, mi_cmd_exec_interrupt},
   { "exec-next", { NULL, 0 }, mi_cmd_exec_next},
   { "exec-next-instruction", { NULL, 0 }, mi_cmd_exec_next_instruction},

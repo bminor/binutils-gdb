@@ -53,6 +53,7 @@ extern mi_cmd_argv_ftype mi_cmd_env_path;
 extern mi_cmd_argv_ftype mi_cmd_env_pwd;
 extern mi_cmd_argv_ftype mi_cmd_exec_continue;
 extern mi_cmd_argv_ftype mi_cmd_exec_finish;
+extern mi_cmd_argv_ftype mi_cmd_exec_jump;
 extern mi_cmd_argv_ftype mi_cmd_exec_next;
 extern mi_cmd_argv_ftype mi_cmd_exec_next_instruction;
 extern mi_cmd_argv_ftype mi_cmd_exec_return;

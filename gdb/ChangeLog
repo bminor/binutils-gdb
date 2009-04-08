@@ -1,3 +1,11 @@
+2009-04-08  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement -exec-jump.
+
+	* mi/mi-cmds.h (mi_cmd_exec_jump): Declare.
+	* mi/mi-main.c (mi_cmd_exec_jump): New.
+	* mi/mi-cmds.c (mi_cmds): Register exec-jump.
+
 2009-04-07  Doug Evans  <dje@google.com>
 
 	* symfile.c (symbol_file_clear): Fix indentation.

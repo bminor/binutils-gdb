@@ -168,6 +168,13 @@ mi_cmd_exec_return (char *command, char **argv, int argc)
   print_stack_frame (get_selected_frame (NULL), 1, LOC_AND_ADDRESS);
 }
 
+void
+mi_cmd_exec_jump (char *args, char **argv, int argc)
+{
+  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
+  return mi_execute_async_cli_command ("jump", argv, argc);
+}
+ 
 static int
 proceed_thread_callback (struct thread_info *thread, void *arg)
 {
