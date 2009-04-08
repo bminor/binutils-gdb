@@ -1,3 +1,8 @@
+2009-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/abs.d: Add  --32 for assembler and -melf_i386 for
+	linker.
+
 2009-04-03  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/rgn-at.s: Use explicit .section pseudos.
