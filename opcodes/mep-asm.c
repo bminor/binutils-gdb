@@ -51,6 +51,8 @@ static const char * parse_insn_normal
 
 /* -- asm.c */
 
+#include "elf/mep.h"
+
 #define CGEN_VALIDATE_INSN_SUPPORTED
 
        const char * parse_csrn       (CGEN_CPU_DESC, const char **, CGEN_KEYWORD *, long *);
@@ -126,9 +128,6 @@ parse_mep_align (CGEN_CPU_DESC cd, const char ** strp,
     case MEP_OPERAND_PCREL12A2:
     case MEP_OPERAND_PCREL17A2:
     case MEP_OPERAND_PCREL24A2:
-    case MEP_OPERAND_CDISP8A2:
-    case MEP_OPERAND_CDISP8A4:
-    case MEP_OPERAND_CDISP8A8:
       err = cgen_parse_signed_integer   (cd, strp, type, field);
       break;
     case MEP_OPERAND_PCABS24A2:
@@ -155,16 +154,13 @@ parse_mep_align (CGEN_CPU_DESC cd, const char ** strp,
     case MEP_OPERAND_PCREL24A2:
     case MEP_OPERAND_PCABS24A2:
     case MEP_OPERAND_UDISP7A2:
-    case MEP_OPERAND_CDISP8A2:
       lsbs = *field & 1;
       break;
     case MEP_OPERAND_UDISP7A4:
     case MEP_OPERAND_UIMM7A4:
     case MEP_OPERAND_ADDR24A4:
-    case MEP_OPERAND_CDISP8A4:
       lsbs = *field & 3;
       break;
-    case MEP_OPERAND_CDISP8A8:
       lsbs = *field & 7;
       break;
     default:
@@ -439,6 +435,66 @@ parse_unsigned7 (CGEN_CPU_DESC cd, const char **strp,
     return _("invalid %function() here");
 
   return parse_mep_alignu (cd, strp, opindex, valuep);
+}
+
+static ATTRIBUTE_UNUSED const char *
+parse_cdisp10 (CGEN_CPU_DESC cd,
+	       const char **strp,
+	       int opindex,
+	       long *valuep)
+{
+  const char *errmsg = 0;
+  signed long value;
+  long have_zero = 0;
+  int wide = 0;
+  int alignment;
+
+  switch (opindex)
+    {
+    case MEP_OPERAND_CDISP10A4:
+      alignment = 2;
+      break;
+    case MEP_OPERAND_CDISP10A2:
+      alignment = 1;
+      break;
+    case MEP_OPERAND_CDISP10:
+    default:
+      alignment = 0;
+      break;
+    }
+
+  if (MEP_CPU == EF_MEP_CPU_C5)
+    wide = 1;
+
+  if (strncmp (*strp, "0x0", 3) == 0 
+      || (**strp == '0' && *(*strp + 1) != 'x'))
+    have_zero = 1;
+
+  errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);
+  if (errmsg)
+    return errmsg;
+
+  if (wide)
+    {
+      if (value < -512 || value > 511)
+	return _("Immediate is out of range -512 to 511");
+    }
+  else
+    {
+      if (value < -128 || value > 127)
+	return _("Immediate is out of range -128 to 127");
+    }
+
+  if (value & ((1<<alignment)-1))
+    return _("Value is not aligned enough");
+
+  /* If this field may require a relocation then use larger dsp16.  */
+  if (! have_zero && value == 0)
+    return (wide ? _("Immediate is out of range -512 to 511")
+	    : _("Immediate is out of range -128 to 127"));
+
+  *valuep = value;
+  return 0;
 }
 
 /* BEGIN LIGHTWEIGHT MACRO PROCESSOR.  */
@@ -727,6 +783,12 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_ADDR24A4 :
       errmsg = parse_mep_alignu (cd, strp, MEP_OPERAND_ADDR24A4, (unsigned long *) (& fields->f_24u8a4n));
       break;
+    case MEP_OPERAND_C5RMUIMM20 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_C5RMUIMM20, (unsigned long *) (& fields->f_c5_rmuimm20));
+      break;
+    case MEP_OPERAND_C5RNMUIMM24 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_C5RNMUIMM24, (unsigned long *) (& fields->f_c5_rnmuimm24));
+      break;
     case MEP_OPERAND_CALLNUM :
       errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_CALLNUM, (unsigned long *) (& fields->f_callnum));
       break;
@@ -736,17 +798,20 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_CCRN :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr, & fields->f_ccrn);
       break;
-    case MEP_OPERAND_CDISP8 :
-      errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_CDISP8, (long *) (& fields->f_8s24));
+    case MEP_OPERAND_CDISP10 :
+      errmsg = parse_cdisp10 (cd, strp, MEP_OPERAND_CDISP10, (long *) (& fields->f_cdisp10));
       break;
-    case MEP_OPERAND_CDISP8A2 :
-      errmsg = parse_mep_align (cd, strp, MEP_OPERAND_CDISP8A2, (long *) (& fields->f_8s24a2));
+    case MEP_OPERAND_CDISP10A2 :
+      errmsg = parse_cdisp10 (cd, strp, MEP_OPERAND_CDISP10A2, (long *) (& fields->f_cdisp10));
       break;
-    case MEP_OPERAND_CDISP8A4 :
-      errmsg = parse_mep_align (cd, strp, MEP_OPERAND_CDISP8A4, (long *) (& fields->f_8s24a4));
+    case MEP_OPERAND_CDISP10A4 :
+      errmsg = parse_cdisp10 (cd, strp, MEP_OPERAND_CDISP10A4, (long *) (& fields->f_cdisp10));
       break;
-    case MEP_OPERAND_CDISP8A8 :
-      errmsg = parse_mep_align (cd, strp, MEP_OPERAND_CDISP8A8, (long *) (& fields->f_8s24a8));
+    case MEP_OPERAND_CDISP10A8 :
+      errmsg = parse_cdisp10 (cd, strp, MEP_OPERAND_CDISP10A8, (long *) (& fields->f_cdisp10));
+      break;
+    case MEP_OPERAND_CDISP12 :
+      errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_CDISP12, (long *) (& fields->f_12s20));
       break;
     case MEP_OPERAND_CIMM4 :
       errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_CIMM4, (unsigned long *) (& fields->f_rn));
@@ -846,6 +911,9 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
       break;
     case MEP_OPERAND_RL :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_gpr, & fields->f_rl);
+      break;
+    case MEP_OPERAND_RL5 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_gpr, & fields->f_rl5);
       break;
     case MEP_OPERAND_RM :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_gpr, & fields->f_rm);

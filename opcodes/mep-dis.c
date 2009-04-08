@@ -500,6 +500,12 @@ mep_cgen_print_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_ADDR24A4 :
       print_normal (cd, info, fields->f_24u8a4n, 0|(1<<CGEN_OPERAND_VIRTUAL), pc, length);
       break;
+    case MEP_OPERAND_C5RMUIMM20 :
+      print_normal (cd, info, fields->f_c5_rmuimm20, 0|(1<<CGEN_OPERAND_VIRTUAL), pc, length);
+      break;
+    case MEP_OPERAND_C5RNMUIMM24 :
+      print_normal (cd, info, fields->f_c5_rnmuimm24, 0|(1<<CGEN_OPERAND_VIRTUAL), pc, length);
+      break;
     case MEP_OPERAND_CALLNUM :
       print_normal (cd, info, fields->f_callnum, 0|(1<<CGEN_OPERAND_VIRTUAL), pc, length);
       break;
@@ -509,17 +515,20 @@ mep_cgen_print_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_CCRN :
       print_keyword (cd, info, & mep_cgen_opval_h_ccr, fields->f_ccrn, 0|(1<<CGEN_OPERAND_VIRTUAL));
       break;
-    case MEP_OPERAND_CDISP8 :
-      print_normal (cd, info, fields->f_8s24, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+    case MEP_OPERAND_CDISP10 :
+      print_normal (cd, info, fields->f_cdisp10, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
-    case MEP_OPERAND_CDISP8A2 :
-      print_normal (cd, info, fields->f_8s24a2, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+    case MEP_OPERAND_CDISP10A2 :
+      print_normal (cd, info, fields->f_cdisp10, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
-    case MEP_OPERAND_CDISP8A4 :
-      print_normal (cd, info, fields->f_8s24a4, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+    case MEP_OPERAND_CDISP10A4 :
+      print_normal (cd, info, fields->f_cdisp10, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
-    case MEP_OPERAND_CDISP8A8 :
-      print_normal (cd, info, fields->f_8s24a8, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+    case MEP_OPERAND_CDISP10A8 :
+      print_normal (cd, info, fields->f_cdisp10, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case MEP_OPERAND_CDISP12 :
+      print_normal (cd, info, fields->f_12s20, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case MEP_OPERAND_CIMM4 :
       print_normal (cd, info, fields->f_rn, 0, pc, length);
@@ -619,6 +628,9 @@ mep_cgen_print_operand (CGEN_CPU_DESC cd,
       break;
     case MEP_OPERAND_RL :
       print_keyword (cd, info, & mep_cgen_opval_h_gpr, fields->f_rl, 0);
+      break;
+    case MEP_OPERAND_RL5 :
+      print_keyword (cd, info, & mep_cgen_opval_h_gpr, fields->f_rl5, 0);
       break;
     case MEP_OPERAND_RM :
       print_keyword (cd, info, & mep_cgen_opval_h_gpr, fields->f_rm, 0);
