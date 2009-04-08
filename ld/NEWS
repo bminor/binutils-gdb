@@ -1,5 +1,8 @@
 -*- text -*-
 
+* ELF: --warn-alternate-em option to warn if an object has alternate
+  ELF machine code.
+
 * New script function REGION_ALIAS to add alias names to memory regions.
 
 * PE targets no longer make use of the long section names PE extension to

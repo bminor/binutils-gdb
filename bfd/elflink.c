@@ -3425,6 +3425,7 @@ _bfd_elf_relocs_compatible (const bfd_target *input,
 static bfd_boolean
 elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 {
+  Elf_Internal_Ehdr *ehdr;
   Elf_Internal_Shdr *hdr;
   bfd_size_type symcount;
   bfd_size_type extsymcount;
@@ -3479,6 +3480,17 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  goto error_return;
 	}
     }
+
+  ehdr = elf_elfheader (abfd);
+  if (info->warn_alternate_em
+      && bed->elf_machine_code != ehdr->e_machine
+      && ((bed->elf_machine_alt1 != 0
+	   && ehdr->e_machine == bed->elf_machine_alt1)
+	  || (bed->elf_machine_alt2 != 0
+	      && ehdr->e_machine == bed->elf_machine_alt2)))
+    info->callbacks->einfo
+      (_("%P: alternate ELF machine code found (%d) in %B, expecting %d\n"),
+       ehdr->e_machine, abfd, bed->elf_machine_code);
 
   /* As a GNU extension, any input sections which are named
      .gnu.warning.SYMBOL are treated as warning symbols for the given

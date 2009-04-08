@@ -1,3 +1,8 @@
+2009-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_link_add_object_symbols): Warn alternate ELF
+	machine code.
+
 2009-04-07  DJ Delorie  <dj@redhat.com>
 
 	* archures.c: Add bfd_mach_mep_c5.

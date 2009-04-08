@@ -1,3 +1,13 @@
+2009-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* lexsup.c (option_values): Add OPTION_WARN_ALTERNATE_EM.
+	(ld_options): Likewise.
+	(parse_args): Likewise.
+
+	* ld.texinfo: Document --warn-alternate-em.
+
+	* NEWS: Mention --warn-alternate-em.
+
 2009-04-07  DJ Delorie  <dj@redhat.com>
 
 	* emulparams/elf32mep.sh: Change default endian to little.

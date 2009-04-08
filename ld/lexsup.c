@@ -163,6 +163,7 @@ enum option_values
   OPTION_WARN_UNRESOLVED_SYMBOLS,
   OPTION_ERROR_UNRESOLVED_SYMBOLS,
   OPTION_WARN_SHARED_TEXTREL,
+  OPTION_WARN_ALTERNATE_EM,
   OPTION_REDUCE_MEMORY_OVERHEADS,
   OPTION_DEFAULT_SCRIPT
 };
@@ -554,6 +555,9 @@ static const struct ld_option ld_options[] =
     TWO_DASHES },
   { {"warn-shared-textrel", no_argument, NULL, OPTION_WARN_SHARED_TEXTREL},
     '\0', NULL, N_("Warn if shared object has DT_TEXTREL"),
+    TWO_DASHES },
+  { {"warn-alternate-em", no_argument, NULL, OPTION_WARN_ALTERNATE_EM},
+    '\0', NULL, N_("Warn if an object has alternate ELF machine code"),
     TWO_DASHES },
   { {"warn-unresolved-symbols", no_argument, NULL,
      OPTION_WARN_UNRESOLVED_SYMBOLS},
@@ -1358,6 +1362,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_WARN_SHARED_TEXTREL:
 	  link_info.warn_shared_textrel = TRUE;
+	  break;
+	case OPTION_WARN_ALTERNATE_EM:
+	  link_info.warn_alternate_em = TRUE;
 	  break;
 	case OPTION_WHOLE_ARCHIVE:
 	  whole_archive = TRUE;
