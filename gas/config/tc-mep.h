@@ -34,7 +34,7 @@
 #define TARGET_FORMAT (target_big_endian ? "elf32-mep" : "elf32-mep-little")
 
 /* This is the default.  */
-#define TARGET_BYTES_BIG_ENDIAN 1
+#define TARGET_BYTES_BIG_ENDIAN 0
 
 /* Permit temporary numeric labels. */
 #define LOCAL_LABELS_FB 1

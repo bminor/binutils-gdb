@@ -1,3 +1,7 @@
+2009-04-07  DJ Delorie  <dj@redhat.com>
+
+	* emulparams/elf32mep.sh: Change default endian to little.
+
 2009-04-07  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo (Output Section Address): Note that specifying an

@@ -136,7 +136,11 @@ static struct mep_hi_fixup * mep_hi_fixup_list;
 #define OPTION_NOREPEAT		(OPTION_MD_BASE + 26)
 #define OPTION_DEBUG		(OPTION_MD_BASE + 27)
 #define OPTION_NODEBUG		(OPTION_MD_BASE + 28)
-#define OPTION_LIBRARY		(OPTION_MD_BASE + 29)
+#define OPTION_UCI		(OPTION_MD_BASE + 29)
+#define OPTION_NOUCI		(OPTION_MD_BASE + 30)
+#define OPTION_DSP		(OPTION_MD_BASE + 31)
+#define OPTION_NODSP		(OPTION_MD_BASE + 32)
+#define OPTION_LIBRARY		(OPTION_MD_BASE + 33)
 
 struct option md_longopts[] = {
   { "EB",          no_argument, NULL, OPTION_EB},
@@ -163,6 +167,10 @@ struct option md_longopts[] = {
   { "mcop32",	   no_argument, NULL, OPTION_COP32},
   { "mdebug",      no_argument, NULL, OPTION_DEBUG},
   { "mno-debug",   no_argument, NULL, OPTION_NODEBUG},
+  { "muci",        no_argument, NULL, OPTION_UCI},
+  { "mno-uci",     no_argument, NULL, OPTION_NOUCI},
+  { "mdsp",        no_argument, NULL, OPTION_DSP},
+  { "mno-dsp",     no_argument, NULL, OPTION_NODSP},
   { "mlibrary",    no_argument, NULL, OPTION_LIBRARY},
   { NULL, 0, NULL, 0 } };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -283,6 +291,22 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       optbits &= ~(1 << CGEN_INSN_OPTIONAL_DEBUG_INSN);
       optbitset |= 1 << CGEN_INSN_OPTIONAL_DEBUG_INSN;
       break;
+    case OPTION_UCI:
+      optbits |= 1 << CGEN_INSN_OPTIONAL_UCI_INSN;
+      optbitset |= 1 << CGEN_INSN_OPTIONAL_UCI_INSN;
+      break;
+    case OPTION_NOUCI:
+      optbits &= ~(1 << CGEN_INSN_OPTIONAL_UCI_INSN);
+      optbitset |= 1 << CGEN_INSN_OPTIONAL_UCI_INSN;
+      break;
+    case OPTION_DSP:
+      optbits |= 1 << CGEN_INSN_OPTIONAL_DSP_INSN;
+      optbitset |= 1 << CGEN_INSN_OPTIONAL_DSP_INSN;
+      break;
+    case OPTION_NODSP:
+      optbits &= ~(1 << CGEN_INSN_OPTIONAL_DSP_INSN);
+      optbitset |= 1 << CGEN_INSN_OPTIONAL_DSP_INSN;
+      break;
     case OPTION_LIBRARY:
       library_flag = EF_MEP_LIBRARY;
       break;
@@ -299,8 +323,8 @@ void
 md_show_usage (FILE *stream)
 {
   fprintf (stream, _("MeP specific command line options:\n\
-  -EB                     assemble for a big endian system (default)\n\
-  -EL                     assemble for a little endian system\n\
+  -EB                     assemble for a big endian system\n\
+  -EL                     assemble for a little endian system (default)\n\
   -mconfig=<name>         specify a chip configuration to use\n\
   -maverage -mno-average -mmult -mno-mult -mdiv -mno-div\n\
   -mbitops -mno-bitops -mleadz -mno-leadz -mabsdiff -mno-absdiff\n\
@@ -394,6 +418,7 @@ mep_machine (void)
     case EF_MEP_CPU_C2: return bfd_mach_mep;
     case EF_MEP_CPU_C3: return bfd_mach_mep;
     case EF_MEP_CPU_C4: return bfd_mach_mep;
+    case EF_MEP_CPU_C5: return bfd_mach_mep_c5;
     case EF_MEP_CPU_H1: return bfd_mach_mep_h1;
     }
 

@@ -1,3 +1,9 @@
+2009-04-07  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-mep.c: Add UCI/DSP instruction support.  Add C5 support.
+	(md_show_usage): Change default endian to little.
+	* config/tc-mep.h (TARGET_BYTES_BIG_ENDIAN): Change default to little.
+
 2009-04-06  DJ Delorie  <dj@redhat.com>
 
 	* tc-h8300.c (do_a_fix_imm): Pass the insn, force relocs for MOVA

@@ -1,3 +1,10 @@
+2009-04-07  DJ Delorie  <dj@redhat.com>
+
+	* archures.c: Add bfd_mach_mep_c5.
+	* bfd-in2.h: Likewise.
+	* cpu-mep.c: Add bfd_c5_arch.
+	* elf32-mep.c: Support it.
+
 2009-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_section_already_linked): Add `\n' for
