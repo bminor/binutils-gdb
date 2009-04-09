@@ -1,3 +1,26 @@
+2009-04-09  Catherine Moore  <clm@codesourcery.com>
+
+	* config/tc-mips.c (mips_fix_24k): Declare.
+	(check_for_24k_errata): New.
+	(mips_cleanup): Call check_for_24k_errata.
+	(start_noreorder): Likewise.
+	(md_mips_end): Likewise.
+	(s_change_sec): Likewise.
+	(s_change_section): Likewise.
+	(append_insn): Call check_for_24k_errata.  Prevent
+	ERET/DERET instructions from being moved into delay
+	slots.
+	(OPTION_FIX_24K): New.
+	(OPTION_NO_FIX_24k) New.
+	(md_longopts): Add "mfix-24k" and "mno-fix-24k".
+	(md_parse_option): Handle fix-24k options.
+	(md_show_usage): Display fix-24k options.
+	* doc/c-mips.texi: Document.
+	* testsuite/gas/mips/mips.exp: Run new tests.
+	* testsuite/gas/mips/eret.s: New test.
+	* testsuite/gas/mips/eret.d: New test output.
+	* testsuite/gas/mips/eret.l: New test output.
+
 2009-04-09  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* config/tc-mips.c (mips_dwarf2_addr_size): Use HAVE_64BIT_OBJECTS
