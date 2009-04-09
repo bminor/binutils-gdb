@@ -1,3 +1,8 @@
+2009-04-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Set Breaks): Rewrite a paragraph to avoid a warning
+	about a missing dot or coma after @xref.
+
 2009-04-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Backtrace): Add a parameter in frame 1 of the first

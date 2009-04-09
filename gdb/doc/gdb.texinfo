@@ -3052,9 +3052,8 @@ C@t{++}, a function name may refer to more than one possible place to break.
 that situation.
 
 It is also possible to insert a breakpoint that will stop the program
-only if a specific thread or a specific task hits that breakpoint.
-@xref{Thread-Specific Breakpoints} and @ref{Ada Tasks} for more
-information about this feature.
+only if a specific thread (@pxref{Thread-Specific Breakpoints})
+or a specific task (@pxref{Ada Tasks}) hits that breakpoint.
 
 @item break
 When called without any arguments, @code{break} sets a breakpoint at
