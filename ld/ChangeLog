@@ -1,3 +1,10 @@
+2009-04-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 9824
+	* ld.texinfo (Output Section Constraint): New node.  Documents the
+	ONLY_IF_RO and ONLY_IF_RW constraints.
+	(Symbolic Constants): New node.  Documents the CONSTANT operator.
+
 2009-04-09  Thilo Fischer <thilo.fischer@uni-muenster.de>
 
 	* emultempl/spuelf.em (embedded_spu_file): Use pex_one in place

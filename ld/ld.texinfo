@@ -3556,7 +3556,10 @@ The full description of an output section looks like this:
 @smallexample
 @group
 @var{section} [@var{address}] [(@var{type})] :
-  [AT(@var{lma})] [ALIGN(@var{section_align})] [SUBALIGN(@var{subsection_align})]
+  [AT(@var{lma})]
+  [ALIGN(@var{section_align})]
+  [SUBALIGN(@var{subsection_align})]
+  [@var{constraint}]
   @{
     @var{output-section-command}
     @var{output-section-command}
@@ -4158,10 +4161,14 @@ section named @samp{/DISCARD/} are not included in the output file.
 @cindex output section attributes
 We showed above that the full description of an output section looked
 like this:
+
 @smallexample
 @group
 @var{section} [@var{address}] [(@var{type})] :
-  [AT(@var{lma})] [ALIGN(@var{section_align})] [SUBALIGN(@var{subsection_align})]
+  [AT(@var{lma})]
+  [ALIGN(@var{section_align})]
+  [SUBALIGN(@var{subsection_align})]
+  [@var{constraint}]
   @{
     @var{output-section-command}
     @var{output-section-command}
@@ -4169,6 +4176,7 @@ like this:
   @} [>@var{region}] [AT>@var{lma_region}] [:@var{phdr} :@var{phdr} @dots{}] [=@var{fillexp}]
 @end group
 @end smallexample
+
 We've already described @var{section}, @var{address}, and
 @var{output-section-command}.  In this section we will describe the
 remaining section attributes.
@@ -4178,6 +4186,7 @@ remaining section attributes.
 * Output Section LMA::		Output section LMA
 * Forced Output Alignment::	Forced Output Alignment
 * Forced Input Alignment::	Forced Input Alignment
+* Output Section Constraint::   Output section constraint
 * Output Section Region::	Output section region
 * Output Section Phdr::		Output section phdr
 * Output Section Fill::		Output section fill
@@ -4310,6 +4319,16 @@ You can increase an output section's alignment by using ALIGN.
 You can force input section alignment within an output section by using
 SUBALIGN.  The value specified overrides any alignment given by input
 sections, whether larger or smaller.
+
+@node Output Section Constraint
+@subsubsection Output Section Constraint
+@kindex ONLY_IF_RO
+@kindex ONLY_IF_RW
+@cindex constraints on output sections
+You can specify that an output section should only be created if all
+of its input sections are read-only or all of its input sections are
+read-write by using the keyword @code{ONLY_IF_RO} and
+@code{ONLY_IF_RW} respectively.
 
 @node Output Section Region
 @subsubsection Output Section Region
@@ -4970,6 +4989,7 @@ expressions.
 
 @menu
 * Constants::			Constants
+* Symbolic Constants::          Symbolic constants
 * Symbols::			Symbol Names
 * Orphan Sections::		Orphan Sections
 * Location Counter::		The Location Counter
@@ -5021,6 +5041,32 @@ _fourk_4 = 10000o;
 
 Note - the @code{K} and @code{M} suffixes cannot be used in
 conjunction with the base suffixes mentioned above.
+
+@node Symbolic Constants
+@subsection Symbolic Constants
+@cindex symbolic constants
+@kindex CONSTANT
+It is possible to refer to target specific constants via the use of
+the @code{CONSTANT(@var{name})} operator, where @var{name} is one of:
+
+@table @code
+@item MAXPAGESIZE
+@kindex MAXPAGESIZE
+The target's maximum page size.
+
+@item COMMONPAGESIZE
+@kindex COMMONPAGESIZE
+The target's default page size.
+@end table
+
+So for example:
+
+@smallexample
+  .text ALIGN (CONSTANT (MAXPAGESIZE)) : @{ *(.text) @} 
+@end smallexample
+
+will create a text section aligned to the largest page boundary
+supported by the target.
 
 @node Symbols
 @subsection Symbol Names
