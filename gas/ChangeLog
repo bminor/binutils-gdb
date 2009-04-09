@@ -1,3 +1,8 @@
+2009-04-09  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* config/tc-mips.c (mips_dwarf2_addr_size): Use HAVE_64BIT_OBJECTS
+	instead of HAVE_64BIT_SYMBOLS.
+
 2009-04-07  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-mep.c: Add UCI/DSP instruction support.  Add C5 support.

@@ -15518,7 +15518,7 @@ mips_dwarf2_format (asection *sec ATTRIBUTE_UNUSED)
 int
 mips_dwarf2_addr_size (void)
 {
-  if (HAVE_64BIT_SYMBOLS)
+  if (HAVE_64BIT_OBJECTS)
     return 8;
   else
     return 4;
