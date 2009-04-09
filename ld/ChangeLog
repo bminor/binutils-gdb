@@ -1,3 +1,8 @@
+2009-04-09  Thilo Fischer <thilo.fischer@uni-muenster.de>
+
+	* emultempl/spuelf.em (embedded_spu_file): Use pex_one in place
+	of fork/execvp.
+
 2009-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lexsup.c (option_values): Add OPTION_WARN_ALTERNATE_EM.

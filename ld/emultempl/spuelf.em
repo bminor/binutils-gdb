@@ -435,9 +435,9 @@ EOF
 
 if grep -q 'ld_elf.*ppc.*_emulation' ldemul-list.h; then
   fragment <<EOF
+#include <errno.h>
 #include "filenames.h"
-#include <fcntl.h>
-#include <sys/wait.h>
+#include "libiberty.h"
 
 static const char *
 base_name (const char *path)
@@ -470,11 +470,11 @@ bfd_boolean
 embedded_spu_file (lang_input_statement_type *entry, const char *flags)
 {
   const char *cmd[6];
+  const char *pex_return;
   const char *sym;
   char *handle, *p;
   char *oname;
   int fd;
-  pid_t pid;
   int status;
   union lang_statement_union **old_stat_tail;
   union lang_statement_union **old_file_tail;
@@ -517,8 +517,6 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
 	  }
       }
 
-  /* Use fork() and exec() rather than system() so that we don't
-     need to worry about quoting args.  */
   cmd[0] = EMBEDSPU;
   cmd[1] = flags;
   cmd[2] = handle;
@@ -532,30 +530,23 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
       fflush (stdout);
     }
 
-  pid = fork ();
-  if (pid == -1)
-    return FALSE;
-  if (pid == 0)
-    {
-      execvp (cmd[0], (char *const *) cmd);
+  pex_return = pex_one (PEX_SEARCH | PEX_LAST, cmd[0], (char *const *) cmd,
+			cmd[0], NULL, NULL, &status, &errno);
+  if (NULL != pex_return) {
       if (strcmp ("embedspu", EMBEDSPU) != 0)
 	{
 	  cmd[0] = "embedspu";
-	  execvp (cmd[0], (char *const *) cmd);
+	  pex_return = pex_one (PEX_SEARCH | PEX_LAST, cmd[0], (char *const *) cmd,
+				cmd[0], NULL, NULL, &status, &errno);
 	}
-      perror (cmd[0]);
-      _exit (127);
-    }
-#ifdef HAVE_WAITPID
-#define WAITFOR(PID, STAT) waitpid (PID, STAT, 0)
-#else
-#define WAITFOR(PID, STAT) wait (STAT)
-#endif
-  if (WAITFOR (pid, &status) != pid
-      || !WIFEXITED (status)
-      || WEXITSTATUS (status) != 0)
+      if (NULL != pex_return) {      
+	perror (pex_return);
+	_exit (127);
+      }
+  }
+  if (status)
     return FALSE;
-#undef WAITFOR
+
 
   old_stat_tail = stat_ptr->tail;
   old_file_tail = input_file_chain.tail;
