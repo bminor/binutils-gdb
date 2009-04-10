@@ -1,6 +1,7 @@
 2009-04-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbtypes.c: Remove excessive parentheses at the return keywords.
+	* varobj.c (varobj_invalidate): Fix indentation.
 
 2009-04-08  Vladimir Prus  <vladimir@codesourcery.com>
 

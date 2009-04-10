@@ -2751,6 +2751,7 @@ When non-zero, varobj debugging is enabled."),
 /* Invalidate the varobjs that are tied to locals and re-create the ones that
    are defined on globals.
    Invalidated varobjs will be always printed in_scope="invalid".  */
+
 void 
 varobj_invalidate (void)
 {
@@ -2758,38 +2759,38 @@ varobj_invalidate (void)
   struct varobj **varp;
 
   if (varobj_list (&all_rootvarobj) > 0)
-  {
-    varp = all_rootvarobj;
-    while (*varp != NULL)
-      {
-	/* Floating varobjs are reparsed on each stop, so we don't care if
-	   the presently parsed expression refers to something that's gone.  */
-	if ((*varp)->root->floating)
-	  continue;
+    {
+      varp = all_rootvarobj;
+      while (*varp != NULL)
+	{
+	  /* Floating varobjs are reparsed on each stop, so we don't care if
+	     the presently parsed expression refers to something that's gone.  */
+	  if ((*varp)->root->floating)
+	    continue;
 
-        /* global var must be re-evaluated.  */     
-        if ((*varp)->root->valid_block == NULL)
-        {
-          struct varobj *tmp_var;
+	  /* global var must be re-evaluated.  */     
+	  if ((*varp)->root->valid_block == NULL)
+	    {
+	      struct varobj *tmp_var;
 
-          /* Try to create a varobj with same expression.  If we succeed replace
-             the old varobj, otherwise invalidate it.  */
-          tmp_var = varobj_create (NULL, (*varp)->name, (CORE_ADDR) 0, USE_CURRENT_FRAME);
-          if (tmp_var != NULL) 
-            { 
-	      tmp_var->obj_name = xstrdup ((*varp)->obj_name);
-              varobj_delete (*varp, NULL, 0);
-              install_variable (tmp_var);
-            }
-          else
-              (*varp)->root->is_valid = 0;
-        }
-        else /* locals must be invalidated.  */
-          (*varp)->root->is_valid = 0;
+	      /* Try to create a varobj with same expression.  If we succeed replace
+		 the old varobj, otherwise invalidate it.  */
+	      tmp_var = varobj_create (NULL, (*varp)->name, (CORE_ADDR) 0, USE_CURRENT_FRAME);
+	      if (tmp_var != NULL) 
+		{ 
+		  tmp_var->obj_name = xstrdup ((*varp)->obj_name);
+		  varobj_delete (*varp, NULL, 0);
+		  install_variable (tmp_var);
+		}
+	      else
+		(*varp)->root->is_valid = 0;
+	    }
+	  else /* locals must be invalidated.  */
+	    (*varp)->root->is_valid = 0;
 
-        varp++;
-      }
-  }
+	  varp++;
+	}
+    }
   xfree (all_rootvarobj);
   return;
 }
