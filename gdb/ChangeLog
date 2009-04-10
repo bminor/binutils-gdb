@@ -2,6 +2,7 @@
 
 	* gdbtypes.c: Remove excessive parentheses at the return keywords.
 	* varobj.c (varobj_invalidate): Fix indentation.
+	* varobj.c (varobj_invalidate): Fix formatting text width.
 
 2009-04-08  Vladimir Prus  <vladimir@codesourcery.com>
 

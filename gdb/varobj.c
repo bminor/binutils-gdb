@@ -2764,7 +2764,8 @@ varobj_invalidate (void)
       while (*varp != NULL)
 	{
 	  /* Floating varobjs are reparsed on each stop, so we don't care if
-	     the presently parsed expression refers to something that's gone.  */
+	     the presently parsed expression refers to something that's gone.
+	     */
 	  if ((*varp)->root->floating)
 	    continue;
 
@@ -2773,9 +2774,10 @@ varobj_invalidate (void)
 	    {
 	      struct varobj *tmp_var;
 
-	      /* Try to create a varobj with same expression.  If we succeed replace
-		 the old varobj, otherwise invalidate it.  */
-	      tmp_var = varobj_create (NULL, (*varp)->name, (CORE_ADDR) 0, USE_CURRENT_FRAME);
+	      /* Try to create a varobj with same expression.  If we succeed
+		 replace the old varobj, otherwise invalidate it.  */
+	      tmp_var = varobj_create (NULL, (*varp)->name, (CORE_ADDR) 0,
+				       USE_CURRENT_FRAME);
 	      if (tmp_var != NULL) 
 		{ 
 		  tmp_var->obj_name = xstrdup ((*varp)->obj_name);
