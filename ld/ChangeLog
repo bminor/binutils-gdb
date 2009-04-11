@@ -1,3 +1,8 @@
+2009-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10047
+	* ldfile.c (ldfile_find_command_file): First try raw name.
+
 2009-04-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 9824

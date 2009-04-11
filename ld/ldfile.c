@@ -542,10 +542,10 @@ find_scripts_dir (void)
   return NULL;
 }
 
-/* If DEFAULT_ONLY is false, try to open NAME; if that fails, look for
-   it in directories specified with -L, then in the default script
-   directory, without and with EXTEND appended.  If DEFAULT_ONLY is
-   true, the search is restricted to the default script location.  */
+/* Try to open NAME; if that fails, look for it in directories specified
+   with -L, then in the default script directory, without and with EXTEND
+   appended.  If DEFAULT_ONLY is true, the search is restricted to the
+   default script location.  */
 
 static FILE *
 ldfile_find_command_file (const char *name, const char *extend,
@@ -556,13 +556,10 @@ ldfile_find_command_file (const char *name, const char *extend,
   char *buffer;
   static search_dirs_type *script_search;
 
-  if (!default_only)
-    {
-      /* First try raw name.  */
-      result = try_open (name, "");
-      if (result != NULL)
-	return result;
-    }
+  /* First try raw name for uninstalled linker.  */
+  result = try_open (name, "");
+  if (result != NULL)
+    return result;
 
   if (!script_search)
     {
