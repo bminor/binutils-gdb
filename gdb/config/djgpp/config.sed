@@ -51,3 +51,4 @@ s|\.gdbinit|gdb.ini|g
 /ac_file_inputs=/s,\( -e "s%\^%\$ac_given_srcdir/%"\)\( -e "s%:% $ac_given_srcdir/%g"\),\2\1,
 /^[ 	]*if test "x`echo /s,sed 's@/,sed -e 's@^[A-z]:@@' -e 's@/,
 /^ *ac_config_headers=/s, config.h", config.h:config.h-in",
+/^ *ac_config_files=/s, config.intl", config.intl:config_intl.in",
