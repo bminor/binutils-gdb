@@ -1,7 +1,7 @@
 2009-04-11  Eli Zaretskii  <eliz@gnu.org>
 
 	* config/djgpp/config.sed: Tweak ac_config_files in intl/configure
-	to be consistent with renaming config.intl.h into config_intl.h.
+	to be consistent with renaming config.intl.in into config_intl.in.
 
 	* go32-nat.c (go32_attach, go32_detach:) Fix prototypes to be
 	consistent with the change from 2009-03-17.
