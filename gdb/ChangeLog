@@ -1,3 +1,8 @@
+2009-04-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* go32-nat.c (go32_attach, go32_detach:) Fix prototypes to be
+	consistent with the change from 2009-03-17.
+
 2009-04-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbtypes.c: Remove excessive parentheses at the return keywords.

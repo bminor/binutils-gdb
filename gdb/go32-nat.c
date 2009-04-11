@@ -167,8 +167,8 @@ static int dr_ref_count[4];
 static int prog_has_started = 0;
 static void go32_open (char *name, int from_tty);
 static void go32_close (int quitting);
-static void go32_attach (char *args, int from_tty);
-static void go32_detach (char *args, int from_tty);
+static void go32_attach (struct target_ops *ops, char *args, int from_tty);
+static void go32_detach (struct target_ops *ops, char *args, int from_tty);
 static void go32_resume (struct target_ops *ops,
 			 ptid_t ptid, int step,
 			 enum target_signal siggnal);
