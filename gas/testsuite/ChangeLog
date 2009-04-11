@@ -1,3 +1,10 @@
+2009-04-09  Catherine Moore  <clm@codesourcery.com>
+
+	* gas/mips/mips.exp: Run new tests.
+	* gas/mips/eret.s: New test.
+	* gas/mips/eret.d: New test output.
+	* gas/mips/eret.l: New test output.
+
 2009-04-07  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/e500mc.d: Update to match extended mnemonics.

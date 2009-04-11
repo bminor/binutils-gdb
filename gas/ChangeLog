@@ -16,10 +16,6 @@
 	(md_parse_option): Handle fix-24k options.
 	(md_show_usage): Display fix-24k options.
 	* doc/c-mips.texi: Document.
-	* testsuite/gas/mips/mips.exp: Run new tests.
-	* testsuite/gas/mips/eret.s: New test.
-	* testsuite/gas/mips/eret.d: New test output.
-	* testsuite/gas/mips/eret.l: New test output.
 
 2009-04-09  Adam Nemet  <anemet@caviumnetworks.com>
 
