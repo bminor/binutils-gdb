@@ -70,6 +70,8 @@ gdb_py_test_silent_cmd "python f0 = f1.newer ()" "get first frame" 0
 
 gdb_test "python print 'result =', f0 == f1" " = False" "test equality comparison (false)"
 gdb_test "python print 'result =', f0 == f0" " = True" "test equality comparison (true)"
+gdb_test "python print 'result =', f0 != f1" " = True" "test inequality comparison (true)"
+gdb_test "python print 'result =', f0 != f0" " = False" "test inequality comparison (false)"
 gdb_test "python print 'result =', f0.is_valid ()" " = True" "test Frame.is_valid"
 gdb_test "python print 'result =', f0.name ()" " = f2" "test Frame.name"
 gdb_test "python print 'result =', f0.type () == gdb.NORMAL_FRAME" " = True" "test Frame.type"

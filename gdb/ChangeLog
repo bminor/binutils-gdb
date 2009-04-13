@@ -1,3 +1,8 @@
+2009-04-13  Tom Tromey  <tromey@redhat.com>
+
+	* python/python-frame.c (frapy_richcompare): Return
+	Py_NotImplemented, not an error.  Handle Py_NE as well.
+
 2009-04-13  Eli Zaretskii  <eliz@gnu.org>
 
 	* charset.c (EILSEQ): Define if not defined by system headers.

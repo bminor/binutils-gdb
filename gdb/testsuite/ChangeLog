@@ -1,3 +1,8 @@
+2009-04-13  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/python-frame.exp (gdb_py_test_silent_cmd): Test !=
+	operator on Frame.
+
 2009-04-03  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.base/attach.exp: Re-enable for spu*-*-* targets.

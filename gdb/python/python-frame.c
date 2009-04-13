@@ -415,21 +415,23 @@ gdbpy_frame_stop_reason_string (PyObject *self, PyObject *args)
 static PyObject *
 frapy_richcompare (PyObject *self, PyObject *other, int op)
 {
-  if (!PyObject_TypeCheck (other, &frame_object_type))
+  int result;
+
+  if (!PyObject_TypeCheck (other, &frame_object_type)
+      || (op != Py_EQ && op != Py_NE))
     {
-      PyErr_SetString (PyExc_TypeError, "Frame object expected in comparison.");
-      return NULL;
-    }
-  else if (op != Py_EQ)
-    {
-      PyErr_SetString (PyExc_TypeError, "Invalid comparison for gdb.Frame.");
-      return NULL;
+      Py_INCREF (Py_NotImplemented);
+      return Py_NotImplemented;
     }
 
   if (frame_id_eq (((frame_object *) self)->frame_id,
 		   ((frame_object *) other)->frame_id))
-    Py_RETURN_TRUE;
+    result = Py_EQ;
+  else
+    result = Py_NE;
 
+  if (op == result)
+    Py_RETURN_TRUE;
   Py_RETURN_FALSE;
 }
 
