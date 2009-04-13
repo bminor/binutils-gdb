@@ -89,6 +89,15 @@
 #undef ICONV_CONST
 #define ICONV_CONST const
 
+/* Some systems, don't have EILSEQ, so we define it here, but not as
+   EINVAL, because callers of `iconv' want to distinguish EINVAL and
+   EILSEQ.  This is what iconv.h from libiconv does as well.  Note
+   that wchar.h may also define EILSEQ, so this needs to be after we
+   include wchar.h, which happens in defs.h through gdb_wchar.h.  */
+#ifndef EILSEQ
+#define EILSEQ ENOENT
+#endif
+
 iconv_t
 iconv_open (const char *to, const char *from)
 {

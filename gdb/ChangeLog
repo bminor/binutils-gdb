@@ -1,3 +1,7 @@
+2009-04-13  Eli Zaretskii  <eliz@gnu.org>
+
+	* charset.c (EILSEQ): Define if not defined by system headers.
+
 2009-04-11  Eli Zaretskii  <eliz@gnu.org>
 
 	* config/djgpp/config.sed: Tweak ac_config_files in intl/configure
