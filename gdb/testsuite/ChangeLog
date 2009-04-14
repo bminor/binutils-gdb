@@ -1,3 +1,7 @@
+2009-04-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/exe-lock.exp: New testcase.
+
 2009-04-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/python-frame.exp (gdb_py_test_silent_cmd): Test !=
