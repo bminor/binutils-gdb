@@ -1,6 +1,6 @@
 /* Linker file opening and searching.
    Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -477,15 +477,12 @@ check_for_scripts_dir (char *dir)
    SCRIPTDIR (passed from Makefile)
 	     (adjusted according to the current location of the binary)
    SCRIPTDIR (passed from Makefile)
-   the dir where this program is (for using it from the build tree)
-   the dir where this program is/../lib
-	     (for installing the tool suite elsewhere).  */
+   the dir where this program is (for using it from the build tree).  */
 
 static char *
 find_scripts_dir (void)
 {
-  char *end, *dir;
-  size_t dirlen;
+  char *dir;
 
   dir = make_relative_prefix (program_name, BINDIR, SCRIPTDIR);
   if (dir)
@@ -508,37 +505,14 @@ find_scripts_dir (void)
     return SCRIPTDIR;
 
   /* Look for "ldscripts" in the dir where our binary is.  */
-  end = strrchr (program_name, '/');
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-  {
-    /* We could have \foo\bar, or /foo\bar.  */
-    char *bslash = strrchr (program_name, '\\');
+  dir = make_relative_prefix (program_name, ".", ".");
+  if (dir)
+    {
+      if (check_for_scripts_dir (dir))
+	return dir;
+      free (dir);
+    }
 
-    if (end == NULL || (bslash != NULL && bslash > end))
-      end = bslash;
-  }
-#endif
-
-  if (end == NULL)
-    /* Don't look for ldscripts in the current directory.  There is
-       too much potential for confusion.  */
-    return NULL;
-
-  dirlen = end - program_name;
-  /* Make a copy of program_name in dir.
-     Leave room for later "/../lib".  */
-  dir = xmalloc (dirlen + sizeof ("/../lib"));
-  strncpy (dir, program_name, dirlen);
-  dir[dirlen] = '\0';
-
-  if (check_for_scripts_dir (dir))
-    return dir;
-
-  /* Look for "ldscripts" in <the dir where our binary is>/../lib.  */
-  strcpy (dir + dirlen, "/../lib");
-  if (check_for_scripts_dir (dir))
-    return dir;
-  free (dir);
   return NULL;
 }
 

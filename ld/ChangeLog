@@ -1,3 +1,9 @@
+2009-04-14  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/10047
+	* ldfile.c (find_scripts_dir): Use make_relative_prefix to find
+	ldscripts in build tree.  Don't repeat search for ../lib/ldscripts.
+
 2009-04-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldfile.c (ldfile_find_command_file): Revert the last change.
