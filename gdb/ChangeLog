@@ -1,3 +1,9 @@
+2009-04-13  David Daney  <ddaney@caviumnetworks.com>
+
+	* infrun.c (maybe_software_singlestep): New function.
+	(resume): Call maybe_software_singlestep.
+	(handle_inferior_event): Same.
+
 2009-04-13  Tom Tromey  <tromey@redhat.com>
 
 	* python/python-frame.c (frapy_richcompare): Return

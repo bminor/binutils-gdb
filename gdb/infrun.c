@@ -950,6 +950,29 @@ set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
     }
 }
 
+/* Try to setup for software single stepping over the specified location.
+   Return 1 if target_resume() should use hardware single step.
+
+   GDBARCH the current gdbarch.
+   PC the location to step over.  */
+
+static int
+maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  int hw_step = 1;
+
+  if (gdbarch_software_single_step_p (gdbarch)
+      && gdbarch_software_single_step (gdbarch, get_current_frame ()))
+    {
+      hw_step = 0;
+      /* Do not pull these breakpoints until after a `wait' in
+	 `wait_for_inferior' */
+      singlestep_breakpoints_inserted_p = 1;
+      singlestep_ptid = inferior_ptid;
+      singlestep_pc = pc;
+    }
+  return hw_step;
+}
 
 /* Resume the inferior, but allow a QUIT.  This is useful if the user
    wants to interrupt some lengthy single-stepping operation
@@ -1031,20 +1054,9 @@ a command like `return' or `jump' to continue execution."));
 	}
     }
 
-  if (step && gdbarch_software_single_step_p (gdbarch))
-    {
-      /* Do it the hard way, w/temp breakpoints */
-      if (gdbarch_software_single_step (gdbarch, get_current_frame ()))
-        {
-          /* ...and don't ask hardware to do it.  */
-          step = 0;
-          /* and do not pull these breakpoints until after a `wait' in
-          `wait_for_inferior' */
-          singlestep_breakpoints_inserted_p = 1;
-          singlestep_ptid = inferior_ptid;
-          singlestep_pc = pc;
-        }
-    }
+  /* Do we need to do it the hard way, w/temp breakpoints?  */
+  if (step)
+    step = maybe_software_singlestep (gdbarch, pc);
 
   /* If there were any forks/vforks/execs that were caught and are
      now to be followed, then do so.  */
@@ -2826,11 +2838,14 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	 the inferior over it.  If we have non-steppable watchpoints,
 	 we must disable the current watchpoint; it's simplest to
 	 disable all watchpoints and breakpoints.  */
-	 
+      int hw_step = 1;
+
       if (!HAVE_STEPPABLE_WATCHPOINT)
 	remove_breakpoints ();
       registers_changed ();
-      target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);	/* Single step */
+	/* Single step */
+      hw_step = maybe_software_singlestep (current_gdbarch, read_pc ());
+      target_resume (ecs->ptid, hw_step, TARGET_SIGNAL_0);
       waiton_ptid = ecs->ptid;
       if (HAVE_STEPPABLE_WATCHPOINT)
 	infwait_state = infwait_step_watch_state;
