@@ -337,9 +337,7 @@ add_angle_brackets (const char *str)
   static char *result = NULL;
 
   xfree (result);
-  result = (char *) xmalloc ((strlen (str) + 3) * sizeof (char));
-
-  sprintf (result, "<%s>", str);
+  result = xstrprintf ("<%s>", str);
   return result;
 }
 
@@ -1114,7 +1112,7 @@ Suppress:
   if (encoded[0] == '<')
     strcpy (decoded, encoded);
   else
-    sprintf (decoded, "<%s>", encoded);
+    xsnprintf (decoded, decoding_buffer_size, "<%s>", encoded);
   return decoded;
 
 }
@@ -6609,13 +6607,14 @@ find_old_style_renaming_symbol (const char *name, struct block *block)
         function_name = function_name + 5;
 
       rename = (char *) alloca (rename_len * sizeof (char));
-      sprintf (rename, "%s__%s___XR", function_name, name);
+      xsnprintf (rename, rename_len * sizeof (char), "%s__%s___XR", 
+		 function_name, name);
     }
   else
     {
       const int rename_len = strlen (name) + 6;
       rename = (char *) alloca (rename_len * sizeof (char));
-      sprintf (rename, "%s___XR", name);
+      xsnprintf (rename, rename_len * sizeof (char), "%s___XR", name);
     }
 
   return ada_find_any_symbol (rename);
@@ -7308,7 +7307,7 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
             int xvz_found = 0;
             LONGEST size;
 
-            sprintf (xvz_name, "%s___XVZ", name);
+            xsnprintf (xvz_name, strlen (name) + 7, "%s___XVZ", name);
             size = get_int_var_value (xvz_name, &xvz_found);
             if (xvz_found && TYPE_LENGTH (fixed_record_type) != size)
               {
@@ -7760,11 +7759,11 @@ ada_enum_name (const char *name)
 
       GROW_VECT (result, result_len, 16);
       if (isascii (v) && isprint (v))
-        sprintf (result, "'%c'", v);
+        xsnprintf (result, result_len, "'%c'", v);
       else if (name[1] == 'U')
-        sprintf (result, "[\"%02x\"]", v);
+        xsnprintf (result, result_len, "[\"%02x\"]", v);
       else
-        sprintf (result, "[\"%04x\"]", v);
+        xsnprintf (result, result_len, "[\"%04x\"]", v);
 
       return result;
     }

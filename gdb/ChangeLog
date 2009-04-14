@@ -1,3 +1,13 @@
+2009-04-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	ARI fix: sprintf rule.
+	* ada-exp.y (convert_char_literal): Replace sprintf by xsnprintf.
+	* ada-lang.c (add_angle_brackets): Use xstrprintf.
+	(ada_decode): Replace sprintf by xsnprintf.
+	(find_old_style_renaming_symbol): Ditto.
+	(ada_to_fixed_type_1, ada_enum_name): Ditto.
+
+
 2009-04-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* target.c (target_mourn_inferior): Call bfd_cache_close_all

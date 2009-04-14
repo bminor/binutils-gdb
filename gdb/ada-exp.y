@@ -1452,7 +1452,7 @@ convert_char_literal (struct type *type, LONGEST val)
 
   if (type == NULL || TYPE_CODE (type) != TYPE_CODE_ENUM)
     return val;
-  sprintf (name, "QU%02x", (int) val);
+  xsnprintf (name, sizeof (name), "QU%02x", (int) val);
   for (f = 0; f < TYPE_NFIELDS (type); f += 1)
     {
       if (strcmp (name, TYPE_FIELD_NAME (type, f)) == 0)
