@@ -1,3 +1,7 @@
+2009-04-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* c-lang.c (c_get_string): Fix xfree crash on a failed string read.
+
 2009-04-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	ARI fix: sprintf rule.

@@ -657,7 +657,7 @@ c_get_string (struct value *value, gdb_byte **buffer, int *length,
 			 buffer, length);
       if (err)
 	{
-	  xfree (buffer);
+	  xfree (*buffer);
 	  error (_("Error reading string from inferior: %s"),
 		 safe_strerror (err));
 	}
