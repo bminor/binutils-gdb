@@ -1,3 +1,15 @@
+2009-04-14  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* objcopy.c (enum long_section_name_handling):  New enum type.
+	(enum command_line_switch):  Add OPTION_LONG_SECTION_NAMES.
+	(copy_options[]):  Add entry for --long-section-names option.
+	(copy_usage):  Document it.
+	(set_long_section_mode):  New subroutine.
+	(copy_file):  Call it.
+	(copy_main):  Accept OPTION_LONG_SECTION_NAMES and parse arg.
+	* doc/binutils.texi:  Update objcopy documentation with details
+	of new option.
+
 2009-04-01  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* dlltool.c (set_dll_name_from_def):  Accept new second arg that

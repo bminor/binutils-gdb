@@ -73,6 +73,11 @@ make_a_section_from_file (bfd *abfd,
       char *p;
       const char *strings;
 
+      /* Flag that this BFD uses long names, even though the format might
+         expect them to be off by default.  This won't directly affect the
+         format of any output BFD created from this one, but the information
+         can be used to decide what to do.  */
+      bfd_coff_set_long_section_names (abfd, TRUE);
       memcpy (buf, hdr->s_name + 1, SCNNMLEN - 1);
       buf[SCNNMLEN - 1] = '\0';
       strindex = strtol (buf, &p, 10);

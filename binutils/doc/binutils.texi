@@ -1001,6 +1001,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--set-section-flags} @var{section}=@var{flags}]
         [@option{--add-section} @var{sectionname}=@var{filename}]
         [@option{--rename-section} @var{oldname}=@var{newname}[,@var{flags}]]
+        [@option{--long-section-names} @{enable,disable,keep@}]
         [@option{--change-leading-char}] [@option{--remove-leading-char}]
         [@option{--reverse-bytes=}@var{num}]
         [@option{--srec-len=}@var{ival}] [@option{--srec-forceS3}]
@@ -1337,6 +1338,18 @@ data you could use the following command line to achieve it:
    --rename-section .data=.rodata,alloc,load,readonly,data,contents \
    <input_binary_file> <output_object_file>
 @end smallexample
+
+@item --long-section-names @{enable,disable,keep@}
+Controls the handling of long section names when processing @code{COFF}
+and @code{PE-COFF} object formats.  The default behaviour, @samp{keep},
+is to preserve long section names if any are present in the input file.
+The @samp{enable} and @samp{disable} options forcibly enable or disable
+the use of long section names in the output object; when @samp{disable}
+is in effect, any long section names in the input object will be truncated.
+The @samp{enable} option will only emit long section names if any are
+present in the inputs; this is mostly the same as @samp{keep}, but it
+is left undefined whether the @samp{enable} option might force the 
+creation of an empty string table in the output file.
 
 @item --change-leading-char
 Some object file formats use special characters at the start of

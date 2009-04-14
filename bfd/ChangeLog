@@ -1,3 +1,9 @@
+2009-04-14  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* coffgen.c (make_a_section_from_file):  Set the backend long
+	section names enable if long section names found on input.
+	* coffcode.h:  Extend long section names documentation to match.
+
 2009-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (elf_link_add_object_symbols): Warn alternate ELF

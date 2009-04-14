@@ -32,6 +32,8 @@
 #include "elf-bfd.h"
 #include <sys/stat.h>
 #include "libbfd.h"
+#include "coff/internal.h"
+#include "libcoff.h"
 
 struct is_specified_symbol_predicate_data
 {
@@ -216,6 +218,18 @@ static bfd_boolean extract_symbol = FALSE;
    of <reverse_bytes> bytes within each output section.  */
 static int reverse_bytes = 0;
 
+/* For Coff objects, we may want to allow or disallow long section names,
+   or preserve them where found in the inputs.  Debug info relies on them.  */
+enum long_section_name_handling
+  {
+    DISABLE,
+    ENABLE,
+    KEEP
+  };
+
+/* The default long section handling mode is to preserve them.
+   This is also the only behaviour for 'strip'.  */
+static enum long_section_name_handling long_section_names = KEEP;
 
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 enum command_line_switch
@@ -247,6 +261,7 @@ enum command_line_switch
     OPTION_KEEP_SYMBOLS,
     OPTION_LOCALIZE_HIDDEN,
     OPTION_LOCALIZE_SYMBOLS,
+    OPTION_LONG_SECTION_NAMES,
     OPTION_GLOBALIZE_SYMBOL,
     OPTION_GLOBALIZE_SYMBOLS,
     OPTION_KEEPGLOBAL_SYMBOLS,
@@ -340,6 +355,7 @@ static struct option copy_options[] =
   {"localize-hidden", no_argument, 0, OPTION_LOCALIZE_HIDDEN},
   {"localize-symbol", required_argument, 0, 'L'},
   {"localize-symbols", required_argument, 0, OPTION_LOCALIZE_SYMBOLS},
+  {"long-section-names", required_argument, 0, OPTION_LONG_SECTION_NAMES},
   {"no-adjust-warnings", no_argument, 0, OPTION_NO_CHANGE_WARNINGS},
   {"no-change-warnings", no_argument, 0, OPTION_NO_CHANGE_WARNINGS},
   {"only-keep-debug", no_argument, 0, OPTION_ONLY_KEEP_DEBUG},
@@ -470,6 +486,8 @@ copy_usage (FILE *stream, int exit_status)
                                    Set section <name>'s properties to <flags>\n\
      --add-section <name>=<file>   Add section <name> found in <file> to output\n\
      --rename-section <old>=<new>[,<flags>] Rename section <old> to <new>\n\
+     --long-section-names {enable|disable|keep}\n\
+                                   Handle long section names in Coff objects.\n\
      --change-leading-char         Force output format's leading character style\n\
      --remove-leading-char         Remove leading character from global symbols\n\
      --reverse-bytes=<num>         Reverse <num> bytes at a time, in output sections with content\n\
@@ -2025,6 +2043,18 @@ copy_unknown_element:
   rmdir (dir);
 }
 
+static void
+set_long_section_mode (bfd *output_bfd, bfd *input_bfd, enum long_section_name_handling style)
+{
+  /* This is only relevant to Coff targets.  */
+  if (bfd_get_flavour (output_bfd) == bfd_target_coff_flavour)
+    {
+      if (style == KEEP)
+	style = bfd_coff_long_section_names (input_bfd) ? ENABLE : DISABLE;
+      bfd_coff_set_long_section_names (output_bfd, style != DISABLE);
+    }
+}
+
 /* The top-level control.  */
 
 static void
@@ -2073,6 +2103,8 @@ copy_file (const char *input_filename, const char *output_filename,
 	  status = 1;
 	  return;
 	}
+      /* This is a no-op on non-Coff targets.  */
+      set_long_section_mode (obfd, ibfd, long_section_names);
 
       copy_archive (ibfd, obfd, output_target, force_output_target);
     }
@@ -2093,6 +2125,8 @@ copy_file (const char *input_filename, const char *output_filename,
  	  status = 1;
  	  return;
  	}
+      /* This is a no-op on non-Coff targets.  */
+      set_long_section_mode (obfd, ibfd, long_section_names);
 
       if (! copy_object (ibfd, obfd))
 	status = 1;
@@ -3351,6 +3385,17 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_LOCALIZE_SYMBOLS:
 	  add_specific_symbols (optarg, localize_specific_htab);
+	  break;
+
+	case OPTION_LONG_SECTION_NAMES:
+	  if (!strcmp ("enable", optarg))
+	    long_section_names = ENABLE;
+	  else if (!strcmp ("disable", optarg))
+	    long_section_names = DISABLE;
+	  else if (!strcmp ("keep", optarg))
+	    long_section_names = KEEP;
+	  else
+	    fatal (_("unknown long section names option '%s'"), optarg);
 	  break;
 
 	case OPTION_GLOBALIZE_SYMBOLS:
