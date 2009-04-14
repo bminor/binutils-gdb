@@ -1,3 +1,8 @@
+2009-04-14  Eli Zaretskii  <eliz@gnu.org>
+
+	* config/djgpp/djconfig.sh (DEPDIR): Define to "_deps", if
+	undefined.
+
 2009-04-13  David Daney  <ddaney@caviumnetworks.com>
 
 	* infrun.c (maybe_software_singlestep): New function.

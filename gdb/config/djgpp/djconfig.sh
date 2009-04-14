@@ -155,6 +155,10 @@ export am_cv_exeext=.exe
 # need all that crap.  Assuming that the environment size is less
 # than 4KB, we can afford 12KB of command-line arguments.
 export lt_cv_sys_max_cmd_len=12288
+# Force depcomp to use _deps rather than .deps as the name of the
+# subdirectory where the *.Po dependency files are put.  File names
+# with leading dots are invalid on DOS 8+3 filesystems.
+export DEPDIR=${DEPDIR:-_deps}
 
 # The configure script needs to see the `install-sh' script, otherwise
 # it decides the source installation is broken.  But "make install" will
