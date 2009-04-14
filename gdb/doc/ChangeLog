@@ -1,3 +1,8 @@
+2009-04-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdbint.texinfo: Change server name from sources.redhat.com to
+	sourceware.org throughout.
+
 2009-04-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Set Breaks): Rewrite a paragraph to avoid a warning

@@ -6709,7 +6709,7 @@ adding more reviewers or deciding who can commit).
 
 @item all commits are posted
 All changes committed to a branch shall also be posted to
-@email{gdb-patches@@sources.redhat.com, the @value{GDBN} patches
+@email{gdb-patches@@sourceware.org, the @value{GDBN} patches
 mailing list}.  While commentary on such changes are encouraged, people
 should remember that the changes only apply to a branch.
 
@@ -6876,13 +6876,13 @@ Remember, everything on the Internet takes a week.
 
 @enumerate
 @item
-Post the proposal on @email{gdb@@sources.redhat.com, the GDB mailing
+Post the proposal on @email{gdb@@sourceware.org, the GDB mailing
 list} Creating a bug report to track the task's state, is also highly
 recommended.
 @item
 Wait a week or so.
 @item
-Post the proposal on @email{gdb-announce@@sources.redhat.com, the GDB
+Post the proposal on @email{gdb-announce@@sourceware.org, the GDB
 Announcement mailing list}.
 @item
 Wait a week or so.
@@ -6942,7 +6942,7 @@ file)
 
 @subheading Check the ARI
 
-@uref{http://sources.redhat.com/gdb/ari,,A.R.I.} is an @code{awk} script
+@uref{http://sourceware.org/gdb/ari,,A.R.I.} is an @code{awk} script
 (Awk Regression Index ;-) that checks for a number of errors and coding
 conventions.  The checks include things like using @code{malloc} instead
 of @code{xmalloc} and file naming problems.  There shouldn't be any
@@ -6968,15 +6968,15 @@ $  V=`echo $v | sed 's/\./_/g'`
 $  D=`date -u +%Y-%m-%d`
 $  echo $u $V $D
 5.1 5_2 2002-03-03
-$  echo cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
+$  echo cvs -f -d :ext:sourceware.org:/cvs/src rtag \
 -D $D-gmt gdb_$V-$D-branchpoint insight
-cvs -f -d :ext:sources.redhat.com:/cvs/src rtag
+cvs -f -d :ext:sourceware.org:/cvs/src rtag
 -D 2002-03-03-gmt gdb_5_2-2002-03-03-branchpoint insight
 $  ^echo ^^
 ...
-$  echo cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
+$  echo cvs -f -d :ext:sourceware.org:/cvs/src rtag \
 -b -r gdb_$V-$D-branchpoint gdb_$V-branch insight
-cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
+cvs -f -d :ext:sourceware.org:/cvs/src rtag \
 -b -r gdb_5_2-2002-03-03-branchpoint gdb_5_2-branch insight
 $  ^echo ^^
 ...
@@ -7006,9 +7006,9 @@ $  V=`echo $v | sed 's/\./_/g'`
 $  echo $u $v$V
 5.1 5_2
 $  cd /tmp
-$  echo cvs -f -d :ext:sources.redhat.com:/cvs/src co \
+$  echo cvs -f -d :ext:sourceware.org:/cvs/src co \
 -r gdb_$V-branch src/gdb/version.in
-cvs -f -d :ext:sources.redhat.com:/cvs/src co
+cvs -f -d :ext:sourceware.org:/cvs/src co
  -r gdb_5_2-branch src/gdb/version.in
 $  ^echo ^^
 U src/gdb/version.in
@@ -7069,10 +7069,10 @@ Send an announcement to the mailing lists:
 
 @itemize @bullet
 @item
-@email{gdb-announce@@sources.redhat.com, GDB Announcement mailing list}
+@email{gdb-announce@@sourceware.org, GDB Announcement mailing list}
 @item
-@email{gdb@@sources.redhat.com, GDB Discussion mailing list} and
-@email{gdb-testers@@sources.redhat.com, GDB Testers mailing list}
+@email{gdb@@sourceware.org, GDB Discussion mailing list} and
+@email{gdb-testers@@sourceware.org, GDB Testers mailing list}
 @end itemize
 
 @emph{Pragmatics: The branch creation is sent to the announce list to
@@ -7114,7 +7114,7 @@ candidate).
 @subsubheading Freeze the branch
 
 Send out an e-mail notifying everyone that the branch is frozen to
-@email{gdb-patches@@sources.redhat.com}.
+@email{gdb-patches@@sourceware.org}.
 
 @subsubheading Establish a few defaults.
 
@@ -7140,7 +7140,7 @@ Notes:
 @item
 Check the @code{autoconf} version carefully.  You want to be using the
 version taken from the @file{binutils} snapshot directory, which can be
-found at @uref{ftp://sources.redhat.com/pub/binutils/}.  It is very
+found at @uref{ftp://sourceware.org/pub/binutils/}.  It is very
 unlikely that a system installed version of @code{autoconf} (e.g.,
 @file{/usr/bin/autoconf}) is correct.
 @end itemize
@@ -7345,10 +7345,10 @@ Tweak @file{version.in} (and @file{ChangeLog} to read
 process can restart.
 @item
 Make the release candidate available in
-@uref{ftp://sources.redhat.com/pub/gdb/snapshots/branch}
+@uref{ftp://sourceware.org/pub/gdb/snapshots/branch}
 @item
-Notify the relevant mailing lists ( @email{gdb@@sources.redhat.com} and
-@email{gdb-testers@@sources.redhat.com} that the candidate is available.
+Notify the relevant mailing lists ( @email{gdb@@sourceware.org} and
+@email{gdb-testers@@sourceware.org} that the candidate is available.
 @end enumerate
 
 @subsection Make a formal release available
@@ -7455,7 +7455,7 @@ Post the @file{ANNOUNCEMENT} file you created above to:
 
 @itemize @bullet
 @item
-@email{gdb-announce@@sources.redhat.com, GDB Announcement mailing list}
+@email{gdb-announce@@sourceware.org, GDB Announcement mailing list}
 @item
 @email{info-gnu@@gnu.org, General GNU Announcement list} (but delay it a
 day or so to let things get out)
@@ -7519,7 +7519,7 @@ trunk.
 
 @subsubheading Revise the release schedule
 
-Post a revised release schedule to @email{gdb@@sources.redhat.com, GDB
+Post a revised release schedule to @email{gdb@@sourceware.org, GDB
 Discussion List} with an updated announcement.  The schedule can be
 generated by running:
 
@@ -7889,7 +7889,7 @@ permits, which, since the maintainers have many demands to meet, may not
 be for quite some time.
 
 Please send patches directly to
-@email{gdb-patches@@sources.redhat.com, the @value{GDBN} maintainers}.
+@email{gdb-patches@@sourceware.org, the @value{GDBN} maintainers}.
 
 @section Build Script
 
