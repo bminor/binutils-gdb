@@ -1941,6 +1941,12 @@ target_mourn_inferior (void)
 	  t->to_mourn_inferior (t);
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog, "target_mourn_inferior ()\n");
+
+          /* We no longer need to keep handles on any of the object files.
+             Make sure to release them to avoid unnecessarily locking any
+             of them while we're not actually debugging.  */
+          bfd_cache_close_all ();
+
 	  return;
 	}
     }

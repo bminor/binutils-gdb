@@ -1,3 +1,8 @@
+2009-04-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* target.c (target_mourn_inferior): Call bfd_cache_close_all
+	after having executed the target mourn_inferior routine.
+
 2009-04-14  Eli Zaretskii  <eliz@gnu.org>
 
 	* config/djgpp/djconfig.sh (DEPDIR): Define to "_deps", if
