@@ -1618,7 +1618,7 @@ host_char_to_target (int c, int *target_c)
 int
 parse_escape (char **string_ptr)
 {
-  int target_char;
+  int target_char = -2;	/* initialize to avoid GCC warnings */
   int c = *(*string_ptr)++;
   switch (c)
     {

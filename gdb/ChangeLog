@@ -1,3 +1,7 @@
+2009-04-15  Eli Zaretskii  <eliz@gnu.org>
+
+	* utils.c (parse_escape): Initialize target_char to pacify GCC.
+
 2009-04-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* c-lang.c (c_get_string): Fix xfree crash on a failed string read.
