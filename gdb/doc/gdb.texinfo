@@ -7998,7 +7998,9 @@ Set the current host character set to @var{charset}.
 
 By default, @value{GDBN} uses a host character set appropriate to the
 system it is running on; you can override that default using the
-@code{set host-charset} command.
+@code{set host-charset} command.  On some systems, @value{GDBN} cannot
+automatically determine the appropriate host character set.  In this
+case, @value{GDBN} uses @samp{UTF-8}.
 
 @value{GDBN} can only use certain character sets as its host character
 set.  If you type @kbd{@w{set target-charset @key{TAB}@key{TAB}}},

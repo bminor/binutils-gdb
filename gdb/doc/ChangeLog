@@ -1,3 +1,7 @@
+2009-04-15  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Character Sets): Document default character set.
+
 2009-04-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdbint.texinfo: Change server name from sources.redhat.com to

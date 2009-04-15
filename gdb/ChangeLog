@@ -1,3 +1,18 @@
+2009-04-14  Tom Tromey  <tromey@redhat.com>
+
+	* c-lang.c (c_emit_char): Use INTERMEDIATE_ENCODING.
+	(c_printstr): Likewise.
+	* charset.c: Include gdb_wait.h.
+	(make_wchar_iterator): Use INTERMEDIATE_ENCODING.
+	(find_charset_names): Use pexecute.  Handle libiconv's output.
+	Detect errors.
+	(_initialize_charset): Use xstrdup.
+	* gdb_wchar.h: Check HAVE_BTOWC.  Split PHONY_ICONV and wchar
+	cases.
+	(INTERMEDIATE_ENCODING): New define.
+	* configure, config.in: Rebuild.
+	* configure.ac: Check for btowc.
+
 2009-04-15  Tom Tromey  <tromey@redhat.com>
 
 	* c-lang.c (evaluate_subexp_c): Correctly handle EVAL_SKIP.

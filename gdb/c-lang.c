@@ -296,7 +296,7 @@ c_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
   obstack_init (&output);
   make_cleanup_obstack_free (&output);
 
-  convert_between_encodings ("wchar_t", host_charset (),
+  convert_between_encodings (INTERMEDIATE_ENCODING, host_charset (),
 			     obstack_base (&wchar_buf),
 			     obstack_object_size (&wchar_buf),
 			     1, &output, translit_char);
@@ -562,7 +562,7 @@ c_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
   obstack_init (&output);
   make_cleanup_obstack_free (&output);
 
-  convert_between_encodings ("wchar_t", host_charset (),
+  convert_between_encodings (INTERMEDIATE_ENCODING, host_charset (),
 			     obstack_base (&wchar_buf),
 			     obstack_object_size (&wchar_buf),
 			     1, &output, translit_char);

@@ -22,6 +22,7 @@
 #include "gdbcmd.h"
 #include "gdb_assert.h"
 #include "gdb_obstack.h"
+#include "gdb_wait.h"
 #include "charset-list.h"
 #include "vec.h"
 
@@ -536,7 +537,7 @@ make_wchar_iterator (const gdb_byte *input, size_t bytes, const char *charset,
   struct wchar_iterator *result;
   iconv_t desc;
 
-  desc = iconv_open ("wchar_t", charset);
+  desc = iconv_open (INTERMEDIATE_ENCODING, charset);
   if (desc == (iconv_t) -1)
     perror_with_name ("Converting character sets");
 
@@ -707,35 +708,92 @@ find_charset_names (void)
 static void
 find_charset_names (void)
 {
-  FILE *in;
+  struct pex_obj *child;
+  char *args[3];
+  int err, status;
+  int fail = 1;
 
-  in = popen ("iconv -l", "r");
-  /* It is ok to ignore errors; we'll fall back on a default.  */
-  if (!in)
-    return;
+  child = pex_init (0, "iconv", NULL);
 
-  /* POSIX says that iconv -l uses an unspecified format.  We parse
-     the glibc format; feel free to add others as needed.  */
-  while (!feof (in))
+  args[0] = "iconv";
+  args[1] = "-l";
+  args[2] = NULL;
+  /* Note that we simply ignore errors here.  */
+  if (!pex_run (child, PEX_SEARCH | PEX_STDERR_TO_STDOUT, "iconv",
+		args, NULL, NULL, &err))
     {
-      /* The size of buf is chosen arbitrarily.  A character set name
-	 longer than this would not be very nice.  */
-      char buf[80];
-      int len;
-      char *r = fgets (buf, sizeof (buf), in);
-      if (!r)
-	break;
-      len = strlen (r);
-      if (len <= 3)
-	continue;
-      if (buf[len - 2] == '/' && buf[len - 3] == '/')
-	buf[len - 3] = '\0';
-      VEC_safe_push (char_ptr, charsets, xstrdup (buf));
+      FILE *in = pex_read_output (child, 0);
+
+      /* POSIX says that iconv -l uses an unspecified format.  We
+	 parse the glibc and libiconv formats; feel free to add others
+	 as needed.  */
+      while (!feof (in))
+	{
+	  /* The size of buf is chosen arbitrarily.  */
+	  char buf[1024];
+	  char *start, *r;
+	  int len, keep_going;
+
+	  r = fgets (buf, sizeof (buf), in);
+	  if (!r)
+	    break;
+	  len = strlen (r);
+	  if (len <= 3)
+	    continue;
+	  /* Strip off the newline.  */
+	  --len;
+	  /* Strip off one or two '/'s.  glibc will print lines like
+	     "8859_7//", but also "10646-1:1993/UCS4/".  */
+	  if (buf[len - 1] == '/')
+	    --len;
+	  if (buf[len - 1] == '/')
+	    --len;
+	  buf[len] = '\0';
+
+	  /* libiconv will print multiple entries per line, separated
+	     by spaces.  */
+	  start = buf;
+	  while (1)
+	    {
+	      int keep_going;
+	      char *p;
+
+	      /* Find the next space, or end-of-line.  */
+	      for (p = start; *p && *p != ' '; ++p)
+		;
+	      /* Ignore an empty result.  */
+	      if (p == start)
+		break;
+	      keep_going = *p;
+	      *p = '\0';
+	      VEC_safe_push (char_ptr, charsets, xstrdup (start));
+	      if (!keep_going)
+		break;
+	      /* Skip any extra spaces.  */
+	      for (start = p + 1; *start && *start == ' '; ++start)
+		;
+	    }
+	}
+
+      if (pex_get_status (child, 1, &status)
+	  && WIFEXITED (status) && !WEXITSTATUS (status))
+	fail = 0;
+
     }
 
-  pclose (in);
+  pex_free (child);
 
-  VEC_safe_push (char_ptr, charsets, NULL);
+  if (fail)
+    {
+      /* Some error occurred, so drop the vector.  */
+      int ix;
+      char *elt;
+      for (ix = 0; VEC_iterate (char_ptr, charsets, ix, elt); ++ix)
+	xfree (elt);
+      VEC_truncate (char_ptr, charsets, 0);
+    }
+  else
+    VEC_safe_push (char_ptr, charsets, NULL);
 }
 
 #endif /* HAVE_ICONVLIST || HAVE_LIBICONVLIST */
@@ -748,7 +806,7 @@ _initialize_charset (void)
 
   /* The first element is always "auto"; then we skip it for the
      commands where it is not allowed.  */
-  VEC_safe_push (char_ptr, charsets, "auto");
+  VEC_safe_push (char_ptr, charsets, xstrdup ("auto"));
   find_charset_names ();
 
   if (VEC_length (char_ptr, charsets) > 1)

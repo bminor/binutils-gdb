@@ -19,13 +19,36 @@
 #ifndef GDB_WCHAR_H
 #define GDB_WCHAR_H
 
-/* If this host has wchar_t and if iconv is available (perhaps via GNU
-   libiconv), then we arrange to use those.  Otherwise, we provide a
-   phony iconv which only handles a single character set, and we
-   provide wrappers for the wchar_t functionality we use.  */
-#if defined(HAVE_ICONV) && defined(HAVE_WCHAR_H)
+/* We handle three different modes here.
+   
+   Capable systems have the full suite: wchar_t support and iconv
+   (perhaps via GNU libiconv).  On these machines, full functionality
+   is available.
+   
+   DJGPP is known to have libiconv but not wchar_t support.  On
+   systems like this, we use the narrow character functions.  The full
+   functionality is available to the user, but many characters (those
+   outside the narrow range) will be displayed as escapes.
+   
+   Finally, some systems do not have iconv.  Here we provide a phony
+   iconv which only handles a single character set, and we provide
+   wrappers for the wchar_t functionality we use.  */
 
+
+#define INTERMEDIATE_ENCODING "wchar_t"
+
+#if defined (HAVE_ICONV)
 #include <iconv.h>
+#else
+/* This define is used elsewhere so we don't need to duplicate the
+   same checking logic in multiple places.  */
+#define PHONY_ICONV
+#endif
+
+/* We use "btowc" as a sentinel to detect functioning wchar_t
+   support.  */
+#if defined (HAVE_ICONV) && defined (HAVE_WCHAR_H) && defined (HAVE_BTOWC)
+
 #include <wchar.h>
 #include <wctype.h>
 
@@ -53,10 +76,15 @@ typedef int gdb_wint_t;
 
 #define LCST(X) X
 
-/* This define is used elsewhere so we don't need to duplicate the
-   same checking logic in multiple places.  */
-#define PHONY_ICONV
+/* If we are using the narrow character set, we want to use the host
+   narrow encoding as our intermediate encoding.  However, if we are
+   also providing a phony iconv, we might as well just stick with
+   "wchar_t".  */
+#ifndef PHONY_ICONV
+#undef INTERMEDIATE_ENCODING
+#define INTERMEDIATE_ENCODING host_charset ()
+#endif
 
-#endif /* defined(HAVE_ICONV) && defined(HAVE_WCHAR_H) */
+#endif
 
 #endif /* GDB_WCHAR_H */
