@@ -1,3 +1,8 @@
+2009-04-15  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/x86-64-sse5.s: Add test of protd.
+	* gas/i386/x86-64-sse5.d: Adjust expectations to match input.
+
 2009-04-09  Catherine Moore  <clm@codesourcery.com>
 
 	* gas/mips/mips.exp: Run new tests.

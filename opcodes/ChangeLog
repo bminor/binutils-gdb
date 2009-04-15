@@ -1,3 +1,10 @@
+2009-04-15  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-opc.tbl (protb, protw, protd, protq): Set opcode
+	extension to None.
+	(pshab, pshaw, pshad, pshaq): Likewise.
+	* i386-tbl.h: Re-generate.
+
 2009-04-07  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes) <"tlbilxlpid", "tlbilxpid", "tlbilxva",

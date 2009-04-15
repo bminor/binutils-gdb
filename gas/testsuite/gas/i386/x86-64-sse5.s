@@ -2968,6 +2968,7 @@ foo:
 
 	protb           $0x4, 0x4(%rdx), %xmm1
 	protw		$0x1, 0x8(%r14), %xmm2
+	protd           $0x2, 0x10000(%rax), %xmm15
 	protq		$0x3, 0x4(%r15), %xmm1
 	
 	ret
