@@ -941,7 +941,15 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	*pos += 2;
 
 	if (noside == EVAL_SKIP)
-	  return NULL;
+	  {
+	    /* Return a dummy value of the appropriate type.  */
+	    if ((dest_type & C_CHAR) != 0)
+	      result = allocate_value (type);
+	    else
+	      result = value_typed_string ("", 0, type);
+	    do_cleanups (cleanup);
+	    return result;
+	  }
 
 	if ((dest_type & C_CHAR) != 0)
 	  {

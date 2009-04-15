@@ -604,4 +604,9 @@ if {$ucs2_ok && $ucs4_ok} {
     test_combination u UCS-2 U UCS-4
 }
 
+# Regression test for a cleanup bug in the charset code.
+gdb_test "print 'a' == 'a' || 'b' == 'b'" \
+  ".* = 1" \
+  "EVAL_SKIP cleanup handling regression test"
+
 gdb_exit 
