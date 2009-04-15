@@ -1,3 +1,9 @@
+2009-04-15  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Don't convert ARM
+	branch to an undef weak symbol into a jump to next instruction if
+	a PLT entry will be created.
+
 2009-04-14  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* coffgen.c (make_a_section_from_file):  Set the backend long

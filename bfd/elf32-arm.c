@@ -6363,8 +6363,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  signed_addend >>= howto->rightshift;
 
 	  /* A branch to an undefined weak symbol is turned into a jump to
-	     the next instruction.  */
-	  if (h && h->root.type == bfd_link_hash_undefweak)
+	     the next instruction unless a PLT entry will be created.  */
+	  if (h && h->root.type == bfd_link_hash_undefweak
+	      && !(splt != NULL && h->plt.offset != (bfd_vma) -1))
 	    {
 	      value = (bfd_get_32 (input_bfd, hit_data) & 0xf0000000)
 		      | 0x0affffff;
