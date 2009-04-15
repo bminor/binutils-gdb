@@ -1,3 +1,7 @@
+2009-04-15  Kazu Hirata  <kazu@codesourcery.com>
+
+	* ldlang.c: Do not include limits.h.
+
 2009-04-14  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/10047
