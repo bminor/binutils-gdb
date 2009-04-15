@@ -5061,8 +5061,8 @@ duplicate:
 		{
 		  /* Reversed arguments on faddp, fsubp, etc.  */
 		  as_warn (_("translating to `%s %s%s,%s%s'"), i.tm.name,
-			   register_prefix, i.op[1].regs->reg_name,
-			   register_prefix, i.op[0].regs->reg_name);
+			   register_prefix, i.op[!intel_syntax].regs->reg_name,
+			   register_prefix, i.op[intel_syntax].regs->reg_name);
 		}
 	      else
 		{

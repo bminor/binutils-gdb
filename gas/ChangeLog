@@ -1,3 +1,8 @@
+2009-04-15  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (process_operands): Print operands in
+	correct order depending on intel_syntax.
+
 2009-04-09  Catherine Moore  <clm@codesourcery.com>
 
 	* config/tc-mips.c (mips_fix_24k): Declare.
