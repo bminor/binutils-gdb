@@ -416,6 +416,9 @@ extern bfd_boolean _bfd_generic_set_section_contents
   ((bfd_boolean (*) (bfd *, struct bfd_section *)) bfd_false)
 #define _bfd_nolink_section_already_linked \
   ((void (*) (bfd *, struct bfd_section *, struct bfd_link_info *)) bfd_void)
+#define _bfd_nolink_bfd_define_common_symbol \
+  ((bfd_boolean (*) (bfd *, struct bfd_link_info *, \
+		     struct bfd_link_hash_entry *)) bfd_false)
 
 /* Routines to use for BFD_JUMP_TABLE_DYNAMIC for targets which do not
    have dynamic symbols or relocs.  Use BFD_JUMP_TABLE_DYNAMIC

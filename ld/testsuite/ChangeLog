@@ -1,3 +1,8 @@
+2009-04-16  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* ld-powerpc/aix-export-2.s, ld-powerpc/aix-export-2.nd: New test.
+	* ld-powerpc/aix52.exp: Run it.
+
 2009-04-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-libs/lib-1.s: Use "==" instead of ".set".

@@ -4233,6 +4233,7 @@ const bfd_target rs6000coff_vec =
     bfd_generic_is_group_section,
     bfd_generic_discard_group,
     _bfd_generic_section_already_linked,
+    _bfd_xcoff_define_common_symbol,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,
@@ -4485,6 +4486,7 @@ const bfd_target pmac_xcoff_vec =
     bfd_generic_is_group_section,
     bfd_generic_discard_group,
     _bfd_generic_section_already_linked,
+    _bfd_xcoff_define_common_symbol,
 
     /* Dynamic */
     _bfd_xcoff_get_dynamic_symtab_upper_bound,

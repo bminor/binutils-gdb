@@ -1,3 +1,7 @@
+2009-04-16  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* ldlang.c (lang_one_common): Use bfd_define_common_symbol.
+
 2009-04-15  Anthony Green  <green@moxielogic.com>
 
 	* configure.tgt: Add moxie support.

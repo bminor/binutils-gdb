@@ -6349,6 +6349,7 @@ som_bfd_link_split_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 #define som_bfd_is_group_section	        bfd_generic_is_group_section
 #define som_bfd_discard_group		        bfd_generic_discard_group
 #define som_section_already_linked              _bfd_generic_section_already_linked
+#define som_bfd_define_common_symbol            bfd_generic_define_common_symbol
 #define som_bfd_merge_private_bfd_data		_bfd_generic_bfd_merge_private_bfd_data
 #define som_bfd_copy_private_header_data	_bfd_generic_bfd_copy_private_header_data
 #define som_bfd_set_private_flags		_bfd_generic_bfd_set_private_flags

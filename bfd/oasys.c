@@ -1198,6 +1198,7 @@ oasys_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define oasys_bfd_is_group_section                 bfd_generic_is_group_section
 #define oasys_bfd_discard_group                    bfd_generic_discard_group
 #define oasys_section_already_linked               _bfd_generic_section_already_linked
+#define oasys_bfd_define_common_symbol             bfd_generic_define_common_symbol
 #define oasys_bfd_link_hash_table_create           _bfd_generic_link_hash_table_create
 #define oasys_bfd_link_hash_table_free             _bfd_generic_link_hash_table_free
 #define oasys_bfd_link_add_symbols                 _bfd_generic_link_add_symbols

@@ -5600,6 +5600,10 @@ static bfd_coff_backend_data ticoff1_swap_table =
   _bfd_generic_section_already_linked
 #endif
 
+#ifndef coff_bfd_define_common_symbol
+#define coff_bfd_define_common_symbol	    bfd_generic_define_common_symbol
+#endif
+
 #define CREATE_BIG_COFF_TARGET_VEC(VAR, NAME, EXTRA_O_FLAGS, EXTRA_S_FLAGS, UNDER, ALTERNATIVE, SWAP_TABLE)	\
 const bfd_target VAR =							\
 {									\

@@ -2398,6 +2398,7 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
 #define _bfd_ecoff_bfd_discard_group bfd_generic_discard_group
 #define _bfd_ecoff_section_already_linked \
   _bfd_generic_section_already_linked
+#define _bfd_ecoff_bfd_define_common_symbol bfd_generic_define_common_symbol
 
 const bfd_target ecoffalpha_little_vec =
 {

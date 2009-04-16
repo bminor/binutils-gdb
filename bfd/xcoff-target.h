@@ -57,6 +57,7 @@
 #define _bfd_xcoff_bfd_merge_sections                  coff_bfd_merge_sections
 #define _bfd_xcoff_bfd_discard_group                   bfd_generic_discard_group
 #define _bfd_xcoff_section_already_linked              _bfd_generic_section_already_linked
+#define _bfd_xcoff_bfd_define_common_symbol            _bfd_xcoff_define_common_symbol
 #define _bfd_xcoff_bfd_link_split_section              coff_bfd_link_split_section
 
 #define CORE_FILE_P _bfd_dummy_target

@@ -3186,3 +3186,62 @@ _bfd_fix_excluded_sec_syms (bfd *obfd, struct bfd_link_info *info)
 {
   bfd_link_hash_traverse (info->hash, fix_syms, obfd);
 }
+
+/*
+FUNCTION
+	bfd_generic_define_common_symbol
+
+SYNOPSIS
+	bfd_boolean bfd_generic_define_common_symbol
+	  (bfd *output_bfd, struct bfd_link_info *info,
+	   struct bfd_link_hash_entry *h);
+
+DESCRIPTION
+	Convert common symbol @var{h} into a defined symbol.
+	Return TRUE on success and FALSE on failure.
+
+.#define bfd_define_common_symbol(output_bfd, info, h) \
+.       BFD_SEND (output_bfd, _bfd_define_common_symbol, (output_bfd, info, h))
+.
+*/
+
+bfd_boolean
+bfd_generic_define_common_symbol (bfd *output_bfd,
+				  struct bfd_link_info *info ATTRIBUTE_UNUSED,
+				  struct bfd_link_hash_entry *h)
+{
+  unsigned int power_of_two;
+  bfd_vma alignment, size;
+  asection *section;
+
+  BFD_ASSERT (h != NULL && h->type == bfd_link_hash_common);
+
+  size = h->u.c.size;
+  power_of_two = h->u.c.p->alignment_power;
+  section = h->u.c.p->section;
+
+  /* Increase the size of the section to align the common symbol.
+     The alignment must be a power of two.  */
+  alignment = bfd_octets_per_byte (output_bfd) << power_of_two;
+  BFD_ASSERT (alignment != 0 && (alignment & -alignment) == alignment);
+  section->size += alignment - 1;
+  section->size &= -alignment;
+
+  /* Adjust the section's overall alignment if necessary.  */
+  if (power_of_two > section->alignment_power)
+    section->alignment_power = power_of_two;
+
+  /* Change the symbol from common to defined.  */
+  h->type = bfd_link_hash_defined;
+  h->u.def.section = section;
+  h->u.def.value = section->size;
+
+  /* Increase the size of the section.  */
+  section->size += size;
+
+  /* Make sure the section is allocated in memory, and make sure that
+     it is no longer a common section.  */
+  section->flags |= SEC_ALLOC;
+  section->flags &= ~SEC_IS_COMMON;
+  return TRUE;
+}

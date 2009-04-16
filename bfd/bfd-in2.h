@@ -5458,7 +5458,8 @@ typedef struct bfd_target
   NAME##_bfd_merge_sections, \
   NAME##_bfd_is_group_section, \
   NAME##_bfd_discard_group, \
-  NAME##_section_already_linked \
+  NAME##_section_already_linked, \
+  NAME##_bfd_define_common_symbol
 
   int         (*_bfd_sizeof_headers) (bfd *, struct bfd_link_info *);
   bfd_byte *  (*_bfd_get_relocated_section_contents)
@@ -5505,6 +5506,10 @@ typedef struct bfd_target
      final link.  */
   void (*_section_already_linked) (bfd *, struct bfd_section *,
                                    struct bfd_link_info *);
+
+  /* Define a common symbol.  */
+  bfd_boolean (*_bfd_define_common_symbol) (bfd *, struct bfd_link_info *,
+                                            struct bfd_link_hash_entry *);
 
   /* Routines to handle dynamic symbols and relocs.  */
 #define BFD_JUMP_TABLE_DYNAMIC(NAME) \
@@ -5569,6 +5574,13 @@ void bfd_section_already_linked (bfd *abfd, asection *sec,
 
 #define bfd_section_already_linked(abfd, sec, info) \
        BFD_SEND (abfd, _section_already_linked, (abfd, sec, info))
+
+bfd_boolean bfd_generic_define_common_symbol
+   (bfd *output_bfd, struct bfd_link_info *info,
+    struct bfd_link_hash_entry *h);
+
+#define bfd_define_common_symbol(output_bfd, info, h) \
+       BFD_SEND (output_bfd, _bfd_define_common_symbol, (output_bfd, info, h))
 
 /* Extracted from simple.c.  */
 bfd_byte *bfd_simple_get_relocated_section_contents

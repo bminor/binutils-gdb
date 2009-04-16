@@ -5639,27 +5639,9 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
     return TRUE;
 
   section = h->u.c.p->section;
-
-  /* Increase the size of the section to align the common sym.  */
-  section->size += ((bfd_vma) 1 << (power_of_two + opb_shift)) - 1;
-  section->size &= (- (bfd_vma) 1 << (power_of_two + opb_shift));
-
-  /* Adjust the alignment if necessary.  */
-  if (power_of_two > section->alignment_power)
-    section->alignment_power = power_of_two;
-
-  /* Change the symbol from common to defined.  */
-  h->type = bfd_link_hash_defined;
-  h->u.def.section = section;
-  h->u.def.value = section->size;
-
-  /* Increase the size of the section.  */
-  section->size += size;
-
-  /* Make sure the section is allocated in memory, and make sure that
-     it is no longer a common section.  */
-  section->flags |= SEC_ALLOC;
-  section->flags &= ~SEC_IS_COMMON;
+  if (!bfd_define_common_symbol (link_info.output_bfd, &link_info, h))
+    einfo (_("%P%F: Could not define common symbol `%T': %E\n"),
+	   h->root.string);
 
   if (config.map_file != NULL)
     {

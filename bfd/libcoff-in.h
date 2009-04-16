@@ -589,6 +589,8 @@ extern bfd_boolean _bfd_xcoff_bfd_link_add_symbols
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_xcoff_bfd_final_link
   (bfd *, struct bfd_link_info *);
+extern bfd_boolean _bfd_xcoff_define_common_symbol
+  (bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *);
 extern bfd_boolean _bfd_ppc_xcoff_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    struct internal_reloc *, struct internal_syment *, asection **);

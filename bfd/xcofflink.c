@@ -2471,6 +2471,21 @@ _bfd_xcoff_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
     }
 }
 
+bfd_boolean
+_bfd_xcoff_define_common_symbol (bfd *output_bfd ATTRIBUTE_UNUSED,
+				 struct bfd_link_info *info ATTRIBUTE_UNUSED,
+				 struct bfd_link_hash_entry *harg)
+{
+  struct xcoff_link_hash_entry *h;
+
+  if (!bfd_generic_define_common_symbol (output_bfd, info, harg))
+    return FALSE;
+
+  h = (struct xcoff_link_hash_entry *) harg;
+  h->flags |= XCOFF_DEF_REGULAR;
+  return TRUE;
+}
+
 /* If symbol H has not been interpreted as a function descriptor,
    see whether it should be.  Set up its descriptor information if so.  */
 
@@ -3329,19 +3344,6 @@ xcoff_post_gc_symbol (struct xcoff_link_hash_entry *h, void * p)
   /* __rtinit, this symbol has special handling. */
   if (h->flags & XCOFF_RTINIT)
     return TRUE;
-
-  /* If this is a final link, and the symbol was defined as a common
-     symbol in a regular object file, and there was no definition in
-     any dynamic object, then the linker will have allocated space for
-     the symbol in a common section but the XCOFF_DEF_REGULAR flag
-     will not have been set.  */
-  if (h->root.type == bfd_link_hash_defined
-      && (h->flags & XCOFF_DEF_REGULAR) == 0
-      && (h->flags & XCOFF_REF_REGULAR) != 0
-      && (h->flags & XCOFF_DEF_DYNAMIC) == 0
-      && (bfd_is_abs_section (h->root.u.def.section)
-	  || (h->root.u.def.section->owner->flags & DYNAMIC) == 0))
-    h->flags |= XCOFF_DEF_REGULAR;
 
   /* We don't want to garbage collect symbols which are not defined in
      XCOFF files.  This is a convenient place to mark them.  */

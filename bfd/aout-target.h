@@ -493,6 +493,9 @@ MY_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 #define MY_section_already_linked \
   _bfd_generic_section_already_linked
 #endif
+#ifndef MY_bfd_define_common_symbol
+#define MY_bfd_define_common_symbol bfd_generic_define_common_symbol
+#endif
 #ifndef MY_bfd_reloc_type_lookup
 #define MY_bfd_reloc_type_lookup NAME (aout, reloc_type_lookup)
 #endif

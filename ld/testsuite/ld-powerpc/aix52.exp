@@ -128,6 +128,10 @@ set aix52tests {
      {{objdump -dj.data aix-export-1-full.dd}}
      "aix-export-1-full.so"}
 
+    {"Export test 2" "-shared -bexpall"
+     {} {aix-export-2.s}
+     {{nm -D aix-export-2.nd}} "aix-export-2.so"}
+
     {"Garbage collection test 1"
      "-shared -binitfini:init_function:fini_function -bE:aix-gc-1.ex"
      "" {aix-gc-1.s}

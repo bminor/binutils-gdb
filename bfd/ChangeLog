@@ -1,3 +1,47 @@
+2009-04-16  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* aout-adobe.c (aout_32_bfd_define_common_symbol): Define.
+	* aout-target.h (MY_bfd_define_common_symbol): Likewise.
+	* aout-tic30.c (MY_bfd_define_common_symbol): Likewise.
+	* binary.c (binary_bfd_define_common_symbol): Likewise.
+	* bout.c (b_out_bfd_define_common_symbol): Likewise.
+	* coff-alpha.c (_bfd_ecoff_bfd_define_common_symbol): Likewise.
+	* coff-mips.c (_bfd_ecoff_bfd_define_common_symbol): Likewise.
+	* coffcode.h (coff_bfd_define_common_symbol): Likewise.
+	* elfxx-target.h (bfd_elfNN_bfd_define_common_symbol): Likewise.
+	* i386msdos.c (msdos_bfd_define_common_symbol): Likewise.
+	* i386os9k.c (os9k_bfd_define_common_symbol): Likewise.
+	* ieee.c (ieee_bfd_define_common_symbol): Likewise.
+	* ihex.c (ihex_bfd_define_common_symbol): Likewise.
+	* libbfd-in.h (_bfd_nolink_bfd_define_common_symbol): Likewise.
+	* mach-o.c (bfd_mach_o_bfd_define_common_symbol): Likewise.
+	* mmo.c (mmo_bfd_define_common_symbol): Likewise.
+	* nlm-target.h (nlm_bfd_define_common_symbol): Likewise.
+	* oasys.c (oasys_bfd_define_common_symbol): Likewise.
+	* pef.c (bfd_pef_bfd_define_common_symbol): Likewise.
+	* ppcboot.c (ppcboot_bfd_define_common_symbol): Likewise.
+	* som.c (som_bfd_define_common_symbol): Likewise.
+	* srec.c (srec_bfd_define_common_symbol): Likewise.
+	* tekhex.c (tekhex_bfd_define_common_symbol): Likewise.
+	* versados.c (versados_bfd_define_common_symbol): Likewise.
+	* vms.c (vms_bfd_define_common_symbol): Likewise.
+	* xcoff-target.h (_bfd_xcoff_bfd_define_common_symbol): Likewise.
+	* xsym.c (bfd_sym_bfd_define_common_symbol): Likewise.
+	* coff-rs6000.c (rs6000coff_vec): Add _bfd_xcoff_define_common_symbol.
+	(pmac_xcoff_vec): Likewise.
+	* coff64-rs6000.c (rs6000coff64_vec): Likewise.
+	(aix5coff64_vec): Likewise.
+	* linker.c (bfd_generic_define_common_symbol): New function.
+	* targets.c (BFD_JUMP_TABLE_LINK): Add NAME##_bfd_define_common_symbol.
+	(_bfd_define_common_symbol): New field.
+	* libcoff-in.h (_bfd_xcoff_define_common_symbol): Declare.
+	* xcofflink.c (_bfd_xcoff_define_common_symbol): New function.
+	(xcoff_build_ldsyms): Don't set XCOFF_DEF_REGULAR for common
+	symbols here.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+	* libcoff.h: Likewise.
+
 2009-04-15  Anthony Green  <green@moxielogic.com>
 
 	* targets.c: Add moxie support.
