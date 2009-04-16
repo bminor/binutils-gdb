@@ -1,3 +1,9 @@
+2009-04-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-libs/lib-1.s: Use "==" instead of ".set".
+	* ld-libs/lib-2.s: Likewise.
+	* ld-scripts/defined.s: Likewise.
+
 2009-04-15  Christophe Lyon  <christophe.lyon@st.com>
 
 	* ld-arm/arm-elf.exp: Add 1 more test to check undef weak

@@ -1,2 +1,2 @@
 	.globl	G
-	.set	G,0x100
+	G == 0x100

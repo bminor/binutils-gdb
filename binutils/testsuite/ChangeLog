@@ -1,3 +1,8 @@
+2009-04-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/localize-hidden-1.s: Use "==" instead of ".set".
+	* binutils-all/localize-hidden-2.s: Likewise.
+
 2009-04-02  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* inutils-all/objcopy.exp (strip_executable):  Delete remote dest

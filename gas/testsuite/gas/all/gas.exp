@@ -59,7 +59,9 @@ case $target_triplet in {
 gas_test "eqv-ok.s" "" "" ".eqv support"
 gas_test_error "eqv-bad.s" "" ".eqv for symbol already set"
 
-gas_test "assign-ok.s" "" "" "== assignment support"
+if { ![istarget "bfin-*-*"] } then {
+    gas_test "assign-ok.s" "" "" "== assignment support"
+}
 gas_test_error "assign-bad.s" "" "== assignment for symbol already set"
 
 # .equ works differently on some targets.
@@ -305,7 +307,9 @@ if {  ([istarget "i*86-*-*pe*"] && ![istarget "i*86-*-openbsd*"]) \
   gas_test "fastcall.s" ""   "" "fastcall labels"
 }
 
-run_dump_test assign
+if { ![istarget "bfin-*-*"] } then {
+    run_dump_test assign
+}
 run_dump_test sleb128
 
 # .byte is 32 bits on tic4x, and .p2align isn't supported on tic54x

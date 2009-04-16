@@ -20,17 +20,17 @@
 	.protected	Gprotected
 	.protected	Wprotected
 
-	.set		Ldefault, 0x1100
-	.set		Lhidden, 0x1200
-	.set		Linternal, 0x1300
-	.set		Lprotected, 0x1400
+	Ldefault == 0x1100
+	Lhidden == 0x1200
+	Linternal == 0x1300
+	Lprotected == 0x1400
 
-	.set		Gdefault, 0x2100
-	.set		Ghidden, 0x2200
-	.set		Ginternal, 0x2300
-	.set		Gprotected, 0x2400
+	Gdefault == 0x2100
+	Ghidden == 0x2200
+	Ginternal == 0x2300
+	Gprotected == 0x2400
 
-	.set		Wdefault, 0x3100
-	.set		Whidden, 0x3200
-	.set		Winternal, 0x3300
-	.set		Wprotected, 0x3400
+	Wdefault == 0x3100
+	Whidden == 0x3200
+	Winternal == 0x3300
+	Wprotected == 0x3400
