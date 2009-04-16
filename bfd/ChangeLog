@@ -1,3 +1,15 @@
+2009-04-15  Anthony Green  <green@moxielogic.com>
+
+	* targets.c: Add moxie support.
+	* Makefile.am: Ditto.
+	* Makefile.in: Rebuilt.
+	* cpu-moxie.c, elf32-moxie.c: New files.
+	* archures.c: Add moxie support.
+	* configure.in: Add moxie support.
+	* configure: Rebuilt.
+	* config.bfd, archures.c: Add moxie support.
+	* bfd-in2.h: Rebuilt.
+
 2009-04-15  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Don't convert ARM

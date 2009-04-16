@@ -441,6 +441,7 @@ ALL_EMULATIONS = \
 	eelf32elmipvxworks.o \
 	eelf32fr30.o \
 	eelf32frv.o \
+	eelf32moxie.o \
 	eelf32i370.o \
 	eelf32ip2k.o \
 	eelf32iq2000.o \
@@ -1574,6 +1575,9 @@ eelf32frvfd.c: $(srcdir)/emulparams/elf32frvfd.sh \
   $(srcdir)/emulparams/elf32frv.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32frvfd "$(tdir_frv)"
+eelf32moxie.c: $(srcdir)/emulparams/elf32moxie.sh \
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32moxie "$(tdir_moxie)"
 eelf32mcore.c: $(srcdir)/emulparams/elf32mcore.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32mcore "$(tdir_mcore)"

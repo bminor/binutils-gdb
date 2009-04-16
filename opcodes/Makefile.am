@@ -98,6 +98,8 @@ CFILES = \
 	frv-dis.c \
 	frv-ibld.c \
 	frv-opc.c \
+	moxie-dis.c \
+	moxie-opc.c \
 	h8300-dis.c \
 	h8500-dis.c \
 	hppa-dis.c \
@@ -256,6 +258,8 @@ ALL_MACHINES = \
 	frv-dis.lo \
 	frv-ibld.lo \
 	frv-opc.lo \
+	moxie-dis.lo \
+	moxie-opc.lo \
 	h8300-dis.lo \
 	h8500-dis.lo \
 	hppa-dis.lo \
@@ -790,6 +794,11 @@ frv-opc.lo: frv-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h frv-desc.h $(INCDIR)/opcode/cgen-bitset.h \
   $(INCDIR)/opcode/cgen.h frv-opc.h $(INCDIR)/libiberty.h \
   $(INCDIR)/elf/frv.h $(INCDIR)/elf/reloc-macros.h
+moxie-dis.lo: moxie-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/opcode/moxie.h $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
+moxie-opc.lo: moxie-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/opcode/moxie.h
 h8300-dis.lo: h8300-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/h8300.h $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/symcat.h opintl.h $(INCDIR)/libiberty.h

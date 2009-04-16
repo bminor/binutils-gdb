@@ -944,7 +944,8 @@ handle_COMDAT (bfd * abfd,
 		   but there's some checking we can do to be
 		   sure.  */
 
-		if (! (isym.n_sclass == C_STAT
+		if (! ((isym.n_sclass == C_STAT
+			|| isym.n_sclass == C_EXT)
 		       && isym.n_type == T_NULL
 		       && isym.n_value == 0))
 		  abort ();
@@ -954,7 +955,7 @@ handle_COMDAT (bfd * abfd,
 		   names like .text$foo__Fv (in the case of a
 		   function).  See comment above for more.  */
 
-		if (strcmp (name, symname) != 0)
+		if (isym.n_sclass == C_STAT && strcmp (name, symname) != 0)
 		  _bfd_error_handler (_("%B: warning: COMDAT symbol '%s' does not match section name '%s'"),
 				      abfd, symname, name);
 

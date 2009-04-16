@@ -74,6 +74,7 @@ ALL_MACHINES = \
 	cpu-dlx.lo \
 	cpu-fr30.lo \
 	cpu-frv.lo \
+	cpu-moxie.lo \
 	cpu-h8300.lo \
 	cpu-h8500.lo \
 	cpu-hppa.lo \
@@ -141,6 +142,7 @@ ALL_MACHINES_CFILES = \
 	cpu-dlx.c \
 	cpu-fr30.c \
 	cpu-frv.c \
+	cpu-moxie.c \
 	cpu-h8300.c \
 	cpu-h8500.c \
 	cpu-hppa.c \
@@ -258,6 +260,7 @@ BFD32_BACKENDS = \
 	elf32-dlx.lo \
 	elf32-fr30.lo \
 	elf32-frv.lo \
+	elf32-moxie.lo \
 	elf32-gen.lo \
 	elf32-h8300.lo \
 	elf32-hppa.lo \
@@ -440,6 +443,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-dlx.c \
 	elf32-fr30.c \
 	elf32-frv.c \
+	elf32-moxie.c \
 	elf32-gen.c \
 	elf32-h8300.c \
 	elf32-hppa.c \
@@ -1119,6 +1123,7 @@ cpu-d30v.lo: cpu-d30v.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-dlx.lo: cpu-dlx.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-fr30.lo: cpu-fr30.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-frv.lo: cpu-frv.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
+cpu-moxie.lo: cpu-moxie.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-h8300.lo: cpu-h8300.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-h8500.lo: cpu-h8500.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-hppa.lo: cpu-hppa.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
@@ -1419,6 +1424,11 @@ elf32-fr30.lo: elf32-fr30.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
 elf32-frv.lo: elf32-frv.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/frv.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/elf/dwarf2.h \
+  elf32-target.h
+elf32-moxie.lo: elf32-moxie.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/moxie.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/elf/dwarf2.h \
   elf32-target.h
 elf32-gen.lo: elf32-gen.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \

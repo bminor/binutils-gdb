@@ -1,3 +1,12 @@
+2009-04-15  Anthony Green  <green@moxielogic.com>
+
+	* moxie-opc.c, moxie-dis.c: Created.
+	* Makefile.am: Build the moxie source files.
+	* configure.in: Add moxie support.
+	* Makefile.in, configure: Rebuilt.
+	* disassemble.c (disassembler): Add moxie support.
+	(ARCH_moxie): Define.
+
 2009-04-15  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-opc.tbl (protb, protw, protd, protq): Set opcode

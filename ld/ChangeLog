@@ -1,3 +1,11 @@
+2009-04-15  Anthony Green  <green@moxielogic.com>
+
+	* configure.tgt: Add moxie support.
+	* Makefile.am: Add moxie files.
+	* Makefile.in: Rebuilt.
+	* emulparams/elf32moxie.sh: New file.
+	* scripttempl/moxie.sc: New file.
+
 2009-04-15  Kazu Hirata  <kazu@codesourcery.com>
 
 	* ldlang.c: Do not include limits.h.

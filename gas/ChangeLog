@@ -1,3 +1,10 @@
+2008-04-15  Anthony Green  <green@moxielogic.com>
+
+	* config/tc-moxie.h: New file.
+	* config/tc-moxie.c: New file.
+	* configure: Add support for moxie.
+	* configure.tgt: Add support for moxie.
+
 2009-04-16  Jan Beulich  <jbeulich@novell.com>
 
 	* expr.c: Include limits.h if available, and #define CHAR_BITS
