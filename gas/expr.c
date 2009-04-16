@@ -31,6 +31,13 @@
 #include "safe-ctype.h"
 #include "obstack.h"
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
 static void floating_constant (expressionS * expressionP);
 static valueT generic_bignum_to_int32 (void);
 #ifdef BFD64
@@ -1778,6 +1785,14 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	    {
 	      as_warn (_("division by zero"));
 	      v = 1;
+	    }
+	  if ((valueT) v >= sizeof(valueT) * CHAR_BIT
+	      && (op_left == O_left_shift || op_left == O_right_shift))
+	    {
+	      as_warn_value_out_of_range (_("shift count"), v, 0,
+					  sizeof(valueT) * CHAR_BIT - 1,
+					  NULL, 0);
+	      resultP->X_add_number = v = 0;
 	    }
 	  switch (op_left)
 	    {

@@ -1,3 +1,10 @@
+2009-04-16  Jan Beulich  <jbeulich@novell.com>
+
+	* expr.c: Include limits.h if available, and #define CHAR_BITS
+	otherwise.
+	(expr): Check range of shift count when evaluating a constant
+	expression.
+
 2009-04-15  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (process_operands): Print operands in
