@@ -1,5 +1,10 @@
 2009-04-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* procfs.c (solib_mappings_callback, find_memory_regions_callback):
+	Revert the previous change.  Might not be correct, actually.
+
+2009-04-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (ada_adjust_exception_stop, ada_print_exception_stop)
 	(ada_get_current_task, ada_print_exception_breakpoint_nontask)
 	(ada_print_exception_breakpoint_task, ada_reset_thread_registers):
