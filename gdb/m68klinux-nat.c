@@ -95,39 +95,16 @@ int have_ptrace_getregs =
 
 /* Fetching registers directly from the U area, one at a time.  */
 
-/* FIXME: This duplicates code from `inptrace.c'.  The problem is that we
-   define FETCH_INFERIOR_REGISTERS since we want to use our own versions
-   of {fetch,store}_inferior_registers that use the GETREGS request.  This
-   means that the code in `infptrace.c' is #ifdef'd out.  But we need to
-   fall back on that code when GDB is running on top of a kernel that
-   doesn't support the GETREGS request.  */
-
-#ifndef PT_READ_U
-#define PT_READ_U PTRACE_PEEKUSR
-#endif
-#ifndef PT_WRITE_U
-#define PT_WRITE_U PTRACE_POKEUSR
-#endif
-
 /* Fetch one register.  */
 
 static void
 fetch_register (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  /* This isn't really an address.  But ptrace thinks of it as one.  */
-  CORE_ADDR regaddr;
-  char mess[128];		/* For messages */
+  long regaddr;
   int i;
   char buf[MAX_REGISTER_SIZE];
   int tid;
-
-  if (gdbarch_cannot_fetch_register (gdbarch, regno))
-    {
-      memset (buf, '\0', register_size (gdbarch, regno)); /* Supply zeroes */
-      regcache_raw_supply (regcache, regno, buf);
-      return;
-    }
 
   /* Overload thread id onto process id */
   tid = TIDGET (inferior_ptid);
@@ -135,19 +112,15 @@ fetch_register (struct regcache *regcache, int regno)
     tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
 
   regaddr = 4 * regmap[regno];
-  for (i = 0; i < register_size (gdbarch, regno);
-       i += sizeof (PTRACE_TYPE_RET))
+  for (i = 0; i < register_size (gdbarch, regno); i += sizeof (long))
     {
       errno = 0;
-      *(PTRACE_TYPE_RET *) &buf[i] = ptrace (PT_READ_U, tid,
-					      (PTRACE_TYPE_ARG3) regaddr, 0);
-      regaddr += sizeof (PTRACE_TYPE_RET);
+      *(long *) &buf[i] = ptrace (PTRACE_PEEKUSER, tid, regaddr, 0);
+      regaddr += sizeof (long);
       if (errno != 0)
-	{
-	  sprintf (mess, "reading register %s (#%d)", 
-		   gdbarch_register_name (gdbarch, regno), regno);
-	  perror_with_name (mess);
-	}
+	error (_("Couldn't read register %s (#%d): %s."), 
+	       gdbarch_register_name (gdbarch, regno),
+	       regno, safe_strerror (errno));
     }
   regcache_raw_supply (regcache, regno, buf);
 }
@@ -180,15 +153,10 @@ static void
 store_register (const struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  /* This isn't really an address.  But ptrace thinks of it as one.  */
-  CORE_ADDR regaddr;
-  char mess[128];		/* For messages */
+  long regaddr;
   int i;
   int tid;
   char buf[MAX_REGISTER_SIZE];
-
-  if (gdbarch_cannot_store_register (gdbarch, regno))
-    return;
 
   /* Overload thread id onto process id */
   tid = TIDGET (inferior_ptid);
@@ -201,19 +169,15 @@ store_register (const struct regcache *regcache, int regno)
   regcache_raw_collect (regcache, regno, buf);
 
   /* Store the local buffer into the inferior a chunk at the time. */
-  for (i = 0; i < register_size (gdbarch, regno);
-       i += sizeof (PTRACE_TYPE_RET))
+  for (i = 0; i < register_size (gdbarch, regno); i += sizeof (long))
     {
       errno = 0;
-      ptrace (PT_WRITE_U, tid, (PTRACE_TYPE_ARG3) regaddr,
-	      *(PTRACE_TYPE_RET *) (buf + i));
-      regaddr += sizeof (PTRACE_TYPE_RET);
+      ptrace (PTRACE_POKEUSER, tid, regaddr, *(long *) &buf[i]);
+      regaddr += sizeof (long);
       if (errno != 0)
-	{
-	  sprintf (mess, "writing register %s (#%d)", 
-		   gdbarch_register_name (gdbarch, regno), regno);
-	  perror_with_name (mess);
-	}
+	error (_("Couldn't write register %s (#%d): %s."),
+	       gdbarch_register_name (gdbarch, regno),
+	       regno, safe_strerror (errno));
     }
 }
 

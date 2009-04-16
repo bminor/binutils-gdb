@@ -1,3 +1,10 @@
+2009-04-16  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* m68klinux-nat.c: Remove obsolete comment.
+	(fetch_register, store_register): Don't call
+	gdbarch_cannot_fetch_register or gdbarch_cannot_store_register,
+	which are always nops here.
+
 2009-04-14  Tom Tromey  <tromey@redhat.com>
 
 	* c-lang.c (c_emit_char): Use INTERMEDIATE_ENCODING.
