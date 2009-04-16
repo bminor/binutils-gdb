@@ -126,8 +126,6 @@ static struct partial_symbol *ada_lookup_partial_symbol (struct partial_symtab
                                                          *, const char *, int,
                                                          domain_enum, int);
 
-static struct symtab *symtab_for_sym (struct symbol *);
-
 static struct value *resolve_subexp (struct expression **, int *, int,
                                      struct type *);
 
@@ -3281,7 +3279,7 @@ See set/show multiple-symbol."));
             (SYMBOL_CLASS (syms[i].sym) == LOC_CONST
              && SYMBOL_TYPE (syms[i].sym) != NULL
              && TYPE_CODE (SYMBOL_TYPE (syms[i].sym)) == TYPE_CODE_ENUM);
-          struct symtab *symtab = symtab_for_sym (syms[i].sym);
+          struct symtab *symtab = syms[i].sym->symtab;
 
           if (SYMBOL_LINE (syms[i].sym) != 0 && symtab != NULL)
             printf_unfiltered (_("[%d] %s at %s:%d\n"),
@@ -4197,63 +4195,6 @@ ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
           i += 1;
         }
     }
-  return NULL;
-}
-
-/* Find a symbol table containing symbol SYM or NULL if none.  */
-
-static struct symtab *
-symtab_for_sym (struct symbol *sym)
-{
-  struct symtab *s;
-  struct objfile *objfile;
-  struct block *b;
-  struct symbol *tmp_sym;
-  struct dict_iterator iter;
-  int j;
-
-  ALL_PRIMARY_SYMTABS (objfile, s)
-  {
-    switch (SYMBOL_CLASS (sym))
-      {
-      case LOC_CONST:
-      case LOC_STATIC:
-      case LOC_TYPEDEF:
-      case LOC_REGISTER:
-      case LOC_LABEL:
-      case LOC_BLOCK:
-      case LOC_CONST_BYTES:
-        b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-        ALL_BLOCK_SYMBOLS (b, iter, tmp_sym) if (sym == tmp_sym)
-          return s;
-        b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-        ALL_BLOCK_SYMBOLS (b, iter, tmp_sym) if (sym == tmp_sym)
-          return s;
-        break;
-      default:
-        break;
-      }
-    switch (SYMBOL_CLASS (sym))
-      {
-      case LOC_REGISTER:
-      case LOC_ARG:
-      case LOC_REF_ARG:
-      case LOC_REGPARM_ADDR:
-      case LOC_LOCAL:
-      case LOC_TYPEDEF:
-      case LOC_COMPUTED:
-        for (j = FIRST_LOCAL_BLOCK;
-             j < BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (s)); j += 1)
-          {
-            b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), j);
-            ALL_BLOCK_SYMBOLS (b, iter, tmp_sym) if (sym == tmp_sym)
-              return s;
-          }
-        break;
-      default:
-        break;
-      }
-  }
   return NULL;
 }
 
