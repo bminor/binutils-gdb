@@ -5492,12 +5492,6 @@ undefined) in @file{nm-@var{system}.h}.
 An x86-based machine can define this to use the generic x86 watchpoint
 support; see @ref{Algorithms, I386_USE_GENERIC_WATCHPOINTS}.
 
-@item PROC_NAME_FMT
-@findex PROC_NAME_FMT
-Defines the format for the name of a @file{/proc} device.  Should be
-defined in @file{nm.h} @emph{only} in order to override the default
-definition in @file{procfs.c}.
-
 @item SOLIB_ADD (@var{filename}, @var{from_tty}, @var{targ}, @var{readsyms})
 @findex SOLIB_ADD
 Define this to expand into an expression that will cause the symbols in

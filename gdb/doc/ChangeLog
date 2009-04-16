@@ -1,3 +1,8 @@
+2009-04-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbint.texinfo (Native Debugging): Remove entry for PROC_NAME_FMT.
+	This macro is no longer used.
+
 2009-04-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Character Sets): Document default character set.
