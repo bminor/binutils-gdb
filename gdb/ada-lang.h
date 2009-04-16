@@ -463,18 +463,6 @@ extern int valid_task_id (int);
 
 extern int ada_get_task_number (ptid_t);
 
-extern void ada_adjust_exception_stop (bpstat bs);
-
-extern void ada_print_exception_stop (bpstat bs);
-
-extern int ada_get_current_task (ptid_t);
-
-extern int ada_print_exception_breakpoint_nontask (struct breakpoint *);
-
-extern void ada_print_exception_breakpoint_task (struct breakpoint *);
-
-extern void ada_reset_thread_registers (void);
-
 extern int ada_build_task_list (int warn_if_null);
 
 extern int ada_exception_catchpoint_p (struct breakpoint *b);
