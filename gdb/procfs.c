@@ -5473,7 +5473,7 @@ int solib_mappings_callback (struct prmap *map,
      no file, so the ioctl may return failure, but that's
      not a problem.  */
 #endif
-  return (*func) (fd, (CORE_ADDR) map->pr_vaddr);
+  return (*func) (fd, (CORE_ADDR) (uintptr_t) map->pr_vaddr);
 }
 
 /*
@@ -5524,7 +5524,7 @@ find_memory_regions_callback (struct prmap *map,
 					   void *),
 			      void *data)
 {
-  return (*func) ((CORE_ADDR) map->pr_vaddr,
+  return (*func) ((CORE_ADDR) (uintptr_t) map->pr_vaddr,
 		  map->pr_size,
 		  (map->pr_mflags & MA_READ) != 0,
 		  (map->pr_mflags & MA_WRITE) != 0,

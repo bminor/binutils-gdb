@@ -1,5 +1,11 @@
 2009-04-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* procfs.c (solib_mappings_callback, find_memory_regions_callback):
+	Fix a compilation warning on mips-irix due to casting from
+	a pointer of different size.
+
+2009-04-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (symtab_for_sym): Delete.
 	(user_select_syms): Use sym->symtab instead of calling symtab_for_sym.
 
