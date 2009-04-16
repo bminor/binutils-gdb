@@ -1139,7 +1139,7 @@ remote_query_attached (int pid)
   getpkt (&rs->buf, &rs->buf_size, 0);
 
   switch (packet_ok (rs->buf,
-		     &remote_protocol_packets[PACKET_qAttached]) == PACKET_OK)
+		     &remote_protocol_packets[PACKET_qAttached]))
     {
     case PACKET_OK:
       if (strcmp (rs->buf, "1") == 0)

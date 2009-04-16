@@ -1,3 +1,8 @@
+2009-04-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_query_attached): Fix pasto in packet_ok result
+	checking.
+
 2009-04-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* procfs.c (solib_mappings_callback, find_memory_regions_callback):
