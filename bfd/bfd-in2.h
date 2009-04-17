@@ -1968,7 +1968,7 @@ enum bfd_architecture
 #define bfd_mach_frvtomcat     499     /* fr500 prototype */
 #define bfd_mach_fr500         500
 #define bfd_mach_fr550         550
-  bfd_arch_moxie,     /* The moxie.  */
+  bfd_arch_moxie,       /* The moxie processor */
 #define bfd_mach_moxie         1
   bfd_arch_mcore,
   bfd_arch_mep,
