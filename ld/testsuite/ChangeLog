@@ -1,3 +1,10 @@
+2009-04-17  Christophe Lyon  <christophe.lyon@st.com>
+
+	* ld-arm/arm-elf.exp: Add new test farcall-mixed-lib.
+	* ld-arm/farcall-mixed-lib.d: Update expected output.
+	* ld-arm/farcall-mixed-lib1.s: New file.
+	* ld-arm/farcall-mixed-lib2.s: New file.
+
 2009-04-16  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* ld-powerpc/aix-export-2.s, ld-powerpc/aix-export-2.nd: New test.

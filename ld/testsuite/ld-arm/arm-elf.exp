@@ -353,6 +353,12 @@ set armeabitests {
      {{objdump -fdw farcall-mixed-app-v5.d} {objdump -Rw farcall-mixed-app.r}
       {readelf -Ds farcall-mixed-app.sym}}
      "farcall-mixed-app-v5"}
+
+    {"Mixed ARM/Thumb shared library with long branches" "-shared -T arm-lib.ld" ""
+     {farcall-mixed-lib1.s farcall-mixed-lib2.s}
+     {{objdump -fdw farcall-mixed-lib.d}}
+     "farcall-mixed-lib.so"}
+
 }
 
 run_ld_link_tests $armeabitests

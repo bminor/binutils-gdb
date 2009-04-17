@@ -1,3 +1,9 @@
+2009-04-17  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (elf32_arm_size_stubs): Handle long branches through
+	PLT entries to an undefined symbol when generating a shared
+	library.
+
 2009-04-17  Nick Clifton  <nickc@redhat.com>
 
 	PR 9909
