@@ -3040,7 +3040,7 @@ set_pe_subsystem (const char *s)
       { "efi-app", 1, IMAGE_SUBSYSTEM_EFI_APPLICATION },
       { "efi-bsd", 1, IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER },
       { "efi-rtd", 1, IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER },
-      { "efi-rom", 1, IMAGE_SUBSYSTEM_EFI_ROM },
+      { "sal-rtd", 1, IMAGE_SUBSYSTEM_SAL_RUNTIME_DRIVER },
       { "xbox", 0, IMAGE_SUBSYSTEM_XBOX }
     };
   short value;

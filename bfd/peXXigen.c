@@ -2198,6 +2198,7 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
     case IMAGE_SUBSYSTEM_WINDOWS_CE_GUI:
       subsystem_name = "Wince CUI";
       break;
+    // These are from UEFI Platform Initialization Specification 1.1.
     case IMAGE_SUBSYSTEM_EFI_APPLICATION:
       subsystem_name = "EFI application";
       break;
@@ -2207,10 +2208,10 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
     case IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER:
       subsystem_name = "EFI runtime driver";
       break;
-    // These are from revision 8.0 of the MS PE/COFF spec
-    case IMAGE_SUBSYSTEM_EFI_ROM:
-      subsystem_name = "EFI ROM";
+    case IMAGE_SUBSYSTEM_SAL_RUNTIME_DRIVER:
+      subsystem_name = "SAL runtime driver";
       break;
+    // This is from revision 8.0 of the MS PE/COFF spec
     case IMAGE_SUBSYSTEM_XBOX:
       subsystem_name = "XBOX";
       break;

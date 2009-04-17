@@ -1564,7 +1564,7 @@ to be used as stack for this program.
 Specifies the subsystem under which your program will execute.  The
 legal values for @var{which} are @code{native}, @code{windows},
 @code{console}, @code{posix}, @code{efi-app}, @code{efi-bsd},
-@code{efi-rtd}, @code{efi-rom}, and @code{xbox}.  You may optionally set
+@code{efi-rtd}, @code{sal-rtd}, and @code{xbox}.  You may optionally set
 the subsystem version also.  Numeric values are also accepted for
 @var{which}.
 [This option is specific to PE targets.]

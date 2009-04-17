@@ -1,5 +1,10 @@
 2009-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* peXXigen.c (_bfd_XX_print_private_bfd_data_common): Replace
+	IMAGE_SUBSYSTEM_EFI_ROM with IMAGE_SUBSYSTEM_SAL_RUNTIME_DRIVER.
+
+2009-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/10074
 	* coffcode.h (bfd_pei_p): New.
 

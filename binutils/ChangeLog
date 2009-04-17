@@ -1,5 +1,10 @@
 2009-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* objcopy.c (set_pe_subsystem): Replace efi-rom with sal-rtd.
+	* doc/binutils.texi: Likewise.
+
+2009-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/10074
 	* objcopy.c: Include coff/i386.h and coff/pe.h.
 	(pe_file_alignment): New.
