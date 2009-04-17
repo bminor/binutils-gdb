@@ -1,3 +1,8 @@
+2009-04-17  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* Makefile.in: Add dummy install-pdf, html, and
+	install-html targets.
+
 2009-01-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/sim-if.c: Include errno.h.

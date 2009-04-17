@@ -1,3 +1,11 @@
+2009-04-17  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* configure.ac: AC_SUBST datarootdir, docdir, htmldir, pdfdir.
+	* configure: Regenerate.
+	* Makefile.in: Set datarootdir, docdir, htmldir, and pdfdir from
+	configure substitutions.
+	(FLAGS_TO_PASS): Add datarootdir, docdir, and htmldir.
+
 2009-04-17  Pierre Muller  <muller.u-strasbg.fr>
 
 	ARI fix: Do not use %p, replace by call to host_address_to_string

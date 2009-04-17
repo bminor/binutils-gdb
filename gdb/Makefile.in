@@ -40,8 +40,10 @@ man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
 infodir = @infodir@
-pdfdir = $(prefix)/share/doc/gdb
-htmldir = $(prefix)/html
+datarootdir = @datarootdir@
+docdir = @docdir@
+htmldir = @htmldir@
+pdfdir = @pdfdir@
 includedir = @includedir@
 
 # This can be referenced by `LIBINTL' as computed by
@@ -530,6 +532,9 @@ FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
 	"infodir=$(infodir)" \
+	"datarootdir=$(datarootdir)" \
+	"docdir=$(docdir)" \
+	"htmldir=$(htmldir)" \
 	"pdfdir=$(pdfdir)" \
 	"libdir=$(libdir)" \
 	"mandir=$(mandir)" \

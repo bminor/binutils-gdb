@@ -1955,6 +1955,12 @@ dnl  At the moment, we just assume it's UTF-8.
 AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
           [Define to be a string naming the default host character set.])
 
+dnl Required by html, pdf, install-pdf and install-html
+AC_SUBST(datarootdir)
+AC_SUBST(docdir)
+AC_SUBST(htmldir)
+AC_SUBST(pdfdir)
+
 AC_OUTPUT(Makefile .gdbinit:gdbinit.in gnulib/Makefile,
 [
 dnl Autoconf doesn't provide a mechanism for modifying definitions 

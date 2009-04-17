@@ -24,8 +24,8 @@ VPATH = @srcdir@
 prefix = @prefix@
 
 infodir = @infodir@
-pdfdir = $(prefix)/share/doc/gdb
-htmldir = $(prefix)/html
+pdfdir = @pdfdir@
+htmldir = @htmldir@
 
 SHELL = @SHELL@
 

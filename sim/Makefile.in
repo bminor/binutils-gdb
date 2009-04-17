@@ -187,6 +187,9 @@ info:
 install-info:
 dvi:
 pdf:
+install-pdf:
+html:
+install-html:
 
 ### 
 ### 

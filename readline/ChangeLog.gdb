@@ -1,3 +1,8 @@
+2009-04-17  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* Makefile.in: Add html target.  Add dummy install-html and
+	install-pdf targets.
+
 2008-08-10  Pedro Alves  <pedro@codesourcery.com>
 
 	Build fixes for DJGPP.
