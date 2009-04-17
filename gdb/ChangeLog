@@ -1,3 +1,8 @@
+2009-04-17  Eli Zaretskii  <eliz@gnu.org>
+
+	* go32-nat.c (go32_sysinfo): Update list of Windows versions of
+	the NT family.
+
 2009-04-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_query_attached): Fix pasto in packet_ok result

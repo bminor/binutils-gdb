@@ -1216,7 +1216,7 @@ go32_sysinfo (char *arg, int from_tty)
       printf_filtered ("%s)\n", windows_flavor);
     }
   else if (true_dos_version == 0x532 && advertized_dos_version == 0x500)
-    printf_filtered ("Windows Version................Windows NT or Windows 2000\n");
+    printf_filtered ("Windows Version................Windows NT family (W2K/XP/W2K3/Vista/W2K8)\n");
   puts_filtered ("\n");
   if (dpmi_vendor_available == 0)
     {
