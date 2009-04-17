@@ -1,7 +1,9 @@
-/* BFD back-end for Intel IA-32 EFI Boot Service driver files.
-   Copyright 1999, 2000, 2001, 2002, 2007, 2008, 2009 Free Software Foundation, Inc.
-   Contributed by Peter Jones <pjones@redhat.com>
-   Based on efi-app-ia32.c by David Mosberger <davidm@hpl.hp.com>
+/* BFD back-end for HP/Intel IA-64 PE IMAGE COFF files.
+   Copyright 1999, 2000, 2001, 2002, 2007, 2009 Free Software Foundation, Inc.
+   Contributed by David Mosberger <davidm@hpl.hp.com>
+
+   This implementation only supports objcopy to ouput IA-64 PE IMAGE COFF
+   files.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -23,15 +25,16 @@
 #include "sysdep.h"
 #include "bfd.h"
 
-#define TARGET_SYM bfd_efi_bsdrv_ia32_vec
-#define TARGET_NAME "efi-bsdrv-ia32"
+#define TARGET_SYM bfd_pei_ia64_vec
+#define TARGET_NAME "pei-ia64"
 #define COFF_IMAGE_WITH_PE
 #define COFF_WITH_PE
+#define COFF_WITH_pep
 #define PCRELOFFSET TRUE
 #define TARGET_UNDERSCORE '_'
 /* Long section names not allowed in executable images, only object files.  */
 #define COFF_LONG_SECTION_NAMES 0
-#define PEI_TARGET_SUBSYSTEM	IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER
+#define PEI_TARGET_SUBSYSTEM		IMAGE_SUBSYSTEM_EFI_APPLICATION
 #define PEI_FORCE_MINIMUM_ALIGNMENT
 
-#include "coff-i386.c"
+#include "coff-ia64.c"

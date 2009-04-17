@@ -1,3 +1,39 @@
+2009-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/10074
+	* objcopy.c: Include coff/i386.h and coff/pe.h.
+	(pe_file_alignment): New.
+	(pe_heap_commit): Likewise.
+	(pe_heap_reserve): Likewise.
+	(pe_image_base): Likewise.
+	(pe_section_alignment): Likewise.
+	(pe_stack_commit): Likewise.
+	(pe_stack_reserve): Likewise.
+	(pe_subsystem): Likewise.
+	(pe_major_subsystem_version): Likewise.
+	(pe_minor_subsystem_version): Likewise.
+	(set_pe_subsystem): Likewise.
+	(convert_efi_target): Likewise.
+	(command_line_switch): Add OPTION_FILE_ALIGNMENT,
+	OPTION_HEAP, OPTION_IMAGE_BASE, OPTION_SECTION_ALIGNMENT,
+	OPTION_STACK and OPTION_SUBSYSTEM.
+	(copy_options): Likewise.
+	(copy_usage): Add --file-alignment, --heap, --image-base,
+	--section-alignment, --stack and --subsystem.
+	(copy_object): Set up PE parameters.
+	(copy_main): Process Add OPTION_FILE_ALIGNMENT,
+	OPTION_HEAP, OPTION_IMAGE_BASE, OPTION_SECTION_ALIGNMENT,
+	OPTION_STACK and OPTION_SUBSYSTEM.   Convert EFI target to
+	PEI target.
+
+	* NEWS: Mention --file-alignment, --heap, --image-base,
+	--section-alignment, --stack and --subsystem command line
+	options for objcopy.
+
+	* doc/binutils.texi: Document --file-alignment, --heap,
+	--image-base, --section-alignment, --stack and --subsystem
+	command line options for objcopy.
+
 2009-04-15  Anthony Green  <green@moxielogic.com>
 
 	* MAINTAINERS: Add myself and Moxie port maintainer.

@@ -879,7 +879,7 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
      sometimes).  */
   if ((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0)
     {
-      if (bfd_pe_executable_p (abfd))
+      if (bfd_pei_p (abfd))
 	{
 	  ps = scnhdr_int->s_size;
 	  ss = 0;
@@ -892,7 +892,7 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
     }
   else
     {
-      if (bfd_pe_executable_p (abfd))
+      if (bfd_pei_p (abfd))
 	ps = scnhdr_int->s_paddr;
       else
 	ps = 0;

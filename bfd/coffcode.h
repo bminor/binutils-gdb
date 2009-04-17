@@ -1560,6 +1560,10 @@ Special entry points for gdb to swap in coff symbol table parts:
 .#define bfd_coff_print_pdata(a,p) \
 .  ((coff_backend_info (a)->_bfd_coff_print_pdata) (a, p))
 .
+.{* Macro: Returns true if the bfd is a PE executable as opposed to a
+.   PE object file.  *}
+.#define bfd_pei_p(abfd) \
+.  (CONST_STRNEQ ((abfd)->xvec->name, "pei-"))
 */
 
 /* See whether the magic number matches.  */

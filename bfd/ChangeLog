@@ -1,3 +1,81 @@
+2009-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/10074
+	* coffcode.h (bfd_pei_p): New.
+
+	* config.bfd: Remove bfd_efi_bsdrv_ia32_vec,
+	bfd_efi_rtdrv_ia32_vec, bfd_efi_bsdrv_x86_64_vec,
+	bfd_efi_rtdrv_x86_64_vec, bfd_efi_bsdrv_ia64_vec and
+	bfd_efi_rtdrv_ia64_vec.  Replace bfd_efi_app_ia32_vec,
+	bfd_efi_app_x86_64_vec and bfd_efi_app_ia64_vec with
+	i386pei_vec, x86_64pei_vec and bfd_pei_ia64_vec, respectively.
+
+	* configure.in: Remove bfd_efi_bsdrv_ia32_vec,
+	bfd_efi_rtdrv_ia32_vec, bfd_efi_bsdrv_x86_64_vec,
+	bfd_efi_rtdrv_x86_64_vec,
+	bfd_efi_bsdrv_ia64_vec and bfd_efi_rtdrv_ia64_vec.  Replace
+	bfd_efi_ia64_vec with bfd_pei_ia64_vec.
+	* targets.c: Likewise.
+
+	* configure: Regenerated.
+	* libcoff.h: Likewise.
+	* Makefile.in: Likewise.
+
+	* efi-app-ia32.c: Removed.
+	* efi-app-x86_64.c: Likewise.
+	* efi-bsdrv-ia32.c: Likewise.
+	* efi-bsdrv-ia64.c: Likewise.
+	* efi-bsdrv-x86_64.c: Likewise.
+	* efi-rtdrv-ia32.c: Likewise.
+	* efi-rtdrv-ia64.c: Likewise.
+	* efi-rtdrv-x86_64.c: Likewise.
+	* efi-rtdrv-ia32.c: Likewise.
+
+	* efi-app-ia64.c: Moved to ...
+	* pei-ia64.c: This.
+	(TARGET_SYM): Set to bfd_pei_ia64_vec.
+	(TARGET_NAME): Set to pei-ia64.
+
+	* libpei.h (bfd_target_pei_p): Removed.
+	(bfd_target_pei_arch): Likewise.
+	(bfd_target_efi_app_p): Likewise.
+	(bfd_target_efi_app_arch): Likewise.
+	(bfd_target_efi_bsdrv_p): Likewise.
+	(bfd_target_efi_bsdrv_arch): Likewise.
+	(bfd_target_efi_rtdrv_p): Likewise.
+	(bfd_target_efi_rtdrv_arch): Likewise.
+	(bfd_pe_executable_p): Likewise.
+
+	* Makefile.am (BFD32_BACKENDS): Remove efi-app-ia32.lo,
+	efi-bsdrv-ia32.lo and efi-rtdrv-ia32.lo.
+	(BFD32_BACKENDS_CFILES): Remove efi-app-ia32.c, efi-bsdrv-ia32.c
+	and efi-rtdrv-ia32.c.
+	(BFD64_BACKENDS): Remove efi-app-ia64.lo, efi-bsdrv-ia64.lo,
+	efi-rtdrv-ia64.lo, efi-app-x86_64.lo, efi-bsdrv-x86_64.lo and
+	efi-rtdrv-x86_64.lo. Add pei-ia64.lo.
+	(BFD64_BACKENDS_CFILES): Remove efi-app-ia64.c, efi-bsdrv-ia64.c,
+	efi-rtdrv-ia64.c, efi-app-x86_64.c, efi-bsdrv-x86_64.c and
+	efi-rtdrv-x86_64.c. Add pei-ia64.c.
+	(efi-app-ia64.lo): Removed.
+	(efi-bsdrv-ia32.lo): Likewise.
+	(efi-rtdrv-ia32.lo): Likewise.
+	(efi-app-ia64.lo): Likewise.
+	(efi-bsdrv-ia64.lo): Likewise.
+	(efi-rtdrv-ia64.lo): Likewise.
+	(efi-app-x86_64.lo): Likewise.
+	(efi-bsdrv-x86_64.lo): Likewise.
+	(efi-rtdrv-x86_64.lo): Likewise.
+	(pei-ia64.lo): New.
+
+	* peicode.h (coff_swap_scnhdr_in): Replace bfd_pe_executable_p
+	with bfd_pei_p.
+	(arch_type): Removed.
+	(pe_arch): Likewise.
+	(pe_bfd_object_p): Just return coff_object_p.
+
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Replace
+	bfd_pe_executable_p with bfd_pei_p.
+
 2009-04-17  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (elf32_arm_size_stubs): Handle long branches through

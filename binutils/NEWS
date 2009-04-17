@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add --file-alignment, --heap, --image-base, --section-alignment,
+  --stack and --subsystem command line options to objcopy, which will
+  set PE optional header.
+
 * Option --dwarf/-W of objdump is now as flexible as readelf --debug-dump/-w.
 
 * --as-needed now links in a dynamic library if it satisfies undefined
