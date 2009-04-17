@@ -1,3 +1,8 @@
+2009-04-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 9909
+	* coffcode.h (handle_COMDAT): Allow for external COMDAT symbols.
+
 2009-04-16  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* aout-adobe.c (aout_32_bfd_define_common_symbol): Define.
