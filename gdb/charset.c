@@ -817,6 +817,10 @@ _initialize_charset (void)
 #ifndef PHONY_ICONV
 #ifdef HAVE_LANGINFO_CODESET
   auto_host_charset_name = nl_langinfo (CODESET);
+  /* Solaris will return `646' here -- but the Solaris iconv then
+     does not accept this.  */
+  if (!strcmp (auto_host_charset_name, "646"))
+    auto_host_charset_name = "ASCII";
   target_charset_name = auto_host_charset_name;
 
   set_be_le_names ();
