@@ -740,8 +740,8 @@ handle_load_dll (void *dummy)
   solib_end->next = windows_make_so (dll_name, event->lpBaseOfDll);
   solib_end = solib_end->next;
 
-  DEBUG_EVENTS (("gdb: Loading dll \"%s\" at %p.\n", solib_end->so_name,
-		 solib_end->lm_info->load_addr));
+  DEBUG_EVENTS (("gdb: Loading dll \"%s\" at %s.\n", solib_end->so_name,
+		 host_address_to_string (solib_end->lm_info->load_addr)));
 
   return 1;
 }
@@ -774,7 +774,8 @@ handle_unload_dll (void *dummy)
 	return 1;
       }
 
-  error (_("Error: dll starting at %p not found."), lpBaseOfDll);
+  error (_("Error: dll starting at %s not found."),
+	   host_address_to_string (lpBaseOfDll));
 
   return 0;
 }
@@ -986,8 +987,9 @@ info_w32_command (char *args, int from_tty)
 
 
 #define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
-  printf_unfiltered ("gdb: Target exception %s at %p\n", x, \
-		     current_event.u.Exception.ExceptionRecord.ExceptionAddress)
+  printf_unfiltered ("gdb: Target exception %s at %s\n", x, \
+    host_address_to_string (\
+      current_event.u.Exception.ExceptionRecord.ExceptionAddress))
 
 static int
 handle_exception (struct target_waitstatus *ourstatus)
@@ -1098,9 +1100,10 @@ handle_exception (struct target_waitstatus *ourstatus)
       /* Treat unhandled first chance exceptions specially. */
       if (current_event.u.Exception.dwFirstChance)
 	return -1;
-      printf_unfiltered ("gdb: unknown target exception 0x%08lx at %p\n",
-		    current_event.u.Exception.ExceptionRecord.ExceptionCode,
-		    current_event.u.Exception.ExceptionRecord.ExceptionAddress);
+      printf_unfiltered ("gdb: unknown target exception 0x%08lx at %s\n",
+	current_event.u.Exception.ExceptionRecord.ExceptionCode,
+	host_address_to_string (
+	  current_event.u.Exception.ExceptionRecord.ExceptionAddress));
       ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
       break;
     }

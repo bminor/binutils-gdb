@@ -1,3 +1,16 @@
+2009-04-17  Pierre Muller  <muller.u-strasbg.fr>
+
+	ARI fix: Do not use %p, replace by call to host_address_to_string
+	for host pointers.
+	* darwin-nat.c (darwin_xfer_partial): Apply change.
+	* gnu-nat.c (inf_continue, gnu_xfer_memory): Ditto.
+	* gnu-nat.h (proc_debug): Ditto.
+	* symmisc.c (maintenance_info_symtabs): Ditto.
+	(maintenance_info_psymtabs): Ditto.
+	* windows-nat.c (handle_load_dll): Ditto.
+	(handle_unload_dll, info_w32_command, handle_exception): Ditto.
+	* xtensa-tdep.c (xtensa_unwind_pc): Ditto.
+
 2009-04-17  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.tgt (i[34567]86-*-linux*): Use 64-bit configuration if

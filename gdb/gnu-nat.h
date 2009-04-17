@@ -88,8 +88,9 @@ extern char *proc_string (struct proc *proc);
 
 #define proc_debug(_proc, msg, args...) \
   do { struct proc *__proc = (_proc); \
-       debug ("{proc %d/%d %p}: " msg, \
-	      __proc_pid (__proc), __proc->tid, __proc , ##args); } while (0)
+       debug ("{proc %d/%d %s}: " msg, \
+	      __proc_pid (__proc), __proc->tid,
+	      host_address_to_string (__proc) , ##args); } while (0)
 
 extern int gnu_debug_flag;
 

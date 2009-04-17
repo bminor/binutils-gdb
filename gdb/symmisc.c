@@ -948,22 +948,24 @@ maintenance_info_symtabs (char *regexp, int from_tty)
 		{
 		  printf_filtered ("{ objfile %s ", objfile->name);
 		  wrap_here ("  ");
-		  printf_filtered ("((struct objfile *) %p)\n", objfile);
+		  printf_filtered ("((struct objfile *) %s)\n", 
+				   host_address_to_string (objfile));
 		  printed_objfile_start = 1;
 		}
 
 	      printf_filtered ("	{ symtab %s ", symtab->filename);
 	      wrap_here ("    ");
-	      printf_filtered ("((struct symtab *) %p)\n", symtab);
+	      printf_filtered ("((struct symtab *) %s)\n", 
+			       host_address_to_string (symtab));
 	      printf_filtered ("	  dirname %s\n",
 			       symtab->dirname ? symtab->dirname : "(null)");
 	      printf_filtered ("	  fullname %s\n",
 			       symtab->fullname ? symtab->fullname : "(null)");
-	      printf_filtered ("	  blockvector ((struct blockvector *) %p)%s\n",
-			       symtab->blockvector,
+	      printf_filtered ("	  blockvector ((struct blockvector *) %s)%s\n",
+			       host_address_to_string (symtab->blockvector),
 			       symtab->primary ? " (primary)" : "");
-	      printf_filtered ("	  linetable ((struct linetable *) %p)\n",
-			       symtab->linetable);
+	      printf_filtered ("	  linetable ((struct linetable *) %s)\n",
+			       host_address_to_string (symtab->linetable));
 	      printf_filtered ("	  debugformat %s\n", symtab->debugformat);
 	      printf_filtered ("	}\n");
 	    }
@@ -1003,13 +1005,16 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
 		{
 		  printf_filtered ("{ objfile %s ", objfile->name);
 		  wrap_here ("  ");
-		  printf_filtered ("((struct objfile *) %p)\n", objfile);
+		  printf_filtered ("((struct objfile *) %s)\n", 
+				   host_address_to_string (objfile));
 		  printed_objfile_start = 1;
 		}
 
 	      printf_filtered ("  { psymtab %s ", psymtab->filename);
 	      wrap_here ("    ");
-	      printf_filtered ("((struct partial_symtab *) %p)\n", psymtab);
+	      printf_filtered ("((struct partial_symtab *) %s)\n", 
+			       host_address_to_string (psymtab));
+
 	      printf_filtered ("    readin %s\n",
 			       psymtab->readin ? "yes" : "no");
 	      printf_filtered ("    fullname %s\n",
@@ -1051,8 +1056,9 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
 
 		      /* Note the string concatenation there --- no comma.  */
 		      printf_filtered ("      psymtab %s "
-				       "((struct partial_symtab *) %p)\n",
-				       dep->filename, dep);
+				       "((struct partial_symtab *) %s)\n",
+				       dep->filename, 
+				       host_address_to_string (dep));
 		    }
 		  printf_filtered ("    }\n");
 		}
