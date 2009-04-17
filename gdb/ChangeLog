@@ -1,3 +1,9 @@
+2009-04-17  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.tgt (i[34567]86-*-linux*): Use 64-bit configuration if
+	--enable-64-bit-bfd.
+	(sparc-*-linux*): Likewise.
+
 2009-04-17  Eli Zaretskii  <eliz@gnu.org>
 
 	* go32-nat.c (go32_sysinfo): Update list of Windows versions of
