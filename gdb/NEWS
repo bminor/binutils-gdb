@@ -49,6 +49,10 @@ QStartNoAckMode
   operation over reliable transport links.  Use of this packet is
   controlled by the `set remote noack-packet' command.
 
+vKill
+  Kill the process with the specified process ID.  Use this in preference
+  to `k' when multiprocess protocol extensions are supported.
+
 qXfer:osdata:read
   Obtains additional operating system information
 
@@ -145,7 +149,7 @@ GDB will now correctly handle all of:
 * Support for user-defined prefixed commands.  The "define" command can
 add new commands to existing prefixes, e.g. "target".
 
-* New commands
+* New commands (for set/show, see "New options" below)
 
 find [/size-char] [/max-count] start-address, end-address|+search-space-size,
     val1 [, val2, ...]
@@ -158,13 +162,70 @@ maint show python print-stack
 python [CODE]
   Invoke CODE by passing it to the Python interpreter.
 
+macro define
+macro list
+macro undef
+  These allow macros to be defined, undefined, and listed
+  interactively.
+
+info os processes
+  Show operating system information about processes.
+
+* New options
+
+set sh calling-convention
+show sh calling-convention
+  Control the calling convention used when calling SH target functions.
+
 set print symbol-loading
 show print symbol-loading
   Control printing of symbol loading messages.
 
 set debug timestamp
 show debug timestamp
-  Display timestamps with GDB debugging output.
+  Control display of timestamps with GDB debugging output.
+
+set disassemble-next-line
+show disassemble-next-line
+  Control display of disassembled source lines or instructions when
+  the debuggee stops.
+
+set remote noack-packet
+show remote noack-packet
+  Set/show the use of remote protocol QStartNoAckMode packet.  See above
+  under "New remote packets."
+
+set remote query-attached-packet
+show remote query-attached-packet
+  Control use of remote protocol `qAttached' (query-attached) packet.
+
+set remote read-siginfo-object
+show remote read-siginfo-object
+  Control use of remote protocol `qXfer:siginfo:read' (read-siginfo-object)
+  packet.
+
+set remote write-siginfo-object
+show remote write-siginfo-object
+  Control use of remote protocol `qXfer:siginfo:write' (write-siginfo-object)
+  packet.
+
+set displaced-stepping
+show displaced-stepping
+  Control displaced stepping mode.  Displaced stepping is a way to
+  single-step over breakpoints without removing them from the debuggee.
+  Also known as "out-of-line single-stepping".
+
+set debug displaced
+show debug displaced
+  Control display of debugging info for displaced stepping.
+
+maint set internal-error
+maint show internal-error
+  Control what GDB does when an internal error is detected.
+
+maint set internal-warning
+maint show internal-warning
+  Control what GDB does when an internal warning is detected.
 
 set exec-wrapper
 show exec-wrapper
@@ -198,7 +259,13 @@ show disable-randomization
   by default on some platforms.  This option keeps the addresses stable across
   multiple debugging sessions.
 
+set non-stop
+show non-stop
+  Control whether other threads are stopped or not when some thread hits
+  a breakpoint.
+
 set target-async
+show target-async
   Requests that asynchronous execution is enabled in the target, if available.
   In this case, it's possible to resume target in the background, and interact
   with GDB while the target is running.  "show target-async" displays the
@@ -216,15 +283,6 @@ show tcp connect-timeout
   These commands allow GDB to retry failed TCP connections to a remote stub
   with a specified timeout period; this is useful if the stub is launched
   in parallel with GDB but may not be ready to accept connections immediately.
-
-macro define
-macro list
-macro undef
-  These allow macros to be defined, undefined, and listed
-  interactively.
-
-info os processes
-  Show operating system information about processes.
 
 * New native configurations
 
