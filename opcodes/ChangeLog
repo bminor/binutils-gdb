@@ -14,6 +14,16 @@
 	(pshab, pshaw, pshad, pshaq): Likewise.
 	* i386-tbl.h: Re-generate.
 
+2009-04-08  DJ Delorie  <dj@redhat.com
+
+	* mep-asm.c: Regenerate.
+	* mep-desc.c: Regenerate.
+	* mep-desc.h: Regenerate.
+	* mep-dis.c: Regenerate.
+	* mep-ibld.c: Regenerate.
+	* mep-opc.c: Regenerate.
+	* mep-opc.h: Regenerate.
+
 2009-04-07  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes) <"tlbilxlpid", "tlbilxpid", "tlbilxva",
