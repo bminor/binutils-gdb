@@ -111,11 +111,8 @@ YLWRAP = $(srcdir)/../ylwrap
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
 
-# Contrary to documentation, the current directory is not
-# searched by texi2html, so specify it explicitly.
-# -macro 2007-07-26
-MAKEHTML = texi2html
-MAKEHTMLFLAGS = -menu -split_chapter -I .
+MAKEHTML = $(MAKEINFO) --html
+MAKEHTMLFLAGS =
 
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefined references.

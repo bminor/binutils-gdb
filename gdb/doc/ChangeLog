@@ -1,3 +1,18 @@
+2009-04-18  Carlos O'Donell  <carlos@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile.in (MAKEHTML): Set to makeinfo --html.
+	(MAKEHTMLFLAGS): Set to empty.
+	(html__strip_dir): Define.
+	(HTMLFILES): Define.
+	(HTMLFILES_INSTALL): Define.
+	(install-html): Copy new automake rule.
+	(html): Depend on $(HTMLFILES).
+	(gdb_toc.html): Rename to gdb/index.html.
+	(gdbint_toc.html): Rename to gdbint/index.html.
+	(stabs_toc.html): Rename to stabs/index.html.
+	(annotate_toc.html): Rename to annotate/index.html.
+
 2009-04-17  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* Makefile.in: Set pdfdir and htmldir from configure

@@ -46,14 +46,8 @@ TEXIDIR=${gdbdir}/../texinfo
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
 
-# Note that texinfo 4.0's makeinfo --html can only generate a
-# single file, which would be too large, so continue to use
-# texi2html. -sts 2000-03-28
-# Contrary to documentation, the current directory is not
-# searched by texi2html, so specify it explicitly.
-# -macro 2007-07-26
-MAKEHTML = texi2html
-MAKEHTMLFLAGS = -menu -split_chapter -I .
+MAKEHTML = $(MAKEINFO) --html 
+MAKEHTMLFLAGS =
 
 # where to find texi2roff, ditto
 TEXI2ROFF=texi2roff
@@ -80,6 +74,9 @@ INFO_DEPS = gdb.info gdbint.info stabs.info annotate.info
 
 # Files which should be generated via 'pdf' and installed by 'install-pdf'
 PDFFILES = gdb.pdf gdbint.pdf stabs.pdf refcard.pdf annotate.pdf
+# Files which should be generated via 'html' and installed by 'install-html'
+HTMLFILES =  gdb/index.html gdbint/index.html stabs/index.html annotate/index.html
+HTMLFILES_INSTALL = gdb gdbint stabs annotate
 
 # There may be alternate predefined collections of switches to configure
 # the GDB manual.  Normally this is not done in synch with the software
@@ -163,7 +160,7 @@ all:
 info: $(INFO_DEPS)
 dvi: gdb.dvi gdbint.dvi stabs.dvi refcard.dvi annotate.dvi
 ps: gdb.ps gdbint.ps stabs.ps refcard.ps annotate.ps
-html: gdb_toc.html gdbint_toc.html stabs_toc.html annotate_toc.html
+html: $(HTMLFILES)
 pdf: $(PDFFILES)
 all-doc: info dvi ps # pdf
 diststuff: info
@@ -205,9 +202,23 @@ uninstall-info:
 	  (cd $(DESTDIR)$(infodir) && rm -f $$file $$file-[0-9] $$file-[0-9][0-9]); \
 	done
 
-install-html: html
-	for i in *.html ; do \
-		$(INSTALL_DATA) $$i $(DESTDIR)$(htmldir)/$$i ; \
+html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+
+install-html: $(HTMLFILES)
+	@$(NORMAL_INSTALL)
+	test -z "$(htmldir)" || $(mkinstalldirs) "$(DESTDIR)$(htmldir)"
+	@list='$(HTMLFILES_INSTALL)'; for p in $$list; do \
+	  if test -f "$$p" || test -d "$$p"; then d=""; else d="$(srcdir)/"; fi; \
+	  f=$(html__strip_dir) \
+	  if test -d "$$d$$p"; then \
+	    echo " $(mkinstalldirs) '$(DESTDIR)$(htmldir)/$$f'"; \
+	    $(mkinstalldirs) "$(DESTDIR)$(htmldir)/$$f" || exit 1; \
+	    echo " $(INSTALL_DATA) '$$d$$p'/* '$(DESTDIR)$(htmldir)/$$f'"; \
+	    $(INSTALL_DATA) "$$d$$p"/* "$(DESTDIR)$(htmldir)/$$f"; \
+	  else \
+	    echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(htmldir)/$$f'"; \
+	    $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(htmldir)/$$f"; \
+	  fi; \
 	done
 
 pdf__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
@@ -417,7 +428,7 @@ gdb.mm: $(GDB_DOC_FILES) links2roff
 
 # GDB MANUAL: HTML file
 
-gdb_toc.html: ${GDB_DOC_FILES}
+gdb/index.html: ${GDB_DOC_FILES}
 	$(MAKEHTML) $(MAKEHTMLFLAGS) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
 
 # Clean these up before each run.  Avoids a catch 22 with not being
@@ -445,7 +456,7 @@ gdbint.info: $(GDBINT_DOC_FILES)
 
 # GDB INTERNALS MANUAL: HTML file
 
-gdbint_toc.html: $(GDBINT_DOC_FILES)
+gdbint/index.html: $(GDBINT_DOC_FILES)
 	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/gdbint.texinfo
 
 stabs.info: $(STABS_DOC_FILES)
@@ -453,7 +464,7 @@ stabs.info: $(STABS_DOC_FILES)
 
 # STABS DOCUMENTATION: HTML file
 
-stabs_toc.html: $(STABS_DOC_FILES)
+stabs/index.html: $(STABS_DOC_FILES)
 	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/stabs.texinfo
 
 # Clean these up before each run.  Avoids a catch 22 with not being
@@ -495,7 +506,7 @@ annotate.pdf: $(ANNOTATE_DOC_FILES)
 annotate.info: $(ANNOTATE_DOC_FILES)
 	$(MAKEINFO)  -I $(srcdir) -o annotate.info $(srcdir)/annotate.texinfo
 
-annotate_toc.html: $(ANNOTATE_DOC_FILES)
+annotate/index.html: $(ANNOTATE_DOC_FILES)
 	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/annotate.texinfo
 
 force:
