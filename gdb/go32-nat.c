@@ -983,6 +983,10 @@ print_mem (unsigned long datum, const char *header, int in_pages_p)
 static void
 go32_sysinfo (char *arg, int from_tty)
 {
+  static const char test_pattern[] =
+    "deadbeafdeadbeafdeadbeafdeadbeafdeadbeaf"
+    "deadbeafdeadbeafdeadbeafdeadbeafdeadbeaf"
+    "deadbeafdeadbeafdeadbeafdeadbeafdeadbeafdeadbeaf";
   struct utsname u;
   char cpuid_vendor[13];
   unsigned cpuid_max = 0, cpuid_eax, cpuid_ebx, cpuid_ecx, cpuid_edx;
@@ -990,8 +994,7 @@ go32_sysinfo (char *arg, int from_tty)
   unsigned advertized_dos_version = ((unsigned int)_osmajor << 8) | _osminor;
   int dpmi_flags;
   char dpmi_vendor_info[129];
-  int dpmi_vendor_available =
-    __dpmi_get_capabilities (&dpmi_flags, dpmi_vendor_info);
+  int dpmi_vendor_available;
   __dpmi_version_ret dpmi_version_data;
   long eflags;
   __dpmi_free_mem_info mem_info;
@@ -1218,7 +1221,15 @@ go32_sysinfo (char *arg, int from_tty)
   else if (true_dos_version == 0x532 && advertized_dos_version == 0x500)
     printf_filtered ("Windows Version................Windows NT family (W2K/XP/W2K3/Vista/W2K8)\n");
   puts_filtered ("\n");
-  if (dpmi_vendor_available == 0)
+  /* On some versions of Windows, __dpmi_get_capabilities returns
+     zero, but the buffer is not filled with info, so we fill the
+     buffer with a known pattern and test for it afterwards.  */
+  memcpy (dpmi_vendor_info, test_pattern, sizeof(dpmi_vendor_info));
+  dpmi_vendor_available =
+    __dpmi_get_capabilities (&dpmi_flags, dpmi_vendor_info);
+  if (dpmi_vendor_available == 0
+      && memcmp (dpmi_vendor_info, test_pattern,
+		 sizeof(dpmi_vendor_info)) != 0)
     {
       /* The DPMI spec says the vendor string should be ASCIIZ, but
 	 I don't trust the vendors to follow that...  */
@@ -1230,6 +1241,8 @@ go32_sysinfo (char *arg, int from_tty)
 		       (unsigned)dpmi_vendor_info[1],
 		       ((unsigned)dpmi_flags & 0x7f));
     }
+  else
+    printf_filtered ("DPMI Host......................(Info not available)\n");
   __dpmi_get_version (&dpmi_version_data);
   printf_filtered ("DPMI Version...................%d.%02d\n",
 		   dpmi_version_data.major, dpmi_version_data.minor);

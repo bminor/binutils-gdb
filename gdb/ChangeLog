@@ -1,3 +1,9 @@
+2009-04-18  Eli Zaretskii  <eliz@gnu.org>
+
+	* go32-nat.c (go32_sysinfo): Check if the call to
+	__dpmi_get_capabilities fills the buffer with information, and
+	don't use the buffer if not.
+
 2009-04-17  Tom Tromey  <tromey@redhat.com>
 
 	* charset.c (_initialize_charset): Add special case for "646".
