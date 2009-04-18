@@ -1,3 +1,10 @@
+2009-04-17  DJ Delorie  <dj@redhat.com
+
+	* mep-desc.c: Regenerate.
+	* mep-ibld.c: Regenerate.
+	* mep-opc.c: Regenerate.
+	* mep-opc.h: Regenerate.
+
 2009-04-15  Anthony Green  <green@moxielogic.com>
 
 	* moxie-opc.c, moxie-dis.c: Created.

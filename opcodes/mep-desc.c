@@ -1122,7 +1122,7 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* lhucpm1 $crn,($rma+),$cdisp10a2 */
   {
     MEP_INSN_LHUCPM1, "lhucpm1", "lhucpm1", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_C5), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* uci $rn,$rm,$uimm16 */
   {
@@ -1133,6 +1133,16 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
   {
     MEP_INSN_DSP, "dsp", "dsp", 32,
     { 0|A(VOLATILE), { { { (1<<MACH_C5), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+  },
+/* dsp0 $c5rnmuimm24 */
+  {
+    -1, "dsp0", "dsp0", 32,
+    { 0|A(ALIAS)|A(NO_DIS)|A(VOLATILE), { { { (1<<MACH_C5), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+  },
+/* dsp1 $rn,$c5rmuimm20 */
+  {
+    -1, "dsp1", "dsp1", 32,
+    { 0|A(ALIAS)|A(NO_DIS)|A(VOLATILE), { { { (1<<MACH_C5), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
   },
 /* sb $rnc,($rma) */
   {

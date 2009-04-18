@@ -649,33 +649,33 @@ mep_cgen_insert_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_CDISP10 :
       {
         long value = fields->f_cdisp10;
-        value = ((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value));
-        errmsg = insert_normal (cd, value, 0, 0, 22, 10, 32, total_length, buffer);
+        value = (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (512))) ? (((((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023))) - (1024))) : (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023)));
+        errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED), 0, 22, 10, 32, total_length, buffer);
       }
       break;
     case MEP_OPERAND_CDISP10A2 :
       {
         long value = fields->f_cdisp10;
-        value = ((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value));
-        errmsg = insert_normal (cd, value, 0, 0, 22, 10, 32, total_length, buffer);
+        value = (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (512))) ? (((((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023))) - (1024))) : (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023)));
+        errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED), 0, 22, 10, 32, total_length, buffer);
       }
       break;
     case MEP_OPERAND_CDISP10A4 :
       {
         long value = fields->f_cdisp10;
-        value = ((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value));
-        errmsg = insert_normal (cd, value, 0, 0, 22, 10, 32, total_length, buffer);
+        value = (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (512))) ? (((((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023))) - (1024))) : (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023)));
+        errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED), 0, 22, 10, 32, total_length, buffer);
       }
       break;
     case MEP_OPERAND_CDISP10A8 :
       {
         long value = fields->f_cdisp10;
-        value = ((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value));
-        errmsg = insert_normal (cd, value, 0, 0, 22, 10, 32, total_length, buffer);
+        value = (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (512))) ? (((((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023))) - (1024))) : (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023)));
+        errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED), 0, 22, 10, 32, total_length, buffer);
       }
       break;
     case MEP_OPERAND_CDISP12 :
-      errmsg = insert_normal (cd, fields->f_12s20, 0, 0, 20, 12, 32, total_length, buffer);
+      errmsg = insert_normal (cd, fields->f_12s20, 0|(1<<CGEN_IFLD_SIGNED), 0, 20, 12, 32, total_length, buffer);
       break;
     case MEP_OPERAND_CIMM4 :
       errmsg = insert_normal (cd, fields->f_rn, 0, 0, 4, 4, 32, total_length, buffer);
@@ -1082,37 +1082,37 @@ mep_cgen_extract_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_CDISP10 :
       {
         long value;
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 22, 10, 32, total_length, pc, & value);
-        value = ((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value));
+        length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 22, 10, 32, total_length, pc, & value);
+        value = (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (512))) ? (((((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023))) - (1024))) : (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023)));
         fields->f_cdisp10 = value;
       }
       break;
     case MEP_OPERAND_CDISP10A2 :
       {
         long value;
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 22, 10, 32, total_length, pc, & value);
-        value = ((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value));
+        length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 22, 10, 32, total_length, pc, & value);
+        value = (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (512))) ? (((((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023))) - (1024))) : (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023)));
         fields->f_cdisp10 = value;
       }
       break;
     case MEP_OPERAND_CDISP10A4 :
       {
         long value;
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 22, 10, 32, total_length, pc, & value);
-        value = ((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value));
+        length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 22, 10, 32, total_length, pc, & value);
+        value = (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (512))) ? (((((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023))) - (1024))) : (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023)));
         fields->f_cdisp10 = value;
       }
       break;
     case MEP_OPERAND_CDISP10A8 :
       {
         long value;
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 22, 10, 32, total_length, pc, & value);
-        value = ((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value));
+        length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 22, 10, 32, total_length, pc, & value);
+        value = (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (512))) ? (((((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023))) - (1024))) : (((((((((value) & (128))) ? (((value) ^ (768))) : (value)) & (512))) ? ((((((value) & (128))) ? (((value) ^ (768))) : (value)) - (1024))) : ((((value) & (128))) ? (((value) ^ (768))) : (value))) & (1023)));
         fields->f_cdisp10 = value;
       }
       break;
     case MEP_OPERAND_CDISP12 :
-      length = extract_normal (cd, ex_info, insn_value, 0, 0, 20, 12, 32, total_length, pc, & fields->f_12s20);
+      length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 20, 12, 32, total_length, pc, & fields->f_12s20);
       break;
     case MEP_OPERAND_CIMM4 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 4, 4, 32, total_length, pc, & fields->f_rn);

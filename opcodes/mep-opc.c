@@ -212,6 +212,14 @@ static const CGEN_IFMT ifmt_dsp ATTRIBUTE_UNUSED = {
   32, 32, 0xf00f0000, { { F (F_MAJOR) }, { F (F_RN) }, { F (F_RM) }, { F (F_SUB4) }, { F (F_16U16) }, { 0 } }
 };
 
+static const CGEN_IFMT ifmt_dsp0 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf00f0000, { { F (F_MAJOR) }, { F (F_C5_RNMUIMM24) }, { F (F_SUB4) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_dsp1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf00f0000, { { F (F_MAJOR) }, { F (F_RN) }, { F (F_C5_RMUIMM20) }, { F (F_SUB4) }, { 0 } }
+};
+
 static const CGEN_IFMT ifmt_sb ATTRIBUTE_UNUSED = {
   16, 16, 0xf00f, { { F (F_MAJOR) }, { F (F_RN) }, { F (F_RM) }, { F (F_SUB4) }, { 0 } }
 };
@@ -568,6 +576,18 @@ static const CGEN_OPCODE mep_cgen_insn_opcode_table[MAX_INSNS] =
     { 0, 0, 0, 0 },
     { { MNEM, ' ', OP (RN), ',', OP (RM), ',', OP (UIMM16), 0 } },
     & ifmt_dsp, { 0xf0000000 }
+  },
+/* dsp0 $c5rnmuimm24 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (C5RNMUIMM24), 0 } },
+    & ifmt_dsp0, { 0xf0000000 }
+  },
+/* dsp1 $rn,$c5rmuimm20 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (RN), ',', OP (C5RMUIMM20), 0 } },
+    & ifmt_dsp1, { 0xf0000000 }
   },
 /* sb $rnc,($rma) */
   {
@@ -1795,14 +1815,6 @@ static const CGEN_OPCODE mep_cgen_insn_opcode_table[MAX_INSNS] =
 #else
 #define F(f) & mep_cgen_ifld_table[MEP_/**/f]
 #endif
-static const CGEN_IFMT ifmt_dsp0 ATTRIBUTE_UNUSED = {
-  32, 32, 0xf00f0000, { { F (F_MAJOR) }, { F (F_RN) }, { F (F_RM) }, { F (F_SUB4) }, { F (F_16U16) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_dsp1 ATTRIBUTE_UNUSED = {
-  32, 32, 0xf00f0000, { { F (F_MAJOR) }, { F (F_RN) }, { F (F_RM) }, { F (F_SUB4) }, { F (F_16U16) }, { 0 } }
-};
-
 static const CGEN_IFMT ifmt_nop ATTRIBUTE_UNUSED = {
   16, 16, 0xffff, { { F (F_MAJOR) }, { F (F_RN) }, { F (F_RM) }, { F (F_SUB4) }, { 0 } }
 };
@@ -1876,16 +1888,6 @@ static const CGEN_IFMT ifmt_lmcp16_0 ATTRIBUTE_UNUSED = {
 
 static const CGEN_IBASE mep_cgen_macro_insn_table[] =
 {
-/* dsp0 $c5rnmuimm24 */
-  {
-    -1, "dsp0", "dsp0", 32,
-    { 0|A(VOLATILE)|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_C5), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
-  },
-/* dsp1 $rn,$c5rmuimm20 */
-  {
-    -1, "dsp1", "dsp1", 32,
-    { 0|A(VOLATILE)|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_C5), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
-  },
 /* nop */
   {
     -1, "nop", "nop", 16,
@@ -1957,18 +1959,6 @@ static const CGEN_IBASE mep_cgen_macro_insn_table[] =
 
 static const CGEN_OPCODE mep_cgen_macro_insn_opcode_table[] =
 {
-/* dsp0 $c5rnmuimm24 */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (C5RNMUIMM24), 0 } },
-    & ifmt_dsp0, { 0xf0000000 }
-  },
-/* dsp1 $rn,$c5rmuimm20 */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (RN), ',', OP (C5RMUIMM20), 0 } },
-    & ifmt_dsp1, { 0xf0000000 }
-  },
 /* nop */
   {
     { 0, 0, 0, 0 },
