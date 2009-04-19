@@ -295,6 +295,9 @@ x86_64 MinGW			x86_64-*-mingw*
 x86 DICOS			i[34567]86-*-dicos*
 x86_64 DICOS		        x86_64-*-dicos*
 
+* The GDB remote stub, gdbserver, now supports x86 Windows CE
+  (mingw32ce) debugging.
+
 * Removed commands
 
 catch load
