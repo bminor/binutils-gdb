@@ -245,7 +245,7 @@
 @V@/gdb/ia64-aix-nat.c @V@/gdb/ia64ax-nat.c
 @V@/gdb/ia64-aix-tdep.c @V@/gdb/ia64ax-tdep.c
 @V@/gdb/ia64-linux-nat.c @V@/gdb/ia64lx-nat.c
-@V@/gdb/ia64-linux-nat.c @V@/gdb/ia64lx-tdep.c
+@V@/gdb/ia64-linux-tdep.c @V@/gdb/ia64lx-tdep.c
 @V@/gdb/jv-exp.tab.c @V@/gdb/jv-exp_tab.c
 @V@/gdb/m2-exp.tab.c @V@/gdb/m2-exp_tab.c
 @V@/gdb/m32r-linux-nat.c @V@/gdb/m32rlnxnat.c
@@ -295,7 +295,7 @@
 @V@/gdb/regformats/rs6000/powerpc-vsx64l.dat @V@/gdb/regformats/rs6000/ppc-v64l.dat
 @V@/gdb/remote-e7000.c @V@/gdb/rmt-e7000.c
 @V@/gdb/remote-est.c @V@/gdb/rmt-est.c
-@V@/gdb/remote-mips.c @V@/gdb/emt-mips.c
+@V@/gdb/remote-mips.c @V@/gdb/rmt-mips.c
 @V@/gdb/remote-rdi.c @V@/gdb/rmt-rdi.c
 @V@/gdb/remote-rdp.c @V@/gdb/rmt-rdp.c
 @V@/gdb/remote-sds.c @V@/gdb/rmt-sds.c
@@ -419,7 +419,7 @@
 @V@/gdb/hppa-hpux-nat.c @V@/gdb/pahpuxnat.c
 @V@/gdb/hppa-hpux-tdep.c @V@/gdb/pahpuxtdep.c
 @V@/gdb/hppanbsd-nat.c @V@/gdb/panbsd-nat.c
-@V@/gdb/hppanbsd-nat.c @V@/gdb/panbsd-tdep.c
+@V@/gdb/hppanbsd-tdep.c @V@/gdb/panbsd-tdep.c
 @V@/gdb/amd64-windows-nat.c @V@/gdb/amd64-wnat.c
 @V@/gdb/amd64-windows-tdep.c @V@/gdb/amd64-wtdep.c
 @V@/gdb/i386-windows-nat.c @V@/gdb/i386-wnat.c

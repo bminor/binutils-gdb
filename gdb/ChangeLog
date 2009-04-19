@@ -1,5 +1,7 @@
 2009-04-19  Eli Zaretskii  <eliz@gnu.org>
 
+	* config/djgpp/fnchange.lst: Fix typos.
+
 	Set default host and target charsets in the DJGPP port.
 
 	* config/djgpp/config.sed (am_cv_langinfo_codeset)
