@@ -1,3 +1,20 @@
+2009-04-19  Eli Zaretskii  <eliz@gnu.org>
+
+	Set default host and target charsets in the DJGPP port.
+
+	* config/djgpp/config.sed (am_cv_langinfo_codeset)
+	(bash_cv_langinfo_codeset, ac_cv_header_nl_types_h): Set to "yes"
+	in all configure scripts that define ac_cv_env_CPP_value.
+
+	* go32-nat.c (dos_codepage, nl_langinfo): New functions.
+	Include langinfo.h.
+
+	* config/djgpp/nl_types.h: New file.
+
+	* config/djgpp/langinfo.h: New file.
+
+	* config/i386/go32.mh (MH_CFLAGS): Add $(srcdir)/config/djgpp.
+
 2009-04-18  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* Makefile.in (MAKEHTML): Set to makeinfo --html.

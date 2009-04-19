@@ -53,6 +53,8 @@
 #include <debug/redir.h>
 #endif
 
+#include <langinfo.h>
+
 #if __DJGPP_MINOR__ < 3
 /* This code will be provided from DJGPP 2.03 on. Until then I code it
    here */
@@ -936,6 +938,47 @@ init_go32_ops (void)
 
   /* Override the default name of the GDB init file.  */
   strcpy (gdbinit, "gdb.ini");
+}
+
+/* Return the current DOS codepage number.  */
+static int
+dos_codepage (void)
+{
+  __dpmi_regs regs;
+
+  regs.x.ax = 0x6601;
+  __dpmi_int (0x21, &regs);
+  if (!(regs.x.flags & 1))
+    return regs.x.bx & 0xffff;
+  else
+    return 437;	/* default */
+}
+
+/* Limited emulation of `nl_langinfo', for charset.c.  */
+char *
+nl_langinfo (nl_item item)
+{
+  char *retval;
+
+  switch (item)
+    {
+      case CODESET:
+	{
+	  /* 8 is enough for SHORT_MAX + "CP" + null.  */
+	  char buf[8];
+	  int blen = sizeof (buf);
+	  int needed = snprintf (buf, blen, "CP%d", dos_codepage ());
+
+	  if (needed > blen)	/* should never happen */
+	    buf[0] = 0;
+	  retval = xstrdup (buf);
+	}
+	break;
+      default:
+	retval = xstrdup ("");
+	break;
+    }
+  return retval;
 }
 
 unsigned short windows_major, windows_minor;

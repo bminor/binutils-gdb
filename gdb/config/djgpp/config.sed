@@ -25,6 +25,12 @@ s|\.gdbinit|gdb.ini|g
   s,config\\.h\\.in,config.h-in,g;t t\
   s,po2tbl\\.sed\\.in,po2tblsed.in,g;t t
 
+# We have an emulation of nl_langinfo in go32-nat.c that supports CODESET.
+/^ac_cv_env_CPP_value=/a\
+am_cv_langinfo_codeset=yes\
+bash_cv_langinfo_codeset=yes\
+ac_cv_header_nl_types_h=yes
+
 # Prevent splitting of config.status substitutions, because that
 # might break multi-line sed commands.
 /ac_max_sed_lines=[0-9]/s,=.*$,=`sed -n "$=" $tmp/subs.sed`,
