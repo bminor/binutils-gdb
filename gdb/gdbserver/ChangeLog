@@ -1,3 +1,7 @@
+2009-04-19  Danny Backx  <dannybackx@users.sourceforge.net>
+
+	* configure.srv: Add x86 Windows CE target.
+
 2009-04-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* inferiors.c (get_thread_process): Make global.
