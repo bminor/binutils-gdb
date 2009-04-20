@@ -129,6 +129,9 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
      they will be handled somewhat correctly in the bfd code.  */
   if (in->n_sclass == C_SECTION)
     {
+      char namebuf[SYMNMLEN + 1];
+      const char *name;
+
       in->n_value = 0x0;
 
       /* Create synthetic empty sections as needed.  DJ */
@@ -136,33 +139,38 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	{
 	  asection *sec;
 
-	  for (sec = abfd->sections; sec; sec = sec->next)
-	    {
-	      if (strcmp (sec->name, in->n_name) == 0)
-		{
-		  in->n_scnum = sec->target_index;
-		  break;
-		}
-	    }
+	  name = _bfd_coff_internal_syment_name (abfd, in, namebuf);
+	  if (name == NULL)
+	    /* FIXME: Return error.  */
+	    abort ();
+	  sec = bfd_get_section_by_name (abfd, name);
+	  if (sec != NULL)
+	    in->n_scnum = sec->target_index;
 	}
 
       if (in->n_scnum == 0)
 	{
 	  int unused_section_number = 0;
 	  asection *sec;
-	  char *name;
 	  flagword flags;
 
 	  for (sec = abfd->sections; sec; sec = sec->next)
 	    if (unused_section_number <= sec->target_index)
 	      unused_section_number = sec->target_index + 1;
 
-	  name = bfd_alloc (abfd, (bfd_size_type) strlen (in->n_name) + 10);
-	  if (name == NULL)
-	    return;
-	  strcpy (name, in->n_name);
+	  if (name == namebuf)
+	    {
+	      name = bfd_alloc (abfd, strlen (namebuf) + 1);
+	      if (name == NULL)
+		/* FIXME: Return error.  */
+		abort ();
+	      strcpy ((char *) name, namebuf);
+	    }
 	  flags = SEC_HAS_CONTENTS | SEC_ALLOC | SEC_DATA | SEC_LOAD;
 	  sec = bfd_make_section_anyway_with_flags (abfd, name, flags);
+	  if (sec == NULL)
+	    /* FIXME: Return error.  */
+	    abort ();
 
 	  sec->vma = 0;
 	  sec->lma = 0;

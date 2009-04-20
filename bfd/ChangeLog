@@ -1,3 +1,10 @@
+2009-04-19  Peter O'Gorman  <binutils@mlists.thewrittenword.com>
+            Alan Modra  <amodra@bigpond.net.au>
+            Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* peXXigen.c (_bfd_XXi_swap_sym_in): Fix name handling w.r.t
+	long names and non-NUL-terminated strings.
+
 2009-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd-in2.h: Regenerated.
