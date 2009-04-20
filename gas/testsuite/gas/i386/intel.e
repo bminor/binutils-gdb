@@ -1,10 +1,4 @@
 .*: Assembler messages:
-.*:154: Warning: Treating `\[0x90909090\]' as memory reference
-.*:155: Warning: Treating `\[0x90909090\]' as memory reference
-.*:156: Warning: Treating `\[0x90909090\]' as memory reference
-.*:157: Warning: Treating `\[0x90909090\]' as memory reference
-.*:494: Warning: Treating `\[0x90909090\]' as memory reference
-.*:495: Warning: Treating `\[0x90909090\]' as memory reference
 .*:635: Warning: translating to `faddp'
 .*:644: Warning: translating to `fdivp'
 .*:653: Warning: translating to `fdivp st\(3\),st'

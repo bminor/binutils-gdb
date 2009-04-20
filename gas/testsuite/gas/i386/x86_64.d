@@ -1,7 +1,6 @@
 #as: -J
 #objdump: -dw
 #name: x86_64
-#stderr: x86_64.e
 .*: +file format .*
 
 Disassembly of section .text:

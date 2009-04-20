@@ -157,6 +157,12 @@ extern int tc_i386_fix_adjustable (struct fix *);
 extern int i386_parse_name (char *, expressionS *, char *);
 #define md_parse_name(s, e, m, c) i386_parse_name (s, e, c)
 
+extern operatorT i386_operator (const char *name, unsigned int operands, char *);
+#define md_operator i386_operator
+
+extern int i386_need_index_operator (void);
+#define md_need_index_operator i386_need_index_operator
+
 #define md_register_arithmetic 0
 
 extern const struct relax_type md_relax_table[];
@@ -280,5 +286,8 @@ extern bfd_vma x86_64_section_letter (int, char **);
 void tc_pe_dwarf2_emit_offset (symbolS *, unsigned int);
 
 #endif /* TE_PE */
+
+/* X_add_symbol:X_op_symbol (Intel mode only) */
+#define O_full_ptr O_md2
 
 #endif /* TC_I386 */

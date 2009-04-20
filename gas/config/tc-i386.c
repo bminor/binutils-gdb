@@ -171,8 +171,14 @@ static void pe_directive_secrel (int);
 #endif
 static void signed_cons (int);
 static char *output_invalid (int c);
+static int i386_finalize_immediate (segT, expressionS *, i386_operand_type,
+				    const char *);
+static int i386_finalize_displacement (segT, expressionS *, i386_operand_type,
+				       const char *);
 static int i386_att_operand (char *);
 static int i386_intel_operand (char *, int);
+static int i386_intel_simplify (expressionS *);
+static int i386_intel_parse_name (const char *, expressionS *);
 static const reg_entry *parse_register (char *, char **);
 static char *parse_insn (char *, char *);
 static char *parse_operands (char *, const char *);
@@ -377,7 +383,7 @@ static expressionS disp_expressions[MAX_MEMORY_OPERANDS];
 static expressionS im_expressions[MAX_IMMEDIATE_OPERANDS];
 
 /* Current operand we are working on.  */
-static int this_operand;
+static int this_operand = -1;
 
 /* We support four different modes.  FLAG_CODE variable is used to distinguish
    these.  */
@@ -1895,6 +1901,8 @@ set_intel_syntax (int syntax_flag)
   else
     allow_naked_reg = (ask_naked_reg < 0);
 
+  expr_set_rank (O_full_ptr, syntax_flag ? 10 : 0);
+  
   identifier_chars['%'] = intel_syntax && allow_naked_reg ? '%' : 0;
   identifier_chars['$'] = intel_syntax ? '$' : 0;
   register_prefix = allow_naked_reg ? "" : "%";
@@ -2748,6 +2756,7 @@ md_assemble (char *line)
     return;
 
   line = parse_operands (line, mnemonic);
+  this_operand = -1;
   if (line == NULL)
     return;
 
@@ -6453,6 +6462,8 @@ lex_got (enum bfd_reloc_code_real *reloc,
 void
 x86_cons (expressionS *exp, int size)
 {
+  intel_syntax = -intel_syntax;
+
   if (size == 4 || (object_64bit && size == 8))
     {
       /* Handle @GOTOFF and the like in an expression.  */
@@ -6491,6 +6502,11 @@ x86_cons (expressionS *exp, int size)
     }
   else
     expression (exp);
+
+  intel_syntax = -intel_syntax;
+
+  if (intel_syntax)
+    i386_intel_simplify (exp);
 }
 #endif
 
@@ -6563,14 +6579,21 @@ i386_immediate (char *imm_start)
 
   input_line_pointer = save_input_line_pointer;
   if (gotfree_input_line)
-    free (gotfree_input_line);
+    {
+      free (gotfree_input_line);
 
-  if (exp->X_op == O_absent
-      || exp->X_op == O_illegal
-      || exp->X_op == O_big
-      || (gotfree_input_line
-	  && (exp->X_op == O_constant
-	      || exp->X_op == O_register)))
+      if (exp->X_op == O_constant || exp->X_op == O_register)
+	exp->X_op = O_illegal;
+    }
+
+  return i386_finalize_immediate (exp_seg, exp, types, imm_start);
+}
+
+static int
+i386_finalize_immediate (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
+			 i386_operand_type types, const char *imm_start)
+{
+  if (exp->X_op == O_absent || exp->X_op == O_illegal || exp->X_op == O_big)
     {
       as_bad (_("missing or invalid immediate expression `%s'"),
 	      imm_start);
@@ -6803,8 +6826,26 @@ i386_displacement (char *disp_start, char *disp_end)
 #endif
   input_line_pointer = save_input_line_pointer;
   if (gotfree_input_line)
-    free (gotfree_input_line);
-  ret = 1;
+    {
+      free (gotfree_input_line);
+
+      if (exp->X_op == O_constant || exp->X_op == O_register)
+	exp->X_op = O_illegal;
+    }
+
+  ret = i386_finalize_displacement (exp_seg, exp, types, disp_start);
+
+  RESTORE_END_STRING (disp_end);
+
+  return ret;
+}
+
+static int
+i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
+			    i386_operand_type types, const char *disp_start)
+{
+  i386_operand_type bigdisp;
+  int ret = 1;
 
   /* We do this to make sure that the section symbol is in
      the symbol table.  We will ultimately change the relocation
@@ -6831,10 +6872,7 @@ i386_displacement (char *disp_start, char *disp_end)
 
   else if (exp->X_op == O_absent
 	   || exp->X_op == O_illegal
-	   || exp->X_op == O_big
-	   || (gotfree_input_line
-	       && (exp->X_op == O_constant
-		   || exp->X_op == O_register)))
+	   || exp->X_op == O_big)
     {
     inv_disp:
       as_bad (_("missing or invalid displacement expression `%s'"),
@@ -6856,8 +6894,6 @@ i386_displacement (char *disp_start, char *disp_end)
       ret = 0;
     }
 #endif
-
-  RESTORE_END_STRING (disp_end);
 
   /* Check if this is a displacement only operand.  */
   bigdisp = i.types[this_operand];
@@ -7913,23 +7949,45 @@ i386_parse_name (char *name, expressionS *e, char *nextcharP)
     }
   input_line_pointer = end;
   *end = 0;
-  return 0;
+  return intel_syntax ? i386_intel_parse_name (name, e) : 0;
 }
 
 void
 md_operand (expressionS *e)
 {
-  if (*input_line_pointer == REGISTER_PREFIX)
-    {
-      char *end;
-      const reg_entry *r = parse_real_register (input_line_pointer, &end);
+  char *end;
+  const reg_entry *r;
 
+  switch (*input_line_pointer)
+    {
+    case REGISTER_PREFIX:
+      r = parse_real_register (input_line_pointer, &end);
       if (r)
 	{
 	  e->X_op = O_register;
 	  e->X_add_number = r - i386_regtab;
 	  input_line_pointer = end;
 	}
+      break;
+
+    case '[':
+      assert (intel_syntax);
+      end = input_line_pointer++;
+      expression (e);
+      if (*input_line_pointer == ']')
+	{
+	  ++input_line_pointer;
+	  e->X_op_symbol = make_expr_symbol (e);
+	  e->X_add_symbol = NULL;
+	  e->X_add_number = 0;
+	  e->X_op = O_index;
+	}
+      else
+	{
+	  e->X_op = O_absent;
+	  input_line_pointer = end;
+	}
+      break;
     }
 }
 
@@ -8642,1352 +8700,7 @@ tc_gen_reloc (section, fixp)
   return rel;
 }
 
-
-/* Parse operands using Intel syntax. This implements a recursive descent
-   parser based on the BNF grammar published in Appendix B of the MASM 6.1
-   Programmer's Guide.
-
-   FIXME: We do not recognize the full operand grammar defined in the MASM
-	  documentation.  In particular, all the structure/union and
-	  high-level macro operands are missing.
-
-   Uppercase words are terminals, lower case words are non-terminals.
-   Objects surrounded by double brackets '[[' ']]' are optional. Vertical
-   bars '|' denote choices. Most grammar productions are implemented in
-   functions called 'intel_<production>'.
-
-   Initial production is 'expr'.
-
-    addOp		+ | -
-
-    alpha		[a-zA-Z]
-
-    binOp		& | AND | \| | OR | ^ | XOR
-
-    byteRegister	AL | AH | BL | BH | CL | CH | DL | DH
-
-    constant		digits [[ radixOverride ]]
-
-    dataType		BYTE | WORD | DWORD | FWORD | QWORD | TBYTE | OWORD | XMMWORD | YMMWORD
-
-    digits		decdigit
-			| digits decdigit
-			| digits hexdigit
-
-    decdigit		[0-9]
-
-    e04			e04 addOp e05
-			| e05
-
-    e05			e05 binOp e06
-			| e06
-
-    e06			e06 mulOp e09
-			| e09
-
-    e09			OFFSET e10
-			| SHORT e10
-			| + e10
-			| - e10
-			| ~ e10
-			| NOT e10
-			| e09 PTR e10
-			| e09 : e10
-			| e10
-
-    e10			e10 [ expr ]
-			| e11
-
-    e11			( expr )
-			| [ expr ]
-			| constant
-			| dataType
-			| id
-			| $
-			| register
-
- => expr		expr cmpOp e04
-			| e04
-
-    gpRegister		AX | EAX | BX | EBX | CX | ECX | DX | EDX
-			| BP | EBP | SP | ESP | DI | EDI | SI | ESI
-
-    hexdigit		a | b | c | d | e | f
-			| A | B | C | D | E | F
-
-    id			alpha
-			| id alpha
-			| id decdigit
-
-    mulOp		* | / | % | MOD | << | SHL | >> | SHR
-
-    quote		" | '
-
-    register		specialRegister
-			| gpRegister
-			| byteRegister
-
-    segmentRegister	CS | DS | ES | FS | GS | SS
-
-    specialRegister	CR0 | CR2 | CR3 | CR4
-			| DR0 | DR1 | DR2 | DR3 | DR6 | DR7
-			| TR3 | TR4 | TR5 | TR6 | TR7
-
-    We simplify the grammar in obvious places (e.g., register parsing is
-    done by calling parse_register) and eliminate immediate left recursion
-    to implement a recursive-descent parser.
-
-    expr	e04 expr'
-
-    expr'	cmpOp e04 expr'
-		| Empty
-
-    e04		e05 e04'
-
-    e04'	addOp e05 e04'
-		| Empty
-
-    e05		e06 e05'
-
-    e05'	binOp e06 e05'
-		| Empty
-
-    e06		e09 e06'
-
-    e06'	mulOp e09 e06'
-		| Empty
-
-    e09		OFFSET e10 e09'
-		| SHORT e10'
-		| + e10'
-		| - e10'
-		| ~ e10'
-		| NOT e10'
-		| e10 e09'
-
-    e09'	PTR e10 e09'
-		| : e10 e09'
-		| Empty
-
-    e10		e11 e10'
-
-    e10'	[ expr ] e10'
-		| Empty
-
-    e11		( expr )
-		| [ expr ]
-		| BYTE
-		| WORD
-		| DWORD
-		| FWORD
-		| QWORD
-		| TBYTE
-		| OWORD
-		| XMMWORD
-		| YMMWORD
-		| .
-		| $
-		| register
-		| id
-		| constant  */
-
-/* Parsing structure for the intel syntax parser. Used to implement the
-   semantic actions for the operand grammar.  */
-struct intel_parser_s
-  {
-    char *op_string;		/* The string being parsed.  */
-    int got_a_float;		/* Whether the operand is a float.  */
-    int op_modifier;		/* Operand modifier.  */
-    int is_mem;			/* 1 if operand is memory reference.  */
-    int in_offset;		/* >=1 if parsing operand of offset.  */
-    int in_bracket;		/* >=1 if parsing operand in brackets.  */
-    const reg_entry *reg;	/* Last register reference found.  */
-    char *disp;			/* Displacement string being built.  */
-    char *next_operand;		/* Resume point when splitting operands.  */
-  };
-
-static struct intel_parser_s intel_parser;
-
-/* Token structure for parsing intel syntax.  */
-struct intel_token
-  {
-    int code;			/* Token code.  */
-    const reg_entry *reg;	/* Register entry for register tokens.  */
-    char *str;			/* String representation.  */
-  };
-
-static struct intel_token cur_token, prev_token;
-
-/* Token codes for the intel parser. Since T_SHORT is already used
-   by COFF, undefine it first to prevent a warning.  */
-#define T_NIL		-1
-#define T_CONST		1
-#define T_REG		2
-#define T_BYTE		3
-#define T_WORD		4
-#define T_DWORD		5
-#define T_FWORD		6
-#define T_QWORD		7
-#define T_TBYTE		8
-#define T_XMMWORD	9
-#undef  T_SHORT
-#define T_SHORT		10
-#define T_OFFSET	11
-#define T_PTR		12
-#define T_ID		13
-#define T_SHL		14
-#define T_SHR		15
-#define T_YMMWORD	16
-
-/* Prototypes for intel parser functions.  */
-static int intel_match_token (int);
-static void intel_putback_token	(void);
-static void intel_get_token (void);
-static int intel_expr (void);
-static int intel_e04 (void);
-static int intel_e05 (void);
-static int intel_e06 (void);
-static int intel_e09 (void);
-static int intel_e10 (void);
-static int intel_e11 (void);
-
-static int
-i386_intel_operand (char *operand_string, int got_a_float)
-{
-  int ret;
-  char *p;
-  const reg_entry *final_base = i.base_reg;
-  const reg_entry *final_index = i.index_reg;
-
-  p = intel_parser.op_string = xstrdup (operand_string);
-  intel_parser.disp = (char *) xmalloc (strlen (operand_string) + 1);
-
-  for (;;)
-    {
-      /* Initialize token holders.  */
-      cur_token.code = prev_token.code = T_NIL;
-      cur_token.reg = prev_token.reg = NULL;
-      cur_token.str = prev_token.str = NULL;
-
-      /* Initialize parser structure.  */
-      intel_parser.got_a_float = got_a_float;
-      intel_parser.op_modifier = 0;
-      intel_parser.is_mem = 0;
-      intel_parser.in_offset = 0;
-      intel_parser.in_bracket = 0;
-      intel_parser.reg = NULL;
-      intel_parser.disp[0] = '\0';
-      intel_parser.next_operand = NULL;
-
-      i.base_reg = NULL;
-      i.index_reg = NULL;
-
-      /* Read the first token and start the parser.  */
-      intel_get_token ();
-      ret = intel_expr ();
-
-      if (!ret)
-	break;
-
-      if (cur_token.code != T_NIL)
-	{
-	  as_bad (_("invalid operand for '%s' ('%s' unexpected)"),
-		  current_templates->start->name, cur_token.str);
-	  ret = 0;
-	}
-      /* If we found a memory reference, hand it over to i386_displacement
-	 to fill in the rest of the operand fields.  */
-      else if (intel_parser.is_mem)
-	{
-	  if ((i.mem_operands == 1
-	       && !current_templates->start->opcode_modifier.isstring)
-	      || i.mem_operands == 2)
-	    {
-	      as_bad (_("too many memory references for '%s'"),
-		      current_templates->start->name);
-	      ret = 0;
-	    }
-	  else
-	    {
-	      char *s = intel_parser.disp;
-
-	      if (!quiet_warnings && intel_parser.is_mem < 0)
-		/* See the comments in intel_bracket_expr.  */
-		as_warn (_("Treating `%s' as memory reference"), operand_string);
-
-	      /* Add the displacement expression.  */
-	      if (*s != '\0')
-		ret = i386_displacement (s, s + strlen (s));
-	      if (ret)
-		{
-		  /* Swap base and index in 16-bit memory operands like
-		     [si+bx]. Since i386_index_check is also used in AT&T
-		     mode we have to do that here.  */
-		  if (i.base_reg
-		      && i.index_reg
-		      && i.base_reg->reg_type.bitfield.reg16
-		      && i.index_reg->reg_type.bitfield.reg16
-		      && i.base_reg->reg_num >= 6
-		      && i.index_reg->reg_num < 6)
-		    {
-		      const reg_entry *base = i.index_reg;
-
-		      i.index_reg = i.base_reg;
-		      i.base_reg = base;
-		    }
-		  ret = i386_index_check (operand_string);
-		}
-	      if (ret)
-		{
-		  i.types[this_operand].bitfield.mem = 1;
-		  i.mem_operands++;
-		}
-	    }
-	}
-
-      /* Constant and OFFSET expressions are handled by i386_immediate.  */
-      else if ((intel_parser.op_modifier & (1 << T_OFFSET))
-	       || intel_parser.reg == NULL)
-	{
-	  if (i.mem_operands < 2 && i.seg[i.mem_operands])
-	    {
-	      if (!(intel_parser.op_modifier & (1 << T_OFFSET)))
-		as_warn (_("Segment override ignored"));
-	      i.seg[i.mem_operands] = NULL;
-	    }
-	  ret = i386_immediate (intel_parser.disp);
-	}
-
-      if (!final_base && !final_index)
-  	{
-	  final_base = i.base_reg;
-	  final_index = i.index_reg;
-  	}
-
-      if (intel_parser.next_operand && this_operand >= MAX_OPERANDS - 1)
-	ret = 0;
-      if (!ret || !intel_parser.next_operand)
-	break;
-      intel_parser.op_string = intel_parser.next_operand;
-      this_operand = i.operands++;
-      i.types[this_operand].bitfield.unspecified = 1;
-    }
-
-  free (p);
-  free (intel_parser.disp);
-
-  if (final_base || final_index)
-    {
-      i.base_reg = final_base;
-      i.index_reg = final_index;
-    }
-
-  return ret;
-}
-
-#define NUM_ADDRESS_REGS (!!i.base_reg + !!i.index_reg)
-
-/* expr	e04 expr'
-
-   expr'  cmpOp e04 expr'
-	| Empty  */
-static int
-intel_expr (void)
-{
-  /* XXX Implement the comparison operators.  */
-  return intel_e04 ();
-}
-
-/* e04	e05 e04'
-
-   e04'	addOp e05 e04'
-	| Empty  */
-static int
-intel_e04 (void)
-{
-  int nregs = -1;
-
-  for (;;)
-    {
-      if (!intel_e05())
-	return 0;
-
-      if (nregs >= 0 && NUM_ADDRESS_REGS > nregs)
-	i.base_reg = i386_regtab + REGNAM_AL; /* al is invalid as base */
-
-      if (cur_token.code == '+')
-	nregs = -1;
-      else if (cur_token.code == '-')
-	nregs = NUM_ADDRESS_REGS;
-      else
-	return 1;
-
-      strcat (intel_parser.disp, cur_token.str);
-      intel_match_token (cur_token.code);
-    }
-}
-
-/* e05	e06 e05'
-
-   e05'	binOp e06 e05'
-	| Empty  */
-static int
-intel_e05 (void)
-{
-  int nregs = ~NUM_ADDRESS_REGS;
-
-  for (;;)
-    {
-      if (!intel_e06())
-	return 0;
-
-      if (cur_token.code == '&'
-	  || cur_token.code == '|'
-	  || cur_token.code == '^')
-	{
-	  char str[2];
-
-	  str[0] = cur_token.code;
-	  str[1] = 0;
-	  strcat (intel_parser.disp, str);
-	}
-      else
-	break;
-
-      intel_match_token (cur_token.code);
-
-      if (nregs < 0)
-	nregs = ~nregs;
-    }
-  if (nregs >= 0 && NUM_ADDRESS_REGS > nregs)
-    i.base_reg = i386_regtab + REGNAM_AL + 1; /* cl is invalid as base */
-  return 1;
-}
-
-/* e06	e09 e06'
-
-   e06'	mulOp e09 e06'
-	| Empty  */
-static int
-intel_e06 (void)
-{
-  int nregs = ~NUM_ADDRESS_REGS;
-
-  for (;;)
-    {
-      if (!intel_e09())
-	return 0;
-
-      if (cur_token.code == '*'
-	  || cur_token.code == '/'
-	  || cur_token.code == '%')
-	{
-	  char str[2];
-
-	  str[0] = cur_token.code;
-	  str[1] = 0;
-	  strcat (intel_parser.disp, str);
-	}
-      else if (cur_token.code == T_SHL)
-	strcat (intel_parser.disp, "<<");
-      else if (cur_token.code == T_SHR)
-	strcat (intel_parser.disp, ">>");
-      else
-	break;
-
-      intel_match_token (cur_token.code);
-
-      if (nregs < 0)
-	nregs = ~nregs;
-    }
-  if (nregs >= 0 && NUM_ADDRESS_REGS > nregs)
-    i.base_reg = i386_regtab + REGNAM_AL + 2; /* dl is invalid as base */
-  return 1;
-}
-
-/* e09	OFFSET e09
-	| SHORT e09
-	| + e09
-	| - e09
-	| ~ e09
-	| NOT e09
-	| e10 e09'
-
-   e09'	PTR e10 e09'
-	| : e10 e09'
-	| Empty */
-static int
-intel_e09 (void)
-{
-  int nregs = ~NUM_ADDRESS_REGS;
-  int in_offset = 0;
-
-  for (;;)
-    {
-      /* Don't consume constants here.  */
-      if (cur_token.code == '+' || cur_token.code == '-')
-	{
-	  /* Need to look one token ahead - if the next token
-	     is a constant, the current token is its sign.  */
-	  int next_code;
-
-	  intel_match_token (cur_token.code);
-	  next_code = cur_token.code;
-	  intel_putback_token ();
-	  if (next_code == T_CONST)
-	    break;
-	}
-
-      /* e09  OFFSET e09  */
-      if (cur_token.code == T_OFFSET)
-	{
-	  if (!in_offset++)
-	    ++intel_parser.in_offset;
-	}
-
-      /* e09  SHORT e09  */
-      else if (cur_token.code == T_SHORT)
-	intel_parser.op_modifier |= 1 << T_SHORT;
-
-      /* e09  + e09  */
-      else if (cur_token.code == '+')
-	strcat (intel_parser.disp, "+");
-
-      /* e09  - e09
-	      | ~ e09
-	      | NOT e09  */
-      else if (cur_token.code == '-' || cur_token.code == '~')
-	{
-	  char str[2];
-
-	  if (nregs < 0)
-	    nregs = ~nregs;
-	  str[0] = cur_token.code;
-	  str[1] = 0;
-	  strcat (intel_parser.disp, str);
-	}
-
-      /* e09  e10 e09'  */
-      else
-	break;
-
-      intel_match_token (cur_token.code);
-    }
-
-  for (;;)
-    {
-      if (!intel_e10 ())
-	return 0;
-
-      /* e09'  PTR e10 e09' */
-      if (cur_token.code == T_PTR)
-	{
-	  char suffix;
-
-	  if (prev_token.code == T_BYTE)
-	    {
-	      suffix = BYTE_MNEM_SUFFIX;
-	      i.types[this_operand].bitfield.byte = 1;
-	    }
-
-	  else if (prev_token.code == T_WORD)
-	    {
-	      if ((current_templates->start->name[0] == 'l'
-		   && current_templates->start->name[2] == 's'
-		   && current_templates->start->name[3] == 0)
-		  || current_templates->start->base_opcode == 0x62 /* bound */)
-		suffix = BYTE_MNEM_SUFFIX; /* so it will cause an error */
-	      else if (intel_parser.got_a_float == 2)	/* "fi..." */
-		suffix = SHORT_MNEM_SUFFIX;
-	      else
-		suffix = WORD_MNEM_SUFFIX;
-	      i.types[this_operand].bitfield.word = 1;
-	    }
-
-	  else if (prev_token.code == T_DWORD)
-	    {
-	      if ((current_templates->start->name[0] == 'l'
-		   && current_templates->start->name[2] == 's'
-		   && current_templates->start->name[3] == 0)
-		  || current_templates->start->base_opcode == 0x62 /* bound */)
-		suffix = WORD_MNEM_SUFFIX;
-	      else if (flag_code == CODE_16BIT
-		       && (current_templates->start->opcode_modifier.jump
-			   || current_templates->start->opcode_modifier.jumpdword))
-		suffix = LONG_DOUBLE_MNEM_SUFFIX;
-	      else if (intel_parser.got_a_float == 1)	/* "f..." */
-		suffix = SHORT_MNEM_SUFFIX;
-	      else
-		suffix = LONG_MNEM_SUFFIX;
-	      i.types[this_operand].bitfield.dword = 1;
-	    }
-
-	  else if (prev_token.code == T_FWORD)
-	    {
-	      if (current_templates->start->name[0] == 'l'
-		  && current_templates->start->name[2] == 's'
-		  && current_templates->start->name[3] == 0)
-		suffix = LONG_MNEM_SUFFIX;
-	      else if (!intel_parser.got_a_float)
-		{
-		  if (flag_code == CODE_16BIT)
-		    add_prefix (DATA_PREFIX_OPCODE);
-		  suffix = LONG_DOUBLE_MNEM_SUFFIX;
-		}
-	      else
-		suffix = BYTE_MNEM_SUFFIX; /* so it will cause an error */
-	      i.types[this_operand].bitfield.fword = 1;
-	    }
-
-	  else if (prev_token.code == T_QWORD)
-	    {
-	      if (current_templates->start->base_opcode == 0x62 /* bound */
-		  || intel_parser.got_a_float == 1)	/* "f..." */
-		suffix = LONG_MNEM_SUFFIX;
-	      else
-		suffix = QWORD_MNEM_SUFFIX;
-	      i.types[this_operand].bitfield.qword = 1;
-	    }
-
-	  else if (prev_token.code == T_TBYTE)
-	    {
-	      if (intel_parser.got_a_float == 1)
-		suffix = LONG_DOUBLE_MNEM_SUFFIX;
-	      else
-		suffix = BYTE_MNEM_SUFFIX; /* so it will cause an error */
-	    }
-
-	  else if (prev_token.code == T_XMMWORD)
-	    {
-	      suffix = XMMWORD_MNEM_SUFFIX;
-	      i.types[this_operand].bitfield.xmmword = 1;
-	    }
-
-	  else if (prev_token.code == T_YMMWORD)
-	    {
-	      suffix = YMMWORD_MNEM_SUFFIX;
-	      i.types[this_operand].bitfield.ymmword = 1;
-	    }
-
-	  else
-	    {
-	      as_bad (_("Unknown operand modifier `%s'"), prev_token.str);
-	      return 0;
-	    }
-
-	  i.types[this_operand].bitfield.unspecified = 0;
-
-	  /* Operands for jump/call using 'ptr' notation denote absolute
-	     addresses.  */
-	  if (current_templates->start->opcode_modifier.jump
-	      || current_templates->start->opcode_modifier.jumpdword)
-	    i.types[this_operand].bitfield.jumpabsolute = 1;
-
-	  if (current_templates->start->base_opcode == 0x8d /* lea */)
-	    ;
-	  else if (!i.suffix)
-	    i.suffix = suffix;
-	  else if (i.suffix != suffix)
-	    {
-	      as_bad (_("Conflicting operand modifiers"));
-	      return 0;
-	    }
-
-	}
-
-      /* e09'  : e10 e09'  */
-      else if (cur_token.code == ':')
-	{
-	  if (prev_token.code != T_REG)
-	    {
-	      /* While {call,jmp} SSSS:OOOO is MASM syntax only when SSSS is a
-		 segment/group identifier (which we don't have), using comma
-		 as the operand separator there is even less consistent, since
-		 there all branches only have a single operand.  */
-	      if (this_operand != 0
-		  || intel_parser.in_offset
-		  || intel_parser.in_bracket
-		  || (!current_templates->start->opcode_modifier.jump
-		      && !current_templates->start->opcode_modifier.jumpdword
-		      && !current_templates->start->opcode_modifier.jumpintersegment
-		      && !current_templates->start->operand_types[0].bitfield.jumpabsolute))
-		return intel_match_token (T_NIL);
-	      /* Remember the start of the 2nd operand and terminate 1st
-		 operand here.
-		 XXX This isn't right, yet (when SSSS:OOOO is right operand of
-		 another expression), but it gets at least the simplest case
-		 (a plain number or symbol on the left side) right.  */
-	      intel_parser.next_operand = intel_parser.op_string;
-	      *--intel_parser.op_string = '\0';
-	      return intel_match_token (':');
-	    }
-	}
-
-      /* e09'  Empty  */
-      else
-	break;
-
-      intel_match_token (cur_token.code);
-
-    }
-
-  if (in_offset)
-    {
-      --intel_parser.in_offset;
-      if (nregs < 0)
-	nregs = ~nregs;
-      if (NUM_ADDRESS_REGS > nregs)
-	{
-	  as_bad (_("Invalid operand to `OFFSET'"));
-	  return 0;
-	}
-      intel_parser.op_modifier |= 1 << T_OFFSET;
-    }
-
-  if (nregs >= 0 && NUM_ADDRESS_REGS > nregs)
-    i.base_reg = i386_regtab + REGNAM_AL + 3; /* bl is invalid as base */
-  return 1;
-}
-
-static int
-intel_bracket_expr (void)
-{
-  int was_offset = intel_parser.op_modifier & (1 << T_OFFSET);
-  const char *start = intel_parser.op_string;
-  int len;
-
-  if (i.op[this_operand].regs)
-    return intel_match_token (T_NIL);
-
-  intel_match_token ('[');
-
-  /* Mark as a memory operand only if it's not already known to be an
-     offset expression.  If it's an offset expression, we need to keep
-     the brace in.  */
-  if (!intel_parser.in_offset)
-    {
-      ++intel_parser.in_bracket;
-
-      /* Operands for jump/call inside brackets denote absolute addresses.  */
-      if (current_templates->start->opcode_modifier.jump
-	  || current_templates->start->opcode_modifier.jumpdword)
-	i.types[this_operand].bitfield.jumpabsolute = 1;
-
-      /* Unfortunately gas always diverged from MASM in a respect that can't
-	 be easily fixed without risking to break code sequences likely to be
-	 encountered (the testsuite even check for this): MASM doesn't consider
-	 an expression inside brackets unconditionally as a memory reference.
-	 When that is e.g. a constant, an offset expression, or the sum of the
-	 two, this is still taken as a constant load. gas, however, always
-	 treated these as memory references. As a compromise, we'll try to make
-	 offset expressions inside brackets work the MASM way (since that's
-	 less likely to be found in real world code), but make constants alone
-	 continue to work the traditional gas way. In either case, issue a
-	 warning.  */
-      intel_parser.op_modifier &= ~was_offset;
-    }
-  else
-    strcat (intel_parser.disp, "[");
-
-  /* Add a '+' to the displacement string if necessary.  */
-  if (*intel_parser.disp != '\0'
-      && *(intel_parser.disp + strlen (intel_parser.disp) - 1) != '+')
-    strcat (intel_parser.disp, "+");
-
-  if (intel_expr ()
-      && (len = intel_parser.op_string - start - 1,
-	  intel_match_token (']')))
-    {
-      /* Preserve brackets when the operand is an offset expression.  */
-      if (intel_parser.in_offset)
-	strcat (intel_parser.disp, "]");
-      else
-	{
-	  --intel_parser.in_bracket;
-	  if (i.base_reg || i.index_reg)
-	    intel_parser.is_mem = 1;
-	  if (!intel_parser.is_mem)
-	    {
-	      if (!(intel_parser.op_modifier & (1 << T_OFFSET)))
-		/* Defer the warning until all of the operand was parsed.  */
-		intel_parser.is_mem = -1;
-	      else if (!quiet_warnings)
-		as_warn (_("`[%.*s]' taken to mean just `%.*s'"),
-			 len, start, len, start);
-	    }
-	}
-      intel_parser.op_modifier |= was_offset;
-
-      return 1;
-    }
-  return 0;
-}
-
-/* e10	e11 e10'
-
-   e10'	[ expr ] e10'
-	| Empty  */
-static int
-intel_e10 (void)
-{
-  if (!intel_e11 ())
-    return 0;
-
-  while (cur_token.code == '[')
-    {
-      if (!intel_bracket_expr ())
-	return 0;
-    }
-
-  return 1;
-}
-
-/* e11	( expr )
-	| [ expr ]
-	| BYTE
-	| WORD
-	| DWORD
-	| FWORD
-	| QWORD
-	| TBYTE
-	| OWORD
-	| XMMWORD
-	| YMMWORD
-	| $
-	| .
-	| register
-	| id
-	| constant  */
-static int
-intel_e11 (void)
-{
-  switch (cur_token.code)
-    {
-    /* e11  ( expr ) */
-    case '(':
-      intel_match_token ('(');
-      strcat (intel_parser.disp, "(");
-
-      if (intel_expr () && intel_match_token (')'))
-	{
-	  strcat (intel_parser.disp, ")");
-	  return 1;
-	}
-      return 0;
-
-    /* e11  [ expr ] */
-    case '[':
-      return intel_bracket_expr ();
-
-    /* e11  $
-	    | .  */
-    case '.':
-      strcat (intel_parser.disp, cur_token.str);
-      intel_match_token (cur_token.code);
-
-      /* Mark as a memory operand only if it's not already known to be an
-	 offset expression.  */
-      if (!intel_parser.in_offset)
-	intel_parser.is_mem = 1;
-
-      return 1;
-
-    /* e11  register  */
-    case T_REG:
-      {
-	const reg_entry *reg = intel_parser.reg = cur_token.reg;
-
-	intel_match_token (T_REG);
-
-	/* Check for segment change.  */
-	if (cur_token.code == ':')
-	  {
-	    if (!reg->reg_type.bitfield.sreg2
-		&& !reg->reg_type.bitfield.sreg3)
-	      {
-		as_bad (_("`%s' is not a valid segment register"),
-			reg->reg_name);
-		return 0;
-	      }
-	    else if (i.mem_operands >= 2)
-	      as_warn (_("Segment override ignored"));
-	    else if (i.seg[i.mem_operands])
-	      as_warn (_("Extra segment override ignored"));
-	    else
-	      {
-		if (!intel_parser.in_offset)
-		  intel_parser.is_mem = 1;
-		switch (reg->reg_num)
-		  {
-		  case 0:
-		    i.seg[i.mem_operands] = &es;
-		    break;
-		  case 1:
-		    i.seg[i.mem_operands] = &cs;
-		    break;
-		  case 2:
-		    i.seg[i.mem_operands] = &ss;
-		    break;
-		  case 3:
-		    i.seg[i.mem_operands] = &ds;
-		    break;
-		  case 4:
-		    i.seg[i.mem_operands] = &fs;
-		    break;
-		  case 5:
-		    i.seg[i.mem_operands] = &gs;
-		    break;
-		  }
-	      }
-	  }
-
-	else if (reg->reg_type.bitfield.sreg3 && reg->reg_num == RegFlat)
-	  {
-	    as_bad (_("cannot use `FLAT' here"));
-	    return 0;
-	  }
-
-	/* Not a segment register. Check for register scaling.  */
-	else if (cur_token.code == '*')
-	  {
-	    if (!intel_parser.in_bracket)
-	      {
-		as_bad (_("Register scaling only allowed in memory operands"));
-		return 0;
-	      }
-
-	    if (reg->reg_type.bitfield.reg16) /* Disallow things like [si*1]. */
-	      reg = i386_regtab + REGNAM_AX + 4; /* sp is invalid as index */
-	    else if (i.index_reg)
-	      reg = i386_regtab + REGNAM_EAX + 4; /* esp is invalid as index */
-
-	    /* What follows must be a valid scale.  */
-	    intel_match_token ('*');
-	    i.index_reg = reg;
-	    i.types[this_operand].bitfield.baseindex = 1;
-
-	    /* Set the scale after setting the register (otherwise,
-	       i386_scale will complain)  */
-	    if (cur_token.code == '+' || cur_token.code == '-')
-	      {
-		char *str, sign = cur_token.code;
-		intel_match_token (cur_token.code);
-		if (cur_token.code != T_CONST)
-		  {
-		    as_bad (_("Syntax error: Expecting a constant, got `%s'"),
-			    cur_token.str);
-		    return 0;
-		  }
-		str = (char *) xmalloc (strlen (cur_token.str) + 2);
-		strcpy (str + 1, cur_token.str);
-		*str = sign;
-		if (!i386_scale (str))
-		  return 0;
-		free (str);
-	      }
-	    else if (!i386_scale (cur_token.str))
-	      return 0;
-	    intel_match_token (cur_token.code);
-	  }
-
-	/* No scaling. If this is a memory operand, the register is either a
-	   base register (first occurrence) or an index register (second
-	   occurrence).  */
-	else if (intel_parser.in_bracket)
-	  {
-
-	    if (!i.base_reg)
-	      i.base_reg = reg;
-	    else if (!i.index_reg)
-	      i.index_reg = reg;
-	    else
-	      {
-		as_bad (_("Too many register references in memory operand"));
-		return 0;
-	      }
-
-	    i.types[this_operand].bitfield.baseindex = 1;
-	  }
-
-	/* It's neither base nor index.  */
-	else if (!intel_parser.in_offset && !intel_parser.is_mem)
-	  {
-	    i386_operand_type temp = reg->reg_type;
-	    temp.bitfield.baseindex = 0;
-	    i.types[this_operand] = operand_type_or (i.types[this_operand],
-						     temp);
-	    i.types[this_operand].bitfield.unspecified = 0;
-	    i.op[this_operand].regs = reg;
-	    i.reg_operands++;
-	  }
-	else
-	  {
-	    as_bad (_("Invalid use of register"));
-	    return 0;
-	  }
-
-	/* Since registers are not part of the displacement string (except
-	   when we're parsing offset operands), we may need to remove any
-	   preceding '+' from the displacement string.  */
-	if (*intel_parser.disp != '\0'
-	    && !intel_parser.in_offset)
-	  {
-	    char *s = intel_parser.disp;
-	    s += strlen (s) - 1;
-	    if (*s == '+')
-	      *s = '\0';
-	  }
-
-	return 1;
-      }
-
-    /* e11  BYTE
-	    | WORD
-	    | DWORD
-	    | FWORD
-	    | QWORD
-	    | TBYTE
-	    | OWORD
-	    | XMMWORD
-	    | YMMWORD  */
-    case T_BYTE:
-    case T_WORD:
-    case T_DWORD:
-    case T_FWORD:
-    case T_QWORD:
-    case T_TBYTE:
-    case T_XMMWORD:
-    case T_YMMWORD:
-      intel_match_token (cur_token.code);
-
-      if (cur_token.code == T_PTR)
-	return 1;
-
-      /* It must have been an identifier.  */
-      intel_putback_token ();
-      cur_token.code = T_ID;
-      /* FALLTHRU */
-
-    /* e11  id
-	    | constant  */
-    case T_ID:
-      if (!intel_parser.in_offset && intel_parser.is_mem <= 0)
-	{
-	  symbolS *symbolP;
-
-	  /* The identifier represents a memory reference only if it's not
-	     preceded by an offset modifier and if it's not an equate.  */
-	  symbolP = symbol_find(cur_token.str);
-	  if (!symbolP || S_GET_SEGMENT(symbolP) != absolute_section)
-	    intel_parser.is_mem = 1;
-	}
-	/* FALLTHRU */
-
-    case T_CONST:
-    case '-':
-    case '+':
-      {
-	char *save_str, sign = 0;
-
-	/* Allow constants that start with `+' or `-'.  */
-	if (cur_token.code == '-' || cur_token.code == '+')
-	  {
-	    sign = cur_token.code;
-	    intel_match_token (cur_token.code);
-	    if (cur_token.code != T_CONST)
-	      {
-		as_bad (_("Syntax error: Expecting a constant, got `%s'"),
-			cur_token.str);
-		return 0;
-	      }
-	  }
-
-	save_str = (char *) xmalloc (strlen (cur_token.str) + 2);
-	strcpy (save_str + !!sign, cur_token.str);
-	if (sign)
-	  *save_str = sign;
-
-	/* Get the next token to check for register scaling.  */
-	intel_match_token (cur_token.code);
-
-	/* Check if this constant is a scaling factor for an
-	   index register.  */
-	if (cur_token.code == '*')
-	  {
-	    if (intel_match_token ('*') && cur_token.code == T_REG)
-	      {
-		const reg_entry *reg = cur_token.reg;
-
-		if (!intel_parser.in_bracket)
-		  {
-		    as_bad (_("Register scaling only allowed "
-			      "in memory operands"));
-		    return 0;
-		  }
-
-		 /* Disallow things like [1*si].
-		    sp and esp are invalid as index.  */
-		if (reg->reg_type.bitfield.reg16)
-		  reg = i386_regtab + REGNAM_AX + 4;
-		else if (i.index_reg)
-		  reg = i386_regtab + REGNAM_EAX + 4;
-
-		/* The constant is followed by `* reg', so it must be
-		   a valid scale.  */
-		i.index_reg = reg;
-		i.types[this_operand].bitfield.baseindex = 1;
-
-		/* Set the scale after setting the register (otherwise,
-		   i386_scale will complain)  */
-		if (!i386_scale (save_str))
-		  return 0;
-		intel_match_token (T_REG);
-
-		/* Since registers are not part of the displacement
-		   string, we may need to remove any preceding '+' from
-		   the displacement string.  */
-		if (*intel_parser.disp != '\0')
-		  {
-		    char *s = intel_parser.disp;
-		    s += strlen (s) - 1;
-		    if (*s == '+')
-		      *s = '\0';
-		  }
-
-		free (save_str);
-
-		return 1;
-	      }
-
-	    /* The constant was not used for register scaling. Since we have
-	       already consumed the token following `*' we now need to put it
-	       back in the stream.  */
-	    intel_putback_token ();
-	  }
-
-	/* Add the constant to the displacement string.  */
-	strcat (intel_parser.disp, save_str);
-	free (save_str);
-
-	return 1;
-      }
-    }
-
-  as_bad (_("Unrecognized token '%s'"), cur_token.str);
-  return 0;
-}
-
-/* Match the given token against cur_token. If they match, read the next
-   token from the operand string.  */
-static int
-intel_match_token (int code)
-{
-  if (cur_token.code == code)
-    {
-      intel_get_token ();
-      return 1;
-    }
-  else
-    {
-      as_bad (_("Unexpected token `%s'"), cur_token.str);
-      return 0;
-    }
-}
-
-/* Read a new token from intel_parser.op_string and store it in cur_token.  */
-static void
-intel_get_token (void)
-{
-  char *end_op;
-  const reg_entry *reg;
-  struct intel_token new_token;
-
-  new_token.code = T_NIL;
-  new_token.reg = NULL;
-  new_token.str = NULL;
-
-  /* Free the memory allocated to the previous token and move
-     cur_token to prev_token.  */
-  if (prev_token.str)
-    free (prev_token.str);
-
-  prev_token = cur_token;
-
-  /* Skip whitespace.  */
-  while (is_space_char (*intel_parser.op_string))
-    intel_parser.op_string++;
-
-  /* Return an empty token if we find nothing else on the line.  */
-  if (*intel_parser.op_string == '\0')
-    {
-      cur_token = new_token;
-      return;
-    }
-
-  /* The new token cannot be larger than the remainder of the operand
-     string.  */
-  new_token.str = (char *) xmalloc (strlen (intel_parser.op_string) + 1);
-  new_token.str[0] = '\0';
-
-  if (strchr ("0123456789", *intel_parser.op_string))
-    {
-      char *p = new_token.str;
-      char *q = intel_parser.op_string;
-      new_token.code = T_CONST;
-
-      /* Allow any kind of identifier char to encompass floating point and
-	 hexadecimal numbers.  */
-      while (is_identifier_char (*q))
-	*p++ = *q++;
-      *p = '\0';
-
-      /* Recognize special symbol names [0-9][bf].  */
-      if (strlen (intel_parser.op_string) == 2
-	  && (intel_parser.op_string[1] == 'b'
-	      || intel_parser.op_string[1] == 'f'))
-	new_token.code = T_ID;
-    }
-
-  else if ((reg = parse_register (intel_parser.op_string, &end_op)) != NULL)
-    {
-      size_t len = end_op - intel_parser.op_string;
-
-      new_token.code = T_REG;
-      new_token.reg = reg;
-
-      memcpy (new_token.str, intel_parser.op_string, len);
-      new_token.str[len] = '\0';
-    }
-
-  else if (is_identifier_char (*intel_parser.op_string))
-    {
-      char *p = new_token.str;
-      char *q = intel_parser.op_string;
-
-      /* A '.' or '$' followed by an identifier char is an identifier.
-	 Otherwise, it's operator '.' followed by an expression.  */
-      if ((*q == '.' || *q == '$') && !is_identifier_char (*(q + 1)))
-	{
-	  new_token.code = '.';
-	  new_token.str[0] = '.';
-	  new_token.str[1] = '\0';
-	}
-      else
-	{
-	  while (is_identifier_char (*q) || *q == '@')
-	    *p++ = *q++;
-	  *p = '\0';
-
-	  if (strcasecmp (new_token.str, "NOT") == 0)
-	    new_token.code = '~';
-
-	  else if (strcasecmp (new_token.str, "MOD") == 0)
-	    new_token.code = '%';
-
-	  else if (strcasecmp (new_token.str, "AND") == 0)
-	    new_token.code = '&';
-
-	  else if (strcasecmp (new_token.str, "OR") == 0)
-	    new_token.code = '|';
-
-	  else if (strcasecmp (new_token.str, "XOR") == 0)
-	    new_token.code = '^';
-
-	  else if (strcasecmp (new_token.str, "SHL") == 0)
-	    new_token.code = T_SHL;
-
-	  else if (strcasecmp (new_token.str, "SHR") == 0)
-	    new_token.code = T_SHR;
-
-	  else if (strcasecmp (new_token.str, "BYTE") == 0)
-	    new_token.code = T_BYTE;
-
-	  else if (strcasecmp (new_token.str, "WORD") == 0)
-	    new_token.code = T_WORD;
-
-	  else if (strcasecmp (new_token.str, "DWORD") == 0)
-	    new_token.code = T_DWORD;
-
-	  else if (strcasecmp (new_token.str, "FWORD") == 0)
-	    new_token.code = T_FWORD;
-
-	  else if (strcasecmp (new_token.str, "QWORD") == 0)
-	    new_token.code = T_QWORD;
-
-	  else if (strcasecmp (new_token.str, "TBYTE") == 0
-		   /* XXX remove (gcc still uses it) */
-		   || strcasecmp (new_token.str, "XWORD") == 0)
-	    new_token.code = T_TBYTE;
-
-	  else if (strcasecmp (new_token.str, "XMMWORD") == 0
-		   || strcasecmp (new_token.str, "OWORD") == 0)
-	    new_token.code = T_XMMWORD;
-
-	  else if (strcasecmp (new_token.str, "YMMWORD") == 0)
-	    new_token.code = T_YMMWORD;
-
-	  else if (strcasecmp (new_token.str, "PTR") == 0)
-	    new_token.code = T_PTR;
-
-	  else if (strcasecmp (new_token.str, "SHORT") == 0)
-	    new_token.code = T_SHORT;
-
-	  else if (strcasecmp (new_token.str, "OFFSET") == 0)
-	    {
-	      new_token.code = T_OFFSET;
-
-	      /* ??? This is not mentioned in the MASM grammar but gcc
-		     makes use of it with -mintel-syntax.  OFFSET may be
-		     followed by FLAT:  */
-	      if (strncasecmp (q, " FLAT:", 6) == 0)
-		strcat (new_token.str, " FLAT:");
-	    }
-
-	  else
-	    new_token.code = T_ID;
-	}
-    }
-
-  else if (strchr ("+-/*%|&^:[]()~", *intel_parser.op_string))
-    {
-      new_token.code = *intel_parser.op_string;
-      new_token.str[0] = *intel_parser.op_string;
-      new_token.str[1] = '\0';
-    }
-
-  else if (strchr ("<>", *intel_parser.op_string)
-	   && *intel_parser.op_string == *(intel_parser.op_string + 1))
-    {
-      new_token.code = *intel_parser.op_string == '<' ? T_SHL : T_SHR;
-      new_token.str[0] = *intel_parser.op_string;
-      new_token.str[1] = *intel_parser.op_string;
-      new_token.str[2] = '\0';
-    }
-
-  else
-    as_bad (_("Unrecognized token `%s'"), intel_parser.op_string);
-
-  intel_parser.op_string += strlen (new_token.str);
-  cur_token = new_token;
-}
-
-/* Put cur_token back into the token stream and make cur_token point to
-   prev_token.  */
-static void
-intel_putback_token (void)
-{
-  if (cur_token.code != T_NIL)
-    {
-      intel_parser.op_string -= strlen (cur_token.str);
-      free (cur_token.str);
-    }
-  cur_token = prev_token;
-
-  /* Forget prev_token.  */
-  prev_token.code = T_NIL;
-  prev_token.reg = NULL;
-  prev_token.str = NULL;
-}
+#include "tc-i386-intel.c"
 
 void
 tc_x86_parse_to_dw2regnum (expressionS *exp)

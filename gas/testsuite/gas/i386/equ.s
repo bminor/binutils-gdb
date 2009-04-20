@@ -27,7 +27,7 @@ _start:
  .equ r, -2
  .equ s, -2
 	mov	eax, r
-	mov	eax, [r]
+	mov	eax, FLAT:[r]
  .equ r, xtrn
 	mov	eax, offset r
 	mov	eax, [r]

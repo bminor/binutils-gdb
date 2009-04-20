@@ -2667,6 +2667,8 @@ e-crisaout.o: $(srcdir)/config/e-crisaout.c
 e-criself.o: $(srcdir)/config/e-criself.c
 	$(COMPILE) -c $(srcdir)/config/e-criself.c
 
+tc-i386.o: $(srcdir)/config/tc-i386-intel.c
+
 xtensa-relax.o: $(srcdir)/config/xtensa-relax.c
 	$(COMPILE) -c $(srcdir)/config/xtensa-relax.c
 

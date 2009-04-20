@@ -1,3 +1,26 @@
+2009-04-20  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/equ.s: Adjust.
+	* gas/i386/equ.d: Remove reference to equ.e.
+	* gas/i386/equ.e: Delete.
+	* gas/i386/intel-expr.s: New.
+	* gas/i386/intel-expr.d: New.
+	* gas/i386/i386.exp: Run new test.
+	* gas/i386/intel.s: Adjust.
+	* gas/i386/intel.e: Remove no longer valid warning messages.
+	* gas/i386/intel16.s: Adjust.
+	* gas/i386/intel16.d: Remove reference to intel16.e.
+	* gas/i386/intel16.e: Delete.
+	* gas/i386/intelbad.s: Add more tests.
+	* gas/i386/intelbad.l: Adjust.
+	* gas/i386/intelok.s: Remove now unneeded equates. Add more
+	tests.
+	* gas/i386/intelok.d: Remove reference to intelok.e. Adjust.
+	* gas/i386/intelok.e: Delete.
+	* gas/i386/x86_64.s: Adjust.
+	* gas/i386/x86_64.d: Remove reference to x86_64.e.
+	* gas/i386/x86_64.e: Delete.
+
 2009-04-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/all/gas.exp: Disable assign and assign-ok tests on blackfin.

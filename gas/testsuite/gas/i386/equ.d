@@ -1,6 +1,5 @@
 #objdump: -drw
 #name: i386 equates
-#stderr: equ.e
 
 .*: +file format .*
 

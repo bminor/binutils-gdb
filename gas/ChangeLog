@@ -1,5 +1,36 @@
 2009-04-20  Jan Beulich  <jbeulich@novell.com>
 
+	* Makefile.am: Add explicit dependency of tc-i386.o on
+	tc-i386-intel.c.
+	* Makefile.in: Likewise.
+	* config/tc-i386.c (i386_finalize_immediate): Declare, broken
+	out from i386_immediate.
+	(i386_immediate): Slightly re-arrange, call
+	i386_finalize_immediate.
+	(i386_finalize_displacement): Declare, broken out from
+	i386_displacement.
+	(i386_displacement): Slightly re-arrange, call
+	i386_finalize_displacement.
+	(i386_intel_simplify, i386_intel_parse_name): Declare.
+	(this_operand): Initialize to -1.
+	(set_intel_syntax): Set expression rank for O_full_ptr.
+	(md_assemble): Set this_operand back to -1 after parsing
+	operands.
+	(x86_cons): Negate intel_syntax to indicate state. Call
+	i386_intel_simplify.
+	(md_operand): Convert if to switch. Handle '[' for Intel
+	syntax.
+	(i386_intel_operand): Delete, including all helper functions
+	and data.
+	* config/tc-i386-intel.c: New file, all new code.
+	* config/tc-i386.h (i386_operator): Declare.
+	(md_operator): Define to i386_operator.
+	(i386_need_index_operator): Declare.
+	(md_need_index_operator): Define to i386_need_index_operator.
+	(O_full_ptr): Define.
+
+2009-04-20  Jan Beulich  <jbeulich@novell.com>
+
 	* expr.c (operand): Call md_need_index_operator() and
 	md_operator() if defined. Add unary label.
 	(operator): Call md_operator() if defined.
