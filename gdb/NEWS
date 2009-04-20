@@ -3,6 +3,10 @@
 
 *** Changes since GDB 6.8
 
+* GDB now supports hardware watchpoints on MIPS/Linux systems.  This
+feature is available with a native GDB running on kernel version
+2.6.28 or later.
+
 * GDB now has support for multi-byte and wide character sets on the
 target.  Strings whose character type is wchar_t, char16_t, or
 char32_t are now correctly printed.  GDB supports wide- and unicode-

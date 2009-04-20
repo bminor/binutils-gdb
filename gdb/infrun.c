@@ -2842,10 +2842,10 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 
       if (!HAVE_STEPPABLE_WATCHPOINT)
 	remove_breakpoints ();
-      registers_changed ();
 	/* Single step */
       hw_step = maybe_software_singlestep (current_gdbarch, read_pc ());
       target_resume (ecs->ptid, hw_step, TARGET_SIGNAL_0);
+      registers_changed ();
       waiton_ptid = ecs->ptid;
       if (HAVE_STEPPABLE_WATCHPOINT)
 	infwait_state = infwait_step_watch_state;

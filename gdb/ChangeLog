@@ -1,3 +1,35 @@
+2009-04-20  David Daney  <ddaney@caviumnetworks.com>
+
+	* NEWS: Mention MIPS/Linux hardware watchpoint support.
+
+2009-04-20  David Daney  <ddaney@caviumnetworks.com>
+
+	* mips-linux-nat.c (command.h, gdbcmd.h, gdb_assert.h): New #includes.
+	(maint_show_dr, super_close): New variables.
+	(super_fetch_registers, super_store_registers): Make static.
+	(PTRACE_GET_WATCH_REGS, PTRACE_SET_WATCH_REGS, W_BIT, R_BIT, I_BIT)
+	(W_MASK, R_MASK, I_MASK, IRW_MASK, MAX_DEBUG_REGISTER): Define.
+	(pt_watch_style): Define new enum.
+	(mips32_watch_regs, mips64_watch_regs, pt_watch_regs, mips_watchpoint):
+	Define new structs.
+	(watch_readback_valid, watch_readback, current_watches,	watch_mirror):
+	New variables.
+	(get_irw_mask, get_reg_mask, get_num_valid, get_watchlo)
+	(set_watchlo, get_watchhi, set_watchhi, mips_show_dr)
+	(mips_linux_read_watch_registers, mips_linux_can_use_hw_breakpoint)
+	(mips_linux_stopped_by_watchpoint, mips_linux_stopped_data_address)
+	(type_to_irw, fill_mask, try_one_watch)
+	(mips_linux_region_ok_for_hw_watchpoint, write_watchpoint_regs)
+	(mips_linux_new_thread, populate_regs_from_watches)
+	(mips_linux_insert_watchpoint, mips_linux_remove_watchpoint)
+	(mips_linux_close): New functions.
+	(_initialize_mips_linux_nat): Register watchpoint functions with
+	the target_ops.  Add show-debug-regs maintenance command.
+
+2009-04-20  David Daney  <ddaney@caviumnetworks.com>
+
+	* infrun.c (handle_inferior_event): Move gegisters_changed call down.
+
 2009-04-19  Pedro Alves  <pedro@codesourcery.com>
 
 	* NEWS: Mention gdbserver support for x86 Windows CE.
