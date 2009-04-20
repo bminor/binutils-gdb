@@ -169,6 +169,7 @@ typedef char operator_rankT;
 extern char get_symbol_end (void);
 extern void expr_begin (void);
 extern void expr_set_precedence (void);
+extern void expr_set_rank (operatorT, operator_rankT);
 extern segT expr (int, expressionS *, enum expr_mode);
 extern unsigned int get_single_number (void);
 extern symbolS *make_expr_symbol (expressionS * expressionP);

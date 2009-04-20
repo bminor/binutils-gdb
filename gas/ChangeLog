@@ -1,3 +1,14 @@
+2009-04-20  Jan Beulich  <jbeulich@novell.com>
+
+	* expr.c (operand): Call md_need_index_operator() and
+	md_operator() if defined. Add unary label.
+	(operator): Call md_operator() if defined.
+	(expr): Adjust assertions on range and rank of op_left and
+	op_right. Don't abort on unhandled operators when reducing
+	expressions with both operands being constant.
+	(expr_set_rank): New.
+	* expr.h (expr_set_rank): Declare.
+
 2008-04-15  Anthony Green  <green@moxielogic.com>
 
 	* config/tc-moxie.h: New file.
