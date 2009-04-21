@@ -1,4 +1,4 @@
-2009-04-20  Andreas Schwab  <schwab@linux-m68k.org>
+2009-04-21  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* configure.ac: Don't postprocess Makefile in config.status.
 	Substitute GDB_NM_FILE.  Don't substitute nm_h.
