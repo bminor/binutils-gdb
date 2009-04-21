@@ -1,3 +1,22 @@
+2009-04-21  Kai Tietz  <kai.tietz@onevision.com>
+
+	* coff-x86_64.c (PEI_HEADERS): Protect includes.
+	(bfd_pe_print_pdata): Remove #ifdef PE variation.
+	* pei-x86_64.c (PEI_HEADERS): Define to prevent double
+	include in coff-x86_64.c of headers.
+	(PDATA_ROW_SIZE): New define.
+	(pex_regs[]): New static array.
+	(pex64_get_runtime_function): New static function.
+	(pex64_get_unwind_info): Likewise.
+	(pex64_get_scope_entry): Likewise.
+	(pex64_xdata_print_uwd_codes): Likewise.
+	(pex64_get_section_by_rva): Likewise.
+	(pex64_dump_xdata): Likewise.
+	(pex64_bfd_print_pdata): Likewise.
+	(bfd_pe_print_pdata): Define as pex64_bfd_print_pdata.
+	* peXXigen.c (_bfd_pex64_print_pdata): Removed implementation.
+	* libpei.h (_bfd_pex64_print_pdata): Removed declaration.
+
 2009-04-19  Peter O'Gorman  <binutils@mlists.thewrittenword.com>
             Alan Modra  <amodra@bigpond.net.au>
             Dave Korn  <dave.korn.cygwin@gmail.com>

@@ -24,6 +24,10 @@
 #define COFF_WITH_pex64
 #endif
 
+/* Note we have to make sure not to include headers twice.
+   Not all headers are wrapped in #ifdef guards, so we define
+   PEI_HEADERS to prevent double including here.  */
+#ifndef PEI_HEADERS
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"
@@ -32,6 +36,7 @@
 #include "coff/pe.h"
 #include "libcoff.h"
 #include "libiberty.h"
+#endif
 
 #define BADMAG(x) AMD64BADMAG(x)
 
@@ -711,14 +716,9 @@ coff_amd64_is_local_label_name (bfd *abfd, const char *name)
 
 #endif /* TARGET_UNDERSCORE */
 
-#ifdef PE
-#undef  bfd_pe_print_pdata
-#define bfd_pe_print_pdata   _bfd_pex64_print_pdata
-#else  /* PE */
 #ifndef bfd_pe_print_pdata
 #define bfd_pe_print_pdata   NULL
 #endif
-#endif /* PE */
 
 #include "coffcode.h"
 
