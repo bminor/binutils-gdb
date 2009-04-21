@@ -37,30 +37,30 @@ intel_state;
 
 /* offset X_add_symbol */
 #define O_offset O_md32
-/* byte ptr X_add_symbol */
-#define O_byte_ptr O_md31
-/* word ptr X_add_symbol */
-#define O_word_ptr O_md30
-/* dword ptr X_add_symbol */
-#define O_dword_ptr O_md29
-/* qword ptr X_add_symbol */
-#define O_qword_ptr O_md28
-/* oword ptr X_add_symbol */
-#define O_oword_ptr O_md27
-/* fword ptr X_add_symbol */
-#define O_fword_ptr O_md26
-/* tbyte ptr X_add_symbol */
-#define O_tbyte_ptr O_md25
-/* xmmword ptr X_add_symbol */
-#define O_xmmword_ptr O_md24
-/* ymmword ptr X_add_symbol */
-#define O_ymmword_ptr O_md23
-/* near ptr X_add_symbol */
-#define O_near_ptr O_md22
-/* far ptr X_add_symbol */
-#define O_far_ptr O_md21
 /* offset X_add_symbol */
-#define O_short O_md20
+#define O_short O_md31
+/* near ptr X_add_symbol */
+#define O_near_ptr O_md30
+/* far ptr X_add_symbol */
+#define O_far_ptr O_md29
+/* byte ptr X_add_symbol */
+#define O_byte_ptr O_md28
+/* word ptr X_add_symbol */
+#define O_word_ptr O_md27
+/* dword ptr X_add_symbol */
+#define O_dword_ptr O_md26
+/* qword ptr X_add_symbol */
+#define O_qword_ptr O_md25
+/* oword ptr X_add_symbol */
+#define O_oword_ptr O_md24
+/* fword ptr X_add_symbol */
+#define O_fword_ptr O_md23
+/* tbyte ptr X_add_symbol */
+#define O_tbyte_ptr O_md22
+/* xmmword ptr X_add_symbol */
+#define O_xmmword_ptr O_md21
+/* ymmword ptr X_add_symbol */
+#define O_ymmword_ptr O_md20
 
 static struct
   {

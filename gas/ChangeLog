@@ -1,3 +1,7 @@
+2009-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386-intel.c (O_XXX): Reorder.
+
 2009-04-20  Jan Beulich  <jbeulich@novell.com>
 
 	* Makefile.am: Add explicit dependency of tc-i386.o on
