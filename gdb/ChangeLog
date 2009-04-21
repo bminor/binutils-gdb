@@ -1,6 +1,12 @@
 2009-04-21  Tom Tromey  <tromey@redhat.com>
 
 	* configure: Rebuild.
+	* configure.ac: Use lower case for start of help strings.  Clean
+	up --with-sysroot help.
+
+2009-04-21  Tom Tromey  <tromey@redhat.com>
+
+	* configure: Rebuild.
 	* acinclude.m4 (AM_ICONV): Use AC_HELP_STRING.
 	* configure.ac: Use AC_HELP_STRING.  Use upper case for variables
 	in help.

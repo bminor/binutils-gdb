@@ -95,7 +95,7 @@ AM_INIT_AUTOMAKE(gdb, UNUSED-VERSION, [no-define])
 debugdir=${libdir}/debug
 	 
 AC_ARG_WITH(separate-debug-dir,
-AC_HELP_STRING([--with-separate-debug-dir=PATH], [Look for global separate debug info in this path [LIBDIR/debug]]),
+AC_HELP_STRING([--with-separate-debug-dir=PATH], [look for global separate debug info in this path [LIBDIR/debug]]),
 [debugdir="${withval}"])
 	
 AC_DEFINE_DIR(DEBUGDIR, debugdir,
@@ -119,7 +119,7 @@ case ${debugdir} in
 esac
 
 AC_ARG_WITH(relocated-sources,
-AC_HELP_STRING([--with-relocated-sources=PATH], [Automatically relocate this path for source files]),
+AC_HELP_STRING([--with-relocated-sources=PATH], [automatically relocate this path for source files]),
 [reloc_srcdir="${withval}"
  AC_DEFINE_DIR(RELOC_SRCDIR, reloc_srcdir,
               [Relocated directory for source files. ])
@@ -318,7 +318,7 @@ esac
 
 # Libunwind support.
 AC_ARG_WITH(libunwind,
-AC_HELP_STRING([--with-libunwind], [Use libunwind frame unwinding support]),
+AC_HELP_STRING([--with-libunwind], [use libunwind frame unwinding support]),
 [case "${withval}" in
   yes)  enable_libunwind=yes ;;
   no)   enable_libunwind=no ;;
@@ -1480,7 +1480,7 @@ fi
 dnl Handle optional features that can be enabled.
 
 AC_ARG_WITH(sysroot,
-AC_HELP_STRING([--with-sysroot[=DIR]], [Search for usr/lib et al within DIR.]),
+AC_HELP_STRING([--with-sysroot@<:@=DIR@:>@], [search for usr/lib et al within DIR]),
 [
  case ${with_sysroot} in
  yes) TARGET_SYSTEM_ROOT='${exec_prefix}/${target_alias}/sys-root' ;;
@@ -1517,7 +1517,7 @@ AC_SUBST(TARGET_SYSTEM_ROOT_DEFINE)
 
 system_gdbinit=
 AC_ARG_WITH(system-gdbinit,
-AC_HELP_STRING([--with-system-gdbinit=FILE], [Automatically load a system-wide gdbinit file]),
+AC_HELP_STRING([--with-system-gdbinit=FILE], [automatically load a system-wide gdbinit file]),
 [system_gdbinit=${withval}])
 
 AC_DEFINE_DIR(SYSTEM_GDBINIT, system_gdbinit,
@@ -1577,7 +1577,7 @@ case "${host}" in
 esac
 
 AC_ARG_ENABLE(build-warnings,
-AC_HELP_STRING([--enable-build-warnings], [Enable build-time compiler warnings if gcc is used]),
+AC_HELP_STRING([--enable-build-warnings], [enable build-time compiler warnings if gcc is used]),
 [case "${enableval}" in
   yes)	;;
   no)	build_warnings="-w";;
@@ -1591,7 +1591,7 @@ if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
   echo "Setting compiler warning flags = $build_warnings" 6>&1
 fi])dnl
 AC_ARG_ENABLE(gdb-build-warnings,
-AC_HELP_STRING([--enable-gdb-build-warnings], [Enable GDB specific build-time compiler warnings if gcc is used]),
+AC_HELP_STRING([--enable-gdb-build-warnings], [enable GDB specific build-time compiler warnings if gcc is used]),
 [case "${enableval}" in
   yes)	;;
   no)	build_warnings="-w";;
@@ -1829,7 +1829,7 @@ AC_PATH_X
 # not part of the source tree.
 #
 AC_ARG_ENABLE(sim,
-AC_HELP_STRING([--enable-sim], [Link gdb with simulator]),
+AC_HELP_STRING([--enable-sim], [link gdb with simulator]),
 [echo "enable_sim = $enable_sim";
  echo "enableval = ${enableval}";
  case "${enableval}" in

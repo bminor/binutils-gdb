@@ -874,22 +874,22 @@ Optional Features:
   --enable-profiling      enable profiling of GDB
   --disable-rpath         do not hardcode runtime library paths
   --enable-werror         treat compile warnings as errors
-  --enable-build-warnings Enable build-time compiler warnings if gcc is used
+  --enable-build-warnings enable build-time compiler warnings if gcc is used
   --enable-gdb-build-warnings
-                          Enable GDB specific build-time compiler warnings if
+                          enable GDB specific build-time compiler warnings if
                           gcc is used
-  --enable-sim            Link gdb with simulator
+  --enable-sim            link gdb with simulator
   --enable-multi-ice      build the multi-ice-gdb-server
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-separate-debug-dir=PATH
-                          Look for global separate debug info in this path
+                          look for global separate debug info in this path
                           LIBDIR/debug
   --with-relocated-sources=PATH
-                          Automatically relocate this path for source files
-  --with-libunwind        Use libunwind frame unwinding support
+                          automatically relocate this path for source files
+  --with-libunwind        use libunwind frame unwinding support
   --with-curses           use the curses library instead of the termcap
                           library
   --with-pkgversion=PKG   Use PKG in the version string in place of "GDB"
@@ -906,9 +906,10 @@ Optional Packages:
                           don't use included regex; this is the default on
                           systems with version 2 of the GNU C library (use
                           with caution on other system)
-  --with-sysroot=DIR    Search for usr/lib et al within DIR.
+  --with-sysroot[=DIR]
+                          search for usr/lib et al within DIR
   --with-system-gdbinit=FILE
-                          Automatically load a system-wide gdbinit file
+                          automatically load a system-wide gdbinit file
   --with-tcl              directory containing tcl configuration (tclConfig.sh)
   --with-tk               directory containing tk configuration (tkConfig.sh)
   --with-x                use the X Window System
