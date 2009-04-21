@@ -95,7 +95,7 @@ AM_INIT_AUTOMAKE(gdb, UNUSED-VERSION, [no-define])
 debugdir=${libdir}/debug
 	 
 AC_ARG_WITH(separate-debug-dir,
-AC_HELP_STRING([--with-separate-debug-dir=PATH], [look for global separate debug info in this path [LIBDIR/debug]]),
+[AC_HELP_STRING([--with-separate-debug-dir=PATH], [look for global separate debug info in this path [LIBDIR/debug]])],
 [debugdir="${withval}"])
 	
 AC_DEFINE_DIR(DEBUGDIR, debugdir,
