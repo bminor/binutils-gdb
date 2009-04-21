@@ -1,3 +1,7 @@
+2009-04-21  Pierre Muller  <muller.u-strasbg.fr>
+
+	* gnu-nat.h (proc_debug): Add missing continuation line in macro.
+	
 2009-04-20  David Daney  <ddaney@caviumnetworks.com>
 
 	* NEWS: Mention MIPS/Linux hardware watchpoint support.
