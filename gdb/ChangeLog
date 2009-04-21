@@ -1,3 +1,12 @@
+2009-04-20  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* configure.ac: Don't postprocess Makefile in config.status.
+	Substitute GDB_NM_FILE.  Don't substitute nm_h.
+	* Makefile.in (GDB_NM_FILE): Substitute.
+	(TAGS): Use $(GDB_NM_FILE) instead of $(NAT_FILE).
+	* configure: Regenerate.
+	* gnulib/Makefile.in: Regenerate.
+
 2009-04-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.ac (--with-datarootdir, --with-docdir, --with-pdfdir,
@@ -38,7 +47,7 @@
 2009-04-21  Pierre Muller  <muller.u-strasbg.fr>
 
 	* gnu-nat.h (proc_debug): Add missing continuation line in macro.
-	
+
 2009-04-20  David Daney  <ddaney@caviumnetworks.com>
 
 	* NEWS: Mention MIPS/Linux hardware watchpoint support.
@@ -313,7 +322,7 @@
 2009-04-01  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* mips-tdep.c (mips_numeric_register_alieses): New definition.
-	(mips_gdbarch_init): Add user registers from 
+	(mips_gdbarch_init): Add user registers from
 	mips_numeric_register_aliases.
 
 2009-04-01  Joel Brobecker  <brobecker@adacore.com>

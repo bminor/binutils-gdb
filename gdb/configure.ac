@@ -1937,9 +1937,7 @@ files=
 links=
 
 rm -f nm.h
-nm_h=""
 if test "${nativefile}" != ""; then
-    nm_h=nm.h
     case "${nativefile}" in
       nm-*.h ) GDB_NM_FILE="config/${gdb_host_cpu}/${nativefile}" ;;
       * ) GDB_NM_FILE="${nativefile}"
@@ -1948,7 +1946,7 @@ if test "${nativefile}" != ""; then
     links="${links} nm.h"
     AC_DEFINE_UNQUOTED(GDB_NM_FILE, "${GDB_NM_FILE}", [nativefile])
 fi
-AC_SUBST(nm_h)
+AC_SUBST(GDB_NM_FILE)
 
 AC_LINK_FILES($files, $links)
 
@@ -1988,24 +1986,10 @@ AC_SUBST(pdfdir)
 
 AC_OUTPUT(Makefile .gdbinit:gdbinit.in gnulib/Makefile,
 [
-dnl Autoconf doesn't provide a mechanism for modifying definitions 
-dnl provided by makefile fragments.
-dnl
-
-changequote(,)dnl
-sed -e '/^NAT_FILE[ 	]*=/s,^NAT_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,' <Makefile >Makefile.tmp
-mv -f Makefile.tmp Makefile
-changequote([,])dnl
-
-
 case x$CONFIG_HEADERS in
 xconfig.h:config.in)
 echo > stamp-h ;;
 esac
-],
-[
-gdb_host_cpu=$gdb_host_cpu
-nativefile=$nativefile
 ])
 
 exit 0

@@ -1107,9 +1107,10 @@ gdb1$(EXEEXT): gdb$(EXEEXT)
 # TAGS depends on all the files that go into it so you can rebuild TAGS
 # with `make TAGS' and not have to say `rm TAGS' first.
 
+GDB_NM_FILE = @GDB_NM_FILE@
 TAGS: $(DEPFILES) $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 	@echo Making TAGS
-	@etags $(srcdir)/$(NAT_FILE) \
+	@etags $(srcdir)/$(GDB_NM_FILE) \
 	`(for i in $(DEPFILES) $(TAGFILES_NO_SRCDIR); do \
 		echo $(srcdir)/$$i ; \
 	done ; for i in $(TAGFILES_WITH_SRCDIR); do \
