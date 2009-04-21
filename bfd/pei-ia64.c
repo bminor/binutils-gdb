@@ -1,5 +1,6 @@
 /* BFD back-end for HP/Intel IA-64 PE IMAGE COFF files.
-   Copyright 1999, 2000, 2001, 2002, 2007, 2009 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2007, 2009
+   Free Software Foundation, Inc.
    Contributed by David Mosberger <davidm@hpl.hp.com>
 
    This implementation only supports objcopy to ouput IA-64 PE IMAGE COFF
@@ -34,7 +35,5 @@
 #define TARGET_UNDERSCORE '_'
 /* Long section names not allowed in executable images, only object files.  */
 #define COFF_LONG_SECTION_NAMES 0
-#define PEI_TARGET_SUBSYSTEM		IMAGE_SUBSYSTEM_EFI_APPLICATION
-#define PEI_FORCE_MINIMUM_ALIGNMENT
 
 #include "coff-ia64.c"

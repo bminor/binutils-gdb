@@ -29,9 +29,9 @@
 #include "libcoff.h"
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
-/* The page size is a guess based on ELF.  */
 
-#define COFF_PAGE_SIZE 0x1000
+/* Windows ia64 uses 8K page size.  */
+#define COFF_PAGE_SIZE 0x2000
 
 static reloc_howto_type howto_table[] =
 {

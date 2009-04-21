@@ -264,13 +264,6 @@ pe_mkobject (bfd * abfd)
   /* in_reloc_p is architecture dependent.  */
   pe->in_reloc_p = in_reloc_p;
 
-#ifdef PEI_FORCE_MINIMUM_ALIGNMENT
-  pe->force_minimum_alignment = 1;
-#endif
-#ifdef PEI_TARGET_SUBSYSTEM
-  pe->target_subsystem = PEI_TARGET_SUBSYSTEM;
-#endif
-
   return TRUE;
 }
 

@@ -1,3 +1,24 @@
+2009-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* coff-ia64.c (COFF_PAGE_SIZE): Changed to 8K.
+	
+	* coffcode.h (coff_compute_section_file_positions): Clear
+	D_PAGED if PE section alignment is smaller than COFF_PAGE_SIZE.
+
+	* libcoff-in.h (pe_tdata): Remove force_minimum_alignment and
+	force_minimum_alignment.
+
+	* libcoff.h: Regenerated.
+
+	* pei-ia64.c (PEI_TARGET_SUBSYSTEM): Removed.
+	(PEI_FORCE_MINIMUM_ALIGNMENT): Likewise.
+
+	* peicode.h (pe_mkobject): Don't set force_minimum_alignment
+	nor target_subsystem.
+
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Don't check
+	force_minimum_alignment nor target_subsystem.
+
 2009-04-21  Kai Tietz  <kai.tietz@onevision.com>
 
 	* coff-x86_64.c (PEI_HEADERS): Protect includes.
@@ -18,8 +39,8 @@
 	* libpei.h (_bfd_pex64_print_pdata): Removed declaration.
 
 2009-04-19  Peter O'Gorman  <binutils@mlists.thewrittenword.com>
-            Alan Modra  <amodra@bigpond.net.au>
-            Dave Korn  <dave.korn.cygwin@gmail.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+	    Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* peXXigen.c (_bfd_XXi_swap_sym_in): Fix name handling w.r.t
 	long names and non-NUL-terminated strings.
@@ -424,7 +445,7 @@
 	    Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* elf32-s390.c (elf_s390_check_relocs): Use the SYMBOL_*
-        macros for visibilty and locality checks.
+	macros for visibilty and locality checks.
 	(elf_s390_adjust_dynamic_symbol): Likewise.
 	(allocate_dynrelocs): Likewise.
 	(elf_s390_relocate_section): Likewise.

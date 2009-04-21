@@ -548,17 +548,6 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   bfd_vma sa, fa, ib;
   IMAGE_DATA_DIRECTORY idata2, idata5, tls;
   
-  if (pe->force_minimum_alignment)
-    {
-      if (!extra->FileAlignment)
-	extra->FileAlignment = PE_DEF_FILE_ALIGNMENT;
-      if (!extra->SectionAlignment)
-	extra->SectionAlignment = PE_DEF_SECTION_ALIGNMENT;
-    }
-
-  if (extra->Subsystem == IMAGE_SUBSYSTEM_UNKNOWN)
-    extra->Subsystem = pe->target_subsystem;
-
   sa = extra->SectionAlignment;
   fa = extra->FileAlignment;
   ib = extra->ImageBase;

@@ -3186,6 +3186,13 @@ coff_compute_section_file_positions (bfd * abfd)
     int target_index;
     bfd_size_type amt;
 
+#ifdef COFF_PAGE_SIZE
+    /* Clear D_PAGED if section alignment is smaller than
+       COFF_PAGE_SIZE.  */
+   if (pe_data (abfd)->pe_opthdr.SectionAlignment < COFF_PAGE_SIZE)
+     abfd->flags &= ~D_PAGED;
+#endif
+
     count = 0;
     for (current = abfd->sections; current != NULL; current = current->next)
       ++count;

@@ -117,8 +117,6 @@ typedef struct pe_tdata
   int has_reloc_section;
   bfd_boolean (*in_reloc_p) (bfd *, reloc_howto_type *);
   flagword real_flags;
-  int target_subsystem;
-  bfd_boolean force_minimum_alignment;
 } pe_data_type;
 
 #define pe_data(bfd)		((bfd)->tdata.pe_obj_data)
