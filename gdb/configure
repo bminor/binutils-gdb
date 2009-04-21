@@ -864,7 +864,8 @@ Optional Features:
 			  (and sometimes confusing) to the casual installer
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
-  --enable-targets        alternative target configurations
+  --enable-targets=TARGETS
+                          alternative target configurations
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
   --disable-gdbcli        disable command-line interface (CLI)
   --disable-gdbmi         disable machine-interface (MI)
@@ -872,35 +873,42 @@ Optional Features:
   --enable-gdbtk          enable gdbtk graphical user interface (GUI)
   --enable-profiling      enable profiling of GDB
   --disable-rpath         do not hardcode runtime library paths
-  --enable-werror    treat compile warnings as errors
+  --enable-werror         treat compile warnings as errors
   --enable-build-warnings Enable build-time compiler warnings if gcc is used
-  --enable-gdb-build-warnings Enable GDB specific build-time compiler warnings if gcc is used
+  --enable-gdb-build-warnings
+                          Enable GDB specific build-time compiler warnings if
+                          gcc is used
   --enable-sim            Link gdb with simulator
   --enable-multi-ice      build the multi-ice-gdb-server
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-separate-debug-dir=path   Look for global separate debug info in this path LIBDIR/debug
+  --with-separate-debug-dir=PATH
+                          Look for global separate debug info in this path
+                          LIBDIR/debug
   --with-relocated-sources=PATH
                           Automatically relocate this path for source files
-  --with-libunwind            Use libunwind frame unwinding support
+  --with-libunwind        Use libunwind frame unwinding support
   --with-curses           use the curses library instead of the termcap
                           library
   --with-pkgversion=PKG   Use PKG in the version string in place of "GDB"
   --with-bugurl=URL       Direct users to URL to report a bug
-  --with-libiconv-prefix=DIR  search for libiconv in DIR/include and DIR/lib
+  --with-libiconv-prefix=DIR
+                          search for libiconv in DIR/include and DIR/lib
   --with-system-readline  use installed readline library
   --with-expat            include expat support (auto/yes/no)
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libexpat-prefix[=DIR]  search for libexpat in DIR/include and DIR/lib
   --without-libexpat-prefix     don't search for libexpat in includedir and libdir
   --with-python           include python support (auto/yes/no/<path>)
-  --without-included-regex don't use included regex; this is the default
-                          on systems with version 2 of the GNU C library
-                          (use with caution on other system)
-  --with-sysroot=DIR Search for usr/lib et al within DIR.
-  --with-system-gdbinit=file       Automatically load a system-wide gdbinit file
+  --without-included-regex
+                          don't use included regex; this is the default on
+                          systems with version 2 of the GNU C library (use
+                          with caution on other system)
+  --with-sysroot=DIR    Search for usr/lib et al within DIR.
+  --with-system-gdbinit=FILE
+                          Automatically load a system-wide gdbinit file
   --with-tcl              directory containing tcl configuration (tclConfig.sh)
   --with-tk               directory containing tk configuration (tkConfig.sh)
   --with-x                use the X Window System

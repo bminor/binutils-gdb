@@ -175,7 +175,7 @@ AC_DEFUN([AM_ICONV],
   dnl those with the standalone portable GNU libiconv installed).
 
   AC_ARG_WITH([libiconv-prefix],
-[  --with-libiconv-prefix=DIR  search for libiconv in DIR/include and DIR/lib], [
+    AC_HELP_STRING([--with-libiconv-prefix=DIR], [search for libiconv in DIR/include and DIR/lib]), [
     for dir in `echo "$withval" | tr : ' '`; do
       if test -d $dir/include; then LIBICONV_INCLUDE="-I$dir/include"; fi
       if test -d $dir/lib; then LIBICONV_LIBDIR="-L$dir/lib"; fi
