@@ -1,3 +1,9 @@
+2009-04-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.ac (--with-datarootdir, --with-docdir, --with-pdfdir,
+	--with-htmldir): New.
+	* configure: Regenerate.
+
 2009-04-21  Tom Tromey  <tromey@redhat.com>
 
 	* configure: Rebuild.

@@ -1,3 +1,24 @@
+2009-04-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.ac (--with-datarootdir, --with-docdir, --with-pdfdir,
+	--with-htmldir): New.
+	* configure: Regenerate.
+	* Makefile.in (datarootdir, docdir): Define.
+	(gdb.dvi, gdb.pdf): Use same -I options as for building gdb.info
+	instead of $(SET_TEXINPUTS).
+	(gdbint.dvi, gdbint.pdf): Use same -I options as for building
+	gdbint.info instead of $(SET_TEXINPUTS).
+	(gdbint/index.html): Use same -I options as for building
+	gdbint.info.
+	(stabs.dvi, stabs.pdf): Use same -I options as for building
+	stabs.info instead of $(SET_TEXINPUTS).
+	(stabs/index.html): Use same -I options as for building
+	stabs.info.
+	(annotate.dvi, annotate.pdf): Use same -I options as for building
+	annotate.info instead of $(SET_TEXINPUTS).
+	(annotate/index.html): Use same -I options as for building
+	annotate.info.
+
 2009-04-21  David Daney  <ddaney@caviumnetworks.com>
 
 	* gdb.texinfo (maint show-debug-regs): Remove mention of x86.

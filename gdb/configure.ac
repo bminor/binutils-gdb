@@ -1960,7 +1960,27 @@ dnl  At the moment, we just assume it's UTF-8.
 AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
           [Define to be a string naming the default host character set.])
 
-dnl Required by html, pdf, install-pdf and install-html
+# Flags needed to enable html installing and building
+AC_ARG_WITH(datarootdir,
+AC_HELP_STRING([--with-datarootdir], [use datarootdir as the data root directory.]),
+[datarootdir="\${prefix}/${withval}"],
+[datarootdir="\${prefix}/share"])
+
+AC_ARG_WITH(docdir,
+AC_HELP_STRING([--with-docdir], [install documentation in this directory.]),
+[docdir="\${prefix}/${withval}"],
+[docdir="\${datarootdir}/doc"])
+
+AC_ARG_WITH(pdfdir,
+AC_HELP_STRING([--with-pdfdir], [install pdf in this directory.]),
+[pdfdir="\${prefix}/${withval}"],
+[pdfdir="\${docdir}"])
+
+AC_ARG_WITH(htmldir,
+AC_HELP_STRING([--with-htmldir], [install html in this directory.]),
+[htmldir="\${prefix}/${withval}"],
+[htmldir="\${docdir}"])
+
 AC_SUBST(datarootdir)
 AC_SUBST(docdir)
 AC_SUBST(htmldir)

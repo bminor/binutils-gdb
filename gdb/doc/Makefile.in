@@ -24,6 +24,8 @@ VPATH = @srcdir@
 prefix = @prefix@
 
 infodir = @infodir@
+datarootdir = @datarootdir@
+docdir = @docdir@
 pdfdir = @pdfdir@
 htmldir = @htmldir@
 
@@ -338,7 +340,8 @@ gdb.dvi: ${GDB_DOC_FILES}
 		ln $(srcdir)/GDBvn.texi . || \
 		cp $(srcdir)/GDBvn.texi . ; else true; fi
 	rm -f $(GDB_TEX_TMPS)
-	$(SET_TEXINPUTS) $(TEXI2DVI) $(srcdir)/gdb.texinfo
+	$(TEXI2DVI) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) \
+		$(srcdir)/gdb.texinfo
 
 gdb.ps: gdb.dvi
 	$(DVIPS) -o $@ $?
@@ -349,7 +352,8 @@ gdb.pdf: ${GDB_DOC_FILES}
 		ln $(srcdir)/GDBvn.texi . || \
 		cp $(srcdir)/GDBvn.texi . ; else true; fi
 	rm -f $(GDB_TEX_TMPS)
-	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/gdb.texinfo
+	$(TEXI2DVI) --pdf -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) \
+		$(srcdir)/gdb.texinfo
 
 # GDB MANUAL: info file
 gdb.info: ${GDB_DOC_FILES}
@@ -440,14 +444,14 @@ GDBINT_TEX_TMPS = gdbint.aux gdbint.cp* gdbint.fn* gdbint.ky* \
 # GDB INTERNALS MANUAL: TeX dvi file
 gdbint.dvi: $(GDBINT_DOC_FILES)
 	rm -f $(GDBINT_TEX_TMPS)
-	$(SET_TEXINPUTS) $(TEXI2DVI) $(srcdir)/gdbint.texinfo
+	$(TEXI2DVI) -I $(srcdir) $(srcdir)/gdbint.texinfo
 
 gdbint.ps : gdbint.dvi
 	$(DVIPS) -o $@ $?
 
 gdbint.pdf: $(GDBINT_DOC_FILES)
 	rm -f $(GDBINT_TEX_TMPS)
-	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/gdbint.texinfo
+	$(TEXI2DVI) --pdf -I $(srcdir) $(srcdir)/gdbint.texinfo
 
 # GDB INTERNALS MANUAL: info file
 
@@ -457,7 +461,7 @@ gdbint.info: $(GDBINT_DOC_FILES)
 # GDB INTERNALS MANUAL: HTML file
 
 gdbint/index.html: $(GDBINT_DOC_FILES)
-	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/gdbint.texinfo
+	$(MAKEHTML) $(MAKEHTMLFLAGS) -I $(srcdir) $(srcdir)/gdbint.texinfo
 
 stabs.info: $(STABS_DOC_FILES)
 	$(MAKEINFO) -I $(srcdir) -o stabs.info $(srcdir)/stabs.texinfo
@@ -465,7 +469,7 @@ stabs.info: $(STABS_DOC_FILES)
 # STABS DOCUMENTATION: HTML file
 
 stabs/index.html: $(STABS_DOC_FILES)
-	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/stabs.texinfo
+	$(MAKEHTML) $(MAKEHTMLFLAGS) -I $(srcdir) $(srcdir)/stabs.texinfo
 
 # Clean these up before each run.  Avoids a catch 22 with not being
 # able to re-generate these files (to fix a corruption) because these
@@ -476,14 +480,14 @@ STABS_TEX_TMPS = stabs.aux stabs.cp* stabs.fn* stabs.ky* \
 # STABS DOCUMENTATION: TeX dvi file
 stabs.dvi : $(STABS_DOC_FILES)
 	rm -f $(STABS_TEX_TMPS)
-	$(SET_TEXINPUTS) $(TEXI2DVI) $(srcdir)/stabs.texinfo
+	$(TEXI2DVI) -I $(srcdir) $(srcdir)/stabs.texinfo
 
 stabs.ps: stabs.dvi
 	$(DVIPS) -o $@ $?
 
 stabs.pdf: $(STABS_DOC_FILES)
 	rm -f $(STABS_TEX_TMPS)
-	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/stabs.texinfo
+	$(TEXI2DVI) --pdf -I $(srcdir) $(srcdir)/stabs.texinfo
 
 # Clean these up before each run.  Avoids a catch 22 with not being
 # able to re-generate these files (to fix a corruption) because these
@@ -494,20 +498,20 @@ ANNOTATE_TEX_TMPS = annotate.aux annotate.cp* annotate.fn* annotate.ky* \
 # ANNOTATE DOCUMENTATION: TeX dvi file
 annotate.dvi : $(ANNOTATE_DOC_FILES)
 	rm -f $(ANNOTATE_TEX_TMPS)
-	$(SET_TEXINPUTS) $(TEXI2DVI) $(srcdir)/annotate.texinfo
+	$(TEXI2DVI) -I $(srcdir) $(srcdir)/annotate.texinfo
 
 annotate.ps: annotate.dvi
 	$(DVIPS) -o $@ $?
 
 annotate.pdf: $(ANNOTATE_DOC_FILES)
 	rm -f $(ANNOTATE_TEX_TMPS)
-	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/annotate.texinfo
+	$(TEXI2DVI) --pdf -I $(srcdir) $(srcdir)/annotate.texinfo
 
 annotate.info: $(ANNOTATE_DOC_FILES)
 	$(MAKEINFO)  -I $(srcdir) -o annotate.info $(srcdir)/annotate.texinfo
 
 annotate/index.html: $(ANNOTATE_DOC_FILES)
-	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/annotate.texinfo
+	$(MAKEHTML) $(MAKEHTMLFLAGS) -I $(srcdir) $(srcdir)/annotate.texinfo
 
 force:
 
