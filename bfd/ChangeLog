@@ -1,3 +1,18 @@
+2009-04-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (INTERWORK_FLAG): Check BFD_LINKER_CREATED.
+	(elf32_arm_write_section): Declare early.
+	(elf32_arm_size_stubs): Skip non-stub sections in the stub BFD.
+	(arm_allocate_glue_section_space): Exclude empty sections.
+	(ARM_GLUE_SECTION_FLAGS): Add SEC_LINKER_CREATED.
+	(bfd_elf32_arm_add_glue_sections_to_bfd): Do not skip the stub
+	BFD.
+	(elf32_arm_output_glue_section, elf32_arm_final_link): New.
+	(elf32_arm_merge_eabi_attributes): Skip the stub BFD.
+	(elf32_arm_size_dynamic_sections): Allocate interworking
+	sections here.
+	(bfd_elf32_bfd_final_link): Define.
+
 2009-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coff-ia64.c (COFF_PAGE_SIZE): Changed to 8K.

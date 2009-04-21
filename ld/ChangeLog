@@ -1,3 +1,13 @@
+2009-04-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* emultempl/armelf.em (bfd_for_interwork, arm_elf_after_open)
+	(arm_elf_set_bfd_for_interworking): Delete.
+	(arm_elf_before_allocation): Do not set the interworking BFD.
+	Move allocation inside not-dynamic block.
+	(arm_elf_create_output_section_statements): Create glue sections
+	and set the interworking BFD here.
+	(LDEMUL_AFTER_OPEN): Delete.
+
 2009-04-16  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* ldlang.c (lang_one_common): Use bfd_define_common_symbol.

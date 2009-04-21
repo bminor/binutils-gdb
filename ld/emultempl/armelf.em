@@ -31,7 +31,6 @@ fragment <<EOF
 #include "elf/arm.h"
 
 static char *thumb_entry_symbol = NULL;
-static bfd *bfd_for_interwork;
 static int byteswap_code = 0;
 static int target1_is_rel = 0${TARGET1_IS_REL};
 static char *target2_type = "${TARGET2_TYPE}";
@@ -53,61 +52,8 @@ gld${EMULATION_NAME}_before_parse (void)
 }
 
 static void
-arm_elf_after_open (void)
-{
-  {
-    LANG_FOR_EACH_INPUT_STATEMENT (is)
-      {
-	bfd_elf32_arm_add_glue_sections_to_bfd (is->the_bfd, & link_info);
-      }
-  }
-
-  /* Call the standard elf routine.  */
-  gld${EMULATION_NAME}_after_open ();
-}
-
-static void
-arm_elf_set_bfd_for_interworking (lang_statement_union_type *statement)
-{
-  if (statement->header.type == lang_input_section_enum)
-    {
-      asection *i = statement->input_section.section;
-
-      if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
-	  && (i->flags & SEC_EXCLUDE) == 0)
-	{
-	  asection *output_section = i->output_section;
-
-	  ASSERT (output_section->owner == link_info.output_bfd);
-
-	  /* Don't attach the interworking stubs to a dynamic object, to
-	     an empty section, etc.  */
-	  if ((output_section->flags & SEC_HAS_CONTENTS) != 0
-	      && (i->flags & SEC_NEVER_LOAD) == 0
-	      && ! (i->owner->flags & DYNAMIC))
-	    bfd_for_interwork = i->owner;
-	}
-    }
-}
-
-static void
 arm_elf_before_allocation (void)
 {
-  if (link_info.input_bfds != NULL)
-    {
-      /* The interworking bfd must be the last one in the link.  */
-      bfd_for_interwork = NULL;
-
-      lang_for_each_statement (arm_elf_set_bfd_for_interworking);
-
-      /* If bfd_for_interwork is NULL, then there are no loadable sections
-	 with real contents to be linked, so we are not going to have to
-	 create any interworking stubs, so it is OK not to call
-	 bfd_elf32_arm_get_bfd_for_interworking.  */
-      if (bfd_for_interwork != NULL)
-	bfd_elf32_arm_get_bfd_for_interworking (bfd_for_interwork, &link_info);
-    }
-
   bfd_elf32_arm_set_byteswap_code (&link_info, byteswap_code);
 
   /* Choose type of VFP11 erratum fix, or warn if specified fix is unnecessary
@@ -130,13 +76,13 @@ arm_elf_before_allocation (void)
 	    /* xgettext:c-format */
 	    einfo (_("Errors encountered processing file %s"), is->filename);
 	}
+
+      /* We have seen it all.  Allocate it, and carry on.  */
+      bfd_elf32_arm_allocate_interworking_sections (& link_info);
     }
 
   /* Call the standard elf routine.  */
   gld${EMULATION_NAME}_before_allocation ();
-
-  /* We have seen it all. Allocate it, and carry on.  */
-  bfd_elf32_arm_allocate_interworking_sections (& link_info);
 }
 
 static void
@@ -461,6 +407,10 @@ arm_elf_create_output_section_statements (void)
  
   stub_file->the_bfd->flags |= BFD_LINKER_CREATED;
   ldlang_add_file (stub_file);
+
+  /* Also use the stub file for stubs placed in a single output section.  */
+  bfd_elf32_arm_add_glue_sections_to_bfd (stub_file->the_bfd, &link_info);
+  bfd_elf32_arm_get_bfd_for_interworking (stub_file->the_bfd, &link_info);
 }
 
 /* Avoid processing the fake stub_file in vercheck, stat_needed and
@@ -620,9 +570,8 @@ PARSE_AND_LIST_ARGS_CASES='
       break;
 '
 
-# We have our own after_open and before_allocation functions, but they call
+# We have our own before_allocation etc. functions, but they call
 # the standard routines, so give them a different name.
-LDEMUL_AFTER_OPEN=arm_elf_after_open
 LDEMUL_BEFORE_ALLOCATION=arm_elf_before_allocation
 LDEMUL_AFTER_ALLOCATION=arm_elf_after_allocation
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=arm_elf_create_output_section_statements

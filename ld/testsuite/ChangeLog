@@ -1,3 +1,9 @@
+2009-04-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/farcall-mix.d, ld-arm/farcall-mix2.d,
+	ld-arm/farcall-group-size2.d, ld-arm/farcall-group.d,
+	ld-arm/farcall-mixed-lib.d: Update for linker changes.
+
 2009-04-17  Christophe Lyon  <christophe.lyon@st.com>
 
 	* ld-arm/arm-elf.exp: Add new test farcall-mixed-lib.

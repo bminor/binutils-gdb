@@ -61,6 +61,11 @@
 
 static struct elf_backend_data elf32_arm_vxworks_bed;
 
+static bfd_boolean elf32_arm_write_section (bfd *output_bfd,
+					    struct bfd_link_info *link_info,
+					    asection *sec,
+					    bfd_byte *contents);
+
 /* Note: code such as elf32_arm_reloc_type_lookup expect to use e.g.
    R_ARM_PC24 as an index into this, and find the R_ARM_PC24 HOWTO
    in that slot.  */
@@ -1881,7 +1886,8 @@ typedef unsigned short int insn16;
    interworkable.  */
 #define INTERWORK_FLAG(abfd)  \
   (EF_ARM_EABI_VERSION (elf_elfheader (abfd)->e_flags) >= EF_ARM_EABI_VER4 \
-  || (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK))
+  || (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK) \
+  || ((abfd)->flags & BFD_LINKER_CREATED))
 
 /* The linker script knows the section names for placement.
    The entry_names are used to do simple name mangling on the stubs.
@@ -3945,7 +3951,13 @@ elf32_arm_size_stubs (bfd *output_bfd,
       for (stub_sec = htab->stub_bfd->sections;
 	   stub_sec != NULL;
 	   stub_sec = stub_sec->next)
-	stub_sec->size = 0;
+	{
+	  /* Ignore non-stub sections.  */
+	  if (!strstr (stub_sec->name, STUB_SUFFIX))
+	    continue;
+
+	  stub_sec->size = 0;
+	}
 
       bfd_hash_traverse (&htab->stub_hash_table, arm_size_one_stub, htab);
 
@@ -4143,7 +4155,16 @@ arm_allocate_glue_section_space (bfd * abfd, bfd_size_type size, const char * na
   bfd_byte * contents;
 
   if (size == 0)
-    return;
+    {
+      /* Do not include empty glue sections in the output.  */
+      if (abfd != NULL)
+	{
+	  s = bfd_get_section_by_name (abfd, name);
+	  if (s != NULL)
+	    s->flags |= SEC_EXCLUDE;
+	}
+      return;
+    }
 
   BFD_ASSERT (abfd != NULL);
 
@@ -4545,11 +4566,9 @@ record_vfp11_erratum_veneer (struct bfd_link_info *link_info,
   return val;
 }
 
-/* Note: we do not include the flag SEC_LINKER_CREATED, as that
-   would prevent elf_link_input_bfd() from processing the contents
-   of the section.  */
 #define ARM_GLUE_SECTION_FLAGS \
-  (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_CODE | SEC_READONLY)
+  (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_CODE \
+   | SEC_READONLY | SEC_LINKER_CREATED)
 
 /* Create a fake section for use by the ARM backend of the linker.  */
 
@@ -4586,10 +4605,6 @@ bfd_elf32_arm_add_glue_sections_to_bfd (bfd *abfd,
   /* If we are only performing a partial
      link do not bother adding the glue.  */
   if (info->relocatable)
-    return TRUE;
-
-  /* Linker stubs don't need glue.  */
-  if (!strcmp (abfd->filename, "linker stubs"))
     return TRUE;
 
   return arm_make_glue_section (abfd, ARM2THUMB_GLUE_SECTION_NAME)
@@ -8232,6 +8247,64 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
   return TRUE;
 }
 
+static bfd_boolean
+elf32_arm_output_glue_section (struct bfd_link_info *info, bfd *obfd,
+			       bfd *ibfd, const char *name)
+{
+  asection *sec, *osec;
+
+  sec = bfd_get_section_by_name (ibfd, name);
+  if (sec == NULL || (sec->flags & SEC_EXCLUDE) != 0)
+    return TRUE;
+
+  osec = sec->output_section;
+  if (elf32_arm_write_section (obfd, info, sec, sec->contents))
+    return TRUE;
+
+  if (! bfd_set_section_contents (obfd, osec, sec->contents,
+				  sec->output_offset, sec->size))
+    return FALSE;
+
+  return TRUE;
+}
+
+static bfd_boolean
+elf32_arm_final_link (bfd *abfd, struct bfd_link_info *info)
+{
+  struct elf32_arm_link_hash_table *globals = elf32_arm_hash_table (info);
+
+  /* Invoke the regular ELF backend linker to do all the work.  */
+  if (!bfd_elf_final_link (abfd, info))
+    return FALSE;
+
+  /* Write out any glue sections now that we have created all the
+     stubs.  */
+  if (globals->bfd_of_glue_owner != NULL)
+    {
+      if (! elf32_arm_output_glue_section (info, abfd,
+					   globals->bfd_of_glue_owner,
+					   ARM2THUMB_GLUE_SECTION_NAME))
+	return FALSE;
+
+      if (! elf32_arm_output_glue_section (info, abfd,
+					   globals->bfd_of_glue_owner,
+					   THUMB2ARM_GLUE_SECTION_NAME))
+	return FALSE;
+
+      if (! elf32_arm_output_glue_section (info, abfd,
+					   globals->bfd_of_glue_owner,
+					   VFP11_ERRATUM_VENEER_SECTION_NAME))
+	return FALSE;
+
+      if (! elf32_arm_output_glue_section (info, abfd,
+					   globals->bfd_of_glue_owner,
+					   ARM_BX_GLUE_SECTION_NAME))
+	return FALSE;
+    }
+
+  return TRUE;
+}
+
 /* Set the right machine number.  */
 
 static bfd_boolean
@@ -8622,6 +8695,12 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   static const int order_01243[5] = {0, 1, 2, 4, 3};
   int i;
   bfd_boolean result = TRUE;
+
+  /* Skip the linker stubs file.  This preserves previous behavior
+     of accepting unknown attributes in the first input file - but
+     is that a bug?  */
+  if (ibfd->flags & BFD_LINKER_CREATED)
+    return TRUE;
 
   if (!elf_known_obj_attributes_proc (obfd)[0].i)
     {
@@ -10781,6 +10860,9 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 			    ibfd->filename);
     }
 
+  /* Allocate space for the glue sections now that we've sized them.  */
+  bfd_elf32_arm_allocate_interworking_sections (info);
+
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
      memory for them.  */
@@ -12519,6 +12601,7 @@ const struct elf_size_info elf32_arm_size_info =
 #define bfd_elf32_bfd_is_target_special_symbol	elf32_arm_is_target_special_symbol
 #define bfd_elf32_close_and_cleanup             elf32_arm_close_and_cleanup
 #define bfd_elf32_bfd_free_cached_info          elf32_arm_bfd_free_cached_info
+#define bfd_elf32_bfd_final_link		elf32_arm_final_link
 
 #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
 #define elf_backend_gc_mark_hook                elf32_arm_gc_mark_hook

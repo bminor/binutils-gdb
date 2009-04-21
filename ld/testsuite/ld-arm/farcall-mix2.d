@@ -18,21 +18,21 @@ Disassembly of section .text:
 Disassembly of section .mytext:
 
 00002000 <__bar5_from_arm-0x10>:
-    2000:	eb000005 	bl	201c <__bar3_veneer>
-    2004:	eb000006 	bl	2024 <__bar4_from_arm>
+    2000:	eb000008 	bl	2028 <__bar3_veneer>
+    2004:	eb000004 	bl	201c <__bar4_from_arm>
     2008:	eb000000 	bl	2010 <__bar5_from_arm>
     200c:	00000000 	andeq	r0, r0, r0
 00002010 <__bar5_from_arm>:
     2010:	e59fc000 	ldr	ip, \[pc, #0\]	; 2018 <__bar5_from_arm\+0x8>
     2014:	e12fff1c 	bx	ip
     2018:	0200302f 	.word	0x0200302f
-0000201c <__bar3_veneer>:
-    201c:	e51ff004 	ldr	pc, \[pc, #-4\]	; 2020 <__bar3_veneer\+0x4>
-    2020:	02003028 	.word	0x02003028
-00002024 <__bar4_from_arm>:
-    2024:	e59fc000 	ldr	ip, \[pc, #0\]	; 202c <__bar4_from_arm\+0x8>
-    2028:	e12fff1c 	bx	ip
-    202c:	0200302d 	.word	0x0200302d
+0000201c <__bar4_from_arm>:
+    201c:	e59fc000 	ldr	ip, \[pc, #0\]	; 2024 <__bar4_from_arm\+0x8>
+    2020:	e12fff1c 	bx	ip
+    2024:	0200302d 	.word	0x0200302d
+00002028 <__bar3_veneer>:
+    2028:	e51ff004 	ldr	pc, \[pc, #-4\]	; 202c <__bar3_veneer\+0x4>
+    202c:	02003028 	.word	0x02003028
 	...
 Disassembly of section .foo:
 
