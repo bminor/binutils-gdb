@@ -1,3 +1,7 @@
+2009-04-21  David Daney  <ddaney@caviumnetworks.com>
+
+	* gdb.texinfo (maint show-debug-regs): Remove mention of x86.
+
 2009-04-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* gdb.texinfo (Source Path): Document --with-relocated-sources.

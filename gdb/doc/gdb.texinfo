@@ -25730,9 +25730,9 @@ Configuring with @samp{--enable-profiling} arranges for @value{GDBN} to be
 compiled with the @samp{-pg} compiler option.
 
 @kindex maint show-debug-regs
-@cindex x86 hardware debug registers
+@cindex hardware debug registers
 @item maint show-debug-regs
-Control whether to show variables that mirror the x86 hardware debug
+Control whether to show variables that mirror the hardware debug
 registers.  Use @code{ON} to enable, @code{OFF} to disable.  If
 enabled, the debug registers values are shown when @value{GDBN} inserts or
 removes a hardware breakpoint or watchpoint, and when the inferior
