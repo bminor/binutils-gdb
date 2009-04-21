@@ -1027,8 +1027,8 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
 	      printf_filtered ("    globals ");
 	      if (psymtab->n_global_syms)
 		{
-		  printf_filtered ("(* (struct partial_symbol **) %p @ %d)\n",
-				   (psymtab->objfile->global_psymbols.list
+		  printf_filtered ("(* (struct partial_symbol **) %s @ %d)\n",
+				   host_address_to_string (psymtab->objfile->global_psymbols.list
 				    + psymtab->globals_offset),
 				   psymtab->n_global_syms);
 		}
@@ -1037,8 +1037,8 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
 	      printf_filtered ("    statics ");
 	      if (psymtab->n_static_syms)
 		{
-		  printf_filtered ("(* (struct partial_symbol **) %p @ %d)\n",
-				   (psymtab->objfile->static_psymbols.list
+		  printf_filtered ("(* (struct partial_symbol **) %s @ %d)\n",
+				   host_address_to_string (psymtab->objfile->static_psymbols.list
 				    + psymtab->statics_offset),
 				   psymtab->n_static_syms);
 		}

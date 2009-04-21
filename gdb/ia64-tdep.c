@@ -1717,10 +1717,11 @@ ia64_frame_this_id (struct frame_info *this_frame, void **this_cache,
     (*this_id) = frame_id_build_special (cache->base, cache->pc, cache->bsp);
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"regular frame id: code 0x%s, stack 0x%s, special 0x%s, this_frame %p\n",
+			"regular frame id: code 0x%s, stack 0x%s, special 0x%s, this_frame %s\n",
 			paddr_nz (this_id->code_addr), 
 			paddr_nz (this_id->stack_addr), 
-			paddr_nz (cache->bsp), this_frame);
+			paddr_nz (cache->bsp),
+			host_address_to_string (this_frame));
 }
 
 static struct value *
@@ -2072,10 +2073,11 @@ ia64_sigtramp_frame_this_id (struct frame_info *this_frame,
                                        cache->bsp);
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"sigtramp frame id: code 0x%s, stack 0x%s, special 0x%s, this_frame %p\n",
+			"sigtramp frame id: code 0x%s, stack 0x%s, special 0x%s, this_frame %s\n",
 			paddr_nz (this_id->code_addr), 
 			paddr_nz (this_id->stack_addr), 
-			paddr_nz (cache->bsp), this_frame);
+			paddr_nz (cache->bsp),
+			host_address_to_string (this_frame));
 }
 
 static struct value *
@@ -2733,9 +2735,10 @@ ia64_libunwind_frame_this_id (struct frame_info *this_frame, void **this_cache,
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"libunwind frame id: code 0x%s, stack 0x%s, special 0x%s, this_frame %p\n",
+			"libunwind frame id: code 0x%s, stack 0x%s, special 0x%s, this_frame %s\n",
 			paddr_nz (id.code_addr), paddr_nz (id.stack_addr), 
-			paddr_nz (bsp), this_frame);
+			paddr_nz (bsp),
+			host_address_to_string (this_frame));
 }
 
 static struct value *
@@ -2858,9 +2861,10 @@ ia64_libunwind_sigtramp_frame_this_id (struct frame_info *this_frame,
 
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
-			"libunwind sigtramp frame id: code 0x%s, stack 0x%s, special 0x%s, this_frame %p\n",
+			"libunwind sigtramp frame id: code 0x%s, stack 0x%s, special 0x%s, this_frame %s\n",
 			paddr_nz (id.code_addr), paddr_nz (id.stack_addr), 
-			paddr_nz (bsp), this_frame);
+			paddr_nz (bsp),
+			host_address_to_string (this_frame));
 }
 
 static struct value *

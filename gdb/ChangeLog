@@ -1,3 +1,12 @@
+2009-04-21  Pierre Muller  <muller.u-strasbg.fr>
+
+	ARI fix: remove "%p".
+	* ia64-tdep.c (ia64_frame_this_id): Use host_address_to_string function.
+	(ia64_sigtramp_frame_this_id): Ditto.
+	(ia64_libunwind_frame_this_id): Ditto.
+	(ia64_libunwind_sigtramp_frame_this_id): Ditto.
+	* symmisc.c (maintenance_info_psymtabs): Ditto.
+
 2009-04-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.ac (--with-relocated-sources): New.
