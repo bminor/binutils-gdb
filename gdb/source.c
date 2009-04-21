@@ -1746,7 +1746,7 @@ find_substitute_path_rule (const char *from)
 /* Add a new substitute-path rule at the end of the current list of rules.
    The new rule will replace FROM into TO.  */
 
-static void
+void
 add_substitute_path_rule (char *from, char *to)
 {
   struct substitute_path_rule *rule;

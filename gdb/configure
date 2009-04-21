@@ -882,6 +882,8 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-separate-debug-dir=path   Look for global separate debug info in this path LIBDIR/debug
+  --with-relocated-sources=PATH
+                          Automatically relocate this path for source files
   --with-libunwind            Use libunwind frame unwinding support
   --with-curses           use the curses library instead of the termcap
                           library
@@ -7131,6 +7133,25 @@ _ACEOF
 
   ;;
 esac
+
+
+# Check whether --with-relocated-sources or --without-relocated-sources was given.
+if test "${with_relocated_sources+set}" = set; then
+  withval="$with_relocated_sources"
+  reloc_srcdir="${withval}"
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $reloc_srcdir`
+  ac_define_dir=`eval echo $ac_define_dir`
+
+cat >>confdefs.h <<_ACEOF
+#define RELOC_SRCDIR "$ac_define_dir"
+_ACEOF
+
+
+
+fi;
 
 
 

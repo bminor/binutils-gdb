@@ -40,6 +40,8 @@
 #include "interps.h"
 #include "main.h"
 
+#include "source.h"
+
 /* If nonzero, display time usage both at startup and for each command.  */
 
 int display_time;
@@ -358,6 +360,12 @@ captured_main (void *data)
     }
 
   get_init_files (&system_gdbinit, &home_gdbinit, &local_gdbinit);
+
+#ifdef RELOC_SRCDIR
+  add_substitute_path_rule (RELOC_SRCDIR,
+			    make_relative_prefix (argv[0], BINDIR,
+						  RELOC_SRCDIR));
+#endif
 
   /* There will always be an interpreter.  Either the one passed into
      this captured main, or one specified by the user at start up, or

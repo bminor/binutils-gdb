@@ -118,6 +118,13 @@ case ${debugdir} in
   ;;
 esac
 
+AC_ARG_WITH(relocated-sources,
+AC_HELP_STRING([--with-relocated-sources=PATH], [Automatically relocate this path for source files]),
+[reloc_srcdir="${withval}"
+ AC_DEFINE_DIR(RELOC_SRCDIR, reloc_srcdir,
+              [Relocated directory for source files. ])
+])
+
 AC_CONFIG_SUBDIRS(doc testsuite)
 
 # Check whether to support alternative target configurations

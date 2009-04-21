@@ -1,3 +1,7 @@
+2009-04-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* gdb.texinfo (Source Path): Document --with-relocated-sources.
+
 2009-04-18  Carlos O'Donell  <carlos@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
 

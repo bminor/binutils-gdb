@@ -1,3 +1,12 @@
+2009-04-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.ac (--with-relocated-sources): New.
+	* configure, config.in: Regenerate.
+	* source.c (add_substitute_path_rule): Remove static.
+	* source.h (add_substitute_path_rule): Declare.
+	* main.c: Include "source.h".
+	(captured_main): Add substitution rule if RELOC_SRCDIR.
+
 2009-04-21  Pierre Muller  <muller.u-strasbg.fr>
 
 	* gnu-nat.h (proc_debug): Add missing continuation line in macro.

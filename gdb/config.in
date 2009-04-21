@@ -630,6 +630,9 @@
    'ptrdiff_t'. */
 #undef PTRDIFF_T_SUFFIX
 
+/* Relocated directory for source files. */
+#undef RELOC_SRCDIR
+
 /* Bug reporting address */
 #undef REPORT_BUGS_TO
 

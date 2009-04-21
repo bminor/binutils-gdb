@@ -5809,6 +5809,19 @@ for any reason a source file that is not relevant to your executable is
 located at the original location, a substitution rule is the only
 method available to point @value{GDBN} at the new location.
 
+@cindex @samp{--with-relocated-sources}
+@cindex default source path substitution
+You can configure a default source path substitution rule by
+configuring @value{GDBN} with the
+@samp{--with-relocated-sources=@var{dir}} option.  The @var{dir}
+should be the name of a directory under @value{GDBN}'s configured
+prefix (set with @samp{--prefix} or @samp{--exec-prefix}), and
+directory names in debug information under @var{dir} will be adjusted
+automatically if the installed @value{GDBN} is moved to a new
+location.  This is useful if @value{GDBN}, libraries or executables
+with debug information and corresponding source code are being moved
+together.
+
 @table @code
 @item directory @var{dirname} @dots{}
 @item dir @var{dirname} @dots{}
