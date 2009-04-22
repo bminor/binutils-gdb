@@ -246,7 +246,7 @@ fetch_register (struct regcache *regcache, int regno)
     {
       if (arm_apcs_32)
         regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			     (char *) &regs[ARM_CPSR_REGNUM]);
+			     (char *) &regs[ARM_CPSR_GREGNUM]);
       else
         regcache_raw_supply (regcache, ARM_PS_REGNUM,
 			     (char *) &regs[ARM_PC_REGNUM]);
@@ -286,7 +286,7 @@ fetch_regs (struct regcache *regcache)
 
   if (arm_apcs_32)
     regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			 (char *) &regs[ARM_CPSR_REGNUM]);
+			 (char *) &regs[ARM_CPSR_GREGNUM]);
   else
     regcache_raw_supply (regcache, ARM_PS_REGNUM,
 			 (char *) &regs[ARM_PC_REGNUM]);
@@ -324,7 +324,7 @@ store_register (const struct regcache *regcache, int regno)
     regcache_raw_collect (regcache, regno, (char *) &regs[regno]);
   else if (arm_apcs_32 && regno == ARM_PS_REGNUM)
     regcache_raw_collect (regcache, regno,
-			 (char *) &regs[ARM_CPSR_REGNUM]);
+			 (char *) &regs[ARM_CPSR_GREGNUM]);
   else if (!arm_apcs_32 && regno == ARM_PS_REGNUM)
     regcache_raw_collect (regcache, ARM_PC_REGNUM,
 			 (char *) &regs[ARM_PC_REGNUM]);
@@ -362,7 +362,7 @@ store_regs (const struct regcache *regcache)
 
   if (arm_apcs_32 && regcache_valid_p (regcache, ARM_PS_REGNUM))
     regcache_raw_collect (regcache, ARM_PS_REGNUM,
-			 (char *) &regs[ARM_CPSR_REGNUM]);
+			 (char *) &regs[ARM_CPSR_GREGNUM]);
 
   ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
 

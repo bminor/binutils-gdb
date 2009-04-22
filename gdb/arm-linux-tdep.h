@@ -24,6 +24,9 @@ struct regcache;
 				+ 2 * INT_REGISTER_SIZE \
 				+ 8 + INT_REGISTER_SIZE)
 
+/* The index to access CSPR in user_regs defined in GLIBC.  */
+#define ARM_CPSR_GREGNUM 16
+
 /* Support for register format used by the NWFPE FPA emulator.  Each
    register takes three words, where either the first one, two, or
    three hold a single, double, or extended precision value (depending

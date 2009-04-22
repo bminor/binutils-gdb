@@ -382,7 +382,7 @@ arm_linux_supply_gregset (const struct regset *regset,
     {
       if (arm_apcs_32)
 	regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			     gregs + INT_REGISTER_SIZE * ARM_CPSR_REGNUM);
+			     gregs + INT_REGISTER_SIZE * ARM_CPSR_GREGNUM);
       else
 	regcache_raw_supply (regcache, ARM_PS_REGNUM,
 			     gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
@@ -416,7 +416,7 @@ arm_linux_collect_gregset (const struct regset *regset,
     {
       if (arm_apcs_32)
 	regcache_raw_collect (regcache, ARM_PS_REGNUM,
-			      gregs + INT_REGISTER_SIZE * ARM_CPSR_REGNUM);
+			      gregs + INT_REGISTER_SIZE * ARM_CPSR_GREGNUM);
       else
 	regcache_raw_collect (regcache, ARM_PS_REGNUM,
 			      gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);

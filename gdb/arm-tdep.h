@@ -38,7 +38,6 @@ enum gdb_regnum {
   ARM_F7_REGNUM = 23, 		/* last floating point register */
   ARM_FPS_REGNUM = 24,		/* floating point status register */
   ARM_PS_REGNUM = 25,		/* Contains processor status */
-  ARM_CPSR_REGNUM = ARM_PS_REGNUM,
   ARM_WR0_REGNUM,		/* WMMX data registers.  */
   ARM_WR15_REGNUM = ARM_WR0_REGNUM + 15,
   ARM_WC0_REGNUM,		/* WMMX control registers.  */

@@ -1,3 +1,12 @@
+2009-04-22  Kazu Hirata  <kazu@codesourcery.com>
+
+	* arm-linux-nat.c (fetch_register, store_register): Use
+	ARM_CPSR_GREGNUM instead of ARM_CPSR_REGNUM.
+	* arm-linux-tdep.c (arm_linux_supply_gregset,
+	arm_linux_collect_gregset): Likewise.
+	* arm-linux-tdep.h (ARM_CPSR_GREGNUM): New.
+	* arm-tdep.h (ARM_CPSR_REGNUM): Remove.
+
 2009-04-22  Hui Zhu  <teawater@gmail.com>
 
 	* stack.c (_initialize_stack): Set the default of
