@@ -1,3 +1,8 @@
+2009-04-22  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-mips.c (macro_end, md_convert_frag): Use '%s' for
+	as_bad calls to silence compiler warning.
+
 2009-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386-intel.c (O_XXX): Reorder.
