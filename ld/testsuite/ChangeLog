@@ -1,3 +1,9 @@
+2009-04-22  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/rgn-at1.d: Cope with larger padding on sections.
+	* ld-scripts/rgn-at2.d: Likewise.
+	* ld-scripts/rgn-at3.d: Likewise.
+
 2009-04-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/farcall-mix.d, ld-arm/farcall-mix2.d,
