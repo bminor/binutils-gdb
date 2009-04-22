@@ -21396,6 +21396,31 @@ fullname="/home/foo/bar/try.c",line="13"@}
 (gdb)
 @end smallexample
 
+@subheading The @code{-exec-jump} Command
+@findex -exec-jump
+
+@subsubheading Synopsis
+
+@smallexample
+ -exec-jump @var{location}
+@end smallexample
+
+Resumes execution of the inferior program at the location specified by
+parameter.  @xref{Specify Location}, for a description of the
+different forms of @var{location}.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{jump}.
+
+@subsubheading Example
+
+@smallexample
+-exec-jump foo.c:10
+*running,thread-id="all"
+^running
+@end smallexample
+
 
 @subheading The @code{-exec-next} Command
 @findex -exec-next

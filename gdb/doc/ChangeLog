@@ -1,3 +1,7 @@
+2009-04-22  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Program Execution): Document -exec-jump.
+
 2009-04-22  Hui Zhu  <teawater@gmail.com>
 
 	* gdb.texinfo (disassemble-next-line): Set the default of
