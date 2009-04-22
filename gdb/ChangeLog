@@ -1,3 +1,7 @@
+2009-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* varobj.c (free_variable): Replace free_current_contents by xfree.
+
 2009-04-22  Kazu Hirata  <kazu@codesourcery.com>
 
 	* arm-linux-nat.c (fetch_register, store_register): Use
