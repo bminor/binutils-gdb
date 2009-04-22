@@ -1539,7 +1539,17 @@ proc get_compiler_info {binfile args} {
     # Run $ifile through the right preprocessor.
     # Toggle gdb.log to keep the compiler output out of the log.
     log_file
-    set cppout [ gdb_compile "${ifile}" "" preprocess [list "$args" quiet] ]
+    if [is_remote host] {
+	# We have to use -E and -o together, despite the comments
+	# above, because of how DejaGnu handles remote host testing.
+	set ppout "$outdir/compiler.i"
+	gdb_compile "${ifile}" "$ppout" preprocess [list "$args" quiet]
+	set file [open $ppout r]
+	set cppout [read $file]
+	close $file
+    } else {
+	set cppout [ gdb_compile "${ifile}" "" preprocess [list "$args" quiet] ]
+    }
     log_file -a "$outdir/$tool.log" 
 
     # Eval the output.

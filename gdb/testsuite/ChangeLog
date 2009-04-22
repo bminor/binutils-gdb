@@ -1,3 +1,7 @@
+2009-04-22  Joseph Myers  <joseph@codesourcery.com>
+
+	* lib/gdb.exp (get_compiler_info): Use -E -o in remote-host case.
+
 2009-04-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/charset.exp: Add regression test.
