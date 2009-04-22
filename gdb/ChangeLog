@@ -1,3 +1,8 @@
+2009-04-22  Hui Zhu  <teawater@gmail.com>
+
+	* stack.c (_initialize_stack): Set the default of
+	disassemble-next-line to off.
+
 2009-04-21  Tom Tromey  <tromey@redhat.com>
 
 	* acinclude.m4: Use AS_HELP_STRING, not AC_HELP_STRING.

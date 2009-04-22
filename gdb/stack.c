@@ -2149,13 +2149,13 @@ Set whether to disassemble next source line when execution stops."), _("\
 Show whether to disassemble next source line when execution stops."), _("\
 If ON, GDB will display disassembly of the next source line when\n\
 execution of the program being debugged stops.\n\
-If AUTO (which is the default), or there's no line info to determine\n\
+If AUTO, or there's no line info to determine\n\
 the source line of the next instruction, display disassembly of next\n\
 instruction instead."),
 			        NULL,
 			        show_disassemble_next_line,
 			        &setlist, &showlist);
-  disassemble_next_line = AUTO_BOOLEAN_AUTO;
+  disassemble_next_line = AUTO_BOOLEAN_FALSE;
 
 #if 0
   add_cmd ("backtrace-limit", class_stack, set_backtrace_limit_command, _(\
