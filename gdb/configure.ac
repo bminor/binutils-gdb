@@ -95,7 +95,7 @@ AM_INIT_AUTOMAKE(gdb, UNUSED-VERSION, [no-define])
 debugdir=${libdir}/debug
 	 
 AC_ARG_WITH(separate-debug-dir,
-[AC_HELP_STRING([--with-separate-debug-dir=PATH], [look for global separate debug info in this path [LIBDIR/debug]])],
+[AS_HELP_STRING([--with-separate-debug-dir=PATH], [look for global separate debug info in this path [LIBDIR/debug]])],
 [debugdir="${withval}"])
 	
 AC_DEFINE_DIR(DEBUGDIR, debugdir,
@@ -119,7 +119,7 @@ case ${debugdir} in
 esac
 
 AC_ARG_WITH(relocated-sources,
-AC_HELP_STRING([--with-relocated-sources=PATH], [automatically relocate this path for source files]),
+AS_HELP_STRING([--with-relocated-sources=PATH], [automatically relocate this path for source files]),
 [reloc_srcdir="${withval}"
  AC_DEFINE_DIR(RELOC_SRCDIR, reloc_srcdir,
               [Relocated directory for source files. ])
@@ -129,7 +129,7 @@ AC_CONFIG_SUBDIRS(doc testsuite)
 
 # Check whether to support alternative target configurations
 AC_ARG_ENABLE(targets,
-AC_HELP_STRING([--enable-targets=TARGETS], [alternative target configurations]),
+AS_HELP_STRING([--enable-targets=TARGETS], [alternative target configurations]),
 [case "${enableval}" in
   yes | "") AC_ERROR(enable-targets option must specify target names or 'all')
             ;;
@@ -139,7 +139,7 @@ esac])
 
 # Check whether to enable 64-bit support on 32-bit hosts
 AC_ARG_ENABLE(64-bit-bfd,
-AC_HELP_STRING([--enable-64-bit-bfd], [64-bit support (on hosts with narrower word sizes)]),
+AS_HELP_STRING([--enable-64-bit-bfd], [64-bit support (on hosts with narrower word sizes)]),
 [case "${enableval}" in
   yes)  want64=true  ;;
   no)   want64=false ;;
@@ -247,7 +247,7 @@ fi
 
 # Enable CLI.
 AC_ARG_ENABLE(gdbcli,
-AC_HELP_STRING([--disable-gdbcli], [disable command-line interface (CLI)]),
+AS_HELP_STRING([--disable-gdbcli], [disable command-line interface (CLI)]),
   [case $enableval in
     yes)
       ;;
@@ -268,7 +268,7 @@ fi
 
 # Enable MI.
 AC_ARG_ENABLE(gdbmi,
-AC_HELP_STRING([--disable-gdbmi], [disable machine-interface (MI)]),
+AS_HELP_STRING([--disable-gdbmi], [disable machine-interface (MI)]),
   [case $enableval in
     yes | no)
       ;;
@@ -287,7 +287,7 @@ fi
 
 # Enable TUI.
 AC_ARG_ENABLE(tui,
-AC_HELP_STRING([--enable-tui], [enable full-screen terminal user interface (TUI)]),
+AS_HELP_STRING([--enable-tui], [enable full-screen terminal user interface (TUI)]),
   [case $enableval in
     yes | no | auto)
       ;;
@@ -297,7 +297,7 @@ AC_HELP_STRING([--enable-tui], [enable full-screen terminal user interface (TUI)
 
 # Enable gdbtk.
 AC_ARG_ENABLE(gdbtk,
-AC_HELP_STRING([--enable-gdbtk], [enable gdbtk graphical user interface (GUI)]),
+AS_HELP_STRING([--enable-gdbtk], [enable gdbtk graphical user interface (GUI)]),
   [case $enableval in
     yes | no)
       ;;
@@ -318,7 +318,7 @@ esac
 
 # Libunwind support.
 AC_ARG_WITH(libunwind,
-AC_HELP_STRING([--with-libunwind], [use libunwind frame unwinding support]),
+AS_HELP_STRING([--with-libunwind], [use libunwind frame unwinding support]),
 [case "${withval}" in
   yes)  enable_libunwind=yes ;;
   no)   enable_libunwind=no ;;
@@ -339,7 +339,7 @@ if test x"$enable_libunwind" = xyes; then
 fi
 
 opt_curses=no
-AC_ARG_WITH(curses, AC_HELP_STRING([--with-curses], [use the curses library instead of the termcap library]), opt_curses=$withval)
+AC_ARG_WITH(curses, AS_HELP_STRING([--with-curses], [use the curses library instead of the termcap library]), opt_curses=$withval)
 
 prefer_curses=no
 if test "$opt_curses" = "yes"; then
@@ -348,7 +348,7 @@ fi
 
 # Profiling support.
 AC_ARG_ENABLE(profiling,
-AC_HELP_STRING([--enable-profiling], [enable profiling of GDB]),
+AS_HELP_STRING([--enable-profiling], [enable profiling of GDB]),
   [case $enableval in
     yes | no)
       ;;
@@ -927,7 +927,7 @@ if test $gdb_cv_have_gnu_regex = yes; then
 fi
 
 AC_ARG_WITH(included-regex,
-  AC_HELP_STRING([--without-included-regex], [don't use included regex; this is the default on systems with version 2 of the GNU C library (use with caution on other system)]),
+  AS_HELP_STRING([--without-included-regex], [don't use included regex; this is the default on systems with version 2 of the GNU C library (use with caution on other system)]),
   gdb_with_regex=$withval,
   gdb_with_regex=$gdb_use_included_regex)
 if test "$gdb_with_regex" = yes; then
@@ -1480,7 +1480,7 @@ fi
 dnl Handle optional features that can be enabled.
 
 AC_ARG_WITH(sysroot,
-AC_HELP_STRING([--with-sysroot@<:@=DIR@:>@], [search for usr/lib et al within DIR]),
+AS_HELP_STRING([--with-sysroot@<:@=DIR@:>@], [search for usr/lib et al within DIR]),
 [
  case ${with_sysroot} in
  yes) TARGET_SYSTEM_ROOT='${exec_prefix}/${target_alias}/sys-root' ;;
@@ -1517,7 +1517,7 @@ AC_SUBST(TARGET_SYSTEM_ROOT_DEFINE)
 
 system_gdbinit=
 AC_ARG_WITH(system-gdbinit,
-AC_HELP_STRING([--with-system-gdbinit=FILE], [automatically load a system-wide gdbinit file]),
+AS_HELP_STRING([--with-system-gdbinit=FILE], [automatically load a system-wide gdbinit file]),
 [system_gdbinit=${withval}])
 
 AC_DEFINE_DIR(SYSTEM_GDBINIT, system_gdbinit,
@@ -1544,7 +1544,7 @@ case ${system_gdbinit} in
 esac
 
 AC_ARG_ENABLE(werror,
-  AC_HELP_STRING([--enable-werror], [treat compile warnings as errors]),
+  AS_HELP_STRING([--enable-werror], [treat compile warnings as errors]),
   [case "${enableval}" in
      yes | y) ERROR_ON_WARNING="yes" ;;
      no | n)  ERROR_ON_WARNING="no" ;;
@@ -1577,7 +1577,7 @@ case "${host}" in
 esac
 
 AC_ARG_ENABLE(build-warnings,
-AC_HELP_STRING([--enable-build-warnings], [enable build-time compiler warnings if gcc is used]),
+AS_HELP_STRING([--enable-build-warnings], [enable build-time compiler warnings if gcc is used]),
 [case "${enableval}" in
   yes)	;;
   no)	build_warnings="-w";;
@@ -1591,7 +1591,7 @@ if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
   echo "Setting compiler warning flags = $build_warnings" 6>&1
 fi])dnl
 AC_ARG_ENABLE(gdb-build-warnings,
-AC_HELP_STRING([--enable-gdb-build-warnings], [enable GDB specific build-time compiler warnings if gcc is used]),
+AS_HELP_STRING([--enable-gdb-build-warnings], [enable GDB specific build-time compiler warnings if gcc is used]),
 [case "${enableval}" in
   yes)	;;
   no)	build_warnings="-w";;
@@ -1829,7 +1829,7 @@ AC_PATH_X
 # not part of the source tree.
 #
 AC_ARG_ENABLE(sim,
-AC_HELP_STRING([--enable-sim], [link gdb with simulator]),
+AS_HELP_STRING([--enable-sim], [link gdb with simulator]),
 [echo "enable_sim = $enable_sim";
  echo "enableval = ${enableval}";
  case "${enableval}" in
@@ -1909,7 +1909,7 @@ fi
 
 # Enable multi-ice-gdb-server.
 AC_ARG_ENABLE(multi-ice,
-AC_HELP_STRING([--enable-multi-ice], [build the multi-ice-gdb-server]),
+AS_HELP_STRING([--enable-multi-ice], [build the multi-ice-gdb-server]),
   [case $enableval in
     yes | no)
       ;;
