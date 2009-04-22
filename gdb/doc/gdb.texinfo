@@ -6074,9 +6074,8 @@ Show the current setting of the disassembly flavor.
 Control whether or not @value{GDBN} will disassemble next source line
 when execution stops.  If ON, GDB will display disassembly of the next
 source line when execution of the program being debugged stops.
-If AUTO (which is the default), or there's no line info to determine
-the source line of the next instruction, display disassembly of next
-instruction instead.
+If AUTO, or there's no line info to determine the source line of the
+next instruction, display disassembly of next instruction instead.
 @end table
 
 

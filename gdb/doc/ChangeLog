@@ -1,3 +1,8 @@
+2009-04-22  Hui Zhu  <teawater@gmail.com>
+
+	* gdb.texinfo (disassemble-next-line): Set the default of
+	disassemble-next-line to off.
+
 2009-04-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.ac (--with-datarootdir, --with-docdir, --with-pdfdir,
