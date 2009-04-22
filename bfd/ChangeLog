@@ -1,3 +1,15 @@
+2009-04-22  Christophe Lyon  <christophe.lyon@st.com>
+
+	PR9743
+	* elf32-arm.c (arm_type_of_stub): Handle R_ARM_THM_JUMP24,
+	R_ARM_JUMP24 and R_ARM_PLT32 relocations.
+	(elf32_arm_size_stubs): Likewise.
+	(record_thumb_to_arm_glue): Deleted unused function.
+	(bfd_elf32_arm_process_before_allocation): No longer handle
+	R_ARM_THM_JUMP24, R_ARM_JUMP24 and R_ARM_PLT32 relocations here.
+	(elf32_arm_final_link_relocate): Handle R_ARM_THM_JUMP24,
+	R_ARM_JUMP24 and R_ARM_PLT32 relocations.
+
 2009-04-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (INTERWORK_FLAG): Check BFD_LINKER_CREATED.

@@ -2921,14 +2921,15 @@ arm_type_of_stub (struct bfd_link_info *info,
 	 places.  */
     }
 
-  if (r_type == R_ARM_THM_CALL)
+  if (r_type == R_ARM_THM_CALL || r_type == R_ARM_THM_JUMP24)
     {
       /* Handle cases where:
 	 - this call goes too far (different Thumb/Thumb2 max
            distance)
-	 - it's a Thumb->Arm call and blx is not available. A stub is
-           needed in this case, but only if this call is not through a
-           PLT entry. Indeed, PLT stubs handle mode switching already.
+	 - it's a Thumb->Arm call and blx is not available, or it's a
+           Thumb->Arm branch (not bl). A stub is needed in this case,
+           but only if this call is not through a PLT entry. Indeed,
+           PLT stubs handle mode switching already.
       */
       if ((!thumb2
 	    && (branch_offset > THM_MAX_FWD_BRANCH_OFFSET
@@ -2937,7 +2938,8 @@ arm_type_of_stub (struct bfd_link_info *info,
 	      && (branch_offset > THM2_MAX_FWD_BRANCH_OFFSET
 		  || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET)))
 	  || ((st_type != STT_ARM_TFUNC)
-	      && ((r_type == R_ARM_THM_CALL) && !globals->use_blx)
+	      && (((r_type == R_ARM_THM_CALL) && !globals->use_blx)
+		  || (r_type == R_ARM_THM_JUMP24))
 	      && !use_plt))
 	{
 	  if (st_type == STT_ARM_TFUNC)
@@ -2947,14 +2949,19 @@ arm_type_of_stub (struct bfd_link_info *info,
 		{
 		  stub_type = (info->shared | globals->pic_veneer)
 		    /* PIC stubs.  */
-		    ? ((globals->use_blx)
-		       /* V5T and above.  */
+		    ? ((globals->use_blx
+			&& (r_type ==R_ARM_THM_CALL))
+		       /* V5T and above. Stub starts with ARM code, so
+			  we must be able to switch mode before
+			  reaching it, which is only possible for 'bl'
+			  (ie R_ARM_THM_CALL relocation).  */
 		       ? arm_stub_long_branch_any_thumb_pic
 		       /* On V4T, use Thumb code only.  */
 		       : arm_stub_long_branch_v4t_thumb_thumb_pic)
 
 		    /* non-PIC stubs.  */
-		    : ((globals->use_blx)
+		    : ((globals->use_blx
+			&& (r_type ==R_ARM_THM_CALL))
 		       /* V5T and above.  */
 		       ? arm_stub_long_branch_any_any
 		       /* V4T.  */
@@ -2984,14 +2991,16 @@ arm_type_of_stub (struct bfd_link_info *info,
 
 	      stub_type = (info->shared | globals->pic_veneer)
 		/* PIC stubs.  */
-		? ((globals->use_blx)
+		? ((globals->use_blx
+		    && (r_type ==R_ARM_THM_CALL))
 		   /* V5T and above.  */
 		   ? arm_stub_long_branch_any_arm_pic
 		   /* V4T PIC stub.  */
 		   : arm_stub_long_branch_v4t_thumb_arm_pic)
 
 		/* non-PIC stubs.  */
-		: ((globals->use_blx)
+		: ((globals->use_blx
+		    && (r_type ==R_ARM_THM_CALL))
 		   /* V5T and above.  */
 		   ? arm_stub_long_branch_any_any
 		   /* V4T.  */
@@ -3005,7 +3014,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 	    }
 	}
     }
-  else if (r_type == R_ARM_CALL)
+  else if (r_type == R_ARM_CALL || r_type == R_ARM_JUMP24 || r_type == R_ARM_PLT32)
     {
       if (st_type == STT_ARM_TFUNC)
 	{
@@ -3025,7 +3034,9 @@ arm_type_of_stub (struct bfd_link_info *info,
 	     the mode change (bit 24 (H) of BLX encoding).  */
 	  if (branch_offset > (ARM_MAX_FWD_BRANCH_OFFSET + 2)
 	      || (branch_offset < ARM_MAX_BWD_BRANCH_OFFSET)
-	      || !globals->use_blx)
+	      || ((r_type == R_ARM_CALL) && !globals->use_blx)
+	      || (r_type == R_ARM_JUMP24)
+	      || (r_type == R_ARM_PLT32))
 	    {
 	      stub_type = (info->shared | globals->pic_veneer)
 		/* PIC stubs.  */
@@ -3769,9 +3780,12 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		      goto error_ret_free_local;
 		    }
 
-		  /* Only look for stubs on call instructions.  */
+		  /* Only look for stubs on branch instructions.  */
 		  if ((r_type != (unsigned int) R_ARM_CALL)
-		      && (r_type != (unsigned int) R_ARM_THM_CALL))
+		      && (r_type != (unsigned int) R_ARM_THM_CALL)
+		      && (r_type != (unsigned int) R_ARM_JUMP24)
+		      && (r_type != (unsigned int) R_ARM_THM_JUMP24)
+		      && (r_type != (unsigned int) R_ARM_PLT32))
 		    continue;
 
 		  /* Now determine the call target, its name, value,
@@ -3922,11 +3936,13 @@ elf32_arm_size_stubs (bfd *output_bfd,
 
 		  /* For historical reasons, use the existing names for
 		     ARM-to-Thumb and Thumb-to-ARM stubs.  */
-		  if (r_type == (unsigned int) R_ARM_THM_CALL
-		      && st_type != STT_ARM_TFUNC)
+		  if ( ((r_type == (unsigned int) R_ARM_THM_CALL)
+			|| (r_type == (unsigned int) R_ARM_THM_JUMP24))
+		       && st_type != STT_ARM_TFUNC)
 		    sprintf (stub_entry->output_name, THUMB2ARM_GLUE_ENTRY_NAME,
 			     sym_name);
-		  else if (r_type == (unsigned int) R_ARM_CALL
+		  else if ( ((r_type == (unsigned int) R_ARM_CALL)
+			     || (r_type == (unsigned int) R_ARM_JUMP24))
 			   && st_type == STT_ARM_TFUNC)
 		    sprintf (stub_entry->output_name, ARM2THUMB_GLUE_ENTRY_NAME,
 			     sym_name);
@@ -4275,86 +4291,6 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
 
   return myh;
 }
-
-static void
-record_thumb_to_arm_glue (struct bfd_link_info *link_info,
-			  struct elf_link_hash_entry *h)
-{
-  const char *name = h->root.root.string;
-  asection *s;
-  char *tmp_name;
-  struct elf_link_hash_entry *myh;
-  struct bfd_link_hash_entry *bh;
-  struct elf32_arm_link_hash_table *hash_table;
-  bfd_vma val;
-
-  hash_table = elf32_arm_hash_table (link_info);
-
-  BFD_ASSERT (hash_table != NULL);
-  BFD_ASSERT (hash_table->bfd_of_glue_owner != NULL);
-
-  s = bfd_get_section_by_name
-    (hash_table->bfd_of_glue_owner, THUMB2ARM_GLUE_SECTION_NAME);
-
-  BFD_ASSERT (s != NULL);
-
-  tmp_name = bfd_malloc ((bfd_size_type) strlen (name)
-			 + strlen (THUMB2ARM_GLUE_ENTRY_NAME) + 1);
-
-  BFD_ASSERT (tmp_name);
-
-  sprintf (tmp_name, THUMB2ARM_GLUE_ENTRY_NAME, name);
-
-  myh = elf_link_hash_lookup
-    (&(hash_table)->root, tmp_name, FALSE, FALSE, TRUE);
-
-  if (myh != NULL)
-    {
-      /* We've already seen this guy.  */
-      free (tmp_name);
-      return;
-    }
-
-  /* The only trick here is using hash_table->thumb_glue_size as the value.
-     Even though the section isn't allocated yet, this is where we will be
-     putting it.  The +1 on the value marks that the stub has not been
-     output yet - not that it is a Thumb function.  */
-  bh = NULL;
-  val = hash_table->thumb_glue_size + 1;
-  _bfd_generic_link_add_one_symbol (link_info, hash_table->bfd_of_glue_owner,
-				    tmp_name, BSF_GLOBAL, s, val,
-				    NULL, TRUE, FALSE, &bh);
-
-  /* If we mark it 'Thumb', the disassembler will do a better job.  */
-  myh = (struct elf_link_hash_entry *) bh;
-  myh->type = ELF_ST_INFO (STB_LOCAL, STT_ARM_TFUNC);
-  myh->forced_local = 1;
-
-  free (tmp_name);
-
-#define CHANGE_TO_ARM "__%s_change_to_arm"
-#define BACK_FROM_ARM "__%s_back_from_arm"
-
-  /* Allocate another symbol to mark where we switch to Arm mode.  */
-  tmp_name = bfd_malloc ((bfd_size_type) strlen (name)
-			 + strlen (CHANGE_TO_ARM) + 1);
-
-  BFD_ASSERT (tmp_name);
-
-  sprintf (tmp_name, CHANGE_TO_ARM, name);
-
-  bh = NULL;
-  val = hash_table->thumb_glue_size + 4,
-  _bfd_generic_link_add_one_symbol (link_info, hash_table->bfd_of_glue_owner,
-				    tmp_name, BSF_LOCAL, s, val,
-				    NULL, TRUE, FALSE, &bh);
-
-  free (tmp_name);
-
-  s->size += THUMB2ARM_GLUE_SIZE;
-  hash_table->thumb_glue_size += THUMB2ARM_GLUE_SIZE;
-}
-
 
 /* Allocate space for ARMv4 BX veneers.  */
 
@@ -4725,9 +4661,6 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 
 	  /* These are the only relocation types we care about.  */
 	  if (   r_type != R_ARM_PC24
-	      && r_type != R_ARM_PLT32
-	      && r_type != R_ARM_JUMP24
-	      && r_type != R_ARM_THM_JUMP24
 	      && (r_type != R_ARM_V4BX || globals->fix_v4bx < 2))
 	    continue;
 
@@ -4779,23 +4712,11 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	  switch (r_type)
 	    {
 	    case R_ARM_PC24:
-	    case R_ARM_PLT32:
-	    case R_ARM_JUMP24:
 	      /* This one is a call from arm code.  We need to look up
 	         the target of the call.  If it is a thumb target, we
 	         insert glue.  */
 	      if (ELF_ST_TYPE (h->type) == STT_ARM_TFUNC)
 		record_arm_to_thumb_glue (link_info, h);
-	      break;
-
-	    case R_ARM_THM_JUMP24:
-	      /* This one is a call from thumb code.  We look
-	         up the target of the call.  If it is not a thumb
-                 target, we insert glue.  */
-	      if (ELF_ST_TYPE (h->type) != STT_ARM_TFUNC
-		  && !(globals->use_blx && r_type == R_ARM_THM_CALL)
-		  && h->root.type != bfd_link_hash_undefweak)
-		record_thumb_to_arm_glue (link_info, h);
 	      break;
 
 	    default:
@@ -6143,7 +6064,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	 far away, in which case a long branch stub should be inserted.  */
       if ((r_type != R_ARM_ABS32 && r_type != R_ARM_REL32
            && r_type != R_ARM_ABS32_NOI && r_type != R_ARM_REL32_NOI
-	   && r_type != R_ARM_CALL)
+	   && r_type != R_ARM_CALL
+	   && r_type != R_ARM_JUMP24
+	   && r_type != R_ARM_PLT32)
 	  && h != NULL
 	  && splt != NULL
 	  && h->plt.offset != (bfd_vma) -1)
@@ -6311,7 +6234,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		   input_bfd,
 		   h ? h->root.root.string : "(local)");
 	    }
-	  else if (r_type != R_ARM_CALL)
+	  else if (r_type == R_ARM_PC24)
 	    {
 	      /* Check for Arm calling Thumb function.  */
 	      if (sym_flags == STT_ARM_TFUNC)
@@ -6329,7 +6252,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	  /* Check if a stub has to be inserted because the
 	     destination is too far or we are changing mode.  */
-	  if (r_type == R_ARM_CALL)
+	  if (   r_type == R_ARM_CALL
+	      || r_type == R_ARM_JUMP24
+	      || r_type == R_ARM_PLT32)
 	    {
 	      /* If the call goes through a PLT entry, make sure to
 		 check distance to the right destination address.  */
@@ -6348,7 +6273,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	      if (branch_offset > ARM_MAX_FWD_BRANCH_OFFSET
 		  || branch_offset < ARM_MAX_BWD_BRANCH_OFFSET
-		  || sym_flags == STT_ARM_TFUNC)
+		  || ((sym_flags == STT_ARM_TFUNC)
+		      && (((r_type == R_ARM_CALL) && !globals->use_blx)
+			  || (r_type == R_ARM_JUMP24)
+			  || (r_type == R_ARM_PLT32) ))
+		  )
 		{
 		  /* The target is out of reach, so redirect the
 		     branch to the local stub for this function.  */
@@ -6414,16 +6343,17 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	      value = (signed_addend & howto->dst_mask)
 		| (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
 
-	      /* Set the H bit in the BLX instruction.  */
-	      if (sym_flags == STT_ARM_TFUNC)
-		{
-		  if (addend)
-		    value |= (1 << 24);
-		  else
-		    value &= ~(bfd_vma)(1 << 24);
-		}
 	      if (r_type == R_ARM_CALL)
 		{
+		  /* Set the H bit in the BLX instruction.  */
+		  if (sym_flags == STT_ARM_TFUNC)
+		    {
+		      if (addend)
+			value |= (1 << 24);
+		      else
+			value &= ~(bfd_vma)(1 << 24);
+		    }
+
 		  /* Select the correct instruction (BL or BLX).  */
 		  /* Only if we are not handling a BL to a stub. In this
 		     case, mode switching is performed by the stub.  */
@@ -6667,7 +6597,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		    /* Convert BL to BLX.  */
 		    lower_insn = (lower_insn & ~0x1000) | 0x0800;
 		  }
-		else if (r_type != R_ARM_THM_CALL)
+		else if ((   r_type != R_ARM_THM_CALL)
+			 && (r_type != R_ARM_THM_JUMP24))
 		  {
 		    if (elf32_thumb_to_arm_stub
 			(info, sym_name, input_bfd, output_bfd, input_section,
@@ -6704,7 +6635,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    *unresolved_reloc_p = FALSE;
 	  }
 
-	if (r_type == R_ARM_THM_CALL)
+	if (r_type == R_ARM_THM_CALL || r_type == R_ARM_THM_JUMP24)
 	  {
 	    /* Check if a stub has to be inserted because the destination
 	       is too far.  */
@@ -6724,7 +6655,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		(thumb2
 		 && (branch_offset > THM2_MAX_FWD_BRANCH_OFFSET
 		     || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET)))
-		|| ((sym_flags != STT_ARM_TFUNC) && !globals->use_blx))
+		|| ((sym_flags != STT_ARM_TFUNC)
+		    && (((r_type == R_ARM_THM_CALL) && !globals->use_blx)
+			|| r_type == R_ARM_THM_JUMP24)))
 	      {
 		/* The target is out of reach or we are changing modes, so
 		   redirect the branch to the local stub for this
@@ -6738,7 +6671,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			   + stub_entry->stub_sec->output_section->vma);
 
 		/* If this call becomes a call to Arm, force BLX.  */
-		if (globals->use_blx)
+		if (globals->use_blx && (r_type == R_ARM_THM_CALL))
 		  {
 		    if ((stub_entry
 			 && !arm_stub_is_thumb (stub_entry->stub_type))
