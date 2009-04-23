@@ -865,6 +865,15 @@ task_command_1 (char *taskno_str, int from_tty)
   if (!ada_task_is_alive (task_info))
     error (_("Cannot switch to task %d: Task is no longer running"), taskno);
    
+  /* On some platforms, the thread list is not updated until the user
+     performs a thread-related operation (by using the "info threads"
+     command, for instance).  So this thread list may not be up to date
+     when the user attempts this task switch.  Since we cannot switch
+     to the thread associated to our task if GDB does not know about
+     that thread, we need to make sure that any new threads gets added
+     to the thread list.  */
+  target_find_new_threads ();
+
   switch_to_thread (task_info->ptid);
   ada_find_printable_frame (get_selected_frame (NULL));
   printf_filtered (_("[Switching to task %d]\n"), taskno);

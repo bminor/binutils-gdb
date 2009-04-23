@@ -1,5 +1,9 @@
 2009-04-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-tasks (task_command_1): Call target_find_new_threads.
+
+2009-04-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* stack.c (do_gdb_disassembly): Print the exception message if an
 	error was thrown while trying to perform the disassembly.
 
