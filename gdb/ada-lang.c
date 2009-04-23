@@ -4945,7 +4945,6 @@ wild_match (const char *patn0, int patn_len, const char *name0)
     }
 }
 
-
 /* Add symbols from BLOCK matching identifier NAME in DOMAIN to
    vector *defn_symbols, updating the list of symbols in OBSTACKP 
    (if necessary).  If WILD, treat as NAME with a wildcard prefix. 

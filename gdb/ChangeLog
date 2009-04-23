@@ -1,3 +1,7 @@
+2009-04-23  joel brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c: Remove an extra empty line. No code change.
+
 2009-04-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix double free on error inserting the breakpoint instruction.
