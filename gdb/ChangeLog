@@ -1,3 +1,19 @@
+2009-04-23  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* configure, config.in: Regenerate.
+	* configure.ac: Support for relocatable GDB datadir.  Use
+	GDB_AC_WITH_DIR.  Always define TARGET_SYSTEM_ROOT_RELOCATABLE.
+	* acinclude.m4 (GDB_AC_WITH_DIR): New defun.
+	* top.c (init_main): Add "set data-directory".
+	* defs.h (gdb_datadir): Declare.
+	* main.c (gdb_datadir): New global.
+	(captured_main): Initialize gdb_datadir.  Use relocate_directory.
+	(relocate_path): New function.
+	(relocate_directory): Likewise.
+	(get_init_files): Use relocate_path.
+	(README): Mention --with-gdb-datadir.
+
 2009-04-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-tasks (task_command_1): Call target_find_new_threads.

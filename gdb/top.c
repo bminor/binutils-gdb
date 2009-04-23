@@ -1619,6 +1619,15 @@ Use \"on\" to enable the notification, and \"off\" to disable it."),
 			   NULL,
 			   show_exec_done_display_p,
 			   &setlist, &showlist);
+
+  add_setshow_filename_cmd ("data-directory", class_maintenance,
+                           &gdb_datadir, _("Set GDB's data directory."),
+                           _("Show GDB's data directory."),
+                           _("\
+When set, GDB uses the specified path to search for data files."),
+                           NULL, NULL,
+                           &setlist,
+                           &showlist);
 }
 
 void

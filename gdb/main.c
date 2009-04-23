@@ -64,6 +64,9 @@ int dbx_commands = 0;
 /* System root path, used to find libraries etc.  */
 char *gdb_sysroot = 0;
 
+/* GDB datadir, used to store data files.  */
+char *gdb_datadir = 0;
+
 struct ui_file *gdb_stdout;
 struct ui_file *gdb_stderr;
 struct ui_file *gdb_stdlog;
@@ -95,6 +98,57 @@ static void print_gdb_help (struct ui_file *);
 
 extern char *external_editor_command;
 
+/* Relocate a file or directory.  PROGNAME is the name by which gdb
+   was invoked (i.e., argv[0]).  INITIAL is the default value for the
+   file or directory.  FLAG is true if the value is relocatable, false
+   otherwise.  Returns a newly allocated string; this may return NULL
+   under the same conditions as make_relative_prefix.  */
+static char *
+relocate_path (const char *progname, const char *initial, int flag)
+{
+  if (flag)
+    return make_relative_prefix (progname, BINDIR, initial);
+  return xstrdup (initial);
+}
+
+/* Like relocate_path, but specifically checks for a directory.
+   INITIAL is relocated according to the rules of relocate_path.  If
+   the result is a directory, it is used; otherwise, INITIAL is used.
+   The chosen directory is then canonicalized using lrealpath.  This
+   function always returns a newly-allocated string.  */
+static char *
+relocate_directory (const char *progname, const char *initial, int flag)
+{
+  char *dir;
+
+  dir = relocate_path (progname, initial, flag);
+  if (dir)
+    {
+      struct stat s;
+
+      if (stat (dir, &s) != 0 || !S_ISDIR (s.st_mode))
+	{
+	  xfree (dir);
+	  dir = NULL;
+	}
+    }
+  if (!dir)
+    dir = xstrdup (initial);
+
+  /* Canonicalize the directory.  */
+  if (*dir)
+    {
+      char *canon_sysroot = lrealpath (dir);
+      if (canon_sysroot)
+	{
+	  xfree (dir);
+	  dir = canon_sysroot;
+	}
+    }
+
+  return dir;
+}
+
 /* Compute the locations of init files that GDB should source and return
    them in SYSTEM_GDBINIT, HOME_GDBINIT, LOCAL_GDBINIT.  If there is 
    no system gdbinit (resp. home gdbinit and local gdbinit) to be loaded,
@@ -115,24 +169,16 @@ get_init_files (char **system_gdbinit,
       struct stat homebuf, cwdbuf, s;
       char *homedir, *relocated_sysgdbinit;
 
-      sysgdbinit = SYSTEM_GDBINIT;
-      if (!sysgdbinit [0] || stat (sysgdbinit, &s) != 0)
-	sysgdbinit = NULL;
-
-#ifdef SYSTEM_GDBINIT_RELOCATABLE
-      relocated_sysgdbinit = make_relative_prefix (gdb_program_name, BINDIR,
-						   SYSTEM_GDBINIT);
-      if (relocated_sysgdbinit)
+      if (SYSTEM_GDBINIT[0])
 	{
-	  struct stat s;
-	  int res = 0;
-
-	  if (stat (relocated_sysgdbinit, &s) == 0)
+	  relocated_sysgdbinit = relocate_path (gdb_program_name,
+						SYSTEM_GDBINIT,
+						SYSTEM_GDBINIT_RELOCATABLE);
+	  if (relocated_sysgdbinit && stat (relocated_sysgdbinit, &s) == 0)
 	    sysgdbinit = relocated_sysgdbinit;
 	  else
 	    xfree (relocated_sysgdbinit);
 	}
-#endif
 
       homedir = getenv ("HOME");
 
@@ -291,73 +337,14 @@ captured_main (void *data)
   current_directory = gdb_dirbuf;
 
   /* Set the sysroot path.  */
-#ifdef TARGET_SYSTEM_ROOT_RELOCATABLE
-  gdb_sysroot = make_relative_prefix (argv[0], BINDIR, TARGET_SYSTEM_ROOT);
-  if (gdb_sysroot)
-    {
-      struct stat s;
-      int res = 0;
+  gdb_sysroot = relocate_directory (argv[0], TARGET_SYSTEM_ROOT,
+				    TARGET_SYSTEM_ROOT_RELOCATABLE);
 
-      if (stat (gdb_sysroot, &s) == 0)
-	if (S_ISDIR (s.st_mode))
-	  res = 1;
+  debug_file_directory = relocate_directory (argv[0], DEBUGDIR,
+					     DEBUGDIR_RELOCATABLE);
 
-      if (res == 0)
-	{
-	  xfree (gdb_sysroot);
-	  gdb_sysroot = xstrdup (TARGET_SYSTEM_ROOT);
-	}
-    }
-  else
-    gdb_sysroot = xstrdup (TARGET_SYSTEM_ROOT);
-#else
-  gdb_sysroot = xstrdup (TARGET_SYSTEM_ROOT);
-#endif
-
-  /* Canonicalize the sysroot path.  */
-  if (*gdb_sysroot)
-    {
-      char *canon_sysroot = lrealpath (gdb_sysroot);
-      if (canon_sysroot)
-	{
-	  xfree (gdb_sysroot);
-	  gdb_sysroot = canon_sysroot;
-	}
-    }
-
-#ifdef DEBUGDIR_RELOCATABLE
-  debug_file_directory = make_relative_prefix (argv[0], BINDIR, DEBUGDIR);
-  if (debug_file_directory)
-    {
-      struct stat s;
-      int res = 0;
-
-      if (stat (debug_file_directory, &s) == 0)
-	if (S_ISDIR (s.st_mode))
-	  res = 1;
-
-      if (res == 0)
-	{
-	  xfree (debug_file_directory);
-	  debug_file_directory = xstrdup (DEBUGDIR);
-	}
-    }
-  else
-    debug_file_directory = xstrdup (DEBUGDIR);
-#else
-  debug_file_directory = xstrdup (DEBUGDIR);
-#endif
-
-  /* Canonicalize the debugfile path.  */
-  if (*debug_file_directory)
-    {
-      char *canon_debug = lrealpath (debug_file_directory);
-      if (canon_debug)
-	{
-	  xfree (debug_file_directory);
-	  debug_file_directory = canon_debug;
-	}
-    }
+  gdb_datadir = relocate_directory (argv[0], GDB_DATADIR,
+				    GDB_DATADIR_RELOCATABLE);
 
   get_init_files (&system_gdbinit, &home_gdbinit, &local_gdbinit);
 

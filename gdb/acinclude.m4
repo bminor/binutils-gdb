@@ -387,3 +387,38 @@ AC_DEFUN([CY_AC_TK_PRIVATE_HEADERS], [
     AC_MSG_RESULT(${private_dir})
   fi
 ])
+
+dnl GDB_AC_WITH_DIR([VARIABLE], [ARG-NAME], [HELP], [DEFAULT])
+dnl Add a new --with option that defines a directory.
+dnl The result is stored in VARIABLE.  AC_DEFINE_DIR is called
+dnl on this variable, as is AC_SUBST.
+dnl ARG-NAME is the base name of the argument (without "--with").
+dnl HELP is the help text to use.
+dnl If the user's choice is relative to the prefix, then the
+dnl result is relocatable, then this will define the C macro
+dnl VARIABLE_RELOCATABLE to 1; otherwise it is defined as 0.
+dnl DEFAULT is the default value, which is used if the user
+dnl does not specify the argument.
+AC_DEFUN([GDB_AC_WITH_DIR], [
+  AC_ARG_WITH([$2], AS_HELP_STRING([--with-][$2][=PATH], [$3]), [
+    [$1]=$withval], [[$1]=[$4]])
+  AC_DEFINE_DIR([$1], [$1], [$3])
+  AC_SUBST([$1])
+  if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
+     if test "x$prefix" = xNONE; then
+     	test_prefix=/usr/local
+     else
+	test_prefix=$prefix
+     fi
+  else
+     test_prefix=$exec_prefix
+  fi
+  value=0
+  case ${ac_define_dir} in
+     "${test_prefix}"|"${test_prefix}/"*|\
+	'${exec_prefix}'|'${exec_prefix}/'*)
+     value=1
+     ;;
+  esac
+  AC_DEFINE_UNQUOTED([$1]_RELOCATABLE, $value, [Define if the $2 directory should be relocated when GDB is moved.])
+  ])

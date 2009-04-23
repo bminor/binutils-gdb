@@ -12734,6 +12734,7 @@ program.  To debug a core dump of a previous run, you must also tell
 * Files::                       Commands to specify files
 * Separate Debug Files::        Debugging information in separate files
 * Symbol Errors::               Errors reading symbol files
+* Data Files::                  GDB data files
 @end menu
 
 @node Files
@@ -13567,6 +13568,36 @@ it.
 @value{GDBN} could not parse a type specification output by the compiler.
 
 @end table
+
+@node Data Files
+@section GDB Data Files
+
+@cindex prefix for data files
+@value{GDBN} will sometimes read an auxiliary data file.  These files
+are kept in a directory known as the @dfn{data directory}.
+
+You can set the data directory's name, and view the name @value{GDBN}
+is currently using.
+
+@table @code
+@kindex set data-directory
+@item set data-directory @var{directory}
+Set the directory which @value{GDBN} searches for auxiliary data files
+to @var{directory}.
+
+@kindex show data-directory
+@item show data-directory
+Show the directory @value{GDBN} searches for auxiliary data files.
+@end table
+
+@cindex default data directory
+@cindex @samp{--with-gdb-datadir}
+You can set the default data directory by using the configure-time
+@samp{--with-gdb-datadir} option.  If the data directory is inside
+@value{GDBN}'s configured binary prefix (set with @samp{--prefix} or
+@samp{--exec-prefix}), then the default data directory will be updated
+automatically if the installed @value{GDBN} is moved to a new
+location.
 
 @node Targets
 @chapter Specifying a Debugging Target

@@ -436,6 +436,11 @@ prefer; but you may abbreviate option names if you use `--'.
      Same as `--host=HOST'.  If you omit this, GDB will guess; it's
      quite accurate.
 
+`--with-gdb-datadir=PATH'
+     Set the GDB-specific data directory.  GDB will look here for
+     certain supporting files or scripts.  This defaults to the `gdb'
+     subdirectory of `datadir' (which can be set using `--datadir').
+
 `configure' accepts other options, for compatibility with configuring
 other GNU tools recursively; but these are the only options that affect
 GDB or its supporting libraries.

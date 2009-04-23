@@ -153,6 +153,9 @@ extern int dbx_commands;
 /* System root path, used to find libraries etc.  */
 extern char *gdb_sysroot;
 
+/* GDB datadir, used to store data files.  */
+extern char *gdb_datadir;
+
 /* Search path for separate debug files.  */
 extern char *debug_file_directory;
 

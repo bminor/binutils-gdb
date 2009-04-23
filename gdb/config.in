@@ -26,10 +26,11 @@
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
-/* Global directory for separate debug files. */
+/* look for global separate debug info in this path [LIBDIR/debug] */
 #undef DEBUGDIR
 
-/* Define if the debug directory should be relocated when GDB is moved. */
+/* Define if the separate-debug-dir directory should be relocated when GDB is
+   moved. */
 #undef DEBUGDIR_RELOCATABLE
 
 /* Define to BFD's default architecture. */
@@ -41,6 +42,13 @@
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 #undef ENABLE_NLS
+
+/* look for global separate data files in this path [DATADIR/gdb] */
+#undef GDB_DATADIR
+
+/* Define if the gdb-datadir directory should be relocated when GDB is moved.
+   */
+#undef GDB_DATADIR_RELOCATABLE
 
 /* Define to be a string naming the default host character set. */
 #undef GDB_DEFAULT_HOST_CHARSET
@@ -670,10 +678,10 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* System-wide gdbinit file. */
+/* automatically load a system-wide gdbinit file */
 #undef SYSTEM_GDBINIT
 
-/* Define if the system-wide gdbinit file should be relocated when GDB is
+/* Define if the system-gdbinit directory should be relocated when GDB is
    moved. */
 #undef SYSTEM_GDBINIT_RELOCATABLE
 

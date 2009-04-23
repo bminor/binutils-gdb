@@ -92,31 +92,15 @@ AC_SUBST(PACKAGE)
 # generate its Makefile.in.
 AM_INIT_AUTOMAKE(gdb, UNUSED-VERSION, [no-define])
 
-debugdir=${libdir}/debug
-	 
-AC_ARG_WITH(separate-debug-dir,
-[AS_HELP_STRING([--with-separate-debug-dir=PATH], [look for global separate debug info in this path [LIBDIR/debug]])],
-[debugdir="${withval}"])
-	
-AC_DEFINE_DIR(DEBUGDIR, debugdir,
-              [Global directory for separate debug files. ])
-#AC_DEFINE_UNQUOTED(DEBUGDIR, "$debugdir"),
+GDB_AC_WITH_DIR(DEBUGDIR, separate-debug-dir,
+    [look for global separate debug info in this path @<:@LIBDIR/debug@:>@],
+    [${libdir}/debug])
 
-if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
-  if test "x$prefix" = xNONE; then
-    test_prefix=/usr/local
-  else
-    test_prefix=$prefix
-  fi
-else
-  test_prefix=$exec_prefix
-fi
-case ${debugdir} in
-"${test_prefix}"|"${test_prefix}/"*|\
-'${exec_prefix}'|'${exec_prefix}/'*)
-  AC_DEFINE(DEBUGDIR_RELOCATABLE, 1, [Define if the debug directory should be relocated when GDB is moved.])
-  ;;
-esac
+# GDB's datadir relocation
+
+GDB_AC_WITH_DIR(GDB_DATADIR, gdb-datadir,
+    [look for global separate data files in this path @<:@DATADIR/gdb@:>@],
+    [${datadir}/gdb])
 
 AC_ARG_WITH(relocated-sources,
 AS_HELP_STRING([--with-relocated-sources=PATH], [automatically relocate this path for source files]),
@@ -1479,6 +1463,7 @@ fi
 
 dnl Handle optional features that can be enabled.
 
+target_sysroot_reloc=0
 AC_ARG_WITH(sysroot,
 AS_HELP_STRING([--with-sysroot@<:@=DIR@:>@], [search for usr/lib et al within DIR]),
 [
@@ -1504,44 +1489,20 @@ AS_HELP_STRING([--with-sysroot@<:@=DIR@:>@], [search for usr/lib et al within DI
  "${test_exec_prefix}"|"${test_exec_prefix}/"*|\
  '${prefix}'|'${prefix}/'*|\
  '${exec_prefix}'|'${exec_prefix}/'*)
-   t="$TARGET_SYSTEM_ROOT_DEFINE -DTARGET_SYSTEM_ROOT_RELOCATABLE"
-   TARGET_SYSTEM_ROOT_DEFINE="$t"
+   target_sysroot_reloc=1
    ;;
  esac
 ], [
  TARGET_SYSTEM_ROOT=
  TARGET_SYSTEM_ROOT_DEFINE='-DTARGET_SYSTEM_ROOT=\"\"'
 ])
+TARGET_SYSTEM_ROOT_DEFINE="$TARGET_SYSTEM_ROOT_DEFINE -DTARGET_SYSTEM_ROOT_RELOCATABLE=$target_sysroot_reloc"
 AC_SUBST(TARGET_SYSTEM_ROOT)
 AC_SUBST(TARGET_SYSTEM_ROOT_DEFINE)
 
-system_gdbinit=
-AC_ARG_WITH(system-gdbinit,
-AS_HELP_STRING([--with-system-gdbinit=FILE], [automatically load a system-wide gdbinit file]),
-[system_gdbinit=${withval}])
-
-AC_DEFINE_DIR(SYSTEM_GDBINIT, system_gdbinit,
-              [System-wide gdbinit file.])
-
-if test "x$prefix" = xNONE; then
-  test_prefix=$ac_default_prefix
-else
-  test_prefix=$prefix
-fi
-if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
-  test_exec_prefix=$test_prefix
-else
-  test_exec_prefix=$exec_prefix
-fi
-case ${system_gdbinit} in
- "${test_prefix}"|"${test_prefix}/"*|\
- "${test_exec_prefix}"|"${test_exec_prefix}/"*|\
- '${prefix}'|'${prefix}/'*|\
- '${exec_prefix}'|'${exec_prefix}/'*)
-  AC_DEFINE(SYSTEM_GDBINIT_RELOCATABLE, 1,
-            [Define if the system-wide gdbinit file should be relocated when GDB is moved.])
-   ;;
-esac
+GDB_AC_WITH_DIR(SYSTEM_GDBINIT, system-gdbinit,
+    [automatically load a system-wide gdbinit file],
+    [])
 
 AC_ARG_ENABLE(werror,
   AS_HELP_STRING([--enable-werror], [treat compile warnings as errors]),

@@ -1,3 +1,8 @@
+2009-04-23  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Data Files): New node.
+	(GDB Files): Update menu.
+
 2009-04-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbint.texinfo (Defining Other Architecture Features): Remove
