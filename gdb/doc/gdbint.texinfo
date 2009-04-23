@@ -4820,10 +4820,6 @@ guess the starting and ending addresses of the compilation unit from them.
 nonzero if a function argument of type @var{type} is passed by reference
 instead of value.
 
-@item PROCESS_LINENUMBER_HOOK
-@findex PROCESS_LINENUMBER_HOOK
-A hook defined for XCOFF reading.
-
 @item CORE_ADDR gdbarch_push_dummy_call (@var{gdbarch}, @var{function}, @var{regcache}, @var{bp_addr}, @var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
 @findex gdbarch_push_dummy_call
 @anchor{gdbarch_push_dummy_call} Define this to push the dummy frame's call to

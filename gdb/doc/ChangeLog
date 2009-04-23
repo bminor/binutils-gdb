@@ -1,3 +1,8 @@
+2009-04-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbint.texinfo (Defining Other Architecture Features): Remove
+	enty for PROCESS_LINENUMBER_HOOK.
+
 2009-04-22  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Program Execution): Document -exec-jump.
