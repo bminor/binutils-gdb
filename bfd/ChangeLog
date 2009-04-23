@@ -1,3 +1,7 @@
+2009-04-23  Matthias Klose  <doko@ubuntu.com>
+
+	* bfd/peXXigen.c (_bfd_XXi_swap_sym_in): Initialize `name'.
+
 2009-04-22  Christophe Lyon  <christophe.lyon@st.com>
 
 	PR9743

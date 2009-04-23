@@ -130,7 +130,7 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
   if (in->n_sclass == C_SECTION)
     {
       char namebuf[SYMNMLEN + 1];
-      const char *name;
+      const char *name = NULL;
 
       in->n_value = 0x0;
 
