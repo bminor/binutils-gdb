@@ -507,6 +507,10 @@ do_gdb_disassembly (int how_many, CORE_ADDR low, CORE_ADDR high)
     {
       gdb_disassembly_stub (&args);
     }
+  /* If an exception was thrown while doing the disassembly, print
+     the error message, to give the user a clue of what happened.  */
+  if (exception.reason == RETURN_ERROR)
+    exception_print (gdb_stderr, exception);
 }
 
 /* Print information about frame FRAME.  The output is format according

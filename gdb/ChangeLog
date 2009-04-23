@@ -1,3 +1,8 @@
+2009-04-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* stack.c (do_gdb_disassembly): Print the exception message if an
+	error was thrown while trying to perform the disassembly.
+
 2009-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* varobj.c (free_variable): Replace free_current_contents by xfree.
