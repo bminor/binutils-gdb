@@ -1,3 +1,11 @@
+2009-04-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix double free on error inserting the breakpoint instruction.
+	* breakpoint.c (create_breakpoints): Move the
+	update_global_location_list call to ...
+	(break_command_really): ... here together with the second local call
+	both unified after all the cleanups.
+
 2009-04-23  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
 	    Tom Tromey  <tromey@redhat.com>
 

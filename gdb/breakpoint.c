@@ -5458,8 +5458,6 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 			 cond_string, type, disposition,
 			 thread, task, ignore_count, ops, from_tty, enabled);
     }
-
-  update_global_location_list (1);
 }
 
 /* Parse ARG which is assumed to be a SAL specification possibly
@@ -5800,7 +5798,6 @@ break_command_really (char *arg, char *cond_string, int thread,
       b->ops = ops;
       b->enable_state = enabled ? bp_enabled : bp_disabled;
 
-      update_global_location_list (1);
       mention (b);
     }
   
@@ -5812,6 +5809,9 @@ break_command_really (char *arg, char *cond_string, int thread,
   discard_cleanups (breakpoint_chain);
   /* But cleanup everything else. */
   do_cleanups (old_chain);
+
+  /* error call may happen here - have BREAKPOINT_CHAIN already discarded.  */
+  update_global_location_list (1);
 }
 
 /* Set a breakpoint. 
