@@ -1,3 +1,9 @@
+2009-04-25  Alan Modra  <amodra@bigpond.net.au>
+
+     	PR 10061
+	* genscripts.sh: Don't pass $EMULATION_NAME as $CUSTOMIZER_SCRIPT
+	param.
+
 2009-04-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* emultempl/armelf.em (bfd_for_interwork, arm_elf_after_open)
