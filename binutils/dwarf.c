@@ -328,36 +328,41 @@ process_extended_line_op (unsigned char *data, int is_stmt)
       printf (_("%s\n\n"), name);
       break;
 
+    case DW_LNE_set_discriminator:
+      printf (_("set Discriminator to %lu\n"),
+              read_leb128 (data, & bytes_read, 0));
+      break;
+
     /* HP extensions.  */
     case DW_LNE_HP_negate_is_UV_update:
-      printf ("DW_LNE_HP_negate_is_UV_update");
+      printf ("DW_LNE_HP_negate_is_UV_update\n");
       break;
     case DW_LNE_HP_push_context:
-      printf ("DW_LNE_HP_push_context");
+      printf ("DW_LNE_HP_push_context\n");
       break;
     case DW_LNE_HP_pop_context:
-      printf ("DW_LNE_HP_pop_context");
+      printf ("DW_LNE_HP_pop_context\n");
       break;
     case DW_LNE_HP_set_file_line_column:
-      printf ("DW_LNE_HP_set_file_line_column");
+      printf ("DW_LNE_HP_set_file_line_column\n");
       break;
     case DW_LNE_HP_set_routine_name:
-      printf ("DW_LNE_HP_set_routine_name");
+      printf ("DW_LNE_HP_set_routine_name\n");
       break;
     case DW_LNE_HP_set_sequence:
-      printf ("DW_LNE_HP_set_sequence");
+      printf ("DW_LNE_HP_set_sequence\n");
       break;
     case DW_LNE_HP_negate_post_semantics:
-      printf ("DW_LNE_HP_negate_post_semantics");
+      printf ("DW_LNE_HP_negate_post_semantics\n");
       break;
     case DW_LNE_HP_negate_function_exit:
-      printf ("DW_LNE_HP_negate_function_exit");
+      printf ("DW_LNE_HP_negate_function_exit\n");
       break;
     case DW_LNE_HP_negate_front_end_logical:
-      printf ("DW_LNE_HP_negate_front_end_logical");
+      printf ("DW_LNE_HP_negate_front_end_logical\n");
       break;
     case DW_LNE_HP_define_proc:
-      printf ("DW_LNE_HP_define_proc");
+      printf ("DW_LNE_HP_define_proc\n");
       break;
 
     default:

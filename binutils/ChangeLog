@@ -1,3 +1,8 @@
+2009-04-24  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf.c (process_extended_line_op): Add DW_LNE_set_discriminator.
+	Add missing newlines to HP extensions.
+
 2009-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objcopy.c (set_pe_subsystem): Replace efi-rom with sal-rtd.
