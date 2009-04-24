@@ -294,6 +294,9 @@ the native maintainer when resolving ABI issues.
 			(sim/ dies with make -j)
 			Michael Snyder		msnyder@vmware.com
 
+	moxie		--target=moxie-elf ,-Werror
+			Anthony Green		green@moxielogic.com
+
 	ms1		--target=ms1-elf ,-Werror
 			Kevin Buettner		kevinb@redhat.com
 

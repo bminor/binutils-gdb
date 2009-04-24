@@ -1,3 +1,10 @@
+2009-04-23  Anthony Green  <green@moxielogic.com>
+
+	* MAINTAINERS: Add moxie target.
+	* configure.tgt: Add moxie-*-elf target.
+	* moxie-tdep.c: New file.
+	* moxie-tdep.h: New file.
+
 2009-04-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c: Remove an extra empty line. No code change.

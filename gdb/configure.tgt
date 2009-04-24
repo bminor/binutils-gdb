@@ -114,6 +114,12 @@ frv-*-*)
 	gdb_sim=../sim/frv/libsim.a
 	;;
 
+moxie-*-elf)
+	gdb_target_obs="moxie-tdep.o"
+	# Add this once the moxie sim has been committed.
+	# gdb_sim=../sim/moxie/libsim.a
+	;;
+
 h8300-*-*)
 	# Target: H8300 with HMS monitor and H8 simulator
 	gdb_target_obs="h8300-tdep.o monitor.o dsrec.o"
