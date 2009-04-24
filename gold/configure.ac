@@ -325,6 +325,19 @@ AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
 AC_CHECK_HEADERS(byteswap.h)
 AC_CHECK_FUNCS(mallinfo posix_fallocate)
 
+# Use of ::std::tr1::unordered_map::rehash causes undefined symbols
+# at link time with some versions of GCC.
+AC_CACHE_CHECK([whether ::std::tr1::unordered_map::rehash is usable.],
+[gold_cv_unordered_map_rehash],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <tr1/unordered_map>
+void bar() { ::std::tr1::unordered_map<int, int> x; x.rehash(10); }
+]])], [gold_cv_unordered_map_rehash=yes], [gold_cv_unordered_map_rehash=no])])
+if test "$gold_cv_unordered_map_rehash" = "yes"; then
+  AC_DEFINE(HAVE_TR1_UNORDERED_MAP_REHASH, 1,
+	    [Define if ::std::tr1::unordered_map::rehash is usable])
+fi
+
 # gcc 4.3.0 doesn't recognize the printf attribute on a template
 # function.  Check for that.  This is gcc bug 35546.  This test can
 # probably be removed after the bug has been fixed for a while.

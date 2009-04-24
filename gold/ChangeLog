@@ -1,3 +1,11 @@
+2009-04-23  Chris Demetriou  <cgd@google.com>
+
+	* configure.ac (HAVE_TR1_UNORDERED_MAP_REHASH): New define.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* gold.h: Avoid std::tr1::unordered_map and std::tr1::unordered_set
+	if HAVE_TR1_UNORDERED_MAP_REHASH is not defined.
+
 2009-04-21  Mikolaj Zalewski  <mikolajz@google.com>
 
 	* incremental.cc (Incremental_inputs_header_data): Renamed from

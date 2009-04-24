@@ -97,6 +97,9 @@
 /* Define to 1 if you have the <tr1/unordered_map> header file. */
 #undef HAVE_TR1_UNORDERED_MAP
 
+/* Define if ::std::tr1::unordered_map::rehash is usable */
+#undef HAVE_TR1_UNORDERED_MAP_REHASH
+
 /* Define to 1 if you have the <tr1/unordered_set> header file. */
 #undef HAVE_TR1_UNORDERED_SET
 
