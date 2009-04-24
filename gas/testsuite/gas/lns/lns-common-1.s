@@ -13,3 +13,5 @@
 	nop
 	.loc 1 7 is_stmt 1
 	nop
+	.loc 1 7 discriminator 1
+	nop

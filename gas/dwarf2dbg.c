@@ -25,7 +25,8 @@
 
 	.file FILENO "file.c"
 	.loc  FILENO LINENO [COLUMN] [basic_block] [prologue_end] \
-	      [epilogue_begin] [is_stmt VALUE] [isa VALUE]
+	      [epilogue_begin] [is_stmt VALUE] [isa VALUE] \
+	      [discriminator VALUE]
 */
 
 #include "as.h"
@@ -194,7 +195,8 @@ bfd_boolean dwarf2_loc_mark_labels;
 /* Current location as indicated by the most recent .loc directive.  */
 static struct dwarf2_line_info current = {
   1, 1, 0, 0,
-  DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0
+  DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0,
+  0
 };
 
 /* The size of an address on the target.  */
@@ -331,6 +333,7 @@ dwarf2_where (struct dwarf2_line_info *line)
       line->column = 0;
       line->flags = DWARF2_FLAG_IS_STMT;
       line->isa = current.isa;
+      line->discriminator = current.discriminator;
     }
   else
     *line = current;
@@ -379,6 +382,7 @@ dwarf2_consume_line_info (void)
   current.flags &= ~(DWARF2_FLAG_BASIC_BLOCK
 		     | DWARF2_FLAG_PROLOGUE_END
 		     | DWARF2_FLAG_EPILOGUE_BEGIN);
+  current.discriminator = 0;
 }
 
 /* Called for each (preferably code) label.  If dwarf2_loc_mark_labels
@@ -581,6 +585,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 
   current.filenum = filenum;
   current.line = line;
+  current.discriminator = 0;
 
 #ifndef NO_LISTING
   if (listing)
@@ -656,6 +661,18 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	  else
 	    {
 	      as_bad (_("isa number less than zero"));
+	      return;
+	    }
+	}
+      else if (strcmp (p, "discriminator") == 0)
+	{
+	  *input_line_pointer = c;
+	  value = get_absolute_expression ();
+	  if (value >= 0)
+	    current.discriminator = value;
+	  else
+	    {
+	      as_bad (_("discriminator less than zero"));
 	      return;
 	    }
 	}
@@ -746,6 +763,14 @@ static void
 out_uleb128 (addressT value)
 {
   output_leb128 (frag_more (sizeof_leb128 (value, 0)), value, 0);
+}
+
+/* Emit a signed "little-endian base 128" number.  */
+
+static void
+out_leb128 (addressT value)
+{
+  output_leb128 (frag_more (sizeof_leb128 (value, 1)), value, 1);
 }
 
 /* Emit a tuple for .debug_abbrev.  */
@@ -1206,6 +1231,14 @@ process_entries (segT seg, struct line_entry *e)
 	  column = e->loc.column;
 	  out_opcode (DW_LNS_set_column);
 	  out_uleb128 (column);
+	}
+
+      if (e->loc.discriminator != 0)
+	{
+	  out_opcode (DW_LNS_extended_op);
+	  out_leb128 (1 + sizeof_leb128 (e->loc.discriminator, 0));
+	  out_opcode (DW_LNE_set_discriminator);
+	  out_uleb128 (e->loc.discriminator);
 	}
 
       if (isa != e->loc.isa)

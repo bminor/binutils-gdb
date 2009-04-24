@@ -1,3 +1,17 @@
+2009-04-24  Cary Coutant  <ccoutant@google.com>
+
+	* NEWS: Add item about discriminator support.
+	* dwarf2dbg.h (struct dwarf2_line_info): Add discriminator field.
+	* dwarf2dbg.c (current): Add discriminator field.
+	(dwarf2_where): Copy discriminator value.
+	(dwarf2_consume_line_info): Set discriminator to 0.
+	(dwarf2_directive_loc): Process discriminator sub-op.
+	(out_leb128): New function.
+	(process_entries): Output DW_LNE_set_discriminator.
+	* doc/as.texinfo: Add discriminator operand to .loc directive.
+	* testsuite/gas/lns/lns-common-1.d: Add test for discriminator.
+	* testsuite/gas/lns/lns-common-1.s: Likewise.
+
 2009-04-22  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-mips.c (macro_end, md_convert_frag): Use '%s' for

@@ -34,6 +34,7 @@ struct dwarf2_line_info {
   unsigned int column;
   unsigned int isa;
   unsigned int flags;
+  unsigned int discriminator;
 };
 
 /* Implements the .file FILENO "FILENAME" directive.  FILENO can be 0

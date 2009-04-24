@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add support for the new discriminator column in the DWARF line table,
+  with a discriminator operand for the .loc directive.
+
 * Add support for Sunplus score architecture.
 
 * Add support for Lattice Mico32 (lm32) architecture.

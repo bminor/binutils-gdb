@@ -5108,6 +5108,10 @@ either 0 or 1.
 This directive will set the @code{isa} register in the @code{.debug_line}
 state machine to @var{value}, which must be an unsigned integer.
 
+@item discriminator @var{value}
+This directive will set the @code{discriminator} register in the @code{.debug_line}
+state machine to @var{value}, which must be an unsigned integer.
+
 @end table
 
 @node Loc_mark_labels
