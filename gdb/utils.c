@@ -68,10 +68,10 @@
 #include <time.h>
 
 #if !HAVE_DECL_MALLOC
-extern PTR malloc ();		/* OK: PTR */
+extern PTR malloc ();		/* ARI: PTR */
 #endif
 #if !HAVE_DECL_REALLOC
-extern PTR realloc ();		/* OK: PTR */
+extern PTR realloc ();		/* ARI: PTR */
 #endif
 #if !HAVE_DECL_FREE
 extern void free ();
@@ -1201,7 +1201,7 @@ nomem (long size)
 /* NOTE: These are declared using PTR to ensure consistency with
    "libiberty.h".  xfree() is GDB local.  */
 
-PTR				/* OK: PTR */
+PTR				/* ARI: PTR */
 xmalloc (size_t size)
 {
   void *val;
@@ -1211,7 +1211,7 @@ xmalloc (size_t size)
   if (size == 0)
     size = 1;
 
-  val = malloc (size);		/* OK: malloc */
+  val = malloc (size);		/* ARI: malloc */
   if (val == NULL)
     nomem (size);
 
@@ -1224,8 +1224,8 @@ xzalloc (size_t size)
   return xcalloc (1, size);
 }
 
-PTR				/* OK: PTR */
-xrealloc (PTR ptr, size_t size)	/* OK: PTR */
+PTR				/* ARI: PTR */
+xrealloc (PTR ptr, size_t size)	/* ARI: PTR */
 {
   void *val;
 
@@ -1235,16 +1235,16 @@ xrealloc (PTR ptr, size_t size)	/* OK: PTR */
     size = 1;
 
   if (ptr != NULL)
-    val = realloc (ptr, size);	/* OK: realloc */
+    val = realloc (ptr, size);	/* ARI: realloc */
   else
-    val = malloc (size);		/* OK: malloc */
+    val = malloc (size);		/* ARI: malloc */
   if (val == NULL)
     nomem (size);
 
   return (val);
 }
 
-PTR				/* OK: PTR */
+PTR				/* ARI: PTR */
 xcalloc (size_t number, size_t size)
 {
   void *mem;
@@ -1257,7 +1257,7 @@ xcalloc (size_t number, size_t size)
       size = 1;
     }
 
-  mem = calloc (number, size);		/* OK: xcalloc */
+  mem = calloc (number, size);		/* ARI: xcalloc */
   if (mem == NULL)
     nomem (number * size);
 
@@ -1268,7 +1268,7 @@ void
 xfree (void *ptr)
 {
   if (ptr != NULL)
-    free (ptr);		/* OK: free */
+    free (ptr);		/* ARI: free */
 }
 
 

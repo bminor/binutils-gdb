@@ -1,3 +1,9 @@
+2009-04-24  Pierre Muller  <muller.u-strasbg.fr>
+
+	ARI change: Use "/* ARI: rule */" pattern.
+	* utils.c: Update ARI patterns.
+	* gdb_dirent.h: Likewise.
+
 2009-04-23  Anthony Green  <green@moxielogic.com>
 
 	* MAINTAINERS: Add moxie target.

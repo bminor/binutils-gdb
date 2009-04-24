@@ -21,11 +21,11 @@
 
 /* See description of `AC_HEADER_DIRENT' in the Autoconf manual.  */
 #ifdef HAVE_DIRENT_H
-# include <dirent.h>		/* OK: dirent.h */
-# define NAMELEN(dirent) strlen ((dirent)->d_name)	/* OK: strlen d_name */
+# include <dirent.h>		/* ARI: dirent.h */
+# define NAMELEN(dirent) strlen ((dirent)->d_name)	/* ARI: strlen d_name */
 #else
 # define dirent direct
-# define NAMELEN(dirent) (dirent)->d_namelen	/* OK: d_namelen */
+# define NAMELEN(dirent) (dirent)->d_namelen	/* ARI: d_namelen */
 # ifdef HAVE_SYS_NDIR_H
 #  include <sys/ndir.h>
 # endif
