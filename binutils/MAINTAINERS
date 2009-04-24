@@ -92,10 +92,10 @@ responsibility among the other maintainers.
   MAXQ		   Inderpreet Singh <inderpreetb@noida.hcltech.com>
   MEP		   Dave Brolley <brolley@redhat.com>
   MIPS		   Eric Christopher <echristo@apple.com>
-  Moxie		   Anthony Green <moxielogic.com>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
   MN10300	   Eric Christopher <echristo@apple.com>
   MN10300	   Alexandre Oliva <aoliva@redhat.com>
+  Moxie		   Anthony Green <green@moxielogic.com>
   MSP430	   Dmitry Diky <diwil@spec.ru>
   NetBSD support   Matt Thomas <matt@netbsd.org>
   PPC		   Geoff Keating <geoffk@geoffk.org>
