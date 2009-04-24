@@ -3460,15 +3460,20 @@ Output_file::close()
   if (this->map_is_anonymous_ && !this->is_temporary_)
     {
       size_t bytes_to_write = this->file_size_;
+      size_t offset = 0;
       while (bytes_to_write > 0)
         {
-          ssize_t bytes_written = ::write(this->o_, this->base_, bytes_to_write);
+          ssize_t bytes_written = ::write(this->o_, this->base_ + offset,
+                                          bytes_to_write);
           if (bytes_written == 0)
             gold_error(_("%s: write: unexpected 0 return-value"), this->name_);
           else if (bytes_written < 0)
             gold_error(_("%s: write: %s"), this->name_, strerror(errno));
           else
-            bytes_to_write -= bytes_written;
+            {
+              bytes_to_write -= bytes_written;
+              offset += bytes_written;
+            }
         }
     }
   this->unmap();

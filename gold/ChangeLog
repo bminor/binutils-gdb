@@ -1,3 +1,8 @@
+2008-04-23  Elliott Hughes  <enh@google.com>
+
+	* output.cc (Output_file::close): After short writes, continue
+	writing from the correct offset in the buffer being written.
+
 2009-04-23  Chris Demetriou  <cgd@google.com>
 
 	* configure.ac (HAVE_TR1_UNORDERED_MAP_REHASH): New define.
