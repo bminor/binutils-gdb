@@ -1,3 +1,31 @@
+2009-04-21  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* incremental.cc (Incremental_inputs_header_data): Renamed from
+	Incremental_input_header_data.
+	(Incremental_inputs_header_data::data_size): New field.
+	(Incremental_inputs_header_data::put_input_file_count): Renamed
+	from input_file_count.
+	(Incremental_inputs_header_data::put_command_line_offset): Renamed
+	from command_line_offset.
+	(Incremental_inputs_header_data::put_reserved): Renamed from
+	put_reserved.
+	(Incremental_inputs_entry_data): Renamed from
+	Incremental_input_entry_data.
+	(Incremental_inputs_entry_data::data_size): New field.
+	(Incremental_inputs::report_command_line): New method.
+	(Incremental_inputs::finalize): New method.
+	(Incremental_inputs::create_incremental_inputs_data): New method.
+	(Incremental_inputs::sized_create_incremental_inputs_data): New method.
+	* incremental.h: New file.
+	* layout.cc (Layout::Layout): Handle new incremental_inputs_.
+       (Layout::finalize): Create incremental inputs section in
+	incremental builds.
+       (Layout::create_incremental_info_sections): New method.
+	* layout.h (Layout::incremental_inputs): New method.
+       (Layout::create_incremental_info_sections): New method.
+       (Layout::incremental_inputs_): New field.
+	* main.cc (main): Notify Incremental_input of the command line.
+
 2009-04-01  Ian Lance Taylor  <iant@google.com>
 	    Mikolaj Zalewski  <mikolajz@google.com>
 

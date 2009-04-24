@@ -39,6 +39,7 @@ namespace gold
 {
 
 class General_options;
+class Incremental_inputs;
 class Input_objects;
 class Mapfile;
 class Symbol_table;
@@ -368,6 +369,12 @@ class Layout
   script_options() const
   { return this->script_options_; }
 
+  // Return the object managing inputs in incremental build. NULL in
+  // non-incremental builds.
+  Incremental_inputs*
+  incremental_inputs()
+  { return this->incremental_inputs_; }
+
   // Compute and write out the build ID if needed.
   void
   write_build_id(Output_file*) const;
@@ -472,6 +479,11 @@ class Layout
   // Create a build ID note if needed.
   void
   create_build_id();
+
+  // Create .gnu_incremental_inputs and .gnu_incremental_strtab sections needed
+  // for the next run of incremental linking to check what has changed.
+  void
+  create_incremental_info_sections();
 
   // Find the first read-only PT_LOAD segment, creating one if
   // necessary.
@@ -717,6 +729,9 @@ class Layout
   bool any_postprocessing_sections_;
   // Whether we have resized the signatures_ hash table.
   bool resized_signatures_;
+  // In incremental build, holds information check the inputs and build the
+  // .gnu_incremental_inputs section.
+  Incremental_inputs* incremental_inputs_;
 };
 
 // This task handles writing out data in output sections which is not

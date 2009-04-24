@@ -46,8 +46,9 @@
 #include "reduced_debug_output.h"
 #include "reloc.h"
 #include "descriptors.h"
-#include "layout.h"
 #include "plugin.h"
+#include "incremental.h"
+#include "layout.h"
 
 namespace gold
 {
@@ -122,7 +123,8 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     input_without_gnu_stack_note_(false),
     has_static_tls_(false),
     any_postprocessing_sections_(false),
-    resized_signatures_(false)
+    resized_signatures_(false),
+    incremental_inputs_(NULL)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -131,6 +133,10 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
   // We expect two unattached Output_data objects: the file header and
   // the segment headers.
   this->special_output_list_.reserve(2);
+
+  // Initialize structure needed for an incremental build.
+  if (parameters->options().incremental())
+    this->incremental_inputs_ = new Incremental_inputs;
 }
 
 // Hash a key we use to look up an output section mapping.
@@ -1215,6 +1221,12 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
       this->create_version_sections(&versions, symtab, local_dynamic_count,
 				    dynamic_symbols, dynstr);
     }
+  
+  if (this->incremental_inputs_)
+    {
+      this->incremental_inputs_->finalize();
+      this->create_incremental_info_sections();
+    }
 
   // If there is a SECTIONS clause, put all the input sections into
   // the required order.
@@ -1591,6 +1603,37 @@ Layout::create_build_id()
       os->add_output_section_data(this->build_id_note_);
       os->set_after_input_sections();
     }
+}
+
+// Create .gnu_incremental_inputs and .gnu_incremental_strtab sections needed
+// for the next run of incremental linking to check what has changed.
+
+void
+Layout::create_incremental_info_sections()
+{
+  gold_assert(this->incremental_inputs_ != NULL);
+
+  // Add the .gnu_incremental_inputs section.
+  const char *incremental_inputs_name =
+    this->namepool_.add(".gnu_incremental_inputs", false, NULL);
+  Output_section* inputs_os =
+    this->make_output_section(incremental_inputs_name,
+			      elfcpp::SHT_GNU_INCREMENTAL_INPUTS, 0);
+  Output_section_data* posd =
+      this->incremental_inputs_->create_incremental_inputs_section_data();
+  inputs_os->add_output_section_data(posd);
+  
+  // Add the .gnu_incremental_strtab section.
+  const char *incremental_strtab_name =
+    this->namepool_.add(".gnu_incremental_strtab", false, NULL);
+  Output_section* strtab_os = this->make_output_section(incremental_strtab_name,
+                                                        elfcpp::SHT_STRTAB,
+                                                        0);
+  Output_data_strtab* strtab_data =
+    new Output_data_strtab(this->incremental_inputs_->get_stringpool());
+  strtab_os->add_output_section_data(strtab_data);
+  
+  inputs_os->set_link_section(strtab_data);
 }
 
 // Return whether SEG1 should be before SEG2 in the output file.  This

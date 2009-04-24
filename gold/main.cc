@@ -44,6 +44,7 @@
 #include "layout.h"
 #include "plugin.h"
 #include "gc.h"
+#include "incremental.h"
 
 using namespace gold;
 
@@ -218,6 +219,9 @@ main(int argc, char** argv)
   // The layout object.
   Layout layout(command_line.number_of_input_files(),
 		&command_line.script_options());
+
+  if (layout.incremental_inputs() != NULL)
+    layout.incremental_inputs()->report_command_line(argc, argv);
 
   // Get the search path from the -L options.
   Dirsearch search_path;
