@@ -1343,11 +1343,10 @@ ALLDEPFILES = \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	sol2-tdep.c \
 	solib-irix.c solib-svr4.c solib-sunos.c \
-	sparc-linux-nat.c \
-	sparc-linux-tdep.c sparc-nat.c sparc-sol2-nat.c sparc-sol2-tdep.c \
-	sparc-tdep.c sparc-sol2-nat.c sparc-sol2-tdep.c sparc64-linux-nat.c \
-	sparc64-linux-tdep.c sparc64-nat.c sparc64-sol2-tdep.c \
-	sparc64-tdep.c sparc64fbsd-nat.c sparc64fbsd-tdep.c \
+	sparc-linux-nat.c sparc-linux-tdep.c \
+	sparc-sol2-nat.c sparc-sol2-tdep.c sparc64-sol2-tdep.c \
+	sparc-nat.c sparc-tdep.c sparc64-linux-nat.c sparc64-linux-tdep.c \
+	sparc64-nat.c sparc64-tdep.c sparc64fbsd-nat.c sparc64fbsd-tdep.c \
 	sparc64nbsd-nat.c sparc64nbsd-tdep.c sparc64obsd-tdep.c \
 	sparcnbsd-nat.c sparcnbsd-tdep.c sparcobsd-tdep.c \
 	spu-linux-nat.c spu-tdep.c \

@@ -1,4 +1,7 @@
-2009-04-24  Eli Zaretskii  <eliz@gnu.org>
+2009-04-25  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (ALLDEPFILES): Remove duplicate entries for
+	sparc-sol2-nat.c and sparc-sol2-tdep.c.
 
 	* stack.c (_initialize_stack) <disassemble-next-line>: Doc fix.
 
