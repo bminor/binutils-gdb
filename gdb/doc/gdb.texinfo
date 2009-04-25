@@ -6071,11 +6071,21 @@ Show the current setting of the disassembly flavor.
 @kindex show disassemble-next-line
 @item set disassemble-next-line
 @itemx show disassemble-next-line
-Control whether or not @value{GDBN} will disassemble next source line
-when execution stops.  If ON, GDB will display disassembly of the next
-source line when execution of the program being debugged stops.
-If AUTO, or there's no line info to determine the source line of the
-next instruction, display disassembly of next instruction instead.
+Control whether or not @value{GDBN} will disassemble the next source
+line or instruction when execution stops.  If ON, @value{GDBN} will
+display disassembly of the next source line when execution of the
+program being debugged stops.  This is @emph{in addition} to
+displaying the source line itself, which @value{GDBN} always does if
+possible.  If the next source line cannot be displayed for some reason
+(e.g., if @value{GDBN} cannot find the source file, or there's no line
+info in the debug info), @value{GDBN} will display disassembly of the
+next @emph{instruction} instead of showing the next source line.  If
+AUTO, @value{GDBN} will display disassembly of next instruction only
+if the source line cannot be displayed.  This setting causes
+@value{GDBN} to display some feedback when you step through a function
+with no line info or whose source file is unavailable.  The default is
+OFF, which means never display the disassembly of the next line or
+instruction.
 @end table
 
 

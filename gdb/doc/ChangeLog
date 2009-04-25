@@ -1,3 +1,8 @@
+2009-04-25  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Machine Code) <disassemble-next-line>: Improve and
+	clarify the wording.
+
 2009-04-23  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Data Files): New node.
