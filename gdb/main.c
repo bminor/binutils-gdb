@@ -346,8 +346,6 @@ captured_main (void *data)
   gdb_datadir = relocate_directory (argv[0], GDB_DATADIR,
 				    GDB_DATADIR_RELOCATABLE);
 
-  get_init_files (&system_gdbinit, &home_gdbinit, &local_gdbinit);
-
 #ifdef RELOC_SRCDIR
   add_substitute_path_rule (RELOC_SRCDIR,
 			    make_relative_prefix (argv[0], BINDIR,
@@ -688,6 +686,11 @@ Excess command line arguments ignored. (%s%s)\n"),
   /* Initialize all files.  Give the interpreter a chance to take
      control of the console via the deprecated_init_ui_hook ().  */
   gdb_init (argv[0]);
+
+  /* Lookup gdbinit files. Note that the gdbinit file name may be overriden
+     during file initialization, so get_init_files should be called after
+     gdb_init.  */
+  get_init_files (&system_gdbinit, &home_gdbinit, &local_gdbinit);
 
   /* Do these (and anything which might call wrap_here or *_filtered)
      after initialize_all_files() but before the interpreter has been
