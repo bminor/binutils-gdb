@@ -1,3 +1,10 @@
+2009-04-27  Doug Evans  <dje@google.com>
+
+	* gdb.threads/watchthreads.c (main): Initialize args before starting
+	the threads.  Plus formatting cleanup.
+	* gdb.threads/watchthreads.exp: Avoid errant failures due to
+	biased scheduling of one thread.
+
 2009-04-27  Jerome Guitton  <guitton@adacore.com>
 
 	* gdb.cp/templates.cc (GetMax): New template.

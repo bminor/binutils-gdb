@@ -62,8 +62,10 @@ set args_1 0
 # Watch values that will be modified by distinct threads.
 gdb_test "watch args\[0\]" "Hardware watchpoint 2: args\\\[0\\\]"
 gdb_test "watch args\[1\]" "Hardware watchpoint 3: args\\\[1\\\]"
+set hwwp_2_enabled 1
+set hwwp_3_enabled 1
 
-set init_line [expr [gdb_get_line_number "Init value"]+1]
+set init_line [gdb_get_line_number "Init value"]
 set inc_line [gdb_get_line_number "Loop increment"]
 set main_loc "main \\\(\\\) at .*watchthreads.c:$init_line"
 set thread0_loc "thread_function \\\(arg=0x0\\\) at .*watchthreads.c:$inc_line"
@@ -113,6 +115,27 @@ for {set i 0} {$i < 30} {incr i} {
 	    set test_flag 1
 	} else {
 	    fail "threaded watch loop"
+	}
+
+	# If one of the watchpoints is disabled, we'd better not stop there.
+	if { !$hwwp_2_enabled && $test_flag_0 } {
+	    fail "disabled hw watchpoint 2 triggered"
+	}
+	if { !$hwwp_3_enabled && $test_flag_1 } {
+	    fail "disabled hw watchpoint 3 triggered"
+	}
+
+	# If we get to 10 in one of the watched locations disable it so we
+	# see some of the other watched location.
+	# 10 is chosen so we're guaranteed to come through here.
+	if { $hwwp_2_enabled && $hwwp_3_enabled } {
+	    if { $args_0 >= 10 && $hwwp_2_enabled } {
+		gdb_test "disable 2" ""
+		set hwwp_2_enabled 0
+	    } elseif { $args_1 >= 10 && $hwwp_3_enabled } {
+		gdb_test "disable 3" ""
+		set hwwp_3_enabled 0
+	    }
 	}
     }
   }
