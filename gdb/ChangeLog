@@ -1,3 +1,9 @@
+2009-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/9675:
+	* dwarf2read.c (unsigned_int_compar, inherit_abstract_dies): New.
+	(read_func_scope): Call inherit_abstract_dies.
+
 2009-04-25  Eli Zaretskii  <eliz@gnu.org>
 
 	* Makefile.in (ALLDEPFILES): Remove duplicate entries for

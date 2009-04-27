@@ -3089,6 +3089,103 @@ add_to_cu_func_list (const char *name, CORE_ADDR lowpc, CORE_ADDR highpc,
   cu->last_fn = thisfn;
 }
 
+/* qsort helper for inherit_abstract_dies.  */
+
+static int
+unsigned_int_compar (const void *ap, const void *bp)
+{
+  unsigned int a = *(unsigned int *) ap;
+  unsigned int b = *(unsigned int *) bp;
+
+  return (a > b) - (b > a);
+}
+
+/* DW_AT_abstract_origin inherits whole DIEs (not just their attributes).
+   Inherit only the children of the DW_AT_abstract_origin DIE not being already
+   referenced by DW_AT_abstract_origin from the children of the current DIE.  */
+
+static void
+inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct die_info *child_die;
+  unsigned die_children_count;
+  /* CU offsets which were referenced by children of the current DIE.  */
+  unsigned *offsets;
+  unsigned *offsets_end, *offsetp;
+  /* Parent of DIE - referenced by DW_AT_abstract_origin.  */
+  struct die_info *origin_die;
+  /* Iterator of the ORIGIN_DIE children.  */
+  struct die_info *origin_child_die;
+  struct cleanup *cleanups;
+  struct attribute *attr;
+
+  attr = dwarf2_attr (die, DW_AT_abstract_origin, cu);
+  if (!attr)
+    return;
+
+  origin_die = follow_die_ref (die, attr, &cu);
+  if (die->tag != origin_die->tag)
+    complaint (&symfile_complaints,
+	       _("DIE 0x%x and its abstract origin 0x%x have different tags"),
+	       die->offset, origin_die->offset);
+
+  child_die = die->child;
+  die_children_count = 0;
+  while (child_die && child_die->tag)
+    {
+      child_die = sibling_die (child_die);
+      die_children_count++;
+    }
+  offsets = xmalloc (sizeof (*offsets) * die_children_count);
+  cleanups = make_cleanup (xfree, offsets);
+
+  offsets_end = offsets;
+  child_die = die->child;
+  while (child_die && child_die->tag)
+    {
+      attr = dwarf2_attr (child_die, DW_AT_abstract_origin, cu);
+      /* According to DWARF3 3.3.8.2 #3 new entries without their abstract
+	 counterpart may exist.  */
+      if (attr)
+	{
+	  struct die_info *child_origin_die;
+
+	  child_origin_die = follow_die_ref (child_die, attr, &cu);
+	  if (child_die->tag != child_origin_die->tag)
+	    complaint (&symfile_complaints,
+		       _("Child DIE 0x%x and its abstract origin 0x%x have "
+			 "different tags"), child_die->offset,
+		       child_origin_die->offset);
+	  *offsets_end++ = child_origin_die->offset;
+	}
+      child_die = sibling_die (child_die);
+    }
+  qsort (offsets, offsets_end - offsets, sizeof (*offsets),
+	 unsigned_int_compar);
+  for (offsetp = offsets + 1; offsetp < offsets_end; offsetp++)
+    if (offsetp[-1] == *offsetp)
+      complaint (&symfile_complaints, _("Multiple children of DIE 0x%x refer "
+					"to DIE 0x%x as their abstract origin"),
+		 die->offset, *offsetp);
+
+  offsetp = offsets;
+  origin_child_die = origin_die->child;
+  while (origin_child_die && origin_child_die->tag)
+    {
+      /* Is ORIGIN_CHILD_DIE referenced by any of the DIE children?  */
+      while (offsetp < offsets_end && *offsetp < origin_child_die->offset)
+	offsetp++;
+      if (offsetp >= offsets_end || *offsetp > origin_child_die->offset)
+	{
+	  /* Found that ORIGIN_CHILD_DIE is really not referenced.  */
+	  process_die (origin_child_die, cu);
+	}
+      origin_child_die = sibling_die (origin_child_die);
+    }
+
+  do_cleanups (cleanups);
+}
+
 static void
 read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -3146,6 +3243,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  child_die = sibling_die (child_die);
 	}
     }
+
+  inherit_abstract_dies (die, cu);
 
   new = pop_context ();
   /* Make a block for the local symbols within.  */
