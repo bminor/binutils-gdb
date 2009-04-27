@@ -1,3 +1,9 @@
+2009-04-27  Jerome Guitton  <guitton@adacore.com>
+
+	* gdb.cp/templates.cc (GetMax): New template.
+	(main): Declare two instances of GetMax.
+	* gdb.cp/templates.exp: Add new test.
+
 2009-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/abstract-origin.exp, gdb.cp/abstract-origin.cc: New test.

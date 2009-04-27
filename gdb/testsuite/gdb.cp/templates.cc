@@ -492,6 +492,13 @@ int
 T5<T>::value()
 { return val; }
 
+template <class T>
+T GetMax (T a, T b) {
+  T result;
+  result = (a>b)? a : b;
+  // set breakpoint on a line with no real code
+  return (result);
+}
 
 #if ! defined(__GNUC__) || defined(GCC_BUG)
 template<class T>
@@ -706,6 +713,7 @@ template<class T> T Garply<T>::garply (int i, T tt)
 int main()
 {
     int i;
+    long l, m, n;
 #ifdef usestubs
     set_debug_traps();
     breakpoint();
@@ -766,6 +774,8 @@ int main()
 
   y = x + fc.x;
   
+  i=GetMax<int>(x,y);
+  n=GetMax<long>(l,m);
 
   return 0;
     

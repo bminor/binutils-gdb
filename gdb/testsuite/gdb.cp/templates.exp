@@ -157,6 +157,11 @@ proc test_template_breakpoints {} {
 	"Breakpoint.*at.* file .*${testfile}.cc, line.*" \
 	"value method breakpoint"
 
+    set bp_location [gdb_get_line_number \
+                         "set breakpoint on a line with no real code"]
+    gdb_test "break ${testfile}.cc:${bp_location}" \
+        "Breakpoint.*at.* file .*${testfile}.cc, line.*(2 locations).*" \
+        "breakpoint on a line with no real code"
     delete_breakpoints
 }
 
