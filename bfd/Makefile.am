@@ -43,7 +43,7 @@ BFD32_LIBS = \
 	format.lo init.lo libbfd.lo opncls.lo reloc.lo \
 	section.lo syms.lo targets.lo hash.lo linker.lo \
 	srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo \
-	merge.lo dwarf2.lo simple.lo compress.lo
+	merge.lo dwarf2.lo simple.lo compress.lo verilog.lo
 
 BFD64_LIBS = archive64.lo
 
@@ -53,7 +53,7 @@ BFD32_LIBS_CFILES = \
 	format.c init.c libbfd.c opncls.c reloc.c \
 	section.c syms.c targets.c hash.c linker.c \
 	srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c \
-	merge.c dwarf2.c simple.c compress.c
+	merge.c dwarf2.c simple.c compress.c verilog.c
 
 BFD64_LIBS_CFILES = archive64.c
 
@@ -1070,6 +1070,8 @@ hash.lo: hash.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
 linker.lo: linker.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/bfdlink.h genlink.h
 srec.lo: srec.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
+verilog.lo: verilog.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
 binary.lo: binary.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/hashtab.h

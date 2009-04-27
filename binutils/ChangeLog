@@ -1,3 +1,7 @@
+2009-04-27  Anthony Green  <green@moxielogic.com>
+
+	* NEWS: Mention verilog support added to bfd.
+
 2009-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objcopy.c (copy_object): Copy pe_opthdr before changing PE

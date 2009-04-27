@@ -1,3 +1,14 @@
+2009-04-27  Anthony Green  <green@moxielogic.com>
+
+	* verilog.c: New file.
+	* Makefile.am (BFD32_LIBS): Add verilog.c.
+	(BFD32_LIBS_CFILES): Add verilog.c.
+	(verilog.lo): New build rule.
+	* Makefile.in: Rebuilt.
+	* targets.c: Add verilog support.
+	* bfd.c (tdata union): Add Verilog private data field.
+	* bfd-in2.h: Regenerate.
+
 2009-04-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Don't
