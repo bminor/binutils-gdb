@@ -601,9 +601,7 @@ Output_data_plt_x86_64::Output_data_plt_x86_64(Layout* layout,
 void
 Output_data_plt_x86_64::do_adjust_output_section(Output_section* os)
 {
-  // UnixWare sets the entsize of .plt to 4, and so does the old GNU
-  // linker, and so do we.
-  os->set_entsize(4);
+  os->set_entsize(plt_entry_size);
 }
 
 // Add an entry to the PLT.
