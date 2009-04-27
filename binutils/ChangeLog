@@ -1,3 +1,8 @@
+2009-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (copy_object): Copy pe_opthdr before changing PE
+	parameters.
+
 2009-04-24  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf.c (process_extended_line_op): Add DW_LNE_set_discriminator.

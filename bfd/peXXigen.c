@@ -2188,7 +2188,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
   ipe = pe_data (ibfd);
   ope = pe_data (obfd);
  
-  ope->pe_opthdr = ipe->pe_opthdr;
+  /* pe_opthdr is copied in copy_object.  */
   ope->dll = ipe->dll;
 
   /* Don't copy input subsystem if output is different from input.  */

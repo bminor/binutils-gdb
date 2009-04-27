@@ -1,3 +1,8 @@
+2009-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Don't
+	copy pe_opthdr.
+
 2009-04-23  Matthias Klose  <doko@ubuntu.com>
 
 	* peXXigen.c (_bfd_XXi_swap_sym_in): Initialize `name'.

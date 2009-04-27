@@ -1491,6 +1491,11 @@ copy_object (bfd *ibfd, bfd *obfd)
       /* Set up PE parameters.  */
       pe_data_type *pe = pe_data (obfd);
 
+      /* Copy PE parameters before changing them.  */
+      if (ibfd->xvec->flavour == bfd_target_coff_flavour
+	  && bfd_pei_p (ibfd))
+	pe->pe_opthdr = pe_data (ibfd)->pe_opthdr;
+
       if (pe_file_alignment != (bfd_vma) -1)
 	pe->pe_opthdr.FileAlignment = pe_file_alignment;
       else
