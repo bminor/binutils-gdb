@@ -1,5 +1,12 @@
 2009-04-27  Jerome Guitton  <guitton@adacore.com>
 
+	* symtab.c (append_exact_match_to_sals): New function, extracted
+	from expand_line_sal.
+	(expand_line_sal): Use append_exact_match_to_sals to append exact
+	matches. If none found, append all best items.
+
+2009-04-27  Jerome Guitton  <guitton@adacore.com>
+
 	* main.c (captured_main): Move gdbinit lookups after gdb_init.
 
 2009-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>

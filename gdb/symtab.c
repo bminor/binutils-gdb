@@ -4460,6 +4460,57 @@ append_expanded_sal (struct symtabs_and_lines *sal,
   ++sal->nelts;
 }
 
+/* Helper to expand_line_sal below.  Search in the symtabs for any
+   linetable entry that exactly matches FILENAME and LINENO and append
+   them to RET. If there is at least one match, return 1; otherwise,
+   return 0, and return the best choice in BEST_ITEM and BEST_SYMTAB.  */
+
+static int
+append_exact_match_to_sals (char *filename, int lineno,
+			    struct symtabs_and_lines *ret,
+			    struct linetable_entry **best_item,
+			    struct symtab **best_symtab)
+{
+  struct objfile *objfile;
+  struct symtab *symtab;
+  int exact = 0;
+  int j;
+  *best_item = 0;
+  *best_symtab = 0;
+  
+  ALL_SYMTABS (objfile, symtab)
+    {
+      if (strcmp (filename, symtab->filename) == 0)
+	{
+	  struct linetable *l;
+	  int len;
+	  l = LINETABLE (symtab);
+	  if (!l)
+	    continue;
+	  len = l->nitems;
+
+	  for (j = 0; j < len; j++)
+	    {
+	      struct linetable_entry *item = &(l->item[j]);
+
+	      if (item->line == lineno)
+		{
+		  exact = 1;
+		  append_expanded_sal (ret, symtab, lineno, item->pc);
+		}
+	      else if (!exact && item->line > lineno
+		       && (*best_item == NULL
+			   || item->line < (*best_item)->line))
+		{
+		  *best_item = item;
+		  *best_symtab = symtab;
+		}
+	    }
+	}
+    }
+  return exact;
+}
+
 /* Compute a set of all sals in
    the entire program that correspond to same file
    and line as SAL and return those.  If there
@@ -4515,42 +4566,14 @@ expand_line_sal (struct symtab_and_line sal)
 	    PSYMTAB_TO_SYMTAB (psymtab);
 	}
 
-      /* For each symtab, we add all pcs to ret.sals.  I'm actually
-	 not sure what to do if we have exact match in one symtab,
-	 and non-exact match on another symtab.  */
-
-      ALL_SYMTABS (objfile, symtab)
-	{
-	  if (strcmp (sal.symtab->filename,
-		      symtab->filename) == 0)
-	    {
-	      struct linetable *l;
-	      int len;
-	      l = LINETABLE (symtab);
-	      if (!l)
-		continue;
-	      len = l->nitems;
-
-	      for (j = 0; j < len; j++)
-		{
-		  struct linetable_entry *item = &(l->item[j]);
-
-		  if (item->line == lineno)
-		    {
-		      exact = 1;
-		      append_expanded_sal (&ret, symtab, lineno, item->pc);
-		    }
-		  else if (!exact && item->line > lineno
-			   && (best_item == NULL || item->line < best_item->line))
-		    {
-		      best_item = item;
-		      best_symtab = symtab;
-		    }
-		}
-	    }
-	}
+      /* Now search the symtab for exact matches and append them.  If
+	 none is found, append the best_item and all its exact
+	 matches.  */
+      exact = append_exact_match_to_sals (sal.symtab->filename, lineno,
+					  &ret, &best_item, &best_symtab);
       if (!exact && best_item)
-	append_expanded_sal (&ret, best_symtab, lineno, best_item->pc);
+	append_exact_match_to_sals (best_symtab->filename, best_item->line,
+				    &ret, &best_item, &best_symtab);
     }
 
   /* For optimized code, compiler can scatter one source line accross
