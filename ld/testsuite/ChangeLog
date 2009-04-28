@@ -1,3 +1,9 @@
+2009-04-28  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-i386/vxworks1-lib.dd: Adjust expected disassembly.
+	* ld-i386/vxworks1.dd: Adjust expected disassembly.
+	* ld-i386/vxworks1-lib.rd: Sections are swapped.
+
 2009-04-22  Christophe Lyon  <christophe.lyon@st.com>
 
 	PR9743
