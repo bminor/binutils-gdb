@@ -1885,11 +1885,13 @@ yylex ()
       lexptr++;
       goto retry;
 
+    case '[':
     case '(':
       paren_depth++;
       lexptr++;
       return c;
 
+    case ']':
     case ')':
       if (paren_depth == 0)
 	return 0;
@@ -1991,8 +1993,6 @@ yylex ()
     case '@':
     case '<':
     case '>':
-    case '[':
-    case ']':
     case '?':
     case ':':
     case '=':

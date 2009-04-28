@@ -1,3 +1,7 @@
+2009-04-27  Tom Tromey  <tromey@redhat.com>
+
+	* c-exp.y (yylex): Handle '[' and ']' like '(' and ')'.
+
 2009-04-27  Jerome Guitton  <guitton@adacore.com>
 
 	* symtab.c (append_exact_match_to_sals): New function, extracted

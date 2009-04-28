@@ -1,3 +1,7 @@
+2009-04-27  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/printcmds.exp (test_printf): Test comma operator in [].
+
 2009-04-27  Doug Evans  <dje@google.com>
 
 	* gdb.threads/watchthreads.c (main): Initialize args before starting
