@@ -1,3 +1,7 @@
+2009-04-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* macrocmd.c (info_macro_command): Print -Dname=value if LINE is zero.
+
 2009-04-27  Tom Tromey  <tromey@redhat.com>
 
 	* c-exp.y (yylex): Handle '[' and ']' like '(' and ')'.

@@ -1,3 +1,8 @@
+2009-04-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Macros): Note command-line for `info macro'.  Append
+	a new part on command-line defined macros.
+
 2009-04-25  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Machine Code) <disassemble-next-line>: Improve and

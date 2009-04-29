@@ -8382,7 +8382,7 @@ can be any string of tokens.
 @cindex definition, showing a macro's
 @item info macro @var{macro}
 Show the definition of the macro named @var{macro}, and describe the
-source location where that definition was established.
+source location or compiler command-line where that definition was established.
 
 @kindex macro define
 @cindex user-defined macros
@@ -8544,6 +8544,18 @@ Defined at /home/jimb/gdb/macros/play/sample.c:13
 expands to: 1729 < 42
 (@value{GDBP}) print N Q M
 $2 = 0
+(@value{GDBP})
+@end smallexample
+
+In addition to source files, macros can be defined on the compilation command
+line using the @option{-D@var{name}=@var{value}} syntax.  For macros defined in
+such a way, @value{GDBN} displays the location of their definition as line zero
+of the source file submitted to the compiler.
+
+@smallexample
+(@value{GDBP}) info macro __STDC__
+Defined at /home/jimb/gdb/macros/play/sample.c:0
+-D__STDC__=1
 (@value{GDBP})
 @end smallexample
 

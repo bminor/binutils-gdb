@@ -26,7 +26,7 @@ set testfile "macscp"
 set objfile ${objdir}/${subdir}/${testfile}.o
 set binfile ${objdir}/${subdir}/${testfile}
 
-set options { debug }
+set options { debug additional_flags=-DFROM_COMMANDLINE=ARG}
 
 get_compiler_info ${binfile}
 if [test_compiler_info gcc*] {
@@ -67,11 +67,14 @@ gdb_load ${binfile}
 
 proc info_macro {macro} {
     global gdb_prompt
-    global decimal
 
     set filepat {macscp[0-9]+\.[ch]}
     set definition {}
     set location {}
+
+    # Line number zero is set for macros defined from the compiler command-line.
+    # Such macros are not being tested by this function.
+    set nonzero {[1-9][0-9]*}
 
     send_gdb "info macro ${macro}\n"
 
@@ -79,7 +82,7 @@ proc info_macro {macro} {
 
     if {$debug_me} {exp_internal 1}
     gdb_expect {
-        -re "Defined at \[^\r\n\]*(${filepat}):${decimal}\[\r\n\]" {
+        -re "Defined at \[^\r\n\]*(${filepat}):${nonzero}\[\r\n\]" {
             # `location' and `definition' should be empty when we see
             # this message.
             if {[llength $location] == 0 && [llength $definition] == 0} {
@@ -101,7 +104,7 @@ proc info_macro {macro} {
                 set definition {}
             }
         }
-        -re "^\[\r\n\]*  included at \[^\r\n\]*(${filepat}):${decimal}\[\r\n\]" {
+        -re "^\[\r\n\]*  included at \[^\r\n\]*(${filepat}):${nonzero}\[\r\n\]" {
             # `location' should *not* be empty when we see this
             # message.  It should have recorded at least the initial
             # `Defined at ' message (for definitions) or ` at' message
@@ -114,7 +117,7 @@ proc info_macro {macro} {
                 set definition {}
             }
         }
-        -re "^\[\r\n\]*at \[^\r\n\]*(${filepat}):${decimal}\[\r\n\]" {
+        -re "^\[\r\n\]*at \[^\r\n\]*(${filepat}):${nonzero}\[\r\n\]" {
             # This appears after a `has no definition' message.
             # `location' should be empty when we see it.
             if {[string compare $definition undefined] == 0 \
@@ -203,6 +206,11 @@ if {[list_and_check_macro main WHERE {macscp1.c {before macscp1_3}}]} {
 }
 list_and_check_macro macscp2_2 WHERE {macscp2.h macscp1.c {before macscp2_2}}
 list_and_check_macro macscp3_2 WHERE {macscp3.h macscp1.c {before macscp3_2}}
+
+
+# Assuming the current position inside program by `list' from above.
+gdb_test "info macro FROM_COMMANDLINE" \
+	 "Defined at \[^\r\n\]*:0\r\n-DFROM_COMMANDLINE=ARG"
 
 
 # Although GDB's macro table structures distinguish between multiple
