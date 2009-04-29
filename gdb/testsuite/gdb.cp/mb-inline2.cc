@@ -21,5 +21,5 @@
 int
 bfn ()
 {
-  return foo (1);
+  return foo (1) + multi_line_foo (1);
 }

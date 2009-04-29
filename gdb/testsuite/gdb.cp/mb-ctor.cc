@@ -28,11 +28,19 @@ public:
   ~Derived();
 private:
   int i;
+  int i2;
 };
 
 Derived::Derived(int i) : Base(i)
 {
   this->i = i;
+  /* The next statement is spread over two lines on purpose to exercise
+     a bug where breakpoints set on all but the last line of a statement
+     would not get multiple breakpoints.
+     The second line's text for gdb_get_line_number is a subset of the
+     first line so that we don't care which line gdb prints when it stops.  */
+  this->i2 = // set breakpoint here
+    i; // breakpoint here
 }
 
 Derived::~Derived()

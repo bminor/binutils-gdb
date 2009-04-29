@@ -23,7 +23,7 @@
 int
 afn ()
 {
-  return foo (0);
+  return foo (0) + multi_line_foo (0);
 }
 
 int

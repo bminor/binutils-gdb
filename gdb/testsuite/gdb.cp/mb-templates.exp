@@ -165,3 +165,25 @@ gdb_test "continue" \
     ".*Breakpoint.*foo<int> \\(i=1\\).*" \
     "instantiation: run to breakpoint 2"
 
+
+# Make sure we can set a breakpoint on a source statement that spans
+# multiple lines.
+
+delete_breakpoints
+
+set bp_location [gdb_get_line_number "set multi-line breakpoint here"]
+
+if { ![runto_main] } {
+    fail "Can't run to main for multi_line_foo tests."
+    return 0
+}
+
+gdb_test "break $srcfile:$bp_location" \
+    "Breakpoint.*at.* file .*$srcfile, line.*\\(2 locations\\).*" \
+    "set multi_line_foo breakpoint"
+gdb_test "continue" \
+    ".*Breakpoint.*multi_line_foo<int> \\(i=0\\).*" \
+    "run to multi_line_foo breakpoint 2 <int>"
+gdb_test "continue" \
+    ".*Breakpoint.*multi_line_foo<double> \\(i=0\\).*" \
+    "run to multi_line_foo breakpoint 2 <double>"

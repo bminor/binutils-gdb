@@ -106,3 +106,25 @@ gdb_expect {
 gdb_test "continue" \
     ".*Program exited normally.*" \
     "continue with disabled breakpoint 1.2"
+
+# Make sure we can set a breakpoint on a source statement that spans
+# multiple lines.
+
+delete_breakpoints
+
+set bp_location [gdb_get_line_number "set multi-line breakpoint here" $hdrfile]
+
+if { ![runto_main] } {
+    fail "Can't run to main for multi_line_foo tests."
+    return 0
+}
+
+gdb_test "break $hdrfile:$bp_location" \
+    "Breakpoint.*at.* file .*$hdrfile, line.*\\(2 locations\\).*" \
+    "set multi_line_foo breakpoint"
+gdb_test "continue" \
+    ".*Breakpoint.*multi_line_foo \\(i=0\\).*" \
+    "run to multi_line_foo breakpoint 4 afn"
+gdb_test "continue" \
+    ".*Breakpoint.*multi_line_foo \\(i=1\\).*" \
+    "run to multi_line_foo breakpoint 4 bfn"

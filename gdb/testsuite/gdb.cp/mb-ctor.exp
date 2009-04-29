@@ -43,6 +43,11 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
+if ![runto_main] then {
+    perror "couldn't run to breakpoint"
+    continue
+}
+
 # Set a breakpoint with multiple locations
 # and a condition.
 
@@ -50,34 +55,31 @@ gdb_test "break 'Derived::Derived(int)'" \
     "Breakpoint.*at.* file .*$srcfile, line.*\\(2 locations\\).*" \
     "set-breakpoint at ctor"
 
+gdb_breakpoint [gdb_get_line_number "set breakpoint here"]
+
 gdb_test "break 'Derived::~Derived()'" \
     "Breakpoint.*at.* file .*$srcfile, line.*\\(2 locations\\).*" \
     "set-breakpoint at dtor"
 
-gdb_run_cmd
-gdb_expect {
-    -re "Breakpoint \[0-9\]+,.*Derived.*i=7.*$gdb_prompt $" {
-	pass "run to breakpoint"
-    }
-    -re "$gdb_prompt $" {
-	fail "run to breakpoint"
-    }
-    timeout {
-	fail "run to breakpoint (timeout)"
-    }
-}
+gdb_test "continue" \
+    ".*Breakpoint.*Derived.*i=7.*" \
+    "run to breakpoint 1 v1"
+
+gdb_continue_to_breakpoint "set breakpoint here" ".* breakpoint here"
 
 gdb_test "continue" \
     ".*Breakpoint.*Derived.*i=15.*" \
-    "run to breakpoint 2"
+    "run to breakpoint 1 v2"
+
+gdb_continue_to_breakpoint "set breakpoint here" ".* breakpoint here"
 
 gdb_test "continue" \
     ".*Breakpoint.*~Derived.*" \
-    "run to breakpoint 3"
+    "run to breakpoint 3 v1"
 
 gdb_test "continue" \
     ".*Breakpoint.*~Derived.*" \
-    "run to breakpoint 4"
+    "run to breakpoint 3 v2"
 
 gdb_test "continue" \
     ".*exited normally.*" \

@@ -26,5 +26,12 @@ foo (int i)
   return i; // set breakpoint here
 }
 
+static int
+multi_line_foo (int i)
+{
+  return // set multi-line breakpoint here
+    i;
+}
+
 extern int afn ();
 extern int bfn ();

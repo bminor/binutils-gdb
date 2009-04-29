@@ -1,3 +1,14 @@
+2009-04-29  Doug Evans  <dje@google.com>
+
+	* gdb.cp/mb-ctor.exp: Add multi-line source statement test.
+	* gdb.cp/mb-ctor.cc: Ditto.
+	* gdb.cp/mb-inline.exp: Add multi-line source statement test.
+	* gdb.cp/mb-inline.h (multi_line_foo): New function.
+	* gdb.cp/mb-inline1.cc: Call it.
+	* gdb.cp/mb-inline2.cc: Ditto.
+	* gdb.cp/mb-templates.exp: Add multi-line source statement test.
+	* gdb.cp/mb-templates.cc (multi_line_foo): New template.
+
 2009-04-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/macscp.exp: New `options' parameter `-DFROM_COMMANDLINE'.
