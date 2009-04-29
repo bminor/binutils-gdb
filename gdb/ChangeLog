@@ -1,3 +1,7 @@
+2009-04-29  Doug Evans  <dje@google.com>
+
+	* i386-nat.c (child_post_startup_inferior): Delete, unused.
+
 2009-04-29  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (print_exception_catchpoint): Access `b' directly
