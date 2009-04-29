@@ -1,3 +1,9 @@
+2009-04-29  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (print_exception_catchpoint): Access `b' directly
+	instead of `b->loc->owner'.
+	(print_mention_exception_catchpoint): Ditto.
+
 2009-04-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* macrocmd.c (info_macro_command): Print -Dname=value if LINE is zero.

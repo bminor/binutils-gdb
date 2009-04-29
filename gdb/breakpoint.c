@@ -6631,7 +6631,7 @@ print_exception_catchpoint (struct breakpoint *b)
     breakpoint_adjustment_warning (b->loc->requested_address,
 	                           b->loc->address,
 				   b->number, 1);
-  bp_temp = b->loc->owner->disposition == disp_del;
+  bp_temp = b->disposition == disp_del;
   ui_out_text (uiout, 
 	       bp_temp ? "Temporary catchpoint "
 		       : "Catchpoint ");
@@ -6678,7 +6678,7 @@ print_mention_exception_catchpoint (struct breakpoint *b)
   int bp_temp;
   int bp_throw;
 
-  bp_temp = b->loc->owner->disposition == disp_del;
+  bp_temp = b->disposition == disp_del;
   bp_throw = strstr (b->addr_string, "throw") != NULL;
   ui_out_text (uiout, bp_temp ? _("Temporary catchpoint ")
 			      : _("Catchpoint "));
