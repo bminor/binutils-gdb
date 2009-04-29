@@ -4975,23 +4975,14 @@ slurp_ia64_unwind_table (FILE * file,
 
   aux->table = xcmalloc (size / (3 * eh_addr_size), sizeof (aux->table[0]));
   tep = aux->table;
-  for (tp = table; tp < table + size; tp += 3 * eh_addr_size, ++tep)
+  for (tp = table; tp < table + size; ++tep)
     {
       tep->start.section = SHN_UNDEF;
       tep->end.section   = SHN_UNDEF;
       tep->info.section  = SHN_UNDEF;
-      if (is_32bit_elf)
-	{
-	  tep->start.offset = byte_get ((unsigned char *) tp + 0, 4);
-	  tep->end.offset   = byte_get ((unsigned char *) tp + 4, 4);
-	  tep->info.offset  = byte_get ((unsigned char *) tp + 8, 4);
-	}
-      else
-	{
-	  tep->start.offset = BYTE_GET ((unsigned char *) tp +  0);
-	  tep->end.offset   = BYTE_GET ((unsigned char *) tp +  8);
-	  tep->info.offset  = BYTE_GET ((unsigned char *) tp + 16);
-	}
+      tep->start.offset = byte_get (tp, eh_addr_size); tp += eh_addr_size;
+      tep->end.offset   = byte_get (tp, eh_addr_size); tp += eh_addr_size;
+      tep->info.offset  = byte_get (tp, eh_addr_size); tp += eh_addr_size;
       tep->start.offset += aux->seg_base;
       tep->end.offset   += aux->seg_base;
       tep->info.offset  += aux->seg_base;

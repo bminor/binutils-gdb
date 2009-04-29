@@ -1,3 +1,9 @@
+2009-04-29  Alan Modra  <amodra@bigpond.net.au>
+	    Denis Scherbakov <denis_scherbakov@yahoo.com>
+
+	* readelf.c (slurp_ia64_unwind_table): Correct 64-bit unwind table
+	read, and merge with 32-bit case.
+
 2009-04-27  Anthony Green  <green@moxielogic.com>
 
 	* NEWS: Mention verilog support added to bfd.
