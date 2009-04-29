@@ -804,6 +804,10 @@ build_exec "vers4" vers4.c vers4 "" "" "" "" vers4.sym
 
 build_exec "vers4a" vers4.c vers4a "-export-dynamic" "" vers4a.ver vers4a.dsym vers4a.sym
 
+# Verify that --no-export-dynamic undoes the effect of --export-dynamic.
+setup_xfail "mips*-*-*"
+build_exec "vers4b" vers4.c vers4b "-export-dynamic -Wl,--no-export-dynamic" "" "" "" vers4.sym
+
 
 #
 # Try multiple definitions foo@BAR and foo@@BAR and make sure the linker

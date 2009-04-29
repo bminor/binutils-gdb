@@ -1,5 +1,8 @@
 -*- text -*-
 
+* New option --no-export-dynamic to undo the effect of the -E and
+  --export-dynamic options.
+
 * ELF: --warn-alternate-em option to warn if an object has alternate
   ELF machine code.
 

@@ -1,3 +1,8 @@
+2009-04-29  Chris Demetriou  <cgd@google.com>
+
+	* ld-elfvers/vers.exp (vers4b): New test to verify that
+	--no-export-dynamic undoes --export-dynamic.
+
 2009-04-28  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-i386/vxworks1-lib.dd: Adjust expected disassembly.

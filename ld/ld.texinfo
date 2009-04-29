@@ -491,15 +491,19 @@ regardless of this option.
 @cindex dynamic symbol table
 @kindex -E
 @kindex --export-dynamic
+@kindex --no-export-dynamic
 @item -E
 @itemx --export-dynamic
-When creating a dynamically linked executable, add all symbols to the
-dynamic symbol table.  The dynamic symbol table is the set of symbols
-which are visible from dynamic objects at run time.
+@itemx --no-export-dynamic
+When creating a dynamically linked executable, using the @option{-E}
+option or the @option{--export-dynamic} option causes the linker to add
+all symbols to the dynamic symbol table.  The dynamic symbol table is the
+set of symbols which are visible from dynamic objects at run time.
 
-If you do not use this option, the dynamic symbol table will normally
-contain only those symbols which are referenced by some dynamic object
-mentioned in the link.
+If you do not use either of these options (or use the
+@option{--no-export-dynamic} option to restore the default behavior), the
+dynamic symbol table will normally contain only those symbols which are
+referenced by some dynamic object mentioned in the link.
 
 If you use @code{dlopen} to load a dynamic object which needs to refer
 back to the symbols defined by the program, rather than some other

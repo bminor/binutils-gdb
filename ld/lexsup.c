@@ -77,6 +77,7 @@ enum option_values
   OPTION_EL,
   OPTION_EMBEDDED_RELOCS,
   OPTION_EXPORT_DYNAMIC,
+  OPTION_NO_EXPORT_DYNAMIC,
   OPTION_HELP,
   OPTION_IGNORE,
   OPTION_MAP,
@@ -222,6 +223,8 @@ static const struct ld_option ld_options[] =
     'e', N_("ADDRESS"), N_("Set start address"), TWO_DASHES },
   { {"export-dynamic", no_argument, NULL, OPTION_EXPORT_DYNAMIC},
     'E', NULL, N_("Export all dynamic symbols"), TWO_DASHES },
+  { {"no-export-dynamic", no_argument, NULL, OPTION_NO_EXPORT_DYNAMIC},
+    '\0', NULL, N_("Undo the effect of --export-dynamic"), TWO_DASHES },
   { {"EB", no_argument, NULL, OPTION_EB},
     '\0', NULL, N_("Link big-endian objects"), ONE_DASH },
   { {"EL", no_argument, NULL, OPTION_EL},
@@ -819,6 +822,9 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_EXPORT_DYNAMIC:
 	case 'E': /* HP/UX compatibility.  */
 	  link_info.export_dynamic = TRUE;
+	  break;
+	case OPTION_NO_EXPORT_DYNAMIC:
+	  link_info.export_dynamic = FALSE;
 	  break;
 	case 'e':
 	  lang_add_entry (optarg, TRUE);

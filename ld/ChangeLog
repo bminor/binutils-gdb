@@ -1,3 +1,11 @@
+2009-04-29  Chris Demetriou  <cgd@google.com>
+
+	* lexsup.c (option_values): Add OPTION_NO_EXPORT_DYNAMIC.
+	(ld_options): Likewise.
+	(parse_args): Likewise.
+	* ld.texinfo: Document --no-export-dynamic.
+	* NEWS: Mention --no-export-dynamic.
+
 2009-04-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* deffilep.y (STACKSIZE_K): Rename from STACKSIZE.
