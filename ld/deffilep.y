@@ -104,7 +104,7 @@ static const char *lex_parse_string_end = 0;
   int number;
 };
 
-%token NAME LIBRARY DESCRIPTION STACKSIZE HEAPSIZE CODE DATAU DATAL
+%token NAME LIBRARY DESCRIPTION STACKSIZE_K HEAPSIZE CODE DATAU DATAL
 %token SECTIONS EXPORTS IMPORTS VERSIONK BASE CONSTANTU CONSTANTL
 %token PRIVATEU PRIVATEL
 %token READ WRITE EXECUTE SHARED NONAMEU NONAMEL DIRECTIVE
@@ -124,7 +124,7 @@ command:
 		NAME opt_name opt_base { def_image_name ($2, $3, 0); }
 	|	LIBRARY opt_name opt_base { def_image_name ($2, $3, 1); }
 	|	DESCRIPTION ID { def_description ($2);}
-	|	STACKSIZE NUMBER opt_number { def_stacksize ($2, $3);}
+	|	STACKSIZE_K NUMBER opt_number { def_stacksize ($2, $3);}
 	|	HEAPSIZE NUMBER opt_number { def_heapsize ($2, $3);}
 	|	CODE attr_list { def_section ("CODE", $2);}
 	|	DATAU attr_list  { def_section ("DATA", $2);}
@@ -570,7 +570,7 @@ struct
 diropts[] =
 {
   { "-heap", HEAPSIZE },
-  { "-stack", STACKSIZE },
+  { "-stack", STACKSIZE_K },
   { "-attr", SECTIONS },
   { "-export", EXPORTS },
   { 0, 0 }
@@ -894,7 +894,7 @@ tokens[] =
   { "SECTIONS", SECTIONS },
   { "SEGMENTS", SECTIONS },
   { "SHARED", SHARED },
-  { "STACKSIZE", STACKSIZE },
+  { "STACKSIZE", STACKSIZE_K },
   { "VERSION", VERSIONK },
   { "WRITE", WRITE },
   { 0, 0 }

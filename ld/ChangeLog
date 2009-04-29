@@ -1,3 +1,7 @@
+2009-04-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* deffilep.y (STACKSIZE_K): Rename from STACKSIZE.
+
 2009-04-25  Alan Modra  <amodra@bigpond.net.au>
 
      	PR 10061
