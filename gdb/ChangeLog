@@ -1,6 +1,11 @@
 2009-04-30  Hui Zhu  <teawater@gmail.com>
             Michael Snyder  <msnyder@vmware.com>
 
+	* target.h (strata): New stratum "record_stratum".
+
+2009-04-30  Hui Zhu  <teawater@gmail.com>
+            Michael Snyder  <msnyder@vmware.com>
+
 	GDBARCH interface for process record and replay.
 
 	* gdbarch.sh (process_record): This interface point to the

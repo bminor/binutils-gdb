@@ -63,7 +63,8 @@ enum strata
     file_stratum,		/* Executable files, etc */
     core_stratum,		/* Core dump files */
     process_stratum,		/* Executing processes */
-    thread_stratum		/* Executing threads */
+    thread_stratum,		/* Executing threads */
+    record_stratum		/* Support record debugging */
   };
 
 enum thread_control_capabilities
