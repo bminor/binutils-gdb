@@ -3,7 +3,7 @@
 	* x86_64.cc (do_adjust_output_section): Set entsize to
 	plt_entry_size.
 
-2008-04-23  Elliott Hughes  <enh@google.com>
+2009-04-23  Elliott Hughes  <enh@google.com>
 
 	* output.cc (Output_file::close): After short writes, continue
 	writing from the correct offset in the buffer being written.
