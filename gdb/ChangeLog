@@ -1,6 +1,14 @@
 2009-04-30  Hui Zhu  <teawater@gmail.com>
             Michael Snyder  <msnyder@vmware.com>
 
+	* infrun.c (use_displaced_stepping): Return false if process
+	record and replay target is used.
+	(proceed): Call function "record_not_record_set" if pocess
+	record and replay target is used.
+
+2009-04-30  Hui Zhu  <teawater@gmail.com>
+            Michael Snyder  <msnyder@vmware.com>
+
 	Linux process record and replay support.
 
 	* Makefile.in (ALLDEPFILES): Add linux-record.c.

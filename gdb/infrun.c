@@ -48,6 +48,7 @@
 #include "gdb_assert.h"
 #include "mi/mi-common.h"
 #include "event-top.h"
+#include "record.h"
 
 /* Prototypes for local functions */
 
@@ -603,7 +604,8 @@ use_displaced_stepping (struct gdbarch *gdbarch)
   return (((can_use_displaced_stepping == can_use_displaced_stepping_auto
 	    && non_stop)
 	   || can_use_displaced_stepping == can_use_displaced_stepping_on)
-	  && gdbarch_displaced_step_copy_insn_p (gdbarch));
+	  && gdbarch_displaced_step_copy_insn_p (gdbarch)
+	  && !RECORD_IS_USED);
 }
 
 /* Clean out any stray displaced stepping state.  */
@@ -2130,6 +2132,10 @@ adjust_pc_after_break (struct execution_control_state *ecs)
   if (software_breakpoint_inserted_here_p (breakpoint_pc)
       || (non_stop && moribund_breakpoint_here_p (breakpoint_pc)))
     {
+      struct cleanup *old_cleanups = NULL;
+      if (RECORD_IS_USED)
+	old_cleanups = record_gdb_operation_disable_set ();
+
       /* When using hardware single-step, a SIGTRAP is reported for both
 	 a completed single-step and a software breakpoint.  Need to
 	 differentiate between the two, as the latter needs adjusting
@@ -2153,6 +2159,9 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 	  || !currently_stepping (ecs->event_thread)
 	  || ecs->event_thread->prev_pc == breakpoint_pc)
 	regcache_write_pc (regcache, breakpoint_pc);
+
+      if (RECORD_IS_USED)
+	do_cleanups (old_cleanups);
     }
 }
 
