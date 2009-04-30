@@ -1,3 +1,11 @@
+2009-04-30  Hui Zhu  <teawater@gmail.com>
+            Michael Snyder  <msnyder@vmware.com>
+
+	GDBARCH interface for process record and replay.
+
+	* gdbarch.sh (process_record): This interface point to the
+	function that records the inferior execute log.
+
 2009-04-29  Doug Evans  <dje@google.com>
 
 	* i386-nat.c (child_post_startup_inferior): Delete, unused.
