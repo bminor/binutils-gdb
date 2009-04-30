@@ -1,5 +1,14 @@
 2009-04-30  Doug Evans  <dje@google.com>
 
+	* inferiors.c (started_inferior_callback): New function.
+	(attached_inferior_callback): New function.
+	(have_started_inferiors_p, have_attached_inferiors_p): New functions.
+	* server.c (print_started_pid, print_attached_pid): New functions.
+	(detach_or_kill_for_exit): New function.
+	(main): Call it instead of for_each_inferior (kill_inferior_callback).
+	* server.h (have_started_inferiors_p): Declare.
+	(have_attached_inferiors_p): Declare.
+
 	* inferiors.c (remove_process): Fix memory leak, free process.
 	* linux-low.c (linux_remove_process): New function.
 	(linux_kill): Call it instead of remove_process.

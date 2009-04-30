@@ -127,6 +127,8 @@ add_inferior_to_list (struct inferior_list *list,
   list->tail = new_inferior;
 }
 
+/* Invoke ACTION for each inferior in LIST.  */
+
 void
 for_each_inferior (struct inferior_list *list,
 		   void (*action) (struct inferior_list_entry *))
@@ -445,6 +447,46 @@ find_process_pid (int pid)
 {
   return (struct process_info *)
     find_inferior_id (&all_processes, pid_to_ptid (pid));
+}
+
+/* Return non-zero if INF, a struct process_info, was started by us,
+   i.e. not attached to.  */
+
+static int
+started_inferior_callback (struct inferior_list_entry *entry, void *args)
+{
+  struct process_info *process = (struct process_info *) entry;
+
+  return ! process->attached;
+}
+
+/* Return non-zero if there are any inferiors that we have created
+   (as opposed to attached-to).  */
+
+int
+have_started_inferiors_p (void)
+{
+  return (find_inferior (&all_processes, started_inferior_callback, NULL)
+	  != NULL);
+}
+
+/* Return non-zero if INF, a struct process_info, was attached to.  */
+
+static int
+attached_inferior_callback (struct inferior_list_entry *entry, void *args)
+{
+  struct process_info *process = (struct process_info *) entry;
+
+  return process->attached;
+}
+
+/* Return non-zero if there are any inferiors that we have attached to.  */
+
+int
+have_attached_inferiors_p (void)
+{
+  return (find_inferior (&all_processes, attached_inferior_callback, NULL)
+	  != NULL);
 }
 
 struct process_info *

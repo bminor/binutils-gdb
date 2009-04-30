@@ -1808,6 +1808,11 @@ kill_inferior_callback (struct inferior_list_entry *entry)
   discard_queued_stop_replies (pid);
 }
 
+/* Callback for for_each_inferior to detach or kill the inferior,
+   depending on whether we attached to it or not.
+   We inform the user whether we're detaching or killing the process
+   as this is only called when gdbserver is about to exit.  */
+
 static void
 detach_or_kill_inferior_callback (struct inferior_list_entry *entry)
 {
@@ -1820,6 +1825,65 @@ detach_or_kill_inferior_callback (struct inferior_list_entry *entry)
     kill_inferior (pid);
 
   discard_queued_stop_replies (pid);
+}
+
+/* for_each_inferior callback for detach_or_kill_for_exit to print
+   the pids of started inferiors.  */
+
+static void
+print_started_pid (struct inferior_list_entry *entry)
+{
+  struct process_info *process = (struct process_info *) entry;
+
+  if (! process->attached)
+    {
+      int pid = ptid_get_pid (process->head.id);
+      fprintf (stderr, " %d", pid);
+    }
+}
+
+/* for_each_inferior callback for detach_or_kill_for_exit to print
+   the pids of attached inferiors.  */
+
+static void
+print_attached_pid (struct inferior_list_entry *entry)
+{
+  struct process_info *process = (struct process_info *) entry;
+
+  if (process->attached)
+    {
+      int pid = ptid_get_pid (process->head.id);
+      fprintf (stderr, " %d", pid);
+    }
+}
+
+/* Call this when exiting gdbserver with possible inferiors that need
+   to be killed or detached from.  */
+
+static void
+detach_or_kill_for_exit (void)
+{
+  /* First print a list of the inferiors we will be killing/detaching.
+     This is to assist the user, for example, in case the inferior unexpectedly
+     dies after we exit: did we screw up or did the inferior exit on its own?
+     Having this info will save some head-scratching.  */
+
+  if (have_started_inferiors_p ())
+    {
+      fprintf (stderr, "Killing process(es):");
+      for_each_inferior (&all_processes, print_started_pid);
+      fprintf (stderr, "\n");
+    }
+  if (have_attached_inferiors_p ())
+    {
+      fprintf (stderr, "Detaching process(es):");
+      for_each_inferior (&all_processes, print_attached_pid);
+      fprintf (stderr, "\n");
+    }
+
+  /* Now we can kill or detach the inferiors.  */
+
+  for_each_inferior (&all_processes, detach_or_kill_inferior_callback);
 }
 
 static void
@@ -2015,9 +2079,7 @@ main (int argc, char *argv[])
 
   if (setjmp (toplevel))
     {
-      fprintf (stderr, "Killing all inferiors\n");
-      for_each_inferior (&all_processes,
-			 kill_inferior_callback);
+      detach_or_kill_for_exit ();
       exit (1);
     }
 
@@ -2062,8 +2124,7 @@ main (int argc, char *argv[])
 
       if (exit_requested)
 	{
-	  for_each_inferior (&all_processes,
-			     detach_or_kill_inferior_callback);
+	  detach_or_kill_for_exit ();
 	  exit (0);
 	}
       else

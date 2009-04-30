@@ -236,6 +236,8 @@ void add_thread (ptid_t ptid, void *target_data);
 struct process_info *add_process (int pid, int attached);
 void remove_process (struct process_info *process);
 struct process_info *find_process_pid (int pid);
+int have_started_inferiors_p (void);
+int have_attached_inferiors_p (void);
 
 struct thread_info *find_thread_pid (ptid_t ptid);
 
