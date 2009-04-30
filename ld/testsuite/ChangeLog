@@ -1,3 +1,10 @@
+2009-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* ld-ifunc: New directory.
+	* ld-ifunc/ifunc.exp: New file: Run the IFUNC tests.
+	* ld-ifunc/prog.c: New file.
+	* ld-ifunc/lib.c: New file.
+
 2009-04-30  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-arm/movw-shared-1.d, ld-arm/movw-shared-1.s,

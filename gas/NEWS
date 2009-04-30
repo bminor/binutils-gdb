@@ -5,6 +5,11 @@
 
 * Add support for Sunplus score architecture.
 
+* The .type pseudo-op now accepts a type of STT_GNU_IFUNC which can be used to
+  indicate that if the symbol is the target of a relocation, its value should
+  not be use.  Instead the function should be invoked and its result used as
+  the value.
+ 
 * Add support for Lattice Mico32 (lm32) architecture.
 
 Changes in 2.19:

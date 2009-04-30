@@ -6327,6 +6327,11 @@ The types supported are:
 @itemx function
 Mark the symbol as being a function name.
 
+@item STT_GNU_IFUNC
+@itemx gnu_indirect_function
+Mark the symbol as an indirect function when evaluated during reloc
+processing.  (This is only supported on Linux targeted assemblers).
+
 @item STT_OBJECT
 @itemx object
 Mark the symbol as being a data object.

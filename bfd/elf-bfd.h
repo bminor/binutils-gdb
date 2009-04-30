@@ -1297,6 +1297,9 @@ struct bfd_elf_section_data
   /* A pointer to the bfd section used for dynamic relocs.  */
   asection *sreloc;
 
+  /* A pointer to the bfd section used for dynamic relocs against ifunc symbols.  */
+  asection *indirect_relocs;
+
   union {
     /* Group name, if this section is a member of a group.  */
     const char *name;
@@ -1558,6 +1561,11 @@ struct elf_obj_tdata
   /* NT_GNU_BUILD_ID note type.  */
   bfd_size_type build_id_size;
   bfd_byte *build_id;
+
+  /* True if the bfd contains symbols that have the STT_GNU_IFUNC
+     symbol type.  Used to set the osabi field in the ELF header
+     structure.  */
+  bfd_boolean has_ifunc_symbols;
 
   /* An identifier used to distinguish different target
      specific extensions to this structure.  */
@@ -2138,6 +2146,9 @@ extern void _bfd_elf_copy_obj_attributes (bfd *, bfd *);
 extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, int);
 extern void _bfd_elf_parse_attributes (bfd *, Elf_Internal_Shdr *);
 extern bfd_boolean _bfd_elf_merge_object_attributes (bfd *, bfd *);
+
+extern asection * _bfd_elf_make_ifunc_reloc_section
+  (bfd *, asection *, bfd *, unsigned int);
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;

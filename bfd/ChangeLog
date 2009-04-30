@@ -1,3 +1,50 @@
+2009-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* elf-bfd.h (struct bfd_elf_section_data): Add indirect_relocs
+	section pointer.
+	(struct elf_obj_data): Add has_ifunc_symbols boolean.
+	* elf.c (swap_out_syms): Convert BSF_GNU_INDIRECT_FUNCTION flags
+	into a STT_GNU_IFUNC symbol type.
+	(_bfd_elf_is_function_type): Accept STT_GNU_IFUNC as a function
+	type.
+	(_bfd_elf_set_osabi): Set the osasbi field to ELFOSABI_LINUX if
+	the binary contains ifunc symbols.
+	* elfcode.h (elf_slurp_symbol_table): Translate the STT_GNU_IFUNC
+	symbol type into a BSF_GNU_INDIRECT_FUNCTION flag.
+	* elf32-i386.c (is_indirect_function): New function.
+	(elf_i386_check_relocs): Create an ifunc output section.
+	(allocate_dynrelocs): Create dynamic relocs in the ifunc output
+	section if necessary.
+	(elf_i386_relocate_section): Emit a reloc against an ifunc symbol
+	if necessary.
+	(elf_i386_add_symbol_hook): New function. Set the
+	has_ifunc_symbols field of the elf_obj_data structure if an ifunc
+	symbol is encountered.
+	(elf_backend_post_process_headers): Define.
+	(elf_backend_add_symbol_hook): Define.
+	(elf_i386_post_process_headers): Rename to
+	elf_i388_fbsd_post_process_headers.
+	* elf64-x86_64.c (IS_X86_64_PCREL_TYPE): New macro.
+	(is_indirect_function): New function.
+	(elf64_x86_64_check_relocs): Create an ifunc output section.
+	(allocate_dynrelocs): Create dynamic relocs in the ifunc output
+	section if necessary.
+	(elf64_x86_64_relocate_section): Emit a reloc against an ifunc
+	symbol if necessary.
+	(elf_i386_add_symbol_hook): Set the has_ifunc_symbols field of the
+	elf_obj_data structure if an ifunc symbol is encountered.
+	(elf_backend_post_process_headers): Define.
+	* elflink.c (_bfd_elf_adjust_dynamic_symbol): Always create a PLT
+	if we have ifunc symbols to handle.
+	(get_ifunc_reloc_section_name): New function.  Computes the name
+	for an ifunc section.
+	(_bfd_elf_make_ifunc_reloc_section): New function.  Creates a
+	section to hold ifunc relocs.
+	* syms.c (BSF_GNU_INDIRECT_FUNCTION): Define.
+	(bfd_print_symbol_vandf): Handle ifunc symbols.
+	(bfd_decode_symclass): Likewise.
+	* bfd-in2.h: Regenerate.
+
 2009-04-30  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_check_relocs): Give errors for absolute

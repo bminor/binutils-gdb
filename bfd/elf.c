@@ -6399,6 +6399,8 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 
       if ((flags & BSF_THREAD_LOCAL) != 0)
 	type = STT_TLS;
+      else if ((flags & BSF_GNU_INDIRECT_FUNCTION) != 0)
+	type = STT_GNU_IFUNC;
       else if ((flags & BSF_FUNCTION) != 0)
 	type = STT_FUNC;
       else if ((flags & BSF_OBJECT) != 0)
@@ -8977,15 +8979,23 @@ _bfd_elf_set_osabi (bfd * abfd,
   i_ehdrp = elf_elfheader (abfd);
 
   i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
+
+  /* To make things simpler for the loader on Linux systems we set the
+     osabi field to ELFOSABI_LINUX if the binary contains symbols of
+     the STT_GNU_IFUNC type.  */
+  if (i_ehdrp->e_ident[EI_OSABI] == ELFOSABI_NONE
+      && elf_tdata (abfd)->has_ifunc_symbols)
+    i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_LINUX;
 }
 
 
 /* Return TRUE for ELF symbol types that represent functions.
    This is the default version of this function, which is sufficient for
-   most targets.  It returns true if TYPE is STT_FUNC.  */
+   most targets.  It returns true if TYPE is STT_FUNC or STT_GNU_IFUNC.  */
 
 bfd_boolean
 _bfd_elf_is_function_type (unsigned int type)
 {
-  return (type == STT_FUNC);
+  return (type == STT_FUNC
+	  || type == STT_GNU_IFUNC);
 }

@@ -4608,6 +4608,12 @@ typedef struct bfd_symbol
   /* This symbol was created by bfd_get_synthetic_symtab.  */
 #define BSF_SYNTHETIC          (1 << 21)
 
+  /* This symbol is an indirect code object.  Unrelated to BSF_INDIRECT.
+     The dynamic linker will compute the value of this symbol by
+     calling the function that it points to.  BSF_FUNCTION must
+     also be also set.  */
+#define BSF_GNU_INDIRECT_FUNCTION (1 << 22)
+
   flagword flags;
 
   /* A pointer to the section to which this symbol is

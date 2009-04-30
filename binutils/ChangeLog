@@ -1,3 +1,9 @@
+2009-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (dump_relocations): Display a relocation against an
+	ifunc symbol as if it were a function invocation.
+	(get_symbol_type): Handle STT_GNU_IFUNC.
+
 2009-04-29  Anthony Green  <green@moxielogic.com>
 
 	* NEWS: Tweak verilog support description.

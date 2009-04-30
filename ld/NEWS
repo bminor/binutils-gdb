@@ -15,6 +15,10 @@
   automatically in the presence of un-stripped debug information, as GDB
   needs to be able to find the debug info sections by their full names.
 
+* For GNU/Linux systems the linker will now avoid processing any relocations
+  made against symbols of the STT_GNU_IFUNC type and instead emit them into
+  the resulting binary for processing by the loader.
+
 * --as-needed now links in a dynamic library if it satisfies undefined
   symbols in regular objects, or in other dynamic libraries.  In the
   latter case the library is not linked if it is found in a DT_NEEDED

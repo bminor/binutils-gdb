@@ -1,3 +1,13 @@
+2009-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-elf.c (obj_elf_type): Add support for a
+	gnu_indirect_function type.
+	* config/tc-i386.c (tc_i386_fix_adjustable): Do not adjust fixups
+	against indirect function symbols.
+	* doc/as.texinfo (.type): Document the support for the
+	gnu_indirect_function symbol type.
+	* NEWS: Mention the new feature.
+
 2009-04-24  Cary Coutant  <ccoutant@google.com>
 
 	* NEWS: Add item about discriminator support.

@@ -2499,6 +2499,10 @@ tc_i386_fix_adjustable (fixS *fixP ATTRIBUTE_UNUSED)
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
+
+  if (fixP->fx_addsy != NULL
+      && symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_GNU_INDIRECT_FUNCTION)
+    return 0;
 #endif
   return 1;
 }

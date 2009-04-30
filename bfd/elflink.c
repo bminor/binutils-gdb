@@ -2749,6 +2749,13 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
   dynobj = elf_hash_table (eif->info)->dynobj;
   bed = get_elf_backend_data (dynobj);
 
+
+  if (h->type == STT_GNU_IFUNC
+      && (bed->elf_osabi == ELFOSABI_LINUX
+	  /* GNU/Linux is still using the default value 0.  */
+	  || bed->elf_osabi == ELFOSABI_NONE))
+    h->needs_plt = 1;
+
   if (! (*bed->elf_backend_adjust_dynamic_symbol) (eif->info, h))
     {
       eif->failed = TRUE;
@@ -12529,6 +12536,73 @@ _bfd_elf_make_dynamic_reloc_section (asection *         sec,
 	}
 
       elf_section_data (sec)->sreloc = reloc_sec;
+    }
+
+  return reloc_sec;
+}
+
+/* Returns the name of the ifunc using dynamic reloc section associated with SEC.  */
+#define IFUNC_INFIX ".ifunc"
+
+static const char *
+get_ifunc_reloc_section_name (bfd *       abfd,
+			      asection *  sec)
+{
+  const char *  dot;
+  char *  name;
+  const char *  base_name;
+  unsigned int  strndx = elf_elfheader (abfd)->e_shstrndx;
+  unsigned int  shnam = elf_section_data (sec)->rel_hdr.sh_name;
+
+  base_name = bfd_elf_string_from_elf_section (abfd, strndx, shnam);
+  if (base_name == NULL)
+    return NULL;
+
+  dot = strchr (base_name + 1, '.');
+  name = bfd_alloc (abfd, strlen (base_name) + strlen (IFUNC_INFIX) + 1);
+  sprintf (name, "%.*s%s%s", (int)(dot - base_name), base_name, IFUNC_INFIX, dot);
+
+  return name;
+}
+
+/* Like _bfd_elf_make_dynamic_reloc_section but it creates a
+   section for holding relocs against symbols with the STT_GNU_IFUNC
+   type.  The section is attached to the OWNER bfd but it is created
+   with a name based on SEC from ABFD.  */
+
+asection *
+_bfd_elf_make_ifunc_reloc_section (bfd *         abfd,
+				   asection *    sec,
+				   bfd *         owner,
+				   unsigned int  align)
+{
+  asection * reloc_sec = elf_section_data (sec)->indirect_relocs;
+
+  if (reloc_sec == NULL)
+    {
+      const char * name = get_ifunc_reloc_section_name (abfd, sec);
+
+      if (name == NULL)
+	return NULL;
+
+      reloc_sec = bfd_get_section_by_name (owner, name);
+
+      if (reloc_sec == NULL)
+	{
+	  flagword flags;
+
+	  flags = (SEC_HAS_CONTENTS | SEC_READONLY | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+	  if ((sec->flags & SEC_ALLOC) != 0)
+	    flags |= SEC_ALLOC | SEC_LOAD;
+
+	  reloc_sec = bfd_make_section_with_flags (owner, name, flags);
+	  
+	  if (reloc_sec != NULL
+	      && ! bfd_set_section_alignment (owner, reloc_sec, align))
+	    reloc_sec = NULL;
+	}
+
+      elf_section_data (sec)->indirect_relocs = reloc_sec;
     }
 
   return reloc_sec;

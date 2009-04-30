@@ -1238,9 +1238,38 @@ dump_relocations (FILE * file,
 
 	      printf (" ");
 
-	      print_vma (psym->st_value, LONG_HEX);
+	      if (ELF_ST_TYPE (psym->st_info) == STT_GNU_IFUNC)
+		{
+		  const char * name;
+		  unsigned int len;
+		  unsigned int width = is_32bit_elf ? 8 : 14;
 
-	      printf (is_32bit_elf ? "   " : " ");
+		  /* Relocations against GNU_IFUNC symbols do not use the value
+		     of the symbol as the address to relocate against.  Instead
+		     they invoke the function named by the symbol and use its
+		     result as the address for relocation.
+
+		     To indicate this to the user, do not display the value of
+		     the symbol in the "Symbols's Value" field.  Instead show
+		     its name followed by () as a hint that the symbol is
+		     invoked.  */
+
+		  if (strtab == NULL
+		      || psym->st_name == 0
+		      || psym->st_name >= strtablen)
+		    name = "??";
+		  else
+		    name = strtab + psym->st_name;
+
+		  len = print_symbol (width, name);
+		  printf ("()%-*s", len <= width ? (width + 1) - len : 1, " ");
+		}
+	      else
+		{
+		  print_vma (psym->st_value, LONG_HEX);
+
+		  printf (is_32bit_elf ? "   " : " ");
+		}
 
 	      if (psym->st_name == 0)
 		{
@@ -6912,6 +6941,12 @@ get_symbol_type (unsigned int type)
 	      if (type == STT_HP_STUB)
 		return "HP_STUB";
 	    }
+
+	  if (type == STT_GNU_IFUNC
+	      && (elf_header.e_ident[EI_OSABI] == ELFOSABI_LINUX
+		  /* GNU/Linux is still using the default value 0.  */
+		  || elf_header.e_ident[EI_OSABI] == ELFOSABI_NONE))
+	    return "IFUNC";
 
 	  snprintf (buff, sizeof (buff), _("<OS specific>: %d"), type);
 	}

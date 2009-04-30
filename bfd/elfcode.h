@@ -1311,6 +1311,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	    case STT_SRELC:
 	      sym->symbol.flags |= BSF_SRELC;
 	      break;
+	    case STT_GNU_IFUNC:
+	      sym->symbol.flags |= BSF_GNU_INDIRECT_FUNCTION;
+	      break;
 	    }
 
 	  if (dynamic)

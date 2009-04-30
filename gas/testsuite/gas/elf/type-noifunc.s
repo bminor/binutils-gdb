@@ -3,10 +3,6 @@
         .type   function,%function
 function:
 	.byte	0x0
-        .size   indirect_function,1
-        .type   indirect_function,%gnu_indirect_function
-indirect_function:
-	.byte	0x0
         .data
         .type   object,%object
         .size   object,1

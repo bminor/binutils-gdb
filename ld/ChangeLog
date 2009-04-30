@@ -1,3 +1,7 @@
+2009-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention support for IFUNC symbols.
+
 2009-04-29  Anthony Green  <green@moxielogic.com>
 
 	* emulparams/elf32moxie.sh (STACK_ADDR): Move default stack

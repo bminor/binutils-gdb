@@ -161,6 +161,12 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	 FALSE)
 };
 
+#define IS_X86_64_PCREL_TYPE(TYPE)	\
+  (   ((TYPE) == R_X86_64_PC8)		\
+   || ((TYPE) == R_X86_64_PC16)		\
+   || ((TYPE) == R_X86_64_PC32)		\
+   || ((TYPE) == R_X86_64_PC64))
+
 /* Map BFD relocs to the x86_64 elf relocs.  */
 struct elf_reloc_map
 {
@@ -977,6 +983,25 @@ elf64_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
   return TRUE;
 }
 
+/* Returns true if the hash entry refers to a symbol
+   marked for indirect handling during reloc processing.  */
+
+static bfd_boolean
+is_indirect_symbol (bfd * abfd, struct elf_link_hash_entry * h)
+{
+  const struct elf_backend_data * bed;
+
+  if (abfd == NULL || h == NULL)
+    return FALSE;
+
+  bed = get_elf_backend_data (abfd);
+
+  return h->type == STT_GNU_IFUNC
+    && (bed->elf_osabi == ELFOSABI_LINUX
+	/* GNU/Linux is still using the default value 0.  */
+	|| bed->elf_osabi == ELFOSABI_NONE);
+}
+
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure
    linkage table, and dynamic reloc sections.  */
@@ -1003,7 +1028,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   sym_hashes = elf_sym_hashes (abfd);
 
   sreloc = NULL;
-
+  
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
@@ -1259,13 +1284,9 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     may need to keep relocations for symbols satisfied by a
 	     dynamic library if we manage to avoid copy relocs for the
 	     symbol.  */
-
 	  if ((info->shared
 	       && (sec->flags & SEC_ALLOC) != 0
-	       && (((r_type != R_X86_64_PC8)
-		    && (r_type != R_X86_64_PC16)
-		    && (r_type != R_X86_64_PC32)
-		    && (r_type != R_X86_64_PC64))
+	       && (! IS_X86_64_PCREL_TYPE (r_type)
 		   || (h != NULL
 		       && (! SYMBOLIC_BIND (info, h)
 			   || h->root.type == bfd_link_hash_defweak
@@ -1293,6 +1314,12 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 		  if (sreloc == NULL)
 		    return FALSE;
+
+		  /* Create the ifunc section, even if we will not encounter an
+		     indirect function symbol.  We may not even see one in the input
+		     object file, but we can still encounter them in libraries.  */
+		  (void) _bfd_elf_make_ifunc_reloc_section
+		    (abfd, sec, htab->elf.dynobj, 2);
 		}
 
 	      /* If this is a global symbol, we count the number of
@@ -1324,6 +1351,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      if (p == NULL || p->sec != sec)
 		{
 		  bfd_size_type amt = sizeof *p;
+
 		  p = ((struct elf64_x86_64_dyn_relocs *)
 		       bfd_alloc (htab->elf.dynobj, amt));
 		  if (p == NULL)
@@ -1336,10 +1364,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		}
 
 	      p->count += 1;
-	      if (r_type == R_X86_64_PC8
-		  || r_type == R_X86_64_PC16
-		  || r_type == R_X86_64_PC32
-		  || r_type == R_X86_64_PC64)
+	      if (IS_X86_64_PCREL_TYPE (r_type))
 		p->pc_count += 1;
 	    }
 	  break;
@@ -1650,6 +1675,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   struct elf64_x86_64_link_hash_table *htab;
   struct elf64_x86_64_link_hash_entry *eh;
   struct elf64_x86_64_dyn_relocs *p;
+  bfd_boolean use_indirect_section = FALSE;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -1728,7 +1754,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       && !info->shared
       && h->dynindx == -1
       && elf64_x86_64_hash_entry (h)->tls_type == GOT_TLS_IE)
-    h->got.offset = (bfd_vma) -1;
+    {
+      h->got.offset = (bfd_vma) -1;
+    }
   else if (h->got.refcount > 0)
     {
       asection *s;
@@ -1827,12 +1855,20 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  /* Make sure undefined weak symbols are output as a dynamic
 	     symbol in PIEs.  */
 	  else if (h->dynindx == -1
-		   && !h->forced_local)
-	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return FALSE;
-	    }
+		   && ! h->forced_local
+		   && ! bfd_elf_link_record_dynamic_symbol (info, h))
+	    return FALSE;
 	}
+    }
+  else if (is_indirect_symbol (info->output_bfd, h)
+	   && h->dynindx == -1
+	   && ! h->forced_local)
+    {
+      if (bfd_elf_link_record_dynamic_symbol (info, h)
+	  && h->dynindx != -1)
+	use_indirect_section = TRUE;
+      else
+	return FALSE;
     }
   else if (ELIMINATE_COPY_RELOCS)
     {
@@ -1850,11 +1886,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  /* Make sure this symbol is output as a dynamic symbol.
 	     Undefined weak syms won't yet be marked as dynamic.  */
 	  if (h->dynindx == -1
-	      && !h->forced_local)
-	    {
-	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		return FALSE;
-	    }
+	      && ! h->forced_local
+	      && ! bfd_elf_link_record_dynamic_symbol (info, h))
+	    return FALSE;
 
 	  /* If that succeeded, we know we'll be keeping all the
 	     relocs.  */
@@ -1872,7 +1906,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
     {
       asection * sreloc;
 
-      sreloc = elf_section_data (p->sec)->sreloc;
+      if (use_indirect_section)
+	sreloc = elf_section_data (p->sec)->indirect_relocs;
+      else
+	sreloc = elf_section_data (p->sec)->sreloc;
 
       BFD_ASSERT (sreloc != NULL);
 
@@ -2674,11 +2711,14 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	       && (h == NULL
 		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		   || h->root.type != bfd_link_hash_undefweak)
-	       && ((r_type != R_X86_64_PC8
-		    && r_type != R_X86_64_PC16
-		    && r_type != R_X86_64_PC32
-		    && r_type != R_X86_64_PC64)
-		   || !SYMBOL_CALLS_LOCAL (info, h)))
+	       && (! IS_X86_64_PCREL_TYPE (r_type)
+		   || ! SYMBOL_CALLS_LOCAL (info, h)))
+	      || (! info->shared
+		  && h != NULL
+		  && h->dynindx != -1
+		  && ! h->forced_local
+		  && ((struct elf64_x86_64_link_hash_entry *) h)->dyn_relocs != NULL
+		  && is_indirect_symbol (output_bfd, h))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL
@@ -2718,13 +2758,10 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		 become local.  */
 	      else if (h != NULL
 		       && h->dynindx != -1
-		       && (r_type == R_X86_64_PC8
-			   || r_type == R_X86_64_PC16
-			   || r_type == R_X86_64_PC32
-			   || r_type == R_X86_64_PC64
-			   || !info->shared
-			   || !SYMBOLIC_BIND (info, h)
-			   || !h->def_regular))
+		       && (IS_X86_64_PCREL_TYPE (r_type)
+			   || ! info->shared
+			   || ! SYMBOLIC_BIND (info, h)
+			   || ! h->def_regular))
 		{
 		  outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
 		  outrel.r_addend = rel->r_addend;
@@ -2773,8 +2810,17 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    }
 		}
 
-	      sreloc = elf_section_data (input_section)->sreloc;
-		
+	      if (! info->shared
+		  && h != NULL
+		  && h->dynindx != -1
+		  && ! h->forced_local
+		  && is_indirect_symbol (output_bfd, h)
+		  && elf_section_data (input_section)->indirect_relocs != NULL
+		  && elf_section_data (input_section)->indirect_relocs->contents != NULL)
+		sreloc = elf_section_data (input_section)->indirect_relocs;
+	      else
+		sreloc = elf_section_data (input_section)->sreloc;
+
 	      BFD_ASSERT (sreloc != NULL && sreloc->contents != NULL);
 
 	      loc = sreloc->contents;
@@ -3660,11 +3706,12 @@ elf64_x86_64_section_from_shdr (bfd *abfd,
 
 static bfd_boolean
 elf64_x86_64_add_symbol_hook (bfd *abfd,
-			      struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			      struct bfd_link_info *info,
 			      Elf_Internal_Sym *sym,
 			      const char **namep ATTRIBUTE_UNUSED,
 			      flagword *flagsp ATTRIBUTE_UNUSED,
-			      asection **secp, bfd_vma *valp)
+			      asection **secp,
+			      bfd_vma *valp)
 {
   asection *lcomm;
 
@@ -3687,6 +3734,10 @@ elf64_x86_64_add_symbol_hook (bfd *abfd,
       *valp = sym->st_size;
       break;
     }
+
+  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+    elf_tdata (info->output_bfd)->has_ifunc_symbols = TRUE;
+
   return TRUE;
 }
 
@@ -3914,6 +3965,9 @@ static const struct bfd_elf_special_section
 #define elf_backend_hash_symbol \
   elf64_x86_64_hash_symbol
 
+#undef  elf_backend_post_process_headers
+#define elf_backend_post_process_headers  _bfd_elf_set_osabi
+
 #include "elf64-target.h"
 
 /* FreeBSD support.  */
@@ -3925,9 +3979,6 @@ static const struct bfd_elf_special_section
 
 #undef	ELF_OSABI
 #define	ELF_OSABI			    ELFOSABI_FREEBSD
-
-#undef  elf_backend_post_process_headers
-#define elf_backend_post_process_headers  _bfd_elf_set_osabi
 
 #undef  elf64_bed
 #define elf64_bed elf64_x86_64_fbsd_bed
