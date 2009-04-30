@@ -1,3 +1,8 @@
+2009-04-29  Anthony Green  <green@moxielogic.com>
+
+	* emulparams/elf32moxie.sh (STACK_ADDR): Move default stack
+	position out to accommodate larger programs.
+
 2009-04-29  Chris Demetriou  <cgd@google.com>
 
 	* lexsup.c (option_values): Add OPTION_NO_EXPORT_DYNAMIC.
