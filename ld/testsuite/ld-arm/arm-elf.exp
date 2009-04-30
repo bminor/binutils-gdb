@@ -187,6 +187,10 @@ run_dump_test "group-relocs-ldc-bad"
 run_dump_test "thumb2-bl-undefweak"
 run_dump_test "thumb2-bl-undefweak1"
 run_dump_test "emit-relocs1"
+run_dump_test "movw-shared-1"
+run_dump_test "movw-shared-2"
+run_dump_test "movw-shared-3"
+run_dump_test "movw-shared-4"
 
 # Exclude non-ARM-EABI targets.
 

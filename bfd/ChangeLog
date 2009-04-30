@@ -1,3 +1,8 @@
+2009-04-30  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_check_relocs): Give errors for absolute
+	MOVW and MOVT relocations in a shared library link.
+
 2009-04-27  Anthony Green  <green@moxielogic.com>
 
 	* verilog.c: New file.

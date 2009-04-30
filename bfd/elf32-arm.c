@@ -9808,16 +9808,27 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    needs_plt = 1;
 	    goto normal_reloc;
 
+	  case R_ARM_MOVW_ABS_NC:
+	  case R_ARM_MOVT_ABS:
+	  case R_ARM_THM_MOVW_ABS_NC:
+	  case R_ARM_THM_MOVT_ABS:
+	    if (info->shared)
+	      {
+		(*_bfd_error_handler)
+		  (_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
+		   abfd, elf32_arm_howto_table_1[r_type].name,
+		   (h) ? h->root.root.string : "a local symbol");
+		bfd_set_error (bfd_error_bad_value);
+		return FALSE;
+	      }
+
+	    /* Fall through.  */
 	  case R_ARM_ABS32:
 	  case R_ARM_ABS32_NOI:
 	  case R_ARM_REL32:
 	  case R_ARM_REL32_NOI:
-	  case R_ARM_MOVW_ABS_NC:
-	  case R_ARM_MOVT_ABS:
 	  case R_ARM_MOVW_PREL_NC:
 	  case R_ARM_MOVT_PREL:
-	  case R_ARM_THM_MOVW_ABS_NC:
-	  case R_ARM_THM_MOVT_ABS:
 	  case R_ARM_THM_MOVW_PREL_NC:
 	  case R_ARM_THM_MOVT_PREL:
 	    needs_plt = 0;

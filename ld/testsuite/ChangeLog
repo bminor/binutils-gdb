@@ -1,3 +1,11 @@
+2009-04-30  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-arm/movw-shared-1.d, ld-arm/movw-shared-1.s,
+	ld-arm/movw-shared-2.d, ld-arm/movw-shared-2.s,
+	ld-arm/movw-shared-3.d, ld-arm/movw-shared-3.s,
+	ld-arm/movw-shared-4.d, ld-arm/movw-shared-4.s: New tests.
+	* ld-arm/arm-elf.exp: Run these new tests.
+
 2009-04-29  Chris Demetriou  <cgd@google.com>
 
 	* ld-elfvers/vers.exp (vers4b): New test to verify that
