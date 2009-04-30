@@ -57,6 +57,7 @@ static int mode = CORE; /* Start in core mode. */
 static int pluspresent = 0;
 static int allow_disabled_registers = 0;
 static int library_flag = 0;
+static int mep_cop = EF_MEP_COP_NONE;
 
 /* We're going to need to store all of the instructions along with
    their fixups so that we can parallelization grouping rules. */
@@ -465,6 +466,8 @@ md_begin ()
   else
     MEP_OMASK = (MEP_OMASK & ~optbitset) | optbits;
 
+  mep_cop = mep_config_map[mep_config_index].cpu_flag & EF_MEP_COP_MASK;
+
   /* Set the machine number and endian.  */
   gas_cgen_cpu_desc = mep_cgen_cpu_open (CGEN_CPU_OPEN_MACHS, 0,
 					 CGEN_CPU_OPEN_ENDIAN,
@@ -769,11 +772,9 @@ mep_check_parallel64_scheduling (void)
 	{
 	  char *errmsg;
 	  mep_insn insn;
-          int i;
 
           /* Initialize the insn buffer.  */
-          for (i = 0; i < 64; i++)
-             insn.buffer[i] = '\0';
+	  memset (insn.buffer, 0, sizeof(insn.buffer));
 
 	  /* We have a coprocessor insn.  At this point in time there
 	     are is 32-bit core nop.  There is only a 16-bit core
@@ -834,11 +835,9 @@ mep_check_parallel64_scheduling (void)
 	{
 	  char * errmsg;
 	  mep_insn insn;
-          int i;
 
           /* Initialize the insn buffer */
-          for (i = 0; i < 64; i++)
-             insn.buffer[i] = '\0';
+	  memset (insn.buffer, 0, sizeof(insn.buffer));
 
 	  /* We have a core insn.  We have to handle all possible nop
 	     lengths.  If a coprocessor doesn't have a nop of a certain
@@ -888,6 +887,238 @@ mep_check_parallel64_scheduling (void)
     }
 }
 
+#ifdef MEP_IVC2_SUPPORTED
+
+/* IVC2 packing is different than other VLIW coprocessors.  Many of
+   the COP insns can be placed in any of three different types of
+   slots, and each bundle can hold up to three insns - zero or one
+   core insns and one or two IVC2 insns.  The insns in CGEN are tagged
+   with which slots they're allowed in, and we have to decide based on
+   that whether or not the user had given us a possible bundling.  */
+
+static int
+slot_ok (int idx, int slot)
+{
+  const CGEN_INSN *insn = saved_insns[idx].insn;
+  return CGEN_ATTR_CGEN_INSN_SLOTS_VALUE (CGEN_INSN_ATTRS (insn)) & (1 << slot);
+}
+
+static void
+mep_check_ivc2_scheduling (void)
+{
+  /* VLIW modes:
+
+     V1 [-----core-----][--------p0s-------][------------p1------------]
+     V2 [-------------core-------------]xxxx[------------p1------------]
+     V3 1111[--p0--]0111[--------p0--------][------------p1------------]
+  */
+
+  int slots[5]; /* Indexed off the SLOTS_ATTR enum.  */
+  int corelength;
+  int i;
+  bfd_byte temp[4];
+  bfd_byte *f;
+  int e = target_big_endian ? 0 : 1;
+
+  /* If there are no insns saved, that's ok.  Just return.  This will
+     happen when mep_process_saved_insns is called when the end of the
+     source file is reached and there are no insns left to be processed.  */
+  if (num_insns_saved == 0)
+    return;
+
+  for (i=0; i<5; i++)
+    slots[i] = -1;
+
+  if (slot_ok (0, SLOTS_CORE))
+    {
+      slots[SLOTS_CORE] = 0;
+      corelength = CGEN_FIELDS_BITSIZE (& saved_insns[0].fields);
+    }
+  else
+    corelength = 0;
+
+  if (corelength == 16)
+    {
+      /* V1 mode: we need a P0S slot and a P1 slot.  */
+      switch (num_insns_saved)
+	{
+	case 1:
+	  /* No other insns, fill with NOPs. */
+	  break;
+
+	case 2:
+	  if (slot_ok (1, SLOTS_P1))
+	    slots[SLOTS_P1] = 1;
+	  else if (slot_ok (1, SLOTS_P0S))
+	    slots[SLOTS_P0S] = 1;
+	  else
+	    as_bad ("cannot pack %s with a 16-bit insn",
+		    CGEN_INSN_NAME (saved_insns[1].insn));
+	  break;
+
+	case 3:
+	  if (slot_ok (1, SLOTS_P0S)
+	      && slot_ok (2, SLOTS_P1))
+	    {
+	      slots[SLOTS_P0S] = 1;
+	      slots[SLOTS_P1] = 2;
+	    }
+	  else if (slot_ok (1, SLOTS_P1)
+	      && slot_ok (2, SLOTS_P0S))
+	    {
+	      slots[SLOTS_P1] = 1;
+	      slots[SLOTS_P0S] = 2;
+	    }
+	  else
+	    as_bad ("cannot pack %s and %s together with a 16-bit insn",
+		    CGEN_INSN_NAME (saved_insns[1].insn),
+		    CGEN_INSN_NAME (saved_insns[2].insn));
+	  break;
+
+	default:
+	  as_bad ("too many IVC2 insns to pack with a 16-bit core insn");
+	  break;
+	}
+    }
+  else if (corelength == 32)
+    {
+      /* V2 mode: we need a P1 slot.  */
+      switch (num_insns_saved)
+	{
+	case 1:
+	  /* No other insns, fill with NOPs. */
+	  break;
+	case 2:
+	  /* The other insn must allow P1.  */
+	  if (!slot_ok (1, SLOTS_P1))
+	    as_bad ("cannot pack %s into slot P1",
+		    CGEN_INSN_NAME (saved_insns[1].insn));
+	  else
+	    slots[SLOTS_P1] = 1;
+	  break;
+	default:
+	  as_bad ("too many IVC2 insns to pack with a 32-bit core insn");
+	  break;
+	}
+    }
+  else if (corelength == 0)
+    {
+      /* V3 mode: we need a P0 slot and a P1 slot, or a P0S+P1 with a
+	 core NOP.  */
+      switch (num_insns_saved)
+	{
+	case 1:
+	  if (slot_ok (0, SLOTS_P0))
+	    slots[SLOTS_P0] = 0;
+	  else if (slot_ok (0, SLOTS_P1))
+	    slots[SLOTS_P1] = 0;
+	  else if (slot_ok (0, SLOTS_P0S))
+	    slots[SLOTS_P0S] = 0;
+	  else
+	    as_bad ("unable to pack %s by itself?",
+		    CGEN_INSN_NAME (saved_insns[0].insn));
+	  break;
+
+	case 2:
+	  if (slot_ok (0, SLOTS_P0)
+	      && slot_ok (1, SLOTS_P1))
+	    {
+	      slots[SLOTS_P0] = 0;
+	      slots[SLOTS_P1] = 1;
+	    }
+	  else if (slot_ok (0, SLOTS_P1)
+	      && slot_ok (1, SLOTS_P0))
+	    {
+	      slots[SLOTS_P1] = 0;
+	      slots[SLOTS_P0] = 1;
+	    }
+	  else if (slot_ok (0, SLOTS_P0S)
+	      && slot_ok (1, SLOTS_P1))
+	    {
+	      slots[SLOTS_P0S] = 0;
+	      slots[SLOTS_P1] = 1;
+	    }
+	  else if (slot_ok (0, SLOTS_P1)
+	      && slot_ok (1, SLOTS_P0S))
+	    {
+	      slots[SLOTS_P1] = 0;
+	      slots[SLOTS_P0S] = 1;
+	    }
+	  else
+	    as_bad ("cannot pack %s and %s together",
+		    CGEN_INSN_NAME (saved_insns[0].insn),
+		    CGEN_INSN_NAME (saved_insns[1].insn));
+	  break;
+
+	default:
+	  as_bad ("too many IVC2 insns to pack together");
+	  break;
+	}
+    }
+
+  /* The core insn needs to be done normally so that fixups,
+     relaxation, etc are done.  Other IVC2 insns need only be resolved
+     to bit patterns; there are no relocations for them.  */
+  if (slots[SLOTS_CORE] != -1)
+    {
+      gas_cgen_restore_fixups (0);
+      gas_cgen_finish_insn (saved_insns[0].insn, saved_insns[0].buffer,
+			    CGEN_FIELDS_BITSIZE (& saved_insns[0].fields),
+			    1, NULL);
+    }
+
+  /* Allocate whatever bytes remain in our insn word.  Adjust the
+     pointer to point (as if it were) to the beginning of the whole
+     word, so that we don't have to adjust for it elsewhere.  */
+  f = (bfd_byte *) frag_more (8 - corelength / 8);
+  /* Unused slots are filled with NOPs, which happen to be all zeros.  */
+  memset (f, 0, 8 - corelength / 8);
+  f -= corelength / 8;
+
+  for (i=1; i<5; i++)
+    {
+      mep_insn *m;
+
+      if (slots[i] == -1)
+	continue;
+
+      m = & saved_insns[slots[i]];
+
+#if CGEN_INT_INSN_P
+      cgen_put_insn_value (gas_cgen_cpu_desc, (unsigned char *) temp, 32,
+			   m->buffer[0]);
+#else
+      memcpy (temp, m->buffer, byte_len);
+#endif
+
+      switch (i)
+	{
+	case SLOTS_P0S:
+	  f[2^e] = temp[1^e];
+	  f[3^e] = temp[2^e];
+	  f[4^e] |= temp[3^e] & 0xf0;
+	  break;
+	case SLOTS_P0:
+	  f[0^e] = 0xf0 | temp[0^e] >> 4;
+	  f[1^e] = temp[0^e] << 4 | 0x07;
+	  f[2^e] = temp[1^e];
+	  f[3^e] = temp[2^e];
+	  f[4^e] |= temp[3^e] & 0xf0;
+	  break;
+	case SLOTS_P1:
+	  f[4^e] |= temp[0^e] >> 4;
+	  f[5^e] = temp[0^e] << 4 | temp[1^e] >> 4;
+	  f[6^e] = temp[1^e] << 4 | temp[2^e] >> 4;
+	  f[7^e] = temp[2^e] << 4 | temp[3^e] >> 4;
+	  break;
+	default:
+	  break;
+	}
+    }
+}
+
+#endif /* MEP_IVC2_SUPPORTED */
+
 /* The scheduling functions are just filters for invalid combinations.
    If there is a violation, they terminate assembly.  Otherise they
    just fall through.  Succesful combinations cause no side effects
@@ -898,7 +1129,12 @@ mep_check_parallel_scheduling (void)
 {
   /* This is where we will eventually read the config information
      and choose which scheduling checking function to call.  */   
-  if (MEP_VLIW64)
+#ifdef MEP_IVC2_SUPPORTED
+  if (mep_cop == EF_MEP_COP_IVC2)
+    mep_check_ivc2_scheduling ();
+  else
+#endif /* MEP_IVC2_SUPPORTED */
+    if (MEP_VLIW64)
     mep_check_parallel64_scheduling ();
   else
     mep_check_parallel32_scheduling ();
@@ -908,21 +1144,31 @@ static void
 mep_process_saved_insns (void)
 {
   int i;
+  unsigned j;
 
   gas_cgen_save_fixups (MAX_SAVED_FIXUP_CHAINS - 1);
 
   /* We have to check for valid scheduling here. */
   mep_check_parallel_scheduling ();
 
-  /* If the last call didn't cause assembly to terminate, we have
-     a valid vliw insn/insn pair saved. Restore this instructions'
-     fixups and process the insns. */
-  for (i = 0;i<num_insns_saved;i++)
+  /* IVC2 has to pack instructions in a funny way, so it does it
+     itself.  */
+  if (mep_cop != EF_MEP_COP_IVC2)
     {
-      gas_cgen_restore_fixups (i);
-      gas_cgen_finish_insn (saved_insns[i].insn, saved_insns[i].buffer,
-			    CGEN_FIELDS_BITSIZE (& saved_insns[i].fields),
-			    1, NULL);
+      /* If the last call didn't cause assembly to terminate, we have
+	 a valid vliw insn/insn pair saved. Restore this instructions'
+	 fixups and process the insns. */
+      for (i = 0;i<num_insns_saved;i++)
+	{
+	  gas_cgen_restore_fixups (i);
+	  gas_cgen_finish_insn (saved_insns[i].insn, saved_insns[i].buffer,
+				CGEN_FIELDS_BITSIZE (& saved_insns[i].fields),
+				1, NULL);
+	  printf("insn[%d] =", i);
+	  for (j=0; j<sizeof(saved_insns[i].buffer); j++)
+	    printf(" %02x", saved_insns[i].buffer[j]);
+	  printf("\n");
+	}
     }
   gas_cgen_restore_fixups (MAX_SAVED_FIXUP_CHAINS - 1);
 
@@ -984,8 +1230,25 @@ md_assemble (char * str)
          for (i=0; i < CGEN_MAX_INSN_SIZE; i++)
             insn.buffer[i]='\0';
 
-      /* Can't tell core / copro insns apart at parse time! */
-      cgen_bitset_union (isas, & MEP_COP_ISA, isas);
+
+      /* IVC2 has two sets of coprocessor opcodes, one for CORE mode
+	 and one for VLIW mode.  They have the same names.  To specify
+	 which one we want, we use the COP isas - the 32 bit ISA is
+	 for the core instructions (which are always 32 bits), and the
+	 other ISAs are for the VLIW ones (which always pack into 64
+	 bit insns).  We use other attributes to determine slotting
+	 later.  */
+      if (mep_cop == EF_MEP_COP_IVC2)
+	{
+	  cgen_bitset_union (isas, & MEP_COP16_ISA, isas);
+	  cgen_bitset_union (isas, & MEP_COP48_ISA, isas);
+	  cgen_bitset_union (isas, & MEP_COP64_ISA, isas);
+	}
+      else
+	{
+	  /* Can't tell core / copro insns apart at parse time! */
+	  cgen_bitset_union (isas, & MEP_COP_ISA, isas);
+	}
 
       /* Assemble the insn so we can examine its attributes. */
       insn.insn = mep_cgen_assemble_insn (gas_cgen_cpu_desc, str,
@@ -1067,6 +1330,10 @@ md_assemble (char * str)
 
       /* Only single instructions are assembled in core mode. */
       mep_insn insn;
+
+      /* See comment in the VLIW clause above about this.  */
+      if (mep_cop & EF_MEP_COP_IVC2)
+	cgen_bitset_union (isas, & MEP_COP32_ISA, isas);
 
       /* If a leading '+' was present, issue an error.
 	 That's not allowed in core mode. */

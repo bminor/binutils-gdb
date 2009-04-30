@@ -89,6 +89,36 @@ print_spreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, PTR dis_info,
 }
 
 /* begin-cop-ip-print-handlers */
+static void
+print_ivc2_cr (CGEN_CPU_DESC,
+	void *,
+	CGEN_KEYWORD *,
+	long,
+	unsigned int) ATTRIBUTE_UNUSED;
+static void
+print_ivc2_cr (CGEN_CPU_DESC cd,
+	void *dis_info,
+	CGEN_KEYWORD *keyword_table ATTRIBUTE_UNUSED,
+	long value,
+	unsigned int attrs)
+{
+  print_keyword (cd, dis_info, & mep_cgen_opval_h_cr_ivc2, value, attrs);
+}
+static void
+print_ivc2_ccr (CGEN_CPU_DESC,
+	void *,
+	CGEN_KEYWORD *,
+	long,
+	unsigned int) ATTRIBUTE_UNUSED;
+static void
+print_ivc2_ccr (CGEN_CPU_DESC cd,
+	void *dis_info,
+	CGEN_KEYWORD *keyword_table ATTRIBUTE_UNUSED,
+	long value,
+	unsigned int attrs)
+{
+  print_keyword (cd, dis_info, & mep_cgen_opval_h_ccr_ivc2, value, attrs);
+}
 /* end-cop-ip-print-handlers */
 
 /************************************************************\
@@ -424,10 +454,199 @@ mep_examine_vliw64_insns (CGEN_CPU_DESC cd, bfd_vma pc, disassemble_info *info)
   return status;
 }
 
+#ifdef MEP_IVC2_SUPPORTED
+
+static int
+print_slot_insn (CGEN_CPU_DESC cd,
+		 bfd_vma pc,
+		 disassemble_info *info,
+		 SLOTS_ATTR slot,
+		 bfd_byte *buf)
+{
+  const CGEN_INSN_LIST *insn_list;
+  CGEN_INSN_INT insn_value;
+  CGEN_EXTRACT_INFO ex_info;
+
+  insn_value = cgen_get_insn_value (cd, buf, 32);
+
+  /* Fill in ex_info fields like read_insn would.  Don't actually call
+     read_insn, since the incoming buffer is already read (and possibly
+     modified a la m32r).  */
+  ex_info.valid = (1 << 8) - 1;
+  ex_info.dis_info = info;
+  ex_info.insn_bytes = buf;
+
+  /* The instructions are stored in hash lists.
+     Pick the first one and keep trying until we find the right one.  */
+
+  insn_list = CGEN_DIS_LOOKUP_INSN (cd, (char *) buf, insn_value);
+  while (insn_list != NULL)
+    {
+      const CGEN_INSN *insn = insn_list->insn;
+      CGEN_FIELDS fields;
+      int length;
+
+      if ((CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_CONFIG)
+	   && CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_CONFIG) != MEP_CONFIG)
+	  || ! (CGEN_ATTR_CGEN_INSN_SLOTS_VALUE (CGEN_INSN_ATTRS (insn)) & (1 << slot)))
+        {
+          insn_list = CGEN_DIS_NEXT_INSN (insn_list);
+	  continue;
+        }
+
+      if ((insn_value & CGEN_INSN_BASE_MASK (insn))
+	  == CGEN_INSN_BASE_VALUE (insn))
+	{
+	  /* Printing is handled in two passes.  The first pass parses the
+	     machine insn and extracts the fields.  The second pass prints
+	     them.  */
+
+	  length = CGEN_EXTRACT_FN (cd, insn)
+	    (cd, insn, &ex_info, insn_value, &fields, pc);
+
+	  /* Length < 0 -> error.  */
+	  if (length < 0)
+	    return length;
+	  if (length > 0)
+	    {
+	      CGEN_PRINT_FN (cd, insn) (cd, info, insn, &fields, pc, length);
+	      /* Length is in bits, result is in bytes.  */
+	      return length / 8;
+	    }
+	}
+
+      insn_list = CGEN_DIS_NEXT_INSN (insn_list);
+    }
+
+  if (slot == SLOTS_P0S)
+    (*info->fprintf_func) (info->stream, "*unknown-p0s*");
+  else if (slot == SLOTS_P0)
+    (*info->fprintf_func) (info->stream, "*unknown-p0*");
+  else if (slot == SLOTS_P1)
+    (*info->fprintf_func) (info->stream, "*unknown-p1*");
+  else if (slot == SLOTS_C3)
+    (*info->fprintf_func) (info->stream, "*unknown-c3*");
+  return 0;
+}
+
+static int
+mep_examine_ivc2_insns (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, bfd_vma pc ATTRIBUTE_UNUSED, disassemble_info *info ATTRIBUTE_UNUSED)
+{
+  int status;
+  int buflength;
+  int cop2buflength;
+  bfd_byte buf[8];
+  bfd_byte insn[8];
+  int e;
+
+  /* At this time we're not supporting internally parallel
+     coprocessors, so cop2buflength will always be 0.  */
+  cop2buflength = 0;
+
+  /* Read in 64 bits.  */
+  buflength = 8; /* VLIW insn spans 8 bytes.  */
+  status = (*info->read_memory_func) (pc, buf, buflength, info);
+
+  if (status != 0)
+    {
+      (*info->memory_error_func) (status, pc, info);
+      return -1;
+    }
+
+  if (info->endian == BFD_ENDIAN_LITTLE)
+    e = 1;
+  else
+    e = 0;
+
+  if ((buf[0^e] & 0xf0) != 0xf0)
+    {
+      /*      <--00--><--11--><--22--><--33--><--44--><--55--><--66--><--77--> */
+      /* V1   [-----core-----][--------p0s-------][------------p1------------] */
+
+      print_insn (cd, pc, info, buf, 2);
+
+      insn[0^e] = 0;
+      insn[1^e] = buf[2^e];
+      insn[2^e] = buf[3^e];
+      insn[3^e] = buf[4^e] & 0xf0;
+      (*info->fprintf_func) (info->stream, " + ");
+      print_slot_insn (cd, pc, info, SLOTS_P0S, insn);
+
+      insn[0^e] = buf[4^e] << 4 | buf[5^e] >> 4;
+      insn[1^e] = buf[5^e] << 4 | buf[6^e] >> 4;
+      insn[2^e] = buf[6^e] << 4 | buf[7^e] >> 4;
+      insn[3^e] = buf[7^e] << 4;
+      (*info->fprintf_func) (info->stream, " + ");
+      print_slot_insn (cd, pc, info, SLOTS_P1, insn);
+    }
+  else if ((buf[0^e] & 0xf0) == 0xf0 && (buf[1^e] & 0x0f) == 0x07)
+    {
+      /*      <--00--><--11--><--22--><--33--><--44--><--55--><--66--><--77--> */
+      /* V3   1111[--p0--]0111[--------p0--------][------------p1------------] */
+      /*                                          00000000111111112222222233333333 */
+
+      insn[0^e] = buf[0^e] << 4 | buf[1^e] >> 4;
+      insn[1^e] = buf[2^e];
+      insn[2^e] = buf[3^e];
+      insn[3^e] = buf[4^e] & 0xf0;
+      print_slot_insn (cd, pc, info, SLOTS_P0, insn);
+
+      insn[0^e] = buf[4^e] << 4 | buf[5^e] >> 4;
+      insn[1^e] = buf[5^e] << 4 | buf[6^e] >> 4;
+      insn[2^e] = buf[6^e] << 4 | buf[7^e] >> 4;
+      insn[3^e] = buf[7^e] << 4;
+      (*info->fprintf_func) (info->stream, " + ");
+      print_slot_insn (cd, pc, info, SLOTS_P1, insn);
+    }
+  else
+    {
+      /*      <--00--><--11--><--22--><--33--><--44--><--55--><--66--><--77--> */
+      /* V2   [-------------core-------------]xxxx[------------p1------------] */
+      print_insn (cd, pc, info, buf, 4);
+
+      insn[0^e] = buf[4^e] << 4 | buf[5^e] >> 4;
+      insn[1^e] = buf[5^e] << 4 | buf[6^e] >> 4;
+      insn[2^e] = buf[6^e] << 4 | buf[7^e] >> 4;
+      insn[3^e] = buf[7^e] << 4;
+      (*info->fprintf_func) (info->stream, " + ");
+      print_slot_insn (cd, pc, info, SLOTS_P1, insn);
+    }
+
+  return 8;
+}
+
+#endif /* MEP_IVC2_SUPPORTED */
+
+/* This is a hack.  SID calls this to update the disassembler as the
+   CPU changes modes.  */
+static int mep_ivc2_disassemble_p = 0;
+static int mep_ivc2_vliw_disassemble_p = 0;
+
+void
+mep_print_insn_set_ivc2_mode (int ivc2_p, int vliw_p, int cfg_idx);
+void
+mep_print_insn_set_ivc2_mode (int ivc2_p, int vliw_p, int cfg_idx)
+{
+  mep_ivc2_disassemble_p = ivc2_p;
+  mep_ivc2_vliw_disassemble_p = vliw_p;
+  mep_config_index = cfg_idx;
+}
+
 static int
 mep_print_insn (CGEN_CPU_DESC cd, bfd_vma pc, disassemble_info *info)
 {
   int status;
+  int cop_type;
+  int ivc2 = 0;
+  static CGEN_ATTR_VALUE_BITSET_TYPE *ivc2_core_isa = NULL;
+
+  if (ivc2_core_isa == NULL)
+    {
+      /* IVC2 has some core-only coprocessor instructions.  We
+	 use COP32 to flag those, and COP64 for the VLIW ones,
+	 since they have the same names.  */
+      ivc2_core_isa = cgen_bitset_create (MAX_ISAS);
+    }
 
   /* Extract and adapt to configuration number, if available. */
   if (info->section && info->section->owner)
@@ -435,6 +654,10 @@ mep_print_insn (CGEN_CPU_DESC cd, bfd_vma pc, disassemble_info *info)
       bfd *abfd = info->section->owner;
       mep_config_index = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_INDEX_MASK;
       /* This instantly redefines MEP_CONFIG, MEP_OMASK, .... MEP_VLIW64 */
+
+      cop_type = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_COP_MASK;
+      if (cop_type == EF_MEP_COP_IVC2)
+	ivc2 = 1;
     }
 
   /* Picking the right ISA bitmask for the current context is tricky.  */
@@ -442,21 +665,55 @@ mep_print_insn (CGEN_CPU_DESC cd, bfd_vma pc, disassemble_info *info)
     {
       if (info->section->flags & SEC_MEP_VLIW)
 	{
-	  /* Are we in 32 or 64 bit vliw mode?  */
-	  if (MEP_VLIW64)
-	    status = mep_examine_vliw64_insns (cd, pc, info);
+#ifdef MEP_IVC2_SUPPORTED
+	  if (ivc2)
+	    {
+	      /* ivc2 has its own way of selecting its functions.  */
+	      cd->isas = & MEP_CORE_ISA;
+	      status = mep_examine_ivc2_insns (cd, pc, info);
+	    }
 	  else
-	    status = mep_examine_vliw32_insns (cd, pc, info);
+#endif
+	    /* Are we in 32 or 64 bit vliw mode?  */
+	    if (MEP_VLIW64)
+	      status = mep_examine_vliw64_insns (cd, pc, info);
+	    else
+	      status = mep_examine_vliw32_insns (cd, pc, info);
 	  /* Both the above branches set their own isa bitmasks.  */
 	}
       else
 	{
-	  cd->isas = & MEP_CORE_ISA;
+	  if (ivc2)
+	    {
+	      cgen_bitset_clear (ivc2_core_isa);
+	      cgen_bitset_union (ivc2_core_isa, &MEP_CORE_ISA, ivc2_core_isa);
+	      cgen_bitset_union (ivc2_core_isa, &MEP_COP32_ISA, ivc2_core_isa);
+	      cd->isas = ivc2_core_isa;
+	    }
+	  else
+	    cd->isas = & MEP_CORE_ISA;
 	  status = default_print_insn (cd, pc, info);
 	}
     }
   else /* sid or gdb */
     {
+#ifdef MEP_IVC2_SUPPORTED
+      if (mep_ivc2_disassemble_p)
+	{
+	  if (mep_ivc2_vliw_disassemble_p)
+	    {
+	      cd->isas = & MEP_CORE_ISA;
+	      status = mep_examine_ivc2_insns (cd, pc, info);
+	      return status;
+	    }
+	  else
+	    {
+	      if (ivc2)
+		cd->isas = ivc2_core_isa;
+	    }
+	}
+#endif
+
       status = default_print_insn (cd, pc, info);
     }
 
@@ -557,6 +814,24 @@ mep_cgen_print_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_CRNX64 :
       print_keyword (cd, info, & mep_cgen_opval_h_cr64, fields->f_crnx, 0|(1<<CGEN_OPERAND_VIRTUAL));
       break;
+    case MEP_OPERAND_CROC :
+      print_keyword (cd, info, & mep_cgen_opval_h_cr64, fields->f_ivc2_5u7, 0);
+      break;
+    case MEP_OPERAND_CROP :
+      print_keyword (cd, info, & mep_cgen_opval_h_cr64, fields->f_ivc2_5u23, 0);
+      break;
+    case MEP_OPERAND_CRPC :
+      print_keyword (cd, info, & mep_cgen_opval_h_cr64, fields->f_ivc2_5u26, 0);
+      break;
+    case MEP_OPERAND_CRPP :
+      print_keyword (cd, info, & mep_cgen_opval_h_cr64, fields->f_ivc2_5u18, 0);
+      break;
+    case MEP_OPERAND_CRQC :
+      print_keyword (cd, info, & mep_cgen_opval_h_cr64, fields->f_ivc2_5u21, 0);
+      break;
+    case MEP_OPERAND_CRQP :
+      print_keyword (cd, info, & mep_cgen_opval_h_cr64, fields->f_ivc2_5u13, 0);
+      break;
     case MEP_OPERAND_CSRN :
       print_keyword (cd, info, & mep_cgen_opval_h_csr, fields->f_csrn, 0|(1<<CGEN_OPERAND_VIRTUAL));
       break;
@@ -577,6 +852,90 @@ mep_cgen_print_operand (CGEN_CPU_DESC cd,
       break;
     case MEP_OPERAND_HI :
       print_keyword (cd, info, & mep_cgen_opval_h_csr, 0, 0);
+      break;
+    case MEP_OPERAND_IMM16P0 :
+      print_normal (cd, info, fields->f_ivc2_imm16p0, 0|(1<<CGEN_OPERAND_VIRTUAL), pc, length);
+      break;
+    case MEP_OPERAND_IMM3P12 :
+      print_normal (cd, info, fields->f_ivc2_3u12, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM3P25 :
+      print_normal (cd, info, fields->f_ivc2_3u25, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM3P4 :
+      print_normal (cd, info, fields->f_ivc2_3u4, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM3P5 :
+      print_normal (cd, info, fields->f_ivc2_3u5, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM3P9 :
+      print_normal (cd, info, fields->f_ivc2_3u9, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM4P10 :
+      print_normal (cd, info, fields->f_ivc2_4u10, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM4P4 :
+      print_normal (cd, info, fields->f_ivc2_4u4, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM4P8 :
+      print_normal (cd, info, fields->f_ivc2_4u8, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM5P23 :
+      print_normal (cd, info, fields->f_ivc2_5u23, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM5P3 :
+      print_normal (cd, info, fields->f_ivc2_5u3, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM5P7 :
+      print_normal (cd, info, fields->f_ivc2_5u7, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM5P8 :
+      print_normal (cd, info, fields->f_ivc2_5u8, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM6P2 :
+      print_normal (cd, info, fields->f_ivc2_6u2, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM6P6 :
+      print_normal (cd, info, fields->f_ivc2_6u6, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM8P0 :
+      print_normal (cd, info, fields->f_ivc2_8u0, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM8P20 :
+      print_normal (cd, info, fields->f_ivc2_8u20, 0, pc, length);
+      break;
+    case MEP_OPERAND_IMM8P4 :
+      print_normal (cd, info, fields->f_ivc2_8u4, 0, pc, length);
+      break;
+    case MEP_OPERAND_IVC_X_0_2 :
+      print_normal (cd, info, fields->f_ivc2_2u0, 0, pc, length);
+      break;
+    case MEP_OPERAND_IVC_X_0_3 :
+      print_normal (cd, info, fields->f_ivc2_3u0, 0, pc, length);
+      break;
+    case MEP_OPERAND_IVC_X_0_4 :
+      print_normal (cd, info, fields->f_ivc2_4u0, 0, pc, length);
+      break;
+    case MEP_OPERAND_IVC_X_0_5 :
+      print_normal (cd, info, fields->f_ivc2_5u0, 0, pc, length);
+      break;
+    case MEP_OPERAND_IVC_X_6_1 :
+      print_normal (cd, info, fields->f_ivc2_1u6, 0, pc, length);
+      break;
+    case MEP_OPERAND_IVC_X_6_2 :
+      print_normal (cd, info, fields->f_ivc2_2u6, 0, pc, length);
+      break;
+    case MEP_OPERAND_IVC_X_6_3 :
+      print_normal (cd, info, fields->f_ivc2_3u6, 0, pc, length);
+      break;
+    case MEP_OPERAND_IVC2CCRN :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr, fields->f_ivc2_ccrn, 0|(1<<CGEN_OPERAND_VIRTUAL));
+      break;
+    case MEP_OPERAND_IVC2CRN :
+      print_keyword (cd, info, & mep_cgen_opval_h_cr64, fields->f_ivc2_crnx, 0|(1<<CGEN_OPERAND_VIRTUAL));
+      break;
+    case MEP_OPERAND_IVC2RM :
+      print_keyword (cd, info, & mep_cgen_opval_h_gpr, fields->f_ivc2_crm, 0);
       break;
     case MEP_OPERAND_LO :
       print_keyword (cd, info, & mep_cgen_opval_h_csr, 0, 0);
@@ -689,11 +1048,20 @@ mep_cgen_print_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_SIMM16 :
       print_normal (cd, info, fields->f_16s16, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
+    case MEP_OPERAND_SIMM16P0 :
+      print_normal (cd, info, fields->f_ivc2_simm16p0, 0|(1<<CGEN_OPERAND_SIGNED)|(1<<CGEN_OPERAND_VIRTUAL), pc, length);
+      break;
     case MEP_OPERAND_SIMM6 :
       print_normal (cd, info, fields->f_6s8, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case MEP_OPERAND_SIMM8 :
       print_normal (cd, info, fields->f_8s8, 0|(1<<CGEN_OPERAND_SIGNED)|(1<<CGEN_OPERAND_RELOC_IMPLIES_OVERFLOW), pc, length);
+      break;
+    case MEP_OPERAND_SIMM8P0 :
+      print_normal (cd, info, fields->f_ivc2_8s0, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case MEP_OPERAND_SIMM8P4 :
+      print_normal (cd, info, fields->f_ivc2_8s4, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case MEP_OPERAND_SP :
       print_keyword (cd, info, & mep_cgen_opval_h_gpr, 0, 0);

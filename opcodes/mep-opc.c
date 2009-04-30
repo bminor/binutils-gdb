@@ -57,6 +57,10 @@ init_mep_all_cop_isas_mask (void)
     return;
   cgen_bitset_init (& mep_all_cop_isas_mask, ISA_MAX);
   /* begin-all-cop-isas */
+  cgen_bitset_add (& mep_all_cop_isas_mask, ISA_EXT_COP1_16);
+  cgen_bitset_add (& mep_all_cop_isas_mask, ISA_EXT_COP1_32);
+  cgen_bitset_add (& mep_all_cop_isas_mask, ISA_EXT_COP1_48);
+  cgen_bitset_add (& mep_all_cop_isas_mask, ISA_EXT_COP1_64);
   /* end-all-cop-isas */
 }
 
@@ -89,8 +93,10 @@ mep_config_map_struct mep_config_map[] =
   /* config-map-start */
   /* Default entry: mep core only, all options enabled. */
   { "", 0, EF_MEP_CPU_C5, 1, 0, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x80"}, OPTION_MASK },
-  { "default", CONFIG_DEFAULT, EF_MEP_CPU_C5, 0, 0, { 1, "\x0" }, { 1, "\x0" }, { 1, "\x0" }, { 1, "\x0" }, { 1, "\x0" }, { 1, "\xc0" },
+  { "default", CONFIG_DEFAULT, EF_MEP_COP_IVC2 | EF_MEP_CPU_C5, 0, 64, { 1, "\x20" }, { 1, "\x10" }, { 1, "\x8" }, { 1, "\x4" }, { 1, "\x3c" }, { 1, "\xc0" },
 	  0
+	| (1 << CGEN_INSN_OPTIONAL_CP_INSN)
+	| (1 << CGEN_INSN_OPTIONAL_CP64_INSN)
 	| (1 << CGEN_INSN_OPTIONAL_MUL_INSN)
 	| (1 << CGEN_INSN_OPTIONAL_DIV_INSN)
 	| (1 << CGEN_INSN_OPTIONAL_BIT_INSN)
@@ -426,6 +432,138 @@ static const CGEN_IFMT ifmt_bcpeq ATTRIBUTE_UNUSED = {
 
 static const CGEN_IFMT ifmt_sim_syscall ATTRIBUTE_UNUSED = {
   16, 16, 0xf8ef, { { F (F_MAJOR) }, { F (F_4) }, { F (F_CALLNUM) }, { F (F_8) }, { F (F_9) }, { F (F_10) }, { F (F_SUB4) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cmov_crn_rm ATTRIBUTE_UNUSED = {
+  32, 32, 0xf00ffff7, { { F (F_MAJOR) }, { F (F_CRNX) }, { F (F_RM) }, { F (F_SUB4) }, { F (F_IVC2_4U16) }, { F (F_IVC2_4U20) }, { F (F_IVC2_4U24) }, { F (F_29) }, { F (F_30) }, { F (F_31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cmovc_ccrn_rm ATTRIBUTE_UNUSED = {
+  32, 32, 0xf00ffff3, { { F (F_MAJOR) }, { F (F_CCRN) }, { F (F_RM) }, { F (F_SUB4) }, { F (F_IVC2_4U16) }, { F (F_IVC2_4U20) }, { F (F_IVC2_4U24) }, { F (F_30) }, { F (F_31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cmov_crn_rm_p0 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfff7ff, { { F (F_IVC2_CRNX) }, { F (F_IVC2_CRM) }, { F (F_IVC2_CMOV1) }, { F (F_21) }, { F (F_IVC2_CMOV2) }, { F (F_IVC2_CMOV3) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cmovc_ccrn_rm_p0 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfff3ff, { { F (F_IVC2_CCRN) }, { F (F_IVC2_CRM) }, { F (F_IVC2_CMOV1) }, { F (F_IVC2_CMOV2) }, { F (F_IVC2_CMOV3) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpadd3_b_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfe0ff801, { { F (F_MAJOR) }, { F (F_IVC2_3U4) }, { F (F_IVC2_5U7) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpfsftbi_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf00ff801, { { F (F_MAJOR) }, { F (F_IVC2_3U4) }, { F (F_IVC2_5U7) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpmovfrcsar0_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfe0fffff, { { F (F_MAJOR) }, { F (F_IVC2_3U4) }, { F (F_IVC2_5U7) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpmovtocsar0_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfffff83f, { { F (F_MAJOR) }, { F (F_IVC2_3U4) }, { F (F_IVC2_5U7) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpmov_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfe0ff83f, { { F (F_MAJOR) }, { F (F_IVC2_3U4) }, { F (F_IVC2_5U7) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpcmpeqz_b_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfffff801, { { F (F_MAJOR) }, { F (F_IVC2_3U4) }, { F (F_IVC2_5U7) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpsrli3_b_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfc0ff801, { { F (F_MAJOR) }, { F (F_IVC2_2U4) }, { F (F_IVC2_3U6) }, { F (F_IVC2_3U9) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpsrli3_h_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfc0ff801, { { F (F_MAJOR) }, { F (F_IVC2_2U4) }, { F (F_IVC2_2U6) }, { F (F_IVC2_4U8) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpsrli3_w_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfc0ff801, { { F (F_MAJOR) }, { F (F_IVC2_2U4) }, { F (F_IVC2_1U6) }, { F (F_IVC2_5U7) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cdsrli3_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfc0ff801, { { F (F_MAJOR) }, { F (F_IVC2_2U4) }, { F (F_IVC2_6U6) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpmovi_b_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf00ff83f, { { F (F_MAJOR) }, { F (F_IVC2_8S4) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpmoviu_h_C3 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf00ff83f, { { F (F_MAJOR) }, { F (F_IVC2_8U4) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpsrlia1_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfc0fffff, { { F (F_MAJOR) }, { F (F_IVC2_2U4) }, { F (F_IVC2_1U6) }, { F (F_IVC2_5U7) }, { F (F_SUB4) }, { F (F_IVC2_5U16) }, { F (F_IVC2_5U21) }, { F (F_IVC2_5U26) }, { F (F_IVC2_1U31) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_c0nop_P0_P0S ATTRIBUTE_UNUSED = {
+  32, 32, 0xffffffff, { { F (F_IVC2_8U0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpadd3_b_P0S_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfff8000f, { { F (F_IVC2_8U0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpmov_P0S_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfff83e0f, { { F (F_IVC2_8U0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpccadd_b_P0S_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfff83fff, { { F (F_IVC2_8U0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpmovfrcsar0_P0S_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfffffe0f, { { F (F_IVC2_8U0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpcmpeqz_b_P0S_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfff801ff, { { F (F_IVC2_8U0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpsrlia0_P0S ATTRIBUTE_UNUSED = {
+  32, 32, 0xfffffe0f, { { F (F_IVC2_8U0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpfsftbi_P0_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf8000f, { { F (F_IVC2_5U0) }, { F (F_IVC2_3U5) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpsrli3_b_P0_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf83e0f, { { F (F_IVC2_5U0) }, { F (F_IVC2_3U5) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpsrli3_h_P0_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf83e0f, { { F (F_IVC2_4U0) }, { F (F_IVC2_4U4) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpsrli3_w_P0_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf83e0f, { { F (F_IVC2_3U0) }, { F (F_IVC2_5U3) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cdsrli3_P0_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf83e0f, { { F (F_IVC2_2U0) }, { F (F_IVC2_6U2) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpmovi_h_P0_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf8300f, { { F (F_IVC2_SIMM16P0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_2U18) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpmoviu_w_P0_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf8300f, { { F (F_IVC2_IMM16P0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_2U18) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpfmulia1s0u_b_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf801ff, { { F (F_IVC2_8S0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_5U23) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpfmulia1u_b_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xf8018f, { { F (F_IVC2_8S0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_5U18) }, { F (F_IVC2_2U23) }, { F (F_IVC2_3U25) }, { F (F_IVC2_4U28) }, { 0 } }
 };
 
 #undef F
@@ -1663,7 +1801,7 @@ static const CGEN_OPCODE mep_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, ' ', OP (PCREL24A2), 0 } },
     & ifmt_bsr24, { 0xd80b0000 }
   },
-/* --unused-- */
+/* --syscall-- */
   {
     { 0, 0, 0, 0 },
     { { MNEM, 0 } },
@@ -1801,6 +1939,4128 @@ static const CGEN_OPCODE mep_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, 0 } },
     & ifmt_mov, { 0xf008 }
   },
+/* cmov $crnx64,$rm */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRNX64), ',', OP (RM), 0 } },
+    & ifmt_cmov_crn_rm, { 0xf007f000 }
+  },
+/* cmov $rm,$crnx64 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (RM), ',', OP (CRNX64), 0 } },
+    & ifmt_cmov_crn_rm, { 0xf007f001 }
+  },
+/* cmovc $ccrn,$rm */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CCRN), ',', OP (RM), 0 } },
+    & ifmt_cmovc_ccrn_rm, { 0xf007f002 }
+  },
+/* cmovc $rm,$ccrn */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (RM), ',', OP (CCRN), 0 } },
+    & ifmt_cmovc_ccrn_rm, { 0xf007f003 }
+  },
+/* cmovh $crnx64,$rm */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRNX64), ',', OP (RM), 0 } },
+    & ifmt_cmov_crn_rm, { 0xf007f100 }
+  },
+/* cmovh $rm,$crnx64 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (RM), ',', OP (CRNX64), 0 } },
+    & ifmt_cmov_crn_rm, { 0xf007f101 }
+  },
+/* cmov $ivc2crn,$ivc2rm */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IVC2CRN), ',', OP (IVC2RM), 0 } },
+    & ifmt_cmov_crn_rm_p0, { 0xf00000 }
+  },
+/* cmov $ivc2rm,$ivc2crn */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IVC2RM), ',', OP (IVC2CRN), 0 } },
+    & ifmt_cmov_crn_rm_p0, { 0xf00100 }
+  },
+/* cmovc $ivc2ccrn,$ivc2rm */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IVC2CCRN), ',', OP (IVC2RM), 0 } },
+    & ifmt_cmovc_ccrn_rm_p0, { 0xf00200 }
+  },
+/* cmovc $ivc2rm,$ivc2ccrn */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IVC2RM), ',', OP (IVC2CCRN), 0 } },
+    & ifmt_cmovc_ccrn_rm_p0, { 0xf00300 }
+  },
+/* cmovh $ivc2crn,$ivc2rm */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IVC2CRN), ',', OP (IVC2RM), 0 } },
+    & ifmt_cmov_crn_rm_p0, { 0xf10000 }
+  },
+/* cmovh $ivc2rm,$ivc2crn */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IVC2RM), ',', OP (IVC2CRN), 0 } },
+    & ifmt_cmov_crn_rm_p0, { 0xf10100 }
+  },
+/* cpadd3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf0070000 }
+  },
+/* cpadd3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf2070000 }
+  },
+/* cpadd3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf4070000 }
+  },
+/* cdadd3 $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf6070000 }
+  },
+/* cpsub3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8070000 }
+  },
+/* cpsub3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfa070000 }
+  },
+/* cpsub3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfc070000 }
+  },
+/* cdsub3 $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfe070000 }
+  },
+/* cpand3 $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf0070800 }
+  },
+/* cpor3 $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf2070800 }
+  },
+/* cpnor3 $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf4070800 }
+  },
+/* cpxor3 $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf6070800 }
+  },
+/* cpsel $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8070800 }
+  },
+/* cpfsftbi $croc,$crqc,$crpc,$imm3p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), ',', OP (IMM3P4), 0 } },
+    & ifmt_cpfsftbi_C3, { 0xf007e800 }
+  },
+/* cpfsftbs0 $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfc070800 }
+  },
+/* cpfsftbs1 $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfe070800 }
+  },
+/* cpunpacku.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf0071000 }
+  },
+/* cpunpacku.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf2071000 }
+  },
+/* cpunpacku.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf4071000 }
+  },
+/* cpunpackl.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8071000 }
+  },
+/* cpunpackl.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfa071000 }
+  },
+/* cpunpackl.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfc071000 }
+  },
+/* cppacku.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8071800 }
+  },
+/* cppack.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfa071800 }
+  },
+/* cppack.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfe071800 }
+  },
+/* cpsrl3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf0072000 }
+  },
+/* cpssrl3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf2072000 }
+  },
+/* cpsrl3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf4072000 }
+  },
+/* cpssrl3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf6072000 }
+  },
+/* cpsrl3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8072000 }
+  },
+/* cpssrl3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfa072000 }
+  },
+/* cdsrl3 $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfc072000 }
+  },
+/* cpsra3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf0072800 }
+  },
+/* cpssra3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf2072800 }
+  },
+/* cpsra3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf4072800 }
+  },
+/* cpssra3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf6072800 }
+  },
+/* cpsra3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8072800 }
+  },
+/* cpssra3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfa072800 }
+  },
+/* cdsra3 $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfc072800 }
+  },
+/* cpsll3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf0073000 }
+  },
+/* cpssll3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf2073000 }
+  },
+/* cpsll3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf4073000 }
+  },
+/* cpssll3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf6073000 }
+  },
+/* cpsll3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8073000 }
+  },
+/* cpssll3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfa073000 }
+  },
+/* cdsll3 $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfc073000 }
+  },
+/* cpsla3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf4073800 }
+  },
+/* cpsla3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8073800 }
+  },
+/* cpsadd3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf4074000 }
+  },
+/* cpsadd3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf6074000 }
+  },
+/* cpssub3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfc074000 }
+  },
+/* cpssub3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfe074000 }
+  },
+/* cpextuaddu3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf0074800 }
+  },
+/* cpextuadd3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf2074800 }
+  },
+/* cpextladdu3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf4074800 }
+  },
+/* cpextladd3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf6074800 }
+  },
+/* cpextusubu3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8074800 }
+  },
+/* cpextusub3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfa074800 }
+  },
+/* cpextlsubu3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfc074800 }
+  },
+/* cpextlsub3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfe074800 }
+  },
+/* cpaveu3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf0075000 }
+  },
+/* cpave3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf2075000 }
+  },
+/* cpave3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf4075000 }
+  },
+/* cpave3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf6075000 }
+  },
+/* cpaddsru3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8075000 }
+  },
+/* cpaddsr3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfa075000 }
+  },
+/* cpaddsr3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfc075000 }
+  },
+/* cpaddsr3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfe075000 }
+  },
+/* cpabsu3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf0075800 }
+  },
+/* cpabs3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf2075800 }
+  },
+/* cpabs3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf4075800 }
+  },
+/* cpmaxu3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf0076000 }
+  },
+/* cpmax3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf2076000 }
+  },
+/* cpmax3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf6076000 }
+  },
+/* cpmaxu3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8076000 }
+  },
+/* cpmax3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfa076000 }
+  },
+/* cpminu3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf0076800 }
+  },
+/* cpmin3.b $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf2076800 }
+  },
+/* cpmin3.h $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf6076800 }
+  },
+/* cpminu3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xf8076800 }
+  },
+/* cpmin3.w $croc,$crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpadd3_b_C3, { 0xfa076800 }
+  },
+/* cpmovfrcsar0 $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf0078000 }
+  },
+/* cpmovfrcsar1 $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf007801e }
+  },
+/* cpmovfrcc $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf0078002 }
+  },
+/* cpmovtocsar0 $crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), 0 } },
+    & ifmt_cpmovtocsar0_C3, { 0xf0078020 }
+  },
+/* cpmovtocsar1 $crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), 0 } },
+    & ifmt_cpmovtocsar0_C3, { 0xf007803e }
+  },
+/* cpmovtocc $crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), 0 } },
+    & ifmt_cpmovtocsar0_C3, { 0xf0078022 }
+  },
+/* cpmov $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078800 }
+  },
+/* cpabsz.b $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078802 }
+  },
+/* cpabsz.h $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078804 }
+  },
+/* cpabsz.w $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078806 }
+  },
+/* cpldz.h $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078808 }
+  },
+/* cpldz.w $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007880a }
+  },
+/* cpnorm.h $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007880c }
+  },
+/* cpnorm.w $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007880e }
+  },
+/* cphaddu.b $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078810 }
+  },
+/* cphadd.b $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078812 }
+  },
+/* cphadd.h $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078814 }
+  },
+/* cphadd.w $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078816 }
+  },
+/* cpccadd.b $crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078818 }
+  },
+/* cpbcast.b $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007881a }
+  },
+/* cpbcast.h $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007881c }
+  },
+/* cpbcast.w $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007881e }
+  },
+/* cpextuu.b $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078820 }
+  },
+/* cpextu.b $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078822 }
+  },
+/* cpextuu.h $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078824 }
+  },
+/* cpextu.h $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078826 }
+  },
+/* cpextlu.b $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078828 }
+  },
+/* cpextl.b $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007882a }
+  },
+/* cpextlu.h $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007882c }
+  },
+/* cpextl.h $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007882e }
+  },
+/* cpcastub.h $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078830 }
+  },
+/* cpcastb.h $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078832 }
+  },
+/* cpcastub.w $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078838 }
+  },
+/* cpcastb.w $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007883a }
+  },
+/* cpcastuh.w $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007883c }
+  },
+/* cpcasth.w $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf007883e }
+  },
+/* cdcastuw $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078834 }
+  },
+/* cdcastw $croc,$crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), ',', OP (CRQC), 0 } },
+    & ifmt_cpmov_C3, { 0xf0078836 }
+  },
+/* cpcmpeqz.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0079000 }
+  },
+/* cpcmpeq.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0179000 }
+  },
+/* cpcmpeq.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0379000 }
+  },
+/* cpcmpeq.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0579000 }
+  },
+/* cpcmpne.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0979000 }
+  },
+/* cpcmpne.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0b79000 }
+  },
+/* cpcmpne.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0d79000 }
+  },
+/* cpcmpgtu.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1079000 }
+  },
+/* cpcmpgt.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1179000 }
+  },
+/* cpcmpgt.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1379000 }
+  },
+/* cpcmpgtu.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1479000 }
+  },
+/* cpcmpgt.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1579000 }
+  },
+/* cpcmpgeu.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1879000 }
+  },
+/* cpcmpge.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1979000 }
+  },
+/* cpcmpge.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1b79000 }
+  },
+/* cpcmpgeu.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1c79000 }
+  },
+/* cpcmpge.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1d79000 }
+  },
+/* cpacmpeq.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf2179000 }
+  },
+/* cpacmpeq.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf2379000 }
+  },
+/* cpacmpeq.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf2579000 }
+  },
+/* cpacmpne.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf2979000 }
+  },
+/* cpacmpne.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf2b79000 }
+  },
+/* cpacmpne.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf2d79000 }
+  },
+/* cpacmpgtu.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3079000 }
+  },
+/* cpacmpgt.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3179000 }
+  },
+/* cpacmpgt.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3379000 }
+  },
+/* cpacmpgtu.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3479000 }
+  },
+/* cpacmpgt.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3579000 }
+  },
+/* cpacmpgeu.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3879000 }
+  },
+/* cpacmpge.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3979000 }
+  },
+/* cpacmpge.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3b79000 }
+  },
+/* cpacmpgeu.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3c79000 }
+  },
+/* cpacmpge.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3d79000 }
+  },
+/* cpocmpeq.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf4179000 }
+  },
+/* cpocmpeq.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf4379000 }
+  },
+/* cpocmpeq.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf4579000 }
+  },
+/* cpocmpne.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf4979000 }
+  },
+/* cpocmpne.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf4b79000 }
+  },
+/* cpocmpne.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf4d79000 }
+  },
+/* cpocmpgtu.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf5079000 }
+  },
+/* cpocmpgt.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf5179000 }
+  },
+/* cpocmpgt.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf5379000 }
+  },
+/* cpocmpgtu.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf5479000 }
+  },
+/* cpocmpgt.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf5579000 }
+  },
+/* cpocmpgeu.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf5879000 }
+  },
+/* cpocmpge.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf5979000 }
+  },
+/* cpocmpge.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf5b79000 }
+  },
+/* cpocmpgeu.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf5c79000 }
+  },
+/* cpocmpge.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf5d79000 }
+  },
+/* cpsrli3.b $crqc,$crpc,$imm3p9 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM3P9), 0 } },
+    & ifmt_cpsrli3_b_C3, { 0xf007a000 }
+  },
+/* cpsrli3.h $crqc,$crpc,$imm4p8 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM4P8), 0 } },
+    & ifmt_cpsrli3_h_C3, { 0xf407a000 }
+  },
+/* cpsrli3.w $crqc,$crpc,$imm5p7 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM5P7), 0 } },
+    & ifmt_cpsrli3_w_C3, { 0xf807a000 }
+  },
+/* cdsrli3 $crqc,$crpc,$imm6p6 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM6P6), 0 } },
+    & ifmt_cdsrli3_C3, { 0xfc07a000 }
+  },
+/* cpsrai3.b $crqc,$crpc,$imm3p9 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM3P9), 0 } },
+    & ifmt_cpsrli3_b_C3, { 0xf007a800 }
+  },
+/* cpsrai3.h $crqc,$crpc,$imm4p8 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM4P8), 0 } },
+    & ifmt_cpsrli3_h_C3, { 0xf407a800 }
+  },
+/* cpsrai3.w $crqc,$crpc,$imm5p7 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM5P7), 0 } },
+    & ifmt_cpsrli3_w_C3, { 0xf807a800 }
+  },
+/* cdsrai3 $crqc,$crpc,$imm6p6 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM6P6), 0 } },
+    & ifmt_cdsrli3_C3, { 0xfc07a800 }
+  },
+/* cpslli3.b $crqc,$crpc,$imm3p9 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM3P9), 0 } },
+    & ifmt_cpsrli3_b_C3, { 0xf007b000 }
+  },
+/* cpslli3.h $crqc,$crpc,$imm4p8 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM4P8), 0 } },
+    & ifmt_cpsrli3_h_C3, { 0xf407b000 }
+  },
+/* cpslli3.w $crqc,$crpc,$imm5p7 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM5P7), 0 } },
+    & ifmt_cpsrli3_w_C3, { 0xf807b000 }
+  },
+/* cdslli3 $crqc,$crpc,$imm6p6 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM6P6), 0 } },
+    & ifmt_cdsrli3_C3, { 0xfc07b000 }
+  },
+/* cpslai3.h $crqc,$crpc,$imm4p8 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM4P8), 0 } },
+    & ifmt_cpsrli3_h_C3, { 0xf407b800 }
+  },
+/* cpslai3.w $crqc,$crpc,$imm5p7 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM5P7), 0 } },
+    & ifmt_cpsrli3_w_C3, { 0xf807b800 }
+  },
+/* cpclipiu3.w $crqc,$crpc,$imm5p7 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM5P7), 0 } },
+    & ifmt_cpsrli3_w_C3, { 0xf007c000 }
+  },
+/* cpclipi3.w $crqc,$crpc,$imm5p7 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM5P7), 0 } },
+    & ifmt_cpsrli3_w_C3, { 0xf407c000 }
+  },
+/* cdclipiu3 $crqc,$crpc,$imm6p6 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM6P6), 0 } },
+    & ifmt_cdsrli3_C3, { 0xf807c000 }
+  },
+/* cdclipi3 $crqc,$crpc,$imm6p6 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), ',', OP (IMM6P6), 0 } },
+    & ifmt_cdsrli3_C3, { 0xfc07c000 }
+  },
+/* cpmovi.b $crqc,$simm8p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (SIMM8P4), 0 } },
+    & ifmt_cpmovi_b_C3, { 0xf007c800 }
+  },
+/* cpmoviu.h $crqc,$imm8p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (IMM8P4), 0 } },
+    & ifmt_cpmoviu_h_C3, { 0xf007c804 }
+  },
+/* cpmovi.h $crqc,$simm8p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (SIMM8P4), 0 } },
+    & ifmt_cpmovi_b_C3, { 0xf007c806 }
+  },
+/* cpmoviu.w $crqc,$imm8p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (IMM8P4), 0 } },
+    & ifmt_cpmoviu_h_C3, { 0xf007c808 }
+  },
+/* cpmovi.w $crqc,$simm8p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (SIMM8P4), 0 } },
+    & ifmt_cpmovi_b_C3, { 0xf007c80a }
+  },
+/* cdmoviu $crqc,$imm8p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (IMM8P4), 0 } },
+    & ifmt_cpmoviu_h_C3, { 0xf007c80c }
+  },
+/* cdmovi $crqc,$simm8p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (SIMM8P4), 0 } },
+    & ifmt_cpmovi_b_C3, { 0xf007c80e }
+  },
+/* cpadda1u.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0070001 }
+  },
+/* cpadda1.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0170001 }
+  },
+/* cpaddua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0270001 }
+  },
+/* cpaddla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0370001 }
+  },
+/* cpaddaca1u.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0470001 }
+  },
+/* cpaddaca1.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0570001 }
+  },
+/* cpaddacua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0670001 }
+  },
+/* cpaddacla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0770001 }
+  },
+/* cpsuba1u.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0870001 }
+  },
+/* cpsuba1.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0970001 }
+  },
+/* cpsubua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0a70001 }
+  },
+/* cpsubla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0b70001 }
+  },
+/* cpsubaca1u.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0c70001 }
+  },
+/* cpsubaca1.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0d70001 }
+  },
+/* cpsubacua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0e70001 }
+  },
+/* cpsubacla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0f70001 }
+  },
+/* cpabsa1u.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1070001 }
+  },
+/* cpabsa1.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1170001 }
+  },
+/* cpabsua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1270001 }
+  },
+/* cpabsla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1370001 }
+  },
+/* cpsada1u.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1470001 }
+  },
+/* cpsada1.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1570001 }
+  },
+/* cpsadua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1670001 }
+  },
+/* cpsadla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1770001 }
+  },
+/* cpseta1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf2070001 }
+  },
+/* cpsetua1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf2270001 }
+  },
+/* cpsetla1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf2370001 }
+  },
+/* cpmova1.b $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf0072001 }
+  },
+/* cpmovua1.h $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf0072005 }
+  },
+/* cpmovla1.h $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf0072007 }
+  },
+/* cpmovuua1.w $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf0072009 }
+  },
+/* cpmovula1.w $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf007200b }
+  },
+/* cpmovlua1.w $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf007200d }
+  },
+/* cpmovlla1.w $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf007200f }
+  },
+/* cppacka1u.b $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf0072021 }
+  },
+/* cppacka1.b $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf0072023 }
+  },
+/* cppackua1.h $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf0072025 }
+  },
+/* cppackla1.h $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf0072027 }
+  },
+/* cppackua1.w $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf0072029 }
+  },
+/* cppackla1.w $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf007202b }
+  },
+/* cpmovhua1.w $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf007202d }
+  },
+/* cpmovhla1.w $croc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROC), 0 } },
+    & ifmt_cpmovfrcsar0_C3, { 0xf007202f }
+  },
+/* cpsrla1 $crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), 0 } },
+    & ifmt_cpmovtocsar0_C3, { 0xf0071001 }
+  },
+/* cpsraa1 $crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), 0 } },
+    & ifmt_cpmovtocsar0_C3, { 0xf0171001 }
+  },
+/* cpslla1 $crqc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), 0 } },
+    & ifmt_cpmovtocsar0_C3, { 0xf0271001 }
+  },
+/* cpsrlia1 $imm5p7 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IMM5P7), 0 } },
+    & ifmt_cpsrlia1_P1, { 0xf0071801 }
+  },
+/* cpsraia1 $imm5p7 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IMM5P7), 0 } },
+    & ifmt_cpsrlia1_P1, { 0xf4071801 }
+  },
+/* cpsllia1 $imm5p7 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IMM5P7), 0 } },
+    & ifmt_cpsrlia1_P1, { 0xf8071801 }
+  },
+/* cpssqa1u.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0070801 }
+  },
+/* cpssqa1.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0170801 }
+  },
+/* cpssda1u.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0470801 }
+  },
+/* cpssda1.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0570801 }
+  },
+/* cpmula1u.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0870801 }
+  },
+/* cpmula1.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0970801 }
+  },
+/* cpmulua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0a70801 }
+  },
+/* cpmulla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0b70801 }
+  },
+/* cpmulua1u.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0c70801 }
+  },
+/* cpmulla1u.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0d70801 }
+  },
+/* cpmulua1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0e70801 }
+  },
+/* cpmulla1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf0f70801 }
+  },
+/* cpmada1u.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1070801 }
+  },
+/* cpmada1.b $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1170801 }
+  },
+/* cpmadua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1270801 }
+  },
+/* cpmadla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1370801 }
+  },
+/* cpmadua1u.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1470801 }
+  },
+/* cpmadla1u.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1570801 }
+  },
+/* cpmadua1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1670801 }
+  },
+/* cpmadla1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1770801 }
+  },
+/* cpmsbua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1a70801 }
+  },
+/* cpmsbla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1b70801 }
+  },
+/* cpmsbua1u.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1c70801 }
+  },
+/* cpmsbla1u.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1d70801 }
+  },
+/* cpmsbua1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1e70801 }
+  },
+/* cpmsbla1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf1f70801 }
+  },
+/* cpsmadua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3270801 }
+  },
+/* cpsmadla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3370801 }
+  },
+/* cpsmadua1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3670801 }
+  },
+/* cpsmadla1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3770801 }
+  },
+/* cpsmsbua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3a70801 }
+  },
+/* cpsmsbla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3b70801 }
+  },
+/* cpsmsbua1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3e70801 }
+  },
+/* cpsmsbla1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf3f70801 }
+  },
+/* cpmulslua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf4a70801 }
+  },
+/* cpmulslla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf4b70801 }
+  },
+/* cpmulslua1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf4e70801 }
+  },
+/* cpmulslla1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf4f70801 }
+  },
+/* cpsmadslua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf7270801 }
+  },
+/* cpsmadslla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf7370801 }
+  },
+/* cpsmadslua1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf7670801 }
+  },
+/* cpsmadslla1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf7770801 }
+  },
+/* cpsmsbslua1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf7a70801 }
+  },
+/* cpsmsbslla1.h $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf7b70801 }
+  },
+/* cpsmsbslua1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf7e70801 }
+  },
+/* cpsmsbslla1.w $crqc,$crpc */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQC), ',', OP (CRPC), 0 } },
+    & ifmt_cpcmpeqz_b_C3, { 0xf7f70801 }
+  },
+/* c0nop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, 0 } },
+    & ifmt_c0nop_P0_P0S, { 0x0 }
+  },
+/* cpadd3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x80000 }
+  },
+/* cpadd3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x100000 }
+  },
+/* cpadd3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x180000 }
+  },
+/* cpunpacku.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x280000 }
+  },
+/* cpunpacku.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x300000 }
+  },
+/* cpunpacku.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x380000 }
+  },
+/* cpunpackl.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x480000 }
+  },
+/* cpunpackl.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x500000 }
+  },
+/* cpunpackl.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x580000 }
+  },
+/* cpsel $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x200000 }
+  },
+/* cpfsftbs0 $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x600000 }
+  },
+/* cpfsftbs1 $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x680000 }
+  },
+/* cpmov $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x800000 }
+  },
+/* cpabsz.b $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x800200 }
+  },
+/* cpabsz.h $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x800400 }
+  },
+/* cpabsz.w $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x800600 }
+  },
+/* cpldz.h $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x800800 }
+  },
+/* cpldz.w $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x800a00 }
+  },
+/* cpnorm.h $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x800c00 }
+  },
+/* cpnorm.w $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x800e00 }
+  },
+/* cphaddu.b $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x801000 }
+  },
+/* cphadd.b $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x801200 }
+  },
+/* cphadd.h $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x801400 }
+  },
+/* cphadd.w $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x801600 }
+  },
+/* cpccadd.b $crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), 0 } },
+    & ifmt_cpccadd_b_P0S_P1, { 0x801800 }
+  },
+/* cpbcast.b $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x801a00 }
+  },
+/* cpbcast.h $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x801c00 }
+  },
+/* cpbcast.w $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x801e00 }
+  },
+/* cpextuu.b $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x802000 }
+  },
+/* cpextu.b $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x802200 }
+  },
+/* cpextuu.h $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x802400 }
+  },
+/* cpextu.h $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x802600 }
+  },
+/* cpextlu.b $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x802800 }
+  },
+/* cpextl.b $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x802a00 }
+  },
+/* cpextlu.h $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x802c00 }
+  },
+/* cpextl.h $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x802e00 }
+  },
+/* cpcastub.h $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x803000 }
+  },
+/* cpcastb.h $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x803200 }
+  },
+/* cpcastub.w $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x803800 }
+  },
+/* cpcastb.w $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x803a00 }
+  },
+/* cpcastuh.w $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x803c00 }
+  },
+/* cpcasth.w $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x803e00 }
+  },
+/* cdcastuw $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x803400 }
+  },
+/* cdcastw $crop,$crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), 0 } },
+    & ifmt_cpmov_P0S_P1, { 0x803600 }
+  },
+/* cpmovfrcsar0 $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0x880000 }
+  },
+/* cpmovfrcsar1 $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0x881e00 }
+  },
+/* cpmovfrcc $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0x880200 }
+  },
+/* cpmovtocsar0 $crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), 0 } },
+    & ifmt_cpccadd_b_P0S_P1, { 0x882000 }
+  },
+/* cpmovtocsar1 $crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), 0 } },
+    & ifmt_cpccadd_b_P0S_P1, { 0x883e00 }
+  },
+/* cpmovtocc $crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), 0 } },
+    & ifmt_cpccadd_b_P0S_P1, { 0x882200 }
+  },
+/* cpcmpeqz.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900000 }
+  },
+/* cpcmpeq.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900010 }
+  },
+/* cpcmpeq.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900030 }
+  },
+/* cpcmpeq.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900050 }
+  },
+/* cpcmpne.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900090 }
+  },
+/* cpcmpne.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x9000b0 }
+  },
+/* cpcmpne.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x9000d0 }
+  },
+/* cpcmpgtu.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900100 }
+  },
+/* cpcmpgt.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900110 }
+  },
+/* cpcmpgt.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900130 }
+  },
+/* cpcmpgtu.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900140 }
+  },
+/* cpcmpgt.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900150 }
+  },
+/* cpcmpgeu.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900180 }
+  },
+/* cpcmpge.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x900190 }
+  },
+/* cpcmpge.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x9001b0 }
+  },
+/* cpcmpgeu.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x9001c0 }
+  },
+/* cpcmpge.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x9001d0 }
+  },
+/* cpadda0u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00000 }
+  },
+/* cpadda0.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00010 }
+  },
+/* cpaddua0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00020 }
+  },
+/* cpaddla0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00030 }
+  },
+/* cpaddaca0u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00040 }
+  },
+/* cpaddaca0.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00050 }
+  },
+/* cpaddacua0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00060 }
+  },
+/* cpaddacla0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00070 }
+  },
+/* cpsuba0u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00080 }
+  },
+/* cpsuba0.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00090 }
+  },
+/* cpsubua0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000a0 }
+  },
+/* cpsubla0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000b0 }
+  },
+/* cpsubaca0u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000c0 }
+  },
+/* cpsubaca0.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000d0 }
+  },
+/* cpsubacua0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000e0 }
+  },
+/* cpsubacla0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000f0 }
+  },
+/* cpabsa0u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00100 }
+  },
+/* cpabsa0.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00110 }
+  },
+/* cpabsua0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00120 }
+  },
+/* cpabsla0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00130 }
+  },
+/* cpsada0u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00140 }
+  },
+/* cpsada0.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00150 }
+  },
+/* cpsadua0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00160 }
+  },
+/* cpsadla0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00170 }
+  },
+/* cpseta0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc001b0 }
+  },
+/* cpsetua0.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc001c0 }
+  },
+/* cpsetla0.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc001d0 }
+  },
+/* cpmova0.b $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80200 }
+  },
+/* cpmovua0.h $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80400 }
+  },
+/* cpmovla0.h $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80600 }
+  },
+/* cpmovuua0.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80800 }
+  },
+/* cpmovula0.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80a00 }
+  },
+/* cpmovlua0.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80c00 }
+  },
+/* cpmovlla0.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80e00 }
+  },
+/* cppacka0u.b $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81000 }
+  },
+/* cppacka0.b $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81200 }
+  },
+/* cppackua0.h $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81400 }
+  },
+/* cppackla0.h $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81600 }
+  },
+/* cppackua0.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81800 }
+  },
+/* cppackla0.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81a00 }
+  },
+/* cpmovhua0.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81c00 }
+  },
+/* cpmovhla0.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81e00 }
+  },
+/* cpacsuma0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, 0 } },
+    & ifmt_c0nop_P0_P0S, { 0xc82000 }
+  },
+/* cpaccpa0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, 0 } },
+    & ifmt_c0nop_P0_P0S, { 0xc82200 }
+  },
+/* cpsrla0 $crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), 0 } },
+    & ifmt_cpccadd_b_P0S_P1, { 0xc83000 }
+  },
+/* cpsraa0 $crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), 0 } },
+    & ifmt_cpccadd_b_P0S_P1, { 0xc83200 }
+  },
+/* cpslla0 $crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), 0 } },
+    & ifmt_cpccadd_b_P0S_P1, { 0xc83400 }
+  },
+/* cpsrlia0 $imm5p23 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IMM5P23), 0 } },
+    & ifmt_cpsrlia0_P0S, { 0xc83800 }
+  },
+/* cpsraia0 $imm5p23 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IMM5P23), 0 } },
+    & ifmt_cpsrlia0_P0S, { 0xc83a00 }
+  },
+/* cpsllia0 $imm5p23 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IMM5P23), 0 } },
+    & ifmt_cpsrlia0_P0S, { 0xc83c00 }
+  },
+/* cpfsftba0s0u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf80000 }
+  },
+/* cpfsftba0s0.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf80010 }
+  },
+/* cpfsftbua0s0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf80020 }
+  },
+/* cpfsftbla0s0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf80030 }
+  },
+/* cpfaca0s0u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf80040 }
+  },
+/* cpfaca0s0.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf80050 }
+  },
+/* cpfacua0s0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf80060 }
+  },
+/* cpfacla0s0.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf80070 }
+  },
+/* cpfsftba0s1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf80080 }
+  },
+/* cpfsftba0s1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf80090 }
+  },
+/* cpfsftbua0s1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf800a0 }
+  },
+/* cpfsftbla0s1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf800b0 }
+  },
+/* cpfaca0s1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf800c0 }
+  },
+/* cpfaca0s1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf800d0 }
+  },
+/* cpfacua0s1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf800e0 }
+  },
+/* cpfacla0s1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf800f0 }
+  },
+/* cpfsftbi $crop,$crqp,$crpp,$imm3p5 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), ',', OP (IMM3P5), 0 } },
+    & ifmt_cpfsftbi_P0_P1, { 0x400000 }
+  },
+/* cpacmpeq.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x980010 }
+  },
+/* cpacmpeq.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x980030 }
+  },
+/* cpacmpeq.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x980050 }
+  },
+/* cpacmpne.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x980090 }
+  },
+/* cpacmpne.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x9800b0 }
+  },
+/* cpacmpne.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x9800d0 }
+  },
+/* cpacmpgtu.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x980100 }
+  },
+/* cpacmpgt.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x980110 }
+  },
+/* cpacmpgt.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x980130 }
+  },
+/* cpacmpgtu.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x980140 }
+  },
+/* cpacmpgt.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x980150 }
+  },
+/* cpacmpgeu.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x980180 }
+  },
+/* cpacmpge.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x980190 }
+  },
+/* cpacmpge.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x9801b0 }
+  },
+/* cpacmpgeu.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x9801c0 }
+  },
+/* cpacmpge.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x9801d0 }
+  },
+/* cpocmpeq.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1980010 }
+  },
+/* cpocmpeq.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1980030 }
+  },
+/* cpocmpeq.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1980050 }
+  },
+/* cpocmpne.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1980090 }
+  },
+/* cpocmpne.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x19800b0 }
+  },
+/* cpocmpne.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x19800d0 }
+  },
+/* cpocmpgtu.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1980100 }
+  },
+/* cpocmpgt.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1980110 }
+  },
+/* cpocmpgt.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1980130 }
+  },
+/* cpocmpgtu.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1980140 }
+  },
+/* cpocmpgt.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1980150 }
+  },
+/* cpocmpgeu.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1980180 }
+  },
+/* cpocmpge.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1980190 }
+  },
+/* cpocmpge.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x19801b0 }
+  },
+/* cpocmpgeu.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x19801c0 }
+  },
+/* cpocmpge.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x19801d0 }
+  },
+/* cdadd3 $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x3a00000 }
+  },
+/* cpsub3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x4a00000 }
+  },
+/* cpsub3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x5a00000 }
+  },
+/* cpsub3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x6a00000 }
+  },
+/* cdsub3 $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x7a00000 }
+  },
+/* cpsadd3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0xaa00000 }
+  },
+/* cpsadd3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0xba00000 }
+  },
+/* cpssub3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0xea00000 }
+  },
+/* cpssub3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0xfa00000 }
+  },
+/* cpextuaddu3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x10a00000 }
+  },
+/* cpextuadd3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x11a00000 }
+  },
+/* cpextladdu3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x12a00000 }
+  },
+/* cpextladd3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x13a00000 }
+  },
+/* cpextusubu3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x14a00000 }
+  },
+/* cpextusub3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x15a00000 }
+  },
+/* cpextlsubu3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x16a00000 }
+  },
+/* cpextlsub3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x17a00000 }
+  },
+/* cpaveu3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x18a00000 }
+  },
+/* cpave3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x19a00000 }
+  },
+/* cpave3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x1aa00000 }
+  },
+/* cpave3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x1ba00000 }
+  },
+/* cpaddsru3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x1ca00000 }
+  },
+/* cpaddsr3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x1da00000 }
+  },
+/* cpaddsr3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x1ea00000 }
+  },
+/* cpaddsr3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x1fa00000 }
+  },
+/* cpabsu3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x20a00000 }
+  },
+/* cpabs3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x21a00000 }
+  },
+/* cpabs3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x22a00000 }
+  },
+/* cpand3 $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x24a00000 }
+  },
+/* cpor3 $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x25a00000 }
+  },
+/* cpnor3 $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x26a00000 }
+  },
+/* cpxor3 $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x27a00000 }
+  },
+/* cppacku.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x2ca00000 }
+  },
+/* cppack.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x2da00000 }
+  },
+/* cppack.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x2fa00000 }
+  },
+/* cpmaxu3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x30a00000 }
+  },
+/* cpmax3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x31a00000 }
+  },
+/* cpmax3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x33a00000 }
+  },
+/* cpmaxu3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x34a00000 }
+  },
+/* cpmax3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x35a00000 }
+  },
+/* cpminu3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x38a00000 }
+  },
+/* cpmin3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x39a00000 }
+  },
+/* cpmin3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x3ba00000 }
+  },
+/* cpminu3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x3ca00000 }
+  },
+/* cpmin3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x3da00000 }
+  },
+/* cpsrl3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x40a00000 }
+  },
+/* cpssrl3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x41a00000 }
+  },
+/* cpsrl3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x42a00000 }
+  },
+/* cpssrl3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x43a00000 }
+  },
+/* cpsrl3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x44a00000 }
+  },
+/* cpssrl3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x45a00000 }
+  },
+/* cdsrl3 $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x46a00000 }
+  },
+/* cpsra3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x48a00000 }
+  },
+/* cpssra3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x49a00000 }
+  },
+/* cpsra3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x4aa00000 }
+  },
+/* cpssra3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x4ba00000 }
+  },
+/* cpsra3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x4ca00000 }
+  },
+/* cpssra3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x4da00000 }
+  },
+/* cdsra3 $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x4ea00000 }
+  },
+/* cpsll3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x50a00000 }
+  },
+/* cpssll3.b $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x51a00000 }
+  },
+/* cpsll3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x52a00000 }
+  },
+/* cpssll3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x53a00000 }
+  },
+/* cpsll3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x54a00000 }
+  },
+/* cpssll3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x55a00000 }
+  },
+/* cdsll3 $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x56a00000 }
+  },
+/* cpsla3.h $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x5aa00000 }
+  },
+/* cpsla3.w $crop,$crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpadd3_b_P0S_P1, { 0x5ca00000 }
+  },
+/* cpsrli3.b $crop,$crqp,$imm3p5 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM3P5), 0 } },
+    & ifmt_cpsrli3_b_P0_P1, { 0xa80000 }
+  },
+/* cpsrli3.h $crop,$crqp,$imm4p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM4P4), 0 } },
+    & ifmt_cpsrli3_h_P0_P1, { 0xa80200 }
+  },
+/* cpsrli3.w $crop,$crqp,$imm5p3 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM5P3), 0 } },
+    & ifmt_cpsrli3_w_P0_P1, { 0xa80400 }
+  },
+/* cdsrli3 $crop,$crqp,$imm6p2 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM6P2), 0 } },
+    & ifmt_cdsrli3_P0_P1, { 0xa80600 }
+  },
+/* cpsrai3.b $crop,$crqp,$imm3p5 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM3P5), 0 } },
+    & ifmt_cpsrli3_b_P0_P1, { 0xa80800 }
+  },
+/* cpsrai3.h $crop,$crqp,$imm4p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM4P4), 0 } },
+    & ifmt_cpsrli3_h_P0_P1, { 0xa80a00 }
+  },
+/* cpsrai3.w $crop,$crqp,$imm5p3 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM5P3), 0 } },
+    & ifmt_cpsrli3_w_P0_P1, { 0xa80c00 }
+  },
+/* cdsrai3 $crop,$crqp,$imm6p2 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM6P2), 0 } },
+    & ifmt_cdsrli3_P0_P1, { 0xa80e00 }
+  },
+/* cpslli3.b $crop,$crqp,$imm3p5 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM3P5), 0 } },
+    & ifmt_cpsrli3_b_P0_P1, { 0xa81000 }
+  },
+/* cpslli3.h $crop,$crqp,$imm4p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM4P4), 0 } },
+    & ifmt_cpsrli3_h_P0_P1, { 0xa81200 }
+  },
+/* cpslli3.w $crop,$crqp,$imm5p3 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM5P3), 0 } },
+    & ifmt_cpsrli3_w_P0_P1, { 0xa81400 }
+  },
+/* cdslli3 $crop,$crqp,$imm6p2 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM6P2), 0 } },
+    & ifmt_cdsrli3_P0_P1, { 0xa81600 }
+  },
+/* cpslai3.h $crop,$crqp,$imm4p4 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM4P4), 0 } },
+    & ifmt_cpsrli3_h_P0_P1, { 0xa81a00 }
+  },
+/* cpslai3.w $crop,$crqp,$imm5p3 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM5P3), 0 } },
+    & ifmt_cpsrli3_w_P0_P1, { 0xa81c00 }
+  },
+/* cpclipiu3.w $crop,$crqp,$imm5p3 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM5P3), 0 } },
+    & ifmt_cpsrli3_w_P0_P1, { 0xa82000 }
+  },
+/* cpclipi3.w $crop,$crqp,$imm5p3 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM5P3), 0 } },
+    & ifmt_cpsrli3_w_P0_P1, { 0xa82200 }
+  },
+/* cdclipiu3 $crop,$crqp,$imm6p2 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM6P2), 0 } },
+    & ifmt_cdsrli3_P0_P1, { 0xa82400 }
+  },
+/* cdclipi3 $crop,$crqp,$imm6p2 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), ',', OP (CRQP), ',', OP (IMM6P2), 0 } },
+    & ifmt_cdsrli3_P0_P1, { 0xa82600 }
+  },
+/* cpmovi.h $crqp,$simm16p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (SIMM16P0), 0 } },
+    & ifmt_cpmovi_h_P0_P1, { 0xb01000 }
+  },
+/* cpmoviu.w $crqp,$imm16p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (IMM16P0), 0 } },
+    & ifmt_cpmoviu_w_P0_P1, { 0xb80000 }
+  },
+/* cpmovi.w $crqp,$simm16p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (SIMM16P0), 0 } },
+    & ifmt_cpmovi_h_P0_P1, { 0xb81000 }
+  },
+/* cdmoviu $crqp,$imm16p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (IMM16P0), 0 } },
+    & ifmt_cpmoviu_w_P0_P1, { 0xb82000 }
+  },
+/* cdmovi $crqp,$simm16p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (SIMM16P0), 0 } },
+    & ifmt_cpmovi_h_P0_P1, { 0xb83000 }
+  },
+/* c1nop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, 0 } },
+    & ifmt_c0nop_P0_P0S, { 0x0 }
+  },
+/* cpadda1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00000 }
+  },
+/* cpadda1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00010 }
+  },
+/* cpaddua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00020 }
+  },
+/* cpaddla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00030 }
+  },
+/* cpaddaca1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00040 }
+  },
+/* cpaddaca1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00050 }
+  },
+/* cpaddacua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00060 }
+  },
+/* cpaddacla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00070 }
+  },
+/* cpsuba1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00080 }
+  },
+/* cpsuba1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00090 }
+  },
+/* cpsubua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000a0 }
+  },
+/* cpsubla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000b0 }
+  },
+/* cpsubaca1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000c0 }
+  },
+/* cpsubaca1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000d0 }
+  },
+/* cpsubacua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000e0 }
+  },
+/* cpsubacla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc000f0 }
+  },
+/* cpabsa1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00100 }
+  },
+/* cpabsa1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00110 }
+  },
+/* cpabsua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00120 }
+  },
+/* cpabsla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00130 }
+  },
+/* cpsada1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00140 }
+  },
+/* cpsada1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00150 }
+  },
+/* cpsadua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00160 }
+  },
+/* cpsadla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc00170 }
+  },
+/* cpseta1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc001b0 }
+  },
+/* cpsetua1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc001c0 }
+  },
+/* cpsetla1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xc001d0 }
+  },
+/* cpmova1.b $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80200 }
+  },
+/* cpmovua1.h $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80400 }
+  },
+/* cpmovla1.h $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80600 }
+  },
+/* cpmovuua1.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80800 }
+  },
+/* cpmovula1.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80a00 }
+  },
+/* cpmovlua1.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80c00 }
+  },
+/* cpmovlla1.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc80e00 }
+  },
+/* cppacka1u.b $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81000 }
+  },
+/* cppacka1.b $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81200 }
+  },
+/* cppackua1.h $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81400 }
+  },
+/* cppackla1.h $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81600 }
+  },
+/* cppackua1.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81800 }
+  },
+/* cppackla1.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81a00 }
+  },
+/* cpmovhua1.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81c00 }
+  },
+/* cpmovhla1.w $crop */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CROP), 0 } },
+    & ifmt_cpmovfrcsar0_P0S_P1, { 0xc81e00 }
+  },
+/* cpacsuma1 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, 0 } },
+    & ifmt_c0nop_P0_P0S, { 0xc82000 }
+  },
+/* cpaccpa1 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, 0 } },
+    & ifmt_c0nop_P0_P0S, { 0xc82200 }
+  },
+/* cpacswp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, 0 } },
+    & ifmt_c0nop_P0_P0S, { 0xc82400 }
+  },
+/* cpsrla1 $crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), 0 } },
+    & ifmt_cpccadd_b_P0S_P1, { 0xc83000 }
+  },
+/* cpsraa1 $crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), 0 } },
+    & ifmt_cpccadd_b_P0S_P1, { 0xc83200 }
+  },
+/* cpslla1 $crqp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), 0 } },
+    & ifmt_cpccadd_b_P0S_P1, { 0xc83400 }
+  },
+/* cpsrlia1 $imm5p23 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IMM5P23), 0 } },
+    & ifmt_cpsrlia0_P0S, { 0xc83800 }
+  },
+/* cpsraia1 $imm5p23 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IMM5P23), 0 } },
+    & ifmt_cpsrlia0_P0S, { 0xc83a00 }
+  },
+/* cpsllia1 $imm5p23 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (IMM5P23), 0 } },
+    & ifmt_cpsrlia0_P0S, { 0xc83c00 }
+  },
+/* cpfmulia1s0u.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80000 }
+  },
+/* cpfmulia1s0.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80010 }
+  },
+/* cpfmuliua1s0.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80020 }
+  },
+/* cpfmulila1s0.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80030 }
+  },
+/* cpfmadia1s0u.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80040 }
+  },
+/* cpfmadia1s0.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80050 }
+  },
+/* cpfmadiua1s0.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80060 }
+  },
+/* cpfmadila1s0.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80070 }
+  },
+/* cpfmulia1s1u.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80080 }
+  },
+/* cpfmulia1s1.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80090 }
+  },
+/* cpfmuliua1s1.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf800a0 }
+  },
+/* cpfmulila1s1.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf800b0 }
+  },
+/* cpfmadia1s1u.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf800c0 }
+  },
+/* cpfmadia1s1.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf800d0 }
+  },
+/* cpfmadiua1s1.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf800e0 }
+  },
+/* cpfmadila1s1.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf800f0 }
+  },
+/* cpamulia1u.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80100 }
+  },
+/* cpamulia1.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80110 }
+  },
+/* cpamuliua1.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80120 }
+  },
+/* cpamulila1.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80130 }
+  },
+/* cpamadia1u.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80140 }
+  },
+/* cpamadia1.b $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80150 }
+  },
+/* cpamadiua1.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80160 }
+  },
+/* cpamadila1.h $crqp,$crpp,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1s0u_b_P1, { 0xf80170 }
+  },
+/* cpfmulia1u.b $crqp,$crpp,$imm3p25,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (IMM3P25), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1u_b_P1, { 0xe00000 }
+  },
+/* cpfmulia1.b $crqp,$crpp,$imm3p25,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (IMM3P25), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1u_b_P1, { 0xe00080 }
+  },
+/* cpfmuliua1.h $crqp,$crpp,$imm3p25,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (IMM3P25), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1u_b_P1, { 0xe00100 }
+  },
+/* cpfmulila1.h $crqp,$crpp,$imm3p25,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (IMM3P25), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1u_b_P1, { 0xe00180 }
+  },
+/* cpfmadia1u.b $crqp,$crpp,$imm3p25,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (IMM3P25), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1u_b_P1, { 0xe80000 }
+  },
+/* cpfmadia1.b $crqp,$crpp,$imm3p25,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (IMM3P25), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1u_b_P1, { 0xe80080 }
+  },
+/* cpfmadiua1.h $crqp,$crpp,$imm3p25,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (IMM3P25), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1u_b_P1, { 0xe80100 }
+  },
+/* cpfmadila1.h $crqp,$crpp,$imm3p25,$simm8p0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), ',', OP (IMM3P25), ',', OP (SIMM8P0), 0 } },
+    & ifmt_cpfmulia1u_b_P1, { 0xe80180 }
+  },
+/* cpssqa1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00000 }
+  },
+/* cpssqa1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00010 }
+  },
+/* cpssda1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00040 }
+  },
+/* cpssda1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00050 }
+  },
+/* cpmula1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00080 }
+  },
+/* cpmula1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00090 }
+  },
+/* cpmulua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf000a0 }
+  },
+/* cpmulla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf000b0 }
+  },
+/* cpmulua1u.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf000c0 }
+  },
+/* cpmulla1u.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf000d0 }
+  },
+/* cpmulua1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf000e0 }
+  },
+/* cpmulla1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf000f0 }
+  },
+/* cpmada1u.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00100 }
+  },
+/* cpmada1.b $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00110 }
+  },
+/* cpmadua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00120 }
+  },
+/* cpmadla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00130 }
+  },
+/* cpmadua1u.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00140 }
+  },
+/* cpmadla1u.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00150 }
+  },
+/* cpmadua1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00160 }
+  },
+/* cpmadla1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf00170 }
+  },
+/* cpmsbua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf001a0 }
+  },
+/* cpmsbla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf001b0 }
+  },
+/* cpmsbua1u.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf001c0 }
+  },
+/* cpmsbla1u.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf001d0 }
+  },
+/* cpmsbua1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf001e0 }
+  },
+/* cpmsbla1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0xf001f0 }
+  },
+/* cpsmadua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1f00120 }
+  },
+/* cpsmadla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1f00130 }
+  },
+/* cpsmadua1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1f00160 }
+  },
+/* cpsmadla1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1f00170 }
+  },
+/* cpsmsbua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1f001a0 }
+  },
+/* cpsmsbla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1f001b0 }
+  },
+/* cpsmsbua1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1f001e0 }
+  },
+/* cpsmsbla1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x1f001f0 }
+  },
+/* cpmulslua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x2f000a0 }
+  },
+/* cpmulslla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x2f000b0 }
+  },
+/* cpmulslua1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x2f000e0 }
+  },
+/* cpmulslla1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x2f000f0 }
+  },
+/* cpsmadslua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x3f00120 }
+  },
+/* cpsmadslla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x3f00130 }
+  },
+/* cpsmadslua1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x3f00160 }
+  },
+/* cpsmadslla1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x3f00170 }
+  },
+/* cpsmsbslua1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x3f001a0 }
+  },
+/* cpsmsbslla1.h $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x3f001b0 }
+  },
+/* cpsmsbslua1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x3f001e0 }
+  },
+/* cpsmsbslla1.w $crqp,$crpp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (CRPP), 0 } },
+    & ifmt_cpcmpeqz_b_P0S_P1, { 0x3f001f0 }
+  },
 };
 
 #undef A
@@ -1891,67 +6151,67 @@ static const CGEN_IBASE mep_cgen_macro_insn_table[] =
 /* nop */
   {
     -1, "nop", "nop", 16,
-    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* sb $rnc,$zero($rma) */
   {
     -1, "sb16-0", "sb", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* sh $rns,$zero($rma) */
   {
     -1, "sh16-0", "sh", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* sw $rnl,$zero($rma) */
   {
     -1, "sw16-0", "sw", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lb $rnc,$zero($rma) */
   {
     -1, "lb16-0", "lb", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lh $rns,$zero($rma) */
   {
     -1, "lh16-0", "lh", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lw $rnl,$zero($rma) */
   {
     -1, "lw16-0", "lw", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lbu $rnuc,$zero($rma) */
   {
     -1, "lbu16-0", "lbu", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lhu $rnus,$zero($rma) */
   {
     -1, "lhu16-0", "lhu", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* swcp $crn,$zero($rma) */
   {
     -1, "swcp16-0", "swcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lwcp $crn,$zero($rma) */
   {
     -1, "lwcp16-0", "lwcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* smcp $crn64,$zero($rma) */
   {
     -1, "smcp16-0", "smcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lmcp $crn64,$zero($rma) */
   {
     -1, "lmcp16-0", "lmcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 };
 

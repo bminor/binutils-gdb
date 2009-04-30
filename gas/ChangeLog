@@ -1,3 +1,14 @@
+2009-04-29  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-mep.c (md_begin): Check coprocessor type.
+	(md_check_parallel64_scheduling): Use memset to initialize the buffer.
+	(md_check_parallel32_scheduling): Likewise.
+	(slot_ok): New.
+	(mep_check_ivc2_scheduling): New.
+	(mep_check_parallel_scheduling): Call it.
+	(mep_process_saved_insns): Add IVC2 slot support.
+	(md_assemble): Likewise.
+
 2009-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-elf.c (obj_elf_type): Add support for a

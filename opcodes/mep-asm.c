@@ -85,6 +85,32 @@ parse_csrn (CGEN_CPU_DESC cd, const char **strp,
 }
 
 /* begin-cop-ip-parse-handlers */
+static const char *
+parse_ivc2_cr (CGEN_CPU_DESC,
+	const char **,
+	CGEN_KEYWORD *,
+	long *) ATTRIBUTE_UNUSED;
+static const char *
+parse_ivc2_cr (CGEN_CPU_DESC cd,
+	const char **strp,
+	CGEN_KEYWORD *keyword_table  ATTRIBUTE_UNUSED,
+	long *field)
+{
+  return cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_cr_ivc2, field);
+}
+static const char *
+parse_ivc2_ccr (CGEN_CPU_DESC,
+	const char **,
+	CGEN_KEYWORD *,
+	long *) ATTRIBUTE_UNUSED;
+static const char *
+parse_ivc2_ccr (CGEN_CPU_DESC cd,
+	const char **strp,
+	CGEN_KEYWORD *keyword_table  ATTRIBUTE_UNUSED,
+	long *field)
+{
+  return cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, field);
+}
 /* end-cop-ip-parse-handlers */
 
 const char *
@@ -840,6 +866,24 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_CRNX64 :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_cr64, & fields->f_crnx);
       break;
+    case MEP_OPERAND_CROC :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_cr64, & fields->f_ivc2_5u7);
+      break;
+    case MEP_OPERAND_CROP :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_cr64, & fields->f_ivc2_5u23);
+      break;
+    case MEP_OPERAND_CRPC :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_cr64, & fields->f_ivc2_5u26);
+      break;
+    case MEP_OPERAND_CRPP :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_cr64, & fields->f_ivc2_5u18);
+      break;
+    case MEP_OPERAND_CRQC :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_cr64, & fields->f_ivc2_5u21);
+      break;
+    case MEP_OPERAND_CRQP :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_cr64, & fields->f_ivc2_5u13);
+      break;
     case MEP_OPERAND_CSRN :
       errmsg = parse_csrn (cd, strp, & mep_cgen_opval_h_csr, & fields->f_csrn);
       break;
@@ -860,6 +904,90 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
       break;
     case MEP_OPERAND_HI :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_csr, & junk);
+      break;
+    case MEP_OPERAND_IMM16P0 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM16P0, (unsigned long *) (& fields->f_ivc2_imm16p0));
+      break;
+    case MEP_OPERAND_IMM3P12 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM3P12, (unsigned long *) (& fields->f_ivc2_3u12));
+      break;
+    case MEP_OPERAND_IMM3P25 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM3P25, (unsigned long *) (& fields->f_ivc2_3u25));
+      break;
+    case MEP_OPERAND_IMM3P4 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM3P4, (unsigned long *) (& fields->f_ivc2_3u4));
+      break;
+    case MEP_OPERAND_IMM3P5 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM3P5, (unsigned long *) (& fields->f_ivc2_3u5));
+      break;
+    case MEP_OPERAND_IMM3P9 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM3P9, (unsigned long *) (& fields->f_ivc2_3u9));
+      break;
+    case MEP_OPERAND_IMM4P10 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM4P10, (unsigned long *) (& fields->f_ivc2_4u10));
+      break;
+    case MEP_OPERAND_IMM4P4 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM4P4, (unsigned long *) (& fields->f_ivc2_4u4));
+      break;
+    case MEP_OPERAND_IMM4P8 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM4P8, (unsigned long *) (& fields->f_ivc2_4u8));
+      break;
+    case MEP_OPERAND_IMM5P23 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM5P23, (unsigned long *) (& fields->f_ivc2_5u23));
+      break;
+    case MEP_OPERAND_IMM5P3 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM5P3, (unsigned long *) (& fields->f_ivc2_5u3));
+      break;
+    case MEP_OPERAND_IMM5P7 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM5P7, (unsigned long *) (& fields->f_ivc2_5u7));
+      break;
+    case MEP_OPERAND_IMM5P8 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM5P8, (unsigned long *) (& fields->f_ivc2_5u8));
+      break;
+    case MEP_OPERAND_IMM6P2 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM6P2, (unsigned long *) (& fields->f_ivc2_6u2));
+      break;
+    case MEP_OPERAND_IMM6P6 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM6P6, (unsigned long *) (& fields->f_ivc2_6u6));
+      break;
+    case MEP_OPERAND_IMM8P0 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM8P0, (unsigned long *) (& fields->f_ivc2_8u0));
+      break;
+    case MEP_OPERAND_IMM8P20 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM8P20, (unsigned long *) (& fields->f_ivc2_8u20));
+      break;
+    case MEP_OPERAND_IMM8P4 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM8P4, (unsigned long *) (& fields->f_ivc2_8u4));
+      break;
+    case MEP_OPERAND_IVC_X_0_2 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IVC_X_0_2, (unsigned long *) (& fields->f_ivc2_2u0));
+      break;
+    case MEP_OPERAND_IVC_X_0_3 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IVC_X_0_3, (unsigned long *) (& fields->f_ivc2_3u0));
+      break;
+    case MEP_OPERAND_IVC_X_0_4 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IVC_X_0_4, (unsigned long *) (& fields->f_ivc2_4u0));
+      break;
+    case MEP_OPERAND_IVC_X_0_5 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IVC_X_0_5, (unsigned long *) (& fields->f_ivc2_5u0));
+      break;
+    case MEP_OPERAND_IVC_X_6_1 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IVC_X_6_1, (unsigned long *) (& fields->f_ivc2_1u6));
+      break;
+    case MEP_OPERAND_IVC_X_6_2 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IVC_X_6_2, (unsigned long *) (& fields->f_ivc2_2u6));
+      break;
+    case MEP_OPERAND_IVC_X_6_3 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IVC_X_6_3, (unsigned long *) (& fields->f_ivc2_3u6));
+      break;
+    case MEP_OPERAND_IVC2CCRN :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr, & fields->f_ivc2_ccrn);
+      break;
+    case MEP_OPERAND_IVC2CRN :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_cr64, & fields->f_ivc2_crnx);
+      break;
+    case MEP_OPERAND_IVC2RM :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_gpr, & fields->f_ivc2_crm);
       break;
     case MEP_OPERAND_LO :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_csr, & junk);
@@ -972,11 +1100,20 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_SIMM16 :
       errmsg = parse_signed16 (cd, strp, MEP_OPERAND_SIMM16, (long *) (& fields->f_16s16));
       break;
+    case MEP_OPERAND_SIMM16P0 :
+      errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_SIMM16P0, (long *) (& fields->f_ivc2_simm16p0));
+      break;
     case MEP_OPERAND_SIMM6 :
       errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_SIMM6, (long *) (& fields->f_6s8));
       break;
     case MEP_OPERAND_SIMM8 :
       errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_SIMM8, (long *) (& fields->f_8s8));
+      break;
+    case MEP_OPERAND_SIMM8P0 :
+      errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_SIMM8P0, (long *) (& fields->f_ivc2_8s0));
+      break;
+    case MEP_OPERAND_SIMM8P4 :
+      errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_SIMM8P4, (long *) (& fields->f_ivc2_8s4));
       break;
     case MEP_OPERAND_SP :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_gpr, & junk);
