@@ -1,3 +1,10 @@
+2009-04-30  Doug Evans  <dje@google.com>
+
+	* inferiors.c (remove_process): Fix memory leak, free process.
+	* linux-low.c (linux_remove_process): New function.
+	(linux_kill): Call it instead of remove_process.
+	(linux_detach, linux_wait_1): Ditto.
+
 2009-04-19  Danny Backx  <dannybackx@users.sourceforge.net>
 
 	* configure.srv: Add x86 Windows CE target.

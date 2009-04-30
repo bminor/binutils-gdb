@@ -427,12 +427,17 @@ add_process (int pid, int attached)
   return process;
 }
 
+/* Remove a process from the common process list and free the memory
+   allocated for it.
+   The caller is responsible for freeing private data first.  */
+
 void
 remove_process (struct process_info *process)
 {
   clear_symbol_cache (&process->symbol_cache);
   free_all_breakpoints (process);
   remove_inferior (&all_processes, &process->head);
+  free (process);
 }
 
 struct process_info *

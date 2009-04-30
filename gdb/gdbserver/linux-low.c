@@ -182,6 +182,16 @@ linux_add_process (int pid, int attached)
   return proc;
 }
 
+/* Remove a process from the common process list,
+   also freeing all private data.  */
+
+static void
+linux_remove_process (struct process_info *process)
+{
+  free (process->private);
+  remove_process (process);
+}
+
 /* Handle a GNU/Linux extended wait response.  If we see a clone
    event, we need to add the new LWP to our list (and not report the
    trap to higher layers).  */
@@ -565,7 +575,7 @@ linux_kill (int pid)
     } while (lwpid > 0 && WIFSTOPPED (wstat));
 
   delete_lwp (lwp);
-  remove_process (process);
+  linux_remove_process (process);
   return 0;
 }
 
@@ -654,7 +664,7 @@ linux_detach (int pid)
 
   delete_all_breakpoints ();
   find_inferior (&all_threads, linux_detach_one_lwp, &pid);
-  remove_process (process);
+  linux_remove_process (process);
   return 0;
 }
 
@@ -1273,7 +1283,7 @@ retry:
 	  struct process_info *process = find_process_pid (pid);
 
 	  delete_lwp (lwp);
-	  remove_process (process);
+	  linux_remove_process (process);
 
 	  current_inferior = NULL;
 
