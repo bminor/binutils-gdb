@@ -807,6 +807,17 @@ extern void set_gdbarch_static_transform_name (struct gdbarch *gdbarch, gdbarch_
 extern int gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch);
 extern void set_gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch, int sofun_address_maybe_missing);
 
+/* Parse the instruction at ADDR storing in the record execution log
+   the registers REGCACHE and memory ranges that will be affected when
+   the instruction executes, along with their current values.
+   Return -1 if something goes wrong, 0 otherwise. */
+
+extern int gdbarch_process_record_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_process_record_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR addr);
+extern int gdbarch_process_record (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR addr);
+extern void set_gdbarch_process_record (struct gdbarch *gdbarch, gdbarch_process_record_ftype *process_record);
+
 /* Signal translation: translate inferior's signal (host's) number into
    GDB's representation. */
 

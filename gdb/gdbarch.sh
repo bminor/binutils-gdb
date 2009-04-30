@@ -709,6 +709,12 @@ F:char *:static_transform_name:char *name:name
 # Set if the address in N_SO or N_FUN stabs may be zero.
 v:int:sofun_address_maybe_missing:::0:0::0
 
+# Parse the instruction at ADDR storing in the record execution log
+# the registers REGCACHE and memory ranges that will be affected when
+# the instruction executes, along with their current values.
+# Return -1 if something goes wrong, 0 otherwise.
+M:int:process_record:struct regcache *regcache, CORE_ADDR addr:regcache, addr
+
 # Signal translation: translate inferior's signal (host's) number into
 # GDB's representation.
 m:enum target_signal:target_signal_from_host:int signo:signo::default_target_signal_from_host::0
