@@ -1,7 +1,7 @@
 -*- text -*-
 
-* The verilog binary file format is now supported as an output format for
-  objcopy.
+* The verilog memory hex dump file format is now supported as an output format
+  for objcopy.
 
 * Add --file-alignment, --heap, --image-base, --section-alignment,
   --stack and --subsystem command line options to objcopy, which will
