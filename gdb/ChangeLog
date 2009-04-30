@@ -1,6 +1,15 @@
 2009-04-30  Hui Zhu  <teawater@gmail.com>
             Michael Snyder  <msnyder@vmware.com>
 
+	Process record and replay target.
+
+	* Makefile.in (SFILES): Add record.c.
+	(COMMON_OBS): Add record.o.
+	* record.c, record.h: New file.
+
+2009-04-30  Hui Zhu  <teawater@gmail.com>
+            Michael Snyder  <msnyder@vmware.com>
+
 	* target.h (strata): New stratum "record_stratum".
 
 2009-04-30  Hui Zhu  <teawater@gmail.com>

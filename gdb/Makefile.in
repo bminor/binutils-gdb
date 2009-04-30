@@ -664,7 +664,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	valarith.c valops.c valprint.c value.c varobj.c vec.c \
 	wrapper.c \
 	xml-tdesc.c xml-support.c \
-	inferior.c gdb_usleep.c
+	inferior.c gdb_usleep.c \
+	record.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -816,7 +817,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	solib.o solib-null.o \
 	prologue-value.o memory-map.o xml-support.o \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
-	inferior.o osdata.o gdb_usleep.o
+	inferior.o osdata.o gdb_usleep.o record.o
 
 TSOBS = inflow.o
 
