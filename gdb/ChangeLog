@@ -1,6 +1,28 @@
 2009-04-30  Hui Zhu  <teawater@gmail.com>
             Michael Snyder  <msnyder@vmware.com>
 
+	I386 architecture process record and replay support.
+
+	* i386-tdep.c (PREFIX_REPZ, PREFIX_REPNZ, PREFIX_LOCK,
+	PREFIX_DATA, PREFIX_ADDR): New macros. Help decode the i386
+	instruction set.
+	(aflag, dflag, override, modrm, mod, reg, rm, ot,
+	i386_record_pc): New variables. Ditto.
+	(i386_record_modrm, i386_record_lea_modrm_addr,
+	i386_record_lea_modrm): New functions. Ditto.
+	(i386_process_record): New function. Parse the instruction in
+	address "addr" and record the values of registers and memory
+	that will be changed by this instruction.
+	(i386_gdbarch_init): Set "i386_process_record" to GDBARCH
+	"process_record" interface.
+	* i386-tdep.h (gdbarch_tdep): New function pointers
+	"i386_intx80_record" and "i386_sysenter_record" that point to
+	the function that can record "intx80" and "sysenter" execute
+	log.
+
+2009-04-30  Hui Zhu  <teawater@gmail.com>
+            Michael Snyder  <msnyder@vmware.com>
+
 	* infrun.c (use_displaced_stepping): Return false if process
 	record and replay target is used.
 	(proceed): Call function "record_not_record_set" if pocess

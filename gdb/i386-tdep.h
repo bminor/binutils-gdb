@@ -106,6 +106,12 @@ struct gdbarch_tdep
   /* ISA-specific data types.  */
   struct type *i386_mmx_type;
   struct type *i386_sse_type;
+
+  /* Process record/replay target.  */
+  /* Parse intx80 args.  */
+  int (*i386_intx80_record) (struct regcache *regcache);
+  /* Parse sysenter args.  */
+  int (*i386_sysenter_record) (struct regcache *regcache);
 };
 
 /* Floating-point registers.  */
