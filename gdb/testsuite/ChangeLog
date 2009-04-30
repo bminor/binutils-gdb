@@ -1,3 +1,8 @@
+2009-04-30  Doug Evans  <dje@google.com>
+
+	* gdb.threads/watchthreads2.exp: New testcase.
+	* gdb.threads/watchthreads2.c: New testcase.
+
 2009-04-29  Doug Evans  <dje@google.com>
 
 	* gdb.cp/mb-ctor.exp: Add multi-line source statement test.
