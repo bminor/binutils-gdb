@@ -1,6 +1,21 @@
 2009-04-30  Hui Zhu  <teawater@gmail.com>
             Michael Snyder  <msnyder@vmware.com>
 
+	I386 Linux process record and replay support.
+
+	* i386-linux-tdep.c (i386_linux_record_tdep): New variable.
+	This struct has the argument for the function
+	"record_linux_system_call".
+	(i386_linux_intx80_sysenter_record): New function. Parse the
+	system call instruction and call function
+	"record_linux_system_call" to record execute log.
+	(i386_linux_init_abi): Initialize "i386_linux_record_tdep".
+	Set "i386_linux_intx80_sysenter_record" to
+	"i386_intx80_record" and "i386_sysenter_record".
+
+2009-04-30  Hui Zhu  <teawater@gmail.com>
+            Michael Snyder  <msnyder@vmware.com>
+
 	I386 architecture process record and replay support.
 
 	* i386-tdep.c (PREFIX_REPZ, PREFIX_REPNZ, PREFIX_LOCK,
