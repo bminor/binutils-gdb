@@ -1,6 +1,17 @@
 2009-04-30  Hui Zhu  <teawater@gmail.com>
             Michael Snyder  <msnyder@vmware.com>
 
+	Linux process record and replay support.
+
+	* Makefile.in (ALLDEPFILES): Add linux-record.c.
+	(ALL_TARGET_OBS): Add linux-record.o.
+	* configure.tgt (x86_64-*-linux*): Add linux-record.o.
+	(i[34567]86-*-linux*): Add linux-record.o.
+	* linux-record.c, linux-record.h: New file.
+
+2009-04-30  Hui Zhu  <teawater@gmail.com>
+            Michael Snyder  <msnyder@vmware.com>
+
 	Process record and replay target.
 
 	* Makefile.in (SFILES): Add record.c.
