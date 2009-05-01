@@ -2597,6 +2597,10 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigtramp_p = NULL;
 
   tdep->jb_pc_offset = 36;
+
+  /* DJGPP does not support the SSE registers.  */
+  tdep->num_xmm_regs = 0;
+  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
 }
 
 

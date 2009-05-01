@@ -1,3 +1,8 @@
+2009-05-01  Eli Zaretskii  <eliz@gnu.org>
+
+	* i386-tdep.c (i386_go32_init_abi): Override the number of
+	registers due to non-support of SSE.
+
 2009-04-30  Anthony Green  <green@moxielogic.com>
 
 	* configure.tgt: Link the moxie simulator in with gdb.
@@ -6,7 +11,7 @@
 
 	* elfread.c (elf_symtab_read): Don't assume .data and .rodata
 	are present.
-	
+
 2009-04-30  Hui Zhu  <teawater@gmail.com>
             Michael Snyder  <msnyder@vmware.com>
 
