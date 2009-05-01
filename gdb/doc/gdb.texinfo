@@ -134,7 +134,7 @@ software in general.  We will miss him.
 * Running::                     Running programs under @value{GDBN}
 * Stopping::                    Stopping and continuing
 * Reverse Execution::           Running programs backward
-* Process record and replay::   Recording inferior's execution and replaying it
+* Process Record and Replay::   Recording inferior's execution and replaying it
 * Stack::                       Examining the stack
 * Source::                      Examining source files
 * Data::                        Examining data
@@ -5003,97 +5003,119 @@ This is the default.
 @end table
 
 
-@node Process record and replay
-@chapter Recording inferior's execution and replaying it
+@node Process Record and Replay
+@chapter Recording Inferior's Execution and Replaying It
 @cindex process record and replay
 @cindex recording inferior's execution and replaying it
 
-In a architecture environment that supports process record and replay,
-process record and replay target can record a log of the process execution,
-and replay it with both forward and reverse execute commands.
+In an architecture environment that supports process recording and
+replay, a special @dfn{process record and replay} target can record a
+log of the process execution, and replay it later with both forward
+and reverse execution commands.
 
-When this target is in use, if the execution log includes the record for
-the next instruction, @value{GDBN} will debug in replay mode.  So inferior
-will not really execute and all the execution events are taken from the
-execution log.  Just the values of registers (include pc register) and
-memory of the inferior will be changed.
+@cindex replay mode
+When this target is in use, if the execution log includes the record
+for the next instruction, @value{GDBN} will debug in @dfn{replay
+mode}.  In the replay mode, the inferior does not really execute code
+instructions.  Instead, all the events that normally happen during
+code execution are taken from the execution log.  While code is not
+really executed in replay mode, the values of registers (including the
+program counter register) and the memory of the inferior are still
+changed as they normally would.
 
-Otherwise, @value{GDBN} will debug in record mode.  So inferior will
-execute normally and @value{GDBN} will record the execution log.
+@cindex record mode
+If the record for the next instruction is not in the execution log,
+@value{GDBN} will debug in @dfn{record mode}.  In this mode, the
+inferior executes normally, and @value{GDBN} records the execution log
+for future replay.
 
-If you are debugging in a architecture environment that supports
-process record and replay, @value{GDBN} provides the following commands.
+For architecture environments that support process record and replay,
+@value{GDBN} provides the following commands:
 
 @table @code
 @kindex target record
 @kindex record
 @kindex rec
 @item target record
-This a standard command to start process record and replay target.
-Process record and replay target can only debug a process that already
-running.  Therefore you need to first start the process @code{run},
-and then start the recording @code{target record}.
+This command starts the process record and replay target.  The process
+record and replay target can only debug a process that is already
+running.  Therefore, you need first to start the process with the
+@kbd{run} or @kbd{start} commands, and then start the recording with
+the @kbd{target record} command.
 
-Both @code{record} and @code{rec} are the aliases of @code{target record}.
+Both @code{record} and @code{rec} are aliases of @code{target record}.
 
-Displaced stepping function will disable when process record and replay
-target is opened.  Because process record and replay target doesn't
-support displaced stepping function.
+@cindex displaced stepping, and process record and replay
+Displaced stepping (@pxref{Maintenance Commands,, displaced stepping})
+will be automatically disabled when process record and replay target
+is started.  That's because the process record and replay target
+doesn't support displaced stepping.
 
-If inferior in non-stop mode (non-stop) or in asynchronous mode
-(target-async), process record and replay target can't be open because
-it doesn't support these two modes.
+@cindex non-stop mode, and process record and replay
+@cindex asynchronous execution, and process record and replay
+If the inferior is in the non-stop mode (@pxref{Non-Stop Mode}) or in
+the asynchronous execution mode (@pxref{Background Execution}), the
+process record and replay target cannot be started because it doesn't
+support these two modes.
 
 @kindex record stop
 @kindex rec s
 @item record stop
-Stop process record and replay target at once.  When Process record and
-replay target stops, all the execution log will be deleted and the inferior
-will either be terminated, or remain in its final state.
+Stop the process record and replay target.  When process record and
+replay target stops, the entire execution log will be deleted and the
+inferior will either be terminated, or will remain in its final state.
 
-When you stop the process record and replay target in record mode (at the
-end of the execution log), the inferior will be stopped at the next
-instruction that would have been recorded.  In other words, if you record
-for a while and then stop recording, the inferior process will be left in
-the same state as if recording never happened.
+When you stop the process record and replay target in record mode (at
+the end of the execution log), the inferior will be stopped at the
+next instruction that would have been recorded.  In other words, if
+you record for a while and then stop recording, the inferior process
+will be left in the same state as if the recording never happened.
 
-On the other hand, if the process record and replay target is stopped while
-in replay mode (that is, not at the end of the execution log but at some
-earlier point), the inferior process will become ``live'' at that earlier state,
-and it will then be possible to continue debugging the process ``live'' from
-that state.
+On the other hand, if the process record and replay target is stopped
+while in replay mode (that is, not at the end of the execution log,
+but at some earlier point), the inferior process will become ``live''
+at that earlier state, and it will then be possible to continue the
+usual ``live'' debugging of the process from that state.
 
-When the inferior process exits, or @value{GDBN} detaches from it, process
-record and replay target will automatically stop itself.
+When the inferior process exits, or @value{GDBN} detaches from it,
+process record and replay target will automatically stop itself.
 
 @kindex set record insn-number-max
 @item set record insn-number-max @var{limit}
 Set the limit of instructions to be recorded.  Default value is 200000.
 
-In this case, if record instructions number is bigger than @var{limit},
-@value{GDBN} will auto delete the earliest recorded instruction execute
-log.
+If @var{limit} is a positive number, then @value{GDBN} will start
+deleting instructions from the log once the number of the record
+instructions becomes greater than @var{limit}.  For every new recorded
+instruction, @value{GDBN} will delete the earliest recorded
+instruction to keep the number of recorded instructions at the limit.
+(Since deleting recorded instructions loses information, @value{GDBN}
+lets you control what happens when the limit is reached, by means of
+the @code{stop-at-limit} option, described below.)
 
-If set to 0, @value{GDBN} will not delete the earliest recorded instruction
-execute log.  Record instructions number limit function will disable.
+If @var{limit} is zero, @value{GDBN} will never delete recorded
+instructions from the execution log.  The number of recorded
+instructions is unlimited in this case.
 
 @kindex show record insn-number-max
 @item show record insn-number-max
-Show the value of recorded instructions limit.
+Show the limit of instructions to be recorded.
 
 @kindex set record stop-at-limit
-@item set record stop-at-limit on
-Set the behavior when record instructions limit is reached.
-This is the default mode.  Meaning that @value{GDBN} will stop ask user
-want close @code{record stop-at-limit} or stop inferior.
+@item set record stop-at-limit
+Control the behavior when the number of recorded instructions reaches
+the limit.  If ON (the default), @value{GDBN} will stop when the limit
+is reached for the first time and ask you whether you want to stop the
+inferior or continue running it and recording the execution log.  If
+you decide to continue recording, each new recorded instruction will
+cause the oldest one to be deleted.
 
-@item set record stop-at-limit off
-This mean that @value{GDBN} will auto delete the oldest record to make
-room for each new one.
+If this option is OFF, @value{GDBN} will automatically delete the
+oldest record to make room for each new one, without asking.
 
 @kindex show record stop-at-limit
 @item show record stop-at-limit
-Show the value of record stop-at-limit.
+Show the current setting of @code{stop-at-limit}.
 
 @kindex info record insn-number
 @item info record insn-number
@@ -5102,9 +5124,9 @@ Show the current number of recorded instructions.
 @kindex record delete
 @kindex rec del
 @item record delete
-When record target running in replay mode (``in the past''), delete the
+When record target runs in replay mode (``in the past''), delete the
 subsequent execution log and begin to record a new execution log starting
-from the current address.  It means you will abandon the previously
+from the current address.  This means you will abandon the previously
 recorded ``future'' and begin recording a new ``future''.
 @end table
 

@@ -1,7 +1,13 @@
+2009-05-01  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Process Record and Replay): Improve and clarify.
+	Add index entries.
+
 2009-04-30  Hui Zhu  <teawater@gmail.com>
             Michael Snyder  <msnyder@vmware.com>
 
-	* gdb.texinfo: Add documentation for process record and replay.
+	* gdb.texinfo: (Process Record and Replay): Add documentation for
+	process record and replay.
 
 2009-04-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
