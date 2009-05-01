@@ -1,3 +1,10 @@
+2009-04-30  Anthony Green  <green@moxielogic.com>
+
+	* MAINTAINERS: Add myself for the moxie port.
+	* moxie: New directory.
+	* configure.ac: Add entry for moxie.
+	* configure: Regenerate.
+
 2009-04-27  Tristan Gingold  <gingold@adacore.com>
 
 	* avr: New directory.
