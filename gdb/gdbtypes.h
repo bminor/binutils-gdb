@@ -1165,7 +1165,8 @@ extern struct type *make_pointer_type (struct type *, struct type **);
 
 extern struct type *lookup_pointer_type (struct type *);
 
-extern struct type *make_function_type (struct type *, struct type **);
+extern struct type *make_function_type (struct type *, struct type **,
+					struct objfile *);
 
 extern struct type *lookup_function_type (struct type *);
 

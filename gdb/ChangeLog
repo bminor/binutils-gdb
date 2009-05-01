@@ -1,3 +1,15 @@
+2009-05-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Make specifiable the make_function_type type memory ownership.
+	* gdbtypes.c (make_function_type): New parameter `objfile', use it
+	explicitely instead of TYPE-initialized removed local variable
+	`objfile'.  Describe `objfile' it in the function comment.
+	(lookup_function_type): Update make_function_type callers.
+	* gdbtypes.h (make_function_type): Update the prototype.
+	* jv-lang.c (java_link_class_type): Update make_function_type callers.
+	* dwarf2read.c (read_subroutine_type): Likewise.
+	* stabsread.c (read_type): Likewise.
+
 2009-05-01  Eli Zaretskii  <eliz@gnu.org>
 
 	* go32-nat.c (go32_pid_to_str): Call normal_pid_to_str instead of

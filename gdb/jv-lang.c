@@ -557,7 +557,8 @@ java_link_class_type (struct type *type, struct value *clas)
 	}
       fn_fields[k].physname = "";
       fn_fields[k].is_stub = 1;
-      fn_fields[k].type = make_function_type (java_void_type, NULL);	/* FIXME */
+      /* FIXME */
+      fn_fields[k].type = make_function_type (java_void_type, NULL, objfile);
       TYPE_CODE (fn_fields[k].type) = TYPE_CODE_METHOD;
     }
 
