@@ -1,3 +1,8 @@
+2009-05-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dictionary.c (dict_hashed_vector, dict_hashed_expandable_vector)
+	(dict_linear_vector, dict_linear_expandable_vector): Fix a comment typo.
+
 2009-05-01  Doug Evans  <dje@google.com>
 
 	* linux-thread-db.c (thread_db_pid_to_str): Delete unused assignment

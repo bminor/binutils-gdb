@@ -287,7 +287,7 @@ static const struct dict_vector dict_hashed_vector =
     DICT_HASHED,			/* type */
     free_obstack,			/* free */
     add_symbol_nonexpandable,		/* add_symbol */
-    iterator_first_hashed,		/* iteractor_first */
+    iterator_first_hashed,		/* iterator_first */
     iterator_next_hashed,		/* iterator_next */
     iter_name_first_hashed,		/* iter_name_first */
     iter_name_next_hashed,		/* iter_name_next */
@@ -299,7 +299,7 @@ static const struct dict_vector dict_hashed_expandable_vector =
     DICT_HASHED_EXPANDABLE,		/* type */
     free_hashed_expandable,		/* free */
     add_symbol_hashed_expandable,	/* add_symbol */
-    iterator_first_hashed,		/* iteractor_first */
+    iterator_first_hashed,		/* iterator_first */
     iterator_next_hashed,		/* iterator_next */
     iter_name_first_hashed,		/* iter_name_first */
     iter_name_next_hashed,		/* iter_name_next */
@@ -311,7 +311,7 @@ static const struct dict_vector dict_linear_vector =
     DICT_LINEAR,			/* type */
     free_obstack,			/* free */
     add_symbol_nonexpandable,		/* add_symbol */
-    iterator_first_linear,		/* iteractor_first */
+    iterator_first_linear,		/* iterator_first */
     iterator_next_linear,		/* iterator_next */
     iter_name_first_linear,		/* iter_name_first */
     iter_name_next_linear,		/* iter_name_next */
@@ -323,7 +323,7 @@ static const struct dict_vector dict_linear_expandable_vector =
     DICT_LINEAR_EXPANDABLE,		/* type */
     free_linear_expandable,		/* free */
     add_symbol_linear_expandable,	/* add_symbol */
-    iterator_first_linear,		/* iteractor_first */
+    iterator_first_linear,		/* iterator_first */
     iterator_next_linear,		/* iterator_next */
     iter_name_first_linear,		/* iter_name_first */
     iter_name_next_linear,		/* iter_name_next */
