@@ -1,6 +1,6 @@
 2009-04-30  Nick Clifton  <nickc@redhat.com>
 
-	* (enum STT): Add STT_GNU_IFUNC.
+	* elfcpp.h (enum STT): Add STT_GNU_IFUNC.
 
 2009-03-20  Mikolaj Zalewski  <mikolajz@google.com>
 
