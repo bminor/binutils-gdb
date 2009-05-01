@@ -1,3 +1,7 @@
+2009-05-01  Eli Zaretskii  <eliz@gnu.org>
+
+	* go32-nat.c: Add comments about dirty secrets of DJGPP debugging.
+
 2009-05-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Make specifiable the make_function_type type memory ownership.

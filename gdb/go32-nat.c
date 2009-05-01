@@ -18,6 +18,70 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* To whomever it may concern, here's a general description of how
+   debugging in DJGPP works, and the special quirks GDB does to
+   support that.
+
+   When the DJGPP port of GDB is debugging a DJGPP program natively,
+   there aren't 2 separate processes, the debuggee and GDB itself, as
+   on other systems.  (This is DOS, where there can only be one active
+   process at any given time, remember?)  Instead, GDB and the
+   debuggee live in the same process.  So when GDB calls
+   go32_create_inferior below, and that function calls edi_init from
+   the DJGPP debug support library libdbg.a, we load the debuggee's
+   executable file into GDB's address space, set it up for execution
+   as the stub loader (a short real-mode program prepended to each
+   DJGPP executable) normally would, and do a lot of preparations for
+   swapping between GDB's and debuggee's internal state, primarily wrt
+   the exception handlers.  This swapping happens every time we resume
+   the debuggee or switch back to GDB's code, and it includes:
+
+    . swapping all the segment registers
+    . swapping the PSP (the Program Segment Prefix)
+    . swapping the signal handlers
+    . swapping the exception handlers
+    . swapping the FPU status
+    . swapping the 3 standard file handles (more about this below)
+
+   Then running the debuggee simply means longjmp into it where its PC
+   is and let it run until it stops for some reason.  When it stops,
+   GDB catches the exception that stopped it and longjmp's back into
+   its own code.  All the possible exit points of the debuggee are
+   watched; for example, the normal exit point is recognized because a
+   DOS program issues a special system call to exit.  If one of those
+   exit points is hit, we mourn the inferior and clean up after it.
+   Cleaning up is very important, even if the process exits normally,
+   because otherwise we might leave behind traces of previous
+   execution, and in several cases GDB itself might be left hosed,
+   because all the exception handlers were not restored.
+
+   Swapping of the standard handles (in redir_to_child and
+   redir_to_debugger) is needed because, since both GDB and the
+   debuggee live in the same process, as far as the OS is concerned,
+   the share the same file table.  This means that the standard
+   handles 0, 1, and 2 point to the same file table entries, and thus
+   are connected to the same devices.  Therefore, if the debugger
+   redirects its standard output, the standard output of the debuggee
+   is also automagically redirected to the same file/device!
+   Similarly, if the debuggee redirects its stdout to a file, you
+   won't be able to see debugger's output (it will go to the same file
+   where the debuggee has its output); and if the debuggee closes its
+   standard input, you will lose the ability to talk to debugger!
+
+   For this reason, every time the debuggee is about to be resumed, we
+   call redir_to_child, which redirects the standard handles to where
+   the debuggee expects them to be.  When the debuggee stops and GDB
+   regains control, we call redir_to_debugger, which redirects those 3
+   handles back to where GDB expects.
+
+   Note that only the first 3 handles are swapped, so if the debuggee
+   redirects or closes any other handles, GDB will not notice.  In
+   particular, the exit code of a DJGPP program forcibly closes all
+   file handles beyond the first 3 ones, so when the debuggee exits,
+   GDB currently loses its stdaux and stdprn streams.  Fortunately,
+   GDB does not use those as of this writing, and will never need
+   to.  */
+
 #include <fcntl.h>
 
 #include "defs.h"
