@@ -247,6 +247,9 @@ set armeabitests {
      {"Thumb-2 Interworked branch" "-T arm.ld" "" {thumb2-b-interwork.s}
       {{objdump -dr thumb2-b-interwork.d}}
       "thumb2-b-interwork"}
+    {"BL/BLX interworking" "-T arm.ld" "" {thumb2-bl-blx-interwork.s}
+     {{objdump -dr thumb2-bl-blx-interwork.d}}
+     "thumb2-bl-blx-interwork"}
     {"ARMv4 interworking" "-static -T arm.ld --fix-v4bx-interworking" "--fix-v4bx -meabi=4" {armv4-bx.s}
      {{objdump -d armv4-bx.d}}
      "armv4-bx"}

@@ -1,3 +1,9 @@
+2009-05-01  Julian Brown  <julian@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armeabitests): Add thumb2-bl-blx-interwork test.
+	* ld-arm/thumb2-bl-blx-interwork.s: New.
+	* ld-arm/thumb2-bl-blx-interwork.d: New.  
+
 2009-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* ld-ifunc: New directory.
