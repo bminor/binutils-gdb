@@ -1035,7 +1035,6 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
       thread_t tid;
 
       tid = thread_info->private->tid;
-      thread_info = find_thread_pid (ptid);
       snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld)",
 		tid, GET_LWP (ptid));
 

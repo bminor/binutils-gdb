@@ -1,3 +1,8 @@
+2009-05-01  Doug Evans  <dje@google.com>
+
+	* linux-thread-db.c (thread_db_pid_to_str): Delete unused assignment
+	to thread_info.
+
 2009-05-01  Eli Zaretskii  <eliz@gnu.org>
 
 	* record.c (_initialize_record): Reformat and clarify doc strings
