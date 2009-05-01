@@ -1,3 +1,7 @@
+2009-05-01  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* emulparams/vxworks.sh (TEXT_START_ADDR): Override.
+
 2009-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Mention support for IFUNC symbols.

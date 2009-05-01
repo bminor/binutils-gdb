@@ -40,6 +40,7 @@ OTHER_READWRITE_SECTIONS=".tls_vars ${RELOCATING-0} : {${RELOCATING+
   __wrs_rtp_tls_vars_size = SIZEOF(.tls_vars);
   ___wrs_rtp_tls_vars_size = SIZEOF(.tls_vars);}"
 
+TEXT_START_ADDR="(DEFINED (__wrs_rtp_base) ? __wrs_rtp_base : 0)"
 ETEXT_NAME=etext_unrelocated
 OTHER_END_SYMBOLS="PROVIDE (${SYMPREFIX}_ehdr = ${TEXT_START_ADDR});"
 DATA_END_SYMBOLS=".edata : { PROVIDE (${SYMPREFIX}_edata = .); }"
