@@ -1,5 +1,9 @@
 2009-05-01  Eli Zaretskii  <eliz@gnu.org>
 
+	* go32-nat.c (go32_pid_to_str): Call normal_pid_to_str instead of
+	printing a bogus "Thread <main>".
+	(go32_thread_alive): Don't return 1 for null_ptid.
+
 	* i386-tdep.c (i386_go32_init_abi): Override the number of
 	registers due to non-support of SSE.
 

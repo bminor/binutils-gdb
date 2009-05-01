@@ -870,15 +870,13 @@ go32_terminal_ours (void)
 static int
 go32_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
-  return 1;
+  return !ptid_equal (inferior_ptid, null_ptid);
 }
 
 static char *
 go32_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
-  static char buf[64];
-  xsnprintf (buf, sizeof buf, "Thread <main>");
-  return buf;
+  return normal_pid_to_str (ptid);
 }
 
 static void
