@@ -1,3 +1,7 @@
+2009-04-30  Anthony Green  <green@moxielogic.com>
+
+	* configure.tgt: Link the moxie simulator in with gdb.
+
 2009-04-30  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* elfread.c (elf_symtab_read): Don't assume .data and .rodata

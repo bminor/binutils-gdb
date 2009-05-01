@@ -116,8 +116,7 @@ frv-*-*)
 
 moxie-*-elf)
 	gdb_target_obs="moxie-tdep.o"
-	# Add this once the moxie sim has been committed.
-	# gdb_sim=../sim/moxie/libsim.a
+	gdb_sim=../sim/moxie/libsim.a
 	;;
 
 h8300-*-*)
