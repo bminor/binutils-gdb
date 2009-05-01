@@ -1,3 +1,10 @@
+2009-05-01  Nathan Sidwell  <nathan@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gas/arm/attr-mcpu.d: Add -mfpu=neon.
+	* gas/arm/mapmisc.d: Correct expected output for .double and
+	.dcb.d.
+
 2009-04-20  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/equ.s: Adjust.

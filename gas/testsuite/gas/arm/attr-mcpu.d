@@ -1,6 +1,6 @@
 # name: EABI attributes from command line
 # source: blank.s
-# as: -mcpu=cortex-a8
+# as: -mcpu=cortex-a8 -mfpu=neon
 # readelf: -A
 # This test is only valid on EABI based ports.
 # target: *-*-*eabi

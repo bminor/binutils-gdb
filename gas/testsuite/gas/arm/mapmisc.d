@@ -1,4 +1,4 @@
-#as: -EL -I$srcdir/$subdir
+#as: -EL -I$srcdir/$subdir -mfpu=neon
 #objdump: --syms --special-syms -d
 #name: ARM Mapping Symbols for miscellaneous directives
 # This test is only valid on EABI based ports.
@@ -74,11 +74,11 @@ Disassembly of section .text:
   50:	e1a00000 	nop			\(mov r0,r0\)
   54:	40200000 	.word	0x40200000
   58:	e1a00000 	nop			\(mov r0,r0\)
-  5c:	400c0000 	.word	0x400c0000
-  60:	00000000 	.word	0x00000000
+  5c:	00000000 	.word	0x00000000
+  60:	400c0000 	.word	0x400c0000
   64:	e1a00000 	nop			\(mov r0,r0\)
-  68:	40120000 	.word	0x40120000
-  6c:	00000000 	.word	0x00000000
+  68:	00000000 	.word	0x00000000
+  6c:	40120000 	.word	0x40120000
   70:	e1a00000 	nop			\(mov r0,r0\)
   74:	00000004 	.word	0x00000004
   78:	00000004 	.word	0x00000004

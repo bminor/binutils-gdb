@@ -20274,7 +20274,8 @@ md_begin (void)
     }
   else if (!mfpu_opt)
     {
-#if !(defined (TE_LINUX) || defined (TE_NetBSD) || defined (TE_VXWORKS))
+#if !(defined (EABI_DEFAULT) || defined (TE_LINUX) \
+	|| defined (TE_NetBSD) || defined (TE_VXWORKS))
       /* Some environments specify a default FPU.  If they don't, infer it
 	 from the processor.  */
       if (mcpu_fpu_opt)

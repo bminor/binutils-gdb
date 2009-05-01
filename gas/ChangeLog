@@ -1,3 +1,10 @@
+2009-05-01  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-armlinux-eabi.h (FPU_DEFAULT): Default to plain VFP.
+	* config/tc-armeabi.h (FPU_DEFAULT): Likewise.
+	* config/tc-arm.c (md_begin): If FPU_DEFAULT is set, don't infer
+	the default FPU from the processor.
+
 2009-05-01  Julian Brown  <julian@codesourcery.com>
 
 	* config/tc-arm.c (do_t_blx): Always use BFD_RELOC_THUMB_PCREL_BLX.
