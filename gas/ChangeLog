@@ -1,3 +1,10 @@
+2009-05-01  Julian Brown  <julian@codesourcery.com>
+
+	* config/tc-arm.c (do_t_blx): Always use BFD_RELOC_THUMB_PCREL_BLX.
+	(md_pcrel_from_section): Align address for BLX.
+	(tc_gen_reloc): Change BFD_RELOC_THUMB_PCREL_BLX relocations to
+	BFD_RELOC_THUMB_PCREL_BRANCH23 for EABI v4+.
+
 2009-04-29  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-mep.c (md_begin): Check coprocessor type.

@@ -9002,12 +9002,7 @@ do_t_blx (void)
     {
       /* No register.  This must be BLX(1).  */
       inst.instruction = 0xf000e800;
-#ifdef OBJ_ELF
-      if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4)
-	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH23;
-      else
-#endif
-	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BLX;
+      inst.reloc.type = BFD_RELOC_THUMB_PCREL_BLX;
       inst.reloc.pc_rel = 1;
     }
 }
@@ -18213,8 +18208,12 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     case BFD_RELOC_THUMB_PCREL_BRANCH20:
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
     case BFD_RELOC_THUMB_PCREL_BRANCH25:
-    case BFD_RELOC_THUMB_PCREL_BLX:
       return base + 4;
+
+      /* BLX is like branches above, but forces the low two bits of PC to
+	 zero.  */
+    case BFD_RELOC_THUMB_PCREL_BLX:
+      return (base + 4) & ~3;
 
       /* ARM mode branches are offset by +8.  However, the Windows CE
 	 loader expects the relocation not to take this into account.  */
@@ -19737,13 +19736,21 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_THUMB_PCREL_BRANCH20:
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
     case BFD_RELOC_THUMB_PCREL_BRANCH25:
-    case BFD_RELOC_THUMB_PCREL_BLX:
     case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_VTABLE_INHERIT:
 #ifdef TE_PE
     case BFD_RELOC_32_SECREL:
 #endif
       code = fixp->fx_r_type;
+      break;
+
+    case BFD_RELOC_THUMB_PCREL_BLX:
+#ifdef OBJ_ELF
+      if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4)
+	code = BFD_RELOC_THUMB_PCREL_BRANCH23;
+      else
+#endif
+	code = BFD_RELOC_THUMB_PCREL_BLX;
       break;
 
     case BFD_RELOC_ARM_LITERAL:
