@@ -1259,28 +1259,21 @@ _initialize_record (void)
 
   /* Record instructions number limit command.  */
   add_setshow_boolean_cmd ("stop-at-limit", no_class,
-			    &record_stop_at_limit,
-			    _("Set whether record/replay stop when "
-			      "record/replay buffer becomes full."),
-			    _("Show whether record/replay stop when "
-			      "record/replay buffer becomes full."),
-	                    _("Enable is default value.\n"
-	                      "When enabled, if the record/replay buffer "
-			      "becomes full,\n"
-                              "ask user what to do.\n"
-                              "When disabled, if the record/replay buffer "
-			      "becomes full,\n"
-                              "delete it and start new recording."),
+			    &record_stop_at_limit, _("\
+Set whether record/replay stops when record/replay buffer becomes full."), _("\
+Show whether record/replay stops when record/replay buffer becomes full."), _("\
+Default is ON.\n\
+When ON, if the record/replay buffer becomes full, ask user what to do.\n\
+When OFF, if the record/replay buffer becomes full,\n\
+delete the oldest recorded instruction to make room for each new one."),
 			    NULL, NULL,
                             &set_record_cmdlist, &show_record_cmdlist);
   add_setshow_zinteger_cmd ("insn-number-max", no_class,
 			    &record_insn_max_num,
 			    _("Set record/replay buffer limit."),
-			    _("Show record/replay buffer limit."),
-			    _("Set the maximum number of instructions to be "
-                              "stored in the\n"
-                              "record/replay buffer.  "
-                              "Zero means unlimited (default 200000)."),
+			    _("Show record/replay buffer limit."), _("\
+Set the maximum number of instructions to be stored in the\n\
+record/replay buffer.  Zero means unlimited.  Default is 200000."),
 			    set_record_insn_max_num,
 			    NULL, &set_record_cmdlist, &show_record_cmdlist);
   add_cmd ("insn-number", class_obscure, show_record_insn_number,

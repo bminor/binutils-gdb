@@ -1,5 +1,8 @@
 2009-05-01  Eli Zaretskii  <eliz@gnu.org>
 
+	* record.c (_initialize_record): Reformat and clarify doc strings
+	for stop-at-limit and insn-number-max.
+
 	* go32-nat.c: Add comments about dirty secrets of DJGPP debugging.
 
 2009-05-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
