@@ -243,6 +243,7 @@ find_function_addr (struct value *function, struct type **retval_type)
 	{
 	  /* Handle function descriptors lacking debug info.  */
 	  int found_descriptor = 0;
+	  funaddr = 0;	/* pacify "gcc -Werror" */
 	  if (VALUE_LVAL (function) == lval_memory)
 	    {
 	      CORE_ADDR nfunaddr;

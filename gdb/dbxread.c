@@ -1684,6 +1684,7 @@ pos %d"),
 	    continue;			/* Not a debugging symbol.   */
 
  	  sym_len = 0;
+	  sym_name = NULL;	/* pacify "gcc -Werror" */
  	  if (psymtab_language == language_cplus)
  	    {
  	      char *new_name, *name = alloca (p - namestring + 1);
