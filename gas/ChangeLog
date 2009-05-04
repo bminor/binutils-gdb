@@ -1,3 +1,7 @@
+2009-05-04  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-alpha.c: Also declare alpha_prologue_label for OBJ_EVAX.
+
 2009-05-01  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-armlinux-eabi.h (FPU_DEFAULT): Default to plain VFP.

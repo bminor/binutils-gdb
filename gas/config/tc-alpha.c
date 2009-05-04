@@ -355,7 +355,7 @@ static int alpha_addr32_on = 0;
    and the section happens to not be on an eight byte boundary, it
    will align both the symbol and the .quad to an eight byte boundary.  */
 static symbolS *alpha_insn_label;
-#ifdef OBJ_ELF
+#if defined(OBJ_ELF) || defined (OBJ_EVAX)
 static symbolS *alpha_prologue_label;
 #endif
 
