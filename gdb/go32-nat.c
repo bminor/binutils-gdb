@@ -249,7 +249,6 @@ static int go32_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 			     struct mem_attrib *attrib,
 			     struct target_ops *target);
 static void go32_files_info (struct target_ops *target);
-static void go32_stop (ptid_t);
 static void go32_kill_inferior (struct target_ops *ops);
 static void go32_create_inferior (struct target_ops *ops, char *exec_file,
 				  char *args, char **env, int from_tty);
@@ -635,25 +634,9 @@ go32_files_info (struct target_ops *target)
 }
 
 static void
-go32_stop (ptid_t ptid)
-{
-  normal_stop ();
-  cleanup_client ();
-  ptid = inferior_ptid;
-  inferior_ptid = null_ptid;
-  delete_thread_silent (ptid);
-  prog_has_started = 0;
-}
-
-static void
 go32_kill_inferior (struct target_ops *ops)
 {
-  redir_cmdline_delete (&child_cmd);
-  resume_signal = -1;
-  resume_is_step = 0;
-  if (!ptid_equal (inferior_ptid, null_ptid))
-    delete_thread_silent (inferior_ptid);
-  unpush_target (&go32_ops);
+  go32_mourn_inferior (ops);
 }
 
 static void
@@ -671,11 +654,6 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
   if (exec_file == 0)
     exec_file = get_exec_file (1);
 
-  if (prog_has_started)
-    {
-      go32_stop (inferior_ptid);
-      go32_kill_inferior (ops);
-    }
   resume_signal = -1;
   resume_is_step = 0;
 
@@ -749,6 +727,14 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
 static void
 go32_mourn_inferior (struct target_ops *ops)
 {
+  ptid_t ptid;
+
+  redir_cmdline_delete (&child_cmd);
+  resume_signal = -1;
+  resume_is_step = 0;
+
+  cleanup_client ();
+
   /* We need to make sure all the breakpoint enable bits in the DR7
      register are reset when the inferior exits.  Otherwise, if they
      rerun the inferior, the uncleared bits may cause random SIGTRAPs,
@@ -757,7 +743,13 @@ go32_mourn_inferior (struct target_ops *ops)
      at all times, but it doesn't, probably under an assumption that
      the OS cleans up when the debuggee exits.  */
   i386_cleanup_dregs ();
-  go32_kill_inferior (ops);
+
+  ptid = inferior_ptid;
+  inferior_ptid = null_ptid;
+  delete_thread_silent (ptid);
+  prog_has_started = 0;
+
+  unpush_target (ops);
   generic_mourn_inferior ();
 }
 
@@ -972,7 +964,6 @@ init_go32_ops (void)
   go32_ops.to_create_inferior = go32_create_inferior;
   go32_ops.to_mourn_inferior = go32_mourn_inferior;
   go32_ops.to_can_run = go32_can_run;
-  go32_ops.to_stop = go32_stop;
   go32_ops.to_thread_alive = go32_thread_alive;
   go32_ops.to_pid_to_str = go32_pid_to_str;
   go32_ops.to_stratum = process_stratum;

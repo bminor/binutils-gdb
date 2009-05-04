@@ -1,3 +1,13 @@
+2009-05-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* go32-nat.c (go32_stop): Delete.
+	(go32_kill_inferior): Rewrite to only call go32_mourn_inferior.
+	(go32_create_inferior): Don't call go32_stop or
+	go32_kill_inferior.
+	(go32_mourn_inferior): Inline go32_stop and go32_kill_inferior
+	here.
+	(init_go32_ops): Don't register go32_stop.
+
 2009-05-02  Eli Zaretskii  <eliz@gnu.org>
 
 	* dbxread.c (read_dbx_symtab): Avoid compiler warnings for
