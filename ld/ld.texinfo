@@ -1816,8 +1816,11 @@ the linker script being used by the linker.
 Specify the name of a version script to the linker.  This is typically
 used when creating shared libraries to specify additional information
 about the version hierarchy for the library being created.  This option
-is only meaningful on ELF platforms which support shared libraries.
-@xref{VERSION}.
+is only fully supported on ELF platforms which support shared libraries;
+see @ref{VERSION}.  It is partially supported on PE platforms, which can
+use version scripts to filter symbol visibility in auto-export mode: any
+symbols marked @samp{local} in the version script will not be exported.
+@xref{WIN32}.
 
 @kindex --warn-common
 @cindex warnings, on combining symbols
@@ -6582,9 +6585,19 @@ which is controlled by the following command line options:
 @item --exclude-symbols
 @item --exclude-libs
 @item --exclude-modules-for-implib
+@item --version-script
 @end itemize
 
-If, however, @samp{--export-all-symbols} is not given explicitly on the
+When auto-export is in operation, @command{ld} will export all the non-local
+(global and common) symbols it finds in a DLL, with the exception of a few
+symbols known to belong to the system's runtime and libraries.  As it will
+often not be desirable to export all of a DLL's symbols, which may include
+private functions that are not part of any public interface, the command-line
+options listed above may be used to filter symbols out from the list for 
+exporting.  The @samp{--output-def} option can be used in order to see the
+final list of exported symbols with all exclusions taken into effect.
+
+If @samp{--export-all-symbols} is not given explicitly on the
 command line, then the default auto-export behavior will be @emph{disabled}
 if either of the following are true:
 

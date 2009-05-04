@@ -5590,6 +5590,10 @@ bfd_boolean bfd_generic_define_common_symbol
 #define bfd_define_common_symbol(output_bfd, info, h) \
        BFD_SEND (output_bfd, _bfd_define_common_symbol, (output_bfd, info, h))
 
+struct bfd_elf_version_tree * bfd_find_version_for_sym
+   (struct bfd_elf_version_tree *verdefs,
+    const char *sym_name, bfd_boolean *hide);
+
 /* Extracted from simple.c.  */
 bfd_byte *bfd_simple_get_relocated_section_contents
    (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);

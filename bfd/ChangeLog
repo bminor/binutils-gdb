@@ -1,3 +1,10 @@
+2009-05-04  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* elflink.c (find_version_for_sym):  Remove from here, ...
+	* linker.c (bfd_find_version_for_sym):  ... rename, replace
+	here, make public and update all callers.
+	* bfd-in2.h:  Regenerate.
+
 2009-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* elf-bfd.h (struct bfd_elf_section_data): Add indirect_relocs

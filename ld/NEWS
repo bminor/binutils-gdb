@@ -1,5 +1,9 @@
 -*- text -*-
 
+* PE targets now add primitive support for ELF version scripts; symbols
+  are not versioned, but the local and global symbol visibility directives
+  are respected when filtering symbols in auto-export mode.
+
 * New option --no-export-dynamic to undo the effect of the -E and
   --export-dynamic options.
 

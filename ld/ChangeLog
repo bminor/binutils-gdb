@@ -1,3 +1,21 @@
+2009-05-04  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* NEWS:  Mention new feature.
+	* ld.texinfo (--version-script):  Document extent of PE support.
+	(WIN32):  Mention --version-script.  Extend auto-export description.
+	* pe-dll.c (process_def_file):  Use version script info to filter
+	symbols from auto-export.
+	* testsuite/ld-pe/vers-script-1.d:  New file.
+	* testsuite/ld-pe/vers-script-2.d:  New file.
+	* testsuite/ld-pe/vers-script-3.d:  New file.
+	* testsuite/ld-pe/vers-script-4.d:  New file.
+	* testsuite/ld-pe/vers-script-1.ver:  New file.
+	* testsuite/ld-pe/vers-script-2.ver:  New file.
+	* testsuite/ld-pe/vers-script-3.ver:  New file.
+	* testsuite/ld-pe/vers-script-4.ver:  New file.
+	* testsuite/ld-pe/vers-script-dll.c:  New file.
+	* testsuite/ld-pe/vers-script.exp:  New test script.
+
 2009-05-01  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* emulparams/vxworks.sh (TEXT_START_ADDR): Override.

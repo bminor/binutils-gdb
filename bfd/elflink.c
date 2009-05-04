@@ -1798,80 +1798,6 @@ nondefault:
   return TRUE;
 }
 
-static struct bfd_elf_version_tree *
-find_version_for_sym (struct bfd_elf_version_tree *verdefs,
-		      const char *sym_name,
-		      bfd_boolean *hide)
-{
-  struct bfd_elf_version_tree *t;
-  struct bfd_elf_version_tree *local_ver, *global_ver, *exist_ver;
-
-  local_ver = NULL;
-  global_ver = NULL;
-  exist_ver = NULL;
-  for (t = verdefs; t != NULL; t = t->next)
-    {
-      if (t->globals.list != NULL)
-	{
-	  struct bfd_elf_version_expr *d = NULL;
-
-	  while ((d = (*t->match) (&t->globals, d, sym_name)) != NULL)
-	    {
-	      global_ver = t;
-	      if (d->symver)
-		exist_ver = t;
-	      d->script = 1;
-	      /* If the match is a wildcard pattern, keep looking for
-		 a more explicit, perhaps even local, match.  */
-	      if (d->literal)
-		break;
-	    }
-
-	  if (d != NULL)
-	    break;
-	}
-
-      if (t->locals.list != NULL)
-	{
-	  struct bfd_elf_version_expr *d = NULL;
-
-	  while ((d = (*t->match) (&t->locals, d, sym_name)) != NULL)
-	    {
-	      local_ver = t;
-	      /* If the match is a wildcard pattern, keep looking for
-		 a more explicit, perhaps even global, match.  */
-	      if (d->literal)
-		{
-		  /* An exact match overrides a global wildcard.  */
-		  global_ver = NULL;
-		  break;
-		}
-	    }
-
-	  if (d != NULL)
-	    break;
-	}
-    }
-
-  if (global_ver != NULL)
-    {
-      /* If we already have a versioned symbol that matches the
-	 node for this symbol, then we don't want to create a
-	 duplicate from the unversioned symbol.  Instead hide the
-	 unversioned symbol.  */
-      *hide = exist_ver == global_ver;
-      return global_ver;
-    }
-
-  if (local_ver != NULL)
-    {
-      *hide = TRUE;
-      return local_ver;
-    }
-
-  return NULL;
-}
-
 /* This routine is used to export all defined symbols into the dynamic
    symbol table.  It is called via elf_link_hash_traverse.  */
 
@@ -1898,7 +1824,7 @@ _bfd_elf_export_symbol (struct elf_link_hash_entry *h, void *data)
       bfd_boolean hide;
 
       if (eif->verdefs == NULL
-	  || (find_version_for_sym (eif->verdefs, h->root.root.string, &hide)
+	  || (bfd_find_version_for_sym (eif->verdefs, h->root.root.string, &hide)
 	      && !hide))
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (eif->info, h))
@@ -2160,7 +2086,7 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
     {
       bfd_boolean hide;
 
-      h->verinfo.vertree = find_version_for_sym (sinfo->verdefs,
+      h->verinfo.vertree = bfd_find_version_for_sym (sinfo->verdefs,
 						 h->root.root.string, &hide);
       if (h->verinfo.vertree != NULL && hide)
 	(*bed->elf_backend_hide_symbol) (info, h, TRUE);

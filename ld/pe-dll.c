@@ -670,9 +670,18 @@ process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	      /* We should export symbols which are either global or not
 		 anything at all.  (.bss data is the latter)
 		 We should not export undefined symbols.  */
-	      if (symbols[j]->section != &bfd_und_section
-		  && ((symbols[j]->flags & BSF_GLOBAL)
-		      || (symbols[j]->flags == 0)))
+	      bfd_boolean would_export = symbols[j]->section != &bfd_und_section
+		      && ((symbols[j]->flags & BSF_GLOBAL)
+			  || (symbols[j]->flags == 0));
+	      if (lang_elf_version_info && would_export)
+		{
+		  bfd_boolean hide = 0;
+		  char ofs = pe_details->underscored && symbols[j]->name[0] == '_';
+		  (void) bfd_find_version_for_sym (lang_elf_version_info,
+				symbols[j]->name + ofs, &hide);
+		  would_export = !hide;
+		}
+	      if (would_export)
 		{
 		  const char *sn = symbols[j]->name;
 
