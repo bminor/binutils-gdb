@@ -1,3 +1,19 @@
+2009-05-05  Anatoly Sokolov  <aesok@post.ru>
+
+	* scripttempl/avr.sc (MEMORY): Use DATA_ORIGIN.
+	* emulparams/avr1.sh (DATA_ORIGIN): Add.
+	* emulparams/avr2.sh (DATA_ORIGIN): Add.
+	* emulparams/avr25.sh (DATA_ORIGIN): Add.
+	* emulparams/avr3.sh (DATA_ORIGIN): Add.
+	* emulparams/avr31.sh (DATA_ORIGIN): Add.
+	* emulparams/avr35.sh (DATA_ORIGIN): Add.
+	* emulparams/avr4.sh (DATA_ORIGIN): Add.
+	* emulparams/avr5.sh (DATA_ORIGIN): Add.
+	* emulparams/avr51.sh (DATA_ORIGIN): Add.
+	(DATA_LENGTH): Update.
+	* emulparams/avr6.sh (DATA_ORIGIN): Add.
+	(DATA_LENGTH): Update.
+
 2009-05-04  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* NEWS:  Mention new feature.
