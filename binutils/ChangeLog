@@ -1,3 +1,11 @@
+2009-05-05  Guillaume Duhamel  <guillaume.duhamel@gmail.com>
+
+	PR 10109
+	* winduni.c: Replace test of HAVE_ICONV_H with a test of
+	HAVE_ICONV.
+	(iconv_onechar): Use ICONV_CONST instead of "const".
+	(wind_MultiByteToWideChar): Initialise local strings.
+
 2009-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (dump_relocations): Display a relocation against an
