@@ -1,3 +1,7 @@
+2009-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/lns/lns-common-1.d: Add test for discriminator.
+
 2009-05-05  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* gas/arm/bl-local-v4t.d: New file.
