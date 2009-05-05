@@ -70,8 +70,6 @@
 	(out_leb128): New function.
 	(process_entries): Output DW_LNE_set_discriminator.
 	* doc/as.texinfo: Add discriminator operand to .loc directive.
-	* testsuite/gas/lns/lns-common-1.d: Add test for discriminator.
-	* testsuite/gas/lns/lns-common-1.s: Likewise.
 
 2009-04-22  Nathan Sidwell  <nathan@codesourcery.com>
 

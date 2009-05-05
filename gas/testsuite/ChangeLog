@@ -17,6 +17,11 @@
 	* gas/arm/mapmisc.d: Correct expected output for .double and
 	.dcb.d.
 
+2009-04-24  Cary Coutant  <ccoutant@google.com>
+
+	* gas/lns/lns-common-1.d: Add test for discriminator.
+	* gas/lns/lns-common-1.s: Likewise.
+
 2009-04-20  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/equ.s: Adjust.
