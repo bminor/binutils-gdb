@@ -1,14 +1,14 @@
 2009-05-05  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
-	* gas\arm\bl-local-v4t.d: New file.
-	* gas\arm\bl-local-v4t.s: New file.
-	* gas\arm\blx-local.s: Update for branches and calls to local
+	* gas/arm/bl-local-v4t.d: New file.
+	* gas/arm/bl-local-v4t.s: New file.
+	* gas/arm/blx-local.s: Update for branches and calls to local
 	  functions.
-	* gas\arm\blx-local.d: Likewise.
-	* gas\arm\blx-local.l: New file.
-	* gas\arm\blx-local-thumb.l: New file.
-	* gas\arm\blx-local-thumb.s: New file.
-	* gas\arm\blx-local-thumb.d: New file.
+	* gas/arm/blx-local.d: Likewise.
+	* gas/arm/blx-local.l: New file.
+	* gas/arm/blx-local-thumb.l: New file.
+	* gas/arm/blx-local-thumb.s: New file.
+	* gas/arm/blx-local-thumb.d: New file.
 
 2009-05-01  Nathan Sidwell  <nathan@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
