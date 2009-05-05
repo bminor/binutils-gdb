@@ -1108,7 +1108,7 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
   CORE_ADDR pc, stubaddr;
   int argreg = 0;
 
-  pc = read_pc ();
+  pc = regcache_read_pc (regcache);
 
   /* Note: we don't want to pass a function descriptor here; push_dummy_call
      fills in the PIC register for us.  */

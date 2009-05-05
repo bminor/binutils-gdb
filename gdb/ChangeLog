@@ -1,5 +1,59 @@
 2009-05-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* inferior.h (read_pc, write_pc): Remove.
+	* regcache.c (read_pc, write_pc): Remove.
+
+	* infrun.c (displaced_step_fixup): Use regcache_read_pc instead
+	of read_pc.
+	(handle_inferior_event): Use regcache_read_pc instead of read_pc
+	when determining value of stop_pc.  Replace subsequent uses of
+	read_pc by inspecting already-retrieved stop_pc value.
+	(keep_going): Use regcache_read_pc instead of read_pc.
+
+	* breakpoint.c (watchpoint_check): Use current frame architecture
+	and PC instead of current_gdbarch and read_pc ().
+	* tracepoint.c (set_traceframe_context): Replace PC argument
+	with FRAME argument.
+	(trace_start_command, finish_tfind_command): Update calls.
+	(finish_tfind_command): Compare frame IDs to identify transitions
+	between frames.
+	(trace_find_pc_command): Use regcache_read_pc instead of read_pc.
+	* rs6000-nat.c (exec_one_dummy_insn): Pass in regcache instead
+	of gdbarch.  Use regcache_read_pc and regcache_write_pc instead
+	of read_pc and write_pc.
+	(store_register): Make regcache argument non-const.  Update call
+	to exec_one_dummy_insn.
+
+	* thread.c (switch_to_thread): Use regcache_read_pc instead of read_pc.
+	* infcmd.c (post_create_inferior): Likewise.
+	* solib-darwin.c (darwin_solib_create_inferior_hook): Likewise.
+	* solib-pa64.c (pa64_solib_create_inferior_hook): Likewise.
+	* solib-sunos.c (sunos_solib_create_inferior_hook): Likewise.
+	* solib-svr4.c (enable_break, svr4_relocate_main_executable): Likewise.
+	* linux-fork.c (fork_load_infrun_state): Likewise.
+	* hppa-hpux-tdep.c (hppa_hpux_push_dummy_code): Likewise.
+	* record.c (record_wait): Likewise.
+	* procfs.c (procfs_wait): Likewise.
+	* remote-mips.c (common_open, mips_wait): Likewise.
+	* remote-m32r-sdi.c (m32r_resume): Likewise.
+
+	* symfile.c (generic_load): Use regcache_write_pc instead of write_pc.
+	* monitor.c (monitor_create_inferior, monitor_load): Likewise.
+	* m32r-rom.c (m32r_load, m32r_upload_command): Likewise.
+	* remote-m32r-sdi.c (m32r_create_inferior, m32r_load): Likewise.
+	* remote-mips.c (mips_create_inferior, mips_load): Likewise.
+
+	* solib-darwin.c: Include "regcache.h".
+	* solib-pa64.c: Include "regcache.h".
+	* solib-svr4.c: Include "regcache.h.".
+
+	* symfile.c: Do not mention read_pc or write_pc in comments.
+	* dink32-rom.c: Likewise.
+	* m32r-rom.c: Likewise.
+	* mips-tdep.c: Likewise.
+
+2009-05-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* fork-child.c (startup_inferior): Move setting stop_pc ...
 	* infcmd.c (post_create_inferior): ... to here.
 

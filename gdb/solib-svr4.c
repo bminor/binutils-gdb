@@ -32,6 +32,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "inferior.h"
+#include "regcache.h"
 #include "gdbthread.h"
 
 #include "gdb_assert.h"
@@ -1289,8 +1290,11 @@ enable_break (void)
          fallback method because it has actually been working well in
          most cases.  */
       if (!load_addr_found)
-	load_addr = (read_pc ()
-		     - exec_entry_point (tmp_bfd, tmp_bfd_target));
+	{
+	  struct regcache *regcache = get_thread_regcache (inferior_ptid);
+	  load_addr = (regcache_read_pc (regcache)
+		       - exec_entry_point (tmp_bfd, tmp_bfd_target));
+	}
 
       if (!loader_found_in_list)
 	{
@@ -1424,7 +1428,8 @@ static void
 svr4_relocate_main_executable (void)
 {
   asection *interp_sect;
-  CORE_ADDR pc = read_pc ();
+  struct regcache *regcache = get_thread_regcache (inferior_ptid);
+  CORE_ADDR pc = regcache_read_pc (regcache);
 
   /* Decide if the objfile needs to be relocated.  As indicated above,
      we will only be here when execution is stopped at the beginning

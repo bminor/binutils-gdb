@@ -24,7 +24,7 @@
 #include "monitor.h"
 #include "serial.h"
 #include "symfile.h" /* For generic_load() */
-#include "inferior.h" /* For write_pc() */
+#include "inferior.h"
 #include "regcache.h"
 
 static void dink32_open (char *args, int from_tty);

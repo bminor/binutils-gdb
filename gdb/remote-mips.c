@@ -1573,7 +1573,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
 
   reinit_frame_cache ();
   registers_changed ();
-  stop_pc = read_pc ();
+  stop_pc = regcache_read_pc (get_current_regcache ());
   print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
   xfree (serial_port_name);
 }
@@ -1792,7 +1792,7 @@ mips_wait (struct target_ops *ops,
          fetch breakpoint, not a data watchpoint.  FIXME when PMON
          provides some way to tell us what type of breakpoint it is.  */
       int i;
-      CORE_ADDR pc = read_pc ();
+      CORE_ADDR pc = regcache_read_pc (get_current_regcache ());
 
       hit_watchpoint = 1;
       for (i = 0; i < MAX_LSI_BREAKPOINTS; i++)
@@ -1843,7 +1843,7 @@ mips_wait (struct target_ops *ops,
 	{
 	  char *func_name;
 	  CORE_ADDR func_start;
-	  CORE_ADDR pc = read_pc ();
+	  CORE_ADDR pc = regcache_read_pc (get_current_regcache ());
 
 	  find_pc_partial_function (pc, &func_name, &func_start, NULL);
 	  if (func_name != NULL && strcmp (func_name, "_exit") == 0
@@ -2204,7 +2204,7 @@ Can't pass arguments to remote MIPS board; arguments ignored.");
 
   /* FIXME: Should we set inferior_ptid here?  */
 
-  write_pc (entry_pt);
+  regcache_write_pc (get_current_regcache (), entry_pt);
 }
 
 /* Clean up after a process.  Actually nothing to do.  */
@@ -3258,6 +3258,8 @@ pmon_load_fast (char *file)
 static void
 mips_load (char *file, int from_tty)
 {
+  struct regcache *regcache;
+
   /* Get the board out of remote debugging mode.  */
   if (mips_exit_debug ())
     error ("mips_load:  Couldn't get into monitor mode.");
@@ -3270,17 +3272,17 @@ mips_load (char *file, int from_tty)
   mips_initialize ();
 
   /* Finally, make the PC point at the start address */
+  regcache = get_current_regcache ();
   if (mips_monitor != MON_IDT)
     {
       /* Work around problem where PMON monitor updates the PC after a load
          to a different value than GDB thinks it has. The following ensures
-         that the write_pc() WILL update the PC value: */
-      struct regcache *regcache = get_current_regcache ();
+         that the regcache_write_pc() WILL update the PC value: */
       regcache_invalidate (regcache,
 			   gdbarch_pc_regnum (get_regcache_arch (regcache)));
     }
   if (exec_bfd)
-    write_pc (bfd_get_start_address (exec_bfd));
+    regcache_write_pc (regcache, bfd_get_start_address (exec_bfd));
 
   inferior_ptid = null_ptid;	/* No process now */
 

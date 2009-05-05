@@ -852,7 +852,7 @@ switch_to_thread (ptid_t ptid)
   if (!ptid_equal (inferior_ptid, null_ptid)
       && !is_exited (ptid)
       && !is_executing (ptid))
-    stop_pc = read_pc ();
+    stop_pc = regcache_read_pc (get_thread_regcache (ptid));
   else
     stop_pc = ~(CORE_ADDR) 0;
 }

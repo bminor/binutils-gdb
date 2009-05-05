@@ -152,10 +152,6 @@ extern void terminal_save_ours (void);
 
 extern void terminal_ours (void);
 
-extern CORE_ADDR read_pc (void);
-
-extern void write_pc (CORE_ADDR);
-
 extern CORE_ADDR unsigned_pointer_to_address (struct type *type,
 					      const gdb_byte *buf);
 extern void unsigned_address_to_pointer (struct type *type, gdb_byte *buf,

@@ -2712,9 +2712,15 @@ watchpoint_check (void *p)
 	 that the watchpoint frame couldn't be found by frame_find_by_id()
 	 because the current PC is currently in an epilogue.  Calling
 	 gdbarch_in_function_epilogue_p() also when fr == NULL fixes that. */
-      if ((!within_current_scope || fr == get_current_frame ())
-          && gdbarch_in_function_epilogue_p (current_gdbarch, read_pc ()))
-	return WP_VALUE_NOT_CHANGED;
+      if (!within_current_scope || fr == get_current_frame ())
+	{
+	  struct frame_info *frame = get_current_frame ();
+	  struct gdbarch *frame_arch = get_frame_arch (frame);
+	  CORE_ADDR frame_pc = get_frame_pc (frame);
+
+	  if (gdbarch_in_function_epilogue_p (frame_arch, frame_pc))
+	    return WP_VALUE_NOT_CHANGED;
+	}
       if (fr && within_current_scope)
 	/* If we end up stopping, the current frame will get selected
 	   in normal_stop.  So this call to select_frame won't affect

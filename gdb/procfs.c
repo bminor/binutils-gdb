@@ -4278,7 +4278,8 @@ wait_again:
                      then remove it.  See comments in procfs_init_inferior()
                      for more details.  */
                   if (dbx_link_bpt_addr != 0
-                      && dbx_link_bpt_addr == read_pc ())
+                      && dbx_link_bpt_addr
+			 == regcache_read_pc (get_current_regcache ()))
                     remove_dbx_link_breakpoint ();
 
 		  wstat = (SIGTRAP << 8) | 0177;

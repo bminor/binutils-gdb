@@ -608,7 +608,7 @@ record_wait (struct target_ops *ops,
 		{
 		  /* Check if there is a breakpoint.  */
 		  registers_changed ();
-		  tmp_pc = read_pc ();
+		  tmp_pc = regcache_read_pc (get_current_regcache ());
 		  if (breakpoint_inserted_here_p (tmp_pc))
 		    {
 		      /* There is a breakpoint.  */

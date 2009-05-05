@@ -26,6 +26,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "inferior.h"
+#include "regcache.h"
 #include "gdbthread.h"
 
 #include "gdb_assert.h"
@@ -332,7 +333,8 @@ darwin_solib_create_inferior_hook (void)
       /* We find the dynamic linker's base address by examining
 	 the current pc (which should point at the entry point for the
 	 dynamic linker) and subtracting the offset of the entry point.  */
-      load_addr = (read_pc () - bfd_get_start_address (dyld_bfd));
+      load_addr = (regcache_read_pc (get_current_regcache ())
+		   - bfd_get_start_address (dyld_bfd));
     }
   else
     {

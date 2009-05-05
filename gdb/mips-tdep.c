@@ -5796,7 +5796,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  reg_names = mips_generic_reg_names;
       }
     /* FIXME: cagney/2003-11-15: For MIPS, hasn't gdbarch_pc_regnum been
-       replaced by read_pc?  */
+       replaced by gdbarch_read_pc?  */
     set_gdbarch_pc_regnum (gdbarch, regnum->pc + num_regs);
     set_gdbarch_sp_regnum (gdbarch, MIPS_SP_REGNUM + num_regs);
     set_gdbarch_fp0_regnum (gdbarch, regnum->fp0);

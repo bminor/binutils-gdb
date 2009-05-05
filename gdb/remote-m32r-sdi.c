@@ -348,7 +348,7 @@ m32r_create_inferior (struct target_ops *ops, char *execfile,
   /* Install inferior's terminal modes.  */
   target_terminal_inferior ();
 
-  write_pc (entry_pt);
+  regcache_write_pc (get_current_regcache (), entry_pt);
 }
 
 /* Open a connection to a remote debugger.
@@ -464,7 +464,7 @@ m32r_resume (struct target_ops *ops,
 
   check_mmu_status ();
 
-  pc_addr = read_pc ();
+  pc_addr = regcache_read_pc (get_current_regcache ());
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "pc <= 0x%lx\n", pc_addr);
 
@@ -1355,7 +1355,8 @@ m32r_load (char *args, int from_tty)
 
   /* Make the PC point at the start address */
   if (exec_bfd)
-    write_pc (bfd_get_start_address (exec_bfd));
+    regcache_write_pc (get_current_regcache (),
+		       bfd_get_start_address (exec_bfd));
 
   inferior_ptid = null_ptid;	/* No process now */
   delete_thread_silent (remote_m32r_ptid);

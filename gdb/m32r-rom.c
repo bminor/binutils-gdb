@@ -37,7 +37,7 @@
 #include <time.h>		/* for time_t */
 #include "gdb_string.h"
 #include "objfiles.h"		/* for ALL_OBJFILES etc. */
-#include "inferior.h"		/* for write_pc() */
+#include "inferior.h"
 #include <ctype.h>
 #include "regcache.h"
 
@@ -175,7 +175,8 @@ m32r_load (char *filename, int from_tty)
 
   /* Finally, make the PC point at the start address */
   if (exec_bfd)
-    write_pc (bfd_get_start_address (exec_bfd));
+    regcache_write_pc (get_current_regcache (),
+		       bfd_get_start_address (exec_bfd));
 
   inferior_ptid = null_ptid;	/* No process now */
 
@@ -532,7 +533,8 @@ m32r_upload_command (char *args, int from_tty)
 	    gdb_flush (gdb_stdout);
 	  }
       /* Finally, make the PC point at the start address */
-      write_pc (bfd_get_start_address (abfd));
+      regcache_write_pc (get_current_regcache (),
+			 bfd_get_start_address (abfd));
       printf_filtered ("Start address 0x%lx\n", 
 		       (unsigned long) bfd_get_start_address (abfd));
       print_transfer_performance (gdb_stdout, data_count, 0, &start_time,

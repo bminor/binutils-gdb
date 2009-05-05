@@ -37,7 +37,8 @@
 #include "language.h"
 #include "complaints.h"
 #include "demangle.h"
-#include "inferior.h"		/* for write_pc */
+#include "inferior.h"
+#include "regcache.h"
 #include "filenames.h"		/* for DOSish file names */
 #include "gdb-stabs.h"
 #include "gdb_obstack.h"
@@ -1986,7 +1987,7 @@ generic_load (char *args, int from_tty)
   ui_out_text (uiout, "\n");
   /* We were doing this in remote-mips.c, I suspect it is right
      for other targets too.  */
-  write_pc (entry);
+  regcache_write_pc (get_current_regcache (), entry);
 
   /* FIXME: are we supposed to call symbol_file_add or not?  According
      to a comment from remote-mips.c (where a call to symbol_file_add

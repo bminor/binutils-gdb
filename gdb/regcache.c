@@ -841,12 +841,6 @@ regcache_read_pc (struct regcache *regcache)
   return pc_val;
 }
 
-CORE_ADDR
-read_pc (void)
-{
-  return regcache_read_pc (get_current_regcache ());
-}
-
 void
 regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
@@ -860,12 +854,6 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
   else
     internal_error (__FILE__, __LINE__,
 		    _("regcache_write_pc: Unable to update PC"));
-}
-
-void
-write_pc (CORE_ADDR pc)
-{
-  regcache_write_pc (get_current_regcache (), pc);
 }
 
 

@@ -392,7 +392,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
   target_find_description ();
 
   /* Now that we know the register layout, retrieve current PC.  */
-  stop_pc = read_pc ();
+  stop_pc = regcache_read_pc (get_current_regcache ());
 
   /* If the solist is global across processes, there's no need to
      refetch it here.  */

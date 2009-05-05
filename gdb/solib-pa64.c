@@ -36,6 +36,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "inferior.h"
+#include "regcache.h"
 
 #include "hppa-tdep.h"
 #include "solist.h"
@@ -421,7 +422,8 @@ pa64_solib_create_inferior_hook (void)
 
 	 Also note the breakpoint is the second instruction in the
 	 routine.  */
-      load_addr = read_pc () - tmp_bfd->start_address;
+      load_addr = regcache_read_pc (get_current_regcache ())
+		  - tmp_bfd->start_address;
       sym_addr = bfd_lookup_symbol (tmp_bfd, "__dld_break");
       sym_addr = load_addr + sym_addr + 4;
       

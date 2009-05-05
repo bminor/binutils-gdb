@@ -224,15 +224,17 @@ set_tracepoint_num (int num)
    the traceframe context (line, function, file) */
 
 static void
-set_traceframe_context (CORE_ADDR trace_pc)
+set_traceframe_context (struct frame_info *trace_frame)
 {
+  CORE_ADDR trace_pc;
+
   static struct type *func_string, *file_string;
   static struct type *func_range, *file_range;
   struct value *func_val;
   struct value *file_val;
   int len;
 
-  if (trace_pc == -1)		/* Cease debugging any trace buffers.  */
+  if (trace_frame == NULL)		/* Cease debugging any trace buffers.  */
     {
       traceframe_fun = 0;
       traceframe_sal.pc = traceframe_sal.line = 0;
@@ -248,6 +250,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
     }
 
   /* Save as globals for internal use.  */
+  trace_pc = get_frame_pc (trace_frame);
   traceframe_sal = find_pc_line (trace_pc, 0);
   traceframe_fun = find_pc_function (trace_pc);
 
@@ -1319,7 +1322,7 @@ trace_start_command (char *args, int from_tty)
 	error (_("Bogus reply from target: %s"), target_buf);
       set_traceframe_num (-1);	/* All old traceframes invalidated.  */
       set_tracepoint_num (-1);
-      set_traceframe_context (-1);
+      set_traceframe_context (NULL);
       trace_running_p = 1;
       if (deprecated_trace_start_stop_hook)
 	deprecated_trace_start_stop_hook (1, from_tty);
@@ -1447,12 +1450,10 @@ finish_tfind_command (char **msg,
 		      int from_tty)
 {
   int target_frameno = -1, target_tracept = -1;
-  CORE_ADDR old_frame_addr;
-  struct symbol *old_func;
+  struct frame_id old_frame_id;
   char *reply;
 
-  old_frame_addr = get_frame_base (get_current_frame ());
-  old_func = find_pc_function (read_pc ());
+  old_frame_id = get_frame_id (get_current_frame ());
 
   putpkt (*msg);
   reply = remote_get_noisy_reply (msg, sizeof_msg);
@@ -1517,9 +1518,9 @@ finish_tfind_command (char **msg,
   set_traceframe_num (target_frameno);
   set_tracepoint_num (target_tracept);
   if (target_frameno == -1)
-    set_traceframe_context (-1);
+    set_traceframe_context (NULL);
   else
-    set_traceframe_context (read_pc ());
+    set_traceframe_context (get_current_frame ());
 
   if (from_tty)
     {
@@ -1529,18 +1530,10 @@ finish_tfind_command (char **msg,
          whether we have made a transition from one function to
          another.  If so, we'll print the "stack frame" (ie. the new
          function and it's arguments) -- otherwise we'll just show the
-         new source line.
+         new source line.  */
 
-         This determination is made by checking (1) whether the
-         current function has changed, and (2) whether the current FP
-         has changed.  Hack: if the FP wasn't collected, either at the
-         current or the previous frame, assume that the FP has NOT
-         changed.  */
-
-      if (old_func == find_pc_function (read_pc ()) &&
-	  (old_frame_addr == 0 ||
-	   get_frame_base (get_current_frame ()) == 0 ||
-	   old_frame_addr == get_frame_base (get_current_frame ())))
+      if (frame_id_eq (old_frame_id,
+		       get_frame_id (get_current_frame ())))
 	print_what = SRC_LINE;
       else
 	print_what = SRC_AND_LOC;
@@ -1635,7 +1628,7 @@ trace_find_pc_command (char *args, int from_tty)
   if (target_is_remote ())
     {
       if (args == 0 || *args == 0)
-	pc = read_pc ();	/* default is current pc */
+	pc = regcache_read_pc (get_current_regcache ());
       else
 	pc = parse_and_eval_address (args);
 

@@ -250,7 +250,7 @@ fork_load_infrun_state (struct fork_info *fp)
   registers_changed ();
   reinit_frame_cache ();
 
-  stop_pc = read_pc ();
+  stop_pc = regcache_read_pc (get_current_regcache ());
   nullify_last_target_wait_ptid ();
 
   /* Now restore the file positions of open file descriptors.  */
@@ -280,7 +280,7 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
 
   fp->savedregs = regcache_dup (get_current_regcache ());
   fp->clobber_regs = clobber_regs;
-  fp->pc = read_pc ();
+  fp->pc = regcache_read_pc (get_current_regcache ());
 
   if (clobber_regs)
     {
@@ -501,7 +501,7 @@ info_forks_command (char *arg, int from_tty)
       if (ptid_equal (fp->ptid, inferior_ptid))
 	{
 	  printf_filtered ("* ");
-	  pc = read_pc ();
+	  pc = regcache_read_pc (get_current_regcache ());
 	}
       else
 	{

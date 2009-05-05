@@ -130,7 +130,7 @@ static int objfile_symbol_add (void *);
 
 static void vmap_symtab (struct vmap *);
 
-static void exec_one_dummy_insn (struct gdbarch *);
+static void exec_one_dummy_insn (struct regcache *);
 
 extern void fixup_breakpoints (CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta);
 
@@ -267,7 +267,7 @@ fetch_register (struct regcache *regcache, int regno)
 /* Store register REGNO back into the inferior. */
 
 static void
-store_register (const struct regcache *regcache, int regno)
+store_register (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int addr[MAX_REGISTER_SIZE];
@@ -303,7 +303,7 @@ store_register (const struct regcache *regcache, int regno)
 	   Otherwise the following ptrace(2) calls will mess up user stack
 	   since kernel will get confused about the bottom of the stack
 	   (%sp). */
-	exec_one_dummy_insn (gdbarch);
+	exec_one_dummy_insn (regcache);
 
       /* The PT_WRITE_GPR operation is rather odd.  For 32-bit inferiors,
          the register's value is passed by value, but for 64-bit inferiors,
@@ -577,7 +577,7 @@ rs6000_wait (struct target_ops *ops,
    including u_area. */
 
 static void
-exec_one_dummy_insn (struct gdbarch *gdbarch)
+exec_one_dummy_insn (struct regcache *regcache)
 {
 #define	DUMMY_INSN_ADDR	AIX_TEXT_SEGMENT_BASE+0x200
 
@@ -596,8 +596,8 @@ exec_one_dummy_insn (struct gdbarch *gdbarch)
      on.  However, rs6000-ibm-aix4.1.3 seems to have screwed this up --
      the inferior never hits the breakpoint (it's also worth noting
      powerpc-ibm-aix4.1.3 works correctly).  */
-  prev_pc = read_pc ();
-  write_pc (DUMMY_INSN_ADDR);
+  prev_pc = regcache_read_pc (regcache);
+  regcache_write_pc (regcache, DUMMY_INSN_ADDR);
   if (ARCH64 ())
     ret = rs6000_ptrace64 (PT_CONTINUE, PIDGET (inferior_ptid), 1, 0, NULL);
   else
@@ -612,7 +612,7 @@ exec_one_dummy_insn (struct gdbarch *gdbarch)
     }
   while (pid != PIDGET (inferior_ptid));
 
-  write_pc (prev_pc);
+  regcache_write_pc (regcache, prev_pc);
   deprecated_remove_raw_breakpoint (bp);
 }
 

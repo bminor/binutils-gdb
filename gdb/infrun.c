@@ -838,7 +838,7 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 
       context_switch (ptid);
 
-      actual_pc = read_pc ();
+      actual_pc = regcache_read_pc (get_thread_regcache (ptid));
 
       if (breakpoint_here_p (actual_pc))
 	{
@@ -2425,7 +2425,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  reinit_frame_cache ();
 	}
 
-      stop_pc = read_pc ();
+      stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
       ecs->event_thread->stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
@@ -2454,7 +2454,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  reinit_frame_cache ();
 	}
 
-      stop_pc = read_pc ();
+      stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
       /* This causes the eventpoints and symbol table to be reset.
          Must do this now, before trying to determine whether to
@@ -2504,7 +2504,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
     case TARGET_WAITKIND_NO_HISTORY:
       /* Reverse execution: target ran out of history info.  */
-      stop_pc = read_pc ();
+      stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
       print_stop_reason (NO_HISTORY, 0);
       stop_stepping (ecs);
       return;
@@ -2852,7 +2852,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
       if (!HAVE_STEPPABLE_WATCHPOINT)
 	remove_breakpoints ();
 	/* Single step */
-      hw_step = maybe_software_singlestep (current_gdbarch, read_pc ());
+      hw_step = maybe_software_singlestep (current_gdbarch, stop_pc);
       target_resume (ecs->ptid, hw_step, TARGET_SIGNAL_0);
       registers_changed ();
       waiton_ptid = ecs->ptid;
@@ -3083,7 +3083,7 @@ process_event_stop_test:
       if (signal_program[ecs->event_thread->stop_signal] == 0)
 	ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
 
-      if (ecs->event_thread->prev_pc == read_pc ()
+      if (ecs->event_thread->prev_pc == stop_pc
 	  && ecs->event_thread->trap_expected
 	  && ecs->event_thread->step_resume_breakpoint == NULL)
 	{
@@ -4032,7 +4032,8 @@ static void
 keep_going (struct execution_control_state *ecs)
 {
   /* Save the pc before execution, to compare with pc after stop.  */
-  ecs->event_thread->prev_pc = read_pc ();		/* Might have been DECR_AFTER_BREAK */
+  ecs->event_thread->prev_pc
+    = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
   /* If we did not do break;, it means we should keep running the
      inferior and not return to debugger.  */
