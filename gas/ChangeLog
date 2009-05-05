@@ -1,10 +1,10 @@
 2009-05-05 Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
-	* config\tc-arm.h: Fix typo in comment.
+	* config/tc-arm.h: Fix typo in comment.
 	(ARM_IS_FUNC): New macro.
 	(MD_APPLY_SYM_VALUE): Define.
 
-	* config\tc-arm.c (do_blx): Retain BFD_RELOC_ARM_PCREL_BLX for
+	* config/tc-arm.c (do_blx): Retain BFD_RELOC_ARM_PCREL_BLX for
 	all versions of EABI.
 	(relax_branch): Do not relax for branches to ARM functions.
 	(md_pcrel_from_section): Set up base correctly for
