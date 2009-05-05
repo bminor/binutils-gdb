@@ -1,3 +1,8 @@
+2009-05-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* fork-child.c (startup_inferior): Move setting stop_pc ...
+	* infcmd.c (post_create_inferior): ... to here.
+
 2009-05-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* go32-nat.c (go32_stop): Delete.

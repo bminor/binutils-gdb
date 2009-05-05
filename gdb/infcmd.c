@@ -391,6 +391,9 @@ post_create_inferior (struct target_ops *target, int from_tty)
      don't need to.  */
   target_find_description ();
 
+  /* Now that we know the register layout, retrieve current PC.  */
+  stop_pc = read_pc ();
+
   /* If the solist is global across processes, there's no need to
      refetch it here.  */
   if (exec_bfd && !gdbarch_has_global_solist (target_gdbarch))

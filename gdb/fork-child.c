@@ -530,8 +530,6 @@ startup_inferior (int ntraps)
 
   /* Mark all threads non-executing.  */
   set_executing (pid_to_ptid (-1), 0);
-
-  stop_pc = read_pc ();
 }
 
 /* Implement the "unset exec-wrapper" command.  */
