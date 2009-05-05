@@ -1,3 +1,25 @@
+2009-05-05 Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* config\tc-arm.h: Fix typo in comment.
+	(ARM_IS_FUNC): New macro.
+	(MD_APPLY_SYM_VALUE): Define.
+
+	* config\tc-arm.c (do_blx): Retain BFD_RELOC_ARM_PCREL_BLX for
+	all versions of EABI.
+	(relax_branch): Do not relax for branches to ARM functions.
+	(md_pcrel_from_section): Set up base correctly for
+	BFD_RELOC_THUMB_PCREL_BLX, BFD_RELOC_THUMB_PCREL_CALL,
+	BFD_RELOC_THUMB_PCREL_BRANCH23, BFD_RELOC_ARM_PCREL_BLX
+	BFD_RELOC_ARM_PCREL_CALL.
+	(md_apply_fix): Flip bl to blx where possible.
+	Flip blx to bl where possible.
+	(arm_force_relocation): Force relocations for
+	BFD_RELOC_ARM_PCREL_JUMP, BFD_RELOC_ARM_PCREL_JUMP,
+	BFD_RELOC_ARM_PCREL_BLX, BFD_RELOC_THUMB_PCREL_BLX,
+	BFD_RELOC_THUMB_PCREL_BRANCH20, BFD_RELOC_THUMB_PCREL_BRANCH23,
+	BFD_RELOC_THUMB_PCREL_BRANCH25.
+	(arm_apply_sym_value): New function.
+	
 2009-05-04  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-alpha.c: Also declare alpha_prologue_label for OBJ_EVAX.

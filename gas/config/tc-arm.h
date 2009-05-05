@@ -126,15 +126,24 @@ bfd_boolean arm_is_eabi (void);
 #ifdef OBJ_ELF
 
 /* For ELF objects THUMB_IS_FUNC is inferred from
-   ARM_IS_TUMB and the function type.  */
+   ARM_IS_THUMB and the function type.  */
 #define THUMB_IS_FUNC(s) \
   ((arm_is_eabi () \
     && (ARM_IS_THUMB (s)) \
     && (symbol_get_bfdsym (s)->flags & BSF_FUNCTION)) \
    || (ARM_GET_FLAG (s) & THUMB_FLAG_FUNC))
 
+#define ARM_IS_FUNC(s) \
+  ((arm_is_eabi () \
+    && !(ARM_IS_THUMB (s)) \
+    /* && !(THUMB_FLAG_FUNC & ARM_GET_FLAG (s)) \ */ \
+    && (symbol_get_bfdsym (s)->flags & BSF_FUNCTION)))
+
+
 #else
 #define THUMB_IS_FUNC(s)	(ARM_GET_FLAG (s) & THUMB_FLAG_FUNC)
+#define ARM_IS_FUNC(s)          (!THUMB_IS_FUNC (s) \
+                                && (symbol_get_bfdsym (s)->flags & BSF_FUNCTION))
 #endif
 
 #define ARM_SET_THUMB(s,t)      ((t) ? ARM_SET_FLAG (s, ARM_FLAG_THUMB)     : ARM_RESET_FLAG (s, ARM_FLAG_THUMB))
@@ -247,12 +256,17 @@ struct arm_segment_info_type
 
 # define EXTERN_FORCE_RELOC 			1
 # define tc_fix_adjustable(FIX) 		arm_fix_adjustable (FIX)
+#endif
+
+#ifdef OBJ_ELF
 /* Values passed to md_apply_fix don't include the symbol value.  */
-# define MD_APPLY_SYM_VALUE(FIX) 		0
+# define MD_APPLY_SYM_VALUE(FIX) 		arm_apply_sym_value (FIX)
 #endif
 
 #ifdef OBJ_COFF
 # define TC_VALIDATE_FIX(FIX, SEGTYPE, LABEL)	arm_validate_fix (FIX)
+/* Values passed to md_apply_fix don't include the symbol value.  */
+# define MD_APPLY_SYM_VALUE(FIX) 		0
 #endif
 
 #define MD_PCREL_FROM_SECTION(F,S) md_pcrel_from_section(F,S)
@@ -290,4 +304,5 @@ void tc_pe_dwarf2_emit_offset (symbolS *, unsigned int);
 #ifdef OBJ_ELF
 #define CONVERT_SYMBOLIC_ATTRIBUTE(name) arm_convert_symbolic_attribute (name)
 extern int arm_convert_symbolic_attribute (const char *);
+extern int arm_apply_sym_value (struct fix *);
 #endif

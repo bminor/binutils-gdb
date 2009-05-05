@@ -6735,7 +6735,7 @@ encode_branch (int default_reloc)
     {
       constraint (inst.operands[0].imm != BFD_RELOC_ARM_PLT32,
 		  _("the only suffix valid here is '(plt)'"));
-      inst.reloc.type	= BFD_RELOC_ARM_PLT32;
+      inst.reloc.type  = BFD_RELOC_ARM_PLT32;
     }
   else
     {
@@ -6794,15 +6794,12 @@ do_blx (void)
   else
     {
       /* Arg is an address; this instruction cannot be executed
-	 conditionally, and the opcode must be adjusted.  */
+	 conditionally, and the opcode must be adjusted.
+	 We retain the BFD_RELOC_ARM_PCREL_BLX till the very end
+	 where we generate out a BFD_RELOC_ARM_PCREL_CALL instead.  */
       constraint (inst.cond != COND_ALWAYS, BAD_COND);
       inst.instruction = 0xfa000000;
-#ifdef OBJ_ELF
-      if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4)
-	encode_branch (BFD_RELOC_ARM_PCREL_CALL);
-      else
-#endif
-	encode_branch (BFD_RELOC_ARM_PCREL_BLX);
+      encode_branch (BFD_RELOC_ARM_PCREL_BLX);
     }
 }
 
@@ -17461,6 +17458,12 @@ relax_branch (fragS *fragp, asection *sec, int bits, long stretch)
       || sec != S_GET_SEGMENT (fragp->fr_symbol))
     return 4;
 
+#ifdef OBJ_ELF
+  if (S_IS_DEFINED (fragp->fr_symbol)
+      && ARM_IS_FUNC (fragp->fr_symbol))
+      return 4;
+#endif
+
   val = relaxed_symbol_addr (fragp, stretch);
   addr = fragp->fr_address + fragp->fr_fix + 4;
   val -= addr;
@@ -18185,6 +18188,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
 	      )))
     base = 0;
 
+
   switch (fixP->fx_r_type)
     {
       /* PC relative addressing on the Thumb is slightly odd as the
@@ -18206,21 +18210,43 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     case BFD_RELOC_THUMB_PCREL_BRANCH9:
     case BFD_RELOC_THUMB_PCREL_BRANCH12:
     case BFD_RELOC_THUMB_PCREL_BRANCH20:
-    case BFD_RELOC_THUMB_PCREL_BRANCH23:
     case BFD_RELOC_THUMB_PCREL_BRANCH25:
       return base + 4;
 
+    case BFD_RELOC_THUMB_PCREL_BRANCH23:
+       if (fixP->fx_addsy
+	  && ARM_IS_FUNC (fixP->fx_addsy)
+ 	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
+ 	base = fixP->fx_where + fixP->fx_frag->fr_address;
+       return base + 4;
+
       /* BLX is like branches above, but forces the low two bits of PC to
 	 zero.  */
-    case BFD_RELOC_THUMB_PCREL_BLX:
+     case BFD_RELOC_THUMB_PCREL_BLX:
+       if (fixP->fx_addsy
+ 	  && THUMB_IS_FUNC (fixP->fx_addsy)
+ 	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
+ 	base = fixP->fx_where + fixP->fx_frag->fr_address;
       return (base + 4) & ~3;
 
       /* ARM mode branches are offset by +8.  However, the Windows CE
 	 loader expects the relocation not to take this into account.  */
-    case BFD_RELOC_ARM_PCREL_BRANCH:
-    case BFD_RELOC_ARM_PCREL_CALL:
-    case BFD_RELOC_ARM_PCREL_JUMP:
     case BFD_RELOC_ARM_PCREL_BLX:
+       if (fixP->fx_addsy
+ 	  && ARM_IS_FUNC (fixP->fx_addsy)
+ 	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
+ 	base = fixP->fx_where + fixP->fx_frag->fr_address;
+       return base + 8;
+
+      case BFD_RELOC_ARM_PCREL_CALL:
+       if (fixP->fx_addsy
+ 	  && THUMB_IS_FUNC (fixP->fx_addsy)
+ 	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
+ 	base = fixP->fx_where + fixP->fx_frag->fr_address;
+       return base + 8;
+
+    case BFD_RELOC_ARM_PCREL_BRANCH:
+    case BFD_RELOC_ARM_PCREL_JUMP:
     case BFD_RELOC_ARM_PLT32:
 #ifdef TE_WINCE
       /* When handling fixups immediately, because we have already
@@ -18238,6 +18264,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
 #else
       return base + 8;
 #endif
+
 
       /* ARM mode loads relative to PC are also offset by +8.  Unlike
 	 branches, the Windows CE loader *does* expect the relocation
@@ -18982,14 +19009,41 @@ md_apply_fix (fixS *	fixP,
 
 #ifdef OBJ_ELF
     case BFD_RELOC_ARM_PCREL_CALL:
-      newval = md_chars_to_number (buf, INSN_SIZE);
-      if ((newval & 0xf0000000) == 0xf0000000)
-	temp = 1;
+
+      if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t)
+	  && fixP->fx_addsy
+	  && !S_IS_EXTERNAL (fixP->fx_addsy)
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && THUMB_IS_FUNC (fixP->fx_addsy))
+	/* Flip the bl to blx. This is a simple flip
+	   bit here because we generate PCREL_CALL for
+	   unconditional bls.  */
+	{
+	  newval = md_chars_to_number (buf, INSN_SIZE);
+	  newval = newval | 0x10000000;
+	  md_number_to_chars (buf, newval, INSN_SIZE);
+	  temp = 1;
+	  fixP->fx_done = 1;
+	}
       else
 	temp = 3;
       goto arm_branch_common;
 
     case BFD_RELOC_ARM_PCREL_JUMP:
+      if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t)
+	  && fixP->fx_addsy
+	  && !S_IS_EXTERNAL (fixP->fx_addsy)
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && THUMB_IS_FUNC (fixP->fx_addsy))
+	{
+	  /* This would map to a bl<cond>, b<cond>,
+	     b<always> to a Thumb function. We
+	     need to force a relocation for this particular
+	     case.  */
+	  newval = md_chars_to_number (buf, INSN_SIZE);
+	  fixP->fx_done = 0;
+	}
+
     case BFD_RELOC_ARM_PLT32:
 #endif
     case BFD_RELOC_ARM_PCREL_BRANCH:
@@ -18997,7 +19051,30 @@ md_apply_fix (fixS *	fixP,
       goto arm_branch_common;
 
     case BFD_RELOC_ARM_PCREL_BLX:
+
       temp = 1;
+      if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t)
+	  && fixP->fx_addsy
+	  && !S_IS_EXTERNAL (fixP->fx_addsy)
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && ARM_IS_FUNC (fixP->fx_addsy))
+	{
+	  /* Flip the blx to a bl and warn.  */
+	  const char *name = S_GET_NAME (fixP->fx_addsy);
+	  newval = 0xeb000000;
+	  as_warn_where (fixP->fx_file, fixP->fx_line,
+			 _("blx to '%s' an ARM ISA state function changed to bl"),
+			  name);
+	  md_number_to_chars (buf, newval, INSN_SIZE);
+	  temp = 3;
+	  fixP->fx_done = 1;
+	}
+
+#ifdef OBJ_ELF
+       if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4)
+         fixP->fx_r_type = BFD_RELOC_ARM_PCREL_CALL;
+#endif
+
     arm_branch_common:
       /* We are going to store value (shifted right by two) in the
 	 instruction, in a 24 bit, signed field.  Bits 26 through 32 either
@@ -19084,6 +19161,16 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH20:
+      if (fixP->fx_addsy
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && !S_IS_EXTERNAL (fixP->fx_addsy)
+	  && S_IS_DEFINED (fixP->fx_addsy)
+	  && ARM_IS_FUNC (fixP->fx_addsy)
+	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
+	{
+	  /* Force a relocation for a branch 20 bits wide.  */
+	  fixP->fx_done = 0;
+	}
       if ((value & ~0x1fffff) && ((value & ~0x1fffff) != ~0x1fffff))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("conditional branch out of range"));
@@ -19109,7 +19196,57 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_THUMB_PCREL_BLX:
+
+      /* If there is a blx from a thumb state function to
+	 another thumb function flip this to a bl and warn
+	 about it.  */
+
+      if (fixP->fx_addsy
+	  && S_IS_DEFINED (fixP->fx_addsy)
+	  && !S_IS_EXTERNAL (fixP->fx_addsy)
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && THUMB_IS_FUNC (fixP->fx_addsy))
+	{
+	  const char *name = S_GET_NAME (fixP->fx_addsy);
+	  as_warn_where (fixP->fx_file, fixP->fx_line,
+			 _("blx to Thumb func '%s' from Thumb ISA state changed to bl"),
+			 name);
+	  newval = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
+	  newval = newval | 0x1000;
+	  md_number_to_chars (buf+THUMB_SIZE, newval, THUMB_SIZE);
+	  fixP->fx_r_type = BFD_RELOC_THUMB_PCREL_BRANCH23;
+	  fixP->fx_done = 1;
+	}
+
+
+      goto thumb_bl_common;
+
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
+
+      /* A bl from Thumb state ISA to an internal ARM state function
+	 is converted to a blx.  */
+      if (fixP->fx_addsy
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && !S_IS_EXTERNAL (fixP->fx_addsy)
+	  && S_IS_DEFINED (fixP->fx_addsy)
+	  && ARM_IS_FUNC (fixP->fx_addsy)
+	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
+	{
+	  newval = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
+	  newval = newval & ~0x1000;
+	  md_number_to_chars (buf+THUMB_SIZE, newval, THUMB_SIZE);
+	  fixP->fx_r_type = BFD_RELOC_THUMB_PCREL_BLX;
+	  fixP->fx_done = 1;
+	}
+
+    thumb_bl_common:
+
+#ifdef OBJ_ELF
+       if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4 &&
+	   fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
+	 fixP->fx_r_type = BFD_RELOC_THUMB_PCREL_BRANCH23;
+#endif
+
       if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("branch out of range"));
@@ -19962,12 +20099,41 @@ arm_validate_fix (fixS * fixP)
 }
 #endif
 
+
 int
 arm_force_relocation (struct fix * fixp)
 {
 #if defined (OBJ_COFF) && defined (TE_PE)
   if (fixp->fx_r_type == BFD_RELOC_RVA)
     return 1;
+#endif
+
+  /* In case we have a call or a branch to a function in ARM ISA mode from
+     a thumb function or vice-versa force the relocation. These relocations
+     are cleared off for some cores that might have blx and simple transformations
+     are possible.  */
+
+#ifdef OBJ_ELF
+  switch (fixp->fx_r_type)
+    {
+    case BFD_RELOC_ARM_PCREL_JUMP:
+    case BFD_RELOC_ARM_PCREL_CALL:
+    case BFD_RELOC_THUMB_PCREL_BLX:
+      if (THUMB_IS_FUNC (fixp->fx_addsy))
+	return 1;
+      break;
+
+    case BFD_RELOC_ARM_PCREL_BLX:
+    case BFD_RELOC_THUMB_PCREL_BRANCH25:
+    case BFD_RELOC_THUMB_PCREL_BRANCH20:
+    case BFD_RELOC_THUMB_PCREL_BRANCH23:
+      if (ARM_IS_FUNC (fixp->fx_addsy))
+	return 1;
+      break;
+
+    default:
+      break;
+    }
 #endif
 
   /* Resolve these relocations even if the symbol is extern or weak.  */
@@ -20450,7 +20616,7 @@ md_begin (void)
 	      -mthumb-interwork		 Code supports ARM/Thumb interworking
 
 	      -m[no-]warn-deprecated     Warn about deprecated features
-	      
+
       For now we will also provide support for:
 
 	      -mapcs-32			 32-bit Program counter
@@ -21608,4 +21774,39 @@ arm_convert_symbolic_attribute (const char *name)
 
   return -1;
 }
+
+
+/* Apply sym value for relocations only in the case that
+   they are for local symbols and you have the respective
+   architectural feature for blx and simple switches.  */
+int
+arm_apply_sym_value (struct fix * fixP)
+{
+  if (fixP->fx_addsy
+      && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t)
+      && !S_IS_EXTERNAL (fixP->fx_addsy))
+    {
+      switch (fixP->fx_r_type)
+	{
+	case BFD_RELOC_ARM_PCREL_BLX:
+	case BFD_RELOC_THUMB_PCREL_BRANCH23:
+	  if (ARM_IS_FUNC (fixP->fx_addsy))
+	    return 1;
+	  break;
+
+	case BFD_RELOC_ARM_PCREL_CALL:
+	case BFD_RELOC_THUMB_PCREL_BLX:
+	  if (THUMB_IS_FUNC (fixP->fx_addsy))
+	      return 1;
+	  break;
+
+	default:
+	  break;
+	}
+
+    }
+  return 0;
+}
 #endif /* OBJ_ELF */
+
+
