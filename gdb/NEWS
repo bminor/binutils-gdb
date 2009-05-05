@@ -3,6 +3,11 @@
 
 *** Changes since GDB 6.8
 
+* Reverse debugging: GDB now has new commands reverse-continue, reverse-
+step, reverse-next, reverse-finish, reverse-stepi, reverse-nexti, and
+set execution-direction {forward|reverse}, for targets that support
+reverse execution.
+
 * GDB now supports hardware watchpoints on MIPS/Linux systems.  This
 feature is available with a native GDB running on kernel version
 2.6.28 or later.
