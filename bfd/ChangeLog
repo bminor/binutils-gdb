@@ -1,3 +1,14 @@
+2009-05-05  Paul Brook  <paul@codesourcery.com>
+
+	* bfd-in.h (elf32_arm_fix_exidx_coverage): Add prototype.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (arm_unwind_edit_type, arm_unwind_table_edit): Define.
+	(_arm_elf_section_data): Add text and exidx fields.
+	(add_unwind_table_edit, get_arm_elf_section_data, adjust_exidx_size,
+	insert_cantunwind_after, elf32_arm_fix_exidx_coverage, offset_prel31,
+	copy_exidx_entry): New functions.
+	(elf32_arm_write_section): Fixup .ARM.exidx contents.
+
 2009-05-05  Christophe lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (DEF_STUBS): New helper define.

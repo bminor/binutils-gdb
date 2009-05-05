@@ -905,7 +905,11 @@ extern bfd_boolean elf32_arm_size_stubs
    struct bfd_section * (*) (const char *, struct bfd_section *), void (*) (void));
 extern bfd_boolean elf32_arm_build_stubs
   (struct bfd_link_info *);
-  
+
+/* ARM unwind section editing support.  */
+extern bfd_boolean elf32_arm_fix_exidx_coverage
+  (struct bfd_section **, unsigned int, struct bfd_link_info *);
+
 /* TI COFF load page support.  */
 extern void bfd_ticoff_set_section_load_page
   (struct bfd_section *, int);

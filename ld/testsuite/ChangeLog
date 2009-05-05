@@ -1,3 +1,16 @@
+2009-05-05  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm.ld: Add .ARM.exidx and .ARM.extab.
+	* ld-arm/arm-elf.exp: Add unwind-[1-4].
+	* ld-arm/unwind-1.d: New test.
+	* ld-arm/unwind-1.s: New test.
+	* ld-arm/unwind-2.d: New test.
+	* ld-arm/unwind-2.s: New test.
+	* ld-arm/unwind-3.d: New test.
+	* ld-arm/unwind-3.s: New test.
+	* ld-arm/unwind-4.d: New test.
+	* ld-arm/unwind-4.s: New test.
+
 2009-05-01  Julian Brown  <julian@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (armeabitests): Add thumb2-bl-blx-interwork test.

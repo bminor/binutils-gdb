@@ -1,3 +1,8 @@
+2009-05-05  Paul Brook  <paul@codesourcery.com>
+
+	* emultempl/armelf.em (compare_output_sec_vma): New function.
+	(gld${EMULATION_NAME}_finish): Add exidx munging code.
+
 2009-05-05  Anatoly Sokolov  <aesok@post.ru>
 
 	* scripttempl/avr.sc (MEMORY): Use DATA_ORIGIN.

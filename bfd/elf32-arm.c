@@ -19,6 +19,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include <limits.h>
+
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
@@ -2283,14 +2285,52 @@ typedef struct elf32_vfp11_erratum_list
 }
 elf32_vfp11_erratum_list;
 
+typedef enum
+{
+  DELETE_EXIDX_ENTRY,
+  INSERT_EXIDX_CANTUNWIND_AT_END
+}
+arm_unwind_edit_type;
+
+/* A (sorted) list of edits to apply to an unwind table.  */
+typedef struct arm_unwind_table_edit
+{
+  arm_unwind_edit_type type;
+  /* Note: we sometimes want to insert an unwind entry corresponding to a
+     section different from the one we're currently writing out, so record the
+     (text) section this edit relates to here.  */
+  asection *linked_section;
+  unsigned int index;
+  struct arm_unwind_table_edit *next;
+}
+arm_unwind_table_edit;
+
 typedef struct _arm_elf_section_data
 {
+  /* Information about mapping symbols.  */
   struct bfd_elf_section_data elf;
   unsigned int mapcount;
   unsigned int mapsize;
   elf32_arm_section_map *map;
+  /* Information about CPU errata.  */
   unsigned int erratumcount;
   elf32_vfp11_erratum_list *erratumlist;
+  /* Information about unwind tables.  */
+  union
+  {
+    /* Unwind info attached to a text section.  */
+    struct
+    {
+      asection *arm_exidx_sec;
+    } text;
+
+    /* Unwind info attached to an .ARM.exidx section.  */
+    struct
+    {
+      arm_unwind_table_edit *unwind_edit_list;
+      arm_unwind_table_edit *unwind_edit_tail;
+    } exidx;
+  } u;
 }
 _arm_elf_section_data;
 
@@ -8148,6 +8188,245 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
   return TRUE;
 }
 
+/* Add a new unwind edit to the list described by HEAD, TAIL.  If INDEX is zero,
+   adds the edit to the start of the list.  (The list must be built in order of
+   ascending INDEX: the function's callers are primarily responsible for
+   maintaining that condition).  */
+
+static void
+add_unwind_table_edit (arm_unwind_table_edit **head,
+		       arm_unwind_table_edit **tail,
+		       arm_unwind_edit_type type,
+		       asection *linked_section,
+		       unsigned int index)
+{
+  arm_unwind_table_edit *new_edit = xmalloc (sizeof (arm_unwind_table_edit));
+  
+  new_edit->type = type;
+  new_edit->linked_section = linked_section;
+  new_edit->index = index;
+  
+  if (index > 0)
+    {
+      new_edit->next = NULL;
+
+      if (*tail)
+	(*tail)->next = new_edit;
+
+      (*tail) = new_edit;
+
+      if (!*head)
+	(*head) = new_edit;
+    }
+  else
+    {
+      new_edit->next = *head;
+
+      if (!*tail)
+	*tail = new_edit;
+
+      *head = new_edit;
+    }
+}
+
+static _arm_elf_section_data *get_arm_elf_section_data (asection *);
+
+/* Increase the size of EXIDX_SEC by ADJUST bytes.  ADJUST mau be negative.  */
+static void
+adjust_exidx_size(asection *exidx_sec, int adjust)
+{
+  asection *out_sec;
+
+  if (!exidx_sec->rawsize)
+    exidx_sec->rawsize = exidx_sec->size;
+
+  bfd_set_section_size (exidx_sec->owner, exidx_sec, exidx_sec->size + adjust);
+  out_sec = exidx_sec->output_section;
+  /* Adjust size of output section.  */
+  bfd_set_section_size (out_sec->owner, out_sec, out_sec->size +adjust);
+}
+
+/* Insert an EXIDX_CANTUNWIND marker at the end of a section.  */
+static void
+insert_cantunwind_after(asection *text_sec, asection *exidx_sec)
+{
+  struct _arm_elf_section_data *exidx_arm_data;
+
+  exidx_arm_data = get_arm_elf_section_data (exidx_sec);
+  add_unwind_table_edit (
+    &exidx_arm_data->u.exidx.unwind_edit_list,
+    &exidx_arm_data->u.exidx.unwind_edit_tail,
+    INSERT_EXIDX_CANTUNWIND_AT_END, text_sec, UINT_MAX);
+
+  adjust_exidx_size(exidx_sec, 8);
+}
+
+/* Scan .ARM.exidx tables, and create a list describing edits which should be
+   made to those tables, such that:
+   
+     1. Regions without unwind data are marked with EXIDX_CANTUNWIND entries.
+     2. Duplicate entries are merged together (EXIDX_CANTUNWIND, or unwind
+        codes which have been inlined into the index).
+
+   The edits are applied when the tables are written
+   (in elf32_arm_write_section).
+*/
+
+bfd_boolean
+elf32_arm_fix_exidx_coverage (asection **text_section_order,
+			      unsigned int num_text_sections,
+			      struct bfd_link_info *info)
+{
+  bfd *inp;
+  unsigned int last_second_word = 0, i;
+  asection *last_exidx_sec = NULL;
+  asection *last_text_sec = NULL;
+  int last_unwind_type = -1;
+
+  /* Walk over all EXIDX sections, and create backlinks from the corrsponding
+     text sections.  */
+  for (inp = info->input_bfds; inp != NULL; inp = inp->link_next)
+    {
+      asection *sec;
+      
+      for (sec = inp->sections; sec != NULL; sec = sec->next)
+        {
+	  struct bfd_elf_section_data *elf_sec = elf_section_data (sec);
+	  Elf_Internal_Shdr *hdr = &elf_sec->this_hdr;
+	  
+	  if (hdr->sh_type != SHT_ARM_EXIDX)
+	    continue;
+	  
+	  if (elf_sec->linked_to)
+	    {
+	      Elf_Internal_Shdr *linked_hdr
+	        = &elf_section_data (elf_sec->linked_to)->this_hdr;
+	      struct _arm_elf_section_data *linked_sec_arm_data
+	        = get_arm_elf_section_data (linked_hdr->bfd_section);
+
+	      if (linked_sec_arm_data == NULL)
+	        continue;
+
+	      /* Link this .ARM.exidx section back from the text section it
+	         describes.  */
+	      linked_sec_arm_data->u.text.arm_exidx_sec = sec;
+	    }
+	}
+    }
+
+  /* Walk all text sections in order of increasing VMA.  Eilminate duplicate
+     index table entries (EXIDX_CANTUNWIND and inlined unwind opcodes),
+     and add EXIDX_CANTUNWIND entries for sections with no unwind table data.
+   */
+
+  for (i = 0; i < num_text_sections; i++)
+    {
+      asection *sec = text_section_order[i];
+      asection *exidx_sec;
+      struct _arm_elf_section_data *arm_data = get_arm_elf_section_data (sec);
+      struct _arm_elf_section_data *exidx_arm_data;
+      bfd_byte *contents = NULL;
+      int deleted_exidx_bytes = 0;
+      bfd_vma j;
+      arm_unwind_table_edit *unwind_edit_head = NULL;
+      arm_unwind_table_edit *unwind_edit_tail = NULL;
+      Elf_Internal_Shdr *hdr;
+      bfd *ibfd;
+
+      if (arm_data == NULL)
+        continue;
+
+      exidx_sec = arm_data->u.text.arm_exidx_sec;
+      if (exidx_sec == NULL)
+	{
+	  /* Section has no unwind data.  */
+	  if (last_unwind_type == 0 || !last_exidx_sec)
+	    continue;
+
+	  /* Ignore zero sized sections.  */
+	  if (sec->size == 0)
+	    continue;
+
+	  insert_cantunwind_after(last_text_sec, last_exidx_sec);
+	  last_unwind_type = 0;
+	  continue;
+	}
+
+      hdr = &elf_section_data (exidx_sec)->this_hdr;
+      if (hdr->sh_type != SHT_ARM_EXIDX)
+        continue;
+      
+      exidx_arm_data = get_arm_elf_section_data (exidx_sec);
+      if (exidx_arm_data == NULL)
+        continue;
+      
+      ibfd = exidx_sec->owner;
+	  
+      if (hdr->contents != NULL)
+	contents = hdr->contents;
+      else if (! bfd_malloc_and_get_section (ibfd, exidx_sec, &contents))
+	/* An error?  */
+	continue;
+
+      for (j = 0; j < hdr->sh_size; j += 8)
+	{
+	  unsigned int second_word = bfd_get_32 (ibfd, contents + j + 4);
+	  int unwind_type;
+	  int elide = 0;
+
+	  /* An EXIDX_CANTUNWIND entry.  */
+	  if (second_word == 1)
+	    {
+	      if (last_unwind_type == 0)
+		elide = 1;
+	      unwind_type = 0;
+	    }
+	  /* Inlined unwinding data.  Merge if equal to previous.  */
+	  else if ((second_word & 0x80000000) != 0)
+	    {
+	      if (last_second_word == second_word && last_unwind_type == 1)
+		elide = 1;
+	      unwind_type = 1;
+	      last_second_word = second_word;
+	    }
+	  /* Normal table entry.  In theory we could merge these too,
+	     but duplicate entries are likely to be much less common.  */
+	  else
+	    unwind_type = 2;
+
+	  if (elide)
+	    {
+	      add_unwind_table_edit (&unwind_edit_head, &unwind_edit_tail,
+				     DELETE_EXIDX_ENTRY, NULL, j / 8);
+
+	      deleted_exidx_bytes += 8;
+	    }
+
+	  last_unwind_type = unwind_type;
+	}
+
+      /* Free contents if we allocated it ourselves.  */
+      if (contents != hdr->contents)
+        free (contents);
+
+      /* Record edits to be applied later (in elf32_arm_write_section).  */
+      exidx_arm_data->u.exidx.unwind_edit_list = unwind_edit_head;
+      exidx_arm_data->u.exidx.unwind_edit_tail = unwind_edit_tail;
+	  
+      if (deleted_exidx_bytes > 0)
+	adjust_exidx_size(exidx_sec, -deleted_exidx_bytes);
+
+      last_exidx_sec = exidx_sec;
+      last_text_sec = sec;
+    }
+
+  /* Add terminating CANTUNWIND entry.  */
+  if (last_exidx_sec && last_unwind_type != 0)
+    insert_cantunwind_after(last_text_sec, last_exidx_sec);
+
+  return TRUE;
+}
+
 static bfd_boolean
 elf32_arm_output_glue_section (struct bfd_link_info *info, bfd *obfd,
 			       bfd *ibfd, const char *name)
@@ -12131,6 +12410,35 @@ elf32_arm_compare_mapping (const void * a, const void * b)
     return 0;
 }
 
+/* Add OFFSET to lower 31 bits of ADDR, leaving other bits unmodified.  */
+
+static unsigned long
+offset_prel31 (unsigned long addr, bfd_vma offset)
+{
+  return (addr & ~0x7ffffffful) | ((addr + offset) & 0x7ffffffful);
+}
+
+/* Copy an .ARM.exidx table entry, adding OFFSET to (applied) PREL31
+   relocations.  */
+
+static void
+copy_exidx_entry (bfd *output_bfd, bfd_byte *to, bfd_byte *from, bfd_vma offset)
+{
+  unsigned long first_word = bfd_get_32 (output_bfd, from);
+  unsigned long second_word = bfd_get_32 (output_bfd, from + 4);
+  
+  /* High bit of first word is supposed to be zero.  */
+  if ((first_word & 0x80000000ul) == 0)
+    first_word = offset_prel31 (first_word, offset);
+  
+  /* If the high bit of the first word is clear, and the bit pattern is not 0x1
+     (EXIDX_CANTUNWIND), this is an offset to an .ARM.extab entry.  */
+  if ((second_word != 0x1) && ((second_word & 0x80000000ul) == 0))
+    second_word = offset_prel31 (second_word, offset);
+  
+  bfd_put_32 (output_bfd, first_word, to);
+  bfd_put_32 (output_bfd, second_word, to + 4);
+}
 
 /* Do code byteswapping.  Return FALSE afterwards so that the section is
    written out as normal.  */
@@ -12235,6 +12543,94 @@ elf32_arm_write_section (bfd *output_bfd,
               abort ();
             }
         }
+    }
+
+  if (arm_data->elf.this_hdr.sh_type == SHT_ARM_EXIDX)
+    {
+      arm_unwind_table_edit *edit_node
+        = arm_data->u.exidx.unwind_edit_list;
+      /* Now, sec->size is the size of the section we will write.  The original
+         size (before we merged duplicate entries and inserted EXIDX_CANTUNWIND
+	 markers) was sec->rawsize.  (This isn't the case if we perform no
+	 edits, then rawsize will be zero and we should use size).  */
+      bfd_byte *edited_contents = bfd_malloc (sec->size);
+      unsigned int input_size = sec->rawsize ? sec->rawsize : sec->size;
+      unsigned int in_index, out_index;
+      bfd_vma add_to_offsets = 0;
+
+      for (in_index = 0, out_index = 0; in_index * 8 < input_size || edit_node;)
+        {
+	  if (edit_node)
+	    {
+	      unsigned int edit_index = edit_node->index;
+	      
+	      if (in_index < edit_index && in_index * 8 < input_size)
+	        {
+		  copy_exidx_entry (output_bfd, edited_contents + out_index * 8,
+				    contents + in_index * 8, add_to_offsets);
+		  out_index++;
+		  in_index++;
+		}
+	      else if (in_index == edit_index
+		       || (in_index * 8 >= input_size
+			   && edit_index == UINT_MAX))
+	        {
+		  switch (edit_node->type)
+		    {
+		    case DELETE_EXIDX_ENTRY:
+		      in_index++;
+		      add_to_offsets += 8;
+		      break;
+		    
+		    case INSERT_EXIDX_CANTUNWIND_AT_END:
+		      {
+		        asection *text_sec = edit_node->linked_section;
+			bfd_vma text_offset = text_sec->output_section->vma
+					      + text_sec->output_offset
+					      + text_sec->size;
+			bfd_vma exidx_offset = offset + out_index * 8;
+		        unsigned long prel31_offset;
+
+			/* Note: this is meant to be equivalent to an
+			   R_ARM_PREL31 relocation.  These synthetic
+			   EXIDX_CANTUNWIND markers are not relocated by the
+			   usual BFD method.  */
+			prel31_offset = (text_offset - exidx_offset)
+					& 0x7ffffffful;
+
+			/* First address we can't unwind.  */
+			bfd_put_32 (output_bfd, prel31_offset,
+				    &edited_contents[out_index * 8]);
+
+			/* Code for EXIDX_CANTUNWIND.  */
+			bfd_put_32 (output_bfd, 0x1,
+				    &edited_contents[out_index * 8 + 4]);
+
+			out_index++;
+			add_to_offsets -= 8;
+		      }
+		      break;
+		    }
+		  
+		  edit_node = edit_node->next;
+		}
+	    }
+	  else
+	    {
+	      /* No more edits, copy remaining entries verbatim.  */
+	      copy_exidx_entry (output_bfd, edited_contents + out_index * 8,
+				contents + in_index * 8, add_to_offsets);
+	      out_index++;
+	      in_index++;
+	    }
+	}
+
+      if (!(sec->flags & SEC_EXCLUDE) && !(sec->flags & SEC_NEVER_LOAD))
+	bfd_set_section_contents (output_bfd, sec->output_section,
+				  edited_contents,
+				  (file_ptr) sec->output_offset, sec->size);
+
+      return TRUE;
     }
 
   if (mapcount == 0)

@@ -258,10 +258,78 @@ build_section_lists (lang_statement_union_type *statement)
     }
 }
 
+static int
+compare_output_sec_vma (const void *a, const void *b)
+{
+  asection *asec = *(asection **) a, *bsec = *(asection **) b;
+  asection *aout = asec->output_section, *bout = bsec->output_section;
+  bfd_vma avma, bvma;
+  
+  /* If there's no output section for some reason, compare equal.  */
+  if (!aout || !bout)
+    return 0;
+  
+  avma = aout->vma + asec->output_offset;
+  bvma = bout->vma + bsec->output_offset;
+  
+  if (avma > bvma)
+    return 1;
+  else if (avma < bvma)
+    return -1;
+  
+  return 0;
+}
+
 static void
 gld${EMULATION_NAME}_finish (void)
 {
   struct bfd_link_hash_entry * h;
+  unsigned int list_size = 10;
+  asection **sec_list = xmalloc (list_size * sizeof (asection *));
+  unsigned int sec_count = 0;
+
+  if (!link_info.relocatable)
+    {
+      /* Build a sorted list of input text sections, then use that to process
+	 the unwind table index.  */
+      LANG_FOR_EACH_INPUT_STATEMENT (is)
+	{
+	  bfd *abfd = is->the_bfd;
+	  asection *sec;
+	  
+	  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
+	    continue;
+	  
+	  for (sec = abfd->sections; sec != NULL; sec = sec->next)
+	    {
+	      asection *out_sec = sec->output_section;
+
+	      if (out_sec
+		  && elf_section_type (sec) == SHT_PROGBITS
+		  && (elf_section_flags (sec) & SHF_EXECINSTR) != 0
+		  && (sec->flags & SEC_EXCLUDE) == 0
+		  && sec->sec_info_type != ELF_INFO_TYPE_JUST_SYMS
+		  && out_sec != bfd_abs_section_ptr)
+		{
+		  if (sec_count == list_size)
+		    {
+		      list_size *= 2;
+		      sec_list = xrealloc (sec_list,
+					   list_size * sizeof (asection *));
+		    }
+
+		  sec_list[sec_count++] = sec;
+		}
+	    }
+	}
+	
+      qsort (sec_list, sec_count, sizeof (asection *), &compare_output_sec_vma);
+      
+      if (elf32_arm_fix_exidx_coverage (sec_list, sec_count, &link_info))
+	need_laying_out = 1;
+      
+      free (sec_list);
+    }
 
   /* bfd_elf32_discard_info just plays with debugging sections,
      ie. doesn't affect any code, so we can delay resizing the
