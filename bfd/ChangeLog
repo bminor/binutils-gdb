@@ -1,3 +1,12 @@
+2009-05-05  Christophe lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (DEF_STUBS): New helper define.
+	(DEF_STUB): Likewise.
+	(stub_def): New type.
+	(stub_definitions): New array, containing stub template pointers
+	and sizes.
+	(arm_size_one_stub): Make use of stub_definitions.
+
 2009-05-04  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* elflink.c (find_version_for_sym):  Remove from here, ...

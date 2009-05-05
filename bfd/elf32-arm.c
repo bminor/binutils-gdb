@@ -2166,21 +2166,38 @@ static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_thumb_pic[] =
    string.  */
 #define STUB_SUFFIX ".stub"
 
-enum elf32_arm_stub_type
-{
+/* One entry per long/short branch stub defined above.  */
+#define DEF_STUBS \
+  DEF_STUB(long_branch_any_any)	\
+  DEF_STUB(long_branch_v4t_arm_thumb) \
+  DEF_STUB(long_branch_thumb_only) \
+  DEF_STUB(long_branch_v4t_thumb_thumb)	\
+  DEF_STUB(long_branch_v4t_thumb_arm) \
+  DEF_STUB(short_branch_v4t_thumb_arm) \
+  DEF_STUB(long_branch_any_arm_pic) \
+  DEF_STUB(long_branch_any_thumb_pic) \
+  DEF_STUB(long_branch_v4t_thumb_thumb_pic) \
+  DEF_STUB(long_branch_v4t_arm_thumb_pic) \
+  DEF_STUB(long_branch_v4t_thumb_arm_pic) \
+  DEF_STUB(long_branch_thumb_only_pic)
+
+#define DEF_STUB(x) arm_stub_##x,
+enum elf32_arm_stub_type {
   arm_stub_none,
-  arm_stub_long_branch_any_any,
-  arm_stub_long_branch_v4t_arm_thumb,
-  arm_stub_long_branch_thumb_only,
-  arm_stub_long_branch_v4t_thumb_thumb,
-  arm_stub_long_branch_v4t_thumb_arm,
-  arm_stub_short_branch_v4t_thumb_arm,
-  arm_stub_long_branch_any_arm_pic,
-  arm_stub_long_branch_any_thumb_pic,
-  arm_stub_long_branch_v4t_arm_thumb_pic,
-  arm_stub_long_branch_v4t_thumb_arm_pic,
-  arm_stub_long_branch_thumb_only_pic,
-  arm_stub_long_branch_v4t_thumb_thumb_pic,
+  DEF_STUBS
+};
+#undef DEF_STUB
+
+typedef struct
+{
+  const insn_sequence* template;
+  int template_size;
+} stub_def;
+
+#define DEF_STUB(x) {elf32_arm_stub_##x, ARRAY_SIZE(elf32_arm_stub_##x)},
+static const stub_def stub_definitions[] = {
+  {NULL, 0},
+  DEF_STUBS
 };
 
 struct elf32_arm_stub_hash_entry
@@ -3361,60 +3378,11 @@ arm_size_one_stub (struct bfd_hash_entry *gen_entry,
   stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
   htab = (struct elf32_arm_link_hash_table *) in_arg;
 
-  switch (stub_entry->stub_type)
-    {
-    case arm_stub_long_branch_any_any:
-      template =  elf32_arm_stub_long_branch_any_any;
-      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_any_any);
-      break;
-    case arm_stub_long_branch_v4t_arm_thumb:
-      template =  elf32_arm_stub_long_branch_v4t_arm_thumb;
-      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_v4t_arm_thumb);
-      break;
-    case arm_stub_long_branch_thumb_only:
-      template =  elf32_arm_stub_long_branch_thumb_only;
-      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_thumb_only);
-      break;
-    case arm_stub_long_branch_v4t_thumb_thumb:
-      template =  elf32_arm_stub_long_branch_v4t_thumb_thumb;
-      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_v4t_thumb_thumb);
-      break;
-    case arm_stub_long_branch_v4t_thumb_arm:
-      template =  elf32_arm_stub_long_branch_v4t_thumb_arm;
-      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_v4t_thumb_arm);
-      break;
-    case arm_stub_short_branch_v4t_thumb_arm:
-      template =  elf32_arm_stub_short_branch_v4t_thumb_arm;
-      template_size = ARRAY_SIZE (elf32_arm_stub_short_branch_v4t_thumb_arm);
-      break;
-    case arm_stub_long_branch_any_arm_pic:
-      template = elf32_arm_stub_long_branch_any_arm_pic;
-      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_any_arm_pic);
-      break;
-    case arm_stub_long_branch_any_thumb_pic:
-      template = elf32_arm_stub_long_branch_any_thumb_pic;
-      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_any_thumb_pic);
-      break;
-    case arm_stub_long_branch_v4t_arm_thumb_pic:
-      template = elf32_arm_stub_long_branch_v4t_arm_thumb_pic;
-      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_v4t_arm_thumb_pic);
-      break;
-    case arm_stub_long_branch_v4t_thumb_arm_pic:
-      template = elf32_arm_stub_long_branch_v4t_thumb_arm_pic;
-      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_v4t_thumb_arm_pic);
-      break;
-    case arm_stub_long_branch_thumb_only_pic:
-      template = elf32_arm_stub_long_branch_thumb_only_pic;
-      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_thumb_only_pic);
-      break;
-    case arm_stub_long_branch_v4t_thumb_thumb_pic:
-      template = elf32_arm_stub_long_branch_v4t_thumb_thumb_pic;
-      template_size = ARRAY_SIZE (elf32_arm_stub_long_branch_v4t_thumb_thumb_pic);
-      break;
-    default:
-      BFD_FAIL ();
-      return FALSE;
-    }
+  BFD_ASSERT((stub_entry->stub_type > arm_stub_none)
+	     && stub_entry->stub_type < ARRAY_SIZE(stub_definitions));
+
+  template = stub_definitions[stub_entry->stub_type].template;
+  template_size = stub_definitions[stub_entry->stub_type].template_size;
 
   size = 0;
   for (i = 0; i < template_size; i++)
