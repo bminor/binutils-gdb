@@ -146,6 +146,10 @@ struct lwp_info
      was a single-step.  */
   int stepping;
 
+  /* If this flag is set, we need to set the event request flags the
+     next time we see this LWP stop.  */
+  int must_set_ptrace_flags;
+
   /* If this is non-zero, it points to a chain of signals which need to
      be delivered to this process.  */
   struct pending_signals *pending_signals;

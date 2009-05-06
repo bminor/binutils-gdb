@@ -1,3 +1,15 @@
+2009-05-06  Pedro Alves  <pedro@codesourcery.com>
+
+	PR server/10048
+
+	* linux-low.c (must_set_ptrace_flags): Delete.
+	(linux_create_inferior): Set `lwp->must_set_ptrace_flags' instead
+	of the global.
+	(linux_attach_lwp_1): Don't set PTRACE_SETOPTIONS here.  Set
+	`lwp->must_set_ptrace_flags' instead.
+	(linux_wait_for_event_1): If ptrace options here.
+	(linux_wait_1): ... not here.
+
 2009-04-30  Doug Evans  <dje@google.com>
 
 	* inferiors.c (started_inferior_callback): New function.

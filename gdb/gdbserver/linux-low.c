@@ -109,8 +109,6 @@ int stopping_threads;
 /* FIXME make into a target method?  */
 int using_threads = 1;
 
-static int must_set_ptrace_flags;
-
 /* This flag is true iff we've just created or attached to our first
    inferior but it has not stopped yet.  As soon as it does, we need
    to call the low target's arch_setup callback.  Doing this only on
@@ -319,7 +317,7 @@ add_lwp (ptid_t ptid)
 static int
 linux_create_inferior (char *program, char **allargs)
 {
-  void *new_lwp;
+  struct lwp_info *new_lwp;
   int pid;
   ptid_t ptid;
 
@@ -354,7 +352,7 @@ linux_create_inferior (char *program, char **allargs)
   ptid = ptid_build (pid, pid, 0);
   new_lwp = add_lwp (ptid);
   add_thread (ptid, new_lwp);
-  must_set_ptrace_flags = 1;
+  new_lwp->must_set_ptrace_flags = 1;
 
   return pid;
 }
@@ -383,10 +381,6 @@ linux_attach_lwp_1 (unsigned long lwpid, int initial)
 	       strerror (errno), errno);
     }
 
-  /* FIXME: This intermittently fails.
-     We need to wait for SIGSTOP first.  */
-  ptrace (PTRACE_SETOPTIONS, lwpid, 0, PTRACE_O_TRACECLONE);
-
   if (initial)
     /* NOTE/FIXME: This lwp might have not been the tgid.  */
     ptid = ptid_build (lwpid, lwpid, 0);
@@ -401,6 +395,11 @@ linux_attach_lwp_1 (unsigned long lwpid, int initial)
 
   new_lwp = (struct lwp_info *) add_lwp (ptid);
   add_thread (ptid, new_lwp);
+
+
+  /* We need to wait for SIGSTOP before being able to make the next
+     ptrace call on this LWP.  */
+  new_lwp->must_set_ptrace_flags = 1;
 
   /* The next time we wait for this LWP we'll see a SIGSTOP as PTRACE_ATTACH
      brings it to a halt.
@@ -996,6 +995,13 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 	  continue;
 	}
 
+      if (event_child->must_set_ptrace_flags)
+	{
+	  ptrace (PTRACE_SETOPTIONS, lwpid_of (event_child),
+		  0, PTRACE_O_TRACECLONE);
+	  event_child->must_set_ptrace_flags = 0;
+	}
+
       if (WIFSTOPPED (*wstat)
 	  && WSTOPSIG (*wstat) == SIGSTOP
 	  && event_child->stop_expected)
@@ -1258,11 +1264,6 @@ retry:
 
   lwp = get_thread_lwp (current_inferior);
 
-  if (must_set_ptrace_flags)
-    {
-      ptrace (PTRACE_SETOPTIONS, lwpid_of (lwp), 0, PTRACE_O_TRACECLONE);
-      must_set_ptrace_flags = 0;
-    }
   /* If we are waiting for a particular child, and it exited,
      linux_wait_for_event will return its exit status.  Similarly if
      the last child exited.  If this is not the last child, however,
