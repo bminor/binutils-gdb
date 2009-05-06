@@ -7,7 +7,7 @@
 	of the global.
 	(linux_attach_lwp_1): Don't set PTRACE_SETOPTIONS here.  Set
 	`lwp->must_set_ptrace_flags' instead.
-	(linux_wait_for_event_1): If ptrace options here.
+	(linux_wait_for_event_1): Set ptrace options here.
 	(linux_wait_1): ... not here.
 
 2009-04-30  Doug Evans  <dje@google.com>
