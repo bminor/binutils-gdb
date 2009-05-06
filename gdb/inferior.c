@@ -84,6 +84,8 @@ add_inferior_silent (int pid)
   inf->next = inferior_list;
   inferior_list = inf;
 
+  observer_notify_new_inferior (pid);
+
   return inf;
 }
 
@@ -91,8 +93,6 @@ struct inferior *
 add_inferior (int pid)
 {
   struct inferior *inf = add_inferior_silent (pid);
-
-  observer_notify_new_inferior (pid);
 
   if (print_inferior_events)
     printf_unfiltered (_("[New inferior %d]\n"), pid);

@@ -1,3 +1,9 @@
+2009-05-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferior.c (add_inferior): Move observer_notify_new_inferior
+	call to ...
+	(add_inferior_silent): ... here.
+
 2009-05-06  Pierre Muller  <muller.u-strasbg.fr>
 	    Pedro Alves  <pedro@codesourcery.com>
 
