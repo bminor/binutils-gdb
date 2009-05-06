@@ -67,6 +67,8 @@
 #include <sys/time.h>
 #include <time.h>
 
+#include "gdb_usleep.h"
+
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
 #endif
@@ -1477,6 +1479,25 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       gdb_flush (gdb_stdout);
 
       answer = fgetc (stdin);
+
+      /* We expect fgetc to block until a character is read.  But
+         this may not be the case if the terminal was opened with
+         the NONBLOCK flag.  In that case, if there is nothing to
+         read on stdin, fgetc returns EOF, but also sets the error
+         condition flag on stdin and errno to EAGAIN.  With a true
+         EOF, stdin's error condition flag is not set.
+
+         A situation where this behavior was observed is a pseudo
+         terminal on AIX.  */
+      while (answer == EOF && ferror (stdin) && errno == EAGAIN)
+        {
+          /* Not a real EOF.  Wait a little while and try again until
+             we read something.  */
+          clearerr (stdin);
+          gdb_usleep (10000);
+          answer = fgetc (stdin);
+        }
+
       clearerr (stdin);		/* in case of C-d */
       if (answer == EOF)	/* C-d */
 	{

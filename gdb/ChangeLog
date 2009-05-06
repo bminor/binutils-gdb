@@ -1,3 +1,10 @@
+2009-05-06  Joel Brobecker   <brobecker@adacore.com>
+
+	* utils.c: Add include of gdb_usleep.h.
+	(defaulted_query): Detect false EOF conditions that happen
+	on terminals opened with the O_NONBLOCK flag when there is
+	nothing to read.
+
 2009-05-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* inferior.c (add_inferior): Move observer_notify_new_inferior
