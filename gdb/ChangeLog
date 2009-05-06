@@ -1,6 +1,10 @@
 2008-05-06  Hui Zhu  <teawater@gmail.com>
 
-       * NEWS: Add item for process record and replay.
+	* i386-tdep.c (i386_process_record): Change bzero to memset.
+
+2008-05-06  Hui Zhu  <teawater@gmail.com>
+
+	* NEWS: Add item for process record and replay.
 
 2009-05-05  Maxim Grigoriev  <maxim2405@gmail.com>
 

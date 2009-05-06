@@ -2993,7 +2993,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   uint32_t opcode;
   struct i386_record_s ir;
 
-  bzero (&ir, sizeof (struct i386_record_s));
+  memset (&ir, 0, sizeof (struct i386_record_s));
   ir.regcache = regcache;
   ir.addr = addr;
   ir.aflag = 1;
