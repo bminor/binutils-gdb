@@ -5322,13 +5322,12 @@ procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
  * else returns zero.
  */
 
-int
-procfs_stopped_by_watchpoint (ptid_t ptid)
+static int
+procfs_stopped_by_watchpoint (void)
 {
   procinfo *pi;
 
-  pi = find_procinfo_or_die (PIDGET (ptid) == -1 ?
-			     PIDGET (inferior_ptid) : PIDGET (ptid), 0);
+  pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
 
   if (!pi)	/* If no process, then not stopped by watchpoint!  */
     return 0;
@@ -5348,6 +5347,53 @@ procfs_stopped_by_watchpoint (ptid_t ptid)
 	}
     }
   return 0;
+}
+
+static int
+procfs_insert_watchpoint (CORE_ADDR addr, int len, int type)
+{
+  if (!HAVE_STEPPABLE_WATCHPOINT
+      && !gdbarch_have_nonsteppable_watchpoint (current_gdbarch))
+    {
+      /* When a hardware watchpoint fires off the PC will be left at
+	 the instruction following the one which caused the
+	 watchpoint.  It will *NOT* be necessary for GDB to step over
+	 the watchpoint.  */
+      return procfs_set_watchpoint (inferior_ptid, addr, len, type, 1);
+    }
+  else
+    {
+      /* When a hardware watchpoint fires off the PC will be left at
+	 the instruction which caused the watchpoint.  It will be
+	 necessary for GDB to step over the watchpoint.  */
+      return procfs_set_watchpoint (inferior_ptid, addr, len, type, 0);
+    }
+}
+
+static int
+procfs_remove_watchpoint (CORE_ADDR addr, int len, int type)
+{
+  return procfs_set_watchpoint (inferior_ptid, addr, 0, 0, 0);
+}
+
+static int
+procfs_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+{
+  /* The man page for proc(4) on Solaris 2.6 and up says that the
+     system can support "thousands" of hardware watchpoints, but gives
+     no method for finding out how many; It doesn't say anything about
+     the allowed size for the watched area either.  So we just tell
+     GDB 'yes'.  */
+  return 1;
+}
+
+void
+procfs_use_watchpoints (struct target_ops *t)
+{
+  t->to_stopped_by_watchpoint = procfs_stopped_by_watchpoint;
+  t->to_insert_watchpoint = procfs_insert_watchpoint;
+  t->to_remove_watchpoint = procfs_remove_watchpoint;
+  t->to_region_ok_for_hw_watchpoint = procfs_region_ok_for_hw_watchpoint;
 }
 
 /*
@@ -5970,6 +6016,10 @@ _initialize_procfs (void)
   struct target_ops * t;
 
   t = procfs_target ();
+
+#ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
+  procfs_use_watchpoints (t);
+#endif
 
   add_target (t);
 

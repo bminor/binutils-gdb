@@ -30,31 +30,6 @@
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS
 
-/* The man page for proc(4) on Solaris 2.6 and up says that the system
-   can support "thousands" of hardware watchpoints, but gives no
-   method for finding out how many; It doesn't say anything about the
-   allowed size for the watched area either.  So we just tell GDB
-   'yes'.  */
-#define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(SIZE) 1
-
-/* When a hardware watchpoint fires off the PC will be left at the
-   instruction following the one which caused the watchpoint.  It will
-   *NOT* be necessary for GDB to step over the watchpoint.  */
-#define HAVE_CONTINUABLE_WATCHPOINT 1
-
-extern int procfs_stopped_by_watchpoint (ptid_t);
-#define STOPPED_BY_WATCHPOINT(W) \
-  procfs_stopped_by_watchpoint(inferior_ptid)
-
-/* Use these macros for watchpoint insertion/deletion.  TYPE can be 0
-   (write watch), 1 (read watch), 2 (access watch (read/write).  */
-
-extern int procfs_set_watchpoint (ptid_t, CORE_ADDR, int, int, int);
-#define target_insert_watchpoint(ADDR, LEN, TYPE) \
-        procfs_set_watchpoint (inferior_ptid, ADDR, LEN, TYPE, 1)
-#define target_remove_watchpoint(ADDR, LEN, TYPE) \
-        procfs_set_watchpoint (inferior_ptid, ADDR, 0, 0, 0)
-
 #endif /* NEW_PROC_API */
 
 #endif /* nm-sol2.h */

@@ -19,26 +19,3 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS
-
-/* TARGET_CAN_USE_HARDWARE_WATCHPOINT is now defined to go through
-   the target vector.  For Irix5, procfs_can_use_hw_watchpoint()
-   should be invoked.  */
-
-/* When a hardware watchpoint fires off the PC will be left at the
-   instruction which caused the watchpoint.  It will be necessary for
-   GDB to step over the watchpoint. */
-
-#define STOPPED_BY_WATCHPOINT(W) \
-     procfs_stopped_by_watchpoint(inferior_ptid)
-extern int procfs_stopped_by_watchpoint (ptid_t);
-
-/* Use these macros for watchpoint insertion/deletion.  */
-/* type can be 0: write watch, 1: read watch, 2: access watch (read/write) */
-#define target_insert_watchpoint(ADDR, LEN, TYPE) \
-     procfs_set_watchpoint (inferior_ptid, ADDR, LEN, TYPE, 0)
-#define target_remove_watchpoint(ADDR, LEN, TYPE) \
-     procfs_set_watchpoint (inferior_ptid, ADDR, 0, 0, 0)
-extern int procfs_set_watchpoint (ptid_t, CORE_ADDR, int, int, int);
-
-#define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(SIZE) 1
-

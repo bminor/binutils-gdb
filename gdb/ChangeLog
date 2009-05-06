@@ -1,3 +1,30 @@
+2009-05-06  Pierre Muller  <muller.u-strasbg.fr>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* procfs.c (procfs_insert_watchpoint, procfs_remove_watchpoint)
+	(procfs_region_ok_for_hw_watchpoint, procfs_use_watchpoints): New
+	functions.
+	(procfs_stopped_by_watchpoint): Made static, ptid argument
+	removed.
+	(_initialize_procfs): Register new watchpoint related target
+	functions.
+	* config/i386/nm-i386sol2.h (TARGET_CAN_USE_HARDWARE_WATCHPOINT)
+	(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT, STOPPED_BY_WATCHPOINT)
+	(HAVE_CONTINUABLE_WATCHPOINT): Delete.
+	(target_insert_watchpoint, target_remove_watchpoint): Delete.
+	(procfs_stopped_by_watchpoint, procfs_set_watchpoint): Delete
+	declarations.
+	* config/mips/nm-irix5.h (STOPPED_BY_WATCHPOINT)
+	(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT): Delete.
+	(target_insert_watchpoint, target_remove_watchpoint): Delete.
+	(procfs_stopped_by_watchpoint, procfs_set_watchpoint): Delete
+	declarations.
+	* config/sparc/nm-sol2.h (TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT)
+	(HAVE_CONTINUABLE_WATCHPOINT, STOPPED_BY_WATCHPOINT): Delete.
+	(target_insert_watchpoint, target_remove_watchpoint): Delete.
+	(procfs_stopped_by_watchpoint, procfs_set_watchpoint): Delete
+	declarations.
+
 2009-05-06  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (i386_process_record): Change bzero to memset.
