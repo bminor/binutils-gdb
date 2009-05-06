@@ -189,13 +189,35 @@ AC_DEFUN([AM_ICONV],
     am_cv_func_iconv="no, consider installing GNU libiconv"
     am_cv_lib_iconv=no
     am_cv_use_build_libiconv=no
-    # First, try to find iconv in libc.
-    AC_TRY_LINK([#include <stdlib.h>
+
+    # If libiconv is part of the build tree, then try using it over
+    # any system iconv.
+    if test -d ../libiconv; then
+      am_save_LIBS="$LIBS"
+      am_save_CPPFLAGS="$CPPFLAGS"
+      LIBS="$LIBS $BUILD_LIBICONV_LIBDIR -liconv"
+      CPPFLAGS="$CPPFLAGS $BUILD_LIBICONV_INCLUDE"
+      AC_TRY_LINK([#include <stdlib.h>
 #include <iconv.h>],
-      [iconv_t cd = iconv_open("","");
-       iconv(cd,NULL,NULL,NULL,NULL);
-       iconv_close(cd);],
-      am_cv_func_iconv=yes)
+        [iconv_t cd = iconv_open("","");
+         iconv(cd,NULL,NULL,NULL,NULL);
+         iconv_close(cd);],
+	am_cv_use_build_libiconv=yes
+        am_cv_lib_iconv=yes
+        am_cv_func_iconv=yes)
+      LIBS="$am_save_LIBS"
+      CPPFLAGS="$am_save_CPPFLAGS"
+    fi
+
+    # Next, try to find iconv in libc.
+    if test "$am_cv_func_iconv" != yes; then
+      AC_TRY_LINK([#include <stdlib.h>
+#include <iconv.h>],
+        [iconv_t cd = iconv_open("","");
+         iconv(cd,NULL,NULL,NULL,NULL);
+         iconv_close(cd);],
+        am_cv_func_iconv=yes)
+    fi
 
     # If iconv was not in libc, try -liconv.  In this case, arrange to
     # look in the libiconv prefix, if it was specified by the user.
@@ -212,24 +234,6 @@ AC_DEFUN([AM_ICONV],
         [iconv_t cd = iconv_open("","");
          iconv(cd,NULL,NULL,NULL,NULL);
          iconv_close(cd);],
-        am_cv_lib_iconv=yes
-        am_cv_func_iconv=yes)
-      LIBS="$am_save_LIBS"
-      CPPFLAGS="$am_save_CPPFLAGS"
-    fi
-
-    # If that didn't work, try to find libiconv in the build tree.
-    if test "$am_cv_func_iconv" != yes && test -d ../libiconv; then
-      am_save_LIBS="$LIBS"
-      am_save_CPPFLAGS="$CPPFLAGS"
-      LIBS="$LIBS $BUILD_LIBICONV_LIBDIR -liconv"
-      CPPFLAGS="$CPPFLAGS $BUILD_LIBICONV_INCLUDE"
-      AC_TRY_LINK([#include <stdlib.h>
-#include <iconv.h>],
-        [iconv_t cd = iconv_open("","");
-         iconv(cd,NULL,NULL,NULL,NULL);
-         iconv_close(cd);],
-	am_cv_use_build_libiconv=yes
         am_cv_lib_iconv=yes
         am_cv_func_iconv=yes)
       LIBS="$am_save_LIBS"

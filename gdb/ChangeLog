@@ -1,5 +1,11 @@
 2009-05-06  Joel Brobecker   <brobecker@adacore.com>
 
+	* acinclude.m4 (AM_ICONV): Prefer in-tree libiconv if present over
+	system iconv.
+	* configure: Regenerate.
+
+2009-05-06  Joel Brobecker   <brobecker@adacore.com>
+
 	* utils.c: Add include of gdb_usleep.h.
 	(defaulted_query): Detect false EOF conditions that happen
 	on terminals opened with the O_NONBLOCK flag when there is
