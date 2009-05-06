@@ -3,6 +3,13 @@
 
 *** Changes since GDB 6.8
 
+* Process record and replay
+
+  In a architecture environment that supports ``process record and
+  replay'', ``process record and replay'' target can record a log of
+  the process execution, and replay it with both forward and reverse
+  execute commands.
+
 * Reverse debugging: GDB now has new commands reverse-continue, reverse-
 step, reverse-next, reverse-finish, reverse-stepi, reverse-nexti, and
 set execution-direction {forward|reverse}, for targets that support
