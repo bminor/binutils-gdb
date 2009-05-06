@@ -1242,7 +1242,7 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	  cache->wd.ws = ws & ~(1 << wb);
 
 	  cache->pc = get_frame_func (this_frame);
-	  cache->ra = (cache->pc & 0xc0000000) | (ra & 0x3fffffff);
+	  cache->ra = (pc & 0xc0000000) | (ra & 0x3fffffff);
 	  cache->ps = (ps & ~PS_CALLINC_MASK)
 	    | ((WINSIZE(ra)/4) << PS_CALLINC_SHIFT);
 	}

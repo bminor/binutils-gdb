@@ -1,3 +1,7 @@
+2009-05-05  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* xtensa-tdep.c (xtensa_frame_cache): Use pc instead of cache->pc.
+
 2009-05-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* inferior.h (read_pc, write_pc): Remove.
