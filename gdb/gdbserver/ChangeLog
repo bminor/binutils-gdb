@@ -1,3 +1,8 @@
+2009-05-07  Doug Evans  <dje@google.com>
+
+	* linux-low.c (regsets_fetch_inferior_registers): Fix memory leak.
+	(regsets_store_inferior_registers): Ditto.
+
 2009-05-06  Pedro Alves  <pedro@codesourcery.com>
 
 	PR server/10048

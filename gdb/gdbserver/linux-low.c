@@ -2092,6 +2092,7 @@ regsets_fetch_inferior_registers ()
 	      /* If we get EIO on a regset, do not try it again for
 		 this process.  */
 	      disabled_regsets[regset - target_regsets] = 1;
+	      free (buf);
 	      continue;
 	    }
 	  else
@@ -2106,6 +2107,7 @@ regsets_fetch_inferior_registers ()
 	saw_general_regs = 1;
       regset->store_function (buf);
       regset ++;
+      free (buf);
     }
   if (saw_general_regs)
     return 0;
@@ -2165,6 +2167,7 @@ regsets_store_inferior_registers ()
 	      /* If we get EIO on a regset, do not try it again for
 		 this process.  */
 	      disabled_regsets[regset - target_regsets] = 1;
+	      free (buf);
 	      continue;
 	    }
 	  else if (errno == ESRCH)
@@ -2173,6 +2176,7 @@ regsets_store_inferior_registers ()
 		 already gone, in which case we simply ignore attempts
 		 to change its registers.  See also the related
 		 comment in linux_resume_one_lwp.  */
+	      free (buf);
 	      return 0;
 	    }
 	  else
