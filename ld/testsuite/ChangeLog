@@ -1,3 +1,8 @@
+2009-05-07  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/eh-group.exp: Only run these tests for ELF based
+	targets.
+
 2009-05-05  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm.ld: Add .ARM.exidx and .ARM.extab.
