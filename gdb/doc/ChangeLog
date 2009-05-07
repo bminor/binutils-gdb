@@ -1,3 +1,8 @@
+2009-05-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbint.texinfo (Adding support for debugging core files): New node.
+	(Native Debugging): Remove the ``Native core file Support'' section.
+
 2009-05-01  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Process Record and Replay): Improve and clarify.

@@ -2831,6 +2831,7 @@ using the Bourne shell script @file{gdbarch.sh}.
 * Register Representation::
 * Frame Interpretation::
 * Inferior Call Setup::
+* Adding support for debugging core files::
 * Defining Other Architecture Features::
 * Adding a New Target::
 @end menu
@@ -4420,6 +4421,17 @@ Some Harvard architectures may not allow this.
 
 @end deftypefn
 
+@node Adding support for debugging core files
+@section Adding support for debugging core files
+@cindex core files
+
+The prerequisite for adding core file support in @value{GDBN} is to have
+core file support in BFD.
+
+Once BFD support is available, writing the apropriate
+@code{regset_from_core_section} architecture function should be all
+that is needed in order to add support for core files in @value{GDBN}.
+
 @node Defining Other Architecture Features 
 @section Defining Other Architecture Features 
 
@@ -5407,64 +5419,6 @@ and exec'' to start up a child process.
 This is the low level interface to inferior processes for systems using
 the Unix @code{ptrace} call in a vanilla way.
 @end table
-
-@section Native core file Support
-@cindex native core files
-
-@table @file
-@findex fetch_core_registers
-@item core-aout.c::fetch_core_registers()
-Support for reading registers out of a core file.  This routine calls
-@code{register_addr()}, see below.  Now that BFD is used to read core
-files, virtually all machines should use @code{core-aout.c}, and should
-just provide @code{fetch_core_registers} in @code{@var{xyz}-nat.c} (or
-@code{REGISTER_U_ADDR} in @code{nm-@var{xyz}.h}).
-
-@item core-aout.c::register_addr()
-If your @code{nm-@var{xyz}.h} file defines the macro
-@code{REGISTER_U_ADDR(addr, blockend, regno)}, it should be defined to
-set @code{addr} to the offset within the @samp{user} struct of @value{GDBN}
-register number @code{regno}.  @code{blockend} is the offset within the
-``upage'' of @code{u.u_ar0}.  If @code{REGISTER_U_ADDR} is defined,
-@file{core-aout.c} will define the @code{register_addr()} function and
-use the macro in it.  If you do not define @code{REGISTER_U_ADDR}, but
-you are using the standard @code{fetch_core_registers()}, you will need
-to define your own version of @code{register_addr()}, put it into your
-@code{@var{xyz}-nat.c} file, and be sure @code{@var{xyz}-nat.o} is in
-the @code{NATDEPFILES} list.  If you have your own
-@code{fetch_core_registers()}, you may not need a separate
-@code{register_addr()}.  Many custom @code{fetch_core_registers()}
-implementations simply locate the registers themselves.@refill
-@end table
-
-When making @value{GDBN} run native on a new operating system, to make it
-possible to debug core files, you will need to either write specific
-code for parsing your OS's core files, or customize
-@file{bfd/trad-core.c}.  First, use whatever @code{#include} files your
-machine uses to define the struct of registers that is accessible
-(possibly in the u-area) in a core file (rather than
-@file{machine/reg.h}), and an include file that defines whatever header
-exists on a core file (e.g., the u-area or a @code{struct core}).  Then
-modify @code{trad_unix_core_file_p} to use these values to set up the
-section information for the data segment, stack segment, any other
-segments in the core file (perhaps shared library contents or control
-information), ``registers'' segment, and if there are two discontiguous
-sets of registers (e.g., integer and float), the ``reg2'' segment.  This
-section information basically delimits areas in the core file in a
-standard way, which the section-reading routines in BFD know how to seek
-around in.
-
-Then back in @value{GDBN}, you need a matching routine called
-@code{fetch_core_registers}.  If you can use the generic one, it's in
-@file{core-aout.c}; if not, it's in your @file{@var{xyz}-nat.c} file.
-It will be passed a char pointer to the entire ``registers'' segment,
-its length, and a zero; or a char pointer to the entire ``regs2''
-segment, its length, and a 2.  The routine should suck out the supplied
-register values and install them into @value{GDBN}'s ``registers'' array.
-
-If your system uses @file{/proc} to control processes, and uses ELF
-format core files, then you may be able to use the same routines for
-reading the registers out of processes and out of core files.
 
 @section ptrace
 
