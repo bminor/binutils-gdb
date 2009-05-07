@@ -29,12 +29,6 @@
 # executable trying to create .eh_frame_hdr.  It needs a separate .exp file due
 # to the requirement of two `ld' runs.
 
-# Exclude non-ELF targets.
-
-if ![is_elf_format] {
-    return
-}
-
 # Exclude non-CFI (such as ia64) targets.
 
 if {![check_as_cfi]} {
