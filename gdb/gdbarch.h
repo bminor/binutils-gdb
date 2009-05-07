@@ -54,6 +54,17 @@ struct displaced_step_closure;
 struct core_regset_section;
 
 extern struct gdbarch *current_gdbarch;
+
+/* The architecture associated with the connection to the target.
+ 
+   The architecture vector provides some information that is really
+   a property of the target: The layout of certain packets, for instance;
+   or the solib_ops vector.  Etc.  To differentiate architecture accesses
+   to per-target properties from per-thread/per-frame/per-objfile properties,
+   accesses to per-target properties should be made through target_gdbarch.
+
+   Eventually, when support for multiple targets is implemented in
+   GDB, this global should be made target-specific.  */
 extern struct gdbarch *target_gdbarch;
 
 
