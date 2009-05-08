@@ -1,3 +1,8 @@
+2009-05-08  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Process Record and Replay): Add description of
+	reverse execution.
+
 2009-05-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbint.texinfo (Adding support for debugging core files): New node.

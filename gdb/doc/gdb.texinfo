@@ -5008,10 +5008,9 @@ This is the default.
 @cindex process record and replay
 @cindex recording inferior's execution and replaying it
 
-In an architecture environment that supports process recording and
-replay, a special @dfn{process record and replay} target can record a
-log of the process execution, and replay it later with both forward
-and reverse execution commands.
+On some platforms, @value{GDBN} provides a special @dfn{process record
+and replay} target that can record a log of the process execution, and
+replay it later with both forward and reverse execution commands.
 
 @cindex replay mode
 When this target is in use, if the execution log includes the record
@@ -5021,13 +5020,26 @@ instructions.  Instead, all the events that normally happen during
 code execution are taken from the execution log.  While code is not
 really executed in replay mode, the values of registers (including the
 program counter register) and the memory of the inferior are still
-changed as they normally would.
+changed as they normally would.  Their contents are taken from the
+execution log.
 
 @cindex record mode
 If the record for the next instruction is not in the execution log,
 @value{GDBN} will debug in @dfn{record mode}.  In this mode, the
 inferior executes normally, and @value{GDBN} records the execution log
 for future replay.
+
+The process record and replay target supports reverse execution
+(@pxref{Reverse Execution}), even if the platform on which the
+inferior runs does not.  However, the reverse execution is limited in
+this case by the range of the instructions recorded in the execution
+log.  In other words, reverse execution on platforms that don't
+support it directly can only be done in the replay mode.
+
+When debugging in the reverse direction, @value{GDBN} will work in
+replay mode as long as the execution log includes the record for the
+previous instruction; otherwise, it will work in record mode, if the
+platform supports reverse execution, or stop if not.
 
 For architecture environments that support process record and replay,
 @value{GDBN} provides the following commands:
