@@ -616,7 +616,7 @@ codepage_from_unicode (rc_uint_type *length, const unichar *unicode, char **asci
     *length = len;
 }
 
-#ifdef HAVE_ICONV
+#if defined (HAVE_ICONV) && !defined (_WIN32) && !defined (__CYGWIN__)
 static int
 iconv_onechar (iconv_t cd, ICONV_CONST char *s, char *d, int d_len, const char **n_s, char **n_d)
 {

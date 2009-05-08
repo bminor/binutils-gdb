@@ -1,3 +1,9 @@
+2009-05-08  Kai Tietz  <kai.tietz@onevision.com>
+
+	* winduni.c (iconv_onechar): Only define when HAVE_ICONV
+	is defined, but not when __CYGWIN__ or _WIN32 are defined.
+	See wind_iconv_cp for call logic of this local funtion.
+
 2009-05-05  Guillaume Duhamel  <guillaume.duhamel@gmail.com>
 
 	PR 10109
