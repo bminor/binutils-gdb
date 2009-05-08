@@ -1,3 +1,7 @@
+2009-05-08  Doug Evans  <dje@google.com>
+
+	* linux-nat.c (linux_xfer_siginfo): Delete unused locals lp, n.
+
 2009-05-07  Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
 
 	* MAINTAINERS (Write After Approval): Add self.

@@ -3261,8 +3261,6 @@ linux_xfer_siginfo (struct target_ops *ops, enum target_object object,
                     const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
-  struct lwp_info *lp;
-  LONGEST n;
   int pid;
   struct siginfo siginfo;
   gdb_byte inf_siginfo[sizeof (struct siginfo)];
