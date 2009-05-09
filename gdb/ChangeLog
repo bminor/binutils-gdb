@@ -1,3 +1,20 @@
+2009-05-08  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c (have_ptrace_getsetregs): New variable.
+	(have_ptrace_getsetfpregs): Likewise.
+	fetch_all_gp_regs): New function.
+	(fetch_gp_regs): New function.
+	(fetch_all_fp_regs): Likewise.
+	(fetch_fp_regs): New function.
+	(fetch_ppc_registers): Using the new methods to fetch general-
+	purpose and floating-pointer registers.
+	(store_all_gp_regs): New function.
+	(store_gp_regs): Likewise.
+	(store_all_fp_regs): New function.
+	(store_fp_regs): Likewise.
+	(store_ppc_registers): Using the new methods to store general-
+	purpose and floating-pointer registers.
+
 2009-05-08  Doug Evans  <dje@google.com>
 
 	* linux-nat.c (linux_xfer_siginfo): Delete unused locals lp, n.

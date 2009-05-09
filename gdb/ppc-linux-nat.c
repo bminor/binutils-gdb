@@ -108,6 +108,21 @@
 #define PTRACE_GETSIGINFO    0x4202
 #endif
 
+/* Similarly for the general-purpose (gp0 -- gp31)
+   and floating-point registers (fp0 -- fp31).  */
+#ifndef PTRACE_GETREGS
+#define PTRACE_GETREGS 12
+#endif
+#ifndef PTRACE_SETREGS
+#define PTRACE_SETREGS 13
+#endif
+#ifndef PTRACE_GETFPREGS
+#define PTRACE_GETFPREGS 14
+#endif
+#ifndef PTRACE_SETFPREGS
+#define PTRACE_SETFPREGS 15
+#endif
+
 /* This oddity is because the Linux kernel defines elf_vrregset_t as
    an array of 33 16 bytes long elements.  I.e. it leaves out vrsave.
    However the PTRACE_GETVRREGS and PTRACE_SETVRREGS requests return
@@ -217,6 +232,18 @@ int have_ptrace_getvrregs = 1;
    registers.  Zero if we've tried one of them and gotten an
    error.  */
 int have_ptrace_getsetevrregs = 1;
+
+/* Non-zero if our kernel may support the PTRACE_GETREGS and
+   PTRACE_SETREGS requests, for reading and writing the
+   general-purpose registers.  Zero if we've tried one of
+   them and gotten an error.  */
+int have_ptrace_getsetregs = 1;
+
+/* Non-zero if our kernel may support the PTRACE_GETFPREGS and
+   PTRACE_SETFPREGS requests, for reading and writing the
+   floating-pointers registers.  Zero if we've tried one of
+   them and gotten an error.  */
+int have_ptrace_getsetfpregs = 1;
 
 /* *INDENT-OFF* */
 /* registers layout, as presented by the ptrace interface:
@@ -601,6 +628,112 @@ fetch_altivec_registers (struct regcache *regcache, int tid)
   supply_vrregset (regcache, &regs);
 }
 
+/* This function actually issues the request to ptrace, telling
+   it to get all general-purpose registers and put them into the
+   specified regset.
+   
+   If the ptrace request does not exist, this function returns 0
+   and properly sets the have_ptrace_* flag.  If the request fails,
+   this function calls perror_with_name.  Otherwise, if the request
+   succeeds, then the regcache gets filled and 1 is returned.  */
+static int
+fetch_all_gp_regs (struct regcache *regcache, int tid)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  gdb_gregset_t gregset;
+
+  if (ptrace (PTRACE_GETREGS, tid, 0, (void *) &gregset) < 0)
+    {
+      if (errno == EIO)
+        {
+          have_ptrace_getsetregs = 0;
+          return 0;
+        }
+      perror_with_name (_("Couldn't get general-purpose registers."));
+    }
+
+  supply_gregset (regcache, (const gdb_gregset_t *) &gregset);
+
+  return 1;
+}
+
+/* This is a wrapper for the fetch_all_gp_regs function.  It is
+   responsible for verifying if this target has the ptrace request
+   that can be used to fetch all general-purpose registers at one
+   shot.  If it doesn't, then we should fetch them using the
+   old-fashioned way, which is to iterate over the registers and
+   request them one by one.  */
+static void
+fetch_gp_regs (struct regcache *regcache, int tid)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int i;
+
+  if (have_ptrace_getsetregs)
+    if (fetch_all_gp_regs (regcache, tid))
+      return;
+
+  /* If we've hit this point, it doesn't really matter which
+     architecture we are using.  We just need to read the
+     registers in the "old-fashioned way".  */
+  for (i = 0; i < ppc_num_gprs; i++)
+    fetch_register (regcache, tid, tdep->ppc_gp0_regnum + i);
+}
+
+/* This function actually issues the request to ptrace, telling
+   it to get all floating-point registers and put them into the
+   specified regset.
+   
+   If the ptrace request does not exist, this function returns 0
+   and properly sets the have_ptrace_* flag.  If the request fails,
+   this function calls perror_with_name.  Otherwise, if the request
+   succeeds, then the regcache gets filled and 1 is returned.  */
+static int
+fetch_all_fp_regs (struct regcache *regcache, int tid)
+{
+  gdb_fpregset_t fpregs;
+
+  if (ptrace (PTRACE_GETFPREGS, tid, 0, (void *) &fpregs) < 0)
+    {
+      if (errno == EIO)
+        {
+          have_ptrace_getsetfpregs = 0;
+          return 0;
+        }
+      perror_with_name (_("Couldn't get floating-point registers."));
+    }
+
+  supply_fpregset (regcache, (const gdb_fpregset_t *) &fpregs);
+
+  return 1;
+}
+
+/* This is a wrapper for the fetch_all_fp_regs function.  It is
+   responsible for verifying if this target has the ptrace request
+   that can be used to fetch all floating-point registers at one
+   shot.  If it doesn't, then we should fetch them using the
+   old-fashioned way, which is to iterate over the registers and
+   request them one by one.  */
+static void
+fetch_fp_regs (struct regcache *regcache, int tid)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int i;
+
+  if (have_ptrace_getsetfpregs)
+    if (fetch_all_fp_regs (regcache, tid))
+      return;
+ 
+  /* If we've hit this point, it doesn't really matter which
+     architecture we are using.  We just need to read the
+     registers in the "old-fashioned way".  */
+  for (i = 0; i < ppc_num_fprs; i++)
+    fetch_register (regcache, tid, tdep->ppc_fp0_regnum + i);
+}
+
 static void 
 fetch_ppc_registers (struct regcache *regcache, int tid)
 {
@@ -608,11 +741,9 @@ fetch_ppc_registers (struct regcache *regcache, int tid)
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  for (i = 0; i < ppc_num_gprs; i++)
-    fetch_register (regcache, tid, tdep->ppc_gp0_regnum + i);
+  fetch_gp_regs (regcache, tid);
   if (tdep->ppc_fp0_regnum >= 0)
-    for (i = 0; i < ppc_num_fprs; i++)
-      fetch_register (regcache, tid, tdep->ppc_fp0_regnum + i);
+    fetch_fp_regs (regcache, tid);
   fetch_register (regcache, tid, gdbarch_pc_regnum (gdbarch));
   if (tdep->ppc_ps_regnum != -1)
     fetch_register (regcache, tid, tdep->ppc_ps_regnum);
@@ -970,18 +1101,142 @@ store_altivec_registers (const struct regcache *regcache, int tid)
     perror_with_name (_("Couldn't write AltiVec registers"));
 }
 
+/* This function actually issues the request to ptrace, telling
+   it to store all general-purpose registers present in the specified
+   regset.
+   
+   If the ptrace request does not exist, this function returns 0
+   and properly sets the have_ptrace_* flag.  If the request fails,
+   this function calls perror_with_name.  Otherwise, if the request
+   succeeds, then the regcache is stored and 1 is returned.  */
+static int
+store_all_gp_regs (const struct regcache *regcache, int tid, int regno)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  gdb_gregset_t gregset;
+
+  if (ptrace (PTRACE_GETREGS, tid, 0, (void *) &gregset) < 0)
+    {
+      if (errno == EIO)
+        {
+          have_ptrace_getsetregs = 0;
+          return 0;
+        }
+      perror_with_name (_("Couldn't get general-purpose registers."));
+    }
+
+  fill_gregset (regcache, &gregset, regno);
+
+  if (ptrace (PTRACE_SETREGS, tid, 0, (void *) &gregset) < 0)
+    {
+      if (errno == EIO)
+        {
+          have_ptrace_getsetregs = 0;
+          return 0;
+        }
+      perror_with_name (_("Couldn't set general-purpose registers."));
+    }
+
+  return 1;
+}
+
+/* This is a wrapper for the store_all_gp_regs function.  It is
+   responsible for verifying if this target has the ptrace request
+   that can be used to store all general-purpose registers at one
+   shot.  If it doesn't, then we should store them using the
+   old-fashioned way, which is to iterate over the registers and
+   store them one by one.  */
+static void
+store_gp_regs (const struct regcache *regcache, int tid, int regno)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int i;
+
+  if (have_ptrace_getsetregs)
+    if (store_all_gp_regs (regcache, tid, regno))
+      return;
+
+  /* If we hit this point, it doesn't really matter which
+     architecture we are using.  We just need to store the
+     registers in the "old-fashioned way".  */
+  for (i = 0; i < ppc_num_gprs; i++)
+    store_register (regcache, tid, tdep->ppc_gp0_regnum + i);
+}
+
+/* This function actually issues the request to ptrace, telling
+   it to store all floating-point registers present in the specified
+   regset.
+   
+   If the ptrace request does not exist, this function returns 0
+   and properly sets the have_ptrace_* flag.  If the request fails,
+   this function calls perror_with_name.  Otherwise, if the request
+   succeeds, then the regcache is stored and 1 is returned.  */
+static int
+store_all_fp_regs (const struct regcache *regcache, int tid, int regno)
+{
+  gdb_fpregset_t fpregs;
+
+  if (ptrace (PTRACE_GETFPREGS, tid, 0, (void *) &fpregs) < 0)
+    {
+      if (errno == EIO)
+        {
+          have_ptrace_getsetfpregs = 0;
+          return 0;
+        }
+      perror_with_name (_("Couldn't get floating-point registers."));
+    }
+
+  fill_fpregset (regcache, &fpregs, regno);
+
+  if (ptrace (PTRACE_SETFPREGS, tid, 0, (void *) &fpregs) < 0)
+    {
+      if (errno == EIO)
+        {
+          have_ptrace_getsetfpregs = 0;
+          return 0;
+        }
+      perror_with_name (_("Couldn't set floating-point registers."));
+    }
+
+  return 1;
+}
+
+/* This is a wrapper for the store_all_fp_regs function.  It is
+   responsible for verifying if this target has the ptrace request
+   that can be used to store all floating-point registers at one
+   shot.  If it doesn't, then we should store them using the
+   old-fashioned way, which is to iterate over the registers and
+   store them one by one.  */
+static void
+store_fp_regs (const struct regcache *regcache, int tid, int regno)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int i;
+
+  if (have_ptrace_getsetfpregs)
+    if (store_all_fp_regs (regcache, tid, regno))
+      return;
+
+  /* If we hit this point, it doesn't really matter which
+     architecture we are using.  We just need to store the
+     registers in the "old-fashioned way".  */
+  for (i = 0; i < ppc_num_fprs; i++)
+    store_register (regcache, tid, tdep->ppc_fp0_regnum + i);
+}
+
 static void
 store_ppc_registers (const struct regcache *regcache, int tid)
 {
   int i;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  
-  for (i = 0; i < ppc_num_gprs; i++)
-    store_register (regcache, tid, tdep->ppc_gp0_regnum + i);
+ 
+  store_gp_regs (regcache, tid, -1);
   if (tdep->ppc_fp0_regnum >= 0)
-    for (i = 0; i < ppc_num_fprs; i++)
-      store_register (regcache, tid, tdep->ppc_fp0_regnum + i);
+    store_fp_regs (regcache, tid, -1);
   store_register (regcache, tid, gdbarch_pc_regnum (gdbarch));
   if (tdep->ppc_ps_regnum != -1)
     store_register (regcache, tid, tdep->ppc_ps_regnum);
