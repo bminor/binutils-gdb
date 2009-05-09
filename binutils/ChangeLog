@@ -1,3 +1,7 @@
+2009-05-09  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* MAINTAINERS:  Add myself as PE/COFF co-maintainer.
+
 2009-05-08  Kai Tietz  <kai.tietz@onevision.com>
 
 	* winduni.c (iconv_onechar): Only define when HAVE_ICONV
