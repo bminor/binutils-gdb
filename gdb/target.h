@@ -1053,24 +1053,18 @@ extern char *normal_pid_to_str (ptid_t ptid);
 /* Returns non-zero if we were stopped by a hardware watchpoint (memory read or
    write).  */
 
-#ifndef STOPPED_BY_WATCHPOINT
 #define STOPPED_BY_WATCHPOINT(w) \
    (*current_target.to_stopped_by_watchpoint) ()
-#endif
 
 /* Non-zero if we have steppable watchpoints  */
 
-#ifndef HAVE_STEPPABLE_WATCHPOINT
 #define HAVE_STEPPABLE_WATCHPOINT \
    (current_target.to_have_steppable_watchpoint)
-#endif
 
 /* Non-zero if we have continuable watchpoints  */
 
-#ifndef HAVE_CONTINUABLE_WATCHPOINT
 #define HAVE_CONTINUABLE_WATCHPOINT \
    (current_target.to_have_continuable_watchpoint)
-#endif
 
 /* Provide defaults for hardware watchpoint functions.  */
 
@@ -1082,41 +1076,31 @@ extern char *normal_pid_to_str (ptid_t ptid);
    bp_hardware_breakpoint.  CNT is the number of such watchpoints used so far
    (including this one?).  OTHERTYPE is who knows what...  */
 
-#ifndef TARGET_CAN_USE_HARDWARE_WATCHPOINT
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(TYPE,CNT,OTHERTYPE) \
  (*current_target.to_can_use_hw_breakpoint) (TYPE, CNT, OTHERTYPE);
-#endif
 
-#ifndef TARGET_REGION_OK_FOR_HW_WATCHPOINT
 #define TARGET_REGION_OK_FOR_HW_WATCHPOINT(addr, len) \
     (*current_target.to_region_ok_for_hw_watchpoint) (addr, len)
-#endif
 
 
 /* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.  TYPE is 0
    for write, 1 for read, and 2 for read/write accesses.  Returns 0 for
    success, non-zero for failure.  */
 
-#ifndef target_insert_watchpoint
 #define	target_insert_watchpoint(addr, len, type)	\
      (*current_target.to_insert_watchpoint) (addr, len, type)
 
 #define	target_remove_watchpoint(addr, len, type)	\
      (*current_target.to_remove_watchpoint) (addr, len, type)
-#endif
 
-#ifndef target_insert_hw_breakpoint
 #define target_insert_hw_breakpoint(bp_tgt) \
      (*current_target.to_insert_hw_breakpoint) (bp_tgt)
 
 #define target_remove_hw_breakpoint(bp_tgt) \
      (*current_target.to_remove_hw_breakpoint) (bp_tgt)
-#endif
 
-#ifndef target_stopped_data_address
 #define target_stopped_data_address(target, x) \
     (*target.to_stopped_data_address) (target, x)
-#endif
 
 #define target_watchpoint_addr_within_range(target, addr, start, length) \
   (*target.to_watchpoint_addr_within_range) (target, addr, start, length)

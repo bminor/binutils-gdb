@@ -1,3 +1,9 @@
+2009-05-10  Pierre Muller  <muller.u-strasbg.fr>
+
+	* src/gdb/target.h: Remove all tests for already defined
+	macros. All macros defined here should not be set in config
+	headers anymore.
+
 2009-05-08  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
 
 	* ppc-linux-nat.c (have_ptrace_getsetregs): New variable.
