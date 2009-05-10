@@ -1,3 +1,7 @@
+2009-05-09  Anthony Green  <green@moxielogic.com>
+
+	* interp.c (sim_resume): Add missing breaks in switch.
+
 2008-10-03  Anthony Green  <green@moxielogic.com>
 
 	* interp.c (sim_resume): Add support for ldo.b, sto.b, ldo.s, sto.s.

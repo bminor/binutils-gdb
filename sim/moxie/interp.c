@@ -460,6 +460,7 @@ sim_resume (sd, step, siggnal)
 		    TRACE("gsr");
 		    cpu.asregs.regs[a] = cpu.asregs.sregs[v];
 		  }
+		  break;
 		case 0x03: /* ssr */
 		  {
 		    int a = (inst >> 8) & 0xf;
@@ -467,6 +468,7 @@ sim_resume (sd, step, siggnal)
 		    TRACE("ssr");
 		    cpu.asregs.sregs[v] = cpu.asregs.regs[a];
 		  }
+		  break;
 		default:
 		  TRACE("SIGILL2");
 		  cpu.asregs.exception = SIGILL;
