@@ -1,3 +1,10 @@
+2009-05-11  Masaki Muranaka  <monaka@monami-software.com>
+
+	* elf32-bfin.c (bfin_bfd_reloc_type_lookup): Remove unnecessary
+	ATTRIBUTE_UNUSED.
+	(bfinfdpic_link_omit_section_dynsym): Likewise.
+	(elf32_bfinfdpic_finish_dynamic_sections): Likewise.
+
 2009-05-05  Paul Brook  <paul@codesourcery.com>
 
 	* bfd-in.h (elf32_arm_fix_exidx_coverage): Add prototype.

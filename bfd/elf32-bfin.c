@@ -1123,7 +1123,7 @@ bfin_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
    bfin local labels begin with L$.  */
 static bfd_boolean
 bfin_is_local_label_name (
-     bfd *abfd ATTRIBUTE_UNUSED,
+     bfd *abfd,
      const char *label)
 {
   if (label[0] == 'L' && label[1] == '$' )
@@ -3351,9 +3351,8 @@ bfinfdpic_gc_sweep_hook (bfd *abfd,
    relocate independently.  */
 static bfd_boolean
 _bfinfdpic_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
-				    struct bfd_link_info *info
-				    ATTRIBUTE_UNUSED,
-				    asection *p ATTRIBUTE_UNUSED)
+				    struct bfd_link_info *info ATTRIBUTE_UNUSED,
+				    asection *p)
 {
   switch (elf_section_data (p)->this_hdr.sh_type)
     {
@@ -4415,8 +4414,8 @@ elf32_bfinfdpic_finish_dynamic_sections (bfd *output_bfd,
 
 static bfd_boolean
 elf32_bfinfdpic_adjust_dynamic_symbol
-(struct bfd_link_info *info ATTRIBUTE_UNUSED,
- struct elf_link_hash_entry *h ATTRIBUTE_UNUSED)
+(struct bfd_link_info *info,
+ struct elf_link_hash_entry *h)
 {
   bfd * dynobj;
 
