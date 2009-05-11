@@ -35,7 +35,7 @@ int main() {
     for (i = 1; i <= NUM; i++)
       {
 	args[i] = 1;
-	res = pthread_create(&threads[i],
+	res = pthread_create(&threads[i - 1],
 		             NULL,
 			     thread_function,
 			     (void *) i);

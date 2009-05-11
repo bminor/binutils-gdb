@@ -1,3 +1,9 @@
+2009-05-11  Doug Evans  <dje@sebabeach.org>
+
+	* gdb.mi/nsintrall.c (main): Fix off-by-one error.
+	* gdb.threads/pending-step.c (main): Fix off-by-one error. 
+	* gdb.threads/schedlock.c (main): Fix off-by-one error.
+
 2009-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/expand-sals.exp, gdb.cp/expand-sals.cc: New.
