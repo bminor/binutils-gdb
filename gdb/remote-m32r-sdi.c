@@ -1398,7 +1398,7 @@ m32r_stop (ptid_t ptid)
 
 /* Tell whether this target can support a hardware breakpoint.  CNT
    is the number of hardware breakpoints already installed.  This
-   implements the TARGET_CAN_USE_HARDWARE_WATCHPOINT macro.  */
+   implements the target_can_use_hardware_watchpoint macro.  */
 
 static int
 m32r_can_use_hw_watchpoint (int type, int cnt, int othertype)

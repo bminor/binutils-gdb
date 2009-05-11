@@ -5289,7 +5289,7 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
 
    Note:  procfs_can_use_hw_breakpoint() is not yet used by all
    procfs.c targets due to the fact that some of them still define
-   TARGET_CAN_USE_HARDWARE_WATCHPOINT.  */
+   target_can_use_hardware_watchpoint.  */
 
 static int
 procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
@@ -5352,7 +5352,7 @@ procfs_stopped_by_watchpoint (void)
 static int
 procfs_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
-  if (!HAVE_STEPPABLE_WATCHPOINT
+  if (!target_have_steppable_watchpoint
       && !gdbarch_have_nonsteppable_watchpoint (current_gdbarch))
     {
       /* When a hardware watchpoint fires off the PC will be left at

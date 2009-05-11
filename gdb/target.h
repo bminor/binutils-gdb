@@ -1053,17 +1053,17 @@ extern char *normal_pid_to_str (ptid_t ptid);
 /* Returns non-zero if we were stopped by a hardware watchpoint (memory read or
    write).  */
 
-#define STOPPED_BY_WATCHPOINT(w) \
-   (*current_target.to_stopped_by_watchpoint) ()
+#define target_stopped_by_watchpoint \
+   (*current_target.to_stopped_by_watchpoint)
 
 /* Non-zero if we have steppable watchpoints  */
 
-#define HAVE_STEPPABLE_WATCHPOINT \
+#define target_have_steppable_watchpoint \
    (current_target.to_have_steppable_watchpoint)
 
 /* Non-zero if we have continuable watchpoints  */
 
-#define HAVE_CONTINUABLE_WATCHPOINT \
+#define target_have_continuable_watchpoint \
    (current_target.to_have_continuable_watchpoint)
 
 /* Provide defaults for hardware watchpoint functions.  */
@@ -1076,10 +1076,10 @@ extern char *normal_pid_to_str (ptid_t ptid);
    bp_hardware_breakpoint.  CNT is the number of such watchpoints used so far
    (including this one?).  OTHERTYPE is who knows what...  */
 
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(TYPE,CNT,OTHERTYPE) \
+#define target_can_use_hardware_watchpoint(TYPE,CNT,OTHERTYPE) \
  (*current_target.to_can_use_hw_breakpoint) (TYPE, CNT, OTHERTYPE);
 
-#define TARGET_REGION_OK_FOR_HW_WATCHPOINT(addr, len) \
+#define target_region_ok_for_hw_watchpoint(addr, len) \
     (*current_target.to_region_ok_for_hw_watchpoint) (addr, len)
 
 

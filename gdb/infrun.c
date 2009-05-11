@@ -2568,7 +2568,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
     {
       fprintf_unfiltered (gdb_stdlog, "infrun: stop_pc = 0x%s\n",
                           paddr_nz (stop_pc));
-      if (STOPPED_BY_WATCHPOINT (&ecs->ws))
+      if (target_stopped_by_watchpoint ())
 	{
           CORE_ADDR addr;
 	  fprintf_unfiltered (gdb_stdlog, "infrun: stopped by watchpoint\n");
@@ -2824,7 +2824,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
   /* If necessary, step over this watchpoint.  We'll be back to display
      it in a moment.  */
   if (stopped_by_watchpoint
-      && (HAVE_STEPPABLE_WATCHPOINT
+      && (target_have_steppable_watchpoint
 	  || gdbarch_have_nonsteppable_watchpoint (current_gdbarch)))
     {
       /* At this point, we are stopped at an instruction which has
@@ -2849,14 +2849,14 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	 disable all watchpoints and breakpoints.  */
       int hw_step = 1;
 
-      if (!HAVE_STEPPABLE_WATCHPOINT)
+      if (!target_have_steppable_watchpoint)
 	remove_breakpoints ();
 	/* Single step */
       hw_step = maybe_software_singlestep (current_gdbarch, stop_pc);
       target_resume (ecs->ptid, hw_step, TARGET_SIGNAL_0);
       registers_changed ();
       waiton_ptid = ecs->ptid;
-      if (HAVE_STEPPABLE_WATCHPOINT)
+      if (target_have_steppable_watchpoint)
 	infwait_state = infwait_step_watch_state;
       else
 	infwait_state = infwait_nonstep_watch_state;

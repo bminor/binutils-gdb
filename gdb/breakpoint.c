@@ -961,7 +961,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	      b->type = bp_watchpoint;
 	    else
 	      {
-		int target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT
+		int target_resources_ok = target_can_use_hardware_watchpoint
 		  (bp_hardware_watchpoint, i + mem_cnt, other_type_used);
 		if (target_resources_ok <= 0)
 		  b->type = bp_watchpoint;
@@ -2602,7 +2602,7 @@ bpstat_alloc (const struct bp_location *bl, bpstat cbs /* Current "bs" value */ 
 int
 watchpoints_triggered (struct target_waitstatus *ws)
 {
-  int stopped_by_watchpoint = STOPPED_BY_WATCHPOINT (*ws);
+  int stopped_by_watchpoint = target_stopped_by_watchpoint ();
   CORE_ADDR addr;
   struct breakpoint *b;
 
@@ -5249,7 +5249,7 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
     {
       int i = hw_breakpoint_used_count ();
       int target_resources_ok = 
-	TARGET_CAN_USE_HARDWARE_WATCHPOINT (bp_hardware_breakpoint, 
+	target_can_use_hardware_watchpoint (bp_hardware_breakpoint, 
 					    i + 1, 0);
       if (target_resources_ok == 0)
 	error (_("No hardware breakpoint support in the target."));
@@ -6170,7 +6170,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
     {
       i = hw_watchpoint_used_count (bp_type, &other_type_used);
       target_resources_ok = 
-	TARGET_CAN_USE_HARDWARE_WATCHPOINT (bp_type, i + mem_cnt, 
+	target_can_use_hardware_watchpoint (bp_type, i + mem_cnt, 
 					    other_type_used);
       if (target_resources_ok == 0 && bp_type != bp_hardware_watchpoint)
 	error (_("Target does not support this type of hardware watchpoint."));
@@ -6308,7 +6308,7 @@ can_use_hardware_watchpoint (struct value *v)
 		  CORE_ADDR vaddr = VALUE_ADDRESS (v) + value_offset (v);
 		  int       len   = TYPE_LENGTH (value_type (v));
 
-		  if (!TARGET_REGION_OK_FOR_HW_WATCHPOINT (vaddr, len))
+		  if (!target_region_ok_for_hw_watchpoint (vaddr, len))
 		    return 0;
 		  else
 		    found_memory_cnt++;
@@ -7977,7 +7977,7 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
       int i;
       i = hw_breakpoint_used_count ();
       target_resources_ok = 
-	TARGET_CAN_USE_HARDWARE_WATCHPOINT (bp_hardware_breakpoint, 
+	target_can_use_hardware_watchpoint (bp_hardware_breakpoint, 
 					    i + 1, 0);
       if (target_resources_ok == 0)
 	error (_("No hardware breakpoint support in the target."));

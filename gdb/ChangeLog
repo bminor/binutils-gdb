@@ -1,3 +1,34 @@
+2009-05-11  Pierre Muller  <muller.u-strasbg.fr>
+
+	Unify target macros.
+
+	* target.h (STOPPED_BY_WATCHPOINT): Delete, replaced by ...
+	(target_stoppped_by_watchpoint): New macro.
+	(HAVE_STEPPABLE_WATCHPOINT): Delete, replaced by ...
+	(target_have_steppable_watchpoint): New macro.
+	(HAVE_CONTINUABLE_WATCHPOINT): Delete, replace by ...
+	(target_have_continuable_watchpoint): New macro.
+	(TARGET_CAN_USE_HARDWARE_WATCHPOINT):Delete, replaced by ...
+	(target_can_use_hardware_watchpoint): New macro.
+	(TARGET_REGION_OK_FOR_HW_WATCHPOINT):Delete, replaced by ...
+	(target_region_ok_for_hw_watchpoint): New macro.
+
+	* breakpoint.c (update_watchpoint): Use new macros.
+	(bpstat_alloc): Likewise.
+	(create_breakpoint): Likewise.
+	(watch_command_1): Likewise.
+	(can_use_hardware_watchpoint): Likewise.
+	(do_enable_breakpoint): Likewise.
+	* infrun.c (handle_inferior_event): Adapt to new macros.
+	* mips-tdep.c (mips_gdbarch_init): Update comments.
+	* procfs.c (procfs_set_watchpoint): Update comment.
+	(procfs_insert_watchpoint): Adapt to new macros.
+	* remote-m32r-sdi.c (m32r_stop):
+	* remote-mips.c (mips_remove_breakpoint):
+	* target.c (debug_to_region_ok_for_hw_watchpoint): Update to new macros.
+	(debug_to_stopped_by_watchpoint): Likewise.
+
+
 2009-05-10  Pierre Muller  <muller.u-strasbg.fr>
 
 	* src/gdb/target.h: Remove all tests for already defined

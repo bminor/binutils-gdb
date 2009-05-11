@@ -2889,7 +2889,7 @@ debug_to_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
   retval = debug_target.to_region_ok_for_hw_watchpoint (addr, len);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "TARGET_REGION_OK_FOR_HW_WATCHPOINT (%ld, %ld) = 0x%lx\n",
+		      "target_region_ok_for_hw_watchpoint (%ld, %ld) = 0x%lx\n",
 		      (unsigned long) addr,
 		      (unsigned long) len,
 		      (unsigned long) retval);
@@ -2904,7 +2904,7 @@ debug_to_stopped_by_watchpoint (void)
   retval = debug_target.to_stopped_by_watchpoint ();
 
   fprintf_unfiltered (gdb_stdlog,
-		      "STOPPED_BY_WATCHPOINT () = %ld\n",
+		      "target_stopped_by_watchpoint () = %ld\n",
 		      (unsigned long) retval);
   return retval;
 }
