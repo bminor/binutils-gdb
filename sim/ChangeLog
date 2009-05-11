@@ -1,3 +1,7 @@
+2009-05-11  Andrew Cagney  <cagney@gnu.org>
+
+	* MAINTAINERS: Orphan ppc.
+
 2009-05-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* m32c/gdb-if.c (m32c_signal_to_host): Rename to
