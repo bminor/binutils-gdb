@@ -1,3 +1,62 @@
+2009-05-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (enum sigchld_state): Delete.
+	(linux_nat_async_events_state): Delete.
+	(struct waitpid_result): Delete.
+	(waitpid_queue): Delete.
+	(queued_waitpid_1): Delete.
+	(async_file_flush): New.
+	(queued_waitpid, push_waitpid): Delete.
+	(async_file_mark): New.
+	(drain_queued_events): Delete.
+	(my_waitpid): Remove locally queued events handling.
+	(linux_test_for_tracefork): Upjust.
+	(linux_child_follow_fork): Ditto.
+	(sync_sigchld_action): Delete.
+	(blocked_mask): Reinstate.
+	(async_sigchld_action): Rename to...
+	(sigchld_action): ... this.
+	(block_child_signals): New.
+	(restore_child_signals_mask): New.
+	(lin_lwp_attach_lwp): Adjust.
+	(linux_nat_create_inferior): Ditto.
+	(linux_nat_attach): Also use lp->status in async mode.
+	(get_pending_status): Don't use queued_waitpid.
+	(linux_nat_detach): Don't drain locally queued events.
+	(linux_nat_resume): Allow pending wait statuses stored lp->status
+	in async mode.  If returning early due to a pending event,
+	re-register the event source.
+	(stop_wait_callback): Allow pending wait statuses stored
+	lp->status in async mode.
+	(pipe_to_local_event_queue, local_event_queue_to_pipe): Delete.
+	(linux_nat_wait): Rename to ...
+	(linux_nat_wait_1): ... this.  Allow pending wait statuses stored
+	lp->status in async mode.  Always add WNOHANG to the waitpid
+	options in async mode.
+	(linux_nat_wait): New.
+	(kill_callback): Don't drain locally queued events.
+	(sigchld_handler): Rewrite.
+	(linux_nat_is_async_p, linux_nat_can_async_p): Fix comments to
+	refer to "set target-async".
+	(linux_nat_async_mask): If in non-stop, and re-enabling async
+	mode, re-register the target event source in the event loop.
+	(linux_nat_event_pipe_pop, linux_nat_event_pipe_push)
+	(get_pending_events, async_sigchld_handler)
+	(linux_nat_async_events): Delete.
+	(handle_target_event): New.
+	(linux_nat_async_file_handler): Delete.
+	(linux_async_pipe): New.
+	(linux_nat_async): Only re-register in the event loop if not
+	registered yet.  Always notify the event-loop once if enabling the
+	event source.
+	(linux_nat_stop_lwp): Rewrite to handle pending events stored in
+	lp->status, not in the locally queued event list.
+	(linux_nat_stop): Don't mask out async event handling.
+	(linux_nat_setup_async): Delete.
+	(_initialize_linux_nat): Adjust.
+	(lin_thread_get_thread_signals): blocked_mask is global again.
+	Adjust.
+
 2009-05-11  Pierre Muller  <muller.u-strasbg.fr>
 
 	Unify target macros.
