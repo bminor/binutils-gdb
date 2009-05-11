@@ -1,3 +1,10 @@
+2009-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf32-spu.c (spu_elf_find_overlays): Don't use .ovl.init lma as
+	start of overlays.
+	(spu_elf_build_stubs): Don't define __icache_tagbase.  Define
+	__icache_tag_array and __icache_tag_array_size.
+
 2009-05-11  Masaki Muranaka  <monaka@monami-software.com>
 
 	* elf32-bfin.c (bfin_bfd_reloc_type_lookup): Remove unnecessary

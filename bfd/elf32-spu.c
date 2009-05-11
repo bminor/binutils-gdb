@@ -657,7 +657,10 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 	    {
 	      asection *s0 = alloc_sec[i - 1];
 	      vma_start = s0->vma;
-	      lma_start = s0->lma;
+	      if (strncmp (s0->name, ".ovl.init", 9) != 0)
+		lma_start = s0->lma;
+	      else
+		lma_start = s->lma;
 	      ovl_end = (s0->vma
 			 + ((bfd_vma) 1
 			    << (htab->num_lines_log2 + htab->line_size_log2)));
@@ -1938,12 +1941,19 @@ spu_elf_build_stubs (struct bfd_link_info *info)
     {
       bfd_vma off, icache_base, linklist;
 
-      h = define_ovtab_symbol (htab, "__icache_tagbase");
+      h = define_ovtab_symbol (htab, "__icache_tag_array");
       if (h == NULL)
 	return FALSE;
       h->root.u.def.value = 0;
       h->size = 16 << htab->num_lines_log2;
       off = h->size;
+
+      h = define_ovtab_symbol (htab, "__icache_tag_array_size");
+      if (h == NULL)
+	return FALSE;
+      h->root.u.def.value = 16 << htab->num_lines_log2;
+      h->root.u.def.section = bfd_abs_section_ptr;
+
       icache_base = htab->ovl_sec[0]->vma;
       linklist = (htab->ovtab->output_section->vma
 		  + htab->ovtab->output_offset
