@@ -1,3 +1,9 @@
+2009-05-11  Joel Brobecker <brobecker@adacore.com>
+
+	Fix internal error on breaking at a multi-locations caller source line.
+	* breakpoint.c (parse_breakpoint_sals): Set EXPLICIT_PC for the `break'
+	command with no parameters.
+
 2009-05-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (enum sigchld_state): Delete.

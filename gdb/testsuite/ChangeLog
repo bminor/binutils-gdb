@@ -1,3 +1,7 @@
+2009-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/expand-sals.exp, gdb.cp/expand-sals.cc: New.
+
 2009-04-30  Doug Evans  <dje@google.com>
 
 	* gdb.threads/watchthreads2.exp: New testcase.

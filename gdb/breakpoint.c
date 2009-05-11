@@ -5494,6 +5494,14 @@ parse_breakpoint_sals (char **address,
 	  sal.line = default_breakpoint_line;
 	  sal.symtab = default_breakpoint_symtab;
 	  sal.section = find_pc_overlay (sal.pc);
+
+	  /* "break" without arguments is equivalent to "break *PC" where PC is
+	     the default_breakpoint_address.  So make sure to set
+	     sal.explicit_pc to prevent GDB from trying to expand the list of
+	     sals to include all other instances with the same symtab and line.
+	   */
+	  sal.explicit_pc = 1;
+
 	  sals->sals[0] = sal;
 	  sals->nelts = 1;
 	}
