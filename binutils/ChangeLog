@@ -1,3 +1,8 @@
+2009-05-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* objcopy.c (set_long_section_mode): Check input_bfd is coff
+	before accessing coff specific fields of bfd.
+
 2009-05-09  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* MAINTAINERS:  Add myself as PE/COFF co-maintainer.
