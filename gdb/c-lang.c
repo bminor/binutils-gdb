@@ -166,9 +166,11 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig, int orig_len,
 					    && w != LCST ('8')
 					    && w != LCST ('9'))))
     {
+      gdb_wchar_t wchar = (gdb_wchar_t) w;
+
       if (w == gdb_btowc (quoter) || w == LCST ('\\'))
 	obstack_grow_wstr (output, LCST ("\\"));
-      obstack_grow (output, &w, sizeof (gdb_wchar_t));
+      obstack_grow (output, &wchar, sizeof (gdb_wchar_t));
     }
   else
     {

@@ -1,3 +1,8 @@
+2009-05-12  Joel Brobecker <brobecker@adacore.com>
+
+	* c-lang.c (print_wchar): Convert w into a gdb_wchar_t before
+	pushing it on the output obstack.
+
 2009-05-11  Joel Brobecker <brobecker@adacore.com>
 
 	Fix internal error on breaking at a multi-locations caller source line.
