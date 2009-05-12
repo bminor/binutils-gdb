@@ -271,7 +271,6 @@ the native maintainer when resolving ABI issues.
 			(--target=ia64-elf broken)
 
 	m32c		--target=m32c-elf ,-Werror
-			Jim Blandy, jimb@codesourcery.com
 
 	m32r		--target=m32r-elf ,-Werror
 

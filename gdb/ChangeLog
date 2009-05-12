@@ -1,3 +1,7 @@
+2009-05-12  Jim Blandy  <jimb@red-bean.com>
+
+	* MAINTAINERS: Remove self as m32c target maintainer.
+
 2009-05-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* cli/cli-decode.c (deprecated_add_set_cmd): Delete.
