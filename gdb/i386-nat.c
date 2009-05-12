@@ -700,13 +700,17 @@ _initialize_i386_nat (void)
 #ifdef I386_USE_GENERIC_WATCHPOINTS
   /* A maintenance command to enable printing the internal DRi mirror
      variables.  */
-  deprecated_add_set_cmd ("show-debug-regs", class_maintenance,
-			  var_boolean, (char *) &maint_show_dr, _("\
-Set whether to show variables that mirror the x86 debug registers.\n\
+  add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
+			   &maint_show_dr, _("\
+Set whether to show variables that mirror the x86 debug registers."), _("\
+Show whether to show variables that mirror the x86 debug registers."), _("\
 Use \"on\" to enable, \"off\" to disable.\n\
 If enabled, the debug registers values are shown when GDB inserts\n\
 or removes a hardware breakpoint or watchpoint, and when the inferior\n\
 triggers a breakpoint or watchpoint."),
-			  &maintenancelist);
+			   NULL,
+			   NULL,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 #endif
 }

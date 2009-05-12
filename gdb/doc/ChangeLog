@@ -1,3 +1,9 @@
+2009-05-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo: Document 'set/show debug gnu-nat'.  Replace 'maint
+	show-debug-regs' docs by 'maint set show-debug-regs' and 'maint
+	show show-debug-regs' docs.
+
 2009-05-08  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Process Record and Replay): Add description of

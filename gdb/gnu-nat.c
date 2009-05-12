@@ -3410,10 +3410,15 @@ _initialize_gnu_nat (void)
 
   add_task_commands ();
   add_thread_commands ();
-  deprecated_add_set_cmd ("gnu-debug", class_maintenance,
-			  var_boolean, (char *) &gnu_debug_flag,
-			  "Set debugging output for the gnu backend.",
-			  &maintenancelist);
+  add_setshow_boolean_cmd ("gnu-nat", class_maintenance,
+			   &gnu_debug_flag,
+			   _("Set debugging output for the gnu backend."),
+			   _("Show debugging output for the gnu backend."),
+			   NULL,
+			   NULL,
+			   NULL,
+			   &setdebuglist,
+			   &showdebuglist);
 }
 
 #ifdef	FLUSH_INFERIOR_CACHE

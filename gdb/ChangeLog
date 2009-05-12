@@ -1,3 +1,16 @@
+2009-05-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* cli/cli-decode.c (deprecated_add_set_cmd): Delete.
+	* command.h (deprecated_add_set_cmd): Delete declaration.
+	* gnu-nat.c (_initialize_gnu_nat): Replace 'maint gnu-debug' with
+	'set debug gnu-nat' and 'show debug gnu-nat'.
+	* i386-nat.c (_initialize_i386_nat): Replace 'maint
+	show-debug-registers' with 'maint set show-debug-registers' and
+	'maint show show-debug-registers'.
+	* mips-linux-nat.c (_initialize_mips_linux_nat): Replace 'maint
+	show-debug-registers' with 'maint set show-debug-registers' and
+	'maint show show-debug-registers'.
+
 2009-05-12  Joel Brobecker <brobecker@adacore.com>
 
 	* c-lang.c (print_wchar): Convert w into a gdb_wchar_t before

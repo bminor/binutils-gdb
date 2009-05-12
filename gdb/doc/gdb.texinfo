@@ -17829,6 +17829,11 @@ default is off.
 @item show debug frame
 Displays the current state of displaying @value{GDBN} frame debugging
 info.
+@item set debug gnu-nat
+@cindex @sc{gnu}/Hurd debug messages
+Turns on or off debugging messages from the @sc{gnu}/Hurd debug support.
+@item show debug gnu-nat
+Show the current state of @sc{gnu}/Hurd debugging messages.
 @item set debug infrun
 @cindex inferior debugging info
 Turns on or off display of @value{GDBN} debugging info for running the inferior.
@@ -25947,9 +25952,11 @@ data in a @file{gmon.out} file, be sure to move it to a safe location.
 Configuring with @samp{--enable-profiling} arranges for @value{GDBN} to be
 compiled with the @samp{-pg} compiler option.
 
-@kindex maint show-debug-regs
+@kindex maint set show-debug-regs
+@kindex maint show show-debug-regs
 @cindex hardware debug registers
-@item maint show-debug-regs
+@item maint set show-debug-regs
+@itemx maint show show-debug-regs
 Control whether to show variables that mirror the hardware debug
 registers.  Use @code{ON} to enable, @code{OFF} to disable.  If
 enabled, the debug registers values are shown when @value{GDBN} inserts or

@@ -205,16 +205,6 @@ extern void help_list (struct cmd_list_element *, char *,
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 			   char *, int, struct ui_file *);
 
-/* NOTE: cagney/2005-02-21: Since every set command should be paired
-   with a corresponding show command (i.e., add_setshow_*) this call
-   should not be needed.  Unfortunatly some are not (e.g.,
-   "maintenance <variable> <value>") and those need to be fixed.  */
-extern struct cmd_list_element *deprecated_add_set_cmd (char *name, enum
-							command_class class,
-							var_types var_type, void *var,
-							char *doc,
-							struct cmd_list_element **list);
-
 /* Method for show a set/show variable's VALUE on FILE.  If this
    method isn't supplied deprecated_show_value_hack() is called (which
    is not good).  */

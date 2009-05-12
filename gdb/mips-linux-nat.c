@@ -1044,15 +1044,18 @@ _initialize_mips_linux_nat (void)
 {
   struct target_ops *t;
 
-  deprecated_add_set_cmd ("show-debug-regs", class_maintenance,
-			  var_boolean, (char *) &maint_show_dr, _("\
-Set whether to show variables that mirror the mips debug registers.\n\
+  add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
+			   &maint_show_dr, _("\
+Set whether to show variables that mirror the mips debug registers."), _("\
+Show whether to show variables that mirror the mips debug registers."), _("\
 Use \"on\" to enable, \"off\" to disable.\n\
 If enabled, the debug registers values are shown when GDB inserts\n\
 or removes a hardware breakpoint or watchpoint, and when the inferior\n\
 triggers a breakpoint or watchpoint."),
-			  &maintenancelist);
-
+			   NULL,
+			   NULL,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 
   t = linux_trad_target (mips_linux_register_u_offset);
 

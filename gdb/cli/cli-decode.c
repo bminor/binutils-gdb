@@ -397,17 +397,6 @@ add_setshow_cmd_full (char *name,
     *show_result = show;
 }
 
-struct cmd_list_element *
-deprecated_add_set_cmd (char *name,
-			enum command_class class,
-			var_types var_type,
-			void *var,
-			char *doc,
-			struct cmd_list_element **list)
-{
-  return add_set_or_show_cmd (name, set_cmd, class, var_type, var, doc, list);
-}
-
 /* Add element named NAME to command list LIST (the list for set or
    some sublist thereof).  CLASS is as in add_cmd.  ENUMLIST is a list
    of strings which may follow NAME.  VAR is address of the variable
