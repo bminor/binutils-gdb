@@ -19,6 +19,9 @@
 
 #include "server.h"
 #include "linux-low.h"
+#include "ansidecl.h" /* For ATTRIBUTE_PACKED, must be bug in external.h.  */
+#include "elf/common.h"
+#include "elf/external.h"
 
 #include <sys/wait.h>
 #include <stdio.h>
@@ -153,6 +156,68 @@ static int linux_event_pipe[2] = { -1, -1 };
 
 static void send_sigstop (struct inferior_list_entry *entry);
 static void wait_for_sigstop (struct inferior_list_entry *entry);
+
+/* Accepts an integer PID; Returns a string representing a file that
+   can be opened to get info for the child process.
+   Space for the result is malloc'd, caller must free.  */
+
+char *
+linux_child_pid_to_exec_file (int pid)
+{
+  char *name1, *name2;
+
+  name1 = xmalloc (MAXPATHLEN);
+  name2 = xmalloc (MAXPATHLEN);
+  memset (name2, 0, MAXPATHLEN);
+
+  sprintf (name1, "/proc/%d/exe", pid);
+  if (readlink (name1, name2, MAXPATHLEN) > 0)
+    {
+      free (name1);
+      return name2;
+    }
+  else
+    {
+      free (name2);
+      return name1;
+    }
+}
+
+/* Return non-zero if HEADER is a 64-bit ELF file.  */
+
+static int
+elf_64_header_p (const Elf64_External_Ehdr *header)
+{
+  return (header->e_ident[EI_MAG0] == ELFMAG0
+          && header->e_ident[EI_MAG1] == ELFMAG1
+          && header->e_ident[EI_MAG2] == ELFMAG2
+          && header->e_ident[EI_MAG3] == ELFMAG3
+          && header->e_ident[EI_CLASS] == ELFCLASS64);
+}
+
+/* Return non-zero if FILE is a 64-bit ELF file,
+   zero if the file is not a 64-bit ELF file,
+   and -1 if the file is not accessible or doesn't exist.  */
+
+int
+elf_64_file_p (const char *file)
+{
+  Elf64_External_Ehdr header;
+  int fd;
+
+  fd = open (file, O_RDONLY);
+  if (fd < 0)
+    return -1;
+
+  if (read (fd, &header, sizeof (header)) != sizeof (header))
+    {
+      close (fd);
+      return 0;
+    }
+  close (fd);
+
+  return elf_64_header_p (&header);
+}
 
 static void
 delete_lwp (struct lwp_info *lwp)
@@ -2458,6 +2523,8 @@ linux_test_for_tracefork (void)
 
   linux_supports_tracefork_flag = 0;
 
+  return;
+
   /* Use CLONE_VM instead of fork, to support uClinux (no MMU).  */
 #ifdef __ia64__
   child_pid = __clone2 (linux_tracefork_child, stack, STACK_SIZE,
@@ -2786,12 +2853,35 @@ linux_qxfer_osdata (const char *annex,
   return len;
 }
 
+/* Convert a native/host siginfo object, into/from the siginfo in the
+   layout of the inferiors' architecture.  */
+
+static void
+siginfo_fixup (struct siginfo *siginfo, void *inf_siginfo, int direction)
+{
+  int done = 0;
+
+  if (the_low_target.siginfo_fixup != NULL)
+    done = the_low_target.siginfo_fixup (siginfo, inf_siginfo, direction);
+
+  /* If there was no callback, or the callback didn't do anything,
+     then just do a straight memcpy.  */
+  if (!done)
+    {
+      if (direction == 1)
+	memcpy (siginfo, inf_siginfo, sizeof (struct siginfo));
+      else
+	memcpy (inf_siginfo, siginfo, sizeof (struct siginfo));
+    }
+}
+
 static int
 linux_xfer_siginfo (const char *annex, unsigned char *readbuf,
 		    unsigned const char *writebuf, CORE_ADDR offset, int len)
 {
+  int pid;
   struct siginfo siginfo;
-  long pid = -1;
+  char inf_siginfo[sizeof (struct siginfo)];
 
   if (current_inferior == NULL)
     return -1;
@@ -2799,7 +2889,7 @@ linux_xfer_siginfo (const char *annex, unsigned char *readbuf,
   pid = lwpid_of (get_thread_lwp (current_inferior));
 
   if (debug_threads)
-    fprintf (stderr, "%s siginfo for lwp %ld.\n",
+    fprintf (stderr, "%s siginfo for lwp %d.\n",
 	     readbuf != NULL ? "Reading" : "Writing",
 	     pid);
 
@@ -2809,14 +2899,24 @@ linux_xfer_siginfo (const char *annex, unsigned char *readbuf,
   if (ptrace (PTRACE_GETSIGINFO, pid, 0, &siginfo) != 0)
     return -1;
 
+  /* When GDBSERVER is built as a 64-bit application, ptrace writes into
+     SIGINFO an object with 64-bit layout.  Since debugging a 32-bit
+     inferior with a 64-bit GDBSERVER should look the same as debugging it
+     with a 32-bit GDBSERVER, we need to convert it.  */
+  siginfo_fixup (&siginfo, inf_siginfo, 0);
+
   if (offset + len > sizeof (siginfo))
     len = sizeof (siginfo) - offset;
 
   if (readbuf != NULL)
-    memcpy (readbuf, (char *) &siginfo + offset, len);
+    memcpy (readbuf, inf_siginfo + offset, len);
   else
     {
-      memcpy ((char *) &siginfo + offset, writebuf, len);
+      memcpy (inf_siginfo + offset, writebuf, len);
+
+      /* Convert back to ptrace layout before flushing it out.  */
+      siginfo_fixup (&siginfo, inf_siginfo, 1);
+
       if (ptrace (PTRACE_SETSIGINFO, pid, 0, &siginfo) != 0)
 	return -1;
     }

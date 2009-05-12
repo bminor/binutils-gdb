@@ -103,7 +103,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
 	$(srcdir)/remote-utils.c $(srcdir)/server.c $(srcdir)/target.c \
 	$(srcdir)/thread-db.c $(srcdir)/utils.c \
 	$(srcdir)/linux-arm-low.c $(srcdir)/linux-cris-low.c \
-	$(srcdir)/linux-crisv32-low.c $(srcdir)/linux-i386-low.c \
+	$(srcdir)/linux-crisv32-low.c \
 	$(srcdir)/i387-fp.c \
 	$(srcdir)/linux-ia64-low.c $(srcdir)/linux-low.c \
 	$(srcdir)/linux-m32r-low.c \
@@ -111,7 +111,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
 	$(srcdir)/linux-ppc-low.c \
 	$(srcdir)/linux-s390-low.c \
 	$(srcdir)/linux-sh-low.c $(srcdir)/linux-sparc-low.c \
-	$(srcdir)/linux-x86-64-low.c \
+	$(srcdir)/linux-x86-low.c \
 	$(srcdir)/linux-xtensa-low.c \
 	$(srcdir)/win32-arm-low.c $(srcdir)/win32-i386-low.c \
 	$(srcdir)/win32-low.c $(srcdir)/wincecompat.c \
@@ -296,8 +296,6 @@ linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h) \
 	$(gdb_proc_service_h)
 linux-cris-low.o: linux-cris-low.c $(linux_low_h) $(server_h)
 linux-crisv32-low.o: linux-crisv32-low.c $(linux_low_h) $(server_h)
-linux-i386-low.o: linux-i386-low.c $(linux_low_h) $(server_h) \
-	$(gdb_proc_service_h)
 linux-ia64-low.o: linux-ia64-low.c $(linux_low_h) $(server_h)
 linux-m32r-low.o: linux-m32r-low.c $(linux_low_h) $(server_h)
 linux-mips-low.o: linux-mips-low.c $(linux_low_h) $(server_h) \
@@ -305,7 +303,7 @@ linux-mips-low.o: linux-mips-low.c $(linux_low_h) $(server_h) \
 linux-ppc-low.o: linux-ppc-low.c $(linux_low_h) $(server_h)
 linux-s390-low.o: linux-s390-low.c $(linux_low_h) $(server_h)
 linux-sh-low.o: linux-sh-low.c $(linux_low_h) $(server_h)
-linux-x86-64-low.o: linux-x86-64-low.c $(linux_low_h) $(server_h) \
+linux-x86-low.o: linux-x86-low.c $(linux_low_h) $(server_h) \
 	$(gdb_proc_service_h)
 linux-xtensa-low.o: linux-xtensa-low.c xtensa-xtregs.c $(linux_low_h) $(server_h)
 

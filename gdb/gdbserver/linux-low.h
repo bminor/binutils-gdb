@@ -43,6 +43,8 @@ struct regset_info
 extern struct regset_info target_regsets[];
 #endif
 
+struct siginfo;
+
 struct process_info_private
 {
   /* True if this process has loaded thread_db, and it is active.  */
@@ -75,7 +77,6 @@ struct linux_target_ops
   int breakpoint_len;
   CORE_ADDR (*breakpoint_reinsert_addr) (void);
 
-
   int decr_pc_after_break;
   int (*breakpoint_at) (CORE_ADDR pc);
 
@@ -89,6 +90,12 @@ struct linux_target_ops
      for registers smaller than an xfer unit).  */
   void (*collect_ptrace_register) (int regno, char *buf);
   void (*supply_ptrace_register) (int regno, const char *buf);
+
+  /* Hook to convert from target format to ptrace format and back.
+     Returns true if any conversion was done; false otherwise.
+     If DIRECTION is 1, then copy from INF to NATIVE.
+     If DIRECTION is 0, copy from NATIVE to INF.  */
+  int (*siginfo_fixup) (struct siginfo *native, void *inf, int direction);
 };
 
 extern struct linux_target_ops the_low_target;
@@ -168,6 +175,9 @@ struct lwp_info
 };
 
 extern struct inferior_list all_lwps;
+
+char *linux_child_pid_to_exec_file (int pid);
+int elf_64_file_p (const char *file);
 
 void linux_attach_lwp (unsigned long pid);
 

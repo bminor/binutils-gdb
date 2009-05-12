@@ -1,3 +1,27 @@
+2009-05-12  Doug Evans  <dje@google.com>
+
+	Biarch support for i386/amd64 gdbserver.
+	* Makefile.in (SFILES): Remove linux-i386-low.c, linux-x86-64-low.c.
+	Add linux-x86-low.c.
+	(linux-i386-low.o, linux-x86-64-low.o): Delete.
+	(linux-x86-low.o): Add.
+	* linux-x86-64-low.c: Delete.
+	* linux-i386-low.c: Delete.
+	* linux-x86-low.c: New file.
+	* configure.srv (i?86-linux srv_tgtobj): Replace linux-i386-low.o with
+	linux-x86-low.o.
+	(x86_64-linux srv_tgtobj): Replace linux-x86-64-low.o with
+	linux-x86-low.o.
+	(x86_64-linux srv_regobj): Add reg-i386-linux.o.
+	* linux-low.c: Include ansidecl.h, elf/common.h, elf/external.h.
+	(linux_child_pid_to_exec_file): New function.
+	(elf_64_header_p, elf_64_file_p): New functions.
+	(siginfo_fixup): New function.
+	(linux_xfer_siginfo): New local inf_siginfo.  Call siginfo_fixup to
+	give target a chance to convert layout.
+	* linux-low.h (linux_target_ops): New member siginfo_fixup.
+	(linux_child_pid_to_exec_file, elf_64_file_p): Declare.
+
 2009-05-07  Doug Evans  <dje@google.com>
 
 	* linux-low.c (regsets_fetch_inferior_registers): Fix memory leak.
