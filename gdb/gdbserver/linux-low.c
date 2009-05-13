@@ -2523,8 +2523,6 @@ linux_test_for_tracefork (void)
 
   linux_supports_tracefork_flag = 0;
 
-  return;
-
   /* Use CLONE_VM instead of fork, to support uClinux (no MMU).  */
 #ifdef __ia64__
   child_pid = __clone2 (linux_tracefork_child, stack, STACK_SIZE,
