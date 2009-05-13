@@ -18,7 +18,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include <assert.h>
 #include <signal.h>
 #include "server.h"
 #include "linux-low.h"
@@ -551,7 +550,8 @@ x86_siginfo_fixup (struct siginfo *native, void *inf, int direction)
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (register_size (0) == 4)
     {
-      assert (sizeof (struct siginfo) == sizeof (compat_siginfo_t));
+      if (sizeof (struct siginfo) != sizeof (compat_siginfo_t))
+	fatal ("unexpected difference in siginfo");
 
       if (direction == 0)
 	compat_siginfo_from_siginfo ((struct compat_siginfo *) inf, native);
@@ -565,7 +565,7 @@ x86_siginfo_fixup (struct siginfo *native, void *inf, int direction)
   return 0;
 }
 
-/* Return non-zero if the target is 64-bit.  */
+/* Initialize gdbserver for the architecture of the inferior.  */
 
 static void
 x86_arch_setup (void)

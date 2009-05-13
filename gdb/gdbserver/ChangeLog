@@ -1,3 +1,9 @@
+2009-05-13  Doug Evans  <dje@google.com>
+
+	* linux-x86-low.c: Don't include assert.h.
+	(x86_siginfo_fixup): Use fatal, not assert.
+	(x86_arch_setup): Fix comment.
+
 2009-05-12  Doug Evans  <dje@google.com>
 
 	Biarch support for i386/amd64 gdbserver.
