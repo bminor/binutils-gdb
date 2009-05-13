@@ -25,10 +25,10 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
+#include "as.h"
 #include <limits.h>
 #include <stdarg.h>
 #define	 NO_RELOC 0
-#include "as.h"
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "obstack.h"
