@@ -1,3 +1,7 @@
+2009-05-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* c-lang.c (print_wchar): Remove unnecessary cast.
+
 2009-05-12  Jim Blandy  <jimb@red-bean.com>
 
 	* MAINTAINERS: Remove self as m32c target maintainer.
