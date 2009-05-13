@@ -76,6 +76,8 @@ struct objc_method {
   CORE_ADDR imp;
 };
 
+static const struct objfile_data *objc_objfile_data;
+
 /* Lookup a structure type named "struct NAME", visible in lexical
    block BLOCK.  If NOERR is nonzero, return zero if NAME is not
    suitably defined.  */
@@ -1154,88 +1156,116 @@ find_methods (struct symtab *symtab, char type,
   if (symtab)
     block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
 
-  ALL_MSYMBOLS (objfile, msymbol)
+  ALL_OBJFILES (objfile)
     {
-      QUIT;
+      unsigned int *objc_csym;
 
-      if ((MSYMBOL_TYPE (msymbol) != mst_text)
-	  && (MSYMBOL_TYPE (msymbol) != mst_file_text))
-	/* Not a function or method.  */
+      /* The objfile_csym variable counts the number of ObjC methods
+	 that this objfile defines.  We save that count as a private
+	 objfile data.	If we have already determined that this objfile
+	 provides no ObjC methods, we can skip it entirely.  */
+
+      unsigned int objfile_csym = 0;
+
+      objc_csym = objfile_data (objfile, objc_objfile_data);
+      if (objc_csym != NULL && *objc_csym == 0)
+	/* There are no ObjC symbols in this objfile.  Skip it entirely.  */
 	continue;
 
-      if (symtab)
-	if ((SYMBOL_VALUE_ADDRESS (msymbol) <  BLOCK_START (block)) ||
-	    (SYMBOL_VALUE_ADDRESS (msymbol) >= BLOCK_END (block)))
-	  /* Not in the specified symtab.  */
-	  continue;
-
-      symname = SYMBOL_NATURAL_NAME (msymbol);
-      if (symname == NULL)
-	continue;
-
-      if ((symname[0] != '-' && symname[0] != '+') || (symname[1] != '['))
-	/* Not a method name.  */
-	continue;
-      
-      while ((strlen (symname) + 1) >= tmplen)
+      ALL_OBJFILE_MSYMBOLS (objfile, msymbol)
 	{
-	  tmplen = (tmplen == 0) ? 1024 : tmplen * 2;
-	  tmp = xrealloc (tmp, tmplen);
-	}
-      strcpy (tmp, symname);
+	  QUIT;
 
-      if (parse_method (tmp, &ntype, &nclass, &ncategory, &nselector) == NULL)
-	continue;
+	  if ((MSYMBOL_TYPE (msymbol) != mst_text)
+	      && (MSYMBOL_TYPE (msymbol) != mst_file_text))
+	    /* Not a function or method.  */
+	    continue;
+
+	  if (symtab)
+	    if ((SYMBOL_VALUE_ADDRESS (msymbol) <  BLOCK_START (block)) ||
+		(SYMBOL_VALUE_ADDRESS (msymbol) >= BLOCK_END (block)))
+	      /* Not in the specified symtab.  */
+	      continue;
+
+	  symname = SYMBOL_NATURAL_NAME (msymbol);
+	  if (symname == NULL)
+	    continue;
+
+	  if ((symname[0] != '-' && symname[0] != '+') || (symname[1] != '['))
+	    /* Not a method name.  */
+	    continue;
       
-      if ((type != '\0') && (ntype != type))
-	continue;
+	  while ((strlen (symname) + 1) >= tmplen)
+	    {
+	      tmplen = (tmplen == 0) ? 1024 : tmplen * 2;
+	      tmp = xrealloc (tmp, tmplen);
+	    }
+	  strcpy (tmp, symname);
 
-      if ((class != NULL) 
-	  && ((nclass == NULL) || (strcmp (class, nclass) != 0)))
-	continue;
+	  if (parse_method (tmp, &ntype, &nclass, &ncategory, &nselector) == NULL)
+	    continue;
+      
+	  objfile_csym++;
 
-      if ((category != NULL) && 
-	  ((ncategory == NULL) || (strcmp (category, ncategory) != 0)))
-	continue;
+	  if ((type != '\0') && (ntype != type))
+	    continue;
 
-      if ((selector != NULL) && 
-	  ((nselector == NULL) || (strcmp (selector, nselector) != 0)))
-	continue;
+	  if ((class != NULL) 
+	      && ((nclass == NULL) || (strcmp (class, nclass) != 0)))
+	    continue;
 
-      sym = find_pc_function (SYMBOL_VALUE_ADDRESS (msymbol));
-      if (sym != NULL)
-        {
-          const char *newsymname = SYMBOL_NATURAL_NAME (sym);
+	  if ((category != NULL) && 
+	      ((ncategory == NULL) || (strcmp (category, ncategory) != 0)))
+	    continue;
+
+	  if ((selector != NULL) && 
+	      ((nselector == NULL) || (strcmp (selector, nselector) != 0)))
+	    continue;
+
+	  sym = find_pc_function (SYMBOL_VALUE_ADDRESS (msymbol));
+	  if (sym != NULL)
+	    {
+	      const char *newsymname = SYMBOL_NATURAL_NAME (sym);
 	  
-          if (strcmp (symname, newsymname) == 0)
-            {
-              /* Found a high-level method sym: swap it into the
-                 lower part of sym_arr (below num_debuggable).  */
-              if (syms != NULL)
-                {
-                  syms[csym] = syms[cdebug];
-                  syms[cdebug] = sym;
-                }
-              csym++;
-              cdebug++;
-            }
-          else
-            {
-              warning (
+	      if (strcmp (symname, newsymname) == 0)
+		{
+		  /* Found a high-level method sym: swap it into the
+		     lower part of sym_arr (below num_debuggable).  */
+		  if (syms != NULL)
+		    {
+		      syms[csym] = syms[cdebug];
+		      syms[cdebug] = sym;
+		    }
+		  csym++;
+		  cdebug++;
+		}
+	      else
+		{
+		  warning (
 "debugging symbol \"%s\" does not match minimal symbol (\"%s\"); ignoring",
-                       newsymname, symname);
-              if (syms != NULL)
-                syms[csym] = (struct symbol *) msymbol;
-              csym++;
-            }
-        }
-      else 
-	{
-	  /* Found a non-debuggable method symbol.  */
-	  if (syms != NULL)
-	    syms[csym] = (struct symbol *) msymbol;
-	  csym++;
+                           newsymname, symname);
+		  if (syms != NULL)
+		    syms[csym] = (struct symbol *) msymbol;
+		  csym++;
+		}
+	    }
+	  else
+	    {
+	      /* Found a non-debuggable method symbol.  */
+	      if (syms != NULL)
+		syms[csym] = (struct symbol *) msymbol;
+	      csym++;
+	    }
 	}
+      if (objc_csym == NULL)
+	{
+	  objc_csym = xmalloc (sizeof (*objc_csym));
+	  *objc_csym = objfile_csym;
+	  set_objfile_data (objfile, objc_objfile_data, objc_csym);
+	}
+      else
+	/* Count of ObjC methods in this objfile should be constant.  */
+	gdb_assert (*objc_csym == objfile_csym);
     }
 
   if (nsym != NULL)
@@ -1791,4 +1821,10 @@ resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
   if (res == 0)
     return 1;
   return 0;
+}
+
+void
+_initialize_objc_lang (void)
+{
+  objc_objfile_data = register_objfile_data ();
 }

@@ -1,3 +1,9 @@
+2009-05-13  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* objc-lang.c (objc_objfile_data): New variable.
+	(find_methods): Skip objfiles without Obj-C methods.
+	(_initialize_objc_lang): New function.
+
 2009-05-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* c-lang.c (print_wchar): Remove unnecessary cast.
