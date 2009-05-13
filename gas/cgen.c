@@ -452,9 +452,10 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
 	  if (exp.X_op == O_symbol
 	      && reloc_type == BFD_RELOC_RELC
 	      && exp.X_add_symbol->sy_value.X_op == O_constant
-	      && exp.X_add_symbol->bsym->section != expr_section
-	      && exp.X_add_symbol->bsym->section != absolute_section
-	      && exp.X_add_symbol->bsym->section != undefined_section)
+	      && (!exp.X_add_symbol->bsym
+		  || (exp.X_add_symbol->bsym->section != expr_section
+		      && exp.X_add_symbol->bsym->section != absolute_section
+		      && exp.X_add_symbol->bsym->section != undefined_section)))
 	    {
 	      /* Local labels will have been (eagerly) turned into constants
 		 by now, due to the inappropriately deep insight of the

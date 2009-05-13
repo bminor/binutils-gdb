@@ -1,3 +1,7 @@
+2009-05-13  DJ Delorie  <dj@redhat.com>
+
+	* cgen.c (gas_cgen_parse_operand): Guard against NULL pointers.
+
 2009-05-13  Andrew Jenner  <andrew@codesourcery.com>
 
 	* config/tc-arm.c: Move as.h to start of file.
