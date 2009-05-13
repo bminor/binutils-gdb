@@ -19,9 +19,9 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include "sysdep.h"
 #include <limits.h>
 
-#include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
 #include "libbfd.h"

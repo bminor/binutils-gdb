@@ -1,3 +1,7 @@
+2009-05-13  Andrew Jenner  <andrew@codesourcery.com>
+
+	* elf32-arm.c: Move sysdep.h to start of file.
+
 2009-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf32-spu.c (spu_elf_find_overlays): Don't use .ovl.init lma as
