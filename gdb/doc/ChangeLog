@@ -1,3 +1,7 @@
+2009-05-15  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (GDB/MI General Design): Break up into four nodes.
+
 2009-05-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo: Document 'set/show debug gnu-nat'.  Replace 'maint
