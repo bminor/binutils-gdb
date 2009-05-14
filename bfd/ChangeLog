@@ -1,5 +1,15 @@
 2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* elf32-spu.c (struct spu_link_hash_table): Add fromelem_size_log2.
+	(spu_elf_setup): Initialize it.
+	(spu_elf_size_stubs): Move .ovtab into .bss for software i-cache.
+	Update to new-sytle cache manager data structures.
+	(spu_elf_build_stubs): Generate new-style cache manager data
+	structures and symbols.
+	(spu_elf_auto_overlay): Update size computation.
+
+2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* elf32-spu.c (spu_elf_modify_segment_map): Move all PF_OVERLAY
 	segments first amongst the program headers.
 

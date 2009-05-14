@@ -322,6 +322,7 @@ struct spu_link_hash_table
   /* For soft icache.  */
   unsigned int line_size_log2;
   unsigned int num_lines_log2;
+  unsigned int fromelem_size_log2;
 
   /* How much memory we have.  */
   unsigned int local_store;
@@ -461,10 +462,18 @@ spu_elf_link_hash_table_create (bfd *abfd)
 void
 spu_elf_setup (struct bfd_link_info *info, struct spu_elf_params *params)
 {
+  bfd_vma max_branch_log2;
+
   struct spu_link_hash_table *htab = spu_hash_table (info);
   htab->params = params;
   htab->line_size_log2 = bfd_log2 (htab->params->line_size);
   htab->num_lines_log2 = bfd_log2 (htab->params->num_lines);
+
+  /* For the software i-cache, we provide a "from" list whose size
+     is a power-of-two number of quadwords, big enough to hold one
+     byte per outgoing branch.  Compute this number here.  */
+  max_branch_log2 = bfd_log2 (htab->params->max_branch);
+  htab->fromelem_size_log2 = max_branch_log2 > 4 ? max_branch_log2 - 4 : 0;
 }
 
 /* Find the symbol for the given R_SYMNDX in IBFD and set *HP and *SYMP
@@ -1704,21 +1713,24 @@ spu_elf_size_stubs (struct bfd_link_info *info)
       stub->size = htab->stub_count[ovl] * ovl_stub_size (htab->params);
     }
 
-  flags = (SEC_ALLOC | SEC_LOAD
-	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY);
-  htab->ovtab = bfd_make_section_anyway_with_flags (ibfd, ".ovtab", flags);
-  if (htab->ovtab == NULL
-      || !bfd_set_section_alignment (ibfd, htab->ovtab, 4))
-    return 0;
-
   if (htab->params->ovly_flavour == ovly_soft_icache)
     {
       /* Space for icache manager tables.
 	 a) Tag array, one quadword per cache line.
-	 b) Linked list elements, max_branch per line quadwords.  */
-      htab->ovtab->size = 16 * ((1 + htab->params->max_branch)
-				<< htab->num_lines_log2);
+	 b) Rewrite "to" list, one quadword per cache line.
+	 c) Rewrite "from" list, one byte per outgoing branch (rounded up to
+	    a power-of-two number of full quadwords) per cache line.  */
 
+      flags = SEC_ALLOC;
+      htab->ovtab = bfd_make_section_anyway_with_flags (ibfd, ".ovtab", flags);
+      if (htab->ovtab == NULL
+	  || !bfd_set_section_alignment (ibfd, htab->ovtab, 4))
+	return 0;
+
+      htab->ovtab->size = (16 + 16 + (16 << htab->fromelem_size_log2))
+			  << htab->num_lines_log2;
+
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
       htab->init = bfd_make_section_anyway_with_flags (ibfd, ".ovini", flags);
       if (htab->init == NULL
 	  || !bfd_set_section_alignment (ibfd, htab->init, 4))
@@ -1740,6 +1752,12 @@ spu_elf_size_stubs (struct bfd_link_info *info)
 	 .	  u32 mapped;
 	 .	} _ovly_buf_table[];
 	 .  */
+
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+      htab->ovtab = bfd_make_section_anyway_with_flags (ibfd, ".ovtab", flags);
+      if (htab->ovtab == NULL
+	  || !bfd_set_section_alignment (ibfd, htab->ovtab, 4))
+	return 0;
 
       htab->ovtab->size = htab->num_overlays * 16 + 16 + htab->num_buf * 4;
     }
@@ -1782,7 +1800,7 @@ spu_elf_place_overlay_data (struct bfd_link_info *info)
 
   ovout = ".data";
   if (htab->params->ovly_flavour == ovly_soft_icache)
-    ovout = ".data.icache";
+    ovout = ".bss";
   (*htab->params->place_spu_section) (htab->ovtab, NULL, ovout);
 
   (*htab->params->place_spu_section) (htab->toe, NULL, ".toe");
@@ -1965,7 +1983,7 @@ spu_elf_build_stubs (struct bfd_link_info *info)
   p = htab->ovtab->contents;
   if (htab->params->ovly_flavour == ovly_soft_icache)
     {
-      bfd_vma off, icache_base, linklist;
+      bfd_vma off;
 
       h = define_ovtab_symbol (htab, "__icache_tag_array");
       if (h == NULL)
@@ -1980,32 +1998,38 @@ spu_elf_build_stubs (struct bfd_link_info *info)
       h->root.u.def.value = 16 << htab->num_lines_log2;
       h->root.u.def.section = bfd_abs_section_ptr;
 
-      icache_base = htab->ovl_sec[0]->vma;
-      linklist = (htab->ovtab->output_section->vma
-		  + htab->ovtab->output_offset
-		  + off);
-      for (i = 0; i < htab->params->num_lines; i++)
-	{
-	  bfd_vma line_end = icache_base + ((i + 1) << htab->line_size_log2);
-	  bfd_vma stub_base = line_end - htab->params->max_branch * 32;
-	  bfd_vma link_elem = linklist + i * htab->params->max_branch * 16;
-	  bfd_vma locator = link_elem - stub_base / 2;
-
-	  bfd_put_32 (htab->ovtab->owner, locator, p + 4);
-	  bfd_put_16 (htab->ovtab->owner, link_elem, p + 8);
-	  bfd_put_16 (htab->ovtab->owner, link_elem, p + 10);
-	  bfd_put_16 (htab->ovtab->owner, link_elem, p + 12);
-	  bfd_put_16 (htab->ovtab->owner, link_elem, p + 14);
-	  p += 16;
-	}
-
-      h = define_ovtab_symbol (htab, "__icache_linked_list");
+      h = define_ovtab_symbol (htab, "__icache_rewrite_to");
       if (h == NULL)
 	return FALSE;
       h->root.u.def.value = off;
-      h->size = htab->params->max_branch << (htab->num_lines_log2 + 4);
+      h->size = 16 << htab->num_lines_log2;
       off += h->size;
-      p += h->size;
+
+      h = define_ovtab_symbol (htab, "__icache_rewrite_to_size");
+      if (h == NULL)
+	return FALSE;
+      h->root.u.def.value = 16 << htab->num_lines_log2;
+      h->root.u.def.section = bfd_abs_section_ptr;
+
+      h = define_ovtab_symbol (htab, "__icache_rewrite_from");
+      if (h == NULL)
+	return FALSE;
+      h->root.u.def.value = off;
+      h->size = 16 << (htab->fromelem_size_log2 + htab->num_lines_log2);
+      off += h->size;
+
+      h = define_ovtab_symbol (htab, "__icache_rewrite_from_size");
+      if (h == NULL)
+	return FALSE;
+      h->root.u.def.value = 16 << (htab->fromelem_size_log2
+				   + htab->num_lines_log2);
+      h->root.u.def.section = bfd_abs_section_ptr;
+
+      h = define_ovtab_symbol (htab, "__icache_log2_fromelemsize");
+      if (h == NULL)
+	return FALSE;
+      h->root.u.def.value = htab->fromelem_size_log2;
+      h->root.u.def.section = bfd_abs_section_ptr;
 
       h = define_ovtab_symbol (htab, "__icache_base");
       if (h == NULL)
@@ -2014,10 +2038,40 @@ spu_elf_build_stubs (struct bfd_link_info *info)
       h->root.u.def.section = bfd_abs_section_ptr;
       h->size = htab->num_buf << htab->line_size_log2;
 
+      h = define_ovtab_symbol (htab, "__icache_linesize");
+      if (h == NULL)
+	return FALSE;
+      h->root.u.def.value = 1 << htab->line_size_log2;
+      h->root.u.def.section = bfd_abs_section_ptr;
+
+      h = define_ovtab_symbol (htab, "__icache_log2_linesize");
+      if (h == NULL)
+	return FALSE;
+      h->root.u.def.value = htab->line_size_log2;
+      h->root.u.def.section = bfd_abs_section_ptr;
+
       h = define_ovtab_symbol (htab, "__icache_neg_log2_linesize");
       if (h == NULL)
 	return FALSE;
       h->root.u.def.value = -htab->line_size_log2;
+      h->root.u.def.section = bfd_abs_section_ptr;
+
+      h = define_ovtab_symbol (htab, "__icache_cachesize");
+      if (h == NULL)
+	return FALSE;
+      h->root.u.def.value = 1 << (htab->num_lines_log2 + htab->line_size_log2);
+      h->root.u.def.section = bfd_abs_section_ptr;
+
+      h = define_ovtab_symbol (htab, "__icache_log2_cachesize");
+      if (h == NULL)
+	return FALSE;
+      h->root.u.def.value = htab->num_lines_log2 + htab->line_size_log2;
+      h->root.u.def.section = bfd_abs_section_ptr;
+
+      h = define_ovtab_symbol (htab, "__icache_neg_log2_cachesize");
+      if (h == NULL)
+	return FALSE;
+      h->root.u.def.value = -(htab->num_lines_log2 + htab->line_size_log2);
       h->root.u.def.section = bfd_abs_section_ptr;
 
       if (htab->init != NULL && htab->init->size != 0)
@@ -4271,14 +4325,14 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  fixed_size += htab->non_ovly_stub * 16;
 	  /* Space for icache manager tables.
 	     a) Tag array, one quadword per cache line.
-	     - word 0: ia address of present line, init to zero.
-	     - word 1: link locator.  link_elem=stub_addr/2+locator
-	     - halfwords 4-7: head/tail pointers for linked lists.  */
+	     - word 0: ia address of present line, init to zero.  */
 	  fixed_size += 16 << htab->num_lines_log2;
-	  /* b) Linked list elements, max_branch per line.  */
-	  fixed_size += htab->params->max_branch << (htab->num_lines_log2 + 4);
-	  /* c) Indirect branch descriptors, 8 quadwords.  */
-	  fixed_size += 8 * 16;
+	  /* b) Rewrite "to" list, one quadword per cache line.  */
+	  fixed_size += 16 << htab->num_lines_log2;
+	  /* c) Rewrite "from" list, one byte per outgoing branch (rounded up
+		to a power-of-two number of full quadwords) per cache line.  */
+	  fixed_size += 16 << (htab->fromelem_size_log2
+			       + htab->num_lines_log2);
 	  /* d) Pointer to __ea backing store (toe), 1 quadword.  */
 	  fixed_size += 16;
 	}

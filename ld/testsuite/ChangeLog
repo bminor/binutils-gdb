@@ -1,5 +1,10 @@
 2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ld-spu/icache1.d: Update all addresses to accomodate icache
+	buffer shifted down 0x800 bytes.
+
+2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ld-spu/icache.d: Update file offsets.
 	* ld-spu/ovl.d: Likewise.
 	* ld-spu/ovl1.d: Likewise.
