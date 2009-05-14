@@ -923,7 +923,7 @@ new_symfile_objfile (struct objfile *objfile, int mainline, int verbo)
     }
   else
     {
-      breakpoint_re_set ();
+      breakpoint_re_set_objfile (objfile);
     }
 
   /* We're done reading the symbol file; finish off complaints.  */

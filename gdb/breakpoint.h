@@ -687,7 +687,7 @@ extern int breakpoint_thread_match (CORE_ADDR, ptid_t);
 extern void until_break_command (char *, int, int);
 
 extern void breakpoint_re_set (void);
-
+extern void breakpoint_re_set_objfile (struct objfile *);
 extern void breakpoint_re_set_thread (struct breakpoint *);
 
 extern struct breakpoint *set_momentary_breakpoint

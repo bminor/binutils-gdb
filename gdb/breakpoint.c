@@ -150,8 +150,6 @@ static int watchpoint_check (void *);
 
 static void maintenance_info_breakpoints (char *, int);
 
-static void create_overlay_event_breakpoint (char *);
-
 static int hw_breakpoint_used_count (void);
 
 static int hw_watchpoint_used_count (enum bptype, int *);
@@ -1459,12 +1457,58 @@ reattach_breakpoints (int pid)
   return 0;
 }
 
+static struct breakpoint *
+create_internal_breakpoint (CORE_ADDR address, enum bptype type)
+{
+  static int internal_breakpoint_number = -1;
+  struct symtab_and_line sal;
+  struct breakpoint *b;
+
+  init_sal (&sal);		/* initialize to zeroes */
+
+  sal.pc = address;
+  sal.section = find_pc_overlay (sal.pc);
+
+  b = set_raw_breakpoint (sal, type);
+  b->number = internal_breakpoint_number--;
+  b->disposition = disp_donttouch;
+
+  return b;
+}
+
+static void
+create_overlay_event_breakpoint (char *func_name, struct objfile *objfile)
+{
+  struct breakpoint *b;
+  struct minimal_symbol *m;
+
+  if ((m = lookup_minimal_symbol_text (func_name, objfile)) == NULL)
+    return;
+
+  b = create_internal_breakpoint (SYMBOL_VALUE_ADDRESS (m),
+				  bp_overlay_event);
+  b->addr_string = xstrdup (func_name);
+
+  if (overlay_debugging == ovly_auto)
+    {
+      b->enable_state = bp_enabled;
+      overlay_events_enabled = 1;
+    }
+  else
+    {
+      b->enable_state = bp_disabled;
+      overlay_events_enabled = 0;
+    }
+  update_global_location_list (1);
+}
+
 void
 update_breakpoints_after_exec (void)
 {
   struct breakpoint *b;
   struct breakpoint *temp;
   struct bp_location *bploc;
+  struct objfile *objfile;
 
   /* We're about to delete breakpoints from GDB's lists.  If the
      INSERTED flag is true, GDB will try to lift the breakpoints by
@@ -1559,7 +1603,8 @@ update_breakpoints_after_exec (void)
       }
   }
   /* FIXME what about longjmp breakpoints?  Re-create them here?  */
-  create_overlay_event_breakpoint ("_ovly_debug_event");
+  ALL_OBJFILES (objfile)
+    create_overlay_event_breakpoint ("_ovly_debug_event", objfile);
 }
 
 int
@@ -4380,26 +4425,6 @@ make_breakpoint_permanent (struct breakpoint *b)
     bl->inserted = 1;
 }
 
-static struct breakpoint *
-create_internal_breakpoint (CORE_ADDR address, enum bptype type)
-{
-  static int internal_breakpoint_number = -1;
-  struct symtab_and_line sal;
-  struct breakpoint *b;
-
-  init_sal (&sal);		/* initialize to zeroes */
-
-  sal.pc = address;
-  sal.section = find_pc_overlay (sal.pc);
-
-  b = set_raw_breakpoint (sal, type);
-  b->number = internal_breakpoint_number--;
-  b->disposition = disp_donttouch;
-
-  return b;
-}
-
-
 static void
 create_longjmp_breakpoint (char *func_name)
 {
@@ -4439,40 +4464,6 @@ delete_longjmp_breakpoint (int thread)
 	if (b->thread == thread)
 	  delete_breakpoint (b);
       }
-}
-
-static void
-create_overlay_event_breakpoint_1 (char *func_name, struct objfile *objfile)
-{
-  struct breakpoint *b;
-  struct minimal_symbol *m;
-
-  if ((m = lookup_minimal_symbol_text (func_name, objfile)) == NULL)
-    return;
- 
-  b = create_internal_breakpoint (SYMBOL_VALUE_ADDRESS (m), 
-				  bp_overlay_event);
-  b->addr_string = xstrdup (func_name);
-
-  if (overlay_debugging == ovly_auto)
-    {
-      b->enable_state = bp_enabled;
-      overlay_events_enabled = 1;
-    }
-  else 
-    {
-      b->enable_state = bp_disabled;
-      overlay_events_enabled = 0;
-    }
-  update_global_location_list (1);
-}
-
-static void
-create_overlay_event_breakpoint (char *func_name)
-{
-  struct objfile *objfile;
-  ALL_OBJFILES (objfile)
-    create_overlay_event_breakpoint_1 (func_name, objfile);
 }
 
 void
@@ -7723,9 +7714,13 @@ breakpoint_re_set_one (void *bint)
   return 0;
 }
 
-/* Re-set all breakpoints after symbols have been re-loaded.  */
+/* Re-set all breakpoints after symbols have been re-loaded.
+
+   If OBJFILE is non-null, create overlay break point only in OBJFILE
+   (speed optimization).  Otherwise rescan all loaded objfiles.  */
+
 void
-breakpoint_re_set (void)
+breakpoint_re_set_objfile (struct objfile *objfile)
 {
   struct breakpoint *b, *temp;
   enum language save_language;
@@ -7744,8 +7739,20 @@ breakpoint_re_set (void)
   }
   set_language (save_language);
   input_radix = save_input_radix;
-  
-  create_overlay_event_breakpoint ("_ovly_debug_event");
+
+  if (objfile == NULL)
+    ALL_OBJFILES (objfile)
+      create_overlay_event_breakpoint ("_ovly_debug_event", objfile);
+  else
+    create_overlay_event_breakpoint ("_ovly_debug_event", objfile);
+}
+
+/* Re-set all breakpoints after symbols have been re-loaded.  */
+
+void
+breakpoint_re_set (void)
+{
+  breakpoint_re_set_objfile (NULL);
 }
 
 /* Reset the thread number of this breakpoint:

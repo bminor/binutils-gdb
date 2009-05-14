@@ -1,3 +1,16 @@
+2009-05-14  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* breakpoint.h: Add breakpoint_re_set_objfile prototype.
+	* breakpoint.c (create_overlay_event_breakpoint): Renamed
+	from create_overlay_event_breakpoint_1, old
+	create_overlay_event_breakpoint deleted.
+	(breakpoint_re_set_objfile): Don't rescan all objfiles
+	unnecessarily.
+	(breakpoint_re_set): New function.
+	* symfile.c (new_symfile_objfile): Call breakpoint_re_set_objfile
+	instead of breakpoint_re_set.
+	* objfiles.c (objfile_relocate): Likewise.
+	
 2009-05-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbarch.sh: Add comment documenting the target_gdbarch global.
