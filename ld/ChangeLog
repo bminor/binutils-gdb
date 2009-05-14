@@ -1,3 +1,13 @@
+2009-05-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_insert_orphan): Add __start_<section> symbol
+	assignment inside output section statement.  Ensure only one
+	set of symbols per output section.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Add non-
+	dollar sections before dollar sections.  Correct add_child
+	list insertion.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+
 2009-05-05  Paul Brook  <paul@codesourcery.com>
 
 	* emultempl/armelf.em (compare_output_sec_vma): New function.
