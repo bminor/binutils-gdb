@@ -1,5 +1,10 @@
 2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* elf32-spu.c (mark_functions_via_relocs): Handle cycles in the
+	control flow graph between fragments of a function.
+
+2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* elf32-spu.c (spu_elf_size_stubs): Even in software i-cache mode,
 	generate only a 16-byte .toe section.
 	(spu_elf_build_stubs, spu_elf_auto_overlay): Likewise.

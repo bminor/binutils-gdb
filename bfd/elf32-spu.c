@@ -2787,7 +2787,14 @@ mark_functions_via_relocs (asection *sec,
 	      callee->fun->is_func = TRUE;
 	    }
 	  else if (callee->fun->start == NULL)
-	    callee->fun->start = caller;
+	    {
+	      struct function_info *caller_start = caller;
+	      while (caller_start->start)
+		caller_start = caller_start->start;
+
+	      if (caller_start != callee->fun)
+		callee->fun->start = caller_start;
+	    }
 	  else
 	    {
 	      struct function_info *callee_start;
