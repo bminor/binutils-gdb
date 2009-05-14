@@ -1748,7 +1748,7 @@ spu_elf_size_stubs (struct bfd_link_info *info)
   if (htab->toe == NULL
       || !bfd_set_section_alignment (ibfd, htab->toe, 4))
     return 0;
-  htab->toe->size = htab->params->ovly_flavour == ovly_soft_icache ? 256 : 16;
+  htab->toe->size = 16;
 
   return 2;
 }
@@ -2088,7 +2088,7 @@ spu_elf_build_stubs (struct bfd_link_info *info)
     return FALSE;
   h->root.u.def.section = htab->toe;
   h->root.u.def.value = 0;
-  h->size = htab->params->ovly_flavour == ovly_soft_icache ? 16 * 16 : 16;
+  h->size = 16;
 
   return TRUE;
 }
@@ -4272,8 +4272,8 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  fixed_size += htab->params->max_branch << (htab->num_lines_log2 + 4);
 	  /* c) Indirect branch descriptors, 8 quadwords.  */
 	  fixed_size += 8 * 16;
-	  /* d) Pointers to __ea backing store, 16 quadwords.  */
-	  fixed_size += 16 * 16;
+	  /* d) Pointer to __ea backing store (toe), 1 quadword.  */
+	  fixed_size += 16;
 	}
       else
 	{
