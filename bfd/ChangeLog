@@ -1,5 +1,10 @@
 2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* elf32-spu.c (mark_overlay_section): Move .init and .fini
+	sections into the software icache.
+
+2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* elf32-spu.c (build_stub): Always build "compact" sofware
 	i-cache stubs.
 

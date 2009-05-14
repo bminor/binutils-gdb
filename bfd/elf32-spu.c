@@ -3398,7 +3398,9 @@ mark_overlay_section (struct function_info *fun,
   if (!fun->sec->linker_mark
       && (htab->params->ovly_flavour != ovly_soft_icache
 	  || htab->params->non_ia_text
-	  || strncmp (fun->sec->name, ".text.ia.", 9) == 0))
+	  || strncmp (fun->sec->name, ".text.ia.", 9) == 0
+	  || strcmp (fun->sec->name, ".init") == 0
+	  || strcmp (fun->sec->name, ".fini") == 0))
     {
       unsigned int size;
 
