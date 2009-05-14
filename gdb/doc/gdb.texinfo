@@ -19834,6 +19834,14 @@ processed.  Therefore, whenever an MI command results in an error,
 we recommend that the frontend refreshes all the information shown in 
 the user interface.
 
+
+@menu
+* Context management::
+* Asynchronous and non-stop modes::
+* Thread groups::
+@end menu
+
+@node Context management
 @subsection Context management
 
 In most cases when @value{GDBN} accesses the target, this access is
@@ -19886,6 +19894,7 @@ all subsequent commands.  No frontend is known to do this exactly
 right, so it is suggested to just always pass the @samp{--thread} and
 @samp{--frame} options.
 
+@node Asynchronous and non-stop modes
 @subsection Asynchronous command execution and non-stop mode
 
 On some targets, @value{GDBN} is capable of processing MI commands
@@ -19921,6 +19930,7 @@ highly target dependent.  However, the two commands
 @code{-exec-interrupt}, to stop a thread, and @code{-thread-info},
 to find the state of a thread, will always work.
 
+@node Thread groups
 @subsection Thread groups
 @value{GDBN} may be used to debug several processes at the same time.
 On some platfroms, @value{GDBN} may support debugging of several
