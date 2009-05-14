@@ -5045,7 +5045,8 @@ static bfd_boolean
 spu_elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 {
   asection *toe, *s;
-  struct elf_segment_map *m;
+  struct elf_segment_map *m, *m_overlay;
+  struct elf_segment_map **p, **p_overlay;
   unsigned int i;
 
   if (info == NULL)
@@ -5091,6 +5092,37 @@ spu_elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 	      }
 	    break;
 	  }
+
+
+  /* Some SPU ELF loaders ignore the PF_OVERLAY flag and just load all
+     PT_LOAD segments.  This can cause the .ovl.init section to be
+     overwritten with the contents of some overlay segment.  To work
+     around this issue, we ensure that all PF_OVERLAY segments are
+     sorted first amongst the program headers; this ensures that even
+     with a broken loader, the .ovl.init section (which is not marked
+     as PF_OVERLAY) will be placed into SPU local store on startup.  */
+
+  /* Move all overlay segments onto a separate list.  */
+  p = &elf_tdata (abfd)->segment_map;
+  p_overlay = &m_overlay;
+  while (*p != NULL)
+    {
+      if ((*p)->p_type == PT_LOAD && (*p)->count == 1
+	  && spu_elf_section_data ((*p)->sections[0])->u.o.ovl_index != 0)
+	{
+	  struct elf_segment_map *m = *p;
+	  *p = m->next;
+	  *p_overlay = m;
+	  p_overlay = &m->next;
+	  continue;
+	}
+
+      p = &((*p)->next);
+    }
+
+  /* Re-insert overlay segments at the head of the segment map.  */
+  *p_overlay = elf_tdata (abfd)->segment_map;
+  elf_tdata (abfd)->segment_map = m_overlay;
 
   return TRUE;
 }

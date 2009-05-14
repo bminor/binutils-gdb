@@ -1,3 +1,9 @@
+2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ld-spu/icache.d: Update file offsets.
+	* ld-spu/ovl.d: Likewise.
+	* ld-spu/ovl1.d: Likewise.
+
 2009-05-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/icache1.d: Update for changed overlay manager placement.

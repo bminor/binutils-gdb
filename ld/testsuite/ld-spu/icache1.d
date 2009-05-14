@@ -8,7 +8,7 @@
 Disassembly of section .ovl.init:
 00000800 <__icache_fileoff>:
 .*	00 00 00 00.*
-.*	00 00 07 00.*
+.*	00 00 02 00.*
 	\.\.\.
 
 Disassembly of section \.ovly1:
