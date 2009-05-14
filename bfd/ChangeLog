@@ -1,5 +1,10 @@
 2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* elf32-spu.c (build_stub): Always build "compact" sofware
+	i-cache stubs.
+
+2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* elf32-spu.c (struct spu_link_hash_table): Add fromelem_size_log2.
 	(spu_elf_setup): Initialize it.
 	(spu_elf_size_stubs): Move .ovtab into .bss for software i-cache.

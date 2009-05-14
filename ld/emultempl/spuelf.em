@@ -719,6 +719,8 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_SPU_SOFT_ICACHE:
       params.ovly_flavour = ovly_soft_icache;
+      /* Software i-cache stubs are always "compact".  */
+      params.compact_stub = 1;
       if (!num_lines_set)
 	params.num_lines = 32;
       else if ((params.num_lines & -params.num_lines) != params.num_lines)

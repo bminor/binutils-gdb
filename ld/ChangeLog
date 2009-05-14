@@ -1,3 +1,8 @@
+2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* emultempl/spuelf.em (PARSE_AND_LIST_ARGS_CASES): Always use
+	compact stubs with software i-cache.
+
 2009-05-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/spuelf.em (spu_before_allocation): Call

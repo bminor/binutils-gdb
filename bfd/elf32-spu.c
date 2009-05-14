@@ -1271,7 +1271,8 @@ build_stub (struct bfd_link_info *info,
       bfd_put_32 (sec->owner, (dest & 0x3ffff) | (dest_ovl << 18),
 		  sec->contents + sec->size + 4);
     }
-  else if (htab->params->ovly_flavour == ovly_soft_icache)
+  else if (htab->params->ovly_flavour == ovly_soft_icache
+	   && htab->params->compact_stub)
     {
       lrlive = 0;
       if (stub_type == nonovl_stub)
@@ -1357,61 +1358,32 @@ build_stub (struct bfd_link_info *info,
 	      + htab->ovly_entry[1]->root.u.def.section->output_offset
 	      + htab->ovly_entry[1]->root.u.def.section->output_section->vma);
 
-      if (!htab->params->compact_stub)
+      /* The branch that uses this stub goes to stub_addr + 4.  We'll
+	 set up an xor pattern that can be used by the icache manager
+	 to modify this branch to go directly to its destination.  */
+      g->stub_addr += 4;
+      br_dest = g->stub_addr;
+      if (irela == NULL)
 	{
-	  /* The branch that uses this stub goes to stub_addr + 12.  We'll
-	     set up an xor pattern that can be used by the icache manager
-	     to modify this branch to go directly to its destination.  */
-	  g->stub_addr += 12;
-	  br_dest = g->stub_addr;
-	  if (irela == NULL)
-	    {
-	      /* Except in the case of _SPUEAR_ stubs, the branch in
-		 question is the one in the stub itself.  */
-	      BFD_ASSERT (stub_type == nonovl_stub);
-	      g->br_addr = g->stub_addr;
-	      br_dest = to;
-	    }
-
-	  bfd_put_32 (sec->owner, dest_ovl - 1,
-		      sec->contents + sec->size + 0);
-	  set_id = ((dest_ovl - 1) >> htab->num_lines_log2) + 1;
-	  bfd_put_32 (sec->owner, (set_id << 18) | (dest & 0x3ffff),
-		      sec->contents + sec->size + 4);
-	  bfd_put_32 (sec->owner, (lrlive << 29) | (g->br_addr & 0x3ffff),
-		      sec->contents + sec->size + 8);
-	  bfd_put_32 (sec->owner, BRASL + ((to << 5) & 0x007fff80) + 75,
-		      sec->contents + sec->size + 12);
-	  patt = dest ^ br_dest;
-	  if (irela != NULL && ELF32_R_TYPE (irela->r_info) == R_SPU_REL16)
-	    patt = (dest - g->br_addr) ^ (br_dest - g->br_addr);
-	  bfd_put_32 (sec->owner, (patt << 5) & 0x007fff80,
-		      sec->contents + sec->size + 16 + (g->br_addr & 0xf));
+	  /* Except in the case of _SPUEAR_ stubs, the branch in
+	     question is the one in the stub itself.  */
+	  BFD_ASSERT (stub_type == nonovl_stub);
+	  g->br_addr = g->stub_addr;
+	  br_dest = to;
 	}
-      else
-	{
-	  g->stub_addr += 4;
-	  br_dest = g->stub_addr;
-	  if (irela == NULL)
-	    {
-	      BFD_ASSERT (stub_type == nonovl_stub);
-	      g->br_addr = g->stub_addr;
-	      br_dest = to;
-	    }
 
-	  set_id = ((dest_ovl - 1) >> htab->num_lines_log2) + 1;
-	  bfd_put_32 (sec->owner, (set_id << 18) | (dest & 0x3ffff),
-		      sec->contents + sec->size);
-	  bfd_put_32 (sec->owner, BRASL + ((to << 5) & 0x007fff80) + 75,
-		      sec->contents + sec->size + 4);
-	  bfd_put_32 (sec->owner, (lrlive << 29) | (g->br_addr & 0x3ffff),
-		      sec->contents + sec->size + 8);
-	  patt = dest ^ br_dest;
-	  if (irela != NULL && ELF32_R_TYPE (irela->r_info) == R_SPU_REL16)
-	    patt = (dest - g->br_addr) ^ (br_dest - g->br_addr);
-	  bfd_put_32 (sec->owner, (patt << 5) & 0x007fff80,
-		      sec->contents + sec->size + 12);
-	}
+      set_id = ((dest_ovl - 1) >> htab->num_lines_log2) + 1;
+      bfd_put_32 (sec->owner, (set_id << 18) | (dest & 0x3ffff),
+		  sec->contents + sec->size);
+      bfd_put_32 (sec->owner, BRASL + ((to << 5) & 0x007fff80) + 75,
+		  sec->contents + sec->size + 4);
+      bfd_put_32 (sec->owner, (lrlive << 29) | (g->br_addr & 0x3ffff),
+		  sec->contents + sec->size + 8);
+      patt = dest ^ br_dest;
+      if (irela != NULL && ELF32_R_TYPE (irela->r_info) == R_SPU_REL16)
+	patt = (dest - g->br_addr) ^ (br_dest - g->br_addr);
+      bfd_put_32 (sec->owner, (patt << 5) & 0x007fff80,
+		  sec->contents + sec->size + 12);
 
       if (ovl == 0)
 	/* Extra space for linked list entries.  */
