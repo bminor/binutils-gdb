@@ -1,3 +1,9 @@
+2009-05-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/icache1.d: Update for changed overlay manager placement.
+	* ld-spu/ovl.d: Likewise.
+	* ld-spu/ovl2.d: Likewise.
+
 2009-05-05  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm.ld: Add .ARM.exidx and .ARM.extab.

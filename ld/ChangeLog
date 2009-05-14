@@ -1,5 +1,10 @@
 2009-05-14  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/spuelf.em (spu_before_allocation): Call
+	spu_elf_place_overlay_data.
+
+2009-05-14  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldlang.c (lang_insert_orphan): Add __start_<section> symbol
 	assignment inside output section statement.  Ensure only one
 	set of symbols per output section.

@@ -34,19 +34,19 @@ Disassembly of section \.ovly2:
      fa0:	00 00 00 02.*
      fa4:	00 04 11 04.*
      fa8:	a0 00 0c 10.*
-     fac:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+     fac:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
      fb0:	00 00 ed 00.*
 	\.\.\.
      fc0:	00 00 00 02.*
      fc4:	00 04 10 00.*
      fc8:	a0 00 0c 14.*
-     fcc:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+     fcc:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
      fd0:	00 00 00 00.*
      fd4:	00 00 0a 80.*
 	\.\.\.
      fe4:	00 04 08 00.*
      fe8:	20 00 0f 38.*
-     fec:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+     fec:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
 	\.\.\.
      ff8:	00 7f 0f 80.*
      ffc:	00 00 00 00.*
@@ -73,7 +73,7 @@ Disassembly of section \.ovly4:
 .*	1c 80 00 81 	ai	\$1,\$1,-512
 .*	33 7f fe 80 	brsl	\$0,1400 <f5>	# 1400
 	\.\.\.
-.*	42 01 00 03 	ila	\$3,200 <__icache_linked_list\+0x1c0>
+.*	42 01 00 03 	ila	\$3,200.*
 .*	18 00 c0 81 	a	\$1,\$1,\$3
 .*	34 00 40 80 	lqd	\$0,16\(\$1\)
 .*	35 00 00 00 	bi	\$0
@@ -91,7 +91,7 @@ Disassembly of section \.ovly5:
  be0:	00 00 00 03.*
  be4:	00 04 14 00.*
  be8:	a0 00 0b 2c.*
- bec:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+ bec:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
 	\.\.\.
  bfc:	00 03 fd 80.*
 
@@ -106,20 +106,20 @@ Disassembly of section \.ovly6:
      fa0:	00 00 00 07.*
      fa4:	00 08 14 00.*
      fa8:	a0 00 0c 00.*
-     fac:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+     fac:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
      fb0:	00 03 75 80.*
 	\.\.\.
      fc0:	00 00 00 07.*
      fc4:	00 08 14 00.*
      fc8:	a0 00 0c 04.*
-     fcc:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+     fcc:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
      fd0:	00 00 00 00.*
      fd4:	00 00 86 80.*
 	\.\.\.
      fe0:	00 00 00 04.*
      fe4:	00 08 08 00.*
      fe8:	20 00 0f 28.*
-     fec:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+     fec:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
 	\.\.\.
      ff8:	00 7f 03 80.*
      ffc:	00 00 00 00.*
@@ -142,20 +142,20 @@ Disassembly of section \.ovly7:
     13a0:	00 00 00 03.*
     13a4:	00 04 14 00.*
     13a8:	a0 00 10 18.*
-    13ac:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+    13ac:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
 	\.\.\.
     13b8:	00 00 0f 80.*
     13bc:	00 00 00 00.*
     13c0:	00 00 00 07.*
     13c4:	00 08 14 00.*
     13c8:	a0 00 10 1c.*
-    13cc:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+    13cc:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
 	\.\.\.
     13dc:	00 00 0a 80.*
     13e0:	00 00 00 05.*
     13e4:	00 08 0c 00.*
     13e8:	20 00 13 44.*
-    13ec:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+    13ec:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
     13f0:	00 00 00 00.*
     13f4:	00 7f 02 80.*
 	\.\.\.
@@ -173,13 +173,13 @@ Disassembly of section \.ovly8:
     17c0:	00 00 00 02.*
     17c4:	00 04 11 04.*
     17c8:	a0 00 14 0c.*
-    17cc:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+    17cc:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
 	\.\.\.
     17dc:	00 00 d9 00.*
     17e0:	00 00 00 06.*
     17e4:	00 08 10 00.*
     17e8:	20 00 17 30.*
-    17ec:	31 03 0a 4b 	brasl	\$75,1850 <__icache_br_handler>
+    17ec:	31 03 01 cb 	brasl	\$75,180c <__icache_br_handler>
     17f0:	00 7f 0d 80.*
 	\.\.\.
 
@@ -189,14 +189,16 @@ Disassembly of section \.text:
 .*	41 00 02 03 	ilhu	\$3,4
 .*	60 8a 00 03 	iohl	\$3,5120	# 1400
 .*	32 00 04 80 	br	182c.*
+0000180c <__icache_br_handler>:
+    180c:	00 00 00 00 	stop
+00001810 <__icache_call_handler>:
 	\.\.\.
     1820:	00 00 00 01.*
     1824:	00 04 0c 00.*
     1828:	a0 00 18 08.*
-    182c:	31 03 0a cb 	brasl	\$75,1854 <__icache_call_handler>
+    182c:	31 03 02 4b 	brasl	\$75,1810 <__icache_call_handler>
 	\.\.\.
     1838:	00 7e 7b 80.*
 	\.\.\.
 
-00001850 <__icache_br_handler>:
 #pass

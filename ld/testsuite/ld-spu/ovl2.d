@@ -19,47 +19,47 @@ Disassembly of section \.text:
 
 00000110 <longjmp>:
 .*	bi	\$0
-.*00 00 01 40.*
+
+.*00 00 03 40.*
 .*SPU_ADDR32	\.ov_a1\+0x14
 	\.\.\.
-
-#00000118 <00000000\.ovl_call.f1_a1>:
-#.*	bra?sl	\$75,.* <__ovly_load>.*
-#.*00 04 04 00.*
-#
-#00000120 <00000000\.ovl_call.setjmp>:
-#.*	bra?sl	\$75,.* <__ovly_load>.*
-#.*00 00 01 0c.*
-#
-#00000128 <_SPUEAR_f1_a2>:
-#.*	bra?sl	\$75,.* <__ovly_load>.*
-#.*00 08 04 00.*
-
-00000120 <00000000\.ovl_call.f1_a1>:
+#...
+00000320 <00000000\.ovl_call.f1_a1>:
 .*	ila	\$78,1
 .*	lnop
 .*	ila	\$79,1040	# 410
 .*	bra?	.* <__ovly_load>.*
 
-00000130 <00000000\.ovl_call.setjmp>:
+00000330 <00000000\.ovl_call.setjmp>:
 .*	ila	\$78,0
 .*	lnop
 .*	ila	\$79,268	# 10c
 .*	bra?	.* <__ovly_load>.*
 
-00000140 <00000000\.ovl_call\.13:5>:
+00000340 <00000000\.ovl_call\.13:5>:
 .* 	ila	\$78,1
 .* 	lnop
 .* 	ila	\$79,1044	# 414
 .* 	bra?	.* <__ovly_load>.*
 
-00000150 <_SPUEAR_f1_a2>:
+00000350 <_SPUEAR_f1_a2>:
 .*	ila	\$78,2
 .*	lnop
 .*	ila	\$79,1040	# 410
 .*	bra?	.* <__ovly_load>.*
 
-#...
+#00000318 <00000000\.ovl_call.f1_a1>:
+#.*	bra?sl	\$75,.* <__ovly_load>.*
+#.*00 04 04 00.*
+#
+#00000320 <00000000\.ovl_call.setjmp>:
+#.*	bra?sl	\$75,.* <__ovly_load>.*
+#.*00 00 01 0c.*
+#
+#00000328 <_SPUEAR_f1_a2>:
+#.*	bra?sl	\$75,.* <__ovly_load>.*
+#.*00 08 04 00.*
+
 Disassembly of section \.ov_a1:
 
 00000400 <00000001\.ovl_call\.14:6>:

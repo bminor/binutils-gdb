@@ -1660,7 +1660,6 @@ spu_elf_size_stubs (struct bfd_link_info *info)
   flagword flags;
   unsigned int i;
   asection *stub;
-  const char *ovout;
 
   if (!process_stubs (info, FALSE))
     return 0;
@@ -1691,7 +1690,6 @@ spu_elf_size_stubs (struct bfd_link_info *info)
   if (htab->params->ovly_flavour == ovly_soft_icache)
     /* Extra space for linked list entries.  */
     stub->size += htab->stub_count[0] * 16;
-  (*htab->params->place_spu_section) (stub, NULL, ".text");
 
   for (i = 0; i < htab->num_overlays; ++i)
     {
@@ -1704,7 +1702,6 @@ spu_elf_size_stubs (struct bfd_link_info *info)
 					 ovl_stub_size_log2 (htab->params)))
 	return 0;
       stub->size = htab->stub_count[ovl] * ovl_stub_size (htab->params);
-      (*htab->params->place_spu_section) (stub, osec, NULL);
     }
 
   flags = (SEC_ALLOC | SEC_LOAD
@@ -1728,7 +1725,6 @@ spu_elf_size_stubs (struct bfd_link_info *info)
 	return 0;
 
       htab->init->size = 16;
-      (*htab->params->place_spu_section) (htab->init, NULL, ".ovl.init");
     }
   else
     {
@@ -1747,19 +1743,49 @@ spu_elf_size_stubs (struct bfd_link_info *info)
 
       htab->ovtab->size = htab->num_overlays * 16 + 16 + htab->num_buf * 4;
     }
-  ovout = ".data";
-  if (htab->params->ovly_flavour == ovly_soft_icache)
-    ovout = ".data.icache";
-  (*htab->params->place_spu_section) (htab->ovtab, NULL, ovout);
 
   htab->toe = bfd_make_section_anyway_with_flags (ibfd, ".toe", SEC_ALLOC);
   if (htab->toe == NULL
       || !bfd_set_section_alignment (ibfd, htab->toe, 4))
     return 0;
   htab->toe->size = htab->params->ovly_flavour == ovly_soft_icache ? 256 : 16;
-  (*htab->params->place_spu_section) (htab->toe, NULL, ".toe");
 
   return 2;
+}
+
+/* Called from ld to place overlay manager data sections.  This is done
+   after the overlay manager itself is loaded, mainly so that the
+   linker's htab->init section is placed after any other .ovl.init
+   sections.  */
+
+void
+spu_elf_place_overlay_data (struct bfd_link_info *info)
+{
+  struct spu_link_hash_table *htab = spu_hash_table (info);
+  unsigned int i;
+  const char *ovout;
+
+  if (htab->stub_count == NULL)
+    return;
+
+  (*htab->params->place_spu_section) (htab->stub_sec[0], NULL, ".text");
+
+  for (i = 0; i < htab->num_overlays; ++i)
+    {
+      asection *osec = htab->ovl_sec[i];
+      unsigned int ovl = spu_elf_section_data (osec)->u.o.ovl_index;
+      (*htab->params->place_spu_section) (htab->stub_sec[ovl], osec, NULL);
+    }
+
+  if (htab->params->ovly_flavour == ovly_soft_icache)
+    (*htab->params->place_spu_section) (htab->init, NULL, ".ovl.init");
+
+  ovout = ".data";
+  if (htab->params->ovly_flavour == ovly_soft_icache)
+    ovout = ".data.icache";
+  (*htab->params->place_spu_section) (htab->ovtab, NULL, ovout);
+
+  (*htab->params->place_spu_section) (htab->toe, NULL, ".toe");
 }
 
 /* Functions to handle embedded spu_ovl.o object.  */

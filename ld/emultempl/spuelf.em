@@ -308,6 +308,8 @@ spu_before_allocation (void)
 	    einfo ("%X%P: can not size overlay stubs: %E\n");
 	  else if (ret == 2)
 	    spu_elf_load_ovl_mgr ();
+
+	  spu_elf_place_overlay_data (&link_info);
 	}
 
       /* We must not cache anything from the preliminary sizing.  */

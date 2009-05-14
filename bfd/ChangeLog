@@ -1,3 +1,9 @@
+2009-05-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_size_stubs): Split out section placement to..
+	(spu_elf_place_overlay_data): ..here.  New function.
+	* elf32-spu.h (spu_elf_place_overlay_data): Declare.
+
 2009-05-13  Andrew Jenner  <andrew@codesourcery.com>
 
 	* elf32-arm.c: Move sysdep.h to start of file.
