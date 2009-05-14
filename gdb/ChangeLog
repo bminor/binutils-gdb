@@ -1,3 +1,65 @@
+2009-05-14  Pierre Muller  <muller.u-strasbg.fr>
+
+	Remove all i386 debug register low level macros in config nm files.
+	(I386_DR_LOW_SET_ADDR, I386_DR_LOW_RESET_ADDR): Remove.
+	(I386_DR_LOW_GET_STATUS, I386_DR_LOW_SET_CONTROL): Remove.
+	(I386_USE_GENERIC_WATCHPOIINTS): Remove.
+
+	* i386-nat.h: New file (adapted from config/i386/nm-i386.h).
+	(struct i386_dr_low_type): New type.
+	(i386_dr_low): New global variable.
+	* i386-nat.c (TARGET_HAS_DR_LEN_8): Update macro.
+	(i386_insert_aligned_watchpoint): Replace i386 dr low macros by
+	i386_dr_low struct variable fields.
+	(i386_remove_aligned_watchpoint): Likewise.
+	(i386_stopped_data_address): Likewise.
+	(i386_stopped_by_hwbp): Likewise.
+	(show_debug_regs_command_added): New static variable.
+	(add_show_debug_regs_command): New static function.
+	(i386_use_watchpoints): Call add_show_debug_regs_command if not done.
+	(i386_set_debug_register_length): New function.
+	(_initialize_i386_nat): Delete.
+	
+	* amd64-linux-nat.c: Include "i386-nat.h".
+	(amd64_linux_dr_set_control):  Change to static.
+	(amd64_linux_dr_get_status): Change to static.
+	(amd64_linux_dr_set_addr,amd64_linux_dr_reset_addr): Likewise.
+	(_initialize_amd64_linux_nat): Set i386_dr_low variable fields.
+	
+	* go32-nat.c: Include "i386-nat.h".
+	(go32_set_addr): Change to static.
+	(go32_set_dr7): Change to static. Change arg type to unisgned long.
+	(go32_get_dr6): Change to static. Change return type to unisnged long.
+	(init_go32_ops):  Set i386_dr_low variable fields.
+	* i386-linux-nat.c: Include "i386-nat.h".
+	(i386_linux_dr_set_control, i386_linux_dr_get_status): Change to static.
+	(i386_linux_dr_set_addr, i386_linux_dr_reset_addr): Idem.
+	(_initialize_i386_linux_nat):  Set i386_dr_low variable fields.
+	* i386bsd-nat.h: Declare functions used for
+	i386_dr_low fields in i386fbsd-nat.c.
+	* i386fbsd-nat.c: Include "i386-nat.h".
+	(_initialize_i386fbsd_nat): Set i386_dr_low variable fields.
+	* windows-nat.c: Include "i386-nat.h".
+	(cygwin_set_dr, cygwin_get_dr6, cygwin_set_dr7): Add prototypes.
+	Change to static.
+	(cygwin_get_dr6): Change return type to unisnged long.
+	(cygwin_set_dr7): Change arg type to unisgned long.
+	(init_windows_ops): Set i386_dr_low function fields.
+
+	* amd64-windows-nat.c (_initialize_amd64_windows_nat): Call 
+	i386_set_debug_register_length.
+	* i386-windows-nat.c (_initialize_i386_windows_nat): Likewise.
+
+	* config/i386/nm-cygwin.h: Remove all I386_* macros.
+	* config/i386/nm-cygwin64.h: Likewise.
+	* config/i386/nm-fbsd.h: Likewise.
+	* config/i386/nm-linux.h: Likewise.
+	* config/i386/nm-i386.h: Remove completely.
+	* config/i386/nm-go32.h: Remove completely.
+	* config/i386/nm-linux64.h: Remove completely.
+	* config/i386/go32.mh (NAT_FILE): Remove entry.
+	* config/i386/linux64.h (NAT_FILE): Change to config/nm-linux.h.
+
 2009-05-14  Jon Beniston  <jon@beniston.com>
 
 	* MAINTAINERS: Add Jon Beniston to write after approval list.

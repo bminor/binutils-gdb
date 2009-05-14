@@ -85,6 +85,7 @@
 #include <fcntl.h>
 
 #include "defs.h"
+#include "i386-nat.h"
 #include "inferior.h"
 #include "gdbthread.h"
 #include "gdb_wait.h"
@@ -768,7 +769,7 @@ go32_can_run (void)
 /* Pass the address ADDR to the inferior in the I'th debug register.
    Here we just store the address in D_REGS, the watchpoint will be
    actually set up when go32_wait runs the debuggee.  */
-void
+static void
 go32_set_dr (int i, CORE_ADDR addr)
 {
   if (i < 0 || i > 3)
@@ -780,8 +781,8 @@ go32_set_dr (int i, CORE_ADDR addr)
 /* Pass the value VAL to the inferior in the DR7 debug control
    register.  Here we just store the address in D_REGS, the watchpoint
    will be actually set up when go32_wait runs the debuggee.  */
-void
-go32_set_dr7 (unsigned val)
+static void
+go32_set_dr7 (unsigned long val)
 {
   CONTROL = val;
 }
@@ -789,7 +790,7 @@ go32_set_dr7 (unsigned val)
 /* Get the value of the DR6 debug status register from the inferior.
    Here we just return the value stored in D_REGS, as we've got it
    from the last go32_wait call.  */
-unsigned
+static unsigned long
 go32_get_dr6 (void)
 {
   return STATUS;
@@ -974,6 +975,13 @@ init_go32_ops (void)
   go32_ops.to_has_execution = 1;
 
   i386_use_watchpoints (&go32_ops);
+
+
+  i386_dr_low.set_control = go32_set_dr7;
+  i386_dr_low.set_addr = go32_set_dr;
+  i386_dr_low.reset_addr = NULL;
+  i386_dr_low.get_status = go32_get_dr6;
+  i386_set_debug_register_length (4);
 
   go32_ops.to_magic = OPS_MAGIC;
 

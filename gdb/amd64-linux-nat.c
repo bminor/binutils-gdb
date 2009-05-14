@@ -50,6 +50,7 @@
 #include "amd64-tdep.h"
 #include "i386-linux-tdep.h"
 #include "amd64-nat.h"
+#include "i386-nat.h"
 
 /* Mapping between the general-purpose registers in GNU/Linux x86-64
    `struct user' format and GDB's register cache layout.  */
@@ -285,7 +286,7 @@ amd64_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
     perror_with_name (_("Couldn't write debug register"));
 }
 
-void
+static void
 amd64_linux_dr_set_control (unsigned long control)
 {
   struct lwp_info *lp;
@@ -296,7 +297,7 @@ amd64_linux_dr_set_control (unsigned long control)
     amd64_linux_dr_set (ptid, DR_CONTROL, control);
 }
 
-void
+static void
 amd64_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
   struct lwp_info *lp;
@@ -309,13 +310,13 @@ amd64_linux_dr_set_addr (int regnum, CORE_ADDR addr)
     amd64_linux_dr_set (ptid, DR_FIRSTADDR + regnum, addr);
 }
 
-void
+static void
 amd64_linux_dr_reset_addr (int regnum)
 {
   amd64_linux_dr_set_addr (regnum, 0);
 }
 
-unsigned long
+static unsigned long
 amd64_linux_dr_get_status (void)
 {
   return amd64_linux_dr_get (inferior_ptid, DR_STATUS);
@@ -666,6 +667,12 @@ _initialize_amd64_linux_nat (void)
   t = linux_target ();
 
   i386_use_watchpoints (t);
+
+  i386_dr_low.set_control = amd64_linux_dr_set_control;
+  i386_dr_low.set_addr = amd64_linux_dr_set_addr;
+  i386_dr_low.reset_addr = amd64_linux_dr_reset_addr;
+  i386_dr_low.get_status = amd64_linux_dr_get_status;
+  i386_set_debug_register_length (8);
 
   /* Override the GNU/Linux inferior startup hook.  */
   super_post_startup_inferior = t->to_post_startup_inferior;

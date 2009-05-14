@@ -18,20 +18,3 @@
 
 #define ADD_SHARED_SYMBOL_FILES dll_symbol_command
 void dll_symbol_command (char *, int);
-
-#define I386_USE_GENERIC_WATCHPOINTS
-
-#include "i386/nm-i386.h"
-
-/* Support for hardware-assisted breakpoints and watchpoints.  */
-
-#define I386_DR_LOW_SET_CONTROL(VAL)	cygwin_set_dr7 (VAL)
-extern void cygwin_set_dr7 (unsigned);
-
-#define I386_DR_LOW_SET_ADDR(N,ADDR)	cygwin_set_dr (N,ADDR)
-extern void cygwin_set_dr (int, CORE_ADDR);
-
-#define I386_DR_LOW_RESET_ADDR(N)
-
-#define I386_DR_LOW_GET_STATUS()	cygwin_get_dr6 ()
-extern unsigned cygwin_get_dr6 (void);

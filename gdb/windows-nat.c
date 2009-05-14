@@ -63,6 +63,7 @@
 
 #include "windows-tdep.h"
 #include "windows-nat.h"
+#include "i386-nat.h"
 
 #define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
 #define DebugActiveProcessStop		dyn_DebugActiveProcessStop
@@ -139,6 +140,10 @@ static int debug_registers_used;
 static void windows_stop (ptid_t);
 static int windows_thread_alive (struct target_ops *, ptid_t);
 static void windows_kill_inferior (struct target_ops *);
+
+static void cygwin_set_dr (int i, CORE_ADDR addr);
+static void cygwin_set_dr7 (unsigned long val);
+static unsigned long cygwin_get_dr6 (void);
 
 static enum target_signal last_sig = TARGET_SIGNAL_0;
 /* Set if a signal was received from the debugged process */
@@ -2166,7 +2171,17 @@ init_windows_ops (void)
   windows_ops.to_has_execution = 1;
   windows_ops.to_pid_to_exec_file = windows_pid_to_exec_file;
   windows_ops.to_get_ada_task_ptid = windows_get_ada_task_ptid;
+
   i386_use_watchpoints (&windows_ops);
+
+  i386_dr_low.set_control = cygwin_set_dr7;
+  i386_dr_low.set_addr = cygwin_set_dr;
+  i386_dr_low.reset_addr = NULL;
+  i386_dr_low.get_status = cygwin_get_dr6;
+
+  /* i386_dr_low.debug_register_length field is set by
+     calling i386_set_debug_register_length function
+     in processor windows specific native file.  */
 
   windows_ops.to_magic = OPS_MAGIC;
 }
@@ -2265,7 +2280,7 @@ Show whether to display kernel exceptions in child process."), NULL,
 /* Pass the address ADDR to the inferior in the I'th debug register.
    Here we just store the address in dr array, the registers will be
    actually set up when windows_continue is called.  */
-void
+static void
 cygwin_set_dr (int i, CORE_ADDR addr)
 {
   if (i < 0 || i > 3)
@@ -2279,10 +2294,10 @@ cygwin_set_dr (int i, CORE_ADDR addr)
 /* Pass the value VAL to the inferior in the DR7 debug control
    register.  Here we just store the address in D_REGS, the watchpoint
    will be actually set up in windows_wait.  */
-void
-cygwin_set_dr7 (unsigned val)
+static void
+cygwin_set_dr7 (unsigned long val)
 {
-  dr[7] = val;
+  dr[7] = (CORE_ADDR) val;
   debug_registers_changed = 1;
   debug_registers_used = 1;
 }
@@ -2290,10 +2305,10 @@ cygwin_set_dr7 (unsigned val)
 /* Get the value of the DR6 debug status register from the inferior.
    Here we just return the value stored in dr[6]
    by the last call to thread_rec for current_event.dwThreadId id.  */
-unsigned
+static unsigned long
 cygwin_get_dr6 (void)
 {
-  return dr[6];
+  return (unsigned long) dr[6];
 }
 
 /* Determine if the thread referenced by "ptid" is alive

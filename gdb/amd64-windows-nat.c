@@ -17,7 +17,7 @@
 
 #include "defs.h"
 #include "windows-nat.h"
-
+#include "i386-nat.h"
 #include <windows.h>
 
 #define context_offset(x) (offsetof (CONTEXT, x))
@@ -89,4 +89,5 @@ void
 _initialize_amd64_windows_nat (void)
 {
   windows_set_context_register_offsets (mappings);
+  i386_set_debug_register_length (8);
 }
