@@ -1,3 +1,9 @@
+2009-05-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbarch.sh: Add comment documenting the target_gdbarch global.
+	gdbarch.h does NOT need to be regenerated as the corresponding
+	change has already been made in a previous commit.
+
 2009-05-14  Pierre Muller  <muller.u-strasbg.fr>
 
 	Remove all i386 debug register low level macros in config nm files.
