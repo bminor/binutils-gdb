@@ -4705,7 +4705,6 @@ spu_elf_relocate_section (bfd *output_bfd,
       bfd_reloc_status_type r;
       bfd_boolean unresolved_reloc;
       bfd_boolean warned;
-      bfd_boolean overlay_encoded;
       enum _stub_type stub_type;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
@@ -4790,7 +4789,6 @@ spu_elf_relocate_section (bfd *output_bfd,
       is_ea_sym = (ea != NULL
 		   && sec != NULL
 		   && sec->output_section == ea);
-      overlay_encoded = FALSE;
 
       /* If this symbol is in an overlay area, we may need to relocate
 	 to the overlay stub.  */
@@ -4828,6 +4826,8 @@ spu_elf_relocate_section (bfd *output_bfd,
 	{
 	  /* For soft icache, encode the overlay index into addresses.  */
 	  if (htab->params->ovly_flavour == ovly_soft_icache
+	      && (r_type == R_SPU_ADDR16_HI
+		  || r_type == R_SPU_ADDR32 || r_type == R_SPU_REL32)
 	      && !is_ea_sym)
 	    {
 	      unsigned int ovl = overlay_index (sec);
@@ -4835,7 +4835,6 @@ spu_elf_relocate_section (bfd *output_bfd,
 		{
 		  unsigned int set_id = ((ovl - 1) >> htab->num_lines_log2) + 1;
 		  relocation += set_id << 18;
-		  overlay_encoded = TRUE;
 		}
 	    }
 	}
@@ -4888,11 +4887,6 @@ spu_elf_relocate_section (bfd *output_bfd,
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
-	      /* FIXME: We don't want to warn on most references
-		 within an overlay to itself, but this may silence a
-		 warning that should be reported.  */
-	      if (overlay_encoded && sec == input_section)
-		break;
 	      if (!((*info->callbacks->reloc_overflow)
 		    (info, (h ? &h->root : NULL), sym_name, howto->name,
 		     (bfd_vma) 0, input_bfd, input_section, rel->r_offset)))

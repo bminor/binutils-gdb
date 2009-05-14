@@ -1,5 +1,11 @@
 2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* elf32-spu.c (spu_elf_relocate_section): Only encode overlay index
+	into addresses for relocation types that look at high bits.  Remove
+	special handling of relocation overflow warnings.
+
+2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* elf32-spu.c (mark_functions_via_relocs): Handle cycles in the
 	control flow graph between fragments of a function.
 
