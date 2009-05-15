@@ -1,3 +1,23 @@
+2009-05-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
+	
+	* NEWS: Mention set/show libthread-db-search-path.
+	* gdb_thread_db.h (LIBTHREAD_DB_SEARCH_PATH): New define.
+	(LIBTHREAD_DB_SO): Moved from linux-thread-db.c
+	* linux-thread-db.c (libthread_db_search_path): New setting.
+	(thread_db_handle): New variable (replaces using_thread_db).
+	(try_thread_db_load_1): New function.
+	(try_thread_db_load, thread_db_load_search): Likewise.
+	(dladdr_to_soname): Likewise.
+	(thread_db_load): Iterate over possibly multiple libthread_db's.
+	(check_for_thread_db): Attempt to load new libthread_db.
+	(thread_db_detach, thread_db_wait): Unload libthread_db.
+	(thread_db_mourn_inferior): Likewise.
+	(_initialize_thread_db): Add new libthread-db-search-path option.
+	Defer loading of libthread_db to check_for_thread_db.
+	* solib.c (libpthread_name_p): New function.
+	(libpthread_solib_p): Call it.
+	* solib.h (libpthread_name_p): New prototype.
+	
 2009-05-15  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* MAINTAINERS: Update my email address.

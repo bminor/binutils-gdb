@@ -1,5 +1,14 @@
 #ifdef HAVE_THREAD_DB_H
 #include <thread_db.h>
+
+#ifndef LIBTHREAD_DB_SO
+#define LIBTHREAD_DB_SO "libthread_db.so.1"
+#endif
+
+#ifndef LIBTHREAD_DB_SEARCH_PATH
+#define LIBTHREAD_DB_SEARCH_PATH ""
+#endif
+
 #else
 
 /* Copyright (C) 1999, 2000, 2007, 2008, 2009 Free Software Foundation, Inc.

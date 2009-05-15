@@ -300,6 +300,11 @@ show tcp connect-timeout
   with a specified timeout period; this is useful if the stub is launched
   in parallel with GDB but may not be ready to accept connections immediately.
 
+set libthread-db-search-path
+show libthread-db-search-path
+  Control list of directories which GDB will search for appropriate
+  libthread_db.
+
 * New native configurations
 
 x86/x86_64 Darwin		i[34567]86-*-darwin*

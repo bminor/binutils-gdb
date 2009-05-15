@@ -684,16 +684,25 @@ update_solib_list (int from_tty, struct target_ops *target)
     }
 }
 
-/* Return non-zero if SO is the libpthread shared library.
+
+/* Return non-zero if NAME is the libpthread shared library.
 
    Uses a fairly simplistic heuristic approach where we check
    the file name against "/libpthread".  This can lead to false
    positives, but this should be good enough in practice.  */
 
+int
+libpthread_name_p (const char *name)
+{
+  return (strstr (name, "/libpthread") != NULL);
+}
+
+/* Return non-zero if SO is the libpthread shared library.  */
+
 static int
 libpthread_solib_p (struct so_list *so)
 {
-  return (strstr (so->so_name, "/libpthread") != NULL);
+  return libpthread_name_p (so->so_name);
 }
 
 /* GLOBAL FUNCTION

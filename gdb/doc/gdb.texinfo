@@ -2430,6 +2430,9 @@ a command to apply a command to a list of threads
 @item thread-specific breakpoints
 @item @samp{set print thread-events}, which controls printing of 
 messages on thread start and exit.
+@item @samp{set libthread-db-search-path @var{path}}, which lets
+the user specify which @code{libthread_db} to use if the default choice
+isn't compatible with the program.
 @end itemize
 
 @quotation
@@ -2647,6 +2650,38 @@ programs with multiple threads.
 
 @xref{Set Watchpoints,,Setting Watchpoints}, for information about
 watchpoints in programs with multiple threads.
+
+@table @code
+@kindex set libthread-db-search-path
+@cindex search path for @code{libthread_db}
+@item set libthread-db-search-path @r{[}@var{path}@r{]}
+If this variable is set, @var{path} is a colon-separated list of
+directories @value{GDBN} will use to search for @code{libthread_db}.
+If you omit @var{path}, @samp{libthread-db-search-path} will be reset to
+an empty list.
+
+On @sc{gnu}/Linux and Solaris systems, @value{GDBN} uses a ``helper''
+@code{libthread_db} library to obtain information about threads in the
+inferior process.  @value{GDBN} will use @samp{libthread-db-search-path}
+to find @code{libthread_db}.  If that fails, @value{GDBN} will continue
+with default system shared library directories, and finally the directory
+from which @code{libpthread} was loaded in the inferior process.
+
+For any @code{libthread_db} library @value{GDBN} finds in above directories,
+@value{GDBN} attempts to initialize it with the current inferior process.
+If this initialization fails (which could happen because of a version
+mismatch between @code{libthread_db} and @code{libpthread}), @value{GDBN}
+will unload @code{libthread_db}, and continue with the next directory.
+If none of @code{libthread_db} libraries initialize successfully,
+@value{GDBN} will issue a warning and thread debugging will be disabled.
+
+Setting @code{libthread-db-search-path} is currently implemented
+only on some platforms.
+
+@kindex show libthread-db-search-path 
+@item show libthread-db-search-path 
+Display current libthread_db search path.
+@end table
 
 @node Processes
 @section Debugging Programs with Multiple Processes

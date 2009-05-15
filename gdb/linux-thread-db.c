@@ -26,13 +26,16 @@
 #include "gdb_thread_db.h"
 
 #include "bfd.h"
+#include "command.h"
 #include "exceptions.h"
+#include "gdbcmd.h"
 #include "gdbthread.h"
 #include "inferior.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "target.h"
 #include "regcache.h"
+#include "solib.h"
 #include "solib-svr4.h"
 #include "gdbcore.h"
 #include "observer.h"
@@ -42,10 +45,6 @@
 
 #ifdef HAVE_GNU_LIBC_VERSION_H
 #include <gnu/libc-version.h>
-#endif
-
-#ifndef LIBTHREAD_DB_SO
-#define LIBTHREAD_DB_SO "libthread_db.so.1"
 #endif
 
 /* GNU/Linux libthread_db support.
@@ -74,14 +73,17 @@
    of the ptid_t prevents thread IDs changing when libpthread is
    loaded or unloaded.  */
 
+static char *libthread_db_search_path;
+
 /* If we're running on GNU/Linux, we must explicitly attach to any new
    threads.  */
 
 /* This module's target vector.  */
 static struct target_ops thread_db_ops;
 
-/* Non-zero if we're using this module's target vector.  */
-static int using_thread_db;
+/* Handle from dlopen for libthread_db.so.  Not NULL if we're using this
+   module's target vector.  */
+static void *thread_db_handle;
 
 /* Non-zero if we have determined the signals used by the threads
    library.  */
@@ -344,7 +346,7 @@ thread_db_attach_lwp (ptid_t ptid)
   td_thrinfo_t ti;
   td_err_e err;
 
-  if (!using_thread_db)
+  if (thread_db_handle == NULL)
     return 0;
 
   /* This ptid comes from linux-nat.c, which should always fill in the
@@ -383,71 +385,6 @@ verbose_dlsym (void *handle, const char *name)
   if (sym == NULL)
     warning (_("Symbol \"%s\" not found in libthread_db: %s"), name, dlerror ());
   return sym;
-}
-
-static int
-thread_db_load (void)
-{
-  void *handle;
-  td_err_e err;
-
-  handle = dlopen (LIBTHREAD_DB_SO, RTLD_NOW);
-  if (handle == NULL)
-    {
-      fprintf_filtered (gdb_stderr, "\n\ndlopen failed on '%s' - %s\n",
-			LIBTHREAD_DB_SO, dlerror ());
-      fprintf_filtered (gdb_stderr,
-			"GDB will not be able to debug pthreads.\n\n");
-      return 0;
-    }
-
-  /* Initialize pointers to the dynamic library functions we will use.
-     Essential functions first.  */
-
-  td_init_p = verbose_dlsym (handle, "td_init");
-  if (td_init_p == NULL)
-    return 0;
-
-  td_ta_new_p = verbose_dlsym (handle, "td_ta_new");
-  if (td_ta_new_p == NULL)
-    return 0;
-
-  td_ta_map_id2thr_p = verbose_dlsym (handle, "td_ta_map_id2thr");
-  if (td_ta_map_id2thr_p == NULL)
-    return 0;
-
-  td_ta_map_lwp2thr_p = verbose_dlsym (handle, "td_ta_map_lwp2thr");
-  if (td_ta_map_lwp2thr_p == NULL)
-    return 0;
-
-  td_ta_thr_iter_p = verbose_dlsym (handle, "td_ta_thr_iter");
-  if (td_ta_thr_iter_p == NULL)
-    return 0;
-
-  td_thr_validate_p = verbose_dlsym (handle, "td_thr_validate");
-  if (td_thr_validate_p == NULL)
-    return 0;
-
-  td_thr_get_info_p = verbose_dlsym (handle, "td_thr_get_info");
-  if (td_thr_get_info_p == NULL)
-    return 0;
-
-  /* Initialize the library.  */
-  err = td_init_p ();
-  if (err != TD_OK)
-    {
-      warning (_("Cannot initialize libthread_db: %s"), thread_db_err_str (err));
-      return 0;
-    }
-
-  /* These are not essential.  */
-  td_ta_event_addr_p = dlsym (handle, "td_ta_event_addr");
-  td_ta_set_event_p = dlsym (handle, "td_ta_set_event");
-  td_ta_event_getmsg_p = dlsym (handle, "td_ta_event_getmsg");
-  td_thr_event_enable_p = dlsym (handle, "td_thr_event_enable");
-  td_thr_tls_get_addr_p = dlsym (handle, "td_thr_tls_get_addr");
-
-  return 1;
 }
 
 static td_err_e
@@ -541,6 +478,278 @@ enable_thread_event_reporting (void)
     }
 }
 
+/* Attempt to initialize dlopen()ed libthread_db, described by HANDLE.
+   Return 1 on success.
+   Failure could happen if libthread_db does not have symbols we expect,
+   or when it refuses to work with the current inferior (e.g. due to
+   version mismatch between libthread_db and libpthread).  */
+
+static int
+try_thread_db_load_1 (void *handle)
+{
+  td_err_e err;
+
+  /* Initialize pointers to the dynamic library functions we will use.
+     Essential functions first.  */
+
+  td_init_p = verbose_dlsym (handle, "td_init");
+  if (td_init_p == NULL)
+    return 0;
+
+  err = td_init_p ();
+  if (err != TD_OK)
+    {
+      warning (_("Cannot initialize libthread_db: %s"), thread_db_err_str (err));
+      return 0;
+    }
+
+  td_ta_new_p = verbose_dlsym (handle, "td_ta_new");
+  if (td_ta_new_p == NULL)
+    return 0;
+
+  /* Initialize the structure that identifies the child process.  */
+  proc_handle.ptid = inferior_ptid;
+
+  /* Now attempt to open a connection to the thread library.  */
+  err = td_ta_new_p (&proc_handle, &thread_agent);
+  if (err != TD_OK)
+    {
+      td_ta_new_p = NULL;
+      if (info_verbose)
+	printf_unfiltered (_("td_ta_new failed: %s\n"),
+			   thread_db_err_str (err));
+      else
+        switch (err)
+          {
+            case TD_NOLIBTHREAD:
+#ifdef THREAD_DB_HAS_TD_VERSION
+            case TD_VERSION:
+#endif
+              /* The errors above are not unexpected and silently ignored:
+                 they just mean we haven't found correct version of
+                 libthread_db yet.  */
+              break;
+            default:
+              warning (_("td_ta_new failed: %s"), thread_db_err_str (err));
+          }
+      return 0;
+    }
+
+  td_ta_map_id2thr_p = verbose_dlsym (handle, "td_ta_map_id2thr");
+  if (td_ta_map_id2thr_p == NULL)
+    return 0;
+
+  td_ta_map_lwp2thr_p = verbose_dlsym (handle, "td_ta_map_lwp2thr");
+  if (td_ta_map_lwp2thr_p == NULL)
+    return 0;
+
+  td_ta_thr_iter_p = verbose_dlsym (handle, "td_ta_thr_iter");
+  if (td_ta_thr_iter_p == NULL)
+    return 0;
+
+  td_thr_validate_p = verbose_dlsym (handle, "td_thr_validate");
+  if (td_thr_validate_p == NULL)
+    return 0;
+
+  td_thr_get_info_p = verbose_dlsym (handle, "td_thr_get_info");
+  if (td_thr_get_info_p == NULL)
+    return 0;
+
+  /* These are not essential.  */
+  td_ta_event_addr_p = dlsym (handle, "td_ta_event_addr");
+  td_ta_set_event_p = dlsym (handle, "td_ta_set_event");
+  td_ta_event_getmsg_p = dlsym (handle, "td_ta_event_getmsg");
+  td_thr_event_enable_p = dlsym (handle, "td_thr_event_enable");
+  td_thr_tls_get_addr_p = dlsym (handle, "td_thr_tls_get_addr");
+
+  printf_unfiltered (_("[Thread debugging using libthread_db enabled]\n"));
+
+  /* The thread library was detected.  Activate the thread_db target.  */
+  push_target (&thread_db_ops);
+  thread_db_handle = handle;
+
+  enable_thread_event_reporting ();
+  thread_db_find_new_threads_1 ();
+  return 1;
+}
+
+/* Lookup a library in which given symbol resides.
+   Note: this is looking in GDB process, not in the inferior.
+   Returns library name, or NULL.  */
+
+static const char *
+dladdr_to_soname (const void *addr)
+{
+  Dl_info info;
+
+  if (dladdr (addr, &info) != 0)
+    return info.dli_fname;
+  return NULL;
+}
+
+/* Attempt to use LIBRARY as libthread_db.  LIBRARY could be absolute,
+   relative, or just LIBTHREAD_DB.  */
+
+static int
+try_thread_db_load (const char *library)
+{
+  void *handle;
+
+  if (info_verbose)
+    printf_unfiltered (_("Trying host libthread_db library: %s.\n"),
+                       library);
+  handle = dlopen (library, RTLD_NOW);
+  if (handle == NULL)
+    {
+      if (info_verbose)
+	printf_unfiltered (_("dlopen failed: %s.\n"), dlerror ());
+      return 0;
+    }
+
+  if (info_verbose && strchr (library, '/') == NULL)
+    {
+      void *td_init;
+
+      td_init = dlsym (handle, "td_init");
+      if (td_init != NULL)
+        {
+          const char *const libpath = dladdr_to_soname (td_init);
+
+          if (libpath != NULL)
+            printf_unfiltered (_("Host %s resolved to: %s.\n"),
+                               library, libpath);
+        }
+    }
+
+  if (try_thread_db_load_1 (handle))
+    return 1;
+
+  /* This library "refused" to work on current inferior.  */
+  dlclose (handle);
+  return 0;
+}
+
+
+/* Search libthread_db_search_path for libthread_db which "agrees"
+   to work on current inferior.  */
+
+static int
+thread_db_load_search (void)
+{
+  char path[PATH_MAX];
+  const char *search_path = libthread_db_search_path;
+  int rc = 0;
+
+  while (*search_path)
+    {
+      const char *end = strchr (search_path, ':');
+      if (end)
+	{
+	  size_t len = end - search_path;
+          if (len + 1 + strlen (LIBTHREAD_DB_SO) + 1 > sizeof (path))
+            {
+              char *cp = xmalloc (len + 1);
+              memcpy (cp, search_path, len);
+              cp[len] = '\0';
+              warning (_("libthread_db_search_path component too long,"
+                         " ignored: %s."), cp);
+              xfree (cp);
+              search_path += len + 1;
+              continue;
+            }
+	  memcpy (path, search_path, len);
+	  path[len] = '\0';
+	  search_path += len + 1;
+	}
+      else
+	{
+          size_t len = strlen (search_path);
+
+          if (len + 1 + strlen (LIBTHREAD_DB_SO) + 1 > sizeof (path))
+            {
+              warning (_("libthread_db_search_path component too long,"
+                         " ignored: %s."), search_path);
+              break;
+            }
+	  memcpy (path, search_path, len + 1);
+	  search_path += len;
+	}
+      strcat (path, "/");
+      strcat (path, LIBTHREAD_DB_SO);
+      if (try_thread_db_load (path))
+	{
+	  rc = 1;
+	  break;
+	}
+    }
+  if (rc == 0)
+    rc = try_thread_db_load (LIBTHREAD_DB_SO);
+  return rc;
+}
+
+/* Attempt to load and initialize libthread_db.
+   Return 1 on success.
+ */
+
+static int
+thread_db_load (void)
+{
+  struct objfile *obj;
+
+  if (thread_db_handle != NULL)
+    return 1;
+
+  /* Don't attempt to use thread_db on targets which can not run
+     (executables not running yet, core files) for now.  */
+  if (!target_has_execution)
+    return 0;
+
+  /* Don't attempt to use thread_db for remote targets.  */
+  if (!target_can_run (&current_target))
+    return 0;
+
+  if (thread_db_load_search ())
+    return 1;
+
+  /* None of the libthread_db's on our search path, not the system default
+     ones worked.  If the executable is dynamically linked against
+     libpthread, try loading libthread_db from the same directory.  */
+
+  ALL_OBJFILES (obj)
+    if (libpthread_name_p (obj->name))
+      {
+	char path[PATH_MAX], *cp;
+
+	gdb_assert (strlen (obj->name) < sizeof (path));
+	strcpy (path, obj->name);
+	cp = strrchr (path, '/');
+
+	if (cp == NULL)
+	  {
+	    warning (_("Expected absolute pathname for libpthread in the"
+		       " inferior, but got %s."), path);
+	  }
+	else if (cp + 1 + strlen (LIBTHREAD_DB_SO) + 1 > path + sizeof (path))
+	  {
+	    warning (_("Unexpected: path to libpthread in the inferior is"
+		       " too long: %s"), path);
+	  }
+	else
+	  {
+	    strcpy (cp + 1, LIBTHREAD_DB_SO);
+	    if (try_thread_db_load (path))
+	      return 1;
+	  }
+	warning (_("Unable to find libthread_db matching inferior's thread"
+		   " library, thread debugging will not be available."));
+	return 0;
+    }
+  /* Either this executable isn't using libpthread at all, or it is
+     statically linked.  Since we can't easily distinguish these two cases,
+     no warning is issued.  */
+  return 0;
+}
+
 static void
 disable_thread_event_reporting (void)
 {
@@ -593,75 +802,34 @@ void
 check_for_thread_db (void)
 {
   td_err_e err;
-  static int already_loaded;
+  static void *last_loaded;
 
   /* Do nothing if we couldn't load libthread_db.so.1.  */
-  if (td_ta_new_p == NULL)
+  if (!thread_db_load ())
     return;
 
   /* First time through, report that libthread_db was successfuly
      loaded.  Can't print this in in thread_db_load as, at that stage,
-     the interpreter and it's console haven't started.  */
+     the interpreter and it's console haven't started.
+     We track td_ta_new_p because the user may switch executables,
+     and as a result we may decide to use a different version of
+     libthread_db. */
 
-  if (!already_loaded)
+  if (last_loaded != td_ta_new_p)
     {
-      Dl_info info;
-      const char *library = NULL;
-      if (dladdr ((*td_ta_new_p), &info) != 0)
-	library = info.dli_fname;
+      last_loaded = td_ta_new_p;
 
-      /* Try dlinfo?  */
+      if (info_verbose || *libthread_db_search_path)
+        {
+          const char *library;
 
-      if (library == NULL)
-	/* Paranoid - don't let a NULL path slip through.  */
-	library = LIBTHREAD_DB_SO;
+          library = dladdr_to_soname (*td_ta_new_p);
+          if (library == NULL)
+            library = LIBTHREAD_DB_SO;
 
-      if (info_verbose)
-	printf_unfiltered (_("Using host libthread_db library \"%s\".\n"),
-			   library);
-      already_loaded = 1;
-    }
-
-  if (using_thread_db)
-    /* Nothing to do.  The thread library was already detected and the
-       target vector was already activated.  */
-    return;
-
-  /* Don't attempt to use thread_db on targets which can not run
-     (executables not running yet, core files) for now.  */
-  if (!target_has_execution)
-    return;
-
-  /* Don't attempt to use thread_db for remote targets.  */
-  if (!target_can_run (&current_target))
-    return;
-
-  /* Initialize the structure that identifies the child process.  */
-  proc_handle.ptid = inferior_ptid;
-
-  /* Now attempt to open a connection to the thread library.  */
-  err = td_ta_new_p (&proc_handle, &thread_agent);
-  switch (err)
-    {
-    case TD_NOLIBTHREAD:
-      /* No thread library was detected.  */
-      break;
-
-    case TD_OK:
-      printf_unfiltered (_("[Thread debugging using libthread_db enabled]\n"));
-
-      /* The thread library was detected.  Activate the thread_db target.  */
-      push_target (&thread_db_ops);
-      using_thread_db = 1;
-
-      enable_thread_event_reporting ();
-      thread_db_find_new_threads_1 ();
-      break;
-
-    default:
-      warning (_("Cannot initialize thread debugging library: %s"),
-	       thread_db_err_str (err));
-      break;
+          printf_unfiltered (_("Using host libthread_db library \"%s\".\n"),
+                             library);
+        }
     }
 }
 
@@ -783,7 +951,9 @@ thread_db_detach (struct target_ops *ops, char *args, int from_tty)
 
   /* Detach thread_db target ops.  */
   unpush_target (&thread_db_ops);
-  using_thread_db = 0;
+  if (thread_db_handle)
+    dlclose (thread_db_handle);
+  thread_db_handle = NULL;
 
   target_beneath->to_detach (target_beneath, args, from_tty);
 }
@@ -896,7 +1066,9 @@ thread_db_wait (struct target_ops *ops,
     {
       remove_thread_event_breakpoints ();
       unpush_target (&thread_db_ops);
-      using_thread_db = 0;
+      if (thread_db_handle)
+	dlclose (thread_db_handle);
+      thread_db_handle = NULL;
 
       return ptid;
     }
@@ -944,7 +1116,9 @@ thread_db_mourn_inferior (struct target_ops *ops)
 
   /* Detach thread_db target ops.  */
   unpush_target (ops);
-  using_thread_db = 0;
+  if (thread_db_handle)
+    dlclose (thread_db_handle);
+  thread_db_handle = NULL;
 }
 
 static int
@@ -1186,13 +1360,28 @@ extern initialize_file_ftype _initialize_thread_db;
 void
 _initialize_thread_db (void)
 {
-  /* Only initialize the module if we can load libthread_db.  */
-  if (thread_db_load ())
-    {
-      init_thread_db_ops ();
-      add_target (&thread_db_ops);
+  init_thread_db_ops ();
+  add_target (&thread_db_ops);
 
-      /* Add ourselves to objfile event chain.  */
-      observer_attach_new_objfile (thread_db_new_objfile);
-    }
+  /* Defer loading of libthread_db.so until inferior is running.
+     This allows gdb to load correct libthread_db for a given
+     executable -- there could be mutiple versions of glibc,
+     compiled with LinuxThreads or NPTL, and until there is
+     a running inferior, we can't tell which libthread_db is
+     the correct one to load. */
+
+  libthread_db_search_path = xstrdup (LIBTHREAD_DB_SEARCH_PATH);
+
+  add_setshow_optional_filename_cmd ("libthread-db-search-path",
+				     class_support,
+				     &libthread_db_search_path, _("\
+Set search path for libthread_db."), _("\
+Show the current search path or libthread_db."), _("\
+This path is used to search for libthread_db to be loaded into \
+gdb itself."),
+			    NULL,
+			    NULL,
+			    &setlist, &showlist);
+  /* Add ourselves to objfile event chain.  */
+  observer_attach_new_objfile (thread_db_new_objfile);
 }

@@ -1,3 +1,7 @@
+2009-05-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.texinfo (Threads): Document libthread-db-search-path.
+	
 2009-05-15  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (GDB/MI General Design): Break up into four nodes.
