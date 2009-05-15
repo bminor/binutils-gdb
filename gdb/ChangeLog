@@ -17,7 +17,7 @@
 	gdbarch.h does NOT need to be regenerated as the corresponding
 	change has already been made in a previous commit.
 
-2009-05-14  Pierre Muller  <muller.u-strasbg.fr>
+2009-05-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Remove all i386 debug register low level macros in config nm files.
 	(I386_DR_LOW_SET_ADDR, I386_DR_LOW_RESET_ADDR): Remove.
@@ -180,7 +180,7 @@
 	(lin_thread_get_thread_signals): blocked_mask is global again.
 	Adjust.
 
-2009-05-11  Pierre Muller  <muller.u-strasbg.fr>
+2009-05-11  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Unify target macros.
 
@@ -211,7 +211,7 @@
 	(debug_to_stopped_by_watchpoint): Likewise.
 
 
-2009-05-10  Pierre Muller  <muller.u-strasbg.fr>
+2009-05-10  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* src/gdb/target.h: Remove all tests for already defined
 	macros. All macros defined here should not be set in config
@@ -265,7 +265,7 @@
 	call to ...
 	(add_inferior_silent): ... here.
 
-2009-05-06  Pierre Muller  <muller.u-strasbg.fr>
+2009-05-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 	    Pedro Alves  <pedro@codesourcery.com>
 
 	* procfs.c (procfs_insert_watchpoint, procfs_remove_watchpoint)
@@ -552,7 +552,7 @@
 
 	* stack.c (_initialize_stack) <disassemble-next-line>: Doc fix.
 
-2009-04-24  Pierre Muller  <muller.u-strasbg.fr>
+2009-04-24  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	ARI change: Use "/* ARI: rule */" pattern.
 	* utils.c: Update ARI patterns.
@@ -658,7 +658,7 @@
 	* configure.ac: Use AC_HELP_STRING.  Use upper case for variables
 	in help.
 
-2009-04-21  Pierre Muller  <muller.u-strasbg.fr>
+2009-04-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	ARI fix: remove "%p".
 	* ia64-tdep.c (ia64_frame_this_id): Use host_address_to_string function.
@@ -676,7 +676,7 @@
 	* main.c: Include "source.h".
 	(captured_main): Add substitution rule if RELOC_SRCDIR.
 
-2009-04-21  Pierre Muller  <muller.u-strasbg.fr>
+2009-04-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gnu-nat.h (proc_debug): Add missing continuation line in macro.
 
@@ -761,7 +761,7 @@
 	configure substitutions.
 	(FLAGS_TO_PASS): Add datarootdir, docdir, and htmldir.
 
-2009-04-17  Pierre Muller  <muller.u-strasbg.fr>
+2009-04-17  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	ARI fix: Do not use %p, replace by call to host_address_to_string
 	for host pointers.
