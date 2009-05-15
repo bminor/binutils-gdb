@@ -1,3 +1,11 @@
+2009-05-15  Andrew Stubbs  <ams@codesourcery.com>
+	Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-elf.exp: Add unwind-5.
+	* ld-arm/discard-unwind.ld: New file.
+	* ld-arm/unwind-5.d: New test.
+	* ld-arm/unwind-5.s: New test.
+
 2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ld-spu/icache1.d: Update for compact stubs.

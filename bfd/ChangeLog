@@ -1,3 +1,9 @@
+2009-05-15  Andrew Stubbs  <ams@codesourcery.com>
+	Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_fix_exidx_coverage): Don't attempt to
+	fix discarded sections.
+
 2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf32-spu.c (mark_overlay_section): Move .init and .fini

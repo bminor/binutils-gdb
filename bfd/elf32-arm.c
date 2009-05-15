@@ -8352,6 +8352,10 @@ elf32_arm_fix_exidx_coverage (asection **text_section_order,
 	  continue;
 	}
 
+      /* Skip /DISCARD/ sections.  */
+      if (bfd_is_abs_section (exidx_sec->output_section))
+	continue;
+
       hdr = &elf_section_data (exidx_sec)->this_hdr;
       if (hdr->sh_type != SHT_ARM_EXIDX)
         continue;
