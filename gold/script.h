@@ -45,6 +45,7 @@ class Symbol_table;
 class Layout;
 class Mapfile;
 class Input_argument;
+class Input_arguments;
 class Input_objects;
 class Input_group;
 class Input_file;
@@ -380,6 +381,26 @@ class Script_options
   Version_script_info version_script_info_;
   // Information from any SECTIONS clauses.
   Script_sections script_sections_;
+};
+
+// Information about a script input that will persist during the whole linker
+// run. Needed only during an incremental build to retrieve the input files
+// added by this script.
+
+class Script_info
+{
+ public:
+  Script_info(Input_arguments* inputs)
+    : inputs_(inputs)
+  { }
+
+  // Returns the input files included because of this script.
+  Input_arguments*
+  inputs()
+  { return inputs_; }
+
+ private:
+  Input_arguments* inputs_;
 };
 
 // FILE was found as an argument on the command line, but was not

@@ -43,6 +43,7 @@
 #include "target-select.h"
 #include "script.h"
 #include "script-c.h"
+#include "incremental.h"
 
 namespace gold
 {
@@ -1414,6 +1415,13 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
       this_blocker = nb;
     }
 
+  if (layout->incremental_inputs())
+    {
+      // Like new Read_symbols(...) above, we rely on close.inputs()
+      // getting leaked by closure.
+      Script_info* info = new Script_info(closure.inputs());
+      layout->incremental_inputs()->report_script(input_argument, info);
+    }
   *used_next_blocker = true;
 
   return true;

@@ -148,7 +148,6 @@ namespace gold
 
 class General_options;
 class Command_line;
-class Input_argument_list;
 class Dirsearch;
 class Input_objects;
 class Mapfile;
@@ -293,7 +292,7 @@ queue_initial_tasks(const General_options&,
 
 // Queue up the set of tasks to be done before
 // the middle set of tasks.  Only used when garbage
-// collection is to be done. 
+// collection is to be done.
 extern void
 queue_middle_gc_tasks(const General_options&,
                       const Task*,

@@ -1275,14 +1275,15 @@ class Input_argument
   Input_file_group* group_;
 };
 
+typedef std::vector<Input_argument> Input_argument_list;
+
 // A group from the command line.  This is a set of arguments within
 // --start-group ... --end-group.
 
 class Input_file_group
 {
  public:
-  typedef std::vector<Input_argument> Files;
-  typedef Files::const_iterator const_iterator;
+  typedef Input_argument_list::const_iterator const_iterator;
 
   Input_file_group()
     : files_()
@@ -1304,7 +1305,7 @@ class Input_file_group
   { return this->files_.end(); }
 
  private:
-  Files files_;
+  Input_argument_list files_;
 };
 
 // A list of files from the command line or a script.
@@ -1312,7 +1313,6 @@ class Input_file_group
 class Input_arguments
 {
  public:
-  typedef std::vector<Input_argument> Input_argument_list;
   typedef Input_argument_list::const_iterator const_iterator;
 
   Input_arguments()

@@ -1,3 +1,40 @@
+2009-05-15  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* gold.h (Incremental_argument_list): Remove (invalid) forward
+	declaration.
+	* incremental.cc (Incremental_inputs::report_achive): New method.
+	(Incremental_inputs::report_object): New method.
+	(Incremental_inputs::report_script): New method.
+	(Incremental_inputs::finalize_inputs): New method.
+	(Incremental_inputs::finalize): Call finalize_inputs().
+	(Incremental_inputs::sized_create_incremental_inputs_section_data):
+	Create inputs entries.
+	* incremental.h (Incremental_input_type): New enum.
+	(Incremental_inputs::Incremental_input): Initialize new fields.
+	(Incremental_inputs::report_inputs): New method.
+	(Incremental_inputs::report_achive): New method.
+	(Incremental_inputs::report_object): New method.
+	(Incremental_inputs::report_script): New method.
+	(Incremental_inputs::finalize_inputs): New method.
+	(Incremental_inputs::Input_info): New struct.
+	(Incremental_inputs::Input_info_map): New typedef.
+	(Incremental_inputs::lock_): New field.
+	(Incremental_inputs::Inputs_): New field.
+	(Incremental_inputs::Inputs_map): New field.
+	* main.cc (main): Call Incremental_input::report_inputs.
+	* options.h (Input_argument_list): Typedef moved from
+	Input_arguments.
+	(Input_file_group::Files): Remove, use ::Input_argument_list.
+	(Input_file_group::Input_argument_list): Remove, use
+	::Input_argument_list.
+	* plugin.cc (Plugin_manager::add_input_file): Add error in
+	incremental build.
+	* read_syms.cc (do_read_syms): Call Incremental_input::report_*
+	functions.
+	* script.cc (read_input_script): Call
+	Incremental_input::report_script.
+	* script.h (Script_info): New class.
+
 2009-04-27  Ian Lance Taylor  <iant@google.com>
 
 	* x86_64.cc (do_adjust_output_section): Set entsize to

@@ -407,6 +407,9 @@ Plugin_manager::add_input_file(char *pathname)
   Input_argument* input_argument = new Input_argument(file);
   Task_token* next_blocker = new Task_token(true);
   next_blocker->add_blocker();
+  if (this->layout_->incremental_inputs())
+    gold_error(_("Input files added by plug-ins in --incremental mode not "
+		 "supported yet.\n"));
   this->workqueue_->queue_soon(new Read_symbols(this->input_objects_,
                                                 this->symtab_,
                                                 this->layout_,

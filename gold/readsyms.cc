@@ -33,6 +33,8 @@
 #include "script.h"
 #include "readsyms.h"
 #include "plugin.h"
+#include "layout.h"
+#include "incremental.h"
 
 namespace gold
 {
@@ -199,7 +201,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
     {
       bool is_thin_archive
           = memcmp(ehdr, Archive::armagt, Archive::sarmag) == 0;
-      if (is_thin_archive 
+      if (is_thin_archive
           || memcmp(ehdr, Archive::armag, Archive::sarmag) == 0)
 	{
 	  // This is an archive.
@@ -207,7 +209,13 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 				      input_file, is_thin_archive,
 				      this->dirpath_, this);
 	  arch->setup();
-	  
+
+	  if (this->layout_->incremental_inputs())
+	    {
+	      const Input_argument* ia = this->input_argument_;	      
+	      this->layout_->incremental_inputs()->report_archive(ia, arch);
+	    }
+
 	  // Unlock the archive so it can be used in the next task.
 	  arch->unlock(this);
 
@@ -279,6 +287,12 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 
       Read_symbols_data* sd = new Read_symbols_data;
       obj->read_symbols(sd);
+
+      if (this->layout_->incremental_inputs())
+	{
+	  const Input_argument* ia = this->input_argument_;
+	  this->layout_->incremental_inputs()->report_object(ia, obj);
+	}
 
       // Opening the file locked it, so now we need to unlock it.  We
       // need to unlock it before queuing the Add_symbols task,

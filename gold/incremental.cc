@@ -86,7 +86,7 @@ class Incremental_inputs_header_write
   Incremental_inputs_header_write(unsigned char *p)
     : p_(reinterpret_cast<internal::Incremental_inputs_header_data*>(p))
   { }
-  
+
   static const int data_size = sizeof(internal::Incremental_inputs_header_data);
 
   void
@@ -179,12 +179,114 @@ Incremental_inputs::report_command_line(int argc, const char* const* argv)
   this->strtab_->add(args.c_str(), true, &this->command_line_key_);
 }
 
+// Record that the input argument INPUT is an achive ARCHIVE.  This is
+// called by Read_symbols after finding out the type of the file.
+
+void
+Incremental_inputs::report_archive(const Input_argument* input,
+                                   Archive* archive)
+{
+  Hold_lock hl(*this->lock_);
+
+  Input_info info;
+  info.type = INCREMENTAL_INPUT_ARCHIVE;
+  info.archive = archive;
+  inputs_map_.insert(std::make_pair(input, info));
+}
+
+// Record that the input argument INPUT is an object OBJ.  This is
+// called by Read_symbols after finding out the type of the file.
+
+void
+Incremental_inputs::report_object(const Input_argument* input,
+                                  Object* obj)
+{
+  Hold_lock hl(*this->lock_);
+
+  Input_info info;
+  info.type = (obj->is_dynamic()
+	       ? INCREMENTAL_INPUT_SHARED_LIBRARY
+	       : INCREMENTAL_INPUT_OBJECT);
+  info.object = obj;
+  inputs_map_.insert(std::make_pair(input, info));
+}
+
+// Record that the input argument INPUT is an script SCRIPT.  This is
+// called by read_script after parsing the script and reading the list
+// of inputs added by this script.
+
+void
+Incremental_inputs::report_script(const Input_argument* input,
+                                  Script_info* script)
+{
+  Hold_lock hl(*this->lock_);
+
+  Input_info info;
+  info.type = INCREMENTAL_INPUT_SCRIPT;
+  info.script = script;
+  inputs_map_.insert(std::make_pair(input, info));
+}
+
+// Compute indexes in the order in which the inputs should appear in
+// .gnu_incremental_inputs.  This needs to be done after all the
+// scripts are parsed.  The function is first called for the command
+// line inputs arguments and may call itself recursively for e.g. a
+// list of elements of a group or a list of inputs added by a script.
+// The [BEGIN; END) interval to analyze and *INDEX is the current
+// value of the index (that will be updated).
+
+void
+Incremental_inputs::finalize_inputs(
+    Input_argument_list::const_iterator begin,
+    Input_argument_list::const_iterator end,
+    unsigned int* index)
+{
+  for (Input_argument_list::const_iterator p = begin; p != end; ++p)
+    {
+      if (p->is_group())
+        {
+          finalize_inputs(p->group()->begin(), p->group()->end(), index);
+          continue;
+        }
+
+      Inputs_info_map::iterator it = inputs_map_.find(&(*p));
+      // TODO: turn it into an assert when the code will be more stable.
+      if (it == inputs_map_.end())
+        {
+          gold_error("internal error: %s: incremental build info not provided",
+		     (p->is_file() ? p->file().name() : "[group]"));
+          continue;
+        }
+      Input_info* info = &it->second;
+      info->index = *index;
+      (*index)++;
+      this->strtab_->add(p->file().name(), false, &info->filename_key);
+      if (info->type == INCREMENTAL_INPUT_SCRIPT)
+        {
+          finalize_inputs(info->script->inputs()->begin(),
+                          info->script->inputs()->end(),
+                          index);
+        }
+    }
+}
+
 // Finalize the incremental link information.  Called from
 // Layout::finalize.
 
 void
 Incremental_inputs::finalize()
 {
+  unsigned int index = 0;
+  finalize_inputs(this->inputs_->begin(), this->inputs_->end(), &index);
+
+  // Sanity check.
+  for (Inputs_info_map::const_iterator p = inputs_map_.begin();
+       p != inputs_map_.end();
+       ++p)
+    {
+      gold_assert(p->second.filename_key != 0);
+    }
+
   this->strtab_->set_string_offsets();
 }
 
@@ -213,7 +315,7 @@ Incremental_inputs::create_incremental_inputs_section_data()
 #endif
     default:
       gold_unreachable();
-    }  
+    }
 }
 
 // Sized creation of .gnu_incremental_inputs section.
@@ -221,22 +323,49 @@ Incremental_inputs::create_incremental_inputs_section_data()
 template<int size, bool big_endian>
 Output_section_data*
 Incremental_inputs::sized_create_inputs_section_data()
-{  
-  unsigned int sz =
+{
+  const int entry_size =
+      Incremental_inputs_entry_write<size, big_endian>::data_size;
+  const int header_size =
       Incremental_inputs_header_write<size, big_endian>::data_size;
+
+  unsigned int sz = header_size + entry_size * this->inputs_map_.size();
   unsigned char* buffer = new unsigned char[sz];
+  unsigned char* inputs_base = buffer + header_size;
+
   Incremental_inputs_header_write<size, big_endian> header_writer(buffer);
-  
   gold_assert(this->command_line_key_ > 0);
   int cmd_offset = this->strtab_->get_offset_from_key(this->command_line_key_);
-  
+
   header_writer.put_version(INCREMENTAL_LINK_VERSION);
-  header_writer.put_input_file_count(0);   // TODO: store input files data.
+  header_writer.put_input_file_count(this->inputs_map_.size());
   header_writer.put_command_line_offset(cmd_offset);
   header_writer.put_reserved(0);
-  
+
+  for (Inputs_info_map::const_iterator it = this->inputs_map_.begin();
+       it != this->inputs_map_.end();
+       ++it)
+    {
+      gold_assert(it->second.index < this->inputs_map_.size());
+
+      unsigned char* entry_buffer =
+          inputs_base + it->second.index * entry_size;
+      Incremental_inputs_entry_write<size, big_endian> entry(entry_buffer);
+      int filename_offset =
+          this->strtab_->get_offset_from_key(it->second.filename_key);
+      entry.put_filename_offset(filename_offset);
+      // TODO: add per input data and timestamp.  Currently we store
+      // an out-of-bounds offset for future version of gold to reject
+      // such an incremental_inputs section.
+      entry.put_data_offset(0xffffffff);
+      entry.put_timestamp_sec(0);
+      entry.put_timestamp_usec(0);
+      entry.put_input_type(it->second.type);
+      entry.put_reserved(0);
+    }
+
   return new Output_data_const_buffer(buffer, sz, 8,
-      "** incremental link inputs list");
+				      "** incremental link inputs list");
 }
 
 } // End namespace gold.

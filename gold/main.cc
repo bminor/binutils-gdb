@@ -221,7 +221,10 @@ main(int argc, char** argv)
 		&command_line.script_options());
 
   if (layout.incremental_inputs() != NULL)
-    layout.incremental_inputs()->report_command_line(argc, argv);
+    {
+      layout.incremental_inputs()->report_command_line(argc, argv);
+      layout.incremental_inputs()->report_inputs(command_line.inputs());
+    }
 
   // Get the search path from the -L options.
   Dirsearch search_path;
