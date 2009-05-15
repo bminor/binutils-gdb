@@ -442,7 +442,7 @@ elf reader		Elena Zannoni		elena.zannoni@oracle.com
 stabs reader		Elena Zannoni		elena.zannoni@oracle.com
 readline/		Elena Zannoni		elena.zannoni@oracle.com
 NetBSD native & host	Jason Thorpe		thorpej@netbsd.org
-Pascal support		Pierre Muller		muller@sources.redhat.com
+Pascal support		Pierre Muller		muller@sourceware.org
 avr			Theodore A. Roth	troth@openavr.org
 Modula-2 support	Gaius Mulley		gaius@glam.ac.uk
 
@@ -543,7 +543,7 @@ Marko Mlinar                                    markom@opencores.org
 Alan Modra					amodra@bigpond.net.au
 Jason Molenda					jmolenda@apple.com
 Phil Muldoon					pmuldoon@redhat.com
-Pierre Muller					muller@sources.redhat.com
+Pierre Muller					muller@sourceware.org
 Gaius Mulley                                    gaius@glam.ac.uk
 Joseph Myers					joseph@codesourcery.com
 Fernando Nasser					fnasser@redhat.com

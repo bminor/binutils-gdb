@@ -1,3 +1,7 @@
+2009-05-15  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* MAINTAINERS: Update my email address.
+	
 2009-05-14  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* breakpoint.h: Add breakpoint_re_set_objfile prototype.
