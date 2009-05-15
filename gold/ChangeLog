@@ -1,3 +1,9 @@
+2009-05-15  Ian Lance Taylor  <iant@google.com>
+
+	* configure.ac: Check for declarations for cases where libiberty.h
+	checks HAVE_DECL_xxx.
+	* configure, config.in: Rebuild.
+
 2009-05-15  Mikolaj Zalewski  <mikolajz@google.com>
 
 	* gold.h (Incremental_argument_list): Remove (invalid) forward
