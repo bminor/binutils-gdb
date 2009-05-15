@@ -1,3 +1,20 @@
+2009-05-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_output_section_statement_lookup): Add function
+	comment.  Make "name" non-const.  Ensure duplicate entries use
+	the same string, allowing simple comparison in hash bucket loop.
+	Tweak constraint check.
+	(next_matching_output_section_statement): New function.
+	* ldlang.h (lang_output_section_statement_lookup): Update.
+	(next_matching_output_section_statement): Declare.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	combine orphan sections when input sections flags differ in
+	alloc or load.
+	* emultempl/pe.em: Formatting throughout.
+	(gld${EMULATION_NAME}_place_orphan): As for elf32.em.
+	* emultempl/pep.em: Formatting throughout.
+	(gld${EMULATION_NAME}_place_orphan): As for elf32.em.
+
 2009-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* emultempl/spuelf.em (PARSE_AND_LIST_ARGS_CASES): Always use

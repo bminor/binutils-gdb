@@ -49,9 +49,7 @@
 # 7. run the produced executables
 
 # This test can only be run on PE/COFF platforms.
-if {    ![istarget *-*-cygwin*]
-     && ![istarget *-*-mingw*]
-     && ![istarget *-*-pe] } {
+if {![is_pecoff_format]} {
     return
 }
 

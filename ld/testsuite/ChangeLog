@@ -1,3 +1,14 @@
+2009-05-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/orphan3.d, * ld-elf/orphan3a.s, * ld-elf/orphan3b.s,
+	* ld-elf/orphan3c.s, * ld-elf/orphan3d.s, * ld-elf/orphan3e.s,
+	* ld-elf/orphan3f.s: New test.
+	* ld-pe/orphan.d, * ld-pe/orphana.s, * ld-pe/orphanb.s,
+	* ld-pe/orphand.s, * ld-pe/orphane.s: New test.
+	* ld-pe/direct.exp: Use is_pecoff_format.
+	* ld-pe/longsecn.exp: Delete.
+	* ld-pe/pe.exp: Run new test and longsecn tests.
+
 2009-05-15  Andrew Stubbs  <ams@codesourcery.com>
 	Paul Brook  <paul@codesourcery.com>
 

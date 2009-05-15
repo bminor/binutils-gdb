@@ -242,9 +242,12 @@ fragment <<EOF
 
 static void
 gld${EMULATION_NAME}_add_options
-  (int ns ATTRIBUTE_UNUSED, char **shortopts ATTRIBUTE_UNUSED, int nl,
-    struct option **longopts, int nrl ATTRIBUTE_UNUSED,
-    struct option **really_longopts ATTRIBUTE_UNUSED)
+  (int ns ATTRIBUTE_UNUSED,
+   char **shortopts ATTRIBUTE_UNUSED,
+   int nl,
+   struct option **longopts,
+   int nrl ATTRIBUTE_UNUSED,
+   struct option **really_longopts ATTRIBUTE_UNUSED)
 {
   static const struct option xtra_long[] = {
     /* PE options */
@@ -267,8 +270,8 @@ gld${EMULATION_NAME}_add_options
     {"use-nul-prefixed-import-tables", no_argument, NULL,
      OPTION_USE_NUL_PREFIXED_IMPORT_TABLES},
 #ifdef DLL_SUPPORT
-    /* getopt allows abbreviations, so we do this to stop it from treating -o
-       as an abbreviation for this option */
+    /* getopt allows abbreviations, so we do this to stop it
+       from treating -o as an abbreviation for this option.  */
     {"output-def", required_argument, NULL, OPTION_OUT_DEF},
     {"output-def", required_argument, NULL, OPTION_OUT_DEF},
     {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL},
@@ -311,8 +314,8 @@ gld${EMULATION_NAME}_add_options
     {NULL, no_argument, NULL, 0}
   };
 
-  *longopts = (struct option *)
-    xrealloc (*longopts, nl * sizeof (struct option) + sizeof (xtra_long));
+  *longopts
+    = xrealloc (*longopts, nl * sizeof (struct option) + sizeof (xtra_long));
   memcpy (*longopts + nl, &xtra_long, sizeof (xtra_long));
 }
 
@@ -819,12 +822,15 @@ gld_${EMULATION_NAME}_set_symbols (void)
       if (link_info.relocatable)
 	init[IMAGEBASEOFF].value = 0;
       else if (init[DLLOFF].value || (link_info.shared && !link_info.pie))
+	{
 #ifdef DLL_SUPPORT
-	init[IMAGEBASEOFF].value = (pe_enable_auto_image_base) ?
-	  compute_dll_image_base (output_filename) : NT_DLL_IMAGE_BASE;
+	  init[IMAGEBASEOFF].value = (pe_enable_auto_image_base
+				      ? compute_dll_image_base (output_filename)
+				      : NT_DLL_IMAGE_BASE);
 #else
-	init[IMAGEBASEOFF].value = NT_DLL_IMAGE_BASE;
+	  init[IMAGEBASEOFF].value = NT_DLL_IMAGE_BASE;
 #endif
+	}
       else
 	init[IMAGEBASEOFF].value = NT_EXE_IMAGE_BASE;
       init[MSIMAGEBASEOFF].value = init[IMAGEBASEOFF].value;
@@ -859,8 +865,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
   /* Restore the pointer.  */
   pop_stat_ptr ();
 
-  if (pe.FileAlignment >
-      pe.SectionAlignment)
+  if (pe.FileAlignment > pe.SectionAlignment)
     {
       einfo (_("%P: warning, file alignment > section alignment.\n"));
     }
@@ -1266,7 +1271,7 @@ gld_${EMULATION_NAME}_after_open (void)
 		      }
 		    symbols = bfd_get_outsymbols (is->the_bfd);
 
-		    relocs = (arelent **) xmalloc ((size_t) relsize);
+		    relocs = xmalloc ((size_t) relsize);
 		    nrelocs = bfd_canonicalize_reloc (is->the_bfd, sec,
 						      relocs, symbols);
 		    if (nrelocs < 0)
@@ -1581,7 +1586,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 		buflen = len + 2;
 	    }
 
-	  buf = (char *) xmalloc (buflen);
+	  buf = xmalloc (buflen);
 
 	  for (i = 0; i < pe_def_file->num_exports; i++)
 	    {
@@ -1716,7 +1721,7 @@ gld_${EMULATION_NAME}_finish (void)
 #ifdef DLL_SUPPORT
   if (link_info.shared
 #if !defined(TARGET_IS_shpe) && !defined(TARGET_IS_mipspe)
-    || (!link_info.relocatable && pe_def_file->num_exports != 0)
+      || (!link_info.relocatable && pe_def_file->num_exports != 0)
 #endif
     )
     {
@@ -1786,21 +1791,32 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 
   lang_list_init (&add_child);
 
-  if (constraint == 0
-      && (os = lang_output_section_find (secname)) != NULL
-      && os->bfd_section != NULL
-      && (os->bfd_section->flags == 0
-	  || ((s->flags ^ os->bfd_section->flags)
-	      & (SEC_LOAD | SEC_ALLOC)) == 0))
-    {
-      /* We already have an output section statement with this
-	 name, and its bfd section has compatible flags.
-	 If the section already exists but does not have any flags set,
-	 then it has been created by the linker, probably as a result of
-	 a --section-start command line switch.  */
-      lang_add_section (&add_child, s, os);
-    }
-  else
+  os = NULL;
+  if (constraint == 0)
+    for (os = lang_output_section_find (secname);
+	 os != NULL;
+	 os = next_matching_output_section_statement (os, 0))
+      {
+	/* If we don't match an existing output section, tell
+	   lang_insert_orphan to create a new output section.  */
+	constraint = SPECIAL;
+
+	if (os->bfd_section != NULL
+	    && (os->bfd_section->flags == 0
+		|| ((s->flags ^ os->bfd_section->flags)
+		    & (SEC_LOAD | SEC_ALLOC)) == 0))
+	  {
+	    /* We already have an output section statement with this
+	       name, and its bfd section has compatible flags.
+	       If the section already exists but does not have any flags set,
+	       then it has been created by the linker, probably as a result of
+	       a --section-start command line switch.  */
+	    lang_add_section (&add_child, s, os);
+	    break;
+	  }
+      }
+
+  if (os == NULL)
     {
       static struct orphan_save hold[] =
 	{
@@ -1906,7 +1922,8 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 
 static bfd_boolean
 gld_${EMULATION_NAME}_open_dynamic_archive
-  (const char *arch ATTRIBUTE_UNUSED, search_dirs_type *search,
+  (const char *arch ATTRIBUTE_UNUSED,
+   search_dirs_type *search,
    lang_input_statement_type *entry)
 {
   static const struct
