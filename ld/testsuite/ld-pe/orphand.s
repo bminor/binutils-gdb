@@ -1,2 +1,2 @@
  .section .foo,"b"
- .space 4
+ .space 16

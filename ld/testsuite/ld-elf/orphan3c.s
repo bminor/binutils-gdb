@@ -1,2 +1,2 @@
  .section .foo,"",%progbits
- .long 2
+ .long 2,2,2,2

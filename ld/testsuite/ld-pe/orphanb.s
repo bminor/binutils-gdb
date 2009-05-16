@@ -1,2 +1,2 @@
  .section .foo
- .long 1
+ .long 1,1,1,1

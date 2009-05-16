@@ -5,4 +5,4 @@ _mainCRTStartup:
 _start:
 
  .section .foo,"b"
- .space 4
+ .space 16

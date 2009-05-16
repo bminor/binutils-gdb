@@ -1,3 +1,11 @@
+2009-05-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/orphan3.d, * ld-elf/orphan3a.s, * ld-elf/orphan3b.s,
+	* ld-elf/orphan3c.s, * ld-elf/orphan3d.s, * ld-elf/orphan3e.s,
+	* ld-elf/orphan3f.s: Increase section size to 16.
+	* ld-pe/orphan.d, * ld-pe/orphana.s, * ld-pe/orphanb.s,
+	* ld-pe/orphand.s, * ld-pe/orphane.s: Likewise.
+
 2009-05-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/orphan3.d, * ld-elf/orphan3a.s, * ld-elf/orphan3b.s,

@@ -1,2 +1,2 @@
  .section .foo,"a",%nobits
- .space 4
+ .space 16
