@@ -1,3 +1,10 @@
+2009-05-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Always report varobj as changed when in_scope attribute changes.
+
+	* varobj.c (install_new_value): If non-NULL-ness of value
+	changed, return 1.
+
 2009-05-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	
 	* NEWS: Mention set/show libthread-db-search-path.

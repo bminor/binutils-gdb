@@ -1,3 +1,9 @@
+2009-05-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-cmd-var.exp: Check that when varobj
+	of structure type enters or leaves the scope, it
+	is reported by -var-update.
+
 2009-05-11  Doug Evans  <dje@sebabeach.org>
 
 	* gdb.mi/nsintrall.c (main): Fix off-by-one error.

@@ -631,5 +631,32 @@ mi_gdb_test "-var-delete endvar" \
     "\\^done,ndeleted=\"1\"" \
     "delete endvar"
 
+mi_delete_breakpoints
+
+mi_runto do_locals_tests
+
+mi_create_varobj "L" "lsimple" "in-and-out-of-scope: create varobj"
+mi_check_varobj_value "L" "{...}" "in-and-out-of-scope: check initial value"
+
+mi_runto main
+
+mi_gdb_test "-var-update L" \
+    {\^done,changelist=\[{name="L",in_scope="false",type_changed="false"}\]} \
+    "in-and-out-of-scope: out of scope now"
+
+mi_gdb_test "-var-update L" \
+    {\^done,changelist=\[]} \
+    "in-and-out-of-scope: out of scope now, not changed"
+
+mi_continue_to do_locals_tests
+
+mi_gdb_test "-var-update L" \
+    {\^done,changelist=\[{name="L",in_scope="true",type_changed="false"}\]} \
+    "in-and-out-of-scope: in scope now"
+
+mi_gdb_test "-var-update L" \
+    {\^done,changelist=\[\]} \
+    "in-and-out-of-scope: in scope now, not changed"
+
 mi_gdb_exit
 return 0

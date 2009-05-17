@@ -982,9 +982,12 @@ varobj_list (struct varobj ***varlist)
    this is the first assignement after the variable object was just
    created, or changed type.  In that case, just assign the value 
    and return 0.
-   Otherwise, assign the value and if type_changeable returns non-zero,
-   find if the new value is different from the current value.
-   Return 1 if so, and 0 if the values are equal.  
+   Otherwise, assign the new value, and return 1 if the value is different
+   from the current one, 0 otherwise. The comparison is done on textual
+   representation of value. Therefore, some types need not be compared. E.g.
+   for structures the reported value is always "{...}", so no comparison is
+   necessary here. If the old value was NULL and new one is not, or vice versa,
+   we always return 1.
 
    The VALUE parameter should not be released -- the function will
    take care of releasing it when needed.  */
@@ -1103,6 +1106,15 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 		changed = 1;
 	    }
 	}
+    }
+
+  if (!initial && !changeable)
+    {
+      /* For values that are not changeable, we don't compare the values.
+	 However, we want to notice if a value was not NULL and now is NULL,
+	 or vise versa, so that we report when top-level varobjs come in scope
+	 and leave the scope.  */
+      changed = (var->value != NULL) != (value != NULL);
     }
 
   /* We must always keep the new value, since children depend on it.  */
