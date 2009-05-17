@@ -7,6 +7,8 @@
 	event copy instead.  Release `execd_pathname' once done with
 	handling the event.
 
+	* infrun.c (pending_follow): Remove mention of exec events.
+
 2009-05-17  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (i386_process_record): Make it extern.

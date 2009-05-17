@@ -255,10 +255,9 @@ void init_thread_stepping_state (struct thread_info *tss);
 
 void init_infwait_state (void);
 
-/* This is used to remember when a fork, vfork or exec event
-   was caught by a catchpoint, and thus the event is to be
-   followed at the next resume of the inferior, and not
-   immediately. */
+/* This is used to remember when a fork or vfork event was caught by a
+   catchpoint, and thus the event is to be followed at the next resume
+   of the inferior, and not immediately.  */
 static struct
 {
   enum target_waitkind kind;
