@@ -111,7 +111,9 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
   else
     {
       inferior_ptid = pid_to_ptid (pid);
-      detach_breakpoints (fpid);
+
+      /* Breakpoints have already been detached from the child by
+	 infrun.c.  */
 
       if (ptrace (PT_DETACH, fpid, (PTRACE_TYPE_ARG3)1, 0) == -1)
 	perror_with_name (("ptrace"));

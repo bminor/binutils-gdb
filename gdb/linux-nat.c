@@ -593,11 +593,15 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
       /* We're already attached to the parent, by default. */
 
       /* Before detaching from the child, remove all breakpoints from
-         it.  (This won't actually modify the breakpoint list, but will
-         physically remove the breakpoints from the child.) */
-      /* If we vforked this will remove the breakpoints from the parent
-	 also, but they'll be reinserted below.  */
-      detach_breakpoints (child_pid);
+         it.  If we forked, then this has already been taken care of
+         by infrun.c.  If we vforked however, any breakpoint inserted
+         in the parent is visible in the child, even those added while
+         stopped in a vfork catchpoint.  This won't actually modify
+         the breakpoint list, but will physically remove the
+         breakpoints from the child.  This will remove the breakpoints
+         from the parent also, but they'll be reinserted below.  */
+      if (has_vforked)
+	detach_breakpoints (child_pid);
 
       /* Detach new forked process?  */
       if (detach_fork)
@@ -700,10 +704,6 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
       /* Otherwise, deleting the parent would get rid of this
 	 breakpoint.  */
       last_tp->step_resume_breakpoint = NULL;
-
-      /* Needed to keep the breakpoint lists in sync.  */
-      if (! has_vforked)
-	detach_breakpoints (child_pid);
 
       /* Before detaching from the parent, remove all breakpoints from it. */
       remove_breakpoints ();

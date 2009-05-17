@@ -147,6 +147,8 @@ proc catch_fork_child_follow {} {
    global gdb_prompt
    global srcfile
 
+   set bp_after_fork [gdb_get_line_number "set breakpoint here"]
+
    send_gdb "catch fork\n"
    gdb_expect {
       -re "Catchpoint .*(fork).*$gdb_prompt $"\
@@ -188,21 +190,21 @@ proc catch_fork_child_follow {} {
       -re "$gdb_prompt $" {pass "set follow child"}
       timeout         {fail "(timeout) set follow child"}
    }
-   send_gdb "tbreak ${srcfile}:24\n"
+   send_gdb "tbreak ${srcfile}:$bp_after_fork\n"
    gdb_expect {
-      -re "Temporary breakpoint.*, line 24.*$gdb_prompt $"\
+      -re "Temporary breakpoint.*, line $bp_after_fork.*$gdb_prompt $"\
                       {pass "set follow child, tbreak"}
       -re "$gdb_prompt $" {fail "set follow child, tbreak"}
       timeout         {fail "(timeout) set follow child, tbreak"}
    }
    send_gdb "continue\n"
    gdb_expect {
-      -re "Attaching after fork to.* at .*24.*$gdb_prompt $"\
+      -re "Attaching after fork to.* at .*$bp_after_fork.*$gdb_prompt $"\
                       {pass "set follow child, hit tbreak"}
       -re "$gdb_prompt $" {fail "set follow child, hit tbreak"}
       timeout         {fail "(timeout) set follow child, hit tbreak"}
    }
-   # The child has been detached; allow time for any output it might
+   # The parent has been detached; allow time for any output it might
    # generate to arrive, so that output doesn't get confused with
    # any expected debugger output from a subsequent testpoint.
    #
@@ -222,9 +224,60 @@ proc catch_fork_child_follow {} {
    }
 }
 
+proc catch_fork_unpatch_child {} {
+   global gdb_prompt
+   global srcfile
+
+   set bp_exit [gdb_get_line_number "at exit"]
+
+   gdb_test "break callee" "file .*$srcfile, line .*" "unpatch child, break at callee"
+   gdb_test "catch fork" "Catchpoint \[0-9\]* \\(fork\\)" "unpatch child, set catch fork"
+
+   gdb_test "continue" \
+       "Catchpoint.*\\(forked process.*\\).*,.*in .*(fork|__kernel_v?syscall).*" \
+       "unpatch child, catch fork"
+
+   # Delete all breakpoints and catchpoints.
+   delete_breakpoints
+
+   gdb_test "break $bp_exit" \
+       "Breakpoint .*file .*$srcfile, line .*" \
+       "unpatch child, breakpoint at exit call"
+
+   gdb_test "set follow child" "" "unpatch child, set follow child"
+
+   set test "unpatch child, unpatched parent breakpoints from child"
+   gdb_test_multiple "continue" $test {
+      -re "at exit.*$gdb_prompt $" {
+	  pass "$test"
+      }
+      -re "SIGTRAP.*$gdb_prompt $" {
+	  fail "$test"
+
+	  # Explicitly kill this child, so we can continue gracefully
+	  # with further testing...
+	  send_gdb "kill\n"
+	  gdb_expect {
+	      -re ".*Kill the program being debugged.*y or n. $" {
+		  send_gdb "y\n"
+		  gdb_expect -re "$gdb_prompt $" {}
+	      }
+	  }
+      }
+      -re ".*$gdb_prompt $" {
+	  fail "$test (unknown output)"
+      }
+      timeout {
+	  fail "$test (timeout)"
+      }
+   }
+}
+
 proc tcatch_fork_parent_follow {} {
    global gdb_prompt
    global srcfile
+
+   set bp_after_fork [gdb_get_line_number "set breakpoint here"]
 
    send_gdb "catch fork\n"
    gdb_expect {
@@ -249,16 +302,16 @@ proc tcatch_fork_parent_follow {} {
       -re "$gdb_prompt $" {pass "set follow parent"}
       timeout         {fail "(timeout) set follow parent"}
    }
-   send_gdb "tbreak ${srcfile}:24\n"
+   send_gdb "tbreak ${srcfile}:$bp_after_fork\n"
    gdb_expect {
-      -re "Temporary breakpoint.*, line 24.*$gdb_prompt $"\
+      -re "Temporary breakpoint.*, line $bp_after_fork.*$gdb_prompt $"\
                       {pass "set follow parent, tbreak"}
       -re "$gdb_prompt $" {fail "set follow parent, tbreak"}
       timeout         {fail "(timeout) set follow child, tbreak"}
    }
    send_gdb "continue\n"
    gdb_expect {
-      -re ".*Detaching after fork from.* at .*24.*$gdb_prompt $"\
+      -re ".*Detaching after fork from.* at .*$bp_after_fork.*$gdb_prompt $"\
                       {pass "set follow parent, hit tbreak"}
       -re "$gdb_prompt $" {fail "set follow parent, hit tbreak"}
       timeout         {fail "(timeout) set follow parent, hit tbreak"}
@@ -361,6 +414,11 @@ By default, the debugger will follow the parent process..*$gdb_prompt $"\
    # followed, and continue.  Make the catchpoint permanent.
    #
    if [runto_main] then { catch_fork_child_follow }
+
+   # Test that parent breakpoints are successfully detached from the
+   # child at fork time, even if the user removes them from the
+   # breakpoints list after stopping at a fork catchpoint.
+   if [runto_main] then { catch_fork_unpatch_child }
 
    # Test the ability to catch a fork, specify via a -do clause that
    # the parent be followed, and continue.  Make the catchpoint temporary.

@@ -2418,6 +2418,27 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  reinit_frame_cache ();
 	}
 
+      /* Immediately detach breakpoints from the child before there's
+	 any chance of letting the user delete breakpoints from the
+	 breakpoint lists.  If we don't do this early, it's easy to
+	 leave left over traps in the child, vis: "break foo; catch
+	 fork; c; <fork>; del; c; <child calls foo>".  We only follow
+	 the fork on the last `continue', and by that time the
+	 breakpoint at "foo" is long gone from the breakpoint table.
+	 If we vforked, then we don't need to unpatch here, since both
+	 parent and child are sharing the same memory pages; we'll
+	 need to unpatch at follow/detach time instead to be certain
+	 that new breakpoints added between catchpoint hit time and
+	 vfork follow are detached.  */
+      if (ecs->ws.kind != TARGET_WAITKIND_VFORKED)
+	{
+	  int child_pid = ptid_get_pid (ecs->ws.value.related_pid);
+
+	  /* This won't actually modify the breakpoint list, but will
+	     physically remove the breakpoints from the child.  */
+	  detach_breakpoints (child_pid);
+	}
+
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
       ecs->event_thread->stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);

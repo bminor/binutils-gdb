@@ -1,5 +1,15 @@
 2009-05-17  Pedro Alves  <pedro@codesourcery.com>
 
+	* infrun.c (handle_inferior_event): When handling a
+	TARGET_WAITKIND_FORKED, detach breakpoints from the fork child
+	immediatelly.
+	* linux-nat.c (linux_child_follow_fork): Only detach breakpoint
+	from the child if vforking.
+	* inf-ptrace.c (inf_ptrace_follow_fork): No need to detach
+	breakpoints from the child here.
+
+2009-05-17  Pedro Alves  <pedro@codesourcery.com>
+
 	* infrun.c (pending_follow): Remove execd_pathname member.
 	(resume): No longer handle TARGET_WAITKIND_EXECD pending follow.
 	(handle_inferior_event): When handling a TARGET_WAITKIND_EXECD

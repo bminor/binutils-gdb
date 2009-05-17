@@ -1,3 +1,15 @@
+2009-05-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/foll-fork.c: Include stdlib.h.  Add markers for
+	`gdb_get_line_number'.  Call `callee' in both parent and child.
+	* gdb.base/foll-fork.exp (catch_fork_child_follow): Use
+	`gdb_get_line_number' instead of hardcoding line numbers.
+	(catch_fork_unpatch_child): New procedure to test detaching
+	breakpoints from child fork.
+	(tcatch_fork_parent_follow): Use `gdb_get_line_number' instead of
+	hardcoding line numbers.
+	(do_fork_tests): Run `catch_fork_unpatch_child'.
+
 2009-05-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-cmd-var.exp: Check that when varobj
