@@ -1,3 +1,12 @@
+2009-05-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (pending_follow): Remove execd_pathname member.
+	(resume): No longer handle TARGET_WAITKIND_EXECD pending follow.
+	(handle_inferior_event): When handling a TARGET_WAITKIND_EXECD
+	event, don't copy `execd_pathname' to pending_follow, use the
+	event copy instead.  Release `execd_pathname' once done with
+	handling the event.
+
 2009-05-17  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (i386_process_record): Make it extern.

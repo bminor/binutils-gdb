@@ -268,7 +268,6 @@ static struct
     ptid_t child_pid;
   }
   fork_event;
-  char *execd_pathname;
 }
 pending_follow;
 
@@ -1076,11 +1075,6 @@ a command like `return' or `jump' to continue execution."));
       regcache = get_current_regcache ();
       gdbarch = get_regcache_arch (regcache);
       pc = regcache_read_pc (regcache);
-      break;
-
-    case TARGET_WAITKIND_EXECD:
-      /* follow_exec is called as soon as the exec event is seen. */
-      pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
       break;
 
     default:
@@ -2444,9 +2438,6 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_EXECD:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_EXECD\n");
-      pending_follow.execd_pathname =
-	savestring (ecs->ws.value.execd_pathname,
-		    strlen (ecs->ws.value.execd_pathname));
 
       if (!ptid_equal (ecs->ptid, inferior_ptid))
 	{
@@ -2459,11 +2450,15 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* This causes the eventpoints and symbol table to be reset.
          Must do this now, before trying to determine whether to
          stop.  */
-      follow_exec (inferior_ptid, pending_follow.execd_pathname);
-      xfree (pending_follow.execd_pathname);
+      follow_exec (inferior_ptid, ecs->ws.value.execd_pathname);
 
       ecs->event_thread->stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
       ecs->random_signal = !bpstat_explains_signal (ecs->event_thread->stop_bpstat);
+
+      /* Note that this may be referenced from inside
+	 bpstat_stop_status above, through inferior_has_execd.  */
+      xfree (ecs->ws.value.execd_pathname);
+      ecs->ws.value.execd_pathname = NULL;
 
       /* If no catchpoint triggered for this, then keep going.  */
       if (ecs->random_signal)
