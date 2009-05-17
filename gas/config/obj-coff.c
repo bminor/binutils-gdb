@@ -1475,6 +1475,7 @@ coff_frob_file_after_relocs (void)
                                                  'x' for text
   						 'r' for read-only data
   						 's' for shared data (PE)
+						 'y' for noread
    But if the argument is not a quoted string, treat it as a
    subsegment number.
 
@@ -1584,6 +1585,10 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
 		    flags |= SEC_READONLY;
 		  break;
 
+		case 'y':
+		  flags |= SEC_COFF_NOREAD | SEC_READONLY;
+		  break;
+
 		case 'i': /* STYP_INFO */
 		case 'l': /* STYP_LIB */
 		case 'o': /* STYP_OVER */
@@ -1628,7 +1633,8 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
       /* This section's attributes have already been set.  Warn if the
          attributes don't match.  */
       flagword matchflags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
-			     | SEC_DATA | SEC_COFF_SHARED | SEC_NEVER_LOAD);
+			     | SEC_DATA | SEC_COFF_SHARED | SEC_NEVER_LOAD
+			     | SEC_COFF_NOREAD);
       if ((flags ^ oldflags) & matchflags)
 	as_warn (_("Ignoring changed section attributes for %s"), name);
     }

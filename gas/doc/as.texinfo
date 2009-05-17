@@ -5726,6 +5726,8 @@ executable section
 shared section (meaningful for PE targets)
 @item a
 ignored.  (For compatibility with the ELF version)
+@item y
+section is not readable (meaningful for PE targets)
 @end table
 
 If no flags are specified, the default flags depend upon the section name.  If

@@ -1,3 +1,9 @@
+2009-05-17  Kai Tietz  <kai.tietz@onevision.com>
+
+        * config/obj-coff.c (obj_coff_section): Add 'y' as
+        specifier for SEC_COFF_NOREAD section flag.
+	* doc/as.texinfo: Add documentation about .section flag 'y'.
+
 2009-05-13  DJ Delorie  <dj@redhat.com>
 
 	* cgen.c (gas_cgen_parse_operand): Guard against NULL pointers.
