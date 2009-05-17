@@ -613,6 +613,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_reg_offset = i386_linux_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (i386_linux_sc_reg_offset);
 
+  set_gdbarch_process_record (gdbarch, i386_process_record);
+
   /* Initialize the i386_linux_record_tdep.  */
   i386_linux_record_tdep.size__old_kernel_stat =
     I386_LINUX_RECORD_SIZE__old_kernel_stat;

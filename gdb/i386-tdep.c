@@ -2982,7 +2982,7 @@ i386_record_lea_modrm (struct i386_record_s *irp)
    memory that will be changed in current instruction to "record_arch_list".
    Return -1 if something wrong. */
 
-static int
+int
 i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		     CORE_ADDR addr)
 {
@@ -5276,8 +5276,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_permanent_breakpoint (gdbarch,
 					 i386_skip_permanent_breakpoint);
-
-  set_gdbarch_process_record (gdbarch, i386_process_record);
 
   return gdbarch;
 }

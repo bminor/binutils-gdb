@@ -1,3 +1,12 @@
+2009-05-17  Hui Zhu  <teawater@gmail.com>
+
+	* i386-tdep.c (i386_process_record): Make it extern.
+	(i386_gdbarch_init): Don't call set_gdbarch_process_record
+	here.
+	* i386-tdep.c (i386_process_record): Declare.
+	* i386-linux-tdep.c (i386_linux_init_abi): Call
+	set_gdbarch_process_record.
+
 2009-05-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Always report varobj as changed when in_scope attribute changes.
