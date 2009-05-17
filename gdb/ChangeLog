@@ -3,7 +3,7 @@
 	* i386-tdep.c (i386_process_record): Make it extern.
 	(i386_gdbarch_init): Don't call set_gdbarch_process_record
 	here.
-	* i386-tdep.c (i386_process_record): Declare.
+	* i386-tdep.h (i386_process_record): Declare.
 	* i386-linux-tdep.c (i386_linux_init_abi): Call
 	set_gdbarch_process_record.
 
