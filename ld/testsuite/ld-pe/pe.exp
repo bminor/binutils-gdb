@@ -35,17 +35,23 @@ if {[istarget i*86-*-cygwin*]
     if {[istarget x86_64-*-mingw*] } {
       set pe_tests {
 	{".secrel32" "" "" {secrel1.s secrel2.s}
-	{{objdump -s secrel_64.d}} "secrel.x"}
+	 {{objdump -s secrel_64.d}} "secrel.x"}
+	{"Empty export table" "" "" "exports.s"
+	 {{objdump -p exports64.d}} "exports.dll"}
       }
     } elseif {[istarget i*86-*-cygwin*] } {
       set pe_tests {
 	{".secrel32" "--disable-auto-import" "" {secrel1.s secrel2.s}
 	 {{objdump -s secrel.d}} "secrel.x"}
+	{"Empty export table" "" "" "exports.s"
+	 {{objdump -p exports.d}} "exports.dll"}
       }
     } else {
       set pe_tests {
 	{".secrel32" "" "" {secrel1.s secrel2.s}
 	 {{objdump -s secrel.d}} "secrel.x"}
+	{"Empty export table" "" "" "exports.s"
+	 {{objdump -p exports.d}} "exports.dll"}
       }
     }
 

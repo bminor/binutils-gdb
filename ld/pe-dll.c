@@ -720,6 +720,10 @@ process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 #undef NE
 #define NE pe_def_file->num_exports
 
+  /* Don't create an empty export table.  */
+  if (NE == 0)
+    return;
+
   /* Canonicalize the export list.  */
   if (pe_dll_kill_ats)
     {

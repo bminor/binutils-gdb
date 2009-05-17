@@ -1,3 +1,9 @@
+2009-05-17  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+  2008-08-07  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* pe-dll.c (process_def_file): Do not create empty export table.
+
 2009-05-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_output_section_statement_lookup): Add function

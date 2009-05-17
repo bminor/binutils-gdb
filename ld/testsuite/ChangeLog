@@ -1,3 +1,11 @@
+2009-05-17  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+  2008-08-07  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+
+	* ld-pe/exports.d: New file.
+	* ld-pe/exports.s: New file.
+	* ld-pe/pe.exp: New test for empty export table.
+
 2009-05-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/orphan3.d, * ld-elf/orphan3a.s, * ld-elf/orphan3b.s,
