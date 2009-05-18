@@ -1,3 +1,11 @@
+2009-05-18  Jon Beniston <jon@beniston.com>
+        
+        * MAINTAINERS: Add lm32 target.        
+        * Makefile.in: Add lm32 dependencies.        
+        * NEWS: Indicate lm32 is a new target.
+        * configure.tgt: Add lm32 targets.
+        * lm32-tdep.c: New file.
+
 2009-05-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* corelow.c (core_open): Flush the register cache before doing

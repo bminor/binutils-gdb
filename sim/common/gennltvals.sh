@@ -73,3 +73,6 @@ dir=libgloss/v850/sys target=v850
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
 
+dir=libgloss target=lm32
+$shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
+        "syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"

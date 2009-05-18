@@ -241,6 +241,11 @@ iq2000-*-*)
 	gdb_sim=../sim/iq2000/libsim.a
 	;;
 
+lm32-*-*)		
+	gdb_target_obs="lm32-tdep.o" 
+	gdb_sim=../sim/lm32/libsim.a
+	;;
+
 m32c-*-*)
 	# Target: Renesas M32C family
 	gdb_target_obs="m32c-tdep.o prologue-value.o"

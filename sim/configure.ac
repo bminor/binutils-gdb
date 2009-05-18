@@ -77,6 +77,10 @@ if test "${enable_sim}" != no; then
            AC_CONFIG_SUBDIRS(iq2000)
 	   testsuite=yes
 	   ;;
+       lm32-*-*)
+           AC_CONFIG_SUBDIRS(lm32)
+	   testsuite=yes
+           ;;
        m32c-*-*)
            AC_CONFIG_SUBDIRS(m32c)
            ;;

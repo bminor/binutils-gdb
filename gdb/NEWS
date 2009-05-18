@@ -313,6 +313,7 @@ x86_64 MinGW			x86_64-*-mingw*
 
 * New targets
 
+Lattice Mico32                  lm32-*
 x86 DICOS			i[34567]86-*-dicos*
 x86_64 DICOS		        x86_64-*-dicos*
 

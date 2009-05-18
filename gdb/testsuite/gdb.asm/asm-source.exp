@@ -64,6 +64,9 @@ switch -glob -- [istarget] {
     "i\[3456\]86-*-*" {
         set asm-arch i386
     }
+    "lm32-*" {
+        set asm-arch lm32
+    }
     "m32r*-linux*" {
         set asm-arch m32r-linux
     }

@@ -484,6 +484,7 @@ ALL_TARGET_OBS = \
 	i386-dicos-tdep.o \
 	iq2000-tdep.o \
 	linux-tdep.o \
+	lm32-tdep.o \
 	m32c-tdep.o \
 	m32r-linux-tdep.o m32r-tdep.o \
 	m68hc11-tdep.o \
@@ -1314,6 +1315,7 @@ ALLDEPFILES = \
 	linux-fork.c \
 	linux-tdep.c \
 	linux-record.c \
+	lm32-tdep.c \
 	m68hc11-tdep.c \
 	m32r-tdep.c \
 	m32r-linux-nat.c m32r-linux-tdep.c \

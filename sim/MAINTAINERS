@@ -13,6 +13,7 @@ arm	        Nick Clifton <nickc@redhat.com>
 cr16	        M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 frv		Dave Brolley <brolley@redhat.com>
 igen		(igen simulators)
+lm32		Jon Beniston <jon@beniston.com>
 m68hc11		Stephane Carrez <stcarrez@nerim.fr>
 mips		Thiemo Seufer <ths@networkno.de>
 moxie		Anthony Green <green@moxielogic.com>

@@ -1,3 +1,9 @@
+2009-05-18  Jon Beniston <jon@beniston.com>
+
+        * MAINTAINERS: Add Jon Beniston as maintainer of lm32 sim.
+        * configure.ac: Add lm32 target. 
+        * lm32: New directory.               
+
 2009-05-11  Andrew Cagney  <cagney@gnu.org>
 
 	* MAINTAINERS: Orphan ppc.

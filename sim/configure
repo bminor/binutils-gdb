@@ -280,6 +280,7 @@ ac_subdirs_all="$ac_subdirs_all d10v"
 ac_subdirs_all="$ac_subdirs_all frv"
 ac_subdirs_all="$ac_subdirs_all h8300"
 ac_subdirs_all="$ac_subdirs_all iq2000"
+ac_subdirs_all="$ac_subdirs_all lm32"
 ac_subdirs_all="$ac_subdirs_all m32c"
 ac_subdirs_all="$ac_subdirs_all m32r"
 ac_subdirs_all="$ac_subdirs_all m68hc11"
@@ -3473,6 +3474,13 @@ subdirs="$subdirs iq2000"
 
 	   testsuite=yes
 	   ;;
+       lm32-*-*)
+
+
+subdirs="$subdirs lm32"
+
+           testsuite=yes
+           ;;
        m32c-*-*)
 
 

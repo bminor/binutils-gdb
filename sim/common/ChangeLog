@@ -1,3 +1,8 @@
+2009-05-18  Jon Beniston <jon@beniston.com>
+
+        * gennltvals.sh: Add lm32 target.
+        * nltvals.def: Add lm32 syscall definitions. 
+
 2009-03-19  J"orn Rennecke  <joern.rennecke@arc.com>  (tiny change)
 
 	Speed up simulator startup:
