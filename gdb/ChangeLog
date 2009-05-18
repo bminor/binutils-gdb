@@ -1,3 +1,16 @@
+2009-05-18  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* doublest.c (NAN): Remove unused define.
+	(extract_floating_by_length, deprecated_extract_floating): Remove.
+	(store_floating_by_length, deprecated_store_floating): Remove.
+	(extract_typed_floating): Do not call extract_floating_by_length.
+	(store_typed_floating): Do not call store_floating_by_length.
+	(convert_typed_floating): Remove redundant assertions.
+	* doublest.h (deprecated_extract_floating): Remove.
+	(deprecated_store_floating): Remove.
+	* sh64-tdep.c (sh64_register_convert_to_raw): Call
+	extract_typed_floating instead of deprecated_extract_floating.
+
 2009-05-18  Jon Beniston <jon@beniston.com>
         
         * MAINTAINERS: Add lm32 target.        

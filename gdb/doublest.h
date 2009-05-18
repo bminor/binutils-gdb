@@ -85,17 +85,6 @@ extern enum float_kind floatformat_classify (const struct floatformat *,
 extern const char *floatformat_mantissa (const struct floatformat *,
 					 const bfd_byte *);
 
-/* These functions have been replaced by extract_typed_floating and
-   store_typed_floating.
-
-   Most calls are passing in TYPE_LENGTH (TYPE) so can be changed to
-   just pass the TYPE.  The remainder pass in the length of a
-   register, those calls should instead pass in the floating point
-   type that corresponds to that length.  */
-
-extern DOUBLEST deprecated_extract_floating (const void *addr, int len);
-extern void deprecated_store_floating (void *addr, int len, DOUBLEST val);
-
 /* Given TYPE, return its floatformat.  TYPE_FLOATFORMAT() may return
    NULL.  type_floatformat() detects that and returns a floatformat
    based on the type size when FLOATFORMAT is NULL.  */

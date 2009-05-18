@@ -1577,7 +1577,7 @@ sh64_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type,
       || (regnum >= DR0_C_REGNUM 
 	  && regnum <= DR_LAST_C_REGNUM))
     {
-      DOUBLEST val = deprecated_extract_floating (from, TYPE_LENGTH(type));
+      DOUBLEST val = extract_typed_floating (from, type);
       floatformat_from_doublest (&floatformat_ieee_double_littlebyte_bigword, 
 				 &val, to);
     }
