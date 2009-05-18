@@ -79,7 +79,7 @@ static int fat_pntr_bounds_bitpos (struct type *);
 
 static int fat_pntr_bounds_bitsize (struct type *);
 
-static struct type *desc_data_type (struct type *);
+static struct type *desc_data_target_type (struct type *);
 
 static struct value *desc_data (struct value *);
 
@@ -1281,11 +1281,13 @@ static struct value *
 thin_data_pntr (struct value *val)
 {
   struct type *type = value_type (val);
+  struct type *data_type = desc_data_target_type (thin_descriptor_type (type));
+  data_type = lookup_pointer_type (data_type);
+
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    return value_cast (desc_data_type (thin_descriptor_type (type)),
-                       value_copy (val));
+    return value_cast (data_type, value_copy (val));
   else
-    return value_from_longest (desc_data_type (thin_descriptor_type (type)),
+    return value_from_longest (data_type,
                                VALUE_ADDRESS (val) + value_offset (val));
 }
 
@@ -1389,23 +1391,28 @@ fat_pntr_bounds_bitsize (struct type *type)
 }
 
 /* If TYPE is the type of an array descriptor (fat or thin pointer) or a
-   pointer to one, the type of its array data (a
-   pointer-to-array-with-no-bounds type); otherwise, NULL.  Use
-   ada_type_of_array to get an array type with bounds data.  */
+   pointer to one, the type of its array data (a array-with-no-bounds type);
+   otherwise, NULL.  Use ada_type_of_array to get an array type with bounds
+   data.  */
 
 static struct type *
-desc_data_type (struct type *type)
+desc_data_target_type (struct type *type)
 {
   type = desc_base_type (type);
 
   /* NOTE: The following is bogus; see comment in desc_bounds.  */
   if (is_thin_pntr (type))
-    return lookup_pointer_type
-      (desc_base_type (TYPE_FIELD_TYPE (thin_descriptor_type (type), 1)));
+    return desc_base_type (TYPE_FIELD_TYPE (thin_descriptor_type (type), 1));
   else if (is_thick_pntr (type))
-    return lookup_struct_elt_type (type, "P_ARRAY", 1);
-  else
-    return NULL;
+    {
+      struct type *data_type = lookup_struct_elt_type (type, "P_ARRAY", 1);
+
+      if (data_type
+	  && TYPE_CODE (ada_check_typedef (data_type)) == TYPE_CODE_PTR)
+	return TYPE_TARGET_TYPE (data_type);
+    }
+
+  return NULL;
 }
 
 /* If ARR is an array descriptor (fat or thin pointer), a pointer to
@@ -1556,18 +1563,14 @@ ada_is_simple_array_type (struct type *type)
 int
 ada_is_array_descriptor_type (struct type *type)
 {
-  struct type *data_type = desc_data_type (type);
+  struct type *data_type = desc_data_target_type (type);
 
   if (type == NULL)
     return 0;
   type = ada_check_typedef (type);
-  return
-    data_type != NULL
-    && ((TYPE_CODE (data_type) == TYPE_CODE_PTR
-         && TYPE_TARGET_TYPE (data_type) != NULL
-         && TYPE_CODE (TYPE_TARGET_TYPE (data_type)) == TYPE_CODE_ARRAY)
-        || TYPE_CODE (data_type) == TYPE_CODE_ARRAY)
-    && desc_arity (desc_bounds_type (type)) > 0;
+  return (data_type != NULL
+	  && TYPE_CODE (data_type) == TYPE_CODE_ARRAY
+	  && desc_arity (desc_bounds_type (type)) > 0);
 }
 
 /* Non-zero iff type is a partially mal-formed GNAT array
@@ -1605,7 +1608,7 @@ ada_type_of_array (struct value *arr, int bounds)
 
   if (!bounds)
     return
-      ada_check_typedef (TYPE_TARGET_TYPE (desc_data_type (value_type (arr))));
+      ada_check_typedef (desc_data_target_type (value_type (arr)));
   else
     {
       struct type *elt_type;
@@ -1693,7 +1696,7 @@ ada_coerce_to_simple_array_type (struct type *type)
     return decode_packed_array_type (type);
 
   if (ada_is_array_descriptor_type (type))
-    return ada_check_typedef (TYPE_TARGET_TYPE (desc_data_type (type)));
+    return ada_check_typedef (desc_data_target_type (type));
 
   return type;
 }
@@ -2377,7 +2380,7 @@ ada_array_element_type (struct type *type, int nindices)
       int k;
       struct type *p_array_type;
 
-      p_array_type = desc_data_type (type);
+      p_array_type = desc_data_target_type (type);
 
       k = ada_array_arity (type);
       if (k == 0)
@@ -2386,7 +2389,6 @@ ada_array_element_type (struct type *type, int nindices)
       /* Initially p_array_type = elt_type(*)[]...(k times)...[].  */
       if (nindices >= 0 && k > nindices)
         k = nindices;
-      p_array_type = TYPE_TARGET_TYPE (p_array_type);
       while (k > 0 && p_array_type != NULL)
         {
           p_array_type = ada_check_typedef (TYPE_TARGET_TYPE (p_array_type));

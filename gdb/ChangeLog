@@ -1,5 +1,15 @@
 2009-05-18  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (desc_data_type): Remove, replace by ...
+	(desc_data_target_type): ... this.
+	(thin_data_pntr): Use desc_data_target_type instead of desc_data_type.
+	(ada_is_array_descriptor_type): Likewise.
+	(ada_type_of_array): Likewise.
+	(ada_coerce_to_simple_array_type): Likewise.
+	(ada_array_element_type): Likewise.
+
+2009-05-18  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-valprint.c (ada_val_print_1): Use val_print_string to print
 	result of ada_vax_float_print_function inferior call.
 
