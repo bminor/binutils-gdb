@@ -379,6 +379,14 @@ core_open (char *filename, int from_tty)
      from ST to MT.  */
   add_thread_silent (inferior_ptid);
 
+  /* Need to flush the register cache (and the frame cache) from a
+     previous debug session.  If inferior_ptid ends up the same as the
+     last debug session --- e.g., b foo; run; gcore core1; step; gcore
+     core2; core core1; core core2 --- then there's potential for
+     get_current_regcache to return the cached regcache of the
+     previous session, and the frame cache being stale.  */
+  registers_changed ();
+
   /* Build up thread list from BFD sections, and possibly set the
      current thread to the .reg/NN section matching the .reg
      section. */

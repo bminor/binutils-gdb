@@ -1,5 +1,10 @@
 2009-05-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* corelow.c (core_open): Flush the register cache before doing
+	anything with registers.
+
+2009-05-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* inflow.h (our_process_group): Remove declaration.
 	(inferior_process_group): Delete global variable declaration.
 	(inferior_process_group): New function declaration.
