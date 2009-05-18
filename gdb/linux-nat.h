@@ -99,6 +99,10 @@ int thread_db_attach_lwp (ptid_t ptid);
 /* Find process PID's pending signal set from /proc/pid/status.  */
 void linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigset_t *ignored);
 
+/* Return the TGID of LWPID from /proc/pid/status.  Returns -1 if not
+   found.  */
+extern int linux_proc_get_tgid (int lwpid);
+
 /* linux-nat functions for handling fork events.  */
 extern void linux_enable_event_reporting (ptid_t ptid);
 

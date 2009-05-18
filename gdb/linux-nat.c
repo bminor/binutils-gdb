@@ -1129,6 +1129,34 @@ exit_lwp (struct lwp_info *lp)
   delete_lwp (lp->ptid);
 }
 
+/* Return an lwp's tgid, found in `/proc/PID/status'.  */
+
+int
+linux_proc_get_tgid (int lwpid)
+{
+  FILE *status_file;
+  char buf[100];
+  int tgid = -1;
+
+  snprintf (buf, sizeof (buf), "/proc/%d/status", (int) lwpid);
+  status_file = fopen (buf, "r");
+  if (status_file != NULL)
+    {
+      while (fgets (buf, sizeof (buf), status_file))
+	{
+	  if (strncmp (buf, "Tgid:", 5) == 0)
+	    {
+	      tgid = strtoul (buf + strlen ("Tgid:"), NULL, 10);
+	      break;
+	    }
+	}
+
+      fclose (status_file);
+    }
+
+  return tgid;
+}
+
 /* Detect `T (stopped)' in `/proc/PID/status'.
    Other states including `T (tracing stop)' are reported as false.  */
 

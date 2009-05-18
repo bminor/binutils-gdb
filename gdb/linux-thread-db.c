@@ -104,6 +104,13 @@ struct thread_db_info
   /* Connection to the libthread_db library.  */
   td_thragent_t *thread_agent;
 
+  /* True if we need to apply the workaround for glibc/BZ5983.  When
+     we catch a PTRACE_O_TRACEFORK, and go query the child's thread
+     list, nptl_db returns the parent's threads in addition to the new
+     (single) child thread.  If this flag is set, we do extra work to
+     be able to ignore such stale entries.  */
+  int need_stale_parent_threads_check;
+
   /* Location of the thread creation event breakpoint.  The code at
      this location in the child process will be called by the pthread
      library whenever a new thread is created.  By setting a special
@@ -168,6 +175,7 @@ add_thread_db_info (void *handle)
   info = xcalloc (1, sizeof (*info));
   info->pid = ptid_get_pid (inferior_ptid);
   info->handle = handle;
+  info->need_stale_parent_threads_check = 1;
 
   info->next = thread_db_list;
   thread_db_list = info;
@@ -1269,8 +1277,6 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
     return 0;			/* A zombie -- ignore.  */
 
-  ptid = ptid_build (info->pid, ti.ti_lid, 0);
-
   if (ti.ti_tid == 0)
     {
       /* A thread ID of zero means that this is the main thread, but
@@ -1279,14 +1285,29 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 	 be yet.  Just enable event reporting and otherwise ignore
 	 it.  */
 
+      /* In that case, we're not stopped in a fork syscall and don't
+	 need this glibc bug workaround.  */
+      info->need_stale_parent_threads_check = 0;
+
       err = info->td_thr_event_enable_p (th_p, 1);
       if (err != TD_OK)
-	error (_("Cannot enable thread event reporting for %s: %s"),
-	       target_pid_to_str (ptid), thread_db_err_str (err));
+	error (_("Cannot enable thread event reporting for LWP %d: %s"),
+	       (int) ti.ti_lid, thread_db_err_str (err));
 
       return 0;
     }
 
+  /* Ignore stale parent threads, caused by glibc/BZ5983.  This is a
+     bit expensive, as it needs to open /proc/pid/status, so try to
+     avoid doing the work if we know we don't have to.  */
+  if (info->need_stale_parent_threads_check)
+    {
+      int tgid = linux_proc_get_tgid (ti.ti_lid);
+      if (tgid != -1 && tgid != info->pid)
+	return 0;
+    }
+
+  ptid = ptid_build (info->pid, ti.ti_lid, 0);
   tp = find_thread_pid (ptid);
   if (tp == NULL || tp->private == NULL)
     attach_thread (ptid, th_p, &ti);
@@ -1480,6 +1501,27 @@ thread_db_get_ada_task_ptid (long lwp, long thread)
 }
 
 static void
+thread_db_resume (struct target_ops *ops,
+		  ptid_t ptid, int step, enum target_signal signo)
+{
+  struct target_ops *beneath = find_target_beneath (ops);
+  struct thread_db_info *info;
+
+  if (ptid_equal (ptid, minus_one_ptid))
+    info = get_thread_db_info (GET_PID (inferior_ptid));
+  else
+    info = get_thread_db_info (GET_PID (ptid));
+
+  /* This workaround is only needed for child fork lwps stopped in a
+     PTRACE_O_TRACEFORK event.  When the inferior is resumed, the
+     workaround can be disabled.  */
+  if (info)
+    info->need_stale_parent_threads_check = 0;
+
+  beneath->to_resume (beneath, ptid, step, signo);
+}
+
+static void
 init_thread_db_ops (void)
 {
   thread_db_ops.to_shortname = "multi-thread";
@@ -1487,6 +1529,7 @@ init_thread_db_ops (void)
   thread_db_ops.to_doc = "Threads and pthreads support.";
   thread_db_ops.to_detach = thread_db_detach;
   thread_db_ops.to_wait = thread_db_wait;
+  thread_db_ops.to_resume = thread_db_resume;
   thread_db_ops.to_mourn_inferior = thread_db_mourn_inferior;
   thread_db_ops.to_find_new_threads = thread_db_find_new_threads;
   thread_db_ops.to_pid_to_str = thread_db_pid_to_str;

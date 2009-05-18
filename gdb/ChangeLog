@@ -1,5 +1,16 @@
 2009-05-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.h (linux_proc_get_tgid): Declare.
+	* linux-nat.c (linux_proc_get_tgid): New.
+	* linux-thread-db.c (struct thread_db_info): New field
+	`need_stale_parent_threads_check'.
+	(add_thread_db_info): Set it.
+	(find_new_threads_callback): Ignore stale fork parent threads.
+	(thread_db_resume): New.
+	(init_thread_db_ops): Install thread_db_resume.
+
+2009-05-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* fork-child.c (fork_inferior): Only reset the thread list if this
 	is the first inferior.
 	(startup_inferior): If the target support multi-process, tell it
