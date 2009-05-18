@@ -1259,7 +1259,8 @@ find_methods (struct symtab *symtab, char type,
 	}
       if (objc_csym == NULL)
 	{
-	  objc_csym = xmalloc (sizeof (*objc_csym));
+	  objc_csym = obstack_alloc (&objfile->objfile_obstack,
+				     sizeof (*objc_csym));
 	  *objc_csym = objfile_csym;
 	  set_objfile_data (objfile, objc_objfile_data, objc_csym);
 	}

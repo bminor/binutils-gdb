@@ -1,3 +1,7 @@
+2009-05-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* objc-lang.c (find_methods): Plug a small memory leak.
+
 2009-05-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* solib-svr4.c: Include observer.h.
