@@ -1,3 +1,41 @@
+2009-05-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* inflow.h (our_process_group): Remove declaration.
+	(inferior_process_group): Delete global variable declaration.
+	(inferior_process_group): New function declaration.
+	* inflow.c: Include observer.h.
+	(inferior_ttystate, our_ttystate, tflags_inferior, tflags_ours):
+	Delete.
+	(struct terminal_info): New struct.
+	(our_terminal_info): New global.
+	(inferior_process_group): New function.
+	(inferior_thisrun_terminal): Extend description comment.
+	(gdb_has_a_terminal): Adjust to write to our_terminal_info fields
+	instead of globals.
+	(terminal_init_inferior_with_pgrp): Adjust to per-inferior
+	terminal settings.
+	(terminal_inferior): Ditto.
+	(terminal_ours_1): Ditto.
+	(inflow_new_inferior, inflow_inferior_exit): New functions.
+	(child_terminal_info): Adjust to per-inferior terminal settings.
+	(osig_set): New global.
+	(set_sigint_trap): Adjust to per-inferior terminal settings.  Set
+	or clear `osig_set' accordingly.
+	(clear_sigint_trap): Check `osig_set' to decide wheater to restore
+	SIGINT handler, instead of checking the current inferior (which
+	may be none).
+	(_initialize_inflow): Attach inflow_new_inferior and
+	inflow_inferior_exit to the "new_inferior" and "inferior_exit"
+	notifications, respectively.
+	* inferior.h (struct terminal_info): Forward declare.
+	(struct inferior): Add `terminal_info' field.
+	* inferior.c (delete_inferior_1): Notify the inferior_exit
+	observers before removing the inferior from the lists and deleting
+	it.
+	* inf-ptrace.c (inf_ptrace_stop): `inferior_process_group' is now
+	a function instead of a variable.  Adjust.
+	* procfs.c (procfs_stop): Ditto.
+
 2009-05-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): When handling a

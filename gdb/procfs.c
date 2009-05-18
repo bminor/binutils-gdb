@@ -4690,7 +4690,7 @@ procfs_files_info (struct target_ops *ignore)
 static void
 procfs_stop (ptid_t ptid)
 {
-  kill (-inferior_process_group, SIGINT);
+  kill (-inferior_process_group (), SIGINT);
 }
 
 /*

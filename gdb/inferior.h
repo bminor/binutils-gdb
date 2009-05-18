@@ -30,6 +30,7 @@ struct type;
 struct gdbarch;
 struct regcache;
 struct ui_out;
+struct terminal_info;
 
 /* For bpstat.  */
 #include "breakpoint.h"
@@ -421,6 +422,9 @@ struct inferior
      this inferior stops.  For continuations associated with a
      specific thread, see `struct thread_info'.  */
   struct continuation *continuations;
+
+  /* Terminal info and state managed by inflow.c.  */
+  struct terminal_info *terminal_info;
 
   /* Private data used by the target vector implementation.  */
   struct private_inferior *private;

@@ -346,7 +346,7 @@ inf_ptrace_stop (ptid_t ptid)
      negative process number in kill() is a System V-ism.  The proper
      BSD interface is killpg().  However, all modern BSDs support the
      System V interface too.  */
-  kill (-inferior_process_group, SIGINT);
+  kill (-inferior_process_group (), SIGINT);
 }
 
 /* Resume execution of thread PTID, or all threads if PTID is -1.  If

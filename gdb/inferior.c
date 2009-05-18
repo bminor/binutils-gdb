@@ -139,19 +139,21 @@ delete_inferior_1 (int pid, int silent)
   if (!inf)
     return;
 
+  arg.pid = pid;
+  arg.silent = silent;
+
+  iterate_over_threads (delete_thread_of_inferior, &arg);
+
+  /* Notify the observers before removing the inferior from the list,
+     so that the observers have a change to look it up.  */
+  observer_notify_inferior_exit (pid);
+
   if (infprev)
     infprev->next = inf->next;
   else
     inferior_list = inf->next;
 
   free_inferior (inf);
-
-  arg.pid = pid;
-  arg.silent = silent;
-
-  iterate_over_threads (delete_thread_of_inferior, &arg);
-
-  observer_notify_inferior_exit (pid);
 }
 
 void
