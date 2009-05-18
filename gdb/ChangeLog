@@ -1,5 +1,10 @@
 2009-05-18  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (ada_coerce_to_simple_array_type): Reimplement to
+	avoid creating a dummy value.
+
+2009-05-18  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* p-valprint.c (pascal_val_print): Use extract_typed_address
 	to extract reference value.
 

@@ -1689,13 +1689,13 @@ ada_coerce_to_simple_array (struct value *arr)
 struct type *
 ada_coerce_to_simple_array_type (struct type *type)
 {
-  struct value *mark = value_mark ();
-  struct value *dummy = value_from_longest (builtin_type_int32, 0);
-  struct type *result;
-  deprecated_set_value_type (dummy, type);
-  result = ada_type_of_array (dummy, 0);
-  value_free_to_mark (mark);
-  return result;
+  if (ada_is_packed_array_type (type))
+    return decode_packed_array_type (type);
+
+  if (ada_is_array_descriptor_type (type))
+    return ada_check_typedef (TYPE_TARGET_TYPE (desc_data_type (type)));
+
+  return type;
 }
 
 /* Non-zero iff TYPE represents a standard GNAT packed-array type.  */
