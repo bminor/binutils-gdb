@@ -1,6 +1,4 @@
-2009-05-17  Dave Korn  <dave.korn.cygwin@gmail.com>
-
-  2008-08-07  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+2009-05-17  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* ld-pe/exports.d: New file.
 	* ld-pe/exports.s: New file.
