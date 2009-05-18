@@ -34,6 +34,7 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "gdbthread.h"
+#include "observer.h"
 
 #include "gdb_assert.h"
 
@@ -272,19 +273,89 @@ IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 				ptr_type) == 0;
 }
 
-static CORE_ADDR debug_base;	/* Base of dynamic linker structures */
+/* Per-inferior SVR4 specific data.  */
 
-/* Validity flag for debug_loader_offset.  */
-static int debug_loader_offset_p;
+struct svr4_info
+{
+  int pid;
 
-/* Load address for the dynamic linker, inferred.  */
-static CORE_ADDR debug_loader_offset;
+  CORE_ADDR debug_base;	/* Base of dynamic linker structures */
 
-/* Name of the dynamic linker, valid if debug_loader_offset_p.  */
-static char *debug_loader_name;
+  /* Validity flag for debug_loader_offset.  */
+  int debug_loader_offset_p;
 
-/* Load map address for the main executable.  */
-static CORE_ADDR main_lm_addr;
+  /* Load address for the dynamic linker, inferred.  */
+  CORE_ADDR debug_loader_offset;
+
+  /* Name of the dynamic linker, valid if debug_loader_offset_p.  */
+  char *debug_loader_name;
+
+  /* Load map address for the main executable.  */
+  CORE_ADDR main_lm_addr;
+};
+
+/* List of known processes using solib-svr4 shared libraries, storing
+   the required bookkeeping for each.  */
+
+typedef struct svr4_info *svr4_info_p;
+DEF_VEC_P(svr4_info_p);
+VEC(svr4_info_p) *svr4_info = NULL;
+
+/* Get svr4 data for inferior PID (target id).  If none is found yet,
+   add it now.  This function always returns a valid object.  */
+
+struct svr4_info *
+get_svr4_info (int pid)
+{
+  int ix;
+  struct svr4_info *it;
+
+  gdb_assert (pid != 0);
+
+  for (ix = 0; VEC_iterate (svr4_info_p, svr4_info, ix, it); ++ix)
+    {
+      if (it->pid == pid)
+	return it;
+    }
+
+  it = XZALLOC (struct svr4_info);
+  it->pid = pid;
+
+  VEC_safe_push (svr4_info_p, svr4_info, it);
+
+  return it;
+}
+
+/* Get rid of any svr4 related bookkeeping for inferior PID (target
+   id).  */
+
+static void
+remove_svr4_info (int pid)
+{
+  int ix;
+  struct svr4_info *it;
+
+  for (ix = 0; VEC_iterate (svr4_info_p, svr4_info, ix, it); ++ix)
+    {
+      if (it->pid == pid)
+	{
+	  VEC_unordered_remove (svr4_info_p, svr4_info, ix);
+	  return;
+	}
+    }
+}
+
+/* This is an "inferior_exit" observer.  Inferior PID (target id) is
+   being removed from the inferior list, because it exited, was
+   killed, detached, or we just dropped the connection to the debug
+   interface --- discard any solib-svr4 related bookkeeping for this
+   inferior.  */
+
+static void
+solib_svr4_inferior_exit (int pid)
+{
+  remove_svr4_info (pid);
+}
 
 /* Local function prototypes */
 
@@ -715,7 +786,7 @@ elf_locate_base (void)
 
    SYNOPSIS
 
-   CORE_ADDR locate_base (void)
+   CORE_ADDR locate_base (struct svr4_info *)
 
    DESCRIPTION
 
@@ -745,7 +816,7 @@ elf_locate_base (void)
  */
 
 static CORE_ADDR
-locate_base (void)
+locate_base (struct svr4_info *info)
 {
   /* Check to see if we have a currently valid address, and if so, avoid
      doing all this work again and just return the cached address.  If
@@ -753,13 +824,13 @@ locate_base (void)
      section for ELF executables.  There's no point in doing any of this
      though if we don't have some link map offsets to work with.  */
 
-  if (debug_base == 0 && svr4_have_link_map_offsets ())
+  if (info->debug_base == 0 && svr4_have_link_map_offsets ())
     {
       if (exec_bfd != NULL
 	  && bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
-	debug_base = elf_locate_base ();
+	info->debug_base = elf_locate_base ();
     }
-  return (debug_base);
+  return info->debug_base;
 }
 
 /* Find the first element in the inferior's dynamic link map, and
@@ -770,30 +841,32 @@ locate_base (void)
    RT_CONSISTENT.  */
 
 static CORE_ADDR
-solib_svr4_r_map (void)
+solib_svr4_r_map (struct svr4_info *info)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
 
-  return read_memory_typed_address (debug_base + lmo->r_map_offset, ptr_type);
+  return read_memory_typed_address (info->debug_base + lmo->r_map_offset,
+				    ptr_type);
 }
 
 /* Find r_brk from the inferior's debug base.  */
 
 static CORE_ADDR
-solib_svr4_r_brk (void)
+solib_svr4_r_brk (struct svr4_info *info)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
 
-  return read_memory_typed_address (debug_base + lmo->r_brk_offset, ptr_type);
+  return read_memory_typed_address (info->debug_base + lmo->r_brk_offset,
+				    ptr_type);
 }
 
 /* Find the link map for the dynamic linker (if it is not in the
    normal list of loaded shared objects).  */
 
 static CORE_ADDR
-solib_svr4_r_ldsomap (void)
+solib_svr4_r_ldsomap (struct svr4_info *info)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
@@ -801,12 +874,13 @@ solib_svr4_r_ldsomap (void)
 
   /* Check version, and return zero if `struct r_debug' doesn't have
      the r_ldsomap member.  */
-  version = read_memory_unsigned_integer (debug_base + lmo->r_version_offset,
-					  lmo->r_version_size);
+  version
+    = read_memory_unsigned_integer (info->debug_base + lmo->r_version_offset,
+				    lmo->r_version_size);
   if (version < 2 || lmo->r_ldsomap_offset == -1)
     return 0;
 
-  return read_memory_typed_address (debug_base + lmo->r_ldsomap_offset,
+  return read_memory_typed_address (info->debug_base + lmo->r_ldsomap_offset,
 				    ptr_type);
 }
 
@@ -844,18 +918,19 @@ open_symbol_file_object (void *from_ttyp)
   int l_name_size = TYPE_LENGTH (ptr_type);
   gdb_byte *l_name_buf = xmalloc (l_name_size);
   struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
+  struct svr4_info *info = get_svr4_info (PIDGET (inferior_ptid));
 
   if (symfile_objfile)
     if (!query (_("Attempt to reload symbols from process? ")))
       return 0;
 
   /* Always locate the debug struct, in case it has moved.  */
-  debug_base = 0;
-  if (locate_base () == 0)
+  info->debug_base = 0;
+  if (locate_base (info) == 0)
     return 0;	/* failed somehow... */
 
   /* First link map member should be the executable.  */
-  lm = solib_svr4_r_map ();
+  lm = solib_svr4_r_map (info);
   if (lm == 0)
     return 0;	/* failed somehow... */
 
@@ -894,10 +969,13 @@ open_symbol_file_object (void *from_ttyp)
 static struct so_list *
 svr4_default_sos (void)
 {
+  struct inferior *inf = current_inferior ();
+  struct svr4_info *info = get_svr4_info (inf->pid);
+
   struct so_list *head = NULL;
   struct so_list **link_ptr = &head;
 
-  if (debug_loader_offset_p)
+  if (info->debug_loader_offset_p)
     {
       struct so_list *new = XZALLOC (struct so_list);
 
@@ -905,11 +983,12 @@ svr4_default_sos (void)
 
       /* Nothing will ever check the cached copy of the link
 	 map if we set l_addr.  */
-      new->lm_info->l_addr = debug_loader_offset;
+      new->lm_info->l_addr = info->debug_loader_offset;
       new->lm_info->lm_addr = 0;
       new->lm_info->lm = NULL;
 
-      strncpy (new->so_name, debug_loader_name, SO_NAME_MAX_PATH_SIZE - 1);
+      strncpy (new->so_name, info->debug_loader_name,
+	       SO_NAME_MAX_PATH_SIZE - 1);
       new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
       strcpy (new->so_original_name, new->so_name);
 
@@ -946,19 +1025,27 @@ svr4_current_sos (void)
   struct so_list *head = 0;
   struct so_list **link_ptr = &head;
   CORE_ADDR ldsomap = 0;
+  struct inferior *inf;
+  struct svr4_info *info;
+
+  if (ptid_equal (inferior_ptid, null_ptid))
+    return NULL;
+
+  inf = current_inferior ();
+  info = get_svr4_info (inf->pid);
 
   /* Always locate the debug struct, in case it has moved.  */
-  debug_base = 0;
-  locate_base ();
+  info->debug_base = 0;
+  locate_base (info);
 
   /* If we can't find the dynamic linker's base structure, this
      must not be a dynamically linked executable.  Hmm.  */
-  if (! debug_base)
+  if (! info->debug_base)
     return svr4_default_sos ();
 
   /* Walk the inferior's link map list, and build our list of
      `struct so_list' nodes.  */
-  lm = solib_svr4_r_map ();
+  lm = solib_svr4_r_map (info);
 
   while (lm)
     {
@@ -985,7 +1072,7 @@ svr4_current_sos (void)
          decide when to ignore it. */
       if (IGNORE_FIRST_LINK_MAP_ENTRY (new) && ldsomap == 0)
 	{
-	  main_lm_addr = new->lm_info->lm_addr;
+	  info->main_lm_addr = new->lm_info->lm_addr;
 	  free_so (new);
 	}
       else
@@ -1025,7 +1112,7 @@ svr4_current_sos (void)
 	 symbol information for the dynamic linker is quite crucial
 	 for skipping dynamic linker resolver code.  */
       if (lm == 0 && ldsomap == 0)
-	lm = ldsomap = solib_svr4_r_ldsomap ();
+	lm = ldsomap = solib_svr4_r_ldsomap (info);
 
       discard_cleanups (old_chain);
     }
@@ -1042,14 +1129,15 @@ CORE_ADDR
 svr4_fetch_objfile_link_map (struct objfile *objfile)
 {
   struct so_list *so;
+  struct svr4_info *info = get_svr4_info (PIDGET (inferior_ptid));
 
   /* Cause svr4_current_sos() to be run if it hasn't been already.  */
-  if (main_lm_addr == 0)
+  if (info->main_lm_addr == 0)
     solib_add (NULL, 0, &current_target, auto_solib_add);
 
   /* svr4_current_sos() will set main_lm_addr for the main executable.  */
   if (objfile == symfile_objfile)
-    return main_lm_addr;
+    return info->main_lm_addr;
 
   /* The other link map addresses may be found by examining the list
      of shared libraries.  */
@@ -1157,13 +1245,14 @@ exec_entry_point (struct bfd *abfd, struct target_ops *targ)
  */
 
 static int
-enable_break (void)
+enable_break (struct svr4_info *info)
 {
   struct minimal_symbol *msymbol;
   char **bkpt_namep;
   asection *interp_sect;
   gdb_byte *interp_name;
   CORE_ADDR sym_addr;
+  struct inferior *inf = current_inferior ();
 
   /* First, remove all the solib event breakpoints.  Their addresses
      may have changed since the last time we ran the program.  */
@@ -1179,8 +1268,8 @@ enable_break (void)
 
   solib_add (NULL, 0, &current_target, auto_solib_add);
   sym_addr = 0;
-  if (debug_base && solib_svr4_r_map () != 0)
-    sym_addr = solib_svr4_r_brk ();
+  if (info->debug_base && solib_svr4_r_map (info) != 0)
+    sym_addr = solib_svr4_r_brk (info);
 
   if (sym_addr != 0)
     {
@@ -1298,9 +1387,9 @@ enable_break (void)
 
       if (!loader_found_in_list)
 	{
-	  debug_loader_name = xstrdup (interp_name);
-	  debug_loader_offset_p = 1;
-	  debug_loader_offset = load_addr;
+	  info->debug_loader_name = xstrdup (interp_name);
+	  info->debug_loader_offset_p = 1;
+	  info->debug_loader_offset = load_addr;
 	  solib_add (NULL, 0, &current_target, auto_solib_add);
 	}
 
@@ -1578,6 +1667,9 @@ svr4_solib_create_inferior_hook (void)
 {
   struct inferior *inf;
   struct thread_info *tp;
+  struct svr4_info *info;
+
+  info = get_svr4_info (PIDGET (inferior_ptid));
 
   /* Relocate the main executable if necessary.  */
   svr4_relocate_main_executable ();
@@ -1585,7 +1677,7 @@ svr4_solib_create_inferior_hook (void)
   if (!svr4_have_link_map_offsets ())
     return;
 
-  if (!enable_break ())
+  if (!enable_break (info))
     return;
 
 #if defined(_SCO_DS)
@@ -1617,12 +1709,7 @@ svr4_solib_create_inferior_hook (void)
 static void
 svr4_clear_solib (void)
 {
-  debug_base = 0;
-  debug_loader_offset_p = 0;
-  debug_loader_offset = 0;
-  xfree (debug_loader_name);
-  debug_loader_name = NULL;
-  main_lm_addr = 0;
+  remove_svr4_info (PIDGET (inferior_ptid));
 }
 
 static void
@@ -1832,4 +1919,6 @@ _initialize_svr4_solib (void)
   svr4_so_ops.in_dynsym_resolve_code = svr4_in_dynsym_resolve_code;
   svr4_so_ops.lookup_lib_global_symbol = elf_lookup_lib_symbol;
   svr4_so_ops.same = svr4_same;
+
+  observer_attach_inferior_exit (solib_svr4_inferior_exit);
 }

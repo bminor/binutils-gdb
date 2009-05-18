@@ -1,5 +1,28 @@
 2009-05-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* solib-svr4.c: Include observer.h.
+	(debug_base, debug_loader_offset_p, debug_loader_offset)
+	(debug_loader_name, main_lm_addr): Move these globals...
+	(struct svr4_info): ... into this new structure.
+	(svr4_info_p): New typedef.
+	(svr4_info): New global.
+	(get_svr4_info, remove_svr4_info, solib_svr4_inferior_exit): New
+	functions.
+	(locate_base, solib_svr4_r_map, solib_svr4_r_brk)
+	(solib_svr4_r_ldsomap): Add svr4_info argument.  Adjust to
+	per-inferior svr4.
+	(open_symbol_file_object): Adjust to per-inferior svr4.
+	(svr4_default_sos, svr4_current_sos, svr4_fetch_objfile_link_map):
+	Ditto.
+	(enable_break): Add svr4_info argument.  Adjust to per-inferior
+	svr4.
+	(enable_break, svr4_solib_create_inferior_hook, svr4_clear_solib):
+	Adjust to per-inferior svr4.
+	(_initialize_svr4_solib): Install the solib_svr4_inferior_exit
+	observer.
+
+2009-05-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.h (linux_proc_get_tgid): Declare.
 	* linux-nat.c (linux_proc_get_tgid): New.
 	* linux-thread-db.c (struct thread_db_info): New field
