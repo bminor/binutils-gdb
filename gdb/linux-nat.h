@@ -105,7 +105,8 @@ extern void linux_enable_event_reporting (ptid_t ptid);
 extern int lin_lwp_attach_lwp (ptid_t ptid);
 
 /* Iterator function for lin-lwp's lwp list.  */
-struct lwp_info *iterate_over_lwps (int (*callback) (struct lwp_info *, 
+struct lwp_info *iterate_over_lwps (ptid_t filter,
+				    int (*callback) (struct lwp_info *,
 						     void *), 
 				    void *data);
 

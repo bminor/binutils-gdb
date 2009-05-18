@@ -392,7 +392,8 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   /* Restore our environment in case a vforked child clob'd it.  */
   environ = save_our_env;
 
-  init_thread_list ();
+  if (!have_inferiors ())
+    init_thread_list ();
 
   add_inferior (pid);
 
@@ -424,6 +425,12 @@ startup_inferior (int ntraps)
 {
   int pending_execs = ntraps;
   int terminal_initted = 0;
+  ptid_t resume_ptid;
+
+  if (target_supports_multi_process ())
+    resume_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+  else
+    resume_ptid = minus_one_ptid;
 
   /* The process was started by the fork that created it, but it will
      have stopped one instruction after execing the shell.  Here we
@@ -435,12 +442,11 @@ startup_inferior (int ntraps)
   while (1)
     {
       int resume_signal = TARGET_SIGNAL_0;
-      ptid_t resume_ptid;
       ptid_t event_ptid;
 
       struct target_waitstatus ws;
       memset (&ws, 0, sizeof (ws));
-      event_ptid = target_wait (pid_to_ptid (-1), &ws);
+      event_ptid = target_wait (resume_ptid, &ws);
 
       if (ws.kind == TARGET_WAITKIND_IGNORE)
 	/* The inferior didn't really stop, keep waiting.  */
@@ -489,12 +495,6 @@ startup_inferior (int ntraps)
 	    break;
 	}
 
-      /* In all-stop mode, resume all threads.  */
-      if (!non_stop)
-	resume_ptid = pid_to_ptid (-1);
-      else
-	resume_ptid = event_ptid;
-
       if (resume_signal != TARGET_SIGNAL_TRAP)
 	{
 	  /* Let shell child handle its own signals in its own way.  */
@@ -529,7 +529,7 @@ startup_inferior (int ntraps)
     }
 
   /* Mark all threads non-executing.  */
-  set_executing (pid_to_ptid (-1), 0);
+  set_executing (resume_ptid, 0);
 }
 
 /* Implement the "unset exec-wrapper" command.  */

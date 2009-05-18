@@ -199,8 +199,10 @@ inf_ptrace_mourn_inferior (struct target_ops *ops)
      only report its exit status to its original parent.  */
   waitpid (ptid_get_pid (inferior_ptid), &status, 0);
 
-  unpush_target (ops);
   generic_mourn_inferior ();
+
+  if (!have_inferiors ())
+    unpush_target (ops);
 }
 
 /* Attach to the process specified by ARGS.  If FROM_TTY is non-zero,

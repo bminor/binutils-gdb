@@ -509,21 +509,23 @@ void
 set_running (ptid_t ptid, int running)
 {
   struct thread_info *tp;
+  int all = ptid_equal (ptid, minus_one_ptid);
 
   /* We try not to notify the observer if no thread has actually changed 
      the running state -- merely to reduce the number of messages to 
      frontend.  Frontend is supposed to handle multiple *running just fine.  */
-  if (PIDGET (ptid) == -1)
+  if (all || ptid_is_pid (ptid))
     {
       int any_started = 0;
       for (tp = thread_list; tp; tp = tp->next)
-	{
- 	  if (tp->state_ == THREAD_EXITED)
-  	    continue;
-  	  if (running && tp->state_ == THREAD_STOPPED)
-  	    any_started = 1;
- 	  tp->state_ = running ? THREAD_RUNNING : THREAD_STOPPED;
-	}
+	if (all || ptid_get_pid (tp->ptid) == ptid_get_pid (ptid))
+	  {
+	    if (tp->state_ == THREAD_EXITED)
+	      continue;
+	    if (running && tp->state_ == THREAD_STOPPED)
+	      any_started = 1;
+	    tp->state_ = running ? THREAD_RUNNING : THREAD_STOPPED;
+	  }
       if (any_started)
 	observer_notify_target_resumed (ptid);
     }
@@ -616,11 +618,13 @@ void
 set_executing (ptid_t ptid, int executing)
 {
   struct thread_info *tp;
+  int all = ptid_equal (ptid, minus_one_ptid);
 
-  if (PIDGET (ptid) == -1)
+  if (all || ptid_is_pid (ptid))
     {
       for (tp = thread_list; tp; tp = tp->next)
-	tp->executing_ = executing;
+	if (all || ptid_get_pid (tp->ptid) == ptid_get_pid (ptid))
+	  tp->executing_ = executing;
     }
   else
     {

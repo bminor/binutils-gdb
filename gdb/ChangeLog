@@ -1,3 +1,112 @@
+2009-05-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* fork-child.c (fork_inferior): Only reset the thread list if this
+	is the first inferior.
+	(startup_inferior): If the target support multi-process, tell it
+	to resume only the new process.
+	* linux-nat.c (num_lwps): Delete global.
+	(purge_lwp_list): New function.
+	(num_lwps): New function.
+	(add_lwp, delete_lwp): Adjust.
+	(ptid_match): New.
+	(iterate_over_lwps): Add filter argument.  Handle it.
+	(linux_nat_attach): Remove FIXME note.
+	(linux_nat_detach): Adjust to iterate over threads of the inferior
+	we're detaching from.  Adjust to num_lwps being a function.  Don't
+	assume the head of the lwp list is the main thread of the process
+	we're detaching from.  Don't destroy the LWP list.
+	(resume_callback): Add debug output.
+	(linux_nat_resume): Handle resuming a single inferior.  Allow a
+	wildcard resume in non-stop mode.
+	(linux_handle_extended_wait): Don't assume inferior_ptid is the
+	correct inferior of the parent LWP.
+	(status_callback): Also check lp->waitstatus.
+	(select_event_lwp): Add new filter parameter.  Handle it.
+	(linux_nat_filter_event): Adjust to num_lwps being a function.
+	(linux_nat_wait_1): When adding the first lwp of the inferior, use
+	an is_lwp check instead of checking for the number of lwps.
+	(linux_nat_wait_1): Handle waiting for a specific tgid.  Handle
+	pending process exit statuses.
+	(linux_nat_mourn_inferior): Don't destroy all the LWP info.
+	Instead delete LWPs of the inferior that we're mourning.  Don't
+	unregister from the event loop here.
+	(linux_nat_pid_to_str): Use `num_lwps'.
+	(linux_nat_make_corefile_notes): Adjust to walk over lwps of a
+	single inferior.
+	(linux_nat_is_async_p): Check if async was masked out.
+	(linux_multi_process): New global.
+	(linux_nat_supports_multi_process): New.
+	(linux_nat_stop_lwp): Remove LWP filtering.  It is done by the
+	caller.
+	(linux_nat_stop): Adjust to make iterate_over_lwps itself do the
+	LWP filtering.
+	(linux_nat_close): New.
+	(linux_nat_add_target): Register linux_nat_close and
+	linux_nat_supports_multi_process.
+	* linux-nat.h (iterate_over_lwps): Add filter argument.
+	* linux-thread-db.c (thread_db_handle): Delete.
+	(proc_handle, thread_agent, td_init_p, td_ta_new_p)
+	(td_ta_map_id2thr_p, td_ta_map_lwp2thr_p, td_ta_thr_iter_p)
+	(td_ta_event_addr_p, td_ta_set_event_p, td_ta_event_getmsg_p)
+	(td_thr_validate_p, td_thr_get_info_p, td_thr_event_enable_p)
+	(td_thr_tls_get_addr_p, td_create_bp_addr, td_death_bp_addr): No
+	longer globals, moved to...
+	(struct thread_db_info): ... this new structure.
+	(thread_db_list): New.
+	(add_thread_db_info, get_thread_db_info, delete_thread_db_info):
+	New.
+	(have_threads_callback): Filter out threads of all inferiors but
+	the one specified by the ARGS argument.
+	(have_threads): Add ptid argument specifying the inferior we're
+	interested in.  Handle it.
+	(struct thread_get_info_inout): New.
+	(thread_get_info_callback, thread_from_lwp): Adjust to use it.
+	(thread_db_attach_lwp): Check that inferior of the passed in
+	thread is using thread-db.  Adjust.
+	(enable_thread_event): Remove thread_agent parameter.  Instead,
+	get it from the per-inferior thread-db info.
+	(dladdr_to_soname): Move higher up.
+	(enable_thread_event_reporting): Adjust to use per-inferior
+	thread-db info.
+	(try_thread_db_load_1): Replace `handle' parameter by a
+	thread_db_info parameter.  Adjust to use per-inferior thread-db
+	info.
+	(try_thread_db_load): Adjust to use per-inferior thread-db info.
+	(thread_db_load, disable_thread_event_reporting): Ditto.
+	(check_for_thread_db): Remove conditional reporting of which
+	libthread_db is in use.
+	(thread_db_new_objfile): Add comment about inferior_ptid.
+	(attach_thread): Adjust to use per-inferior thread-db info.
+	(thread_db_detach): Adjust to use per-inferior thread-db info.
+	Remove thread event breakpoints of the current inferior.  Only
+	unpush the thread-db target if there are no more processes using
+	it.
+	(check_event): Adjust to use per-inferior thread-db info.
+	(thread_db_wait): Adjust to use per-inferior thread-db info.  Only
+	unpush the thread-db target if there are no more processes using
+	it.
+	(thread_db_mourn_inferior): Adjust to use per-inferior thread-db
+	info.  Mark breakpoints of the current inferior out before
+	deleting them.  Only unpush the thread-db target if there are no
+	more processes using it.
+	(find_new_threads_callback): Adjust to use per-inferior thread_db
+	info.
+	(thread_db_find_new_threads_1): Add new ptid argument.  Adjust to
+	use per-inferior thread-db info.
+	(thread_db_find_new_threads): Adjust to use per-inferior thread-db
+	info.
+	(thread_db_get_thread_local_address): Adjust.
+	(thread_db_get_ada_task_ptid): Adjust.
+	* inf-ptrace.c (inf_ptrace_mourn_inferior): Only unpush the target
+	if there no more processes left to debug.
+	* thread.c (set_running, set_executing): Handle resuming all
+	threads of a single inferior.
+	* mi/mi-interp.c (mi_output_running_pid): New.
+	(mi_inferior_count): New.
+	(mi_on_resume): For backwards compatibility, if resuming all
+	threads of an inferior, and there is only one inferior, output
+	"all".
+
 2009-05-18  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ada-lang.c (ada_find_any_type): Move check for primitive types ...

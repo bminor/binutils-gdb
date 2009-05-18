@@ -389,6 +389,31 @@ mi_about_to_proceed (void)
   mi_proceeded = 1;
 }
 
+static int
+mi_output_running_pid (struct thread_info *info, void *arg)
+{
+  ptid_t *ptid = arg;
+
+  if (ptid_get_pid (*ptid) == ptid_get_pid (info->ptid))
+    fprintf_unfiltered (raw_stdout,
+			"*running,thread-id=\"%d\"\n",
+			info->num);
+
+  return 0;
+}
+
+static int
+mi_inferior_count (struct inferior *inf, void *arg)
+{
+  if (inf->pid != 0)
+    {
+      int *count_p = arg;
+      (*count_p)++;
+    }
+
+  return 0;
+}
+
 static void
 mi_on_resume (ptid_t ptid)
 {
@@ -420,11 +445,19 @@ mi_on_resume (ptid_t ptid)
 
   if (PIDGET (ptid) == -1)
     fprintf_unfiltered (raw_stdout, "*running,thread-id=\"all\"\n");
-  else if (thread_count () == 0)
+  else if (ptid_is_pid (ptid))
     {
-      /* This is a target where for single-threaded programs the thread
-	 table has zero threads.  Don't print any thread-id field.  */
-      fprintf_unfiltered (raw_stdout, "*running\n");
+      int count;
+
+      /* Backwards compatibility.  If there's only one inferior,
+	 output "all", otherwise, output each resumed thread
+	 individually.  */
+      iterate_over_inferiors (mi_inferior_count, &count);
+
+      if (count == 1)
+	fprintf_unfiltered (raw_stdout, "*running,thread-id=\"all\"\n");
+      else
+	iterate_over_threads (mi_output_running_pid, &ptid);
     }
   else
     {
