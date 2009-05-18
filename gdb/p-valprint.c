@@ -251,11 +251,10 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
       elttype = check_typedef (TYPE_TARGET_TYPE (type));
       if (options->addressprint)
 	{
+	  CORE_ADDR addr
+	    = extract_typed_address (valaddr + embedded_offset, type);
 	  fprintf_filtered (stream, "@");
-	  /* Extract the address, assume that it is unsigned.  */
-	  fputs_filtered (paddress (
-	    extract_unsigned_integer (valaddr + embedded_offset,
-	       gdbarch_ptr_bit (current_gdbarch) / HOST_CHAR_BIT)), stream);
+	  fputs_filtered (paddress (addr), stream);
 	  if (options->deref_ref)
 	    fputs_filtered (": ", stream);
 	}
