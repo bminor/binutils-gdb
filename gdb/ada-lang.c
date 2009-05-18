@@ -6481,22 +6481,19 @@ ada_find_any_symbol (const char *name)
   return sym;
 }
 
-/* Find a type named NAME.  Ignores ambiguity.  */
+/* Find a type named NAME.  Ignores ambiguity.  This routine will look
+   solely for types defined by debug info, it will not search the GDB
+   primitive types.  */
 
 struct type *
 ada_find_any_type (const char *name)
 {
   struct symbol *sym = ada_find_any_symbol (name);
-  struct type *type = NULL;
 
   if (sym != NULL)
-    type = SYMBOL_TYPE (sym);
+    return SYMBOL_TYPE (sym);
 
-  if (type == NULL)
-    type = language_lookup_primitive_type_by_name
-      (language_def (language_ada), current_gdbarch, name);
-
-  return type;
+  return NULL;
 }
 
 /* Given NAME and an associated BLOCK, search all symbols for
@@ -9450,6 +9447,11 @@ to_fixed_range_type (char *name, struct value *dval, struct objfile *objfile)
   struct type *raw_type = ada_find_any_type (name);
   struct type *base_type;
   char *subtype_info;
+
+  /* Also search primitive types if type symbol could not be found.  */
+  if (raw_type == NULL)
+    raw_type = language_lookup_primitive_type_by_name
+		(language_def (language_ada), current_gdbarch, name);
 
   if (raw_type == NULL)
     base_type = builtin_type_int32;

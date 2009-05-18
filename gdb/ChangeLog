@@ -1,5 +1,10 @@
 2009-05-18  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (ada_find_any_type): Move check for primitive types ...
+	(to_fixed_range_type): ... to here.
+
+2009-05-18  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (desc_data_type): Remove, replace by ...
 	(desc_data_target_type): ... this.
 	(thin_data_pntr): Use desc_data_target_type instead of desc_data_type.
