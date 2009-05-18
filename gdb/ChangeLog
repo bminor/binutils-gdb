@@ -1,5 +1,10 @@
 2009-05-18  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-valprint.c (ada_val_print_1): Use val_print_string to print
+	result of ada_vax_float_print_function inferior call.
+
+2009-05-18  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (ada_coerce_to_simple_array_type): Reimplement to
 	avoid creating a dummy value.
 

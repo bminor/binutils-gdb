@@ -739,22 +739,10 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	  struct value *func = ada_vax_float_print_function (type);
 	  if (func != 0)
 	    {
-	      static struct type *parray_of_char = NULL;
-	      struct value *printable_val;
-
-	      if (parray_of_char == NULL)
-		parray_of_char =
-		  make_pointer_type
-		  (create_array_type
-		   (NULL, builtin_type_true_char,
-		    create_range_type (NULL, builtin_type_int32, 0, 32)), NULL);
-
-	      printable_val =
-		value_ind (value_cast (parray_of_char,
-				       call_function_by_hand (func, 1,
-							      &val)));
-
-	      fprintf_filtered (stream, "%s", value_contents (printable_val));
+	      CORE_ADDR addr;
+	      addr = value_as_address (call_function_by_hand (func, 1, &val));
+	      val_print_string (builtin_type_true_char,
+				addr, -1, stream, options);
 	      return 0;
 	    }
 	  /* No special printing function.  Do as best we can.  */
