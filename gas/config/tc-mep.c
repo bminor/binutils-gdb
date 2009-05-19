@@ -413,7 +413,7 @@ mep_check_for_disabled_registers (mep_insn *insn)
 static int
 mep_machine (void)
 {
-  switch (MEP_CPU)
+  switch (MEP_CPU & EF_MEP_CPU_MASK)
     {
     default: break;
     case EF_MEP_CPU_C2: return bfd_mach_mep;
@@ -1144,7 +1144,6 @@ static void
 mep_process_saved_insns (void)
 {
   int i;
-  unsigned j;
 
   gas_cgen_save_fixups (MAX_SAVED_FIXUP_CHAINS - 1);
 
@@ -1164,10 +1163,6 @@ mep_process_saved_insns (void)
 	  gas_cgen_finish_insn (saved_insns[i].insn, saved_insns[i].buffer,
 				CGEN_FIELDS_BITSIZE (& saved_insns[i].fields),
 				1, NULL);
-	  printf("insn[%d] =", i);
-	  for (j=0; j<sizeof(saved_insns[i].buffer); j++)
-	    printf(" %02x", saved_insns[i].buffer[j]);
-	  printf("\n");
 	}
     }
   gas_cgen_restore_fixups (MAX_SAVED_FIXUP_CHAINS - 1);

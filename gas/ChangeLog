@@ -1,3 +1,8 @@
+2009-05-19  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-mep.c (mep_machine): Only check CPU flags, not COP flags.
+	(mep_process_saved_insns): Remove debugging printfs.
+
 2009-05-19  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* NEWS:  Mention new feature.
