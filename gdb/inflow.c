@@ -67,7 +67,7 @@ struct terminal_info
 {
   /* The name of the tty (from the `tty' command) that we gave to the
      inferior when it was started.  */
-  const char *run_terminal;
+  char *run_terminal;
 
   /* TTY state.  We save it whenever the inferior stops, and restore
      it when it resumes.  */
@@ -109,9 +109,9 @@ static void (*sigquit_ours) ();
 
 /* The name of the tty (from the `tty' command) that we're giving to
    the inferior when starting it up.  This is only (and should only
-   be) used as a transient global by new_tty_prefork, new_tty and
-   create_tty_session, called from fork_inferior, while forking a new
-   child.  */
+   be) used as a transient global by new_tty_prefork,
+   create_tty_session, new_tty and new_tty_postfork, all called from
+   fork_inferior, while forking a new child.  */
 static const char *inferior_thisrun_terminal;
 
 /* Nonzero if our terminal settings are in effect.  Zero if the
@@ -485,8 +485,17 @@ inflow_inferior_exit (int pid)
 {
   struct inferior *inf = find_inferior_pid (pid);
 
+  xfree (inf->terminal_info->run_terminal);
   xfree (inf->terminal_info);
   inf->terminal_info = NULL;
+}
+
+void
+copy_terminal_info (struct inferior *to, struct inferior *from)
+{
+  *to->terminal_info = *from->terminal_info;
+  if (from->terminal_info->run_terminal)
+    to->terminal_info->run_terminal = from->terminal_info->run_terminal;
 }
 
 void
@@ -668,6 +677,24 @@ new_tty (void)
     close (tty);
 #endif /* !go32 && !win32 */
 }
+
+/* NEW_TTY_POSTFORK is called after forking a new child process, and
+   adding it to the inferior table, to store the TTYNAME being used by
+   the child, or null if it sharing the terminal with gdb.  */
+
+void
+new_tty_postfork (void)
+{
+  /* Save the name for later, for determining whether we and the child
+     are sharing a tty.  */
+
+  if (inferior_thisrun_terminal)
+    current_inferior ()->terminal_info->run_terminal
+      = xstrdup (inferior_thisrun_terminal);
+
+  inferior_thisrun_terminal = NULL;
+}
+
 
 /* Kill the inferior process.  Make us have no inferior.  */
 

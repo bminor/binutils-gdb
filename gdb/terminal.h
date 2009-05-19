@@ -76,7 +76,15 @@
 #endif /* sgtty */
 #endif
 
+struct inferior;
+
+extern void new_tty_prefork (const char *);
+
 extern void new_tty (void);
+
+extern void new_tty_postfork (void);
+
+extern void copy_terminal_info (struct inferior *to, struct inferior *from);
 
 /* Do we have job control?  Can be assumed to always be the same within
    a given run of GDB.  In inflow.c.  */
@@ -90,5 +98,11 @@ extern int gdb_setpgid (void);
 
 /* Set up a serial structure describing standard input.  In inflow.c.  */
 extern void initialize_stdin_serial (void);
+
+extern int gdb_has_a_terminal (void);
+
+/* Set the process group of the caller to its own pid, or do nothing
+   if we lack job control.  */
+extern int gdb_setpgid (void);
 
 #endif /* !defined (TERMINAL_H) */

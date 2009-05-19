@@ -22,8 +22,8 @@
 
 #include "defs.h"
 #include "gdb_string.h"
-#include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
+#include "terminal.h"
 #include "target.h"
 #include "gdb_wait.h"
 #include "gdb_vfork.h"
@@ -399,6 +399,8 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 
   /* Needed for wait_for_inferior stuff below.  */
   inferior_ptid = pid_to_ptid (pid);
+
+  new_tty_postfork ();
 
   /* We have something that executes now.  We'll be running through
      the shell at this point, but the pid shouldn't change.  Targets

@@ -1,5 +1,30 @@
 2009-05-19  Pedro Alves  <pedro@codesourcery.com>
 
+	* fork-child.c: Don't include frame.h.  Include terminal.h.
+	(fork_inferior): Call new_tty_postfork after forking adn adding
+	the child to the inferior list.
+	* inferior.h (new_tty_prefork, gdb_has_a_terminal): Don't declare
+	here.
+	* inflow.c (struct terminal_info): Remove const qualifier from
+	`run_terminal' field.
+	(inferior_thisrun_terminal): Tweak comment.
+	(inflow_inferior_exit): Release the `run_terminal' field.
+	(copy_terminal_info): New function.
+	(new_tty_postfork): New function.
+	* terminal.h (new_tty_prefork, new_tty, new_tty_postfork,
+	(copy_terminal_info, gdb_has_a_terminal, gdb_setpgid): Declare.
+	* inf-ptrace.c: Include terminal.h.
+	(inf_ptrace_follow_fork): Copy the parent's terminal info to the
+	child.
+	* linux-nat.c: Include terminal.h.
+	(linux_child_follow_fork): Copy the parent's terminal info to the
+	child.
+	* inf-ttrace.c: Include terminal.h.
+	(inf_ttrace_follow_fork): Copy the parent's terminal info to the
+	child.
+
+2009-05-19  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (insert_breakpoints, breakpoint_init_inferior)
 	(update_global_location_list): Use gdbarch_has_global_breakpoints
 	instead of gdbarch_has_global_solist and

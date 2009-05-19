@@ -53,6 +53,7 @@
 #include <sys/types.h>
 #include "gdb_dirent.h"
 #include "xml-support.h"
+#include "terminal.h"
 
 #ifdef HAVE_PERSONALITY
 # include <sys/personality.h>
@@ -626,6 +627,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 
 	  parent_inf = find_inferior_pid (GET_PID (last_ptid));
 	  child_inf->attach_flag = parent_inf->attach_flag;
+	  copy_terminal_info (child_inf, parent_inf);
 
 	  /* Retain child fork in ptrace (stopped) state.  */
 	  fp = find_fork_pid (child_pid);
@@ -723,6 +725,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 
       parent_inf = find_inferior_pid (GET_PID (last_ptid));
       child_inf->attach_flag = parent_inf->attach_flag;
+      copy_terminal_info (child_inf, parent_inf);
 
       /* If we're vforking, we may want to hold on to the parent until
 	 the child exits or execs.  At exec time we can remove the old

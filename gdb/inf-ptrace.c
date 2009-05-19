@@ -23,6 +23,7 @@
 #include "command.h"
 #include "inferior.h"
 #include "inflow.h"
+#include "terminal.h"
 #include "gdbcore.h"
 #include "regcache.h"
 
@@ -74,13 +75,19 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
       CORE_ADDR step_range_start = last_tp->step_range_start;
       CORE_ADDR step_range_end = last_tp->step_range_end;
       struct frame_id step_frame_id = last_tp->step_frame_id;
-      int attach_flag = find_inferior_pid (pid)->attach_flag;
-      struct inferior *inf;
+      struct inferior *parent_inf, *child_inf;
       struct thread_info *tp;
 
       /* Otherwise, deleting the parent would get rid of this
 	 breakpoint.  */
       last_tp->step_resume_breakpoint = NULL;
+
+      parent_inf = find_inferior_pid (pid);
+
+      /* Add the child.  */
+      child_inf = add_inferior (fpid);
+      child_inf->attach_flag = parent_inf->attach_flag;
+      copy_terminal_info (child_inf, parent_inf);
 
       /* Before detaching from the parent, remove all breakpoints from
 	 it.  */
@@ -95,9 +102,6 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
       /* Delete the parent.  */
       detach_inferior (pid);
 
-      /* Add the child.  */
-      inf = add_inferior (fpid);
-      inf->attach_flag = attach_flag;
       tp = add_thread_silent (inferior_ptid);
 
       tp->step_resume_breakpoint = step_resume_breakpoint;

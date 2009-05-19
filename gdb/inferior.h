@@ -213,12 +213,6 @@ extern void startup_inferior (int);
 
 extern char *construct_inferior_arguments (struct gdbarch *, int, char **);
 
-/* From inflow.c */
-
-extern void new_tty_prefork (const char *);
-
-extern int gdb_has_a_terminal (void);
-
 /* From infrun.c */
 
 extern void start_remote (int from_tty);
