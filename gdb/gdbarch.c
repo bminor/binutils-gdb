@@ -245,6 +245,7 @@ struct gdbarch
   gdbarch_get_siginfo_type_ftype *get_siginfo_type;
   gdbarch_record_special_symbol_ftype *record_special_symbol;
   int has_global_solist;
+  int has_global_breakpoints;
 };
 
 
@@ -381,6 +382,7 @@ struct gdbarch startup_gdbarch =
   0,  /* get_siginfo_type */
   0,  /* record_special_symbol */
   0,  /* has_global_solist */
+  0,  /* has_global_breakpoints */
   /* startup_gdbarch() */
 };
 
@@ -638,6 +640,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of get_siginfo_type, has predicate */
   /* Skip verify of record_special_symbol, has predicate */
   /* Skip verify of has_global_solist, invalid_p == 0 */
+  /* Skip verify of has_global_breakpoints, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -861,6 +864,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: get_siginfo_type = <%s>\n",
                       host_address_to_string (gdbarch->get_siginfo_type));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: has_global_breakpoints = %s\n",
+                      plongest (gdbarch->has_global_breakpoints));
   fprintf_unfiltered (file,
                       "gdbarch_dump: has_global_solist = %s\n",
                       plongest (gdbarch->has_global_solist));
@@ -3380,6 +3386,23 @@ set_gdbarch_has_global_solist (struct gdbarch *gdbarch,
                                int has_global_solist)
 {
   gdbarch->has_global_solist = has_global_solist;
+}
+
+int
+gdbarch_has_global_breakpoints (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of has_global_breakpoints, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_has_global_breakpoints called\n");
+  return gdbarch->has_global_breakpoints;
+}
+
+void
+set_gdbarch_has_global_breakpoints (struct gdbarch *gdbarch,
+                                    int has_global_breakpoints)
+{
+  gdbarch->has_global_breakpoints = has_global_breakpoints;
 }
 
 

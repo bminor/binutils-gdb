@@ -2220,8 +2220,9 @@ attach_command (char *args, int from_tty)
 
   dont_repeat ();		/* Not for the faint of heart */
 
-  if (target_supports_multi_process ())
-    /* Don't complain if we can be attached to multiple processes.  */
+  if (gdbarch_has_global_solist (target_gdbarch))
+    /* Don't complain if all processes share the same symbol
+       space.  */
     ;
   else if (target_has_execution)
     {

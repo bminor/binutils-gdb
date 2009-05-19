@@ -2824,9 +2824,8 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 	remote_check_symbols (symfile_objfile);
     }
 
-  /* If code is shared between processes, then breakpoints are global
-     too; Insert them now.  */
-  if (gdbarch_has_global_solist (target_gdbarch)
+  /* If breakpoints are global, insert them now.  */
+  if (gdbarch_has_global_breakpoints (target_gdbarch)
       && breakpoints_always_inserted_mode ())
     insert_breakpoints ();
 }

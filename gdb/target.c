@@ -1788,7 +1788,7 @@ target_detach (char *args, int from_tty)
 {
   struct target_ops* t;
   
-  if (gdbarch_has_global_solist (target_gdbarch))
+  if (gdbarch_has_global_breakpoints (target_gdbarch))
     /* Don't remove global breakpoints here.  They're removed on
        disconnection from the target.  */
     ;

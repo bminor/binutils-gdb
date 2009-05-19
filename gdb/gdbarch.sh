@@ -732,10 +732,16 @@ M:void:record_special_symbol:struct objfile *objfile, asymbol *sym:objfile, sym
 
 # True if the list of shared libraries is one and only for all
 # processes, as opposed to a list of shared libraries per inferior.
-# When this property is true, GDB assumes that since shared libraries
-# are shared across processes, so is all code.  Hence, GDB further
-# assumes an inserted breakpoint location is visible to all processes.
+# This usually means that all processes, although may or may not share
+# an address space, will see the same set of symbols at the same
+# addresses.
 v:int:has_global_solist:::0:0::0
+
+# On some targets, even though each inferior has its own private
+# address space, the debug interface takes care of making breakpoints
+# visible to all address spaces automatically.  For such cases,
+# this property should be set to true.
+v:int:has_global_breakpoints:::0:0::0
 EOF
 }
 

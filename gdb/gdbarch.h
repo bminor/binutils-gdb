@@ -863,12 +863,20 @@ extern void set_gdbarch_record_special_symbol (struct gdbarch *gdbarch, gdbarch_
 
 /* True if the list of shared libraries is one and only for all
    processes, as opposed to a list of shared libraries per inferior.
-   When this property is true, GDB assumes that since shared libraries
-   are shared across processes, so is all code.  Hence, GDB further
-   assumes an inserted breakpoint location is visible to all processes. */
+   This usually means that all processes, although may or may not share
+   an address space, will see the same set of symbols at the same
+   addresses. */
 
 extern int gdbarch_has_global_solist (struct gdbarch *gdbarch);
 extern void set_gdbarch_has_global_solist (struct gdbarch *gdbarch, int has_global_solist);
+
+/* On some targets, even though each inferior has its own private
+   address space, the debug interface takes care of making breakpoints
+   visible to all address spaces automatically.  For such cases,
+   this property should be set to true. */
+
+extern int gdbarch_has_global_breakpoints (struct gdbarch *gdbarch);
+extern void set_gdbarch_has_global_breakpoints (struct gdbarch *gdbarch, int has_global_breakpoints);
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 

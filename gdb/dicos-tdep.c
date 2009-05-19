@@ -33,8 +33,13 @@ dicos_init_abi (struct gdbarch *gdbarch)
   set_solib_ops (gdbarch, &solib_target_so_ops);
 
   /* Every process, although has its own address space, sees the same
-     list of shared libraries.  */
+     list of shared libraries.  There's no "main executable" in DICOS,
+     so this accounts for all code.  */
   set_gdbarch_has_global_solist (gdbarch, 1);
+
+  /* The DICOS breakpoint API takes care of magically making
+     breakpoints visible to all inferiors.  */
+  set_gdbarch_has_global_breakpoints (gdbarch, 1);
 
   /* There's no (standard definition of) entry point or a guaranteed
      text location with a symbol where to place the call dummy, so we
