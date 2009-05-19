@@ -1,3 +1,21 @@
+2009-05-19  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (insert_breakpoints, breakpoint_init_inferior)
+	(update_global_location_list): Use gdbarch_has_global_breakpoints
+	instead of gdbarch_has_global_solist and
+	target_supports_multi_process.
+	* dicos-tdep.c (dicos_init_abi): Set
+	gdbarch_has_global_breakpoints.
+	* gdbarch.sh (has_global_solist): Update comment.
+	(has_global_breakpoints): New.
+	* remote.c (remote_start_remote): Use
+	gdbarch_has_global_breakpoints instead of
+	gdbarch_has_global_solist.
+	* target.c (target_detach): Use gdbarch_has_global_breakpoints
+	instead of gdbarch_has_global_solist.
+	* infcmd.c (attach_command): Use gdbarch_has_global_solist instead
+	of target_supports_multi_process.
+
 2009-05-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* objc-lang.c (find_methods): Plug a small memory leak.
