@@ -1,5 +1,13 @@
 2009-05-19  Pedro Alves  <pedro@codesourcery.com>
 
+	* inflow.c (kill_command): Moved to infcmd.c.
+	(_initialize_inflow): Don't add the "kill" command or clear
+	inferior_ptid here.
+	* infcmd.c (kill_command): Moved here from inflow.c.
+	(_initialize_infcmd): Add the "kill" command here.
+
+2009-05-19  Pedro Alves  <pedro@codesourcery.com>
+
 	* fork-child.c: Don't include frame.h.  Include terminal.h.
 	(fork_inferior): Call new_tty_postfork after forking adn adding
 	the child to the inferior list.

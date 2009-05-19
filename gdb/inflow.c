@@ -696,38 +696,6 @@ new_tty_postfork (void)
 }
 
 
-/* Kill the inferior process.  Make us have no inferior.  */
-
-static void
-kill_command (char *arg, int from_tty)
-{
-  /* FIXME:  This should not really be inferior_ptid (or target_has_execution).
-     It should be a distinct flag that indicates that a target is active, cuz
-     some targets don't have processes! */
-
-  if (ptid_equal (inferior_ptid, null_ptid))
-    error (_("The program is not being run."));
-  if (!query (_("Kill the program being debugged? ")))
-    error (_("Not confirmed."));
-  target_kill ();
-
-  /* If the current target interface claims there's still execution,
-     then don't mess with threads of other processes.  */
-  if (!target_has_execution)
-    {
-      init_thread_list ();		/* Destroy thread info */
-
-      /* Killing off the inferior can leave us with a core file.  If
-	 so, print the state we are left in.  */
-      if (target_has_stack)
-	{
-	  printf_filtered (_("In %s,\n"), target_longname);
-	  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
-	}
-    }
-  bfd_cache_close_all ();
-}
-
 /* Call set_sigint_trap when you need to pass a signal on to an attached
    process when handling SIGINT */
 
@@ -847,11 +815,6 @@ _initialize_inflow (void)
 {
   add_info ("terminal", term_info,
 	    _("Print inferior's saved terminal status."));
-
-  add_com ("kill", class_run, kill_command,
-	   _("Kill execution of program being debugged."));
-
-  inferior_ptid = null_ptid;
 
   terminal_is_ours = 1;
 
