@@ -1,4 +1,5 @@
-# Expect script for version-script driven export from dll tests
+# Expect script for complex PE tests that require a C compiler
+# in addition to the just-built binutils.
 #   Copyright 2009
 #   Free Software Foundation, Inc.
 #
@@ -20,7 +21,7 @@
 # MA 02110-1301, USA.
 #
 
-# This test can only be run on PE/COFF platforms.
+# These tests can only be run on PE/COFF platforms.
 if {![is_pecoff_format]} {
     return
 }
@@ -28,6 +29,8 @@ if {![is_pecoff_format]} {
 # No compiler, no test.
 if { [which $CC] == 0 } {
     untested "PE version scripts"
+    untested "aligned common tests"
+    # Add more "untested" directives here when adding more tests below.
     return
 }
 
@@ -36,7 +39,7 @@ proc build_vers_script_dll_o {} {
     global CFLAGS
     global srcdir
     global subdir
-    
+
     # Compile the object file.
     if ![ld_compile "$CC $CFLAGS -shared" $srcdir/$subdir/vers-script-dll.c tmpdir/vers-script-dll.o] {
 	fail "compiling shared lib object"
@@ -74,3 +77,15 @@ run_ver_script_test "vers-script-2"
 run_ver_script_test "vers-script-3"
 run_ver_script_test "vers-script-4"
 
+set align_tests {
+  {"aligned common 1" "" "" {aligncomm-1.c}
+   {{nm -C aligncomm.d}} "aligncomm-1.x"}
+  {"aligned common 2" "" "" {aligncomm-2.c}
+   {{nm -C aligncomm.d}} "aligncomm-2.x"}
+  {"aligned common 3" "" "" {aligncomm-3.c}
+   {{nm -C aligncomm.d}} "aligncomm-3.x"}
+  {"aligned common 4" "" "" {aligncomm-4.c}
+   {{nm -C aligncomm.d}} "aligncomm-4.x"}
+}
+
+run_ld_link_tests $align_tests

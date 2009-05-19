@@ -169,6 +169,71 @@ obj_coff_bss (int ignore ATTRIBUTE_UNUSED)
     s_lcomm (0);
 }
 
+#ifdef TE_PE
+/* Called from read.c:s_comm after we've parsed .comm symbol, size.
+   Parse a possible alignment value.  */
+
+static symbolS *
+obj_coff_common_parse (int ignore ATTRIBUTE_UNUSED, symbolS *symbolP, addressT size)
+{
+  addressT align = 0;
+
+  if (*input_line_pointer == ',')
+    {
+      align = parse_align (0);
+      if (align == (addressT) -1)
+	return NULL;
+    }
+
+  S_SET_VALUE (symbolP, size);
+  S_SET_EXTERNAL (symbolP);
+  S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
+
+  symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
+
+  /* There is no S_SET_ALIGN (symbolP, align) in COFF/PE.
+     Instead we must add a note to the .drectve section.  */
+  if (align)
+    {
+      segT current_seg = now_seg;
+      subsegT current_subseg = now_subseg;
+      flagword oldflags;
+      asection *sec;
+      size_t pfxlen, numlen;
+      char *frag;
+      char numbuff[20];
+
+      sec = subseg_new (".drectve", 0);
+      oldflags = bfd_get_section_flags (stdoutput, sec);
+      if (oldflags == SEC_NO_FLAGS)
+	{
+	  if (!bfd_set_section_flags (stdoutput, sec,
+		TC_COFF_SECTION_DEFAULT_ATTRIBUTES))
+	    as_warn (_("error setting flags for \"%s\": %s"),
+		bfd_section_name (stdoutput, sec),
+		bfd_errmsg (bfd_get_error ()));
+	}
+
+      /* Emit a string.  Note no NUL-termination.  */
+      pfxlen = strlen (" -aligncomm:") + strlen (S_GET_NAME (symbolP)) + 1;
+      numlen = snprintf (numbuff, sizeof (numbuff), "%d", (int) align);
+      frag = frag_more (pfxlen + numlen);
+      (void) sprintf (frag, " -aligncomm:%s,", S_GET_NAME (symbolP));
+      memcpy (frag + pfxlen, numbuff, numlen);
+      /* Restore original subseg. */
+      subseg_set (current_seg, current_subseg);
+    }
+
+  return symbolP;
+}
+
+static void
+obj_coff_comm (int ignore ATTRIBUTE_UNUSED)
+{
+  s_comm_internal (ignore, obj_coff_common_parse);
+}
+#endif /* TE_PE */
+
 #define GET_FILENAME_STRING(X) \
   ((char *) (&((X)->sy_symbol.ost_auxent->x_file.x_n.x_offset))[1])
 
@@ -1784,6 +1849,10 @@ const pseudo_typeS coff_pseudo_table[] =
   /* We accept the .bss directive for backward compatibility with
      earlier versions of gas.  */
   {"bss", obj_coff_bss, 0},
+#ifdef TE_PE
+  /* PE provides an enhanced version of .comm with alignment.  */
+  {"comm", obj_coff_comm, 0},
+#endif /* TE_PE */
   {"def", obj_coff_def, 0},
   {"dim", obj_coff_dim, 0},
   {"endef", obj_coff_endef, 0},

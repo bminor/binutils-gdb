@@ -1,3 +1,21 @@
+2009-05-19  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* NEWS:  Mention new feature.
+	* deffile.h (def_file_aligncomm):  Add new struct definition.
+	(def_file):  Add new def_file_aligncomm member.
+	* deffilep.y (%token):  Add new ALIGNCOMM token.
+	(command):  Add production rule for ALIGNCOMM.
+	(def_file_free):  Free any chained def_file_aligncomm structs.
+	(diropts[]):  Add entry for '-aligncomm' .drectve command.
+	(def_aligncomm):  New grammar function.
+	* ld.texinfo:  Document new feature.
+	* pe-dll.c (process_def_file):  Rename from this ...
+	(process_def_file_and_drectve):  ... to this, updating all callers,
+	and process any aligncomms chained to the def file after scanning
+	all .drectve sections.
+	(generate_edata):  Updated to match.
+	(pe_dll_build_sections):  Likewise.
+
 2009-05-17  Dave Korn  <dave.korn.cygwin@gmail.com>
 
   2008-08-07  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>

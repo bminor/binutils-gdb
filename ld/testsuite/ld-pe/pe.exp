@@ -1,4 +1,4 @@
-# Expect script for export table in executables tests
+# Expect script for simple PE tests that require the just-built binutils only.
 #   Copyright 2004, 2006, 2007
 #   Free Software Foundation, Inc.
 #

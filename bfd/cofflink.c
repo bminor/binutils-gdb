@@ -1282,6 +1282,15 @@ process_embedded_commands (bfd *output_bfd,
       else if (CONST_STRNEQ (s, "-stack"))
 	s = dores_com (s + 6, output_bfd, 0);
 
+      /* GNU extension for aligned commons.  */
+      else if (CONST_STRNEQ (s, "-aligncomm:"))
+	{
+	  /* Common symbols must be aligned on reading, as it
+	  is too late to do anything here, after they have
+	  already been allocated, so just skip the directive.  */
+	  s += 11;
+	}
+
       else
 	s++;
     }

@@ -6994,6 +6994,17 @@ implemented.
 As a GNU extension, weak symbols that do not specify an alternate symbol
 are supported.  If the symbol is undefined when linking, the symbol
 uses a default value.
+
+@cindex aligned common symbols
+@item aligned common symbols
+As a GNU extension to the PE file format, it is possible to specify the
+desired alignment for a common symbol.  This information is conveyed from
+the assembler or compiler to the linker by means of GNU-specific commands
+carried in the object file's @samp{.drectve} section, which are recognized
+by @command{ld} and respected when laying out the common symbols.  Native
+tools will be able to process object files employing this GNU extension,
+but will fail to respect the alignment instructions, and may issue noisy
+warnings about unknown linker directives.
 @end table
 
 @ifclear GENERIC

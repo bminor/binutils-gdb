@@ -1,3 +1,20 @@
+2009-05-19  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-pe/aligncomm-1.c:  New test source file.
+	* ld-pe/aligncomm-2.c:  Likewise.
+	* ld-pe/aligncomm-3.c:  Likewise.
+	* ld-pe/aligncomm-4.c:  Likewise.
+	* ld-pe/aligncomm.d:  New test pattern file.
+
+	* ld-pe/direct.exp:  Deleted, and content moved into ...
+	* ld-pe/pe-run.exp:  ... New common file for all PE run tests.
+
+	* ld-pe/vers-script.exp:  Deleted, and content merged into ...
+	* ld-pe/pe-compile.exp:  ... New common file for PE tests needing
+	a compiler, adding aligned common tests.
+
+	* ld-pe/pe.exp:  Update header comment.
+
 2009-05-17  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* ld-pe/exports.d: New file.

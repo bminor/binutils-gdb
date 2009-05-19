@@ -1,4 +1,5 @@
-# Expect script for direct linking from dll tests
+# Expect script for complex PE tests that require a C compiler and the ability
+# to run target executables natively, in addition to the just-built binutils.
 #   Copyright 2006, 2007
 #   Free Software Foundation, Inc.
 #
@@ -67,7 +68,7 @@ proc test_direct_link_dll {} {
     global srcdir
     global subdir
     global tmpdir
-    
+
     # Compile the dll.
     if ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/direct_dll.c $tmpdir/direct_dll.o ] {
 	fail "compiling shared lib"

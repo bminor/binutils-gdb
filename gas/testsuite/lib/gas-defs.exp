@@ -310,6 +310,18 @@ proc is_elf_format {} {
     return 1
 }
 
+# True if the object format is known to be PE COFF.
+#
+proc is_pecoff_format {} {
+    if { ![istarget *-*-mingw*] \
+	 && ![istarget *-*-cygwin*] \
+	 && ![istarget *-*-pe*] } {
+	return 0
+    }
+
+    return 1
+}
+
 # run_dump_tests TESTCASES EXTRA_OPTIONS
 # Wrapper for run_dump_test, which is suitable for invoking as
 #   run_dump_tests [lsort [glob -nocomplain $srcdir/$subdir/*.d]]

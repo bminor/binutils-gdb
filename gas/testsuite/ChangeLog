@@ -1,3 +1,17 @@
+2009-05-19  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* gas/pe/:  New directory for PE format-specific tests.
+	* gas/pe/aligncomm-a.d:  New test pattern file.
+	* gas/pe/aligncomm-a.s:  New test source file.
+	* gas/pe/aligncomm-b.d:  New test pattern file.
+	* gas/pe/aligncomm-b.s:  New test source file.
+	* gas/pe/aligncomm-c.d:  New test pattern file.
+	* gas/pe/aligncomm-c.s:  New test source file.
+	* gas/pe/aligncomm-d.d:  New test pattern file.
+	* gas/pe/aligncomm-d.s:  New test source file.
+	* gas/pe/pe.exp:  New test control script.
+	* lib/gas-defs.exp (is_pecoff_format):  New function.
+
 2009-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/lns/lns-common-1-ia64.s: Add test for discriminator.

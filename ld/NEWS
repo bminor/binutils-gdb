@@ -1,5 +1,9 @@
 -*- text -*-
 
+* PE targets now support a GNU extension to allow the alignment of common
+  common symbols to be specified.  This support uses custom options in
+  the .drectve section, which will be disregarded by the native tools.
+
 * PE targets now add primitive support for ELF version scripts; symbols
   are not versioned, but the local and global symbol visibility directives
   are respected when filtering symbols in auto-export mode.

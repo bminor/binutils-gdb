@@ -89,6 +89,7 @@ static void def_section_alt (const char *, const char *);
 static void def_stacksize (int, int);
 static void def_version (int, int);
 static void def_directive (char *);
+static void def_aligncomm (char *str, int align);
 static int def_parse (void);
 static int def_error (const char *);
 static int def_lex (void);
@@ -106,7 +107,7 @@ static const char *lex_parse_string_end = 0;
 
 %token NAME LIBRARY DESCRIPTION STACKSIZE_K HEAPSIZE CODE DATAU DATAL
 %token SECTIONS EXPORTS IMPORTS VERSIONK BASE CONSTANTU CONSTANTL
-%token PRIVATEU PRIVATEL
+%token PRIVATEU PRIVATEL ALIGNCOMM
 %token READ WRITE EXECUTE SHARED NONAMEU NONAMEL DIRECTIVE
 %token <id> ID
 %token <number> NUMBER
@@ -134,6 +135,7 @@ command:
 	|	VERSIONK NUMBER { def_version ($2, 0);}
 	|	VERSIONK NUMBER '.' NUMBER { def_version ($2, $4);}
 	|	DIRECTIVE ID { def_directive ($2);}
+	|	ALIGNCOMM ID ',' NUMBER { def_aligncomm ($2, $4);}
 	;
 
 
@@ -379,6 +381,14 @@ def_file_free (def_file *def)
       free (m);
     }
 
+  while (def->aligncomms)
+    {
+      def_file_aligncomm *c = def->aligncomms;
+      def->aligncomms = def->aligncomms->next;
+      free (c->symbol_name);
+      free (c);
+    }
+
   free (def);
 }
 
@@ -573,6 +583,7 @@ diropts[] =
   { "-stack", STACKSIZE_K },
   { "-attr", SECTIONS },
   { "-export", EXPORTS },
+  { "-aligncomm", ALIGNCOMM },
   { 0, 0 }
 };
 
@@ -829,6 +840,18 @@ def_directive (char *str)
   directives = d;
   d->name = xstrdup (str);
   d->len = strlen (str);
+}
+
+static void
+def_aligncomm (char *str, int align)
+{
+  def_file_aligncomm *c = xmalloc (sizeof (def_file_aligncomm));
+
+  c->symbol_name = xstrdup (str);
+  c->alignment = (unsigned int) align;
+
+  c->next = def->aligncomms;
+  def->aligncomms = c;
 }
 
 static int

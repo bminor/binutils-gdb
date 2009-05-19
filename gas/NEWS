@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for common symbol alignment to PE formats.
+
 * Add support for the new discriminator column in the DWARF line table,
   with a discriminator operand for the .loc directive.
 

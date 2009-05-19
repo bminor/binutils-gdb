@@ -4308,16 +4308,23 @@ absolute expression.  If @code{@value{LD}} sees multiple common symbols with
 the same name, and they do not all have the same size, it will allocate space
 using the largest size.
 
-@ifset ELF
-When using ELF, the @code{.comm} directive takes an optional third argument.
-This is the desired alignment of the symbol, specified as a byte boundary (for
-example, an alignment of 16 means that the least significant 4 bits of the
-address should be zero).  The alignment must be an absolute expression, and it
-must be a power of two.  If @code{@value{LD}} allocates uninitialized memory
-for the common symbol, it will use the alignment when placing the symbol.  If
-no alignment is specified, @command{@value{AS}} will set the alignment to the
+@ifset COFF-ELF
+When using ELF or (as a GNU extension) PE, the @code{.comm} directive takes
+an optional third argument.  This is the desired alignment of the symbol, 
+specified for ELF as a byte boundary (for example, an alignment of 16 means
+that the least significant 4 bits of the address should be zero), and for PE
+as a power of two (for example, an alignment of 5 means aligned to a 32-byte
+boundary).  The alignment must be an absolute expression, and it must be a 
+power of two.  If @code{@value{LD}} allocates uninitialized memory for the
+common symbol, it will use the alignment when placing the symbol.  If no 
+alignment is specified, @command{@value{AS}} will set the alignment to the
 largest power of two less than or equal to the size of the symbol, up to a
-maximum of 16.
+maximum of 16 on ELF, or the default section alignment of 4 on PE@footnote{This
+is not the same as the executable image file alignment controlled by @code{@value{LD}}'s
+@samp{--section-alignment} option; image file sections in PE are aligned to
+multiples of 4096, which is far too large an alignment for ordinary variables.
+It is rather the default alignment for (non-debug) sections within object
+(@samp{*.o}) files, which are less strictly aligned.}.
 @end ifset
 
 @ifset HPPA

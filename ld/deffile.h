@@ -53,6 +53,12 @@ typedef struct def_file_import {
   int data;			/* = 1 if data */
 } def_file_import;
 
+typedef struct def_file_aligncomm {
+  struct def_file_aligncomm *next;	/* Chain pointer.  */
+  char *symbol_name;		/* Name of common symbol.  */
+  unsigned int alignment;	/* log-2 alignment.        */
+} def_file_aligncomm;
+
 typedef struct def_file {
   /* From the NAME or LIBRARY command.  */
   char *name;
@@ -83,6 +89,10 @@ typedef struct def_file {
 
   /* From the VERSION command, -1 if not specified.  */
   int version_major, version_minor;
+
+  /* Only expected from .drectve sections, not .DEF files.  */
+  def_file_aligncomm *aligncomms;
+
 } def_file;
 
 extern def_file *def_file_empty (void);

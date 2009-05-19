@@ -615,7 +615,7 @@ auto_export (bfd *abfd, def_file *d, const char *n)
 }
 
 static void
-process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
+process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 {
   int i, j;
   struct bfd_link_hash_entry *blhe;
@@ -639,6 +639,28 @@ process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	  bfd_get_section_contents (b, s, buf, 0, size);
 	  def_file_add_directive (pe_def_file, buf, size);
 	  free (buf);
+	}
+    }
+
+  /* Process aligned common symbol information from the
+     .drectve sections now; common symbol allocation is
+     done before final link, so it will be too late to
+     process them in process_embedded_commands() called
+     from _bfd_coff_link_input_bfd().  */
+  if (pe_def_file->aligncomms)
+    {
+      def_file_aligncomm *ac = pe_def_file->aligncomms;
+      while (ac)
+	{
+	  struct coff_link_hash_entry *sym_hash;
+	  sym_hash = coff_link_hash_lookup (coff_hash_table (info),
+		ac->symbol_name, FALSE, FALSE, FALSE);
+	  if (sym_hash && sym_hash->root.type == bfd_link_hash_common
+	    && sym_hash->root.u.c.p->alignment_power < (unsigned) ac->alignment)
+	    {
+	      sym_hash->root.u.c.p->alignment_power = (unsigned) ac->alignment;
+	    }
+	  ac = ac->next;
 	}
     }
 
@@ -1057,7 +1079,7 @@ generate_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 }
 
 /* Fill the exported symbol offsets. The preliminary work has already
-   been done in process_def_file().  */
+   been done in process_def_file_and_drectve().  */
 
 static void
 fill_exported_offsets (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
@@ -3066,7 +3088,7 @@ pe_dll_build_sections (bfd *abfd, struct bfd_link_info *info)
 {
   pe_dll_id_target (bfd_get_target (abfd));
   pe_output_file_set_long_section_names (abfd);
-  process_def_file (abfd, info);
+  process_def_file_and_drectve (abfd, info);
 
   if (pe_def_file->num_exports == 0 && !info->shared)
     return;
