@@ -195,7 +195,7 @@ class Object
   Object(const std::string& name, Input_file* input_file, bool is_dynamic,
 	 off_t offset = 0)
     : name_(name), input_file_(input_file), offset_(offset), shnum_(-1U),
-      is_dynamic_(is_dynamic), target_(NULL), xindex_(NULL)
+      is_dynamic_(is_dynamic), target_(NULL), xindex_(NULL), no_export_(false)
   { input_file->file().add_object(); }
 
   virtual ~Object()
@@ -463,6 +463,14 @@ class Object
   searched_for() const
   { return this->input_file()->will_search_for(); }
 
+  bool
+  no_export() const
+  { return this->no_export_; }
+
+  void
+  set_no_export(bool value)
+  { this->no_export_ = value; }
+
  protected:
   // Returns NULL for Objects that are not plugin objects.  This method
   // is overridden in the Pluginobj class.
@@ -581,6 +589,9 @@ class Object
   Target* target_;
   // Many sections for objects with more than SHN_LORESERVE sections.
   Xindex* xindex_;
+  // True if exclude this object from automatic symbol export.
+  // This is used only for archive objects.
+  bool no_export_;
 };
 
 // Implement sized_target inline for efficiency.  This approach breaks

@@ -1126,6 +1126,26 @@ Symbol_table::add_from_relobj(
 	  psym = &sym2;
 	}
 
+      // Fix up visibility if object has no-export set.
+      if (relobj->no_export())
+        {
+	  // We may have copied symbol already above.
+	  if (psym != &sym2)
+	    {
+	      memcpy(symbuf, p, sym_size);
+	      psym = &sym2;
+	    }
+
+	  elfcpp::STV visibility = sym2.get_st_visibility();
+	  if (visibility == elfcpp::STV_DEFAULT
+	      || visibility == elfcpp::STV_PROTECTED)
+	    {
+	      elfcpp::Sym_write<size, big_endian> sw(symbuf);
+	      unsigned char nonvis = sym2.get_st_nonvis();
+	      sw.put_st_other(elfcpp::STV_HIDDEN, nonvis);
+	    }
+        }
+
       Stringpool::Key name_key;
       name = this->namepool_.add_with_length(name, namelen, true,
 					     &name_key);

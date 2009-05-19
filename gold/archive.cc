@@ -83,6 +83,17 @@ const char Archive::armagt[sarmag] =
 
 const char Archive::arfmag[2] = { '`', '\n' };
 
+Archive::Archive(const std::string& name, Input_file* input_file,
+                 bool is_thin_archive, Dirsearch* dirpath, Task* task)
+  : name_(name), input_file_(input_file), armap_(), armap_names_(),
+    extended_names_(), armap_checked_(), seen_offsets_(), members_(),
+    is_thin_archive_(is_thin_archive), included_member_(false),
+    nested_archives_(), dirpath_(dirpath), task_(task), num_members_(0)
+{
+  this->no_export_ =
+    parameters->options().check_excluded_libs(input_file->found_name());
+}
+
 // Set up the archive: read the symbol map and the extended name
 // table.
 
@@ -549,10 +560,12 @@ Archive::get_elf_object_for_member(off_t off, bool* punconfigured)
       return NULL;
     }
 
-  return make_elf_object((std::string(this->input_file_->filename())
-			  + "(" + member_name + ")"),
-			 input_file, memoff, ehdr, read_size,
-			 punconfigured);
+  Object *obj = make_elf_object((std::string(this->input_file_->filename())
+				 + "(" + member_name + ")"),
+				input_file, memoff, ehdr, read_size,
+				punconfigured);
+  obj->set_no_export(this->no_export());
+  return obj;
 }
 
 // Read the symbols from all the archive members in the link.

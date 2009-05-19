@@ -49,12 +49,7 @@ class Archive
 {
  public:
   Archive(const std::string& name, Input_file* input_file,
-          bool is_thin_archive, Dirsearch* dirpath, Task* task)
-    : name_(name), input_file_(input_file), armap_(), armap_names_(),
-      extended_names_(), armap_checked_(), seen_offsets_(), members_(),
-      is_thin_archive_(is_thin_archive), included_member_(false),
-      nested_archives_(), dirpath_(dirpath), task_(task), num_members_(0)
-  { }
+          bool is_thin_archive, Dirsearch* dirpath, Task* task);
 
   // The length of the magic string at the start of an archive.
   static const int sarmag = 8;
@@ -147,6 +142,11 @@ class Archive
   // Return the number of members in the archive.
   size_t
   count_members();
+
+  // Return the no-export flag.
+  bool
+  no_export()
+  { return this->no_export_; }
 
  private:
   Archive(const Archive&);
@@ -293,6 +293,8 @@ class Archive
   Task *task_;
   // Number of members in this archive;
   unsigned int num_members_;
+  // True if we exclude this library archive from automatic export.
+  bool no_export_;
 };
 
 // This class is used to read an archive and pick out the desired

@@ -660,6 +660,10 @@ class General_options
   DEFINE_string(entry, options::TWO_DASHES, 'e', NULL,
                 N_("Set program start address"), N_("ADDRESS"));
 
+  DEFINE_special(exclude_libs, options::TWO_DASHES, '\0',
+		 N_("Exclude libraries from automatic export"),
+		 N_(("lib,lib ...")));
+
   DEFINE_bool(export_dynamic, options::TWO_DASHES, 'E', false,
               N_("Export all dynamic symbols"),
 	      N_("Do not export all dynamic symbols (default)"));
@@ -1022,6 +1026,11 @@ class General_options
   incremental_disposition() const
   { return this->incremental_disposition_; }
 
+  // Return true if S is the name of a library excluded from automatic
+  // symbol export.
+  bool
+  check_excluded_libs (const std::string &s) const;
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -1087,6 +1096,8 @@ class General_options
   // build (--incremental-changed, --incremental-unchanged or
   // --incremental-unknown)
   bool implicit_incremental_;
+  // Libraries excluded from automatic export via --exclude-libs
+  Unordered_set<std::string> excluded_libs_;
 };
 
 // The position-dependent options.  We use this to store the state of

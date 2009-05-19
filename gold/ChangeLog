@@ -1,3 +1,37 @@
+2009-05-19  Doug Kwan  <dougkwan@google.com>
+
+	* archive.cc (Archive::Archive): Move constructor from archive.h
+	to here.  Initialize no_export_.
+	(Archive::get_elf_object_for_member): Set no_export flag of object.
+	* archive.h (Archive::Archive): Move constructor body to
+	archive.cc.
+	(Archive::no_export): New method.
+	(Archive::no_export_): New field.
+	* object.h (Object::Object): Initialize no_export_ to false.
+	(Object::no_export, Object::set_no_export): New methods.
+	(Object::no_export_): New field.
+	* options.cc (General_options::parse_exclude_libs): New method.
+	(General_options::check_excluded_libs) Same.
+	* options.h (exclude_libs): New option.
+	(General_options::check_excluded_libs): New method declaration.
+	(General_options::excluded_libs_): New field.
+	* symtab.cc (Symbol_table::add_from_relobj): Hide symbols with
+	default or protected visibility if an object has no-export flag set.
+	testsuite/Makefile.am (check_PROGRAMS): Add exclude_libs_test.
+	(check_SCRIPTS): Add exclude_libs_test.sh.
+	(check_DATA): Add exclude_libs_test.syms.
+	(MOSTLYCLEANFILES): Add exclude_libs_test.syms,
+	libexclude_libs_test_1.a and libexclude_libs_test_2.a.
+	(exclude_libs_test_SOURCES, exclude_libs_test_DEPENDENCIES,
+	exclude_libs_test_LDFLAGS and exclude_libs_test_LDADD): Define.
+	(exclude_libs_test.syms, libexclude_libs_test_1.a,
+	libexclude_libs_test_2.a): New rules.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/exclude_libs_test.c: New file.
+	* testsuite/exclude_libs_test.sh: Ditto.
+	* testsuite/exclude_libs_test_1.c: Ditto.
+	* testsuite/exclude_libs_test_2.c: Ditto.
+
 2009-05-15  Ian Lance Taylor  <iant@google.com>
 
 	* configure.ac: Check for declarations for cases where libiberty.h

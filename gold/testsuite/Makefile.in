@@ -48,7 +48,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 	$(am__EXEEXT_7) $(am__EXEEXT_8) $(am__EXEEXT_9) \
 	$(am__EXEEXT_10) $(am__EXEEXT_11) $(am__EXEEXT_12) \
 	$(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15) \
-	$(am__EXEEXT_16)
+	$(am__EXEEXT_16) $(am__EXEEXT_17)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
@@ -317,6 +317,14 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_24 = exclude_libs_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_25 = exclude_libs_test.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = exclude_libs_test.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = exclude_libs_test.syms libexclude_libs_test_1.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@        libexclude_libs_test_2.a
+
+@GCC_FALSE@exclude_libs_test_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@exclude_libs_test_DEPENDENCIES =
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -421,6 +429,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_17 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	exclude_libs_test$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -528,6 +538,10 @@ am__exception_test_SOURCES_DIST = exception_test_main.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_2.$(OBJEXT)
 exception_test_OBJECTS = $(am_exception_test_OBJECTS)
 exception_test_LDADD = $(LDADD)
+am__exclude_libs_test_SOURCES_DIST = exclude_libs_test.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_exclude_libs_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	exclude_libs_test.$(OBJEXT)
+exclude_libs_test_OBJECTS = $(am_exclude_libs_test_OBJECTS)
 flagstest_compress_debug_sections_SOURCES =  \
 	flagstest_compress_debug_sections.c
 flagstest_compress_debug_sections_OBJECTS =  \
@@ -884,6 +898,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(exception_shared_1_test_SOURCES) \
 	$(exception_shared_2_test_SOURCES) \
 	$(exception_static_test_SOURCES) $(exception_test_SOURCES) \
+	$(exclude_libs_test_SOURCES) \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(initpri1_SOURCES) $(justsyms_SOURCES) many_sections_r_test.c \
@@ -937,6 +952,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__exception_shared_2_test_SOURCES_DIST) \
 	$(am__exception_static_test_SOURCES_DIST) \
 	$(am__exception_test_SOURCES_DIST) \
+	$(am__exclude_libs_test_SOURCES_DIST) \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(am__initpri1_SOURCES_DIST) $(am__justsyms_SOURCES_DIST) \
@@ -1158,13 +1174,14 @@ TEST_AR = $(top_builddir)/../binutils/ar
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so $(am__append_16) $(am__append_23)
+MOSTLYCLEANFILES = *.so $(am__append_16) $(am__append_23) \
+	$(am__append_27)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_2) $(am__append_21)
-check_DATA = $(am__append_3) $(am__append_22)
+check_SCRIPTS = $(am__append_2) $(am__append_21) $(am__append_25)
+check_DATA = $(am__append_3) $(am__append_22) $(am__append_26)
 BUILT_SOURCES = $(am__append_14)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
@@ -1491,6 +1508,14 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_2_DEPENDENCIES = gcctestdir/ld libthinall.a
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_2_LDFLAGS = -Bgcctestdir/ -L.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_2_LDADD = -lthinall
+@GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test_SOURCES = exclude_libs_test.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test_DEPENDENCIES = gcctestdir/ld libexclude_libs_test_1.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_2.a
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test_LDFLAGS = -Bgcctestdir/ -L. \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	-Wl,--exclude-libs,dummy:libexclude_libs_test_1
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test_LDADD = -lexclude_libs_test_1 -lexclude_libs_test_2
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -1505,9 +1530,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  testsuite/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  testsuite/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  testsuite/Makefile
+	  $(AUTOMAKE) --gnu  testsuite/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -1598,6 +1623,9 @@ exception_static_test$(EXEEXT): $(exception_static_test_OBJECTS) $(exception_sta
 exception_test$(EXEEXT): $(exception_test_OBJECTS) $(exception_test_DEPENDENCIES) 
 	@rm -f exception_test$(EXEEXT)
 	$(CXXLINK) $(exception_test_LDFLAGS) $(exception_test_OBJECTS) $(exception_test_LDADD) $(LIBS)
+exclude_libs_test$(EXEEXT): $(exclude_libs_test_OBJECTS) $(exclude_libs_test_DEPENDENCIES) 
+	@rm -f exclude_libs_test$(EXEEXT)
+	$(LINK) $(exclude_libs_test_LDFLAGS) $(exclude_libs_test_OBJECTS) $(exclude_libs_test_LDADD) $(LIBS)
 @GCC_FALSE@flagstest_compress_debug_sections$(EXEEXT): $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f flagstest_compress_debug_sections$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(flagstest_compress_debug_sections_LDFLAGS) $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_LDADD) $(LIBS)
@@ -1854,6 +1882,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exclude_libs_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
@@ -2564,6 +2593,12 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@empty.syms:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "" >empty.syms
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "Symbol table" >>empty.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test.syms: exclude_libs_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@libexclude_libs_test_1.a: exclude_libs_test_1.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) rc $@ $^
+@GCC_TRUE@@NATIVE_LINKER_TRUE@libexclude_libs_test_2.a: exclude_libs_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) rc $@ $^
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

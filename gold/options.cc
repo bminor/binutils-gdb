@@ -402,6 +402,67 @@ General_options::parse_end_group(const char*, const char*,
   cmdline->inputs().end_group();
 }
 
+// The function add_excluded_libs() in ld/ldlang.c of GNU ld breaks up a list
+// of names seperated by commas or semi-colons and puts them in a linked list.
+// We implement the same parsing of names here but store names in an unordered
+// map to speed up searching of names.
+
+void
+General_options::parse_exclude_libs(const char*, const char* arg,
+                                    Command_line*)
+{
+  const char *p = arg;
+
+  while (*p != '\0')
+    {
+      size_t length = strcspn(p, ",:");
+      this->excluded_libs_.insert(std::string(p, length));
+      p += (p[length] ? length + 1 : length);
+    }
+}
+
+// The checking logic is based on the function check_excluded_libs() in
+// ld/ldlang.c of GNU ld but our implementation is different because we use
+// an unordered map instead of a linked list, which is what GNU ld uses.  GNU
+// ld searches sequentially in the excluded libs list.  For a given archive,
+// a match is found if the archive's name matches exactly one of the list
+// entry or if the archive's name is of the form FOO.a and FOO matches exactly
+// one of the list entry.  An entry "ALL" in the list is considered as a
+// wild-card and matches any given name.
+
+bool
+General_options::check_excluded_libs (const std::string &name) const
+{
+  Unordered_set<std::string>::const_iterator p;
+
+  // Exit early for the most common case.
+  if (excluded_libs_.empty())
+    return false;
+
+  // If we see "ALL", all archives are excluded from automatic export.
+  p = excluded_libs_.find(std::string("ALL"));
+  if (p != excluded_libs_.end())
+    return true;
+
+  // Try finding an exact match.
+  p = excluded_libs_.find(name);
+  if (p != excluded_libs_.end())
+    return true;
+
+  // Try matching NAME without ".a" at the end.
+  size_t length = name.length();
+  if ((length >= 2)
+      && (name[length-2] == '.')
+      && (name[length-1] == 'a'))
+    {
+      p = excluded_libs_.find(name.substr(0, length - 2));
+      if (p != excluded_libs_.end())
+	return true;
+    }
+
+  return false;
+}
+
 } // End namespace gold.
 
 namespace
