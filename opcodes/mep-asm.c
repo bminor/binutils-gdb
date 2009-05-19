@@ -489,7 +489,7 @@ parse_cdisp10 (CGEN_CPU_DESC cd,
       break;
     }
 
-  if (MEP_CPU == EF_MEP_CPU_C5)
+  if ((MEP_CPU & EF_MEP_CPU_MASK) == EF_MEP_CPU_C5)
     wide = 1;
 
   if (strncmp (*strp, "0x0", 3) == 0 

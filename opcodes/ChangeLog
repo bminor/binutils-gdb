@@ -1,3 +1,8 @@
+2009-05-19  DJ Delorie  <dj@redhat.com>
+
+	* mep-asm.c: Regenerate.
+	* mep-opc.c: Regenerate.
+
 2009-04-30  DJ Delorie  <dj@redhat.com>
 
 	* mep-asm.c: Regenerate.

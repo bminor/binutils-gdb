@@ -91,8 +91,8 @@ mep_insn_supported_by_isa (const CGEN_INSN *insn, CGEN_ATTR_VALUE_BITSET_TYPE *i
 mep_config_map_struct mep_config_map[] =
 {
   /* config-map-start */
-  /* Default entry: mep core only, all options enabled. */
-  { "", 0, EF_MEP_CPU_C5, 1, 0, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x0"}, {1,"\x80"}, OPTION_MASK },
+  /* Default entry: first module, with all options enabled. */
+  { "", 0,  EF_MEP_COP_IVC2 | EF_MEP_CPU_C5,1, 0, { 1, "\x20" }, { 1, "\x10" }, { 1, "\x8" }, { 1, "\x4" }, { 1, "\x3c" }, { 1, "\xc0" }, OPTION_MASK | (1 << CGEN_INSN_OPTIONAL_DSP_INSN) | (1 << CGEN_INSN_OPTIONAL_UCI_INSN) },
   { "default", CONFIG_DEFAULT, EF_MEP_COP_IVC2 | EF_MEP_CPU_C5, 0, 64, { 1, "\x20" }, { 1, "\x10" }, { 1, "\x8" }, { 1, "\x4" }, { 1, "\x3c" }, { 1, "\xc0" },
 	  0
 	| (1 << CGEN_INSN_OPTIONAL_CP_INSN)
@@ -117,7 +117,7 @@ check_configured_mach (int machs)
 {
   /* All base insns are supported.  */
   int mach = 1 << MACH_BASE;
-  switch (MEP_CPU)
+  switch (MEP_CPU & EF_MEP_CPU_MASK)
     {
     case EF_MEP_CPU_C2:
     case EF_MEP_CPU_C3:
