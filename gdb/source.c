@@ -658,7 +658,8 @@ is_regular_file (const char *name)
 }
 
 /* Open a file named STRING, searching path PATH (dir names sep by some char)
-   using mode MODE and protection bits PROT in the calls to open.
+   using mode MODE in the calls to open.  You cannot use this function to
+   create files (O_CREAT).
 
    OPTS specifies the function behaviour in specific cases.
 
@@ -685,8 +686,7 @@ is_regular_file (const char *name)
     >>>>  eg executable, non-directory */
 int
 openp (const char *path, int opts, const char *string,
-       int mode, int prot,
-       char **filename_opened)
+       int mode, char **filename_opened)
 {
   int fd;
   char *filename;
@@ -694,6 +694,9 @@ openp (const char *path, int opts, const char *string,
   const char *p1;
   int len;
   int alloclen;
+
+  /* The open syscall MODE parameter is not specified.  */
+  gdb_assert ((mode & O_CREAT) == 0);
 
   if (!path)
     path = ".";
@@ -708,7 +711,7 @@ openp (const char *path, int opts, const char *string,
 	{
 	  filename = alloca (strlen (string) + 1);
 	  strcpy (filename, string);
-	  fd = open (filename, mode, prot);
+	  fd = open (filename, mode);
 	  if (fd >= 0)
 	    goto done;
 	}
@@ -827,7 +830,7 @@ source_full_path_of (const char *filename, char **full_pathname)
   int fd;
 
   fd = openp (source_path, OPF_TRY_CWD_FIRST | OPF_SEARCH_IN_PATH, filename,
-	      O_RDONLY, 0, full_pathname);
+	      O_RDONLY, full_pathname);
   if (fd < 0)
     {
       *full_pathname = NULL;
@@ -1017,13 +1020,13 @@ find_and_open_source (struct objfile *objfile,
         }
     }
 
-  result = openp (path, OPF_SEARCH_IN_PATH, filename, OPEN_MODE, 0, fullname);
+  result = openp (path, OPF_SEARCH_IN_PATH, filename, OPEN_MODE, fullname);
   if (result < 0)
     {
       /* Didn't work.  Try using just the basename. */
       p = lbasename (filename);
       if (p != filename)
-	result = openp (path, OPF_SEARCH_IN_PATH, p, OPEN_MODE, 0, fullname);
+	result = openp (path, OPF_SEARCH_IN_PATH, p, OPEN_MODE, fullname);
     }
 
   return result;

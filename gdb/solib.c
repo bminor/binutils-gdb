@@ -210,14 +210,14 @@ solib_find (char *in_pathname, int *fd)
   /* If not found, search the solib_search_path (if any).  */
   if (found_file < 0 && solib_search_path != NULL)
     found_file = openp (solib_search_path, OPF_TRY_CWD_FIRST,
-			in_pathname, O_RDONLY | O_BINARY, 0, &temp_pathname);
+			in_pathname, O_RDONLY | O_BINARY, &temp_pathname);
   
   /* If not found, next search the solib_search_path (if any) for the basename
      only (ignoring the path).  This is to allow reading solibs from a path
      that differs from the opened path.  */
   if (found_file < 0 && solib_search_path != NULL)
     found_file = openp (solib_search_path, OPF_TRY_CWD_FIRST,
-                        lbasename (in_pathname), O_RDONLY | O_BINARY, 0,
+                        lbasename (in_pathname), O_RDONLY | O_BINARY,
                         &temp_pathname);
 
   /* If not found, try to use target supplied solib search method */
@@ -228,14 +228,14 @@ solib_find (char *in_pathname, int *fd)
   /* If not found, next search the inferior's $PATH environment variable. */
   if (found_file < 0 && gdb_sysroot_is_empty)
     found_file = openp (get_in_environ (inferior_environ, "PATH"),
-			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY, 0,
+			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY,
 			&temp_pathname);
 
   /* If not found, next search the inferior's $LD_LIBRARY_PATH 
      environment variable. */
   if (found_file < 0 && gdb_sysroot_is_empty)
     found_file = openp (get_in_environ (inferior_environ, "LD_LIBRARY_PATH"),
-			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY, 0,
+			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY,
 			&temp_pathname);
 
   *fd = found_file;

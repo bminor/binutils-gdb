@@ -451,7 +451,7 @@ source_script (char *file, int from_tty)
   /* Search for and open 'file' on the search path used for source
      files.  Put the full location in 'full_pathname'.  */
   fd = openp (source_path, OPF_TRY_CWD_FIRST,
-	      file, O_RDONLY, 0, &full_pathname);
+	      file, O_RDONLY, &full_pathname);
   make_cleanup (xfree, full_pathname);
 
   /* Use the full path name, if it is found.  */

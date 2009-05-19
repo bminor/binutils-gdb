@@ -619,7 +619,7 @@ extern void print_address (CORE_ADDR, struct ui_file *);
 #define OPF_TRY_CWD_FIRST     0x01
 #define OPF_SEARCH_IN_PATH    0x02
 
-extern int openp (const char *, int, const char *, int, int, char **);
+extern int openp (const char *, int, const char *, int, char **);
 
 extern int source_full_path_of (const char *, char **);
 

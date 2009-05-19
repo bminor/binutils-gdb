@@ -1,3 +1,10 @@
+2009-05-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove the PROT parameter from openp.
+	* source.c (openp): Remove the parameter PROT.  Assertion check MODE.
+	defs.h (openp): Update the prototype.
+	Update all the openp callers.
+
 2009-05-19  Pedro Alves  <pedro@codesourcery.com>
 
 	* inflow.c (kill_command): Moved to infcmd.c.
