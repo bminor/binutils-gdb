@@ -570,22 +570,36 @@ pcmp (const void *p1v, const void *p2v)
   return p1->pthid < p2->pthid ? -1 : p1->pthid > p2->pthid;
 }
 
-/* iterate_over_threads() callback for counting GDB threads.  */
+/* iterate_over_threads() callback for counting GDB threads.
+
+   Do not count the main thread (whose tid is zero).  This matches
+   the list of threads provided by the pthreaddebug library, which
+   does not include that main thread either, and thus allows us
+   to compare the two lists.  */
 
 static int
 giter_count (struct thread_info *thread, void *countp)
 {
-  (*(int *) countp)++;
+  if (PD_TID (thread->ptid))
+    (*(int *) countp)++;
   return 0;
 }
 
-/* iterate_over_threads() callback for accumulating GDB thread pids.  */
+/* iterate_over_threads() callback for accumulating GDB thread pids.
+
+   Do not include the main thread (whose tid is zero).  This matches
+   the list of threads provided by the pthreaddebug library, which
+   does not include that main thread either, and thus allows us
+   to compare the two lists.  */
 
 static int
 giter_accum (struct thread_info *thread, void *bufp)
 {
-  **(struct thread_info ***) bufp = thread;
-  (*(struct thread_info ***) bufp)++;
+  if (PD_TID (thread->ptid))
+    {
+      **(struct thread_info ***) bufp = thread;
+      (*(struct thread_info ***) bufp)++;
+    }
   return 0;
 }
 

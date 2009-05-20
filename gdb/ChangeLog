@@ -1,3 +1,8 @@
+2009-05-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* aix-thread.c (giter_count): Do not count the main thread.
+	(giter_accum): Do not include the main thread.
+
 2009-05-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Remove the PROT parameter from openp.
