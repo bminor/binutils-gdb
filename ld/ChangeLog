@@ -16,9 +16,7 @@
 	(generate_edata):  Updated to match.
 	(pe_dll_build_sections):  Likewise.
 
-2009-05-17  Dave Korn  <dave.korn.cygwin@gmail.com>
-
-  2008-08-07  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
+2009-05-17  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* pe-dll.c (process_def_file): Do not create empty export table.
 
