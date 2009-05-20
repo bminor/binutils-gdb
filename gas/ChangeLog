@@ -1,3 +1,18 @@
+2009-05-20  Kai Tietz  <kai.tietz@onevision.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-coff.h: Include "coff/x86_64.h" for x86 pe-coff.
+	(TARGET_FORMAT): Removed for x86 pe-coff.
+	(COFF_TARGET_FORMAT): Likewise.
+
+	* config/tc-i386.c (md_longopts): Allow --64 for x86 pe-coff.
+	(md_parse_option): Likewise.
+	(md_show_usage): Show option --32/--64 for x86 pe-coff.
+	(i386_target_format): Use also for x86 pe-coff.
+
+	* config/tc-i386.h (TARGET_FORMAT): Defined as i386_target_format
+	for x86 pe-coff.
+
 2009-05-19  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-mep.c (mep_machine): Only check CPU flags, not COP flags.
@@ -13,8 +28,8 @@
 
 2009-05-17  Kai Tietz  <kai.tietz@onevision.com>
 
-        * config/obj-coff.c (obj_coff_section): Add 'y' as
-        specifier for SEC_COFF_NOREAD section flag.
+	* config/obj-coff.c (obj_coff_section): Add 'y' as
+	specifier for SEC_COFF_NOREAD section flag.
 	* doc/as.texinfo: Add documentation about .section flag 'y'.
 
 2009-05-13  DJ Delorie  <dj@redhat.com>
@@ -685,7 +700,7 @@
 	qdsub in Thumb-2 mode.
 
 2009-01-29  Paul Brook  <paul@codesourcery.com>
-            Mark Mitchell  <mark@codesourcery.com>
+	    Mark Mitchell  <mark@codesourcery.com>
 
 	* config/tc-arm.c (do_t_mul): In Thumb-2 mode, use 16-bit encoding
 	of MUL when possible.

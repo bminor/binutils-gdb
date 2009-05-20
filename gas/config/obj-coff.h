@@ -55,20 +55,10 @@
 #endif
 
 #ifdef TC_I386
-#ifndef TE_PEP
+#ifdef TE_PEP
 #include "coff/x86_64.h"
 #else
 #include "coff/i386.h"
-#endif
-
-#ifdef TE_PE
-#ifdef TE_PEP
-extern const char *i386_target_format (void);
-#define TARGET_FORMAT i386_target_format ()
-#define COFF_TARGET_FORMAT "pe-x86-64"
-#else
-#define TARGET_FORMAT "pe-i386"
-#endif
 #endif
 
 #ifndef TARGET_FORMAT

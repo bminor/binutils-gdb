@@ -8018,7 +8018,8 @@ const char *md_shortopts = "qn";
 struct option md_longopts[] =
 {
   {"32", no_argument, NULL, OPTION_32},
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined(TE_PEP)
+#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
+     || defined (TE_PE) || defined (TE_PEP))
   {"64", no_argument, NULL, OPTION_64},
 #endif
   {"divide", no_argument, NULL, OPTION_DIVIDE},
@@ -8071,7 +8072,8 @@ md_parse_option (int c, char *arg)
 	 .stab instead of .stab.excl.  We always use .stab anyhow.  */
       break;
 #endif
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined(TE_PEP)
+#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
+     || defined (TE_PE) || defined (TE_PEP))
     case OPTION_64:
       {
 	const char **list, **l;
@@ -8258,7 +8260,8 @@ md_show_usage (stream)
   fprintf (stream, _("\
   -s                      ignored\n"));
 #endif
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined(TE_PEP)
+#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
+     || defined (TE_PE) || defined (TE_PEP))
   fprintf (stream, _("\
   --32/--64               generate 32bit/64bit code\n"));
 #endif
@@ -8305,7 +8308,8 @@ md_show_usage (stream)
 }
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
-     || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (TE_PEP))
+     || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
+     || defined (TE_PE) || defined (TE_PEP))
 
 /* Pick the target format to use.  */
 
@@ -8362,10 +8366,9 @@ i386_target_format (void)
     as_fatal (_("Unknown architecture"));
   switch (OUTPUT_FLAVOR)
     {
-#ifdef TE_PEP
+#if defined (TE_PE) || defined (TE_PEP)
     case bfd_target_coff_flavour:
-      return flag_code == CODE_64BIT ? COFF_TARGET_FORMAT : "pe-i386";
-      break;
+      return flag_code == CODE_64BIT ? "pe-x86-64" : "pe-i386";
 #endif
 #ifdef OBJ_MAYBE_AOUT
     case bfd_target_aout_flavour:
