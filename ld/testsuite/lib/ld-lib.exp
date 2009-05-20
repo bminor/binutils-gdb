@@ -1132,9 +1132,15 @@ proc run_ld_link_tests { ldtests } {
     global env
     global CC
     global CFLAGS
+    global runtests
 
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
+
+	if ![runtest_file_p $runtests $testname] then {
+	    continue
+	}
+
 	set ld_options [lindex $testitem 1]
 	set as_options [lindex $testitem 2]
 	set src_files  [lindex $testitem 3]

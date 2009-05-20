@@ -1,3 +1,8 @@
+2009-05-20  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* lib/ld-lib.exp (run_ld_link_tests):  Filter test names against
+	runtests list.
+
 2009-05-19  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-pe/aligncomm-1.c:  New test source file.
