@@ -265,7 +265,7 @@ exp 	:	MIN_FUNC '(' type ')'
 exp	: 	MAX_FUNC '(' type ')'
 			{ write_exp_elt_opcode (UNOP_MAX);
 			  write_exp_elt_type ($3);
-			  write_exp_elt_opcode (UNOP_MIN); }
+			  write_exp_elt_opcode (UNOP_MAX); }
 	;
 
 exp	:	FLOAT_FUNC '(' exp ')'
