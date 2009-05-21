@@ -1,3 +1,8 @@
+2009-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix parsing DW_AT_const_value using DW_FORM_string.
+	* dwarf2read.c (dwarf2_const_value <DW_FORM_string>): New.
+
 2009-05-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* aix-thread.c (giter_count): Do not count the main thread.

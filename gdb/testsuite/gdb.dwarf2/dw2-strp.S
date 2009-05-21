@@ -52,17 +52,23 @@
 	.byte		1			/* DW_AT_byte_size */
 	.byte		6			/* DW_AT_encoding */
 
-	.uleb128	5			/* Abbrev: DW_TAG_variable */
+	.uleb128	5			/* Abbrev: DW_TAG_variable DW_FORM_strp */
 	.4byte		.Lvarname		/* DW_AT_name */
 	.4byte		.Lconst_type-.Lcu1_begin/* DW_AT_type */
 	.4byte		.Lvarcontents		/* DW_AT_const_value */
 	.byte		1			/* DW_AT_external */
 
+	.uleb128	6			/* Abbrev: DW_TAG_variable DW_FORM_string */
+	.string		"a_string2"		/* DW_AT_name */
+	.4byte		.Lconst_type-.Lcu1_begin/* DW_AT_type */
+	.string		"hello world2\n"	/* DW_AT_const_value */
+	.byte		1			/* DW_AT_external */
+
 .Lconst_type:
-	.uleb128	6			/* Abbrev: DW_TAG_const_type */
+	.uleb128	7			/* Abbrev: DW_TAG_const_type */
 	.4byte		.Larray_type-.Lcu1_begin/* DW_AT_type */
 
-	.uleb128	7			/* Abbrev: DW_TAG_variable (name "") */
+	.uleb128	8			/* Abbrev: DW_TAG_variable (name "") */
 	.4byte		.Lemptyname		/* DW_AT_name */
 
 	.byte		0			/* End of children of CU */
@@ -125,6 +131,20 @@
 	.byte		0x0			/* Terminator */
 
 	.uleb128	6			/* Abbrev code */
+	.uleb128	0x34			/* DW_TAG_variable */
+	.byte		0x0			/* no_children */
+	.uleb128	0x3			/* DW_AT_name */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0x49			/* DW_AT_type */
+	.uleb128	0x13			/* DW_FORM_ref4 */
+	.uleb128	0x1c			/* DW_AT_const_value */
+	.uleb128	0x8			/* DW_FORM_string */
+	.uleb128	0x3f			/* DW_AT_external */
+	.uleb128	0xc			/* DW_FORM_flag */
+	.byte		0x0			/* Terminator */
+	.byte		0x0			/* Terminator */
+
+	.uleb128	7			/* Abbrev code */
 	.uleb128	0x26			/* DW_TAG_const_type */
 	.byte		0x0			/* DW_children_no */
 	.uleb128	0x49			/* DW_AT_type */
@@ -132,7 +152,7 @@
 	.byte		0x0			/* Terminator */
 	.byte		0x0			/* Terminator */
 
-	.uleb128	7			/* Abbrev code */
+	.uleb128	8			/* Abbrev code */
 	.uleb128	0x34			/* DW_TAG_variable */
 	.byte		0x0			/* DW_children_no */
 	.uleb128	0x3			/* DW_AT_name */
