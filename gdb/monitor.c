@@ -1065,7 +1065,7 @@ monitor_wait_filter (char *buf,
 
 static ptid_t
 monitor_wait (struct target_ops *ops,
-	      ptid_t ptid, struct target_waitstatus *status)
+	      ptid_t ptid, struct target_waitstatus *status, int options)
 {
   int old_timeout = timeout;
   char buf[TARGET_BUF_SIZE];

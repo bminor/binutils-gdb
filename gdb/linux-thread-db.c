@@ -1178,12 +1178,13 @@ check_event (ptid_t ptid)
 
 static ptid_t
 thread_db_wait (struct target_ops *ops,
-		ptid_t ptid, struct target_waitstatus *ourstatus)
+		ptid_t ptid, struct target_waitstatus *ourstatus,
+		int options)
 {
   struct thread_db_info *info;
   struct target_ops *beneath = find_target_beneath (ops);
 
-  ptid = beneath->to_wait (beneath, ptid, ourstatus);
+  ptid = beneath->to_wait (beneath, ptid, ourstatus, options);
 
   if (ourstatus->kind == TARGET_WAITKIND_IGNORE)
     return ptid;

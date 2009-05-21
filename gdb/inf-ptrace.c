@@ -396,7 +396,7 @@ inf_ptrace_resume (struct target_ops *ops,
 
 static ptid_t
 inf_ptrace_wait (struct target_ops *ops,
-		 ptid_t ptid, struct target_waitstatus *ourstatus)
+		 ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
   pid_t pid;
   int status, save_errno;

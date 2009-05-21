@@ -1842,9 +1842,9 @@ wait_for_inferior (int treat_exec_as_sigtrap)
       struct cleanup *old_chain;
 
       if (deprecated_target_wait_hook)
-	ecs->ptid = deprecated_target_wait_hook (waiton_ptid, &ecs->ws);
+	ecs->ptid = deprecated_target_wait_hook (waiton_ptid, &ecs->ws, 0);
       else
-	ecs->ptid = target_wait (waiton_ptid, &ecs->ws);
+	ecs->ptid = target_wait (waiton_ptid, &ecs->ws, 0);
 
       if (debug_infrun)
 	print_target_wait_results (waiton_ptid, ecs->ptid, &ecs->ws);
@@ -1920,9 +1920,9 @@ fetch_inferior_event (void *client_data)
 
   if (deprecated_target_wait_hook)
     ecs->ptid =
-      deprecated_target_wait_hook (waiton_ptid, &ecs->ws);
+      deprecated_target_wait_hook (waiton_ptid, &ecs->ws, TARGET_WNOHANG);
   else
-    ecs->ptid = target_wait (waiton_ptid, &ecs->ws);
+    ecs->ptid = target_wait (waiton_ptid, &ecs->ws, TARGET_WNOHANG);
 
   if (debug_infrun)
     print_target_wait_results (waiton_ptid, ecs->ptid, &ecs->ws);

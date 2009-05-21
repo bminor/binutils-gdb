@@ -1,5 +1,56 @@
 2009-05-21  Pedro Alves  <pedro@codesourcery.com>
 
+	* target.h (TARGET_WNOHANG): New.
+	* target.c (target_wait): Add `options' argument.  Adjust.
+	(struct target_ops) <to_wait>: Add `options' argument.
+	(target_wait): Add `options' argument.
+	* infrun.c (wait_for_inferior): Pass 0 as options to
+	target_wait (blocking wait).
+	(fetch_inferior_event): Pass TARGET_WNOHANG as options to
+	target_wait.
+	* fork-child.c (startup_inferior): Pass 0 as options to
+	target_wait (blocking wait).
+	* linux-nat.c (linux_nat_create_inferior): Remove async masking.
+	(linux_nat_wait_1): Add `target_options' argument.  Use it instead
+	of checking on target_can_async_p.
+	(linux_nat_wait): Add `target_options' argument.  Adjust.
+	* remote.c (remote_wait_ns): Add `options' argument.  Adjust to
+	check on TARGET_WNOWAIT instead of checking on remote_is_async_p.
+	(remote_wait_as): Add `options' argument.  Adjust to check on
+	TARGET_WNOWAIT instead of checking on remote_is_async_p.  If doing
+	a blocking wait, keep waiting until an interesting event comes
+	out.
+	(remote_wait): Add `options' argument.  Don't loop here if the
+	target is in async mode, and a blocking wait has been requested.
+
+	* top.c (deprecated_target_wait_hook): Add `options' argument.
+	* linux-thread-db.c (thread_db_wait): Add `options' argument, and
+	pass it down to the layer beneath.
+	* inf-ptrace.c (inf_ptrace_wait): Add `options' argument.
+	* record.c (record_beneath_to_wait): Add `options' argument.
+	(record_wait): Add `options' argument, and pass it down to the
+	layer beneath.
+	* bsd-uthread.c (bsd_uthread_wait): Add `options' argument.
+	* darwin-nat.c (darwin_wait): Likewise.
+	* defs.h (deprecated_target_wait_hook): Likewise.
+	* gnu-nat.c (gnu_wait): Add `options' argument.
+	* go32-nat.c (go32_wait): Likewise.
+	* hpux-thread.c (hpux_thread_wait): Add `options' argument, and
+	pass it down to the layer beneath.
+	* inf-ttrace.c (inf_ttrace_wait): Add `options' argument.
+	* monitor.c (monitor_wait): Likewise.
+	* nto-procfs.c (procfs_wait): Likewise.
+	* remote-mips.c (mips_wait): Add `options' argument.
+	* remote-sim.c (gdbsim_wait): Likewise.
+	* rs6000-nat.c (rs6000_wait): Add `options' argument.
+	* sol-thread.c (sol_thread_wait): Add `options' argument, and pass
+	it down to the layer beneath.
+	* spu-linux-nat.c (spu_child_wait): Add `options' argument.
+	* windows-nat.c (windows_wait): Likewise.
+	* tui/tui-hooks.c (tui_target_wait_hook): Likewise.  Adjust.
+
+2009-05-21  Pedro Alves  <pedro@codesourcery.com>
+
 	* mi/mi-interp.c (mi_on_resume): Account for whole process
 	resumes.
 

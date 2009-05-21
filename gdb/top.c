@@ -266,7 +266,8 @@ void (*deprecated_memory_changed_hook) (CORE_ADDR addr, int len);
    while waiting for target events.  */
 
 ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
-				       struct target_waitstatus * status);
+				       struct target_waitstatus *status,
+				       int options);
 
 /* Used by UI as a wrapper around command execution.  May do various things
    like enabling/disabling buttons, etc...  */

@@ -924,7 +924,7 @@ inf_ttrace_resume (struct target_ops *ops,
 
 static ptid_t
 inf_ttrace_wait (struct target_ops *ops,
-		 ptid_t ptid, struct target_waitstatus *ourstatus)
+		 ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
   pid_t pid = ptid_get_pid (ptid);
   lwpid_t lwpid = ptid_get_lwp (ptid);

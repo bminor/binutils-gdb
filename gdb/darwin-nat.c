@@ -476,7 +476,7 @@ catch_exception_raise (mach_port_t port,
 
 static ptid_t
 darwin_wait (struct target_ops *ops,
-	     ptid_t ptid, struct target_waitstatus *status)
+	     ptid_t ptid, struct target_waitstatus *status, int options)
 {
   kern_return_t kret;
   mach_msg_header_t *hdr = &msgin.hdr;

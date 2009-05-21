@@ -1836,7 +1836,7 @@ target_disconnect (char *args, int from_tty)
 }
 
 ptid_t
-target_wait (ptid_t ptid, struct target_waitstatus *status)
+target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 {
   struct target_ops *t;
 
@@ -1844,7 +1844,7 @@ target_wait (ptid_t ptid, struct target_waitstatus *status)
     {
       if (t->to_wait != NULL)
 	{
-	  ptid_t retval = (*t->to_wait) (t, ptid, status);
+	  ptid_t retval = (*t->to_wait) (t, ptid, status, options);
 
 	  if (targetdebug)
 	    {

@@ -416,7 +416,7 @@ static char child_cwd[FILENAME_MAX];
 
 static ptid_t
 go32_wait (struct target_ops *ops,
-	   ptid_t ptid, struct target_waitstatus *status)
+	   ptid_t ptid, struct target_waitstatus *status, int options)
 {
   int i;
   unsigned char saved_opcode;

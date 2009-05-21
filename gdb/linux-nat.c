@@ -1341,18 +1341,12 @@ linux_nat_create_inferior (struct target_ops *ops,
 			   char *exec_file, char *allargs, char **env,
 			   int from_tty)
 {
-  int saved_async = 0;
 #ifdef HAVE_PERSONALITY
   int personality_orig = 0, personality_set = 0;
 #endif /* HAVE_PERSONALITY */
 
   /* The fork_child mechanism is synchronous and calls target_wait, so
      we have to mask the async mode.  */
-
-  if (target_can_async_p ())
-    /* Mask async mode.  Creating a child requires a loop calling
-       wait_for_inferior currently.  */
-    saved_async = linux_nat_async_mask (0);
 
 #ifdef HAVE_PERSONALITY
   if (disable_randomization)
@@ -1383,9 +1377,6 @@ linux_nat_create_inferior (struct target_ops *ops,
 		 safe_strerror (errno));
     }
 #endif /* HAVE_PERSONALITY */
-
-  if (saved_async)
-    linux_nat_async_mask (saved_async);
 }
 
 static void
@@ -2687,7 +2678,8 @@ linux_nat_filter_event (int lwpid, int status, int options)
 
 static ptid_t
 linux_nat_wait_1 (struct target_ops *ops,
-		  ptid_t ptid, struct target_waitstatus *ourstatus)
+		  ptid_t ptid, struct target_waitstatus *ourstatus,
+		  int target_options)
 {
   static sigset_t prev_mask;
   struct lwp_info *lp = NULL;
@@ -2822,8 +2814,9 @@ retry:
       set_sigint_trap ();
     }
 
-  if (target_can_async_p ())
-    options |= WNOHANG; /* In async mode, don't block.  */
+  /* Translate generic target_wait options into waitpid options.  */
+  if (target_options & TARGET_WNOHANG)
+    options |= WNOHANG;
 
   while (lp == NULL)
     {
@@ -2928,7 +2921,7 @@ retry:
 	     In sync mode, suspend waiting for a SIGCHLD signal.  */
 	  if (options & __WCLONE)
 	    {
-	      if (target_can_async_p ())
+	      if (target_options & TARGET_WNOHANG)
 		{
 		  /* No interesting event.  */
 		  ourstatus->kind = TARGET_WAITKIND_IGNORE;
@@ -3072,7 +3065,8 @@ retry:
 
 static ptid_t
 linux_nat_wait (struct target_ops *ops,
-		ptid_t ptid, struct target_waitstatus *ourstatus)
+		ptid_t ptid, struct target_waitstatus *ourstatus,
+		int target_options)
 {
   ptid_t event_ptid;
 
@@ -3083,7 +3077,7 @@ linux_nat_wait (struct target_ops *ops,
   if (target_can_async_p ())
     async_file_flush ();
 
-  event_ptid = linux_nat_wait_1 (ops, ptid, ourstatus);
+  event_ptid = linux_nat_wait_1 (ops, ptid, ourstatus, target_options);
 
   /* If we requested any event, and something came out, assume there
      may be more.  If we requested a specific lwp or process, also

@@ -623,7 +623,7 @@ nto_interrupt (int signo)
 
 static ptid_t
 procfs_wait (struct target_ops *ops,
-	     ptid_t ptid, struct target_waitstatus *ourstatus)
+	     ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
   sigset_t set;
   siginfo_t info;

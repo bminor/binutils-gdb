@@ -98,7 +98,8 @@ static void (*record_beneath_to_resume) (struct target_ops *, ptid_t, int,
                                          enum target_signal);
 static struct target_ops *record_beneath_to_wait_ops;
 static ptid_t (*record_beneath_to_wait) (struct target_ops *, ptid_t,
-					 struct target_waitstatus *);
+					 struct target_waitstatus *,
+					 int);
 static struct target_ops *record_beneath_to_store_registers_ops;
 static void (*record_beneath_to_store_registers) (struct target_ops *,
                                                   struct regcache *,
@@ -566,7 +567,8 @@ record_wait_cleanups (void *ignore)
 
 static ptid_t
 record_wait (struct target_ops *ops,
-              ptid_t ptid, struct target_waitstatus *status)
+	     ptid_t ptid, struct target_waitstatus *status,
+	     int options)
 {
   struct cleanup *set_cleanups = record_gdb_operation_disable_set ();
 
@@ -590,7 +592,7 @@ record_wait (struct target_ops *ops,
 	{
 	  /* This is a single step.  */
 	  return record_beneath_to_wait (record_beneath_to_wait_ops,
-                                                      ptid, status);
+					 ptid, status, 0);
 	}
       else
 	{
@@ -601,7 +603,7 @@ record_wait (struct target_ops *ops,
 	  while (1)
 	    {
 	      ret = record_beneath_to_wait (record_beneath_to_wait_ops,
-					    ptid, status);
+					    ptid, status, 0);
 
 	      if (status->kind == TARGET_WAITKIND_STOPPED
 		  && status->value.sig == TARGET_SIGNAL_TRAP)

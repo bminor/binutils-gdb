@@ -190,7 +190,7 @@ hpux_thread_resume (struct target_ops *ops,
 
 static ptid_t
 hpux_thread_wait (struct target_ops *ops,
-		  ptid_t ptid, struct target_waitstatus *ourstatus)
+		  ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
   ptid_t rtnval;
   struct cleanup *old_chain;
@@ -203,7 +203,7 @@ hpux_thread_wait (struct target_ops *ops,
     ptid = main_ptid;
 
   rtnval = deprecated_child_ops.to_wait (&deprecated_child_ops,
-					 ptid, ourstatus);
+					 ptid, ourstatus, options);
 
   rtnval = find_active_thread ();
 

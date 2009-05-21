@@ -4646,7 +4646,7 @@ process_stop_reply (struct stop_reply *stop_reply,
 /* The non-stop mode version of target_wait.  */
 
 static ptid_t
-remote_wait_ns (ptid_t ptid, struct target_waitstatus *status)
+remote_wait_ns (ptid_t ptid, struct target_waitstatus *status, int options)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
@@ -4688,16 +4688,15 @@ remote_wait_ns (ptid_t ptid, struct target_waitstatus *status)
       if (stop_reply != NULL)
 	return process_stop_reply (stop_reply, status);
 
-      /* Still no event.  If we're in asynchronous mode, then just
+      /* Still no event.  If we're just polling for an event, then
 	 return to the event loop.  */
-      if (remote_is_async_p ())
+      if (options & TARGET_WNOHANG)
 	{
 	  status->kind = TARGET_WAITKIND_IGNORE;
 	  return minus_one_ptid;
 	}
 
-      /* Otherwise, asynchronous mode is masked, so do a blocking
-	 wait.  */
+      /* Otherwise do a blocking wait.  */
       ret = getpkt_or_notif_sane (&rs->buf, &rs->buf_size,
 				  1 /* forever */);
     }
@@ -4707,7 +4706,7 @@ remote_wait_ns (ptid_t ptid, struct target_waitstatus *status)
    STATUS just as `wait' would.  */
 
 static ptid_t
-remote_wait_as (ptid_t ptid, struct target_waitstatus *status)
+remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
@@ -4716,6 +4715,8 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status)
   int solibs_changed = 0;
   char *buf, *p;
   struct stop_reply *stop_reply;
+
+ again:
 
   status->kind = TARGET_WAITKIND_IGNORE;
   status->value.integer = 0;
@@ -4819,8 +4820,14 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status)
     }
 
   if (status->kind == TARGET_WAITKIND_IGNORE)
-    /* Nothing interesting happened.  */
-    return minus_one_ptid;
+    {
+      /* Nothing interesting happened.  If we're doing a non-blocking
+	 poll, we're done.  Otherwise, go back to waiting.  */
+      if (options & TARGET_WNOHANG)
+	return minus_one_ptid;
+      else
+	goto again;
+    }
   else if (status->kind != TARGET_WAITKIND_EXITED
 	   && status->kind != TARGET_WAITKIND_SIGNALLED)
     {
@@ -4841,24 +4848,14 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status)
 
 static ptid_t
 remote_wait (struct target_ops *ops,
-	     ptid_t ptid, struct target_waitstatus *status)
+	     ptid_t ptid, struct target_waitstatus *status, int options)
 {
   ptid_t event_ptid;
 
   if (non_stop)
-    event_ptid = remote_wait_ns (ptid, status);
+    event_ptid = remote_wait_ns (ptid, status, options);
   else
-    {
-      /* In synchronous mode, keep waiting until the target stops.  In
-	 asynchronous mode, always return to the event loop.  */
-
-      do
-	{
-	  event_ptid = remote_wait_as (ptid, status);
-	}
-      while (status->kind == TARGET_WAITKIND_IGNORE
-	     && !target_can_async_p ());
-    }
+    event_ptid = remote_wait_as (ptid, status, options);
 
   if (target_can_async_p ())
     {

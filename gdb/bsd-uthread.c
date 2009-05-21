@@ -345,13 +345,13 @@ bsd_uthread_xfer_partial (struct target_ops *ops, enum target_object object,
 
 static ptid_t
 bsd_uthread_wait (struct target_ops *ops,
-		  ptid_t ptid, struct target_waitstatus *status)
+		  ptid_t ptid, struct target_waitstatus *status, int options)
 {
   CORE_ADDR addr;
   struct target_ops *beneath = find_target_beneath (ops);
 
   /* Pass the request to the layer beneath.  */
-  ptid = beneath->to_wait (beneath, ptid, status);
+  ptid = beneath->to_wait (beneath, ptid, status, options);
 
   /* If the process is no longer alive, there's no point in figuring
      out the thread ID.  It will fail anyway.  */

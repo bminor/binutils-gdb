@@ -153,6 +153,13 @@ struct target_waitstatus
     value;
   };
 
+/* Options that can be passed to target_wait.  */
+
+/* Return immediately if there's no event already queued.  If this
+   options is not requested, target_wait blocks waiting for an
+   event.  */
+#define TARGET_WNOHANG 1
+
 /* Return a pretty printed form of target_waitstatus.
    Space for the result is malloc'd, caller must free.  */
 extern char *target_waitstatus_to_string (const struct target_waitstatus *);
@@ -327,7 +334,7 @@ struct target_ops
     void (*to_disconnect) (struct target_ops *, char *, int);
     void (*to_resume) (struct target_ops *, ptid_t, int, enum target_signal);
     ptid_t (*to_wait) (struct target_ops *,
-		      ptid_t, struct target_waitstatus *);
+		       ptid_t, struct target_waitstatus *, int);
     void (*to_fetch_registers) (struct target_ops *, struct regcache *, int);
     void (*to_store_registers) (struct target_ops *, struct regcache *, int);
     void (*to_prepare_to_store) (struct regcache *);
@@ -621,9 +628,11 @@ extern void target_resume (ptid_t ptid, int step, enum target_signal signal);
    _NOT_ OK to throw_exception() out of target_wait() without popping
    the debugging target from the stack; GDB isn't prepared to get back
    to the prompt with a debugging target but without the frame cache,
-   stop_pc, etc., set up.  */
+   stop_pc, etc., set up.  OPTIONS is a bitwise OR of TARGET_W*
+   options.  */
 
-extern ptid_t target_wait (ptid_t ptid, struct target_waitstatus *status);
+extern ptid_t target_wait (ptid_t ptid, struct target_waitstatus *status,
+			   int options);
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 

@@ -160,7 +160,7 @@ tui_event_modify_breakpoint (int number)
    Leave curses mode and setup program mode.  */
 static ptid_t
 tui_target_wait_hook (ptid_t pid, 
-		      struct target_waitstatus *status)
+		      struct target_waitstatus *status, int options)
 {
   ptid_t res;
 
@@ -174,7 +174,7 @@ tui_target_wait_hook (ptid_t pid,
     }
 #endif
   tui_target_has_run = 1;
-  res = target_wait (pid, status);
+  res = target_wait (pid, status, options);
 
   if (tui_active)
     {

@@ -1435,7 +1435,7 @@ struct inf *waiting_inf;
 /* Wait for something to happen in the inferior, returning what in STATUS. */
 static ptid_t
 gnu_wait (struct target_ops *ops,
-	  ptid_t ptid, struct target_waitstatus *status)
+	  ptid_t ptid, struct target_waitstatus *status, int options)
 {
   struct msg
     {

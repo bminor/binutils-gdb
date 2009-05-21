@@ -1111,7 +1111,8 @@ extern void (*deprecated_register_changed_hook) (int regno);
 extern void (*deprecated_memory_changed_hook) (CORE_ADDR addr, int len);
 extern void (*deprecated_context_hook) (int);
 extern ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
-                                         struct target_waitstatus * status);
+					      struct target_waitstatus *status,
+					      int options);
 
 extern void (*deprecated_attach_hook) (void);
 extern void (*deprecated_detach_hook) (void);

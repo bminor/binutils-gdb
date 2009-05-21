@@ -422,7 +422,7 @@ spu_child_post_attach (int pid)
    minus_one_ptid in case of error; store status into *OURSTATUS.  */
 static ptid_t
 spu_child_wait (struct target_ops *ops,
-		ptid_t ptid, struct target_waitstatus *ourstatus)
+		ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
   int save_errno;
   int status;

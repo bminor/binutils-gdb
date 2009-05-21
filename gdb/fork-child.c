@@ -448,7 +448,7 @@ startup_inferior (int ntraps)
 
       struct target_waitstatus ws;
       memset (&ws, 0, sizeof (ws));
-      event_ptid = target_wait (resume_ptid, &ws);
+      event_ptid = target_wait (resume_ptid, &ws, 0);
 
       if (ws.kind == TARGET_WAITKIND_IGNORE)
 	/* The inferior didn't really stop, keep waiting.  */

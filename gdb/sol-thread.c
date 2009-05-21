@@ -381,7 +381,7 @@ sol_thread_resume (struct target_ops *ops,
 
 static ptid_t
 sol_thread_wait (struct target_ops *ops,
-		 ptid_t ptid, struct target_waitstatus *ourstatus)
+		 ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
   ptid_t rtnval;
   ptid_t save_ptid;
@@ -407,7 +407,7 @@ sol_thread_wait (struct target_ops *ops,
 		 GET_THREAD (save_ptid));
     }
 
-  rtnval = beneath->to_wait (beneath, ptid, ourstatus);
+  rtnval = beneath->to_wait (beneath, ptid, ourstatus, options);
 
   if (ourstatus->kind != TARGET_WAITKIND_EXITED)
     {

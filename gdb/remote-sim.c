@@ -676,7 +676,7 @@ gdbsim_cntrl_c (int signo)
 
 static ptid_t
 gdbsim_wait (struct target_ops *ops,
-	     ptid_t ptid, struct target_waitstatus *status)
+	     ptid_t ptid, struct target_waitstatus *status, int options)
 {
   static RETSIGTYPE (*prev_sigint) ();
   int sigrc = 0;

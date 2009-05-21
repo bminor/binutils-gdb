@@ -1494,7 +1494,7 @@ out:
 /* Wait for interesting events to occur in the target process.  */
 static ptid_t
 windows_wait (struct target_ops *ops,
-	      ptid_t ptid, struct target_waitstatus *ourstatus)
+	      ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
   int pid = -1;
 
