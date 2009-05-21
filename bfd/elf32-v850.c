@@ -2095,7 +2095,7 @@ v850_elf_add_symbol_hook (bfd *abfd,
   return TRUE;
 }
 
-static bfd_boolean
+static int
 v850_elf_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 				  const char *name ATTRIBUTE_UNUSED,
 				  Elf_Internal_Sym *sym,
@@ -2122,7 +2122,7 @@ v850_elf_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
   sym->st_other &= ~(V850_OTHER_SDA | V850_OTHER_ZDA | V850_OTHER_TDA
 		     | V850_OTHER_ERROR);
 
-  return TRUE;
+  return 1;
 }
 
 static bfd_boolean

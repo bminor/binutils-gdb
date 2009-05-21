@@ -2903,7 +2903,7 @@ s7_bfd_score_elf_symbol_processing (bfd *abfd, asymbol *asym)
     }
 }
 
-bfd_boolean
+int
 s7_bfd_score_elf_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
                                           const char *name ATTRIBUTE_UNUSED,
                                           Elf_Internal_Sym *sym,
@@ -2916,7 +2916,7 @@ s7_bfd_score_elf_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_U
   if (sym->st_shndx == SHN_COMMON && strcmp (input_sec->name, ".scommon") == 0)
     sym->st_shndx = SHN_SCORE_SCOMMON;
 
-  return TRUE;
+  return 1;
 }
 
 bfd_boolean

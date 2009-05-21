@@ -4984,7 +4984,7 @@ spu_elf_relocate_section (bfd *output_bfd,
 
 /* Adjust _SPUEAR_ syms to point at their overlay stubs.  */
 
-static bfd_boolean
+static int
 spu_elf_output_symbol_hook (struct bfd_link_info *info,
 			    const char *sym_name ATTRIBUTE_UNUSED,
 			    Elf_Internal_Sym *sym,
@@ -5016,7 +5016,7 @@ spu_elf_output_symbol_hook (struct bfd_link_info *info,
 	  }
     }
 
-  return TRUE;
+  return 1;
 }
 
 static int spu_plugin = 0;

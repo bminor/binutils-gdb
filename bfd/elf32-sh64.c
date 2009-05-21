@@ -60,7 +60,7 @@ static int sh64_elf_get_symbol_type
 static bfd_boolean sh64_elf_add_symbol_hook
   (bfd *, struct bfd_link_info *, Elf_Internal_Sym *, const char **,
    flagword *, asection **, bfd_vma *);
-static bfd_boolean sh64_elf_link_output_symbol_hook
+static int sh64_elf_link_output_symbol_hook
   (struct bfd_link_info *, const char *, Elf_Internal_Sym *, asection *,
    struct elf_link_hash_entry *);
 static bfd_boolean sh64_backend_section_from_shdr
@@ -477,7 +477,7 @@ sh64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
    we don't need to look up and make sure to emit the main symbol for each
    DataLabel symbol.  */
 
-bfd_boolean
+static int
 sh64_elf_link_output_symbol_hook (struct bfd_link_info *info,
 				  const char *cname,
 				  Elf_Internal_Sym *sym,
@@ -492,7 +492,7 @@ sh64_elf_link_output_symbol_hook (struct bfd_link_info *info,
 	name[strlen (name) - strlen (DATALABEL_SUFFIX)] = 0;
     }
 
-  return TRUE;
+  return 1;
 }
 
 /* Check a SH64-specific reloc and put the value to relocate to into

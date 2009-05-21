@@ -927,7 +927,7 @@ elf32_cr16c_add_symbol_hook (bfd *abfd,
   return TRUE;
 }
 
-static bfd_boolean
+static int
 elf32_cr16c_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 				     const char *name ATTRIBUTE_UNUSED,
 				     Elf_Internal_Sym *sym,
@@ -946,7 +946,7 @@ elf32_cr16c_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED
 	sym->st_shndx = SHN_CR16C_NCOMMON;
     }
 
-  return TRUE;
+  return 1;
 }
 
 /* Definitions for setting CR16C target vector.  */

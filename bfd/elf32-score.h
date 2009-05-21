@@ -61,7 +61,7 @@ s7_bfd_score_elf_add_symbol_hook (bfd *,
 extern void
 s7_bfd_score_elf_symbol_processing (bfd *, asymbol *);
 
-extern bfd_boolean
+extern int
 s7_bfd_score_elf_link_output_symbol_hook (struct bfd_link_info *,
                                           const char *,
                                           Elf_Internal_Sym *,

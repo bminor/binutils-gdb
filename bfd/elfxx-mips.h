@@ -41,7 +41,7 @@ extern bfd_boolean _bfd_mips_elf_section_from_bfd_section
 extern bfd_boolean _bfd_mips_elf_add_symbol_hook
   (bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
    const char **, flagword *, asection **, bfd_vma *);
-extern bfd_boolean _bfd_mips_elf_link_output_symbol_hook
+extern int _bfd_mips_elf_link_output_symbol_hook
   (struct bfd_link_info *, const char *, Elf_Internal_Sym *,
    asection *, struct elf_link_hash_entry *);
 extern bfd_boolean _bfd_mips_elf_create_dynamic_sections

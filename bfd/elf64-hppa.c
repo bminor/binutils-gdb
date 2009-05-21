@@ -184,7 +184,7 @@ static bfd_boolean elf64_hppa_mark_milli_and_exported_functions
 static bfd_boolean elf64_hppa_size_dynamic_sections
   (bfd *, struct bfd_link_info *);
 
-static bfd_boolean elf64_hppa_link_output_symbol_hook
+static int elf64_hppa_link_output_symbol_hook
   (struct bfd_link_info *, const char *, Elf_Internal_Sym *,
    asection *, struct elf_link_hash_entry *);
 
@@ -1914,7 +1914,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
    the symbols have their expected value in the normal symbol
    table.  Ick.  */
 
-static bfd_boolean
+static int
 elf64_hppa_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 				    const char *name,
 				    Elf_Internal_Sym *sym,
@@ -1926,7 +1926,7 @@ elf64_hppa_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
   /* We may be called with the file symbol or section symbols.
      They never need munging, so it is safe to ignore them.  */
   if (!name || !eh)
-    return TRUE;
+    return 1;
 
   /* Function symbols for which we created .opd entries *may* have been
      munged by finish_dynamic_symbol and have to be un-munged here.
@@ -1942,7 +1942,7 @@ elf64_hppa_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       sym->st_shndx = hh->st_shndx;
     }
 
-  return TRUE;
+  return 1;
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various

@@ -1,5 +1,38 @@
 2009-05-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct elf_backend_data
+	<elf_backend_link_output_symbol_hook>): Return an int.
+	* elf64-ppc.c (ppc64_elf_output_symbol_hook): Return 2 to drop
+	symbols on deleted .opd entries.
+	* elflink.c (elf_link_output_sym): Return without outputting sym
+	if output_symbol_hook returns 2.
+	(elf_link_output_extsym): Don't assign h->indx when symbol discarded.
+	Abort if we must not discard sym.
+	(elf_link_input_bfd): Similarly, don't set finfo->indices for
+	local syms.
+	(bfd_elf_final_link): Adjust elf_link_output_sym calls.
+	* elf-vxworks.c (elf_vxworks_link_output_symbol_hook): Adjust for
+	elf_backend_link_output_symbol_hook return type change.
+	* elf32-arm.c (output_arch_syminfo): Likewise.
+	(elf32_arm_output_map_sym, elf32_arm_output_stub_sym): Likewise.
+	(elf32_arm_output_arch_local_syms): Likewise.
+	* elf32-cr16c.c (elf32_cr16c_link_output_symbol_hook): Likewise.
+	* elf32-score.c (s3_bfd_score_elf_link_output_symbol_hook): Likewise.
+	(bfd_score_elf_link_output_symbol_hook): Likewise.
+	* elf32-score.h (s7_bfd_score_elf_link_output_symbol_hook): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_link_output_symbol_hook): Likewise.
+	* elf32-sh64.c (sh64_elf_link_output_symbol_hook): Likewise.
+	* elf32-spu.c (spu_elf_output_symbol_hook): Likewise.
+	* elf32-v850.c (v850_elf_link_output_symbol_hook): Likewise.
+	* elf64-hppa.c (elf64_hppa_link_output_symbol_hook): Likewise.
+	* elf64-mmix.c (mmix_elf_link_output_symbol_hook): Likewise.
+	* elf64-sh64.c (sh64_elf64_link_output_symbol_hook): Likewise.
+	* elf64-sparc.c (elf64_sparc_output_arch_syms): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_link_output_symbol_hook): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_link_output_symbol_hook): Likewise.
+
+2009-05-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Don't segfault on
 	out of range .opd symbols.
 

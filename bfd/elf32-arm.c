@@ -11998,8 +11998,8 @@ typedef struct
   struct bfd_link_info *info;
   asection *sec;
   int sec_shndx;
-  bfd_boolean (*func) (void *, const char *, Elf_Internal_Sym *,
-		       asection *, struct elf_link_hash_entry *);
+  int (*func) (void *, const char *, Elf_Internal_Sym *,
+	       asection *, struct elf_link_hash_entry *);
 } output_arch_syminfo;
 
 enum map_symbol_type
@@ -12029,9 +12029,7 @@ elf32_arm_output_map_sym (output_arch_syminfo *osi,
   sym.st_other = 0;
   sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_NOTYPE);
   sym.st_shndx = osi->sec_shndx;
-  if (!osi->func (osi->finfo, names[type], &sym, osi->sec, NULL))
-    return FALSE;
-  return TRUE;
+  return osi->func (osi->finfo, names[type], &sym, osi->sec, NULL) == 1;
 }
 
 
@@ -12129,9 +12127,7 @@ elf32_arm_output_stub_sym (output_arch_syminfo *osi, const char *name,
   sym.st_other = 0;
   sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FUNC);
   sym.st_shndx = osi->sec_shndx;
-  if (!osi->func (osi->finfo, name, &sym, osi->sec, NULL))
-    return FALSE;
-  return TRUE;
+  return osi->func (osi->finfo, name, &sym, osi->sec, NULL) == 1;
 }
 
 static bfd_boolean
@@ -12244,10 +12240,10 @@ static bfd_boolean
 elf32_arm_output_arch_local_syms (bfd *output_bfd,
 				  struct bfd_link_info *info,
 				  void *finfo,
-				  bfd_boolean (*func) (void *, const char *,
-						       Elf_Internal_Sym *,
-						       asection *,
-						       struct elf_link_hash_entry *))
+				  int (*func) (void *, const char *,
+					       Elf_Internal_Sym *,
+					       asection *,
+					       struct elf_link_hash_entry *))
 {
   output_arch_syminfo osi;
   struct elf32_arm_link_hash_table *htab;

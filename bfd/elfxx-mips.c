@@ -6785,7 +6785,7 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
    symbol.  We mark symbols as small common if appropriate.  This is
    also where we undo the increment of the value for a mips16 symbol.  */
 
-bfd_boolean
+int
 _bfd_mips_elf_link_output_symbol_hook
   (struct bfd_link_info *info ATTRIBUTE_UNUSED,
    const char *name ATTRIBUTE_UNUSED, Elf_Internal_Sym *sym,
@@ -6801,7 +6801,7 @@ _bfd_mips_elf_link_output_symbol_hook
   if (ELF_ST_IS_MIPS16 (sym->st_other))
     sym->st_value &= ~1;
 
-  return TRUE;
+  return 1;
 }
 
 /* Functions for the dynamic linker.  */

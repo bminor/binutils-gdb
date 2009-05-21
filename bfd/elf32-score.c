@@ -3068,7 +3068,7 @@ s3_bfd_score_elf_symbol_processing (bfd *abfd, asymbol *asym)
     }
 }
 
-static bfd_boolean
+static int
 s3_bfd_score_elf_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
                                           const char *name ATTRIBUTE_UNUSED,
                                           Elf_Internal_Sym *sym,
@@ -3081,7 +3081,7 @@ s3_bfd_score_elf_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_U
   if (sym->st_shndx == SHN_COMMON && strcmp (input_sec->name, ".scommon") == 0)
     sym->st_shndx = SHN_SCORE_SCOMMON;
 
-  return TRUE;
+  return 1;
 }
 
 static bfd_boolean
@@ -4179,7 +4179,7 @@ _bfd_score_elf_symbol_processing (bfd *abfd, asymbol *asym)
     return s7_bfd_score_elf_symbol_processing (abfd, asym);
 }
 
-static bfd_boolean
+static int
 _bfd_score_elf_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
      const char *name ATTRIBUTE_UNUSED,
      Elf_Internal_Sym *sym,
@@ -4194,7 +4194,7 @@ _bfd_score_elf_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNU
          common in the output file.  */
       if (sym->st_shndx == SHN_COMMON && strcmp (input_sec->name, ".scommon") == 0)
         sym->st_shndx = SHN_SCORE_SCOMMON;
-      return TRUE;
+      return 1;
     }
 
   if (bfd_get_mach (info->input_bfds) == bfd_mach_score3)
