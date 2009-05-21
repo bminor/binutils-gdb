@@ -1959,16 +1959,7 @@ coff_print_symbol (bfd *abfd,
 		   combined->u.syment.n_type,
 		   combined->u.syment.n_sclass,
 		   combined->u.syment.n_numaux);
-#ifdef BFD64
-	  /* fprintf_vma() on a 64-bit enabled host will always print a 64-bit
-	     value, but really we want to display the address in the target's
-	     address size.  Since we do not have a field in the bfd structure
-	     to tell us this, we take a guess, based on the target's name.  */
-	  if (strstr (bfd_get_target (abfd), "64") == NULL)
-	    fprintf (file, "%08lx", (unsigned long) (val & 0xffffffff));
-	  else
-#endif
-	    fprintf_vma (file, val);
+	  bfd_fprintf_vma (abfd, file, val);
 	  fprintf (file, " %s", symbol->name);
 
 	  for (aux = 0; aux < combined->u.syment.n_numaux; aux++)
@@ -2051,7 +2042,7 @@ coff_print_symbol (bfd *abfd,
 	      while (l->line_number)
 		{
 		  fprintf (file, "\n%4d : ", l->line_number);
-		  fprintf_vma (file, l->u.offset + symbol->section->vma);
+		  bfd_fprintf_vma (abfd, file, l->u.offset + symbol->section->vma);
 		  l++;
 		}
 	    }

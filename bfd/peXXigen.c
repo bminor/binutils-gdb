@@ -1469,7 +1469,7 @@ pe_print_edata (bfd * abfd, void * vfile)
 
   fprintf (file,
 	   _("Name \t\t\t\t"));
-  fprintf_vma (file, edt.name);
+  bfd_fprintf_vma (abfd, file, edt.name);
   fprintf (file,
 	   " %s\n", data + edt.name - adj);
 
@@ -1491,17 +1491,17 @@ pe_print_edata (bfd * abfd, void * vfile)
 
   fprintf (file,
 	   _("\tExport Address Table \t\t"));
-  fprintf_vma (file, edt.eat_addr);
+  bfd_fprintf_vma (abfd, file, edt.eat_addr);
   fprintf (file, "\n");
 
   fprintf (file,
 	   _("\tName Pointer Table \t\t"));
-  fprintf_vma (file, edt.npt_addr);
+  bfd_fprintf_vma (abfd, file, edt.npt_addr);
   fprintf (file, "\n");
 
   fprintf (file,
 	   _("\tOrdinal Table \t\t\t"));
-  fprintf_vma (file, edt.ot_addr);
+  bfd_fprintf_vma (abfd, file, edt.ot_addr);
   fprintf (file, "\n");
 
   /* The next table to find is the Export Address Table. It's basically
@@ -1666,14 +1666,14 @@ pe_print_pdata (bfd * abfd, void * vfile)
       prolog_end_addr &= ~(bfd_vma) 0x3;
 
       fputc (' ', file);
-      fprintf_vma (file, i + section->vma); fputc ('\t', file);
-      fprintf_vma (file, begin_addr); fputc (' ', file);
-      fprintf_vma (file, end_addr); fputc (' ', file);
-      fprintf_vma (file, eh_handler);
+      bfd_fprintf_vma (abfd, file, i + section->vma); fputc ('\t', file);
+      bfd_fprintf_vma (abfd, file, begin_addr); fputc (' ', file);
+      bfd_fprintf_vma (abfd, file, end_addr); fputc (' ', file);
+      bfd_fprintf_vma (abfd, file, eh_handler);
 #if !defined(COFF_WITH_pep) || defined(COFF_WITH_pex64)
       fputc (' ', file);
-      fprintf_vma (file, eh_data); fputc (' ', file);
-      fprintf_vma (file, prolog_end_addr);
+      bfd_fprintf_vma (abfd, file, eh_data); fputc (' ', file);
+      bfd_fprintf_vma (abfd, file, prolog_end_addr);
       fprintf (file, "   %x", em_data);
 #endif
 
@@ -1838,10 +1838,10 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
       exception_flag = (int)((other_data & 0x80000000) >> 31);
 
       fputc (' ', file);
-      fprintf_vma (file, i + section->vma); fputc ('\t', file);
-      fprintf_vma (file, begin_addr); fputc (' ', file);
-      fprintf_vma (file, prolog_length); fputc (' ', file);
-      fprintf_vma (file, function_length); fputc (' ', file);
+      bfd_fprintf_vma (abfd, file, i + section->vma); fputc ('\t', file);
+      bfd_fprintf_vma (abfd, file, begin_addr); fputc (' ', file);
+      bfd_fprintf_vma (abfd, file, prolog_length); fputc (' ', file);
+      bfd_fprintf_vma (abfd, file, function_length); fputc (' ', file);
       fprintf (file, "%2d  %2d   ", flag32bit, exception_flag);
 
       /* Get the exception handler's address and the data passed from the
@@ -2068,21 +2068,21 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
   fprintf (file, "SizeOfUninitializedData\t%08lx\n",
 	   (unsigned long) i->SizeOfUninitializedData);
   fprintf (file, "AddressOfEntryPoint\t");
-  fprintf_vma (file, i->AddressOfEntryPoint);
+  bfd_fprintf_vma (abfd, file, i->AddressOfEntryPoint);
   fprintf (file, "\nBaseOfCode\t\t");
-  fprintf_vma (file, i->BaseOfCode);
+  bfd_fprintf_vma (abfd, file, i->BaseOfCode);
 #if !defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
   /* PE32+ does not have BaseOfData member!  */
   fprintf (file, "\nBaseOfData\t\t");
-  fprintf_vma (file, i->BaseOfData);
+  bfd_fprintf_vma (abfd, file, i->BaseOfData);
 #endif
 
   fprintf (file, "\nImageBase\t\t");
-  fprintf_vma (file, i->ImageBase);
+  bfd_fprintf_vma (abfd, file, i->ImageBase);
   fprintf (file, "\nSectionAlignment\t");
-  fprintf_vma (file, i->SectionAlignment);
+  bfd_fprintf_vma (abfd, file, i->SectionAlignment);
   fprintf (file, "\nFileAlignment\t\t");
-  fprintf_vma (file, i->FileAlignment);
+  bfd_fprintf_vma (abfd, file, i->FileAlignment);
   fprintf (file, "\nMajorOSystemVersion\t%d\n", i->MajorOperatingSystemVersion);
   fprintf (file, "MinorOSystemVersion\t%d\n", i->MinorOperatingSystemVersion);
   fprintf (file, "MajorImageVersion\t%d\n", i->MajorImageVersion);
@@ -2141,13 +2141,13 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
     fprintf (file, "\t(%s)", subsystem_name);
   fprintf (file, "\nDllCharacteristics\t%08x\n", i->DllCharacteristics);
   fprintf (file, "SizeOfStackReserve\t");
-  fprintf_vma (file, i->SizeOfStackReserve);
+  bfd_fprintf_vma (abfd, file, i->SizeOfStackReserve);
   fprintf (file, "\nSizeOfStackCommit\t");
-  fprintf_vma (file, i->SizeOfStackCommit);
+  bfd_fprintf_vma (abfd, file, i->SizeOfStackCommit);
   fprintf (file, "\nSizeOfHeapReserve\t");
-  fprintf_vma (file, i->SizeOfHeapReserve);
+  bfd_fprintf_vma (abfd, file, i->SizeOfHeapReserve);
   fprintf (file, "\nSizeOfHeapCommit\t");
-  fprintf_vma (file, i->SizeOfHeapCommit);
+  bfd_fprintf_vma (abfd, file, i->SizeOfHeapCommit);
   fprintf (file, "\nLoaderFlags\t\t%08lx\n", (unsigned long) i->LoaderFlags);
   fprintf (file, "NumberOfRvaAndSizes\t%08lx\n",
 	   (unsigned long) i->NumberOfRvaAndSizes);
@@ -2156,7 +2156,7 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
   for (j = 0; j < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; j++)
     {
       fprintf (file, "Entry %1x ", j);
-      fprintf_vma (file, i->DataDirectory[j].VirtualAddress);
+      bfd_fprintf_vma (abfd, file, i->DataDirectory[j].VirtualAddress);
       fprintf (file, " %08lx ", (unsigned long) i->DataDirectory[j].Size);
       fprintf (file, "%s\n", dir_names[j]);
     }

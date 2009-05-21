@@ -1,3 +1,12 @@
+2009-05-21  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* coffgen.c (coff_print_symbol):  Use bfd_fprintf_vma, not
+	fprintf_vma directly.
+	* peXXigen.c (pe_print_edata):  Likewise.
+	(pe_print_pdata):  Likewise.
+	(_bfd_XX_print_ce_compressed_pdata):  Likewise.
+	(_bfd_XX_print_private_bfd_data_common):  Likewise.
+
 2009-05-19  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* cofflink.c (process_embedded_commands):  Ignore "-aligncomm".
