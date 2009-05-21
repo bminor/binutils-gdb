@@ -1,3 +1,11 @@
+2009-05-21  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-pe/aligncomm-1.c (_alloca):  Add dummy definition to
+	satisfy final link on Windows targets when using gcc-3.
+	* ld-pe/aligncomm-2.c (_alloca):  Likewise.
+	* ld-pe/aligncomm-3.c (_alloca):  Likewise.
+	* ld-pe/aligncomm-4.c (_alloca):  Likewise.
+
 2009-05-20  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* lib/ld-lib.exp (run_ld_link_tests):  Filter test names against

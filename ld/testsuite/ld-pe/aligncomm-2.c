@@ -18,3 +18,9 @@ void __main (void)
 	"  .ascii \" -aligncomm:r,4\"\n"
 	"  .text");
 }
+
+#if defined (__CYGWIN__) || defined (__MINGW32__)
+void _alloca (void)
+{
+}
+#endif
