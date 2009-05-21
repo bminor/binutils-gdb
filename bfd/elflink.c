@@ -9065,8 +9065,6 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
       if (osym.st_shndx == SHN_BAD)
 	return FALSE;
 
-      *pindex = bfd_get_symcount (output_bfd);
-
       /* ELF symbols in relocatable files are section relative, but
 	 in executable files they are virtual addresses.  Note that
 	 this code assumes that all ELF sections have an associated

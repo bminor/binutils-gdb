@@ -1,5 +1,10 @@
 2009-05-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (elf_link_input_bfd): Correct *pindex change in last
+	commit.
+
+2009-05-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (struct elf_backend_data
 	<elf_backend_link_output_symbol_hook>): Return an int.
 	* elf64-ppc.c (ppc64_elf_output_symbol_hook): Return 2 to drop
