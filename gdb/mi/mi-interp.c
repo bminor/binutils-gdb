@@ -419,7 +419,7 @@ mi_on_resume (ptid_t ptid)
 {
   struct thread_info *tp = NULL;
 
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
     tp = inferior_thread ();
   else
     tp = find_thread_pid (ptid);

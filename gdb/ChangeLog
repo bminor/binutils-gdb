@@ -1,3 +1,8 @@
+2009-05-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* mi/mi-interp.c (mi_on_resume): Account for whole process
+	resumes.
+
 2009-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* m2-exp.y (MAX_FUNC): Fix trailing UNOP_MAX.
