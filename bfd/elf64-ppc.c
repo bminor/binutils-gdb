@@ -3033,6 +3033,10 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	{
 	  bfd_vma ent;
 
+	  /* Ignore bogus symbols.  */
+	  if (syms[i]->value > opd->size - 8)
+	    continue;
+
 	  ent = bfd_get_64 (abfd, contents + syms[i]->value);
 	  if (!sym_exists_at (syms, opdsymend, symcount, -1, ent))
 	    {
@@ -3125,6 +3129,9 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
       for (i = secsymend; i < opdsymend; ++i)
 	{
 	  bfd_vma ent;
+
+	  if (syms[i]->value > opd->size - 8)
+	    continue;
 
 	  ent = bfd_get_64 (abfd, contents + syms[i]->value);
 	  if (!sym_exists_at (syms, opdsymend, symcount, -1, ent))
