@@ -695,7 +695,7 @@ gdb_cntrl_c (int signo)
 
 static ptid_t
 m32r_wait (struct target_ops *ops,
-	   ptid_t ptid, struct target_waitstatus *status)
+	   ptid_t ptid, struct target_waitstatus *status, int options)
 {
   static RETSIGTYPE (*prev_sigint) ();
   unsigned long bp_addr, pc_addr;

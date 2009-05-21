@@ -452,14 +452,14 @@ get_active_ptid (void)
 
 static ptid_t
 dec_thread_wait (struct target_ops *ops,
-		 ptid_t ptid, struct target_waitstatus *status)
+		 ptid_t ptid, struct target_waitstatus *status, int options)
 {
   ptid_t active_ptid;
   struct target_ops *beneath = find_target_beneath (ops);
 
   debug ("dec_thread_wait");
 
-  ptid = beneath->to_wait (beneath, ptid, status);
+  ptid = beneath->to_wait (beneath, ptid, status, options);
 
   /* The ptid returned by the target beneath us is the ptid of the process.
      We need to find which thread is currently active and return its ptid.  */
