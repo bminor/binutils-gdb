@@ -1,5 +1,9 @@
 2009-05-21  Pedro Alves  <pedro@codesourcery.com>
 
+	* aix-thread.c (init_aix_thread_ops): Whitespace.
+
+2009-05-21  Pedro Alves  <pedro@codesourcery.com>
+
 	* dec-thread.c (dec_thread_wait): Add options parameter.  Use it
 	to call the to_wait method in the target beneath.
 	* remote-m32r-sdi.c (m32r_wait): Add options parameter.

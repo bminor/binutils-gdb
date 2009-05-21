@@ -1792,26 +1792,26 @@ aix_thread_get_ada_task_ptid (long lwp, long thread)
 static void
 init_aix_thread_ops (void)
 {
-  aix_thread_ops.to_shortname          = "aix-threads";
-  aix_thread_ops.to_longname           = _("AIX pthread support");
-  aix_thread_ops.to_doc                = _("AIX pthread support");
+  aix_thread_ops.to_shortname = "aix-threads";
+  aix_thread_ops.to_longname = _("AIX pthread support");
+  aix_thread_ops.to_doc = _("AIX pthread support");
 
-  aix_thread_ops.to_attach             = aix_thread_attach;
-  aix_thread_ops.to_detach             = aix_thread_detach;
-  aix_thread_ops.to_resume             = aix_thread_resume;
-  aix_thread_ops.to_wait               = aix_thread_wait;
-  aix_thread_ops.to_fetch_registers    = aix_thread_fetch_registers;
-  aix_thread_ops.to_store_registers    = aix_thread_store_registers;
-  aix_thread_ops.to_xfer_partial       = aix_thread_xfer_partial;
+  aix_thread_ops.to_attach = aix_thread_attach;
+  aix_thread_ops.to_detach = aix_thread_detach;
+  aix_thread_ops.to_resume = aix_thread_resume;
+  aix_thread_ops.to_wait = aix_thread_wait;
+  aix_thread_ops.to_fetch_registers = aix_thread_fetch_registers;
+  aix_thread_ops.to_store_registers = aix_thread_store_registers;
+  aix_thread_ops.to_xfer_partial = aix_thread_xfer_partial;
   /* No need for aix_thread_ops.to_create_inferior, because we activate thread
      debugging when the inferior reaches pd_brk_addr.  */
-  aix_thread_ops.to_mourn_inferior     = aix_thread_mourn_inferior;
-  aix_thread_ops.to_thread_alive       = aix_thread_thread_alive;
-  aix_thread_ops.to_pid_to_str         = aix_thread_pid_to_str;
-  aix_thread_ops.to_extra_thread_info  = aix_thread_extra_thread_info;
-  aix_thread_ops.to_get_ada_task_ptid  = aix_thread_get_ada_task_ptid;
-  aix_thread_ops.to_stratum            = thread_stratum;
-  aix_thread_ops.to_magic              = OPS_MAGIC;
+  aix_thread_ops.to_mourn_inferior = aix_thread_mourn_inferior;
+  aix_thread_ops.to_thread_alive = aix_thread_thread_alive;
+  aix_thread_ops.to_pid_to_str = aix_thread_pid_to_str;
+  aix_thread_ops.to_extra_thread_info = aix_thread_extra_thread_info;
+  aix_thread_ops.to_get_ada_task_ptid = aix_thread_get_ada_task_ptid;
+  aix_thread_ops.to_stratum = thread_stratum;
+  aix_thread_ops.to_magic = OPS_MAGIC;
 }
 
 /* Module startup initialization function, automagically called by
