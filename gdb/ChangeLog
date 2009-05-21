@@ -1,3 +1,8 @@
+2009-05-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* aix-thread.c (aix_thread_wait): Add options parameter.  Use it
+	to call the to_wait method in the target_beneath.
+
 2009-05-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_nat_terminal_inferior)

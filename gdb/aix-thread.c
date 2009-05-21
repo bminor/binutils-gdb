@@ -1012,7 +1012,7 @@ aix_thread_resume (struct target_ops *ops,
 
 static ptid_t
 aix_thread_wait (struct target_ops *ops,
-		 ptid_t ptid, struct target_waitstatus *status)
+		 ptid_t ptid, struct target_waitstatus *status, int options)
 {
   struct cleanup *cleanup = save_inferior_ptid ();
   struct target_ops *beneath = find_target_beneath (ops);
@@ -1020,7 +1020,7 @@ aix_thread_wait (struct target_ops *ops,
   pid_to_prc (&ptid);
 
   inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-  ptid = beneath->to_wait (beneath, ptid, status);
+  ptid = beneath->to_wait (beneath, ptid, status, options);
   do_cleanups (cleanup);
 
   if (PIDGET (ptid) == -1)
