@@ -4078,19 +4078,12 @@ remote_terminal_inferior (void)
     /* Nothing to do.  */
     return;
 
-  /* FIXME: cagney/1999-09-27: Shouldn't need to test for
-     sync_execution here.  This function should only be called when
-     GDB is resuming the inferior in the forground.  A background
-     resume (``run&'') should leave GDB in control of the terminal and
-     consequently should not call this code.  */
-  if (!sync_execution)
-    return;
-  /* FIXME: cagney/1999-09-27: Closely related to the above.  Make
-     calls target_terminal_*() idenpotent. The event-loop GDB talking
-     to an asynchronous target with a synchronous command calls this
-     function from both event-top.c and infrun.c/infcmd.c.  Once GDB
-     stops trying to transfer the terminal to the target when it
-     shouldn't this guard can go away.  */
+  /* FIXME: cagney/1999-09-27: Make calls to target_terminal_*()
+     idempotent.  The event-loop GDB talking to an asynchronous target
+     with a synchronous command calls this function from both
+     event-top.c and infrun.c/infcmd.c.  Once GDB stops trying to
+     transfer the terminal to the target when it shouldn't this guard
+     can go away.  */
   if (!remote_async_terminal_ours_p)
     return;
   delete_file_handler (input_fd);
@@ -4108,9 +4101,6 @@ remote_terminal_ours (void)
     /* Nothing to do.  */
     return;
 
-  /* See FIXME in remote_terminal_inferior.  */
-  if (!sync_execution)
-    return;
   /* See FIXME in remote_terminal_inferior.  */
   if (remote_async_terminal_ours_p)
     return;

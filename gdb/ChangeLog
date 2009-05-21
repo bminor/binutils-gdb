@@ -1,5 +1,19 @@
 2009-05-21  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (linux_nat_terminal_inferior)
+	(linux_nat_terminal_ours): Don't check sync_execution.
+	* remote.c (remote_terminal_inferior, remote_terminal_ours):
+	Don't check sync_execution.  Update comments.
+	* target.c (target_terminal_inferior): New.
+	* target.h (target_terminal_inferior): Delete macro, and declare
+	as function.
+	* event-top.c (async_disable_stdin): Make idempotent.  Don't give
+	the target the terminal here.
+	* inflow.c (terminal_ours_1): Don't return early without setting
+	`terminal_is_ours'.
+
+2009-05-21  Pedro Alves  <pedro@codesourcery.com>
+
 	* target.h (TARGET_WNOHANG): New.
 	* target.c (target_wait): Add `options' argument.  Adjust.
 	(struct target_ops) <to_wait>: Add `options' argument.

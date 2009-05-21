@@ -4360,14 +4360,9 @@ linux_nat_terminal_inferior (void)
       return;
     }
 
-  /* GDB should never give the terminal to the inferior, if the
-     inferior is running in the background (run&, continue&, etc.).
-     This check can be removed when the common code is fixed.  */
-  if (!sync_execution)
-    return;
-
   terminal_inferior ();
 
+  /* Calls to target_terminal_*() are meant to be idempotent.  */
   if (!async_terminal_is_ours)
     return;
 
@@ -4392,9 +4387,6 @@ linux_nat_terminal_ours (void)
      inferior is running in the background (run&, continue&, etc.),
      but claiming it sure should.  */
   terminal_ours ();
-
-  if (!sync_execution)
-    return;
 
   if (async_terminal_is_ours)
     return;

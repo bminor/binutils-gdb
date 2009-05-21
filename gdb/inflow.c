@@ -361,6 +361,8 @@ terminal_ours_1 (int output_only)
   if (terminal_is_ours)
     return;
 
+  terminal_is_ours = 1;
+
   /* Checking inferior->run_terminal is necessary so that
      if GDB is running in the background, it won't block trying
      to do the ioctl()'s below.  Checking gdb_has_a_terminal
@@ -371,7 +373,6 @@ terminal_ours_1 (int output_only)
   if (inf->terminal_info->run_terminal != NULL || gdb_has_a_terminal () == 0)
     return;
 
-  if (!terminal_is_ours)
     {
 #ifdef SIGTTOU
       /* Ignore this signal since it will happen when we try to set the
@@ -379,8 +380,6 @@ terminal_ours_1 (int output_only)
       void (*osigttou) () = NULL;
 #endif
       int result;
-
-      terminal_is_ours = 1;
 
 #ifdef SIGTTOU
       if (job_control)

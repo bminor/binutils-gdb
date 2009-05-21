@@ -763,8 +763,7 @@ extern void print_section_info (struct target_ops *, bfd *);
 /* Put the inferior's terminal settings into effect.
    This is preparation for starting or resuming the inferior.  */
 
-#define target_terminal_inferior() \
-     (*current_target.to_terminal_inferior) ()
+extern void target_terminal_inferior (void);
 
 /* Put some of our terminal settings into effect,
    enough to get proper results from our output,

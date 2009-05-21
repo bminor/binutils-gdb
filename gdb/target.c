@@ -301,6 +301,18 @@ target_create_inferior (char *exec_file, char *args,
 		  "could not find a target to create inferior");
 }
 
+void
+target_terminal_inferior (void)
+{
+  /* A background resume (``run&'') should leave GDB in control of the
+     terminal.  */
+  if (target_is_async_p () && !sync_execution)
+    return;
+
+  /* If GDB is resuming the inferior in the foreground, install
+     inferior's terminal modes.  */
+  (*current_target.to_terminal_inferior) ();
+}
 
 static int
 nomemory (CORE_ADDR memaddr, char *myaddr, int len, int write,

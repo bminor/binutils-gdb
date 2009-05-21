@@ -458,14 +458,11 @@ async_enable_stdin (void)
 void
 async_disable_stdin (void)
 {
-  sync_execution = 1;
-  push_prompt ("", "", "");
-  /* FIXME: cagney/1999-09-27: At present this call is technically
-     redundant since infcmd.c and infrun.c both already call
-     target_terminal_inferior().  As the terminal handling (in
-     sync/async mode) is refined, the duplicate calls can be
-     eliminated (Here or in infcmd.c/infrun.c). */
-  target_terminal_inferior ();
+  if (!sync_execution)
+    {
+      sync_execution = 1;
+      push_prompt ("", "", "");
+    }
 }
 
 
