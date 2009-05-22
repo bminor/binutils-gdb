@@ -1,3 +1,9 @@
+2009-05-22  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ldlang.c (lang_check_section_addresses): Ignore non-loadable
+	sections when checking for overlap.  Clarify error message
+	concerns load address.
+
 2009-05-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

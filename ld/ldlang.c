@@ -4498,7 +4498,8 @@ lang_check_section_addresses (void)
   for (s = link_info.output_bfd->sections; s != NULL; s = s->next)
     {
       /* Only consider loadable sections with real contents.  */
-      if (IGNORE_SECTION (s) || s->size == 0)
+      if ((s->flags & SEC_NEVER_LOAD) || !(s->flags & SEC_LOAD)
+	  || s->size == 0)
 	continue;
 
       sections[count] = s;
@@ -4529,7 +4530,7 @@ lang_check_section_addresses (void)
 
       /* Look for an overlap.  */
       if (s_end >= os_start && s_start <= os_end)
-	einfo (_("%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"),
+	einfo (_("%X%P: section %s loaded at [%V,%V] overlaps section %s loaded at [%V,%V]\n"),
 	       s->name, s_start, s_end, os->name, os_start, os_end);
     }
 

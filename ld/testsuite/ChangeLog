@@ -1,3 +1,8 @@
+2009-05-22  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/rgn-at4.t: New.
+	* ld-scripts/rgn-at4.d: New.
+
 2009-05-21  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-pe/aligncomm-1.c (_alloca):  Add dummy definition to
