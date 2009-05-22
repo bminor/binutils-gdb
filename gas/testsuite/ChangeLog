@@ -60,7 +60,7 @@
 	Provide an alternative test for targets which do not support ifunc
 	symbols.
 	gas/elf/type.s: Add entry for an ifunc symbol.
-	gas/elftype.e: Add ifunc entry to expected symbol dump.
+	gas/elf/type.e: Add ifunc entry to expected symbol dump.
 	gas/elf/section2.e-armelf: Add  entry for ifunc symbol.
 	gas/elf/type-noifunc.s: New file.
 	gas/elf/type-noifunc.e: Likewise.
