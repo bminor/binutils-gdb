@@ -7152,7 +7152,6 @@ compare_sections_command (char *args, int from_tty)
   struct remote_state *rs = get_remote_state ();
   asection *s;
   unsigned long host_crc, target_crc;
-  extern bfd *exec_bfd;
   struct cleanup *old_chain;
   char *tmp;
   char *sectdata;

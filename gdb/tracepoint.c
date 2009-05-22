@@ -40,6 +40,7 @@
 #include "observer.h"
 #include "user-regs.h"
 #include "valprint.h"
+#include "gdbcore.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -1247,7 +1248,6 @@ static long target_buf_size;
 static void
 remote_set_transparent_ranges (void)
 {
-  extern bfd *exec_bfd;
   asection *s;
   bfd_size_type size;
   bfd_vma lma;

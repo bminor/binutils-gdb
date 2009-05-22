@@ -1,3 +1,9 @@
+2009-05-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (compare_sections_command): Don't declare exec_bfd.
+	* tracepoint.c: Include "gdbcore.h".
+	(remote_set_transparent_ranges): Don't declare exec_bfd.
+
 2009-05-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* aix-thread.c (init_aix_thread_ops): Whitespace.
