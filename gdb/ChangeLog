@@ -1,5 +1,22 @@
 2009-05-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* bfd-target.c: Don't include gdb_assert.h or gdb_string.h.
+	Include exec.h.
+	(struct section_closure): Delete.
+	(add_to_section_table): Delete.
+	(build_target_sections_from_bfd): Delete.
+	(target_bfd_xfer_partial): Use section_table_xfer_memory_partial.
+	(target_bfd_reopen): Use build_section_table.
+	* exec.c (xfer_memory): Move most code except for overlay
+	debugging support from here...
+	(section_table_xfer_memory): ... to this new function.
+	(section_table_xfer_memory_partial): New.
+	* exec.h (section_table_xfer_memory_partial): Declare.
+	* bfd-target.h (build_target_sections_from_bfd): Delete
+	declaration.
+
+2009-05-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote.c (compare_sections_command): Don't declare exec_bfd.
 	* tracepoint.c: Include "gdbcore.h".
 	(remote_set_transparent_ranges): Don't declare exec_bfd.

@@ -446,10 +446,16 @@ map_vmap (bfd *abfd, bfd *arch)
   return vp;
 }
 
-/* Read or write the exec file.
+/* Read or write from BFD executable files.
 
-   Args are address within a BFD file, address within gdb address-space,
-   length, and a flag indicating whether to read or write.
+   MEMADDR is an address within the target address space, MYADDR is an
+   address within GDB address-space where data is written to, LEN is
+   length of buffer, and WRITE indicates whether to read or write.
+   SECTIONS and SECTIONS_END defines a section table holding sections
+   from possibly multiple BFDs.
+
+   If SECTION_NAME is not NULL, only access sections with that same
+   name.
 
    Result is a length:
 
@@ -459,38 +465,28 @@ map_vmap (bfd *abfd, bfd *arch)
    to handle more bytes beyond this length, but no
    promises.
    < 0:  We cannot handle this address, but if somebody
-   else handles (-N) bytes, we can start from there.
+   else handles (-N) bytes, we can start from there.  */
 
-   The same routine is used to handle both core and exec files;
-   we just tail-call it with more arguments to select between them.  */
-
-int
-xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
-	     struct mem_attrib *attrib, struct target_ops *target)
+static int
+section_table_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr,
+			   int len, int write,
+			   struct section_table *sections,
+			   struct section_table *sections_end,
+			   const char *section_name)
 {
   int res;
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
-  struct obj_section *section = NULL;
 
   if (len <= 0)
     internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 
-  if (overlay_debugging)
-    {
-      section = find_pc_overlay (memaddr);
-      if (pc_in_unmapped_range (memaddr, section))
-	memaddr = overlay_mapped_address (memaddr, section);
-    }
-
   memend = memaddr + len;
   nextsectaddr = memend;
 
-  for (p = target->to_sections; p < target->to_sections_end; p++)
+  for (p = sections; p < sections_end; p++)
     {
-      if (overlay_debugging && section
-	  && strcmp (section->the_bfd_section->name,
-		     p->the_bfd_section->name) != 0)
+      if (section_name && strcmp (section_name, p->the_bfd_section->name) != 0)
 	continue;		/* not the section we need */
       if (memaddr >= p->addr)
         {
@@ -535,6 +531,66 @@ xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
     return 0;			/* We can't help */
   else
     return -(nextsectaddr - memaddr);	/* Next boundary where we can help */
+}
+
+int
+section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
+				   ULONGEST offset, LONGEST len,
+				   struct section_table *sections,
+				   struct section_table *sections_end)
+{
+  if (readbuf != NULL)
+    return section_table_xfer_memory (offset, readbuf, len, 0,
+				      sections, sections_end, NULL);
+  else
+    return section_table_xfer_memory (offset, (gdb_byte *) writebuf, len, 1,
+				      sections, sections_end, NULL);
+}
+
+/* Read or write the exec file.
+
+   Args are address within a BFD file, address within gdb address-space,
+   length, and a flag indicating whether to read or write.
+
+   Result is a length:
+
+   0:    We cannot handle this address and length.
+   > 0:  We have handled N bytes starting at this address.
+   (If N == length, we did it all.)  We might be able
+   to handle more bytes beyond this length, but no
+   promises.
+   < 0:  We cannot handle this address, but if somebody
+   else handles (-N) bytes, we can start from there.
+
+   The same routine is used to handle both core and exec files;
+   we just tail-call it with more arguments to select between them.  */
+
+int
+xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
+	     struct mem_attrib *attrib, struct target_ops *target)
+{
+  int res;
+  const char *section_name = NULL;
+
+  if (len <= 0)
+    internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+
+  if (overlay_debugging)
+    {
+      struct obj_section *section = find_pc_overlay (memaddr);
+
+      if (section != NULL)
+	{
+	  if (pc_in_unmapped_range (memaddr, section))
+	    memaddr = overlay_mapped_address (memaddr, section);
+	  section_name = section->the_bfd_section->name;
+	}
+    }
+
+  return section_table_xfer_memory (memaddr, myaddr, len, write,
+				    target->to_sections,
+				    target->to_sections_end,
+				    section_name);
 }
 
 

@@ -34,6 +34,24 @@ extern struct target_ops exec_ops;
 extern int build_section_table (struct bfd *, struct section_table **,
 				struct section_table **);
 
+/* Request to transfer up to LEN 8-bit bytes of the target sections
+   defined by SECTIONS and SECTIONS_END.  The OFFSET specifies the
+   starting address.
+
+   Return the number of bytes actually transfered, or non-positive
+   when no data is available for the requested range.
+
+   This function is intended to be used from target_xfer_partial
+   implementations.  See target_read and target_write for more
+   information.
+
+   One, and only one, of readbuf or writebuf must be non-NULL.  */
+
+extern int section_table_xfer_memory_partial (gdb_byte *, const gdb_byte *,
+					      ULONGEST, LONGEST,
+					      struct section_table *,
+					      struct section_table *);
+
 /* Set the loaded address of a section.  */
 extern void exec_set_section_address (const char *, int, CORE_ADDR);
 

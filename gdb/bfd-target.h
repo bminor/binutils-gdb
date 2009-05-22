@@ -28,10 +28,4 @@ struct target_ops;
    freopen and fdopen).  */
 struct target_ops *target_bfd_reopen (struct bfd *bfd);
 
-/* Map over ABFD's sections, creating corresponding entries in the
-   target's section table.  */
-
-void build_target_sections_from_bfd (struct target_ops *targ,
-				     struct bfd *abfd);
-
 #endif
