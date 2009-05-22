@@ -1,3 +1,7 @@
+2009-05-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-scripts/rgn-over7.d: Adjust expected message for recent change.
+
 2009-05-22  Julian Brown  <julian@codesourcery.com>
 
 	* ld-arm/cortex-a8-arm-target.s: New.
