@@ -1,3 +1,23 @@
+2009-05-22  Hui Zhu  <teawater@gmail.com>
+
+	Add sys_fcntl argument interfaces to linux_record_tdep.
+
+	* linux-record.h (linux_record_tdep): Add fcntl_F_GETLK,
+	fcntl_F_GETLK64, fcntl_F_SETLK64 and fcntl_F_SETLKW64 to be
+	interfaces.
+	* i386-linux-tdep.c (I386_LINUX_RECORD_FCNTL_F_GETLK,
+	I386_LINUX_RECORD_FCNTL_F_GETLK64,
+	I386_LINUX_RECORD_FCNTL_F_SETLK64,
+	I386_LINUX_RECORD_FCNTL_F_SETLKW64): New macros. The values
+	of I386 Linux sys_fcntl arguments.
+	(i386_linux_init_abi): Set macros values to linux_record_tdep.
+	* linux-record.c (record_linux_system_call): Change to use
+	the interface in linux_record_tdep in sys_fcntl and
+	sys_fcntl64.
+
+	* linux-record.c (record_linux_system_call): Fix the process
+	record build error about type in CYGWIN.
+
 2009-05-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* inflow.c (kill_command): Delete left over static declaration.
