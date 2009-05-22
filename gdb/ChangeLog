@@ -1,5 +1,9 @@
 2009-05-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* inflow.c (kill_command): Delete left over static declaration.
+
+2009-05-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* bfd-target.c: Don't include gdb_assert.h or gdb_string.h.
 	Include exec.h.
 	(struct section_closure): Delete.

@@ -51,8 +51,6 @@ extern void _initialize_inflow (void);
 
 static void pass_signal (int);
 
-static void kill_command (char *, int);
-
 static void terminal_ours_1 (int);
 
 /* Record terminal status separately for debugger and inferior.  */
