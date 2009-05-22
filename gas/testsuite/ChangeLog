@@ -54,6 +54,17 @@
 	* gas/arm/mapmisc.d: Correct expected output for .double and
 	.dcb.d.
 
+2009-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/elf.exp: Extend type test to include an ifunc symbol.
+	Provide an alternative test for targets which do not support ifunc
+	symbols.
+	gas/elf/type.s: Add entry for an ifunc symbol.
+	gas/elftype.e: Add ifunc entry to expected symbol dump.
+	gas/elf/section2.e-armelf: Add  entry for ifunc symbol.
+	gas/elf/type-noifunc.s: New file.
+	gas/elf/type-noifunc.e: Likewise.
+
 2009-04-24  Cary Coutant  <ccoutant@google.com>
 
 	* gas/lns/lns-common-1.d: Add test for discriminator.
