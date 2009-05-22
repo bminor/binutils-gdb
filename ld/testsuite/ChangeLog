@@ -1,3 +1,28 @@
+2009-05-22  Julian Brown  <julian@codesourcery.com>
+
+	* ld-arm/cortex-a8-arm-target.s: New.
+	* ld-arm/cortex-a8-thumb-target.s: New.
+	* ld-arm/cortex-a8-fix-b-rel.s: New.
+	* ld-arm/cortex-a8-fix-b-rel-arm.d: New.
+	* ld-arm/cortex-a8-fix-b-rel-thumb.d: New.
+	* ld-arm/cortex-a8-fix-b.s: New.
+	* ld-arm/cortex-a8-fix-b.d: New.
+	* ld-arm/cortex-a8-fix-bl-rel.s: New.
+	* ld-arm/cortex-a8-fix-bl-rel-arm.d: New.
+	* ld-arm/cortex-a8-fix-bl-rel-thumb.d: New.
+	* ld-arm/cortex-a8-fix-bl.s: New.
+	* ld-arm/cortex-a8-fix-bl.d: New.
+	* ld-arm/cortex-a8-fix-bcc-rel.s: New.
+	* ld-arm/cortex-a8-fix-bcc-rel-thumb.d: New.
+	* ld-arm/cortex-a8-fix-bcc.s: New.
+	* ld-arm/cortex-a8-fix-bcc.d: New.
+	* ld-arm/cortex-a8-fix-blx-rel.s: New.
+	* ld-arm/cortex-a8-fix-blx-rel-arm.d: New.
+	* ld-arm/cortex-a8-fix-blx-rel-thumb.d: New.
+	* ld-arm/cortex-a8-fix-blx.s: New.
+	* ld-arm/cortex-a8-fix-blx.d: New.
+	* ld-arm/arm-elf.exp: Add new tests.
+
 2009-05-22  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/rgn-at4.t: New.

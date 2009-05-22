@@ -161,6 +161,50 @@ set armelftests {
      "-EL --vfp11-denorm-fix=scalar -Ttext=0x8000" "-EL -mfpu=vfpxd" {vfp11-fix-none.s}
      {{objdump -dr vfp11-fix-none.d}}
      "vfp11-fix-none"}
+    {"Cortex-A8 erratum fix, b.w"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-fix-b.s}
+     {{objdump -dr cortex-a8-fix-b.d}}
+     "cortex-a8-fix-b"}
+    {"Cortex-A8 erratum fix, bl.w"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-fix-bl.s}
+     {{objdump -dr cortex-a8-fix-bl.d}}
+     "cortex-a8-fix-bl"}
+    {"Cortex-A8 erratum fix, bcc.w"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-fix-bcc.s}
+     {{objdump -dr cortex-a8-fix-bcc.d}}
+     "cortex-a8-fix-bcc"}
+    {"Cortex-A8 erratum fix, blx.w"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-fix-blx.s}
+     {{objdump -dr cortex-a8-fix-blx.d}}
+     "cortex-a8-fix-blx"}
+    {"Cortex-A8 erratum fix, relocate b.w to ARM"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-arm-target.s cortex-a8-fix-b-rel.s}
+     {{objdump -dr cortex-a8-fix-b-rel-arm.d}}
+     "cortex-a8-fix-b-rel-arm"}
+    {"Cortex-A8 erratum fix, relocate b.w to Thumb"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-b-rel.s}
+     {{objdump -dr cortex-a8-fix-b-rel-thumb.d}}
+     "cortex-a8-fix-b-rel-thumb"}
+    {"Cortex-A8 erratum fix, relocate bl.w to ARM"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-arm-target.s cortex-a8-fix-bl-rel.s}
+     {{objdump -dr cortex-a8-fix-bl-rel-arm.d}}
+     "cortex-a8-fix-bl-rel-arm"}
+    {"Cortex-A8 erratum fix, relocate bl.w to Thumb"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bl-rel.s}
+     {{objdump -dr cortex-a8-fix-bl-rel-thumb.d}}
+     "cortex-a8-fix-bl-rel-thumb"}
+    {"Cortex-A8 erratum fix, relocate b<cond>.w to Thumb"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-bcc-rel.s}
+     {{objdump -dr cortex-a8-fix-bcc-rel-thumb.d}}
+     "cortex-a8-fix-bcc-rel-thumb"}
+    {"Cortex-A8 erratum fix, relocate blx.w to ARM"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-arm-target.s cortex-a8-fix-blx-rel.s}
+     {{objdump -dr cortex-a8-fix-blx-rel-arm.d}}
+     "cortex-a8-fix-blx-rel-arm"}
+    {"Cortex-A8 erratum fix, relocate blx.w to Thumb"
+     "-EL -Ttext=0x8f00 --fix-cortex-a8" "-EL" {cortex-a8-thumb-target.s cortex-a8-fix-blx-rel.s}
+     {{objdump -dr cortex-a8-fix-blx-rel-thumb.d}}
+     "cortex-a8-fix-blx-rel-thumb"}
     {"Unwinding and -gc-sections" "-gc-sections" "" {gc-unwind.s}
      {{objdump -sj.data gc-unwind.d}}
      "gc-unwind"}

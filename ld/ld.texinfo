@@ -5865,6 +5865,13 @@ instructions into @code{bal} instructions when it determines that the
 target subroutine is a leaf routine (that is, the target subroutine does
 not itself call any subroutines).
 
+@cindex Cortex-A8 erratum workaround
+@kindex --fix-cortex-a8
+@kindex --no-fix-cortex-a8
+The @samp{--fix-cortex-a8} switch enables a link-time workaround for an erratum in certain Cortex-A8 processors.  The workaround is enabled by default if you are targeting the ARM v7-A architecture profile.  It can be enabled otherwise by specifying @samp{--fix-cortex-a8}, or disabled unconditionally by specifying @samp{--no-fix-cortex-a8}.
+
+The erratum only affects Thumb-2 code.  Please contact ARM for further details.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

@@ -2026,11 +2026,15 @@ enum stub_insn_type
     DATA_TYPE
   };
 
-#define THUMB16_INSN(X)    {(X), THUMB16_TYPE, R_ARM_NONE, 0}
-#define THUMB32_INSN(X)    {(X), THUMB32_TYPE, R_ARM_NONE, 0}
-#define ARM_INSN(X)        {(X), ARM_TYPE, R_ARM_NONE, 0}
-#define ARM_REL_INSN(X, Z) {(X), ARM_TYPE, R_ARM_JUMP24, (Z)}
-#define DATA_WORD(X,Y,Z)   {(X), DATA_TYPE, (Y), (Z)}
+#define THUMB16_INSN(X)		{(X), THUMB16_TYPE, R_ARM_NONE, 0}
+/* A bit of a hack.  A Thumb conditional branch, in which the proper condition
+   is inserted in arm_build_one_stub().  */
+#define THUMB16_BCOND_INSN(X)	{(X), THUMB16_TYPE, R_ARM_NONE, 1}
+#define THUMB32_INSN(X)		{(X), THUMB32_TYPE, R_ARM_NONE, 0}
+#define THUMB32_B_INSN(X, Z)	{(X), THUMB32_TYPE, R_ARM_THM_JUMP24, (Z)}
+#define ARM_INSN(X)		{(X), ARM_TYPE, R_ARM_NONE, 0}
+#define ARM_REL_INSN(X, Z)	{(X), ARM_TYPE, R_ARM_JUMP24, (Z)}
+#define DATA_WORD(X,Y,Z)	{(X), DATA_TYPE, (Y), (Z)}
 
 typedef struct
 {
@@ -2164,6 +2168,39 @@ static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_thumb_pic[] =
     DATA_WORD(0, R_ARM_REL32, 0),     /* dcd  R_ARM_REL32(X) */
   };
 
+/* Cortex-A8 erratum-workaround stubs.  */
+
+/* Stub used for conditional branches (which may be beyond +/-1MB away, so we
+   can't use a conditional branch to reach this stub).  */
+
+static const insn_sequence elf32_arm_stub_a8_veneer_b_cond[] =
+  {
+    THUMB16_BCOND_INSN(0xd001),         /* b<cond>.n true.  */
+    THUMB32_B_INSN(0xf000b800, -4),     /* b.w insn_after_original_branch.  */
+    THUMB32_B_INSN(0xf000b800, -4)      /* true: b.w original_branch_dest.  */
+  };
+
+/* Stub used for b.w and bl.w instructions.  */
+
+static const insn_sequence elf32_arm_stub_a8_veneer_b[] =
+  {
+    THUMB32_B_INSN(0xf000b800, -4)	/* b.w original_branch_dest.  */
+  };
+
+static const insn_sequence elf32_arm_stub_a8_veneer_bl[] =
+  {
+    THUMB32_B_INSN(0xf000b800, -4)	/* b.w original_branch_dest.  */
+  };
+
+/* Stub used for Thumb-2 blx.w instructions.  We modified the original blx.w
+   instruction (which switches to ARM mode) to point to this stub.  Jump to the
+   real destination using an ARM-mode branch.  */
+
+static const insn_sequence elf32_arm_stub_a8_veneer_blx[] =
+  {
+    ARM_REL_INSN(0xea000000, -8)	/* b original_branch_dest.  */
+  };
+
 /* Section name for stubs is the associated section name plus this
    string.  */
 #define STUB_SUFFIX ".stub"
@@ -2181,7 +2218,11 @@ static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_thumb_pic[] =
   DEF_STUB(long_branch_v4t_thumb_thumb_pic) \
   DEF_STUB(long_branch_v4t_arm_thumb_pic) \
   DEF_STUB(long_branch_v4t_thumb_arm_pic) \
-  DEF_STUB(long_branch_thumb_only_pic)
+  DEF_STUB(long_branch_thumb_only_pic) \
+  DEF_STUB(a8_veneer_b_cond) \
+  DEF_STUB(a8_veneer_b) \
+  DEF_STUB(a8_veneer_bl) \
+  DEF_STUB(a8_veneer_blx)
 
 #define DEF_STUB(x) arm_stub_##x,
 enum elf32_arm_stub_type {
@@ -2217,6 +2258,13 @@ struct elf32_arm_stub_hash_entry
      value when building the stubs (so the stub knows where to jump).  */
   bfd_vma target_value;
   asection *target_section;
+
+  /* Offset to apply to relocation referencing target_value.  */
+  bfd_vma target_addend;
+
+  /* The instruction which caused this stub to be generated (only valid for
+     Cortex-A8 erratum workaround stubs at present).  */
+  unsigned long orig_insn;
 
   /* The stub type.  */
   enum elf32_arm_stub_type stub_type;
@@ -2336,6 +2384,34 @@ _arm_elf_section_data;
 
 #define elf32_arm_section_data(sec) \
   ((_arm_elf_section_data *) elf_section_data (sec))
+
+/* A fix which might be required for Cortex-A8 Thumb-2 branch/TLB erratum.
+   These fixes are subject to a relaxation procedure (in elf32_arm_size_stubs),
+   so may be created multiple times: we use an array of these entries whilst
+   relaxing which we can refresh easily, then create stubs for each potentially
+   erratum-triggering instruction once we've settled on a solution.  */
+
+struct a8_erratum_fix {
+  bfd *input_bfd;
+  asection *section;
+  bfd_vma offset;
+  bfd_vma addend;
+  unsigned long orig_insn;
+  char *stub_name;
+  enum elf32_arm_stub_type stub_type;
+};
+
+/* A table of relocs applied to branches which might trigger Cortex-A8
+   erratum.  */
+
+struct a8_erratum_reloc {
+  bfd_vma from;
+  bfd_vma destination;
+  unsigned int r_type;
+  unsigned char st_type;
+  const char *sym_name;
+  bfd_boolean non_a8_stub;
+};
 
 /* The size of the thread control block.  */
 #define TCB_SIZE	8
@@ -2468,6 +2544,12 @@ struct elf32_arm_link_hash_table
      veneers.  */
   bfd_size_type vfp11_erratum_glue_size;
 
+  /* A table of fix locations for Cortex-A8 Thumb-2 branch/TLB erratum.  This
+     holds Cortex-A8 erratum fix locations between elf32_arm_size_stubs() and
+     elf32_arm_write_section().  */
+  struct a8_erratum_fix *a8_erratum_fixes;
+  unsigned int num_a8_erratum_fixes;
+
   /* An arbitrary input BFD chosen to hold the glue sections.  */
   bfd * bfd_of_glue_owner;
 
@@ -2485,6 +2567,9 @@ struct elf32_arm_link_hash_table
      1 = Convert BX to MOV PC.
      2 = Generate v4 interworing stubs.  */
   int fix_v4bx;
+
+  /* Whether we should fix the Cortex-A8 Thumb-2 branch/TLB erratum.  */
+  int fix_cortex_a8;
 
   /* Nonzero if the ARM/Thumb BLX instructions are available for use.  */
   int use_blx;
@@ -2825,6 +2910,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->vfp11_fix = BFD_ARM_VFP11_FIX_NONE;
   ret->vfp11_erratum_glue_size = 0;
   ret->num_vfp11_fixes = 0;
+  ret->fix_cortex_a8 = 0;
   ret->bfd_of_glue_owner = NULL;
   ret->byteswap_code = 0;
   ret->target1_is_rel = 0;
@@ -3214,17 +3300,16 @@ elf32_arm_get_stub_entry (const asection *input_section,
   return stub_entry;
 }
 
-/* Add a new stub entry to the stub hash.  Not all fields of the new
-   stub entry are initialised.  */
+/* Find or create a stub section.  Returns a pointer to the stub section, and
+   the section to which the stub section will be attached (in *LINK_SEC_P). 
+   LINK_SEC_P may be NULL.  */
 
-static struct elf32_arm_stub_hash_entry *
-elf32_arm_add_stub (const char *stub_name,
-		    asection *section,
-		    struct elf32_arm_link_hash_table *htab)
+static asection *
+elf32_arm_create_or_find_stub_sec (asection **link_sec_p, asection *section,
+				   struct elf32_arm_link_hash_table *htab)
 {
   asection *link_sec;
   asection *stub_sec;
-  struct elf32_arm_stub_hash_entry *stub_entry;
 
   link_sec = htab->stub_group[section->id].link_sec;
   stub_sec = htab->stub_group[section->id].stub_sec;
@@ -3252,6 +3337,28 @@ elf32_arm_add_stub (const char *stub_name,
 	}
       htab->stub_group[section->id].stub_sec = stub_sec;
     }
+  
+  if (link_sec_p)
+    *link_sec_p = link_sec;
+  
+  return stub_sec;
+}
+
+/* Add a new stub entry to the stub hash.  Not all fields of the new
+   stub entry are initialised.  */
+
+static struct elf32_arm_stub_hash_entry *
+elf32_arm_add_stub (const char *stub_name,
+		    asection *section,
+		    struct elf32_arm_link_hash_table *htab)
+{
+  asection *link_sec;
+  asection *stub_sec;
+  struct elf32_arm_stub_hash_entry *stub_entry;
+
+  stub_sec = elf32_arm_create_or_find_stub_sec (&link_sec, section, htab);
+  if (stub_sec == NULL)
+    return NULL;
 
   /* Enter this entry into the linker stub hash table.  */
   stub_entry = arm_stub_hash_lookup (&htab->stub_hash_table, stub_name,
@@ -3297,10 +3404,16 @@ put_thumb_insn (struct elf32_arm_link_hash_table * htab,
     bfd_putb16 (val, ptr);
 }
 
+static bfd_reloc_status_type elf32_arm_final_link_relocate
+  (reloc_howto_type *, bfd *, bfd *, asection *, bfd_byte *,
+   Elf_Internal_Rela *, bfd_vma, struct bfd_link_info *, asection *,
+   const char *, int, struct elf_link_hash_entry *, bfd_boolean *, char **);
+
 static bfd_boolean
 arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 		    void * in_arg)
 {
+#define MAXRELOCS 2
   struct elf32_arm_stub_hash_entry *stub_entry;
   struct bfd_link_info *info;
   struct elf32_arm_link_hash_table *htab;
@@ -3314,8 +3427,9 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   const insn_sequence *template;
   int i;
   struct elf32_arm_link_hash_table * globals;
-  int stub_reloc_idx = -1;
-  int stub_reloc_offset = 0;
+  int stub_reloc_idx[MAXRELOCS] = {-1, -1};
+  int stub_reloc_offset[MAXRELOCS] = {0, 0};
+  int nrelocs = 0;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
@@ -3350,9 +3464,33 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
       switch (template[i].type)
 	{
 	case THUMB16_TYPE:
-	  put_thumb_insn (globals, stub_bfd, template[i].data, loc + size);
-	  size += 2;
+	  {
+	    bfd_vma data = template[i].data;
+	    if (template[i].reloc_addend != 0)
+	      {
+                /* We've borrowed the reloc_addend field to mean we should
+                   insert a condition code into this (Thumb-1 branch)
+                   instruction.  See THUMB16_BCOND_INSN.  */
+                BFD_ASSERT ((data & 0xff00) == 0xd000);
+                data |= ((stub_entry->orig_insn >> 22) & 0xf) << 8;
+	      }
+	    put_thumb_insn (globals, stub_bfd, data, loc + size);
+	    size += 2;
+	  }
 	  break;
+
+	case THUMB32_TYPE:
+          put_thumb_insn (globals, stub_bfd, (template[i].data >> 16) & 0xffff,
+                          loc + size);
+          put_thumb_insn (globals, stub_bfd, template[i].data & 0xffff,
+                          loc + size + 2);
+          if (template[i].r_type != R_ARM_NONE)
+            {
+              stub_reloc_idx[nrelocs] = i;
+              stub_reloc_offset[nrelocs++] = size;
+            }
+          size += 4;
+          break;
 
 	case ARM_TYPE:
 	  put_arm_insn (globals, stub_bfd, template[i].data, loc + size);
@@ -3360,16 +3498,16 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 	     instruction.  */
 	  if (template[i].r_type == R_ARM_JUMP24)
 	    {
-	      stub_reloc_idx = i;
-	      stub_reloc_offset = size;
+	      stub_reloc_idx[nrelocs] = i;
+	      stub_reloc_offset[nrelocs++] = size;
 	    }
 	  size += 4;
 	  break;
 
 	case DATA_TYPE:
 	  bfd_put_32 (stub_bfd, template[i].data, loc + size);
-	  stub_reloc_idx = i;
-	  stub_reloc_offset = size;
+	  stub_reloc_idx[nrelocs] = i;
+	  stub_reloc_offset[nrelocs++] = size;
 	  size += 4;
 	  break;
 
@@ -3389,15 +3527,101 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   if (stub_entry->st_type == STT_ARM_TFUNC)
     sym_value |= 1;
 
-  /* Assume there is one and only one entry to relocate in each stub.  */
-  BFD_ASSERT (stub_reloc_idx != -1);
+  /* Assume there is at least one and at most MAXRELOCS entries to relocate
+     in each stub.  */
+  BFD_ASSERT (nrelocs != 0 && nrelocs <= MAXRELOCS);
 
-  _bfd_final_link_relocate (elf32_arm_howto_from_type (template[stub_reloc_idx].r_type),
-			    stub_bfd, stub_sec, stub_sec->contents,
-			    stub_entry->stub_offset + stub_reloc_offset,
-			    sym_value, template[stub_reloc_idx].reloc_addend);
+  for (i = 0; i < nrelocs; i++)
+    if (template[stub_reloc_idx[i]].r_type == R_ARM_THM_JUMP24
+	|| template[stub_reloc_idx[i]].r_type == R_ARM_THM_JUMP19
+	|| template[stub_reloc_idx[i]].r_type == R_ARM_THM_CALL
+	|| template[stub_reloc_idx[i]].r_type == R_ARM_THM_XPC22)
+      {
+	Elf_Internal_Rela rel;
+	bfd_boolean unresolved_reloc;
+	char *error_message;
+	int sym_flags
+	  = (template[stub_reloc_idx[i]].r_type != R_ARM_THM_XPC22)
+	    ? STT_ARM_TFUNC : 0;
+	bfd_vma points_to = sym_value + stub_entry->target_addend;
+
+	rel.r_offset = stub_entry->stub_offset + stub_reloc_offset[i];
+	rel.r_info = ELF32_R_INFO (0, template[stub_reloc_idx[i]].r_type);
+	rel.r_addend = template[stub_reloc_idx[i]].reloc_addend;
+
+	if (stub_entry->stub_type == arm_stub_a8_veneer_b_cond && i == 0)
+	  /* The first relocation in the elf32_arm_stub_a8_veneer_b_cond[]
+	     template should refer back to the instruction after the original
+	     branch.  */
+	  points_to = sym_value;
+
+	/* Note: _bfd_final_link_relocate doesn't handle these relocations
+	   properly.  We should probably use this function unconditionally,
+	   rather than only for certain relocations listed in the enclosing
+	   conditional, for the sake of consistency.  */
+	elf32_arm_final_link_relocate (elf32_arm_howto_from_type
+	    (template[stub_reloc_idx[i]].r_type),
+	  stub_bfd, info->output_bfd, stub_sec, stub_sec->contents, &rel,
+	  points_to, info, stub_entry->target_section, "", sym_flags,
+	  (struct elf_link_hash_entry *) stub_entry, &unresolved_reloc,
+	  &error_message);
+      }
+    else
+      {
+	_bfd_final_link_relocate (elf32_arm_howto_from_type
+	    (template[stub_reloc_idx[i]].r_type), stub_bfd, stub_sec,
+	  stub_sec->contents, stub_entry->stub_offset + stub_reloc_offset[i],
+	  sym_value + stub_entry->target_addend,
+	  template[stub_reloc_idx[i]].reloc_addend);
+      }
 
   return TRUE;
+#undef MAXRELOCS
+}
+
+/* Calculate the template, template size and instruction size for a stub.
+   Return value is the instruction size.  */
+
+static unsigned int
+find_stub_size_and_template (enum elf32_arm_stub_type stub_type,
+			     const insn_sequence **stub_template,
+			     int *stub_template_size)
+{
+  const insn_sequence *template = NULL;
+  int template_size = 0, i;
+  unsigned int size;
+
+  template = stub_definitions[stub_type].template;
+  template_size = stub_definitions[stub_type].template_size;
+
+  size = 0;
+  for (i = 0; i < template_size; i++)
+    {
+      switch (template[i].type)
+	{
+	case THUMB16_TYPE:
+	  size += 2;
+	  break;
+
+	case ARM_TYPE:
+	case THUMB32_TYPE:
+	case DATA_TYPE:
+	  size += 4;
+	  break;
+
+	default:
+	  BFD_FAIL ();
+	  return FALSE;
+	}
+    }
+
+  if (stub_template)
+    *stub_template = template;
+
+  if (stub_template_size)
+    *stub_template_size = template_size;
+
+  return size;
 }
 
 /* As above, but don't actually build the stub.  Just bump offset so
@@ -3410,9 +3634,7 @@ arm_size_one_stub (struct bfd_hash_entry *gen_entry,
   struct elf32_arm_stub_hash_entry *stub_entry;
   struct elf32_arm_link_hash_table *htab;
   const insn_sequence *template;
-  int template_size;
-  int size;
-  int i;
+  int template_size, size;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
@@ -3421,31 +3643,8 @@ arm_size_one_stub (struct bfd_hash_entry *gen_entry,
   BFD_ASSERT((stub_entry->stub_type > arm_stub_none)
 	     && stub_entry->stub_type < ARRAY_SIZE(stub_definitions));
 
-  template = stub_definitions[stub_entry->stub_type].template;
-  template_size = stub_definitions[stub_entry->stub_type].template_size;
-
-  size = 0;
-  for (i = 0; i < template_size; i++)
-    {
-      switch (template[i].type)
-	{
-	case THUMB16_TYPE:
-	  size += 2;
-	  break;
-
-	case ARM_TYPE:
-	  size += 4;
-	  break;
-
-	case DATA_TYPE:
-	  size += 4;
-	  break;
-
-	default:
-	  BFD_FAIL ();
-	  return FALSE;
-	}
-    }
+  size = find_stub_size_and_template (stub_entry->stub_type, &template,
+				      &template_size);
 
   stub_entry->stub_size = size;
   stub_entry->stub_template = template;
@@ -3663,6 +3862,290 @@ group_sections (struct elf32_arm_link_hash_table *htab,
 #undef NEXT_SEC
 }
 
+/* Comparison function for sorting/searching relocations relating to Cortex-A8
+   erratum fix.  */
+
+static int
+a8_reloc_compare (const void *a, const void *b)
+{
+  const struct a8_erratum_reloc *ra = a, *rb = b;
+
+  if (ra->from < rb->from)
+    return -1;
+  else if (ra->from > rb->from)
+    return 1;
+  else
+    return 0;
+}
+
+static struct elf_link_hash_entry *find_thumb_glue (struct bfd_link_info *,
+						    const char *, char **);
+
+/* Helper function to scan code for sequences which might trigger the Cortex-A8
+   branch/TLB erratum.  Fill in the table described by A8_FIXES_P,
+   NUM_A8_FIXES_P, A8_FIX_TABLE_SIZE_P.  Return 1 if an error occurs, 0
+   otherwise.  */
+
+static int
+cortex_a8_erratum_scan (bfd *input_bfd, struct bfd_link_info *info,
+			struct a8_erratum_fix **a8_fixes_p,
+			unsigned int *num_a8_fixes_p,
+			unsigned int *a8_fix_table_size_p,
+			struct a8_erratum_reloc *a8_relocs,
+			unsigned int num_a8_relocs)
+{
+  asection *section;
+  struct elf32_arm_link_hash_table *htab = elf32_arm_hash_table (info);
+  struct a8_erratum_fix *a8_fixes = *a8_fixes_p;
+  unsigned int num_a8_fixes = *num_a8_fixes_p;
+  unsigned int a8_fix_table_size = *a8_fix_table_size_p;
+
+  for (section = input_bfd->sections;
+       section != NULL;
+       section = section->next)
+    {
+      bfd_byte *contents = NULL;
+      struct _arm_elf_section_data *sec_data;
+      unsigned int span;
+      bfd_vma base_vma;
+
+      if (elf_section_type (section) != SHT_PROGBITS
+          || (elf_section_flags (section) & SHF_EXECINSTR) == 0
+          || (section->flags & SEC_EXCLUDE) != 0
+          || (section->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
+          || (section->output_section == bfd_abs_section_ptr))
+        continue;
+
+      base_vma = section->output_section->vma + section->output_offset;
+
+      if (elf_section_data (section)->this_hdr.contents != NULL)
+        contents = elf_section_data (section)->this_hdr.contents;
+      else if (! bfd_malloc_and_get_section (input_bfd, section, &contents))
+        return 1;
+
+      sec_data = elf32_arm_section_data (section);
+
+      for (span = 0; span < sec_data->mapcount; span++)
+        {
+          unsigned int span_start = sec_data->map[span].vma;
+          unsigned int span_end = (span == sec_data->mapcount - 1)
+            ? section->size : sec_data->map[span + 1].vma;
+          unsigned int i;
+          char span_type = sec_data->map[span].type;
+          bfd_boolean last_was_32bit = FALSE, last_was_branch = FALSE;
+
+          if (span_type != 't')
+            continue;
+
+          /* Span is entirely within a single 4KB region: skip scanning.  */
+          if (((base_vma + span_start) & ~0xfff)
+	      == ((base_vma + span_end) & ~0xfff))
+            continue;
+
+          /* Scan for 32-bit Thumb-2 branches which span two 4K regions, where:
+
+               * The opcode is BLX.W, BL.W, B.W, Bcc.W
+               * The branch target is in the same 4KB region as the
+                 first half of the branch.
+               * The instruction before the branch is a 32-bit
+                 length non-branch instruction.
+          */
+
+          for (i = span_start; i < span_end;)
+            {
+              unsigned int insn = bfd_getl16 (&contents[i]);
+              bfd_boolean insn_32bit = FALSE, is_blx = FALSE, is_b = FALSE;
+	      bfd_boolean is_bl = FALSE, is_bcc = FALSE, is_32bit_branch;
+
+              if ((insn & 0xe000) == 0xe000 && (insn & 0x1800) != 0x0000)
+                insn_32bit = TRUE;
+
+	      if (insn_32bit)
+	        {
+                  /* Load the rest of the insn (in manual-friendly order).  */
+                  insn = (insn << 16) | bfd_getl16 (&contents[i + 2]);
+
+        	  /* Encoding T4: B<c>.W.  */
+        	  is_b = (insn & 0xf800d000) == 0xf0009000;
+        	  /* Encoding T1: BL<c>.W.  */
+        	  is_bl = (insn & 0xf800d000) == 0xf000d000;
+        	  /* Encoding T2: BLX<c>.W.  */
+        	  is_blx = (insn & 0xf800d000) == 0xf000c000;
+		  /* Encoding T3: B<c>.W (not permitted in IT block).  */
+		  is_bcc = (insn & 0xf800d000) == 0xf0008000
+			   && (insn & 0x07f00000) != 0x03800000;
+		}
+
+	      is_32bit_branch = is_b || is_bl || is_blx || is_bcc;
+			   
+              if (((base_vma + i) & 0xfff) == 0xffe && insn_32bit
+		  && is_32bit_branch && last_was_32bit && !last_was_branch)
+                {
+                  bfd_vma offset;
+                  bfd_boolean force_target_arm = FALSE;
+		  bfd_boolean force_target_thumb = FALSE;
+                  bfd_vma target;
+                  enum elf32_arm_stub_type stub_type = arm_stub_none;
+                  struct a8_erratum_reloc key, *found;
+
+                  key.from = base_vma + i;
+                  found = bsearch (&key, a8_relocs, num_a8_relocs,
+                                   sizeof (struct a8_erratum_reloc),
+                                   &a8_reloc_compare);
+
+		  if (found)
+		    {
+		      char *error_message = NULL;
+		      struct elf_link_hash_entry *entry;
+
+		      /* We don't care about the error returned from this
+		         function, only if there is glue or not.  */
+		      entry = find_thumb_glue (info, found->sym_name,
+					       &error_message);
+
+		      if (entry)
+			found->non_a8_stub = TRUE;
+
+		      if (found->r_type == R_ARM_THM_CALL
+			  && found->st_type != STT_ARM_TFUNC)
+			force_target_arm = TRUE;
+		      else if (found->r_type == R_ARM_THM_CALL
+			       && found->st_type == STT_ARM_TFUNC)
+			force_target_thumb = TRUE;
+		    }
+
+                  /* Check if we have an offending branch instruction.  */
+
+		  if (found && found->non_a8_stub)
+		    /* We've already made a stub for this instruction, e.g.
+		       it's a long branch or a Thumb->ARM stub.  Assume that
+		       stub will suffice to work around the A8 erratum (see
+		       setting of always_after_branch above).  */
+		    ;
+                  else if (is_bcc)
+                    {
+                      offset = (insn & 0x7ff) << 1;
+                      offset |= (insn & 0x3f0000) >> 4;
+                      offset |= (insn & 0x2000) ? 0x40000 : 0;
+                      offset |= (insn & 0x800) ? 0x80000 : 0;
+                      offset |= (insn & 0x4000000) ? 0x100000 : 0;
+                      if (offset & 0x100000)
+                        offset |= ~0xfffff;
+                      stub_type = arm_stub_a8_veneer_b_cond;
+                    }
+                  else if (is_b || is_bl || is_blx)
+                    {
+                      int s = (insn & 0x4000000) != 0;
+                      int j1 = (insn & 0x2000) != 0;
+                      int j2 = (insn & 0x800) != 0;
+                      int i1 = !(j1 ^ s);
+                      int i2 = !(j2 ^ s);
+
+                      offset = (insn & 0x7ff) << 1;
+                      offset |= (insn & 0x3ff0000) >> 4;
+                      offset |= i2 << 22;
+                      offset |= i1 << 23;
+                      offset |= s << 24;
+                      if (offset & 0x1000000)
+                        offset |= ~0xffffff;
+
+                      if (is_blx)
+                        offset &= ~3u;
+
+                      stub_type = is_blx ? arm_stub_a8_veneer_blx :
+                        is_bl ? arm_stub_a8_veneer_bl : arm_stub_a8_veneer_b;
+                    }
+
+                  if (stub_type != arm_stub_none)
+                    {
+                      bfd_vma pc_for_insn = base_vma + i + 4;
+
+		      /* The original instruction is a BL, but the target is
+		         an ARM instruction.  If we were not making a stub,
+			 the BL would have been converted to a BLX.  Use the
+			 BLX stub instead in that case.  */
+		      if (htab->use_blx && force_target_arm
+			  && stub_type == arm_stub_a8_veneer_bl)
+			{
+			  stub_type = arm_stub_a8_veneer_blx;
+			  is_blx = TRUE;
+			  is_bl = FALSE;
+			}
+		      /* Conversely, if the original instruction was
+			 BLX but the target is Thumb mode, use the BL
+			 stub.  */
+		      else if (force_target_thumb
+			       && stub_type == arm_stub_a8_veneer_blx)
+			{
+			  stub_type = arm_stub_a8_veneer_bl;
+			  is_blx = FALSE;
+			  is_bl = TRUE;
+			}
+
+                      if (is_blx)
+                        pc_for_insn &= ~3u;
+
+                      /* If we found a relocation, use the proper destination,
+		         not the offset in the (unrelocated) instruction.
+			 Note this is always done if we switched the stub type
+			 above.  */
+                      if (found)
+                        offset = found->destination - pc_for_insn;
+
+                      target = pc_for_insn + offset;
+
+                      /* The BLX stub is ARM-mode code.  Adjust the offset to
+		         take the different PC value (+8 instead of +4) into
+			 account.  */
+                      if (stub_type == arm_stub_a8_veneer_blx)
+                        offset += 4;
+
+                      if (((base_vma + i) & ~0xfff) == (target & ~0xfff))
+                        {
+                          char *stub_name;
+
+                          if (num_a8_fixes == a8_fix_table_size)
+                            {
+                              a8_fix_table_size *= 2;
+                              a8_fixes = bfd_realloc (a8_fixes,
+                                sizeof (struct a8_erratum_fix)
+                                * a8_fix_table_size);
+                            }
+
+                          stub_name = bfd_malloc (8 + 1 + 8 + 1);
+                          if (stub_name != NULL)
+                            sprintf (stub_name, "%x:%x", section->id, i);
+
+                          a8_fixes[num_a8_fixes].input_bfd = input_bfd;
+                          a8_fixes[num_a8_fixes].section = section;
+                          a8_fixes[num_a8_fixes].offset = i;
+                          a8_fixes[num_a8_fixes].addend = offset;
+                          a8_fixes[num_a8_fixes].orig_insn = insn;
+                          a8_fixes[num_a8_fixes].stub_name = stub_name;
+                          a8_fixes[num_a8_fixes].stub_type = stub_type;
+
+                          num_a8_fixes++;
+                        }
+                    }
+                }
+
+              i += insn_32bit ? 4 : 2;
+              last_was_32bit = insn_32bit;
+	      last_was_branch = is_32bit_branch;
+            }
+        }
+
+      if (elf_section_data (section)->this_hdr.contents == NULL)
+        free (contents);
+    }
+  
+  *a8_fixes_p = a8_fixes;
+  *num_a8_fixes_p = num_a8_fixes;
+  *a8_fix_table_size_p = a8_fix_table_size;
+  
+  return 0;
+}
+
 /* Determine and set the size of the stub section for a final link.
 
    The basic idea here is to examine all the relocations looking for
@@ -3681,6 +4164,18 @@ elf32_arm_size_stubs (bfd *output_bfd,
   bfd_boolean stubs_always_after_branch;
   bfd_boolean stub_changed = 0;
   struct elf32_arm_link_hash_table *htab = elf32_arm_hash_table (info);
+  struct a8_erratum_fix *a8_fixes = NULL;
+  unsigned int num_a8_fixes = 0, prev_num_a8_fixes = 0, a8_fix_table_size = 10;
+  struct a8_erratum_reloc *a8_relocs = NULL;
+  unsigned int num_a8_relocs = 0, a8_reloc_table_size = 10, i;
+
+  if (htab->fix_cortex_a8)
+    {
+      a8_fixes = bfd_zmalloc (sizeof (struct a8_erratum_fix)
+                              * a8_fix_table_size);
+      a8_relocs = bfd_zmalloc (sizeof (struct a8_erratum_reloc)
+                               * a8_reloc_table_size);
+    }
 
   /* Propagate mach to stub bfd, because it may not have been
      finalized when we created stub_bfd.  */
@@ -3692,6 +4187,13 @@ elf32_arm_size_stubs (bfd *output_bfd,
   htab->add_stub_section = add_stub_section;
   htab->layout_sections_again = layout_sections_again;
   stubs_always_after_branch = group_size < 0;
+
+  /* The Cortex-A8 erratum fix depends on stubs not being in the same 4K page
+     as the first half of a 32-bit branch straddling two 4K pages.  This is a
+     crude way of enforcing that.  */
+  if (htab->fix_cortex_a8)
+    stubs_always_after_branch = 1;
+
   if (group_size < 0)
     stub_group_size = -group_size;
   else
@@ -3719,6 +4221,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
       unsigned int bfd_indx;
       asection *stub_sec;
 
+      num_a8_fixes = 0;
+
       for (input_bfd = info->input_bfds, bfd_indx = 0;
 	   input_bfd != NULL;
 	   input_bfd = input_bfd->link_next, bfd_indx++)
@@ -3726,6 +4230,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *section;
 	  Elf_Internal_Sym *local_syms = NULL;
+
+	  num_a8_relocs = 0;
 
 	  /* We'll need the symbol table in a second.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -3775,6 +4281,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		  char *stub_name;
 		  const asection *id_sec;
 		  unsigned char st_type;
+		  bfd_boolean created_stub = FALSE;
 
 		  r_type = ELF32_R_TYPE (irela->r_info);
 		  r_indx = ELF32_R_SYM (irela->r_info);
@@ -3792,6 +4299,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		  if ((r_type != (unsigned int) R_ARM_CALL)
 		      && (r_type != (unsigned int) R_ARM_THM_CALL)
 		      && (r_type != (unsigned int) R_ARM_JUMP24)
+		      && (r_type != (unsigned int) R_ARM_THM_JUMP19)
+		      && (r_type != (unsigned int) R_ARM_THM_XPC22)
 		      && (r_type != (unsigned int) R_ARM_THM_JUMP24)
 		      && (r_type != (unsigned int) R_ARM_PLT32))
 		    continue;
@@ -3892,80 +4401,145 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		      sym_name = hash->root.root.root.string;
 		    }
 
-		  /* Determine what (if any) linker stub is needed.  */
-		  stub_type = arm_type_of_stub (info, section, irela, st_type,
-						hash, destination, sym_sec,
-						input_bfd, sym_name);
-		  if (stub_type == arm_stub_none)
-		    continue;
-
-		  /* Support for grouping stub sections.  */
-		  id_sec = htab->stub_group[section->id].link_sec;
-
-		  /* Get the name of this stub.  */
-		  stub_name = elf32_arm_stub_name (id_sec, sym_sec, hash, irela);
-		  if (!stub_name)
-		    goto error_ret_free_internal;
-
-		  stub_entry = arm_stub_hash_lookup (&htab->stub_hash_table,
-						    stub_name,
-						    FALSE, FALSE);
-		  if (stub_entry != NULL)
+		  do
 		    {
-		      /* The proper stub has already been created.  */
-		      free (stub_name);
-		      continue;
-		    }
+		      /* Determine what (if any) linker stub is needed.  */
+		      stub_type = arm_type_of_stub (info, section, irela,
+						    st_type, hash,
+						    destination, sym_sec,
+						    input_bfd, sym_name);
+		      if (stub_type == arm_stub_none)
+			break;
 
-		  stub_entry = elf32_arm_add_stub (stub_name, section, htab);
-		  if (stub_entry == NULL)
-		    {
-		      free (stub_name);
-		      goto error_ret_free_internal;
-		    }
+		      /* Support for grouping stub sections.  */
+		      id_sec = htab->stub_group[section->id].link_sec;
 
-		  stub_entry->target_value = sym_value;
-		  stub_entry->target_section = sym_sec;
-		  stub_entry->stub_type = stub_type;
-		  stub_entry->h = hash;
-		  stub_entry->st_type = st_type;
+		      /* Get the name of this stub.  */
+		      stub_name = elf32_arm_stub_name (id_sec, sym_sec, hash,
+						       irela);
+		      if (!stub_name)
+			goto error_ret_free_internal;
 
-		  if (sym_name == NULL)
-		    sym_name = "unnamed";
-		  stub_entry->output_name
-		    = bfd_alloc (htab->stub_bfd,
-				 sizeof (THUMB2ARM_GLUE_ENTRY_NAME)
-				 + strlen (sym_name));
-		  if (stub_entry->output_name == NULL)
-		    {
-		      free (stub_name);
-		      goto error_ret_free_internal;
-		    }
+		      /* We've either created a stub for this reloc already,
+			 or we are about to.  */
+		      created_stub = TRUE;
 
-		  /* For historical reasons, use the existing names for
-		     ARM-to-Thumb and Thumb-to-ARM stubs.  */
-		  if ( ((r_type == (unsigned int) R_ARM_THM_CALL)
-			|| (r_type == (unsigned int) R_ARM_THM_JUMP24))
-		       && st_type != STT_ARM_TFUNC)
-		    sprintf (stub_entry->output_name, THUMB2ARM_GLUE_ENTRY_NAME,
-			     sym_name);
-		  else if ( ((r_type == (unsigned int) R_ARM_CALL)
-			     || (r_type == (unsigned int) R_ARM_JUMP24))
-			   && st_type == STT_ARM_TFUNC)
-		    sprintf (stub_entry->output_name, ARM2THUMB_GLUE_ENTRY_NAME,
-			     sym_name);
-		  else
-		    sprintf (stub_entry->output_name, STUB_ENTRY_NAME,
-			     sym_name);
+		      stub_entry = arm_stub_hash_lookup
+				     (&htab->stub_hash_table, stub_name,
+				      FALSE, FALSE);
+		      if (stub_entry != NULL)
+			{
+			  /* The proper stub has already been created.  */
+			  free (stub_name);
+			  break;
+			}
 
-		  stub_changed = TRUE;
+		      stub_entry = elf32_arm_add_stub (stub_name, section,
+						       htab);
+		      if (stub_entry == NULL)
+			{
+			  free (stub_name);
+			  goto error_ret_free_internal;
+			}
+
+                      stub_entry->target_value = sym_value;
+                      stub_entry->target_section = sym_sec;
+                      stub_entry->stub_type = stub_type;
+                      stub_entry->h = hash;
+                      stub_entry->st_type = st_type;
+
+                      if (sym_name == NULL)
+                	sym_name = "unnamed";
+                      stub_entry->output_name
+                	= bfd_alloc (htab->stub_bfd,
+                                     sizeof (THUMB2ARM_GLUE_ENTRY_NAME)
+                                     + strlen (sym_name));
+                      if (stub_entry->output_name == NULL)
+                	{
+                          free (stub_name);
+                          goto error_ret_free_internal;
+                	}
+
+                      /* For historical reasons, use the existing names for
+                	 ARM-to-Thumb and Thumb-to-ARM stubs.  */
+                      if ( ((r_type == (unsigned int) R_ARM_THM_CALL)
+                            || (r_type == (unsigned int) R_ARM_THM_JUMP24))
+                           && st_type != STT_ARM_TFUNC)
+                	sprintf (stub_entry->output_name,
+                        	 THUMB2ARM_GLUE_ENTRY_NAME, sym_name);
+                      else if ( ((r_type == (unsigned int) R_ARM_CALL)
+                        	 || (r_type == (unsigned int) R_ARM_JUMP24))
+                               && st_type == STT_ARM_TFUNC)
+                	sprintf (stub_entry->output_name,
+                        	 ARM2THUMB_GLUE_ENTRY_NAME, sym_name);
+                      else
+                	sprintf (stub_entry->output_name, STUB_ENTRY_NAME,
+                        	 sym_name);
+
+                      stub_changed = TRUE;
+                    }
+                  while (0);
+
+                  /* Look for relocations which might trigger Cortex-A8
+                     erratum.  */
+                  if (htab->fix_cortex_a8
+                      && (r_type == (unsigned int) R_ARM_THM_JUMP24
+                          || r_type == (unsigned int) R_ARM_THM_JUMP19
+                          || r_type == (unsigned int) R_ARM_THM_CALL
+                          || r_type == (unsigned int) R_ARM_THM_XPC22))
+                    {
+                      bfd_vma from = section->output_section->vma
+                                     + section->output_offset
+                                     + irela->r_offset;
+
+                      if ((from & 0xfff) == 0xffe)
+                        {
+                          /* Found a candidate.  Note we haven't checked the
+                             destination is within 4K here: if we do so (and
+                             don't create an entry in a8_relocs) we can't tell
+                             that a branch should have been relocated when
+                             scanning later.  */
+                          if (num_a8_relocs == a8_reloc_table_size)
+                            {
+                              a8_reloc_table_size *= 2;
+                              a8_relocs = bfd_realloc (a8_relocs,
+                                sizeof (struct a8_erratum_reloc)
+                                * a8_reloc_table_size);
+                            }
+
+                          a8_relocs[num_a8_relocs].from = from;
+                          a8_relocs[num_a8_relocs].destination = destination;
+                          a8_relocs[num_a8_relocs].r_type = r_type;
+                          a8_relocs[num_a8_relocs].st_type = st_type;
+                          a8_relocs[num_a8_relocs].sym_name = sym_name;
+                          a8_relocs[num_a8_relocs].non_a8_stub = created_stub;
+
+                          num_a8_relocs++;
+                        }
+                    }
 		}
 
-	      /* We're done with the internal relocs, free them.  */
-	      if (elf_section_data (section)->relocs == NULL)
-		free (internal_relocs);
+              /* We're done with the internal relocs, free them.  */
+              if (elf_section_data (section)->relocs == NULL)
+                free (internal_relocs);
+            }
+
+          if (htab->fix_cortex_a8)
+	    {
+              /* Sort relocs which might apply to Cortex-A8 erratum.  */
+              qsort (a8_relocs, num_a8_relocs, sizeof (struct a8_erratum_reloc),
+                     &a8_reloc_compare);
+
+              /* Scan for branches which might trigger Cortex-A8 erratum.  */
+              if (cortex_a8_erratum_scan (input_bfd, info, &a8_fixes,
+					  &num_a8_fixes, &a8_fix_table_size,
+					  a8_relocs, num_a8_relocs) != 0)
+		goto error_ret_free_local;
 	    }
 	}
+
+      if (htab->fix_cortex_a8 && num_a8_fixes != prev_num_a8_fixes)
+        stub_changed = TRUE;
 
       if (!stub_changed)
 	break;
@@ -3985,11 +4559,80 @@ elf32_arm_size_stubs (bfd *output_bfd,
 
       bfd_hash_traverse (&htab->stub_hash_table, arm_size_one_stub, htab);
 
+      /* Add Cortex-A8 erratum veneers to stub section sizes too.  */
+      if (htab->fix_cortex_a8)
+        for (i = 0; i < num_a8_fixes; i++)
+          {
+	    stub_sec = elf32_arm_create_or_find_stub_sec (NULL,
+			 a8_fixes[i].section, htab);
+
+	    if (stub_sec == NULL)
+	      goto error_ret_free_local;
+
+            stub_sec->size
+              += find_stub_size_and_template (a8_fixes[i].stub_type, NULL,
+                                              NULL);
+          }
+
+
       /* Ask the linker to do its stuff.  */
       (*htab->layout_sections_again) ();
       stub_changed = FALSE;
+      prev_num_a8_fixes = num_a8_fixes;
     }
 
+  /* Add stubs for Cortex-A8 erratum fixes now.  */
+  if (htab->fix_cortex_a8)
+    {
+      for (i = 0; i < num_a8_fixes; i++)
+        {
+          struct elf32_arm_stub_hash_entry *stub_entry;
+          char *stub_name = a8_fixes[i].stub_name;
+          asection *section = a8_fixes[i].section;
+          unsigned int section_id = a8_fixes[i].section->id;
+          asection *link_sec = htab->stub_group[section_id].link_sec;
+          asection *stub_sec = htab->stub_group[section_id].stub_sec;
+          const insn_sequence *template;
+          int template_size, size = 0;
+
+          stub_entry = arm_stub_hash_lookup (&htab->stub_hash_table, stub_name,
+                                             TRUE, FALSE);
+          if (stub_entry == NULL)
+            {
+              (*_bfd_error_handler) (_("%s: cannot create stub entry %s"),
+                                     section->owner,
+                                     stub_name);
+              return FALSE;
+            }
+
+          stub_entry->stub_sec = stub_sec;
+          stub_entry->stub_offset = 0;
+          stub_entry->id_sec = link_sec;
+          stub_entry->stub_type = a8_fixes[i].stub_type;
+          stub_entry->target_section = a8_fixes[i].section;
+          stub_entry->target_value = a8_fixes[i].offset;
+          stub_entry->target_addend = a8_fixes[i].addend;
+          stub_entry->orig_insn = a8_fixes[i].orig_insn;
+          stub_entry->st_type = STT_ARM_TFUNC;
+
+          size = find_stub_size_and_template (a8_fixes[i].stub_type, &template,
+                                              &template_size);
+
+          stub_entry->stub_size = size;
+          stub_entry->stub_template = template;
+          stub_entry->stub_template_size = template_size;
+        }
+
+      /* Stash the Cortex-A8 erratum fix array for use later in
+         elf32_arm_write_section().  */
+      htab->a8_erratum_fixes = a8_fixes;
+      htab->num_a8_erratum_fixes = num_a8_fixes;
+    }
+  else
+    {
+      htab->a8_erratum_fixes = NULL;
+      htab->num_a8_erratum_fixes = 0;
+    }
   return TRUE;
 
  error_ret_free_local:
@@ -4807,6 +5450,28 @@ bfd_elf32_arm_init_maps (bfd *abfd)
 }
 
 
+/* Auto-select enabling of Cortex-A8 erratum fix if the user didn't explicitly
+   say what they wanted.  */
+
+void
+bfd_elf32_arm_set_cortex_a8_fix (bfd *obfd, struct bfd_link_info *link_info)
+{
+  struct elf32_arm_link_hash_table *globals = elf32_arm_hash_table (link_info);
+  obj_attribute *out_attr = elf_known_obj_attributes_proc (obfd);
+
+  if (globals->fix_cortex_a8 == -1)
+    {
+      /* Turn on Cortex-A8 erratum workaround for ARMv7-A.  */
+      if (out_attr[Tag_CPU_arch].i == TAG_CPU_ARCH_V7
+	  && (out_attr[Tag_CPU_arch_profile].i == 'A'
+	      || out_attr[Tag_CPU_arch_profile].i == 0))
+	globals->fix_cortex_a8 = 1;
+      else
+	globals->fix_cortex_a8 = 0;
+    }
+}
+
+
 void
 bfd_elf32_arm_set_vfp11_fix (bfd *obfd, struct bfd_link_info *link_info)
 {
@@ -5416,7 +6081,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
 				 int use_blx,
                                  bfd_arm_vfp11_fix vfp11_fix,
 				 int no_enum_warn, int no_wchar_warn,
-				 int pic_veneer)
+				 int pic_veneer, int fix_cortex_a8)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -5438,6 +6103,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
   globals->use_blx |= use_blx;
   globals->vfp11_fix = vfp11_fix;
   globals->pic_veneer = pic_veneer;
+  globals->fix_cortex_a8 = fix_cortex_a8;
 
   BFD_ASSERT (is_arm_elf (output_bfd));
   elf_arm_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
@@ -12172,13 +12838,14 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
 	return FALSE;
       break;
     case THUMB16_TYPE:
+    case THUMB32_TYPE:
       if (!elf32_arm_output_stub_sym (osi, stub_name, addr | 1,
 				      stub_entry->stub_size))
 	return FALSE;
       break;
     default:
       BFD_FAIL ();
-      return FALSE;
+      return 0;
     }
 
   prev_type = DATA_TYPE;
@@ -12192,6 +12859,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
 	  break;
 
 	case THUMB16_TYPE:
+	case THUMB32_TYPE:
 	  sym_type = ARM_MAP_THUMB;
 	  break;
 
@@ -12214,6 +12882,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
       switch (template[i].type)
 	{
 	case ARM_TYPE:
+	case THUMB32_TYPE:
 	  size += 4;
 	  break;
 
@@ -12440,6 +13109,120 @@ copy_exidx_entry (bfd *output_bfd, bfd_byte *to, bfd_byte *from, bfd_vma offset)
   bfd_put_32 (output_bfd, second_word, to + 4);
 }
 
+/* Data for make_branch_to_a8_stub().  */
+
+struct a8_branch_to_stub_data {
+  asection *writing_section;
+  bfd_byte *contents;
+};
+
+
+/* Helper to insert branches to Cortex-A8 erratum stubs in the right
+   places for a particular section.  */
+
+static bfd_boolean
+make_branch_to_a8_stub (struct bfd_hash_entry *gen_entry,
+                       void *in_arg)
+{
+  struct elf32_arm_stub_hash_entry *stub_entry;
+  struct a8_branch_to_stub_data *data;
+  bfd_byte *contents;
+  unsigned long branch_insn;
+  bfd_vma veneered_insn_loc, veneer_entry_loc;
+  bfd_signed_vma branch_offset;
+  bfd *abfd;
+  unsigned int index;
+
+  stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
+  data = (struct a8_branch_to_stub_data *) in_arg;
+
+  if (stub_entry->target_section != data->writing_section
+      || stub_entry->stub_type < arm_stub_a8_veneer_b_cond)
+    return TRUE;
+
+  contents = data->contents;
+
+  veneered_insn_loc = stub_entry->target_section->output_section->vma
+		      + stub_entry->target_section->output_offset
+		      + stub_entry->target_value;
+
+  veneer_entry_loc = stub_entry->stub_sec->output_section->vma
+		     + stub_entry->stub_sec->output_offset
+		     + stub_entry->stub_offset;
+
+  if (stub_entry->stub_type == arm_stub_a8_veneer_blx)
+    veneered_insn_loc &= ~3u;
+
+  branch_offset = veneer_entry_loc - veneered_insn_loc - 4;
+
+  abfd = stub_entry->target_section->owner;
+  index = stub_entry->target_value;
+
+  /* We attempt to avoid this condition by setting stubs_always_after_branch
+     in elf32_arm_size_stubs if we've enabled the Cortex-A8 erratum workaround.
+     This check is just to be on the safe side...  */
+  if ((veneered_insn_loc & ~0xfff) == (veneer_entry_loc & ~0xfff))
+    {
+      (*_bfd_error_handler) (_("%B: error: Cortex-A8 erratum stub is "
+			       "allocated in unsafe location"), abfd);
+      return FALSE;
+    }
+
+  switch (stub_entry->stub_type)
+    {
+    case arm_stub_a8_veneer_b:
+    case arm_stub_a8_veneer_b_cond:
+      branch_insn = 0xf0009000;
+      goto jump24;
+
+    case arm_stub_a8_veneer_blx:
+      branch_insn = 0xf000e800;
+      goto jump24;
+
+    case arm_stub_a8_veneer_bl:
+      {
+	unsigned int i1, j1, i2, j2, s;
+
+	branch_insn = 0xf000d000;
+
+      jump24:
+	if (branch_offset < -16777216 || branch_offset > 16777214)
+	  {
+	    /* There's not much we can do apart from complain if this
+	       happens.  */
+	    (*_bfd_error_handler) (_("%B: error: Cortex-A8 erratum stub out "
+				     "of range (input file too large)"), abfd);
+	    return FALSE;
+	  }
+
+	/* i1 = not(j1 eor s), so:
+	   not i1 = j1 eor s
+	   j1 = (not i1) eor s.  */
+
+	branch_insn |= (branch_offset >> 1) & 0x7ff;
+	branch_insn |= ((branch_offset >> 12) & 0x3ff) << 16;
+	i2 = (branch_offset >> 22) & 1;
+	i1 = (branch_offset >> 23) & 1;
+	s = (branch_offset >> 24) & 1;
+	j1 = (!i1) ^ s;
+	j2 = (!i2) ^ s;
+	branch_insn |= j2 << 11;
+	branch_insn |= j1 << 13;
+	branch_insn |= s << 26;
+      }
+      break;
+
+    default:
+      BFD_FAIL ();
+      return FALSE;
+    }
+
+  bfd_put_16 (abfd, (branch_insn >> 16) & 0xffff, &contents[index]);
+  bfd_put_16 (abfd, branch_insn & 0xffff, &contents[index + 2]);
+
+  return TRUE;
+}
+
 /* Do code byteswapping.  Return FALSE afterwards so that the section is
    written out as normal.  */
 
@@ -12449,7 +13232,7 @@ elf32_arm_write_section (bfd *output_bfd,
 			 asection *sec,
 			 bfd_byte *contents)
 {
-  int mapcount, errcount;
+  unsigned int mapcount, errcount;
   _arm_elf_section_data *arm_data;
   struct elf32_arm_link_hash_table *globals = elf32_arm_hash_table (link_info);
   elf32_arm_section_map *map;
@@ -12458,7 +13241,7 @@ elf32_arm_write_section (bfd *output_bfd,
   bfd_vma end;
   bfd_vma offset = sec->output_section->vma + sec->output_offset;
   bfd_byte tmp;
-  int i;
+  unsigned int i;
 
   /* If this section has not been allocated an _arm_elf_section_data
      structure then we cannot record anything.  */
@@ -12631,6 +13414,18 @@ elf32_arm_write_section (bfd *output_bfd,
 				  (file_ptr) sec->output_offset, sec->size);
 
       return TRUE;
+    }
+
+  /* Fix code to point to Cortex-A8 erratum stubs.  */
+  if (globals->fix_cortex_a8)
+    {
+      struct a8_branch_to_stub_data data;
+
+      data.writing_section = sec;
+      data.contents = contents;
+
+      bfd_hash_traverse (&globals->stub_hash_table, make_branch_to_a8_stub,
+			 &data);
     }
 
   if (mapcount == 0)

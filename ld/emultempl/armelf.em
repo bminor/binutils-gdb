@@ -37,6 +37,7 @@ static char *target2_type = "${TARGET2_TYPE}";
 static int fix_v4bx = 0;
 static int use_blx = 0;
 static bfd_arm_vfp11_fix vfp11_denorm_fix = BFD_ARM_VFP11_FIX_DEFAULT;
+static int fix_cortex_a8 = -1;
 static int no_enum_size_warning = 0;
 static int no_wchar_size_warning = 0;
 static int pic_veneer = 0;
@@ -59,6 +60,9 @@ arm_elf_before_allocation (void)
   /* Choose type of VFP11 erratum fix, or warn if specified fix is unnecessary
      due to architecture version.  */
   bfd_elf32_arm_set_vfp11_fix (link_info.output_bfd, &link_info);
+
+  /* Auto-select Cortex-A8 erratum fix if it wasn't explicitly specified.  */
+  bfd_elf32_arm_set_cortex_a8_fix (link_info.output_bfd, &link_info);
 
   /* We should be able to set the size of the interworking stub section.  We
      can't do it until later if we have dynamic sections, though.  */
@@ -458,7 +462,7 @@ arm_elf_create_output_section_statements (void)
 				   target2_type, fix_v4bx, use_blx,
 				   vfp11_denorm_fix, no_enum_size_warning,
 				   no_wchar_size_warning,
-				   pic_veneer);
+				   pic_veneer, fix_cortex_a8);
 
   stub_file = lang_add_input_file ("linker stubs",
  				   lang_input_file_is_fake_enum,
@@ -520,6 +524,8 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_FIX_V4BX_INTERWORKING	311
 #define OPTION_STUBGROUP_SIZE           312
 #define OPTION_NO_WCHAR_SIZE_WARNING	313
+#define OPTION_FIX_CORTEX_A8		314
+#define OPTION_NO_FIX_CORTEX_A8		315
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -539,6 +545,8 @@ PARSE_AND_LIST_LONGOPTS='
   { "pic-veneer", no_argument, NULL, OPTION_PIC_VENEER},
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
   { "no-wchar-size-warning", no_argument, NULL, OPTION_NO_WCHAR_SIZE_WARNING},
+  { "fix-cortex-a8", no_argument, NULL, OPTION_FIX_CORTEX_A8 },
+  { "no-fix-cortex-a8", no_argument, NULL, OPTION_NO_FIX_CORTEX_A8 },
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -565,6 +573,7 @@ PARSE_AND_LIST_OPTIONS='
                            after each stub section.  Values of +/-1 indicate\n\
                            the linker should choose suitable defaults.\n"
  		   ));
+  fprintf (file, _("  --[no-]fix-cortex-a8        Disable/enable Cortex-A8 Thumb-2 branch erratum fix\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -635,6 +644,14 @@ PARSE_AND_LIST_ARGS_CASES='
         if (*end)
 	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
       }
+      break;
+
+    case OPTION_FIX_CORTEX_A8:
+      fix_cortex_a8 = 1;
+      break;
+
+    case OPTION_NO_FIX_CORTEX_A8:
+      fix_cortex_a8 = 0;
       break;
 '
 

@@ -1,3 +1,38 @@
+2009-05-22  Julian Brown  <julian@codesourcery.com>
+
+	* elf32-arm.c (THUMB16_BCOND_INSN, THUMB32_INSN, THUMB32_B_INSN): New
+	macros.
+	(elf32_arm_stub_a8_veneer_b_cond, elf32_arm_stub_a8_veneer_b)
+	(elf32_arm_stub_a8_veneer_blx): New stub sequences.
+	(elf32_arm_stub_type): Add arm_stub_a8_veneer_b_cond,
+	arm_stub_a8_veneer_b and arm_stub_a8_veneer_blx.
+	(elf32_arm_stub_hash_entry): Add target_addend, orig_insn fields.
+	(a8_erratum_fix, a8_erratum_reloc): New structs.
+	(elf32_arm_link_hash_table): Add a8_erratum_fixes,
+	num_a8_erratum_fixes, fix_cortex_a8 fields.
+	(elf32_arm_link_hash_table_create): Zero fix_cortex_a8.
+	(elf32_arm_add_stub): Split into two parts, creating...
+	(elf32_arm_create_or_find_stub_sec): New function.
+	(elf32_arm_final_link_relocate): Add forward declaration.
+	(arm_build_one_stub): Add support for THUMB32_TYPE, Thumb-2
+	relocations, multiple relocations per stub.
+	(find_stub_size_and_template): New (using parts of arm_size_one_stub).
+	(arm_size_one_stub): Use find_stub_size_and_template.
+	(a8_reloc_compare): New.
+	(find_thumb_glue): Add forward declaration.
+	(cortex_a8_erratum_scan): New.
+	(elf32_arm_size_stubs): Add Cortex-A8 erratum workaround support.
+	(bfd_elf32_arm_set_cortex_a8_fix): New.
+	(bfd_elf32_arm_set_target_relocs): Add fix_cortex_a8 argument.
+	(arm_map_one_stub): Add THUMB32_TYPE support.
+	(a8_branch_to_stub_data): New.
+	(make_branch_to_a8_stub): New.
+	(elf32_arm_write_section): Add Cortex-A8 erratum workaround support.
+	* bfd-in.h (bfd_elf32_arm_set_cortex_a8_fix): New.
+	(bfd_elf32_arm_set_target_relocs): Add argument for controlling
+	Cortex-A8 erratum workaround.
+	* bfd-in2.h: Regenerate.
+
 2009-05-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
