@@ -29,7 +29,7 @@
 
 check()
 {
-    if ! grep -q "$2" "$1"
+    if grep -q "$2" "$1"
     then
         echo "Garbage collection failed to collect :"
         echo "   $2"

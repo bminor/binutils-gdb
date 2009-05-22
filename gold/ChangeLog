@@ -1,3 +1,11 @@
+2009-05-22  Sriraman Tallam  <tmsriram@google.com>
+
+	* testsuite/Makefile.am: Add -ffunction-sections to compile 
+	gc_comdat_test files.  Add -Wl,--gc-sections to build
+	gc_comdat_test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/gc_comdat_test.sh: Fix the condition around grep.
+
 2009-05-21  Sriraman Tallam  <tmsriram@google.com>
 
 	* object.cc (Sized_relobj::map_to_kept_section): Return NULL if the

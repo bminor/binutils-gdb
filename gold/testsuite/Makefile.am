@@ -107,11 +107,11 @@ flagstest_ndebug.o: constructor_test.cc
 check_SCRIPTS += gc_comdat_test.sh
 check_DATA += gc_comdat_test.stdout
 gc_comdat_test_1.o: gc_comdat_test_1.cc 
-	$(CXXCOMPILE) -O0 -c -g -o $@ $<
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 gc_comdat_test_2.o: gc_comdat_test_2.cc 
-	$(CXXCOMPILE) -O0 -c -g -o $@ $<
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 gc_comdat_test: gc_comdat_test_1.o gc_comdat_test_2.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ --gc-sections gc_comdat_test_1.o gc_comdat_test_2.o
+	$(CXXLINK) -Bgcctestdir/ -Wl,--gc-sections gc_comdat_test_1.o gc_comdat_test_2.o
 gc_comdat_test.stdout: gc_comdat_test
 	$(TEST_NM) -C gc_comdat_test > gc_comdat_test.stdout
 
