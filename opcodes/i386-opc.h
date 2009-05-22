@@ -76,10 +76,8 @@
 #define CpuSSE4_1	(CpuABM + 1)
 /* SSE4.2 support required */
 #define CpuSSE4_2	(CpuSSE4_1 + 1)
-/* SSE5 support required */
-#define CpuSSE5		(CpuSSE4_2 + 1)
 /* AVX support required */
-#define CpuAVX		(CpuSSE5 + 1)
+#define CpuAVX		(CpuSSE4_2 + 1)
 /* Xsave/xrstor New Instuctions support required */
 #define CpuXsave	(CpuAVX + 1)
 /* AES support required */
@@ -141,7 +139,6 @@ typedef union i386_cpu_flags
       unsigned int cpuabm:1;
       unsigned int cpusse4_1:1;
       unsigned int cpusse4_2:1;
-      unsigned int cpusse5:1;
       unsigned int cpuavx:1;
       unsigned int cpuxsave:1;
       unsigned int cpuaes:1;
@@ -239,13 +236,8 @@ typedef union i386_cpu_flags
 #define Rex64			(NoRex64 + 1)
 /* deprecated fp insn, gets a warning */
 #define Ugh			(Rex64 + 1)
-#define Drex			(Ugh + 1)
-/* instruction needs DREX with multiple encodings for memory ops */
-#define Drexv			(Drex + 1)
-/* special DREX for comparisons */
-#define Drexc			(Drexv + 1)
 /* insn has VEX prefix. */
-#define Vex			(Drexc + 1)
+#define Vex			(Ugh + 1)
 /* insn has 256bit VEX prefix. */
 #define Vex256			(Vex + 1)
 /* insn has VEX NDS. Register-only source is encoded in Vex prefix.
@@ -323,9 +315,6 @@ typedef struct i386_opcode_modifier
   unsigned int norex64:1;
   unsigned int rex64:1;
   unsigned int ugh:1;
-  unsigned int drex:1;
-  unsigned int drexv:1;
-  unsigned int drexc:1;
   unsigned int vex:1;
   unsigned int vex256:1;
   unsigned int vexnds:1;
@@ -535,7 +524,7 @@ typedef struct template
      This field is also used to store the 8-bit opcode suffix for the
      AMD 3DNow! instructions.
      If this template has no extension opcode (the usual case) use None 
-     Instructions with Drex use this to specify 2 bits for OC */
+     Instructions */
   unsigned int extension_opcode;
 #define None 0xffff		/* If no extension_opcode is possible.  */
 

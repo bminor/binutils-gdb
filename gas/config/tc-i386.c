@@ -114,33 +114,6 @@ modrm_byte;
 /* x86-64 extension prefix.  */
 typedef int rex_byte;
 
-/* The SSE5 instructions have a two bit instruction modifier (OC) that 
-   is stored in two separate bytes in the instruction.  Pick apart OC 
-   into the 2 separate bits for instruction.  */
-#define DREX_OC0(x)	(((x) & 1) != 0)
-#define DREX_OC1(x)	(((x) & 2) != 0)
-
-#define DREX_OC0_MASK	(1 << 3)	/* set OC0 in byte 4 */
-#define DREX_OC1_MASK	(1 << 2)	/* set OC1 in byte 3 */
-
-/* OC mappings */
-#define DREX_XMEM_X1_X2_X2 0	/* 4 op insn, dest = src3, src1 = reg/mem */
-#define DREX_X1_XMEM_X2_X2 1	/* 4 op insn, dest = src3, src2 = reg/mem */
-#define DREX_X1_XMEM_X2_X1 2	/* 4 op insn, dest = src1, src2 = reg/mem */
-#define DREX_X1_X2_XMEM_X1 3	/* 4 op insn, dest = src1, src3 = reg/mem */
-
-#define DREX_XMEM_X1_X2	   0	/* 3 op insn, src1 = reg/mem */
-#define DREX_X1_XMEM_X2	   1	/* 3 op insn, src1 = reg/mem */
-
-/* Information needed to create the DREX byte in SSE5 instructions.  */
-typedef struct
-{
-  unsigned int reg;		/* register */
-  unsigned int rex;		/* REX flags */
-  unsigned int modrm_reg;	/* which arg goes in the modrm.reg field */
-  unsigned int modrm_regmem;	/* which arg goes in the modrm.regmem field */
-} drex_byte;
-
 /* 386 opcode byte to code indirect addressing.  */
 typedef struct
 {
@@ -194,7 +167,6 @@ static int check_long_reg (void);
 static int check_qword_reg (void);
 static int check_word_reg (void);
 static int finalize_imm (void);
-static void process_drex (void);
 static int process_operands (void);
 static const seg_entry *build_modrm_byte (void);
 static void output_insn (void);
@@ -277,13 +249,10 @@ struct _i386_insn
     unsigned char prefix[MAX_PREFIXES];
 
     /* RM and SIB are the modrm byte and the sib byte where the
-       addressing modes of this insn are encoded.  DREX is the byte
-       added by the SSE5 instructions.  */
-
+       addressing modes of this insn are encoded.  */
     modrm_byte rm;
     rex_byte rex;
     sib_byte sib;
-    drex_byte drex;
     vex_prefix vex;
 
     /* Swap operand in encoding.  */
@@ -678,8 +647,6 @@ static const arch_entry cpu_arch[] =
     CPU_SSE4A_FLAGS },
   { ".abm", PROCESSOR_UNKNOWN,
     CPU_ABM_FLAGS },
-  { ".sse5", PROCESSOR_UNKNOWN,
-    CPU_SSE5_FLAGS },
 };
 
 #ifdef I386COFF
@@ -2216,8 +2183,6 @@ pi (char *line, i386_insn *x)
 	   (x->rex & REX_R) != 0,
 	   (x->rex & REX_X) != 0,
 	   (x->rex & REX_B) != 0);
-  fprintf (stdout, "  drex:  reg %d rex 0x%x\n", 
-	   x->drex.reg, x->drex.rex);
   for (i = 0; i < x->operands; i++)
     {
       fprintf (stdout, "    #%d:  ", i + 1);
@@ -2713,13 +2678,11 @@ process_immext (void)
      would be.  Here we fake an 8-bit immediate operand from the
      opcode suffix stored in tm.extension_opcode.
 
-     SSE5 and AVX instructions also use this encoding, for some of
+     AVX instructions also use this encoding, for some of
      3 argument instructions.  */
 
   assert (i.imm_operands == 0
 	  && (i.operands <= 2
-	      || (i.tm.cpu_flags.bitfield.cpusse5
-		  && i.operands <= 3)
 	      || (i.tm.opcode_modifier.vex
 		  && i.operands <= 4)));
 
@@ -2941,14 +2904,7 @@ md_assemble (char *line)
 	}
     }
 
-  /* If the instruction has the DREX attribute (aka SSE5), don't emit a
-     REX prefix.  */
-  if (i.tm.opcode_modifier.drex || i.tm.opcode_modifier.drexc)
-    {
-      i.drex.rex = i.rex;
-      i.rex = 0;
-    }
-  else if (i.rex != 0)
+if (i.rex != 0)
     add_prefix (REX_OPCODE | i.rex);
 
   /* We are ready to output the insn.  */
@@ -4551,336 +4507,6 @@ finalize_imm (void)
   return 1;
 }
 
-static void
-process_drex (void)
-{
-  i.drex.modrm_reg = 0;
-  i.drex.modrm_regmem = 0;
-
-  /* SSE5 4 operand instructions must have the destination the same as 
-     one of the inputs.  Figure out the destination register and cache
-     it away in the drex field, and remember which fields to use for 
-     the modrm byte.  */
-  if (i.tm.opcode_modifier.drex 
-      && i.tm.opcode_modifier.drexv 
-      && i.operands == 4)
-    {
-      i.tm.extension_opcode = None;
-
-      /* Case 1: 4 operand insn, dest = src1, src3 = register.  */
-      if (i.types[0].bitfield.regxmm != 0
-	  && i.types[1].bitfield.regxmm != 0
-	  && i.types[2].bitfield.regxmm != 0
-	  && i.types[3].bitfield.regxmm != 0
-	  && i.op[0].regs->reg_num == i.op[3].regs->reg_num
-	  && i.op[0].regs->reg_flags == i.op[3].regs->reg_flags)
-	{
-	  /* Clear the arguments that are stored in drex.  */
-	  operand_type_set (&i.types[0], 0); 
-	  operand_type_set (&i.types[3], 0);
-	  i.reg_operands -= 2;
-
-	  /* There are two different ways to encode a 4 operand 
-	     instruction with all registers that uses OC1 set to 
-	     0 or 1.  Favor setting OC1 to 0 since this mimics the 
-	     actions of other SSE5 assemblers.  Use modrm encoding 2 
-	     for register/register.  Include the high order bit that 
-	     is normally stored in the REX byte in the register
-	     field.  */
-	  i.tm.extension_opcode = DREX_X1_XMEM_X2_X1;
-	  i.drex.modrm_reg = 2;
-	  i.drex.modrm_regmem = 1;
-	  i.drex.reg = (i.op[3].regs->reg_num
-			+ ((i.op[3].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      /* Case 2: 4 operand insn, dest = src1, src3 = memory.  */
-      else if (i.types[0].bitfield.regxmm != 0
-	       && i.types[1].bitfield.regxmm != 0
-	       && (i.types[2].bitfield.regxmm 
-		   || operand_type_check (i.types[2], anymem))
-	       && i.types[3].bitfield.regxmm != 0
-	       && i.op[0].regs->reg_num == i.op[3].regs->reg_num
-	       && i.op[0].regs->reg_flags == i.op[3].regs->reg_flags)
-	{
-	  /* clear the arguments that are stored in drex */
-	  operand_type_set (&i.types[0], 0); 
-	  operand_type_set (&i.types[3], 0);
-	  i.reg_operands -= 2;
-
-	  /* Specify the modrm encoding for memory addressing.  Include 
-	     the high order bit that is normally stored in the REX byte
-	     in the register field.  */
-	  i.tm.extension_opcode = DREX_X1_X2_XMEM_X1;
-	  i.drex.modrm_reg = 1;
-	  i.drex.modrm_regmem = 2;
-	  i.drex.reg = (i.op[3].regs->reg_num
-			+ ((i.op[3].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      /* Case 3: 4 operand insn, dest = src1, src2 = memory.  */
-      else if (i.types[0].bitfield.regxmm != 0
-	       && operand_type_check (i.types[1], anymem) != 0
-	       && i.types[2].bitfield.regxmm != 0
-	       && i.types[3].bitfield.regxmm != 0
-	       && i.op[0].regs->reg_num == i.op[3].regs->reg_num
-	       && i.op[0].regs->reg_flags == i.op[3].regs->reg_flags)
-	{
-	  /* Clear the arguments that are stored in drex.  */
-	  operand_type_set (&i.types[0], 0); 
-	  operand_type_set (&i.types[3], 0);
-	  i.reg_operands -= 2;
-
-	  /* Specify the modrm encoding for memory addressing.  Include
-	     the high order bit that is normally stored in the REX byte 
-	     in the register field.  */
-	  i.tm.extension_opcode = DREX_X1_XMEM_X2_X1;
-	  i.drex.modrm_reg = 2;
-	  i.drex.modrm_regmem = 1;
-	  i.drex.reg = (i.op[3].regs->reg_num
-			+ ((i.op[3].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      /* Case 4: 4 operand insn, dest = src3, src2 = register. */
-      else if (i.types[0].bitfield.regxmm != 0
-	       && i.types[1].bitfield.regxmm != 0
-	       && i.types[2].bitfield.regxmm != 0
-	       && i.types[3].bitfield.regxmm != 0
-	       && i.op[2].regs->reg_num == i.op[3].regs->reg_num
-	       && i.op[2].regs->reg_flags == i.op[3].regs->reg_flags)
-	{
-	  /* clear the arguments that are stored in drex */
-	  operand_type_set (&i.types[2], 0); 
-	  operand_type_set (&i.types[3], 0);
-	  i.reg_operands -= 2;
-
-	  /* There are two different ways to encode a 4 operand 
-	     instruction with all registers that uses OC1 set to 
-	     0 or 1.  Favor setting OC1 to 0 since this mimics the 
-	     actions of other SSE5 assemblers.  Use modrm encoding 
-	     2 for register/register.  Include the high order bit that 
-	     is normally stored in the REX byte in the register 
-	     field.  */
-	  i.tm.extension_opcode = DREX_XMEM_X1_X2_X2;
-	  i.drex.modrm_reg = 1;
-	  i.drex.modrm_regmem = 0;
-
-	  /* Remember the register, including the upper bits */
-	  i.drex.reg = (i.op[3].regs->reg_num
-			+ ((i.op[3].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      /* Case 5: 4 operand insn, dest = src3, src2 = memory.  */
-      else if (i.types[0].bitfield.regxmm != 0
-	       && (i.types[1].bitfield.regxmm 
-		   || operand_type_check (i.types[1], anymem)) 
-	       && i.types[2].bitfield.regxmm != 0
-	       && i.types[3].bitfield.regxmm != 0
-	       && i.op[2].regs->reg_num == i.op[3].regs->reg_num
-	       && i.op[2].regs->reg_flags == i.op[3].regs->reg_flags)
-	{
-	  /* Clear the arguments that are stored in drex.  */
-	  operand_type_set (&i.types[2], 0); 
-	  operand_type_set (&i.types[3], 0);
-	  i.reg_operands -= 2;
-
-	  /* Specify the modrm encoding and remember the register 
-	     including the bits normally stored in the REX byte. */
-	  i.tm.extension_opcode = DREX_X1_XMEM_X2_X2;
-	  i.drex.modrm_reg = 0;
-	  i.drex.modrm_regmem = 1;
-	  i.drex.reg = (i.op[3].regs->reg_num
-			+ ((i.op[3].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      /* Case 6: 4 operand insn, dest = src3, src1 = memory.  */
-      else if (operand_type_check (i.types[0], anymem) != 0
-	       && i.types[1].bitfield.regxmm != 0
-	       && i.types[2].bitfield.regxmm != 0
-	       && i.types[3].bitfield.regxmm != 0
-	       && i.op[2].regs->reg_num == i.op[3].regs->reg_num
-	       && i.op[2].regs->reg_flags == i.op[3].regs->reg_flags)
-	{
-	  /* clear the arguments that are stored in drex */
-	  operand_type_set (&i.types[2], 0); 
-	  operand_type_set (&i.types[3], 0);
-	  i.reg_operands -= 2;
-
-	  /* Specify the modrm encoding and remember the register 
-	     including the bits normally stored in the REX byte. */
-	  i.tm.extension_opcode = DREX_XMEM_X1_X2_X2;
-	  i.drex.modrm_reg = 1;
-	  i.drex.modrm_regmem = 0;
-	  i.drex.reg = (i.op[3].regs->reg_num
-			+ ((i.op[3].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      else
-	as_bad (_("Incorrect operands for the '%s' instruction"), 
-		i.tm.name);
-    }
-
-  /* SSE5 instructions with the DREX byte where the only memory operand 
-     is in the 2nd argument, and the first and last xmm register must 
-     match, and is encoded in the DREX byte. */
-  else if (i.tm.opcode_modifier.drex 
-	   && !i.tm.opcode_modifier.drexv 
-	   && i.operands == 4)
-    {
-      /* Case 1: 4 operand insn, dest = src1, src3 = reg/mem.  */
-      if (i.types[0].bitfield.regxmm != 0
-	  && (i.types[1].bitfield.regxmm 
-	      || operand_type_check(i.types[1], anymem)) 
-	  && i.types[2].bitfield.regxmm != 0
-	  && i.types[3].bitfield.regxmm != 0
-	  && i.op[0].regs->reg_num == i.op[3].regs->reg_num
-	  && i.op[0].regs->reg_flags == i.op[3].regs->reg_flags)
-	{
-	  /* clear the arguments that are stored in drex */
-	  operand_type_set (&i.types[0], 0); 
-	  operand_type_set (&i.types[3], 0);
-	  i.reg_operands -= 2;
-
-	  /* Specify the modrm encoding and remember the register 
-	     including the high bit normally stored in the REX 
-	     byte.  */
-	  i.drex.modrm_reg = 2;
-	  i.drex.modrm_regmem = 1;
-	  i.drex.reg = (i.op[3].regs->reg_num
-			+ ((i.op[3].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      else
-	as_bad (_("Incorrect operands for the '%s' instruction"), 
-		i.tm.name);
-    }
-
-  /* SSE5 3 operand instructions that the result is a register, being 
-     either operand can be a memory operand, using OC0 to note which 
-     one is the memory.  */
-  else if (i.tm.opcode_modifier.drex 
-	   && i.tm.opcode_modifier.drexv
-	   && i.operands == 3)
-    {
-      i.tm.extension_opcode = None;
-
-      /* Case 1: 3 operand insn, src1 = register.  */
-      if (i.types[0].bitfield.regxmm != 0
-	  && i.types[1].bitfield.regxmm != 0
-	  && i.types[2].bitfield.regxmm != 0)
-	{
-	  /* Clear the arguments that are stored in drex.  */
-	  operand_type_set (&i.types[2], 0);
-	  i.reg_operands--;
-
-	  /* Specify the modrm encoding and remember the register 
-	     including the high bit normally stored in the REX byte.  */
-	  i.tm.extension_opcode = DREX_XMEM_X1_X2;
-	  i.drex.modrm_reg = 1;
-	  i.drex.modrm_regmem = 0;
-	  i.drex.reg = (i.op[2].regs->reg_num
-			+ ((i.op[2].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      /* Case 2: 3 operand insn, src1 = memory.  */
-      else if (operand_type_check (i.types[0], anymem) != 0
-	       && i.types[1].bitfield.regxmm != 0
-	       && i.types[2].bitfield.regxmm != 0)
-	{
-	  /* Clear the arguments that are stored in drex.  */
-	  operand_type_set (&i.types[2], 0);
-	  i.reg_operands--;
-
-	  /* Specify the modrm encoding and remember the register 
-	     including the high bit normally stored in the REX 
-	     byte.  */
-	  i.tm.extension_opcode = DREX_XMEM_X1_X2;
-	  i.drex.modrm_reg = 1;
-	  i.drex.modrm_regmem = 0;
-	  i.drex.reg = (i.op[2].regs->reg_num
-			+ ((i.op[2].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      /* Case 3: 3 operand insn, src2 = memory.  */
-      else if (i.types[0].bitfield.regxmm != 0
-	       && operand_type_check (i.types[1], anymem) != 0
-	       && i.types[2].bitfield.regxmm != 0)
-	{
-	  /* Clear the arguments that are stored in drex.  */
-	  operand_type_set (&i.types[2], 0);
-	  i.reg_operands--;
-
-	  /* Specify the modrm encoding and remember the register 
-	     including the high bit normally stored in the REX byte.  */
-	  i.tm.extension_opcode = DREX_X1_XMEM_X2;
-	  i.drex.modrm_reg = 0;
-	  i.drex.modrm_regmem = 1;
-	  i.drex.reg = (i.op[2].regs->reg_num
-			+ ((i.op[2].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      else
-	as_bad (_("Incorrect operands for the '%s' instruction"), 
-		i.tm.name);
-    }
-
-  /* SSE5 4 operand instructions that are the comparison instructions 
-     where the first operand is the immediate value of the comparison 
-     to be done.  */
-  else if (i.tm.opcode_modifier.drexc != 0 && i.operands == 4)
-    {
-      /* Case 1: 4 operand insn, src1 = reg/memory. */
-      if (operand_type_check (i.types[0], imm) != 0
-	  && (i.types[1].bitfield.regxmm 
-	      || operand_type_check (i.types[1], anymem)) 
-	  && i.types[2].bitfield.regxmm != 0
-	  && i.types[3].bitfield.regxmm != 0)
-	{
-	  /* clear the arguments that are stored in drex */
-	  operand_type_set (&i.types[3], 0);
-	  i.reg_operands--;
-
-	  /* Specify the modrm encoding and remember the register 
-	     including the high bit normally stored in the REX byte.  */
-	  i.drex.modrm_reg = 2;
-	  i.drex.modrm_regmem = 1;
-	  i.drex.reg = (i.op[3].regs->reg_num
-			+ ((i.op[3].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      /* Case 2: 3 operand insn with ImmExt that places the 
-	 opcode_extension as an immediate argument.  This is used for 
-	 all of the varients of comparison that supplies the appropriate
-	 value as part of the instruction.  */
-      else if ((i.types[0].bitfield.regxmm
-		|| operand_type_check (i.types[0], anymem)) 
-	       && i.types[1].bitfield.regxmm != 0
-	       && i.types[2].bitfield.regxmm != 0
-	       && operand_type_check (i.types[3], imm) != 0)
-	{
-	  /* clear the arguments that are stored in drex */
-	  operand_type_set (&i.types[2], 0);
-	  i.reg_operands--;
-
-	  /* Specify the modrm encoding and remember the register 
-	     including the high bit normally stored in the REX byte.  */
-	  i.drex.modrm_reg = 1;
-	  i.drex.modrm_regmem = 0;
-	  i.drex.reg = (i.op[2].regs->reg_num
-			+ ((i.op[2].regs->reg_flags & RegRex) ? 8 : 0));
-	}
-
-      else
-	as_bad (_("Incorrect operands for the '%s' instruction"), 
-		i.tm.name);
-    }
-
-  else if (i.tm.opcode_modifier.drex 
-	   || i.tm.opcode_modifier.drexv 
-	   || i.tm.opcode_modifier.drexc)
-    as_bad (_("Internal error for the '%s' instruction"), i.tm.name);
-}
-
 static int
 bad_implicit_operand (int xmm)
 {
@@ -4901,12 +4527,6 @@ process_operands (void)
      accesses.  0 means unknown.  This is only for optimizing out
      unnecessary segment overrides.  */
   const seg_entry *default_seg = 0;
-
-  /* Handle all of the DREX munging that SSE5 needs.  */
-  if (i.tm.opcode_modifier.drex 
-      || i.tm.opcode_modifier.drexv 
-      || i.tm.opcode_modifier.drexc)
-    process_drex ();
 
   if (i.tm.opcode_modifier.sse2avx
       && (i.tm.opcode_modifier.vexnds
@@ -5179,34 +4799,13 @@ build_modrm_byte (void)
   else
     source = dest = 0;
 
-  /* SSE5 4 operand instructions are encoded in such a way that one of 
-     the inputs must match the destination register.  Process_drex hides
-     the 3rd argument in the drex field, so that by the time we get 
-     here, it looks to GAS as if this is a 2 operand instruction.  */
-  if ((i.tm.opcode_modifier.drex 
-       || i.tm.opcode_modifier.drexv 
-       || i.tm.opcode_modifier.drexc)
-      && i.reg_operands == 2)
-    {
-      const reg_entry *reg = i.op[i.drex.modrm_reg].regs;
-      const reg_entry *regmem = i.op[i.drex.modrm_regmem].regs;
-
-      i.rm.reg = reg->reg_num;
-      i.rm.regmem = regmem->reg_num;
-      i.rm.mode = 3;
-      if ((reg->reg_flags & RegRex) != 0)
-	i.rex |= REX_R;
-      if ((regmem->reg_flags & RegRex) != 0)
-	i.rex |= REX_B;
-    }
-
   /* i.reg_operands MUST be the number of real register operands;
      implicit registers do not count.  If there are 3 register
      operands, it must be a instruction with VexNDS.  For a
      instruction with VexNDD, the destination register is encoded
      in VEX prefix.  If there are 4 register operands, it must be
      a instruction with VEX prefix and 3 sources.  */
-  else if (i.mem_operands == 0
+    if (i.mem_operands == 0
 	   && ((i.reg_operands == 2
 		&& !i.tm.opcode_modifier.vexndd)
 	       || (i.reg_operands == 3
@@ -5329,19 +4928,10 @@ build_modrm_byte (void)
 	  unsigned int fake_zero_displacement = 0;
 	  unsigned int op;
 
- 	  /* This has been precalculated for SSE5 instructions 
-	     that have a DREX field earlier in process_drex.  */
- 	  if (i.tm.opcode_modifier.drex 
-	      || i.tm.opcode_modifier.drexv 
-	      || i.tm.opcode_modifier.drexc)
- 	    op = i.drex.modrm_regmem;
- 	  else
- 	    {
 	      for (op = 0; op < i.operands; op++)
 		if (operand_type_check (i.types[op], anymem))
 		  break;
 	      assert (op < i.operands);
-	    }
 
 	  default_seg = &ds;
 
@@ -5540,20 +5130,6 @@ build_modrm_byte (void)
       if (i.reg_operands)
 	{
 	  unsigned int op;
-
-	  /* This has been precalculated for SSE5 instructions 
-	     that have a DREX field earlier in process_drex.  */
-	  if (i.tm.opcode_modifier.drex 
-	      || i.tm.opcode_modifier.drexv 
-	      || i.tm.opcode_modifier.drexc)
-	    {
-	      op = i.drex.modrm_reg;
-	      i.rm.reg = i.op[op].regs->reg_num;
-	      if ((i.op[op].regs->reg_flags & RegRex) != 0)
-		i.rex |= REX_R;
-	    }
-	  else
-	    {
 	      unsigned int vex_reg = ~0;
 	      
 	      for (op = 0; op < i.operands; op++)
@@ -5628,7 +5204,6 @@ build_modrm_byte (void)
 		  if ((i.op[op].regs->reg_flags & RegRex) != 0)
 		    i.rex |= REX_R;
 		}
-	    }
 
 	  /* Now, if no memory operand has set i.rm.mode = 0, 1, 2 we
 	     must set it to 3 to indicate this is a register operand
@@ -5638,10 +5213,7 @@ build_modrm_byte (void)
 	}
 
       /* Fill in i.rm.reg field with extension opcode (if any).  */
-      if (i.tm.extension_opcode != None
-	  && !(i.tm.opcode_modifier.drex 
-	      || i.tm.opcode_modifier.drexv 
-	      || i.tm.opcode_modifier.drexc))
+      if (i.tm.extension_opcode != None)
 	i.rm.reg = i.tm.extension_opcode;
     }
   return default_seg;
@@ -5975,13 +5547,6 @@ check_prefix:
 	  /* Put out high byte first: can't use md_number_to_chars!  */
 	  *p++ = (i.tm.base_opcode >> 8) & 0xff;
 	  *p = i.tm.base_opcode & 0xff;
-
-	  /* On SSE5, encode the OC1 bit in the DREX field if this 
-	     encoding has multiple formats.  */
-	  if (i.tm.opcode_modifier.drex 
-	      && i.tm.opcode_modifier.drexv 
-	      && DREX_OC1 (i.tm.extension_opcode))
-	    *p |= DREX_OC1_MASK;
 	}
 
       /* Now the modrm byte and sib byte (if present).  */
@@ -6000,20 +5565,6 @@ check_prefix:
 	    FRAG_APPEND_1_CHAR ((i.sib.base << 0
 				 | i.sib.index << 3
 				 | i.sib.scale << 6));
-	}
-
-      /* Write the DREX byte if needed.  */
-      if (i.tm.opcode_modifier.drex || i.tm.opcode_modifier.drexc)
-	{
-	  p = frag_more (1);
-	  *p = (((i.drex.reg & 0xf) << 4) | (i.drex.rex & 0x7));
-
-	  /* Encode the OC0 bit if this encoding has multiple 
-	     formats.  */
-	  if ((i.tm.opcode_modifier.drex 
-	       || i.tm.opcode_modifier.drexv) 
-	      && DREX_OC0 (i.tm.extension_opcode))
-	    *p |= DREX_OC0_MASK;
 	}
 
       if (i.disp_operands)
@@ -8283,7 +7834,7 @@ md_show_usage (stream)
                            mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, sse4,\n\
                            avx, vmx, smx, xsave, movbe, ept, aes, pclmul, fma,\n\
                            clflush, syscall, rdtscp, 3dnow, 3dnowa, sse4a,\n\
-                           sse5, svme, abm, padlock\n"));
+                           svme, abm, padlock\n"));
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\

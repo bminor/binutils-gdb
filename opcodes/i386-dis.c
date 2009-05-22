@@ -55,8 +55,8 @@ static void append_seg (void);
 static void OP_indirE (int, int);
 static void print_operand_value (char *, int, bfd_vma);
 static void OP_E_register (int, int);
-static void OP_E_memory (int, int, int);
-static void OP_E_extended (int, int, int);
+static void OP_E_memory (int, int);
+static void OP_E_extended (int, int);
 static void print_displacement (char *, bfd_vma);
 static void OP_E (int, int);
 static void OP_G (int, int);
@@ -111,11 +111,7 @@ static void REP_Fixup (int, int);
 static void CMPXCHG8B_Fixup (int, int);
 static void XMM_Fixup (int, int);
 static void CRC32_Fixup (int, int);
-static void print_drex_arg (unsigned int, int, int);
-static void OP_DREX4 (int, int);
-static void OP_DREX3 (int, int);
-static void OP_DREX_ICMP (int, int);
-static void OP_DREX_FCMP (int, int);
+
 static void MOVBE_Fixup (int, int);
 
 struct dis_private {
@@ -162,20 +158,6 @@ static int rex_ignored;
     else						\
       rex_used |= REX_OPCODE;				\
   }
-
-/* Special 'registers' for DREX handling */
-#define DREX_REG_UNKNOWN	1000	/* not initialized */
-#define DREX_REG_MEMORY         1001	/* use MODRM/SIB/OFFSET memory */
-
-/* The DREX byte has the following fields:
-   Bits 7-4 -- DREX.Dest, xmm destination register
-   Bit 3    -- DREX.OC0, operand config bit defines operand order
-   Bit 2    -- DREX.R, equivalent to REX_R bit, to extend ModRM register
-   Bit 1    -- DREX.X, equivalent to REX_X bit, to extend SIB index field
-   Bit 0    -- DREX.W, equivalent to REX_B bit, to extend ModRM r/m field,
-	       SIB base field, or opcode reg field.  */
-#define DREX_XMM(drex) ((drex >> 4) & 0xf)
-#define DREX_OC0(drex) ((drex >> 3) & 0x1)
 
 /* Flags for prefixes which we somehow handled when printing the
    current instruction.  */
@@ -514,15 +496,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 
 #define MAX_BYTEMODE	indir_dx_reg
 
-/* Flags that are OR'ed into the bytemode field to pass extra
-   information.  */
-#define DREX_OC1		0x10000	/* OC1 bit set */
-#define DREX_NO_OC0		0x20000	/* OC0 bit not used */
-#define DREX_MASK		0x40000	/* mask to delete */
-
-#if MAX_BYTEMODE >= DREX_OC1
-#error MAX_BYTEMODE must be less than DREX_OC1
-#endif
 
 #define FLOATCODE		1
 #define USE_REG_TABLE		(FLOATCODE + 1)
@@ -1042,12 +1015,9 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define X86_64_0F01_REG_2	(X86_64_0F01_REG_1 + 1)
 #define X86_64_0F01_REG_3	(X86_64_0F01_REG_2 + 1)
 
-#define THREE_BYTE_0F24		0
-#define THREE_BYTE_0F25		(THREE_BYTE_0F24 + 1)
-#define THREE_BYTE_0F38		(THREE_BYTE_0F25 + 1)
+#define THREE_BYTE_0F38		0
 #define THREE_BYTE_0F3A		(THREE_BYTE_0F38 + 1)
 #define THREE_BYTE_0F7A		(THREE_BYTE_0F3A + 1)
-#define THREE_BYTE_0F7B		(THREE_BYTE_0F7A + 1)
 
 #define VEX_0F			0
 #define VEX_0F38		(VEX_0F + 1)
@@ -1642,7 +1612,7 @@ static const struct dis386 dis386_twobyte[] = {
   { MOD_TABLE (MOD_0F22) },
   { MOD_TABLE (MOD_0F23) },
   { MOD_TABLE (MOD_0F24) },
-  { THREE_BYTE_TABLE (THREE_BYTE_0F25) },
+  { "(bad)",		{ XX } },
   { MOD_TABLE (MOD_0F26) },
   { "(bad)",		{ XX } },
   /* 28 */
@@ -1739,7 +1709,7 @@ static const struct dis386 dis386_twobyte[] = {
   { PREFIX_TABLE (PREFIX_0F78) },
   { PREFIX_TABLE (PREFIX_0F79) },
   { THREE_BYTE_TABLE (THREE_BYTE_0F7A) },
-  { THREE_BYTE_TABLE (THREE_BYTE_0F7B) },
+  { "(bad)",		{ XX } },
   { PREFIX_TABLE (PREFIX_0F7C) },
   { PREFIX_TABLE (PREFIX_0F7D) },
   { PREFIX_TABLE (PREFIX_0F7E) },
@@ -5270,588 +5240,7 @@ static const struct dis386 x86_64_table[][2] = {
 };
 
 static const struct dis386 three_byte_table[][256] = {
-  /* THREE_BYTE_0F24 */
-  {
-    /* 00 */
-    { "fmaddps",	{ { OP_DREX4, q_mode } } },
-    { "fmaddpd",	{ { OP_DREX4, q_mode } } },
-    { "fmaddss",	{ { OP_DREX4, w_mode } } },
-    { "fmaddsd",	{ { OP_DREX4, d_mode } } },
-    { "fmaddps",	{ { OP_DREX4, DREX_OC1 + q_mode } } },
-    { "fmaddpd",	{ { OP_DREX4, DREX_OC1 + q_mode } } },
-    { "fmaddss",	{ { OP_DREX4, DREX_OC1 + w_mode } } },
-    { "fmaddsd",	{ { OP_DREX4, DREX_OC1 + d_mode } } },
-    /* 08 */
-    { "fmsubps",	{ { OP_DREX4, q_mode } } },
-    { "fmsubpd",	{ { OP_DREX4, q_mode } } },
-    { "fmsubss",	{ { OP_DREX4, w_mode } } },
-    { "fmsubsd",	{ { OP_DREX4, d_mode } } },
-    { "fmsubps",	{ { OP_DREX4, DREX_OC1 + q_mode } } },
-    { "fmsubpd",	{ { OP_DREX4, DREX_OC1 + q_mode } } },
-    { "fmsubss",	{ { OP_DREX4, DREX_OC1 + w_mode } } },
-    { "fmsubsd",	{ { OP_DREX4, DREX_OC1 + d_mode } } },
-    /* 10 */
-    { "fnmaddps",	{ { OP_DREX4, q_mode } } },
-    { "fnmaddpd",	{ { OP_DREX4, q_mode } } },
-    { "fnmaddss",	{ { OP_DREX4, w_mode } } },
-    { "fnmaddsd",	{ { OP_DREX4, d_mode } } },
-    { "fnmaddps",	{ { OP_DREX4, DREX_OC1 + q_mode } } },
-    { "fnmaddpd",	{ { OP_DREX4, DREX_OC1 + q_mode } } },
-    { "fnmaddss",	{ { OP_DREX4, DREX_OC1 + w_mode } } },
-    { "fnmaddsd",	{ { OP_DREX4, DREX_OC1 + d_mode } } },
-    /* 18 */
-    { "fnmsubps",	{ { OP_DREX4, q_mode } } },
-    { "fnmsubpd",	{ { OP_DREX4, q_mode } } },
-    { "fnmsubss",	{ { OP_DREX4, w_mode } } },
-    { "fnmsubsd",	{ { OP_DREX4, d_mode } } },
-    { "fnmsubps",	{ { OP_DREX4, DREX_OC1 + q_mode } } },
-    { "fnmsubpd",	{ { OP_DREX4, DREX_OC1 + q_mode } } },
-    { "fnmsubss",	{ { OP_DREX4, DREX_OC1 + w_mode } } },
-    { "fnmsubsd",	{ { OP_DREX4, DREX_OC1 + d_mode } } },
-    /* 20 */
-    { "permps",		{ { OP_DREX4, q_mode } } },
-    { "permpd",		{ { OP_DREX4, q_mode } } },
-    { "pcmov",		{ { OP_DREX4, q_mode } } },
-    { "pperm",		{ { OP_DREX4, q_mode } } },
-    { "permps",		{ { OP_DREX4, DREX_OC1 + q_mode } } },
-    { "permpd",		{ { OP_DREX4, DREX_OC1 + q_mode } } },
-    { "pcmov",		{ { OP_DREX4, DREX_OC1 + w_mode } } },
-    { "pperm",		{ { OP_DREX4, DREX_OC1 + d_mode } } },
-    /* 28 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 30 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 38 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 40 */
-    { "protb",		{ { OP_DREX3, q_mode } } },
-    { "protw",		{ { OP_DREX3, q_mode } } },
-    { "protd",		{ { OP_DREX3, q_mode } } },
-    { "protq",		{ { OP_DREX3, q_mode } } },
-    { "pshlb",		{ { OP_DREX3, q_mode } } },
-    { "pshlw",		{ { OP_DREX3, q_mode } } },
-    { "pshld",		{ { OP_DREX3, q_mode } } },
-    { "pshlq",		{ { OP_DREX3, q_mode } } },
-    /* 48 */
-    { "pshab",		{ { OP_DREX3, q_mode } } },
-    { "pshaw",		{ { OP_DREX3, q_mode } } },
-    { "pshad",		{ { OP_DREX3, q_mode } } },
-    { "pshaq",		{ { OP_DREX3, q_mode } } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 50 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 58 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 60 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 68 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 70 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 78 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 80 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "pmacssww",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    { "pmacsswd",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    { "pmacssdql",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    /* 88 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "pmacssdd",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    { "pmacssdqh",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    /* 90 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "pmacsww",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    { "pmacswd",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    { "pmacsdql",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    /* 98 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "pmacsdd",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    { "pmacsdqh",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    /* a0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "pmadcsswd",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    { "(bad)",		{ XX } },
-    /* a8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* b0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "pmadcswd",	{ { OP_DREX4, DREX_OC1 + DREX_NO_OC0 + q_mode } } },
-    { "(bad)",		{ XX } },
-    /* b8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* c0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* c8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* d0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* d8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* e0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* e8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* f0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* f8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-  },
-  /* THREE_BYTE_0F25 */
-  {
-    /* 00 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 08 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 10 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 18 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 20 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 28 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "comps",		{ { OP_DREX3, q_mode }, { OP_DREX_FCMP, b_mode } } },
-    { "compd",		{ { OP_DREX3, q_mode }, { OP_DREX_FCMP, b_mode } } },
-    { "comss",		{ { OP_DREX3, w_mode }, { OP_DREX_FCMP, b_mode } } },
-    { "comsd",		{ { OP_DREX3, d_mode }, { OP_DREX_FCMP, b_mode } } },
-    /* 30 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 38 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 40 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 48 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "pcomb",		{ { OP_DREX3, q_mode }, { OP_DREX_ICMP, b_mode } } },
-    { "pcomw",		{ { OP_DREX3, q_mode }, { OP_DREX_ICMP, b_mode } } },
-    { "pcomd",		{ { OP_DREX3, q_mode }, { OP_DREX_ICMP, b_mode } } },
-    { "pcomq",		{ { OP_DREX3, q_mode }, { OP_DREX_ICMP, b_mode } } },
-    /* 50 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 58 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 60 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 68 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "pcomub",		{ { OP_DREX3, q_mode }, { OP_DREX_ICMP, b_mode } } },
-    { "pcomuw",		{ { OP_DREX3, q_mode }, { OP_DREX_ICMP, b_mode } } },
-    { "pcomud",		{ { OP_DREX3, q_mode }, { OP_DREX_ICMP, b_mode } } },
-    { "pcomuq",		{ { OP_DREX3, q_mode }, { OP_DREX_ICMP, b_mode } } },
-    /* 70 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 78 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 80 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 88 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 90 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 98 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* a0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* a8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* b0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* b8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* c0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* c8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* d0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* d8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* e0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* e8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* f0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* f8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-  },
+
   /* THREE_BYTE_0F38 */
   {
     /* 00 */
@@ -6434,6 +5823,7 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
   },
+
   /* THREE_BYTE_0F7A */
   {
     /* 00 */
@@ -6455,10 +5845,10 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     /* 10 */
-    { "frczps",		{ XM, EXq } },
-    { "frczpd",		{ XM, EXq } },
-    { "frczss",		{ XM, EXq } },
-    { "frczsd",		{ XM, EXq } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
@@ -6491,8 +5881,8 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     /* 30 */
-    { "cvtph2ps",	{ XM, EXd } },
-    { "cvtps2ph",	{ EXd, XM } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
@@ -6725,298 +6115,8 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
   },
-  /* THREE_BYTE_0F7B */
-  {
-    /* 00 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 08 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 10 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 18 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 20 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 28 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 30 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 38 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 40 */
-    { "protb",		{ XM, EXq, Ib } },
-    { "protw",		{ XM, EXq, Ib } },
-    { "protd",		{ XM, EXq, Ib } },
-    { "protq",		{ XM, EXq, Ib } },
-    { "pshlb",		{ XM, EXq, Ib } },
-    { "pshlw",		{ XM, EXq, Ib } },
-    { "pshld",		{ XM, EXq, Ib } },
-    { "pshlq",		{ XM, EXq, Ib } },
-    /* 48 */
-    { "pshab",		{ XM, EXq, Ib } },
-    { "pshaw",		{ XM, EXq, Ib } },
-    { "pshad",		{ XM, EXq, Ib } },
-    { "pshaq",		{ XM, EXq, Ib } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 50 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 58 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 60 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 68 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 70 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 78 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 80 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 88 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 90 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* 98 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* a0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* a8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* b0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* b8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* c0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* c8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* d0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* d8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* e0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* e8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* f0 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    /* f8 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-  },
 };
+
 
 static const struct dis386 vex_table[][256] = {
   /* VEX_0F */
@@ -9153,7 +8253,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F24 */
-    { THREE_BYTE_TABLE (THREE_BYTE_0F24) },
+    { "(bad)",		{ XX } },    
     { "movL",		{ Rd, Td } },
   },
   {
@@ -10251,6 +9351,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
     }
 
   op = 0;
+
   if (*codep == 0x0f)
     {
       unsigned char threebyte;
@@ -11607,7 +10708,7 @@ OP_E_register (int bytemode, int sizeflag)
 }
 
 static void
-OP_E_memory (int bytemode, int sizeflag, int has_drex)
+OP_E_memory (int bytemode, int sizeflag)
 {
   bfd_vma disp = 0;
   int add = (rex & REX_B) ? 8 : 0;
@@ -11649,14 +10750,6 @@ OP_E_memory (int bytemode, int sizeflag, int has_drex)
 	  codep++;
 	}
       rbase = base + add;
-
-      /* If we have a DREX byte, skip it now 
-	 (it has already been handled) */
-      if (has_drex)
-	{
-	  FETCH_DATA (the_info, codep + 1);
-	  codep++;
-	}
 
       switch (modrm.mod)
 	{
@@ -11867,7 +10960,7 @@ OP_E_memory (int bytemode, int sizeflag, int has_drex)
 }
 
 static void
-OP_E_extended (int bytemode, int sizeflag, int has_drex)
+OP_E_extended (int bytemode, int sizeflag)
 {
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
@@ -11876,13 +10969,13 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
   if (modrm.mod == 3)
     OP_E_register (bytemode, sizeflag);
   else
-    OP_E_memory (bytemode, sizeflag, has_drex);
+    OP_E_memory (bytemode, sizeflag);
 }
 
 static void
 OP_E (int bytemode, int sizeflag)
 {
-  OP_E_extended (bytemode, sizeflag, 0);
+  OP_E_extended (bytemode, sizeflag);
 }
 
 
@@ -12682,7 +11775,7 @@ OP_EX (int bytemode, int sizeflag)
 
   if (modrm.mod != 3)
     {
-      OP_E_memory (bytemode, sizeflag, 0);
+      OP_E_memory (bytemode, sizeflag);
       return;
     }
 
@@ -13100,347 +12193,6 @@ skip:
     }
   else
     OP_E (bytemode, sizeflag);
-}
-
-/* Print a DREX argument as either a register or memory operation.  */
-static void
-print_drex_arg (unsigned int reg, int bytemode, int sizeflag)
-{
-  if (reg == DREX_REG_UNKNOWN)
-    BadOp ();
-
-  else if (reg != DREX_REG_MEMORY)
-    {
-      sprintf (scratchbuf, "%%xmm%d", reg);
-      oappend (scratchbuf + intel_syntax);
-    }
-
-  else
-    OP_E_extended (bytemode, sizeflag, 1);
-}
-
-/* SSE5 instructions that have 4 arguments are encoded as:
-   0f 24 <sub-opcode> <modrm> <optional-sib> <drex> <offset>.
-
-   The <sub-opcode> byte has 1 bit (0x4) that is combined with 1 bit in
-   the DREX field (0x8) to determine how the arguments are laid out.  
-   The destination register must be the same register as one of the 
-   inputs, and it is encoded in the DREX byte.  No REX prefix is used 
-   for these instructions, since the DREX field contains the 3 extension
-   bits provided by the REX prefix.
-
-   The bytemode argument adds 2 extra bits for passing extra information:
-	DREX_OC1	-- Set the OC1 bit to indicate dest == 1st arg
-	DREX_NO_OC0	-- OC0 in DREX is invalid 
-	(but pretend it is set).  */
-
-static void
-OP_DREX4 (int flag_bytemode, int sizeflag)
-{
-  unsigned int drex_byte;
-  unsigned int regs[4];
-  unsigned int modrm_regmem;
-  unsigned int modrm_reg;
-  unsigned int drex_reg;
-  int bytemode;
-  int rex_save = rex;
-  int rex_used_save = rex_used;
-  int has_sib = 0;
-  int oc1 = (flag_bytemode & DREX_OC1) ? 2 : 0;
-  int oc0;
-  int i;
-
-  bytemode = flag_bytemode & ~ DREX_MASK;
-
-  for (i = 0; i < 4; i++)
-    regs[i] = DREX_REG_UNKNOWN;
-
-  /* Determine if we have a SIB byte in addition to MODRM before the 
-     DREX byte.  */
-  if (((sizeflag & AFLAG) || address_mode == mode_64bit)
-      && (modrm.mod != 3)
-      && (modrm.rm == 4))
-    has_sib = 1;
-
-  /* Get the DREX byte.  */
-  FETCH_DATA (the_info, codep + 2 + has_sib);
-  drex_byte = codep[has_sib+1];
-  drex_reg = DREX_XMM (drex_byte);
-  modrm_reg = modrm.reg + ((drex_byte & REX_R) ? 8 : 0);
-
-  /* Is OC0 legal?  If not, hardwire oc0 == 1.  */
-  if (flag_bytemode & DREX_NO_OC0)
-    {
-      oc0 = 1;
-      if (DREX_OC0 (drex_byte))
-	BadOp ();
-    }
-  else
-    oc0 = DREX_OC0 (drex_byte);
-
-  if (modrm.mod == 3)
-    {			
-      /* regmem == register  */
-      modrm_regmem = modrm.rm + ((drex_byte & REX_B) ? 8 : 0);
-      rex = rex_used = 0;
-      /* skip modrm/drex since we don't call OP_E_extended  */
-      codep += 2;
-    }
-  else
-    {			
-      /* regmem == memory, fill in appropriate REX bits  */
-      modrm_regmem = DREX_REG_MEMORY;
-      rex = drex_byte & (REX_B | REX_X | REX_R);
-      if (rex)
-	rex |= REX_OPCODE;
-      rex_used = rex;
-    }
-  
-  /* Based on the OC1/OC0 bits, lay out the arguments in the correct 
-     order.  */
-  switch (oc0 + oc1)
-    {
-    default:
-      BadOp ();
-      return;
-
-    case 0:
-      regs[0] = modrm_regmem;
-      regs[1] = modrm_reg;
-      regs[2] = drex_reg;
-      regs[3] = drex_reg;
-      break;
-
-    case 1:
-      regs[0] = modrm_reg;
-      regs[1] = modrm_regmem;
-      regs[2] = drex_reg;
-      regs[3] = drex_reg;
-      break;
-
-    case 2:
-      regs[0] = drex_reg;
-      regs[1] = modrm_regmem;
-      regs[2] = modrm_reg;
-      regs[3] = drex_reg;
-      break;
-
-    case 3:
-      regs[0] = drex_reg;
-      regs[1] = modrm_reg;
-      regs[2] = modrm_regmem;
-      regs[3] = drex_reg;
-      break;
-    }
-
-  /* Print out the arguments.  */
-  for (i = 0; i < 4; i++)
-    {
-      int j = (intel_syntax) ? 3 - i : i;
-      if (i > 0)
-	{
-	  *obufp++ = ',';
-	  *obufp = '\0';
-	}
-
-      print_drex_arg (regs[j], bytemode, sizeflag);
-    }
-
-  rex = rex_save;
-  rex_used = rex_used_save;
-}
-
-/* SSE5 instructions that have 3 arguments, and are encoded as:
-   0f 24 <sub-opcode> <modrm> <optional-sib> <drex> <offset>	(or)
-   0f 25 <sub-opcode> <modrm> <optional-sib> <drex> <offset> <cmp-byte>
-
-   The DREX field has 1 bit (0x8) to determine how the arguments are 
-   laid out. The destination register is encoded in the DREX byte.  
-   No REX prefix is used for these instructions, since the DREX field 
-   contains the 3 extension bits provided by the REX prefix.  */
-
-static void
-OP_DREX3 (int flag_bytemode, int sizeflag)
-{
-  unsigned int drex_byte;
-  unsigned int regs[3];
-  unsigned int modrm_regmem;
-  unsigned int modrm_reg;
-  unsigned int drex_reg;
-  int bytemode;
-  int rex_save = rex;
-  int rex_used_save = rex_used;
-  int has_sib = 0;
-  int oc0;
-  int i;
-
-  bytemode = flag_bytemode & ~ DREX_MASK;
-
-  for (i = 0; i < 3; i++)
-    regs[i] = DREX_REG_UNKNOWN;
-
-  /* Determine if we have a SIB byte in addition to MODRM before the 
-     DREX byte.  */
-  if (((sizeflag & AFLAG) || address_mode == mode_64bit)
-      && (modrm.mod != 3)
-      && (modrm.rm == 4))
-    has_sib = 1;
-
-  /* Get the DREX byte.  */
-  FETCH_DATA (the_info, codep + 2 + has_sib);
-  drex_byte = codep[has_sib+1];
-  drex_reg = DREX_XMM (drex_byte);
-  modrm_reg = modrm.reg + ((drex_byte & REX_R) ? 8 : 0);
-
-  /* Is OC0 legal?  If not, hardwire oc0 == 0 */
-  oc0 = DREX_OC0 (drex_byte);
-  if ((flag_bytemode & DREX_NO_OC0) && oc0)
-    BadOp ();
-
-  if (modrm.mod == 3)
-    {			
-      /* regmem == register */
-      modrm_regmem = modrm.rm + ((drex_byte & REX_B) ? 8 : 0);
-      rex = rex_used = 0;
-      /* skip modrm/drex since we don't call OP_E_extended.  */
-      codep += 2;
-    }
-  else
-    {			
-      /* regmem == memory, fill in appropriate REX bits.  */
-      modrm_regmem = DREX_REG_MEMORY;
-      rex = drex_byte & (REX_B | REX_X | REX_R);
-      if (rex)
-	rex |= REX_OPCODE;
-      rex_used = rex;
-    }
-
-  /* Based on the OC1/OC0 bits, lay out the arguments in the correct 
-     order.  */
-  switch (oc0)
-    {
-    default:
-      BadOp ();
-      return;
-
-    case 0:
-      regs[0] = modrm_regmem;
-      regs[1] = modrm_reg;
-      regs[2] = drex_reg;
-      break;
-
-    case 1:
-      regs[0] = modrm_reg;
-      regs[1] = modrm_regmem;
-      regs[2] = drex_reg;
-      break;
-    }
-
-  /* Print out the arguments.  */
-  for (i = 0; i < 3; i++)
-    {
-      int j = (intel_syntax) ? 2 - i : i;
-      if (i > 0)
-	{
-	  *obufp++ = ',';
-	  *obufp = '\0';
-	}
-
-      print_drex_arg (regs[j], bytemode, sizeflag);
-    }
-
-  rex = rex_save;
-  rex_used = rex_used_save;
-}
-
-/* Emit a floating point comparison for comp<xx> instructions.  */
-
-static void
-OP_DREX_FCMP (int bytemode ATTRIBUTE_UNUSED, 
-	      int sizeflag ATTRIBUTE_UNUSED)
-{
-  unsigned char byte;
-
-  static const char *const cmp_test[] = {
-    "eq",
-    "lt",
-    "le",
-    "unord",
-    "ne",
-    "nlt",
-    "nle",
-    "ord",
-    "ueq",
-    "ult",
-    "ule",
-    "false",
-    "une",
-    "unlt",
-    "unle",
-    "true"
-  };
-
-  FETCH_DATA (the_info, codep + 1);
-  byte = *codep & 0xff;
-
-  if (byte >= ARRAY_SIZE (cmp_test)
-      || obuf[0] != 'c'
-      || obuf[1] != 'o'
-      || obuf[2] != 'm')
-    {
-      /* The instruction isn't one we know about, so just append the 
-	 extension byte as a numeric value.  */
-      OP_I (b_mode, 0);
-    }
-
-  else
-    {
-      sprintf (scratchbuf, "com%s%s", cmp_test[byte], obuf+3);
-      mnemonicendp = stpcpy (obuf, scratchbuf);
-      codep++;
-    }
-}
-
-/* Emit an integer point comparison for pcom<xx> instructions, 
-   rewriting the instruction to have the test inside of it.  */
-
-static void
-OP_DREX_ICMP (int bytemode ATTRIBUTE_UNUSED, 
-	      int sizeflag ATTRIBUTE_UNUSED)
-{
-  unsigned char byte;
-
-  static const char *const cmp_test[] = {
-    "lt",
-    "le",
-    "gt",
-    "ge",
-    "eq",
-    "ne",
-    "false",
-    "true"
-  };
-
-  FETCH_DATA (the_info, codep + 1);
-  byte = *codep & 0xff;
-
-  if (byte >= ARRAY_SIZE (cmp_test)
-      || obuf[0] != 'p'
-      || obuf[1] != 'c'
-      || obuf[2] != 'o'
-      || obuf[3] != 'm')
-    {
-      /* The instruction isn't one we know about, so just print the 
-	 comparison test byte as a numeric value.  */
-      OP_I (b_mode, 0);
-    }
-
-  else
-    {
-      sprintf (scratchbuf, "pcom%s%s", cmp_test[byte], obuf+4);
-      mnemonicendp = stpcpy (obuf, scratchbuf);
-      codep++;
-    }
 }
 
 /* Display the destination register operand for instructions with

@@ -19,7 +19,6 @@
 .*:54: Error: .*
 .*:56: Error: .*
 .*:58: Error: .*
-.*:60: Error: .*
 GAS LISTING .*
 
 
@@ -86,7 +85,5 @@ GAS LISTING .*
 [ 	]*54[ 	]+vmload
 [ 	]*55[ 	]+\# ABM
 [ 	]*56[ 	]+lzcnt %ecx,%ebx
-[ 	]*57[ 	]+\# SSE5
-[ 	]*58[ 	]+frczss          %xmm2, %xmm1
-[ 	]*59[ 	]+\# PadLock
-[ 	]*60[ 	]+xstorerng
+[ 	]*57[ 	]+\# PadLock
+[ 	]*58[ 	]+xstorerng

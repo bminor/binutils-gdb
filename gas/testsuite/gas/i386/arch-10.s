@@ -54,7 +54,5 @@ insertq %xmm2,%xmm1
 vmload
 # ABM
 lzcnt %ecx,%ebx
-# SSE5
-frczss          %xmm2, %xmm1
 # PadLock
 xstorerng

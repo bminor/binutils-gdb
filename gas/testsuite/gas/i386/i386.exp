@@ -103,11 +103,9 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "arch-1"
     run_dump_test "arch-2"
     run_dump_test "arch-3"
-    run_dump_test "arch-4"
     run_dump_test "arch-5"
     run_dump_test "arch-6"
     run_dump_test "arch-7"
-    run_dump_test "arch-8"
     run_dump_test "arch-9"
     run_dump_test "arch-10"
     run_list_test "arch-10-1" "-march=generic32 -I${srcdir}/$subdir -al"
@@ -267,9 +265,6 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-simd"
     run_dump_test "x86-64-simd-intel"
     run_dump_test "x86-64-simd-suffix"
-    if { ![istarget "*-*-mingw*"] } then {
-      run_dump_test "x86-64-sse5"
-    }
     run_dump_test "x86-64-mem"
     run_dump_test "x86-64-mem-intel"
     run_dump_test "x86-64-reg"

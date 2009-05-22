@@ -1,3 +1,22 @@
+2009-05-22  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+
+	* gas/i386/i386.exp: Remove SSE5 tests.
+	* gas/i386/x86-64-sse5.s: Delete. Remove SSE5 tests.
+	* gas/i386/x86-64-sse5.d: Ditto.
+	* gas/i386/arch-10-1.l: Remove SSE5 tests.
+	* gas/i386/arch-10-2.l: Ditto.
+	* gas/i386/arch-10-3.l: Ditto.
+	* gas/i386/arch-10-4.l: Ditto.
+	* gas/i386/arch-10.d: Ditto.
+	* gas/i386/arch-10.s: Ditto.
+	* gas/i386/arch-4.s: Delete. Remove SSE5 tests.
+	* gas/i386/arch-4.d: Ditto.
+	* gas/i386/arch-8.s: Ditto.
+	* gas/i386/arch-8.d: Ditto.
+	* gas/i386/arch-2.s: Remove SSE5 tests.
+	* gas/i386/arch-2.d: Remove SSE5 tests.
+	* gas/i386/x86-64-arch-2.s: Ditto.
+	
 2009-05-19  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* gas/pe/:  New directory for PE format-specific tests.

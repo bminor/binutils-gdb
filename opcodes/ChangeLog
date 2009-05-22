@@ -1,3 +1,20 @@
+2009-05-22  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+
+	* i386-opc.h (Cpusse5): Delete.
+	(i386_cpu_flags): Delete.
+	* i386-gen.c: Remove CpuSSE5, Drex, Drexv and Drexc.
+	* i386-opc.tbl: Remove SSE5 instructions.
+	* i386-tbl.h: Regenerate.
+	* i386-init.h: Regenerate.
+	* i386-dis.c (OP_E_memeory, OP_E_extended): Remove drex handling.
+	(print_drex_arg): Delete.
+	(OP_DREX4): Delete.
+	(OP_DREX3): Delete.
+	(OP_DREX_ICMP): Delete.
+	(OP_DREX_FCMP): Delete.
+	(DREX_*): Delete.
+	(THREE_BYTE_0F24, THREE_BYTE_0F25, THREE_BYTE_0f7B): Delete.
+	
 2009-05-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

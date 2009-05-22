@@ -1,3 +1,13 @@
+2009-05-22  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+
+	* config/tc-i386.c (process_drex): Delete. Remove SSE5 support.
+	(build_modrm_byte): Remove DREX handling support.
+	(DREX_*): Delete.
+	(drex_byte): Delete.
+	(md_assemble): Remove DREX handling support.
+	(process_operands): Remove DREX, SSE5 support.
+	(i386_insn): Remove DREX.
+	
 2009-05-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
