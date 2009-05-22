@@ -50,7 +50,7 @@ null_free_so (struct so_list *so)
 
 static void
 null_relocate_section_addresses (struct so_list *so,
-                                 struct section_table *sec)
+                                 struct target_section *sec)
 {
 }
 

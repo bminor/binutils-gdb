@@ -26,7 +26,7 @@
 #include "symtab.h"
 
 /* Opaque declarations.  */
-struct section_table;
+struct target_section;
 struct objfile;
 struct obj_section;
 struct obstack;
@@ -237,9 +237,9 @@ extern struct section_addr_info *(copy_section_addr_info
    existing section table.  */
 
 extern struct section_addr_info
-  *build_section_addr_info_from_section_table (const struct section_table
+  *build_section_addr_info_from_section_table (const struct target_section
 					       *start,
-					       const struct section_table
+					       const struct target_section
 					       *end);
 
 /* Free all memory allocated by

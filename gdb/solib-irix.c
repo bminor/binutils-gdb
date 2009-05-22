@@ -687,7 +687,7 @@ irix_special_symbol_handling (void)
 
 static void
 irix_relocate_section_addresses (struct so_list *so,
-				 struct section_table *sec)
+				 struct target_section *sec)
 {
   sec->addr += so->lm_info->reloc_offset;
   sec->endaddr += so->lm_info->reloc_offset;

@@ -379,7 +379,7 @@ darwin_free_so (struct so_list *so)
    Relocate these VMAs according to solib info.  */
 static void
 darwin_relocate_section_addresses (struct so_list *so,
-				   struct section_table *sec)
+				   struct target_section *sec)
 {
   sec->addr += so->lm_info->lm_addr;
   sec->endaddr += so->lm_info->lm_addr;

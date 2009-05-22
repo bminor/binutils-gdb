@@ -369,11 +369,11 @@ copy_section_addr_info (struct section_addr_info *addrs)
    an existing section table. */
 
 extern struct section_addr_info *
-build_section_addr_info_from_section_table (const struct section_table *start,
-                                            const struct section_table *end)
+build_section_addr_info_from_section_table (const struct target_section *start,
+                                            const struct target_section *end)
 {
   struct section_addr_info *sap;
-  const struct section_table *stp;
+  const struct target_section *stp;
   int oidx;
 
   sap = alloc_section_addr_info (end - start);

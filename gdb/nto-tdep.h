@@ -150,7 +150,7 @@ char **nto_parse_redirection (char *start_argv[], const char **in,
 int proc_iterate_over_mappings (int (*func) (int, CORE_ADDR));
 
 void nto_relocate_section_addresses (struct so_list *,
-				     struct section_table *);
+				     struct target_section *);
 
 int nto_map_arch_to_cputype (const char *);
 

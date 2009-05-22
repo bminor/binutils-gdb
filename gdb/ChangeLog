@@ -1,3 +1,30 @@
+2009-05-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.h (struct section_table): Rename to ...
+	(struct target_section): ... this.
+	* exec.c: Adjust all references.
+	* exec.h: Adjust all references.
+	* nto-tdep.c: Adjust all references.
+	* nto-tdep.h: Adjust all references.
+	* ppc-linux-tdep.c: Adjust all references.
+	* rs6000-nat.c: Adjust all references.
+	* s390-tdep.c: Adjust all references.
+	* solib-darwin.c: Adjust all references.
+	* solib-frv.c: Adjust all references.
+	* solib-irix.c: Adjust all references.
+	* solib-null.c: Adjust all references.
+	* solib-osf.c: Adjust all references.
+	* solib-pa64.c: Adjust all references.
+	* solib-som.c: Adjust all references.
+	* solib-sunos.c: Adjust all references.
+	* solib-svr4.c: Adjust all references.
+	* solib-target.c: Adjust all references.
+	* solib.c: Adjust all references.
+	* solist.h: Adjust all references.
+	* symfile.c: Adjust all references.
+	* symfile.h: Adjust all references.
+	* target.c: Adjust all references.
+
 2009-05-22  Hui Zhu  <teawater@gmail.com>
 
 	Add sys_fcntl argument interfaces to linux_record_tdep.

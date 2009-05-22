@@ -998,7 +998,7 @@ frv_free_so (struct so_list *so)
 
 static void
 frv_relocate_section_addresses (struct so_list *so,
-                                 struct section_table *sec)
+                                 struct target_section *sec)
 {
   int seg;
   struct int_elf32_fdpic_loadmap *map;

@@ -62,8 +62,8 @@ struct so_list
     char symbols_loaded;	/* flag: symbols read in yet? */
     char from_tty;		/* flag: print msgs? */
     struct objfile *objfile;	/* objfile for loaded lib */
-    struct section_table *sections;
-    struct section_table *sections_end;
+    struct target_section *sections;
+    struct target_section *sections_end;
 
     /* Record the range of addresses belonging to this shared library.
        There may not be just one (e.g. if two segments are relocated
@@ -76,7 +76,7 @@ struct target_so_ops
     /* Adjust the section binding addresses by the base address at
        which the object was actually mapped.  */
     void (*relocate_section_addresses) (struct so_list *so,
-                                        struct section_table *);
+                                        struct target_section *);
 
     /* Free the the link map info and any other private data
        structures associated with a so_list entry.  */

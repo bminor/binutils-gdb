@@ -22,7 +22,7 @@
 
 #include "target.h"
 
-struct section_table;
+struct target_section;
 struct target_ops;
 struct bfd;
 
@@ -31,8 +31,8 @@ extern struct target_ops exec_ops;
 /* Builds a section table, given args BFD, SECTABLE_PTR, SECEND_PTR.
    Returns 0 if OK, 1 on error.  */
 
-extern int build_section_table (struct bfd *, struct section_table **,
-				struct section_table **);
+extern int build_section_table (struct bfd *, struct target_section **,
+				struct target_section **);
 
 /* Request to transfer up to LEN 8-bit bytes of the target sections
    defined by SECTIONS and SECTIONS_END.  The OFFSET specifies the
@@ -49,8 +49,8 @@ extern int build_section_table (struct bfd *, struct section_table **,
 
 extern int section_table_xfer_memory_partial (gdb_byte *, const gdb_byte *,
 					      ULONGEST, LONGEST,
-					      struct section_table *,
-					      struct section_table *);
+					      struct target_section *,
+					      struct target_section *);
 
 /* Set the loaded address of a section.  */
 extern void exec_set_section_address (const char *, int, CORE_ADDR);

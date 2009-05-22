@@ -347,7 +347,7 @@ solib_map_sections (void *arg)
 {
   struct so_list *so = (struct so_list *) arg;	/* catch_errors bogon */
   char *filename;
-  struct section_table *p;
+  struct target_section *p;
   struct cleanup *old_chain;
   bfd *abfd;
 
@@ -849,7 +849,7 @@ int
 solib_contains_address_p (const struct so_list *const solib,
 			  CORE_ADDR address)
 {
-  struct section_table *p;
+  struct target_section *p;
 
   for (p = solib->sections; p < solib->sections_end; p++)
     if (p->addr <= address && address < p->endaddr)

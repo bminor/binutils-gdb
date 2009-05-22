@@ -621,7 +621,7 @@ ppc64_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 					CORE_ADDR addr,
 					struct target_ops *targ)
 {
-  struct section_table *s = target_section_by_addr (targ, addr);
+  struct target_section *s = target_section_by_addr (targ, addr);
 
   /* Check if ADDR points to a function descriptor.  */
   if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)

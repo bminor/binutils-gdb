@@ -817,7 +817,7 @@ sunos_free_so (struct so_list *so)
 
 static void
 sunos_relocate_section_addresses (struct so_list *so,
-                                 struct section_table *sec)
+				  struct target_section *sec)
 {
   sec->addr += LM_ADDR (so);
   sec->endaddr += LM_ADDR (so);

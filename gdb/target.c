@@ -1017,10 +1017,10 @@ done:
 }
 
 /* Find a section containing ADDR.  */
-struct section_table *
+struct target_section *
 target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
 {
-  struct section_table *secp;
+  struct target_section *secp;
   for (secp = target->to_sections;
        secp < target->to_sections_end;
        secp++)
@@ -1049,7 +1049,7 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
   /* Try the executable file, if "trust-readonly-sections" is set.  */
   if (readbuf != NULL && trust_readonly)
     {
-      struct section_table *secp;
+      struct target_section *secp;
 
       secp = target_section_by_addr (ops, memaddr);
       if (secp != NULL
@@ -2348,7 +2348,7 @@ int
 target_resize_to_sections (struct target_ops *target, int num_added)
 {
   struct target_ops **t;
-  struct section_table *old_value;
+  struct target_section *old_value;
   int old_count;
 
   old_value = target->to_sections;
@@ -2356,15 +2356,15 @@ target_resize_to_sections (struct target_ops *target, int num_added)
   if (target->to_sections)
     {
       old_count = target->to_sections_end - target->to_sections;
-      target->to_sections = (struct section_table *)
+      target->to_sections = (struct target_section *)
 	xrealloc ((char *) target->to_sections,
-		  (sizeof (struct section_table)) * (num_added + old_count));
+		  (sizeof (struct target_section)) * (num_added + old_count));
     }
   else
     {
       old_count = 0;
-      target->to_sections = (struct section_table *)
-	xmalloc ((sizeof (struct section_table)) * num_added);
+      target->to_sections = (struct target_section *)
+	xmalloc ((sizeof (struct target_section)) * num_added);
     }
   target->to_sections_end = target->to_sections + (num_added + old_count);
 
@@ -2408,7 +2408,7 @@ remove_target_sections (bfd *abfd)
 
   for (t = target_structs; t < target_structs + target_struct_size; t++)
     {
-      struct section_table *src, *dest;
+      struct target_section *src, *dest;
 
       dest = (*t)->to_sections;
       for (src = (*t)->to_sections; src < (*t)->to_sections_end; src++)

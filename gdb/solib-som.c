@@ -111,7 +111,7 @@ dld_cache;
 
 static void
 som_relocate_section_addresses (struct so_list *so,
-				struct section_table *sec)
+				struct target_section *sec)
 {
   flagword aflag = bfd_get_section_flags(so->abfd, sec->the_bfd_section);
 

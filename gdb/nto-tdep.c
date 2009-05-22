@@ -318,7 +318,7 @@ find_load_phdr (bfd *abfd)
 }
 
 void
-nto_relocate_section_addresses (struct so_list *so, struct section_table *sec)
+nto_relocate_section_addresses (struct so_list *so, struct target_section *sec)
 {
   /* Neutrino treats the l_addr base address field in link.h as different than
      the base address in the System V ABI and so the offset needs to be

@@ -351,7 +351,7 @@ static void
 add_to_section_table (bfd *abfd, struct bfd_section *asect,
 		      void *table_pp_char)
 {
-  struct section_table **table_pp = (struct section_table **) table_pp_char;
+  struct target_section **table_pp = (struct target_section **) table_pp_char;
   flagword aflag;
 
   /* Check the section flags, but do not discard zero-length sections, since
@@ -374,15 +374,15 @@ add_to_section_table (bfd *abfd, struct bfd_section *asect,
    Returns 0 if OK, 1 on error.  */
 
 int
-build_section_table (struct bfd *some_bfd, struct section_table **start,
-		     struct section_table **end)
+build_section_table (struct bfd *some_bfd, struct target_section **start,
+		     struct target_section **end)
 {
   unsigned count;
 
   count = bfd_count_sections (some_bfd);
   if (*start)
     xfree (* start);
-  *start = (struct section_table *) xmalloc (count * sizeof (**start));
+  *start = (struct target_section *) xmalloc (count * sizeof (**start));
   *end = *start;
   bfd_map_over_sections (some_bfd, add_to_section_table, (char *) end);
   if (*end > *start + count)
@@ -470,12 +470,12 @@ map_vmap (bfd *abfd, bfd *arch)
 static int
 section_table_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr,
 			   int len, int write,
-			   struct section_table *sections,
-			   struct section_table *sections_end,
+			   struct target_section *sections,
+			   struct target_section *sections_end,
 			   const char *section_name)
 {
   int res;
-  struct section_table *p;
+  struct target_section *p;
   CORE_ADDR nextsectaddr, memend;
 
   if (len <= 0)
@@ -536,8 +536,8 @@ section_table_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr,
 int
 section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 				   ULONGEST offset, LONGEST len,
-				   struct section_table *sections,
-				   struct section_table *sections_end)
+				   struct target_section *sections,
+				   struct target_section *sections_end)
 {
   if (readbuf != NULL)
     return section_table_xfer_memory (offset, readbuf, len, 0,
@@ -597,7 +597,7 @@ xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 void
 print_section_info (struct target_ops *t, bfd *abfd)
 {
-  struct section_table *p;
+  struct target_section *p;
   /* FIXME: 16 is not wide enough when gdbarch_addr_bit > 64.  */
   int wid = gdbarch_addr_bit (gdbarch_from_bfd (abfd)) <= 32 ? 8 : 16;
 
@@ -661,7 +661,7 @@ exec_files_info (struct target_ops *t)
 static void
 set_section_command (char *args, int from_tty)
 {
-  struct section_table *p;
+  struct target_section *p;
   char *secname;
   unsigned seclen;
   unsigned long secaddr;
@@ -704,7 +704,7 @@ set_section_command (char *args, int from_tty)
 void
 exec_set_section_address (const char *filename, int index, CORE_ADDR address)
 {
-  struct section_table *p;
+  struct target_section *p;
 
   for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
     {

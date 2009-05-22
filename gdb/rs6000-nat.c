@@ -1158,7 +1158,7 @@ xcoff_relocate_core (struct target_ops *target)
          add our sections to the section table for the core target.  */
       if (vp != vmap)
 	{
-	  struct section_table *stp;
+	  struct target_section *stp;
 
 	  target_resize_to_sections (target, 2);
 	  stp = target->to_sections_end - 2;

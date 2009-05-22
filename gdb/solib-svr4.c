@@ -1747,7 +1747,7 @@ svr4_truncate_ptr (CORE_ADDR addr)
 
 static void
 svr4_relocate_section_addresses (struct so_list *so,
-                                 struct section_table *sec)
+                                 struct target_section *sec)
 {
   sec->addr    = svr4_truncate_ptr (sec->addr    + LM_ADDR_CHECK (so,
 								  sec->bfd));

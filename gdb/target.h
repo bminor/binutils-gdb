@@ -420,9 +420,9 @@ struct target_ops
     int to_has_execution;
     int to_has_thread_control;	/* control thread execution */
     int to_attach_no_wait;
-    struct section_table
+    struct target_section
      *to_sections;
-    struct section_table
+    struct target_section
      *to_sections_end;
     /* ASYNC target controls */
     int (*to_can_async_p) (void);
@@ -1194,11 +1194,11 @@ void target_mark_running (struct target_ops *);
 
 void target_mark_exited (struct target_ops *);
 
-/* Struct section_table maps address ranges to file sections.  It is
+/* Struct target_section maps address ranges to file sections.  It is
    mostly used with BFD files, but can be used without (e.g. for handling
    raw disks, or files not in formats handled by BFD).  */
 
-struct section_table
+struct target_section
   {
     CORE_ADDR addr;		/* Lowest address in section */
     CORE_ADDR endaddr;		/* 1+highest address in section */
@@ -1209,9 +1209,8 @@ struct section_table
   };
 
 /* Return the "section" containing the specified address.  */
-struct section_table *target_section_by_addr (struct target_ops *target,
-					      CORE_ADDR addr);
-
+struct target_section *target_section_by_addr (struct target_ops *target,
+					       CORE_ADDR addr);
 
 /* From mem-break.c */
 

@@ -772,7 +772,7 @@ s390_load (struct s390_prologue_data *data,
      we're analyzing the code to unwind past that frame.  */
   if (pv_is_constant (addr))
     {
-      struct section_table *secp;
+      struct target_section *secp;
       secp = target_section_by_addr (&current_target, addr.k);
       if (secp != NULL
           && (bfd_get_section_flags (secp->bfd, secp->the_bfd_section)

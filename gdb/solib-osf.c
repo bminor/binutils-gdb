@@ -234,7 +234,7 @@ fetch_sec_names (struct lm_info *lmi)
 
 static void
 osf_relocate_section_addresses (struct so_list *so,
-				struct section_table *sec)
+				struct target_section *sec)
 {
   struct lm_info *lmi;
   struct lm_sec lms_key, *lms;

@@ -328,7 +328,7 @@ solib_target_free_so (struct so_list *so)
 
 static void
 solib_target_relocate_section_addresses (struct so_list *so,
-					 struct section_table *sec)
+					 struct target_section *sec)
 {
   int flags = bfd_get_section_flags (sec->bfd, sec->the_bfd_section);
   CORE_ADDR offset;

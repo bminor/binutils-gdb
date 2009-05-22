@@ -80,7 +80,7 @@ read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p);
 
 static void
 pa64_relocate_section_addresses (struct so_list *so,
-				 struct section_table *sec)
+				 struct target_section *sec)
 {
   asection *asec = sec->the_bfd_section;
   CORE_ADDR load_offset;
