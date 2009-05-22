@@ -100,6 +100,7 @@ cpu-mcore.c
 cpu-mep.c
 cpu-mips.c
 cpu-mmix.c
+cpu-moxie.c
 cpu-msp430.c
 cpu-mt.c
 cpu-ns32k.c
@@ -133,15 +134,6 @@ dwarf2.c
 ecoff.c
 ecofflink.c
 ecoffswap.h
-efi-app-ia32.c
-efi-app-ia64.c
-efi-app-x86_64.c
-efi-bsdrv-ia32.c
-efi-bsdrv-ia64.c
-efi-bsdrv-x86_64.c
-efi-rtdrv-ia32.c
-efi-rtdrv-ia64.c
-efi-rtdrv-x86_64.c
 elf-attrs.c
 elf-bfd.h
 elf-eh-frame.c
@@ -186,6 +178,7 @@ elf32-m88k.c
 elf32-mcore.c
 elf32-mep.c
 elf32-mips.c
+elf32-moxie.c
 elf32-msp430.c
 elf32-mt.c
 elf32-openrisc.c
@@ -194,6 +187,7 @@ elf32-pj.c
 elf32-ppc.c
 elf32-s390.c
 elf32-score.c
+elf32-score7.c
 elf32-sh-symbian.c
 elf32-sh.c
 elf32-sh64-com.c
@@ -304,6 +298,7 @@ pef.h
 pei-arm-wince.c
 pei-arm.c
 pei-i386.c
+pei-ia64.c
 pei-mcore.c
 pei-mips.c
 pei-ppc.c
@@ -333,6 +328,7 @@ trad-core.c
 vax1knetbsd.c
 vaxbsd.c
 vaxnetbsd.c
+verilog.c
 versados.c
 version.h
 vms-gsd.c

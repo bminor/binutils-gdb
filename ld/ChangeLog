@@ -1,3 +1,8 @@
+2009-05-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2009-05-19  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* NEWS:  Mention new feature.

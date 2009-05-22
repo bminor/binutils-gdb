@@ -1,3 +1,8 @@
+2009-05-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2009-05-20  Kai Tietz  <kai.tietz@onevision.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

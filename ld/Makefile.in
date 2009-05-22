@@ -1789,7 +1789,7 @@ eelf32i370.c: $(srcdir)/emulparams/elf32i370.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elfi370.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32i370 "$(tdir_elf32i370)"
 eelf32ip2k.c: $(srcdir)/emulparams/elf32ip2k.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/ip2k.sc ${GEN_DEPENDS}
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ip2k "$(tdir_ip2k)"
 eelf32iq2000.c: $(srcdir)/emulparams/elf32iq2000.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/iq2000.sc ${GEN_DEPENDS}

@@ -577,7 +577,9 @@ objcopy.o: objcopy.c sysdep.h $(INCDIR)/alloca-conf.h \
   $(INCDIR)/progress.h $(INCDIR)/libiberty.h bucomm.h \
   budbg.h $(INCDIR)/filenames.h $(INCDIR)/fnmatch.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/bfdlink.h $(BFDDIR)/libbfd.h $(INCDIR)/hashtab.h
+  $(INCDIR)/bfdlink.h $(BFDDIR)/libbfd.h $(INCDIR)/hashtab.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/coff/i386.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/pe.h
 objdump.o: objdump.c sysdep.h $(INCDIR)/alloca-conf.h \
   config.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/binary-io.h ../bfd/bfd.h $(INCDIR)/symcat.h \

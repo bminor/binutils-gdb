@@ -1,3 +1,9 @@
+2009-05-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2009-05-19  DJ Delorie  <dj@redhat.com>
 
 	* mep-asm.c: Regenerate.

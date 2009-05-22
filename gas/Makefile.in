@@ -957,15 +957,17 @@ DEPTC_i386_aout = $(INCDIR)/alloca-conf.h $(srcdir)/config/obj-aout.h \
   $(INCDIR)/opcode/i386.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h $(INCDIR)/elf/x86-64.h \
-  $(INCDIR)/elf/reloc-macros.h $(srcdir)/../opcodes/i386-init.h
+  $(INCDIR)/elf/reloc-macros.h $(srcdir)/../opcodes/i386-init.h \
+  $(srcdir)/config/tc-i386-intel.c
 
 DEPTC_i386_coff = $(INCDIR)/alloca-conf.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-i386.h $(srcdir)/../opcodes/i386-opc.h \
-  $(INCDIR)/opcode/i386.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/x86_64.h \
+  $(INCDIR)/opcode/i386.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h $(INCDIR)/elf/x86-64.h \
-  $(INCDIR)/elf/reloc-macros.h $(srcdir)/../opcodes/i386-init.h
+  $(INCDIR)/elf/reloc-macros.h $(srcdir)/../opcodes/i386-init.h \
+  $(srcdir)/config/tc-i386-intel.c
 
 DEPTC_i386_elf = $(INCDIR)/alloca-conf.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
@@ -973,7 +975,8 @@ DEPTC_i386_elf = $(INCDIR)/alloca-conf.h $(srcdir)/config/obj-elf.h \
   $(srcdir)/../opcodes/i386-opc.h $(INCDIR)/opcode/i386.h \
   dwarf2dbg.h $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   dw2gencfi.h $(INCDIR)/elf/dwarf2.h $(INCDIR)/elf/x86-64.h \
-  $(INCDIR)/elf/reloc-macros.h $(srcdir)/../opcodes/i386-init.h
+  $(INCDIR)/elf/reloc-macros.h $(srcdir)/../opcodes/i386-init.h \
+  $(srcdir)/config/tc-i386-intel.c
 
 DEPTC_i860_elf = $(INCDIR)/alloca-conf.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
@@ -1481,7 +1484,7 @@ DEPOBJ_i386_aout = $(INCDIR)/alloca-conf.h $(srcdir)/config/obj-aout.h \
 
 DEPOBJ_i386_coff = $(INCDIR)/alloca-conf.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-i386.h $(srcdir)/../opcodes/i386-opc.h \
-  $(INCDIR)/opcode/i386.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/x86_64.h \
+  $(INCDIR)/opcode/i386.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/obstack.h subsegs.h
 
@@ -1923,7 +1926,7 @@ DEP_i386_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-i386.h \
 
 DEP_i386_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-i386.h \
   $(srcdir)/../opcodes/i386-opc.h $(INCDIR)/opcode/i386.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/x86_64.h $(INCDIR)/coff/external.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/i386.h $(INCDIR)/coff/external.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
 
 DEP_i386_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
@@ -1931,7 +1934,7 @@ DEP_i386_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i386.h $(srcdir)/../opcodes/i386-opc.h \
   $(INCDIR)/opcode/i386.h dwarf2dbg.h $(INCDIR)/alloca-conf.h \
   $(srcdir)/config/obj-coff.h $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/x86_64.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h
+  $(INCDIR)/coff/i386.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h
 
 DEP_i860_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \

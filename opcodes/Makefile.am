@@ -796,7 +796,7 @@ frv-opc.lo: frv-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/frv.h $(INCDIR)/elf/reloc-macros.h
 moxie-dis.lo: moxie-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/moxie.h $(INCDIR)/dis-asm.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
+  $(INCDIR)/symcat.h
 moxie-opc.lo: moxie-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/moxie.h
 h8300-dis.lo: h8300-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
@@ -976,7 +976,8 @@ mcore-dis.lo: mcore-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 mep-asm.lo: mep-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h mep-desc.h $(INCDIR)/opcode/cgen-bitset.h \
   $(INCDIR)/opcode/cgen.h mep-opc.h opintl.h $(INCDIR)/xregex.h \
-  $(INCDIR)/xregex2.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
+  $(INCDIR)/xregex2.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
+  $(INCDIR)/elf/mep.h $(INCDIR)/elf/reloc-macros.h
 mep-desc.lo: mep-desc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h mep-desc.h $(INCDIR)/opcode/cgen-bitset.h \
   $(INCDIR)/opcode/cgen.h mep-opc.h opintl.h $(INCDIR)/libiberty.h \
