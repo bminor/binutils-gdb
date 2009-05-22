@@ -586,6 +586,14 @@ static int i386_linux_sc_reg_offset[] =
 #define I386_LINUX_RECORD_IOCTL_TIOCSHAYESESP		0x545F
 #define I386_LINUX_RECORD_IOCTL_FIOQSIZE		0x5460
 
+/* The values of the second argument of system call "sys_fcntl"
+   and "sys_fcntl64".  The values of these macros were obtained from
+   Linux Kernel source.  */
+#define I386_LINUX_RECORD_FCNTL_F_GETLK			5
+#define I386_LINUX_RECORD_FCNTL_F_GETLK64		12
+#define I386_LINUX_RECORD_FCNTL_F_SETLK64		13
+#define I386_LINUX_RECORD_FCNTL_F_SETLKW64		14
+
 static void
 i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -782,6 +790,12 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.ioctl_TIOCSHAYESESP =
     I386_LINUX_RECORD_IOCTL_TIOCSHAYESESP;
   i386_linux_record_tdep.ioctl_FIOQSIZE = I386_LINUX_RECORD_IOCTL_FIOQSIZE;
+
+  i386_linux_record_tdep.fcntl_F_GETLK = I386_LINUX_RECORD_FCNTL_F_GETLK;
+  i386_linux_record_tdep.fcntl_F_GETLK64 = I386_LINUX_RECORD_FCNTL_F_GETLK64;
+  i386_linux_record_tdep.fcntl_F_SETLK64 = I386_LINUX_RECORD_FCNTL_F_SETLK64;
+  i386_linux_record_tdep.fcntl_F_SETLKW64 =
+    I386_LINUX_RECORD_FCNTL_F_SETLKW64;
 
   i386_linux_record_tdep.arg1 = I386_EBX_REGNUM;
   i386_linux_record_tdep.arg2 = I386_ECX_REGNUM;

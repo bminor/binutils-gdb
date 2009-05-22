@@ -158,6 +158,13 @@ struct linux_record_tdep
   int ioctl_TIOCSHAYESESP;
   int ioctl_FIOQSIZE;
 
+  /* The values of the second argument of system call "sys_fcntl"
+     and "sys_fcntl64".  */
+  int fcntl_F_GETLK;
+  int fcntl_F_GETLK64;
+  int fcntl_F_SETLK64;
+  int fcntl_F_SETLKW64;
+
   /* The number of the registers that are used as the arguments of
      a system call.  */
   int arg1;
