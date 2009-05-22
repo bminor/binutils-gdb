@@ -1948,7 +1948,8 @@ copy_symbol_attributes (symbolS *dest, symbolS *src)
 
   /* In an expression, transfer the settings of these flags.
      The user can override later, of course.  */
-#define COPIED_SYMFLAGS	(BSF_FUNCTION | BSF_OBJECT)
+#define COPIED_SYMFLAGS	(BSF_FUNCTION | BSF_OBJECT \
+			 | BSF_GNU_INDIRECT_FUNCTION)
   dest->bsym->flags |= src->bsym->flags & COPIED_SYMFLAGS;
 
 #ifdef OBJ_COPY_SYMBOL_ATTRIBUTES

@@ -1,3 +1,7 @@
+2009-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* symbols.c (COPIED_SYMFLAGS): Add BSF_GNU_INDIRECT_FUNCTION.
+
 2009-05-22  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 
 	* config/tc-i386.c (process_drex): Delete. Remove SSE5 support.

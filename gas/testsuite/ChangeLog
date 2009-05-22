@@ -1,3 +1,10 @@
+2009-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/elf/ifunc-1.d: New.
+	* gas/elf/ifunc-1.s: Likewise.
+
+	* gas/elf/elf.exp: Run ifunc-1.
+
 2009-05-22  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 
 	* gas/i386/i386.exp: Remove SSE5 tests.

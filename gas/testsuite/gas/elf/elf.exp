@@ -125,6 +125,7 @@ if { ([istarget "*-*-*elf*"]
 	|| [istarget "xscale*-*-*"]} then {
 	    run_elf_list_test "type-noifunc" "" "" "-s" "| grep \"1 \\\[FONTC\\\]\""
     } else {
+    	    run_dump_test ifunc-1
 	    run_elf_list_test "type" "" "" "-s" "| grep \"1 \\\[FIONTC\\\]\""
     }
 
