@@ -558,7 +558,7 @@ mep_examine_ivc2_insns (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, bfd_vma pc ATTRIBUTE_
   else
     e = 0;
 
-  if ((buf[0^e] & 0xf0) != 0xf0)
+  if (((unsigned char)buf[0^e] & 0xf0) < 0xc0)
     {
       /*      <--00--><--11--><--22--><--33--><--44--><--55--><--66--><--77--> */
       /* V1   [-----core-----][--------p0s-------][------------p1------------] */
@@ -928,8 +928,11 @@ mep_cgen_print_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_IVC_X_6_3 :
       print_normal (cd, info, fields->f_ivc2_3u6, 0, pc, length);
       break;
+    case MEP_OPERAND_IVC2C3CCRN :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, fields->f_ccrn, 0|(1<<CGEN_OPERAND_VIRTUAL));
+      break;
     case MEP_OPERAND_IVC2CCRN :
-      print_keyword (cd, info, & mep_cgen_opval_h_ccr, fields->f_ivc2_ccrn, 0|(1<<CGEN_OPERAND_VIRTUAL));
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, fields->f_ivc2_ccrn, 0|(1<<CGEN_OPERAND_VIRTUAL));
       break;
     case MEP_OPERAND_IVC2CRN :
       print_keyword (cd, info, & mep_cgen_opval_h_cr64, fields->f_ivc2_crnx, 0|(1<<CGEN_OPERAND_VIRTUAL));
@@ -1059,6 +1062,9 @@ mep_cgen_print_operand (CGEN_CPU_DESC cd,
       break;
     case MEP_OPERAND_SIMM8P0 :
       print_normal (cd, info, fields->f_ivc2_8s0, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case MEP_OPERAND_SIMM8P20 :
+      print_normal (cd, info, fields->f_ivc2_8s20, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case MEP_OPERAND_SIMM8P4 :
       print_normal (cd, info, fields->f_ivc2_8s4, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);

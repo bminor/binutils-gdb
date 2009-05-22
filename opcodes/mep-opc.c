@@ -92,7 +92,7 @@ mep_config_map_struct mep_config_map[] =
 {
   /* config-map-start */
   /* Default entry: first module, with all options enabled. */
-  { "", 0,  EF_MEP_COP_IVC2 | EF_MEP_CPU_C5,1, 0, { 1, "\x20" }, { 1, "\x10" }, { 1, "\x8" }, { 1, "\x4" }, { 1, "\x3c" }, { 1, "\xc0" }, OPTION_MASK | (1 << CGEN_INSN_OPTIONAL_DSP_INSN) | (1 << CGEN_INSN_OPTIONAL_UCI_INSN) },
+  { "", 0,  EF_MEP_COP_IVC2 | EF_MEP_CPU_C5,0, 64, { 1, "\x20" }, { 1, "\x10" }, { 1, "\x8" }, { 1, "\x4" }, { 1, "\x3c" }, { 1, "\xc0" }, OPTION_MASK | (1 << CGEN_INSN_OPTIONAL_DSP_INSN) | (1 << CGEN_INSN_OPTIONAL_UCI_INSN) },
   { "default", CONFIG_DEFAULT, EF_MEP_COP_IVC2 | EF_MEP_CPU_C5, 0, 64, { 1, "\x20" }, { 1, "\x10" }, { 1, "\x8" }, { 1, "\x4" }, { 1, "\x3c" }, { 1, "\xc0" },
 	  0
 	| (1 << CGEN_INSN_OPTIONAL_CP_INSN)
@@ -556,6 +556,10 @@ static const CGEN_IFMT ifmt_cpmovi_h_P0_P1 ATTRIBUTE_UNUSED = {
 
 static const CGEN_IFMT ifmt_cpmoviu_w_P0_P1 ATTRIBUTE_UNUSED = {
   32, 32, 0xf8300f, { { F (F_IVC2_IMM16P0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_2U18) }, { F (F_IVC2_4U28) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_cpmovi_b_P0S_P1 ATTRIBUTE_UNUSED = {
+  32, 32, 0xfff8300f, { { F (F_IVC2_8U0) }, { F (F_IVC2_5U8) }, { F (F_IVC2_5U13) }, { F (F_IVC2_2U18) }, { F (F_IVC2_8U20) }, { F (F_IVC2_4U28) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_cpfmulia1s0u_b_P1 ATTRIBUTE_UNUSED = {
@@ -1951,16 +1955,16 @@ static const CGEN_OPCODE mep_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, ' ', OP (RM), ',', OP (CRNX64), 0 } },
     & ifmt_cmov_crn_rm, { 0xf007f001 }
   },
-/* cmovc $ccrn,$rm */
+/* cmovc $ivc2c3ccrn,$rm */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (CCRN), ',', OP (RM), 0 } },
+    { { MNEM, ' ', OP (IVC2C3CCRN), ',', OP (RM), 0 } },
     & ifmt_cmovc_ccrn_rm, { 0xf007f002 }
   },
-/* cmovc $rm,$ccrn */
+/* cmovc $rm,$ivc2c3ccrn */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, ' ', OP (RM), ',', OP (CCRN), 0 } },
+    { { MNEM, ' ', OP (RM), ',', OP (IVC2C3CCRN), 0 } },
     & ifmt_cmovc_ccrn_rm, { 0xf007f003 }
   },
 /* cmovh $crnx64,$rm */
@@ -5286,6 +5290,12 @@ static const CGEN_OPCODE mep_cgen_insn_opcode_table[MAX_INSNS] =
     { 0, 0, 0, 0 },
     { { MNEM, 0 } },
     & ifmt_c0nop_P0_P0S, { 0x0 }
+  },
+/* cpmovi.b $crqp,$simm8p20 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (CRQP), ',', OP (SIMM8P20), 0 } },
+    & ifmt_cpmovi_b_P0S_P1, { 0xb00000 }
   },
 /* cpadda1u.b $crqp,$crpp */
   {

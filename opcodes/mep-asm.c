@@ -980,8 +980,11 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_IVC_X_6_3 :
       errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IVC_X_6_3, (unsigned long *) (& fields->f_ivc2_3u6));
       break;
+    case MEP_OPERAND_IVC2C3CCRN :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & fields->f_ccrn);
+      break;
     case MEP_OPERAND_IVC2CCRN :
-      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr, & fields->f_ivc2_ccrn);
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & fields->f_ivc2_ccrn);
       break;
     case MEP_OPERAND_IVC2CRN :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_cr64, & fields->f_ivc2_crnx);
@@ -1111,6 +1114,9 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
       break;
     case MEP_OPERAND_SIMM8P0 :
       errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_SIMM8P0, (long *) (& fields->f_ivc2_8s0));
+      break;
+    case MEP_OPERAND_SIMM8P20 :
+      errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_SIMM8P20, (long *) (& fields->f_ivc2_8s20));
       break;
     case MEP_OPERAND_SIMM8P4 :
       errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_SIMM8P4, (long *) (& fields->f_ivc2_8s4));

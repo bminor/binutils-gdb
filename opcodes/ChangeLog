@@ -1,3 +1,13 @@
+2009-05-22  DJ Delorie  <dj@redhat.com>
+
+	* mep-asm.c: Regenerate.
+	* mep-desc.c: Regenerate.
+	* mep-desc.h: Regenerate.
+	* mep-dis.c: Regenerate.
+	* mep-ibld.c: Regenerate.
+	* mep-opc.c: Regenerate.
+	* mep-opc.h: Regenerate.
+
 2009-05-22  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 
 	* i386-opc.h (Cpusse5): Delete.
