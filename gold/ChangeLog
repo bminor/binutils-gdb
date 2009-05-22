@@ -1,3 +1,13 @@
+2009-05-21  Sriraman Tallam  <tmsriram@google.com>
+
+	* object.cc (Sized_relobj::map_to_kept_section): Return NULL if the
+	kept comdat section was garbage collected.
+	* testsuite/Makefile.am: Add test gc_comdat_test.sh.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/gc_comdat_test.sh: New file.
+	* testsuite/gc_comdat_test_1.cc: New file.
+	* testsuite/gc_comdat_test_2.cc: New file.
+
 2009-05-19  Doug Kwan  <dougkwan@google.com>
 
 	* archive.cc (Archive::Archive): Move constructor from archive.h

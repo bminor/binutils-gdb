@@ -23,6 +23,7 @@ TEST_OBJDUMP = $(top_builddir)/../binutils/objdump
 TEST_CXXFILT = $(top_builddir)/../binutils/cxxfilt
 TEST_STRIP = $(top_builddir)/../binutils/strip-new
 TEST_AR = $(top_builddir)/../binutils/ar
+TEST_NM = $(top_builddir)/../binutils/nm-new
 
 if PLUGINS
 LIBDL = -ldl
@@ -101,6 +102,18 @@ flagstest_debug.o: constructor_test.cc
 	$(CXXCOMPILE) -O0 -g -c -o $@ $<
 flagstest_ndebug.o: constructor_test.cc
 	$(CXXCOMPILE) -O0 -c -o $@ $<
+
+
+check_SCRIPTS += gc_comdat_test.sh
+check_DATA += gc_comdat_test.stdout
+gc_comdat_test_1.o: gc_comdat_test_1.cc 
+	$(CXXCOMPILE) -O0 -c -g -o $@ $<
+gc_comdat_test_2.o: gc_comdat_test_2.cc 
+	$(CXXCOMPILE) -O0 -c -g -o $@ $<
+gc_comdat_test: gc_comdat_test_1.o gc_comdat_test_2.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ --gc-sections gc_comdat_test_1.o gc_comdat_test_2.o
+gc_comdat_test.stdout: gc_comdat_test
+	$(TEST_NM) -C gc_comdat_test > gc_comdat_test.stdout
 
 
 check_PROGRAMS += basic_test

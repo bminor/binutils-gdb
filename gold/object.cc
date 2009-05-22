@@ -1873,8 +1873,8 @@ Sized_relobj<size, big_endian>::map_to_kept_section(
       *found = true;
       Output_section* os = kept->object_->output_section(kept->shndx_);
       Address offset = kept->object_->get_output_section_offset(kept->shndx_);
-      gold_assert(os != NULL && offset != invalid_address);
-      return os->address() + offset;
+      if (os != NULL && offset != invalid_address)
+        return os->address() + offset;
     }
   *found = false;
   return 0;
