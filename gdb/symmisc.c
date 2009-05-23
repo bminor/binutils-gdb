@@ -496,16 +496,23 @@ static void
 dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	     struct ui_file *outfile)
 {
-  enum language saved_lang;
-
   /* Set the current language to the language of the symtab we're dumping
      because certain routines used during dump_symtab() use the current
-     language to print an image of the symbol.  We'll restore it later.  */
-  saved_lang = set_language (symtab->language);
+     language to print an image of the symbol.  We'll restore it later.
+     But use only real languages, not placeholders.  */
+  if (symtab->language != language_unknown
+      && symtab->language != language_auto)
+    {
+      enum language saved_lang;
 
-  dump_symtab_1 (objfile, symtab, outfile);
+      saved_lang = set_language (symtab->language);
 
-  set_language (saved_lang);
+      dump_symtab_1 (objfile, symtab, outfile);
+
+      set_language (saved_lang);
+    }
+  else
+    dump_symtab_1 (objfile, symtab, outfile);
 }
 
 void

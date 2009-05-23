@@ -758,6 +758,11 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	    coff_end_symtab (objfile);
 
 	  coff_start_symtab ("_globals_");
+	  /* coff_start_symtab will set the language of this symtab to
+	     language_unknown, since such a ``file name'' is not
+	     recognized.  Override that with the minimal language to
+	     allow printing values in this symtab.  */
+	  current_subfile->language = language_minimal;
 	  complete_symtab ("_globals_", 0, 0);
 	  /* done with all files, everything from here on out is globals */
 	}

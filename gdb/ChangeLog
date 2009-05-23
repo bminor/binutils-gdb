@@ -1,3 +1,12 @@
+2009-05-23  Eli Zaretskii  <eliz@gnu.org>
+
+	* symmisc.c (dump_symtab): Switch the current language to
+	the language of the symtab we are dumping only if the symtab's
+	language is neither language_auto nor language_unknown.
+
+	* coffread.c (coff_symtab_read): Set language_minimal as the
+	language for the "_globals_" pseudo-file.
+
 2009-05-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* target.h (struct section_table): Rename to ...
