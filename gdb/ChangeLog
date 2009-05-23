@@ -6,6 +6,8 @@
 
 	* coffread.c (coff_symtab_read): Set language_minimal as the
 	language for the "_globals_" pseudo-file.
+	(process_coff_symbol): Set the symbol's language to the language
+	of current_subfile.
 
 2009-05-22  Pedro Alves  <pedro@codesourcery.com>
 
