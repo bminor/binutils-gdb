@@ -94,7 +94,7 @@ build_command_line (enum command_control_type type, char *args)
     = (struct command_line **) xmalloc (sizeof (struct command_line *)
 					* cmd->body_count);
   memset (cmd->body_list, 0, sizeof (struct command_line *) * cmd->body_count);
-  cmd->line = savestring (args, strlen (args));
+  cmd->line = xstrdup (args);
 
   return cmd;
 }
@@ -1384,7 +1384,7 @@ define_command (char *comname, int from_tty)
 	}
     }
 
-  comname = savestring (comname, strlen (comname));
+  comname = xstrdup (comname);
 
   /* If the rest of the commands will be case insensitive, this one
      should behave in the same manner. */
@@ -1400,7 +1400,7 @@ define_command (char *comname, int from_tty)
 
   newc = add_cmd (comname, class_user, user_defined_command,
 		  (c && c->class == class_user)
-		  ? c->doc : savestring ("User-defined.", 13), list);
+		  ? c->doc : xstrdup ("User-defined."), list);
   newc->user_commands = cmds;
 
   /* If this new command is a hook, then mark both commands as being

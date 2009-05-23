@@ -736,8 +736,8 @@ add_vmap (LdInfo *ldi)
 
   filename = LDI_FILENAME (ldi, arch64);
   mem = filename + strlen (filename) + 1;
-  mem = savestring (mem, strlen (mem));
-  objname = savestring (filename, strlen (filename));
+  mem = xstrdup (mem);
+  objname = xstrdup (filename);
 
   fd = LDI_FD (ldi, arch64);
   if (fd < 0)

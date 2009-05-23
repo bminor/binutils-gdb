@@ -597,7 +597,7 @@ condition_command (char *arg, int from_tty)
 	    arg = p;
 	    /* I don't know if it matters whether this is the string the user
 	       typed in or the decompiled expression.  */
-	    b->cond_string = savestring (arg, strlen (arg));
+	    b->cond_string = xstrdup (arg);
 	    b->condition_not_parsed = 0;
 	    for (loc = b->loc; loc; loc = loc->next)
 	      {
@@ -4394,8 +4394,7 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
   if (sal.symtab == NULL)
     b->source_file = NULL;
   else
-    b->source_file = savestring (sal.symtab->filename,
-				 strlen (sal.symtab->filename));
+    b->source_file = xstrdup (sal.symtab->filename);
   b->loc->section = sal.section;
   b->line_number = sal.line;
 
@@ -4816,8 +4815,7 @@ create_catchpoint (int tempflag, char *cond_string,
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
 
-  b->cond_string = (cond_string == NULL) ? 
-    NULL : savestring (cond_string, strlen (cond_string));
+  b->cond_string = (cond_string == NULL) ? NULL : xstrdup (cond_string);
   b->thread = -1;
   b->addr_string = NULL;
   b->enable_state = bp_enabled;
@@ -7490,9 +7488,7 @@ update_breakpoint_locations (struct breakpoint *b,
       if (sals.sals[i].symtab == NULL)
 	b->source_file = NULL;
       else
-	b->source_file =
-	  savestring (sals.sals[i].symtab->filename,
-		      strlen (sals.sals[i].symtab->filename));
+	b->source_file = xstrdup (sals.sals[i].symtab->filename);
 
       if (b->line_number == 0)
 	b->line_number = sals.sals[i].line;

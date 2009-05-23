@@ -125,8 +125,7 @@ set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
 	    {
 	      xfree (current_demangling_style_string);
 	      current_demangling_style_string =
-		savestring (dem->demangling_style_name,
-			    strlen (dem->demangling_style_name));
+		xstrdup (dem->demangling_style_name);
 	    }
 	}
       if (current_demangling_style == unknown_demangling)
@@ -136,9 +135,7 @@ set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
 	     one as the default. */
 	  current_demangling_style = libiberty_demanglers[0].demangling_style;
 	  current_demangling_style_string =
-	    savestring (
-              libiberty_demanglers[0].demangling_style_name,
-	      strlen (libiberty_demanglers[0].demangling_style_name));
+	    xstrdup (libiberty_demanglers[0].demangling_style_name);
 	  warning (_("`%s' style demangling chosen as the default."),
 		   current_demangling_style_string);
 	}
@@ -154,7 +151,7 @@ set_demangling_style (char *style)
     {
       xfree (current_demangling_style_string);
     }
-  current_demangling_style_string = savestring (style, strlen (style));
+  current_demangling_style_string = xstrdup (style);
   set_demangling_command ((char *) NULL, 0, (struct cmd_list_element *) NULL);
 }
 

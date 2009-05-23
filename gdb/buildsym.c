@@ -561,9 +561,8 @@ start_subfile (char *name, char *dirname)
   current_subfile = subfile;
 
   /* Save its name and compilation directory name */
-  subfile->name = (name == NULL) ? NULL : savestring (name, strlen (name));
-  subfile->dirname =
-    (dirname == NULL) ? NULL : savestring (dirname, strlen (dirname));
+  subfile->name = (name == NULL) ? NULL : xstrdup (name);
+  subfile->dirname = (dirname == NULL) ? NULL : xstrdup (dirname);
 
   /* Initialize line-number recording for this subfile.  */
   subfile->line_vector = NULL;
@@ -638,7 +637,7 @@ patch_subfile_names (struct subfile *subfile, char *name)
       && subfile->name[strlen (subfile->name) - 1] == '/')
     {
       subfile->dirname = subfile->name;
-      subfile->name = savestring (name, strlen (name));
+      subfile->name = xstrdup (name);
       last_source_file = name;
 
       /* Default the source language to whatever can be deduced from
@@ -1260,7 +1259,7 @@ hashname (char *name)
 void
 record_debugformat (char *format)
 {
-  current_subfile->debugformat = savestring (format, strlen (format));
+  current_subfile->debugformat = xstrdup (format);
 }
 
 void
@@ -1271,7 +1270,7 @@ record_producer (const char *producer)
   if (producer == NULL)
     return;
 
-  current_subfile->producer = savestring (producer, strlen (producer));
+  current_subfile->producer = xstrdup (producer);
 }
 
 /* Merge the first symbol list SRCLIST into the second symbol list

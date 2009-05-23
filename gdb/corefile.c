@@ -399,7 +399,7 @@ set_gnutarget (char *newtarget)
 {
   if (gnutarget_string != NULL)
     xfree (gnutarget_string);
-  gnutarget_string = savestring (newtarget, strlen (newtarget));
+  gnutarget_string = xstrdup (newtarget);
   set_gnutarget_command (NULL, 0, NULL);
 }
 

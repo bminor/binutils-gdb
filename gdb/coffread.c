@@ -364,7 +364,7 @@ coff_start_symtab (char *name)
      this pointer into last_source_file and we put it in
      subfiles->name, which end_symtab frees; that's why
      it must be malloc'd.  */
-		 savestring (name, strlen (name)),
+		 xstrdup (name),
   /* We never know the directory name for COFF.  */
 		 NULL,
   /* The start address is irrelevant, since we set
@@ -383,7 +383,7 @@ complete_symtab (char *name, CORE_ADDR start_addr, unsigned int size)
 {
   if (last_source_file != NULL)
     xfree (last_source_file);
-  last_source_file = savestring (name, strlen (name));
+  last_source_file = xstrdup (name);
   current_source_start_addr = start_addr;
   current_source_end_addr = start_addr + size;
 }

@@ -178,7 +178,7 @@ set_inferior_io_terminal (const char *terminal_name)
   if (!terminal_name)
     inferior_io_terminal = NULL;
   else
-    inferior_io_terminal = savestring (terminal_name, strlen (terminal_name));
+    inferior_io_terminal = xstrdup (terminal_name);
 }
 
 const char *
@@ -2154,7 +2154,7 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
 	     filename.  Not much more we can do...)
 	   */
 	  if (!source_full_path_of (exec_file, &full_exec_path))
-	    full_exec_path = savestring (exec_file, strlen (exec_file));
+	    full_exec_path = xstrdup (exec_file);
 
 	  exec_file_attach (full_exec_path, from_tty);
 	  symbol_file_add_main (full_exec_path, from_tty);

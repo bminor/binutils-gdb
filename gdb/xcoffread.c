@@ -831,8 +831,8 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset, unsigned endoff
    text address for the file, and SIZE is the number of bytes of text.  */
 
 #define complete_symtab(name, start_addr) {	\
-  last_source_file = savestring (name, strlen (name));	\
-  last_source_start_addr = start_addr;			\
+  last_source_file = xstrdup (name);		\
+  last_source_start_addr = start_addr;		\
 }
 
 

@@ -587,7 +587,7 @@ See set/show multiple-symbol."));
 		  if (canonical_arr[i] == NULL)
 		    {
 		      symname = SYMBOL_LINKAGE_NAME (sym_arr[i]);
-		      canonical_arr[i] = savestring (symname, strlen (symname));
+		      canonical_arr[i] = xstrdup (symname);
 		    }
 		}
 	    }
@@ -611,7 +611,7 @@ See set/show multiple-symbol."));
 		{
 		  symname = SYMBOL_LINKAGE_NAME (sym_arr[num]);
 		  make_cleanup (xfree, symname);
-		  canonical_arr[i] = savestring (symname, strlen (symname));
+		  canonical_arr[i] = xstrdup (symname);
 		}
 	      return_values.sals[i++] = values.sals[num];
 	      values.sals[num].pc = 0;

@@ -1153,11 +1153,11 @@ void
 set_prompt (char *s)
 {
 /* ??rehrauer: I don't know why this fails, since it looks as though
-   assignments to prompt are wrapped in calls to savestring...
+   assignments to prompt are wrapped in calls to xstrdup...
    if (prompt != NULL)
    xfree (prompt);
  */
-  PROMPT (0) = savestring (s, strlen (s));
+  PROMPT (0) = xstrdup (s);
 }
 
 
@@ -1458,7 +1458,7 @@ init_history (void)
 
   tmpenv = getenv ("GDBHISTFILE");
   if (tmpenv)
-    history_filename = savestring (tmpenv, strlen (tmpenv));
+    history_filename = xstrdup (tmpenv);
   else if (!history_filename)
     {
       /* We include the current directory so that if the user changes
@@ -1516,13 +1516,13 @@ init_main (void)
      whatever the DEFAULT_PROMPT is.  */
   the_prompts.top = 0;
   PREFIX (0) = "";
-  PROMPT (0) = savestring (DEFAULT_PROMPT, strlen (DEFAULT_PROMPT));
+  PROMPT (0) = xstrdup (DEFAULT_PROMPT);
   SUFFIX (0) = "";
   /* Set things up for annotation_level > 1, if the user ever decides
      to use it.  */
   async_annotation_suffix = "prompt";
   /* Set the variable associated with the setshow prompt command.  */
-  new_async_prompt = savestring (PROMPT (0), strlen (PROMPT (0)));
+  new_async_prompt = xstrdup (PROMPT (0));
 
   /* If gdb was started with --annotate=2, this is equivalent to the
      user entering the command 'set annotate 2' at the gdb prompt, so

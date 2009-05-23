@@ -177,14 +177,14 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    arg = "";
 	  if (*(char **) c->var != NULL)
 	    xfree (*(char **) c->var);
-	  *(char **) c->var = savestring (arg, strlen (arg));
+	  *(char **) c->var = xstrdup (arg);
 	  break;
 	case var_optional_filename:
 	  if (arg == NULL)
 	    arg = "";
 	  if (*(char **) c->var != NULL)
 	    xfree (*(char **) c->var);
-	  *(char **) c->var = savestring (arg, strlen (arg));
+	  *(char **) c->var = xstrdup (arg);
 	  break;
 	case var_filename:
 	  if (arg == NULL)

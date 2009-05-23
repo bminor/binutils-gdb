@@ -395,7 +395,7 @@ add_new_header_file (char *name, int instance)
 
   i = N_HEADER_FILES (current_objfile)++;
   hfile = HEADER_FILES (current_objfile) + i;
-  hfile->name = savestring (name, strlen (name));
+  hfile->name = xstrdup (name);
   hfile->instance = instance;
   hfile->length = 10;
   hfile->vector

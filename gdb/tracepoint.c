@@ -938,7 +938,7 @@ stringify_collection_list (struct collection_list *list, char *string)
 	  sprintf (end, "%02X", list->regs_mask[i]);
 	  end += 2;
 	}
-      (*str_list)[ndx] = savestring (temp_buf, end - temp_buf);
+      (*str_list)[ndx] = xstrdup (temp_buf);
       ndx++;
     }
   if (info_verbose)

@@ -1,5 +1,34 @@
 2009-05-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Replace the savestring calls by xstrdup calls where possible.
+	* breakpoint.c (condition_command, set_raw_breakpoint)
+	(create_catchpoint, update_breakpoint_locations): Replace the
+	savestring calls by xstrdup calls where possible.
+	* buildsym.c (start_subfile, patch_subfile_names, record_debugformat)
+	(record_producer): Likewise.
+	* coffread.c (coff_start_symtab, complete_symtab): Likewise.
+	* corefile.c (set_gnutarget): Likewise.
+	* dbxread.c (add_new_header_file): Likewise.
+	* demangle.c (set_demangling_command, set_demangling_style): Likewise.
+	* event-top.c (push_prompt, pop_prompt, command_line_handler)
+	(set_async_prompt): Likewise.
+	* infcmd.c (set_inferior_io_terminal, attach_command_post_wait):
+	Likewise.
+	* language.c (set_language_command, _initialize_language): Likewise.
+	* linespec.c (decode_line_2): Likewise.
+	* rs6000-nat.c (add_vmap): Likewise.
+	* top.c (set_prompt, init_history, init_main): Likewise.
+	* tracepoint.c (stringify_collection_list): Likewise.
+	* varobj.c (varobj_create): Remove variable expr_len.  Replace the 
+	savestring calls by xstrdup calls where possible.
+	(value_of_root, c_name_of_variable, c_describe_child): Replace the
+	savestring calls by xstrdup calls where possible.
+	* xcoffread.c (complete_symtab): Likewise.
+	* cli/cli-script.c (build_command_line, define_command): Likewise.
+	* cli/cli-setshow.c (do_setshow_command): Likewise.
+
+2009-05-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Remove already unreachable code.
 	* varobj.c (varobj_get_handle): Fix comment when error is called.
 	All callers updated.

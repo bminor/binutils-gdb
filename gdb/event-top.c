@@ -372,22 +372,22 @@ change_annotation_level (void)
 /* Pushes a new prompt on the prompt stack. Each prompt has three
    parts: prefix, prompt, suffix. Usually prefix and suffix are empty
    strings, except when the annotation level is 2. Memory is allocated
-   within savestring for the new prompt. */
+   within xstrdup for the new prompt. */
 void
 push_prompt (char *prefix, char *prompt, char *suffix)
 {
   the_prompts.top++;
-  PREFIX (0) = savestring (prefix, strlen (prefix));
+  PREFIX (0) = xstrdup (prefix);
 
   /* Note that this function is used by the set annotate 2
      command. This is why we take care of saving the old prompt
      in case a new one is not specified. */
   if (prompt)
-    PROMPT (0) = savestring (prompt, strlen (prompt));
+    PROMPT (0) = xstrdup (prompt);
   else
-    PROMPT (0) = savestring (PROMPT (-1), strlen (PROMPT (-1)));
+    PROMPT (0) = xstrdup (PROMPT (-1));
 
-  SUFFIX (0) = savestring (suffix, strlen (suffix));
+  SUFFIX (0) = xstrdup (suffix);
 }
 
 /* Pops the top of the prompt stack, and frees the memory allocated for it. */
@@ -404,7 +404,7 @@ pop_prompt (void)
     if (strcmp (PROMPT (0), PROMPT (-1)))
       {
 	xfree (PROMPT (-1));
-	PROMPT (-1) = savestring (PROMPT (0), strlen (PROMPT (0)));
+	PROMPT (-1) = xstrdup (PROMPT (0));
       }
 
   xfree (PREFIX (0));
@@ -624,8 +624,7 @@ command_line_handler (char *rl)
     {
       p--;			/* Put on top of '\'.  */
 
-      readline_input_state.linebuffer = savestring (linebuffer,
-						    strlen (linebuffer));
+      readline_input_state.linebuffer = xstrdup (linebuffer);
       readline_input_state.linebuffer_ptr = p;
 
       /* We will not invoke a execute_command if there is more
@@ -1063,7 +1062,7 @@ set_async_annotation_level (char *args, int from_tty, struct cmd_list_element *c
 void
 set_async_prompt (char *args, int from_tty, struct cmd_list_element *c)
 {
-  PROMPT (0) = savestring (new_async_prompt, strlen (new_async_prompt));
+  PROMPT (0) = xstrdup (new_async_prompt);
 }
 
 /* Set things up for readline to be invoked via the alternate

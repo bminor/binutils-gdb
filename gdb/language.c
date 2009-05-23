@@ -215,7 +215,7 @@ local or auto    Automatic setting based on source file\n"));
 
   /* Reset the language (esp. the global string "language") to the 
      correct values. */
-  err_lang = savestring (language, strlen (language));
+  err_lang = xstrdup (language);
   make_cleanup (xfree, err_lang);	/* Free it after error */
   set_language (current_language->la_language);
   error (_("Unknown language `%s'."), err_lang);
@@ -1401,10 +1401,10 @@ For Fortran the default is off; for other languages the default is on."),
   add_language (&local_language_defn);
   add_language (&auto_language_defn);
 
-  language = savestring ("auto", strlen ("auto"));
-  type = savestring ("auto", strlen ("auto"));
-  range = savestring ("auto", strlen ("auto"));
-  case_sensitive = savestring ("auto",strlen ("auto"));
+  language = xstrdup ("auto");
+  type = xstrdup ("auto");
+  range = xstrdup ("auto");
+  case_sensitive = xstrdup ("auto");
 
   /* Have the above take effect */
   set_language (language_auto);
