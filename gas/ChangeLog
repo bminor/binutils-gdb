@@ -1,3 +1,8 @@
+2009-05-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (nops_for_vr4130): Don't check noreorder_p.
+	(nops_for_insn): Likewise.
+
 2009-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* symbols.c (COPIED_SYMFLAGS): Add BSF_GNU_INDIRECT_FUNCTION.

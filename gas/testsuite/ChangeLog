@@ -1,5 +1,9 @@
 2009-05-23  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/vr4130.s, gas/mips/vr4130.d: Expect part A to have nops.
+
+2009-05-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/align.d: Use an nm test rather than an objdump one.
 
 2009-05-22  H.J. Lu  <hongjiu.lu@intel.com>

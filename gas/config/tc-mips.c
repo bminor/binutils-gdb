@@ -2679,7 +2679,7 @@ nops_for_vr4130 (const struct mips_cl_insn *history,
 
   /* Search for the first MFLO or MFHI.  */
   for (i = 0; i < MAX_VR4130_NOPS; i++)
-    if (!history[i].noreorder_p && MF_HILO_INSN (history[i].insn_mo->pinfo))
+    if (MF_HILO_INSN (history[i].insn_mo->pinfo))
       {
 	/* Extract the destination register.  */
 	if (mips_opts.mips16)
@@ -2714,12 +2714,11 @@ nops_for_insn (const struct mips_cl_insn *history,
 
   nops = 0;
   for (i = 0; i < MAX_DELAY_NOPS; i++)
-    if (!history[i].noreorder_p)
-      {
-	tmp_nops = insns_between (history + i, insn) - i;
-	if (tmp_nops > nops)
-	  nops = tmp_nops;
-      }
+    {
+      tmp_nops = insns_between (history + i, insn) - i;
+      if (tmp_nops > nops)
+	nops = tmp_nops;
+    }
 
   if (mips_fix_vr4130)
     {
