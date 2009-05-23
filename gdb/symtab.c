@@ -2599,6 +2599,47 @@ find_function_start_pc (struct gdbarch *gdbarch,
   return pc;
 }
 
+/* Given a function start address FUNC_ADDR and SYMTAB, find the first
+   address for that function that has an entry in SYMTAB's line info
+   table.  If such an entry cannot be found, return FUNC_ADDR
+   unaltered.  */
+CORE_ADDR
+skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
+{
+  CORE_ADDR func_start, func_end;
+  struct linetable *l;
+  int ind, i, len;
+  int best_lineno = 0;
+  CORE_ADDR best_pc = func_addr;
+
+  /* Give up if this symbol has no lineinfo table.  */
+  l = LINETABLE (symtab);
+  if (l == NULL)
+    return func_addr;
+
+  /* Get the range for the function's PC values, or give up if we
+     cannot, for some reason.  */
+  if (!find_pc_partial_function (func_addr, NULL, &func_start, &func_end))
+    return func_addr;
+
+  /* Linetable entries are ordered by PC values, see the commentary in
+     symtab.h where `struct linetable' is defined.  Thus, the first
+     entry whose PC is in the range [FUNC_START..FUNC_END[ is the
+     address we are looking for.  */
+  for (i = 0; i < l->nitems; i++)
+    {
+      struct linetable_entry *item = &(l->item[i]);
+
+      /* Don't use line numbers of zero, they mark special entries in
+	 the table.  See the commentary on symtab.h before the
+	 definition of struct linetable.  */
+      if (item->line > 0 && func_start <= item->pc && item->pc < func_end)
+	return item->pc;
+    }
+
+  return func_addr;
+}
+
 /* Given a function symbol SYM, find the symtab and line for the start
    of the function.
    If the argument FUNFIRSTLINE is nonzero, we want the first line
@@ -2646,6 +2687,21 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
     {
       pc = gdbarch_skip_main_prologue (current_gdbarch, pc);
       /* Recalculate the line number (might not be N+1).  */
+      sal = find_pc_sect_line (pc, SYMBOL_OBJ_SECTION (sym), 0);
+    }
+
+  /* If we still don't have a valid source line, try to find the first
+     PC in the lineinfo table that belongs to the same function.  This
+     happens with COFF debug info, which does not seem to have an
+     entry in lineinfo table for the code after the prologue which has
+     no direct relation to source.  For example, this was found to be
+     the case with the DJGPP target using "gcc -gcoff" when the
+     compiler inserted code after the prologue to make sure the stack
+     is aligned.  */
+  if (funfirstline && sal.symtab == NULL)
+    {
+      pc = skip_prologue_using_lineinfo (pc, SYMBOL_SYMTAB (sym));
+      /* Recalculate the line number.  */
       sal = find_pc_sect_line (pc, SYMBOL_OBJ_SECTION (sym), 0);
     }
 

@@ -1,5 +1,9 @@
 2009-05-23  Eli Zaretskii  <eliz@gnu.org>
 
+	* symtab.c (skip_prologue_using_lineinfo): New function.
+	(find_function_start_sal): Use it to get to the first line of
+	function's body that has an entry in the lineinfo table.
+
 	* symmisc.c (dump_symtab): Switch the current language to
 	the language of the symtab we are dumping only if the symtab's
 	language is neither language_auto nor language_unknown.
