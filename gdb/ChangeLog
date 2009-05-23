@@ -1,3 +1,9 @@
+2009-05-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove already unreachable code.
+	* varobj.c (varobj_get_handle): Fix comment when error is called.
+	All callers updated.
+
 2009-05-23  Eli Zaretskii  <eliz@gnu.org>
 
 	* README (`configure' options): Document GDB-specific options to

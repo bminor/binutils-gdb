@@ -591,8 +591,8 @@ varobj_gen_name (void)
   return obj_name;
 }
 
-/* Given an "objname", returns the pointer to the corresponding varobj
-   or NULL if not found */
+/* Given an OBJNAME, returns the pointer to the corresponding varobj.  Call
+   error if OBJNAME cannot be found.  */
 
 struct varobj *
 varobj_get_handle (char *objname)
