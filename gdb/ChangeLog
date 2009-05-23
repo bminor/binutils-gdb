@@ -1,5 +1,8 @@
 2009-05-23  Eli Zaretskii  <eliz@gnu.org>
 
+	* README (`configure' options): Document GDB-specific options to
+	`configure'.
+
 	* symtab.c (skip_prologue_using_lineinfo): New function.
 	(find_function_start_sal): Use it to get to the first line of
 	function's body that has an entry in the lineinfo table.

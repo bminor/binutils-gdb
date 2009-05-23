@@ -398,6 +398,16 @@ prefer; but you may abbreviate option names if you use `--'.
      directories under the working directory in parallel to the source
      directories below PATH.
 
+`--host=HOST'
+     Configure GDB to run on the specified HOST.
+
+     There is no convenient way to generate a list of all available
+     hosts.
+
+`HOST ...'
+     Same as `--host=HOST'.  If you omit this, GDB will guess; it's
+     quite accurate.
+
 `--norecursion'
      Configure only the directory level where `configure' is executed;
      do not propagate configuration to subdirectories.
@@ -418,6 +428,11 @@ prefer; but you may abbreviate option names if you use `--'.
 	-Wparentheses
 	-Wpointer-arith
 
+`--enable-werror'
+     Treat compiler warnings as werrors.  Use this only with GCC.  It
+     adds the -Werror flag to the compiler, which will fail the
+     compilation if the compiler outputs any warning messages.
+
 `--target=TARGET'
      Configure GDB for cross-debugging programs running on the specified
      TARGET.  Without this option, GDB is configured to debug programs
@@ -426,20 +441,95 @@ prefer; but you may abbreviate option names if you use `--'.
      There is no convenient way to generate a list of all available
      targets.
 
-`--host=HOST'
-     Configure GDB to run on the specified HOST.
-
-     There is no convenient way to generate a list of all available
-     hosts.
-
-`HOST ...'
-     Same as `--host=HOST'.  If you omit this, GDB will guess; it's
-     quite accurate.
-
 `--with-gdb-datadir=PATH'
      Set the GDB-specific data directory.  GDB will look here for
      certain supporting files or scripts.  This defaults to the `gdb'
      subdirectory of `datadir' (which can be set using `--datadir').
+
+`--with-relocated-sources=DIR'
+     Sets up the default source path substitution rule so that
+     directory names recorded in debug information will be
+     automatically adjusted for any directory under DIR.  DIR should
+     be a subdirectory of GDB's configured prefix, the one mentioned
+     in the `--prefix' or `--exec-prefix' options to configure.  This
+     option is useful if GDB is supposed to be moved to a different
+     place after it is built.
+
+`--enable-64-bit-bfd'
+     Enable 64-bit support in BFD on 32-bit hosts.
+
+`--disable-gdbmi'
+     Build GDB without the GDB/MI machine interface.
+
+`--enable-tui'
+     Build GDB with the text-mode full-screen user interface (TUI).
+     Requires a curses library (ncurses and cursesX are also
+     supported).
+
+`--enable-gdbtk'
+     Build GDB with the gdbtk GUI interface.  Requires TCL/Tk to be
+     installed.
+
+`--with-libunwind'
+     Use the libunwind library for unwinding function call stack.  See
+     http://www.nongnu.org/libunwind/index.html fro details.
+     Supported only on some platforms.
+
+`--with-curses'
+     Use the curses library instead of the termcap library, for
+     text-mode terminal operations.
+
+`--enable-profiling' Enable profiling of GDB itself.  Necessary if you
+     want to use the "maint set profile" command for profiling GDB.
+     Requires the functions `monstartup' and `_mcleanup' to be present
+     in the standard C library used to build GDB, and also requires a
+     compiler that supports the `-pg' option.
+
+`--with-system-readline'
+     Use the readline library installed on the host, rather than the
+     library supplied as part of GDB tarball.
+
+`--with-expat'
+     Build GDB with the libexpat library.  (Done by default if
+     libexpat is installed and found at configure time.)  This library
+     is used to read XML files supplied with GDB.  If it is
+     unavailable, some features, such as remote protocol memory maps,
+     target descriptions, and shared library lists, that are based on
+     XML files, will not be available in GDB.  If your host does not
+     have libexpat installed, you can  get the latest version from
+     http://expat.sourceforge.net.
+
+`--with-python[=PATH]'
+     Build GDB with Python scripting support.  (Done by default if
+     libpython is present and found at configure time.)  Python makes
+     GDB scripting much more powerful than the restricted CLI
+     scripting language.  If your host does not have Python installed,
+     you can find it on http://www.python.org/download/.  The oldest
+     version of Python supported by GDB is 2.4.  The optional argument
+     PATH says where to find the Python headers and libraries; the
+     configure script will look in PATH/include for headers and in
+     PATH/lib for the libraries.
+
+`--without-included-regex'
+     Don't use the regex library included with GDB (as part of the
+     libiberty library).  This is the default on hosts with version 2
+     of the GNU C library.
+
+`--with-sysroot=DIR'
+     Use DIR as the default system root directory for libraries whose
+     file names begin with `/lib' or `/usr/lib'.  (The value of DIR
+     can be modified at run time by using the "set sysroot" command.)
+     If DIR is under the GDB configured prefix (set with `--prefix' or
+     `--exec-prefix' options), the default system root will be
+     automatically adjusted if and when GDB is moved to a different
+     location.
+
+`--with-system-gdbinit=FILE'
+     Configure GDB to automatically load a system-wide init file.
+     FILE should be an absolute file name.  If FILE is in a directory
+     under the configured prefix, and GDB is moved to another location
+     after being built, the location of the system-wide init file will
+     be adjusted accordingly. 
 
 `configure' accepts other options, for compatibility with configuring
 other GNU tools recursively; but these are the only options that affect
