@@ -1,5 +1,10 @@
 2009-05-24  Doug Evans  <dje@google.com>
 
+	Global renaming of find_thread_pid to find_thread_ptid.
+	* gdbthread.h (find_thread_ptid): Renamed from find_thread_pid.
+	* thread.c (find_thread_ptid): Renamed from find_thread_pid.
+	All callers updated.
+
 	* infrun.c (follow_fork): Initialize new step_* locals
 	to avoid "may be used uninitialized" warnings.
 

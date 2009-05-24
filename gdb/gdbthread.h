@@ -229,7 +229,7 @@ extern int in_thread_list (ptid_t ptid);
 extern int valid_thread_id (int thread);
 
 /* Search function to lookup a thread by 'pid'.  */
-extern struct thread_info *find_thread_pid (ptid_t ptid);
+extern struct thread_info *find_thread_ptid (ptid_t ptid);
 
 /* Find thread by GDB user-visible thread number.  */
 struct thread_info *find_thread_id (int num);

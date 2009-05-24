@@ -374,7 +374,7 @@ follow_fork (void)
 	       or another.  The previous selected thread may be gone
 	       from the lists by now, but if it is still around, need
 	       to clear the pending follow request.  */
-	    tp = find_thread_pid (parent);
+	    tp = find_thread_ptid (parent);
 	    if (tp)
 	      tp->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
 
@@ -1528,7 +1528,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 	  && !ptid_equal (last_ptid, null_ptid)
 	  && !ptid_equal (last_ptid, minus_one_ptid))
 	{
-	  last_thread = find_thread_pid (last_ptid);
+	  last_thread = find_thread_ptid (last_ptid);
 	  if (last_thread)
 	    {
 	      tp->stop_signal = last_thread->stop_signal;
@@ -1757,7 +1757,7 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
 	 have consistent output as if the stop event had been
 	 reported.  */
       ecs->ptid = info->ptid;
-      ecs->event_thread = find_thread_pid (info->ptid);
+      ecs->event_thread = find_thread_ptid (info->ptid);
       ecs->ws.kind = TARGET_WAITKIND_STOPPED;
       ecs->ws.value.sig = TARGET_SIGNAL_0;
 
@@ -2337,7 +2337,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED && ecs->new_thread_event)
     add_thread (ecs->ptid);
 
-  ecs->event_thread = find_thread_pid (ecs->ptid);
+  ecs->event_thread = find_thread_ptid (ecs->ptid);
 
   /* Dependent on valid ECS->EVENT_THREAD.  */
   adjust_pc_after_break (ecs);
@@ -2864,7 +2864,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
                  stop_signal = ecs->event_thread->stop_signal;
                  ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
                  ecs->ptid = singlestep_ptid;
-                 ecs->event_thread = find_thread_pid (ecs->ptid);
+                 ecs->event_thread = find_thread_ptid (ecs->ptid);
                  ecs->event_thread->stop_signal = stop_signal;
                  stop_pc = new_singlestep_pc;
                }

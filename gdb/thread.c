@@ -75,7 +75,7 @@ enum thread_state
 struct thread_info*
 inferior_thread (void)
 {
-  struct thread_info *tp = find_thread_pid (inferior_ptid);
+  struct thread_info *tp = find_thread_ptid (inferior_ptid);
   gdb_assert (tp);
   return tp;
 }
@@ -168,7 +168,7 @@ add_thread_silent (ptid_t ptid)
 {
   struct thread_info *tp;
 
-  tp = find_thread_pid (ptid);
+  tp = find_thread_ptid (ptid);
   if (tp)
     /* Found an old thread with the same id.  It has to be dead,
        otherwise we wouldn't be adding a new thread with the same id.
@@ -313,7 +313,7 @@ find_thread_id (int num)
 
 /* Find a thread_info by matching PTID.  */
 struct thread_info *
-find_thread_pid (ptid_t ptid)
+find_thread_ptid (ptid_t ptid)
 {
   struct thread_info *tp;
 
@@ -510,7 +510,7 @@ thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid)
   inf = find_inferior_pid (ptid_get_pid (old_ptid));
   inf->pid = ptid_get_pid (new_ptid);
 
-  tp = find_thread_pid (old_ptid);
+  tp = find_thread_ptid (old_ptid);
   tp->ptid = new_ptid;
 
   observer_notify_thread_ptid_changed (old_ptid, new_ptid);
@@ -543,7 +543,7 @@ set_running (ptid_t ptid, int running)
   else
     {
       int started = 0;
-      tp = find_thread_pid (ptid);
+      tp = find_thread_ptid (ptid);
       gdb_assert (tp);
       gdb_assert (tp->state_ != THREAD_EXITED);
       if (running && tp->state_ == THREAD_STOPPED)
@@ -562,7 +562,7 @@ is_thread_state (ptid_t ptid, enum thread_state state)
   if (!target_has_execution)
     return 0;
 
-  tp = find_thread_pid (ptid);
+  tp = find_thread_ptid (ptid);
   gdb_assert (tp);
   return tp->state_ == state;
 }
@@ -620,7 +620,7 @@ is_executing (ptid_t ptid)
   if (!target_has_execution)
     return 0;
 
-  tp = find_thread_pid (ptid);
+  tp = find_thread_ptid (ptid);
   gdb_assert (tp);
   return tp->executing_;
 }
@@ -639,7 +639,7 @@ set_executing (ptid_t ptid, int executing)
     }
   else
     {
-      tp = find_thread_pid (ptid);
+      tp = find_thread_ptid (ptid);
       gdb_assert (tp);
       tp->executing_ = executing;
     }
@@ -659,7 +659,7 @@ set_stop_requested (ptid_t ptid, int stop)
     }
   else
     {
-      tp = find_thread_pid (ptid);
+      tp = find_thread_ptid (ptid);
       gdb_assert (tp);
       tp->stop_requested = stop;
     }
@@ -695,7 +695,7 @@ finish_thread_state (ptid_t ptid)
     }
   else
     {
-      tp = find_thread_pid (ptid);
+      tp = find_thread_ptid (ptid);
       gdb_assert (tp);
       if (tp->state_ != THREAD_EXITED)
 	{
@@ -948,7 +948,7 @@ do_restore_current_thread_cleanup (void *arg)
   struct thread_info *tp;
   struct current_thread_cleanup *old = arg;
 
-  tp = find_thread_pid (old->inferior_ptid);
+  tp = find_thread_ptid (old->inferior_ptid);
 
   /* If the previously selected thread belonged to a process that has
      in the mean time been deleted (due to normal exit, detach, etc.),
@@ -977,7 +977,7 @@ restore_current_thread_cleanup_dtor (void *arg)
 {
   struct current_thread_cleanup *old = arg;
   struct thread_info *tp;
-  tp = find_thread_pid (old->inferior_ptid);
+  tp = find_thread_ptid (old->inferior_ptid);
   if (tp)
     tp->refcount--;
   xfree (old);
@@ -1007,7 +1007,7 @@ make_cleanup_restore_current_thread (void)
       old->selected_frame_id = get_frame_id (frame);
       old->selected_frame_level = frame_relative_level (frame);
 
-      tp = find_thread_pid (inferior_ptid);
+      tp = find_thread_ptid (inferior_ptid);
       if (tp)
 	tp->refcount++;
     }

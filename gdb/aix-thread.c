@@ -986,7 +986,7 @@ aix_thread_resume (struct target_ops *ops,
     }
   else
     {
-      thread = find_thread_pid (ptid);
+      thread = find_thread_ptid (ptid);
       if (!thread)
 	error (_("aix-thread resume: unknown pthread %ld"),
 	       TIDGET (ptid));
@@ -1302,7 +1302,7 @@ aix_thread_fetch_registers (struct target_ops *ops,
     beneath->to_fetch_registers (beneath, regcache, regno);
   else
     {
-      thread = find_thread_pid (inferior_ptid);
+      thread = find_thread_ptid (inferior_ptid);
       tid = thread->private->tid;
 
       if (tid == PTHDB_INVALID_TID)
@@ -1643,7 +1643,7 @@ aix_thread_store_registers (struct target_ops *ops,
     beneath->to_store_registers (beneath, regcache, regno);
   else
     {
-      thread = find_thread_pid (inferior_ptid);
+      thread = find_thread_ptid (inferior_ptid);
       tid = thread->private->tid;
 
       if (tid == PTHDB_INVALID_TID)

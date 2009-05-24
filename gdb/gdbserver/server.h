@@ -239,7 +239,7 @@ struct process_info *find_process_pid (int pid);
 int have_started_inferiors_p (void);
 int have_attached_inferiors_p (void);
 
-struct thread_info *find_thread_pid (ptid_t ptid);
+struct thread_info *find_thread_ptid (ptid_t ptid);
 
 ptid_t thread_id_to_gdb_id (ptid_t);
 ptid_t thread_to_gdb_id (struct thread_info *);

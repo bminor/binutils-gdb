@@ -350,7 +350,7 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
 
   /* At this point the current thread may have changed.  Refresh
      CALL_THREAD as it could be invalid if its thread has exited.  */
-  call_thread = find_thread_pid (call_thread_ptid);
+  call_thread = find_thread_ptid (call_thread_ptid);
 
   /* Don't restore the async mask if the target has changed,
      saved_async is for the original target.  */

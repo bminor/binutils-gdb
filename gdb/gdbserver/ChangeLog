@@ -1,5 +1,10 @@
 2009-05-24  Doug Evans  <dje@google.com>
 
+	Global renaming of find_thread_pid to find_thread_ptid.
+	* server.h (find_thread_ptid): Renamed from find_thread_pid.
+	* inferiors.c (find_thread_ptid): Renamed from find_thread_pid.
+	All callers updated.
+
 	* linux-low.c (handle_extended_wait): Use linux_resume_one_lwp
 	to resume the newly created thread, don't call ptrace (PTRACE_CONT)
 	directly.

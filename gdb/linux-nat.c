@@ -1096,7 +1096,7 @@ linux_nat_switch_fork (ptid_t new_ptid)
 static void
 exit_lwp (struct lwp_info *lp)
 {
-  struct thread_info *th = find_thread_pid (lp->ptid);
+  struct thread_info *th = find_thread_ptid (lp->ptid);
 
   if (th)
     {
@@ -1426,7 +1426,7 @@ get_pending_status (struct lwp_info *lp, int *status)
 	     have the last signal recorded in
 	     thread_info->stop_signal.  */
 
-	  struct thread_info *tp = find_thread_pid (lp->ptid);
+	  struct thread_info *tp = find_thread_ptid (lp->ptid);
 	  signo = tp->stop_signal;
 	}
 
@@ -1455,7 +1455,7 @@ GPT: lwp %s had signal %s, but it is in no pass state\n",
     {
       if (GET_LWP (lp->ptid) == GET_LWP (last_ptid))
 	{
-	  struct thread_info *tp = find_thread_pid (lp->ptid);
+	  struct thread_info *tp = find_thread_ptid (lp->ptid);
 	  if (tp->stop_signal != TARGET_SIGNAL_0
 	      && signal_pass_state (tp->stop_signal))
 	    *status = W_STOPCODE (target_signal_to_host (tp->stop_signal));
@@ -4515,7 +4515,7 @@ linux_nat_stop_lwp (struct lwp_info *lwp, void *data)
 
       if (debug_linux_nat)
 	{
-	  if (find_thread_pid (lwp->ptid)->stop_requested)
+	  if (find_thread_ptid (lwp->ptid)->stop_requested)
 	    fprintf_unfiltered (gdb_stdlog, "\
 LNSL: already stopped/stop_requested %s\n",
 				target_pid_to_str (lwp->ptid));

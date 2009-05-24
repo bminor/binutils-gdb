@@ -371,7 +371,7 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *argp)
 
   /* Fill the cache.  */
   thread_ptid = ptid_build (info->pid, ti.ti_lid, 0);
-  inout->thread_info = find_thread_pid (thread_ptid);
+  inout->thread_info = find_thread_ptid (thread_ptid);
 
   /* In the case of a zombie thread, don't continue.  We don't want to
      attach to it thinking it is a new thread.  */
@@ -385,7 +385,7 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *argp)
  	thread_db_find_new_threads_1 (thread_ptid);
       else
 	attach_thread (thread_ptid, thp, &ti);
-      inout->thread_info = find_thread_pid (thread_ptid);
+      inout->thread_info = find_thread_ptid (thread_ptid);
       gdb_assert (inout->thread_info != NULL);
     }
 
@@ -975,7 +975,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
      thread and attach to the new one.  */
   if (in_thread_list (ptid))
     {
-      tp = find_thread_pid (ptid);
+      tp = find_thread_ptid (ptid);
       gdb_assert (tp != NULL);
 
       /* If tp->private is NULL, then GDB is already attached to this
@@ -1046,7 +1046,7 @@ detach_thread (ptid_t ptid)
      until we notice that it's dead (via prune_threads), or until
      something re-uses its thread ID.  We'll report the thread exit
      when the underlying LWP dies.  */
-  thread_info = find_thread_pid (ptid);
+  thread_info = find_thread_ptid (ptid);
   gdb_assert (thread_info != NULL && thread_info->private != NULL);
   thread_info->private->dying = 1;
 }
@@ -1309,7 +1309,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
     }
 
   ptid = ptid_build (info->pid, ti.ti_lid, 0);
-  tp = find_thread_pid (ptid);
+  tp = find_thread_ptid (ptid);
   if (tp == NULL || tp->private == NULL)
     attach_thread (ptid, th_p, &ti);
 
@@ -1364,7 +1364,7 @@ thread_db_find_new_threads (struct target_ops *ops)
 static char *
 thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
-  struct thread_info *thread_info = find_thread_pid (ptid);
+  struct thread_info *thread_info = find_thread_ptid (ptid);
   struct target_ops *beneath;
 
   if (thread_info != NULL && thread_info->private != NULL)
@@ -1418,7 +1418,7 @@ thread_db_get_thread_local_address (struct target_ops *ops,
     thread_db_find_new_threads_1 (ptid);
 
   /* Find the matching thread.  */
-  thread_info = find_thread_pid (ptid);
+  thread_info = find_thread_ptid (ptid);
 
   if (thread_info != NULL && thread_info->private != NULL)
     {

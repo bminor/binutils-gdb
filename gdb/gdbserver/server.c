@@ -1156,7 +1156,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	err = 1;
       else
 	{
-	  struct thread_info *thread = find_thread_pid (ptid);
+	  struct thread_info *thread = find_thread_ptid (ptid);
 
 	  if (thread == NULL)
 	    err = 2;

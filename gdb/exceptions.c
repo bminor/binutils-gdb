@@ -219,7 +219,7 @@ throw_exception (struct gdb_exception exception)
   immediate_quit = 0;
 
   if (!ptid_equal (inferior_ptid, null_ptid))
-    tp = find_thread_pid (inferior_ptid);
+    tp = find_thread_ptid (inferior_ptid);
 
   /* Perhaps it would be cleaner to do this via the cleanup chain (not sure
      I can think of a reason why that is vital, though).  */

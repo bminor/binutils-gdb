@@ -1091,7 +1091,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 
 	saved_inferior = current_inferior;
 
-	current_inferior = find_thread_pid (ptid);
+	current_inferior = find_thread_ptid (ptid);
 
 	if (the_target->stopped_by_watchpoint != NULL
 	    && (*the_target->stopped_by_watchpoint) ())

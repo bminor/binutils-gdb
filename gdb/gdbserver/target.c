@@ -29,7 +29,7 @@ set_desired_inferior (int use_general)
   struct thread_info *found;
 
   if (use_general == 1)
-    found = find_thread_pid (general_thread);
+    found = find_thread_ptid (general_thread);
   else
     {
       found = NULL;
@@ -41,10 +41,10 @@ set_desired_inferior (int use_general)
 	   && !ptid_equal (step_thread, minus_one_ptid))
 	  && (ptid_equal (cont_thread, null_ptid)
 	      || ptid_equal (cont_thread, minus_one_ptid)))
-	found = find_thread_pid (step_thread);
+	found = find_thread_ptid (step_thread);
 
       if (found == NULL)
-	found = find_thread_pid (cont_thread);
+	found = find_thread_ptid (cont_thread);
     }
 
   if (found == NULL)

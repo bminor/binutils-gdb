@@ -210,7 +210,7 @@ thread_to_gdb_id (struct thread_info *thread)
 }
 
 struct thread_info *
-find_thread_pid (ptid_t ptid)
+find_thread_ptid (ptid_t ptid)
 {
   struct inferior_list_entry *inf = all_threads.head;
 
@@ -228,7 +228,7 @@ find_thread_pid (ptid_t ptid)
 ptid_t
 gdb_id_to_thread_id (ptid_t gdb_id)
 {
-  struct thread_info *thread = find_thread_pid (gdb_id);
+  struct thread_info *thread = find_thread_ptid (gdb_id);
 
   return thread ? thread->entry.id : null_ptid;
 }

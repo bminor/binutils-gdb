@@ -422,7 +422,7 @@ mi_on_resume (ptid_t ptid)
   if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
     tp = inferior_thread ();
   else
-    tp = find_thread_pid (ptid);
+    tp = find_thread_ptid (ptid);
 
   /* Suppress output while calling an inferior function.  */
   if (tp->in_infcall)
@@ -461,7 +461,7 @@ mi_on_resume (ptid_t ptid)
     }
   else
     {
-      struct thread_info *ti = find_thread_pid (ptid);
+      struct thread_info *ti = find_thread_ptid (ptid);
       gdb_assert (ti);
       fprintf_unfiltered (raw_stdout, "*running,thread-id=\"%d\"\n", ti->num);
     }

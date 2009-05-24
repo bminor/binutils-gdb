@@ -884,7 +884,7 @@ inf_ttrace_resume (struct target_ops *ops,
   if (resume_all)
     ptid = inferior_ptid;
 
-  info = find_thread_pid (ptid);
+  info = find_thread_ptid (ptid);
   inf_ttrace_resume_lwp (info, request, sig);
 
   if (resume_all)
@@ -957,7 +957,7 @@ inf_ttrace_wait (struct target_ops *ops,
 
       /* We haven't set the private member on the main thread yet.  Do
 	 it now.  */
-      ti = find_thread_pid (inferior_ptid);
+      ti = find_thread_ptid (inferior_ptid);
       gdb_assert (ti != NULL && ti->private == NULL);
       ti->private =
 	xmalloc (sizeof (struct inf_ttrace_private_thread_info));
@@ -1058,7 +1058,7 @@ inf_ttrace_wait (struct target_ops *ops,
     case TTEVT_LWP_EXIT:
       if (print_thread_events)
 	printf_unfiltered (_("[%s exited]\n"), target_pid_to_str (ptid));
-      ti = find_thread_pid (ptid);
+      ti = find_thread_ptid (ptid);
       gdb_assert (ti != NULL);
       ((struct inf_ttrace_private_thread_info *)ti->private)->dying = 1;
       inf_ttrace_num_lwps--;
@@ -1075,7 +1075,7 @@ inf_ttrace_wait (struct target_ops *ops,
       if (print_thread_events)
 	printf_unfiltered(_("[%s has been terminated]\n"),
 			  target_pid_to_str (ptid));
-      ti = find_thread_pid (ptid);
+      ti = find_thread_ptid (ptid);
       gdb_assert (ti != NULL);
       ((struct inf_ttrace_private_thread_info *)ti->private)->dying = 1;
       inf_ttrace_num_lwps--;
