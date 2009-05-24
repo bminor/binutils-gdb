@@ -86,7 +86,6 @@ struct linux_record_tdep
   int size_termios2;
   int size_pid_t;
   int size_winsize;
-  int size_char;
   int size_serial_struct;
   int size_serial_icounter_struct;
   int size_hayes_esp_config;

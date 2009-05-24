@@ -345,7 +345,8 @@ record_linux_system_call (int num, struct regcache *regcache,
 	{
 	  regcache_raw_read (regcache, tdep->arg3,
 			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_char))
+          /* This syscall affect a char size memory.  */
+	  if (record_arch_list_add_mem (tmpu32, 1))
 	    return -1;
 	}
       else if (tmpu32 == tdep->ioctl_TIOCGSERIAL)

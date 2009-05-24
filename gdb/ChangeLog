@@ -1,3 +1,17 @@
+2009-05-24  Hui Zhu  <teawater@gmail.com>
+
+	* i386-linux-tdep.c (I386_LINUX_RECORD_SIZE_*,
+	I386_LINUX_RECORD_IOCTL_*,
+	I386_LINUX_RECORD_FCNTL_*) Removed.
+	(i386_linux_init_abi): Change size of record from macros to
+	numbers.
+
+2009-05-24  Hui Zhu  <teawater@gmail.com>
+
+	* i386-linux-tdep.c (i386_linux_init_abi): Remove size_char.
+	* linux-record.c (record_linux_system_call): Ditto.
+	* linux-record.h (linux_record_tdep): Ditto.
+
 2009-05-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Replace the savestring calls by xstrdup calls where possible.
