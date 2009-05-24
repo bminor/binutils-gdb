@@ -290,12 +290,12 @@ follow_fork (void)
 
   /* Copy user stepping state to the new inferior thread.  FIXME: the
      followed fork child thread should have a copy of most of the
-     parent thread structure's run control related fields, not just
-     these.  */
-  struct breakpoint *step_resume_breakpoint;
-  CORE_ADDR step_range_start;
-  CORE_ADDR step_range_end;
-  struct frame_id step_frame_id;
+     parent thread structure's run control related fields, not just these.
+     Initialized to avoid "may be used uninitialized" warnings from gcc.  */
+  struct breakpoint *step_resume_breakpoint = NULL;
+  CORE_ADDR step_range_start = 0;
+  CORE_ADDR step_range_end = 0;
+  struct frame_id step_frame_id = { 0 };
 
   if (!non_stop)
     {

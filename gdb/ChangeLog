@@ -1,3 +1,8 @@
+2009-05-24  Doug Evans  <dje@google.com>
+
+	* infrun.c (follow_fork): Initialize new step_* locals
+	to avoid "may be used uninitialized" warnings.
+
 2009-05-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* inflow.c (copy_terminal_info): Deep copy `run_terminal'.
