@@ -354,10 +354,13 @@ get_stop_pc (void)
 {
   CORE_ADDR stop_pc = (*the_low_target.get_pc) ();
 
-  if (get_thread_lwp (current_inferior)->stepping)
-    return stop_pc;
-  else
-    return stop_pc - the_low_target.decr_pc_after_break;
+  if (! get_thread_lwp (current_inferior)->stepping)
+    stop_pc -= the_low_target.decr_pc_after_break;
+
+  if (debug_threads)
+    fprintf (stderr, "stop pc is 0x%lx\n", (long) stop_pc);
+
+  return stop_pc;
 }
 
 static void *
@@ -814,7 +817,11 @@ check_removed_breakpoint (struct lwp_info *event_child)
      decrement.  We go immediately from this function to resuming,
      and can not safely call get_stop_pc () again.  */
   if (the_low_target.set_pc != NULL)
-    (*the_low_target.set_pc) (stop_pc);
+    {
+      if (debug_threads)
+	fprintf (stderr, "Set pc to 0x%lx\n", (long) stop_pc);
+      (*the_low_target.set_pc) (stop_pc);
+    }
 
   /* We consumed the pending SIGTRAP.  */
   event_child->pending_is_breakpoint = 0;
@@ -942,14 +949,16 @@ retry:
     }
 
   if (debug_threads
-      && WIFSTOPPED (*wstatp))
+      && WIFSTOPPED (*wstatp)
+      && the_low_target.get_pc != NULL)
     {
       struct thread_info *saved_inferior = current_inferior;
+      CORE_ADDR pc;
+
       current_inferior = (struct thread_info *)
 	find_inferior_id (&all_threads, child->head.id);
-      /* For testing only; i386_stop_pc prints out a diagnostic.  */
-      if (the_low_target.get_pc != NULL)
-	get_stop_pc ();
+      pc = (*the_low_target.get_pc) ();
+      fprintf (stderr, "linux_wait_for_lwp: pc is 0x%lx\n", (long) pc);
       current_inferior = saved_inferior;
     }
 
@@ -1706,8 +1715,8 @@ linux_resume_one_lwp (struct lwp_info *lwp,
 
   if (debug_threads && the_low_target.get_pc != NULL)
     {
-      fprintf (stderr, "  ");
-      (*the_low_target.get_pc) ();
+      CORE_ADDR pc = (*the_low_target.get_pc) ();
+      fprintf (stderr, "  resuming from pc 0x%lx\n", (long) pc);
     }
 
   /* If we have pending signals, consume one unless we are trying to reinsert

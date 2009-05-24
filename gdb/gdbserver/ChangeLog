@@ -1,3 +1,9 @@
+2009-05-24  Doug Evans  <dje@google.com>
+
+	* linux-low.c (get_stop_pc): Print pc if debug_threads.
+	(check_removed_breakpoint, linux_wait_for_lwp): Ditto.
+	(linux_resume_one_lwp): Ditto.
+
 2009-05-23  Doug Evans  <dje@google.com>
 
 	* linux-low.c (linux_resume_one_lwp): Change type of first arg
