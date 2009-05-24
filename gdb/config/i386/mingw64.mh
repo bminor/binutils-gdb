@@ -1,2 +1,1 @@
 NATDEPFILES= i386-nat.o windows-nat.o amd64-windows-nat.o
-NAT_FILE=nm-cygwin64.h

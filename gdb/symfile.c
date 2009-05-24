@@ -96,8 +96,6 @@ static void symbol_file_add_main_1 (char *args, int from_tty, int flags);
 
 static void add_symbol_file_command (char *, int);
 
-static void add_shared_symbol_files_command (char *, int);
-
 static void reread_separate_symbols (struct objfile *objfile);
 
 static void cashier_psymtab (struct partial_symtab *);
@@ -2234,16 +2232,7 @@ add_symbol_file_command (char *args, int from_tty)
   do_cleanups (my_cleanups);
 }
 
-static void
-add_shared_symbol_files_command (char *args, int from_tty)
-{
-#ifdef ADD_SHARED_SYMBOL_FILES
-  ADD_SHARED_SYMBOL_FILES (args, from_tty);
-#else
-  error (_("This command is not available in this configuration of GDB."));
-#endif
-}
-
+
 /* Re-read symbols if a symbol-file has changed.  */
 void
 reread_symbols (void)
@@ -4101,13 +4090,6 @@ should be specified if the data and bss segments are not contiguous\n\
 with the text.  SECT is a section name to be loaded at SECT_ADDR."),
 	       &cmdlist);
   set_cmd_completer (c, filename_completer);
-
-  c = add_cmd ("add-shared-symbol-files", class_files,
-	       add_shared_symbol_files_command, _("\
-Load the symbols from shared objects in the dynamic linker's link map."),
-	       &cmdlist);
-  c = add_alias_cmd ("assf", "add-shared-symbol-files", class_files, 1,
-		     &cmdlist);
 
   c = add_cmd ("load", class_files, load_command, _("\
 Dynamically load FILE into the running program, and record its symbols\n\

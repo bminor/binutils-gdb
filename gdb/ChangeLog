@@ -1,3 +1,18 @@
+2009-05-15  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* symfile.c (add_shared_symbol_files_command): Remove
+	prototype and function.
+	(_initialize _symfile): Move "add-shared-symbol-files"
+	command and "assf" alias.
+	* windows-nat.c (_initialize_windows_nat): to here.
+	Change "add-shared-symbol-files" to alias.
+	
+	* config/i386/cygwin.mh: Remove NAT_FILE.
+	* config/i386/mingw.mh: Remove NAT_FILE.
+	* config/i386/mingw64.mh: Remove NAT_FILE.
+	* config/i386/nm-cygwin.h: Remove file.
+	* config/i386/nm-cygwin64.h: Remove file.
+
 2009-05-24  Hui Zhu  <teawater@gmail.com>
 
 	* i386-linux-tdep.c (I386_LINUX_RECORD_SIZE_*,

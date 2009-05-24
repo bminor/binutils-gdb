@@ -2205,6 +2205,10 @@ _initialize_windows_nat (void)
 
   add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
 
+  add_com_alias ("add-shared-symbol-files", "dll-symbols", class_alias, 1);
+
+  add_com_alias ("assf", "dll-symbols", class_alias, 1);
+
 #ifdef __CYGWIN__
   add_setshow_boolean_cmd ("shell", class_support, &useshell, _("\
 Set use of shell to start subprocess."), _("\
