@@ -1,3 +1,9 @@
+2009-05-24  Alan Modra  <amodra@bigpond.net.au>
+
+       * bfdio.c (bfd_seek): Formatting.  Ensure newly allocated memory
+       for BFD_IN_MEMORY is cleared.
+       (bfd_bwrite): Zero excess memory allocated.
+
 2009-05-22  Julian Brown  <julian@codesourcery.com>
 
 	* elf32-arm.c (THUMB16_BCOND_INSN, THUMB32_INSN, THUMB32_B_INSN): New

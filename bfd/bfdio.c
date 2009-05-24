@@ -235,6 +235,8 @@ bfd_bwrite (const void *ptr, bfd_size_type size, bfd *abfd)
 		  bim->size = 0;
 		  return 0;
 		}
+	      if (newsize > bim->size)
+		memset (bim->buffer + bim->size, 0, newsize - bim->size);
 	    }
 	}
       memcpy (bim->buffer + abfd->where, ptr, (size_t) size);
@@ -342,8 +344,8 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
 
       if (abfd->where > bim->size)
 	{
-	  if ((abfd->direction == write_direction) ||
-	      (abfd->direction == both_direction))
+	  if (abfd->direction == write_direction
+	      || abfd->direction == both_direction)
 	    {
 	      bfd_size_type newsize, oldsize;
 
@@ -359,6 +361,7 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
 		      bim->size = 0;
 		      return -1;
 		    }
+		  memset (bim->buffer + oldsize, 0, newsize - oldsize);
 	        }
 	    }
 	  else
