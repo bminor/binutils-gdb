@@ -1,3 +1,9 @@
+2009-05-23  Doug Evans  <dje@google.com>
+
+	* linux-low.c (linux_resume_one_lwp): Change type of first arg
+	from struct inferior_list_entry * to struct lwp_info *.
+	All callers updated.
+
 2009-05-13  Doug Evans  <dje@google.com>
 
 	* linux-x86-low.c: Don't include assert.h.

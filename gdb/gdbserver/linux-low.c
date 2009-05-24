@@ -121,7 +121,7 @@ int using_threads = 1;
    control of gdbserver have the same architecture.  */
 static int new_inferior;
 
-static void linux_resume_one_lwp (struct inferior_list_entry *entry,
+static void linux_resume_one_lwp (struct lwp_info *lwp,
 				  int step, int signal, siginfo_t *info);
 static void linux_resume (struct thread_resume *resume_info, size_t n);
 static void stop_all_lwps (void);
@@ -323,8 +323,7 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
       /* Always resume the current thread.  If we are stopping
 	 threads, it will have a pending SIGSTOP; we may as well
 	 collect it now.  */
-      linux_resume_one_lwp (&event_child->head,
-			    event_child->stepping, 0, NULL);
+      linux_resume_one_lwp (event_child, event_child->stepping, 0, NULL);
     }
 }
 
@@ -688,7 +687,7 @@ linux_detach_one_lwp (struct inferior_list_entry *entry, void *args)
       /* Clear stop_expected, so that the SIGSTOP will be reported.  */
       lwp->stop_expected = 0;
       if (lwp->stopped)
-	linux_resume_one_lwp (&lwp->head, 0, 0, NULL);
+	linux_resume_one_lwp (lwp, 0, 0, NULL);
       linux_wait_for_event (lwp->head.id, &wstat, __WALL);
     }
 
@@ -849,7 +848,7 @@ status_pending_p (struct inferior_list_entry *entry, void *arg)
 	   So instead of reporting the old SIGTRAP, pretend we got to
 	   the breakpoint just after it was removed instead of just
 	   before; resume the process.  */
-	linux_resume_one_lwp (&lwp->head, 0, 0, NULL);
+	linux_resume_one_lwp (lwp, 0, 0, NULL);
 	return 0;
       }
 
@@ -1074,8 +1073,7 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 	  if (debug_threads)
 	    fprintf (stderr, "Expected stop.\n");
 	  event_child->stop_expected = 0;
-	  linux_resume_one_lwp (&event_child->head,
-				event_child->stepping, 0, NULL);
+	  linux_resume_one_lwp (event_child, event_child->stepping, 0, NULL);
 	  continue;
 	}
 
@@ -1117,7 +1115,7 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 	    info_p = &info;
 	  else
 	    info_p = NULL;
-	  linux_resume_one_lwp (&event_child->head,
+	  linux_resume_one_lwp (event_child,
 				event_child->stepping,
 				WSTOPSIG (*wstat), info_p);
 	  continue;
@@ -1147,7 +1145,7 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 	  event_child->bp_reinsert = 0;
 
 	  /* Clear the single-stepping flag and SIGTRAP as we resume.  */
-	  linux_resume_one_lwp (&event_child->head, 0, 0, NULL);
+	  linux_resume_one_lwp (event_child, 0, 0, NULL);
 	  continue;
 	}
 
@@ -1189,18 +1187,18 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 	     events.  */
 	  if (bp_status == 2)
 	    /* No need to reinsert.  */
-	    linux_resume_one_lwp (&event_child->head, 0, 0, NULL);
+	    linux_resume_one_lwp (event_child, 0, 0, NULL);
 	  else if (the_low_target.breakpoint_reinsert_addr == NULL)
 	    {
 	      event_child->bp_reinsert = stop_pc;
 	      uninsert_breakpoint (stop_pc);
-	      linux_resume_one_lwp (&event_child->head, 1, 0, NULL);
+	      linux_resume_one_lwp (event_child, 1, 0, NULL);
 	    }
 	  else
 	    {
 	      reinsert_breakpoint_by_bp
 		(stop_pc, (*the_low_target.breakpoint_reinsert_addr) ());
-	      linux_resume_one_lwp (&event_child->head, 0, 0, NULL);
+	      linux_resume_one_lwp (event_child, 0, 0, NULL);
 	    }
 
 	  continue;
@@ -1645,10 +1643,9 @@ stop_all_lwps (void)
    If SIGNAL is nonzero, give it that signal.  */
 
 static void
-linux_resume_one_lwp (struct inferior_list_entry *entry,
+linux_resume_one_lwp (struct lwp_info *lwp,
 		      int step, int signal, siginfo_t *info)
 {
-  struct lwp_info *lwp = (struct lwp_info *) entry;
   struct thread_info *saved_inferior;
 
   if (lwp->stopped == 0)
@@ -1918,7 +1915,7 @@ linux_resume_one_thread (struct inferior_list_entry *entry, void *arg)
       else
 	step = (lwp->resume->kind == resume_step);
 
-      linux_resume_one_lwp (&lwp->head, step, lwp->resume->sig, NULL);
+      linux_resume_one_lwp (lwp, step, lwp->resume->sig, NULL);
     }
   else
     {
