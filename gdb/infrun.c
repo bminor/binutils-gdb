@@ -83,6 +83,8 @@ static int prepare_to_proceed (int);
 
 void _initialize_infrun (void);
 
+void nullify_last_target_wait_ptid (void);
+
 /* When set, stop the 'step' command if we enter a function which has
    no line number information.  The normal behavior is that we step
    over such function.  */
@@ -255,21 +257,6 @@ void init_thread_stepping_state (struct thread_info *tss);
 
 void init_infwait_state (void);
 
-/* This is used to remember when a fork or vfork event was caught by a
-   catchpoint, and thus the event is to be followed at the next resume
-   of the inferior, and not immediately.  */
-static struct
-{
-  enum target_waitkind kind;
-  struct
-  {
-    ptid_t parent_pid;
-    ptid_t child_pid;
-  }
-  fork_event;
-}
-pending_follow;
-
 static const char follow_fork_mode_child[] = "child";
 static const char follow_fork_mode_parent[] = "parent";
 
@@ -290,12 +277,157 @@ Debugger response to a program call of fork or vfork is \"%s\".\n"),
 }
 
 
+/* Tell the target to follow the fork we're stopped at.  Returns true
+   if the inferior should be resumed; false, if the target for some
+   reason decided it's best not to resume.  */
+
 static int
 follow_fork (void)
 {
   int follow_child = (follow_fork_mode_string == follow_fork_mode_child);
+  int should_resume = 1;
+  struct thread_info *tp;
 
-  return target_follow_fork (follow_child);
+  /* Copy user stepping state to the new inferior thread.  FIXME: the
+     followed fork child thread should have a copy of most of the
+     parent thread structure's run control related fields, not just
+     these.  */
+  struct breakpoint *step_resume_breakpoint;
+  CORE_ADDR step_range_start;
+  CORE_ADDR step_range_end;
+  struct frame_id step_frame_id;
+
+  if (!non_stop)
+    {
+      ptid_t wait_ptid;
+      struct target_waitstatus wait_status;
+
+      /* Get the last target status returned by target_wait().  */
+      get_last_target_status (&wait_ptid, &wait_status);
+
+      /* If not stopped at a fork event, then there's nothing else to
+	 do.  */
+      if (wait_status.kind != TARGET_WAITKIND_FORKED
+	  && wait_status.kind != TARGET_WAITKIND_VFORKED)
+	return 1;
+
+      /* Check if we switched over from WAIT_PTID, since the event was
+	 reported.  */
+      if (!ptid_equal (wait_ptid, minus_one_ptid)
+	  && !ptid_equal (inferior_ptid, wait_ptid))
+	{
+	  /* We did.  Switch back to WAIT_PTID thread, to tell the
+	     target to follow it (in either direction).  We'll
+	     afterwards refuse to resume, and inform the user what
+	     happened.  */
+	  switch_to_thread (wait_ptid);
+	  should_resume = 0;
+	}
+    }
+
+  tp = inferior_thread ();
+
+  /* If there were any forks/vforks that were caught and are now to be
+     followed, then do so now.  */
+  switch (tp->pending_follow.kind)
+    {
+    case TARGET_WAITKIND_FORKED:
+    case TARGET_WAITKIND_VFORKED:
+      {
+	ptid_t parent, child;
+
+	/* If the user did a next/step, etc, over a fork call,
+	   preserve the stepping state in the fork child.  */
+	if (follow_child && should_resume)
+	  {
+	    step_resume_breakpoint
+	      = clone_momentary_breakpoint (tp->step_resume_breakpoint);
+	    step_range_start = tp->step_range_start;
+	    step_range_end = tp->step_range_end;
+	    step_frame_id = tp->step_frame_id;
+
+	    /* For now, delete the parent's sr breakpoint, otherwise,
+	       parent/child sr breakpoints are considered duplicates,
+	       and the child version will not be installed.  Remove
+	       this when the breakpoints module becomes aware of
+	       inferiors and address spaces.  */
+	    delete_step_resume_breakpoint (tp);
+	    tp->step_range_start = 0;
+	    tp->step_range_end = 0;
+	    tp->step_frame_id = null_frame_id;
+	  }
+
+	parent = inferior_ptid;
+	child = tp->pending_follow.value.related_pid;
+
+	/* Tell the target to do whatever is necessary to follow
+	   either parent or child.  */
+	if (target_follow_fork (follow_child))
+	  {
+	    /* Target refused to follow, or there's some other reason
+	       we shouldn't resume.  */
+	    should_resume = 0;
+	  }
+	else
+	  {
+	    /* This pending follow fork event is now handled, one way
+	       or another.  The previous selected thread may be gone
+	       from the lists by now, but if it is still around, need
+	       to clear the pending follow request.  */
+	    tp = find_thread_pid (parent);
+	    if (tp)
+	      tp->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
+
+	    /* This makes sure we don't try to apply the "Switched
+	       over from WAIT_PID" logic above.  */
+	    nullify_last_target_wait_ptid ();
+
+	    /* If we followed the child, switch to it... */
+	    if (follow_child)
+	      {
+		switch_to_thread (child);
+
+		/* ... and preserve the stepping state, in case the
+		   user was stepping over the fork call.  */
+		if (should_resume)
+		  {
+		    tp = inferior_thread ();
+		    tp->step_resume_breakpoint = step_resume_breakpoint;
+		    tp->step_range_start = step_range_start;
+		    tp->step_range_end = step_range_end;
+		    tp->step_frame_id = step_frame_id;
+		  }
+		else
+		  {
+		    /* If we get here, it was because we're trying to
+		       resume from a fork catchpoint, but, the user
+		       has switched threads away from the thread that
+		       forked.  In that case, the resume command
+		       issued is most likely not applicable to the
+		       child, so just warn, and refuse to resume.  */
+		    warning (_("\
+Not resuming: switched threads before following fork child.\n"));
+		  }
+
+		/* Reset breakpoints in the child as appropriate.  */
+		follow_inferior_reset_breakpoints ();
+	      }
+	    else
+	      switch_to_thread (parent);
+	  }
+      }
+      break;
+    case TARGET_WAITKIND_SPURIOUS:
+      /* Nothing to follow.  */
+      break;
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "Unexpected pending_follow.kind %d\n",
+		      tp->pending_follow.kind);
+      break;
+    }
+
+  return should_resume;
 }
 
 void
@@ -987,8 +1119,6 @@ resume (int step, enum target_signal sig)
 {
   int should_resume = 1;
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
-
-  /* Note that these must be reset if we follow a fork below.  */
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct thread_info *tp = inferior_thread ();
@@ -1057,31 +1187,6 @@ a command like `return' or `jump' to continue execution."));
   /* Do we need to do it the hard way, w/temp breakpoints?  */
   if (step)
     step = maybe_software_singlestep (gdbarch, pc);
-
-  /* If there were any forks/vforks/execs that were caught and are
-     now to be followed, then do so.  */
-  switch (pending_follow.kind)
-    {
-    case TARGET_WAITKIND_FORKED:
-    case TARGET_WAITKIND_VFORKED:
-      pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-      if (follow_fork ())
-	should_resume = 0;
-
-      /* Following a child fork will change our notion of current
-	 thread.  */
-      tp = inferior_thread ();
-      regcache = get_current_regcache ();
-      gdbarch = get_regcache_arch (regcache);
-      pc = regcache_read_pc (regcache);
-      break;
-
-    default:
-      break;
-    }
-
-  /* Install inferior's terminal modes.  */
-  target_terminal_inferior ();
 
   if (should_resume)
     {
@@ -1163,6 +1268,9 @@ a command like `return' or `jump' to continue execution."));
           read_memory (actual_pc, buf, sizeof (buf));
           displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
         }
+
+      /* Install inferior's terminal modes.  */
+      target_terminal_inferior ();
 
       /* Avoid confusing the next resume, if the next stop/resume
 	 happens to apply to another thread.  */
@@ -1305,11 +1413,25 @@ prepare_to_proceed (int step)
 void
 proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 {
-  struct regcache *regcache = get_current_regcache ();
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct regcache *regcache;
+  struct gdbarch *gdbarch;
   struct thread_info *tp;
-  CORE_ADDR pc = regcache_read_pc (regcache);
+  CORE_ADDR pc;
   int oneproc = 0;
+
+  /* If we're stopped at a fork/vfork, follow the branch set by the
+     "set follow-fork-mode" command; otherwise, we'll just proceed
+     resuming the current thread.  */
+  if (!follow_fork ())
+    {
+      /* The target for some reason decided not to resume.  */
+      normal_stop ();
+      return;
+    }
+
+  regcache = get_current_regcache ();
+  gdbarch = get_regcache_arch (regcache);
+  pc = regcache_read_pc (regcache);
 
   if (step > 0)
     step_start_function = find_pc_function (pc);
@@ -1517,9 +1639,6 @@ init_wait_for_inferior (void)
 
   breakpoint_init_inferior (inf_starting);
 
-  /* The first resume is not following a fork/vfork/exec. */
-  pending_follow.kind = TARGET_WAITKIND_SPURIOUS;	/* I.e., none. */
-
   clear_proceed_status ();
 
   stepping_past_singlestep_breakpoint = 0;
@@ -1697,8 +1816,6 @@ infrun_thread_stop_requested (ptid_t ptid)
 
   iterate_over_threads (infrun_thread_stop_requested_callback, &ptid);
 }
-
-void nullify_last_target_wait_ptid (void);
 
 static void
 infrun_thread_thread_exit (struct thread_info *tp, int silent)
@@ -2407,10 +2524,6 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_VFORKED:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_FORKED\n");
-      pending_follow.kind = ecs->ws.kind;
-
-      pending_follow.fork_event.parent_pid = ecs->ptid;
-      pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
 
       if (!ptid_equal (ecs->ptid, inferior_ptid))
 	{
@@ -2439,6 +2552,11 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  detach_breakpoints (child_pid);
 	}
 
+      /* In case the event is caught by a catchpoint, remember that
+	 the event is to be followed at the next resume of the thread,
+	 and not immediately.  */
+      ecs->event_thread->pending_follow = ecs->ws;
+
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
       ecs->event_thread->stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
@@ -2448,8 +2566,19 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* If no catchpoint triggered for this, then keep going.  */
       if (ecs->random_signal)
 	{
+	  int should_resume;
+
 	  ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
-	  keep_going (ecs);
+
+	  should_resume = follow_fork ();
+
+	  ecs->event_thread = inferior_thread ();
+	  ecs->ptid = inferior_ptid;
+
+	  if (should_resume)
+	    keep_going (ecs);
+	  else
+	    stop_stepping (ecs);
 	  return;
 	}
       ecs->event_thread->stop_signal = TARGET_SIGNAL_TRAP;

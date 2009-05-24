@@ -1,3 +1,8 @@
+2009-05-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.threads/fork-thread-pending.c: New.
+	* gdb.threads/fork-thread-pending.exp: New.
+
 2009-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-strp.exp (p a_string2, ptype a_string2): New.

@@ -141,6 +141,28 @@ init_thread_list (void)
   thread_list = NULL;
 }
 
+/* Allocate a new thread with target id PTID and add it to the thread
+   list.  */
+
+static struct thread_info *
+new_thread (ptid_t ptid)
+{
+  struct thread_info *tp;
+
+  tp = xcalloc (1, sizeof (*tp));
+
+  tp->ptid = ptid;
+  tp->num = ++highest_thread_num;
+  tp->next = thread_list;
+  thread_list = tp;
+
+  /* Nothing to follow yet.  */
+  tp->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
+  tp->state_ = THREAD_STOPPED;
+
+  return tp;
+}
+
 struct thread_info *
 add_thread_silent (ptid_t ptid)
 {
@@ -162,12 +184,7 @@ add_thread_silent (ptid_t ptid)
 
       if (ptid_equal (inferior_ptid, ptid))
 	{
-	  tp = xmalloc (sizeof (*tp));
-	  memset (tp, 0, sizeof (*tp));
-	  tp->ptid = minus_one_ptid;
-	  tp->num = ++highest_thread_num;
-	  tp->next = thread_list;
-	  thread_list = tp;
+	  tp = new_thread (ptid);
 
 	  /* Make switch_to_thread not read from the thread.  */
 	  tp->state_ = THREAD_EXITED;
@@ -191,13 +208,7 @@ add_thread_silent (ptid_t ptid)
 	delete_thread (ptid);
     }
 
-  tp = (struct thread_info *) xmalloc (sizeof (*tp));
-  memset (tp, 0, sizeof (*tp));
-  tp->ptid = ptid;
-  tp->num = ++highest_thread_num;
-  tp->next = thread_list;
-  thread_list = tp;
-
+  tp = new_thread (ptid);
   observer_notify_new_thread (tp);
 
   return tp;

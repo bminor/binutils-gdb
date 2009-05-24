@@ -696,6 +696,8 @@ extern struct breakpoint *set_momentary_breakpoint
 extern struct breakpoint *set_momentary_breakpoint_at_pc
   (CORE_ADDR pc, enum bptype type);
 
+extern struct breakpoint *clone_momentary_breakpoint (struct breakpoint *bpkt);
+
 extern void set_ignore_count (int, int, int);
 
 extern void set_default_breakpoint (int, CORE_ADDR, struct symtab *, int);

@@ -46,20 +46,8 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
 {
   pid_t pid, fpid;
   ptrace_state_t pe;
-  struct thread_info *last_tp = NULL;
 
-  /* FIXME: kettenis/20050720: This stuff should really be passed as
-     an argument by our caller.  */
-  {
-    ptid_t ptid;
-    struct target_waitstatus status;
-
-    get_last_target_status (&ptid, &status);
-    gdb_assert (status.kind == TARGET_WAITKIND_FORKED);
-
-    pid = ptid_get_pid (ptid);
-    last_tp = find_thread_pid (ptid);
-  }
+  pid = ptid_get_pid (inferior_ptid);
 
   if (ptrace (PT_GET_PROCESS_STATE, pid,
 	       (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
@@ -70,17 +58,8 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
 
   if (follow_child)
     {
-      /* Copy user stepping state to the new inferior thread.  */
-      struct breakpoint *step_resume_breakpoint = last_tp->step_resume_breakpoint;
-      CORE_ADDR step_range_start = last_tp->step_range_start;
-      CORE_ADDR step_range_end = last_tp->step_range_end;
-      struct frame_id step_frame_id = last_tp->step_frame_id;
       struct inferior *parent_inf, *child_inf;
       struct thread_info *tp;
-
-      /* Otherwise, deleting the parent would get rid of this
-	 breakpoint.  */
-      last_tp->step_resume_breakpoint = NULL;
 
       parent_inf = find_inferior_pid (pid);
 
@@ -102,26 +81,15 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
       /* Delete the parent.  */
       detach_inferior (pid);
 
-      tp = add_thread_silent (inferior_ptid);
-
-      tp->step_resume_breakpoint = step_resume_breakpoint;
-      tp->step_range_start = step_range_start;
-      tp->step_range_end = step_range_end;
-      tp->step_frame_id = step_frame_id;
-
-      /* Reset breakpoints in the child as appropriate.  */
-      follow_inferior_reset_breakpoints ();
+      add_thread_silent (inferior_ptid);
     }
   else
     {
-      inferior_ptid = pid_to_ptid (pid);
-
       /* Breakpoints have already been detached from the child by
 	 infrun.c.  */
 
       if (ptrace (PT_DETACH, fpid, (PTRACE_TYPE_ARG3)1, 0) == -1)
 	perror_with_name (("ptrace"));
-      detach_inferior (pid);
     }
 
   return 0;

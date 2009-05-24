@@ -1456,10 +1456,11 @@ reattach_breakpoints (int pid)
   return 0;
 }
 
+static int internal_breakpoint_number = -1;
+
 static struct breakpoint *
 create_internal_breakpoint (CORE_ADDR address, enum bptype type)
 {
-  static int internal_breakpoint_number = -1;
   struct symtab_and_line sal;
   struct breakpoint *b;
 
@@ -5005,6 +5006,43 @@ set_momentary_breakpoint (struct symtab_and_line sal, struct frame_id frame_id,
   update_global_location_list_nothrow (1);
 
   return b;
+}
+
+/* Make a deep copy of momentary breakpoint ORIG.  Returns NULL if
+   ORIG is NULL.  */
+
+struct breakpoint *
+clone_momentary_breakpoint (struct breakpoint *orig)
+{
+  struct breakpoint *copy;
+
+  /* If there's nothing to clone, then return nothing.  */
+  if (orig == NULL)
+    return NULL;
+
+  copy = set_raw_breakpoint_without_location (orig->type);
+  copy->loc = allocate_bp_location (copy);
+  set_breakpoint_location_function (copy->loc);
+
+  copy->loc->requested_address = orig->loc->requested_address;
+  copy->loc->address = orig->loc->address;
+  copy->loc->section = orig->loc->section;
+
+  if (orig->source_file == NULL)
+    copy->source_file = NULL;
+  else
+    copy->source_file = xstrdup (orig->source_file);
+
+  copy->line_number = orig->line_number;
+  copy->frame_id = orig->frame_id;
+  copy->thread = orig->thread;
+
+  copy->enable_state = bp_enabled;
+  copy->disposition = disp_donttouch;
+  copy->number = internal_breakpoint_number--;
+
+  update_global_location_list_nothrow (0);
+  return copy;
 }
 
 struct breakpoint *

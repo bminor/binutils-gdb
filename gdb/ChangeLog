@@ -1,3 +1,32 @@
+2009-05-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbthread.h (struct thread_info): New `pending_follow' field.
+	* thread.c (new_thread): New function.
+	(add_thread_silent): Use it.
+	* breakpoint.c (internal_breakpoint_number): New global, moved
+	from inside...
+	(create_internal_breakpoint): ... this.
+	(clone_momentary_breakpoint): New.
+	* breakpoint.h (clone_momentary_breakpoint): Declare.
+	* infrun.c (nullify_last_target_wait_ptid): Move declaration
+	higher.
+	(pending_follow): Delete.
+	(follow_fork): Handle pending follow fork event here.  Moved the
+	preserving of thread stepping state here.
+	(resume): Don't handle pending follow fork events here.  Only
+	install the inferior's terminal modes if we're about to resume it.
+	(proceed): Handle possible pending follow fork events here.
+	(init_wait_for_inferior): No need to clear pending_follow anymore,
+	it's gone.
+	(handle_inferior_event): Adjust to per-thread `pending_follow'.
+	Call `follow_fork' to handle following the fork.  If the
+	follow-fork is cancelled, stop stepping.
+	* linux-nat.c (linux_child_follow_fork): Adjust to per-thread
+	`pending_follow' events.  Remove code that handled preserving the
+	thread stepping state.
+	* inf-ptrace.c (inf_ptrace_follow_fork): Ditto.
+	* inf-ttrace.c (inf_ttrace_follow_fork): Ditto.
+
 2009-05-24  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* symfile.c (add_shared_symbol_files_command): Remove

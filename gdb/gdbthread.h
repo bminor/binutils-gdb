@@ -165,6 +165,11 @@ struct thread_info
      next time inferior stops if it stops due to stepping.  */
   int step_multi;
 
+  /* This is used to remember when a fork or vfork event was caught by
+     a catchpoint, and thus the event is to be followed at the next
+     resume of the thread, and not immediately.  */
+  struct target_waitstatus pending_follow;
+
   /* Last signal that the inferior received (why it stopped).  */
   enum target_signal stop_signal;
 
