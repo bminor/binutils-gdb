@@ -1,5 +1,9 @@
 2009-05-24  Pedro Alves  <pedro@codesourcery.com>
 
+	* inflow.c (copy_terminal_info): Deep copy `run_terminal'.
+
+2009-05-24  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdbthread.h (struct thread_info): New `pending_follow' field.
 	* thread.c (new_thread): New function.
 	(add_thread_silent): Use it.

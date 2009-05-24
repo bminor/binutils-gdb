@@ -492,7 +492,8 @@ copy_terminal_info (struct inferior *to, struct inferior *from)
 {
   *to->terminal_info = *from->terminal_info;
   if (from->terminal_info->run_terminal)
-    to->terminal_info->run_terminal = from->terminal_info->run_terminal;
+    to->terminal_info->run_terminal
+      = xstrdup (from->terminal_info->run_terminal);
 }
 
 void
