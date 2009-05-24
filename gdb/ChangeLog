@@ -1,4 +1,4 @@
-2009-05-15  Pierre Muller  <muller@ics.u-strasbg.fr>
+2009-05-24  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* symfile.c (add_shared_symbol_files_command): Remove
 	prototype and function.
