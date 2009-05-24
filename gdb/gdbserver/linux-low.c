@@ -295,29 +295,32 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
       new_lwp = (struct lwp_info *) add_lwp (ptid);
       add_thread (ptid, new_lwp);
 
+      /* Either we're going to immediately resume the new thread
+	 or leave it stopped.  linux_resume_one_lwp is a nop if it
+	 thinks the thread is currently running, so set this first
+	 before calling linux_resume_one_lwp.  */
+      new_lwp->stopped = 1;
+
       /* Normally we will get the pending SIGSTOP.  But in some cases
 	 we might get another signal delivered to the group first.
 	 If we do get another signal, be sure not to lose it.  */
       if (WSTOPSIG (status) == SIGSTOP)
 	{
-	  if (stopping_threads)
-	    new_lwp->stopped = 1;
-	  else
-	    ptrace (PTRACE_CONT, new_pid, 0, 0);
+	  if (! stopping_threads)
+	    linux_resume_one_lwp (new_lwp, 0, 0, NULL);
 	}
       else
 	{
 	  new_lwp->stop_expected = 1;
 	  if (stopping_threads)
 	    {
-	      new_lwp->stopped = 1;
 	      new_lwp->status_pending_p = 1;
 	      new_lwp->status_pending = status;
 	    }
 	  else
 	    /* Pass the signal on.  This is what GDB does - except
 	       shouldn't we really report it instead?  */
-	    ptrace (PTRACE_CONT, new_pid, 0, WSTOPSIG (status));
+	    linux_resume_one_lwp (new_lwp, 0, WSTOPSIG (status), NULL);
 	}
 
       /* Always resume the current thread.  If we are stopping

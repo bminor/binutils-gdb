@@ -1,5 +1,9 @@
 2009-05-24  Doug Evans  <dje@google.com>
 
+	* linux-low.c (handle_extended_wait): Use linux_resume_one_lwp
+	to resume the newly created thread, don't call ptrace (PTRACE_CONT)
+	directly.
+
 	* linux-low.c (get_stop_pc): Print pc if debug_threads.
 	(check_removed_breakpoint, linux_wait_for_lwp): Ditto.
 	(linux_resume_one_lwp): Ditto.
