@@ -1,3 +1,9 @@
+2009-05-25  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms-in: Fix CFLAGS, add addr2line.exe target.
+
+	* configure.com: Fix it: handle alloca and define TARGET in config.h.
+
 2009-05-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

@@ -10,22 +10,16 @@
 # Distribution version, filled in by configure.com
 VERSION=@VERSION@
 
-ifeq ($(ARCH),ALPHA)
-TARGET=""vms-alpha""
-else
-TARGET=""vms-vax""
-endif
-
 ifeq ($(CC),gcc)
+DEFS=
 CFLAGS=/include=([],[-.include],[-.bfd])$(DEFS)
-DEFS=/define=("TARGET=$(TARGET)")
 LIBS=,gnu_cc_library:libgcc/lib,sys$$library:vaxcrtl.olb/lib,gnu_cc_library:crt0.obj
 else
-CFLAGS=/noopt/debug/include=([],[-.include],[-.bfd])$(DEFS)\
-/name=(as_is,shortened)\
-/warnings=disable=(missingreturn,longextern)\
-/prefix=(all,except=("getopt","optarg","optopt","optind","opterr"))
-DEFS=/define=("TARGET=$(TARGET)","const=","unlink=remove")
+DEFS=
+OPT=/noopt/debug
+CFLAGS=$(OPT)/include=([],[-.include],[-.bfd])$(DEFS)\
+ /name=(as_is,shortened)\
+ /prefix=(all,except=("getopt","optarg","optopt","optind","opterr"))
 LIBS=,sys$$library:vaxcrtl.olb/lib
 endif
 
@@ -51,9 +45,11 @@ STRINGSOBJS = $(ADDL_DEPS),strings.obj
 
 NMOBJS = $(ADDL_DEPS),nm.obj
 
+ADDR2LINEOBJS = $(ADDL_DEPS),addr2line.obj
+
 OBJDUMPOBJS = $(ADDL_DEPS),objdump.obj,prdbg.obj,$(DEBUG_OBJS),$(OPCODES_DEP)
 
-all: config.h size.exe strings.exe objdump.exe nm.exe
+all: config.h size.exe strings.exe objdump.exe nm.exe addr2line.exe
 
 size.exe: $(SIZEOBJS)
 	link/exe=$@ size.obj,$(ADDL_LIBS)$(LIBS)
@@ -64,12 +60,11 @@ strings.exe: $(STRINGSOBJS)
 nm.exe: $(NMOBJS)
 	link/exe=$@ nm.obj,$(ADDL_LIBS)$(LIBS)
 
+addr2line.exe: $(ADDR2LINEOBJS)
+	link/exe=$@ addr2line.obj,$(ADDL_LIBS)$(LIBS)
+
 objdump.exe: $(OBJDUMPOBJS)
 	link/exe=$@ objdump.obj,prdbg.obj,$(DEBUG_OBJS),$(BFDLIB),$(OPCODES),$(ADDL_LIBS)$(LIBS)
-
-
-version.obj: version.c
-	$(CC) $(CFLAGS)/define=(VERSION="""$(VERSION)""") $<
 
 config.h:
 	$$ @configure
