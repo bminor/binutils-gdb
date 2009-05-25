@@ -1,3 +1,8 @@
+2009-05-25  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms (OPT): New variable.
+	(CFLAGS): Update compilation flags.
+
 2009-05-22  DJ Delorie  <dj@redhat.com>
 
 	* mep-asm.c: Regenerate.

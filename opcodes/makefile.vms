@@ -21,8 +21,9 @@ DEFS=/define=($(FORMAT))
 CFLAGS=/include=([],[-.include],[-.bfd])$(DEFS)
 else
 DEFS=/define=($(FORMAT))
-CFLAGS=/noopt/debug/include=([],[-.include],[-.bfd])$(DEFS)\
-/name=(as_is,shortened)/warnings=disable=(missingreturn,longextern)
+OPT=/noopt/debug
+CFLAGS=$(OPT)/include=([],[-.include],[-.bfd])$(DEFS)\
+ /name=(as_is,shortened)
 endif
 
 libopcodes.olb: sysdep.h $(OBJS)
