@@ -1,3 +1,7 @@
+2009-05-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* procfs.c (procfs_wait): Add options parameter.
+
 2009-05-24  Doug Evans  <dje@google.com>
 
 	Global renaming of find_thread_pid to find_thread_ptid.

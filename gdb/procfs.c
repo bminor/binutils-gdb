@@ -128,7 +128,7 @@ static void procfs_mourn_inferior (struct target_ops *ops);
 static void procfs_create_inferior (struct target_ops *, char *, 
 				    char *, char **, int);
 static ptid_t procfs_wait (struct target_ops *,
-			   ptid_t, struct target_waitstatus *);
+			   ptid_t, struct target_waitstatus *, int);
 static int procfs_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			       struct mem_attrib *attrib,
 			       struct target_ops *);
@@ -3947,7 +3947,7 @@ syscall_is_lwp_create (procinfo *pi, int scall)
 
 static ptid_t
 procfs_wait (struct target_ops *ops,
-	     ptid_t ptid, struct target_waitstatus *status)
+	     ptid_t ptid, struct target_waitstatus *status, int options)
 {
   /* First cut: loosely based on original version 2.1 */
   procinfo *pi;
