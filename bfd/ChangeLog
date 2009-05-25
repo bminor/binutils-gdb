@@ -1,3 +1,7 @@
+2009-05-25  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms: Add verilog.obj to object list OBJS.
+
 2009-05-24  Alan Modra  <amodra@bigpond.net.au>
 
        * bfdio.c (bfd_seek): Formatting.  Ensure newly allocated memory
