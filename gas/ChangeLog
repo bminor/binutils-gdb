@@ -1,4 +1,4 @@
-2009-05-05  Tristan Gingold  <gingold@adacore.com>
+2009-05-25  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms: New file to compile gas on VMS.
 
