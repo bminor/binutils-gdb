@@ -1,3 +1,13 @@
+2009-05-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* dep-in.sed: Don't modify .o to .lo here.  Output one filename
+	per line with all lines having continuation backslash.  Prefix
+	first line with "A", following lines with "B".
+	* Makefile.am (DEP): Don't use dep.sed here.
+	(DEP1): Run $MKDEP on single files, modify .o to .lo here.  Use
+	dep.sed here on dependencies, sort and uniq.
+	* Makefile.in: Regenerate.
+
 2009-05-25  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms: Add verilog.obj to object list OBJS.
