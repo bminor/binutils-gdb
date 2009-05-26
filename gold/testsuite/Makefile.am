@@ -1055,18 +1055,23 @@ check_PROGRAMS += exclude_libs_test
 check_SCRIPTS += exclude_libs_test.sh
 check_DATA += exclude_libs_test.syms
 MOSTLYCLEANFILES += exclude_libs_test.syms libexclude_libs_test_1.a \
-        libexclude_libs_test_2.a
+        libexclude_libs_test_2.a alt/libexclude_libs_test_3.a
 exclude_libs_test_SOURCES = exclude_libs_test.c
 exclude_libs_test_DEPENDENCIES = gcctestdir/ld libexclude_libs_test_1.a \
-	libexclude_libs_test_2.a
-exclude_libs_test_LDFLAGS = -Bgcctestdir/ -L. \
-	-Wl,--exclude-libs,dummy:libexclude_libs_test_1
-exclude_libs_test_LDADD = -lexclude_libs_test_1 -lexclude_libs_test_2
+	libexclude_libs_test_2.a alt/libexclude_libs_test_3.a
+exclude_libs_test_LDFLAGS = -Bgcctestdir/ -L. -Lalt \
+	-Wl,--exclude-libs,dummy:libexclude_libs_test_1 \
+	-Wl,--exclude-libs,libexclude_libs_test_3
+exclude_libs_test_LDADD = -lexclude_libs_test_1 -lexclude_libs_test_2 \
+	alt/libexclude_libs_test_3.a
 exclude_libs_test.syms: exclude_libs_test
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 libexclude_libs_test_1.a: exclude_libs_test_1.o
 	$(TEST_AR) rc $@ $^
 libexclude_libs_test_2.a: exclude_libs_test_2.o
+	$(TEST_AR) rc $@ $^
+alt/libexclude_libs_test_3.a: exclude_libs_test_3.o
+	test -d alt || mkdir -p alt
 	$(TEST_AR) rc $@ $^
 
 endif GCC

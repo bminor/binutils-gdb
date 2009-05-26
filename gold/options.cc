@@ -403,7 +403,7 @@ General_options::parse_end_group(const char*, const char*,
 }
 
 // The function add_excluded_libs() in ld/ldlang.c of GNU ld breaks up a list
-// of names seperated by commas or semi-colons and puts them in a linked list.
+// of names seperated by commas or colons and puts them in a linked list.
 // We implement the same parsing of names here but store names in an unordered
 // map to speed up searching of names.
 
@@ -444,18 +444,21 @@ General_options::check_excluded_libs (const std::string &name) const
   if (p != excluded_libs_.end())
     return true;
 
+  // First strip off any directories in name.
+  const char *basename = lbasename(name.c_str());
+
   // Try finding an exact match.
-  p = excluded_libs_.find(name);
+  p = excluded_libs_.find(std::string(basename));
   if (p != excluded_libs_.end())
     return true;
 
   // Try matching NAME without ".a" at the end.
-  size_t length = name.length();
+  size_t length = strlen(basename);
   if ((length >= 2)
-      && (name[length-2] == '.')
-      && (name[length-1] == 'a'))
+      && (basename[length - 2] == '.')
+      && (basename[length - 1] == 'a'))
     {
-      p = excluded_libs_.find(name.substr(0, length - 2));
+      p = excluded_libs_.find(std::string(basename, length - 2));
       if (p != excluded_libs_.end())
 	return true;
     }

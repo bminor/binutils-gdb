@@ -55,5 +55,9 @@ check "exclude_libs_test.syms" "lib2_default" "DEFAULT"
 check "exclude_libs_test.syms" "lib2_protected" "PROTECTED"
 check "exclude_libs_test.syms" "lib2_internal" "INTERNAL"
 check "exclude_libs_test.syms" "lib2_hidden" "HIDDEN"
+check "exclude_libs_test.syms" "lib3_default" "HIDDEN"
+check "exclude_libs_test.syms" "lib3_protected" "HIDDEN"
+check "exclude_libs_test.syms" "lib3_internal" "INTERNAL"
+check "exclude_libs_test.syms" "lib3_hidden" "HIDDEN"
 
 exit 0
