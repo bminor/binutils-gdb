@@ -4498,7 +4498,9 @@ lang_check_section_addresses (void)
   for (s = link_info.output_bfd->sections; s != NULL; s = s->next)
     {
       /* Only consider loadable sections with real contents.  */
-      if ((s->flags & SEC_NEVER_LOAD) || !(s->flags & SEC_LOAD)
+      if ((s->flags & SEC_NEVER_LOAD)
+	  || !(s->flags & SEC_LOAD)
+	  || !(s->flags & SEC_ALLOC)
 	  || s->size == 0)
 	continue;
 

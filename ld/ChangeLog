@@ -1,3 +1,7 @@
+2009-05-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_check_section_addresses): Ignore non-alloc sections.
+
 2009-05-22  Julian Brown  <julian@codesourcery.com>
 
 	* emultempl/armelf.em (fix_cortex_a8): New.
