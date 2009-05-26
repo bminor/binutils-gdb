@@ -169,13 +169,13 @@ int yyerror (char *msg);
 void error (char *format, ...)
 {
     va_list ap;
-    char buffer[2000];
+    static char buffer[2000];
     
     va_start (ap, format);
     vsprintf (buffer, format, ap);
     va_end (ap);
 
-    as_bad (buffer);
+    as_bad ("%s", buffer);
 }
 
 int

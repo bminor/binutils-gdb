@@ -1,3 +1,9 @@
+2009-05-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 10143
+	* config/bfin-parse.y (error): Use "%s" as format string for error
+	message.
+
 2009-05-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Output one filename per line with all lines having
