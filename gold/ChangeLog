@@ -1,3 +1,8 @@
+2009-05-26  Nick Clifton  <nickc@redhat.com>
+
+	* po/id.po: New Indonesian translation.
+	* po/gold.pot: Updated template file.
+
 2009-05-22  Sriraman Tallam  <tmsriram@google.com>
 
 	* testsuite/Makefile.am: Add -ffunction-sections to compile 

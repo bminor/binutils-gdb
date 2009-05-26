@@ -2,14 +2,14 @@
 # Copyright (C) 2002 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
 # Tedi Heriyanto <tedi_h@gmx.net>, 2002.
-# Arif E. Nugroho <arif_endro@yahoo.com>, 2008.
+# Arif E. Nugroho <arif_endro@yahoo.com>, 2008, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.18.90\n"
+"Project-Id-Version: gprof 2.19.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2008-09-09 15:56+0930\n"
-"PO-Revision-Date: 2008-12-31 07:30+0700\n"
+"PO-Revision-Date: 2009-05-26 08:00+0700\n"
 "Last-Translator: Arif E. Nugroho <arif_endro@yahoo.com>\n"
 "Language-Team: Indonesian <translation-team-id@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -142,7 +142,7 @@ msgid ""
 "granularity: each sample hit covers %ld byte(s)"
 msgstr ""
 "\n"
-"granularitas: setiap sampel mencapai %ld byte(s)"
+"granularitas: setiap contoh mencapai %ld byte(s)"
 
 #: cg_print.c:82
 #, c-format
@@ -513,7 +513,7 @@ msgid ""
 "Each sample counts as %g %s.\n"
 msgstr ""
 "\n"
-"Setiap sampel dihitung sebagai %g %s.\n"
+"Setiap contoh dihitung sebagai %g %s.\n"
 
 #: hist.c:481
 #, c-format
@@ -555,12 +555,12 @@ msgstr ""
 "\n"
 "\n"
 "\n"
-"profil flat:\n"
+"profil rata:\n"
 
 #: hist.c:586
 #, c-format
 msgid "Flat profile:\n"
-msgstr "Profil flat:\n"
+msgstr "Profil rata:\n"
 
 #: hist.c:705
 #, c-format

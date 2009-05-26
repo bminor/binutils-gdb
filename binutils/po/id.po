@@ -1,14 +1,14 @@
 # Pesan Bahasa Indonesia untuk binutils
 # Copyright (C) 2008 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Arif E. Nugroho <arif_endro@yahoo.com>, 2008.
+# Arif E. Nugroho <arif_endro@yahoo.com>, 2008,2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: binutils 2.18.90\n"
+"Project-Id-Version: binutils 2.19.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2008-09-09 15:56+0930\n"
-"PO-Revision-Date: 2008-10-21 17:45+0700\n"
+"PO-Revision-Date: 2009-05-26 08:00+0700\n"
 "Last-Translator: Arif E. Nugroho <arif_endro@yahoo.com>\n"
 "Language-Team: Indonesian <translation-team-id@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -18,7 +18,7 @@ msgstr ""
 #: addr2line.c:76
 #, c-format
 msgid "Usage: %s [option(s)] [addr(s)]\n"
-msgstr "Penggunaan: %s [opsi] [alamat]\n"
+msgstr "Penggunaan: %s [pilihan] [alamat]\n"
 
 #: addr2line.c:77
 #, c-format
@@ -46,8 +46,8 @@ msgid ""
 "  -v --version           Display the program's version\n"
 "\n"
 msgstr ""
-" Opsi adalah:\n"
-"  @<berkas>              Baca opsi dari <berkas>\n"
+" Pilihan adalah:\n"
+"  @<berkas>              Baca pilihan dari <berkas>\n"
 "  -b --target=<bfdname>  Set format berkas binary\n"
 "  -e --exe=executable>   Set nama berkas masukan (baku a.out)\n"
 "  -i --inlines           Buka fungsi inline\n"
@@ -89,7 +89,7 @@ msgstr "tidak ada masukan %s dalam archive\n"
 #: ar.c:228
 #, c-format
 msgid "Usage: %s [emulation options] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n"
-msgstr "Penggunaan: %s [opsi emulasi] [-]{dmpqrstx}[abcfilNoPsSuvV] [nama-anggota] [jumlah] berkas-archive berkas...\n"
+msgstr "Penggunaan: %s [pilihan emulasi] [-]{dmpqrstx}[abcfilNoPsSuvV] [nama-anggota] [jumlah] berkas-archive berkas...\n"
 
 #: ar.c:231
 #, c-format
@@ -214,12 +214,12 @@ msgstr "  [V]          - tampilkan nomor versi\n"
 #: ar.c:255
 #, c-format
 msgid "  @<file>      - read options from <file>\n"
-msgstr "  @<berkas>    - baca opsi dari <berkas>\n"
+msgstr "  @<berkas>    - baca pilihan dari <berkas>\n"
 
 #: ar.c:262
 #, c-format
 msgid "Usage: %s [options] archive\n"
-msgstr "Penggunaan: %s [opsi] archive\n"
+msgstr "Penggunaan: %s [pilihan] archive\n"
 
 #: ar.c:263
 #, c-format
@@ -235,20 +235,20 @@ msgid ""
 "  -h --help                    Print this help message\n"
 "  -v --version                 Print version information\n"
 msgstr ""
-" Opsi adalah:\n"
-"  @<berkas>                    Baca opsi dari <berkas>\n"
+" Pilihan adalah:\n"
+"  @<berkas>                    Baca pilihan dari <berkas>\n"
 "  -t                           Update archive peta simbol tanda-waktu\n"
 "  -h --help                    Tampilkan pesan bantuan ini\n"
 "  -v --version                 Tampilkan informasi versi\n"
 
 #: ar.c:499
 msgid "two different operation options specified"
-msgstr "dua opsi operasi berbeda dispesifikasikan"
+msgstr "dua pilihan operasi berbeda dispesifikasikan"
 
 #: ar.c:577
 #, c-format
 msgid "illegal option -- %c"
-msgstr "opsi tidak legal -- %c"
+msgstr "pilihan tidak legal -- %c"
 
 #: ar.c:620
 msgid "no operation specified"
@@ -256,11 +256,11 @@ msgstr "tidak ada operasi yang dispesifikasikan"
 
 #: ar.c:623
 msgid "`u' is only meaningful with the `r' option."
-msgstr "`u' hanya berarti dengan opsi `r'."
+msgstr "`u' hanya berarti dengan pilihan `r'."
 
 #: ar.c:631
 msgid "`N' is only meaningful with the `x' and `d' options."
-msgstr "`N' hanya berarti dengan opsi `x' dan `d'."
+msgstr "`N' hanya berarti dengan pilihan `x' dan `d'."
 
 #: ar.c:634
 msgid "Value for `N' must be positive."
@@ -273,7 +273,7 @@ msgstr "`x' tidak dapat digunakan dalam archive tipis."
 #: ar.c:687
 #, c-format
 msgid "internal error -- this option not implemented"
-msgstr "internal error -- opsi ini tidak terimplementasi"
+msgstr "internal error -- pilihan ini tidak terimplementasi"
 
 #: ar.c:756
 #, c-format
@@ -384,13 +384,13 @@ msgstr "Tampilkan bytes dari stdin dalam format hex.\n"
 #: binemul.c:38
 #, c-format
 msgid "  No emulation specific options\n"
-msgstr "  Tidak ada opsi spesifik emulasi\n"
+msgstr "  Tidak ada pilihan spesifik emulasi\n"
 
 #. Macros for common output.
 #: binemul.h:43
 #, c-format
 msgid " emulation options: \n"
-msgstr " opsi emulasi: \n"
+msgstr " pilihan emulasi: \n"
 
 #: bucomm.c:157
 #, c-format
@@ -455,7 +455,7 @@ msgstr "#baris %d "
 #: coffdump.c:460 sysdump.c:647
 #, c-format
 msgid "Usage: %s [option(s)] in-file\n"
-msgstr "Penggunaan: %s [opsi[ in-berkas\n"
+msgstr "Penggunaan: %s [pilihan] in-berkas\n"
 
 #: coffdump.c:461
 #, c-format
@@ -471,8 +471,8 @@ msgid ""
 "  -v --version           Display the program's version\n"
 "\n"
 msgstr ""
-" Opsi adalah:\n"
-"  @<berkas>              Baca opsi dari <berkas>\n"
+" Pilihan adalah:\n"
+"  @<berkas>              Baca pilihan dari <berkas>\n"
 "  -h --help              Tampilkan informasi ini\n"
 "  -v --version           Tampilkan versi aplikasi\n"
 "\n"
@@ -761,7 +761,7 @@ msgstr "Definisi telah terproses"
 #: dlltool.c:3136 dllwrap.c:471
 #, c-format
 msgid "Usage %s <option(s)> <object-file(s)>\n"
-msgstr "Penggunaan %s <opsi> <berkas-objek>\n"
+msgstr "Penggunaan %s <pilihan> <berkas-objek>\n"
 
 #. xgetext:c-format
 #: dlltool.c:3138
@@ -907,7 +907,7 @@ msgstr "   -h --help                 Tampilkan informasi ini.\n"
 #: dlltool.c:3166
 #, c-format
 msgid "   @<file>                   Read options from <file>.\n"
-msgstr "   @<berkas>                 Baca opsi dari <berkas>.\n"
+msgstr "   @<berkas>                 Baca pilihan dari <berkas>.\n"
 
 #: dlltool.c:3168
 #, c-format
@@ -982,12 +982,12 @@ msgstr "Menghapus berkas de sementara %s"
 #: dllwrap.c:472
 #, c-format
 msgid "  Generic options:\n"
-msgstr "  Opsi umum:\n"
+msgstr "  Pilihan umum:\n"
 
 #: dllwrap.c:473
 #, c-format
 msgid "   @<file>                Read options from <file>\n"
-msgstr "   @<berkas>              Baca opsi dari <berkas>\n"
+msgstr "   @<berkas>              Baca pilihan dari <berkas>\n"
 
 #: dllwrap.c:474
 #, c-format
@@ -1012,7 +1012,7 @@ msgstr "   --implib <outname>     Sinonim untuk --output-lib\n"
 #: dllwrap.c:478
 #, c-format
 msgid "  Options for %s:\n"
-msgstr "  Opsi untuk %s:\n"
+msgstr "  Pilihan untuk %s:\n"
 
 #: dllwrap.c:479
 #, c-format
@@ -1057,7 +1057,7 @@ msgstr "   --mno-cygwin           Buat Mingw DLL\n"
 #: dllwrap.c:487
 #, c-format
 msgid "  Options passed to DLLTOOL:\n"
-msgstr "  Opsi dilewatkan ke DLLTOOL:\n"
+msgstr "  Pilihan dilewatkan ke DLLTOOL:\n"
 
 #: dllwrap.c:488
 #, c-format
@@ -1161,7 +1161,7 @@ msgstr "  Sisanya dilewatkan tidak termodifikasi ke driver bahasa\n"
 
 #: dllwrap.c:781
 msgid "Must provide at least one of -o or --dllname options"
-msgstr "Harus menyediakan paling tidak satu dari opsi -o atau --dllname"
+msgstr "Harus menyediakan paling tidak satu dari pilihan -o atau --dllname"
 
 #: dllwrap.c:810
 msgid ""
@@ -1179,7 +1179,7 @@ msgstr "nama DLLTOOL    : %s\n"
 #: dllwrap.c:970
 #, c-format
 msgid "DLLTOOL options : %s\n"
-msgstr "opsi DLLTOOL    : %s\n"
+msgstr "pilihan DLLTOOL    : %s\n"
 
 #: dllwrap.c:971
 #, c-format
@@ -1189,7 +1189,7 @@ msgstr "nama DRIVER     : %s\n"
 #: dllwrap.c:972
 #, c-format
 msgid "DRIVER options  : %s\n"
-msgstr "opsi DRIVER     : %s\n"
+msgstr "pilihan DRIVER     : %s\n"
 
 #: dwarf.c:98 dwarf.c:142 readelf.c:370 readelf.c:526
 #, c-format
@@ -2388,7 +2388,7 @@ msgstr "peringatan: FULLMAP tidak didukung: coba ld -M"
 #: nlmconv.c:1100
 #, c-format
 msgid "Usage: %s [option(s)] [in-file [out-file]]\n"
-msgstr "Penggunaan: %s [opsi] [berkas-masuk [berkas-keluar]]\n"
+msgstr "Penggunaan: %s [pilihan] [berkas-masuk [berkas-keluar]]\n"
 
 #: nlmconv.c:1101
 #, c-format
@@ -2408,13 +2408,13 @@ msgid ""
 "  -h --help                     Display this information\n"
 "  -v --version                  Display the program's version\n"
 msgstr ""
-" Opsi adalah:\n"
+" Pilihan adalah:\n"
 "  -I --input-target=<bfdname>   Set format berkas masukan binari\n"
 "  -O --output-target=<bfdname>  Set format berkas keluaran binari\n"
 "  -T --header-file=<file>       Baca <berkas> untuk informasi header NLM\n"
 "  -l --linker=<linker>          Gunakan <linker> untuk linking apapun\n"
 "  -d --debug                    Tampilkan di stderr baris perintah linker\n"
-"  @<berkas>                     Baca opsi dari <berkas>.\n"
+"  @<berkas>                     Baca pilihan dari <berkas>.\n"
 "  -h --help                     Tampilkan informasi ini\n"
 "  -v --version                  Tampilkan versi aplikasi\n"
 
@@ -2478,7 +2478,7 @@ msgstr "Eksekusi dari %s gagal"
 #: nm.c:217 size.c:78 strings.c:647
 #, c-format
 msgid "Usage: %s [option(s)] [file(s)]\n"
-msgstr "Penggunaan: %s [opsi] [berkas]\n"
+msgstr "Penggunaan: %s [pilihan] [berkas]\n"
 
 #: nm.c:218
 #, c-format
@@ -2524,7 +2524,7 @@ msgid ""
 "  -V, --version          Display this program's version number\n"
 "\n"
 msgstr ""
-" Opsi adalah:\n"
+" Pilihan adalah:\n"
 "  -a, --debug-syms       Tampilkan debugger-only simbol\n"
 "  -A, --print-file-name  Tampilkan nama dari berkas masukan sebelum setiap simbol\n"
 "  -B                     Sama seperti --format=bsd\n"
@@ -2555,7 +2555,7 @@ msgstr ""
 "      --target=BFDNAME   Spesifikasikan format objek target sebagai BFDNAME\n"
 "  -u, --undefined-only   Tampilkan hanya simbol tidak terdefinisi\n"
 "  -X 32_64               (diabaikan)\n"
-"  @BERKAS                Baca opsi dari BERKAS\n"
+"  @BERKAS                Baca pilihan dari BERKAS\n"
 "  -h, --help             Tampilkan informasi ini\n"
 "  -V, --version          Tampilkan nomor versi aplikasi ini\n"
 "\n"
@@ -2675,7 +2675,7 @@ msgstr "Hanya -X 32_64 yang didukung"
 
 #: nm.c:1623
 msgid "Using the --size-sort and --undefined-only options together"
-msgstr "Gunakan --size-sort dan --undefined-only opsi secara bersamaan"
+msgstr "Gunakan --size-sort dan --undefined-only pilihan secara bersamaan"
 
 #: nm.c:1624
 msgid "will produce no output, since undefined symbols have no size."
@@ -2689,7 +2689,7 @@ msgstr "ukuran data %ld"
 #: objcopy.c:424 srconv.c:1730
 #, c-format
 msgid "Usage: %s [option(s)] in-file [out-file]\n"
-msgstr "Penggunaan: %s [opsi] berkas-masukan [berkas-keluaran]\n"
+msgstr "Penggunaan: %s [pilihan] berkas-masukan [berkas-keluaran]\n"
 
 #: objcopy.c:425
 #, c-format
@@ -2699,7 +2699,7 @@ msgstr " Menyalin sebuah berkas binari, kemungkinan mengubahnya dalam proses ini
 #: objcopy.c:426 objcopy.c:522
 #, c-format
 msgid " The options are:\n"
-msgstr " Opsi adalah:\n"
+msgstr " Pilihan adalah:\n"
 
 #: objcopy.c:427
 #, c-format
@@ -2864,7 +2864,7 @@ msgstr ""
 "                                   Tambahkan <awalan> ke awal dari setiap alokasi\n"
 "                                   nama bagian\n"
 "  -v --verbose                     Daftar seluruh berkas objek termodifikasi\n"
-"  @<berkas>                        Baca opsi dari <berkas>\n"
+"  @<berkas>                        Baca pilihan dari <berkas>\n"
 "  -V --version                     Tampilkan nomor versi aplikasi ini\n"
 "  -h --help                        Tampilkan keluaran ini\n"
 "     --info                        Daftar objek format dan arsitektur yang didukung\n"
@@ -2872,7 +2872,7 @@ msgstr ""
 #: objcopy.c:520
 #, c-format
 msgid "Usage: %s <option(s)> in-file(s)\n"
-msgstr "Penggunaan: %s <opsi> berkas-masukan\n"
+msgstr "Penggunaan: %s <pilihan> berkas-masukan\n"
 
 #: objcopy.c:521
 #, c-format
@@ -3201,7 +3201,7 @@ msgstr "%s %s%c0x%s tidak pernah digunakan"
 #: objdump.c:182
 #, c-format
 msgid "Usage: %s <option(s)> <file(s)>\n"
-msgstr "Penggunaan: %s <opsi> <berkas>\n"
+msgstr "Penggunaan: %s <pilihan> <berkas>\n"
 
 #: objdump.c:183
 #, c-format
@@ -3255,7 +3255,7 @@ msgstr ""
 "  -T, --dynamic-syms       Tampilkan isi dari tabel simbol dinamis\n"
 "  -r, --reloc              Tampilkan masukan relokasi dalam berkas\n"
 "  -R, --dynamic-reloc      Tampilkan masukan relokasi dinamis dalam berkas\n"
-"  @<berkas>                Baca opsi dari <berkas>\n"
+"  @<berkas>                Baca pilihan dari <berkas>\n"
 "  -v, --version            Tampilkan nomor versi aplikasi ini\n"
 "  -i, --info               Daftar format dan arsitektur objek yang didukung\n"
 "  -H, --help               Tampilkan informasi ini\n"
@@ -3488,7 +3488,7 @@ msgstr "error: stop alamat seharusnya setelah awal alamat"
 
 #: objdump.c:3252
 msgid "unrecognized -E option"
-msgstr "opsi -E tidak dikenal"
+msgstr "pilihan -E tidak dikenal"
 
 #: objdump.c:3263
 #, c-format
@@ -3700,7 +3700,7 @@ msgstr "<tidak dikenal: %x>"
 #: readelf.c:2826
 #, c-format
 msgid "Usage: readelf <option(s)> elf-file(s)\n"
-msgstr "Penggunaan: readelf <opsi> berkas-elf\n"
+msgstr "Penggunaan: readelf <pilihan> berkas-elf\n"
 
 #: readelf.c:2827
 #, c-format
@@ -3738,7 +3738,7 @@ msgid ""
 "  --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n"
 "                         Display the contents of DWARF2 debug sections\n"
 msgstr ""
-" Opsi adalah:\n"
+" Pilihan adalah:\n"
 "  -a --all               Sama dengan: -h -l -S -s -r -d -V -A -I\n"
 "  -h --file-header       Tampilkan ELF file header\n"
 "  -l --program-headers   Tampilkan program header\n"
@@ -3786,7 +3786,7 @@ msgid ""
 msgstr ""
 "  -I --histogram         Tampilkan histogram dari daftar panjang bucket\n"
 "  -W --wide              Ijinkan lebar keluaran untuk melebihi 80 karakter\n"
-"  @<berkas>              Baca opsi dari <berkas>\n"
+"  @<berkas>              Baca pilihan dari <berkas>\n"
 "  -H --help              Tampilkan informasi ini\n"
 "  -v --version           Tampilkan nomor versi dari readelf\n"
 
@@ -3797,12 +3797,12 @@ msgstr "Kehabisan memori mengalokasikan permintaan dump tabel.\n"
 #: readelf.c:3090 readelf.c:3160
 #, c-format
 msgid "Unrecognized debug option '%s'\n"
-msgstr "Opsi debug '%s' tidak dikenal\n"
+msgstr "Pilihan debug '%s' tidak dikenal\n"
 
 #: readelf.c:3191
 #, c-format
 msgid "Invalid option '-%c'\n"
-msgstr "Opsi tidak valid '-%c'\n"
+msgstr "Pilihan tidak valid '-%c'\n"
 
 #: readelf.c:3205
 msgid "Nothing to do.\n"
@@ -4897,7 +4897,7 @@ msgstr "liblist"
 
 #: readelf.c:9469
 msgid "options"
-msgstr "opsi"
+msgstr "pilihan"
 
 #: readelf.c:9499
 #, c-format
@@ -5751,13 +5751,13 @@ msgid ""
 "  -v        --version                 Display the program's version\n"
 "\n"
 msgstr ""
-" Opsi adalah:\n"
+" Pilihan adalah:\n"
 "  -A|-B     --format={sysv|berkeley}  Pilih gaya keluaran (baku adalah %s)\n"
 "  -o|-d|-x  --radix={8|10|16}         Tampilkan nomor dalam oktal, desimal atau heksadesimal\n"
 "  -t        --totals                  Tampilkan jumlah total (Berkeley saja)\n"
 "            --common                  Tampilkan jumlah total untuk *COM* syms\n"
 "            --target=<bfdname>        Set format berkas binari\n"
-"            @<berkas>                 Baca opsi dari <berkas>\n"
+"            @<berkas>                 Baca pilihan dari <berkas>\n"
 "  -h        --help                    Tampilkan informasi ini\n"
 "  -v        --version                 Tampilkan versi aplikasi\n"
 "\n"
@@ -5788,11 +5788,11 @@ msgid ""
 "  -h --help        Display this information\n"
 "  -v --version     Print the program's version number\n"
 msgstr ""
-" Opsi adalah:\n"
+" Pilihan adalah:\n"
 "  -q --quick       (Kadaluarsaa - diabaikan)\n"
 "  -n --noprescan   Jangan lakukan sebuah scan untuk mengubah common menjadi def\n"
 "  -d --debug       Tampilkan informasi mengenai apa yang sedang dikerjakan\n"
-"  @<berkas>        Baca opsi dari <berkas>\n"
+"  @<berkas>        Baca pilihan dari <berkas>\n"
 "  -h --help        Tampilkan informasi ini\n"
 "  -v --version     Tampilkan nomor versi aplikasi\n"
 
@@ -5961,7 +5961,7 @@ msgid ""
 "  -h --help                 Display this information\n"
 "  -v --version              Print the program's version number\n"
 msgstr ""
-" Opsi adalah:\n"
+" Pilihan adalah:\n"
 " -a --all                   Periksa seluruh berkas, tidak hanya daerah data\n"
 " -f --print-file-name       Tampilkan nama dari berkas sebelum setiap string\n"
 " -n --bytes=[nomor]         Lokasikan dan tampilkan urutan NUL-terakhiri apapun dari di\n"
@@ -5971,7 +5971,7 @@ msgstr ""
 " -T --target=<BFDNAME>      Spesifikasikan format berkas binari\n"
 " -e --encoding={s,S,b,l,B,L} Pilih ukuran karakter dan tipe endian:\n"
 "                            s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n"
-" @<berkas>                  Baca opsi dari <berkas>\n"
+" @<berkas>                  Baca pilihan dari <berkas>\n"
 " -h --help                  Tampilkan informasi ini\n"
 " -v --version               Tampilkan nomor versi aplikasi\n"
 
@@ -5987,7 +5987,7 @@ msgid ""
 "  -h --help        Display this information\n"
 "  -v --version     Print the program's version number\n"
 msgstr ""
-" Opsi adalah:\n"
+" Pilihan adalah:\n"
 "  -h --help        Tampilkan informasi ini\n"
 "  -v --version     Tampilkan nomor versi aplikasi\n"
 
@@ -6009,7 +6009,7 @@ msgid ""
 "This program has absolutely no warranty.\n"
 msgstr ""
 "Aplikasi ini adalah software bebas; anda boleh meredistribusikannya dibawah ijin dari\n"
-"Lisensi GNU General Public  versi 3 atau (menurut opsi anda) mungkin versi selanjutnya.\n"
+"Lisensi GNU General Public  versi 3 atau (menurut pilihan anda) mungkin versi selanjutnya.\n"
 "Aplikasi ini tidak memiliki garansi apapun.\n"
 
 #: windmc.c:195
@@ -6020,7 +6020,7 @@ msgstr "tidak dapat membuat berkas %s, %s' untuk keluaran.\n"
 #: windmc.c:203
 #, c-format
 msgid "Usage: %s [option(s)] [input-file]\n"
-msgstr "Penggunaan: %s [opsi] [berkas-masukan]\n"
+msgstr "Penggunaan: %s [pilihan] [berkas-masukan]\n"
 
 #: windmc.c:205
 #, c-format
@@ -6045,7 +6045,7 @@ msgid ""
 "  -x --xdbg=<directory>        Where to create the .dbg C include file\n"
 "                               that maps message ID's to their symbolic name.\n"
 msgstr ""
-" Opsi adalah:\n"
+" Pilihan adalah:\n"
 "  -a --ascii_in                Baca berkas masukan sebagai berkas ASCII\n"
 "  -A --ascii_out               Tulis pesan binari sebagai ASCII\n"
 "  -b --binprefix               nama berkas .bin diawali sebagai nama berkas .mc supaya unik.\n"
@@ -6138,12 +6138,12 @@ msgstr "%s: format yang didukung:"
 #: windres.c:651
 #, c-format
 msgid "can not determine type of file `%s'; use the -J option"
-msgstr "tidak dapat menentukan tipe dari berkas `%s'; gunakan opsi -J"
+msgstr "tidak dapat menentukan tipe dari berkas `%s'; gunakan pilihan -J"
 
 #: windres.c:663
 #, c-format
 msgid "Usage: %s [option(s)] [input-file] [output-file]\n"
-msgstr "Penggunaan: %s [opsi] [berkas-masukan] [berkas-keluaran]\n"
+msgstr "Penggunaan: %s [pilihan] [berkas-masukan] [berkas-keluaran]\n"
 
 #: windres.c:665
 #, c-format
@@ -6165,7 +6165,7 @@ msgid ""
 "                               the preprocessor output\n"
 "     --no-use-temp-file        Use popen (default)\n"
 msgstr ""
-" Opsi adalah:\n"
+" Pilihan adalah:\n"
 "  -i --input=<berkas>          Nama berkas masukan\n"
 "  -o --output=<berkas>         Nama berkas keluaran\n"
 "  -J --input-format=<format>   Spesifikasikan format masukan\n"
@@ -6196,7 +6196,7 @@ msgid ""
 "  -V --version                 Print version information\n"
 msgstr ""
 "  -r                           Mengabaikan untuk kompabilitas dengan rc\n"
-"  @<berkas>                    Baca opsi dari <berkas>\n"
+"  @<berkas>                    Baca pilihan dari <berkas>\n"
 "  -h --help                    Tampilkan pesan bantuan ini\n"
 "  -V --version                 Tampilkan informasi versi\n"
 
@@ -6217,16 +6217,16 @@ msgstr "kode halaman yang dispesifikasikan tidak valid.\n"
 
 #: windres.c:863
 msgid "invalid option -f\n"
-msgstr "opsi -f tidak valid\n"
+msgstr "pilihan -f tidak valid\n"
 
 #: windres.c:868
 msgid "No filename following the -fo option.\n"
-msgstr "Tidak ada nama berkas yang mengikuti opsi -fo.\n"
+msgstr "Tidak ada nama berkas yang mengikuti pilihan -fo.\n"
 
 #: windres.c:927
 #, c-format
 msgid "Option -I is deprecated for setting the input format, please use -J instead.\n"
-msgstr "Opsi -I kadaluarsa untuk konfigurasi format masukan, tolong gunakan -J lebih baik.\n"
+msgstr "Pilihan -I kadaluarsa untuk konfigurasi format masukan, tolong gunakan -J lebih baik.\n"
 
 #: windres.c:1037
 msgid "no resources"

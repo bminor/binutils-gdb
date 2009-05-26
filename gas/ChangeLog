@@ -1,5 +1,10 @@
 2009-05-26  Nick Clifton  <nickc@redhat.com>
 
+	* po/id.po: Updated Indonesian translation.
+	* po/gas.pot: Updated template file.
+
+2009-05-26  Nick Clifton  <nickc@redhat.com>
+
 	PR 10143
 	* config/bfin-parse.y (error): Use "%s" as format string for error
 	message.

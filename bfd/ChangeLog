@@ -1,3 +1,7 @@
+2009-05-26  Nick Clifton  <nickc@redhat.com>
+
+	* po/id.po: Updated Indonesian translation.
+
 2009-05-26  Rafael Avila de Espindola  <espindola@google.com>
 
 	* Makefile.am: Run "make dep-am".

@@ -1,3 +1,8 @@
+2009-05-26  Nick Clifton  <nickc@redhat.com>
+
+	* po/id.po: Updated Indonesian translation.
+	* po/binutils.pot: Updated template file.
+
 2009-05-26  Rafael Avila de Espindola  <espindola@google.com>
 
 	* ar.c: Include plugin.h.

@@ -1,14 +1,14 @@
 # Pesan Bahasa Indonesia untuk GAS
 # Copyright (C) 2008 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Arif E. Nugroho <arif_endro@yahoo.com>, 2008.
+# Arif E. Nugroho <arif_endro@yahoo.com>, 2008, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gas 2.18.90\n"
+"Project-Id-Version: gas 2.19.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2008-09-09 15:56+0930\n"
-"PO-Revision-Date: 2008-10-16 10:00+0700\n"
+"PO-Revision-Date: 2009-05-26 08:00+0700\n"
 "Last-Translator: Arif E. Nugroho <arif_endro@yahoo.com>\n"
 "Language-Team: Indonesian <translation-team-id@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -70,7 +70,7 @@ msgstr "GNU assembler versi %s (%s) menggunakan BFD versi %s\n"
 #: as.c:227
 #, c-format
 msgid "Usage: %s [option...] [asmfile...]\n"
-msgstr "Penggunaan: %s [opsi...] [asmfile...]\n"
+msgstr "Penggunaan: %s [pilihan...] [asmfile...]\n"
 
 #: as.c:229
 #, c-format
@@ -88,9 +88,9 @@ msgid ""
 "                      \t  s      include symbols\n"
 "                      \t  =FILE  list to FILE (must be last sub-option)\n"
 msgstr ""
-"Opsi:\n"
-"  -a[sub-opsi...]\t    aktifkan listing\n"
-"                      \t  Sub-opsi [default hls]:\n"
+"Pilihan:\n"
+"  -a[sub-pilihan...]\t    aktifkan listing\n"
+"                      \t  Sub-pilihan [default hls]:\n"
 "                      \t  c      abaikan kondisional salah\n"
 "                      \t  d      abaikan debugging direktif\n"
 "                      \t  g      masukan informasi umum\n"
@@ -99,7 +99,7 @@ msgstr ""
 "                      \t  m      masukan ekspansi macro\n"
 "                      \t  n      abaikan pemrosesan form\n"
 "                      \t  s      masukan simbol\n"
-"                      \t  =FILE  daftar dari BERKAS (harus akhir dari sub-opsi)\n"
+"                      \t  =FILE  daftar dari BERKAS (harus akhir dari sub-pilihan)\n"
 
 #: as.c:243
 #, c-format
@@ -174,7 +174,7 @@ msgstr "  --help                  tampilkan pesan ini dan keluar\n"
 #: as.c:289
 #, c-format
 msgid "  --target-help           show target specific options\n"
-msgstr "  --target-help           tampilkan opsi spesifik target\n"
+msgstr "  --target-help           tampilkan pilihan spesifik target\n"
 
 #: as.c:291
 #, c-format
@@ -332,7 +332,7 @@ msgstr ""
 #: as.c:351
 #, c-format
 msgid "  @FILE                   read options from FILE\n"
-msgstr "  @BERKAS                 baca opsi dari BERKAS\n"
+msgstr "  @BERKAS                 baca pilihan dari BERKAS\n"
 
 #: as.c:359
 #, c-format
@@ -342,7 +342,7 @@ msgstr "Laporkan bugs ke %s\n"
 #: as.c:564
 #, c-format
 msgid "unrecognized option -%c%s"
-msgstr "opsi tidak dikenal -%c%s"
+msgstr "pilihan tidak dikenal -%c%s"
 
 #. This output is intended to follow the GNU standards document.
 #: as.c:602
@@ -410,7 +410,7 @@ msgstr "bad defsym; format adalah --defsym nama=nilai"
 
 #: as.c:666
 msgid "no file name following -t option"
-msgstr "tidak ada nama berkas mengikuti opsi -t"
+msgstr "tidak ada nama berkas mengikuti pilihan -t"
 
 #: as.c:681
 #, c-format
@@ -420,7 +420,7 @@ msgstr "gagal untuk membaca tabel instruksi %s\n"
 #: as.c:852
 #, c-format
 msgid "invalid listing option `%c'"
-msgstr "opsi listing `%c' tidak valid"
+msgstr "pilihan listing `%c' tidak valid"
 
 #: as.c:905
 msgid "--hash-size needs a numeric argument"
@@ -1315,7 +1315,7 @@ msgid ""
 "-m21064 | -m21066 | -m21164 | -m21164a | -m21164pc | -m21264 | -m21264a | -m21264b\n"
 "\t\t\tthese variants include PALcode opcodes\n"
 msgstr ""
-"Alpha opsi:\n"
+"Alpha pilihan:\n"
 "-32addr\t\t\tperlakukan alamat sebagai nilai 32-bit\n"
 "-F\t\t\ttidak ada dukungan instruksi floating point\n"
 "-mev4 | -mev45 | -mev5 | -mev56 | -mpca56 | -mev6 | -mev67 | -mev68 | -mall\n"
@@ -1329,7 +1329,7 @@ msgid ""
 "-+\t\t\thash encode (don't truncate) names longer than 64 characters\n"
 "-H\t\t\tshow new symbol after hash truncation\n"
 msgstr ""
-"VMS opsi:\n"
+"VMS pilihan:\n"
 "-+\t\t\thash enkode (jangan potong) nama lebih panjang dari 64 karakter\n"
 "-H\t\t\tperlihatkan simbol baru setelah pemotongan hash\n"
 
@@ -2100,7 +2100,7 @@ msgstr "'}' diduga di akhir dari daerah 'option'"
 
 #: config/tc-arm.c:4764
 msgid "cannot combine index with option"
-msgstr "tidak dapat menkombinasikan indeks dengan opsi"
+msgstr "tidak dapat menkombinasikan indeks dengan pilihan"
 
 #: config/tc-arm.c:4777
 msgid "cannot combine pre- and post-indexing"
@@ -2746,7 +2746,7 @@ msgstr "mencoba menggunakan sebuah instruksi ARM di Thumb-only prosesor -- `%s'"
 
 #: config/tc-arm.c:17114
 msgid "alignments greater than 32 bytes not supported in .text sections."
-msgstr "alignments lebih besar dari 32 bytes tidak didukung dalam daerah .text."
+msgstr "alignments lebih besar dari 32 bytes tidak didukung dalam daerah ..text."
 
 #: config/tc-arm.c:17363 config/tc-ia64.c:3450
 #, c-format
@@ -2943,11 +2943,11 @@ msgstr "%s: tidak diduga tipe fungsi: %d"
 
 #: config/tc-arm.c:19635
 msgid "use of old and new-style options to set CPU type"
-msgstr "gunakan opsi gaya lama dan baru untuk menset tipe CPU"
+msgstr "gunakan pilihan gaya lama dan baru untuk menset tipe CPU"
 
 #: config/tc-arm.c:19645
 msgid "use of old and new-style options to set FPU type"
-msgstr "gunakan opsi gaya lama dan baru untuk menset tipe FPU"
+msgstr "gunakan pilihan gaya lama dan baru untuk menset tipe FPU"
 
 #: config/tc-arm.c:19720
 msgid "hard-float conflicts with specified fpu"
@@ -3290,12 +3290,12 @@ msgstr "<ver>\t\t  rakit untuk eabi versi <ver>"
 #: config/tc-arm.c:20535 config/tc-arm.c:20555 config/tc-arm.c:20577
 #, c-format
 msgid "option `-%c%s' is deprecated: %s"
-msgstr "opsi `-%c%s' kadaluarsa: %s"
+msgstr "pilihan `-%c%s' kadaluarsa: %s"
 
 #: config/tc-arm.c:20598
 #, c-format
 msgid " ARM-specific assembler options:\n"
-msgstr " opsi perakit ARM-spesifik:\n"
+msgstr " pilihan perakit ARM-spesifik:\n"
 
 #: config/tc-arm.c:20609
 #, c-format
@@ -3337,7 +3337,7 @@ msgid ""
 "                   avr6  - enhanced AVR core with up to 256K program memory\n"
 "                   or immediate microcontroller name.\n"
 msgstr ""
-"Opsi AVR:\n"
+"Pilihan AVR:\n"
 "  -mmcu=[nama-avr] pilih variasi mikro-kontroller\n"
 "                   [nama-avr]  dapat berupa:\n"
 "                   avr1  - klasik AVR core tanpa data RAM\n"
@@ -3527,7 +3527,7 @@ msgstr "hilang ')'"
 #: config/tc-bfin.c:350
 #, c-format
 msgid " BFIN specific command line options:\n"
-msgstr " opsi baris perintah spesifik BFIN:\n"
+msgstr " pilihan baris perintah spesifik BFIN:\n"
 
 #: config/tc-bfin.c:363
 msgid "Could not set architecture and machine."
@@ -3983,7 +3983,7 @@ msgstr "Nilai tidak dalam jangkauan 6 bit unsigned: %ld"
 #: config/tc-cris.c:3742
 #, c-format
 msgid "Please use --help to see usage and options for this assembler.\n"
-msgstr "Tolong gunakan --help untuk melihat penggunaan dan opsi untuk perakit ini.\n"
+msgstr "Tolong gunakan --help untuk melihat penggunaan dan pilihan untuk perakit ini.\n"
 
 #: config/tc-cris.c:3754
 msgid "--no-underscore is invalid with a.out format"
@@ -4007,7 +4007,7 @@ msgstr "Tidak dapat menghasilkan tipe relokasi untuk simbol %s, kode %s"
 #: config/tc-cris.c:3939
 #, c-format
 msgid "CRIS-specific options:\n"
-msgstr "Opsi CRIS-spesifik:\n"
+msgstr "Pilihan CRIS-spesifik:\n"
 
 #: config/tc-cris.c:3941
 msgid "  -h, -H                  Don't execute, print this help text.  Deprecated.\n"
@@ -4061,12 +4061,12 @@ msgstr "Membetulkan signed .word (%ld) overflows: pernyataan-`switch' terlalu be
 #: config/tc-cris.c:4088
 #, c-format
 msgid ".syntax %s requires command-line option `--underscore'"
-msgstr ".syntax %s membutuhkan opsi baris-perintah `--underscore'"
+msgstr ".syntax %s membutuhkan pilihan baris-perintah `--underscore'"
 
 #: config/tc-cris.c:4097
 #, c-format
 msgid ".syntax %s requires command-line option `--no-underscore'"
-msgstr ".syntax %s membutuhkan opsi baris-perintah `--no-underscore'"
+msgstr ".syntax %s membutuhkan pilihan baris-perintah `--no-underscore'"
 
 #: config/tc-cris.c:4134
 msgid "Unknown .syntax operand"
@@ -4086,7 +4086,7 @@ msgstr "operan ke .arch tidak dikenal"
 
 #: config/tc-cris.c:4308
 msgid ".arch <arch> requires a matching --march=... option"
-msgstr ".arch <arch> membutuhkan sebuah pencocokan opsi --march=..."
+msgstr ".arch <arch> membutuhkan sebuah pencocokan pilihan --march=..."
 
 #: config/tc-crx.c:819
 #, c-format
@@ -4176,7 +4176,7 @@ msgid ""
 "--no-gstabs-packing     If --gstabs is specified, do not pack adjacent\n"
 "                        instructions together.\n"
 msgstr ""
-"Opsi D10V:\n"
+"Pilihan D10V:\n"
 "-O                      Optimasi. Akan melakukan beberapa operasi dalam paralel.\n"
 "--gstabs-packing        Pack adjacent instruksi pendek bersama walaupun\n"
 "                        ketika --gstabs dispesifikasikan. Aktif secara default.\n"
@@ -4324,7 +4324,7 @@ msgid ""
 "-C                      Opposite of -C.  -c is the default.\n"
 msgstr ""
 "\n"
-"Opsi D30V:\n"
+"Pilihan D30V:\n"
 "-O                      Buat adjacent instruksi pendek paralel jika memungkinkan.\n"
 "-n                      Peringatkan mengenai seluruh NOP yang dimasukan dengan perakit.\n"
 "-N\t\t\tPeringatkan mengenai NOP yang dimasukan setelah kelipatan kata.\n"
@@ -4548,7 +4548,7 @@ msgstr "Ekspresi tidak valid sesudah # number\n"
 #: config/tc-fr30.c:82
 #, c-format
 msgid " FR30 specific command line options:\n"
-msgstr " Opsi spesifik baris perintah FR30:\n"
+msgstr " Pilihan spesifik baris perintah FR30:\n"
 
 #: config/tc-fr30.c:135
 #, c-format
@@ -4563,7 +4563,7 @@ msgstr "cpu -mcpu=%s tidak dikenal"
 #: config/tc-frv.c:457
 #, c-format
 msgid "FRV specific command line options:\n"
-msgstr "Opsi spesifik baris perintah FRV:\n"
+msgstr "Pilihan spesifik baris perintah FRV:\n"
 
 #: config/tc-frv.c:458
 #, c-format
@@ -5267,7 +5267,7 @@ msgstr "Kehabisan memori: tidak dapat mengalokasikan rantai masukan subspace bar
 
 #: config/tc-hppa.c:8220
 msgid "-R option not supported on this target."
-msgstr "-R opsi tidak didukung di target ini."
+msgstr "-R pilihan tidak didukung di target ini."
 
 #: config/tc-hppa.c:8237 config/tc-sparc.c:811 config/tc-sparc.c:848
 #, c-format
@@ -5714,27 +5714,27 @@ msgstr "Tidak dikompile untuk mendukung x86_64"
 #: config/tc-i386.c:8115 config/tc-i386.c:8162
 #, c-format
 msgid "Invalid -march= option: `%s'"
-msgstr "Opsi -march= tidak valid: `%s'"
+msgstr "Pilihan -march= tidak valid: `%s'"
 
 #: config/tc-i386.c:8171 config/tc-i386.c:8183
 #, c-format
 msgid "Invalid -mtune= option: `%s'"
-msgstr "Opsi -mtune= tidak valid: `%s'"
+msgstr "Pilihan -mtune= tidak valid: `%s'"
 
 #: config/tc-i386.c:8192
 #, c-format
 msgid "Invalid -mmnemonic= option: `%s'"
-msgstr "Opsi -mmnemonic tidak valid: `%s'"
+msgstr "Pilihan -mmnemonic tidak valid: `%s'"
 
 #: config/tc-i386.c:8201
 #, c-format
 msgid "Invalid -msyntax= option: `%s'"
-msgstr "Opsi -msyntax= tidak valid: `%s'"
+msgstr "Pilihan -msyntax= tidak valid: `%s'"
 
 #: config/tc-i386.c:8228
 #, c-format
 msgid "Invalid -msse-check= option: `%s'"
-msgstr "Opsi -msse-check= tidak valid: `%s'"
+msgstr "Pilihan -msse-check= tidak valid: `%s'"
 
 #: config/tc-i386.c:8242
 #, c-format
@@ -5971,15 +5971,15 @@ msgstr ".largecomm hanya didukung dalam mode 64 bit, menghasilkan .comm"
 
 #: config/tc-i860.c:122
 msgid "Directive .dual available only with -mintel-syntax option"
-msgstr "Direktif .dual hanya tersedia dengan opsi -mintel-syntax"
+msgstr "Direktif .dual hanya tersedia dengan pilihan -mintel-syntax"
 
 #: config/tc-i860.c:132
 msgid "Directive .enddual available only with -mintel-syntax option"
-msgstr "Direktif .enddual hanya tersedia dengan opsi -mintel-syntax"
+msgstr "Direktif .enddual hanya tersedia dengan pilihan -mintel-syntax"
 
 #: config/tc-i860.c:145
 msgid "Directive .atmp available only with -mintel-syntax option"
-msgstr "Direktif .atmp hanya tersedia dengan opsi -mintel-syntax"
+msgstr "Direktif .atmp hanya tersedia dengan pilihan -mintel-syntax"
 
 #: config/tc-i860.c:167 config/tc-i860.c:171
 msgid "Unknown temporary pseudo register"
@@ -6168,7 +6168,7 @@ msgstr "arsitektur %s tidak valid"
 #: config/tc-i960.c:1881
 #, c-format
 msgid "I960 options:\n"
-msgstr "opsi I960:\n"
+msgstr "pilihan I960:\n"
 
 #: config/tc-i960.c:1884
 #, c-format
@@ -6236,7 +6236,7 @@ msgstr "tidak dapat menggunakan format COBR dengan label eksternal"
 
 #: config/tc-i960.c:2570
 msgid "option --link-relax is only supported in b.out format"
-msgstr "opsi --link-relax hanya didukung dalam format b.out"
+msgstr "pilihan --link-relax hanya didukung dalam format b.out"
 
 #: config/tc-i960.c:2597
 #, c-format
@@ -6624,7 +6624,7 @@ msgstr "Mencoba untuk meredefinisi register set `%s'"
 #: config/tc-ia64.c:4620
 #, c-format
 msgid "Unknown psr option `%s'"
-msgstr "Opsi psr `%s' tidak dikenal"
+msgstr "Pilihan psr `%s' tidak dikenal"
 
 #: config/tc-ia64.c:4668
 msgid "Missing section name"
@@ -6826,7 +6826,7 @@ msgstr "Hilang '}' diakhir dari berkas"
 #: config/tc-ia64.c:6909
 #, c-format
 msgid "Unrecognized option '-x%s'"
-msgstr "Opsi '-x%s' tidak dikenal"
+msgstr "Pilihan '-x%s' tidak dikenal"
 
 #: config/tc-ia64.c:6936
 msgid ""
@@ -6853,7 +6853,7 @@ msgid ""
 "  -xdebugx\t\t  debug dependency violation checker and turn on\n"
 "\t\t\t  dependency violation checking\n"
 msgstr ""
-"Opsi IA-64:\n"
+"Pilihan IA-64:\n"
 "  --mconstant-gp\t   tandai keluaran berkas menggunakan model konstanta-GP\n"
 "\t\t\t  (sets tanda header ELF EF_IA_64_CONS_GP)\n"
 "  --mauto-pic\t\t  tandai keluaran dari berkas dengan menggunakan model konstanta-GG\n"
@@ -7102,7 +7102,7 @@ msgstr "bagian `%s' dialiakan ke `%s' tidak digunakan"
 #: config/tc-ip2k.c:158
 #, c-format
 msgid "IP2K specific command line options:\n"
-msgstr "opsi spesifik baris perintah IP2K:\n"
+msgstr "pilihan spesifik baris perintah IP2K:\n"
 
 #: config/tc-ip2k.c:159
 #, c-format
@@ -7178,21 +7178,21 @@ msgstr "hilang `.end'"
 #: config/tc-m32c.c:143
 #, c-format
 msgid " M32C specific command line options:\n"
-msgstr " M32C spesifik opsi baris perintah:\n"
+msgstr " M32C spesifik pilihan baris perintah:\n"
 
 #. Pretend that we do not recognise this option.
 #: config/tc-m32r.c:331
 msgid "Unrecognised option: -hidden"
-msgstr "Opsi tidak diketanl: -hidden"
+msgstr "Pilihan tidak diketanl: -hidden"
 
 #: config/tc-m32r.c:358 config/tc-sparc.c:579
 msgid "Unrecognized option following -K"
-msgstr "Opsi berikut -K tidak dikenal"
+msgstr "Pilihan berikut -K tidak dikenal"
 
 #: config/tc-m32r.c:373
 #, c-format
 msgid " M32R specific command line options:\n"
-msgstr " Opsi spesifik M32R baris perintah:\n"
+msgstr " Pilihan spesifik M32R baris perintah:\n"
 
 #: config/tc-m32r.c:375
 #, c-format
@@ -7440,7 +7440,7 @@ msgid ""
 "  --generate-example      generate an example of each instruction\n"
 "                          (used for testing)\n"
 msgstr ""
-"Motorola 68HC11/68HC12/68HCS12 opsi:\n"
+"Motorola 68HC11/68HC12/68HCS12 pilihan:\n"
 "  -m68hc11 | -m68hc12 |\n"
 "  -m68hcs12               spesifikasikan prosesor [baku %s]\n"
 "  -mshort                 gunakan 16-bit int ABI (baku)\n"
@@ -7471,7 +7471,7 @@ msgstr "Nama   # Mode   Min ops  Maks ops Mode  mask  # Digunakan\n"
 #: config/tc-m68hc11.c:501
 #, c-format
 msgid "Option `%s' is not recognized."
-msgstr "Opsi `%s' tidak dikenal."
+msgstr "Pilihan `%s' tidak dikenal."
 
 #: config/tc-m68hc11.c:671
 msgid "#<imm8>"
@@ -8019,17 +8019,17 @@ msgstr "id koprosesor buruk"
 
 #: config/tc-m68k.c:5569
 msgid "unrecognized fopt option"
-msgstr "opsi fopt tidak dikenal"
+msgstr "pilihan fopt tidak dikenal"
 
 #: config/tc-m68k.c:5702
 #, c-format
 msgid "option `%s' may not be negated"
-msgstr "opsi `%s' tidak boleh dinegasikan"
+msgstr "pilihan `%s' tidak boleh dinegasikan"
 
 #: config/tc-m68k.c:5713
 #, c-format
 msgid "option `%s' not recognized"
-msgstr "opsi `%s' tidak dikenal"
+msgstr "pilihan `%s' tidak dikenal"
 
 #: config/tc-m68k.c:5742
 msgid "bad format of OPT NEST=depth"
@@ -8136,7 +8136,7 @@ msgstr "ekstensi `%s' tidak dikenal"
 #: config/tc-m68k.c:7403
 #, c-format
 msgid "option `-A%s' is deprecated: use `-%s'"
-msgstr "opsi `-A%s' kadaluarsa: gunakan `-%s'"
+msgstr "pilihan `-A%s' kadaluarsa: gunakan `-%s'"
 
 #: config/tc-m68k.c:7436
 msgid "architecture features both enabled and disabled"
@@ -8228,7 +8228,7 @@ msgstr "Bukan sebuah arsitektur terdefinisi coldfire"
 #: config/tc-maxq.c:209
 #, c-format
 msgid " MAXQ-specific assembler options:\n"
-msgstr " Opsi perakit MAXQ-spesifik:\n"
+msgstr " Pilihan perakit MAXQ-spesifik:\n"
 
 #: config/tc-maxq.c:211
 #, c-format
@@ -8610,7 +8610,7 @@ msgid ""
 "  -EB                     assemble for a big endian system (default)\n"
 "  -EL                     assemble for a little endian system\n"
 msgstr ""
-"Opsi spesifik MCORE:\n"
+"Pilihan spesifik MCORE:\n"
 "  -{no-}jsri2bsr\t  {non}aktifkan transformasi jsri ke bsr (baku: non)\n"
 "  -{no-}sifilter\t  {non}aktifkan perlakuan filter silicon (baku: non)\n"
 "  -cpu=[210|340]          pilih tipe CPU\n"
@@ -8680,7 +8680,7 @@ msgid ""
 "  if any enabling -m options are given, only those are enabled;\n"
 "  if only disabling -m options are given, only those are disabled.\n"
 msgstr ""
-"Opsi spesifik Mep baris perintah:\n"
+"Pilihan spesifik Mep baris perintah:\n"
 "  -EB                     rakit untuk sistem big endian (baku)\n"
 "  -EL                     rakit untuk sistem little endian\n"
 "  -mconfig=<nama>         spesifikasikan konfigurasi chip yang digunakan\n"
@@ -8689,10 +8689,10 @@ msgstr ""
 "  -mminmax -mno-minmax -mclip -mno-clip -msatur -mno-satur -mcop32\n"
 "                          aktifkan/non-aktifkan opkode yang diberikan\n"
 "\n"
-"  Jika -mconfig diberikan, opsi -m lain memodifikasinya. Jika tidak,\n"
-"  jika tidak ada opsi -m yang diberikan, seluruh core opkode diaktifkan;\n"
-"  jika pengaktifan opsi -m diberikan, hanya itu saja yang diaktifkan saja;\n"
-"  jika hanya menon-aktifkan opsi -m diberikan, hanya itu saja yang dinon-aktifkan.\n"
+"  Jika -mconfig diberikan, pilihan -m lain memodifikasinya. Jika tidak,\n"
+"  jika tidak ada pilihan -m yang diberikan, seluruh core opkode diaktifkan;\n"
+"  jika pengaktifan pilihan -m diberikan, hanya itu saja yang diaktifkan saja;\n"
+"  jika hanya menon-aktifkan pilihan -m diberikan, hanya itu saja yang dinon-aktifkan.\n"
 
 #. There are no insns in the queue and a plus is present.
 #. This is a syntax error.  Let's not tolerate this.
@@ -9214,7 +9214,7 @@ msgstr "-G tidak didukung dalam konfigurasi ini."
 #: config/tc-mips.c:11746
 #, c-format
 msgid "-%s conflicts with the other architecture options, which imply -%s"
-msgstr "-%s konflik dengan opsi arsitektur lain, yang mengindikasikan -%s"
+msgstr "-%s konflik dengan pilihan arsitektur lain, yang mengindikasikan -%s"
 
 #: config/tc-mips.c:11777
 msgid "-mgp64 used with a 32-bit processor"
@@ -9298,7 +9298,7 @@ msgstr "-G tidak boleh digunakan dengan kode SVR4 PIC"
 #: config/tc-mips.c:12676
 #, c-format
 msgid "Unrecognized option \"%s\""
-msgstr "Opsi \"%s\" tidak dikenal"
+msgstr "Pilihan \"%s\" tidak dikenal"
 
 #: config/tc-mips.c:12719
 #, c-format
@@ -9409,7 +9409,7 @@ msgid ""
 "-G NUM\t\t\tallow referencing objects up to NUM bytes\n"
 "\t\t\timplicitly with the gp register [default 8]\n"
 msgstr ""
-"Opsi MIPS:\n"
+"Pilihan MIPS:\n"
 "-EB\t\t\thasilkan keluaran big endian\n"
 "-EL\t\t\thasilkan keluaran little endian\n"
 "-g, -g2\t\t\tjangan hapus NOPS yang tidak dibutuhkan atau swap branch\n"
@@ -9572,7 +9572,7 @@ msgstr ""
 #: config/tc-mmix.c:693
 #, c-format
 msgid " MMIX-specific command line options:\n"
-msgstr " Opsi MMIX-spesifik baris perintah:\n"
+msgstr " Pilihan MMIX-spesifik baris perintah:\n"
 
 #: config/tc-mmix.c:694
 #, c-format
@@ -9833,7 +9833,7 @@ msgid ""
 "MN10200 options:\n"
 "none yet\n"
 msgstr ""
-"opsi MN10200:\n"
+"pilihan MN10200:\n"
 "belum ada\n"
 
 #: config/tc-mn10200.c:898 config/tc-mn10300.c:1249 config/tc-ppc.c:2297
@@ -9848,7 +9848,7 @@ msgid ""
 "MN10300 assembler options:\n"
 "none yet\n"
 msgstr ""
-"Opsi perakit MN10300:\n"
+"Pilihan perakit MN10300:\n"
 "belum ada\n"
 
 #: config/tc-mn10300.c:1065 config/tc-sh.c:776 config/tc-z80.c:671 read.c:4226
@@ -9926,7 +9926,7 @@ msgid ""
 "                  msp430x435  msp430x436  msp430x437\n"
 "                  msp430x447  msp430x448  msp430x449\n"
 msgstr ""
-"opsi MSP430:\n"
+"pilihan MSP430:\n"
 "  -mmcu=[msp430-name] pilih tipe mikrokontroler\n"
 "                  msp430x110  msp430x112\n"
 "                  msp430x1101 msp430x1111\n"
@@ -10080,7 +10080,7 @@ msgstr "instruksi membutuhkan label"
 
 #: config/tc-msp430.c:1716 config/tc-msp430.c:1758
 msgid "polymorphs are not enabled. Use -mP option to enable."
-msgstr "polymorphs tidak aktif. Gunakan opsi -mP untuk meng-aktifkan."
+msgstr "polymorphs tidak aktif. Gunakan pilihan -mP untuk meng-aktifkan."
 
 #: config/tc-msp430.c:1795
 msgid "Illegal instruction or not implemented opcode."
@@ -10104,7 +10104,7 @@ msgstr "masalah internal tidak konsisten dalam %s: %lx"
 #: config/tc-mt.c:151
 #, c-format
 msgid "MT specific command line options:\n"
-msgstr "opsi MT spesifik baris perintah:\n"
+msgstr "pilihan MT spesifik baris perintah:\n"
 
 #: config/tc-mt.c:152
 #, c-format
@@ -10203,7 +10203,7 @@ msgstr "Akhiran buruk setelah ':' gunakan {b|w|d} baku ke d"
 
 #: config/tc-ns32k.c:813
 msgid "Very short instr to option, ie you can't do it on a NULLstr"
-msgstr "Sangat pendek instruksi ke opsi, anda tidak dapat melakukan ini di NULLstr"
+msgstr "Sangat pendek instruksi ke pilihan, anda tidak dapat melakukan ini di NULLstr"
 
 #: config/tc-ns32k.c:863
 msgid "No such entry in list. (cpu/mmu register)"
@@ -10323,7 +10323,7 @@ msgstr "Tidak dapat hash %s: %s"
 #: config/tc-ns32k.c:2145
 #, c-format
 msgid "invalid architecture option -m%s, ignored"
-msgstr "opsi arsitektur -m%s tidak valid, diabaikan"
+msgstr "pilihan arsitektur -m%s tidak valid, diabaikan"
 
 #: config/tc-ns32k.c:2158
 #, c-format
@@ -10337,7 +10337,7 @@ msgid ""
 "-m32032 | -m32532\tselect variant of NS32K architecture\n"
 "--disp-size-default=<1|2|4>\n"
 msgstr ""
-"Opsi NS32K:\n"
+"Pilihan NS32K:\n"
 "-m32032 | -m32532\tpilih varian dari arsitektur NS32K\n"
 "--disp-size-default=<1|2|4>\n"
 
@@ -10412,7 +10412,7 @@ msgid ""
 "-little\t\t\tgenerate little endian code\n"
 "-big\t\t\tgenerate big endian code\n"
 msgstr ""
-"Opsi PJ:\n"
+"Pilihan PJ:\n"
 "-little\t\t\tmenghasilkan kode little endian\n"
 "-big\t\t\tmenghasilkan kode big endian\n"
 
@@ -10459,7 +10459,7 @@ msgid ""
 "\t\t\tgenerate code for PowerPC 7400/7410/7450/7455\n"
 "-m750cl\t\t\tgenerate code for PowerPC 750cl\n"
 msgstr ""
-"Opsi PowerPC:\n"
+"Pilihan PowerPC:\n"
 "-a32\t\t\tmenghasilkan ELF32/XCOFF32\n"
 "-a64\t\t\tmenghasilkan ELF64/XCOFF64\n"
 "-u\t\t\tdiabaikan\n"
@@ -10539,8 +10539,8 @@ msgid ""
 "-V\t\t\tprint assembler version number\n"
 "-Qy, -Qn\t\tignored\n"
 msgstr ""
-"-mrelocatable\t\tdukung untuk opsi GCC -mrelocatble\n"
-"-mrelocatable-lib\tdukung untuk opsi GCC -mrelocatble\n"
+"-mrelocatable\t\tdukung untuk pilihan GCC -mrelocatble\n"
+"-mrelocatable-lib\tdukung untuk pilihan GCC -mrelocatble\n"
 "-memb\t\t\tset PPC_EMB bit dalam tanda ELF\n"
 "-mlittle, -mlittle-endian, -l, -le\n"
 "\t\t\tmenghasilkan kode untuk sebuah mesin little endian\n"
@@ -10835,7 +10835,7 @@ msgid ""
 "        -m31              Set file format to 31 bit format\n"
 "        -m64              Set file format to 64 bit format\n"
 msgstr ""
-"        opsi S390:\n"
+"        pilihan S390:\n"
 "        -mregnames        Ijinkan nama simbolik untuk register\n"
 "        -mwarn-areg-zero  Peringatkan mengenai register dasar/indeks nol\n"
 "        -mno-regnames     Jangan ijinkan nama simbolik untuk register\n"
@@ -11111,7 +11111,7 @@ msgstr "Sunplus-v2-0-0-20060510\n"
 #: config/tc-score.c:5716
 #, c-format
 msgid " Score-specific assembler options:\n"
-msgstr " Opsi Score-specific perakit:\n"
+msgstr " Pilihan Score-specific perakit:\n"
 
 #: config/tc-score.c:5718
 #, c-format
@@ -11208,11 +11208,11 @@ msgstr "simbol `%s' telah terdefinisi"
 
 #: config/tc-sh.c:63
 msgid "directive .big encountered when option -big required"
-msgstr "direktif .big ditemui ketika opsi -big dibutuhkan"
+msgstr "direktif .big ditemui ketika pilihan -big dibutuhkan"
 
 #: config/tc-sh.c:73
 msgid "directive .little encountered when option -little required"
-msgstr "direktif .little ditemui ketika opsi -little dibutuhkan"
+msgstr "direktif .little ditemui ketika pilihan -little dibutuhkan"
 
 #: config/tc-sh.c:1364
 msgid "misplaced PIC operand"
@@ -11410,7 +11410,7 @@ msgid ""
 "    | dsp               same as '-dsp'\n"
 "    | fp"
 msgstr ""
-"Opsi SH:\n"
+"Pilihan SH:\n"
 "--little\t\tmenghasilkan kode little endian\n"
 "--big\t\tmenghasilkan kode big endian\n"
 "--relax\t\t\tubah instruksi lompat ke long displacement\n"
@@ -11659,11 +11659,11 @@ msgstr "Direktif `.abi %s' tidak valid untuk arsitektur ini"
 
 #: config/tc-sh64.c:2907
 msgid "`.abi 64' but command-line options do not specify 64-bit ABI"
-msgstr "`.abi 64' tetapi opsi baris-perintah tidak menspesifikasikan 64-bit ABI"
+msgstr "`.abi 64' tetapi pilihan baris-perintah tidak menspesifikasikan 64-bit ABI"
 
 #: config/tc-sh64.c:2912
 msgid "`.abi 32' but command-line options do not specify 32-bit ABI"
-msgstr "`.abi 32' tetapi opsi baris-perintah tidak menspesifikasikan 32-bit ABI"
+msgstr "`.abi 32' tetapi pilihan baris-perintah tidak menspesifikasikan 32-bit ABI"
 
 #: config/tc-sh64.c:2915
 #, c-format
@@ -11732,7 +11732,7 @@ msgstr "Tidak dikompile untuk mendukung %d bit format berkas objek"
 #: config/tc-sparc.c:619
 #, c-format
 msgid "SPARC options:\n"
-msgstr "Opsi SPARC:\n"
+msgstr "Pilihan SPARC:\n"
 
 #: config/tc-sparc.c:648
 #, c-format
@@ -11954,7 +11954,7 @@ msgstr "Operan tidak legal: %%%s hanya dapat digunakan dengan call __tls_get_add
 
 #: config/tc-sparc.c:2098
 msgid "detected global register use not covered by .register pseudo-op"
-msgstr "terdeteksi penggunaan global register tidak dilingkupi oleh .register pseudo-op"
+msgstr "terdeteksi penggunaan global register tidak dilingkupi oleh ..register pseudo-op"
 
 #: config/tc-sparc.c:2169
 msgid ": There are only 64 f registers; [0-63]"
@@ -12146,7 +12146,7 @@ msgid ""
 "SPU options:\n"
 "  --apuasm\t\t  emulate behaviour of apuasm\n"
 msgstr ""
-"opsi SPU:\n"
+"pilihan SPU:\n"
 "  --apuasm\t\t  emulasikan perilaku dari apuasm\n"
 
 #: config/tc-spu.c:287
@@ -12229,7 +12229,7 @@ msgid ""
 "  -menhanced              enable enhanced opcode support\n"
 msgstr ""
 "\n"
-"Opsi TIC4X:\n"
+"Pilihan TIC4X:\n"
 "  -mcpu=CPU  -mCPU          pilih variasi arsitektur. CPU dapat berupa:\n"
 "                              30 - TMS320C30\n"
 "                              31 - TMS320C31, TMS320LC31\n"
@@ -12239,7 +12239,7 @@ msgstr ""
 "                              44 - TMS320C44\n"
 "  -mrev=REV                 set revisi perangkat cpu (bilangan bulat).\n"
 "                            Kombinasi dari -mcpu dan -mrev akan menaktifkan/menon-aktifkan\n"
-"                            opsi yang sesuai (-midle2, -mlowpower dan\n"
+"                            pilihan yang sesuai (-midle2, -mlowpower dan\n"
 "                            -menhanced) menurut tipe yang dipilih\n"
 "  -mbig                     pilih model memori besar\n"
 "  -msmall                   pilih model memori kecil (baku)\n"
@@ -12258,7 +12258,7 @@ msgstr "pseudo-op tidak legal dalam .struct/.union"
 #: config/tc-tic54x.c:234
 #, c-format
 msgid "C54x-specific command line  options:\n"
-msgstr "opsi baris perintah C54x spesifik:\n"
+msgstr "pilihan baris perintah C54x spesifik:\n"
 
 #: config/tc-tic54x.c:235
 #, c-format
@@ -12341,7 +12341,7 @@ msgstr "Nilai relokasi membutuhkan paling tidak penyimpanan WORD"
 
 #: config/tc-tic54x.c:1107
 msgid "Use of .def/.ref is deprecated.  Use .global instead"
-msgstr "Penggunaan dari .def/.ref adalah kadaluarsa. Lebih baik gunakan .global"
+msgstr "Penggunaan dari .def/.ref adalah kadaluarsa. Lebih baik gunakan ..global"
 
 #: config/tc-tic54x.c:1301
 msgid ".space/.bes repeat count is negative, ignored"
@@ -12751,7 +12751,7 @@ msgstr "register kedua seharusnya mengikuti dash dalam daftar register"
 #: config/tc-v850.c:1118
 #, c-format
 msgid " V850 options:\n"
-msgstr " opsi V850:\n"
+msgstr " pilihan V850:\n"
 
 #: config/tc-v850.c:1119
 #, c-format
@@ -13034,7 +13034,7 @@ msgid ""
 "-T\t\t\tignored\n"
 "-V\t\t\tignored\n"
 msgstr ""
-"opsi VAX:\n"
+"pilihan VAX:\n"
 "-d LENGTH\t\tdiabaikan\n"
 "-J\t\t\tdiabaikan\n"
 "-S\t\t\tdiabaikan\n"
@@ -13054,7 +13054,7 @@ msgid ""
 "\t\t\t0 = upper, 2 = lower, 3 = preserve case\n"
 "-v\"VERSION\"\t\tcode being assembled was produced by compiler \"VERSION\"\n"
 msgstr ""
-"opsi VMS:\n"
+"pilihan VMS:\n"
 "-+\t\t\thash enkode nama lebih panjang dari 31 karakter\n"
 "-1\t\t\tpenanganan `const' kompatibel dengan gcc 1.x\n"
 "-H\t\t\ttampilkan simbol baru sesudah pemotongan hash\n"
@@ -13123,12 +13123,12 @@ msgstr "VIP_BEGIN error:%s"
 #: config/tc-xc16x.c:211
 #, c-format
 msgid " XC16X specific command line options:\n"
-msgstr " XC16X spesifik opsi baris perintah:\n"
+msgstr " XC16X spesifik pilihan baris perintah:\n"
 
 #: config/tc-xstormy16.c:78
 #, c-format
 msgid " XSTORMY16 specific command line options:\n"
-msgstr " XSTORMY16 spesifik opsi baris perintah:\n"
+msgstr " XSTORMY16 spesifik pilihan baris perintah:\n"
 
 #: config/tc-xtensa.c:617
 msgid "illegal range of target hardware versions"
@@ -13136,11 +13136,11 @@ msgstr "jangkauan tidak legal dari versi target perangkat"
 
 #: config/tc-xtensa.c:766
 msgid "--density option is ignored"
-msgstr "opsi --density diabaikan"
+msgstr "pilihan --density diabaikan"
 
 #: config/tc-xtensa.c:769
 msgid "--no-density option is ignored"
-msgstr "opsi --no-density diabaikan"
+msgstr "pilihan --no-density diabaikan"
 
 #: config/tc-xtensa.c:778
 msgid "--generics is deprecated; use --transform instead"
@@ -13160,7 +13160,7 @@ msgstr "--no-relax kadaluarsa; lebih baik gunakan --no-transform"
 
 #: config/tc-xtensa.c:804
 msgid "--absolute-literals option not supported in this Xtensa configuration"
-msgstr "opsi --absolute-literals tidak didukung di konfigurasi Xtensa ini"
+msgstr "pilihan --absolute-literals tidak didukung di konfigurasi Xtensa ini"
 
 #: config/tc-xtensa.c:877
 msgid "prefer-l32r conflicts with prefer-const16"
@@ -13218,7 +13218,7 @@ msgstr ".begin [no-]density diabaikan"
 
 #: config/tc-xtensa.c:1264 config/tc-xtensa.c:1314
 msgid "Xtensa absolute literals option not supported; ignored"
-msgstr "Xtensa absolut litera opsi tidak didukung; diabaikan"
+msgstr "Xtensa absolut litera pilihan tidak didukung; diabaikan"
 
 #: config/tc-xtensa.c:1307
 msgid ".end [no-]density is ignored"
@@ -13344,7 +13344,7 @@ msgstr "operan %d dari '%s' memiliki nilai '%u' tidak valid"
 #: config/tc-xtensa.c:2750
 #, c-format
 msgid "internal error: unknown option name '%s'"
-msgstr "internal error: nama opsi '%s' tidak dikenal"
+msgstr "internal error: nama pilihan '%s' tidak dikenal"
 
 #: config/tc-xtensa.c:3852
 msgid "can't handle generation of literal/labels yet"
@@ -13894,7 +13894,7 @@ msgid ""
 "  -z8002                  generate unsegmented code\n"
 "  -linkrelax              create linker relaxable code\n"
 msgstr ""
-" opsi Z8K:\n"
+" pilihan Z8K:\n"
 "  -z8001                  menghasilkan kode tersegmen\n"
 "  -z8002                  menghasilkan kode tidak tersegmen\n"
 "  -linkrelax              membuat linker relaxable kode\n"
@@ -13924,7 +13924,7 @@ msgstr "panggilan ke md_estimate_size_before_relax\n"
 #: config/xtensa-relax.c:1545
 #, c-format
 msgid "invalid configuration option '%s' in transition rule '%s'"
-msgstr "opsi konfigurasi '%s' tidak valid dalam aturan transisi '%s'"
+msgstr "pilihan konfigurasi '%s' tidak valid dalam aturan transisi '%s'"
 
 #: config/xtensa-relax.c:1670
 #, c-format
@@ -14027,7 +14027,7 @@ msgstr "CFI instruksi digunakan tanpa .cfi_startproc sebelumnya"
 
 #: dw2gencfi.c:675
 msgid "invalid or unsupported encoding in .cfi_personality"
-msgstr "tidak valid atau tidak didukung pengkodean dalam .cfi_personality"
+msgstr "tidak valid atau tidak didukung pengkodean dalam ..cfi_personality"
 
 #: dw2gencfi.c:682
 msgid ".cfi_personality requires encoding and symbol arguments"
@@ -14465,7 +14465,7 @@ msgid ""
 " options passed\t: "
 msgstr ""
 "\n"
-" opsi dilewati\t: "
+" pilihan dilewati\t: "
 
 #: listing.c:1138
 #, c-format

@@ -1,14 +1,14 @@
 # Pesan Bahasa Indonesia untuk BFD
 # Copyright (C) 2008 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Arif E. Nugroho <arif_endro@yahoo.com>, 2008.
+# Arif E. Nugroho <arif_endro@yahoo.com>, 2008, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: bfd 2.18.90\n"
+"Project-Id-Version: bfd 2.19.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2008-09-09 15:56+0930\n"
-"PO-Revision-Date: 2008-10-08 07:45+0700\n"
+"PO-Revision-Date: 2009-05-26 08:00+0700\n"
 "Last-Translator: Arif E. Nugroho <arif_endro@yahoo.com>\n"
 "Language-Team: Indonesian <translation-team-id@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -2591,7 +2591,7 @@ msgstr "Menghapus daerah tidak digunakan '%s' dalam berkas '%B'"
 
 #: elflink.c:11525
 msgid "Warning: gc-sections option ignored"
-msgstr "Peringatan: gc-sections opsi diabaikan"
+msgstr "Peringatan: gc-sections pilihan diabaikan"
 
 #: elflink.c:12056
 msgid "%B: ignoring duplicate section `%A'"
@@ -2623,7 +2623,7 @@ msgstr "%B: %A+0x%lx: lompat ke routine stub dimana bukan jal"
 
 #: elfxx-mips.c:6206 elfxx-mips.c:6427
 msgid "%B: Warning: bad `%s' option size %u smaller than its header"
-msgstr "%B: Peringatan: opsi `%s' buruk ukuran %u lebih kecil dari headernya"
+msgstr "%B: Peringatan: pilihan `%s' buruk ukuran %u lebih kecil dari headernya"
 
 #: elfxx-mips.c:7174 elfxx-mips.c:7299
 msgid "%B: Warning: cannot determine the target function for stub section `%s'"
@@ -2652,7 +2652,7 @@ msgstr "%B: Tidak dapat menemukan cocok LO16 relokasi terhadap `%s' untuk %s di 
 
 #: elfxx-mips.c:9086
 msgid "small-data section exceeds 64KB; lower small-data size limit (see option -G)"
-msgstr "daerah data-kecil melebihi 64KB; dibawah data-kecil batas ukuran (lihat opsi -G)"
+msgstr "daerah data-kecil melebihi 64KB; dibawah data-kecil batas ukuran (lihat pilihan -G)"
 
 #: elfxx-mips.c:11887
 #, c-format

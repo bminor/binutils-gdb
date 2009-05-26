@@ -1,3 +1,8 @@
+2009-05-26  Nick Clifton  <nickc@redhat.com>
+
+	* po/id.po: Updated Indonesian translation.
+	* po/opcodes.pot: Updated template file.
+
 2009-05-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Don't modify .o to .lo here.  Output one filename

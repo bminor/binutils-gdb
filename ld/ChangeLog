@@ -1,3 +1,8 @@
+2009-05-26  Nick Clifton  <nickc@redhat.com>
+
+	* po/id.po: Updated Indonesian translation.
+	* po/ld.pot: Updated template file.
+
 2009-05-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Output one filename per line with all lines having

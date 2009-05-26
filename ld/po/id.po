@@ -1,14 +1,14 @@
 # Pesan Bahasa Indonesia untuk LD
 # Copyright (C) 2008 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Arif E. Nugroho <arif_endro@yahoo.com>, 2008.
+# Arif E. Nugroho <arif_endro@yahoo.com>, 2008, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: ld 2.18.90\n"
+"Project-Id-Version: ld 2.19.1\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2008-09-09 15:56+0930\n"
-"PO-Revision-Date: 2008-10-08 10:00+0700\n"
+"PO-Revision-Date: 2009-05-26 08:00+0700\n"
 "Last-Translator: Arif E. Nugroho <arif_endro@yahoo.com>\n"
 "Language-Team: Indonesian <translation-team-id@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -256,7 +256,7 @@ msgstr ""
 
 #: emultempl/pe.em:431
 msgid "%P: warning: bad version number in -subsystem option\n"
-msgstr "%P: peringatan: nomor versi buruk dalam opsi -subsistem\n"
+msgstr "%P: peringatan: nomor versi buruk dalam pilihan -subsistem\n"
 
 #: emultempl/pe.em:462
 msgid "%P%F: invalid subsystem type %s\n"
@@ -435,7 +435,7 @@ msgstr "Emulasi yang didukung: "
 #: ldemul.c:304
 #, c-format
 msgid "  no emulation specific options.\n"
-msgstr "  tidak ada opsi spesifik emulasi.\n"
+msgstr "  tidak ada pilihan spesifik emulasi.\n"
 
 #: ldexp.c:350
 #, c-format
@@ -1539,7 +1539,7 @@ msgstr "Set ukuran default tabel hash mendekati ke <NOMOR>"
 
 #: lexsup.c:404
 msgid "Print option help"
-msgstr "Tampilkan opsi bantuan"
+msgstr "Tampilkan pilihan bantuan"
 
 #: lexsup.c:406
 msgid "Call SYMBOL at load-time"
@@ -1695,7 +1695,7 @@ msgstr "Tampilkan statistik penggunaan memori"
 
 #: lexsup.c:501
 msgid "Display target specific options"
-msgstr "Tampilkan opsi target spesifik"
+msgstr "Tampilkan pilihan target spesifik"
 
 #: lexsup.c:503
 msgid "Do task level linking"
@@ -1809,19 +1809,19 @@ msgstr "Gunakan fungsi wrapper untuk SIMBOL"
 
 #: lexsup.c:712
 msgid "%P: unrecognized option '%s'\n"
-msgstr "%P: opsi tidak dikenal '%s'\n"
+msgstr "%P: pilihan tidak dikenal '%s'\n"
 
 #: lexsup.c:716
 msgid "%P%F: use the --help option for usage information\n"
-msgstr "%P%F: gunakan opsi --help untuk informasi penggunaan\n"
+msgstr "%P%F: gunakan pilihan --help untuk informasi penggunaan\n"
 
 #: lexsup.c:734
 msgid "%P%F: unrecognized -a option `%s'\n"
-msgstr "%P%F: opsi -a tidak dikenal `%s'\n"
+msgstr "%P%F: pilihan -a tidak dikenal `%s'\n"
 
 #: lexsup.c:747
 msgid "%P%F: unrecognized -assert option `%s'\n"
-msgstr "%P%F: opsi -assert tidak dikenal `%s'\n"
+msgstr "%P%F: pilihan -assert tidak dikenal `%s'\n"
 
 #: lexsup.c:790
 msgid "%F%P: unknown demangling style `%s'"
@@ -1833,7 +1833,7 @@ msgstr "%P%F: nomor tidak valid `%s'\n"
 
 #: lexsup.c:950
 msgid "%P%F: bad --unresolved-symbols option: %s\n"
-msgstr "%P%F: buruk opsi --unresolved-symbols: %s\n"
+msgstr "%P%F: buruk pilihan --unresolved-symbols: %s\n"
 
 #. This can happen if the user put "-rpath,a" on the command
 #. line.  (Or something similar.  The comma is important).
@@ -1845,7 +1845,7 @@ msgstr "%P%F: buruk opsi --unresolved-symbols: %s\n"
 #. and will seg-fault the next time around.
 #: lexsup.c:1024
 msgid "%P%F: bad -rpath option\n"
-msgstr "%P%F: opsi -rpath buruk\n"
+msgstr "%P%F: pilihan -rpath buruk\n"
 
 #: lexsup.c:1135
 msgid "%P%F: -shared not supported\n"
@@ -1865,7 +1865,7 @@ msgstr "meningkat"
 
 #: lexsup.c:1157
 msgid "%P%F: invalid common section sorting option: %s\n"
-msgstr "%P%F: opsi pengurutan daerah umum tidak valid: %s\n"
+msgstr "%P%F: pilihan pengurutan daerah umum tidak valid: %s\n"
 
 #: lexsup.c:1161
 msgid "name"
@@ -1877,15 +1877,15 @@ msgstr "alignment"
 
 #: lexsup.c:1166
 msgid "%P%F: invalid section sorting option: %s\n"
-msgstr "%P%F: opsi pengurutan daerah tidak valid: %s\n"
+msgstr "%P%F: pilihan pengurutan daerah tidak valid: %s\n"
 
 #: lexsup.c:1200
 msgid "%P%F: invalid argument to option \"--section-start\"\n"
-msgstr "%P%F: argumen ke opsi \"--section-start\" tidak valid\n"
+msgstr "%P%F: argumen ke pilihan \"--section-start\" tidak valid\n"
 
 #: lexsup.c:1207
 msgid "%P%F: missing argument(s) to option \"--section-start\"\n"
-msgstr "%P%F: hilang argumen ke opsi \"--section-start\"\n"
+msgstr "%P%F: hilang argumen ke pilihan \"--section-start\"\n"
 
 #: lexsup.c:1421
 msgid "%P%F: may not nest groups (--help for usage)\n"
@@ -1906,12 +1906,12 @@ msgstr "%P%F: nomor hex tidak valid `%s'\n"
 #: lexsup.c:1556
 #, c-format
 msgid "Usage: %s [options] file...\n"
-msgstr "Penggunaan: %s [opsi] berkas...\n"
+msgstr "Penggunaan: %s [pilihan] berkas...\n"
 
 #: lexsup.c:1558
 #, c-format
 msgid "Options:\n"
-msgstr "Opsi:\n"
+msgstr "Pilihan:\n"
 
 #: lexsup.c:1636
 #, c-format
@@ -1921,7 +1921,7 @@ msgstr "  @BERKAS"
 #: lexsup.c:1639
 #, c-format
 msgid "Read options from FILE\n"
-msgstr "Baca opsi dari BERKAS\n"
+msgstr "Baca pilihan dari BERKAS\n"
 
 #. Note: Various tools (such as libtool) depend upon the
 #. format of the listings below - do not change them.
@@ -1938,7 +1938,7 @@ msgstr "%s: emulasi yang didukung: "
 #: lexsup.c:1657
 #, c-format
 msgid "%s: emulation specific options:\n"
-msgstr "%s: opsi spesifik emulasi:\n"
+msgstr "%s: pilihan spesifik emulasi:\n"
 
 #: lexsup.c:1662
 #, c-format
