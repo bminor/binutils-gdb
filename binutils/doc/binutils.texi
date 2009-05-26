@@ -170,7 +170,7 @@ in the section entitled ``GNU Free Documentation License''.
 @c man title ar create, modify, and extract from archives
 
 @smallexample
-ar [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
+ar [@option{--plugin} @var{name}] [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
 ar -M [ <mri-script ]
 @end smallexample
 
@@ -245,7 +245,7 @@ program.
 
 @smallexample
 @c man begin SYNOPSIS ar
-ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
+ar [@option{--plugin} @var{name}] [@option{-X32_64}] [@option{-}]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
 @c man end
 @end smallexample
 
@@ -488,6 +488,11 @@ default for @sc{gnu} @command{ar}.  @command{ar} does not support any of the oth
 @samp{-X} options; in particular, it does not support @option{-X32}
 which is the default for AIX @command{ar}.
 
+The optional command line switch @option{--plugin} @var{name} causes
+@command{ar} to load the plugin called @var{name} which adds support
+for more file formats.  This option is only available if the toolchain
+has been built with plugin support enabled.
+
 @c man end
 
 @ignore
@@ -677,7 +682,8 @@ The @sc{gnu} linker @command{ld} is now described in a separate manual.
 
 @smallexample
 @c man begin SYNOPSIS nm
-nm [@option{-a}|@option{--debug-syms}] [@option{-g}|@option{--extern-only}]
+nm [@option{-a}|@option{--debug-syms}]
+   [@option{-g}|@option{--extern-only}][@option{--plugin} @var{name}]
    [@option{-B}] [@option{-C}|@option{--demangle}[=@var{style}]] [@option{-D}|@option{--dynamic}]
    [@option{-S}|@option{--print-size}] [@option{-s}|@option{--print-armap}]
    [@option{-A}|@option{-o}|@option{--print-file-name}][@option{--special-syms}]
@@ -858,6 +864,12 @@ either upper or lower case.
 @itemx --extern-only
 @cindex external symbols
 Display only external symbols.
+
+@item --plugin @var{name}
+@cindex load plugin
+Load the plugin called @var{name} to add support for extra target
+types.  This option is only available if the toolchain has been built
+with plugin support enabled.
 
 @item -l
 @itemx --line-numbers

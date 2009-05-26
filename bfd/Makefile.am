@@ -26,6 +26,10 @@ bfdlib_LTLIBRARIES = libbfd.la
 WARN_CFLAGS = @WARN_CFLAGS@
 NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS)
+AM_CPPFLAGS = -DBINDIR='"$(bindir)"'
+if PLUGINS
+LIBDL = -ldl
+endif
 
 # bfd.h goes here, for now
 BFD_H = bfd.h
@@ -74,38 +78,39 @@ ALL_MACHINES = \
 	cpu-dlx.lo \
 	cpu-fr30.lo \
 	cpu-frv.lo \
-	cpu-moxie.lo \
 	cpu-h8300.lo \
 	cpu-h8500.lo \
 	cpu-hppa.lo \
-	cpu-ia64.lo \
 	cpu-i370.lo \
 	cpu-i386.lo \
 	cpu-i860.lo \
 	cpu-i960.lo \
+	cpu-ia64.lo \
 	cpu-ip2k.lo \
 	cpu-iq2000.lo \
 	cpu-lm32.lo \
+	cpu-m10200.lo \
+	cpu-m10300.lo \
 	cpu-m32c.lo \
 	cpu-m32r.lo \
 	cpu-m68hc11.lo \
 	cpu-m68hc12.lo \
 	cpu-m68k.lo \
 	cpu-m88k.lo \
-	cpu-m10200.lo \
-	cpu-m10300.lo \
 	cpu-maxq.lo \
 	cpu-mcore.lo \
 	cpu-mep.lo \
 	cpu-mips.lo \
 	cpu-mmix.lo \
-	cpu-mt.lo \
+	cpu-moxie.lo \
 	cpu-msp430.lo \
-	cpu-or32.lo \
+	cpu-mt.lo \
 	cpu-ns32k.lo \
 	cpu-openrisc.lo \
+	cpu-or32.lo \
 	cpu-pdp11.lo \
 	cpu-pj.lo \
+	cpu-plugin.lo \
 	cpu-powerpc.lo \
 	cpu-rs6000.lo \
 	cpu-s390.lo \
@@ -119,11 +124,11 @@ ALL_MACHINES = \
 	cpu-tic80.lo \
 	cpu-v850.lo \
 	cpu-vax.lo \
-	cpu-we32k.lo \
 	cpu-w65.lo \
+	cpu-we32k.lo \
+	cpu-xc16x.lo \
 	cpu-xstormy16.lo \
 	cpu-xtensa.lo \
-	cpu-xc16x.lo \
 	cpu-z80.lo \
 	cpu-z8k.lo
 
@@ -134,46 +139,47 @@ ALL_MACHINES_CFILES = \
 	cpu-avr.c \
 	cpu-bfin.c \
 	cpu-cr16.c \
-	cpu-cris.c \
 	cpu-cr16c.c \
+	cpu-cris.c \
 	cpu-crx.c \
 	cpu-d10v.c \
 	cpu-d30v.c \
 	cpu-dlx.c \
 	cpu-fr30.c \
 	cpu-frv.c \
-	cpu-moxie.c \
 	cpu-h8300.c \
 	cpu-h8500.c \
 	cpu-hppa.c \
-	cpu-ia64.c \
 	cpu-i370.c \
 	cpu-i386.c \
 	cpu-i860.c \
 	cpu-i960.c \
+	cpu-ia64.c \
 	cpu-ip2k.c \
 	cpu-iq2000.c \
 	cpu-lm32.c \
+	cpu-m10200.c \
+	cpu-m10300.c \
 	cpu-m32c.c \
 	cpu-m32r.c \
 	cpu-m68hc11.c \
 	cpu-m68hc12.c \
 	cpu-m68k.c \
 	cpu-m88k.c \
-	cpu-m10200.c \
-	cpu-m10300.c \
 	cpu-maxq.c \
 	cpu-mcore.c \
 	cpu-mep.c \
 	cpu-mips.c \
 	cpu-mmix.c \
-	cpu-mt.c \
+	cpu-moxie.c \
 	cpu-msp430.c \
-	cpu-or32.c \
+	cpu-mt.c \
 	cpu-ns32k.c \
 	cpu-openrisc.c \
+	cpu-or32.c \
 	cpu-pdp11.c \
 	cpu-pj.c \
+	cpu-plugin.c \
 	cpu-powerpc.c \
 	cpu-rs6000.c \
 	cpu-s390.c \
@@ -187,11 +193,11 @@ ALL_MACHINES_CFILES = \
 	cpu-tic80.c \
 	cpu-v850.c \
 	cpu-vax.c \
-	cpu-we32k.c \
 	cpu-w65.c \
+	cpu-we32k.c \
+	cpu-xc16x.c \
 	cpu-xstormy16.c \
 	cpu-xtensa.c \
-	cpu-xc16x.c \
 	cpu-z80.c \
 	cpu-z8k.c
 
@@ -213,10 +219,10 @@ BFD32_BACKENDS = \
 	coff-apollo.lo \
 	coff-arm.lo \
 	coff-aux.lo \
+	coff-go32.lo \
 	coff-h8300.lo \
 	coff-h8500.lo \
 	coff-i386.lo \
-	coff-go32.lo \
 	coff-i860.lo \
 	coff-i960.lo \
 	coff-m68k.lo \
@@ -234,14 +240,20 @@ BFD32_BACKENDS = \
 	coff-tic54x.lo \
 	coff-tic80.lo \
 	coff-u68k.lo \
-	coff-we32k.lo \
 	coff-w65.lo \
+	coff-we32k.lo \
 	coff-z80.lo \
 	coff-z8k.lo \
 	cofflink.lo \
 	dwarf1.lo \
 	ecoff.lo \
 	ecofflink.lo \
+	elf-attrs.lo \
+	elf-eh-frame.lo \
+	elf-m10200.lo \
+	elf-m10300.lo \
+	elf-strtab.lo \
+	elf-vxworks.lo \
 	elf.lo \
 	elf32-am33lin.lo \
 	elf32-arc.lo \
@@ -257,7 +269,6 @@ BFD32_BACKENDS = \
 	elf32-dlx.lo \
 	elf32-fr30.lo \
 	elf32-frv.lo \
-	elf32-moxie.lo \
 	elf32-gen.lo \
 	elf32-h8300.lo \
 	elf32-hppa.lo \
@@ -275,51 +286,45 @@ BFD32_BACKENDS = \
 	elf32-m68hc1x.lo \
 	elf32-m68k.lo \
 	elf32-m88k.lo \
-	elf-m10200.lo \
-	elf-m10300.lo \
 	elf32-mcore.lo \
 	elf32-mep.lo \
-	elfxx-mips.lo \
 	elf32-mips.lo \
-	elf32-mt.lo \
+	elf32-moxie.lo \
 	elf32-msp430.lo \
+	elf32-mt.lo \
 	elf32-openrisc.lo \
 	elf32-or32.lo \
 	elf32-pj.lo \
 	elf32-ppc.lo \
 	elf32-s390.lo \
-	elf32-sh.lo \
 	elf32-sh-symbian.lo \
-	elf32-sh64.lo \
+	elf32-sh.lo \
 	elf32-sh64-com.lo \
-	elfxx-sparc.lo \
+	elf32-sh64.lo \
 	elf32-sparc.lo \
 	elf32-spu.lo \
 	elf32-v850.lo \
 	elf32-vax.lo \
+	elf32-xc16x.lo \
 	elf32-xstormy16.lo \
 	elf32-xtensa.lo \
-	elf32-xc16x.lo \
 	elf32.lo \
 	elflink.lo \
-	elf-attrs.lo \
-	elf-strtab.lo \
-	elf-eh-frame.lo \
-	elf-vxworks.lo \
+	elfxx-mips.lo \
+	elfxx-sparc.lo \
 	epoc-pe-arm.lo \
 	epoc-pei-arm.lo \
 	hp300bsd.lo \
 	hp300hpux.lo \
-	som.lo \
 	i386aout.lo \
 	i386bsd.lo \
 	i386dynix.lo \
 	i386freebsd.lo \
 	i386linux.lo \
 	i386lynx.lo \
+	i386mach3.lo \
 	i386msdos.lo \
 	i386netbsd.lo \
-	i386mach3.lo \
 	i386os9k.lo \
 	ieee.lo \
 	m68k4knetbsd.lo \
@@ -332,45 +337,47 @@ BFD32_BACKENDS = \
 	newsos3.lo \
 	nlm.lo \
 	nlm32-i386.lo \
-	nlm32-sparc.lo \
 	nlm32-ppc.lo \
+	nlm32-sparc.lo \
 	nlm32.lo \
 	ns32knetbsd.lo \
 	oasys.lo \
 	pc532-mach.lo \
 	pdp11.lo \
-	pef.lo \
-	pe-arm.lo \
-	pei-arm.lo \
 	pe-arm-wince.lo \
-	pei-arm-wince.lo \
+	pe-arm.lo \
 	pe-i386.lo \
-	pei-i386.lo \
 	pe-mcore.lo \
-	pei-mcore.lo \
-	pe-ppc.lo \
-	pei-ppc.lo \
-	pe-sh.lo \
-	pei-sh.lo \
 	pe-mips.lo \
+	pe-ppc.lo \
+	pe-sh.lo \
+	pef.lo \
+	pei-arm-wince.lo \
+	pei-arm.lo \
+	pei-i386.lo \
+	pei-mcore.lo \
 	pei-mips.lo \
+	pei-ppc.lo \
+	pei-sh.lo \
 	peigen.lo \
+	plugin.lo \
 	ppcboot.lo \
 	reloc16.lo \
 	riscix.lo \
+	som.lo \
 	sparclinux.lo \
 	sparclynx.lo \
 	sparcnetbsd.lo \
 	sunos.lo \
-	vaxnetbsd.lo \
 	vax1knetbsd.lo \
 	vaxbsd.lo \
+	vaxnetbsd.lo \
 	versados.lo \
-	vms.lo \
 	vms-gsd.lo \
 	vms-hdr.lo \
 	vms-misc.lo \
 	vms-tir.lo \
+	vms.lo \
 	vmsutil.lo \
 	xcofflink.lo \
 	xsym.lo \
@@ -393,11 +400,11 @@ BFD32_BACKENDS_CFILES = \
 	coff-apollo.c \
 	coff-arm.c \
 	coff-aux.c \
+	coff-go32.c \
 	coff-h8300.c \
 	coff-h8500.c \
 	coff-i386.c \
 	coff-i860.c \
-	coff-go32.c \
 	coff-i960.c \
 	coff-m68k.c \
 	coff-m88k.c \
@@ -414,14 +421,20 @@ BFD32_BACKENDS_CFILES = \
 	coff-tic54x.c \
 	coff-tic80.c \
 	coff-u68k.c \
-	coff-we32k.c \
 	coff-w65.c \
+	coff-we32k.c \
 	coff-z80.c \
 	coff-z8k.c \
 	cofflink.c \
 	dwarf1.c \
 	ecoff.c \
 	ecofflink.c \
+	elf-attrs.c \
+	elf-eh-frame.c \
+	elf-m10200.c \
+	elf-m10300.c \
+	elf-strtab.c \
+	elf-vxworks.c \
 	elf.c \
 	elf32-am33lin.c \
 	elf32-arc.c \
@@ -437,7 +450,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-dlx.c \
 	elf32-fr30.c \
 	elf32-frv.c \
-	elf32-moxie.c \
 	elf32-gen.c \
 	elf32-h8300.c \
 	elf32-hppa.c \
@@ -450,56 +462,50 @@ BFD32_BACKENDS_CFILES = \
 	elf32-lm32.c \
 	elf32-m32c.c \
 	elf32-m32r.c \
-	elf32-m68k.c \
 	elf32-m68hc11.c \
 	elf32-m68hc12.c \
 	elf32-m68hc1x.c \
+	elf32-m68k.c \
 	elf32-m88k.c \
-	elf-m10200.c \
-	elf-m10300.c \
 	elf32-mcore.c \
 	elf32-mep.c \
-	elfxx-mips.c \
 	elf32-mips.c \
-	elf32-mt.c \
+	elf32-moxie.c \
 	elf32-msp430.c \
+	elf32-mt.c \
 	elf32-openrisc.c \
 	elf32-or32.c \
 	elf32-pj.c \
 	elf32-ppc.c \
-	elf32-sh64.c \
-	elf32-sh64-com.c \
 	elf32-s390.c \
-	elf32-sh.c \
 	elf32-sh-symbian.c \
-	elfxx-sparc.c \
+	elf32-sh.c \
+	elf32-sh64-com.c \
+	elf32-sh64.c \
 	elf32-sparc.c \
 	elf32-spu.c \
 	elf32-v850.c \
 	elf32-vax.c \
+	elf32-xc16x.c \
 	elf32-xstormy16.c \
 	elf32-xtensa.c \
-	elf32-xc16x.c \
 	elf32.c \
 	elflink.c \
-	elf-attrs.c \
-	elf-strtab.c \
-	elf-eh-frame.c \
-	elf-vxworks.c \
+	elfxx-mips.c \
+	elfxx-sparc.c \
 	epoc-pe-arm.c \
 	epoc-pei-arm.c \
 	hp300bsd.c \
 	hp300hpux.c \
-	som.c \
 	i386aout.c \
 	i386bsd.c \
 	i386dynix.c \
 	i386freebsd.c \
 	i386linux.c \
 	i386lynx.c \
+	i386mach3.c \
 	i386msdos.c \
 	i386netbsd.c \
-	i386mach3.c \
 	i386os9k.c \
 	ieee.c \
 	m68k4knetbsd.c \
@@ -512,44 +518,46 @@ BFD32_BACKENDS_CFILES = \
 	newsos3.c \
 	nlm.c \
 	nlm32-i386.c \
-	nlm32-sparc.c \
 	nlm32-ppc.c \
+	nlm32-sparc.c \
 	nlm32.c \
 	ns32knetbsd.c \
 	oasys.c \
 	pc532-mach.c \
 	pdp11.c \
-	pef.c \
-	pe-arm.c \
-	pei-arm.c \
 	pe-arm-wince.c \
-	pei-arm-wince.c \
+	pe-arm.c \
 	pe-i386.c \
-	pei-i386.c \
 	pe-mcore.c \
-	pei-mcore.c \
-	pe-ppc.c \
-	pei-ppc.c \
-	pe-sh.c \
-	pei-sh.c \
 	pe-mips.c \
+	pe-ppc.c \
+	pe-sh.c \
+	pef.c \
+	pei-arm-wince.c \
+	pei-arm.c \
+	pei-i386.c \
+	pei-mcore.c \
 	pei-mips.c \
+	pei-ppc.c \
+	pei-sh.c \
+	plugin.c \
 	ppcboot.c \
 	reloc16.c \
 	riscix.c \
+	som.c \
 	sparclinux.c \
 	sparclynx.c \
 	sparcnetbsd.c \
 	sunos.c \
-	vaxnetbsd.c \
 	vax1knetbsd.c \
 	vaxbsd.c \
+	vaxnetbsd.c \
 	versados.c \
-	vms.c \
 	vms-gsd.c \
 	vms-hdr.c \
 	vms-misc.c \
 	vms-tir.c \
+	vms.c \
 	vmsutil.c \
 	xcofflink.c \
 	xsym.c \
@@ -565,30 +573,30 @@ BFD64_BACKENDS = \
 	aix5ppc-core.lo \
 	aout64.lo \
 	coff-alpha.lo \
+	coff-x86_64.lo \
 	coff64-rs6000.lo \
 	demo64.lo \
-	pei-ia64.lo \
-	elf64-x86-64.lo \
-	elf64-alpha.lo \
-	elf64-hppa.lo \
 	elf32-ia64.lo \
-	elf64-ia64.lo \
-	elf64-gen.lo \
-	elfn32-mips.lo \
-	elf64-mips.lo \
-	elf64-mmix.lo \
 	elf32-score.lo \
 	elf32-score7.lo \
-	elf64-sh64.lo \
+	elf64-alpha.lo \
+	elf64-gen.lo \
+	elf64-hppa.lo \
+	elf64-ia64.lo \
+	elf64-mips.lo \
+	elf64-mmix.lo \
 	elf64-ppc.lo \
 	elf64-s390.lo \
+	elf64-sh64.lo \
 	elf64-sparc.lo \
+	elf64-x86-64.lo \
 	elf64.lo \
+	elfn32-mips.lo \
 	mmo.lo \
 	nlm32-alpha.lo \
 	nlm64.lo \
-	coff-x86_64.lo \
 	pe-x86_64.lo \
+	pei-ia64.lo \
 	pei-x86_64.lo \
 	pepigen.lo \
 	pex64igen.lo
@@ -597,49 +605,49 @@ BFD64_BACKENDS_CFILES = \
 	aix5ppc-core.c \
 	aout64.c \
 	coff-alpha.c \
+	coff-x86_64.c \
 	coff64-rs6000.c \
 	demo64.c \
-	pei-ia64.c \
-	elf64-x86-64.c \
+	elf32-score.c \
+	elf32-score7.c \
 	elf64-alpha.c \
-	elf64-hppa.c \
 	elf64-gen.c \
-	elfn32-mips.c \
+	elf64-hppa.c \
 	elf64-mips.c \
 	elf64-mmix.c \
 	elf64-ppc.c \
 	elf64-s390.c \
-	elf32-score.c \
-	elf32-score7.c \
 	elf64-sh64.c \
 	elf64-sparc.c \
+	elf64-x86-64.c \
 	elf64.c \
+	elfn32-mips.c \
 	mmo.c \
 	nlm32-alpha.c \
 	nlm64.c \
-	coff-x86_64.c \
 	pe-x86_64.c \
+	pei-ia64.c \
 	pei-x86_64.c
 
 OPTIONAL_BACKENDS = \
 	aix386-core.lo \
+	cisco-core.lo \
 	hpux-core.lo \
 	irix-core.lo \
 	lynx-core.lo \
 	osf-core.lo \
 	sco5-core.lo \
-	trad-core.lo \
-	cisco-core.lo
+	trad-core.lo
 
 OPTIONAL_BACKENDS_CFILES = \
 	aix386-core.c \
+	cisco-core.c \
 	hpux-core.c \
 	irix-core.c \
 	lynx-core.c \
 	osf-core.c \
 	sco5-core.c \
-	trad-core.c \
-	cisco-core.c
+	trad-core.c
 
 # We want to rerun configure if configure.in, config.bfd or
 # configure.host change. configure.in is needed since the version
@@ -789,7 +797,7 @@ ofiles: stamp-ofiles ; @true
 # libbfd_la_SOURCES, we put BFD64_LIBS in OFILES instead.
 libbfd_la_SOURCES = $(BFD32_LIBS_CFILES)
 libbfd_la_DEPENDENCIES = $(OFILES) ofiles
-libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@
+libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL)
 libbfd_la_LDFLAGS = -release `cat libtool-soversion` @SHARED_LDFLAGS@
 
 # libtool will build .libs/libbfd.a.  We create libbfd.a in the build
@@ -1276,10 +1284,6 @@ cpu-frv.lo: \
   cpu-frv.c \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
-cpu-moxie.lo: \
-  cpu-moxie.c \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/hashtab.h
 cpu-h8300.lo: \
   cpu-h8300.c \
   $(INCDIR)/filenames.h \
@@ -1380,12 +1384,16 @@ cpu-mmix.lo: \
   cpu-mmix.c \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
-cpu-mt.lo: \
-  cpu-mt.c \
+cpu-moxie.lo: \
+  cpu-moxie.c \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
 cpu-msp430.lo: \
   cpu-msp430.c \
+  $(INCDIR)/filenames.h \
+  $(INCDIR)/hashtab.h
+cpu-mt.lo: \
+  cpu-mt.c \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
 cpu-or32.lo: \
@@ -1407,6 +1415,10 @@ cpu-pdp11.lo: \
   $(INCDIR)/hashtab.h
 cpu-pj.lo: \
   cpu-pj.c \
+  $(INCDIR)/filenames.h \
+  $(INCDIR)/hashtab.h
+cpu-plugin.lo: \
+  cpu-plugin.c \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
 cpu-powerpc.lo: \
@@ -2199,18 +2211,6 @@ elf32-frv.lo: \
   $(INCDIR)/hashtab.h \
   elf-bfd.h \
   elf32-target.h
-elf32-moxie.lo: \
-  elf32-moxie.c \
-  $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/external.h \
-  $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/moxie.h \
-  $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/hashtab.h \
-  elf-bfd.h \
-  elf32-target.h
 elf32-gen.lo: \
   elf32-gen.c \
   $(INCDIR)/bfdlink.h \
@@ -2513,13 +2513,13 @@ elf32-mips.lo: \
   elf32-target.h \
   elfxx-mips.h \
   genlink.h
-elf32-mt.lo: \
-  elf32-mt.c \
+elf32-moxie.lo: \
+  elf32-moxie.c \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/mt.h \
+  $(INCDIR)/elf/moxie.h \
   $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h \
@@ -2536,6 +2536,18 @@ elf32-msp430.lo: \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h \
   $(INCDIR)/libiberty.h \
+  elf-bfd.h \
+  elf32-target.h
+elf32-mt.lo: \
+  elf32-mt.c \
+  $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/mt.h \
+  $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/filenames.h \
+  $(INCDIR)/hashtab.h \
   elf-bfd.h \
   elf32-target.h
 elf32-openrisc.lo: \
@@ -3402,6 +3414,13 @@ pei-mips.lo: \
   libpei.h \
   pe-mips.c \
   peicode.h
+plugin.lo: \
+  plugin.c \
+  $(INCDIR)/plugin-api.h \
+  $(INCDIR)/filenames.h \
+  plugin.h \
+  $(INCDIR)/hashtab.h \
+  $(INCDIR)/libiberty.h
 ppcboot.lo: \
   ppcboot.c \
   $(INCDIR)/filenames.h \

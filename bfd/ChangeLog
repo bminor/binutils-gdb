@@ -1,3 +1,29 @@
+2009-05-26  Rafael Avila de Espindola  <espindola@google.com>
+
+	* Makefile.am: Run "make dep-am".
+	(AM_CPPFLAGS): New.
+	(LIBDL): New.
+	(ALL_MACHINES): Add cpu-plugin.lo.
+	(ALL_MACHINES_CFILES): Add cpu-plugin.c.
+	(BFD32_BACKENDS): Add plugin.lo.
+	(BFD32_BACKENDS_CFILES): Add plugin.c.
+	(libbfd_la_LIBADD): Add LIBDL
+	* archures.c (bfd_architecture): Add bfd_arch_plugin.
+	(bfd_plugin_arch): Declare.
+	* bfd-in.h (BFD_SUPPORTS_PLUGINS): New.
+	* bfd.c (bfd): Add plugin_data.
+	* config.bfd: Handle the plugin target.
+	* configure.in: Check for --enable-plugins.
+	(LT_INIT): Use the dlopen option.
+	* cpu-plugin.c: New.
+	* plugin.c: New.
+	* plugin.h: New.
+	* targets.c (plugin_vec): Declare.
+	(_bfd_target_vector): Add plugin_vec.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+
 2009-05-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Don't modify .o to .lo here.  Output one filename

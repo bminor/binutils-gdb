@@ -1,6 +1,6 @@
 /* nm.c -- Describe symbol table of a rel file.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2007
+   2001, 2002, 2003, 2004, 2005, 2007, 2009
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -31,6 +31,7 @@
 #include "elf-bfd.h"
 #include "elf/common.h"
 #include "bucomm.h"
+#include "plugin.h"
 
 /* When sorting by size, we use this structure to hold the size and a
    pointer to the minisymbol.  */
@@ -178,6 +179,7 @@ static bfd *lineno_cache_bfd;
 static bfd *lineno_cache_rel_bfd;
 
 #define OPTION_TARGET 200
+#define OPTION_PLUGIN 201
 
 static struct option long_options[] =
 {
@@ -192,6 +194,7 @@ static struct option long_options[] =
   {"no-demangle", no_argument, &do_demangle, 0},
   {"no-sort", no_argument, &no_sort, 1},
   {"numeric-sort", no_argument, &sort_numerically, 1},
+  {"plugin", required_argument, 0, OPTION_PLUGIN},
   {"portability", no_argument, 0, 'P'},
   {"print-armap", no_argument, &print_armap, 1},
   {"print-file-name", no_argument, 0, 'o'},
@@ -237,8 +240,11 @@ usage (FILE *stream, int status)
   -o                     Same as -A\n\
   -p, --no-sort          Do not sort the symbols\n\
   -P, --portability      Same as --format=posix\n\
-  -r, --reverse-sort     Reverse the sense of the sort\n\
-  -S, --print-size       Print size of defined symbols\n\
+  -r, --reverse-sort     Reverse the sense of the sort\n"
+#if BFD_SUPPORTS_PLUGINS
+"      --plugin NAME      Load the specified plugin\n"
+#endif
+"  -S, --print-size       Print size of defined symbols\n\
   -s, --print-armap      Include index for symbols from archive members\n\
       --size-sort        Sort symbols by size\n\
       --special-syms     Include special symbols in the output\n\
@@ -1606,6 +1612,14 @@ main (int argc, char **argv)
 
 	case OPTION_TARGET:	/* --target */
 	  target = optarg;
+	  break;
+
+	case OPTION_PLUGIN:	/* --plugin */
+#if BFD_SUPPORTS_PLUGINS
+	  bfd_plugin_set_plugin (optarg);
+#else
+	  fatal (_("sorry - this program has been built without plugin support\n"));
+#endif
 	  break;
 
 	case 0:		/* A long option that just sets a flag.  */

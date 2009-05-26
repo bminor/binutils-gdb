@@ -137,6 +137,11 @@ case "${targ}" in
     exit 1
     ;;
 
+  plugin)
+    targ_defvec=plugin_vec
+    targ_selvecs="plugin_vec"
+    ;;
+
 # START OF targmatch.h
 #ifdef BFD64
   alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)

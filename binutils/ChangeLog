@@ -1,3 +1,16 @@
+2009-05-26  Rafael Avila de Espindola  <espindola@google.com>
+
+	* ar.c: Include plugin.h.
+	(main): Handle the --plugin option.
+	* nm.c: Include plugin.h.
+	(OPTION_PLUGIN): New.
+	(long_options): Add plugin.
+	(main): Handle OPTION_PLUGIN.
+	* NEWS: Mention  the new feature.
+	* doc/binutils: Documement the new command line options.
+	* configure.in: Check for --enable-plugins.
+	* configure: Regenerate.
+
 2009-05-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Output one filename per line with all lines having

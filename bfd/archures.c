@@ -204,6 +204,7 @@ DESCRIPTION
 .#define bfd_mach_h8300sx  6
 .#define bfd_mach_h8300sxn 7
 .  bfd_arch_pdp11,     {* DEC PDP-11 *}
+.  bfd_arch_plugin,
 .  bfd_arch_powerpc,   {* PowerPC *}
 .#define bfd_mach_ppc		32
 .#define bfd_mach_ppc64		64
@@ -501,6 +502,7 @@ extern const bfd_arch_info_type bfd_openrisc_arch;
 extern const bfd_arch_info_type bfd_or32_arch;
 extern const bfd_arch_info_type bfd_pdp11_arch;
 extern const bfd_arch_info_type bfd_pj_arch;
+extern const bfd_arch_info_type bfd_plugin_arch;
 extern const bfd_arch_info_type bfd_powerpc_archs[];
 #define bfd_powerpc_arch bfd_powerpc_archs[0]
 extern const bfd_arch_info_type bfd_rs6000_arch;

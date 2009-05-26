@@ -766,6 +766,7 @@ extern const bfd_target pc532netbsd_vec;
 extern const bfd_target pdp11_aout_vec;
 extern const bfd_target pef_vec;
 extern const bfd_target pef_xlib_vec;
+extern const bfd_target plugin_vec;
 extern const bfd_target pmac_xcoff_vec;
 extern const bfd_target ppcboot_vec;
 extern const bfd_target riscix_vec;
@@ -1144,6 +1145,7 @@ static const bfd_target * const _bfd_target_vector[] =
 	&pdp11_aout_vec,
 	&pef_vec,
 	&pef_xlib_vec,
+	&plugin_vec,
 #if 0
 	/* This has the same magic number as RS/6000.  */
 	&pmac_xcoff_vec,
