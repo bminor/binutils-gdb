@@ -1,3 +1,21 @@
+2009-05-26  Doug Kwan  <dougkwan@google.com>
+
+	* options.cc (General_options::parse_exclude_libs).  Fix a comment.
+	(General_options::check_excluded_libs): Strip off directories in
+	archive name before matching like GNU ld does.
+	* testsuite/Makefile.am (MOSTLYCLEANFILES,
+	exclude_libs_test_DEPENDENCIES): Add alt/libexclude_libs_test_3.a
+	(exclude_libs_test_LDFLAGS): Add linker option
+	-Wl,--exclude-libs,libexclude_libs_test_3
+	(exclude_libs_test_LADD): Add alt/libexclude_libs_test_3.a as
+	an explicit archive without using -l.
+	(alt/libexclude_libs_test_3.a): New make rule.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/exclude_libs_test.c : Declare lib3_default().
+	(main): Call it.
+	* exclude_libs_test.sh: Add tests for alt/exclude_libs_test_3.a.
+	* exclude_libs_test_3.c: New file.
+
 2009-05-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/id.po: New Indonesian translation.
