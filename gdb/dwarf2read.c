@@ -9577,6 +9577,10 @@ maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
   queue_comp_unit (per_cu, this_cu->objfile);
 }
 
+/* Follow reference attribute ATTR of SRC_DIE.
+   On entry *REF_CU is the CU of SRC_DIE.
+   On exit *REF_CU is the CU of the result.  */
+
 static struct die_info *
 follow_die_ref (struct die_info *src_die, struct attribute *attr,
 		struct dwarf2_cu **ref_cu)
@@ -10830,9 +10834,6 @@ get_die_type (struct die_info *die, struct dwarf2_cu *cu)
     return NULL;
 }
 
-/* Set the mark field in CU and in every other compilation unit in the
-   cache that we must keep because we are keeping CU.  */
-
 /* Add a dependence relationship from CU to REF_PER_CU.  */
 
 static void
@@ -10853,7 +10854,8 @@ dwarf2_add_dependence (struct dwarf2_cu *cu,
     *slot = ref_per_cu;
 }
 
-/* Set the mark field in CU and in every other compilation unit in the
+/* Subroutine of dwarf2_mark to pass to htab_traverse.
+   Set the mark field in every compilation unit in the
    cache that we must keep because we are keeping CU.  */
 
 static int
@@ -10871,6 +10873,9 @@ dwarf2_mark_helper (void **slot, void *data)
 
   return 1;
 }
+
+/* Set the mark field in CU and in every other compilation unit in the
+   cache that we must keep because we are keeping CU.  */
 
 static void
 dwarf2_mark (struct dwarf2_cu *cu)

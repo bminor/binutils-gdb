@@ -1,3 +1,9 @@
+2009-05-26  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (follow_die_ref): Add comment.
+	(dwarf2_mark_helper): Tweak comment.
+	(dwarf2_mark): Move description to its proper place.
+
 2009-05-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* procfs.c (procfs_wait): Add options parameter.
