@@ -1196,25 +1196,6 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
   return TRUE;
 }
 
-/* Returns true if the hash entry refers to a symbol
-   marked for indirect handling during reloc processing.  */
-
-static bfd_boolean
-is_indirect_symbol (bfd * abfd, struct elf_link_hash_entry * h)
-{
-  const struct elf_backend_data * bed;
-
-  if (abfd == NULL || h == NULL)
-    return FALSE;
-
-  bed = get_elf_backend_data (abfd);
-
-  return h->type == STT_GNU_IFUNC
-    && (bed->elf_osabi == ELFOSABI_LINUX
-	/* GNU/Linux is still using the default value 0.  */
-	|| bed->elf_osabi == ELFOSABI_NONE);
-}
-
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure linkage
    table, and dynamic reloc sections.  */
@@ -2062,7 +2043,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
     }
-  else if (is_indirect_symbol (info->output_bfd, h)
+  else if (_bfd_elf_is_ifunc_symbol (info->output_bfd, h)
 	   && h->dynindx == -1
 	   && ! h->forced_local)
     {
@@ -2921,7 +2902,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  && h->dynindx != -1
 		  && ! h->forced_local
 		  && ((struct elf_i386_link_hash_entry *) h)->dyn_relocs != NULL
-		  && is_indirect_symbol (output_bfd, h))
+		  && _bfd_elf_is_ifunc_symbol (output_bfd, h))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL
@@ -2974,7 +2955,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  && h != NULL
 		  && h->dynindx != -1
 		  && ! h->forced_local
-		  && is_indirect_symbol (output_bfd, h)
+		  && _bfd_elf_is_ifunc_symbol (output_bfd, h)
 		  && elf_section_data (input_section)->indirect_relocs != NULL
 		  && elf_section_data (input_section)->indirect_relocs->contents != NULL)
 		sreloc = elf_section_data (input_section)->indirect_relocs;

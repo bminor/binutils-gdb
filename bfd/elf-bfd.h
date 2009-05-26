@@ -2155,6 +2155,9 @@ extern asection * _bfd_elf_make_ifunc_reloc_section
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;
 
+extern bfd_boolean _bfd_elf_is_ifunc_symbol
+  (bfd *, struct elf_link_hash_entry *);
+
 /* This is the condition under which finish_dynamic_symbol will be called.
    If our finish_dynamic_symbol isn't called, we'll need to do something
    about initializing any .plt and .got entries in relocate_section.  */

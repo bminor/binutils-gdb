@@ -1,3 +1,17 @@
+2009-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_is_ifunc_symbol): New.
+
+	* elf32-i386.c (is_indirect_symbol): Renamed to ...
+	* elflink.c (_bfd_elf_is_ifunc_symbol): This.
+
+	* elf32-i386.c (allocate_dynrelocs): Updated.
+	(elf_i386_relocate_section): Likewise.
+	* elf64-x86-64.c (allocate_dynrelocs): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+
+	* elf64-x86-64.c (is_indirect_symbol): Removed.
+
 2009-05-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/id.po: Updated Indonesian translation.

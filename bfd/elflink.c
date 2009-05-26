@@ -12553,3 +12553,22 @@ _bfd_elf_make_ifunc_reloc_section (bfd *         abfd,
 
   return reloc_sec;
 }
+
+/* Returns true if the hash entry refers to a symbol marked for
+   indirect handling during reloc processing.  */
+
+bfd_boolean
+_bfd_elf_is_ifunc_symbol (bfd *abfd, struct elf_link_hash_entry *h)
+{
+  const struct elf_backend_data * bed;
+
+  if (abfd == NULL || h == NULL)
+    return FALSE;
+
+  bed = get_elf_backend_data (abfd);
+
+  /* GNU/Linux is still using the default value ELFOSABI_NONE.  */
+  return (h->type == STT_GNU_IFUNC
+	  && (bed->elf_osabi == ELFOSABI_LINUX
+	      || bed->elf_osabi == ELFOSABI_NONE));
+}
