@@ -529,8 +529,7 @@ tab (int i, char *s)
   if (s)
     {
       p ();
-      printf (s);
-      printf ("\n");
+      puts (s);
     }
 }
 

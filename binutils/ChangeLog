@@ -1,3 +1,7 @@
+2009-05-27  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* sysdump.c (tab): Use puts rather than two printfs.
+
 2009-05-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/id.po: Updated Indonesian translation.
