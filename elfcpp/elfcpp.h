@@ -371,6 +371,17 @@ enum SHT
 
   SHT_SPARC_GOTDATA = 0x70000000,
 
+  // ARM-specific section types.
+  // Exception Index table.
+  SHT_ARM_EXIDX = 0x70000001,
+  // BPABI DLL dynamic linking pre-emption map.
+  SHT_ARM_PREEMPTMAP = 0x70000002,
+  // Object file compatibility attributes.
+  SHT_ARM_ATTRIBUTES = 0x70000003,
+  // Support for debugging overlaid programs.
+  SHT_ARM_DEBUGOVERLAY = 0x70000004,
+  SHT_ARM_OVERLAYSECTION = 0x70000005,
+
   // Link editor is to sort the entries in this section based on the
   // address specified in the associated symbol table entry.
   SHT_ORDERED = 0x7fffffff,
@@ -439,7 +450,11 @@ enum PT
   // Stack flags.
   PT_GNU_STACK = 0x6474e551,
   // Read only after relocation.
-  PT_GNU_RELRO = 0x6474e552
+  PT_GNU_RELRO = 0x6474e552,
+  // Platform architecture compatibility information
+  PT_ARM_ARCHEXT = 0x70000000,
+  // Exception unwind tables
+  PT_ARM_EXIDX = 0x70000001
 };
 
 // The valid bit flags found in the Phdr p_flags field.
@@ -486,6 +501,10 @@ enum STT
   // The section type that must be used for register symbols on
   // Sparc.  These symbols initialize a global register.
   STT_SPARC_REGISTER = 13,
+
+  // ARM: a THUMB function.  This is not defined in ARM ELF Specification but
+  // used by the GNU tool-chain.
+  STT_ARM_TFUNC = 13,
 };
 
 inline STB

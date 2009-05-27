@@ -1,3 +1,10 @@
+2009-05-27  Doug Kwan  <dougkwan@google.com>
+
+	* arm.h: New file.
+	* elfcpp.h (enum SHT): Add ARM-specific special sections.
+	(enum PT): Add ARM-specific section types.
+	(enum SST): Add STT_ARM_TFUNC.
+
 2009-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* elfcpp.h (enum STT): Add STT_GNU_IFUNC.
