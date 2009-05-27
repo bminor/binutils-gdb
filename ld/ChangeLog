@@ -1,3 +1,16 @@
+2009-05-27  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* deffilep.y (%union):  Add new string-type semantic value 'digits'.
+	(%token):  Remove NUMBER as token, add DIGITS.
+	(%type):  Add NUMBER as type.  Add new id types anylang_id, opt_id.
+	(ALIGNCOMM):  Parse an anylang_id instead of a plain ID.
+	(anylang_id):  New production.
+	(opt_digits):  Likewise.
+	(opt_id):  Likewise.
+	(NUMBER):  Likewise.
+	(def_lex):  Return strings of digits in raw string form as DIGITS
+	token, instead of converting to numeric integer type.
+
 2009-05-26  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldmain.c (main): Don't reject --relax -r.

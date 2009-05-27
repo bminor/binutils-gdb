@@ -1,3 +1,9 @@
+2009-05-27  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-pe/non-c-lang-syms.c:  New dump test source file.
+	* ld-pe/non-c-lang-syms.d:  New dump test pattern file.
+	* ld-pe/pe.exp:  Run new "foreign symbol" test.
+
 2009-05-26  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-powerpc/vxworks-relax-2.s: New.

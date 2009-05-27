@@ -69,3 +69,10 @@ run_dump_test "longsecn-4"
 run_dump_test "longsecn-5"
 
 run_dump_test "orphan"
+
+set foreign_sym_test {
+  {"non-C aligned common" "" "" {non-c-lang-syms.s}
+   {{nm -C non-c-lang-syms.d}} "non-c-lang-syms.x"}
+}
+
+run_ld_link_tests $foreign_sym_test
