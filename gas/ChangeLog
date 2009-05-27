@@ -1,3 +1,14 @@
+2009-05-26  Catherine Moore  <clm@codesourcery.com>
+
+	* config/tc-mips.c (check_for_24k_errata): Remove.
+	(md_mips_end): Remove call to check_for_24k_errata.
+	(start_noreorder): Likewise.
+	(s_change_sec): Likewise.
+	(s_change_section): Likewise.
+	(insns_between): Add 24k errata checks.
+	(append_insn): Remove declaration and references to nhdx_24k.
+	Remove calls to check_for_24k_errata.
+	    
 2009-05-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/id.po: Updated Indonesian translation.

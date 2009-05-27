@@ -1,5 +1,5 @@
 #objdump: -d
-#name: MIPS eret disassembly
+#name: MIPS eret-1 disassembly
 #as: -mfix-24k -march=24kc --no-warn
 
 .*\.o:     file format .*mips.*

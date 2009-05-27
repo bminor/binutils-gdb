@@ -1792,85 +1792,6 @@ reg_lookup (char **s, unsigned int types, unsigned int *regnop)
   return reg >= 0;
 }
 
-#define INSN_ERET  0x42000018
-#define INSN_DERET 0x4200001f
-
-/*  Implement the ERET/DERET Errata for MIPS 24k.
- 
-    If an ERET/DERET is encountered in a noreorder block,
-    warn if the ERET/DERET is followed by a branch instruction.
-    Also warn if the ERET/DERET is the last instruction in the 
-    noreorder block.
-
-    IF an ERET/DERET is in a reorder block and is followed by a
-    branch instruction, insert a nop.  */
-
-static void
-check_for_24k_errata (struct mips_cl_insn *insn, int eret_ndx)
-{
-  bfd_boolean next_insn_is_branch = FALSE;
-
-  /* eret_ndx will be -1 for the last instruction in a section
-     and the ERET/DERET will be in insn, not history.  */
-  if (insn
-      && eret_ndx == -1
-      && (insn->insn_opcode == INSN_ERET
-	  || insn->insn_opcode == INSN_DERET)
-      && insn->noreorder_p)
-    {
-      as_warn (_("ERET and DERET must be followed by a NOP on the 24K."));
-      return;
-    }
-   
-  if (history[eret_ndx].insn_opcode != INSN_ERET
-      && history[eret_ndx].insn_opcode != INSN_DERET)
-    return;
-
-  if (!insn)
-    {
-      if (history[eret_ndx].noreorder_p)
-	as_warn (_("ERET and DERET must be followed by a NOP on the 24K."));
-      return;
-    }
-
-  next_insn_is_branch = ((insn->insn_opcode == INSN_ERET)
-			 || (insn->insn_opcode == INSN_DERET)
-			 || (insn->insn_mo->pinfo
-			     & (INSN_UNCOND_BRANCH_DELAY
-				| INSN_COND_BRANCH_DELAY
-				| INSN_COND_BRANCH_LIKELY)));
-
-  if (next_insn_is_branch && history[eret_ndx].noreorder_p)
-    {
-      as_warn (_("ERET and DERET must be followed by a NOP on the 24K."));
-      return;
-    }
-
-  /* Emit nop if the next instruction is a branch.  */ 
-  if (next_insn_is_branch)
-    {
-      long nop_where, br_where;
-      struct frag *nop_frag, *br_frag;
-      struct mips_cl_insn br_insn, nop_insn;
-
-      emit_nop ();
-
-      nop_insn = history[eret_ndx - 1]; 
-      nop_frag = history[eret_ndx - 1].frag;
-      nop_where = history[eret_ndx - 1].where;
-
-      br_insn = history[eret_ndx];
-      br_frag = history[eret_ndx].frag;
-      br_where = history[eret_ndx].where;
-
-      move_insn (&nop_insn, br_frag, br_where);
-      move_insn (&br_insn, nop_frag, nop_where);
-
-      history[eret_ndx-1] = br_insn;
-      history[eret_ndx] = nop_insn;
-    }
-}
-
 /* Return TRUE if opcode MO is valid on the currently selected ISA and
    architecture.  If EXPANSIONP is TRUE then this check is done while
    expanding a macro.  Use is_opcode_valid_16 for MIPS16 opcodes.  */
@@ -2156,9 +2077,6 @@ md_begin (void)
 void
 md_mips_end (void)
 {
-  if (mips_fix_24k)
-    check_for_24k_errata ((struct mips_cl_insn *) &history[0], -1);
-
   if (! ECOFF_DEBUGGING)
     md_obj_end ();
 }
@@ -2536,6 +2454,9 @@ classify_vr4120_insn (const char *name)
   return NUM_FIX_VR4120_CLASSES;
 }
 
+#define INSN_ERET  0x42000018
+#define INSN_DERET 0x4200001f
+
 /* Return the number of instructions that must separate INSN1 and INSN2,
    where INSN1 is the earlier instruction.  Return the worst-case value
    for any INSN2 if INSN2 is null.  */
@@ -2572,6 +2493,24 @@ insns_between (const struct mips_cl_insn *insn1,
       && MF_HILO_INSN (pinfo1)
       && INSN2_USES_REG (EXTRACT_OPERAND (RD, *insn1), MIPS_GR_REG))
     return 2;
+
+  /* If we're working around 24K errata, one instruction is required
+     if an ERET or DERET is followed by a branch instruction.  */
+  if (mips_fix_24k)
+    {
+      if (insn1->insn_opcode == INSN_ERET
+	  || insn1->insn_opcode == INSN_DERET)
+	{
+	  if (insn2 == NULL
+	      || insn2->insn_opcode == INSN_ERET
+	      || insn2->insn_opcode == INSN_DERET
+	      || (insn2->insn_mo->pinfo
+		  & (INSN_UNCOND_BRANCH_DELAY
+		     | INSN_COND_BRANCH_DELAY
+		     | INSN_COND_BRANCH_LIKELY)) != 0)
+	    return 1;
+	}
+    }
 
   /* If working around VR4120 errata, check for combinations that need
      a single intervening instruction.  */
@@ -2789,7 +2728,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     bfd_reloc_code_real_type *reloc_type)
 {
   unsigned long prev_pinfo, pinfo;
-  int hndx_24k = 0;
   relax_stateT prev_insn_frag_type = 0;
   bfd_boolean relaxed_branch = FALSE;
   segment_info_type *si = seg_info (now_seg);
@@ -3347,8 +3285,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		     slot, and bump the destination address.  */
 		  insert_into_history (0, 1, ip);
 		  emit_nop ();
-		  if (mips_fix_24k)
-		    hndx_24k++;
 		}
 		
 	      if (mips_relax.sequence)
@@ -3389,11 +3325,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     insn information.  */
 	  if (pinfo & INSN_UNCOND_BRANCH_DELAY)
 	    {
-	      /* Check for eret/deret before clearing history.  */
-	      if (mips_fix_24k)
-		check_for_24k_errata (
-			(struct mips_cl_insn *) &history[hndx_24k],
-			hndx_24k+1);
 	      mips_no_prev_insn ();
 	    }
 	}
@@ -3405,18 +3336,12 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     the next instruction.  */
 	  insert_into_history (0, 1, ip);
 	  emit_nop ();
-	  if (mips_fix_24k)
-	    hndx_24k++;
 	}
       else
 	insert_into_history (0, 1, ip);
     }
   else
     insert_into_history (0, 1, ip);
-
-  if (mips_fix_24k)
-    check_for_24k_errata ((struct mips_cl_insn *) &history[hndx_24k],
-			  hndx_24k+1);
 
   /* We just output an insn, so the next one doesn't have a label.  */
   mips_clear_insn_labels ();
@@ -3504,8 +3429,6 @@ start_noreorder (void)
 static void
 end_noreorder (void)
 {
-  if (mips_fix_24k)
-    check_for_24k_errata (NULL, 0);
 
   mips_opts.noreorder--;
   if (mips_opts.noreorder == 0 && prev_nop_frag != NULL)
@@ -12588,9 +12511,6 @@ s_change_sec (int sec)
 
   mips_emit_delays ();
 
-  if (mips_fix_24k)
-    check_for_24k_errata ((struct mips_cl_insn *) &history[0], -1);
-
   switch (sec)
     {
     case 't':
@@ -12648,9 +12568,6 @@ s_change_section (int ignore ATTRIBUTE_UNUSED)
 
   if (!IS_ELF)
     return;
-
-  if (mips_fix_24k)
-    check_for_24k_errata ((struct mips_cl_insn *) &history[0], -1);
 
   section_name = input_line_pointer;
   c = get_symbol_end ();

@@ -1,3 +1,16 @@
+2009-05-26  Catherine Moore  <clm@codesourcery.com>
+
+	* gas/mips/eret.s: Remove.
+	* gas/mips/ eret.d: Remove.
+	* gas/mips/eret.l: Remove.
+	* gas/mips/eret-1.s: New.
+	* gas/mips/eret-1.d: New.
+	* gas/mips/eret-2.s: New.
+	* gas/mips/eret-2.d: New.
+	* gas/mips/eret-3.s: New.
+	* gas/mips/eret-3.d: New.
+	* gas/mips/mips.exp: Run new tests.  Remove old tests.
+
 2009-05-23  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/vr4130.s, gas/mips/vr4130.d: Expect part A to have nops.

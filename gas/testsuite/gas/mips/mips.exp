@@ -436,8 +436,9 @@ if { [istarget mips*-*-vxworks*] } {
     } else {
 	run_dump_test "jal"
     }
-    run_dump_test "eret"
-    run_list_test "eret" "-mfix-24k -march=24kc" "MIPS eret warnings"
+    run_dump_test "eret-1"
+    run_dump_test "eret-2"
+    run_dump_test "eret-3"
 
     if $elf { run_dump_test "jal-svr4pic" }
     if $elf { run_dump_test "jal-xgot" }
