@@ -1,3 +1,9 @@
+2009-05-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (follow_exec): Clear the stop_requested flag.
+	* linux-nat.c (linux_handle_extended_wait) <PTRACE_EVENT_EXEC>:
+	Add debug output.
+
 2009-05-27  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* nto-procfs.c (get_regset): Pass correct pointer.

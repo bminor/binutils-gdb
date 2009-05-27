@@ -1892,6 +1892,11 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 
   if (event == PTRACE_EVENT_EXEC)
     {
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "LHEW: Got exec event from LWP %ld\n",
+			    GET_LWP (lp->ptid));
+
       ourstatus->kind = TARGET_WAITKIND_EXECD;
       ourstatus->value.execd_pathname
 	= xstrdup (linux_child_pid_to_exec_file (pid));

@@ -494,6 +494,14 @@ follow_exec (ptid_t pid, char *execd_pathname)
   th->step_range_start = 0;
   th->step_range_end = 0;
 
+  /* The target reports the exec event to the main thread, even if
+     some other thread does the exec, and even if the main thread was
+     already stopped --- if debugging in non-stop mode, it's possible
+     the user had the main thread held stopped in the previous image
+     --- release it now.  This is the same behavior as step-over-exec
+     with scheduler-locking on in all-stop mode.  */
+  th->stop_requested = 0;
+
   /* What is this a.out's name? */
   printf_unfiltered (_("Executing new program: %s\n"), execd_pathname);
 

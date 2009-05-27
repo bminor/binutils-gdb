@@ -1,3 +1,7 @@
+2009-05-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.mi/nsthrexec.c, gdb.mi/mi-nsthrexec.exp: New.
+
 2009-05-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/fork-thread-pending.c: New.
