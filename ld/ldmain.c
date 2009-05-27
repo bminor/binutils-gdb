@@ -294,8 +294,6 @@ main (int argc, char **argv)
     {
       if (command_line.check_section_addresses < 0)
 	command_line.check_section_addresses = 0;
-      if (command_line.relax)
-	einfo (_("%P%F: --relax and -r may not be used together\n"));
       if (link_info.shared)
 	einfo (_("%P%F: -r and -shared may not be used together\n"));
     }

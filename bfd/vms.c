@@ -1914,6 +1914,10 @@ vms_bfd_relax_section (bfd * abfd ATTRIBUTE_UNUSED,
 		       struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 		       bfd_boolean *again ATTRIBUTE_UNUSED)
 {
+  if (link_info->relocatable)
+    (*link_info->callbacks->einfo)
+      (_("%P%F: --relax and -r may not be used together\n"));
+
 #if VMS_DEBUG
   vms_debug (1, "vms_bfd_relax_section (%p, %s, %p, <ret>)\n",
 	     abfd, section->name, link_info);

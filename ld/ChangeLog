@@ -1,3 +1,9 @@
+2009-05-26  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ldmain.c (main): Don't reject --relax -r.
+	* ld.texinfo (PowerPC ELF32): Document behaviour of relaxing
+	partial links.
+
 2009-05-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/id.po: Updated Indonesian translation.

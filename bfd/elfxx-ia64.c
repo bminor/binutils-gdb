@@ -786,6 +786,10 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
      one pass.  */
   *again = FALSE;
 
+  if (link_info->relocatable)
+    (*link_info->callbacks->einfo)
+      (_("%P%F: --relax and -r may not be used together\n"));
+
   /* Don't even try to relax for non-ELF outputs.  */
   if (!is_elf_hash_table (link_info->hash))
     return FALSE;

@@ -6284,7 +6284,10 @@ displacement, which may result in @command{ld} giving
 @samp{--relax} enables the generation of trampolines that can access
 the entire 32-bit address space.  These trampolines are inserted at
 section boundaries, so may not themselves be reachable if an input
-section exceeds 33M in size.
+section exceeds 33M in size.  You may combine @samp{-r} and
+@samp{--relax} to add trampolines in a partial link.  In that case
+both branches to undefined symbols and inter-section branches are also
+considered potentially out of range, and trampolines inserted.
 
 @cindex PowerPC ELF32 options
 @table @option

@@ -5738,6 +5738,10 @@ elf32_frvfdpic_relax_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 {
   struct _frvfdpic_dynamic_got_plt_info gpinfo;
 
+  if (info->relocatable)
+    (*info->callbacks->einfo)
+      (_("%P%F: --relax and -r may not be used together\n"));
+
   /* If we return early, we didn't change anything.  */
   *again = FALSE;
 

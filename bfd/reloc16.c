@@ -157,6 +157,10 @@ bfd_coff_reloc16_relax_section (abfd, input_section, link_info, again)
   arelent **reloc_vector = NULL;
   long reloc_count;
 
+  if (link_info->relocatable)
+    (*link_info->callbacks->einfo)
+      (_("%P%F: --relax and -r may not be used together\n"));
+
   /* We only do global relaxation once.  It is not safe to do it multiple
      times (see discussion of the "shrinks" array below).  */
   *again = FALSE;

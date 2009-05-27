@@ -1,3 +1,9 @@
+2009-05-26  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-powerpc/vxworks-relax-2.s: New.
+	* ld-powerpc/vxworks-relax-2.rd: New.
+	* ld-powerpc/powerpc.exp: Add it.
+
 2009-05-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-scripts/rgn-over7.d: Adjust expected message for recent change.

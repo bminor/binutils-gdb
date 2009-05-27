@@ -2590,6 +2590,10 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
   /* Assume nothing changes.  */
   *again = FALSE;
 
+  if (link_info->relocatable)
+    (*link_info->callbacks->einfo)
+      (_("%P%F: --relax and -r may not be used together\n"));
+
   /* We don't have to do anything if this section does not have relocs, or
      if this is not a code section.  */
   if ((sec->flags & SEC_RELOC) == 0

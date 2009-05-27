@@ -1,3 +1,19 @@
+2009-05-27  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-ppc.c (ppc_elf_relax_section): Work with a partial
+	link.
+	* bout.c (b_out_bfd_relax_section): Reject relocatable links.
+	* elf32-m10300.c (mn10300_elf_relax_section): Likewise.
+	* elf32-avr.c (elf32_avr_relax_section): Likewise.
+	* elf32-frv.c (elf32_avr_relax_section): Likewise.
+	* elf32-xtensa.c (elf_xtensa_relax_section): Likewise.
+	* elf64-mmix.c (mmix_elf_relax_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_relax_section): Likewise.
+	* reloc.c (bfd_generic_relax_section): Likewise.
+	* reloc16.c (bfd_coff_reloc16_relax_section): Likewise.
+	* vms.c (vms_bfd_relax_section): Likewise.
+
 2009-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (_bfd_elf_is_ifunc_symbol): New.

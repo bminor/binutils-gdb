@@ -5661,6 +5661,12 @@ ppc_elf_relax_section (bfd *abfd,
       || isec->reloc_count == 0)
     return TRUE;
 
+  /* We cannot represent the required PIC relocs in the output, so don't
+     do anything.  The linker doesn't support mixing -shared and -r
+     anyway.  */
+  if (link_info->relocatable && link_info->shared)
+     return TRUE;
+  
   trampoff = (isec->size + 3) & (bfd_vma) -4;
   /* Space for a branch around any trampolines.  */
   trampoff += 4;
@@ -5726,7 +5732,7 @@ ppc_elf_relax_section (bfd *abfd,
 	    }
 	  isym = isymbuf + ELF32_R_SYM (irel->r_info);
 	  if (isym->st_shndx == SHN_UNDEF)
-	    continue;	/* We can't do anything with undefined symbols.  */
+	    tsec = bfd_und_section_ptr;
 	  else if (isym->st_shndx == SHN_ABS)
 	    tsec = bfd_abs_section_ptr;
 	  else if (isym->st_shndx == SHN_COMMON)
@@ -5778,6 +5784,12 @@ ppc_elf_relax_section (bfd *abfd,
 	    {
 	      tsec = h->root.u.def.section;
 	      toff = h->root.u.def.value;
+	    }
+	  else if (h->root.type == bfd_link_hash_undefined
+		   || h->root.type == bfd_link_hash_undefweak)
+	    {
+	      tsec = bfd_und_section_ptr;
+	      toff = 0;
 	    }
 	  else
 	    continue;
@@ -5838,7 +5850,12 @@ ppc_elf_relax_section (bfd *abfd,
       reladdr = isec->output_section->vma + isec->output_offset + roff;
 
       /* If the branch is in range, no need to do anything.  */
-      if (symaddr - reladdr + max_branch_offset < 2 * max_branch_offset)
+      if (tsec != bfd_und_section_ptr
+	  && (!link_info->relocatable
+	      /* A relocatable link may have sections moved during
+		 final link, so do not presume they remain in range.  */
+	      || tsec->output_section == isec->output_section)
+	  && symaddr - reladdr + max_branch_offset < 2 * max_branch_offset)
 	continue;
 
       /* Look for an existing fixup to this address.  */
@@ -6048,6 +6065,27 @@ ppc_elf_relax_section (bfd *abfd,
     free (internal_relocs);
 
   *again = changes != 0;
+  if (!*again && link_info->relocatable)
+    {
+      /* Convert the internal relax relocs to external form.  */
+      for (irel = internal_relocs; irel < irelend; irel++)
+	if (ELF32_R_TYPE (irel->r_info) == R_PPC_RELAX32)
+	  {
+	    unsigned long r_symndx = ELF32_R_SYM (irel->r_info);
+
+	    /* Rewrite the reloc and convert one of the trailing nop
+	       relocs to describe this relocation.  */
+	    BFD_ASSERT (ELF32_R_TYPE (irelend[-1].r_info) == R_PPC_NONE);
+	    /* The relocs are at the bottom 2 bytes */
+	    irel[0].r_offset += 2;
+	    memmove (irel + 1, irel, (irelend - irel - 1) * sizeof (*irel));
+	    irel[0].r_info = ELF32_R_INFO (r_symndx, R_PPC_ADDR16_HA);
+	    irel[1].r_offset += 4;
+	    irel[1].r_info = ELF32_R_INFO (r_symndx, R_PPC_ADDR16_LO);
+	    irel++;
+	  }
+    }
+  
   return TRUE;
 
  error_return:

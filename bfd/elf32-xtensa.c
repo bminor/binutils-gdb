@@ -6638,6 +6638,10 @@ elf_xtensa_relax_section (bfd *abfd,
   static bfd_boolean relocations_analyzed = FALSE;
   xtensa_relax_info *relax_info;
 
+  if (link_info->relocatable)
+    (*link_info->callbacks->einfo)
+      (_("%P%F: --relax and -r may not be used together\n"));
+
   if (!relocations_analyzed)
     {
       /* Do some overall initialization for relaxation.  */

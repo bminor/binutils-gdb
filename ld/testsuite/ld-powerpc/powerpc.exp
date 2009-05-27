@@ -54,6 +54,11 @@ if {[istarget "*-*-vxworks"]} {
 	 "-mregnames" {vxworks-relax.s}
 	 {{readelf --relocs vxworks-relax.rd}}
 	 "vxworks-relax"}
+	{"VxWorks relocatable relax test"
+	 "-Tvxworks1.ld -r --relax -q"
+	 "-mregnames" {vxworks-relax-2.s}
+	 {{readelf --relocs vxworks-relax-2.rd}}
+	 "vxworks-relax-2"}
     }
     run_ld_link_tests $ppcvxtests
     run_dump_test "vxworks1-static"

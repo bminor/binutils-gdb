@@ -1634,6 +1634,10 @@ elf32_avr_relax_section (bfd *abfd,
   static Elf_Internal_Rela *last_reloc = NULL;
   struct elf32_avr_link_hash_table *htab;
 
+  if (link_info->relocatable)
+    (*link_info->callbacks->einfo)
+      (_("%P%F: --relax and -r may not be used together\n"));
+
   htab = avr_link_hash_table (link_info);
   if (htab == NULL)
     return FALSE;

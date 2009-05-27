@@ -1145,6 +1145,10 @@ b_out_bfd_relax_section (bfd *abfd,
   arelent **reloc_vector = NULL;
   long reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
 
+  if (link_info->relocatable)
+    (*link_info->callbacks->einfo)
+      (_("%P%F: --relax and -r may not be used together\n"));
+
   if (reloc_size < 0)
     return FALSE;
 
