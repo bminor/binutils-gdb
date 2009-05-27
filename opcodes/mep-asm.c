@@ -981,7 +981,7 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
       errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IVC_X_6_3, (unsigned long *) (& fields->f_ivc2_3u6));
       break;
     case MEP_OPERAND_IVC2C3CCRN :
-      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & fields->f_ccrn);
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & fields->f_ivc2_ccrn_c3);
       break;
     case MEP_OPERAND_IVC2CCRN :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & fields->f_ivc2_ccrn);

@@ -484,6 +484,8 @@ struct cgen_fields
   long f_ivc2_3u25;
   long f_ivc2_imm16p0;
   long f_ivc2_simm16p0;
+  long f_ivc2_ccrn_c3hi;
+  long f_ivc2_ccrn_c3lo;
   long f_ivc2_crn;
   long f_ivc2_crm;
   long f_ivc2_ccrn_h1;
@@ -492,6 +494,7 @@ struct cgen_fields
   long f_ivc2_cmov1;
   long f_ivc2_cmov2;
   long f_ivc2_cmov3;
+  long f_ivc2_ccrn_c3;
   long f_ivc2_ccrn;
   long f_ivc2_crnx;
 };

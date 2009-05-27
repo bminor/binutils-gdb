@@ -1,3 +1,13 @@
+2009-05-26  DJ Delorie  <dj@redhat.com>
+
+	* mep-asm.c: Regenerate.
+	* mep-desc.c: Regenerate.
+	* mep-desc.h: Regenerate.
+	* mep-dis.c: Regenerate.
+	* mep-ibld.c: Regenerate.
+	* mep-opc.c: Regenerate.
+	* mep-opc.h: Regenerate.
+
 2009-05-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/id.po: Updated Indonesian translation.

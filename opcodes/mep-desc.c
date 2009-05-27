@@ -473,22 +473,22 @@ static CGEN_KEYWORD_ENTRY mep_cgen_opval_h_ccr_ivc2_entries[] =
   { "$cofa0", 6, {0, {{{0, 0}}}}, 0, 0 },
   { "$cofa1", 7, {0, {{{0, 0}}}}, 0, 0 },
   { "$csar1", 15, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc00", 16, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc01", 17, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc02", 18, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc03", 19, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc04", 20, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc05", 21, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc06", 22, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc07", 23, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc10", 24, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc11", 25, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc12", 26, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc13", 27, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc14", 28, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc15", 29, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc16", 30, {0, {{{0, 0}}}}, 0, 0 },
-  { "$acc17", 31, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc0_0", 16, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc0_1", 17, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc0_2", 18, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc0_3", 19, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc0_4", 20, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc0_5", 21, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc0_6", 22, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc0_7", 23, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc1_0", 24, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc1_1", 25, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc1_2", 26, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc1_3", 27, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc1_4", 28, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc1_5", 29, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc1_6", 30, {0, {{{0, 0}}}}, 0, 0 },
+  { "$acc1_7", 31, {0, {{{0, 0}}}}, 0, 0 },
   { "$ccr0", 0, {0, {{{0, 0}}}}, 0, 0 },
   { "$ccr1", 1, {0, {{{0, 0}}}}, 0, 0 },
   { "$ccr2", 2, {0, {{{0, 0}}}}, 0, 0 },
@@ -555,7 +555,7 @@ const CGEN_HW_ENTRY mep_cgen_hw_table[] =
   { "h-ccr", HW_H_CCR, CGEN_ASM_KEYWORD, (PTR) & mep_cgen_opval_h_ccr, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } } },
   { "h-ccr-w", HW_H_CCR_W, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } } },
   { "h-cr-ivc2", HW_H_CR_IVC2, CGEN_ASM_KEYWORD, (PTR) & mep_cgen_opval_h_cr_ivc2, { 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xd0" } } } } },
-  { "h-ccr-ivc2", HW_H_CCR_IVC2, CGEN_ASM_KEYWORD, (PTR) & mep_cgen_opval_h_ccr_ivc2, { 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xd0" } } } } },
+  { "h-ccr-ivc2", HW_H_CCR_IVC2, CGEN_ASM_KEYWORD, (PTR) & mep_cgen_opval_h_ccr_ivc2, { 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } } },
   { 0, 0, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } } }
 };
 
@@ -715,6 +715,8 @@ const CGEN_IFLD mep_cgen_ifld_table[] =
   { MEP_F_IVC2_3U25, "f-ivc2-3u25", 0, 32, 25, 3, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
   { MEP_F_IVC2_IMM16P0, "f-ivc2-imm16p0", 0, 0, 0, 0,{ 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
   { MEP_F_IVC2_SIMM16P0, "f-ivc2-simm16p0", 0, 0, 0, 0,{ 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
+  { MEP_F_IVC2_CCRN_C3HI, "f-ivc2-ccrn-c3hi", 0, 32, 28, 2, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
+  { MEP_F_IVC2_CCRN_C3LO, "f-ivc2-ccrn-c3lo", 0, 32, 4, 4, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
   { MEP_F_IVC2_CRN, "f-ivc2-crn", 0, 32, 0, 4, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
   { MEP_F_IVC2_CRM, "f-ivc2-crm", 0, 32, 4, 4, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
   { MEP_F_IVC2_CCRN_H1, "f-ivc2-ccrn-h1", 0, 32, 20, 1, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
@@ -723,6 +725,7 @@ const CGEN_IFLD mep_cgen_ifld_table[] =
   { MEP_F_IVC2_CMOV1, "f-ivc2-cmov1", 0, 32, 8, 12, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
   { MEP_F_IVC2_CMOV2, "f-ivc2-cmov2", 0, 32, 22, 6, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
   { MEP_F_IVC2_CMOV3, "f-ivc2-cmov3", 0, 32, 28, 4, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
+  { MEP_F_IVC2_CCRN_C3, "f-ivc2-ccrn-c3", 0, 0, 0, 0,{ 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
   { MEP_F_IVC2_CCRN, "f-ivc2-ccrn", 0, 0, 0, 0,{ 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
   { MEP_F_IVC2_CRNX, "f-ivc2-crnx", 0, 0, 0, 0,{ 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
   { 0, 0, 0, 0, 0, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } } }
@@ -747,6 +750,7 @@ const CGEN_MAYBE_MULTI_IFLD MEP_F_C5_RMUIMM20_MULTI_IFIELD [];
 const CGEN_MAYBE_MULTI_IFLD MEP_F_C5_RNMUIMM24_MULTI_IFIELD [];
 const CGEN_MAYBE_MULTI_IFLD MEP_F_IVC2_IMM16P0_MULTI_IFIELD [];
 const CGEN_MAYBE_MULTI_IFLD MEP_F_IVC2_SIMM16P0_MULTI_IFIELD [];
+const CGEN_MAYBE_MULTI_IFLD MEP_F_IVC2_CCRN_C3_MULTI_IFIELD [];
 const CGEN_MAYBE_MULTI_IFLD MEP_F_IVC2_CCRN_MULTI_IFIELD [];
 const CGEN_MAYBE_MULTI_IFLD MEP_F_IVC2_CRNX_MULTI_IFIELD [];
 
@@ -831,6 +835,12 @@ const CGEN_MAYBE_MULTI_IFLD MEP_F_IVC2_SIMM16P0_MULTI_IFIELD [] =
 {
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_IVC2_8U0] } },
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_IVC2_8U20] } },
+    { 0, { (const PTR) 0 } }
+};
+const CGEN_MAYBE_MULTI_IFLD MEP_F_IVC2_CCRN_C3_MULTI_IFIELD [] =
+{
+    { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_IVC2_CCRN_C3HI] } },
+    { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_IVC2_CCRN_C3LO] } },
     { 0, { (const PTR) 0 } }
 };
 const CGEN_MAYBE_MULTI_IFLD MEP_F_IVC2_CCRN_MULTI_IFIELD [] =
@@ -1347,7 +1357,7 @@ const CGEN_OPERAND mep_cgen_operand_table[] =
     { 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } }, { { CDATA_REGNUM, 0 } }, { { 1, 0 } } } }  },
 /* ivc2c3ccrn: copro control reg CCRn */
   { "ivc2c3ccrn", MEP_OPERAND_IVC2C3CCRN, HW_H_CCR_IVC2, 4, 6,
-    { 2, { (const PTR) &MEP_F_CCRN_MULTI_IFIELD[0] } }, 
+    { 2, { (const PTR) &MEP_F_IVC2_CCRN_C3_MULTI_IFIELD[0] } }, 
     { 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } }, { { CDATA_REGNUM, 0 } }, { { 1, 0 } } } }  },
 /* sentinel */
   { 0, 0, 0, 0, 0,

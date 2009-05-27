@@ -439,7 +439,7 @@ static const CGEN_IFMT ifmt_cmov_crn_rm ATTRIBUTE_UNUSED = {
 };
 
 static const CGEN_IFMT ifmt_cmovc_ccrn_rm ATTRIBUTE_UNUSED = {
-  32, 32, 0xf00ffff3, { { F (F_MAJOR) }, { F (F_CCRN) }, { F (F_RM) }, { F (F_SUB4) }, { F (F_IVC2_4U16) }, { F (F_IVC2_4U20) }, { F (F_IVC2_4U24) }, { F (F_30) }, { F (F_31) }, { 0 } }
+  32, 32, 0xf00ffff3, { { F (F_MAJOR) }, { F (F_IVC2_CCRN_C3) }, { F (F_RM) }, { F (F_SUB4) }, { F (F_IVC2_4U16) }, { F (F_IVC2_4U20) }, { F (F_IVC2_4U24) }, { F (F_30) }, { F (F_31) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_cmov_crn_rm_p0 ATTRIBUTE_UNUSED = {

@@ -929,7 +929,7 @@ mep_cgen_print_operand (CGEN_CPU_DESC cd,
       print_normal (cd, info, fields->f_ivc2_3u6, 0, pc, length);
       break;
     case MEP_OPERAND_IVC2C3CCRN :
-      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, fields->f_ccrn, 0|(1<<CGEN_OPERAND_VIRTUAL));
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, fields->f_ivc2_ccrn_c3, 0|(1<<CGEN_OPERAND_VIRTUAL));
       break;
     case MEP_OPERAND_IVC2CCRN :
       print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, fields->f_ivc2_ccrn, 0|(1<<CGEN_OPERAND_VIRTUAL));

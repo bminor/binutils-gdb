@@ -881,13 +881,13 @@ mep_cgen_insert_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_IVC2C3CCRN :
       {
 {
-  FLD (f_ccrn_hi) = ((((unsigned int) (FLD (f_ccrn)) >> (4))) & (3));
-  FLD (f_ccrn_lo) = ((FLD (f_ccrn)) & (15));
+  FLD (f_ivc2_ccrn_c3hi) = ((((unsigned int) (FLD (f_ivc2_ccrn_c3)) >> (4))) & (3));
+  FLD (f_ivc2_ccrn_c3lo) = ((FLD (f_ivc2_ccrn_c3)) & (15));
 }
-        errmsg = insert_normal (cd, fields->f_ccrn_hi, 0, 0, 28, 2, 32, total_length, buffer);
+        errmsg = insert_normal (cd, fields->f_ivc2_ccrn_c3hi, 0, 0, 28, 2, 32, total_length, buffer);
         if (errmsg)
           break;
-        errmsg = insert_normal (cd, fields->f_ccrn_lo, 0, 0, 4, 4, 32, total_length, buffer);
+        errmsg = insert_normal (cd, fields->f_ivc2_ccrn_c3lo, 0, 0, 4, 4, 32, total_length, buffer);
         if (errmsg)
           break;
       }
@@ -1461,11 +1461,11 @@ mep_cgen_extract_operand (CGEN_CPU_DESC cd,
       break;
     case MEP_OPERAND_IVC2C3CCRN :
       {
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 28, 2, 32, total_length, pc, & fields->f_ccrn_hi);
+        length = extract_normal (cd, ex_info, insn_value, 0, 0, 28, 2, 32, total_length, pc, & fields->f_ivc2_ccrn_c3hi);
         if (length <= 0) break;
-        length = extract_normal (cd, ex_info, insn_value, 0, 0, 4, 4, 32, total_length, pc, & fields->f_ccrn_lo);
+        length = extract_normal (cd, ex_info, insn_value, 0, 0, 4, 4, 32, total_length, pc, & fields->f_ivc2_ccrn_c3lo);
         if (length <= 0) break;
-  FLD (f_ccrn) = ((((FLD (f_ccrn_hi)) << (4))) | (FLD (f_ccrn_lo)));
+  FLD (f_ivc2_ccrn_c3) = ((((FLD (f_ivc2_ccrn_c3hi)) << (4))) | (FLD (f_ivc2_ccrn_c3lo)));
       }
       break;
     case MEP_OPERAND_IVC2CCRN :
@@ -1918,7 +1918,7 @@ mep_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       value = fields->f_ivc2_3u6;
       break;
     case MEP_OPERAND_IVC2C3CCRN :
-      value = fields->f_ccrn;
+      value = fields->f_ivc2_ccrn_c3;
       break;
     case MEP_OPERAND_IVC2CCRN :
       value = fields->f_ivc2_ccrn;
@@ -2301,7 +2301,7 @@ mep_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       value = fields->f_ivc2_3u6;
       break;
     case MEP_OPERAND_IVC2C3CCRN :
-      value = fields->f_ccrn;
+      value = fields->f_ivc2_ccrn_c3;
       break;
     case MEP_OPERAND_IVC2CCRN :
       value = fields->f_ivc2_ccrn;
@@ -2685,7 +2685,7 @@ mep_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       fields->f_ivc2_3u6 = value;
       break;
     case MEP_OPERAND_IVC2C3CCRN :
-      fields->f_ccrn = value;
+      fields->f_ivc2_ccrn_c3 = value;
       break;
     case MEP_OPERAND_IVC2CCRN :
       fields->f_ivc2_ccrn = value;
@@ -3042,7 +3042,7 @@ mep_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       fields->f_ivc2_3u6 = value;
       break;
     case MEP_OPERAND_IVC2C3CCRN :
-      fields->f_ccrn = value;
+      fields->f_ivc2_ccrn_c3 = value;
       break;
     case MEP_OPERAND_IVC2CCRN :
       fields->f_ivc2_ccrn = value;
