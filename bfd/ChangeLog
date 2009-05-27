@@ -1,3 +1,11 @@
+2009-05-26  Rafael Avila de Espindola  <espindola@google.com>
+
+	* aclocal.m4: Include ../config/plugins.m4.
+	* configure.in: Use AC_PLUGINS.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2009-05-27  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-ppc.c (ppc_elf_relax_section): Work with a partial

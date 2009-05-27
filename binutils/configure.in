@@ -16,14 +16,7 @@ AC_PROG_CC
 AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
 
-AC_ARG_ENABLE([plugins],
-AS_HELP_STRING([--enable-plugins], [linker plugins (defaults no)]),
-[case "${enableval}" in
-  yes | "") plugins=yes ;;
-  no) plugins=no ;;
-  *) plugins=yes ;;
- esac],
-[plugins=no])
+AC_PLUGINS
 
 case "${target}" in
 changequote(,)dnl

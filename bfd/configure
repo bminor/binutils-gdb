@@ -1009,7 +1009,7 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
-  --enable-plugins        linker plugins (defaults no)
+  --enable-plugins        Enable support for plugins (defaults no)
   --disable-largefile     omit support for large files
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
   --enable-targets        alternative target configurations
@@ -11414,6 +11414,7 @@ CC="$lt_save_CC"
 
 
 
+
 # Check whether --enable-plugins or --disable-plugins was given.
 if test "${enable_plugins+set}" = set; then
   enableval="$enable_plugins"
@@ -11425,6 +11426,7 @@ if test "${enable_plugins+set}" = set; then
 else
   plugins=no
 fi;
+
 
 
 
