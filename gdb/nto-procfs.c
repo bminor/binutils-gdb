@@ -1159,7 +1159,7 @@ get_regset (int regset, char *buf, int bufsize, int *regsize)
     default:
       return -1;
     }
-  if (devctl (ctl_fd, dev_get, &buf, bufsize, regsize) != EOK)
+  if (devctl (ctl_fd, dev_get, buf, bufsize, regsize) != EOK)
     return -1;
 
   return dev_set;

@@ -1,3 +1,7 @@
+2009-05-27  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* nto-procfs.c (get_regset): Pass correct pointer.
+
 2009-05-26  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (follow_die_ref): Add comment.
