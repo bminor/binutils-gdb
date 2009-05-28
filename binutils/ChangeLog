@@ -1,5 +1,9 @@
 2009-05-28  Nick Clifton  <nickc@redhat.com>
 
+	* po/da.po: Updated Danish translation.
+
+2009-05-28  Nick Clifton  <nickc@redhat.com>
+
 	* readelf.c (display_debug_section): Do not display debug sections
 	with the NOBITS section type.
 
