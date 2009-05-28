@@ -23,10 +23,12 @@
 #include "symtab.h"
 #include "language.h"
 #include "valprint.h"
+
 #include "python.h"
-#include "python-internal.h"
 
 #ifdef HAVE_PYTHON
+#include "python-internal.h"
+
 
 /* Helper function for find_pretty_printer which iterates over a list,
    calls each function and inspects output.  This will return a
@@ -587,9 +589,8 @@ gdbpy_default_visualizer (PyObject *self, PyObject *args)
 int
 apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
 			  int embedded_offset, CORE_ADDR address,
-			  struct ui_file *stream, int format,
-			  int deref_ref, int recurse,
-			  enum val_prettyprint pretty,
+			  struct ui_file *stream, int recurse,
+			  const struct value_print_options *options,
 			  const struct language_defn *language)
 {
   return 0;

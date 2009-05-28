@@ -1,3 +1,12 @@
+2009-05-28  Pierre Muller  <muller@ics.u-strasbg.fr>
+	    Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* configure.ac (!have_libpython): Add python-prettyprint source
+	and object files.
+	* configure: Regenerate.
+	* python/python-prettyprint.c: Move "#ifdef HAVE_PYTHON" before
+	python headers.
+	
 2009-05-27  Vladimir Prus  <vladimir@codesourcery.com>
 	    Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
