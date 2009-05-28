@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2008, 2009 Free Software Foundation, Inc.
+   Copyright 2008 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,39 +15,16 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct s
-{
-  int a;
-  int b;
+template <typename T>
+struct Foo {
 };
 
-union u
+#ifndef TYPE
+#define TYPE int
+#endif
+
+int main()
 {
-  int a;
-  float b;
-};
-
-enum e
-  {
-    ONE = 1,
-    TWO = 2
-  };
-
-typedef struct s *PTR;
-
-enum e evalue = TWO;
-
-int
-main (int argc, char *argv[])
-{
-  char *cp = argv[0]; /* Prevent gcc from optimizing argv[] out.  */
-  struct s s;
-  union u u;
-  PTR x = &s;
-
-  s.a = 3;
-  s.b = 5;
-  u.a = 7;
-
-  return 0;      /* break to inspect struct and union */
+  Foo<TYPE> foo;
+  return 0; // break here
 }

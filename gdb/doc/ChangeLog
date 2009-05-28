@@ -1,3 +1,10 @@
+2009-05-27  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Types In Python): New node.
+	(Values From Inferior): "type" is now an attribute.
+	(Python API): Update.
+
 2009-05-27  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Phil Muldoon  <pmuldoon@redhat.com>

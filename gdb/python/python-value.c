@@ -59,6 +59,7 @@ typedef struct {
   PyObject_HEAD
   struct value *value;
   PyObject *address;
+  PyObject *type;
 } value_object;
 
 /* Called by the Python interpreter when deallocating a value object.  */
@@ -75,6 +76,11 @@ valpy_dealloc (PyObject *obj)
     /* Use braces to appease gcc warning.  *sigh*  */
     {
       Py_DECREF (self->address);
+    }
+
+  if (self->type)
+    {
+      Py_DECREF (self->type);
     }
 
   self->ob_type->tp_free (self);
@@ -111,6 +117,7 @@ valpy_new (PyTypeObject *subtype, PyObject *args, PyObject *keywords)
 
   value_obj->value = value;
   value_obj->address = NULL;
+  value_obj->type = NULL;
   release_value (value);
   value_prepend_to_list (&values_in_python, value);
 
@@ -161,6 +168,24 @@ valpy_get_address (PyObject *self, void *closure)
   return val_obj->address;
 }
 
+/* Return type of the value.  */
+static PyObject *
+valpy_get_type (PyObject *self, void *closure)
+{
+  value_object *obj = (value_object *) self;
+  if (!obj->type)
+    {
+      obj->type = type_to_type_object (value_type (obj->value));
+      if (!obj->type)
+	{
+	  obj->type = Py_None;
+	  Py_INCREF (obj->type);
+	}
+    }
+  Py_INCREF (obj->type);
+  return obj->type;
+}
+
 /* Implementation of gdb.Value.string ([encoding] [, errors]) -> string
    Return Unicode string with value contents.  If ENCODING is not given,
    the string is assumed to be encoded in the target's charset.  */
@@ -193,6 +218,34 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
   xfree (buffer);
 
   return unicode;
+}
+
+/* Cast a value to a given type.  */
+static PyObject *
+valpy_cast (PyObject *self, PyObject *args)
+{
+  PyObject *type_obj;
+  struct type *type;
+  struct value *res_val = NULL;	  /* Initialize to appease gcc warning.  */
+  volatile struct gdb_exception except;
+
+  if (! PyArg_ParseTuple (args, "O", &type_obj))
+    return NULL;
+
+  type = type_object_to_type (type_obj);
+  if (! type)
+    {
+      PyErr_SetString (PyExc_RuntimeError, "argument must be a Type");
+      return NULL;
+    }
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      res_val = value_cast (type, ((value_object *) self)->value);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  return value_to_value_object (res_val);
 }
 
 static Py_ssize_t
@@ -744,6 +797,7 @@ value_to_value_object (struct value *val)
     {
       val_obj->value = val;
       val_obj->address = NULL;
+      val_obj->type = NULL;
       release_value (val);
       value_prepend_to_list (&values_in_python, val);
     }
@@ -855,16 +909,20 @@ gdbpy_initialize_values (void)
   values_in_python = NULL;
 }
 
+
+
 static PyGetSetDef value_object_getset[] = {
   { "address", valpy_get_address, NULL, "The address of the value.",
     NULL },
   { "is_optimized_out", valpy_get_is_optimized_out, NULL,
     "Boolean telling whether the value is optimized out (i.e., not available).",
     NULL },
+  { "type", valpy_get_type, NULL, "Type of the value.", NULL },
   {NULL}  /* Sentinel */
 };
 
 static PyMethodDef value_object_methods[] = {
+  { "cast", valpy_cast, METH_VARARGS, "Cast the value to the supplied type." },
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
   { "string", (PyCFunction) valpy_string, METH_VARARGS | METH_KEYWORDS,
     "string ([encoding] [, errors]) -> string\n\

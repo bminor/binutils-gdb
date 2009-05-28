@@ -18516,6 +18516,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Exception Handling::
 * Auto-loading::                Automatically loading Python code.
 * Values From Inferior::
+* Types In Python::		Python representation of types.
 * Commands In Python::          Implementing new commands in Python.
 * Functions In Python::         Writing new convenience functions.
 * Objfiles In Python::          Object files.
@@ -18701,17 +18702,22 @@ Again, @code{bar} will also be a @code{gdb.Value} object.
 The following attributes are provided:
 
 @table @code
-@defmethod Value address
+@defivar Value address
 If this object is addressable, this read-only attribute holds a
 @code{gdb.Value} object representing the address.  Otherwise,
 this attribute holds @code{None}.
-@end defmethod
+@end defivar
 
 @cindex optimized out value in Python
-@defmethod Value is_optimized_out
+@defivar Value is_optimized_out
 This read-only boolean attribute is true if the compiler optimized out
 this value, thus it is not available for fetching from the inferior.
-@end defmethod
+@end defivar
+
+@defivar Value type
+The type of this @code{gdb.Value}.  The value of this attribute is a
+@code{gdb.Type} object.
+@end defivar
 @end table
 
 The following methods are provided:
@@ -18764,6 +18770,278 @@ will be used, if the current language is able to supply one.
 The optional @var{errors} argument is the same as the corresponding
 argument to Python's @code{string.decode} method.
 @end defmethod
+@end table
+
+@node Types In Python
+@subsubsection Types In Python
+@cindex types in Python
+@cindex Python, working with types
+
+@tindex gdb.Type
+@value{GDBN} represents types from the inferior using the class
+@code{gdb.Type}.
+
+The following type-related functions are available in the @code{gdb}
+module:
+
+@findex gdb.lookup_type
+@defun lookup_type name [block]
+This function looks up a type by name.  @var{name} is the name of the
+type to look up.  It must be a string.
+
+Ordinarily, this function will return an instance of @code{gdb.Type}.
+If the named type cannot be found, it will throw an exception.
+@end defun
+
+An instance of @code{Type} has the following attributes:
+
+@table @code
+@defivar Type code
+The type code for this type.  The type code will be one of the
+@code{TYPE_CODE_} constants defined below.
+@end defivar
+
+@defivar Type sizeof
+The size of this type, in target @code{char} units.  Usually, a
+target's @code{char} type will be an 8-bit byte.  However, on some
+unusual platforms, this type may have a different size.
+@end defivar
+
+@defivar Type tag
+The tag name for this type.  The tag name is the name after
+@code{struct}, @code{union}, or @code{enum} in C and C@t{++}; not all
+languages have this concept.  If this type has no tag name, then
+@code{None} is returned.
+@end defivar
+@end table
+
+The following methods are provided:
+
+@table @code
+@defmethod Type fields
+For structure and union types, this method returns the fields.  Range
+types have two fields, the minimum and maximum values.  Enum types
+have one field per enum constant.  Function and method types have one
+field per parameter.  The base types of C@t{++} classes are also
+represented as fields.  If the type has no fields, or does not fit
+into one of these categories, an empty sequence will be returned.
+
+Each field is an object, with some pre-defined attributes:
+@table @code
+@item bitpos
+This attribute is not available for @code{static} fields (as in
+C@t{++} or Java).  For non-@code{static} fields, the value is the bit
+position of the field.
+
+@item name
+The name of the field, or @code{None} for anonymous fields.
+
+@item artificial
+This is @code{True} if the field is artificial, usually meaning that
+it was provided by the compiler and not the user.  This attribute is
+always provided, and is @code{False} if the field is not artificial.
+
+@item bitsize
+If the field is packed, or is a bitfield, then this will have a
+non-zero value, which is the size of the field in bits.  Otherwise,
+this will be zero; in this case the field's size is given by its type.
+
+@item type
+The type of the field.  This is usually an instance of @code{Type},
+but it can be @code{None} in some situations.
+@end table
+@end defmethod
+
+@defmethod Type const
+Return a new @code{gdb.Type} object which represents a
+@code{const}-qualified variant of this type.
+@end defmethod
+
+@defmethod Type volatile
+Return a new @code{gdb.Type} object which represents a
+@code{volatile}-qualified variant of this type.
+@end defmethod
+
+@defmethod Type unqualified
+Return a new @code{gdb.Type} object which represents an unqualified
+variant of this type.  That is, the result is neither @code{const} nor
+@code{volatile}.
+@end defmethod
+
+@defmethod Type reference
+Return a new @code{gdb.Type} object which represents a reference to this
+type.
+@end defmethod
+
+@defmethod Type strip_typedefs
+Return a new @code{gdb.Type} that represents the real type,
+after removing all layers of typedefs.
+@end defmethod
+
+@defmethod Type target
+Return a new @code{gdb.Type} object which represents the target type
+of this type.
+
+For a pointer type, the target type is the type of the pointed-to
+object.  For an array type (meaning C-like arrays), the target type is
+the type of the elements of the array.  For a function or method type,
+the target type is the type of the return value.  For a complex type,
+the target type is the type of the elements.  For a typedef, the
+target type is the aliased type.
+
+If the type does not have a target, this method will throw an
+exception.
+@end defmethod
+
+@defmethod Type template_argument n
+If this @code{gdb.Type} is an instantiation of a template, this will
+return a new @code{gdb.Type} which represents the type of the
+@var{n}th template argument.
+
+If this @code{gdb.Type} is not a template type, this will throw an
+exception.  Ordinarily, only C@t{++} code will have template types.
+
+@var{name} is searched for globally.
+@end defmethod
+@end table
+
+
+Each type has a code, which indicates what category this type falls
+into.  The available type categories are represented by constants
+defined in the @code{gdb} module:
+
+@table @code
+@findex TYPE_CODE_PTR
+@findex gdb.TYPE_CODE_PTR
+@item TYPE_CODE_PTR
+The type is a pointer.
+
+@findex TYPE_CODE_ARRAY
+@findex gdb.TYPE_CODE_ARRAY
+@item TYPE_CODE_ARRAY
+The type is an array.
+
+@findex TYPE_CODE_STRUCT
+@findex gdb.TYPE_CODE_STRUCT
+@item TYPE_CODE_STRUCT
+The type is a structure.
+
+@findex TYPE_CODE_UNION
+@findex gdb.TYPE_CODE_UNION
+@item TYPE_CODE_UNION
+The type is a union.
+
+@findex TYPE_CODE_ENUM
+@findex gdb.TYPE_CODE_ENUM
+@item TYPE_CODE_ENUM
+The type is an enum.
+
+@findex TYPE_CODE_FLAGS
+@findex gdb.TYPE_CODE_FLAGS
+@item TYPE_CODE_FLAGS
+A bit flags type, used for things such as status registers.
+
+@findex TYPE_CODE_FUNC
+@findex gdb.TYPE_CODE_FUNC
+@item TYPE_CODE_FUNC
+The type is a function.
+
+@findex TYPE_CODE_INT
+@findex gdb.TYPE_CODE_INT
+@item TYPE_CODE_INT
+The type is an integer type.
+
+@findex TYPE_CODE_FLT
+@findex gdb.TYPE_CODE_FLT
+@item TYPE_CODE_FLT
+A floating point type.
+
+@findex TYPE_CODE_VOID
+@findex gdb.TYPE_CODE_VOID
+@item TYPE_CODE_VOID
+The special type @code{void}.
+
+@findex TYPE_CODE_SET
+@findex gdb.TYPE_CODE_SET
+@item TYPE_CODE_SET
+A Pascal set type.
+
+@findex TYPE_CODE_RANGE
+@findex gdb.TYPE_CODE_RANGE
+@item TYPE_CODE_RANGE
+A range type, that is, an integer type with bounds.
+
+@findex TYPE_CODE_STRING
+@findex gdb.TYPE_CODE_STRING
+@item TYPE_CODE_STRING
+A string type.  Note that this is only used for certain languages with
+language-defined string types; C strings are not represented this way.
+
+@findex TYPE_CODE_BITSTRING
+@findex gdb.TYPE_CODE_BITSTRING
+@item TYPE_CODE_BITSTRING
+A string of bits.
+
+@findex TYPE_CODE_ERROR
+@findex gdb.TYPE_CODE_ERROR
+@item TYPE_CODE_ERROR
+An unknown or erroneous type.
+
+@findex TYPE_CODE_METHOD
+@findex gdb.TYPE_CODE_METHOD
+@item TYPE_CODE_METHOD
+A method type, as found in C@t{++} or Java.
+
+@findex TYPE_CODE_METHODPTR
+@findex gdb.TYPE_CODE_METHODPTR
+@item TYPE_CODE_METHODPTR
+A pointer-to-member-function.
+
+@findex TYPE_CODE_MEMBERPTR
+@findex gdb.TYPE_CODE_MEMBERPTR
+@item TYPE_CODE_MEMBERPTR
+A pointer-to-member.
+
+@findex TYPE_CODE_REF
+@findex gdb.TYPE_CODE_REF
+@item TYPE_CODE_REF
+A reference type.
+
+@findex TYPE_CODE_CHAR
+@findex gdb.TYPE_CODE_CHAR
+@item TYPE_CODE_CHAR
+A character type.
+
+@findex TYPE_CODE_BOOL
+@findex gdb.TYPE_CODE_BOOL
+@item TYPE_CODE_BOOL
+A boolean type.
+
+@findex TYPE_CODE_COMPLEX
+@findex gdb.TYPE_CODE_COMPLEX
+@item TYPE_CODE_COMPLEX
+A complex float type.
+
+@findex TYPE_CODE_TYPEDEF
+@findex gdb.TYPE_CODE_TYPEDEF
+@item TYPE_CODE_TYPEDEF
+A typedef to some other type.
+
+@findex TYPE_CODE_NAMESPACE
+@findex gdb.TYPE_CODE_NAMESPACE
+@item TYPE_CODE_NAMESPACE
+A C@t{++} namespace.
+
+@findex TYPE_CODE_DECFLOAT
+@findex gdb.TYPE_CODE_DECFLOAT
+@item TYPE_CODE_DECFLOAT
+A decimal floating point type.
+
+@findex TYPE_CODE_INTERNAL_FUNCTION
+@findex gdb.TYPE_CODE_INTERNAL_FUNCTION
+@item TYPE_CODE_INTERNAL_FUNCTION
+A function internal to @value{GDBN}.  This is the type used to represent
+convenience functions.
 @end table
 
 @node Commands In Python

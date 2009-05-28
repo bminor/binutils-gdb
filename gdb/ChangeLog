@@ -1,6 +1,31 @@
 2009-05-27  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Phil Muldoon  <pmuldoon@redhat.com>
+	    Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* python/python.c (_initialize_python): Call
+	gdbpy_initialize_types.
+	(GdbMethods): Add "lookup_type".
+	* python/python-value.c (value_object) <type>: New field.
+	(valpy_dealloc): Decref type.
+	(valpy_new): Initialize type.
+	(valpy_get_type): New function.
+	(value_to_value_object): Initialize type.
+	(valpy_cast): New function.
+	(value_object_getset): Add "type".
+	(value_object_methods): Add "cast".
+	* python/python-internal.h (type_to_type_object): Declare.
+	(type_object_to_type): Likewise.
+	(gdbpy_initialize_types): Likewise.
+	(gdbpy_lookup_type): Declare.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add python-type.o.
+	(SUBDIR_PYTHON_SRCS): Add python-type.c.
+	(python-type.o): New target.
+	* python/python-type.c: New file.
+
+2009-05-27  Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/python.c: Include objfiles.h, observer.h.
 	(gdbpy_auto_load): New global.

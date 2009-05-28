@@ -66,17 +66,21 @@ extern PyTypeObject value_object_type;
 PyObject *gdbpy_history (PyObject *self, PyObject *args);
 PyObject *gdbpy_frame_stop_reason_string (PyObject *, PyObject *);
 PyObject *gdbpy_selected_frame (PyObject *self, PyObject *args);
+PyObject *gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw);
 
 PyObject *value_to_value_object (struct value *v);
+PyObject *type_to_type_object (struct type *);
 PyObject *objfile_to_objfile_object (struct objfile *);
 
 PyObject *objfpy_get_printers (PyObject *, void *);
 
 struct value *convert_value_from_python (PyObject *obj);
+struct type *type_object_to_type (PyObject *obj);
 
 void gdbpy_initialize_values (void);
 void gdbpy_initialize_frames (void);
 void gdbpy_initialize_commands (void);
+void gdbpy_initialize_types (void);
 void gdbpy_initialize_functions (void);
 void gdbpy_initialize_objfile (void);
 

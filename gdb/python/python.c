@@ -552,6 +552,7 @@ Enables or disables auto-loading of Python code when an object is opened."),
   gdbpy_initialize_frames ();
   gdbpy_initialize_commands ();
   gdbpy_initialize_functions ();
+  gdbpy_initialize_types ();
   gdbpy_initialize_objfile ();
 
   PyRun_SimpleString ("import gdb");
@@ -617,6 +618,11 @@ Return the selected frame object." },
   { "frame_stop_reason_string", gdbpy_frame_stop_reason_string, METH_VARARGS,
     "stop_reason_string (Integer) -> String.\n\
 Return a string explaining unwind stop reason." },
+
+  { "lookup_type", (PyCFunction) gdbpy_lookup_type,
+    METH_VARARGS | METH_KEYWORDS,
+    "lookup_type (name [, block]) -> type\n\
+Return a Type corresponding to the given name." },
 
   { "write", gdbpy_write, METH_VARARGS,
     "Write a string using gdb's filtered stream." },

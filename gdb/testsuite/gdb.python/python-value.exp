@@ -246,6 +246,33 @@ proc test_objfiles {} {
       "pretty_printers attribute must be a list.*Error while executing Python code."
 }
 
+proc test_value_after_death {} {
+  # Construct a type while the inferior is still running.
+  gdb_py_test_silent_cmd "python ptrtype = gdb.lookup_type('PTR')" \
+    "create PTR type" 1
+
+  # Kill the inferior and remove the symbols.
+  gdb_test "kill" "" "kill the inferior" \
+    "Kill the program being debugged. .y or n. $" \
+    "y"
+  gdb_test "file" "" "Discard the symbols" \
+    "Discard symbol table from.*y or n. $" \
+    "y"
+
+  # Now create a value using that type.  Relies on arg0, created by
+  # test_value_in_inferior.
+  gdb_py_test_silent_cmd "python castval = arg0.cast(ptrtype.pointer())" \
+    "cast arg0 to PTR" 1
+
+  # Make sure the type is deleted.
+  gdb_py_test_silent_cmd "python ptrtype = None" \
+    "delete PTR type" 1
+
+  # Now see if the value's type is still valid.
+  gdb_test "python print castval.type" "PTR ." \
+    "print value's type"
+}
+
 # Start with a fresh gdb.
 
 gdb_exit
@@ -275,3 +302,4 @@ if ![runto_main] then {
 }
 
 test_value_in_inferior
+test_value_after_death

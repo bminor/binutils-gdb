@@ -1,3 +1,18 @@
+2009-05-27  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+	    Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.python/python-template.exp: New file.
+	* gdb.python/python-template.cc: New file.
+	* gdb.python/python.exp (gdb_py_test_multiple): Add two objfile
+	tests.
+	* gdb.python/python-value.exp (py_objfile_tests): New proc.
+	Call it.
+	(test_value_after_death): New proc.
+	* gdb.python/python-value.c (PTR): New typedef.
+	(main): New variable 'x'.
+
 2009-05-27  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/python.exp (gdb_py_test_multiple): Add two objfile
