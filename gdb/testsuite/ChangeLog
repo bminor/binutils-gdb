@@ -1,3 +1,10 @@
+2009-05-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.threads/threxit-hop-specific.c: New.
+	* gdb.threads/threxit-hop-specific.exp: New.
+	* gdb.threads/thread-execl.c: New.
+	* gdb.threads/thread-execl.exp: New.
+
 2009-05-27  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 

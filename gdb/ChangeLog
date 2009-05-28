@@ -1,3 +1,17 @@
+2009-05-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): When thread hoping, switch
+	inferior_ptid to the event thread before removing breakpoints from
+	the target.  If not stopping, also try to revert back to a thread
+	that was doing a "next".  Check if that thread still exists before
+	resuming.
+	(currently_stepping_thread): Delete and merge with ...
+	(currently_stepping): ... this.
+	(currently_stepping_callback): Rename to ...
+	(currently_stepping_or_nexting_callback): ... this, and also
+	return true if the thread was stepping over a call (has a
+	step-resume breakpoint).
+
 2009-05-28  Tom Tromey  <tromey@redhat.com>
 
 	* python/python.c (gdbpy_parameter): Rename.  Fix error message.

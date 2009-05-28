@@ -75,7 +75,8 @@ static void set_schedlock_func (char *args, int from_tty,
 
 static int currently_stepping (struct thread_info *tp);
 
-static int currently_stepping_callback (struct thread_info *tp, void *data);
+static int currently_stepping_or_nexting_callback (struct thread_info *tp,
+						   void *data);
 
 static void xdb_handle_command (char *args, int from_tty);
 
@@ -2896,6 +2897,11 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: thread_hop_needed\n");
 
+	  /* Switch context before touching inferior memory, the
+	     previous thread may have exited.  */
+	  if (!ptid_equal (inferior_ptid, ecs->ptid))
+	    context_switch (ecs->ptid);
+
 	  /* Saw a breakpoint, but it was hit by the wrong thread.
 	     Just continue. */
 
@@ -2922,9 +2928,6 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	    error (_("Cannot step over breakpoint hit in wrong thread"));
 	  else
 	    {			/* Single step */
-	      if (!ptid_equal (inferior_ptid, ecs->ptid))
-		context_switch (ecs->ptid);
-
 	      if (!non_stop)
 		{
 		  /* Only need to require the next event from this
@@ -3483,7 +3486,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
   if (!non_stop)
     {
       struct thread_info *tp;
-      tp = iterate_over_threads (currently_stepping_callback,
+      tp = iterate_over_threads (currently_stepping_or_nexting_callback,
 				 ecs->event_thread);
       if (tp)
 	{
@@ -3494,6 +3497,21 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	       && ecs->event_thread->stop_signal != TARGET_SIGNAL_TRAP)
 	      || ecs->event_thread->stepping_over_breakpoint)
 	    {
+	      keep_going (ecs);
+	      return;
+	    }
+
+	  /* If the stepping thread exited, then don't try reverting
+	     back to it, just keep going.  We need to query the target
+	     in case it doesn't support thread exit events.  */
+	  if (is_exited (tp->ptid)
+	      || !target_thread_alive (tp->ptid))
+	    {
+	      if (debug_infrun)
+		fprintf_unfiltered (gdb_stdlog, "\
+infrun: not switching back to stepped thread, it has vanished\n");
+
+	      delete_thread (tp->ptid);
 	      keep_going (ecs);
 	      return;
 	    }
@@ -3931,28 +3949,29 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
   keep_going (ecs);
 }
 
-/* Are we in the middle of stepping?  */
-
-static int
-currently_stepping_thread (struct thread_info *tp)
-{
-  return (tp->step_range_end && tp->step_resume_breakpoint == NULL)
-	 || tp->trap_expected
-	 || tp->stepping_through_solib_after_catch;
-}
-
-static int
-currently_stepping_callback (struct thread_info *tp, void *data)
-{
-  /* Return true if any thread *but* the one passed in "data" is
-     in the middle of stepping.  */
-  return tp != data && currently_stepping_thread (tp);
-}
+/* Is thread TP in the middle of single-stepping?  */
 
 static int
 currently_stepping (struct thread_info *tp)
 {
-  return currently_stepping_thread (tp) || bpstat_should_step ();
+  return ((tp->step_range_end && tp->step_resume_breakpoint == NULL)
+ 	  || tp->trap_expected
+ 	  || tp->stepping_through_solib_after_catch
+ 	  || bpstat_should_step ());
+}
+
+/* Returns true if any thread *but* the one passed in "data" is in the
+   middle of stepping or of handling a "next".  */
+
+static int
+currently_stepping_or_nexting_callback (struct thread_info *tp, void *data)
+{
+  if (tp == data)
+    return 0;
+
+  return (tp->step_range_end
+ 	  || tp->trap_expected
+ 	  || tp->stepping_through_solib_after_catch);
 }
 
 /* Inferior has stepped into a subroutine call with source code that
