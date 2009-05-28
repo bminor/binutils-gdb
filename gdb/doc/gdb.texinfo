@@ -21,6 +21,7 @@
 
 @finalout
 @syncodeindex ky cp
+@syncodeindex tp cp
 
 @c readline appendices use @vindex, @findex and @ftable,
 @c annotate.texi and gdbmi use @findex.
@@ -18513,9 +18514,11 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 @menu
 * Basic Python::                Basic Python Functions.
 * Exception Handling::
+* Auto-loading::                Automatically loading Python code.
 * Values From Inferior::
 * Commands In Python::          Implementing new commands in Python.
 * Functions In Python::         Writing new convenience functions.
+* Objfiles In Python::          Object files.
 * Frames In Python::            Acessing inferior stack frames from Python.
 @end menu
 
@@ -18613,6 +18616,53 @@ exception handler will see @code{RuntimeError} or
 message as its value, and the Python call stack backtrace at the
 Python statement closest to where the @value{GDBN} error occured as the
 traceback.
+
+@node Auto-loading
+@subsubsection Auto-loading
+@cindex auto-loading, Python
+
+When a new object file is read (for example, due to the @code{file}
+command, or because the inferior has loaded a shared library),
+@value{GDBN} will look for a file named @file{@var{objfile}-gdb.py},
+where @var{objfile} is the object file's real name, formed by ensuring
+that the file name is absolute, following all symlinks, and resolving
+@code{.} and @code{..}  components.  If this file exists and is
+readable, @value{GDBN} will evaluate it as a Python script.
+
+If this file does not exist, and if the parameter
+@code{debug-file-directory} is set (@pxref{Separate Debug Files}),
+then @value{GDBN} will use the file named
+@file{@var{debug-file-directory}/@var{real-name}}, where
+@var{real-name} is the object file's real name, as described above.
+
+Finally, if this file does not exist, then @value{GDBN} will look for
+a file named @file{@var{data-directory}/python/auto-load/@var{real-name}}, where
+@var{data-directory} is @value{GDBN}'s data directory (available via
+@code{show data-directory}, @pxref{Data Files}), and @var{real-name}
+is the object file's real name, as described above.
+
+When reading an auto-loaded file, @value{GDBN} sets the ``current
+objfile''.  This is available via the @code{gdb.current_objfile}
+function (@pxref{Objfiles In Python}).  This can be useful for
+registering objfile-specific pretty-printers.
+
+The auto-loading feature is useful for supplying application-specific
+debugging commands and scripts.  You can enable or disable this
+feature, and view its current state.
+
+@table @code
+@kindex maint set python auto-load
+@item maint set python auto-load [yes|no]
+Enable or disable the Python auto-loading feature.
+
+@kindex show python auto-load
+@item show python auto-load
+Show whether Python auto-loading is enabled or disabled.
+@end table
+
+@value{GDBN} does not track which files it has already auto-loaded.
+So, your @samp{-gdb.py} file should take care to ensure that it may be
+evaluated multiple times without error.
 
 @node Values From Inferior
 @subsubsection Values From Inferior
@@ -19026,6 +19076,50 @@ The last line instantiates the class, and is necessary to trigger the
 registration of the function with @value{GDBN}.  Depending on how the
 Python code is read into @value{GDBN}, you may need to import the
 @code{gdb} module explicitly.
+
+@node Objfiles In Python
+@subsubsection Objfiles In Python
+
+@cindex objfiles in python
+@tindex gdb.Objfile
+@tindex Objfile
+@value{GDBN} loads symbols for an inferior from various
+symbol-containing files (@pxref{Files}).  These include the primary
+executable file, any shared libraries used by the inferior, and any
+separate debug info files (@pxref{Separate Debug Files}).
+@value{GDBN} calls these symbol-containing files @dfn{objfiles}.
+
+The following objfile-related functions are available in the
+@code{gdb} module:
+
+@findex gdb.current_objfile
+@defun current_objfile
+When auto-loading a Python script (@pxref{Auto-loading}), @value{GDBN}
+sets the ``current objfile'' to the corresponding objfile.  This
+function returns the current objfile.  If there is no current objfile,
+this function returns @code{None}.
+@end defun
+
+@findex gdb.objfiles
+@defun objfiles
+Return a sequence of all the objfiles current known to @value{GDBN}.
+@xref{Objfiles In Python}.
+@end defun
+
+Each objfile is represented by an instance of the @code{gdb.Objfile}
+class.
+
+@defivar Objfile filename
+The file name of the objfile as a string.
+@end defivar
+
+@defivar Objfile pretty_printers
+The @code{pretty_printers} attribute is a list of functions.  It is
+used to look up pretty-printers.  A @code{Value} is passed to each
+function in order; if the function returns @code{None}, then the
+search continues.  Otherwise, the return value should be an object
+which is used to format the value.
+@end defivar
 
 @node Frames In Python
 @subsubsection Acessing inferior stack frames from Python.

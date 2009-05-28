@@ -71,3 +71,6 @@ gdb_py_test_multiple "indented multi-line python command" \
   "  print 'hello, world!'" "" \
   "foo ()" "" \
   "end" "hello, world!"
+
+gdb_test "python print gdb.current_objfile()" "None"
+gdb_test "python print gdb.objfiles()" "\\\[\\\]"

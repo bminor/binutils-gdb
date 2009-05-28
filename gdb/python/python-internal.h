@@ -68,6 +68,9 @@ PyObject *gdbpy_frame_stop_reason_string (PyObject *, PyObject *);
 PyObject *gdbpy_selected_frame (PyObject *self, PyObject *args);
 
 PyObject *value_to_value_object (struct value *v);
+PyObject *objfile_to_objfile_object (struct objfile *);
+
+PyObject *objfpy_get_printers (PyObject *, void *);
 
 struct value *convert_value_from_python (PyObject *obj);
 
@@ -75,6 +78,7 @@ void gdbpy_initialize_values (void);
 void gdbpy_initialize_frames (void);
 void gdbpy_initialize_commands (void);
 void gdbpy_initialize_functions (void);
+void gdbpy_initialize_objfile (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
 struct cleanup *make_cleanup_py_restore_gil (PyGILState_STATE *state);

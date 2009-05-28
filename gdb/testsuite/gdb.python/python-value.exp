@@ -236,6 +236,15 @@ proc test_value_in_inferior {} {
   gdb_test "python print 'result =', arg0.address" "= 0x\[\[:xdigit:\]\]+" "Test address attribute"
 }
 
+# A few objfile tests.
+proc test_objfiles {} {
+    gdb_test "python\nok=False\nfor file in gdb.objfiles():\n  if 'python-value' in file.filename:\n    ok=True\nprint ok\nend" "True"
+
+    gdb_test "python print gdb.objfiles()\[0\].pretty_printers" "\\\[\\\]"
+
+    gdb_test "python gdb.objfiles()\[0\].pretty_printers = 0" \
+      "pretty_printers attribute must be a list.*Error while executing Python code."
+}
 
 # Start with a fresh gdb.
 
@@ -256,6 +265,7 @@ test_value_creation
 test_value_numeric_ops
 test_value_boolean
 test_value_compare
+test_objfiles
 
 # The following tests require execution.
 

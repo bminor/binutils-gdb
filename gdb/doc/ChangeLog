@@ -1,3 +1,12 @@
+2009-05-27  Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo: Add @syncodeindex for `tp'.
+	(Python API): Update.
+	(Auto-loading): New node.
+	(Objfiles In Python): New node.
+
 2009-05-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.texinfo (Threads): Document libthread-db-search-path.

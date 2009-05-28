@@ -1,3 +1,10 @@
+2009-05-27  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/python.exp (gdb_py_test_multiple): Add two objfile
+	tests.
+	* gdb.python/python-value.exp (py_objfile_tests): New proc.
+	Call it.
+
 2009-05-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.mi/nsthrexec.c, gdb.mi/mi-nsthrexec.exp: New.

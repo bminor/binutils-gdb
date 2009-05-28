@@ -267,6 +267,7 @@ SUBDIR_PYTHON_OBS = \
 	python-cmd.o \
 	python-frame.o \
 	python-function.o \
+	python-objfile.o \
 	python-utils.o \
 	python-value.o
 SUBDIR_PYTHON_SRCS = \
@@ -274,6 +275,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/python-cmd.c \
 	python/python-frame.c \
 	python/python-function.c \
+	python/python-objfile.c \
 	python/python-utils.c \
 	python/python-value.c
 SUBDIR_PYTHON_DEPS =
@@ -1862,6 +1864,10 @@ python-frame.o: $(srcdir)/python/python-frame.c
 
 python-function.o: $(srcdir)/python/python-function.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-function.c
+	$(POSTCOMPILE)
+
+python-objfile.o: $(srcdir)/python/python-objfile.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-objfile.c
 	$(POSTCOMPILE)
 
 python-utils.o: $(srcdir)/python/python-utils.c
