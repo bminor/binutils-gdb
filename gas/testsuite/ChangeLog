@@ -1,7 +1,7 @@
 2009-05-26  Catherine Moore  <clm@codesourcery.com>
 
 	* gas/mips/eret.s: Remove.
-	* gas/mips/ eret.d: Remove.
+	* gas/mips/eret.d: Remove.
 	* gas/mips/eret.l: Remove.
 	* gas/mips/eret-1.s: New.
 	* gas/mips/eret-1.d: New.
