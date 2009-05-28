@@ -23,6 +23,7 @@
 
 #include "bfd.h"
 
+void bfd_plugin_set_program_name (const char *);
 void bfd_plugin_set_plugin (const char *);
 
 typedef struct plugin_data_struct

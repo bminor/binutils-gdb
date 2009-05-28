@@ -3,6 +3,19 @@
 	* readelf.c (display_debug_section): Do not display debug sections
 	with the NOBITS section type.
 
+2009-05-27  Rafael Avila de Espindola  <espindola@google.com>
+
+	* aclocal.m4: Include ../config/plugins.m4.
+	* configure.in: Use AC_PLUGINS.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2009-05-27  Rafael Avila de Espindola  <espindola@google.com>
+
+	* ar.c (main): Call bfd_plugin_set_program_name.
+	* nm.c (main): Call bfd_plugin_set_program_name.
+
 2009-05-27  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* sysdump.c (tab): Use puts rather than two printfs.

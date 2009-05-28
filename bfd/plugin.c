@@ -106,7 +106,13 @@ add_symbols (void * handle,
   return LDPS_OK;
 }
 
-extern char *program_name __attribute__ ((weak));
+static const char *plugin_program_name;
+
+void
+bfd_plugin_set_program_name (const char *program_name)
+{
+  plugin_program_name = program_name;
+}
 
 static int
 try_load_plugin (const char *pname)
@@ -180,11 +186,11 @@ load_plugin (void)
   if (plugin_name)
     return try_load_plugin (plugin_name);
 
-  if (!program_name)
+  if (plugin_program_name == NULL)
     return 0;
 
   plugin_dir = concat (BINDIR, "/../lib/bfd-plugins", NULL);
-  p = make_relative_prefix (program_name,
+  p = make_relative_prefix (plugin_program_name,
 			    BINDIR,
 			    plugin_dir);
   free (plugin_dir);

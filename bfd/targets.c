@@ -1145,7 +1145,9 @@ static const bfd_target * const _bfd_target_vector[] =
 	&pdp11_aout_vec,
 	&pef_vec,
 	&pef_xlib_vec,
+#if BFD_SUPPORTS_PLUGINS
 	&plugin_vec,
+#endif
 #if 0
 	/* This has the same magic number as RS/6000.  */
 	&pmac_xcoff_vec,

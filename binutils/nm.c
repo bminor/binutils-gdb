@@ -1515,6 +1515,9 @@ main (int argc, char **argv)
 
   program_name = *argv;
   xmalloc_set_program_name (program_name);
+#if BFD_SUPPORTS_PLUGINS
+  bfd_plugin_set_program_name (program_name);
+#endif
 
   START_PROGRESS (program_name, 0);
 
