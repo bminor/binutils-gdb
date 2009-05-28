@@ -61,7 +61,9 @@ static const char * parse_insn_normal
        const char * parse_mep_align  (CGEN_CPU_DESC, const char **, enum cgen_operand_type, long *);
        const char * parse_mep_alignu (CGEN_CPU_DESC, const char **, enum cgen_operand_type, unsigned long *);
 static const char * parse_signed16   (CGEN_CPU_DESC, const char **, int, long *);
+static const char * parse_signed16_range   (CGEN_CPU_DESC, const char **, int, long *);
 static const char * parse_unsigned16 (CGEN_CPU_DESC, const char **, int, unsigned long *);
+static const char * parse_unsigned16_range (CGEN_CPU_DESC, const char **, int, unsigned long *);
 static const char * parse_lo16       (CGEN_CPU_DESC, const char **, int, long *, long);
 static const char * parse_unsigned7  (CGEN_CPU_DESC, const char **, enum cgen_operand_type, unsigned long *);
 static const char * parse_zero       (CGEN_CPU_DESC, const char **, int, long *);
@@ -314,6 +316,46 @@ parse_unsigned16 (CGEN_CPU_DESC cd,
 		  unsigned long *valuep)
 {
   return parse_lo16 (cd, strp, opindex, (long *) valuep, 0);
+}
+
+static const char *
+parse_signed16_range (CGEN_CPU_DESC cd,
+		      const char **strp,
+		      int opindex,
+		      signed long *valuep)
+{
+  const char *errmsg = 0;
+  signed long value;
+
+  errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);
+  if (errmsg)
+    return errmsg;
+
+  if (value < -32768 || value > 32767)
+    return _("Immediate is out of range -32768 to 32767");
+
+  *valuep = value;
+  return 0;
+}
+
+static const char *
+parse_unsigned16_range (CGEN_CPU_DESC cd,
+			const char **strp,
+			int opindex,
+			unsigned long *valuep)
+{
+  const char *errmsg = 0;
+  unsigned long value;
+
+  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, & value);
+  if (errmsg)
+    return errmsg;
+
+  if (value > 65535)
+    return _("Immediate is out of range 0 to 65535");
+
+  *valuep = value;
+  return 0;
 }
 
 /* A special case of parse_signed16 which accepts only the value zero.  */
@@ -906,7 +948,7 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_csr, & junk);
       break;
     case MEP_OPERAND_IMM16P0 :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM16P0, (unsigned long *) (& fields->f_ivc2_imm16p0));
+      errmsg = parse_unsigned16_range (cd, strp, MEP_OPERAND_IMM16P0, (unsigned long *) (& fields->f_ivc2_imm16p0));
       break;
     case MEP_OPERAND_IMM3P12 :
       errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IMM3P12, (unsigned long *) (& fields->f_ivc2_3u12));
@@ -1104,7 +1146,7 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
       errmsg = parse_signed16 (cd, strp, MEP_OPERAND_SIMM16, (long *) (& fields->f_16s16));
       break;
     case MEP_OPERAND_SIMM16P0 :
-      errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_SIMM16P0, (long *) (& fields->f_ivc2_simm16p0));
+      errmsg = parse_signed16_range (cd, strp, MEP_OPERAND_SIMM16P0, (long *) (& fields->f_ivc2_simm16p0));
       break;
     case MEP_OPERAND_SIMM6 :
       errmsg = cgen_parse_signed_integer (cd, strp, MEP_OPERAND_SIMM6, (long *) (& fields->f_6s8));

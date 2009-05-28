@@ -1335,11 +1335,11 @@ const CGEN_OPERAND mep_cgen_operand_table[] =
   { "ivc-x-0-5", MEP_OPERAND_IVC_X_0_5, HW_H_UINT, 0, 5,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_IVC2_5U0] } }, 
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
-/* imm16p0: Imm16p0 */
+/* imm16p0: comment */
   { "imm16p0", MEP_OPERAND_IMM16P0, HW_H_UINT, 0, 16,
     { 2, { (const PTR) &MEP_F_IVC2_IMM16P0_MULTI_IFIELD[0] } }, 
     { 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
-/* simm16p0: sImm16p0 */
+/* simm16p0: comment */
   { "simm16p0", MEP_OPERAND_SIMM16P0, HW_H_SINT, 0, 16,
     { 2, { (const PTR) &MEP_F_IVC2_SIMM16P0_MULTI_IFIELD[0] } }, 
     { 0|A(VIRTUAL), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
