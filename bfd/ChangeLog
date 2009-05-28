@@ -1,5 +1,16 @@
 2009-05-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* elf32-spu.c (struct call_info): New member broken_cycle.
+	(remove_cycle): Instead of physically removing call_info structures
+	to break call graph cycles, mark them using the broken_cycle flag.
+	(mark_overlay_section): Respect broken_cycle flag.
+	(unmark_overlay_section): Likewise.
+	(collect_lib_sections): Likewise.
+	(collect_overlays): Likewise.
+	(sum_stack): Likewise.
+
+2009-05-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* elf32-spu.c (insert_callee): Accumulate incoming callee->count.
 	(mark_functions_via_relocs): Initialize callee->count to 1.
 	(pasted_function): Likewise.

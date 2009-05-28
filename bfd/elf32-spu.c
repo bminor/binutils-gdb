@@ -367,6 +367,7 @@ struct call_info
   unsigned int max_depth;
   unsigned int is_tail : 1;
   unsigned int is_pasted : 1;
+  unsigned int broken_cycle : 1;
   unsigned int priority : 13;
 };
 
@@ -3271,9 +3272,8 @@ remove_cycles (struct function_info *fun,
 				       "from %s to %s\n"),
 				     f1, f2);
 	    }
-	  *callp = call->next;
-	  free (call);
-	  continue;
+
+	  call->broken_cycle = TRUE;
 	}
       callp = &call->next;
     }
@@ -3516,7 +3516,8 @@ mark_overlay_section (struct function_info *fun,
 	  BFD_ASSERT (!fun->sec->segment_mark);
 	  fun->sec->segment_mark = 1;
 	}
-      if (!mark_overlay_section (call->fun, info, param))
+      if (!call->broken_cycle
+	  && !mark_overlay_section (call->fun, info, param))
 	return FALSE;
     }
 
@@ -3576,7 +3577,8 @@ unmark_overlay_section (struct function_info *fun,
     }
 
   for (call = fun->call_list; call != NULL; call = call->next)
-    if (!unmark_overlay_section (call->fun, info, param))
+    if (!call->broken_cycle
+	&& !unmark_overlay_section (call->fun, info, param))
       return FALSE;
 
   if (RECURSE_UNMARK)
@@ -3627,7 +3629,8 @@ collect_lib_sections (struct function_info *fun,
     }
 
   for (call = fun->call_list; call != NULL; call = call->next)
-    collect_lib_sections (call->fun, info, param);
+    if (!call->broken_cycle)
+      collect_lib_sections (call->fun, info, param);
 
   return TRUE;
 }
@@ -3821,7 +3824,7 @@ collect_overlays (struct function_info *fun,
 
   fun->visit7 = TRUE;
   for (call = fun->call_list; call != NULL; call = call->next)
-    if (!call->is_pasted)
+    if (!call->is_pasted && !call->broken_cycle)
       {
 	if (!collect_overlays (call->fun, info, ovly_sections))
 	  return FALSE;
@@ -3867,7 +3870,8 @@ collect_overlays (struct function_info *fun,
     }
 
   for (call = fun->call_list; call != NULL; call = call->next)
-    if (!collect_overlays (call->fun, info, ovly_sections))
+    if (!call->broken_cycle
+	&& !collect_overlays (call->fun, info, ovly_sections))
       return FALSE;
 
   if (added_fun)
@@ -3918,6 +3922,8 @@ sum_stack (struct function_info *fun,
   max = NULL;
   for (call = fun->call_list; call; call = call->next)
     {
+      if (call->broken_cycle)
+	continue;
       if (!call->is_pasted)
 	has_call = TRUE;
       if (!sum_stack (call->fun, info, sum_stack_param))
@@ -3961,7 +3967,7 @@ sum_stack (struct function_info *fun,
 	{
 	  info->callbacks->minfo (_("  calls:\n"));
 	  for (call = fun->call_list; call; call = call->next)
-	    if (!call->is_pasted)
+	    if (!call->is_pasted && !call->broken_cycle)
 	      {
 		const char *f2 = func_name (call->fun);
 		const char *ann1 = call->fun == max ? "*" : " ";
