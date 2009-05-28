@@ -1211,9 +1211,9 @@ evaluate_subexp_standard (struct type *expect_type,
 	    if (TYPE_CODE (value_type (method)) != TYPE_CODE_FUNC)
 	      error (_("method address has symbol information with non-function type; skipping"));
 	    if (struct_return)
-	      VALUE_ADDRESS (method) = value_as_address (msg_send_stret);
+	      set_value_address (method, value_as_address (msg_send_stret));
 	    else
-	      VALUE_ADDRESS (method) = value_as_address (msg_send);
+	      set_value_address (method, value_as_address (msg_send));
 	    called_method = method;
 	  }
 	else
@@ -1437,7 +1437,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	 	 of the ``this'' pointer if necessary, so modify argvec[1] to
 		 reflect any ``this'' changes.  */
 	      arg2 = value_from_longest (lookup_pointer_type(value_type (temp)),
-					 VALUE_ADDRESS (temp) + value_offset (temp)
+					 value_address (temp)
 					 + value_embedded_offset (temp));
 	      argvec[1] = arg2;	/* the ``this'' pointer */
 	    }

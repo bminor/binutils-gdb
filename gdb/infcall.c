@@ -217,7 +217,7 @@ find_function_addr (struct value *function, struct type **retval_type)
   /* Determine address to call.  */
   if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
     {
-      funaddr = VALUE_ADDRESS (function);
+      funaddr = value_address (function);
       value_type = TYPE_TARGET_TYPE (ftype);
     }
   else if (code == TYPE_CODE_PTR)

@@ -249,7 +249,7 @@ allocate_value_lazy (struct type *type)
   val->type = type;
   val->enclosing_type = type;
   VALUE_LVAL (val) = not_lval;
-  VALUE_ADDRESS (val) = 0;
+  val->location.address = 0;
   VALUE_FRAME_ID (val) = null_frame_id;
   val->offset = 0;
   val->bitpos = 0;
@@ -525,10 +525,30 @@ deprecated_value_lval_hack (struct value *value)
   return &value->lval;
 }
 
-CORE_ADDR *
-deprecated_value_address_hack (struct value *value)
+CORE_ADDR
+value_address (struct value *value)
 {
-  return &value->location.address;
+  if (value->lval == lval_internalvar
+      || value->lval == lval_internalvar_component)
+    return 0;
+  return value->location.address + value->offset;
+}
+
+CORE_ADDR
+value_raw_address (struct value *value)
+{
+  if (value->lval == lval_internalvar
+      || value->lval == lval_internalvar_component)
+    return 0;
+  return value->location.address;
+}
+
+void
+set_value_address (struct value *value, CORE_ADDR addr)
+{
+  gdb_assert (value->lval != lval_internalvar
+	      && value->lval != lval_internalvar_component);
+  value->location.address = addr;
 }
 
 struct internalvar **
@@ -1292,7 +1312,7 @@ value_as_address (struct value *val)
 
      Upon entry to this function, if VAL is a value of type `function'
      (that is, TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_FUNC), then
-     VALUE_ADDRESS (val) is the address of the function.  This is what
+     value_address (val) is the address of the function.  This is what
      you'll get if you evaluate an expression like `main'.  The call
      to COERCE_ARRAY below actually does all the usual unary
      conversions, which includes converting values of type `function'
@@ -1312,7 +1332,7 @@ value_as_address (struct value *val)
      function, just return its address directly.  */
   if (TYPE_CODE (value_type (val)) == TYPE_CODE_FUNC
       || TYPE_CODE (value_type (val)) == TYPE_CODE_METHOD)
-    return VALUE_ADDRESS (val);
+    return value_address (val);
 
   val = coerce_array (val);
 
@@ -1543,7 +1563,7 @@ value_static_field (struct type *type, int fieldno)
  	}
       if (retval && VALUE_LVAL (retval) == lval_memory)
 	SET_FIELD_PHYSADDR (TYPE_FIELD (type, fieldno),
-			    VALUE_ADDRESS (retval));
+			    value_address (retval));
     }
   return retval;
 }
@@ -1688,7 +1708,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *ty
   v = allocate_value (ftype);
   if (sym)
     {
-      VALUE_ADDRESS (v) = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      set_value_address (v, BLOCK_START (SYMBOL_BLOCK_VALUE (sym)));
     }
   else
     {
@@ -1697,9 +1717,9 @@ value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *ty
       struct objfile *objfile = msymbol_objfile (msym);
       struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
-      VALUE_ADDRESS (v)
-	= gdbarch_convert_from_func_ptr_addr
-	   (gdbarch, SYMBOL_VALUE_ADDRESS (msym), &current_target);
+      set_value_address (v,
+	gdbarch_convert_from_func_ptr_addr
+	   (gdbarch, SYMBOL_VALUE_ADDRESS (msym), &current_target));
     }
 
   if (arg1p)
@@ -1912,7 +1932,7 @@ value_from_contents_and_address (struct type *type,
     set_value_lazy (v, 1);
   else
     memcpy (value_contents_raw (v), valaddr, TYPE_LENGTH (type));
-  VALUE_ADDRESS (v) = address;
+  set_value_address (v, address);
   VALUE_LVAL (v) = lval_memory;
   return v;
 }

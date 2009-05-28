@@ -315,7 +315,7 @@ common_val_print (struct value *val, struct ui_file *stream, int recurse,
     return 0;
 
   return val_print (value_type (val), value_contents_all (val),
-		    value_embedded_offset (val), VALUE_ADDRESS (val),
+		    value_embedded_offset (val), value_address (val),
 		    stream, recurse, options, language);
 }
 

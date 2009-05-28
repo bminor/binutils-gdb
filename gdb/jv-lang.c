@@ -211,8 +211,7 @@ get_java_utf8_name (struct obstack *obstack, struct value *name)
   CORE_ADDR data_addr;
   temp = value_struct_elt (&temp, NULL, "length", NULL, "structure");
   name_length = (int) value_as_long (temp);
-  data_addr = VALUE_ADDRESS (temp) + value_offset (temp)
-    + TYPE_LENGTH (value_type (temp));
+  data_addr = value_address (temp) + TYPE_LENGTH (value_type (temp));
   chrs = obstack_alloc (obstack, name_length + 1);
   chrs[name_length] = '\0';
   read_memory (data_addr, (gdb_byte *) chrs, name_length);
@@ -267,7 +266,7 @@ type_from_class (struct value *clas)
 	return NULL;
       clas = value_ind (clas);
     }
-  addr = VALUE_ADDRESS (clas) + value_offset (clas);
+  addr = value_address (clas);
 
 #if 0
   get_java_class_symtab ();
@@ -422,8 +421,7 @@ java_link_class_type (struct type *type, struct value *clas)
 
   fields = NULL;
   nfields--;			/* First set up dummy "class" field. */
-  SET_FIELD_PHYSADDR (TYPE_FIELD (type, nfields),
-		      VALUE_ADDRESS (clas) + value_offset (clas));
+  SET_FIELD_PHYSADDR (TYPE_FIELD (type, nfields), value_address (clas));
   TYPE_FIELD_NAME (type, nfields) = "class";
   TYPE_FIELD_TYPE (type, nfields) = value_type (clas);
   SET_TYPE_FIELD_PRIVATE (type, nfields);
@@ -440,7 +438,9 @@ java_link_class_type (struct type *type, struct value *clas)
 	}
       else
 	{			/* Re-use field value for next field. */
-	  VALUE_ADDRESS (field) += TYPE_LENGTH (value_type (field));
+	  CORE_ADDR addr
+	    = value_address (field) + TYPE_LENGTH (value_type (field));
+	  set_value_address (field, addr);
 	  set_value_lazy (field, 1);
 	}
       temp = field;
@@ -510,7 +510,9 @@ java_link_class_type (struct type *type, struct value *clas)
 	}
       else
 	{			/* Re-use method value for next method. */
-	  VALUE_ADDRESS (method) += TYPE_LENGTH (value_type (method));
+	  CORE_ADDR addr
+	    = value_address (method) + TYPE_LENGTH (value_type (method));
+	  set_value_address (method, addr);
 	  set_value_lazy (method, 1);
 	}
 

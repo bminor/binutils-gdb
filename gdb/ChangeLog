@@ -1,4 +1,93 @@
 2009-05-27  Tom Tromey  <tromey@redhat.com>
+	    Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* mi/mi-main.c (mi_cmd_data_evaluate_expression): Use
+	value_address.
+	* cli/cli-dump.c (dump_value_to_file): Use value_address.
+	* valprint.c (common_val_print): Likewise.
+	* v850-tdep.c (v850_push_dummy_call): Use value_address.
+	* tracepoint.c (encode_actions): Use value_address.
+	* printcmd.c (print_formatted): Use value_address.
+	(x_command): Likewise.
+	* p-valprint.c (pascal_object_print_static_field): Use
+	value_address.
+	* mn10300-tdep.c (mn10300_push_dummy_call): Use value_address.
+	* mips-tdep.c (mips_eabi_push_dummy_call): Use value_address.
+	* m32r-tdep.c (m32r_push_dummy_call): Use value_address.
+	* jv-valprint.c (java_value_print): Use value_address.
+	* infcall.c (find_function_addr): Use value_address.
+	* gnu-v3-abi.c (gnuv3_rtti_type): Use value_address.
+	* gnu-v2-abi.c (gnuv2_value_rtti_type): Use value_address.
+	* frv-tdep.c (frv_push_dummy_call): Use value_address.
+	* frame.c (frame_register_unwind): Use value_address.
+	(frame_unwind_register_value): Likewise.
+	* darwin-nat-info.c (info_mach_region_command): Use
+	value_address.
+	* cp-valprint.c (cp_print_static_field): Use value_address.
+	* c-valprint.c (c_value_print): Use value_address.
+	* breakpoint.c (update_watchpoint): Use value_address.
+	(can_use_hardware_watchpoint): Likewise.
+	* ada-valprint.c (ada_val_print_1): Use value_address.
+	(ada_value_print): Likewise.
+	* ada-tasks.c (read_fat_string_value): Use value_address.
+	* jv-lang.c (java_link_class_type): Use set_value_address.
+	(java_link_class_type): Likewise.
+	(get_java_utf8_name): Use value_address.
+	(type_from_class): Likewise.
+	(java_link_class_type): Likewise.
+	* findvar.c (value_of_register): Use set_value_address.
+	(read_var_value): Likewise.
+	(read_var_value): Likewise.
+	* eval.c (evaluate_subexp_standard): Use set_value_address.
+	(evaluate_subexp_standard): Use value_address.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Use set_value_address.
+	* ada-lang.c (coerce_unspec_val_to_type): Use set_value_address.
+	(ada_value_primitive_packed_val): Likewise.
+	(ensure_lval): Likewise.
+	(thin_data_pntr): Use value_address.
+	(desc_bounds): Likewise.
+	(ada_value_primitive_packed_val): Likewise.
+	(value_assign_to_component): Likewise.
+	(ensure_lval): Likewise.
+	(make_array_descriptor): Likewise.
+	(ada_to_fixed_value): Likewise.
+	(unwrap_value): Likewise.
+	* value.c (deprecated_value_address_hack): Remove.
+	(value_address): New function.
+	(value_raw_address): Likewise.
+	(set_value_address): Likewise.
+	(value_fn_field): Use set_value_address.
+	(value_from_contents_and_address): Likewise.
+	(value_fn_field): Likewise.
+	(allocate_value_lazy): Don't use VALUE_ADDRESS.
+	(value_as_address): Use value_address.
+	(value_static_field): Likewise.
+	* valops.c (search_struct_field): Use set_value_address.
+	(value_at): Likewise.
+	(value_at_lazy): Likewise.
+	(value_repeat): Likewise.
+	(value_cast_structs): Use value_address.
+	(value_cast): Likewise.
+	(value_fetch_lazy): Likewise.
+	(value_assign): Likewise.
+	(value_repeat): Likewise.
+	(address_of_variable): Likewise.
+	(value_coerce_array): Likewise.
+	(value_coerce_function): Likewise.
+	(value_addr): Likewise.
+	(search_struct_field): Likewise.
+	(search_struct_method): Likewise.
+	(find_method_list): Likewise.
+	(value_struct_elt_for_reference): Likewise.
+	(value_full_object): Likewise.
+	* jv-valprint.c (java_value_print): Use set_value_address.
+	* value.h (deprecated_value_address_hack): Remove.
+	(VALUE_ADDRESS): Remove.
+	(value_address): Declare.
+	(value_raw_address): Declare.
+	(set_value_address): Declare.
+
+2009-05-27  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Phil Muldoon  <pmuldoon@redhat.com>
 	    Paul Pluzhnikov  <ppluzhnikov@google.com>

@@ -264,7 +264,7 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
       retval = allocate_value (SYMBOL_TYPE (var));
       VALUE_LVAL (retval) = lval_memory;
       set_value_lazy (retval, 1);
-      VALUE_ADDRESS (retval) = address;
+      set_value_address (retval, address);
     }
 
   set_value_initialized (retval, ctx->initialized);

@@ -45,7 +45,7 @@ java_value_print (struct value *val, struct ui_file *stream,
   struct value_print_options opts;
 
   type = value_type (val);
-  address = VALUE_ADDRESS (val) + value_offset (val);
+  address = value_address (val);
 
   if (is_object_type (type))
     {
@@ -143,8 +143,8 @@ java_value_print (struct value *val, struct ui_file *stream,
 	  struct value *v = allocate_value (el_type);
 	  struct value *next_v = allocate_value (el_type);
 
-	  VALUE_ADDRESS (v) = address + JAVA_OBJECT_SIZE + 4;
-	  VALUE_ADDRESS (next_v) = VALUE_ADDRESS (v);
+	  set_value_address (v, address + JAVA_OBJECT_SIZE + 4);
+	  set_value_address (next_v, value_raw_address (v));
 
 	  while (i < length && things_printed < options->print_max)
 	    {

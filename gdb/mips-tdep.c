@@ -2766,7 +2766,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (len > regsize
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
-	  store_unsigned_integer (valbuf, regsize, VALUE_ADDRESS (arg));
+	  store_unsigned_integer (valbuf, regsize, value_address (arg));
 	  typecode = TYPE_CODE_PTR;
 	  len = regsize;
 	  val = valbuf;

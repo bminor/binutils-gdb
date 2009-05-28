@@ -272,11 +272,18 @@ extern void set_value_component_location (struct value *component,
 extern enum lval_type *deprecated_value_lval_hack (struct value *);
 #define VALUE_LVAL(val) (*deprecated_value_lval_hack (val))
 
-/* If lval == lval_memory, this is the address in the inferior.  If
-   lval == lval_register, this is the byte offset into the registers
-   structure.  */
-extern CORE_ADDR *deprecated_value_address_hack (struct value *);
-#define VALUE_ADDRESS(val) (*deprecated_value_address_hack (val))
+/* If lval == lval_memory, return the address in the inferior.  If
+   lval == lval_register, return the byte offset into the registers
+   structure.  Otherwise, return 0.  The returned address
+   includes the offset, if any.  */
+extern CORE_ADDR value_address (struct value *);
+
+/* Like value_address, except the result does not include value's
+   offset.  */
+extern CORE_ADDR value_raw_address (struct value *);
+
+/* Set the address of a value.  */
+extern void set_value_address (struct value *, CORE_ADDR);
 
 /* Pointer to internal variable.  */
 extern struct internalvar **deprecated_value_internalvar_hack (struct value *);

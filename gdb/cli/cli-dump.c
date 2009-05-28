@@ -296,7 +296,7 @@ dump_value_to_file (char *cmd, char *mode, char *file_format)
 
       if (VALUE_LVAL (val))
 	{
-	  vaddr = VALUE_ADDRESS (val);
+	  vaddr = value_address (val);
 	}
       else
 	{

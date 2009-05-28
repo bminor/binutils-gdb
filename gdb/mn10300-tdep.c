@@ -1267,7 +1267,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 	  /* Change to pointer-to-type.  */
 	  arg_len = push_size;
 	  store_unsigned_integer (valbuf, push_size, 
-				  VALUE_ADDRESS (*args));
+				  value_address (*args));
 	  val = &valbuf[0];
 	}
       else

@@ -242,7 +242,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
     we'd waste a bunch of time figuring out we already know the type.
     Besides, we don't care about the type, just the actual pointer
   */
-  if (VALUE_ADDRESS (value_field (v, known_type_vptr_fieldno)) == 0)
+  if (value_address (value_field (v, known_type_vptr_fieldno)) == 0)
     return NULL;
 
   vtbl = value_as_address (value_field (v, known_type_vptr_fieldno));

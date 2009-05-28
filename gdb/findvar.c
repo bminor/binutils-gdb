@@ -275,7 +275,7 @@ value_of_register (int regnum, struct frame_info *frame)
   memcpy (value_contents_raw (reg_val), raw_buffer,
 	  register_size (gdbarch, regnum));
   VALUE_LVAL (reg_val) = lval;
-  VALUE_ADDRESS (reg_val) = addr;
+  set_value_address (reg_val, addr);
   VALUE_REGNUM (reg_val) = regnum;
   set_value_optimized_out (reg_val, optim);
   VALUE_FRAME_ID (reg_val) = get_frame_id (frame);
@@ -477,10 +477,10 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 
     case LOC_BLOCK:
       if (overlay_debugging)
-	VALUE_ADDRESS (v) = symbol_overlayed_address
-	  (BLOCK_START (SYMBOL_BLOCK_VALUE (var)), SYMBOL_OBJ_SECTION (var));
+	set_value_address (v, symbol_overlayed_address
+	  (BLOCK_START (SYMBOL_BLOCK_VALUE (var)), SYMBOL_OBJ_SECTION (var)));
       else
-	VALUE_ADDRESS (v) = BLOCK_START (SYMBOL_BLOCK_VALUE (var));
+	set_value_address (v, BLOCK_START (SYMBOL_BLOCK_VALUE (var)));
       return v;
 
     case LOC_REGISTER:
@@ -551,7 +551,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
       break;
     }
 
-  VALUE_ADDRESS (v) = addr;
+  set_value_address (v, addr);
   set_value_lazy (v, 1);
   return v;
 }

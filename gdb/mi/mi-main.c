@@ -788,7 +788,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   get_user_print_options (&opts);
   opts.deref_ref = 0;
   val_print (value_type (val), value_contents (val),
-	     value_embedded_offset (val), VALUE_ADDRESS (val),
+	     value_embedded_offset (val), value_address (val),
 	     stb->stream, 0, &opts, current_language);
 
   ui_out_field_stream (uiout, "value", stb);

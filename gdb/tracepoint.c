@@ -1144,7 +1144,7 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 		    case UNOP_MEMVAL:
 		      /* safe because we know it's a simple expression */
 		      tempval = evaluate_expression (exp);
-		      addr = VALUE_ADDRESS (tempval) + value_offset (tempval);
+		      addr = value_address (tempval);
 		      len = TYPE_LENGTH (check_typedef (exp->elts[1].type));
 		      add_memrange (collect, memrange_absolute, addr, len);
 		      break;

@@ -684,7 +684,7 @@ info_mach_region_command (char *exp, int from_tty)
   if (TYPE_CODE (value_type (val)) == TYPE_CODE_FUNC
       && VALUE_LVAL (val) == lval_memory)
     {
-      address = VALUE_ADDRESS (val);
+      address = value_address (val);
     }
   else
     {

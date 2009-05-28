@@ -485,7 +485,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
       set_value_component_location (result, val);
       set_value_bitsize (result, value_bitsize (val));
       set_value_bitpos (result, value_bitpos (val));
-      VALUE_ADDRESS (result) += value_offset (val);
+      set_value_address (result, value_address (val));
       if (value_lazy (val)
           || TYPE_LENGTH (type) > TYPE_LENGTH (value_type (val)))
         set_value_lazy (result, 1);
@@ -1287,8 +1287,7 @@ thin_data_pntr (struct value *val)
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     return value_cast (data_type, value_copy (val));
   else
-    return value_from_longest (data_type,
-                               VALUE_ADDRESS (val) + value_offset (val));
+    return value_from_longest (data_type, value_address (val));
 }
 
 /* True iff TYPE indicates a "thick" array pointer type.  */
@@ -1353,7 +1352,7 @@ desc_bounds (struct value *arr)
       if (TYPE_CODE (type) == TYPE_CODE_PTR)
         addr = value_as_long (arr);
       else
-        addr = VALUE_ADDRESS (arr) + value_offset (arr);
+        addr = value_address (arr);
 
       return
         value_from_longest (lookup_pointer_type (bounds_type),
@@ -1968,9 +1967,9 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
       v = value_at (type,
-                    VALUE_ADDRESS (obj) + value_offset (obj) + offset);
+                    value_address (obj) + offset);
       bytes = (unsigned char *) alloca (len);
-      read_memory (VALUE_ADDRESS (v), bytes, len);
+      read_memory (value_address (v), bytes, len);
     }
   else
     {
@@ -1980,15 +1979,17 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 
   if (obj != NULL)
     {
+      CORE_ADDR new_addr;
       set_value_component_location (v, obj);
-      VALUE_ADDRESS (v) += value_offset (obj) + offset;
+      new_addr = value_address (obj) + offset;
       set_value_bitpos (v, bit_offset + value_bitpos (obj));
       set_value_bitsize (v, bit_size);
       if (value_bitpos (v) >= HOST_CHAR_BIT)
         {
-          VALUE_ADDRESS (v) += 1;
+	  ++new_addr;
           set_value_bitpos (v, value_bitpos (v) - HOST_CHAR_BIT);
         }
+      set_value_address (v, new_addr);
     }
   else
     set_value_bitsize (v, bit_size);
@@ -2181,7 +2182,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       int from_size;
       char *buffer = (char *) alloca (len);
       struct value *val;
-      CORE_ADDR to_addr = VALUE_ADDRESS (toval) + value_offset (toval);
+      CORE_ADDR to_addr = value_address (toval);
 
       if (TYPE_CODE (type) == TYPE_CODE_FLT)
         fromval = value_cast (type, fromval);
@@ -2222,8 +2223,7 @@ value_assign_to_component (struct value *container, struct value *component,
 			   struct value *val)
 {
   LONGEST offset_in_container =
-    (LONGEST)  (VALUE_ADDRESS (component) + value_offset (component)
-		- VALUE_ADDRESS (container) - value_offset (container));
+    (LONGEST)  (value_address (component) - value_address (container));
   int bit_offset_in_container = 
     value_bitpos (component) - value_bitpos (container);
   int bits;
@@ -3750,7 +3750,7 @@ parse_old_style_renaming (struct type *type,
 /* Return an lvalue containing the value VAL.  This is the identity on
    lvalues, and otherwise has the side-effect of pushing a copy of VAL 
    on the stack, using and updating *SP as the stack pointer, and 
-   returning an lvalue whose VALUE_ADDRESS points to the copy.  */
+   returning an lvalue whose value_address points to the copy.  */
 
 static struct value *
 ensure_lval (struct value *val, CORE_ADDR *sp)
@@ -3764,12 +3764,12 @@ ensure_lval (struct value *val, CORE_ADDR *sp)
 	 indicated. */
       if (gdbarch_inner_than (current_gdbarch, 1, 2))
 	{
-	  /* Stack grows downward.  Align SP and VALUE_ADDRESS (val) after
+	  /* Stack grows downward.  Align SP and value_address (val) after
 	     reserving sufficient space. */
 	  *sp -= len;
 	  if (gdbarch_frame_align_p (current_gdbarch))
 	    *sp = gdbarch_frame_align (current_gdbarch, *sp);
-	  VALUE_ADDRESS (val) = *sp;
+	  set_value_address (val, *sp);
 	}
       else
 	{
@@ -3777,14 +3777,14 @@ ensure_lval (struct value *val, CORE_ADDR *sp)
 	     then again, re-align the frame. */
 	  if (gdbarch_frame_align_p (current_gdbarch))
 	    *sp = gdbarch_frame_align (current_gdbarch, *sp);
-	  VALUE_ADDRESS (val) = *sp;
+	  set_value_address (val, *sp);
 	  *sp += len;
 	  if (gdbarch_frame_align_p (current_gdbarch))
 	    *sp = gdbarch_frame_align (current_gdbarch, *sp);
 	}
       VALUE_LVAL (val) = lval_memory;
 
-      write_memory (VALUE_ADDRESS (val), value_contents_raw (val), len);
+      write_memory (value_address (val), value_contents_raw (val), len);
     }
 
   return val;
@@ -3873,12 +3873,12 @@ make_array_descriptor (struct type *type, struct value *arr, CORE_ADDR *sp)
   bounds = ensure_lval (bounds, sp);
 
   modify_general_field (value_contents_writeable (descriptor),
-                        VALUE_ADDRESS (ensure_lval (arr, sp)),
+                        value_address (ensure_lval (arr, sp)),
                         fat_pntr_data_bitpos (desc_type),
                         fat_pntr_data_bitsize (desc_type));
 
   modify_general_field (value_contents_writeable (descriptor),
-                        VALUE_ADDRESS (bounds),
+                        value_address (bounds),
                         fat_pntr_bounds_bitpos (desc_type),
                         fat_pntr_bounds_bitsize (desc_type));
 
@@ -7430,7 +7430,7 @@ static struct value *
 ada_to_fixed_value (struct value *val)
 {
   return ada_to_fixed_value_create (value_type (val),
-                                    VALUE_ADDRESS (val) + value_offset (val),
+                                    value_address (val),
                                     val);
 }
 
@@ -7776,7 +7776,7 @@ unwrap_value (struct value *val)
       return
         coerce_unspec_val_to_type
         (val, ada_to_fixed_type (raw_real_type, 0,
-                                 VALUE_ADDRESS (val) + value_offset (val),
+                                 value_address (val),
                                  NULL, 1));
     }
 }

@@ -602,7 +602,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 
   *optimizedp = value_optimized_out (value);
   *lvalp = VALUE_LVAL (value);
-  *addrp = VALUE_ADDRESS (value);
+  *addrp = value_address (value);
   *realnump = VALUE_REGNUM (value);
 
   if (bufferp)
@@ -688,7 +688,7 @@ frame_unwind_register_value (struct frame_info *frame, int regnum)
 				VALUE_REGNUM (value));
 	  else if (VALUE_LVAL (value) == lval_memory)
 	    fprintf_unfiltered (gdb_stdlog, " address=0x%s",
-				paddr_nz (VALUE_ADDRESS (value)));
+				paddr_nz (value_address (value)));
 	  else
 	    fprintf_unfiltered (gdb_stdlog, " computed");
 
