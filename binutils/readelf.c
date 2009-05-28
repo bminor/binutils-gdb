@@ -8539,6 +8539,15 @@ display_debug_section (Elf_Internal_Shdr * section, FILE * file)
       printf (_("\nSection '%s' has no debugging data.\n"), name);
       return 0;
     }
+  if (section->sh_type == SHT_NOBITS)
+    {
+      /* There is no point in dumping the contents of a debugging section
+	 which has the NOBITS type - the bits in the file will be random.
+	 This can happen when a file containing a .eh_frame section is
+	 stripped with the --only-keep-debug command line option.  */
+      printf (_("section '%s' has the NOBITS type - its contents are unreliable.\n"), name);
+      return 0;
+    }
 
   if (const_strneq (name, ".gnu.linkonce.wi."))
     name = ".debug_info";
