@@ -2592,7 +2592,7 @@ insert_callee (struct function_info *caller, struct call_info *callee)
 	    p->fun->start = NULL;
 	    p->fun->is_func = TRUE;
 	  }
-	p->count += 1;
+	p->count += callee->count;
 	/* Reorder list so most recent call is first.  */
 	*pp = p->next;
 	p->next = caller->call_list;
@@ -2600,7 +2600,6 @@ insert_callee (struct function_info *caller, struct call_info *callee)
 	return FALSE;
       }
   callee->next = caller->call_list;
-  callee->count += 1;
   caller->call_list = callee;
   return TRUE;
 }
@@ -2790,7 +2789,7 @@ mark_functions_via_relocs (asection *sec,
       callee->is_tail = !is_call;
       callee->is_pasted = FALSE;
       callee->priority = priority;
-      callee->count = 0;
+      callee->count = 1;
       if (callee->fun->last_caller != sec)
 	{
 	  callee->fun->last_caller = sec;
@@ -2882,7 +2881,7 @@ pasted_function (asection *sec)
 	      callee->fun = fun;
 	      callee->is_tail = TRUE;
 	      callee->is_pasted = TRUE;
-	      callee->count = 0;
+	      callee->count = 1;
 	      if (!insert_callee (fun_start, callee))
 		free (callee);
 	      return TRUE;
@@ -4438,14 +4437,18 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  for (call = dummy_caller.call_list; call; call = call->next)
 	    {
 	      unsigned int k;
+	      unsigned int stub_delta = 1;
 
-	      ++num_stubs;
+	      if (htab->params->ovly_flavour == ovly_soft_icache)
+		stub_delta = call->count;
+	      num_stubs += stub_delta;
+
 	      /* If the call is within this overlay, we won't need a
 		 stub.  */
 	      for (k = base; k < i + 1; k++)
 		if (call->fun->sec == ovly_sections[2 * k])
 		  {
-		    --num_stubs;
+		    num_stubs -= stub_delta;
 		    break;
 		  }
 	    }

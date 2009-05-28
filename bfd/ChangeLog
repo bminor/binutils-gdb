@@ -1,3 +1,11 @@
+2009-05-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf32-spu.c (insert_callee): Accumulate incoming callee->count.
+	(mark_functions_via_relocs): Initialize callee->count to 1.
+	(pasted_function): Likewise.
+	(spu_elf_auto_overlay): Honor call counts when determining number
+	of stubs required in software i-cache mode.
+
 2009-05-26  Rafael Avila de Espindola  <espindola@google.com>
 
 	* aclocal.m4: Include ../config/plugins.m4.
