@@ -6774,6 +6774,12 @@ Without this format, @value{GDBN} displays pointers to and arrays of
 @code{char}, @w{@code{unsigned char}}, and @w{@code{signed char}} as
 strings.  Single-byte members of a vector are displayed as an integer
 array.
+
+@item r
+@cindex raw printing
+Print using the @samp{raw} formatting.  By default, @value{GDBN} will
+use a type-specific pretty-printer.  The @samp{r} format bypasses any
+pretty-printer which might exist for the value's type.
 @end table
 
 For example, to print the program counter in hex (@pxref{Registers}), type
@@ -18517,6 +18523,8 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Auto-loading::                Automatically loading Python code.
 * Values From Inferior::
 * Types In Python::		Python representation of types.
+* Pretty Printing::		Pretty-printing values.
+* Selecting Pretty-Printers::   How GDB chooses a pretty-printer.
 * Commands In Python::          Implementing new commands in Python.
 * Functions In Python::         Writing new convenience functions.
 * Objfiles In Python::          Object files.
@@ -19044,6 +19052,217 @@ A function internal to @value{GDBN}.  This is the type used to represent
 convenience functions.
 @end table
 
+@node Pretty Printing
+@subsubsection Pretty Printing
+
+@value{GDBN} provides a mechanism to allow pretty-printing of values
+using Python code.  The pretty-printer API allows application-specific
+code to greatly simplify the display of complex objects.  This
+mechanism works for both MI and the CLI.
+
+For example, here is how a C@t{++} @code{std::string} looks without a
+pretty-printer:
+
+@smallexample
+(@value{GDBP}) print s
+$1 = @{
+  static npos = 4294967295, 
+  _M_dataplus = @{
+    <std::allocator<char>> = @{
+      <__gnu_cxx::new_allocator<char>> = @{<No data fields>@}, <No data fields>@}, 
+    members of std::basic_string<char, std::char_traits<char>, std::allocator<char> >::_Alloc_hider: 
+    _M_p = 0x804a014 "abcd"
+  @}
+@}
+@end smallexample
+
+After a pretty-printer for @code{std::string} has been installed, only
+the contents are printed:
+
+@smallexample
+(@value{GDBP}) print s
+$2 = "abcd"
+@end smallexample
+
+A pretty-printer is just an object that holds a value and implements a
+specific interface, defined here.
+
+@defop Operation {pretty printer} children (self)
+@value{GDBN} will call this method on a pretty-printer to compute the
+children of the pretty-printer's value.
+
+This method must return an object conforming to the Python iterator
+protocol.  Each item returned by the iterator must be a tuple holding
+two elements.  The first element is the ``name'' of the child; the
+second element is the child's value.  The value can be any Python
+object which is convertible to a @value{GDBN} value.
+
+This method is optional.  If it does not exist, @value{GDBN} will act
+as though the value has no children.
+@end defop
+
+@defop Operation {pretty printer} display_hint (self)
+The CLI may call this method and use its result to change the
+formatting of a value.  The result will also be supplied to an MI
+consumer as a @samp{displayhint} attribute of the variable being
+printed.
+
+This method is optional.  If it does exist, this method must return a
+string.
+
+Some display hints are predefined by @value{GDBN}:
+
+@table @samp
+@item array
+Indicate that the object being printed is ``array-like''.  The CLI
+uses this to respect parameters such as @code{set print elements} and
+@code{set print array}.
+
+@item map
+Indicate that the object being printed is ``map-like'', and that the
+children of this value can be assumed to alternate between keys and
+values.
+
+@item string
+Indicate that the object being printed is ``string-like''.  If the
+printer's @code{to_string} method returns a Python string of some
+kind, then @value{GDBN} will call its internal language-specific
+string-printing function to format the string.  For the CLI this means
+adding quotation marks, possibly escaping some characters, respecting
+@code{set print elements}, and the like.
+@end table
+@end defop
+
+@defop Operation {pretty printer} to_string (self)
+@value{GDBN} will call this method to display the string
+representation of the value passed to the object's constructor.
+
+When printing from the CLI, if the @code{to_string} method exists,
+then @value{GDBN} will prepend its result to the values returned by
+@code{children}.  Exactly how this formatting is done is dependent on
+the display hint, and may change as more hints are added.  Also,
+depending on the print settings (@pxref{Print Settings}), the CLI may
+print just the result of @code{to_string} in a stack trace, omitting
+the result of @code{children}.
+
+If this method returns a string, it is printed verbatim.
+
+Otherwise, if this method returns an instance of @code{gdb.Value},
+then @value{GDBN} prints this value.  This may result in a call to
+another pretty-printer.
+
+If instead the method returns a Python value which is convertible to a
+@code{gdb.Value}, then @value{GDBN} performs the conversion and prints
+the resulting value.  Again, this may result in a call to another
+pretty-printer.  Python scalars (integers, floats, and booleans) and
+strings are convertible to @code{gdb.Value}; other types are not.
+
+If the result is not one of these types, an exception is raised.
+@end defop
+
+@node Selecting Pretty-Printers
+@subsubsection Selecting Pretty-Printers
+
+The Python list @code{gdb.pretty_printers} contains an array of
+functions that have been registered via addition as a pretty-printer.
+Each @code{gdb.Objfile} also contains a @code{pretty_printers}
+attribute.
+
+A function on one of these lists is passed a single @code{gdb.Value}
+argument and should return a pretty-printer object conforming to the
+interface definition above (@pxref{Pretty Printing}).  If a function
+cannot create a pretty-printer for the value, it should return
+@code{None}.
+
+@value{GDBN} first checks the @code{pretty_printers} attribute of each
+@code{gdb.Objfile} and iteratively calls each function in the list for
+that @code{gdb.Objfile} until it receives a pretty-printer object.
+After these lists have been exhausted, it tries the global
+@code{gdb.pretty-printers} list, again calling each function until an
+object is returned.
+
+The order in which the objfiles are searched is not specified.  For a
+given list, functions are always invoked from the head of the list,
+and iterated over sequentially until the end of the list, or a printer
+object is returned.
+
+Here is an example showing how a @code{std::string} printer might be
+written:
+
+@smallexample
+class StdStringPrinter:
+    "Print a std::string"
+
+    def __init__ (self, val):
+        self.val = val
+
+    def to_string (self):
+        return self.val['_M_dataplus']['_M_p']
+
+    def display_hint (self):
+        return 'string'
+@end smallexample
+
+And here is an example showing how a lookup function for the printer
+example above might be written.
+
+@smallexample
+def str_lookup_function (val):
+
+    lookup_tag = val.type.tag
+    regex = re.compile ("^std::basic_string<char,.*>$")
+    if lookup_tag == None:
+        return None
+    if regex.match (lookup_tag):
+        return StdStringPrinter (val)
+    
+    return None
+@end smallexample
+
+The example lookup function extracts the value's type, and attempts to
+match it to a type that it can pretty-print.  If it is a type the
+printer can pretty-print, it will return a printer object.  If not, it
+returns @code{None}.
+
+We recommend that you put your core pretty-printers into a Python
+package.  If your pretty-printers are for use with a library, we
+further recommend embedding a version number into the package name.
+This practice will enable @value{GDBN} to load multiple versions of
+your pretty-printers at the same time, because they will have
+different names.
+
+You should write auto-loaded code (@pxref{Auto-loading}) such that it
+can be evaluated multiple times without changing its meaning.  An
+ideal auto-load file will consist solely of @code{import}s of your
+printer modules, followed by a call to a register pretty-printers with
+the current objfile.
+
+Taken as a whole, this approach will scale nicely to multiple
+inferiors, each potentially using a different library version.
+Embedding a version number in the Python package name will ensure that
+@value{GDBN} is able to load both sets of printers simultaneously.
+Then, because the search for pretty-printers is done by objfile, and
+because your auto-loaded code took care to register your library's
+printers with a specific objfile, @value{GDBN} will find the correct
+printers for the specific version of the library used by each
+inferior.
+
+To continue the @code{std::string} example (@pxref{Pretty Printing}),
+this code might appear in @code{gdb.libstdcxx.v6}:
+
+@smallexample
+def register_printers (objfile):
+    objfile.pretty_printers.add (str_lookup_function)
+@end smallexample
+
+@noindent
+And then the corresponding contents of the auto-load file would be:
+
+@smallexample
+import gdb.libstdcxx.v6
+gdb.libstdcxx.v6.register_printers (gdb.current_objfile ())
+@end smallexample
+
 @node Commands In Python
 @subsubsection Commands In Python
 
@@ -19396,7 +19615,8 @@ The @code{pretty_printers} attribute is a list of functions.  It is
 used to look up pretty-printers.  A @code{Value} is passed to each
 function in order; if the function returns @code{None}, then the
 search continues.  Otherwise, the return value should be an object
-which is used to format the value.
+which is used to format the value.  @xref{Pretty Printing}, for more
+information.
 @end defivar
 
 @node Frames In Python

@@ -34,6 +34,7 @@
 #include "doublest.h"
 #include "exceptions.h"
 #include "dfp.h"
+#include "python/python.h"
 
 #include <errno.h>
 
@@ -80,7 +81,9 @@ struct value_print_options user_print_options =
   0,				/* print_array_indexes */
   0,				/* deref_ref */
   1,				/* static_field_print */
-  1				/* pascal_static_field_print */
+  1,				/* pascal_static_field_print */
+  0,				/* raw */
+  0				/* summary */
 };
 
 /* Initialize *OPTS to be a copy of the user print options.  */
@@ -214,6 +217,33 @@ show_addressprint (struct ui_file *file, int from_tty,
 }
 
 
+/* A helper function for val_print.  When printing in "summary" mode,
+   we want to print scalar arguments, but not aggregate arguments.
+   This function distinguishes between the two.  */
+
+static int
+scalar_type_p (struct type *type)
+{
+  CHECK_TYPEDEF (type);
+  while (TYPE_CODE (type) == TYPE_CODE_REF)
+    {
+      type = TYPE_TARGET_TYPE (type);
+      CHECK_TYPEDEF (type);
+    }
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_SET:
+    case TYPE_CODE_STRING:
+    case TYPE_CODE_BITSTRING:
+      return 0;
+    default:
+      return 1;
+    }
+}
+
 /* Print using the given LANGUAGE the data of type TYPE located at VALADDR
    (within GDB), which came from the inferior at address ADDRESS, onto
    stdio stream STREAM according to OPTIONS.
@@ -255,6 +285,23 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       fprintf_filtered (stream, "<incomplete type>");
       gdb_flush (stream);
       return (0);
+    }
+
+  if (!options->raw)
+    {
+      ret = apply_val_pretty_printer (type, valaddr, embedded_offset,
+				      address, stream, recurse, options,
+				      language);
+      if (ret)
+	return ret;
+    }
+
+  /* Handle summary mode.  If the value is a scalar, print it;
+     otherwise, print an ellipsis.  */
+  if (options->summary && !scalar_type_p (type))
+    {
+      fprintf_filtered (stream, "...");
+      return 0;
     }
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
@@ -330,6 +377,18 @@ value_print (struct value *val, struct ui_file *stream,
 {
   if (!value_check_printable (val, stream))
     return 0;
+
+  if (!options->raw)
+    {
+      int r = apply_val_pretty_printer (value_type (val),
+					value_contents_all (val),
+					value_embedded_offset (val),
+					value_address (val),
+					stream, 0, options,
+					current_language);
+      if (r)
+	return r;
+    }
 
   return LA_VALUE_PRINT (val, stream, options);
 }

@@ -33,6 +33,7 @@
 
 #if HAVE_LIBPYTHON2_4
 #include "python2.4/Python.h"
+#include "python2.4/frameobject.h"
 /* Py_ssize_t is not defined until 2.5.
    Logical type for Py_ssize_t is Py_intptr_t, but that fails in 64-bit
    compilation due to several apparent mistakes in python2.4 API, so we
@@ -40,8 +41,10 @@
 typedef int Py_ssize_t;
 #elif HAVE_LIBPYTHON2_5
 #include "python2.5/Python.h"
+#include "python2.5/frameobject.h"
 #elif HAVE_LIBPYTHON2_6
 #include "python2.6/Python.h"
+#include "python2.6/frameobject.h"
 #else
 #error "Unable to find usable Python.h"
 #endif
@@ -74,6 +77,7 @@ PyObject *objfile_to_objfile_object (struct objfile *);
 
 PyObject *objfpy_get_printers (PyObject *, void *);
 
+struct value *value_object_to_value (PyObject *self);
 struct value *convert_value_from_python (PyObject *obj);
 struct type *type_object_to_type (PyObject *obj);
 
@@ -108,5 +112,8 @@ PyObject *target_string_to_unicode (const gdb_byte *str, int length);
 int gdbpy_is_string (PyObject *obj);
 
 extern PyObject *gdbpy_doc_cst;
+extern PyObject *gdbpy_children_cst;
+extern PyObject *gdbpy_to_string_cst;
+extern PyObject *gdbpy_display_hint_cst;
 
 #endif /* GDB_PYTHON_INTERNAL_H */

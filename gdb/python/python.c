@@ -52,6 +52,10 @@ static PyMethodDef GdbMethods[];
 
 PyObject *gdb_module;
 
+/* Some string constants we may wish to use.  */
+PyObject *gdbpy_to_string_cst;
+PyObject *gdbpy_children_cst;
+PyObject *gdbpy_display_hint_cst;
 PyObject *gdbpy_doc_cst;
 
 /* Given a command_line, return a command string suitable for passing
@@ -556,9 +560,13 @@ Enables or disables auto-loading of Python code when an object is opened."),
   gdbpy_initialize_objfile ();
 
   PyRun_SimpleString ("import gdb");
+  PyRun_SimpleString ("gdb.pretty_printers = []");
 
   observer_attach_new_objfile (gdbpy_new_objfile);
 
+  gdbpy_to_string_cst = PyString_FromString ("to_string");
+  gdbpy_children_cst = PyString_FromString ("children");
+  gdbpy_display_hint_cst = PyString_FromString ("display_hint");
   gdbpy_doc_cst = PyString_FromString ("__doc__");
 
   /* Create a couple objects which are used for Python's stdout and

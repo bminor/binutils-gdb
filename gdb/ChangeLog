@@ -1,4 +1,46 @@
 2009-05-27  Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Phil Muldoon  <pmuldoon@redhat.com>
+	    Paul Pluzhnikov  <ppluzhnikov@google.com>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+
+	* python/python-value.c (value_object_to_value): New function.
+	* python/python-internal.h: Include frameobject.h.
+	(gdbpy_children_cst, gdbpy_to_string_cst, gdbpy_display_hint_cst):
+	Declare.
+	(value_object_to_value): Declare.
+	* printcmd.c (struct format_data) <raw>: New field.
+	(last_format): Default to 0.
+	(decode_format): Initialize val.raw.  Handle /r flag.
+	(print_command_1): Initialize fmt.raw and opts.raw.
+	(output_command): Likewise.
+	(x_command): Fix initialization of fmt.format.  Initialize
+	fmt.raw.
+	(display_command): Initialize fmt.raw.
+	(do_one_display): Set opts.raw.
+	* python/python.c (gdbpy_to_string_cst, gdbpy_children_cst,
+	gdbpy_display_hint_cst): New globals.
+	(_initialize_python): Initialize them.  Set gdb.pretty_printers.
+	* cp-valprint.c: Include python.h.
+	(cp_print_value): Call apply_val_pretty_printer.
+	* python/python.h (apply_val_pretty_printer): Declare.
+	* stack.c (print_this_frame_argument_p): Remove.
+	(print_frame_args): Compute summary flag.  Don't use
+	print_this_frame_argument_p.
+	* valprint.c: Include python.h.
+	(user_print_options): Initialize new fields.
+	(scalar_type_p): New function.
+	(val_print): Handle 'raw' and 'summary' modes.  Call
+	apply_val_pretty_printer.
+	(value_print): Handle 'raw' mode.
+	* valprint.h (struct value_print_options) <raw, summary>: New
+	fields.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add python-prettyprint.o
+	(SUBDIR_PYTHON_SRCS): Add python-prettyprint.c.
+	(python-prettyprint.o): New target.
+	* python/python-prettyprint.c: New file.
+
+2009-05-27  Tom Tromey  <tromey@redhat.com>
 	    Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* mi/mi-main.c (mi_cmd_data_evaluate_expression): Use

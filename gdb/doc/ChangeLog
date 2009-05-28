@@ -1,3 +1,13 @@
+2009-05-27  Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Objfiles In Python): Reference pretty printing.
+	(Pretty Printing): New node.
+	(Selecting Pretty-Printers): Likewise.
+	(Python API): Update.
+	(Output Formats): Document /r format.
+
 2009-05-27  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Tom Tromey  <tromey@redhat.com>
 

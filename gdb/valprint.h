@@ -84,6 +84,12 @@ struct value_print_options
   /* If nonzero, print static fields for Pascal.  FIXME: C++ and Java
      share one flag, why not Pascal too?  */
   int pascal_static_field_print;
+
+  /* Controls Python pretty-printing.  */
+  int raw;
+
+  /* If nonzero, print the value in "summary" form.  */
+  int summary;
 };
 
 /* The global print options set by the user.  In general this should

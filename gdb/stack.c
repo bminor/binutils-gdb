@@ -158,46 +158,6 @@ print_frame_nameless_args (struct frame_info *frame, long start, int num,
     }
 }
 
-/* Return non-zero if the debugger should print the value of the provided
-   symbol parameter (SYM).  */
-
-static int
-print_this_frame_argument_p (struct symbol *sym)
-{
-  struct type *type;
-  
-  /* If the user asked to print no argument at all, then obviously
-     do not print this argument.  */
-
-  if (strcmp (print_frame_arguments, "none") == 0)
-    return 0;
-
-  /* If the user asked to print all arguments, then we should print
-     that one.  */
-
-  if (strcmp (print_frame_arguments, "all") == 0)
-    return 1;
-
-  /* The user asked to print only the scalar arguments, so do not
-     print the non-scalar ones.  */
-
-  type = check_typedef (SYMBOL_TYPE (sym));
-  while (TYPE_CODE (type) == TYPE_CODE_REF)
-    type = check_typedef (TYPE_TARGET_TYPE (type));
-  switch (TYPE_CODE (type))
-    {
-      case TYPE_CODE_ARRAY:
-      case TYPE_CODE_STRUCT:
-      case TYPE_CODE_UNION:
-      case TYPE_CODE_SET:
-      case TYPE_CODE_STRING:
-      case TYPE_CODE_BITSTRING:
-        return 0;
-      default:
-        return 1;
-    }
-}
-
 /* Print the arguments of frame FRAME on STREAM, given the function
    FUNC running in that frame (as a symbol), where NUM is the number
    of arguments according to the stack frame (or -1 if the number of
@@ -220,6 +180,10 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
   int args_printed = 0;
   struct cleanup *old_chain, *list_chain;
   struct ui_stream *stb;
+  /* True if we should print arguments, false otherwise.  */
+  int print_args = strcmp (print_frame_arguments, "none");
+  /* True in "summary" mode, false otherwise.  */
+  int summary = !strcmp (print_frame_arguments, "scalars");
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -354,7 +318,7 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	  annotate_arg_name_end ();
 	  ui_out_text (uiout, "=");
 
-          if (print_this_frame_argument_p (sym))
+          if (print_args)
             {
 	      /* Avoid value_print because it will deref ref parameters.
 		 We just want to print their addresses.  Print ??? for
@@ -381,8 +345,8 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 
 		  get_raw_print_options (&opts);
 		  opts.deref_ref = 0;
-		  common_val_print (val, stb->stream, 2,
-				    &opts, language);
+		  opts.summary = summary;
+		  common_val_print (val, stb->stream, 2, &opts, language);
 		  ui_out_field_stream (uiout, "value", stb);
 	        }
 	      else

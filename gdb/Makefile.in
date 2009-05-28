@@ -268,6 +268,7 @@ SUBDIR_PYTHON_OBS = \
 	python-frame.o \
 	python-function.o \
 	python-objfile.o \
+	python-prettyprint.o \
 	python-type.o \
 	python-utils.o \
 	python-value.o
@@ -277,6 +278,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/python-frame.c \
 	python/python-function.c \
 	python/python-objfile.c \
+	python/python-prettyprint.c \
 	python/python-type.c \
 	python/python-utils.c \
 	python/python-value.c
@@ -1870,6 +1872,10 @@ python-function.o: $(srcdir)/python/python-function.c
 
 python-objfile.o: $(srcdir)/python/python-objfile.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-objfile.c
+	$(POSTCOMPILE)
+
+python-prettyprint.o: $(srcdir)/python/python-prettyprint.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-prettyprint.c
 	$(POSTCOMPILE)
 
 python-type.o: $(srcdir)/python/python-type.c

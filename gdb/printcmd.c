@@ -68,11 +68,15 @@ struct format_data
     int count;
     char format;
     char size;
+
+    /* True if the value should be printed raw -- that is, bypassing
+       python-based formatters.  */
+    unsigned char raw;
   };
 
 /* Last specified output format.  */
 
-static char last_format = 'x';
+static char last_format = 0;
 
 /* Last specified examination size.  'b', 'h', 'w' or `q'.  */
 
@@ -181,6 +185,7 @@ decode_format (char **string_ptr, int oformat, int osize)
   val.format = '?';
   val.size = '?';
   val.count = 1;
+  val.raw = 0;
 
   if (*p >= '0' && *p <= '9')
     val.count = atoi (p);
@@ -193,6 +198,11 @@ decode_format (char **string_ptr, int oformat, int osize)
     {
       if (*p == 'b' || *p == 'h' || *p == 'w' || *p == 'g')
 	val.size = *p++;
+      else if (*p == 'r')
+	{
+	  val.raw = 1;
+	  p++;
+	}
       else if (*p >= 'a' && *p <= 'z')
 	val.format = *p++;
       else
@@ -874,6 +884,7 @@ print_command_1 (char *exp, int inspect, int voidprint)
       fmt.count = 1;
       fmt.format = 0;
       fmt.size = 0;
+      fmt.raw = 0;
     }
 
   if (exp && *exp)
@@ -909,6 +920,7 @@ print_command_1 (char *exp, int inspect, int voidprint)
 
       get_formatted_print_options (&opts, format);
       opts.inspect_it = inspect;
+      opts.raw = fmt.raw;
 
       print_formatted (val, fmt.size, &opts, gdb_stdout);
       printf_filtered ("\n");
@@ -959,6 +971,7 @@ output_command (char *exp, int from_tty)
   struct value_print_options opts;
 
   fmt.size = 0;
+  fmt.raw = 0;
 
   if (exp && *exp == '/')
     {
@@ -976,6 +989,7 @@ output_command (char *exp, int from_tty)
   annotate_value_begin (value_type (val));
 
   get_formatted_print_options (&opts, format);
+  opts.raw = fmt.raw;
   print_formatted (val, fmt.size, &opts, gdb_stdout);
 
   annotate_value_end ();
@@ -1296,9 +1310,10 @@ x_command (char *exp, int from_tty)
   struct cleanup *old_chain;
   struct value *val;
 
-  fmt.format = last_format;
+  fmt.format = last_format ? last_format : 'x';
   fmt.size = last_size;
   fmt.count = 1;
+  fmt.raw = 0;
 
   if (exp && *exp == '/')
     {
@@ -1402,6 +1417,7 @@ display_command (char *exp, int from_tty)
 	  fmt.format = 0;
 	  fmt.size = 0;
 	  fmt.count = 0;
+	  fmt.raw = 0;
 	}
 
       innermost_block = NULL;
@@ -1613,6 +1629,7 @@ do_one_display (struct display *d)
       annotate_display_expression ();
 
       get_formatted_print_options (&opts, d->format.format);
+      opts.raw = d->format.raw;
       print_formatted (evaluate_expression (d->exp),
 		       d->format.size, &opts, gdb_stdout);
       printf_filtered ("\n");

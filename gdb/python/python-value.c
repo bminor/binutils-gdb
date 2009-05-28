@@ -805,6 +805,17 @@ value_to_value_object (struct value *val)
   return (PyObject *) val_obj;
 }
 
+/* Returns value structure corresponding to the given value object.  */
+struct value *
+value_object_to_value (PyObject *self)
+{
+  value_object *real;
+  if (! PyObject_TypeCheck (self, &value_object_type))
+    return NULL;
+  real = (value_object *) self;
+  return real->value;
+}
+
 /* Try to convert a Python value to a gdb value.  If the value cannot
    be converted, set a Python exception and return NULL.  */
 
