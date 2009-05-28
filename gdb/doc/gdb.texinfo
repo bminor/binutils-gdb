@@ -18554,8 +18554,8 @@ command as having originated from the user invoking it interactively.
 It must be a boolean value.  If omitted, it defaults to @code{False}.
 @end defun
 
-@findex gdb.get_parameter
-@defun get_parameter parameter
+@findex gdb.parameter
+@defun parameter parameter
 Return the value of a @value{GDBN} parameter.  @var{parameter} is a
 string naming the parameter to look up; @var{parameter} may contain
 spaces if the parameter has a multi-part name.  For example,

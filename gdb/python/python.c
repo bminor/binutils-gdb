@@ -212,7 +212,7 @@ parameter_to_python (struct cmd_list_element *cmd)
    value.  */
 
 static PyObject *
-get_parameter (PyObject *self, PyObject *args)
+gdbpy_parameter (PyObject *self, PyObject *args)
 {
   struct cmd_list_element *alias, *prefix, *cmd;
   char *arg, *newarg;
@@ -235,7 +235,7 @@ get_parameter (PyObject *self, PyObject *args)
 			 "could not find parameter `%s'", arg);
 
   if (! cmd->var)
-    return PyErr_Format (PyExc_RuntimeError, "`%s' is not a variable", arg);
+    return PyErr_Format (PyExc_RuntimeError, "`%s' is not a parameter", arg);
   return parameter_to_python (cmd);
 }
 
@@ -612,7 +612,7 @@ static PyMethodDef GdbMethods[] =
     "Get a value from history" },
   { "execute", execute_gdb_command, METH_VARARGS,
     "Execute a gdb command" },
-  { "get_parameter", get_parameter, METH_VARARGS,
+  { "parameter", gdbpy_parameter, METH_VARARGS,
     "Return a gdb parameter's value" },
 
   { "default_visualizer", gdbpy_default_visualizer, METH_VARARGS,
