@@ -1,4 +1,16 @@
 2009-05-27  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document "python"
+	feature.
+	(GDB/MI Variable Objects): Document -var-set-visualizer.
+
+2009-04-02  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document "python"
+	feature.
+	(GDB/MI Variable Objects): Document -var-set-visualizer.
+
+2009-05-27  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Phil Muldoon  <pmuldoon@redhat.com>
 

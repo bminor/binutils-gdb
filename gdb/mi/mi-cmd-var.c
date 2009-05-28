@@ -243,6 +243,22 @@ mi_cmd_var_set_format (char *command, char **argv, int argc)
 }
 
 void
+mi_cmd_var_set_visualizer (char *command, char **argv, int argc)
+{
+  struct varobj *var;
+
+  if (argc != 2)
+    error ("Usage: NAME VISUALIZER_FUNCTION.");
+
+  var = varobj_get_handle (argv[0]);
+
+  if (var == NULL)
+    error ("Variable object not found");
+
+  varobj_set_visualizer (var, argv[1]);
+}
+
+void
 mi_cmd_var_set_frozen (char *command, char **argv, int argc)
 {
   struct varobj *var;
@@ -357,6 +373,7 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   int numchild;
   enum print_values print_values;
   int ix;
+  char *display_hint;
 
   if (argc != 1 && argc != 2)
     error (_("mi_cmd_var_list_children: Usage: [PRINT_VALUES] NAME"));
@@ -373,6 +390,13 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
     print_values = mi_parse_values_option (argv[0]);
   else
     print_values = PRINT_NO_VALUES;
+
+  display_hint = varobj_get_display_hint (var);
+  if (display_hint)
+    {
+      ui_out_field_string (uiout, "displayhint", display_hint);
+      xfree (display_hint);
+    }
 
   if (VEC_length (varobj_p, children) == 0)
     return;
@@ -634,6 +658,8 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
   
   for (i = 0; VEC_iterate (varobj_update_result, changes, i, r); ++i)
     {
+      char *display_hint;
+
       if (mi_version (uiout) > 1)
         cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "name", varobj_get_objname (r->varobj));
@@ -666,6 +692,33 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
           ui_out_field_string (uiout, "new_type", varobj_get_type (r->varobj));
           ui_out_field_int (uiout, "new_num_children", 
 			    varobj_get_num_children (r->varobj));
+	}
+
+      display_hint = varobj_get_display_hint (var);
+      if (display_hint)
+	{
+	  ui_out_field_string (uiout, "displayhint", display_hint);
+	  xfree (display_hint);
+	}
+
+      if (r->children_changed)
+	{
+	  int ix;
+	  struct varobj *child;
+	  struct cleanup *cleanup =
+	    make_cleanup_ui_out_list_begin_end (uiout, "children");
+
+	  VEC (varobj_p)* children = varobj_list_children (r->varobj);
+
+	  for (ix = 0; VEC_iterate (varobj_p, children, ix, child); ++ix)
+	    {
+	      struct cleanup *cleanup_child;
+	      cleanup_child = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	      print_varobj (child, print_values, 1 /* print expression */);
+	      do_cleanups (cleanup_child);
+	    }
+
+	  do_cleanups (cleanup);
 	}
   
       if (mi_version (uiout) > 1)

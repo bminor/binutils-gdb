@@ -1249,11 +1249,62 @@ proc mi_varobj_update_with_type_change { name new_type new_children testname } {
     mi_gdb_test "-var-update $name" $er $testname
 }
 
+# Update a dynamic varobj named NAME.  CHILDREN is a list of children,
+# in the same form as mi_list_varobj_children.  TESTNAME is the name
+# of the test.
+proc mi_varobj_update_dynamic {name children testname} {
+    set children_exp_j [mi_child_regexp $children 0]
+
+    set er "\\^done,changelist=\\\["
+
+    append er "{name=\"$name\",in_scope=\"true\",type_changed=\"false\""
+    append er ",children=\\\[$children_exp_j.*\\\]}\\\]"
+
+    verbose -log "Expecting: $er"
+    mi_gdb_test "-var-update $name" $er $testname
+}
+
 proc mi_check_varobj_value { name value testname } {
 
     mi_gdb_test "-var-evaluate-expression $name" \
 	"\\^done,value=\"$value\"" \
 	$testname
+}
+
+# Helper proc which constructs a child regexp for
+# mi_list_varobj_children and mi_varobj_update_dynamic.
+proc mi_child_regexp {children add_child} {
+    set children_exp {}
+    set whatever "\"\[^\"\]+\""
+
+    if {$add_child} {
+	set pre "child="
+    } else {
+	set pre ""
+    }
+
+    foreach item $children {
+
+        set name [lindex $item 0]
+        set exp [lindex $item  1]
+        set numchild [lindex $item 2]
+        if {[llength $item] == 5} {
+            set type [lindex $item 3]
+            set value [lindex $item 4]
+
+            lappend children_exp\
+                "$pre{name=\"$name\",exp=\"$exp\",numchild=\"$numchild\",value=\"$value\",type=\"$type\"\(,thread-id=\"\[0-9\]+\")?}"
+        } elseif {[llength $item] == 4} {
+            set type [lindex $item 3]
+
+            lappend children_exp\
+                "$pre{name=\"$name\",exp=\"$exp\",numchild=\"$numchild\",type=\"$type\"\(,thread-id=\"\[0-9\]+\")?}"
+        } else {
+            lappend children_exp\
+                "$pre{name=\"$name\",exp=\"$exp\",numchild=\"$numchild\"(,thread-id=\"\[0-9\]+\")?}"
+        }
+    }
+    return [join $children_exp ","]
 }
 
 # Check the results of the:
@@ -1277,39 +1328,23 @@ proc mi_check_varobj_value { name value testname } {
 # have no value.
 #
 proc mi_list_varobj_children { varname children testname } {
+    mi_list_varobj_children_range $varname [llength $children] $children \
+      $testname
+}
 
+# Like mi_list_varobj_children, but assumes that a subrange has been
+# selected with -var-set-child-range.  NUMCHILDREN is the total number
+# of children.
+proc mi_list_varobj_children_range {varname numchildren children testname} {
     set options ""
     if {[llength $varname] == 2} {
         set options [lindex $varname 1]
         set varname [lindex $varname 0]
     }
 
-    set numchildren [llength $children]
-    set children_exp {}
     set whatever "\"\[^\"\]+\""
 
-    foreach item $children {
-
-        set name [lindex $item 0]
-        set exp [lindex $item  1]
-        set numchild [lindex $item 2]
-        if {[llength $item] == 5} {
-            set type [lindex $item 3]
-            set value [lindex $item 4]
-
-            lappend children_exp\
-                "child={name=\"$name\",exp=\"$exp\",numchild=\"$numchild\",value=\"$value\",type=\"$type\"\(,thread-id=\"\[0-9\]+\")?}"
-        } elseif {[llength $item] == 4} {
-            set type [lindex $item 3]
-
-            lappend children_exp\
-                "child={name=\"$name\",exp=\"$exp\",numchild=\"$numchild\",type=\"$type\"\(,thread-id=\"\[0-9\]+\")?}"
-        } else {
-            lappend children_exp\
-                "child={name=\"$name\",exp=\"$exp\",numchild=\"$numchild\"(,thread-id=\"\[0-9\]+\")?}"
-        }
-    }
-    set children_exp_j [join $children_exp ","]
+    set children_exp_j [mi_child_regexp $children 1]
     if {$numchildren} {
         set expected "\\^done,numchild=\".*\",children=\\\[$children_exp_j.*\\\]"
     } {
@@ -1781,4 +1816,26 @@ proc mi_check_thread_states { xstates test } {
 
     verbose -log "expecting: $pattern"
     mi_gdb_test "-thread-info" $pattern $test
+}
+
+# Return a list of MI features supported by this gdb.
+proc mi_get_features {} {
+    global expect_out mi_gdb_prompt
+
+    send_gdb "-list-features\n"
+
+    gdb_expect {
+	-re "\\^done,features=\\\[(.*)\\\]\r\n$mi_gdb_prompt$" {
+	    regsub -all -- \" $expect_out(1,string) "" features
+	    return [split $features ,]
+	}
+	-re ".*\r\n$mi_gdb_prompt$" {
+	    verbose -log "got $expect_out(buffer)"
+	    return ""
+	}
+	timeout {
+	    verbose -log "timeout in mi_gdb_prompt"
+	    return ""
+	}
+    }
 }

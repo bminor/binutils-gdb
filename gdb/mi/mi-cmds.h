@@ -94,6 +94,7 @@ extern mi_cmd_argv_ftype mi_cmd_var_info_type;
 extern mi_cmd_argv_ftype mi_cmd_var_list_children;
 extern mi_cmd_argv_ftype mi_cmd_var_set_format;
 extern mi_cmd_argv_ftype mi_cmd_var_set_frozen;
+extern mi_cmd_argv_ftype mi_cmd_var_set_visualizer;
 extern mi_cmd_argv_ftype mi_cmd_var_show_attributes;
 extern mi_cmd_argv_ftype mi_cmd_var_show_format;
 extern mi_cmd_argv_ftype mi_cmd_var_update;

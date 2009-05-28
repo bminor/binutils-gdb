@@ -23442,6 +23442,64 @@ Unfreezing a variable does not update it, only subsequent
 (gdb)
 @end smallexample
 
+@subheading The @code{-var-set-visualizer} command
+@findex -var-set-visualizer
+@anchor{-var-set-visualizer}
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-set-visualizer @var{name} @var{visualizer}
+@end smallexample
+
+Set a visualizer for the variable object @var{name}.
+
+@var{visualizer} is the visualizer to use.  The special value
+@samp{None} means to disable any visualizer in use.
+
+If not @samp{None}, @var{visualizer} must be a Python expression.
+This expression must evaluate to a callable object which accepts a
+single argument.  @value{GDBN} will call this object with the value of
+the varobj @var{name} as an argument (this is done so that the same
+Python pretty-printing code can be used for both the CLI and MI).
+When called, this object must return an object which conforms to the
+pretty-printing interface (@pxref{Pretty Printing}).
+
+The pre-defined function @code{gdb.default_visualizer} may be used to
+select a visualizer by following the built-in process
+(@pxref{Selecting Pretty-Printers}).  This is done automatically when
+a varobj is created, and so ordinarily is not needed.
+
+This feature is only available if Python support is enabled.  The MI
+command @code{-list-features} (@pxref{GDB/MI Miscellaneous Commands})
+can be used to check this.
+
+@subsubheading Example
+
+Resetting the visualizer:
+
+@smallexample
+(gdb)
+-var-set-visualizer V None
+^done
+@end smallexample
+
+Reselecting the default (type-based) visualizer:
+
+@smallexample
+(gdb)
+-var-set-visualizer V gdb.default_visualizer
+^done
+@end smallexample
+
+Suppose @code{SomeClass} is a visualizer class.  A lambda expression
+can be used to instantiate this class for a varobj:
+
+@smallexample
+(gdb)
+-var-set-visualizer V "lambda val: SomeClass()"
+^done
+@end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Data Manipulation
@@ -25001,6 +25059,10 @@ as possible presense of the @code{frozen} field in the output
 of @code{-varobj-create}.
 @item pending-breakpoints
 Indicates presence of the @option{-f} option to the @code{-break-insert} command.
+@item python
+Indicates presence of Python scripting support, Python-based
+pretty-printing commands, and possible presence of the
+@samp{display_hint} field in the output of @code{-var-list-children}
 @item thread-info
 Indicates presence of the @code{-thread-info} command.
 

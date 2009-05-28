@@ -508,6 +508,80 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
   return result;
 }
 
+/* Apply a pretty-printer for the varobj code.  PRINTER_OBJ is the
+   print object.  It must have a 'to_string' method (but this is
+   checked by varobj, not here) which takes no arguments and
+   returns a string.  This function returns an xmalloc()d string if
+   the printer returns a string.  The printer may return a replacement
+   value instead; in this case *REPLACEMENT is set to the replacement
+   value, and this function returns NULL.  On error, *REPLACEMENT is
+   set to NULL and this function also returns NULL.  */
+char *
+apply_varobj_pretty_printer (PyObject *printer_obj,
+			     struct value **replacement)
+{
+  char *result;
+  PyGILState_STATE state = PyGILState_Ensure ();
+
+  *replacement = NULL;
+  result = pretty_print_one_value (printer_obj, replacement);
+  if (result == NULL);
+    gdbpy_print_stack ();
+  PyGILState_Release (state);
+
+  return result;
+}
+
+/* Find a pretty-printer object for the varobj module.  Returns a new
+   reference to the object if successful; returns NULL if not.  VALUE
+   is the value for which a printer tests to determine if it 
+   can pretty-print the value.  */
+PyObject *
+gdbpy_get_varobj_pretty_printer (struct value *value)
+{
+  PyObject *val_obj;
+  PyObject *pretty_printer = NULL;
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      value = value_copy (value);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+  
+  val_obj = value_to_value_object (value);
+  if (! val_obj)
+    return NULL;
+
+  pretty_printer = find_pretty_printer (val_obj);
+  Py_DECREF (val_obj);
+  return pretty_printer;
+}
+
+/* A Python function which wraps find_pretty_printer and instantiates
+   the resulting class.  This accepts a Value argument and returns a
+   pretty printer instance, or None.  This function is useful as an
+   argument to the MI command -var-set-visualizer.  */
+PyObject *
+gdbpy_default_visualizer (PyObject *self, PyObject *args)
+{
+  PyObject *val_obj;
+  PyObject *cons, *printer = NULL;
+  struct value *value;
+
+  if (! PyArg_ParseTuple (args, "O", &val_obj))
+    return NULL;
+  value = value_object_to_value (val_obj);
+  if (! value)
+    {
+      PyErr_SetString (PyExc_TypeError, "argument must be a gdb.Value");
+      return NULL;
+    }
+
+  cons = find_pretty_printer (val_obj);
+  return cons;
+}
+
 #else /* HAVE_PYTHON */
 
 int

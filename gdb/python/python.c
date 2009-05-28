@@ -615,6 +615,9 @@ static PyMethodDef GdbMethods[] =
   { "get_parameter", get_parameter, METH_VARARGS,
     "Return a gdb parameter's value" },
 
+  { "default_visualizer", gdbpy_default_visualizer, METH_VARARGS,
+    "Find the default visualizer for a Value." },
+
   { "current_objfile", gdbpy_get_current_objfile, METH_NOARGS,
     "Return the current Objfile being loaded, or None." },
   { "objfiles", gdbpy_objfiles, METH_NOARGS,

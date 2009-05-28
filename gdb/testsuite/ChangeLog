@@ -1,5 +1,15 @@
 2009-05-27  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* lib/mi-support.exp (mi_varobj_update_dynamic): New proc.
+	(mi_child_regexp): Likewise.
+	(mi_list_varobj_children_range): Likewise.
+	(mi_get_features): Likewise.
+	(mi_list_varobj_children): Rewrite.
+	* gdb.python/python-mi.exp: New file.
+
+2009-05-27  Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Phil Muldoon  <pmuldoon@redhat.com>
 	    Paul Pluzhnikov  <ppluzhnikov@google.com>
 

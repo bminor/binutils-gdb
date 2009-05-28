@@ -1,3 +1,50 @@
+2009-05-27  Vladimir Prus  <vladimir@codesourcery.com>
+	    Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* mi/mi-main.c (mi_cmd_list_features): List "python" feature.
+	* varobj.h (varobj_set_visualizer): Declare.
+	(varobj_get_display_hint): Likewise.
+	(varobj_update_result_t) <children_changed, value_installed>: New
+	fields.
+	* mi/mi-cmds.c (mi_cmds): Add var-set-visualizer.
+	* mi/mi-cmds.h (mi_cmd_var_set_visualizer,
+	mi_cmd_var_set_child_range): Declare.
+	* mi/mi-cmd-var.c (mi_cmd_var_set_visualizer): New function.
+	(mi_cmd_var_list_children): Emit display hint.
+	(varobj_update_one): Emit display hint.  Handle dynamic children.
+	* python/python.c (GdbMethods): Add "default_visualizer".
+	* python/python-internal.h (apply_varobj_pretty_printer,
+	gdbpy_get_varobj_pretty_printer, gdbpy_get_display_hint):
+	Declare.
+	(gdbpy_default_visualizer): Likewise.
+	* varobj.c: Include python.h, python-internal.h.
+	(PyObject): New typedef.
+	(struct varobj) <children_requested, pretty_printer>: New fields.
+	(varobj_create): Call install_default_visualizer.
+	(instantiate_pretty_printer): New function.
+	(varobj_set_display_format): Update.
+	(varobj_get_display_hint): New function.
+	(update_dynamic_varobj_children): New function.
+	(varobj_get_num_children): Handle dynamic children.
+	(varobj_list_children): Likewise.
+	(install_new_value): Likewise.
+	(varobj_add_child): New function.
+	(install_visualizer): Likewise.
+	(install_default_visualizer): Likewise.
+	(varobj_set_visualizer): Likewise.
+	(varobj_update): Handle dynamic children.
+	(create_child): Use create_child_with_value.
+	(create_child_with_value): New function.
+	(value_get_print_value): Call pretty printer.  Add value_formatter
+	argument.
+	(c_value_of_variable): Update.
+	(varobj_invalidate): Always free all_rootvarobj.
+	* python/python-prettyprint.c (apply_varobj_pretty_printer): New
+	function.
+	(gdbpy_get_varobj_pretty_printer): Likewise.
+	(gdbpy_default_visualizer): Likewise.
+
 2009-05-27  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Phil Muldoon  <pmuldoon@redhat.com>
