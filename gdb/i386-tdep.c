@@ -2601,6 +2601,13 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* DJGPP does not support the SSE registers.  */
   tdep->num_xmm_regs = 0;
   set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
+
+  /* Native compiler is GCC, which uses the SVR4 register numbering
+     even in COFF and STABS.  See the comment in i386_gdbarch_init,
+     before the calls to set_gdbarch_stab_reg_to_regnum and
+     set_gdbarch_sdb_reg_to_regnum.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
+  set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
 }
 
 

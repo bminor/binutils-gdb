@@ -1,3 +1,8 @@
+2009-05-29  Eli Zaretskii  <eliz@gnu.org>
+
+	* i386-tdep.c (i386_go32_init_abi): Use SVR4 register numbering
+	for stabs and COFF debug info.
+
 2009-05-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): When thread hoping, switch
