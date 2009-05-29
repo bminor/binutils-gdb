@@ -104,6 +104,20 @@ powerpc64-*)
   targ_big_endian=true
   targ_extra_big_endian=false
   ;;
+armeb*-*-*|armbe*-*-*)
+ targ_obj=arm
+ targ_machine=EM_ARM
+ targ_size=32
+ targ_big_endian=true
+ targ_extra_big_endian=false
+ ;;
+arm*-*-*)
+ targ_obj=arm
+ targ_machine=EM_ARM
+ targ_size=32
+ targ_big_endian=false
+ targ_extra_big_endian=true
+ ;;
 *)
   targ_obj=UNKNOWN
   ;;

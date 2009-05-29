@@ -1,3 +1,11 @@
+2009-05-28  Doug Kwan  <dougkwan@google.com>
+
+	* Makefile.am (TARGETSOURCES): Add arm.cc.
+	(ALL_TARGETOBJECTS): Add arm.$(OBJEXT)
+	* Makefile.in: Regenerate.
+	* arm.cc: New file.
+	* configure.tgt: Add armbe*-*-*, armeb*-*-* and arm*-*-* targets.
+
 2009-05-26  Doug Kwan  <dougkwan@google.com>
 
 	* options.cc (General_options::parse_exclude_libs).  Fix a comment.
