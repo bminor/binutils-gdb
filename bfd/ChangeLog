@@ -1,3 +1,31 @@
+2009-05-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (link_hash_newfunc): Add elf_i386_ prefix.
+	(create_got_section): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(set_tls_module_base): Likewise.
+	(dtpoff_base): Likewise.
+	(tpoff): Likewise.
+	(elf_i386_link_hash_table_create): Updated.
+	(elf_i386_create_dynamic_sections): Likewise.
+	(elf_i386_check_relocs): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+
+	* elf64-x86-64.c (link_hash_newfunc): Add elf64_x86_64_ prefix.
+	(create_got_section): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(set_tls_module_base): Likewise.
+	(dtpoff_base): Likewise.
+	(tpoff): Likewise.
+	(elf64_x86_64_link_hash_table_create): Updated.
+	(elf64_x86_64_create_dynamic_sections): Likewise.
+	(elf64_x86_64_check_relocs): Likewise.
+	(elf64_x86_64_size_dynamic_sections): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+
 2009-05-28  Nick Clifton  <nickc@redhat.com>
 
 	* targets.c (_bfd_target_vector): Only include plugin target in

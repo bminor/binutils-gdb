@@ -525,8 +525,9 @@ struct elf64_x86_64_link_hash_table
 /* Create an entry in an x86-64 ELF linker hash table.	*/
 
 static struct bfd_hash_entry *
-link_hash_newfunc (struct bfd_hash_entry *entry, struct bfd_hash_table *table,
-		   const char *string)
+elf64_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
+				struct bfd_hash_table *table,
+				const char *string)
 {
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
@@ -565,7 +566,8 @@ elf64_x86_64_link_hash_table_create (bfd *abfd)
   if (ret == NULL)
     return NULL;
 
-  if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd, link_hash_newfunc,
+  if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
+				      elf64_x86_64_link_hash_newfunc,
 				      sizeof (struct elf64_x86_64_link_hash_entry)))
     {
       free (ret);
@@ -593,7 +595,7 @@ elf64_x86_64_link_hash_table_create (bfd *abfd)
    shortcuts to them in our hash table.  */
 
 static bfd_boolean
-create_got_section (bfd *dynobj, struct bfd_link_info *info)
+elf64_x86_64_create_got_section (bfd *dynobj, struct bfd_link_info *info)
 {
   struct elf64_x86_64_link_hash_table *htab;
 
@@ -628,7 +630,7 @@ elf64_x86_64_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   struct elf64_x86_64_link_hash_table *htab;
 
   htab = elf64_x86_64_hash_table (info);
-  if (!htab->sgot && !create_got_section (dynobj, info))
+  if (!htab->sgot && !elf64_x86_64_create_got_section (dynobj, info))
     return FALSE;
 
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
@@ -1168,7 +1170,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
-	      if (!create_got_section (htab->elf.dynobj, info))
+	      if (!elf64_x86_64_create_got_section (htab->elf.dynobj,
+						    info))
 		return FALSE;
 	    }
 	  break;
@@ -1650,7 +1653,7 @@ elf64_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
    dynamic relocs.  */
 
 static bfd_boolean
-allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+elf64_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 {
   struct bfd_link_info *info;
   struct elf64_x86_64_link_hash_table *htab;
@@ -1903,7 +1906,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 /* Find any dynamic relocs that apply to read-only sections.  */
 
 static bfd_boolean
-readonly_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+elf64_x86_64_readonly_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 {
   struct elf64_x86_64_link_hash_entry *eh;
   struct elf64_x86_64_dyn_relocs *p;
@@ -2065,7 +2068,8 @@ elf64_x86_64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
-  elf_link_hash_traverse (&htab->elf, allocate_dynrelocs, info);
+  elf_link_hash_traverse (&htab->elf, elf64_x86_64_allocate_dynrelocs,
+			  info);
 
   /* For every jump slot reserved in the sgotplt, reloc_count is
      incremented.  However, when we reserve space for TLS descriptors,
@@ -2196,7 +2200,9 @@ elf64_x86_64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* If any dynamic relocs apply to a read-only section,
 	     then we need a DT_TEXTREL entry.  */
 	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->elf, readonly_dynrelocs, info);
+	    elf_link_hash_traverse (&htab->elf, 
+				    elf64_x86_64_readonly_dynrelocs,
+				    info);
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
@@ -2254,7 +2260,7 @@ elf64_x86_64_always_size_sections (bfd *output_bfd,
    multiple times, it is idempotent.  */
 
 static void
-set_tls_module_base (struct bfd_link_info *info)
+elf64_x86_64_set_tls_module_base (struct bfd_link_info *info)
 {
   struct bfd_link_hash_entry *base;
 
@@ -2274,7 +2280,7 @@ set_tls_module_base (struct bfd_link_info *info)
    This is PT_TLS segment p_vaddr.  */
 
 static bfd_vma
-dtpoff_base (struct bfd_link_info *info)
+elf64_x86_64_dtpoff_base (struct bfd_link_info *info)
 {
   /* If tls_sec is NULL, we should have signalled an error already.  */
   if (elf_hash_table (info)->tls_sec == NULL)
@@ -2286,7 +2292,7 @@ dtpoff_base (struct bfd_link_info *info)
    if STT_TLS virtual address is ADDRESS.  */
 
 static bfd_vma
-tpoff (struct bfd_link_info *info, bfd_vma address)
+elf64_x86_64_tpoff (struct bfd_link_info *info, bfd_vma address)
 {
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
@@ -2339,7 +2345,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   local_got_offsets = elf_local_got_offsets (input_bfd);
   local_tlsdesc_gotents = elf64_x86_64_local_tlsdesc_gotent (input_bfd);
 
-  set_tls_module_base (info);
+  elf64_x86_64_set_tls_module_base (info);
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;
@@ -2852,7 +2858,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  memcpy (contents + roff - 4,
 			  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
 			  16);
-		  bfd_put_32 (output_bfd, tpoff (info, relocation),
+		  bfd_put_32 (output_bfd,
+			      elf64_x86_64_tpoff (info, relocation),
 			      contents + roff + 8);
 		  /* Skip R_X86_64_PC32/R_X86_64_PLT32.  */
 		  rel++;
@@ -2878,7 +2885,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  bfd_put_8 (output_bfd, 0xc7, contents + roff - 2);
 		  bfd_put_8 (output_bfd, 0xc0 | ((val >> 3) & 7),
 			     contents + roff - 1);
-		  bfd_put_32 (output_bfd, tpoff (info, relocation),
+		  bfd_put_32 (output_bfd,
+			      elf64_x86_64_tpoff (info, relocation),
 			      contents + roff);
 		  continue;
 		}
@@ -2944,7 +2952,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      bfd_put_8 (output_bfd, 0x80 | reg | (reg << 3),
 				 contents + roff - 1);
 		    }
-		  bfd_put_32 (output_bfd, tpoff (info, relocation),
+		  bfd_put_32 (output_bfd,
+			      elf64_x86_64_tpoff (info, relocation),
 			      contents + roff);
 		  continue;
 		}
@@ -2999,7 +3008,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  BFD_ASSERT (loc + sizeof (Elf64_External_Rela)
 			      <= sreloc->contents + sreloc->size);
 		  if (indx == 0)
-		    outrel.r_addend = relocation - dtpoff_base (info);
+		    outrel.r_addend = relocation - elf64_x86_64_dtpoff_base (info);
 		  else
 		    outrel.r_addend = 0;
 		  bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
@@ -3021,7 +3030,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      outrel.r_addend = 0;
 	      if ((dr_type == R_X86_64_TPOFF64
 		   || dr_type == R_X86_64_TLSDESC) && indx == 0)
-		outrel.r_addend = relocation - dtpoff_base (info);
+		outrel.r_addend = relocation - elf64_x86_64_dtpoff_base (info);
 	      outrel.r_info = ELF64_R_INFO (indx, dr_type);
 
 	      loc = sreloc->contents;
@@ -3036,7 +3045,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    {
 		      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_64 (output_bfd,
-				  relocation - dtpoff_base (info),
+				  relocation - elf64_x86_64_dtpoff_base (info),
 				  htab->sgot->contents + off + GOT_ENTRY_SIZE);
 		    }
 		  else
@@ -3216,14 +3225,14 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	case R_X86_64_DTPOFF32:
 	  if (info->shared || (input_section->flags & SEC_CODE) == 0)
-	    relocation -= dtpoff_base (info);
+	    relocation -= elf64_x86_64_dtpoff_base (info);
 	  else
-	    relocation = tpoff (info, relocation);
+	    relocation = elf64_x86_64_tpoff (info, relocation);
 	  break;
 
 	case R_X86_64_TPOFF32:
 	  BFD_ASSERT (! info->shared);
-	  relocation = tpoff (info, relocation);
+	  relocation = elf64_x86_64_tpoff (info, relocation);
 	  break;
 
 	default:

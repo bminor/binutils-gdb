@@ -708,9 +708,9 @@ struct elf_i386_link_hash_table
 /* Create an entry in an i386 ELF linker hash table.  */
 
 static struct bfd_hash_entry *
-link_hash_newfunc (struct bfd_hash_entry *entry,
-		   struct bfd_hash_table *table,
-		   const char *string)
+elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
+			    struct bfd_hash_table *table,
+			    const char *string)
 {
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
@@ -749,7 +749,8 @@ elf_i386_link_hash_table_create (bfd *abfd)
   if (ret == NULL)
     return NULL;
 
-  if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd, link_hash_newfunc,
+  if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
+				      elf_i386_link_hash_newfunc,
 				      sizeof (struct elf_i386_link_hash_entry)))
     {
       free (ret);
@@ -779,7 +780,7 @@ elf_i386_link_hash_table_create (bfd *abfd)
    shortcuts to them in our hash table.  */
 
 static bfd_boolean
-create_got_section (bfd *dynobj, struct bfd_link_info *info)
+elf_i386_create_got_section (bfd *dynobj, struct bfd_link_info *info)
 {
   struct elf_i386_link_hash_table *htab;
 
@@ -814,7 +815,7 @@ elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   struct elf_i386_link_hash_table *htab;
 
   htab = elf_i386_hash_table (info);
-  if (!htab->sgot && !create_got_section (dynobj, info))
+  if (!htab->sgot && !elf_i386_create_got_section (dynobj, info))
     return FALSE;
 
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
@@ -1389,7 +1390,7 @@ elf_i386_check_relocs (bfd *abfd,
 	    {
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
-	      if (!create_got_section (htab->elf.dynobj, info))
+	      if (!elf_i386_create_got_section (htab->elf.dynobj, info))
 		return FALSE;
 	    }
 	  if (r_type != R_386_TLS_IE)
@@ -1815,7 +1816,7 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
    dynamic relocs.  */
 
 static bfd_boolean
-allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct elf_i386_link_hash_table *htab;
@@ -2106,7 +2107,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 /* Find any dynamic relocs that apply to read-only sections.  */
 
 static bfd_boolean
-readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+elf_i386_readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct elf_i386_link_hash_entry *eh;
   struct elf_i386_dyn_relocs *p;
@@ -2275,7 +2276,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
-  elf_link_hash_traverse (&htab->elf, allocate_dynrelocs, info);
+  elf_link_hash_traverse (&htab->elf, elf_i386_allocate_dynrelocs, info);
 
   /* For every jump slot reserved in the sgotplt, reloc_count is
      incremented.  However, when we reserve space for TLS descriptors,
@@ -2388,7 +2389,8 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* If any dynamic relocs apply to a read-only section,
 	     then we need a DT_TEXTREL entry.  */
 	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->elf, readonly_dynrelocs, info);
+	    elf_link_hash_traverse (&htab->elf,
+				    elf_i386_readonly_dynrelocs, info);
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
@@ -2483,7 +2485,7 @@ elf_i386_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
    multiple times, it is idempotent.  */
 
 static void
-set_tls_module_base (struct bfd_link_info *info)
+elf_i386_set_tls_module_base (struct bfd_link_info *info)
 {
   struct bfd_link_hash_entry *base;
 
@@ -2503,7 +2505,7 @@ set_tls_module_base (struct bfd_link_info *info)
    This is PT_TLS segment p_vaddr.  */
 
 static bfd_vma
-dtpoff_base (struct bfd_link_info *info)
+elf_i386_dtpoff_base (struct bfd_link_info *info)
 {
   /* If tls_sec is NULL, we should have signalled an error already.  */
   if (elf_hash_table (info)->tls_sec == NULL)
@@ -2515,7 +2517,7 @@ dtpoff_base (struct bfd_link_info *info)
    if STT_TLS virtual address is ADDRESS.  */
 
 static bfd_vma
-tpoff (struct bfd_link_info *info, bfd_vma address)
+elf_i386_tpoff (struct bfd_link_info *info, bfd_vma address)
 {
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
@@ -2559,7 +2561,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		    && !strcmp (input_section->output_section->name,
 				".tls_vars"));
 
-  set_tls_module_base (info);
+  elf_i386_set_tls_module_base (info);
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;
@@ -3048,7 +3050,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 			      "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
 		      roff = rel->r_offset + 6;
 		    }
-		  bfd_put_32 (output_bfd, tpoff (info, relocation),
+		  bfd_put_32 (output_bfd, elf_i386_tpoff (info, relocation),
 			      contents + roff);
 		  /* Skip R_386_PC32/R_386_PLT32.  */
 		  rel++;
@@ -3075,7 +3077,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		     below with 0x86.  */
 		  bfd_put_8 (output_bfd, val ^ 0x86,
 			     contents + roff - 1);
-		  bfd_put_32 (output_bfd, -tpoff (info, relocation),
+		  bfd_put_32 (output_bfd, -elf_i386_tpoff (info, relocation),
 			      contents + roff);
 		  continue;
 		}
@@ -3143,7 +3145,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 			  break;
 			}
 		    }
-		  bfd_put_32 (output_bfd, -tpoff (info, relocation),
+		  bfd_put_32 (output_bfd, -elf_i386_tpoff (info, relocation),
 			      contents + rel->r_offset);
 		  continue;
 		}
@@ -3189,10 +3191,10 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  else
 		    BFD_FAIL ();
 		  if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GOTIE)
-		    bfd_put_32 (output_bfd, -tpoff (info, relocation),
+		    bfd_put_32 (output_bfd, -elf_i386_tpoff (info, relocation),
 				contents + rel->r_offset);
 		  else
-		    bfd_put_32 (output_bfd, tpoff (info, relocation),
+		    bfd_put_32 (output_bfd, elf_i386_tpoff (info, relocation),
 				contents + rel->r_offset);
 		  continue;
 		}
@@ -3249,7 +3251,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		    {
 		      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_32 (output_bfd,
-				  relocation - dtpoff_base (info),
+				  relocation - elf_i386_dtpoff_base (info),
 				  htab->sgotplt->contents + offplt
 				  + htab->sgotplt_jump_table_size + 4);
 		    }
@@ -3276,10 +3278,12 @@ elf_i386_relocate_section (bfd *output_bfd,
 		dr_type = R_386_TLS_TPOFF32;
 
 	      if (dr_type == R_386_TLS_TPOFF && indx == 0)
-		bfd_put_32 (output_bfd, relocation - dtpoff_base (info),
+		bfd_put_32 (output_bfd,
+			    relocation - elf_i386_dtpoff_base (info),
 			    htab->sgot->contents + off);
 	      else if (dr_type == R_386_TLS_TPOFF32 && indx == 0)
-		bfd_put_32 (output_bfd, dtpoff_base (info) - relocation,
+		bfd_put_32 (output_bfd, 
+			    elf_i386_dtpoff_base (info) - relocation,
 			    htab->sgot->contents + off);
 	      else if (dr_type != R_386_TLS_DESC)
 		bfd_put_32 (output_bfd, 0,
@@ -3298,7 +3302,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		    {
 	    	      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_32 (output_bfd,
-				  relocation - dtpoff_base (info),
+				  relocation - elf_i386_dtpoff_base (info),
 				  htab->sgot->contents + off + 4);
 		    }
 		  else
@@ -3318,7 +3322,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      else if (tls_type == GOT_TLS_IE_BOTH)
 		{
 		  bfd_put_32 (output_bfd,
-			      indx == 0 ? relocation - dtpoff_base (info) : 0,
+			      (indx == 0
+			       ? relocation - elf_i386_dtpoff_base (info)
+			       : 0),
 			      htab->sgot->contents + off + 4);
 		  outrel.r_info = ELF32_R_INFO (indx, R_386_TLS_TPOFF);
 		  outrel.r_offset += 4;
@@ -3533,10 +3539,10 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 	case R_386_TLS_LDO_32:
 	  if (info->shared || (input_section->flags & SEC_CODE) == 0)
-	    relocation -= dtpoff_base (info);
+	    relocation -= elf_i386_dtpoff_base (info);
 	  else
 	    /* When converting LDO to LE, we must negate.  */
-	    relocation = -tpoff (info, relocation);
+	    relocation = -elf_i386_tpoff (info, relocation);
 	  break;
 
 	case R_386_TLS_LE_32:
@@ -3568,14 +3574,14 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      if (indx)
 		continue;
 	      else if (r_type == R_386_TLS_LE_32)
-		relocation = dtpoff_base (info) - relocation;
+		relocation = elf_i386_dtpoff_base (info) - relocation;
 	      else
-		relocation -= dtpoff_base (info);
+		relocation -= elf_i386_dtpoff_base (info);
 	    }
 	  else if (r_type == R_386_TLS_LE_32)
-	    relocation = tpoff (info, relocation);
+	    relocation = elf_i386_tpoff (info, relocation);
 	  else
-	    relocation = -tpoff (info, relocation);
+	    relocation = -elf_i386_tpoff (info, relocation);
 	  break;
 
 	default:
