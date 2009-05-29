@@ -1,3 +1,7 @@
+2009-05-29  Pedro Alves  <pedro@codesourcery.com>
+
+	* mi/mi-interp.c (mi_on_resume): Initialize `count' to 0.
+
 2009-05-29  Eli Zaretskii  <eliz@gnu.org>
 
 	* i386-tdep.c (i386_go32_init_abi): Use SVR4 register numbering

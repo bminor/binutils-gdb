@@ -447,7 +447,7 @@ mi_on_resume (ptid_t ptid)
     fprintf_unfiltered (raw_stdout, "*running,thread-id=\"all\"\n");
   else if (ptid_is_pid (ptid))
     {
-      int count;
+      int count = 0;
 
       /* Backwards compatibility.  If there's only one inferior,
 	 output "all", otherwise, output each resumed thread
