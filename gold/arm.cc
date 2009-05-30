@@ -48,6 +48,9 @@ namespace
 
 using namespace gold;
 
+template<bool big_endian>
+class Output_data_plt_arm;
+
 // The arm target class.
 //
 // This is a very simple port of gold for ARM-EABI.  It is intended for
@@ -72,7 +75,6 @@ using namespace gold;
 // R_ARM_PREL31
 // 
 // Coming soon (pending patches):
-// - Support for dynamic symbols (GOT, PLT and etc).
 // - Local scanner
 // - Global scanner
 // - Relocation
@@ -85,6 +87,8 @@ using namespace gold;
 // - Create a PT_ARM_EXIDX program header for a shared object that
 //   might throw an exception.
 // - Support more relocation types as needed. 
+// - Make PLTs more flexible for different architecture features like
+//   Thumb-2 and BE8.
 
 template<bool big_endian>
 class Target_arm : public Sized_target<32, big_endian>
@@ -94,7 +98,9 @@ class Target_arm : public Sized_target<32, big_endian>
     Reloc_section;
 
   Target_arm()
-    : Sized_target<32, big_endian>(&arm_info)
+    : Sized_target<32, big_endian>(&arm_info),
+      got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
+      copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL)
   { }
 
   // Process the relocations to determine unreferenced sections for 
@@ -132,7 +138,7 @@ class Target_arm : public Sized_target<32, big_endian>
   void
   do_finalize_sections(Layout*);
 
-  // Return the value to use for a dynamic which requires special
+  // Return the value to use for a dynamic symbol which requires special
   // treatment.
   uint64_t
   do_dynsym_value(const Symbol*) const;
@@ -184,6 +190,14 @@ class Target_arm : public Sized_target<32, big_endian>
   bool
   do_is_defined_by_abi(Symbol* sym) const
   { return strcmp(sym->name(), "__tls_get_addr") == 0; }
+
+  // Return the size of the GOT section.
+  section_size_type
+  got_size()
+  {
+    gold_assert(this->got_ != NULL);
+    return this->got_->data_size();
+  }
 
   // Map platform-specific reloc types
   static unsigned int
@@ -256,9 +270,80 @@ class Target_arm : public Sized_target<32, big_endian>
     get_size_for_reloc(unsigned int, Relobj*);
   };
 
+  // Get the GOT section, creating it if necessary.
+  Output_data_got<32, big_endian>*
+  got_section(Symbol_table*, Layout*);
+
+  // Get the GOT PLT section.
+  Output_data_space*
+  got_plt_section() const
+  {
+    gold_assert(this->got_plt_ != NULL);
+    return this->got_plt_;
+  }
+
+  // Create a PLT entry for a global symbol.
+  void
+  make_plt_entry(Symbol_table*, Layout*, Symbol*);
+
+  // Get the PLT section.
+  const Output_data_plt_arm<big_endian>*
+  plt_section() const
+  {
+    gold_assert(this->plt_ != NULL);
+    return this->plt_;
+  }
+
+  // Get the dynamic reloc section, creating it if necessary.
+  Reloc_section*
+  rel_dyn_section(Layout*);
+
+  // Return true if the symbol may need a COPY relocation.
+  // References from an executable object to non-function symbols
+  // defined in a dynamic object may need a COPY relocation.
+  bool
+  may_need_copy_reloc(Symbol* gsym)
+  {
+    return (!parameters->options().shared()
+	    && gsym->is_from_dynobj()
+	    && gsym->type() != elfcpp::STT_FUNC);
+  }
+
+  // Add a potential copy relocation.
+  void
+  copy_reloc(Symbol_table* symtab, Layout* layout,
+	     Sized_relobj<32, big_endian>* object,
+	     unsigned int shndx, Output_section* output_section,
+	     Symbol* sym, const elfcpp::Rel<32, big_endian>& reloc)
+  {
+    this->copy_relocs_.copy_reloc(symtab, layout,
+				  symtab->get_sized_symbol<32>(sym),
+				  object, shndx, output_section, reloc,
+				  this->rel_dyn_section(layout));
+  }
+
   // Information about this specific target which we pass to the
   // general Target structure.
   static const Target::Target_info arm_info;
+
+  // The types of GOT entries needed for this platform.
+  enum Got_type
+  {
+    GOT_TYPE_STANDARD = 0	// GOT entry for a regular symbol
+  };
+
+  // The GOT section.
+  Output_data_got<32, big_endian>* got_;
+  // The PLT section.
+  Output_data_plt_arm<big_endian>* plt_;
+  // The GOT PLT section.
+  Output_data_space* got_plt_;
+  // The dynamic reloc section.
+  Reloc_section* rel_dyn_;
+  // Relocs saved to avoid a COPY reloc.
+  Copy_relocs<elfcpp::SHT_REL, 32, big_endian> copy_relocs_;
+  // Space for variables copied with a COPY reloc.
+  Output_data_space* dynbss_;
 };
 
 template<bool big_endian>
@@ -277,6 +362,300 @@ const Target::Target_info Target_arm<big_endian>::arm_info =
   0x1000,		// abi_pagesize (overridable by -z max-page-size)
   0x1000		// common_pagesize (overridable by -z common-page-size)
 };
+
+// Get the GOT section, creating it if necessary.
+
+template<bool big_endian>
+Output_data_got<32, big_endian>*
+Target_arm<big_endian>::got_section(Symbol_table* symtab, Layout* layout)
+{
+  if (this->got_ == NULL)
+    {
+      gold_assert(symtab != NULL && layout != NULL);
+
+      this->got_ = new Output_data_got<32, big_endian>();
+
+      Output_section* os;
+      os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+					   (elfcpp::SHF_ALLOC
+					    | elfcpp::SHF_WRITE),
+					   this->got_);
+      os->set_is_relro();
+
+      // The old GNU linker creates a .got.plt section.  We just
+      // create another set of data in the .got section.  Note that we
+      // always create a PLT if we create a GOT, although the PLT
+      // might be empty.
+      this->got_plt_ = new Output_data_space(4, "** GOT PLT");
+      os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+					   (elfcpp::SHF_ALLOC
+					    | elfcpp::SHF_WRITE),
+					   this->got_plt_);
+      os->set_is_relro();
+
+      // The first three entries are reserved.
+      this->got_plt_->set_current_data_size(3 * 4);
+
+      // Define _GLOBAL_OFFSET_TABLE_ at the start of the PLT.
+      symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
+				    this->got_plt_,
+				    0, 0, elfcpp::STT_OBJECT,
+				    elfcpp::STB_LOCAL,
+				    elfcpp::STV_HIDDEN, 0,
+				    false, false);
+    }
+  return this->got_;
+}
+
+// Get the dynamic reloc section, creating it if necessary.
+
+template<bool big_endian>
+typename Target_arm<big_endian>::Reloc_section*
+Target_arm<big_endian>::rel_dyn_section(Layout* layout)
+{
+  if (this->rel_dyn_ == NULL)
+    {
+      gold_assert(layout != NULL);
+      this->rel_dyn_ = new Reloc_section(parameters->options().combreloc());
+      layout->add_output_section_data(".rel.dyn", elfcpp::SHT_REL,
+				      elfcpp::SHF_ALLOC, this->rel_dyn_);
+    }
+  return this->rel_dyn_;
+}
+
+// A class to handle the PLT data.
+
+template<bool big_endian>
+class Output_data_plt_arm : public Output_section_data
+{
+ public:
+  typedef Output_data_reloc<elfcpp::SHT_REL, true, 32, big_endian>
+    Reloc_section;
+
+  Output_data_plt_arm(Layout*, Output_data_space*);
+
+  // Add an entry to the PLT.
+  void
+  add_entry(Symbol* gsym);
+
+  // Return the .rel.plt section data.
+  const Reloc_section*
+  rel_plt() const
+  { return this->rel_; }
+
+ protected:
+  void
+  do_adjust_output_section(Output_section* os);
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** PLT")); }
+
+ private:
+  // Template for the first PLT entry.
+  static const uint32_t first_plt_entry[5];
+
+  // Template for subsequent PLT entries. 
+  static const uint32_t plt_entry[3];
+
+  // Set the final size.
+  void
+  set_final_data_size()
+  {
+    this->set_data_size(sizeof(first_plt_entry)
+			+ this->count_ * sizeof(plt_entry));
+  }
+
+  // Write out the PLT data.
+  void
+  do_write(Output_file*);
+
+  // The reloc section.
+  Reloc_section* rel_;
+  // The .got.plt section.
+  Output_data_space* got_plt_;
+  // The number of PLT entries.
+  unsigned int count_;
+};
+
+// Create the PLT section.  The ordinary .got section is an argument,
+// since we need to refer to the start.  We also create our own .got
+// section just for PLT entries.
+
+template<bool big_endian>
+Output_data_plt_arm<big_endian>::Output_data_plt_arm(Layout* layout,
+						     Output_data_space* got_plt)
+  : Output_section_data(4), got_plt_(got_plt), count_(0)
+{
+  this->rel_ = new Reloc_section(false);
+  layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
+				  elfcpp::SHF_ALLOC, this->rel_);
+}
+
+template<bool big_endian>
+void
+Output_data_plt_arm<big_endian>::do_adjust_output_section(Output_section* os)
+{
+  os->set_entsize(0);
+}
+
+// Add an entry to the PLT.
+
+template<bool big_endian>
+void
+Output_data_plt_arm<big_endian>::add_entry(Symbol* gsym)
+{
+  gold_assert(!gsym->has_plt_offset());
+
+  // Note that when setting the PLT offset we skip the initial
+  // reserved PLT entry.
+  gsym->set_plt_offset((this->count_) * sizeof(plt_entry)
+		       + sizeof(first_plt_entry));
+
+  ++this->count_;
+
+  section_offset_type got_offset = this->got_plt_->current_data_size();
+
+  // Every PLT entry needs a GOT entry which points back to the PLT
+  // entry (this will be changed by the dynamic linker, normally
+  // lazily when the function is called).
+  this->got_plt_->set_current_data_size(got_offset + 4);
+
+  // Every PLT entry needs a reloc.
+  gsym->set_needs_dynsym_entry();
+  this->rel_->add_global(gsym, elfcpp::R_ARM_JUMP_SLOT, this->got_plt_,
+			 got_offset);
+
+  // Note that we don't need to save the symbol.  The contents of the
+  // PLT are independent of which symbols are used.  The symbols only
+  // appear in the relocations.
+}
+
+// ARM PLTs.
+// FIXME:  This is not very flexible.  Right now this has only been tested
+// on armv5te.  If we are to support additional architecture features like
+// Thumb-2 or BE8, we need to make this more flexible like GNU ld.
+
+// The first entry in the PLT.
+template<bool big_endian>
+const uint32_t Output_data_plt_arm<big_endian>::first_plt_entry[5] =
+{
+  0xe52de004,	// str   lr, [sp, #-4]!
+  0xe59fe004,   // ldr   lr, [pc, #4]
+  0xe08fe00e,	// add   lr, pc, lr 
+  0xe5bef008,	// ldr   pc, [lr, #8]!
+  0x00000000,	// &GOT[0] - .
+};
+
+// Subsequent entries in the PLT.
+
+template<bool big_endian>
+const uint32_t Output_data_plt_arm<big_endian>::plt_entry[3] =
+{
+  0xe28fc600,	// add   ip, pc, #0xNN00000
+  0xe28cca00,	// add   ip, ip, #0xNN000
+  0xe5bcf000,	// ldr   pc, [ip, #0xNNN]!
+};
+
+// Write out the PLT.  This uses the hand-coded instructions above,
+// and adjusts them as needed.  This is all specified by the arm ELF
+// Processor Supplement.
+
+template<bool big_endian>
+void
+Output_data_plt_arm<big_endian>::do_write(Output_file* of)
+{
+  const off_t offset = this->offset();
+  const section_size_type oview_size =
+    convert_to_section_size_type(this->data_size());
+  unsigned char* const oview = of->get_output_view(offset, oview_size);
+
+  const off_t got_file_offset = this->got_plt_->offset();
+  const section_size_type got_size =
+    convert_to_section_size_type(this->got_plt_->data_size());
+  unsigned char* const got_view = of->get_output_view(got_file_offset,
+						      got_size);
+  unsigned char* pov = oview;
+
+  elfcpp::Elf_types<32>::Elf_Addr plt_address = this->address();
+  elfcpp::Elf_types<32>::Elf_Addr got_address = this->got_plt_->address();
+
+  // Write first PLT entry.  All but the last word are constants.
+  const size_t num_first_plt_words = (sizeof(first_plt_entry)
+				      / sizeof(plt_entry[0]));
+  for (size_t i = 0; i < num_first_plt_words - 1; i++)
+    elfcpp::Swap<32, big_endian>::writeval(pov + i * 4, first_plt_entry[i]);
+  // Last word in first PLT entry is &GOT[0] - .
+  elfcpp::Swap<32, big_endian>::writeval(pov + 16,
+					 got_address - (plt_address + 16));
+  pov += sizeof(first_plt_entry);
+
+  unsigned char* got_pov = got_view;
+
+  memset(got_pov, 0, 12);
+  got_pov += 12;
+
+  const int rel_size = elfcpp::Elf_sizes<32>::rel_size;
+  unsigned int plt_offset = sizeof(first_plt_entry);
+  unsigned int plt_rel_offset = 0;
+  unsigned int got_offset = 12;
+  const unsigned int count = this->count_;
+  for (unsigned int i = 0;
+       i < count;
+       ++i,
+	 pov += sizeof(plt_entry),
+	 got_pov += 4,
+	 plt_offset += sizeof(plt_entry),
+	 plt_rel_offset += rel_size,
+	 got_offset += 4)
+    {
+      // Set and adjust the PLT entry itself.
+      int32_t offset = ((got_address + got_offset)
+			 - (plt_address + plt_offset + 8));
+
+      gold_assert(offset >= 0 && offset < 0x0fffffff);
+      uint32_t plt_insn0 = plt_entry[0] | ((offset >> 20) & 0xff);
+      elfcpp::Swap<32, big_endian>::writeval(pov, plt_insn0);
+      uint32_t plt_insn1 = plt_entry[1] | ((offset >> 12) & 0xff);
+      elfcpp::Swap<32, big_endian>::writeval(pov + 4, plt_insn1);
+      uint32_t plt_insn2 = plt_entry[2] | (offset & 0xfff);
+      elfcpp::Swap<32, big_endian>::writeval(pov + 8, plt_insn2);
+
+      // Set the entry in the GOT.
+      elfcpp::Swap<32, big_endian>::writeval(got_pov, plt_address);
+    }
+
+  gold_assert(static_cast<section_size_type>(pov - oview) == oview_size);
+  gold_assert(static_cast<section_size_type>(got_pov - got_view) == got_size);
+
+  of->write_output_view(offset, oview_size, oview);
+  of->write_output_view(got_file_offset, got_size, got_view);
+}
+
+// Create a PLT entry for a global symbol.
+
+template<bool big_endian>
+void
+Target_arm<big_endian>::make_plt_entry(Symbol_table* symtab, Layout* layout,
+				       Symbol* gsym)
+{
+  if (gsym->has_plt_offset())
+    return;
+
+  if (this->plt_ == NULL)
+    {
+      // Create the GOT sections first.
+      this->got_section(symtab, layout);
+
+      this->plt_ = new Output_data_plt_arm<big_endian>(layout, this->got_plt_);
+      layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
+				      (elfcpp::SHF_ALLOC
+				       | elfcpp::SHF_EXECINSTR),
+				      this->plt_);
+    }
+  this->plt_->add_entry(gsym);
+}
 
 // Report an unsupported relocation against a local symbol.
 
@@ -436,9 +815,44 @@ Target_arm<big_endian>::scan_relocs(const General_options& options,
 
 template<bool big_endian>
 void
-Target_arm<big_endian>::do_finalize_sections(Layout* /* layout */)
+Target_arm<big_endian>::do_finalize_sections(Layout* layout)
 {
-  gold_unreachable ();
+  // Fill in some more dynamic tags.
+  Output_data_dynamic* const odyn = layout->dynamic_data();
+  if (odyn != NULL)
+    {
+      if (this->got_plt_ != NULL)
+	odyn->add_section_address(elfcpp::DT_PLTGOT, this->got_plt_);
+
+      if (this->plt_ != NULL)
+	{
+	  const Output_data* od = this->plt_->rel_plt();
+	  odyn->add_section_size(elfcpp::DT_PLTRELSZ, od);
+	  odyn->add_section_address(elfcpp::DT_JMPREL, od);
+	  odyn->add_constant(elfcpp::DT_PLTREL, elfcpp::DT_REL);
+	}
+
+      if (this->rel_dyn_ != NULL)
+	{
+	  const Output_data* od = this->rel_dyn_;
+	  odyn->add_section_address(elfcpp::DT_REL, od);
+	  odyn->add_section_size(elfcpp::DT_RELSZ, od);
+	  odyn->add_constant(elfcpp::DT_RELENT,
+			     elfcpp::Elf_sizes<32>::rel_size);
+	}
+
+      if (!parameters->options().shared())
+	{
+	  // The value of the DT_DEBUG tag is filled in by the dynamic
+	  // linker at run time, and used by the debugger.
+	  odyn->add_constant(elfcpp::DT_DEBUG, 0);
+	}
+    }
+
+  // Emit any relocs we saved in an attempt to avoid generating COPY
+  // relocs.
+  if (this->copy_relocs_.any_saved_relocs())
+    this->copy_relocs_.emit(this->rel_dyn_section(layout));
 }
 
 // Perform a relocation.
@@ -621,12 +1035,17 @@ Target_arm<big_endian>::relocate_for_relocatable(
     reloc_view_size);
 }
 
+// Return the value to use for a dynamic symbol which requires special
+// treatment.  This is how we support equality comparisons of function
+// pointers across shared library boundaries, as described in the
+// processor specific ABI supplement.
+
 template<bool big_endian>
 uint64_t
-Target_arm<big_endian>::do_dynsym_value(const Symbol* /*gsym*/) const
+Target_arm<big_endian>::do_dynsym_value(const Symbol* gsym) const
 {
-  gold_unreachable ();
-  return 0;
+  gold_assert(gsym->is_from_dynobj() && gsym->has_plt_offset());
+  return this->plt_section()->address() + gsym->plt_offset();
 }
 
 // Map platform-specific relocs to real relocs

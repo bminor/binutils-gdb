@@ -1,3 +1,33 @@
+2009-05-29  Doug Kwan  <dougkwan@google.com>
+
+	* gold/arm.cc (Output_data_plt_arm): Forward declaration for new
+	template class.
+	(class Target_arm): Update comment.
+	(Target_arm::Target_arm): Initialize new data members GOT_,
+	PLT_, GOT_PLT_, REL_DYN_, COPY_RELOCS_ and DYNBSS_.
+	Declare new methods Target_arm::got_section, Target_arm::make_plt_entry
+	and Target_arm::rel_dyn_section.
+	Declare new_enum Target_arm::Got_type.
+	Declare new data members GOT_, PLT_, GOT_PLT_, REL_DYN_, COPY_RELOCS_
+	and DYNBSS_.
+	Update commments for member do_dynsym_value.
+	(Target_arm::got_size, Target_arm::plt_section,
+	Target_arm::may_need_copy_reloc and Target_arm::copy_reloc): Define
+	new methods inside class defintion.
+	(Target_arm::got_section): Define new method.
+	(Target_arm::rel_dyn_section): Same.
+	(Output_data_plt_arm): New template class.
+	(Output_data_plt_arm::Output_data_plt_arm): Define constructor.
+	(Output_data_plt_arm:do_adjust_output_section): Define new method.
+	(Output_data_plt_arm::add_entry): Same.
+	(Output_data_plt_arm::first_plt_entry): Define new
+	static data member for PLT instruction template.
+	(Output_data_plt_arm::plt_entry): Same.
+	(Output_data_plt_arm::do_write): Define new method.
+	(Target_arm::make_plt_entry): Same.
+	(Target_arm::do_finalize_sections): Same.
+	(Target_arm::do_dynsym_value): Same.
+
 2009-05-28  Doug Kwan  <dougkwan@google.com>
 
 	* Makefile.am (TARGETSOURCES): Add arm.cc.
