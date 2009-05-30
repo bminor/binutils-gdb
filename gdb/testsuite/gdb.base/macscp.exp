@@ -155,7 +155,7 @@ proc info_macro {macro} {
     switch -exact -- $definition {
         no-macro-info { return no-macro-info }
         timeout { return timeout }
-        undefined -
+        undefined { return undefined }
         default {
             if {[llength $location] >= 1} {
                 return [concat $location [list $definition]]
@@ -181,6 +181,10 @@ proc check_macro {macro expected where} {
                 xfail "executable includes no macro debugging information"
                 return 1
             }
+	    undefined {
+		fail "info macro $macro $where (undefined)"
+		return 1
+	    }
             timeout {
                 fail "info macro $macro $where (timeout)"
             }
@@ -202,8 +206,28 @@ proc list_and_check_macro {func macro expected} {
 
 
 if {[list_and_check_macro main WHERE {macscp1.c {before macscp1_3}}]} {
-    return 0
+    global verbose
+    set macro_support "unknown"
+    send_gdb "info source\n"
+    gdb_test_multiple "info source" "Test macro information"  {
+	-re "Includes preprocessor macro info\..*$gdb_prompt $" {
+	    set macro_support 1
+	    verbose "Source has macro information"
+	}
+	-re "Does not include preprocessor macro info\..*$gdb_prompt $" {
+	    set macro_support 0
+	    verbose "Source has no macro information"
+	}
+	default {
+	    warning "couldn't check macro support (no valid response)."
+	}
+    }
+    if {$macro_support == 0} {
+	unsupported "Skipping test because debug information does not include macro information."
+	return 0
+    }
 }
+ 
 list_and_check_macro macscp2_2 WHERE {macscp2.h macscp1.c {before macscp2_2}}
 list_and_check_macro macscp3_2 WHERE {macscp3.h macscp1.c {before macscp3_2}}
 

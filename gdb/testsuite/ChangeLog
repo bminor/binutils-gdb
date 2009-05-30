@@ -1,3 +1,10 @@
+2009-05-30  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.base/macscp.exp (info_macro): Return undefined if undefined.
+	(check_macro): Return 1 if undefined.
+	If first test fails, check if macro debug information is available,
+	and report unsupported test if no macro information is found.
+
 2009-05-29  Doug Evans  <dje@google.com>
 
 	* gdb.threads/hand-call-in-threads.exp: New.
