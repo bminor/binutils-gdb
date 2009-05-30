@@ -1,3 +1,9 @@
+2009-05-29  Doug Evans  <dje@google.com>
+
+	* infrun.c (prepare_to_proceed): Document.  Assert !non_stop.
+	If scheduler-locking is enabled, we're not going to be singlestepping
+	any other previously stopped thread.
+
 2009-05-29  Pedro Alves  <pedro@codesourcery.com>
 
 	* mi/mi-interp.c (mi_on_resume): Initialize `count' to 0.

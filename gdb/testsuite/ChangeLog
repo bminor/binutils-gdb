@@ -1,3 +1,8 @@
+2009-05-29  Doug Evans  <dje@google.com>
+
+	* gdb.threads/hand-call-in-threads.exp: New.
+	* gdb.threads/hand-call-in-threads.c: New.
+
 2009-05-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/threxit-hop-specific.c: New.

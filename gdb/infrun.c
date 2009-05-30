@@ -1364,13 +1364,21 @@ clear_proceed_status (void)
     }
 }
 
-/* This should be suitable for any targets that support threads. */
+/* Check the current thread against the thread that reported the most recent
+   event.  If a step-over is required return TRUE and set the current thread
+   to the old thread.  Otherwise return FALSE.
+
+   This should be suitable for any targets that support threads. */
 
 static int
 prepare_to_proceed (int step)
 {
   ptid_t wait_ptid;
   struct target_waitstatus wait_status;
+  int schedlock_enabled;
+
+  /* With non-stop mode on, threads are always handled individually.  */
+  gdb_assert (! non_stop);
 
   /* Get the last target status returned by target_wait().  */
   get_last_target_status (&wait_ptid, &wait_status);
@@ -1382,9 +1390,15 @@ prepare_to_proceed (int step)
       return 0;
     }
 
+  schedlock_enabled = (scheduler_mode == schedlock_on
+		       || (scheduler_mode == schedlock_step
+			   && step));
+
   /* Switched over from WAIT_PID.  */
   if (!ptid_equal (wait_ptid, minus_one_ptid)
-      && !ptid_equal (inferior_ptid, wait_ptid))
+      && !ptid_equal (inferior_ptid, wait_ptid)
+      /* Don't single step WAIT_PID if scheduler locking is on.  */
+      && !schedlock_enabled)
     {
       struct regcache *regcache = get_thread_regcache (wait_ptid);
 
