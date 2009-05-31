@@ -162,6 +162,12 @@ Incremental_inputs::report_command_line(int argc, const char* const* argv)
   // Copied from collect_argv in main.cc.
   for (int i = 1; i < argc; ++i)
     {
+      // Adding/removing these options should result in a full relink.
+      if (strcmp(argv[i], "--incremental-changed") == 0
+	  || strcmp(argv[i], "--incremental-unchanged") == 0
+	  || strcmp(argv[i], "--incremental-unknown") == 0)
+        continue;
+
       args.append(" '");
       // Now append argv[i], but with all single-quotes escaped
       const char* argpos = argv[i];

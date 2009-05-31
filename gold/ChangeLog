@@ -1,3 +1,8 @@
+2009-05-31  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* incremental.cc (Incremental_inputs::report_command_line): Filter
+	out --incremental-* options.
+
 2009-05-29  Doug Kwan  <dougkwan@google.com>
 
 	* gold/arm.cc (Output_data_plt_arm): Forward declaration for new
