@@ -113,15 +113,15 @@ if test -z "${INITIAL_READONLY_SECTIONS}${CREATE_SHLIB}"; then
   INITIAL_READONLY_SECTIONS=".interp       ${RELOCATING-0} : { *(.interp) }"
 fi
 if test -z "$PLT"; then
-  PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
+  PLT=".plt          ${RELOCATING-0} : { *(.plt) *(.iplt)}"
 fi
 test -n "${DATA_PLT-${BSS_PLT-text}}" && TEXT_PLT=yes
 if test -z "$GOT"; then
   if test -z "$SEPARATE_GOTPLT"; then
-    GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) }"
+    GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.igot.plt) *(.got) *(.igot) }"
   else
-    GOT=".got          ${RELOCATING-0} : { *(.got) }"
-    GOTPLT=".got.plt      ${RELOCATING-0} : { *(.got.plt) }"
+    GOT=".got          ${RELOCATING-0} : { *(.got) *(.igot) }"
+    GOTPLT=".got.plt      ${RELOCATING-0} : { *(.got.plt)  *(.igot.plt) }"
   fi
 fi
 DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
@@ -354,8 +354,20 @@ EOF
 fi
 
 cat >> ldscripts/dyntmp.$$ <<EOF
-  .rel.plt      ${RELOCATING-0} : { *(.rel.plt) }
-  .rela.plt     ${RELOCATING-0} : { *(.rela.plt) }
+  .rel.plt      ${RELOCATING-0} :
+    {
+      *(.rel.plt)
+      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_start = .);}}
+      *(.rel.iplt)
+      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_end = .);}}
+    }
+  .rela.plt     ${RELOCATING-0} :
+    {
+      *(.rela.plt)
+      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rela_iplt_start = .);}}
+      *(.rela.iplt)
+      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rela_iplt_end = .);}}
+    }
   ${OTHER_PLT_RELOC_SECTIONS}
 EOF
 

@@ -1,3 +1,23 @@
+2009-06-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (struct bfd_elf_section_data): Remove indirect_relocs.
+	(_bfd_elf_make_ifunc_reloc_section): Removed.
+	(_bfd_elf_is_ifunc_symbol): Likewise.
+	(_bfd_elf_create_static_ifunc_sections): New.
+
+	* elflink.c (_bfd_elf_adjust_dynamic_symbol): Move STT_GNU_IFUNC
+	symbol check to ...
+	(elf_link_add_object_symbols): Here.
+	(_bfd_elf_link_hash_hide_symbol): Don't clean plt on
+	STT_GNU_IFUNC symbol.
+	(elf_link_output_extsym): Call elf_backend_finish_dynamic_symbol
+	if a STT_GNU_IFUNC symbol is referenced in a non-shared object.
+	(IFUNC_INFIX): Removed.
+	(get_ifunc_reloc_section_name): Likewise.
+	(_bfd_elf_make_ifunc_reloc_section): Likewise.
+	(_bfd_elf_is_ifunc_symbol): Likewise.
+	(_bfd_elf_create_static_ifunc_sections): New.
+
 2009-05-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (link_hash_newfunc): Add elf_i386_ prefix.

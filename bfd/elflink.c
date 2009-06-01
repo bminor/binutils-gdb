@@ -2675,13 +2675,6 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
   dynobj = elf_hash_table (eif->info)->dynobj;
   bed = get_elf_backend_data (dynobj);
 
-
-  if (h->type == STT_GNU_IFUNC
-      && (bed->elf_osabi == ELFOSABI_LINUX
-	  /* GNU/Linux is still using the default value 0.  */
-	  || bed->elf_osabi == ELFOSABI_NONE))
-    h->needs_plt = 1;
-
   if (! (*bed->elf_backend_adjust_dynamic_symbol) (eif->info, h))
     {
       eif->failed = TRUE;
@@ -4294,6 +4287,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	      h->type = ELF_ST_TYPE (isym->st_info);
 	    }
+
+	  /* STT_GNU_IFUNC symbol must go through PLT.  */
+	  if (h->type == STT_GNU_IFUNC)
+	    h->needs_plt = 1;
 
 	  /* Merge st_other field.  */
 	  elf_merge_st_other (abfd, h, isym, definition, dynamic);
@@ -6669,8 +6666,12 @@ _bfd_elf_link_hash_hide_symbol (struct bfd_link_info *info,
 				struct elf_link_hash_entry *h,
 				bfd_boolean force_local)
 {
-  h->plt = elf_hash_table (info)->init_plt_offset;
-  h->needs_plt = 0;
+  /* STT_GNU_IFUNC symbol must go through PLT.  */
+  if (h->type != STT_GNU_IFUNC)
+    {
+      h->plt = elf_hash_table (info)->init_plt_offset;
+      h->needs_plt = 0;
+    }
   if (force_local)
     {
       h->forced_local = 1;
@@ -8649,14 +8650,18 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
   /* Give the processor backend a chance to tweak the symbol value,
      and also to finish up anything that needs to be done for this
      symbol.  FIXME: Not calling elf_backend_finish_dynamic_symbol for
-     forced local syms when non-shared is due to a historical quirk.  */
-  if ((h->dynindx != -1
-       || h->forced_local)
-      && ((finfo->info->shared
-	   && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	       || h->root.type != bfd_link_hash_undefweak))
-	  || !h->forced_local)
-      && elf_hash_table (finfo->info)->dynamic_sections_created)
+     forced local syms when non-shared is due to a historical quirk.
+     STT_GNU_IFUNC symbol must go through PLT.  */
+  if ((h->type == STT_GNU_IFUNC
+       && h->ref_regular
+       && !finfo->info->relocatable)
+      || ((h->dynindx != -1
+	   || h->forced_local)
+	  && ((finfo->info->shared
+	       && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		   || h->root.type != bfd_link_hash_undefweak))
+	      || !h->forced_local)
+	  && elf_hash_table (finfo->info)->dynamic_sections_created))
     {
       if (! ((*bed->elf_backend_finish_dynamic_symbol)
 	     (finfo->output_bfd, finfo->info, h, &sym)))
@@ -12487,88 +12492,87 @@ _bfd_elf_make_dynamic_reloc_section (asection *         sec,
   return reloc_sec;
 }
 
-/* Returns the name of the ifunc using dynamic reloc section associated with SEC.  */
-#define IFUNC_INFIX ".ifunc"
-
-static const char *
-get_ifunc_reloc_section_name (bfd *       abfd,
-			      asection *  sec)
-{
-  const char *  dot;
-  char *  name;
-  const char *  base_name;
-  unsigned int  strndx = elf_elfheader (abfd)->e_shstrndx;
-  unsigned int  shnam = elf_section_data (sec)->rel_hdr.sh_name;
-
-  base_name = bfd_elf_string_from_elf_section (abfd, strndx, shnam);
-  if (base_name == NULL)
-    return NULL;
-
-  dot = strchr (base_name + 1, '.');
-  name = bfd_alloc (abfd, strlen (base_name) + strlen (IFUNC_INFIX) + 1);
-  sprintf (name, "%.*s%s%s", (int)(dot - base_name), base_name, IFUNC_INFIX, dot);
-
-  return name;
-}
-
-/* Like _bfd_elf_make_dynamic_reloc_section but it creates a
-   section for holding relocs against symbols with the STT_GNU_IFUNC
-   type.  The section is attached to the OWNER bfd but it is created
-   with a name based on SEC from ABFD.  */
-
-asection *
-_bfd_elf_make_ifunc_reloc_section (bfd *         abfd,
-				   asection *    sec,
-				   bfd *         owner,
-				   unsigned int  align)
-{
-  asection * reloc_sec = elf_section_data (sec)->indirect_relocs;
-
-  if (reloc_sec == NULL)
-    {
-      const char * name = get_ifunc_reloc_section_name (abfd, sec);
-
-      if (name == NULL)
-	return NULL;
-
-      reloc_sec = bfd_get_section_by_name (owner, name);
-
-      if (reloc_sec == NULL)
-	{
-	  flagword flags;
-
-	  flags = (SEC_HAS_CONTENTS | SEC_READONLY | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-	  if ((sec->flags & SEC_ALLOC) != 0)
-	    flags |= SEC_ALLOC | SEC_LOAD;
-
-	  reloc_sec = bfd_make_section_with_flags (owner, name, flags);
-	  
-	  if (reloc_sec != NULL
-	      && ! bfd_set_section_alignment (owner, reloc_sec, align))
-	    reloc_sec = NULL;
-	}
-
-      elf_section_data (sec)->indirect_relocs = reloc_sec;
-    }
-
-  return reloc_sec;
-}
-
-/* Returns true if the hash entry refers to a symbol marked for
-   indirect handling during reloc processing.  */
+/* Create sections needed by STT_GNU_IFUNC symbol for static
+   executables.  */
 
 bfd_boolean
-_bfd_elf_is_ifunc_symbol (bfd *abfd, struct elf_link_hash_entry *h)
+_bfd_elf_create_static_ifunc_sections (bfd *abfd,
+				       struct bfd_link_info *info)
 {
-  const struct elf_backend_data * bed;
+  flagword flags, pltflags;
+  int ptralign;
+  asection *s;
+  const struct elf_backend_data *bed;
 
-  if (abfd == NULL || h == NULL)
-    return FALSE;
+  /* Should never be called for shared library.  */
+  BFD_ASSERT (!info->shared);
+
+  /* This function may be called more than once.  */
+  s = bfd_get_section_by_name (abfd, ".iplt");
+  if (s != NULL)
+    return TRUE;
 
   bed = get_elf_backend_data (abfd);
 
-  /* GNU/Linux is still using the default value ELFOSABI_NONE.  */
-  return (h->type == STT_GNU_IFUNC
-	  && (bed->elf_osabi == ELFOSABI_LINUX
-	      || bed->elf_osabi == ELFOSABI_NONE));
+  /* We need to create .iplt, .rel[a].iplt, .igot, .igot.plt,  */
+  flags = bed->dynamic_sec_flags;
+
+  pltflags = flags;
+  if (bed->plt_not_loaded)
+    /* We do not clear SEC_ALLOC here because we still want the OS to
+       allocate space for the section; it's just that there's nothing
+       to read in from the object file.  */
+    pltflags &= ~ (SEC_CODE | SEC_LOAD | SEC_HAS_CONTENTS);
+  else
+    pltflags |= SEC_ALLOC | SEC_CODE | SEC_LOAD;
+  if (bed->plt_readonly)
+    pltflags |= SEC_READONLY;
+
+  s = bfd_make_section_with_flags (abfd, ".iplt", pltflags);
+  if (s == NULL
+      || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
+    return FALSE;
+
+  s = bfd_make_section_with_flags (abfd,
+				   (bed->rela_plts_and_copies_p
+				    ? ".rela.iplt" : ".rel.iplt"),
+				   flags | SEC_READONLY);
+  if (s == NULL
+      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+    return FALSE;
+
+  switch (bed->s->arch_size)
+    {
+    case 32:
+      ptralign = 2;
+      break;
+
+    case 64:
+      ptralign = 3;
+      break;
+
+    default:
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  /* We don't need the .igot section if we have the .igot.plt
+     section.  */
+
+  if (bed->want_got_plt)
+    {
+      s = bfd_make_section_with_flags (abfd, ".igot.plt", flags);
+      if (s == NULL
+	  || !bfd_set_section_alignment (abfd, s, ptralign))
+	return FALSE;
+    }
+  else
+    {
+      s = bfd_make_section_with_flags (abfd, ".igot", flags);
+      if (s == NULL
+	  || !bfd_set_section_alignment (abfd, s, ptralign))
+	return FALSE;
+    }
+
+  return TRUE;
 }

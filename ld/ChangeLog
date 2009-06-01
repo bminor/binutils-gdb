@@ -1,3 +1,13 @@
+2009-06-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* scripttempl/elf.sc (PLT): Add "*(.iplt)".
+	(GOT): Add "*(.igot.plt)a" and "*(.igot)".
+	(GOTPLT): Add "*(.igot)".
+	(__rel_iplt_start): New.
+	(__rel_iplt_end): Likewise.
+	(__rela_iplt_start): Likewise.
+	(__rela_iplt_end): Likewise.
+
 2009-05-27  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* deffilep.y (%union):  Add new string-type semantic value 'digits'.

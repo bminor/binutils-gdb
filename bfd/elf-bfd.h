@@ -1299,9 +1299,6 @@ struct bfd_elf_section_data
   /* A pointer to the bfd section used for dynamic relocs.  */
   asection *sreloc;
 
-  /* A pointer to the bfd section used for dynamic relocs against ifunc symbols.  */
-  asection *indirect_relocs;
-
   union {
     /* Group name, if this section is a member of a group.  */
     const char *name;
@@ -2149,14 +2146,11 @@ extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, int);
 extern void _bfd_elf_parse_attributes (bfd *, Elf_Internal_Shdr *);
 extern bfd_boolean _bfd_elf_merge_object_attributes (bfd *, bfd *);
 
-extern asection * _bfd_elf_make_ifunc_reloc_section
-  (bfd *, asection *, bfd *, unsigned int);
+extern bfd_boolean _bfd_elf_create_static_ifunc_sections
+  (bfd *, struct bfd_link_info *);
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;
-
-extern bfd_boolean _bfd_elf_is_ifunc_symbol
-  (bfd *, struct elf_link_hash_entry *);
 
 /* This is the condition under which finish_dynamic_symbol will be called.
    If our finish_dynamic_symbol isn't called, we'll need to do something
