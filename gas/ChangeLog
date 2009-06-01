@@ -1,3 +1,8 @@
+2009-06-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10198
+	* config/tc-i386-intel.c (i386_intel_operand): Check '$' as '.'.
+
 2009-05-26  Catherine Moore  <clm@codesourcery.com>
 
 	* config/tc-mips.c (check_for_24k_errata): Remove.

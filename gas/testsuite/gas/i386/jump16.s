@@ -50,3 +50,7 @@
 	jmp	word ptr [bx]
 	jmp	dword ptr [bx]
 	jmp	fword ptr [bx]
+	jmp	$+2
+	nop
+	jmp	.+2
+	nop

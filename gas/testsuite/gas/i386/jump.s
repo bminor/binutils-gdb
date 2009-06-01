@@ -31,3 +31,7 @@
 	jmp	word ptr [ebx]
 	jmp	dword ptr [ebx]
 	jmp	fword ptr [ebx]
+	jmp	$+2
+	nop
+	jmp	.+2
+	nop
