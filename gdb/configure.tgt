@@ -96,10 +96,7 @@ arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
 avr-*-*)
 	# Target: AVR
 	gdb_target_obs="avr-tdep.o"
-	# There is no simulator provided with gdb (yet).
-	# See <http://savannah.gnu.org/projects/simulavr/>
-	# for the simulator used during development of avr
-	# support for gdb.
+	gdb_sim=../sim/avr/libsim.a
 	;;
 
 cris*)

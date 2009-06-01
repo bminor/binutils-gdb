@@ -1,3 +1,7 @@
+2009-06-01  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.tgt (avr): Set gdb_sim to use the simulator.
+
 2009-05-29  Doug Evans  <dje@google.com>
 
 	* infrun.c (prepare_to_proceed): Document.  Assert !non_stop.
