@@ -1,5 +1,51 @@
 2009-06-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/10205
+	* elf32-i386.c (elf_howto_table): Add R_386_IRELATIVE.
+	(elf_i386_reloc_type_lookup): Likewise.
+	(R_386_tls): Removed.
+	(R_386_irelative): New.
+	(R_386_vt_offset): Updated.
+	(elf_i386_rtype_to_howto): Likewise.
+	(elf_i386_link_hash_table): Add igotplt, iplt and irelplt.
+	(elf_i386_link_hash_table_create): Initialize igotplt,
+	iplt and irelplt.
+	(elf_i386_check_relocs): Handle STT_GNU_IFUNC symbol first.
+	(elf_i386_adjust_dynamic_symbol): Likewise.
+	(elf_i386_allocate_dynrelocs): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_size_dynamic_sections): Set up .iplt and .igot.plt
+	sections.
+	(elf_i386_finish_dynamic_symbol): When building a static
+	executable, use .iplt, .igot.plt and .rel.iplt sections for
+	STT_GNU_IFUNC symbols.  Generate R_386_IRELATIVE relocation for
+	locally defined STT_GNU_IFUNC symbol.
+
+	* elf64-x86-64.c (x86_64_elf_howto): Add R_X86_64_IRELATIVE.
+	(x86_64_reloc_map): Likewise.
+	(R_X86_64_standard): Updated.
+	(elf64_x86_64_link_hash_table): Add igotplt, iplt and irelplt.
+	(elf64_x86_64_link_hash_table_create): Initialize igotplt,
+	iplt and irelplt.
+	(elf64_x86_64_check_relocs): Handle STT_GNU_IFUNC symbol first.
+	(elf64_x86_64_adjust_dynamic_symbol): Likewise.
+	(elf64_x86_64_allocate_dynrelocs): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+	(elf64_x86_64_size_dynamic_sections): Set up .iplt and .igot.plt
+	sections.
+	(elf64_x86_64_finish_dynamic_symbol): When building a static
+	executable, use .iplt, .igot.plt and .rela.iplt sections for
+	STT_GNU_IFUNC symbols.  Generate R_X86_64_IRELATIVE relocation
+	for locally defined STT_GNU_IFUNC symbol.
+
+	* reloc.c (BFD_RELOC_386_IRELATIVE): New.
+	(BFD_RELOC_X86_64_IRELATIVE): Likewise.
+
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
+2009-06-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf-bfd.h (struct bfd_elf_section_data): Remove indirect_relocs.
 	(_bfd_elf_make_ifunc_reloc_section): Removed.
 	(_bfd_elf_is_ifunc_symbol): Likewise.

@@ -1,3 +1,30 @@
+2009-06-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10205
+	* ld-ifunc/ifunc.exp (contains_irelative_reloc): New.
+	Use it on executable and shared library.
+	Run *.d.
+
+	* ld-ifunc/lib.c: Add a hidden alias, __GI_library_func2, for
+	library_func2.
+	(library_func): New.
+
+	* ld-ifunc/ifunc-1-x86.d: New.
+	* ld-ifunc/ifunc-1-x86.s: Likewise.
+	* ld-ifunc/ifunc-2-i386.d: Likewise.
+	* ld-ifunc/ifunc-2-i386.s: Likewise.
+	* ld-ifunc/ifunc-2-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-2-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-3a-x86.d: Likewise.
+	* ld-ifunc/ifunc-3b-x86.d: Likewise.
+	* ld-ifunc/ifunc-3-x86.s: Likewise.
+	* ld-ifunc/ifunc-4-x86.d: Likewise.
+	* ld-ifunc/ifunc-4-x86.s: Likewise.
+	* ld-ifunc/ifunc-5-i386.d: Likewise.
+	* ld-ifunc/ifunc-5-i386.s: Likewise.
+	* ld-ifunc/ifunc-5-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-5-x86-64.s: Likewise.
+
 2009-05-27  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-pe/non-c-lang-syms.c:  New dump test source file.
