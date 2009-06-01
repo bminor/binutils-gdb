@@ -899,7 +899,10 @@ Equivalent to @samp{-f posix}.
 
 @item -S
 @itemx --print-size
-Print size, not the value, of defined symbols for the @code{bsd} output format.
+Print both value and size of defined symbols for the @code{bsd} output style.
+This option has no effect for object formats that do not record symbol
+sizes, unless @samp{--size-sort} is also used in which case a
+calculated size is displayed.
 
 @item -s
 @itemx --print-armap
