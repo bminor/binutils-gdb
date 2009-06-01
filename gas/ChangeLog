@@ -228,7 +228,7 @@
 	(expr_set_rank): New.
 	* expr.h (expr_set_rank): Declare.
 
-2008-04-15  Anthony Green  <green@moxielogic.com>
+2009-04-15  Anthony Green  <green@moxielogic.com>
 
 	* config/tc-moxie.h: New file.
 	* config/tc-moxie.c: New file.
