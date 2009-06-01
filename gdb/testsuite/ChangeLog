@@ -10,6 +10,11 @@
 	* gdb.threads/hand-call-in-threads.exp: New.
 	* gdb.threads/hand-call-in-threads.c: New.
 
+2009-05-29  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/break-always.exp: Change "1" to "on".
+	Add confirmation check.
+
 2009-05-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/threxit-hop-specific.c: New.
