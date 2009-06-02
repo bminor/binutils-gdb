@@ -1,3 +1,7 @@
+2009-06-02  Nick Clifton  <nickc@redhat.com>
+
+	* po/nl.po: Updated Dutch translation.
+
 2009-06-02  Tristan Gingold  <gingold@adacore.com>
 
 	* ia64-gen.c (parse_resource_users, print_dependency_table,

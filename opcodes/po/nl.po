@@ -1,14 +1,14 @@
 # Dutch messages for the Opcodes Library.
-# Copyright (C) 1999, 2002, 2003, 2005, 2006, 2007 Free Software Foundation, Inc.
-# This file is distributed under the same license as the Opcodes package.
-# Tim Van Holder <tim.van.holder@telenet.be>, 1999, 2002, 2003, 2005, 2006, 2007.
+# Copyright (C) 1999, 2002, 2003, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+# This file is distributed under the same license as the binutils package.
+# Tim Van Holder <tim.van.holder@telenet.be>, 1999, 2002, 2003, 2005, 2006, 2007, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: opcodes 2.17.90\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-07-05 09:17+0100\n"
-"PO-Revision-Date: 2007-08-27 17:13+0200\n"
+"Project-Id-Version: opcodes 2.19.1\n"
+"Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
+"POT-Creation-Date: 2008-09-09 15:56+0930\n"
+"PO-Revision-Date: 2009-06-01 14:42+0200\n"
 "Last-Translator: Tim Van Holder <tim.van.holder@telenet.be>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
 "MIME-Version: 1.0\n"
@@ -58,7 +58,7 @@ msgstr "te veel lange constantes"
 
 # of "bij opladen" ipv "in load"?
 #: arc-opc.c:668
-msgid "to many shimms in load"
+msgid "too many shimms in load"
 msgstr "te veel shimms in load"
 
 #. Do we have a limm already?
@@ -134,7 +134,7 @@ msgstr "Registernaam-verzameling niet herkend: %s\n"
 msgid "Unrecognised disassembler option: %s\n"
 msgstr "Disassembler-optie niet herkend: %s\n"
 
-#: arm-dis.c:4226
+#: arm-dis.c:4238
 #, c-format
 msgid ""
 "\n"
@@ -209,14 +209,14 @@ msgstr "Registerlijst is ongeldig"
 # Klinkt niet echt geweldig, maar ja...
 #: fr30-asm.c:310 frv-asm.c:1263 ip2k-asm.c:511 iq2000-asm.c:459
 #: m32c-asm.c:1589 m32r-asm.c:328 mep-asm.c:1001 mt-asm.c:595
-#: openrisc-asm.c:241 xc16x-asm.c:375 xstormy16-asm.c:276
+#: openrisc-asm.c:241 xc16x-asm.c:376 xstormy16-asm.c:276
 #, c-format
 msgid "Unrecognized field %d while parsing.\n"
 msgstr "Veld %d niet herkend tijdens analyse.\n"
 
 #: fr30-asm.c:361 frv-asm.c:1314 ip2k-asm.c:562 iq2000-asm.c:510
 #: m32c-asm.c:1640 m32r-asm.c:379 mep-asm.c:1052 mt-asm.c:646
-#: openrisc-asm.c:292 xc16x-asm.c:426 xstormy16-asm.c:327
+#: openrisc-asm.c:292 xc16x-asm.c:427 xstormy16-asm.c:327
 msgid "missing mnemonic in syntax string"
 msgstr "mnemonic ontbreekt in syntaxstring"
 
@@ -229,7 +229,7 @@ msgstr "mnemonic ontbreekt in syntaxstring"
 #: m32r-asm.c:605 m32r-asm.c:706 mep-asm.c:1187 mep-asm.c:1191 mep-asm.c:1278
 #: mep-asm.c:1379 mt-asm.c:781 mt-asm.c:785 mt-asm.c:872 mt-asm.c:973
 #: openrisc-asm.c:427 openrisc-asm.c:431 openrisc-asm.c:518 openrisc-asm.c:619
-#: xc16x-asm.c:561 xc16x-asm.c:565 xc16x-asm.c:652 xc16x-asm.c:753
+#: xc16x-asm.c:562 xc16x-asm.c:566 xc16x-asm.c:653 xc16x-asm.c:754
 #: xstormy16-asm.c:462 xstormy16-asm.c:466 xstormy16-asm.c:553
 #: xstormy16-asm.c:654
 msgid "unrecognized instruction"
@@ -237,40 +237,40 @@ msgstr "instructie niet herkend"
 
 #: fr30-asm.c:543 frv-asm.c:1496 ip2k-asm.c:744 iq2000-asm.c:692
 #: m32c-asm.c:1822 m32r-asm.c:561 mep-asm.c:1234 mt-asm.c:828
-#: openrisc-asm.c:474 xc16x-asm.c:608 xstormy16-asm.c:509
+#: openrisc-asm.c:474 xc16x-asm.c:609 xstormy16-asm.c:509
 #, c-format
 msgid "syntax error (expected char `%c', found `%c')"
 msgstr "syntaxfout (verwachtte `%c', vond `%c')"
 
 #: fr30-asm.c:553 frv-asm.c:1506 ip2k-asm.c:754 iq2000-asm.c:702
 #: m32c-asm.c:1832 m32r-asm.c:571 mep-asm.c:1244 mt-asm.c:838
-#: openrisc-asm.c:484 xc16x-asm.c:618 xstormy16-asm.c:519
+#: openrisc-asm.c:484 xc16x-asm.c:619 xstormy16-asm.c:519
 #, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
 msgstr "syntaxfout (verwachtte `%c', vond het einde van de instructie)"
 
 #: fr30-asm.c:581 frv-asm.c:1534 ip2k-asm.c:782 iq2000-asm.c:730
 #: m32c-asm.c:1860 m32r-asm.c:599 mep-asm.c:1272 mt-asm.c:866
-#: openrisc-asm.c:512 xc16x-asm.c:646 xstormy16-asm.c:547
+#: openrisc-asm.c:512 xc16x-asm.c:647 xstormy16-asm.c:547
 msgid "junk at end of line"
 msgstr "rommel aan einde van lijn"
 
 #: fr30-asm.c:687 frv-asm.c:1640 ip2k-asm.c:888 iq2000-asm.c:836
 #: m32c-asm.c:1966 m32r-asm.c:705 mep-asm.c:1378 mt-asm.c:972
-#: openrisc-asm.c:618 xc16x-asm.c:752 xstormy16-asm.c:653
+#: openrisc-asm.c:618 xc16x-asm.c:753 xstormy16-asm.c:653
 msgid "unrecognized form of instruction"
 msgstr "instructievorm niet herkend"
 
 #: fr30-asm.c:699 frv-asm.c:1652 ip2k-asm.c:900 iq2000-asm.c:848
 #: m32c-asm.c:1978 m32r-asm.c:717 mep-asm.c:1390 mt-asm.c:984
-#: openrisc-asm.c:630 xc16x-asm.c:764 xstormy16-asm.c:665
+#: openrisc-asm.c:630 xc16x-asm.c:765 xstormy16-asm.c:665
 #, c-format
 msgid "bad instruction `%.50s...'"
 msgstr "slechte instructie `%s.50s...'"
 
 #: fr30-asm.c:702 frv-asm.c:1655 ip2k-asm.c:903 iq2000-asm.c:851
 #: m32c-asm.c:1981 m32r-asm.c:720 mep-asm.c:1393 mt-asm.c:987
-#: openrisc-asm.c:633 xc16x-asm.c:767 xstormy16-asm.c:668
+#: openrisc-asm.c:633 xc16x-asm.c:768 xstormy16-asm.c:668
 #, c-format
 msgid "bad instruction `%.50s'"
 msgstr "slechte instructie `%s.50s'"
@@ -391,11 +391,11 @@ msgstr "kan niet omgaan met insert %d\n"
 msgid "%02x\t\t*unknown*"
 msgstr "%02x\t\t*onbekend*"
 
-#: i386-dis.c:3196
+#: i386-dis.c:9545
 msgid "<internal disassembler error>"
 msgstr "<interne fout in de disassembler>"
 
-#: i386-dis.c:3423
+#: i386-dis.c:9776
 #, c-format
 msgid ""
 "\n"
@@ -407,78 +407,125 @@ msgstr ""
 "gebruik via de -M optie (meerdere opties moeten door komma's gescheiden\n"
 "worden):\n"
 
-#: i386-dis.c:3427
+#: i386-dis.c:9780
 #, c-format
 msgid "  x86-64      Disassemble in 64bit mode\n"
 msgstr "  x86-64      Disassembleer in 64-bits modus\n"
 
-#: i386-dis.c:3428
+#: i386-dis.c:9781
 #, c-format
 msgid "  i386        Disassemble in 32bit mode\n"
 msgstr "  i386        Disassembleer in 32-bits modus\n"
 
-#: i386-dis.c:3429
+#: i386-dis.c:9782
 #, c-format
 msgid "  i8086       Disassemble in 16bit mode\n"
 msgstr "  i8086       Disassembleer in 16-bits modus\n"
 
-#: i386-dis.c:3430
+#: i386-dis.c:9783
 #, c-format
 msgid "  att         Display instruction in AT&T syntax\n"
 msgstr "  att         Toon instructie in AT&T syntax\n"
 
-#: i386-dis.c:3431
+#: i386-dis.c:9784
 #, c-format
 msgid "  intel       Display instruction in Intel syntax\n"
 msgstr "  intel       Toon instructie in Intel syntax\n"
 
-#: i386-dis.c:3432
+# Of "... in AT&T mnemonic syntax"?
+#: i386-dis.c:9785
+#, c-format
+msgid ""
+"  att-mnemonic\n"
+"              Display instruction in AT&T mnemonic\n"
+msgstr ""
+"  att-mnemonic\n"
+"              Toon instructie in verkorte AT&T syntax\n"
+
+# Of "... in Intel mnemonic syntax"?
+#: i386-dis.c:9787
+#, c-format
+msgid ""
+"  intel-mnemonic\n"
+"              Display instruction in Intel mnemonic\n"
+msgstr ""
+"  intel-mnemonic\n"
+"              Toon instructie in verkorte Intel syntax\n"
+
+#: i386-dis.c:9789
 #, c-format
 msgid "  addr64      Assume 64bit address size\n"
 msgstr "  addr64      Ga uit van een 64-bits adresgrootte\n"
 
-#: i386-dis.c:3433
+#: i386-dis.c:9790
 #, c-format
 msgid "  addr32      Assume 32bit address size\n"
 msgstr "  addr32      Ga uit van een 32-bits adresgrootte\n"
 
-#: i386-dis.c:3434
+#: i386-dis.c:9791
 #, c-format
 msgid "  addr16      Assume 16bit address size\n"
 msgstr "  addr16      Ga uit van een 16-bits adresgrootte\n"
 
-#: i386-dis.c:3435
+#: i386-dis.c:9792
 #, c-format
 msgid "  data32      Assume 32bit data size\n"
 msgstr "  data32      Ga uit van een 32-bits datagrootte\n"
 
-#: i386-dis.c:3436
+#: i386-dis.c:9793
 #, c-format
 msgid "  data16      Assume 16bit data size\n"
 msgstr "  data16      Ga uit van een 16-bits datagrootte\n"
 
-#: i386-dis.c:3437
+#: i386-dis.c:9794
 #, c-format
 msgid "  suffix      Always display instruction suffix in AT&T syntax\n"
 msgstr "  suffix      Toon altijd de instructiesuffix in AT&T syntax\n"
 
-#: i386-gen.c:42 ia64-gen.c:307
+#: i386-gen.c:411 ia64-gen.c:307
 #, c-format
 msgid "%s: Error: "
 msgstr "%s: Fout: "
 
-#: i386-gen.c:109
-msgid "can't find i386-opc.tbl for reading\n"
-msgstr "kan invoerbestand i386-opc.tbl niet vinden\n"
+#: i386-gen.c:510
+#, c-format
+msgid "%s: %d: Unknown bitfield: %s\n"
+msgstr "%s: %d: Onbekend bitveld: %s\n"
 
-#: i386-gen.c:260
-msgid "can't find i386-reg.tbl for reading\n"
-msgstr "kan invoerbestand i386-reg.tbl niet vinden\n"
+#: i386-gen.c:674
+#, c-format
+msgid "can't find i386-opc.tbl for reading, errno = %s\n"
+msgstr "kan invoerbestand i386-opc.tbl niet vinden; errno = %s\n"
 
-#: i386-gen.c:386 ia64-gen.c:2841
+#: i386-gen.c:851
+#, c-format
+msgid "can't find i386-reg.tbl for reading, errno = %s\n"
+msgstr "kan invoerbestand i386-reg.tbl niet vinden; errno = %s\n"
+
+#: i386-gen.c:943
+#, c-format
+msgid "can't create i386-init.h, errno = %s\n"
+msgstr "kan i386-init.h niet aanmaken; errno = %s\n"
+
+#: i386-gen.c:1032 ia64-gen.c:2850
 #, c-format
 msgid "unable to change directory to \"%s\", errno = %s\n"
 msgstr "kan niet naar directory \"%s\" gaan, errno = %s\n"
+
+#: i386-gen.c:1039
+#, c-format
+msgid "%d unused bits in i386_cpu_flags.\n"
+msgstr "%d ongebruikte bits in i386_cpu_flags.\n"
+
+#: i386-gen.c:1046
+#, c-format
+msgid "%d unused bits in i386_operand_type.\n"
+msgstr "%d ongebruikte bits in i386_operand_type.\n"
+
+#: i386-gen.c:1060
+#, c-format
+msgid "can't create i386-tbl.h, errno = %s\n"
+msgstr "kan i386-tbl.h niet aanmaken; errno = %s\n"
 
 #: ia64-gen.c:320
 #, c-format
@@ -518,62 +565,67 @@ msgstr "overlappend veld %s->%s\n"
 msgid "overwriting note %d with note %d (IC:%s)\n"
 msgstr "noot %d wordt overschreven door noot %d (IC:%s)\n"
 
-#: ia64-gen.c:1455
+#: ia64-gen.c:1459
 #, c-format
 msgid "don't know how to specify %% dependency %s\n"
 msgstr "ik weet niet hoe ik de %%-dependency %s moet opgeven\n"
 
-#: ia64-gen.c:1477
+#: ia64-gen.c:1481
 #, c-format
 msgid "Don't know how to specify # dependency %s\n"
 msgstr "Ik weet niet hoe ik de #-dependency %s moet opgeven\n"
 
-#: ia64-gen.c:1516
+#: ia64-gen.c:1520
 #, c-format
 msgid "IC:%s [%s] has no terminals or sub-classes\n"
 msgstr "IC:%s [%s] heeft geen eindsymbolen of subklassen\n"
 
-#: ia64-gen.c:1519
+#: ia64-gen.c:1523
 #, c-format
 msgid "IC:%s has no terminals or sub-classes\n"
 msgstr "IC:%s heeft geen eindsymbolen of subklassen\n"
 
-#: ia64-gen.c:1528
+#: ia64-gen.c:1532
 #, c-format
 msgid "no insns mapped directly to terminal IC %s [%s]"
 msgstr "er zijn geen insns die rechtstreeks naar eindsymbool IC %s [%s] vertaald worden"
 
-#: ia64-gen.c:1531
+#: ia64-gen.c:1535
 #, c-format
 msgid "no insns mapped directly to terminal IC %s\n"
 msgstr "er zijn geen insns die rechtstreeks naar eindsymbool IC %s vertaald worden\n"
 
-#: ia64-gen.c:1542
+#: ia64-gen.c:1546
 #, c-format
 msgid "class %s is defined but not used\n"
 msgstr "klasse %s is gedefinieerd maar wordt niet gebruikt\n"
 
-#: ia64-gen.c:1553
+#: ia64-gen.c:1559
 #, c-format
-msgid "Warning: rsrc %s (%s) has no chks%s\n"
-msgstr "Let Op: rsrc %s (%s) heeft geen chks%s\n"
+msgid "Warning: rsrc %s (%s) has no chks\n"
+msgstr "Let Op: rsrc %s (%s) heeft geen chks\n"
 
-#: ia64-gen.c:1557
+#: ia64-gen.c:1562
+#, c-format
+msgid "Warning: rsrc %s (%s) has no chks or regs\n"
+msgstr "Let Op: rsrc %s (%s) heeft geen chks of regs\n"
+
+#: ia64-gen.c:1566
 #, c-format
 msgid "rsrc %s (%s) has no regs\n"
 msgstr "rsrc %s (%s) heeft geen regs\n"
 
-#: ia64-gen.c:2469
+#: ia64-gen.c:2478
 #, c-format
 msgid "IC note %d in opcode %s (IC:%s) conflicts with resource %s note %d\n"
 msgstr "IC noot %d in opcode %s (IC:%s) geeft een conflict met resource %s noot %d\n"
 
-#: ia64-gen.c:2497
+#: ia64-gen.c:2506
 #, c-format
 msgid "IC note %d for opcode %s (IC:%s) conflicts with resource %s note %d\n"
 msgstr "IC noot %d voor opcode %s (IC:%s) geeft een conflict met resource %s noot %d\n"
 
-#: ia64-gen.c:2511
+#: ia64-gen.c:2520
 #, c-format
 msgid "opcode %s has no class (ops %d %d %d)\n"
 msgstr "opcode %s heeft geen klasse (ops %d %d %d)\n"
@@ -769,26 +821,26 @@ msgstr "Deze opcode laat alleen stp of $15 toe"
 msgid "invalid %function() here"
 msgstr "ongeldige %function() op deze plek"
 
-#: mips-dis.c:745
+#: mips-dis.c:781
 msgid "# internal error, incomplete extension sequence (+)"
 msgstr "# interne fout, onvolledige extension sequence  (+)"
 
-#: mips-dis.c:852
+#: mips-dis.c:915
 #, c-format
 msgid "# internal error, undefined extension sequence (+%c)"
 msgstr "# interne fout, extension sequence (+%c) niet gedefinieerd"
 
-#: mips-dis.c:1211
+#: mips-dis.c:1274
 #, c-format
-msgid "# internal error, undefined modifier(%c)"
-msgstr "# interne fout, modifier(%c) niet gedefinieerd"
+msgid "# internal error, undefined modifier (%c)"
+msgstr "# interne fout, modifier (%c) niet gedefinieerd"
 
-#: mips-dis.c:1818
+#: mips-dis.c:1881
 #, c-format
 msgid "# internal disassembler error, unrecognised modifier (%c)"
-msgstr "# interne fout in disassembler, modifier(%c) niet herkend"
+msgstr "# interne fout in disassembler, modifier (%c) niet herkend"
 
-#: mips-dis.c:2049
+#: mips-dis.c:2112
 #, c-format
 msgid ""
 "\n"
@@ -799,7 +851,7 @@ msgstr ""
 "De volgende MIPS-specifieke disassembler-opties worden ondersteund voor gebruik\n"
 "via de -M optie (meerdere opties moeten door komma's gescheiden worden):\n"
 
-#: mips-dis.c:2053
+#: mips-dis.c:2116
 #, c-format
 msgid ""
 "\n"
@@ -811,7 +863,7 @@ msgstr ""
 "                           Standaard: gebaseerd op het binair bestand dat\n"
 "                           gedesassembleerd wordt.\n"
 
-#: mips-dis.c:2057
+#: mips-dis.c:2120
 #, c-format
 msgid ""
 "\n"
@@ -822,7 +874,7 @@ msgstr ""
 "  fpr-names=ABI            Druk FPR-namen af volgens de opgegeven ABI.\n"
 "                           Standaard: numeriek.\n"
 
-#: mips-dis.c:2061
+#: mips-dis.c:2124
 #, c-format
 msgid ""
 "\n"
@@ -836,7 +888,7 @@ msgstr ""
 "                           Standaard: gebaseerd op het binair bestand dat\n"
 "                           gedesassembleerd wordt.\n"
 
-#: mips-dis.c:2066
+#: mips-dis.c:2129
 #, c-format
 msgid ""
 "\n"
@@ -850,7 +902,7 @@ msgstr ""
 "                           gedesassembleerd wordt.\n"
 "\n"
 
-#: mips-dis.c:2071
+#: mips-dis.c:2134
 #, c-format
 msgid ""
 "\n"
@@ -860,7 +912,7 @@ msgstr ""
 "\n"
 "  reg-names=ABI            Druk GPR- en FPR-namen af volgens de opgegeven ABI.\n"
 
-#: mips-dis.c:2075
+#: mips-dis.c:2138
 #, c-format
 msgid ""
 "\n"
@@ -871,7 +923,7 @@ msgstr ""
 "  reg-names=ARCH           Druk CP0 registernamen en HWR-namen af volgens de\n"
 "                           opgegeven architectuur.\n"
 
-#: mips-dis.c:2079
+#: mips-dis.c:2142
 #, c-format
 msgid ""
 "\n"
@@ -882,12 +934,12 @@ msgstr ""
 "  Voor de bovenstaande opties zijn dit de ondersteunde waarden voor \"ABI\":\n"
 "   "
 
-#: mips-dis.c:2084 mips-dis.c:2092 mips-dis.c:2094
+#: mips-dis.c:2147 mips-dis.c:2155 mips-dis.c:2157
 #, c-format
 msgid "\n"
 msgstr "\n"
 
-#: mips-dis.c:2086
+#: mips-dis.c:2149
 #, c-format
 msgid ""
 "\n"
@@ -927,9 +979,8 @@ msgid "Biiiig Trouble in parse_imm16!"
 msgstr "Groooooooot Probleem in parse_imm16!"
 
 #: mt-asm.c:157
-#, c-format
-msgid "%operator operand is not a symbol"
-msgstr "operand van %operator is geen symbool"
+msgid "The percent-operator's operand is not a symbol"
+msgstr "Operand van percent-operator is geen symbool"
 
 #: mt-asm.c:395
 msgid "invalid operand.  type may have values 0,1,2 only."
@@ -945,43 +996,64 @@ msgstr "ongeldige operand.  type mag alleen 0,1,2 als waarde hebben."
 msgid "$<undefined>"
 msgstr "$<niet gedefinieerd>"
 
-#: ppc-opc.c:782 ppc-opc.c:810
+#: ppc-opc.c:862 ppc-opc.c:890
 msgid "invalid conditional option"
 msgstr "ongeldige voorwaardelijke optie"
 
 # Dit kan waarschijnlijk beter
-#: ppc-opc.c:812
+#: ppc-opc.c:892
 msgid "attempt to set y bit when using + or - modifier"
 msgstr "poging om y bit in te stellen wanneer + of - modifier gebruikt wordt"
 
-#: ppc-opc.c:844
+#: ppc-opc.c:924
 msgid "invalid mask field"
 msgstr "ongeldig maskerveld"
 
-#: ppc-opc.c:870
+#: ppc-opc.c:950
 msgid "ignoring invalid mfcr mask"
 msgstr "ongeldig mfcr-masker wordt genegeerd"
 
-#: ppc-opc.c:920 ppc-opc.c:955
+#: ppc-opc.c:1000 ppc-opc.c:1035
 msgid "illegal bitmask"
 msgstr "ongeldig bitmasker"
 
 # of is laadbereik beter?
-#: ppc-opc.c:1075
+#: ppc-opc.c:1155
 msgid "index register in load range"
 msgstr "indexregister in load-bereik"
 
-#: ppc-opc.c:1091
+#: ppc-opc.c:1171
 msgid "source and target register operands must be different"
 msgstr "bron- en doel-registeroperanden moeten verschillen"
 
-#: ppc-opc.c:1106
+#: ppc-opc.c:1186
 msgid "invalid register operand when updating"
 msgstr "ongeldige register-operand bij update"
 
-#: ppc-opc.c:1188
+#: ppc-opc.c:1265
 msgid "invalid sprg number"
 msgstr "ongeldig sprg-nummer"
+
+#: s390-dis.c:276
+#, c-format
+msgid ""
+"\n"
+"The following S/390 specific disassembler options are supported for use\n"
+"with the -M switch (multiple options should be separated by commas):\n"
+msgstr ""
+"\n"
+"De volgende S/390-specifieke disassembler-opties worden ondersteund voor gebruik\n"
+"via de -M optie (meerdere opties moeten door komma's gescheiden worden):\n"
+
+#: s390-dis.c:280
+#, c-format
+msgid "  esa         Disassemble in ESA architecture mode\n"
+msgstr "  esa         Disassembleer in ESA-architectuur  modus\n"
+
+#: s390-dis.c:281
+#, c-format
+msgid "  zarch       Disassemble in z/Architecture mode\n"
+msgstr "  zarch       Disassembleer in z/Archiecture modus\n"
 
 #: score-dis.c:220 score-dis.c:383
 msgid "<illegal instruction>"
@@ -1070,27 +1142,27 @@ msgstr "onmiddellijke waarde niet in bereik en niet even"
 msgid "immediate value must be even"
 msgstr "onmiddellijke waarde moet even zijn"
 
-#: xc16x-asm.c:65
+#: xc16x-asm.c:66
 msgid "Missing '#' prefix"
 msgstr "'#' prefix ontbreekt"
 
-#: xc16x-asm.c:81
+#: xc16x-asm.c:82
 msgid "Missing '.' prefix"
 msgstr "'.' prefix ontbreekt"
 
-#: xc16x-asm.c:97
+#: xc16x-asm.c:98
 msgid "Missing 'pof:' prefix"
 msgstr "'pof.' prefix ontbreekt"
 
-#: xc16x-asm.c:113
+#: xc16x-asm.c:114
 msgid "Missing 'pag:' prefix"
 msgstr "'pag:' prefix ontbreekt"
 
-#: xc16x-asm.c:129
+#: xc16x-asm.c:130
 msgid "Missing 'sof:' prefix"
 msgstr "'sof:' prefix ontbreekt"
 
-#: xc16x-asm.c:145
+#: xc16x-asm.c:146
 msgid "Missing 'seg:' prefix"
 msgstr "'seg:' prefix ontbreekt"
 
