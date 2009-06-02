@@ -1,3 +1,12 @@
+2009-06-02  Tristan Gingold  <gingold@adacore.com>
+
+	* ia64-gen.c (parse_resource_users, print_dependency_table,
+	add_dis_table_ent, finish_distable, insert_bit_table_ent,
+	add_dis_entry, compact_distree, gen_dis_table, completer_entries_eq,
+	get_prefix_len, compute_completer_bits, insert_opcode_dependencies,
+	insert_completer_entry, print_completer_entry, print_completer_table,
+	opcodes_eq, add_opcode_entry, shrink): Use ISO C syntax for functions.
+
 2009-05-28  DJ Delorie  <dj@redhat.com>
 
 	* mep-asm.c: Regenerate.
