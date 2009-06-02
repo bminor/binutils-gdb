@@ -1126,6 +1126,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 		case R_X86_64_GOTPCREL:
 		case R_X86_64_GOTPCREL64:
+		  h->got.refcount += 1;
 		  if (htab->sgot == NULL
 		      && !elf64_x86_64_create_got_section (htab->elf.dynobj,
 							   info))
@@ -1837,8 +1838,13 @@ elf64_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       if (h->dynindx == -1 || h->forced_local)
 	eh->dyn_relocs = NULL;
 
-      /* STT_GNU_IFUNC symbol uses .got.plt, not .got.  */
-      h->got.refcount = 0;
+      /* STT_GNU_IFUNC symbol uses .got.plt, not .got.  But for
+	 shared library, we must go through GOT and we can't
+	 use R_X86_64_IRELATIVE unless it is forced local.   */
+      if (!info->shared 
+	  || info->symbolic
+	  || h->forced_local)
+	h->got.refcount = 0;
     }
   else if (htab->elf.dynamic_sections_created
 	   && h->plt.refcount > 0)
@@ -2616,49 +2622,51 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      base_got = htab->sgot;
 	      off = h->got.offset;
 
-	      if (base_got == NULL
-		  || off != (bfd_vma) -1)
+	      if (base_got == NULL)
 		abort ();
 
-	      /* We can't use h->got.offset here to save state, or
-		 even just remember the offset, as finish_dynamic_symbol
-		 would use that as offset into .got.  */
-
-	      if (htab->splt != NULL)
+	      if (off == (bfd_vma) -1)
 		{
-		  plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
-		  off = (plt_index + 3) * GOT_ENTRY_SIZE;
-		  base_got = htab->sgotplt;
-		}
-	      else
-		{
-		  plt_index = h->plt.offset / PLT_ENTRY_SIZE;
-		  off = plt_index * GOT_ENTRY_SIZE;
-		  base_got = htab->igotplt;
-		}
+		  /* We can't use h->got.offset here to save state, or
+		     even just remember the offset, as finish_dynamic_symbol
+		     would use that as offset into .got.  */
 
-	      if (h->dynindx == -1
-		  || h->forced_local
-		  || info->symbolic)
-		{
-		  /* This references the local defitionion.  We must 
-		     initialize this entry in the global offset table.
-		     Since the offset must always be a multiple of 8, we
-		     use the least significant bit to record whether we
-		     have initialized it already.
-
-		     When doing a dynamic link, we create a .rela.got
-		     relocation entry to initialize the value.	This is
-		     done in the finish_dynamic_symbol routine.	 */
-		  if ((off & 1) != 0)
-		    off &= ~1;
+		  if (htab->splt != NULL)
+		    {
+		      plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
+		      off = (plt_index + 3) * GOT_ENTRY_SIZE;
+		      base_got = htab->sgotplt;
+		    }
 		  else
 		    {
-		      bfd_put_64 (output_bfd, relocation,
-				  base_got->contents + off);
-		      /* Note that this is harmless for the GOTPLT64 case,
-		         as -1 | 1 still is -1.  */
-		      h->got.offset |= 1;
+		      plt_index = h->plt.offset / PLT_ENTRY_SIZE;
+		      off = plt_index * GOT_ENTRY_SIZE;
+		      base_got = htab->igotplt;
+		    }
+
+		  if (h->dynindx == -1
+		      || h->forced_local
+		      || info->symbolic)
+		    {
+		      /* This references the local defitionion.  We must 
+			 initialize this entry in the global offset table.
+			 Since the offset must always be a multiple of 8, 
+			 we use the least significant bit to record
+			 whether we have initialized it already.
+
+			 When doing a dynamic link, we create a .rela.got
+			 relocation entry to initialize the value.  This
+			 is done in the finish_dynamic_symbol routine.	 */
+		      if ((off & 1) != 0)
+			off &= ~1;
+		      else
+			{
+			  bfd_put_64 (output_bfd, relocation,
+				      base_got->contents + off);
+			  /* Note that this is harmless for the GOTPLT64
+			     case, as -1 | 1 still is -1.  */
+			  h->got.offset |= 1;
+			}
 		    }
 		}
 

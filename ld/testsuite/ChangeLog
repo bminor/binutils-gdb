@@ -1,3 +1,26 @@
+2009-06-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc-5-i386.d: Renamed to ...
+	* ld-ifunc/ifunc-5a-i386.d: This.
+
+	* ld-ifunc/ifunc-5-x86-64.d: Renamed to ...
+	* ld-ifunc/ifunc-5a-x86-64.d: This.
+
+	* ld-ifunc/ifunc-5b-i386.d: New.
+	* ld-ifunc/ifunc-5b-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-6a-i386.d: Likewise.
+	* ld-ifunc/ifunc-6a-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-6b-i386.d: Likewise.
+	* ld-ifunc/ifunc-6b-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-6-i386.s: Likewise.
+	* ld-ifunc/ifunc-6-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-7a-i386.d: Likewise.
+	* ld-ifunc/ifunc-7a-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-7b-i386.d: Likewise.
+	* ld-ifunc/ifunc-7b-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-7-i386.s: Likewise.
+	* ld-ifunc/ifunc-7-x86-64.s: Likewise.
+
 2009-06-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10205
