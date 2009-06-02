@@ -145,16 +145,6 @@ set aix52tests {
      {{objdump {-D -j.text -j.data} aix-glink-1-SIZE.dd}}
      "aix-glink-1.so"}
 
-    {"Line number test 1 (no discards)" "-e.main"
-     "" {aix-lineno-1.s}
-     {{objdump -dS aix-lineno-1a.dd} {nm {} aix-lineno-1a.nd}}
-     "aix-lineno-1a.exe"}
-
-    {"Line number test 1 (discard locals)" "-e.main -x"
-     "" {aix-lineno-1.s}
-     {{objdump -dS aix-lineno-1b.dd} {nm {} aix-lineno-1b.nd}}
-     "aix-lineno-1b.exe"}
-
     {"Glink test 2 (part a)" "-shared -bE:aix-glink-2a.ex"
      "" {aix-glink-2a.s}
      {}
@@ -175,6 +165,32 @@ set aix52tests {
      "" {aix-glink-2d.s}
      {{objdump -d aix-glink-2-SIZE.dd}}
      "aix-glink-2"}
+
+    {"Glink test 3 (shared library a)"
+     "-shared -bexpall"
+     "" {aix-glink-3a.s}
+     {} "aix-glink-3a.so"}
+
+    {"Glink test 3 (shared library b)"
+     "-shared -bexpall"
+     "" {aix-glink-3b.s}
+     {} "aix-glink-3b.so"}
+
+    {"Glink test 3 (main test)"
+     "-bnoautoimp tmpdir/aix-glink-3b.so tmpdir/aix-glink-3a.so"
+     "" {aix-glink-3.s}
+     {{objdump -d aix-glink-3.dd}}
+     "aix-glink-3"}
+
+    {"Line number test 1 (no discards)" "-e.main"
+     "" {aix-lineno-1.s}
+     {{objdump -dS aix-lineno-1a.dd} {nm {} aix-lineno-1a.nd}}
+     "aix-lineno-1a.exe"}
+
+    {"Line number test 1 (discard locals)" "-e.main -x"
+     "" {aix-lineno-1.s}
+     {{objdump -dS aix-lineno-1b.dd} {nm {} aix-lineno-1b.nd}}
+     "aix-lineno-1b.exe"}
 
     {"Relocatable test 1" "-r"
      "" {aix-rel-1.s}
@@ -236,5 +252,9 @@ foreach test $aix52tests {
     }
 }
 
+run_dump_test "aix-glink-1-32"
+run_dump_test "aix-glink-1-64"
+run_dump_test "aix-glink-3-32"
+run_dump_test "aix-glink-3-64"
 run_dump_test "aix-weak-3-32"
 run_dump_test "aix-weak-3-64"

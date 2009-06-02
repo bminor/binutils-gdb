@@ -3460,6 +3460,8 @@ xcoff_ppc_relocate_section (output_bfd, info, input_bfd,
 	      else
 		{
 		  BFD_ASSERT (info->relocatable
+			      || (info->static_link
+				  && (h->flags & XCOFF_WAS_UNDEFINED) != 0)
 			      || (h->flags & XCOFF_DEF_DYNAMIC) != 0
 			      || (h->flags & XCOFF_IMPORT) != 0);
 		}

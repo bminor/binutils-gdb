@@ -1889,6 +1889,15 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	      || sym._n._n_n._n_offset == 0)
 	    copy = TRUE;
 
+	  /* Ignore global linkage code when linking statically.  */
+	  if (info->static_link
+	      && (smtyp == XTY_SD || smtyp == XTY_LD)
+	      && aux.x_csect.x_smclas == XMC_GL)
+	    {
+	      section = bfd_und_section_ptr;
+	      value = 0;
+	    }
+
 	  /* The AIX linker appears to only detect multiple symbol
 	     definitions when there is a reference to the symbol.  If
 	     a symbol is defined multiple times, and the only
@@ -1913,8 +1922,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	     We also have to handle the case of statically linking a
 	     shared object, which will cause symbol redefinitions,
 	     although this is an easier case to detect.  */
-
- 	  if (info->output_bfd->xvec == abfd->xvec)
+ 	  else if (info->output_bfd->xvec == abfd->xvec)
 	    {
 	      if (! bfd_is_und_section (section))
 		*sym_hash = xcoff_link_hash_lookup (xcoff_hash_table (info),
@@ -1934,23 +1942,8 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		  && ! bfd_is_com_section (section))
 		{
 		  /* This is a second definition of a defined symbol.  */
-		  if ((abfd->flags & DYNAMIC) != 0
-		      && ((*sym_hash)->smclas != XMC_GL
-			  || aux.x_csect.x_smclas == XMC_GL
-			  || ((*sym_hash)->root.u.def.section->owner->flags
-			      & DYNAMIC) == 0))
-		    {
-		      /* The new symbol is from a shared library, and
-			 either the existing symbol is not global
-			 linkage code or this symbol is global linkage
-			 code.  If the existing symbol is global
-			 linkage code and the new symbol is not, then
-			 we want to use the new symbol.  */
-		      section = bfd_und_section_ptr;
-		      value = 0;
-		    }
-		  else if (((*sym_hash)->flags & XCOFF_DEF_REGULAR) == 0
-			   && ((*sym_hash)->flags & XCOFF_DEF_DYNAMIC) != 0)
+		  if (((*sym_hash)->flags & XCOFF_DEF_REGULAR) == 0
+		      && ((*sym_hash)->flags & XCOFF_DEF_DYNAMIC) != 0)
 		    {
 		      /* The existing symbol is from a shared library.
 			 Replace it.  */
@@ -2049,7 +2042,9 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      int flag;
 
-	      if (smtyp == XTY_ER || smtyp == XTY_CM)
+	      if (smtyp == XTY_ER
+		  || smtyp == XTY_CM
+		  || section == bfd_und_section_ptr)
 		flag = XCOFF_REF_REGULAR;
 	      else
 		flag = XCOFF_DEF_REGULAR;
@@ -2741,6 +2736,10 @@ xcoff_mark_symbol (struct bfd_link_info *info, struct xcoff_link_hash_entry *h)
 	  /* We handle writing out the contents of the descriptor in
 	     xcoff_write_global_symbol.  */
 	}
+      else if (info->static_link)
+	/* We can't get a symbol value dynamically, so just assume
+	   that it's undefined.  */
+	h->flags |= XCOFF_WAS_UNDEFINED;
       else if ((h->flags & XCOFF_CALLED) != 0)
 	{
 	  /* This is a function symbol for which we need to create

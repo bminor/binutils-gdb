@@ -1,3 +1,11 @@
+2009-06-02  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* ld-powerpc/aix-glink-3.s, ld-powerpc/aix-glink-3a.s,
+	ld-powerpc/aix-glink-3b.s, ld-powerpc/aix-glink-3.dd,
+	ld-powerpc/aix-glink-3-32.d, ld-powerpc/aix-glink-3-64.d: New tests.
+	* ld-powerpc/aix52.exp: Run them.  Move the lineno tests to maintain
+	alphabetical order.
+
 2009-06-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-ifunc/ifunc-5-i386.d: Renamed to ...

@@ -1,3 +1,10 @@
+2009-06-02  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* coff-rs6000.c (xcoff_ppc_relocate_section): Allow undefined
+	symbols to be left unimported when linking statically.
+	* xcofflink.c (xcoff_link_add_symbols): Ignore global linkage
+	code when linking statically.
+
 2009-06-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Increment
