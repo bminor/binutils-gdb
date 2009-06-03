@@ -1,6 +1,30 @@
+2009-06-03  Doug Kwan  <dougkwan@google.com>
+
+	* gold/arm.cc (namespace utils): New.
+	(Target_arm::reloc_is_non_pic): Define new method.
+	(class Arm_relocate_functions): New.
+	(Target_arm::Relocate::relocate): Handle relocation types used by
+	Android.
+
 2009-06-03  Ian Lance Taylor  <iant@google.com>
 
 	* arm.cc (Target_arm::scan::global): Use || instead of |.
+
+2009-06-02  Doug Kwan  <dougkwan@google.com>
+
+	* gold/arm.cc (Target_arm::Scan::Scan):  Initialize
+	issued_non_pic_error_.
+	(class Target_arm::Scan): Declare new method check_non_pic.
+	Define new method symbol_needs_plt_entry.
+	Declare new data member issued_non_pic_error_.
+	(class Target_arm::Relocate): Declare new method
+	should_apply_static_reloc.
+	(Target_arm::may_need_copy_reloc): Handle STT_ARM_TFUNC.
+	(Target_arm::Scan::check_non_pic): Define new method.
+	(Target_arm::Scan::local): Handle a small subset of reloc types used
+	by Android.
+	(Target_arm::Scan::local): Same.
+	(Target_arm::Relocate::should_apply_statci_reloc): Define new method.
 
 2009-05-31  Mikolaj Zalewski  <mikolajz@google.com>
 

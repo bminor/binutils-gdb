@@ -75,7 +75,6 @@ class Output_data_plt_arm;
 // R_ARM_PREL31
 // 
 // Coming soon (pending patches):
-// - Relocation
 // - Defining section symbols __exidx_start and __exidx_stop.
 // - Support interworking.
 // - Mergeing all .ARM.xxx.yyy sections into .ARM.xxx.  Currently, they
@@ -87,6 +86,48 @@ class Output_data_plt_arm;
 // - Support more relocation types as needed. 
 // - Make PLTs more flexible for different architecture features like
 //   Thumb-2 and BE8.
+
+// Utilities for manipulating integers of up to 32-bits
+
+namespace utils
+{
+  // Sign extend an n-bit unsigned integer stored in an uint32_t into
+  // an int32_t.  NO_BITS must be between 1 to 32.
+  template<int no_bits>
+  static inline int32_t
+  sign_extend(uint32_t bits)
+  {
+    gold_assert(no_bits < 1 || no_bits > 32);
+    if (no_bits == 32)
+      return static_cast<int32_t>(bits);
+    uint32_t mask = (~((uint32_t) 0)) >> (32 - no_bits);
+    bits &= mask;
+    uint32_t top_bit = 1U << (no_bits - 1);
+    int32_t as_signed = static_cast<int32_t>(bits);
+    return (bits & top_bit) ? as_signed + (-top_bit * 2) : as_signed;
+  }
+
+  // Detects overflow of an NO_BITS integer stored in a uint32_t.
+  template<int no_bits>
+  static inline bool
+  has_overflow(uint32_t bits)
+  {
+    gold_assert(no_bits < 1 || no_bits > 32);
+    if (no_bits == 32)
+      return false;
+    int32_t max = (1 << (no_bits - 1)) - 1;
+    int32_t min = -(1 << (no_bits - 1));
+    int32_t as_signed = static_cast<int32_t>(bits);
+    return as_signed > max || as_signed < min;
+  }
+
+  // Select bits from A and B using bits in MASK.  For each n in [0..31],
+  // the n-th bit in the result is chosen from the n-th bits of A and B.
+  // A zero selects A and a one selects B.
+  static inline uint32_t
+  bit_select(uint32_t a, uint32_t b, uint32_t mask)
+  { return (a & ~mask) | (b & mask); }
+};
 
 template<bool big_endian>
 class Target_arm : public Sized_target<32, big_endian>
@@ -288,6 +329,24 @@ class Target_arm : public Sized_target<32, big_endian>
 	     const Symbol_value<32>*,
 	     unsigned char*, elfcpp::Elf_types<32>::Elf_Addr,
 	     section_size_type);
+
+    // Return whether we want to pass flag NON_PIC_REF for this
+    // reloc.
+    static inline bool
+    reloc_is_non_pic (unsigned int r_type)
+    {
+      switch (r_type)
+	{
+	case elfcpp::R_ARM_REL32:
+	case elfcpp::R_ARM_THM_CALL:
+	case elfcpp::R_ARM_CALL:
+	case elfcpp::R_ARM_JUMP24:
+	case elfcpp::R_ARM_PREL31:
+	  return true;
+	default:
+	  return false;
+	}
+    }
   };
 
   // A class which returns the size required for a relocation type,
@@ -391,6 +450,254 @@ const Target::Target_info Target_arm<big_endian>::arm_info =
   0x8000,		// default_text_segment_address
   0x1000,		// abi_pagesize (overridable by -z max-page-size)
   0x1000		// common_pagesize (overridable by -z common-page-size)
+};
+
+// Arm relocate functions class
+//
+
+template<bool big_endian>
+class Arm_relocate_functions : public Relocate_functions<32, big_endian>
+{
+ public:
+  typedef enum
+  {
+    STATUS_OKAY,	// No error during relocation.
+    STATUS_OVERFLOW,	// Relocation oveflow.
+    STATUS_BAD_RELOC	// Relocation cannot be applied.
+  } Status;
+
+ private:
+  typedef Relocate_functions<32, big_endian> Base;
+  typedef Arm_relocate_functions<big_endian> This;
+
+  // Get an symbol value of *PSYMVAL with an ADDEND.  This is a wrapper
+  // to Symbol_value::value().  If HAS_THUMB_BIT is true, that LSB is used
+  // to distinguish ARM and THUMB functions and it is treated specially.
+  static inline Symbol_value<32>::Value
+  arm_symbol_value (const Sized_relobj<32, big_endian> *object,
+		    const Symbol_value<32>* psymval,
+		    Symbol_value<32>::Value addend,
+		    bool has_thumb_bit)
+  {
+    typedef Symbol_value<32>::Value Valtype;
+
+    if (has_thumb_bit)
+      {
+	Valtype raw = psymval->value(object, 0);
+	Valtype thumb_bit = raw & 1;
+	return ((raw & ~((Valtype) 1)) + addend) | thumb_bit;
+      }
+    else
+      return psymval->value(object, addend);
+  }
+
+  // FIXME: This probably only works for Android on ARM v5te. We should
+  // following GNU ld for the general case.
+  template<unsigned r_type>
+  static inline typename This::Status
+  arm_branch_common(unsigned char *view,
+		    const Sized_relobj<32, big_endian>* object,
+		    const Symbol_value<32>* psymval,
+		    elfcpp::Elf_types<32>::Elf_Addr address,
+		    bool has_thumb_bit)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
+     
+    bool insn_is_b = (((val >> 28) & 0xf) <= 0xe)
+		      && ((val & 0x0f000000UL) == 0x0a000000UL);
+    bool insn_is_uncond_bl = (val & 0xff000000UL) == 0xeb000000UL;
+    bool insn_is_cond_bl = (((val >> 28) & 0xf) < 0xe)
+			    && ((val & 0x0f000000UL) == 0x0b000000UL);
+    bool insn_is_blx = (val & 0xfe000000UL) == 0xfa000000UL;
+    bool insn_is_any_branch = (val & 0x0e000000UL) == 0x0a000000UL;
+
+    if (r_type == elfcpp::R_ARM_CALL)
+      {
+	if (!insn_is_uncond_bl && !insn_is_blx)
+	  return This::STATUS_BAD_RELOC;
+      }
+    else if (r_type == elfcpp::R_ARM_JUMP24)
+      {
+	if (!insn_is_b && !insn_is_cond_bl)
+	  return This::STATUS_BAD_RELOC;
+      }
+    else if (r_type == elfcpp::R_ARM_PLT32)
+      {
+	if (!insn_is_any_branch)
+	  return This::STATUS_BAD_RELOC;
+      }
+    else
+      gold_unreachable();
+
+    Valtype addend = utils::sign_extend<26>(val << 2);
+    Valtype x = (This::arm_symbol_value(object, psymval, addend, has_thumb_bit)
+		 - address);
+
+    // If target has thumb bit set, we need to either turn the BL
+    // into a BLX (for ARMv5 or above) or generate a stub.
+    if (x & 1)
+      {
+	// Turn BL to BLX.
+	if (insn_is_uncond_bl)
+	  val = (val & 0xffffff) | 0xfa000000 | ((x & 2) << 23);
+	else
+	  return This::STATUS_BAD_RELOC;
+      }
+    else
+      gold_assert(!insn_is_blx);
+
+    val = utils::bit_select(val, (x >> 2), 0xffffffUL);
+    elfcpp::Swap<32, big_endian>::writeval(wv, val);
+    return (utils::has_overflow<26>(x)
+	    ? This::STATUS_OVERFLOW : This::STATUS_OKAY);
+  }
+
+ public:
+  // R_ARM_ABS32: (S + A) | T
+  static inline typename This::Status
+  abs32(unsigned char *view,
+	const Sized_relobj<32, big_endian>* object,
+	const Symbol_value<32>* psymval,
+	bool has_thumb_bit)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype addend = elfcpp::Swap<32, big_endian>::readval(wv);
+    Valtype x = This::arm_symbol_value(object, psymval, addend, has_thumb_bit);
+    elfcpp::Swap<32, big_endian>::writeval(wv, x);
+    return This::STATUS_OKAY;
+  }
+
+  // R_ARM_REL32: (S + A) | T - P
+  static inline typename This::Status
+  rel32(unsigned char *view,
+	const Sized_relobj<32, big_endian>* object,
+	const Symbol_value<32>* psymval,
+	elfcpp::Elf_types<32>::Elf_Addr address,
+	bool has_thumb_bit)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype addend = elfcpp::Swap<32, big_endian>::readval(wv);
+    Valtype x = (This::arm_symbol_value(object, psymval, addend, has_thumb_bit) 
+		 - address);
+    elfcpp::Swap<32, big_endian>::writeval(wv, x);
+    return This::STATUS_OKAY;
+  }
+
+  // R_ARM_THM_CALL: (S + A) | T - P
+  static inline typename This::Status
+  thm_call(unsigned char *view,
+	   const Sized_relobj<32, big_endian>* object,
+	   const Symbol_value<32>* psymval,
+	   elfcpp::Elf_types<32>::Elf_Addr address,
+	   bool has_thumb_bit)
+  {
+    // A thumb call consists of two instructions.
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype hi = elfcpp::Swap<16, big_endian>::readval(wv);
+    Valtype lo = elfcpp::Swap<16, big_endian>::readval(wv + 1);
+    // Must be a BL instruction. lo == 11111xxxxxxxxxxx.
+    gold_assert((lo & 0xf800) == 0xf800);
+    Reltype addend = utils::sign_extend<23>(((hi & 0x7ff) << 12)
+					   | ((lo & 0x7ff) << 1));
+    Reltype x = (This::arm_symbol_value(object, psymval, addend, has_thumb_bit)
+		 - address);
+
+    // If target has no thumb bit set, we need to either turn the BL
+    // into a BLX (for ARMv5 or above) or generate a stub.
+    if ((x & 1) == 0)
+      {
+	// This only works for ARMv5 and above with interworking enabled.
+	lo &= 0xefff;
+      }
+    hi = utils::bit_select(hi, (x >> 12), 0x7ffU);
+    lo = utils::bit_select(lo, (x >> 1), 0x7ffU);
+    elfcpp::Swap<16, big_endian>::writeval(wv, hi);
+    elfcpp::Swap<16, big_endian>::writeval(wv + 1, lo);
+    return (utils::has_overflow<23>(x)
+	    ? This::STATUS_OVERFLOW
+	    : This::STATUS_OKAY);
+  }
+
+  // R_ARM_BASE_PREL: B(S) + A - P
+  static inline typename This::Status
+  base_prel(unsigned char* view,
+	    elfcpp::Elf_types<32>::Elf_Addr origin,
+	    elfcpp::Elf_types<32>::Elf_Addr address)
+  {
+    Base::rel32(view, origin - address);
+    return STATUS_OKAY;
+  }
+
+  // R_ARM_GOT_BREL: GOT(S) + A - GOT_ORG
+  static inline typename This::Status
+  got_brel(unsigned char* view,
+	   typename elfcpp::Swap<32, big_endian>::Valtype got_offset)
+  {
+    Base::rel32(view, got_offset);
+    return This::STATUS_OKAY;
+  }
+
+  // R_ARM_PLT32: (S + A) | T - P
+  static inline typename This::Status
+  plt32(unsigned char *view,
+	const Sized_relobj<32, big_endian>* object,
+	const Symbol_value<32>* psymval,
+	elfcpp::Elf_types<32>::Elf_Addr address,
+	bool has_thumb_bit)
+  {
+    return arm_branch_common<elfcpp::R_ARM_PLT32>(view, object, psymval,
+						  address, has_thumb_bit);
+  }
+
+  // R_ARM_CALL: (S + A) | T - P
+  static inline typename This::Status
+  call(unsigned char *view,
+       const Sized_relobj<32, big_endian>* object,
+       const Symbol_value<32>* psymval,
+       elfcpp::Elf_types<32>::Elf_Addr address,
+       bool has_thumb_bit)
+  {
+    return arm_branch_common<elfcpp::R_ARM_CALL>(view, object, psymval,
+						 address, has_thumb_bit);
+  }
+
+  // R_ARM_JUMP24: (S + A) | T - P
+  static inline typename This::Status
+  jump24(unsigned char *view,
+	 const Sized_relobj<32, big_endian>* object,
+	 const Symbol_value<32>* psymval,
+	 elfcpp::Elf_types<32>::Elf_Addr address,
+	 bool has_thumb_bit)
+  {
+    return arm_branch_common<elfcpp::R_ARM_JUMP24>(view, object, psymval,
+						   address, has_thumb_bit);
+  }
+
+  // R_ARM_PREL: (S + A) | T - P
+  static inline typename This::Status
+  prel31(unsigned char *view,
+	 const Sized_relobj<32, big_endian>* object,
+	 const Symbol_value<32>* psymval,
+	 elfcpp::Elf_types<32>::Elf_Addr address,
+	 bool has_thumb_bit)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
+    Valtype addend = utils::sign_extend<31>(val);
+    Valtype x = (This::arm_symbol_value(object, psymval, addend, has_thumb_bit)
+		 - address);
+    val = utils::bit_select(val, x, 0x7fffffffU);
+    elfcpp::Swap<32, big_endian>::writeval(wv, val);
+    return (utils::has_overflow<31>(x) ?
+	    This::STATUS_OVERFLOW : This::STATUS_OKAY);
+  }
 };
 
 // Get the GOT section, creating it if necessary.
@@ -1199,23 +1506,192 @@ Target_arm<big_endian>::Relocate::should_apply_static_reloc(
 template<bool big_endian>
 inline bool
 Target_arm<big_endian>::Relocate::relocate(
-    const Relocate_info<32, big_endian>* /* relinfo */,
-    Target_arm* /* target */,
-    Output_section* /* output_section */,
-    size_t /* relnum */,
-    const elfcpp::Rel<32, big_endian>& /* rel */,
+    const Relocate_info<32, big_endian>* relinfo,
+    Target_arm* target,
+    Output_section *output_section,
+    size_t relnum,
+    const elfcpp::Rel<32, big_endian>& rel,
     unsigned int r_type,
-    const Sized_symbol<32>* /* gsym */,
-    const Symbol_value<32>* /* psymval */,
-    unsigned char* /* view */,
-    elfcpp::Elf_types<32>::Elf_Addr /* address */,
+    const Sized_symbol<32>* gsym,
+    const Symbol_value<32>* psymval,
+    unsigned char* view,
+    elfcpp::Elf_types<32>::Elf_Addr address,
     section_size_type /* view_size */ )
 {
+  typedef Arm_relocate_functions<big_endian> Arm_relocate_functions;
+
+  r_type = get_real_reloc_type(r_type);
+
+  // If this the symbol may be a Thumb function, set thumb bit to 1.
+  bool has_thumb_bit = ((gsym != NULL)
+			&& (gsym->type() == elfcpp::STT_FUNC
+			    || gsym->type() == elfcpp::STT_ARM_TFUNC));
+
+  // Pick the value to use for symbols defined in shared objects.
+  Symbol_value<32> symval;
+  if (gsym != NULL
+      && gsym->use_plt_offset(reloc_is_non_pic(r_type)))
+    {
+      symval.set_output_value(target->plt_section()->address()
+			      + gsym->plt_offset());
+      psymval = &symval;
+      has_thumb_bit = 0;
+    }
+
+  const Sized_relobj<32, big_endian>* object = relinfo->object;
+  
+  // Get the GOT offset if needed.
+  // The GOT pointer points to the end of the GOT section.
+  // We need to subtract the size of the GOT section to get
+  // the actual offset to use in the relocation.
+  bool have_got_offset = false;
+  unsigned int got_offset = 0;
+  switch (r_type)
+    {
+    case elfcpp::R_ARM_GOT_BREL:
+      if (gsym != NULL)
+	{
+	  gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
+	  got_offset = (gsym->got_offset(GOT_TYPE_STANDARD)
+			- target->got_size());
+	}
+      else
+	{
+	  unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
+	  gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
+	  got_offset = (object->local_got_offset(r_sym, GOT_TYPE_STANDARD)
+			- target->got_size());
+	}
+      have_got_offset = true;
+      break;
+
+    default:
+      break;
+    }
+
+  typename Arm_relocate_functions::Status reloc_status =
+	Arm_relocate_functions::STATUS_OKAY;
   switch (r_type)
     {
     case elfcpp::R_ARM_NONE:
       break;
 
+    case elfcpp::R_ARM_ABS32:
+      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true,
+				    output_section))
+	reloc_status = Arm_relocate_functions::abs32(view, object, psymval,
+						     has_thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_REL32:
+      reloc_status = Arm_relocate_functions::rel32(view, object, psymval,
+						   address, has_thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_THM_CALL:
+      reloc_status = Arm_relocate_functions::thm_call(view, object, psymval,
+						      address, has_thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_GOTOFF32:
+      {
+	elfcpp::Elf_types<32>::Elf_Addr got_origin;
+	got_origin = target->got_plt_section()->address();
+	reloc_status = Arm_relocate_functions::rel32(view, object, psymval,
+						     got_origin, has_thumb_bit);
+      }
+      break;
+
+    case elfcpp::R_ARM_BASE_PREL:
+      {
+	uint32_t origin;
+	// Get the addressing origin of the output segment defining the 
+	// symbol gsym (AAELF 4.6.1.2 Relocation types)
+	gold_assert(gsym != NULL); 
+	if (gsym->source() == Symbol::IN_OUTPUT_SEGMENT)
+	  origin = gsym->output_segment()->vaddr();
+	else if (gsym->source () == Symbol::IN_OUTPUT_DATA)
+	  origin = gsym->output_data()->address();
+	else
+	  {
+            gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+				   _("cannot find origin of R_ARM_BASE_PREL"));
+	    return true;
+	  }
+	reloc_status = Arm_relocate_functions::base_prel(view, origin, address);
+      }
+      break;
+
+    case elfcpp::R_ARM_GOT_BREL:
+      gold_assert(have_got_offset);
+      reloc_status = Arm_relocate_functions::got_brel(view, got_offset);
+      break;
+
+    case elfcpp::R_ARM_PLT32:
+      gold_assert(gsym == NULL
+		  || gsym->has_plt_offset()
+		  || gsym->final_value_is_known()
+		  || (gsym->is_defined()
+		      && !gsym->is_from_dynobj()
+		      && !gsym->is_preemptible()));
+      reloc_status = Arm_relocate_functions::plt32(view, object, psymval,
+						   address, has_thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_CALL:
+      reloc_status = Arm_relocate_functions::call(view, object, psymval,
+						  address, has_thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_JUMP24:
+      reloc_status = Arm_relocate_functions::jump24(view, object, psymval,
+						    address, has_thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_PREL31:
+      reloc_status = Arm_relocate_functions::prel31(view, object, psymval,
+						    address, has_thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_TARGET1:
+      // This should have been mapped to another type already.
+      // Fall through.
+    case elfcpp::R_ARM_COPY:
+    case elfcpp::R_ARM_GLOB_DAT:
+    case elfcpp::R_ARM_JUMP_SLOT:
+    case elfcpp::R_ARM_RELATIVE:
+      // These are relocations which should only be seen by the
+      // dynamic linker, and should never be seen here.
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("unexpected reloc %u in object file"),
+			     r_type);
+      break;
+
+    default:
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("unsupported reloc %u"),
+			     r_type);
+      break;
+    }
+
+  // Report any errors.
+  switch (reloc_status)
+    {
+    case Arm_relocate_functions::STATUS_OKAY:
+      break;
+    case Arm_relocate_functions::STATUS_OVERFLOW:
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("relocation overflow in relocation %u"),
+			     r_type);
+      break;
+    case Arm_relocate_functions::STATUS_BAD_RELOC:
+      gold_error_at_location(
+	relinfo,
+	relnum,
+	rel.get_r_offset(),
+	_("unexpected opcode while processing relocation %u"),
+	r_type);
+      break;
     default:
       gold_unreachable();
     }
