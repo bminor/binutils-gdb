@@ -75,8 +75,6 @@ class Output_data_plt_arm;
 // R_ARM_PREL31
 // 
 // Coming soon (pending patches):
-// - Local scanner
-// - Global scanner
 // - Relocation
 // - Defining section symbols __exidx_start and __exidx_stop.
 // - Support interworking.
@@ -209,6 +207,7 @@ class Target_arm : public Sized_target<32, big_endian>
   {
    public:
     Scan()
+      : issued_non_pic_error_(false)
     { }
 
     inline void
@@ -237,6 +236,29 @@ class Target_arm : public Sized_target<32, big_endian>
     static void
     unsupported_reloc_global(Sized_relobj<32, big_endian>*,
 			     unsigned int r_type, Symbol*);
+
+    void
+    check_non_pic(Relobj*, unsigned int r_type);
+
+    // Almost identical to Symbol::needs_plt_entry except that it also
+    // handles STT_ARM_TFUNC.
+    static bool
+    symbol_needs_plt_entry(const Symbol* sym)
+    {
+      // An undefined symbol from an executable does not need a PLT entry.
+      if (sym->is_undefined() && !parameters->options().shared())
+	return false;
+
+      return (!parameters->doing_static_link()
+	      && (sym->type() == elfcpp::STT_FUNC
+		  || sym->type() == elfcpp::STT_ARM_TFUNC)
+	      && (sym->is_from_dynobj()
+		  || sym->is_undefined()
+		  || sym->is_preemptible()));
+    }
+
+    // Whether we have issued an error about a non-PIC compilation.
+    bool issued_non_pic_error_;
   };
 
   // The class which implements relocation.
@@ -248,6 +270,13 @@ class Target_arm : public Sized_target<32, big_endian>
 
     ~Relocate()
     { }
+
+    // Return whether the static relocation needs to be applied.
+    inline bool
+    should_apply_static_reloc(const Sized_symbol<32>* gsym,
+			      int ref_flags,
+			      bool is_32bit,
+			      Output_section* output_section);
 
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
@@ -306,7 +335,8 @@ class Target_arm : public Sized_target<32, big_endian>
   {
     return (!parameters->options().shared()
 	    && gsym->is_from_dynobj()
-	    && gsym->type() != elfcpp::STT_FUNC);
+	    && gsym->type() != elfcpp::STT_FUNC
+	    && gsym->type() != elfcpp::STT_ARM_TFUNC);
   }
 
   // Add a potential copy relocation.
@@ -669,18 +699,65 @@ Target_arm<big_endian>::Scan::unsupported_reloc_local(
 	     object->name().c_str(), r_type);
 }
 
+// We are about to emit a dynamic relocation of type R_TYPE.  If the
+// dynamic linker does not support it, issue an error.  The GNU linker
+// only issues a non-PIC error for an allocated read-only section.
+// Here we know the section is allocated, but we don't know that it is
+// read-only.  But we check for all the relocation types which the
+// glibc dynamic linker supports, so it seems appropriate to issue an
+// error even if the section is not read-only.
+
+template<bool big_endian>
+void
+Target_arm<big_endian>::Scan::check_non_pic(Relobj* object,
+					    unsigned int r_type)
+{
+  switch (r_type)
+    {
+    // These are the relocation types supported by glibc for ARM.
+    case elfcpp::R_ARM_RELATIVE:
+    case elfcpp::R_ARM_COPY:
+    case elfcpp::R_ARM_GLOB_DAT:
+    case elfcpp::R_ARM_JUMP_SLOT:
+    case elfcpp::R_ARM_ABS32:
+    case elfcpp::R_ARM_PC24:
+    // FIXME: The following 3 types are not supported by Android's dynamic
+    // linker.
+    case elfcpp::R_ARM_TLS_DTPMOD32:
+    case elfcpp::R_ARM_TLS_DTPOFF32:
+    case elfcpp::R_ARM_TLS_TPOFF32:
+      return;
+
+    default:
+      // This prevents us from issuing more than one error per reloc
+      // section.  But we can still wind up issuing more than one
+      // error per object file.
+      if (this->issued_non_pic_error_)
+	return;
+      object->error(_("requires unsupported dynamic reloc; "
+		      "recompile with -fPIC"));
+      this->issued_non_pic_error_ = true;
+      return;
+
+    case elfcpp::R_ARM_NONE:
+      gold_unreachable();
+    }
+}
+
 // Scan a relocation for a local symbol.
+// FIXME: This only handles a subset of relocation types used by Android
+// on ARM v5te devices.
 
 template<bool big_endian>
 inline void
 Target_arm<big_endian>::Scan::local(const General_options&,
-				    Symbol_table* /* symtab */,
-				    Layout* /* layout */,
-				    Target_arm* /* target */,
+				    Symbol_table* symtab,
+				    Layout* layout,
+				    Target_arm* target,
 				    Sized_relobj<32, big_endian>* object,
-				    unsigned int /* data_shndx */,
-				    Output_section* /* output_section */,
-				    const elfcpp::Rel<32, big_endian>& /* reloc */,
+				    unsigned int data_shndx,
+				    Output_section* output_section,
+				    const elfcpp::Rel<32, big_endian>& reloc,
 				    unsigned int r_type,
 				    const elfcpp::Sym<32, big_endian>&)
 {
@@ -688,6 +765,77 @@ Target_arm<big_endian>::Scan::local(const General_options&,
   switch (r_type)
     {
     case elfcpp::R_ARM_NONE:
+      break;
+
+    case elfcpp::R_ARM_ABS32:
+      // If building a shared library (or a position-independent
+      // executable), we need to create a dynamic relocation for
+      // this location. The relocation applied at link time will
+      // apply the link-time value, so we flag the location with
+      // an R_ARM_RELATIVE relocation so the dynamic loader can
+      // relocate it easily.
+      if (parameters->options().output_is_position_independent())
+	{
+	  Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+	  unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+   	  // If we are to add more other reloc types than R_ARM_ABS32,
+   	  // we need to add check_non_pic(object, r_type) here.
+	  rel_dyn->add_local_relative(object, r_sym, elfcpp::R_ARM_RELATIVE,
+				      output_section, data_shndx,
+				      reloc.get_r_offset());
+	}
+      break;
+
+    case elfcpp::R_ARM_REL32:
+    case elfcpp::R_ARM_THM_CALL:
+    case elfcpp::R_ARM_CALL:
+    case elfcpp::R_ARM_PREL31:
+    case elfcpp::R_ARM_JUMP24:
+    case elfcpp::R_ARM_PLT32:
+      break;
+
+    case elfcpp::R_ARM_GOTOFF32:
+      // We need a GOT section:
+      target->got_section(symtab, layout);
+      break;
+
+    case elfcpp::R_ARM_BASE_PREL:
+      // FIXME: What about this?
+      break;
+
+    case elfcpp::R_ARM_GOT_BREL:
+      {
+	// The symbol requires a GOT entry.
+	Output_data_got<32, big_endian>* got =
+	  target->got_section(symtab, layout);
+	unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+	if (got->add_local(object, r_sym, GOT_TYPE_STANDARD))
+	  {
+	    // If we are generating a shared object, we need to add a
+	    // dynamic RELATIVE relocation for this symbol's GOT entry.
+	    if (parameters->options().output_is_position_independent())
+	      {
+		Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+		unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+		rel_dyn->add_local_relative(
+		    object, r_sym, elfcpp::R_ARM_RELATIVE, got,
+		    object->local_got_offset(r_sym, GOT_TYPE_STANDARD));
+	      }
+	  }
+      }
+      break;
+
+    case elfcpp::R_ARM_TARGET1:
+      // This should have been mapped to another type already.
+      // Fall through.
+    case elfcpp::R_ARM_COPY:
+    case elfcpp::R_ARM_GLOB_DAT:
+    case elfcpp::R_ARM_JUMP_SLOT:
+    case elfcpp::R_ARM_RELATIVE:
+      // These are relocations which should only be seen by the
+      // dynamic linker, and should never be seen here.
+      gold_error(_("%s: unexpected reloc %u in object file"),
+		 object->name().c_str(), r_type);
       break;
 
     default:
@@ -710,17 +858,19 @@ Target_arm<big_endian>::Scan::unsupported_reloc_global(
 }
 
 // Scan a relocation for a global symbol.
+// FIXME: This only handles a subset of relocation types used by Android
+// on ARM v5te devices.
 
 template<bool big_endian>
 inline void
 Target_arm<big_endian>::Scan::global(const General_options&,
-				     Symbol_table* /* symtab */,
-				     Layout* /* layout */,
-				     Target_arm* /* target */,
+				     Symbol_table* symtab,
+				     Layout* layout,
+				     Target_arm* target,
 				     Sized_relobj<32, big_endian>* object,
-				     unsigned int /* data_shndx */,
-				     Output_section* /* output_section */,
-				     const elfcpp::Rel<32, big_endian>& /* reloc */,
+				     unsigned int data_shndx,
+				     Output_section* output_section,
+				     const elfcpp::Rel<32, big_endian>& reloc,
 				     unsigned int r_type,
 				     Symbol* gsym)
 {
@@ -728,6 +878,155 @@ Target_arm<big_endian>::Scan::global(const General_options&,
   switch (r_type)
     {
     case elfcpp::R_ARM_NONE:
+      break;
+
+    case elfcpp::R_ARM_ABS32:
+      {
+	// Make a dynamic relocation if necessary.
+	if (gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF))
+	  {
+	    if (target->may_need_copy_reloc(gsym))
+	      {
+		target->copy_reloc(symtab, layout, object,
+				   data_shndx, output_section, gsym, reloc);
+	      }
+	    else if (gsym->can_use_relative_reloc(false))
+	      {
+   		// If we are to add more other reloc types than R_ARM_ABS32,
+   		// we need to add check_non_pic(object, r_type) here.
+		Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+		rel_dyn->add_global_relative(gsym, elfcpp::R_ARM_RELATIVE,
+					     output_section, object,
+					     data_shndx, reloc.get_r_offset());
+	      }
+	    else
+	      {
+   		// If we are to add more other reloc types than R_ARM_ABS32,
+   		// we need to add check_non_pic(object, r_type) here.
+		Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+		rel_dyn->add_global(gsym, r_type, output_section, object,
+				    data_shndx, reloc.get_r_offset());
+	      }
+	  }
+      }
+      break;
+
+    case elfcpp::R_ARM_REL32:
+    case elfcpp::R_ARM_PREL31:
+      {
+	// Make a dynamic relocation if necessary.
+	int flags = Symbol::NON_PIC_REF;
+	if (gsym->needs_dynamic_reloc(flags))
+	  {
+	    if (target->may_need_copy_reloc(gsym))
+	      {
+		target->copy_reloc(symtab, layout, object,
+				   data_shndx, output_section, gsym, reloc);
+	      }
+	    else
+	      {
+		check_non_pic(object, r_type);
+		Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+		rel_dyn->add_global(gsym, r_type, output_section, object,
+				    data_shndx, reloc.get_r_offset());
+	      }
+	  }
+      }
+      break;
+
+    case elfcpp::R_ARM_JUMP24:
+    case elfcpp::R_ARM_THM_CALL:
+    case elfcpp::R_ARM_CALL:
+      {
+	if (Target_arm<big_endian>::Scan::symbol_needs_plt_entry(gsym))
+	  target->make_plt_entry(symtab, layout, gsym);
+	// Make a dynamic relocation if necessary.
+	int flags = Symbol::NON_PIC_REF;
+	if (gsym->type() == elfcpp::STT_FUNC
+	    | gsym->type() == elfcpp::STT_ARM_TFUNC)
+	  flags |= Symbol::FUNCTION_CALL;
+	if (gsym->needs_dynamic_reloc(flags))
+	  {
+	    if (target->may_need_copy_reloc(gsym))
+	      {
+		target->copy_reloc(symtab, layout, object,
+				   data_shndx, output_section, gsym,
+				   reloc);
+	      }
+	    else
+	      {
+		check_non_pic(object, r_type);
+		Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+		rel_dyn->add_global(gsym, r_type, output_section, object,
+				    data_shndx, reloc.get_r_offset());
+	      }
+	  }
+      }
+      break;
+
+    case elfcpp::R_ARM_PLT32:
+      // If the symbol is fully resolved, this is just a relative
+      // local reloc.  Otherwise we need a PLT entry.
+      if (gsym->final_value_is_known())
+	break;
+      // If building a shared library, we can also skip the PLT entry
+      // if the symbol is defined in the output file and is protected
+      // or hidden.
+      if (gsym->is_defined()
+	  && !gsym->is_from_dynobj()
+	  && !gsym->is_preemptible())
+	break;
+      target->make_plt_entry(symtab, layout, gsym);
+      break;
+
+    case elfcpp::R_ARM_GOTOFF32:
+      // We need a GOT section.
+      target->got_section(symtab, layout);
+      break;
+
+    case elfcpp::R_ARM_BASE_PREL:
+      // FIXME: What about this?
+      break;
+      
+    case elfcpp::R_ARM_GOT_BREL:
+      {
+	// The symbol requires a GOT entry.
+	Output_data_got<32, big_endian>* got =
+	  target->got_section(symtab, layout);
+	if (gsym->final_value_is_known())
+	  got->add_global(gsym, GOT_TYPE_STANDARD);
+	else
+	  {
+	    // If this symbol is not fully resolved, we need to add a
+	    // GOT entry with a dynamic relocation.
+	    Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+	    if (gsym->is_from_dynobj()
+		|| gsym->is_undefined()
+		|| gsym->is_preemptible())
+	      got->add_global_with_rel(gsym, GOT_TYPE_STANDARD,
+				       rel_dyn, elfcpp::R_ARM_GLOB_DAT);
+	    else
+	      {
+		if (got->add_global(gsym, GOT_TYPE_STANDARD))
+		  rel_dyn->add_global_relative(
+		      gsym, elfcpp::R_ARM_RELATIVE, got,
+		      gsym->got_offset(GOT_TYPE_STANDARD));
+	      }
+	  }
+      }
+      break;
+
+    case elfcpp::R_ARM_TARGET1:
+      // This should have been mapped to another type already.
+      // Fall through.
+    case elfcpp::R_ARM_COPY:
+    case elfcpp::R_ARM_GLOB_DAT:
+    case elfcpp::R_ARM_JUMP_SLOT:
+    case elfcpp::R_ARM_RELATIVE:
+      // These are relocations which should only be seen by the
+      // dynamic linker, and should never be seen here.
+      gold_error(_("%s: unexpected reloc %u in object file"),
+		 object->name().c_str(), r_type);
       break;
 
     default:
@@ -853,6 +1152,46 @@ Target_arm<big_endian>::do_finalize_sections(Layout* layout)
   // relocs.
   if (this->copy_relocs_.any_saved_relocs())
     this->copy_relocs_.emit(this->rel_dyn_section(layout));
+}
+
+// Return whether a direct absolute static relocation needs to be applied.
+// In cases where Scan::local() or Scan::global() has created
+// a dynamic relocation other than R_ARM_RELATIVE, the addend
+// of the relocation is carried in the data, and we must not
+// apply the static relocation.
+
+template<bool big_endian>
+inline bool
+Target_arm<big_endian>::Relocate::should_apply_static_reloc(
+    const Sized_symbol<32>* gsym,
+    int ref_flags,
+    bool is_32bit,
+    Output_section* output_section)
+{
+  // If the output section is not allocated, then we didn't call
+  // scan_relocs, we didn't create a dynamic reloc, and we must apply
+  // the reloc here.
+  if ((output_section->flags() & elfcpp::SHF_ALLOC) == 0)
+      return true;
+
+  // For local symbols, we will have created a non-RELATIVE dynamic
+  // relocation only if (a) the output is position independent,
+  // (b) the relocation is absolute (not pc- or segment-relative), and
+  // (c) the relocation is not 32 bits wide.
+  if (gsym == NULL)
+    return !(parameters->options().output_is_position_independent()
+	     && (ref_flags & Symbol::ABSOLUTE_REF)
+	     && !is_32bit);
+
+  // For global symbols, we use the same helper routines used in the
+  // scan pass.  If we did not create a dynamic relocation, or if we
+  // created a RELATIVE dynamic relocation, we should apply the static
+  // relocation.
+  bool has_dyn = gsym->needs_dynamic_reloc(ref_flags);
+  bool is_rel = (ref_flags & Symbol::ABSOLUTE_REF)
+		 && gsym->can_use_relative_reloc(ref_flags
+						 & Symbol::FUNCTION_CALL);
+  return !has_dyn || is_rel;
 }
 
 // Perform a relocation.
