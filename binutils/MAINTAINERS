@@ -90,6 +90,7 @@ responsibility among the other maintainers.
   LM32             Jon Beniston <jon@beniston.com>
   M68HC11 M68HC12  Stephane Carrez <stcarrez@nerim.fr>
   M88k		   Mark Kettenis <kettenis@gnu.org>
+  MACH-O           Tristan Gingold <gingold@adacore.com>
   MAXQ		   Inderpreet Singh <inderpreetb@noida.hcltech.com>
   MEP		   Dave Brolley <brolley@redhat.com>
   MIPS		   Eric Christopher <echristo@apple.com>
