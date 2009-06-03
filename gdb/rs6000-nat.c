@@ -1160,8 +1160,7 @@ xcoff_relocate_core (struct target_ops *target)
 	{
 	  struct target_section *stp;
 
-	  target_resize_to_sections (target, 2);
-	  stp = target->to_sections_end - 2;
+	  stp = deprecated_core_resize_section_table (2);
 
 	  stp->bfd = vp->bfd;
 	  stp->the_bfd_section = bfd_get_section_by_name (stp->bfd, ".text");

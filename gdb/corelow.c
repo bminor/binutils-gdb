@@ -67,6 +67,14 @@ static struct core_fns *core_vec = NULL;
 
 struct gdbarch *core_gdbarch = NULL;
 
+/* Per-core data.  Currently, only the section table.  Note that these
+   target sections are *not* mapped in the current address spaces' set
+   of target sections --- those should come only from pure executable
+   or shared library bfds.  The core bfd sections are an
+   implementation detail of the core target, just like ptrace is for
+   unix child targets.  */
+static struct target_section_table *core_data;
+
 static void core_files_info (struct target_ops *);
 
 static struct core_fns *sniff_core_bfd (bfd *);
@@ -203,18 +211,16 @@ core_close (int quitting)
          comments in clear_solib in solib.c. */
       clear_solib ();
 
+      xfree (core_data->sections);
+      xfree (core_data);
+      core_data = NULL;
+
       name = bfd_get_filename (core_bfd);
       if (!bfd_close (core_bfd))
 	warning (_("cannot close \"%s\": %s"),
 		 name, bfd_errmsg (bfd_get_error ()));
       xfree (name);
       core_bfd = NULL;
-      if (core_ops.to_sections)
-	{
-	  xfree (core_ops.to_sections);
-	  core_ops.to_sections = NULL;
-	  core_ops.to_sections_end = NULL;
-	}
     }
   core_vec = NULL;
   core_gdbarch = NULL;
@@ -347,9 +353,11 @@ core_open (char *filename, int from_tty)
 
   validate_files ();
 
+  core_data = XZALLOC (struct target_section_table);
+
   /* Find the data section */
-  if (build_section_table (core_bfd, &core_ops.to_sections,
-			   &core_ops.to_sections_end))
+  if (build_section_table (core_bfd,
+			   &core_data->sections, &core_data->sections_end))
     error (_("\"%s\": Can't find sections: %s"),
 	   bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
 
@@ -434,6 +442,23 @@ core_detach (struct target_ops *ops, char *args, int from_tty)
     printf_filtered (_("No core file now.\n"));
 }
 
+#ifdef DEPRECATED_IBM6000_TARGET
+
+/* Resize the core memory's section table, by NUM_ADDED.  Returns a
+   pointer into the first new slot.  This will not be necessary when
+   the rs6000 target is converted to use the standard solib
+   framework.  */
+
+struct target_section *
+deprecated_core_resize_section_table (int num_added)
+{
+  int old_count;
+
+  old_count = resize_section_table (core_data, num_added);
+  return core_data->sections + old_count;
+}
+
+#endif
 
 /* Try to retrieve registers from a section in core_bfd, and supply
    them to core_vec->core_read_registers, as the register set numbered
@@ -562,7 +587,7 @@ get_core_registers (struct target_ops *ops,
 static void
 core_files_info (struct target_ops *t)
 {
-  print_section_info (t, core_bfd);
+  print_section_info (core_data, core_bfd);
 }
 
 static LONGEST
@@ -573,13 +598,11 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-      if (readbuf)
-	return (*ops->deprecated_xfer_memory) (offset, readbuf,
-					       len, 0/*read*/, NULL, ops);
-      if (writebuf)
-	return (*ops->deprecated_xfer_memory) (offset, (gdb_byte *) writebuf,
-					       len, 1/*write*/, NULL, ops);
-      return -1;
+      return section_table_xfer_memory_partial (readbuf, writebuf,
+						offset, len,
+						core_data->sections,
+						core_data->sections_end,
+						NULL);
 
     case TARGET_OBJECT_AUXV:
       if (readbuf)
@@ -738,7 +761,6 @@ init_core_ops (void)
   core_ops.to_detach = core_detach;
   core_ops.to_fetch_registers = get_core_registers;
   core_ops.to_xfer_partial = core_xfer_partial;
-  core_ops.deprecated_xfer_memory = xfer_memory;
   core_ops.to_files_info = core_files_info;
   core_ops.to_insert_breakpoint = ignore;
   core_ops.to_remove_breakpoint = ignore;

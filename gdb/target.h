@@ -30,6 +30,7 @@ struct mem_attrib;
 struct target_ops;
 struct bp_target_info;
 struct regcache;
+struct target_section_table;
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -412,6 +413,7 @@ struct target_ops
     void (*to_rcmd) (char *command, struct ui_file *output);
     char *(*to_pid_to_exec_file) (int pid);
     void (*to_log_command) (const char *);
+    struct target_section_table *(*to_get_section_table) (struct target_ops *);
     enum strata to_stratum;
     int to_has_all_memory;
     int to_has_memory;
@@ -420,10 +422,6 @@ struct target_ops
     int to_has_execution;
     int to_has_thread_control;	/* control thread execution */
     int to_attach_no_wait;
-    struct target_section
-     *to_sections;
-    struct target_section
-     *to_sections_end;
     /* ASYNC target controls */
     int (*to_can_async_p) (void);
     int (*to_is_async_p) (void);
@@ -668,9 +666,6 @@ extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
 extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 				int len);
 
-extern int xfer_memory (CORE_ADDR, gdb_byte *, int, int,
-			struct mem_attrib *, struct target_ops *);
-
 /* Fetches the target's memory map.  If one is found it is sorted
    and returned, after some consistency checking.  Otherwise, NULL
    is returned.  */
@@ -732,10 +727,6 @@ extern int inferior_has_forked (ptid_t pid, ptid_t *child_pid);
 extern int inferior_has_vforked (ptid_t pid, ptid_t *child_pid);
 
 extern int inferior_has_execd (ptid_t pid, char **execd_pathname);
-
-/* From exec.c */
-
-extern void print_section_info (struct target_ops *, bfd *);
 
 /* Print a line about the current target.  */
 
@@ -1208,9 +1199,23 @@ struct target_section
     bfd *bfd;			/* BFD file pointer */
   };
 
+/* Holds an array of target sections.  Defined by [SECTIONS..SECTIONS_END[.  */
+
+struct target_section_table
+{
+  struct target_section *sections;
+  struct target_section *sections_end;
+};
+
 /* Return the "section" containing the specified address.  */
 struct target_section *target_section_by_addr (struct target_ops *target,
 					       CORE_ADDR addr);
+
+/* Return the target section table this target (or the targets
+   beneath) currently manipulate.  */
+
+extern struct target_section_table *target_get_section_table
+  (struct target_ops *target);
 
 /* From mem-break.c */
 
@@ -1241,11 +1246,6 @@ extern struct target_ops *find_run_target (void);
 extern struct target_ops *find_core_target (void);
 
 extern struct target_ops *find_target_beneath (struct target_ops *);
-
-extern int target_resize_to_sections (struct target_ops *target,
-				      int num_added);
-
-extern void remove_target_sections (bfd *abfd);
 
 /* Read OS data object of type TYPE from the target, and return it in
    XML format.  The result is NUL-terminated and returned as a string,

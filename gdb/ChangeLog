@@ -1,3 +1,83 @@
+2009-06-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.c: Include "exec.h".
+	(update_current_target): Don't inherit to_sections or
+	to_sections_end.
+	(target_get_section_table): New.
+	(target_section_by_addr): Fetch the section table from the passed
+	in target.
+	(memory_xfer_partial): Handle unmapped overlay sections before
+	anything else.  Get the overlay mapped address here.  Adjust to
+	use section_table_xfer_memory_partial.
+	(get_target_memory): Request a TARGET_OBJECT_RAW_MEMORY object
+	instead of TARGET_OBJECT_MEMORY.
+	(target_resize_to_sections): Delete.
+	(remove_target_sections): Adjust to remove target sections from
+	`current_target_sections', and use resize_section_table.
+	* target.h (struct target_ops) <to_sections, to_sections_end>:
+	Remove fields.
+	<to_get_section_table>: New method.
+	(xfer_memory, print_section_info): Delete declarations.
+	(struct target_section_table): New type.
+	(target_get_section_table): Declare.
+	(target_resize_to_sections): Delete declaration.
+	(remove_target_sections): Delete declaration.
+	* bfd-target.c (target_bfd_xfer_partial): Get the section table
+	from to_data.
+	(target_bfd_get_section_table): New.
+	(target_bfd_xclose): Adjust.
+	(target_bfd_reopen): Store the section table in the to_data field.
+	* corelow.c (core_data): New.
+	(core_close): Adjust to release core_data and its sections.
+	(core_open): Allocate core_data, and build its target sections
+	table.
+	(deprecated_core_resize_section_table): New.
+	(core_files_info): Pass core_data to print_section_info.
+	(core_xfer_partial): Adjust to use
+	section_table_xfer_memory_partial for TARGET_OBJECT_MEMORY xfers.
+	(init_core_ops): Do not install a deprecated_xfer_memory callback
+	anymore.
+	* solib.c (update_solib_list): Add the shared library sections
+	to the current target sections table.
+	* exec.c (current_target_sections_1): New global.
+	(current_target_sections): New global.
+	(exec_close_1): New function, refactored from exec_close.  Remove
+	the exec_bfd's sections from the current target sections table.
+	Adjust to not use to_sections.
+	(exec_close): Remove all target sections.  Call exec_close_1.
+	(exec_file_clear): Use exec_close_1 instead of unpushing the
+	target.
+	(exec_file_attach): Likewise.  Adjust to not use to_sections.  Add
+	exec_bfd's sections to the current target sections table.  Don't
+	push the exec_ops target here.
+	(resize_section_table): New.
+	(add_target_sections): New.
+	(remove_target_sections): Moved here.
+	(section_table_xfer_memory): Adjust to implement the xfer_partial
+	interface, and rename to...
+	(section_table_xfer_memory_partial): ... this, replacing the
+	current function of that same name.
+	(exec_get_section_table): New.
+	(exec_xfer_partial): New.
+	(xfer_memory): Delete.
+	(print_section_info): Replace the target_ops parameter by a
+	target_section_table parameter.
+	(exec_files_info, set_section_command, exec_set_section_address):
+	Adjust to use the current sections table.
+	(init_exec_ops): Do not register a deprecated_xfer_memory
+	callback.  Register to_xfer_partial and to_get_section_table
+	callbacks.
+	* infrun.c (handle_inferior_event): Update comments around
+	solib_add.
+	* rs6000-nat.c (xcoff_relocate_core): Adjust to use
+	deprecated_core_resize_section_table.
+	* exec.h (resize_section_table): Declare.
+	(section_table_xfer_memory_partial): Add const char * argument.
+	(remove_target_sections): Declare here.
+	(add_target_sections): Declare.
+	(print_section_info): Declare here.
+	* gdbcore.h (deprecated_core_resize_section_table): Declare.
+
 2009-06-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* value.h (struct internalvar): Remove.

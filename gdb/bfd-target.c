@@ -32,35 +32,52 @@ target_bfd_xfer_partial (struct target_ops *ops,
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-      return section_table_xfer_memory_partial (readbuf, writebuf, offset, len,
-						ops->to_sections,
-						ops->to_sections_end);
+      {
+	struct target_section_table *table = ops->to_data;
+	return section_table_xfer_memory_partial (readbuf, writebuf, offset, len,
+						  table->sections,
+						  table->sections_end,
+						  NULL);
+      }
     default:
       return -1;
     }
 }
 
+static struct target_section_table *
+target_bfd_get_section_table (struct target_ops *ops)
+{
+  return ops->to_data;
+}
+
 static void
 target_bfd_xclose (struct target_ops *t, int quitting)
 {
-  bfd_close (t->to_data);
-  xfree (t->to_sections);
+  struct target_section_table *table = t->to_data;
+  if (table->sections)
+    bfd_close (table->sections->bfd);
+  xfree (table->sections);
+  xfree (table);
   xfree (t);
 }
 
 struct target_ops *
 target_bfd_reopen (struct bfd *bfd)
 {
-  struct target_ops *t = XZALLOC (struct target_ops);
+  struct target_ops *t;
+  struct target_section_table *table;
+
+  table = XZALLOC (struct target_section_table);
+  build_section_table (bfd, &table->sections, &table->sections_end);
+
+  t = XZALLOC (struct target_ops);
   t->to_shortname = "bfd";
   t->to_longname = _("BFD backed target");
   t->to_doc = _("You should never see this");
+  t->to_get_section_table = target_bfd_get_section_table;
   t->to_xfer_partial = target_bfd_xfer_partial;
   t->to_xclose = target_bfd_xclose;
-  t->to_data = bfd;
+  t->to_data = table;
 
-  build_section_table (bfd,
-		       &t->to_sections,
-		       &t->to_sections_end);
   return t;
 }

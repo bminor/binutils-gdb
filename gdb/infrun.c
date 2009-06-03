@@ -2448,15 +2448,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     operations such as address => section name and hence
 	     require the table to contain all sections (including
 	     those found in shared libraries).  */
-	  /* NOTE: cagney/2003-11-25: Pass current_target and not
-	     exec_ops to SOLIB_ADD.  This is because current GDB is
-	     only tooled to propagate section_table changes out from
-	     the "current_target" (see target_resize_to_sections), and
-	     not up from the exec stratum.  This, of course, isn't
-	     right.  "infrun.c" should only interact with the
-	     exec/process stratum, instead relying on the target stack
-	     to propagate relevant changes (stop, section table
-	     changed, ...) up to other layers.  */
 #ifdef SOLIB_ADD
 	  SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
 #else
@@ -3446,15 +3437,6 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	     operations such as address => section name and hence
 	     require the table to contain all sections (including
 	     those found in shared libraries).  */
-	  /* NOTE: cagney/2003-11-25: Pass current_target and not
-	     exec_ops to SOLIB_ADD.  This is because current GDB is
-	     only tooled to propagate section_table changes out from
-	     the "current_target" (see target_resize_to_sections), and
-	     not up from the exec stratum.  This, of course, isn't
-	     right.  "infrun.c" should only interact with the
-	     exec/process stratum, instead relying on the target stack
-	     to propagate relevant changes (stop, section table
-	     changed, ...) up to other layers.  */
 #ifdef SOLIB_ADD
 	  SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
 #else

@@ -661,21 +661,11 @@ update_solib_list (int from_tty, struct target_ops *target)
 			"Error while mapping shared library sections:\n",
 			RETURN_MASK_ALL);
 
-	  /* If requested, add the shared object's sections to the TARGET's
-	     section table.  Do this immediately after mapping the object so
-	     that later nodes in the list can query this object, as is needed
-	     in solib-osf.c.  */
-	  if (target)
-	    {
-	      int count = (i->sections_end - i->sections);
-	      if (count > 0)
-		{
-		  int space = target_resize_to_sections (target, count);
-		  memcpy (target->to_sections + space,
-			  i->sections,
-			  count * sizeof (i->sections[0]));
-		}
-	    }
+	  /* Add the shared object's sections to the current set of
+	     file section tables.  Do this immediately after mapping
+	     the object so that later nodes in the list can query this
+	     object, as is needed in solib-osf.c.  */
+	  add_target_sections (i->sections, i->sections_end);
 
 	  /* Notify any observer that the shared object has been
              loaded now that we've added it to GDB's tables.  */

@@ -189,4 +189,6 @@ extern void deprecated_add_core_fns (struct core_fns *cf);
 extern int default_core_sniffer (struct core_fns *cf, bfd * abfd);
 extern int default_check_format (bfd * abfd);
 
+struct target_section *deprecated_core_resize_section_table (int num_added);
+
 #endif /* !defined (GDBCORE_H) */
