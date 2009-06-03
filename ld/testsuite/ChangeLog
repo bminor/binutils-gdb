@@ -1,3 +1,21 @@
+2009-06-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc-2-x86-64.d: Pass --64 to as and -melf_x86_64 to
+	ld.
+	* ld-ifunc/ifunc-5a-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-5b-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-6a-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-6b-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-7a-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-7b-x86-64.d: Likewise.
+
+	* ld-ifunc/ifunc-8a-i386.s: New.
+	* ld-ifunc/ifunc-8a-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-8b-i386.s: Likewise.
+	* ld-ifunc/ifunc-8b-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-8-i386.d: Likewise.
+	* ld-ifunc/ifunc-8-x86-64.d: Likewise.
+
 2009-06-02  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* ld-powerpc/aix-glink-3.s, ld-powerpc/aix-glink-3a.s,

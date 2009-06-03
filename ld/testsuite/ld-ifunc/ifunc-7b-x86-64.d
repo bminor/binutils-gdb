@@ -1,5 +1,6 @@
 #source: ifunc-7-x86-64.s
-#ld: -shared
+#as: --64
+#ld: -melf_x86_64 -shared
 #readelf: -r --wide
 #target: x86_64-*-*
 

@@ -1,5 +1,6 @@
 #source: ifunc-6-x86-64.s
-#ld: -shared -z nocombreloc
+#as: --64
+#ld: -melf_x86_64 -shared -z nocombreloc
 #readelf: -r --wide
 #target: x86_64-*-*
 

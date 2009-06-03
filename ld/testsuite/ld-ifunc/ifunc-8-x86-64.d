@@ -1,4 +1,5 @@
-#source: ifunc-7-x86-64.s
+#source: ifunc-8a-x86-64.s
+#source: ifunc-8b-x86-64.s
 #as: --64
 #ld: -melf_x86_64
 #readelf: -r --wide
