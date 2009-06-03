@@ -774,7 +774,7 @@ value_assign (struct value *toval, struct value *fromval)
     {
     case lval_internalvar:
       set_internalvar (VALUE_INTERNALVAR (toval), fromval);
-      val = value_copy (VALUE_INTERNALVAR (toval)->value);
+      val = value_copy (fromval);
       val = value_change_enclosing_type (val, 
 					 value_enclosing_type (fromval));
       set_value_embedded_offset (val, value_embedded_offset (fromval));

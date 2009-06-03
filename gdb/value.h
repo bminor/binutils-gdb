@@ -309,23 +309,6 @@ extern struct value *coerce_ref (struct value *value);
 
 extern struct value *coerce_array (struct value *value);
 
-/* Internal variables (variables for convenience of use of debugger)
-   are recorded as a chain of these structures.  */
-
-typedef struct value * (*internalvar_make_value) (struct internalvar *);
-
-struct internalvar
-{
-  struct internalvar *next;
-  char *name;
-  struct value *value;
-  internalvar_make_value make_value;
-  int endian;
-  /* True if this internalvar is the canonical name for a convenience
-     function.  */
-  int canonical;
-};
-
 
 
 #include "symtab.h"
@@ -538,7 +521,13 @@ extern struct value *access_value_history (int num);
 
 extern struct value *value_of_internalvar (struct internalvar *var);
 
+extern int get_internalvar_integer (struct internalvar *var, LONGEST *l);
+
 extern void set_internalvar (struct internalvar *var, struct value *val);
+
+extern void set_internalvar_integer (struct internalvar *var, LONGEST l);
+
+extern void clear_internalvar (struct internalvar *var);
 
 extern void set_internalvar_component (struct internalvar *var,
 				       int offset,
@@ -548,6 +537,8 @@ extern void set_internalvar_component (struct internalvar *var,
 extern struct internalvar *lookup_only_internalvar (const char *name);
 
 extern struct internalvar *create_internalvar (const char *name);
+
+typedef struct value * (*internalvar_make_value) (struct internalvar *);
 
 extern struct internalvar *
   create_internalvar_type_lazy (char *name, internalvar_make_value fun);

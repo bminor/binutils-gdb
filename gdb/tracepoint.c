@@ -208,8 +208,7 @@ static void
 set_traceframe_num (int num)
 {
   traceframe_number = num;
-  set_internalvar (lookup_internalvar ("trace_frame"),
-		   value_from_longest (builtin_type_int32, (LONGEST) num));
+  set_internalvar_integer (lookup_internalvar ("trace_frame"), num);
 }
 
 /* Set tracepoint number to NUM.  */
@@ -217,8 +216,7 @@ static void
 set_tracepoint_num (int num)
 {
   tracepoint_number = num;
-  set_internalvar (lookup_internalvar ("tracepoint"),
-		   value_from_longest (builtin_type_int32, (LONGEST) num));
+  set_internalvar_integer (lookup_internalvar ("tracepoint"), num);
 }
 
 /* Set externally visible debug variables for querying/printing
@@ -240,13 +238,9 @@ set_traceframe_context (struct frame_info *trace_frame)
       traceframe_fun = 0;
       traceframe_sal.pc = traceframe_sal.line = 0;
       traceframe_sal.symtab = NULL;
-      set_internalvar (lookup_internalvar ("trace_func"),
-		       allocate_value (builtin_type_void));
-      set_internalvar (lookup_internalvar ("trace_file"),
-		       allocate_value (builtin_type_void));
-      set_internalvar (lookup_internalvar ("trace_line"),
-		       value_from_longest (builtin_type_int32,
-					   (LONGEST) - 1));
+      clear_internalvar (lookup_internalvar ("trace_func"));
+      clear_internalvar (lookup_internalvar ("trace_file"));
+      set_internalvar_integer (lookup_internalvar ("trace_line"), -1);
       return;
     }
 
@@ -257,16 +251,14 @@ set_traceframe_context (struct frame_info *trace_frame)
 
   /* Save linenumber as "$trace_line", a debugger variable visible to
      users.  */
-  set_internalvar (lookup_internalvar ("trace_line"),
-		   value_from_longest (builtin_type_int32,
-				       (LONGEST) traceframe_sal.line));
+  set_internalvar_integer (lookup_internalvar ("trace_line"),
+			   traceframe_sal.line);
 
   /* Save func name as "$trace_func", a debugger variable visible to
      users.  */
-  if (traceframe_fun == NULL ||
-      SYMBOL_LINKAGE_NAME (traceframe_fun) == NULL)
-    set_internalvar (lookup_internalvar ("trace_func"),
-		     allocate_value (builtin_type_void));
+  if (traceframe_fun == NULL
+      || SYMBOL_LINKAGE_NAME (traceframe_fun) == NULL)
+    clear_internalvar (lookup_internalvar ("trace_func"));
   else
     {
       len = strlen (SYMBOL_LINKAGE_NAME (traceframe_fun));
@@ -285,10 +277,9 @@ set_traceframe_context (struct frame_info *trace_frame)
 
   /* Save file name as "$trace_file", a debugger variable visible to
      users.  */
-  if (traceframe_sal.symtab == NULL ||
-      traceframe_sal.symtab->filename == NULL)
-    set_internalvar (lookup_internalvar ("trace_file"),
-		     allocate_value (builtin_type_void));
+  if (traceframe_sal.symtab == NULL
+      || traceframe_sal.symtab->filename == NULL)
+    clear_internalvar (lookup_internalvar ("trace_file"));
   else
     {
       len = strlen (traceframe_sal.symtab->filename);

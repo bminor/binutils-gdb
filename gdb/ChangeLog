@@ -1,5 +1,46 @@
 2009-06-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* value.h (struct internalvar): Remove.
+	(get_internalvar_integer): Add prototype.
+	(set_internalvar_integer): Add prototype.
+	(clear_internalvar): Add prototype.
+
+	* value.c (struct internalvar): Move here.  Add type member.  Remove
+	endian member.  Add union_internalvar member instead of value member.
+	(init_if_undefined_command): Use intvar->type.
+	(create_internalvar): Do not initialize value/endian, but type.
+	(create_internalvar_type_lazy): Call create_internalvar.
+	(value_of_internalvar): Handle host-side internalvar contents.
+	(set_internalvar_component): Likewise.
+	(set_internalvar): Likewise.
+	(get_internalvar_integer): New function.
+	(clear_internalvar): Likewise.
+	(set_internalvar_integer): Likewise.
+	(preserve_values): Handle host-side internalvar contents.
+
+	* breakpoint.c (set_breakpoint_count, set_tracepoint_count): Call
+	set_internalvar_integer instead of set_internalvar.
+	* findcmd.c (find_command): Likewise.
+	* infrun.c (handle_inferior_event): Likewise.
+	* source.c (forward_search_command, reverse_search_command): Likewise.
+	* tracepoint.c (set_traceframe_num, set_tracepoint_num,
+	set_traceframe_context): Likewise.
+
+	* printcmd.c (x_command): Call clear_internalvar instead of
+	set_internalvar.
+	* tracepoint.c (set_traceframe_context): Likewise.
+	
+	* breakpoint.c (get_number_trailer): Call get_internalvar_integer
+	instead of value_of_internalvar.
+	* linespec.c (decode_dollar): Likewise.
+
+	* expprint.c (dump_subexp_body_standard): Use internalvar_name
+	instead of accessing internalvar private elements.
+	* valops.c (value_assign): Copy from original source instead of
+	accessing internalvar private elements.
+
+2009-06-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* scm-lang.c (builtin_type_scm): Remove.
 	(scm_lookup_name): Add GDBARCH parameter.  Use it instead of
 	objfile architecture.  Use per-architecture builtin_scm_type instead

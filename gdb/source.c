@@ -1615,9 +1615,7 @@ forward_search_command (char *regex, int from_tty)
 	  /* Match! */
 	  fclose (stream);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
-	  set_internalvar (lookup_internalvar ("_"),
-			   value_from_longest (builtin_type_int32,
-					       (LONGEST) line));
+	  set_internalvar_integer (lookup_internalvar ("_"), line);
 	  current_source_line = max (line - lines_to_list / 2, 1);
 	  return;
 	}
@@ -1695,9 +1693,7 @@ reverse_search_command (char *regex, int from_tty)
 	  /* Match! */
 	  fclose (stream);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
-	  set_internalvar (lookup_internalvar ("_"),
-			   value_from_longest (builtin_type_int32,
-					       (LONGEST) line));
+	  set_internalvar_integer (lookup_internalvar ("_"), line);
 	  current_source_line = max (line - lines_to_list / 2, 1);
 	  return;
 	}

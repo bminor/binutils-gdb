@@ -1002,7 +1002,7 @@ dump_subexp_body_standard (struct expression *exp,
       fprintf_filtered (stream, "Internal var @");
       gdb_print_host_address (exp->elts[elt].internalvar, stream);
       fprintf_filtered (stream, " (%s)",
-			exp->elts[elt].internalvar->name);
+			internalvar_name (exp->elts[elt].internalvar));
       elt += 2;
       break;
     case OP_FUNCALL:

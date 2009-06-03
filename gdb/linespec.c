@@ -1669,7 +1669,7 @@ static struct symtabs_and_lines
 decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 	       char ***canonical, struct symtab *file_symtab)
 {
-  struct value *valx;
+  LONGEST valx;
   int index = 0;
   int need_canonical = 0;
   struct symtabs_and_lines values;
@@ -1684,10 +1684,12 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
   if (!*p)		/* Reached end of token without hitting non-digit.  */
     {
       /* We have a value history reference.  */
+      struct value *val_history;
       sscanf ((copy[1] == '$') ? copy + 2 : copy + 1, "%d", &index);
-      valx = access_value_history ((copy[1] == '$') ? -index : index);
-      if (TYPE_CODE (value_type (valx)) != TYPE_CODE_INT)
+      val_history = access_value_history ((copy[1] == '$') ? -index : index);
+      if (TYPE_CODE (value_type (val_history)) != TYPE_CODE_INT)
 	error (_("History values used in line specs must have integer values."));
+      valx = value_as_long (val_history);
     }
   else
     {
@@ -1709,8 +1711,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 	return minsym_found (funfirstline, msymbol);
 
       /* Not a user variable or function -- must be convenience variable.  */
-      valx = value_of_internalvar (lookup_internalvar (copy + 1));
-      if (TYPE_CODE (value_type (valx)) != TYPE_CODE_INT)
+      if (!get_internalvar_integer (lookup_internalvar (copy + 1), &valx))
 	error (_("Convenience variables used in line specs must have integer values."));
     }
 
@@ -1718,7 +1719,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 
   /* Either history value or convenience value from above, in valx.  */
   val.symtab = file_symtab ? file_symtab : default_symtab;
-  val.line = value_as_long (valx);
+  val.line = valx;
   val.pc = 0;
 
   values.sals = (struct symtab_and_line *) xmalloc (sizeof val);
