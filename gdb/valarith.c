@@ -887,22 +887,6 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       gdb_byte v1[16], v2[16];
       gdb_byte v[16];
 
-      value_args_as_decimal (arg1, arg2, v1, &len_v1, v2, &len_v2);
-
-      switch (op)
-	{
-	case BINOP_ADD:
-	case BINOP_SUB:
-	case BINOP_MUL:
-	case BINOP_DIV:
-	case BINOP_EXP:
-	  decimal_binop (op, v1, len_v1, v2, len_v2, v, &len_v);
-	  break;
-
-	default:
-	  error (_("Operation not valid for decimal floating point number."));
-	}
-
       /* If only one type is decimal float, use its type.
 	 Otherwise use the bigger type.  */
       if (TYPE_CODE (type1) != TYPE_CODE_DECFLOAT)
@@ -913,6 +897,24 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	result_type = type2;
       else
 	result_type = type1;
+
+      len_v = TYPE_LENGTH (result_type);
+
+      value_args_as_decimal (arg1, arg2, v1, &len_v1, v2, &len_v2);
+
+      switch (op)
+	{
+	case BINOP_ADD:
+	case BINOP_SUB:
+	case BINOP_MUL:
+	case BINOP_DIV:
+	case BINOP_EXP:
+	  decimal_binop (op, v1, len_v1, v2, len_v2, v, len_v);
+	  break;
+
+	default:
+	  error (_("Operation not valid for decimal floating point number."));
+	}
 
       val = value_from_decfloat (result_type, v);
     }

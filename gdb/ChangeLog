@@ -1,3 +1,14 @@
+2009-06-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* dfp.h (decimal_binop): Convert LEN_RESULT to input parameter.
+	* dfp.c (promote_decimal): Remove.
+	(decimal_binop): Convert LEN_RESULT to input parameter.
+	Remove call to decimal_binop.
+	(decimal_compare): Remove call to decimal_binop.
+
+	* valarith.c (value_binop): Pass desired result type length
+	to decimal_binop.
+
 2009-06-01  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.tgt (avr): Set gdb_sim to use the simulator.

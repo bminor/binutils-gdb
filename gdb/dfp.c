@@ -255,38 +255,11 @@ decimal_to_doublest (const gdb_byte *from, int len)
   return strtod (buffer, NULL);
 }
 
-/* Check if operands have the same size and convert them to the
-   biggest of the two if necessary.  */
-static int
-promote_decimal (gdb_byte *x, int len_x, gdb_byte *y, int len_y)
-{
-  int len_result;
-  decNumber number;
-
-  if (len_x < len_y)
-    {
-      decimal_to_number (x, len_x, &number);
-      decimal_from_number (&number, x, len_y);
-      len_result = len_y;
-    }
-  else if (len_x > len_y)
-    {
-      decimal_to_number (y, len_y, &number);
-      decimal_from_number (&number, y, len_x);
-      len_result = len_x;
-    }
-  else
-    len_result = len_x;
-
-  return len_result;
-}
-
-/* Perform operation OP with operands X and Y and store value in RESULT.
-   If LEN_X and LEN_Y are not equal, RESULT will have the size of the biggest
-   of the two, and LEN_RESULT will be set accordingly.  */
+/* Perform operation OP with operands X and Y with sizes LEN_X and LEN_Y
+   and store value in RESULT with size LEN_RESULT.  */
 void
 decimal_binop (enum exp_opcode op, const gdb_byte *x, int len_x,
-	       const gdb_byte *y, int len_y, gdb_byte *result, int *len_result)
+	       const gdb_byte *y, int len_y, gdb_byte *result, int len_result)
 {
   decContext set;
   decNumber number1, number2, number3;
@@ -295,14 +268,10 @@ decimal_binop (enum exp_opcode op, const gdb_byte *x, int len_x,
   match_endianness (x, len_x, dec1);
   match_endianness (y, len_y, dec2);
 
-  *len_result = promote_decimal (dec1, len_x, dec2, len_y);
+  decimal_to_number (dec1, len_x, &number1);
+  decimal_to_number (dec2, len_y, &number2);
 
-  /* Both operands are of size *len_result from now on.  */
-
-  decimal_to_number (dec1, *len_result, &number1);
-  decimal_to_number (dec2, *len_result, &number2);
-
-  set_decnumber_context (&set, *len_result);
+  set_decnumber_context (&set, len_result);
 
   switch (op)
     {
@@ -330,9 +299,9 @@ decimal_binop (enum exp_opcode op, const gdb_byte *x, int len_x,
   /* Check for errors in the DFP operation.  */
   decimal_check_errors (&set);
 
-  decimal_from_number (&number3, dec3, *len_result);
+  decimal_from_number (&number3, dec3, len_result);
 
-  match_endianness (dec3, *len_result, result);
+  match_endianness (dec3, len_result, result);
 }
 
 /* Returns true if X (which is LEN bytes wide) is the number zero.  */
@@ -362,11 +331,11 @@ decimal_compare (const gdb_byte *x, int len_x, const gdb_byte *y, int len_y)
   match_endianness (x, len_x, dec1);
   match_endianness (y, len_y, dec2);
 
-  len_result = promote_decimal (dec1, len_x, dec2, len_y);
+  decimal_to_number (dec1, len_x, &number1);
+  decimal_to_number (dec2, len_y, &number2);
 
-  decimal_to_number (dec1, len_result, &number1);
-  decimal_to_number (dec2, len_result, &number2);
-
+  /* Perform the comparison in the larger of the two sizes.  */
+  len_result = len_x > len_y ? len_x : len_y;
   set_decnumber_context (&set, len_result);
 
   decNumberCompare (&result, &number1, &number2, &set);
