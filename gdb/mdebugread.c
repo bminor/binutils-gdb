@@ -207,34 +207,6 @@ static int n_undef_symbols, n_undef_labels, n_undef_vars, n_undef_procs;
 
 static char stabs_symbol[] = STABS_SYMBOL;
 
-/* Types corresponding to mdebug format bt* basic types.  */
-
-static struct type *mdebug_type_void;
-static struct type *mdebug_type_char;
-static struct type *mdebug_type_short;
-static struct type *mdebug_type_int_32;
-#define mdebug_type_int mdebug_type_int_32
-static struct type *mdebug_type_int_64;
-static struct type *mdebug_type_long_32;
-static struct type *mdebug_type_long_64;
-static struct type *mdebug_type_long_long_64;
-static struct type *mdebug_type_unsigned_char;
-static struct type *mdebug_type_unsigned_short;
-static struct type *mdebug_type_unsigned_int_32;
-static struct type *mdebug_type_unsigned_int_64;
-static struct type *mdebug_type_unsigned_long_32;
-static struct type *mdebug_type_unsigned_long_64;
-static struct type *mdebug_type_unsigned_long_long_64;
-static struct type *mdebug_type_adr_32;
-static struct type *mdebug_type_adr_64;
-static struct type *mdebug_type_float;
-static struct type *mdebug_type_double;
-static struct type *mdebug_type_complex;
-static struct type *mdebug_type_double_complex;
-static struct type *mdebug_type_fixed_dec;
-static struct type *mdebug_type_float_dec;
-static struct type *mdebug_type_string;
-
 /* Nonzero if we have seen ecoff debugging info for a file.  */
 
 static int found_ecoff_debugging_info;
@@ -703,7 +675,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;	/* so that it can be used */
       SYMBOL_CLASS (s) = LOC_LABEL;	/* but not misused */
       SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
-      SYMBOL_TYPE (s) = mdebug_type_int;
+      SYMBOL_TYPE (s) = builtin_type (gdbarch)->builtin_int;
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       break;
 
@@ -746,7 +718,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Type of the return value */
       if (SC_IS_UNDEF (sh->sc) || sh->sc == scNil)
-	t = mdebug_type_int;
+	t = builtin_type (gdbarch)->builtin_int;
       else
 	{
 	  t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
@@ -1156,7 +1128,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 	  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
 	  SYMBOL_CLASS (s) = LOC_CONST;
-	  SYMBOL_TYPE (s) = mdebug_type_void;
+	  SYMBOL_TYPE (s) = builtin_type_void;
 	  e = ((struct mdebug_extra_func_info *)
 	       obstack_alloc (&current_objfile->objfile_obstack,
 			      sizeof (struct mdebug_extra_func_info)));
@@ -1350,6 +1322,179 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
   return count;
 }
 
+/* Basic types.  */
+
+static const struct objfile_data *basic_type_data;
+
+static struct type *
+basic_type (int bt, struct objfile *objfile)
+{
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct type **map_bt = objfile_data (objfile, basic_type_data);
+  struct type *tp;
+
+  if (bt >= btMax)
+    return NULL;
+
+  if (!map_bt)
+    {
+      map_bt = OBSTACK_CALLOC (&objfile->objfile_obstack,
+			       btMax, struct type *);
+      set_objfile_data (objfile, basic_type_data, map_bt);
+    }
+
+  if (map_bt[bt])
+    return map_bt[bt];
+
+  switch (bt)
+    {
+    case btNil:
+      tp = builtin_type_void;
+      break;
+
+    case btAdr:
+      tp = init_type (TYPE_CODE_PTR, 4, TYPE_FLAG_UNSIGNED,
+		      "adr_32", objfile);
+      TYPE_TARGET_TYPE (tp) = builtin_type_void;
+      break;
+
+    case btChar:
+      tp = init_type (TYPE_CODE_INT, 1, 0,
+		      "char", objfile);
+      break;
+
+    case btUChar:
+      tp = init_type (TYPE_CODE_INT, 1, TYPE_FLAG_UNSIGNED,
+		      "unsigned char", objfile);
+      break;
+
+    case btShort:
+      tp = init_type (TYPE_CODE_INT, 2, 0,
+		      "short", objfile);
+      break;
+
+    case btUShort:
+      tp = init_type (TYPE_CODE_INT, 2, TYPE_FLAG_UNSIGNED,
+		      "unsigned short", objfile);
+      break;
+
+    case btInt:
+      tp = init_type (TYPE_CODE_INT, 4, 0,
+		      "int", objfile);
+      break;
+
+   case btUInt:
+      tp = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED,
+		      "unsigned int", objfile);
+      break;
+
+    case btLong:
+      tp = init_type (TYPE_CODE_INT, 4, 0,
+		      "long", objfile);
+      break;
+
+    case btULong:
+      tp = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED,
+		      "unsigned long", objfile);
+      break;
+
+    case btFloat:
+      tp = init_type (TYPE_CODE_FLT,
+		      gdbarch_float_bit (gdbarch) / TARGET_CHAR_BIT, 0,
+		      "float", objfile);
+      break;
+
+    case btDouble:
+      tp = init_type (TYPE_CODE_FLT,
+		      gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT, 0,
+		      "double", objfile);
+      break;
+
+    case btComplex:
+      tp = init_type (TYPE_CODE_COMPLEX,
+		      2 * gdbarch_float_bit (gdbarch) / TARGET_CHAR_BIT, 0,
+		      "complex", objfile);
+      TYPE_TARGET_TYPE (tp) = basic_type (btFloat, objfile);
+      break;
+
+    case btDComplex:
+      tp = init_type (TYPE_CODE_COMPLEX,
+		      2 * gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT, 0,
+		      "double complex", objfile);
+      TYPE_TARGET_TYPE (tp) = basic_type (btDouble, objfile);
+      break;
+
+    case btFixedDec:
+      /* We use TYPE_CODE_INT to print these as integers.  Does this do any
+	 good?  Would we be better off with TYPE_CODE_ERROR?  Should
+	 TYPE_CODE_ERROR print things in hex if it knows the size?  */
+      tp = init_type (TYPE_CODE_INT,
+		      gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT, 0,
+		      "fixed decimal", objfile);
+      break;
+
+    case btFloatDec:
+      tp = init_type (TYPE_CODE_ERROR,
+		      gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT, 0,
+		      "floating decimal", objfile);
+      break;
+
+    case btString:
+      /* Is a "string" the way btString means it the same as TYPE_CODE_STRING?
+	 FIXME.  */
+      tp = init_type (TYPE_CODE_STRING, 1, 0,
+		      "string", objfile);
+      break;
+
+    case btVoid:
+      tp = builtin_type_void;
+      break;
+
+    case btLong64:
+      tp = init_type (TYPE_CODE_INT, 8, 0,
+		      "long", objfile);
+      break;
+
+    case btULong64:
+      tp = init_type (TYPE_CODE_INT, 8, TYPE_FLAG_UNSIGNED,
+		      "unsigned long", objfile);
+      break;
+
+    case btLongLong64:
+      tp = init_type (TYPE_CODE_INT, 8, 0,
+		      "long long", objfile);
+      break;
+
+    case btULongLong64:
+      tp = init_type (TYPE_CODE_INT, 8, TYPE_FLAG_UNSIGNED,
+		      "unsigned long long", objfile);
+      break;
+
+    case btAdr64:
+      tp = init_type (TYPE_CODE_PTR, 8, TYPE_FLAG_UNSIGNED,
+		      "adr_64", objfile);
+      TYPE_TARGET_TYPE (tp) = builtin_type_void;
+      break;
+
+    case btInt64:
+      tp = init_type (TYPE_CODE_INT, 8, 0,
+		      "int", objfile);
+      break;
+
+    case btUInt64:
+      tp = init_type (TYPE_CODE_INT, 8, TYPE_FLAG_UNSIGNED,
+		      "unsigned int", objfile);
+      break;
+
+    default:
+      tp = NULL;
+      break;
+    }
+
+  map_bt[bt] = tp;
+  return tp;
+}
+
 /* Parse the type information provided in the raw AX entries for
    the symbol SH. Return the bitfield size in BS, in case.
    We must byte-swap the AX entries before we use them; BIGEND says whether
@@ -1359,78 +1504,27 @@ static struct type *
 parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	    int bigend, char *sym_name)
 {
-  /* Null entries in this map are treated specially */
-  static struct type **map_bt[] =
-  {
-    &mdebug_type_void,		/* btNil */
-    &mdebug_type_adr_32,	/* btAdr */
-    &mdebug_type_char,		/* btChar */
-    &mdebug_type_unsigned_char,	/* btUChar */
-    &mdebug_type_short,		/* btShort */
-    &mdebug_type_unsigned_short,	/* btUShort */
-    &mdebug_type_int_32,	/* btInt */
-    &mdebug_type_unsigned_int_32,	/* btUInt */
-    &mdebug_type_long_32,	/* btLong */
-    &mdebug_type_unsigned_long_32,	/* btULong */
-    &mdebug_type_float,		/* btFloat */
-    &mdebug_type_double,	/* btDouble */
-    0,				/* btStruct */
-    0,				/* btUnion */
-    0,				/* btEnum */
-    0,				/* btTypedef */
-    0,				/* btRange */
-    0,				/* btSet */
-    &mdebug_type_complex,	/* btComplex */
-    &mdebug_type_double_complex,	/* btDComplex */
-    0,				/* btIndirect */
-    &mdebug_type_fixed_dec,	/* btFixedDec */
-    &mdebug_type_float_dec,	/* btFloatDec */
-    &mdebug_type_string,	/* btString */
-    0,				/* btBit */
-    0,				/* btPicture */
-    &mdebug_type_void,		/* btVoid */
-    0,				/* DEC C++:  Pointer to member */
-    0,				/* DEC C++:  Virtual function table */
-    0,				/* DEC C++:  Class (Record) */
-    &mdebug_type_long_64,	/* btLong64  */
-    &mdebug_type_unsigned_long_64,	/* btULong64 */
-    &mdebug_type_long_long_64,	/* btLongLong64  */
-    &mdebug_type_unsigned_long_long_64,		/* btULongLong64 */
-    &mdebug_type_adr_64,	/* btAdr64 */
-    &mdebug_type_int_64,	/* btInt64  */
-    &mdebug_type_unsigned_int_64,	/* btUInt64 */
-  };
-
   TIR t[1];
   struct type *tp = 0;
   enum type_code type_code = TYPE_CODE_UNDEF;
 
   /* Handle undefined types, they have indexNil. */
   if (aux_index == indexNil)
-    return mdebug_type_int;
+    return basic_type (btInt, current_objfile);
 
   /* Handle corrupt aux indices.  */
   if (aux_index >= (debug_info->fdr + fd)->caux)
     {
       index_complaint (sym_name);
-      return mdebug_type_int;
+      return basic_type (btInt, current_objfile);
     }
   ax += aux_index;
 
   /* Use aux as a type information record, map its basic type.  */
   (*debug_swap->swap_tir_in) (bigend, &ax->a_ti, t);
-  if (t->bt >= (sizeof (map_bt) / sizeof (*map_bt)))
+  tp = basic_type (t->bt, current_objfile);
+  if (tp == NULL)
     {
-      basic_type_complaint (t->bt, sym_name);
-      return mdebug_type_int;
-    }
-  if (map_bt[t->bt])
-    {
-      tp = *map_bt[t->bt];
-    }
-  else
-    {
-      tp = NULL;
       /* Cannot use builtin types -- build our own */
       switch (t->bt)
 	{
@@ -1461,7 +1555,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  break;
 	default:
 	  basic_type_complaint (t->bt, sym_name);
-	  return mdebug_type_int;
+	  return basic_type (btInt, current_objfile);
 	}
     }
 
@@ -1478,9 +1572,9 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	     as short and unsigned short types with a field width of 8.
 	     Enum types also have a field width which we ignore for now.  */
 	  if (t->bt == btShort && width == 8)
-	    tp = mdebug_type_char;
+	    tp = basic_type (btChar, current_objfile);
 	  else if (t->bt == btUShort && width == 8)
-	    tp = mdebug_type_unsigned_char;
+	    tp = basic_type (btUChar, current_objfile);
 	  else if (t->bt == btEnum)
 	    ;
 	  else
@@ -1515,7 +1609,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	{
 	  complaint (&symfile_complaints,
 		     _("unable to cross ref btIndirect for %s"), sym_name);
-	  return mdebug_type_int;
+	  return basic_type (btInt, current_objfile);
 	}
       xref_fh = get_rfd (fd, rf);
       xref_fd = xref_fh - debug_info->fdr;
@@ -1632,7 +1726,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	{
 	  complaint (&symfile_complaints,
 		     _("unable to cross ref btTypedef for %s"), sym_name);
-	  tp = mdebug_type_int;
+	  tp = basic_type (btInt, current_objfile);
 	}
     }
 
@@ -1745,7 +1839,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
 	{
 	  complaint (&symfile_complaints,
 		     _("illegal array index type for %s, assuming int"), sym_name);
-	  indx = mdebug_type_int;
+	  indx = builtin_type_int32;
 	}
 
       /* Get the bounds, and create the array type.  */
@@ -1897,7 +1991,8 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Donno its type, hope int is ok */
-      SYMBOL_TYPE (s) = lookup_function_type (mdebug_type_int);
+      SYMBOL_TYPE (s)
+	= lookup_function_type (builtin_type (gdbarch)->builtin_int);
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       /* Wont have symbols for this one */
       b = new_block (2);
@@ -3937,7 +4032,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 		  memset (e, 0, sizeof (struct mdebug_extra_func_info));
 		  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
 		  SYMBOL_CLASS (s) = LOC_CONST;
-		  SYMBOL_TYPE (s) = mdebug_type_void;
+		  SYMBOL_TYPE (s) = builtin_type_void;
 		  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
 		  e->pdr.framereg = -1;
 		  add_symbol_to_list (s, &local_symbols);
@@ -4739,115 +4834,5 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
 void
 _initialize_mdebugread (void)
 {
-  mdebug_type_void =
-    init_type (TYPE_CODE_VOID, 1,
-	       0,
-	       "void", (struct objfile *) NULL);
-  mdebug_type_char =
-    init_type (TYPE_CODE_INT, 1,
-	       0,
-	       "char", (struct objfile *) NULL);
-  mdebug_type_unsigned_char =
-    init_type (TYPE_CODE_INT, 1,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned char", (struct objfile *) NULL);
-  mdebug_type_short =
-    init_type (TYPE_CODE_INT, 2,
-	       0,
-	       "short", (struct objfile *) NULL);
-  mdebug_type_unsigned_short =
-    init_type (TYPE_CODE_INT, 2,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned short", (struct objfile *) NULL);
-  mdebug_type_int_32 =
-    init_type (TYPE_CODE_INT, 4,
-	       0,
-	       "int", (struct objfile *) NULL);
-  mdebug_type_unsigned_int_32 =
-    init_type (TYPE_CODE_INT, 4,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned int", (struct objfile *) NULL);
-  mdebug_type_int_64 =
-    init_type (TYPE_CODE_INT, 8,
-	       0,
-	       "int", (struct objfile *) NULL);
-  mdebug_type_unsigned_int_64 =
-    init_type (TYPE_CODE_INT, 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned int", (struct objfile *) NULL);
-  mdebug_type_long_32 =
-    init_type (TYPE_CODE_INT, 4,
-	       0,
-	       "long", (struct objfile *) NULL);
-  mdebug_type_unsigned_long_32 =
-    init_type (TYPE_CODE_INT, 4,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned long", (struct objfile *) NULL);
-  mdebug_type_long_64 =
-    init_type (TYPE_CODE_INT, 8,
-	       0,
-	       "long", (struct objfile *) NULL);
-  mdebug_type_unsigned_long_64 =
-    init_type (TYPE_CODE_INT, 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned long", (struct objfile *) NULL);
-  mdebug_type_long_long_64 =
-    init_type (TYPE_CODE_INT, 8,
-	       0,
-	       "long long", (struct objfile *) NULL);
-  mdebug_type_unsigned_long_long_64 =
-    init_type (TYPE_CODE_INT, 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned long long", (struct objfile *) NULL);
-  mdebug_type_adr_32 =
-    init_type (TYPE_CODE_PTR, 4,
-	       TYPE_FLAG_UNSIGNED,
-	       "adr_32", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (mdebug_type_adr_32) = mdebug_type_void;
-  mdebug_type_adr_64 =
-    init_type (TYPE_CODE_PTR, 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "adr_64", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (mdebug_type_adr_64) = mdebug_type_void;
-  mdebug_type_float =
-    init_type (TYPE_CODE_FLT,
-	       gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "float", (struct objfile *) NULL);
-  mdebug_type_double =
-    init_type (TYPE_CODE_FLT,
-	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "double", (struct objfile *) NULL);
-  mdebug_type_complex =
-    init_type (TYPE_CODE_COMPLEX,
-	       2 * gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "complex", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (mdebug_type_complex) = mdebug_type_float;
-  mdebug_type_double_complex =
-    init_type (TYPE_CODE_COMPLEX,
-	       2 * gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "double complex", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (mdebug_type_double_complex) = mdebug_type_double;
-
-  /* Is a "string" the way btString means it the same as TYPE_CODE_STRING?
-     FIXME.  */
-  mdebug_type_string =
-    init_type (TYPE_CODE_STRING,
-	       TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       0, "string",
-	       (struct objfile *) NULL);
-
-  /* We use TYPE_CODE_INT to print these as integers.  Does this do any
-     good?  Would we be better off with TYPE_CODE_ERROR?  Should
-     TYPE_CODE_ERROR print things in hex if it knows the size?  */
-  mdebug_type_fixed_dec =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "fixed decimal",
-	       (struct objfile *) NULL);
-
-  mdebug_type_float_dec =
-    init_type (TYPE_CODE_ERROR,
-	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "floating decimal",
-	       (struct objfile *) NULL);
+  basic_type_data = register_objfile_data ();
 }

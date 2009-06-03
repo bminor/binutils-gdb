@@ -1,5 +1,32 @@
 2009-06-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* mdebugread.c (mdebug_type_void, mdebug_type_char, mdebug_type_short,
+	mdebug_type_int, mdebug_type_int_32, mdebug_type_int_64,
+	mdebug_type_long_32, mdebug_type_long_64, mdebug_type_long_long_64,
+	mdebug_type_unsigned_char, mdebug_type_unsigned_short,
+	mdebug_type_unsigned_int_32, mdebug_type_unsigned_int_64,
+	mdebug_type_unsigned_long_32, mdebug_type_unsigned_long_64,
+	mdebug_type_unsigned_long_long_64, mdebug_type_adr_32,
+	mdebug_type_adr_64, mdebug_type_float, mdebug_type_double,
+	mdebug_type_complex, mdebug_type_double_complex,
+	mdebug_type_fixed_dec, mdebug_type_float_dec, mdebug_type_string):
+	Remove.
+
+	(basic_type_data): New global variable.
+	(basic_type): New function.
+	(parse_type): Remove static basic type map map_bt.  Call basic_type
+	to get basic types instead of using mdebug_type_ variables.
+
+	(parse_symbol): Use builtin types instead of mdebug_type_ variables.
+	(upgrade_type): Likewise.
+	(parse_procedure): Likewise.
+	(psymtab_to_symtab_1): Likewise.
+
+	(_initialize_mdebugread): Do not initialize mdebug_type_ variables.
+	Initialize basic_type_data.
+
+2009-06-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* dfp.h (decimal_binop): Convert LEN_RESULT to input parameter.
 	* dfp.c (promote_decimal): Remove.
 	(decimal_binop): Convert LEN_RESULT to input parameter.
