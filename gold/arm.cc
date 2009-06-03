@@ -943,7 +943,7 @@ Target_arm<big_endian>::Scan::global(const General_options&,
 	// Make a dynamic relocation if necessary.
 	int flags = Symbol::NON_PIC_REF;
 	if (gsym->type() == elfcpp::STT_FUNC
-	    | gsym->type() == elfcpp::STT_ARM_TFUNC)
+	    || gsym->type() == elfcpp::STT_ARM_TFUNC)
 	  flags |= Symbol::FUNCTION_CALL;
 	if (gsym->needs_dynamic_reloc(flags))
 	  {
