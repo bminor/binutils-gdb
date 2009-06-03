@@ -470,7 +470,7 @@ handle_immediate:
   if (!skipping)
     {
       write_exp_elt_opcode (OP_LONG);
-      write_exp_elt_type (builtin_type_scm);
+      write_exp_elt_type (builtin_scm_type (parse_gdbarch)->builtin_scm);
       write_exp_elt_longcst (svalue);
       write_exp_elt_opcode (OP_LONG);
     }

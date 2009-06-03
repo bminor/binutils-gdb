@@ -1,5 +1,41 @@
 2009-06-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* scm-lang.c (builtin_type_scm): Remove.
+	(scm_lookup_name): Add GDBARCH parameter.  Use it instead of
+	objfile architecture.  Use per-architecture builtin_scm_type instead
+	of builtin_type_scm.
+	(evaluate_exp): Pass expression architecture to scm_lookup_name.
+
+	(scm_get_field): Add SIZE parameter.  Use it instead of 
+	TYPE_LENGTH (builtin_type_scm).
+
+	(build_scm_types): New function.
+	(scm_type_data): New variable.
+	(builtin_scm_type): New function.
+	(_initialize_scheme_language): Do not initialize builtin_type_scm.
+	Register build_scm_types as post-init function for scm_type_data.
+
+	* scm-exp.c (scm_lreadr): Use per-architecture builtin_scm_type
+	instead of builtin_type_scm.
+
+	* scm-lang.h (SCM_CAR, SCM_CDR): Pass SCM_SIZE to scm_get_field.
+	(scm_get_field): Add SIZE paramter.
+	(scm_scmval_print): Remove prototype.
+	(builtin_type_scm): Remove.
+	(struct builtin_scm_type): Add structure definition.
+	(builtin_scm_type): Add prototype.
+
+	* scm-valprint.c (scm_inferior_print): Add TYPE parameter.  Use it
+	instead of builtin_core_addr type; do not use objfile architecture.
+	(scm_scmlist_print): Add TYPE parameter.  Use it to define SCM_SIZE.
+	Pass type to scm_scmval_print.
+	(scm_ipruk): Add TYPE parameter.  Use it to define SCM_SIZE.
+	(scm_scmval_print): Make static.  Add TYPE parameter.  Use it to
+	define SCM_SIZE.  Pass type to scm_ipruk and scm_scmlist_print.
+	(scm_val_print): Pass type to scm_inferior_print and scm_scmval_print.
+
+2009-06-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* mdebugread.c (mdebug_type_void, mdebug_type_char, mdebug_type_short,
 	mdebug_type_int, mdebug_type_int_32, mdebug_type_int_64,
 	mdebug_type_long_32, mdebug_type_long_64, mdebug_type_long_long_64,

@@ -37,10 +37,8 @@
 extern void _initialize_scheme_language (void);
 static struct value *evaluate_subexp_scm (struct type *, struct expression *,
 				      int *, enum noside);
-static struct value *scm_lookup_name (char *);
+static struct value *scm_lookup_name (struct gdbarch *, char *);
 static int in_eval_c (void);
-
-struct type *builtin_type_scm;
 
 void
 scm_printchar (int c, struct type *type, struct ui_file *stream)
@@ -70,12 +68,11 @@ is_scmvalue_type (struct type *type)
    of the 0'th one.  */
 
 LONGEST
-scm_get_field (LONGEST svalue, int index)
+scm_get_field (LONGEST svalue, int index, int size)
 {
   gdb_byte buffer[20];
-  read_memory (SCM2PTR (svalue) + index * TYPE_LENGTH (builtin_type_scm),
-	       buffer, TYPE_LENGTH (builtin_type_scm));
-  return extract_signed_integer (buffer, TYPE_LENGTH (builtin_type_scm));
+  read_memory (SCM2PTR (svalue) + index * size, buffer, size);
+  return extract_signed_integer (buffer, size);
 }
 
 /* Unpack a value of type TYPE in buffer VALADDR as an integer
@@ -147,18 +144,15 @@ in_eval_c (void)
    function), then try lookup_symbol for compiled variables. */
 
 static struct value *
-scm_lookup_name (char *str)
+scm_lookup_name (struct gdbarch *gdbarch, char *str)
 {
-  struct objfile *objf;
-  struct gdbarch *gdbarch;
   struct value *args[3];
   int len = strlen (str);
   struct value *func;
   struct value *val;
   struct symbol *sym;
 
-  func = find_function_in_inferior ("scm_lookup_cstr", &objf);
-  gdbarch = get_objfile_arch (objf);
+  func = find_function_in_inferior ("scm_lookup_cstr", NULL);
 
   args[0] = value_allocate_space_in_inferior (len);
   args[1] = value_from_longest (builtin_type (gdbarch)->builtin_int, len);
@@ -171,7 +165,8 @@ scm_lookup_name (char *str)
     args[2] = value_of_variable (sym, expression_context_block);
   else
     /* FIXME in this case, we should try lookup_symbol first */
-    args[2] = value_from_longest (builtin_type_scm, SCM_EOL);
+    args[2] = value_from_longest (builtin_scm_type (gdbarch)->builtin_scm,
+				  SCM_EOL);
 
   val = call_function_by_hand (func, 3, args);
   if (!value_logical_not (val))
@@ -214,7 +209,7 @@ evaluate_exp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
 	goto nosideret;
       str = &exp->elts[pc + 2].string;
-      return scm_lookup_name (str);
+      return scm_lookup_name (exp->gdbarch, str);
     case OP_STRING:
       pc = (*pos)++;
       len = longest_to_int (exp->elts[pc + 1].longconst);
@@ -277,12 +272,32 @@ const struct language_defn scm_language_defn =
   LANG_MAGIC
 };
 
+static void *
+build_scm_types (struct gdbarch *gdbarch)
+{
+  struct builtin_scm_type *builtin_scm_type
+    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_scm_type);
+
+  builtin_scm_type->builtin_scm =
+    init_type (TYPE_CODE_INT,
+	       gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT,
+	       0, "SCM", (struct objfile *) NULL);
+
+  return builtin_scm_type;
+}
+
+static struct gdbarch_data *scm_type_data;
+
+const struct builtin_scm_type *
+builtin_scm_type (struct gdbarch *gdbarch)
+{
+  return gdbarch_data (gdbarch, scm_type_data);
+}
+
 void
 _initialize_scheme_language (void)
 {
+  scm_type_data = gdbarch_data_register_post_init (build_scm_types);
+
   add_language (&scm_language_defn);
-  builtin_type_scm =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "SCM", (struct objfile *) NULL);
 }

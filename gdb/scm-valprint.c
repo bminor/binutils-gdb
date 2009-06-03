@@ -32,30 +32,29 @@
 #include "infcall.h"
 #include "objfiles.h"
 
-static void scm_ipruk (char *, LONGEST, struct ui_file *);
-static void scm_scmlist_print (LONGEST, struct ui_file *, int,
-			       const struct value_print_options *);
-static int scm_inferior_print (LONGEST, struct ui_file *, int,
-			       const struct value_print_options *);
+static void scm_ipruk (char *, struct type *, LONGEST, struct ui_file *);
+static void scm_scmval_print (struct type *, LONGEST, struct ui_file *,
+			      int, const struct value_print_options *);
+static void scm_scmlist_print (struct type *, LONGEST, struct ui_file *,
+			       int, const struct value_print_options *);
+static int scm_inferior_print (struct type *, LONGEST, struct ui_file *,
+			       int, const struct value_print_options *);
 
 /* Prints the SCM value VALUE by invoking the inferior, if appropraite.
    Returns >= 0 on success;  return -1 if the inferior cannot/should not
    print VALUE. */
 
 static int
-scm_inferior_print (LONGEST value, struct ui_file *stream,
+scm_inferior_print (struct type *type, LONGEST value, struct ui_file *stream,
 		    int recurse, const struct value_print_options *options)
 {
-  struct objfile *objf;
-  struct gdbarch *gdbarch;
   struct value *func, *arg, *result;
   struct symbol *gdb_output_sym, *gdb_output_len_sym;
   char *output;
   int ret, output_len;
 
-  func = find_function_in_inferior ("gdb_print", &objf);
-  gdbarch = get_objfile_arch (objf);
-  arg = value_from_longest (builtin_type (gdbarch)->builtin_core_addr, value);
+  func = find_function_in_inferior ("gdb_print", NULL);
+  arg = value_from_longest (type, value);
 
   result = call_function_by_hand (func, 1, &arg);
   ret = (int) value_as_long (result);
@@ -77,7 +76,7 @@ scm_inferior_print (LONGEST value, struct ui_file *stream,
 		       (char *) &output_len, sizeof (output_len));
 
 	  output = (char *) alloca (output_len);
-	  remote_buffer = value_at (builtin_type (gdbarch)->builtin_core_addr,
+	  remote_buffer = value_at (type,
 				    SYMBOL_VALUE_ADDRESS (gdb_output_sym));
 	  read_memory (value_as_address (remote_buffer),
 		       output, output_len);
@@ -129,16 +128,18 @@ static char *scm_isymnames[] =
 };
 
 static void
-scm_scmlist_print (LONGEST svalue, struct ui_file *stream, int recurse,
+scm_scmlist_print (struct type *type, LONGEST svalue,
+		   struct ui_file *stream, int recurse,
 		   const struct value_print_options *options)
 {
+#define SCM_SIZE (TYPE_LENGTH (type))
   unsigned int more = options->print_max;
   if (recurse > 6)
     {
       fputs_filtered ("...", stream);
       return;
     }
-  scm_scmval_print (SCM_CAR (svalue), stream, recurse + 1, options);
+  scm_scmval_print (type, SCM_CAR (svalue), stream, recurse + 1, options);
   svalue = SCM_CDR (svalue);
   for (; SCM_NIMP (svalue); svalue = SCM_CDR (svalue))
     {
@@ -150,30 +151,35 @@ scm_scmlist_print (LONGEST svalue, struct ui_file *stream, int recurse,
 	  fputs_filtered ("...", stream);
 	  return;
 	}
-      scm_scmval_print (SCM_CAR (svalue), stream, recurse + 1, options);
+      scm_scmval_print (type, SCM_CAR (svalue), stream, recurse + 1, options);
     }
   if (SCM_NNULLP (svalue))
     {
       fputs_filtered (" . ", stream);
-      scm_scmval_print (svalue, stream, recurse + 1, options);
+      scm_scmval_print (type, svalue, stream, recurse + 1, options);
     }
+#undef SCM_SIZE
 }
 
 static void
-scm_ipruk (char *hdr, LONGEST ptr, struct ui_file *stream)
+scm_ipruk (char *hdr, struct type *type, LONGEST ptr,
+	   struct ui_file *stream)
 {
+#define SCM_SIZE (TYPE_LENGTH (type))
   fprintf_filtered (stream, "#<unknown-%s", hdr);
-#define SCM_SIZE TYPE_LENGTH (builtin_type_scm)
   if (SCM_CELLP (ptr))
     fprintf_filtered (stream, " (0x%lx . 0x%lx) @",
 		      (long) SCM_CAR (ptr), (long) SCM_CDR (ptr));
   fprintf_filtered (stream, " 0x%s>", paddr_nz (ptr));
+#undef SCM_SIZE
 }
 
-void
-scm_scmval_print (LONGEST svalue, struct ui_file *stream,
-		  int recurse, const struct value_print_options *options)
+static void
+scm_scmval_print (struct type *type, LONGEST svalue,
+		  struct ui_file *stream, int recurse,
+		  const struct value_print_options *options)
 {
+#define SCM_SIZE (TYPE_LENGTH (type))
 taloop:
   switch (7 & (int) svalue)
     {
@@ -215,7 +221,7 @@ taloop:
       goto taloop;
     default:
     idef:
-      scm_ipruk ("immediate", svalue, stream);
+      scm_ipruk ("immediate", type, svalue, stream);
       break;
     case 0:
 
@@ -243,12 +249,13 @@ taloop:
 	case scm_tcs_cons_imcar:
 	case scm_tcs_cons_nimcar:
 	  fputs_filtered ("(", stream);
-	  scm_scmlist_print (svalue, stream, recurse + 1, options);
+	  scm_scmlist_print (type, svalue, stream, recurse + 1, options);
 	  fputs_filtered (")", stream);
 	  break;
 	case scm_tcs_closures:
 	  fputs_filtered ("#<CLOSURE ", stream);
-	  scm_scmlist_print (SCM_CODE (svalue), stream, recurse + 1, options);
+	  scm_scmlist_print (type, SCM_CODE (svalue), stream,
+			     recurse + 1, options);
 	  fputs_filtered (">", stream);
 	  break;
 	case scm_tc7_string:
@@ -303,8 +310,8 @@ taloop:
 	      {
 		if (i > 0)
 		  fputs_filtered (" ", stream);
-		scm_scmval_print (scm_get_field (elements, i), stream,
-				  recurse + 1, options);
+		scm_scmval_print (type, scm_get_field (elements, i, SCM_SIZE),
+				  stream, recurse + 1, options);
 	      }
 	    fputs_filtered (")", stream);
 	  }
@@ -390,10 +397,11 @@ taloop:
 #if 0
 	punk:
 #endif
-	  scm_ipruk ("type", svalue, stream);
+	  scm_ipruk ("type", type, svalue, stream);
 	}
       break;
     }
+#undef SCM_SIZE
 }
 
 int
@@ -406,12 +414,12 @@ scm_val_print (struct type *type, const gdb_byte *valaddr,
     {
       LONGEST svalue = extract_signed_integer (valaddr, TYPE_LENGTH (type));
 
-      if (scm_inferior_print (svalue, stream, recurse, options) >= 0)
+      if (scm_inferior_print (type, svalue, stream, recurse, options) >= 0)
 	{
 	}
       else
 	{
-	  scm_scmval_print (svalue, stream, recurse, options);
+	  scm_scmval_print (type, svalue, stream, recurse, options);
 	}
 
       gdb_flush (stream);
