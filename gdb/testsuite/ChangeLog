@@ -1,3 +1,8 @@
+2009-06-03  Doug Evans  <dje@google.com>
+
+	* gdb.arch/i386-sse.exp: Test xmm[8-15] if amd64.
+	* gdb.arch/i386-see.c: Ditto.
+
 2009-05-30  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.base/macscp.exp (info_macro): Return undefined if undefined.

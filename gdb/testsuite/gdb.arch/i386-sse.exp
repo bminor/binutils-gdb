@@ -25,8 +25,8 @@ if $tracelevel {
 set prms_id 0
 set bug_id 0
 
-if ![istarget "i?86-*-*"] then {
-    verbose "Skipping i386 SSE tests."
+if { ![istarget i?86-*-*] && ![istarget x86_64-*-* ] } {
+    verbose "Skipping x86 SSE tests."
     return
 }
 
@@ -79,7 +79,13 @@ gdb_test "break [gdb_get_line_number "first breakpoint here"]" \
          "set first breakpoint in main"
 gdb_continue_to_breakpoint "continue to first breakpoint in main"
 
-foreach r {0 1 2 3 4 5 6 7} {
+if [istarget i?86-*-*] {
+    set nr_regs 8
+} else {
+    set nr_regs 16
+}
+
+for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "print \$xmm$r.v4_float" \
         ".. = \\{$r, $r.25, $r.5, $r.75\\}.*" \
         "check float contents of %xmm$r"
@@ -88,7 +94,7 @@ foreach r {0 1 2 3 4 5 6 7} {
         "check int8 contents of %xmm$r"
 }
 
-foreach r {0 1 2 3 4 5 6 7} {
+for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "set var \$xmm$r.v4_float\[0\] = $r + 10" "" "set %xmm$r"
 }
 
@@ -97,7 +103,7 @@ gdb_test "break [gdb_get_line_number "second breakpoint here"]" \
          "set second breakpoint in main"
 gdb_continue_to_breakpoint "continue to second breakpoint in main"
 
-foreach r {0 1 2 3 4 5 6 7} {
+for { set r 0 } { $r < $nr_regs } { incr r } {
     gdb_test "print data\[$r\]" \
         ".. = \\{f = \\{[expr $r + 10], $r.25, $r.5, $r.75\\}\\}.*" \
         "check contents of data\[$r\]"

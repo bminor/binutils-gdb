@@ -25,16 +25,26 @@ typedef struct {
 } v4sf_t;
 
 
-v4sf_t data[8] =
+v4sf_t data[] =
   {
-    { {  0.0, 0.25, 0.50, 0.75 } },
-    { {  1.0, 1.25, 1.50, 1.75 } },
-    { {  2.0, 2.25, 2.50, 2.75 } },
-    { {  3.0, 3.25, 3.50, 3.75 } },
-    { {  4.0, 4.25, 4.50, 4.75 } },
-    { {  5.0, 5.25, 5.50, 5.75 } },
-    { {  6.0, 6.25, 6.50, 6.75 } },
-    { {  7.0, 7.25, 7.50, 7.75 } },
+    { {  0.0,  0.25,  0.50,  0.75 } },
+    { {  1.0,  1.25,  1.50,  1.75 } },
+    { {  2.0,  2.25,  2.50,  2.75 } },
+    { {  3.0,  3.25,  3.50,  3.75 } },
+    { {  4.0,  4.25,  4.50,  4.75 } },
+    { {  5.0,  5.25,  5.50,  5.75 } },
+    { {  6.0,  6.25,  6.50,  6.75 } },
+    { {  7.0,  7.25,  7.50,  7.75 } },
+#ifdef __x86_64__
+    { {  8.0,  8.25,  8.50,  8.75 } },
+    { {  9.0,  9.25,  9.50,  9.75 } },
+    { { 10.0, 10.25, 10.50, 10.75 } },
+    { { 11.0, 11.25, 11.50, 11.75 } },
+    { { 12.0, 12.25, 12.50, 12.75 } },
+    { { 13.0, 13.25, 13.50, 13.75 } },
+    { { 14.0, 14.25, 14.50, 14.75 } },
+    { { 15.0, 15.25, 15.50, 15.75 } },
+#endif
   };
 
 
@@ -65,6 +75,19 @@ main (int argc, char **argv)
            : /* no output operands */
            : "r" (data) 
            : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+#ifdef __x86_64__
+      asm ("movaps 128(%0), %%xmm8\n\t"
+           "movaps 144(%0), %%xmm9\n\t"
+           "movaps 160(%0), %%xmm10\n\t"
+           "movaps 176(%0), %%xmm11\n\t"
+           "movaps 192(%0), %%xmm12\n\t"
+           "movaps 208(%0), %%xmm13\n\t"
+           "movaps 224(%0), %%xmm14\n\t"
+           "movaps 240(%0), %%xmm15\n\t"
+           : /* no output operands */
+           : "r" (data) 
+           : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
+#endif
 
       asm ("nop"); /* first breakpoint here */
 
@@ -80,6 +103,20 @@ main (int argc, char **argv)
            : /* no output operands */
            : "r" (data) 
            : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+#ifdef __x86_64__
+      asm (
+           "movaps %%xmm8, 128(%0)\n\t"
+           "movaps %%xmm9, 144(%0)\n\t"
+           "movaps %%xmm10, 160(%0)\n\t"
+           "movaps %%xmm11, 176(%0)\n\t"
+           "movaps %%xmm12, 192(%0)\n\t"
+           "movaps %%xmm13, 208(%0)\n\t"
+           "movaps %%xmm14, 224(%0)\n\t"
+           "movaps %%xmm15, 240(%0)\n\t"
+           : /* no output operands */
+           : "r" (data) 
+           : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
+#endif
 
       puts ("Bye!"); /* second breakpoint here */
     }
