@@ -1955,9 +1955,6 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  return TRUE;
 	}
 
-      if (h->plt.refcount <= 0)
-	abort ();
-
       /* When building a static executable, use .iplt, .igot.plt and
 	 .rel.iplt sections for STT_GNU_IFUNC symbols.  */
       if (htab->splt != 0)
