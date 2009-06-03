@@ -2003,10 +2003,26 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       /* STT_GNU_IFUNC symbol uses .got.plt, not .got.  But for
 	 shared library, we must go through GOT and we can't
 	 use R_386_IRELATIVE unless it is forced local.   */
-      if (!info->shared 
+      if (info->executable
 	  || info->symbolic
 	  || h->forced_local)
-	h->got.refcount = 0;
+	{
+	  if (h->pointer_equality_needed
+	      && htab->sgot != NULL)
+	    {
+	      /* We can't use .got.plt, which contains the real
+		 function addres, since we need pointer equality.
+		 We will load the GOT entry with the PLT entry
+		 in elf_i386_finish_dynamic_symbol and don't
+		 need GOT relocation.  */
+	      h->got.offset = htab->sgot->size;
+	      htab->sgot->size += 4;
+	      eh->tlsdesc_got = (bfd_vma) -1;
+	      goto skip_relgot;
+	    }
+	  else
+	    h->got.refcount = 0;
+	}
     }
   else if (htab->elf.dynamic_sections_created
 	   && h->plt.refcount > 0)
@@ -2153,6 +2169,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   else
     h->got.offset = (bfd_vma) -1;
 
+skip_relgot:
   if (eh->dyn_relocs == NULL)
     return TRUE;
 
@@ -2966,11 +2983,16 @@ elf_i386_relocate_section (bfd *output_bfd,
 		    relocation += gotplt->output_offset;
 		}
 	      else
-		relocation = (base_got->output_section->vma
-			      + base_got->output_offset + off
-			      - gotplt->output_section->vma
-			      - gotplt->output_offset);
-	     
+		{
+		  relocation = (base_got->output_section->vma
+				+ base_got->output_offset + off
+				- gotplt->output_section->vma
+				- gotplt->output_offset);
+		  /* Adjust for static executables.  */
+		  if (htab->splt == NULL)
+		    relocation += gotplt->output_offset;
+		}
+
 	      goto do_relocation;
 
 	    case R_386_GOTOFF:
@@ -4113,8 +4135,28 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	 of a version file, we just want to emit a RELATIVE reloc.
 	 The entry in the global offset table will already have been
 	 initialized in the relocate_section function.  */
-      if (info->shared
-	  && SYMBOL_REFERENCES_LOCAL (info, h))
+      if ((info->executable
+	   || info->symbolic
+	   || h->forced_local)
+	  && h->def_regular
+	  && h->pointer_equality_needed
+	  && h->type == STT_GNU_IFUNC)
+	{
+	  /* The STT_GNU_IFUNC symbol is locally defined.  But we can't
+	     use .got.plt, which contains the real function addres,
+	     since we need pointer equality.  We load the GOT entry
+	     with the PLT entry without relocation.  */
+	  asection *plt = htab->splt ? htab->splt : htab->iplt;
+	  if (htab->sgot == NULL
+	      || h->plt.offset == (bfd_vma) -1)
+	    abort ();
+	  bfd_put_32 (output_bfd, (plt->output_section->vma
+				   + plt->output_offset + h->plt.offset),
+		      htab->sgot->contents + h->got.offset);
+	  return TRUE;
+	}
+      else if (info->shared
+	       && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  rel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
