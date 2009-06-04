@@ -411,7 +411,8 @@ DEP1: $(CFILES) $(GENERATED_CFILES)
 	for f in $?; do \
 	  $(MKDEP) $(INCLUDES) $(CFLAGS) $$f > DEPA; \
 	  sed -n -e '1s/: .*/: \\/p' -e q < DEPA >> DEP2; \
-	  sed -e '1s/.*: //' -f dep.sed < DEPA | LC_ALL=C sort | uniq | \
+	  sed -e '1s/.*: //' -f dep.sed < DEPA | \
+	    LC_ALL=C sort | LC_ALL=C uniq | \
 	    sed -e 's/^[AB]/  /' -e '$$s/ \\$$//' >> DEP2; \
 	done
 	rm -f DEPA
@@ -496,6 +497,7 @@ addr2line.o: \
 ar.o: \
   ar.c \
   $(BFDDIR)/libbfd.h \
+  $(BFDDIR)/plugin.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/ansidecl.h \
   $(INCDIR)/aout/ar.h \
@@ -764,6 +766,7 @@ nlmconv.o: \
 nm.o: \
   nm.c \
   $(BFDDIR)/elf-bfd.h \
+  $(BFDDIR)/plugin.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/ansidecl.h \
   $(INCDIR)/aout/ranlib.h \
