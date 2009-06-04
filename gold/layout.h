@@ -433,16 +433,16 @@ class Layout
   Layout(const Layout&);
   Layout& operator=(const Layout&);
 
-  // Mapping from .gnu.linkonce section names to output section names.
-  struct Linkonce_mapping
+  // Mapping from input section names to output section names.
+  struct Section_name_mapping
   {
     const char* from;
     int fromlen;
     const char* to;
     int tolen;
   };
-  static const Linkonce_mapping linkonce_mapping[];
-  static const int linkonce_mapping_count;
+  static const Section_name_mapping section_name_mapping[];
+  static const int section_name_mapping_count;
 
   // During a relocatable link, a list of group sections and
   // signatures.
@@ -555,11 +555,6 @@ class Layout
   // initialized to the length of NAME.
   static const char*
   output_section_name(const char* name, size_t* plen);
-
-  // Return the output section name to use for a linkonce section
-  // name.  PLEN is as for output_section_name.
-  static const char*
-  linkonce_output_name(const char* name, size_t* plen);
 
   // Return the number of allocated output sections.
   size_t

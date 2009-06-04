@@ -2841,57 +2841,58 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     odyn->add_constant(elfcpp::DT_FLAGS_1, flags);
 }
 
-// The mapping of .gnu.linkonce section names to real section names.
+// The mapping of input section name prefixes to output section names.
+// In some cases one prefix is itself a prefix of another prefix; in
+// such a case the longer prefix must come first.  These prefixes are
+// based on the GNU linker default ELF linker script.
 
 #define MAPPING_INIT(f, t) { f, sizeof(f) - 1, t, sizeof(t) - 1 }
-const Layout::Linkonce_mapping Layout::linkonce_mapping[] =
+const Layout::Section_name_mapping Layout::section_name_mapping[] =
 {
-  MAPPING_INIT("d.rel.ro.local", ".data.rel.ro.local"), // Before "d.rel.ro".
-  MAPPING_INIT("d.rel.ro", ".data.rel.ro"),		// Before "d".
-  MAPPING_INIT("t", ".text"),
-  MAPPING_INIT("r", ".rodata"),
-  MAPPING_INIT("d", ".data"),
-  MAPPING_INIT("b", ".bss"),
-  MAPPING_INIT("s", ".sdata"),
-  MAPPING_INIT("sb", ".sbss"),
-  MAPPING_INIT("s2", ".sdata2"),
-  MAPPING_INIT("sb2", ".sbss2"),
-  MAPPING_INIT("wi", ".debug_info"),
-  MAPPING_INIT("td", ".tdata"),
-  MAPPING_INIT("tb", ".tbss"),
-  MAPPING_INIT("lr", ".lrodata"),
-  MAPPING_INIT("l", ".ldata"),
-  MAPPING_INIT("lb", ".lbss"),
+  MAPPING_INIT(".text.", ".text"),
+  MAPPING_INIT(".ctors.", ".ctors"),
+  MAPPING_INIT(".dtors.", ".dtors"),
+  MAPPING_INIT(".rodata.", ".rodata"),
+  MAPPING_INIT(".data.rel.ro.local", ".data.rel.ro.local"),
+  MAPPING_INIT(".data.rel.ro", ".data.rel.ro"),
+  MAPPING_INIT(".data.", ".data"),
+  MAPPING_INIT(".bss.", ".bss"),
+  MAPPING_INIT(".tdata.", ".tdata"),
+  MAPPING_INIT(".tbss.", ".tbss"),
+  MAPPING_INIT(".init_array.", ".init_array"),
+  MAPPING_INIT(".fini_array.", ".fini_array"),
+  MAPPING_INIT(".sdata.", ".sdata"),
+  MAPPING_INIT(".sbss.", ".sbss"),
+  // FIXME: In the GNU linker, .sbss2 and .sdata2 are handled
+  // differently depending on whether it is creating a shared library.
+  MAPPING_INIT(".sdata2.", ".sdata"),
+  MAPPING_INIT(".sbss2.", ".sbss"),
+  MAPPING_INIT(".lrodata.", ".lrodata"),
+  MAPPING_INIT(".ldata.", ".ldata"),
+  MAPPING_INIT(".lbss.", ".lbss"),
+  MAPPING_INIT(".gcc_except_table.", ".gcc_except_table"),
+  MAPPING_INIT(".gnu.linkonce.d.rel.ro.local.", ".data.rel.ro.local"),
+  MAPPING_INIT(".gnu.linkonce.d.rel.ro.", ".data.rel.ro"),
+  MAPPING_INIT(".gnu.linkonce.t.", ".text"),
+  MAPPING_INIT(".gnu.linkonce.r.", ".rodata"),
+  MAPPING_INIT(".gnu.linkonce.d.", ".data"),
+  MAPPING_INIT(".gnu.linkonce.b.", ".bss"),
+  MAPPING_INIT(".gnu.linkonce.s.", ".sdata"),
+  MAPPING_INIT(".gnu.linkonce.sb.", ".sbss"),
+  MAPPING_INIT(".gnu.linkonce.s2.", ".sdata"),
+  MAPPING_INIT(".gnu.linkonce.sb2.", ".sbss"),
+  MAPPING_INIT(".gnu.linkonce.wi.", ".debug_info"),
+  MAPPING_INIT(".gnu.linkonce.td.", ".tdata"),
+  MAPPING_INIT(".gnu.linkonce.tb.", ".tbss"),
+  MAPPING_INIT(".gnu.linkonce.lr.", ".lrodata"),
+  MAPPING_INIT(".gnu.linkonce.l.", ".ldata"),
+  MAPPING_INIT(".gnu.linkonce.lb.", ".lbss"),
 };
 #undef MAPPING_INIT
 
-const int Layout::linkonce_mapping_count =
-  sizeof(Layout::linkonce_mapping) / sizeof(Layout::linkonce_mapping[0]);
-
-// Return the name of the output section to use for a .gnu.linkonce
-// section.  This is based on the default ELF linker script of the old
-// GNU linker.  For example, we map a name like ".gnu.linkonce.t.foo"
-// to ".text".  Set *PLEN to the length of the name.  *PLEN is
-// initialized to the length of NAME.
-
-const char*
-Layout::linkonce_output_name(const char* name, size_t *plen)
-{
-  const char* s = name + sizeof(".gnu.linkonce") - 1;
-  if (*s != '.')
-    return name;
-  ++s;
-  const Linkonce_mapping* plm = linkonce_mapping;
-  for (int i = 0; i < linkonce_mapping_count; ++i, ++plm)
-    {
-      if (strncmp(s, plm->from, plm->fromlen) == 0 && s[plm->fromlen] == '.')
-	{
-	  *plen = plm->tolen;
-	  return plm->to;
-	}
-    }
-  return name;
-}
+const int Layout::section_name_mapping_count =
+  (sizeof(Layout::section_name_mapping)
+   / sizeof(Layout::section_name_mapping[0]));
 
 // Choose the output section name to use given an input section name.
 // Set *PLEN to the length of the name.  *PLEN is initialized to the
@@ -2900,13 +2901,6 @@ Layout::linkonce_output_name(const char* name, size_t *plen)
 const char*
 Layout::output_section_name(const char* name, size_t* plen)
 {
-  if (Layout::is_linkonce(name))
-    {
-      // .gnu.linkonce sections are laid out as though they were named
-      // for the sections are placed into.
-      return Layout::linkonce_output_name(name, plen);
-    }
-
   // gcc 4.3 generates the following sorts of section names when it
   // needs a section name specific to a function:
   //   .text.FN
@@ -2933,58 +2927,25 @@ Layout::output_section_name(const char* name, size_t* plen)
   // Also of interest: .rodata.strN.N, .rodata.cstN, both of which the
   // GNU linker maps to .rodata.
 
-  // The .data.rel.ro sections enable a security feature triggered by
-  // the -z relro option.  Section which need to be relocated at
-  // program startup time but which may be readonly after startup are
-  // grouped into .data.rel.ro.  They are then put into a PT_GNU_RELRO
-  // segment.  The dynamic linker will make that segment writable,
-  // perform relocations, and then make it read-only.  FIXME: We do
-  // not yet implement this optimization.
+  // The .data.rel.ro sections are used with -z relro.  The sections
+  // are recognized by name.  We use the same names that the GNU
+  // linker does for these sections.
 
-  // It is hard to handle this in a principled way.
+  // It is hard to handle this in a principled way, so we don't even
+  // try.  We use a table of mappings.  If the input section name is
+  // not found in the table, we simply use it as the output section
+  // name.
 
-  // These are the rules we follow:
-
-  // If the section name has no initial '.', or no dot other than an
-  // initial '.', we use the name unchanged (i.e., "mysection" and
-  // ".text" are unchanged).
-
-  // If the name starts with '.note', we keep it unchanged (e.g. to
-  // avoid truncating '.note.ABI-tag' to '.note').
-
-  // If the name starts with ".data.rel.ro.local" we use
-  // ".data.rel.ro.local".
-
-  // If the name starts with ".data.rel.ro" we use ".data.rel.ro".
-
-  // Otherwise, we drop the second '.' and everything that comes after
-  // it (i.e., ".text.XXX" becomes ".text").
-
-  const char* s = name;
-  if (*s != '.')
-    return name;
-  ++s;
-  const char* sdot = strchr(s, '.');
-  if (sdot == NULL)
-    return name;
-  if (strncmp(name, ".note.", 6) == 0)
-    return name;
-
-  const char* const data_rel_ro_local = ".data.rel.ro.local";
-  if (strncmp(name, data_rel_ro_local, strlen(data_rel_ro_local)) == 0)
+  const Section_name_mapping* psnm = section_name_mapping;
+  for (int i = 0; i < section_name_mapping_count; ++i, ++psnm)
     {
-      *plen = strlen(data_rel_ro_local);
-      return data_rel_ro_local;
+      if (strncmp(name, psnm->from, psnm->fromlen) == 0)
+	{
+	  *plen = psnm->tolen;
+	  return psnm->to;
+	}
     }
 
-  const char* const data_rel_ro = ".data.rel.ro";
-  if (strncmp(name, data_rel_ro, strlen(data_rel_ro)) == 0)
-    {
-      *plen = strlen(data_rel_ro);
-      return data_rel_ro;
-    }
-
-  *plen = sdot - name;
   return name;
 }
 

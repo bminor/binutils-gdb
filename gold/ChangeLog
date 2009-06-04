@@ -1,3 +1,16 @@
+2009-06-03  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::section_name_mapping): New array, replacing
+	Layout::linkonce_mapping.
+	(Layout::section_name_mapping_count): New variable, replacing
+	Layout::linkonce_mapping_count.
+	(Layout::linkonce_output_name): Remove.
+	(Layout::output_section_name): Rewrite.
+	* layout.h (class Layout): Rename Linkonce_mapping to
+	Section_name_mapping, linkonce_mapping to section_name_mapping,
+	linkonce_mapping_count to section_name_mapping_count.  Don't
+	declare linkonce_output_name.
+
 2009-06-03  Doug Kwan  <dougkwan@google.com>
 
 	* gold/arm.cc (namespace utils): New.
