@@ -97,7 +97,7 @@ namespace utils
   static inline int32_t
   sign_extend(uint32_t bits)
   {
-    gold_assert(no_bits < 1 || no_bits > 32);
+    gold_assert(no_bits >= 0 && no_bits <= 32);
     if (no_bits == 32)
       return static_cast<int32_t>(bits);
     uint32_t mask = (~((uint32_t) 0)) >> (32 - no_bits);
@@ -112,7 +112,7 @@ namespace utils
   static inline bool
   has_overflow(uint32_t bits)
   {
-    gold_assert(no_bits < 1 || no_bits > 32);
+    gold_assert(no_bits >= 0 && no_bits <= 32);
     if (no_bits == 32)
       return false;
     int32_t max = (1 << (no_bits - 1)) - 1;

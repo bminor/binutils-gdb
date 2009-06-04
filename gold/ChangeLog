@@ -1,3 +1,8 @@
+2009-06-03  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (utils::sign_extend): Reverse test in gold_assert.
+	(utils::has_overflow): Same.
+
 2009-06-03  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::section_name_mapping): New array, replacing
