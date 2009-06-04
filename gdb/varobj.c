@@ -1539,7 +1539,8 @@ VEC(varobj_update_result) *varobj_update (struct varobj **varp, int explicit)
 
       if (r.status == VAROBJ_NOT_IN_SCOPE)
 	{
-	  VEC_safe_push (varobj_update_result, result, &r);
+	  if (r.type_changed || r.changed)
+	    VEC_safe_push (varobj_update_result, result, &r);
 	  return result;
 	}
             
