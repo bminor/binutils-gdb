@@ -3313,7 +3313,7 @@ relationship between pointers and addresses.  These have default
 definitions, appropriate for architectures on which all pointers are
 simple unsigned byte addresses.
 
-@deftypefun CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *@var{current_gdbarch}, struct type *@var{type}, char *@var{buf})
+@deftypefun CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *@var{gdbarch}, struct type *@var{type}, char *@var{buf})
 Assume that @var{buf} holds a pointer of type @var{type}, in the
 appropriate format for the current architecture.  Return the byte
 address the pointer refers to.
@@ -3322,7 +3322,7 @@ This function may safely assume that @var{type} is either a pointer or a
 C@t{++} reference type.
 @end deftypefun
 
-@deftypefun void gdbarch_address_to_pointer (struct gdbarch *@var{current_gdbarch}, struct type *@var{type}, char *@var{buf}, CORE_ADDR @var{addr})
+@deftypefun void gdbarch_address_to_pointer (struct gdbarch *@var{gdbarch}, struct type *@var{type}, char *@var{buf}, CORE_ADDR @var{addr})
 Store in @var{buf} a pointer of type @var{type} representing the address
 @var{addr}, in the appropriate format for the current architecture.
 
@@ -3346,18 +3346,18 @@ following macros should be defined in order to disambiguate these
 types within @value{GDBN} as well as provide the added information to
 a @value{GDBN} user when printing type expressions.
 
-@deftypefun int gdbarch_address_class_type_flags (struct gdbarch *@var{current_gdbarch}, int @var{byte_size}, int @var{dwarf2_addr_class})
+@deftypefun int gdbarch_address_class_type_flags (struct gdbarch *@var{gdbarch}, int @var{byte_size}, int @var{dwarf2_addr_class})
 Returns the type flags needed to construct a pointer type whose size
 is @var{byte_size} and whose address class is @var{dwarf2_addr_class}.
 This function is normally called from within a symbol reader.  See
 @file{dwarf2read.c}.
 @end deftypefun
 
-@deftypefun {char *} gdbarch_address_class_type_flags_to_name (struct gdbarch *@var{current_gdbarch}, int @var{type_flags})
+@deftypefun {char *} gdbarch_address_class_type_flags_to_name (struct gdbarch *@var{gdbarch}, int @var{type_flags})
 Given the type flags representing an address class qualifier, return
 its name.
 @end deftypefun
-@deftypefun int gdbarch_address_class_name_to_type_flags (struct gdbarch *@var{current_gdbarch}, int @var{name}, int *@var{type_flags_ptr})
+@deftypefun int gdbarch_address_class_name_to_type_flags (struct gdbarch *@var{gdbarch}, int @var{name}, int *@var{type_flags_ptr})
 Given an address qualifier name, set the @code{int} referenced by @var{type_flags_ptr} to the type flags
 for that address class qualifier.
 @end deftypefun
