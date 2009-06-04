@@ -4979,7 +4979,8 @@ DEP1: $(CFILES) $(MULTI_CFILES)
 	for f in $?; do \
 	  $(MKDEP) $(DEP_FLAGS) $$f > DEP; \
 	  sed -n -e '1s/: .*/: \\/p' -e q < DEP >> DEP2; \
-	  sed -e '1s/.*://' -f ../dep.sed < DEP | LC_ALL=C sort | uniq | \
+	  sed -e '1s/.*://' -f ../dep.sed < DEP | \
+	    LC_ALL=C sort | LC_ALL=C uniq | \
 	    sed -e 's/^[AB]/  /' -e '$$s/ \\$$//' >> DEP2; \
 	done
 	mv -f DEPDIR/DEP2 $@
@@ -5009,7 +5010,7 @@ DEPTC: $(TARGET_CPU_CFILES)
 	      echo "DEPTC_$${c}_$${o} = \\" >> ../DEPTCA; \
 	      $(MKDEP) $(DEP_FLAGS) dumtc.c | \
 		sed -e '1s/dumtc.o: //' -f ../dep.sed | \
-		LC_ALL=C sort | uniq | \
+		LC_ALL=C sort | LC_ALL=C uniq | \
 		sed -e '/^A/d' -e 's/^B/  /' -e '$$s/ \\$$//' >> ../DEPTCA; \
 	      rm -f dumtc.c; \
 	    else true; fi; \
@@ -5050,7 +5051,7 @@ DEPOBJ: $(OBJ_FORMAT_CFILES)
 	      echo "DEPOBJ_$${c}_$${o} = \\" >> ../DEPOBJA; \
 	      $(MKDEP) $(DEP_FLAGS) dumobj.c | \
 	        sed -e "s/dumobj.o: //" -f ../dep.sed | \
-		LC_ALL=C sort | uniq | \
+		LC_ALL=C sort | LC_ALL=C uniq | \
 		sed -e '/^A/d' -e 's/^B/  /' -e '$$s/ \\$$//' >> ../DEPOBJA; \
 	      rm -f dumobj.c; \
 	    else true; fi; \
@@ -5088,7 +5089,7 @@ DEP2: $(TARGET_CPU_HFILES) $(OBJ_FORMAT_HFILES)
 	      echo "DEP_$${c}_$${o} = \\" >> ../DEP2A; \
 	      $(MKDEP) $(DEP_FLAGS) dummy.c | \
 	        sed -e "s/dummy.o: //" -f ../dep.sed | \
-		LC_ALL=C sort | uniq | \
+		LC_ALL=C sort | LC_ALL=C uniq | \
 		sed -e '/^A/d' -e 's/^B/  /' -e '$$s/ \\$$//' >> ../DEP2A; \
 	    else true; fi; \
 	  done; \
