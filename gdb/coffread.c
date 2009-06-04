@@ -1474,6 +1474,16 @@ patch_opaque_types (struct symtab *s)
     }
 }
 
+static int
+coff_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
+{
+  return gdbarch_sdb_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
+}
+
+static const struct symbol_register_ops coff_register_funcs = {
+  coff_reg_to_regnum
+};
+
 static struct symbol *
 process_coff_symbol (struct coff_symbol *cs,
 		     union internal_auxent *aux,
@@ -1554,8 +1564,8 @@ process_coff_symbol (struct coff_symbol *cs,
 #endif
 	case C_REG:
 	  SYMBOL_CLASS (sym) = LOC_REGISTER;
-	  SYMBOL_VALUE (sym) = gdbarch_sdb_reg_to_regnum
-				 (current_gdbarch, cs->c_value);
+	  SYMBOL_REGISTER_OPS (sym) = &coff_register_funcs;
+	  SYMBOL_VALUE (sym) = cs->c_value;
 	  add_symbol_to_list (sym, &local_symbols);
 	  break;
 
@@ -1571,9 +1581,9 @@ process_coff_symbol (struct coff_symbol *cs,
 
 	case C_REGPARM:
 	  SYMBOL_CLASS (sym) = LOC_REGISTER;
+	  SYMBOL_REGISTER_OPS (sym) = &coff_register_funcs;
 	  SYMBOL_IS_ARGUMENT (sym) = 1;
-	  SYMBOL_VALUE (sym) = gdbarch_sdb_reg_to_regnum
-				 (current_gdbarch, cs->c_value);
+	  SYMBOL_VALUE (sym) = cs->c_value;
 	  add_symbol_to_list (sym, &local_symbols);
 	  break;
 

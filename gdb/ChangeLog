@@ -1,3 +1,39 @@
+2009-06-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* symtab.h: Rename SYMBOL_OPS to SYMBOL_COMPUTED_OPS.
+	* ax-gdb.c (gen_var_ref): Likewise.
+	* findvar.c (read_var_value, symbol_read_needs_frame): Likewise.
+	* printcmd.c (address_info): Likewise.
+	* dwarf2loc.c (dwarf_expr_frame_base): Likewise.
+	* dwarf2read.c (dwarf2_symbol_mark_computed): Likewise.
+	* symtab.h: Rename struct symbol_ops to struct symbol_computed_ops.
+	* dwarf2loc.h: Likewise.
+	* dwarf2loc.c (dwarf2_locexpr_funcs, dwarf2_loclist_funcs): Likewise.
+
+	* symtab.h: (struct symbol_register_ops): New struct definition.
+	(struct symbol): Make "ops" member a union of symbol_computed_ops and
+	symbol_register_ops callback pointers.
+	(SYMBOL_REGISTER_OPS): New macro.
+	* tracepoint.c: Include "objfiles.h".
+	(scope_info, collect_symbol): Use SYMBOL_REGISTER_OPS register_number
+	callback to retrieve register numbers.
+	* ax-gdb.c (gen_var_ref): Likewise.
+	* findvar.c (read_var_value): Likewise.
+	* printcmd.c (address_info): Likewise.
+
+	* coffread.c (coff_reg_to_regnum): New function.
+	(coff_register_funcs): New static variable.
+	(process_coff_symbol): Do not call gdbarch_sdb_reg_to_regnum.
+	Install SYMBOL_REGISTER_OPS callbacks.
+	* mdebugread.c (mdebug_reg_to_regnum): New function.
+	(mdebug_register_funcs): New static variable.
+	(parse_symbol): Do not call gdbarch_ecoff_reg_to_regnum.
+	Install SYMBOL_REGISTER_OPS callbacks.
+	* stabsread.c (stab_reg_to_regnum): New function.
+	(stab_register_funcs): New static variable.
+	(define_symbol): Do not call gdbarch_stab_reg_to_regnum.
+	Install SYMBOL_REGISTER_OPS callbacks.
+
 2009-06-03  Doug Evans  <dje@google.com>
 
 	* symfile.c (reread_symbols): Reset psymtabs_addrmap to NULL

@@ -528,6 +528,16 @@ add_pending (FDR *fh, char *sh, struct type *t)
    SYMR's handled (normally one).  */
 
 static int
+mdebug_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
+{
+  return gdbarch_ecoff_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
+}
+
+static const struct symbol_register_ops mdebug_register_funcs = {
+  mdebug_reg_to_regnum
+};
+
+static int
 parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	      struct section_offsets *section_offsets, struct objfile *objfile)
 {
@@ -607,16 +617,16 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       goto data;
 
     case stLocal:		/* local variable, goes into current block */
-      if (sh->sc == scRegister)
-	{
-	  class = LOC_REGISTER;
-	  svalue = gdbarch_ecoff_reg_to_regnum (current_gdbarch, svalue);
-	}
-      else
-	class = LOC_LOCAL;
       b = top_stack->cur_block;
       s = new_symbol (name);
       SYMBOL_VALUE (s) = svalue;
+      if (sh->sc == scRegister)
+	{
+	  class = LOC_REGISTER;
+	  SYMBOL_REGISTER_OPS (s) = &mdebug_register_funcs;
+	}
+      else
+	class = LOC_LOCAL;
 
     data:			/* Common code for symbols describing data */
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;
@@ -649,7 +659,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	case scRegister:
 	  /* Pass by value in register.  */
 	  SYMBOL_CLASS (s) = LOC_REGISTER;
-	  svalue = gdbarch_ecoff_reg_to_regnum (current_gdbarch, svalue);
+	  SYMBOL_REGISTER_OPS (s) = &mdebug_register_funcs;
 	  break;
 	case scVar:
 	  /* Pass by reference on stack.  */
@@ -658,7 +668,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	case scVarRegister:
 	  /* Pass by reference in register.  */
 	  SYMBOL_CLASS (s) = LOC_REGPARM_ADDR;
-	  svalue = gdbarch_ecoff_reg_to_regnum (current_gdbarch, svalue);
+	  SYMBOL_REGISTER_OPS (s) = &mdebug_register_funcs;
 	  break;
 	default:
 	  /* Pass by value on stack.  */

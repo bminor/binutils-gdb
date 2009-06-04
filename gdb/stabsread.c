@@ -579,6 +579,29 @@ symbol_reference_defined (char **string)
     }
 }
 
+static int
+stab_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
+{
+  int regno = gdbarch_stab_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
+
+  if (regno >= gdbarch_num_regs (gdbarch)
+		+ gdbarch_num_pseudo_regs (gdbarch))
+    {
+      reg_value_complaint (regno,
+			   gdbarch_num_regs (gdbarch)
+			     + gdbarch_num_pseudo_regs (gdbarch),
+			   SYMBOL_PRINT_NAME (sym));
+
+      regno = gdbarch_sp_regnum (gdbarch); /* Known safe, though useless */
+    }
+
+  return regno;
+}
+
+static const struct symbol_register_ops stab_register_funcs = {
+  stab_reg_to_regnum
+};
+
 struct symbol *
 define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	       struct objfile *objfile)
@@ -993,18 +1016,9 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* Parameter which is in a register.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGISTER;
+      SYMBOL_REGISTER_OPS (sym) = &stab_register_funcs;
       SYMBOL_IS_ARGUMENT (sym) = 1;
-      SYMBOL_VALUE (sym) = gdbarch_stab_reg_to_regnum (current_gdbarch, valu);
-      if (SYMBOL_VALUE (sym) >= gdbarch_num_regs (current_gdbarch)
-				  + gdbarch_num_pseudo_regs (current_gdbarch))
-	{
-	  reg_value_complaint (SYMBOL_VALUE (sym),
-			       gdbarch_num_regs (current_gdbarch)
-				 + gdbarch_num_pseudo_regs (current_gdbarch),
-			       SYMBOL_PRINT_NAME (sym));
-	  SYMBOL_VALUE (sym) = gdbarch_sp_regnum (current_gdbarch);
-	  /* Known safe, though useless */
-	}
+      SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
       break;
@@ -1013,17 +1027,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* Register variable (either global or local).  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGISTER;
-      SYMBOL_VALUE (sym) = gdbarch_stab_reg_to_regnum (current_gdbarch, valu);
-      if (SYMBOL_VALUE (sym) >= gdbarch_num_regs (current_gdbarch)
-				+ gdbarch_num_pseudo_regs (current_gdbarch))
-	{
-	  reg_value_complaint (SYMBOL_VALUE (sym),
-			       gdbarch_num_regs (current_gdbarch)
-				 + gdbarch_num_pseudo_regs (current_gdbarch),
-			       SYMBOL_PRINT_NAME (sym));
-	  SYMBOL_VALUE (sym) = gdbarch_sp_regnum (current_gdbarch);
-	  /* Known safe, though useless */
-	}
+      SYMBOL_REGISTER_OPS (sym) = &stab_register_funcs;
+      SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       if (within_function)
 	{
@@ -1059,6 +1064,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 			     SYMBOL_LINKAGE_NAME (sym)) == 0)
 		{
 		  SYMBOL_CLASS (prev_sym) = LOC_REGISTER;
+		  SYMBOL_REGISTER_OPS (prev_sym) = &stab_register_funcs;
 		  /* Use the type from the LOC_REGISTER; that is the type
 		     that is actually in that register.  */
 		  SYMBOL_TYPE (prev_sym) = SYMBOL_TYPE (sym);
@@ -1296,18 +1302,9 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* Reference parameter which is in a register.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
+      SYMBOL_REGISTER_OPS (sym) = &stab_register_funcs;
       SYMBOL_IS_ARGUMENT (sym) = 1;
-      SYMBOL_VALUE (sym) = gdbarch_stab_reg_to_regnum (current_gdbarch, valu);
-      if (SYMBOL_VALUE (sym) >= gdbarch_num_regs (current_gdbarch)
-				+ gdbarch_num_pseudo_regs (current_gdbarch))
-	{
-	  reg_value_complaint (SYMBOL_VALUE (sym),
-			       gdbarch_num_regs (current_gdbarch)
-				 + gdbarch_num_pseudo_regs (current_gdbarch),
-			       SYMBOL_PRINT_NAME (sym));
-	  SYMBOL_VALUE (sym) = gdbarch_sp_regnum (current_gdbarch);
-	  /* Known safe, though useless */
-	}
+      SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
       break;

@@ -347,11 +347,11 @@ symbol_read_needs_frame (struct symbol *sym)
          we failed to consider one.  */
     case LOC_COMPUTED:
       /* FIXME: cagney/2004-01-26: It should be possible to
-	 unconditionally call the SYMBOL_OPS method when available.
+	 unconditionally call the SYMBOL_COMPUTED_OPS method when available.
 	 Unfortunately DWARF 2 stores the frame-base (instead of the
 	 function) location in a function's symbol.  Oops!  For the
 	 moment enable this when/where applicable.  */
-      return SYMBOL_OPS (sym)->read_needs_frame (sym);
+      return SYMBOL_COMPUTED_OPS (sym)->read_needs_frame (sym);
 
     case LOC_REGISTER:
     case LOC_ARG:
@@ -486,7 +486,8 @@ read_var_value (struct symbol *var, struct frame_info *frame)
     case LOC_REGISTER:
     case LOC_REGPARM_ADDR:
       {
-	int regno = SYMBOL_VALUE (var);
+	int regno = SYMBOL_REGISTER_OPS (var)
+		      ->register_number (var, get_frame_arch (frame));
 	struct value *regval;
 
 	if (SYMBOL_CLASS (var) == LOC_REGPARM_ADDR)
@@ -514,11 +515,11 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 
     case LOC_COMPUTED:
       /* FIXME: cagney/2004-01-26: It should be possible to
-	 unconditionally call the SYMBOL_OPS method when available.
+	 unconditionally call the SYMBOL_COMPUTED_OPS method when available.
 	 Unfortunately DWARF 2 stores the frame-base (instead of the
 	 function) location in a function's symbol.  Oops!  For the
 	 moment enable this when/where applicable.  */
-      return SYMBOL_OPS (var)->read_variable (var, frame);
+      return SYMBOL_COMPUTED_OPS (var)->read_variable (var, frame);
 
     case LOC_UNRESOLVED:
       {

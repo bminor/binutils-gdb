@@ -1105,6 +1105,8 @@ sym_info (char *arg, int from_tty)
 static void
 address_info (char *exp, int from_tty)
 {
+  struct gdbarch *gdbarch;
+  int regno;
   struct symbol *sym;
   struct minimal_symbol *msymbol;
   long val;
@@ -1167,6 +1169,7 @@ address_info (char *exp, int from_tty)
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
   section = SYMBOL_OBJ_SECTION (sym);
+  gdbarch = get_objfile_arch (SYMBOL_SYMTAB (sym)->objfile);
 
   switch (SYMBOL_CLASS (sym))
     {
@@ -1191,20 +1194,28 @@ address_info (char *exp, int from_tty)
 
     case LOC_COMPUTED:
       /* FIXME: cagney/2004-01-26: It should be possible to
-	 unconditionally call the SYMBOL_OPS method when available.
+	 unconditionally call the SYMBOL_COMPUTED_OPS method when available.
 	 Unfortunately DWARF 2 stores the frame-base (instead of the
 	 function) location in a function's symbol.  Oops!  For the
 	 moment enable this when/where applicable.  */
-      SYMBOL_OPS (sym)->describe_location (sym, gdb_stdout);
+      SYMBOL_COMPUTED_OPS (sym)->describe_location (sym, gdb_stdout);
       break;
 
     case LOC_REGISTER:
+      /* GDBARCH is the architecture associated with the objfile the symbol
+	 is defined in; the target architecture may be different, and may
+	 provide additional registers.  However, we do not know the target
+	 architecture at this point.  We assume the objfile architecture
+	 will contain all the standard registers that occur in debug info
+	 in that objfile.  */
+      regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
+
       if (SYMBOL_IS_ARGUMENT (sym))
 	printf_filtered (_("an argument in register %s"),
-			 gdbarch_register_name (current_gdbarch, val));
+			 gdbarch_register_name (gdbarch, regno));
       else
 	printf_filtered (_("a variable in register %s"),
-			 gdbarch_register_name (current_gdbarch, val));
+			 gdbarch_register_name (gdbarch, regno));
       break;
 
     case LOC_STATIC:
@@ -1222,8 +1233,10 @@ address_info (char *exp, int from_tty)
       break;
 
     case LOC_REGPARM_ADDR:
+      /* Note comment at LOC_REGISTER.  */
+      regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
       printf_filtered (_("address of an argument in register %s"),
-		       gdbarch_register_name (current_gdbarch, val));
+		       gdbarch_register_name (gdbarch, regno));
       break;
 
     case LOC_ARG:

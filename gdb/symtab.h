@@ -414,7 +414,11 @@ enum address_class
 
   LOC_STATIC,
 
-  /* Value is in register.  SYMBOL_VALUE is the register number.
+  /* Value is in register.  SYMBOL_VALUE is the register number
+     in the original debug format.  SYMBOL_REGISTER_OPS holds a
+     function that can be called to transform this into the
+     actual register number this represents in a specific target
+     architecture (gdbarch).
 
      For some symbol formats (stabs, for some compilers at least),
      the compiler generates two symbols, an argument and a register.
@@ -488,16 +492,16 @@ enum address_class
   LOC_OPTIMIZED_OUT,
 
   /* The variable's address is computed by a set of location
-     functions (see "struct symbol_ops" below).  */
+     functions (see "struct symbol_computed_ops" below).  */
   LOC_COMPUTED,
 };
 
-/* The methods needed to implement a symbol class.  These methods can
+/* The methods needed to implement LOC_COMPUTED.  These methods can
    use the symbol's .aux_value for additional per-symbol information.
 
    At present this is only used to implement location expressions.  */
 
-struct symbol_ops
+struct symbol_computed_ops
 {
 
   /* Return the value of the variable SYMBOL, relative to the stack
@@ -525,6 +529,13 @@ struct symbol_ops
 
   void (*tracepoint_var_ref) (struct symbol * symbol, struct agent_expr * ax,
 			      struct axs_value * value);
+};
+
+/* Functions used with LOC_REGISTER and LOC_REGPARM_ADDR.  */
+
+struct symbol_register_ops
+{
+  int (*register_number) (struct symbol *symbol, struct gdbarch *gdbarch);
 };
 
 /* This structure is space critical.  See space comments at the top. */
@@ -571,7 +582,14 @@ struct symbol
   /* Method's for symbol's of this class.  */
   /* NOTE: cagney/2003-11-02: See comment above attached to "aclass".  */
 
-  const struct symbol_ops *ops;
+  union
+    {
+      /* Used with LOC_COMPUTED.  */
+      const struct symbol_computed_ops *ops_computed;
+
+      /* Used with LOC_REGISTER and LOC_REGPARM_ADDR.  */
+      const struct symbol_register_ops *ops_register;
+    } ops;
 
   /* An arbitrary data pointer, allowing symbol readers to record
      additional information on a per-symbol basis.  Note that this data
@@ -598,7 +616,8 @@ struct symbol
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_SYMTAB(symbol)		(symbol)->symtab
-#define SYMBOL_OPS(symbol)              (symbol)->ops
+#define SYMBOL_COMPUTED_OPS(symbol)     (symbol)->ops.ops_computed
+#define SYMBOL_REGISTER_OPS(symbol)     (symbol)->ops.ops_register
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
 
 /* A partial_symbol records the name, domain, and address class of

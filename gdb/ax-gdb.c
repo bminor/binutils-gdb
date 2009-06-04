@@ -592,7 +592,7 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
          this as an lvalue or rvalue, the caller will generate the
          right code.  */
       value->kind = axs_lvalue_register;
-      value->u.reg = SYMBOL_VALUE (var);
+      value->u.reg = SYMBOL_REGISTER_OPS (var)->register_number (var, gdbarch);
       break;
 
       /* A lot like LOC_REF_ARG, but the pointer lives directly in a
@@ -600,7 +600,7 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
          because it's just like any other case where the thing
 	 has a real address.  */
     case LOC_REGPARM_ADDR:
-      ax_reg (ax, SYMBOL_VALUE (var));
+      ax_reg (ax, SYMBOL_REGISTER_OPS (var)->register_number (var, gdbarch));
       value->kind = axs_lvalue_memory;
       break;
 
@@ -619,11 +619,11 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
 
     case LOC_COMPUTED:
       /* FIXME: cagney/2004-01-26: It should be possible to
-	 unconditionally call the SYMBOL_OPS method when available.
+	 unconditionally call the SYMBOL_COMPUTED_OPS method when available.
 	 Unfortunately DWARF 2 stores the frame-base (instead of the
 	 function) location in a function's symbol.  Oops!  For the
 	 moment enable this when/where applicable.  */
-      SYMBOL_OPS (var)->tracepoint_var_ref (var, ax, value);
+      SYMBOL_COMPUTED_OPS (var)->tracepoint_var_ref (var, ax, value);
       break;
 
     case LOC_OPTIMIZED_OUT:

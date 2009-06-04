@@ -41,6 +41,7 @@
 #include "user-regs.h"
 #include "valprint.h"
 #include "gdbcore.h"
+#include "objfiles.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -783,7 +784,7 @@ collect_symbol (struct collection_list *collect,
       add_memrange (collect, memrange_absolute, offset, len);
       break;
     case LOC_REGISTER:
-      reg = SYMBOL_VALUE (sym);
+      reg = SYMBOL_REGISTER_OPS (sym)->register_number (sym, current_gdbarch);
       if (info_verbose)
 	printf_filtered ("LOC_REG[parm] %s: ", 
 			 SYMBOL_PRINT_NAME (sym));
@@ -1845,6 +1846,8 @@ scope_info (char *args, int from_tty)
   char **canonical, *symname, *save_args = args;
   struct dict_iterator iter;
   int j, count = 0;
+  struct gdbarch *gdbarch;
+  int regno;
 
   if (args == 0 || *args == 0)
     error (_("requires an argument (function, line or *addr) to define a scope"));
@@ -1871,6 +1874,8 @@ scope_info (char *args, int from_tty)
 	  if (symname == NULL || *symname == '\0')
 	    continue;		/* probably botched, certainly useless */
 
+	  gdbarch = get_objfile_arch (SYMBOL_SYMTAB (sym)->objfile);
+
 	  printf_filtered ("Symbol %s is ", symname);
 	  switch (SYMBOL_CLASS (sym))
 	    {
@@ -1896,14 +1901,21 @@ scope_info (char *args, int from_tty)
 	      printf_filtered ("%s", paddress (SYMBOL_VALUE_ADDRESS (sym)));
 	      break;
 	    case LOC_REGISTER:
+	      /* GDBARCH is the architecture associated with the objfile
+		 the symbol is defined in; the target architecture may be
+		 different, and may provide additional registers.  However,
+		 we do not know the target architecture at this point.
+		 We assume the objfile architecture will contain all the
+		 standard registers that occur in debug info in that
+		 objfile.  */
+	      regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
+
 	      if (SYMBOL_IS_ARGUMENT (sym))
 		printf_filtered ("an argument in register $%s",
-				 gdbarch_register_name
-				 (current_gdbarch, SYMBOL_VALUE (sym)));
+				 gdbarch_register_name (gdbarch, regno));
 	      else
 		printf_filtered ("a local variable in register $%s",
-				 gdbarch_register_name
-				 (current_gdbarch, SYMBOL_VALUE (sym)));
+				 gdbarch_register_name (gdbarch, regno));
 	      break;
 	    case LOC_ARG:
 	      printf_filtered ("an argument at stack/frame offset %ld",
@@ -1918,9 +1930,10 @@ scope_info (char *args, int from_tty)
 			       SYMBOL_VALUE (sym));
 	      break;
 	    case LOC_REGPARM_ADDR:
+	      /* Note comment at LOC_REGISTER.  */
+	      regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
 	      printf_filtered ("the address of an argument, in register $%s",
-			       gdbarch_register_name
-				 (current_gdbarch, SYMBOL_VALUE (sym)));
+			       gdbarch_register_name (gdbarch, regno));
 	      break;
 	    case LOC_TYPEDEF:
 	      printf_filtered ("a typedef.\n");
@@ -1948,7 +1961,7 @@ scope_info (char *args, int from_tty)
 	      printf_filtered ("optimized out.\n");
 	      continue;
 	    case LOC_COMPUTED:
-	      SYMBOL_OPS (sym)->describe_location (sym, gdb_stdout);
+	      SYMBOL_COMPUTED_OPS (sym)->describe_location (sym, gdb_stdout);
 	      break;
 	    }
 	  if (SYMBOL_TYPE (sym))

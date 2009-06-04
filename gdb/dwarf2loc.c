@@ -154,7 +154,7 @@ dwarf_expr_frame_base (void *baton, gdb_byte **start, size_t * length)
      something has gone wrong.  */
   gdb_assert (framefunc != NULL);
 
-  if (SYMBOL_OPS (framefunc) == &dwarf2_loclist_funcs)
+  if (SYMBOL_COMPUTED_OPS (framefunc) == &dwarf2_loclist_funcs)
     {
       struct dwarf2_loclist_baton *symbaton;
       struct frame_info *frame = debaton->frame;
@@ -532,7 +532,7 @@ locexpr_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
 
 /* The set of location functions used with the DWARF-2 expression
    evaluator.  */
-const struct symbol_ops dwarf2_locexpr_funcs = {
+const struct symbol_computed_ops dwarf2_locexpr_funcs = {
   locexpr_read_variable,
   locexpr_read_needs_frame,
   locexpr_describe_location,
@@ -610,7 +610,7 @@ loclist_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
 
 /* The set of location functions used with the DWARF-2 expression
    evaluator and location lists.  */
-const struct symbol_ops dwarf2_loclist_funcs = {
+const struct symbol_computed_ops dwarf2_loclist_funcs = {
   loclist_read_variable,
   loclist_read_needs_frame,
   loclist_describe_location,

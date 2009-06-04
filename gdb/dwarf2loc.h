@@ -20,7 +20,7 @@
 #if !defined (DWARF2LOC_H)
 #define DWARF2LOC_H
 
-struct symbol_ops;
+struct symbol_computed_ops;
 struct objfile;
 struct dwarf2_per_cu_data;
 
@@ -69,7 +69,7 @@ struct dwarf2_loclist_baton
   struct dwarf2_per_cu_data *per_cu;
 };
 
-extern const struct symbol_ops dwarf2_locexpr_funcs;
-extern const struct symbol_ops dwarf2_loclist_funcs;
+extern const struct symbol_computed_ops dwarf2_locexpr_funcs;
+extern const struct symbol_computed_ops dwarf2_loclist_funcs;
 
 #endif /* dwarf2loc.h */
