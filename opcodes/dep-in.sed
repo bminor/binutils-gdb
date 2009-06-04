@@ -15,5 +15,6 @@ s! \.\./intl/libintl\.h!!g
 s/ *$//
 s/  */ /g
 s/^ */A/
-s/ / \\\nB/g
+s/ / \\\
+B/g
 $s/$/ \\/
