@@ -2361,6 +2361,7 @@ reread_symbols (void)
 	      objfile->sections = NULL;
 	      objfile->symtabs = NULL;
 	      objfile->psymtabs = NULL;
+	      objfile->psymtabs_addrmap = NULL;
 	      objfile->free_psymtabs = NULL;
 	      objfile->cp_namespace_symtab = NULL;
 	      objfile->msymbols = NULL;
