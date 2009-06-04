@@ -1,5 +1,9 @@
 2009-06-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* strings.c (main): Delay parsing of decimal digits.
+
+2009-06-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* dep-in.sed: Don't use \n in replacement part of s command.
 	* Makefile.am (DEP1): LC_ALL for uniq.
 	Run "make dep-am".

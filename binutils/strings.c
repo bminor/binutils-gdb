@@ -158,6 +158,7 @@ main (int argc, char **argv)
   int exit_status = 0;
   bfd_boolean files_given = FALSE;
   char *s;
+  int numeric_opt = 0;
 
 #if defined (HAVE_SETLOCALE)
   setlocale (LC_ALL, "");
@@ -247,13 +248,17 @@ main (int argc, char **argv)
 	  usage (stderr, 1);
 
 	default:
-	  string_min = (int) strtoul (argv[optind - 1] + 1, &s, 0);
-	  if (s != NULL && *s != 0)
-	    fatal (_("invalid integer argument %s"), argv[optind - 1] + 1);
+	  numeric_opt = optind;
 	  break;
 	}
     }
 
+  if (numeric_opt != 0)
+    {
+      string_min = (int) strtoul (argv[numeric_opt - 1] + 1, &s, 0);
+      if (s != NULL && *s != 0)
+	fatal (_("invalid integer argument %s"), argv[numeric_opt - 1] + 1);
+    }
   if (string_min < 1)
     fatal (_("invalid minimum string length %d"), string_min);
 
