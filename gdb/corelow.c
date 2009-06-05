@@ -421,7 +421,9 @@ core_open (char *filename, int from_tty)
        name ..._from_host(). */
     printf_filtered (_("Program terminated with signal %d, %s.\n"), siggy,
 		     target_signal_to_string (
-		       gdbarch_target_signal_from_host (core_gdbarch, siggy)));
+		       (core_gdbarch != NULL) ?
+			gdbarch_target_signal_from_host (core_gdbarch, siggy)
+			: siggy));
 
   /* Fetch all registers from core file.  */
   target_fetch_registers (get_current_regcache (), -1);

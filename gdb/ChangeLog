@@ -1,3 +1,8 @@
+2009-06-05  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* corelow.c (core_open): Check for core_gdbarch before calling
+	gdbarch_target_signal_from_host.
+
 2009-06-05  Tom Tromey  <tromey@redhat.com>
 
 	* c-exp.y (parse_number): Don't use K&R definition.
