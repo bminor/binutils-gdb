@@ -1,3 +1,7 @@
+2009-06-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* scripttempl/elf.sc: Remove .rel.ifunc.dyn and .rela.ifunc.dyn.
+
 2009-06-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Don't use \n in replacement part of s command.

@@ -336,19 +336,11 @@ EOF
 sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rela\./d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
 cat >> ldscripts/dyntmp.$$ <<EOF
     }
-  .rel.ifunc.dyn      ${RELOCATING-0} :
-    {
-      *(.rel.ifunc.*)
-    }
   .rela.dyn     ${RELOCATING-0} :
     {
 EOF
 sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rel\./d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
 cat >> ldscripts/dyntmp.$$ <<EOF
-    }
-  .rela.ifunc.dyn     ${RELOCATING-0} :
-    {
-      *(.rela.ifunc.*)
     }
 EOF
 fi
