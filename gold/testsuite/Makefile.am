@@ -1080,5 +1080,17 @@ local_labels_test.o: ver_test_6.c
 local_labels_test: local_labels_test.o
 	$(LINK) -Bgcctestdir/ local_labels_test.o
 
+check_PROGRAMS += discard_locals_test
+check_SCRIPTS += discard_locals_test.sh
+check_DATA += discard_locals_test.syms
+MOSTLYCLEANFILES += discard_locals_test.syms
+discard_locals_test_SOURCES = discard_locals_test.c
+discard_locals_test_LDFLAGS = -Bgcctestdir/ -Wl,--discard-locals
+discard_locals_test.syms: discard_locals_test
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+# '-Wa,-L' is required to preserve the local label used for testing.
+discard_locals_test.o: discard_locals_test.c
+	$(COMPILE) -c -Wa,-L -o $@ $<
+
 endif GCC
 endif NATIVE_LINKER

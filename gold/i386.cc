@@ -155,6 +155,19 @@ class Target_i386 : public Target_freebsd<32, false>
   do_is_defined_by_abi(const Symbol* sym) const
   { return strcmp(sym->name(), "___tls_get_addr") == 0; }
 
+  // Return whether a symbol name implies a local label.  The UnixWare
+  // 2.1 cc generates temporary symbols that start with .X, so we
+  // recognize them here.  FIXME: do other SVR4 compilers also use .X?.
+  // If so, we should move the .X recognition into
+  // Target::do_is_local_label_name.
+  bool
+  do_is_local_label_name(const char* name) const
+  {
+    if (name[0] == '.' && name[1] == 'X')
+      return true;
+    return Target::do_is_local_label_name(name);
+  }
+
   // Return the size of the GOT section.
   section_size_type
   got_size()

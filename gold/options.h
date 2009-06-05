@@ -645,6 +645,9 @@ class General_options
               N_("Try to detect violations of the One Definition Rule"),
               NULL);
 
+  DEFINE_bool(discard_locals, options::TWO_DASHES, 'X', false,
+              N_("Delete all temporary local symbols"), NULL);
+
   DEFINE_bool(dynamic_list_data, options::TWO_DASHES, '\0', false,
               N_("Add data symbols to dynamic symbols"), NULL);
 

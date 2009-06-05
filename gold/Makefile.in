@@ -87,8 +87,8 @@ am__objects_1 = archive.$(OBJEXT) binary.$(OBJEXT) common.$(OBJEXT) \
 	plugin.$(OBJEXT) readsyms.$(OBJEXT) \
 	reduced_debug_output.$(OBJEXT) reloc.$(OBJEXT) \
 	resolve.$(OBJEXT) script-sections.$(OBJEXT) script.$(OBJEXT) \
-	stringpool.$(OBJEXT) symtab.$(OBJEXT) target-select.$(OBJEXT) \
-	version.$(OBJEXT) workqueue.$(OBJEXT) \
+	stringpool.$(OBJEXT) symtab.$(OBJEXT) target.$(OBJEXT) \
+	target-select.$(OBJEXT) version.$(OBJEXT) workqueue.$(OBJEXT) \
 	workqueue-threads.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = yyscript.$(OBJEXT)
@@ -352,6 +352,7 @@ CCFILES = \
 	script.cc \
 	stringpool.cc \
 	symtab.cc \
+	target.cc \
 	target-select.cc \
 	version.cc \
 	workqueue.cc \
@@ -542,6 +543,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mremap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compressed_output.Po@am__quote@
@@ -581,6 +583,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringpool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symtab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/target-select.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/target.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/workqueue-threads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/workqueue.Po@am__quote@

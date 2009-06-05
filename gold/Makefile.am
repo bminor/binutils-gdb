@@ -68,6 +68,7 @@ CCFILES = \
 	script.cc \
 	stringpool.cc \
 	symtab.cc \
+	target.cc \
 	target-select.cc \
 	version.cc \
 	workqueue.cc \

@@ -319,12 +319,17 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_24 = exclude_libs_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_25 = exclude_libs_test.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = exclude_libs_test.syms
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = exclude_libs_test.syms libexclude_libs_test_1.a \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@        libexclude_libs_test_2.a alt/libexclude_libs_test_3.a
-
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_25 = exclude_libs_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = exclude_libs_test.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = exclude_libs_test.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_1.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_2.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libexclude_libs_test_3.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -431,7 +436,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_17 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exclude_libs_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -490,6 +496,14 @@ am__copy_test_SOURCES_DIST = copy_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_copy_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test.$(OBJEXT)
 copy_test_OBJECTS = $(am_copy_test_OBJECTS)
+am__discard_locals_test_SOURCES_DIST = discard_locals_test.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_discard_locals_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.$(OBJEXT)
+discard_locals_test_OBJECTS = $(am_discard_locals_test_OBJECTS)
+discard_locals_test_LDADD = $(LDADD)
+discard_locals_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__exception_same_shared_test_SOURCES_DIST = exception_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_exception_same_shared_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_main.$(OBJEXT)
@@ -899,6 +913,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(binary_test_SOURCES) $(binary_unittest_SOURCES) \
 	$(common_test_1_SOURCES) $(constructor_static_test_SOURCES) \
 	$(constructor_test_SOURCES) $(copy_test_SOURCES) \
+	$(discard_locals_test_SOURCES) \
 	$(exception_same_shared_test_SOURCES) \
 	$(exception_separate_shared_12_test_SOURCES) \
 	$(exception_separate_shared_21_test_SOURCES) \
@@ -952,6 +967,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__constructor_static_test_SOURCES_DIST) \
 	$(am__constructor_test_SOURCES_DIST) \
 	$(am__copy_test_SOURCES_DIST) \
+	$(am__discard_locals_test_SOURCES_DIST) \
 	$(am__exception_same_shared_test_SOURCES_DIST) \
 	$(am__exception_separate_shared_12_test_SOURCES_DIST) \
 	$(am__exception_separate_shared_21_test_SOURCES_DIST) \
@@ -1528,7 +1544,8 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test_LDADD = -lexclude_libs_test_1 -lexclude_libs_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libexclude_libs_test_3.a
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@local_labels_test_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@discard_locals_test_SOURCES = discard_locals_test.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@discard_locals_test_LDFLAGS = -Bgcctestdir/ -Wl,--discard-locals
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -1543,9 +1560,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  testsuite/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  testsuite/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  testsuite/Makefile
+	  $(AUTOMAKE) --foreign  testsuite/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -1615,6 +1632,9 @@ constructor_test$(EXEEXT): $(constructor_test_OBJECTS) $(constructor_test_DEPEND
 copy_test$(EXEEXT): $(copy_test_OBJECTS) $(copy_test_DEPENDENCIES) 
 	@rm -f copy_test$(EXEEXT)
 	$(CXXLINK) $(copy_test_LDFLAGS) $(copy_test_OBJECTS) $(copy_test_LDADD) $(LIBS)
+discard_locals_test$(EXEEXT): $(discard_locals_test_OBJECTS) $(discard_locals_test_DEPENDENCIES) 
+	@rm -f discard_locals_test$(EXEEXT)
+	$(LINK) $(discard_locals_test_LDFLAGS) $(discard_locals_test_OBJECTS) $(discard_locals_test_LDADD) $(LIBS)
 exception_same_shared_test$(EXEEXT): $(exception_same_shared_test_OBJECTS) $(exception_same_shared_test_DEPENDENCIES) 
 	@rm -f exception_same_shared_test$(EXEEXT)
 	$(CXXLINK) $(exception_same_shared_test_LDFLAGS) $(exception_same_shared_test_OBJECTS) $(exception_same_shared_test_LDADD) $(LIBS)
@@ -1898,6 +1918,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constructor_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copy_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/discard_locals_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_main.Po@am__quote@
@@ -2634,6 +2655,11 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -g -c -Wa,-L -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@local_labels_test: local_labels_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ local_labels_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@discard_locals_test.syms: discard_locals_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+# '-Wa,-L' is required to preserve the local label used for testing.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@discard_locals_test.o: discard_locals_test.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -Wa,-L -o $@ $<
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

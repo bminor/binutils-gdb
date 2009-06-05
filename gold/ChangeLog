@@ -1,5 +1,27 @@
 2009-06-05  Doug Kwan  <dougkwan@google.com>
 
+	* Makefile.am (CCFILES): Add target.cc.
+	* Makefile.in: Regenerate. 
+	* i386.cc (class Target_i386): Define new virtual method to
+	override do_is_local_label_name in parent.
+	* object.cc (Sized_relobj::do_count_local_symbols): Discard
+	local symbols if --discard-locals or -X is given.
+	* options.h (class General_options): Declare new options
+	'--discard-locals' and '-X' for discarding locals.
+	* target.h (class Target): Define new methods is_local_label_name.
+	Declare new virtual method do_is_local_label_name.
+	* target.cc: New file.
+	* testsuite/Makefile.am (check_PROGRAMS): Add discard_locals_test.
+	(check_SCRIPTS): Add discard_locals_test.sh.
+	(check_DATA): Add discard_local_tests.syms.
+	(discard_locals_test_SOURCES, discard_locals_test_LDFLAGS): Define.
+	(discard_local_tests.syms, discard_locals_test.o): New make rules.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/discard_locals_test.c: New file.
+	* testsuite/discard_locals_test.sh: Same.
+
+2009-06-05  Doug Kwan  <dougkwan@google.com>
+
 	* object.cc (Sized_relobj::Sized_relobj): Initialize
 	discarded_eh_frame_shndx_ to -1U.
 	(Sized_relobj::do_layout): Record index of a discard .eh_frame

@@ -173,6 +173,12 @@ class Target
   adjust_elf_header(unsigned char* view, int len) const
   { return this->do_adjust_elf_header(view, len); }
 
+  // Return whether NAME is a local label name.  This is used to implement the
+  // --discard-locals options.
+  bool
+  is_local_label_name(const char* name) const
+  { return this->do_is_local_label_name(name); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -238,6 +244,10 @@ class Target
   virtual void
   do_adjust_elf_header(unsigned char*, int) const
   { }
+
+  // Virtual function which may be overriden by the child class.
+  virtual bool
+  do_is_local_label_name(const char*) const;
 
  private:
   Target(const Target&);
