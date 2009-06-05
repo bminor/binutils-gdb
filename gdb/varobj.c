@@ -850,19 +850,19 @@ update_dynamic_varobj_children (struct varobj *var,
   if (!children)
     {
       gdbpy_print_stack ();
-      error ("Null value returned for children");
+      error (_("Null value returned for children"));
     }
 
   make_cleanup_py_decref (children);
 
   if (!PyIter_Check (children))
-    error ("Returned value is not iterable");
+    error (_("Returned value is not iterable"));
 
   iterator = PyObject_GetIter (children);
   if (!iterator)
     {
       gdbpy_print_stack ();
-      error ("Could not get children iterator");
+      error (_("Could not get children iterator"));
     }
   make_cleanup_py_decref (iterator);
 
@@ -879,7 +879,7 @@ update_dynamic_varobj_children (struct varobj *var,
       inner = make_cleanup_py_decref (item);
 
       if (!PyArg_ParseTuple (item, "sO", &name, &py_v))
-	error ("Invalid item from the child list");
+	error (_("Invalid item from the child list"));
       
       if (PyObject_TypeCheck (py_v, &value_object_type))
 	{
@@ -1383,7 +1383,7 @@ install_visualizer (struct varobj *var, PyObject *visualizer)
   if (!visualizer && var->children_requested)
     varobj_list_children (var);
 #else
-  error ("Python support required");
+  error (_("Python support required"));
 #endif
 }
 
@@ -1454,7 +1454,7 @@ varobj_set_visualizer (struct varobj *var, const char *visualizer)
   if (! pretty_printer)
     {
       gdbpy_print_stack ();
-      error ("Could not evaluate visualizer expression: %s", visualizer);
+      error (_("Could not evaluate visualizer expression: %s"), visualizer);
     }
 
   if (pretty_printer == Py_None)
@@ -1467,7 +1467,7 @@ varobj_set_visualizer (struct varobj *var, const char *visualizer)
 
   do_cleanups (back_to);
 #else
-  error ("Python support required");
+  error (_("Python support required"));
 #endif
 }
 
