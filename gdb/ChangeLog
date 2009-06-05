@@ -1,3 +1,9 @@
+2009-06-05  Tom Tromey  <tromey@redhat.com>
+
+	* c-exp.y (parse_number): Don't use K&R definition.
+	(yylex): Likewise.
+	(yyerror): Likewise.
+
 2009-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* varobj.c (varobj_update): Fix out of scope varobjs to not to change.
