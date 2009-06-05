@@ -1,3 +1,9 @@
+2009-06-05  Marc Khouzam <marc.khouzam@ericsson.com>
+
+	* mi/mi-main.c (mi_cmd_exec_continue)
+	(mi_cmd_exec_interrupt): Adjust parsing of thread group
+	ids to current reality, where they don't have any 'p' prefix.
+
 2009-06-05  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* corelow.c (core_open): Check for core_gdbarch before calling
