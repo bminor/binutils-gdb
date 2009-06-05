@@ -541,8 +541,8 @@ case "${targ}" in
     targ_selvecs="i386coff_vec i386aout_vec"
     ;;
   i[3-7]86-*-darwin* | i[3-7]86-*-macos10* | i[3-7]86-*-rhapsody*)
-    targ_defvec=mach_o_le_vec
-    targ_selvecs="mach_o_le_vec mach_o_be_vec mach_o_fat_vec pef_vec pef_xlib_vec sym_vec"
+    targ_defvec=mach_o_i386_vec
+    targ_selvecs="mach_o_i386_vec mach_o_le_vec mach_o_be_vec mach_o_fat_vec pef_vec pef_xlib_vec sym_vec"
     targ_archs="bfd_i386_arch bfd_powerpc_arch bfd_rs6000_arch"
     ;;
  i[3-7]86-sequent-bsd*)

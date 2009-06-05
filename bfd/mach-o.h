@@ -1,5 +1,5 @@
 /* Mach-O support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008
+   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -39,6 +39,15 @@
 #define BFD_MACH_O_SYM_NTYPE(SYM) (((SYM)->udata.i >> 24) & 0xff)
 #define BFD_MACH_O_SYM_NSECT(SYM) (((SYM)->udata.i >> 16) & 0xff)
 #define BFD_MACH_O_SYM_NDESC(SYM) ((SYM)->udata.i & 0xffff)
+
+typedef enum bfd_mach_o_mach_header_magic
+{
+  BFD_MACH_O_MH_MAGIC = 0xfeedface,
+  BFD_MACH_O_MH_CIGAM = 0xcefaedfe,
+  BFD_MACH_O_MH_MAGIC_64 = 0xfeedfacf,
+  BFD_MACH_O_MH_CIGAM_64 = 0xcffaedfe
+}
+bfd_mach_o_mach_header_magic;
 
 typedef enum bfd_mach_o_ppc_thread_flavour
 {
@@ -134,6 +143,12 @@ typedef enum bfd_mach_o_cpu_type
 }
 bfd_mach_o_cpu_type;
 
+typedef enum bfd_mach_o_cpu_subtype
+{
+  BFD_MACH_O_CPU_SUBTYPE_X86_ALL = 3
+}
+bfd_mach_o_cpu_subtype;
+
 typedef enum bfd_mach_o_filetype
 {
   BFD_MACH_O_MH_OBJECT = 1,
@@ -225,8 +240,6 @@ bfd_mach_o_section_type;
 /* Section contains only true machine instructions.  */
 #define BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS 0x80000000
 
-typedef unsigned long bfd_mach_o_cpu_subtype;
-
 typedef struct bfd_mach_o_header
 {
   unsigned long magic;
@@ -242,6 +255,9 @@ typedef struct bfd_mach_o_header
   enum bfd_endian byteorder;
 }
 bfd_mach_o_header;
+
+#define BFD_MACH_O_HEADER_SIZE 28
+#define BFD_MACH_O_HEADER_64_SIZE 32
 
 typedef struct bfd_mach_o_section
 {
@@ -260,6 +276,8 @@ typedef struct bfd_mach_o_section
   unsigned long reserved3;
 }
 bfd_mach_o_section;
+#define BFD_MACH_O_SECTION_SIZE 68
+#define BFD_MACH_O_SECTION_64_SIZE 80
 
 typedef struct bfd_mach_o_segment_command
 {
@@ -276,6 +294,8 @@ typedef struct bfd_mach_o_segment_command
   asection *segment;
 }
 bfd_mach_o_segment_command;
+#define BFD_MACH_O_LC_SEGMENT_SIZE 56
+#define BFD_MACH_O_LC_SEGMENT_64_SIZE 72
 
 /* Protection flags.  */
 #define BFD_MACH_O_PROT_READ    0x01
@@ -506,7 +526,7 @@ bfd_mach_o_uuid_command;
 typedef struct bfd_mach_o_load_command
 {
   bfd_mach_o_load_command_type type;
-  unsigned int type_required;
+  bfd_boolean type_required;
   bfd_vma offset;
   bfd_vma len;
   union
@@ -540,26 +560,44 @@ mach_o_data_struct;
 
 typedef struct mach_o_data_struct bfd_mach_o_data_struct;
 
-bfd_boolean        bfd_mach_o_valid  (bfd *);
-int                bfd_mach_o_scan_read_symtab_symbol        (bfd *, bfd_mach_o_symtab_command *, asymbol *, unsigned long);
-int                bfd_mach_o_scan_read_symtab_strtab        (bfd *, bfd_mach_o_symtab_command *);
-int                bfd_mach_o_scan_read_symtab_symbols       (bfd *, bfd_mach_o_symtab_command *);
-int                bfd_mach_o_scan_read_dysymtab_symbol      (bfd *, bfd_mach_o_dysymtab_command *, bfd_mach_o_symtab_command *, asymbol *, unsigned long);
-int                bfd_mach_o_scan_start_address             (bfd *);
-int                bfd_mach_o_scan                           (bfd *, bfd_mach_o_header *, bfd_mach_o_data_struct *);
-bfd_boolean        bfd_mach_o_mkobject                       (bfd *);
-const bfd_target * bfd_mach_o_object_p                       (bfd *);
-const bfd_target * bfd_mach_o_core_p                         (bfd *);
-const bfd_target * bfd_mach_o_archive_p                      (bfd *);
-bfd *              bfd_mach_o_openr_next_archived_file       (bfd *, bfd *);
-int                bfd_mach_o_lookup_section                 (bfd *, asection *, bfd_mach_o_load_command **, bfd_mach_o_section **);
-int                bfd_mach_o_lookup_command                 (bfd *, bfd_mach_o_load_command_type, bfd_mach_o_load_command **);
-unsigned long      bfd_mach_o_stack_addr                     (enum bfd_mach_o_cpu_type);
-int                bfd_mach_o_core_fetch_environment         (bfd *, unsigned char **, unsigned int *);
-char *             bfd_mach_o_core_file_failing_command      (bfd *);
-int                bfd_mach_o_core_file_failing_signal       (bfd *);
-bfd_boolean        bfd_mach_o_core_file_matches_executable_p (bfd *, bfd *);
+bfd_boolean bfd_mach_o_valid (bfd *);
+int bfd_mach_o_scan_read_symtab_symbol (bfd *, bfd_mach_o_symtab_command *, asymbol *, unsigned long);
+int bfd_mach_o_scan_read_symtab_strtab (bfd *, bfd_mach_o_symtab_command *);
+int bfd_mach_o_scan_read_symtab_symbols (bfd *, bfd_mach_o_symtab_command *);
+int bfd_mach_o_scan_read_dysymtab_symbol (bfd *, bfd_mach_o_dysymtab_command *, bfd_mach_o_symtab_command *, asymbol *, unsigned long);
+int bfd_mach_o_scan_start_address (bfd *);
+int bfd_mach_o_scan (bfd *, bfd_mach_o_header *, bfd_mach_o_data_struct *);
+bfd_boolean bfd_mach_o_mkobject_init (bfd *);
+const bfd_target *bfd_mach_o_object_p (bfd *);
+const bfd_target *bfd_mach_o_core_p (bfd *);
+const bfd_target *bfd_mach_o_archive_p (bfd *);
+bfd *bfd_mach_o_openr_next_archived_file (bfd *, bfd *);
+int bfd_mach_o_lookup_section (bfd *, asection *, bfd_mach_o_load_command **, bfd_mach_o_section **);
+int bfd_mach_o_lookup_command (bfd *, bfd_mach_o_load_command_type, bfd_mach_o_load_command **);
+bfd_boolean bfd_mach_o_write_contents (bfd *);
+bfd_boolean bfd_mach_o_bfd_copy_private_symbol_data (bfd *, asymbol *,
+                                                     bfd *, asymbol *);
+bfd_boolean bfd_mach_o_bfd_copy_private_section_data (bfd *, asection *,
+                                                      bfd *, asection *);
+bfd_boolean bfd_mach_o_bfd_copy_private_bfd_data (bfd *, bfd *);
+long bfd_mach_o_get_symtab_upper_bound (bfd *);
+long bfd_mach_o_canonicalize_symtab (bfd *, asymbol **);
+asymbol *bfd_mach_o_make_empty_symbol (bfd *);
+void bfd_mach_o_get_symbol_info (bfd *, asymbol *, symbol_info *);
+void bfd_mach_o_print_symbol (bfd *, PTR, asymbol *, bfd_print_symbol_type);
+bfd_boolean bfd_mach_o_bfd_print_private_bfd_data (bfd *, PTR);
+int bfd_mach_o_sizeof_headers (bfd *, struct bfd_link_info *);
+unsigned long bfd_mach_o_stack_addr (enum bfd_mach_o_cpu_type);
+int bfd_mach_o_core_fetch_environment (bfd *, unsigned char **, unsigned int *);
+char *bfd_mach_o_core_file_failing_command (bfd *);
+int bfd_mach_o_core_file_failing_signal (bfd *);
+bfd_boolean bfd_mach_o_core_file_matches_executable_p (bfd *, bfd *);
 bfd *bfd_mach_o_fat_extract (bfd *, bfd_format , const bfd_arch_info_type *);
+const bfd_target *bfd_mach_o_header_p (bfd *, bfd_mach_o_filetype,
+                                       bfd_mach_o_cpu_type);
+bfd_boolean bfd_mach_o_build_commands (bfd *abfd);
+bfd_boolean bfd_mach_o_set_section_contents (bfd *, asection *, const void *,
+                                             file_ptr, bfd_size_type);
 
 extern const bfd_target mach_o_be_vec;
 extern const bfd_target mach_o_le_vec;

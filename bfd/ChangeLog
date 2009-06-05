@@ -1,3 +1,117 @@
+2009-06-05  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h: Update copyright year.
+	(bfd_mach_o_mach_header_magic): New enum.
+	(bfd_mach_o_cpu_subtype): Now an enum.
+	(BFD_MACH_O_HEADER_SIZE, BFD_MACH_O_HEADER_64_SIZE): New macros.
+	(BFD_MACH_O_SECTION_SIZE, BFD_MACH_O_SECTION_64_SIZE): Ditto.
+	(BFD_MACH_O_LC_SEGMENT_SIZE, BFD_MACH_O_LC_SEGMENT_64_SIZE): Ditto.
+	(bfd_mach_o_load_command): Field type_required is now a boolean.
+	Reindent prototypes.
+	(bfd_mach_o_object_p, bfd_mach_o_core_p): Remove.
+	(bfd_mach_o_bfd_copy_private_symbol_data): Add a prototype.
+	(bfd_mach_o_bfd_copy_private_section_data): Ditto.
+	(bfd_mach_o_bfd_copy_private_bfd_data): Ditto.
+	(bfd_mach_o_get_symtab_upper_bound): Ditto.
+	(bfd_mach_o_canonicalize_symtab): Ditto.
+	(bfd_mach_o_get_symbol_info): Ditto.
+	(bfd_mach_o_print_symbol): Ditto.
+	(bfd_mach_o_bfd_print_private_bfd_data): Ditto.
+	(bfd_mach_o_make_empty_symbol): Ditto.
+	(bfd_mach_o_write_contents): Ditto.
+
+	* mach-o.c (bfd_mach_o_object_p, bfd_mach_o_core_p,
+	bfd_mach_o_mkobject): Defines.
+	(bfd_mach_o_valid): Returns FALSE/TRUE instead of 0/1.
+	Do not check with target vector but with flavour.
+	(struct mach_o_section_name_xlat): New declaration.
+	(dwarf_section_names_xlat): Ditto.
+	(text_section_names_xlat): Ditto.
+	(data_section_names_xlat): Ditto.
+	(struct mach_o_segment_name_xlat): Ditto.
+	(segsec_names_xlat): Ditto.
+	(bfd_mach_o_convert_section_name_to_bfd): New function.
+	(bfd_mach_o_convert_section_name_to_mach_o): Ditto.
+	(bfd_mach_o_bfd_copy_private_symbol_data): Make it public.
+	(bfd_mach_o_bfd_copy_private_section_data): Ditto.
+	(bfd_mach_o_bfd_copy_private_bfd_data): Ditto.
+	Accept any input and output flavour.  Do not share private data
+	anymore.
+	(bfd_mach_o_count_symbols): Add a comment.
+	(bfd_mach_o_get_symtab_upper_bound): Make it public.
+	(bfd_mach_o_canonicalize_symtab): Ditto.
+	(bfd_mach_o_get_symbol_info): Ditto.
+	(bfd_mach_o_print_symbol): Ditto.
+	(bfd_mach_o_write_header): Now returns a boolean instead of an int.
+	Use constants instead of hard-coded values.
+	(bfd_mach_o_scan_write_section_32): Use constants instead of hard-coded
+	values.
+	(bfd_mach_o_scan_write_section_64): Ditto.
+	(bfd_mach_o_scan_write_segment): Ditto.
+	Do not copy sections anymore.
+	(bfd_mach_o_write_contents): Make it public.
+	Remove dead code.  Rewrite typeflag assignment.
+	(bfd_mach_o_build_commands): New function.
+	(bfd_mach_o_set_section_contents): Ditto.
+	(bfd_mach_o_make_empty_symbol): Make it public.
+	(bfd_mach_o_read_header): Make it static.
+	Convert to bfd_boolean.
+	Use constants instead of hard-coded values.
+	(bfd_mach_o_make_bfd_section): Call
+	bfd_mach_o_convert_section_name_to_bfd to create name.
+	(bfd_mach_o_scan_read_section_32): Use constants instead of hard-coded
+	values.
+	(bfd_mach_o_scan_read_section_64): Ditto.
+	(bfd_mach_o_scan_read_segment): Do not create a bfd section for
+	a segment anymore.  Use constants instead of hard-coded values.
+	(bfd_mach_o_scan_read_command): Fix style.
+	(bfd_mach_o_scan): Use constants instead of hard-coded values.
+	Get rid of BFD_IO_FUNCS.
+	(bfd_mach_o_mkobject_init): Renamed from bfd_mach_o_mkobject.
+	(bfd_mach_o_header_p): Created from bfd_mach_o_object_p.
+	(bfd_mach_o_gen_object_p): New function, replaces bfd_mach_o_object_p.
+	(bfd_mach_o_object_p): Removed.
+	(bfd_mach_o_gen_core_p): New function, replaces ...
+	(bfd_mach_o_core_p): ... deleted.
+	(bfd_mach_o_bfd_print_private_bfd_data): Make it public.
+
+	* mach-o-i386.c: New file.
+	* config.bfd: Use mach_o_i386_vec as targ_defvec for ix86-darwin.
+	* configure.in (TDEFINES): Add mach_o_i386_vec.
+	* configure: Regenerated.
+	* targets.c: Add mach_o_i386_vec.
+
+	* mach-o.c: Update copyright years.
+	(BFD_IO_FUNCS): Remove (was not used).
+	(bfd_mach_o_mkarchive, bfd_mach_o_read_ar_hdr, bfd_mach_o_slurp_armap
+	bfd_mach_o_slurp_extended_name_table,
+	bfd_mach_o_construct_extended_name_table,
+	bfd_mach_o_truncate_arname, bfd_mach_o_write_armap,
+	bfd_mach_o_get_elt_at_index, bfd_mach_o_generic_stat_arch_elt,
+	bfd_mach_o_update_armap_timestamp, bfd_mach_o_close_and_cleanup,
+	bfd_mach_o_bfd_free_cached_info, bfd_mach_o_new_section_hook,
+	bfd_mach_o_get_section_contents_in_window,
+	bfd_mach_o_bfd_is_local_label_name,
+	bfd_mach_o_bfd_is_target_special_symbol,
+	bfd_mach_o_bfd_is_local_label_name, bfd_mach_o_get_lineno,
+	bfd_mach_o_find_nearest_line, bfd_mach_o_find_inliner_info,
+	bfd_mach_o_bfd_make_debug_symbol, bfd_mach_o_read_minisymbols,
+	bfd_mach_o_minisymbol_to_symbol,
+	bfd_mach_o_bfd_get_relocated_section_contents,
+	bfd_mach_o_bfd_relax_section, bfd_mach_o_bfd_link_hash_table_create,
+	bfd_mach_o_bfd_link_hash_table_free, bfd_mach_o_bfd_link_add_symbols,
+	bfd_mach_o_bfd_link_just_syms, bfd_mach_o_bfd_final_link,
+	bfd_mach_o_bfd_link_split_section, bfd_mach_o_set_arch_mach,
+	bfd_mach_o_bfd_merge_private_bfd_data,
+	bfd_mach_o_bfd_set_private_flags, bfd_mach_o_get_section_contents,
+	bfd_mach_o_bfd_gc_sections, bfd_mach_o_bfd_merge_sections,
+	bfd_mach_o_bfd_is_group_section, bfd_mach_o_bfd_discard_group,
+	bfd_mach_o_section_already_linked, bfd_mach_o_bfd_define_common_symbol,
+	bfd_mach_o_bfd_copy_private_header_data,
+	bfd_mach_o_core_file_matches_executable_p): Move these defines ...
+	* mach-o-target.c: ... here.
+	Update copyright years.
+
 2009-06-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Don't use \n in replacement part of s command.
@@ -564,7 +678,7 @@
 2009-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coff-ia64.c (COFF_PAGE_SIZE): Changed to 8K.
-	
+
 	* coffcode.h (coff_compute_section_file_positions): Clear
 	D_PAGED if PE section alignment is smaller than COFF_PAGE_SIZE.
 
@@ -817,7 +931,7 @@
 
 2009-04-02  Sterling Augustine  <sterling@jaw.hq.tensilica.com>
 
-	* elf32-xtensa.c (relax_property_section): Always set r_offset 
+	* elf32-xtensa.c (relax_property_section): Always set r_offset
 	to zero.
 
 2009-04-02  Christophe Lyon  <christophe.lyon@st.com>
@@ -833,7 +947,7 @@
 
 	* elf32-vax.c (elf_vax_check_relocs): Do not put relocations against
 	hidden symbols into the GOT or PLT.GOT.
-	(elf_vax_relocate_section): Do not emit a PCREL reloc 
+	(elf_vax_relocate_section): Do not emit a PCREL reloc
 	into a shared object if it is against a hidden symbol.
 
 2009-04-01  Richard Sandiford  <r.sandiford@uk.ibm.com>
