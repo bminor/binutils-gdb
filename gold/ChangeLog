@@ -1,3 +1,18 @@
+2009-06-05  Doug Kwan  <dougkwan@google.com>
+
+	* object.cc (Sized_relobj::Sized_relobj): Initialize
+	discarded_eh_frame_shndx_ to -1U.
+	(Sized_relobj::do_layout): Record index of a discard .eh_frame
+	section.
+	(Sized_relobj::do_count_local_symbols): Skip local symbols in
+	a discarded .eh_frame section.
+	(Sized_relobj::do_finalize_local_symbols): Ditto.
+	* object.h (class Sized_relobj): Declare new member
+	discarded_eh_frame_shndx_.
+	* testsuite/Makefile.am (check_PROGRAMS): Add local_labels_test.
+	(local_labels_test.o, local_labels_test): New rules.
+	* testsuite/Makefile.in: Regenerate.
+
 2009-06-04  Doug Kwan  <dougkwan@google.com>
 
 	* layout.cc (Layout::section_name_mapping): Add mapping for

@@ -1074,5 +1074,11 @@ alt/libexclude_libs_test_3.a: exclude_libs_test_3.o
 	test -d alt || mkdir -p alt
 	$(TEST_AR) rc $@ $^
 
+check_PROGRAMS += local_labels_test
+local_labels_test.o: ver_test_6.c
+	$(COMPILE) -g -c -Wa,-L -o $@ $<
+local_labels_test: local_labels_test.o
+	$(LINK) -Bgcctestdir/ local_labels_test.o
+
 endif GCC
 endif NATIVE_LINKER

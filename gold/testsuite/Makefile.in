@@ -318,7 +318,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.err
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_24 = exclude_libs_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_24 = exclude_libs_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_25 = exclude_libs_test.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = exclude_libs_test.syms
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = exclude_libs_test.syms libexclude_libs_test_1.a \
@@ -429,7 +430,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_17 =  \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	exclude_libs_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	exclude_libs_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -573,6 +575,12 @@ am__justsyms_SOURCES_DIST = justsyms_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_1.$(OBJEXT)
 justsyms_OBJECTS = $(am_justsyms_OBJECTS)
 justsyms_LDADD = $(LDADD)
+local_labels_test_SOURCES = local_labels_test.c
+local_labels_test_OBJECTS = local_labels_test.$(OBJEXT)
+local_labels_test_LDADD = $(LDADD)
+local_labels_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 many_sections_r_test_SOURCES = many_sections_r_test.c
 many_sections_r_test_OBJECTS = many_sections_r_test.$(OBJEXT)
 many_sections_r_test_LDADD = $(LDADD)
@@ -900,15 +908,15 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(exclude_libs_test_SOURCES) \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
-	$(initpri1_SOURCES) $(justsyms_SOURCES) many_sections_r_test.c \
-	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
-	plugin_test_1.c plugin_test_2.c plugin_test_3.c \
-	plugin_test_4.c $(protected_1_SOURCES) $(protected_2_SOURCES) \
-	$(relro_script_test_SOURCES) $(relro_test_SOURCES) \
-	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
-	script_test_3.c $(thin_archive_test_1_SOURCES) \
-	$(thin_archive_test_2_SOURCES) $(tls_pic_test_SOURCES) \
-	$(tls_shared_gd_to_ie_test_SOURCES) \
+	$(initpri1_SOURCES) $(justsyms_SOURCES) local_labels_test.c \
+	many_sections_r_test.c $(many_sections_test_SOURCES) \
+	$(object_unittest_SOURCES) plugin_test_1.c plugin_test_2.c \
+	plugin_test_3.c plugin_test_4.c $(protected_1_SOURCES) \
+	$(protected_2_SOURCES) $(relro_script_test_SOURCES) \
+	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
+	$(script_test_2_SOURCES) script_test_3.c \
+	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
+	$(tls_pic_test_SOURCES) $(tls_shared_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
@@ -955,7 +963,8 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(am__initpri1_SOURCES_DIST) $(am__justsyms_SOURCES_DIST) \
-	many_sections_r_test.c $(am__many_sections_test_SOURCES_DIST) \
+	local_labels_test.c many_sections_r_test.c \
+	$(am__many_sections_test_SOURCES_DIST) \
 	$(object_unittest_SOURCES) plugin_test_1.c plugin_test_2.c \
 	plugin_test_3.c plugin_test_4.c \
 	$(am__protected_1_SOURCES_DIST) \
@@ -1519,6 +1528,7 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test_LDADD = -lexclude_libs_test_1 -lexclude_libs_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libexclude_libs_test_3.a
 
+@GCC_TRUE@@NATIVE_LINKER_TRUE@local_labels_test_LDFLAGS = -Bgcctestdir/
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -1659,6 +1669,12 @@ initpri1$(EXEEXT): $(initpri1_OBJECTS) $(initpri1_DEPENDENCIES)
 justsyms$(EXEEXT): $(justsyms_OBJECTS) $(justsyms_DEPENDENCIES) 
 	@rm -f justsyms$(EXEEXT)
 	$(CXXLINK) $(justsyms_LDFLAGS) $(justsyms_OBJECTS) $(justsyms_LDADD) $(LIBS)
+@GCC_FALSE@local_labels_test$(EXEEXT): $(local_labels_test_OBJECTS) $(local_labels_test_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f local_labels_test$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(local_labels_test_LDFLAGS) $(local_labels_test_OBJECTS) $(local_labels_test_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@local_labels_test$(EXEEXT): $(local_labels_test_OBJECTS) $(local_labels_test_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f local_labels_test$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(local_labels_test_LDFLAGS) $(local_labels_test_OBJECTS) $(local_labels_test_LDADD) $(LIBS)
 @GCC_FALSE@many_sections_r_test$(EXEEXT): $(many_sections_r_test_OBJECTS) $(many_sections_r_test_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f many_sections_r_test$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(many_sections_r_test_LDFLAGS) $(many_sections_r_test_OBJECTS) $(many_sections_r_test_LDADD) $(LIBS)
@@ -1891,6 +1907,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/initpri1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/local_labels_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_r_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
@@ -2613,6 +2630,10 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@alt/libexclude_libs_test_3.a: exclude_libs_test_3.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d alt || mkdir -p alt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) rc $@ $^
+@GCC_TRUE@@NATIVE_LINKER_TRUE@local_labels_test.o: ver_test_6.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -g -c -Wa,-L -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@local_labels_test: local_labels_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ local_labels_test.o
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
