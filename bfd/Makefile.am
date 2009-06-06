@@ -333,6 +333,7 @@ BFD32_BACKENDS = \
 	m88kmach3.lo \
 	m88kopenbsd.lo \
 	mach-o.lo \
+	mach-o-i386.lo \
 	mipsbsd.lo \
 	newsos3.lo \
 	nlm.lo \
@@ -514,6 +515,7 @@ BFD32_BACKENDS_CFILES = \
 	m88kmach3.c \
 	m88kopenbsd.c \
 	mach-o.c \
+	mach-o-i386.c \
 	mipsbsd.c \
 	newsos3.c \
 	nlm.c \
@@ -3085,6 +3087,13 @@ mach-o.lo: \
   mach-o.c \
   $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/filenames.h \
+  $(INCDIR)/hashtab.h \
+  $(INCDIR)/libiberty.h \
+  mach-o-target.c \
+  mach-o.h
+mach-o-i386.lo: \
+  mach-o-i386.c \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h \
   $(INCDIR)/libiberty.h \

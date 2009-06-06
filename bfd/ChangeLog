@@ -1,3 +1,10 @@
+2009-06-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.am: Run "make dep-am".
+	(BFD32_BACKENDS): Add mach-o-i386.lo.
+	(BFD32_BACKENDS_CFILES): Add mach-o-i386.c.
+	* Makefile.in: Regenerate.
+
 2009-06-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_relocate_section): Match overlay number
