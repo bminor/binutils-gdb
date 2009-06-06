@@ -1,3 +1,33 @@
+2009-06-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Make room for dynamic
+	relocation for R_386_32 against STT_GNU_IFUNC symbol when
+	building shared object.  Check info->executable instead of
+	!info->shared when setting non_got_ref.
+	(elf_i386_allocate_dynrelocs): Allocate dynamic relocation
+	for non-GOT reference of STT_GNU_IFUNC symbol in shared
+	object. Allocate GOT relocation agsinst STT_GNU_IFUNC
+	symbol if needed.
+	(elf_i386_relocate_section): Output dynamic relocation for
+	R_386_32 against STT_GNU_IFUNC symbol to get the real
+	function address when building shared object.
+	(elf_i386_finish_dynamic_symbol): Output R_386_GLOB_DAT
+	relocation for STT_GNU_IFUNC symbol in shared object.
+
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Make room for
+	dynamic relocation for R_X86_64_64 against STT_GNU_IFUNC
+	symbol when building shared object.  Check info->executable
+	instead of !info->shared when setting non_got_ref.
+	(elf64_x86_64_allocate_dynrelocs): Allocate dynamic relocation
+	for non-GOT reference of STT_GNU_IFUNC symbol in shared
+	library. Allocate GOT relocation agsinst STT_GNU_IFUNC symbol
+	if needed.
+	(elf64_x86_64_relocate_section): Output dynamic relocation
+	for R_X86_64_64 against STT_GNU_IFUNC symbol to get the real
+	function address when building shared object.
+	(elf64_x86_64_finish_dynamic_symbol): Output R_X86_64_GLOB_DAT
+	relocation for STT_GNU_IFUNC symbol in shared object.
+
 2009-06-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.am: Run "make dep-am".

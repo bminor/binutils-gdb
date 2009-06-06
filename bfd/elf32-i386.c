@@ -1325,10 +1325,48 @@ elf_i386_check_relocs (bfd *abfd,
 		   return FALSE;
 
 		case R_386_32:
+		  h->non_got_ref = 1;
+		  h->pointer_equality_needed = 1;
+		  if (info->shared)
+		    {
+		      struct elf_i386_dyn_relocs *p;
+		      struct elf_i386_dyn_relocs **head;
+
+		      /* We must copy these reloc types into the
+			 output file.  Create a reloc section in
+			 dynobj and make room for this reloc.  */
+		      if (sreloc == NULL)
+			{
+			  if (htab->elf.dynobj == NULL)
+			    htab->elf.dynobj = abfd;
+
+			  sreloc = _bfd_elf_make_dynamic_reloc_section
+			    (sec, htab->elf.dynobj, 2, abfd, FALSE);
+
+			  if (sreloc == NULL)
+			    return FALSE;
+			}
+
+		      head = &((struct elf_i386_link_hash_entry *) h)->dyn_relocs;
+		      p = *head;
+		      if (p == NULL || p->sec != sec)
+			{
+			  bfd_size_type amt = sizeof *p;
+			  p = bfd_alloc (htab->elf.dynobj, amt);
+			  if (p == NULL)
+			    return FALSE;
+			  p->next = *head;
+			  *head = p;
+			  p->sec = sec;
+			  p->count = 0;
+			  p->pc_count = 0;
+			}
+		      p->count += 1;
+		    }
+		  break;
+
 		case R_386_PC32:
 		  h->non_got_ref = 1;
-		  if (r_type != R_386_PC32)
-		    h->pointer_equality_needed = 1;
 		  break;
 
 		case R_386_PLT32:
@@ -1501,7 +1539,7 @@ elf_i386_check_relocs (bfd *abfd,
 
 	case R_386_32:
 	case R_386_PC32:
-	  if (h != NULL && !info->shared)
+	  if (h != NULL && info->executable)
 	    {
 	      /* If this reloc is in a read-only section, we might
 		 need a copy reloc.  We can't check reliably at this
@@ -1957,7 +1995,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* When building a static executable, use .iplt, .igot.plt and
 	 .rel.iplt sections for STT_GNU_IFUNC symbols.  */
-      if (htab->splt != 0)
+      if (htab->splt != NULL)
 	{
 	  plt = htab->splt;
 	  gotplt = htab->sgotplt;
@@ -1992,34 +2030,50 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       relplt->size += sizeof (Elf32_External_Rel);
       relplt->reloc_count++;
 
-      /* No need for dynamic relocation for local STT_GNU_IFUNC symbol.
-	 Discard space for relocations against it.  */
-      if (h->dynindx == -1 || h->forced_local)
+      /* We need dynamic relocation for STT_GNU_IFUNC symbol only
+	 when there is a non-GOT reference in a shared object.  */
+      if (!info->shared
+	  || !h->non_got_ref)
 	eh->dyn_relocs = NULL;
 
-      /* STT_GNU_IFUNC symbol uses .got.plt, not .got.  But for
-	 shared library, we must go through GOT and we can't
-	 use R_386_IRELATIVE unless it is forced local.   */
-      if (info->executable
-	  || info->symbolic
-	  || h->forced_local)
+      /* Finally, allocate space.  */
+      for (p = eh->dyn_relocs; p != NULL; p = p->next)
 	{
-	  if (h->pointer_equality_needed
-	      && htab->sgot != NULL)
-	    {
-	      /* We can't use .got.plt, which contains the real
-		 function addres, since we need pointer equality.
-		 We will load the GOT entry with the PLT entry
-		 in elf_i386_finish_dynamic_symbol and don't
-		 need GOT relocation.  */
-	      h->got.offset = htab->sgot->size;
-	      htab->sgot->size += 4;
-	      eh->tlsdesc_got = (bfd_vma) -1;
-	      goto skip_relgot;
-	    }
-	  else
-	    h->got.refcount = 0;
+	  asection * sreloc = elf_section_data (p->sec)->sreloc;
+	  sreloc->size += p->count * sizeof (Elf32_External_Rel);
 	}
+
+      /* For STT_GNU_IFUNC symbol, .got.plt has the real function
+	 addres and .got has the PLT entry adddress.  We will load
+	 the GOT entry with the PLT entry in finish_dynamic_symbol if
+	 it is used.  For branch, it uses .got.plt.  For symbol value,
+	 1. Use .got.plt in a shared object if it is forced local or
+	 not dynamic.
+	 2. Use .got.plt in a non-shared object if pointer equality 
+	 isn't needed.
+	 3. Use .got.plt if .got isn't used.
+	 4. Otherwise use .got so that it can be shared among different
+	 objects at run-time.
+	 We only need to relocate .got entry in shared object.  */
+      if ((info->shared
+	   && (h->dynindx == -1
+	       || h->forced_local))
+	  || (!info->shared
+	      && !h->pointer_equality_needed)
+	  || htab->sgot == NULL)
+	{
+	  /* Use .got.plt.  */
+	  h->got.offset = (bfd_vma) -1;
+	}
+      else
+	{
+	  h->got.offset = htab->sgot->size;
+	  htab->sgot->size += 4;
+	  if (info->shared)
+	    htab->srelgot->size += sizeof (Elf32_External_Rel);
+	}
+
+      return TRUE;
     }
   else if (htab->elf.dynamic_sections_created
 	   && h->plt.refcount > 0)
@@ -2166,7 +2220,6 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   else
     h->got.offset = (bfd_vma) -1;
 
-skip_relgot:
   if (eh->dyn_relocs == NULL)
     return TRUE;
 
@@ -2920,6 +2973,57 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      return FALSE;
 
 	    case R_386_32:
+	      /* Generate dynamic relcoation only when there is a
+		 non-GOF reference in a shared object.  */
+	      if (info->shared && h->non_got_ref)
+		{
+		  Elf_Internal_Rela outrel;
+		  bfd_byte *loc;
+		  asection *sreloc;
+		  bfd_vma offset;
+
+		  /* Need a dynamic relocation get the the real
+		     function adddress.  */
+		  offset = _bfd_elf_section_offset (output_bfd,
+						    info,
+						    input_section,
+						    rel->r_offset);
+		  if (offset == (bfd_vma) -1
+		      || offset == (bfd_vma) -2)
+		    abort ();
+
+		  outrel.r_offset = (input_section->output_section->vma
+				     + input_section->output_offset
+				     + offset);
+
+		  if (h->dynindx == -1
+		      || h->forced_local)
+		    {
+		      /* This symbol is resolved locally.  */
+		      outrel.r_info = ELF32_R_INFO (0, R_386_IRELATIVE);
+		      bfd_put_32 (output_bfd,
+				  (h->root.u.def.value 
+				   + h->root.u.def.section->output_section->vma
+				   + h->root.u.def.section->output_offset),
+				  contents + offset);
+		    }
+		  else
+		    outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
+
+		  sreloc = elf_section_data (input_section)->sreloc;
+		  loc = sreloc->contents;
+		  loc += (sreloc->reloc_count++
+			  * sizeof (Elf32_External_Rel));
+		  bfd_elf32_swap_reloc_out (output_bfd, &outrel, loc);
+
+		  /* If this reloc is against an external symbol, we
+		     do not want to fiddle with the addend.  Otherwise,
+		     we need to include the symbol value so that it
+		     becomes an addend for the dynamic reloc.  For an
+		     internal symbol, we have updated addend.  */
+		  continue;
+		}
+
 	    case R_386_PC32:
 	    case R_386_PLT32:
 	      goto do_relocation;
@@ -3950,7 +4054,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 
       /* When building a static executable, use .iplt, .igot.plt and
 	 .rel.iplt sections for STT_GNU_IFUNC symbols.  */
-      if (htab->splt != 0)
+      if (htab->splt != NULL)
 	{
 	  plt = htab->splt;
 	  gotplt = htab->sgotplt;
@@ -4132,25 +4236,29 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	 of a version file, we just want to emit a RELATIVE reloc.
 	 The entry in the global offset table will already have been
 	 initialized in the relocate_section function.  */
-      if ((info->executable
-	   || info->symbolic
-	   || h->forced_local)
-	  && h->def_regular
-	  && h->pointer_equality_needed
+      if (h->def_regular
 	  && h->type == STT_GNU_IFUNC)
 	{
-	  /* The STT_GNU_IFUNC symbol is locally defined.  But we can't
-	     use .got.plt, which contains the real function addres,
-	     since we need pointer equality.  We load the GOT entry
-	     with the PLT entry without relocation.  */
-	  asection *plt = htab->splt ? htab->splt : htab->iplt;
-	  if (htab->sgot == NULL
-	      || h->plt.offset == (bfd_vma) -1)
-	    abort ();
-	  bfd_put_32 (output_bfd, (plt->output_section->vma
-				   + plt->output_offset + h->plt.offset),
-		      htab->sgot->contents + h->got.offset);
-	  return TRUE;
+	  if (info->shared)
+	    {
+	      /* Generate R_386_GLOB_DAT.  */
+	      goto do_glob_dat;
+	    }
+	  else
+	    {
+	      if (!h->pointer_equality_needed)
+		abort ();
+
+	      /* For non-shared object, we can't use .got.plt, which
+		 contains the real function addres if we need pointer
+		 equality.  We load the GOT entry with the PLT entry.  */
+	      asection *plt = htab->splt ? htab->splt : htab->iplt;
+	      bfd_put_32 (output_bfd,
+			  (plt->output_section->vma
+			   + plt->output_offset + h->plt.offset),
+			  htab->sgot->contents + h->got.offset);
+	      return TRUE;
+	    }
 	}
       else if (info->shared
 	       && SYMBOL_REFERENCES_LOCAL (info, h))
@@ -4161,6 +4269,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
       else
 	{
 	  BFD_ASSERT((h->got.offset & 1) == 0);
+do_glob_dat:
 	  bfd_put_32 (output_bfd, (bfd_vma) 0,
 		      htab->sgot->contents + h->got.offset);
 	  rel.r_info = ELF32_R_INFO (h->dynindx, R_386_GLOB_DAT);
