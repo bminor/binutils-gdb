@@ -93,6 +93,17 @@ print_insn_moxie (bfd_vma addr, struct disassemble_info * info)
 	    length = 6;
 	  }
 	  break;
+	case MOXIE_F1_M:
+	  {
+	    unsigned imm;
+	    if ((status = info->read_memory_func (addr + 2, buffer, 4, info)))
+	      goto fail;
+	    imm = bfd_getb32 (buffer);
+	    fpr (stream, "%s\t", opcode->name);
+	    info->print_address_func ((bfd_vma) imm, info);
+	    length = 6;
+	  }
+	  break;
 	case MOXIE_F1_AiB:
 	  fpr (stream, "%s\t(%s), %s", opcode->name,
 	       reg_names[OP_A(iword)], reg_names[OP_B(iword)]);
