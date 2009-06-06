@@ -4848,9 +4848,10 @@ spu_elf_relocate_section (bfd *output_bfd,
 
 	  for (g = *head; g != NULL; g = g->next)
 	    if (htab->params->ovly_flavour == ovly_soft_icache
-		? g->br_addr == (rel->r_offset
-				 + input_section->output_offset
-				 + input_section->output_section->vma)
+		? (g->ovl == ovl
+		   && g->br_addr == (rel->r_offset
+				     + input_section->output_offset
+				     + input_section->output_section->vma))
 		: g->addend == addend && (g->ovl == ovl || g->ovl == 0))
 	      break;
 	  if (g == NULL)

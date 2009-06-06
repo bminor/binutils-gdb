@@ -1,3 +1,8 @@
+2009-06-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_relocate_section): Match overlay number
+	when looking for soft-icache stubs.
+
 2009-06-05  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.h: Update copyright year.
