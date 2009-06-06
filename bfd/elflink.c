@@ -12492,31 +12492,17 @@ _bfd_elf_make_dynamic_reloc_section (asection *         sec,
   return reloc_sec;
 }
 
-/* Create sections needed by STT_GNU_IFUNC symbol for static
-   executables.  */
+/* Create sections needed by STT_GNU_IFUNC symbol.  */
 
 bfd_boolean
-_bfd_elf_create_static_ifunc_sections (bfd *abfd,
-				       struct bfd_link_info *info)
+_bfd_elf_create_ifunc_sections (bfd *abfd, struct bfd_link_info *info)
 {
   flagword flags, pltflags;
   int ptralign;
   asection *s;
-  const struct elf_backend_data *bed;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
-  /* Should never be called for shared library.  */
-  BFD_ASSERT (!info->shared);
-
-  /* This function may be called more than once.  */
-  s = bfd_get_section_by_name (abfd, ".iplt");
-  if (s != NULL)
-    return TRUE;
-
-  bed = get_elf_backend_data (abfd);
-
-  /* We need to create .iplt, .rel[a].iplt, .igot, .igot.plt,  */
   flags = bed->dynamic_sec_flags;
-
   pltflags = flags;
   if (bed->plt_not_loaded)
     /* We do not clear SEC_ALLOC here because we still want the OS to
@@ -12528,47 +12514,68 @@ _bfd_elf_create_static_ifunc_sections (bfd *abfd,
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 
-  s = bfd_make_section_with_flags (abfd, ".iplt", pltflags);
-  if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
-    return FALSE;
-
-  s = bfd_make_section_with_flags (abfd,
-				   (bed->rela_plts_and_copies_p
-				    ? ".rela.iplt" : ".rel.iplt"),
-				   flags | SEC_READONLY);
-  if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
-    return FALSE;
-
-  switch (bed->s->arch_size)
+  if (info->shared)
     {
-    case 32:
-      ptralign = 2;
-      break;
+      /* We need to create .rel[a].ifunc for shared objects.  */
+      const char *rel_sec = (bed->rela_plts_and_copies_p
+			     ? ".rela.ifunc" : ".rel.ifunc");
 
-    case 64:
-      ptralign = 3;
-      break;
+      /* This function should be called only once.  */
+      s = bfd_get_section_by_name (abfd, rel_sec);
+      if (s != NULL)
+	abort ();
 
-    default:
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
-
-  /* We don't need the .igot section if we have the .igot.plt
-     section.  */
-
-  if (bed->want_got_plt)
-    {
-      s = bfd_make_section_with_flags (abfd, ".igot.plt", flags);
+      s = bfd_make_section_with_flags (abfd, rel_sec,
+				       flags | SEC_READONLY);
       if (s == NULL
-	  || !bfd_set_section_alignment (abfd, s, ptralign))
+	  || ! bfd_set_section_alignment (abfd, s,
+					  bed->s->log_file_align))
 	return FALSE;
     }
   else
     {
-      s = bfd_make_section_with_flags (abfd, ".igot", flags);
+      /* This function should be called only once.  */
+      s = bfd_get_section_by_name (abfd, ".iplt");
+      if (s != NULL)
+	abort ();
+
+      /* We need to create .iplt, .rel[a].iplt, .igot and .igot.plt
+	 for static executables.   */
+      s = bfd_make_section_with_flags (abfd, ".iplt", pltflags);
+      if (s == NULL
+	  || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
+	return FALSE;
+
+      s = bfd_make_section_with_flags (abfd,
+				       (bed->rela_plts_and_copies_p
+					? ".rela.iplt" : ".rel.iplt"),
+				       flags | SEC_READONLY);
+      if (s == NULL
+	  || ! bfd_set_section_alignment (abfd, s,
+					  bed->s->log_file_align))
+	return FALSE;
+
+      switch (bed->s->arch_size)
+	{ 
+	case 32:
+	  ptralign = 2;
+	  break;
+
+	case 64:
+	  ptralign = 3;
+	  break;
+
+	default:
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+
+      /* We don't need the .igot section if we have the .igot.plt
+	 section.  */
+      if (bed->want_got_plt)
+	s = bfd_make_section_with_flags (abfd, ".igot.plt", flags);
+      else
+	s = bfd_make_section_with_flags (abfd, ".igot", flags);
       if (s == NULL
 	  || !bfd_set_section_alignment (abfd, s, ptralign))
 	return FALSE;

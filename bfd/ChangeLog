@@ -1,5 +1,34 @@
 2009-06-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_link_hash_table): Add irelifunc.
+	(elf_i386_link_hash_table_create): Initialize irelifunc.
+	(elf_i386_check_relocs): Updated.  Set up irelifunc for
+	shared objects.
+	(elf_i386_allocate_dynrelocs): Use irelifunc for dynamic
+	relocation for non-GOT reference of STT_GNU_IFUNC symbol in
+	shared objects.
+	(elf_i386_relocate_section): Likewise.
+
+	* elf64-x86-64.c (elf64_x86_64_link_hash_table): Add irelifunc.
+	(elf64_x86_64_link_hash_table_create): Initialize irelifunc.
+	(elf64_x86_64_check_relocs): Updated.  Set up irelifunc for
+	shared objects.
+	(elf64_x86_64_allocate_dynrelocs): Use irelifunc for dynamic
+	relocation for non-GOT reference of STT_GNU_IFUNC symbol in
+	shared objects.
+	(elf64_x86_64_relocate_section): Likewise.
+
+	* elf-bfd.h (_bfd_elf_create_static_ifunc_sections): Renamed to
+	...
+	(_bfd_elf_create_ifunc_sections): This.
+
+	* elflink.c (_bfd_elf_create_static_ifunc_sections): Renamd to
+	...
+	(_bfd_elf_create_ifunc_sections): This.  Create .rel[a].ifunc
+	for shared objects.
+
+2009-06-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_check_relocs): Make room for dynamic
 	relocation for R_386_32 against STT_GNU_IFUNC symbol when
 	building shared object.  Check info->executable instead of

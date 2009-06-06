@@ -678,6 +678,7 @@ struct elf_i386_link_hash_table
   asection *igotplt;
   asection *iplt;
   asection *irelplt;
+  asection *irelifunc;
 
   /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.  */
   asection *srelplt2;
@@ -777,6 +778,7 @@ elf_i386_link_hash_table_create (bfd *abfd)
   ret->igotplt= NULL;
   ret->iplt = NULL;
   ret->irelplt= NULL;
+  ret->irelifunc = NULL;
   ret->tls_ldm_got.refcount = 0;
   ret->next_tls_desc_index = 0;
   ret->sgotplt_jump_table_size = 0;
@@ -1279,21 +1281,30 @@ elf_i386_check_relocs (bfd *abfd,
 	    case R_386_PLT32:
 	    case R_386_GOT32:
 	    case R_386_GOTOFF:
-	      if (!info->shared && htab->iplt == NULL)
+	      if (htab->irelifunc == NULL && htab->iplt == NULL)
 		{
-		  if (!_bfd_elf_create_static_ifunc_sections (abfd,
-							      info))
+		  if (!_bfd_elf_create_ifunc_sections (abfd, info))
 		    return FALSE;
 
-		  htab->iplt = bfd_get_section_by_name (abfd, ".iplt");
-		  htab->irelplt = bfd_get_section_by_name (abfd,
-							   ".rel.iplt");
-		  htab->igotplt = bfd_get_section_by_name (abfd,
-							   ".igot.plt");
-		  if (!htab->iplt
-		      || !htab->irelplt
-		      || !htab->igotplt)
-		    abort ();
+		  if (info->shared)
+		    {
+		      htab->irelifunc = bfd_get_section_by_name (abfd,
+								 ".rel.ifunc");
+		      if (!htab->irelifunc)
+			abort ();
+		    }
+		  else
+		    {
+		      htab->iplt = bfd_get_section_by_name (abfd, ".iplt");
+		      htab->irelplt = bfd_get_section_by_name (abfd,
+							       ".rel.iplt");
+		      htab->igotplt = bfd_get_section_by_name (abfd,
+							       ".igot.plt");
+		      if (!htab->iplt
+			  || !htab->irelplt
+			  || !htab->igotplt)
+			abort ();
+		    }
 		}
 	      break;
 	    }
@@ -2038,10 +2049,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* Finally, allocate space.  */
       for (p = eh->dyn_relocs; p != NULL; p = p->next)
-	{
-	  asection * sreloc = elf_section_data (p->sec)->sreloc;
-	  sreloc->size += p->count * sizeof (Elf32_External_Rel);
-	}
+	htab->irelifunc->size += p->count * sizeof (Elf32_External_Rel);
 
       /* For STT_GNU_IFUNC symbol, .got.plt has the real function
 	 addres and .got has the PLT entry adddress.  We will load
@@ -3010,7 +3018,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  else
 		    outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 
-		  sreloc = elf_section_data (input_section)->sreloc;
+		  sreloc = htab->irelifunc;
 		  loc = sreloc->contents;
 		  loc += (sreloc->reloc_count++
 			  * sizeof (Elf32_External_Rel));

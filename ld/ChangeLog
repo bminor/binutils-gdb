@@ -1,3 +1,7 @@
+2009-06-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* scripttempl/elf.sc: Add .rel.ifunc and .rela.ifunc.
+
 2009-06-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* scripttempl/elf.sc: Remove .rel.ifunc.dyn and .rela.ifunc.dyn.

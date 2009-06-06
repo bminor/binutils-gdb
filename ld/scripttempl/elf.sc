@@ -326,6 +326,8 @@ eval $COMBRELOCCAT <<EOF
   .rel.bss      ${RELOCATING-0} : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
   .rela.bss     ${RELOCATING-0} : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
   ${REL_LARGE}
+  .rel.ifunc      ${RELOCATING-0} : { *(.rel.ifunc) }
+  .rela.ifunc     ${RELOCATING-0} : { *(.rela.ifunc) }
 EOF
 
 if [ -n "$COMBRELOC" ]; then
