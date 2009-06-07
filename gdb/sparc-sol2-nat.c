@@ -24,6 +24,8 @@
 #include "gregset.h"
 
 #include "sparc-tdep.h"
+#include "target.h"
+#include "procfs.h"
 
 /* This file provids the (temporary) glue between the Solaris SPARC
    target dependent code and the machine independent SVR4 /proc
@@ -93,4 +95,19 @@ void
 fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs, int regnum)
 {
   sparc_collect_fpregset (regcache, regnum, fpregs);
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_sparc_sol2_nat;
+
+void
+_initialize_sparc_sol2_nat (void)
+{
+  struct target_ops *t;
+
+  t = procfs_target ();
+#ifdef NEW_PROC_API	/* Solaris 6 and above can do HW watchpoints */
+  procfs_use_watchpoints (t);
+#endif
+  add_target (t);
 }

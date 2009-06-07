@@ -96,8 +96,3 @@ typedef PROC_CTL_WORD_TYPE procfs_ctl_t;
 #else
 typedef long procfs_ctl_t;
 #endif
-
-
-/* From procfs.c */
-
-extern ptid_t procfs_first_available (void);

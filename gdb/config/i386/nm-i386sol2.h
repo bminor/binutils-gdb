@@ -18,8 +18,6 @@
 
 #ifdef NEW_PROC_API	/* Solaris 6 and above can do HW watchpoints */
 
-#define TARGET_HAS_HARDWARE_WATCHPOINTS
-
 /* Solaris x86 2.6 and 2.7 targets have a kernel bug when stepping
    over an instruction that causes a page fault without triggering
    a hardware watchpoint. The kernel properly notices that it shouldn't

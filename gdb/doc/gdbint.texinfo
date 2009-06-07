@@ -694,11 +694,6 @@ changed are announced as hit.
 watchpoints:
 
 @table @code
-@findex TARGET_HAS_HARDWARE_WATCHPOINTS
-@item TARGET_HAS_HARDWARE_WATCHPOINTS
-If defined, the target supports hardware watchpoints.
-(Currently only used for several native configs.)
-
 @findex TARGET_CAN_USE_HARDWARE_WATCHPOINT
 @item TARGET_CAN_USE_HARDWARE_WATCHPOINT (@var{type}, @var{count}, @var{other})
 Return the number of hardware watchpoints of type @var{type} that are

@@ -1,3 +1,40 @@
+2009-06-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* procfs.h: New.
+	* proc-utils.h (procfs_first_available): Don't declare here.
+	* sol-thread.c: Include procfs.h instead of sys/procfs.h and
+	proc-utils.h.
+	* procfs.c: Include procfs.h.
+	(procfs_target): Make it public.  Don't register
+	procfs_can_use_hw_breakpoint here.
+	(proc_set_watchpoint): Check for PCWATCH or PIOCSWATCH being
+	defined instead of TARGET_HAS_HARDWARE_WATCHPOINTS.
+	(procfs_can_use_hw_breakpoint): Remove check of
+	TARGET_HAS_HARDWARE_WATCHPOINTS.
+	(procfs_use_watchpoints): Register procfs_can_use_hw_breakpoint
+	here.
+	(_initialize_procfs): Don't add the procfs target here.
+
+	* i386-sol2-nat.c: Include target.h and procfs.h.
+	(_initialize_amd64_sol2_nat): Install the procfs target here,
+	customized with watchpoints support.
+	* irix5-nat.c: Include target.h.
+	(_initialize_core_irix5): Rename to ...
+	(_initialize_irix5_nat): ... this.  Install the procfs target
+	here, customized with watchpoints support.
+	* alpha-nat.c: Include procfs.h.
+	(_initialize_core_alpha): Rename to...
+	(_initialize_alpha_nat): ... this.  Install the procfs target
+	here, customized with watchpoints support.
+	* sparc-sol2-nat.c: Include target.h and procfs.h.
+	(_initialize_sparc_sol2_nat): New.
+
+	* config/i386/nm-i386sol2.h (TARGET_HAS_HARDWARE_WATCHPOINTS): Delete.
+	* config/sparc/nm-sol2.h (TARGET_HAS_HARDWARE_WATCHPOINTS): Delete.
+	* config/mips/irix5.mh (NAT_FILE): Delete.
+	* config/mips/irix6.mh (NAT_FILE): Delete.
+	* config/mips/nm-irix5.h: Delete.
+
 20009-06-07  Pedro  Alves  <pedro@codesourcery.com>
 
 	* auxv.c (procfs_xfer_auxv): Change type of the `object' argument

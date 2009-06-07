@@ -1,3 +1,8 @@
+2009-06-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbint.texinfo (TARGET_HAS_HARDWARE_WATCHPOINTS): Delete all
+	references.
+
 2009-06-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbint.texinfo: Rename formal parameters to gdbarch function

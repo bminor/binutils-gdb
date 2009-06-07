@@ -23,13 +23,4 @@
 #define GDB_GREGSET_T prgregset_t
 #define GDB_FPREGSET_T prfpregset_t
 
-/* Hardware wactchpoints.  */
-
-/* Solaris 2.6 and above can do HW watchpoints.  */
-#ifdef NEW_PROC_API
-
-#define TARGET_HAS_HARDWARE_WATCHPOINTS
-
-#endif /* NEW_PROC_API */
-
 #endif /* nm-sol2.h */

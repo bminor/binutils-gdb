@@ -66,8 +66,7 @@
 #include "symfile.h"
 #include "observer.h"
 #include "gdb_string.h"
-#include <sys/procfs.h>
-#include "proc-utils.h"
+#include "procfs.h"
 
 struct target_ops sol_thread_ops;
 

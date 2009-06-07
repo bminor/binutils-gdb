@@ -22,6 +22,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "target.h"
+#include "procfs.h"
 #include "regcache.h"
 
 #include "alpha-tdep.h"
@@ -183,8 +184,16 @@ static struct core_fns alpha_osf_core_fns =
   NULL					/* next */
 };
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_alpha_nat;
+
 void
-_initialize_core_alpha (void)
+_initialize_alpha_nat (void)
 {
+  struct target_ops *t;
+
+  t = procfs_target ();
+  add_target (t);
+
   deprecated_add_core_fns (&alpha_osf_core_fns);
 }

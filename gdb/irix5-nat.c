@@ -29,6 +29,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "regcache.h"
+#include "procfs.h"
 
 #include "gdb_string.h"
 #include <sys/time.h>
@@ -256,8 +257,17 @@ static struct core_fns irix5_core_fns =
   NULL					/* next */
 };
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_irix5_nat;
+
 void
-_initialize_core_irix5 (void)
+_initialize_irix5_nat (void)
 {
+  struct target_ops *t;
+
+  t = procfs_target ();
+  procfs_use_watchpoints (t);
+  add_target (t);
+
   deprecated_add_core_fns (&irix5_core_fns);
 }

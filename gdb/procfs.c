@@ -50,6 +50,7 @@
 #include "gdb_assert.h"
 #include "inflow.h"
 #include "auxv.h"
+#include "procfs.h"
 
 /*
  * PROCFS.C
@@ -181,7 +182,7 @@ procfs_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 }
 #endif
 
-static struct target_ops *
+struct target_ops *
 procfs_target (void)
 {
   struct target_ops *t = inf_child_target ();
@@ -212,7 +213,6 @@ procfs_target (void)
   t->to_has_thread_control  = tc_schedlock;
   t->to_find_memory_regions = proc_find_memory_regions;
   t->to_make_corefile_notes = procfs_make_note_section;
-  t->to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
 
 #if defined(PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
   t->to_auxv_parse = procfs_auxv_parse;
@@ -2902,7 +2902,10 @@ procfs_address_to_host_pointer (CORE_ADDR addr)
 int
 proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
 {
-#if !defined (TARGET_HAS_HARDWARE_WATCHPOINTS)
+#if !defined (PCWATCH) && !defined (PIOCSWATCH)
+  /* If neither or these is defined, we can't support watchpoints.
+     This just avoids possibly failing to compile the below on such
+     systems.  */
   return 0;
 #else
 /* Horrible hack!  Detect Solaris 2.5, because this doesn't work on 2.5 */
@@ -5294,9 +5297,6 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
 static int
 procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
 {
-#ifndef TARGET_HAS_HARDWARE_WATCHPOINTS
-  return 0;
-#else
   /* Due to the way that proc_set_watchpoint() is implemented, host
      and target pointers must be of the same size.  If they are not,
      we can't use hardware watchpoints.  This limitation is due to the
@@ -5312,7 +5312,6 @@ procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
   /* Other tests here???  */
 
   return 1;
-#endif
 }
 
 /*
@@ -5394,6 +5393,7 @@ procfs_use_watchpoints (struct target_ops *t)
   t->to_insert_watchpoint = procfs_insert_watchpoint;
   t->to_remove_watchpoint = procfs_remove_watchpoint;
   t->to_region_ok_for_hw_watchpoint = procfs_region_ok_for_hw_watchpoint;
+  t->to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
 }
 
 /*
@@ -5988,16 +5988,6 @@ proc_untrace_sysexit_cmd (char *args, int from_tty)
 void
 _initialize_procfs (void)
 {
-  struct target_ops * t;
-
-  t = procfs_target ();
-
-#ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
-  procfs_use_watchpoints (t);
-#endif
-
-  add_target (t);
-
   add_info ("proc", info_proc_cmd, _("\
 Show /proc process information about any running process.\n\
 Specify process id, or use the program being debugged by default.\n\
