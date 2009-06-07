@@ -1590,6 +1590,11 @@ use_dbt_breakpoints_command (char *args, int from_tty)
   use_ib_breakpoints = 0;
 }
 
+static int
+m32r_return_one (struct target_ops *target)
+{
+  return 1;
+}
 
 /* Define the target subroutine names */
 
@@ -1627,11 +1632,11 @@ init_m32r_ops (void)
   m32r_ops.to_thread_alive = m32r_thread_alive;
   m32r_ops.to_pid_to_str = m32r_pid_to_str;
   m32r_ops.to_stratum = process_stratum;
-  m32r_ops.to_has_all_memory = 1;
-  m32r_ops.to_has_memory = 1;
-  m32r_ops.to_has_stack = 1;
-  m32r_ops.to_has_registers = 1;
-  m32r_ops.to_has_execution = 1;
+  m32r_ops.to_has_all_memory = m32r_return_one;
+  m32r_ops.to_has_memory = m32r_return_one;
+  m32r_ops.to_has_stack = m32r_return_one;
+  m32r_ops.to_has_registers = m32r_return_one;
+  m32r_ops.to_has_execution = m32r_return_one;
   m32r_ops.to_magic = OPS_MAGIC;
 };
 

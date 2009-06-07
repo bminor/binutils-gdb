@@ -325,6 +325,12 @@ bsd_kvm_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return buf;
 }
 
+static int
+bsd_kvm_return_one (struct target_ops *ops)
+{
+  return 1;
+}
+
 /* Add the libkvm interface to the list of all possible targets and
    register CUPPLY_PCB as the architecture-specific process control
    block interpreter.  */
@@ -347,9 +353,9 @@ Optionally specify the filename of a core dump.");
   bsd_kvm_ops.to_thread_alive = bsd_kvm_thread_alive;
   bsd_kvm_ops.to_pid_to_str = bsd_kvm_pid_to_str;
   bsd_kvm_ops.to_stratum = process_stratum;
-  bsd_kvm_ops.to_has_memory = 1;
-  bsd_kvm_ops.to_has_stack = 1;
-  bsd_kvm_ops.to_has_registers = 1;
+  bsd_kvm_ops.to_has_memory = bsd_kvm_return_one;
+  bsd_kvm_ops.to_has_stack = bsd_kvm_return_one;
+  bsd_kvm_ops.to_has_registers = bsd_kvm_return_one;
   bsd_kvm_ops.to_magic = OPS_MAGIC;
 
   add_target (&bsd_kvm_ops);

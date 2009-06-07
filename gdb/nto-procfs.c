@@ -1327,11 +1327,11 @@ init_procfs_ops (void)
   procfs_ops.to_pid_to_str = procfs_pid_to_str;
   procfs_ops.to_stop = procfs_stop;
   procfs_ops.to_stratum = process_stratum;
-  procfs_ops.to_has_all_memory = 1;
-  procfs_ops.to_has_memory = 1;
-  procfs_ops.to_has_stack = 1;
-  procfs_ops.to_has_registers = 1;
-  procfs_ops.to_has_execution = 1;
+  procfs_ops.to_has_all_memory = default_child_has_all_memory;
+  procfs_ops.to_has_memory = default_child_has_memory;
+  procfs_ops.to_has_stack = default_child_has_stack;
+  procfs_ops.to_has_registers = default_child_has_registers;
+  procfs_ops.to_has_execution = default_child_has_execution;
   procfs_ops.to_magic = OPS_MAGIC;
   procfs_ops.to_have_continuable_watchpoint = 1;
 }

@@ -491,6 +491,10 @@ extern void print_inferior (struct ui_out *uiout, int requested_inferior);
 /* Returns true if the inferior list is not empty.  */
 extern int have_inferiors (void);
 
+/* Returns true if there are any live inferiors in the inferior list
+   (not cores, not executables, real live processes).  */
+extern int have_live_inferiors (void);
+
 /* Return a pointer to the current inferior.  It is an error to call
    this if there is no current inferior.  */
 extern struct inferior *current_inferior (void);

@@ -415,11 +415,11 @@ struct target_ops
     void (*to_log_command) (const char *);
     struct target_section_table *(*to_get_section_table) (struct target_ops *);
     enum strata to_stratum;
-    int to_has_all_memory;
-    int to_has_memory;
-    int to_has_stack;
-    int to_has_registers;
-    int to_has_execution;
+    int (*to_has_all_memory) (struct target_ops *);
+    int (*to_has_memory) (struct target_ops *);
+    int (*to_has_stack) (struct target_ops *);
+    int (*to_has_registers) (struct target_ops *);
+    int (*to_has_execution) (struct target_ops *);
     int to_has_thread_control;	/* control thread execution */
     int to_attach_no_wait;
     /* ASYNC target controls */
@@ -931,24 +931,24 @@ extern void target_find_new_threads (void);
    determines whether we look up the target chain for other parts of
    memory if this target can't satisfy a request.  */
 
-#define	target_has_all_memory	\
-     (current_target.to_has_all_memory)
+extern int target_has_all_memory_1 (void);
+#define target_has_all_memory target_has_all_memory_1 ()
 
 /* Does the target include memory?  (Dummy targets don't.)  */
 
-#define	target_has_memory	\
-     (current_target.to_has_memory)
+extern int target_has_memory_1 (void);
+#define target_has_memory target_has_memory_1 ()
 
 /* Does the target have a stack?  (Exec files don't, VxWorks doesn't, until
    we start a process.)  */
 
-#define	target_has_stack	\
-     (current_target.to_has_stack)
+extern int target_has_stack_1 (void);
+#define target_has_stack target_has_stack_1 ()
 
 /* Does the target have registers?  (Exec files don't.)  */
 
-#define	target_has_registers	\
-     (current_target.to_has_registers)
+extern int target_has_registers_1 (void);
+#define target_has_registers target_has_registers_1 ()
 
 /* Does the target have execution?  Can we make it jump (through
    hoops), or pop its stack a few times?  This means that the current
@@ -958,8 +958,17 @@ extern void target_find_new_threads (void);
    case this will become true after target_create_inferior or
    target_attach.  */
 
-#define	target_has_execution	\
-     (current_target.to_has_execution)
+extern int target_has_execution_1 (void);
+#define target_has_execution target_has_execution_1 ()
+
+/* Default implementations for process_stratum targets.  Return true
+   if there's a selected inferior, false otherwise.  */
+
+extern int default_child_has_all_memory (struct target_ops *ops);
+extern int default_child_has_memory (struct target_ops *ops);
+extern int default_child_has_stack (struct target_ops *ops);
+extern int default_child_has_registers (struct target_ops *ops);
+extern int default_child_has_execution (struct target_ops *ops);
 
 /* Can the target support the debugger control of thread execution?
    Can it lock the thread scheduler?  */
@@ -1177,13 +1186,6 @@ extern void pop_all_targets_above (enum strata above_stratum, int quitting);
 
 extern CORE_ADDR target_translate_tls_address (struct objfile *objfile,
 					       CORE_ADDR offset);
-
-/* Mark a pushed target as running or exited, for targets which do not
-   automatically pop when not active.  */
-
-void target_mark_running (struct target_ops *);
-
-void target_mark_exited (struct target_ops *);
 
 /* Struct target_section maps address ranges to file sections.  It is
    mostly used with BFD files, but can be used without (e.g. for handling

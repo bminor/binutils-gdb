@@ -559,9 +559,6 @@ is_thread_state (ptid_t ptid, enum thread_state state)
 {
   struct thread_info *tp;
 
-  if (!target_has_execution)
-    return 0;
-
   tp = find_thread_ptid (ptid);
   gdb_assert (tp);
   return tp->state_ == state;
@@ -570,30 +567,18 @@ is_thread_state (ptid_t ptid, enum thread_state state)
 int
 is_stopped (ptid_t ptid)
 {
-  /* Without execution, this property is always true.  */
-  if (!target_has_execution)
-    return 1;
-
   return is_thread_state (ptid, THREAD_STOPPED);
 }
 
 int
 is_exited (ptid_t ptid)
 {
-  /* Without execution, this property is always false.  */
-  if (!target_has_execution)
-    return 0;
-
   return is_thread_state (ptid, THREAD_EXITED);
 }
 
 int
 is_running (ptid_t ptid)
 {
-   /* Without execution, this property is always false.  */
-  if (!target_has_execution)
-    return 0;
-
   return is_thread_state (ptid, THREAD_RUNNING);
 }
 
@@ -601,9 +586,6 @@ int
 any_running (void)
 {
   struct thread_info *tp;
-
-  if (!target_has_execution)
-    return 0;
 
   for (tp = thread_list; tp; tp = tp->next)
     if (tp->state_ == THREAD_RUNNING)
@@ -616,9 +598,6 @@ int
 is_executing (ptid_t ptid)
 {
   struct thread_info *tp;
-
-  if (!target_has_execution)
-    return 0;
 
   tp = find_thread_ptid (ptid);
   gdb_assert (tp);

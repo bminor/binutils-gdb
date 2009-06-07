@@ -802,6 +802,15 @@ ignore (struct bp_target_info *bp_tgt)
   return 0;
 }
 
+static int
+exec_has_memory (struct target_ops *ops)
+{
+  /* We can provide memory if we have any file/target sections to read
+     from.  */
+  return (current_target_sections->sections
+	  != current_target_sections->sections_end);
+}
+
 /* Find mapped memory. */
 
 extern void
@@ -836,7 +845,7 @@ Specify the filename of the executable file.";
   exec_ops.to_remove_breakpoint = ignore;
   exec_ops.to_create_inferior = find_default_create_inferior;
   exec_ops.to_stratum = file_stratum;
-  exec_ops.to_has_memory = 1;
+  exec_ops.to_has_memory = exec_has_memory;
   exec_ops.to_make_corefile_notes = exec_make_note_section;
   exec_ops.to_magic = OPS_MAGIC;
 }

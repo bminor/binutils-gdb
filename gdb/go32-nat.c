@@ -968,11 +968,11 @@ init_go32_ops (void)
   go32_ops.to_thread_alive = go32_thread_alive;
   go32_ops.to_pid_to_str = go32_pid_to_str;
   go32_ops.to_stratum = process_stratum;
-  go32_ops.to_has_all_memory = 1;
-  go32_ops.to_has_memory = 1;
-  go32_ops.to_has_stack = 1;
-  go32_ops.to_has_registers = 1;
-  go32_ops.to_has_execution = 1;
+  go32_ops.to_has_all_memory = default_child_has_all_memory;
+  go32_ops.to_has_memory = default_child_has_memory;
+  go32_ops.to_has_stack = default_child_has_stack;
+  go32_ops.to_has_registers = default_child_has_registers;
+  go32_ops.to_has_execution = default_child_has_execution;
 
   i386_use_watchpoints (&go32_ops);
 

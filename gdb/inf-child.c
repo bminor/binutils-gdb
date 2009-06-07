@@ -193,11 +193,11 @@ inf_child_target (void)
   t->to_can_run = inf_child_can_run;
   t->to_pid_to_exec_file = inf_child_pid_to_exec_file;
   t->to_stratum = process_stratum;
-  t->to_has_all_memory = 1;
-  t->to_has_memory = 1;
-  t->to_has_stack = 1;
-  t->to_has_registers = 1;
-  t->to_has_execution = 1;
+  t->to_has_all_memory = default_child_has_all_memory;
+  t->to_has_memory = default_child_has_memory;
+  t->to_has_stack = default_child_has_stack;
+  t->to_has_registers = default_child_has_registers;
+  t->to_has_execution = default_child_has_execution;
   t->to_magic = OPS_MAGIC;
   return t;
 }

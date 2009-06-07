@@ -2654,11 +2654,11 @@ init_gnu_ops (void)
   gnu_ops.to_pid_to_str = gnu_pid_to_str;   /* to_pid_to_str */
   gnu_ops.to_stop = gnu_stop;	/* to_stop */
   gnu_ops.to_stratum = process_stratum;		/* to_stratum */
-  gnu_ops.to_has_all_memory = 1;	/* to_has_all_memory */
-  gnu_ops.to_has_memory = 1;		/* to_has_memory */
-  gnu_ops.to_has_stack = 1;		/* to_has_stack */
-  gnu_ops.to_has_registers = 1;		/* to_has_registers */
-  gnu_ops.to_has_execution = 1;		/* to_has_execution */
+  gnu_ops.to_has_all_memory = default_child_has_all_memory;
+  gnu_ops.to_has_memory = default_child_has_memory;
+  gnu_ops.to_has_stack = default_child_has_stack;
+  gnu_ops.to_has_registers = default_child_has_registers;
+  gnu_ops.to_has_execution = default_child_has_execution;
   gnu_ops.to_magic = OPS_MAGIC;		/* to_magic */
 }				/* init_gnu_ops */
 

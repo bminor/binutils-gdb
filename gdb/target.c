@@ -213,6 +213,120 @@ target_command (char *arg, int from_tty)
 		  gdb_stdout);
 }
 
+/* Default target_has_* methods for process_stratum targets.  */
+
+int
+default_child_has_all_memory (struct target_ops *ops)
+{
+  /* If no inferior selected, then we can't read memory here.  */
+  if (ptid_equal (inferior_ptid, null_ptid))
+    return 0;
+
+  return 1;
+}
+
+int
+default_child_has_memory (struct target_ops *ops)
+{
+  /* If no inferior selected, then we can't read memory here.  */
+  if (ptid_equal (inferior_ptid, null_ptid))
+    return 0;
+
+  return 1;
+}
+
+int
+default_child_has_stack (struct target_ops *ops)
+{
+  /* If no inferior selected, there's no stack.  */
+  if (ptid_equal (inferior_ptid, null_ptid))
+    return 0;
+
+  return 1;
+}
+
+int
+default_child_has_registers (struct target_ops *ops)
+{
+  /* Can't read registers from no inferior.  */
+  if (ptid_equal (inferior_ptid, null_ptid))
+    return 0;
+
+  return 1;
+}
+
+int
+default_child_has_execution (struct target_ops *ops)
+{
+  /* If there's no thread selected, then we can't make it run through
+     hoops.  */
+  if (ptid_equal (inferior_ptid, null_ptid))
+    return 0;
+
+  return 1;
+}
+
+
+int
+target_has_all_memory_1 (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_has_all_memory (t))
+      return 1;
+
+  return 0;
+}
+
+int
+target_has_memory_1 (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_has_memory (t))
+      return 1;
+
+  return 0;
+}
+
+int
+target_has_stack_1 (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_has_stack (t))
+      return 1;
+
+  return 0;
+}
+
+int
+target_has_registers_1 (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_has_registers (t))
+      return 1;
+
+  return 0;
+}
+
+int
+target_has_execution_1 (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_has_execution (t))
+      return 1;
+
+  return 0;
+}
+
 /* Add a possible target architecture to the list.  */
 
 void
@@ -221,6 +335,21 @@ add_target (struct target_ops *t)
   /* Provide default values for all "must have" methods.  */
   if (t->to_xfer_partial == NULL)
     t->to_xfer_partial = default_xfer_partial;
+
+  if (t->to_has_all_memory == NULL)
+    t->to_has_all_memory = (int (*) (struct target_ops *)) return_zero;
+
+  if (t->to_has_memory == NULL)
+    t->to_has_memory = (int (*) (struct target_ops *)) return_zero;
+
+  if (t->to_has_stack == NULL)
+    t->to_has_stack = (int (*) (struct target_ops *)) return_zero;
+
+  if (t->to_has_registers == NULL)
+    t->to_has_registers = (int (*) (struct target_ops *)) return_zero;
+
+  if (t->to_has_execution == NULL)
+    t->to_has_execution = (int (*) (struct target_ops *)) return_zero;
 
   if (!target_structs)
     {
@@ -486,11 +615,11 @@ update_current_target (void)
       INHERIT (to_pid_to_exec_file, t);
       INHERIT (to_log_command, t);
       INHERIT (to_stratum, t);
-      INHERIT (to_has_all_memory, t);
-      INHERIT (to_has_memory, t);
-      INHERIT (to_has_stack, t);
-      INHERIT (to_has_registers, t);
-      INHERIT (to_has_execution, t);
+      /* Do not inherit to_has_all_memory */
+      /* Do not inherit to_has_memory */
+      /* Do not inherit to_has_stack */
+      /* Do not inherit to_has_registers */
+      /* Do not inherit to_has_execution */
       INHERIT (to_has_thread_control, t);
       INHERIT (to_can_async_p, t);
       INHERIT (to_is_async_p, t);
@@ -656,56 +785,6 @@ update_current_target (void)
 
   if (targetdebug)
     setup_target_debug ();
-}
-
-/* Mark OPS as a running target.  This reverses the effect
-   of target_mark_exited.  */
-
-void
-target_mark_running (struct target_ops *ops)
-{
-  struct target_ops *t;
-
-  for (t = target_stack; t != NULL; t = t->beneath)
-    if (t == ops)
-      break;
-  if (t == NULL)
-    internal_error (__FILE__, __LINE__,
-		    "Attempted to mark unpushed target \"%s\" as running",
-		    ops->to_shortname);
-
-  ops->to_has_execution = 1;
-  ops->to_has_all_memory = 1;
-  ops->to_has_memory = 1;
-  ops->to_has_stack = 1;
-  ops->to_has_registers = 1;
-
-  update_current_target ();
-}
-
-/* Mark OPS as a non-running target.  This reverses the effect
-   of target_mark_running.  */
-
-void
-target_mark_exited (struct target_ops *ops)
-{
-  struct target_ops *t;
-
-  for (t = target_stack; t != NULL; t = t->beneath)
-    if (t == ops)
-      break;
-  if (t == NULL)
-    internal_error (__FILE__, __LINE__,
-		    "Attempted to mark unpushed target \"%s\" as running",
-		    ops->to_shortname);
-
-  ops->to_has_execution = 0;
-  ops->to_has_all_memory = 0;
-  ops->to_has_memory = 0;
-  ops->to_has_stack = 0;
-  ops->to_has_registers = 0;
-
-  update_current_target ();
 }
 
 /* Push a new target type into the stack of the existing target accessors,
@@ -1176,7 +1255,7 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
 
       /* We want to continue past core files to executables, but not
 	 past a running target's memory.  */
-      if (ops->to_has_all_memory)
+      if (ops->to_has_all_memory (ops))
 	break;
 
       ops = ops->beneath;
@@ -1293,7 +1372,10 @@ target_xfer_partial (struct target_ops *ops,
 int
 target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
-  if (target_read (&current_target, TARGET_OBJECT_MEMORY, NULL,
+  /* Dispatch to the topmost target, not the flattened current_target.
+     Memory accesses check target->to_has_(all_)memory, and the
+     flattened target doesn't inherit those.  */
+  if (target_read (current_target.beneath, TARGET_OBJECT_MEMORY, NULL,
 		   myaddr, memaddr, len) == len)
     return 0;
   else
@@ -1303,7 +1385,10 @@ target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 int
 target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
 {
-  if (target_write (&current_target, TARGET_OBJECT_MEMORY, NULL,
+  /* Dispatch to the topmost target, not the flattened current_target.
+     Memory accesses check target->to_has_(all_)memory, and the
+     flattened target doesn't inherit those.  */
+  if (target_write (current_target.beneath, TARGET_OBJECT_MEMORY, NULL,
 		    myaddr, memaddr, len) == len)
     return 0;
   else
@@ -1756,7 +1841,7 @@ target_info (char *args, int from_tty)
 
   for (t = target_stack; t != NULL; t = t->beneath)
     {
-      if (!t->to_has_memory)
+      if (!(*t->to_has_memory) (t))
 	continue;
 
       if ((int) (t->to_stratum) <= (int) dummy_stratum)
@@ -1765,7 +1850,7 @@ target_info (char *args, int from_tty)
 	printf_unfiltered (_("\tWhile running this, GDB does not access memory from...\n"));
       printf_unfiltered ("%s:\n", t->to_longname);
       (t->to_files_info) (t);
-      has_all_mem = t->to_has_all_memory;
+      has_all_mem = (*t->to_has_all_memory) (t);
     }
 }
 
@@ -2169,7 +2254,7 @@ target_search_memory (CORE_ADDR start_addr, ULONGEST search_space_len,
     {
       /* If a special version of to_search_memory isn't available, use the
 	 simple version.  */
-      found = simple_search_memory (&current_target,
+      found = simple_search_memory (current_target.beneath,
 				    start_addr, search_space_len,
 				    pattern, pattern_len, found_addrp);
     }
@@ -2541,6 +2626,11 @@ init_dummy_target (void)
   dummy_target.to_find_memory_regions = dummy_find_memory_regions;
   dummy_target.to_make_corefile_notes = dummy_make_corefile_notes;
   dummy_target.to_xfer_partial = default_xfer_partial;
+  dummy_target.to_has_all_memory = (int (*) (struct target_ops *)) return_zero;
+  dummy_target.to_has_memory = (int (*) (struct target_ops *)) return_zero;
+  dummy_target.to_has_stack = (int (*) (struct target_ops *)) return_zero;
+  dummy_target.to_has_registers = (int (*) (struct target_ops *)) return_zero;
+  dummy_target.to_has_execution = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_magic = OPS_MAGIC;
 }
 
@@ -3264,7 +3354,7 @@ static void
 set_maintenance_target_async_permitted (char *args, int from_tty,
 					struct cmd_list_element *c)
 {
-  if (target_has_execution)
+  if (have_live_inferiors ())
     {
       target_async_permitted_1 = target_async_permitted;
       error (_("Cannot change this setting while the inferior is running."));

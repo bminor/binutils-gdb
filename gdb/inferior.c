@@ -284,6 +284,14 @@ have_inferiors (void)
   return inferior_list != NULL;
 }
 
+int
+have_live_inferiors (void)
+{
+  /* The check on stratum suffices, as GDB doesn't currently support
+     multiple target interfaces.  */
+  return (current_target.to_stratum >= process_stratum && have_inferiors ());
+}
+
 /* Prints the list of inferiors and their details on UIOUT.  This is a
    version of 'info_inferior_command' suitable for use from MI.
 

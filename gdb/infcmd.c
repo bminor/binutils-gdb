@@ -2052,9 +2052,9 @@ kill_command (char *arg, int from_tty)
     error (_("Not confirmed."));
   target_kill ();
 
-  /* If the current target interface claims there's still execution,
-     then don't mess with threads of other processes.  */
-  if (!target_has_execution)
+  /* If we still have other inferiors to debug, then don't mess with
+     with their threads.  */
+  if (!have_inferiors ())
     {
       init_thread_list ();		/* Destroy thread info */
 
@@ -2442,9 +2442,9 @@ detach_command (char *args, int from_tty)
   if (!gdbarch_has_global_solist (target_gdbarch))
     no_shared_libraries (NULL, from_tty);
 
-  /* If the current target interface claims there's still execution,
-     then don't mess with threads of other processes.  */
-  if (!target_has_execution)
+  /* If we still have inferiors to debug, then don't mess with their
+     threads.  */
+  if (!have_inferiors ())
     init_thread_list ();
 
   if (deprecated_detach_hook)

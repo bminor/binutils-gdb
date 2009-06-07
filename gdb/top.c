@@ -1222,10 +1222,15 @@ kill_or_detach (struct inferior *inf, void *args)
   if (thread)
     {
       switch_to_thread (thread->ptid);
-      if (inf->attach_flag)
-	target_detach (qt->args, qt->from_tty);
-      else
-	target_kill ();
+
+      /* Leave core files alone.  */
+      if (target_has_execution)
+	{
+	  if (inf->attach_flag)
+	    target_detach (qt->args, qt->from_tty);
+	  else
+	    target_kill ();
+	}
     }
 
   return 0;
@@ -1239,8 +1244,7 @@ quit_target (void *arg)
   struct qt_args *qt = (struct qt_args *)arg;
 
   /* Kill or detach all inferiors.  */
-  if (target_has_execution)
-    iterate_over_inferiors (kill_or_detach, qt);
+  iterate_over_inferiors (kill_or_detach, qt);
 
   /* Give all pushed targets a chance to do minimal cleanup, and pop
      them all out.  */

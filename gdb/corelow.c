@@ -748,6 +748,24 @@ core_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return buf;
 }
 
+static int
+core_has_memory (struct target_ops *ops)
+{
+  return (core_bfd != NULL);
+}
+
+static int
+core_has_stack (struct target_ops *ops)
+{
+  return (core_bfd != NULL);
+}
+
+static int
+core_has_registers (struct target_ops *ops)
+{
+  return (core_bfd != NULL);
+}
+
 /* Fill in core_ops with its defined operations and properties.  */
 
 static void
@@ -771,9 +789,9 @@ init_core_ops (void)
   core_ops.to_read_description = core_read_description;
   core_ops.to_pid_to_str = core_pid_to_str;
   core_ops.to_stratum = core_stratum;
-  core_ops.to_has_memory = 1;
-  core_ops.to_has_stack = 1;
-  core_ops.to_has_registers = 1;
+  core_ops.to_has_memory = core_has_memory;
+  core_ops.to_has_stack = core_has_stack;
+  core_ops.to_has_registers = core_has_registers;
   core_ops.to_magic = OPS_MAGIC;
 }
 

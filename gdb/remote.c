@@ -1179,15 +1179,6 @@ remote_add_inferior (int pid, int attached)
 
   inf->attach_flag = attached;
 
-  /* This may be the first inferior we hear about.  */
-  if (!target_has_execution)
-    {
-      if (rs->extended)
-	target_mark_running (&extended_remote_ops);
-      else
-	target_mark_running (&remote_ops);
-    }
-
   return inf;
 }
 
@@ -2688,15 +2679,12 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
     {
       if (rs->buf[0] == 'W' || rs->buf[0] == 'X')
 	{
-	  if (args->extended_p)
-	    {
-	      /* We're connected, but not running.  Drop out before we
-		 call start_remote.  */
-	      target_mark_exited (args->target);
-	      return;
-	    }
-	  else
+	  if (!args->extended_p)
 	    error (_("The target is not running (try extended-remote?)"));
+
+	  /* We're connected, but not running.  Drop out before we
+	     call start_remote.  */
+	  return;
 	}
       else
 	{
@@ -2786,19 +2774,13 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 
       if (thread_count () == 0)
 	{
-	  if (args->extended_p)
-	    {
-	      /* We're connected, but not running.  Drop out before we
-		 call start_remote.  */
-	      target_mark_exited (args->target);
-	      return;
-	    }
-	  else
+	  if (!args->extended_p)
 	    error (_("The target is not running (try extended-remote?)"));
-	}
 
-      if (args->extended_p)
-	target_mark_running (args->target);
+	  /* We're connected, but not running.  Drop out before we
+	     call start_remote.  */
+	  return;
+	}
 
       /* Let the stub know that we want it to return the thread.  */
 
@@ -3209,7 +3191,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
      But if we're connected to a target system with no running process,
      then we will still be connected when it returns.  Ask this question
      first, before target_preopen has a chance to kill anything.  */
-  if (remote_desc != NULL && !target_has_execution)
+  if (remote_desc != NULL && !have_inferiors ())
     {
       if (!from_tty
 	  || query (_("Already connected to a remote target.  Disconnect? ")))
@@ -3227,7 +3209,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
      process, we may still be connected.  If we are starting "target
      remote" now, the extended-remote target will not have been
      removed by unpush_target.  */
-  if (remote_desc != NULL && !target_has_execution)
+  if (remote_desc != NULL && !have_inferiors ())
     pop_target ();
 
   /* Make sure we send the passed signals list the next time we resume.  */
@@ -3269,10 +3251,6 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
       puts_filtered ("\n");
     }
   push_target (target);		/* Switch to using remote target now.  */
-
-  /* Assume that the target is not running, until we learn otherwise.  */
-  if (extended_p)
-    target_mark_exited (target);
 
   /* Register extra event sources in the event loop.  */
   remote_async_inferior_event_token
@@ -6680,16 +6658,7 @@ extended_remote_mourn_1 (struct target_ops *target)
 		 so that the user can say "kill" again.	 */
 	      inferior_ptid = magic_null_ptid;
 	    }
-	  else
-	    {
-	      /* Mark this (still pushed) target as not executable until we
-		 restart it.  */
-	      target_mark_exited (target);
-	    }
 	}
-      else
-	/* Always remove execution if this was the last process.  */
-	target_mark_exited (target);
     }
 }
 
@@ -8803,11 +8772,11 @@ Specify the serial device it is connected to\n\
   remote_ops.to_log_command = serial_log_command;
   remote_ops.to_get_thread_local_address = remote_get_thread_local_address;
   remote_ops.to_stratum = process_stratum;
-  remote_ops.to_has_all_memory = 1;
-  remote_ops.to_has_memory = 1;
-  remote_ops.to_has_stack = 1;
-  remote_ops.to_has_registers = 1;
-  remote_ops.to_has_execution = 1;
+  remote_ops.to_has_all_memory = default_child_has_all_memory;
+  remote_ops.to_has_memory = default_child_has_memory;
+  remote_ops.to_has_stack = default_child_has_stack;
+  remote_ops.to_has_registers = default_child_has_registers;
+  remote_ops.to_has_execution = default_child_has_execution;
   remote_ops.to_has_thread_control = tc_schedlock;	/* can lock scheduler */
   remote_ops.to_can_execute_reverse = remote_can_execute_reverse;
   remote_ops.to_magic = OPS_MAGIC;

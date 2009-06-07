@@ -1286,12 +1286,10 @@ insert_breakpoints (void)
 
   update_global_location_list (1);
 
-  if (!breakpoints_always_inserted_mode ()
-      && (target_has_execution
- 	  || gdbarch_has_global_breakpoints (target_gdbarch)))
-    /* update_global_location_list does not insert breakpoints
-       when always_inserted_mode is not enabled.  Explicitly
-       insert them now.  */
+  /* update_global_location_list does not insert breakpoints when
+     always_inserted_mode is not enabled.  Explicitly insert them
+     now.  */
+  if (!breakpoints_always_inserted_mode ())
     insert_breakpoint_locations ();
 }
 
@@ -7232,7 +7230,7 @@ update_global_location_list (int should_insert)
     }
 
   if (breakpoints_always_inserted_mode () && should_insert
-      && (target_has_execution
+      && (have_live_inferiors ()
 	  || (gdbarch_has_global_breakpoints (target_gdbarch))))
     insert_breakpoint_locations ();
 

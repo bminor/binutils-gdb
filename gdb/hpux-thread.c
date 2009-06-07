@@ -565,11 +565,11 @@ init_hpux_thread_ops (void)
   hpux_thread_ops.to_thread_alive = hpux_thread_alive;
   hpux_thread_ops.to_stop = hpux_thread_stop;
   hpux_thread_ops.to_stratum = process_stratum;
-  hpux_thread_ops.to_has_all_memory = 1;
-  hpux_thread_ops.to_has_memory = 1;
-  hpux_thread_ops.to_has_stack = 1;
-  hpux_thread_ops.to_has_registers = 1;
-  hpux_thread_ops.to_has_execution = 1;
+  hpux_thread_ops.to_has_all_memory = default_child_has_all_memory;
+  hpux_thread_ops.to_has_memory = default_child_has_memory;
+  hpux_thread_ops.to_has_stack = default_child_has_stack;
+  hpux_thread_ops.to_has_registers = default_child_has_registers;
+  hpux_thread_ops.to_has_execution = default_child_has_execution;
   hpux_thread_ops.to_magic = OPS_MAGIC;
 }
 

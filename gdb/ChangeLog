@@ -1,3 +1,102 @@
+2009-06-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.h (struct target_ops): Make to_has_all_memory,
+	to_has_memory, to_has_stack, to_has_registers and to_has_execution
+	methods instead of variables.
+	(target_has_all_memory_1, target_has_memory_1, target_has_stack_1)
+	(target_has_registers_1, target_has_execution_1): Declare
+	functions.
+	(target_has_all_memory): Rewrite to call target_has_all_memory_1.
+	(target_has_memory): Rewrite to call target_has_memory_1.
+	(target_has_stack): Rewrite to call target_has_all_stack_1.
+	(target_has_registers): Rewrite to call target_has_registers_1.
+	(target_has_execution): Rewrite to call target_has_execution_1.
+	(default_child_has_all_memory, default_child_has_memory)
+	(default_child_has_stack, default_child_has_registers)
+	(default_child_has_execution): Declare.
+	(target_mark_running, target_mark_exited): Delete declarations.
+	* target.c (default_child_has_all_memory,
+	default_child_has_memory, default_child_has_stack,
+	default_child_has_registers, default_child_has_execution): New.
+	(target_has_all_memory_1, target_has_memory_1, target_has_stack_1,
+	target_has_registers_1, target_has_execution_1): New.
+	(add_target): Default the to_has_all_memory, to_has_all_memory,
+	to_has_memory, to_has_stack, to_has_registers and to_has_execution
+	callbacks to return 0.
+	(update_current_target): Do not inherit to_has_all_memory,
+	to_has_memory, to_has_stack, to_has_registers or to_has_execution.
+	(target_mark_running, target_mark_exited): Delete.
+	(memory_xfer_partial): Adjust.
+	(target_read_memory, target_write_memory, target_search_memory):
+	Dispatch to the the top-most target, not the flattened
+	current_target.
+	(target_info): Adjust.
+	(init_dummy_target): Install return_zero as callback for
+	to_has_all_memory, to_has_memory, to_has_stack, to_has_registers,
+	to_has_execution.
+	(set_maintenance_target_async_permitted): Use have_live_inferiors
+	instead of target_has_execution.
+	* target-memory.c (target_write_memory_blocks): Dispatch memory
+	writes to the the top-most target, not the flattened
+	current_target.
+
+	* breakpoint.c (insert_breakpoints): Don't check for
+	target_has_execution here.
+	(update_global_location_list): Check if there are live inferiors
+	to debug instead of target_has_execution.
+	* infcmd.c (kill_command, detach_command): Check if there are
+	inferiors instead of target_has_execution.
+	* inferior.h (have_live_inferiors): Declare.
+	* inferior.c (have_live_inferiors): New.
+	* infrun.c (normal_stop): Don't check for target_has_execution to
+	finish the thread states.
+	* thread.c (is_thread_state, is_stopped, is_exited, is_running)
+	(any_running, is_executing): Remove checks for
+	target_has_execution.
+	* top.c (kill_or_detach): Don't try to kill core inferiors.
+	(quit_target): Don't check for target_has_execution.
+
+	* corelow.c (core_has_memory, core_has_stack, core_has_registers):
+	New.
+	(init_core_ops): Install core_has_memory, core_has_stack and
+	core_has_registers.
+	* exec.c (exec_has_memory): New.
+	(init_exec_ops): Install exec_has_memory.
+	* remote.c (remote_add_inferior): Don't call target_mark_running.
+	(remote_start_remote): Don't call target_mark_exited or call
+	target_mark_running.
+	(remote_open_1): Use have_inferiors instead of
+	target_has_execution.  Don't use target_mark_exited.
+	(init_remote_ops): Install deafult_child_has_all_memory,
+	default_child_has_memory, default_child_has_stack,
+	default_child_has_registers, default_child_has_execution.
+	* bsd-kvm.c (bsd_kvm_return_one): New.
+	(bsd_kvm_add_target): Register bsd_kvm_return_one as
+	to_has_memory, to_has_stack and to_has_registers callbacks.
+	* remote-m32r-sdi.c (m32r_return_one): New.
+	(init_m32r_ops): Register it.
+	* inf-child.c (inf_child_target): Adjust to register
+	default_child_has_all_memory, default_child_has_memory,
+	default_child_has_stack, default_child_has_registers,
+	default_child_has_execution callbacks.
+	* gnu-nat.c (init_gnu_ops): Likewise.
+	* go32-nat.c (init_go32_ops): Likewise.
+	* hpux-thread.c (init_hpux_thread_ops): Likewise.
+	* monitor.c (init_base_monitor_ops): Likewise.
+	* nto-procfs.c (init_procfs_ops): Likewise.
+	* remote-mips.c (_initialize_remote_mips): Likewise.
+	* windows-nat.c (init_windows_ops): Likewise.
+	* remote-sim.c (gdbsim_create_inferior): Don't use
+	target_mark_running or target_mark_exited.
+	(gdbsim_mourn_inferior): Don't call target_mark_exited.
+	(init_gdbsim_ops): Adjust to register
+	default_child_has_all_memory, default_child_has_memory,
+	default_child_has_stack, default_child_has_registers,
+	default_child_has_execution callbacks.
+
+	* linux-nat.c (linux_nat_xfer_partial): If reading memory, and
+	there's no inferior selected, defer to a lower stratum.
+
 2009-06-05  Tom Tromey  <tromey@redhat.com>
 
 	* varobj.c (update_dynamic_varobj_children): Wrap error text in

@@ -4437,14 +4437,11 @@ normal_stop (void)
      propagate GDB's knowledge of the executing state to the
      frontend/user running state.  A QUIT is an easy exception to see
      here, so do this before any filtered output.  */
-  if (target_has_execution)
-    {
-      if (!non_stop)
-	make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
-      else if (last.kind != TARGET_WAITKIND_SIGNALLED
-	       && last.kind != TARGET_WAITKIND_EXITED)
-	make_cleanup (finish_thread_state_cleanup, &inferior_ptid);
-    }
+  if (!non_stop)
+    make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
+  else if (last.kind != TARGET_WAITKIND_SIGNALLED
+	   && last.kind != TARGET_WAITKIND_EXITED)
+    make_cleanup (finish_thread_state_cleanup, &inferior_ptid);
 
   /* In non-stop mode, we don't want GDB to switch threads behind the
      user's back, to avoid races where the user is typing a command to

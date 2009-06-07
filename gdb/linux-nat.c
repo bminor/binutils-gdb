@@ -3290,6 +3290,12 @@ linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
     return linux_xfer_siginfo (ops, object, annex, readbuf, writebuf,
 			       offset, len);
 
+  /* The target is connected but no live inferior is selected.  Pass
+     this request down to a lower stratum (e.g., the executable
+     file).  */
+  if (object == TARGET_OBJECT_MEMORY && ptid_equal (inferior_ptid, null_ptid))
+    return 0;
+
   old_chain = save_inferior_ptid ();
 
   if (is_lwp (inferior_ptid))

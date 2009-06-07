@@ -474,7 +474,6 @@ gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
   add_inferior_silent (ptid_get_pid (inferior_ptid));
   add_thread_silent (inferior_ptid);
 
-  target_mark_running (&gdbsim_ops);
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
 
   clear_proceed_status ();
@@ -552,7 +551,6 @@ gdbsim_open (char *args, int from_tty)
   /* There's nothing running after "target sim" or "load"; not until
      "run".  */
   inferior_ptid = null_ptid;
-  target_mark_exited (&gdbsim_ops);
 }
 
 /* Does whatever cleanup is required for a target that we are no longer
@@ -820,7 +818,6 @@ gdbsim_mourn_inferior (struct target_ops *target)
     printf_filtered ("gdbsim_mourn_inferior:\n");
 
   remove_breakpoints ();
-  target_mark_exited (target);
   generic_mourn_inferior ();
   delete_thread_silent (remote_sim_ptid);
 }
@@ -913,11 +910,11 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_thread_alive = gdbsim_thread_alive;
   gdbsim_ops.to_pid_to_str = gdbsim_pid_to_str;
   gdbsim_ops.to_stratum = process_stratum;
-  gdbsim_ops.to_has_all_memory = 1;
-  gdbsim_ops.to_has_memory = 1;
-  gdbsim_ops.to_has_stack = 1;
-  gdbsim_ops.to_has_registers = 1;
-  gdbsim_ops.to_has_execution = 1;
+  gdbsim_ops.to_has_all_memory = default_child_has_all_memory;
+  gdbsim_ops.to_has_memory = default_child_has_memory;
+  gdbsim_ops.to_has_stack = default_child_has_stack;
+  gdbsim_ops.to_has_registers = default_child_has_registers;
+  gdbsim_ops.to_has_execution = default_child_has_execution;
   gdbsim_ops.to_magic = OPS_MAGIC;
 }
 
