@@ -5,7 +5,7 @@
 	(install_visualizer): Likewise.
 	(varobj_set_visualizer): Likewise.
 
-2009-06-05  Marc Khouzam <marc.khouzam@ericsson.com>
+2009-06-05  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* mi/mi-main.c (mi_cmd_exec_continue)
 	(mi_cmd_exec_interrupt): Adjust parsing of thread group
