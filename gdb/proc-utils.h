@@ -16,6 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* From proc-why.c */
 
 /*
  * Pretty-print functions for /proc data 
@@ -52,6 +53,9 @@ extern void proc_prettyfprint_syscalls (FILE *file, sysset_t *sysset,
 					int verbose);
 
 extern void proc_prettyfprint_status (long, int, int, int);
+
+
+/* From proc-api.c */
 
 /*
  * Trace functions for /proc api.
@@ -92,3 +96,8 @@ typedef PROC_CTL_WORD_TYPE procfs_ctl_t;
 #else
 typedef long procfs_ctl_t;
 #endif
+
+
+/* From procfs.c */
+
+extern ptid_t procfs_first_available (void);

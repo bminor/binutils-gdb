@@ -1,5 +1,11 @@
 2009-06-07  Pedro Alves  <pedro@codesourcery.com>
 
+	* inferior.h (procfs_first_available): Move declaration to...
+	* proc-utils.h: ... here.
+	* sol-thread.c: Include procfs.h and proc-utils.h.
+
+2009-06-07  Pedro Alves  <pedro@codesourcery.com>
+
 	* inferior.h (proc_iterate_over_mappings): Delete declaration.
 	* nto-tdep.h (proc_iterate_over_mappings): Delete declaration.
 	* procfs.c (proc_iterate_over_mappings): Delete.

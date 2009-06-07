@@ -196,10 +196,6 @@ extern void terminal_init_inferior (void);
 
 extern void terminal_init_inferior_with_pgrp (int pgrp);
 
-/* From procfs.c */
-
-extern ptid_t procfs_first_available (void);
-
 /* From fork-child.c */
 
 extern int fork_inferior (char *, char *, char **,
