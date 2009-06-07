@@ -21,14 +21,9 @@
 #ifndef AUXV_H
 #define AUXV_H
 
+#include "target.h"
+
 /* See "include/elf/common.h" for the definition of valid AT_* values.  */
-
-
-/* Avoid miscellaneous includes in this file, so that it can be
-   included by nm-*.h for the procfs_xfer_auxv decl if that is
-   used in NATIVE_XFER_AUXV.  */
-struct target_ops;		/* Forward declaration.  */
-
 
 /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
    Return 0 if *READPTR is already at the end of the buffer.
@@ -48,16 +43,12 @@ extern int target_auxv_search (struct target_ops *ops,
 /* Print the contents of the target's AUXV on the specified file. */
 extern int fprint_target_auxv (struct ui_file *file, struct target_ops *ops);
 
-
-/* This function is called like a to_xfer_partial hook,
-   but must be called with TARGET_OBJECT_AUXV.
-   It handles access via /proc/PID/auxv, which is the common method.
-   This function is appropriate for doing:
-	   #define NATIVE_XFER_AUXV	procfs_xfer_auxv
-   for a native target that uses inftarg.c's child_xfer_partial hook.  */
+/* This function is called like a to_xfer_partial hook, but must be
+   called with TARGET_OBJECT_AUXV.  It handles access via
+   /proc/PID/auxv, which is a common method for native targets.  */
 
 extern LONGEST procfs_xfer_auxv (struct target_ops *ops,
-				 int /* enum target_object */ object,
+				 enum target_object object,
 				 const char *annex,
 				 gdb_byte *readbuf,
 				 const gdb_byte *writebuf,

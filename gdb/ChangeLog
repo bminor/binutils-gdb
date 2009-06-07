@@ -1,3 +1,10 @@
+20009-06-07  Pedro  Alves  <pedro@codesourcery.com>
+
+	* auxv.c (procfs_xfer_auxv): Change type of the `object' argument
+	to enum target_object.  Cleanup comments.
+	* auxv.h: Include "target.h".  Cleanup comments to not mention
+	NATIVE_XFER_AUXV anymore.
+
 2009-06-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* inferior.h (procfs_first_available): Move declaration to...

@@ -33,16 +33,13 @@
 #include <fcntl.h>
 
 
-/* This function is called like a to_xfer_partial hook,
-   but must be called with TARGET_OBJECT_AUXV.
-   It handles access via /proc/PID/auxv, which is the common method.
-   This function is appropriate for doing:
-	   #define NATIVE_XFER_AUXV	procfs_xfer_auxv
-   for a native target that uses inftarg.c's child_xfer_partial hook.  */
+/* This function is called like a to_xfer_partial hook, but must be
+   called with TARGET_OBJECT_AUXV.  It handles access via
+   /proc/PID/auxv, which is a common method for native targets.  */
 
 LONGEST
 procfs_xfer_auxv (struct target_ops *ops,
-		  int /* enum target_object */ object,
+		  enum target_object object,
 		  const char *annex,
 		  gdb_byte *readbuf,
 		  const gdb_byte *writebuf,
