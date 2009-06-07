@@ -5524,31 +5524,6 @@ int solib_mappings_callback (struct prmap *map,
 }
 
 /*
- * Function: proc_iterate_over_mappings
- *
- * Uses the unified "iterate_over_mappings" function
- * to implement the exported interface to solib-svr4.c.
- *
- * Given a pointer to a function, call that function once for every
- * mapped address space in the process.  The callback function
- * receives an open file descriptor for the file corresponding to
- * that mapped address space (if there is one), and the base address
- * of the mapped space.  Quit when the callback function returns a
- * nonzero value, or at teh end of the mappings.
- *
- * Returns: the first non-zero return value of the callback function,
- * or zero.
- */
-
-int
-proc_iterate_over_mappings (int (*func) (int, CORE_ADDR))
-{
-  procinfo *pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
-
-  return iterate_over_mappings (pi, func, pi, solib_mappings_callback);
-}
-
-/*
  * Function: find_memory_regions_callback
  *
  * Implements the to_find_memory_regions method.

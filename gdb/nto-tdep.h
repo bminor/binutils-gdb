@@ -147,8 +147,6 @@ void nto_set_target(struct nto_target_ops *);
 char **nto_parse_redirection (char *start_argv[], const char **in,
 			      const char **out, const char **err);
 
-int proc_iterate_over_mappings (int (*func) (int, CORE_ADDR));
-
 void nto_relocate_section_addresses (struct so_list *,
 				     struct target_section *);
 

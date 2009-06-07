@@ -198,8 +198,6 @@ extern void terminal_init_inferior_with_pgrp (int pgrp);
 
 /* From procfs.c */
 
-extern int proc_iterate_over_mappings (int (*)(int, CORE_ADDR));
-
 extern ptid_t procfs_first_available (void);
 
 /* From fork-child.c */

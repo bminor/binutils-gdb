@@ -1,5 +1,11 @@
 2009-06-07  Pedro Alves  <pedro@codesourcery.com>
 
+	* inferior.h (proc_iterate_over_mappings): Delete declaration.
+	* nto-tdep.h (proc_iterate_over_mappings): Delete declaration.
+	* procfs.c (proc_iterate_over_mappings): Delete.
+
+2009-06-07  Pedro Alves  <pedro@codesourcery.com>
+
 	* target.h (struct target_ops): Make to_has_all_memory,
 	to_has_memory, to_has_stack, to_has_registers and to_has_execution
 	methods instead of variables.
