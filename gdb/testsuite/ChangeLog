@@ -1,3 +1,8 @@
+2009-06-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.threads/manythreads.c (main): Check if PTHREAD_STACK_MIN is
+	defined before referencing it.
+
 2009-06-03  Doug Evans  <dje@google.com>
 
 	* gdb.arch/i386-sse.exp: Test xmm[8-15] if amd64.

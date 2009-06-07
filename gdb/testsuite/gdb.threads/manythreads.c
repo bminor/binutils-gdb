@@ -42,7 +42,10 @@ main (int argc, char **argv)
   int i, j;
 
   pthread_attr_init (&attr);
+
+#ifdef PTHREAD_STACK_MIN
   pthread_attr_setstacksize (&attr, PTHREAD_STACK_MIN);
+#endif
 
   /* Create a ton of quick-executing threads, then wait for them to
      complete.  */
