@@ -3145,6 +3145,9 @@ hppa_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file, "elf = %s\n", tdep->is_elf ? "yes" : "no");
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_hppa_tdep;
+
 void
 _initialize_hppa_tdep (void)
 {

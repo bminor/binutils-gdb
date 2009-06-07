@@ -1,5 +1,9 @@
 2009-06-07  Pedro Alves  <pedro@codesourcery.com>
 
+	* hppa-tdep.c (_initialize_hppa_tdep): Add declaration.
+
+2009-06-07  Pedro Alves  <pedro@codesourcery.com>
+
 	* procfs.h: New.
 	* proc-utils.h (procfs_first_available): Don't declare here.
 	* sol-thread.c: Include procfs.h instead of sys/procfs.h and
