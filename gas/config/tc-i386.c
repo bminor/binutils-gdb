@@ -6956,6 +6956,10 @@ md_estimate_size_before_relax (fragP, segment)
 	  && (S_IS_EXTERNAL (fragP->fr_symbol)
 	      || S_IS_WEAK (fragP->fr_symbol)))
 #endif
+#if defined (OBJ_COFF) && defined (TE_PE)
+      || (OUTPUT_FLAVOR == bfd_target_coff_flavour 
+	  && S_IS_WEAK (fragP->fr_symbol))
+#endif
       )
     {
       /* Symbol is undefined in this segment, or we need to keep a
@@ -7249,6 +7253,12 @@ md_apply_fix (fixP, valP, seg)
 	value += md_pcrel_from (fixP);
 #endif
     }
+#if defined (OBJ_COFF) && defined (TE_PE)
+  if (fixP->fx_addsy != NULL && S_IS_WEAK (fixP->fx_addsy))
+    {
+      value -= S_GET_VALUE (fixP->fx_addsy);
+    }
+#endif
 
   /* Fix a few things - the dynamic linker expects certain values here,
      and we must not disappoint it.  */
@@ -7312,6 +7322,16 @@ md_apply_fix (fixP, valP, seg)
   /* Are we finished with this relocation now?  */
   if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;
+#if defined (OBJ_COFF) && defined (TE_PE)
+  else if (fixP->fx_addsy != NULL && S_IS_WEAK (fixP->fx_addsy))
+    {
+      fixP->fx_done = 0;
+      /* Remember value for tc_gen_reloc.  */
+      fixP->fx_addnumber = value;
+      /* Clear out the frag for now.  */
+      value = 0;
+    }
+#endif
   else if (use_rela_relocations)
     {
       fixP->fx_no_overflow = 1;
@@ -8214,7 +8234,11 @@ tc_gen_reloc (section, fixp)
 	 vtable entry to be used in the relocation's section offset.  */
       if (fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
 	rel->address = fixp->fx_offset;
-
+#if defined (OBJ_COFF) && defined (TE_PE)
+      else if (fixp->fx_addsy && S_IS_WEAK (fixp->fx_addsy))
+	rel->addend = fixp->fx_addnumber - (S_GET_VALUE (fixp->fx_addsy) * 2);
+      else
+#endif
       rel->addend = 0;
     }
   /* Use the rela in 64bit mode.  */

@@ -1,3 +1,13 @@
+2009-06-08  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	PR gas/977
+	* config/tc-i386.c (md_estimate_size_before_relax):  Don't relax
+	branches to weak symbols.
+	(md_apply_fix):  Don't convert fixes against weak symbols to
+	section-relative offsets, but save addend for later reloc emission.
+	(tc_gen_reloc):  When emitting reloc against weak symbol, adjust
+	addend to pre-compensate for bfd_install_relocation.
+
 2009-06-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Don't use \n in replacement part of s command.
