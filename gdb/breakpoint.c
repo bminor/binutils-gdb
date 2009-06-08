@@ -8802,11 +8802,8 @@ BREAK_ARGS_HELP ("break")));
   add_com_alias ("bre", "break", class_run, 1);
   add_com_alias ("brea", "break", class_run, 1);
 
- if (xdb_commands)
-    {
-      add_com_alias ("ba", "break", class_breakpoint, 1);
-      add_com_alias ("bu", "ubreak", class_breakpoint, 1);
-    }
+  if (xdb_commands)
+   add_com_alias ("ba", "break", class_breakpoint, 1);
 
   if (dbx_commands)
     {
