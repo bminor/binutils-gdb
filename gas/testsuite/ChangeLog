@@ -1,3 +1,7 @@
+2009-06-08  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* gas/i386/jump.d:  Tweak patterns to also match PE platform output.
+
 2009-06-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/10198

@@ -32,8 +32,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 ff 23             	jmpw   \*\(%ebx\)
 [ 	]*[a-f0-9]+:	ff 23                	jmp    \*\(%ebx\)
 [ 	]*[a-f0-9]+:	ff 2b                	ljmp   \*\(%ebx\)
-[ 	]*[a-f0-9]+:	eb 00                	jmp    0x7b
+[ 	]*[a-f0-9]+:	eb 00                	jmp    (0x)?7b( <.text(\+0x7b)?>)?
 [ 	]*[a-f0-9]+:	90                   	nop
-[ 	]*[a-f0-9]+:	eb 00                	jmp    0x7e
+[ 	]*[a-f0-9]+:	eb 00                	jmp    (0x)?7e( <.text(\+0x7e)?>)?
 [ 	]*[a-f0-9]+:	90                   	nop
 #pass
