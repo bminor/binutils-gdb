@@ -1,3 +1,7 @@
+2009-06-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* cli/cli-decode.c (add_alias_cmd): Correct assertion.
+
 2009-06-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* hppa-tdep.c (_initialize_hppa_tdep): Add declaration.

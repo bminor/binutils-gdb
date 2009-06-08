@@ -251,7 +251,7 @@ add_alias_cmd (char *name, char *oldname, enum command_class class,
 						     &prehook, &prehookee,
 						     &posthook, &posthookee);
       /* If this happens, it means a programmer error somewhere.  */
-      gdb_assert (!aliases && !prehook && prehookee
+      gdb_assert (!aliases && !prehook && !prehookee
 		  && !posthook && ! posthookee);
       return 0;
     }
