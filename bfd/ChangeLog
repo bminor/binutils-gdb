@@ -1,3 +1,57 @@
+2009-06-09  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h (bfd_mach_o_symtab_command): Remove stabs_segment
+	and stabstr_segment fields.
+	(mach_o_be_vec, mach_o_le_vec): Removed
+	(bfd_mach_o_version): New prototype.
+
+	* mach-o.c (bfd_mach_o_version): Make this function public.
+	(mach_o_wide_p): New function.
+	(bfd_mach_o_wide_p): Ditto.
+	(bfd_mach_o_convert_section_name_to_bfd): Add prefix only for
+	weird names.
+	(bfd_mach_o_convert_section_name_to_mach_o): Fix typo in comment.
+	Search in the list only if the name starts with a dot.
+	(bfd_mach_o_write_header): Use mach_o_wide_p instead of hard-coded
+	test.  Check bfd_seek status.
+	(bfd_mach_o_scan_write_thread): Check bfd_seek status.
+	(bfd_mach_o_scan_write_section_32): Ditto.
+	(bfd_mach_o_scan_write_section_64): Ditto.
+	(bfd_mach_o_scan_write_section): Removed.
+	(bfd_mach_o_scan_write_segment): Split into ...
+	(bfd_mach_o_scan_write_segment_32): ... this and ...
+	(bfd_mach_o_scan_write_segment_64): ... this.  Check bfd_seek status.
+	(bfd_mach_o_scan_write_symtab_symbols): Moved into ...
+	(bfd_mach_o_scan_write_symtab): ... this.  Write symtab from BFD
+	symbol table.  Now returns a boolean.
+	(bfd_mach_o_write_contents): Set filetype.  Check bfd_seek status.
+	Adjust for status type.
+	(bfd_mach_o_build_commands): Use mach_o_wide_p instead of hard-coded
+	test.  Write symbol table.  Numbers the sections.
+	(bfd_mach_o_read_header): Check bfd_seek status.
+	Use mach_o_wide_p instead of hard-coded test.
+	(bfd_mach_o_scan_read_section_32): Check bfd_seek status.
+	(bfd_mach_o_scan_read_section_64): Ditto.
+	(bfd_mach_o_scan_read_symtab_symbol): Ditto.  Check bfd_seek status.
+	Use BFD_MACH_O_N_TYPE instead of hard-coded value.  Correctly
+	handled common symbols.
+	(bfd_mach_o_scan_read_symtab_strtab): Check bfd_seek status.
+	(bfd_mach_o_scan_read_dysymtab_symbol): Ditto.
+	(bfd_mach_o_scan_read_dylinker): Ditto.
+	(bfd_mach_o_scan_read_dylib): Ditto.
+	(bfd_mach_o_scan_read_thread): Ditto.
+	(bfd_mach_o_scan_read_symtab): Ditto.
+	Do not create a section for the stabs.
+	(bfd_mach_o_scan_read_uuid): Check bfd_seek status.
+	(bfd_mach_o_scan_read_segment): Ditto.
+	(bfd_mach_o_scan_read_command): Ditto.
+	(bfd_mach_o_scan_start_address): Ditto.
+	(bfd_mach_o_scan): Use mach_o_wide_p instead of hard-coded test.
+	(bfd_mach_o_archive_p): Check bfd_seek status.
+	(bfd_mach_o_core_fetch_environment): Ditto.
+
+	* mach-o-i386.c (bfd_mach_o_i386_mkobject): Don't set filetype.
+
 2009-06-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_link_hash_table): Add irelifunc.
@@ -22,7 +76,7 @@
 	...
 	(_bfd_elf_create_ifunc_sections): This.
 
-	* elflink.c (_bfd_elf_create_static_ifunc_sections): Renamd to
+	* elflink.c (_bfd_elf_create_static_ifunc_sections): Renamed to
 	...
 	(_bfd_elf_create_ifunc_sections): This.  Create .rel[a].ifunc
 	for shared objects.

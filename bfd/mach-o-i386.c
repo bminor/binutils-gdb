@@ -54,7 +54,6 @@ bfd_mach_o_i386_mkobject (bfd *abfd)
   mdata->header.magic = BFD_MACH_O_MH_MAGIC;
   mdata->header.cputype = BFD_MACH_O_CPU_TYPE_I386;
   mdata->header.cpusubtype = BFD_MACH_O_CPU_SUBTYPE_X86_ALL;
-  mdata->header.filetype = BFD_MACH_O_MH_OBJECT;
   mdata->header.byteorder = BFD_ENDIAN_LITTLE;
   mdata->header.version = 1;
 

@@ -310,8 +310,6 @@ typedef struct bfd_mach_o_symtab_command
   unsigned long strsize;
   asymbol *symbols;
   char *strtab;
-  asection *stabs_segment;
-  asection *stabstr_segment;
 }
 bfd_mach_o_symtab_command;
 
@@ -598,9 +596,8 @@ const bfd_target *bfd_mach_o_header_p (bfd *, bfd_mach_o_filetype,
 bfd_boolean bfd_mach_o_build_commands (bfd *abfd);
 bfd_boolean bfd_mach_o_set_section_contents (bfd *, asection *, const void *,
                                              file_ptr, bfd_size_type);
+unsigned int bfd_mach_o_version (bfd *);
 
-extern const bfd_target mach_o_be_vec;
-extern const bfd_target mach_o_le_vec;
 extern const bfd_target mach_o_fat_vec;
 
 #endif /* _BFD_MACH_O_H_ */
