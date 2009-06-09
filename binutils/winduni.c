@@ -661,7 +661,15 @@ wind_MultiByteToWideChar (rc_uint_type cp, const char *mb,
   rc_uint_type ret = 0;
 
 #if defined (_WIN32) || defined (__CYGWIN__)
-  ret = (rc_uint_type) MultiByteToWideChar (cp, MB_PRECOMPOSED,
+  rc_uint_type conv_flags = MB_PRECOMPOSED;
+
+  /* MB_PRECOMPOSED is not allowed for UTF-7 or UTF-8.  
+     MultiByteToWideChar will set the last error to
+     ERROR_INVALID_FLAGS if we do. */
+  if (cp == CP_UTF8 || cp == CP_UTF7)
+    conv_flags = 0;
+
+  ret = (rc_uint_type) MultiByteToWideChar (cp, conv_flags,
 					    mb, -1, u, u_len);
   /* Convert to bytes. */
   ret *= sizeof (unichar);

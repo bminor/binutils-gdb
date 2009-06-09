@@ -1,3 +1,9 @@
+2009-06-09  Tom Bramer  <tjb@postpro.net>
+
+	PR 10165
+	* winduni.c (wind_MultiByteToWideChar): Do not pass MB_PRECOMPOSED
+	to MultiByteToWideChar when using the CP_UTF8 or CO_UTF7 types.
+
 2009-06-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* strings.c (main): Delay parsing of decimal digits.
