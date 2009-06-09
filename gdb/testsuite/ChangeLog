@@ -1,3 +1,32 @@
+2009-06-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.mi/mi-async.exp, gdb.mi/mi-basics.exp,
+	gdb.mi/mi-break.exp, gdb.mi/mi-cli.exp,
+	gdb.mi/mi-disassemble.exp, gdb.mi/mi-eval.exp,
+	gdb.mi/mi-file-transfer.exp, gdb.mi/mi-file.exp,
+	gdb.mi/mi-regs.exp, gdb.mi/mi-return.exp,
+	gdb.mi/mi-simplerun.exp, gdb.mi/mi-stepi.exp,
+	gdb.mi/mi-var-block.exp, gdb.mi/mi-var-cmd.exp,
+	gdb.mi/mi-var-display.exp, gdb.mi/mi-var-invalidate.exp,
+	gdb.mi/mi-watch.exp, gdb.mi/mi2-basics.exp,
+	gdb.mi/mi2-break.exp, gdb.mi/mi2-cli.exp,
+	gdb.mi/mi2-disassemble.exp, gdb.mi/mi2-eval.exp,
+	gdb.mi/mi2-file.exp, gdb.mi/mi2-regs.exp,
+	gdb.mi/mi2-return.exp, gdb.mi/mi2-simplerun.exp,
+	gdb.mi/mi2-stepi.exp, gdb.mi/mi2-var-block.exp,
+	gdb.mi/mi2-var-child.exp, gdb.mi/mi2-var-cmd.exp,
+	gdb.mi/mi2-var-display.exp, gdb.mi/mi2-watch.exp,
+	gdb.server/ext-run.exp, gdb.server/file-transfer.exp,
+	gdb.server/server-mon.exp, gdb.server/server-run.exp,
+	gdb.trace/actions.exp, gdb.trace/backtrace.exp,
+	gdb.trace/deltrace.exp, gdb.trace/infotrace.exp,
+	gdb.trace/packetlen.exp, gdb.trace/passc-dyn.exp,
+	gdb.trace/passcount.exp, gdb.trace/report.exp,
+	gdb.trace/save-trace.exp, gdb.trace/tfind.exp,
+	gdb.trace/tracecmd.exp, gdb.trace/while-dyn.exp,
+	gdb.trace/while-stepping.exp: Use a unique name for the compiled
+	executable.
+
 2009-06-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/manythreads.c (main): Check if PTHREAD_STACK_MIN is

@@ -33,7 +33,7 @@ if [mi_gdb_start] {
 
 set testfile "basics"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile ${objdir}/${subdir}/mi2-regs
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
      untested mi2-regs.exp
      return -1

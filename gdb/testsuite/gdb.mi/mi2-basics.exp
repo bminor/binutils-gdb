@@ -36,7 +36,7 @@ if [mi_gdb_start] {
 
 set testfile "basics"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile ${objdir}/${subdir}/mi2-basics
 set escapedobjdir [string_to_regexp ${objdir}]
 set envirodir [string_to_regexp ${objdir}/${subdir}]
 

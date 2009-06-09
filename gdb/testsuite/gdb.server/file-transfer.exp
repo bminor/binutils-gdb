@@ -20,7 +20,7 @@ load_lib gdbserver-support.exp
 
 set testfile "server"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}${EXEEXT}
+set binfile ${objdir}/${subdir}/file-transfer${EXEEXT}
 
 if { [skip_gdbserver_tests] } {
     return 0

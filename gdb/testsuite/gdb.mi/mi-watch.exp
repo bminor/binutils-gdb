@@ -35,7 +35,7 @@ if [mi_gdb_start] {
 
 set testfile "basics"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile ${objdir}/${subdir}/mi-watch
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
      untested mi-watch.exp
      return -1

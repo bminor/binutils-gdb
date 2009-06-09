@@ -33,7 +33,7 @@ if [istarget "m68k-*-elf"] then {
 } else {
     set testfile "actions"
     set srcfile ${testfile}.c
-    set binfile ${objdir}/${subdir}/${testfile}
+    set binfile ${objdir}/${subdir}/while-stepping
     if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" $binfile \
 	    executable {debug nowarnings}] != "" } {
 	untested while-stepping.exp

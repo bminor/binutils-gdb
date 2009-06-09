@@ -30,13 +30,13 @@ if [mi_gdb_start] {
 
 set testfile "var-cmd"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile ${objdir}/${subdir}/mi-var-invalidate
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
     untested mi-var-invalidate.exp
     return -1
 }
 # Just change the output binary.
-set binfile_bis ${objdir}/${subdir}/${testfile}_bis
+set binfile_bis ${objdir}/${subdir}/mi-var-invalidate_bis
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile_bis}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
     untested mi-var-invalidate.exp
     return -1
