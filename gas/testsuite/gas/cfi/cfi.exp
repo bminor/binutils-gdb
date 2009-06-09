@@ -89,6 +89,7 @@ if { ![istarget "hppa64*-*"] } then {
   run_dump_test "cfi-common-3"
   run_dump_test "cfi-common-4"
   run_dump_test "cfi-common-5"
+  run_dump_test "cfi-common-7"
 }
 
 # MIPS doesn't support PC relative cfi directives.

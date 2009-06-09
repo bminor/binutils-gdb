@@ -1,3 +1,9 @@
+2009-06-09  Jakub Jelinek  <jakub@redhat.com>
+
+	PR gas/10255
+	* dw2gencfi.c (output_cfi_insn): Initialize fragment before rs_cfa
+	to DW_CFA_advance_loc4.
+
 2009-06-08  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	PR gas/977
