@@ -1,3 +1,9 @@
+2009-06-10  Jonas Maebe  <jonas.maebe@elis.ugent.be>
+
+	* darwin-nat.c (darwin_stop_inferior): Pass 0 as options to
+	darwin_wait (blocking wait).
+	(darwin_kill_inferior): Likewise.
+
 2009-06-10  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): Update comment around trying

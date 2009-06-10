@@ -688,7 +688,7 @@ darwin_stop_inferior (struct target_ops *ops, darwin_inferior *inf)
   if (res != 0)
     warning (_("cannot kill: %s\n"), safe_strerror (errno));
 
-  ptid = darwin_wait (ops, inferior_ptid, &wstatus);
+  ptid = darwin_wait (ops, inferior_ptid, &wstatus, 0);
   gdb_assert (wstatus.kind = TARGET_WAITKIND_STOPPED);
 }
 
@@ -720,7 +720,7 @@ darwin_kill_inferior (struct target_ops *ops)
   kret = task_resume (darwin_inf->task);
   MACH_CHECK_ERROR (kret);
 
-  ptid = darwin_wait (ops, inferior_ptid, &wstatus);
+  ptid = darwin_wait (ops, inferior_ptid, &wstatus, 0);
 
   /* This double wait seems required...  */
   res = waitpid (darwin_inf->pid, &status, 0);
