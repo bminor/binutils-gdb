@@ -1,3 +1,7 @@
+2009-06-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* varobj.c (varobj_create): Properly restore the selected frame.
+
 2009-06-05  Tom Tromey  <tromey@redhat.com>
 
 	* inferior.c (print_inferior): Make a table, not a list.  Emit

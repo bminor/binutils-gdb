@@ -577,7 +577,7 @@ varobj_create (char *objname,
       var->root->rootvar = var;
 
       /* Reset the selected frame */
-      if (fi != NULL)
+      if (old_fi != NULL)
 	select_frame (old_fi);
     }
 
