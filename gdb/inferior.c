@@ -302,8 +302,31 @@ print_inferior (struct ui_out *uiout, int requested_inferior)
 {
   struct inferior *inf;
   struct cleanup *old_chain;
+  int inf_count = 0;
 
-  old_chain = make_cleanup_ui_out_list_begin_end (uiout, "inferiors");
+  /* Compute number of inferiors we will print.  */
+  for (inf = inferior_list; inf; inf = inf->next)
+    {
+      struct cleanup *chain2;
+
+      if (requested_inferior != -1 && inf->num != requested_inferior)
+	continue;
+
+      ++inf_count;
+    }
+
+  if (inf_count == 0)
+    {
+      ui_out_message (uiout, 0, "No inferiors.\n");
+      return;
+    }
+
+  old_chain = make_cleanup_ui_out_table_begin_end (uiout, 3, inf_count,
+						   "inferiors");
+  ui_out_table_header (uiout, 3, ui_right, "current", "Cur");
+  ui_out_table_header (uiout, 4, ui_right, "id", "Id");
+  ui_out_table_header (uiout, 7, ui_right, "target-id", "PID");
+  ui_out_table_body (uiout);
 
   for (inf = inferior_list; inf; inf = inf->next)
     {
@@ -315,12 +338,11 @@ print_inferior (struct ui_out *uiout, int requested_inferior)
       chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
       if (inf->pid == ptid_get_pid (inferior_ptid))
-	ui_out_text (uiout, "* ");
+	ui_out_field_string (uiout, "current", "*");
       else
-	ui_out_text (uiout, "  ");
+	ui_out_field_skip (uiout, "current");
 
       ui_out_field_int (uiout, "id", inf->num);
-      ui_out_text (uiout, " ");
       ui_out_field_int (uiout, "target-id", inf->pid);
 
       ui_out_text (uiout, "\n");

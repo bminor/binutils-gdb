@@ -1,3 +1,8 @@
+2009-06-05  Tom Tromey  <tromey@redhat.com>
+
+	* inferior.c (print_inferior): Make a table, not a list.  Emit
+	table headers.
+
 2009-06-10  Jonas Maebe  <jonas.maebe@elis.ugent.be>
 
 	* darwin-nat.c (darwin_stop_inferior): Pass 0 as options to
