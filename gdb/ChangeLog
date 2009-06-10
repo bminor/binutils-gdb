@@ -1,3 +1,8 @@
+2009-06-10  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf2read.c (dwarf_decode_lines): Recognize and ignore
+	DW_LNE_set_discriminator.
+
 2009-06-10  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* breakpoint.c: ARI fixes.

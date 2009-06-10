@@ -7357,6 +7357,11 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
                     add_file_name (lh, cur_file, dir_index, mod_time, length);
                   }
 		  break;
+		case DW_LNE_set_discriminator:
+		  /* The discriminator is not interesting to the debugger;
+		     just ignore it.  */
+		  line_ptr = extended_end;
+		  break;
 		default:
 		  complaint (&symfile_complaints,
 			     _("mangled .debug_line section"));
