@@ -259,6 +259,7 @@ md_assemble (char *str)
 		     BFD_RELOC_32);
       }
       break;
+    case MOXIE_F1_M:
     case MOXIE_F1_4:
       iword = opcode->opcode << 8;
       while (ISSPACE (*op_end))

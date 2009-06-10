@@ -1,3 +1,8 @@
+2009-06-10  Anthony Green  <green@moxielogic.com>
+
+	* config/tc-moxie.c (md_assemble): Handle MOXIE_F1_M encoded
+	opcodes.
+
 2009-06-09  Jakub Jelinek  <jakub@redhat.com>
 
 	PR gas/10255
