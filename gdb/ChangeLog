@@ -1,3 +1,8 @@
+2009-06-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Update comment around trying
+	to revert back to a stepping thread that has exited.
+
 2009-06-10  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf2read.c (dwarf_decode_lines): Recognize and ignore
