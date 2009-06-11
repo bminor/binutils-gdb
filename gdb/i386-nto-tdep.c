@@ -287,8 +287,6 @@ i386nto_sigtramp_p (struct frame_info *this_frame)
   return name && strcmp ("__signalstub", name) == 0;
 }
 
-#define I386_NTO_SIGCONTEXT_OFFSET 136
-
 /* Assuming THIS_FRAME is a QNX Neutrino sigtramp routine, return the
    address of the associated sigcontext structure.  */
 
@@ -296,12 +294,14 @@ static CORE_ADDR
 i386nto_sigcontext_addr (struct frame_info *this_frame)
 {
   char buf[4];
-  CORE_ADDR sp;
+  CORE_ADDR ptrctx;
 
-  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
-  sp = extract_unsigned_integer (buf, 4);
+  /* We store __ucontext_t addr in EDI register.  */
+  get_frame_register (this_frame, I386_EDI_REGNUM, buf);
+  ptrctx = extract_unsigned_integer (buf, 4);
+  ptrctx += 24 /* Context pointer is at this offset.  */;
 
-  return sp + I386_NTO_SIGCONTEXT_OFFSET;
+  return ptrctx;
 }
 
 static void
@@ -340,8 +340,8 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->sigtramp_p = i386nto_sigtramp_p;
   tdep->sigcontext_addr = i386nto_sigcontext_addr;
-  tdep->sc_pc_offset = 56;
-  tdep->sc_sp_offset = 68;
+  tdep->sc_reg_offset = i386nto_gregset_reg_offset;
+  tdep->sc_num_regs = ARRAY_SIZE (i386nto_gregset_reg_offset);
 
   /* Setjmp()'s return PC saved in EDX (5).  */
   tdep->jb_pc_offset = 20;	/* 5x32 bit ints in.  */

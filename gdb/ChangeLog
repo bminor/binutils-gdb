@@ -1,5 +1,12 @@
 2009-06-11  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* i386-nto-tdep.c (I386_NTO_SIGCONTEXT_OFFSET): Remove define.
+	(i386nto_sigcontext_addr): Change the way context address is calculated.
+	(i386nto_init_abi): Remove usage of deprecated sc_reg_offset and
+	sc_sp_offset and set sc_reg_offset and sc_num_regs.
+
+2009-06-11  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* i386-nto-tdep.c (i386_nto_target): Remove definition.
 	(init_i386nto_ops): Use macros to set fields to global
 	current_nto_target directly.
