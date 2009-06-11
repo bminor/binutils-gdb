@@ -1,3 +1,8 @@
+2009-06-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (break_command_really): Rename local variable
+	breakpoint_chain to bkpt_chain.
+
 2009-06-11  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	Add support for XMM registers.

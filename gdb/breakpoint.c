@@ -5688,7 +5688,7 @@ break_command_really (char *arg, char *cond_string, int thread,
   char *addr_start = arg;
   char **addr_string;
   struct cleanup *old_chain;
-  struct cleanup *breakpoint_chain = NULL;
+  struct cleanup *bkpt_chain = NULL;
   struct captured_parse_breakpoint_args parse_args;
   int i;
   int pending = 0;
@@ -5766,12 +5766,11 @@ break_command_really (char *arg, char *cond_string, int thread,
   /* ----------------------------- SNIP -----------------------------
      Anything added to the cleanup chain beyond this point is assumed
      to be part of a breakpoint.  If the breakpoint create succeeds
-     then the memory is not reclaimed. */
-  breakpoint_chain = make_cleanup (null_cleanup, 0);
+     then the memory is not reclaimed.  */
+  bkpt_chain = make_cleanup (null_cleanup, 0);
 
   /* Mark the contents of the addr_string for cleanup.  These go on
-     the breakpoint_chain and only occure if the breakpoint create
-     fails. */
+     the bkpt_chain and only occur if the breakpoint create fails.  */
   for (i = 0; i < sals.nelts; i++)
     {
       if (addr_string[i] != NULL)
@@ -5843,13 +5842,13 @@ break_command_really (char *arg, char *cond_string, int thread,
   if (sals.nelts > 1)
     warning (_("Multiple breakpoints were set.\n"
 	       "Use the \"delete\" command to delete unwanted breakpoints."));
-  /* That's it. Discard the cleanups for data inserted into the
-     breakpoint. */
-  discard_cleanups (breakpoint_chain);
-  /* But cleanup everything else. */
+  /* That's it.  Discard the cleanups for data inserted into the
+     breakpoint.  */
+  discard_cleanups (bkpt_chain);
+  /* But cleanup everything else.  */
   do_cleanups (old_chain);
 
-  /* error call may happen here - have BREAKPOINT_CHAIN already discarded.  */
+  /* error call may happen here - have BKPT_CHAIN already discarded.  */
   update_global_location_list (1);
 }
 
