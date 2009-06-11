@@ -1,3 +1,8 @@
+2009-06-11  Tom Tromey  <tromey@redhat.com>
+
+	* eval.c (evaluate_subexp_standard) <OP_OBJC_MSGCALL>: Remove
+	'static' from local variable definitions.
+
 2009-06-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* symtab.c (append_expanded_sal): Remove unused local variables.

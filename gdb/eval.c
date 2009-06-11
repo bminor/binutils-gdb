@@ -1016,17 +1016,17 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_OBJC_MSGCALL:
       {				/* Objective C message (method) call.  */
 
-	static CORE_ADDR responds_selector = 0;
-	static CORE_ADDR method_selector = 0;
+	CORE_ADDR responds_selector = 0;
+	CORE_ADDR method_selector = 0;
 
 	CORE_ADDR selector = 0;
 
 	int struct_return = 0;
 	int sub_no_side = 0;
 
-	static struct value *msg_send = NULL;
-	static struct value *msg_send_stret = NULL;
-	static int gnu_runtime = 0;
+	struct value *msg_send = NULL;
+	struct value *msg_send_stret = NULL;
+	int gnu_runtime = 0;
 
 	struct value *target = NULL;
 	struct value *method = NULL;
