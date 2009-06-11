@@ -1,5 +1,9 @@
 2009-06-11  Pedro Alves  <pedro@codesourcery.com>
 
+	* symtab.c (append_expanded_sal): Remove unused local variables.
+
+2009-06-11  Pedro Alves  <pedro@codesourcery.com>
+
 	* infrun.c (sched_multi): New global.
 	(resume): If sched_multi is set, resume only threads of the
 	current inferior.

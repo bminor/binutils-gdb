@@ -4502,8 +4502,6 @@ append_expanded_sal (struct symtabs_and_lines *sal,
 		     struct symtab *symtab,
 		     int lineno, CORE_ADDR pc)
 {
-  CORE_ADDR func_addr, func_end;
-
   sal->sals = xrealloc (sal->sals,
 			sizeof (sal->sals[0])
 			* (sal->nelts + 1));
