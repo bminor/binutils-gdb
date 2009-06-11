@@ -1,3 +1,10 @@
+2009-06-11  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	Add support for XMM registers.
+	* i386-nto-tdep.c (i386nto_regset_id): Add case for SSE register set.
+	(i386nto_register_area): Correctly calculate offsets and sizes for
+	all supported registers.
+
 2009-06-11  Tom Tromey  <tromey@redhat.com>
 
 	* eval.c (evaluate_subexp_standard) <OP_OBJC_MSGCALL>: Remove
