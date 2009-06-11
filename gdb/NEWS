@@ -305,6 +305,11 @@ show libthread-db-search-path
   Control list of directories which GDB will search for appropriate
   libthread_db.
 
+set schedule-multiple (on|off)
+show schedule-multiple
+  Allow GDB to resume all threads of all processes or only threads of
+  the current process.
+
 * New native configurations
 
 x86/x86_64 Darwin		i[34567]86-*-darwin*

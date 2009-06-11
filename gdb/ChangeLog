@@ -1,5 +1,17 @@
 2009-06-11  Pedro Alves  <pedro@codesourcery.com>
 
+	* infrun.c (sched_multi): New global.
+	(resume): If sched_multi is set, resume only threads of the
+	current inferior.
+	(prepare_to_proceed): Don't switch over to wait_ptid if we're
+	resuming a different inferior, and sched_multi is off.
+	(show_schedule_multiple): New.
+	(_initialize_infrun): Register new "set schedule-multiple" command.
+	* inferior.h (sched_multi): Declare.
+	* NEWS: Mention new "schedule-multiple" setting.
+
+2009-06-11  Pedro Alves  <pedro@codesourcery.com>
+
 	* varobj.c (varobj_create): Properly restore the selected frame.
 
 2009-06-05  Tom Tromey  <tromey@redhat.com>

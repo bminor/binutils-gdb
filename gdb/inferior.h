@@ -135,6 +135,8 @@ extern void clear_proceed_status (void);
 
 extern void proceed (CORE_ADDR, enum target_signal, int);
 
+extern int sched_multi;
+
 /* When set, stop the 'step' command if we enter a function which has
    no line number information.  The normal behavior is that we step
    over such function.  */

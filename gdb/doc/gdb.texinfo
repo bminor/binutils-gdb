@@ -4650,6 +4650,36 @@ the current thread away from the thread that you are debugging.
 Display the current scheduler locking mode.
 @end table
 
+@cindex resume threads of multiple processes simultaneously
+By default, when you issue one of the execution commands such as
+@code{continue}, @code{next} or @code{step}, @value{GDBN} allows only
+threads of the current inferior to run.  For example, if @value{GDBN}
+is attached to two inferiors, each with two threads, the
+@code{continue} command resumes only the two threads of the current
+inferior.  This is useful, for example, when you debug a program that
+forks and you want to hold the parent stopped (so that, for instance,
+it doesn't run to exit), while you debug the child.  In other
+situations, you may not be interested in inspecting the current state
+of any of the processes @value{GDBN} is attached to, and you may want
+to resume them all until some breakpoint is hit.  In the latter case,
+you can instruct @value{GDBN} to allow all threads of all the
+inferiors to run with the @w{@code{set schedule-multiple}} command.
+
+@table @code
+@kindex set schedule-multiple
+@item set schedule-multiple
+Set the mode for allowing threads of multiple processes to be resumed
+when an execution command is issued.  When @code{on}, all threads of
+all processes are allowed to run.  When @code{off}, only the threads
+of the current process are resumed.  The default is @code{off}.  The
+@code{scheduler-locking} mode takes precedence when set to @code{on},
+or while you are stepping and set to @code{step}.
+
+@item show schedule-multiple
+Display the current mode for resuming the execution of threads of
+multiple processes.
+@end table
+
 @node Non-Stop Mode
 @subsection Non-Stop Mode
 
