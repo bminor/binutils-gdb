@@ -43,6 +43,8 @@ const pseudo_typeS md_pseudo_table[] =
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 const char EXP_CHARS[] = "eE";
 
+static int md_chars_to_number (char *val, int n);
+
 void
 md_operand (expressionS *op __attribute__((unused)))
 {
@@ -67,7 +69,7 @@ md_begin (void)
   for (count = 0, opcode = moxie_form2_opc_info; count++ < 4; opcode++)
     hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
 
-  for (count = 0, opcode = moxie_form3_opc_info; count++ < 4; opcode++)
+  for (count = 0, opcode = moxie_form3_opc_info; count++ < 10; opcode++)
     hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, 0);
@@ -513,6 +515,22 @@ md_assemble (char *str)
       if (*op_end != 0)
 	as_warn ("extra stuff on line ignored");
       break;
+    case MOXIE_F3_PCREL:
+      iword = (3<<14) | (opcode->opcode << 10);
+      while (ISSPACE (*op_end))
+	op_end++;
+      {
+	expressionS arg;
+
+	op_end = parse_exp_save_ilp (op_end, &arg);
+	fix_new_exp (frag_now,
+		     (p - frag_now->fr_literal),
+		     2,
+		     &arg,
+		     TRUE,
+		     BFD_RELOC_MOXIE_10_PCREL);
+      }
+      break;
     default:
       abort();
     }
@@ -596,10 +614,12 @@ md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
 /* Apply a fixup to the object file.  */
 
 void
-md_apply_fix (fixS *fixP ATTRIBUTE_UNUSED, valueT * valP ATTRIBUTE_UNUSED, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP ATTRIBUTE_UNUSED, 
+	      valueT * valP ATTRIBUTE_UNUSED, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   long val = *valP;
+  long newval;
   long max, min;
   int shift;
 
@@ -623,6 +643,19 @@ md_apply_fix (fixS *fixP ATTRIBUTE_UNUSED, valueT * valP ATTRIBUTE_UNUSED, segT 
       *buf++ = val;
       break;
 
+    case BFD_RELOC_MOXIE_10_PCREL:
+      if (!val)
+	break;
+      if (val < -1024 || val > 1022)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+                      _("pcrel too far BFD_RELOC_MOXIE_10"));
+      /* 11 bit offset even numbered, so we remove right bit.  */
+      val >>= 1;
+      newval = md_chars_to_number (buf, 2);
+      newval |= val & 0x03ff;
+      md_number_to_chars (buf, newval, 2);
+      break;
+
     default:
       abort ();
     }
@@ -642,6 +675,22 @@ md_number_to_chars (char *ptr, valueT use, int nbytes)
   number_to_chars_bigendian (ptr, use, nbytes);
 }
 
+/* Convert from target byte order to host byte order.  */
+
+static int
+md_chars_to_number (char *val, int n)
+{
+  int retval = 0;
+
+  while (n--)
+    {
+      retval <<= 8;
+      retval |= (*val++ & 255);
+    }
+
+  return retval;
+}
+
 /* Generate a machine-dependent relocation.  */
 arelent *
 tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
@@ -652,6 +701,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_32:
+      code = fixP->fx_r_type;
+      break;
+    case BFD_RELOC_MOXIE_10_PCREL:
       code = fixP->fx_r_type;
       break;
     default:
@@ -719,12 +771,12 @@ md_pcrel_from (fixS *fixP)
 {
   valueT addr = fixP->fx_where + fixP->fx_frag->fr_address;
 
-  fprintf (stderr, "md_pcrel_from 0x%d\n", fixP->fx_r_type);
-
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_32:
       return addr + 4;
+    case BFD_RELOC_MOXIE_10_PCREL:
+      return addr;
     default:
       abort ();
       return addr;

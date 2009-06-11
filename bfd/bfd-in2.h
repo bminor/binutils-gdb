@@ -2737,6 +2737,10 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_MIPS_JUMP_SLOT,
 
 
+/* Moxie ELF relocations.  */
+  BFD_RELOC_MOXIE_10_PCREL,
+
+
 /* Fujitsu Frv Relocations.  */
   BFD_RELOC_FRV_LABEL16,
   BFD_RELOC_FRV_LABEL24,

@@ -1,3 +1,10 @@
+2009-06-11  Anthony Green  <green@moxielogic.com>
+
+	* moxie-opc.c (moxie_form1_opc_info): Remove branch instructions.
+	(moxie_form3_opc_info): Add branch instructions.
+	* moxie-dis.c (print_insn_moxie): Disassemble MOXIE_F3_PCREL
+	encoded instructions.
+
 2009-06-06  Anthony Green  <green@moxielogic.com>
 
 	* moxie-opc.c: Recode some MOXIE_F1_4 opcodes as MOXIE_F1_M.

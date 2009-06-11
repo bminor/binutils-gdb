@@ -1,5 +1,4 @@
 /* moxie-specific support for 32-bit ELF.
-   Copyright 2008 Anthony Green.
    Copyright 2009 Free Software Foundation, Inc.
 
    Copied from elf32-fr30.c which is..
@@ -62,6 +61,21 @@ static reloc_howto_type moxie_elf_howto_table [] =
 	 0x00000000,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
+
+  /* A 10 bit PC-relative relocation.  */
+  HOWTO (R_MOXIE_PCREL10,	/* type.  */
+	 1,			/* rightshift.  */
+	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 10,			/* bitsize.  */
+	 TRUE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_signed, /* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	/* special_function.  */
+	 "R_MOXIE_PCREL10",		/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0,			/* src_mask.  */
+	 0x000003FF,		/* dst_mask.  */
+	 TRUE),			/* pcrel_offset.  */
 };
 
 /* Map BFD reloc types to MOXIE ELF reloc types.  */
@@ -74,8 +88,9 @@ struct moxie_reloc_map
 
 static const struct moxie_reloc_map moxie_reloc_map [] =
 {
-  { BFD_RELOC_NONE,           R_MOXIE_NONE },
-  { BFD_RELOC_32,             R_MOXIE_32 },
+  { BFD_RELOC_NONE,            R_MOXIE_NONE },
+  { BFD_RELOC_32,              R_MOXIE_32 },
+  { BFD_RELOC_MOXIE_10_PCREL,  R_MOXIE_PCREL10 },
 };
 
 static reloc_howto_type *

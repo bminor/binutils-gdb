@@ -1,3 +1,13 @@
+2009-06-11  Anthony Green  <green@moxielogic.com>
+
+	* config/tc-moxie.c (md_chars_to_number): Define.
+	(md_begin): Populate opcode hashtable with more form 3 opcodes.
+	(md_assemble): Assemble MOXIE_F3_PCREL encoded instructions.
+	(md_apply_fix): Handle BFD_RELOC_MOXIE_10_PCREL relocations.
+	(tc_gen_reloc): Ditto.
+	(md_pcrel_from): Ditto.
+	(md_chars_to_number): New function.
+
 2009-06-10  Anthony Green  <green@moxielogic.com>
 
 	* config/tc-moxie.c (md_assemble): Handle MOXIE_F1_M encoded

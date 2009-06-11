@@ -1,3 +1,13 @@
+2009-06-11  Anthony Green  <green@moxielogic.com>
+
+	* reloc.c: Add BFD_RELOC_MOXIE_10_PCREL.
+	* bfd-in2.h: Rebuilt.
+	* libbfd.h: Rebuilt.
+	* elf32-moxie.c (moxie_elf_howto_table): Add R_MOXIE_PCREL10
+	relocation support.
+	(moxie_reloc_map): Ditto.
+	Clean up copyright notice.
+
 2009-06-10  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	
 	* bfd-in2.h: bfd_mmap prototype.
