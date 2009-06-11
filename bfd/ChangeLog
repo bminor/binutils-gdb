@@ -1,9 +1,9 @@
 2009-06-10  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	
-	* bfd-in2.h: bfd_mmap prototype
+	* bfd-in2.h: bfd_mmap prototype.
 	* bfdio.c (bfd_mmap): New function.
 	* libbfd.h (bfd_iovec): Add bmmap.
-	* cache.c (cache_bmap): New function.
+	* cache.c (cache_bmmap): New function.
 	(cache_iovec): Initialize bmmap member.
 	* opencls.c (opncls_bmmap): New function.
 	(opncls_iovec): Initialize bmmap member.	
