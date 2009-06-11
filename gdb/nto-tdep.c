@@ -67,19 +67,6 @@ nto_target (void)
 #endif
 }
 
-void
-nto_set_target (struct nto_target_ops *targ)
-{
-  nto_regset_id = targ->regset_id;
-  nto_supply_gregset = targ->supply_gregset;
-  nto_supply_fpregset = targ->supply_fpregset;
-  nto_supply_altregset = targ->supply_altregset;
-  nto_supply_regset = targ->supply_regset;
-  nto_register_area = targ->register_area;
-  nto_regset_fill = targ->regset_fill;
-  nto_fetch_link_map_offsets = targ->fetch_link_map_offsets;
-}
-
 /* Take a string such as i386, rs6000, etc. and map it onto CPUTYPE_X86,
    CPUTYPE_PPC, etc. as defined in nto-share/dsmsgs.h.  */
 int

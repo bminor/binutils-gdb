@@ -34,9 +34,6 @@
 #include "solib.h"
 #include "solib-svr4.h"
 
-/* Target vector for QNX NTO x86.  */
-static struct nto_target_ops i386_nto_target;
-
 #ifndef X86_CPU_FXSR
 #define X86_CPU_FXSR (1L << 12)
 #endif
@@ -310,14 +307,14 @@ i386nto_sigcontext_addr (struct frame_info *this_frame)
 static void
 init_i386nto_ops (void)
 {
-  i386_nto_target.regset_id = i386nto_regset_id;
-  i386_nto_target.supply_gregset = i386nto_supply_gregset;
-  i386_nto_target.supply_fpregset = i386nto_supply_fpregset;
-  i386_nto_target.supply_altregset = nto_dummy_supply_regset;
-  i386_nto_target.supply_regset = i386nto_supply_regset;
-  i386_nto_target.register_area = i386nto_register_area;
-  i386_nto_target.regset_fill = i386nto_regset_fill;
-  i386_nto_target.fetch_link_map_offsets =
+  nto_regset_id = i386nto_regset_id;
+  nto_supply_gregset = i386nto_supply_gregset;
+  nto_supply_fpregset = i386nto_supply_fpregset;
+  nto_supply_altregset = nto_dummy_supply_regset;
+  nto_supply_regset = i386nto_supply_regset;
+  nto_register_area = i386nto_register_area;
+  nto_regset_fill = i386nto_regset_fill;
+  nto_fetch_link_map_offsets =
     svr4_ilp32_fetch_link_map_offsets;
 }
 
@@ -371,8 +368,6 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
         = nto_in_dynsym_resolve_code;
     }
   set_solib_ops (gdbarch, &nto_svr4_so_ops);
-
-  nto_set_target (&i386_nto_target);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
