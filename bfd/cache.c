@@ -46,6 +46,10 @@ SUBSECTION
 #include "libbfd.h"
 #include "libiberty.h"
 
+#ifdef HAVE_MMAP
+#include <sys/mman.h>
+#endif
+
 /* In some cases we can optimize cache operation when reopening files.
    For instance, a flush is entirely unnecessary if the file is already
    closed, so a flush would use CACHE_NO_OPEN.  Similarly, a seek using
@@ -388,10 +392,38 @@ cache_bstat (struct bfd *abfd, struct stat *sb)
   return sts;
 }
 
+static void *
+cache_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
+	     void *addr ATTRIBUTE_UNUSED,
+	     bfd_size_type len ATTRIBUTE_UNUSED,
+	     int prot ATTRIBUTE_UNUSED,
+	     int flags ATTRIBUTE_UNUSED,
+	     file_ptr offset ATTRIBUTE_UNUSED)
+{
+  void *ret = (void *) -1;
+
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    abort ();
+#ifdef HAVE_MMAP
+  else
+    {
+      FILE *f = bfd_cache_lookup (abfd, CACHE_NO_SEEK_ERROR);
+      if (f == NULL)
+	return ret;
+
+      ret = mmap (addr, len, prot, flags, fileno (f), offset);
+      if (ret == (void *) -1)
+	bfd_set_error (bfd_error_system_call);
+    }
+#endif
+
+  return ret;
+}
+
 static const struct bfd_iovec cache_iovec =
 {
   &cache_bread, &cache_bwrite, &cache_btell, &cache_bseek,
-  &cache_bclose, &cache_bflush, &cache_bstat
+  &cache_bclose, &cache_bflush, &cache_bstat, &cache_bmmap
 };
 
 /*

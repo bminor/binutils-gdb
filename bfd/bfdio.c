@@ -158,6 +158,8 @@ DESCRIPTION
 .  int (*bclose) (struct bfd *abfd);
 .  int (*bflush) (struct bfd *abfd);
 .  int (*bstat) (struct bfd *abfd, struct stat *sb);
+.  void* (*bmmap) (struct bfd *abfd, void *addr, bfd_size_type len,
+.                  int prot, int flags, file_ptr offset);
 .};
 
 */
@@ -510,4 +512,32 @@ bfd_get_size (bfd *abfd)
     return 0;
 
   return buf.st_size;
+}
+
+
+/*
+FUNCTION
+	bfd_mmap
+
+SYNOPSIS
+	void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
+	                int prot, int flags, file_ptr offset);
+
+DESCRIPTION
+	Return mmap()ed region of the file, if possible and implemented.
+
+*/
+
+void *
+bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
+	  int prot, int flags, file_ptr offset)
+{
+  void *ret = (void *)-1;
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    return ret;
+
+  if (abfd->iovec == NULL)
+    return ret;
+
+  return abfd->iovec->bmmap (abfd, addr, len, prot, flags, offset);
 }

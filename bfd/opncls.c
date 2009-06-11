@@ -505,9 +505,20 @@ opncls_bstat (struct bfd *abfd, struct stat *sb)
   return (vec->stat) (abfd, vec->stream, sb);
 }
 
+static void *
+opncls_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
+	      void *addr ATTRIBUTE_UNUSED,
+	      bfd_size_type len ATTRIBUTE_UNUSED,
+	      int prot ATTRIBUTE_UNUSED,
+	      int flags ATTRIBUTE_UNUSED,
+	      file_ptr offset ATTRIBUTE_UNUSED)
+{
+  return (void *) -1;
+}
+
 static const struct bfd_iovec opncls_iovec = {
   &opncls_bread, &opncls_bwrite, &opncls_btell, &opncls_bseek,
-  &opncls_bclose, &opncls_bflush, &opncls_bstat
+  &opncls_bclose, &opncls_bflush, &opncls_bstat, &opncls_bmmap
 };
 
 bfd *
