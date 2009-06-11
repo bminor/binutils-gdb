@@ -35,6 +35,10 @@ host_callback *       callback;
 
 FILE *tracefile;
 
+/* Extract the signed 10-bit offset from a 16-bit branch
+   instruction.  */
+#define INST2OFFSET(o) ((((signed short)((o & ((1<<10)-1))<<6))>>6)<<1)
+
 #define EXTRACT_WORD(addr) (((addr)[0] << 24) \
 			    + ((addr)[1] << 16) \
 			    + ((addr)[2] << 8) \
@@ -424,10 +428,86 @@ sim_resume (sd, step, siggnal)
 	  if (inst & (1 << 14))
 	    {
 	      /* This is a Form 3 instruction.  */
-	      /* We haven't implemented any yet, so just SIGILL for now.  */
-	      TRACE("SIGILL3");
-	      cpu.asregs.exception = SIGILL;
-	      break;
+	      int opcode = (inst >> 10 & 0xf);
+
+	      switch (opcode)
+		{
+		case 0x00: /* beq */
+		  {
+		    TRACE("beq");
+		    if (cpu.asregs.cc & CC_EQ)
+		      pc += INST2OFFSET(inst) - 2;
+		  }
+		  break;
+		case 0x01: /* bne */
+		  {
+		    TRACE("bne");
+		    if (! (cpu.asregs.cc & CC_EQ))
+		      pc += INST2OFFSET(inst) - 2;
+		  }
+		  break;
+		case 0x02: /* blt */
+		  {
+		    TRACE("blt");
+		    if (cpu.asregs.cc & CC_LT)
+		      pc += INST2OFFSET(inst) - 2;
+		  }		  break;
+		case 0x03: /* bgt */
+		  {
+		    TRACE("bgt");
+		    if (cpu.asregs.cc & CC_GT)
+		      pc += INST2OFFSET(inst) - 2;
+		  }
+		  break;
+		case 0x04: /* bltu */
+		  {
+		    TRACE("bltu");
+		    if (cpu.asregs.cc & CC_LTU)
+		      pc += INST2OFFSET(inst) - 2;
+		  }
+		  break;
+		case 0x05: /* bgtu */
+		  {
+		    TRACE("bgtu");
+		    if (cpu.asregs.cc & CC_GTU)
+		      pc += INST2OFFSET(inst) - 2;
+		  }
+		  break;
+		case 0x06: /* bge */
+		  {
+		    TRACE("bge");
+		    if (cpu.asregs.cc & (CC_GT | CC_EQ))
+		      pc += INST2OFFSET(inst) - 2;
+		  }
+		  break;
+		case 0x07: /* ble */
+		  {
+		    TRACE("ble");
+		    if (cpu.asregs.cc & (CC_LT | CC_EQ))
+		      pc += INST2OFFSET(inst) - 2;
+		  }
+		  break;
+		case 0x08: /* bgeu */
+		  {
+		    TRACE("bgeu");
+		    if (cpu.asregs.cc & (CC_GTU | CC_EQ))
+		      pc += INST2OFFSET(inst) - 2;
+		  }
+		  break;
+		case 0x09: /* bleu */
+		  {
+		    TRACE("bleu");
+		    if (cpu.asregs.cc & (CC_LTU | CC_EQ))
+		      pc += INST2OFFSET(inst) - 2;
+		  }
+		  break;
+		default:
+		  {
+		    TRACE("SIGILL3");
+		    cpu.asregs.exception = SIGILL;
+		    break;
+		  }
+		}
 	    }
 	  else
 	    {
@@ -655,126 +735,22 @@ sim_resume (sd, step, siggnal)
 		cpu.asregs.cc = cc;
 	      }
 	      break;
-	    case 0x0f: /* beq */
+	    case 0x0f:
+	    case 0x10:
+	    case 0x11:
+	    case 0x12:
+	    case 0x13:
+	    case 0x14:
+	    case 0x15:
+	    case 0x16:
+	    case 0x17:
+	    case 0x18:
 	      {
-		unsigned int tgt = EXTRACT_WORD(&memory[pc+2]);
-		TRACE("beq");
-		if (cpu.asregs.cc & CC_EQ)
-		  {
-		    pc = tgt - 2;
-		  }
-		else
-		  pc += 4;
+		opc = opcode;
+		TRACE("SIGILL0");
+		cpu.asregs.exception = SIGILL;
+		break;
 	      }
-	      break;
-	    case 0x10: /* bne */
-	      {
-		unsigned int tgt = EXTRACT_WORD(&memory[pc+2]);
-		TRACE("bne");
-		if (! (cpu.asregs.cc & CC_EQ))
-		  {
-		    pc = tgt - 2;
-		  }
-		else
-		  pc += 4;
-	      }
-	      break;
-	    case 0x11: /* blt */
-	      {
-		unsigned int tgt = EXTRACT_WORD(&memory[pc+2]);
-		TRACE("blt");
-		if (cpu.asregs.cc & CC_LT)
-		  {
-		    pc = tgt - 2;
-		  }
-		else
-		  pc += 4;
-	      }
-	      break;
-	    case 0x12: /* bgt */
-	      {
-		unsigned int tgt = EXTRACT_WORD(&memory[pc+2]);
-		TRACE("bgt");
-		if (cpu.asregs.cc & CC_GT)
-		  {
-		    pc = tgt - 2;
-		  }
-		else
-		  pc += 4;
-	      }
-	      break;
-	    case 0x13: /* bltu */
-	      {
-		unsigned int tgt = EXTRACT_WORD(&memory[pc+2]);
-		TRACE("bltu");
-		if (cpu.asregs.cc & CC_LTU)
-		  {
-		    pc = tgt - 2;
-		  }
-		else
-		  pc += 4;
-	      }
-	      break;
-	    case 0x14: /* bgtu */
-	      {
-		unsigned int tgt = EXTRACT_WORD(&memory[pc+2]);
-		TRACE("bgtu");
-		if (cpu.asregs.cc & CC_GTU)
-		  {
-		    pc = tgt - 2;
-		  }
-		else
-		  pc += 4;
-	      }
-	      break;
-	    case 0x15: /* bge */
-	      {
-		unsigned int tgt = EXTRACT_WORD(&memory[pc+2]);
-		TRACE("bge");
-		if ((cpu.asregs.cc & CC_GT) || (cpu.asregs.cc & CC_EQ))		   
-		  {
-		    pc = tgt - 2;
-		  }
-		else
-		  pc += 4;
-	      }
-	      break;
-	    case 0x16: /* ble */
-	      {
-		unsigned int tgt = EXTRACT_WORD(&memory[pc+2]);
-		TRACE("ble");
-		if ((cpu.asregs.cc & CC_LT) || (cpu.asregs.cc & CC_EQ))
-		  {
-		    pc = tgt - 2;
-		  }
-		else
-		  pc += 4;
-	      }
-	      break;
-	    case 0x17: /* bgeu */
-	      {
-		unsigned int tgt = EXTRACT_WORD(&memory[pc+2]);
-		TRACE("bgeu");
-		if ((cpu.asregs.cc & CC_GTU) || (cpu.asregs.cc & CC_EQ))
-		  {
-		    pc = tgt - 2;
-		  }
-		else
-		  pc += 4;
-	      }
-	      break;
-	    case 0x18: /* bleu */
-	      {
-		unsigned int tgt = EXTRACT_WORD(&memory[pc+2]);
-		TRACE("bleu");
-		if ((cpu.asregs.cc & CC_LTU) || (cpu.asregs.cc & CC_EQ))
-		  {
-		    pc = tgt - 2;
-		  }
-		else
-		  pc += 4;
-	      }
-	      break;
 	    case 0x19: /* jsr */
 	      {
 		unsigned int fn = cpu.asregs.regs[(inst >> 4) & 0xf];
