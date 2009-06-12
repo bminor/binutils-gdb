@@ -1,3 +1,113 @@
+2009-06-12  Tristan Gingold  <gingold@adacore.com>
+
+	* reloc.c: Add BFD_RELOC_MACH_O_SECTDIFF and BFD_RELOC_MACH_O_PAIR.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+
+	* mach-o.c (FILE_ALIGN): New macro.
+	(bfd_mach_o_canonicalize_symtab): Adjust for bfd_mach_o_asymbol.
+	(bfd_mach_o_print_symbol): Ditto.
+	(bfd_mach_o_scan_write_thread): Adjust type of variable offset.
+	(bfd_mach_o_get_reloc_upper_bound): New function.
+	(bfd_mach_o_canonicalize_reloc): Ditto.
+	(bfd_mach_o_scan_write_relocs): Ditto.
+	(bfd_mach_o_scan_write_section_32): Remove offset argument.
+	(bfd_mach_o_scan_write_section_64): Ditto.
+	(bfd_mach_o_scan_write_segment_32): Write relocs.  Fix size of data
+	written for load command.  Do not compute section file offset.
+	(bfd_mach_o_scan_write_segment_64): Ditto.
+	(bfd_mach_o_scan_write_symtab): Compute file offset first.
+	Adjust for bfd_mach_o_asymbol.  Move code to convert from BFD to
+	Mach-O to ...
+	(bfd_mach_o_mangle_symbols): ... this new function.
+	(bfd_mach_o_write_contents): Be sure to habe load commands built.
+	Call bfd_mach_o_mangle_symbols.
+	(bfd_mach_o_build_commands): Adjust for filelen field.
+	Use FILE_ALIGN macro.  Clear section file offset if section is empty.
+	Do not set symtab file offset anymore here.
+	(bfd_mach_o_make_empty_symbol): Allocate a bfd_mach_o_asymbol.
+	(bfd_mach_o_make_bfd_section): Set SEC_RELOC if has reloc.
+	Set reloc_count and rel_filepos section fields.
+	(bfd_mach_o_scan_read_section_32): Type of argument offset is now
+	unsigned int.
+	(bfd_mach_o_scan_read_section_64): Ditto.
+	(bfd_mach_o_scan_read_section): Ditto.
+	(bfd_mach_o_scan_read_symtab_symbol): Typr of argument s is now
+	bfd_mach_o_asymbol.  Use unsigned int for file offset type.
+	(bfd_mach_o_scan_read_symtab_symbol): Adjust for bfd_mach_o_asymbol.
+	Handle weak-ref symbols.
+	(bfd_mach_o_scan_read_symtab_symbols): Adjust for bfd_mach_o_asymbol.
+	(bfd_mach_o_scan_read_dysymtab_symbol): Ditto.
+	(bfd_mach_o_scan): Remove assignment to removed field.
+	(bfd_mach_o_mkobject_init): Ditto.
+	(bfd_mach_o_bfd_print_private_bfd_data): Adjust printf formatter.
+	(bfd_mach_o_bfd_reloc_type_lookup): New macro.
+	(bfd_mach_o_bfd_reloc_name_lookup): Ditto.
+	(bfd_mach_o_swap_reloc_in): Ditto.
+	(bfd_mach_o_swap_reloc_out): Ditto.
+
+	* mach-o.h (BFD_MACH_O_REFERENCE_FLAG_UNDEFINED_NON_LAZY)
+	(BFD_MACH_O_REFERENCE_FLAG_UNDEFINED_LAZY)
+	(BFD_MACH_O_REFERENCE_FLAG_DEFINED)
+	(BFD_MACH_O_REFERENCE_FLAG_PRIVATE_DEFINED)
+	(BFD_MACH_O_REFERENCE_FLAG_PRIVATE_UNDEFINED_NON_LAZY)
+	(BFD_MACH_O_REFERENCE_FLAG_PRIVATE_UNDEFINED_LAZY)
+	(BFD_MACH_O_REFERENCED_DYNAMICALLY, BFD_MACH_O_N_DESC_DISCARDED)
+	(BFD_MACH_O_N_NO_DEAD_STRIP, BFD_MACH_O_N_WEAK_REF)
+	(BFD_MACH_O_N_WEAK_DEF): New macros.
+	Add comments.
+	(bfd_mach_o_section_type): Add new enumeration values.
+	(BFD_MACH_O_S_SELF_MODIFYING_CODE)
+	(BFD_MACH_O_S_ATTR_LIVE_SUPPORT)
+	(BFD_MACH_O_S_ATTR_NO_DEAD_STRIP)
+	(BFD_MACH_O_S_ATTR_STRIP_STATIC_SYMS, BFD_MACH_O_S_ATTR_NO_TOC): New
+	macros.
+	(BFD_MACH_O_GENERIC_RELOC_VANILLA)
+	(BFD_MACH_O_GENERIC_RELOC_PAIR)
+	(BFD_MACH_O_GENERIC_RELOC_SECTDIFF)
+	(BFD_MACH_O_GENERIC_RELOC_PB_LA_PTR)
+	(BFD_MACH_O_GENERIC_RELOC_LOCAL_SECTDIFF): Ditto.
+	(BFD_MACH_O_RELENT_SIZE): Ditto.
+	(BFD_MACH_O_R_PCREL, BFD_MACH_O_GET_R_LENGTH)
+	(BFD_MACH_O_R_EXTERN, BFD_MACH_O_GET_R_TYPE)
+	(BFD_MACH_O_GET_R_SYMBOLNUM, BFD_MACH_O_SET_R_LENGTH)
+	(BFD_MACH_O_SET_R_TYPE, BFD_MACH_O_SET_R_SYMBOLNUM): Ditto.
+	(BFD_MACH_O_SR_SCATTERED, BFD_MACH_O_SR_PCREL)
+	(BFD_MACH_O_GET_SR_LENGTH, BFD_MACH_O_GET_SR_TYPE)
+	(BFD_MACH_O_GET_SR_ADDRESS, BFD_MACH_O_SET_SR_LENGTH)
+	(BFD_MACH_O_SET_SR_TYPE, BFD_MACH_O_SET_SR_ADDRESS): Ditto.
+	(bfd_mach_o_reloc_info): New struct.
+	(bfd_mach_o_asymbol): New struct.
+	(bfd_mach_o_symtab_command): The symbols field is now of type
+	bfd_mach_o_asymbol.
+	(bfd_mach_o_load_command): The offset and len fields are now of type
+	unsigned int.
+	(mach_o_data_struct): Remove symbols, nsymbols and ibfd fields.
+	Add a filelen field.  Add comments.
+	(bfd_mach_o_backend_data): New struct.
+	(bfd_mach_o_get_backend_data): New macro.
+	(bfd_mach_o_scan_read_symtab_symbol): Parameter symbol now of type
+	bfd_mach_o_asymbol.
+	(bfd_mach_o_scan_read_dysymtab_symbol): Ditto.
+	(bfd_mach_o_get_reloc_upper_bound): New prototype.
+	(bfd_mach_o_canonicalize_reloc): Ditto.
+	
+	* mach-o-target.c (bfd_mach_o_bfd_is_local_label_name): Remove
+	duplicated macro.  Now defined to _bfd_generic_is_local_label.
+	(TARGET_NAME_BACKEND): New macro...
+	(TARGET_NAME_BACKEND): ... used to name a new variable.
+	(TARGET_NAME): Define relocs table using bfd_mach_o, reference
+	Mach-O backend data.
+
+	* mach-o-i386.c (i386_howto_table): New variable.
+	(bfd_mach_o_i386_swap_reloc_in): New function.
+	(bfd_mach_o_i386_swap_reloc_out): Ditto.
+	(bfd_mach_o_i386_bfd_reloc_type_lookup): Ditto.
+	(bfd_mach_o_i386_bfd_reloc_name_lookup): Ditto.
+	(bfd_mach_o_swap_reloc_in, bfd_mach_o_swap_reloc_out): New macros.
+	(bfd_mach_o_bfd_reloc_type_lookup)
+	(bfd_mach_o_bfd_reloc_name_lookup): Ditto.
+
 2009-06-11  Anthony Green  <green@moxielogic.com>
 
 	* reloc.c: Add BFD_RELOC_MOXIE_10_PCREL.

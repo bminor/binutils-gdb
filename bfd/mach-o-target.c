@@ -39,9 +39,8 @@
 #define bfd_mach_o_bfd_free_cached_info               _bfd_generic_bfd_free_cached_info
 #define bfd_mach_o_new_section_hook                   _bfd_generic_new_section_hook
 #define bfd_mach_o_get_section_contents_in_window     _bfd_generic_get_section_contents_in_window
-#define bfd_mach_o_bfd_is_local_label_name            _bfd_nosymbols_bfd_is_local_label_name
 #define bfd_mach_o_bfd_is_target_special_symbol       ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
-#define bfd_mach_o_bfd_is_local_label_name            _bfd_nosymbols_bfd_is_local_label_name
+#define bfd_mach_o_bfd_is_local_label_name            bfd_generic_is_local_label_name
 #define bfd_mach_o_get_lineno                         _bfd_nosymbols_get_lineno
 #define bfd_mach_o_find_nearest_line                  _bfd_nosymbols_find_nearest_line
 #define bfd_mach_o_find_inliner_info                  _bfd_nosymbols_find_inliner_info
@@ -69,6 +68,8 @@
 #define bfd_mach_o_bfd_copy_private_header_data       _bfd_generic_bfd_copy_private_header_data
 #define bfd_mach_o_core_file_matches_executable_p     generic_core_file_matches_executable_p
 
+#define TARGET_NAME_BACKEND XCONCAT2(TARGET_NAME,_backend)
+
 #endif /* MACH_O_TARGET_COMMON_DEFINED */
 
 #ifndef TARGET_NAME
@@ -90,6 +91,12 @@
 #if ((TARGET_ARCHIVE) && (! TARGET_BIG_ENDIAN))
 #error Mach-O fat files must always be big-endian.
 #endif /* ((TARGET_ARCHIVE) && (! TARGET_BIG_ENDIAN)) */
+
+static const bfd_mach_o_backend_data TARGET_NAME_BACKEND =
+{
+  bfd_mach_o_swap_reloc_in,
+  bfd_mach_o_swap_reloc_out
+};
 
 const bfd_target TARGET_NAME =
 {
@@ -162,13 +169,15 @@ const bfd_target TARGET_NAME =
   BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
 #endif
   BFD_JUMP_TABLE_SYMBOLS (bfd_mach_o),
-  BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
+  BFD_JUMP_TABLE_RELOCS (bfd_mach_o),
   BFD_JUMP_TABLE_WRITE (bfd_mach_o),
   BFD_JUMP_TABLE_LINK (bfd_mach_o),
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
+  /* Alternative endian target.  */
   NULL,
 
-  NULL
+  /* Back-end data.  */
+  &TARGET_NAME_BACKEND
 };
 

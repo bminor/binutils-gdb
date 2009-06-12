@@ -4499,6 +4499,13 @@ BFD_RELOC_XTENSA_ASM_EXPAND.  */
   BFD_RELOC_LM32_GLOB_DAT,
   BFD_RELOC_LM32_JMP_SLOT,
   BFD_RELOC_LM32_RELATIVE,
+
+/* Difference between two section addreses.  Must be followed by a
+BFD_RELOC_MACH_O_PAIR.  */
+  BFD_RELOC_MACH_O_SECTDIFF,
+
+/* Mach-O generic relocations.  */
+  BFD_RELOC_MACH_O_PAIR,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *bfd_reloc_type_lookup

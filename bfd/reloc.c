@@ -5180,6 +5180,16 @@ ENUMX
    BFD_RELOC_LM32_RELATIVE
 ENUMDOC
  Lattice Mico32 relocations.
+
+ENUM
+   BFD_RELOC_MACH_O_SECTDIFF
+ENUMDOC
+   Difference between two section addreses.  Must be followed by a
+   BFD_RELOC_MACH_O_PAIR.
+ENUM
+   BFD_RELOC_MACH_O_PAIR
+ENUMDOC
+ Mach-O generic relocations.
    
 ENDSENUM
   BFD_RELOC_UNUSED

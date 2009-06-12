@@ -2069,6 +2069,8 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_LM32_GLOB_DAT",
   "BFD_RELOC_LM32_JMP_SLOT",
   "BFD_RELOC_LM32_RELATIVE",
+  "BFD_RELOC_MACH_O_SECTDIFF",
+  "BFD_RELOC_MACH_O_PAIR",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif
