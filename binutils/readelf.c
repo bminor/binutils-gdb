@@ -7152,19 +7152,19 @@ process_symbol_table (FILE * file)
 		 SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
-	  return 0;
+	  goto no_hash;
 	}
 
       if (fread (nb, hash_ent_size, 1, file) != 1)
 	{
 	  error (_("Failed to read in number of buckets\n"));
-	  return 0;
+	  goto no_hash;
 	}
 
       if (fread (nc, hash_ent_size, 1, file) != 1)
 	{
 	  error (_("Failed to read in number of chains\n"));
-	  return 0;
+	  goto no_hash;
 	}
 
       nbuckets = byte_get (nb, hash_ent_size);
@@ -7173,8 +7173,18 @@ process_symbol_table (FILE * file)
       buckets = get_dynamic_data (file, nbuckets, hash_ent_size);
       chains  = get_dynamic_data (file, nchains, hash_ent_size);
 
+    no_hash:
       if (buckets == NULL || chains == NULL)
-	return 0;
+	{
+	  if (do_using_dynamic)
+	    return 0;
+	  free (buckets);
+	  free (chains);
+	  buckets = NULL;
+	  chains = NULL;
+	  nbuckets = 0;
+	  nchains = 0;
+	}
     }
 
   if (dynamic_info_DT_GNU_HASH
@@ -7192,13 +7202,13 @@ process_symbol_table (FILE * file)
 		 SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
-	  return 0;
+	  goto no_gnu_hash;
 	}
 
       if (fread (nb, 16, 1, file) != 1)
 	{
 	  error (_("Failed to read in number of buckets\n"));
-	  return 0;
+	  goto no_gnu_hash;
 	}
 
       ngnubuckets = byte_get (nb, 4);
@@ -7216,13 +7226,13 @@ process_symbol_table (FILE * file)
 		 SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
-	  return 0;
+	  goto no_gnu_hash;
 	}
 
       gnubuckets = get_dynamic_data (file, ngnubuckets, 4);
 
       if (gnubuckets == NULL)
-	return 0;
+	goto no_gnu_hash;
 
       for (i = 0; i < ngnubuckets; i++)
 	if (gnubuckets[i] != 0)
@@ -7235,7 +7245,7 @@ process_symbol_table (FILE * file)
 	  }
 
       if (maxchain == 0xffffffff)
-	return 0;
+	goto no_gnu_hash;
 
       maxchain -= gnusymidx;
 
@@ -7246,7 +7256,7 @@ process_symbol_table (FILE * file)
 		 SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
-	  return 0;
+	  goto no_gnu_hash;
 	}
 
       do
@@ -7254,11 +7264,11 @@ process_symbol_table (FILE * file)
 	  if (fread (nb, 4, 1, file) != 1)
 	    {
 	      error (_("Failed to determine last chain length\n"));
-	      return 0;
+	      goto no_gnu_hash;
 	    }
 
 	  if (maxchain + 1 == 0)
-	    return 0;
+	    goto no_gnu_hash;
 
 	  ++maxchain;
 	}
@@ -7270,13 +7280,20 @@ process_symbol_table (FILE * file)
 		 SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information\n"));
-	  return 0;
+	  goto no_gnu_hash;
 	}
 
       gnuchains = get_dynamic_data (file, maxchain, 4);
 
+    no_gnu_hash:
       if (gnuchains == NULL)
-	return 0;
+	{
+	  free (gnubuckets);
+	  if (do_using_dynamic)
+	    return 0;
+	  gnubuckets = NULL;
+	  ngnubuckets = 0;
+	}
     }
 
   if ((dynamic_info[DT_HASH] || dynamic_info_DT_GNU_HASH)
@@ -7608,7 +7625,7 @@ process_symbol_table (FILE * file)
       free (chains);
     }
 
-  if (do_histogram && dynamic_info_DT_GNU_HASH)
+  if (do_histogram && gnubuckets != NULL)
     {
       unsigned long * lengths;
       unsigned long * counts;

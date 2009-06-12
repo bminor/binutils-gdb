@@ -1,3 +1,8 @@
+2009-06-12  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (process_symbol_table): Don't return early if
+	.hash/.gnu.hash is empty/unusable and not -D.
+
 2009-06-09  Tom Bramer  <tjb@postpro.net>
 
 	PR 10165
