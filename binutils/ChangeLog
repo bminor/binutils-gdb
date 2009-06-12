@@ -1,3 +1,8 @@
+2009-06-12  John Reiser  <jreiser@BitWagon.com>
+
+	* readelf.c (process_symbol_table): Set gnubuckets to NULL after
+	freeing it and before returning.
+
 2009-06-12  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (process_symbol_table): Don't return early if

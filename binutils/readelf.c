@@ -7289,10 +7289,10 @@ process_symbol_table (FILE * file)
       if (gnuchains == NULL)
 	{
 	  free (gnubuckets);
-	  if (do_using_dynamic)
-	    return 0;
 	  gnubuckets = NULL;
 	  ngnubuckets = 0;
+	  if (do_using_dynamic)
+	    return 0;
 	}
     }
 
