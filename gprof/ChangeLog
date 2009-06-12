@@ -1,3 +1,16 @@
+2009-06-12  Homer Xing  <homer.xing@yahoo.com>
+
+	* corefile.c (num_of_syms_in): New function - computes the number
+	of symbols in a given file.
+	(core_create_syms_from): New function - populates a symbol table
+	from the symbols found in a specified file.
+	* corefile.h: Prototype core_create_syms_from.
+	* gprof.c (long_options): Add --external-symbol-table.
+	(usage): Mention it.
+	(main): Initiailize external_symbol_table from
+	--external-symbol-table option.  If set use it.
+	* gprof.texi: Document the new option.
+
 2009-06-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Don't use \n in replacement part of s command.

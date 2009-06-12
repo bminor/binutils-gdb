@@ -1,3 +1,7 @@
+2009-06-12  Homer Xing  <homer.xing@yahoo.com>
+
+	* NEWS: Mention new feature added to gprof.
+
 2009-06-12  John Reiser  <jreiser@BitWagon.com>
 
 	* readelf.c (process_symbol_table): Set gnubuckets to NULL after

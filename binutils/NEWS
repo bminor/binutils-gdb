@@ -1,4 +1,7 @@
 -*- text -*-
+* The gprof program has been given a new command line option:
+  --external-symbols-table=<filename> which reads in symbols from a specified
+  file.
 
 * The plugin target has been added to bfd. It can load the same shared objects
   used by gold and uses them to provide basic support for new file formats.

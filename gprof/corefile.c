@@ -1,6 +1,6 @@
 /* corefile.c
 
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -33,13 +33,13 @@ bfd *core_bfd;
 static int core_num_syms;
 static asymbol **core_syms;
 asection *core_text_sect;
-PTR core_text_space;
+void * core_text_space;
 
 static int min_insn_size;
 int offset_to_code;
 
 /* For mapping symbols to specific .o files during file ordering.  */
-struct function_map *symbol_map;
+struct function_map * symbol_map;
 unsigned int symbol_map_count;
 
 static void read_function_mappings (const char *);
@@ -432,6 +432,104 @@ get_src_info (bfd_vma addr, const char **filename, const char **name, int *line_
 			      func_name ? func_name : "<unknown>"));
       return FALSE;
     }
+}
+
+/* Return number of symbols in a symbol-table file.  */
+
+static int 
+num_of_syms_in (FILE * f)
+{
+  const int BUFSIZE = 1024;
+  char * buf = (char *) xmalloc (BUFSIZE);
+  char * address = (char *) xmalloc (BUFSIZE);
+  char   type;
+  char * name = (char *) xmalloc (BUFSIZE);
+  int num = 0;
+  
+  while (!feof (f) && fgets (buf, BUFSIZE - 1, f))
+    {
+      if (sscanf (buf, "%s %c %s", address, &type, name) == 3)
+        if (type == 't' || type == 'T')
+          ++num;
+    }
+
+  free (buf);
+  free (address);
+  free (name);
+
+  return num;
+}
+
+/* Read symbol table from a file.  */
+
+void
+core_create_syms_from (const char * sym_table_file)
+{
+  const int BUFSIZE = 1024;
+  char * buf = (char *) xmalloc (BUFSIZE);
+  char * address = (char *) xmalloc (BUFSIZE);
+  char type;
+  char * name = (char *) xmalloc (BUFSIZE);
+  bfd_vma min_vma = ~(bfd_vma) 0;
+  bfd_vma max_vma = 0;
+  FILE * f;
+
+  f = fopen (sym_table_file, "r");
+  if (!f)
+    {
+      fprintf (stderr, _("%s: could not open %s.\n"), whoami, sym_table_file);
+      done (1);
+    }
+
+  /* Pass 1 - determine upper bound on number of function names.  */
+  symtab.len = num_of_syms_in (f);
+
+  if (symtab.len == 0)
+    {
+      fprintf (stderr, _("%s: file `%s' has no symbols\n"), whoami, sym_table_file);
+      done (1);
+    }
+
+  symtab.base = (Sym *) xmalloc (symtab.len * sizeof (Sym));
+
+  /* Pass 2 - create symbols.  */
+  symtab.limit = symtab.base;
+
+  if (fseek (f, 0, SEEK_SET) != 0)
+    {
+      perror (sym_table_file);
+      done (1);
+    }
+
+  while (!feof (f) && fgets (buf, sizeof (buf), f))
+    {
+      if (sscanf (buf, "%s %c %s", address, &type, name) == 3)
+        if (type != 't' && type != 'T')
+          continue;
+
+      sym_init (symtab.limit);
+
+      sscanf (address, "%lx", &(symtab.limit->addr) );
+
+      symtab.limit->name = (char *) xmalloc (strlen (name) + 1);
+      strcpy ((char *) symtab.limit->name, name);
+      symtab.limit->mapped = 0;
+      symtab.limit->is_func = TRUE;
+      symtab.limit->is_bb_head = TRUE;
+      symtab.limit->is_static = (type == 't');
+      min_vma = MIN (symtab.limit->addr, min_vma);
+      max_vma = MAX (symtab.limit->addr, max_vma);
+
+      ++symtab.limit;
+    }
+  fclose (f);
+
+  symtab.len = symtab.limit - symtab.base;
+  symtab_finalize (&symtab);
+
+  free (buf);
+  free (address);
+  free (name);
 }
 
 /* Read in symbol table from core.
