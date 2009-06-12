@@ -108,6 +108,15 @@
 	(bfd_mach_o_bfd_reloc_type_lookup)
 	(bfd_mach_o_bfd_reloc_name_lookup): Ditto.
 
+2009-06-11  Eric Paris  <eparis@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* opncls.c (_maybe_make_executable): New function.  Gives execute
+	permission to an executable bfd that was opened for writing
+	provided that it is a regular file.  Replaces common code found in...
+	(bfd_close): here and ...
+	(bfd_close_all_done): here.
+
 2009-06-11  Anthony Green  <green@moxielogic.com>
 
 	* reloc.c: Add BFD_RELOC_MOXIE_10_PCREL.

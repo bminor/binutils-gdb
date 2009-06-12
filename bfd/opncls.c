@@ -629,6 +629,32 @@ bfd_openw (const char *filename, const char *target)
   return nbfd;
 }
 
+static inline void
+_maybe_make_executable (bfd * abfd)
+{
+  /* If the file was open for writing and is now executable,
+     make it so.  */
+  if (abfd->direction == write_direction
+      && abfd->flags & EXEC_P)
+    {
+      struct stat buf;
+
+      if (stat (abfd->filename, &buf) == 0
+	  /* Do not attempt to change non-regular files.  This is
+	     here especially for configure scripts and kernel builds
+	     which run tests with "ld [...] -o /dev/null".  */
+	  && S_ISREG(buf.st_mode))
+	{
+	  unsigned int mask = umask (0);
+
+	  umask (mask);
+	  chmod (abfd->filename,
+		 (0777
+		  & (buf.st_mode | ((S_IXUSR | S_IXGRP | S_IXOTH) &~ mask))));
+	}
+    }
+}
+
 /*
 
 FUNCTION
@@ -684,24 +710,8 @@ bfd_close (bfd *abfd)
   else
     ret = TRUE;
 
-  /* If the file was open for writing and is now executable,
-     make it so.  */
-  if (ret
-      && abfd->direction == write_direction
-      && abfd->flags & EXEC_P)
-    {
-      struct stat buf;
-
-      if (stat (abfd->filename, &buf) == 0)
-	{
-	  unsigned int mask = umask (0);
-
-	  umask (mask);
-	  chmod (abfd->filename,
-		 (0777
-		  & (buf.st_mode | ((S_IXUSR | S_IXGRP | S_IXOTH) &~ mask))));
-	}
-    }
+  if (ret)
+    _maybe_make_executable (abfd);
 
   _bfd_delete_bfd (abfd);
 
@@ -737,24 +747,8 @@ bfd_close_all_done (bfd *abfd)
 
   ret = bfd_cache_close (abfd);
 
-  /* If the file was open for writing and is now executable,
-     make it so.  */
-  if (ret
-      && abfd->direction == write_direction
-      && abfd->flags & EXEC_P)
-    {
-      struct stat buf;
-
-      if (stat (abfd->filename, &buf) == 0)
-	{
-	  unsigned int mask = umask (0);
-
-	  umask (mask);
-	  chmod (abfd->filename,
-		 (0777
-		  & (buf.st_mode | ((S_IXUSR | S_IXGRP | S_IXOTH) &~ mask))));
-	}
-    }
+  if (ret)
+    _maybe_make_executable (abfd);
 
   _bfd_delete_bfd (abfd);
 
