@@ -309,6 +309,7 @@ gld${EMULATION_NAME}_finish (void)
 	      asection *out_sec = sec->output_section;
 
 	      if (out_sec
+		  && elf_section_data (sec)
 		  && elf_section_type (sec) == SHT_PROGBITS
 		  && (elf_section_flags (sec) & SHF_EXECINSTR) != 0
 		  && (sec->flags & SEC_EXCLUDE) == 0

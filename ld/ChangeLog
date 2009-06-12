@@ -1,3 +1,8 @@
+2009-06-10  Philip Blundell  <philb@gnu.org>
+
+	* emultempl/armelf.em (gld${EMULATION_NAME}_finish): Avoid crash
+	if section has no ELF data.
+
 2009-06-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* scripttempl/elf.sc: Add .rel.ifunc and .rela.ifunc.
