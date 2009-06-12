@@ -39,12 +39,16 @@ extern int build_section_table (struct bfd *, struct target_section **,
 
 extern int resize_section_table (struct target_section_table *, int);
 
-/* Request to transfer up to LEN 8-bit bytes of the target sections
+/* Read or write from mappable sections of BFD executable files.
+
+   Request to transfer up to LEN 8-bit bytes of the target sections
    defined by SECTIONS and SECTIONS_END.  The OFFSET specifies the
    starting address.
+   If SECTION_NAME is not NULL, only access sections with that same
+   name.
 
-   Return the number of bytes actually transfered, or non-positive
-   when no data is available for the requested range.
+   Return the number of bytes actually transfered, or zero when no
+   data is available for the requested range.
 
    This function is intended to be used from target_xfer_partial
    implementations.  See target_read and target_write for more

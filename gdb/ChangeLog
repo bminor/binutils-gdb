@@ -1,3 +1,10 @@
+2009-06-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* exec.h (section_table_xfer_memory_partial): Improve description,
+	mention SECTION_NAME.
+	* exec.c (section_table_xfer_memory_partial): Remove stale
+	description.
+
 2009-06-11  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* nto-tdep.h (nto_generic_supply_gpregset)
