@@ -1,3 +1,8 @@
+2009-06-10  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.c (elf32_arm_fix_exidx_coverage): Avoid crash if
+	elf_sec->this_hdr == NULL.
+
 2009-06-12  Tristan Gingold  <gingold@adacore.com>
 
 	* reloc.c: Add BFD_RELOC_MACH_O_SECTDIFF and BFD_RELOC_MACH_O_PAIR.
