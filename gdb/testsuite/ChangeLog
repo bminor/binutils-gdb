@@ -1,3 +1,8 @@
+2009-06-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Report error on GDB crash during runto.
+	* lib/gdb.exp (runto <eof>): New.
+
 2009-06-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.mi/mi-async.exp, gdb.mi/mi-basics.exp,
