@@ -1,5 +1,12 @@
 2009-06-11  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* nto-tdep.h (nto_generic_supply_gpregset)
+	(nto_generic_supply_fpregset, nto_generic_supply_altregset): Remove.
+	* nto-tdep.c (nto_generic_supply_gpregset)
+	(nto_generic_supply_fpregset, nto_generic_supply_altregset): Remove.
+
+2009-06-11  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* i386-nto-tdep.c (I386_NTO_SIGCONTEXT_OFFSET): Remove define.
 	(i386nto_sigcontext_addr): Change the way context address is calculated.
 	(i386nto_init_abi): Remove usage of deprecated sc_reg_offset and

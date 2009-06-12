@@ -156,15 +156,6 @@ enum gdb_osabi nto_elf_osabi_sniffer (bfd *abfd);
 
 void nto_initialize_signals (void);
 
-void nto_generic_supply_gpregset (const struct regset *, struct regcache *,
-				  int, const void *, size_t);
-
-void nto_generic_supply_fpregset (const struct regset *, struct regcache *,
-				  int, const void *, size_t);
-
-void nto_generic_supply_altregset (const struct regset *, struct regcache *,
-				   int, const void *, size_t);
-
 /* Dummy function for initializing nto_target_ops on targets which do
    not define a particular regset.  */
 void nto_dummy_supply_regset (struct regcache *regcache, char *regs);

@@ -328,27 +328,6 @@ nto_in_dynsym_resolve_code (CORE_ADDR pc)
 }
 
 void
-nto_generic_supply_gpregset (const struct regset *regset,
-			     struct regcache *regcache, int regnum,
-			     const void *gregs, size_t len)
-{
-}
-
-void
-nto_generic_supply_fpregset (const struct regset *regset,
-			     struct regcache *regcache, int regnum,
-			     const void *fpregs, size_t len)
-{
-}
-
-void
-nto_generic_supply_altregset (const struct regset *regset,
-			      struct regcache *regcache, int regnum,
-			      const void *altregs, size_t len)
-{
-}
-
-void
 nto_dummy_supply_regset (struct regcache *regcache, char *regs)
 {
   /* Do nothing.  */
