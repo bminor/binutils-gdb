@@ -1,3 +1,9 @@
+2009-06-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2read.c (dwarf2_psymtab_to_symtab): Propagate
+	`has_section_at_zero' flag from stripped objfile to separate,
+	debug info only, objfile.
+
 2009-06-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* exec.h (section_table_xfer_memory_partial): Improve description,

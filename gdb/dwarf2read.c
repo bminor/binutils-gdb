@@ -2541,6 +2541,19 @@ dwarf2_psymtab_to_symtab (struct partial_symtab *pst)
 	  dwarf2_per_objfile = objfile_data (pst->objfile,
 					     dwarf2_objfile_data_key);
 
+	  /* If this psymtab is constructed from a debug-only objfile, the
+	     has_section_at_zero flag will not necessarily be correct.  We
+	     can get the correct value for this flag by looking at the data
+	     associated with the (presumably stripped) associated objfile.  */
+	  if (pst->objfile->separate_debug_objfile_backlink)
+	    {
+	      struct dwarf2_per_objfile *dpo_backlink
+	        = objfile_data (pst->objfile->separate_debug_objfile_backlink,
+		                dwarf2_objfile_data_key);
+	      dwarf2_per_objfile->has_section_at_zero
+		= dpo_backlink->has_section_at_zero;
+	    }
+
 	  psymtab_to_symtab_1 (pst);
 
 	  /* Finish up the debug error message.  */
