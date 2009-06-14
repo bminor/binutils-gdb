@@ -2867,7 +2867,9 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		(_("%B: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' isn't handled by %s"), input_bfd,
 		 x86_64_elf_howto_table[r_type].name,
-		 h->root.root.string, __FUNCTION__);
+		 (h->root.root.string
+		  ? h->root.root.string : "a local symbol"),
+		 __FUNCTION__);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 
@@ -2883,7 +2885,9 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    (_("%B: relocation %s against STT_GNU_IFUNC "
 		       "symbol `%s' has non-zero addend: %d"),
 		     input_bfd, x86_64_elf_howto_table[r_type].name,
-		     h->root.root.string, rel->r_addend);
+		     (h->root.root.string
+		      ? h->root.root.string : "a local symbol"),
+		     rel->r_addend);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}

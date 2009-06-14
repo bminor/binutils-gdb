@@ -3163,7 +3163,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 		(_("%B: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' isn't handled by %s"), input_bfd,
 		 elf_howto_table[r_type].name,
-		 h->root.root.string, __FUNCTION__);
+		 (h->root.root.string
+		  ? h->root.root.string : "a local symbol"),
+		 __FUNCTION__);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 
