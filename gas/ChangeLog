@@ -1,3 +1,11 @@
+2009-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10269
+	* config/tc-i386.c (md_apply_fix): Use TC_FORCE_RELOCATION
+	instead of generic_force_reloc.
+
+	* config/tc-i386.h (TC_FORCE_RELOCATION): New.
+
 2009-06-11  Anthony Green  <green@moxielogic.com>
 
 	* config/tc-moxie.c (md_chars_to_number): Define.

@@ -26,6 +26,8 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "bfd_stdint.h"
+#include "objalloc.h"
+#include "hashtab.h"
 
 #include "elf/x86-64.h"
 
@@ -520,6 +522,10 @@ struct elf64_x86_64_link_hash_table
 
   /* _TLS_MODULE_BASE_ symbol.  */
   struct bfd_link_hash_entry *tls_module_base;
+
+  /* Used by local STT_GNU_IFUNC symbols.  */
+  htab_t loc_hash_table;
+  void *loc_hash_memory;
 };
 
 /* Get the x86-64 ELF linker hash table from a link_info structure.  */
@@ -562,6 +568,82 @@ elf64_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
   return entry;
 }
 
+static hashval_t
+elf64_x86_64_local_hash (int id, int r_sym)
+{
+  return ((((id & 0xff) << 24) | ((id & 0xff00) << 8))
+	  ^ r_sym ^ (id >> 16));
+}
+
+/* Compute a hash of a local hash entry.  We use elf_link_hash_entry
+  for local symbol so that we can handle local STT_GNU_IFUNC symbols
+  as global symbol.  We reuse indx and dynstr_index for local symbol
+  hash since they aren't used by global symbols in this backend.  */
+
+static hashval_t
+elf64_x86_64_local_htab_hash (const void *ptr)
+{
+  struct elf_link_hash_entry *h
+    = (struct elf_link_hash_entry *) ptr;
+  return elf64_x86_64_local_hash (h->indx, h->dynstr_index);
+}
+
+/* Compare local hash entries.  */
+
+static int
+elf64_x86_64_local_htab_eq (const void *ptr1, const void *ptr2)
+{
+  struct elf_link_hash_entry *h1
+     = (struct elf_link_hash_entry *) ptr1;
+  struct elf_link_hash_entry *h2
+    = (struct elf_link_hash_entry *) ptr2;
+
+  return h1->indx == h2->indx && h1->dynstr_index == h2->dynstr_index;
+}
+
+/* Find and/or create a hash entry for local symbol.  */
+
+static struct elf_link_hash_entry *
+elf64_x86_64_get_local_sym_hash (struct elf64_x86_64_link_hash_table *htab,
+				 bfd *abfd, const Elf_Internal_Rela *rel,
+				 bfd_boolean create)
+{
+  struct elf64_x86_64_link_hash_entry e, *ret;
+  asection *sec = abfd->sections;
+  hashval_t h = elf64_x86_64_local_hash (sec->id,
+					 ELF64_R_SYM (rel->r_info));
+  void **slot;
+
+  e.elf.indx = sec->id;
+  e.elf.dynstr_index = ELF64_R_SYM (rel->r_info);
+  slot = htab_find_slot_with_hash (htab->loc_hash_table, &e, h,
+				   create ? INSERT : NO_INSERT);
+
+  if (!slot)
+    return NULL;
+
+  if (*slot)
+    {
+      ret = (struct elf64_x86_64_link_hash_entry *) *slot;
+      return &ret->elf;
+    }
+
+  ret = (struct elf64_x86_64_link_hash_entry *)
+	objalloc_alloc ((struct objalloc *) htab->loc_hash_memory,
+			sizeof (struct elf64_x86_64_link_hash_entry));
+  if (ret)
+    {
+      memset (ret, 0, sizeof (*ret));
+      ret->elf.indx = sec->id;
+      ret->elf.dynstr_index = ELF64_R_SYM (rel->r_info);
+      ret->elf.dynindx = -1;
+      ret->elf.plt.offset = (bfd_vma) -1;
+      ret->elf.got.offset = (bfd_vma) -1;
+      *slot = ret;
+    }
+  return &ret->elf;
+}
+
 /* Create an X86-64 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -600,7 +682,33 @@ elf64_x86_64_link_hash_table_create (bfd *abfd)
   ret->sgotplt_jump_table_size = 0;
   ret->tls_module_base = NULL;
 
+  ret->loc_hash_table = htab_try_create (1024,
+					 elf64_x86_64_local_htab_hash,
+					 elf64_x86_64_local_htab_eq,
+					 NULL);
+  ret->loc_hash_memory = objalloc_create ();
+  if (!ret->loc_hash_table || !ret->loc_hash_memory)
+    {
+      free (ret);
+      return NULL;
+    }
+
   return &ret->elf.root;
+}
+
+/* Destroy an X86-64 ELF linker hash table.  */
+
+static void
+elf64_x86_64_link_hash_table_free (struct bfd_link_hash_table *hash)
+{
+  struct elf64_x86_64_link_hash_table *htab
+    = (struct elf64_x86_64_link_hash_table *) hash;
+
+  if (htab->loc_hash_table)
+    htab_delete (htab->loc_hash_table);
+  if (htab->loc_hash_memory)
+    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
+  _bfd_generic_link_hash_table_free (hash);
 }
 
 /* Create .got, .gotplt, and .rela.got sections in DYNOBJ, and set up
@@ -1012,6 +1120,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
+  Elf_Internal_Sym *isymbuf;
 
   if (info->relocatable)
     return TRUE;
@@ -1020,6 +1129,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   htab = elf64_x86_64_hash_table (info);
   symtab_hdr = &elf_symtab_hdr (abfd);
+  isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
   sym_hashes = elf_sym_hashes (abfd);
 
   sreloc = NULL;
@@ -1042,14 +1152,50 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
 
       if (r_symndx < symtab_hdr->sh_info)
-	h = NULL;
+	{
+	  /* A local symbol.  */
+	  Elf_Internal_Sym *isym;
+
+	  /* Read this BFD's local symbols.  */
+	  if (isymbuf == NULL)
+	    {
+	      if (isymbuf == NULL)
+		isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+						symtab_hdr->sh_info, 0,
+						NULL, NULL, NULL);
+	      if (isymbuf == NULL)
+		  return FALSE;
+	    }
+
+	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
+	  isym = isymbuf + r_symndx;
+	  if (ELF64_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+	    {
+	      h = elf64_x86_64_get_local_sym_hash (htab, abfd, rel,
+						   TRUE);
+	      if (h == NULL)
+		return FALSE;
+	      
+	      /* Fake a STT_GNU_IFUNC symbol.  */
+	      h->type = STT_GNU_IFUNC;
+	      h->def_regular = 1;
+	      h->ref_regular = 1;
+	      h->forced_local = 1;
+	      h->root.type = bfd_link_hash_defined;
+	    }
+	  else
+	    h = NULL;
+	}
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
 
+      if (h != NULL)
+	{
 	  /* Create the ifunc sections for static executables.  If we
 	     never see an indirect function symbol nor we are building
 	     a static executable, those sections will be empty and
@@ -1117,7 +1263,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		     (_("%B: relocation %s against STT_GNU_IFUNC "
 			"symbol `%s' isn't handled by %s"), abfd,
 		      x86_64_elf_howto_table[r_type].name,
-		      h->root.root.string, __FUNCTION__);
+		      h != NULL ? h->root.root.string : "a local symbol",
+		      __FUNCTION__);
 		   bfd_set_error (bfd_error_bad_value);
 		   return FALSE;
 
@@ -2145,6 +2292,25 @@ elf64_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   return TRUE;
 }
 
+/* Allocate space in .plt, .got and associated reloc sections for
+   local dynamic relocs.  */
+
+static bfd_boolean
+elf64_x86_64_allocate_local_dynrelocs (void **slot, void *inf)
+{
+  struct elf_link_hash_entry *h
+    = (struct elf_link_hash_entry *) *slot;
+
+  if (h->type != STT_GNU_IFUNC
+      || !h->def_regular
+      || !h->ref_regular
+      || !h->forced_local
+      || h->root.type != bfd_link_hash_defined)
+    abort ();
+
+  return elf64_x86_64_allocate_dynrelocs (h, inf);
+}
+
 /* Find any dynamic relocs that apply to read-only sections.  */
 
 static bfd_boolean
@@ -2312,6 +2478,11 @@ elf64_x86_64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
      sym dynamic relocs.  */
   elf_link_hash_traverse (&htab->elf, elf64_x86_64_allocate_dynrelocs,
 			  info);
+
+  /* Allocate .plt and .got entries, and space for local symbols.  */
+  htab_traverse (htab->loc_hash_table,
+		 elf64_x86_64_allocate_local_dynrelocs,
+		 info);
 
   /* For every jump slot reserved in the sgotplt, reloc_count is
      incremented.  However, when we reserve space for TLS descriptors,
@@ -2630,7 +2801,21 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
 
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym,
+						&sec, rel);
+
+	  /* Relocate against local STT_GNU_IFUNC symbol.  */
+	  if (ELF64_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+	    {
+	      h = elf64_x86_64_get_local_sym_hash (htab, input_bfd,
+						   rel, FALSE);
+	      if (h == NULL)
+		abort ();
+
+	      /* Set STT_GNU_IFUNC symbol value.  */ 
+	      h->root.u.def.value = sym->st_value;
+	      h->root.u.def.section = sec;
+	    }
 	}
       else
 	{
@@ -2710,8 +2895,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  bfd_byte *loc;
 		  asection *sreloc;
 
-		  /* Need a dynamic relocation get the the real
-		     function address. */
+		  /* Need a dynamic relocation to get the real function
+		     address.  */
 		  outrel.r_offset = _bfd_elf_section_offset (output_bfd,
 							     info,
 							     input_section,
@@ -3941,12 +4126,29 @@ do_glob_dat:
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 
-  /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0
-      || h == htab->elf.hgot)
+  /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  SYM may
+     be NULL for local symbols.  */
+  if (sym != NULL
+      && (strcmp (h->root.root.string, "_DYNAMIC") == 0
+	  || h == htab->elf.hgot))
     sym->st_shndx = SHN_ABS;
 
   return TRUE;
+}
+
+/* Finish up local dynamic symbol handling.  We set the contents of
+   various dynamic sections here.  */
+
+static bfd_boolean
+elf64_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
+{
+  struct elf_link_hash_entry *h
+    = (struct elf_link_hash_entry *) *slot;
+  struct bfd_link_info *info
+    = (struct bfd_link_info *) inf; 
+
+  return elf64_x86_64_finish_dynamic_symbol (info->output_bfd,
+					     info, h, NULL);
 }
 
 /* Used to decide how to sort relocs in an optimal manner for the
@@ -4138,6 +4340,11 @@ elf64_x86_64_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *inf
   if (htab->sgot && htab->sgot->size > 0)
     elf_section_data (htab->sgot->output_section)->this_hdr.sh_entsize
       = GOT_ENTRY_SIZE;
+
+  /* Fill PLT and GOT entries for local STT_GNU_IFUNC symbols.  */
+  htab_traverse (htab->loc_hash_table,
+		 elf64_x86_64_finish_local_dynamic_symbol,
+		 info);
 
   return TRUE;
 }
@@ -4387,6 +4594,8 @@ static const struct bfd_elf_special_section
 
 #define bfd_elf64_bfd_link_hash_table_create \
   elf64_x86_64_link_hash_table_create
+#define bfd_elf64_bfd_link_hash_table_free \
+  elf64_x86_64_link_hash_table_free
 #define bfd_elf64_bfd_reloc_type_lookup	    elf64_x86_64_reloc_type_lookup
 #define bfd_elf64_bfd_reloc_name_lookup \
   elf64_x86_64_reloc_name_lookup

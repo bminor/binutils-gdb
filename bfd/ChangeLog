@@ -1,3 +1,47 @@
+2009-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10269
+	* elf32-i386.c: Include "objalloc.h" and "hashtab.h".
+	(elf_i386_link_hash_table): Add loc_hash_table and
+	loc_hash_memory.
+	(elf_i386_local_hash): New.
+	(elf_i386_local_htab_hash): Likewise.
+	(elf_i386_local_htab_eq): Likewise.
+	(elf_i386_get_local_sym_hash): Likewise.
+	(elf_i386_link_hash_table_free): Likewise.
+	(elf_i386_allocate_local_dynrelocs): Likewise.
+	(elf_i386_finish_local_dynamic_symbol): Likewise.
+	(bfd_elf64_bfd_link_hash_table_free): Likewise.
+	(elf_i386_link_hash_table_create): Create loc_hash_table and
+	loc_hash_memory.
+	(elf_i386_check_relocs): Handle local STT_GNU_IFUNC symbols.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_sections): Likewise.
+	(elf_i386_finish_dynamic_symbol): Check _DYNAMIC only if sym
+	isn't NULL.
+
+	* elf64-x86-64.c: Include "objalloc.h" and "hashtab.h".
+	(elf64_x86_64_link_hash_table): Add loc_hash_table and
+	loc_hash_memory.
+	(elf64_x86_64_local_hash): New.
+	(elf64_x86_64_local_htab_hash): Likewise.
+	(elf64_x86_64_local_htab_eq): Likewise.
+	(elf64_x86_64_get_local_sym_hash): Likewise.
+	(elf64_x86_64_link_hash_table_free): Likewise.
+	(elf64_x86_64_allocate_local_dynrelocs): Likewise.
+	(elf64_x86_64_finish_local_dynamic_symbol): Likewise.
+	(bfd_elf64_bfd_link_hash_table_free): Likewise.
+	(elf64_x86_64_link_hash_table_create): Create loc_hash_table
+	and loc_hash_memory.
+	(elf64_x86_64_check_relocs): Handle local STT_GNU_IFUNC
+	symbols.
+	(elf64_x86_64_size_dynamic_sections): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+	(elf64_x86_64_finish_dynamic_sections): Likewise.
+	(elf64_x86_64_finish_dynamic_symbol): Check _DYNAMIC only if
+	sym isn't NULL.
+
 2009-06-10  Philip Blundell  <philb@gnu.org>
 
 	* elf32-arm.c (elf32_arm_fix_exidx_coverage): Avoid crash if

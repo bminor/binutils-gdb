@@ -26,6 +26,8 @@
 #include "elf-bfd.h"
 #include "elf-vxworks.h"
 #include "bfd_stdint.h"
+#include "objalloc.h"
+#include "hashtab.h"
 
 /* 386 uses REL relocations instead of RELA.  */
 #define USE_REL	1
@@ -706,6 +708,10 @@ struct elf_i386_link_hash_table
 
   /* _TLS_MODULE_BASE_ symbol.  */
   struct bfd_link_hash_entry *tls_module_base;
+
+  /* Used by local STT_GNU_IFUNC symbols.  */
+  htab_t loc_hash_table;
+  void *loc_hash_memory;
 };
 
 /* Get the i386 ELF linker hash table from a link_info structure.  */
@@ -748,6 +754,82 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
   return entry;
 }
 
+static hashval_t
+elf_i386_local_hash (int id, int r_sym)
+{
+  return ((((id & 0xff) << 24) | ((id & 0xff00) << 8))
+	  ^ r_sym ^ (id >> 16));
+}
+
+/* Compute a hash of a local hash entry.  We use elf_link_hash_entry
+  for local symbol so that we can handle local STT_GNU_IFUNC symbols
+  as global symbol.  We reuse indx and dynstr_index for local symbol
+  hash since they aren't used by global symbols in this backend.  */
+
+static hashval_t
+elf_i386_local_htab_hash (const void *ptr)
+{
+  struct elf_link_hash_entry *h
+    = (struct elf_link_hash_entry *) ptr;
+  return elf_i386_local_hash (h->indx, h->dynstr_index);
+}
+
+/* Compare local hash entries.  */
+
+static int
+elf_i386_local_htab_eq (const void *ptr1, const void *ptr2)
+{
+  struct elf_link_hash_entry *h1
+     = (struct elf_link_hash_entry *) ptr1;
+  struct elf_link_hash_entry *h2
+    = (struct elf_link_hash_entry *) ptr2;
+
+  return h1->indx == h2->indx && h1->dynstr_index == h2->dynstr_index;
+}
+
+/* Find and/or create a hash entry for local symbol.  */
+
+static struct elf_link_hash_entry *
+elf_i386_get_local_sym_hash (struct elf_i386_link_hash_table *htab,
+			     bfd *abfd, const Elf_Internal_Rela *rel,
+			     bfd_boolean create)
+{
+  struct elf_i386_link_hash_entry e, *ret;
+  asection *sec = abfd->sections;
+  hashval_t h = elf_i386_local_hash (sec->id,
+				     ELF32_R_SYM (rel->r_info));
+  void **slot;
+
+  e.elf.indx = sec->id;
+  e.elf.dynstr_index = ELF32_R_SYM (rel->r_info);
+  slot = htab_find_slot_with_hash (htab->loc_hash_table, &e, h,
+				   create ? INSERT : NO_INSERT);
+
+  if (!slot)
+    return NULL;
+
+  if (*slot)
+    {
+      ret = (struct elf_i386_link_hash_entry *) *slot;
+      return &ret->elf;
+    }
+
+  ret = (struct elf_i386_link_hash_entry *)
+	objalloc_alloc ((struct objalloc *) htab->loc_hash_memory,
+			sizeof (struct elf_i386_link_hash_entry));
+  if (ret)
+    {
+      memset (ret, 0, sizeof (*ret));
+      ret->elf.indx = sec->id;
+      ret->elf.dynstr_index = ELF32_R_SYM (rel->r_info);
+      ret->elf.dynindx = -1;
+      ret->elf.plt.offset = (bfd_vma) -1;
+      ret->elf.got.offset = (bfd_vma) -1;
+      *slot = ret;
+    }
+  return &ret->elf;
+}
+
 /* Create an i386 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -788,8 +870,37 @@ elf_i386_link_hash_table_create (bfd *abfd)
   ret->plt0_pad_byte = 0;
   ret->tls_module_base = NULL;
 
+  ret->loc_hash_table = htab_try_create (1024,
+					 elf_i386_local_htab_hash,
+					 elf_i386_local_htab_eq,
+					 NULL);
+  ret->loc_hash_memory = objalloc_create ();
+  if (!ret->loc_hash_table || !ret->loc_hash_memory)
+    {
+      free (ret);
+      return NULL;
+    }
+
   return &ret->elf.root;
 }
+
+/* Destroy an i386 ELF linker hash table.  */
+
+static void
+elf_i386_link_hash_table_free (struct bfd_link_hash_table *hash)
+{
+  struct elf_i386_link_hash_table *htab
+    = (struct elf_i386_link_hash_table *) hash;
+
+  if (htab->loc_hash_table)
+    htab_delete (htab->loc_hash_table);
+  if (htab->loc_hash_memory)
+    objalloc_free ((struct objalloc *) htab->loc_hash_memory);
+  _bfd_generic_link_hash_table_free (hash);
+}
+
+/* Create .got, .gotplt, and .rela.got sections in DYNOBJ, and set up
+   shortcuts to them in our hash table.  */
 
 /* Create .got, .gotplt, and .rel.got sections in DYNOBJ, and set up
    shortcuts to them in our hash table.  */
@@ -1228,6 +1339,7 @@ elf_i386_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
+  Elf_Internal_Sym *isymbuf;
 
   if (info->relocatable)
     return TRUE;
@@ -1236,6 +1348,7 @@ elf_i386_check_relocs (bfd *abfd,
 
   htab = elf_i386_hash_table (info);
   symtab_hdr = &elf_symtab_hdr (abfd);
+  isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
   sym_hashes = elf_sym_hashes (abfd);
 
   sreloc = NULL;
@@ -1259,14 +1372,50 @@ elf_i386_check_relocs (bfd *abfd,
 	}
 
       if (r_symndx < symtab_hdr->sh_info)
-	h = NULL;
+	{
+	  /* A local symbol.  */
+	  Elf_Internal_Sym *isym;
+
+	  /* Read this BFD's local symbols.  */
+	  if (isymbuf == NULL)
+	    {
+	      if (isymbuf == NULL)
+		isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+						symtab_hdr->sh_info, 0,
+						NULL, NULL, NULL);
+	      if (isymbuf == NULL)
+		  return FALSE;
+	    }
+
+	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
+	  isym = isymbuf + r_symndx;
+	  if (ELF32_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+	    {
+	      h = elf_i386_get_local_sym_hash (htab, abfd, rel,
+						   TRUE);
+	      if (h == NULL)
+		return FALSE;
+	      
+	      /* Fake a STT_GNU_IFUNC symbol.  */
+	      h->type = STT_GNU_IFUNC;
+	      h->def_regular = 1;
+	      h->ref_regular = 1;
+	      h->forced_local = 1;
+	      h->root.type = bfd_link_hash_defined;
+	    }
+	  else
+	    h = NULL;
+	}
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
 
+      if (h != NULL)
+	{
 	  /* Create the ifunc sections for static executables.  If we
 	     never see an indirect function symbol nor we are building
 	     a static executable, those sections will be empty and
@@ -1331,7 +1480,8 @@ elf_i386_check_relocs (bfd *abfd,
 		     (_("%B: relocation %s against STT_GNU_IFUNC "
 			"symbol `%s' isn't handled by %s"), abfd,
 		      elf_howto_table[r_type].name,
-		      h->root.root.string, __FUNCTION__);
+		      h != NULL ? h->root.root.string : "a local symbol",
+		      __FUNCTION__);
 		   bfd_set_error (bfd_error_bad_value);
 		   return FALSE;
 
@@ -2337,6 +2487,25 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
+/* Allocate space in .plt, .got and associated reloc sections for
+   local dynamic relocs.  */
+
+static bfd_boolean
+elf_i386_allocate_local_dynrelocs (void **slot, void *inf)
+{
+  struct elf_link_hash_entry *h
+    = (struct elf_link_hash_entry *) *slot;
+
+  if (h->type != STT_GNU_IFUNC
+      || !h->def_regular
+      || !h->ref_regular
+      || !h->forced_local
+      || h->root.type != bfd_link_hash_defined)
+    abort ();
+
+  return elf_i386_allocate_dynrelocs (h, inf);
+}
+
 /* Find any dynamic relocs that apply to read-only sections.  */
 
 static bfd_boolean
@@ -2510,6 +2679,11 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
   elf_link_hash_traverse (&htab->elf, elf_i386_allocate_dynrelocs, info);
+
+  /* Allocate .plt and .got entries, and space for local symbols.  */
+  htab_traverse (htab->loc_hash_table,
+		 elf_i386_allocate_local_dynrelocs,
+		 info);
 
   /* For every jump slot reserved in the sgotplt, reloc_count is
      incremented.  However, when we reserve space for TLS descriptors,
@@ -2916,6 +3090,18 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  break;
 		}
 	    }
+	  else if (ELF32_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+	    {
+	      /* Relocate against local STT_GNU_IFUNC symbol.  */
+	      h = elf_i386_get_local_sym_hash (htab, input_bfd,
+						   rel, FALSE);
+	      if (h == NULL)
+		abort ();
+
+	      /* Set STT_GNU_IFUNC symbol value.  */ 
+	      h->root.u.def.value = sym->st_value;
+	      h->root.u.def.section = sec;
+	    }
 	}
       else
 	{
@@ -2990,8 +3176,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  asection *sreloc;
 		  bfd_vma offset;
 
-		  /* Need a dynamic relocation get the the real
-		     function adddress.  */
+		  /* Need a dynamic relocation to get the real function
+		     adddress.  */
 		  offset = _bfd_elf_section_offset (output_bfd,
 						    info,
 						    input_section,
@@ -4310,14 +4496,32 @@ do_glob_dat:
       bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
     }
 
-  /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.
+  /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  SYM may
+     be NULL for local symbols.
+
      On VxWorks, the _GLOBAL_OFFSET_TABLE_ symbol is not absolute: it
      is relative to the ".got" section.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0
-      || (!htab->is_vxworks && h == htab->elf.hgot))
+  if (sym != NULL
+      && (strcmp (h->root.root.string, "_DYNAMIC") == 0
+	  || (!htab->is_vxworks && h == htab->elf.hgot)))
     sym->st_shndx = SHN_ABS;
 
   return TRUE;
+}
+
+/* Finish up local dynamic symbol handling.  We set the contents of
+   various dynamic sections here.  */
+
+static bfd_boolean
+elf_i386_finish_local_dynamic_symbol (void **slot, void *inf)
+{
+  struct elf_link_hash_entry *h
+    = (struct elf_link_hash_entry *) *slot;
+  struct bfd_link_info *info
+    = (struct bfd_link_info *) inf; 
+
+  return elf_i386_finish_dynamic_symbol (info->output_bfd, info,
+					 h, NULL);
 }
 
 /* Used to decide how to sort relocs in an optimal manner for the
@@ -4527,6 +4731,11 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
   if (htab->sgot && htab->sgot->size > 0)
     elf_section_data (htab->sgot->output_section)->this_hdr.sh_entsize = 4;
 
+  /* Fill PLT and GOT entries for local STT_GNU_IFUNC symbols.  */
+  htab_traverse (htab->loc_hash_table,
+		 elf_i386_finish_local_dynamic_symbol,
+		 info);
+
   return TRUE;
 }
 
@@ -4592,6 +4801,7 @@ elf_i386_add_symbol_hook (bfd * abfd ATTRIBUTE_UNUSED,
 
 #define bfd_elf32_bfd_is_local_label_name     elf_i386_is_local_label_name
 #define bfd_elf32_bfd_link_hash_table_create  elf_i386_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_free    elf_i386_link_hash_table_free
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_i386_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	      elf_i386_reloc_name_lookup
 

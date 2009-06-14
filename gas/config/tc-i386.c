@@ -7235,7 +7235,7 @@ md_apply_fix (fixP, valP, seg)
 	  if ((sym_seg == seg
 	       || (symbol_section_p (fixP->fx_addsy)
 		   && sym_seg != absolute_section))
-	      && !generic_force_reloc (fixP))
+	      && !TC_FORCE_RELOCATION (fixP))
 	    {
 	      /* Yes, we add the values in twice.  This is because
 		 bfd_install_relocation subtracts them out again.  I think
