@@ -1,5 +1,12 @@
 2009-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_check_relocs): Properly report
+	local symbol for unhandled relocation against STT_GNU_IFUNC
+	symbol.
+	* elf64-x86-64.c (elf64_x86_64_check_relocs):  Likewise.
+
+2009-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/10269
 	* elf32-i386.c: Include "objalloc.h" and "hashtab.h".
 	(elf_i386_link_hash_table): Add loc_hash_table and

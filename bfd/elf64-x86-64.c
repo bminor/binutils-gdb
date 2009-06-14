@@ -1263,7 +1263,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		     (_("%B: relocation %s against STT_GNU_IFUNC "
 			"symbol `%s' isn't handled by %s"), abfd,
 		      x86_64_elf_howto_table[r_type].name,
-		      h != NULL ? h->root.root.string : "a local symbol",
+		     (h->root.root.string
+		      ? h->root.root.string : "a local symbol"),
 		      __FUNCTION__);
 		   bfd_set_error (bfd_error_bad_value);
 		   return FALSE;
