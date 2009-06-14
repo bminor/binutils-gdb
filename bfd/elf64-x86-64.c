@@ -1982,6 +1982,27 @@ elf64_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
     {
       asection *plt, *gotplt, *relplt;
 
+      /* When a shared library references a STT_GNU_IFUNC symbol
+	 defined in executable. the .got.plt slot in the shared library
+	 will contain address of the .plt slot in the binary and only
+	 its .got.plt will contain the resolved function that should be
+	 called.  Pointer equality won't work correctly.  PIE should
+	 be used if pointer equality is required here.  */
+      if (!info->shared
+	  && (h->dynindx != -1
+	      || info->export_dynamic)
+	  && h->pointer_equality_needed)
+	{
+	  info->callbacks->einfo 
+	    (_("%F%P: dynamic STT_GNU_IFUNC symbool `%s' with pointer "
+	       "equality in `%B' can not be used when making an "
+	       "executable; recompile with -fPIE and relink with -pie\n"),
+	     h->root.root.string,
+	     h->root.u.def.section->owner);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+
       /* Return and discard space for dynamic relocations against it if
 	 it is never referenced in a non-shared object.  */
       if (!h->ref_regular)
@@ -2049,8 +2070,9 @@ elf64_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	 not dynamic.
 	 2. Use .got.plt in a non-shared object if pointer equality 
 	 isn't needed.
-	 3. Use .got.plt if .got isn't used.
-	 4. Otherwise use .got so that it can be shared among different
+	 3. Use .got.plt in PIE.
+	 4. Use .got.plt if .got isn't used.
+	 5. Otherwise use .got so that it can be shared among different
 	 objects at run-time.
 	 We only need to relocate .got entry in shared object.  */
       if ((info->shared
@@ -2058,6 +2080,7 @@ elf64_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	       || h->forced_local))
 	  || (!info->shared
 	      && !h->pointer_equality_needed)
+	  || (info->executable && info->shared)
 	  || htab->sgot == NULL)
 	{
 	  /* Use .got.plt.  */
@@ -2914,7 +2937,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 				      + input_section->output_offset);
 
 		  if (h->dynindx == -1
-		      || h->forced_local)
+		      || h->forced_local
+		      || info->executable)
 		    {
 		      /* This symbol is resolved locally.  */
 		      outrel.r_info = ELF64_R_INFO (0, R_X86_64_IRELATIVE);

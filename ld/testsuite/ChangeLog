@@ -1,20 +1,26 @@
+2009-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10270
+	* ld-ifunc/ifunc-9-x86.d: New.
+	* ld-ifunc/ifunc-9-x86.s: Likewise.
+
 2009-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10269
-	*: ld-ifunc/ifunc-1-local-x86.d: New.
-	*: ld-ifunc/ifunc-1-local-x86.s: Likewise.
-	*: ld-ifunc/ifunc-2-local-i386.d: Likewise.
-	*: ld-ifunc/ifunc-2-local-i386.s: Likewise.
-	*: ld-ifunc/ifunc-2-local-x86-64.d: Likewise.
-	*: ld-ifunc/ifunc-2-local-x86-64.s: Likewise.
-	*: ld-ifunc/ifunc-4-local-x86.d: Likewise.
-	*: ld-ifunc/ifunc-4-local-x86.s: Likewise.
-	*: ld-ifunc/ifunc-5-local-i386.s: Likewise.
-	*: ld-ifunc/ifunc-5-local-x86-64.s: Likewise.
-	*: ld-ifunc/ifunc-5a-local-i386.d: Likewise.
-	*: ld-ifunc/ifunc-5a-local-x86-64.d: Likewise.
-	*: ld-ifunc/ifunc-5b-local-i386.d: Likewise.
-	*: ld-ifunc/ifunc-5b-local-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-1-local-x86.d: New.
+	* ld-ifunc/ifunc-1-local-x86.s: Likewise.
+	* ld-ifunc/ifunc-2-local-i386.d: Likewise.
+	* ld-ifunc/ifunc-2-local-i386.s: Likewise.
+	* ld-ifunc/ifunc-2-local-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-2-local-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-4-local-x86.d: Likewise.
+	* ld-ifunc/ifunc-4-local-x86.s: Likewise.
+	* ld-ifunc/ifunc-5-local-i386.s: Likewise.
+	* ld-ifunc/ifunc-5-local-x86-64.s: Likewise.
+	* ld-ifunc/ifunc-5a-local-i386.d: Likewise.
+	* ld-ifunc/ifunc-5a-local-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-5b-local-i386.d: Likewise.
+	* ld-ifunc/ifunc-5b-local-x86-64.d: Likewise.
 
 2009-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 

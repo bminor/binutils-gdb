@@ -1,3 +1,18 @@
+2009-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10270
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Disallow
+	dynamic IFUNC pointer in non-shared object.  Use .got.plt
+	for IFUNC definition in PIE.
+	(elf_i386_allocate_dynrelocs): Resolve IFUNC definition in
+	PIE locally.
+
+	* elf64-x86-64.c (elf64_x86_64_allocate_dynrelocs): Disallow
+	dynamic IFUNC pointer in non-shared object.  Use .got.plt
+	for IFUNC definition in PIE.
+	(elf64_x86_64_relocate_section): Resolve IFUNC definition in
+	PIE locally.
+
 2009-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Properly report
