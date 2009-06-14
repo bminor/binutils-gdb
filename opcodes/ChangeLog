@@ -1,3 +1,7 @@
+2009-06-11  Doug Evans  <dje@sebabeach.org>
+
+	* cgen.sh: Handle multiple simultaneous runs for parallel makes.
+
 2009-06-11  Anthony Green  <green@moxielogic.com>
 
 	* moxie-opc.c (moxie_form1_opc_info): Remove branch instructions.
