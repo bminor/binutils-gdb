@@ -1,3 +1,10 @@
+2009-06-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 10263
+	* objdump.c (disassemble_bytes): Set the DISASSEMBLE_DATA bit in
+	the flags field of the disassemble_info structure if the -D switch
+	is in operation.
+
 2009-06-12  Homer Xing  <homer.xing@yahoo.com>
 
 	* NEWS: Mention new feature added to gprof.

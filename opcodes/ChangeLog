@@ -1,3 +1,9 @@
+2009-06-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 10263
+	* arm-dis.c (print_insn): Ignore is_data if the user has requested
+	the disassembly of data as well as instructions.
+
 2009-06-11  Doug Evans  <dje@sebabeach.org>
 
 	* cgen.sh: Handle multiple simultaneous runs for parallel makes.

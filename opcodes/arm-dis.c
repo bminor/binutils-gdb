@@ -1,6 +1,6 @@
 /* Instruction printing code for the ARM
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   2007, Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+   2004, 2007, 2009  Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
    Modification by James G. Smith (jsmith@cygnus.co.uk)
 
@@ -4120,11 +4120,12 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 
   info->bytes_per_line = 4;
 
-  if (is_data)
+  /* PR 10263: Disassemble data if requested to do so by the user.  */
+  if (is_data && ((info->flags & DISASSEMBLE_DATA) == 0))
     {
       int i;
 
-      /* size was already set above.  */
+      /* Size was already set above.  */
       info->bytes_per_chunk = size;
       printer = print_insn_data;
 

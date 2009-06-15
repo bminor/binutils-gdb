@@ -1525,7 +1525,7 @@ disassemble_bytes (struct disassemble_info * info,
 	      info->stream = &sfile;
 	      info->bytes_per_line = 0;
 	      info->bytes_per_chunk = 0;
-	      info->flags = 0;
+	      info->flags = disassemble_all ? DISASSEMBLE_DATA : 0;
 
 	      if (info->disassembler_needs_relocs
 		  && (bfd_get_file_flags (aux->abfd) & EXEC_P) == 0
@@ -1554,7 +1554,7 @@ disassemble_bytes (struct disassemble_info * info,
 		      || (distance_to_rel > 0
 			  && distance_to_rel < (bfd_signed_vma) (previous_octets/ opb)))
 		    {
-		      info->flags = INSN_HAS_RELOC;
+		      info->flags |= INSN_HAS_RELOC;
 		      aux->reloc = **relppp;
 		    }
 		  else
