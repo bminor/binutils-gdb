@@ -1,3 +1,9 @@
+2009-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: New Russian translation.
+	* configure.in (ALL_LINGUAS): Add ru.
+	* configure: Regenerate.
+
 2009-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c: Remove duplicated comments.
