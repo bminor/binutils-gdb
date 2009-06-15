@@ -1,3 +1,8 @@
+2009-06-15  Homer Xing  <homer.xing@yahoo.com>
+
+	* corefile.c (core_create_syms_from): Use BFD_VMA_FMT when
+	scanning in an address.
+
 2009-06-12  Homer Xing  <homer.xing@yahoo.com>
 
 	* corefile.c (num_of_syms_in): New function - computes the number
