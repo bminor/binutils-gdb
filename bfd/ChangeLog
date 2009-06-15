@@ -1,3 +1,8 @@
+2009-06-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Fix a typo.
+	* elf64-x86-64.c (elf64_x86_64_allocate_dynrelocs): Likewise.
+
 2009-06-15  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: New Russian translation.

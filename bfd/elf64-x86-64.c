@@ -1994,7 +1994,7 @@ elf64_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  && h->pointer_equality_needed)
 	{
 	  info->callbacks->einfo 
-	    (_("%F%P: dynamic STT_GNU_IFUNC symbool `%s' with pointer "
+	    (_("%F%P: dynamic STT_GNU_IFUNC symbol `%s' with pointer "
 	       "equality in `%B' can not be used when making an "
 	       "executable; recompile with -fPIE and relink with -pie\n"),
 	     h->root.root.string,
