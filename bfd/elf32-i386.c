@@ -1472,16 +1472,16 @@ elf_i386_check_relocs (bfd *abfd,
 
 	      switch (r_type)
 		{
-		 default:
-		   (*_bfd_error_handler)
-		     (_("%B: relocation %s against STT_GNU_IFUNC "
-			"symbol `%s' isn't handled by %s"), abfd,
-		      elf_howto_table[r_type].name,
+		default:
+		  (*_bfd_error_handler)
+		    (_("%B: relocation %s against STT_GNU_IFUNC "
+		       "symbol `%s' isn't handled by %s"), abfd,
+		     elf_howto_table[r_type].name,
 		     (h->root.root.string
 		      ? h->root.root.string : "a local symbol"),
-		      __FUNCTION__);
-		   bfd_set_error (bfd_error_bad_value);
-		   return FALSE;
+		     __FUNCTION__);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
 
 		case R_386_32:
 		  h->non_got_ref = 1;
