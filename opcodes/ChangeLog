@@ -1,5 +1,10 @@
 2009-06-15  Nick Clifton  <nickc@redhat.com>
 
+	PR 10173
+	* cr16-dis.c (print_arg): Avoid printing the 0x prefix twice.
+
+2009-06-15  Nick Clifton  <nickc@redhat.com>
+
 	PR 10263
 	* arm-dis.c (print_insn): Ignore is_data if the user has requested
 	the disassembly of data as well as instructions.
