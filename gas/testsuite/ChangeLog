@@ -1,3 +1,8 @@
+2009-06-15  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/10186
+	* gas/arm/thumb32.d: Fix expected binary value of SEV.W instruction.
+
 2009-06-09  Jakub Jelinek  <jakub@redhat.com>
 
 	PR gas/10255

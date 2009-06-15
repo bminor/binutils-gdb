@@ -1,5 +1,9 @@
 2009-06-15  Nick Clifton  <nickc@redhat.com>
 
+	PR 10186
+	* arm-dis.c (thumb32_opcodes): Fix binary value of SEV.W
+	instruction.
+
 	PR 10173
 	* cr16-dis.c (print_arg): Avoid printing the 0x prefix twice.
 

@@ -8429,7 +8429,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(yield, bf10, f3af8001),			\
   X(wfe,   bf20, f3af8002),			\
   X(wfi,   bf30, f3af8003),			\
-  X(sev,   bf40, f3af9004), /* typo, 8004? */
+  X(sev,   bf40, f3af8004), 
 
 /* To catch errors in encoding functions, the codes are all offset by
    0xF800, putting them in one of the 32-bit prefix ranges, ergo undefined

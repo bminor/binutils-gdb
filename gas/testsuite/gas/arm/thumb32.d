@@ -359,7 +359,7 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> f3af 8001 	yield\.w
 0[0-9a-f]+ <[^>]+> f3af 8002 	wfe\.w
 0[0-9a-f]+ <[^>]+> f3af 8003 	wfi\.w
-0[0-9a-f]+ <[^>]+> f3af 9004 	sev\.w
+0[0-9a-f]+ <[^>]+> f3af 8004 	sev\.w
 0[0-9a-f]+ <[^>]+> bf90      	nop	\{9\}
 0[0-9a-f]+ <[^>]+> f3af 8081 	nop\.w	\{129\}
 0[0-9a-f]+ <[^>]+> bf08      	it	eq

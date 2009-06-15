@@ -1245,7 +1245,7 @@ static const struct opcode32 thumb32_opcodes[] =
   {ARM_EXT_V6T2, 0xf3af8001, 0xffffffff, "yield%c.w"},
   {ARM_EXT_V6T2, 0xf3af8002, 0xffffffff, "wfe%c.w"},
   {ARM_EXT_V6T2, 0xf3af8003, 0xffffffff, "wfi%c.w"},
-  {ARM_EXT_V6T2, 0xf3af9004, 0xffffffff, "sev%c.w"},
+  {ARM_EXT_V6T2, 0xf3af8004, 0xffffffff, "sev%c.w"},
   {ARM_EXT_V6T2, 0xf3af8000, 0xffffff00, "nop%c.w\t{%0-7d}"},
 
   {ARM_EXT_V6T2, 0xf3bf8f2f, 0xffffffff, "clrex%c"},
