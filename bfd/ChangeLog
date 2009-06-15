@@ -1,5 +1,9 @@
 2009-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c: Remove duplicated comments.
+
+2009-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/10270
 	* elf32-i386.c (elf_i386_allocate_dynrelocs): Disallow
 	dynamic IFUNC pointer in non-shared object.  Use .got.plt

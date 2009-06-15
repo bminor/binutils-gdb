@@ -899,9 +899,6 @@ elf_i386_link_hash_table_free (struct bfd_link_hash_table *hash)
   _bfd_generic_link_hash_table_free (hash);
 }
 
-/* Create .got, .gotplt, and .rela.got sections in DYNOBJ, and set up
-   shortcuts to them in our hash table.  */
-
 /* Create .got, .gotplt, and .rel.got sections in DYNOBJ, and set up
    shortcuts to them in our hash table.  */
 
