@@ -12895,6 +12895,16 @@ It is possible for the function you call via the @code{print} or
 the function, or if you passed it incorrect arguments).  What happens
 in that case is controlled by the @code{set unwindonsignal} command.
 
+Similarly, with a C@t{++} program it is possible for the function you
+call via the @code{print} or @code{call} command to generate an
+exception that is not handled due to the constraints of the dummy
+frame.  In this case, any exception that is raised in the frame, but has
+an out-of-frame exception handler will not be found.  GDB builds a
+dummy-frame for the inferior function call, and the unwinder cannot
+seek for exception handlers outside of this dummy-frame.  What happens
+in that case is controlled by the
+@code{set unwind-on-terminating-exception} command.
+
 @table @code
 @item set unwindonsignal
 @kindex set unwindonsignal
@@ -12911,6 +12921,23 @@ received.
 @kindex show unwindonsignal
 Show the current setting of stack unwinding in the functions called by
 @value{GDBN}.
+
+@item set unwind-on-terminating-exception
+@kindex set unwind-on-terminating-exception
+@cindex unwind stack in called functions with unhandled exceptions
+@cindex call dummy stack unwinding on unhandled exception.
+Set unwinding of the stack if a C@t{++} exception is raised, but left
+unhandled while in a function that @value{GDBN} called in the program being
+debugged.  If set to on (the default), @value{GDBN} unwinds the stack
+it created for the call and restores the context to what it was before
+the call.  If set to off, @value{GDBN} the exception is delivered to
+the default C@t{++} exception handler and the inferior terminated.
+
+@item show unwind-on-terminating-exception
+@kindex show unwind-on-terminating-exception
+Show the current setting of stack unwinding in the functions called by
+@value{GDBN}.
+
 @end table
 
 @cindex weak alias functions

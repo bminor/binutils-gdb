@@ -1,3 +1,8 @@
+2009-06-15  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.cp/gdb2495.cc: New file.
+	* gdb.cp/gdb2495.exp: New file.
+
 2009-06-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Report error on GDB crash during runto.

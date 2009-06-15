@@ -98,6 +98,30 @@ Unwinding of stack if a signal is received while in a call dummy is %s.\n"),
 		    value);
 }
 
+/* This boolean tells what gdb should do if a std::terminate call is
+   made while in a function called from gdb (call dummy).
+   As the confines of a single dummy stack prohibit out-of-frame
+   handlers from handling a raised exception, and as out-of-frame
+   handlers are common in C++, this can lead to no handler being found
+   by the unwinder, and a std::terminate call.  This is a false positive.
+   If set, gdb unwinds the stack and restores the context to what it
+   was before the call.
+
+   The default is to unwind the frame if a std::terminate call is
+   made.  */
+
+static int unwind_on_terminating_exception_p = 1;
+
+static void
+show_unwind_on_terminating_exception_p (struct ui_file *file, int from_tty,
+					struct cmd_list_element *c,
+					const char *value)
+
+{
+  fprintf_filtered (file, _("\
+Unwind stack if a C++ exception is unhandled while in a call dummy is %s.\n"),
+		    value);
+}
 
 /* Perform the standard coercions that are specified
    for arguments to be passed to C or Ada functions.
@@ -416,6 +440,8 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   struct cleanup *args_cleanup;
   struct frame_info *frame;
   struct gdbarch *gdbarch;
+  struct breakpoint *terminate_bp = NULL;
+  struct minimal_symbol *tm;
   ptid_t call_thread_ptid;
   struct gdb_exception e;
   const char *name;
@@ -716,6 +742,27 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     bpt->disposition = disp_del;
   }
 
+  /* Create a breakpoint in std::terminate.
+     If a C++ exception is raised in the dummy-frame, and the
+     exception handler is (normally, and expected to be) out-of-frame,
+     the default C++ handler will (wrongly) be called in an inferior
+     function call.  This is wrong, as an exception can be  normally
+     and legally handled out-of-frame.  The confines of the dummy frame
+     prevent the unwinder from finding the correct handler (or any
+     handler, unless it is in-frame).  The default handler calls
+     std::terminate.  This will kill the inferior.  Assert that
+     terminate should never be called in an inferior function
+     call.  Place a momentary breakpoint in the std::terminate function
+     and if triggered in the call, rewind.  */
+  if (unwind_on_terminating_exception_p)
+     {
+       struct minimal_symbol *tm = lookup_minimal_symbol  ("std::terminate()",
+							   NULL, NULL);
+       if (tm != NULL)
+	   terminate_bp = set_momentary_breakpoint_at_pc
+	     (SYMBOL_VALUE_ADDRESS (tm),  bp_breakpoint);
+     }
+
   /* Everything's ready, push all the info needed to restore the
      caller (and identify the dummy-frame) onto the dummy-frame
      stack.  */
@@ -725,6 +772,10 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
      From this point on we explicitly restore the associated state
      or discard it.  */
   discard_cleanups (inf_status_cleanup);
+
+  /* Register a clean-up for unwind_on_terminating_exception_breakpoint.  */
+  if (terminate_bp)
+    make_cleanup_delete_breakpoint (terminate_bp);
 
   /* - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP -
      If you're looking to implement asynchronous dummy-frames, then
@@ -881,6 +932,38 @@ When the function is done executing, GDB will silently stop."),
 
       if (!stop_stack_dummy)
 	{
+
+	  /* Check if unwind on terminating exception behaviour is on.  */
+	  if (unwind_on_terminating_exception_p)
+	    {
+	      /* Check that the breakpoint is our special std::terminate
+		 breakpoint.  If it is, we do not want to kill the inferior
+		 in an inferior function call. Rewind, and warn the
+		 user.  */
+
+	      if (terminate_bp != NULL
+		  && (inferior_thread()->stop_bpstat->breakpoint_at->address
+		      == terminate_bp->loc->address))
+		{
+		  /* We must get back to the frame we were before the
+		     dummy call.  */
+		  dummy_frame_pop (dummy_id);
+
+		  /* We also need to restore inferior status to that before the
+		     dummy call.  */
+		  restore_inferior_status (inf_status);
+
+		  error (_("\
+The program being debugged entered a std::terminate call, most likely\n\
+caused by an unhandled C++ exception.  GDB blocked this call in order\n\
+to prevent the program from being terminated, and has restored the\n\
+context to its original state before the call.\n\
+To change this behaviour use \"set unwind-on-terminating-exception off\".\n\
+Evaluation of the expression containing the function (%s)\n\
+will be abandoned."),
+			 name);
+		}
+	    }
 	  /* We hit a breakpoint inside the FUNCTION.
 	     Keep the dummy frame, the user may want to examine its state.
 	     Discard inferior status, we're not at the same point
@@ -989,4 +1072,19 @@ The default is to stop in the frame where the signal was received."),
 			   NULL,
 			   show_unwind_on_signal_p,
 			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("unwind-on-terminating-exception", no_class,
+			   &unwind_on_terminating_exception_p, _("\
+Set unwinding of stack if std::terminate is called while in call dummy."), _("\
+Show unwinding of stack if std::terminate() is called while in a call dummy."), _("\
+The unwind on terminating exception flag lets the user determine\n\
+what gdb should do if a std::terminate() call is made from the\n\
+default exception handler.  If set, gdb unwinds the stack and restores\n\
+the context to what it was before the call.  If unset, gdb allows the\n\
+std::terminate call to proceed.\n\
+The default is to unwind the frame."),
+			   NULL,
+			   show_unwind_on_terminating_exception_p,
+			   &setlist, &showlist);
+
 }

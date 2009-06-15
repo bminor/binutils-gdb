@@ -1,3 +1,13 @@
+2009-06-15  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* infcall.c (show_unwind_on_terminating_exception_p): New
+	function.
+	(call_function_by_hand): Create breakpoint and clean-up call for
+	std::terminate.breakpoint. Add unwind_on_terminating_exception_p
+	gate. Pop frame on breakpoint hit.
+	(_initialize_infcall): Add add_setshow_boolean_cmd for
+	unwind-on-terminating-exception.
+
 2009-06-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2read.c (dwarf2_psymtab_to_symtab): Propagate
