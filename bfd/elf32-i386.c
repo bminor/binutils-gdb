@@ -2141,11 +2141,11 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       asection *plt, *gotplt, *relplt;
 
       /* When a shared library references a STT_GNU_IFUNC symbol
-	 defined in executable. the .got.plt slot in the shared library
-	 will contain address of the .plt slot in the binary and only
-	 its .got.plt will contain the resolved function that should be
-	 called.  Pointer equality won't work correctly.  PIE should
-	 be used if pointer equality is required here.  */
+	 defined in executable, the address of the resolved function
+	 may be used.  But in non-shared executable, the address of
+	 its .plt slot may be used.  Pointer equality may not work
+	 correctly.  PIE should be used if pointer equality is
+	 required here.  */
       if (!info->shared
 	  && (h->dynindx != -1
 	      || info->export_dynamic)
