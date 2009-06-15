@@ -2337,6 +2337,7 @@ elf32-i386.lo: \
   $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h \
+  $(INCDIR)/objalloc.h \
   bfd_stdint.h \
   elf-bfd.h \
   elf-vxworks.h \
@@ -3841,6 +3842,7 @@ elf64-x86-64.lo: \
   $(INCDIR)/elf/x86-64.h \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h \
+  $(INCDIR)/objalloc.h \
   bfd_stdint.h \
   elf-bfd.h \
   elf64-target.h

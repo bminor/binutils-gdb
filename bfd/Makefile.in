@@ -1019,15 +1019,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
-	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --cygnus '; \
+	      cd $(srcdir) && $(AUTOMAKE) --cygnus  \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  Makefile
+	  $(AUTOMAKE) --cygnus  Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -2938,6 +2938,7 @@ elf32-i386.lo: \
   $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h \
+  $(INCDIR)/objalloc.h \
   bfd_stdint.h \
   elf-bfd.h \
   elf-vxworks.h \
@@ -4442,6 +4443,7 @@ elf64-x86-64.lo: \
   $(INCDIR)/elf/x86-64.h \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h \
+  $(INCDIR)/objalloc.h \
   bfd_stdint.h \
   elf-bfd.h \
   elf64-target.h
