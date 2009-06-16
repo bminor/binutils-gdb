@@ -691,8 +691,8 @@ objfile_symbol_add (void *arg)
 {
   struct objfile *obj = (struct objfile *) arg;
 
-  syms_from_objfile (obj, NULL, 0, 0, 0, 0);
-  new_symfile_objfile (obj, 0, 0);
+  syms_from_objfile (obj, NULL, 0, 0, 0);
+  new_symfile_objfile (obj, 0);
   return 1;
 }
 

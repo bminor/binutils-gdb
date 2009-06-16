@@ -556,7 +556,9 @@ static int
 safe_symbol_file_add_stub (void *argv)
 {
 #define p ((struct safe_symbol_file_add_args *) argv)
-  p->ret = symbol_file_add (p->name, p->from_tty, p->addrs, p->mainline, p->flags);
+  const int add_flags = ((p->from_tty ? SYMFILE_VERBOSE : 0)
+                         | (p->mainline ? SYMFILE_MAINLINE : 0));
+  p->ret = symbol_file_add (p->name, add_flags, p->addrs, p->flags);
   return !!p->ret;
 #undef p
 }

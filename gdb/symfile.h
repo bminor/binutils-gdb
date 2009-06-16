@@ -210,18 +210,34 @@ extern int free_named_symtabs (char *);
 
 extern void add_symtab_fns (struct sym_fns *);
 
+/* This enum encodes bit-flags passed as ADD_FLAGS parameter to
+   syms_from_objfile, symbol_file_add, etc.  */
+
+enum symfile_add_flags
+  {
+    /* Be chatty about what you are doing.  */
+    SYMFILE_VERBOSE = 1 << 1,
+
+    /* This is the main symbol file (as opposed to symbol file for dynamically
+       loaded code).  */
+    SYMFILE_MAINLINE = 1 << 2,
+
+    /* Do not call breakpoint_re_set when adding this symbol file.  */
+    SYMFILE_DEFER_BP_RESET = 1 << 3
+  };
+
 extern void syms_from_objfile (struct objfile *,
 			       struct section_addr_info *,
-			       struct section_offsets *, int, int, int);
+			       struct section_offsets *, int, int);
 
-extern void new_symfile_objfile (struct objfile *, int, int);
+extern void new_symfile_objfile (struct objfile *, int);
 
 extern struct objfile *symbol_file_add (char *, int,
-					struct section_addr_info *, int, int);
+					struct section_addr_info *, int);
 
 extern struct objfile *symbol_file_add_from_bfd (bfd *, int,
                                                  struct section_addr_info *,
-                                                 int, int);
+                                                 int);
 
 /* Create a new section_addr_info, with room for NUM_SECTIONS.  */
 

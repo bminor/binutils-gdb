@@ -740,22 +740,20 @@ default_symfile_segments (bfd *abfd)
    list any more; all we have is the section offset table.)  If
    OFFSETS is non-zero, ADDRS must be zero.
 
-   MAINLINE is nonzero if this is the main symbol file, or zero if
-   it's an extra symbol file such as dynamically loaded code.
-
-   VERBO is nonzero if the caller has printed a verbose message about
-   the symbol reading (and complaints can be more terse about it).  */
+   ADD_FLAGS encodes verbosity level, whether this is main symbol or
+   an extra symbol file such as dynamically loaded code, and wether
+   breakpoint reset should be deferred.  */
 
 void
 syms_from_objfile (struct objfile *objfile,
                    struct section_addr_info *addrs,
                    struct section_offsets *offsets,
                    int num_offsets,
-		   int mainline,
-                   int verbo)
+		   int add_flags)
 {
   struct section_addr_info *local_addr = NULL;
   struct cleanup *old_chain;
+  const int mainline = add_flags & SYMFILE_MAINLINE;
 
   gdb_assert (! (addrs && offsets));
 
@@ -875,7 +873,7 @@ syms_from_objfile (struct objfile *objfile,
      initial symbol reading for this file. */
 
   (*objfile->sf->sym_init) (objfile);
-  clear_complaints (&symfile_complaints, 1, verbo);
+  clear_complaints (&symfile_complaints, 1, add_flags & SYMFILE_VERBOSE);
 
   if (addrs)
     (*objfile->sf->sym_offsets) (objfile, addrs);
@@ -906,26 +904,26 @@ syms_from_objfile (struct objfile *objfile,
    objfile. */
 
 void
-new_symfile_objfile (struct objfile *objfile, int mainline, int verbo)
+new_symfile_objfile (struct objfile *objfile, int add_flags)
 {
 
   /* If this is the main symbol file we have to clean up all users of the
      old main symbol file. Otherwise it is sufficient to fixup all the
      breakpoints that may have been redefined by this symbol file.  */
-  if (mainline)
+  if (add_flags & SYMFILE_MAINLINE)
     {
       /* OK, make it the "real" symbol file.  */
       symfile_objfile = objfile;
 
       clear_symtab_users ();
     }
-  else
+  else if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
     {
       breakpoint_re_set_objfile (objfile);
     }
 
   /* We're done reading the symbol file; finish off complaints.  */
-  clear_complaints (&symfile_complaints, 0, verbo);
+  clear_complaints (&symfile_complaints, 0, add_flags & SYMFILE_VERBOSE);
 }
 
 /* Process a symbol file, as either the main file or as a dynamically
@@ -934,23 +932,23 @@ new_symfile_objfile (struct objfile *objfile, int mainline, int verbo)
    ABFD is a BFD already open on the file, as from symfile_bfd_open.
    This BFD will be closed on error, and is always consumed by this function.
 
-   FROM_TTY says how verbose to be.
-
-   MAINLINE specifies whether this is the main symbol file, or whether
-   it's an extra symbol file such as dynamically loaded code.
+   ADD_FLAGS encodes verbosity, whether this is main symbol file or
+   extra, such as dynamically loaded code, and what to do with breakpoins.
 
    ADDRS, OFFSETS, and NUM_OFFSETS are as described for
-   syms_from_objfile, above.  ADDRS is ignored when MAINLINE is
-   non-zero.
+   syms_from_objfile, above.
+   ADDRS is ignored when SYMFILE_MAINLINE bit is set in ADD_FLAGS.
 
    Upon success, returns a pointer to the objfile that was added.
    Upon failure, jumps back to command level (never returns). */
+
 static struct objfile *
-symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
+symbol_file_add_with_addrs_or_offsets (bfd *abfd,
+                                       int add_flags,
                                        struct section_addr_info *addrs,
                                        struct section_offsets *offsets,
                                        int num_offsets,
-                                       int mainline, int flags)
+                                       int flags)
 {
   struct objfile *objfile;
   struct partial_symtab *psymtab;
@@ -958,6 +956,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
   struct section_addr_info *orig_addrs = NULL;
   struct cleanup *my_cleanups;
   const char *name = bfd_get_filename (abfd);
+  const int from_tty = add_flags & SYMFILE_VERBOSE;
 
   my_cleanups = make_cleanup_bfd_close (abfd);
 
@@ -965,7 +964,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
      interactively wiping out any existing symbols.  */
 
   if ((have_full_symbols () || have_partial_symbols ())
-      && mainline
+      && (add_flags & SYMFILE_MAINLINE)
       && from_tty
       && !query (_("Load new symbol table from \"%s\"? "), name))
     error (_("Not confirmed."));
@@ -997,7 +996,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
 	}
     }
   syms_from_objfile (objfile, addrs, offsets, num_offsets,
-		     mainline, from_tty);
+		     add_flags);
 
   /* We now have at least a partial symbol table.  Check to see if the
      user requested that all symbols be read on initial access via either
@@ -1031,12 +1030,12 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
       if (addrs != NULL)
 	{
 	  objfile->separate_debug_objfile
-            = symbol_file_add (debugfile, from_tty, orig_addrs, 0, flags);
+            = symbol_file_add (debugfile, add_flags, orig_addrs, flags);
 	}
       else
 	{
 	  objfile->separate_debug_objfile
-            = symbol_file_add (debugfile, from_tty, NULL, 0, flags);
+            = symbol_file_add (debugfile, add_flags, NULL, flags);
 	}
       objfile->separate_debug_objfile->separate_debug_objfile_backlink
         = objfile;
@@ -1081,7 +1080,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
   if (objfile->sf == NULL)
     return objfile;	/* No symbols. */
 
-  new_symfile_objfile (objfile, mainline, from_tty);
+  new_symfile_objfile (objfile, add_flags);
 
   observer_notify_new_objfile (objfile);
 
@@ -1096,13 +1095,12 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
    See symbol_file_add_with_addrs_or_offsets's comments for
    details.  */
 struct objfile *
-symbol_file_add_from_bfd (bfd *abfd, int from_tty,
+symbol_file_add_from_bfd (bfd *abfd, int add_flags,
                           struct section_addr_info *addrs,
-                          int mainline, int flags)
+                          int flags)
 {
-  return symbol_file_add_with_addrs_or_offsets (abfd,
-						from_tty, addrs, 0, 0,
-                                                mainline, flags);
+  return symbol_file_add_with_addrs_or_offsets (abfd, add_flags, addrs, 0, 0,
+                                                flags);
 }
 
 
@@ -1110,11 +1108,11 @@ symbol_file_add_from_bfd (bfd *abfd, int from_tty,
    loaded file.  See symbol_file_add_with_addrs_or_offsets's comments
    for details.  */
 struct objfile *
-symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
-		 int mainline, int flags)
+symbol_file_add (char *name, int add_flags, struct section_addr_info *addrs,
+		 int flags)
 {
-  return symbol_file_add_from_bfd (symfile_bfd_open (name), from_tty,
-                                   addrs, mainline, flags);
+  return symbol_file_add_from_bfd (symfile_bfd_open (name), add_flags, addrs,
+                                   flags);
 }
 
 
@@ -1135,7 +1133,8 @@ symbol_file_add_main (char *args, int from_tty)
 static void
 symbol_file_add_main_1 (char *args, int from_tty, int flags)
 {
-  symbol_file_add (args, from_tty, NULL, 1, flags);
+  const int add_flags = SYMFILE_MAINLINE | (from_tty ? SYMFILE_VERBOSE : 0);
+  symbol_file_add (args, add_flags, NULL, flags);
 
   /* Getting new symbols may change our opinion about
      what is frameless.  */
@@ -2224,7 +2223,8 @@ add_symbol_file_command (char *args, int from_tty)
   if (from_tty && (!query ("%s", "")))
     error (_("Not confirmed."));
 
-  symbol_file_add (filename, from_tty, section_addrs, 0, flags);
+  symbol_file_add (filename, from_tty ? SYMFILE_VERBOSE : 0,
+                   section_addrs, flags);
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */
@@ -2506,10 +2506,9 @@ reread_separate_symbols (struct objfile *objfile)
       objfile->separate_debug_objfile
         = (symbol_file_add_with_addrs_or_offsets
            (symfile_bfd_open (debug_file),
-            info_verbose, /* from_tty: Don't override the default. */
+            info_verbose ? SYMFILE_VERBOSE : 0,
             0, /* No addr table.  */
             objfile->section_offsets, objfile->num_sections,
-            0, /* Not mainline.  See comments about this above.  */
             objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
                               | OBJF_USERLOADED)));
       objfile->separate_debug_objfile->separate_debug_objfile_backlink

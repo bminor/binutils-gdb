@@ -1,3 +1,21 @@
+2009-06-16  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* solib.c (symbol_add_stub): New FLAGS parameter.
+	(solib_read_symbols): FROM_TTY -> FLAGS, call symbol_add_stub
+	directly.
+	(solib_add): Defer breakpoint_re_set until after all solibs.
+	* bsd-uthread.c (bsd_uthread_solib_loaded): Adjust.
+	* rs6000-nat.c (objfile_symbol_add): Adjust.
+	* symfile.c (syms_from_objfile): Merge parameters into ADD_FLAGS.
+	(new_symfile_objfile): Likewise.
+	(symbol_file_add_with_addrs_or_offsets): Likewise.
+	(symbol_file_add_from_bfd): Likewise.
+	(symbol_file_add): Likewise.
+	* symfile.h (enum symfile_add_flags): New. Adjust prototypes.
+	* symfile-mem.c (symbol_file_add_from_memory): Adjust.
+	* windows-nat.c (safe_symbol_file_add_stub): Adjust.
+	* machoread.c (macho_oso_symfile, macho_symfile_read): Adjust.
+	
 2009-06-16  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (collect_methods): Delete.

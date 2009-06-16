@@ -448,39 +448,37 @@ master_so_list (void)
   return so_list_head;
 }
 
-
-/* A small stub to get us past the arg-passing pinhole of catch_errors.  */
-
-static int
-symbol_add_stub (void *arg)
+static void
+symbol_add_stub (struct so_list *so, int flags)
 {
-  struct so_list *so = (struct so_list *) arg;  /* catch_errs bogon */
   struct section_addr_info *sap;
 
   /* Have we already loaded this shared object?  */
   ALL_OBJFILES (so->objfile)
     {
       if (strcmp (so->objfile->name, so->so_name) == 0)
-	return 1;
+	return;
     }
 
   sap = build_section_addr_info_from_section_table (so->sections,
                                                     so->sections_end);
 
-  so->objfile = symbol_file_add_from_bfd (so->abfd, so->from_tty,
-					  sap, 0, OBJF_SHARED | OBJF_KEEPBFD);
+  so->objfile = symbol_file_add_from_bfd (so->abfd, flags,
+					  sap, OBJF_SHARED | OBJF_KEEPBFD);
   free_section_addr_info (sap);
 
-  return (1);
+  return;
 }
 
-/* Read in symbols for shared object SO.  If FROM_TTY is non-zero, be
-   chatty about it.  Return non-zero if any symbols were actually
+/* Read in symbols for shared object SO.  If SYMFILE_VERBOSE is set in FLAGS,
+   be chatty about it.  Return non-zero if any symbols were actually
    loaded.  */
 
 int
-solib_read_symbols (struct so_list *so, int from_tty)
+solib_read_symbols (struct so_list *so, int flags)
 {
+  const int from_tty = flags & SYMFILE_VERBOSE;
+
   if (so->symbols_loaded)
     {
       if (from_tty)
@@ -493,15 +491,21 @@ solib_read_symbols (struct so_list *so, int from_tty)
     }
   else
     {
-      if (catch_errors (symbol_add_stub, so,
-			"Error while reading shared library symbols:\n",
-			RETURN_MASK_ALL))
-	{
-	  if (from_tty && print_symbol_loading)
-	    printf_unfiltered (_("Loaded symbols for %s\n"), so->so_name);
-	  so->symbols_loaded = 1;
-	  return 1;
-	}
+      volatile struct gdb_exception exception;
+      TRY_CATCH (exception, RETURN_MASK_ALL)
+        {
+          symbol_add_stub (so, flags);
+        }
+      if (exception.reason != 0)
+        {
+          exception_fprintf (gdb_stderr, exception,
+                             "Error while reading shared library symbols:\n");
+          return 0;
+        }
+      if (from_tty && print_symbol_loading)
+        printf_unfiltered (_("Loaded symbols for %s\n"), so->so_name);
+      so->symbols_loaded = 1;
+      return 1;
     }
 
   return 0;
@@ -736,6 +740,8 @@ solib_add (char *pattern, int from_tty, struct target_ops *target, int readsyms)
   {
     int any_matches = 0;
     int loaded_any_symbols = 0;
+    const int flags =
+        SYMFILE_DEFER_BP_RESET | (from_tty ? SYMFILE_VERBOSE : 0);
 
     for (gdb = so_list_head; gdb; gdb = gdb->next)
       if (! pattern || re_exec (gdb->so_name))
@@ -749,9 +755,12 @@ solib_add (char *pattern, int from_tty, struct target_ops *target, int readsyms)
             (readsyms || libpthread_solib_p (gdb));
 
 	  any_matches = 1;
-	  if (add_this_solib && solib_read_symbols (gdb, from_tty))
+	  if (add_this_solib && solib_read_symbols (gdb, flags))
 	    loaded_any_symbols = 1;
 	}
+
+    if (loaded_any_symbols)
+      breakpoint_re_set ();
 
     if (from_tty && pattern && ! any_matches)
       printf_unfiltered

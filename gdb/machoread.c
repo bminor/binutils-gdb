@@ -406,7 +406,7 @@ macho_oso_symfile (struct objfile *main_objfile)
 	      bfd_close (member_bfd);
 	    }
 	    else
-	      symbol_file_add_from_bfd (member_bfd, 0, addrs, 0, 0);
+	      symbol_file_add_from_bfd (member_bfd, 0, addrs, 0);
 	}
       else
 	{
@@ -429,7 +429,7 @@ macho_oso_symfile (struct objfile *main_objfile)
 	      continue;
 	    }
   
-	  symbol_file_add_from_bfd (abfd, 0, addrs, 0, 0);
+	  symbol_file_add_from_bfd (abfd, 0, addrs, 0);
 	}
       xfree (oso->symbols);
       xfree (oso->offsets);
@@ -592,7 +592,7 @@ macho_symfile_read (struct objfile *objfile, int mainline)
 	  oso_vector = NULL;
 
 	  /* Now recurse: read dwarf from dsym.  */
-	  symbol_file_add_from_bfd (dsym_bfd, 0, NULL, 0, 0);
+	  symbol_file_add_from_bfd (dsym_bfd, 0, NULL, 0);
       
 	  /* Don't try to read dwarf2 from main file or shared libraries.  */
 	  return;

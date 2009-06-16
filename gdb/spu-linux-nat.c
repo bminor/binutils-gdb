@@ -372,7 +372,8 @@ spu_symbol_file_add_from_memory (int inferior_fd)
   /* Open BFD representing SPE executable and read its symbols.  */
   nbfd = spu_bfd_open (addr);
   if (nbfd)
-    symbol_file_add_from_bfd (nbfd, 1, NULL, 1, 0);
+    symbol_file_add_from_bfd (nbfd, SYMFILE_VERBOSE | SYMFILE_MAINLINE,
+                              NULL, 0);
 }
 
 
@@ -600,4 +601,3 @@ _initialize_spu_nat (void)
   /* Register SPU target.  */
   add_target (t);
 }
-
