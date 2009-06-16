@@ -1,3 +1,18 @@
+2009-06-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_link_hash_table): Remove got_sec,
+	rel_got_sec and plt_sec.
+	(elfNN_ia64_relax_section): Updated.
+	(elfNN_ia64_create_dynamic_sections): Likewise.
+	(get_got): Likewise.
+	(allocate_dynrel_entries): Likewise.
+	(elfNN_ia64_size_dynamic_sections): Likewise.
+	(set_got_entry): Likewise.
+	(elfNN_ia64_choose_gp): Likewise.
+	(elfNN_ia64_relocate_section): Likewise.
+	(elfNN_ia64_finish_dynamic_symbol): Likewise.
+	(elfNN_ia64_finish_dynamic_sections): Likewise.
+
 2009-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf32-spu.c (needs_ovl_stub): Respect .brinfo lrlive bits
