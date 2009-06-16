@@ -1,5 +1,21 @@
 2009-06-16  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
+	* dwarf2read.c (dwarf_info_section, dwarf_abbrev_section)
+	(dwarf_line_section, dwarf_pubnames_section, dwarf_aranges_section)
+	(dwarf_loc_section, dwarf_macinfo_section, dwarf_str_section)
+	(dwarf_ranges_section, dwarf_frame_section)
+	(dwarf_eh_frame_section): Removed.
+	(dwarf2_resize_section): Likewise.
+	(dwarf2_read_section): Now static, use bfd_mmap() if possible.
+	(dwarf2_get_section_info): New function.
+	(munmap_section_buffer): Likewise.
+	(dwarf2_per_objfile_cleanup): Likewise.
+	(section_is_p): Signature change.
+	* dwarf2-frame.c (dwarf2_build_frame_info): Use
+	dwarf2_get_section_info instead of dwarf2_read_section.
+	
+2009-06-16  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
 	* solib.c (symbol_add_stub): New FLAGS parameter.
 	(solib_read_symbols): FROM_TTY -> FLAGS, call symbol_add_stub
 	directly.

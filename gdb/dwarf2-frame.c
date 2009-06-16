@@ -1896,15 +1896,9 @@ decode_frame_entry (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 }
 
 
-/* FIXME: kettenis/20030504: This still needs to be integrated with
-   dwarf2read.c in a better way.  */
-
 /* Imported from dwarf2read.c.  */
-extern asection *dwarf_frame_section;
-extern asection *dwarf_eh_frame_section;
-
-/* Imported from dwarf2read.c.  */
-extern gdb_byte *dwarf2_read_section (struct objfile *objfile, asection *sectp);
+extern void dwarf2_get_section_info (struct objfile *, const char *, asection **,
+                                     gdb_byte **, bfd_size_type *);
 
 void
 dwarf2_build_frame_info (struct objfile *objfile)
@@ -1922,17 +1916,15 @@ dwarf2_build_frame_info (struct objfile *objfile)
 
   /* First add the information from the .eh_frame section.  That way,
      the FDEs from that section are searched last.  */
-  if (dwarf_eh_frame_section)
+  dwarf2_get_section_info (objfile, ".eh_frame",
+                           &unit->dwarf_frame_section,
+                           &unit->dwarf_frame_buffer,
+                           &unit->dwarf_frame_size);
+  if (unit->dwarf_frame_size)
     {
       asection *got, *txt;
 
       unit->cie = NULL;
-      unit->dwarf_frame_buffer = dwarf2_read_section (objfile,
-						      dwarf_eh_frame_section);
-
-      unit->dwarf_frame_size = bfd_get_section_size (dwarf_eh_frame_section);
-      unit->dwarf_frame_section = dwarf_eh_frame_section;
-
       /* FIXME: kettenis/20030602: This is the DW_EH_PE_datarel base
 	 that is used for the i386/amd64 target, which currently is
 	 the only target in GCC that supports/uses the
@@ -1952,13 +1944,13 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	frame_ptr = decode_frame_entry (unit, frame_ptr, 1);
     }
 
-  if (dwarf_frame_section)
+  dwarf2_get_section_info (objfile, ".debug_frame",
+                           &unit->dwarf_frame_section,
+                           &unit->dwarf_frame_buffer,
+                           &unit->dwarf_frame_size);
+  if (unit->dwarf_frame_size)
     {
       unit->cie = NULL;
-      unit->dwarf_frame_buffer = dwarf2_read_section (objfile,
-						      dwarf_frame_section);
-      unit->dwarf_frame_size = bfd_get_section_size (dwarf_frame_section);
-      unit->dwarf_frame_section = dwarf_frame_section;
 
       frame_ptr = unit->dwarf_frame_buffer;
       while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
