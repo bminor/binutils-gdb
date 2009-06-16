@@ -2075,6 +2075,22 @@ elf_vax_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
   return TRUE;
 }
 
+static enum elf_reloc_type_class
+elf_vax_reloc_type_class (const Elf_Internal_Rela *rela)
+{
+  switch ((int) ELF32_R_TYPE (rela->r_info))
+    {
+    case R_VAX_RELATIVE:
+      return reloc_class_relative;
+    case R_VAX_JMP_SLOT:
+      return reloc_class_plt;
+    case R_VAX_COPY:
+      return reloc_class_copy;
+    default:
+      return reloc_class_normal;
+    }
+}
+
 #define TARGET_LITTLE_SYM		bfd_elf32_vax_vec
 #define TARGET_LITTLE_NAME		"elf32-vax"
 #define ELF_MACHINE_CODE		EM_VAX
@@ -2097,6 +2113,7 @@ elf_vax_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 					elf_vax_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
 					elf_vax_finish_dynamic_sections
+#define elf_backend_reloc_type_class	elf_vax_reloc_type_class
 #define elf_backend_gc_mark_hook	elf_vax_gc_mark_hook
 #define elf_backend_gc_sweep_hook	elf_vax_gc_sweep_hook
 #define bfd_elf32_bfd_merge_private_bfd_data \

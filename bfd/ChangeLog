@@ -1,5 +1,10 @@
 2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elf32-vax.c (elf_vax_reloc_type_class): New function.
+	(elf_backend_reloc_type_class): Define.
+
+2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf32-vax.c (elf_vax_relocate_section): For symbol references
 	from an executable to a shared library treat R_VAX_PC32
 	relocations as R_VAX_PLT32 ones.
