@@ -1,6 +1,7 @@
 /* cg_print.c -  Print routines for displaying call graphs.
 
-   Copyright 2000, 2001, 2002, 2004, 2007 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2004, 2007, 2009
+   Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -1212,12 +1213,22 @@ order_and_dump_functions_by_arcs (the_arcs, arc_count, all,
       }
 }
 
+/* Compare two function_map structs based on file name.
+   We want to sort in ascending order.  */
+
+static int
+cmp_symbol_map (const void * l, const void * r)
+{
+  return strcmp (((struct function_map *) l)->file_name, 
+	         ((struct function_map *) r)->file_name);
+}
+
 /* Print a suggested .o ordering for files on a link line based
    on profiling information.  This uses the function placement
    code for the bulk of its work.  */
 
 void
-cg_print_file_ordering ()
+cg_print_file_ordering (void)
 {
   unsigned long scratch_arc_count, index;
   Arc **scratch_arcs;
@@ -1243,6 +1254,8 @@ cg_print_file_ordering ()
 	  && ! symtab.base[index].has_been_placed)
 	printf ("%s\n", symtab.base[index].name);
     }
+
+  qsort (symbol_map, symbol_map_count, sizeof (struct function_map), cmp_symbol_map);
 
   /* Now output any .o's that didn't have any text symbols.  */
   last = NULL;

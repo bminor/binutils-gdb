@@ -24,8 +24,9 @@
 
 struct function_map
 {
-  char *function_name;
-  char *file_name;
+  char *         function_name;
+  char *         file_name;
+  unsigned int   is_first:1;	/* Is this the first symbol in an object file?  */
 };
 
 extern struct function_map * symbol_map;
@@ -33,9 +34,9 @@ extern unsigned int symbol_map_count;
 
 extern bfd * core_bfd;		  /* BFD for core-file.  */
 extern asection * core_text_sect; /* Core text section.  */
-extern void * core_text_space;	/* Text space of a.out in core.  */
-extern int offset_to_code;	/* Offset (in bytes) of code from entry
-				   address of routine.  */
+extern void * core_text_space;    /* Text space of a.out in core.  */
+extern int offset_to_code;	  /* Offset (in bytes) of code from entry
+				     address of routine.  */
 
 extern void core_init                  (const char *);
 extern void core_get_text_space        (bfd *);

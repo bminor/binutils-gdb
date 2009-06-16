@@ -61,12 +61,23 @@ parse_error (const char *filename)
   done (1);
 }
 
+/* Compare two function_map structs based on function name.
+   We want to sort in ascending order.  */
+
+static int
+cmp_symbol_map (const void * l, const void * r)
+{
+  return strcmp (((struct function_map *) l)->function_name, 
+		 ((struct function_map *) r)->function_name);
+}
+
 static void
 read_function_mappings (const char *filename)
 {
-  FILE *file = fopen (filename, "r");
+  FILE * file = fopen (filename, "r");
   char dummy[1024];
   int count = 0;
+  unsigned int i;
 
   if (!file)
     {
@@ -144,11 +155,16 @@ read_function_mappings (const char *filename)
 
   /* Record the size of the map table for future reference.  */
   symbol_map_count = count;
+
+  for (i = 0; i < symbol_map_count; ++i)
+    if (i == 0 || strcmp (symbol_map[i].file_name, symbol_map[i - 1].file_name))
+      symbol_map[i].is_first = 1;
+
+  qsort (symbol_map, symbol_map_count, sizeof (struct function_map), cmp_symbol_map);
 }
 
-
 void
-core_init (const char *aout_name)
+core_init (const char * aout_name)
 {
   int core_sym_bytes;
   asymbol *synthsyms;
@@ -532,17 +548,23 @@ core_create_syms_from (const char * sym_table_file)
   free (name);
 }
 
+static int
+search_mapped_symbol (const void * l, const void * r)
+{
+    return strcmp ((const char *) l, ((const struct function_map *) r)->function_name);
+}
+
 /* Read in symbol table from core.
    One symbol per function is entered.  */
 
 void
-core_create_function_syms ()
+core_create_function_syms (void)
 {
-  bfd_vma min_vma = ~(bfd_vma) 0;
+  bfd_vma min_vma = ~ (bfd_vma) 0;
   bfd_vma max_vma = 0;
   int class;
-  long i, found, skip;
-  unsigned int j;
+  long i;
+  struct function_map * found;
 
   /* Pass 1 - determine upper bound on number of function names.  */
   symtab.len = 0;
@@ -552,23 +574,12 @@ core_create_function_syms ()
       if (!core_sym_class (core_syms[i]))
 	continue;
 
-      /* This should be replaced with a binary search or hashed
-	 search.  Gross.
-
-	 Don't create a symtab entry for a function that has
+      /* Don't create a symtab entry for a function that has
 	 a mapping to a file, unless it's the first function
 	 in the file.  */
-      skip = 0;
-      for (j = 0; j < symbol_map_count; j++)
-	if (!strcmp (core_syms[i]->name, symbol_map[j].function_name))
-	  {
-	    if (j > 0 && ! strcmp (symbol_map [j].file_name,
-				   symbol_map [j - 1].file_name))
-	      skip = 1;
-	    break;
-	  }
-
-      if (!skip)
+      found = bsearch (core_syms[i]->name, symbol_map, symbol_map_count,
+		       sizeof (struct function_map), search_mapped_symbol);
+      if (found == NULL || found->is_first)
 	++symtab.len;
     }
 
@@ -598,23 +609,9 @@ core_create_function_syms ()
 	  continue;
 	}
 
-      /* This should be replaced with a binary search or hashed
-	 search.  Gross.   */
-      skip = 0;
-      found = 0;
-
-      for (j = 0; j < symbol_map_count; j++)
-	if (!strcmp (core_syms[i]->name, symbol_map[j].function_name))
-	  {
-	    if (j > 0 && ! strcmp (symbol_map [j].file_name,
-				   symbol_map [j - 1].file_name))
-	      skip = 1;
-	    else
-	      found = j;
-	    break;
-	  }
-
-      if (skip)
+      found = bsearch (core_syms[i]->name, symbol_map, symbol_map_count,
+		       sizeof (struct function_map), search_mapped_symbol);
+      if (found && ! found->is_first)
 	continue;
 
       sym_init (symtab.limit);
@@ -625,10 +622,9 @@ core_create_function_syms ()
       if (sym_sec)
 	symtab.limit->addr += bfd_get_section_vma (sym_sec->owner, sym_sec);
 
-      if (symbol_map_count
-	  && !strcmp (core_syms[i]->name, symbol_map[found].function_name))
+      if (found)
 	{
-	  symtab.limit->name = symbol_map[found].file_name;
+	  symtab.limit->name = found->file_name;
 	  symtab.limit->mapped = 1;
 	}
       else
@@ -639,10 +635,11 @@ core_create_function_syms ()
 
       /* Lookup filename and line number, if we can.  */
       {
-	const char *filename, *func_name;
+	const char * filename;
+	const char * func_name;
 
-	if (get_src_info (symtab.limit->addr, &filename, &func_name,
-			  &symtab.limit->line_num))
+	if (get_src_info (symtab.limit->addr, & filename, & func_name,
+			  & symtab.limit->line_num))
 	  {
 	    symtab.limit->file = source_file_lookup_path (filename);
 
@@ -702,7 +699,7 @@ core_create_function_syms ()
    One symbol per line of source code is entered.  */
 
 void
-core_create_line_syms ()
+core_create_line_syms (void)
 {
   char *prev_name, *prev_filename;
   unsigned int prev_name_len, prev_filename_len;
