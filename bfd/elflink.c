@@ -101,41 +101,39 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   asection *s;
   struct elf_link_hash_entry *h;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  int ptralign;
+  struct elf_link_hash_table *htab = elf_hash_table (info);
 
   /* This function may be called more than once.  */
   s = bfd_get_section_by_name (abfd, ".got");
   if (s != NULL && (s->flags & SEC_LINKER_CREATED) != 0)
     return TRUE;
 
-  switch (bed->s->arch_size)
-    {
-    case 32:
-      ptralign = 2;
-      break;
-
-    case 64:
-      ptralign = 3;
-      break;
-
-    default:
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
-
   flags = bed->dynamic_sec_flags;
 
   s = bfd_make_section_with_flags (abfd, ".got", flags);
   if (s == NULL
-      || !bfd_set_section_alignment (abfd, s, ptralign))
+      || !bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
+  htab->sgot = s;
+
+  s = bfd_make_section_with_flags (abfd,
+				   (bed->rela_plts_and_copies_p
+				    ? ".rela.got" : ".rel.got"),
+				   (bed->dynamic_sec_flags
+				    | SEC_READONLY));
+  if (s == NULL
+      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+    return FALSE;
+  htab->srelgot = s;
 
   if (bed->want_got_plt)
     {
       s = bfd_make_section_with_flags (abfd, ".got.plt", flags);
       if (s == NULL
-	  || !bfd_set_section_alignment (abfd, s, ptralign))
+	  || !bfd_set_section_alignment (abfd, s,
+					 bed->s->log_file_align))
 	return FALSE;
+      htab->sgotplt = s;
     }
 
   if (bed->want_got_sym)
@@ -144,7 +142,8 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 	 (or .got.plt) section.  We don't do this in the linker script
 	 because we don't want to define the symbol if we are not creating
 	 a global offset table.  */
-      h = _bfd_elf_define_linkage_sym (abfd, info, s, "_GLOBAL_OFFSET_TABLE_");
+      h = _bfd_elf_define_linkage_sym (abfd, info, s,
+				       "_GLOBAL_OFFSET_TABLE_");
       elf_hash_table (info)->hgot = h;
       if (h == NULL)
 	return FALSE;
@@ -303,6 +302,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   struct elf_link_hash_entry *h;
   asection *s;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  struct elf_link_hash_table *htab = elf_hash_table (info);
 
   /* We need to create .plt, .rel[a].plt, .got, .got.plt, .dynbss, and
      .rel[a].bss sections.  */
@@ -323,6 +323,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
     return FALSE;
+  htab->splt = s;
 
   /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
      .plt section.  */
@@ -342,6 +343,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
+  htab->srelplt = s;
 
   if (! _bfd_elf_create_got_section (abfd, info))
     return FALSE;
@@ -12490,96 +12492,4 @@ _bfd_elf_make_dynamic_reloc_section (asection *         sec,
     }
 
   return reloc_sec;
-}
-
-/* Create sections needed by STT_GNU_IFUNC symbol.  */
-
-bfd_boolean
-_bfd_elf_create_ifunc_sections (bfd *abfd, struct bfd_link_info *info)
-{
-  flagword flags, pltflags;
-  int ptralign;
-  asection *s;
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
-  flags = bed->dynamic_sec_flags;
-  pltflags = flags;
-  if (bed->plt_not_loaded)
-    /* We do not clear SEC_ALLOC here because we still want the OS to
-       allocate space for the section; it's just that there's nothing
-       to read in from the object file.  */
-    pltflags &= ~ (SEC_CODE | SEC_LOAD | SEC_HAS_CONTENTS);
-  else
-    pltflags |= SEC_ALLOC | SEC_CODE | SEC_LOAD;
-  if (bed->plt_readonly)
-    pltflags |= SEC_READONLY;
-
-  if (info->shared)
-    {
-      /* We need to create .rel[a].ifunc for shared objects.  */
-      const char *rel_sec = (bed->rela_plts_and_copies_p
-			     ? ".rela.ifunc" : ".rel.ifunc");
-
-      /* This function should be called only once.  */
-      s = bfd_get_section_by_name (abfd, rel_sec);
-      if (s != NULL)
-	abort ();
-
-      s = bfd_make_section_with_flags (abfd, rel_sec,
-				       flags | SEC_READONLY);
-      if (s == NULL
-	  || ! bfd_set_section_alignment (abfd, s,
-					  bed->s->log_file_align))
-	return FALSE;
-    }
-  else
-    {
-      /* This function should be called only once.  */
-      s = bfd_get_section_by_name (abfd, ".iplt");
-      if (s != NULL)
-	abort ();
-
-      /* We need to create .iplt, .rel[a].iplt, .igot and .igot.plt
-	 for static executables.   */
-      s = bfd_make_section_with_flags (abfd, ".iplt", pltflags);
-      if (s == NULL
-	  || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
-	return FALSE;
-
-      s = bfd_make_section_with_flags (abfd,
-				       (bed->rela_plts_and_copies_p
-					? ".rela.iplt" : ".rel.iplt"),
-				       flags | SEC_READONLY);
-      if (s == NULL
-	  || ! bfd_set_section_alignment (abfd, s,
-					  bed->s->log_file_align))
-	return FALSE;
-
-      switch (bed->s->arch_size)
-	{ 
-	case 32:
-	  ptralign = 2;
-	  break;
-
-	case 64:
-	  ptralign = 3;
-	  break;
-
-	default:
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
-
-      /* We don't need the .igot section if we have the .igot.plt
-	 section.  */
-      if (bed->want_got_plt)
-	s = bfd_make_section_with_flags (abfd, ".igot.plt", flags);
-      else
-	s = bfd_make_section_with_flags (abfd, ".igot", flags);
-      if (s == NULL
-	  || !bfd_set_section_alignment (abfd, s, ptralign))
-	return FALSE;
-    }
-
-  return TRUE;
 }

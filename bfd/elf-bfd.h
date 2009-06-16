@@ -457,6 +457,17 @@ struct elf_link_hash_table
 
   /* A linked list of BFD's loaded in the link.  */
   struct elf_link_loaded_list *loaded;
+
+  /* Short-cuts to get to dynamic linker sections.  */
+  asection *sgot;
+  asection *sgotplt;
+  asection *srelgot;
+  asection *splt;
+  asection *srelplt;
+  asection *igotplt;
+  asection *iplt;
+  asection *irelplt;
+  asection *irelifunc;
 };
 
 /* Look up an entry in an ELF linker hash table.  */

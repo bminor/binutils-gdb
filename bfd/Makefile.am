@@ -250,6 +250,7 @@ BFD32_BACKENDS = \
 	ecofflink.lo \
 	elf-attrs.lo \
 	elf-eh-frame.lo \
+	elf-ifunc.lo \
 	elf-m10200.lo \
 	elf-m10300.lo \
 	elf-strtab.lo \
@@ -432,6 +433,7 @@ BFD32_BACKENDS_CFILES = \
 	ecofflink.c \
 	elf-attrs.c \
 	elf-eh-frame.c \
+	elf-ifunc.c \
 	elf-m10200.c \
 	elf-m10300.c \
 	elf-strtab.c \
@@ -2045,6 +2047,18 @@ elf-eh-frame.lo: \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h \
+  elf-bfd.h
+elf-ifunc.lo: \
+  elf-ifunc.c \
+  $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/internal.h \
+  $(INCDIR)/filenames.h \
+  $(INCDIR)/hashtab.h \
+  $(INCDIR)/libiberty.h \
+  $(INCDIR)/objalloc.h \
+  $(INCDIR)/safe-ctype.h \
   elf-bfd.h
 elf-m10200.lo: \
   elf-m10200.c \

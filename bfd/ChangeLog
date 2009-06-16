@@ -1,8 +1,55 @@
+2009-06-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.in (elf): Add elf-ifunc.lo.
+
+	* configure: Regenerated.
+	* Makefile.in: Likewise.
+
+	* elf-bfd.h (elf_link_hash_table): Add sgot, sgotplt,
+	srelgot, splt, srelplt, igotplt, iplt, irelplt and irelifunc.
+
+	* elf32-i386.c (elf_i386_link_hash_table): Remove sgot,
+	sgotplt, srelgot, splt, srelplt, igotplt, iplt, irelplt and
+	irelifunc.
+	(elf_i386_link_hash_table_create): Likewise.
+	(elf_i386_create_dynamic_sections): Likewise.
+	(elf_i386_check_relocs): Likewise.
+	(elf_i386_allocate_dynrelocs): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(elf_i386_finish_dynamic_sections): Likewise.
+	(elf_i386_create_got_section): Removed.
+
+	* elf64-x86-64.c (elf64_x86_64_link_hash_table): Remove sgot,
+	sgotplt, srelgot, splt, srelplt, igotplt, iplt, irelplt and
+	irelifunc.
+	(elf64_x86_64_compute_jump_table_size): Updated.
+	(elf64_x86_64_link_hash_table_create): Likewise.
+	(elf64_x86_64_create_dynamic_sections): Likewise.
+	(elf64_x86_64_check_relocs): Likewise.
+	(elf64_x86_64_allocate_dynrelocs): Likewise.
+	(elf64_x86_64_size_dynamic_sections): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+	(elf64_x86_64_finish_dynamic_symbol): Likewise.
+	(elf64_x86_64_finish_dynamic_sections): Likewise.
+	(elf64_x86_64_create_got_section): Removed.
+
+	* elflink.c (_bfd_elf_create_got_section): Use log_file_align
+	for pointer alignment.  Set up section pointers.
+	(_bfd_elf_create_dynamic_sections): Likewise.
+	(_bfd_elf_create_ifunc_sections): Moved to ...
+	* elf-ifunc.c: Here.  New.
+
+	* Makefile.am (BFD32_BACKENDS): Add elf-ifunc.lo.
+	(BFD32_BACKENDS_CFILES): Add elf-ifunc.c.
+	Run "make dep-am".
+
 2009-06-16  Doug Kwan  <dougkwan@google.com>
 
-        * elf32-arm.c (cortex_a8_erratum_scan): Change type of offset
-        to bfd_signed_vma.  Cast constant operands which are used in
-        offset related expressions to bfd_signed_vma type as appropriate.
+	* elf32-arm.c (cortex_a8_erratum_scan): Change type of offset
+	to bfd_signed_vma.  Cast constant operands which are used in
+	offset related expressions to bfd_signed_vma type as appropriate.
 
 2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
 
