@@ -745,13 +745,6 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
   return entry;
 }
 
-static hashval_t
-elf_i386_local_hash (int id, int r_sym)
-{
-  return ((((id & 0xff) << 24) | ((id & 0xff00) << 8))
-	  ^ r_sym ^ (id >> 16));
-}
-
 /* Compute a hash of a local hash entry.  We use elf_link_hash_entry
   for local symbol so that we can handle local STT_GNU_IFUNC symbols
   as global symbol.  We reuse indx and dynstr_index for local symbol
@@ -762,7 +755,7 @@ elf_i386_local_htab_hash (const void *ptr)
 {
   struct elf_link_hash_entry *h
     = (struct elf_link_hash_entry *) ptr;
-  return elf_i386_local_hash (h->indx, h->dynstr_index);
+  return ELF_LOCAL_SYMBOL_HASH (h->indx, h->dynstr_index);
 }
 
 /* Compare local hash entries.  */
@@ -787,8 +780,8 @@ elf_i386_get_local_sym_hash (struct elf_i386_link_hash_table *htab,
 {
   struct elf_i386_link_hash_entry e, *ret;
   asection *sec = abfd->sections;
-  hashval_t h = elf_i386_local_hash (sec->id,
-				     ELF32_R_SYM (rel->r_info));
+  hashval_t h = ELF_LOCAL_SYMBOL_HASH (sec->id,
+				       ELF32_R_SYM (rel->r_info));
   void **slot;
 
   e.elf.indx = sec->id;

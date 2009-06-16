@@ -1809,8 +1809,7 @@ elfNN_ia64_local_htab_hash (const void *ptr)
   struct elfNN_ia64_local_hash_entry *entry
     = (struct elfNN_ia64_local_hash_entry *) ptr;
 
-  return (((entry->id & 0xff) << 24) | ((entry->id & 0xff00) << 8))
-	  ^ entry->r_sym ^ (entry->id >> 16);
+  return ELF_LOCAL_SYMBOL_HASH (entry->id, entry->r_sym);
 }
 
 /* Compare local hash entries.  */
@@ -2033,8 +2032,8 @@ get_local_sym_hash (struct elfNN_ia64_link_hash_table *ia64_info,
 {
   struct elfNN_ia64_local_hash_entry e, *ret;
   asection *sec = abfd->sections;
-  hashval_t h = (((sec->id & 0xff) << 24) | ((sec->id & 0xff00) << 8))
-		^ ELFNN_R_SYM (rel->r_info) ^ (sec->id >> 16);
+  hashval_t h = ELF_LOCAL_SYMBOL_HASH (sec->id,
+				       ELFNN_R_SYM (rel->r_info));
   void **slot;
 
   e.id = sec->id;

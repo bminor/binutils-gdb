@@ -1,5 +1,19 @@
 2009-06-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf-bfd.h (ELF_LOCAL_SYMBOL_HASH): New.
+
+	* elf32-i386.c (elf_i386_local_hash): Removed.
+	(elf_i386_local_htab_hash): Use ELF_LOCAL_SYMBOL_HASH.
+	(elf_i386_get_local_sym_hash): Likewise.
+
+	* elf64-x86-64.c (elf64_x86_64_local_hash): Removed.
+	(elf64_x86_64_local_htab_hash): Use ELF_LOCAL_SYMBOL_HASH.
+	(elf64_x86_64_get_local_sym_hash): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_local_htab_hash): Likewise.
+	(get_local_sym_hash): Likewise.
+
+2009-06-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-ia64.c (elfNN_ia64_link_hash_table): Remove got_sec,
 	rel_got_sec and plt_sec.
 	(elfNN_ia64_relax_section): Updated.
