@@ -1,3 +1,9 @@
+2009-06-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* mi/mi-main.c (mi_cmd_data_read_memory): Dispatch
+	TARGET_OJECT_MEMORY reads to the topmost target, not to the
+	flattened current_target.
+
 2009-06-16  Tristan Gingold  <gingold@adacore.com>
 
 	* avr-tdep.c (struct gdbarch_tdep): Replace the unused field with
