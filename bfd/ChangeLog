@@ -1,5 +1,10 @@
 2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elf32-vax.c (elf_vax_plt_entry): Set the entry mask to
+	include <R11:R2>.
+
+2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf32-vax.c (elf_vax_check_relocs): Handle the visibility
 	attribute.
 	(elf_vax_relocate_section): Likewise.
