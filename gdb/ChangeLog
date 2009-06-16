@@ -1,3 +1,28 @@
+2009-06-16  Tristan Gingold  <gingold@adacore.com>
+
+	* avr-tdep.c (struct gdbarch_tdep): Replace the unused field with
+	call_length field.
+	(avr_register_name): Add const to register_names.
+	(avr_scan_arg_moves): Move inside avr_scan_prologue.
+	(avr_scan_prologue): Add pc_end argument.
+	Only read prologue bytes that can be read.
+	Limit the scan to the known prologue length.
+	Makes pattern variables static and const.
+	Fix indentation.
+	(avr_skip_prologue): Pass func_end argument to avr_scan_prologue.
+	Fix indentation.
+	(avr_breakpoint_from_pc): Constify avr_break_insn.
+	(avr_extract_return_value): Fix function comment.
+	(avr_frame_unwind_cache): Fix GNU style violations.
+	Pass current_pc argument to avr_scan_prologue to stop prologue
+	analysis to the current pc.  This fixes the bug with the 'next'
+	command.
+	Correctly set the SP register of the previous frame (use call_length).
+	(avr_frame_prev_register): Fix indentation.
+	Correctly read PC from the stack on avr6 architectures.
+	(avr_push_dummy_call): Fix indentation.
+	(avr_gdbarch_init): Set call_length according to the architecture.
+
 2009-06-15  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* infcall.c (show_unwind_on_terminating_exception_p): New

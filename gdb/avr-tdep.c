@@ -181,8 +181,9 @@ struct avr_unwind_cache
 
 struct gdbarch_tdep
 {
-  /* FIXME: TRoth: is there anything to put here? */
-  int foo;
+  /* Number of bytes stored to the stack by call instructions.
+     2 bytes for avr1-5, 3 bytes for avr6.  */
+  int call_length;
 };
 
 /* Lookup the name of a register given it's number. */
@@ -190,7 +191,7 @@ struct gdbarch_tdep
 static const char *
 avr_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  static char *register_names[] = {
+  static const char * const register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
     "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
     "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
@@ -324,25 +325,6 @@ avr_write_pc (struct regcache *regcache, CORE_ADDR val)
 				  avr_convert_iaddr_to_raw (val));
 }
 
-static int
-avr_scan_arg_moves (int vpc, unsigned char *prologue)
-{
-  unsigned short insn;
-
-  for (; vpc < AVR_MAX_PROLOGUE_SIZE; vpc += 2)
-    {
-      insn = EXTRACT_INSN (&prologue[vpc]);
-      if ((insn & 0xff00) == 0x0100)	/* movw rXX, rYY */
-        continue;
-      else if ((insn & 0xfc00) == 0x2c00) /* mov rXX, rYY */
-        continue;
-      else
-          break;
-    }
-    
-  return vpc;
-}
-
 /* Function: avr_scan_prologue
 
    This function decodes an AVR function prologue to determine:
@@ -439,7 +421,8 @@ avr_scan_arg_moves (int vpc, unsigned char *prologue)
    types.  */
 
 static CORE_ADDR
-avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
+avr_scan_prologue (CORE_ADDR pc_beg, CORE_ADDR pc_end,
+		   struct avr_unwind_cache *info)
 {
   int i;
   unsigned short insn;
@@ -447,12 +430,17 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
   struct minimal_symbol *msymbol;
   unsigned char prologue[AVR_MAX_PROLOGUE_SIZE];
   int vpc = 0;
+  int len;
+
+  len = pc_end - pc_beg;
+  if (len > AVR_MAX_PROLOGUE_SIZE)
+    len = AVR_MAX_PROLOGUE_SIZE;
 
   /* FIXME: TRoth/2003-06-11: This could be made more efficient by only
      reading in the bytes of the prologue. The problem is that the figuring
      out where the end of the prologue is is a bit difficult. The old code 
      tried to do that, but failed quite often.  */
-  read_memory (pc, prologue, AVR_MAX_PROLOGUE_SIZE);
+  read_memory (pc_beg, prologue, len);
 
   /* Scanning main()'s prologue
      ldi r28,lo8(<RAM_ADDR> - <LOCALS_SIZE>)
@@ -460,10 +448,10 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
      out __SP_H__,r29
      out __SP_L__,r28 */
 
-  if (1)
+  if (len >= 4)
     {
       CORE_ADDR locals;
-      unsigned char img[] = {
+      static const unsigned char img[] = {
 	0xde, 0xbf,		/* out __SP_H__,r29 */
 	0xcd, 0xbf		/* out __SP_L__,r28 */
       };
@@ -478,11 +466,12 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
 	  if ((insn & 0xf0f0) == 0xe0d0)
 	    {
 	      locals |= ((insn & 0xf) | ((insn & 0x0f00) >> 4)) << 8;
-	      if (memcmp (prologue + vpc + 4, img, sizeof (img)) == 0)
+	      if (vpc + 4 + sizeof (img) < len
+		  && memcmp (prologue + vpc + 4, img, sizeof (img)) == 0)
 		{
                   info->prologue_type = AVR_PROLOGUE_MAIN;
                   info->base = locals;
-                  return pc + 4;
+                  return pc_beg + 4;
 		}
 	    }
 	}
@@ -497,6 +486,11 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
       int body_addr;
       unsigned num_pushes;
       int pc_offset = 0;
+
+      /* At least the fifth instruction must have been executed to
+	 modify frame shape.  */
+      if (len < 10)
+	break;
 
       insn = EXTRACT_INSN (&prologue[vpc]);
       /* ldi r26,<LOCALS_SIZE> */
@@ -539,9 +533,9 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
           /* Convert offset to byte addressable mode */
           i *= 2;
           /* Destination address */
-          i += pc + 10;
+          i += pc_beg + 10;
 
-          if (body_addr != (pc + 10)/2)
+          if (body_addr != (pc_beg + 10)/2)
             break;
 
           pc_offset += 2;
@@ -554,7 +548,7 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
           /* Convert address to byte addressable mode */
           i *= 2;
 
-          if (body_addr != (pc + 12)/2)
+          if (body_addr != (pc_beg + 12)/2)
             break;
 
           pc_offset += 4;
@@ -589,7 +583,7 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
       info->size = loc_size + num_pushes;
       info->prologue_type = AVR_PROLOGUE_CALL;
 
-      return pc + pc_offset;
+      return pc_beg + pc_offset;
     }
 
   /* Scan for the beginning of the prologue for an interrupt or signal
@@ -599,7 +593,7 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
 
   if (1)
     {
-      unsigned char img[] = {
+      static const unsigned char img[] = {
 	0x78, 0x94,		/* sei */
 	0x1f, 0x92,		/* push r1 */
 	0x0f, 0x92,		/* push r0 */
@@ -607,7 +601,8 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
 	0x0f, 0x92,		/* push r0 */
 	0x11, 0x24		/* clr r1 */
       };
-      if (memcmp (prologue, img, sizeof (img)) == 0)
+      if (len >= sizeof (img)
+	  && memcmp (prologue, img, sizeof (img)) == 0)
 	{
           info->prologue_type = AVR_PROLOGUE_INTR;
 	  vpc += sizeof (img);
@@ -616,7 +611,8 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
           info->saved_regs[1].addr = 1;
           info->size += 3;
 	}
-      else if (memcmp (img + 2, prologue, sizeof (img) - 2) == 0)
+      else if (len >= sizeof (img) - 2
+	       && memcmp (img + 2, prologue, sizeof (img) - 2) == 0)
 	{
           info->prologue_type = AVR_PROLOGUE_SIG;
           vpc += sizeof (img) - 2;
@@ -630,7 +626,7 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
   /* First stage of the prologue scanning.
      Scan pushes (saved registers) */
 
-  for (; vpc < AVR_MAX_PROLOGUE_SIZE; vpc += 2)
+  for (; vpc < len; vpc += 2)
     {
       insn = EXTRACT_INSN (&prologue[vpc]);
       if ((insn & 0xfe0f) == 0x920f)	/* push rXX */
@@ -654,15 +650,16 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
      in r28,__SP_L__
      in r29,__SP_H__ */
 
-  if (scan_stage == 1 && vpc < AVR_MAX_PROLOGUE_SIZE)
+  if (scan_stage == 1 && vpc < len)
     {
-      unsigned char img[] = {
+      static const unsigned char img[] = {
 	0xcd, 0xb7,		/* in r28,__SP_L__ */
 	0xde, 0xb7		/* in r29,__SP_H__ */
       };
       unsigned short insn1;
 
-      if (memcmp (prologue + vpc, img, sizeof (img)) == 0)
+      if (vpc + sizeof (img) < len
+	  && memcmp (prologue + vpc, img, sizeof (img)) == 0)
 	{
 	  vpc += 4;
 	  scan_stage = 2;
@@ -679,21 +676,21 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
      out __SREG__,__tmp_reg__
      out __SP_L__,r28 */
 
-  if (scan_stage == 2 && vpc < AVR_MAX_PROLOGUE_SIZE)
+  if (scan_stage == 2 && vpc < len)
     {
       int locals_size = 0;
-      unsigned char img[] = {
+      static const unsigned char img[] = {
 	0x0f, 0xb6,		/* in r0,0x3f */
 	0xf8, 0x94,		/* cli */
 	0xde, 0xbf,		/* out 0x3e,r29 ; SPH */
 	0x0f, 0xbe,		/* out 0x3f,r0  ; SREG */
 	0xcd, 0xbf		/* out 0x3d,r28 ; SPL */
       };
-      unsigned char img_sig[] = {
+      static const unsigned char img_sig[] = {
 	0xde, 0xbf,		/* out 0x3e,r29 ; SPH */
 	0xcd, 0xbf		/* out 0x3d,r28 ; SPL */
       };
-      unsigned char img_int[] = {
+      static const unsigned char img_int[] = {
 	0xf8, 0x94,		/* cli */
 	0xde, 0xbf,		/* out 0x3e,r29 ; SPH */
 	0x78, 0x94,		/* sei */
@@ -712,21 +709,24 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
 	  locals_size += ((insn & 0xf) | ((insn & 0xf00) >> 4) << 8);
 	}
       else
-	return pc + vpc;
+	return pc_beg + vpc;
 
       /* Scan the last part of the prologue. May not be present for interrupt
          or signal handler functions, which is why we set the prologue type
          when we saw the beginning of the prologue previously.  */
 
-      if (memcmp (prologue + vpc, img_sig, sizeof (img_sig)) == 0)
+      if (vpc + sizeof (img_sig) < len
+	  && memcmp (prologue + vpc, img_sig, sizeof (img_sig)) == 0)
         {
           vpc += sizeof (img_sig);
         }
-      else if (memcmp (prologue + vpc, img_int, sizeof (img_int)) == 0)
+      else if (vpc + sizeof (img_int) < len 
+	       && memcmp (prologue + vpc, img_int, sizeof (img_int)) == 0)
         {
           vpc += sizeof (img_int);
         }
-      if (memcmp (prologue + vpc, img, sizeof (img)) == 0)
+      if (vpc + sizeof (img) < len
+	  && memcmp (prologue + vpc, img, sizeof (img)) == 0)
         {
           info->prologue_type = AVR_PROLOGUE_NORMAL;
           vpc += sizeof (img);
@@ -734,13 +734,24 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
 
       info->size += locals_size;
 
-      return pc + avr_scan_arg_moves (vpc, prologue);
+      /* Fall through.  */
     }
 
   /* If we got this far, we could not scan the prologue, so just return the pc
      of the frame plus an adjustment for argument move insns.  */
 
-  return pc + avr_scan_arg_moves (vpc, prologue);;
+  for (; vpc < len; vpc += 2)
+    {
+      insn = EXTRACT_INSN (&prologue[vpc]);
+      if ((insn & 0xff00) == 0x0100)	/* movw rXX, rYY */
+        continue;
+      else if ((insn & 0xfc00) == 0x2c00) /* mov rXX, rYY */
+        continue;
+      else
+          break;
+    }
+    
+  return pc_beg + vpc;
 }
 
 static CORE_ADDR
@@ -763,7 +774,7 @@ avr_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
          prologue and possibly skip over moving arguments passed via registers
          to other registers.  */
 
-      prologue_end = avr_scan_prologue (pc, &info);
+      prologue_end = avr_scan_prologue (func_addr, func_end, &info);
 
       if (info.prologue_type == AVR_PROLOGUE_NONE)
         return pc;
@@ -776,9 +787,9 @@ avr_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
         }
     }
 
-/* Either we didn't find the start of this function (nothing we can do),
-   or there's no line info, or the line after the prologue is after
-   the end of the function (there probably isn't a prologue). */
+  /* Either we didn't find the start of this function (nothing we can do),
+     or there's no line info, or the line after the prologue is after
+     the end of the function (there probably isn't a prologue). */
 
   return prologue_end;
 }
@@ -790,12 +801,12 @@ avr_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static const unsigned char *
 avr_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR * pcptr, int *lenptr)
 {
-    static unsigned char avr_break_insn [] = { 0x98, 0x95 };
+    static const unsigned char avr_break_insn [] = { 0x98, 0x95 };
     *lenptr = sizeof (avr_break_insn);
     return avr_break_insn;
 }
 
-/* Given a return value in `regbuf' with a type `valtype', 
+/* Given a return value in `regcache' with a type `type', 
    extract and copy its value into `valbuf'.
 
    Return values are always passed via registers r25:r24:...  */
@@ -875,26 +886,28 @@ static struct avr_unwind_cache *
 avr_frame_unwind_cache (struct frame_info *this_frame,
                         void **this_prologue_cache)
 {
-  CORE_ADDR pc;
+  CORE_ADDR start_pc, current_pc;
   ULONGEST prev_sp;
   ULONGEST this_base;
   struct avr_unwind_cache *info;
+  struct gdbarch *gdbarch;
+  struct gdbarch_tdep *tdep;
   int i;
 
-  if ((*this_prologue_cache))
-    return (*this_prologue_cache);
+  if (*this_prologue_cache)
+    return *this_prologue_cache;
 
   info = FRAME_OBSTACK_ZALLOC (struct avr_unwind_cache);
-  (*this_prologue_cache) = info;
+  *this_prologue_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   info->size = 0;
   info->prologue_type = AVR_PROLOGUE_NONE;
 
-  pc = get_frame_func (this_frame);
-
-  if ((pc > 0) && (pc < get_frame_pc (this_frame)))
-    avr_scan_prologue (pc, info);
+  start_pc = get_frame_func (this_frame);
+  current_pc = get_frame_pc (this_frame);
+  if ((start_pc > 0) && (start_pc <= current_pc))
+    avr_scan_prologue (start_pc, current_pc, info);
 
   if ((info->prologue_type != AVR_PROLOGUE_NONE)
       && (info->prologue_type != AVR_PROLOGUE_MAIN))
@@ -905,7 +918,7 @@ avr_frame_unwind_cache (struct frame_info *this_frame,
          was created.  Get THIS frame's FP value by unwinding it from
          the next frame.  */
       this_base = get_frame_register_unsigned (this_frame, AVR_FP_REGNUM);
-      high_base = get_frame_register_unsigned (this_frame, AVR_FP_REGNUM+1);
+      high_base = get_frame_register_unsigned (this_frame, AVR_FP_REGNUM + 1);
       this_base += (high_base << 8);
       
       /* The FP points at the last saved register.  Adjust the FP back
@@ -922,29 +935,28 @@ avr_frame_unwind_cache (struct frame_info *this_frame,
 
   /* Add 1 here to adjust for the post-decrement nature of the push
      instruction.*/
-  info->prev_sp = avr_make_saddr (prev_sp+1);
-
+  info->prev_sp = avr_make_saddr (prev_sp + 1);
   info->base = avr_make_saddr (this_base);
+
+  gdbarch = get_frame_arch (this_frame);
 
   /* Adjust all the saved registers so that they contain addresses and not
      offsets.  */
-  for (i = 0; i < gdbarch_num_regs (get_frame_arch (this_frame)) - 1; i++)
-    if (info->saved_regs[i].addr)
-      {
-        info->saved_regs[i].addr = (info->prev_sp - info->saved_regs[i].addr);
-      }
+  for (i = 0; i < gdbarch_num_regs (gdbarch) - 1; i++)
+    if (info->saved_regs[i].addr > 0)
+      info->saved_regs[i].addr = info->prev_sp - info->saved_regs[i].addr;
 
   /* Except for the main and startup code, the return PC is always saved on
      the stack and is at the base of the frame. */
 
   if (info->prologue_type != AVR_PROLOGUE_MAIN)
-    {
-      info->saved_regs[AVR_PC_REGNUM].addr = info->prev_sp;
-    }  
+    info->saved_regs[AVR_PC_REGNUM].addr = info->prev_sp;
 
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
-  trad_frame_set_value (info->saved_regs, AVR_SP_REGNUM, info->prev_sp+1);
+  tdep = gdbarch_tdep (gdbarch);
+  trad_frame_set_value (info->saved_regs, AVR_SP_REGNUM,
+                        info->prev_sp - 1 + tdep->call_length);
 
   return info;
 }
@@ -999,7 +1011,7 @@ avr_frame_this_id (struct frame_info *this_frame,
 
 static struct value *
 avr_frame_prev_register (struct frame_info *this_frame,
-			  void **this_prologue_cache, int regnum)
+			 void **this_prologue_cache, int regnum)
 {
   struct avr_unwind_cache *info
     = avr_frame_unwind_cache (this_frame, this_prologue_cache);
@@ -1020,25 +1032,20 @@ avr_frame_prev_register (struct frame_info *this_frame,
 	     And to confuse matters even more, the return address stored
 	     on the stack is in big endian byte order, even though most
 	     everything else about the avr is little endian. Ick!  */
-
-	  /* FIXME: number of bytes read here will need updated for the
-	     mega256 when it is available.  */
-
 	  ULONGEST pc;
-	  unsigned char tmp;
-	  unsigned char buf[2];
+	  int i;
+	  unsigned char buf[3];
+	  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+	  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-	  read_memory (info->saved_regs[regnum].addr, buf, 2);
+	  read_memory (info->saved_regs[regnum].addr, buf, tdep->call_length);
 
-	  /* Convert the PC read from memory as a big-endian to
-	     little-endian order. */
-	  tmp = buf[0];
-	  buf[0] = buf[1];
-	  buf[1] = tmp;
+	  /* Extract the PC read from memory as a big-endian.  */
+	  pc = 0;
+	  for (i = 0; i < tdep->call_length; i++)
+	    pc = (pc << 8) | buf[i];
 
-	  pc = (extract_unsigned_integer (buf, 2) * 2);
-
-	  return frame_unwind_got_constant (this_frame, regnum, pc);
+	  return frame_unwind_got_constant (this_frame, regnum, pc << 1);
         }
 
       return frame_unwind_got_optimized (this_frame, regnum);
@@ -1220,7 +1227,7 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       sp -= si->len;
       /* Add 1 to sp here to account for post decr nature of pushes. */
-      write_memory (sp+1, si->data, si->len);
+      write_memory (sp + 1, si->data, si->len);
       si = pop_stack_item (si);
     }
 
@@ -1231,7 +1238,7 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   buf[1] = return_pc & 0xff;
 
   sp -= 2;
-  write_memory (sp+1, buf, 2);  /* Add one since pushes are post decr ops. */
+  write_memory (sp + 1, buf, 2);  /* Add one since pushes are post decr ops. */
 
   /* Finally, update the SP register. */
   regcache_cooked_write_unsigned (regcache, AVR_SP_REGNUM,
@@ -1247,17 +1254,10 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
+  struct gdbarch_list *best_arch;
+  int call_length;
 
-  /* Find a candidate among the list of pre-declared architectures. */
-  arches = gdbarch_list_lookup_by_info (arches, &info);
-  if (arches != NULL)
-    return arches->gdbarch;
-
-  /* None found, create a new architecture from the information provided. */
-  tdep = XMALLOC (struct gdbarch_tdep);
-  gdbarch = gdbarch_alloc (&info, tdep);
-
-  /* If we ever need to differentiate the device types, do it here. */
+  /* Avr-6 call instructions save 3 bytes.  */
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_avr1:
@@ -1265,8 +1265,28 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_avr3:
     case bfd_mach_avr4:
     case bfd_mach_avr5:
+    default:
+      call_length = 2;
+      break;
+    case bfd_mach_avr6:
+      call_length = 3;
       break;
     }
+
+  /* If there is already a candidate, use it.  */
+  for (best_arch = gdbarch_list_lookup_by_info (arches, &info);
+       best_arch != NULL;
+       best_arch = gdbarch_list_lookup_by_info (best_arch->next, &info))
+    {
+      if (gdbarch_tdep (best_arch->gdbarch)->call_length == call_length)
+	return best_arch->gdbarch;
+    }
+
+  /* None found, create a new architecture from the information provided. */
+  tdep = XMALLOC (struct gdbarch_tdep);
+  gdbarch = gdbarch_alloc (&info, tdep);
+  
+  tdep->call_length = call_length;
 
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
