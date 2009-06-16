@@ -1,3 +1,10 @@
+2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* vax-dis.c (is_function_entry): Return success for synthetic
+	symbols too.
+	(is_plt_tail): New function.
+	(print_insn_vax): Decode PLT entry offset longword.
+
 2009-06-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 10186

@@ -1,5 +1,10 @@
 2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elf32-vax.c (elf_vax_plt_sym_val): New function.
+	(elf_backend_plt_sym_val): Define.
+
+2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf32-vax.c (elf_vax_reloc_type_class): New function.
 	(elf_backend_reloc_type_class): Define.
 

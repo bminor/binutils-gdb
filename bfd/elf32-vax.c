@@ -47,6 +47,8 @@ static bfd_boolean elf_vax_finish_dynamic_symbol (bfd *, struct bfd_link_info *,
 						  Elf_Internal_Sym *);
 static bfd_boolean elf_vax_finish_dynamic_sections (bfd *,
 						    struct bfd_link_info *);
+static bfd_vma elf_vax_plt_sym_val (bfd_vma, const asection *,
+				    const arelent *);
 
 static bfd_boolean elf32_vax_set_private_flags (bfd *, flagword);
 static bfd_boolean elf32_vax_merge_private_bfd_data (bfd *, bfd *);
@@ -2091,6 +2093,13 @@ elf_vax_reloc_type_class (const Elf_Internal_Rela *rela)
     }
 }
 
+static bfd_vma
+elf_vax_plt_sym_val (bfd_vma i, const asection *plt,
+		     const arelent *rel ATTRIBUTE_UNUSED)
+{
+  return plt->vma + (i + 1) * PLT_ENTRY_SIZE;
+}
+
 #define TARGET_LITTLE_SYM		bfd_elf32_vax_vec
 #define TARGET_LITTLE_NAME		"elf32-vax"
 #define ELF_MACHINE_CODE		EM_VAX
@@ -2116,6 +2125,7 @@ elf_vax_reloc_type_class (const Elf_Internal_Rela *rela)
 #define elf_backend_reloc_type_class	elf_vax_reloc_type_class
 #define elf_backend_gc_mark_hook	elf_vax_gc_mark_hook
 #define elf_backend_gc_sweep_hook	elf_vax_gc_sweep_hook
+#define elf_backend_plt_sym_val		elf_vax_plt_sym_val
 #define bfd_elf32_bfd_merge_private_bfd_data \
                                         elf32_vax_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags \
