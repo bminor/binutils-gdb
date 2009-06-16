@@ -396,23 +396,20 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	          || S_IS_WEAK (fragP->fr_symbol)
 	          || S_IS_EXTERNAL (fragP->fr_symbol)))
 	    {
-	      if (p[0] & 0x10)
-		{
-		  if (flag_want_pic)
-		    as_fatal ("PIC reference to %s is indirect.\n",
-			      S_GET_NAME (fragP->fr_symbol));
-		}
+	      /* Indirect references cannot go through the GOT or PLT,
+	         let's hope they'll become local in the final link.  */
+	      if ((ELF_ST_VISIBILITY (S_GET_OTHER (fragP->fr_symbol))
+		   != STV_DEFAULT)
+		  || (p[0] & 0x10))
+		reloc_type = BFD_RELOC_32_PCREL;
+	      else if (((unsigned char *) fragP->fr_opcode)[0] == VAX_CALLS
+		       || ((unsigned char *) fragP->fr_opcode)[0] == VAX_CALLG
+		       || ((unsigned char *) fragP->fr_opcode)[0] == VAX_JSB
+		       || ((unsigned char *) fragP->fr_opcode)[0] == VAX_JMP
+		       || S_IS_FUNCTION (fragP->fr_symbol))
+		reloc_type = BFD_RELOC_32_PLT_PCREL;
 	      else
-		{
-		  if (((unsigned char *) fragP->fr_opcode)[0] == VAX_CALLS
-		      || ((unsigned char *) fragP->fr_opcode)[0] == VAX_CALLG
-		      || ((unsigned char *) fragP->fr_opcode)[0] == VAX_JSB
-		      || ((unsigned char *) fragP->fr_opcode)[0] == VAX_JMP
-		      || S_IS_FUNCTION (fragP->fr_symbol))
-		    reloc_type = BFD_RELOC_32_PLT_PCREL;
-		  else
-		    reloc_type = BFD_RELOC_32_GOT_PCREL;
-		}
+		reloc_type = BFD_RELOC_32_GOT_PCREL;
 	    }
 #endif
 	  switch (RELAX_STATE (fragP->fr_subtype))

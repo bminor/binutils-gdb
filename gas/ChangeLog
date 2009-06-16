@@ -1,3 +1,10 @@
+2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-vax.c (md_estimate_size_before_relax): Accept
+	indirect symbol references in the PIC mode and emit a
+	PC-relative relocation instead of a GOT/PLT one.  Likewise
+	for symbols known to be hidden at this point.
+
 2009-06-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 10186

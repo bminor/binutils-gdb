@@ -605,6 +605,11 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	      || h == elf_hash_table (info)->hplt)
 	    break;
 
+	  /* If this is a local symbol, we resolve it directly without
+	     creating a global offset table entry.  */
+	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	    break;
+
 	  /* This symbol requires a global offset table entry.  */
 
 	  if (dynobj == NULL)
@@ -677,7 +682,7 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	  /* If this is a local symbol, we resolve it directly without
 	     creating a procedure linkage table entry.  */
 	  BFD_ASSERT (h != NULL);
-	  if (h->forced_local)
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT || h->forced_local)
 	    break;
 
 	  h->needs_plt = 1;
@@ -706,7 +711,9 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		&& (!info->symbolic
 		    || !h->def_regular)))
 	    {
-	      if (h != NULL && !h->forced_local)
+	      if (h != NULL
+		  && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		  && !h->forced_local)
 		{
 		  /* Make sure a plt entry is created for this symbol if
 		     it turns out to be a function defined by a dynamic
@@ -718,14 +725,17 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		}
 	      break;
 	    }
-	  if (h != NULL && h->forced_local)
+	  /* If this is a local symbol, we can resolve it directly.  */
+	  if (h != NULL
+	      && (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+		  || h->forced_local))
 	    break;
 
 	  /* Fall through.  */
 	case R_VAX_8:
 	case R_VAX_16:
 	case R_VAX_32:
-	  if (h != NULL)
+	  if (h != NULL && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    {
 	      /* Make sure a plt entry is created for this symbol if it
 		 turns out to be a function defined by a dynamic object.  */
@@ -1465,7 +1475,10 @@ elf_vax_relocate_section (bfd *output_bfd,
 	case R_VAX_GOT32:
 	  /* Relocation is to the address of the entry for this symbol
 	     in the global offset table.  */
-	  if (h == NULL || h->got.offset == (bfd_vma) -1 || h->forced_local)
+	  if (h == NULL
+	      || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || h->got.offset == (bfd_vma) -1
+	      || h->forced_local)
 	    break;
 
 	  /* Relocation is the offset of the entry for this symbol in
@@ -1527,7 +1540,9 @@ elf_vax_relocate_section (bfd *output_bfd,
 
 	  /* Resolve a PLTxx reloc against a local symbol directly,
 	     without using the procedure linkage table.  */
-	  if (h == NULL || h->forced_local)
+	  if (h == NULL
+	      || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || h->forced_local)
 	    break;
 
 	  if (h->plt.offset == (bfd_vma) -1
@@ -1581,7 +1596,9 @@ elf_vax_relocate_section (bfd *output_bfd,
 	case R_VAX_PC8:
 	case R_VAX_PC16:
 	case R_VAX_PC32:
-	  if (h == NULL || h->forced_local)
+	  if (h == NULL
+	      || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      || h->forced_local)
 	    break;
 	  /* Fall through.  */
 	case R_VAX_8:
