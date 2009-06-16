@@ -1014,18 +1014,14 @@ needs_ovl_stub (struct elf_link_hash_entry *h,
   if (spu_elf_section_data (sym_sec->output_section)->u.o.ovl_index
        != spu_elf_section_data (input_section->output_section)->u.o.ovl_index)
     {
-      if (call || sym_type == STT_FUNC)
+      unsigned int lrlive = 0;
+      if (branch)
+	lrlive = (contents[1] & 0x70) >> 4;
+
+      if (!lrlive && (call || sym_type == STT_FUNC))
 	ret = call_ovl_stub;
       else
-	{
-	  ret = br000_ovl_stub;
-
-	  if (branch)
-	    {
-	      unsigned int lrlive = (contents[1] & 0x70) >> 4;
-	      ret += lrlive;
-	    }
-	}
+	ret = br000_ovl_stub + lrlive;
     }
 
   /* If this insn isn't a branch then we are possibly taking the

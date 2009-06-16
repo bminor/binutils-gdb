@@ -1,3 +1,8 @@
+2009-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf32-spu.c (needs_ovl_stub): Respect .brinfo lrlive bits
+	also for calls.
+
 2009-06-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.in (elf): Add elf-ifunc.lo.
