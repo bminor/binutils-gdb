@@ -1,5 +1,11 @@
 2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elf32-vax.c (elf_vax_relocate_section): For symbol references
+	from an executable to a shared library treat R_VAX_PC32
+	relocations as R_VAX_PLT32 ones.
+
+2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf32-vax.c (elf_vax_instantiate_got_entries): Skip local
 	symbols in GOT space calculation.
 	(elf_vax_relocate_section): Adjust accordingly.

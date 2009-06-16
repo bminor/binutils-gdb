@@ -1544,6 +1544,14 @@ elf_vax_relocate_section (bfd *output_bfd,
 	  }
 	  break;
 
+	case R_VAX_PC32:
+	  /* If we are creating an executable and the function this
+	     reloc refers to is in a shared lib, then we made a PLT
+	     entry for this symbol and need to handle the reloc like
+	     a PLT reloc.  */
+	  if (info->shared)
+	     goto r_vax_pc32_shared;
+	  /* Fall through.  */
 	case R_VAX_PLT32:
 	  /* Relocation is to the entry for this symbol in the
 	     procedure linkage table.  */
@@ -1605,7 +1613,7 @@ elf_vax_relocate_section (bfd *output_bfd,
 
 	case R_VAX_PC8:
 	case R_VAX_PC16:
-	case R_VAX_PC32:
+	r_vax_pc32_shared:
 	  if (h == NULL
 	      || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 	      || h->forced_local)
