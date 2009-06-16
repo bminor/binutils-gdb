@@ -1332,6 +1332,8 @@ elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, PTR infoptr)
     }
   else if (h->got.refcount > 0)
     {
+      bfd_boolean dyn;
+
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (h->dynindx == -1)
 	{
@@ -1339,9 +1341,15 @@ elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, PTR infoptr)
 	    return FALSE;
 	}
 
+      dyn = elf_hash_table (info)->dynamic_sections_created;
       /* Allocate space in the .got and .rela.got sections.  */
-      sgot->size += 4;
-      srelgot->size += sizeof (Elf32_External_Rela);
+      if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	  && (info->shared
+	      || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
+	{
+	  sgot->size += 4;
+	  srelgot->size += sizeof (Elf32_External_Rela);
+	}
     }
 
   return TRUE;
@@ -1485,6 +1493,7 @@ elf_vax_relocate_section (bfd *output_bfd,
 	     the global offset table.  */
 
 	  {
+	    bfd_boolean dyn;
 	    bfd_vma off;
 
 	    if (sgot == NULL)
@@ -1498,9 +1507,10 @@ elf_vax_relocate_section (bfd *output_bfd,
 	    BFD_ASSERT (off != (bfd_vma) -1);
 	    BFD_ASSERT (off < sgot->size);
 
-	    if (info->shared
-		&& h->dynindx == -1
-		&& h->def_regular)
+	    dyn = elf_hash_table (info)->dynamic_sections_created;
+	    if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
+		|| (info->shared
+		    && SYMBOL_REFERENCES_LOCAL (info, h)))
 	      {
 		/* The symbol was forced to be local
 		   because of a version file..  We must initialize

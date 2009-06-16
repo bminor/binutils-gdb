@@ -1,5 +1,11 @@
 2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elf32-vax.c (elf_vax_instantiate_got_entries): Skip local
+	symbols in GOT space calculation.
+	(elf_vax_relocate_section): Adjust accordingly.
+
+2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf32-vax.c (elf_vax_plt_entry): Set the entry mask to
 	include <R11:R2>.
 
