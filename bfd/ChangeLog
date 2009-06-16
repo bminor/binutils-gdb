@@ -1,3 +1,9 @@
+2009-06-16  Doug Kwan  <dougkwan@google.com>
+
+        * elf32-arm.c (cortex_a8_erratum_scan): Change type of offset
+        to bfd_signed_vma.  Cast constant operands which are used in
+        offset related expressions to bfd_signed_vma type as appropriate.
+
 2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elf32-vax.c (elf_vax_plt_sym_val): New function.
