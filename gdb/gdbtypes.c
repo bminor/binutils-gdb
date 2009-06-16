@@ -1334,34 +1334,6 @@ get_vptr_fieldno (struct type *type, struct type **basetypep)
     }
 }
 
-/* Find the method and field indices for the destructor in class type T.
-   Return 1 if the destructor was found, otherwise, return 0.  */
-
-int
-get_destructor_fn_field (struct type *t, 
-			 int *method_indexp, 
-			 int *field_indexp)
-{
-  int i;
-
-  for (i = 0; i < TYPE_NFN_FIELDS (t); i++)
-    {
-      int j;
-      struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
-
-      for (j = 0; j < TYPE_FN_FIELDLIST_LENGTH (t, i); j++)
-	{
-	  if (is_destructor_name (TYPE_FN_FIELD_PHYSNAME (f, j)) != 0)
-	    {
-	      *method_indexp = i;
-	      *field_indexp = j;
-	      return 1;
-	    }
-	}
-    }
-  return 0;
-}
-
 static void
 stub_noname_complaint (void)
 {

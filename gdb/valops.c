@@ -1849,10 +1849,6 @@ value_struct_elt (struct value **argp, struct value **args,
 
       /* C++: If it was not found as a data field, then try to
          return it as a pointer to a method.  */
-
-      if (destructor_name_p (name, t))
-	error (_("Cannot get value of destructor"));
-
       v = search_struct_method (name, argp, args, 0, 
 				static_memfuncp, t);
 
@@ -1868,32 +1864,6 @@ value_struct_elt (struct value **argp, struct value **args,
       return v;
     }
 
-  if (destructor_name_p (name, t))
-    {
-      if (!args[1])
-	{
-	  /* Destructors are a special case.  */
-	  int m_index, f_index;
-
-	  v = NULL;
-	  if (get_destructor_fn_field (t, &m_index, &f_index))
-	    {
-	      v = value_fn_field (NULL, 
-				  TYPE_FN_FIELDLIST1 (t, m_index),
-				  f_index, NULL, 0);
-	    }
-	  if (v == NULL)
-	    error (_("could not find destructor function named %s."), 
-		   name);
-	  else
-	    return v;
-	}
-      else
-	{
-	  error (_("destructor should not have any argument"));
-	}
-    }
-  else
     v = search_struct_method (name, argp, args, 0, 
 			      static_memfuncp, t);
   
@@ -2499,8 +2469,6 @@ classify_oload_match (struct badness_vector *oload_champ_bv,
 int
 destructor_name_p (const char *name, const struct type *type)
 {
-  /* Destructors are a special case.  */
-
   if (name[0] == '~')
     {
       char *dname = type_name_no_tag (type);
@@ -2538,14 +2506,6 @@ check_field (struct type *type, const char *name)
 
   /* C++: If it was not found as a data field, then try to return it
      as a pointer to a method.  */
-
-  /* Destructors are a special case.  */
-  if (destructor_name_p (name, type))
-    {
-      int m_index, f_index;
-
-      return get_destructor_fn_field (type, &m_index, &f_index);
-    }
 
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
     {
@@ -2641,12 +2601,6 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
   /* C++: If it was not found as a data field, then try to return it
      as a pointer to a method.  */
-
-  /* Destructors are a special case.  */
-  if (destructor_name_p (name, t))
-    {
-      error (_("member pointers to destructors not implemented yet"));
-    }
 
   /* Perform all necessary dereferencing.  */
   while (intype && TYPE_CODE (intype) == TYPE_CODE_PTR)

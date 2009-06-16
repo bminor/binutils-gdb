@@ -1202,8 +1202,6 @@ extern struct type *lookup_template_type (char *, struct type *,
 
 extern int get_vptr_fieldno (struct type *, struct type **);
 
-extern int get_destructor_fn_field (struct type *, int *, int *);
-
 extern int get_discrete_bounds (struct type *, LONGEST *, LONGEST *);
 
 extern int is_ancestor (struct type *, struct type *);

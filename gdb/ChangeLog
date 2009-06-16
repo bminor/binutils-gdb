@@ -1,3 +1,18 @@
+2009-06-16  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (collect_methods): Delete.
+	(add_matching_methods): Reove destructor special case.
+	(find_method): Call find_methods directly instead of
+	collect_methods.
+	* valops.c (value_struct_elt): Remove destructor
+	special cases.
+	(check_field): Likewise.
+	(value_struct_elt_for_reference): Likewise.
+	(destructor_name_p): Remove misleading comment about dtors
+	being "special cases". 
+	* gdbtypes.h (get_destructor_fn_field): Remove. No longer needed.
+	* gdbtypes.c (get_destructor_fn_field): Likewise. 
+
 2009-06-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* mi/mi-main.c (mi_cmd_data_read_memory): Dispatch
