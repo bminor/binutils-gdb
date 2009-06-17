@@ -1,3 +1,15 @@
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* infrun.c (handle_inferior_event): Use current frame architecture
+	or thread architecture instead of current_gdbarch.  Pass to
+	handle_step_into_function and handle_step_into_function_backward.
+	(handle_step_into_function): Add GDBARCH parameter.  Use it instead
+	of current_gdbarch.
+	(handle_step_into_function_backward): Likewise.
+	(insert_step_resume_breakpoint_at_frame): Use frame architecture
+	instead of current_gdbarch.
+	(insert_step_resume_breakpoint_at_caller): Likewise.
+
 2009-06-17  Pierre Muller  <muller@ics.u-strasbg.fr>
 	Pedro Alves  <pedro@codesourcery.com>
 	
