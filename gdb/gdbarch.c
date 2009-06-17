@@ -226,6 +226,7 @@ struct gdbarch
   struct core_regset_section * core_regset_sections;
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
   gdbarch_core_pid_to_str_ftype *core_pid_to_str;
+  const char * gcore_bfd_target;
   int vtable_function_descriptors;
   int vbit_in_delta;
   gdbarch_skip_permanent_breakpoint_ftype *skip_permanent_breakpoint;
@@ -362,6 +363,7 @@ struct gdbarch startup_gdbarch =
   0,  /* core_regset_sections */
   0,  /* core_xfer_shared_libraries */
   0,  /* core_pid_to_str */
+  0,  /* gcore_bfd_target */
   0,  /* vtable_function_descriptors */
   0,  /* vbit_in_delta */
   0,  /* skip_permanent_breakpoint */
@@ -616,6 +618,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of core_reg_section_encodes_pid, invalid_p == 0 */
   /* Skip verify of core_xfer_shared_libraries, has predicate */
   /* Skip verify of core_pid_to_str, has predicate */
+  /* Skip verify of gcore_bfd_target, has predicate */
   /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
   /* Skip verify of vbit_in_delta, invalid_p == 0 */
   /* Skip verify of skip_permanent_breakpoint, has predicate */
@@ -845,6 +848,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: frame_red_zone_size = %s\n",
                       plongest (gdbarch->frame_red_zone_size));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_gcore_bfd_target_p() = %d\n",
+                      gdbarch_gcore_bfd_target_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gcore_bfd_target = %s\n",
+                      gdbarch->gcore_bfd_target);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_get_longjmp_target_p() = %d\n",
                       gdbarch_get_longjmp_target_p (gdbarch));
@@ -2984,6 +2993,31 @@ set_gdbarch_core_pid_to_str (struct gdbarch *gdbarch,
                              gdbarch_core_pid_to_str_ftype core_pid_to_str)
 {
   gdbarch->core_pid_to_str = core_pid_to_str;
+}
+
+int
+gdbarch_gcore_bfd_target_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->gcore_bfd_target != 0;
+}
+
+const char *
+gdbarch_gcore_bfd_target (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Check variable changed from pre-default.  */
+  gdb_assert (gdbarch->gcore_bfd_target != 0);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_gcore_bfd_target called\n");
+  return gdbarch->gcore_bfd_target;
+}
+
+void
+set_gdbarch_gcore_bfd_target (struct gdbarch *gdbarch,
+                              const char * gcore_bfd_target)
+{
+  gdbarch->gcore_bfd_target = gcore_bfd_target;
 }
 
 int

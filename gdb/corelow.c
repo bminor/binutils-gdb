@@ -721,8 +721,8 @@ core_thread_alive (struct target_ops *ops, ptid_t ptid)
 static const struct target_desc *
 core_read_description (struct target_ops *target)
 {
-  if (gdbarch_core_read_description_p (current_gdbarch))
-    return gdbarch_core_read_description (current_gdbarch, target, core_bfd);
+  if (core_gdbarch && gdbarch_core_read_description_p (core_gdbarch))
+    return gdbarch_core_read_description (core_gdbarch, target, core_bfd);
 
   return NULL;
 }

@@ -609,6 +609,9 @@ M:LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, LONGEST
 # string.
 M:char *:core_pid_to_str:ptid_t ptid:ptid
 
+# BFD target to use when generating a core file.
+V:const char *:gcore_bfd_target:::0:0:::gdbarch->gcore_bfd_target
+
 # If the elements of C++ vtables are in-place function descriptors rather
 # than normal function pointers (which may point to code or a descriptor),
 # set this to one.

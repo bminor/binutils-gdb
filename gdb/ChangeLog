@@ -1,5 +1,19 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (gcore_bfd_target): New gdbarch callback.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* gcore.c (default_gcore_target): Make return value const.
+	Call gdbarch_gcore_bfd_target if present.
+	(default_gcore_arch, default_gcore_mach): Use target_gdbarch.
+
+	* corelow.c (core_read_description): Call gdbarch_core_read_description
+	on core_gdbarch instead of current_gdbarch.
+
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Install gcore_bfd_target.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.c (create_string_type): Receive character type as argument.
 	* gdbtypes.h (create_string_type): Add character type argument.
 	* dwarf2read.c (read_tag_string_type): Pass character type to

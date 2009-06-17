@@ -668,6 +668,13 @@ typedef char * (gdbarch_core_pid_to_str_ftype) (struct gdbarch *gdbarch, ptid_t 
 extern char * gdbarch_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid);
 extern void set_gdbarch_core_pid_to_str (struct gdbarch *gdbarch, gdbarch_core_pid_to_str_ftype *core_pid_to_str);
 
+/* BFD target to use when generating a core file. */
+
+extern int gdbarch_gcore_bfd_target_p (struct gdbarch *gdbarch);
+
+extern const char * gdbarch_gcore_bfd_target (struct gdbarch *gdbarch);
+extern void set_gdbarch_gcore_bfd_target (struct gdbarch *gdbarch, const char * gcore_bfd_target);
+
 /* If the elements of C++ vtables are in-place function descriptors rather
    than normal function pointers (which may point to code or a descriptor),
    set this to one. */

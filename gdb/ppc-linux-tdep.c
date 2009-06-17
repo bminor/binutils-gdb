@@ -1102,6 +1102,12 @@ ppc_linux_init_abi (struct gdbarch_info info,
       /* Trampolines.  */
       tramp_frame_prepend_unwinder (gdbarch, &ppc32_linux_sigaction_tramp_frame);
       tramp_frame_prepend_unwinder (gdbarch, &ppc32_linux_sighandler_tramp_frame);
+
+      /* BFD target for core files.  */
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
+	set_gdbarch_gcore_bfd_target (gdbarch, "elf32-powerpcle");
+      else
+	set_gdbarch_gcore_bfd_target (gdbarch, "elf32-powerpc");
     }
   
   if (tdep->wordsize == 8)
@@ -1119,6 +1125,12 @@ ppc_linux_init_abi (struct gdbarch_info info,
       /* Trampolines.  */
       tramp_frame_prepend_unwinder (gdbarch, &ppc64_linux_sigaction_tramp_frame);
       tramp_frame_prepend_unwinder (gdbarch, &ppc64_linux_sighandler_tramp_frame);
+
+      /* BFD target for core files.  */
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
+	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpcle");
+      else
+	set_gdbarch_gcore_bfd_target (gdbarch, "elf64-powerpc");
     }
   set_gdbarch_regset_from_core_section (gdbarch, ppc_linux_regset_from_core_section);
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
