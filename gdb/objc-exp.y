@@ -898,11 +898,15 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier.  */
 			{ $$ = lookup_enum (copy_name ($2),
 					    expression_context_block); }
 	|	UNSIGNED typename
-			{ $$ = lookup_unsigned_typename (TYPE_NAME($2.type)); }
+			{ $$ = lookup_unsigned_typename (parse_language,
+							 parse_gdbarch,
+							 TYPE_NAME($2.type)); }
 	|	UNSIGNED
 			{ $$ = parse_type->builtin_unsigned_int; }
 	|	SIGNED_KEYWORD typename
-			{ $$ = lookup_signed_typename (TYPE_NAME($2.type)); }
+			{ $$ = lookup_signed_typename (parse_language,
+						       parse_gdbarch,
+						       TYPE_NAME($2.type)); }
 	|	SIGNED_KEYWORD
 			{ $$ = parse_type->builtin_int; }
 	|	TEMPLATE name '<' type '>'

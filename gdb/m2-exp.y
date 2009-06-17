@@ -643,7 +643,8 @@ variable:	NAME
 
 type
 	:	TYPENAME
-			{ $$ = lookup_typename (copy_name ($1),
+			{ $$ = lookup_typename (parse_language, parse_gdbarch,
+						copy_name ($1),
 						expression_context_block, 0); }
 
 	;
@@ -1026,7 +1027,8 @@ yylex ()
     sym = lookup_symbol (tmp, expression_context_block, VAR_DOMAIN, 0);
     if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
       return BLOCKNAME;
-    if (lookup_typename (copy_name (yylval.sval), expression_context_block, 1))
+    if (lookup_typename (parse_language, parse_gdbarch,
+			 copy_name (yylval.sval), expression_context_block, 1))
       return TYPENAME;
 
     if(sym)

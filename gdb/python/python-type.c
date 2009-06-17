@@ -26,6 +26,7 @@
 #include "cp-support.h"
 #include "demangle.h"
 #include "objfiles.h"
+#include "language.h"
 
 typedef struct pyty_type_object
 {
@@ -373,7 +374,8 @@ typy_lookup_typename (char *type_name)
       else if (!strncmp (type_name, "enum ", 5))
 	type = lookup_enum (type_name + 5, NULL);
       else
-	type = lookup_typename (type_name, NULL, 0);
+	type = lookup_typename (current_language, current_gdbarch,
+				type_name, NULL, 0);
     }
   if (except.reason < 0)
     {

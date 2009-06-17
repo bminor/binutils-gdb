@@ -2271,7 +2271,9 @@ printf_command (char *arg, int from_tty)
 	      gdb_byte *str;
 	      CORE_ADDR tem;
 	      int j;
-	      struct type *wctype = lookup_typename ("wchar_t", NULL, 0);
+	      struct type *wctype = lookup_typename (current_language,
+						     current_gdbarch,
+						     "wchar_t", NULL, 0);
 	      int wcwidth = TYPE_LENGTH (wctype);
 	      gdb_byte *buf = alloca (wcwidth);
 	      struct obstack output;
@@ -2309,7 +2311,9 @@ printf_command (char *arg, int from_tty)
 	    break;
 	  case wide_char_arg:
 	    {
-	      struct type *wctype = lookup_typename ("wchar_t", NULL, 0);
+	      struct type *wctype = lookup_typename (current_language,
+						     current_gdbarch,
+						     "wchar_t", NULL, 0);
 	      struct type *valtype;
 	      struct obstack output;
 	      struct cleanup *inner_cleanup;

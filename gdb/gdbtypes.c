@@ -1036,7 +1036,9 @@ type_name_no_tag (const struct type *type)
    suitably defined.  */
 
 struct type *
-lookup_typename (char *name, struct block *block, int noerr)
+lookup_typename (const struct language_defn *language,
+		 struct gdbarch *gdbarch, char *name,
+		 struct block *block, int noerr)
 {
   struct symbol *sym;
   struct type *tmp;
@@ -1044,9 +1046,7 @@ lookup_typename (char *name, struct block *block, int noerr)
   sym = lookup_symbol (name, block, VAR_DOMAIN, 0);
   if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
     {
-      tmp = language_lookup_primitive_type_by_name (current_language,
-						    current_gdbarch,
-						    name);
+      tmp = language_lookup_primitive_type_by_name (language, gdbarch, name);
       if (tmp)
 	{
 	  return tmp;
@@ -1064,28 +1064,30 @@ lookup_typename (char *name, struct block *block, int noerr)
 }
 
 struct type *
-lookup_unsigned_typename (char *name)
+lookup_unsigned_typename (const struct language_defn *language,
+			  struct gdbarch *gdbarch, char *name)
 {
   char *uns = alloca (strlen (name) + 10);
 
   strcpy (uns, "unsigned ");
   strcpy (uns + 9, name);
-  return (lookup_typename (uns, (struct block *) NULL, 0));
+  return lookup_typename (language, gdbarch, uns, (struct block *) NULL, 0);
 }
 
 struct type *
-lookup_signed_typename (char *name)
+lookup_signed_typename (const struct language_defn *language,
+			struct gdbarch *gdbarch, char *name)
 {
   struct type *t;
   char *uns = alloca (strlen (name) + 8);
 
   strcpy (uns, "signed ");
   strcpy (uns + 7, name);
-  t = lookup_typename (uns, (struct block *) NULL, 1);
+  t = lookup_typename (language, gdbarch, uns, (struct block *) NULL, 1);
   /* If we don't find "signed FOO" just try again with plain "FOO".  */
   if (t != NULL)
     return t;
-  return lookup_typename (name, (struct block *) NULL, 0);
+  return lookup_typename (language, gdbarch, name, (struct block *) NULL, 0);
 }
 
 /* Lookup a structure type named "struct NAME",

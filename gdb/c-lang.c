@@ -908,13 +908,16 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 					      exp->gdbarch);
 	    break;
 	  case C_WIDE_STRING:
-	    type = lookup_typename ("wchar_t", NULL, 0);
+	    type = lookup_typename (exp->language_defn, exp->gdbarch,
+				    "wchar_t", NULL, 0);
 	    break;
 	  case C_STRING_16:
-	    type = lookup_typename ("char16_t", NULL, 0);
+	    type = lookup_typename (exp->language_defn, exp->gdbarch,
+				    "char16_t", NULL, 0);
 	    break;
 	  case C_STRING_32:
-	    type = lookup_typename ("char32_t", NULL, 0);
+	    type = lookup_typename (exp->language_defn, exp->gdbarch,
+				    "char32_t", NULL, 0);
 	    break;
 	  default:
 	    internal_error (__FILE__, __LINE__, "unhandled c_string_type");

@@ -1,5 +1,29 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (struct language_defn): Add forward declaration.
+	(lookup_typename): Add LANGUAGE and GDBARCH parameters.
+	(lookup_unsigned_typename): Likewise.
+	(lookup_signed_typename): Likewise.
+	* gdbtypes.c (lookup_typename): Add LANGUAGE and GDBARCH parameters.
+	Use them instead of current_language and current_gdbarch.
+	(lookup_unsigned_typename): Add LANGUAGE and GDBARCH parameters.
+	Pass them to lookup_typename.
+	(lookup_signed_typename): Likewise.
+
+	* c-exp.y: Pass parse_language and parse_gdbarch to
+	lookup_unsigned_typename and lookup_signed_typename.
+	* objc-exp.y: Likewise.
+	* m2-exp.y: Pass parse_language and parse_gdbarch to lookup_typename.
+
+	* c-lang.c (evaluate_subexp_c): Pass expression language and
+	gdbarch to lookup_typename.
+	* printcmd.c (printf_command): Pass current language and
+	gdbarch to lookup_typename.
+	* python/python-type.c (typy_lookup_typename): Likewise.
+	Include "language.h".
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* sparc64-nat.c (sparc64_gregset_supplies_p): Add GDBARCH parameter.
 	Use it instead of current_gdbarch.  Pass architecture to
 	sparc32_gregset_supplies_p.
