@@ -128,7 +128,7 @@ static void overlay_command (char *, int);
 
 static void simple_free_overlay_table (void);
 
-static void read_target_long_array (CORE_ADDR, unsigned int *, int);
+static void read_target_long_array (CORE_ADDR, unsigned int *, int, int);
 
 static int simple_read_overlay_table (void);
 
@@ -3288,6 +3288,8 @@ overlay_invalidate_all (void)
 int
 section_is_mapped (struct obj_section *osect)
 {
+  struct gdbarch *gdbarch;
+
   if (osect == 0 || !section_is_overlay (osect))
     return 0;
 
@@ -3299,7 +3301,8 @@ section_is_mapped (struct obj_section *osect)
     case ovly_auto:		/* overlay debugging automatic */
       /* Unles there is a gdbarch_overlay_update function,
          there's really nothing useful to do here (can't really go auto)  */
-      if (gdbarch_overlay_update_p (current_gdbarch))
+      gdbarch = get_objfile_arch (osect->objfile);
+      if (gdbarch_overlay_update_p (gdbarch))
 	{
 	  if (overlay_cache_invalid)
 	    {
@@ -3307,7 +3310,7 @@ section_is_mapped (struct obj_section *osect)
 	      overlay_cache_invalid = 0;
 	    }
 	  if (osect->ovly_mapped == -1)
-	    gdbarch_overlay_update (current_gdbarch, osect);
+	    gdbarch_overlay_update (gdbarch, osect);
 	}
       /* fall thru to manual case */
     case ovly_on:		/* overlay debugging manual */
@@ -3708,8 +3711,6 @@ enum ovly_index
   {
     VMA, SIZE, LMA, MAPPED
   };
-#define TARGET_LONG_BYTES (gdbarch_long_bit (current_gdbarch) \
-			    / TARGET_CHAR_BIT)
 
 /* Throw away the cached copy of _ovly_table */
 static void
@@ -3735,19 +3736,19 @@ simple_free_overlay_region_table (void)
 }
 #endif
 
-/* Read an array of ints from the target into a local buffer.
+/* Read an array of ints of size SIZE from the target into a local buffer.
    Convert to host order.  int LEN is number of ints  */
 static void
-read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr, int len)
+read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr,
+			int len, int size)
 {
   /* FIXME (alloca): Not safe if array is very large. */
-  gdb_byte *buf = alloca (len * TARGET_LONG_BYTES);
+  gdb_byte *buf = alloca (len * size);
   int i;
 
-  read_memory (memaddr, buf, len * TARGET_LONG_BYTES);
+  read_memory (memaddr, buf, len * size);
   for (i = 0; i < len; i++)
-    myaddr[i] = extract_unsigned_integer (TARGET_LONG_BYTES * i + buf,
-					  TARGET_LONG_BYTES);
+    myaddr[i] = extract_unsigned_integer (size * i + buf, size);
 }
 
 /* Find and grab a copy of the target _ovly_table
@@ -3756,6 +3757,8 @@ static int
 simple_read_overlay_table (void)
 {
   struct minimal_symbol *novlys_msym, *ovly_table_msym;
+  struct gdbarch *gdbarch;
+  int word_size;
 
   simple_free_overlay_table ();
   novlys_msym = lookup_minimal_symbol ("_novlys", NULL, NULL);
@@ -3776,13 +3779,16 @@ simple_read_overlay_table (void)
       return 0;
     }
 
+  gdbarch = get_objfile_arch (msymbol_objfile (ovly_table_msym));
+  word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
+
   cache_novlys = read_memory_integer (SYMBOL_VALUE_ADDRESS (novlys_msym), 4);
   cache_ovly_table
     = (void *) xmalloc (cache_novlys * sizeof (*cache_ovly_table));
   cache_ovly_table_base = SYMBOL_VALUE_ADDRESS (ovly_table_msym);
   read_target_long_array (cache_ovly_table_base,
                           (unsigned int *) cache_ovly_table,
-                          cache_novlys * 4);
+                          cache_novlys * 4, word_size);
 
   return 1;			/* SUCCESS */
 }
@@ -3807,10 +3813,12 @@ simple_read_overlay_region_table (void)
       msym = lookup_minimal_symbol ("_ovly_region_table", NULL, NULL);
       if (msym != NULL)
 	{
+	  struct gdbarch *gdbarch = get_objfile_arch (msymbol_objfile (msym));
+	  int word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
 	  cache_ovly_region_table_base = SYMBOL_VALUE_ADDRESS (msym);
 	  read_target_long_array (cache_ovly_region_table_base,
 				  (unsigned int *) cache_ovly_region_table,
-				  cache_novly_regions * 3);
+				  cache_novly_regions * 3, word_size);
 	}
       else
 	return 0;		/* failure */
@@ -3835,6 +3843,8 @@ simple_overlay_update_1 (struct obj_section *osect)
   int i, size;
   bfd *obfd = osect->objfile->obfd;
   asection *bsect = osect->the_bfd_section;
+  struct gdbarch *gdbarch = get_objfile_arch (osect->objfile);
+  int word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
 
   size = bfd_get_section_size (osect->the_bfd_section);
   for (i = 0; i < cache_novlys; i++)
@@ -3842,8 +3852,9 @@ simple_overlay_update_1 (struct obj_section *osect)
 	&& cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect)
 	/* && cache_ovly_table[i][SIZE] == size */ )
       {
-	read_target_long_array (cache_ovly_table_base + i * TARGET_LONG_BYTES,
-				(unsigned int *) cache_ovly_table[i], 4);
+	read_target_long_array (cache_ovly_table_base + i * word_size,
+				(unsigned int *) cache_ovly_table[i],
+				4, word_size);
 	if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
 	    && cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect)
 	    /* && cache_ovly_table[i][SIZE] == size */ )

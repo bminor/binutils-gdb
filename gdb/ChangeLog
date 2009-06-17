@@ -1,5 +1,17 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* symfile.c (section_is_mapped): Use objfile architecture instead
+	of current_gdbarch.
+	(TARGET_LONG_BYTES): Remove.
+	(read_target_long_array): Add SIZE argument.  Use it instead of
+	TARGET_LONG_BYTES.
+	(simple_read_overlay_table): Retrieve long size from objfile
+	architecture; pass it to read_target_long_array.
+	(simple_read_overlay_region_table): Likewise.
+	(simple_overlay_update_1): Likewise.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* infrun.c (cleanup_displaced_step_closure): Remove.
 	(displaced_step_clear_cleanup): Move to before displaced_step_prepare.
 	(displaced_step_prepare): Use displaced_step_clear_cleanup instead
