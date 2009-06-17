@@ -1,5 +1,14 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* infrun.c (cleanup_displaced_step_closure): Remove.
+	(displaced_step_clear_cleanup): Move to before displaced_step_prepare.
+	(displaced_step_prepare): Use displaced_step_clear_cleanup instead
+	of cleanup_displaced_step_closure.
+	(handle_inferior_event, keep_going): Use thread architecture instead
+	of current_gdbarch.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* infrun.c (handle_inferior_event): Use current frame architecture
 	or thread architecture instead of current_gdbarch.  Pass to
 	handle_step_into_function and handle_step_into_function_backward.

@@ -763,11 +763,9 @@ displaced_step_clear (void)
 }
 
 static void
-cleanup_displaced_step_closure (void *ptr)
+displaced_step_clear_cleanup (void *ignore)
 {
-  struct displaced_step_closure *closure = ptr;
-
-  gdbarch_displaced_step_free_closure (current_gdbarch, closure);
+  displaced_step_clear ();
 }
 
 /* Dump LEN bytes at BUF in hex to FILE, followed by a newline.  */
@@ -878,7 +876,15 @@ displaced_step_prepare (ptid_t ptid)
   /* We don't support the fully-simulated case at present.  */
   gdb_assert (closure);
 
-  make_cleanup (cleanup_displaced_step_closure, closure);
+  /* Save the information we need to fix things up if the step
+     succeeds.  */
+  displaced_step_ptid = ptid;
+  displaced_step_gdbarch = gdbarch;
+  displaced_step_closure = closure;
+  displaced_step_original = original;
+  displaced_step_copy = copy;
+
+  make_cleanup (displaced_step_clear_cleanup, 0);
 
   /* Resume execution at the copy.  */
   regcache_write_pc (regcache, copy);
@@ -891,20 +897,7 @@ displaced_step_prepare (ptid_t ptid)
     fprintf_unfiltered (gdb_stdlog, "displaced: displaced pc to 0x%s\n",
 			paddr_nz (copy));
 
-  /* Save the information we need to fix things up if the step
-     succeeds.  */
-  displaced_step_ptid = ptid;
-  displaced_step_gdbarch = gdbarch;
-  displaced_step_closure = closure;
-  displaced_step_original = original;
-  displaced_step_copy = copy;
   return 1;
-}
-
-static void
-displaced_step_clear_cleanup (void *ignore)
-{
-  displaced_step_clear ();
 }
 
 static void
@@ -2923,6 +2916,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 
       if (thread_hop_needed)
 	{
+	  struct regcache *thread_regcache;
 	  int remove_status = 0;
 
 	  if (debug_infrun)
@@ -2945,7 +2939,8 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 
 	  /* If the arch can displace step, don't remove the
 	     breakpoints.  */
-	  if (!use_displaced_stepping (current_gdbarch))
+	  thread_regcache = get_thread_regcache (ecs->ptid);
+	  if (!use_displaced_stepping (get_regcache_arch (thread_regcache)))
 	    remove_status = remove_breakpoints ();
 
 	  /* Did we fail to remove breakpoints?  If so, try
@@ -4281,7 +4276,8 @@ keep_going (struct execution_control_state *ecs)
       
       if (ecs->event_thread->stepping_over_breakpoint)
 	{
-	  if (! use_displaced_stepping (current_gdbarch))
+	  struct regcache *thread_regcache = get_thread_regcache (ecs->ptid);
+	  if (!use_displaced_stepping (get_regcache_arch (thread_regcache)))
 	    /* Since we can't do a displaced step, we have to remove
 	       the breakpoint while we step it.  To keep things
 	       simple, we remove them all.  */
