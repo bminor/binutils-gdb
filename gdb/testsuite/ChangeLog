@@ -1,5 +1,9 @@
 2009-06-17  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* gdb.base/dump.exp: Handle SPU like 64-bit platforms.
+
+2009-06-17  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.mi/gdb680.exp: Update test for error message.
 
 2009-06-17  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>

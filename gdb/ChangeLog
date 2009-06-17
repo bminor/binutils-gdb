@@ -1,5 +1,19 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* printcmd.c (print_scalar_formatted): Always truncate
+	unsigned data types.
+
+	* cli-dump.c (struct callback_data): Change type of load_offset
+	to CORE_ADDR.
+	(restore_binary_file): Update type casts.
+	(restore_command): Parse load_offset as address, not long.
+
+	* utils.c (string_to_core_addr): Do not sign-extend value.
+	* varobj.c (find_frame_addr_in_frame_chain): Truncate frame_base
+	before comparing against requested frame address.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (gcore_bfd_target): New gdbarch callback.
 	* gdbarch.h, gdbarch.c: Regenerate.
 

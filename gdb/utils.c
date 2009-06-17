@@ -3154,7 +3154,6 @@ core_addr_to_string_nz (const CORE_ADDR addr)
 CORE_ADDR
 string_to_core_addr (const char *my_string)
 {
-  int addr_bit = gdbarch_addr_bit (current_gdbarch);
   CORE_ADDR addr = 0;
 
   if (my_string[0] == '0' && tolower (my_string[1]) == 'x')
@@ -3170,17 +3169,6 @@ string_to_core_addr (const char *my_string)
 	  else
 	    error (_("invalid hex \"%s\""), my_string);
 	}
-
-      /* Not very modular, but if the executable format expects
-         addresses to be sign-extended, then do so if the address was
-         specified with only 32 significant bits.  Really this should
-         be determined by the target architecture, not by the object
-         file.  */
-      if (i - 2 == addr_bit / 4
-	  && exec_bfd
-	  && bfd_get_sign_extend_vma (exec_bfd))
-	addr = (addr ^ ((CORE_ADDR) 1 << (addr_bit - 1)))
-	       - ((CORE_ADDR) 1 << (addr_bit - 1));
     }
   else
     {

@@ -42,6 +42,12 @@ if {[istarget "ia64*-*-*"] || [istarget "hppa64-*-*"]} then {
     set is64bitonly "yes"
 }
 
+if {[istarget "spu*-*-*"]} then {
+    # The internal address format used for the combined Cell/B.E.
+    # debugger requires 64-bit.
+    set is64bitonly "yes"
+}
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable ${options}] != "" } {
      untested dump.exp
      return -1

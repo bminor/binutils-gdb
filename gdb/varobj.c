@@ -462,7 +462,16 @@ find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
        frame != NULL;
        frame = get_prev_frame (frame))
     {
-      if (get_frame_base_address (frame) == frame_addr)
+      /* The CORE_ADDR we get as argument was parsed from a string GDB
+	 output as $fp.  This output got truncated to gdbarch_addr_bit.
+	 Truncate the frame base address in the same manner before
+	 comparing it against our argument.  */
+      CORE_ADDR frame_base = get_frame_base_address (frame);
+      int addr_bit = gdbarch_addr_bit (get_frame_arch (frame));
+      if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
+	frame_base &= ((CORE_ADDR) 1 << addr_bit) - 1;
+
+      if (frame_base == frame_addr)
 	return frame;
     }
 

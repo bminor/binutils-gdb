@@ -428,7 +428,7 @@ add_dump_command (char *name, void (*func) (char *args, char *mode),
 
 /* Opaque data for restore_section_callback. */
 struct callback_data {
-  long load_offset;
+  CORE_ADDR load_offset;
   CORE_ADDR load_start;
   CORE_ADDR load_end;
 };
@@ -533,8 +533,8 @@ restore_binary_file (char *filename, struct callback_data *data)
   printf_filtered 
     ("Restoring binary file %s into memory (0x%lx to 0x%lx)\n", 
      filename, 
-     (unsigned long) data->load_start + data->load_offset, 
-     (unsigned long) data->load_start + data->load_offset + len);
+     (unsigned long) (data->load_start + data->load_offset),
+     (unsigned long) (data->load_start + data->load_offset + len));
 
   /* Now set the file pos to the requested load start pos.  */
   if (fseek (file, data->load_start, SEEK_SET) != 0)
@@ -584,7 +584,7 @@ restore_command (char *args, int from_tty)
       /* Parse offset (optional). */
       if (args != NULL && *args != '\0')
       data.load_offset = 
-	parse_and_eval_long (scan_expression_with_cleanup (&args, NULL));
+	parse_and_eval_address (scan_expression_with_cleanup (&args, NULL));
       if (args != NULL && *args != '\0')
 	{
 	  /* Parse start address (optional). */

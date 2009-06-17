@@ -407,7 +407,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
   /* If we are printing it as unsigned, truncate it in case it is actually
      a negative signed value (e.g. "print/u (short)-1" should print 65535
      (if shorts are 16 bits) instead of 4294967295).  */
-  if (options->format != 'd')
+  if (options->format != 'd' || TYPE_UNSIGNED (type))
     {
       if (len < sizeof (LONGEST))
 	val_long &= ((LONGEST) 1 << HOST_CHAR_BIT * len) - 1;
