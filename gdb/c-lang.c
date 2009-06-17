@@ -904,8 +904,8 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	switch (dest_type & ~C_CHAR)
 	  {
 	  case C_STRING:
-	    type = language_string_char_type (current_language,
-					      current_gdbarch);
+	    type = language_string_char_type (exp->language_defn,
+					      exp->gdbarch);
 	    break;
 	  case C_WIDE_STRING:
 	    type = lookup_typename ("wchar_t", NULL, 0);

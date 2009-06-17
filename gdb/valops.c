@@ -832,6 +832,7 @@ value_assign (struct value *toval, struct value *fromval)
     case lval_register:
       {
 	struct frame_info *frame;
+	struct gdbarch *gdbarch;
 	int value_reg;
 
 	/* Figure out which frame this is in currently.  */
@@ -840,14 +841,14 @@ value_assign (struct value *toval, struct value *fromval)
 
 	if (!frame)
 	  error (_("Value being assigned to is no longer active."));
-	
-	if (gdbarch_convert_register_p
-	    (current_gdbarch, VALUE_REGNUM (toval), type))
+
+	gdbarch = get_frame_arch (frame);
+	if (gdbarch_convert_register_p (gdbarch, VALUE_REGNUM (toval), type))
 	  {
 	    /* If TOVAL is a special machine register requiring
 	       conversion of program values to a special raw
 	       format.  */
-	    gdbarch_value_to_register (current_gdbarch, frame, 
+	    gdbarch_value_to_register (gdbarch, frame,
 				       VALUE_REGNUM (toval), type,
 				       value_contents (fromval));
 	  }

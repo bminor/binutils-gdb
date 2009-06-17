@@ -906,7 +906,7 @@ mt_frame_unwind_cache (struct frame_info *this_frame,
     return info;
 
   end_addr = get_frame_pc (this_frame);
-  prologue_end_addr = skip_prologue_using_sal (start_addr);
+  prologue_end_addr = skip_prologue_using_sal (gdbarch, start_addr);
   if (end_addr == 0)
   for (next_addr = start_addr; next_addr < end_addr; next_addr += 4)
     {

@@ -566,7 +566,8 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     }
   else
     {
-      struct_return = using_struct_return (value_type (function), values_type);
+      struct_return = using_struct_return (gdbarch,
+					   value_type (function), values_type);
       target_values_type = values_type;
     }
 

@@ -1,5 +1,79 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* dummy-frame.c (deprecated_pc_in_call_dummy): Add GDBARCH parameter,
+	use it instead of current_gdbarch.
+	* frame.h (deprecated_pc_in_call_dummy): Add GDBARCH parameter.
+	* arm-tdep.c (arm_skip_prologue): Pass architecture to
+	deprecated_pc_in_call_dummy.
+
+	* symtab.c (skip_prologue_using_sal): Add GDBARCH parameter.
+	Use it instead of current_gdbarch.
+	* symtab.h (skip_prologue_using_sal): Add GDBARCH parameter.
+	* breakpoint.c (expand_line_sal_maybe): Pass architecture to
+	skip_prologue_using_sal.
+	* arm-tdep.c (skip_prologue_using_sal): Likewise.
+	* lm32-tdep.c (lm32_skip_prologue): Likewise.
+	* m32-tdep.c (m32c_skip_prologue): Likewise.
+	* mips-tdep.c (mips_skip_prologue): Likewise.
+	* moxie-tdep.c (moxie_skip_prologue): Likewise.
+	* mt-tdep.c (mt_frame_unwind_cache): Likewise.
+	* rs6000-tdep.c (rs6000_skip_prologue): Likewise.
+	* frv-tdep.c (frv_analyze_prologue): Add GDBARCH parameter, pass
+	it to skip_prologue_using_sal.  Update call sites ...
+	(frv_skip_prologue, frv_frame_unwind_cache): ... here.
+
+	* mn10300-tdep.c (struct mn10300_prologue): Add GDBARCH member.
+	(check_for_saved): Use it instead of current_gdbarch.
+	(mn10300_analyze_prologue): Set it.
+
+	* value.c (using_struct_return): Add GDBARCH parameter.  Use it
+	instead of current_gdbarch.
+	* value.h (using_struct_return): Add GDBARCH parameter.
+	* eval.c (evaluate_subexp_standard): Pass architecture to
+	using_struct_return.
+	* infcall.c (call_function_by_hand): Likewise.
+	* stack.c (return_command): Likewise.
+	* sparc-tdep.c (sparc32_push_dummy_code): Likewise.
+
+	* symtab.c (in_prologue): Add GDBARCH parameter.  Use it instead of
+	current_gdbarch.
+	* symtab.h (in_prologue): Add GDBARCH parameter.
+	* infrun.c (handle_inferior_event): Pass architecture to in_prologue.
+
+	* eval.c (evaluate_subexp_standard): Use expression architecture
+	instead of current_gdbarch.
+
+	* c-lang.c (evaluate_subexp_c): Use expression architecture and
+	language instead of current_gdbarch and current_language.
+
+	* printcmd.c (do_one_display): Use expression architecture instead
+	of current_gdbarch.
+
+	* infcmd.c (print_return_value): Use architecture of stop_regcache
+	instead of current_gdbarch.
+	(print_vector_info, print_float_info): Remove GDBARCH argument,
+	use frame architecture instead.
+	(vector_info, float_info): Update calls.
+
+	* objc-lang.c (objc_skip_trampoline): Use frame architecture
+	instead of current_gdbarch.
+
+	* parse.c (write_dollar_variable): Use parse architecture instead
+	of current_gdbarch.
+
+	* source.c (line_info): Use objfile architecture instead of
+	current_gdbarch.
+
+	* symtab.c (find_function_start_sal): Use gdbarch instead of
+	current_gdbarch.
+	(print_msymbol_info): Use objfile architecture instead of
+	current_gdbarch.
+
+	* valops.c (value_assign): Use frame architecture instead of
+	current_gdbarch.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* buildsym.c (record_line): Remove call to gdbarch_addr_bits_remove.
 
 	* coffread.c (coff_symtab_read): Call gdbarch_addr_bits_remove before

@@ -194,7 +194,8 @@ lm32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
      is greater.  */
   if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
     {
-      CORE_ADDR post_prologue_pc = skip_prologue_using_sal (func_addr);
+      CORE_ADDR post_prologue_pc
+	= skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
 	return max (pc, post_prologue_pc);
     }
@@ -205,7 +206,7 @@ lm32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   /* Find an upper limit on the function prologue using the debug
      information.  If the debug information could not be used to provide
      that bound, then use an arbitrary large number as the upper bound.  */
-  limit_pc = skip_prologue_using_sal (pc);
+  limit_pc = skip_prologue_using_sal (gdbarch, pc);
   if (limit_pc == 0)
     limit_pc = pc + 100;	/* Magic.  */
 

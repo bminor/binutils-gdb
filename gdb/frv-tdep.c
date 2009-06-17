@@ -510,7 +510,8 @@ is_argument_reg (int reg)
    arguments in any frame but the top, you'll need to do this serious
    prologue analysis.  */
 static CORE_ADDR
-frv_analyze_prologue (CORE_ADDR pc, struct frame_info *this_frame,
+frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
+		      struct frame_info *this_frame,
                       struct frv_unwind_cache *info)
 {
   /* When writing out instruction bitpatterns, we use the following
@@ -568,7 +569,7 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *this_frame,
 
   /* Try to compute an upper limit (on how far to scan) based on the
      line number info.  */
-  lim_pc = skip_prologue_using_sal (pc);
+  lim_pc = skip_prologue_using_sal (gdbarch, pc);
   /* If there's no line number info, lim_pc will be 0.  In that case,
      set the limit to be 100 instructions away from pc.  Hopefully, this
      will be far enough away to account for the entire prologue.  Don't
@@ -993,7 +994,7 @@ frv_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
      If we didn't find a real source location past that, then
      do a full analysis of the prologue.  */
   if (new_pc < pc + 20)
-    new_pc = frv_analyze_prologue (pc, 0, 0);
+    new_pc = frv_analyze_prologue (gdbarch, pc, 0, 0);
 
   return new_pc;
 }
@@ -1095,7 +1096,8 @@ frv_frame_unwind_cache (struct frame_info *this_frame,
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* Prologue analysis does the rest...  */
-  frv_analyze_prologue (get_frame_func (this_frame), this_frame, info);
+  frv_analyze_prologue (gdbarch,
+			get_frame_func (this_frame), this_frame, info);
 
   return info;
 }

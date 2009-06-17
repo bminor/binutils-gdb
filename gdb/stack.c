@@ -1823,12 +1823,14 @@ void
 return_command (char *retval_exp, int from_tty)
 {
   struct frame_info *thisframe;
+  struct gdbarch *gdbarch;
   struct symbol *thisfun;
   struct value *return_value = NULL;
   const char *query_prefix = "";
 
   thisframe = get_selected_frame ("No selected frame.");
   thisfun = get_frame_function (thisframe);
+  gdbarch = get_frame_arch (thisframe);
 
   /* Compute the return value.  If the computation triggers an error,
      let it bail.  If the return type can't be handled, set
@@ -1873,7 +1875,8 @@ return_command (char *retval_exp, int from_tty)
            occur.  */
 	return_value = NULL;
       else if (thisfun != NULL
-	       && using_struct_return (SYMBOL_TYPE (thisfun), return_type))
+	       && using_struct_return (gdbarch,
+				       SYMBOL_TYPE (thisfun), return_type))
 	{
 	  query_prefix = "\
 The location at which to store the function's return value is unknown.\n\

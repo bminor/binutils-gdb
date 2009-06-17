@@ -1292,9 +1292,11 @@ extern enum language deduce_language_from_filename (char *);
 
 /* symtab.c */
 
-extern int in_prologue (CORE_ADDR pc, CORE_ADDR func_start);
+extern int in_prologue (struct gdbarch *gdbarch,
+			CORE_ADDR pc, CORE_ADDR func_start);
 
-extern CORE_ADDR skip_prologue_using_sal (CORE_ADDR func_addr);
+extern CORE_ADDR skip_prologue_using_sal (struct gdbarch *gdbarch,
+					  CORE_ADDR func_addr);
 
 extern struct symbol *fixup_symbol_section (struct symbol *,
 					    struct objfile *);

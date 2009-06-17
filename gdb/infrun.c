@@ -3723,7 +3723,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 
       if ((ecs->event_thread->step_over_calls == STEP_OVER_NONE)
 	  || ((ecs->event_thread->step_range_end == 1)
-	      && in_prologue (ecs->event_thread->prev_pc,
+	      && in_prologue (gdbarch, ecs->event_thread->prev_pc,
 			      ecs->stop_func_start)))
 	{
 	  /* I presume that step_over_calls is only 0 when we're

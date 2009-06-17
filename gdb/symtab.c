@@ -2681,11 +2681,11 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
      to `__main' in `main' between the prologue and before user
      code.  */
   if (funfirstline
-      && gdbarch_skip_main_prologue_p (current_gdbarch)
+      && gdbarch_skip_main_prologue_p (gdbarch)
       && SYMBOL_LINKAGE_NAME (sym)
       && strcmp (SYMBOL_LINKAGE_NAME (sym), "main") == 0)
     {
-      pc = gdbarch_skip_main_prologue (current_gdbarch, pc);
+      pc = gdbarch_skip_main_prologue (gdbarch, pc);
       /* Recalculate the line number (might not be N+1).  */
       sal = find_pc_sect_line (pc, SYMBOL_OBJ_SECTION (sym), 0);
     }
@@ -3399,9 +3399,10 @@ print_symbol_info (domain_enum kind, struct symtab *s, struct symbol *sym,
 static void
 print_msymbol_info (struct minimal_symbol *msymbol)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (msymbol_objfile (msymbol));
   char *tmp;
 
-  if (gdbarch_addr_bit (current_gdbarch) <= 32)
+  if (gdbarch_addr_bit (gdbarch) <= 32)
     tmp = hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol)
 			     & (CORE_ADDR) 0xffffffff,
 			     8);
@@ -4237,7 +4238,7 @@ make_source_files_completion_list (char *text, char *word)
  */
 
 int
-in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
+in_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR func_start)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
@@ -4269,7 +4270,7 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
       if (! func_start)
 	return 1;		/* We *might* be in a prologue.  */
 
-      prologue_end = gdbarch_skip_prologue (current_gdbarch, func_start);
+      prologue_end = gdbarch_skip_prologue (gdbarch, func_start);
 
       return func_start <= pc && pc < prologue_end;
     }
@@ -4293,8 +4294,7 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
       /* We don't have any good line number info, so use the minsym
 	 information, together with the architecture-specific prologue
 	 scanning code.  */
-      CORE_ADDR prologue_end = gdbarch_skip_prologue
-			         (current_gdbarch, func_addr);
+      CORE_ADDR prologue_end = gdbarch_skip_prologue (gdbarch, func_addr);
 
       return func_addr <= pc && pc < prologue_end;
     }
@@ -4321,7 +4321,7 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
    found in both ia64 and ppc).  */
 
 CORE_ADDR
-skip_prologue_using_sal (CORE_ADDR func_addr)
+skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 {
   struct symtab_and_line prologue_sal;
   CORE_ADDR start_pc;
@@ -4330,7 +4330,7 @@ skip_prologue_using_sal (CORE_ADDR func_addr)
 
   /* Get an initial range for the function.  */
   find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);
-  start_pc += gdbarch_deprecated_function_start_offset (current_gdbarch);
+  start_pc += gdbarch_deprecated_function_start_offset (gdbarch);
 
   prologue_sal = find_pc_line (start_pc, 0);
   if (prologue_sal.line != 0)

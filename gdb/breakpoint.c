@@ -5420,8 +5420,18 @@ expand_line_sal_maybe (struct symtab_and_line sal)
 		  if (sym)
 		    expanded.sals[i] = find_function_start_sal (sym, 1);
 		  else
-		    expanded.sals[i].pc 
-		      = gdbarch_skip_prologue (current_gdbarch, pc);
+		    {
+		      /* Since find_pc_partial_function returned true,
+			 we should really always find the section here.  */
+		      struct obj_section *section = find_pc_section (pc);
+		      if (section)
+			{
+			  struct gdbarch *gdbarch
+			    = get_objfile_arch (section->objfile);
+			  expanded.sals[i].pc
+			    = gdbarch_skip_prologue (gdbarch, pc);
+			}
+		    }
 		}
 	    }
 	}

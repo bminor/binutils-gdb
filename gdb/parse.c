@@ -597,7 +597,7 @@ write_dollar_variable (struct stoken str)
 
   /* Handle tokens that refer to machine registers:
      $ followed by a register name.  */
-  i = user_reg_map_name_to_regnum (current_gdbarch,
+  i = user_reg_map_name_to_regnum (parse_gdbarch,
 				   str.ptr + 1, str.length - 1);
   if (i >= 0)
     goto handle_register;

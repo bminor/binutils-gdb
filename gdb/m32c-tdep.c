@@ -1815,7 +1815,7 @@ m32c_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip)
   /* Find end by prologue analysis.  */
   m32c_analyze_prologue (gdbarch, ip, func_end, &p);
   /* Find end by line info.  */
-  sal_end = skip_prologue_using_sal (ip);
+  sal_end = skip_prologue_using_sal (gdbarch, ip);
   /* Return whichever is lower.  */
   if (sal_end != 0 && sal_end != ip && sal_end < p.prologue_end)
     return sal_end;

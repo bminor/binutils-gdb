@@ -47,6 +47,9 @@
 /* This structure holds the results of a prologue analysis.  */
 struct mn10300_prologue
 {
+  /* The architecture for which we generated this prologue info.  */
+  struct gdbarch *gdbarch;
+
   /* The offset from the frame base to the stack pointer --- always
      zero or negative.
 
@@ -371,7 +374,7 @@ check_for_saved (void *result_untyped, pv_t addr, CORE_ADDR size, pv_t value)
   if (value.kind == pvk_register
       && value.k == 0
       && pv_is_register (addr, E_SP_REGNUM)
-      && size == register_size (current_gdbarch, value.reg))
+      && size == register_size (result->gdbarch, value.reg))
     result->reg_offset[value.reg] = addr.k;
 }
 
@@ -393,6 +396,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
   int am33_mode = AM33_MODE (gdbarch);
 
   memset (result, 0, sizeof (*result));
+  result->gdbarch = gdbarch;
 
   for (rn = 0; rn < MN10300_MAX_NUM_REGS; rn++)
     {

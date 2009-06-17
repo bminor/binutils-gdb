@@ -204,7 +204,8 @@ moxie_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
      is greater.  */
   if (find_pc_partial_function (pc, &func_name, &func_addr, &func_end))
     {
-      CORE_ADDR post_prologue_pc = skip_prologue_using_sal (func_addr);
+      CORE_ADDR post_prologue_pc
+	= skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
 	return max (pc, post_prologue_pc);
       else

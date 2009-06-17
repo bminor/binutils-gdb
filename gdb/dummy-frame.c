@@ -66,7 +66,7 @@ static struct dummy_frame *dummy_frame_stack = NULL;
    NOTE: cagney/2004-08-02: Code should not need to call this.  */
 
 int
-deprecated_pc_in_call_dummy (CORE_ADDR pc)
+deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct dummy_frame *dummyframe;
   for (dummyframe = dummy_frame_stack;
@@ -75,7 +75,7 @@ deprecated_pc_in_call_dummy (CORE_ADDR pc)
     {
       if ((pc >= dummyframe->id.code_addr)
 	  && (pc <= dummyframe->id.code_addr
-		    + gdbarch_decr_pc_after_break (current_gdbarch)))
+		    + gdbarch_decr_pc_after_break (gdbarch)))
 	return 1;
     }
   return 0;

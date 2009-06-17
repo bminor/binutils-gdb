@@ -1515,7 +1515,7 @@ line_info (char *arg, int from_tty)
 	    }
 
 	  /* x/i should display this line's code.  */
-	  set_next_address (current_gdbarch, start_pc);
+	  set_next_address (get_objfile_arch (sal.symtab->objfile), start_pc);
 
 	  /* Repeating "info line" should do the following line.  */
 	  last_line_listed = sal.line + 1;

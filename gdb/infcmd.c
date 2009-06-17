@@ -1291,7 +1291,7 @@ advance_command (char *arg, int from_tty)
 static void
 print_return_value (struct type *func_type, struct type *value_type)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct gdbarch *gdbarch = get_regcache_arch (stop_registers);
   struct cleanup *old_chain;
   struct ui_stream *stb;
   struct value *value;
@@ -2012,9 +2012,11 @@ nofp_registers_info (char *addr_exp, int from_tty)
 }
 
 static void
-print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
+print_vector_info (struct ui_file *file,
 		   struct frame_info *frame, const char *args)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+
   if (gdbarch_print_vector_info_p (gdbarch))
     gdbarch_print_vector_info (gdbarch, file, frame, args);
   else
@@ -2044,8 +2046,7 @@ vector_info (char *args, int from_tty)
   if (!target_has_registers)
     error (_("The program has no registers now."));
 
-  print_vector_info (current_gdbarch, gdb_stdout,
-		     get_selected_frame (NULL), args);
+  print_vector_info (gdb_stdout, get_selected_frame (NULL), args);
 }
 
 /* Kill the inferior process.  Make us have no inferior.  */
@@ -2528,9 +2529,11 @@ interrupt_target_command (char *args, int from_tty)
 }
 
 static void
-print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
+print_float_info (struct ui_file *file,
 		  struct frame_info *frame, const char *args)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+
   if (gdbarch_print_float_info_p (gdbarch))
     gdbarch_print_float_info (gdbarch, file, frame, args);
   else
@@ -2561,8 +2564,7 @@ float_info (char *args, int from_tty)
   if (!target_has_registers)
     error (_("The program has no registers now."));
 
-  print_float_info (current_gdbarch, gdb_stdout, 
-		    get_selected_frame (NULL), args);
+  print_float_info (gdb_stdout, get_selected_frame (NULL), args);
 }
 
 static void

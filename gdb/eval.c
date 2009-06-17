@@ -754,7 +754,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	struct value *val;
 
 	(*pos) += 3 + BYTES_TO_EXP_ELEM (exp->elts[pc + 1].longconst + 1);
-	regno = user_reg_map_name_to_regnum (current_gdbarch,
+	regno = user_reg_map_name_to_regnum (exp->gdbarch,
 					     name, strlen (name));
 	if (regno == -1)
 	  error (_("Register $%s not available."), name);
@@ -765,9 +765,9 @@ evaluate_subexp_standard (struct type *expect_type,
            So for these registers, we fetch the register value regardless
            of the evaluation mode.  */
 	if (noside == EVAL_AVOID_SIDE_EFFECTS
-	    && regno < gdbarch_num_regs (current_gdbarch)
-	       + gdbarch_num_pseudo_regs (current_gdbarch))
-	  val = value_zero (register_type (current_gdbarch, regno), not_lval);
+	    && regno < gdbarch_num_regs (exp->gdbarch)
+			+ gdbarch_num_pseudo_regs (exp->gdbarch))
+	  val = value_zero (register_type (exp->gdbarch, regno), not_lval);
 	else
 	  val = value_of_register (regno, get_selected_frame (NULL));
 	if (val == NULL)
@@ -1185,11 +1185,12 @@ evaluate_subexp_standard (struct type *expect_type,
 		  val_type = expect_type;
 	      }
 
-	    struct_return = using_struct_return (value_type (method), val_type);
+	    struct_return = using_struct_return (exp->gdbarch,
+						 value_type (method), val_type);
 	  }
 	else if (expect_type != NULL)
 	  {
-	    struct_return = using_struct_return (NULL,
+	    struct_return = using_struct_return (exp->gdbarch, NULL,
 						 check_typedef (expect_type));
 	  }
 	
