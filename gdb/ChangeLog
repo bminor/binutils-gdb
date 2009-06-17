@@ -1,3 +1,7 @@
+2009-06-17  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (zlib_decompress_section): Use a cleanup.
+
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbarch.sh (pointer_to_address): Change to type 'm'.

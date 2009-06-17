@@ -1208,6 +1208,7 @@ zlib_decompress_section (struct objfile *objfile, asection *sectp,
 #else
   bfd_size_type compressed_size = bfd_get_section_size (sectp);
   gdb_byte *compressed_buffer = xmalloc (compressed_size);
+  struct cleanup *cleanup = make_cleanup (xfree, compressed_buffer);
   bfd_size_type uncompressed_size;
   gdb_byte *uncompressed_buffer;
   z_stream strm;
@@ -1264,7 +1265,7 @@ zlib_decompress_section (struct objfile *objfile, asection *sectp,
     error (_("Dwarf Error: concluding DWARF uncompression in '%s': %d"),
            bfd_get_filename (abfd), rc);
 
-  xfree (compressed_buffer);
+  do_cleanups (cleanup);
   *outbuf = uncompressed_buffer;
   *outsize = uncompressed_size;
 #endif
