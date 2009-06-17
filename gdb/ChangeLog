@@ -1,5 +1,18 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* tui/tui-regs.c (tui_show_register_group): Remove GDBARCH parameter;
+	use frame architecture instead.  Replace current_gdbarch uses.
+	(tui_show_registers): Update call.
+	(tui_get_register): Remove GDBARCH parameter; use frame architecture
+	instead.
+	(tui_show_register_group): Update call.
+	(tui_check_register_values): Likewise.
+	(tui_register_format): Remove GDBARCH parameter; use frame
+	architecture instead.  Replace current_gdbarch uses.
+	(tui_get_register): Update call.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (construct_inferior_arguments): Remove.
 	* gdbarch.c, gdbarch.h: Regenerate.
 	* infcmd.c (get_inferior_args): Call construct_inferior_arguments
