@@ -1747,6 +1747,7 @@ proc gdb_compile {source dest type options} {
 
     if { $type == "executable" } {
 	if { ([istarget "*-*-mingw*"]
+	      || [istarget "*-*-*djgpp"]
 	      || [istarget "*-*-cygwin*"])} {
 	    # Force output to unbuffered mode, by linking in an object file
 	    # with a global contructor that calls setvbuf.

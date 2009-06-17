@@ -1,3 +1,8 @@
+2009-06-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* lib/gdb.exp (gdb_compile): Also force unbuffered mode for DJGPP
+	target.
+
 2009-06-17  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.base/dump.exp: Handle SPU like 64-bit platforms.
