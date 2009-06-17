@@ -581,19 +581,6 @@ typedef int (gdbarch_in_function_epilogue_p_ftype) (struct gdbarch *gdbarch, COR
 extern int gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch, gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p);
 
-/* Given a vector of command-line arguments, return a newly allocated
-   string which, when passed to the create_inferior function, will be
-   parsed (on Unix systems, by the shell) to yield the same vector.
-   This function should call error() if the argument vector is not
-   representable for this target or if this target does not support
-   command-line arguments.
-   ARGC is the number of elements in the vector.
-   ARGV is an array of strings, one per argument. */
-
-typedef char * (gdbarch_construct_inferior_arguments_ftype) (struct gdbarch *gdbarch, int argc, char **argv);
-extern char * gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv);
-extern void set_gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch, gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments);
-
 typedef void (gdbarch_elf_make_msymbol_special_ftype) (asymbol *sym, struct minimal_symbol *msym);
 extern void gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, asymbol *sym, struct minimal_symbol *msym);
 extern void set_gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special);

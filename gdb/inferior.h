@@ -207,7 +207,7 @@ extern int fork_inferior (char *, char *, char **,
 
 extern void startup_inferior (int);
 
-extern char *construct_inferior_arguments (struct gdbarch *, int, char **);
+extern char *construct_inferior_arguments (int, char **);
 
 /* From infrun.c */
 

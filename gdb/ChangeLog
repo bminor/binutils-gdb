@@ -1,5 +1,14 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (construct_inferior_arguments): Remove.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* infcmd.c (get_inferior_args): Call construct_inferior_arguments
+	directly instead of gdbarch_construct_inferior_arguments.
+	(construct_inferior_arguments): Remove GDBARCH argument.
+	* inferior.h (construct_inferior_arguments): Likewise.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* symfile.c (section_is_mapped): Use objfile architecture instead
 	of current_gdbarch.
 	(TARGET_LONG_BYTES): Remove.

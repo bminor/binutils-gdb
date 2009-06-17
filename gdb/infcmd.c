@@ -194,8 +194,7 @@ get_inferior_args (void)
     {
       char *n, *old;
 
-      n = gdbarch_construct_inferior_arguments (current_gdbarch,
-						inferior_argc, inferior_argv);
+      n = construct_inferior_arguments (inferior_argc, inferior_argv);
       old = set_inferior_args (n);
       xfree (old);
     }
@@ -247,7 +246,7 @@ notice_args_read (struct ui_file *file, int from_tty,
 /* Compute command-line string given argument vector.  This does the
    same shell processing as fork_inferior.  */
 char *
-construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
+construct_inferior_arguments (int argc, char **argv)
 {
   char *result;
 

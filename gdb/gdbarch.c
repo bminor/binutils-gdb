@@ -212,7 +212,6 @@ struct gdbarch
   gdbarch_skip_solib_resolver_ftype *skip_solib_resolver;
   gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline;
   gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
-  gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments;
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
   int cannot_step_breakpoint;
@@ -349,7 +348,6 @@ struct gdbarch startup_gdbarch =
   generic_skip_solib_resolver,  /* skip_solib_resolver */
   0,  /* in_solib_return_trampoline */
   generic_in_function_epilogue_p,  /* in_function_epilogue_p */
-  construct_inferior_arguments,  /* construct_inferior_arguments */
   0,  /* elf_make_msymbol_special */
   0,  /* coff_make_msymbol_special */
   0,  /* cannot_step_breakpoint */
@@ -458,7 +456,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->skip_solib_resolver = generic_skip_solib_resolver;
   gdbarch->in_solib_return_trampoline = generic_in_solib_return_trampoline;
   gdbarch->in_function_epilogue_p = generic_in_function_epilogue_p;
-  gdbarch->construct_inferior_arguments = construct_inferior_arguments;
   gdbarch->elf_make_msymbol_special = default_elf_make_msymbol_special;
   gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
   gdbarch->register_reggroup_p = default_register_reggroup_p;
@@ -606,7 +603,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */
   /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
-  /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
   /* Skip verify of elf_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of cannot_step_breakpoint, invalid_p == 0 */
@@ -732,9 +728,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: coff_make_msymbol_special = <%s>\n",
                       host_address_to_string (gdbarch->coff_make_msymbol_special));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: construct_inferior_arguments = <%s>\n",
-                      host_address_to_string (gdbarch->construct_inferior_arguments));
   fprintf_unfiltered (file,
                       "gdbarch_dump: convert_from_func_ptr_addr = <%s>\n",
                       host_address_to_string (gdbarch->convert_from_func_ptr_addr));
@@ -2705,23 +2698,6 @@ set_gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch,
                                     gdbarch_in_function_epilogue_p_ftype in_function_epilogue_p)
 {
   gdbarch->in_function_epilogue_p = in_function_epilogue_p;
-}
-
-char *
-gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->construct_inferior_arguments != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_construct_inferior_arguments called\n");
-  return gdbarch->construct_inferior_arguments (gdbarch, argc, argv);
-}
-
-void
-set_gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch,
-                                          gdbarch_construct_inferior_arguments_ftype construct_inferior_arguments)
-{
-  gdbarch->construct_inferior_arguments = construct_inferior_arguments;
 }
 
 void
