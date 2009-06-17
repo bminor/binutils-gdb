@@ -3175,12 +3175,11 @@ arm_type_of_stub (struct bfd_link_info *info,
 
 	  /* We have an extra 2-bytes reach because of
 	     the mode change (bit 24 (H) of BLX encoding).  */
-	  if ((branch_offset > (ARM_MAX_FWD_BRANCH_OFFSET + 2)
-               || (branch_offset < ARM_MAX_BWD_BRANCH_OFFSET)
-               || ((r_type == R_ARM_CALL) && !globals->use_blx)
-               || (r_type == R_ARM_JUMP24)
-               || (r_type == R_ARM_PLT32))
-              && !use_plt)
+	  if (branch_offset > (ARM_MAX_FWD_BRANCH_OFFSET + 2)
+	      || (branch_offset < ARM_MAX_BWD_BRANCH_OFFSET)
+	      || ((r_type == R_ARM_CALL) && !globals->use_blx)
+	      || (r_type == R_ARM_JUMP24)
+	      || (r_type == R_ARM_PLT32))
 	    {
 	      stub_type = (info->shared | globals->pic_veneer)
 		/* PIC stubs.  */
