@@ -366,9 +366,9 @@ dwarf2_loc_desc_needs_frame (gdb_byte *data, unsigned short size,
 }
 
 static void
-dwarf2_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
-			   struct axs_value *value, gdb_byte *data,
-			   int size)
+dwarf2_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
+			   struct agent_expr *ax, struct axs_value *value,
+			   gdb_byte *data, int size)
 {
   if (size == 0)
     error (_("Symbol \"%s\" has been optimized out."),
@@ -401,7 +401,7 @@ dwarf2_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
 	error (_("Unexpected opcode after DW_OP_fbreg for symbol \"%s\"."),
 	       SYMBOL_PRINT_NAME (symbol));
 
-      gdbarch_virtual_frame_pointer (current_gdbarch, 
+      gdbarch_virtual_frame_pointer (gdbarch,
 				     ax->scope, &frame_reg, &frame_offset);
       ax_reg (ax, frame_reg);
       ax_const_l (ax, frame_offset);
@@ -522,12 +522,13 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
    against.  When there is one this function should be revisited.  */
 
 static void
-locexpr_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
-			    struct axs_value * value)
+locexpr_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
+			    struct agent_expr *ax, struct axs_value *value)
 {
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
 
-  dwarf2_tracepoint_var_ref (symbol, ax, value, dlbaton->data, dlbaton->size);
+  dwarf2_tracepoint_var_ref (symbol, gdbarch, ax, value,
+			     dlbaton->data, dlbaton->size);
 }
 
 /* The set of location functions used with the DWARF-2 expression
@@ -594,8 +595,8 @@ loclist_describe_location (struct symbol *symbol, struct ui_file *stream)
 /* Describe the location of SYMBOL as an agent value in VALUE, generating
    any necessary bytecode in AX.  */
 static void
-loclist_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
-			    struct axs_value * value)
+loclist_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
+			    struct agent_expr *ax, struct axs_value *value)
 {
   struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   gdb_byte *data;
@@ -605,7 +606,7 @@ loclist_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
   if (data == NULL)
     error (_("Variable \"%s\" is not available."), SYMBOL_NATURAL_NAME (symbol));
 
-  dwarf2_tracepoint_var_ref (symbol, ax, value, data, size);
+  dwarf2_tracepoint_var_ref (symbol, gdbarch, ax, value, data, size);
 }
 
 /* The set of location functions used with the DWARF-2 expression

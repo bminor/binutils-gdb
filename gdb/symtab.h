@@ -527,8 +527,8 @@ struct symbol_computed_ops
      the caller will generate the right code in the process of
      treating this as an lvalue or rvalue.  */
 
-  void (*tracepoint_var_ref) (struct symbol * symbol, struct agent_expr * ax,
-			      struct axs_value * value);
+  void (*tracepoint_var_ref) (struct symbol *symbol, struct gdbarch *gdbarch,
+			      struct agent_expr *ax, struct axs_value *value);
 };
 
 /* Functions used with LOC_REGISTER and LOC_REGPARM_ADDR.  */

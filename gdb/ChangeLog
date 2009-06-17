@@ -1,5 +1,22 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ax-gdb.c (gen_bitfield_ref): Add EXP argument, use expression
+	architecture instead of current_gdbarch.
+	(gen_struct_ref): Add EXP argument, pass to get_bitfield_ref.
+	(gen_expr): Pass expression to get_struct_ref.
+
+	* symtab.h (struct symbol_ops): Add GDBARCH parameter to
+	tracepoint_var_ref callback.
+	* ax-gdb.c (gen_var_ref): Pass architecture to tracepoint_var_ref
+	symbol operation callback.
+	* dwarf2loc.c (dwarf2_tracepoint_var_ref): Add GDBARCH parameter.
+	Use it instead of current_gdbarch.
+	(locexpr_tracepoint_var_ref): Add GDBARCH parameter.  Pass it to
+	dwarf2_tracepoint_var_ref.
+	(loclist_tracepoint_var_ref): Likewise.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* prologue-value.c (make_pv_area): Add ADDR_BIT argument.
 	Use it instead of address bits of current_gdbarch.
 	* prologue-value.c (make_pv_area): Add ADDR_BIT argument.

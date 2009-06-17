@@ -124,10 +124,10 @@ static void gen_complement (struct agent_expr *ax, struct axs_value *value);
 static void gen_deref (struct agent_expr *, struct axs_value *);
 static void gen_address_of (struct agent_expr *, struct axs_value *);
 static int find_field (struct type *type, char *name);
-static void gen_bitfield_ref (struct agent_expr *ax,
+static void gen_bitfield_ref (struct expression *exp, struct agent_expr *ax,
 			      struct axs_value *value,
 			      struct type *type, int start, int end);
-static void gen_struct_ref (struct agent_expr *ax,
+static void gen_struct_ref (struct expression *exp, struct agent_expr *ax,
 			    struct axs_value *value,
 			    char *field,
 			    char *operator_name, char *operand_name);
@@ -623,7 +623,7 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
 	 Unfortunately DWARF 2 stores the frame-base (instead of the
 	 function) location in a function's symbol.  Oops!  For the
 	 moment enable this when/where applicable.  */
-      SYMBOL_COMPUTED_OPS (var)->tracepoint_var_ref (var, ax, value);
+      SYMBOL_COMPUTED_OPS (var)->tracepoint_var_ref (var, gdbarch, ax, value);
       break;
 
     case LOC_OPTIMIZED_OUT:
@@ -1147,8 +1147,9 @@ find_field (struct type *type, char *name)
    starting and one-past-ending *bit* numbers of the field within the
    structure.  */
 static void
-gen_bitfield_ref (struct agent_expr *ax, struct axs_value *value,
-		  struct type *type, int start, int end)
+gen_bitfield_ref (struct expression *exp, struct agent_expr *ax,
+		  struct axs_value *value, struct type *type,
+		  int start, int end)
 {
   /* Note that ops[i] fetches 8 << i bits.  */
   static enum agent_op ops[]
@@ -1274,7 +1275,7 @@ gen_bitfield_ref (struct agent_expr *ax, struct axs_value *value,
 	     the sign/zero extension will wipe them out.
 	     - If we're in the interior of the word, then there is no garbage
 	     on either end, because the ref operators zero-extend.  */
-	  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+	  if (gdbarch_byte_order (exp->gdbarch) == BFD_ENDIAN_BIG)
 	    gen_left_shift (ax, end - (offset + op_size));
 	  else
 	    gen_left_shift (ax, offset - start);
@@ -1308,7 +1309,8 @@ gen_bitfield_ref (struct agent_expr *ax, struct axs_value *value,
    the operator being compiled, and OPERAND_NAME is the kind of thing
    it operates on; we use them in error messages.  */
 static void
-gen_struct_ref (struct agent_expr *ax, struct axs_value *value, char *field,
+gen_struct_ref (struct expression *exp, struct agent_expr *ax,
+		struct axs_value *value, char *field,
 		char *operator_name, char *operand_name)
 {
   struct type *type;
@@ -1339,7 +1341,7 @@ gen_struct_ref (struct agent_expr *ax, struct axs_value *value, char *field,
 
   /* Is this a bitfield?  */
   if (TYPE_FIELD_PACKED (type, i))
-    gen_bitfield_ref (ax, value, TYPE_FIELD_TYPE (type, i),
+    gen_bitfield_ref (exp, ax, value, TYPE_FIELD_TYPE (type, i),
 		      TYPE_FIELD_BITPOS (type, i),
 		      (TYPE_FIELD_BITPOS (type, i)
 		       + TYPE_FIELD_BITSIZE (type, i)));
@@ -1698,9 +1700,9 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	(*pc) += 4 + BYTES_TO_EXP_ELEM (length + 1);
 	gen_expr (exp, pc, ax, value);
 	if (op == STRUCTOP_STRUCT)
-	  gen_struct_ref (ax, value, name, ".", "structure or union");
+	  gen_struct_ref (exp, ax, value, name, ".", "structure or union");
 	else if (op == STRUCTOP_PTR)
-	  gen_struct_ref (ax, value, name, "->",
+	  gen_struct_ref (exp, ax, value, name, "->",
 			  "pointer to a structure or union");
 	else
 	  /* If this `if' chain doesn't handle it, then the case list
