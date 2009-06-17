@@ -55,6 +55,9 @@ struct value *values_in_python = NULL;
 #define builtin_type_pybool \
   language_bool_type (current_language, current_gdbarch)
 
+#define builtin_type_pychar \
+  language_string_char_type (current_language, current_gdbarch)
+
 typedef struct {
   PyObject_HEAD
   struct value *value;
@@ -867,7 +870,7 @@ convert_value_from_python (PyObject *obj)
 	  if (s != NULL)
 	    {
 	      old = make_cleanup (xfree, s);
-	      value = value_from_string (s);
+	      value = value_cstring (s, strlen (s), builtin_type_pychar);
 	      do_cleanups (old);
 	    }
 	}

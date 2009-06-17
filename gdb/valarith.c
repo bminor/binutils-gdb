@@ -624,6 +624,7 @@ value_concat (struct value *arg1, struct value *arg2)
   char inchar;
   struct type *type1 = check_typedef (value_type (arg1));
   struct type *type2 = check_typedef (value_type (arg2));
+  struct type *char_type;
 
   /* First figure out if we are dealing with two values to be concatenated
      or a repeat count and a value to be repeated.  INVAL1 is set to the
@@ -659,6 +660,7 @@ value_concat (struct value *arg1, struct value *arg2)
 	  ptr = (char *) alloca (count * inval2len);
 	  if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	    {
+	      char_type = type2;
 	      inchar = (char) unpack_long (type2,
 					   value_contents (inval2));
 	      for (idx = 0; idx < count; idx++)
@@ -668,13 +670,14 @@ value_concat (struct value *arg1, struct value *arg2)
 	    }
 	  else
 	    {
+	      char_type = TYPE_TARGET_TYPE (type2);
 	      for (idx = 0; idx < count; idx++)
 		{
 		  memcpy (ptr + (idx * inval2len), value_contents (inval2),
 			  inval2len);
 		}
 	    }
-	  outval = value_string (ptr, count * inval2len);
+	  outval = value_string (ptr, count * inval2len, char_type);
 	}
       else if (TYPE_CODE (type2) == TYPE_CODE_BITSTRING
 	       || TYPE_CODE (type2) == TYPE_CODE_BOOL)
@@ -700,10 +703,12 @@ value_concat (struct value *arg1, struct value *arg2)
       ptr = (char *) alloca (inval1len + inval2len);
       if (TYPE_CODE (type1) == TYPE_CODE_CHAR)
 	{
+	  char_type = type1;
 	  *ptr = (char) unpack_long (type1, value_contents (inval1));
 	}
       else
 	{
+	  char_type = TYPE_TARGET_TYPE (type1);
 	  memcpy (ptr, value_contents (inval1), inval1len);
 	}
       if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
@@ -715,7 +720,7 @@ value_concat (struct value *arg1, struct value *arg2)
 	{
 	  memcpy (ptr + inval1len, value_contents (inval2), inval2len);
 	}
-      outval = value_string (ptr, inval1len + inval2len);
+      outval = value_string (ptr, inval1len + inval2len, char_type);
     }
   else if (TYPE_CODE (type1) == TYPE_CODE_BITSTRING
 	   || TYPE_CODE (type1) == TYPE_CODE_BOOL)

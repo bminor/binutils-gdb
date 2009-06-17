@@ -333,7 +333,8 @@ exp	: 	'[' TYPENAME
 			{
 			  CORE_ADDR class;
 
-			  class = lookup_objc_class (copy_name ($2.stoken));
+			  class = lookup_objc_class (parse_gdbarch,
+						     copy_name ($2.stoken));
 			  if (class == 0)
 			    error ("%s is not an ObjC Class", 
 				   copy_name ($2.stoken));
@@ -1748,7 +1749,7 @@ yylex ()
     /* See if it's an ObjC classname.  */
     if (!sym)
       {
-	CORE_ADDR Class = lookup_objc_class(tmp);
+	CORE_ADDR Class = lookup_objc_class (parse_gdbarch, tmp);
 	if (Class)
 	  {
 	    yylval.class.class = Class;

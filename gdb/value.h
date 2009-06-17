@@ -339,7 +339,6 @@ extern struct value *value_from_pointer (struct type *type, CORE_ADDR addr);
 extern struct value *value_from_double (struct type *type, DOUBLEST num);
 extern struct value *value_from_decfloat (struct type *type,
 					  const gdb_byte *decbytes);
-extern struct value *value_from_string (char *string);
 
 extern struct value *value_at (struct type *type, CORE_ADDR addr);
 extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr);
@@ -381,9 +380,10 @@ extern struct value *value_mark (void);
 
 extern void value_free_to_mark (struct value *mark);
 
-extern struct value *value_typed_string (char *ptr, int len,
-					 struct type *char_type);
-extern struct value *value_string (char *ptr, int len);
+extern struct value *value_cstring (char *ptr, int len,
+				    struct type *char_type);
+extern struct value *value_string (char *ptr, int len,
+				   struct type *char_type);
 extern struct value *value_bitstring (char *ptr, int len);
 
 extern struct value *value_array (int lowbound, int highbound,

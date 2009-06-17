@@ -5165,6 +5165,7 @@ static struct type *
 read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct type *type, *range_type, *index_type, *char_type;
   struct attribute *attr;
   unsigned int length;
@@ -5190,7 +5191,8 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
 
   index_type = builtin_type_int32;
   range_type = create_range_type (NULL, index_type, 1, length);
-  type = create_string_type (NULL, range_type);
+  char_type = language_string_char_type (cu->language_defn, gdbarch);
+  type = create_string_type (NULL, char_type, range_type);
 
   return set_die_type (die, type, cu);
 }

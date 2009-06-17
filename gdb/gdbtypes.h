@@ -1177,7 +1177,8 @@ extern struct type *create_range_type (struct type *, struct type *, int,
 extern struct type *create_array_type (struct type *, struct type *,
 				       struct type *);
 
-extern struct type *create_string_type (struct type *, struct type *);
+extern struct type *create_string_type (struct type *, struct type *,
+					struct type *);
 
 extern struct type *create_set_type (struct type *, struct type *);
 

@@ -846,13 +846,10 @@ create_array_type (struct type *result_type,
    type?  */
 
 struct type *
-create_string_type (struct type *result_type, 
+create_string_type (struct type *result_type,
+		    struct type *string_char_type,
 		    struct type *range_type)
 {
-  struct type *string_char_type;
-      
-  string_char_type = language_string_char_type (current_language,
-						current_gdbarch);
   result_type = create_array_type (result_type,
 				   string_char_type,
 				   range_type);

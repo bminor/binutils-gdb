@@ -951,7 +951,7 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	    if ((dest_type & C_CHAR) != 0)
 	      result = allocate_value (type);
 	    else
-	      result = value_typed_string ("", 0, type);
+	      result = value_cstring ("", 0, type);
 	    do_cleanups (cleanup);
 	    return result;
 	  }
@@ -971,9 +971,9 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	    /* Write the terminating character.  */
 	    for (i = 0; i < TYPE_LENGTH (type); ++i)
 	      obstack_1grow (&output, 0);
-	    result = value_typed_string (obstack_base (&output),
-					 obstack_object_size (&output),
-					 type);
+	    result = value_cstring (obstack_base (&output),
+				    obstack_object_size (&output),
+				    type);
 	  }
 	do_cleanups (cleanup);
 	return result;

@@ -108,8 +108,9 @@ lookup_struct_typedef (char *name, struct block *block, int noerr)
 }
 
 CORE_ADDR 
-lookup_objc_class (char *classname)
+lookup_objc_class (struct gdbarch *gdbarch, char *classname)
 {
+  struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value * function, *classval;
 
   if (! target_has_execution)
@@ -128,15 +129,16 @@ lookup_objc_class (char *classname)
       return 0;
     }
 
-  classval = value_string (classname, strlen (classname) + 1);
+  classval = value_string (classname, strlen (classname) + 1, char_type);
   classval = value_coerce_array (classval);
   return (CORE_ADDR) value_as_long (call_function_by_hand (function, 
 							   1, &classval));
 }
 
 CORE_ADDR
-lookup_child_selector (char *selname)
+lookup_child_selector (struct gdbarch *gdbarch, char *selname)
 {
+  struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value * function, *selstring;
 
   if (! target_has_execution)
@@ -156,52 +158,49 @@ lookup_child_selector (char *selname)
     }
 
   selstring = value_coerce_array (value_string (selname, 
-						strlen (selname) + 1));
+						strlen (selname) + 1, char_type));
   return value_as_long (call_function_by_hand (function, 1, &selstring));
 }
 
 struct value * 
-value_nsstring (char *ptr, int len)
+value_nsstring (struct gdbarch *gdbarch, char *ptr, int len)
 {
+  struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value *stringValue[3];
   struct value *function, *nsstringValue;
   struct symbol *sym;
   struct type *type;
-  struct objfile *objf;
-  struct gdbarch *gdbarch;
 
   if (!target_has_execution)
     return 0;		/* Can't call into inferior to create NSString.  */
 
-  stringValue[2] = value_string(ptr, len);
+  stringValue[2] = value_string(ptr, len, char_type);
   stringValue[2] = value_coerce_array(stringValue[2]);
   /* _NSNewStringFromCString replaces "istr" after Lantern2A.  */
   if (lookup_minimal_symbol("_NSNewStringFromCString", 0, 0))
     {
-      function = find_function_in_inferior("_NSNewStringFromCString", &objf);
+      function = find_function_in_inferior("_NSNewStringFromCString", NULL);
       nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
     }
   else if (lookup_minimal_symbol("istr", 0, 0))
     {
-      function = find_function_in_inferior("istr", &objf);
+      function = find_function_in_inferior("istr", NULL);
       nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
     }
   else if (lookup_minimal_symbol("+[NSString stringWithCString:]", 0, 0))
     {
       function
-	= find_function_in_inferior("+[NSString stringWithCString:]", &objf);
-      type = builtin_type (get_objfile_arch (objf))->builtin_long;
+	= find_function_in_inferior("+[NSString stringWithCString:]", NULL);
+      type = builtin_type (gdbarch)->builtin_long;
 
       stringValue[0] = value_from_longest 
-	(type, lookup_objc_class ("NSString"));
+	(type, lookup_objc_class (gdbarch, "NSString"));
       stringValue[1] = value_from_longest 
-	(type, lookup_child_selector ("stringWithCString:"));
+	(type, lookup_child_selector (gdbarch, "stringWithCString:"));
       nsstringValue = call_function_by_hand(function, 3, &stringValue[0]);
     }
   else
     error (_("NSString: internal error -- no way to create new NSString"));
-
-  gdbarch = get_objfile_arch (objf);
 
   sym = lookup_struct_typedef("NSString", 0, 1);
   if (sym == NULL)
@@ -612,7 +611,7 @@ end_msglist(void)
   selname_chain = sel->next;
   msglist_len = sel->msglist_len;
   msglist_sel = sel->msglist_sel;
-  selid = lookup_child_selector(p);
+  selid = lookup_child_selector (parse_gdbarch, p);
   if (!selid)
     error (_("Can't find selector \"%s\""), p);
   write_exp_elt_longcst (selid);

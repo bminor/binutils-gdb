@@ -1,5 +1,44 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.c (create_string_type): Receive character type as argument.
+	* gdbtypes.h (create_string_type): Add character type argument.
+	* dwarf2read.c (read_tag_string_type): Pass character type to
+	create_string_type.
+
+	* value.h (value_string): Add character type argument.
+	* valops.c (value_string): Add character type argument.  Pass it to
+	create_string_type.  Do not allocate space in inferior.
+	* valarith.c (value_concat): Pass character type to value_string.
+
+	* value.h (value_typed_string): Rename to ...
+	(value_cstring): ... this.
+	* valops.c (value_typed_string): Rename to ...
+	(value_cstring): ... this.
+	* c-lang.c (evaluate_subexp_c): Update.
+
+	* python/python-value.c (builtin_type_pychar): New define.
+	(convert_value_from_python): Call value_cstring instead
+	of value_from_string.
+	* value.c (value_from_string): Remove.
+	* value.h (value_from_string): Remove.
+
+	* eval.c (evaluate_subexp_standard): Pass character type to
+	value_string.  Pass expression architecture to value_nsstring
+	and lookup_child_selector.
+	* objc-lang.h (lookup_objc_class): Add GDBARCH parameter.
+	(lookup_child_selector): Likewise.
+	(value_nsstring): Likewise.
+	* objc-lang.c (lookup_objc_class): Add GDBARCH parameter.
+	Pass character type to value_string..
+	(lookup_child_selector): Likewise.
+	(value_nsstring): Add GDBARCH parameter, use it instead of
+	objfile architecture.  Pass architecture to lookup_objc_class
+	and lookup_child_selector. Pass character type to value_string.
+	(end_msglist): Pass architecture to lookup_objc_class.
+	* objc-exp.y: Pass architecture to lookup_objc_class.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (struct language_defn): Add forward declaration.
 	(lookup_typename): Add LANGUAGE and GDBARCH parameters.
 	(lookup_unsigned_typename): Likewise.
