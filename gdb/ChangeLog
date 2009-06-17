@@ -1,3 +1,9 @@
+2009-06-17  Pierre Muller  <muller@ics.u-strasbg.fr>
+	Pedro Alves  <pedro@codesourcery.com>
+	
+	* infcmd.c (post_create_inferior): Call breakpoint_re_set after target
+	is pushed for watchpoint promotion to hardware watchpoint.
+
 2009-06-16  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* dwarf2read.c (dwarf_info_section, dwarf_abbrev_section)

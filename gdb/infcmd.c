@@ -421,6 +421,18 @@ post_create_inferior (struct target_ops *target, int from_tty)
 #endif
     }
 
+  /* If the user sets watchpoints before execution having started,
+     then she gets software watchpoints, because GDB can't know which
+     target will end up being pushed, or if it supports hardware
+     watchpoints or not.  breakpoint_re_set takes care of promoting
+     watchpoints to hardware watchpoints if possible, however, if this
+     new inferior doesn't load shared libraries or we don't pull in
+     symbols from any other source on this target/arch,
+     breakpoint_re_set is never called.  Call it now so that software
+     watchpoints get a chance to be promoted to hardware watchpoints
+     if the now pushed target supports hardware watchpoints.  */
+  breakpoint_re_set ();
+
   observer_notify_inferior_created (target, from_tty);
 }
 
