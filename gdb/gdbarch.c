@@ -317,8 +317,8 @@ struct gdbarch startup_gdbarch =
   0,  /* register_to_value */
   0,  /* value_to_register */
   0,  /* value_from_register */
-  0,  /* pointer_to_address */
-  0,  /* address_to_pointer */
+  unsigned_pointer_to_address,  /* pointer_to_address */
+  unsigned_address_to_pointer,  /* address_to_pointer */
   0,  /* integer_to_address */
   0,  /* return_value */
   0,  /* skip_prologue */
@@ -2096,7 +2096,7 @@ gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const gd
   gdb_assert (gdbarch->pointer_to_address != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_pointer_to_address called\n");
-  return gdbarch->pointer_to_address (type, buf);
+  return gdbarch->pointer_to_address (gdbarch, type, buf);
 }
 
 void
@@ -2113,7 +2113,7 @@ gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, gdb_byte
   gdb_assert (gdbarch->address_to_pointer != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_address_to_pointer called\n");
-  gdbarch->address_to_pointer (type, buf, addr);
+  gdbarch->address_to_pointer (gdbarch, type, buf, addr);
 }
 
 void

@@ -87,7 +87,8 @@ insn_addr_from_ptr (CORE_ADDR ptr)	/* target_pointer to CORE_ADDR.  */
    Convert a target pointer to an address in host (CORE_ADDR) format. */
 
 static CORE_ADDR
-iq2000_pointer_to_address (struct type * type, const gdb_byte * buf)
+iq2000_pointer_to_address (struct gdbarch *gdbarch,
+			   struct type * type, const gdb_byte * buf)
 {
   enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
   CORE_ADDR addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
@@ -104,7 +105,8 @@ iq2000_pointer_to_address (struct type * type, const gdb_byte * buf)
    Convert a host-format address (CORE_ADDR) into a target pointer.  */
 
 static void
-iq2000_address_to_pointer (struct type *type, gdb_byte *buf, CORE_ADDR addr)
+iq2000_address_to_pointer (struct gdbarch *gdbarch,
+			   struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
   enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
 

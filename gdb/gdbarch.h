@@ -359,11 +359,11 @@ typedef struct value * (gdbarch_value_from_register_ftype) (struct type *type, i
 extern struct value * gdbarch_value_from_register (struct gdbarch *gdbarch, struct type *type, int regnum, struct frame_info *frame);
 extern void set_gdbarch_value_from_register (struct gdbarch *gdbarch, gdbarch_value_from_register_ftype *value_from_register);
 
-typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, const gdb_byte *buf);
+typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
 extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
 extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_pointer_to_address_ftype *pointer_to_address);
 
-typedef void (gdbarch_address_to_pointer_ftype) (struct type *type, gdb_byte *buf, CORE_ADDR addr);
+typedef void (gdbarch_address_to_pointer_ftype) (struct gdbarch *gdbarch, struct type *type, gdb_byte *buf, CORE_ADDR addr);
 extern void gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, gdb_byte *buf, CORE_ADDR addr);
 extern void set_gdbarch_address_to_pointer (struct gdbarch *gdbarch, gdbarch_address_to_pointer_ftype *address_to_pointer);
 

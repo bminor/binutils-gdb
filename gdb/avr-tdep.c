@@ -279,7 +279,8 @@ avr_convert_saddr_to_raw (CORE_ADDR x)
 /* Convert from address to pointer and vice-versa. */
 
 static void
-avr_address_to_pointer (struct type *type, gdb_byte *buf, CORE_ADDR addr)
+avr_address_to_pointer (struct gdbarch *gdbarch,
+			struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
   /* Is it a code address?  */
   if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
@@ -297,7 +298,8 @@ avr_address_to_pointer (struct type *type, gdb_byte *buf, CORE_ADDR addr)
 }
 
 static CORE_ADDR
-avr_pointer_to_address (struct type *type, const gdb_byte *buf)
+avr_pointer_to_address (struct gdbarch *gdbarch,
+			struct type *type, const gdb_byte *buf)
 {
   CORE_ADDR addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
 

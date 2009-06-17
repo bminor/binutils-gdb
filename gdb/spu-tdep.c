@@ -327,7 +327,8 @@ spu_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 /* Address conversion.  */
 
 static CORE_ADDR
-spu_pointer_to_address (struct type *type, const gdb_byte *buf)
+spu_pointer_to_address (struct gdbarch *gdbarch,
+			struct type *type, const gdb_byte *buf)
 {
   ULONGEST addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
   ULONGEST lslr = SPU_LS_SIZE - 1; /* Hard-wired LS size.  */

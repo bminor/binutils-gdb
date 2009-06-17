@@ -2401,7 +2401,8 @@ m32c_skip_trampoline_code (struct frame_info *frame, CORE_ADDR stop_pc)
    programmer!  :)  */
 
 static void
-m32c_m16c_address_to_pointer (struct type *type, gdb_byte *buf, CORE_ADDR addr)
+m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
+			      struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
   enum type_code target_code;
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_PTR ||
@@ -2449,7 +2450,8 @@ m32c_m16c_address_to_pointer (struct type *type, gdb_byte *buf, CORE_ADDR addr)
 
 
 static CORE_ADDR
-m32c_m16c_pointer_to_address (struct type *type, const gdb_byte *buf)
+m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
+			      struct type *type, const gdb_byte *buf)
 {
   CORE_ADDR ptr;
   enum type_code target_code;

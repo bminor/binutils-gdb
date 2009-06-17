@@ -309,13 +309,15 @@ value_of_register_lazy (struct frame_info *frame, int regnum)
 /* Given a pointer of type TYPE in target form in BUF, return the
    address it represents.  */
 CORE_ADDR
-unsigned_pointer_to_address (struct type *type, const gdb_byte *buf)
+unsigned_pointer_to_address (struct gdbarch *gdbarch,
+			     struct type *type, const gdb_byte *buf)
 {
   return extract_unsigned_integer (buf, TYPE_LENGTH (type));
 }
 
 CORE_ADDR
-signed_pointer_to_address (struct type *type, const gdb_byte *buf)
+signed_pointer_to_address (struct gdbarch *gdbarch,
+			   struct type *type, const gdb_byte *buf)
 {
   return extract_signed_integer (buf, TYPE_LENGTH (type));
 }
@@ -323,14 +325,15 @@ signed_pointer_to_address (struct type *type, const gdb_byte *buf)
 /* Given an address, store it as a pointer of type TYPE in target
    format in BUF.  */
 void
-unsigned_address_to_pointer (struct type *type, gdb_byte *buf,
-			     CORE_ADDR addr)
+unsigned_address_to_pointer (struct gdbarch *gdbarch, struct type *type,
+			     gdb_byte *buf, CORE_ADDR addr)
 {
   store_unsigned_integer (buf, TYPE_LENGTH (type), addr);
 }
 
 void
-address_to_signed_pointer (struct type *type, gdb_byte *buf, CORE_ADDR addr)
+address_to_signed_pointer (struct gdbarch *gdbarch, struct type *type,
+			   gdb_byte *buf, CORE_ADDR addr)
 {
   store_signed_integer (buf, TYPE_LENGTH (type), addr);
 }

@@ -155,13 +155,17 @@ extern void terminal_save_ours (void);
 
 extern void terminal_ours (void);
 
-extern CORE_ADDR unsigned_pointer_to_address (struct type *type,
+extern CORE_ADDR unsigned_pointer_to_address (struct gdbarch *gdbarch,
+					      struct type *type,
 					      const gdb_byte *buf);
-extern void unsigned_address_to_pointer (struct type *type, gdb_byte *buf,
+extern void unsigned_address_to_pointer (struct gdbarch *gdbarch,
+					 struct type *type, gdb_byte *buf,
 					 CORE_ADDR addr);
-extern CORE_ADDR signed_pointer_to_address (struct type *type,
+extern CORE_ADDR signed_pointer_to_address (struct gdbarch *gdbarch,
+					    struct type *type,
 					    const gdb_byte *buf);
-extern void address_to_signed_pointer (struct type *type, gdb_byte *buf,
+extern void address_to_signed_pointer (struct gdbarch *gdbarch,
+				       struct type *type, gdb_byte *buf,
 				       CORE_ADDR addr);
 
 extern void wait_for_inferior (int treat_exec_as_sigtrap);

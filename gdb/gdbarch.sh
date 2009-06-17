@@ -466,8 +466,8 @@ f:void:value_to_register:struct frame_info *frame, int regnum, struct type *type
 # (but not the value contents) filled in.
 f:struct value *:value_from_register:struct type *type, int regnum, struct frame_info *frame:type, regnum, frame::default_value_from_register::0
 #
-f:CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, buf::unsigned_pointer_to_address::0
-f:void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
+m:CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, buf::unsigned_pointer_to_address::0
+m:void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
 M:CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 
 # Return the return-value convention that will be used by FUNCTYPE

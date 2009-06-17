@@ -592,7 +592,8 @@ xstormy16_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
    and vice versa.  */
 
 static CORE_ADDR
-xstormy16_pointer_to_address (struct type *type, const gdb_byte *buf)
+xstormy16_pointer_to_address (struct gdbarch *gdbarch,
+			      struct type *type, const gdb_byte *buf)
 {
   enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
   CORE_ADDR addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
@@ -608,7 +609,8 @@ xstormy16_pointer_to_address (struct type *type, const gdb_byte *buf)
 }
 
 static void
-xstormy16_address_to_pointer (struct type *type, gdb_byte *buf, CORE_ADDR addr)
+xstormy16_address_to_pointer (struct gdbarch *gdbarch,
+			      struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
   enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
 

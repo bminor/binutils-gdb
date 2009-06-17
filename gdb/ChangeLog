@@ -1,5 +1,28 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (pointer_to_address): Change to type 'm'.
+	(address_to_pointer): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* inferior.h (unsigned_pointer_to_address): Add GDBARCH argument.
+	(signed_pointer_to_address): Likewise.
+	(unsigned_address_to_pointer, address_to_signed_pointer): Likewise.
+	* findvar.c (unsigned_pointer_to_address): Likewise.
+	(signed_pointer_to_address): Likewise.
+	(unsigned_address_to_pointer, address_to_signed_pointer): Likewise.
+
+	* avr-tdep.c (avr_address_to_pointer): Likewise.
+	(avr_pointer_to_address): Likewise.
+	* iq2000-tdep.c (iq2000_pointer_to_address): Likewise.
+	(iq2000_address_to_pointer): Likewise.
+	* m32c-tdep.c (m32c_m16c_address_to_pointer): Likewise.
+	(m32c_m16c_pointer_to_address): Likewise.
+	* spu-tdep.c (spu_pointer_to_address): Likewise.
+	* xstormy16-tdep.c (xstormy16_pointer_to_address): Likewise.
+	(xstormy16_address_to_pointer): Likewise.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* printcmd.c (print_scalar_formatted): Always truncate
 	unsigned data types.
 
