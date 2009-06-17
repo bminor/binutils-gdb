@@ -83,10 +83,10 @@ sparc64nbsd_collect_fpregset (const struct regcache *regcache,
 /* Determine whether `gregset_t' contains register REGNUM.  */
 
 static int
-sparc64nbsd_gregset_supplies_p (int regnum)
+sparc64nbsd_gregset_supplies_p (struct gdbarch *gdbarch, int regnum)
 {
-  if (gdbarch_ptr_bit (current_gdbarch) == 32)
-    return sparc32_gregset_supplies_p (regnum);
+  if (gdbarch_ptr_bit (gdbarch) == 32)
+    return sparc32_gregset_supplies_p (gdbarch, regnum);
 
   /* Integer registers.  */
   if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_G7_REGNUM)
@@ -108,10 +108,10 @@ sparc64nbsd_gregset_supplies_p (int regnum)
 /* Determine whether `fpregset_t' contains register REGNUM.  */
 
 static int
-sparc64nbsd_fpregset_supplies_p (int regnum)
+sparc64nbsd_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum)
 {
-  if (gdbarch_ptr_bit (current_gdbarch) == 32)
-    return sparc32_fpregset_supplies_p (regnum);
+  if (gdbarch_ptr_bit (gdbarch) == 32)
+    return sparc32_fpregset_supplies_p (gdbarch, regnum);
 
   /* Floating-point registers.  */
   if ((regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)

@@ -29,11 +29,11 @@ extern void (*sparc_collect_gregset) (const struct sparc_gregset *,
 				      const struct regcache *, int, void *);
 extern void (*sparc_supply_fpregset) (struct regcache *, int , const void *);
 extern void (*sparc_collect_fpregset) (const struct regcache *, int , void *);
-extern int (*sparc_gregset_supplies_p) (int);
-extern int (*sparc_fpregset_supplies_p) (int);
+extern int (*sparc_gregset_supplies_p) (struct gdbarch *gdbarch, int);
+extern int (*sparc_fpregset_supplies_p) (struct gdbarch *gdbarch, int);
 
-extern int sparc32_gregset_supplies_p (int regnum);
-extern int sparc32_fpregset_supplies_p (int regnum);
+extern int sparc32_gregset_supplies_p (struct gdbarch *gdbarch, int regnum);
+extern int sparc32_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum);
 
 /* Create a prototype generic SPARC target.  The client can override
    it with local methods.  */

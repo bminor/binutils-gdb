@@ -89,13 +89,13 @@ void (*sparc_collect_gregset) (const struct sparc_gregset *,
 			       const struct regcache *, int, void *);
 void (*sparc_supply_fpregset) (struct regcache *, int , const void *);
 void (*sparc_collect_fpregset) (const struct regcache *, int , void *);
-int (*sparc_gregset_supplies_p) (int);
-int (*sparc_fpregset_supplies_p) (int);
+int (*sparc_gregset_supplies_p) (struct gdbarch *, int);
+int (*sparc_fpregset_supplies_p) (struct gdbarch *, int);
 
 /* Determine whether `gregset_t' contains register REGNUM.  */
 
 int
-sparc32_gregset_supplies_p (int regnum)
+sparc32_gregset_supplies_p (struct gdbarch *gdbarch, int regnum)
 {
   /* Integer registers.  */
   if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_G7_REGNUM)
@@ -117,7 +117,7 @@ sparc32_gregset_supplies_p (int regnum)
 /* Determine whether `fpregset_t' contains register REGNUM.  */
 
 int
-sparc32_fpregset_supplies_p (int regnum)
+sparc32_fpregset_supplies_p (struct gdbarch *gdbarch, int regnum)
 {
   /* Floating-point registers.  */
   if (regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
@@ -137,6 +137,7 @@ void
 sparc_fetch_inferior_registers (struct target_ops *ops,
 				struct regcache *regcache, int regnum)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int pid;
 
   /* NOTE: cagney/2002-12-03: This code assumes that the currently
@@ -162,7 +163,7 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
       return;
     }
 
-  if (regnum == -1 || sparc_gregset_supplies_p (regnum))
+  if (regnum == -1 || sparc_gregset_supplies_p (gdbarch, regnum))
     {
       gregset_t regs;
 
@@ -174,7 +175,7 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
 	return;
     }
 
-  if (regnum == -1 || sparc_fpregset_supplies_p (regnum))
+  if (regnum == -1 || sparc_fpregset_supplies_p (gdbarch, regnum))
     {
       fpregset_t fpregs;
 
@@ -189,6 +190,7 @@ void
 sparc_store_inferior_registers (struct target_ops *ops,
 				struct regcache *regcache, int regnum)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int pid;
 
   /* NOTE: cagney/2002-12-02: See comment in fetch_inferior_registers
@@ -197,7 +199,7 @@ sparc_store_inferior_registers (struct target_ops *ops,
   if (pid == 0)
     pid = PIDGET (inferior_ptid);
 
-  if (regnum == -1 || sparc_gregset_supplies_p (regnum))
+  if (regnum == -1 || sparc_gregset_supplies_p (gdbarch, regnum))
     {
       gregset_t regs;
 
@@ -223,7 +225,7 @@ sparc_store_inferior_registers (struct target_ops *ops,
 	return;
     }
 
-  if (regnum == -1 || sparc_fpregset_supplies_p (regnum))
+  if (regnum == -1 || sparc_fpregset_supplies_p (gdbarch, regnum))
     {
       fpregset_t fpregs, saved_fpregs;
 

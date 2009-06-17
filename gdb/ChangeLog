@@ -1,5 +1,24 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* sparc64-nat.c (sparc64_gregset_supplies_p): Add GDBARCH parameter.
+	Use it instead of current_gdbarch.  Pass architecture to
+	sparc32_gregset_supplies_p.
+	(sparc64_fpregset_supplies_p): Add GDBARCH parameter.  Use it instead
+	of current_gdbarch.  Pass architecture to sparc32_fpregset_supplies_p.
+	* sparc64nbsd-nat.c (sparc64nbsd_gregset_supplies_p,
+	sparc64nbsd_fpregset_supplies_p): Likewise.
+	* sparc-nat.c (sparc_gregset_supplies_p, sparc_fpregset_supplies_p):
+	Add GDBARCH parameter.
+	(sparc32_gregset_supplies_p, sparc32_fpregset_supplies_p): Likewise.
+	(sparc_fetch_inferior_registers): Pass regcache architecture to
+	sparc_gregset_supplies_p and sparc_fpregset_supplies_p.
+	(sparc_store_inferior_registers): Likewise.
+	* sparc-nat.h (sparc_gregset_supplies_p, sparc_fpregset_supplies_p:
+	Add GDBARCH parameter.
+	(sparc32_gregset_supplies_p, sparc32_fpregset_supplies_p): Likewise.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-tasks.c (read_known_tasks_array): Use target_gdbarch instead
 	of current_gdbarch.
 	* aix-thread.c (pd_enable): Likewise.
