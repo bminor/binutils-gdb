@@ -1412,7 +1412,7 @@ monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
   monitor_debug ("MON write %d %s\n", len, paddr (memaddr));
 
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
-    memaddr = gdbarch_addr_bits_remove (current_gdbarch, memaddr);
+    memaddr = gdbarch_addr_bits_remove (target_gdbarch, memaddr);
 
   /* Use memory fill command for leading 0 bytes.  */
 
@@ -1811,7 +1811,7 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 		 paddr_nz (memaddr), (long) myaddr, len);
 
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
-    memaddr = gdbarch_addr_bits_remove (current_gdbarch, memaddr);
+    memaddr = gdbarch_addr_bits_remove (target_gdbarch, memaddr);
 
   if (current_monitor->flags & MO_GETMEM_READ_SINGLE)
     return monitor_read_memory_single (memaddr, myaddr, len);

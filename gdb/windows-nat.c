@@ -1248,9 +1248,10 @@ windows_resume (struct target_ops *ops,
       if (step)
 	{
 	  /* Single step by setting t bit */
-	  windows_fetch_inferior_registers (ops,
-					    get_current_regcache (),
-					    gdbarch_ps_regnum (current_gdbarch));
+	  struct regcache *regcache = get_current_regcache ();
+	  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+	  windows_fetch_inferior_registers (ops, regcache,
+					    gdbarch_ps_regnum (gdbarch));
 	  th->context.EFlags |= FLAG_TRACE_BIT;
 	}
 

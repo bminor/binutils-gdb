@@ -4473,7 +4473,7 @@ invalidate_cache (procinfo *parent, procinfo *pi, void *ptr)
       if (!proc_set_gregs (pi))	/* flush gregs cache */
 	proc_warn (pi, "target_resume, set_gregs",
 		   __LINE__);
-  if (gdbarch_fp0_regnum (current_gdbarch) >= 0)
+  if (gdbarch_fp0_regnum (target_gdbarch) >= 0)
     if (pi->fpregs_dirty)
       if (parent == NULL ||
 	  proc_get_current_thread (parent) != pi->tid)
@@ -5352,7 +5352,7 @@ static int
 procfs_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
   if (!target_have_steppable_watchpoint
-      && !gdbarch_have_nonsteppable_watchpoint (current_gdbarch))
+      && !gdbarch_have_nonsteppable_watchpoint (target_gdbarch))
     {
       /* When a hardware watchpoint fires off the PC will be left at
 	 the instruction following the one which caused the
@@ -5756,7 +5756,7 @@ info_mappings_callback (struct prmap *map, int (*ignore) (), void *unused)
   pr_off = map->pr_off;
 #endif
 
-  if (gdbarch_addr_bit (current_gdbarch) == 32)
+  if (gdbarch_addr_bit (target_gdbarch) == 32)
     printf_filtered ("\t%#10lx %#10lx %#10lx %#10x %7s\n",
 		     (unsigned long) map->pr_vaddr,
 		     (unsigned long) map->pr_vaddr + map->pr_size - 1,
@@ -5787,7 +5787,7 @@ info_proc_mappings (procinfo *pi, int summary)
     return;	/* No output for summary mode. */
 
   printf_filtered (_("Mapped address spaces:\n\n"));
-  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+  if (gdbarch_ptr_bit (target_gdbarch) == 32)
     printf_filtered ("\t%10s %10s %10s %10s %7s\n",
 		     "Start Addr",
 		     "  End Addr",

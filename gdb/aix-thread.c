@@ -887,7 +887,7 @@ pd_enable (void)
     return;
 
   /* Check application word size.  */
-  arch64 = register_size (current_gdbarch, 0) == 8;
+  arch64 = register_size (target_gdbarch, 0) == 8;
 
   /* Check whether the application is pthreaded.  */
   stub_name = NULL;

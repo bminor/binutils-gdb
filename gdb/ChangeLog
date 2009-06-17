@@ -1,5 +1,31 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-tasks.c (read_known_tasks_array): Use target_gdbarch instead
+	of current_gdbarch.
+	* aix-thread.c (pd_enable): Likewise.
+	* amd64-linux-nat.c (ps_get_thread_area): Likewise.
+	* bsd-uthread.c (bsd_uthread_activate): Likewise.
+	* linux-nat.c (linux_nat_info_proc_cmd): Likewise.
+	* linux-thread-db.c (enable_thread_event): Likewise.
+	* monitor.c (monitor_write_memory, monitor_read_memory): Likewise.
+	* nto-procfs.c (procfs_open): Likewise.
+	* procfs.c (invalidate_cache, procfs_insert_watchpoint,
+	info_proc_mappings, info_mappings_callback): Likewise.
+	* record.c (record_open): Likewise.
+	* rs6000-nat.c (ARCH64): Likewise.
+	* solib-darwin.c (darwin_solib_create_inferior_hook): Likewise.
+	(darwin_bfd_open): Likewise.
+	* memattr.c (mem_info_command): Likewise.
+
+	* windows-nat.c (win32_resume): Use current regcache architecture
+	instead of current_gdbarch.
+
+	* dbug-rom.c (dbug_regname): Remove check against number of
+	registers in current_gdbarch.
+	* solib-pa64.c (read_dynamic_info): Remove unused variable.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* dummy-frame.c (deprecated_pc_in_call_dummy): Add GDBARCH parameter,
 	use it instead of current_gdbarch.
 	* frame.h (deprecated_pc_in_call_dummy): Add GDBARCH parameter.

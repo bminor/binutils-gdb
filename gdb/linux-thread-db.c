@@ -509,7 +509,7 @@ enable_thread_event (int event, CORE_ADDR *bp)
   /* Set up the breakpoint.  */
   gdb_assert (exec_bfd);
   (*bp) = (gdbarch_convert_from_func_ptr_addr
-	   (current_gdbarch,
+	   (target_gdbarch,
 	    /* Do proper sign extension for the target.  */
 	    (bfd_get_sign_extend_vma (exec_bfd) > 0
 	     ? (CORE_ADDR) (intptr_t) notify.u.bptaddr

@@ -75,7 +75,7 @@
 #ifndef ARCH3264
 # define ARCH64() 0
 #else
-# define ARCH64() (register_size (current_gdbarch, 0) == 8)
+# define ARCH64() (register_size (target_gdbarch, 0) == 8)
 #endif
 
 /* Union of 32-bit and 64-bit versions of ld_info. */

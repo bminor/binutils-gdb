@@ -159,7 +159,7 @@ bsd_uthread_read_memory_address (CORE_ADDR addr)
 static int
 bsd_uthread_activate (struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct gdbarch *gdbarch = target_gdbarch;
   struct bsd_uthread_ops *ops = gdbarch_data (gdbarch, bsd_uthread_data);
 
   /* Skip if the thread stratum has already been activated.  */

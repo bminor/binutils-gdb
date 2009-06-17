@@ -428,7 +428,7 @@ record_open (char *name, int from_tty)
     error (_("Process record target can't debug inferior in asynchronous "
 	     "mode (target-async)."));
 
-  if (!gdbarch_process_record_p (current_gdbarch))
+  if (!gdbarch_process_record_p (target_gdbarch))
     error (_("Process record: the current architecture doesn't support "
 	     "record function."));
 

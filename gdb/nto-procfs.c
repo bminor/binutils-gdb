@@ -197,7 +197,7 @@ procfs_open (char *arg, int from_tty)
 	    {
 	      if (sysinfo->type !=
 		  nto_map_arch_to_cputype (gdbarch_bfd_arch_info
-					   (current_gdbarch)->arch_name))
+					   (target_gdbarch)->arch_name))
 		error (_("Invalid target CPU."));
 	    }
 	}

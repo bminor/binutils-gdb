@@ -313,7 +313,7 @@ darwin_solib_create_inferior_hook (void)
     {
       bfd *sub;
       sub = bfd_mach_o_fat_extract (dyld_bfd, bfd_object,
-				    gdbarch_bfd_arch_info (current_gdbarch));
+				    gdbarch_bfd_arch_info (target_gdbarch));
       if (sub)
 	dyld_bfd = sub;
       else
@@ -423,7 +423,7 @@ darwin_bfd_open (char *pathname)
   abfd = solib_bfd_fopen (found_pathname, found_file);
 
   res = bfd_mach_o_fat_extract (abfd, bfd_object,
-				gdbarch_bfd_arch_info (current_gdbarch));
+				gdbarch_bfd_arch_info (target_gdbarch));
   if (!res)
     {
       bfd_close (abfd);

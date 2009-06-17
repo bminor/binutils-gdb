@@ -90,8 +90,7 @@ dbug_regname (int index)
     /* no float registers */
   };
 
-  if ((index >= (sizeof (regnames) / sizeof (regnames[0]))) 
-      || (index < 0) || (index >= gdbarch_num_regs (current_gdbarch)))
+  if (index >= ARRAY_SIZE (regnames) || index < 0)
     return NULL;
   else
     return regnames[index];
