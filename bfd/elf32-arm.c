@@ -2748,15 +2748,9 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   if (!htab->sgot || !htab->sgotplt)
     abort ();
 
-  htab->srelgot = bfd_make_section_with_flags (dynobj,
-					       RELOC_SECTION (htab, ".got"),
-					       (SEC_ALLOC | SEC_LOAD
-						| SEC_HAS_CONTENTS
-						| SEC_IN_MEMORY
-						| SEC_LINKER_CREATED
-						| SEC_READONLY));
-  if (htab->srelgot == NULL
-      || ! bfd_set_section_alignment (dynobj, htab->srelgot, 2))
+  htab->srelgot = bfd_get_section_by_name (dynobj,
+					   RELOC_SECTION (htab, ".got"));
+  if (htab->srelgot == NULL)
     return FALSE;
   return TRUE;
 }

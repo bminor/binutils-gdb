@@ -110,12 +110,6 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 
   flags = bed->dynamic_sec_flags;
 
-  s = bfd_make_section_with_flags (abfd, ".got", flags);
-  if (s == NULL
-      || !bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
-    return FALSE;
-  htab->sgot = s;
-
   s = bfd_make_section_with_flags (abfd,
 				   (bed->rela_plts_and_copies_p
 				    ? ".rela.got" : ".rel.got"),
@@ -126,6 +120,12 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
   htab->srelgot = s;
 
+  s = bfd_make_section_with_flags (abfd, ".got", flags);
+  if (s == NULL
+      || !bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+    return FALSE;
+  htab->sgot = s;
+
   if (bed->want_got_plt)
     {
       s = bfd_make_section_with_flags (abfd, ".got.plt", flags);
@@ -135,6 +135,9 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
       htab->sgotplt = s;
     }
+
+  /* The first bit of the global offset table is the header.  */
+  s->size += bed->got_header_size;
 
   if (bed->want_got_sym)
     {
@@ -148,9 +151,6 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
       if (h == NULL)
 	return FALSE;
     }
-
-  /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size;
 
   return TRUE;
 }

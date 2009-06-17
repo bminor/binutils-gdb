@@ -899,13 +899,7 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   htab->sgot = bfd_get_section_by_name (dynobj, ".got");
   BFD_ASSERT (htab->sgot != NULL);
 
-  htab->srelgot = bfd_make_section_with_flags (dynobj, ".rela.got",
-					       SEC_ALLOC
-					       | SEC_LOAD
-					       | SEC_HAS_CONTENTS
-					       | SEC_IN_MEMORY
-					       | SEC_LINKER_CREATED
-					       | SEC_READONLY);
+  htab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
   if (htab->srelgot == NULL
       || ! bfd_set_section_alignment (dynobj, htab->srelgot,
 				      htab->word_align_power))

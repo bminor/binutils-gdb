@@ -1,3 +1,20 @@
+2009-06-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-arm.c (create_got_section): Get existing .rela.got
+	section.
+	* elf32-hppa.c (elf32_hppa_create_dynamic_sections): Likewise.
+	* elf32-lm32.c (create_got_section): Likewise.
+	* elf32-m32r.c (create_got_section): Likewise.
+	* elf32-ppc.c (ppc_elf_create_got): Likewise.
+	* elf32-s390.c (create_got_section): Likewise.
+	* elf32-sh.c (create_got_section): Likewise.
+	* elf32-xtensa.c (elf_xtensa_create_dynamic_sections): Likewise.
+	* elf64-s390.c (create_got_section): Likewise.
+	* elfxx-sparc.c (create_got_section): Likewise.
+
+	* elflink.c (_bfd_elf_create_got_section): Properly initialize
+	the GOT size.
+
 2009-06-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (ELF_LOCAL_SYMBOL_HASH): New.

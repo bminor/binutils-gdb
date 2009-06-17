@@ -2845,12 +2845,9 @@ ppc_elf_create_got (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
     }
 
-  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
-	   | SEC_LINKER_CREATED | SEC_READONLY);
-  htab->relgot = bfd_make_section_with_flags (abfd, ".rela.got", flags);
-  if (!htab->relgot
-      || ! bfd_set_section_alignment (abfd, htab->relgot, 2))
-    return FALSE;
+  htab->relgot = bfd_get_section_by_name (abfd, ".rela.got");
+  if (!htab->relgot)
+    abort ();
 
   return TRUE;
 }

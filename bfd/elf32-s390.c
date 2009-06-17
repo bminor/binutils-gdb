@@ -821,18 +821,10 @@ create_got_section (dynobj, info)
   htab = elf_s390_hash_table (info);
   htab->sgot = bfd_get_section_by_name (dynobj, ".got");
   htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
-  if (!htab->sgot || !htab->sgotplt)
+  htab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+  if (!htab->sgot || !htab->sgotplt || !htab->srelgot)
     abort ();
 
-  htab->srelgot = bfd_make_section_with_flags (dynobj, ".rela.got",
-					       (SEC_ALLOC | SEC_LOAD
-						| SEC_HAS_CONTENTS
-						| SEC_IN_MEMORY
-						| SEC_LINKER_CREATED
-						| SEC_READONLY));
-  if (htab->srelgot == NULL
-      || ! bfd_set_section_alignment (dynobj, htab->srelgot, 2))
-    return FALSE;
   return TRUE;
 }
 

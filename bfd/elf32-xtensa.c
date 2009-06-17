@@ -1404,6 +1404,7 @@ elf_xtensa_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   htab->srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
   htab->sgot = bfd_get_section_by_name (dynobj, ".got");
   htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
+  htab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
 
   /* Create any extra PLT sections in case check_relocs has already
      been called on all the non-dynamic input files.  */
@@ -1417,12 +1418,6 @@ elf_xtensa_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   /* Mark the ".got.plt" section READONLY.  */
   if (htab->sgotplt == NULL
       || ! bfd_set_section_flags (dynobj, htab->sgotplt, flags))
-    return FALSE;
-
-  /* Create ".rela.got".  */
-  htab->srelgot = bfd_make_section_with_flags (dynobj, ".rela.got", flags);
-  if (htab->srelgot == NULL
-      || ! bfd_set_section_alignment (dynobj, htab->srelgot, 2))
     return FALSE;
 
   /* Create ".got.loc" (literal tables for use by dynamic linker).  */

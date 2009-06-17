@@ -1011,16 +1011,7 @@ elf32_hppa_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   htab->srelplt = bfd_get_section_by_name (abfd, ".rela.plt");
 
   htab->sgot = bfd_get_section_by_name (abfd, ".got");
-  htab->srelgot = bfd_make_section_with_flags (abfd, ".rela.got",
-					       (SEC_ALLOC
-						| SEC_LOAD
-						| SEC_HAS_CONTENTS
-						| SEC_IN_MEMORY
-						| SEC_LINKER_CREATED
-						| SEC_READONLY));
-  if (htab->srelgot == NULL
-      || ! bfd_set_section_alignment (abfd, htab->srelgot, 2))
-    return FALSE;
+  htab->srelgot = bfd_get_section_by_name (abfd, ".rela.got");
 
   htab->sdynbss = bfd_get_section_by_name (abfd, ".dynbss");
   htab->srelbss = bfd_get_section_by_name (abfd, ".rela.bss");
