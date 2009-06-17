@@ -91,7 +91,7 @@ static void mi_execute_async_cli_command (char *cli_command,
 							char **argv, int argc);
 static int register_changed_p (int regnum, struct regcache *,
 			       struct regcache *);
-static void get_register (int regnum, int format);
+static void get_register (struct frame_info *, int regnum, int format);
 
 /* Command implementations.  FIXME: Is this libgdb?  No.  This is the MI
    layer that calls libgdb.  Any operation used in the below should be
@@ -446,6 +446,8 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
 void
 mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 {
+  struct frame_info *frame;
+  struct gdbarch *gdbarch;
   int regnum, numregs;
   int i;
   struct cleanup *cleanup;
@@ -456,8 +458,9 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
      In this case, some entries of gdbarch_register_name will change depending
      upon the particular processor being debugged.  */
 
-  numregs = gdbarch_num_regs (current_gdbarch)
-	    + gdbarch_num_pseudo_regs (current_gdbarch);
+  frame = get_selected_frame (NULL);
+  gdbarch = get_frame_arch (frame);
+  numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-names");
 
@@ -467,13 +470,12 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 	   regnum < numregs;
 	   regnum++)
 	{
-	  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
-	      || *(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
+	  if (gdbarch_register_name (gdbarch, regnum) == NULL
+	      || *(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	    ui_out_field_string (uiout, NULL, "");
 	  else
 	    ui_out_field_string (uiout, NULL,
-				 gdbarch_register_name
-				   (current_gdbarch, regnum));
+				 gdbarch_register_name (gdbarch, regnum));
 	}
     }
 
@@ -484,12 +486,12 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
       if (regnum < 0 || regnum >= numregs)
 	error ("bad register number");
 
-      if (gdbarch_register_name (current_gdbarch, regnum) == NULL
-	  || *(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
+      if (gdbarch_register_name (gdbarch, regnum) == NULL
+	  || *(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	ui_out_field_string (uiout, NULL, "");
       else
 	ui_out_field_string (uiout, NULL,
-			     gdbarch_register_name (current_gdbarch, regnum));
+			     gdbarch_register_name (gdbarch, regnum));
     }
   do_cleanups (cleanup);
 }
@@ -499,6 +501,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 {
   static struct regcache *this_regs = NULL;
   struct regcache *prev_regs;
+  struct gdbarch *gdbarch;
   int regnum, numregs, changed;
   int i;
   struct cleanup *cleanup;
@@ -517,8 +520,8 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
      In this  case, some entries of gdbarch_register_name will change depending
      upon the particular processor being debugged.  */
 
-  numregs = gdbarch_num_regs (current_gdbarch)
-	    + gdbarch_num_pseudo_regs (current_gdbarch);
+  gdbarch = get_regcache_arch (this_regs);
+  numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   make_cleanup_ui_out_list_begin_end (uiout, "changed-registers");
 
@@ -528,8 +531,8 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	   regnum < numregs;
 	   regnum++)
 	{
-	  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
-	      || *(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
+	  if (gdbarch_register_name (gdbarch, regnum) == NULL
+	      || *(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	    continue;
 	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
@@ -546,8 +549,8 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 
       if (regnum >= 0
 	  && regnum < numregs
-	  && gdbarch_register_name (current_gdbarch, regnum) != NULL
-	  && *gdbarch_register_name (current_gdbarch, regnum) != '\000')
+	  && gdbarch_register_name (gdbarch, regnum) != NULL
+	  && *gdbarch_register_name (gdbarch, regnum) != '\000')
 	{
 	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
@@ -597,6 +600,8 @@ register_changed_p (int regnum, struct regcache *prev_regs,
 void
 mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 {
+  struct frame_info *frame;
+  struct gdbarch *gdbarch;
   int regnum, numregs, format;
   int i;
   struct cleanup *list_cleanup, *tuple_cleanup;
@@ -607,13 +612,14 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
      In this case, some entries of gdbarch_register_name will change depending
      upon the particular processor being debugged.  */
 
-  numregs = gdbarch_num_regs (current_gdbarch)
-	    + gdbarch_num_pseudo_regs (current_gdbarch);
-
   if (argc == 0)
     error ("mi_cmd_data_list_register_values: Usage: -data-list-register-values <format> [<regnum1>...<regnumN>]");
 
   format = (int) argv[0][0];
+
+  frame = get_selected_frame (NULL);
+  gdbarch = get_frame_arch (frame);
+  numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-values");
 
@@ -623,12 +629,12 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	   regnum < numregs;
 	   regnum++)
 	{
-	  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
-	      || *(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
+	  if (gdbarch_register_name (gdbarch, regnum) == NULL
+	      || *(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	    continue;
 	  tuple_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
-	  get_register (regnum, format);
+	  get_register (frame, regnum, format);
 	  do_cleanups (tuple_cleanup);
 	}
     }
@@ -640,12 +646,12 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 
       if (regnum >= 0
 	  && regnum < numregs
-	  && gdbarch_register_name (current_gdbarch, regnum) != NULL
-	  && *gdbarch_register_name (current_gdbarch, regnum) != '\000')
+	  && gdbarch_register_name (gdbarch, regnum) != NULL
+	  && *gdbarch_register_name (gdbarch, regnum) != '\000')
 	{
 	  tuple_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
-	  get_register (regnum, format);
+	  get_register (frame, regnum, format);
 	  do_cleanups (tuple_cleanup);
 	}
       else
@@ -656,8 +662,9 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 
 /* Output one register's contents in the desired format.  */
 static void
-get_register (int regnum, int format)
+get_register (struct frame_info *frame, int regnum, int format)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte buffer[MAX_REGISTER_SIZE];
   int optim;
   int realnum;
@@ -670,8 +677,7 @@ get_register (int regnum, int format)
   if (format == 'N')
     format = 0;
 
-  frame_register (get_selected_frame (NULL), regnum, &optim, &lval, &addr,
-		  &realnum, buffer);
+  frame_register (frame, regnum, &optim, &lval, &addr, &realnum, buffer);
 
   if (optim)
     error ("Optimized out");
@@ -683,10 +689,10 @@ get_register (int regnum, int format)
 
       strcpy (buf, "0x");
       ptr = buf + 2;
-      for (j = 0; j < register_size (current_gdbarch, regnum); j++)
+      for (j = 0; j < register_size (gdbarch, regnum); j++)
 	{
-	  int idx = gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG ? j
-	  : register_size (current_gdbarch, regnum) - 1 - j;
+	  int idx = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ?
+		    j : register_size (gdbarch, regnum) - 1 - j;
 	  sprintf (ptr, "%02x", (unsigned char) buffer[idx]);
 	  ptr += 2;
 	}
@@ -698,7 +704,7 @@ get_register (int regnum, int format)
       struct value_print_options opts;
       get_formatted_print_options (&opts, format);
       opts.deref_ref = 1;
-      val_print (register_type (current_gdbarch, regnum), buffer, 0, 0,
+      val_print (register_type (gdbarch, regnum), buffer, 0, 0,
 		 stb->stream, 0, &opts, current_language);
       ui_out_field_stream (uiout, "value", stb);
       ui_out_stream_delete (stb);
@@ -711,6 +717,8 @@ get_register (int regnum, int format)
 void
 mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 {
+  struct regcache *regcache;
+  struct gdbarch *gdbarch;
   int numregs, i;
   char format;
 
@@ -720,8 +728,9 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
      In this case, some entries of gdbarch_register_name will change depending
      upon the particular processor being debugged.  */
 
-  numregs = gdbarch_num_regs (current_gdbarch)
-	    + gdbarch_num_pseudo_regs (current_gdbarch);
+  regcache = get_current_regcache ();
+  gdbarch = get_regcache_arch (regcache);
+  numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   if (argc == 0)
     error ("mi_cmd_data_write_register_values: Usage: -data-write-register-values <format> [<regnum1> <value1>...<regnumN> <valueN>]");
@@ -742,8 +751,8 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
       int regnum = atoi (argv[i]);
 
       if (regnum >= 0 && regnum < numregs
-	  && gdbarch_register_name (current_gdbarch, regnum)
-	  && *gdbarch_register_name (current_gdbarch, regnum))
+	  && gdbarch_register_name (gdbarch, regnum)
+	  && *gdbarch_register_name (gdbarch, regnum))
 	{
 	  LONGEST value;
 
@@ -751,7 +760,7 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  value = parse_and_eval_address (argv[i + 1]);
 
 	  /* Write it down.  */
-	  regcache_cooked_write_signed (get_current_regcache (), regnum, value);
+	  regcache_cooked_write_signed (regcache, regnum, value);
 	}
       else
 	error ("bad register number");

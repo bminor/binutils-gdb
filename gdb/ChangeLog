@@ -1,5 +1,18 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* mi/mi-main.c (mi_cmd_data_list_register_names): Use selected
+	frame architecture instead of current_gdbarch.
+	(mi_cmd_data_list_changed_registers): Likewise.
+	(mi_cmd_data_list_register_values): Likewise.  Pass selected
+	frame to get_register.
+	(get_register): Add FRAME argument, use it as frame to retrieve
+	registers from (instead of selected frame).  Use frame architecture
+	instead of current_gdbarch.
+	(mi_cmd_data_write_register_values): Use current regcache
+	architecture instead of current_gdbarch.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* tui/tui-regs.c (tui_show_register_group): Remove GDBARCH parameter;
 	use frame architecture instead.  Replace current_gdbarch uses.
 	(tui_show_registers): Update call.

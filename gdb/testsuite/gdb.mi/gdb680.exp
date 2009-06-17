@@ -27,7 +27,7 @@ if [mi_gdb_start] {
 
 proc do_test {count} {
   mi_gdb_test "-data-list-register-names -1" \
-    {\^error,msg=\"bad register number\"} \
+    {\^error,msg=\"No registers.\"} \
     "-data-list-register-names -1, try $count"
 }
 
