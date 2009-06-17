@@ -399,7 +399,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
       regs[rn] = pv_register (rn, 0);
       result->reg_offset[rn] = 1;
     }
-  stack = make_pv_area (E_SP_REGNUM);
+  stack = make_pv_area (E_SP_REGNUM, gdbarch_addr_bit (gdbarch));
   back_to = make_cleanup_free_pv_area (stack);
 
  /* The typical call instruction will have saved the return address on the

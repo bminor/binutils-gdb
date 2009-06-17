@@ -314,7 +314,7 @@ struct pv_area
 
 
 struct pv_area *
-make_pv_area (int base_reg)
+make_pv_area (int base_reg, int addr_bit)
 {
   struct pv_area *a = (struct pv_area *) xmalloc (sizeof (*a));
 
@@ -325,8 +325,7 @@ make_pv_area (int base_reg)
 
   /* Remember that shift amounts equal to the type's width are
      undefined.  */
-  a->addr_mask = ((((CORE_ADDR) 1
-		   << (gdbarch_addr_bit (current_gdbarch) - 1)) - 1) << 1) | 1;
+  a->addr_mask = ((((CORE_ADDR) 1 << (addr_bit - 1)) - 1) << 1) | 1;
 
   return a;
 }

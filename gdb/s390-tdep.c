@@ -857,7 +857,7 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
   {
     int i;
 
-    data->stack = make_pv_area (S390_SP_REGNUM);
+    data->stack = make_pv_area (S390_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
     /* For the purpose of prologue tracking, we consider the GPR size to
        be equal to the ABI word size, even if it is actually larger

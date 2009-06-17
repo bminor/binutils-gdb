@@ -1691,7 +1691,7 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
       result->reg_offset[rn] = 1;
     }
 
-  stack = make_pv_area (MEP_SP_REGNUM);
+  stack = make_pv_area (MEP_SP_REGNUM, gdbarch_addr_bit (gdbarch));
   back_to = make_cleanup_free_pv_area (stack);
 
   pc = start_pc;

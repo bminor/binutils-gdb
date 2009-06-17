@@ -1541,7 +1541,7 @@ m32c_analyze_prologue (struct gdbarch *arch,
   st.fb = pv_register (tdep->fb->num, 0);
   st.sp = pv_register (tdep->sp->num, 0);
   st.pc = pv_register (tdep->pc->num, 0);
-  st.stack = make_pv_area (tdep->sp->num);
+  st.stack = make_pv_area (tdep->sp->num, gdbarch_addr_bit (arch));
   back_to = make_cleanup_free_pv_area (st.stack);
 
   /* Record that the call instruction has saved the return address on

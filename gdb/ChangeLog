@@ -1,5 +1,18 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* prologue-value.c (make_pv_area): Add ADDR_BIT argument.
+	Use it instead of address bits of current_gdbarch.
+	* prologue-value.c (make_pv_area): Add ADDR_BIT argument.
+	* arm-tdep.c (thumb_analyze_prologue): Pass address bits to
+	make_pv_area.
+	(arm_scan_prologue): Likewise.
+	* m32c-tdep.c (m32c_analyze_prologue): Likewise.
+	* mep-tdep.c (mep_analyze_prologue): Likewise.
+	* mn10300-tdep.c (mn10300_analyze_prologue): Likewise.
+	* s390-tdep.c (s390_analyze_prologue): Likewise.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* mi/mi-main.c (mi_cmd_data_list_register_names): Use selected
 	frame architecture instead of current_gdbarch.
 	(mi_cmd_data_list_changed_registers): Likewise.

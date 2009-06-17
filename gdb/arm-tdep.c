@@ -395,7 +395,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 
   for (i = 0; i < 16; i++)
     regs[i] = pv_register (i, 0);
-  stack = make_pv_area (ARM_SP_REGNUM);
+  stack = make_pv_area (ARM_SP_REGNUM, gdbarch_addr_bit (gdbarch));
   back_to = make_cleanup_free_pv_area (stack);
 
   while (start < limit)
@@ -862,7 +862,7 @@ arm_scan_prologue (struct frame_info *this_frame,
 
   for (regno = 0; regno < ARM_FPS_REGNUM; regno++)
     regs[regno] = pv_register (regno, 0);
-  stack = make_pv_area (ARM_SP_REGNUM);
+  stack = make_pv_area (ARM_SP_REGNUM, gdbarch_addr_bit (gdbarch));
   back_to = make_cleanup_free_pv_area (stack);
 
   for (current_pc = prologue_start;
