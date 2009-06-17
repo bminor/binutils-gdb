@@ -731,8 +731,6 @@ record_line (struct subfile *subfile, int line, CORE_ADDR pc)
 		      * sizeof (struct linetable_entry))));
     }
 
-  pc = gdbarch_addr_bits_remove (current_gdbarch, pc);
-
   /* Normally, we treat lines as unsorted.  But the end of sequence
      marker is special.  We sort line markers at the same PC by line
      number, so end of sequence markers (which have line == 0) appear

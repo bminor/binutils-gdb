@@ -2790,7 +2790,11 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	     which may have an N_FUN stabs at the end of the function,
 	     but no N_SLINE stabs.  */
 	  if (sline_found_in_function)
-	    record_line (current_subfile, 0, last_function_start + valu);
+	    {
+	      CORE_ADDR addr = last_function_start + valu;
+	      record_line (current_subfile, 0,
+			   gdbarch_addr_bits_remove (gdbarch, addr));
+	    }
 
 	  within_function = 0;
 	  new = pop_context ();
@@ -3006,14 +3010,15 @@ no enclosing block"));
 
       if (within_function && sline_found_in_function == 0)
 	{
-	  if (processing_gcc_compilation == 2)
-	    record_line (current_subfile, desc, last_function_start);
-	  else
-	    record_line (current_subfile, desc, valu);
+	  CORE_ADDR addr = processing_gcc_compilation == 2 ?
+			   last_function_start : valu;
+	  record_line (current_subfile, desc,
+		       gdbarch_addr_bits_remove (gdbarch, addr));
 	  sline_found_in_function = 1;
 	}
       else
-	record_line (current_subfile, desc, valu);
+	record_line (current_subfile, desc,
+		     gdbarch_addr_bits_remove (gdbarch, valu));
       break;
 
     case N_BCOMM:

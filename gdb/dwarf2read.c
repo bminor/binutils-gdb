@@ -7226,6 +7226,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
   unsigned char op_code, extended_op, adj_opcode;
   CORE_ADDR baseaddr;
   struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   const int decode_for_pst_p = (pst != NULL);
   struct subfile *last_subfile = NULL, *first_subfile = current_subfile;
 
@@ -7245,6 +7246,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
       int is_stmt = lh->default_is_stmt;
       int basic_block = 0;
       int end_sequence = 0;
+      CORE_ADDR addr;
 
       if (!decode_for_pst_p && lh->num_file_names >= file)
 	{
@@ -7285,16 +7287,18 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		{
 		  lh->file_names[file - 1].included_p = 1;
 		  if (!decode_for_pst_p)
-                    {
-                      if (last_subfile != current_subfile)
-                        {
-                          if (last_subfile)
-                            record_line (last_subfile, 0, address);
-                          last_subfile = current_subfile;
-                        }
+		    {
+		      if (last_subfile != current_subfile)
+			{
+			  addr = gdbarch_addr_bits_remove (gdbarch, address);
+			  if (last_subfile)
+			    record_line (last_subfile, 0, addr);
+			  last_subfile = current_subfile;
+			}
 		      /* Append row to matrix using current values.  */
-		      record_line (current_subfile, line, 
-				   check_cu_functions (address, cu));
+		      addr = check_cu_functions (address, cu);
+		      addr = gdbarch_addr_bits_remove (gdbarch, addr);
+		      record_line (current_subfile, line, addr);
 		    }
 		}
 	      basic_block = 1;
@@ -7363,16 +7367,18 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		{
 		  lh->file_names[file - 1].included_p = 1;
 		  if (!decode_for_pst_p)
-                    {
-                      if (last_subfile != current_subfile)
-                        {
-                          if (last_subfile)
-                            record_line (last_subfile, 0, address);
-                          last_subfile = current_subfile;
-                        }
-                      record_line (current_subfile, line, 
-                                   check_cu_functions (address, cu));
-                    }
+		    {
+		      if (last_subfile != current_subfile)
+			{
+			  addr = gdbarch_addr_bits_remove (gdbarch, address);
+			  if (last_subfile)
+			    record_line (last_subfile, 0, addr);
+			  last_subfile = current_subfile;
+			}
+		      addr = check_cu_functions (address, cu);
+		      addr = gdbarch_addr_bits_remove (gdbarch, addr);
+		      record_line (current_subfile, line, addr);
+		    }
 		}
 	      basic_block = 0;
 	      break;
@@ -7452,7 +7458,10 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
         {
           lh->file_names[file - 1].included_p = 1;
           if (!decode_for_pst_p)
-            record_line (current_subfile, 0, address);
+	    {
+	      addr = gdbarch_addr_bits_remove (gdbarch, address);
+	      record_line (current_subfile, 0, addr);
+	    }
         }
     }
 

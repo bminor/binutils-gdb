@@ -1024,7 +1024,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	         for which we do not have any other statement-line-number. */
 	      if (fcn_last_line == 1)
 		record_line (current_subfile, fcn_first_line,
-			     fcn_first_line_addr);
+			     gdbarch_addr_bits_remove (gdbarch,
+						       fcn_first_line_addr));
 	      else
 		enter_linenos (fcn_line_ptr, fcn_first_line, fcn_last_line,
 			       objfile);
@@ -1350,6 +1351,7 @@ static void
 enter_linenos (long file_offset, int first_line,
 	       int last_line, struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   char *rawptr;
   struct internal_lineno lptr;
 
@@ -1382,9 +1384,12 @@ enter_linenos (long file_offset, int first_line,
       /* The next function, or the sentinel, will have L_LNNO32 zero;
 	 we exit. */
       if (L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line)
-	record_line (current_subfile, first_line + L_LNNO32 (&lptr),
-		     lptr.l_addr.l_paddr
-		     + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile)));
+	{
+	  CORE_ADDR addr = lptr.l_addr.l_paddr;
+	  addr += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+	  record_line (current_subfile, first_line + L_LNNO32 (&lptr),
+		       gdbarch_addr_bits_remove (gdbarch, addr));
+	}
       else
 	break;
     }

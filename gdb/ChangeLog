@@ -1,5 +1,17 @@
 2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* buildsym.c (record_line): Remove call to gdbarch_addr_bits_remove.
+
+	* coffread.c (coff_symtab_read): Call gdbarch_addr_bits_remove before
+	calling record_line.
+	(enter_linenos): Likewise.
+	* dbxread.c (process_one_symbol): Likewise.
+	* dwarf2read.c (dwarf_decode_lines): Likewise.
+	* mdebugread.c (psymtab_to_symtab_1): Likewise.
+	* xcoffread.c (enter_line_range): Likewise.
+
+2009-06-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ax-gdb.c (gen_bitfield_ref): Add EXP argument, use expression
 	architecture instead of current_gdbarch.
 	(gen_struct_ref): Add EXP argument, pass to get_bitfield_ref.

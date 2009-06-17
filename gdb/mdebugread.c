@@ -3966,6 +3966,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 
   if (processing_gcc_compilation != 0)
     {
+      struct gdbarch *gdbarch = get_objfile_arch (pst->objfile);
 
       /* This symbol table contains stabs-in-ecoff entries.  */
 
@@ -4060,7 +4061,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 		{
 		  /* Handle encoded stab line number. */
 		  valu += ANOFFSET (pst->section_offsets, SECT_OFF_TEXT (pst->objfile));
-		  record_line (current_subfile, sh.index, valu);
+		  record_line (current_subfile, sh.index,
+			       gdbarch_addr_bits_remove (gdbarch, valu));
 		}
 	    }
 	  else if (sh.st == stProc || sh.st == stStaticProc
