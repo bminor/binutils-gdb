@@ -44,7 +44,10 @@ alpha*-*-openbsd*)	targ_emul=elf64alpha
 arc-*-elf*)		targ_emul=arcelf
 			;;
 arm-epoc-pe)		targ_emul=arm_epoc_pe ;	targ_extra_ofiles="deffilep.o pe-dll.o" ;;
-arm-wince-pe | arm-*-wince) targ_emul=arm_wince_pe ; targ_extra_ofiles="deffilep.o pe-dll.o" ;;
+arm*-*-cegcc*)		targ_emul=arm_wince_pe ; targ_extra_ofiles="deffilep.o pe-dll.o"
+			LIB_PATH='${tooldir}/lib/w32api' ;;
+arm-wince-pe | arm-*-wince | arm*-*-mingw32ce*)
+			targ_emul=arm_wince_pe ; targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 arm-*-pe)		targ_emul=armpe ; targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 arm-*-aout | armel-*-aout) targ_emul=armaoutl ;;
 armeb-*-aout)		targ_emul=armaoutb ;;

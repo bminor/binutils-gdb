@@ -1,3 +1,20 @@
+2009-06-18  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+  Merge cegcc and mingw32ce target name changes from CeGCC project.
+
+  2008-09-24  Pedro Alves  <pedroalves@users.sourceforge.net>
+
+	* configure.tgt (arm*-*-cegcc*): Set LIB_PATH to
+	${tooldir}/lib/w32api.
+
+  2007-12-25  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* configure.tgt: Add arm*-*-cegcc* target.
+
+  2007-12-17  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* configure.tgt: Add arm-*-mingw32ce* target.
+
 2009-06-10  Philip Blundell  <philb@gnu.org>
 
 	* emultempl/armelf.em (gld${EMULATION_NAME}_finish): Avoid crash

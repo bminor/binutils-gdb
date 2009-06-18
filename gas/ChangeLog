@@ -1,3 +1,15 @@
+2009-06-18  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+  Merge cegcc and mingw32ce target name changes from CeGCC project.
+
+  2007-12-25  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* configure.tgt: Add arm*-*-cegcc* target.
+
+  2007-12-17  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* configure.tgt: Add arm-*-mingw32ce* target.
+
 2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-vax.c (md_estimate_size_before_relax): Accept

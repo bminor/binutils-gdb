@@ -121,7 +121,8 @@ case ${generic_target} in
   arm-*-*n*bsd*)			fmt=aout em=nbsd ;;
   arm-*-nto*)				fmt=elf ;;
   arm-epoc-pe | thumb-epoc-pe)		fmt=coff em=epoc-pe ;;
-  arm-wince-pe | arm-*-wince)		fmt=coff em=wince-pe ;;
+  arm-wince-pe | arm-*-wince | arm*-*-mingw32ce* | arm*-*-cegcc*)
+					fmt=coff em=wince-pe ;;
   arm-*-pe | thumb-*-pe)		fmt=coff em=pe ;;
   arm-*-riscix*)			fmt=aout em=riscix ;;
 
