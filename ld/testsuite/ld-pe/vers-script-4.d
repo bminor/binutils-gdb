@@ -62,11 +62,11 @@ EXPORTS
     _Z9_Jv_ZFreePvS_ @61
     _Z9_Jv_equalP13_Jv_Utf8ConstPN4java4lang6StringEi @62
     _Z9shsUpdateP8SHS_INFOPhi @63
-    _ZGr30_java\$Sutil\$Sweeks\$_properties @64
-    _ZGr32_java\$Sutil\$Siso4217\$_properties @65
-    _ZGr48_gnu\$Sjavax\$Sprint\$SPrinterDialog_de\$_properties @66
-    _ZGr49_gnu\$Sjava\$Slocale\$SLocaleInformation\$_properties @67
-    _ZGr51_gnu\$Sjava\$Sutil\$Sregex\$SMessagesBundle\$_properties @68
+    _ZGr30_java_Sutil_Sweeks__properties @64
+    _ZGr32_java_Sutil_Siso4217__properties @65
+    _ZGr48_gnu_Sjavax_Sprint_SPrinterDialog_de__properties @66
+    _ZGr49_gnu_Sjava_Slocale_SLocaleInformation__properties @67
+    _ZGr51_gnu_Sjava_Sutil_Sregex_SMessagesBundle__properties @68
     _ZTVN5javax8security4auth4x50021X500PrivateCredentialE @69
     _ZTVN5javax8security4auth5login12LoginContextE @70
     _ZTVN5javax8security4auth5login13ConfigurationE @71

@@ -1,3 +1,14 @@
+2009-06-18  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-pe/pe-run.exp (proc test_direct_link_dll):  Always pass
+	--enable-auto-import to the linker.
+	* ld-pe/vers-script-1.d:  Replace '\$' by '_' in all symbol names.
+	* ld-pe/vers-script-3.d:  Likewise.
+	* ld-pe/vers-script-4.d:  Likewise.
+	* ld-pe/vers-script-dll.c:  Likewise.
+	* lib/ld-lib.exp (proc is_pecoff_format):  Also return true for
+	"*-*-cegcc*" targets.
+
 2009-06-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-ifunc/ifunc-9-x86.d: Fix a typo.

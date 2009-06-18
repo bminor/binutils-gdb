@@ -447,6 +447,7 @@ proc is_aout_format {} {
 proc is_pecoff_format {} {
     if { ![istarget *-*-mingw*] \
 	 && ![istarget *-*-cygwin*] \
+	 && ![istarget *-*-cegcc*] \
 	 && ![istarget *-*-pe*] } {
 	return 0
     }

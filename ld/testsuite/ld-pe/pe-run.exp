@@ -83,7 +83,8 @@ proc test_direct_link_dll {} {
 	} else {
 	    # Check linking directly to direct_dll.dll.
 	    set msg "linking client (.dll)"
-	    if [ld_simple_link $CC $tmpdir/direct_client_dll.exe "$tmpdir/direct_client.o $tmpdir/direct_dll.dll" ] {
+	    if [ld_simple_link "$CC -Wl,--enable-auto-import" $tmpdir/direct_client_dll.exe
+	      "$tmpdir/direct_client.o $tmpdir/direct_dll.dll" ] {
 		pass $msg
 	    } else {
 		fail $msg 
@@ -91,7 +92,8 @@ proc test_direct_link_dll {} {
 
 	    # Check linking directly to direct_dll.sl.
 	    set msg "linking client (.sl)"
-	    if [ld_simple_link $CC $tmpdir/direct_client_sl.exe "$tmpdir/direct_client.o $tmpdir/direct_dll.sl" ] {
+	    if [ld_simple_link "$CC -Wl,--enable-auto-import" $tmpdir/direct_client_sl.exe
+	      "$tmpdir/direct_client.o $tmpdir/direct_dll.sl" ] {
 		pass $msg
 	    } else {
 		fail $msg 
@@ -101,7 +103,8 @@ proc test_direct_link_dll {} {
 	    # Create symbolic link.
 	    catch "exec ln -fs direct_dll.dll $tmpdir/libdirect_dll.dll.a" ln_catch
 	    set msg "linking client (symlink -> .dll)"
-	    if [ld_simple_link $CC $tmpdir/direct_client_symlink_dll.exe "$tmpdir/direct_client.o $tmpdir/libdirect_dll.dll.a" ] {
+	    if [ld_simple_link "$CC -Wl,--enable-auto-import" $tmpdir/direct_client_symlink_dll.exe
+	      "$tmpdir/direct_client.o $tmpdir/libdirect_dll.dll.a" ] {
 	        pass $msg
 	    } else {
 		fail $msg
@@ -111,7 +114,8 @@ proc test_direct_link_dll {} {
 	    # Create symbolic link.
 	    catch "exec ln -fs direct_dll.sl $tmpdir/libdirect_sl.dll.a" ln_catch
 	    set msg "linking client (symlink -> .sl)"
-	    if [ld_simple_link $CC $tmpdir/direct_client_symlink_sl.exe "$tmpdir/direct_client.o $tmpdir/libdirect_sl.dll.a" ] {
+	    if [ld_simple_link "$CC -Wl,--enable-auto-import" $tmpdir/direct_client_symlink_sl.exe
+	      "$tmpdir/direct_client.o $tmpdir/libdirect_sl.dll.a" ] {
 		pass $msg
 	    } else {
 		fail $msg 
