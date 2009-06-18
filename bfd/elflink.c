@@ -8082,6 +8082,8 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	      + (i2e - 1) * sizeof (Elf_Internal_Rela));
 
   count = dynamic_relocs->size / ext_size;
+  if (count == 0)
+    return 0;
   sort = bfd_zmalloc (sort_elt * count);
 
   if (sort == NULL)

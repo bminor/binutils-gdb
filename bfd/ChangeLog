@@ -1,3 +1,8 @@
+2009-06-18  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (elf_link_sort_relocs): Return early if there are no
+	relocs to sort.
+
 2009-06-18  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Merge cegcc and mingw32ce target name changes from
