@@ -130,7 +130,7 @@ struct comp_unit
   gdb_byte *dwarf_frame_buffer;
 
   /* Length of the loaded .debug_frame section.  */
-  unsigned long dwarf_frame_size;
+  bfd_size_type dwarf_frame_size;
 
   /* Pointer to the .debug_frame section.  */
   asection *dwarf_frame_section;

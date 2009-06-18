@@ -1,3 +1,8 @@
+2009-06-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* dwarf2-frame.c (struct comp_unit): Use bfd_size_type for
+	dwarf_frame_size.
+
 2009-06-17  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (zlib_decompress_section): Use a cleanup.
