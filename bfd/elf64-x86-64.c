@@ -396,27 +396,6 @@ static const bfd_byte elf64_x86_64_plt_entry[PLT_ENTRY_SIZE] =
   0, 0, 0, 0	/* replaced with offset to start of .plt0.  */
 };
 
-/* The x86-64 linker needs to keep track of the number of relocs that
-   it decides to copy as dynamic relocs in check_relocs for each symbol.
-   This is so that it can later discard them if they are found to be
-   unnecessary.  We store the information in a field extending the
-   regular ELF linker hash table.  */
-
-struct elf64_x86_64_dyn_relocs
-{
-  /* Next section.  */
-  struct elf64_x86_64_dyn_relocs *next;
-
-  /* The input section of the reloc.  */
-  asection *sec;
-
-  /* Total number of relocs copied for the input section.  */
-  bfd_size_type count;
-
-  /* Number of pc-relative relocs copied for the input section.  */
-  bfd_size_type pc_count;
-};
-
 /* x86-64 ELF linker hash entry.  */
 
 struct elf64_x86_64_link_hash_entry
@@ -424,7 +403,7 @@ struct elf64_x86_64_link_hash_entry
   struct elf_link_hash_entry elf;
 
   /* Track dynamic relocs copied for this symbol.  */
-  struct elf64_x86_64_dyn_relocs *dyn_relocs;
+  struct elf_dyn_relocs *dyn_relocs;
 
 #define GOT_UNKNOWN	0
 #define GOT_NORMAL	1
@@ -726,14 +705,14 @@ elf64_x86_64_copy_indirect_symbol (struct bfd_link_info *info,
     {
       if (edir->dyn_relocs != NULL)
 	{
-	  struct elf64_x86_64_dyn_relocs **pp;
-	  struct elf64_x86_64_dyn_relocs *p;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
-	      struct elf64_x86_64_dyn_relocs *q;
+	      struct elf_dyn_relocs *q;
 
 	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
@@ -1192,41 +1171,14 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  h->pointer_equality_needed = 1;
 		  if (info->shared)
 		    {
-		      struct elf64_x86_64_dyn_relocs *p;
-		      struct elf64_x86_64_dyn_relocs **head;
-
 		      /* We must copy these reloc types into the output
 			 file.  Create a reloc section in dynobj and
 			 make room for this reloc.  */
+		      sreloc = _bfd_elf_create_ifunc_dyn_reloc
+			(abfd, info, sec, sreloc,
+			 &((struct elf64_x86_64_link_hash_entry *) h)->dyn_relocs);
 		      if (sreloc == NULL)
-			{
-			  if (htab->elf.dynobj == NULL)
-			    htab->elf.dynobj = abfd;
-
-			  sreloc = _bfd_elf_make_dynamic_reloc_section
-			    (sec, htab->elf.dynobj, 3, abfd, TRUE);
-
-			  if (sreloc == NULL)
-			    return FALSE;
-			}
-		      
-		      head = &((struct elf64_x86_64_link_hash_entry *) h)->dyn_relocs;
-		      p = *head;
-		      if (p == NULL || p->sec != sec)
-			{
-			  bfd_size_type amt = sizeof *p;
-
-			  p = ((struct elf64_x86_64_dyn_relocs *)
-			       bfd_alloc (htab->elf.dynobj, amt));
-			  if (p == NULL)
-			    return FALSE;
-			  p->next = *head;
-			  *head = p;
-			  p->sec = sec;
-			  p->count = 0;
-			  p->pc_count = 0;
-			}
-		      p->count += 1;
+			return FALSE;
 		    }
 		  break;
 
@@ -1500,8 +1452,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  && (h->root.type == bfd_link_hash_defweak
 		      || !h->def_regular)))
 	    {
-	      struct elf64_x86_64_dyn_relocs *p;
-	      struct elf64_x86_64_dyn_relocs **head;
+	      struct elf_dyn_relocs *p;
+	      struct elf_dyn_relocs **head;
 
 	      /* We must copy these reloc types into the output file.
 		 Create a reloc section in dynobj and make room for
@@ -1540,7 +1492,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  /* Beware of type punned pointers vs strict aliasing
 		     rules.  */
 		  vpp = &(elf_section_data (s)->local_dynrel);
-		  head = (struct elf64_x86_64_dyn_relocs **)vpp;
+		  head = (struct elf_dyn_relocs **)vpp;
 		}
 
 	      p = *head;
@@ -1548,7 +1500,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		{
 		  bfd_size_type amt = sizeof *p;
 
-		  p = ((struct elf64_x86_64_dyn_relocs *)
+		  p = ((struct elf_dyn_relocs *)
 		       bfd_alloc (htab->elf.dynobj, amt));
 		  if (p == NULL)
 		    return FALSE;
@@ -1642,8 +1594,8 @@ elf64_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx >= symtab_hdr->sh_info)
 	{
 	  struct elf64_x86_64_link_hash_entry *eh;
-	  struct elf64_x86_64_dyn_relocs **pp;
-	  struct elf64_x86_64_dyn_relocs *p;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
@@ -1820,7 +1772,7 @@ elf64_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (ELIMINATE_COPY_RELOCS)
     {
       struct elf64_x86_64_link_hash_entry * eh;
-      struct elf64_x86_64_dyn_relocs *p;
+      struct elf_dyn_relocs *p;
 
       eh = (struct elf64_x86_64_link_hash_entry *) h;
       for (p = eh->dyn_relocs; p != NULL; p = p->next)
@@ -1881,7 +1833,7 @@ elf64_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   struct bfd_link_info *info;
   struct elf64_x86_64_link_hash_table *htab;
   struct elf64_x86_64_link_hash_entry *eh;
-  struct elf64_x86_64_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -1897,124 +1849,10 @@ elf64_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
      here if it is defined and referenced in a non-shared object.  */
   if (h->type == STT_GNU_IFUNC
       && h->def_regular)
-    {
-      asection *plt, *gotplt, *relplt;
-
-      /* When a shared library references a STT_GNU_IFUNC symbol
-	 defined in executable, the address of the resolved function
-	 may be used.  But in non-shared executable, the address of
-	 its .plt slot may be used.  Pointer equality may not work
-	 correctly.  PIE should be used if pointer equality is
-	 required here.  */
-      if (!info->shared
-	  && (h->dynindx != -1
-	      || info->export_dynamic)
-	  && h->pointer_equality_needed)
-	{
-	  info->callbacks->einfo 
-	    (_("%F%P: dynamic STT_GNU_IFUNC symbol `%s' with pointer "
-	       "equality in `%B' can not be used when making an "
-	       "executable; recompile with -fPIE and relink with -pie\n"),
-	     h->root.root.string,
-	     h->root.u.def.section->owner);
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
-
-      /* Return and discard space for dynamic relocations against it if
-	 it is never referenced in a non-shared object.  */
-      if (!h->ref_regular)
-	{
-	  if (h->plt.refcount > 0
-	      || h->got.refcount > 0)
-	    abort ();
-	  h->got.offset = (bfd_vma) -1;
-	  eh->dyn_relocs = NULL;
-	  return TRUE;
-	}
-
-      /* When building a static executable, use .iplt, .igot.plt and
-	 .rela.iplt sections for STT_GNU_IFUNC symbols.  */
-      if (htab->elf.splt != NULL)
-	{
-	  plt = htab->elf.splt;
-	  gotplt = htab->elf.sgotplt;
-	  relplt = htab->elf.srelplt;
-	  
-	  /* If this is the first .plt entry, make room for the special
-	     first entry.  */
-	  if (plt->size == 0)
-	    plt->size += PLT_ENTRY_SIZE;
-	}
-      else
-	{
-	  plt = htab->elf.iplt;
-	  gotplt = htab->elf.igotplt;
-	  relplt = htab->elf.irelplt;
-	}
-
-      /* Don't update value of STT_GNU_IFUNC symbol to PLT.  We need
-	 the original value for R_X86_64_IRELATIVE.  */  
-      h->plt.offset = plt->size;
-
-      /* Make room for this entry in the .plt/.iplt section.  */
-      plt->size += PLT_ENTRY_SIZE;
-
-      /* We also need to make an entry in the .got.plt/.got.iplt
-	 section, which will be placed in the .got section by the
-	 linker script.  */
-      gotplt->size += GOT_ENTRY_SIZE;
-
-      /* We also need to make an entry in the .rela.plt/.rela.iplt
-	 section.  */
-      relplt->size += sizeof (Elf64_External_Rela);
-      relplt->reloc_count++;
-
-      /* We need dynamic relocation for STT_GNU_IFUNC symbol only
-	 when there is a non-GOT reference in a shared object.  */
-      if (!info->shared
-	  || !h->non_got_ref)
-	eh->dyn_relocs = NULL;
-
-      /* Finally, allocate space.  */
-      for (p = eh->dyn_relocs; p != NULL; p = p->next)
-	htab->elf.irelifunc->size
-	  += p->count * sizeof (Elf64_External_Rela);
-
-      /* For STT_GNU_IFUNC symbol, .got.plt has the real function
-	 addres and .got has the PLT entry adddress.  We will load
-	 the GOT entry with the PLT entry in finish_dynamic_symbol if
-	 it is used.  For branch, it uses .got.plt.  For symbol value,
-	 1. Use .got.plt in a shared object if it is forced local or
-	 not dynamic.
-	 2. Use .got.plt in a non-shared object if pointer equality 
-	 isn't needed.
-	 3. Use .got.plt in PIE.
-	 4. Use .got.plt if .got isn't used.
-	 5. Otherwise use .got so that it can be shared among different
-	 objects at run-time.
-	 We only need to relocate .got entry in shared object.  */
-      if ((info->shared
-	   && (h->dynindx == -1
-	       || h->forced_local))
-	  || (!info->shared
-	      && !h->pointer_equality_needed)
-	  || (info->executable && info->shared)
-	  || htab->elf.sgot == NULL)
-	{
-	  /* Use .got.plt.  */
-	  h->got.offset = (bfd_vma) -1;
-	}
-      else
-	{
-	  h->got.offset = htab->elf.sgot->size;
-	  htab->elf.sgot->size += GOT_ENTRY_SIZE;
-	  if (info->shared)
-	    htab->elf.srelgot->size += sizeof (Elf64_External_Rela);
-	}
-
-      return TRUE;
-    }
+    return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
+					       &eh->dyn_relocs,
+					       PLT_ENTRY_SIZE,
+					       GOT_ENTRY_SIZE);
   else if (htab->elf.dynamic_sections_created
 	   && h->plt.refcount > 0)
     {
@@ -2159,7 +1997,7 @@ elf64_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	 should avoid writing weird assembly.  */
       if (SYMBOL_CALLS_LOCAL (info, h))
 	{
-	  struct elf64_x86_64_dyn_relocs **pp;
+	  struct elf_dyn_relocs **pp;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -2260,7 +2098,7 @@ static bfd_boolean
 elf64_x86_64_readonly_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 {
   struct elf64_x86_64_link_hash_entry *eh;
-  struct elf64_x86_64_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
 
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
@@ -2330,9 +2168,9 @@ elf64_x86_64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  struct elf64_x86_64_dyn_relocs *p;
+	  struct elf_dyn_relocs *p;
 
-	  for (p = (struct elf64_x86_64_dyn_relocs *)
+	  for (p = (struct elf_dyn_relocs *)
 		    (elf_section_data (s)->local_dynrel);
 	       p != NULL;
 	       p = p->next)
