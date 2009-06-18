@@ -3777,10 +3777,21 @@ infrun: not switching back to stepped thread, it has vanished\n");
 		  keep_going (ecs);
 		  return;
 		}
-	      /* Normal (staticly linked) function call return.  */
-	      init_sal (&sr_sal);
-	      sr_sal.pc = ecs->stop_func_start;
-	      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	      if (gdbarch_skip_trampoline_code(current_gdbarch,
+					       get_current_frame (),
+					       stop_pc))
+		{
+		  /* We are in a function call trampoline.
+		     Keep stepping backward to get to the caller.  */
+		  ecs->event_thread->stepping_over_breakpoint = 1;
+		}
+	      else
+		{
+		  /* Normal function call return (static or dynamic).  */
+		  init_sal (&sr_sal);
+		  sr_sal.pc = ecs->stop_func_start;
+		  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+		}
 	    }
 	  else
 	    insert_step_resume_breakpoint_at_caller (frame);
