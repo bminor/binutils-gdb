@@ -1094,7 +1094,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      h = elf64_x86_64_get_local_sym_hash (htab, abfd, rel,
 						   TRUE);
 	      if (h == NULL)
-		return FALSE;
+		goto error_return;
 	      
 	      /* Fake a STT_GNU_IFUNC symbol.  */
 	      h->type = STT_GNU_IFUNC;
@@ -1134,7 +1134,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_X86_64_GOTPCREL:
 	    case R_X86_64_GOTPCREL64:
 	      if (!_bfd_elf_create_ifunc_sections (abfd, info))
-		return FALSE;
+		goto error_return;
 	      break;
 	    }
 
@@ -1164,7 +1164,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      ? h->root.root.string : "a local symbol"),
 		     __FUNCTION__);
 		  bfd_set_error (bfd_error_bad_value);
-		  return FALSE;
+		  goto error_return;
 
 		case R_X86_64_64:
 		  h->non_got_ref = 1;
@@ -1178,7 +1178,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 			(abfd, info, sec, sreloc,
 			 &((struct elf64_x86_64_link_hash_entry *) h)->dyn_relocs);
 		      if (sreloc == NULL)
-			return FALSE;
+			goto error_return;
 		    }
 		  break;
 
@@ -1201,7 +1201,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (htab->elf.sgot == NULL
 		      && !_bfd_elf_create_got_section (htab->elf.dynobj,
 						       info))
-		    return FALSE;
+		    goto error_return;
 		  break;
 		}
 
@@ -1213,7 +1213,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 					 symtab_hdr, sym_hashes,
 					 &r_type, GOT_UNKNOWN,
 					 rel, rel_end, h))
-	return FALSE;
+	goto error_return;
 
       switch (r_type)
 	{
@@ -1230,7 +1230,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		 x86_64_elf_howto_table[r_type].name,
 		 (h) ? h->root.root.string : "a local symbol");
 	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
+	      goto error_return;
 	    }
 	  break;
 
@@ -1290,7 +1290,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    local_got_refcounts = ((bfd_signed_vma *)
 					   bfd_zalloc (abfd, size));
 		    if (local_got_refcounts == NULL)
-		      return FALSE;
+		      goto error_return;
 		    elf_local_got_refcounts (abfd) = local_got_refcounts;
 		    elf64_x86_64_local_tlsdesc_gotent (abfd)
 		      = (bfd_vma *) (local_got_refcounts + symtab_hdr->sh_info);
@@ -1318,7 +1318,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    (*_bfd_error_handler)
 		      (_("%B: '%s' accessed both as normal and thread local symbol"),
 		       abfd, h ? h->root.root.string : "<local>");
-		    return FALSE;
+		    goto error_return;
 		  }
 	      }
 
@@ -1342,7 +1342,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		htab->elf.dynobj = abfd;
 	      if (!_bfd_elf_create_got_section (htab->elf.dynobj,
 						info))
-		return FALSE;
+		goto error_return;
 	    }
 	  break;
 
@@ -1391,7 +1391,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		 x86_64_elf_howto_table[r_type].name,
 		 (h) ? h->root.root.string : "a local symbol");
 	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
+	      goto error_return;
 	    }
 	  /* Fall through.  */
 
@@ -1467,7 +1467,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    (sec, htab->elf.dynobj, 3, abfd, /*rela?*/ TRUE);
 
 		  if (sreloc == NULL)
-		    return FALSE;
+		    goto error_return;
 		}
 
 	      /* If this is a global symbol, we count the number of
@@ -1487,7 +1487,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
 						 sec, r_symndx);
 		  if (s == NULL)
-		    return FALSE;
+		    goto error_return;
 
 		  /* Beware of type punned pointers vs strict aliasing
 		     rules.  */
@@ -1503,7 +1503,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  p = ((struct elf_dyn_relocs *)
 		       bfd_alloc (htab->elf.dynobj, amt));
 		  if (p == NULL)
-		    return FALSE;
+		    goto error_return;
 		  p->next = *head;
 		  *head = p;
 		  p->sec = sec;
@@ -1521,7 +1521,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     Reconstruct it for later use during GC.  */
 	case R_X86_64_GNU_VTINHERIT:
 	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-	    return FALSE;
+	    goto error_return;
 	  break;
 
 	  /* This relocation describes which C++ vtable entries are actually
@@ -1530,7 +1530,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  BFD_ASSERT (h != NULL);
 	  if (h != NULL
 	      && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-	    return FALSE;
+	    goto error_return;
 	  break;
 
 	default:
@@ -1538,7 +1538,25 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
     }
 
+   if (isymbuf != NULL
+       && (unsigned char *) isymbuf != symtab_hdr->contents)
+    {
+      if (!info->keep_memory)
+	free (isymbuf);
+      else
+	{
+	  /* Cache the symbols for elf_link_input_bfd.  */
+	  symtab_hdr->contents = (unsigned char *) isymbuf;
+	}
+    }
+
   return TRUE;
+
+error_return:
+   if (isymbuf != NULL
+       && (unsigned char *) isymbuf != symtab_hdr->contents)
+     free (isymbuf);
+   return FALSE;
 }
 
 /* Return the section that should be marked against GC for a given
