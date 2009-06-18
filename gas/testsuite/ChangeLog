@@ -1,3 +1,8 @@
+2009-06-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/cfi/cfi-common-7.s: Skip a multiple of four.
+	* gas/cfi/cfi-common-7.d: Adjust.
+
 2009-06-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 10169
