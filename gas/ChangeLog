@@ -1,3 +1,11 @@
+2009-06-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 10169
+	* gas/tc-arm.c (do_t_ssat): Move common code from here...
+	(do_t_usat): ... and here to...
+	(do_t_ssat_usat): New function: ... here.  Add code to check that
+	the shift value, if present, is in range.
+
 2009-06-18  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Merge cegcc and mingw32ce target name changes

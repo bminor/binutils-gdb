@@ -10654,7 +10654,7 @@ do_t_smc (void)
 }
 
 static void
-do_t_ssat (void)
+do_t_ssat_usat (int bias)
 {
   unsigned Rd, Rn;
 
@@ -10665,23 +10665,36 @@ do_t_ssat (void)
   reject_bad_reg (Rn);
 
   inst.instruction |= Rd << 8;
-  inst.instruction |= inst.operands[1].imm - 1;
+  inst.instruction |= inst.operands[1].imm - bias;
   inst.instruction |= Rn << 16;
 
   if (inst.operands[3].present)
     {
+      offsetT shift_amount = inst.reloc.exp.X_add_number;
+
+      inst.reloc.type = BFD_RELOC_UNUSED;
+
       constraint (inst.reloc.exp.X_op != O_constant,
 		  _("expression too complex"));
 
-      if (inst.reloc.exp.X_add_number != 0)
+      if (shift_amount != 0)
 	{
+	  constraint (shift_amount > 31,
+		      _("shift expression is too large"));
+
 	  if (inst.operands[3].shift_kind == SHIFT_ASR)
-	    inst.instruction |= 0x00200000;  /* sh bit */
-	  inst.instruction |= (inst.reloc.exp.X_add_number & 0x1c) << 10;
-	  inst.instruction |= (inst.reloc.exp.X_add_number & 0x03) << 6;
+	    inst.instruction |= 0x00200000;  /* sh bit.  */
+
+	  inst.instruction |= (shift_amount & 0x1c) << 10;
+	  inst.instruction |= (shift_amount & 0x03) << 6;
 	}
-      inst.reloc.type = BFD_RELOC_UNUSED;
     }
+}
+  
+static void
+do_t_ssat (void)
+{
+  do_t_ssat_usat (1);
 }
 
 static void
@@ -10818,32 +10831,7 @@ do_t_tb (void)
 static void
 do_t_usat (void)
 {
-  unsigned Rd, Rn;
-
-  Rd = inst.operands[0].reg;
-  Rn = inst.operands[2].reg;
-
-  reject_bad_reg (Rd);
-  reject_bad_reg (Rn);
-
-  inst.instruction |= Rd << 8;
-  inst.instruction |= inst.operands[1].imm;
-  inst.instruction |= Rn << 16;
-
-  if (inst.operands[3].present)
-    {
-      constraint (inst.reloc.exp.X_op != O_constant,
-		  _("expression too complex"));
-      if (inst.reloc.exp.X_add_number != 0)
-	{
-	  if (inst.operands[3].shift_kind == SHIFT_ASR)
-	    inst.instruction |= 0x00200000;  /* sh bit */
-
-	  inst.instruction |= (inst.reloc.exp.X_add_number & 0x1c) << 10;
-	  inst.instruction |= (inst.reloc.exp.X_add_number & 0x03) << 6;
-	}
-      inst.reloc.type = BFD_RELOC_UNUSED;
-    }
+  do_t_ssat_usat (0);
 }
 
 static void

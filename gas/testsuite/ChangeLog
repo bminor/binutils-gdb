@@ -1,5 +1,10 @@
 2009-06-18  Nick Clifton  <nickc@redhat.com>
 
+	PR 10169
+	* gas/arm/thumb2_bad_reg.s: Add tests for SSAT and USAT with an
+	out of range shift.
+	* gas/arm/thumb2_bad_reg.l: Update expected error messages.
+
 	PR 10288
 	* gas/arm/align.s: Add labels so that COFF based targets can
 	correctly locate THUMB code.
