@@ -1,3 +1,13 @@
+2009-06-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 10288
+	* arm-dis.c (print_insn_coprocessor): Check that a user specified
+	ARM architecture supports the matched instruction.
+	(print_insn_arm): Likewise.
+	(select_arm_features): New function.  Fills in the fields of an
+	arm_feature_set structure based on a given arm machine number.
+	(print_insn): Initialise an arm_feature_set structure.
+
 2009-06-16  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* vax-dis.c (is_function_entry): Return success for synthetic

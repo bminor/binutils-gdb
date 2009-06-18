@@ -1635,6 +1635,8 @@ print_insn_coprocessor (bfd_vma pc, struct disassemble_info *info, long given,
 
   for (insn = coprocessor_opcodes; insn->assembler; insn++)
     {
+      const char *c;
+
       if (insn->value == FIRST_IWMMXT_INSN
 	  && info->mach != bfd_mach_arm_XScale
 	  && info->mach != bfd_mach_arm_iWMMXt
@@ -1671,447 +1673,447 @@ print_insn_coprocessor (bfd_vma pc, struct disassemble_info *info, long given,
 		cond = 16;
 	    }
 	}
-      if ((given & mask) == value)
+      
+      if ((given & mask) != value)
+	continue;
+
+      if ((insn->arch & ((arm_feature_set *) info->private_data)->coproc) == 0)
+	continue;
+
+      for (c = insn->assembler; *c; c++)
 	{
-	  const char *c;
-
-	  for (c = insn->assembler; *c; c++)
+	  if (*c == '%')
 	    {
-	      if (*c == '%')
+	      switch (*++c)
 		{
-		  switch (*++c)
+		case '%':
+		  func (stream, "%%");
+		  break;
+
+		case 'A':
+		  func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
+
+		  if ((given & (1 << 24)) != 0)
 		    {
-		    case '%':
-		      func (stream, "%%");
-		      break;
+		      int offset = given & 0xff;
 
-		    case 'A':
-		      func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
+		      if (offset)
+			func (stream, ", #%s%d]%s",
+			      ((given & 0x00800000) == 0 ? "-" : ""),
+			      offset * 4,
+			      ((given & 0x00200000) != 0 ? "!" : ""));
+		      else
+			func (stream, "]");
+		    }
+		  else
+		    {
+		      int offset = given & 0xff;
 
-		      if ((given & (1 << 24)) != 0)
+		      func (stream, "]");
+
+		      if (given & (1 << 21))
 			{
-			  int offset = given & 0xff;
-
 			  if (offset)
-			    func (stream, ", #%s%d]%s",
+			    func (stream, ", #%s%d",
 				  ((given & 0x00800000) == 0 ? "-" : ""),
-				  offset * 4,
-				  ((given & 0x00200000) != 0 ? "!" : ""));
-			  else
-			    func (stream, "]");
+				  offset * 4);
 			}
 		      else
-			{
-			  int offset = given & 0xff;
+			func (stream, ", {%d}", offset);
+		    }
+		  break;
 
-			  func (stream, "]");
+		case 'B':
+		  {
+		    int regno = ((given >> 12) & 0xf) | ((given >> (22 - 4)) & 0x10);
+		    int offset = (given >> 1) & 0x3f;
 
-			  if (given & (1 << 21))
-			    {
-			      if (offset)
-				func (stream, ", #%s%d",
-				      ((given & 0x00800000) == 0 ? "-" : ""),
-				      offset * 4);
-			    }
-			  else
-			    func (stream, ", {%d}", offset);
-			}
-		      break;
+		    if (offset == 1)
+		      func (stream, "{d%d}", regno);
+		    else if (regno + offset > 32)
+		      func (stream, "{d%d-<overflow reg d%d>}", regno, regno + offset - 1);
+		    else
+		      func (stream, "{d%d-d%d}", regno, regno + offset - 1);
+		  }
+		  break;
 
-		    case 'B':
+		case 'C':
+		  {
+		    int rn = (given >> 16) & 0xf;
+		    int offset = (given & 0xff) * 4;
+		    int add = (given >> 23) & 1;
+
+		    func (stream, "[%s", arm_regnames[rn]);
+
+		    if (offset)
 		      {
-			int regno = ((given >> 12) & 0xf) | ((given >> (22 - 4)) & 0x10);
-			int offset = (given >> 1) & 0x3f;
-			
-			if (offset == 1)
-			  func (stream, "{d%d}", regno);
-			else if (regno + offset > 32)
-			  func (stream, "{d%d-<overflow reg d%d>}", regno, regno + offset - 1);
-			else
-			  func (stream, "{d%d-d%d}", regno, regno + offset - 1);
+			if (!add)
+			  offset = -offset;
+			func (stream, ", #%d", offset);
 		      }
-		      break;
-		      
-		    case 'C':
+		    func (stream, "]");
+		    if (rn == 15)
 		      {
-			int rn = (given >> 16) & 0xf;
-			int offset = (given & 0xff) * 4;
-			int add = (given >> 23) & 1;
-			
-			func (stream, "[%s", arm_regnames[rn]);
-			
-			if (offset)
-			  {
-			    if (!add)
-			      offset = -offset;
-			    func (stream, ", #%d", offset);
-			  }
-			func (stream, "]");
-			if (rn == 15)
-			  {
-			    func (stream, "\t; ");
-                            /* FIXME: Unsure if info->bytes_per_chunk is the
-                               right thing to use here.  */
-			    info->print_address_func (offset + pc
-                              + info->bytes_per_chunk * 2, info);
-			  }
+			func (stream, "\t; ");
+			/* FIXME: Unsure if info->bytes_per_chunk is the
+			   right thing to use here.  */
+			info->print_address_func (offset + pc
+						  + info->bytes_per_chunk * 2, info);
 		      }
-		      break;
+		  }
+		  break;
 
-		    case 'c':
-		      func (stream, "%s", arm_conditional[cond]);
-		      break;
+		case 'c':
+		  func (stream, "%s", arm_conditional[cond]);
+		  break;
 
-		    case 'I':
-		      /* Print a Cirrus/DSP shift immediate.  */
-		      /* Immediates are 7bit signed ints with bits 0..3 in
-			 bits 0..3 of opcode and bits 4..6 in bits 5..7
-			 of opcode.  */
+		case 'I':
+		  /* Print a Cirrus/DSP shift immediate.  */
+		  /* Immediates are 7bit signed ints with bits 0..3 in
+		     bits 0..3 of opcode and bits 4..6 in bits 5..7
+		     of opcode.  */
+		  {
+		    int imm;
+
+		    imm = (given & 0xf) | ((given & 0xe0) >> 1);
+
+		    /* Is ``imm'' a negative number?  */
+		    if (imm & 0x40)
+		      imm |= (-1 << 7);
+
+		    func (stream, "%d", imm);
+		  }
+
+		  break;
+
+		case 'F':
+		  switch (given & 0x00408000)
+		    {
+		    case 0:
+		      func (stream, "4");
+		      break;
+		    case 0x8000:
+		      func (stream, "1");
+		      break;
+		    case 0x00400000:
+		      func (stream, "2");
+		      break;
+		    default:
+		      func (stream, "3");
+		    }
+		  break;
+
+		case 'P':
+		  switch (given & 0x00080080)
+		    {
+		    case 0:
+		      func (stream, "s");
+		      break;
+		    case 0x80:
+		      func (stream, "d");
+		      break;
+		    case 0x00080000:
+		      func (stream, "e");
+		      break;
+		    default:
+		      func (stream, _("<illegal precision>"));
+		      break;
+		    }
+		  break;
+
+		case 'Q':
+		  switch (given & 0x00408000)
+		    {
+		    case 0:
+		      func (stream, "s");
+		      break;
+		    case 0x8000:
+		      func (stream, "d");
+		      break;
+		    case 0x00400000:
+		      func (stream, "e");
+		      break;
+		    default:
+		      func (stream, "p");
+		      break;
+		    }
+		  break;
+
+		case 'R':
+		  switch (given & 0x60)
+		    {
+		    case 0:
+		      break;
+		    case 0x20:
+		      func (stream, "p");
+		      break;
+		    case 0x40:
+		      func (stream, "m");
+		      break;
+		    default:
+		      func (stream, "z");
+		      break;
+		    }
+		  break;
+
+		case '0': case '1': case '2': case '3': case '4':
+		case '5': case '6': case '7': case '8': case '9':
+		  {
+		    int width;
+		    unsigned long value;
+
+		    c = arm_decode_bitfield (c, given, &value, &width);
+
+		    switch (*c)
 		      {
-			int imm;
-
-			imm = (given & 0xf) | ((given & 0xe0) >> 1);
-
-			/* Is ``imm'' a negative number?  */
-			if (imm & 0x40)
-			  imm |= (-1 << 7);
-
-			func (stream, "%d", imm);
-		      }
-
-		      break;
-
-		    case 'F':
-		      switch (given & 0x00408000)
-			{
-			case 0:
-			  func (stream, "4");
-			  break;
-			case 0x8000:
-			  func (stream, "1");
-			  break;
-			case 0x00400000:
-			  func (stream, "2");
-			  break;
-			default:
-			  func (stream, "3");
-			}
-		      break;
-
-		    case 'P':
-		      switch (given & 0x00080080)
-			{
-			case 0:
-			  func (stream, "s");
-			  break;
-			case 0x80:
-			  func (stream, "d");
-			  break;
-			case 0x00080000:
-			  func (stream, "e");
-			  break;
-			default:
-			  func (stream, _("<illegal precision>"));
-			  break;
-			}
-		      break;
-		    case 'Q':
-		      switch (given & 0x00408000)
-			{
-			case 0:
-			  func (stream, "s");
-			  break;
-			case 0x8000:
-			  func (stream, "d");
-			  break;
-			case 0x00400000:
-			  func (stream, "e");
-			  break;
-			default:
-			  func (stream, "p");
-			  break;
-			}
-		      break;
-		    case 'R':
-		      switch (given & 0x60)
-			{
-			case 0:
-			  break;
-			case 0x20:
-			  func (stream, "p");
-			  break;
-			case 0x40:
-			  func (stream, "m");
-			  break;
-			default:
-			  func (stream, "z");
-			  break;
-			}
-		      break;
-
-		    case '0': case '1': case '2': case '3': case '4':
-		    case '5': case '6': case '7': case '8': case '9':
-		      {
-			int width;
-			unsigned long value;
-
-			c = arm_decode_bitfield (c, given, &value, &width);
-
-			switch (*c)
-			  {
-			  case 'r':
-			    func (stream, "%s", arm_regnames[value]);
-			    break;
-			  case 'D':
-			    func (stream, "d%ld", value);
-			    break;
-			  case 'Q':
-			    if (value & 1)
-			      func (stream, "<illegal reg q%ld.5>", value >> 1);
-			    else
-			      func (stream, "q%ld", value >> 1);
-			    break;
-			  case 'd':
-			    func (stream, "%ld", value);
-			    break;
-                          case 'k':
-                            {
-                              int from = (given & (1 << 7)) ? 32 : 16;
-                              func (stream, "%ld", from - value);
-                            }
-                            break;
-                            
-			  case 'f':
-			    if (value > 7)
-			      func (stream, "#%s", arm_fp_const[value & 7]);
-			    else
-			      func (stream, "f%ld", value);
-			    break;
-
-			  case 'w':
-			    if (width == 2)
-			      func (stream, "%s", iwmmxt_wwnames[value]);
-			    else
-			      func (stream, "%s", iwmmxt_wwssnames[value]);
-			    break;
-
-			  case 'g':
-			    func (stream, "%s", iwmmxt_regnames[value]);
-			    break;
-			  case 'G':
-			    func (stream, "%s", iwmmxt_cregnames[value]);
-			    break;
-
-			  case 'x':
-			    func (stream, "0x%lx", value);
-			    break;
-
-			  case '`':
-			    c++;
-			    if (value == 0)
-			      func (stream, "%c", *c);
-			    break;
-			  case '\'':
-			    c++;
-			    if (value == ((1ul << width) - 1))
-			      func (stream, "%c", *c);
-			    break;
-			  case '?':
-			    func (stream, "%c", c[(1 << width) - (int)value]);
-			    c += 1 << width;
-			    break;
-			  default:
-			    abort ();
-			  }
-			break;
-
-		      case 'y':
-		      case 'z':
-			{
-			  int single = *c++ == 'y';
-			  int regno;
-			  
-			  switch (*c)
-			    {
-			    case '4': /* Sm pair */
-			    case '0': /* Sm, Dm */
-			      regno = given & 0x0000000f;
-			      if (single)
-				{
-				  regno <<= 1;
-				  regno += (given >> 5) & 1;
-				}
-                              else
-                                regno += ((given >> 5) & 1) << 4;
-			      break;
-
-			    case '1': /* Sd, Dd */
-			      regno = (given >> 12) & 0x0000000f;
-			      if (single)
-				{
-				  regno <<= 1;
-				  regno += (given >> 22) & 1;
-				}
-                              else
-                                regno += ((given >> 22) & 1) << 4;
-			      break;
-
-			    case '2': /* Sn, Dn */
-			      regno = (given >> 16) & 0x0000000f;
-			      if (single)
-				{
-				  regno <<= 1;
-				  regno += (given >> 7) & 1;
-				}
-                              else
-                                regno += ((given >> 7) & 1) << 4;
-			      break;
-			      
-			    case '3': /* List */
-			      func (stream, "{");
-			      regno = (given >> 12) & 0x0000000f;
-			      if (single)
-				{
-				  regno <<= 1;
-				  regno += (given >> 22) & 1;
-				}
-                              else
-                                regno += ((given >> 22) & 1) << 4;
-			      break;
-			      
-			    default:
-			      abort ();
-			    }
-
-			  func (stream, "%c%d", single ? 's' : 'd', regno);
-
-			  if (*c == '3')
-			    {
-			      int count = given & 0xff;
-			      
-			      if (single == 0)
-				count >>= 1;
-			      
-			      if (--count)
-				{
-				  func (stream, "-%c%d",
-					single ? 's' : 'd',
-					regno + count);
-				}
-			      
-			      func (stream, "}");
-			    }
-			  else if (*c == '4')
-			    func (stream, ", %c%d", single ? 's' : 'd',
-				  regno + 1);
-			}
-			break;
-
-		      case 'L':
-			switch (given & 0x00400100)
-			  {
-			  case 0x00000000: func (stream, "b"); break;
-			  case 0x00400000: func (stream, "h"); break;
-			  case 0x00000100: func (stream, "w"); break;
-			  case 0x00400100: func (stream, "d"); break;
-			  default:
-			    break;
-			  }
-			break;
-
-		      case 'Z':
-			{
-			  int value;
-			  /* given (20, 23) | given (0, 3) */
-			  value = ((given >> 16) & 0xf0) | (given & 0xf);
-			  func (stream, "%d", value);
-			}
-			break;
-
-		      case 'l':
-			/* This is like the 'A' operator, except that if
-			   the width field "M" is zero, then the offset is
-			   *not* multiplied by four.  */
-			{
-			  int offset = given & 0xff;
-			  int multiplier = (given & 0x00000100) ? 4 : 1;
-
-			  func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
-
-			  if (offset)
-			    {
-			      if ((given & 0x01000000) != 0)
-				func (stream, ", #%s%d]%s",
-				      ((given & 0x00800000) == 0 ? "-" : ""),
-				      offset * multiplier,
-				      ((given & 0x00200000) != 0 ? "!" : ""));
-			      else
-				func (stream, "], #%s%d",
-				      ((given & 0x00800000) == 0 ? "-" : ""),
-				      offset * multiplier);
-			    }
-			  else
-			    func (stream, "]");
-			}
-			break;
-
 		      case 'r':
+			func (stream, "%s", arm_regnames[value]);
+			break;
+		      case 'D':
+			func (stream, "d%ld", value);
+			break;
+		      case 'Q':
+			if (value & 1)
+			  func (stream, "<illegal reg q%ld.5>", value >> 1);
+			else
+			  func (stream, "q%ld", value >> 1);
+			break;
+		      case 'd':
+			func (stream, "%ld", value);
+			break;
+		      case 'k':
 			{
-			  int imm4 = (given >> 4) & 0xf;
-			  int puw_bits = ((given >> 22) & 6) | ((given >> 21) & 1);
-			  int ubit = (given >> 23) & 1;
-			  const char *rm = arm_regnames [given & 0xf];
-			  const char *rn = arm_regnames [(given >> 16) & 0xf];
-
-			  switch (puw_bits)
-			    {
-			    case 1:
-			      /* fall through */
-			    case 3:
-			      func (stream, "[%s], %c%s", rn, ubit ? '+' : '-', rm);
-			      if (imm4)
-				func (stream, ", lsl #%d", imm4);
-			      break;
-
-			    case 4:
-			      /* fall through */
-			    case 5:
-			      /* fall through */
-			    case 6:
-			      /* fall through */
-			    case 7:
-			      func (stream, "[%s, %c%s", rn, ubit ? '+' : '-', rm);
-			      if (imm4 > 0)
-				func (stream, ", lsl #%d", imm4);
-			      func (stream, "]");
-			      if (puw_bits == 5 || puw_bits == 7)
-				func (stream, "!");
-			      break;
-
-			    default:
-			      func (stream, "INVALID");
-			    }
+			  int from = (given & (1 << 7)) ? 32 : 16;
+			  func (stream, "%ld", from - value);
 			}
 			break;
 
-		      case 'i':
-			{
-			  long imm5;
-			  imm5 = ((given & 0x100) >> 4) | (given & 0xf);
-			  func (stream, "%ld", (imm5 == 0) ? 32 : imm5);
-			}
+		      case 'f':
+			if (value > 7)
+			  func (stream, "#%s", arm_fp_const[value & 7]);
+			else
+			  func (stream, "f%ld", value);
 			break;
 
+		      case 'w':
+			if (width == 2)
+			  func (stream, "%s", iwmmxt_wwnames[value]);
+			else
+			  func (stream, "%s", iwmmxt_wwssnames[value]);
+			break;
+
+		      case 'g':
+			func (stream, "%s", iwmmxt_regnames[value]);
+			break;
+		      case 'G':
+			func (stream, "%s", iwmmxt_cregnames[value]);
+			break;
+
+		      case 'x':
+			func (stream, "0x%lx", value);
+			break;
+
+		      case '`':
+			c++;
+			if (value == 0)
+			  func (stream, "%c", *c);
+			break;
+		      case '\'':
+			c++;
+			if (value == ((1ul << width) - 1))
+			  func (stream, "%c", *c);
+			break;
+		      case '?':
+			func (stream, "%c", c[(1 << width) - (int)value]);
+			c += 1 << width;
+			break;
 		      default:
 			abort ();
 		      }
+		    break;
+
+		  case 'y':
+		  case 'z':
+		    {
+		      int single = *c++ == 'y';
+		      int regno;
+
+		      switch (*c)
+			{
+			case '4': /* Sm pair */
+			case '0': /* Sm, Dm */
+			  regno = given & 0x0000000f;
+			  if (single)
+			    {
+			      regno <<= 1;
+			      regno += (given >> 5) & 1;
+			    }
+			  else
+			    regno += ((given >> 5) & 1) << 4;
+			  break;
+
+			case '1': /* Sd, Dd */
+			  regno = (given >> 12) & 0x0000000f;
+			  if (single)
+			    {
+			      regno <<= 1;
+			      regno += (given >> 22) & 1;
+			    }
+			  else
+			    regno += ((given >> 22) & 1) << 4;
+			  break;
+
+			case '2': /* Sn, Dn */
+			  regno = (given >> 16) & 0x0000000f;
+			  if (single)
+			    {
+			      regno <<= 1;
+			      regno += (given >> 7) & 1;
+			    }
+			  else
+			    regno += ((given >> 7) & 1) << 4;
+			  break;
+
+			case '3': /* List */
+			  func (stream, "{");
+			  regno = (given >> 12) & 0x0000000f;
+			  if (single)
+			    {
+			      regno <<= 1;
+			      regno += (given >> 22) & 1;
+			    }
+			  else
+			    regno += ((given >> 22) & 1) << 4;
+			  break;
+
+			default:
+			  abort ();
+			}
+
+		      func (stream, "%c%d", single ? 's' : 'd', regno);
+
+		      if (*c == '3')
+			{
+			  int count = given & 0xff;
+
+			  if (single == 0)
+			    count >>= 1;
+
+			  if (--count)
+			    {
+			      func (stream, "-%c%d",
+				    single ? 's' : 'd',
+				    regno + count);
+			    }
+
+			  func (stream, "}");
+			}
+		      else if (*c == '4')
+			func (stream, ", %c%d", single ? 's' : 'd',
+			      regno + 1);
 		    }
+		    break;
+
+		  case 'L':
+		    switch (given & 0x00400100)
+		      {
+		      case 0x00000000: func (stream, "b"); break;
+		      case 0x00400000: func (stream, "h"); break;
+		      case 0x00000100: func (stream, "w"); break;
+		      case 0x00400100: func (stream, "d"); break;
+		      default:
+			break;
+		      }
+		    break;
+
+		  case 'Z':
+		    {
+		      int value;
+		      /* given (20, 23) | given (0, 3) */
+		      value = ((given >> 16) & 0xf0) | (given & 0xf);
+		      func (stream, "%d", value);
+		    }
+		    break;
+
+		  case 'l':
+		    /* This is like the 'A' operator, except that if
+		       the width field "M" is zero, then the offset is
+		       *not* multiplied by four.  */
+		    {
+		      int offset = given & 0xff;
+		      int multiplier = (given & 0x00000100) ? 4 : 1;
+
+		      func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
+
+		      if (offset)
+			{
+			  if ((given & 0x01000000) != 0)
+			    func (stream, ", #%s%d]%s",
+				  ((given & 0x00800000) == 0 ? "-" : ""),
+				  offset * multiplier,
+				  ((given & 0x00200000) != 0 ? "!" : ""));
+			  else
+			    func (stream, "], #%s%d",
+				  ((given & 0x00800000) == 0 ? "-" : ""),
+				  offset * multiplier);
+			}
+		      else
+			func (stream, "]");
+		    }
+		    break;
+
+		  case 'r':
+		    {
+		      int imm4 = (given >> 4) & 0xf;
+		      int puw_bits = ((given >> 22) & 6) | ((given >> 21) & 1);
+		      int ubit = (given >> 23) & 1;
+		      const char *rm = arm_regnames [given & 0xf];
+		      const char *rn = arm_regnames [(given >> 16) & 0xf];
+
+		      switch (puw_bits)
+			{
+			case 1:
+			case 3:
+			  func (stream, "[%s], %c%s", rn, ubit ? '+' : '-', rm);
+			  if (imm4)
+			    func (stream, ", lsl #%d", imm4);
+			  break;
+
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+			  func (stream, "[%s, %c%s", rn, ubit ? '+' : '-', rm);
+			  if (imm4 > 0)
+			    func (stream, ", lsl #%d", imm4);
+			  func (stream, "]");
+			  if (puw_bits == 5 || puw_bits == 7)
+			    func (stream, "!");
+			  break;
+
+			default:
+			  func (stream, "INVALID");
+			}
+		    }
+		    break;
+
+		  case 'i':
+		    {
+		      long imm5;
+		      imm5 = ((given & 0x100) >> 4) | (given & 0xf);
+		      func (stream, "%ld", (imm5 == 0) ? 32 : imm5);
+		    }
+		    break;
+
+		  default:
+		    abort ();
+		  }
 		}
-	      else
-		func (stream, "%c", *c);
 	    }
-	  return TRUE;
+	  else
+	    func (stream, "%c", *c);
 	}
+      return TRUE;
     }
   return FALSE;
 }
@@ -2221,7 +2223,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
     {
       if ((given & 0xef000000) == 0xef000000)
 	{
-	  /* move bit 28 to bit 24 to translate Thumb2 to ARM encoding.  */
+	  /* Move bit 28 to bit 24 to translate Thumb2 to ARM encoding.  */
 	  unsigned long bit28 = given & (1 << 28);
 
 	  given &= 0x00ffffff;
@@ -2687,13 +2689,18 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 	  && info->mach != bfd_mach_arm_iWMMXt)
 	insn = insn + IWMMXT_INSN_COUNT;
 
-      if ((given & insn->mask) == insn->value
-	  /* Special case: an instruction with all bits set in the condition field
-	     (0xFnnn_nnnn) is only matched if all those bits are set in insn->mask,
-	     or by the catchall at the end of the table.  */
-	  && ((given & 0xF0000000) != 0xF0000000
-	      || (insn->mask & 0xF0000000) == 0xF0000000
-	      || (insn->mask == 0 && insn->value == 0)))
+      if ((given & insn->mask) != insn->value)
+	continue;
+    
+      if ((insn->arch & ((arm_feature_set *) info->private_data)->core) == 0)
+	continue;
+
+      /* Special case: an instruction with all bits set in the condition field
+	 (0xFnnn_nnnn) is only matched if all those bits are set in insn->mask,
+	 or by the catchall at the end of the table.  */
+      if ((given & 0xF0000000) != 0xF0000000
+	  || (insn->mask & 0xF0000000) == 0xF0000000
+	  || (insn->mask == 0 && insn->value == 0))
 	{
 	  const char *c;
 
@@ -3967,6 +3974,47 @@ get_sym_code_type (struct disassemble_info *info, int n,
   return FALSE;
 }
 
+/* Given a bfd_mach_arm_XXX value, this function fills in the fields
+   of the supplied arm_feature_set structure with bitmasks indicating
+   the support base architectures and coprocessor extensions.
+
+   FIXME: This could more efficiently implemented as a constant array,
+   although it would also be less robust.  */
+
+static void
+select_arm_features (unsigned long mach,
+		     arm_feature_set * features)
+{
+#undef  ARM_FEATURE
+#define ARM_FEATURE(ARCH,CEXT) \
+  features->core = (ARCH); \
+  features->coproc = (CEXT) | FPU_FPA; \
+  return
+
+  switch (mach)
+    {
+    case bfd_mach_arm_2:       ARM_ARCH_V2;
+    case bfd_mach_arm_2a:      ARM_ARCH_V2S;
+    case bfd_mach_arm_3:       ARM_ARCH_V3;
+    case bfd_mach_arm_3M:      ARM_ARCH_V3M;
+    case bfd_mach_arm_4:       ARM_ARCH_V4;
+    case bfd_mach_arm_4T:      ARM_ARCH_V4T;
+    case bfd_mach_arm_5:       ARM_ARCH_V5;
+    case bfd_mach_arm_5T:      ARM_ARCH_V5T;
+    case bfd_mach_arm_5TE:     ARM_ARCH_V5TE;
+    case bfd_mach_arm_XScale:  ARM_ARCH_XSCALE;
+    case bfd_mach_arm_ep9312:  ARM_FEATURE (ARM_AEXT_V4T, ARM_CEXT_MAVERICK | FPU_MAVERICK);
+    case bfd_mach_arm_iWMMXt:  ARM_ARCH_IWMMXT;
+    case bfd_mach_arm_iWMMXt2: ARM_ARCH_IWMMXT2;
+      /* If the machine type is unknown allow all
+	 architecture types and all extensions.  */
+    case bfd_mach_arm_unknown: ARM_FEATURE (-1UL, -1UL);
+    default:
+      abort ();
+    }
+}
+
+
 /* NOTE: There are no checks in these routines that
    the relevant number of data bytes exist.  */
 
@@ -3991,6 +4039,40 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       info->disassembler_options = NULL;
     }
 
+  /* PR 10288: Control which instructions will be disassembled.  */
+  if (info->private_data == NULL)
+    {
+      static arm_feature_set features;
+
+      if ((info->flags & USER_SPECIFIED_MACHINE_TYPE) == 0)
+	/* If the user did not use the -m command line switch then default to
+	   disassembling all types of ARM instruction.
+	   
+	   The info->mach value has to be ignored as this will be based on
+	   the default archictecture for the target and/or hints in the notes
+	   section, but it will never be greater than the current largest arm
+	   machine value (iWMMXt2), which is only equivalent to the V5TE
+	   architecture.  ARM architectures have advanced beyond the machine
+	   value encoding, and these newer architectures would be ignored if
+	   the machine value was used.
+
+	   Ie the -m switch is used to restrict which instructions will be
+	   disassembled.  If it is necessary to use the -m switch to tell
+	   objdump that an ARM binary is being disassembled, eg because the
+	   input is a raw binary file, but it is also desired to disassemble
+	   all ARM instructions then use "-marm".  This will select the
+	   "unknown" arm architecture which is compatible with any ARM
+	   instruction.  */
+	  info->mach = bfd_mach_arm_unknown;
+
+      /* Compute the architecture bitmask from the machine number.
+	 Note: This assumes that the machine number will not change
+	 during disassembly....  */
+      select_arm_features (info->mach, & features);
+
+      info->private_data = & features;
+    }
+  
   /* Decide if our code is going to be little-endian, despite what the
      function argument might say.  */
   little_code = ((info->endian_code == BFD_ENDIAN_LITTLE) || little);
@@ -4146,7 +4228,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       info->bytes_per_chunk = 4;
       size = 4;
 
-      status = info->read_memory_func (pc, (bfd_byte *)b, 4, info);
+      status = info->read_memory_func (pc, (bfd_byte *) b, 4, info);
       if (little_code)
 	given = (b[0]) | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
       else
@@ -4176,7 +4258,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	      || (given & 0xF800) == 0xF000
 	      || (given & 0xF800) == 0xE800)
 	    {
-	      status = info->read_memory_func (pc + 2, (bfd_byte *)b, 2, info);
+	      status = info->read_memory_func (pc + 2, (bfd_byte *) b, 2, info);
 	      if (little_code)
 		given = (b[0]) | (b[1] << 8) | (given << 16);
 	      else
@@ -4188,7 +4270,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	}
 
       if (ifthen_address != pc)
-	find_ifthen_state(pc, info, little_code);
+	find_ifthen_state (pc, info, little_code);
 
       if (ifthen_state)
 	{

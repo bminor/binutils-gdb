@@ -1,4 +1,4 @@
-#objdump: -dr --prefix-addresses --show-raw-insn --architecture=armv5te
+#objdump: -dr --prefix-addresses --show-raw-insn 
 #name: ARM CoProcessor Instructions
 #as: -march=armv5te -EL
 

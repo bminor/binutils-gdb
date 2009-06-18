@@ -1,3 +1,10 @@
+2009-06-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 10288
+	* gas/arm/align.s: Add labels so that COFF based targets can
+	correctly locate THUMB code.
+	* gas/arm/copro.d: Do not pass --architecture switch to objdump.
+
 2009-06-15  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/10186
