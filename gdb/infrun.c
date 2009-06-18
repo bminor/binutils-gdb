@@ -3630,9 +3630,17 @@ infrun: not switching back to stepped thread, it has vanished\n");
 
      Note that step_range_end is the address of the first instruction
      beyond the step range, and NOT the address of the last instruction
-     within it! */
+     within it!
+
+     Note also that during reverse execution, we may be stepping
+     through a function epilogue and therefore must detect when
+     the current-frame changes in the middle of a line.  */
+
   if (stop_pc >= ecs->event_thread->step_range_start
-      && stop_pc < ecs->event_thread->step_range_end)
+      && stop_pc < ecs->event_thread->step_range_end
+      && (execution_direction != EXEC_REVERSE
+	  || frame_id_eq (get_frame_id (get_current_frame ()),
+			  ecs->event_thread->step_frame_id)))
     {
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog, "infrun: stepping inside range [0x%s-0x%s]\n",

@@ -1,3 +1,9 @@
+2009-06-18  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
+	* infrun.c (handle_inferior_event): Improve reverse stepping
+	through function epilogue.
+
 2009-06-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* dwarf2-frame.c (struct comp_unit): Use bfd_size_type for
