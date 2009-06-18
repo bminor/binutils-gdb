@@ -1,12 +1,13 @@
 2009-06-18  Dave Korn  <dave.korn.cygwin@gmail.com>
 
-  Merge cegcc and mingw32ce target name changes from CeGCC project.
+	Merge cegcc and mingw32ce target name changes
+	from CeGCC project:
 
-  2007-12-25  Pedro Alves  <pedro_alves@portugalmail.pt>
+	2007-12-25  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* configure.tgt: Add arm*-*-cegcc* target.
 
-  2007-12-17  Pedro Alves  <pedro_alves@portugalmail.pt>
+	2007-12-17  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* configure.tgt: Add arm-*-mingw32ce* target.
 
