@@ -487,8 +487,8 @@ struct elf64_x86_64_link_hash_table
   /* The amount of space used by the jump slots in the GOT.  */
   bfd_vma sgotplt_jump_table_size;
 
-  /* Small local sym to section mapping cache.  */
-  struct sym_sec_cache sym_sec;
+  /* Small local sym cache.  */
+  struct sym_cache sym_cache;
 
   /* _TLS_MODULE_BASE_ symbol.  */
   struct bfd_link_hash_entry *tls_module_base;
@@ -629,7 +629,7 @@ elf64_x86_64_link_hash_table_create (bfd *abfd)
 
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
-  ret->sym_sec.abfd = NULL;
+  ret->sym_cache.abfd = NULL;
   ret->tlsdesc_plt = 0;
   ret->tlsdesc_got = 0;
   ret->tls_ld_got.refcount = 0;
@@ -1478,16 +1478,21 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		}
 	      else
 		{
-		  void **vpp;
 		  /* Track dynamic relocs needed for local syms too.
 		     We really need local syms available to do this
 		     easily.  Oh well.  */
-
 		  asection *s;
-		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
-						 sec, r_symndx);
+		  void **vpp;
+		  Elf_Internal_Sym *isym;
+
+		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+						abfd, r_symndx);
+		  if (isym == NULL)
+		    return FALSE;
+
+		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
 		  if (s == NULL)
-		    goto error_return;
+		    s = sec;
 
 		  /* Beware of type punned pointers vs strict aliasing
 		     rules.  */

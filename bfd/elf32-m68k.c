@@ -909,8 +909,8 @@ struct elf_m68k_link_hash_table
 {
   struct elf_link_hash_table root;
 
-  /* Small local sym to section mapping cache.  */
-  struct sym_sec_cache sym_sec;
+  /* Small local sym cache.  */
+  struct sym_cache sym_cache;
 
   /* The PLT format used by this link, or NULL if the format has not
      yet been chosen.  */
@@ -989,7 +989,7 @@ elf_m68k_link_hash_table_create (abfd)
       return NULL;
     }
 
-  ret->sym_sec.abfd = NULL;
+  ret->sym_cache.abfd = NULL;
   ret->plt_info = NULL;
   ret->local_gp_p = FALSE;
   ret->use_neg_got_offsets_p = FALSE;
@@ -2793,12 +2793,16 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		    {
 		      asection *s;
 		      void *vpp;
+		      Elf_Internal_Sym *isym;
 
-		      s = (bfd_section_from_r_symndx
-			   (abfd, &elf_m68k_hash_table (info)->sym_sec,
-			    sec, r_symndx));
-		      if (s == NULL)
+		      isym = bfd_sym_from_r_symndx (&elf_m68k_hash_table (info)->sym_cache,
+						    abfd, r_symndx);
+		      if (isym == NULL)
 			return FALSE;
+
+		      s = bfd_section_from_elf_index (abfd, isym->st_shndx);
+		      if (s == NULL)
+			s = sec;
 
 		      vpp = &elf_section_data (s)->local_dynrel;
 		      head = (struct elf_m68k_pcrel_relocs_copied **) vpp;

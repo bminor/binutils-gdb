@@ -59,8 +59,8 @@ struct _bfd_sparc_elf_link_hash_table
     bfd_vma offset;
   } tls_ldm_got;
 
-  /* Small local sym to section mapping cache.  */
-  struct sym_sec_cache sym_sec;
+  /* Small local sym cache.  */
+  struct sym_cache sym_cache;
 
   /* True if the target system is VxWorks.  */
   int is_vxworks;

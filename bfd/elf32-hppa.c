@@ -301,8 +301,8 @@ struct elf32_hppa_link_hash_table
   /* Set if we need a .plt stub to support lazy dynamic linking.  */
   unsigned int need_plt_stub:1;
 
-  /* Small local sym to section mapping cache.  */
-  struct sym_sec_cache sym_sec;
+  /* Small local sym cache.  */
+  struct sym_cache sym_cache;
 
   /* Data for LDM relocations.  */
   union
@@ -460,7 +460,7 @@ elf32_hppa_link_hash_table_create (bfd *abfd)
   htab->has_17bit_branch = 0;
   htab->has_22bit_branch = 0;
   htab->need_plt_stub = 0;
-  htab->sym_sec.abfd = NULL;
+  htab->sym_cache.abfd = NULL;
   htab->tls_ldm_got.refcount = 0;
 
   return &htab->etab.root;
@@ -1522,14 +1522,18 @@ elf32_hppa_check_relocs (bfd *abfd,
 		  /* Track dynamic relocs needed for local syms too.
 		     We really need local syms available to do this
 		     easily.  Oh well.  */
-
 		  asection *sr;
 		  void *vpp;
+		  Elf_Internal_Sym *isym;
 
-		  sr = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
-						       sec, r_symndx);
-		  if (sr == NULL)
+		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+						abfd, r_symndx);
+		  if (isym == NULL)
 		    return FALSE;
+
+		  sr = bfd_section_from_elf_index (abfd, isym->st_shndx);
+		  if (sr == NULL)
+		    sr = sec;
 
 		  vpp = &elf_section_data (sr)->local_dynrel;
 		  hdh_head = (struct elf32_hppa_dyn_reloc_entry **) vpp;

@@ -674,8 +674,8 @@ struct elf_i386_link_hash_table
      section, plus whatever space is used by the jump slots.  */
   bfd_vma sgotplt_jump_table_size;
 
-  /* Small local sym to section mapping cache.  */
-  struct sym_sec_cache sym_sec;
+  /* Small local sym cache.  */
+  struct sym_cache sym_cache;
 
   /* _TLS_MODULE_BASE_ symbol.  */
   struct bfd_link_hash_entry *tls_module_base;
@@ -819,7 +819,7 @@ elf_i386_link_hash_table_create (bfd *abfd)
   ret->tls_ldm_got.refcount = 0;
   ret->next_tls_desc_index = 0;
   ret->sgotplt_jump_table_size = 0;
-  ret->sym_sec.abfd = NULL;
+  ret->sym_cache.abfd = NULL;
   ret->is_vxworks = 0;
   ret->srelplt2 = NULL;
   ret->plt0_pad_byte = 0;
@@ -1650,16 +1650,21 @@ elf_i386_check_relocs (bfd *abfd,
 		}
 	      else
 		{
-		  void **vpp;
 		  /* Track dynamic relocs needed for local syms too.
 		     We really need local syms available to do this
 		     easily.  Oh well.  */
-
+		  void **vpp;
 		  asection *s;
-		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
-						 sec, r_symndx);
+		  Elf_Internal_Sym *isym;
+
+		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+						abfd, r_symndx);
+		  if (isym == NULL)
+		    return FALSE;
+
+		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
 		  if (s == NULL)
-		    goto error_return;
+		    s = sec;
 
 		  vpp = &elf_section_data (s)->local_dynrel;
 		  head = (struct elf_dyn_relocs **)vpp;

@@ -493,14 +493,14 @@ struct elf_link_hash_table
 #define is_elf_hash_table(htab)					      	\
   (((struct bfd_link_hash_table *) (htab))->type == bfd_link_elf_hash_table)
 
-/* Used by bfd_section_from_r_symndx to cache a small number of local
-   symbol to section mappings.  */
+/* Used by bfd_sym_from_r_symndx to cache a small number of local
+   symbols.  */
 #define LOCAL_SYM_CACHE_SIZE 32
-struct sym_sec_cache
+struct sym_cache
 {
   bfd *abfd;
   unsigned long indx[LOCAL_SYM_CACHE_SIZE];
-  unsigned int shndx[LOCAL_SYM_CACHE_SIZE];
+  Elf_Internal_Sym sym[LOCAL_SYM_CACHE_SIZE];
 };
 
 /* Constant information held for an ELF backend.  */
@@ -1807,8 +1807,8 @@ extern bfd_boolean bfd_section_from_phdr
 extern int _bfd_elf_symbol_from_bfd_symbol
   (bfd *, asymbol **);
 
-extern asection *bfd_section_from_r_symndx
-  (bfd *, struct sym_sec_cache *, asection *, unsigned long);
+extern Elf_Internal_Sym *bfd_sym_from_r_symndx 
+  (struct sym_cache *, bfd *, unsigned long);
 extern asection *bfd_section_from_elf_index
   (bfd *, unsigned int);
 extern struct bfd_strtab_hash *_bfd_elf_stringtab_init

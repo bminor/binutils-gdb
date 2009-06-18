@@ -95,7 +95,7 @@ m68hc11_elf_hash_table_create (bfd *abfd)
   ret->stub_bfd = NULL;
   ret->stub_section = 0;
   ret->add_stub_section = NULL;
-  ret->sym_sec.abfd = NULL;
+  ret->sym_cache.abfd = NULL;
 
   return ret;
 }

@@ -3671,8 +3671,8 @@ struct ppc_link_hash_table
   /* Incremented every time we size stubs.  */
   unsigned int stub_iteration;
 
-  /* Small local sym to section mapping cache.  */
-  struct sym_sec_cache sym_sec;
+  /* Small local sym cache.  */
+  struct sym_cache sym_cache;
 };
 
 /* Rename some of the generic section flags to better document how they
@@ -4897,8 +4897,17 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  dest = h->root.u.def.section;
 	      }
 	    else
-	      dest = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
-						sec, r_symndx);
+	      {
+		Elf_Internal_Sym *isym;
+
+		isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+					      abfd, r_symndx);
+		if (isym == NULL)
+		  return FALSE;
+
+		dest = bfd_section_from_elf_index (abfd, isym->st_shndx);
+	      }
+
 	    if (dest != sec)
 	      ppc64_elf_section_data (sec)->has_14bit_branch = 1;
 	  }
@@ -5018,12 +5027,15 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      else
 		{
 		  asection *s;
+		  Elf_Internal_Sym *isym;
 
-		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec, sec,
-						 r_symndx);
-		  if (s == NULL)
+		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+						abfd, r_symndx);
+		  if (isym == NULL)
 		    return FALSE;
-		  else if (s != sec)
+
+		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
+		  if (s != NULL && s != sec)
 		    opd_sym_map[rel->r_offset / 8] = s;
 		}
 	    }
@@ -5119,14 +5131,18 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  /* Track dynamic relocs needed for local syms too.
 		     We really need local syms available to do this
 		     easily.  Oh well.  */
-
 		  asection *s;
 		  void *vpp;
+		  Elf_Internal_Sym *isym;
 
-		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
-						 sec, r_symndx);
-		  if (s == NULL)
+		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+						abfd, r_symndx);
+		  if (isym == NULL)
 		    return FALSE;
+
+		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
+		  if (s == NULL)
+		    s = sec;
 
 		  vpp = &elf_section_data (s)->local_dynrel;
 		  head = (struct ppc_dyn_relocs **) vpp;

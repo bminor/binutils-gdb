@@ -2187,8 +2187,8 @@ struct elf_sh_link_hash_table
   /* The (unloaded but important) VxWorks .rela.plt.unloaded section.  */
   asection *srelplt2;
 
-  /* Small local sym to section mapping cache.  */
-  struct sym_sec_cache sym_sec;
+  /* Small local sym cache.  */
+  struct sym_cache sym_cache;
 
   /* A counter or offset to track a TLS got entry.  */
   union
@@ -2281,7 +2281,7 @@ sh_elf_link_hash_table_create (bfd *abfd)
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
   ret->srelplt2 = NULL;
-  ret->sym_sec.abfd = NULL;
+  ret->sym_cache.abfd = NULL;
   ret->tls_ldm_got.refcount = 0;
   ret->plt_info = NULL;
   ret->vxworks_p = vxworks_object_p (abfd);
@@ -5203,14 +5203,19 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		head = &((struct elf_sh_link_hash_entry *) h)->dyn_relocs;
 	      else
 		{
+		  /* Track dynamic relocs needed for local syms too.  */
 		  asection *s;
 		  void *vpp;
+		  Elf_Internal_Sym *isym;
 
-		  /* Track dynamic relocs needed for local syms too.  */
-		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
-						 sec, r_symndx);
-		  if (s == NULL)
+		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+						abfd, r_symndx);
+		  if (isym == NULL)
 		    return FALSE;
+
+		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
+		  if (s == NULL)
+		    s = sec;
 
 		  vpp = &elf_section_data (s)->local_dynrel;
 		  head = (struct elf_sh_dyn_relocs **) vpp;

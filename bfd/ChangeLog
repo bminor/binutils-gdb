@@ -1,3 +1,29 @@
+2009-06-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct sym_sec_cache): Delete.
+	(struct sym_cache): New.
+	(bfd_section_from_r_symndx): Delete prototype.
+	(bfd_sym_from_r_symndx): Define prototype.
+	* elf.c (bfd_section_from_r_symndx): Delete, replace with..
+	(bfd_sym_from_r_symndx): ..new function.
+	* elf32-arm.c: Update all uses of struct sym_sec_cache and
+	bfd_section_from_r_symndx to new struct and function.
+	* elf32-bfin.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-m68hc1x.h: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* elfxx-sparc.h: Likewise.
+
 2009-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Cache or free isymbuf.

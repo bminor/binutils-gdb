@@ -2735,8 +2735,8 @@ struct ppc_elf_link_hash_table
   /* The size of the first PLT entry.  */
   int plt_initial_entry_size;
 
-  /* Small local sym to section mapping cache.  */
-  struct sym_sec_cache sym_sec;
+  /* Small local sym cache.  */
+  struct sym_cache sym_cache;
 };
 
 /* Get the PPC ELF linker hash table from a link_info structure.  */
@@ -3713,9 +3713,14 @@ ppc_elf_check_relocs (bfd *abfd,
 		 reliably deduce the GOT pointer value needed for
 		 PLT call stubs.  */
 	      asection *s;
+	      Elf_Internal_Sym *isym;
 
-	      s = bfd_section_from_r_symndx (abfd, &htab->sym_sec, sec,
-					     r_symndx);
+	      isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+					    abfd, r_symndx);
+	      if (isym == NULL)
+		return FALSE;
+
+	      s = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	      if (s == got2)
 		{
 		  htab->plt_type = PLT_OLD;
@@ -3843,14 +3848,18 @@ ppc_elf_check_relocs (bfd *abfd,
 		  /* Track dynamic relocs needed for local syms too.
 		     We really need local syms available to do this
 		     easily.  Oh well.  */
-
 		  asection *s;
 		  void *vpp;
+		  Elf_Internal_Sym *isym;
 
-		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
-						 sec, r_symndx);
-		  if (s == NULL)
+		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+						abfd, r_symndx);
+		  if (isym == NULL)
 		    return FALSE;
+
+		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
+		  if (s == NULL)
+		    s = sec;
 
 		  vpp = &elf_section_data (s)->local_dynrel;
 		  head = (struct ppc_elf_dyn_relocs **) vpp;
