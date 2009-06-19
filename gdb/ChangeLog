@@ -1,5 +1,9 @@
 2009-06-19  Tristan Gingold  <gingold@adacore.com>
 
+	* darwin-nat.c (_initialize_darwin_inferior): Remove commented-out
+	line.
+
+2009-06-19  Tristan Gingold  <gingold@adacore.com>
 	* machoread.c (macho_symtab_read): Adjust for bfd changes.
 	* darwin-nat.h (struct darwin_exception_msg): New type to describe
 	a mach exception.

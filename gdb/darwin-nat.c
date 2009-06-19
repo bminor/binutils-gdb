@@ -1934,7 +1934,6 @@ _initialize_darwin_inferior (void)
   darwin_ops->to_xfer_partial = darwin_xfer_partial;
   darwin_ops->to_supports_multi_process = darwin_supports_multi_process;
   darwin_ops->to_get_ada_task_ptid = darwin_get_ada_task_ptid;
-  /* darwin_ops->to_has_thread_control = tc_schedlock | tc_switch */;
 
   darwin_complete_target (darwin_ops);
 
