@@ -1,3 +1,8 @@
+2009-06-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (md_gather_operands): Accept an instruction
+	without operands if all operands are tagged as optional.
+
 2009-06-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 10169

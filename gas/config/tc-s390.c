@@ -1188,7 +1188,24 @@ md_gather_operands (char *str,
       if (ex.X_op == O_illegal)
 	as_bad (_("illegal operand"));
       else if (ex.X_op == O_absent)
-	as_bad (_("missing operand"));
+	{
+	  /* No operands, check if all operands can be skipped.  */
+	  while (*opindex_ptr != 0 && operand->flags & S390_OPERAND_OPTIONAL)
+	    {
+	      if (operand->flags & S390_OPERAND_DISP)
+		{
+		  /* An optional displacement makes the whole D(X,B)
+		     D(L,B) or D(B) block optional.  */
+		  do {
+		    operand = s390_operands + *(++opindex_ptr);
+		  } while (!(operand->flags & S390_OPERAND_BASE));
+		}
+	      operand = s390_operands + *(++opindex_ptr);
+	    }
+	  if (opindex_ptr[0] == '\0')
+	    break;
+	  as_bad (_("missing operand"));
+	}
       else if (ex.X_op == O_register || ex.X_op == O_constant)
 	{
 	  s390_lit_suffix (&str, &ex, ELF_SUFFIX_NONE);
