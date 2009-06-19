@@ -260,10 +260,10 @@ b252 msr RRE_RR "multiply single" g5 esa,zarch
 71 ms RX_RRRD "multiply single" g5 esa,zarch
 a700 tmh RI_RU "test under mask high" g5 esa,zarch
 a701 tml RI_RU "test under mask low" g5 esa,zarch
-0700 nopr RR_0R "no operation" g5 esa,zarch
+0700 nopr RR_0R_OPT "no operation" g5 esa,zarch
 0700 b*8r RR_0R "conditional branch" g5 esa,zarch
 07f0 br RR_0R "unconditional branch" g5 esa,zarch
-4700 nop RX_0RRD "no operation" g5 esa,zarch
+4700 nop RX_0RRD_OPT "no operation" g5 esa,zarch
 4700 b*8 RX_0RRD "conditional branch" g5 esa,zarch
 47f0 b RX_0RRD "unconditional branch" g5 esa,zarch
 a704 j*8 RI_0P "conditional jump" g5 esa,zarch

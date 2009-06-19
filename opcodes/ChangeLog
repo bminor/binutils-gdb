@@ -1,3 +1,9 @@
+2009-06-19  Martin Schwidefsky  <sschwidefsky@de.ibm.com>
+
+	* s390-opc.c (INSTR_RR_0R_OPT, INSTR_RX_0RRD_OPT, MASK_RR_0R_OPT,
+	MASK_RX_0RRD_OPT): New instruction formats with optional arguments.
+	* s390-opc.txt (nopr, nop): Use new instruction format.
+
 2009-06-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 10288
