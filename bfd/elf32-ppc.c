@@ -3570,8 +3570,11 @@ ppc_elf_check_relocs (bfd *abfd,
 	    h->non_got_ref = TRUE;
 	  break;
 
-	case R_PPC_PLT32:
 	case R_PPC_PLTREL24:
+	  if (h == NULL)
+	    break;
+	  /* Fall through */
+	case R_PPC_PLT32:
 	case R_PPC_PLTREL32:
 	case R_PPC_PLT16_LO:
 	case R_PPC_PLT16_HI:
@@ -7210,6 +7213,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_PPC_PLTREL24:
+	  if (h == NULL)
+	    break;
 	  /* Relocation is to the entry for this symbol in the
 	     procedure linkage table.  */
 	  {

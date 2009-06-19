@@ -1,5 +1,11 @@
 2009-06-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_check_relocs): Allow local symbols for
+	R_PPC_PLTREL24 relocs.
+	(ppc_elf_relocate_section): Likewise.
+
+2009-06-19  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (find_plt_ent): Pass pointer to plist rather than
 	pointer to sym hash.  Update all uses.
 	(update_plt_info): Likewise.  Don't check addend here.
