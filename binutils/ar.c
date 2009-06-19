@@ -278,11 +278,13 @@ usage (int help)
       fprintf (s, _("Usage: %s [options] archive\n"), program_name);
       fprintf (s, _(" Generate an index to speed access to archives\n"));
       fprintf (s, _(" The options are:\n\
-  @<file>                      Read options from <file>\n"
+  @<file>                      Read options from <file>\n"));
 #if BFD_SUPPORTS_PLUGINS
-"  --plugin <name>              Load the specified plugin\n"
+      fprintf (s, _("\
+  --plugin <name>              Load the specified plugin\n"));
 #endif
-"  -t                           Update the archive's symbol map timestamp\n\
+      fprintf (s, _("\
+  -t                           Update the archive's symbol map timestamp\n\
   -h --help                    Print this help message\n\
   -v --version                 Print version information\n"));
     }

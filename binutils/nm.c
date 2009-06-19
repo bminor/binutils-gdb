@@ -240,11 +240,13 @@ usage (FILE *stream, int status)
   -o                     Same as -A\n\
   -p, --no-sort          Do not sort the symbols\n\
   -P, --portability      Same as --format=posix\n\
-  -r, --reverse-sort     Reverse the sense of the sort\n"
+  -r, --reverse-sort     Reverse the sense of the sort\n"));
 #if BFD_SUPPORTS_PLUGINS
-"      --plugin NAME      Load the specified plugin\n"
+  fprintf (stream, _("\
+      --plugin NAME      Load the specified plugin\n"));
 #endif
-"  -S, --print-size       Print size of defined symbols\n\
+  fprintf (stream, _("\
+  -S, --print-size       Print size of defined symbols\n		\
   -s, --print-armap      Include index for symbols from archive members\n\
       --size-sort        Sort symbols by size\n\
       --special-syms     Include special symbols in the output\n\

@@ -1,3 +1,8 @@
+2009-06-19  Nick Clifton  <nickc@redhat.com>
+
+	* ar.c (usage): Do not use #ifdef inside _("...).
+	* nm.c (usage): Likewise.
+
 2009-06-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 10288
