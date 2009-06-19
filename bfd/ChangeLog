@@ -1,3 +1,9 @@
+2009-06-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (find_plt_ent): Pass pointer to plist rather than
+	pointer to sym hash.  Update all uses.
+	(update_plt_info): Likewise.  Don't check addend here.
+
 2009-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Remove isymbuf and use

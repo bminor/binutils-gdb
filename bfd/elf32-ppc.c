@@ -3239,14 +3239,12 @@ update_local_sym_info (bfd *abfd,
 }
 
 static bfd_boolean
-update_plt_info (bfd *abfd, struct elf_link_hash_entry *h,
+update_plt_info (bfd *abfd, struct plt_entry **plist,
 		 asection *sec, bfd_vma addend)
 {
   struct plt_entry *ent;
 
-  if (addend < 32768)
-    sec = NULL;
-  for (ent = h->plt.plist; ent != NULL; ent = ent->next)
+  for (ent = *plist; ent != NULL; ent = ent->next)
     if (ent->sec == sec && ent->addend == addend)
       break;
   if (ent == NULL)
@@ -3255,24 +3253,24 @@ update_plt_info (bfd *abfd, struct elf_link_hash_entry *h,
       ent = bfd_alloc (abfd, amt);
       if (ent == NULL)
 	return FALSE;
-      ent->next = h->plt.plist;
+      ent->next = *plist;
       ent->sec = sec;
       ent->addend = addend;
       ent->plt.refcount = 0;
-      h->plt.plist = ent;
+      *plist = ent;
     }
   ent->plt.refcount += 1;
   return TRUE;
 }
 
 static struct plt_entry *
-find_plt_ent (struct elf_link_hash_entry *h, asection *sec, bfd_vma addend)
+find_plt_ent (struct plt_entry **plist, asection *sec, bfd_vma addend)
 {
   struct plt_entry *ent;
 
   if (addend < 32768)
     sec = NULL;
-  for (ent = h->plt.plist; ent != NULL; ent = ent->next)
+  for (ent = *plist; ent != NULL; ent = ent->next)
     if (ent->sec == sec && ent->addend == addend)
       break;
   return ent;
@@ -3610,7 +3608,8 @@ ppc_elf_check_relocs (bfd *abfd,
 		  addend = rel->r_addend;
 		}
 	      h->needs_plt = 1;
-	      if (!update_plt_info (abfd, h, got2, addend))
+	      if (!update_plt_info (abfd, &h->plt.plist,
+				    addend < 32768 ? NULL : got2, addend))
 		return FALSE;
 	    }
 	  break;
@@ -3742,7 +3741,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	    {
 	      /* We may need a plt entry if the symbol turns out to be
 		 a function defined in a dynamic object.  */
-	      if (!update_plt_info (abfd, h, NULL, 0))
+	      if (!update_plt_info (abfd, &h->plt.plist, NULL, 0))
 		return FALSE;
 
 	      /* We may need a copy reloc too.  */
@@ -3776,7 +3775,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	    {
 	      /* We may need a plt entry if the symbol turns out to be
 		 a function defined in a dynamic object.  */
-	      if (!update_plt_info (abfd, h, NULL, 0))
+	      if (!update_plt_info (abfd, &h->plt.plist, NULL, 0))
 		return FALSE;
 	      break;
 	    }
@@ -4351,7 +4350,8 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
 	  if (h != NULL)
 	    {
 	      bfd_vma addend = r_type == R_PPC_PLTREL24 ? rel->r_addend : 0;
-	      struct plt_entry *ent = find_plt_ent (h, got2, addend);
+	      struct plt_entry *ent = find_plt_ent (&h->plt.plist,
+						    got2, addend);
 	      if (ent->plt.refcount > 0)
 		ent->plt.refcount -= 1;
 	    }
@@ -4609,7 +4609,8 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		    {
 		      struct plt_entry *ent;
 
-		      ent = find_plt_ent (htab->tls_get_addr, NULL, 0);
+		      ent = find_plt_ent (&htab->tls_get_addr->plt.plist,
+					  NULL, 0);
 		      if (ent != NULL && ent->plt.refcount > 0)
 			ent->plt.refcount -= 1;
 		    }
@@ -5767,7 +5768,8 @@ ppc_elf_relax_section (bfd *abfd,
 	  if (r_type == R_PPC_PLTREL24
 	      && htab->plt != NULL)
 	    {
-	      struct plt_entry *ent = find_plt_ent (h, got2, irel->r_addend);
+	      struct plt_entry *ent = find_plt_ent (&h->plt.plist,
+						    got2, irel->r_addend);
 
 	      if (ent != NULL)
 		{
@@ -7119,7 +7121,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_RELAX32PC_PLT:
 	case R_PPC_RELAX32_PLT:
 	  {
-	    struct plt_entry *ent = find_plt_ent (h, got2, addend);
+	    struct plt_entry *ent = find_plt_ent (&h->plt.plist, got2, addend);
 
 	    if (htab->plt_type == PLT_NEW)
 	      relocation = (htab->glink->output_section->vma
@@ -7211,7 +7213,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  /* Relocation is to the entry for this symbol in the
 	     procedure linkage table.  */
 	  {
-	    struct plt_entry *ent = find_plt_ent (h, got2, addend);
+	    struct plt_entry *ent = find_plt_ent (&h->plt.plist, got2, addend);
 
 	    addend = 0;
 	    if (ent == NULL
