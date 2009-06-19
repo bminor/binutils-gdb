@@ -755,10 +755,11 @@ apropos_cmd (struct ui_file *stream, struct cmd_list_element *commandlist,
 			 struct re_pattern_buffer *regex, char *prefix)
 {
   struct cmd_list_element *c;
-  int returnvalue=1; /*Needed to avoid double printing*/
+  int returnvalue;
   /* Walk through the commands */
   for (c=commandlist;c;c=c->next)
     {
+      returnvalue = -1; /*Needed to avoid double printing*/
       if (c->name != NULL)
 	{
 	  /* Try to match against the name*/
@@ -769,7 +770,7 @@ apropos_cmd (struct ui_file *stream, struct cmd_list_element *commandlist,
 				      0 /* don't recurse */, stream);
 	    }
 	}
-      if (c->doc != NULL && returnvalue != 0)
+      if (c->doc != NULL && returnvalue < 0)
 	{
 	  /* Try to match against documentation */
 	  if (re_search(regex,c->doc,strlen(c->doc),0,strlen(c->doc),NULL) >=0)
