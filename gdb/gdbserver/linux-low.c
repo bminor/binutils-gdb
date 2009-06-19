@@ -3008,6 +3008,12 @@ linux_start_non_stop (int nonstop)
   return 0;
 }
 
+static int
+linux_supports_multi_process (void)
+{
+  return 1;
+}
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
@@ -3045,6 +3051,7 @@ static struct target_ops linux_target_ops = {
   linux_supports_non_stop,
   linux_async,
   linux_start_non_stop,
+  linux_supports_multi_process
 };
 
 static void

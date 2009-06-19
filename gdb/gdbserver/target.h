@@ -275,6 +275,9 @@ struct target_ops
   /* Switch to non-stop (1) or all-stop (0) mode.  Return 0 on
      success, -1 otherwise.  */
   int (*start_non_stop) (int);
+
+  /* Returns true if the target supports multi-process debugging.  */
+  int (*supports_multi_process) (void);
 };
 
 extern struct target_ops *the_target;
@@ -310,6 +313,10 @@ void set_target_ops (struct target_ops *);
 
 #define target_async(enable) \
   (the_target->async ? (*the_target->async) (enable) : 0)
+
+#define target_supports_multi_process() \
+  (the_target->supports_multi_process ? \
+   (*the_target->supports_multi_process) () : 0)
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 

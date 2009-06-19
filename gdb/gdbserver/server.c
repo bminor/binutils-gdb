@@ -1074,9 +1074,13 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	     p != NULL;
 	     p = strtok (NULL, ";"))
 	  {
-	    /* Record if GDB knows about multiprocess support.  */
 	    if (strcmp (p, "multiprocess+") == 0)
-	      multi_process = 1;
+	      {
+		/* GDB supports and wants multi-process support if
+		   possible.  */
+		if (target_supports_multi_process ())
+		  multi_process = 1;
+	      }
 	  }
 
       sprintf (own_buf, "PacketSize=%x;QPassSignals+", PBUFSIZ - 1);
@@ -1106,7 +1110,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (the_target->qxfer_osdata != NULL)
 	strcat (own_buf, ";qXfer:osdata:read+");
 
-      strcat (own_buf, ";multiprocess+");
+      if (target_supports_multi_process ())
+	strcat (own_buf, ";multiprocess+");
 
       if (target_supports_non_stop ())
 	strcat (own_buf, ";QNonStop+");

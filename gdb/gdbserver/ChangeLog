@@ -1,3 +1,16 @@
+2009-06-19  Aleksandar Ristovski  <aristovski@qnx.com>
+	    Pedro Alves <pedro@codesourcery.com>
+
+	* target.h (struct target_ops) <supports_multi_process>: New
+	callback.
+	(target_supports_multi_process): New.
+	* server.c (handle_query): Even if GDB reports support, only
+	enable multi-process if the target also supports it.  Report
+	multi-process support only if the target backend supports it.
+	* linux-low.c (linux_supports_multi_process): New function.
+	(linux_target_ops): Install it as target_supports_multi_process
+	callback.
+
 2009-05-24  Doug Evans  <dje@google.com>
 
 	Global renaming of find_thread_pid to find_thread_ptid.
