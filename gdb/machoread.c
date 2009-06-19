@@ -103,7 +103,6 @@ macho_symtab_read (struct objfile *objfile,
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   long storage_needed;
-  asymbol *sym;
   long i, j;
   CORE_ADDR offset;
   enum minimal_symbol_type ms_type;
@@ -114,15 +113,16 @@ macho_symtab_read (struct objfile *objfile,
 
   for (i = 0; i < number_of_symbols; i++)
     {
-      sym = symbol_table[i];
+      asymbol *sym = symbol_table[i];
+      bfd_mach_o_asymbol *mach_o_sym = (bfd_mach_o_asymbol *)sym;
+
       offset = ANOFFSET (objfile->section_offsets, sym->section->index);
 
       if (sym->flags & BSF_DEBUGGING)
 	{
-	  unsigned char type = BFD_MACH_O_SYM_NTYPE(sym);
 	  bfd_vma addr;
 
-	  switch (type)
+	  switch (mach_o_sym->n_type)
 	    {
 	    case N_SO:
 	      if ((sym->name == NULL || sym->name[0] == 0)

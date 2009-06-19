@@ -1,5 +1,5 @@
 /* Darwin support for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2008, 2009
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2008
    Free Software Foundation, Inc.
 
    Contributed by Apple Computer, Inc.
@@ -8,7 +8,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -17,7 +17,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* The name of the ppc_thread_state structure, and the names of its
    members, have been changed for Unix conformance reasons.  The easiest
@@ -118,9 +120,9 @@ get_task_from_args (char *args)
 
   if (args == NULL || *args == 0)
     {
-      if (darwin_inf->task == TASK_NULL)
+      if (ptid_equal (inferior_ptid, null_ptid))
 	printf_unfiltered (_("No inferior running\n"));
-      return darwin_inf->task;
+      return current_inferior ()->private->task;
     }
   if (strcmp (args, "gdb") == 0)
     return mach_task_self ();
@@ -252,25 +254,44 @@ info_mach_ports_command (char *args, int from_tty)
 	    printf_unfiltered (_(" gdb-task"));
 	  else if (port == darwin_host_self)
 	    printf_unfiltered (_(" host-self"));
-	  else if (port == darwin_not_port)
-	    printf_unfiltered (_(" gdb-notifier"));
 	  else if (port == darwin_ex_port)
 	    printf_unfiltered (_(" gdb-exception"));
 	  else if (port == darwin_port_set)
 	    printf_unfiltered (_(" gdb-port_set"));
-	  else if (darwin_inf && port == darwin_inf->task)
-	    printf_unfiltered (_(" inferior-task"));
-	  else if (darwin_inf && darwin_inf->threads)
+	  else if (!ptid_equal (inferior_ptid, null_ptid))
 	    {
-	      int k;
-	      thread_t t;
-	      for (k = 0; VEC_iterate(thread_t, darwin_inf->threads, k, t); k++)
-		if (port == t)
-		  {
-		    printf_unfiltered (_(" inferior-thread for 0x%x"),
-				       darwin_inf->task);
-		    break;
-		  }
+	      struct inferior *inf = current_inferior ();
+
+	      if (port == inf->private->task)
+		printf_unfiltered (_(" inferior-task"));
+	      else if (port == inf->private->notify_port)
+		printf_unfiltered (_(" inferior-notify"));
+	      else
+		{
+		  int k;
+		  darwin_thread_t *t;
+
+		  for (k = 0; k < inf->private->exception_info.count; k++)
+		    if (port == inf->private->exception_info.ports[k])
+		      {
+			printf_unfiltered (_(" inferior-excp-port"));
+			break;
+		      }
+
+		  if (inf->private->threads)
+		    {
+		      for (k = 0;
+			   VEC_iterate(darwin_thread_t,
+				       inf->private->threads, k, t);
+			   k++)
+			if (port == t->gdb_port)
+			  {
+			    printf_unfiltered (_(" inferior-thread for 0x%x"),
+					       inf->private->task);
+			    break;
+			  }
+		    }
+		}
 	    }
 	}
       printf_unfiltered (_("\n"));
@@ -600,12 +621,36 @@ darwin_debug_regions_recurse (task_t task)
   vm_region_submap_short_info_data_64_t r_info;
   kern_return_t kret;
   int ret;
+  struct cleanup *table_chain;
+
+  table_chain = make_cleanup_ui_out_table_begin_end (uiout, 9, -1, "regions");
+
+  if (gdbarch_addr_bit (current_gdbarch) <= 32)
+    {
+      ui_out_table_header (uiout, 10, ui_left, "start", "Start");
+      ui_out_table_header (uiout, 10, ui_left, "end", "End");
+    }
+  else
+    {
+      ui_out_table_header (uiout, 18, ui_left, "start", "Start");
+      ui_out_table_header (uiout, 18, ui_left, "end", "End");
+    }
+  ui_out_table_header (uiout, 3, ui_left, "min-prot", "Min");
+  ui_out_table_header (uiout, 3, ui_left, "max-prot", "Max");
+  ui_out_table_header (uiout, 5, ui_left, "inheritence", "Inh");
+  ui_out_table_header (uiout, 9, ui_left, "share-mode", "Shr");
+  ui_out_table_header (uiout, 1, ui_left, "depth", "D");
+  ui_out_table_header (uiout, 3, ui_left, "submap", "Sm");
+  ui_out_table_header (uiout, 0, ui_noalign, "tag", "Tag");
+
+  ui_out_table_body (uiout);
 
   r_start = 0;
   r_depth = 0;
   while (1)
     {
       const char *tag;
+      struct cleanup *row_chain;
 
       r_info_size = VM_REGION_SUBMAP_SHORT_INFO_COUNT_64;
       r_size = -1;
@@ -614,25 +659,39 @@ darwin_debug_regions_recurse (task_t task)
 				     &r_info_size);
       if (kret != KERN_SUCCESS)
 	break;
-      printf_filtered (_("%s-%s %s/%s  %-5s %-10s %2d %s"),
-		       paddr(r_start),
-		       paddr(r_start + r_size),
-		       unparse_protection (r_info.protection),
-		       unparse_protection (r_info.max_protection),
-		       unparse_inheritance (r_info.inheritance),
-		       unparse_share_mode (r_info.share_mode),
-		       r_depth,
-		       r_info.is_submap ? _("sm ") : _("obj"));
+      row_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "regions-row");
+
+      ui_out_field_core_addr (uiout, "start", r_start);
+      ui_out_field_core_addr (uiout, "end", r_start + r_size);
+      ui_out_field_string (uiout, "min-prot", 
+			   unparse_protection (r_info.protection));
+      ui_out_field_string (uiout, "max-prot", 
+			   unparse_protection (r_info.max_protection));
+      ui_out_field_string (uiout, "inheritence",
+			   unparse_inheritance (r_info.inheritance));
+      ui_out_field_string (uiout, "share-mode",
+			   unparse_share_mode (r_info.share_mode));
+      ui_out_field_int (uiout, "depth", r_depth);
+      ui_out_field_string (uiout, "submap",
+			   r_info.is_submap ? _("sm ") : _("obj"));
       tag = unparse_user_tag (r_info.user_tag);
       if (tag)
-	printf_unfiltered (_(" %s\n"), tag);
+	ui_out_field_string (uiout, "tag", tag);
       else
-	printf_unfiltered (_(" %u\n"), r_info.user_tag);
+	ui_out_field_int (uiout, "tag", r_info.user_tag);
+
+      do_cleanups (row_chain);
+
+      if (!ui_out_is_mi_like_p (uiout))
+	ui_out_text (uiout, "\n");
+
       if (r_info.is_submap)
 	r_depth++;
       else
 	r_start += r_size;
     }
+  do_cleanups (table_chain);
+
 }
 
 
@@ -672,6 +731,7 @@ info_mach_region_command (char *exp, int from_tty)
   struct expression *expr;
   struct value *val;
   mach_vm_address_t address;
+  struct inferior *inf;
 
   expr = parse_expression (exp);
   val = evaluate_expression (expr);
@@ -679,22 +739,13 @@ info_mach_region_command (char *exp, int from_tty)
     {
       val = value_ind (val);
     }
-  /* In rvalue contexts, such as this, functions are coerced into
-     pointers to functions. */
-  if (TYPE_CODE (value_type (val)) == TYPE_CODE_FUNC
-      && VALUE_LVAL (val) == lval_memory)
-    {
-      address = value_address (val);
-    }
-  else
-    {
-      address = value_as_address (val);
-    }
+  address = value_as_address (val);
 
-  if ((!darwin_inf) || (darwin_inf->task == TASK_NULL))
+  if (ptid_equal (inferior_ptid, null_ptid))
     error (_("Inferior not available"));
 
-  darwin_debug_region (darwin_inf->task, address);
+  inf = current_inferior ();
+  darwin_debug_region (inf->private->task, address);
 }
 
 static void
@@ -761,9 +812,9 @@ info_mach_exceptions_command (char *args, int from_tty)
     {
       if (strcmp (args, "saved") == 0)
 	{
-	  if (darwin_inf->task == TASK_NULL)
-	    error (_("No inferior running\n"));
-	  disp_exception (&darwin_inf->exception_info);
+	  if (ptid_equal (inferior_ptid, null_ptid))
+	    printf_unfiltered (_("No inferior running\n"));
+	  disp_exception (&current_inferior ()->private->exception_info);
 	  return;
 	}
       else if (strcmp (args, "host") == 0)
@@ -780,11 +831,14 @@ info_mach_exceptions_command (char *args, int from_tty)
     }
   else
     {
-      if (darwin_inf->task == TASK_NULL)
-	error (_("No inferior running\n"));
+      struct inferior *inf;
+
+      if (ptid_equal (inferior_ptid, null_ptid))
+	printf_unfiltered (_("No inferior running\n"));
+      inf = current_inferior ();
       
       kret = task_get_exception_ports
-	(darwin_inf->task, EXC_MASK_ALL, info.masks,
+	(inf->private->task, EXC_MASK_ALL, info.masks,
 	 &info.count, info.ports, info.behaviors, info.flavors);
       MACH_CHECK_ERROR (kret);
       disp_exception (&info);

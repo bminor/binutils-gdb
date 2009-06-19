@@ -22,9 +22,6 @@
 #include <mach/mach.h>
 #include "gdb_assert.h"
 
-/* Define the threads vector type.  */
-DEF_VEC_I (thread_t);
-
 /* Describe the mach exception handling state for a task.  This state is saved
    before being changed and restored when a process is detached.
    For more information on these fields see task_get_exception_ports manual
@@ -48,34 +45,82 @@ struct darwin_exception_info
 };
 typedef struct darwin_exception_info darwin_exception_info;
 
-/* Describe an inferior.  */
-struct darwin_inferior
+struct darwin_exception_msg
 {
-  /* Inferior PID.  */
-  int pid;
+  mach_msg_header_t header;
 
+  /* Thread and task taking the exception.  */
+  mach_port_t thread_port;
+  mach_port_t task_port;
+
+  /* Type of the exception.  */
+  exception_type_t ex_type;
+
+  /* Machine dependent details.  */
+  mach_msg_type_number_t data_count;
+  integer_t ex_data[2];
+};
+
+enum darwin_msg_state { DARWIN_RUNNING, DARWIN_STOPPED, DARWIN_MESSAGE };
+
+struct private_thread_info
+{
+  /* The thread port from a GDB point of view.  */
+  thread_t gdb_port;
+
+  /* The thread port from the inferior point of view.  Not to be used inside
+     gdb except for get_ada_task_ptid.  */
+  thread_t inf_port;
+
+  /* Current message state.
+     If the kernel has sent a message it expects a reply and the inferior
+     can't be killed before.  */
+  enum darwin_msg_state msg_state;
+
+  /* True if this thread is single-stepped.  */
+  unsigned char single_step;
+
+  /* True if a signal was manually sent to the thread.  */
+  unsigned char signaled;
+
+  /* The last exception received.  */
+  struct darwin_exception_msg event;
+};
+typedef struct private_thread_info darwin_thread_t;
+
+/* Define the threads vector type.  */
+DEF_VEC_O (darwin_thread_t);
+
+
+/* Describe an inferior.  */
+struct private_inferior
+{
   /* Corresponding task port.  */
   task_t task;
 
-  /* Previous port for request notification on task.  */
-  mach_port_t prev_not_port;
+  /* Port which will receive the dead-name notification for the task port.
+     This is used to detect the death of the task.  */
+  mach_port_t notify_port;
 
   /* Initial exception handling.  */
   darwin_exception_info exception_info;
 
-  /* Sorted vector of known threads.  */
-  VEC(thread_t) *threads;
-};
-typedef struct darwin_inferior darwin_inferior;
+  /* Number of messages that have been received but not yet replied.  */
+  unsigned int pending_messages;
 
-/* Current inferior.  */
-extern darwin_inferior *darwin_inf;
+  /* Set if inferior is not controlled by ptrace(2) but through Mach.  */
+  unsigned char no_ptrace;
+
+  /* True if this task is suspended.  */
+  unsigned char suspended;
+
+  /* Sorted vector of known threads.  */
+  VEC(darwin_thread_t) *threads;
+};
+typedef struct private_inferior darwin_inferior;
 
 /* Exception port.  */
 extern mach_port_t darwin_ex_port;
-
-/* Notification port.  */
-extern mach_port_t darwin_not_port;
 
 /* Port set.  */
 extern mach_port_t darwin_port_set;

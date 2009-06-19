@@ -1,3 +1,77 @@
+2009-06-19  Tristan Gingold  <gingold@adacore.com>
+
+	* machoread.c (macho_symtab_read): Adjust for bfd changes.
+	* darwin-nat.h (struct darwin_exception_msg): New type to describe
+	a mach exception.
+	(struct private_thread_info): New type to describe the state of the
+	thread.
+	(DEF_VEC_I thread_t): Removed, replaced by ...
+	(DEF_VEC_O darwin_thread_t): ... this new type.
+	(struct darwin_inferior): Renamed to ...
+	(struct private_inferior): ... this type.  Fields added.
+	(darwin_not_port): Moved into the private inferior structure.
+	* darwin-nat.c: Add includes, improve comments.
+	Rewrite to handle multiple threads and processes.
+	(darwin_resume_to): New function and protype.
+	(darwin_resume, darwin_wait_to, darwin_wait): Ditto.
+	(darwin_kill_inferior): Add ops argument.
+	(darwin_pid_to_str): New function.
+	(darwin_thread_alive): Ditto.
+	(darwin_inf, darwin_not_port): Removed.
+	(darwin_inf_fake_stop): New variable.
+	(msgin, msgout, msg_state, exc_msg): Removed.
+	(mach_check_error): Use warning instead of error.
+	(darwin_ptrace): Adjust debug level.
+	(cmp_thread_t): Fix names (typo).
+	(darwin_check_new_threads): Argument is now an inferior,
+	adjust for new structures, add no change check, ignore dead ports,
+	handle first thread case.
+	(find_inferior_task_it): New function.
+	(find_inferior_notify_it): Ditto.
+	(darwin_find_inferior_by_task): Ditto.
+	(darwin_find_inferior_by_notify): Ditto.
+	(darwin_find_thread): Ditto.
+	(darwin_suspend_inferior): Ditto.
+	(darwin_resume_inferior): Ditto.
+	(catch_exception_raise_state): Removed.
+	(catch_exception_raise_state_identity): Removed.
+	(darwin_suspend_inferior_it): New function.
+	(darwin_resume_inferior_it): Ditto.
+	(darwin_dump_message): New function, extracted from darwin_wait.
+	(darwin_decode_exception_message): New function.
+	(darwin_encode_reply): New function.
+	(catch_exception_raise): Removed.
+	(darwin_send_reply): New function, extracted from darwin_resume.
+	(darwin_resume_thread): New function, extracted from darwin_resume.
+	(struct resume_inferior_threads_param): New type.
+	(darwin_resume_inferior_threads_it): New function.
+	(darwin_resume_inferior_threads): New function.
+	(darwin_suspend_inferior_threads): New function.
+	(darwin_resume): Mostly rewritten to handle multiple threads and
+	some corner cases.
+	(darwin_decode_message): New function extracted from darwin_wait.
+	(cancel_breakpoint): New function.
+	(darwin_wait): Mostly rewritten.  Handle multiple threads.
+	(darwin_mourn_inferior): Adjust for per process structures.
+	(darwin_reply_to_all_pending_messages): New function.
+	(darwin_stop_inferior): Adjust for per inferior structures.
+	(darwin_attach_pid): Ditto.
+	(darwin_init_thread_list): Ditto.
+	(darwin_attach): Ditto.
+	(darwin_detach): Ditto.
+	(darwin_files_info): Now empty.
+	(darwin_pid_to_str): Adjust returns string to match one expected by
+	the testsuite.
+	(darwin_read_write_inferior): Rename err variable to match other uses.
+	Adjust debug message.  Handle submaps.
+	(darwin_xfer_memory): Adjust for per inferior structures.
+	(set_enable_mach_exceptions): Ditto.
+	(darwin_pid_to_exec_file): New function.
+	(darwin_get_ada_task_ptid): Ditto.
+	(darwin_supports_multi_process): Ditto.
+	(_initialize_darwin_inferior): Remove useless assertion, adjust for
+	per inferior structures.  Add new target operations.
+
 2009-06-18  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@vmware.com>
 
