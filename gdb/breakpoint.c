@@ -207,6 +207,9 @@ static void disable_trace_command (char *, int);
 
 static void trace_pass_command (char *, int);
 
+static void skip_prologue_sal (struct symtab_and_line *sal);
+
+
 /* Flag indicating that a command has proceeded the inferior past the
    current breakpoint.  */
 
@@ -5436,6 +5439,15 @@ expand_line_sal_maybe (struct symtab_and_line sal)
 	    }
 	}
     }
+  else
+    {
+      for (i = 0; i < expanded.nelts; ++i)
+	{
+	  /* If this SAL corresponds to a breakpoint inserted using a
+	     line number, then skip the function prologue if necessary.  */
+	  skip_prologue_sal (&expanded.sals[i]);
+	}
+    }
 
   
   if (expanded.nelts <= 1)
@@ -5903,7 +5915,8 @@ set_breakpoint (char *address, char *condition,
 
 /* Adjust SAL to the first instruction past the function prologue.
    The end of the prologue is determined using the line table from
-   the debugging information.
+   the debugging information.  explicit_pc and explicit_line are
+   not modified.
 
    If SAL is already past the prologue, then do nothing.  */
 
@@ -5918,7 +5931,11 @@ skip_prologue_sal (struct symtab_and_line *sal)
 
   start_sal = find_function_start_sal (sym, 1);
   if (sal->pc < start_sal.pc)
-    *sal = start_sal;
+    {
+      start_sal.explicit_line = sal->explicit_line;
+      start_sal.explicit_pc = sal->explicit_pc;
+      *sal = start_sal;
+    }
 }
 
 /* Helper function for break_command_1 and disassemble_command.  */

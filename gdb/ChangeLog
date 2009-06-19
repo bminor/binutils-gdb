@@ -1,3 +1,10 @@
+2009-06-19  Jerome Guitton  <guitton@adacore.com>
+
+	* breakpoint.c (expand_line_sal_maybe): When explicit_line,
+	skip prologue on each sals.
+	(skip_prologue_sal): Return explicit_line and explicit_pc
+	unmodified.
+
 2009-06-19  Tristan Gingold  <gingold@adacore.com>
 
 	* darwin-nat.c (_initialize_darwin_inferior): Remove commented-out
