@@ -1,12 +1,12 @@
 2009-06-19  Samuel Bronson  <naesten@gmail.com>
 
-	PR cli/9930:
+	PR cli/9903:
 	* cli/cli-decode.c (apropos_cmd): Skip traversing abbreviations
 	for prefix commands to avoid duplicates in the output.
 
 2009-06-19  Samuel Bronson  <naesten@gmail.com>
 
-	PR cli/9930:
+	PR cli/9903:
 	* cli/cli-decode.c (apropos_cmd): Fix avoidance of double
 	printing.
 
