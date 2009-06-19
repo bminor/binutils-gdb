@@ -937,7 +937,8 @@ elf64_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 			     unsigned int *r_type, int tls_type,
 			     const Elf_Internal_Rela *rel,
 			     const Elf_Internal_Rela *relend,
-			     struct elf_link_hash_entry *h)
+			     struct elf_link_hash_entry *h,
+			     unsigned long r_symndx)
 {
   unsigned int from_type = *r_type;
   unsigned int to_type = from_type;
@@ -1007,15 +1008,27 @@ elf64_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 					      from_type, rel, relend))
     {
       reloc_howto_type *from, *to;
+      const char *name;
 
       from = elf64_x86_64_rtype_to_howto (abfd, from_type);
       to = elf64_x86_64_rtype_to_howto (abfd, to_type);
 
+      if (h)
+	name = h->root.root.string;
+      else
+	{
+	  Elf_Internal_Sym *isym;
+	  struct elf64_x86_64_link_hash_table *htab;
+	  htab = elf64_x86_64_hash_table (info);
+	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+					abfd, r_symndx);
+	  name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
+	}
+
       (*_bfd_error_handler)
 	(_("%B: TLS transition from %s to %s against `%s' at 0x%lx "
 	   "in section `%A' failed"),
-	 abfd, sec, from->name, to->name,
-	 h ? h->root.root.string : "a local symbol",
+	 abfd, sec, from->name, to->name, name,
 	 (unsigned long) rel->r_offset);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -1058,6 +1071,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       unsigned int r_type;
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
+      Elf_Internal_Sym *isym;
+      const char *name;
 
       r_symndx = ELF64_R_SYM (rel->r_info);
       r_type = ELF64_R_TYPE (rel->r_info);
@@ -1072,8 +1087,6 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  Elf_Internal_Sym *isym;
-
 	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
@@ -1099,6 +1112,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
       else
 	{
+	  isym = NULL;
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
@@ -1147,13 +1161,16 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      switch (r_type)
 		{
 		default:
+		  if (h->root.root.string)
+		    name = h->root.root.string;
+		  else
+		    name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
+					     NULL);
 		  (*_bfd_error_handler)
 		    (_("%B: relocation %s against STT_GNU_IFUNC "
 		       "symbol `%s' isn't handled by %s"), abfd,
 		     x86_64_elf_howto_table[r_type].name,
-		     (h->root.root.string
-		      ? h->root.root.string : "a local symbol"),
-		     __FUNCTION__);
+		     name, __FUNCTION__);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 
@@ -1203,7 +1220,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (! elf64_x86_64_tls_transition (info, abfd, sec, NULL,
 					 symtab_hdr, sym_hashes,
 					 &r_type, GOT_UNKNOWN,
-					 rel, rel_end, h))
+					 rel, rel_end, h, r_symndx))
 	return FALSE;
 
       switch (r_type)
@@ -1215,11 +1232,15 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_TPOFF32:
 	  if (info->shared)
 	    {
+	      if (h->root.root.string)
+		name = h->root.root.string;
+	      else
+		name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
+					 NULL);
 	      (*_bfd_error_handler)
 		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
 		 abfd,
-		 x86_64_elf_howto_table[r_type].name,
-		 (h) ? h->root.root.string : "a local symbol");
+		 x86_64_elf_howto_table[r_type].name, name);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -1306,9 +1327,14 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  tls_type |= old_tls_type;
 		else
 		  {
+		    if (h->root.root.string)
+		      name = h->root.root.string;
+		    else
+		      name = bfd_elf_sym_name (abfd, symtab_hdr,
+					       isym, NULL);
 		    (*_bfd_error_handler)
 		      (_("%B: '%s' accessed both as normal and thread local symbol"),
-		       abfd, h ? h->root.root.string : "<local>");
+		       abfd, name);
 		    return FALSE;
 		  }
 	      }
@@ -1376,11 +1402,13 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (sec->flags & SEC_READONLY) != 0)
 	    {
+	      if (h->root.root.string)
+		name = h->root.root.string;
+	      else
+		name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
 	      (*_bfd_error_handler)
 		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
-		 abfd,
-		 x86_64_elf_howto_table[r_type].name,
-		 (h) ? h->root.root.string : "a local symbol");
+		 abfd, x86_64_elf_howto_table[r_type].name, name);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
@@ -1612,7 +1640,7 @@ elf64_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
       if (! elf64_x86_64_tls_transition (info, abfd, sec, NULL,
 					 symtab_hdr, sym_hashes,
 					 &r_type, GOT_UNKNOWN,
-					 rel, relend, h))
+					 rel, relend, h, r_symndx))
 	return FALSE;
 
       switch (r_type)
@@ -2627,6 +2655,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	{
 	  asection *plt;
 	  bfd_vma plt_index;
+	  const char *name;
 
 	  if ((input_section->flags & SEC_ALLOC) == 0
 	      || h->plt.offset == (bfd_vma) -1)
@@ -2640,13 +2669,16 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  switch (r_type)
 	    {
 	    default:
+	      if (h->root.root.string)
+		name = h->root.root.string;
+	      else
+		name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
+					 NULL);
 	      (*_bfd_error_handler)
 		(_("%B: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' isn't handled by %s"), input_bfd,
 		 x86_64_elf_howto_table[r_type].name,
-		 (h->root.root.string
-		  ? h->root.root.string : "a local symbol"),
-		 __FUNCTION__);
+		 name, __FUNCTION__);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 
@@ -2658,13 +2690,16 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    case R_X86_64_64: 
 	      if (rel->r_addend != 0)
 		{
+		  if (h->root.root.string)
+		    name = h->root.root.string;
+		  else
+		    name = bfd_elf_sym_name (input_bfd, symtab_hdr,
+					     sym, NULL);
 		  (*_bfd_error_handler)
 		    (_("%B: relocation %s against STT_GNU_IFUNC "
 		       "symbol `%s' has non-zero addend: %d"),
 		     input_bfd, x86_64_elf_howto_table[r_type].name,
-		     (h->root.root.string
-		      ? h->root.root.string : "a local symbol"),
-		     rel->r_addend);
+		     name, rel->r_addend);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}
@@ -3209,7 +3244,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 					     input_section, contents,
 					     symtab_hdr, sym_hashes,
 					     &r_type, tls_type, rel,
-					     relend, h))
+					     relend, h, r_symndx))
 	    return FALSE;
 
 	  if (r_type == R_X86_64_TPOFF32)
@@ -3543,7 +3578,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 					     input_section, contents,
 					     symtab_hdr, sym_hashes,
 					     &r_type, GOT_UNKNOWN,
-					     rel, relend, h))
+					     rel, relend, h, r_symndx))
 	    return FALSE;
 
 	  if (r_type != R_X86_64_TLSLD)

@@ -1,3 +1,19 @@
+2009-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_tls_transition): Add a parameter,
+	r_symndx.  Report local symbol name on error.
+	(elf_i386_check_relocs): Updated.  Report local symbol name on
+	error.
+	(elf_i386_gc_sweep_hook): Updated.
+	(elf_i386_relocate_section): Likewise.
+
+	* elf64-x86-64.c (elf64_x86_64_tls_transition): Add a parameter,
+	r_symndx.  Report local symbol name on error.
+	(elf64_x86_64_check_relocs): Updated.  Report local symbol name
+	on error.
+	(elf64_x86_64_gc_sweep_hook): Updated.
+	(elf64_x86_64_relocate_section): Likewise.
+
 2009-06-19  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_print_private_header): Fix format character.

@@ -1,3 +1,12 @@
+2009-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp: Run tlsgd2.
+
+	* ld-i386/tlsgd2.d: New.
+	* ld-i386/tlsgd2.s: Likewise.
+
+	* ld-x86-64/tlsgd3.d: Updated.
+
 2009-06-18  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-pe/pe-run.exp (proc test_direct_link_dll):  Always pass

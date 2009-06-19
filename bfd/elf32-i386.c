@@ -1149,7 +1149,8 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 			 unsigned int *r_type, int tls_type,
 			 const Elf_Internal_Rela *rel,
 			 const Elf_Internal_Rela *relend,
-			 struct elf_link_hash_entry *h)
+			 struct elf_link_hash_entry *h,
+			 unsigned long r_symndx)
 {
   unsigned int from_type = *r_type;
   unsigned int to_type = from_type;
@@ -1224,15 +1225,27 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 					  from_type, rel, relend))
     {
       reloc_howto_type *from, *to;
+      const char *name;
 
       from = elf_i386_rtype_to_howto (abfd, from_type);
       to = elf_i386_rtype_to_howto (abfd, to_type);
 
+      if (h)
+	name = h->root.root.string;
+      else
+	{
+	  Elf_Internal_Sym *isym;
+	  struct elf_i386_link_hash_table *htab;
+	  htab = elf_i386_hash_table (info);
+	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+					abfd, r_symndx);
+	  name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
+	}
+
       (*_bfd_error_handler)
 	(_("%B: TLS transition from %s to %s against `%s' at 0x%lx "
 	   "in section `%A' failed"),
-	 abfd, sec, from->name, to->name,
-	 h ? h->root.root.string : "a local symbol",
+	 abfd, sec, from->name, to->name, name,
 	 (unsigned long) rel->r_offset);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
@@ -1276,6 +1289,8 @@ elf_i386_check_relocs (bfd *abfd,
       unsigned int r_type;
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
+      Elf_Internal_Sym *isym;
+      const char *name;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -1291,8 +1306,6 @@ elf_i386_check_relocs (bfd *abfd,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  Elf_Internal_Sym *isym;
-
 	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
@@ -1318,6 +1331,7 @@ elf_i386_check_relocs (bfd *abfd,
 	}
       else
 	{
+	  isym = NULL;
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
@@ -1363,13 +1377,16 @@ elf_i386_check_relocs (bfd *abfd,
 	      switch (r_type)
 		{
 		default:
+		  if (h->root.root.string)
+		    name = h->root.root.string;
+		  else
+		    name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
+					     NULL);
 		  (*_bfd_error_handler)
 		    (_("%B: relocation %s against STT_GNU_IFUNC "
 		       "symbol `%s' isn't handled by %s"), abfd,
 		     elf_howto_table[r_type].name,
-		     (h->root.root.string
-		      ? h->root.root.string : "a local symbol"),
-		     __FUNCTION__);
+		     name, __FUNCTION__);
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 
@@ -1413,7 +1430,7 @@ elf_i386_check_relocs (bfd *abfd,
       if (! elf_i386_tls_transition (info, abfd, sec, NULL,
 				     symtab_hdr, sym_hashes,
 				     &r_type, GOT_UNKNOWN,
-				     rel, rel_end, h)) 
+				     rel, rel_end, h, r_symndx)) 
 	return FALSE;
 
       switch (r_type)
@@ -1521,11 +1538,15 @@ elf_i386_check_relocs (bfd *abfd,
 		  tls_type |= old_tls_type;
 		else
 		  {
+		    if (h->root.root.string)
+		      name = h->root.root.string;
+		    else
+		      name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
+					     NULL);
 		    (*_bfd_error_handler)
 		      (_("%B: `%s' accessed both as normal and "
 			 "thread local symbol"),
-		       abfd,
-		       h ? h->root.root.string : "<local>");
+		       abfd, name);
 		    return FALSE;
 		  }
 	      }
@@ -1781,7 +1802,7 @@ elf_i386_gc_sweep_hook (bfd *abfd,
       if (! elf_i386_tls_transition (info, abfd, sec, NULL,
 				     symtab_hdr, sym_hashes,
 				     &r_type, GOT_UNKNOWN,
-				     rel, relend, h)) 
+				     rel, relend, h, r_symndx)) 
 	return FALSE;
 
       switch (r_type)
@@ -2914,6 +2935,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	{
 	  asection *plt, *gotplt, *base_got;
 	  bfd_vma plt_index;
+	  const char *name;
 
 	  if ((input_section->flags & SEC_ALLOC) == 0
 	      || h->plt.offset == (bfd_vma) -1)
@@ -2937,13 +2959,16 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  switch (r_type)
 	    {
 	    default:
+	      if (h->root.root.string)
+		name = h->root.root.string;
+	      else
+		name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
+					 NULL);
 	      (*_bfd_error_handler)
 		(_("%B: relocation %s against STT_GNU_IFUNC "
 		   "symbol `%s' isn't handled by %s"), input_bfd,
 		 elf_howto_table[r_type].name,
-		 (h->root.root.string
-		  ? h->root.root.string : "a local symbol"),
-		 __FUNCTION__);
+		 name, __FUNCTION__);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 
@@ -3375,7 +3400,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 					 input_section, contents,
 					 symtab_hdr, sym_hashes,
 					 &r_type, tls_type, rel,
-					 relend, h))
+					 relend, h, r_symndx))
 	    return FALSE;
 
 	  if (r_type == R_386_TLS_LE_32)
@@ -3844,7 +3869,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 					 input_section, contents,
 					 symtab_hdr, sym_hashes,
 					 &r_type, GOT_UNKNOWN, rel,
-					 relend, h))
+					 relend, h, r_symndx))
 	    return FALSE;
 
 	  if (r_type != R_386_TLS_LDM)
