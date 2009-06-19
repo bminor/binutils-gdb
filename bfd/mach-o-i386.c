@@ -50,7 +50,7 @@ bfd_mach_o_i386_mkobject (bfd *abfd)
   if (!bfd_mach_o_mkobject_init (abfd))
     return FALSE;
 
-  mdata = abfd->tdata.mach_o_data;
+  mdata = bfd_mach_o_get_data (abfd);
   mdata->header.magic = BFD_MACH_O_MH_MAGIC;
   mdata->header.cputype = BFD_MACH_O_CPU_TYPE_I386;
   mdata->header.cpusubtype = BFD_MACH_O_CPU_SUBTYPE_X86_ALL;

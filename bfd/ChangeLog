@@ -1,3 +1,104 @@
+2009-06-19  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_scan_read_symtab_symbols): Add prototype.
+	(bfd_mach_o_version): Use bfd_mach_o_get_data instead of direct access.
+	(bfd_mach_o_valid): Ditto.
+	(bfd_mach_o_wide_p): Ditto.
+	(bfd_mach_o_canonicalize_reloc): Ditto.
+	(bfd_mach_o_build_commands): Ditto.
+	(bfd_mach_o_scan_read_thread): Ditto.
+	(bfd_mach_o_flatten_sections): Ditto.
+	(bfd_mach_o_scan_start_address): Ditto.
+	(bfd_mach_o_lookup_section): Ditto.
+	(bfd_mach_o_core_fetch_environment): Ditto.
+	(bfd_mach_o_write_contents): Ditto.  Handle reexport_dylib.
+	(bfd_mach_o_scan_write_relocs): Adjust for bfd_mach_o_get_data.
+	(bfd_mach_o_scan_write_symtab): Ditto.
+	Use macros instead of hard-coded values.
+	(bfd_mach_o_scan_read_symtab_symbol): Make the function static.
+	Use bfd_mach_o_get_data instead of direct access.  Use macros
+	instead of hard-coded values.
+	(bfd_mach_o_scan_read_symtab_strtab): Make the function static.
+	Remove sym argument and get section from mdata.
+	Move code into the else branch.
+	(bfd_mach_o_scan_read_symtab_symbols): Make the function static.
+	Remove sym argument and get section from mdata.  Adjust code.
+	(bfd_mach_o_scan_read_dylib): Move assertion into the created
+	switch (which replaces consecutive if statements).
+	(bfd_mach_o_scan_read_dysymtab): Rename seg to cmd.  Load
+	module table, table of content, indirect symbols and external
+	referenced symbols.
+	(bfd_mach_o_scan_read_symtab): Renames seg to symtab.  Set symtab
+	field.
+	(bfd_mach_o_scan_read_linkedit): New function.
+	(bfd_mach_o_scan_read_str): Ditto.
+	(bfd_mach_o_count_symbols): Simplify the code by using the symtab
+	field of mdata.
+	(bfd_mach_o_get_symtab_upper_bound): Remove check as
+	bfd_mach_o_count_symbols never returns an error.
+	(bfd_mach_o_canonicalize_symtab): Simplify the code by using the
+	symtab field (there might be only one symtab).
+	(bfd_mach_o_scan_read_command): Handle reexported dylib.
+	Handle sub frameworks, sub umbrella, sub library and sub client.
+	Read code signature and segment split info commands.
+	(bfd_mach_o_scan): Reindent.
+	(bfd_mach_o_xlat_name): New type.
+	(bfd_mach_o_print_flags): New function.
+	(bfd_mach_o_get_name): Ditto.
+	(bfd_mach_o_cpu_name): New variable.
+	(bfd_mach_o_filetype_name, bfd_mach_o_header_flags_name)
+	(bfd_mach_o_section_type_name)
+	(bfd_mach_o_section_attribute_name)
+	(bfd_mach_o_load_command_name): New variables.
+	(bfd_mach_o_print_private_header): New function.
+	(bfd_mach_o_print_section_map): New function extracted from
+	bfd_mach_o_print_private_bfd_data.
+	(bfd_mach_o_print_section): Ditto.  Print more infos.
+	(bfd_mach_o_print_segment): Ditto.
+	(bfd_mach_o_print_dysymtab): Ditto.
+	(bfd_mach_o_bfd_print_private_bfd_data): Reworked.  Handle
+	load weak dylib, reexport dylib and id dylib.
+	Handle code signature and segment_split info.
+	Handle sub frameworks, sub umbrella, sub library and sub client.
+	(bfd_mach_o_section_get_nbr_indirect): New function.
+
+	* mach-o.h (BFD_MACH_O_REFERENCE_MASK): New macro.  Add comment.
+	(bfd_mach_o_header_flags): New enum to define header flags.
+	(bfd_mach_o_section_attribute): New enum to replace ...
+	(BFD_MACH_O_S_ATTR_LOC_RELOC, BFD_MACH_O_S_ATTR_EXT_RELOC,
+	BFD_MACH_O_S_ATTR_SOME_INSTRUCTIONS, BFD_MACH_O_S_ATTR_DEBUG,
+	BFD_MACH_O_S_SELF_MODIFYING_CODE, BFD_MACH_O_S_ATTR_LIVE_SUPPORT,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, BFD_MACH_O_S_ATTR_STRIP_STATIC_SYMS,
+	BFD_MACH_O_S_ATTR_NO_TOC, BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS): ...
+	these removed macros.
+	(BFD_MACH_O_NLIST_SIZE, BFD_MACH_O_NLIST_64_SIZE): New macros.
+	(bfd_mach_o_dylib_module): New type.
+	(BFD_MACH_O_DYLIB_MODULE_SIZE, BFD_MACH_O_DYLIB_MODULE_64_SIZE): New
+	macros.
+	(bfd_mach_o_dylib_table_of_content): New type.
+	(BFD_MACH_O_TABLE_OF_CONTENT_SIZE): New macro.
+	(bfd_mach_o_dylib_reference): New type.
+	(BFD_MACH_O_REFERENCE_SIZE): New macro.
+	(bfd_mach_o_dysymtab_command): Add fields for loaded and decoded
+	modules, toc, references and indirect syms.
+	(BFD_MACH_O_INDIRECT_SYMBOL_SIZE): New macro.
+	(bfd_mach_o_dylinker_command): Remove cmd and cmdsize fields (were
+	unused).  Add comment.
+	(bfd_mach_o_dylib_command): Ditto.
+	(bfd_mach_o_prebound_dylib_command): Ditto.
+	(bfd_mach_o_linkedit_command): New type.
+	(bfd_mach_o_str_command): New type.
+	(bfd_mach_o_load_command): Add linkedit and str fields.
+	(mach_o_data_struct): Add symtab field.
+	(bfd_get_mach_o_data): Renamed to ...
+	(bfd_mach_o_get_data): ... this new macro.
+	(bfd_mach_o_scan_read_symtab_symbol,
+	bfd_mach_o_scan_read_symtab_strtab,
+	bfd_mach_o_scan_read_symtab_symbols): Prototypes removed.
+
+	* mach-o-i386.c (bfd_mach_o_i386_mkobject): Use bfd_mach_o_get_data
+	instead of direct access.
+
 2009-06-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Allow local symbols for
@@ -366,7 +467,7 @@
 	Adjust for bfd_mach_o_asymbol.  Move code to convert from BFD to
 	Mach-O to ...
 	(bfd_mach_o_mangle_symbols): ... this new function.
-	(bfd_mach_o_write_contents): Be sure to habe load commands built.
+	(bfd_mach_o_write_contents): Be sure to have load commands built.
 	Call bfd_mach_o_mangle_symbols.
 	(bfd_mach_o_build_commands): Adjust for filelen field.
 	Use FILE_ALIGN macro.  Clear section file offset if section is empty.
