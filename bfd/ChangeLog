@@ -1,5 +1,9 @@
 2009-06-19  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_print_private_header): Fix format character.
+
+2009-06-19  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_scan_read_symtab_symbols): Add prototype.
 	(bfd_mach_o_version): Use bfd_mach_o_get_data instead of direct access.
 	(bfd_mach_o_valid): Ditto.

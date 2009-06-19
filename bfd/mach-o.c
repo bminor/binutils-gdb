@@ -3155,7 +3155,7 @@ bfd_mach_o_print_private_header (bfd *abfd, FILE *file)
   fprintf (file, _(" flags     : %08lx ("), h->flags);
   bfd_mach_o_print_flags (bfd_mach_o_header_flags_name, h->flags, file);
   fprintf (file, _(")\n"));
-  fprintf (file, _(" reserved  : %08lx\n"), h->reserved);
+  fprintf (file, _(" reserved  : %08x\n"), h->reserved);
 }
 
 static void
