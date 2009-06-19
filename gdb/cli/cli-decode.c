@@ -779,8 +779,11 @@ apropos_cmd (struct ui_file *stream, struct cmd_list_element *commandlist,
 				      0 /* don't recurse */, stream);
 	    }
 	}
-      /* Check if this command has subcommands */
-      if (c->prefixlist != NULL)
+      /* Check if this command has subcommands and is not an abbreviation.
+	 We skip listing subcommands of abbreviations in order to avoid
+	 duplicates in the output.
+       */
+      if (c->prefixlist != NULL && !c->abbrev_flag)
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.
