@@ -1,3 +1,11 @@
+2009-06-20  Aleksandar Ristovski  <aristovski@qnx.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* solib-svr4.c (IGNORE_FIRST_LINK_MAP_ENTRY): Avoid dereferencing
+	NULL pointer.
+	(scan_dyntag): Skip if input bfd isn't elf flavoured.
+	(locate_base): Call elf_locate_base even without an exec_bfd.
+
 2009-06-19  Samuel Bronson  <naesten@gmail.com>
 
 	PR cli/9903:

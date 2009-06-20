@@ -266,7 +266,7 @@ IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 
   /* Assume that everything is a library if the dynamic loader was loaded
      late by a static executable.  */
-  if (bfd_get_section_by_name (exec_bfd, ".dynamic") == NULL)
+  if (exec_bfd && bfd_get_section_by_name (exec_bfd, ".dynamic") == NULL)
     return 0;
 
   return extract_typed_address (so->lm_info->lm + lmo->l_prev_offset,
@@ -600,9 +600,13 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
 
   if (abfd == NULL)
     return 0;
+
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return 0;
+
   arch_size = bfd_get_arch_size (abfd);
   if (arch_size == -1)
-   return 0;
+    return 0;
 
   /* Find the start address of the .dynamic section.  */
   sect = bfd_get_section_by_name (abfd, ".dynamic");
@@ -825,11 +829,7 @@ locate_base (struct svr4_info *info)
      though if we don't have some link map offsets to work with.  */
 
   if (info->debug_base == 0 && svr4_have_link_map_offsets ())
-    {
-      if (exec_bfd != NULL
-	  && bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
-	info->debug_base = elf_locate_base ();
-    }
+    info->debug_base = elf_locate_base ();
   return info->debug_base;
 }
 
