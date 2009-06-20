@@ -1,3 +1,9 @@
+2009-06-20  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 10302
+	* doc/as.texinfo (Section <ELF "M,S" flag>): Clarify tail merge.
+
+=======
 2009-06-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (md_gather_operands): Accept an instruction

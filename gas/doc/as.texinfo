@@ -5819,7 +5819,10 @@ constants, each @var{entsize} octets long. Sections with both @code{M} and
 @code{S} must contain zero terminated strings where each character is
 @var{entsize} bytes long. The linker may remove duplicates within sections with
 the same name, same entity size and same flags.  @var{entsize} must be an
-absolute expression.
+absolute expression.  For sections with both @code{M} and @code{S}, a string
+which is a suffix of a larger string is considered a duplicate.  Thus
+@code{"def"} will be merged with @code{"abcdef"};  A reference to the first
+@code{"def"} will be changed to a reference to @code{"abcdef"+3}.
 
 If @var{flags} contains the @code{G} symbol then the @var{type} argument must
 be present along with an additional field like this:
