@@ -1,3 +1,9 @@
+2009-06-20  Doug Evans  <dje@sebabeach.org>
+
+	* mloop.in: Add missing # comment marker.
+	* mloop2.in: Ditto.
+	* mloopx.in: Ditto.
+
 2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure: Regenerate to track ../common/common.m4 changes.
