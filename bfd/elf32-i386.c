@@ -1538,7 +1538,7 @@ elf_i386_check_relocs (bfd *abfd,
 		  tls_type |= old_tls_type;
 		else
 		  {
-		    if (h->root.root.string)
+		    if (h)
 		      name = h->root.root.string;
 		    else
 		      name = bfd_elf_sym_name (abfd, symtab_hdr, isym,

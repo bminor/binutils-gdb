@@ -1232,7 +1232,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_TPOFF32:
 	  if (info->shared)
 	    {
-	      if (h->root.root.string)
+	      if (h)
 		name = h->root.root.string;
 	      else
 		name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
@@ -1327,7 +1327,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  tls_type |= old_tls_type;
 		else
 		  {
-		    if (h->root.root.string)
+		    if (h)
 		      name = h->root.root.string;
 		    else
 		      name = bfd_elf_sym_name (abfd, symtab_hdr,
@@ -1402,7 +1402,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (sec->flags & SEC_READONLY) != 0)
 	    {
-	      if (h->root.root.string)
+	      if (h)
 		name = h->root.root.string;
 	      else
 		name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);

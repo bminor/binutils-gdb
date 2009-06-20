@@ -1,5 +1,11 @@
 2009-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_check_relocs): Properly check local
+	symbol on error.
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Likewise.
+
+2009-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_tls_transition): Add a parameter,
 	r_symndx.  Report local symbol name on error.
 	(elf_i386_check_relocs): Updated.  Report local symbol name on
