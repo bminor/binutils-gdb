@@ -1,5 +1,10 @@
 2009-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elflink.c (elf_link_add_object_symbols): Avoid warning
+	from -Wjump-misses-init in gcc 4.5.0.
+
+2009-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_check_relocs): Properly check local
 	symbol on error.
 	* elf64-x86-64.c (elf64_x86_64_check_relocs): Likewise.

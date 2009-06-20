@@ -3549,7 +3549,11 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  unsigned long shlink;
 
 	  if (!bfd_malloc_and_get_section (abfd, s, &dynbuf))
-	    goto error_free_dyn;
+	    {
+error_free_dyn:
+	      free (dynbuf);
+	      goto error_return;
+	    }
 
 	  elfsec = _bfd_elf_section_from_bfd_section (abfd, s);
 	  if (elfsec == SHN_BAD)
@@ -3633,11 +3637,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  amt = strlen (fnm) + 1;
 		  anm = bfd_alloc (abfd, amt);
 		  if (anm == NULL)
-		    {
-		    error_free_dyn:
-		      free (dynbuf);
-		      goto error_return;
-		    }
+		    goto error_free_dyn;
 		  memcpy (anm, fnm, amt);
 		  n->name = anm;
 		  n->by = abfd;
