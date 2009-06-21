@@ -287,8 +287,9 @@ extern int stop_stack_dummy;
 
 extern int stopped_by_random_signal;
 
-/* 1 means step over all subroutine calls.
-   -1 means step over calls to undebuggable functions.  */
+/* STEP_OVER_ALL means step over all subroutine calls.
+   STEP_OVER_UNDEBUGGABLE means step over calls to undebuggable functions.
+   STEP_OVER_NONE means don't step over any subroutine calls.  */
 
 enum step_over_calls_kind
   {

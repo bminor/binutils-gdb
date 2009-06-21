@@ -1,3 +1,7 @@
+2009-06-21  Michael Snyder  <msnyder@vmware.com>
+
+	* inferior.h: Update ancient comment.
+
 2009-06-20  Aleksandar Ristovski  <aristovski@qnx.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
