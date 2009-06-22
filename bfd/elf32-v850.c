@@ -1680,7 +1680,7 @@ v850_elf_relocate_section (bfd *output_bfd,
 		name = bfd_section_name (input_bfd, sec);
 	    }
 
-	  switch (r)
+	  switch ((int) r)
 	    {
 	    case bfd_reloc_overflow:
 	      if (! ((*info->callbacks->reloc_overflow)
