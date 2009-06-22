@@ -1,3 +1,8 @@
+2009-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR server/10306
+	* remote.c (getpkt_or_notif_sane_1): Initialize val to -1.
+
 2009-06-21  Michael Snyder  <msnyder@vmware.com>
 
 	* inferior.h: Update ancient comment.

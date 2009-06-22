@@ -6380,7 +6380,7 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
   int c;
   int tries;
   int timeout;
-  int val;
+  int val = -1;
 
   /* We're reading a new response.  Make sure we don't look at a
      previously cached response.  */
