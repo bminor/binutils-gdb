@@ -1,4 +1,10 @@
-2009-05-07  Sami Wagiaalla  <swagiaal@redhat.com>
+2009-06-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/9988:
+	* buildsym.c (block_compar): New function.
+	(end_symtab): Replace the bubble sort by a qsort based code.
+
+2009-06-22  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* MAINTAINERS (Write After Approval): Add self.
 

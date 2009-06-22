@@ -899,6 +899,19 @@ watch_main_source_file_lossage (void)
     }
 }
 
+/* Helper function for qsort.  Parametes are `struct block *' pointers,
+   function sorts them in descending order by their BLOCK_START.  */
+
+static int
+block_compar (const void *ap, const void *bp)
+{
+  const struct block *a = *(const struct block **) ap;
+  const struct block *b = *(const struct block **) bp;
+
+  return ((BLOCK_START (b) > BLOCK_START (a))
+	  - (BLOCK_START (b) < BLOCK_START (a)));
+}
+
 /* Finish the symbol definitions for one main source file, close off
    all the lexical contexts for that file (creating struct block's for
    them), then make the struct symtab for that file and put it in the
@@ -952,32 +965,28 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
      OBJF_REORDERED is true, then sort the pending blocks.  */
   if ((objfile->flags & OBJF_REORDERED) && pending_blocks)
     {
-      /* FIXME!  Remove this horrid bubble sort and use merge sort!!! */
-      int swapped;
-      do
-	{
-	  struct pending_block *pb, *pbnext;
+      unsigned count = 0;
+      struct pending_block *pb;
+      struct block **barray, **bp;
+      struct cleanup *back_to;
 
-	  pb = pending_blocks;
-	  pbnext = pb->next;
-	  swapped = 0;
+      for (pb = pending_blocks; pb != NULL; pb = pb->next)
+	count++;
 
-	  while (pbnext)
-	    {
-	      /* swap blocks if unordered! */
+      barray = xmalloc (sizeof (*barray) * count);
+      back_to = make_cleanup (xfree, barray);
 
-	      if (BLOCK_START (pb->block) < BLOCK_START (pbnext->block))
-		{
-		  struct block *tmp = pb->block;
-		  pb->block = pbnext->block;
-		  pbnext->block = tmp;
-		  swapped = 1;
-		}
-	      pb = pbnext;
-	      pbnext = pbnext->next;
-	    }
-	}
-      while (swapped);
+      bp = barray;
+      for (pb = pending_blocks; pb != NULL; pb = pb->next)
+	*bp++ = pb->block;
+
+      qsort (barray, count, sizeof (*barray), block_compar);
+
+      bp = barray;
+      for (pb = pending_blocks; pb != NULL; pb = pb->next)
+	pb->block = *bp++;
+
+      do_cleanups (back_to);
     }
 
   /* Cleanup any undefined types that have been left hanging around
