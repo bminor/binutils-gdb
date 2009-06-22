@@ -6721,11 +6721,12 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 	{
 	  Elf_Internal_Rela *write_rel;
 	  bfd_byte *rptr, *wptr;
-	  bfd_byte *new_contents = NULL;
+	  bfd_byte *new_contents;
 	  bfd_boolean skip;
 	  long opd_ent_size;
 	  bfd_size_type amt;
 
+	  new_contents = NULL;
 	  amt = sec->size * sizeof (long) / 8;
 	  opd = &ppc64_elf_section_data (sec)->u.opd;
 	  opd->adjust = bfd_zalloc (obfd, amt);
