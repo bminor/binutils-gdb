@@ -5,6 +5,8 @@ _start:
 	mov	ip, sp
 	stmdb	sp!, {r11, ip, lr, pc}
 	bl	app_func
+	bl	lib_func1
+	bl	lib_func2
 	ldmia	sp, {r11, sp, lr}
 	bx lr
 
@@ -30,6 +32,7 @@ app_func:
 	mov	ip, sp
 	stmdb	sp!, {r11, ip, lr, pc}
 	bl	lib_func1
+	bl	lib_func2
 	ldmia	sp, {r11, sp, lr}
 	bx lr
 

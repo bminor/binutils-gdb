@@ -1,3 +1,12 @@
+2009-06-22  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (elf32_arm_size_stubs): Use PLT address as
+	destination for defined dynamic symbols when deciding whether to
+	insert a stub or not.
+	(allocate_dynrelocs): Make sure functions are not marked as Thumb
+	when actually accessed through a PLT, even when generating a
+	shared lib.
+
 2009-06-22  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_canonicalize_reloc): Append a sentinel to

@@ -25,10 +25,10 @@ Disassembly of section .text:
  .*:	e1a0c00d 	mov	ip, sp
  .*:	e92dd800 	push	{fp, ip, lr, pc}
  .*:	eb000008 	bl	.* <__app_func_veneer>
+ .*:	ebfffff8 	bl	.* <_start-0xc>
+ .*:	ebfffff4 	bl	.* <_start-0x18>
  .*:	e89d6800 	ldm	sp, {fp, sp, lr}
  .*:	e12fff1e 	bx	lr
- .*:	e1a00000 	nop			\(mov r0,r0\)
- .*:	e1a00000 	nop			\(mov r0,r0\)
  .*:	e1a00000 	nop			\(mov r0,r0\)
 
 .* <app_tfunc_close>:
@@ -49,10 +49,10 @@ Disassembly of section .far_arm:
 .* <app_func>:
  .*:	e1a0c00d 	mov	ip, sp
  .*:	e92dd800 	push	{fp, ip, lr, pc}
- .*:	eb000008 	bl	.* <__lib_func1_veneer>
+ .*:	eb00000a 	bl	.* <__lib_func1_veneer>
+ .*:	eb000007 	bl	.* <__lib_func2_veneer>
  .*:	e89d6800 	ldm	sp, {fp, sp, lr}
  .*:	e12fff1e 	bx	lr
- .*:	e1a00000 	nop			\(mov r0,r0\)
  .*:	e1a00000 	nop			\(mov r0,r0\)
  .*:	e1a00000 	nop			\(mov r0,r0\)
 
@@ -62,8 +62,11 @@ Disassembly of section .far_arm:
  .*:	e1a00000 	nop			\(mov r0,r0\)
  .*:	e1a00000 	nop			\(mov r0,r0\)
 
+.* <__lib_func2_veneer>:
+ .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; 2100034 <__lib_func2_veneer\+0x4>
+ .*:	00008218 	.word	0x00008218
 .* <__lib_func1_veneer>:
- .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; 2100034 <__lib_func1_veneer\+0x4>
+ .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; 210003c <__lib_func1_veneer\+0x4>
  .*:	00008224 	.word	0x00008224
 
 Disassembly of section .far_thumb:

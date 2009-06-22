@@ -14,6 +14,8 @@ lib_func1:
 	bl	app_func
 	.weak	app_func_weak
 	bl	app_func_weak
+	bl	lib_func3
+	bl	lib_func4
 	ldmia	sp, {r11, sp, lr}
 	bx lr
 	.size lib_func1, . - lib_func1
@@ -27,5 +29,7 @@ lib_func1:
 lib_func2:
 	bl	app_func
 	bl	app_func_weak
+	bl	lib_func3
+	bl	lib_func4
 	bx lr
 	.size lib_func2, . - lib_func2

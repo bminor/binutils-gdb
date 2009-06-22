@@ -1,3 +1,13 @@
+2009-06-22  Christophe Lyon  <christophe.lyon@st.com>
+
+	ld/testsuite:
+	* ld-arm/farcall-mixed-app.s: Add new references to check more
+	modes switching.
+	* ld-arm/farcall-mixed-lib1.s: Likewise.
+	* ld-arm/farcall-mixed-app-v5.d: Update expected result.
+	* farcall-mixed-app.d: Likewise.
+	* ld-arm/farcall-mixed-lib.d: Likewise.
+
 2009-06-22  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-pe/pe-run.exp (proc test_direct_link_dll):  Fix incorrect

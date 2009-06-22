@@ -4361,7 +4361,25 @@ elf32_arm_size_stubs (bfd *output_bfd,
 			{
 			  sym_sec = hash->root.root.u.def.section;
 			  sym_value = hash->root.root.u.def.value;
-			  if (sym_sec->output_section != NULL)
+
+			  struct elf32_arm_link_hash_table *globals =
+						  elf32_arm_hash_table (info);
+
+			  /* For a destination in a shared library,
+			     use the PLT stub as target address to
+			     decide whether a branch stub is
+			     needed.  */
+			  if (globals->splt != NULL && hash != NULL
+			      && hash->root.plt.offset != (bfd_vma) -1)
+			    {
+			      sym_sec = globals->splt;
+			      sym_value = hash->root.plt.offset;
+			      if (sym_sec->output_section != NULL)
+				destination = (sym_value
+					       + sym_sec->output_offset
+					       + sym_sec->output_section->vma);
+			    }
+			  else if (sym_sec->output_section != NULL)
 			    destination = (sym_value + irela->r_addend
 					   + sym_sec->output_offset
 					   + sym_sec->output_section->vma);
@@ -11277,13 +11295,13 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    {
 	      h->root.u.def.section = s;
 	      h->root.u.def.value = h->plt.offset;
-
-	      /* Make sure the function is not marked as Thumb, in case
-		 it is the target of an ABS32 relocation, which will
-		 point to the PLT entry.  */
-	      if (ELF_ST_TYPE (h->type) == STT_ARM_TFUNC)
-		h->type = ELF_ST_INFO (ELF_ST_BIND (h->type), STT_FUNC);
 	    }
+
+	  /* Make sure the function is not marked as Thumb, in case
+	     it is the target of an ABS32 relocation, which will
+	     point to the PLT entry.  */
+	  if (ELF_ST_TYPE (h->type) == STT_ARM_TFUNC)
+	    h->type = ELF_ST_INFO (ELF_ST_BIND (h->type), STT_FUNC);
 
 	  /* Make room for this entry.  */
 	  s->size += htab->plt_entry_size;
