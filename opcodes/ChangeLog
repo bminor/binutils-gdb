@@ -1,3 +1,9 @@
+2009-06-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* score-dis.c (print_insn_score48, print_insn_score32): Move default
+	case label to proper lexical block.
+	* score7-dis.c (print_insn_score32): Likewise.
+
 2009-06-19  Martin Schwidefsky  <sschwidefsky@de.ibm.com>
 
 	* s390-opc.c (INSTR_RR_0R_OPT, INSTR_RX_0RRD_OPT, MASK_RR_0R_OPT,

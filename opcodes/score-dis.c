@@ -646,10 +646,9 @@ print_insn_score48 (struct disassemble_info *info, bfd_vma given)
                             abort ();
                           }
                         break;
-
-                    default:
-                        abort ();
                       }
+                    default:
+		      abort ();
                     }
                 }
               else
@@ -854,10 +853,9 @@ print_insn_score32 (bfd_vma pc, struct disassemble_info *info, long given)
                             abort ();
                           }
                         break;
-
-                    default:
-                        abort ();
                       }
+                    default:
+		      abort ();
                     }
                 }
               else
