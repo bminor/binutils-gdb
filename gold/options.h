@@ -896,19 +896,20 @@ class General_options
               NULL);
   DEFINE_bool(execstack, options::DASH_Z, '\0', false,
               N_("Mark output as requiring executable stack"), NULL);
-  DEFINE_uint64(max_page_size, options::DASH_Z, '\0', 0,
-                N_("Set maximum page size to SIZE"), N_("SIZE"));
-  DEFINE_bool(noexecstack, options::DASH_Z, '\0', false,
-              N_("Mark output as not requiring executable stack"), NULL);
   DEFINE_bool(initfirst, options::DASH_Z, '\0', false,
 	      N_("Mark DSO to be initialized first at runtime"),
 	      NULL);
   DEFINE_bool(interpose, options::DASH_Z, '\0', false,
 	      N_("Mark object to interpose all DSOs but executable"),
 	      NULL);
+  DEFINE_bool(lazy, options::DASH_Z, '\0', false,
+	      N_("Mark object for lazy runtime binding (default)"),
+	      NULL);
   DEFINE_bool(loadfltr, options::DASH_Z, '\0', false,
 	      N_("Mark object requiring immediate process"),
 	      NULL);
+  DEFINE_uint64(max_page_size, options::DASH_Z, '\0', 0,
+                N_("Set maximum page size to SIZE"), N_("SIZE"));
   DEFINE_bool(nodefaultlib, options::DASH_Z, '\0', false,
 	      N_("Mark object not to use default search paths"),
 	      NULL);
@@ -921,12 +922,17 @@ class General_options
   DEFINE_bool(nodump, options::DASH_Z, '\0', false,
 	      N_("Mark DSO not available to dldump"),
 	      NULL);
-  DEFINE_bool(relro, options::DASH_Z, '\0', false,
-	      N_("Where possible mark variables read-only after relocation"),
-	      N_("Don't mark variables read-only after relocation"));
+  DEFINE_bool(noexecstack, options::DASH_Z, '\0', false,
+              N_("Mark output as not requiring executable stack"), NULL);
+  DEFINE_bool(now, options::DASH_Z, '\0', false,
+	      N_("Mark object for immediate function binding"),
+	      NULL);
   DEFINE_bool(origin, options::DASH_Z, '\0', false,
 	      N_("Mark DSO to indicate that needs immediate $ORIGIN "
                  "processing at runtime"), NULL);
+  DEFINE_bool(relro, options::DASH_Z, '\0', false,
+	      N_("Where possible mark variables read-only after relocation"),
+	      N_("Don't mark variables read-only after relocation"));
 
  public:
   typedef options::Dir_list Dir_list;

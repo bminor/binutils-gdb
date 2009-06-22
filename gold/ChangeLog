@@ -1,3 +1,10 @@
+2009-06-22  Ian Lance Taylor  <ian@airs.com>
+
+	PR 10141
+	* options.h (class General_options): Add -z lazy and -z now.  Sort
+	-z options into alphabetical order.
+	* layout.cc (Layout::finish_dynamic_section): Handle -z now.
+
 2009-06-21  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::make_output_section): Call
