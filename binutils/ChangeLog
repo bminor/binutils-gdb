@@ -1,3 +1,12 @@
+2009-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (target_specific_reloc_handling): New function:
+	Processes relocs in a target specific manner.
+	(debug_apply_relocations): Use the new function.
+	* dwarf.c (display_debug_loc): End the dump with a blank line.
+	(struct debug_display): Enable reloc processing for .debug_aranges
+	and .debug_loc sections.
+
 2009-06-19  Nick Clifton  <nickc@redhat.com>
 
 	* ar.c (usage): Do not use #ifdef inside _("...).

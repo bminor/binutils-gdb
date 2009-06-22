@@ -3254,6 +3254,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
   if (start < section_end)
     warn (_("There are %ld unused bytes at the end of section %s\n"),
 	  (long) (section_end - start), section->name);
+  putchar ('\n');
   return 1;
 }
 
@@ -4865,7 +4866,7 @@ struct dwarf_section_display debug_displays[] =
   { { ".debug_abbrev",		".zdebug_abbrev",	NULL,	NULL,	0,	0 },
     display_debug_abbrev,		&do_debug_abbrevs,	0,	0 },
   { { ".debug_aranges",		".zdebug_aranges",	NULL,	NULL,	0,	0 },
-    display_debug_aranges,		&do_debug_aranges,	0,	0 },
+    display_debug_aranges,		&do_debug_aranges,	1,	0 },
   { { ".debug_frame",		".zdebug_frame",	NULL,	NULL,	0,	0 },
     display_debug_frames,		&do_debug_frames,	1,	0 },
   { { ".debug_info",		".zdebug_info",		NULL,	NULL,	0,	0 },
@@ -4881,7 +4882,7 @@ struct dwarf_section_display debug_displays[] =
   { { ".debug_str",		".zdebug_str",		NULL,	NULL,	0,	0 },
     display_debug_str,			&do_debug_str,		0,	0 },
   { { ".debug_loc",		".zdebug_loc",		NULL,	NULL,	0,	0 },
-    display_debug_loc,			&do_debug_loc,		0,	0 },
+    display_debug_loc,			&do_debug_loc,		1,	0 },
   { { ".debug_pubtypes",	".zdebug_pubtypes",	NULL,	NULL,	0,	0 },
     display_debug_pubnames,		&do_debug_pubnames,	0,	0 },
   { { ".debug_ranges",		".zdebug_ranges",	NULL,	NULL,	0,	0 },

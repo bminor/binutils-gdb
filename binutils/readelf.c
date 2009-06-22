@@ -6436,6 +6436,7 @@ get_ver_flags (unsigned int flags)
 }
 
 /* Display the contents of the version sections.  */
+
 static int
 process_version_sections (FILE * file)
 {
@@ -8337,6 +8338,54 @@ uncompress_section_contents (unsigned char ** buffer, dwarf_size_type * size)
 #endif  /* HAVE_ZLIB_H */
 }
 
+/* Check to see if the given reloc needs to be handled in a target specific
+   manner.  If so then process the reloc and return TRUE otherwise return
+   FALSE.  */
+
+static bfd_boolean
+target_specific_reloc_handling (Elf_Internal_Rela * reloc,
+				unsigned char *     start,
+				Elf_Internal_Sym *  symtab)
+{
+  unsigned int reloc_type = get_reloc_type (reloc->r_info);
+
+  switch (elf_header.e_machine)
+    {
+    case EM_MN10300:
+    case EM_CYGNUS_MN10300:
+      {
+	static Elf_Internal_Sym * saved_sym = NULL;
+
+	switch (reloc_type)
+	  {
+	  case 34: /* R_MN10300_ALIGN */
+	    return TRUE;
+	  case 33: /* R_MN10300_SYM_DIFF */
+	    saved_sym = symtab + get_reloc_symindex (reloc->r_info);
+	    return TRUE;
+	  case 1: /* R_MN10300_32 */
+	    if (saved_sym != NULL)
+	      {
+		bfd_vma value;
+
+		value = reloc->r_addend
+		  + (symtab[get_reloc_symindex (reloc->r_info)].st_value
+		     - saved_sym->st_value);
+
+		byte_put (start + reloc->r_offset, value, 4);
+
+		saved_sym = NULL;
+		return TRUE;
+	      }
+	    break;
+	  }
+	break;
+      }
+    }
+
+  return FALSE;
+}
+
 /* Apply relocations to a debug section.  */
 
 static void
@@ -8401,11 +8450,12 @@ debug_apply_relocations (void * file,
 
 	  reloc_type = get_reloc_type (rp->r_info);
 
-	  if (is_none_reloc (reloc_type))
+	  if (target_specific_reloc_handling (rp, start, symtab))
 	    continue;
-
-	  if (is_32bit_abs_reloc (reloc_type)
-	      || is_32bit_pcrel_reloc (reloc_type))
+	  else if (is_none_reloc (reloc_type))
+	    continue;
+	  else if (is_32bit_abs_reloc (reloc_type)
+		   || is_32bit_pcrel_reloc (reloc_type))
 	    reloc_size = 4;
 	  else if (is_64bit_abs_reloc (reloc_type)
 		   || is_64bit_pcrel_reloc (reloc_type))
