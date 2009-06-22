@@ -1,3 +1,7 @@
+2009-05-07  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2009-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_get_longjmp_target): New function.
