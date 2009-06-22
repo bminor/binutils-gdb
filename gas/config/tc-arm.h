@@ -82,7 +82,7 @@ struct fix;
 #define TC_FORCE_RELOCATION(FIX) arm_force_relocation (FIX)
 
 #define md_relax_frag(segment, fragp, stretch) \
-  arm_relax_frag(segment, fragp, stretch)
+  arm_relax_frag (segment, fragp, stretch)
 extern int arm_relax_frag (asection *, struct frag *, long);
 
 #define md_optimize_expr(l,o,r)		arm_optimize_expr (l, o, r)
@@ -123,6 +123,7 @@ bfd_boolean arm_is_eabi (void);
 
 #define ARM_IS_THUMB(s)		(ARM_GET_FLAG (s) & ARM_FLAG_THUMB)
 #define ARM_IS_INTERWORK(s)	(ARM_GET_FLAG (s) & ARM_FLAG_INTERWORK)
+
 #ifdef OBJ_ELF
 
 /* For ELF objects THUMB_IS_FUNC is inferred from
@@ -141,6 +142,7 @@ bfd_boolean arm_is_eabi (void);
 
 
 #else
+
 #define THUMB_IS_FUNC(s)	(ARM_GET_FLAG (s) & THUMB_FLAG_FUNC)
 #define ARM_IS_FUNC(s)          (!THUMB_IS_FUNC (s) \
                                 && (symbol_get_bfdsym (s)->flags & BSF_FUNCTION))
@@ -151,6 +153,7 @@ bfd_boolean arm_is_eabi (void);
 #define THUMB_SET_FUNC(s,t)     ((t) ? ARM_SET_FLAG (s, THUMB_FLAG_FUNC)    : ARM_RESET_FLAG (s, THUMB_FLAG_FUNC))
 
 void arm_copy_symbol_attributes (symbolS *, symbolS *);
+
 #ifndef TC_COPY_SYMBOL_ATTRIBUTES
 #define TC_COPY_SYMBOL_ATTRIBUTES(DEST, SRC) \
   (arm_copy_symbol_attributes (DEST, SRC))
@@ -212,6 +215,21 @@ void arm_copy_symbol_attributes (symbolS *, symbolS *);
 /* Registers are generally saved at negative offsets to the CFA.  */
 #define DWARF2_CIE_DATA_ALIGNMENT     (-4)
 
+/* State variables for IT block handling.  */
+enum it_state
+{
+  OUTSIDE_IT_BLOCK, MANUAL_IT_BLOCK, AUTOMATIC_IT_BLOCK
+};
+struct current_it
+{
+  int mask;
+  enum it_state state;
+  int cc;
+  int block_length;
+  char *insn;
+  int state_handled;
+};
+
 #ifdef OBJ_ELF
 # define obj_frob_symbol(sym, punt)	armelf_frob_symbol ((sym), & (punt))
 # define md_elf_section_change_hook()	arm_elf_change_section ()
@@ -239,6 +257,7 @@ struct arm_segment_info_type
 {
   enum mstate mapstate;
   unsigned int marked_pr_dependency;
+  struct current_it current_it;
 };
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */

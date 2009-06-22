@@ -265,6 +265,16 @@ static int thumb_mode = 0;
    tc_frag_data field of a frag.  */
 #define MODE_RECORDED (1 << 4)
 
+/* Specifies the intrinsic IT insn behavior mode.  */
+enum implicit_it_mode
+{
+  IMPLICIT_IT_MODE_NEVER  = 0x00,
+  IMPLICIT_IT_MODE_ARM    = 0x01,
+  IMPLICIT_IT_MODE_THUMB  = 0x02,
+  IMPLICIT_IT_MODE_ALWAYS = (IMPLICIT_IT_MODE_ARM | IMPLICIT_IT_MODE_THUMB)
+};
+static int implicit_it_mode = IMPLICIT_IT_MODE_ARM;
+
 /* If unified_syntax is true, we are processing the new unified
    ARM/Thumb syntax.  Important differences from the old ARM mode:
 
@@ -315,6 +325,18 @@ struct neon_type
   unsigned elems;
 };
 
+enum it_instruction_type
+{
+   OUTSIDE_IT_INSN,
+   INSIDE_IT_INSN,
+   INSIDE_IT_LAST_INSN,
+   IF_INSIDE_IT_LAST_INSN, /* Either outside or inside;
+                              if inside, should be the last one.  */
+   NEUTRAL_IT_INSN,        /* This could be either inside or outside,
+                              i.e. BKPT and NOP.  */
+   IT_INSN                 /* The IT insn has been parsed.  */
+};
+
 struct arm_it
 {
   const char *	error;
@@ -336,6 +358,8 @@ struct arm_it
     expressionS		     exp;
     int			     pc_rel;
   } reloc;
+
+  enum it_instruction_type it_insn_type;
 
   struct
   {
@@ -674,6 +698,9 @@ struct asm_opcode
 #define BAD_BRANCH	_("branch must be last instruction in IT block")
 #define BAD_NOT_IT	_("instruction not allowed in IT block")
 #define BAD_FPU		_("selected FPU does not support instruction")
+#define BAD_OUT_IT 	_("thumb conditional instruction should be in IT block")
+#define BAD_IT_COND	_("incorrect condition in IT block")
+#define BAD_IT_IT 	_("IT falling in the range of a previous IT block")
 
 static struct hash_control *arm_ops_hsh;
 static struct hash_control *arm_cond_hsh;
@@ -695,7 +722,7 @@ static struct hash_control *arm_barrier_opt_hsh;
 
 symbolS *  last_label_seen;
 static int label_is_thumb_function_name = FALSE;
-
+
 /* Literal pool structure.  Held on a per-section
    and per-sub-section basis.  */
 
@@ -714,10 +741,49 @@ typedef struct literal_pool
 /* Pointer to a linked list of literal pools.  */
 literal_pool * list_of_pools = NULL;
 
-/* State variables for IT block handling.  */
-static bfd_boolean current_it_mask = 0;
-static int current_cc;
-
+#ifdef OBJ_ELF
+#  define now_it seg_info (now_seg)->tc_segment_info_data.current_it
+#else
+static struct current_it now_it;
+#endif
+
+static inline int
+now_it_compatible (int cond)
+{
+  return (cond & ~1) == (now_it.cc & ~1);
+}
+
+static inline int
+conditional_insn (void)
+{
+  return inst.cond != COND_ALWAYS;
+}
+
+static int in_it_block (void);
+
+static int handle_it_state (void);
+
+static void force_automatic_it_block_close (void);
+
+#define set_it_insn_type(type)			\
+  do						\
+    {						\
+      inst.it_insn_type = type;			\
+      if (handle_it_state () == FAIL)		\
+        return;					\
+    }						\
+  while (0)
+
+#define set_it_insn_type_last()				\
+  do							\
+    {							\
+      if (inst.cond == COND_ALWAYS)			\
+        set_it_insn_type (IF_INSIDE_IT_LAST_INSN);	\
+      else						\
+        set_it_insn_type (INSIDE_IT_LAST_INSN);		\
+    }							\
+  while (0)
+
 /* Pure syntax.	 */
 
 /* This array holds the chars that always start a comment.  If the
@@ -1431,6 +1497,7 @@ parse_scalar (char **ccp, int elsize, struct neon_type_el *type)
 }
 
 /* Parse an ARM register list.  Returns the bitmask, or FAIL.  */
+
 static long
 parse_reg_list (char ** strp)
 {
@@ -5068,7 +5135,7 @@ parse_cond (char **str)
   n = 0;
   while (ISALPHA (*q) && n < 3)
     {
-      cond[n] = TOLOWER(*q);
+      cond[n] = TOLOWER (*q);
       q++;
       n++;
     }
@@ -5516,69 +5583,90 @@ parse_operands (char *str, const unsigned char *pattern)
   enum arm_reg_type rtype;
   parse_operand_result result;
 
-#define po_char_or_fail(chr) do {		\
-  if (skip_past_char (&str, chr) == FAIL)	\
-    goto bad_args;				\
-} while (0)
+#define po_char_or_fail(chr)			\
+  do						\
+    {						\
+      if (skip_past_char (&str, chr) == FAIL)	\
+        goto bad_args;				\
+    }						\
+  while (0)
 
-#define po_reg_or_fail(regtype) do {				\
-  val = arm_typed_reg_parse (&str, regtype, &rtype,		\
-  			     &inst.operands[i].vectype);	\
-  if (val == FAIL)						\
+#define po_reg_or_fail(regtype)					\
+  do								\
     {								\
-      first_error (_(reg_expected_msgs[regtype]));		\
-      goto failure;						\
+      val = arm_typed_reg_parse (& str, regtype, & rtype,	\
+  			         & inst.operands[i].vectype);	\
+      if (val == FAIL)						\
+        {							\
+          first_error (_(reg_expected_msgs[regtype]));		\
+          goto failure;						\
+        }							\
+      inst.operands[i].reg = val;				\
+      inst.operands[i].isreg = 1;				\
+      inst.operands[i].isquad = (rtype == REG_TYPE_NQ);		\
+      inst.operands[i].issingle = (rtype == REG_TYPE_VFS);	\
+      inst.operands[i].isvec = (rtype == REG_TYPE_VFS		\
+                             || rtype == REG_TYPE_VFD		\
+                             || rtype == REG_TYPE_NQ);		\
     }								\
-  inst.operands[i].reg = val;					\
-  inst.operands[i].isreg = 1;					\
-  inst.operands[i].isquad = (rtype == REG_TYPE_NQ);		\
-  inst.operands[i].issingle = (rtype == REG_TYPE_VFS);		\
-  inst.operands[i].isvec = (rtype == REG_TYPE_VFS		\
-                            || rtype == REG_TYPE_VFD		\
-                            || rtype == REG_TYPE_NQ);		\
-} while (0)
+  while (0)
 
-#define po_reg_or_goto(regtype, label) do {			\
-  val = arm_typed_reg_parse (&str, regtype, &rtype,		\
-                             &inst.operands[i].vectype);	\
-  if (val == FAIL)						\
-    goto label;							\
+#define po_reg_or_goto(regtype, label)				\
+  do								\
+    {								\
+      val = arm_typed_reg_parse (& str, regtype, & rtype,	\
+				 & inst.operands[i].vectype);	\
+      if (val == FAIL)						\
+	goto label;						\
 								\
-  inst.operands[i].reg = val;					\
-  inst.operands[i].isreg = 1;					\
-  inst.operands[i].isquad = (rtype == REG_TYPE_NQ);		\
-  inst.operands[i].issingle = (rtype == REG_TYPE_VFS);		\
-  inst.operands[i].isvec = (rtype == REG_TYPE_VFS		\
-                            || rtype == REG_TYPE_VFD		\
-                            || rtype == REG_TYPE_NQ);		\
-} while (0)
+      inst.operands[i].reg = val;				\
+      inst.operands[i].isreg = 1;				\
+      inst.operands[i].isquad = (rtype == REG_TYPE_NQ);		\
+      inst.operands[i].issingle = (rtype == REG_TYPE_VFS);	\
+      inst.operands[i].isvec = (rtype == REG_TYPE_VFS		\
+                             || rtype == REG_TYPE_VFD		\
+			     || rtype == REG_TYPE_NQ);		\
+    }								\
+  while (0)
 
-#define po_imm_or_fail(min, max, popt) do {			\
-  if (parse_immediate (&str, &val, min, max, popt) == FAIL)	\
-    goto failure;						\
-  inst.operands[i].imm = val;					\
-} while (0)
+#define po_imm_or_fail(min, max, popt)				\
+  do								\
+    {								\
+      if (parse_immediate (&str, &val, min, max, popt) == FAIL)	\
+	goto failure;						\
+      inst.operands[i].imm = val;				\
+    }								\
+  while (0)
 
-#define po_scalar_or_goto(elsz, label) do {			\
-  val = parse_scalar (&str, elsz, &inst.operands[i].vectype);	\
-  if (val == FAIL)						\
-    goto label;							\
-  inst.operands[i].reg = val;					\
-  inst.operands[i].isscalar = 1;				\
-} while (0)
+#define po_scalar_or_goto(elsz, label)					\
+  do									\
+    {									\
+      val = parse_scalar (& str, elsz, & inst.operands[i].vectype);	\
+      if (val == FAIL)							\
+	goto label;							\
+      inst.operands[i].reg = val;					\
+      inst.operands[i].isscalar = 1;					\
+    }									\
+  while (0)
 
-#define po_misc_or_fail(expr) do {		\
-  if (expr)					\
-    goto failure;				\
-} while (0)
+#define po_misc_or_fail(expr)			\
+  do						\
+    {						\
+      if (expr)					\
+	goto failure;				\
+    }						\
+  while (0)
 
-#define po_misc_or_fail_no_backtrack(expr) do {	\
-  result = expr;				\
-  if (result == PARSE_OPERAND_FAIL_NO_BACKTRACK)\
-    backtrack_pos = 0;				\
-  if (result != PARSE_OPERAND_SUCCESS)		\
-    goto failure;				\
-} while (0)
+#define po_misc_or_fail_no_backtrack(expr)		\
+  do							\
+    {							\
+      result = expr;					\
+      if (result == PARSE_OPERAND_FAIL_NO_BACKTRACK)	\
+	backtrack_pos = 0;				\
+      if (result != PARSE_OPERAND_SUCCESS)		\
+	goto failure;					\
+    }							\
+  while (0)
 
   skip_whitespace (str);
 
@@ -5844,11 +5932,11 @@ parse_operands (char *str, const unsigned char *pattern)
 	  po_misc_or_fail (parse_half (&str));
 	  break;
 
-	  /* Register or expression */
+	  /* Register or expression.  */
 	case OP_RR_EXr:	  po_reg_or_goto (REG_TYPE_RN, EXPr); break;
 	case OP_RR_EXi:	  po_reg_or_goto (REG_TYPE_RN, EXPi); break;
 
-	  /* Register or immediate */
+	  /* Register or immediate.  */
 	case OP_RRnpc_I0: po_reg_or_goto (REG_TYPE_RN, I0);   break;
 	I0:		  po_imm_or_fail (0, 0, FALSE);	      break;
 
@@ -5869,7 +5957,7 @@ parse_operands (char *str, const unsigned char *pattern)
 	case OP_RIWR_I32z: po_reg_or_goto (REG_TYPE_MMXWR, I32z); break;
 	I32z:		  po_imm_or_fail (0, 32, FALSE);	  break;
 
-	  /* Two kinds of register */
+	  /* Two kinds of register.  */
 	case OP_RIWR_RIWC:
 	  {
 	    struct reg_entry *rege = arm_reg_parse_multi (&str);
@@ -5948,7 +6036,7 @@ parse_operands (char *str, const unsigned char *pattern)
 	  po_misc_or_fail (parse_tb (&str));
 	  break;
 
-	  /* Register lists */
+	  /* Register lists.  */
 	case OP_REGLST:
 	  val = parse_reg_list (&str);
 	  if (*str == '^')
@@ -6120,15 +6208,18 @@ parse_operands (char *str, const unsigned char *pattern)
 #undef po_reg_or_goto
 #undef po_imm_or_fail
 #undef po_scalar_or_fail
-
+
 /* Shorthand macro for instruction encoding functions issuing errors.  */
-#define constraint(expr, err) do {		\
-  if (expr)					\
+#define constraint(expr, err)			\
+  do						\
     {						\
-      inst.error = err;				\
-      return;					\
+      if (expr)					\
+	{					\
+	  inst.error = err;			\
+	  return;				\
+	}					\
     }						\
-} while (0)
+  while (0)
 
 /* Reject "bad registers" for Thumb-2 instructions.  Many Thumb-2
    instructions are unpredictable if these registers are used.  This
@@ -6960,8 +7051,17 @@ static void
 do_it (void)
 {
   /* There is no IT instruction in ARM mode.  We
-     process it but do not generate code for it.  */
+     process it to do the validation as if in
+     thumb mode, just in case the code gets
+     assembled for thumb using the unified syntax.  */
+
   inst.size = 0;
+  if (unified_syntax)
+    {
+      set_it_insn_type (IT_INSN);
+      now_it.mask = (inst.instruction & 0xf) | 0x10;
+      now_it.cc = inst.operands[0].imm;
+    }
 }
 
 static void
@@ -8482,6 +8582,9 @@ do_t_add_sub (void)
 	? inst.operands[1].reg    /* Rd, Rs, foo */
 	: inst.operands[0].reg);  /* Rd, foo -> Rd, Rd, foo */
 
+  if (Rd == REG_PC)
+    set_it_insn_type_last ();
+
   if (unified_syntax)
     {
       bfd_boolean flags;
@@ -8491,9 +8594,9 @@ do_t_add_sub (void)
       flags = (inst.instruction == T_MNEM_adds
 	       || inst.instruction == T_MNEM_subs);
       if (flags)
-	narrow = (current_it_mask == 0);
+	narrow = !in_it_block ();
       else
-	narrow = (current_it_mask != 0);
+	narrow = in_it_block ();
       if (!inst.operands[2].isreg)
 	{
 	  int add;
@@ -8745,9 +8848,9 @@ do_t_arit3 (void)
 
 	  /* See if we can do this with a 16-bit instruction.  */
 	  if (THUMB_SETS_FLAGS (inst.instruction))
-	    narrow = current_it_mask == 0;
+	    narrow = !in_it_block ();
 	  else
-	    narrow = current_it_mask != 0;
+	    narrow = in_it_block ();
 
 	  if (Rd > 7 || Rn > 7 || Rs > 7)
 	    narrow = FALSE;
@@ -8833,9 +8936,9 @@ do_t_arit3c (void)
 
 	  /* See if we can do this with a 16-bit instruction.  */
 	  if (THUMB_SETS_FLAGS (inst.instruction))
-	    narrow = current_it_mask == 0;
+	    narrow = !in_it_block ();
 	  else
-	    narrow = current_it_mask != 0;
+	    narrow = in_it_block ();
 
 	  if (Rd > 7 || Rn > 7 || Rs > 7)
 	    narrow = FALSE;
@@ -8988,7 +9091,8 @@ do_t_bfx (void)
 static void
 do_t_blx (void)
 {
-  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
+  set_it_insn_type_last ();
+
   if (inst.operands[0].isreg)
     {
       constraint (inst.operands[0].reg == REG_PC, BAD_PC);
@@ -9010,13 +9114,14 @@ do_t_branch (void)
   int opcode;
   int cond;
 
-  if (current_it_mask)
+  cond = inst.cond;
+  set_it_insn_type (IF_INSIDE_IT_LAST_INSN);
+
+  if (in_it_block ())
     {
       /* Conditional branches inside IT blocks are encoded as unconditional
          branches.  */
       cond = COND_ALWAYS;
-      /* A branch must be the last instruction in an IT block.  */
-      constraint (current_it_mask != 0x10, BAD_BRANCH);
     }
   else
     cond = inst.cond;
@@ -9066,13 +9171,14 @@ do_t_bkpt (void)
       constraint (inst.operands[0].imm > 255,
 		  _("immediate value out of range"));
       inst.instruction |= inst.operands[0].imm;
+      set_it_insn_type (NEUTRAL_IT_INSN);
     }
 }
 
 static void
 do_t_branch23 (void)
 {
-  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
+  set_it_insn_type_last ();
   inst.reloc.type   = BFD_RELOC_THUMB_PCREL_BRANCH23;
   inst.reloc.pc_rel = 1;
 
@@ -9093,7 +9199,7 @@ do_t_branch23 (void)
 static void
 do_t_bx (void)
 {
-  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
+  set_it_insn_type_last ();
   inst.instruction |= inst.operands[0].reg << 3;
   /* ??? FIXME: Should add a hacky reloc here if reg is REG_PC.	 The reloc
      should cause the alignment to be checked once it is known.	 This is
@@ -9105,7 +9211,7 @@ do_t_bxj (void)
 {
   int Rm;
 
-  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
+  set_it_insn_type_last ();
   Rm = inst.operands[0].reg;
   reject_bad_reg (Rm);
   inst.instruction |= Rm << 16;
@@ -9131,14 +9237,14 @@ do_t_clz (void)
 static void
 do_t_cps (void)
 {
-  constraint (current_it_mask, BAD_NOT_IT);
+  set_it_insn_type (OUTSIDE_IT_INSN);
   inst.instruction |= inst.operands[0].imm;
 }
 
 static void
 do_t_cpsi (void)
 {
-  constraint (current_it_mask, BAD_NOT_IT);
+  set_it_insn_type (OUTSIDE_IT_INSN);
   if (unified_syntax
       && (inst.operands[1].present || inst.size_req == 4)
       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6_notm))
@@ -9185,7 +9291,7 @@ do_t_cpy (void)
 static void
 do_t_cbz (void)
 {
-  constraint (current_it_mask, BAD_NOT_IT);
+  set_it_insn_type (OUTSIDE_IT_INSN);
   constraint (inst.operands[0].reg > 7, BAD_HIREG);
   inst.instruction |= inst.operands[0].reg;
   inst.reloc.pc_rel = 1;
@@ -9231,9 +9337,9 @@ do_t_it (void)
 {
   unsigned int cond = inst.operands[0].imm;
 
-  constraint (current_it_mask, BAD_NOT_IT);
-  current_it_mask = (inst.instruction & 0xf) | 0x10;
-  current_cc = cond;
+  set_it_insn_type (IT_INSN);
+  now_it.mask = (inst.instruction & 0xf) | 0x10;
+  now_it.cc = cond;
 
   /* If the condition is a negative condition, invert the mask.  */
   if ((cond & 0x1) == 0x0)
@@ -9268,9 +9374,13 @@ encode_thumb2_ldmstm (int base, unsigned mask, bfd_boolean writeback)
     inst.error =  _("SP not allowed in register list");
   if (load)
     {
-      if (mask & (1 << 14)
-	  && mask & (1 << 15))
-	inst.error = _("LR and PC should not both be in register list");
+      if (mask & (1 << 15))
+        {
+          if (mask & (1 << 14))
+            inst.error = _("LR and PC should not both be in register list");
+          else
+            set_it_insn_type_last ();
+        }
 
       if ((mask & (1 << base)) != 0
 	  && writeback)
@@ -9445,6 +9555,11 @@ do_t_ldst (void)
 {
   unsigned long opcode;
   int Rn;
+
+  if (inst.operands[0].isreg
+      && !inst.operands[0].preind
+      && inst.operands[0].reg == REG_PC)
+    set_it_insn_type_last ();
 
   opcode = inst.instruction;
   if (unified_syntax)
@@ -9666,6 +9781,9 @@ do_t_mov_cmp (void)
   Rn = inst.operands[0].reg;
   Rm = inst.operands[1].reg;
 
+  if (Rn == REG_PC)
+    set_it_insn_type_last ();
+
   if (unified_syntax)
     {
       int r0off = (inst.instruction == T_MNEM_mov
@@ -9676,7 +9794,7 @@ do_t_mov_cmp (void)
 
       low_regs = (Rn <= 7 && Rm <= 7);
       opcode = inst.instruction;
-      if (current_it_mask)
+      if (in_it_block ())
 	narrow = opcode != T_MNEM_movs;
       else
 	narrow = opcode != T_MNEM_movs || low_regs;
@@ -9731,7 +9849,7 @@ do_t_mov_cmp (void)
       if (!inst.operands[1].isreg)
 	{
 	  /* Immediate operand.  */
-	  if (current_it_mask == 0 && opcode == T_MNEM_mov)
+	  if (!in_it_block () && opcode == T_MNEM_mov)
 	    narrow = 0;
 	  if (low_regs && narrow)
 	    {
@@ -9757,7 +9875,7 @@ do_t_mov_cmp (void)
 	  /* Register shifts are encoded as separate shift instructions.  */
 	  bfd_boolean flags = (inst.instruction == T_MNEM_movs);
 
-	  if (current_it_mask)
+	  if (in_it_block ())
 	    narrow = !flags;
 	  else
 	    narrow = flags;
@@ -9813,7 +9931,7 @@ do_t_mov_cmp (void)
 	      && (inst.instruction == T_MNEM_mov
 		  || inst.instruction == T_MNEM_movs))
 	    {
-	      if (current_it_mask)
+	      if (in_it_block ())
 		narrow = (inst.instruction == T_MNEM_mov);
 	      else
 		narrow = (inst.instruction == T_MNEM_movs);
@@ -9975,9 +10093,9 @@ do_t_mvn_tst (void)
       else if (inst.instruction == T_MNEM_cmn)
 	narrow = TRUE;
       else if (THUMB_SETS_FLAGS (inst.instruction))
-	narrow = (current_it_mask == 0);
+	narrow = !in_it_block ();
       else
-	narrow = (current_it_mask != 0);
+	narrow = in_it_block ();
 
       if (!inst.operands[1].isreg)
 	{
@@ -10116,9 +10234,9 @@ do_t_mul (void)
 	  || Rm > 7)
 	narrow = FALSE;
       else if (inst.instruction == T_MNEM_muls)
-	narrow = (current_it_mask == 0);
+	narrow = !in_it_block ();
       else
-	narrow = (current_it_mask != 0);
+	narrow = in_it_block ();
     }
   else
     {
@@ -10143,8 +10261,8 @@ do_t_mul (void)
     }
   else
     {
-      constraint(inst.instruction != T_MNEM_mul,
-		 _("Thumb-2 MUL must not set flags"));
+      constraint (inst.instruction != T_MNEM_mul,
+		  _("Thumb-2 MUL must not set flags"));
       /* 32-bit MUL.  */
       inst.instruction = THUMB_OP32 (inst.instruction);
       inst.instruction |= Rd << 8;
@@ -10184,6 +10302,8 @@ do_t_mull (void)
 static void
 do_t_nop (void)
 {
+  set_it_insn_type (NEUTRAL_IT_INSN);
+
   if (unified_syntax)
     {
       if (inst.size_req == 4 || inst.operands[0].imm > 15)
@@ -10220,9 +10340,9 @@ do_t_neg (void)
       bfd_boolean narrow;
 
       if (THUMB_SETS_FLAGS (inst.instruction))
-	narrow = (current_it_mask == 0);
+	narrow = !in_it_block ();
       else
-	narrow = (current_it_mask != 0);
+	narrow = in_it_block ();
       if (inst.operands[0].reg > 7 || inst.operands[1].reg > 7)
 	narrow = FALSE;
       if (inst.size_req == 4)
@@ -10446,9 +10566,9 @@ do_t_rsb (void)
       bfd_boolean narrow;
 
       if ((inst.instruction & 0x00100000) != 0)
-	narrow = (current_it_mask == 0);
+	narrow = !in_it_block ();
       else
-	narrow = (current_it_mask != 0);
+	narrow = in_it_block ();
 
       if (Rd > 7 || Rs > 7)
 	narrow = FALSE;
@@ -10482,7 +10602,7 @@ do_t_rsb (void)
 static void
 do_t_setend (void)
 {
-  constraint (current_it_mask, BAD_NOT_IT);
+  set_it_insn_type (OUTSIDE_IT_INSN);
   if (inst.operands[0].imm)
     inst.instruction |= 0x8;
 }
@@ -10512,9 +10632,9 @@ do_t_shift (void)
 	}
 
       if (THUMB_SETS_FLAGS (inst.instruction))
-	narrow = (current_it_mask == 0);
+	narrow = !in_it_block ();
       else
-	narrow = (current_it_mask != 0);
+	narrow = in_it_block ();
       if (inst.operands[0].reg > 7 || inst.operands[1].reg > 7)
 	narrow = FALSE;
       if (!inst.operands[2].isreg && shift_kind == SHIFT_ROR)
@@ -10813,7 +10933,7 @@ do_t_tb (void)
   int half;
 
   half = (inst.instruction & 0x10) != 0;
-  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
+  set_it_insn_type_last ();
   constraint (inst.operands[0].immisreg,
 	      _("instruction requires register index"));
 
@@ -10878,7 +10998,7 @@ struct neon_tab_entry
   X(vcge,	0x0000310, 0x1000e00, 0x1b10080),	\
   X(vcgt,	0x0000300, 0x1200e00, 0x1b10000),	\
   /* Register variants of the following two instructions are encoded as
-     vcge / vcgt with the operands reversed. */  	\
+     vcge / vcgt with the operands reversed.  */  	\
   X(vclt,	0x0000300, 0x1200e00, 0x1b10200),	\
   X(vcle,	0x0000310, 0x1000e00, 0x1b10180),	\
   X(vmla,	0x0000900, 0x0000d10, 0x0800040),	\
@@ -14425,6 +14545,28 @@ output_inst (const char * str)
   dwarf2_emit_insn (inst.size);
 }
 
+static char *
+output_it_inst (int cond, int mask, char * to)
+{
+  unsigned long instruction = 0xbf00;
+
+  mask &= 0xf;
+  instruction |= mask;
+  instruction |= cond << 4;
+
+  if (to == NULL)
+    {
+      to = frag_more (2);
+#ifdef OBJ_ELF
+      dwarf2_emit_insn (2);
+#endif
+    }
+
+  md_number_to_chars (to, instruction, 2);
+
+  return to;
+}
+
 /* Tag values used in struct asm_opcode's tag field.  */
 enum opcode_tag
 {
@@ -14670,6 +14812,320 @@ opcode_lookup (char **str)
   return 0;
 }
 
+/* This function generates an initial IT instruction, leaving its block
+   virtually open for the new instructions. Eventually,
+   the mask will be updated by now_it_add_mask () each time
+   a new instruction needs to be included in the IT block.
+   Finally, the block is closed with close_automatic_it_block ().
+   The block closure can be requested either from md_assemble (),
+   a tencode (), or due to a label hook.  */
+
+static void
+new_automatic_it_block (int cond)
+{
+  now_it.state = AUTOMATIC_IT_BLOCK;
+  now_it.mask = 0x18;
+  now_it.cc = cond;
+  now_it.block_length = 1;
+  now_it.insn = output_it_inst (cond, now_it.mask, NULL);
+}
+
+/* Close an automatic IT block.
+   See comments in new_automatic_it_block ().  */
+
+static void
+close_automatic_it_block (void)
+{
+  now_it.mask = 0x10;
+  now_it.block_length = 0;
+}
+
+/* Update the mask of the current automatically-generated IT
+   instruction. See comments in new_automatic_it_block ().  */
+
+static void
+now_it_add_mask (int cond)
+{
+#define CLEAR_BIT(value, nbit)  ((value) & ~(1 << (nbit)))
+#define SET_BIT_VALUE(value, bitvalue, nbit)  (CLEAR_BIT (value, nbit) \
+                                              | ((bitvalue) << (nbit)))
+
+  const int resulting_bit = (cond & 1);
+  now_it.mask &= 0xf;
+  now_it.mask = SET_BIT_VALUE (now_it.mask,
+                                   resulting_bit,
+                                  (5 - now_it.block_length));
+  now_it.mask = SET_BIT_VALUE (now_it.mask,
+                                   1,
+                                   ((5 - now_it.block_length) - 1) );
+  output_it_inst (now_it.cc, now_it.mask, now_it.insn);
+
+#undef CLEAR_BIT
+#undef SET_BIT_VALUE
+
+}
+
+/* The IT blocks handling machinery is accessed through the these functions:
+     it_fsm_pre_encode ()               from md_assemble ()
+     set_it_insn_type ()                optional, from the tencode functions
+     set_it_insn_type_last ()           ditto
+     in_it_block ()                     ditto
+     it_fsm_post_encode ()              from md_assemble ()
+     force_automatic_it_block_close ()  from label habdling functions
+
+   Rationale:
+     1) md_assemble () calls it_fsm_pre_encode () before calling tencode (),
+        initializing the IT insn type with a generic initial value depending
+        on the inst.condition.
+     2) During the tencode function, two things may happen:
+        a) The tencode function overrides the IT insn type by
+           calling either set_it_insn_type (type) or set_it_insn_type_last ().
+        b) The tencode function queries the IT block state by
+           calling in_it_block () (i.e. to determine narrow/not narrow mode).
+
+        Both set_it_insn_type and in_it_block run the internal FSM state
+        handling function (handle_it_state), because: a) setting the IT insn
+        type may incur in an invalid state (exiting the function),
+        and b) querying the state requires the FSM to be updated.
+        Specifically we want to avoid creating an IT block for conditional
+        branches, so it_fsm_pre_encode is actually a guess and we can't
+        determine whether an IT block is required until the tencode () routine
+        has decided what type of instruction this actually it.
+        Because of this, if set_it_insn_type and in_it_block have to be used,
+        set_it_insn_type has to be called first.
+
+        set_it_insn_type_last () is a wrapper of set_it_insn_type (type), that
+        determines the insn IT type depending on the inst.cond code.
+        When a tencode () routine encodes an instruction that can be
+        either outside an IT block, or, in the case of being inside, has to be
+        the last one, set_it_insn_type_last () will determine the proper
+        IT instruction type based on the inst.cond code. Otherwise,
+        set_it_insn_type can be called for overriding that logic or
+        for covering other cases.
+
+        Calling handle_it_state () may not transition the IT block state to
+        OUTSIDE_IT_BLOCK immediatelly, since the (current) state could be
+        still queried. Instead, if the FSM determines that the state should
+        be transitioned to OUTSIDE_IT_BLOCK, a flag is marked to be closed
+        after the tencode () function: that's what it_fsm_post_encode () does.
+
+        Since in_it_block () calls the state handling function to get an
+        updated state, an error may occur (due to invalid insns combination).
+        In that case, inst.error is set.
+        Therefore, inst.error has to be checked after the execution of
+        the tencode () routine.
+
+     3) Back in md_assemble(), it_fsm_post_encode () is called to commit
+        any pending state change (if any) that didn't take place in
+        handle_it_state () as explained above.  */
+
+static void
+it_fsm_pre_encode (void)
+{
+  if (inst.cond != COND_ALWAYS)
+    inst.it_insn_type = INSIDE_IT_INSN;
+  else
+    inst.it_insn_type = OUTSIDE_IT_INSN;
+
+  now_it.state_handled = 0;
+}
+
+/* IT state FSM handling function.  */
+
+static int
+handle_it_state (void)
+{
+  now_it.state_handled = 1;
+
+  switch (now_it.state)
+    {
+    case OUTSIDE_IT_BLOCK:
+      switch (inst.it_insn_type)
+	{
+	case OUTSIDE_IT_INSN:
+	  break;
+
+	case INSIDE_IT_INSN:
+	case INSIDE_IT_LAST_INSN:
+	  if (thumb_mode == 0)
+	    {
+	      if (unified_syntax 
+		  && !(implicit_it_mode & IMPLICIT_IT_MODE_ARM))
+		as_tsktsk (_("Warning: conditional outside an IT block"\
+			     " for Thumb."));
+	    }
+	  else
+	    {
+	      if ((implicit_it_mode & IMPLICIT_IT_MODE_THUMB)
+		  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2))
+		{
+		  /* Automatically generate the IT instruction.  */
+		  new_automatic_it_block (inst.cond);
+		  if (inst.it_insn_type == INSIDE_IT_LAST_INSN)
+		    close_automatic_it_block ();
+		}
+	      else
+		{
+		  inst.error = BAD_OUT_IT;
+		  return FAIL;
+		}
+	    }
+	  break;
+
+	case IF_INSIDE_IT_LAST_INSN:
+	case NEUTRAL_IT_INSN:
+	  break;
+
+	case IT_INSN:
+	  now_it.state = MANUAL_IT_BLOCK;
+	  now_it.block_length = 0;
+	  break;
+	}
+      break;
+
+    case AUTOMATIC_IT_BLOCK:
+      /* Three things may happen now:
+	 a) We should increment current it block size;
+	 b) We should close current it block (closing insn or 4 insns);
+	 c) We should close current it block and start a new one (due
+	 to incompatible conditions or
+	 4 insns-length block reached).  */
+
+      switch (inst.it_insn_type)
+	{
+	case OUTSIDE_IT_INSN:
+	  /* The closure of the block shall happen immediatelly,
+	     so any in_it_block () call reports the block as closed.  */
+	  force_automatic_it_block_close ();
+	  break;
+
+	case INSIDE_IT_INSN:
+	case INSIDE_IT_LAST_INSN:
+	case IF_INSIDE_IT_LAST_INSN:
+	  now_it.block_length++;
+
+	  if (now_it.block_length > 4
+	      || !now_it_compatible (inst.cond))
+	    {
+	      force_automatic_it_block_close ();
+	      if (inst.it_insn_type != IF_INSIDE_IT_LAST_INSN)
+		new_automatic_it_block (inst.cond);
+	    }
+	  else
+	    {
+	      now_it_add_mask (inst.cond);
+	    }
+
+	  if (now_it.state == AUTOMATIC_IT_BLOCK
+	      && (inst.it_insn_type == INSIDE_IT_LAST_INSN
+		  || inst.it_insn_type == IF_INSIDE_IT_LAST_INSN))
+	    close_automatic_it_block ();
+	  break;
+
+	case NEUTRAL_IT_INSN:
+	  now_it.block_length++;
+
+	  if (now_it.block_length > 4)
+	    force_automatic_it_block_close ();
+	  else
+	    now_it_add_mask (now_it.cc & 1);
+	  break;
+
+	case IT_INSN:
+	  close_automatic_it_block ();
+	  now_it.state = MANUAL_IT_BLOCK;
+	  break;
+	}
+      break;
+
+    case MANUAL_IT_BLOCK:
+      {
+	/* Check conditional suffixes.  */
+	const int cond = now_it.cc ^ ((now_it.mask >> 4) & 1) ^ 1;
+	int is_last;
+	now_it.mask <<= 1;
+	now_it.mask &= 0x1f;
+	is_last = (now_it.mask == 0x10);
+
+	switch (inst.it_insn_type)
+	  {
+	  case OUTSIDE_IT_INSN:
+	    inst.error = BAD_NOT_IT;
+	    return FAIL;
+
+	  case INSIDE_IT_INSN:
+	    if (cond != inst.cond)
+	      {
+		inst.error = BAD_IT_COND;
+		return FAIL;
+	      }
+	    break;
+
+	  case INSIDE_IT_LAST_INSN:
+	  case IF_INSIDE_IT_LAST_INSN:
+	    if (cond != inst.cond)
+	      {
+		inst.error = BAD_IT_COND;
+		return FAIL;
+	      }
+	    if (!is_last)
+	      {
+		inst.error = BAD_BRANCH;
+		return FAIL;
+	      }
+	    break;
+
+	  case NEUTRAL_IT_INSN:
+	    /* The BKPT instruction is unconditional even in an IT block.  */
+	    break;
+
+	  case IT_INSN:
+	    inst.error = BAD_IT_IT;
+	    return FAIL;
+	  }
+      }
+      break;
+    }
+
+  return SUCCESS;
+}
+
+static void
+it_fsm_post_encode (void)
+{
+  int is_last;
+
+  if (!now_it.state_handled)
+    handle_it_state ();
+
+  is_last = (now_it.mask == 0x10);
+  if (is_last)
+    {
+      now_it.state = OUTSIDE_IT_BLOCK;
+      now_it.mask = 0;
+    }
+}
+
+static void
+force_automatic_it_block_close (void)
+{
+  if (now_it.state == AUTOMATIC_IT_BLOCK)
+    {
+      close_automatic_it_block ();
+      now_it.state = OUTSIDE_IT_BLOCK;
+      now_it.mask = 0;
+    }
+}
+
+static int
+in_it_block (void)
+{
+  if (!now_it.state_handled)
+    handle_it_state ();
+
+  return now_it.state != OUTSIDE_IT_BLOCK;
+}
+
 void
 md_assemble (char *str)
 {
@@ -14734,41 +15190,24 @@ md_assemble (char *str)
 	  /* Implicit require narrow instructions on Thumb-1.  This avoids
 	     relaxation accidentally introducing Thumb-2 instructions.  */
 	  if (opcode->tencode != do_t_blx && opcode->tencode != do_t_branch23
-	      && !(ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_msr)
-		   || ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_barrier)))
+	      && !(ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_msr)
+		   || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_barrier)))
 	    inst.size_req = 2;
-	}
-
-      /* Check conditional suffixes.  */
-      if (current_it_mask)
-	{
-	  int cond;
-	  cond = current_cc ^ ((current_it_mask >> 4) & 1) ^ 1;
-	  current_it_mask <<= 1;
-	  current_it_mask &= 0x1f;
-	  /* The BKPT instruction is unconditional even in an IT block.  */
-	  if (!inst.error
-	      && cond != inst.cond && opcode->tencode != do_t_bkpt)
-	    {
-	      as_bad (_("incorrect condition in IT block"));
-	      return;
-	    }
-	}
-      else if (inst.cond != COND_ALWAYS && opcode->tencode != do_t_branch)
-	{
-	  as_bad (_("thumb conditional instruction not in IT block"));
-	  return;
 	}
 
       mapping_state (MAP_THUMB);
       inst.instruction = opcode->tvalue;
 
       if (!parse_operands (p, opcode->operands))
-	opcode->tencode ();
+        {
+          /* Prepare the it_insn_type for those encodings that don't set
+             it.  */
+          it_fsm_pre_encode ();
 
-      /* Clear current_it_mask at the end of an IT block.  */
-      if (current_it_mask == 0x10)
-	current_it_mask = 0;
+          opcode->tencode ();
+
+          it_fsm_post_encode ();
+        }
 
       if (!(inst.error || inst.relax))
 	{
@@ -14793,8 +15232,8 @@ md_assemble (char *str)
 	 This is overly pessimistic for relaxable instructions.  */
       if (((inst.size == 4 && (inst.instruction & 0xf800e800) != 0xf000e800)
 	   || inst.relax)
-	  && !(ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_msr)
-	       || ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_barrier)))
+	  && !(ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_msr)
+	       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_barrier)))
 	ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 				arm_ext_v6t2);
     }
@@ -14827,7 +15266,11 @@ md_assemble (char *str)
 	inst.instruction |= inst.cond << 28;
       inst.size = INSN_SIZE;
       if (!parse_operands (p, opcode->operands))
-	opcode->aencode ();
+        {
+          it_fsm_pre_encode ();
+          opcode->aencode ();
+          it_fsm_post_encode ();
+        }
       /* Arm mode bx is marked as both v4T and v5 because it's still required
          on a hypothetical non-thumb v5 core.  */
       if (is_bx)
@@ -14843,6 +15286,25 @@ md_assemble (char *str)
       return;
     }
   output_inst (str);
+}
+
+static void
+check_it_blocks_finished (void)
+{
+#ifdef OBJ_ELF
+  asection *sect;
+
+  for (sect = stdoutput->sections; sect != NULL; sect = sect->next)
+    if (seg_info (sect)->tc_segment_info_data.current_it.state
+	== MANUAL_IT_BLOCK)
+      {
+	as_warn (_("section '%s' finished with an open IT block."),
+		 sect->name);
+      }
+#else
+  if (now_it.state == MANUAL_IT_BLOCK)
+    as_warn (_("file finished with an open IT block."));
+#endif
 }
 
 /* Various frobbings of labels and their addresses.  */
@@ -14863,6 +15325,8 @@ arm_frob_label (symbolS * sym)
 #if defined OBJ_COFF || defined OBJ_ELF
   ARM_SET_INTERWORK (sym, support_interwork);
 #endif
+
+  force_automatic_it_block_close ();
 
   /* Note - do not allow local symbols (.Lxxx) to be labelled
      as Thumb functions.  This is because these labels, whilst
@@ -15229,9 +15693,9 @@ static struct asm_barrier_opt barrier_opt_names[] =
 /* Two variants of the above - TCE for a numeric Thumb opcode, tCE for
    a T_MNEM_xyz enumerator.  */
 #define TCE(mnem, aop, top, nops, ops, ae, te) \
-       TxCE(mnem, aop, 0x##top, nops, ops, ae, te)
+      TxCE (mnem, aop, 0x##top, nops, ops, ae, te)
 #define tCE(mnem, aop, top, nops, ops, ae, te) \
-       TxCE(mnem, aop, T_MNEM_##top, nops, ops, ae, te)
+      TxCE (mnem, aop, T_MNEM_##top, nops, ops, ae, te)
 
 /* Second most common sort of mnemonic: has a Thumb variant, takes a conditional
    infix after the third character.  */
@@ -15242,45 +15706,45 @@ static struct asm_barrier_opt barrier_opt_names[] =
   { #mnem, OPS##nops ops, OT_cinfix3_deprecated, 0x##op, top, ARM_VARIANT, \
     THUMB_VARIANT, do_##ae, do_##te }
 #define TC3(mnem, aop, top, nops, ops, ae, te) \
-       TxC3(mnem, aop, 0x##top, nops, ops, ae, te)
+      TxC3 (mnem, aop, 0x##top, nops, ops, ae, te)
 #define TC3w(mnem, aop, top, nops, ops, ae, te) \
-       TxC3w(mnem, aop, 0x##top, nops, ops, ae, te)
+      TxC3w (mnem, aop, 0x##top, nops, ops, ae, te)
 #define tC3(mnem, aop, top, nops, ops, ae, te) \
-       TxC3(mnem, aop, T_MNEM_##top, nops, ops, ae, te)
+      TxC3 (mnem, aop, T_MNEM_##top, nops, ops, ae, te)
 #define tC3w(mnem, aop, top, nops, ops, ae, te) \
-       TxC3w(mnem, aop, T_MNEM_##top, nops, ops, ae, te)
+      TxC3w (mnem, aop, T_MNEM_##top, nops, ops, ae, te)
 
 /* Mnemonic with a conditional infix in an unusual place.  Each and every variant has to
    appear in the condition table.  */
 #define TxCM_(m1, m2, m3, op, top, nops, ops, ae, te)	\
-  { #m1 #m2 #m3, OPS##nops ops, sizeof(#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof(#m1) - 1, \
+  { #m1 #m2 #m3, OPS##nops ops, sizeof (#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof (#m1) - 1, \
     0x##op, top, ARM_VARIANT, THUMB_VARIANT, do_##ae, do_##te }
 
 #define TxCM(m1, m2, op, top, nops, ops, ae, te)	\
-  TxCM_(m1,   , m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, eq, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, ne, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, cs, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, hs, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, cc, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, ul, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, lo, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, mi, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, pl, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, vs, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, vc, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, hi, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, ls, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, ge, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, lt, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, gt, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, le, m2, op, top, nops, ops, ae, te),	\
-  TxCM_(m1, al, m2, op, top, nops, ops, ae, te)
+  TxCM_ (m1,   , m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, eq, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, ne, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, cs, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, hs, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, cc, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, ul, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, lo, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, mi, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, pl, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, vs, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, vc, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, hi, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, ls, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, ge, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, lt, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, gt, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, le, m2, op, top, nops, ops, ae, te),	\
+  TxCM_ (m1, al, m2, op, top, nops, ops, ae, te)
 
 #define TCM(m1,m2, aop, top, nops, ops, ae, te)		\
-       TxCM(m1,m2, aop, 0x##top, nops, ops, ae, te)
-#define tCM(m1,m2, aop, top, nops, ops, ae, te)			\
-       TxCM(m1,m2, aop, T_MNEM_##top, nops, ops, ae, te)
+      TxCM (m1,m2, aop, 0x##top, nops, ops, ae, te)
+#define tCM(m1,m2, aop, top, nops, ops, ae, te)		\
+      TxCM (m1,m2, aop, T_MNEM_##top, nops, ops, ae, te)
 
 /* Mnemonic that cannot be conditionalized.  The ARM condition-code
    field is still 0xE.  Many of the Thumb variants can be executed
@@ -15327,29 +15791,29 @@ static struct asm_barrier_opt barrier_opt_names[] =
 
 #define xCM_(m1, m2, m3, op, nops, ops, ae)	\
   { #m1 #m2 #m3, OPS##nops ops, \
-    sizeof(#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof(#m1) - 1, \
+    sizeof (#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof (#m1) - 1, \
     0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
 
 #define CM(m1, m2, op, nops, ops, ae)	\
-  xCM_(m1,   , m2, op, nops, ops, ae),	\
-  xCM_(m1, eq, m2, op, nops, ops, ae),	\
-  xCM_(m1, ne, m2, op, nops, ops, ae),	\
-  xCM_(m1, cs, m2, op, nops, ops, ae),	\
-  xCM_(m1, hs, m2, op, nops, ops, ae),	\
-  xCM_(m1, cc, m2, op, nops, ops, ae),	\
-  xCM_(m1, ul, m2, op, nops, ops, ae),	\
-  xCM_(m1, lo, m2, op, nops, ops, ae),	\
-  xCM_(m1, mi, m2, op, nops, ops, ae),	\
-  xCM_(m1, pl, m2, op, nops, ops, ae),	\
-  xCM_(m1, vs, m2, op, nops, ops, ae),	\
-  xCM_(m1, vc, m2, op, nops, ops, ae),	\
-  xCM_(m1, hi, m2, op, nops, ops, ae),	\
-  xCM_(m1, ls, m2, op, nops, ops, ae),	\
-  xCM_(m1, ge, m2, op, nops, ops, ae),	\
-  xCM_(m1, lt, m2, op, nops, ops, ae),	\
-  xCM_(m1, gt, m2, op, nops, ops, ae),	\
-  xCM_(m1, le, m2, op, nops, ops, ae),	\
-  xCM_(m1, al, m2, op, nops, ops, ae)
+  xCM_ (m1,   , m2, op, nops, ops, ae),	\
+  xCM_ (m1, eq, m2, op, nops, ops, ae),	\
+  xCM_ (m1, ne, m2, op, nops, ops, ae),	\
+  xCM_ (m1, cs, m2, op, nops, ops, ae),	\
+  xCM_ (m1, hs, m2, op, nops, ops, ae),	\
+  xCM_ (m1, cc, m2, op, nops, ops, ae),	\
+  xCM_ (m1, ul, m2, op, nops, ops, ae),	\
+  xCM_ (m1, lo, m2, op, nops, ops, ae),	\
+  xCM_ (m1, mi, m2, op, nops, ops, ae),	\
+  xCM_ (m1, pl, m2, op, nops, ops, ae),	\
+  xCM_ (m1, vs, m2, op, nops, ops, ae),	\
+  xCM_ (m1, vc, m2, op, nops, ops, ae),	\
+  xCM_ (m1, hi, m2, op, nops, ops, ae),	\
+  xCM_ (m1, ls, m2, op, nops, ops, ae),	\
+  xCM_ (m1, ge, m2, op, nops, ops, ae),	\
+  xCM_ (m1, lt, m2, op, nops, ops, ae),	\
+  xCM_ (m1, gt, m2, op, nops, ops, ae),	\
+  xCM_ (m1, le, m2, op, nops, ops, ae),	\
+  xCM_ (m1, al, m2, op, nops, ops, ae)
 
 #define UE(mnem, op, nops, ops, ae)	\
   { #mnem, OPS##nops ops, OT_unconditional, 0x##op, 0, ARM_VARIANT, 0, do_##ae, NULL }
@@ -15377,10 +15841,10 @@ static struct asm_barrier_opt barrier_opt_names[] =
     THUMB_VARIANT, do_##enc, do_##enc }
 
 #define NCE(mnem, op, nops, ops, enc)					\
-  NCE_tag(mnem, op, nops, ops, enc, OT_csuffix)
+   NCE_tag (mnem, op, nops, ops, enc, OT_csuffix)
 
 #define NCEF(mnem, op, nops, ops, enc)					\
-  NCE_tag(mnem, op, nops, ops, enc, OT_csuffixF)
+    NCE_tag (mnem, op, nops, ops, enc, OT_csuffixF)
 
 /* Neon insn with conditional suffix for the ARM version, overloaded types.  */
 #define nCE_tag(mnem, op, nops, ops, enc, tag)				\
@@ -15388,15 +15852,15 @@ static struct asm_barrier_opt barrier_opt_names[] =
     ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc }
 
 #define nCE(mnem, op, nops, ops, enc)					\
-  nCE_tag(mnem, op, nops, ops, enc, OT_csuffix)
+   nCE_tag (mnem, op, nops, ops, enc, OT_csuffix)
 
 #define nCEF(mnem, op, nops, ops, enc)					\
-  nCE_tag(mnem, op, nops, ops, enc, OT_csuffixF)
+    nCE_tag (mnem, op, nops, ops, enc, OT_csuffixF)
 
 #define do_0 0
 
 /* Thumb-only, unconditional.  */
-#define UT(mnem,  op, nops, ops, te) TUE(mnem,  0, op, nops, ops, 0, te)
+#define UT(mnem,  op, nops, ops, te) TUE (mnem,  0, op, nops, ops, 0, te)
 
 static const struct asm_opcode insns[] =
 {
@@ -15818,24 +16282,26 @@ static const struct asm_opcode insns[] =
 
   UT(cbnz,      b900,    2, (RR, EXP), t_cbz),
   UT(cbz,       b100,    2, (RR, EXP), t_cbz),
- /* ARM does not really have an IT instruction, so always allow it.  */
+ /* ARM does not really have an IT instruction, so always allow it. The opcode
+    is copied from Thumb in order to allow warnings
+    in -mimplicit-it=[never | arm] modes.  */
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v1
- TUE(it,        0,        bf08,     1, (COND),   it,    t_it),
- TUE(itt,       0,        bf0c,     1, (COND),   it,    t_it),
- TUE(ite,       0,        bf04,     1, (COND),   it,    t_it),
- TUE(ittt,      0,        bf0e,     1, (COND),   it,    t_it),
- TUE(itet,      0,        bf06,     1, (COND),   it,    t_it),
- TUE(itte,      0,        bf0a,     1, (COND),   it,    t_it),
- TUE(itee,      0,        bf02,     1, (COND),   it,    t_it),
- TUE(itttt,     0,        bf0f,     1, (COND),   it,    t_it),
- TUE(itett,     0,        bf07,     1, (COND),   it,    t_it),
- TUE(ittet,     0,        bf0b,     1, (COND),   it,    t_it),
- TUE(iteet,     0,        bf03,     1, (COND),   it,    t_it),
- TUE(ittte,     0,        bf0d,     1, (COND),   it,    t_it),
- TUE(itete,     0,        bf05,     1, (COND),   it,    t_it),
- TUE(ittee,     0,        bf09,     1, (COND),   it,    t_it),
- TUE(iteee,     0,        bf01,     1, (COND),   it,    t_it),
+ TUE(it,        bf08,        bf08,     1, (COND),   it,    t_it),
+ TUE(itt,       bf0c,        bf0c,     1, (COND),   it,    t_it),
+ TUE(ite,       bf04,        bf04,     1, (COND),   it,    t_it),
+ TUE(ittt,      bf0e,        bf0e,     1, (COND),   it,    t_it),
+ TUE(itet,      bf06,        bf06,     1, (COND),   it,    t_it),
+ TUE(itte,      bf0a,        bf0a,     1, (COND),   it,    t_it),
+ TUE(itee,      bf02,        bf02,     1, (COND),   it,    t_it),
+ TUE(itttt,     bf0f,        bf0f,     1, (COND),   it,    t_it),
+ TUE(itett,     bf07,        bf07,     1, (COND),   it,    t_it),
+ TUE(ittet,     bf0b,        bf0b,     1, (COND),   it,    t_it),
+ TUE(iteet,     bf03,        bf03,     1, (COND),   it,    t_it),
+ TUE(ittte,     bf0d,        bf0d,     1, (COND),   it,    t_it),
+ TUE(itete,     bf05,        bf05,     1, (COND),   it,    t_it),
+ TUE(ittee,     bf09,        bf09,     1, (COND),   it,    t_it),
+ TUE(iteee,     bf01,        bf01,     1, (COND),   it,    t_it),
  /* ARM/Thumb-2 instructions with no Thumb-1 equivalent.  */
  TC3(rrx,       01a00060, ea4f0030, 2, (RR, RR), rd_rm, t_rrx),
  TC3(rrxs,      01b00060, ea5f0030, 2, (RR, RR), rd_rm, t_rrx),
@@ -20246,14 +20712,13 @@ armelf_frob_symbol (symbolS * symp,
 
 /* MD interface: Finalization.	*/
 
-/* A good place to do this, although this was probably not intended
-   for this kind of use.  We need to dump the literal pool before
-   references are made to a null symbol pointer.  */
-
 void
 arm_cleanup (void)
 {
   literal_pool * pool;
+
+  /* Ensure that all the IT blocks are properly closed.  */
+  check_it_blocks_finished ();
 
   for (pool = list_of_pools; pool; pool = pool->next)
     {
@@ -20927,10 +21392,10 @@ static const struct arm_cpu_option_table arm_cpus[] =
   {"arm1156t2f-s",	ARM_ARCH_V6T2,	 FPU_ARCH_VFP_V2, NULL},
   {"arm1176jz-s",	ARM_ARCH_V6ZK,	 FPU_NONE,	  NULL},
   {"arm1176jzf-s",	ARM_ARCH_V6ZK,	 FPU_ARCH_VFP_V2, NULL},
-  {"cortex-a8",		ARM_ARCH_V7A,	 ARM_FEATURE(0, FPU_VFP_V3
+  {"cortex-a8",		ARM_ARCH_V7A,	 ARM_FEATURE (0, FPU_VFP_V3
                                                         | FPU_NEON_EXT_V1),
                                                           NULL},
-  {"cortex-a9",		ARM_ARCH_V7A,	 ARM_FEATURE(0, FPU_VFP_V3
+  {"cortex-a9",		ARM_ARCH_V7A,	 ARM_FEATURE (0, FPU_VFP_V3
                                                         | FPU_NEON_EXT_V1),
                                                           NULL},
   {"cortex-r4",		ARM_ARCH_V7R,	 FPU_NONE,	  NULL},
@@ -20944,7 +21409,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
   {"iwmmxt2",		ARM_ARCH_IWMMXT2,FPU_ARCH_VFP_V2, NULL},
   {"i80200",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2, NULL},
   /* Maverick */
-  {"ep9312",	ARM_FEATURE(ARM_AEXT_V4T, ARM_CEXT_MAVERICK), FPU_ARCH_MAVERICK, "ARM920T"},
+  {"ep9312",	ARM_FEATURE (ARM_AEXT_V4T, ARM_CEXT_MAVERICK), FPU_ARCH_MAVERICK, "ARM920T"},
   {NULL,		ARM_ARCH_NONE,	 ARM_ARCH_NONE, NULL}
 };
 
@@ -21264,6 +21729,29 @@ arm_parse_eabi (char * str)
 }
 #endif
 
+static int
+arm_parse_it_mode (char * str)
+{
+  int ret = 1;
+
+  if (streq ("arm", str))
+    implicit_it_mode = IMPLICIT_IT_MODE_ARM;
+  else if (streq ("thumb", str))
+    implicit_it_mode = IMPLICIT_IT_MODE_THUMB;
+  else if (streq ("always", str))
+    implicit_it_mode = IMPLICIT_IT_MODE_ALWAYS;
+  else if (streq ("never", str))
+    implicit_it_mode = IMPLICIT_IT_MODE_NEVER;
+  else
+    {
+      as_bad (_("unknown implicit IT mode `%s', should be "\
+                "arm, thumb, always, or never."), str);
+      ret = 0;
+    }
+
+  return ret;
+}
+
 struct arm_long_option_table arm_long_opts[] =
 {
   {"mcpu=", N_("<cpu name>\t  assemble for CPU <cpu name>"),
@@ -21278,6 +21766,8 @@ struct arm_long_option_table arm_long_opts[] =
   {"meabi=", N_("<ver>\t\t  assemble for eabi version <ver>"),
    arm_parse_eabi, NULL},
 #endif
+  {"mimplicit-it=", N_("<mode>\t  controls implicit insertion of IT instructions"),
+   arm_parse_it_mode, NULL},
   {NULL, NULL, 0, NULL}
 };
 

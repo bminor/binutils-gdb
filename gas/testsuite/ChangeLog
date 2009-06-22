@@ -1,3 +1,26 @@
+2009-06-22  Daniel Gutson <dgutson@codesourcery.com>
+
+	* gas/arm/arm-it-auto.d: New test.
+	* gas/arm/arm-it-auto.s: New file.
+	* gas/arm/arm-it-auto-2.d: New test case.
+	* gas/arm/arm-it-auto-2.s: New file.
+	* gas/arm/arm-it-auto-3.d: New test case.
+	* gas/arm/arm-it-auto-3.s: New file.
+	* gas/arm/arm-it-bad.d: New test case.
+	* gas/arm/arm-it-bad.l: New file.
+	* gas/arm/arm-it-bad.s: New file.
+	* gas/arm/arm-it-bad-2.d: New test case.
+	* gas/arm/arm-it-bad-2.l: New file.
+	* gas/arm/arm-it-bad-2.s: New file.
+	* gas/arm/arm-it-bad-3.d: New test case.
+	* gas/arm/arm-it-bad-3.l: New file.
+	* gas/arm/arm-it-bad-3.s: New file.
+	* gas/arm/thumb2_it_auto.d: New test.
+	* gas/arm/thumb2_it_bad.l: Error message updated.
+	* gas/arm/thumb2_it_bad_auto.d: New test.
+	* gas/arm/thumb2_it.d: Comment added.
+	* gas/arm/thumb2_it_bad.d: Comment added.
+
 2009-06-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/cfi/cfi-common-7.s: Skip a multiple of four.

@@ -1,9 +1,65 @@
+2009-06-22  Daniel Gutson <dgutson@codesourcery.com>
+
+	* config/tc-arm.c (implicit_it_mode): New enum.
+	(implicit_it_mode): New global.
+	(it_instruction_type): New enum.
+	(arm_parse_it_mode): New function.
+	(arm_long_opts): New option added.
+	(arm_it): New field.
+	(it_state): New enum.
+	(now_it): New macro.
+	(check_it_blocks_finished): New function.
+	(insns[]): Use the IT Thumb opcodes for ARM too.
+	(arm_cleanup): Call check_it_blocks_finished.
+	(now_it_compatible): New function.
+	(conditional_insn): New function.
+	(set_it_insn_type): New macro.
+	(set_it_insn_type_last): New macro.
+	(do_it): Call automatic IT machinery functions.
+	(do_t_add_sub): Likewise
+	(do_t_arit3): Likewise.
+	(do_t_arit3c): Likewise.
+	(do_t_blx): Likewise.
+	(do_t_branch): Likewise.
+	(do_t_bkpt): Likewise.
+	(do_t_branch23): Likewise.
+	(do_t_bx): Likewise.
+	(do_t_bxj): Likewise.
+	(do_t_cps): Likewise.
+	(do_t_cpsi): Likewise.
+	(do_t_cbz): Likewise.
+	(do_t_it): Likewise.
+	(encode_thumb2_ldmstm): Likewise.
+	(do_t_ldst): Likewise.
+	(do_t_mov_cmp): Likewise.
+	(do_t_mvn_tst): Likewise.
+	(do_t_mul): Likewise.
+	(do_t_neg): Likewise.
+	(do_t_setend): Likewise.
+	(do_t_shift): Likewise.
+	(do_t_tb): Likewise.
+	(output_it_inst): New function.
+	(new_automatic_it_block): New function.
+	(close_automatic_it_block): New function.
+	(now_it_add_mask): New function.
+	(it_fsm_pre_encode): New function.
+	(handle_it_state): New function.
+	(it_fsm_post_encode): New function.
+	(force_automatic_it_block_close): New function.
+	(in_it_block): New function.
+	(md_assemble): Call automatic IT block machinery functions.
+	(arm_frob_label): Likewise.
+	(arm_opts): New element.
+	* config/tc-arm.h (it_state): New enum.
+	(current_it): New struct.
+	(arm_segment_info_type): New member added.
+	* doc/c-arm.texi: New option -mimplicit-it documented.
+
 2009-06-20  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 10302
 	* doc/as.texinfo (Section <ELF "M,S" flag>): Clarify tail merge.
 
-=======
 2009-06-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (md_gather_operands): Accept an instruction
