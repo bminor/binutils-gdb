@@ -1772,8 +1772,10 @@ darwin_xfer_partial (struct target_ops *ops,
   struct inferior *inf = current_inferior ();
 
   inferior_debug
-    (8, _("darwin_xfer_partial(%s, %d, rbuf=%p, wbuf=%p) pid=%u\n"),
-     core_addr_to_string (offset), (int)len, readbuf, writebuf, inf->pid);
+    (8, _("darwin_xfer_partial(%s, %d, rbuf=%s, wbuf=%s) pid=%u\n"),
+     core_addr_to_string (offset), (int)len,
+     host_address_to_string (readbuf), host_address_to_string (writebuf),
+     inf->pid);
 
   if (object != TARGET_OBJECT_MEMORY)
     return -1;
