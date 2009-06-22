@@ -1,6 +1,6 @@
 // elfcpp.h -- main header file for elfcpp    -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of elfcpp.
@@ -321,6 +321,9 @@ enum
   // with the SHF_LINK_ORDER and SHF_ORDERED section flags.
   SHN_BEFORE = 0xff00,
   SHN_AFTER = 0xff01,
+
+  // x86_64 specific large common symbol.
+  SHN_X86_64_LCOMMON = 0xff02
 };
 
 // The valid values found in the Shdr sh_type field.
@@ -382,6 +385,9 @@ enum SHT
   SHT_ARM_DEBUGOVERLAY = 0x70000004,
   SHT_ARM_OVERLAYSECTION = 0x70000005,
 
+  // x86_64 unwind information.
+  SHT_X86_64_UNWIND = 0x70000001,
+
   // Link editor is to sort the entries in this section based on the
   // address specified in the associated symbol table entry.
   SHT_ORDERED = 0x7fffffff,
@@ -415,6 +421,9 @@ enum SHF
   // executable or shared object.  This flag is ignored if SHF_ALLOC
   // is also set, or if relocations exist against the section.
   SHF_EXCLUDE = 0x80000000,
+
+  // x86_64 specific large section.
+  SHF_X86_64_LARGE = 0x10000000
 };
 
 // Bit flags which appear in the first 32-bit word of the section data

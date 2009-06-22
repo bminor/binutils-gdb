@@ -1,3 +1,9 @@
+2009-06-21  Ian Lance Taylor  <iant@google.com>
+
+	* elfcpp.h (SHN_X86_64_LCOMMON): Define enum constant.
+	(enum SHT): Add SHT_X86_64_UNWIND.
+	(enum SHF): Add SHT_X86_64_LARGE.
+
 2009-05-27  Doug Kwan  <dougkwan@google.com>
 
 	* arm.h: New file.
