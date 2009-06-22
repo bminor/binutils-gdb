@@ -1,3 +1,8 @@
+2009-06-22  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-pe/pe-run.exp (proc test_direct_link_dll):  Fix incorrect
+	line-wrapping.
+
 2009-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/i386.exp: Run tlsgd2.
