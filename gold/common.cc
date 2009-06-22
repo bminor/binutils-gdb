@@ -146,10 +146,18 @@ template<int size>
 void
 Symbol_table::do_allocate_commons(Layout* layout, Mapfile* mapfile)
 {
-  this->do_allocate_commons_list<size>(layout, false, &this->commons_,
-				       mapfile);
-  this->do_allocate_commons_list<size>(layout, true, &this->tls_commons_,
-				       mapfile);
+  if (!this->commons_.empty())
+    this->do_allocate_commons_list<size>(layout, COMMONS_NORMAL,
+					 &this->commons_, mapfile);
+  if (!this->tls_commons_.empty())
+    this->do_allocate_commons_list<size>(layout, COMMONS_TLS,
+					 &this->tls_commons_, mapfile);
+  if (!this->small_commons_.empty())
+    this->do_allocate_commons_list<size>(layout, COMMONS_SMALL,
+					 &this->small_commons_, mapfile);
+  if (!this->large_commons_.empty())
+    this->do_allocate_commons_list<size>(layout, COMMONS_LARGE,
+					 &this->large_commons_, mapfile);
 }
 
 // Allocate the common symbols in a list.  IS_TLS indicates whether
@@ -157,9 +165,11 @@ Symbol_table::do_allocate_commons(Layout* layout, Mapfile* mapfile)
 
 template<int size>
 void
-Symbol_table::do_allocate_commons_list(Layout* layout, bool is_tls,
-				       Commons_type* commons,
-				       Mapfile* mapfile)
+Symbol_table::do_allocate_commons_list(
+    Layout* layout,
+    Commons_section_type commons_section_type,
+    Commons_type* commons,
+    Mapfile* mapfile)
 {
   typedef typename Sized_symbol<size>::Value_type Value_type;
   typedef typename Sized_symbol<size>::Size_type Size_type;
@@ -198,20 +208,45 @@ Symbol_table::do_allocate_commons_list(Layout* layout, bool is_tls,
 	    Sort_commons<size>(this));
 
   // Place them in a newly allocated BSS section.
-
-  Output_data_space *poc = new Output_data_space(addralign,
-						 (is_tls
-						  ? "** tls common"
-						  : "** common"));
-
-  const char* name = ".bss";
   elfcpp::Elf_Xword flags = elfcpp::SHF_WRITE | elfcpp::SHF_ALLOC;
-  if (is_tls)
+  const char* name;
+  const char* ds_name;
+  switch (commons_section_type)
     {
-      name = ".tbss";
+    case COMMONS_NORMAL:
+      name = ".bss";
+      ds_name = "** common";
+      break;
+    case COMMONS_TLS:
       flags |= elfcpp::SHF_TLS;
+      name = ".tbss";
+      ds_name = "** tls common";
+      break;
+    case COMMONS_SMALL:
+      flags |= parameters->target().small_common_section_flags();
+      name = ".sbss";
+      ds_name = "** small common";
+      break;
+    case COMMONS_LARGE:
+      flags |= parameters->target().large_common_section_flags();
+      name = ".lbss";
+      ds_name = "** large common";
+      break;
+    default:
+      gold_unreachable();
     }
-  layout->add_output_section_data(name, elfcpp::SHT_NOBITS, flags, poc);
+
+  Output_data_space *poc = new Output_data_space(addralign, ds_name);
+  Output_section *os = layout->add_output_section_data(name,
+						       elfcpp::SHT_NOBITS,
+						       flags, poc);
+  if (os != NULL)
+    {
+      if (commons_section_type == COMMONS_SMALL)
+	os->set_is_small_section();
+      else if (commons_section_type == COMMONS_LARGE)
+	os->set_is_large_section();
+    }
 
   // Allocate them all.
 

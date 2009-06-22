@@ -352,7 +352,11 @@ Target::Target_info Target_powerpc<32, true>::powerpc_info =
   "/usr/lib/ld.so.1",	// dynamic_linker
   0x10000000,		// default_text_segment_address
   64 * 1024,		// abi_pagesize (overridable by -z max-page-size)
-  4 * 1024		// common_pagesize (overridable by -z common-page-size)
+  4 * 1024,		// common_pagesize (overridable by -z common-page-size)
+  elfcpp::SHN_UNDEF,	// small_common_shndx
+  elfcpp::SHN_UNDEF,	// large_common_shndx
+  0,			// small_common_section_flags
+  0			// large_common_section_flags
 };
 
 template<>
@@ -369,7 +373,11 @@ Target::Target_info Target_powerpc<32, false>::powerpc_info =
   "/usr/lib/ld.so.1",	// dynamic_linker
   0x10000000,		// default_text_segment_address
   64 * 1024,		// abi_pagesize (overridable by -z max-page-size)
-  4 * 1024		// common_pagesize (overridable by -z common-page-size)
+  4 * 1024,		// common_pagesize (overridable by -z common-page-size)
+  elfcpp::SHN_UNDEF,	// small_common_shndx
+  elfcpp::SHN_UNDEF,	// large_common_shndx
+  0,			// small_common_section_flags
+  0			// large_common_section_flags
 };
 
 template<>
@@ -386,7 +394,11 @@ Target::Target_info Target_powerpc<64, true>::powerpc_info =
   "/usr/lib/ld.so.1",	// dynamic_linker
   0x10000000,		// default_text_segment_address
   64 * 1024,		// abi_pagesize (overridable by -z max-page-size)
-  8 * 1024		// common_pagesize (overridable by -z common-page-size)
+  8 * 1024,		// common_pagesize (overridable by -z common-page-size)
+  elfcpp::SHN_UNDEF,	// small_common_shndx
+  elfcpp::SHN_UNDEF,	// large_common_shndx
+  0,			// small_common_section_flags
+  0			// large_common_section_flags
 };
 
 template<>
@@ -403,7 +415,11 @@ Target::Target_info Target_powerpc<64, false>::powerpc_info =
   "/usr/lib/ld.so.1",	// dynamic_linker
   0x10000000,		// default_text_segment_address
   64 * 1024,		// abi_pagesize (overridable by -z max-page-size)
-  8 * 1024		// common_pagesize (overridable by -z common-page-size)
+  8 * 1024,		// common_pagesize (overridable by -z common-page-size)
+  elfcpp::SHN_UNDEF,	// small_common_shndx
+  elfcpp::SHN_UNDEF,	// large_common_shndx
+  0,			// small_common_section_flags
+  0			// large_common_section_flags
 };
 
 template<int size, bool big_endian>

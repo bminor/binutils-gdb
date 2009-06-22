@@ -371,7 +371,11 @@ Target::Target_info Target_sparc<32, true>::sparc_info =
   "/usr/lib/ld.so.1",	// dynamic_linker
   0x00010000,		// default_text_segment_address
   64 * 1024,		// abi_pagesize (overridable by -z max-page-size)
-  8 * 1024		// common_pagesize (overridable by -z common-page-size)
+  8 * 1024,		// common_pagesize (overridable by -z common-page-size)
+  elfcpp::SHN_UNDEF,	// small_common_shndx
+  elfcpp::SHN_UNDEF,	// large_common_shndx
+  0,			// small_common_section_flags
+  0			// large_common_section_flags
 };
 
 template<>
@@ -388,7 +392,11 @@ Target::Target_info Target_sparc<64, true>::sparc_info =
   "/usr/lib/sparcv9/ld.so.1",	// dynamic_linker
   0x100000,		// default_text_segment_address
   64 * 1024,		// abi_pagesize (overridable by -z max-page-size)
-  8 * 1024		// common_pagesize (overridable by -z common-page-size)
+  8 * 1024,		// common_pagesize (overridable by -z common-page-size)
+  elfcpp::SHN_UNDEF,	// small_common_shndx
+  elfcpp::SHN_UNDEF,	// large_common_shndx
+  0,			// small_common_section_flags
+  0			// large_common_section_flags
 };
 
 // We have to take care here, even when operating in little-endian

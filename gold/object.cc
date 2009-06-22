@@ -1554,7 +1554,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 
       if (!is_ordinary)
 	{
-	  if (shndx == elfcpp::SHN_ABS || shndx == elfcpp::SHN_COMMON)
+	  if (shndx == elfcpp::SHN_ABS || Symbol::is_common_shndx(shndx))
 	    lv.set_output_value(lv.input_value());
 	  else
 	    {

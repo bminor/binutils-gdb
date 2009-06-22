@@ -788,6 +788,8 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
  else
     os = new Output_section(name, type, flags);
 
+  parameters->target().new_output_section(os);
+
   this->section_list_.push_back(os);
 
   // The GNU linker by default sorts some sections by priority, so we
@@ -875,7 +877,8 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
 
   // In general the only thing we really care about for PT_LOAD
   // segments is whether or not they are writable, so that is how we
-  // search for them.  People who need segments sorted on some other
+  // search for them.  Large data sections also go into their own
+  // PT_LOAD segment.  People who need segments sorted on some other
   // basis will have to use a linker script.
 
   Segment_list::const_iterator p;
@@ -883,28 +886,32 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
        p != this->segment_list_.end();
        ++p)
     {
-      if ((*p)->type() == elfcpp::PT_LOAD
-	  && (parameters->options().omagic()
-	      || ((*p)->flags() & elfcpp::PF_W) == (seg_flags & elfcpp::PF_W)))
-        {
-          // If -Tbss was specified, we need to separate the data
-          // and BSS segments.
-          if (parameters->options().user_set_Tbss())
-            {
-              if ((os->type() == elfcpp::SHT_NOBITS)
-                  == (*p)->has_any_data_sections())
-                continue;
-            }
+      if ((*p)->type() != elfcpp::PT_LOAD)
+	continue;
+      if (!parameters->options().omagic()
+	  && ((*p)->flags() & elfcpp::PF_W) != (seg_flags & elfcpp::PF_W))
+	continue;
+      // If -Tbss was specified, we need to separate the data and BSS
+      // segments.
+      if (parameters->options().user_set_Tbss())
+	{
+	  if ((os->type() == elfcpp::SHT_NOBITS)
+	      == (*p)->has_any_data_sections())
+	    continue;
+	}
+      if (os->is_large_data_section() && !(*p)->is_large_data_segment())
+	continue;
 
-          (*p)->add_output_section(os, seg_flags);
-          break;
-        }
+      (*p)->add_output_section(os, seg_flags);
+      break;
     }
 
   if (p == this->segment_list_.end())
     {
       Output_segment* oseg = this->make_output_segment(elfcpp::PT_LOAD,
                                                        seg_flags);
+      if (os->is_large_data_section())
+	oseg->set_is_large_data_segment();
       oseg->add_output_section(os, seg_flags);
     }
 
@@ -1729,14 +1736,25 @@ Layout::segment_precedes(const Output_segment* seg1,
   else if (seg2->are_addresses_set())
     return false;
 
-  // We sort PT_LOAD segments based on the flags.  Readonly segments
-  // come before writable segments.  Then writable segments with data
-  // come before writable segments without data.  Then executable
-  // segments come before non-executable segments.  Then the unlikely
-  // case of a non-readable segment comes before the normal case of a
-  // readable segment.  If there are multiple segments with the same
-  // type and flags, we require that the address be set, and we sort
-  // by virtual address and then physical address.
+  // A segment which holds large data comes after a segment which does
+  // not hold large data.
+  if (seg1->is_large_data_segment())
+    {
+      if (!seg2->is_large_data_segment())
+	return false;
+    }
+  else if (seg2->is_large_data_segment())
+    return true;
+
+  // Otherwise, we sort PT_LOAD segments based on the flags.  Readonly
+  // segments come before writable segments.  Then writable segments
+  // with data come before writable segments without data.  Then
+  // executable segments come before non-executable segments.  Then
+  // the unlikely case of a non-readable segment comes before the
+  // normal case of a readable segment.  If there are multiple
+  // segments with the same type and flags, we require that the
+  // address be set, and we sort by virtual address and then physical
+  // address.
   if ((flags1 & elfcpp::PF_W) != (flags2 & elfcpp::PF_W))
     return (flags1 & elfcpp::PF_W) == 0;
   if ((flags1 & elfcpp::PF_W) != 0
@@ -1750,6 +1768,19 @@ Layout::segment_precedes(const Output_segment* seg1,
   // We shouldn't get here--we shouldn't create segments which we
   // can't distinguish.
   gold_unreachable();
+}
+
+// Increase OFF so that it is congruent to ADDR modulo ABI_PAGESIZE.
+
+static off_t
+align_file_offset(off_t off, uint64_t addr, uint64_t abi_pagesize)
+{
+  uint64_t unsigned_off = off;
+  uint64_t aligned_off = ((unsigned_off & ~(abi_pagesize - 1))
+			  | (addr & (abi_pagesize - 1)));
+  if (aligned_off < unsigned_off)
+    aligned_off += abi_pagesize;
+  return aligned_off;
 }
 
 // Set the file offsets of all the segments, and all the sections they
@@ -1838,22 +1869,7 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	      && !parameters->options().omagic())
 	    (*p)->set_minimum_p_align(common_pagesize);
 
-	  if (are_addresses_set)
-	    {
-	      if (!parameters->options().nmagic()
-		  && !parameters->options().omagic())
-		{
-		  // Adjust the file offset to the same address modulo
-		  // the page size.
-		  uint64_t unsigned_off = off;
-		  uint64_t aligned_off = ((unsigned_off & ~(abi_pagesize - 1))
-					  | (addr & (abi_pagesize - 1)));
-		  if (aligned_off < unsigned_off)
-		    aligned_off += abi_pagesize;
-		  off = aligned_off;
-		}
-	    }
-	  else
+	  if (!are_addresses_set)
 	    {
 	      // If the last segment was readonly, and this one is
 	      // not, then skip the address forward one page,
@@ -1873,6 +1889,10 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
 	      off = orig_off + ((addr - orig_addr) & (abi_pagesize - 1));
 	    }
+
+	  if (!parameters->options().nmagic()
+	      && !parameters->options().omagic())
+	    off = align_file_offset(off, addr, abi_pagesize);
 
 	  unsigned int shndx_hold = *pshndx;
 	  uint64_t new_addr = (*p)->set_section_addresses(this, false, addr,
@@ -1900,6 +1920,7 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 		  addr = align_address(aligned_addr, common_pagesize);
 		  addr = align_address(addr, (*p)->maximum_alignment());
 		  off = orig_off + ((addr - orig_addr) & (abi_pagesize - 1));
+		  off = align_file_offset(off, addr, abi_pagesize);
 		  new_addr = (*p)->set_section_addresses(this, true, addr,
                                                          &off, pshndx);
 		}

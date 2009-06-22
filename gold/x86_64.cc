@@ -67,6 +67,10 @@ class Target_x86_64 : public Target_freebsd<64, false>
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
   { }
 
+  // Hook for a new output section.
+  void
+  do_new_output_section(Output_section*) const;
+
   // Scan the relocations to look for symbol adjustments.
   void
   gc_process_relocs(const General_options& options,
@@ -438,8 +442,22 @@ const Target::Target_info Target_x86_64::x86_64_info =
   "/lib/ld64.so.1",     // program interpreter
   0x400000,		// default_text_segment_address
   0x1000,		// abi_pagesize (overridable by -z max-page-size)
-  0x1000		// common_pagesize (overridable by -z common-page-size)
+  0x1000,		// common_pagesize (overridable by -z common-page-size)
+  elfcpp::SHN_UNDEF,	// small_common_shndx
+  elfcpp::SHN_X86_64_LCOMMON,	// large_common_shndx
+  0,			// small_common_section_flags
+  elfcpp::SHF_X86_64_LARGE	// large_common_section_flags
 };
+
+// This is called when a new output section is created.  This is where
+// we handle the SHF_X86_64_LARGE.
+
+void
+Target_x86_64::do_new_output_section(Output_section *os) const
+{
+  if ((os->flags() & elfcpp::SHF_X86_64_LARGE) != 0)
+    os->set_is_large_section();
+}
 
 // Get the GOT section, creating it if necessary.
 

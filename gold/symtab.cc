@@ -280,6 +280,16 @@ Sized_symbol<size>::init_undefined(const char* name, const char* version,
   this->symsize_ = 0;
 }
 
+// Return true if SHNDX represents a common symbol.
+
+bool
+Symbol::is_common_shndx(unsigned int shndx)
+{
+  return (shndx == elfcpp::SHN_COMMON
+	  || shndx == parameters->target().small_common_shndx()
+	  || shndx == parameters->target().large_common_shndx());
+}
+
 // Allocate a common symbol.
 
 template<int size>
@@ -477,7 +487,8 @@ Symbol::set_output_section(Output_section* os)
 Symbol_table::Symbol_table(unsigned int count,
                            const Version_script_info& version_script)
   : saw_undefined_(0), offset_(0), table_(count), namepool_(),
-    forwarders_(), commons_(), tls_commons_(), forced_locals_(), warnings_(),
+    forwarders_(), commons_(), tls_commons_(), small_commons_(),
+    large_commons_(), forced_locals_(), warnings_(),
     version_script_(version_script), gc_(NULL)
 {
   namepool_.reserve(count);
@@ -975,10 +986,16 @@ Symbol_table::add_from_object(Object* object,
   // allocation.
   if (!was_common && ret->is_common())
     {
-      if (ret->type() != elfcpp::STT_TLS)
-	this->commons_.push_back(ret);
-      else
+      if (ret->type() == elfcpp::STT_TLS)
 	this->tls_commons_.push_back(ret);
+      else if (!is_ordinary
+	       && st_shndx == parameters->target().small_common_shndx())
+	this->small_commons_.push_back(ret);
+      else if (!is_ordinary
+	       && st_shndx == parameters->target().large_common_shndx())
+	this->large_commons_.push_back(ret);
+      else
+	this->commons_.push_back(ret);
     }
 
   // If we're not doing a relocatable link, then any symbol with
@@ -2370,10 +2387,9 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 	bool is_ordinary;
 	unsigned int shndx = sym->shndx(&is_ordinary);
 
-	// FIXME: We need some target specific support here.
 	if (!is_ordinary
 	    && shndx != elfcpp::SHN_ABS
-	    && shndx != elfcpp::SHN_COMMON)
+	    && !Symbol::is_common_shndx(shndx))
 	  {
 	    gold_error(_("%s: unsupported symbol section 0x%x"),
 		       sym->demangled_name().c_str(), shndx);
@@ -2394,7 +2410,8 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 	else if (shndx == elfcpp::SHN_UNDEF)
 	  value = 0;
 	else if (!is_ordinary
-		 && (shndx == elfcpp::SHN_ABS || shndx == elfcpp::SHN_COMMON))
+		 && (shndx == elfcpp::SHN_ABS
+		     || Symbol::is_common_shndx(shndx)))
 	  value = sym->value();
 	else
 	  {
@@ -2597,10 +2614,9 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	    bool is_ordinary;
 	    unsigned int in_shndx = sym->shndx(&is_ordinary);
 
-	    // FIXME: We need some target specific support here.
 	    if (!is_ordinary
 		&& in_shndx != elfcpp::SHN_ABS
-		&& in_shndx != elfcpp::SHN_COMMON)
+		&& !Symbol::is_common_shndx(in_shndx))
 	      {
 		gold_error(_("%s: unsupported symbol section 0x%x"),
 			   sym->demangled_name().c_str(), in_shndx);
@@ -2620,7 +2636,7 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 		else if (in_shndx == elfcpp::SHN_UNDEF
 			 || (!is_ordinary
 			     && (in_shndx == elfcpp::SHN_ABS
-				 || in_shndx == elfcpp::SHN_COMMON)))
+				 || Symbol::is_common_shndx(in_shndx))))
 		  shndx = in_shndx;
 		else
 		  {

@@ -1,3 +1,78 @@
+2009-06-21  Ian Lance Taylor  <ian@airs.com>
+
+	* layout.cc (Layout::make_output_section): Call
+	Target::new_output_section.
+	(Layout::attach_allocated_section_to_segment): Put large section
+	sections in a separate load segment with the large segment flag
+	set.
+	(Layout::segment_precedes): Sort large data segments after other
+	load segments.
+	(align_file_offset): New static function.
+	(Layout::set_segment_offsets): Use align_file_offset.
+	* output.h (class Output_section): Add is_small_section_ and
+	is_large_section_ fields.
+	(Output_section::is_small_section): New function.
+	(Output_section::set_is_small_section):  New function.
+	(Output_section::is_large_section): New function.
+	(Output_section::set_is_large_section): New function.
+	(Output_section::is_large_data_section): New function.
+	(class Output_segment): Add is_large_data_segment_ field.
+	(Output_segment::is_large_data_segment): New function.
+	(Output_segment::set_is_large_data_segment): New function.
+	* output.cc (Output_section::Output_section): Initialize new
+	fields.
+	(Output_segment::Output_segment): Likewise.
+	(Output_segment::add_output_section): Add assertion that large
+	data sections always go in large data segments.  Force small data
+	sections to the end of the list of data sections.  Force small BSS
+	sections to the start of the list of BSS sections.  For large BSS
+	sections to the end of the list of BSS sections.
+	* symtab.h (class Symbol): Declare is_common_shndx.
+	(Symbol::is_defined): Check Symbol::is_common_shndx.
+	(Symbol::is_common): Likewise.
+	(class Symbol_table): Define enum Commons_section_type.  Update
+	declarations.  Add small_commons_ and large_commons_ fields.
+	* symtab.cc (Symbol::is_common_shndx): New function.
+	(Symbol_table::Symbol_table): Initialize new fields.
+	(Symbol_table::add_from_object): Put small and large common
+	symbols in the right list.
+	(Symbol_table::sized_finalized_symbol): Check
+	Symbol::is_common_shndx.
+	(Symbol_table::sized_write_globals): Likewise.
+	* common.cc (Symbol_table::do_allocate_commons): Allocate new
+	common symbol lists.  Don't call do_allocate_commons_list if the
+	list is empty.
+	(Symbol_table::do_allocate_commons_list): Remove is_tls
+	parameter.  Add comons_section_type parameter.  Change all
+	callers.  Handle small and large common symbols.
+	* object.cc (Sized_relobj::do_finalize_local_symbols): Check
+	Symbol::is_common_shndx.
+	* resolve.cc (symbol_to_bits): Likewise.
+	* target.h (Target::small_common_shndx): New function.
+	(Target::small_common_section_flags): New function.
+	(Target::large_common_shndx): New function.
+	(Target::large_common_section_flags): New function.
+	(Target::new_output_section): New function.
+	(Target::Target_info): Add small_common_shndx, large_common_shndx,
+	small_common_section_flags, and large_common_section_flags
+	fields.
+	(Target::do_new_output_section): New virtual function.
+	* arm.cc (Target_arm::arm_info): Initialize new fields.
+	* i386.cc (Target_i386::i386_info): Likewise.
+	* powerpc.cc (Target_powerpc::powerpc_info) [all versions]:
+	Likewise.
+	* sparc.c (Target_sparc::sparc_info) [all versions]: Likewise.
+	* x86_64.cc (Target_x86_64::x86_64_info): Likewise.
+	(Target_x86_64::do_new_output_section): New function.
+	* configure.ac: Define conditional MCMODEL_MEDIUM.
+	* testsuite/Makefile.am (check_PROGRAMS): Add large.
+	(large_SOURCES, large_CFLAGS, large_DEPENDENCIES): Define.
+	(large_LDFLAGS): Define.
+	* testsuite/large.c: New file.
+	* testsuite/testfile.cc (Target_test::test_target_info):
+	Initialize new fields.
+	* configure, testsuite/Makefile.in: Rebuild.
+
 2009-06-05  Doug Kwan  <dougkwan@google.com>
 
 	* Makefile.am (CCFILES): Add target.cc.

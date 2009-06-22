@@ -221,6 +221,9 @@ AM_CONDITIONAL(FN_PTRS_IN_SO_WITHOUT_PIC, [
     *) true;;
   esac])
 
+dnl Whether we can test -mcmodel=medium.
+AM_CONDITIONAL(MCMODEL_MEDIUM, [test "$target_cpu" = "x86_64"])
+
 dnl Test for __thread support.
 AC_CACHE_CHECK([for thread support], [gold_cv_c_thread],
 [AC_COMPILE_IFELSE([__thread int i = 1;],

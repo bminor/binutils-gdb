@@ -2195,6 +2195,33 @@ class Output_section : public Output_data
   set_is_relro_local()
   { this->is_relro_local_ = true; }
 
+  // True if this is a small section: a section which holds small
+  // variables.
+  bool
+  is_small_section() const
+  { return this->is_small_section_; }
+
+  // Record that this is a small section.
+  void
+  set_is_small_section()
+  { this->is_small_section_ = true; }
+
+  // True if this is a large section: a section which holds large
+  // variables.
+  bool
+  is_large_section() const
+  { return this->is_large_section_; }
+
+  // Record that this is a large section.
+  void
+  set_is_large_section()
+  { this->is_large_section_ = true; }
+
+  // True if this is a large data (not BSS) section.
+  bool
+  is_large_data_section()
+  { return this->is_large_section_ && this->type_ != elfcpp::SHT_NOBITS; }
+
   // Return whether this section should be written after all the input
   // sections are complete.
   bool
@@ -2808,6 +2835,10 @@ class Output_section : public Output_data
   bool is_relro_ : 1;
   // True if this section holds relro local data.
   bool is_relro_local_ : 1;
+  // True if this is a small section.
+  bool is_small_section_ : 1;
+  // True if this is a large section.
+  bool is_large_section_ : 1;
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;
@@ -2857,6 +2888,17 @@ class Output_segment
   off_t
   offset() const
   { return this->offset_; }
+
+  // Whether this is a segment created to hold large data sections.
+  bool
+  is_large_data_segment() const
+  { return this->is_large_data_segment_; }
+
+  // Record that this is a segment created to hold large data
+  // sections.
+  void
+  set_is_large_data_segment()
+  { this->is_large_data_segment_ = true; }
 
   // Return the maximum alignment of the Output_data.
   uint64_t
@@ -3040,6 +3082,8 @@ class Output_segment
   bool is_max_align_known_ : 1;
   // Whether vaddr and paddr were set by a linker script.
   bool are_addresses_set_ : 1;
+  // Whether this segment holds large data sections.
+  bool is_large_data_segment_ : 1;
 };
 
 // This class represents the output file.

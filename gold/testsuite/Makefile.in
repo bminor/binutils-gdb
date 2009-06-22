@@ -48,7 +48,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 	$(am__EXEEXT_7) $(am__EXEEXT_8) $(am__EXEEXT_9) \
 	$(am__EXEEXT_10) $(am__EXEEXT_11) $(am__EXEEXT_12) \
 	$(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15) \
-	$(am__EXEEXT_16) $(am__EXEEXT_17)
+	$(am__EXEEXT_16) $(am__EXEEXT_17) $(am__EXEEXT_18)
 
 # Test --detect-odr-violations
 
@@ -330,6 +330,20 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_2.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libexclude_libs_test_3.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms
+@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_28 = large
+@GCC_FALSE@large_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@MCMODEL_MEDIUM_FALSE@large_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@MCMODEL_MEDIUM_FALSE@	../../libiberty/libiberty.a \
+@MCMODEL_MEDIUM_FALSE@	$(am__DEPENDENCIES_1) \
+@MCMODEL_MEDIUM_FALSE@	$(am__DEPENDENCIES_1) \
+@MCMODEL_MEDIUM_FALSE@	$(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@large_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -438,6 +452,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exclude_libs_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test$(EXEEXT)
+@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_18 = large$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -589,6 +604,10 @@ am__justsyms_SOURCES_DIST = justsyms_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_1.$(OBJEXT)
 justsyms_OBJECTS = $(am_justsyms_OBJECTS)
 justsyms_LDADD = $(LDADD)
+am__large_SOURCES_DIST = large.c
+@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am_large_OBJECTS = large-large.$(OBJEXT)
+large_OBJECTS = $(am_large_OBJECTS)
+large_LDADD = $(LDADD)
 local_labels_test_SOURCES = local_labels_test.c
 local_labels_test_OBJECTS = local_labels_test.$(OBJEXT)
 local_labels_test_LDADD = $(LDADD)
@@ -923,15 +942,16 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(exclude_libs_test_SOURCES) \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
-	$(initpri1_SOURCES) $(justsyms_SOURCES) local_labels_test.c \
-	many_sections_r_test.c $(many_sections_test_SOURCES) \
-	$(object_unittest_SOURCES) plugin_test_1.c plugin_test_2.c \
-	plugin_test_3.c plugin_test_4.c $(protected_1_SOURCES) \
-	$(protected_2_SOURCES) $(relro_script_test_SOURCES) \
-	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
-	$(script_test_2_SOURCES) script_test_3.c \
-	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
-	$(tls_pic_test_SOURCES) $(tls_shared_gd_to_ie_test_SOURCES) \
+	$(initpri1_SOURCES) $(justsyms_SOURCES) $(large_SOURCES) \
+	local_labels_test.c many_sections_r_test.c \
+	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
+	plugin_test_1.c plugin_test_2.c plugin_test_3.c \
+	plugin_test_4.c $(protected_1_SOURCES) $(protected_2_SOURCES) \
+	$(relro_script_test_SOURCES) $(relro_test_SOURCES) \
+	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
+	script_test_3.c $(thin_archive_test_1_SOURCES) \
+	$(thin_archive_test_2_SOURCES) $(tls_pic_test_SOURCES) \
+	$(tls_shared_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
@@ -979,8 +999,8 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(am__initpri1_SOURCES_DIST) $(am__justsyms_SOURCES_DIST) \
-	local_labels_test.c many_sections_r_test.c \
-	$(am__many_sections_test_SOURCES_DIST) \
+	$(am__large_SOURCES_DIST) local_labels_test.c \
+	many_sections_r_test.c $(am__many_sections_test_SOURCES_DIST) \
 	$(object_unittest_SOURCES) plugin_test_1.c plugin_test_2.c \
 	plugin_test_3.c plugin_test_4.c \
 	$(am__protected_1_SOURCES_DIST) \
@@ -1086,6 +1106,8 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+MCMODEL_MEDIUM_FALSE = @MCMODEL_MEDIUM_FALSE@
+MCMODEL_MEDIUM_TRUE = @MCMODEL_MEDIUM_TRUE@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
 MSGMERGE = @MSGMERGE@
@@ -1546,6 +1568,10 @@ binary_unittest_SOURCES = binary_unittest.cc
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@discard_locals_test_SOURCES = discard_locals_test.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@discard_locals_test_LDFLAGS = -Bgcctestdir/ -Wl,--discard-locals
+@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_SOURCES = large.c
+@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_CFLAGS = -mcmodel=medium
+@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_LDFLAGS = -Bgcctestdir/
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -1689,6 +1715,9 @@ initpri1$(EXEEXT): $(initpri1_OBJECTS) $(initpri1_DEPENDENCIES)
 justsyms$(EXEEXT): $(justsyms_OBJECTS) $(justsyms_DEPENDENCIES) 
 	@rm -f justsyms$(EXEEXT)
 	$(CXXLINK) $(justsyms_LDFLAGS) $(justsyms_OBJECTS) $(justsyms_LDADD) $(LIBS)
+large$(EXEEXT): $(large_OBJECTS) $(large_DEPENDENCIES) 
+	@rm -f large$(EXEEXT)
+	$(LINK) $(large_LDFLAGS) $(large_OBJECTS) $(large_LDADD) $(LIBS)
 @GCC_FALSE@local_labels_test$(EXEEXT): $(local_labels_test_OBJECTS) $(local_labels_test_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f local_labels_test$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(local_labels_test_LDFLAGS) $(local_labels_test_OBJECTS) $(local_labels_test_LDADD) $(LIBS)
@@ -1928,6 +1957,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/initpri1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/large-large.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/local_labels_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_r_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
@@ -1979,6 +2009,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+large-large.o: large.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(large_CFLAGS) $(CFLAGS) -MT large-large.o -MD -MP -MF "$(DEPDIR)/large-large.Tpo" -c -o large-large.o `test -f 'large.c' || echo '$(srcdir)/'`large.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/large-large.Tpo" "$(DEPDIR)/large-large.Po"; else rm -f "$(DEPDIR)/large-large.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='large.c' object='large-large.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(large_CFLAGS) $(CFLAGS) -c -o large-large.o `test -f 'large.c' || echo '$(srcdir)/'`large.c
+
+large-large.obj: large.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(large_CFLAGS) $(CFLAGS) -MT large-large.obj -MD -MP -MF "$(DEPDIR)/large-large.Tpo" -c -o large-large.obj `if test -f 'large.c'; then $(CYGPATH_W) 'large.c'; else $(CYGPATH_W) '$(srcdir)/large.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/large-large.Tpo" "$(DEPDIR)/large-large.Po"; else rm -f "$(DEPDIR)/large-large.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='large.c' object='large-large.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(large_CFLAGS) $(CFLAGS) -c -o large-large.obj `if test -f 'large.c'; then $(CYGPATH_W) 'large.c'; else $(CYGPATH_W) '$(srcdir)/large.c'; fi`
 
 .cc.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

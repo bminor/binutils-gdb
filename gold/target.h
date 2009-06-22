@@ -141,6 +141,43 @@ class Target
   wrap_char() const
   { return this->pti_->wrap_char; }
 
+  // Return the special section index which indicates a small common
+  // symbol.  This will return SHN_UNDEF if there are no small common
+  // symbols.
+  elfcpp::Elf_Half
+  small_common_shndx() const
+  { return this->pti_->small_common_shndx; }
+
+  // Return values to add to the section flags for the section holding
+  // small common symbols.
+  elfcpp::Elf_Xword
+  small_common_section_flags() const
+  {
+    gold_assert(this->pti_->small_common_shndx != elfcpp::SHN_UNDEF);
+    return this->pti_->small_common_section_flags;
+  }
+
+  // Return the special section index which indicates a large common
+  // symbol.  This will return SHN_UNDEF if there are no large common
+  // symbols.
+  elfcpp::Elf_Half
+  large_common_shndx() const
+  { return this->pti_->large_common_shndx; }
+
+  // Return values to add to the section flags for the section holding
+  // large common symbols.
+  elfcpp::Elf_Xword
+  large_common_section_flags() const
+  {
+    gold_assert(this->pti_->large_common_shndx != elfcpp::SHN_UNDEF);
+    return this->pti_->large_common_section_flags;
+  }
+
+  // This hook is called when an output section is created.
+  void
+  new_output_section(Output_section* os) const
+  { this->do_new_output_section(os); }
+
   // This is called to tell the target to complete any sections it is
   // handling.  After this all sections must have their final size.
   void
@@ -210,10 +247,25 @@ class Target
     uint64_t abi_pagesize;
     // The common page size used by actual implementations.
     uint64_t common_pagesize;
+    // The special section index for small common symbols; SHN_UNDEF
+    // if none.
+    elfcpp::Elf_Half small_common_shndx;
+    // The special section index for large common symbols; SHN_UNDEF
+    // if none.
+    elfcpp::Elf_Half large_common_shndx;
+    // Section flags for small common section.
+    elfcpp::Elf_Xword small_common_section_flags;
+    // Section flags for large common section.
+    elfcpp::Elf_Xword large_common_section_flags;
   };
 
   Target(const Target_info* pti)
     : pti_(pti)
+  { }
+
+  // Virtual function which may be implemented by the child class.
+  virtual void
+  do_new_output_section(Output_section*) const
   { }
 
   // Virtual function which may be implemented by the child class.

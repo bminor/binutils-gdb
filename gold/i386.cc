@@ -444,7 +444,11 @@ const Target::Target_info Target_i386::i386_info =
   "/usr/lib/libc.so.1",	// dynamic_linker
   0x08048000,		// default_text_segment_address
   0x1000,		// abi_pagesize (overridable by -z max-page-size)
-  0x1000		// common_pagesize (overridable by -z common-page-size)
+  0x1000,		// common_pagesize (overridable by -z common-page-size)
+  elfcpp::SHN_UNDEF,	// small_common_shndx
+  elfcpp::SHN_UNDEF,	// large_common_shndx
+  0,			// small_common_section_flags
+  0			// large_common_section_flags
 };
 
 // Get the GOT section, creating it if necessary.

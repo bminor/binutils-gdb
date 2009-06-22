@@ -99,7 +99,11 @@ const Target::Target_info Target_test<size, big_endian>::test_target_info =
   "/dummy",				// dynamic_linker
   0x08000000,				// default_text_segment_address
   0x1000,				// abi_pagesize
-  0x1000				// common_pagesize
+  0x1000,				// common_pagesize
+  elfcpp::SHN_UNDEF,			// small_common_shndx
+  elfcpp::SHN_UNDEF,			// large_common_shndx
+  0,					// small_common_section_flags
+  0					// large_common_section_flags
 };
 
 // The test targets.

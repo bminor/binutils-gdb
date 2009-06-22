@@ -411,6 +411,11 @@ class Symbol
   bool
   final_value_is_known() const;
 
+  // Return true if SHNDX represents a common symbol.  This depends on
+  // the target.
+  static bool
+  is_common_shndx(unsigned int shndx);
+
   // Return whether this is a defined symbol (not undefined or
   // common).
   bool
@@ -422,7 +427,7 @@ class Symbol
     unsigned int shndx = this->shndx(&is_ordinary);
     return (is_ordinary
 	    ? shndx != elfcpp::SHN_UNDEF
-	    : shndx != elfcpp::SHN_COMMON);
+	    : !Symbol::is_common_shndx(shndx));
   }
 
   // Return true if this symbol is from a dynamic object.
@@ -463,11 +468,13 @@ class Symbol
   bool
   is_common() const
   {
+    if (this->type_ == elfcpp::STT_COMMON)
+      return true;
+    if (this->source_ != FROM_OBJECT)
+      return false;
     bool is_ordinary;
-    return (this->source_ == FROM_OBJECT
-	    && ((this->shndx(&is_ordinary) == elfcpp::SHN_COMMON
-		 && !is_ordinary)
-		|| this->type_ == elfcpp::STT_COMMON));
+    unsigned int shndx = this->shndx(&is_ordinary);
+    return !is_ordinary && Symbol::is_common_shndx(shndx);
   }
 
   // Return whether this symbol can be seen outside this object.
@@ -1505,6 +1512,16 @@ class Symbol_table
   void
   do_add_undefined_symbols_from_command_line();
 
+  // Types of common symbols.
+
+  enum Commons_section_type
+  {
+    COMMONS_NORMAL,
+    COMMONS_TLS,
+    COMMONS_SMALL,
+    COMMONS_LARGE
+  };
+
   // Allocate the common symbols, sized version.
   template<int size>
   void
@@ -1513,7 +1530,8 @@ class Symbol_table
   // Allocate the common symbols from one list.
   template<int size>
   void
-  do_allocate_commons_list(Layout*, bool is_tls, Commons_type*, Mapfile*);
+  do_allocate_commons_list(Layout*, Commons_section_type, Commons_type*,
+			   Mapfile*);
 
   // Implement detect_odr_violations.
   template<int size, bool big_endian>
@@ -1630,6 +1648,10 @@ class Symbol_table
   // This is like the commons_ field, except that it holds TLS common
   // symbols.
   Commons_type tls_commons_;
+  // This is for small common symbols.
+  Commons_type small_commons_;
+  // This is for large common symbols.
+  Commons_type large_commons_;
   // A list of symbols which have been forced to be local.  We don't
   // expect there to be very many of them, so we keep a list of them
   // rather than walking the whole table to find them.

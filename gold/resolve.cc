@@ -217,6 +217,8 @@ symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
     default:
       if (type == elfcpp::STT_COMMON)
 	bits |= common_flag;
+      else if (!is_ordinary && Symbol::is_common_shndx(shndx))
+	bits |= common_flag;
       else
         bits |= def_flag;
       break;

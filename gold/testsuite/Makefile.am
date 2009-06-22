@@ -1092,5 +1092,13 @@ discard_locals_test.syms: discard_locals_test
 discard_locals_test.o: discard_locals_test.c
 	$(COMPILE) -c -Wa,-L -o $@ $<
 
+if MCMODEL_MEDIUM
+check_PROGRAMS += large
+large_SOURCES = large.c
+large_CFLAGS = -mcmodel=medium
+large_DEPENDENCIES = gcctestdir/ld
+large_LDFLAGS = -Bgcctestdir/
+endif MCMODEL_MEDIUM
+
 endif GCC
 endif NATIVE_LINKER
