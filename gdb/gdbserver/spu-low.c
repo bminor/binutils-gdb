@@ -471,10 +471,6 @@ spu_fetch_registers (int regno)
   int fd;
   CORE_ADDR addr;
 
-  /* ??? Some callers use 0 to mean all registers.  */
-  if (regno == 0)
-    regno = -1;
-
   /* We must be stopped on a spu_run system call.  */
   if (!parse_spufs_run (&fd, &addr))
     return;

@@ -2054,7 +2054,7 @@ error_exit:;
 static void
 usr_fetch_inferior_registers (int regno)
 {
-  if (regno == -1 || regno == 0)
+  if (regno == -1)
     for (regno = 0; regno < the_low_target.num_regs; regno++)
       fetch_register (regno);
   else

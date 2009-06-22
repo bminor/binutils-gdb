@@ -331,7 +331,7 @@ child_fetch_inferior_registers (int r)
 {
   int regno;
   win32_thread_info *th = thread_rec (current_inferior_ptid (), TRUE);
-  if (r == -1 || r == 0 || r > NUM_REGS)
+  if (r == -1 || r > NUM_REGS)
     child_fetch_inferior_registers (NUM_REGS);
   else
     for (regno = 0; regno < r; regno++)

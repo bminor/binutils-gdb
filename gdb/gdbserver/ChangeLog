@@ -1,3 +1,12 @@
+2009-06-22  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* linux-low.c (usr_fetch_inferior_registers): Remove check for regno 0.
+	* proc-service.c (ps_lgetregs): Pass -1 to fetch all registers.
+	* regcache.c (get_regcache): Likewise.
+	* spu-low.c (spu_fetch_registers): Remove 0 to -1 conversion.
+	* win32-low.c (child_fetch_inferior_registers): Remove check for
+	regno 0.
+
 2009-06-19  Aleksandar Ristovski  <aristovski@qnx.com>
 	    Pedro Alves <pedro@codesourcery.com>
 

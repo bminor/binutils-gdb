@@ -53,7 +53,7 @@ get_regcache (struct thread_info *inf, int fetch)
   /* FIXME - fetch registers for INF */
   if (fetch && regcache->registers_valid == 0)
     {
-      fetch_inferior_registers (0);
+      fetch_inferior_registers (-1);
       regcache->registers_valid = 1;
     }
 
