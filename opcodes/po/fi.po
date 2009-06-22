@@ -1,16 +1,16 @@
-# translation of opcodes-2.17.90.po to
+# translation of opcodes-2.19.1.po to
 # Finnish messages for opcodes
 # This file is distributed under the same license as the binutils package.
-# Copyright (C) 2005, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2005, 2009 Free Software Foundation, Inc.
 #
-# Jorma Karvonen <karvjorm@users.sourceforge.net>, 2006, 2007.
+# Jorma Karvonen <karvonen.jorma@gmail.com>, 2006-2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: opcodes-2.17.90\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-07-05 09:17+0100\n"
-"PO-Revision-Date: 2007-08-07 19:02+0300\n"
-"Last-Translator: Jorma Karvonen <karvjorm@users.sourceforge.net>\n"
+"Project-Id-Version: opcodes 2.19.1\n"
+"Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
+"POT-Creation-Date: 2008-09-09 15:56+0930\n"
+"PO-Revision-Date: 2009-06-21 20:52+0200\n"
+"Last-Translator: Jorma Karvonen <karvonen.jorma@gmail.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -57,9 +57,8 @@ msgstr "Väärä rekisterinimi \"%d\""
 msgid "too many long constants"
 msgstr "liian monta pitkää vakiota"
 
-#  otaksun: to many -> too many ...
 #: arc-opc.c:668
-msgid "to many shimms in load"
+msgid "too many shimms in load"
 msgstr "liian monta short-tyyppistä suoraa muistiosoitetta ladattavana"
 
 #. Do we have a limm already?
@@ -131,7 +130,7 @@ msgstr "Tuntematon rekisterinimijoukko: %s\n"
 msgid "Unrecognised disassembler option: %s\n"
 msgstr "Tunnistamaton disassembler-valinta: %s\n"
 
-#: arm-dis.c:4226
+#: arm-dis.c:4238
 #, c-format
 msgid ""
 "\n"
@@ -203,14 +202,14 @@ msgstr "Rekisteriluettelo ei ole oikea"
 
 #: fr30-asm.c:310 frv-asm.c:1263 ip2k-asm.c:511 iq2000-asm.c:459
 #: m32c-asm.c:1589 m32r-asm.c:328 mep-asm.c:1001 mt-asm.c:595
-#: openrisc-asm.c:241 xc16x-asm.c:375 xstormy16-asm.c:276
+#: openrisc-asm.c:241 xc16x-asm.c:376 xstormy16-asm.c:276
 #, c-format
 msgid "Unrecognized field %d while parsing.\n"
 msgstr "Tunnistamaton kenttä %d jäsentämisen aikana.\n"
 
 #: fr30-asm.c:361 frv-asm.c:1314 ip2k-asm.c:562 iq2000-asm.c:510
 #: m32c-asm.c:1640 m32r-asm.c:379 mep-asm.c:1052 mt-asm.c:646
-#: openrisc-asm.c:292 xc16x-asm.c:426 xstormy16-asm.c:327
+#: openrisc-asm.c:292 xc16x-asm.c:427 xstormy16-asm.c:327
 msgid "missing mnemonic in syntax string"
 msgstr "syntaksimerkkijonosta puuttuu muistikas"
 
@@ -223,7 +222,7 @@ msgstr "syntaksimerkkijonosta puuttuu muistikas"
 #: m32r-asm.c:605 m32r-asm.c:706 mep-asm.c:1187 mep-asm.c:1191 mep-asm.c:1278
 #: mep-asm.c:1379 mt-asm.c:781 mt-asm.c:785 mt-asm.c:872 mt-asm.c:973
 #: openrisc-asm.c:427 openrisc-asm.c:431 openrisc-asm.c:518 openrisc-asm.c:619
-#: xc16x-asm.c:561 xc16x-asm.c:565 xc16x-asm.c:652 xc16x-asm.c:753
+#: xc16x-asm.c:562 xc16x-asm.c:566 xc16x-asm.c:653 xc16x-asm.c:754
 #: xstormy16-asm.c:462 xstormy16-asm.c:466 xstormy16-asm.c:553
 #: xstormy16-asm.c:654
 msgid "unrecognized instruction"
@@ -231,40 +230,40 @@ msgstr "tunnistamaton käsky"
 
 #: fr30-asm.c:543 frv-asm.c:1496 ip2k-asm.c:744 iq2000-asm.c:692
 #: m32c-asm.c:1822 m32r-asm.c:561 mep-asm.c:1234 mt-asm.c:828
-#: openrisc-asm.c:474 xc16x-asm.c:608 xstormy16-asm.c:509
+#: openrisc-asm.c:474 xc16x-asm.c:609 xstormy16-asm.c:509
 #, c-format
 msgid "syntax error (expected char `%c', found `%c')"
 msgstr "syntaksivirhe (odotettiin merkkiä \"%c\", löydettiin \"%c\")"
 
 #: fr30-asm.c:553 frv-asm.c:1506 ip2k-asm.c:754 iq2000-asm.c:702
 #: m32c-asm.c:1832 m32r-asm.c:571 mep-asm.c:1244 mt-asm.c:838
-#: openrisc-asm.c:484 xc16x-asm.c:618 xstormy16-asm.c:519
+#: openrisc-asm.c:484 xc16x-asm.c:619 xstormy16-asm.c:519
 #, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
 msgstr "syntaksivirhe (odotettiin merkkiä \"%c\", löydettiin käskyn loppu)"
 
 #: fr30-asm.c:581 frv-asm.c:1534 ip2k-asm.c:782 iq2000-asm.c:730
 #: m32c-asm.c:1860 m32r-asm.c:599 mep-asm.c:1272 mt-asm.c:866
-#: openrisc-asm.c:512 xc16x-asm.c:646 xstormy16-asm.c:547
+#: openrisc-asm.c:512 xc16x-asm.c:647 xstormy16-asm.c:547
 msgid "junk at end of line"
 msgstr "roskaa rivin lopussa"
 
 #: fr30-asm.c:687 frv-asm.c:1640 ip2k-asm.c:888 iq2000-asm.c:836
 #: m32c-asm.c:1966 m32r-asm.c:705 mep-asm.c:1378 mt-asm.c:972
-#: openrisc-asm.c:618 xc16x-asm.c:752 xstormy16-asm.c:653
+#: openrisc-asm.c:618 xc16x-asm.c:753 xstormy16-asm.c:653
 msgid "unrecognized form of instruction"
 msgstr "käskyn muoto tunnistamaton"
 
 #: fr30-asm.c:699 frv-asm.c:1652 ip2k-asm.c:900 iq2000-asm.c:848
 #: m32c-asm.c:1978 m32r-asm.c:717 mep-asm.c:1390 mt-asm.c:984
-#: openrisc-asm.c:630 xc16x-asm.c:764 xstormy16-asm.c:665
+#: openrisc-asm.c:630 xc16x-asm.c:765 xstormy16-asm.c:665
 #, c-format
 msgid "bad instruction `%.50s...'"
 msgstr "väärä käsky \"%.50s...\""
 
 #: fr30-asm.c:702 frv-asm.c:1655 ip2k-asm.c:903 iq2000-asm.c:851
 #: m32c-asm.c:1981 m32r-asm.c:720 mep-asm.c:1393 mt-asm.c:987
-#: openrisc-asm.c:633 xc16x-asm.c:767 xstormy16-asm.c:668
+#: openrisc-asm.c:633 xc16x-asm.c:768 xstormy16-asm.c:668
 #, c-format
 msgid "bad instruction `%.50s'"
 msgstr "väärä käsky \"%.50s\""
@@ -384,11 +383,11 @@ msgstr "kohteen %d sijoittamisesta ei selviydytty\n"
 msgid "%02x\t\t*unknown*"
 msgstr "%02x\t\t*tuntematon*"
 
-#: i386-dis.c:3196
+#: i386-dis.c:9545
 msgid "<internal disassembler error>"
 msgstr "<sisäinen disassembler-virhe>"
 
-#: i386-dis.c:3423
+#: i386-dis.c:9776
 #, c-format
 msgid ""
 "\n"
@@ -399,78 +398,123 @@ msgstr ""
 "Seuraavat i386/x86-64-kohtaiset disassembler-valinnat ovat tuettuja käyttöön\n"
 "-M -valinnan kanssa (monivalinnat pitää erottaa pilkulla):\n"
 
-#: i386-dis.c:3427
+#: i386-dis.c:9780
 #, c-format
 msgid "  x86-64      Disassemble in 64bit mode\n"
 msgstr "  x86-64      Disassembloi 64-bittitilassa\n"
 
-#: i386-dis.c:3428
+#: i386-dis.c:9781
 #, c-format
 msgid "  i386        Disassemble in 32bit mode\n"
 msgstr "  i386        Disassembloi 32-bittitilassa\n"
 
-#: i386-dis.c:3429
+#: i386-dis.c:9782
 #, c-format
 msgid "  i8086       Disassemble in 16bit mode\n"
 msgstr "  i8086       Disassembloi 16-bittitilassa\n"
 
-#: i386-dis.c:3430
+#: i386-dis.c:9783
 #, c-format
 msgid "  att         Display instruction in AT&T syntax\n"
 msgstr "  att         Näyttää käskyn AT&T-syntaksissa\n"
 
-#: i386-dis.c:3431
+#: i386-dis.c:9784
 #, c-format
 msgid "  intel       Display instruction in Intel syntax\n"
 msgstr "  intel       Näyttää käskyn Intel-syntaksissa\n"
 
-#: i386-dis.c:3432
+#: i386-dis.c:9785
+#, c-format
+msgid ""
+"  att-mnemonic\n"
+"              Display instruction in AT&T mnemonic\n"
+msgstr ""
+"  att-mnemonic\n"
+"              Näyttää käskyn AT&T-syntaksissa\n"
+
+#: i386-dis.c:9787
+#, c-format
+msgid ""
+"  intel-mnemonic\n"
+"              Display instruction in Intel mnemonic\n"
+msgstr ""
+"  intel-mnemonic\n"
+"              Näyttää käskyn Intel-syntaksissa\n"
+
+#: i386-dis.c:9789
 #, c-format
 msgid "  addr64      Assume 64bit address size\n"
 msgstr "  addr64      Otaksuu osoitekooksi 64 bittiä\n"
 
-#: i386-dis.c:3433
+#: i386-dis.c:9790
 #, c-format
 msgid "  addr32      Assume 32bit address size\n"
 msgstr "  addr32      Otaksuu osoitekooksi 32 bittiä\n"
 
-#: i386-dis.c:3434
+#: i386-dis.c:9791
 #, c-format
 msgid "  addr16      Assume 16bit address size\n"
 msgstr "  addr16      Otaksuu osoitekooksi16 bittiä\n"
 
-#: i386-dis.c:3435
+#: i386-dis.c:9792
 #, c-format
 msgid "  data32      Assume 32bit data size\n"
 msgstr "  data32      Otaksuu datakooksi 32 bittiä\n"
 
-#: i386-dis.c:3436
+#: i386-dis.c:9793
 #, c-format
 msgid "  data16      Assume 16bit data size\n"
 msgstr "  data16      Otaksuu datakooksi 16 bittiä\n"
 
-#: i386-dis.c:3437
+#: i386-dis.c:9794
 #, c-format
 msgid "  suffix      Always display instruction suffix in AT&T syntax\n"
 msgstr "  suffix      Näyttää käskysuffiksin aina AT&T-syntaksissa\n"
 
-#: i386-gen.c:42 ia64-gen.c:307
+#: i386-gen.c:411 ia64-gen.c:307
 #, c-format
 msgid "%s: Error: "
 msgstr "%s: Virhe: "
 
-#: i386-gen.c:109
-msgid "can't find i386-opc.tbl for reading\n"
-msgstr "i386-opc.tbl ei löytynyt luettavaksi\n"
+#: i386-gen.c:510
+#, c-format
+msgid "%s: %d: Unknown bitfield: %s\n"
+msgstr "%s: %d: Tuntematon bittikenttä: %s\n"
 
-#: i386-gen.c:260
-msgid "can't find i386-reg.tbl for reading\n"
-msgstr "i386-reg.tbl ei löytynyt luettavaksi\n"
+#: i386-gen.c:674
+#, c-format
+msgid "can't find i386-opc.tbl for reading, errno = %s\n"
+msgstr "i386-opc.tbl ei löytynyt luettavaksi, errno = %s\n"
 
-#: i386-gen.c:386 ia64-gen.c:2841
+#: i386-gen.c:851
+#, c-format
+msgid "can't find i386-reg.tbl for reading, errno = %s\n"
+msgstr "i386-reg.tbl ei löytynyt luettavaksi, errno = %s\n"
+
+#: i386-gen.c:943
+#, c-format
+msgid "can't create i386-init.h, errno = %s\n"
+msgstr "ei voi luoda tiedostoa i386-init.h, errno = %s\n"
+
+#: i386-gen.c:1032 ia64-gen.c:2850
 #, c-format
 msgid "unable to change directory to \"%s\", errno = %s\n"
 msgstr "vaihtaminen hakemistoon \"%s\" ei onnistu, virhenumero = %s\n"
+
+#: i386-gen.c:1039
+#, c-format
+msgid "%d unused bits in i386_cpu_flags.\n"
+msgstr "%d käyttämättömiä bittejä  i386_cpu_flags-lipussa.\n"
+
+#: i386-gen.c:1046
+#, c-format
+msgid "%d unused bits in i386_operand_type.\n"
+msgstr "%d käyttämättömiä bittejä i386_operand_type-lipussa.\n"
+
+#: i386-gen.c:1060
+#, c-format
+msgid "can't create i386-tbl.h, errno = %s\n"
+msgstr "ei voi luoda tiedostoa i386-tbl.h, errno = %s\n"
 
 #: ia64-gen.c:320
 #, c-format
@@ -510,62 +554,67 @@ msgstr "päällekkäinen kenttä %s->%s\n"
 msgid "overwriting note %d with note %d (IC:%s)\n"
 msgstr "merkki %d kirjoitetaan merkin %d päälle (IC:%s)\n"
 
-#: ia64-gen.c:1455
+#: ia64-gen.c:1459
 #, c-format
 msgid "don't know how to specify %% dependency %s\n"
 msgstr "kohteen %% riippuvuutta %s ei osattu määritellä\n"
 
-#: ia64-gen.c:1477
+#: ia64-gen.c:1481
 #, c-format
 msgid "Don't know how to specify # dependency %s\n"
 msgstr "Kohteen # riippuvuutta %s ei osattu määritellä\n"
 
-#: ia64-gen.c:1516
+#: ia64-gen.c:1520
 #, c-format
 msgid "IC:%s [%s] has no terminals or sub-classes\n"
 msgstr "Kohteella IC:%s [%s] ei ole päätepisteitä tai alaluokkia\n"
 
-#: ia64-gen.c:1519
+#: ia64-gen.c:1523
 #, c-format
 msgid "IC:%s has no terminals or sub-classes\n"
 msgstr "Kohteella IC:%s ei ole päätepisteitä tai alaluokkia\n"
 
-#: ia64-gen.c:1528
+#: ia64-gen.c:1532
 #, c-format
 msgid "no insns mapped directly to terminal IC %s [%s]"
 msgstr "yhtään käskyä ei ole mapattu suoraan päätepisteeseen IC %s [%s]"
 
-#: ia64-gen.c:1531
+#: ia64-gen.c:1535
 #, c-format
 msgid "no insns mapped directly to terminal IC %s\n"
 msgstr "yhtään käskyä ei ole mapattu suoraan päätepisteeseen IC %s\n"
 
-#: ia64-gen.c:1542
+#: ia64-gen.c:1546
 #, c-format
 msgid "class %s is defined but not used\n"
 msgstr "luokka %s on määritelty mutta käyttämätön\n"
 
-#: ia64-gen.c:1553
+#: ia64-gen.c:1559
 #, c-format
-msgid "Warning: rsrc %s (%s) has no chks%s\n"
-msgstr "Varoitus: kohteessa rsrc %s (%s) ei ole %s-valintaa\n"
+msgid "Warning: rsrc %s (%s) has no chks\n"
+msgstr "Varoitus: kohteessa rsrc %s (%s) ei ole tarkistuksia\n"
 
-#: ia64-gen.c:1557
+#: ia64-gen.c:1562
+#, c-format
+msgid "Warning: rsrc %s (%s) has no chks or regs\n"
+msgstr "Varoitus: kohteessa rsrc %s (%s) ei ole tarkistuksia tai registereitä\n"
+
+#: ia64-gen.c:1566
 #, c-format
 msgid "rsrc %s (%s) has no regs\n"
 msgstr "kohteessa rsrc %s (%s) ei ole rekistereitä\n"
 
-#: ia64-gen.c:2469
+#: ia64-gen.c:2478
 #, c-format
 msgid "IC note %d in opcode %s (IC:%s) conflicts with resource %s note %d\n"
 msgstr "IC-merkintä %d käskyssä %s (IC:%s) on ristiriidassa resurssin %s merkinnän %d kanssa\n"
 
-#: ia64-gen.c:2497
+#: ia64-gen.c:2506
 #, c-format
 msgid "IC note %d for opcode %s (IC:%s) conflicts with resource %s note %d\n"
 msgstr "IC-merkintä %d käskyyn %s (IC:%s) on ristiriidassa resurssin %s merkinnän %d kanssa\n"
 
-#: ia64-gen.c:2511
+#: ia64-gen.c:2520
 #, c-format
 msgid "opcode %s has no class (ops %d %d %d)\n"
 msgstr "käskyssä %s ei ole luokkaa (toiminnat %d %d %d)\n"
@@ -746,26 +795,26 @@ msgstr "Vain $sp tai $15 sallittu tälle käskykoodille"
 msgid "invalid %function() here"
 msgstr "virheellinen %function() tässä"
 
-#: mips-dis.c:745
+#: mips-dis.c:781
 msgid "# internal error, incomplete extension sequence (+)"
 msgstr "# sisäinen virhe, epätäydellinen laajennussekvenssi (+)"
 
-#: mips-dis.c:852
+#: mips-dis.c:915
 #, c-format
 msgid "# internal error, undefined extension sequence (+%c)"
 msgstr "# sisäinen virhe, määrittelemätön laajennussekvenssi (+%c)"
 
-#: mips-dis.c:1211
+#: mips-dis.c:1274
 #, c-format
-msgid "# internal error, undefined modifier(%c)"
-msgstr "# sisäinen virhe, määrittelemätön määrite(%c)"
+msgid "# internal error, undefined modifier (%c)"
+msgstr "# sisäinen virhe, määrittelemätön määrite (%c)"
 
-#: mips-dis.c:1818
+#: mips-dis.c:1881
 #, c-format
 msgid "# internal disassembler error, unrecognised modifier (%c)"
 msgstr "# sisäinen disassembler-virhe, tunnistamaton määrite (%c)"
 
-#: mips-dis.c:2049
+#: mips-dis.c:2112
 #, c-format
 msgid ""
 "\n"
@@ -776,7 +825,7 @@ msgstr ""
 "Seuraavat MIPS-kohtaiset disassembler-valinnat ovat tuettuja käyttöön\n"
 "-M -valinnan kanssa (monivalinnat pitää erottaa pilkulla):\n"
 
-#: mips-dis.c:2053
+#: mips-dis.c:2116
 #, c-format
 msgid ""
 "\n"
@@ -787,7 +836,7 @@ msgstr ""
 "  gpr-names=ABI            Tulosta GPR-nimet määritellyn ABI:n mukaisesti.\n"
 "                           Oletus: perustuu disassembloitavaan binääritiedostoon.\n"
 
-#: mips-dis.c:2057
+#: mips-dis.c:2120
 #, c-format
 msgid ""
 "\n"
@@ -798,7 +847,7 @@ msgstr ""
 "  fpr-names=ABI            Tulosta FPR-nimet määritellyn ABI:n mukaisesti.\n"
 "                           Oletus: numeerinen.\n"
 
-#: mips-dis.c:2061
+#: mips-dis.c:2124
 #, c-format
 msgid ""
 "\n"
@@ -811,7 +860,7 @@ msgstr ""
 "                           määritellyn arkkitehtuurin mukaisesti.\n"
 "                           Oletus: perustuu disassemloitavaan binääritiedostoon.\n"
 
-#: mips-dis.c:2066
+#: mips-dis.c:2129
 #, c-format
 msgid ""
 "\n"
@@ -824,7 +873,7 @@ msgstr ""
 "\t\t\t   arkkitehtuurin mukaisesti.\n"
 "                           Oletus: perustuu disassembloitavaan binääritiedostoon.\n"
 
-#: mips-dis.c:2071
+#: mips-dis.c:2134
 #, c-format
 msgid ""
 "\n"
@@ -835,7 +884,7 @@ msgstr ""
 "  reg-names=ABI            Tulosta GPR- ja FPR-nimet määritellyn\n"
 "                           ABI:n mukaisesti.\n"
 
-#: mips-dis.c:2075
+#: mips-dis.c:2138
 #, c-format
 msgid ""
 "\n"
@@ -846,7 +895,7 @@ msgstr ""
 "  reg-names=ARCH           Tulosta CP0-rekisteri ja HWR-nimet määritellyn\n"
 "                           arkkitehtuurin mukaisesti.\n"
 
-#: mips-dis.c:2079
+#: mips-dis.c:2142
 #, c-format
 msgid ""
 "\n"
@@ -857,12 +906,12 @@ msgstr ""
 "  Ylläolevista valinnoista \"ABI\" tukee seuraavia arvoja:\n"
 "   "
 
-#: mips-dis.c:2084 mips-dis.c:2092 mips-dis.c:2094
+#: mips-dis.c:2147 mips-dis.c:2155 mips-dis.c:2157
 #, c-format
 msgid "\n"
 msgstr "\n"
 
-#: mips-dis.c:2086
+#: mips-dis.c:2149
 #, c-format
 msgid ""
 "\n"
@@ -901,9 +950,8 @@ msgid "Biiiig Trouble in parse_imm16!"
 msgstr "Iso pulma parse_imm16-käskyssä!"
 
 #: mt-asm.c:157
-#, c-format
-msgid "%operator operand is not a symbol"
-msgstr "%operaattori-kohdemuuttuja ei ole symboli."
+msgid "The percent-operator's operand is not a symbol"
+msgstr "prosenttioperaattori-kohdemuuttuja ei ole symboli"
 
 #: mt-asm.c:395
 msgid "invalid operand.  type may have values 0,1,2 only."
@@ -919,41 +967,62 @@ msgstr "virheellinen kohdemuuttuja. tyypin arvo saa olla vain 0,1 tai 2."
 msgid "$<undefined>"
 msgstr "$<määrittelemätön>"
 
-#: ppc-opc.c:782 ppc-opc.c:810
+#: ppc-opc.c:862 ppc-opc.c:890
 msgid "invalid conditional option"
 msgstr "virheellinen ehdollinen valinta"
 
-#: ppc-opc.c:812
+#: ppc-opc.c:892
 msgid "attempt to set y bit when using + or - modifier"
 msgstr "yritys asettaa y-bitti kun käytetään + tai - määritettä"
 
-#: ppc-opc.c:844
+#: ppc-opc.c:924
 msgid "invalid mask field"
 msgstr "virheellinen maskikenttä"
 
-#: ppc-opc.c:870
+#: ppc-opc.c:950
 msgid "ignoring invalid mfcr mask"
 msgstr "virheellistä mfcr-maskia ei oteta huomioon"
 
-#: ppc-opc.c:920 ppc-opc.c:955
+#: ppc-opc.c:1000 ppc-opc.c:1035
 msgid "illegal bitmask"
 msgstr "virheellinen bittimaski"
 
-#: ppc-opc.c:1075
+#: ppc-opc.c:1155
 msgid "index register in load range"
 msgstr "indeksirekisteri on latauslukurajojen sisällä"
 
-#: ppc-opc.c:1091
+#: ppc-opc.c:1171
 msgid "source and target register operands must be different"
 msgstr "lähde- ja kohderekisterin kohdemuuttujien on oltava erilaiset"
 
-#: ppc-opc.c:1106
+#: ppc-opc.c:1186
 msgid "invalid register operand when updating"
 msgstr "rekisterin kohdemuuttuja virheellinen päivitettäessä"
 
-#: ppc-opc.c:1188
+#: ppc-opc.c:1265
 msgid "invalid sprg number"
 msgstr "virheellinen sprg-numero"
+
+#: s390-dis.c:276
+#, c-format
+msgid ""
+"\n"
+"The following S/390 specific disassembler options are supported for use\n"
+"with the -M switch (multiple options should be separated by commas):\n"
+msgstr ""
+"\n"
+"Seuraavat S/390-kohtaiset disassembler-valinnat ovat tuettuja käyttöön\n"
+"-M -valinnan kanssa (monivalinnat pitää erottaa pilkulla):\n"
+
+#: s390-dis.c:280
+#, c-format
+msgid "  esa         Disassemble in ESA architecture mode\n"
+msgstr "  esa        Disassembloi ESA-arkkitehtuuritilassa\n"
+
+#: s390-dis.c:281
+#, c-format
+msgid "  zarch       Disassemble in z/Architecture mode\n"
+msgstr "  zarch        Disassembloi z/Arkkitehtuuritilassa\n"
 
 #: score-dis.c:220 score-dis.c:383
 msgid "<illegal instruction>"
@@ -1038,27 +1107,27 @@ msgstr "suora muistiosoitusarvo ei ole rajojen sisällä eikä ole parillinen"
 msgid "immediate value must be even"
 msgstr "Suoran muistiosoitusarvon täytyy olla parillinen"
 
-#: xc16x-asm.c:65
+#: xc16x-asm.c:66
 msgid "Missing '#' prefix"
 msgstr "Puuttuva \"#\" prefiksi"
 
-#: xc16x-asm.c:81
+#: xc16x-asm.c:82
 msgid "Missing '.' prefix"
 msgstr "Puuttuva \".\" prefiksi"
 
-#: xc16x-asm.c:97
+#: xc16x-asm.c:98
 msgid "Missing 'pof:' prefix"
 msgstr "Puuttuva \"pof:\" prefiksi"
 
-#: xc16x-asm.c:113
+#: xc16x-asm.c:114
 msgid "Missing 'pag:' prefix"
 msgstr "Puuttuva \"pag:\" prefiksi"
 
-#: xc16x-asm.c:129
+#: xc16x-asm.c:130
 msgid "Missing 'sof:' prefix"
 msgstr "Puuttuva \"sof:\" prefiksi"
 
-#: xc16x-asm.c:145
+#: xc16x-asm.c:146
 msgid "Missing 'seg:' prefix"
 msgstr "Puuttuva \"seg:\" prefiksi"
 
@@ -1101,3 +1170,6 @@ msgstr "Kohdemuuttuja ei ole symboli"
 #: xstormy16-asm.c:165
 msgid "Syntax error: No trailing ')'"
 msgstr "Syntaksivirhe: loppukaarisulku \")\" puuttuu"
+
+#~ msgid "%operator operand is not a symbol"
+#~ msgstr "%operaattori-kohdemuuttuja ei ole symboli."
