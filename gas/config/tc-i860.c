@@ -261,7 +261,7 @@ md_assemble (char *str)
   int i;
   struct i860_it pseudo[3];
 
-  assert (str);
+  gas_assert (str);
   fc = 0;
 
   /* Assemble the instruction.  */
@@ -1489,4 +1489,3 @@ i860_check_label (symbolS *labelsym)
       input_line_pointer++;
     }
 }
-

@@ -2237,7 +2237,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 		    bfd_get_reloc_code_name (code));
       /* Set howto to a garbage value so that we can keep going.  */
       reloc->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);
-      assert (reloc->howto != NULL);
+      gas_assert (reloc->howto != NULL);
     }
   reloc->addend = fixp->fx_offset;
 

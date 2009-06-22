@@ -2527,7 +2527,7 @@ md_assemble (char *str)
 		 explain.  */
 	      if (ex.X_op == O_symbol)
 		{
-		  assert (ex.X_add_symbol != NULL);
+		  gas_assert (ex.X_add_symbol != NULL);
 		  if (symbol_get_bfdsym (ex.X_add_symbol)->section
 		      != tocdata_section)
 		    {
@@ -5819,7 +5819,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	/* Nothing else to do here.  */
 	return;
 
-      assert (fixP->fx_addsy != NULL);
+      gas_assert (fixP->fx_addsy != NULL);
 
       /* Determine a BFD reloc value based on the operand information.
 	 We are only prepared to turn a few of the operands into

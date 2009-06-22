@@ -101,7 +101,7 @@ atof_generic (/* return pointer to just AFTER number we read.  */
   int seen_significant_digit;
 
 #ifdef ASSUME_DECIMAL_MARK_IS_DOT
-  assert (string_of_decimal_marks[0] == '.'
+  gas_assert (string_of_decimal_marks[0] == '.'
 	  && string_of_decimal_marks[1] == 0);
 #define IS_DECIMAL_MARK(c)	((c) == '.')
 #else

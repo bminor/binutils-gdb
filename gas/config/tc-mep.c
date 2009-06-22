@@ -1698,7 +1698,7 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
   if (S_GET_SEGMENT (fragP->fr_symbol) != sec
       || operand == MEP_OPERAND_PCABS24A2)
     {
-      assert (fragP->fr_cgen.insn != 0);
+      gas_assert (fragP->fr_cgen.insn != 0);
       gas_cgen_record_fixup (fragP,
 			     where,
 			     fragP->fr_cgen.insn,
@@ -1870,7 +1870,7 @@ mep_frob_file ()
       segment_info_type * seginfo;
       int pass;
 
-      assert (FX_OPINFO_R_TYPE (l->fixp) == BFD_RELOC_HI16
+      gas_assert (FX_OPINFO_R_TYPE (l->fixp) == BFD_RELOC_HI16
 	      || FX_OPINFO_R_TYPE (l->fixp) == BFD_RELOC_LO16);
 
       /* Check quickly whether the next fixup happens to be a matching low.  */
@@ -1910,7 +1910,7 @@ mep_frob_file ()
 		  for (pf = &seginfo->fix_root;
 		       * pf != l->fixp;
 		       pf = & (* pf)->fx_next)
-		    assert (* pf != NULL);
+		    gas_assert (* pf != NULL);
 
 		  * pf = l->fixp->fx_next;
 

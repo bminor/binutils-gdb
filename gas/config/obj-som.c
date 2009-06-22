@@ -280,7 +280,7 @@ adjust_stab_sections (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   nsyms = bfd_section_size (abfd, sec) / 12 - 1;
 
   p = seg_info (sec)->stabu.p;
-  assert (p != 0);
+  gas_assert (p != 0);
 
   bfd_h_put_16 (abfd, (bfd_vma) nsyms, (bfd_byte *) p + 6);
   bfd_h_put_32 (abfd, (bfd_vma) strsz, (bfd_byte *) p + 8);

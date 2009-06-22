@@ -913,7 +913,7 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 			 && operand != M32C_OPERAND_LAB32_JMP_S)))
     {
       fixS *fixP;
-      assert (fragP->fr_cgen.insn != 0);
+      gas_assert (fragP->fr_cgen.insn != 0);
       fixP = gas_cgen_record_fixup (fragP,
 				    where,
 				    fragP->fr_cgen.insn,

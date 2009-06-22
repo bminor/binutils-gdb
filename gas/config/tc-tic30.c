@@ -1388,7 +1388,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 #undef F
 
   rel = xmalloc (sizeof (* rel));
-  assert (rel != 0);
+  gas_assert (rel != 0);
   rel->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   rel->address = fixP->fx_frag->fr_address + fixP->fx_where;
@@ -2003,4 +2003,3 @@ md_assemble (char *line)
   debug ("Final opcode: %08X\n", insn.opcode);
   debug ("\n");
 }
-

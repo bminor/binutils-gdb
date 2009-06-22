@@ -1339,7 +1339,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 #endif
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
-  assert (reloc->howto != 0);
+  gas_assert (reloc->howto != 0);
 
   return reloc;
 }
@@ -1492,7 +1492,7 @@ m68k_ip (char *instring)
 
 	  /* Make a copy of the operands of this insn so that
 	     we can modify them safely, should we want to.  */
-	  assert (opsfound <= (int) ARRAY_SIZE (operands_backup));
+	  gas_assert (opsfound <= (int) ARRAY_SIZE (operands_backup));
 	  for (i = 0; i < opsfound; i++)
 	    operands_backup[i] = the_ins.operands[i];
 
@@ -5164,14 +5164,14 @@ md_convert_frag_1 (fragS *fragP)
       fragP->fr_fix += 4;
       break;
     case TAB (PCINDEX, BYTE):
-      assert (fragP->fr_fix >= 2);
+      gas_assert (fragP->fr_fix >= 2);
       buffer_address[-2] &= ~1;
       fixP = fix_new (fragP, fragP->fr_fix - 1, 1, fragP->fr_symbol,
 		      fragP->fr_offset, 1, RELAX_RELOC_PC8);
       fixP->fx_pcrel_adjust = 1;
       break;
     case TAB (PCINDEX, SHORT):
-      assert (fragP->fr_fix >= 2);
+      gas_assert (fragP->fr_fix >= 2);
       buffer_address[-2] |= 0x1;
       buffer_address[-1] = 0x20;
       fixP = fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
@@ -5180,7 +5180,7 @@ md_convert_frag_1 (fragS *fragP)
       fragP->fr_fix += 2;
       break;
     case TAB (PCINDEX, LONG):
-      assert (fragP->fr_fix >= 2);
+      gas_assert (fragP->fr_fix >= 2);
       buffer_address[-2] |= 0x1;
       buffer_address[-1] = 0x30;
       fixP = fix_new (fragP, (int) (fragP->fr_fix), 4, fragP->fr_symbol,

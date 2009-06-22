@@ -1496,7 +1496,7 @@ operand_size_match (const template *t)
     return match;
 
   /* Check reverse.  */
-  assert (i.operands == 2);
+  gas_assert (i.operands == 2);
 
   match = 1;
   for (j = 0; j < 2; j++)
@@ -2564,7 +2564,7 @@ build_vex_prefix (const template *t)
       i.op[xchg] = i.op[0];
       i.op[0] = temp_op;
 
-      assert (i.rm.mode == 3);
+      gas_assert (i.rm.mode == 3);
 
       i.rex = REX_R;
       xchg = i.rm.regmem;
@@ -2681,7 +2681,7 @@ process_immext (void)
      AVX instructions also use this encoding, for some of
      3 argument instructions.  */
 
-  assert (i.imm_operands == 0
+  gas_assert (i.imm_operands == 0
 	  && (i.operands <= 2
 	      || (i.tm.opcode_modifier.vex
 		  && i.operands <= 4)));
@@ -4502,7 +4502,7 @@ finalize_imm (void)
       return 0;
 
   i.types[2] = operand_type_and (i.types[2], i.tm.operand_types[2]);
-  assert (operand_type_check (i.types[2], imm) == 0);
+  gas_assert (operand_type_check (i.types[2], imm) == 0);
 
   return 1;
 }
@@ -4537,14 +4537,14 @@ process_operands (void)
       unsigned int j;
 
       /* The destination must be an xmm register.  */
-      assert (i.reg_operands
+      gas_assert (i.reg_operands
 	      && MAX_OPERANDS > dup
 	      && operand_type_equal (&i.types[dest], &regxmm));
 
       if (i.tm.opcode_modifier.firstxmm0)
 	{
 	  /* The first operand is implicit and must be xmm0.  */
-	  assert (operand_type_equal (&i.types[0], &regxmm));
+	  gas_assert (operand_type_equal (&i.types[0], &regxmm));
 	  if (i.op[0].regs->reg_num != 0)
 	    return bad_implicit_operand (1);
 
@@ -4569,7 +4569,7 @@ process_operands (void)
 	}
       else if (i.tm.opcode_modifier.implicit1stxmm0)
 	{ 
-	  assert ((MAX_OPERANDS - 1) > dup
+	  gas_assert ((MAX_OPERANDS - 1) > dup
 		  && i.tm.opcode_modifier.vex3sources);
 
 	  /* Add the implicit xmm0 for instructions with VEX prefix
@@ -4615,7 +4615,7 @@ duplicate:
       unsigned int j;
 
       /* The first operand is implicit and must be xmm0/ymm0.  */
-      assert (i.reg_operands
+      gas_assert (i.reg_operands
 	      && (operand_type_equal (&i.types[0], &regxmm)
 		  || operand_type_equal (&i.types[0], &regymm)));
       if (i.op[0].regs->reg_num != 0)
@@ -4648,7 +4648,7 @@ duplicate:
       else
 	first_reg_op = 1;
       /* Pretend we saw the extra register operand.  */
-      assert (i.reg_operands == 1
+      gas_assert (i.reg_operands == 1
 	      && i.op[first_reg_op + 1].regs == 0);
       i.op[first_reg_op + 1].regs = i.op[first_reg_op].regs;
       i.types[first_reg_op + 1] = i.types[first_reg_op];
@@ -4765,7 +4765,7 @@ build_modrm_byte (void)
       /* This instruction must have 4 operands: 4 register operands
 	 or 3 register operands plus 1 memory operand.  It must have
 	 VexNDS and VexImmExt.  */
-      assert (i.operands == 4
+      gas_assert (i.operands == 4
 	      && (i.reg_operands == 4
 		  || (i.reg_operands == 3 && i.mem_operands == 1))
 	      && i.tm.opcode_modifier.vexnds
@@ -4822,7 +4822,7 @@ build_modrm_byte (void)
 	     which may be the first or the last operand.  Otherwise,
 	     the first operand must be shift count register (cl) or it
 	     is an instruction with VexNDS. */
-	  assert (i.imm_operands == 1
+	  gas_assert (i.imm_operands == 1
 		  || (i.imm_operands == 0
 		      && (i.tm.opcode_modifier.vexnds
 			  || i.types[0].bitfield.shiftcount)));
@@ -4840,7 +4840,7 @@ build_modrm_byte (void)
 	     For instructions with VexNDS, if the first operand
 	     an imm8, the source operand is the 2nd one.  If the last
 	     operand is imm8, the source operand is the first one.  */
-	  assert ((i.imm_operands == 2
+	  gas_assert ((i.imm_operands == 2
 		   && i.types[0].bitfield.imm8
 		   && i.types[1].bitfield.imm8)
 		  || (i.tm.opcode_modifier.vexnds
@@ -4931,7 +4931,7 @@ build_modrm_byte (void)
 	      for (op = 0; op < i.operands; op++)
 		if (operand_type_check (i.types[op], anymem))
 		  break;
-	      assert (op < i.operands);
+	      gas_assert (op < i.operands);
 
 	  default_seg = &ds;
 
@@ -5109,7 +5109,7 @@ build_modrm_byte (void)
 		 holds the correct displacement size.  */
 	      expressionS *exp;
 
-	      assert (i.op[op].disps == 0);
+	      gas_assert (i.op[op].disps == 0);
 	      exp = &disp_expressions[i.disp_operands++];
 	      i.op[op].disps = exp;
 	      exp->X_op = O_constant;
@@ -5153,17 +5153,17 @@ build_modrm_byte (void)
 		{
 		  /* For instructions with VexNDS, the register-only
 		     source operand is encoded in VEX prefix. */
-		  assert (mem != (unsigned int) ~0);
+		  gas_assert (mem != (unsigned int) ~0);
 
 		  if (op > mem)
 		    {
 		      vex_reg = op++;
-		      assert (op < i.operands);
+		      gas_assert (op < i.operands);
 		    }
 		  else
 		    {
 		      vex_reg = op + 1;
-		      assert (vex_reg < i.operands);
+		      gas_assert (vex_reg < i.operands);
 		    }
 		}
 	      else if (i.tm.opcode_modifier.vexndd)
@@ -5171,16 +5171,16 @@ build_modrm_byte (void)
 		  /* For instructions with VexNDD, there should be
 		     no memory operand and the register destination
 		     is encoded in VEX prefix.  */
-		  assert (i.mem_operands == 0
+		  gas_assert (i.mem_operands == 0
 			  && (op + 2) == i.operands);
 		  vex_reg = op + 1;
 		}
 	      else
-		assert (op < i.operands);
+		gas_assert (op < i.operands);
 
 	      if (vex_reg != (unsigned int) ~0)
 		{
-		  assert (i.reg_operands == 2);
+		  gas_assert (i.reg_operands == 2);
 
 		  if (!operand_type_equal (&i.tm.operand_types[vex_reg],
 					   & regxmm)
@@ -5640,7 +5640,7 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	      int pcrel = (i.flags[n] & Operand_PCrel) != 0;
 
 	      /* We can't have 8 bit displacement here.  */
-	      assert (!i.types[n].bitfield.disp8);
+	      gas_assert (!i.types[n].bitfield.disp8);
 
 	      /* The PC relative address is computed relative
 		 to the instruction boundary, so in case immediate
@@ -5655,12 +5655,12 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		      {
 			/* Only one immediate is allowed for PC
 			   relative address.  */
-			assert (sz == 0);
+			gas_assert (sz == 0);
 			sz = imm_size (n1);
 			i.op[n].disps->X_add_number -= sz;
 		      }
 		  /* We should find the immediate.  */
-		  assert (sz != 0);
+		  gas_assert (sz != 0);
 		}
 
 	      p = frag_more (size);
@@ -6531,7 +6531,7 @@ i386_index_check (const char *operand_string)
 		   : i386_regtab[j].reg_type.bitfield.reg16)
 		&& i386_regtab[j].reg_num == expected)
 	      break;
-	  assert (j < i386_regtab_size);
+	  gas_assert (j < i386_regtab_size);
 	  as_warn (_("`%s' is not valid here (expected `%c%s%s%c')"),
 		   operand_string,
 		   intel_syntax ? '[' : '(',
@@ -7546,7 +7546,7 @@ md_operand (expressionS *e)
       break;
 
     case '[':
-      assert (intel_syntax);
+      gas_assert (intel_syntax);
       end = input_line_pointer++;
       expression (e);
       if (*input_line_pointer == ']')
@@ -8276,7 +8276,7 @@ tc_gen_reloc (section, fixp)
 		    bfd_get_reloc_code_name (code));
       /* Set howto to a garbage value so that we can keep going.  */
       rel->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);
-      assert (rel->howto != NULL);
+      gas_assert (rel->howto != NULL);
     }
 
   return rel;
@@ -8326,7 +8326,7 @@ tc_x86_frame_initial_instructions (void)
 
       input_line_pointer = sp[flag_code >> 1];
       tc_x86_parse_to_dw2regnum (&exp);
-      assert (exp.X_op == O_constant);
+      gas_assert (exp.X_op == O_constant);
       sp_regno[flag_code >> 1] = exp.X_add_number;
       input_line_pointer = saved_input;
     }

@@ -1,3 +1,29 @@
+2009-06-22  Martin Thuresson  <martin@mtme.org>
+	
+	* gas/app, gas/as.c, gas/as.h, gas/atof-generic.c, gas/cgen.c,
+	gas/config/atof-ieee.c, gas/config/obj-aout.c,
+	gas/config/obj-coff.c, gas/config/obj-ecoff.c,
+	gas/config/obj-elf.c, gas/config/obj-som.c, gas/config/tc-alpha.c,
+	gas/config/tc-arc.c, gas/config/tc-arm.c, gas/config/tc-cr16.c,
+	gas/config/tc-cris.c, gas/config/tc-crx.c, gas/config/tc-d30v.c,
+	gas/config/tc-dlx.c, gas/config/tc-hppa.c, gas/config/tc-i370.c,
+	gas/config/tc-i386-intel.c, gas/config/tc-i386.c,
+	gas/config/tc-i860.c, gas/config/tc-i960.c, gas/config/tc-ia64.c,
+	gas/config/tc-iq2000.c, gas/config/tc-m32c.c,
+	gas/config/tc-m32r.c, gas/config/tc-m68hc11.c,
+	gas/config/tc-m68k.c, gas/config/tc-maxq.c, gas/config/tc-mcore.c,
+	gas/config/tc-mep.c, gas/config/tc-mips.c, gas/config/tc-mmix.c,
+	gas/config/tc-mn10300.c, gas/config/tc-moxie.c,
+	gas/config/tc-ns32k.c, gas/config/tc-pj.c, gas/config/tc-ppc.c,
+	gas/config/tc-s390.c, gas/config/tc-score.c,
+	gas/config/tc-score7.c, gas/config/tc-sh.c, gas/config/tc-sparc.c,
+	gas/config/tc-spu.c, gas/config/tc-tic30.c, gas/config/tc-vax.c,
+	gas/config/tc-xtensa.c, gas/config/xtensa-relax.c,
+	gas/dw2gencfi.c, gas/dwarf2dbg.c, gas/ehopt.c, gas/expr.c,
+	gas/frags.c, gas/input-file.c, gas/read.c, gas/sb.c,
+	gas/subsegs.c, gas/symbols.c, gas/write.c: Change the name of the
+	gas macro `assert' to `gas_assert'.
+
 2009-06-22  Daniel Gutson <dgutson@codesourcery.com>
 
 	* config/tc-arm.c (implicit_it_mode): New enum.

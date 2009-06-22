@@ -2842,7 +2842,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
     }
 
   relP = (arelent *) xmalloc (sizeof (arelent));
-  assert (relP != 0);
+  gas_assert (relP != 0);
   relP->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
   *relP->sym_ptr_ptr = baddsy;
   relP->address = fixP->fx_frag->fr_address + fixP->fx_where;

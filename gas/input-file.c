@@ -124,7 +124,7 @@ input_file_open (char *filename, /* "" means use stdin. Must not be 0.  */
 
   preprocess = pre;
 
-  assert (filename != 0);	/* Filename may not be NULL.  */
+  gas_assert (filename != 0);	/* Filename may not be NULL.  */
   if (filename[0])
     {
       f_in = fopen (filename, FOPEN_RT);

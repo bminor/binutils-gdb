@@ -97,7 +97,7 @@
 
 #ifdef DEBUG
 #include <assert.h>
-#define ASSERT(x) assert(x)
+#define ASSERT(x) gas_assert (x)
 #define DBG(x) printf x
 #else
 #define ASSERT(x)

@@ -1203,7 +1203,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
       return NULL;
     }
 
-  assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
+  gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
   reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
@@ -1235,4 +1235,3 @@ dlx_pop_insert (void)
   pop_insert (dlx_pseudo_table);
   return ;
 }
-

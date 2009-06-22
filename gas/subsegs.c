@@ -84,7 +84,7 @@ subseg_set_rest (segT seg, subsegT subseg)
   if (frag_now && frchain_now)
     frchain_now->frch_frag_now = frag_now;
 
-  assert (frchain_now == 0
+  gas_assert (frchain_now == 0
 	  || frchain_now->frch_last == frag_now);
 
   subseg_change (seg, (int) subseg);
@@ -125,7 +125,7 @@ subseg_set_rest (segT seg, subsegT subseg)
   frchain_now = frcP;
   frag_now = frcP->frch_frag_now;
 
-  assert (frchain_now->frch_last == frag_now);
+  gas_assert (frchain_now->frch_last == frag_now);
 }
 
 /*

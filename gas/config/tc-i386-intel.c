@@ -468,9 +468,9 @@ i386_intel_operand (char *operand_string, int got_a_float)
   intel_state.index = NULL;
   intel_state.seg = NULL;
   operand_type_set (&intel_state.reloc_types, ~0);
-  assert (!intel_state.in_offset);
-  assert (!intel_state.in_bracket);
-  assert (!intel_state.in_scale);
+  gas_assert (!intel_state.in_offset);
+  gas_assert (!intel_state.in_bracket);
+  gas_assert (!intel_state.in_scale);
 
   saved_input_line_pointer = input_line_pointer;
   input_line_pointer = buf = xstrdup (operand_string);
@@ -501,9 +501,9 @@ i386_intel_operand (char *operand_string, int got_a_float)
   input_line_pointer = saved_input_line_pointer;
   free (buf);
 
-  assert (!intel_state.in_offset);
-  assert (!intel_state.in_bracket);
-  assert (!intel_state.in_scale);
+  gas_assert (!intel_state.in_offset);
+  gas_assert (!intel_state.in_bracket);
+  gas_assert (!intel_state.in_scale);
 
   if (!ret)
     return 0;

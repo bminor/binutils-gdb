@@ -146,7 +146,7 @@ ecoff_frob_file (void)
   char *set;
 
   /* Build the ECOFF debugging information.  */
-  assert (ecoff_data (stdoutput) != 0);
+  gas_assert (ecoff_data (stdoutput) != 0);
   hdr = &ecoff_data (stdoutput)->debug_info.symbolic_header;
   ecoff_build_debug (hdr, &buf, debug_swap);
 

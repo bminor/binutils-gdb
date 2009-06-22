@@ -1809,8 +1809,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
     {
       fixS *fixP;
 
-      assert (fragP->fr_subtype != 1);
-      assert (fragP->fr_cgen.insn != 0);
+      gas_assert (fragP->fr_subtype != 1);
+      gas_assert (fragP->fr_cgen.insn != 0);
 
       fixP = gas_cgen_record_fixup (fragP,
 				    /* Offset of branch insn in frag.  */
@@ -1900,7 +1900,7 @@ m32r_record_hi16 (int reloc_type,
 {
   struct m32r_hi_fixup *hi_fixup;
 
-  assert (reloc_type == BFD_RELOC_M32R_HI16_SLO
+  gas_assert (reloc_type == BFD_RELOC_M32R_HI16_SLO
 	  || reloc_type == BFD_RELOC_M32R_HI16_ULO);
 
   hi_fixup = xmalloc (sizeof (* hi_fixup));
@@ -2008,7 +2008,7 @@ m32r_frob_file (void)
       segment_info_type *seginfo;
       int pass;
 
-      assert (FX_OPINFO_R_TYPE (l->fixp) == BFD_RELOC_M32R_HI16_SLO
+      gas_assert (FX_OPINFO_R_TYPE (l->fixp) == BFD_RELOC_M32R_HI16_SLO
 	      || FX_OPINFO_R_TYPE (l->fixp) == BFD_RELOC_M32R_HI16_ULO);
 
       /* Check quickly whether the next fixup happens to be a matching low.  */
@@ -2049,7 +2049,7 @@ m32r_frob_file (void)
 		  for (pf = &seginfo->fix_root;
 		       *pf != l->fixp;
 		       pf = & (*pf)->fx_next)
-		    assert (*pf != NULL);
+		    gas_assert (*pf != NULL);
 
 		  *pf = l->fixp->fx_next;
 

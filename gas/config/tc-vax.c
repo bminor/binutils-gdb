@@ -2400,7 +2400,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 #endif
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
-  assert (reloc->howto != 0);
+  gas_assert (reloc->howto != 0);
 
   return reloc;
 }

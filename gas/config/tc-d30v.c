@@ -1516,7 +1516,7 @@ d30v_align (int n, char *pfill, symbolS *label)
       valueT       old_value;
       valueT       new_value;
 
-      assert (S_GET_SEGMENT (label) == now_seg);
+      gas_assert (S_GET_SEGMENT (label) == now_seg);
 
       old_frag  = symbol_get_frag (label);
       old_value = S_GET_VALUE (label);
@@ -2113,4 +2113,3 @@ const pseudo_typeS md_pseudo_table[] =
   { "sect.s", s_d30v_section, 0 },
   { NULL, NULL, 0 }
 };
-

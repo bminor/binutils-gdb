@@ -586,7 +586,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS * fixP)
 	}
 #endif
 
-  assert ((int) fixP->fx_r_type > 0);
+  gas_assert ((int) fixP->fx_r_type > 0);
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
 
   if (reloc->howto == NULL)
@@ -597,7 +597,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS * fixP)
                     bfd_get_reloc_code_name (fixP->fx_r_type));
       return NULL;
     }
-  assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
+  gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
   return reloc;
 }

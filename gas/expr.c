@@ -411,7 +411,7 @@ integer_constant (int radix, expressionS *expressionP)
       if (num_little_digits > SIZE_OF_LARGE_NUMBER - 1)
 	num_little_digits = SIZE_OF_LARGE_NUMBER - 1;
 
-      assert (num_little_digits >= 4);
+      gas_assert (num_little_digits >= 4);
 
       if (num_little_digits != 8)
 	as_bad (_("a bignum with underscores must have exactly 4 words"));
@@ -1564,7 +1564,7 @@ expr_set_precedence (void)
 void
 expr_set_rank (operatorT operator, operator_rankT rank)
 {
-  assert (operator >= O_md1 && operator < ARRAY_SIZE (op_rank));
+  gas_assert (operator >= O_md1 && operator < ARRAY_SIZE (op_rank));
   op_rank[operator] = rank;
 }
 
@@ -1579,7 +1579,7 @@ expr_begin (void)
   {
     expressionS e;
     e.X_op = O_max;
-    assert (e.X_op == O_max);
+    gas_assert (e.X_op == O_max);
   }
 }
 

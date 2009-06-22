@@ -273,7 +273,7 @@ md_assemble (char *op)
   struct spu_insn insn;
   int i;
 
-  assert (op);
+  gas_assert (op);
 
   /* skip over instruction to find parameters */
 

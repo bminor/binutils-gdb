@@ -2322,7 +2322,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
   int size = 0;
   int value = (int) * valP;
 
-  assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
+  gas_assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
 
   /* This should never happen.  */
   if (seg->flags & SEC_ALLOC)

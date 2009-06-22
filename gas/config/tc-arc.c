@@ -889,7 +889,7 @@ arc_common (int localScope)
       as_warn (_("length of symbol \"%s\" already %ld, ignoring %d"),
 	       S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
     }
-  assert (symbolP->sy_frag == &zero_address_frag);
+  gas_assert (symbolP->sy_frag == &zero_address_frag);
 
   /* Now parse the alignment field.  This field is optional for
      local and global symbols. Default alignment is zero.  */
@@ -1283,21 +1283,21 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	 limm values.  */
       if (operand->fmt == 'B')
 	{
-	  assert ((operand->flags & ARC_OPERAND_RELATIVE_BRANCH) != 0
+	  gas_assert ((operand->flags & ARC_OPERAND_RELATIVE_BRANCH) != 0
 		  && operand->bits == 20
 		  && operand->shift == 7);
 	  fixP->fx_r_type = BFD_RELOC_ARC_B22_PCREL;
 	}
       else if (operand->fmt == 'J')
 	{
-	  assert ((operand->flags & ARC_OPERAND_ABSOLUTE_BRANCH) != 0
+	  gas_assert ((operand->flags & ARC_OPERAND_ABSOLUTE_BRANCH) != 0
 		  && operand->bits == 24
 		  && operand->shift == 32);
 	  fixP->fx_r_type = BFD_RELOC_ARC_B26;
 	}
       else if (operand->fmt == 'L')
 	{
-	  assert ((operand->flags & ARC_OPERAND_LIMM) != 0
+	  gas_assert ((operand->flags & ARC_OPERAND_LIMM) != 0
 		  && operand->bits == 32
 		  && operand->shift == 32);
 	  fixP->fx_r_type = BFD_RELOC_32;
@@ -1365,7 +1365,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
       return NULL;
     }
 
-  assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
+  gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
   /* Set addend to account for PC being advanced one insn before the
      target address is computed.  */

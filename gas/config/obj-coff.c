@@ -248,7 +248,7 @@ fetch_coff_debug_section (void)
       const asymbol *s;
 
       s = bfd_make_debug_symbol (stdoutput, NULL, 0);
-      assert (s != 0);
+      gas_assert (s != 0);
       debug_section = s->section;
     }
   return debug_section;
@@ -1098,7 +1098,7 @@ weak_altname2name (const char * name)
   char * weak_name;
   char * dot;
 
-  assert (weak_is_altname (name));
+  gas_assert (weak_is_altname (name));
 
   weak_name = xstrdup (name + 6);
   if ((dot = strchr (weak_name, '.')))
@@ -1119,7 +1119,7 @@ weak_uniquify (const char * name)
   if (an_external_name != NULL)
     unique = an_external_name;
 #endif
-  assert (weak_is_altname (name));
+  gas_assert (weak_is_altname (name));
 
   if (strchr (name + sizeof (weak_altprefix), '.'))
     return name;
@@ -1249,8 +1249,8 @@ coff_frob_symbol (symbolS *symp, int *punt)
       symbolS *weakp = symbol_find_noref (weak_altname2name
 					  (S_GET_NAME (symp)), 1);
 
-      assert (weakp);
-      assert (S_GET_NUMBER_AUXILIARY (weakp) == 1);
+      gas_assert (weakp);
+      gas_assert (S_GET_NUMBER_AUXILIARY (weakp) == 1);
 
       if (! S_IS_WEAK (weakp))
 	{
@@ -1332,7 +1332,7 @@ coff_frob_symbol (symbolS *symp, int *punt)
 
       if (!S_IS_DEFINED (symp) && !SF_GET_LOCAL (symp))
 	{
-	  assert (S_GET_VALUE (symp) == 0);
+	  gas_assert (S_GET_VALUE (symp) == 0);
 	  if (S_IS_WEAKREFD (symp))
 	    *punt = 1;
 	  else
@@ -1790,7 +1790,7 @@ coff_frob_section (segT sec)
   fragp = seg_info (sec)->frchainP->frch_root;
   while (fragp && fragp->fr_fix == 0)
     fragp = fragp->fr_next;
-  assert (fragp != 0 && fragp->fr_fix >= 12);
+  gas_assert (fragp != 0 && fragp->fr_fix >= 12);
 
   /* Store the values.  */
   p = fragp->fr_literal;

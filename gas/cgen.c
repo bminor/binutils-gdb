@@ -1035,7 +1035,7 @@ gas_cgen_tc_gen_reloc (section, fixP)
       return NULL;
     }
 
-  assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
+  gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
   reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
@@ -1062,4 +1062,3 @@ gas_cgen_begin ()
   else
     cgen_clear_signed_overflow_ok (gas_cgen_cpu_desc);
 }
-

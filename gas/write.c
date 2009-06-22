@@ -386,7 +386,7 @@ chain_frchains_together_1 (segT section, struct frchain *frchp)
     {
       prev_frag->fr_next = frchp->frch_root;
       prev_frag = frchp->frch_last;
-      assert (prev_frag->fr_type != 0);
+      gas_assert (prev_frag->fr_type != 0);
       if (frchp->fix_root != (fixS *) NULL)
 	{
 	  if (seg_info (section)->fix_root == (fixS *) NULL)
@@ -396,8 +396,8 @@ chain_frchains_together_1 (segT section, struct frchain *frchp)
 	  prev_fix = frchp->fix_tail;
 	}
     }
-  assert (prev_frag->fr_type != 0);
-  assert (prev_frag != &dummy);
+  gas_assert (prev_frag->fr_type != 0);
+  gas_assert (prev_frag != &dummy);
   prev_frag->fr_next = 0;
   return prev_frag;
 }
@@ -478,7 +478,7 @@ cvt_frag_to_fill (segT sec ATTRIBUTE_UNUSED, fragS *fragP)
     case rs_machine_dependent:
       md_convert_frag (stdoutput, sec, fragP);
 
-      assert (fragP->fr_next == NULL
+      gas_assert (fragP->fr_next == NULL
 	      || ((offsetT) (fragP->fr_next->fr_address - fragP->fr_address)
 		  == fragP->fr_fix));
 
@@ -566,15 +566,15 @@ size_seg (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   flags &= ~SEC_RELOC;
   x = bfd_set_section_flags (abfd, sec, flags);
-  assert (x);
+  gas_assert (x);
 
   newsize = md_section_align (sec, size);
   x = bfd_set_section_size (abfd, sec, newsize);
-  assert (x);
+  gas_assert (x);
 
   /* If the size had to be rounded up, add some padding in the last
      non-empty frag.  */
-  assert (newsize >= size);
+  gas_assert (newsize >= size);
   if (size != newsize)
     {
       fragS *last = seginfo->frchainP->frch_last;
@@ -1299,7 +1299,7 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
       char *fill_literal;
       offsetT count;
 
-      assert (f->fr_type == rs_fill);
+      gas_assert (f->fr_type == rs_fill);
       if (f->fr_fix)
 	{
 	  x = bfd_set_section_contents (stdoutput, sec,
@@ -1313,7 +1313,7 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
       fill_literal = f->fr_literal + f->fr_fix;
       fill_size = f->fr_var;
       count = f->fr_offset;
-      assert (count >= 0);
+      gas_assert (count >= 0);
       if (fill_size && count)
 	{
 	  char buf[256];
@@ -1410,7 +1410,7 @@ set_symtab (void)
   else
     asympp = 0;
   result = bfd_set_symtab (stdoutput, asympp, nsyms);
-  assert (result);
+  gas_assert (result);
   symbol_table_frozen = 1;
 }
 

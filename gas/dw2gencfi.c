@@ -285,7 +285,7 @@ cfi_add_CFA_offset (unsigned regno, offsetT offset)
 {
   unsigned int abs_data_align;
 
-  assert (DWARF2_CIE_DATA_ALIGNMENT != 0);
+  gas_assert (DWARF2_CIE_DATA_ALIGNMENT != 0);
   cfi_add_CFA_insn_reg_offset (DW_CFA_offset, regno, offset);
 
   abs_data_align = (DWARF2_CIE_DATA_ALIGNMENT < 0

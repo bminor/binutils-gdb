@@ -2817,7 +2817,7 @@ ia64_estimate_size_before_relax (fragS *frag,
 
   /* fr_var carries the max_chars that we created the fragment with.
      We must, of course, have allocated enough memory earlier.  */
-  assert (frag->fr_var >= size);
+  gas_assert (frag->fr_var >= size);
 
   return frag->fr_fix + size;
 }
@@ -2848,7 +2848,7 @@ ia64_convert_frag (fragS *frag)
 
   /* fr_var carries the max_chars that we created the fragment with.
      We must, of course, have allocated enough memory earlier.  */
-  assert (frag->fr_var >= size);
+  gas_assert (frag->fr_var >= size);
 
   /* Initialize the header area. fr_offset is initialized with
      unwind.personality_routine.  */
@@ -5886,7 +5886,7 @@ parse_operands (struct ia64_opcode *idesc)
   char *first_arg = 0, *end, *saved_input_pointer;
   unsigned int sof;
 
-  assert (strlen (idesc->name) <= 128);
+  gas_assert (strlen (idesc->name) <= 128);
 
   strcpy (mnemonic, idesc->name);
   if (idesc->operands[2] == IA64_OPND_SOF
@@ -6210,7 +6210,7 @@ build_insn (struct slot *slot, bfd_vma *insnp)
       else if (slot->opnd[i].X_op == O_big)
 	{
 	  /* This must be the value 0x10000000000000000.  */
-	  assert (idesc->operands[i] == IA64_OPND_IMM8M1U8);
+	  gas_assert (idesc->operands[i] == IA64_OPND_IMM8M1U8);
 	  val = 0;
 	}
       else

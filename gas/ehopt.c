@@ -474,7 +474,7 @@ eh_frame_estimate_size_before_relax (fragS *frag)
 
   diff = resolve_symbol_value (frag->fr_symbol);
 
-  assert (ca > 0);
+  gas_assert (ca > 0);
   diff /= ca;
   if (diff < 0x40)
     ret = 0;
@@ -521,23 +521,23 @@ eh_frame_convert_frag (fragS *frag)
   diff = resolve_symbol_value (frag->fr_symbol);
 
   ca = frag->fr_subtype >> 3;
-  assert (ca > 0);
+  gas_assert (ca > 0);
   diff /= ca;
   switch (frag->fr_subtype & 7)
     {
     case 0:
-      assert (diff < 0x40);
+      gas_assert (diff < 0x40);
       loc4_frag->fr_literal[loc4_fix] = DW_CFA_advance_loc | diff;
       break;
 
     case 1:
-      assert (diff < 0x100);
+      gas_assert (diff < 0x100);
       loc4_frag->fr_literal[loc4_fix] = DW_CFA_advance_loc1;
       frag->fr_literal[frag->fr_fix] = diff;
       break;
 
     case 2:
-      assert (diff < 0x10000);
+      gas_assert (diff < 0x10000);
       loc4_frag->fr_literal[loc4_fix] = DW_CFA_advance_loc2;
       md_number_to_chars (frag->fr_literal + frag->fr_fix, diff, 2);
       break;

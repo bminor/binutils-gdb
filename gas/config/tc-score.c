@@ -4286,7 +4286,7 @@ s3_do_macro_la_rdi32 (char *str)
 		}
 	      else
 		{
-		  assert (s3_inst.reloc.exp.X_add_symbol);
+		  gas_assert (s3_inst.reloc.exp.X_add_symbol);
 		  s3_build_la_pic (reg_rd, s3_inst.reloc.exp);
 		}
 
@@ -4555,7 +4555,7 @@ s3_do_macro_bcmp (char *str)
               }
             else
               {
-                assert (s3_inst.reloc.exp.X_add_symbol);
+                gas_assert (s3_inst.reloc.exp.X_add_symbol);
               }
             /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
             s3_inst.bwarn = -1;
@@ -4589,7 +4589,7 @@ s3_do_macro_bcmp (char *str)
         }
       else
         {
-          assert (s3_inst.reloc.exp.X_add_symbol);
+          gas_assert (s3_inst.reloc.exp.X_add_symbol);
         }
       inst_main.relax_size = inst_expand[0].size + inst_expand[1].size;
       inst_main.type = Insn_BCMP;
@@ -4704,7 +4704,7 @@ s3_do_macro_bcmpz (char *str)
             }
           else
             {
-              assert (s3_inst.reloc.exp.X_add_symbol);
+              gas_assert (s3_inst.reloc.exp.X_add_symbol);
             }
           /* Set bwarn as -1, so macro instruction itself will not be generated frag.  */
           s3_inst.bwarn = -1;
@@ -4737,7 +4737,7 @@ s3_do_macro_bcmpz (char *str)
         }
       else
         {
-          assert (s3_inst.reloc.exp.X_add_symbol);
+          gas_assert (s3_inst.reloc.exp.X_add_symbol);
         }
       inst_main.relax_size = inst_expand[0].size + inst_expand[1].size;
       inst_main.type = Insn_BCMP;
@@ -5825,7 +5825,7 @@ s3_s_score_end (int x ATTRIBUTE_UNUSED)
     }
   if (p != NULL)
     {
-      assert (S_GET_NAME (p));
+      gas_assert (S_GET_NAME (p));
       if (strcmp (S_GET_NAME (p), S_GET_NAME (s3_cur_proc_ptr->isym)))
         as_warn (_(".end symbol does not match .ent symbol."));
       if (debug_type == DEBUG_STABS)
@@ -5843,7 +5843,7 @@ s3_s_score_end (int x ATTRIBUTE_UNUSED)
   else
     {
       dot = frag_now_fix ();
-      assert (s3_pdr_seg);
+      gas_assert (s3_pdr_seg);
       subseg_set (s3_pdr_seg, 0);
       /* Write the symbol.  */
       exp.X_op = O_symbol;
@@ -7103,7 +7103,7 @@ s3_apply_fix (fixS *fixP, valueT *valP, segT seg)
 
   char *buf = fixP->fx_frag->fr_literal + fixP->fx_where;
 
-  assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
+  gas_assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
   if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
     {
       if (fixP->fx_r_type != BFD_RELOC_SCORE_DUMMY_HI16)
@@ -7446,7 +7446,7 @@ s3_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
 
       retval[1]->addend = 0;
       retval[1]->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_LO16);
-      assert (retval[1]->howto != NULL);
+      gas_assert (retval[1]->howto != NULL);
 
       fixp->fx_r_type = BFD_RELOC_HI16_S;
     }

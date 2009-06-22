@@ -712,7 +712,7 @@ get_addr_mode (char *ptr, addr_modeS *addr_modeP)
       addr_modeP->am_size += 1;
     }
 
-  assert (addr_modeP->mode >= 0); 
+  gas_assert (addr_modeP->mode >= 0); 
   if (disp_test[(unsigned int) addr_modeP->mode])
     {
       char c;
@@ -725,7 +725,7 @@ get_addr_mode (char *ptr, addr_modeS *addr_modeP)
       /* There was a displacement, probe for length  specifying suffix.  */
       addr_modeP->pcrel = 0;
 
-      assert(addr_modeP->mode >= 0);
+      gas_assert (addr_modeP->mode >= 0);
       if (disp_test[(unsigned int) addr_modeP->mode])
 	{
 	  /* There is a displacement.  */

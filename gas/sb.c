@@ -59,7 +59,7 @@ sb_build (sb *ptr, int size)
   /* See if we can find one to allocate.  */
   sb_element *e;
 
-  assert (size < sb_max_power_two);
+  gas_assert (size < sb_max_power_two);
 
   e = free_list.size[size];
   if (!e)

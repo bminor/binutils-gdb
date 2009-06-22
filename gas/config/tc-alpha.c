@@ -1280,7 +1280,7 @@ load_expression (int targreg,
 
 	assemble_tokens_to_insn ("ldq", newtok, 3, &insn);
 
-	assert (insn.nfixups == 1);
+	gas_assert (insn.nfixups == 1);
 	insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITERAL;
 	insn.sequence = emit_lituse = next_sequence_num--;
 #endif /* OBJ_ECOFF */
@@ -1316,7 +1316,7 @@ load_expression (int targreg,
 
 	assemble_tokens_to_insn ("ldq", newtok, 3, &insn);
 
-	assert (insn.nfixups == 1);
+	gas_assert (insn.nfixups == 1);
 	insn.fixups[0].reloc = BFD_RELOC_ALPHA_ELF_LITERAL;
 	insn.sequence = emit_lituse = next_sequence_num--;
 #endif /* OBJ_ELF */
@@ -1376,7 +1376,7 @@ load_expression (int targreg,
 		    memcpy (ensymname, ptr1, ptr2 - ptr1);
 		    memcpy (ensymname + (ptr2 - ptr1), "..en", 5);
 
-		    assert (insn.nfixups + 1 <= MAX_INSN_FIXUPS);
+		    gas_assert (insn.nfixups + 1 <= MAX_INSN_FIXUPS);
 		    insn.fixups[insn.nfixups].reloc = BFD_RELOC_ALPHA_NOP;
 		    ensym = symbol_find_or_make (ensymname);
 		    ensym->sy_used = 1;
@@ -1405,7 +1405,7 @@ load_expression (int targreg,
 		    psymname = (char *) xmalloc (ptr2 - ptr1 + 1);
 		    memcpy (psymname, ptr1, ptr2 - ptr1);
 		    psymname [ptr2 - ptr1] = 0;
-		    assert (insn.nfixups + 1 <= MAX_INSN_FIXUPS);
+		    gas_assert (insn.nfixups + 1 <= MAX_INSN_FIXUPS);
 		    insn.fixups[insn.nfixups].reloc = BFD_RELOC_ALPHA_LDA;
 		    psym = symbol_find_or_make (psymname);
 		    psym->sy_used = 1;
@@ -1544,7 +1544,7 @@ load_expression (int targreg,
 
       assemble_tokens_to_insn ("ldq", newtok, 3, &insn);
 
-      assert (insn.nfixups == 1);
+      gas_assert (insn.nfixups == 1);
 #ifdef OBJ_ECOFF
       insn.fixups[0].reloc = BFD_RELOC_ALPHA_LITERAL;
 #endif
@@ -1562,7 +1562,7 @@ load_expression (int targreg,
 
       assemble_tokens_to_insn ("ldq", newtok, 3, &insn);
 
-      assert (insn.nfixups < MAX_INSN_FIXUPS);
+      gas_assert (insn.nfixups < MAX_INSN_FIXUPS);
       insn.fixups[insn.nfixups].reloc = DUMMY_RELOC_LITUSE_BASE;
       insn.fixups[insn.nfixups].exp.X_op = O_absent;
       insn.nfixups++;
@@ -1765,7 +1765,7 @@ emit_insn (struct alpha_insn *insn)
 	{
 	  reloc_howto_type *reloc_howto
 	    = bfd_reloc_type_lookup (stdoutput, fixup->reloc);
-	  assert (reloc_howto);
+	  gas_assert (reloc_howto);
 
 	  size = bfd_get_reloc_size (reloc_howto);
 
@@ -1779,7 +1779,7 @@ emit_insn (struct alpha_insn *insn)
 	      break;
 #endif
 	    default:
-	      assert (size >= 1 && size <= 4);
+	      gas_assert (size >= 1 && size <= 4);
 	    }
  
 	  pcrel = reloc_howto->pc_relative;
@@ -2060,7 +2060,7 @@ assemble_insn (const struct alpha_opcode *opcode,
 
 	case O_constant:
 	  image = insert_operand (image, operand, t->X_add_number, NULL, 0);
-	  assert (reloc_operand == NULL);
+	  gas_assert (reloc_operand == NULL);
 	  reloc_operand = operand;
 	  reloc_exp = t;
 	  break;
@@ -2090,7 +2090,7 @@ assemble_insn (const struct alpha_opcode *opcode,
 	      if (reloc == BFD_RELOC_UNUSED)
 		reloc = operand->default_reloc;
 
-	      assert (reloc_operand == NULL);
+	      gas_assert (reloc_operand == NULL);
 	      reloc_operand = operand;
 	      reloc_exp = t;
 	    }
@@ -2180,7 +2180,7 @@ emit_ir_load (const expressionS *tok,
 
   if (lituse)
     {
-      assert (insn.nfixups < MAX_INSN_FIXUPS);
+      gas_assert (insn.nfixups < MAX_INSN_FIXUPS);
       insn.fixups[insn.nfixups].reloc = DUMMY_RELOC_LITUSE_BASE;
       insn.fixups[insn.nfixups].exp.X_op = O_absent;
       insn.nfixups++;
@@ -2229,7 +2229,7 @@ emit_loadstore (const expressionS *tok,
 
   if (lituse)
     {
-      assert (insn.nfixups < MAX_INSN_FIXUPS);
+      gas_assert (insn.nfixups < MAX_INSN_FIXUPS);
       insn.fixups[insn.nfixups].reloc = DUMMY_RELOC_LITUSE_BASE;
       insn.fixups[insn.nfixups].exp.X_op = O_absent;
       insn.nfixups++;
@@ -2275,7 +2275,7 @@ emit_ldXu (const expressionS *tok,
 
       if (lituse)
 	{
-	  assert (insn.nfixups < MAX_INSN_FIXUPS);
+	  gas_assert (insn.nfixups < MAX_INSN_FIXUPS);
 	  insn.fixups[insn.nfixups].reloc = DUMMY_RELOC_LITUSE_BASE;
 	  insn.fixups[insn.nfixups].exp.X_op = O_absent;
 	  insn.nfixups++;
@@ -2291,7 +2291,7 @@ emit_ldXu (const expressionS *tok,
 
       if (lituse)
 	{
-	  assert (insn.nfixups < MAX_INSN_FIXUPS);
+	  gas_assert (insn.nfixups < MAX_INSN_FIXUPS);
 	  insn.fixups[insn.nfixups].reloc = DUMMY_RELOC_LITUSE_BYTOFF;
 	  insn.fixups[insn.nfixups].exp.X_op = O_absent;
 	  insn.nfixups++;
@@ -2427,7 +2427,7 @@ emit_stX (const expressionS *tok,
 
       if (lituse)
 	{
-	  assert (insn.nfixups < MAX_INSN_FIXUPS);
+	  gas_assert (insn.nfixups < MAX_INSN_FIXUPS);
 	  insn.fixups[insn.nfixups].reloc = DUMMY_RELOC_LITUSE_BASE;
 	  insn.fixups[insn.nfixups].exp.X_op = O_absent;
 	  insn.nfixups++;
@@ -2444,7 +2444,7 @@ emit_stX (const expressionS *tok,
 
       if (lituse)
 	{
-	  assert (insn.nfixups < MAX_INSN_FIXUPS);
+	  gas_assert (insn.nfixups < MAX_INSN_FIXUPS);
 	  insn.fixups[insn.nfixups].reloc = DUMMY_RELOC_LITUSE_BYTOFF;
 	  insn.fixups[insn.nfixups].exp.X_op = O_absent;
 	  insn.nfixups++;
@@ -2460,7 +2460,7 @@ emit_stX (const expressionS *tok,
 
       if (lituse)
 	{
-	  assert (insn.nfixups < MAX_INSN_FIXUPS);
+	  gas_assert (insn.nfixups < MAX_INSN_FIXUPS);
 	  insn.fixups[insn.nfixups].reloc = DUMMY_RELOC_LITUSE_BYTOFF;
 	  insn.fixups[insn.nfixups].exp.X_op = O_absent;
 	  insn.nfixups++;
@@ -2480,7 +2480,7 @@ emit_stX (const expressionS *tok,
 
       if (lituse)
 	{
-	  assert (insn.nfixups < MAX_INSN_FIXUPS);
+	  gas_assert (insn.nfixups < MAX_INSN_FIXUPS);
 	  insn.fixups[insn.nfixups].reloc = DUMMY_RELOC_LITUSE_BASE;
 	  insn.fixups[insn.nfixups].exp.X_op = O_absent;
 	  insn.nfixups++;
@@ -2845,7 +2845,7 @@ emit_jsrjmp (const expressionS *tok,
 
   if (lituse)
     {
-      assert (insn.nfixups < MAX_INSN_FIXUPS);
+      gas_assert (insn.nfixups < MAX_INSN_FIXUPS);
       insn.fixups[insn.nfixups].reloc = DUMMY_RELOC_LITUSE_JSR;
       insn.fixups[insn.nfixups].exp.X_op = O_absent;
       insn.nfixups++;
@@ -2866,7 +2866,7 @@ emit_jsrjmp (const expressionS *tok,
       memcpy (ensymname, symname, symlen);
       memcpy (ensymname + symlen, "..en", 5);
 
-      assert (insn.nfixups < MAX_INSN_FIXUPS);
+      gas_assert (insn.nfixups < MAX_INSN_FIXUPS);
       if (insn.nfixups > 0)
 	{
 	  memmove (&insn.fixups[1], &insn.fixups[0],
@@ -4008,7 +4008,7 @@ s_alpha_coff_wrapper (int which)
     ecoff_directive_val,
   };
 
-  assert (which >= 0 && which < (int) (sizeof (fns)/sizeof (*fns)));
+  gas_assert (which >= 0 && which < (int) (sizeof (fns)/sizeof (*fns)));
 
   if (ECOFF_DEBUGGING)
     (*fns[which]) (0);
@@ -5294,7 +5294,7 @@ maybe_set_gp (asection *sec)
 static void
 select_gp_value (void)
 {
-  assert (alpha_gp_value == 0);
+  gas_assert (alpha_gp_value == 0);
 
   /* Get minus-one in whatever width...  */
   alpha_gp_value = 0;
@@ -5401,7 +5401,7 @@ md_begin (void)
     expressionS e;
 
     e.X_op = O_max;
-    assert (e.X_op == O_max);
+    gas_assert (e.X_op == O_max);
   }
 
   /* Create the opcode hash table.  */
@@ -5782,7 +5782,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 
 #ifdef OBJ_ECOFF
     case BFD_RELOC_GPREL32:
-      assert (fixP->fx_subsy == alpha_gp_symbol);
+      gas_assert (fixP->fx_subsy == alpha_gp_symbol);
       fixP->fx_subsy = 0;
       /* FIXME: inherited this obliviousness of `value' -- why?  */
       md_number_to_chars (fixpos, -alpha_gp_value, 4);
@@ -5928,7 +5928,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  as_fatal (_("unhandled relocation type %s"),
 		    bfd_get_reloc_code_name (fixP->fx_r_type));
 
-	assert (-(int) fixP->fx_r_type < (int) alpha_num_operands);
+	gas_assert (-(int) fixP->fx_r_type < (int) alpha_num_operands);
 	operand = &alpha_operands[-(int) fixP->fx_r_type];
 
 	/* The rest of these fixups only exist internally during symbol
@@ -6213,7 +6213,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
 
   /* Make sure none of our internal relocations make it this far.
      They'd better have been fully resolved by this point.  */
-  assert ((int) fixp->fx_r_type > 0);
+  gas_assert ((int) fixp->fx_r_type > 0);
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == NULL)
@@ -6228,7 +6228,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
     as_fatal (_("internal error? cannot generate `%s' relocation"),
 	      bfd_get_reloc_code_name (fixp->fx_r_type));
 
-  assert (!fixp->fx_pcrel == !reloc->howto->pc_relative);
+  gas_assert (!fixp->fx_pcrel == !reloc->howto->pc_relative);
 
 #ifdef OBJ_ECOFF
   if (fixp->fx_r_type == BFD_RELOC_ALPHA_LITERAL)

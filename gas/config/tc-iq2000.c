@@ -534,7 +534,7 @@ iq2000_record_hi16 (int    reloc_type,
 {
   struct iq2000_hi_fixup * hi_fixup;
 
-  assert (reloc_type == BFD_RELOC_HI16);
+  gas_assert (reloc_type == BFD_RELOC_HI16);
 
   hi_fixup = xmalloc (sizeof * hi_fixup);
   hi_fixup->fixp = fixP;
@@ -587,7 +587,7 @@ iq2000_frob_file (void)
       segment_info_type * seginfo;
       int                 pass;
 
-      assert (FX_OPINFO_R_TYPE (l->fixp) == BFD_RELOC_HI16
+      gas_assert (FX_OPINFO_R_TYPE (l->fixp) == BFD_RELOC_HI16
 	      || FX_OPINFO_R_TYPE (l->fixp) == BFD_RELOC_LO16);
 
       /* Check quickly whether the next fixup happens to be a matching low.  */
@@ -627,7 +627,7 @@ iq2000_frob_file (void)
 		  for (pf = &seginfo->fix_root;
 		       * pf != l->fixp;
 		       pf = & (* pf)->fx_next)
-		    assert (* pf != NULL);
+		    gas_assert (* pf != NULL);
 
 		  * pf = l->fixp->fx_next;
 
@@ -837,7 +837,7 @@ s_iq2000_end (int x ATTRIBUTE_UNUSED)
 
   if (p != NULL)
     {
-      assert (S_GET_NAME (p));
+      gas_assert (S_GET_NAME (p));
       if (strcmp (S_GET_NAME (p), S_GET_NAME (cur_proc_ptr->isym)))
 	as_warn (_(".end symbol does not match .ent symbol."));
     }

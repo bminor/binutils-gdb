@@ -1923,7 +1923,7 @@ md_assemble (char *str)
     {
       const struct i370_macro *macro;
 
-      assert (i370_macro_hash);
+      gas_assert (i370_macro_hash);
       macro = (const struct i370_macro *) hash_find (i370_macro_hash, str);
       if (macro == (const struct i370_macro *) NULL)
         as_bad ("Unrecognized opcode: `%s'", str);
@@ -2668,4 +2668,3 @@ const pseudo_typeS md_pseudo_table[] =
 
   { NULL,       NULL,		0 }
 };
-

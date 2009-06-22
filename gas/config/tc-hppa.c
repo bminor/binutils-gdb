@@ -1388,8 +1388,8 @@ tc_gen_reloc (asection *section, fixS *fixp)
   if (fixp->fx_addsy == 0)
     return &no_relocs;
 
-  assert (hppa_fixp != 0);
-  assert (section != 0);
+  gas_assert (hppa_fixp != 0);
+  gas_assert (section != 0);
 
   reloc = xmalloc (sizeof (arelent));
 
@@ -1434,7 +1434,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
   switch (fixp->fx_r_type)
     {
     default:
-      assert (n_relocs == 1);
+      gas_assert (n_relocs == 1);
 
       code = *codes[0];
 
@@ -1488,7 +1488,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 					    (bfd_reloc_code_real_type) code);
       reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
-      assert (reloc->howto && (unsigned int) code == reloc->howto->type);
+      gas_assert (reloc->howto && (unsigned int) code == reloc->howto->type);
       break;
     }
 #else /* OBJ_SOM */
@@ -1511,7 +1511,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 	  /* The only time we ever use a R_COMP2 fixup is for the difference
 	     of two symbols.  With that in mind we fill in all four
 	     relocs now and break out of the loop.  */
-	  assert (i == 1);
+	  gas_assert (i == 1);
 	  relocs[0]->sym_ptr_ptr
 	    = (asymbol **) bfd_abs_section_ptr->symbol_ptr_ptr;
 	  relocs[0]->howto
@@ -5728,7 +5728,7 @@ md_assemble (char *str)
   char *to;
 
   /* The had better be something to assemble.  */
-  assert (str);
+  gas_assert (str);
 
   /* If we are within a procedure definition, make sure we've
      defined a label for the procedure; handle case where the
@@ -6433,7 +6433,7 @@ hppa_elf_mark_end_of_function (void)
 	  symbolP = symbol_new (name, now_seg, (valueT) (frag_now_fix () - 4),
 				frag_now);
 
-	  assert (symbolP);
+	  gas_assert (symbolP);
 	  S_CLEAR_EXTERNAL (symbolP);
 	  symbol_table_insert (symbolP);
 	}
@@ -8465,7 +8465,7 @@ hppa_force_relocation (struct fix *fixp)
     return 1;
 #endif
 
-  assert (fixp->fx_addsy != NULL);
+  gas_assert (fixp->fx_addsy != NULL);
 
   /* Ensure we emit a relocation for global symbols so that dynamic
      linking works.  */

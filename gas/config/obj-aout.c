@@ -132,7 +132,7 @@ obj_aout_frob_file_before_fix (void)
     x = bfd_set_section_contents (stdoutput, data_section, &b, (file_ptr) 0,
 				  (bfd_size_type) 1);
 
-  assert (x);
+  gas_assert (x);
 }
 
 static void

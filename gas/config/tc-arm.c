@@ -3468,7 +3468,7 @@ s_arm_unwind_save_vfp_armv6 (void)
 
   /* Generate opcode for registers numbered in the range 0 .. 15.  */
   num_regs_below_16 = num_vfpv3_regs > 0 ? 16 - (int) start : count;
-  assert (num_regs_below_16 + num_vfpv3_regs == count);
+  gas_assert (num_regs_below_16 + num_vfpv3_regs == count);
   if (num_regs_below_16 > 0)
     {
       op = 0xc900 | (start << 4) | (num_regs_below_16 - 1);
@@ -4125,7 +4125,7 @@ parse_big_immediate (char **str, int i)
       /* Bignums have their least significant bits in
          generic_bignum[0]. Make sure we put 32 bits in imm and
          32 bits in reg,  in a (hopefully) portable way.  */
-      assert (parts != 0);
+      gas_assert (parts != 0);
       inst.operands[i].imm = 0;
       for (j = 0; j < parts; j++, idx++)
         inst.operands[i].imm |= generic_bignum[idx]
@@ -4643,7 +4643,7 @@ parse_shifter_operand_group_reloc (char **str, int i)
 
       /* Record the relocation type (always the ALU variant here).  */
       inst.reloc.type = entry->alu_code;
-      assert (inst.reloc.type != 0);
+      gas_assert (inst.reloc.type != 0);
 
       return PARSE_OPERAND_SUCCESS;
     }
@@ -4802,7 +4802,7 @@ parse_address_main (char **str, int i, int group_relocations,
                     break;
 
                   default:
-                    assert (0);
+                    gas_assert (0);
                 }
 
               if (inst.reloc.type == 0)
@@ -5675,7 +5675,7 @@ parse_operands (char *str, const unsigned char *pattern)
       if (upat[i] >= OP_FIRST_OPTIONAL)
 	{
 	  /* Remember where we are in case we need to backtrack.  */
-	  assert (!backtrack_pos);
+	  gas_assert (!backtrack_pos);
 	  backtrack_pos = str;
 	  backtrack_error = inst.error;
 	  backtrack_index = i;
@@ -6380,7 +6380,7 @@ encode_arm_shifter_operand (int i)
 static void
 encode_arm_addr_mode_common (int i, bfd_boolean is_t)
 {
-  assert (inst.operands[i].isreg);
+  gas_assert (inst.operands[i].isreg);
   inst.instruction |= inst.operands[i].reg << 16;
 
   if (inst.operands[i].preind)
@@ -6397,7 +6397,7 @@ encode_arm_addr_mode_common (int i, bfd_boolean is_t)
     }
   else if (inst.operands[i].postind)
     {
-      assert (inst.operands[i].writeback);
+      gas_assert (inst.operands[i].writeback);
       if (is_t)
 	inst.instruction |= WRITE_BACK;
     }
@@ -6491,11 +6491,11 @@ encode_arm_cp_address (int i, int wb_ok, int unind_ok, int reloc_override)
 {
   inst.instruction |= inst.operands[i].reg << 16;
 
-  assert (!(inst.operands[i].preind && inst.operands[i].postind));
+  gas_assert (!(inst.operands[i].preind && inst.operands[i].postind));
 
   if (!inst.operands[i].preind && !inst.operands[i].postind) /* unindexed */
     {
-      assert (!inst.operands[i].writeback);
+      gas_assert (!inst.operands[i].writeback);
       if (!unind_ok)
 	{
 	  inst.error = _("instruction does not support unindexed addressing");
@@ -8432,7 +8432,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
     }
   else if (inst.operands[i].postind)
     {
-      assert (inst.operands[i].writeback);
+      gas_assert (inst.operands[i].writeback);
       constraint (is_pc, _("cannot use post-indexing with PC-relative addressing"));
       constraint (is_t, _("cannot use post-indexing with this instruction"));
 
@@ -9138,7 +9138,7 @@ do_t_branch (void)
 	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH25;
       else
 	{
-	  assert (cond != 0xF);
+	  gas_assert (cond != 0xF);
 	  inst.instruction |= cond << 22;
 	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH20;
 	}
@@ -11402,7 +11402,7 @@ neon_type_promote (struct neon_type_el *key, unsigned thisarg)
 {
   struct neon_type_el dest = *key;
 
-  assert ((thisarg & N_EQK) != 0);
+  gas_assert ((thisarg & N_EQK) != 0);
 
   neon_modify_type_size (thisarg, &dest.type, &dest.size);
 
@@ -13603,7 +13603,7 @@ do_neon_rev (void)
      extract it here to check the elements to be reversed are smaller.
      Otherwise we'd get a reserved instruction.  */
   unsigned elsize = (op == 2) ? 16 : (op == 1) ? 32 : (op == 0) ? 64 : 0;
-  assert (elsize != 0);
+  gas_assert (elsize != 0);
   constraint (et.size >= elsize,
               _("elements must be smaller than reversal region"));
   neon_two_same (neon_quad (rs), 1, et.size);
@@ -14309,7 +14309,7 @@ do_neon_ld_dup (void)
   switch ((inst.instruction >> 8) & 3)
     {
     case 0:  /* VLD1.  */
-      assert (NEON_REG_STRIDE (inst.operands[0].imm) != 2);
+      gas_assert (NEON_REG_STRIDE (inst.operands[0].imm) != 2);
       align_good = neon_alignment_bit (et.size, inst.operands[1].imm >> 8,
                                        &do_align, 16, 16, 32, 32, -1);
       if (align_good == FAIL)
@@ -14525,12 +14525,12 @@ output_inst (const char * str)
 
   if (thumb_mode && (inst.size > THUMB_SIZE))
     {
-      assert (inst.size == (2 * THUMB_SIZE));
+      gas_assert (inst.size == (2 * THUMB_SIZE));
       put_thumb32_insn (to, inst.instruction);
     }
   else if (inst.size > INSN_SIZE)
     {
-      assert (inst.size == (2 * INSN_SIZE));
+      gas_assert (inst.size == (2 * INSN_SIZE));
       md_number_to_chars (to, inst.instruction, INSN_SIZE);
       md_number_to_chars (to + INSN_SIZE, inst.instruction, INSN_SIZE);
     }
@@ -14720,7 +14720,7 @@ opcode_lookup (char **str)
 	as_warn (_("conditional infixes are deprecated in unified syntax"));
       affix = base + (opcode->tag - OT_odd_infix_0);
       cond = hash_find_n (arm_cond_hsh, affix, 2);
-      assert (cond);
+      gas_assert (cond);
 
       inst.cond = cond->value;
       return opcode;
@@ -15211,7 +15211,7 @@ md_assemble (char *str)
 
       if (!(inst.error || inst.relax))
 	{
-	  assert (inst.instruction < 0xe800 || inst.instruction > 0xffff);
+	  gas_assert (inst.instruction < 0xe800 || inst.instruction > 0xffff);
 	  inst.size = (inst.instruction > 0xffff ? 4 : 2);
 	  if (inst.size_req && inst.size_req != inst.size)
 	    {
@@ -15222,7 +15222,7 @@ md_assemble (char *str)
 
       /* Something has gone badly wrong if we try to relax a fixed size
          instruction.  */
-      assert (inst.size_req == 0 || !inst.relax);
+      gas_assert (inst.size_req == 0 || !inst.relax);
 
       ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 			      *opcode->tvariant);
@@ -18082,7 +18082,7 @@ arm_handle_align (fragS * fragP)
   if (bytes > MAX_MEM_FOR_RS_ALIGN_CODE)
     bytes &= MAX_MEM_FOR_RS_ALIGN_CODE;
 
-  assert ((fragP->tc_frag_data & MODE_RECORDED) != 0);
+  gas_assert ((fragP->tc_frag_data & MODE_RECORDED) != 0);
 
   if (fragP->tc_frag_data & (~ MODE_RECORDED))
     {
@@ -18792,7 +18792,7 @@ validate_immediate_twopart (unsigned int   val,
 	  }
 	else
 	  {
-	    assert (a & 0xff000000);
+	    gas_assert (a & 0xff000000);
 	    * highpart = (a >> 24) | ((i + 8) << 7);
 	  }
 
@@ -19021,7 +19021,7 @@ md_apply_fix (fixS *	fixP,
   int		 sign;
   char *	 buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
-  assert (fixP->fx_r_type <= BFD_RELOC_UNUSED);
+  gas_assert (fixP->fx_r_type <= BFD_RELOC_UNUSED);
 
   /* Note whether this will delete the relocation.  */
 
@@ -20071,7 +20071,7 @@ md_apply_fix (fixS *	fixP,
    case BFD_RELOC_ARM_ALU_SB_G1_NC:
    case BFD_RELOC_ARM_ALU_SB_G1:
    case BFD_RELOC_ARM_ALU_SB_G2:
-     assert (!fixP->fx_done);
+     gas_assert (!fixP->fx_done);
      if (!seg->use_rela_p)
        {
          bfd_vma insn;
@@ -20113,7 +20113,7 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_LDR_SB_G0:
     case BFD_RELOC_ARM_LDR_SB_G1:
     case BFD_RELOC_ARM_LDR_SB_G2:
-      assert (!fixP->fx_done);
+      gas_assert (!fixP->fx_done);
       if (!seg->use_rela_p)
         {
           bfd_vma insn;
@@ -20152,7 +20152,7 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_LDRS_SB_G0:
     case BFD_RELOC_ARM_LDRS_SB_G1:
     case BFD_RELOC_ARM_LDRS_SB_G2:
-      assert (!fixP->fx_done);
+      gas_assert (!fixP->fx_done);
       if (!seg->use_rela_p)
         {
           bfd_vma insn;
@@ -20192,7 +20192,7 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_LDC_SB_G0:
     case BFD_RELOC_ARM_LDC_SB_G1:
     case BFD_RELOC_ARM_LDC_SB_G2:
-      assert (!fixP->fx_done);
+      gas_assert (!fixP->fx_done);
       if (!seg->use_rela_p)
         {
           bfd_vma insn;
@@ -22286,5 +22286,3 @@ arm_apply_sym_value (struct fix * fixP)
   return 0;
 }
 #endif /* OBJ_ELF */
-
-

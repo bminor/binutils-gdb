@@ -903,8 +903,6 @@ bfin_start_line_hook ()
 
 /* Special extra functions that help bfin-parse.y perform its job.  */
 
-#include <assert.h>
-
 struct obstack mempool;
 
 INSTR_T
@@ -933,7 +931,7 @@ INSTR_T
 note_reloc (INSTR_T code, Expr_Node * symbol, int reloc, int pcrel)
 {
   /* Assert that the symbol is not an operator.  */
-  assert (symbol->type == Expr_Node_Reloc);
+  gas_assert (symbol->type == Expr_Node_Reloc);
 
   return note_reloc1 (code, symbol->value.s_value, reloc, pcrel);
 

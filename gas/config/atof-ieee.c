@@ -784,7 +784,7 @@ ieee_md_atof (int type,
       return _("Unrecognized or unsupported floating point constant");
     }
 
-  assert (prec <= MAX_LITTLENUMS);
+  gas_assert (prec <= MAX_LITTLENUMS);
 
   t = atof_ieee (input_line_pointer, type, words);
   if (t)

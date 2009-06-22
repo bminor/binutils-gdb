@@ -1150,7 +1150,7 @@ main (int argc, char ** argv)
   PROGRESS (1);
 
   output_file_create (out_file_name);
-  assert (stdoutput != 0);
+  gas_assert (stdoutput != 0);
 
 #ifdef tc_init_after_args
   tc_init_after_args ();

@@ -713,7 +713,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
     }
 
   relP = xmalloc (sizeof (arelent));
-  assert (relP != 0);
+  gas_assert (relP != 0);
   relP->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
   *relP->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   relP->address = fixP->fx_frag->fr_address + fixP->fx_where;

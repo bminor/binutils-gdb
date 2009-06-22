@@ -459,7 +459,7 @@ obj_elf_visibility (int visibility)
       bfdsym = symbol_get_bfdsym (symbolP);
       elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
 
-      assert (elfsym);
+      gas_assert (elfsym);
 
       elfsym->internal_elf_sym.st_other &= ~3;
       elfsym->internal_elf_sym.st_other |= visibility;
@@ -1346,7 +1346,7 @@ obj_elf_vtable_inherit (int ignore ATTRIBUTE_UNUSED)
   if (bad)
     return NULL;
 
-  assert (symbol_get_value_expression (csym)->X_op == O_constant);
+  gas_assert (symbol_get_value_expression (csym)->X_op == O_constant);
   return fix_new (symbol_get_frag (csym),
 		  symbol_get_value_expression (csym)->X_add_number,
 		  0, psym, 0, 0, BFD_RELOC_VTABLE_INHERIT);
@@ -1779,7 +1779,7 @@ adjust_stab_sections (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   nsyms = bfd_section_size (abfd, sec) / 12 - 1;
 
   p = seg_info (sec)->stabu.p;
-  assert (p != 0);
+  gas_assert (p != 0);
 
   bfd_h_put_16 (abfd, nsyms, p + 6);
   bfd_h_put_32 (abfd, strsz, p + 8);
@@ -2190,7 +2190,7 @@ elf_frob_file_after_relocs (void)
 		  bfd_errmsg (bfd_get_error ()));
 
       sec = bfd_get_section_by_name (stdoutput, ".mdebug");
-      assert (sec != NULL);
+      gas_assert (sec != NULL);
 
       know (!stdoutput->output_has_begun);
 

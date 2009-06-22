@@ -525,8 +525,8 @@ append_transition (TransitionTable *tt,
   TransitionList *tl = (TransitionList *) xmalloc (sizeof (TransitionList));
   TransitionList *prev;
   TransitionList **t_p;
-  assert (tt != NULL);
-  assert (opcode < tt->num_opcodes);
+  gas_assert (tt != NULL);
+  gas_assert (opcode < tt->num_opcodes);
 
   prev = tt->table[opcode];
   tl->rule = t;
@@ -899,7 +899,7 @@ op_is_constant (const opname_map_e *m1)
 static unsigned
 op_get_constant (const opname_map_e *m1)
 {
-  assert (m1->operand_name == NULL);
+  gas_assert (m1->operand_name == NULL);
   return m1->constant_value;
 }
 

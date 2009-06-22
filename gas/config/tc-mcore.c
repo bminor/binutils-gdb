@@ -2135,7 +2135,7 @@ md_pcrel_from_section (fixS * fixp, segT sec ATTRIBUTE_UNUSED)
 	  || (S_GET_SEGMENT (fixp->fx_addsy) != sec)))
 
   {
-    assert (fixp->fx_size == 2);	/* must be an insn */
+    gas_assert (fixp->fx_size == 2);	/* must be an insn */
     return fixp->fx_size;
   }
 #endif
@@ -2201,7 +2201,7 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
 
       /* Set howto to a garbage value so that we can keep going.  */
       rel->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);
-      assert (rel->howto != NULL);
+      gas_assert (rel->howto != NULL);
     }
 
   return rel;
