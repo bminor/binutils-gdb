@@ -615,6 +615,7 @@ bfd_mach_o_canonicalize_reloc (bfd *abfd, asection *asect,
         }
       rels[i] = &res[i];
     }
+  rels[asect->reloc_count] = NULL;
   asect->relocation = res;
   free (native_relocs);
   return i;

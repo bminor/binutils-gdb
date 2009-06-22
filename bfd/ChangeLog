@@ -1,3 +1,8 @@
+2009-06-22  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_canonicalize_reloc): Append a sentinel to
+	the relocs array.
+
 2009-06-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Handle R_PPC_RELAX* in switch.
