@@ -1,5 +1,9 @@
 2009-06-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* m32c-asm.c: Regenerate.
+
+2009-06-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* score-dis.c (print_insn_score48, print_insn_score32): Move default
 	case label to proper lexical block.
 	* score7-dis.c (print_insn_score32): Likewise.

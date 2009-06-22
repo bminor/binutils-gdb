@@ -1,3 +1,7 @@
+2009-06-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* m32c.opc (parse_lab_5_3): Use correct enum.
+
 2009-01-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* frv.cpu (mabshs): Explicitly sign-extend arguments of abs to DI.
