@@ -81,23 +81,42 @@ textual_name (const char *name)
 static int
 textual_element_type (struct type *type, char format)
 {
-  struct type *true_type = check_typedef (type);
+  struct type *true_type, *iter_type;
 
   if (format != 0 && format != 's')
     return 0;
 
+  /* We also rely on this for its side effect of setting up all the
+     typedef pointers.  */
+  true_type = check_typedef (type);
+
   /* TYPE_CODE_CHAR is always textual.  */
   if (TYPE_CODE (true_type) == TYPE_CODE_CHAR)
     return 1;
+
   /* Any other character-like types must be integral.  */
   if (TYPE_CODE (true_type) != TYPE_CODE_INT)
     return 0;
 
-  /* Check the names of the type and the typedef.  */
-  if (TYPE_NAME (type) && textual_name (TYPE_NAME (type)))
-    return 1;
-  if (TYPE_NAME (true_type) && textual_name (TYPE_NAME (true_type)))
-    return 1;
+  /* We peel typedefs one by one, looking for a match.  */
+  iter_type = type;
+  while (iter_type)
+    {
+      /* Check the name of the type.  */
+      if (TYPE_NAME (iter_type) && textual_name (TYPE_NAME (iter_type)))
+	return 1;
+
+      if (TYPE_CODE (iter_type) != TYPE_CODE_TYPEDEF)
+	break;
+
+      /* Peel a single typedef.  If the typedef doesn't have a target
+	 type, we use check_typedef and hope the result is ok -- it
+	 might be for C++, where wchar_t is a built-in type.  */
+      if (TYPE_TARGET_TYPE (iter_type))
+	iter_type = TYPE_TARGET_TYPE (iter_type);
+      else
+	iter_type = check_typedef (iter_type);
+    }
 
   if (format == 's')
     {

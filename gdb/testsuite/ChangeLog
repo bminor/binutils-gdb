@@ -1,3 +1,10 @@
+2009-06-23  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/charset.exp (test_combination): Regression test.
+	* gdb.base/charset.c (my_wchar_t): New typedef.
+	(myvar): New global.
+	(main): Set myvar.
+
 2009-06-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* lib/gdb.exp (gdb_compile): Also force unbuffered mode for DJGPP

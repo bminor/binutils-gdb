@@ -77,9 +77,12 @@ classify_type (struct type *elttype, const char **encoding)
   struct type *saved_type;
   enum c_string_type result;
 
-  /* We do one or two passes -- one on ELTTYPE, and then maybe a
-     second one on a typedef target.  */
-  do
+  /* We loop because ELTTYPE may be a typedef, and we want to
+     successively peel each typedef until we reach a type we
+     understand.  We don't use CHECK_TYPEDEF because that will strip
+     all typedefs at once -- but in C, wchar_t is itself a typedef, so
+     that would do the wrong thing.  */
+  while (elttype)
     {
       char *name = TYPE_NAME (elttype);
 
@@ -107,10 +110,22 @@ classify_type (struct type *elttype, const char **encoding)
 	  goto done;
 	}
 
-      saved_type = elttype;
-      CHECK_TYPEDEF (elttype);
+      if (TYPE_CODE (elttype) != TYPE_CODE_TYPEDEF)
+	break;
+
+      /* Call for side effects.  */
+      check_typedef (elttype);
+
+      if (TYPE_TARGET_TYPE (elttype))
+	elttype = TYPE_TARGET_TYPE (elttype);
+      else
+	{
+	  /* Perhaps check_typedef did not update the target type.  In
+	     this case, force the lookup again and hope it works out.
+	     It never will for C, but it might for C++.  */
+	  CHECK_TYPEDEF (elttype);
+	}
     }
-  while (elttype != saved_type);
 
   /* Punt.  */
   result = C_CHAR;

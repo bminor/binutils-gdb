@@ -65,6 +65,10 @@ typedef unsigned int char32_t;
 char16_t uvar;
 char32_t Uvar;
 
+/* A typedef to a typedef should also work.  */
+typedef wchar_t my_wchar_t;
+my_wchar_t myvar;
+
 void
 init_string (char string[],
              char x,
@@ -168,6 +172,8 @@ int main ()
   fill_run (ibm1047_string, 59, 10, 240);
 
   init_ucs4 ();
+
+  myvar = ucs_4_string[7];
 
   return 0;            /* all strings initialized */
 }
