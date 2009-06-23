@@ -1,3 +1,13 @@
+2009-06-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	Revert 2009-05-14 breakpoint commit (no longer needed).
+	* breakpoint.h (breakpoint_re_set_objfile): Remove
+	* breakpoint.c (breakpoint_re_set_objfile): Likewise
+	(create_overlay_event_breakpoint): Remove objfile parameter,
+	iterate over all objfiles.
+	* objfiles.c (objfile_relocate): Update.
+	* symfile.c (new_symfile_objfile): Likewise.	
+	
 2009-06-23  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/10309:

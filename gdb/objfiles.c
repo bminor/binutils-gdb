@@ -674,7 +674,7 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
     }
 
   /* Relocate breakpoints as necessary, after things are relocated. */
-  breakpoint_re_set_objfile (objfile);
+  breakpoint_re_set ();
 }
 
 /* Many places in gdb want to test just to see if we have any partial

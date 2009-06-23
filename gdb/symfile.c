@@ -919,7 +919,7 @@ new_symfile_objfile (struct objfile *objfile, int add_flags)
     }
   else if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
     {
-      breakpoint_re_set_objfile (objfile);
+      breakpoint_re_set ();
     }
 
   /* We're done reading the symbol file; finish off complaints.  */
