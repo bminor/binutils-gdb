@@ -988,6 +988,11 @@ class General_options
     OBJECT_FORMAT_BINARY
   };
 
+  // Convert a string to an Object_format.  Gives an error if the
+  // string is not recognized.
+  static Object_format
+  string_to_object_format(const char* arg);
+
   // Note: these functions are not very fast.
   Object_format format_enum() const;
   Object_format oformat_enum() const;

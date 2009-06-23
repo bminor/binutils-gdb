@@ -1,5 +1,17 @@
 2009-06-22  Ian Lance Taylor  <iant@google.com>
 
+	PR 10030
+	* yyscript.y: Parse TARGET.
+	* script.cc (script_set_target): New function.
+	* script-c.h (script_set_target): Declare.
+	* options.cc (General_options::string_to_object_format): Rename
+	from string_to_object_format in anonymous namespace.  Change
+	callers.
+	* options.h (class General_options): Declare
+	string_to_object_format.
+
+2009-06-22  Ian Lance Taylor  <iant@google.com>
+
 	* script-sections.cc (Script_sections::create_segments): Don't put
 	program headers in a PT_LOAD segment if -n or -N.
 

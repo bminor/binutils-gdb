@@ -266,6 +266,8 @@ file_cmd:
 	    { script_start_sections(closure); }
 	  sections_block '}'
 	    { script_finish_sections(closure); }
+	| TARGET_K '(' string ')'
+	    { script_set_target(closure, $3.value, $3.length); }
         | VERSIONK '{'
             { script_push_lex_into_version_mode(closure); }
           version_script '}'

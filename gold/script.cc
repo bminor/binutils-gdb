@@ -1207,7 +1207,7 @@ class Parser_closure
   skip_on_incompatible_target() const
   { return this->skip_on_incompatible_target_; }
 
-  // Stop skipping to the next flie on an incompatible target.  This
+  // Stop skipping to the next file on an incompatible target.  This
   // is called when we make some unrevocable change to the data
   // structures.
   void
@@ -2329,6 +2329,18 @@ script_check_output_format(void* closurev,
       // FIXME: Should we warn about the unknown target?
     }
   return 1;
+}
+
+// Called by the bison parser to handle TARGET.
+
+extern "C" void
+script_set_target(void* closurev, const char* target, size_t len)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  std::string s(target, len);
+  General_options::Object_format format_enum;
+  format_enum = General_options::string_to_object_format(s.c_str());
+  closure->position_dependent_options().set_format_enum(format_enum);
 }
 
 // Called by the bison parser to handle SEARCH_DIR.  This is handled

@@ -258,6 +258,10 @@ extern int
 script_check_output_format(void* closure, const char*, size_t,
 			   const char*, size_t, const char*, size_t);
 
+/* Called by the bison parser to handle TARGET.  */
+extern void
+script_set_target(void* closure, const char*, size_t);
+
 /* Called by the bison parser to handle SEARCH_DIR.  */
 
 extern void
