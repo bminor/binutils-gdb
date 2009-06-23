@@ -1,5 +1,13 @@
 2009-06-23  Ian Lance Taylor  <iant@google.com>
 
+	PR 10147
+	* object.cc (Object::section_contents): Don't try to get a view if
+	the section has length zero.
+	(Object::handle_gnu_warning_section): If the section is empty, use
+	the name of the section as the warning.
+
+2009-06-23  Ian Lance Taylor  <iant@google.com>
+
 	PR 10133
 	* stringpool.h (class Stringpool_template): Add optimize_ field.
 	(Stringpool_template::set_optimize): New function.

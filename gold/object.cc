@@ -170,6 +170,11 @@ Object::section_contents(unsigned int shndx, section_size_type* plen,
 {
   Location loc(this->do_section_contents(shndx));
   *plen = convert_to_section_size_type(loc.data_size);
+  if (*plen == 0)
+    {
+      static const unsigned char empty[1] = { '\0' };
+      return empty;
+    }
   return this->get_view(loc.file_offset, *plen, true, cache);
 }
 
@@ -226,6 +231,12 @@ Object::handle_gnu_warning_section(const char* name, unsigned int shndx,
       section_size_type len;
       const unsigned char* contents = this->section_contents(shndx, &len,
 							     false);
+      if (len == 0)
+	{
+	  const char* warning = name + warn_prefix_len;
+	  contents = reinterpret_cast<const unsigned char*>(warning);
+	  len = strlen(warning);
+	}
       std::string warning(reinterpret_cast<const char*>(contents), len);
       symtab->add_warning(name + warn_prefix_len, this, warning);
       return true;
