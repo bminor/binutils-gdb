@@ -1421,8 +1421,8 @@ print_object_command (char *args, int from_tty)
       make_cleanup (free_current_contents, &expr);
     int pc = 0;
 
-    object = expr->language_defn->la_exp_desc->evaluate_exp 
-      (builtin_type (expr->gdbarch)->builtin_data_ptr, expr, &pc, EVAL_NORMAL);
+    object = evaluate_subexp (builtin_type (expr->gdbarch)->builtin_data_ptr,
+			      expr, &pc, EVAL_NORMAL);
     do_cleanups (old_chain);
   }
 

@@ -157,9 +157,6 @@ static struct symbol *find_old_style_renaming_symbol (const char *,
 static struct type *ada_lookup_struct_elt_type (struct type *, char *,
                                                 int, int, int *);
 
-static struct value *evaluate_subexp (struct type *, struct expression *,
-                                      int *, enum noside);
-
 static struct value *evaluate_subexp_type (struct expression *, int *);
 
 static int is_dynamic_field (struct type *, int);
@@ -7730,14 +7727,6 @@ ada_enum_name (const char *name)
     }
 }
 
-static struct value *
-evaluate_subexp (struct type *expect_type, struct expression *exp, int *pos,
-                 enum noside noside)
-{
-  return (*exp->language_defn->la_exp_desc->evaluate_exp)
-    (expect_type, exp, pos, noside);
-}
-
 /* Evaluate the subexpression of EXP starting at *POS as for
    evaluate_type, updating *POS to point just past the evaluated
    expression.  */
@@ -7745,8 +7734,7 @@ evaluate_subexp (struct type *expect_type, struct expression *exp, int *pos,
 static struct value *
 evaluate_subexp_type (struct expression *exp, int *pos)
 {
-  return (*exp->language_defn->la_exp_desc->evaluate_exp)
-    (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
+  return evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
 }
 
 /* If VAL is wrapped in an aligner or subtype wrapper, return the

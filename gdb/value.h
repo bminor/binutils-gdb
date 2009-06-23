@@ -490,6 +490,10 @@ extern struct value *evaluate_expression (struct expression *exp);
 
 extern struct value *evaluate_type (struct expression *exp);
 
+extern struct value *evaluate_subexp (struct type *expect_type,
+				      struct expression *exp,
+				      int *pos, enum noside noside);
+
 extern struct value *evaluate_subexpression_type (struct expression *exp,
 						  int subexp);
 

@@ -56,9 +56,6 @@ static struct value *evaluate_subexp_for_sizeof (struct expression *, int *);
 static struct value *evaluate_subexp_for_address (struct expression *,
 						  int *, enum noside);
 
-static struct value *evaluate_subexp (struct type *, struct expression *,
-				      int *, enum noside);
-
 static char *get_label (struct expression *, int *);
 
 static struct value *evaluate_struct_tuple (struct value *,
@@ -69,7 +66,7 @@ static LONGEST init_array_element (struct value *, struct value *,
 				   struct expression *, int *, enum noside,
 				   LONGEST, LONGEST);
 
-static struct value *
+struct value *
 evaluate_subexp (struct type *expect_type, struct expression *exp,
 		 int *pos, enum noside noside)
 {
