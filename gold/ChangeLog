@@ -1,4 +1,9 @@
-2009-06-22  Ian Lance Taylor  <ian@airs.com>
+2009-06-22  Ian Lance Taylor  <iant@google.com>
+
+	* script-sections.cc (Script_sections::create_segments): Don't put
+	program headers in a PT_LOAD segment if -n or -N.
+
+2009-06-22  Ian Lance Taylor  <iant@google.com>
 
 	PR 10141
 	* options.h (class General_options): Add -z lazy and -z now.  Sort

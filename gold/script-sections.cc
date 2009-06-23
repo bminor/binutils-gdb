@@ -2981,6 +2981,11 @@ Script_sections::create_segments(Layout* layout)
   if (first_seg == NULL)
     return NULL;
 
+  // -n or -N mean that the program is not demand paged and there is
+  // no need to put the program headers in a PT_LOAD segment.
+  if (parameters->options().nmagic() || parameters->options().omagic())
+    return NULL;
+
   size_t sizeof_headers = this->total_header_size(layout);
 
   uint64_t vma = first_seg->vaddr();
