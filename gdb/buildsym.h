@@ -125,6 +125,10 @@ EXTERN struct pending *local_symbols;
 
 EXTERN struct pending *param_symbols;
 
+/* "using" directives local to lexical context.  */
+
+EXTERN struct using_direct *using_directives;
+
 /* Stack representing unclosed lexical contexts (that will become
    blocks, eventually).  */
 
@@ -137,6 +141,10 @@ struct context_stack
     /* Pending func params at the time we entered */
 
     struct pending *params;
+
+    /* Pending using directives at the time we entered.  */
+
+    struct using_direct *using_directives;
 
     /* Pointer into blocklist as of entry */
 

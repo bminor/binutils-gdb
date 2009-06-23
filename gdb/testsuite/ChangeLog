@@ -1,3 +1,8 @@
+2009-06-23  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/namespace-using.exp: New test.
+	* gdb.cp/namespace-using.cc: New test.
+
 2009-05-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/variant_record_packed_array: New testcase.

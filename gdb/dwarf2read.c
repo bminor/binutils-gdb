@@ -946,6 +946,8 @@ static void read_namespace (struct die_info *die, struct dwarf2_cu *);
 
 static void read_module (struct die_info *die, struct dwarf2_cu *cu);
 
+static void read_import_statement (struct die_info *die, struct dwarf2_cu *);
+
 static const char *namespace_name (struct die_info *die,
 				   int *is_anonymous, struct dwarf2_cu *);
 
@@ -2985,14 +2987,12 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       break;
     case DW_TAG_imported_declaration:
     case DW_TAG_imported_module:
-      /* FIXME: carlton/2002-10-16: Eventually, we should use the
-	 information contained in these.  DW_TAG_imported_declaration
-	 dies shouldn't have children; DW_TAG_imported_module dies
-	 shouldn't in the C++ case, but conceivably could in the
-	 Fortran case.  */
       processing_has_namespace_info = 1;
-      complaint (&symfile_complaints, _("unsupported tag: '%s'"),
-		 dwarf_tag_name (die->tag));
+      if (die->child != NULL && (die->tag == DW_TAG_imported_declaration
+				 || cu->language != language_fortran))
+	complaint (&symfile_complaints, _("Tag '%s' has unexpected children"),
+		   dwarf_tag_name (die->tag));
+      read_import_statement (die, cu);
       break;
     default:
       new_symbol (die, NULL, cu);
@@ -3036,6 +3036,68 @@ dwarf2_full_name (struct die_info *die, struct dwarf2_cu *cu)
 			    name, cu);
 
   return name;
+}
+
+/* Read the import statement specified by the given die and record it.  */
+
+static void
+read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct attribute *import_attr;
+  struct die_info *imported_die;
+  const char *imported_name;
+
+  import_attr = dwarf2_attr (die, DW_AT_import, cu);
+  if (import_attr == NULL)
+    {
+      complaint (&symfile_complaints, _("Tag '%s' has no DW_AT_import"),
+		 dwarf_tag_name (die->tag));
+      return;
+    }
+
+  imported_die = follow_die_ref (die, import_attr, &cu);
+  imported_name = dwarf2_name (imported_die, cu);
+  if (imported_name == NULL)
+    {
+      /* GCC bug: https://bugzilla.redhat.com/show_bug.cgi?id=506524
+
+        The import in the following code:
+        namespace A
+          {
+            typedef int B;
+          }
+
+        int main ()
+          {
+            using A::B;
+            B b;
+            return b;
+          }
+
+        ...
+         <2><51>: Abbrev Number: 3 (DW_TAG_imported_declaration)
+            <52>   DW_AT_decl_file   : 1
+            <53>   DW_AT_decl_line   : 6
+            <54>   DW_AT_import      : <0x75>
+         <2><58>: Abbrev Number: 4 (DW_TAG_typedef)
+            <59>   DW_AT_name        : B
+            <5b>   DW_AT_decl_file   : 1
+            <5c>   DW_AT_decl_line   : 2
+            <5d>   DW_AT_type        : <0x6e>
+        ...
+         <1><75>: Abbrev Number: 7 (DW_TAG_base_type)
+            <76>   DW_AT_byte_size   : 4
+            <77>   DW_AT_encoding    : 5        (signed)
+
+        imports the wrong die ( 0x75 instead of 0x58 ).
+        This case will be ignored until the gcc bug is fixed.  */
+      return;
+    }
+
+  /* FIXME: dwarf2_name (die); for the local name after import.  */
+
+  using_directives = cp_add_using (imported_name, strlen (imported_name), 0,
+                                   using_directives);
 }
 
 static void
@@ -3371,6 +3433,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
      back to building a containing block's symbol lists.  */
   local_symbols = new->locals;
   param_symbols = new->params;
+  using_directives = new->using_directives;
 
   /* If we've finished processing a top-level function, subsequent
      symbols go in the file symbol list.  */
@@ -3433,6 +3496,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
       dwarf2_record_block_ranges (die, block, baseaddr, cu);
     }
   local_symbols = new->locals;
+  using_directives = new->using_directives;
 }
 
 /* Get low and high pc attributes from DW_AT_ranges attribute value OFFSET.

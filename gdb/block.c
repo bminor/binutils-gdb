@@ -206,25 +206,16 @@ block_set_scope (struct block *block, const char *scope,
   BLOCK_NAMESPACE (block)->scope = scope;
 }
 
-/* This returns the first using directives associated to BLOCK, if
+/* This returns the using directives list associated with BLOCK, if
    any.  */
-
-/* FIXME: carlton/2003-04-23: This uses the fact that we currently
-   only have using directives in static blocks, because we only
-   generate using directives from anonymous namespaces.  Eventually,
-   when we support using directives everywhere, we'll want to replace
-   this by some iterator functions.  */
 
 struct using_direct *
 block_using (const struct block *block)
 {
-  const struct block *static_block = block_static_block (block);
-
-  if (static_block == NULL
-      || BLOCK_NAMESPACE (static_block) == NULL)
+  if (block == NULL || BLOCK_NAMESPACE (block) == NULL)
     return NULL;
   else
-    return BLOCK_NAMESPACE (static_block)->using;
+    return BLOCK_NAMESPACE (block)->using;
 }
 
 /* Set BLOCK's using member to USING; if needed, allocate memory via

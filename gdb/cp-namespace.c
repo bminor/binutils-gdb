@@ -30,15 +30,7 @@
 #include "dictionary.h"
 #include "command.h"
 #include "frame.h"
-
-/* List of using directives that are active in the current file.  */
-
-static struct using_direct *using_list;
-
-static struct using_direct *cp_add_using (const char *name,
-					  unsigned int inner_len,
-					  unsigned int outer_len,
-					  struct using_direct *next);
+#include "buildsym.h"
 
 static struct using_direct *cp_copy_usings (struct using_direct *using,
 					    struct obstack *obstack);
@@ -77,31 +69,6 @@ static int check_one_possible_namespace_symbol (const char *name,
 static struct symbol *lookup_possible_namespace_symbol (const char *name);
 
 static void maintenance_cplus_namespace (char *args, int from_tty);
-
-/* Set up support for dealing with C++ namespace info in the current
-   symtab.  */
-
-void cp_initialize_namespace ()
-{
-  using_list = NULL;
-}
-
-/* Add all the using directives we've gathered to the current symtab.
-   STATIC_BLOCK should be the symtab's static block; OBSTACK is used
-   for allocation.  */
-
-void
-cp_finalize_namespace (struct block *static_block,
-		       struct obstack *obstack)
-{
-  if (using_list != NULL)
-    {
-      block_set_using (static_block,
-		       cp_copy_usings (using_list, obstack),
-		       obstack);
-      using_list = NULL;
-    }
-}
 
 /* Check to see if SYMBOL refers to an object contained within an
    anonymous namespace; if so, add an appropriate using directive.  */
@@ -170,7 +137,7 @@ cp_add_using_directive (const char *name, unsigned int outer_length,
 
   /* Has it already been added?  */
 
-  for (current = using_list; current != NULL; current = current->next)
+  for (current = using_directives; current != NULL; current = current->next)
     {
       if ((strncmp (current->inner, name, inner_length) == 0)
 	  && (strlen (current->inner) == inner_length)
@@ -178,8 +145,8 @@ cp_add_using_directive (const char *name, unsigned int outer_length,
 	return;
     }
 
-  using_list = cp_add_using (name, inner_length, outer_length,
-			     using_list);
+  using_directives = cp_add_using (name, inner_length, outer_length,
+                                   using_directives);
 }
 
 /* Record the namespace that the function defined by SYMBOL was
@@ -237,7 +204,7 @@ cp_is_anonymous (const char *namespace)
    using xmalloc.  It copies the strings, so NAME can be a temporary
    string.  */
 
-static struct using_direct *
+struct using_direct *
 cp_add_using (const char *name,
 	      unsigned int inner_len,
 	      unsigned int outer_len,

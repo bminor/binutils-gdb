@@ -80,6 +80,11 @@ extern void cp_add_using_directive (const char *name,
 				    unsigned int outer_length,
 				    unsigned int inner_length);
 
+extern struct using_direct *cp_add_using (const char *name,
+					  unsigned int inner_len,
+					  unsigned int outer_len,
+					  struct using_direct *next);
+
 extern void cp_initialize_namespace (void);
 
 extern void cp_finalize_namespace (struct block *static_block,
