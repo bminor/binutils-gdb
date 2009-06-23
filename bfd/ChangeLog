@@ -1,3 +1,8 @@
+2009-06-23  Tristan Gingold  <gingold@adacore.com>
+
+	* vms.c (vms_get_synthetic_symtab): Remove duplicate definition
+	of this macro.  Fix indentation.
+
 2009-06-22  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (elf32_arm_size_stubs): Use PLT address as
