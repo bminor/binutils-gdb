@@ -1,7 +1,6 @@
 /* THIS FILE IS GENERATED.  Original: powerpc-601.xml */
 
 #include "defs.h"
-#include "gdbtypes.h"
 #include "target-descriptions.h"
 
 struct target_desc *tdesc_powerpc_601;
@@ -10,7 +9,7 @@ initialize_tdesc_powerpc_601 (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
-  struct type *field_type, *type;
+  struct tdesc_type *field_type, *type;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.power.core");
   tdesc_create_reg (feature, "r0", 0, 1, NULL, 32, "int");

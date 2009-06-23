@@ -1,7 +1,6 @@
 /* THIS FILE IS GENERATED.  Original: powerpc-isa205-vsx32l.xml */
 
 #include "defs.h"
-#include "gdbtypes.h"
 #include "target-descriptions.h"
 
 struct target_desc *tdesc_powerpc_isa205_vsx32l;
@@ -10,7 +9,7 @@ initialize_tdesc_powerpc_isa205_vsx32l (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
-  struct type *field_type, *type;
+  struct tdesc_type *field_type, *type;
 
   set_tdesc_architecture (result, bfd_scan_arch ("powerpc:common"));
 
@@ -95,39 +94,28 @@ initialize_tdesc_powerpc_isa205_vsx32l (void)
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.power.altivec");
   field_type = tdesc_named_type (feature, "ieee_single");
-  type = init_vector_type (field_type, 4);
-  TYPE_NAME (type) = xstrdup ("v4f");
-  tdesc_record_type (feature, type);
+  tdesc_create_vector (feature, "v4f", field_type, 4);
 
   field_type = tdesc_named_type (feature, "int32");
-  type = init_vector_type (field_type, 4);
-  TYPE_NAME (type) = xstrdup ("v4i32");
-  tdesc_record_type (feature, type);
+  tdesc_create_vector (feature, "v4i32", field_type, 4);
 
   field_type = tdesc_named_type (feature, "int16");
-  type = init_vector_type (field_type, 8);
-  TYPE_NAME (type) = xstrdup ("v8i16");
-  tdesc_record_type (feature, type);
+  tdesc_create_vector (feature, "v8i16", field_type, 8);
 
   field_type = tdesc_named_type (feature, "int8");
-  type = init_vector_type (field_type, 16);
-  TYPE_NAME (type) = xstrdup ("v16i8");
-  tdesc_record_type (feature, type);
+  tdesc_create_vector (feature, "v16i8", field_type, 16);
 
-  type = init_composite_type (NULL, TYPE_CODE_UNION);
-  TYPE_NAME (type) = xstrdup ("vec128");
+  type = tdesc_create_union (feature, "vec128");
   field_type = tdesc_named_type (feature, "uint128");
-  append_composite_type_field (type, xstrdup ("uint128"), field_type);
+  tdesc_add_field (type, "uint128", field_type);
   field_type = tdesc_named_type (feature, "v4f");
-  append_composite_type_field (type, xstrdup ("v4_float"), field_type);
+  tdesc_add_field (type, "v4_float", field_type);
   field_type = tdesc_named_type (feature, "v4i32");
-  append_composite_type_field (type, xstrdup ("v4_int32"), field_type);
+  tdesc_add_field (type, "v4_int32", field_type);
   field_type = tdesc_named_type (feature, "v8i16");
-  append_composite_type_field (type, xstrdup ("v8_int16"), field_type);
+  tdesc_add_field (type, "v8_int16", field_type);
   field_type = tdesc_named_type (feature, "v16i8");
-  append_composite_type_field (type, xstrdup ("v16_int8"), field_type);
-  TYPE_VECTOR (type) = 1;
-  tdesc_record_type (feature, type);
+  tdesc_add_field (type, "v16_int8", field_type);
 
   tdesc_create_reg (feature, "vr0", 73, 1, NULL, 128, "vec128");
   tdesc_create_reg (feature, "vr1", 74, 1, NULL, 128, "vec128");

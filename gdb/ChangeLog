@@ -1,3 +1,94 @@
+2009-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* target-descriptions.h (struct type): Do not declare.
+	(struct tdesc_type): Declare.
+	(tdesc_named_type): Change return type to struct tdesc_type *.
+	(tdesc_record_type): Remove.
+	(tdesc_create_vector): Add prototype.
+	(tdesc_create_union): Likewise.
+	(tdesc_add_field): Likewise.
+
+	* target-descriptions.c (struct tdesc_reg): Replace gdb_type
+	member by tdesc_type member.
+	(struct tdesc_type_field, tdesc_type_field): Add type and vector def.
+	(struct tdesc_type, tdesc_type_p): Likewise.
+	(struct tdesc_arch_reg, tdesc_arch_reg): Likewise.
+	(struct tdesc_feature): Change type of "types" to VEC(tdesc_type_p).
+	(struct tdesc_arch_data): Replace registers member by arch_regs.
+
+	(tdesc_predefined_types): Change to array of pre-defined
+	struct tdesc_type structures.  Add "code_ptr" and "data_ptr".
+	(tdesc_named_type): Return struct tdesc_type * instead of GDB type.
+	(tdesc_gdb_type): New function.
+
+	(target_find_description): Update for data structure changes.
+	(tdesc_data_cleanup): Likewise.
+	(tdesc_numbered_register): Likewise.
+	(tdesc_use_registers): Likewise.
+	(tdesc_create_reg): Likewise.
+	
+	(tdesc_find_arch_register): New function.
+	(tdesc_find_register): Use it.
+	(tdesc_register_type): Use tdesc_gdb_type to generate GDB type from
+	tdesc_type on demand; cache generated types in tdesc_arch_reg.
+
+	(tdesc_free_type): New function.
+	(tdesc_free_feature): Call it.
+
+	(tdesc_create_vector): New function.
+	(tdesc_create_union): Likewise.
+	(tdesc_add_field): Likewise.
+	(tdesc_record_type): Remove.
+
+	(tdesc_type_id): Remove.
+	(maint_print_c_tdesc_cmd): Update for data structure changes.  Update
+	generated code to create tdesc_type structures instead of GDB types.
+
+	* xml-tdesc.c: Do not include "gdbtypes.h".
+	(struct tdesc_parsing_data): Change type of current_union to
+	struct tdesc_type *.
+	(tdesc_start_reg): Do not special-case "code_ptr" or "data_ptr".
+	(tdesc_start_union): Call tdesc_create_union.
+	(tdesc_start_field): Call tdesc_add_field.
+	(tdesc_start_vector): Call tdesc_create_vector.
+	(tdesc_end_union): Remove.
+	(feature_children): Remove reference to tdesc_end_union.
+
+	* features/arm-with-iwmmxt.c: Regenerate.
+	* features/mips-linux.c: Regenerate.
+	* features/mips64-linux.c: Regenerate.
+	* features/rs6000/powerpc-32.c: Regenerate.
+	* features/rs6000/powerpc-32l.c: Regenerate.
+	* features/rs6000/powerpc-403.c: Regenerate.
+	* features/rs6000/powerpc-403gc.c: Regenerate.
+	* features/rs6000/powerpc-505.c: Regenerate.
+	* features/rs6000/powerpc-601.c: Regenerate.
+	* features/rs6000/powerpc-602.c: Regenerate.
+	* features/rs6000/powerpc-603.c: Regenerate.
+	* features/rs6000/powerpc-604.c: Regenerate.
+	* features/rs6000/powerpc-64.c: Regenerate.
+	* features/rs6000/powerpc-64l.c: Regenerate.
+	* features/rs6000/powerpc-7400.c: Regenerate.
+	* features/rs6000/powerpc-750.c: Regenerate.
+	* features/rs6000/powerpc-860.c: Regenerate.
+	* features/rs6000/powerpc-altivec32.c: Regenerate.
+	* features/rs6000/powerpc-altivec32l.c: Regenerate.
+	* features/rs6000/powerpc-altivec64.c: Regenerate.
+	* features/rs6000/powerpc-altivec64l.c: Regenerate.
+	* features/rs6000/powerpc-e500.c: Regenerate.
+	* features/rs6000/powerpc-e500l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-32l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-64l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-altivec32l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-altivec64l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-vsx32l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-vsx64l.c: Regenerate.
+	* features/rs6000/powerpc-vsx32.c: Regenerate.
+	* features/rs6000/powerpc-vsx32l.c: Regenerate.
+	* features/rs6000/powerpc-vsx64.c: Regenerate.
+	* features/rs6000/powerpc-vsx64l.c: Regenerate.
+	* features/rs6000/rs6000.c: Regenerate.
+
 2009-06-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (decode_packed_array): If the value is a pointer to

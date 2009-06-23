@@ -24,10 +24,10 @@
 
 struct tdesc_feature;
 struct tdesc_arch_data;
+struct tdesc_type;
 struct tdesc_reg;
 struct target_desc;
 struct target_ops;
-struct type;
 
 /* Fetch the current target's description, and switch the current
    architecture to one which incorporates that description.  */
@@ -146,8 +146,8 @@ const char *tdesc_feature_name (const struct tdesc_feature *feature);
 /* Return the type associated with ID in the context of FEATURE, or
    NULL if none.  */
 
-struct type *tdesc_named_type (const struct tdesc_feature *feature,
-			       const char *id);
+struct tdesc_type *tdesc_named_type (const struct tdesc_feature *feature,
+				     const char *id);
 
 /* Return the name of register REGNO, from the target description or
    from an architecture-provided pseudo_register_name method.  */
@@ -172,8 +172,14 @@ void set_tdesc_property (struct target_desc *,
 
 struct tdesc_feature *tdesc_create_feature (struct target_desc *tdesc,
 					    const char *name);
-void tdesc_record_type (struct tdesc_feature *feature, struct type *type);
-
+struct tdesc_type *tdesc_create_vector (struct tdesc_feature *feature,
+					const char *name,
+					struct tdesc_type *field_type,
+					int count);
+struct tdesc_type *tdesc_create_union (struct tdesc_feature *feature,
+				       const char *name);
+void tdesc_add_field (struct tdesc_type *type, const char *field_name,
+		      struct tdesc_type *field_type);
 void tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 		       int regnum, int save_restore, const char *group,
 		       int bitsize, const char *type);

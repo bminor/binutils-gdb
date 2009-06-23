@@ -20,7 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdbtypes.h"
 #include "target.h"
 #include "target-descriptions.h"
 #include "xml-support.h"
@@ -86,7 +85,7 @@ struct tdesc_parsing_data
   int next_regnum;
 
   /* The union we are currently parsing, or last parsed.  */
-  struct type *current_union;
+  struct tdesc_type *current_union;
 };
 
 /* Handle the end of an <architecture> element and its value.  */
@@ -176,8 +175,6 @@ tdesc_start_reg (struct gdb_xml_parser *parser,
 
   if (strcmp (type, "int") != 0
       && strcmp (type, "float") != 0
-      && strcmp (type, "code_ptr") != 0
-      && strcmp (type, "data_ptr") != 0
       && tdesc_named_type (data->current_feature, type) == NULL)
     gdb_xml_error (parser, _("Register \"%s\" has unknown type \"%s\""),
 		   name, type);
@@ -198,33 +195,8 @@ tdesc_start_union (struct gdb_xml_parser *parser,
 {
   struct tdesc_parsing_data *data = user_data;
   char *id = VEC_index (gdb_xml_value_s, attributes, 0)->value;
-  struct type *type;
 
-  type = init_composite_type (NULL, TYPE_CODE_UNION);
-  TYPE_NAME (type) = xstrdup (id);
-  tdesc_record_type (data->current_feature, type);
-  data->current_union = type;
-}
-
-/* Handle the end of a <union> element.  */
-
-static void
-tdesc_end_union (struct gdb_xml_parser *parser,
-		 const struct gdb_xml_element *element,
-		 void *user_data, const char *body_text)
-{
-  struct tdesc_parsing_data *data = user_data;
-  int i;
-
-  /* If any of the children of this union are vectors, flag the union
-     as a vector also.  This allows e.g. a union of two vector types
-     to show up automatically in "info vector".  */
-  for (i = 0; i < TYPE_NFIELDS (data->current_union); i++)
-    if (TYPE_VECTOR (TYPE_FIELD_TYPE (data->current_union, i)))
-      {
-        TYPE_VECTOR (data->current_union) = 1;
-        break;
-      }
+  data->current_union = tdesc_create_union (data->current_feature, id);
 }
 
 /* Handle the start of a <field> element.  Attach the field to the
@@ -237,7 +209,7 @@ tdesc_start_field (struct gdb_xml_parser *parser,
 {
   struct tdesc_parsing_data *data = user_data;
   struct gdb_xml_value *attrs = VEC_address (gdb_xml_value_s, attributes);
-  struct type *type, *field_type;
+  struct tdesc_type *field_type;
   char *field_name, *field_type_id;
 
   field_name = attrs[0].value;
@@ -249,8 +221,7 @@ tdesc_start_field (struct gdb_xml_parser *parser,
 			     "type \"%s\""),
 		   field_name, field_type_id);
 
-  append_composite_type_field (data->current_union, xstrdup (field_name),
-			       field_type);
+  tdesc_add_field (data->current_union, field_name, field_type);
 }
 
 /* Handle the start of a <vector> element.  Initialize the type and
@@ -263,7 +234,7 @@ tdesc_start_vector (struct gdb_xml_parser *parser,
 {
   struct tdesc_parsing_data *data = user_data;
   struct gdb_xml_value *attrs = VEC_address (gdb_xml_value_s, attributes);
-  struct type *type, *field_type, *range_type;
+  struct tdesc_type *field_type;
   char *id, *field_type_id;
   int count;
 
@@ -276,10 +247,7 @@ tdesc_start_vector (struct gdb_xml_parser *parser,
     gdb_xml_error (parser, _("Vector \"%s\" references undefined type \"%s\""),
 		   id, field_type_id);
 
-  type = init_vector_type (field_type, count);
-  TYPE_NAME (type) = xstrdup (id);
-
-  tdesc_record_type (data->current_feature, type);
+  tdesc_create_vector (data->current_feature, id, field_type, count);
 }
 
 /* The elements and attributes of an XML target description.  */
@@ -330,7 +298,7 @@ static const struct gdb_xml_element feature_children[] = {
     tdesc_start_reg, NULL },
   { "union", union_attributes, union_children,
     GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
-    tdesc_start_union, tdesc_end_union },
+    tdesc_start_union, NULL },
   { "vector", vector_attributes, NULL,
     GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
     tdesc_start_vector, NULL },

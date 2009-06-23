@@ -1,7 +1,6 @@
 /* THIS FILE IS GENERATED.  Original: powerpc-32.xml */
 
 #include "defs.h"
-#include "gdbtypes.h"
 #include "target-descriptions.h"
 
 struct target_desc *tdesc_powerpc_32;
@@ -10,7 +9,7 @@ initialize_tdesc_powerpc_32 (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
-  struct type *field_type, *type;
+  struct tdesc_type *field_type, *type;
 
   set_tdesc_architecture (result, bfd_scan_arch ("powerpc:common"));
 

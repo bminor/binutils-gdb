@@ -1,7 +1,6 @@
 /* THIS FILE IS GENERATED.  Original: mips64-linux.xml */
 
 #include "defs.h"
-#include "gdbtypes.h"
 #include "target-descriptions.h"
 
 struct target_desc *tdesc_mips64_linux;
@@ -10,7 +9,7 @@ initialize_tdesc_mips64_linux (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
-  struct type *field_type, *type;
+  struct tdesc_type *field_type, *type;
 
   set_tdesc_architecture (result, bfd_scan_arch ("mips"));
 
