@@ -1,3 +1,15 @@
+2009-06-23  Ian Lance Taylor  <iant@google.com>
+
+	PR 10133
+	* stringpool.h (class Stringpool_template): Add optimize_ field.
+	(Stringpool_template::set_optimize): New function.
+	* stringpool.cc (Stringpool_template::Stringpool_template):
+	Initialize optimize_ field.
+	(Stringpool_template::set_string_offsets): Test local optimize
+	fild rather than parameter.
+	* layout.cc (Layout::Layout): Call set_optimize on the section
+	name stringpool.
+
 2009-06-22  Ian Lance Taylor  <iant@google.com>
 
 	PR 10030

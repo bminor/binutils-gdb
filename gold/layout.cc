@@ -137,6 +137,10 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
   // Initialize structure needed for an incremental build.
   if (parameters->options().incremental())
     this->incremental_inputs_ = new Incremental_inputs;
+
+  // The section name pool is worth optimizing in all cases, because
+  // it is small, but there are often overlaps due to .rel sections.
+  this->namepool_.set_optimize();
 }
 
 // Hash a key we use to look up an output section mapping.

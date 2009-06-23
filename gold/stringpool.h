@@ -176,6 +176,12 @@ class Stringpool_template
   set_no_zero_null()
   { this->zero_null_ = false; }
 
+  // Indicate that this string pool should be optimized, even if not
+  // running with -O2.
+  void
+  set_optimize()
+  { this->optimize_ = true; }
+
   // Add the string S to the pool.  This returns a canonical permanent
   // pointer to the string in the pool.  If COPY is true, the string
   // is copied into permanent storage.  If PKEY is not NULL, this sets
@@ -364,6 +370,8 @@ class Stringpool_template
   section_size_type strtab_size_;
   // Whether to reserve offset 0 to hold the null string.
   bool zero_null_;
+  // Whether to optimize the string table.
+  bool optimize_;
 };
 
 // The most common type of Stringpool.

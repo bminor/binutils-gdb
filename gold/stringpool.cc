@@ -36,8 +36,10 @@ namespace gold
 template<typename Stringpool_char>
 Stringpool_template<Stringpool_char>::Stringpool_template()
   : string_set_(), key_to_offset_(), strings_(), strtab_size_(0),
-    zero_null_(true)
+    zero_null_(true), optimize_(false)
 {
+  if (parameters->options_valid() && parameters->options().optimize() >= 2)
+    this->optimize_ = true;
 }
 
 template<typename Stringpool_char>
@@ -395,7 +397,7 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
   // the strtab size, and gives a relatively small benefit (it's
   // typically rare for a symbol to be a suffix of another), we only
   // take the time to sort when the user asks for heavy optimization.
-  if (parameters->options().optimize() < 2)
+  if (!this->optimize_)
     {
       for (typename String_set_type::iterator curr = this->string_set_.begin();
            curr != this->string_set_.end();
