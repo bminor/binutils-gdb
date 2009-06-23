@@ -1,3 +1,13 @@
+2009-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* jv-lang.h (JAVA_OBJECT_SIZE): Remove.
+	(get_java_object_header_size): Add GDBARCH parameter.
+	* jv-lang.c (get_java_object_header_size): Add GDBARCH parameter.
+	Use it instead of current_gdbarch.
+	(evaluate_subexp_java): Replace JAVA_OBJECT_SIZE with call to
+	get_java_object_header_size.
+	* jv-valprint.c (java_value_print): Likewise.
+
 2009-06-23  Sami Wagiaalla  <swagiaal@redhat.com>
 
        * dwarf2read.c (process_die): Handle import statements

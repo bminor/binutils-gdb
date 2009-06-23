@@ -589,11 +589,11 @@ get_java_object_type (void)
 }
 
 int
-get_java_object_header_size (void)
+get_java_object_header_size (struct gdbarch *gdbarch)
 {
   struct type *objtype = get_java_object_type ();
   if (objtype == NULL)
-    return (2 * gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT);
+    return (2 * gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
   else
     return TYPE_LENGTH (objtype);
 }
@@ -900,7 +900,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    return value_zero (el_type, VALUE_LVAL (arg1));
 	  address = value_as_address (arg1);
-	  address += JAVA_OBJECT_SIZE;
+	  address += get_java_object_header_size (exp->gdbarch);
 	  read_memory (address, buf4, 4);
 	  length = (long) extract_signed_integer (buf4, 4);
 	  index = (long) value_as_long (arg2);

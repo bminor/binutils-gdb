@@ -27,9 +27,6 @@ extern int java_parse (void);	/* Defined in jv-exp.y */
 
 extern void java_error (char *);	/* Defined in jv-exp.y */
 
-/* sizeof (struct Object) */
-#define JAVA_OBJECT_SIZE (get_java_object_header_size ())
-
 extern struct type *java_int_type;
 extern struct type *java_byte_type;
 extern struct type *java_short_type;
@@ -58,7 +55,7 @@ extern struct type *java_primitive_type_from_name (char *, int);
 extern struct type *java_array_type (struct type *, int);
 
 extern struct type *get_java_object_type (void);
-extern int get_java_object_header_size (void);
+extern int get_java_object_header_size (struct gdbarch *);
 
 extern struct type *java_lookup_class (char *);
 

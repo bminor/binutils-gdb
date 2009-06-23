@@ -38,6 +38,7 @@ int
 java_value_print (struct value *val, struct ui_file *stream, 
 		  const struct value_print_options *options)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
   struct type *type;
   CORE_ADDR address;
   int i;
@@ -76,9 +77,8 @@ java_value_print (struct value *val, struct ui_file *stream,
       unsigned int things_printed = 0;
       int reps;
       struct type *el_type = java_primitive_type_from_name (name, i - 2);
-
       i = 0;
-      read_memory (address + JAVA_OBJECT_SIZE, buf4, 4);
+      read_memory (address + get_java_object_header_size (gdbarch), buf4, 4);
 
       length = (long) extract_signed_integer (buf4, 4);
       fprintf_filtered (stream, "{length: %ld", length);
@@ -88,13 +88,14 @@ java_value_print (struct value *val, struct ui_file *stream,
 	  CORE_ADDR element;
 	  CORE_ADDR next_element = -1; /* dummy initial value */
 
-	  address += JAVA_OBJECT_SIZE + 4;	/* Skip object header and length. */
+	  /* Skip object header and length. */
+	  address += get_java_object_header_size (gdbarch) + 4;
 
 	  while (i < length && things_printed < options->print_max)
 	    {
 	      gdb_byte *buf;
 
-	      buf = alloca (gdbarch_ptr_bit (current_gdbarch) / HOST_CHAR_BIT);
+	      buf = alloca (gdbarch_ptr_bit (gdbarch) / HOST_CHAR_BIT);
 	      fputs_filtered (", ", stream);
 	      wrap_here (n_spaces (2));
 
@@ -103,7 +104,7 @@ java_value_print (struct value *val, struct ui_file *stream,
 	      else
 		{
 		  read_memory (address, buf, sizeof (buf));
-		  address += gdbarch_ptr_bit (current_gdbarch) / HOST_CHAR_BIT;
+		  address += gdbarch_ptr_bit (gdbarch) / HOST_CHAR_BIT;
 		  /* FIXME: cagney/2003-05-24: Bogus or what.  It
                      pulls a host sized pointer out of the target and
                      then extracts that as an address (while assuming
@@ -114,7 +115,7 @@ java_value_print (struct value *val, struct ui_file *stream,
 	      for (reps = 1; i + reps < length; reps++)
 		{
 		  read_memory (address, buf, sizeof (buf));
-		  address += gdbarch_ptr_bit (current_gdbarch) / HOST_CHAR_BIT;
+		  address += gdbarch_ptr_bit (gdbarch) / HOST_CHAR_BIT;
 		  /* FIXME: cagney/2003-05-24: Bogus or what.  It
                      pulls a host sized pointer out of the target and
                      then extracts that as an address (while assuming
@@ -143,7 +144,8 @@ java_value_print (struct value *val, struct ui_file *stream,
 	  struct value *v = allocate_value (el_type);
 	  struct value *next_v = allocate_value (el_type);
 
-	  set_value_address (v, address + JAVA_OBJECT_SIZE + 4);
+	  set_value_address (v, (address
+				 + get_java_object_header_size (gdbarch) + 4));
 	  set_value_address (next_v, value_raw_address (v));
 
 	  while (i < length && things_printed < options->print_max)
