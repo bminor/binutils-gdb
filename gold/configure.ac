@@ -321,13 +321,18 @@ AC_REPLACE_FUNCS(pread ftruncate mremap ffsll)
 AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
 AM_CONDITIONAL(HAVE_ZLIB, test "$ac_cv_search_zlibVersion" != "no")
 
+dnl We have to check these in C, not C++, because autoconf generates
+dnl tests which have no type information, and current glibc provides
+dnl multiple declarations of functions like basename when compiling
+dnl with C++.
+AC_CHECK_DECLS([basename, ffs, asprintf, vasprintf, snprintf, vsnprintf, strverscmp])
+
 AC_LANG_PUSH(C++)
 
 AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)
 AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
 AC_CHECK_HEADERS(byteswap.h)
 AC_CHECK_FUNCS(mallinfo posix_fallocate)
-AC_CHECK_DECLS([basename, ffs, asprintf, vasprintf, snprintf, vsnprintf, strverscmp])
 
 # Use of ::std::tr1::unordered_map::rehash causes undefined symbols
 # at link time with some versions of GCC.

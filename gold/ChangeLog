@@ -1,5 +1,10 @@
 2009-06-23  Ian Lance Taylor  <iant@google.com>
 
+	* configure.ac: Call AC_CHECK_DECLS using C, not C++.
+	* configure: Rebuild.
+
+2009-06-23  Ian Lance Taylor  <iant@google.com>
+
 	PR 10147
 	* object.cc (Object::section_contents): Don't try to get a view if
 	the section has length zero.
