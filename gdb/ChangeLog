@@ -1,5 +1,19 @@
 2009-06-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (decode_packed_array): If the value is a pointer to
+	an array, then use value_ind to dereference it, not ada_value_ind.
+	(ada_template_to_fixed_record_type_1): Handle the case where a
+	dynamic field is an aligner type.
+	(to_fixed_array_type): Add handling for packed array types.
+	(ada_get_base_type): Do not follow the XVS type if the type is
+	an aligner type.
+	(ada_evaluate_subexp): Split a few statements up for clarity
+	and debuggability.
+	<OP_FUNCALL>: Add handling of the case of a packed array that
+	has already been fixed.
+
+2009-06-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (evaluate_subexp): Delete.  Use the version from eval.c.
 	(evaluate_subexp_type): Reimplement using evaluate_subexp.
 	* value.h (evaluate_subexp): Add declaration.

@@ -1818,8 +1818,15 @@ decode_packed_array (struct value *arr)
   struct type *type;
 
   arr = ada_coerce_ref (arr);
+
+  /* If our value is a pointer, then dererence it.  Make sure that
+     this operation does not cause the target type to be fixed, as
+     this would indirectly cause this array to be decoded.  The rest
+     of the routine assumes that the array hasn't been decoded yet,
+     so we use the basic "value_ind" routine to perform the dereferencing,
+     as opposed to using "ada_value_ind".  */
   if (TYPE_CODE (value_type (arr)) == TYPE_CODE_PTR)
-    arr = ada_value_ind (arr);
+    arr = value_ind (arr);
 
   type = decode_packed_array_type (value_type (arr));
   if (type == NULL)
@@ -6780,6 +6787,11 @@ ada_template_to_fixed_record_type_1 (struct type *type,
         }
       else if (is_dynamic_field (type, f))
         {
+	  const gdb_byte *field_valaddr = valaddr;
+	  CORE_ADDR field_address = address;
+	  struct type *field_type =
+	    TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, f));
+
           if (dval0 == NULL)
 	    {
 	      /* rtype's length is computed based on the run-time
@@ -6793,18 +6805,36 @@ ada_template_to_fixed_record_type_1 (struct type *type,
           else
             dval = dval0;
 
-          /* Get the fixed type of the field. Note that, in this case, we
-             do not want to get the real type out of the tag: if the current
-             field is the parent part of a tagged record, we will get the
-             tag of the object. Clearly wrong: the real type of the parent
-             is not the real type of the child. We would end up in an infinite
-             loop.  */
-          TYPE_FIELD_TYPE (rtype, f) =
-            ada_to_fixed_type
-            (ada_get_base_type
-             (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, f))),
-             cond_offset_host (valaddr, off / TARGET_CHAR_BIT),
-             cond_offset_target (address, off / TARGET_CHAR_BIT), dval, 0);
+	  /* If the type referenced by this field is an aligner type, we need
+	     to unwrap that aligner type, because its size might not be set.
+	     Keeping the aligner type would cause us to compute the wrong
+	     size for this field, impacting the offset of the all the fields
+	     that follow this one.  */
+	  if (ada_is_aligner_type (field_type))
+	    {
+	      long field_offset = TYPE_FIELD_BITPOS (field_type, f);
+
+	      field_valaddr = cond_offset_host (field_valaddr, field_offset);
+	      field_address = cond_offset_target (field_address, field_offset);
+	      field_type = ada_aligned_type (field_type);
+	    }
+
+	  field_valaddr = cond_offset_host (field_valaddr,
+					    off / TARGET_CHAR_BIT);
+	  field_address = cond_offset_target (field_address,
+					      off / TARGET_CHAR_BIT);
+
+	  /* Get the fixed type of the field.  Note that, in this case,
+	     we do not want to get the real type out of the tag: if
+	     the current field is the parent part of a tagged record,
+	     we will get the tag of the object.  Clearly wrong: the real
+	     type of the parent is not the real type of the child.  We
+	     would end up in an infinite loop.	*/
+	  field_type = ada_get_base_type (field_type);
+	  field_type = ada_to_fixed_type (field_type, field_valaddr,
+					  field_address, dval, 0);
+
+	  TYPE_FIELD_TYPE (rtype, f) = field_type;
           TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
           bit_incr = fld_bit_len =
             TYPE_LENGTH (TYPE_FIELD_TYPE (rtype, f)) * TARGET_CHAR_BIT;
@@ -7130,10 +7160,14 @@ to_fixed_array_type (struct type *type0, struct value *dval,
 {
   struct type *index_type_desc;
   struct type *result;
+  int packed_array_p;
 
-  if (ada_is_packed_array_type (type0)  /* revisit? */
-      || TYPE_FIXED_INSTANCE (type0))
+  if (TYPE_FIXED_INSTANCE (type0))
     return type0;
+
+  packed_array_p = ada_is_packed_array_type (type0);
+  if (packed_array_p)
+    type0 = decode_packed_array_type (type0);
 
   index_type_desc = ada_find_parallel_type (type0, "___XA");
   if (index_type_desc == NULL)
@@ -7152,7 +7186,10 @@ to_fixed_array_type (struct type *type0, struct value *dval,
          consult the object tag.  */
       struct type *elt_type = ada_to_fixed_type (elt_type0, 0, 0, dval, 1);
 
-      if (elt_type0 == elt_type)
+      /* Make sure we always create a new array type when dealing with
+	 packed array types, since we're going to fix-up the array
+	 type length and element bitsize a little further down.  */
+      if (elt_type0 == elt_type && !packed_array_p)
         result = type0;
       else
         result = create_array_type (alloc_type (TYPE_OBJFILE (type0)),
@@ -7190,6 +7227,21 @@ to_fixed_array_type (struct type *type0, struct value *dval,
         }
       if (!ignore_too_big && TYPE_LENGTH (result) > varsize_limit)
         error (_("array type with dynamic size is larger than varsize-limit"));
+    }
+
+  if (packed_array_p)
+    {
+      /* So far, the resulting type has been created as if the original
+	 type was a regular (non-packed) array type.  As a result, the
+	 bitsize of the array elements needs to be set again, and the array
+	 length needs to be recomputed based on that bitsize.  */
+      int len = TYPE_LENGTH (result) / TYPE_LENGTH (TYPE_TARGET_TYPE (result));
+      int elt_bitsize = TYPE_FIELD_BITSIZE (type0, 0);
+
+      TYPE_FIELD_BITSIZE (result, 0) = TYPE_FIELD_BITSIZE (type0, 0);
+      TYPE_LENGTH (result) = len * elt_bitsize / HOST_CHAR_BIT;
+      if (TYPE_LENGTH (result) * HOST_CHAR_BIT < len * elt_bitsize)
+        TYPE_LENGTH (result)++;
     }
 
   TYPE_FIXED_INSTANCE (result) = 1;
@@ -7613,6 +7665,21 @@ ada_get_base_type (struct type *raw_type)
   struct type *raw_real_type;
 
   if (raw_type == NULL || TYPE_CODE (raw_type) != TYPE_CODE_STRUCT)
+    return raw_type;
+
+  if (ada_is_aligner_type (raw_type))
+    /* The encoding specifies that we should always use the aligner type.
+       So, even if this aligner type has an associated XVS type, we should
+       simply ignore it.
+
+       According to the compiler gurus, an XVS type parallel to an aligner
+       type may exist because of a stabs limitation.  In stabs, aligner
+       types are empty because the field has a variable-sized type, and
+       thus cannot actually be used as an aligner type.  As a result,
+       we need the associated parallel XVS type to decode the type.
+       Since the policy in the compiler is to not change the internal
+       representation based on the debugging info format, we sometimes
+       end up having a redundant XVS type parallel to the aligner type.  */
     return raw_type;
 
   real_type_namer = ada_find_parallel_type (raw_type, "___XVS");
@@ -8253,6 +8320,225 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
   return value_cast (type, arg2);
 }
 
+/*  Evaluating Ada expressions, and printing their result.
+    ------------------------------------------------------
+
+    We usually evaluate an Ada expression in order to print its value.
+    We also evaluate an expression in order to print its type, which
+    happens during the EVAL_AVOID_SIDE_EFFECTS phase of the evaluation,
+    but we'll focus mostly on the EVAL_NORMAL phase.  In practice, the
+    EVAL_AVOID_SIDE_EFFECTS phase allows us to simplify certain aspects of
+    the evaluation compared to the EVAL_NORMAL, but is otherwise very
+    similar.
+
+    Evaluating expressions is a little more complicated for Ada entities
+    than it is for entities in languages such as C.  The main reason for
+    this is that Ada provides types whose definition might be dynamic.
+    One example of such types is variant records.  Or another example
+    would be an array whose bounds can only be known at run time.
+
+    The following description is a general guide as to what should be
+    done (and what should NOT be done) in order to evaluate an expression
+    involving such types, and when.  This does not cover how the semantic
+    information is encoded by GNAT as this is covered separatly.  For the
+    document used as the reference for the GNAT encoding, see exp_dbug.ads
+    in the GNAT sources.
+
+    Ideally, we should embed each part of this description next to its
+    associated code.  Unfortunately, the amount of code is so vast right
+    now that it's hard to see whether the code handling a particular
+    situation might be duplicated or not.  One day, when the code is
+    cleaned up, this guide might become redundant with the comments
+    inserted in the code, and we might want to remove it.
+
+    When evaluating Ada expressions, the tricky issue is that they may
+    reference entities whose type contents and size are not statically
+    known.  Consider for instance a variant record:
+
+       type Rec (Empty : Boolean := True) is record
+          case Empty is
+             when True => null;
+             when False => Value : Integer;
+          end case;
+       end record;
+       Yes : Rec := (Empty => False, Value => 1);
+       No  : Rec := (empty => True);
+
+    The size and contents of that record depends on the value of the
+    descriminant (Rec.Empty).  At this point, neither the debugging
+    information nor the associated type structure in GDB are able to
+    express such dynamic types.  So what the debugger does is to create
+    "fixed" versions of the type that applies to the specific object.
+    We also informally refer to this opperation as "fixing" an object,
+    which means creating its associated fixed type.
+
+    Example: when printing the value of variable "Yes" above, its fixed
+    type would look like this:
+
+       type Rec is record
+          Empty : Boolean;
+          Value : Integer;
+       end record;
+
+    On the other hand, if we printed the value of "No", its fixed type
+    would become:
+
+       type Rec is record
+          Empty : Boolean;
+       end record;
+
+    Things become a little more complicated when trying to fix an entity
+    with a dynamic type that directly contains another dynamic type,
+    such as an array of variant records, for instance.  There are
+    two possible cases: Arrays, and records.
+
+    Arrays are a little simpler to handle, because the same amount of
+    memory is allocated for each element of the array, even if the amount
+    of space used by each element changes from element to element.
+    Consider for instance the following array of type Rec:
+
+       type Rec_Array is array (1 .. 2) of Rec;
+
+    The type structure in GDB describes an array in terms of its
+    bounds, and the type of its elements.  By design, all elements
+    in the array have the same type.  So we cannot use a fixed type
+    for the array elements in this case, since the fixed type depends
+    on the actual value of each element.
+
+    Fortunately, what happens in practice is that each element of
+    the array has the same size, which is the maximum size that
+    might be needed in order to hold an object of the element type.
+    And the compiler shows it in the debugging information by wrapping
+    the array element inside a private PAD type.  This type should not
+    be shown to the user, and must be "unwrap"'ed before printing. Note
+    that we also use the adjective "aligner" in our code to designate
+    these wrapper types.
+
+    These wrapper types should have a constant size, which is the size
+    of each element of the array.  In the case when the size is statically
+    known, the PAD type will already have the right size, and the array
+    element type should remain unfixed.  But there are cases when
+    this size is not statically known.  For instance, assuming that
+    "Five" is an integer variable:
+
+        type Dynamic is array (1 .. Five) of Integer;
+        type Wrapper (Has_Length : Boolean := False) is record
+           Data : Dynamic;
+           case Has_Length is
+              when True => Length : Integer;
+              when False => null;
+           end case;
+        end record;
+        type Wrapper_Array is array (1 .. 2) of Wrapper;
+
+        Hello : Wrapper_Array := (others => (Has_Length => True,
+                                             Data => (others => 17),
+                                             Length => 1));
+
+
+    The debugging info would describe variable Hello as being an
+    array of a PAD type.  The size of that PAD type is not statically
+    known, but can be determined using a parallel XVZ variable.
+    In that case, a copy of the PAD type with the correct size should
+    be used for the fixed array.
+
+    However, things are slightly different in the case of dynamic
+    record types.  In this case, in order to compute the associated
+    fixed type, we need to determine the size and offset of each of
+    its components.  This, in turn, requires us to compute the fixed
+    type of each of these components.
+
+    Consider for instance the example:
+
+        type Bounded_String (Max_Size : Natural) is record
+           Str : String (1 .. Max_Size);
+           Length : Natural;
+        end record;
+        My_String : Bounded_String (Max_Size => 10);
+
+    In that case, the position of field "Length" depends on the size
+    of field Str, which itself depends on the value of the Max_Size
+    discriminant. In order to fix the type of variable My_String,
+    we need to fix the type of field Str.  Therefore, fixing a variant
+    record requires us to fix each of its components.
+
+    However, if a component does not have a dynamic size, the component
+    should not be fixed.  In particular, fields that use a PAD type
+    should not fixed.  Here is an example where this might happen
+    (assuming type Rec above):
+
+       type Container (Big : Boolean) is record
+          First : Rec;
+          After : Integer;
+          case Big is
+             when True => Another : Integer;
+             when False => null;
+          end case;
+       end record;
+       My_Container : Container := (Big => False,
+                                    First => (Empty => True),
+                                    After => 42);
+
+    In that example, the compiler creates a PAD type for component First,
+    whose size is constant, and then positions the component After just
+    right after it.  The offset of component After is therefore constant
+    in this case.
+
+    The debugger computes the position of each field based on an algorithm
+    that uses, among other things, the actual position and size of the field
+    preceding it.  Let's now imagine that the user is trying to print the
+    value of My_Container.  If the type fixing was recursive, we would
+    end up computing the offset of field After based on the size of the
+    fixed version of field First.  And since in our example First has
+    only one actual field, the size of the fixed type is actually smaller
+    than the amount of space allocated to that field, and thus we would
+    compute the wrong offset of field After.
+
+    Unfortunately, we need to watch out for dynamic components of variant
+    records (identified by the ___XVL suffix in the component name).
+    Even if the target type is a PAD type, the size of that type might
+    not be statically known.  So the PAD type needs to be unwrapped and
+    the resulting type needs to be fixed.  Otherwise, we might end up
+    with the wrong size for our component.  This can be observed with
+    the following type declarations:
+
+        type Octal is new Integer range 0 .. 7;
+        type Octal_Array is array (Positive range <>) of Octal;
+        pragma Pack (Octal_Array);
+
+        type Octal_Buffer (Size : Positive) is record
+           Buffer : Octal_Array (1 .. Size);
+           Length : Integer;
+        end record;
+
+    In that case, Buffer is a PAD type whose size is unset and needs
+    to be computed by fixing the unwrapped type.
+
+    Lastly, when should the sub-elements of a type that remained unfixed
+    thus far, be actually fixed?
+
+    The answer is: Only when referencing that element.  For instance
+    when selecting one component of a record, this specific component
+    should be fixed at that point in time.  Or when printing the value
+    of a record, each component should be fixed before its value gets
+    printed.  Similarly for arrays, the element of the array should be
+    fixed when printing each element of the array, or when extracting
+    one element out of that array.  On the other hand, fixing should
+    not be performed on the elements when taking a slice of an array!
+
+    Note that one of the side-effects of miscomputing the offset and
+    size of each field is that we end up also miscomputing the size
+    of the containing type.  This can have adverse results when computing
+    the value of an entity.  GDB fetches the value of an entity based
+    on the size of its type, and thus a wrong size causes GDB to fetch
+    the wrong amount of memory.  In the case where the computed size is
+    too small, GDB fetches too little data to print the value of our
+    entiry.  Results in this case as unpredicatble, as we usually read
+    past the buffer containing the data =:-o.  */
+
+/* Implement the evaluate_exp routine in the exp_descriptor structure
+   for the Ada language.  */
+
 static struct value *
 ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                      int *pos, enum noside noside)
@@ -8525,9 +8811,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         }
       else
         {
-          arg1 =
-            unwrap_value (evaluate_subexp_standard
-                          (expect_type, exp, pos, noside));
+          arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
+          arg1 = unwrap_value (arg1);
           return ada_to_fixed_value (arg1);
         }
 
@@ -8556,6 +8841,12 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
       if (ada_is_packed_array_type (desc_base_type (value_type (argvec[0]))))
         argvec[0] = ada_coerce_to_simple_array (argvec[0]);
+      else if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_ARRAY
+               && TYPE_FIELD_BITSIZE (value_type (argvec[0]), 0) != 0)
+        /* This is a packed array that has already been fixed, and
+	   therefore already coerced to a simple array.  Nothing further
+	   to do.  */
+        ;
       else if (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_REF
                || (TYPE_CODE (value_type (argvec[0])) == TYPE_CODE_ARRAY
                    && VALUE_LVAL (argvec[0]) == lval_memory))
@@ -9126,10 +9417,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           return value_zero (ada_aligned_type (type), lval_memory);
         }
       else
-        return
-          ada_to_fixed_value (unwrap_value
-                              (ada_value_struct_elt
-                               (arg1, &exp->elts[pc + 2].string, 0)));
+        arg1 = ada_value_struct_elt (arg1, &exp->elts[pc + 2].string, 0);
+        arg1 = unwrap_value (arg1);
+        return ada_to_fixed_value (arg1);
+
     case OP_TYPE:
       /* The value is not supposed to be used.  This is here to make it
          easier to accommodate expressions that contain types.  */
