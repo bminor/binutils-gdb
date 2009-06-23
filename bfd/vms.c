@@ -129,9 +129,7 @@ static bfd_boolean vms_bfd_final_link (bfd *abfd,
 				       struct bfd_link_info *link_info);
 static bfd_boolean vms_bfd_link_split_section (bfd *abfd, asection *section);
 static long vms_get_dynamic_symtab_upper_bound (bfd *abfd);
-static long vms_canonicalize_dynamic_symtab
-  (bfd *abfd, asymbol **symbols);
-#define vms_get_synthetic_symtab _bfd_nodynamic_get_synthetic_symtab
+static long vms_canonicalize_dynamic_symtab (bfd *abfd, asymbol **symbols);
 static long vms_get_dynamic_reloc_upper_bound (bfd *abfd);
 static long vms_canonicalize_dynamic_reloc
   (bfd *abfd, arelent **arel, asymbol **symbols);
