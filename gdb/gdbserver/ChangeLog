@@ -1,3 +1,9 @@
+2009-06-23  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* server.c (process_serial_event): Add support for Z0 and Z1 packet.
+	* target.h (target_ops): Comment for *_watchpoint to make it clear
+	the functions can get types '0' and '1'.
+
 2009-06-22  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* linux-low.c (usr_fetch_inferior_registers): Remove check for regno 0.

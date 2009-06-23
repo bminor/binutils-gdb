@@ -216,10 +216,11 @@ struct target_ops
   /* Insert and remove a hardware watchpoint.
      Returns 0 on success, -1 on failure and 1 on unsupported.
      The type is coded as follows:
-       2 = write watchpoint
-       3 = read watchpoint
-       4 = access watchpoint
-  */
+       '0' - software-breakpoint
+       '1' - hardware-breakpoint
+       '2' - write watchpoint
+       '3' - read watchpoint
+       '4' - access watchpoint  */
 
   int (*insert_watchpoint) (char type, CORE_ADDR addr, int len);
   int (*remove_watchpoint) (char type, CORE_ADDR addr, int len);

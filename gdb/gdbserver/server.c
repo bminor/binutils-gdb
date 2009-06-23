@@ -2371,66 +2371,56 @@ process_serial_event (void)
       signal = 0;
       myresume (own_buf, 1, signal);
       break;
-    case 'Z':
+    case 'Z':  /* insert_ ... */
+      /* Fallthrough.  */
+    case 'z':  /* remove_ ... */
       {
 	char *lenptr;
 	char *dataptr;
 	CORE_ADDR addr = strtoul (&own_buf[3], &lenptr, 16);
 	int len = strtol (lenptr + 1, &dataptr, 16);
 	char type = own_buf[1];
+	int res;
+	const int insert_ = ch == 'Z';
+
+	/* Type: '0' - software-breakpoint
+		 '1' - hardware-breakpoint
+		 '2' - write watchpoint
+		 '3' - read watchpoint
+		 '4' - access watchpoint  */
 
 	if (the_target->insert_watchpoint == NULL
-	    || (type < '2' || type > '4'))
-	  {
-	    /* No watchpoint support or not a watchpoint command;
-	       unrecognized either way.  */
-	    own_buf[0] = '\0';
-	  }
+	    || the_target->remove_watchpoint == NULL)
+	  res = 1;  /* Not supported.  */
 	else
-	  {
-	    int res;
+	  switch (type)
+	    {
+	    case '2':
+	      /* Fallthrough.  */
+	    case '3':
+	      /* Fallthrough.  */
+	    case '4':
+	      require_running (own_buf);
+	      /* Fallthrough.  */
+	    case '0':
+	      /* Fallthrough.  */
+	    case '1':
+	      res = insert_ ? (*the_target->insert_watchpoint) (type, addr,
+								len)
+			    : (*the_target->remove_watchpoint) (type, addr,
+								len);
+	      break;
+	    default:
+	      res = -1; /* Unrecognized type.  */
+	    }
 
-	    require_running (own_buf);
-	    res = (*the_target->insert_watchpoint) (type, addr, len);
-	    if (res == 0)
-	      write_ok (own_buf);
-	    else if (res == 1)
-	      /* Unsupported.  */
-	      own_buf[0] = '\0';
-	    else
-	      write_enn (own_buf);
-	  }
-	break;
-      }
-    case 'z':
-      {
-	char *lenptr;
-	char *dataptr;
-	CORE_ADDR addr = strtoul (&own_buf[3], &lenptr, 16);
-	int len = strtol (lenptr + 1, &dataptr, 16);
-	char type = own_buf[1];
-
-	if (the_target->remove_watchpoint == NULL
-	    || (type < '2' || type > '4'))
-	  {
-	    /* No watchpoint support or not a watchpoint command;
-	       unrecognized either way.  */
-	    own_buf[0] = '\0';
-	  }
+	if (res == 0)
+	  write_ok (own_buf);
+	else if (res == 1)
+	  /* Unsupported.  */
+	  own_buf[0] = '\0';
 	else
-	  {
-	    int res;
-
-	    require_running (own_buf);
-	    res = (*the_target->remove_watchpoint) (type, addr, len);
-	    if (res == 0)
-	      write_ok (own_buf);
-	    else if (res == 1)
-	      /* Unsupported.  */
-	      own_buf[0] = '\0';
-	    else
-	      write_enn (own_buf);
-	  }
+	  write_enn (own_buf);
 	break;
       }
     case 'k':
