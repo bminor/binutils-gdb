@@ -1,3 +1,9 @@
+2009-06-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix a regression by the mmap patch from 2009-06-16.
+	* symfile.c (reread_symbols): Move sym_finish and clear_objfile_data
+	calls before deleting the OBJFILE obstack.  Extend the comment.
+
 2009-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* jv-lang.h (JAVA_OBJECT_SIZE): Remove.

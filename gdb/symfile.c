@@ -2334,7 +2334,16 @@ reread_symbols (void)
 
 	      /* Nuke all the state that we will re-read.  Much of the following
 	         code which sets things to NULL really is necessary to tell
-	         other parts of GDB that there is nothing currently there.  */
+	         other parts of GDB that there is nothing currently there.
+		 
+		 Try to keep the freeing order compatible with free_objfile.  */
+
+	      if (objfile->sf != NULL)
+		{
+		  (*objfile->sf->sym_finish) (objfile);
+		}
+
+	      clear_objfile_data (objfile);
 
 	      /* FIXME: Do we have to free a whole linked list, or is this
 	         enough?  */
@@ -2371,11 +2380,6 @@ reread_symbols (void)
 		      sizeof (objfile->msymbol_hash));
 	      memset (&objfile->msymbol_demangled_hash, 0,
 		      sizeof (objfile->msymbol_demangled_hash));
-	      clear_objfile_data (objfile);
-	      if (objfile->sf != NULL)
-		{
-		  (*objfile->sf->sym_finish) (objfile);
-		}
 
 	      objfile->psymbol_cache = bcache_xmalloc ();
 	      objfile->macro_cache = bcache_xmalloc ();
