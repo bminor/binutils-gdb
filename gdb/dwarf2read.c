@@ -7353,7 +7353,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      else
 		{
 		  lh->file_names[file - 1].included_p = 1;
-		  if (!decode_for_pst_p)
+		  if (!decode_for_pst_p && is_stmt)
 		    {
 		      if (last_subfile != current_subfile)
 			{
@@ -7368,7 +7368,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		      record_line (current_subfile, line, addr);
 		    }
 		}
-	      basic_block = 1;
+	      basic_block = 0;
 	    }
 	  else switch (op_code)
 	    {
@@ -7433,7 +7433,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      else
 		{
 		  lh->file_names[file - 1].included_p = 1;
-		  if (!decode_for_pst_p)
+		  if (!decode_for_pst_p && is_stmt)
 		    {
 		      if (last_subfile != current_subfile)
 			{
