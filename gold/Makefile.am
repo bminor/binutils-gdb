@@ -131,6 +131,7 @@ ALL_TARGETOBJS = \
 	arm.$(OBJEXT)
 
 libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
+libgold_a_LIBADD = $(LIBOBJS)
 
 sources_var = main.cc
 deps_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
@@ -138,8 +139,8 @@ ldadd_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL) \
 	 $(THREADSLIB) $(LIBDL)
 
 ld_new_SOURCES = $(sources_var)
-ld_new_DEPENDENCIES = $(deps_var) $(LIBOBJS)
-ld_new_LDADD = $(ldadd_var) $(LIBOBJS)
+ld_new_DEPENDENCIES = $(deps_var)
+ld_new_LDADD = $(ldadd_var)
 
 EXTRA_ld_new_SOURCES = $(TARGETSOURCES)
 

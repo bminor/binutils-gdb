@@ -24,7 +24,9 @@
 #define GOLD_RELOC_H
 
 #include <vector>
+#ifdef HAVE_BYTESWAP_H
 #include <byteswap.h>
+#endif
 
 #include "elfcpp.h"
 #include "workqueue.h"

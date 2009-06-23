@@ -1,3 +1,15 @@
+2009-06-23  Doug Kwan  <dougkwan@google.com>
+
+	* Makefile.am (libgold_a_LIBADD): New.
+	(ld_new_DEPENDENCIES, ld_new_LDADD): Remove LIBOBJS
+ 	* Makefile.in: Regenerate.
+	* config.in (HAVE_DECL_MEMMEM, HAVE_DECL_STRNDUP): New.
+	* configure: Regenerate.
+	* configure.ac (AC_CHECK_DECLS): Add strndup and memmem.
+	* fileread.cc: Include sys/state.h
+	* gold.h: Declare memmem and strndup if found missing.
+	* gold_reloc.h: Include byteswap.h if HAVE_BYTESWAP_H is defined.
+
 2009-06-23  Ian Lance Taylor  <iant@google.com>
 
 	* configure.ac: Call AC_CHECK_DECLS using C, not C++.

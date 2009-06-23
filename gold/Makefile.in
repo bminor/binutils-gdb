@@ -74,7 +74,8 @@ LIBRARIES = $(noinst_LIBRARIES)
 AR = ar
 ARFLAGS = cru
 libgold_a_AR = $(AR) $(ARFLAGS)
-libgold_a_LIBADD =
+am__DEPENDENCIES_1 = @LIBOBJS@
+libgold_a_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__objects_1 = archive.$(OBJEXT) binary.$(OBJEXT) common.$(OBJEXT) \
 	compressed_output.$(OBJEXT) copy-relocs.$(OBJEXT) \
 	cref.$(OBJEXT) defstd.$(OBJEXT) descriptors.$(OBJEXT) \
@@ -99,12 +100,11 @@ PROGRAMS = $(noinst_PROGRAMS)
 am__objects_4 = main.$(OBJEXT)
 am_ld_new_OBJECTS = $(am__objects_4)
 ld_new_OBJECTS = $(am_ld_new_OBJECTS)
-am__DEPENDENCIES_1 =
-am__DEPENDENCIES_2 = ../libiberty/libiberty.a
-am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1) libgold.a \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-am__DEPENDENCIES_4 = @LIBOBJS@
+am__DEPENDENCIES_2 =
+am__DEPENDENCIES_3 = ../libiberty/libiberty.a
+am__DEPENDENCIES_4 = $(am__DEPENDENCIES_2) libgold.a \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_2)
 am__ld1_SOURCES_DIST = main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_ld1_OBJECTS = $(am__objects_4)
 ld1_OBJECTS = $(am_ld1_OBJECTS)
@@ -416,14 +416,15 @@ ALL_TARGETOBJS = \
 	arm.$(OBJEXT)
 
 libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
+libgold_a_LIBADD = $(LIBOBJS)
 sources_var = main.cc
 deps_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
 ldadd_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL) \
 	 $(THREADSLIB) $(LIBDL)
 
 ld_new_SOURCES = $(sources_var)
-ld_new_DEPENDENCIES = $(deps_var) $(LIBOBJS)
-ld_new_LDADD = $(ldadd_var) $(LIBOBJS)
+ld_new_DEPENDENCIES = $(deps_var)
+ld_new_LDADD = $(ldadd_var)
 EXTRA_ld_new_SOURCES = $(TARGETSOURCES)
 POTFILES = $(CCFILES) $(HFILES) $(TARGETSOURCES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_SOURCES = $(sources_var)

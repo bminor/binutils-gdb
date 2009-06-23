@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/uio.h>
+#include <sys/stat.h>
 #include "filenames.h"
 
 #include "debug.h"

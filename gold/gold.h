@@ -141,6 +141,14 @@ extern "C" void *mremap(void *, size_t, size_t, int, ...);
 extern "C" int ffsll(long long);
 #endif
 
+#if !HAVE_DECL_MEMMEM
+extern "C" void *memmem(const void *, size_t, const void *, size_t);
+#endif
+
+#if !HAVE_DECL_STRNDUP
+extern "C" char *strndup(const char *, size_t);
+#endif
+
 namespace gold
 {
 

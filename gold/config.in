@@ -39,9 +39,17 @@
 /* Define to 1 if you have the declaration of `ffs', and to 0 if you don't. */
 #undef HAVE_DECL_FFS
 
+/* Define to 1 if you have the declaration of `memmem', and to 0 if you
+   don't. */
+#undef HAVE_DECL_MEMMEM
+
 /* Define to 1 if you have the declaration of `snprintf', and to 0 if you
    don't. */
 #undef HAVE_DECL_SNPRINTF
+
+/* Define to 1 if you have the declaration of `strndup', and to 0 if you
+   don't. */
+#undef HAVE_DECL_STRNDUP
 
 /* Define to 1 if you have the declaration of `strverscmp', and to 0 if you
    don't. */
