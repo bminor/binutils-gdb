@@ -1,3 +1,7 @@
+2009-05-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/variant_record_packed_array: New testcase.
+
 2009-06-23  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/charset.exp (test_combination): Regression test.
