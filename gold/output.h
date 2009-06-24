@@ -330,6 +330,13 @@ class Output_data
 
   // Functions that child classes may call.
 
+  // Reset the address.  The Output_section class needs this when an
+  // SHF_ALLOC input section is added to an output section which was
+  // formerly not SHF_ALLOC.
+  void
+  mark_address_invalid()
+  { this->is_address_valid_ = false; }
+
   // Set the size of the data.
   void
   set_data_size(off_t data_size)
@@ -1948,22 +1955,9 @@ class Output_section : public Output_data
   flags() const
   { return this->flags_; }
 
-  // Set the section flags.  This may only be used with the Layout
-  // code when it is prepared to move the section to a different
-  // segment.
-  void
-  set_flags(elfcpp::Elf_Xword flags)
-  { this->flags_ = flags; }
-
   // Update the output section flags based on input section flags.
   void
-  update_flags_for_input_section(elfcpp::Elf_Xword flags)
-  {
-    this->flags_ |= (flags
-		     & (elfcpp::SHF_WRITE
-			| elfcpp::SHF_ALLOC
-			| elfcpp::SHF_EXECINSTR));
-  }
+  update_flags_for_input_section(elfcpp::Elf_Xword flags);
 
   // Return the entsize field.
   uint64_t

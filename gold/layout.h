@@ -208,6 +208,10 @@ class Layout
   void
   define_section_symbols(Symbol_table*);
 
+  // Create automatic note sections.
+  void
+  create_notes();
+
   // Create sections for linker scripts.
   void
   create_script_sections()
@@ -474,7 +478,7 @@ class Layout
 
   // Record whether the stack must be executable.
   void
-  create_executable_stack_info(const Target*);
+  create_executable_stack_info();
 
   // Create a build ID note if needed.
   void

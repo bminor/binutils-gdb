@@ -1995,6 +1995,24 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
   return true;
 }
 
+// Update the output section flags based on input section flags.
+
+void
+Output_section::update_flags_for_input_section(elfcpp::Elf_Xword flags)
+{
+  // If we created the section with SHF_ALLOC clear, we set the
+  // address.  If we are now setting the SHF_ALLOC flag, we need to
+  // undo that.
+  if ((this->flags_ & elfcpp::SHF_ALLOC) == 0
+      && (flags & elfcpp::SHF_ALLOC) != 0)
+    this->mark_address_invalid();
+
+  this->flags_ |= (flags
+		   & (elfcpp::SHF_WRITE
+		      | elfcpp::SHF_ALLOC
+		      | elfcpp::SHF_EXECINSTR));
+}
+
 // Given an address OFFSET relative to the start of input section
 // SHNDX in OBJECT, return whether this address is being included in
 // the final link.  This should only be called if SHNDX in OBJECT has

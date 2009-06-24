@@ -386,6 +386,9 @@ queue_middle_tasks(const General_options& options,
   // TODO: if this is too slow, do this as a task, rather than inline.
   symtab->detect_odr_violations(task, options.output_file_name());
 
+  // Create any automatic note sections.
+  layout->create_notes();
+
   // Create any output sections required by any linker script.
   layout->create_script_sections();
 

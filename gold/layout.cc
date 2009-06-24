@@ -416,7 +416,10 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
       if (output_section_slot != NULL)
 	{
 	  if (*output_section_slot != NULL)
-	    return *output_section_slot;
+	    {
+	      (*output_section_slot)->update_flags_for_input_section(flags);
+	      return *output_section_slot;
+	    }
 
 	  // We don't put sections found in the linker script into
 	  // SECTION_NAME_MAP_.  That keeps us from getting confused
@@ -1028,6 +1031,16 @@ Layout::layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags)
     }
 }
 
+// Create automatic note sections.
+
+void
+Layout::create_notes()
+{
+  this->create_gold_note();
+  this->create_executable_stack_info();
+  this->create_build_id();
+}
+
 // Create the dynamic sections which are needed before we read the
 // relocs.
 
@@ -1198,9 +1211,6 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 
   this->count_local_symbols(task, input_objects);
 
-  this->create_gold_note();
-  this->create_executable_stack_info(target);
-  this->create_build_id();
   this->link_stabs_sections();
 
   Output_segment* phdr_seg = NULL;
@@ -1442,6 +1452,9 @@ Layout::create_note(const char* name, int note_type,
   Output_section* os = this->choose_output_section(NULL, section_name,
 						   elfcpp::SHT_NOTE,
 						   flags, false);
+  if (os == NULL)
+    return NULL;
+
   Output_section_data* posd = new Output_data_const_buffer(buffer, notehdrsz,
 							   size / 8,
 							   "** note header");
@@ -1467,6 +1480,8 @@ Layout::create_gold_note()
   Output_section *os = this->create_note("GNU", elfcpp::NT_GNU_GOLD_VERSION,
 					 ".note.gnu.gold-version", desc.size(),
 					 false, &trailing_padding);
+  if (os == NULL)
+    return;
 
   Output_section_data* posd = new Output_data_const(desc, 4);
   os->add_output_section_data(posd);
@@ -1491,7 +1506,7 @@ Layout::create_gold_note()
 // library, we create a PT_GNU_STACK segment.
 
 void
-Layout::create_executable_stack_info(const Target* target)
+Layout::create_executable_stack_info()
 {
   bool is_stack_executable;
   if (parameters->options().is_execstack_set())
@@ -1503,7 +1518,8 @@ Layout::create_executable_stack_info(const Target* target)
       if (this->input_requires_executable_stack_)
 	is_stack_executable = true;
       else if (this->input_without_gnu_stack_note_)
-	is_stack_executable = target->is_default_stack_executable();
+	is_stack_executable =
+	  parameters->target().is_default_stack_executable();
       else
 	is_stack_executable = false;
     }
@@ -1600,6 +1616,8 @@ Layout::create_build_id()
   Output_section* os = this->create_note("GNU", elfcpp::NT_GNU_BUILD_ID,
 					 ".note.gnu.build-id", descsz, true,
 					 &trailing_padding);
+  if (os == NULL)
+    return;
 
   if (!desc.empty())
     {
@@ -1622,7 +1640,6 @@ Layout::create_build_id()
       gold_assert(trailing_padding == 0);
       this->build_id_note_ = new Output_data_zero_fill(descsz, 4);
       os->add_output_section_data(this->build_id_note_);
-      os->set_after_input_sections();
     }
 }
 

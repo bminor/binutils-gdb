@@ -1,5 +1,30 @@
 2009-06-24  Ian Lance Taylor  <iant@google.com>
 
+	PR 10156
+	* layout.cc (Layout::choose_output_section): If we find an
+	existing section, update the flags.
+	(Layout::create_notes): New function, broken out of
+	Layout::finalize.
+	(Layout::finalize): Don't create note sections.
+	(Layout::create_note): Don't crash if linker script discards
+	section.
+	(Layout::create_gold_note): Likewise.
+	(Layout::create_build_id): Likewise.  Don't set
+	after_input_sections on the section.
+	(Layout::create_executable_stack_info): Remove target parameter.
+	Change caller.
+	* layout.h (class Layout): Declare create_notes.  Update
+	declaration of create_executable_stack_info.
+	* gold.cc (queue_middle_tasks): Call create_notes.
+	* output.cc (Output_section::update_flags_for_input_section): Move
+	here from output.h.  If SHF_ALLOC flag is newly set, mark address
+	invalid.
+	* output.h (Output_data::mark_address_invalid): New function.
+	(class Output_section): Only declare, not define,
+	update_flags_for_input_section.  Remove set_flags.
+
+2009-06-24  Ian Lance Taylor  <iant@google.com>
+
 	* script-sections.cc (Output_section_definition::
 	set_section_addresses): Rename shadowing local load_address to
 	laddr.
