@@ -946,6 +946,11 @@ class General_options
   // any problems.
   void finalize();
 
+  // True if we printed the version information.
+  bool
+  printed_version() const
+  { return this->printed_version_; }
+
   // The macro defines output() (based on --output), but that's a
   // generic name.  Provide this alternative name, which is clearer.
   const char*
@@ -1090,6 +1095,8 @@ class General_options
   void
   add_plugin_option(const char* opt);
 
+  // Whether we printed version information.
+  bool printed_version_;
   // Whether to mark the stack as executable.
   Execstack execstack_status_;
   // Whether to do a static link.
@@ -1106,7 +1113,7 @@ class General_options
   // --incremental-unchanged or --incremental-unknown option.  The
   // value may change as we proceed parsing the command line flags.
   Incremental_disposition incremental_disposition_;
-  // Wheater we have seen one of the options that require incremental
+  // Whether we have seen one of the options that require incremental
   // build (--incremental-changed, --incremental-unchanged or
   // --incremental-unknown)
   bool implicit_incremental_;

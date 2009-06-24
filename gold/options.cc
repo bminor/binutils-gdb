@@ -273,6 +273,7 @@ void
 General_options::parse_V(const char*, const char*, Command_line*)
 {
   gold::print_version(true);
+  this->printed_version_ = true;
   printf(_("  Supported targets:\n"));
   std::vector<const char*> supported_names;
   gold::supported_target_names(&supported_names);
@@ -708,7 +709,8 @@ namespace gold
 {
 
 General_options::General_options()
-  : execstack_status_(General_options::EXECSTACK_FROM_INPUT), static_(false),
+  : printed_version_(false),
+    execstack_status_(General_options::EXECSTACK_FROM_INPUT), static_(false),
     do_demangle_(false), plugins_(),
     incremental_disposition_(INCREMENTAL_CHECK), implicit_incremental_(false)
 {

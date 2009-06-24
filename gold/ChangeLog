@@ -1,5 +1,16 @@
 2009-06-23  Ian Lance Taylor  <iant@google.com>
 
+	PR 10237
+	* options.cc (General_options::parse_V): Set printed_version_.
+	(General_options::General_options): Initialize printed_version_.
+	* options.h (class General_options): Add printed_version_ field.
+	* gold.cc (queue_initial_tasks): If there are no input files,
+	don't give a fatal error if we printed the version information.
+	(queue_middle_tasks): If using -r with a shared object, give a
+	fatal error rather than an ordinary error.
+
+2009-06-23  Ian Lance Taylor  <iant@google.com>
+
 	PR 10219
 	* layout.cc (Layout::Layout): Initialize have_stabstr_section_.
 	(Layout::make_output_section): Set have_stabstr_section_ if we see

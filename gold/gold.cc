@@ -164,7 +164,11 @@ queue_initial_tasks(const General_options& options,
 		    Symbol_table* symtab, Layout* layout, Mapfile* mapfile)
 {
   if (cmdline.begin() == cmdline.end())
-    gold_fatal(_("no input files"));
+    {
+      if (options.printed_version())
+	gold_exit(true);
+      gold_fatal(_("no input files"));
+    }
 
   int thread_count = options.thread_count_initial();
   if (thread_count == 0)
@@ -364,7 +368,7 @@ queue_middle_tasks(const General_options& options,
 		 (*input_objects->dynobj_begin())->name().c_str());
     }
   if (!doing_static_link && parameters->options().relocatable())
-    gold_error(_("cannot mix -r with dynamic object %s"),
+    gold_fatal(_("cannot mix -r with dynamic object %s"),
 	       (*input_objects->dynobj_begin())->name().c_str());
   if (!doing_static_link
       && options.oformat_enum() != General_options::OBJECT_FORMAT_ELF)
