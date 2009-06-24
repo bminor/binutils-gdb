@@ -1,3 +1,14 @@
+2009-06-23  Ian Lance Taylor  <iant@google.com>
+
+	PR 10219
+	* layout.cc (Layout::Layout): Initialize have_stabstr_section_.
+	(Layout::make_output_section): Set have_stabstr_section_ if we see
+	a .stab*str section.
+	(Layout::finalize): Call link_stabs_sections.
+	(Layout::link_stabs_sections): New file.
+	* layout.h (class Layout): Add have_stabstr_section_ field.
+	Declare link_stabs_sections.
+
 2009-06-23  Doug Kwan  <dougkwan@google.com>
 
 	* Makefile.am (libgold_a_LIBADD): New.

@@ -124,6 +124,7 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     has_static_tls_(false),
     any_postprocessing_sections_(false),
     resized_signatures_(false),
+    have_stabstr_section_(false),
     incremental_inputs_(NULL)
 {
   // Make space for more than enough segments for a typical file.
@@ -823,6 +824,14 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 	}
     }
 
+  // Check for .stab*str sections, as .stab* sections need to link to
+  // them.
+  if (type == elfcpp::SHT_STRTAB
+      && !this->have_stabstr_section_
+      && strncmp(name, ".stab", 5) == 0
+      && strcmp(name + strlen(name) - 3, "str") == 0)
+    this->have_stabstr_section_ = true;
+
   // If we have already attached the sections to segments, then we
   // need to attach this one now.  This happens for sections created
   // directly by the linker.
@@ -1192,6 +1201,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   this->create_gold_note();
   this->create_executable_stack_info(target);
   this->create_build_id();
+  this->link_stabs_sections();
 
   Output_segment* phdr_seg = NULL;
   if (!parameters->options().relocatable() && !parameters->doing_static_link())
@@ -1613,6 +1623,40 @@ Layout::create_build_id()
       this->build_id_note_ = new Output_data_zero_fill(descsz, 4);
       os->add_output_section_data(this->build_id_note_);
       os->set_after_input_sections();
+    }
+}
+
+// If we have both .stabXX and .stabXXstr sections, then the sh_link
+// field of the former should point to the latter.  I'm not sure who
+// started this, but the GNU linker does it, and some tools depend
+// upon it.
+
+void
+Layout::link_stabs_sections()
+{
+  if (!this->have_stabstr_section_)
+    return;
+
+  for (Section_list::iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    {
+      if ((*p)->type() != elfcpp::SHT_STRTAB)
+	continue;
+
+      const char* name = (*p)->name();
+      if (strncmp(name, ".stab", 5) != 0)
+	continue;
+
+      size_t len = strlen(name);
+      if (strcmp(name + len - 3, "str") != 0)
+	continue;
+
+      std::string stab_name(name, len - 3);
+      Output_section* stab_sec;
+      stab_sec = this->find_output_section(stab_name.c_str());
+      if (stab_sec != NULL)
+	stab_sec->set_link_section(*p);
     }
 }
 
