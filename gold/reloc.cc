@@ -822,6 +822,10 @@ Sized_relobj<size, big_endian>::relocate_sections(
       if (sh_type != elfcpp::SHT_REL && sh_type != elfcpp::SHT_RELA)
 	continue;
 
+      off_t sh_size = shdr.get_sh_size();
+      if (sh_size == 0)
+	continue;
+
       unsigned int index = this->adjust_shndx(shdr.get_sh_info());
       if (index >= this->shnum())
 	{
@@ -851,7 +855,6 @@ Sized_relobj<size, big_endian>::relocate_sections(
 	  continue;
 	}
 
-      off_t sh_size = shdr.get_sh_size();
       const unsigned char* prelocs = this->get_view(shdr.get_sh_offset(),
 						    sh_size, true, false);
 
