@@ -1,5 +1,13 @@
 2009-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* eval.c (evaluate_subexp_standard): Use expression architecture
+	instead of current_gdbarch.
+
+	* infrun.c (handle_inferior_event): Avoid unncessary reference
+	to current_gdbarch and get_current_frame ().
+
+2009-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* breakpoint.h (set_longjmp_breakpoint): Add THREAD argument.
 	(enum bptype): Add bp_longjmp_master.
 

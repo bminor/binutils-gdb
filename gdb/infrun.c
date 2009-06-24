@@ -3777,9 +3777,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 		  keep_going (ecs);
 		  return;
 		}
-	      if (gdbarch_skip_trampoline_code(current_gdbarch,
-					       get_current_frame (),
-					       stop_pc))
+	      if (gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc))
 		{
 		  /* We are in a function call trampoline.
 		     Keep stepping backward to get to the caller.  */

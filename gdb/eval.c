@@ -938,7 +938,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      for (; range_low <= range_high; range_low++)
 		{
 		  int bit_index = (unsigned) range_low % TARGET_CHAR_BIT;
-		  if (gdbarch_bits_big_endian (current_gdbarch))
+		  if (gdbarch_bits_big_endian (exp->gdbarch))
 		    bit_index = TARGET_CHAR_BIT - 1 - bit_index;
 		  valaddr[(unsigned) range_low / TARGET_CHAR_BIT]
 		    |= 1 << bit_index;
