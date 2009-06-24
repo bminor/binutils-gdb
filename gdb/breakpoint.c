@@ -1507,6 +1507,31 @@ create_overlay_event_breakpoint (char *func_name)
   update_global_location_list (1);
 }
 
+static void
+create_longjmp_master_breakpoint (char *func_name)
+{
+  struct objfile *objfile;
+
+  ALL_OBJFILES (objfile)
+    {
+      struct breakpoint *b;
+      struct minimal_symbol *m;
+
+      if (!gdbarch_get_longjmp_target_p (get_objfile_arch (objfile)))
+	continue;
+
+      m = lookup_minimal_symbol_text (func_name, objfile);
+      if (m == NULL)
+        continue;
+
+      b = create_internal_breakpoint (SYMBOL_VALUE_ADDRESS (m),
+                                      bp_longjmp_master);
+      b->addr_string = xstrdup (func_name);
+      b->enable_state = bp_disabled;
+    }
+  update_global_location_list (1);
+}
+
 void
 update_breakpoints_after_exec (void)
 {
@@ -1535,8 +1560,9 @@ update_breakpoints_after_exec (void)
       }
 
     /* Thread event breakpoints must be set anew after an exec(),
-       as must overlay event breakpoints.  */
-    if (b->type == bp_thread_event || b->type == bp_overlay_event)
+       as must overlay event and longjmp master breakpoints.  */
+    if (b->type == bp_thread_event || b->type == bp_overlay_event
+	|| b->type == bp_longjmp_master)
       {
 	delete_breakpoint (b);
 	continue;
@@ -1608,6 +1634,10 @@ update_breakpoints_after_exec (void)
   }
   /* FIXME what about longjmp breakpoints?  Re-create them here?  */
   create_overlay_event_breakpoint ("_ovly_debug_event");
+  create_longjmp_master_breakpoint ("longjmp");
+  create_longjmp_master_breakpoint ("_longjmp");
+  create_longjmp_master_breakpoint ("siglongjmp");
+  create_longjmp_master_breakpoint ("_siglongjmp");
 }
 
 int
@@ -2426,6 +2456,12 @@ print_it_typical (bpstat bs)
       result = PRINT_NOTHING;
       break;
 
+    case bp_longjmp_master:
+      /* These should never be enabled.  */
+      printf_filtered (_("Longjmp Master Breakpoint: gdb should not stop!\n"));
+      result = PRINT_NOTHING;
+      break;
+
     case bp_watchpoint:
     case bp_hardware_watchpoint:
       annotate_watchpoint (b->number);
@@ -3119,7 +3155,8 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
     if (!bs->stop)
       continue;
 
-    if (b->type == bp_thread_event || b->type == bp_overlay_event)
+    if (b->type == bp_thread_event || b->type == bp_overlay_event
+	|| b->type == bp_longjmp_master)
       /* We do not stop for these.  */
       bs->stop = 0;
     else
@@ -3403,6 +3440,7 @@ bpstat_what (bpstat bs)
 	  break;
 	case bp_thread_event:
 	case bp_overlay_event:
+	case bp_longjmp_master:
 	  bs_class = bp_nostop;
 	  break;
 	case bp_catchpoint:
@@ -3529,6 +3567,7 @@ print_one_breakpoint_location (struct breakpoint *b,
     {bp_shlib_event, "shlib events"},
     {bp_thread_event, "thread events"},
     {bp_overlay_event, "overlay events"},
+    {bp_longjmp_master, "longjmp master"},
     {bp_catchpoint, "catchpoint"},
     {bp_tracepoint, "tracepoint"},
   };
@@ -3657,6 +3696,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       case bp_shlib_event:
       case bp_thread_event:
       case bp_overlay_event:
+      case bp_longjmp_master:
       case bp_tracepoint:
 	if (opts.addressprint)
 	  {
@@ -4274,6 +4314,7 @@ allocate_bp_location (struct breakpoint *bpt)
     case bp_shlib_event:
     case bp_thread_event:
     case bp_overlay_event:
+    case bp_longjmp_master:
       loc->loc_type = bp_loc_software_breakpoint;
       break;
     case bp_hardware_breakpoint:
@@ -4428,32 +4469,26 @@ make_breakpoint_permanent (struct breakpoint *b)
     bl->inserted = 1;
 }
 
-static void
-create_longjmp_breakpoint (char *func_name)
-{
-  struct minimal_symbol *m;
-
-  m = lookup_minimal_symbol_text (func_name, NULL);
-  if (m == NULL)
-    return;
-  set_momentary_breakpoint_at_pc (SYMBOL_VALUE_ADDRESS (m), bp_longjmp);
-  update_global_location_list (1);
-}
-
 /* Call this routine when stepping and nexting to enable a breakpoint
-   if we do a longjmp().  When we hit that breakpoint, call
+   if we do a longjmp() in THREAD.  When we hit that breakpoint, call
    set_longjmp_resume_breakpoint() to figure out where we are going. */
 
 void
-set_longjmp_breakpoint (void)
+set_longjmp_breakpoint (int thread)
 {
-  if (gdbarch_get_longjmp_target_p (current_gdbarch))
-    {
-      create_longjmp_breakpoint ("longjmp");
-      create_longjmp_breakpoint ("_longjmp");
-      create_longjmp_breakpoint ("siglongjmp");
-      create_longjmp_breakpoint ("_siglongjmp");
-    }
+  struct breakpoint *b, *temp;
+
+  /* To avoid having to rescan all objfile symbols at every step,
+     we maintain a list of continually-inserted but always disabled
+     longjmp "master" breakpoints.  Here, we simply create momentary
+     clones of those and enable them for the requested thread.  */
+  ALL_BREAKPOINTS_SAFE (b, temp)
+    if (b->type == bp_longjmp_master)
+      {
+	struct breakpoint *clone = clone_momentary_breakpoint (b);
+	clone->type = bp_longjmp;
+	clone->thread = thread;
+      }
 }
 
 /* Delete all longjmp breakpoints from THREAD.  */
@@ -5164,6 +5199,7 @@ mention (struct breakpoint *b)
       case bp_shlib_event:
       case bp_thread_event:
       case bp_overlay_event:
+      case bp_longjmp_master:
 	break;
       }
 
@@ -7432,6 +7468,7 @@ delete_command (char *arg, int from_tty)
 	    && b->type != bp_shlib_event
 	    && b->type != bp_thread_event
 	    && b->type != bp_overlay_event
+	    && b->type != bp_longjmp_master
 	    && b->number >= 0)
 	  {
 	    breaks_to_delete = 1;
@@ -7449,6 +7486,7 @@ delete_command (char *arg, int from_tty)
 		&& b->type != bp_shlib_event
 		&& b->type != bp_thread_event
 		&& b->type != bp_overlay_event
+		&& b->type != bp_longjmp_master
 		&& b->number >= 0)
 	      delete_breakpoint (b);
 	  }
@@ -7743,9 +7781,10 @@ breakpoint_re_set_one (void *bint)
     default:
       printf_filtered (_("Deleting unknown breakpoint type %d\n"), b->type);
       /* fall through */
-      /* Delete overlay event breakpoints; they will be reset later by
-         breakpoint_re_set.  */
+      /* Delete overlay event and longjmp master breakpoints; they will be
+	 reset later by breakpoint_re_set.  */
     case bp_overlay_event:
+    case bp_longjmp_master:
       delete_breakpoint (b);
       break;
 
@@ -7797,6 +7836,10 @@ breakpoint_re_set (void)
   input_radix = save_input_radix;
 
   create_overlay_event_breakpoint ("_ovly_debug_event");
+  create_longjmp_master_breakpoint ("longjmp");
+  create_longjmp_master_breakpoint ("_longjmp");
+  create_longjmp_master_breakpoint ("siglongjmp");
+  create_longjmp_master_breakpoint ("_siglongjmp");
 }
 
 /* Reset the thread number of this breakpoint:

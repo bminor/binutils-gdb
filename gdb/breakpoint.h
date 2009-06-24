@@ -110,6 +110,13 @@ enum bptype
 
     bp_overlay_event, 
 
+    /* Master copies of longjmp breakpoints.  These are always installed
+       as soon as an objfile containing longjmp is loaded, but they are
+       always disabled.  While necessary, temporary clones of bp_longjmp
+       type will be created and enabled.  */
+
+    bp_longjmp_master,
+
     bp_catchpoint,
 
     bp_tracepoint,
@@ -765,7 +772,7 @@ extern void update_breakpoints_after_exec (void);
    inferior_ptid.  */
 extern int detach_breakpoints (int);
 
-extern void set_longjmp_breakpoint (void);
+extern void set_longjmp_breakpoint (int thread);
 extern void delete_longjmp_breakpoint (int thread);
 
 extern void enable_overlay_breakpoints (void);

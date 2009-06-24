@@ -1,3 +1,21 @@
+2009-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* breakpoint.h (set_longjmp_breakpoint): Add THREAD argument.
+	(enum bptype): Add bp_longjmp_master.
+
+	* breakpoint.c (create_longjmp_master_breakpoint): New function.
+	(update_breakpoints_after_exec): Handle bp_longjmp_master
+	breakpoints.  Call create_longjmp_master_breakpoint.
+	(print_it_typical, bpstat_stop_status, bpstat_what,
+	print_one_breakpoint_location, allocate_bp_location, mention,
+	delete_command, breakpoint_re_set_one): Handle bp_longjmp_master.
+	(breakpoint_re_set): Call create_longjmp_master_breakpoint.
+	(create_longjmp_breakpoint): Delete.
+	(set_longjmp_breakpoint): Add THREAD argument.  Reimplement
+	to install momentary clones of bp_longjmp_master breakpoints.
+
+	* infcmd.c (step_1): Pass thread to set_longjmp_breakpoint.
+
 2009-06-23  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf2read.c (dwarf_decode_lines): Ignore rows where is_stmt is 0.

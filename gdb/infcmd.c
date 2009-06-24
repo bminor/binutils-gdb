@@ -831,7 +831,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
       if (in_thread_list (inferior_ptid))
  	thread = pid_to_thread_id (inferior_ptid);
 
-      set_longjmp_breakpoint ();
+      set_longjmp_breakpoint (thread);
 
       make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
     }
