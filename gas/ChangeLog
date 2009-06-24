@@ -1,3 +1,12 @@
+2009-06-23  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-mep.c (mep_check_ivc2_scheduling): For IVC2, allocate
+	32 bits for relaxable branches so that we can relax them later.
+	(md_estimate_size_before_relax): Assume IVC2 branches will be relaxed.
+	(mep_relax_frag): New.
+	(md_convert_frag): Relax IVC2 branches in-place.
+	* config/tc-mep.h ((mep_relax_frag): New.
+
 2009-06-22  Martin Thuresson  <martin@mtme.org>
 	
 	* gas/app, gas/as.c, gas/as.h, gas/atof-generic.c, gas/cgen.c,

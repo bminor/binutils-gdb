@@ -80,6 +80,9 @@ extern int mep_flush_pending_output(void);
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 
+extern long mep_relax_frag (segT, fragS *, long);
+#define md_relax_frag mep_relax_frag
+
 /* Account for inserting a jmp after the insn.  */
 #define TC_CGEN_MAX_RELAX(insn, len) ((len) + 4)
 

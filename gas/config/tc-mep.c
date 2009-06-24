@@ -914,7 +914,7 @@ mep_check_ivc2_scheduling (void)
   */
 
   int slots[5]; /* Indexed off the SLOTS_ATTR enum.  */
-  int corelength;
+  int corelength, realcorelength;
   int i;
   bfd_byte temp[4];
   bfd_byte *f;
@@ -932,10 +932,19 @@ mep_check_ivc2_scheduling (void)
   if (slot_ok (0, SLOTS_CORE))
     {
       slots[SLOTS_CORE] = 0;
-      corelength = CGEN_FIELDS_BITSIZE (& saved_insns[0].fields);
+      realcorelength = corelength = CGEN_FIELDS_BITSIZE (& saved_insns[0].fields);
+
+      /* If we encounter one of these, it may get relaxed later into a
+	 longer instruction.  We can't just push the other opcodes
+	 away, the bigger insn has to fit into the existing slot.  So,
+	 we make room for the relaxed instruction here.  */
+
+      if (saved_insns[0].insn->base->num == MEP_INSN_BSR12
+	  || saved_insns[0].insn->base->num == MEP_INSN_BRA)
+	corelength = 32;
     }
   else
-    corelength = 0;
+    realcorelength = corelength = 0;
 
   if (corelength == 16)
     {
@@ -1070,10 +1079,10 @@ mep_check_ivc2_scheduling (void)
   /* Allocate whatever bytes remain in our insn word.  Adjust the
      pointer to point (as if it were) to the beginning of the whole
      word, so that we don't have to adjust for it elsewhere.  */
-  f = (bfd_byte *) frag_more (8 - corelength / 8);
+  f = (bfd_byte *) frag_more (8 - realcorelength / 8);
   /* Unused slots are filled with NOPs, which happen to be all zeros.  */
-  memset (f, 0, 8 - corelength / 8);
-  f -= corelength / 8;
+  memset (f, 0, 8 - realcorelength / 8);
+  f -= realcorelength / 8;
 
   for (i=1; i<5; i++)
     {
@@ -1499,7 +1508,12 @@ md_estimate_size_before_relax (fragS * fragP, segT segment)
   if (fragP->fr_subtype == 1)
     fragP->fr_subtype = insn_to_subtype (fragP->fr_cgen.insn->base->num);
 
-  if (S_GET_SEGMENT (fragP->fr_symbol) != segment)
+  if (S_GET_SEGMENT (fragP->fr_symbol) != segment
+#ifdef MEP_IVC2_SUPPORTED
+      || (mep_cop == EF_MEP_COP_IVC2
+	  && bfd_get_section_flags (stdoutput, segment) & SEC_MEP_VLIW)
+#endif /* MEP_IVC2_SUPPORTED */
+      )
     {
       int new_insn;
 
@@ -1539,7 +1553,27 @@ md_estimate_size_before_relax (fragS * fragP, segT segment)
 	}
     }
 
+#ifdef MEP_IVC2_SUPPORTED
+  if (mep_cop == EF_MEP_COP_IVC2
+      && bfd_get_section_flags (stdoutput, segment) & SEC_MEP_VLIW)
+    return 0;
+#endif /* MEP_IVC2_SUPPORTED */
+
   return subtype_mappings[fragP->fr_subtype].growth;
+}
+
+/* VLIW does relaxing, but not growth.  */
+
+long
+mep_relax_frag (segT segment, fragS *fragP, long stretch)
+{
+  long rv = relax_frag (segment, fragP, stretch);
+#ifdef MEP_IVC2_SUPPORTED
+  if (mep_cop == EF_MEP_COP_IVC2
+      && bfd_get_section_flags (stdoutput, segment) & SEC_MEP_VLIW)
+    return 0;
+#endif
+  return rv;
 }
 
 /* *fragP has been relaxed to its final size, and now needs to have
@@ -1563,19 +1597,29 @@ target_address_for (fragS *frag)
 
 void
 md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED, 
-		 segT sec ATTRIBUTE_UNUSED,
+		 segT seg ATTRIBUTE_UNUSED,
 		 fragS *fragP)
 {
   int addend, rn, bit = 0;
   int operand;
   int where = fragP->fr_opcode - fragP->fr_literal;
   int e = target_big_endian ? 0 : 1;
+  int core_mode;
+
+#ifdef MEP_IVC2_SUPPORTED
+  if (bfd_get_section_flags (stdoutput, seg) & SEC_MEP_VLIW
+      && mep_cop == EF_MEP_COP_IVC2)
+    core_mode = 0;
+  else
+#endif /* MEP_IVC2_SUPPORTED */
+    core_mode = 1;
 
   addend = target_address_for (fragP) - (fragP->fr_address + where);
 
   if (subtype_mappings[fragP->fr_subtype].insn == -1)
     {
-      fragP->fr_fix += subtype_mappings[fragP->fr_subtype].growth;
+      if (core_mode)
+	fragP->fr_fix += subtype_mappings[fragP->fr_subtype].growth;
       switch (subtype_mappings[fragP->fr_subtype].insn_for_extern)
 	{
 	case MEP_PSEUDO64_16BITCC:
@@ -1617,7 +1661,8 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
 	break;
 
       case MEP_INSN_BSR24:
-	fragP->fr_fix += 2;
+	if (core_mode)
+	  fragP->fr_fix += 2;
 	fragP->fr_opcode[0^e] = 0xd8 | ((addend >> 5) & 0x07);
 	fragP->fr_opcode[1^e] = 0x09 | ((addend << 3) & 0xf0);
 	fragP->fr_opcode[2^e] = 0x00 | ((addend >>16) & 0xff);
@@ -1637,7 +1682,8 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
 	   instructions to JMP.  */
 	if (addend <= 65535 && addend >= -65536)
 	  {
-	    fragP->fr_fix += 2;
+	    if (core_mode)
+	      fragP->fr_fix += 2;
 	    fragP->fr_opcode[0^e] = 0xe0;
 	    fragP->fr_opcode[1^e] = 0x01;
 	    fragP->fr_opcode[2^e] = 0x00 | ((addend >> 9) & 0xff);
@@ -1649,7 +1695,8 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
 
       case MEP_INSN_JMP:
 	addend = target_address_for (fragP);
-	fragP->fr_fix += 2;
+	if (core_mode)
+	  fragP->fr_fix += 2;
 	fragP->fr_opcode[0^e] = 0xd8 | ((addend >> 5) & 0x07);
 	fragP->fr_opcode[1^e] = 0x08 | ((addend << 3) & 0xf0);
 	fragP->fr_opcode[2^e] = 0x00 | ((addend >>16) & 0xff);
@@ -1669,7 +1716,8 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
       case MEP_INSN_BEQI:
 	if (subtype_mappings[fragP->fr_subtype].growth)
 	  {
-	    fragP->fr_fix += subtype_mappings[fragP->fr_subtype].growth;
+	    if (core_mode)
+	      fragP->fr_fix += subtype_mappings[fragP->fr_subtype].growth;
 	    rn = fragP->fr_opcode[0^e] & 0x0f;
 	    fragP->fr_opcode[0^e] = 0xe0 | rn;
 	    fragP->fr_opcode[1^e] = bit;
@@ -1695,7 +1743,7 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
 	abort ();
       }
 
-  if (S_GET_SEGMENT (fragP->fr_symbol) != sec
+  if (S_GET_SEGMENT (fragP->fr_symbol) != seg
       || operand == MEP_OPERAND_PCABS24A2)
     {
       gas_assert (fragP->fr_cgen.insn != 0);
