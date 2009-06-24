@@ -1,5 +1,11 @@
 2009-06-23  Ian Lance Taylor  <iant@google.com>
 
+	PR 10156
+	* layout.cc (Layout::create_note): Use choose_output_section
+	rather than make_output_section.
+
+2009-06-23  Ian Lance Taylor  <iant@google.com>
+
 	PR 10237
 	* options.cc (General_options::parse_V): Set printed_version_.
 	(General_options::General_options): Initialize printed_version_.

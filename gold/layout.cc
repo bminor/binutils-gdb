@@ -1361,10 +1361,11 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 }
 
 // Create a note header following the format defined in the ELF ABI.
-// NAME is the name, NOTE_TYPE is the type, DESCSZ is the size of the
-// descriptor.  ALLOCATE is true if the section should be allocated in
-// memory.  This returns the new note section.  It sets
-// *TRAILING_PADDING to the number of trailing zero bytes required.
+// NAME is the name, NOTE_TYPE is the type, SECTION_NAME is the name
+// of the section to create, DESCSZ is the size of the descriptor.
+// ALLOCATE is true if the section should be allocated in memory.
+// This returns the new note section.  It sets *TRAILING_PADDING to
+// the number of trailing zero bytes required.
 
 Output_section*
 Layout::create_note(const char* name, int note_type,
@@ -1435,13 +1436,12 @@ Layout::create_note(const char* name, int note_type,
 
   memcpy(buffer + 3 * (size / 8), name, namesz);
 
-  const char *note_name = this->namepool_.add(section_name, false, NULL);
   elfcpp::Elf_Xword flags = 0;
   if (allocate)
     flags = elfcpp::SHF_ALLOC;
-  Output_section* os = this->make_output_section(note_name,
-						 elfcpp::SHT_NOTE,
-						 flags);
+  Output_section* os = this->choose_output_section(NULL, section_name,
+						   elfcpp::SHT_NOTE,
+						   flags, false);
   Output_section_data* posd = new Output_data_const_buffer(buffer, notehdrsz,
 							   size / 8,
 							   "** note header");
