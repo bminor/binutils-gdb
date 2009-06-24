@@ -1,5 +1,9 @@
 2009-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* valops.c (value_one): Reimplement broken decimal-float case.
+
+2009-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* eval.c (evaluate_subexp_standard): Use expression architecture
 	instead of current_gdbarch.
 

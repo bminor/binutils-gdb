@@ -537,15 +537,12 @@ struct value *
 value_one (struct type *type, enum lval_type lv)
 {
   struct type *type1 = check_typedef (type);
-  struct value *val = NULL; /* avoid -Wall warning */
+  struct value *val;
 
   if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT)
     {
-      struct value *int_one = value_from_longest (builtin_type_int32, 1);
-      struct value *val;
       gdb_byte v[16];
-
-      decimal_from_integral (int_one, v, TYPE_LENGTH (builtin_type_int32));
+      decimal_from_string (v, TYPE_LENGTH (type), "1");
       val = value_from_decfloat (type, v);
     }
   else if (TYPE_CODE (type1) == TYPE_CODE_FLT)
