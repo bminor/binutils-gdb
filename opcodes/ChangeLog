@@ -1,5 +1,11 @@
 2009-06-23  DJ Delorie  <dj@redhat.com>
 
+	* mep-desc.c: Regenerate.
+	* mep-desc.h: Regenerate.
+	* mep-dis.c: Regenerate.
+	* mep-ibld.c: Regenerate.
+	* mep-opc.c: Regenerate.
+
 	* mep-asm.c: Regenerate.
 	* mep-opc.c: Regenerate.
 	* mep-opc.h: Regenerate.

@@ -1023,6 +1023,75 @@ mep_cgen_parse_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_IVC_X_6_3 :
       errmsg = cgen_parse_unsigned_integer (cd, strp, MEP_OPERAND_IVC_X_6_3, (unsigned long *) (& fields->f_ivc2_3u6));
       break;
+    case MEP_OPERAND_IVC2_ACC0_0 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_1 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_2 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_3 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_4 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_5 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_6 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_7 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_0 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_1 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_2 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_3 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_4 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_5 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_6 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_7 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_CC :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_COFA0 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_COFA1 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_COFR0 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_COFR1 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_CSAR0 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
+    case MEP_OPERAND_IVC2_CSAR1 :
+      errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & junk);
+      break;
     case MEP_OPERAND_IVC2C3CCRN :
       errmsg = cgen_parse_keyword (cd, strp, & mep_cgen_opval_h_ccr_ivc2, & fields->f_ivc2_ccrn_c3);
       break;

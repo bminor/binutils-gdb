@@ -928,6 +928,75 @@ mep_cgen_print_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_IVC_X_6_3 :
       print_normal (cd, info, fields->f_ivc2_3u6, 0, pc, length);
       break;
+    case MEP_OPERAND_IVC2_ACC0_0 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_1 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_2 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_3 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_4 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_5 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_6 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC0_7 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_0 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_1 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_2 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_3 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_4 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_5 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_6 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_ACC1_7 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_CC :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_COFA0 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_COFA1 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_COFR0 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_COFR1 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_CSAR0 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
+    case MEP_OPERAND_IVC2_CSAR1 :
+      print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, 0, 0);
+      break;
     case MEP_OPERAND_IVC2C3CCRN :
       print_keyword (cd, info, & mep_cgen_opval_h_ccr_ivc2, fields->f_ivc2_ccrn_c3, 0|(1<<CGEN_OPERAND_VIRTUAL));
       break;

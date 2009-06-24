@@ -145,6 +145,12 @@ mep_cgen_insn_supported (CGEN_CPU_DESC cd, const CGEN_INSN *insn)
   int ok1;
   int ok2;
   int ok3;
+ 
+  /* If we're assembling VLIW packets, ignore the 12-bit BSR as we
+     can't relax that.  The 24-bit BSR is matched instead.  */
+  if (insn->base->num == MEP_INSN_BSR12
+      && cgen_bitset_contains (cd->isas, ISA_EXT_COP1_64))
+    return 0;
 
   /* If the insn has an option bit set that we don't want,
      reject it.  */
@@ -6173,67 +6179,67 @@ static const CGEN_IBASE mep_cgen_macro_insn_table[] =
 /* nop */
   {
     -1, "nop", "nop", 16,
-    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* sb $rnc,$zero($rma) */
   {
     -1, "sb16-0", "sb", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* sh $rns,$zero($rma) */
   {
     -1, "sh16-0", "sh", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* sw $rnl,$zero($rma) */
   {
     -1, "sw16-0", "sw", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lb $rnc,$zero($rma) */
   {
     -1, "lb16-0", "lb", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lh $rns,$zero($rma) */
   {
     -1, "lh16-0", "lh", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lw $rnl,$zero($rma) */
   {
     -1, "lw16-0", "lw", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lbu $rnuc,$zero($rma) */
   {
     -1, "lbu16-0", "lbu", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lhu $rnus,$zero($rma) */
   {
     -1, "lhu16-0", "lhu", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* swcp $crn,$zero($rma) */
   {
     -1, "swcp16-0", "swcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lwcp $crn,$zero($rma) */
   {
     -1, "lwcp16-0", "lwcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* smcp $crn64,$zero($rma) */
   {
     -1, "smcp16-0", "smcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 /* lmcp $crn64,$zero($rma) */
   {
     -1, "lmcp16-0", "lmcp", 16,
-    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
+    { 0|A(NO_DIS)|A(OPTIONAL_CP64_INSN)|A(OPTIONAL_CP_INSN)|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_CORE), 0 } } } }
   },
 };
 

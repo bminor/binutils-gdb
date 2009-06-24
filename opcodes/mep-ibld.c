@@ -878,6 +878,52 @@ mep_cgen_insert_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_IVC_X_6_3 :
       errmsg = insert_normal (cd, fields->f_ivc2_3u6, 0, 0, 6, 3, 32, total_length, buffer);
       break;
+    case MEP_OPERAND_IVC2_ACC0_0 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_1 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_2 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_3 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_4 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_5 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_6 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_7 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_0 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_1 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_2 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_3 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_4 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_5 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_6 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_7 :
+      break;
+    case MEP_OPERAND_IVC2_CC :
+      break;
+    case MEP_OPERAND_IVC2_COFA0 :
+      break;
+    case MEP_OPERAND_IVC2_COFA1 :
+      break;
+    case MEP_OPERAND_IVC2_COFR0 :
+      break;
+    case MEP_OPERAND_IVC2_COFR1 :
+      break;
+    case MEP_OPERAND_IVC2_CSAR0 :
+      break;
+    case MEP_OPERAND_IVC2_CSAR1 :
+      break;
     case MEP_OPERAND_IVC2C3CCRN :
       {
 {
@@ -1459,6 +1505,52 @@ mep_cgen_extract_operand (CGEN_CPU_DESC cd,
     case MEP_OPERAND_IVC_X_6_3 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 6, 3, 32, total_length, pc, & fields->f_ivc2_3u6);
       break;
+    case MEP_OPERAND_IVC2_ACC0_0 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_1 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_2 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_3 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_4 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_5 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_6 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_7 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_0 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_1 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_2 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_3 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_4 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_5 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_6 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_7 :
+      break;
+    case MEP_OPERAND_IVC2_CC :
+      break;
+    case MEP_OPERAND_IVC2_COFA0 :
+      break;
+    case MEP_OPERAND_IVC2_COFA1 :
+      break;
+    case MEP_OPERAND_IVC2_COFR0 :
+      break;
+    case MEP_OPERAND_IVC2_COFR1 :
+      break;
+    case MEP_OPERAND_IVC2_CSAR0 :
+      break;
+    case MEP_OPERAND_IVC2_CSAR1 :
+      break;
     case MEP_OPERAND_IVC2C3CCRN :
       {
         length = extract_normal (cd, ex_info, insn_value, 0, 0, 28, 2, 32, total_length, pc, & fields->f_ivc2_ccrn_c3hi);
@@ -1917,6 +2009,75 @@ mep_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MEP_OPERAND_IVC_X_6_3 :
       value = fields->f_ivc2_3u6;
       break;
+    case MEP_OPERAND_IVC2_ACC0_0 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_1 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_2 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_3 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_4 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_5 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_6 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_7 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_0 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_1 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_2 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_3 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_4 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_5 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_6 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_7 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_CC :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_COFA0 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_COFA1 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_COFR0 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_COFR1 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_CSAR0 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_CSAR1 :
+      value = 0;
+      break;
     case MEP_OPERAND_IVC2C3CCRN :
       value = fields->f_ivc2_ccrn_c3;
       break;
@@ -2299,6 +2460,75 @@ mep_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MEP_OPERAND_IVC_X_6_3 :
       value = fields->f_ivc2_3u6;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_0 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_1 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_2 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_3 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_4 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_5 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_6 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_7 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_0 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_1 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_2 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_3 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_4 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_5 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_6 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_ACC1_7 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_CC :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_COFA0 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_COFA1 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_COFR0 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_COFR1 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_CSAR0 :
+      value = 0;
+      break;
+    case MEP_OPERAND_IVC2_CSAR1 :
+      value = 0;
       break;
     case MEP_OPERAND_IVC2C3CCRN :
       value = fields->f_ivc2_ccrn_c3;
@@ -2684,6 +2914,52 @@ mep_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MEP_OPERAND_IVC_X_6_3 :
       fields->f_ivc2_3u6 = value;
       break;
+    case MEP_OPERAND_IVC2_ACC0_0 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_1 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_2 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_3 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_4 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_5 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_6 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_7 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_0 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_1 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_2 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_3 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_4 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_5 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_6 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_7 :
+      break;
+    case MEP_OPERAND_IVC2_CC :
+      break;
+    case MEP_OPERAND_IVC2_COFA0 :
+      break;
+    case MEP_OPERAND_IVC2_COFA1 :
+      break;
+    case MEP_OPERAND_IVC2_COFR0 :
+      break;
+    case MEP_OPERAND_IVC2_COFR1 :
+      break;
+    case MEP_OPERAND_IVC2_CSAR0 :
+      break;
+    case MEP_OPERAND_IVC2_CSAR1 :
+      break;
     case MEP_OPERAND_IVC2C3CCRN :
       fields->f_ivc2_ccrn_c3 = value;
       break;
@@ -3040,6 +3316,52 @@ mep_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MEP_OPERAND_IVC_X_6_3 :
       fields->f_ivc2_3u6 = value;
+      break;
+    case MEP_OPERAND_IVC2_ACC0_0 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_1 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_2 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_3 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_4 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_5 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_6 :
+      break;
+    case MEP_OPERAND_IVC2_ACC0_7 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_0 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_1 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_2 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_3 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_4 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_5 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_6 :
+      break;
+    case MEP_OPERAND_IVC2_ACC1_7 :
+      break;
+    case MEP_OPERAND_IVC2_CC :
+      break;
+    case MEP_OPERAND_IVC2_COFA0 :
+      break;
+    case MEP_OPERAND_IVC2_COFA1 :
+      break;
+    case MEP_OPERAND_IVC2_COFR0 :
+      break;
+    case MEP_OPERAND_IVC2_COFR1 :
+      break;
+    case MEP_OPERAND_IVC2_CSAR0 :
+      break;
+    case MEP_OPERAND_IVC2_CSAR1 :
       break;
     case MEP_OPERAND_IVC2C3CCRN :
       fields->f_ivc2_ccrn_c3 = value;
