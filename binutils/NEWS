@@ -1,4 +1,7 @@
 -*- text -*-
+* Readelf can now display the relocated contents of a section as a sequence
+  of bytes via the --relocated-dump=<name|number> command line option.
+
 * The gprof program has been given a new command line option:
   --external-symbols-table=<filename> which reads in symbols from a specified
   file.

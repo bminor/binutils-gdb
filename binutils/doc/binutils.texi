@@ -3844,6 +3844,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-D}|@option{--use-dynamic}]
         [@option{-x} <number or name>|@option{--hex-dump=}<number or name>]
         [@option{-p} <number or name>|@option{--string-dump=}<number or name>]
+        [@option{-R} <number or name>|@option{--relocated-dump=}<number or name>]
         [@option{-c}|@option{--archive-index}]
         [@option{-w[lLiaprmfFsoR]}|
          @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]]
@@ -3966,9 +3967,17 @@ symbols section.
 
 @item -x <number or name>
 @itemx --hex-dump=<number or name>
-Displays the contents of the indicated section as a hexadecimal dump.
+Displays the contents of the indicated section as a hexadecimal bytes.
 A number identifies a particular section by index in the section table;
 any other string identifies all sections with that name in the object file.
+
+@item -R <number or name>
+@itemx --relocated-dump=<number or name>
+Displays the contents of the indicated section as a hexadecimal
+bytes.  A number identifies a particular section by index in the
+section table; any other string identifies all sections with that name
+in the object file.  The contents of the section will be relocated
+before they are displayed.
 
 @item -p <number or name>
 @itemx --string-dump=<number or name>

@@ -1,3 +1,24 @@
+2009-06-23  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (display_debug_lines_raw): Include the name of the
+	section in warning message.
+	(struct debug_display): Enable reloc processing for .debug_line
+	and .debug_ranges sections.
+
+	* readelf.c: Add --relocated-dump command line option to dump the
+	relocated contents of a specified section.
+	(request_dump): New function.
+	(parse_args): Use it.
+	(dump_section_as_bytes): Add parameter to indicate whether the
+	contents should be relocated.
+	(target_specific_reloc_handling): Add code for a R_MN10300_16
+	reloc found after a R_MN10300_SYM_DIFF reloc.
+	(debug_apply_relocations): Rename to apply_relocations.
+	(get_section_contents): New function.  Replaces common code found
+	in dump_section_as_strings and dump_section_as_bytes.
+	* doc/binutils.texi: Document new command line option.
+	* NEWS: Mention the new feature.
+
 2009-06-22  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (target_specific_reloc_handling): New function:
