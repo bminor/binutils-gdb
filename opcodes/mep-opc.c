@@ -163,6 +163,18 @@ mep_cgen_insn_supported (CGEN_CPU_DESC cd, const CGEN_INSN *insn)
 
   return (ok1 && ok2 && ok3);
 }
+
+int
+mep_cgen_insn_supported_asm (CGEN_CPU_DESC cd, const CGEN_INSN *insn)
+{
+  /* If we're assembling VLIW packets, ignore the 12-bit BSR as we
+     can't relax that.  The 24-bit BSR is matched instead.  */
+  if (insn->base->num == MEP_INSN_BSR12
+      && cgen_bitset_contains (cd->isas, ISA_EXT_COP1_64))
+    return 0;
+
+  return mep_cgen_insn_supported (cd, insn);
+}
 /* The hash functions are recorded here to help keep assembler code out of
    the disassembler and vice versa.  */
 

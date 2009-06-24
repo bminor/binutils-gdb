@@ -54,6 +54,7 @@ static const char * parse_insn_normal
 #include "elf/mep.h"
 
 #define CGEN_VALIDATE_INSN_SUPPORTED
+#define mep_cgen_insn_supported mep_cgen_insn_supported_asm
 
        const char * parse_csrn       (CGEN_CPU_DESC, const char **, CGEN_KEYWORD *, long *);
        const char * parse_tpreg      (CGEN_CPU_DESC, const char **, CGEN_KEYWORD *, long *);
