@@ -1,3 +1,8 @@
+2009-06-24  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* server.c (handle_v_kill): Pass signal_pid to
+	kill_inferior if multi_process is zero.
+
 2009-06-23  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* server.c (process_serial_event): Add support for Z0 and Z1 packet.

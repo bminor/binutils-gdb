@@ -1523,8 +1523,10 @@ handle_v_kill (char *own_buf)
 {
   int pid;
   char *p = &own_buf[6];
-
-  pid = strtol (p, NULL, 16);
+  if (multi_process)
+    pid = strtol (p, NULL, 16);
+  else
+    pid = signal_pid;
   if (pid != 0 && kill_inferior (pid) == 0)
     {
       last_status.kind = TARGET_WAITKIND_SIGNALLED;
