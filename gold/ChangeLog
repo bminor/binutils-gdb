@@ -1,5 +1,11 @@
 2009-06-24  Ian Lance Taylor  <iant@google.com>
 
+	* script-sections.cc (Output_section_definition::
+	set_section_addresses): Rename shadowing local load_address to
+	laddr.
+
+2009-06-24  Ian Lance Taylor  <iant@google.com>
+
 	PR 10244
 	* reloc.cc (relocate_sections): Skip empty relocation sections.
 

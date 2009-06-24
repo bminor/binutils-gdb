@@ -1863,12 +1863,12 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
   else
     {
       Output_section* dummy;
-      uint64_t load_address =
+      uint64_t laddr =
 	this->load_address_->eval_with_dot(symtab, layout, true, *dot_value,
 					   this->output_section_, &dummy);
       if (this->output_section_ != NULL)
-        this->output_section_->set_load_address(load_address);
-      this->evaluated_load_address_ = load_address;
+        this->output_section_->set_load_address(laddr);
+      this->evaluated_load_address_ = laddr;
     }
 
   uint64_t subalign;
@@ -3076,7 +3076,7 @@ Script_sections::create_note_and_tls_segments(
 
 // Add a program header.  The PHDRS clause is syntactically distinct
 // from the SECTIONS clause, but we implement it with the SECTIONS
-// support becauase PHDRS is useless if there is no SECTIONS clause.
+// support because PHDRS is useless if there is no SECTIONS clause.
 
 void
 Script_sections::add_phdr(const char* name, size_t namelen, unsigned int type,
