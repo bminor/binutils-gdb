@@ -1,3 +1,7 @@
+2009-06-25  Karen Osmond  <karen.osmond@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2009-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* valops.c (value_one): Reimplement broken decimal-float case.
