@@ -78,7 +78,7 @@ static void print_statement (lang_statement_union_type *,
 static void print_statement_list (lang_statement_union_type *,
 				  lang_output_section_statement_type *);
 static void print_statements (void);
-static void print_input_section (asection *);
+static void print_input_section (asection *, bfd_boolean);
 static bfd_boolean lang_one_common (struct bfd_link_hash_entry *, void *);
 static void lang_record_phdrs (void);
 static void lang_do_version_exports_section (void);
@@ -1917,7 +1917,7 @@ lang_map (void)
 		dis_header_printed = TRUE;
 	      }
 
-	    print_input_section (s);
+	    print_input_section (s, TRUE);
 	  }
     }
 
@@ -3957,7 +3957,7 @@ print_all_symbols (asection *sec)
 /* Print information about an input section to the map file.  */
 
 static void
-print_input_section (asection *i)
+print_input_section (asection *i, bfd_boolean is_discarded)
 {
   bfd_size_type size = i->size;
   int len;
@@ -3986,7 +3986,8 @@ print_input_section (asection *i)
   else
     {
       addr = print_dot;
-      size = 0;
+      if (!is_discarded)
+	size = 0;
     }
 
   minfo ("0x%V %W %B\n", addr, TO_ADDR (size), i->owner);
@@ -4281,7 +4282,7 @@ print_statement (lang_statement_union_type *s,
       print_reloc_statement (&s->reloc_statement);
       break;
     case lang_input_section_enum:
-      print_input_section (s->input_section.section);
+      print_input_section (s->input_section.section, FALSE);
       break;
     case lang_padding_statement_enum:
       print_padding_statement (&s->padding_statement);

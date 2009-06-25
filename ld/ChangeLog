@@ -1,3 +1,10 @@
+2009-06-25  Tristan Gingold  <gingold@adacore.com>
+
+	* ldlang.c (print_input_section): Add is_discarded parameter.  Adjust
+	prototype.
+	(lang_map): Print the size of discarded sections.
+	(print_statement): Adjust call to print_input_section.
+
 2009-06-18  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Merge cegcc and mingw32ce target name changes from CeGCC project:
