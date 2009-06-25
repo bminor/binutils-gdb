@@ -2383,38 +2383,26 @@ process_serial_event (void)
 	int len = strtol (lenptr + 1, &dataptr, 16);
 	char type = own_buf[1];
 	int res;
-	const int insert_ = ch == 'Z';
+	const int insert = ch == 'Z';
 
-	/* Type: '0' - software-breakpoint
-		 '1' - hardware-breakpoint
-		 '2' - write watchpoint
-		 '3' - read watchpoint
-		 '4' - access watchpoint  */
-
-	if (the_target->insert_watchpoint == NULL
-	    || the_target->remove_watchpoint == NULL)
-	  res = 1;  /* Not supported.  */
-	else
-	  switch (type)
-	    {
-	    case '2':
-	      /* Fallthrough.  */
-	    case '3':
-	      /* Fallthrough.  */
-	    case '4':
-	      require_running (own_buf);
-	      /* Fallthrough.  */
-	    case '0':
-	      /* Fallthrough.  */
-	    case '1':
-	      res = insert_ ? (*the_target->insert_watchpoint) (type, addr,
-								len)
-			    : (*the_target->remove_watchpoint) (type, addr,
-								len);
-	      break;
-	    default:
-	      res = -1; /* Unrecognized type.  */
-	    }
+	/* Default to unrecognized/unsupported.  */
+	res = 1;
+	switch (type)
+	  {
+	  case '0': /* software-breakpoint */
+	  case '1': /* hardware-breakpoint */
+	  case '2': /* write watchpoint */
+	  case '3': /* read watchpoint */
+	  case '4': /* access watchpoint */
+	    require_running (own_buf);
+	    if (insert && the_target->insert_point != NULL)
+	      res = (*the_target->insert_point) (type, addr, len);
+	    else if (!insert && the_target->remove_point != NULL)
+	      res = (*the_target->remove_point) (type, addr, len);
+	    break;
+	  default:
+	    break;
+	  }
 
 	if (res == 0)
 	  write_ok (own_buf);

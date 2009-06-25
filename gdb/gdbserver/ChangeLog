@@ -1,3 +1,24 @@
+2009-06-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (process_serial_event): Re-return unsupported, not
+	error, if the type isn't recognized.  Re-allow supporting only
+	insert or remove packets.  Also call require_running for
+	breakpoints.  Add missing break statement to default case.  Tidy.
+	* target.h (struct target_ops): Rename insert_watchpoint to
+	insert_point, and remove_watchpoint to remove_point.
+
+	* linux-low.h (struct linux_target_ops): Likewise.
+	* linux-low.c (linux_insert_watchpoint): Rename to ...
+	(linux_insert_point): ... this.  Adjust.
+	(linux_remove_watchpoint): Rename to ...
+	(linux_remove_point): ... this.  Adjust.
+	(linux_target_ops): Adjust.
+	* linux-crisv32-low.c (cris_insert_watchpoint): Rename to ...
+	(cris_insert_point): ... this.
+	(cris_remove_watchpoint): Rename to ...
+	(cris_remove_point): ... this.
+	(the_low_target): Adjust.
+
 2009-06-24  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* server.c (handle_v_kill): Pass signal_pid to

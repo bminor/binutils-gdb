@@ -213,7 +213,7 @@ struct target_ops
   int (*read_auxv) (CORE_ADDR offset, unsigned char *myaddr,
 		    unsigned int len);
 
-  /* Insert and remove a hardware watchpoint.
+  /* Insert and remove a break or watchpoint.
      Returns 0 on success, -1 on failure and 1 on unsupported.
      The type is coded as follows:
        '0' - software-breakpoint
@@ -222,8 +222,8 @@ struct target_ops
        '3' - read watchpoint
        '4' - access watchpoint  */
 
-  int (*insert_watchpoint) (char type, CORE_ADDR addr, int len);
-  int (*remove_watchpoint) (char type, CORE_ADDR addr, int len);
+  int (*insert_point) (char type, CORE_ADDR addr, int len);
+  int (*remove_point) (char type, CORE_ADDR addr, int len);
 
   /* Returns 1 if target was stopped due to a watchpoint hit, 0 otherwise.  */
 

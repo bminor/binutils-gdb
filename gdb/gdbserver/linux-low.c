@@ -2671,24 +2671,25 @@ linux_read_auxv (CORE_ADDR offset, unsigned char *myaddr, unsigned int len)
   return n;
 }
 
-/* These watchpoint related wrapper functions simply pass on the function call
-   if the target has registered a corresponding function.  */
+/* These breakpoint and watchpoint related wrapper functions simply
+   pass on the function call if the target has registered a
+   corresponding function.  */
 
 static int
-linux_insert_watchpoint (char type, CORE_ADDR addr, int len)
+linux_insert_point (char type, CORE_ADDR addr, int len)
 {
-  if (the_low_target.insert_watchpoint != NULL)
-    return the_low_target.insert_watchpoint (type, addr, len);
+  if (the_low_target.insert_point != NULL)
+    return the_low_target.insert_point (type, addr, len);
   else
     /* Unsupported (see target.h).  */
     return 1;
 }
 
 static int
-linux_remove_watchpoint (char type, CORE_ADDR addr, int len)
+linux_remove_point (char type, CORE_ADDR addr, int len)
 {
-  if (the_low_target.remove_watchpoint != NULL)
-    return the_low_target.remove_watchpoint (type, addr, len);
+  if (the_low_target.remove_point != NULL)
+    return the_low_target.remove_point (type, addr, len);
   else
     /* Unsupported (see target.h).  */
     return 1;
@@ -3030,8 +3031,8 @@ static struct target_ops linux_target_ops = {
   linux_look_up_symbols,
   linux_request_interrupt,
   linux_read_auxv,
-  linux_insert_watchpoint,
-  linux_remove_watchpoint,
+  linux_insert_point,
+  linux_remove_point,
   linux_stopped_by_watchpoint,
   linux_stopped_data_address,
 #if defined(__UCLIBC__) && defined(HAS_NOMMU)

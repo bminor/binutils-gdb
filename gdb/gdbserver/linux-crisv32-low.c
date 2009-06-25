@@ -137,7 +137,7 @@ cris_write_data_breakpoint (int bp, unsigned long start, unsigned long end)
 }
 
 static int
-cris_insert_watchpoint (char type, CORE_ADDR addr, int len)
+cris_insert_point (char type, CORE_ADDR addr, int len)
 {
   int bp;
   unsigned long bp_ctrl;
@@ -220,7 +220,7 @@ cris_insert_watchpoint (char type, CORE_ADDR addr, int len)
 }
 
 static int
-cris_remove_watchpoint (char type, CORE_ADDR addr, int len)
+cris_remove_point (char type, CORE_ADDR addr, int len)
 {
   int bp;
   unsigned long bp_ctrl;
@@ -375,8 +375,8 @@ struct linux_target_ops the_low_target = {
   cris_reinsert_addr,
   0,
   cris_breakpoint_at,
-  cris_insert_watchpoint,
-  cris_remove_watchpoint,
+  cris_insert_point,
+  cris_remove_point,
   cris_stopped_by_watchpoint,
   cris_stopped_data_address,
 };
