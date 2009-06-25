@@ -203,11 +203,11 @@ load_plugin (void)
   while ((ent = readdir (d)))
     {
       char *full_name;
-      if (ent->d_type != DT_REG && ent->d_type != DT_LNK)
-	continue;
+      struct stat s;
 
       full_name = concat (p, "/", ent->d_name, NULL);
-      found = try_load_plugin (full_name);
+      if (stat(full_name, &s) == 0 && S_ISREG (s.st_mode))
+	found = try_load_plugin (full_name);
       free (full_name);
       if (found)
 	break;

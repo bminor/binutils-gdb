@@ -1,3 +1,8 @@
+2009-06-25  Rafael Avila de Espindola  <espindola@google.com>
+
+	* plugin.c (load_plugin): Use stat and S_ISREG instead of the d_type
+	field of struct dirent.
+
 2009-06-23  Tristan Gingold  <gingold@adacore.com>
 
 	* vms.c (vms_get_synthetic_symtab): Remove duplicate definition
