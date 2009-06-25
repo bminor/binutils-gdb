@@ -1,3 +1,10 @@
+2009-06-25  Kai Tietz  <kai.tietz@onevision.com>
+
+	* coffcode.h (sec_to_styp_flags): Set discardable for .reloc and
+	give .debug and .reloc data characteristics.
+	(DOT_RELOC): New define for .reloc section string.
+	(coff_write_object_contents): Use DOT_RELOC instead of string.
+
 2009-06-25  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o-target.c (bfd_mach_o_get_dynamic_symtab_upper_bound)

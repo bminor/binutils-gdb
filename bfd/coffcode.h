@@ -371,6 +371,7 @@ CODE_FRAGMENT
 
 #define DOT_DEBUG	".debug"
 #define GNU_LINKONCE_WI ".gnu.linkonce.wi."
+#define DOT_RELOC	".reloc"
 
 #if defined (COFF_LONG_SECTION_NAMES)
 /* Needed to expand the inputs to BLANKOR1TOODD.  */
@@ -645,7 +646,12 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
   /* FIXME: There is no gas syntax to specify the debug section flag.  */
   if (CONST_STRNEQ (sec_name, DOT_DEBUG)
       || CONST_STRNEQ (sec_name, GNU_LINKONCE_WI))
-    sec_flags = SEC_DEBUGGING | SEC_READONLY;
+    sec_flags = SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_DEBUGGING | SEC_READONLY;
+  else if (CONST_STRNEQ (sec_name, DOT_RELOC))
+    {
+      sec_flags = SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
+      styp_flags |= IMAGE_SCN_MEM_DISCARDABLE;
+    }
 
   /* skip LOAD */
   /* READONLY later */
@@ -3625,7 +3631,7 @@ coff_write_object_contents (bfd * abfd)
       bfd_boolean is_reloc_section = FALSE;
 
 #ifdef COFF_IMAGE_WITH_PE
-      if (strcmp (current->name, ".reloc") == 0)
+      if (strcmp (current->name, DOT_RELOC) == 0)
 	{
 	  is_reloc_section = TRUE;
 	  hasrelocs = TRUE;
