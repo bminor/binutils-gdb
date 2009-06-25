@@ -1,3 +1,8 @@
+2009-06-26  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.base/exe-lock.exp (binfile): Add $EXEEXT suffix to fix
+	windows problem for 'file delete $binfile'.
+
 2009-06-23  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/namespace-using.exp: New test.

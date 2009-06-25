@@ -23,7 +23,10 @@ if $tracelevel {
 
 set testfile "arrayidx"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+# $EXEEXT suffix is needed here, because otherwise, Windows targets
+# don't find the $binfile for 'file delete $binfile'.
+set binfile ${objdir}/${subdir}/${testfile}$EXEEXT
+
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     untested "Couldn't compile ${srcfile}"
     return -1
