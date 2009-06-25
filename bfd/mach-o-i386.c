@@ -102,14 +102,14 @@ bfd_mach_o_i386_swap_reloc_in (arelent *res, bfd_mach_o_reloc_info *reloc)
         case BFD_MACH_O_GENERIC_RELOC_PAIR:
           if (reloc->r_length != 2)
             return FALSE;
-          res->howto = &i386_howto_table[3];
+          res->howto = &i386_howto_table[6];
           res->address = res[-1].address;
           return TRUE;
         case BFD_MACH_O_GENERIC_RELOC_SECTDIFF:
         case BFD_MACH_O_GENERIC_RELOC_LOCAL_SECTDIFF:
           if (reloc->r_length != 2)
             return FALSE;
-          res->howto = &i386_howto_table[2];
+          res->howto = &i386_howto_table[5];
           return TRUE;
         default:
           return FALSE;
@@ -217,8 +217,71 @@ bfd_mach_o_i386_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static bfd_boolean
+bfd_mach_o_i386_print_thread (bfd *abfd, bfd_mach_o_thread_flavour *thread,
+                              void *vfile, char *buf)
+{
+  FILE *file = (FILE *)vfile;
+
+  switch (thread->flavour)
+    {
+    case BFD_MACH_O_x86_THREAD_STATE:
+      if (thread->size < (8 + 16 * 4))
+        return FALSE;
+      fprintf (file, "   x86_THREAD_STATE:\n");
+      fprintf (file, "    flavor: 0x%08lx  count: 0x%08lx\n",
+               (unsigned long)bfd_get_32 (abfd, buf + 0),
+               (unsigned long)bfd_get_32 (abfd, buf + 4));
+      fprintf (file, "     eax: %08lx  ebx: %08lx  ecx: %08lx  edx: %08lx\n",
+               (unsigned long)bfd_get_32 (abfd, buf + 8),
+               (unsigned long)bfd_get_32 (abfd, buf + 12),
+               (unsigned long)bfd_get_32 (abfd, buf + 16),
+               (unsigned long)bfd_get_32 (abfd, buf + 20));
+      fprintf (file, "     edi: %08lx  esi: %08lx  ebp: %08lx  esp: %08lx\n",
+               (unsigned long)bfd_get_32 (abfd, buf + 24),
+               (unsigned long)bfd_get_32 (abfd, buf + 28),
+               (unsigned long)bfd_get_32 (abfd, buf + 32),
+               (unsigned long)bfd_get_32 (abfd, buf + 36));
+      fprintf (file, "      ss: %08lx  flg: %08lx  eip: %08lx   cs: %08lx\n",
+               (unsigned long)bfd_get_32 (abfd, buf + 40),
+               (unsigned long)bfd_get_32 (abfd, buf + 44),
+               (unsigned long)bfd_get_32 (abfd, buf + 48),
+               (unsigned long)bfd_get_32 (abfd, buf + 52));
+      fprintf (file, "      ds: %08lx   es: %08lx   fs: %08lx   gs: %08lx\n",
+               (unsigned long)bfd_get_32 (abfd, buf + 56),
+               (unsigned long)bfd_get_32 (abfd, buf + 60),
+               (unsigned long)bfd_get_32 (abfd, buf + 64),
+               (unsigned long)bfd_get_32 (abfd, buf + 68));
+      return TRUE;
+    case BFD_MACH_O_x86_FLOAT_STATE:
+      if (thread->size < 8)
+        return FALSE;
+      fprintf (file, "   x86_FLOAT_STATE:\n");
+      fprintf (file, "    flavor: 0x%08lx  count: 0x%08lx\n",
+               (unsigned long)bfd_get_32 (abfd, buf + 0),
+               (unsigned long)bfd_get_32 (abfd, buf + 4));
+      return TRUE;
+    case BFD_MACH_O_x86_EXCEPTION_STATE:
+      if (thread->size < 8 + 3 * 4)
+        return FALSE;
+      fprintf (file, "   x86_EXCEPTION_STATE:\n");
+      fprintf (file, "    flavor: 0x%08lx  count: 0x%08lx\n",
+               (unsigned long)bfd_get_32 (abfd, buf + 0),
+               (unsigned long)bfd_get_32 (abfd, buf + 4));
+      fprintf (file, "    trapno: %08lx  err: %08lx  faultaddr: %08lx\n",
+               (unsigned long)bfd_get_32 (abfd, buf + 8),
+               (unsigned long)bfd_get_32 (abfd, buf + 12),
+               (unsigned long)bfd_get_32 (abfd, buf + 16));
+      return TRUE;
+    default:
+      break;
+    }
+  return FALSE;
+}
+
 #define bfd_mach_o_swap_reloc_in bfd_mach_o_i386_swap_reloc_in
 #define bfd_mach_o_swap_reloc_out bfd_mach_o_i386_swap_reloc_out
+#define bfd_mach_o_print_thread bfd_mach_o_i386_print_thread
 
 #define bfd_mach_o_bfd_reloc_type_lookup bfd_mach_o_i386_bfd_reloc_type_lookup 
 #define bfd_mach_o_bfd_reloc_name_lookup bfd_mach_o_i386_bfd_reloc_name_lookup

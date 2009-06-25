@@ -68,6 +68,10 @@
 #define bfd_mach_o_bfd_copy_private_header_data       _bfd_generic_bfd_copy_private_header_data
 #define bfd_mach_o_core_file_matches_executable_p     generic_core_file_matches_executable_p
 
+#define bfd_mach_o_get_dynamic_symtab_upper_bound     bfd_mach_o_get_symtab_upper_bound
+#define bfd_mach_o_canonicalize_dynamic_symtab	      bfd_mach_o_canonicalize_symtab
+#define bfd_mach_o_get_synthetic_symtab		      _bfd_nodynamic_get_synthetic_symtab
+
 #define TARGET_NAME_BACKEND XCONCAT2(TARGET_NAME,_backend)
 
 #endif /* MACH_O_TARGET_COMMON_DEFINED */
@@ -95,7 +99,8 @@
 static const bfd_mach_o_backend_data TARGET_NAME_BACKEND =
 {
   bfd_mach_o_swap_reloc_in,
-  bfd_mach_o_swap_reloc_out
+  bfd_mach_o_swap_reloc_out,
+  bfd_mach_o_print_thread
 };
 
 const bfd_target TARGET_NAME =
@@ -172,7 +177,7 @@ const bfd_target TARGET_NAME =
   BFD_JUMP_TABLE_RELOCS (bfd_mach_o),
   BFD_JUMP_TABLE_WRITE (bfd_mach_o),
   BFD_JUMP_TABLE_LINK (bfd_mach_o),
-  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+  BFD_JUMP_TABLE_DYNAMIC (bfd_mach_o),
 
   /* Alternative endian target.  */
   NULL,

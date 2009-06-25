@@ -54,8 +54,8 @@
 
 typedef enum bfd_mach_o_mach_header_magic
 {
-  BFD_MACH_O_MH_MAGIC = 0xfeedface,
-  BFD_MACH_O_MH_CIGAM = 0xcefaedfe,
+  BFD_MACH_O_MH_MAGIC    = 0xfeedface,
+  BFD_MACH_O_MH_CIGAM    = 0xcefaedfe,
   BFD_MACH_O_MH_MAGIC_64 = 0xfeedfacf,
   BFD_MACH_O_MH_CIGAM_64 = 0xcffaedfe
 }
@@ -63,30 +63,32 @@ bfd_mach_o_mach_header_magic;
 
 typedef enum bfd_mach_o_ppc_thread_flavour
 {
-  BFD_MACH_O_PPC_THREAD_STATE = 1,
-  BFD_MACH_O_PPC_FLOAT_STATE = 2,
-  BFD_MACH_O_PPC_EXCEPTION_STATE = 3,
-  BFD_MACH_O_PPC_VECTOR_STATE = 4,
-  BFD_MACH_O_PPC_THREAD_STATE_64 = 5
+  BFD_MACH_O_PPC_THREAD_STATE      = 1,
+  BFD_MACH_O_PPC_FLOAT_STATE       = 2,
+  BFD_MACH_O_PPC_EXCEPTION_STATE   = 3,
+  BFD_MACH_O_PPC_VECTOR_STATE      = 4,
+  BFD_MACH_O_PPC_THREAD_STATE64    = 5,
+  BFD_MACH_O_PPC_EXCEPTION_STATE64 = 6,
+  BFD_MACH_O_PPC_THREAD_STATE_NONE = 7
 }
 bfd_mach_o_ppc_thread_flavour;
 
 /* Defined in <mach/i386/thread_status.h> */
 typedef enum bfd_mach_o_i386_thread_flavour
 {
-  BFD_MACH_O_x86_THREAD_STATE32 = 1,
-  BFD_MACH_O_x86_FLOAT_STATE32 = 2,
+  BFD_MACH_O_x86_THREAD_STATE32    = 1,
+  BFD_MACH_O_x86_FLOAT_STATE32     = 2,
   BFD_MACH_O_x86_EXCEPTION_STATE32 = 3,
-  BFD_MACH_O_x86_THREAD_STATE64 = 4,
-  BFD_MACH_O_x86_FLOAT_STATE64 = 5,
+  BFD_MACH_O_x86_THREAD_STATE64    = 4,
+  BFD_MACH_O_x86_FLOAT_STATE64     = 5,
   BFD_MACH_O_x86_EXCEPTION_STATE64 = 6,
-  BFD_MACH_O_x86_THREAD_STATE = 7,
-  BFD_MACH_O_x86_FLOAT_STATE = 8,
-  BFD_MACH_O_x86_EXCEPTION_STATE = 9,
-  BFD_MACH_O_x86_DEBUG_STATE32 = 10,
-  BFD_MACH_O_x86_DEBUG_STATE64 = 11,
-  BFD_MACH_O_x86_DEBUG_STATE = 12,
-  BFD_MACH_O_THREAD_STATE_NONE = 13
+  BFD_MACH_O_x86_THREAD_STATE      = 7,
+  BFD_MACH_O_x86_FLOAT_STATE       = 8,
+  BFD_MACH_O_x86_EXCEPTION_STATE   = 9,
+  BFD_MACH_O_x86_DEBUG_STATE32     = 10,
+  BFD_MACH_O_x86_DEBUG_STATE64     = 11,
+  BFD_MACH_O_x86_DEBUG_STATE       = 12,
+  BFD_MACH_O_x86_THREAD_STATE_NONE = 13
 }
 bfd_mach_o_i386_thread_flavour;
 
@@ -373,7 +375,6 @@ typedef struct bfd_mach_o_segment_command
   unsigned long nsects;
   unsigned long flags;
   bfd_mach_o_section *sections;
-  asection *segment;
 }
 bfd_mach_o_segment_command;
 #define BFD_MACH_O_LC_SEGMENT_SIZE 56
@@ -689,10 +690,12 @@ bfd_mach_o_dysymtab_command;
 #define BFD_MACH_O_INDIRECT_SYMBOL_ABS   0x40000000
 #define BFD_MACH_O_INDIRECT_SYMBOL_SIZE  4
 
+/* For LC_THREAD or LC_UNIXTHREAD.  */
+
 typedef struct bfd_mach_o_thread_flavour
 {
   unsigned long flavour;
-  bfd_vma offset;
+  unsigned long offset;
   unsigned long size;
 }
 bfd_mach_o_thread_flavour;
@@ -711,7 +714,7 @@ typedef struct bfd_mach_o_dylinker_command
 {
   unsigned long name_offset;         /* Offset to library's path name.  */
   unsigned long name_len;            /* Offset to library's path name.  */
-  asection *section;
+  char *name_str;
 }
 bfd_mach_o_dylinker_command;
 
@@ -725,7 +728,7 @@ typedef struct bfd_mach_o_dylib_command
   unsigned long timestamp;	       /* Library's build time stamp.  */
   unsigned long current_version;       /* Library's current version number.  */
   unsigned long compatibility_version; /* Library's compatibility vers number.  */
-  asection *section;
+  char *name_str;
 }
 bfd_mach_o_dylib_command;
 
@@ -736,7 +739,6 @@ typedef struct bfd_mach_o_prebound_dylib_command
   unsigned long name;                /* Library's path name.  */
   unsigned long nmodules;            /* Number of modules in library.  */
   unsigned long linked_modules;      /* Bit vector of linked modules.  */
-  asection *section;
 }
 bfd_mach_o_prebound_dylib_command;
 
@@ -808,6 +810,7 @@ typedef struct mach_o_data_struct
      a direct access to it.  Also it is not clearly stated, only one symtab
      is expected.  */
   bfd_mach_o_symtab_command *symtab;
+  bfd_mach_o_dysymtab_command *dysymtab;
 }
 bfd_mach_o_data_struct;
 
@@ -816,6 +819,8 @@ typedef struct bfd_mach_o_backend_data
 {
   bfd_boolean (*_bfd_mach_o_swap_reloc_in)(arelent *, bfd_mach_o_reloc_info *);
   bfd_boolean (*_bfd_mach_o_swap_reloc_out)(arelent *, bfd_mach_o_reloc_info *);
+  bfd_boolean (*_bfd_mach_o_print_thread)(bfd *, bfd_mach_o_thread_flavour *,
+                                          void *, char *);
 }
 bfd_mach_o_backend_data;
 
@@ -842,10 +847,10 @@ bfd_boolean bfd_mach_o_bfd_copy_private_section_data (bfd *, asection *,
 bfd_boolean bfd_mach_o_bfd_copy_private_bfd_data (bfd *, bfd *);
 long bfd_mach_o_get_symtab_upper_bound (bfd *);
 long bfd_mach_o_canonicalize_symtab (bfd *, asymbol **);
-long bfd_mach_o_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED,
-                                       asection *asect);
-long bfd_mach_o_canonicalize_reloc (bfd *abfd, asection *asect,
-                                    arelent **rels, asymbol **syms);
+long bfd_mach_o_get_reloc_upper_bound (bfd *, asection *);
+long bfd_mach_o_canonicalize_reloc (bfd *, asection *, arelent **, asymbol **);
+long bfd_mach_o_get_dynamic_reloc_upper_bound (bfd *);
+long bfd_mach_o_canonicalize_dynamic_reloc (bfd *, arelent **, asymbol **);
 asymbol *bfd_mach_o_make_empty_symbol (bfd *);
 void bfd_mach_o_get_symbol_info (bfd *, asymbol *, symbol_info *);
 void bfd_mach_o_print_symbol (bfd *, PTR, asymbol *, bfd_print_symbol_type);
@@ -859,7 +864,7 @@ bfd_boolean bfd_mach_o_core_file_matches_executable_p (bfd *, bfd *);
 bfd *bfd_mach_o_fat_extract (bfd *, bfd_format , const bfd_arch_info_type *);
 const bfd_target *bfd_mach_o_header_p (bfd *, bfd_mach_o_filetype,
                                        bfd_mach_o_cpu_type);
-bfd_boolean bfd_mach_o_build_commands (bfd *abfd);
+bfd_boolean bfd_mach_o_build_commands (bfd *);
 bfd_boolean bfd_mach_o_set_section_contents (bfd *, asection *, const void *,
                                              file_ptr, bfd_size_type);
 unsigned int bfd_mach_o_version (bfd *);
