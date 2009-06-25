@@ -1,3 +1,8 @@
+2009-06-25  Christopher Faylor  <me+cygwin@cgf.cx>
+
+	* binutils-all/objcopy.exp: Always treat objcopy_test as XFAIL on
+	cygwin.
+
 2009-04-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/localize-hidden-1.s: Use "==" instead of ".set".
