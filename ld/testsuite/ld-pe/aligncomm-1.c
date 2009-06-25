@@ -1,5 +1,6 @@
 
 typedef float __m128 __attribute__ ((__vector_size__ (16), __may_alias__));
+typedef __SIZE_TYPE__ size_t;
 
 long s1 = 0;
 __m128 r;
@@ -7,7 +8,7 @@ __m128 * volatile raddr = &r;
 
 int main (int argc, const char **argv)
 {
-  return 15 & (int)raddr;
+  return 15 & (int)(size_t)raddr;
 }
 
 void __main (void)

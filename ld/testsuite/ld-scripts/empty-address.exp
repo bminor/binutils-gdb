@@ -20,6 +20,10 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
+if [istarget "x86_64-*-mingw*"] then {
+  set LDFLAGS "$LDFLAGS --image-base 0"
+}
+
 run_dump_test empty-address-1
 run_dump_test empty-address-2a
 run_dump_test empty-address-2b

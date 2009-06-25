@@ -1,3 +1,14 @@
+2009-06-25  Kai Tietz  <kai.tietz@onevision.com>
+
+	* ld-pe/aligncomm-1.c (size_t): Add typedef.
+	(main): Use it for casting pointer to scalar.
+	* ld-pe/aligncomm-2.c: Likewise.
+	* ld-pe/aligncomm-3.c: Likewise.
+	* ld-pe/aligncomm-4.c: Likewise.
+	* ld-scripts/empty-address.exp: Make sure that for x86_64-*-mingw*
+	target imagebase is set to zero.
+	* ld-scripts/weak.exp: Don't fail for x86_64-*-mingw* target.
+
 2009-06-22  Christophe Lyon  <christophe.lyon@st.com>
 
 	ld/testsuite:
