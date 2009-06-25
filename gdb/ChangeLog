@@ -1,5 +1,14 @@
 2009-06-25  Karen Osmond  <karen.osmond@gmail.com>
 
+	* linespec.c (find_method): Add new not_found_ptr parameter to
+	bring in line with symtab_from_filename, decode_variable.
+	(decode_compound): Likewise.  Also propagate not_found_ptr to 
+	find_method.
+	(decode_line_1): Propagate not_found_ptr to decode_compound.
+	(cplusplus_error): Now throws NOT_FOUND_ERROR.
+
+2009-06-25  Karen Osmond  <karen.osmond@gmail.com>
+
 	* MAINTAINERS (Write After Approval): Add self.
 
 2009-06-23  Ulrich Weigand  <uweigand@de.ibm.com>

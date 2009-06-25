@@ -65,7 +65,8 @@ static struct symtabs_and_lines decode_compound (char **argptr,
 						 int funfirstline,
 						 char ***canonical,
 						 char *saved_arg,
-						 char *p);
+						 char *p,
+						 int *not_found_ptr);
 
 static struct symbol *lookup_prefix_sym (char **argptr, char *p);
 
@@ -74,7 +75,8 @@ static struct symtabs_and_lines find_method (int funfirstline,
 					     char *saved_arg,
 					     char *copy,
 					     struct type *t,
-					     struct symbol *sym_class);
+					     struct symbol *sym_class,
+					     int *not_found_ptr);
 
 static NORETURN void cplusplus_error (const char *name,
 				      const char *fmt, ...)
@@ -148,6 +150,8 @@ static NORETURN void
 cplusplus_error (const char *name, const char *fmt, ...)
 {
   struct ui_file *tmp_stream;
+  long len;
+  char *message;
   tmp_stream = mem_fileopen ();
   make_cleanup_ui_file_delete (tmp_stream);
 
@@ -164,7 +168,10 @@ cplusplus_error (const char *name, const char *fmt, ...)
 		      ("Hint: try '%s<TAB> or '%s<ESC-?>\n"
 		       "(Note leading single quote.)"),
 		      name, name);
-  error_stream (tmp_stream);
+
+  message = ui_file_xstrdup (tmp_stream, &len);                                   
+  make_cleanup (xfree, message);                                              
+  throw_error (NOT_FOUND_ERROR, "%s", message);  
 }
 
 /* Return the number of methods described for TYPE, including the
@@ -756,7 +763,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	
       if (p[0] == '.' || p[1] == ':')
 	return decode_compound (argptr, funfirstline, canonical,
-				saved_arg, p);
+				saved_arg, p, not_found_ptr);
 
       /* No, the first part is a filename; set file_symtab to be that file's
 	 symtab.  Also, move argptr past the filename.  */
@@ -1190,7 +1197,7 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
 
 static struct symtabs_and_lines
 decode_compound (char **argptr, int funfirstline, char ***canonical,
-		 char *saved_arg, char *p)
+		 char *saved_arg, char *p, int *not_found_ptr)
 {
   struct symtabs_and_lines values;
   char *p2;
@@ -1357,7 +1364,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	 we'll lookup the whole string in the symbol tables.  */
 
       return find_method (funfirstline, canonical, saved_arg,
-			  copy, t, sym_class);
+			  copy, t, sym_class, not_found_ptr);
 
     } /* End if symbol found */
 
@@ -1380,6 +1387,8 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 
   /* Couldn't find any interpretation as classes/namespaces, so give
      up.  The quotes are important if copy is empty.  */
+  if (not_found_ptr)
+    *not_found_ptr = 1;
   cplusplus_error (saved_arg,
 		   "Can't find member of namespace, class, struct, or union named \"%s\"\n",
 		   copy);
@@ -1425,7 +1434,7 @@ lookup_prefix_sym (char **argptr, char *p)
 
 static struct symtabs_and_lines
 find_method (int funfirstline, char ***canonical, char *saved_arg,
-	     char *copy, struct type *t, struct symbol *sym_class)
+	     char *copy, struct type *t, struct symbol *sym_class, int *not_found_ptr)
 {
   struct symtabs_and_lines values;
   struct symbol *sym = NULL;
@@ -1476,6 +1485,8 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
 	}
       else
 	tmp = copy;
+      if (not_found_ptr)
+        *not_found_ptr = 1;
       if (tmp[0] == '~')
 	cplusplus_error (saved_arg,
 			 "the class `%s' does not have destructor defined\n",
