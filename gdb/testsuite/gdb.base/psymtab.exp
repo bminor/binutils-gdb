@@ -61,6 +61,11 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
+# Disable the prompt for whether to set pending breakpoints.
+# We don't want a breakpoint, we just want to verify the symbol
+# isn't found.
+gdb_test "set breakpoint pending off" "" "psymtab pending setup"
+
 # This test is looking for a bug that manifested itself when GDB was
 # looking for a partial symbol such that there wasn't such a partial
 # symbol in the psymtab, but such that the last psym in the psymtab

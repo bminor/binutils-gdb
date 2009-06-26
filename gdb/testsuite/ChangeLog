@@ -1,3 +1,7 @@
+2009-06-26  Doug Evans  <dje@google.com>
+
+	* gdb.base/psymtab.exp: Turn off pending breakpoints.
+
 2009-06-26  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.base/exe-lock.exp (binfile): Add $EXEEXT suffix to fix
