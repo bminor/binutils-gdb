@@ -214,6 +214,11 @@
 	* c-lang.c (classify_type): Iterate over typedefs.
 	* c-valprint.c (textual_element_type): Iterate over typedefs.
 
+2009-06-22  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (darwin_xfer_partial): Use host_address_to_string
+	instead of "%p".
+
 2009-06-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/9988:
