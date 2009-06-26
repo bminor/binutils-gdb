@@ -64,26 +64,26 @@
 
 2009-06-23  Sami Wagiaalla  <swagiaal@redhat.com>
 
-       * dwarf2read.c (process_die): Handle import statements
-       (DW_TAG_imported_declaration, case DW_TAG_imported_module)
-       (read_import_statement): New.
-       (read_func_scope): Update using_directives to point to current context
-       (read_lexical_block_scope): Ditto.
-       * cp-support.h: Added prototype for cp_add_using.
-       * cp-namespace.c: Removed local context_stack.
-       (cp_initialize_namespace): Deleted.
-       (cp_finalize_namespace): Deleted.
-       (cp_add_using_directive): Use using_directives instead of using_list.
-       (cp_add_using): No longer static.
-       * buildsym.h: Created global using_direct variable.
-       Created using_direct variable in context_stack.
-       * buildsym.c (finish_block): Set using directives for the block under
-       construction.
-       (start_symtab): Removed call to cp_initialize_namespace().
-       (end_symtab): Removed call to cp_finalize_namespace().
-       (push_context): Save and reset using_directives.
-       * block.c (block_using): Return using directives for given
-       block instead of static block.
+	* dwarf2read.c (process_die): Handle import statements
+	(DW_TAG_imported_declaration, case DW_TAG_imported_module)
+	(read_import_statement): New.
+	(read_func_scope): Update using_directives to point to current context
+	(read_lexical_block_scope): Ditto.
+	* cp-support.h: Added prototype for cp_add_using.
+	* cp-namespace.c: Removed local context_stack.
+	(cp_initialize_namespace): Deleted.
+	(cp_finalize_namespace): Deleted.
+	(cp_add_using_directive): Use using_directives instead of using_list.
+	(cp_add_using): No longer static.
+	* buildsym.h: Created global using_direct variable.
+	Created using_direct variable in context_stack.
+	* buildsym.c (finish_block): Set using directives for the block under
+	construction.
+	(start_symtab): Removed call to cp_initialize_namespace().
+	(end_symtab): Removed call to cp_finalize_namespace().
+	(push_context): Save and reset using_directives.
+	* block.c (block_using): Return using directives for given
+	block instead of static block.
 
 2009-06-23  Ulrich Weigand  <uweigand@de.ibm.com>
 
