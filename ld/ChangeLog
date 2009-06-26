@@ -1,3 +1,8 @@
+2009-06-26  Kai Tietz  <kai.tietz@onevision.com>
+
+	* scripttempl/pe.sc (.debug_pubtypes): Added section rule.
+	* scripttempl/pep.sc: Likewise.
+
 2009-06-25  Tristan Gingold  <gingold@adacore.com>
 
 	* ldlang.c (print_input_section): Add is_discarded parameter.  Adjust

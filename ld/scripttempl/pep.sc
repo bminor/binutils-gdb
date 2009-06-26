@@ -214,6 +214,11 @@ SECTIONS
     *(.debug_pubnames)
   }
 
+  .debug_pubtypes ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)}
+  {
+    *(.debug_pubtypes)
+  }
+
   /* DWARF 2.  */
   .debug_info ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
   {
