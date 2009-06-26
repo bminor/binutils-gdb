@@ -1,5 +1,10 @@
 2009-06-25  Christopher Faylor  <me+cygwin@cgf.cx>
 
+	* binutils-all/objcopy.exp: Move XFAIL from objcopy_test to
+	copy_executable.
+
+2009-06-25  Christopher Faylor  <me+cygwin@cgf.cx>
+
 	* binutils-all/objcopy.exp: Always treat objcopy_test as XFAIL on
 	cygwin.
 

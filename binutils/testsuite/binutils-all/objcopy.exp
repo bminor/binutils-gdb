@@ -89,7 +89,6 @@ proc objcopy_test {testname srcfile} {
 	setup_xfail "or32-*-rtems*" "or32-*-coff"
 	setup_xfail "sh-*-coff*" "sh-*-rtems*" 
 	setup_xfail "tic4x-*-*" "tic80-*-*" "w65-*"
-	setup_xfail "*-*-cygwin*"
 
 	clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
 	clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"
@@ -585,6 +584,7 @@ proc copy_executable { prog flags test1 test2 } {
 	setup_xfail "thumb*-*-coff"
 	setup_xfail "thumb*-*-pe"
 	setup_xfail "x86_64-*-mingw*"
+	setup_xfail "*-*-cygwin*"
     
 	fail $test1
     }
