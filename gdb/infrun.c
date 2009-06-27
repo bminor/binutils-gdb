@@ -3639,7 +3639,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
   if (stop_pc >= ecs->event_thread->step_range_start
       && stop_pc < ecs->event_thread->step_range_end
       && (execution_direction != EXEC_REVERSE
-	  || frame_id_eq (get_frame_id (get_current_frame ()),
+	  || frame_id_eq (get_frame_id (frame),
 			  ecs->event_thread->step_frame_id)))
     {
       if (debug_infrun)
@@ -3667,10 +3667,19 @@ infrun: not switching back to stepped thread, it has vanished\n");
   /* We stepped out of the stepping range.  */
 
   /* If we are stepping at the source level and entered the runtime
-     loader dynamic symbol resolution code, we keep on single stepping
-     until we exit the run time loader code and reach the callee's
-     address.  */
-  if (ecs->event_thread->step_over_calls == STEP_OVER_UNDEBUGGABLE
+     loader dynamic symbol resolution code...
+
+     EXEC_FORWARD: we keep on single stepping until we exit the run
+     time loader code and reach the callee's address.
+
+     EXEC_REVERSE: we've already executed the callee (backward), and
+     the runtime loader code is handled just like any other
+     undebuggable function call.  Now we need only keep stepping
+     backward through the trampoline code, and that's handled further
+     down, so there is nothing for us to do here.  */
+
+  if (execution_direction != EXEC_REVERSE
+      && ecs->event_thread->step_over_calls == STEP_OVER_UNDEBUGGABLE
       && in_solib_dynsym_resolve_code (stop_pc))
     {
       CORE_ADDR pc_after_resolver =
@@ -3740,9 +3749,26 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	  /* Also, maybe we just did a "nexti" inside a prolog, so we
 	     thought it was a subroutine call but it was not.  Stop as
 	     well.  FENN */
+	  /* And this works the same backward as frontward.  MVS */
 	  ecs->event_thread->stop_step = 1;
 	  print_stop_reason (END_STEPPING_RANGE, 0);
 	  stop_stepping (ecs);
+	  return;
+	}
+
+      /* Reverse stepping through solib trampolines.  */
+
+      if (execution_direction == EXEC_REVERSE
+	  && (gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc)
+	      || (ecs->stop_func_start == 0
+		  && in_solib_dynsym_resolve_code (stop_pc))))
+	{
+	  /* Any solib trampoline code can be handled in reverse
+	     by simply continuing to single-step.  We have already
+	     executed the solib function (backwards), and a few 
+	     steps will take us back through the trampoline to the
+	     caller.  */
+	  keep_going (ecs);
 	  return;
 	}
 
@@ -3763,33 +3789,10 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	    {
 	      struct symtab_and_line sr_sal;
 
-	      if (ecs->stop_func_start == 0 
-		  && in_solib_dynsym_resolve_code (stop_pc))
-		{
-		  /* Stepped into runtime loader dynamic symbol
-		     resolution code.  Since we're in reverse, 
-		     we have already backed up through the runtime
-		     loader and the dynamic function.  This is just
-		     the trampoline (jump table).
-
-		     Just keep stepping, we'll soon be home.
-		  */
-		  keep_going (ecs);
-		  return;
-		}
-	      if (gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc))
-		{
-		  /* We are in a function call trampoline.
-		     Keep stepping backward to get to the caller.  */
-		  ecs->event_thread->stepping_over_breakpoint = 1;
-		}
-	      else
-		{
-		  /* Normal function call return (static or dynamic).  */
-		  init_sal (&sr_sal);
-		  sr_sal.pc = ecs->stop_func_start;
-		  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
-		}
+	      /* Normal function call return (static or dynamic).  */
+	      init_sal (&sr_sal);
+	      sr_sal.pc = ecs->stop_func_start;
+	      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
 	    }
 	  else
 	    insert_step_resume_breakpoint_at_caller (frame);

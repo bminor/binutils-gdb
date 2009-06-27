@@ -1,3 +1,8 @@
+2009-06-27  Michael Snyder  <msnyder@vmware.com>
+
+	* infrun.c (handle_inferior_event): Improve handling of
+	reverse-stepping into and over shared library functions.
+
 2009-06-25  Karen Osmond  <karen.osmond@gmail.com>
 
 	* linespec.c (find_method): Add new not_found_ptr parameter to
