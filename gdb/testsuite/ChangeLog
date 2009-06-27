@@ -1,3 +1,8 @@
+2009-06-27  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* gdb.cp/exception.exp: Don't require $hex before inner frame in
+	backtrace.
+
 2009-06-27  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.reverse: New directory.
