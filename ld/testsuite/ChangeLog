@@ -1,3 +1,8 @@
+2009-06-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10337
+	* ld-ifunc/binutils.exp: New.
+
 2009-06-25  Kai Tietz  <kai.tietz@onevision.com>
 
 	* ld-pe/aligncomm-1.c (size_t): Add typedef.

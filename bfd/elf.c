@@ -1728,8 +1728,11 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	   reject them, but, unfortunately, some people need to use
 	   them.  We scan through the section headers; if we find only
 	   one suitable symbol table, we clobber the sh_link to point
-	   to it.  I hope this doesn't break anything.  */
-	if (elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_SYMTAB
+	   to it.  I hope this doesn't break anything.
+
+	   Don't do it on executable nor shared library.  */
+	if ((abfd->flags & (DYNAMIC | EXEC_P)) == 0
+	    && elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_SYMTAB
 	    && elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_DYNSYM)
 	  {
 	    unsigned int scan;
@@ -1764,8 +1767,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	   represent such a section, so at least for now, we don't
 	   try.  We just present it as a normal section.  We also
 	   can't use it as a reloc section if it points to the null
-	   section, an invalid section, or another reloc section.  */
+	   section, an invalid section, another reloc section, or its
+	   sh_link points to the null section.  */
 	if (hdr->sh_link != elf_onesymtab (abfd)
+	    || hdr->sh_link == SHN_UNDEF
 	    || hdr->sh_info == SHN_UNDEF
 	    || hdr->sh_info >= num_sec
 	    || elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_REL

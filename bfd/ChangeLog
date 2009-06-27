@@ -1,3 +1,11 @@
+2009-06-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10337
+	* elf.c (bfd_section_from_shdr): Don't change sh_link for
+	SHT_REL/SHT_RELA sections on executable nor shared library.
+	Treat SHT_REL/SHT_RELA sections with sh_link set to SHN_UNDEF
+	as a normal section.
+
 2009-06-25  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_relax_section): Handle non-section
