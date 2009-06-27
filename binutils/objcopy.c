@@ -2159,9 +2159,13 @@ copy_file (const char *input_filename, const char *output_filename,
   bfd *ibfd;
   char **obj_matching;
   char **core_matching;
+  off_t size = get_file_size (input_filename);
 
-  if (get_file_size (input_filename) < 1)
+  if (size < 1)
     {
+      if (size == 0)
+	non_fatal (_("error: the input file '%s' is empty"),
+		   input_filename);
       status = 1;
       return;
     }

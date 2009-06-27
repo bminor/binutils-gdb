@@ -1,3 +1,10 @@
+2009-06-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/10321
+	* bucomm.c (get_file_size): Return -1 on error.
+
+	* objcopy.c (copy_file): Report empty file.
+
 2009-06-23  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (display_debug_lines_raw): Include the name of the

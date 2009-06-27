@@ -571,7 +571,7 @@ get_file_size (const char * file_name)
   else
     return statbuf.st_size;
 
-  return 0;
+  return (off_t) -1;
 }
 
 /* Return the filename in a static buffer.  */
