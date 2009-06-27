@@ -1,3 +1,29 @@
+2009-06-27  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.reverse: New directory.
+	* gdb.reverse/break-reverse.c: New test.
+	* gdb.reverse/break-reverse.exp: New test.
+	* gdb.reverse/consecutive-reverse.c: New test.
+	* gdb.reverse/consecutive-reverse.exp: New test.
+	* gdb.reverse/finish-reverse.c: New test.
+	* gdb.reverse/finish-reverse.exp: New test.
+	* gdb.reverse/machinestate.c: New test.
+	* gdb.reverse/ms1.c: New test.
+	* gdb.reverse/machinestate.exp: New test.
+	* gdb.reverse/Makefile.in: New file.
+	* gdb.reverse/shr2.c: New test.
+	* gdb.reverse/solib-reverse.c: New test.
+	* gdb.reverse/solib-reverse.exp: New test.
+	* gdb.reverse/step-reverse.c: New test.
+	* gdb.reverse/step-reverse.exp: New test.
+	* gdb.reverse/until-reverse.c: New test.
+	* gdb.reverse/ur1.c: New test.
+	* gdb.reverse/until-reverse.exp: New test.
+	* gdb.reverse/watch-reverse.c: New test.
+	* gdb.reverse/watch-reverse.exp: New test.
+	* configure.ac (AC_OUTPUT): Add gdb.reverse/Makefile.
+	* configure: Regenerate.
+
 2009-06-26  Doug Evans  <dje@google.com>
 
 	* gdb.base/psymtab.exp: Turn off pending breakpoints.

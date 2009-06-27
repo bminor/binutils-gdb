@@ -117,5 +117,5 @@ AC_OUTPUT([Makefile \
   gdb.fortran/Makefile gdb.server/Makefile \
   gdb.java/Makefile gdb.mi/Makefile gdb.modula2/Makefile \
   gdb.objc/Makefile gdb.opt/Makefile gdb.pascal/Makefile \
-  gdb.python/Makefile \
+  gdb.python/Makefile gdb.reverse/Makefile \
   gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile])
