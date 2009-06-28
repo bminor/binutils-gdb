@@ -1,3 +1,16 @@
+2009-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/break.exp: Add an XFAIL for gcc/36748.
+	* gdb.cp/annota2.exp: Accept frames-invalid in more places.
+	* gdb.opt/Makefile.in (EXECUTABLES): Update.
+	* gdb.opt/clobbered-registers-O2.exp: Update to GPL v3.
+	* gdb.opt/inline-bt.c, gdb.opt/inline-bt.exp,
+	gdb.opt/inline-cmds.c, gdb.opt/inline-cmds.exp,
+	gdb.opt/inline-locals.c, gdb.opt/inline-locals.exp,
+	gdb.opt/inline-markers.c: New files.
+	* lib/gdb.exp (skip_inline_frame_tests): New function.
+	(skip_inline_var_tests): New function.
+
 2009-06-27  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* gdb.cp/exception.exp: Don't require $hex before inner frame in

@@ -46,6 +46,7 @@
 #include "hashtab.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "block.h"
 #include "addrmap.h"
 
 #include <fcntl.h>
@@ -2932,12 +2933,8 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       read_file_scope (die, cu);
       break;
     case DW_TAG_subprogram:
-      read_func_scope (die, cu);
-      break;
     case DW_TAG_inlined_subroutine:
-      /* FIXME:  These are ignored for now.
-         They could be used to set breakpoints on all inlined instances
-         of a function and make GDB `next' properly over inlined functions.  */
+      read_func_scope (die, cu);
       break;
     case DW_TAG_lexical_block:
     case DW_TAG_try_block:
@@ -3291,7 +3288,9 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
     return;
 
   origin_die = follow_die_ref (die, attr, &cu);
-  if (die->tag != origin_die->tag)
+  if (die->tag != origin_die->tag
+      && !(die->tag == DW_TAG_inlined_subroutine
+	   && origin_die->tag == DW_TAG_subprogram))
     complaint (&symfile_complaints,
 	       _("DIE 0x%x and its abstract origin 0x%x have different tags"),
 	       die->offset, origin_die->offset);
@@ -3318,7 +3317,9 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	  struct die_info *child_origin_die;
 
 	  child_origin_die = follow_die_ref (child_die, attr, &cu);
-	  if (child_die->tag != child_origin_die->tag)
+	  if (child_die->tag != child_origin_die->tag
+	      && !(child_die->tag == DW_TAG_inlined_subroutine
+		   && child_origin_die->tag == DW_TAG_subprogram))
 	    complaint (&symfile_complaints,
 		       _("Child DIE 0x%x and its abstract origin 0x%x have "
 			 "different tags"), child_die->offset,
@@ -3361,10 +3362,25 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   CORE_ADDR lowpc;
   CORE_ADDR highpc;
   struct die_info *child_die;
-  struct attribute *attr;
+  struct attribute *attr, *call_line, *call_file;
   char *name;
   CORE_ADDR baseaddr;
   struct block *block;
+  int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
+
+  if (inlined_func)
+    {
+      /* If we do not have call site information, we can't show the
+	 caller of this inlined function.  That's too confusing, so
+	 only use the scope for local variables.  */
+      call_line = dwarf2_attr (die, DW_AT_call_line, cu);
+      call_file = dwarf2_attr (die, DW_AT_call_file, cu);
+      if (call_line == NULL || call_file == NULL)
+	{
+	  read_lexical_block_scope (die, cu);
+	  return;
+	}
+    }
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -7016,13 +7032,18 @@ die_is_declaration (struct die_info *die, struct dwarf2_cu *cu)
 
 /* Return the die giving the specification for DIE, if there is
    one.  *SPEC_CU is the CU containing DIE on input, and the CU
-   containing the return value on output.  */
+   containing the return value on output.  If there is no
+   specification, but there is an abstract origin, that is
+   returned.  */
 
 static struct die_info *
 die_specification (struct die_info *die, struct dwarf2_cu **spec_cu)
 {
   struct attribute *spec_attr = dwarf2_attr (die, DW_AT_specification,
 					     *spec_cu);
+
+  if (spec_attr == NULL)
+    spec_attr = dwarf2_attr (die, DW_AT_abstract_origin, *spec_cu);
 
   if (spec_attr == NULL)
     return NULL;
@@ -7720,6 +7741,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   struct attribute *attr = NULL;
   struct attribute *attr2 = NULL;
   CORE_ADDR baseaddr;
+  int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -7747,13 +7769,17 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	SYMBOL_TYPE (sym) = type;
       else
 	SYMBOL_TYPE (sym) = die_type (die, cu);
-      attr = dwarf2_attr (die, DW_AT_decl_line, cu);
+      attr = dwarf2_attr (die,
+			  inlined_func ? DW_AT_call_line : DW_AT_decl_line,
+			  cu);
       if (attr)
 	{
 	  SYMBOL_LINE (sym) = DW_UNSND (attr);
 	}
 
-      attr = dwarf2_attr (die, DW_AT_decl_file, cu);
+      attr = dwarf2_attr (die,
+			  inlined_func ? DW_AT_call_file : DW_AT_decl_file,
+			  cu);
       if (attr)
 	{
 	  int file_index = DW_UNSND (attr);
@@ -7799,6 +7825,14 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    {
 	      add_symbol_to_list (sym, cu->list_in_scope);
 	    }
+	  break;
+	case DW_TAG_inlined_subroutine:
+	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
+	     finish_block.  */
+	  SYMBOL_CLASS (sym) = LOC_BLOCK;
+	  SYMBOL_INLINED (sym) = 1;
+	  /* Do not add the symbol to any lists.  It will be found via
+	     BLOCK_FUNCTION from the blockvector.  */
 	  break;
 	case DW_TAG_variable:
 	  /* Compilation with minimal debug info may result in variables
@@ -7853,7 +7887,14 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    }
 	  break;
 	case DW_TAG_formal_parameter:
-	  SYMBOL_IS_ARGUMENT (sym) = 1;
+	  /* If we are inside a function, mark this as an argument.  If
+	     not, we might be looking at an argument to an inlined function
+	     when we do not have enough information to show inlined frames;
+	     pretend it's a local variable in that case so that the user can
+	     still see it.  */
+	  if (context_stack_depth > 0
+	      && context_stack[context_stack_depth - 1].name != NULL)
+	    SYMBOL_IS_ARGUMENT (sym) = 1;
 	  attr = dwarf2_attr (die, DW_AT_location, cu);
 	  if (attr)
 	    {
@@ -8194,6 +8235,7 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
       break;
     case DW_TAG_subprogram:
     case DW_TAG_subroutine_type:
+    case DW_TAG_inlined_subroutine:
       this_type = read_subroutine_type (die, cu);
       break;
     case DW_TAG_array_type:

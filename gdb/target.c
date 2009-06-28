@@ -42,6 +42,7 @@
 #include "gdbthread.h"
 #include "solib.h"
 #include "exec.h"
+#include "inline-frame.h"
 
 static void target_info (char *, int);
 
@@ -2037,6 +2038,7 @@ target_resume (ptid_t ptid, int step, enum target_signal signal)
 
 	  set_executing (ptid, 1);
 	  set_running (ptid, 1);
+	  clear_inline_frame_state (ptid);
 	  return;
 	}
     }

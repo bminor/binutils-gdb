@@ -1,3 +1,9 @@
+2009-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Debugging Optimized Code): New chapter.
+	(Compiling for Debugging): Reference it.  Move some
+	text to the new section.
+
 2009-06-15  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* doc/gdb.texinfo (Calling): Document

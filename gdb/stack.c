@@ -46,6 +46,7 @@
 #include "gdbthread.h"
 #include "cp-support.h"
 #include "disasm.h"
+#include "inline-frame.h"
 
 #include "gdb_assert.h"
 #include <ctype.h>
@@ -97,6 +98,30 @@ print_stack_frame_stub (void *args)
   print_frame_info (p->frame, p->print_level, p->print_what, p->print_args);
   set_current_sal_from_frame (p->frame, center);
   return 0;
+}
+
+/* Return 1 if we should display the address in addition to the location,
+   because we are in the middle of a statement.  */
+
+static int
+frame_show_address (struct frame_info *frame,
+		    struct symtab_and_line sal)
+{
+  /* If there is a line number, but no PC, then there is no location
+     information associated with this sal.  The only way that should
+     happen is for the call sites of inlined functions (SAL comes from
+     find_frame_sal).  Otherwise, we would have some PC range if the
+     SAL came from a line table.  */
+  if (sal.line != 0 && sal.pc == 0 && sal.end == 0)
+    {
+      if (get_next_frame (frame) == NULL)
+	gdb_assert (inline_skipped_frames (inferior_ptid) > 0);
+      else
+	gdb_assert (get_frame_type (get_next_frame (frame)) == INLINE_FRAME);
+      return 0;
+    }
+
+  return get_frame_pc (frame) != sal.pc;
 }
 
 /* Show or print a stack frame FRAME briefly.  The output is format
@@ -565,7 +590,7 @@ print_frame_info (struct frame_info *frame, int print_level,
     {
       int done = 0;
       int mid_statement = ((print_what == SRC_LINE)
-			   && (get_frame_pc (frame) != sal.pc));
+			   && frame_show_address (frame, sal));
 
       if (annotation_level)
 	done = identify_source_line (sal.symtab, sal.line, mid_statement,
@@ -623,7 +648,7 @@ find_frame_funname (struct frame_info *frame, char **funname,
   *funname = NULL;
   *funlang = language_unknown;
 
-  func = find_pc_function (get_frame_address_in_block (frame));
+  func = get_frame_function (frame);
   if (func)
     {
       /* In certain pathological cases, the symtabs give the wrong
@@ -644,8 +669,13 @@ find_frame_funname (struct frame_info *frame, char **funname,
          changed (and we'll create a find_pc_minimal_function or some
          such).  */
 
-      struct minimal_symbol *msymbol =
-	lookup_minimal_symbol_by_pc (get_frame_address_in_block (frame));
+      struct minimal_symbol *msymbol = NULL;
+
+      /* Don't attempt to do this for inlined functions, which do not
+	 have a corresponding minimal symbol.  */
+      if (!block_inlined_p (SYMBOL_BLOCK_VALUE (func)))
+	msymbol
+	  = lookup_minimal_symbol_by_pc (get_frame_address_in_block (frame));
 
       if (msymbol != NULL
 	  && (SYMBOL_VALUE_ADDRESS (msymbol)
@@ -719,7 +749,7 @@ print_frame (struct frame_info *frame, int print_level,
     }
   get_user_print_options (&opts);
   if (opts.addressprint)
-    if (get_frame_pc (frame) != sal.pc || !sal.symtab
+    if (frame_show_address (frame, sal) || !sal.symtab
 	|| print_what == LOC_AND_ADDRESS)
       {
 	annotate_frame_address ();
@@ -1042,8 +1072,10 @@ frame_info (char *addr_exp, int from_tty)
 	printf_filtered (_(" Outermost frame: %s\n"),
 			 frame_stop_reason_string (reason));
     }
-
-  if (calling_frame_info)
+  else if (get_frame_type (fi) == INLINE_FRAME)
+    printf_filtered (" inlined into frame %d",
+		     frame_relative_level (get_prev_frame (fi)));
+  else
     {
       printf_filtered (" called by frame at ");
       fputs_filtered (paddress (get_frame_base (calling_frame_info)),
@@ -1503,7 +1535,9 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
       if (print_block_frame_locals (block, frame, num_tabs, stream))
 	values_printed = 1;
       /* After handling the function's top-level block, stop.  Don't
-         continue to its superblock, the block of per-file symbols.  */
+         continue to its superblock, the block of per-file symbols.
+         Also do not continue to the containing function of an inlined
+         function.  */
       if (BLOCK_FUNCTION (block))
 	break;
       block = BLOCK_SUPERBLOCK (block);
@@ -1574,7 +1608,9 @@ print_frame_label_vars (struct frame_info *frame, int this_level_only,
 	return;
 
       /* After handling the function's top-level block, stop.  Don't
-         continue to its superblock, the block of per-file symbols.  */
+         continue to its superblock, the block of per-file symbols.
+         Also do not continue to the containing function of an inlined
+         function.  */
       if (BLOCK_FUNCTION (block))
 	break;
       block = BLOCK_SUPERBLOCK (block);
@@ -1839,6 +1875,9 @@ return_command (char *retval_exp, int from_tty)
   thisframe = get_selected_frame ("No selected frame.");
   thisfun = get_frame_function (thisframe);
   gdbarch = get_frame_arch (thisframe);
+
+  if (get_frame_type (get_current_frame ()) == INLINE_FRAME)
+    error (_("Can not force return from an inlined function."));
 
   /* Compute the return value.  If the computation triggers an error,
      let it bail.  If the return type can't be handled, set

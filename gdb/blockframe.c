@@ -36,6 +36,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "block.h"
+#include "inline-frame.h"
 
 /* Prototypes for exported functions. */
 
@@ -61,11 +62,29 @@ struct block *
 get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
   const CORE_ADDR pc = get_frame_address_in_block (frame);
+  struct frame_info *next_frame;
+  struct block *bl;
+  int inline_count;
 
   if (addr_in_block)
     *addr_in_block = pc;
 
-  return block_for_pc (pc);
+  bl = block_for_pc (pc);
+  if (bl == NULL)
+    return NULL;
+
+  inline_count = frame_inlined_callees (frame);
+
+  while (inline_count > 0)
+    {
+      if (block_inlined_p (bl))
+	inline_count--;
+
+      bl = BLOCK_SUPERBLOCK (bl);
+      gdb_assert (bl != NULL);
+    }
+
+  return bl;
 }
 
 CORE_ADDR
@@ -104,9 +123,14 @@ struct symbol *
 get_frame_function (struct frame_info *frame)
 {
   struct block *bl = get_frame_block (frame, 0);
-  if (bl == 0)
-    return 0;
-  return block_linkage_function (bl);
+
+  if (bl == NULL)
+    return NULL;
+
+  while (BLOCK_FUNCTION (bl) == NULL && BLOCK_SUPERBLOCK (bl) != NULL)
+    bl = BLOCK_SUPERBLOCK (bl);
+
+  return BLOCK_FUNCTION (bl);
 }
 
 
@@ -350,8 +374,8 @@ block_innermost_frame (struct block *block)
   frame = get_current_frame ();
   while (frame != NULL)
     {
-      calling_pc = get_frame_address_in_block (frame);
-      if (calling_pc >= start && calling_pc < end)
+      struct block *frame_block = get_frame_block (frame, NULL);
+      if (frame_block != NULL && contained_in (frame_block, block))
 	return frame;
 
       frame = get_prev_frame (frame);

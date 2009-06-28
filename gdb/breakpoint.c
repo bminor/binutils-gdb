@@ -2772,40 +2772,38 @@ watchpoint_check (void *p)
     within_current_scope = 1;
   else
     {
-      /* There is no current frame at this moment.  If we're going to have
-         any chance of handling watchpoints on local variables, we'll need
-         the frame chain (so we can determine if we're in scope).  */
-      reinit_frame_cache ();
+      struct frame_info *frame = get_current_frame ();
+      struct gdbarch *frame_arch = get_frame_arch (frame);
+      CORE_ADDR frame_pc = get_frame_pc (frame);
+
       fr = frame_find_by_id (b->watchpoint_frame);
       within_current_scope = (fr != NULL);
 
       /* If we've gotten confused in the unwinder, we might have
 	 returned a frame that can't describe this variable.  */
-      if (within_current_scope
-	  && (block_linkage_function (b->exp_valid_block)
-	      != get_frame_function (fr)))
-	within_current_scope = 0;
+      if (within_current_scope)
+	{
+	  struct symbol *function;
+
+	  function = get_frame_function (fr);
+	  if (function == NULL
+	      || !contained_in (b->exp_valid_block,
+				SYMBOL_BLOCK_VALUE (function)))
+	    within_current_scope = 0;
+	}
 
       /* in_function_epilogue_p() returns a non-zero value if we're still
 	 in the function but the stack frame has already been invalidated.
 	 Since we can't rely on the values of local variables after the
 	 stack has been destroyed, we are treating the watchpoint in that
-	 state as `not changed' without further checking.
-	 
-	 vinschen/2003-09-04: The former implementation left out the case
-	 that the watchpoint frame couldn't be found by frame_find_by_id()
-	 because the current PC is currently in an epilogue.  Calling
-	 gdbarch_in_function_epilogue_p() also when fr == NULL fixes that. */
-      if (!within_current_scope || fr == get_current_frame ())
-	{
-	  struct frame_info *frame = get_current_frame ();
-	  struct gdbarch *frame_arch = get_frame_arch (frame);
-	  CORE_ADDR frame_pc = get_frame_pc (frame);
+	 state as `not changed' without further checking.  Don't mark
+	 watchpoints as changed if the current frame is in an epilogue -
+	 even if they are in some other frame, our view of the stack
+	 is likely to be wrong.  */
+      if (gdbarch_in_function_epilogue_p (frame_arch, frame_pc))
+	return WP_VALUE_NOT_CHANGED;
 
-	  if (gdbarch_in_function_epilogue_p (frame_arch, frame_pc))
-	    return WP_VALUE_NOT_CHANGED;
-	}
-      if (fr && within_current_scope)
+      if (within_current_scope)
 	/* If we end up stopping, the current frame will get selected
 	   in normal_stop.  So this call to select_frame won't affect
 	   the user.  */
@@ -3039,7 +3037,7 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
   struct breakpoint *b = bl->owner;
 
   if (frame_id_p (b->frame_id)
-      && !frame_id_eq (b->frame_id, get_frame_id (get_current_frame ())))
+      && !frame_id_eq (b->frame_id, get_stack_frame_id (get_current_frame ())))
     bs->stop = 0;
   else if (bs->stop)
     {
@@ -3061,8 +3059,12 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 	     function call.  */
 	  struct value *mark = value_mark ();
 
-	  /* Need to select the frame, with all that implies
-	     so that the conditions will have the right context.  */
+	  /* Need to select the frame, with all that implies so that
+	     the conditions will have the right context.  Because we
+	     use the frame, we will not see an inlined function's
+	     variables when we arrive at a breakpoint at the start
+	     of the inlined function; the current frame will be the
+	     call site.  */
 	  select_frame (get_current_frame ());
 	  value_is_zero
 	    = catch_errors (breakpoint_cond_eval, (bl->cond),
@@ -5032,6 +5034,11 @@ set_momentary_breakpoint (struct symtab_and_line sal, struct frame_id frame_id,
 			  enum bptype type)
 {
   struct breakpoint *b;
+
+  /* If FRAME_ID is valid, it should be a real frame, not an inlined
+     one.  */
+  gdb_assert (!frame_id_inlined_p (frame_id));
+
   b = set_raw_breakpoint (sal, type);
   b->enable_state = bp_enabled;
   b->disposition = disp_donttouch;
@@ -6143,7 +6150,6 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   struct block *exp_valid_block;
   struct value *val, *mark;
   struct frame_info *frame;
-  struct frame_info *prev_frame = NULL;
   char *exp_start = NULL;
   char *exp_end = NULL;
   char *tok, *id_tok_start, *end_tok;
@@ -6283,34 +6289,34 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
     bp_type = bp_watchpoint;
 
   frame = block_innermost_frame (exp_valid_block);
-  if (frame)
-    prev_frame = get_prev_frame (frame);
-  else
-    prev_frame = NULL;
 
   /* If the expression is "local", then set up a "watchpoint scope"
      breakpoint at the point where we've left the scope of the watchpoint
      expression.  Create the scope breakpoint before the watchpoint, so
      that we will encounter it first in bpstat_stop_status.  */
-  if (innermost_block && prev_frame)
+  if (innermost_block && frame)
     {
-      scope_breakpoint = create_internal_breakpoint (get_frame_pc (prev_frame),
-						     bp_watchpoint_scope);
+      if (frame_id_p (frame_unwind_caller_id (frame)))
+	{
+ 	  scope_breakpoint
+	    = create_internal_breakpoint (frame_unwind_caller_pc (frame),
+					  bp_watchpoint_scope);
 
-      scope_breakpoint->enable_state = bp_enabled;
+	  scope_breakpoint->enable_state = bp_enabled;
 
-      /* Automatically delete the breakpoint when it hits.  */
-      scope_breakpoint->disposition = disp_del;
+	  /* Automatically delete the breakpoint when it hits.  */
+	  scope_breakpoint->disposition = disp_del;
 
-      /* Only break in the proper frame (help with recursion).  */
-      scope_breakpoint->frame_id = get_frame_id (prev_frame);
+	  /* Only break in the proper frame (help with recursion).  */
+	  scope_breakpoint->frame_id = frame_unwind_caller_id (frame);
 
-      /* Set the address at which we will stop.  */
-      scope_breakpoint->loc->requested_address
-	= get_frame_pc (prev_frame);
-      scope_breakpoint->loc->address
-	= adjust_breakpoint_address (scope_breakpoint->loc->requested_address,
-				     scope_breakpoint->type);
+	  /* Set the address at which we will stop.  */
+	  scope_breakpoint->loc->requested_address
+	    = frame_unwind_caller_pc (frame);
+	  scope_breakpoint->loc->address
+	    = adjust_breakpoint_address (scope_breakpoint->loc->requested_address,
+					 scope_breakpoint->type);
+	}
     }
 
   /* Now set up the breakpoint.  */
@@ -6491,7 +6497,6 @@ until_break_command (char *arg, int from_tty, int anywhere)
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct frame_info *frame = get_selected_frame (NULL);
-  struct frame_info *prev_frame = get_prev_frame (frame);
   struct breakpoint *breakpoint;
   struct breakpoint *breakpoint2 = NULL;
   struct cleanup *old_chain;
@@ -6524,20 +6529,22 @@ until_break_command (char *arg, int from_tty, int anywhere)
        we don't specify a frame at which we need to stop.  */
     breakpoint = set_momentary_breakpoint (sal, null_frame_id, bp_until);
   else
-    /* Otherwise, specify the current frame, because we want to stop only
+    /* Otherwise, specify the selected frame, because we want to stop only
        at the very same frame.  */
-    breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame),
+    breakpoint = set_momentary_breakpoint (sal, get_stack_frame_id (frame),
 					   bp_until);
 
   old_chain = make_cleanup_delete_breakpoint (breakpoint);
 
   /* Keep within the current frame, or in frames called by the current
      one.  */
-  if (prev_frame)
+
+  if (frame_id_p (frame_unwind_caller_id (frame)))
     {
-      sal = find_pc_line (get_frame_pc (prev_frame), 0);
-      sal.pc = get_frame_pc (prev_frame);
-      breakpoint2 = set_momentary_breakpoint (sal, get_frame_id (prev_frame),
+      sal = find_pc_line (frame_unwind_caller_pc (frame), 0);
+      sal.pc = frame_unwind_caller_pc (frame);
+      breakpoint2 = set_momentary_breakpoint (sal,
+					      frame_unwind_caller_id (frame),
 					      bp_until);
       make_cleanup_delete_breakpoint (breakpoint2);
     }

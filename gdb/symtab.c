@@ -1384,10 +1384,13 @@ lookup_symbol_aux_local (const char *name, const char *linkage_name,
       sym = lookup_symbol_aux_block (name, linkage_name, block, domain);
       if (sym != NULL)
 	return sym;
+
+      if (BLOCK_FUNCTION (block) != NULL && block_inlined_p (block))
+	break;
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  /* We've reached the static block without finding a result.  */
+  /* We've reached the edge of the function without finding a result.  */
 
   return NULL;
 }
@@ -2654,6 +2657,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
 
   CORE_ADDR pc;
   struct symtab_and_line sal;
+  struct block *b, *function_block;
 
   pc = BLOCK_START (block);
   fixup_symbol_section (sym, objfile);
@@ -2706,6 +2710,25 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
     }
 
   sal.pc = pc;
+
+  /* Check if we are now inside an inlined function.  If we can,
+     use the call site of the function instead.  */
+  b = block_for_pc_sect (sal.pc, SYMBOL_OBJ_SECTION (sym));
+  function_block = NULL;
+  while (b != NULL)
+    {
+      if (BLOCK_FUNCTION (b) != NULL && block_inlined_p (b))
+	function_block = b;
+      else if (BLOCK_FUNCTION (b) != NULL)
+	break;
+      b = BLOCK_SUPERBLOCK (b);
+    }
+  if (function_block != NULL
+      && SYMBOL_LINE (BLOCK_FUNCTION (function_block)) != 0)
+    {
+      sal.line = SYMBOL_LINE (BLOCK_FUNCTION (function_block));
+      sal.symtab = SYMBOL_SYMTAB (BLOCK_FUNCTION (function_block));
+    }
 
   return sal;
 }
@@ -3707,6 +3730,24 @@ language_search_unquoted_string (char *text, char *p)
   return p;
 }
 
+static void
+completion_list_add_fields (struct symbol *sym, char *sym_text,
+			    int sym_text_len, char *text, char *word)
+{
+  if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+    {
+      struct type *t = SYMBOL_TYPE (sym);
+      enum type_code c = TYPE_CODE (t);
+      int j;
+
+      if (c == TYPE_CODE_UNION || c == TYPE_CODE_STRUCT)
+	for (j = TYPE_N_BASECLASSES (t); j < TYPE_NFIELDS (t); j++)
+	  if (TYPE_FIELD_NAME (t, j))
+	    completion_list_add_name (TYPE_FIELD_NAME (t, j),
+				      sym_text, sym_text_len, text, word);
+    }
+}
+
 /* Type of the user_data argument passed to add_macro_name.  The
    contents are simply whatever is needed by
    completion_list_add_name.  */
@@ -3742,9 +3783,9 @@ default_make_symbol_completion_list (char *text, char *word)
   struct partial_symtab *ps;
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
-  struct block *b, *surrounding_static_block = 0;
+  struct block *b;
+  const struct block *surrounding_static_block, *surrounding_global_block;
   struct dict_iterator iter;
-  int j;
   struct partial_symbol **psym;
   /* The symbol we are completing on.  Points in same buffer as text.  */
   char *sym_text;
@@ -3854,41 +3895,43 @@ default_make_symbol_completion_list (char *text, char *word)
   }
 
   /* Search upwards from currently selected frame (so that we can
-     complete on local vars.  */
+     complete on local vars).  Also catch fields of types defined in
+     this places which match our text string.  Only complete on types
+     visible from current context. */
 
-  for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
-    {
-      if (!BLOCK_SUPERBLOCK (b))
-	{
-	  surrounding_static_block = b;		/* For elmin of dups */
-	}
+  b = get_selected_block (0);
+  surrounding_static_block = block_static_block (b);
+  surrounding_global_block = block_global_block (b);
+  if (surrounding_static_block != NULL)
+    while (b != surrounding_static_block)
+      {
+	QUIT;
 
-      /* Also catch fields of types defined in this places which match our
-         text string.  Only complete on types visible from current context. */
+	ALL_BLOCK_SYMBOLS (b, iter, sym)
+	  {
+	    COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text,
+					word);
+	    completion_list_add_fields (sym, sym_text, sym_text_len, text,
+					word);
+	  }
 
-      ALL_BLOCK_SYMBOLS (b, iter, sym)
-	{
-	  QUIT;
-	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-	  if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
-	    {
-	      struct type *t = SYMBOL_TYPE (sym);
-	      enum type_code c = TYPE_CODE (t);
+	/* Stop when we encounter an enclosing function.  Do not stop for
+	   non-inlined functions - the locals of the enclosing function
+	   are in scope for a nested function.  */
+	if (BLOCK_FUNCTION (b) != NULL && block_inlined_p (b))
+	  break;
+	b = BLOCK_SUPERBLOCK (b);
+      }
 
-	      if (c == TYPE_CODE_UNION || c == TYPE_CODE_STRUCT)
-		{
-		  for (j = TYPE_N_BASECLASSES (t); j < TYPE_NFIELDS (t); j++)
-		    {
-		      if (TYPE_FIELD_NAME (t, j))
-			{
-			  completion_list_add_name (TYPE_FIELD_NAME (t, j),
-					sym_text, sym_text_len, text, word);
-			}
-		    }
-		}
-	    }
-	}
-    }
+  /* Add fields from the file's types; symbols will be added below.  */
+
+  if (surrounding_static_block != NULL)
+    ALL_BLOCK_SYMBOLS (surrounding_static_block, iter, sym)
+      completion_list_add_fields (sym, sym_text, sym_text_len, text, word);
+
+  if (surrounding_global_block != NULL)
+      ALL_BLOCK_SYMBOLS (surrounding_global_block, iter, sym)
+	completion_list_add_fields (sym, sym_text, sym_text_len, text, word);
 
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
@@ -3907,9 +3950,6 @@ default_make_symbol_completion_list (char *text, char *word)
   {
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-    /* Don't do this block twice.  */
-    if (b == surrounding_static_block)
-      continue;
     ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
 	COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
@@ -4375,6 +4415,25 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 	     line mark the prologue -> body transition.  */
 	  if (sal.line >= prologue_sal.line)
 	    break;
+
+	  /* The line number is smaller.  Check that it's from the
+	     same function, not something inlined.  If it's inlined,
+	     then there is no point comparing the line numbers.  */
+	  bl = block_for_pc (prologue_sal.end);
+	  while (bl)
+	    {
+	      if (block_inlined_p (bl))
+		break;
+	      if (BLOCK_FUNCTION (bl))
+		{
+		  bl = NULL;
+		  break;
+		}
+	      bl = BLOCK_SUPERBLOCK (bl);
+	    }
+	  if (bl != NULL)
+	    break;
+
 	  /* The case in which compiler's optimizer/scheduler has
 	     moved instructions into the prologue.  We look ahead in
 	     the function looking for address ranges whose

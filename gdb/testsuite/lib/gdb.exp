@@ -1459,6 +1459,37 @@ proc skip_hp_tests {} {
     return $skip_hp
 }
 
+# Return whether we should skip tests for showing inlined functions in
+# backtraces.  Requires get_compiler_info and get_debug_format.
+
+proc skip_inline_frame_tests {} {
+    # GDB only recognizes inlining information in DWARF 2 (DWARF 3).
+    if { ! [test_debug_format "DWARF 2"] } {
+	return 1
+    }
+
+    # GCC before 4.1 does not emit DW_AT_call_file / DW_AT_call_line.
+    if { ([test_compiler_info "gcc-2-*"]
+	  || [test_compiler_info "gcc-3-*"]
+	  || [test_compiler_info "gcc-4-0-*"]) } {
+	return 1
+    }
+
+    return 0
+}
+
+# Return whether we should skip tests for showing variables from
+# inlined functions.  Requires get_compiler_info and get_debug_format.
+
+proc skip_inline_var_tests {} {
+    # GDB only recognizes inlining information in DWARF 2 (DWARF 3).
+    if { ! [test_debug_format "DWARF 2"] } {
+	return 1
+    }
+
+    return 0
+}
+
 set compiler_info		"unknown"
 set gcc_compiled		0
 set hp_cc_compiler		0

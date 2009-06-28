@@ -880,6 +880,13 @@ gdb_expect {
         # marker4() is defined at line 46 when compiled with -DPROTOTYPES
 	pass "run until breakpoint set at small function, optimized file (line bp_location14)"
     }
+    -re "Breakpoint $decimal, factorial \\(.*\\) .*\{\r\n$gdb_prompt" {
+	# GCC 4.3 emits bad line number information - see gcc/36748.
+	if { [test_compiler_info "gcc-4-3-*"] } {
+	    setup_xfail *-*-*
+	}
+	fail "run until breakpoint set at small function, optimized file"
+    }
     -re ".*$gdb_prompt " {
 	fail "run until breakpoint set at small function, optimized file"
     }

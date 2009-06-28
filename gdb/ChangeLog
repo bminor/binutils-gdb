@@ -1,4 +1,102 @@
 2009-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS: Document inlined function support.
+	* Makefile.in (SFILES): Add inline-frame.c.
+	(COMMON_OBS): Add inline-frame.o.
+	* block.c (contained_in): Rewrite to use lexical nesting.
+	(block_linkage_function): Skip inlined function blocks.
+	(block_inlined_p): New.
+	* block.h (struct block): Update comment.
+	(block_inlined_p): New prototype.
+	* blockframe.c (get_frame_block): Handle inlined functions.
+	(get_frame_function): Do not use block_linkage_function.
+	(block_innermost_frame): Use get_frame_block and contained_in.
+	* breakpoint.c (watchpoint_check): Remove extra reinit_frame_cache.
+	Skip over inlined functions.  Simplify epilogue check.
+	(bpstat_check_breakpoint_conditions): Use get_stack_frame_id.
+	Update comments.
+	(set_momentary_breakpoint): Only accept non-inlined frames.
+	(watch_command_1): Use frame_unwind_caller_pc and
+	frame_unwind_caller_id instead of get_prev_frame.
+	(until_break_command): Likewise.  Use get_stack_frame_id.
+	* buildsym.c (end_symtab): Set SYMBOL_SYMTAB for block functions.
+	* dwarf2loc.c (dwarf_expr_frame_base): Use block_linkage_function.
+	* dwarf2read.c (process_die): Handle DW_TAG_inlined_subroutine.
+	(read_func_scope, new_symbol): Likewise.  Handle arguments specially
+	for inlined functions without call site information.
+	(inherit_abstract_dies): Allow tag mismatch for inlined subroutines.
+	(die_specification): Treat DW_AT_abstract_origin as a specification.
+	(read_type_die): Handle DW_TAG_inlined_subroutine.
+	* frame-unwind.c (frame_unwind_init): Add inline_frame_unwind.
+	* frame.c (fprint_frame_id): Print inline depth.
+	(fprint_frame_type): Handle INLINE_FRAME and SENTINEL_FRAME.
+	(skip_inlined_frames, get_stack_frame_id): New.
+	(frame_unwind_caller_id): Use skip_inlined_frames.
+	(frame_id_inlined_p): New.
+	(frame_id_eq): Make the logic match the comments.  Add inline_depth
+	check.
+	(frame_id_inner): Handle inlined functions.
+	(frame_unwind_pc): New function, copied from frame_unwind_caller_pc.
+	(frame_unwind_caller_pc): Use skip_inlined_frames and frame_unwind_pc.
+	(get_prev_frame_1): Check for inline frames.  Split out frame
+	allocation to get_prev_frame_raw.
+	(get_prev_frame_raw): New function.
+	(get_prev_frame): Handle inline frames.
+	(get_frame_pc): Use frame_unwind_pc.
+	(get_frame_address_in_block): Skip inlined frames on both sides.
+	(pc_notcurrent): Delete.
+	(find_frame_sal): Rewrite to handle inline call sites.  Use
+	get_frame_address_in_block.
+	(deprecated_update_frame_pc_hack): Make static.
+	* frame.h: Update comments.
+	(struct frame_id): Add inline_depth.
+	(enum frame_type): Add INLINE_FRAME.
+	(frame_id_inlined_p, get_stack_frame_id): New prototypes.
+	* gdbthread.h (struct thread_info): Add step_stack_frame_id field.
+	* infcmd.c (set_step_frame): New function.
+	(step_once): Use set_step_frame.  Handle inlined functions.
+	(until_next_command): Use set_step_frame.
+	(finish_backward), finish_forward): Use get_stack_frame_id.
+	(finish_command): Support inlined functions.
+	* inferior.h (set_step_info): New prototype.
+	* infrun.c (RESUME_ALL): Use minus_one_ptid.
+	(clear_proceed_status): Clear step_stack_frame_id.
+	(init_wait_for_inferior): Call clear_inline_frame_state.
+	(init_execution_control_state): Make static.
+	(set_step_info): New function.
+	(init_thread_stepping_state): Do not set the symtab or line here.
+	(stepped_in_from): New function.
+	(handle_inferior_event): Handle inlined functions.  Use set_step_info.
+	(insert_step_resume_breakpoint_at_frame): Use get_stack_frame_id.
+	(struct inferior_status): Add step_stack_frame_id.
+	(save_inferior_status, restore_inferior_status): Save and restore
+	step_stack_frame_id.
+	* inline-frame.c, inline-frame.h: New files.
+	* minsyms.c (prim_record_minimal_symbol_and_info): Use XCALLOC.
+	* regcache.c (regcache_write_pc): Call reinit_frame_cache.
+	* s390-tdep.c (s390_prologue_frame_unwind_cache): Handle INLINE_FRAME.
+	* stack.c (frame_show_address): New.
+	(print_frame_info, print_frame): Use it.
+	(find_frame_funname): Use get_frame_function.  Handle inlined blocks.
+	(frame_info): Mark inlined functions.
+	(backtrace_command_1): Use get_current_user_frame.
+	(print_frame_local_vars, print_frame_label_vars): Update comments.
+	(return_command): Refuse inlined functions.
+	* symtab.c (lookup_symbol_aux_local): Stop at inlined function
+	boundaries.
+	(find_function_start_sal): Avoid inlined functions.
+	(completion_list_add_fields): New function.
+	(default_make_symbol_completion_list): Use it.  Use block_static_block
+	and block_global_block.  Check for inlined functions.
+	(skip_prologue_using_sal): Avoid line number comparison across
+	inlining.
+	* symtab.h (struct symbol): Add is_inlined.
+	(SYMBOL_INLINED): New.
+	* target.c (target_resume): Call clear_inline_frame_state.
+	* valops.c (value_of_variable): Check block_inlined_p.
+
+2009-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* frame.c (frame_unwind_id): Renamed to ...
 	(frame_unwind_caller_id): ... this.  All callers updated.

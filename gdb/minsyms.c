@@ -790,7 +790,7 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
 
   if (msym_bunch_index == BUNCH_SIZE)
     {
-      new = (struct msym_bunch *) xmalloc (sizeof (struct msym_bunch));
+      new = XCALLOC (1, struct msym_bunch);
       msym_bunch_index = 0;
       new->next = msym_bunch;
       msym_bunch = new;

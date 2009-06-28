@@ -573,9 +573,18 @@ struct symbol
 
   unsigned is_argument : 1;
 
-  /* Line number of definition.  FIXME:  Should we really make the assumption
-     that nobody will try to debug files longer than 64K lines?  What about
-     machine generated programs? */
+  /* Whether this is an inlined function (class LOC_BLOCK only).  */
+  unsigned is_inlined : 1;
+
+  /* Line number of this symbol's definition, except for inlined
+     functions.  For an inlined function (class LOC_BLOCK and
+     SYMBOL_INLINED set) this is the line number of the function's call
+     site.  Inlined function symbols are not definitions, and they are
+     never found by symbol table lookup.
+
+     FIXME: Should we really make the assumption that nobody will try
+     to debug files longer than 64K lines?  What about machine
+     generated programs?  */
 
   unsigned short line;
 
@@ -613,6 +622,7 @@ struct symbol
 #define SYMBOL_DOMAIN(symbol)	(symbol)->domain
 #define SYMBOL_CLASS(symbol)		(symbol)->aclass
 #define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
+#define SYMBOL_INLINED(symbol)		(symbol)->is_inlined
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_SYMTAB(symbol)		(symbol)->symtab

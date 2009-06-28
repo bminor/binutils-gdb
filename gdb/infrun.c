@@ -49,6 +49,7 @@
 #include "mi/mi-common.h"
 #include "event-top.h"
 #include "record.h"
+#include "inline-frame.h"
 
 /* Prototypes for local functions */
 
@@ -209,7 +210,7 @@ static unsigned char *signal_program;
 
 /* Value to pass to target_resume() to cause all threads to resume */
 
-#define RESUME_ALL (pid_to_ptid (-1))
+#define RESUME_ALL minus_one_ptid
 
 /* Command list pointer for the "stop" placeholder.  */
 
@@ -1316,6 +1317,7 @@ clear_proceed_status_thread (struct thread_info *tp)
   tp->step_range_start = 0;
   tp->step_range_end = 0;
   tp->step_frame_id = null_frame_id;
+  tp->step_stack_frame_id = null_frame_id;
   tp->step_over_calls = STEP_OVER_UNDEBUGGABLE;
   tp->stop_requested = 0;
 
@@ -1689,6 +1691,9 @@ init_wait_for_inferior (void)
   init_infwait_state ();
 
   displaced_step_clear ();
+
+  /* Discard any skipped inlined frames.  */
+  clear_inline_frame_state (minus_one_ptid);
 }
 
 
@@ -1744,7 +1749,7 @@ struct execution_control_state
   int wait_some_more;
 };
 
-void init_execution_control_state (struct execution_control_state *ecs);
+static void init_execution_control_state (struct execution_control_state *ecs);
 
 void handle_inferior_event (struct execution_control_state *ecs);
 
@@ -2137,10 +2142,23 @@ fetch_inferior_event (void *client_data)
     display_gdb_prompt (0);
 }
 
+/* Record the frame and location we're currently stepping through.  */
+void
+set_step_info (struct frame_info *frame, struct symtab_and_line sal)
+{
+  struct thread_info *tp = inferior_thread ();
+
+  tp->step_frame_id = get_frame_id (frame);
+  tp->step_stack_frame_id = get_stack_frame_id (frame);
+
+  tp->current_symtab = sal.symtab;
+  tp->current_line = sal.line;
+}
+
 /* Prepare an execution control state for looping through a
    wait_for_inferior-type loop.  */
 
-void
+static void
 init_execution_control_state (struct execution_control_state *ecs)
 {
   ecs->random_signal = 0;
@@ -2151,16 +2169,10 @@ init_execution_control_state (struct execution_control_state *ecs)
 void
 init_thread_stepping_state (struct thread_info *tss)
 {
-  struct symtab_and_line sal;
-
   tss->stepping_over_breakpoint = 0;
   tss->step_after_step_resume_breakpoint = 0;
   tss->stepping_through_solib_after_catch = 0;
   tss->stepping_through_solib_catchpoints = NULL;
-
-  sal = find_pc_line (tss->prev_pc, 0);
-  tss->current_line = sal.line;
-  tss->current_symtab = sal.symtab;
 }
 
 /* Return the cached copy of the last pid/waitstatus returned by
@@ -2335,6 +2347,22 @@ ensure_not_running (void)
 {
   if (is_running (inferior_ptid))
     error_is_running ();
+}
+
+static int
+stepped_in_from (struct frame_info *frame, struct frame_id step_frame_id)
+{
+  for (frame = get_prev_frame (frame);
+       frame != NULL;
+       frame = get_prev_frame (frame))
+    {
+      if (frame_id_eq (get_frame_id (frame), step_frame_id))
+	return 1;
+      if (get_frame_type (frame) != INLINE_FRAME)
+	break;
+    }
+
+  return 0;
 }
 
 /* Given an execution control state that has been freshly filled in
@@ -3065,6 +3093,12 @@ targets should add new threads to the thread list themselves in non-stop mode.")
   ecs->random_signal = 0;
   stopped_by_random_signal = 0;
 
+  /* Hide inlined functions starting here, unless we just performed stepi or
+     nexti.  After stepi and nexti, always show the innermost frame (not any
+     inline function call sites).  */
+  if (ecs->event_thread->step_range_end != 1)
+    skip_inline_frames (ecs->ptid);
+
   if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP
       && ecs->event_thread->trap_expected
       && gdbarch_single_step_through_delay_p (gdbarch)
@@ -3302,8 +3336,8 @@ process_event_stop_test:
 	  && ecs->event_thread->stop_signal != TARGET_SIGNAL_0
 	  && (ecs->event_thread->step_range_start <= stop_pc
 	      && stop_pc < ecs->event_thread->step_range_end)
-	  && frame_id_eq (get_frame_id (frame),
-			  ecs->event_thread->step_frame_id)
+	  && frame_id_eq (get_stack_frame_id (frame),
+			  ecs->event_thread->step_stack_frame_id)
 	  && ecs->event_thread->step_resume_breakpoint == NULL)
 	{
 	  /* The inferior is about to take a signal that will take it
@@ -3727,10 +3761,10 @@ infrun: not switching back to stepped thread, it has vanished\n");
      NOTE: frame_id_eq will never report two invalid frame IDs as
      being equal, so to get into this block, both the current and
      previous frame must have valid frame IDs.  */
-  if (!frame_id_eq (get_frame_id (frame),
-		    ecs->event_thread->step_frame_id)
+  if (!frame_id_eq (get_stack_frame_id (frame),
+		    ecs->event_thread->step_stack_frame_id)
       && (frame_id_eq (frame_unwind_caller_id (frame),
-		       ecs->event_thread->step_frame_id)
+		       ecs->event_thread->step_stack_frame_id)
 	  || execution_direction == EXEC_REVERSE))
     {
       CORE_ADDR real_stop_pc;
@@ -3974,6 +4008,82 @@ infrun: not switching back to stepped thread, it has vanished\n");
       return;
     }
 
+  /* Look for "calls" to inlined functions, part one.  If the inline
+     frame machinery detected some skipped call sites, we have entered
+     a new inline function.  */
+
+  if (frame_id_eq (get_frame_id (get_current_frame ()),
+		   ecs->event_thread->step_frame_id)
+      && inline_skipped_frames (ecs->ptid))
+    {
+      struct symtab_and_line call_sal;
+
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: stepped into inlined function\n");
+
+      find_frame_sal (get_current_frame (), &call_sal);
+
+      if (ecs->event_thread->step_over_calls != STEP_OVER_ALL)
+	{
+	  /* For "step", we're going to stop.  But if the call site
+	     for this inlined function is on the same source line as
+	     we were previously stepping, go down into the function
+	     first.  Otherwise stop at the call site.  */
+
+	  if (call_sal.line == ecs->event_thread->current_line
+	      && call_sal.symtab == ecs->event_thread->current_symtab)
+	    step_into_inline_frame (ecs->ptid);
+
+	  ecs->event_thread->stop_step = 1;
+	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  stop_stepping (ecs);
+	  return;
+	}
+      else
+	{
+	  /* For "next", we should stop at the call site if it is on a
+	     different source line.  Otherwise continue through the
+	     inlined function.  */
+	  if (call_sal.line == ecs->event_thread->current_line
+	      && call_sal.symtab == ecs->event_thread->current_symtab)
+	    keep_going (ecs);
+	  else
+	    {
+	      ecs->event_thread->stop_step = 1;
+	      print_stop_reason (END_STEPPING_RANGE, 0);
+	      stop_stepping (ecs);
+	    }
+	  return;
+	}
+    }
+
+  /* Look for "calls" to inlined functions, part two.  If we are still
+     in the same real function we were stepping through, but we have
+     to go further up to find the exact frame ID, we are stepping
+     through a more inlined call beyond its call site.  */
+
+  if (get_frame_type (get_current_frame ()) == INLINE_FRAME
+      && !frame_id_eq (get_frame_id (get_current_frame ()),
+		       ecs->event_thread->step_frame_id)
+      && stepped_in_from (get_current_frame (),
+			  ecs->event_thread->step_frame_id))
+    {
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: stepping through inlined function\n");
+
+      if (ecs->event_thread->step_over_calls == STEP_OVER_ALL)
+	keep_going (ecs);
+      else
+	{
+	  ecs->event_thread->stop_step = 1;
+	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  stop_stepping (ecs);
+	}
+      return;
+    }
+
   if ((stop_pc == stop_pc_sal.pc)
       && (ecs->event_thread->current_line != stop_pc_sal.line
  	  || ecs->event_thread->current_symtab != stop_pc_sal.symtab))
@@ -3999,9 +4109,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 
   ecs->event_thread->step_range_start = stop_pc_sal.pc;
   ecs->event_thread->step_range_end = stop_pc_sal.end;
-  ecs->event_thread->step_frame_id = get_frame_id (frame);
-  ecs->event_thread->current_line = stop_pc_sal.line;
-  ecs->event_thread->current_symtab = stop_pc_sal.symtab;
+  set_step_info (frame, stop_pc_sal);
 
   if (debug_infrun)
      fprintf_unfiltered (gdb_stdlog, "infrun: keep going\n");
@@ -4188,7 +4296,7 @@ insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
   sr_sal.pc = gdbarch_addr_bits_remove (gdbarch, get_frame_pc (return_frame));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
-  insert_step_resume_breakpoint_at_sal (sr_sal, get_frame_id (return_frame));
+  insert_step_resume_breakpoint_at_sal (sr_sal, get_stack_frame_id (return_frame));
 }
 
 /* Similar to insert_step_resume_breakpoint_at_frame, except
@@ -5266,6 +5374,7 @@ struct inferior_status
   CORE_ADDR step_range_start;
   CORE_ADDR step_range_end;
   struct frame_id step_frame_id;
+  struct frame_id step_stack_frame_id;
   enum step_over_calls_kind step_over_calls;
   CORE_ADDR step_resume_break_address;
   int stop_after_trap;
@@ -5295,6 +5404,7 @@ save_inferior_status (void)
   inf_status->step_range_start = tp->step_range_start;
   inf_status->step_range_end = tp->step_range_end;
   inf_status->step_frame_id = tp->step_frame_id;
+  inf_status->step_stack_frame_id = tp->step_stack_frame_id;
   inf_status->step_over_calls = tp->step_over_calls;
   inf_status->stop_after_trap = stop_after_trap;
   inf_status->stop_soon = inf->stop_soon;
@@ -5348,6 +5458,7 @@ restore_inferior_status (struct inferior_status *inf_status)
   tp->step_range_start = inf_status->step_range_start;
   tp->step_range_end = inf_status->step_range_end;
   tp->step_frame_id = inf_status->step_frame_id;
+  tp->step_stack_frame_id = inf_status->step_stack_frame_id;
   tp->step_over_calls = inf_status->step_over_calls;
   stop_after_trap = inf_status->stop_after_trap;
   inf->stop_soon = inf_status->stop_soon;

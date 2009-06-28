@@ -645,6 +645,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	inf-loop.c \
 	infcall.c \
 	infcmd.c inflow.c infrun.c \
+	inline-frame.c \
 	interps.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
 	language.c linespec.c \
@@ -817,6 +818,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	user-regs.o \
 	frame.o frame-unwind.o doublest.o \
 	frame-base.o \
+	inline-frame.o \
 	gnu-v2-abi.o gnu-v3-abi.o cp-abi.o cp-support.o \
 	cp-namespace.o \
 	reggroups.o regset.o \

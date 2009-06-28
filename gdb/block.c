@@ -47,8 +47,16 @@ contained_in (const struct block *a, const struct block *b)
 {
   if (!a || !b)
     return 0;
-  return BLOCK_START (a) >= BLOCK_START (b)
-    && BLOCK_END (a) <= BLOCK_END (b);
+
+  do
+    {
+      if (a == b)
+	return 1;
+      a = BLOCK_SUPERBLOCK (a);
+    }
+  while (a != NULL);
+
+  return 0;
 }
 
 
@@ -60,10 +68,19 @@ contained_in (const struct block *a, const struct block *b)
 struct symbol *
 block_linkage_function (const struct block *bl)
 {
-  while (BLOCK_FUNCTION (bl) == 0 && BLOCK_SUPERBLOCK (bl) != 0)
+  while ((BLOCK_FUNCTION (bl) == NULL || block_inlined_p (bl))
+	 && BLOCK_SUPERBLOCK (bl) != NULL)
     bl = BLOCK_SUPERBLOCK (bl);
 
   return BLOCK_FUNCTION (bl);
+}
+
+/* Return one if BL represents an inlined function.  */
+
+int
+block_inlined_p (const struct block *bl)
+{
+  return BLOCK_FUNCTION (bl) != NULL && SYMBOL_INLINED (BLOCK_FUNCTION (bl));
 }
 
 /* Return the blockvector immediately containing the innermost lexical

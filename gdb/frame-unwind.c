@@ -21,6 +21,7 @@
 #include "frame.h"
 #include "frame-unwind.h"
 #include "dummy-frame.h"
+#include "inline-frame.h"
 #include "value.h"
 #include "regcache.h"
 
@@ -51,8 +52,10 @@ frame_unwind_init (struct obstack *obstack)
      can't override this.  */
   table->list = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
   table->list->unwinder = dummy_frame_unwind;
+  table->list->next = OBSTACK_ZALLOC (obstack, struct frame_unwind_table_entry);
+  table->list->next->unwinder = inline_frame_unwind;
   /* The insertion point for OSABI sniffers.  */
-  table->osabi_head = &table->list->next;
+  table->osabi_head = &table->list->next->next;
   return table;
 }
 

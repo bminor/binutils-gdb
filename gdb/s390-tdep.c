@@ -1182,6 +1182,7 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
   CORE_ADDR prev_sp;
   int frame_pointer;
   int size;
+  struct frame_info *next_frame;
 
   /* Try to find the function start address.  If we can't find it, we don't
      bother searching for it -- with modern compilers this would be mostly
@@ -1215,7 +1216,10 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
       /* FIXME: cagney/2004-05-01: This sanity check shouldn't be
 	 needed, instead the code should simpliy rely on its
 	 analysis.  */
-      if (get_next_frame (this_frame)
+      next_frame = get_next_frame (this_frame);
+      while (next_frame && get_frame_type (next_frame) == INLINE_FRAME)
+	next_frame = get_next_frame (next_frame);
+      if (next_frame
 	  && get_frame_type (get_next_frame (this_frame)) == NORMAL_FRAME)
 	return 0;
 
@@ -1261,8 +1265,11 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
      This can only happen in an innermost frame.  */
   /* FIXME: cagney/2004-05-01: This sanity check shouldn't be needed,
      instead the code should simpliy rely on its analysis.  */
+  next_frame = get_next_frame (this_frame);
+  while (next_frame && get_frame_type (next_frame) == INLINE_FRAME)
+    next_frame = get_next_frame (next_frame);
   if (size > 0
-      && (!get_next_frame (this_frame)
+      && (next_frame == NULL
 	  || get_frame_type (get_next_frame (this_frame)) != NORMAL_FRAME))
     {
       /* See the comment in s390_in_function_epilogue_p on why this is

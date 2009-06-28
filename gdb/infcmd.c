@@ -52,6 +52,7 @@
 #include "cli/cli-decode.h"
 #include "gdbthread.h"
 #include "valprint.h"
+#include "inline-frame.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -758,6 +759,17 @@ Can't resume all threads and specify proceed count simultaneously."));
   continue_1 (all_threads);
 }
 
+/* Record the starting point of a "step" or "next" command.  */
+
+static void
+set_step_frame (void)
+{
+  struct symtab_and_line sal;
+
+  find_frame_sal (get_current_frame (), &sal);
+  set_step_info (get_current_frame (), sal);
+}
+
 /* Step until outside of current statement.  */
 
 static void
@@ -926,7 +938,7 @@ step_1_continuation (void *args)
 static void
 step_once (int skip_subroutines, int single_inst, int count, int thread)
 {
-  struct frame_info *frame;
+  struct frame_info *frame = get_current_frame ();
 
   if (count > 0)
     {
@@ -936,13 +948,24 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	 THREAD is set.  */
       struct thread_info *tp = inferior_thread ();
       clear_proceed_status ();
-
-      frame = get_current_frame ();
-      tp->step_frame_id = get_frame_id (frame);
+      set_step_frame ();
 
       if (!single_inst)
 	{
 	  CORE_ADDR pc;
+
+	  /* Step at an inlined function behaves like "down".  */
+	  if (!skip_subroutines && !single_inst
+	      && inline_skipped_frames (inferior_ptid))
+	    {
+	      step_into_inline_frame (inferior_ptid);
+	      if (count > 1)
+		step_once (skip_subroutines, single_inst, count - 1, thread);
+	      else
+		/* Pretend that we've stopped.  */
+		normal_stop ();
+	      return;
+	    }
 
 	  pc = get_frame_pc (frame);
 	  find_pc_line_pc_range (pc,
@@ -950,9 +973,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 
 	  /* If we have no line info, switch to stepi mode.  */
 	  if (tp->step_range_end == 0 && step_stop_if_no_debug)
-	    {
-	      tp->step_range_start = tp->step_range_end = 1;
-	    }
+	    tp->step_range_start = tp->step_range_end = 1;
 	  else if (tp->step_range_end == 0)
 	    {
 	      char *name;
@@ -1188,6 +1209,7 @@ until_next_command (int from_tty)
   struct thread_info *tp = inferior_thread ();
 
   clear_proceed_status ();
+  set_step_frame ();
 
   frame = get_current_frame ();
 
@@ -1217,7 +1239,6 @@ until_next_command (int from_tty)
     }
 
   tp->step_over_calls = STEP_OVER_ALL;
-  tp->step_frame_id = get_frame_id (frame);
 
   tp->step_multi = 0;		/* Only one call to proceed */
 
@@ -1443,7 +1464,7 @@ finish_backward (struct symbol *function)
       /* Set breakpoint and continue.  */
       breakpoint =
 	set_momentary_breakpoint (sal,
-				  get_frame_id (get_selected_frame (NULL)),
+				  get_stack_frame_id (get_selected_frame (NULL)),
 				  bp_breakpoint);
       /* Tell the breakpoint to keep quiet.  We won't be done
          until we've done another reverse single-step.  */
@@ -1481,7 +1502,7 @@ finish_forward (struct symbol *function, struct frame_info *frame)
   sal = find_pc_line (get_frame_pc (frame), 0);
   sal.pc = get_frame_pc (frame);
 
-  breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame),
+  breakpoint = set_momentary_breakpoint (sal, get_stack_frame_id (frame),
                                          bp_finish);
 
   old_chain = make_cleanup_delete_breakpoint (breakpoint);
@@ -1543,6 +1564,36 @@ finish_command (char *arg, int from_tty)
     error (_("\"finish\" not meaningful in the outermost frame."));
 
   clear_proceed_status ();
+
+  /* Finishing from an inline frame is completely different.  We don't
+     try to show the "return value" - no way to locate it.  So we do
+     not need a completion.  */
+  if (get_frame_type (get_selected_frame (_("No selected frame.")))
+      == INLINE_FRAME)
+    {
+      /* Claim we are stepping in the calling frame.  An empty step
+	 range means that we will stop once we aren't in a function
+	 called by that frame.  We don't use the magic "1" value for
+	 step_range_end, because then infrun will think this is nexti,
+	 and not step over the rest of this inlined function call.  */
+      struct thread_info *tp = inferior_thread ();
+      struct symtab_and_line empty_sal;
+      init_sal (&empty_sal);
+      set_step_info (frame, empty_sal);
+      tp->step_range_start = tp->step_range_end = get_frame_pc (frame);
+      tp->step_over_calls = STEP_OVER_ALL;
+
+      /* Print info on the selected frame, including level number but not
+	 source.  */
+      if (from_tty)
+	{
+	  printf_filtered (_("Run till exit from "));
+	  print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
+	}
+
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
+      return;
+    }
 
   /* Find the function we will return from.  */
 

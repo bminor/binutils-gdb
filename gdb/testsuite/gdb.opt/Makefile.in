@@ -1,7 +1,7 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-EXECUTABLES = hello/hello
+EXECUTABLES = clobbered-registers-O2 inline-bt inline-cmds inline-locals
 
 MISCELLANEOUS =
 

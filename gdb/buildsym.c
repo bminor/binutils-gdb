@@ -1187,6 +1187,12 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	  struct symbol *sym;
 	  struct dict_iterator iter;
 
+	  /* Inlined functions may have symbols not in the global or static
+	     symbol lists.  */
+	  if (BLOCK_FUNCTION (block) != NULL)
+	    if (SYMBOL_SYMTAB (BLOCK_FUNCTION (block)) == NULL)
+	      SYMBOL_SYMTAB (BLOCK_FUNCTION (block)) = symtab;
+
 	  for (sym = dict_iterator_first (BLOCK_DICT (block), &iter);
 	       sym != NULL;
 	       sym = dict_iterator_next (&iter))

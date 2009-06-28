@@ -83,6 +83,11 @@ struct thread_info
      This is how we know when we step into a subroutine call, and how
      to set the frame for the breakpoint used to step out.  */
   struct frame_id step_frame_id;
+
+  /* Similarly, the frame ID of the underlying stack frame (skipping
+     any inlined frames).  */
+  struct frame_id step_stack_frame_id;
+
   int current_line;
   struct symtab *current_symtab;
 

@@ -854,6 +854,10 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
   else
     internal_error (__FILE__, __LINE__,
 		    _("regcache_write_pc: Unable to update PC"));
+
+  /* Writing the PC (for instance, from "load") invalidates the
+     current frame.  */
+  reinit_frame_cache ();
 }
 
 

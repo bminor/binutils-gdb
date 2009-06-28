@@ -1003,7 +1003,7 @@ value_of_variable (struct symbol *var, struct block *b)
       frame = block_innermost_frame (b);
       if (!frame)
 	{
-	  if (BLOCK_FUNCTION (b)
+	  if (BLOCK_FUNCTION (b) && !block_inlined_p (b)
 	      && SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)))
 	    error (_("No frame is currently executing in block %s."),
 		   SYMBOL_PRINT_NAME (BLOCK_FUNCTION (b)));

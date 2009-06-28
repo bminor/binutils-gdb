@@ -31,6 +31,7 @@
 #include "regcache.h"
 #include "objfiles.h"
 #include "exceptions.h"
+#include "block.h"
 
 #include "elf/dwarf2.h"
 #include "dwarf2expr.h"
@@ -147,14 +148,19 @@ dwarf_expr_frame_base (void *baton, gdb_byte **start, size_t * length)
   struct symbol *framefunc;
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
 
-  framefunc = get_frame_function (debaton->frame);
+  /* Use block_linkage_function, which returns a real (not inlined)
+     function, instead of get_frame_function, which may return an
+     inlined function.  */
+  framefunc = block_linkage_function (get_frame_block (debaton->frame, NULL));
 
   /* If we found a frame-relative symbol then it was certainly within
      some function associated with a frame. If we can't find the frame,
      something has gone wrong.  */
   gdb_assert (framefunc != NULL);
 
-  if (SYMBOL_COMPUTED_OPS (framefunc) == &dwarf2_loclist_funcs)
+  if (SYMBOL_LOCATION_BATON (framefunc) == NULL)
+    *start = NULL;
+  else if (SYMBOL_COMPUTED_OPS (framefunc) == &dwarf2_loclist_funcs)
     {
       struct dwarf2_loclist_baton *symbaton;
       struct frame_info *frame = debaton->frame;
