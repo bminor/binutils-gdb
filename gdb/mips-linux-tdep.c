@@ -702,7 +702,7 @@ mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
   resolver = lookup_minimal_symbol ("__dl_runtime_resolve", NULL, NULL);
 
   if (resolver && SYMBOL_VALUE_ADDRESS (resolver) == pc)
-    return frame_pc_unwind (get_current_frame ());
+    return frame_unwind_caller_pc (get_current_frame ());
 
   return glibc_skip_solib_resolver (gdbarch, pc);
 }
@@ -1117,7 +1117,7 @@ mips_linux_syscall_next_pc (struct frame_info *frame)
       || v0 == MIPS_NR_rt_sigreturn
       || v0 == MIPS_NR_N64_rt_sigreturn
       || v0 == MIPS_NR_N32_rt_sigreturn)
-    return frame_pc_unwind (get_current_frame ());
+    return frame_unwind_caller_pc (get_current_frame ());
 
   return pc + 4;
 }
