@@ -1,3 +1,7 @@
+2009-06-28  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* mi/mi-cmds.c (mi_cmds): Remove unimplemented entries.
+	
 2009-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

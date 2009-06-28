@@ -21943,6 +21943,7 @@ The corresponding @value{GDBN} command is @samp{set args}.
 @end smallexample
 
 
+@ignore
 @subheading The @code{-exec-show-arguments} Command
 @findex -exec-show-arguments
 
@@ -21960,6 +21961,7 @@ The corresponding @value{GDBN} command is @samp{show args}.
 
 @subsubheading Example
 N.A.
+@end ignore
 
 
 @subheading The @code{-environment-cd} Command
@@ -24160,6 +24162,7 @@ The tracepoint commands are not yet implemented.
 @section @sc{gdb/mi} Symbol Query Commands
 
 
+@ignore
 @subheading The @code{-symbol-info-address} Command
 @findex -symbol-info-address
 
@@ -24275,6 +24278,7 @@ List the functions in the executable.
 
 @subsubheading Example
 N.A.
+@end ignore
 
 
 @subheading The @code{-symbol-list-lines} Command
@@ -24303,6 +24307,7 @@ There is no corresponding @value{GDBN} command.
 @end smallexample
 
 
+@ignore
 @subheading The @code{-symbol-list-types} Command
 @findex -symbol-list-types
 
@@ -24377,6 +24382,7 @@ The corresponding @value{GDBN} command is @samp{ptype}, @code{gdbtk} has
 
 @subsubheading Example
 N.A.
+@end ignore
 
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -24445,6 +24451,7 @@ The corresponding @value{GDBN} command is @samp{exec-file}.
 @end smallexample
 
 
+@ignore
 @subheading The @code{-file-list-exec-sections} Command
 @findex -file-list-exec-sections
 
@@ -24464,6 +24471,7 @@ information as this command.  @code{gdbtk} has a corresponding command
 
 @subsubheading Example
 N.A.
+@end ignore
 
 
 @subheading The @code{-file-list-exec-source-file} Command
@@ -24524,6 +24532,7 @@ The @value{GDBN} equivalent is @samp{info sources}.
 (gdb)
 @end smallexample
 
+@ignore
 @subheading The @code{-file-list-shared-libraries} Command
 @findex -file-list-shared-libraries
 
@@ -24560,6 +24569,7 @@ The corresponding @value{GDBN} command is @samp{info file} (part of it).
 
 @subsubheading Example
 N.A.
+@end ignore
 
 
 @subheading The @code{-file-symbol-file} Command
@@ -24656,6 +24666,7 @@ The corresponding @value{GDBN} command is @samp{attach}.
 (gdb)
 @end smallexample
 
+@ignore
 @subheading The @code{-target-compare-sections} Command
 @findex -target-compare-sections
 
@@ -24674,6 +24685,7 @@ The @value{GDBN} equivalent is @samp{compare-sections}.
 
 @subsubheading Example
 N.A.
+@end ignore
 
 
 @subheading The @code{-target-detach} Command
@@ -24833,6 +24845,7 @@ write-rate="429"
 @end smallexample
 
 
+@ignore
 @subheading The @code{-target-exec-status} Command
 @findex -target-exec-status
 
@@ -24902,6 +24915,7 @@ N.A.
 @end smallexample
 
 @c ????
+@end ignore
 
 @subsubheading @value{GDBN} Command
 
@@ -25063,6 +25077,7 @@ Approximately corresponds to @samp{quit}.
 @end smallexample
 
 
+@ignore
 @subheading The @code{-exec-abort} Command
 @findex -exec-abort
 
@@ -25080,6 +25095,7 @@ The corresponding @value{GDBN} command is @samp{kill}.
 
 @subsubheading Example
 N.A.
+@end ignore
 
 
 @subheading The @code{-gdb-set} Command

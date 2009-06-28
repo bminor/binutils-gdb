@@ -1,3 +1,13 @@
+2009-06-28  Paul Pluzhnikov  <ppluzhnikov@google.com>
+	
+	* gdb.texinfo (GDB/MI Program Context): @ignore unimplemented
+	MI commands.
+	(GDB/MI Symbol Query): Likewise.
+	(GDB/MI File Commands): Likewise.
+	(GDB/MI File Transfer Commands): Likewise.
+	(GDB/MI Target Manipulation): Likewise.
+	(GDB/MI Miscellaneous Commands): Likewise.
+	
 2009-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Debugging Optimized Code): New chapter.
