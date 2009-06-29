@@ -1,3 +1,25 @@
+2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ada-lang.c (ada_index_type): Make static.  Add NAME argument.
+	Throw error on invalid input arguments.  Return NULL if unable
+	to determine index type.
+
+	(ada_array_bound_from_type): Remove TYPEP argument.
+	(ada_array_bound): Make static.  Return LONGEST instead of value.
+	Update for ada_array_bound_from_type change.
+	(ada_array_length): Return LONGEST instead of value.
+	Update for ada_array_bound_from_type change.
+	(make_array_descriptor): Update for ada_array_bound change.
+
+	(ada_evaluate_subexp) [OP_ATR_RANGE, OP_ATR_FIRST, OP_ATR_LAST,
+	OP_ATR_LENGTH]: Update for ada_array_bound_from_type,
+	ada_array_bound, ada_array_length, ada_index_type changes.
+	Always use ada_index_type to compute result type; fall back
+	to architecture-specific integer type if ada_index_type fails.
+
+	* ada-lang.h (ada_index_type): Remove prototype.
+	(ada_array_bound): Likewise.
+
 2009-06-29  Pedro Alves  <pedro@codesourcery.com>
 
 	* dbxread.c (read_dbx_symtab): Clear has_line_numbers when ending

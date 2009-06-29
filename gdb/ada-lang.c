@@ -2410,15 +2410,15 @@ ada_array_element_type (struct type *type, int nindices)
 /* The type of nth index in arrays of given type (n numbering from 1).
    Does not examine memory.  */
 
-struct type *
-ada_index_type (struct type *type, int n)
+static struct type *
+ada_index_type (struct type *type, int n, const char *name)
 {
   struct type *result_type;
 
   type = desc_base_type (type);
 
-  if (n > ada_array_arity (type))
-    return NULL;
+  if (n < 0 || n > ada_array_arity (type))
+    error (_("invalid dimension number to '%s"), name);
 
   if (ada_is_simple_array_type (type))
     {
@@ -2430,25 +2430,27 @@ ada_index_type (struct type *type, int n)
       /* FIXME: The stabs type r(0,0);bound;bound in an array type
          has a target type of TYPE_CODE_UNDEF.  We compensate here, but
          perhaps stabsread.c would make more sense.  */
-      if (result_type == NULL || TYPE_CODE (result_type) == TYPE_CODE_UNDEF)
-        result_type = builtin_type_int32;
-
-      return result_type;
+      if (result_type && TYPE_CODE (result_type) == TYPE_CODE_UNDEF)
+        result_type = NULL;
     }
   else
-    return desc_index_type (desc_bounds_type (type), n);
+    {
+      result_type = desc_index_type (desc_bounds_type (type), n);
+      if (result_type == NULL)
+	error (_("attempt to take bound of something that is not an array"));
+    }
+
+  return result_type;
 }
 
 /* Given that arr is an array type, returns the lower bound of the
    Nth index (numbering from 1) if WHICH is 0, and the upper bound if
    WHICH is 1.  This returns bounds 0 .. -1 if ARR_TYPE is an
-   array-descriptor type.  If TYPEP is non-null, *TYPEP is set to the
-   bounds type.  It works for other arrays with bounds supplied by
-   run-time quantities other than discriminants.  */
+   array-descriptor type.  It works for other arrays with bounds supplied
+   by run-time quantities other than discriminants.  */
 
 static LONGEST
-ada_array_bound_from_type (struct type * arr_type, int n, int which,
-                           struct type ** typep)
+ada_array_bound_from_type (struct type * arr_type, int n, int which)
 {
   struct type *type, *index_type_desc, *index_type;
   LONGEST retval;
@@ -2459,11 +2461,7 @@ ada_array_bound_from_type (struct type * arr_type, int n, int which,
     arr_type = decode_packed_array_type (arr_type);
 
   if (arr_type == NULL || !ada_is_simple_array_type (arr_type))
-    {
-      if (typep != NULL)
-        *typep = builtin_type_int32;
-      return (LONGEST) - which;
-    }
+    return (LONGEST) - which;
 
   if (TYPE_CODE (arr_type) == TYPE_CODE_PTR)
     type = TYPE_TARGET_TYPE (arr_type);
@@ -2500,9 +2498,6 @@ ada_array_bound_from_type (struct type * arr_type, int n, int which,
       internal_error (__FILE__, __LINE__, _("invalid type code of index type"));
     }
 
-  if (typep != NULL)
-    *typep = index_type;
-
   return retval;
 }
 
@@ -2511,7 +2506,7 @@ ada_array_bound_from_type (struct type * arr_type, int n, int which,
    WHICH is 1.  This routine will also work for arrays with bounds
    supplied by run-time quantities other than discriminants.  */
 
-struct value *
+static LONGEST
 ada_array_bound (struct value *arr, int n, int which)
 {
   struct type *arr_type = value_type (arr);
@@ -2519,13 +2514,9 @@ ada_array_bound (struct value *arr, int n, int which)
   if (ada_is_packed_array_type (arr_type))
     return ada_array_bound (decode_packed_array (arr), n, which);
   else if (ada_is_simple_array_type (arr_type))
-    {
-      struct type *type;
-      LONGEST v = ada_array_bound_from_type (arr_type, n, which, &type);
-      return value_from_longest (type, v);
-    }
+    return ada_array_bound_from_type (arr_type, n, which);
   else
-    return desc_one_bound (desc_bounds (arr), n, which);
+    return value_as_long (desc_one_bound (desc_bounds (arr), n, which));
 }
 
 /* Given that arr is an array value, returns the length of the
@@ -2534,7 +2525,7 @@ ada_array_bound (struct value *arr, int n, int which)
    Does not work for arrays indexed by enumeration types with representation
    clauses at the moment.  */
 
-static struct value *
+static LONGEST
 ada_array_length (struct value *arr, int n)
 {
   struct type *arr_type = ada_check_typedef (value_type (arr));
@@ -2543,20 +2534,11 @@ ada_array_length (struct value *arr, int n)
     return ada_array_length (decode_packed_array (arr), n);
 
   if (ada_is_simple_array_type (arr_type))
-    {
-      struct type *type;
-      LONGEST v =
-        ada_array_bound_from_type (arr_type, n, 1, &type) -
-        ada_array_bound_from_type (arr_type, n, 0, NULL) + 1;
-      return value_from_longest (type, v);
-    }
+    return (ada_array_bound_from_type (arr_type, n, 1)
+	    - ada_array_bound_from_type (arr_type, n, 0) + 1);
   else
-    return
-      value_from_longest (builtin_type_int32,
-                          value_as_long (desc_one_bound (desc_bounds (arr),
-                                                         n, 1))
-                          - value_as_long (desc_one_bound (desc_bounds (arr),
-                                                           n, 0)) + 1);
+    return (value_as_long (desc_one_bound (desc_bounds (arr), n, 1))
+	    - value_as_long (desc_one_bound (desc_bounds (arr), n, 0)) + 1);
 }
 
 /* An empty array whose type is that of ARR_TYPE (an array type),
@@ -3859,11 +3841,11 @@ make_array_descriptor (struct type *type, struct value *arr, CORE_ADDR *sp)
   for (i = ada_array_arity (ada_check_typedef (value_type (arr))); i > 0; i -= 1)
     {
       modify_general_field (value_contents_writeable (bounds),
-                            value_as_long (ada_array_bound (arr, i, 0)),
+                            ada_array_bound (arr, i, 0),
                             desc_bound_bitpos (bounds_type, i, 0),
                             desc_bound_bitsize (bounds_type, i, 0));
       modify_general_field (value_contents_writeable (bounds),
-                            value_as_long (ada_array_bound (arr, i, 1)),
+                            ada_array_bound (arr, i, 1),
                             desc_bound_bitpos (bounds_type, i, 1),
                             desc_bound_bitsize (bounds_type, i, 1));
     }
@@ -9046,11 +9028,12 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
       tem = longest_to_int (exp->elts[pc + 1].longconst);
 
-      if (tem < 1 || tem > ada_array_arity (value_type (arg2)))
-        error (_("invalid dimension number to 'range"));
+      type = ada_index_type (value_type (arg2), tem, "range");
+      if (!type)
+	type = value_type (arg1);
 
-      arg3 = ada_array_bound (arg2, tem, 1);
-      arg2 = ada_array_bound (arg2, tem, 0);
+      arg3 = value_from_longest (type, ada_array_bound (arg2, tem, 1));
+      arg2 = value_from_longest (type, ada_array_bound (arg2, tem, 0));
 
       binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
       binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
@@ -9112,29 +9095,27 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             if (ada_is_packed_array_type (value_type (arg1)))
               arg1 = ada_coerce_to_simple_array (arg1);
 
-            if (tem < 1 || tem > ada_array_arity (value_type (arg1)))
-              error (_("invalid dimension number to '%s"),
-                     ada_attribute_name (op));
+            type = ada_index_type (value_type (arg1), tem,
+				   ada_attribute_name (op));
+            if (type == NULL)
+	      type = builtin_type (exp->gdbarch)->builtin_int;
 
             if (noside == EVAL_AVOID_SIDE_EFFECTS)
-              {
-                type = ada_index_type (value_type (arg1), tem);
-                if (type == NULL)
-                  error
-                    (_("attempt to take bound of something that is not an array"));
-                return allocate_value (type);
-              }
+              return allocate_value (type);
 
             switch (op)
               {
               default:          /* Should never happen.  */
                 error (_("unexpected attribute encountered"));
               case OP_ATR_FIRST:
-                return ada_array_bound (arg1, tem, 0);
+                return value_from_longest
+			(type, ada_array_bound (arg1, tem, 0));
               case OP_ATR_LAST:
-                return ada_array_bound (arg1, tem, 1);
+                return value_from_longest
+			(type, ada_array_bound (arg1, tem, 1));
               case OP_ATR_LENGTH:
-                return ada_array_length (arg1, tem);
+                return value_from_longest
+			(type, ada_array_length (arg1, tem));
               }
           }
         else if (discrete_type_p (type_arg))
@@ -9170,14 +9151,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             if (ada_is_packed_array_type (type_arg))
               type_arg = decode_packed_array_type (type_arg);
 
-            if (tem < 1 || tem > ada_array_arity (type_arg))
-              error (_("invalid dimension number to '%s"),
-                     ada_attribute_name (op));
-
-            type = ada_index_type (type_arg, tem);
+            type = ada_index_type (type_arg, tem, ada_attribute_name (op));
             if (type == NULL)
-              error
-                (_("attempt to take bound of something that is not an array"));
+	      type = builtin_type (exp->gdbarch)->builtin_int;
+
             if (noside == EVAL_AVOID_SIDE_EFFECTS)
               return allocate_value (type);
 
@@ -9186,14 +9163,14 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
               default:
                 error (_("unexpected attribute encountered"));
               case OP_ATR_FIRST:
-                low = ada_array_bound_from_type (type_arg, tem, 0, &type);
+                low = ada_array_bound_from_type (type_arg, tem, 0);
                 return value_from_longest (type, low);
               case OP_ATR_LAST:
-                high = ada_array_bound_from_type (type_arg, tem, 1, &type);
+                high = ada_array_bound_from_type (type_arg, tem, 1);
                 return value_from_longest (type, high);
               case OP_ATR_LENGTH:
-                low = ada_array_bound_from_type (type_arg, tem, 0, &type);
-                high = ada_array_bound_from_type (type_arg, tem, 1, NULL);
+                low = ada_array_bound_from_type (type_arg, tem, 0);
+                high = ada_array_bound_from_type (type_arg, tem, 1);
                 return value_from_longest (type, high - low + 1);
               }
           }
