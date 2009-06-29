@@ -1,3 +1,8 @@
+2009-06-29  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/namespace-nested-import.cc: New test.
+	* gdb.cp/namespace-nested-import.exp: New test.
+
 2009-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/break.exp: Add an XFAIL for gcc/36748.

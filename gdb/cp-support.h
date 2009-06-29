@@ -76,13 +76,11 @@ extern struct type *cp_lookup_rtti_type (const char *name,
 
 extern int cp_is_anonymous (const char *namespace);
 
-extern void cp_add_using_directive (const char *name,
-				    unsigned int outer_length,
-				    unsigned int inner_length);
+extern void cp_add_using_directive (const char *outer,
+                                    const char *inner);
 
-extern struct using_direct *cp_add_using (const char *name,
-					  unsigned int inner_len,
-					  unsigned int outer_len,
+extern struct using_direct *cp_add_using (const char *outer,
+                                          const char *inner,
 					  struct using_direct *next);
 
 extern void cp_initialize_namespace (void);

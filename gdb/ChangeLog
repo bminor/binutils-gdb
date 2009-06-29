@@ -1,3 +1,10 @@
+2009-06-29  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* dwarf2read.c (read_import_statement): Properly set import location
+	and destination.
+	* cp-support.h (cp_add_using, cp_add_using_directive): Now take char*
+	inner, char* outer arguments. Updated callers.
+
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* value.h (value_subscript, value_subscripted_rvalue,

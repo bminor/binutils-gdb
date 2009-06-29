@@ -103,14 +103,23 @@ cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
 			  "(anonymous namespace)",
 			  ANONYMOUS_NAMESPACE_LEN) == 0)
 	    {
+	      int outer_len = (previous_component == 0 ? 0 : previous_component - 2);
+	      int inner_len = next_component;
+
+	      char *outer = alloca (outer_len + 1);
+	      char *inner = alloca (inner_len + 1);
+
+	      memcpy (outer, name, outer_len);
+	      memcpy (inner, name, inner_len);
+
+	      outer[outer_len] = '\0';
+	      inner[inner_len] = '\0';
+
 	      /* We've found a component of the name that's an
 		 anonymous namespace.  So add symbols in it to the
 		 namespace given by the previous component if there is
 		 one, or to the global namespace if there isn't.  */
-	      cp_add_using_directive (name,
-				      previous_component == 0
-				      ? 0 : previous_component - 2,
-				      next_component);
+	      cp_add_using_directive (outer, inner);
 	    }
 	  /* The "+ 2" is for the "::".  */
 	  previous_component = next_component + 2;
@@ -121,16 +130,11 @@ cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
     }
 }
 
-/* Add a using directive to using_list.  NAME is the start of a string
-   that should contain the namespaces we want to add as initial
-   substrings, OUTER_LENGTH is the end of the outer namespace, and
-   INNER_LENGTH is the end of the inner namespace.  If the using
-   directive in question has already been added, don't add it
-   twice.  */
+/* Add a using directive to using_list. If the using directive in question
+   has already been added, don't add it twice.  */
 
 void
-cp_add_using_directive (const char *name, unsigned int outer_length,
-			unsigned int inner_length)
+cp_add_using_directive (const char *outer, const char *inner)
 {
   struct using_direct *current;
   struct using_direct *new;
@@ -139,14 +143,13 @@ cp_add_using_directive (const char *name, unsigned int outer_length,
 
   for (current = using_directives; current != NULL; current = current->next)
     {
-      if ((strncmp (current->inner, name, inner_length) == 0)
-	  && (strlen (current->inner) == inner_length)
-	  && (strlen (current->outer) == outer_length))
+      if (strcmp (current->inner, inner) == 0
+          && strcmp (current->outer, outer) == 0)
 	return;
     }
 
-  using_directives = cp_add_using (name, inner_length, outer_length,
-                                   using_directives);
+  using_directives = cp_add_using (outer, inner, using_directives);
+
 }
 
 /* Record the namespace that the function defined by SYMBOL was
@@ -197,26 +200,22 @@ cp_is_anonymous (const char *namespace)
 	  != NULL);
 }
 
-/* Create a new struct using direct whose inner namespace is the
-   initial substring of NAME of leng INNER_LEN and whose outer
-   namespace is the initial substring of NAME of length OUTER_LENGTH.
+/* Create a new struct using direct whose inner namespace is INNER
+   and whose outer namespace is OUTER.
    Set its next member in the linked list to NEXT; allocate all memory
    using xmalloc.  It copies the strings, so NAME can be a temporary
    string.  */
 
 struct using_direct *
-cp_add_using (const char *name,
-	      unsigned int inner_len,
-	      unsigned int outer_len,
+cp_add_using (const char *outer,
+              const char *inner,
 	      struct using_direct *next)
 {
   struct using_direct *retval;
 
-  gdb_assert (outer_len < inner_len);
-
   retval = xmalloc (sizeof (struct using_direct));
-  retval->inner = savestring (name, inner_len);
-  retval->outer = savestring (name, outer_len);
+  retval->inner = savestring (inner, strlen(inner));
+  retval->outer = savestring (outer, strlen(outer));
   retval->next = next;
 
   return retval;
