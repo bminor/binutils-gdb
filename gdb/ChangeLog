@@ -1,3 +1,8 @@
+2009-06-29  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Context switch to the new
+	thread when resuming for a new_thread_event.
+
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ada-lang.h (ada_convert_actual): Add GDBARCH argument.

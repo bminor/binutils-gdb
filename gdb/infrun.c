@@ -2746,6 +2746,8 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	 in either the OS or the native code).  Therefore we need to
 	 continue all threads in order to make progress.  */
 
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	context_switch (ecs->ptid);
       target_resume (RESUME_ALL, 0, TARGET_SIGNAL_0);
       prepare_to_wait (ecs);
       return;
