@@ -1,5 +1,13 @@
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (resolve): Use per-architecture void type instead
+	of platform-independent one.
+	(ada_evaluate_subexp) [STRUCTOP_STRUCT]: Likewise.
+	(ada_resolve_function): Reimplement fallback logic to avoid
+	explicit reference to builtin_type_void.
+
+2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-valprint.c (ada_print_scalar): Accept NULL type argument
 	to indicate scalar should be printed as default integer.
 	(print_optional_low_bound): Pass NULL to ada_print_scalar to

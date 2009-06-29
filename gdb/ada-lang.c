@@ -2586,9 +2586,13 @@ ada_decoded_op_name (enum exp_opcode op)
 static void
 resolve (struct expression **expp, int void_context_p)
 {
-  int pc;
-  pc = 0;
-  resolve_subexp (expp, &pc, 1, void_context_p ? builtin_type_void : NULL);
+  struct type *context_type = NULL;
+  int pc = 0;
+
+  if (void_context_p)
+    context_type = builtin_type ((*expp)->gdbarch)->builtin_void;
+
+  resolve_subexp (expp, &pc, 1, context_type);
 }
 
 /* Resolve the operator of the subexpression beginning at
@@ -3094,35 +3098,27 @@ ada_resolve_function (struct ada_symbol_info syms[],
                       int nsyms, struct value **args, int nargs,
                       const char *name, struct type *context_type)
 {
+  int fallback;
   int k;
   int m;                        /* Number of hits */
-  struct type *fallback;
-  struct type *return_type;
-
-  return_type = context_type;
-  if (context_type == NULL)
-    fallback = builtin_type_void;
-  else
-    fallback = NULL;
 
   m = 0;
-  while (1)
+  /* In the first pass of the loop, we only accept functions matching
+     context_type.  If none are found, we add a second pass of the loop
+     where every function is accepted.  */
+  for (fallback = 0; m == 0 && fallback < 2; fallback++)
     {
       for (k = 0; k < nsyms; k += 1)
         {
           struct type *type = ada_check_typedef (SYMBOL_TYPE (syms[k].sym));
 
           if (ada_args_match (syms[k].sym, args, nargs)
-              && return_match (type, return_type))
+              && (fallback || return_match (type, context_type)))
             {
               syms[m] = syms[k];
               m += 1;
             }
         }
-      if (m > 0 || return_type == fallback)
-        break;
-      else
-        return_type = fallback;
     }
 
   if (m == 0)
@@ -9375,7 +9371,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                    in some extension of the type.  Return an object of 
                    "type" void, which will match any formal 
                    (see ada_type_match). */
-                return value_zero (builtin_type_void, lval_memory);
+                return value_zero (builtin_type (exp->gdbarch)->builtin_void,
+				   lval_memory);
             }
           else
             type =
