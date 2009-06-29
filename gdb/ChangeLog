@@ -1,5 +1,14 @@
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.h (ada_convert_actual): Add GDBARCH argument.
+	* ada-lang.c (convert_actual): Remove stale prototype.
+	(ensure_lval, make_array_descriptor, ada_convert_actual):
+	Add GDBARCH argument and pass through to subroutine calls.
+	(ensure_lval): Use GDBARCH instead of current_gdbarch.
+	* infcall.c (value_arg_coerce): Update ada_convert_actual call.
+
+2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (resolve): Use per-architecture void type instead
 	of platform-independent one.
 	(ada_evaluate_subexp) [STRUCTOP_STRUCT]: Likewise.

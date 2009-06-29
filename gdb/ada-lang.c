@@ -101,13 +101,11 @@ static int ada_type_match (struct type *, struct type *, int);
 
 static int ada_args_match (struct symbol *, struct value **, int);
 
-static struct value *ensure_lval (struct value *, CORE_ADDR *);
-
-static struct value *convert_actual (struct value *, struct type *,
-                                     CORE_ADDR *);
+static struct value *ensure_lval (struct value *,
+				  struct gdbarch *, CORE_ADDR *);
 
 static struct value *make_array_descriptor (struct type *, struct value *,
-                                            CORE_ADDR *);
+                                            struct gdbarch *, CORE_ADDR *);
 
 static void ada_add_block_symbols (struct obstack *,
                                    struct block *, const char *,
@@ -3729,7 +3727,7 @@ parse_old_style_renaming (struct type *type,
    returning an lvalue whose value_address points to the copy.  */
 
 static struct value *
-ensure_lval (struct value *val, CORE_ADDR *sp)
+ensure_lval (struct value *val, struct gdbarch *gdbarch, CORE_ADDR *sp)
 {
   if (! VALUE_LVAL (val))
     {
@@ -3738,25 +3736,25 @@ ensure_lval (struct value *val, CORE_ADDR *sp)
       /* The following is taken from the structure-return code in
 	 call_function_by_hand. FIXME: Therefore, some refactoring seems 
 	 indicated. */
-      if (gdbarch_inner_than (current_gdbarch, 1, 2))
+      if (gdbarch_inner_than (gdbarch, 1, 2))
 	{
 	  /* Stack grows downward.  Align SP and value_address (val) after
 	     reserving sufficient space. */
 	  *sp -= len;
-	  if (gdbarch_frame_align_p (current_gdbarch))
-	    *sp = gdbarch_frame_align (current_gdbarch, *sp);
+	  if (gdbarch_frame_align_p (gdbarch))
+	    *sp = gdbarch_frame_align (gdbarch, *sp);
 	  set_value_address (val, *sp);
 	}
       else
 	{
 	  /* Stack grows upward.  Align the frame, allocate space, and
 	     then again, re-align the frame. */
-	  if (gdbarch_frame_align_p (current_gdbarch))
-	    *sp = gdbarch_frame_align (current_gdbarch, *sp);
+	  if (gdbarch_frame_align_p (gdbarch))
+	    *sp = gdbarch_frame_align (gdbarch, *sp);
 	  set_value_address (val, *sp);
 	  *sp += len;
-	  if (gdbarch_frame_align_p (current_gdbarch))
-	    *sp = gdbarch_frame_align (current_gdbarch, *sp);
+	  if (gdbarch_frame_align_p (gdbarch))
+	    *sp = gdbarch_frame_align (gdbarch, *sp);
 	}
       VALUE_LVAL (val) = lval_memory;
 
@@ -3773,7 +3771,7 @@ ensure_lval (struct value *val, CORE_ADDR *sp)
 
 struct value *
 ada_convert_actual (struct value *actual, struct type *formal_type0,
-                    CORE_ADDR *sp)
+                    struct gdbarch *gdbarch, CORE_ADDR *sp)
 {
   struct type *actual_type = ada_check_typedef (value_type (actual));
   struct type *formal_type = ada_check_typedef (formal_type0);
@@ -3786,7 +3784,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0,
 
   if (ada_is_array_descriptor_type (formal_target)
       && TYPE_CODE (actual_target) == TYPE_CODE_ARRAY)
-    return make_array_descriptor (formal_type, actual, sp);
+    return make_array_descriptor (formal_type, actual, gdbarch, sp);
   else if (TYPE_CODE (formal_type) == TYPE_CODE_PTR
 	   || TYPE_CODE (formal_type) == TYPE_CODE_REF)
     {
@@ -3804,7 +3802,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0,
               memcpy ((char *) value_contents_raw (val),
                       (char *) value_contents (actual),
                       TYPE_LENGTH (actual_type));
-              actual = ensure_lval (val, sp);
+              actual = ensure_lval (val, gdbarch, sp);
             }
           result = value_addr (actual);
         }
@@ -3826,7 +3824,8 @@ ada_convert_actual (struct value *actual, struct type *formal_type0,
    representing a pointer to this descriptor.  */
 
 static struct value *
-make_array_descriptor (struct type *type, struct value *arr, CORE_ADDR *sp)
+make_array_descriptor (struct type *type, struct value *arr,
+		       struct gdbarch *gdbarch, CORE_ADDR *sp)
 {
   struct type *bounds_type = desc_bounds_type (type);
   struct type *desc_type = desc_base_type (type);
@@ -3846,10 +3845,10 @@ make_array_descriptor (struct type *type, struct value *arr, CORE_ADDR *sp)
                             desc_bound_bitsize (bounds_type, i, 1));
     }
 
-  bounds = ensure_lval (bounds, sp);
+  bounds = ensure_lval (bounds, gdbarch, sp);
 
   modify_general_field (value_contents_writeable (descriptor),
-                        value_address (ensure_lval (arr, sp)),
+                        value_address (ensure_lval (arr, gdbarch, sp)),
                         fat_pntr_data_bitpos (desc_type),
                         fat_pntr_data_bitsize (desc_type));
 
@@ -3858,7 +3857,7 @@ make_array_descriptor (struct type *type, struct value *arr, CORE_ADDR *sp)
                         fat_pntr_bounds_bitpos (desc_type),
                         fat_pntr_bounds_bitsize (desc_type));
 
-  descriptor = ensure_lval (descriptor, sp);
+  descriptor = ensure_lval (descriptor, gdbarch, sp);
 
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     return value_addr (descriptor);
