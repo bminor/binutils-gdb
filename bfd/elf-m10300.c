@@ -2783,11 +2783,30 @@ mn10300_elf_relax_section (bfd *abfd,
 	  if ((sym_sec->flags & SEC_MERGE)
 	      && sym_sec->sec_info_type == ELF_INFO_TYPE_MERGE)
 	    {
-	      symval = isym->st_value + irel->r_addend;
+	      symval = isym->st_value;
+
+	      /* GAS may reduce relocations against symbols in SEC_MERGE
+		 sections to a relocation against the section symbol when
+		 the original addend was zero.  When the reloc is against
+		 a section symbol we should include the addend in the
+		 offset passed to _bfd_merged_section_offset, since the
+		 location of interest is the original symbol.  On the
+		 other hand, an access to "sym+addend" where "sym" is not
+		 a section symbol should not include the addend;  Such an
+		 access is presumed to be an offset from "sym";  The
+		 location of interest is just "sym".  */
+	      if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
+		symval += irel->r_addend;
+
 	      symval = _bfd_merged_section_offset (abfd, & sym_sec,
 						   elf_section_data (sym_sec)->sec_info,
 						   symval);
-	      symval += sym_sec->output_section->vma + sym_sec->output_offset - irel->r_addend;
+
+	      if (ELF_ST_TYPE (isym->st_info) != STT_SECTION)
+		symval += irel->r_addend;
+
+	      symval += sym_sec->output_section->vma
+		+ sym_sec->output_offset - irel->r_addend;
 	    }
 	  else
 	    symval = (isym->st_value
