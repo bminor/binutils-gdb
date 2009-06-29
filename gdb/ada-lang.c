@@ -168,7 +168,7 @@ static struct type *to_fixed_variant_branch_type (struct type *,
 static struct type *to_fixed_array_type (struct type *, struct value *, int);
 
 static struct type *to_fixed_range_type (char *, struct value *,
-                                         struct objfile *);
+                                         struct type *);
 
 static struct type *to_static_fixed_type (struct type *);
 static struct type *static_unwrap_type (struct type *type);
@@ -2455,8 +2455,9 @@ ada_index_type (struct type *type, int n, const char *name)
 static LONGEST
 ada_array_bound_from_type (struct type * arr_type, int n, int which)
 {
-  struct type *type, *index_type_desc, *index_type;
+  struct type *type, *elt_type, *index_type_desc, *index_type;
   LONGEST retval;
+  int i;
 
   gdb_assert (which == 0 || which == 1);
 
@@ -2471,20 +2472,16 @@ ada_array_bound_from_type (struct type * arr_type, int n, int which)
   else
     type = arr_type;
 
+  elt_type = type;
+  for (i = n; i > 1; i--)
+    elt_type = TYPE_TARGET_TYPE (type);
+
   index_type_desc = ada_find_parallel_type (type, "___XA");
   if (index_type_desc != NULL)
     index_type = to_fixed_range_type (TYPE_FIELD_NAME (index_type_desc, n - 1),
-				      NULL, TYPE_OBJFILE (arr_type));
+				      NULL, TYPE_INDEX_TYPE (elt_type));
   else
-    {
-      while (n > 1)
-        {
-          type = TYPE_TARGET_TYPE (type);
-          n -= 1;
-        }
-
-      index_type = TYPE_INDEX_TYPE (type);
-    }
+    index_type = TYPE_INDEX_TYPE (elt_type);
 
   switch (TYPE_CODE (index_type))
     {
@@ -7195,13 +7192,16 @@ to_fixed_array_type (struct type *type0, struct value *dval,
          consult the object tag.  */
       result =
         ada_to_fixed_type (ada_check_typedef (elt_type0), 0, 0, dval, 1);
+
+      elt_type0 = type0;
       for (i = TYPE_NFIELDS (index_type_desc) - 1; i >= 0; i -= 1)
         {
           struct type *range_type =
             to_fixed_range_type (TYPE_FIELD_NAME (index_type_desc, i),
-                                 dval, TYPE_OBJFILE (type0));
-          result = create_array_type (alloc_type (TYPE_OBJFILE (type0)),
+                                 dval, TYPE_INDEX_TYPE (elt_type0));
+          result = create_array_type (alloc_type (TYPE_OBJFILE (elt_type0)),
                                       result, range_type);
+	  elt_type0 = TYPE_TARGET_TYPE (elt_type0);
         }
       if (!ignore_too_big && TYPE_LENGTH (result) > varsize_limit)
         error (_("array type with dynamic size is larger than varsize-limit"));
@@ -9127,8 +9127,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             char *name = ada_type_name (type_arg);
             range_type = NULL;
             if (name != NULL && TYPE_CODE (type_arg) != TYPE_CODE_ENUM)
-              range_type =
-                to_fixed_range_type (name, NULL, TYPE_OBJFILE (type_arg));
+              range_type = to_fixed_range_type (name, NULL, type_arg);
             if (range_type == NULL)
               range_type = type_arg;
             switch (op)
@@ -9688,26 +9687,24 @@ get_int_var_value (char *name, int *flag)
 /* Return a range type whose base type is that of the range type named
    NAME in the current environment, and whose bounds are calculated
    from NAME according to the GNAT range encoding conventions.
-   Extract discriminant values, if needed, from DVAL.  If a new type
-   must be created, allocate in OBJFILE's space.  The bounds
-   information, in general, is encoded in NAME, the base type given in
-   the named range type.  */
+   Extract discriminant values, if needed, from DVAL.  ORIG_TYPE is the
+   corresponding range type from debug information; fall back to using it
+   if symbol lookup fails.  If a new type must be created, allocate it
+   like ORIG_TYPE was.  The bounds information, in general, is encoded
+   in NAME, the base type given in the named range type.  */
 
 static struct type *
-to_fixed_range_type (char *name, struct value *dval, struct objfile *objfile)
+to_fixed_range_type (char *name, struct value *dval, struct type *orig_type)
 {
   struct type *raw_type = ada_find_any_type (name);
   struct type *base_type;
   char *subtype_info;
 
-  /* Also search primitive types if type symbol could not be found.  */
+  /* Fall back to the original type if symbol lookup failed.  */
   if (raw_type == NULL)
-    raw_type = language_lookup_primitive_type_by_name
-		(language_def (language_ada), current_gdbarch, name);
+    raw_type = orig_type;
 
-  if (raw_type == NULL)
-    base_type = builtin_type_int32;
-  else if (TYPE_CODE (raw_type) == TYPE_CODE_RANGE)
+  if (TYPE_CODE (raw_type) == TYPE_CODE_RANGE)
     base_type = TYPE_TARGET_TYPE (raw_type);
   else
     base_type = raw_type;
@@ -9720,7 +9717,8 @@ to_fixed_range_type (char *name, struct value *dval, struct objfile *objfile)
       if (L < INT_MIN || U > INT_MAX)
 	return raw_type;
       else
-	return create_range_type (alloc_type (objfile), raw_type, 
+	return create_range_type (alloc_type (TYPE_OBJFILE (orig_type)),
+				  raw_type,
 				  discrete_type_low_bound (raw_type),
 				  discrete_type_high_bound (raw_type));
     }
@@ -9783,9 +9781,8 @@ to_fixed_range_type (char *name, struct value *dval, struct objfile *objfile)
             }
         }
 
-      if (objfile == NULL)
-        objfile = TYPE_OBJFILE (base_type);
-      type = create_range_type (alloc_type (objfile), base_type, L, U);
+      type = create_range_type (alloc_type (TYPE_OBJFILE (orig_type)),
+				base_type, L, U);
       TYPE_NAME (type) = name;
       return type;
     }

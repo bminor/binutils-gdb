@@ -55,7 +55,7 @@ static void
 print_dynamic_range_bound (struct type *, const char *, int,
 			   const char *, struct ui_file *);
 
-static void print_range_type_named (char *, struct ui_file *);
+static void print_range_type_named (char *, struct type *, struct ui_file *);
 
 
 
@@ -233,26 +233,27 @@ print_dynamic_range_bound (struct type *type, const char *name, int name_len,
     fprintf_filtered (stream, "?");
 }
 
-/* Print the range type named NAME.  */
+/* Print the range type named NAME.  If symbol lookup fails, fall back
+   to ORIG_TYPE as base type.  */
 
 static void
-print_range_type_named (char *name, struct ui_file *stream)
+print_range_type_named (char *name, struct type *orig_type,
+			struct ui_file *stream)
 {
   struct type *raw_type = ada_find_any_type (name);
   struct type *base_type;
   char *subtype_info;
 
   if (raw_type == NULL)
-    base_type = builtin_type_int32;
-  else if (TYPE_CODE (raw_type) == TYPE_CODE_RANGE)
+    raw_type = orig_type;
+
+  if (TYPE_CODE (raw_type) == TYPE_CODE_RANGE)
     base_type = TYPE_TARGET_TYPE (raw_type);
   else
     base_type = raw_type;
 
   subtype_info = strstr (name, "___XD");
-  if (subtype_info == NULL && raw_type == NULL)
-    fprintf_filtered (stream, "? .. ?");
-  else if (subtype_info == NULL)
+  if (subtype_info == NULL)
     print_range (raw_type, stream);
   else
     {
@@ -398,7 +399,8 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 		  if (k > 0)
 		    fprintf_filtered (stream, ", ");
 		  print_range_type_named (TYPE_FIELD_NAME
-					  (range_desc_type, k), stream);
+					  (range_desc_type, k),
+					  TYPE_INDEX_TYPE (arr_type), stream);
 		  if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
 		    bitsize = TYPE_FIELD_BITSIZE (arr_type, 0);
 		}
@@ -816,7 +818,7 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
 	    else
 	      {
 		fprintf_filtered (stream, "range ");
-		print_range_type_named (name, stream);
+		print_range_type_named (name, type, stream);
 	      }
 	  }
 	break;

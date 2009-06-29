@@ -1,5 +1,19 @@
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (to_fixed_range_type): Add ORIG_TYPE argument.
+	Fall back to orig_type as index type if symbol lookup fails.
+	Allocate result types from ORIG_TYPE's objfile.
+	(ada_array_bound_from_type, to_fixed_array_type,
+	ada_evaluate_subexp): Pass original index type to
+	to_fixed_range_type.  Do not pass objfile.
+
+	* ada-typeprint.c (print_range_type_named): Add ORIG_TYPE argument.
+	Fall back to orig_type as index type if symbol lookup fails.
+	(print_array_type, ada_print_type): Pass original index type
+	to print_range_type_named.
+
+2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (ada_index_type): Update comment.
 
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
