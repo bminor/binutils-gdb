@@ -642,6 +642,20 @@ or
 	make site.exp	(builds the site specific file)
 	runtest -tool gdb GDB=../gdb    (or GDB=<somepath> as appropriate)
 
+When using a `make'-based method, you can use the Makefile variable
+`RUNTESTFLAGS' to pass flags to `runtest', e.g.:
+
+	make RUNTESTFLAGS=--directory=gdb.cp check
+
+If you use GNU make, you can use its `-j' option to run the testsuite
+in parallel.  This can greatly reduce the amount of time it takes for
+the testsuite to run.  In this case, if you set `RUNTESTFLAGS' then,
+by default, the tests will be run serially even under `-j'.  You can
+override this and force a parallel run by setting the `make' variable
+`FORCE_PARALLEL' to any non-empty value.  Note that the parallel `make
+check' assumes that you want to run the entire testsuite, so it is not
+compatible with some dejagnu options, like `--directory'.
+
 The last method gives you slightly more control in case of problems
 with building one or more test executables or if you are using the
 testsuite `standalone', without it being part of the GDB source tree.

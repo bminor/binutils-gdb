@@ -1,3 +1,7 @@
+2009-06-29  Tom Tromey  <tromey@redhat.com>
+
+	* README: Mention parallel check.
+
 2009-06-29  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* dwarf2read.c (read_import_statement): Properly set import location

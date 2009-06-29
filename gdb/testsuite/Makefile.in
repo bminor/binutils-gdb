@@ -48,6 +48,8 @@ RUNTEST = $(RUNTEST_FOR_TARGET)
 
 RUNTESTFLAGS =
 
+FORCE_PARALLEL =
+
 RUNTEST_FOR_TARGET = `\
   if [ -f $${srcdir}/../../dejagnu/runtest ]; then \
     echo $${srcdir}/../../dejagnu/runtest; \
@@ -122,7 +124,18 @@ site.exp: ./config.status Makefile
 
 installcheck:
 
-check: all site.exp
+# For GNU make, try to run the tests in parallel.  If RUNTESTFLAGS is
+# not empty, then by default the tests will be serialized.  This can
+# be overridden by setting FORCE_PARALLEL to any non-empty value.
+# For a non-GNU make, do not parallelize.
+@GMAKE_TRUE@CHECK_TARGET = $(if $(FORCE_PARALLEL),check-parallel,$(if $(RUNTESTFLAGS),check-single,check-parallel))
+@GMAKE_FALSE@CHECK_TARGET = check-single
+
+check: $(CHECK_TARGET)
+
+# All the hair to invoke dejagnu.  A given invocation can just append
+# $(RUNTESTFLAGS)
+DO_RUNTEST = \
 	rootme=`pwd`; export rootme; \
 	srcdir=${srcdir} ; export srcdir ; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
@@ -132,7 +145,46 @@ check: all site.exp
 	if [ -f $${rootme}/../../expect/expect ] ; then  \
 	  TCL_LIBRARY=$${srcdir}/../../tcl/library ; \
 	  export TCL_LIBRARY ; fi ; \
-	$(RUNTEST) $(RUNTESTFLAGS) 
+	$(RUNTEST)
+
+check-single: all site.exp
+	$(DO_RUNTEST) $(RUNTESTFLAGS)
+
+# A list of all directories named "gdb.*" which also hold a .exp file.
+# We filter out gdb.base and add fake entries, because that directory
+# takes the longest to process, and so we split it in half.
+TEST_DIRS = gdb.base1 gdb.base2 $(filter-out gdb.base,$(sort $(notdir $(patsubst %/,%,$(dir $(wildcard $(srcdir)/gdb.*/*.exp))))))
+
+TEST_TARGETS = $(addprefix check-,$(TEST_DIRS))
+
+# We explicitly re-invoke make here for two reasons.  First, it lets
+# us add a -k option, which makes the parallel check mimic the
+# behavior of the serial check; and second, it means that we can still
+# regenerate the sum and log files even if a sub-make fails -- which
+# it usually does because dejagnu exits with an error if any test
+# fails.
+check-parallel:
+	$(MAKE) -k $(TEST_TARGETS); \
+	$(SHELL) $(srcdir)/dg-extract-results.sh \
+	  $(addsuffix /gdb.sum,$(TEST_DIRS)) > gdb.sum; \
+	$(SHELL) $(srcdir)/dg-extract-results.sh -L \
+	  $(addsuffix /gdb.log,$(TEST_DIRS)) > gdb.log
+
+$(filter-out check-gdb.base%,$(TEST_TARGETS)): check-gdb.%: all site.exp gdb.%/.dir
+	$(DO_RUNTEST) --directory=gdb.$* --outdir=gdb.$* $(RUNTESTFLAGS)
+
+# Each half (roughly) of the .exp files from gdb.base.
+BASE1_FILES = $(patsubst $(srcdir)/%,%,$(wildcard $(srcdir)/gdb.base/[a-m]*.exp))
+BASE2_FILES = $(patsubst $(srcdir)/%,%,$(wildcard $(srcdir)/gdb.base/[n-z]*.exp))
+
+# Handle each half of gdb.base.
+check-gdb.base%: all site.exp gdb.base%/.dir
+	@if test ! -d gdb.base$*; then mkdir gdb.base$*; fi
+	$(DO_RUNTEST) $(BASE$*_FILES) --outdir gdb.base$* $(RUNTESTFLAGS)
+
+%/.dir:
+	@-if test ! -d $*; then mkdir $*; fi
+	@echo > $@
 
 subdir_do: force
 	@for i in $(DODIRS); do \

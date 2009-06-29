@@ -1,3 +1,24 @@
+2009-06-29  Tom Tromey  <tromey@redhat.com>
+
+	* dg-extract-results.sh: New file.
+	* Makefile.in (FORCE_PARALLEL): New variable.
+	(CHECK_TARGET): New conditional variable.
+	(check): Use CHECK_TARGET.
+	(DO_RUNTEST): New variable.
+	(check-single): New target.
+	(TEST_DIRS): New variable.
+	(TEST_TARGETS): Likewise.
+	(check-parallel): New target.
+	(check-gdb.%): New pattern.
+	(BASE1_FILES): New variable.
+	(BASE2_FILES): Likewise.
+	(check-gdb.base%): New pattern.
+	(%/.dir): New pattern.
+	* configure: Rebuild.
+	* aclocal.m4 (AM_CONDITIONAL): New defun.
+	* configure.ac: Check whether user is using GNU make.
+	(GMAKE): New conditional.
+
 2009-06-29  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/namespace-nested-import.cc: New test.
