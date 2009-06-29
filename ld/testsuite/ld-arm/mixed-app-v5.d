@@ -14,10 +14,10 @@ Disassembly of section .plt:
  .*:	.*
  .*:	e28fc6.* 	add	ip, pc, #.*	; 0x.*
  .*:	e28cca.* 	add	ip, ip, #.*	; 0x.*
- .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!
+ .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!.*
  .*:	e28fc6.* 	add	ip, pc, #.*	; 0x.*
  .*:	e28cca.* 	add	ip, ip, #.*	; 0x.*
- .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!
+ .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!.*
 Disassembly of section .text:
 
 .* <_start>:

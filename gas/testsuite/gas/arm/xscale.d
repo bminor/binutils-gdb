@@ -20,7 +20,7 @@ Disassembly of section .text:
 0+28 <[^>]*> ec543000 	mra	r3, r4, acc0
 0+2c <[^>]*> ec585000 	mra	r5, r8, acc0
 0+30 <[^>]*> f5d0f000 	pld	\[r0\]
-0+34 <[^>]*> f5d1f789 	pld	\[r1, #1929\]
+0+34 <[^>]*> f5d1f789 	pld	\[r1, #1929\].*
 0+38 <[^>]*> f7d2f003 	pld	\[r2, r3\]
 0+3c <[^>]*> f754f285 	pld	\[r4, -r5, lsl #5\]
 0+40 <[^>]*> e1c100d0 	ldrd	r0, \[r1\]

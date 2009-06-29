@@ -6,7 +6,7 @@
 .*: +file format .*arm.*
 
 Disassembly of section .text:
-00000000 <.text> 3a40      	subs	r2, #64
+00000000 <.text> 3a40      	subs	r2, #64.*
 00000002 <.text\+0x2> bfa1      	itttt	ge
 00000004 <.text\+0x4> e8a0 500a 	stmiage.w	r0!, {r1, r3, ip, lr}
 00000008 <.text\+0x8> e8a0 500a 	stmiage.w	r0!, {r1, r3, ip, lr}

@@ -12,8 +12,8 @@ Disassembly of section .text:
 0+010 <[^>]*> 11b4cf9f ?	ldrexdne	ip, \[r4\]
 0+014 <[^>]*> e1fc4f9f ?	ldrexh	r4, \[ip\]
 0+018 <[^>]*> 11f4cf9f ?	ldrexhne	ip, \[r4\]
-0+01c <[^>]*> e320f080 ?	nop	\{128\}
-0+020 <[^>]*> 1320f07f ?	nopne	\{127\}
+0+01c <[^>]*> e320f080 ?	nop	\{128\}.*
+0+020 <[^>]*> 1320f07f ?	nopne	\{127\}.*
 0+024 <[^>]*> e320f004 ?	sev
 0+028 <[^>]*> e1c74f9c ?	strexb	r4, ip, \[r7\]
 0+02c <[^>]*> 11c8cf94 ?	strexbne	ip, r4, \[r8\]

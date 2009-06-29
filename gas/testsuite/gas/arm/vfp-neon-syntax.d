@@ -7,16 +7,16 @@
 Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> eeb00a60 	(vmov\.f32|fcpys)	s0, s1
 0[0-9a-f]+ <[^>]+> eeb00b41 	(vmov\.f64|fcpyd)	d0, d1
-0[0-9a-f]+ <[^>]+> eeb50a00 	(vmov\.f32|fconsts)	s0, #80
-0[0-9a-f]+ <[^>]+> eeb70b00 	(vmov\.f64|fconstd)	d0, #112
+0[0-9a-f]+ <[^>]+> eeb50a00 	(vmov\.f32|fconsts)	s0, #80.*
+0[0-9a-f]+ <[^>]+> eeb70b00 	(vmov\.f64|fconstd)	d0, #112.*
 0[0-9a-f]+ <[^>]+> ee100a90 	(vmov|fmrs)	r0, s1
 0[0-9a-f]+ <[^>]+> ee001a10 	(vmov|fmsr)	s0, r1
 0[0-9a-f]+ <[^>]+> ec510a11 	(vmov	r0, r1, s2, s3|fmrrs	r0, r1, {s2, s3})
 0[0-9a-f]+ <[^>]+> ec442a10 	(vmov	s0, s1, r2, r4|fmsrr	{s0, s1}, r2, r4)
 0[0-9a-f]+ <[^>]+> 0eb00a60 	(vmoveq\.f32|fcpyseq)	s0, s1
 0[0-9a-f]+ <[^>]+> 0eb00b41 	(vmoveq\.f64|fcpydeq)	d0, d1
-0[0-9a-f]+ <[^>]+> 0eb50a00 	(vmoveq\.f32|fconstseq)	s0, #80
-0[0-9a-f]+ <[^>]+> 0eb70b00 	(vmoveq\.f64|fconstdeq)	d0, #112
+0[0-9a-f]+ <[^>]+> 0eb50a00 	(vmoveq\.f32|fconstseq)	s0, #80.*
+0[0-9a-f]+ <[^>]+> 0eb70b00 	(vmoveq\.f64|fconstdeq)	d0, #112.*
 0[0-9a-f]+ <[^>]+> 0e100a90 	(vmoveq|fmrseq)	r0, s1
 0[0-9a-f]+ <[^>]+> 0e001a10 	(vmoveq|fmsreq)	s0, r1
 0[0-9a-f]+ <[^>]+> 0c510a11 	(vmoveq	r0, r1, s2, s3|fmrrseq	r0, r1, {s2, s3})

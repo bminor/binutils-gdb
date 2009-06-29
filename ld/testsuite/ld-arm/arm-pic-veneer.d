@@ -4,7 +4,7 @@
 Disassembly of section .text:
 
 00008000 <_start>:
-    8000:	ea000000 	b	8008 <__foo_from_arm>
+    8000:	ea...... 	b	800. <.*>
 
 00008004 <foo>:
     8004:	46c0      	nop			\(mov r8, r8\)

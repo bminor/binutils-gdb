@@ -1,3 +1,29 @@
+2009-06-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 10288
+	* arm-dis.c (enum opcode_sentinels): New:  Used to mark the
+	boundary between variaant and generic coprocessor instuctions.
+	(coprocessor): Use it.
+	Fix architecture version of MCRR and MRRC instructions.
+	(arm_opcdes): Fix patterns for STRB and STRH instructions.
+	(print_insn_coprocessor): Check architecture and extension masks.
+	Print a hexadecimal version of any decimal constant that is
+	outside of the range of -16 to +32.
+	(print_arm_address): Add a return value of the offset used in the
+	adress, if it is worth printing a hexadecimal version of it.
+	(print_insn_neon): Print a hexadecimal version of any decimal
+	constant that is outside of the range of -16 to +32.
+	(print_insn_arm): Likewise.
+	(print_insn_thumb16): Likewise.
+	(print_insn_thumb32): Likewise.
+	
+	PR 10297
+	* arm-dis.c (UNDEFINED_INSTRUCTION): New macro for a description
+	of an undefined instruction.
+	(arm_opcodes): Use it.
+	(thumb_opcod): Use it.
+	(thumb32_opc): Use it.
+
 2009-06-23  DJ Delorie  <dj@redhat.com>
 
 	* mep-desc.c: Regenerate.

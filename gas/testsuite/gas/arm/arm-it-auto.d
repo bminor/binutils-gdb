@@ -34,7 +34,7 @@ Disassembly of section .text:
 00000040 <main\+0x40> bfb8      	it	lt
 00000042 <main\+0x42> f000 f828 	bllt	00000096 <main\+0x96>
 00000046 <main\+0x46> bf17      	itett	ne
-00000048 <main\+0x48> 202d      	movne	r0, #45
+00000048 <main\+0x48> 202d      	movne	r0, #45.*
 0000004a <main\+0x4a> 2005      	moveq	r0, #5
 0000004c <main\+0x4c> 2006      	movne	r0, #6
 0000004e <main\+0x4e> 4487      	addne	pc, r0

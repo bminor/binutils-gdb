@@ -1,3 +1,32 @@
+2009-06-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 10288
+	* gas/arm/arch6zk.d: Update expected disassembly.
+	* gas/arm/arch7.d: Likewise.
+	* gas/arm/arm-it-auto-2.d: Likewise.
+	* gas/arm/arm-it-auto.d: Likewise.
+	* gas/arm/copro.d: Likewise.
+	* gas/arm/float.d: Likewise.
+	* gas/arm/fpa-mem.d: Likewise.
+	* gas/arm/group-reloc-ldc.d: Likewise.
+	* gas/arm/group-reloc-ldr.d: Likewise.
+	* gas/arm/iwmmxt.d: Likewise.
+	* gas/arm/maverick.d: Likewise.
+	* gas/arm/neon-omit.d: Likewise.
+	* gas/arm/svc.d: Likewise.
+	* gas/arm/thumb-eabi.d: Likewise.
+	* gas/arm/thumb.d: Likewise.
+	* gas/arm/thumb1_unified.d: Likewise.
+	* gas/arm/thumb2_add.d: Likewise.
+	* gas/arm/thumb2_relax.d: Likewise.
+	* gas/arm/thumb32.d: Likewise.
+	* gas/arm/vfp-neon-syntax.d: Likewise.
+	* gas/arm/vfp-neon-syntax_t2.d: Likewise.
+	* gas/arm/vfp1xD.d: Likewise.
+	* gas/arm/vfp1xD_t2.d: Likewise.
+	* gas/arm/vfpv3-const-conv.d: Likewise.
+	* gas/arm/xscale.d: Likewise.
+
 2009-06-22  Daniel Gutson <dgutson@codesourcery.com>
 
 	* gas/arm/arm-it-auto.d: New test.

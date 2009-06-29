@@ -14,7 +14,7 @@ Disassembly of section .plt:
     .*:	.* 	.*
     .*:	e28fc6.* 	add	ip, pc, #.*	; .*
     .*:	e28cca.* 	add	ip, ip, #.*	; .*
-    .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!
+    .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!.*
 Disassembly of section .text:
 
 .* <_start>:

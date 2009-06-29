@@ -1,3 +1,21 @@
+2009-06-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 10288
+	* ld-arm/arm-app-abs32.d: Update expected disassembly.
+	* ld-arm/arm-app.d: Likewise.
+	* ld-arm/arm-lib-plt32.d: Likewise.
+	* ld-arm/arm-lib.d: Likewise.
+	* ld-arm/arm-pic-veneer.d: Likewise.
+	* ld-arm/armthumb-lib.d: Likewise.
+	* ld-arm/farcall-mixed-app-v5.d: Likewise.
+	* ld-arm/farcall-mixed-app.d: Likewise.
+	* ld-arm/farcall-mixed-lib.d: Likewise.
+	* ld-arm/group-relocs.d: Likewise.
+	* ld-arm/mixed-app-v5.d: Likewise.
+	* ld-arm/mixed-app.d: Likewise.
+	* ld-arm/mixed-lib.d: Likewise.
+	* ld-arm/thumb2-bl-undefweak.d: Likewise.
+
 2009-06-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10337

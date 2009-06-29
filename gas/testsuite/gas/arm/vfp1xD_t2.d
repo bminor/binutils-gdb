@@ -125,12 +125,12 @@ Disassembly of section .text:
 0+1cc <[^>]*> ed91 0a00 	(vldr|flds)	s0, \[r1\]
 0+1d0 <[^>]*> ed9e 0a00 	(vldr|flds)	s0, \[lr\]
 0+1d4 <[^>]*> ed90 0a00 	(vldr|flds)	s0, \[r0\]
-0+1d8 <[^>]*> ed90 0aff 	(vldr|flds)	s0, \[r0, #1020\]
-0+1dc <[^>]*> ed10 0aff 	(vldr|flds)	s0, \[r0, #-1020\]
+0+1d8 <[^>]*> ed90 0aff 	(vldr|flds)	s0, \[r0, #1020\].*
+0+1dc <[^>]*> ed10 0aff 	(vldr|flds)	s0, \[r0, #-1020\].*
 0+1e0 <[^>]*> edd0 0a00 	(vldr|flds)	s1, \[r0\]
 0+1e4 <[^>]*> ed90 1a00 	(vldr|flds)	s2, \[r0\]
 0+1e8 <[^>]*> edd0 fa00 	(vldr|flds)	s31, \[r0\]
-0+1ec <[^>]*> edcc aac9 	(vstr|fsts)	s21, \[ip, #804\]
+0+1ec <[^>]*> edcc aac9 	(vstr|fsts)	s21, \[ip, #804\].*
 0+1f0 <[^>]*> ecd0 0a01 	(vldmia|fldmias)	r0, {s1}
 0+1f4 <[^>]*> ec90 1a01 	(vldmia|fldmias)	r0, {s2}
 0+1f8 <[^>]*> ecd0 fa01 	(vldmia|fldmias)	r0, {s31}
