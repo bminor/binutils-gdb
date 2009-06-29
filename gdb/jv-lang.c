@@ -302,7 +302,10 @@ type_from_class (struct value *clas)
   if (type != NULL)
     return type;
 
-  type = alloc_type (objfile);
+  /* Do not use the "fake" dynamics objfile to own dynamically generated
+     types, as it does not provide an architecture, and it would not help
+     manage the lifetime of these types anyway.  */
+  type = alloc_type (NULL);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   INIT_CPLUS_SPECIFIC (type);
 
@@ -560,7 +563,7 @@ java_link_class_type (struct type *type, struct value *clas)
       fn_fields[k].physname = "";
       fn_fields[k].is_stub = 1;
       /* FIXME */
-      fn_fields[k].type = make_function_type (java_void_type, NULL, objfile);
+      fn_fields[k].type = lookup_function_type (java_void_type);
       TYPE_CODE (fn_fields[k].type) = TYPE_CODE_METHOD;
     }
 

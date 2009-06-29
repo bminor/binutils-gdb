@@ -378,24 +378,24 @@ lookup_reference_type (struct type *type)
 /* Lookup a function type that returns type TYPE.  TYPEPTR, if
    nonzero, points to a pointer to memory where the function type
    should be stored.  If *TYPEPTR is zero, update it to point to the
-   function type we return.  We allocate new memory from OBJFILE if needed; use
-   NULL for permanent types.  */
+   function type we return.  We allocate new memory if needed.  */
 
 struct type *
-make_function_type (struct type *type, struct type **typeptr,
-		    struct objfile *objfile)
+make_function_type (struct type *type, struct type **typeptr)
 {
   struct type *ntype;	/* New type */
+  struct objfile *objfile;
 
   if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
     {
-      ntype = alloc_type (objfile);
+      ntype = alloc_type (TYPE_OBJFILE (type));
       if (typeptr)
 	*typeptr = ntype;
     }
   else			/* We have storage, but need to reset it.  */
     {
       ntype = *typeptr;
+      objfile = TYPE_OBJFILE (ntype);
       smash_type (ntype);
       TYPE_OBJFILE (ntype) = objfile;
     }
@@ -415,7 +415,7 @@ make_function_type (struct type *type, struct type **typeptr,
 struct type *
 lookup_function_type (struct type *type)
 {
-  return make_function_type (type, (struct type **) 0, TYPE_OBJFILE (type));
+  return make_function_type (type, (struct type **) 0);
 }
 
 /* Identify address space identifier by name --

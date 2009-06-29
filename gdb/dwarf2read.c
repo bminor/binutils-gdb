@@ -5297,7 +5297,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
 
   type = die_type (die, cu);
-  ftype = make_function_type (type, (struct type **) 0, cu->objfile);
+  ftype = lookup_function_type (type);
 
   /* All functions in C++, Pascal and Java have prototypes.  */
   attr = dwarf2_attr (die, DW_AT_prototyped, cu);

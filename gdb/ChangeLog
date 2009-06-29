@@ -1,5 +1,16 @@
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (make_function_type): Remove OBJFILE parameter.
+	* gdbtypes.c (make_function_type): Remove OBJFILE parameter.
+	(lookup_function_type): Update call.
+	* stabsread.c (read_type): Likewise.
+	* dwarf2read.c (read_subroutine_type): Use lookup_function_type
+	instead of make_function_type.
+	* jv-lang.c (type_from_class): Likewise.  Do not allocate types
+	on the fake "dynamics" obstack.
+
+2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (struct builtin_type): Remove builtin_core_addr,
 	nodebug_text_symbol, nodebug_data_symbol, nodebug_unknown_symbol,
 	and nodebug_tls_symbol members.
