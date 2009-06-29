@@ -1,5 +1,9 @@
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (ada_index_type): Update comment.
+
+2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (ada_index_type): Make static.  Add NAME argument.
 	Throw error on invalid input arguments.  Return NULL if unable
 	to determine index type.
