@@ -467,7 +467,7 @@ ALL_64_TARGET_OBS = \
 	alphabsd-tdep.o alphafbsd-tdep.o alpha-linux-tdep.o alpha-mdebug-tdep.o \
 	alphanbsd-tdep.o alphaobsd-tdep.o alpha-osf1-tdep.o alpha-tdep.o \
 	amd64fbsd-tdep.o amd64-dicos-tdep.o amd64-linux-tdep.o amd64nbsd-tdep.o \
-	amd64obsd-tdep.o amd64-sol2-tdep.o amd64-tdep.o \
+	amd64obsd-tdep.o amd64-sol2-tdep.o amd64-tdep.o amd64-windows-tdep.o \
 	ia64-linux-tdep.o ia64-tdep.o \
 	mips64obsd-tdep.o \
 	sparc64fbsd-tdep.o sparc64-linux-tdep.o sparc64nbsd-tdep.o \
@@ -487,7 +487,7 @@ ALL_TARGET_OBS = \
 	i386bsd-tdep.o i386-cygwin-tdep.o i386fbsd-tdep.o i386gnu-tdep.o \
 	i386-linux-tdep.o i386nbsd-tdep.o i386-nto-tdep.o i386obsd-tdep.o \
 	i386-sol2-tdep.o i386-tdep.o i387-tdep.o \
-	i386-dicos-tdep.o \
+	i386-dicos-tdep.o i386-darwin-tdep.o \
 	iq2000-tdep.o \
 	linux-tdep.o \
 	lm32-tdep.o \
@@ -500,6 +500,7 @@ ALL_TARGET_OBS = \
 	mips-irix-tdep.o mips-linux-tdep.o \
 	mipsnbsd-tdep.o mips-tdep.o \
 	mn10300-linux-tdep.o mn10300-tdep.o \
+	moxie-tdep.o \
 	mt-tdep.o \
 	nto-tdep.o \
 	ppc-linux-tdep.o ppcnbsd-tdep.o ppcobsd-tdep.o ppc-sysv-tdep.o \
@@ -519,7 +520,7 @@ ALL_TARGET_OBS = \
 	nbsd-tdep.o obsd-tdep.o \
 	sol2-tdep.o \
 	solib.o solib-frv.o solib-irix.o solib-svr4.o solib-target.o \
-	solib-som.o solib-pa64.o \
+	solib-som.o solib-pa64.o solib-darwin.o \
 	dbug-rom.o dink32-rom.o ppcbug-rom.o m32r-rom.o dsrec.o monitor.o \
 	remote-m32r-sdi.o \
 	xcoffread.o \

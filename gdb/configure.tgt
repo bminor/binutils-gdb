@@ -7,6 +7,10 @@
 #  gdb_osabi		default OS ABI to use with target
 #  build_gdbserver	set to "yes" if gdbserver supports target
 
+# NOTE: Every file added to a gdb_target_obs variable for any target here
+#       must also be added to either ALL_TARGET_OBS or ALL_64_TARGET_OBS
+#	in Makefile.in!
+
 case $targ in
  d10v-*-* | \
  hppa*-*-hiux* | \

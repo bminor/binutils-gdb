@@ -1,3 +1,11 @@
+2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* Makefile.in (ALL_64_TARGET_OBS): Add amd64-windows-tdep.o.
+	(ALL_TARGET_OBS): Add moxie-tdep.o, i386-darwin-tdep.o, and
+	solib-darwin.o.
+
+	* configure.tgt: Add comment.
+
 2009-06-28  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* mi/mi-cmds.c (mi_cmds): Remove unimplemented entries.
