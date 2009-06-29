@@ -2556,9 +2556,7 @@ c_describe_child (struct varobj *parent, int index,
       if (cvalue && value)
 	{
 	  int real_index = index + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type));
-	  struct value *indval = 
-	    value_from_longest (builtin_type_int32, (LONGEST) real_index);
-	  gdb_value_subscript (value, indval, cvalue);
+	  gdb_value_subscript (value, real_index, cvalue);
 	}
 
       if (ctype)

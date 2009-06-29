@@ -918,7 +918,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
 	  else
-	    return value_subscript (arg1, arg2);
+	    return value_subscript (arg1, value_as_long (arg2));
 	}
       if (name)
 	error (_("cannot subscript something of type `%s'"), name);

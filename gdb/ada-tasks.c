@@ -548,7 +548,8 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
         ada_coerce_to_simple_array_ptr (value_field (tcb_value,
                                                      fieldno.entry_calls));
       entry_calls_value_element =
-        value_subscript (entry_calls_value, atc_nesting_level_value);
+        value_subscript (entry_calls_value,
+			 value_as_long (atc_nesting_level_value));
       called_task_fieldno =
         ada_get_field_index (value_type (entry_calls_value_element),
                              "called_task", 0);

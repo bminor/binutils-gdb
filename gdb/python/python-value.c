@@ -293,7 +293,7 @@ valpy_getitem (PyObject *self, PyObject *key)
 	  if (idx == NULL)
 	    return NULL;
 
-	  res_val = value_subscript (tmp, idx);
+	  res_val = value_subscript (tmp, value_as_long (idx));
 	}
     }
   if (field)
@@ -413,10 +413,12 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 	    CHECK_TYPEDEF (rtype);
 	    rtype = STRIP_REFERENCE (rtype);
 
-	    if (TYPE_CODE (ltype) == TYPE_CODE_PTR)
-	      res_val = value_ptradd (arg1, arg2);
-	    else if (TYPE_CODE (rtype) == TYPE_CODE_PTR)
-	      res_val = value_ptradd (arg2, arg1);
+	    if (TYPE_CODE (ltype) == TYPE_CODE_PTR
+		&& is_integral_type (rtype))
+	      res_val = value_ptradd (arg1, value_as_long (arg2));
+	    else if (TYPE_CODE (rtype) == TYPE_CODE_PTR
+		     && is_integral_type (ltype))
+	      res_val = value_ptradd (arg2, value_as_long (arg1));
 	    else
 	      res_val = value_binop (arg1, arg2, BINOP_ADD);
 	  }
@@ -431,16 +433,14 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 	    CHECK_TYPEDEF (rtype);
 	    rtype = STRIP_REFERENCE (rtype);
 
-	    if (TYPE_CODE (ltype) == TYPE_CODE_PTR)
-	      {
-		if (TYPE_CODE (rtype) == TYPE_CODE_PTR)
-		    /* A ptrdiff_t for the target would be preferable
-		       here.  */
-		    res_val = value_from_longest (builtin_type_pyint,
-						  value_ptrdiff (arg1, arg2));
-		else
-		  res_val = value_ptrsub (arg1, arg2);
-	      }
+	    if (TYPE_CODE (ltype) == TYPE_CODE_PTR
+		&& TYPE_CODE (rtype) == TYPE_CODE_PTR)
+	      /* A ptrdiff_t for the target would be preferable here.  */
+	      res_val = value_from_longest (builtin_type_pyint,
+					    value_ptrdiff (arg1, arg2));
+	    else if (TYPE_CODE (ltype) == TYPE_CODE_PTR
+		     && is_integral_type (rtype))
+	      res_val = value_ptradd (arg1, - value_as_long (arg2));
 	    else
 	      res_val = value_binop (arg1, arg2, BINOP_SUB);
 	  }

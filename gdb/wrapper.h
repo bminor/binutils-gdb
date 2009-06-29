@@ -36,8 +36,7 @@ extern int gdb_value_equal (struct value *, struct value *, int *);
 
 extern int gdb_value_assign (struct value *, struct value *, struct value **);
 
-extern int gdb_value_subscript (struct value *, struct value *,
-				struct value **);
+extern int gdb_value_subscript (struct value *, LONGEST, struct value **);
 
 extern enum gdb_rc gdb_value_struct_elt (struct ui_out *uiout,
 					 struct value **result_ptr,

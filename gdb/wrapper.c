@@ -100,14 +100,14 @@ gdb_value_assign (struct value *val1, struct value *val2,
 }
 
 int
-gdb_value_subscript (struct value *val1, struct value *val2,
+gdb_value_subscript (struct value *val, LONGEST index,
 		     struct value **result)
 {
   volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      *result = value_subscript (val1, val2);
+      *result = value_subscript (val, index);
     }
 
   if (except.reason < 0)

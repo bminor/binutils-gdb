@@ -2273,7 +2273,7 @@ ada_value_subscript (struct value *arr, int arity, struct value **ind)
     {
       if (TYPE_CODE (elt_type) != TYPE_CODE_ARRAY)
         error (_("too many subscripts (%d expected)"), k);
-      elt = value_subscript (elt, value_pos_atr (builtin_type_int32, ind[k]));
+      elt = value_subscript (elt, pos_atr (ind[k]));
     }
   return elt;
 }
@@ -2291,19 +2291,13 @@ ada_value_ptr_subscript (struct value *arr, struct type *type, int arity,
   for (k = 0; k < arity; k += 1)
     {
       LONGEST lwb, upb;
-      struct value *idx;
 
       if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
         error (_("too many subscripts (%d expected)"), k);
       arr = value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
                         value_copy (arr));
       get_discrete_bounds (TYPE_INDEX_TYPE (type), &lwb, &upb);
-      idx = value_pos_atr (builtin_type_int32, ind[k]);
-      if (lwb != 0)
-	idx = value_binop (idx, value_from_longest (value_type (idx), lwb),
-			   BINOP_SUB);
-
-      arr = value_ptradd (arr, idx);
+      arr = value_ptradd (arr, pos_atr (ind[k]) - lwb);
       type = TYPE_TARGET_TYPE (type);
     }
 
@@ -5568,8 +5562,7 @@ ada_tag_name_2 (struct tag_args *args)
   valp = value_cast (info_type, args->tag);
   if (valp == NULL)
     return 0;
-  val = value_ind (value_ptradd (valp,
-				 value_from_longest (builtin_type_int8, -1)));
+  val = value_ind (value_ptradd (valp, -1));
   if (val == NULL)
     return 0;
   val = ada_value_struct_elt (val, "expanded_name", 1);

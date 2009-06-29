@@ -46,7 +46,7 @@ void _initialize_valarith (void);
    If the pointer type is void *, then return 1.
    If the target type is incomplete, then error out.
    This isn't a general purpose function, but just a 
-   helper for value_ptrsub & value_ptradd.
+   helper for value_ptradd.
 */
 
 static LONGEST
@@ -85,7 +85,7 @@ find_size_for_pointer_math (struct type *ptr_type)
    result of C-style pointer arithmetic ARG1 + ARG2.  */
 
 struct value *
-value_ptradd (struct value *arg1, struct value *arg2)
+value_ptradd (struct value *arg1, LONGEST arg2)
 {
   struct type *valptrtype;
   LONGEST sz;
@@ -94,33 +94,8 @@ value_ptradd (struct value *arg1, struct value *arg2)
   valptrtype = check_typedef (value_type (arg1));
   sz = find_size_for_pointer_math (valptrtype);
 
-  if (!is_integral_type (value_type (arg2)))
-    error (_("Argument to arithmetic operation not a number or boolean."));
-
   return value_from_pointer (valptrtype,
-			     value_as_address (arg1)
-			       + (sz * value_as_long (arg2)));
-}
-
-/* Given a pointer ARG1 and an integral value ARG2, return the
-   result of C-style pointer arithmetic ARG1 - ARG2.  */
-
-struct value *
-value_ptrsub (struct value *arg1, struct value *arg2)
-{
-  struct type *valptrtype;
-  LONGEST sz;
-
-  arg1 = coerce_array (arg1);
-  valptrtype = check_typedef (value_type (arg1));
-  sz = find_size_for_pointer_math (valptrtype);
-
-  if (!is_integral_type (value_type (arg2)))
-    error (_("Argument to arithmetic operation not a number or boolean."));
-
-  return value_from_pointer (valptrtype,
-			     value_as_address (arg1)
-			       - (sz * value_as_long (arg2)));
+			     value_as_address (arg1) + sz * arg2);
 }
 
 /* Given two compatible pointer values ARG1 and ARG2, return the
@@ -162,7 +137,7 @@ an integer nor a pointer of the same type."));
    verbosity is set, warn about invalid indices (but still use them). */
 
 struct value *
-value_subscript (struct value *array, struct value *idx)
+value_subscript (struct value *array, LONGEST index)
 {
   struct value *bound;
   int c_style = current_language->c_style_arrays;
@@ -179,13 +154,12 @@ value_subscript (struct value *array, struct value *idx)
       get_discrete_bounds (range_type, &lowerbound, &upperbound);
 
       if (VALUE_LVAL (array) != lval_memory)
-	return value_subscripted_rvalue (array, idx, lowerbound);
+	return value_subscripted_rvalue (array, index, lowerbound);
 
       if (c_style == 0)
 	{
-	  LONGEST index = value_as_long (idx);
 	  if (index >= lowerbound && index <= upperbound)
-	    return value_subscripted_rvalue (array, idx, lowerbound);
+	    return value_subscripted_rvalue (array, index, lowerbound);
 	  /* Emit warning unless we have an array of unknown size.
 	     An array of unknown size has lowerbound 0 and upperbound -1.  */
 	  if (upperbound > -1)
@@ -194,17 +168,12 @@ value_subscript (struct value *array, struct value *idx)
 	  c_style = 1;
 	}
 
-      if (lowerbound != 0)
-	{
-	  bound = value_from_longest (value_type (idx), (LONGEST) lowerbound);
-	  idx = value_binop (idx, bound, BINOP_SUB);
-	}
-
+      index -= lowerbound;
       array = value_coerce_array (array);
     }
 
   if (c_style)
-    return value_ind (value_ptradd (array, idx));
+    return value_ind (value_ptradd (array, index));
   else
     error (_("not an array or string"));
 }
@@ -214,12 +183,11 @@ value_subscript (struct value *array, struct value *idx)
    to doubles, but no longer does.  */
 
 struct value *
-value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound)
+value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
 {
   struct type *array_type = check_typedef (value_type (array));
   struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
   unsigned int elt_size = TYPE_LENGTH (elt_type);
-  LONGEST index = value_as_long (idx);
   unsigned int elt_offs = elt_size * longest_to_int (index - lowerbound);
   struct value *v;
 
@@ -244,11 +212,10 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
 
 struct value *
 value_bitstring_subscript (struct type *type,
-			   struct value *bitstring, struct value *idx)
+			   struct value *bitstring, LONGEST index)
 {
 
   struct type *bitstring_type, *range_type;
-  LONGEST index = value_as_long (idx);
   struct value *v;
   int offset, byte, bit_index;
   LONGEST lowerbound, upperbound;

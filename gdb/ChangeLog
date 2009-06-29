@@ -1,5 +1,38 @@
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* value.h (value_subscript, value_subscripted_rvalue,
+	value_bitstring_subscript, value_ptradd): Use LONGEST instead
+	of value as type of the index argument.
+	(value_ptrsub): Remove.
+	* valarith.c (value_subscript, value_subscripted_rvalue,
+	value_bitstring_subscript, value_ptradd): Use LONGEST instead
+	of value as type of the index argument.
+	(value_ptrsub): Remove.
+
+	* wrapper.h (gdb_value_subscript): Use LONGEST instead of
+	value as type of the index argument.
+	* wrapper.c (gdb_value_subscript): Likewise.
+
+	Update calls to gdb_value_subscript, value_subscript,
+	value_subscripted_rvalue, value_bitstring_subscript and
+	value_ptradd to use LONGEST instead of value as index
+	argument type.  Use value_ptradd instead of value_ptrsub.
+	* ada-lang.c (ada_value_subscript, ada_value_ptr_subscript,
+	ada_tag_name_2): Update.
+	* ada-tasks.c (read_atcb): Update.
+	* eval.c (evaluate_subexp_standard): Update.
+	* valarith.c (value_subscript): Update.
+	* gnu-v2-abi.c (gnuv2_virtual_fn_field): Update.
+	* gnu-v3-abi.c (gnuv3_get_virtual_fn, gnuv3_baseclass_offset,
+	gnuv3_method_ptr_to_value): Update.
+	* jv-lang.c (evaluate_subexp_java): Update.
+	* m2-lang.c (evaluate_subexp_modula2): Update.
+	* python/python-value.c (valpy_getitem, valpy_binop): Update.
+	* wrapper.c (gdb_value_subscript): Update.
+	* varobj.c (c_describe_child): Update.
+
+2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (make_function_type): Remove OBJFILE parameter.
 	* gdbtypes.c (make_function_type): Remove OBJFILE parameter.
 	(lookup_function_type): Update call.

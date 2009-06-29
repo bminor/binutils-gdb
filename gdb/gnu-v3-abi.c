@@ -359,7 +359,7 @@ gnuv3_get_virtual_fn (struct gdbarch *gdbarch, struct value *container,
 
   /* Fetch the appropriate function pointer from the vtable.  */
   vfn = value_subscript (value_field (vtable, vtable_field_virtual_functions),
-                         value_from_longest (builtin_type_int32, vtable_index));
+                         vtable_index);
 
   /* If this architecture uses function descriptors directly in the vtable,
      then the address of the vtable entry is actually a "function pointer"
@@ -419,7 +419,7 @@ gnuv3_baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
   struct type *ptr_type;
   struct value *vtable;
   struct type *vbasetype;
-  struct value *offset_val, *vbase_array;
+  struct value *vbase_array;
   CORE_ADDR vtable_address;
   long int cur_base_offset, base_offset;
   int vbasetype_vptr_fieldno;
@@ -471,9 +471,8 @@ gnuv3_baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
   vtable
     = value_at_lazy (vtable_type,
 		     vtable_address - vtable_address_point_offset (gdbarch));
-  offset_val = value_from_longest (builtin_type_int32, cur_base_offset);
   vbase_array = value_field (vtable, vtable_field_vcall_and_vbase_offsets);
-  base_offset = value_as_long (value_subscript (vbase_array, offset_val));
+  base_offset = value_as_long (value_subscript (vbase_array, cur_base_offset));
   return base_offset;
 }
 
@@ -691,7 +690,6 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
   CORE_ADDR ptr_value;
   struct type *domain_type, *final_type, *method_type;
   LONGEST adjustment;
-  struct value *adjval;
   int vbit;
 
   domain_type = TYPE_DOMAIN_TYPE (check_typedef (value_type (method_ptr)));
@@ -723,9 +721,7 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
      You can provoke this case by casting a Base::* to a Derived::*, for
      instance.  */
   *this_p = value_cast (builtin_type (gdbarch)->builtin_data_ptr, *this_p);
-  adjval = value_from_longest (builtin_type (gdbarch)->builtin_long,
-			       adjustment);
-  *this_p = value_ptradd (*this_p, adjval);
+  *this_p = value_ptradd (*this_p, adjustment);
   *this_p = value_cast (final_type, *this_p);
 
   if (vbit)
