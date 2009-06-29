@@ -1,5 +1,16 @@
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-valprint.c (ada_print_scalar): Accept NULL type argument
+	to indicate scalar should be printed as default integer.
+	(print_optional_low_bound): Pass NULL to ada_print_scalar to
+	indicate default integer output.
+	* ada-typeprint.c (print_range, print_range_bound): Likewise.
+	(print_choices): Likewise.  Thus, accept NULL as val_type.
+	* ada-lang.c (ada_variant_discrim_type): Return NULL when failed
+	to look up controlling discriminant name.
+
+2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (to_fixed_range_type): Add ORIG_TYPE argument.
 	Fall back to orig_type as index type if symbol lookup fails.
 	Allocate result types from ORIG_TYPE's objfile.

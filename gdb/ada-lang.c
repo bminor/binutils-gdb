@@ -5648,18 +5648,14 @@ ada_is_variant_part (struct type *type, int field_num)
 
 /* Assuming that VAR_TYPE is a variant wrapper (type of the variant part)
    whose discriminants are contained in the record type OUTER_TYPE,
-   returns the type of the controlling discriminant for the variant.  */
+   returns the type of the controlling discriminant for the variant.
+   May return NULL if the type could not be found.  */
 
 struct type *
 ada_variant_discrim_type (struct type *var_type, struct type *outer_type)
 {
   char *name = ada_variant_discrim_name (var_type);
-  struct type *type =
-    ada_lookup_struct_elt_type (outer_type, name, 1, 1, NULL);
-  if (type == NULL)
-    return builtin_type_int32;
-  else
-    return type;
+  return ada_lookup_struct_elt_type (outer_type, name, 1, 1, NULL);
 }
 
 /* Assuming that TYPE is the type of a variant wrapper, and FIELD_NUM is a

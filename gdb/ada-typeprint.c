@@ -133,7 +133,7 @@ print_range (struct type *type, struct ui_file *stream)
     case TYPE_CODE_ENUM:
       break;
     default:
-      target_type = builtin_type_int32;
+      target_type = NULL;
       break;
     }
 
@@ -181,12 +181,12 @@ print_range_bound (struct type *type, char *bounds, int *n,
          be printed as a signed or an unsigned value.  This causes
          the upper bound of the 0 .. -1 range types to be printed as
          a very large unsigned number instead of -1.
-         To workaround this stabs deficiency, we replace the TYPE by
-         builtin_type_int32 when we detect that the bound is negative,
+         To workaround this stabs deficiency, we replace the TYPE by NULL
+         to indicate default output when we detect that the bound is negative,
          and the type is a TYPE_CODE_INT.  The bound is negative when
          'm' is the last character of the number scanned in BOUNDS.  */
       if (bounds[*n - 1] == 'm' && TYPE_CODE (type) == TYPE_CODE_INT)
-	type = builtin_type_int32;
+	type = NULL;
       ada_print_scalar (type, B, stream);
       if (bounds[*n] == '_')
 	*n += 2;
@@ -423,7 +423,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 }
 
 /* Print the choices encoded by field FIELD_NUM of variant-part TYPE on
-   STREAM, assuming the VAL_TYPE is the type of the values.  */
+   STREAM, assuming that VAL_TYPE (if non-NULL) is the type of the values.  */
 
 static void
 print_choices (struct type *type, int field_num, struct ui_file *stream,

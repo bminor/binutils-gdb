@@ -122,7 +122,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
 	return 0;
       break;
     case TYPE_CODE_UNDEF:
-      index_type = builtin_type_int32;
+      index_type = NULL;
       /* FALL THROUGH */
     default:
       if (low_bound == 1)
@@ -375,13 +375,20 @@ ada_printchar (int c, struct type *type, struct ui_file *stream)
 }
 
 /* [From print_type_scalar in typeprint.c].   Print VAL on STREAM in a
-   form appropriate for TYPE.  */
+   form appropriate for TYPE, if non-NULL.  If TYPE is NULL, print VAL
+   like a default signed integer.  */
 
 void
 ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 {
   unsigned int i;
   unsigned len;
+
+  if (!type)
+    {
+      print_longest (stream, 'd', 0, val);
+      return;
+    }
 
   type = ada_check_typedef (type);
 
