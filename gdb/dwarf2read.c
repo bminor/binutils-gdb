@@ -4830,7 +4830,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
      arrays with unspecified length.  */
   if (die->child == NULL)
     {
-      index_type = builtin_type_int32;
+      index_type = objfile_type (objfile)->builtin_int;
       range_type = create_range_type (NULL, index_type, 0, -1);
       type = create_array_type (NULL, element_type, range_type);
       return set_die_type (die, type, cu);
@@ -5270,7 +5270,7 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
         }
     }
 
-  index_type = builtin_type_int32;
+  index_type = objfile_type (objfile)->builtin_int;
   range_type = create_range_type (NULL, index_type, 1, length);
   char_type = language_string_char_type (cu->language_defn, gdbarch);
   type = create_string_type (NULL, char_type, range_type);
@@ -7735,7 +7735,6 @@ static struct symbol *
 new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct symbol *sym = NULL;
   char *name;
   struct attribute *attr = NULL;
@@ -7840,7 +7839,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	     to something sensible.  */
 	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_VOID)
 	    SYMBOL_TYPE (sym)
-	      = builtin_type (gdbarch)->nodebug_data_symbol;
+	      = objfile_type (objfile)->nodebug_data_symbol;
 
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  if (attr)
@@ -8148,7 +8147,6 @@ dwarf2_const_value_data (struct attribute *attr,
 static struct type *
 die_type (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (cu->objfile);
   struct type *type;
   struct attribute *type_attr;
   struct die_info *type_die;
@@ -8157,7 +8155,7 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
   if (!type_attr)
     {
       /* A missing DW_AT_type represents a void type.  */
-      return builtin_type (gdbarch)->builtin_void;
+      return objfile_type (cu->objfile)->builtin_void;
     }
   else
     type_die = follow_die_ref (die, type_attr, &cu);

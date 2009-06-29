@@ -1713,7 +1713,7 @@ decode_type (struct coff_symbol *cs, unsigned int c_type,
 	  *dim = 0;
 
 	  base_type = decode_type (cs, new_c_type, aux, objfile);
-	  index_type = builtin_type_int32;
+	  index_type = objfile_type (objfile)->builtin_int;
 	  range_type =
 	    create_range_type ((struct type *) NULL, index_type, 0, n - 1);
 	  type =
@@ -1777,39 +1777,39 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
     {
     case T_NULL:
       /* shows up with "void (*foo)();" structure members */
-      return builtin_type (gdbarch)->builtin_void;
+      return objfile_type (objfile)->builtin_void;
 
 #ifdef T_VOID
     case T_VOID:
       /* Intel 960 COFF has this symbol and meaning.  */
-      return builtin_type (gdbarch)->builtin_void;
+      return objfile_type (objfile)->builtin_void;
 #endif
 
     case T_CHAR:
-      return builtin_type (gdbarch)->builtin_char;
+      return objfile_type (objfile)->builtin_char;
 
     case T_SHORT:
-      return builtin_type (gdbarch)->builtin_short;
+      return objfile_type (objfile)->builtin_short;
 
     case T_INT:
-      return builtin_type (gdbarch)->builtin_int;
+      return objfile_type (objfile)->builtin_int;
 
     case T_LONG:
       if (cs->c_sclass == C_FIELD
 	  && aux->x_sym.x_misc.x_lnsz.x_size
 	     > gdbarch_long_bit (gdbarch))
-	return builtin_type (gdbarch)->builtin_long_long;
+	return objfile_type (objfile)->builtin_long_long;
       else
-	return builtin_type (gdbarch)->builtin_long;
+	return objfile_type (objfile)->builtin_long;
 
     case T_FLOAT:
-      return builtin_type (gdbarch)->builtin_float;
+      return objfile_type (objfile)->builtin_float;
 
     case T_DOUBLE:
-      return builtin_type (gdbarch)->builtin_double;
+      return objfile_type (objfile)->builtin_double;
 
     case T_LNGDBL:
-      return builtin_type (gdbarch)->builtin_long_double;
+      return objfile_type (objfile)->builtin_long_double;
 
     case T_STRUCT:
       if (cs->c_naux != 1)
@@ -1890,24 +1890,24 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
       break;
 
     case T_UCHAR:
-      return builtin_type (gdbarch)->builtin_unsigned_char;
+      return objfile_type (objfile)->builtin_unsigned_char;
 
     case T_USHORT:
-      return builtin_type (gdbarch)->builtin_unsigned_short;
+      return objfile_type (objfile)->builtin_unsigned_short;
 
     case T_UINT:
-      return builtin_type (gdbarch)->builtin_unsigned_int;
+      return objfile_type (objfile)->builtin_unsigned_int;
 
     case T_ULONG:
       if (cs->c_sclass == C_FIELD
 	  && aux->x_sym.x_misc.x_lnsz.x_size
 	     > gdbarch_long_bit (gdbarch))
-	return builtin_type (gdbarch)->builtin_unsigned_long_long;
+	return objfile_type (objfile)->builtin_unsigned_long_long;
       else
-	return builtin_type (gdbarch)->builtin_unsigned_long;
+	return objfile_type (objfile)->builtin_unsigned_long;
     }
   complaint (&symfile_complaints, _("Unexpected type for symbol %s"), cs->c_name);
-  return builtin_type (gdbarch)->builtin_void;
+  return objfile_type (objfile)->builtin_void;
 }
 
 /* This page contains subroutines of read_type.  */

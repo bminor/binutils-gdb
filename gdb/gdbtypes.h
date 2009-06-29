@@ -957,33 +957,6 @@ extern void allocate_cplus_struct_type (struct type *);
 
 struct builtin_type
 {
-  /* Address/pointer types.  */
-
-  /* `pointer to data' type.  Some target platforms use an implicitly
-     {sign,zero} -extended 32-bit ABI pointer on a 64-bit ISA.  */
-  struct type *builtin_data_ptr;
-
-  /* `pointer to function (returning void)' type.  Harvard
-     architectures mean that ABI function and code pointers are not
-     interconvertible.  Similarly, since ANSI, C standards have
-     explicitly said that pointers to functions and pointers to data
-     are not interconvertible --- that is, you can't cast a function
-     pointer to void * and back, and expect to get the same value.
-     However, all function pointer types are interconvertible, so void
-     (*) () can server as a generic function pointer.  */
-  struct type *builtin_func_ptr;
-
-  /* The target CPU's address type.  This is the ISA address size.  */
-  struct type *builtin_core_addr;
-
-
-  /* Types used for symbols with no debug information.  */
-  struct type *nodebug_text_symbol;
-  struct type *nodebug_data_symbol;
-  struct type *nodebug_unknown_symbol;
-  struct type *nodebug_tls_symbol;
-
-
   /* Integral types.  */
 
   /* Implicit size/sign (based on the the architecture's ABI).  */
@@ -1009,10 +982,65 @@ struct builtin_type
   struct type *builtin_decfloat;
   struct type *builtin_decdouble;
   struct type *builtin_declong;
+
+
+  /* Pointer types.  */
+
+  /* `pointer to data' type.  Some target platforms use an implicitly
+     {sign,zero} -extended 32-bit ABI pointer on a 64-bit ISA.  */
+  struct type *builtin_data_ptr;
+
+  /* `pointer to function (returning void)' type.  Harvard
+     architectures mean that ABI function and code pointers are not
+     interconvertible.  Similarly, since ANSI, C standards have
+     explicitly said that pointers to functions and pointers to data
+     are not interconvertible --- that is, you can't cast a function
+     pointer to void * and back, and expect to get the same value.
+     However, all function pointer types are interconvertible, so void
+     (*) () can server as a generic function pointer.  */
+  struct type *builtin_func_ptr;
 };
 
 /* Return the type table for the specified architecture.  */
 extern const struct builtin_type *builtin_type (struct gdbarch *gdbarch);
+
+
+/* Per-objfile types used by symbol readers.  */
+
+struct objfile_type
+{
+  /* Basic types based on the objfile architecture.  */
+  struct type *builtin_void;
+  struct type *builtin_char;
+  struct type *builtin_short;
+  struct type *builtin_int;
+  struct type *builtin_long;
+  struct type *builtin_long_long;
+  struct type *builtin_signed_char;
+  struct type *builtin_unsigned_char;
+  struct type *builtin_unsigned_short;
+  struct type *builtin_unsigned_int;
+  struct type *builtin_unsigned_long;
+  struct type *builtin_unsigned_long_long;
+  struct type *builtin_float;
+  struct type *builtin_double;
+  struct type *builtin_long_double;
+
+  /* This type is used to represent symbol addresses.  */
+  struct type *builtin_core_addr;
+
+  /* This type represents a type that was unrecognized in symbol read-in.  */
+  struct type *builtin_error;
+
+  /* Types used for symbols with no debug information.  */
+  struct type *nodebug_text_symbol;
+  struct type *nodebug_data_symbol;
+  struct type *nodebug_unknown_symbol;
+  struct type *nodebug_tls_symbol;
+};
+
+/* Return the type table for the specified objfile.  */
+extern const struct objfile_type *objfile_type (struct objfile *objfile);
 
  
 /* Explicit sizes - see C9X <intypes.h> for naming scheme.  The "int0"
@@ -1063,14 +1091,6 @@ extern struct type *builtin_type_void;
 extern struct type *builtin_type_true_char;
 extern struct type *builtin_type_true_unsigned_char;
 
-
-/* This type represents a type that was unrecognized in symbol
-   read-in.  */
-extern struct type *builtin_type_error;
-
-
-/* RTTI for C++ */
-/* extern struct type *builtin_type_cxx_typeinfo; */
 
 /* Maximum and minimum values of built-in types */
 

@@ -1,5 +1,49 @@
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (struct builtin_type): Remove builtin_core_addr,
+	nodebug_text_symbol, nodebug_data_symbol, nodebug_unknown_symbol,
+	and nodebug_tls_symbol members.
+	(struct objfile_type): New data structure.
+	(objfile_type): Add prototype.
+	* gdbtypes.c (gdbtypes_post_init): Remove initialization code
+	for types no longer in struct builtin_type.
+	(objfile_type_data): New static variable.
+	(_initialize_gdbtypes): Initialize it.
+	(objfile_type): New function.
+
+	* gdbtypes.h (builtin_type_error): Remove.
+	* gdbtypes.c (build_complex): Do not use builtin_type_error.
+	* symtab.c (builtin_type_error): Remove.
+	(_initialize_symtab): Remove initialization.
+
+	* stabsread.c (dbx_lookup_type, define_symbol, error_type,
+	rs6000_builtin_type, read_range_type): Use per-objfile types
+	instead of global or per-architecture builtin types.
+	* coffread.c (decode_type): Likewise.
+	* dwarf2read.c (read_array_type, read_tag_string_type,
+	new_symbol, die_type): Likewise.
+	* mdebugread.c (parse_symbol, basic_type, upgrade_type,
+	parse_procedure, psymtab_to_symtab_1): Likewise.
+	* xcoffread.c (process_xcoff_symbol): Likewise.
+	* parse.c (write_exp_msymbol): Likewise.
+
+	* stabsread.c (rs6000_builtin_type_data): New static variable.
+	(_initialize_stabsread): Initialize it.
+	(rs6000_builtin_type): Add OBJFILE argument.  Allocate builtin
+	types per-objfile instead of globally.
+
+	* stabsread.c (dbx_lookup_type): Add OBJFILE argument.  Use it
+	instead of current_objfile; pass it to rs6000_builtin_type.
+	(dbx_alloc_type, read_type, read_range_type): Update calls.
+	(cleanup_undefined_types_noname): Add OBJFILE argument and
+	pass it to dbx_lookup_type.
+	(cleanup_undefined_types): Add OBJFILE argument and pass it
+	to cleanup_undefined_types_noname.
+	* stabsread.h (cleanup_undefined_types): Add OBJFILE argument.
+	* buildsym.c (end_symtab): Update call.
+
+2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* darwin-nat-info.c (darwin_debug_regions_recurse): Use
 	target_gdbarch instead of current_gdbarch.
 

@@ -489,7 +489,7 @@ write_exp_msymbol (struct minimal_symbol *msymbol)
 
   write_exp_elt_opcode (OP_LONG);
   /* Let's make the type big enough to hold a 64-bit address.  */
-  write_exp_elt_type (builtin_type (gdbarch)->builtin_core_addr);
+  write_exp_elt_type (objfile_type (objfile)->builtin_core_addr);
   write_exp_elt_longcst ((LONGEST) addr);
   write_exp_elt_opcode (OP_LONG);
 
@@ -497,7 +497,7 @@ write_exp_msymbol (struct minimal_symbol *msymbol)
     {
       write_exp_elt_opcode (UNOP_MEMVAL_TLS);
       write_exp_elt_objfile (objfile);
-      write_exp_elt_type (builtin_type (gdbarch)->nodebug_tls_symbol);
+      write_exp_elt_type (objfile_type (objfile)->nodebug_tls_symbol);
       write_exp_elt_opcode (UNOP_MEMVAL_TLS);
       return;
     }
@@ -508,18 +508,18 @@ write_exp_msymbol (struct minimal_symbol *msymbol)
     case mst_text:
     case mst_file_text:
     case mst_solib_trampoline:
-      write_exp_elt_type (builtin_type (gdbarch)->nodebug_text_symbol);
+      write_exp_elt_type (objfile_type (objfile)->nodebug_text_symbol);
       break;
 
     case mst_data:
     case mst_file_data:
     case mst_bss:
     case mst_file_bss:
-      write_exp_elt_type (builtin_type (gdbarch)->nodebug_data_symbol);
+      write_exp_elt_type (objfile_type (objfile)->nodebug_data_symbol);
       break;
 
     default:
-      write_exp_elt_type (builtin_type (gdbarch)->nodebug_unknown_symbol);
+      write_exp_elt_type (objfile_type (objfile)->nodebug_unknown_symbol);
       break;
     }
   write_exp_elt_opcode (UNOP_MEMVAL);

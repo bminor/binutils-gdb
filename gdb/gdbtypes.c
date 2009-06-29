@@ -3070,11 +3070,6 @@ static struct type *
 build_complex (int bit, char *name, struct type *target_type)
 {
   struct type *t;
-  if (bit <= 0 || target_type == builtin_type_error)
-    {
-      gdb_assert (builtin_type_error != NULL);
-      return builtin_type_error;
-    }
   t = init_type (TYPE_CODE_COMPLEX, 2 * bit / TARGET_CHAR_BIT,
 		 0, name, (struct objfile *) NULL);
   TYPE_TARGET_TYPE (t) = target_type;
@@ -3087,6 +3082,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   struct builtin_type *builtin_type
     = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_type);
 
+  /* Basic types.  */
   builtin_type->builtin_void =
     init_type (TYPE_CODE_VOID, 1,
 	       0,
@@ -3179,7 +3175,130 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 	       0,
 	       "_Decimal128", (struct objfile *) NULL);
 
-  /* Pointer/Address types.  */
+  /* Default data/code pointer types.  */
+  builtin_type->builtin_data_ptr =
+    make_pointer_type (builtin_type->builtin_void, NULL);
+  builtin_type->builtin_func_ptr =
+    lookup_pointer_type (lookup_function_type (builtin_type->builtin_void));
+
+  return builtin_type;
+}
+
+
+/* This set of objfile-based types is intended to be used by symbol
+   readers as basic types.  */
+
+static const struct objfile_data *objfile_type_data;
+
+const struct objfile_type *
+objfile_type (struct objfile *objfile)
+{
+  struct gdbarch *gdbarch;
+  struct objfile_type *objfile_type
+    = objfile_data (objfile, objfile_type_data);
+
+  if (objfile_type)
+    return objfile_type;
+
+  objfile_type = OBSTACK_CALLOC (&objfile->objfile_obstack,
+				 1, struct objfile_type);
+
+  /* Use the objfile architecture to determine basic type properties.  */
+  gdbarch = get_objfile_arch (objfile);
+
+  /* Basic types.  */
+  objfile_type->builtin_void
+    = init_type (TYPE_CODE_VOID, 1,
+		 0,
+		 "void", objfile);
+
+  objfile_type->builtin_char
+    = init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+		 (TYPE_FLAG_NOSIGN
+		  | (gdbarch_char_signed (gdbarch) ? 0 : TYPE_FLAG_UNSIGNED)),
+		 "char", objfile);
+  objfile_type->builtin_signed_char
+    = init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+		 0,
+		 "signed char", objfile);
+  objfile_type->builtin_unsigned_char
+    = init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+		 TYPE_FLAG_UNSIGNED,
+		 "unsigned char", objfile);
+  objfile_type->builtin_short
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_short_bit (gdbarch) / TARGET_CHAR_BIT,
+		 0, "short", objfile);
+  objfile_type->builtin_unsigned_short
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_short_bit (gdbarch) / TARGET_CHAR_BIT,
+		 TYPE_FLAG_UNSIGNED, "unsigned short", objfile);
+  objfile_type->builtin_int
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
+		 0, "int", objfile);
+  objfile_type->builtin_unsigned_int
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
+		 TYPE_FLAG_UNSIGNED, "unsigned int", objfile);
+  objfile_type->builtin_long
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT,
+		 0, "long", objfile);
+  objfile_type->builtin_unsigned_long
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT,
+		 TYPE_FLAG_UNSIGNED, "unsigned long", objfile);
+  objfile_type->builtin_long_long
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_long_long_bit (gdbarch) / TARGET_CHAR_BIT,
+		 0, "long long", objfile);
+  objfile_type->builtin_unsigned_long_long
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_long_long_bit (gdbarch) / TARGET_CHAR_BIT,
+		 TYPE_FLAG_UNSIGNED, "unsigned long long", objfile);
+
+  objfile_type->builtin_float
+    = init_type (TYPE_CODE_FLT,
+		 gdbarch_float_bit (gdbarch) / TARGET_CHAR_BIT,
+		 0, "float", objfile);
+  TYPE_FLOATFORMAT (objfile_type->builtin_float)
+    = gdbarch_float_format (gdbarch);
+  objfile_type->builtin_double
+    = init_type (TYPE_CODE_FLT,
+		 gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT,
+		 0, "double", objfile);
+  TYPE_FLOATFORMAT (objfile_type->builtin_double)
+    = gdbarch_double_format (gdbarch);
+  objfile_type->builtin_long_double
+    = init_type (TYPE_CODE_FLT,
+		 gdbarch_long_double_bit (gdbarch) / TARGET_CHAR_BIT,
+		 0, "long double", objfile);
+  TYPE_FLOATFORMAT (objfile_type->builtin_long_double)
+    = gdbarch_long_double_format (gdbarch);
+
+  /* This type represents a type that was unrecognized in symbol read-in.  */
+  objfile_type->builtin_error
+    = init_type (TYPE_CODE_ERROR, 0, 0, "<unknown type>", objfile);
+
+  /* The following set of types is used for symbols with no
+     debug information.  */
+  objfile_type->nodebug_text_symbol
+    = init_type (TYPE_CODE_FUNC, 1, 0,
+		 "<text variable, no debug info>", objfile);
+  TYPE_TARGET_TYPE (objfile_type->nodebug_text_symbol)
+    = objfile_type->builtin_int;
+  objfile_type->nodebug_data_symbol
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT, 0,
+		 "<data variable, no debug info>", objfile);
+  objfile_type->nodebug_unknown_symbol
+    = init_type (TYPE_CODE_INT, 1, 0,
+		 "<variable (not text or data), no debug info>", objfile);
+  objfile_type->nodebug_tls_symbol
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT, 0,
+		 "<thread local variable, no debug info>", objfile);
 
   /* NOTE: on some targets, addresses and pointers are not necessarily
      the same --- for example, on the D10V, pointers are 16 bits long,
@@ -3203,49 +3322,27 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
      - If p is a D10V pointer type, TYPE_LENGTH (p) == 2, just as
        sizeof (void *) == 2 on the target.
 
-     In this context, builtin_type->CORE_ADDR is a bit odd: it's a
-     target type for a value the target will never see.  It's only
-     used to hold the values of (typeless) linker symbols, which are
-     indeed in the unified virtual address space.  */
+     In this context, objfile_type->builtin_core_addr is a bit odd:
+     it's a target type for a value the target will never see.  It's
+     only used to hold the values of (typeless) linker symbols, which
+     are indeed in the unified virtual address space.  */
 
-  builtin_type->builtin_data_ptr =
-    make_pointer_type (builtin_type->builtin_void, NULL);
-  builtin_type->builtin_func_ptr =
-    lookup_pointer_type (lookup_function_type (builtin_type->builtin_void));
-  builtin_type->builtin_core_addr =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_addr_bit (gdbarch) / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "__CORE_ADDR", (struct objfile *) NULL);
+  objfile_type->builtin_core_addr
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_addr_bit (gdbarch) / 8,
+		 TYPE_FLAG_UNSIGNED, "__CORE_ADDR", objfile);
 
-
-  /* The following set of types is used for symbols with no
-     debug information.  */
-  builtin_type->nodebug_text_symbol =
-    init_type (TYPE_CODE_FUNC, 1, 0, 
-	       "<text variable, no debug info>", NULL);
-  TYPE_TARGET_TYPE (builtin_type->nodebug_text_symbol) =
-    builtin_type->builtin_int;
-  builtin_type->nodebug_data_symbol =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT, 0,
-	       "<data variable, no debug info>", NULL);
-  builtin_type->nodebug_unknown_symbol =
-    init_type (TYPE_CODE_INT, 1, 0,
-	       "<variable (not text or data), no debug info>", NULL);
-  builtin_type->nodebug_tls_symbol =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT, 0,
-	       "<thread local variable, no debug info>", NULL);
-
-  return builtin_type;
+  set_objfile_data (objfile, objfile_type_data, objfile_type);
+  return objfile_type;
 }
+
 
 extern void _initialize_gdbtypes (void);
 void
 _initialize_gdbtypes (void)
 {
   gdbtypes_data = gdbarch_data_register_post_init (gdbtypes_post_init);
+  objfile_type_data = register_objfile_data ();
 
   /* FIXME: The following types are architecture-neutral.  However,
      they contain pointer_type and reference_type fields potentially

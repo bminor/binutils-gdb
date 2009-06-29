@@ -997,7 +997,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
      are no-ops.  FIXME: Is this handled right in case of QUIT?  Can
      we make this cleaner?  */
 
-  cleanup_undefined_types ();
+  cleanup_undefined_types (objfile);
   finish_global_stabs (objfile);
 
   if (pending_blocks == NULL

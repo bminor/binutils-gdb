@@ -146,9 +146,6 @@ multiple_symbols_select_mode (void)
   return multiple_symbols_mode;
 }
 
-/* The single non-language-specific builtin type */
-struct type *builtin_type_error;
-
 /* Block in which the most recently searched-for symbol was found.
    Might be better to make this a parameter to lookup_symbol and
    value_of_this. */
@@ -4778,10 +4775,6 @@ in an expression."), _("\
 Show how the debugger handles ambiguities in expressions."), _("\
 Valid values are \"ask\", \"all\", \"cancel\", and the default is \"all\"."),
                         NULL, NULL, &setlist, &showlist);
-
-  /* Initialize the one built-in type that isn't language dependent... */
-  builtin_type_error = init_type (TYPE_CODE_ERROR, 0, 0,
-				  "<unknown type>", (struct objfile *) NULL);
 
   observer_attach_executable_changed (symtab_observer_executable_changed);
 }

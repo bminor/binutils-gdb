@@ -1454,7 +1454,6 @@ read_xcoff_symtab (struct partial_symtab *pst)
 static struct symbol *
 process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct symbol onesymbol;
   struct symbol *sym = &onesymbol;
   struct symbol *sym2 = NULL;
@@ -1494,7 +1493,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
          patch_block_stabs (), unless the file was compiled without -g.  */
 
       SYMBOL_SET_LINKAGE_NAME (sym, SYMNAME_ALLOC (name, symname_alloced));
-      SYMBOL_TYPE (sym) = builtin_type (gdbarch)->nodebug_text_symbol;
+      SYMBOL_TYPE (sym) = objfile_type (objfile)->nodebug_text_symbol;
 
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       SYMBOL_DUP (sym, sym2);
@@ -1507,7 +1506,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
   else
     {
       /* In case we can't figure out the type, provide default. */
-      SYMBOL_TYPE (sym) = builtin_type (gdbarch)->nodebug_data_symbol;
+      SYMBOL_TYPE (sym) = objfile_type (objfile)->nodebug_data_symbol;
 
       switch (cs->c_sclass)
 	{

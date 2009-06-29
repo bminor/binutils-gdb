@@ -636,7 +636,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       /* Type could be missing if file is compiled without debugging info.  */
       if (SC_IS_UNDEF (sh->sc)
 	  || sh->sc == scNil || sh->index == indexNil)
-	SYMBOL_TYPE (s) = builtin_type (gdbarch)->nodebug_data_symbol;
+	SYMBOL_TYPE (s) = objfile_type (objfile)->nodebug_data_symbol;
       else
 	SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
       /* Value of a data symbol is its memory address */
@@ -685,7 +685,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;	/* so that it can be used */
       SYMBOL_CLASS (s) = LOC_LABEL;	/* but not misused */
       SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
-      SYMBOL_TYPE (s) = builtin_type (gdbarch)->builtin_int;
+      SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_int;
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       break;
 
@@ -728,7 +728,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Type of the return value */
       if (SC_IS_UNDEF (sh->sc) || sh->sc == scNil)
-	t = builtin_type (gdbarch)->builtin_int;
+	t = objfile_type (objfile)->builtin_int;
       else
 	{
 	  t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
@@ -1138,7 +1138,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 	  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
 	  SYMBOL_CLASS (s) = LOC_CONST;
-	  SYMBOL_TYPE (s) = builtin_type_void;
+	  SYMBOL_TYPE (s) = objfile_type (current_objfile)->builtin_void;
 	  e = ((struct mdebug_extra_func_info *)
 	       obstack_alloc (&current_objfile->objfile_obstack,
 			      sizeof (struct mdebug_extra_func_info)));
@@ -1359,13 +1359,13 @@ basic_type (int bt, struct objfile *objfile)
   switch (bt)
     {
     case btNil:
-      tp = builtin_type_void;
+      tp = objfile_type (objfile)->builtin_void;
       break;
 
     case btAdr:
       tp = init_type (TYPE_CODE_PTR, 4, TYPE_FLAG_UNSIGNED,
 		      "adr_32", objfile);
-      TYPE_TARGET_TYPE (tp) = builtin_type_void;
+      TYPE_TARGET_TYPE (tp) = objfile_type (objfile)->builtin_void;
       break;
 
     case btChar:
@@ -1457,7 +1457,7 @@ basic_type (int bt, struct objfile *objfile)
       break;
 
     case btVoid:
-      tp = builtin_type_void;
+      tp = objfile_type (objfile)->builtin_void;
       break;
 
     case btLong64:
@@ -1483,7 +1483,7 @@ basic_type (int bt, struct objfile *objfile)
     case btAdr64:
       tp = init_type (TYPE_CODE_PTR, 8, TYPE_FLAG_UNSIGNED,
 		      "adr_64", objfile);
-      TYPE_TARGET_TYPE (tp) = builtin_type_void;
+      TYPE_TARGET_TYPE (tp) = objfile_type (objfile)->builtin_void;
       break;
 
     case btInt64:
@@ -1849,7 +1849,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
 	{
 	  complaint (&symfile_complaints,
 		     _("illegal array index type for %s, assuming int"), sym_name);
-	  indx = builtin_type_int32;
+	  indx = objfile_type (current_objfile)->builtin_int;
 	}
 
       /* Get the bounds, and create the array type.  */
@@ -1918,7 +1918,6 @@ static void
 parse_procedure (PDR *pr, struct symtab *search_symtab,
 		 struct partial_symtab *pst)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (pst->objfile);
   struct symbol *s, *i;
   struct block *b;
   char *sh_name;
@@ -2002,7 +2001,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Donno its type, hope int is ok */
       SYMBOL_TYPE (s)
-	= lookup_function_type (builtin_type (gdbarch)->builtin_int);
+	= lookup_function_type (objfile_type (pst->objfile)->builtin_int);
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       /* Wont have symbols for this one */
       b = new_block (2);
@@ -2057,7 +2056,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
   if (processing_gcc_compilation == 0
       && found_ecoff_debugging_info == 0
       && TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (s))) == TYPE_CODE_VOID)
-    SYMBOL_TYPE (s) = builtin_type (gdbarch)->nodebug_text_symbol;
+    SYMBOL_TYPE (s) = objfile_type (pst->objfile)->nodebug_text_symbol;
 }
 
 /* Parse the external symbol ES. Just call parse_symbol() after
@@ -4043,7 +4042,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 		  memset (e, 0, sizeof (struct mdebug_extra_func_info));
 		  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
 		  SYMBOL_CLASS (s) = LOC_CONST;
-		  SYMBOL_TYPE (s) = builtin_type_void;
+		  SYMBOL_TYPE (s) = objfile_type (pst->objfile)->builtin_void;
 		  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
 		  e->pdr.framereg = -1;
 		  add_symbol_to_list (s, &local_symbols);
