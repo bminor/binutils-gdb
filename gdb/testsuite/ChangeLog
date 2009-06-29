@@ -1,3 +1,7 @@
+2009-06-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/current-lwp-dead.exp, gdb.threads/current-lwp-dead.c: New.
+
 2009-06-29  Tom Tromey  <tromey@redhat.com>
 
 	* dg-extract-results.sh: New file.
