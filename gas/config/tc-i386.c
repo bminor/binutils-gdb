@@ -660,11 +660,11 @@ pe_lcomm_internal (int needs_align, symbolS *symbolP, addressT size)
 
   SKIP_WHITESPACE ();
 
-  if (needs_align 
+  if (needs_align
       && *input_line_pointer == ',')
     {
       align = parse_align (needs_align - 1);
-      
+
       if (align == (addressT) -1)
 	return NULL;
     }
@@ -1650,7 +1650,7 @@ static i386_operand_type
 smallest_imm_type (offsetT num)
 {
   i386_operand_type t;
- 
+
   operand_type_set (&t, 0);
   t.bitfield.imm64 = 1;
 
@@ -1869,7 +1869,7 @@ set_intel_syntax (int syntax_flag)
     allow_naked_reg = (ask_naked_reg < 0);
 
   expr_set_rank (O_full_ptr, syntax_flag ? 10 : 0);
-  
+
   identifier_chars['%'] = intel_syntax && allow_naked_reg ? '%' : 0;
   identifier_chars['$'] = intel_syntax ? '$' : 0;
   register_prefix = allow_naked_reg ? "" : "%";
@@ -2682,9 +2682,9 @@ process_immext (void)
      3 argument instructions.  */
 
   gas_assert (i.imm_operands == 0
-	  && (i.operands <= 2
-	      || (i.tm.opcode_modifier.vex
-		  && i.operands <= 4)));
+	      && (i.operands <= 2
+		  || (i.tm.opcode_modifier.vex
+		      && i.operands <= 4)));
 
   exp = &im_expressions[i.imm_operands++];
   i.op[i.operands].imms = exp;
@@ -2790,7 +2790,7 @@ md_assemble (char *line)
 	 there is no suffix, the default will be byte extension.  */
       if (i.reg_operands != 2
 	  && !i.suffix
-	  && intel_syntax) 
+	  && intel_syntax)
 	as_bad (_("ambiguous operand size for `%s'"), i.tm.name);
 
       i.suffix = 0;
@@ -2904,7 +2904,7 @@ md_assemble (char *line)
 	}
     }
 
-if (i.rex != 0)
+  if (i.rex != 0)
     add_prefix (REX_OPCODE | i.rex);
 
   /* We are ready to output the insn.  */
@@ -3113,7 +3113,7 @@ check_suffix:
   if (supported != CPU_FLAGS_PERFECT_MATCH)
     {
       as_bad (_("`%s' is not supported on `%s%s'"),
-	      current_templates->start->name, 
+	      current_templates->start->name,
 	      cpu_arch_name ? cpu_arch_name : default_arch,
 	      cpu_sub_arch_name ? cpu_sub_arch_name : "");
       return NULL;
@@ -3330,7 +3330,7 @@ optimize_imm (void)
 	 In any case, we can't set i.suffix yet.  */
       for (op = i.operands; --op >= 0;)
 	if (i.types[op].bitfield.reg8)
-	  { 
+	  {
 	    guess_suffix = BYTE_MNEM_SUFFIX;
 	    break;
 	  }
@@ -4087,7 +4087,7 @@ process_suffix (void)
       else
 	{
 	  unsigned int suffixes;
-	  
+
 	  suffixes = !i.tm.opcode_modifier.no_bsuf;
 	  if (!i.tm.opcode_modifier.no_wsuf)
 	    suffixes |= 1 << 1;
@@ -4450,7 +4450,7 @@ update_imm (unsigned int j)
 	  i386_operand_type temp;
 
 	  operand_type_set (&temp, 0);
-	  if (i.suffix == BYTE_MNEM_SUFFIX) 
+	  if (i.suffix == BYTE_MNEM_SUFFIX)
 	    {
 	      temp.bitfield.imm8 = overlap.bitfield.imm8;
 	      temp.bitfield.imm8s = overlap.bitfield.imm8s;
@@ -4538,8 +4538,8 @@ process_operands (void)
 
       /* The destination must be an xmm register.  */
       gas_assert (i.reg_operands
-	      && MAX_OPERANDS > dup
-	      && operand_type_equal (&i.types[dest], &regxmm));
+		  && MAX_OPERANDS > dup
+		  && operand_type_equal (&i.types[dest], &regxmm));
 
       if (i.tm.opcode_modifier.firstxmm0)
 	{
@@ -4568,9 +4568,9 @@ process_operands (void)
 	    }
 	}
       else if (i.tm.opcode_modifier.implicit1stxmm0)
-	{ 
+	{
 	  gas_assert ((MAX_OPERANDS - 1) > dup
-		  && i.tm.opcode_modifier.vex3sources);
+		      && i.tm.opcode_modifier.vex3sources);
 
 	  /* Add the implicit xmm0 for instructions with VEX prefix
 	     and 3 sources.  */
@@ -4582,7 +4582,7 @@ process_operands (void)
 	    }
 	  i.op[0].regs
 	    = (const reg_entry *) hash_find (reg_hash, "xmm0");
-	  i.types[0] = regxmm; 
+	  i.types[0] = regxmm;
 	  i.tm.operand_types[0] = regxmm;
 
 	  i.operands += 2;
@@ -4616,8 +4616,8 @@ duplicate:
 
       /* The first operand is implicit and must be xmm0/ymm0.  */
       gas_assert (i.reg_operands
-	      && (operand_type_equal (&i.types[0], &regxmm)
-		  || operand_type_equal (&i.types[0], &regymm)));
+		  && (operand_type_equal (&i.types[0], &regxmm)
+		      || operand_type_equal (&i.types[0], &regymm)));
       if (i.op[0].regs->reg_num != 0)
 	return bad_implicit_operand (i.types[0].bitfield.regxmm);
 
@@ -4649,7 +4649,7 @@ duplicate:
 	first_reg_op = 1;
       /* Pretend we saw the extra register operand.  */
       gas_assert (i.reg_operands == 1
-	      && i.op[first_reg_op + 1].regs == 0);
+		  && i.op[first_reg_op + 1].regs == 0);
       i.op[first_reg_op + 1].regs = i.op[first_reg_op].regs;
       i.types[first_reg_op + 1] = i.types[first_reg_op];
       i.operands++;
@@ -4673,15 +4673,15 @@ duplicate:
 	}
       else
 	{
-	  /* The register or float register operand is in operand 
+	  /* The register or float register operand is in operand
 	     0 or 1.  */
 	  unsigned int op;
-	  
-	   if (i.types[0].bitfield.floatreg
-	       || operand_type_check (i.types[0], reg))
-	     op = 0;
-	   else
-	     op = 1;
+
+	  if (i.types[0].bitfield.floatreg
+	      || operand_type_check (i.types[0], reg))
+	    op = 0;
+	  else
+	    op = 1;
 	  /* Register goes in low 3 bits of opcode.  */
 	  i.tm.base_opcode |= i.op[op].regs->reg_num;
 	  if ((i.op[op].regs->reg_flags & RegRex) != 0)
@@ -4748,7 +4748,7 @@ build_modrm_byte (void)
 {
   const seg_entry *default_seg = 0;
   unsigned int source, dest;
-  int vex_3_sources; 
+  int vex_3_sources;
 
   /* The first operand of instructions with VEX prefix and 3 sources
      must be VEX_Imm4.  */
@@ -4766,22 +4766,22 @@ build_modrm_byte (void)
 	 or 3 register operands plus 1 memory operand.  It must have
 	 VexNDS and VexImmExt.  */
       gas_assert (i.operands == 4
-	      && (i.reg_operands == 4
-		  || (i.reg_operands == 3 && i.mem_operands == 1))
-	      && i.tm.opcode_modifier.vexnds
-	      && i.tm.opcode_modifier.veximmext
-	      && (operand_type_equal (&i.tm.operand_types[dest],
-				      &regxmm)
-		  || operand_type_equal (&i.tm.operand_types[dest],
-					 &regymm))
-	      && (operand_type_equal (&i.tm.operand_types[nds],
-				      &regxmm)
-		  || operand_type_equal (&i.tm.operand_types[nds],
-					 &regymm))
-	      && (operand_type_equal (&i.tm.operand_types[reg],
-				      &regxmm)
-		  || operand_type_equal (&i.tm.operand_types[reg],
-					 &regymm)));
+		  && (i.reg_operands == 4
+		      || (i.reg_operands == 3 && i.mem_operands == 1))
+		  && i.tm.opcode_modifier.vexnds
+		  && i.tm.opcode_modifier.veximmext
+		  && (operand_type_equal (&i.tm.operand_types[dest],
+					  &regxmm)
+		      || operand_type_equal (&i.tm.operand_types[dest],
+					     &regymm))
+		  && (operand_type_equal (&i.tm.operand_types[nds],
+					  &regxmm)
+		      || operand_type_equal (&i.tm.operand_types[nds],
+					     &regymm))
+		  && (operand_type_equal (&i.tm.operand_types[reg],
+					  &regxmm)
+		      || operand_type_equal (&i.tm.operand_types[reg],
+					     &regymm)));
 
       /* Generate an 8bit immediate operand to encode the register
 	 operand.  */
@@ -4805,12 +4805,12 @@ build_modrm_byte (void)
      instruction with VexNDD, the destination register is encoded
      in VEX prefix.  If there are 4 register operands, it must be
      a instruction with VEX prefix and 3 sources.  */
-    if (i.mem_operands == 0
-	   && ((i.reg_operands == 2
-		&& !i.tm.opcode_modifier.vexndd)
-	       || (i.reg_operands == 3
-		   && i.tm.opcode_modifier.vexnds)
-	       || (i.reg_operands == 4 && vex_3_sources)))
+  if (i.mem_operands == 0
+      && ((i.reg_operands == 2
+	   && !i.tm.opcode_modifier.vexndd)
+	  || (i.reg_operands == 3
+	      && i.tm.opcode_modifier.vexnds)
+	  || (i.reg_operands == 4 && vex_3_sources)))
     {
       switch (i.operands)
 	{
@@ -4823,9 +4823,9 @@ build_modrm_byte (void)
 	     the first operand must be shift count register (cl) or it
 	     is an instruction with VexNDS. */
 	  gas_assert (i.imm_operands == 1
-		  || (i.imm_operands == 0
-		      && (i.tm.opcode_modifier.vexnds
-			  || i.types[0].bitfield.shiftcount)));
+		      || (i.imm_operands == 0
+			  && (i.tm.opcode_modifier.vexnds
+			      || i.types[0].bitfield.shiftcount)));
 	  if (operand_type_check (i.types[0], imm)
 	      || i.types[0].bitfield.shiftcount)
 	    source = 1;
@@ -4841,12 +4841,12 @@ build_modrm_byte (void)
 	     an imm8, the source operand is the 2nd one.  If the last
 	     operand is imm8, the source operand is the first one.  */
 	  gas_assert ((i.imm_operands == 2
-		   && i.types[0].bitfield.imm8
-		   && i.types[1].bitfield.imm8)
-		  || (i.tm.opcode_modifier.vexnds
-		      && i.imm_operands == 1
-		      && (i.types[0].bitfield.imm8
-			  || i.types[i.operands - 1].bitfield.imm8)));
+		       && i.types[0].bitfield.imm8
+		       && i.types[1].bitfield.imm8)
+		      || (i.tm.opcode_modifier.vexnds
+			  && i.imm_operands == 1
+			  && (i.types[0].bitfield.imm8
+			      || i.types[i.operands - 1].bitfield.imm8)));
 	  if (i.tm.opcode_modifier.vexnds)
 	    {
 	      if (i.types[0].bitfield.imm8)
@@ -4928,10 +4928,11 @@ build_modrm_byte (void)
 	  unsigned int fake_zero_displacement = 0;
 	  unsigned int op;
 
-	      for (op = 0; op < i.operands; op++)
-		if (operand_type_check (i.types[op], anymem))
-		  break;
-	      gas_assert (op < i.operands);
+	  for (op = 0; op < i.operands; op++)
+	    if (operand_type_check (i.types[op], anymem))
+	      break;
+
+	  gas_assert (op < i.operands);
 
 	  default_seg = &ds;
 
@@ -5130,80 +5131,80 @@ build_modrm_byte (void)
       if (i.reg_operands)
 	{
 	  unsigned int op;
-	      unsigned int vex_reg = ~0;
-	      
-	      for (op = 0; op < i.operands; op++)
-		if (i.types[op].bitfield.reg8
-		    || i.types[op].bitfield.reg16
-		    || i.types[op].bitfield.reg32
-		    || i.types[op].bitfield.reg64
-		    || i.types[op].bitfield.regmmx
-		    || i.types[op].bitfield.regxmm
-		    || i.types[op].bitfield.regymm
-		    || i.types[op].bitfield.sreg2
-		    || i.types[op].bitfield.sreg3
-		    || i.types[op].bitfield.control
-		    || i.types[op].bitfield.debug
-		    || i.types[op].bitfield.test)
-		  break;
+	  unsigned int vex_reg = ~0;
 
-	      if (vex_3_sources)
-		op = dest;
-	      else if (i.tm.opcode_modifier.vexnds)
+	  for (op = 0; op < i.operands; op++)
+	    if (i.types[op].bitfield.reg8
+		|| i.types[op].bitfield.reg16
+		|| i.types[op].bitfield.reg32
+		|| i.types[op].bitfield.reg64
+		|| i.types[op].bitfield.regmmx
+		|| i.types[op].bitfield.regxmm
+		|| i.types[op].bitfield.regymm
+		|| i.types[op].bitfield.sreg2
+		|| i.types[op].bitfield.sreg3
+		|| i.types[op].bitfield.control
+		|| i.types[op].bitfield.debug
+		|| i.types[op].bitfield.test)
+	      break;
+
+	  if (vex_3_sources)
+	    op = dest;
+	  else if (i.tm.opcode_modifier.vexnds)
+	    {
+	      /* For instructions with VexNDS, the register-only
+		 source operand is encoded in VEX prefix. */
+	      gas_assert (mem != (unsigned int) ~0);
+
+	      if (op > mem)
 		{
-		  /* For instructions with VexNDS, the register-only
-		     source operand is encoded in VEX prefix. */
-		  gas_assert (mem != (unsigned int) ~0);
-
-		  if (op > mem)
-		    {
-		      vex_reg = op++;
-		      gas_assert (op < i.operands);
-		    }
-		  else
-		    {
-		      vex_reg = op + 1;
-		      gas_assert (vex_reg < i.operands);
-		    }
+		  vex_reg = op++;
+		  gas_assert (op < i.operands);
 		}
-	      else if (i.tm.opcode_modifier.vexndd)
+	      else
 		{
-		  /* For instructions with VexNDD, there should be
-		     no memory operand and the register destination
-		     is encoded in VEX prefix.  */
-		  gas_assert (i.mem_operands == 0
-			  && (op + 2) == i.operands);
 		  vex_reg = op + 1;
+		  gas_assert (vex_reg < i.operands);
 		}
-	      else
-		gas_assert (op < i.operands);
+	    }
+	  else if (i.tm.opcode_modifier.vexndd)
+	    {
+	      /* For instructions with VexNDD, there should be
+		 no memory operand and the register destination
+		 is encoded in VEX prefix.  */
+	      gas_assert (i.mem_operands == 0
+			  && (op + 2) == i.operands);
+	      vex_reg = op + 1;
+	    }
+	  else
+	    gas_assert (op < i.operands);
 
-	      if (vex_reg != (unsigned int) ~0)
-		{
-		  gas_assert (i.reg_operands == 2);
+	  if (vex_reg != (unsigned int) ~0)
+	    {
+	      gas_assert (i.reg_operands == 2);
 
-		  if (!operand_type_equal (&i.tm.operand_types[vex_reg],
-					   & regxmm)
-		      && !operand_type_equal (&i.tm.operand_types[vex_reg],
-					      &regymm))
-		    abort ();
-		  i.vex.register_specifier = i.op[vex_reg].regs;
-		}
+	      if (!operand_type_equal (&i.tm.operand_types[vex_reg],
+				       & regxmm)
+		  && !operand_type_equal (&i.tm.operand_types[vex_reg],
+					  &regymm))
+		abort ();
+	      i.vex.register_specifier = i.op[vex_reg].regs;
+	    }
 
-	      /* If there is an extension opcode to put here, the 
-		 register number must be put into the regmem field.  */
-	      if (i.tm.extension_opcode != None)
-		{
-		  i.rm.regmem = i.op[op].regs->reg_num;
-		  if ((i.op[op].regs->reg_flags & RegRex) != 0)
-		    i.rex |= REX_B;
-		}
-	      else
-		{
-		  i.rm.reg = i.op[op].regs->reg_num;
-		  if ((i.op[op].regs->reg_flags & RegRex) != 0)
-		    i.rex |= REX_R;
-		}
+	  /* If there is an extension opcode to put here, the
+	     register number must be put into the regmem field.  */
+	  if (i.tm.extension_opcode != None)
+	    {
+	      i.rm.regmem = i.op[op].regs->reg_num;
+	      if ((i.op[op].regs->reg_flags & RegRex) != 0)
+		i.rex |= REX_B;
+	    }
+	  else
+	    {
+	      i.rm.reg = i.op[op].regs->reg_num;
+	      if ((i.op[op].regs->reg_flags & RegRex) != 0)
+		i.rex |= REX_R;
+	    }
 
 	  /* Now, if no memory operand has set i.rm.mode = 0, 1, 2 we
 	     must set it to 3 to indicate this is a register operand
@@ -5922,7 +5923,7 @@ lex_got (enum bfd_reloc_code_real *reloc,
       OPERAND_TYPE_NONE },
     { "DTPOFF",   { BFD_RELOC_386_TLS_LDO_32,
 		    BFD_RELOC_X86_64_DTPOFF32 },
-      
+
       OPERAND_TYPE_IMM32_32S_64_DISP32_64 },
     { "GOTNTPOFF",{ BFD_RELOC_386_TLS_GOTIE,
 		    0                         },
@@ -6957,7 +6958,7 @@ md_estimate_size_before_relax (fragP, segment)
 	      || S_IS_WEAK (fragP->fr_symbol)))
 #endif
 #if defined (OBJ_COFF) && defined (TE_PE)
-      || (OUTPUT_FLAVOR == bfd_target_coff_flavour 
+      || (OUTPUT_FLAVOR == bfd_target_coff_flavour
 	  && S_IS_WEAK (fragP->fr_symbol))
 #endif
       )
