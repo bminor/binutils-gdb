@@ -1,3 +1,8 @@
+2009-06-29  Pedro Alves  <pedro@codesourcery.com>
+
+	* dbxread.c (read_dbx_symtab): Clear has_line_numbers when ending
+	a psymtab.
+
 2009-06-29  Tom Tromey  <tromey@redhat.com>
 
 	* README: Mention parallel check.

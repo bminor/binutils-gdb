@@ -1384,6 +1384,7 @@ read_dbx_symtab (struct objfile *objfile)
 		  pst = (struct partial_symtab *) 0;
 		  includes_used = 0;
 		  dependencies_used = 0;
+		  has_line_numbers = 0;
 		}
 	      else
 		past_first_source_file = 1;
@@ -1508,6 +1509,7 @@ read_dbx_symtab (struct objfile *objfile)
 		    pst = (struct partial_symtab *) 0;
 		    includes_used = 0;
 		    dependencies_used = 0;
+		    has_line_numbers = 0;
 		  }
 	      }
 
@@ -2107,6 +2109,7 @@ pos %d"),
 	      pst = (struct partial_symtab *) 0;
 	      includes_used = 0;
 	      dependencies_used = 0;
+	      has_line_numbers = 0;
 	    }
 	  continue;
 
