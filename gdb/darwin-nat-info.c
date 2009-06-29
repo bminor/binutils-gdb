@@ -625,7 +625,7 @@ darwin_debug_regions_recurse (task_t task)
 
   table_chain = make_cleanup_ui_out_table_begin_end (uiout, 9, -1, "regions");
 
-  if (gdbarch_addr_bit (current_gdbarch) <= 32)
+  if (gdbarch_addr_bit (target_gdbarch) <= 32)
     {
       ui_out_table_header (uiout, 10, ui_left, "start", "Start");
       ui_out_table_header (uiout, 10, ui_left, "end", "End");

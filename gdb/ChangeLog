@@ -1,5 +1,10 @@
 2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* darwin-nat-info.c (darwin_debug_regions_recurse): Use
+	target_gdbarch instead of current_gdbarch.
+
+2009-06-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* Makefile.in (ALL_64_TARGET_OBS): Add amd64-windows-tdep.o.
 	(ALL_TARGET_OBS): Add moxie-tdep.o, i386-darwin-tdep.o, and
 	solib-darwin.o.
