@@ -1808,7 +1808,7 @@ proc mi_reverse_list { list } {
 proc mi_check_thread_states { xstates test } {
     global expect_out
     set states [mi_reverse_list $xstates]
-    set pattern "\\^done,threads=\\\["
+    set pattern ".*\\^done,threads=\\\["
     foreach s $states {
 	set pattern "${pattern}(.*)state=\"$s\""
     }

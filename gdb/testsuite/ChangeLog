@@ -1,5 +1,10 @@
 2009-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* lib/mi-support.exp (mi_check_thread_states): Permit any output before
+	the expected result record.
+
+2009-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Remove racy FAILs relying just on the timeouts.
 	* gdb.base/setshow.exp (set annotate 2, show annotate (2))
 	(annotation_level 2): Remove racy FAILs.
