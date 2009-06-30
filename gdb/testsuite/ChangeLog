@@ -1,3 +1,8 @@
+2009-06-30  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	gdb/10275
+	* gdb.dwarf2/dw2-restore.{S,exp}: New test.	
+	
 2009-06-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.opt/inline-locals.exp: Remove XFAIL with duplicated arg1.

@@ -1,3 +1,9 @@
+2009-06-30  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	gdb/10275
+	* dwarf2-frame.c (dwarf2_frame_state): Move cfa_offset, cfa_reg,
+	cfa_how and cfa_exp into regs and adjust users.
+	
 2009-06-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (inherit_abstract_dies): Work around GCC PR 40573.
