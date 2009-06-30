@@ -34,6 +34,7 @@
 #include "vec.h"
 #include "gdbthread.h"
 #include "inferior.h"
+#include "typeprint.h"
 
 #if HAVE_PYTHON
 #include "python/python.h"
@@ -1030,29 +1031,13 @@ varobj_add_child (struct varobj *var, const char *name, struct value *value)
 char *
 varobj_get_type (struct varobj *var)
 {
-  struct value *val;
-  struct cleanup *old_chain;
-  struct ui_file *stb;
-  char *thetype;
-  long length;
-
   /* For the "fake" variables, do not return a type. (It's type is
      NULL, too.)
      Do not return a type for invalid variables as well.  */
   if (CPLUS_FAKE_CHILD (var) || !var->root->is_valid)
     return NULL;
 
-  stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
-
-  /* To print the type, we simply create a zero ``struct value *'' and
-     cast it to our type. We then typeprint this variable. */
-  val = value_zero (var->type, not_lval);
-  type_print (value_type (val), "", stb, -1);
-
-  thetype = ui_file_xstrdup (stb, &length);
-  do_cleanups (old_chain);
-  return thetype;
+  return type_to_string (var->type);
 }
 
 /* Obtain the type of an object variable.  */
