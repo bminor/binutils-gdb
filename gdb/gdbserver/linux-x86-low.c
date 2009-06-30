@@ -18,10 +18,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <stddef.h>
 #include <signal.h>
 #include "server.h"
 #include "linux-low.h"
 #include "i387-fp.h"
+#include "i386-low.h"
 
 #include "gdb_proc_service.h"
 
@@ -55,6 +57,21 @@ void init_registers_x86_64_linux (void);
 #define ARCH_GET_FS 0x1003
 #define ARCH_GET_GS 0x1004
 #endif
+
+/* Per-process arch-specific data we want to keep.  */
+
+struct arch_process_info
+{
+  struct i386_debug_reg_state debug_reg_state;
+};
+
+/* Per-thread arch-specific data we want to keep.  */
+
+struct arch_lwp_info
+{
+  /* Non-zero if our copy differs from what's recorded in the thread.  */
+  int debug_registers_changed;
+};
 
 #ifdef __x86_64__
 
@@ -315,6 +332,198 @@ x86_breakpoint_at (CORE_ADDR pc)
     return 1;
 
   return 0;
+}
+
+/* Support for debug registers.  */
+
+static unsigned long
+x86_linux_dr_get (ptid_t ptid, int regnum)
+{
+  int tid;
+  unsigned long value;
+
+  tid = ptid_get_lwp (ptid);
+
+  errno = 0;
+  value = ptrace (PTRACE_PEEKUSER, tid,
+		  offsetof (struct user, u_debugreg[regnum]), 0);
+  if (errno != 0)
+    error ("Couldn't read debug register");
+
+  return value;
+}
+
+static void
+x86_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
+{
+  int tid;
+
+  tid = ptid_get_lwp (ptid);
+
+  errno = 0;
+  ptrace (PTRACE_POKEUSER, tid,
+	  offsetof (struct user, u_debugreg[regnum]), value);
+  if (errno != 0)
+    error ("Couldn't write debug register");
+}
+
+/* Update the inferior's debug register REGNUM from STATE.  */
+
+void
+i386_dr_low_set_addr (const struct i386_debug_reg_state *state, int regnum)
+{
+  struct inferior_list_entry *lp;
+  CORE_ADDR addr;
+  /* Only need to update the threads of this process.  */
+  int pid = pid_of (get_thread_lwp (current_inferior));
+
+  if (! (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR))
+    fatal ("Invalid debug register %d", regnum);
+
+  addr = state->dr_mirror[regnum];
+
+  for (lp = all_lwps.head; lp; lp = lp->next)
+    {
+      struct lwp_info *lwp = (struct lwp_info *) lp;
+
+      /* The actual update is done later, we just mark that the register
+	 needs updating.  */
+      if (pid_of (lwp) == pid)
+	lwp->arch_private->debug_registers_changed = 1;
+    }
+}
+
+/* Update the inferior's DR7 debug control register from STATE.  */
+
+void
+i386_dr_low_set_control (const struct i386_debug_reg_state *state)
+{
+  struct inferior_list_entry *lp;
+  /* Only need to update the threads of this process.  */
+  int pid = pid_of (get_thread_lwp (current_inferior));
+
+  for (lp = all_lwps.head; lp; lp = lp->next)
+    {
+      struct lwp_info *lwp = (struct lwp_info *) lp;
+
+      /* The actual update is done later, we just mark that the register
+	 needs updating.  */
+      if (pid_of (lwp) == pid)
+	lwp->arch_private->debug_registers_changed = 1;
+    }
+}
+
+/* Get the value of the DR6 debug status register from the inferior
+   and record it in STATE.  */
+
+void
+i386_dr_low_get_status (struct i386_debug_reg_state *state)
+{
+  struct lwp_info *lwp = get_thread_lwp (current_inferior);
+  ptid_t ptid = ptid_of (lwp);
+
+  state->dr_status_mirror = x86_linux_dr_get (ptid, DR_STATUS);
+}
+
+/* Watchpoint support.  */
+
+static int
+x86_insert_point (char type, CORE_ADDR addr, int len)
+{
+  struct process_info *proc = current_process ();
+  switch (type)
+    {
+    case '2':
+    case '3':
+    case '4':
+      return i386_low_insert_watchpoint (&proc->private->arch_private->debug_reg_state,
+					 type, addr, len);
+    default:
+      /* Unsupported.  */
+      return 1;
+    }
+}
+
+static int
+x86_remove_point (char type, CORE_ADDR addr, int len)
+{
+  struct process_info *proc = current_process ();
+  switch (type)
+    {
+    case '2':
+    case '3':
+    case '4':
+      return i386_low_remove_watchpoint (&proc->private->arch_private->debug_reg_state,
+					 type, addr, len);
+    default:
+      /* Unsupported.  */
+      return 1;
+    }
+}
+
+static int
+x86_stopped_by_watchpoint (void)
+{
+  struct process_info *proc = current_process ();
+  return i386_low_stopped_by_watchpoint (&proc->private->arch_private->debug_reg_state);
+}
+
+static CORE_ADDR
+x86_stopped_data_address (void)
+{
+  struct process_info *proc = current_process ();
+  CORE_ADDR addr;
+  if (i386_low_stopped_data_address (&proc->private->arch_private->debug_reg_state,
+				     &addr))
+    return addr;
+  return 0;
+}
+
+/* Called when a new process is created.  */
+
+static struct arch_process_info *
+x86_linux_new_process (void)
+{
+  struct arch_process_info *info = xcalloc (1, sizeof (*info));
+
+  i386_low_init_dregs (&info->debug_reg_state);
+
+  return info;
+}
+
+/* Called when a new thread is detected.  */
+
+static struct arch_lwp_info *
+x86_linux_new_thread (void)
+{
+  struct arch_lwp_info *info = xcalloc (1, sizeof (*info));
+
+  info->debug_registers_changed = 1;
+
+  return info;
+}
+
+/* Called when resuming a thread.
+   If the debug regs have changed, update the thread's copies.  */
+
+static void
+x86_linux_prepare_to_resume (struct lwp_info *lwp)
+{
+  if (lwp->arch_private->debug_registers_changed)
+    {
+      int i;
+      ptid_t ptid = ptid_of (lwp);
+      int pid = ptid_get_pid (ptid);
+      struct process_info *proc = find_process_pid (pid);
+      struct i386_debug_reg_state *state = &proc->private->arch_private->debug_reg_state;
+
+      for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
+	x86_linux_dr_set (ptid, i, state->dr_mirror[i]);
+
+      x86_linux_dr_set (ptid, DR_CONTROL, state->dr_control_mirror);
+
+      lwp->arch_private->debug_registers_changed = 0;
+    }
 }
 
 /* When GDBSERVER is built as a 64-bit application on linux, the
@@ -630,10 +839,10 @@ struct linux_target_ops the_low_target =
   NULL,
   1,
   x86_breakpoint_at,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
+  x86_insert_point,
+  x86_remove_point,
+  x86_stopped_by_watchpoint,
+  x86_stopped_data_address,
   /* collect_ptrace_register/supply_ptrace_register are not needed in the
      native i386 case (no registers smaller than an xfer unit), and are not
      used in the biarch case (HAVE_LINUX_USRREGS is not defined).  */
@@ -641,4 +850,7 @@ struct linux_target_ops the_low_target =
   NULL,
   /* need to fix up i386 siginfo if host is amd64 */
   x86_siginfo_fixup,
+  x86_linux_new_process,
+  x86_linux_new_thread,
+  x86_linux_prepare_to_resume
 };

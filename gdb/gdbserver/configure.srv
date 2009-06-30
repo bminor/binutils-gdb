@@ -53,10 +53,10 @@ case "${target}" in
 			srv_linux_thread_db=yes
 			;;
   i[34567]86-*-cygwin*)	srv_regobj=reg-i386.o
-			srv_tgtobj="win32-low.o win32-i386-low.o"
+			srv_tgtobj="i386-low.o win32-low.o win32-i386-low.o"
 			;;
   i[34567]86-*-linux*)	srv_regobj=reg-i386-linux.o
-			srv_tgtobj="linux-low.o linux-x86-low.o i387-fp.o"
+			srv_tgtobj="linux-low.o linux-x86-low.o i386-low.o i387-fp.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
@@ -71,7 +71,7 @@ case "${target}" in
 			srv_mingwce=yes
 			;;
   i[34567]86-*-mingw*)	srv_regobj=reg-i386.o
-			srv_tgtobj="win32-low.o win32-i386-low.o"
+			srv_tgtobj="i386-low.o win32-low.o win32-i386-low.o"
 			srv_mingw=yes
 			;;
   ia64-*-linux*)	srv_regobj=reg-ia64.o
@@ -170,7 +170,7 @@ case "${target}" in
 			srv_tgtobj="spu-low.o"
 			;;
   x86_64-*-linux*)	srv_regobj="reg-x86-64-linux.o reg-i386-linux.o"
-			srv_tgtobj="linux-low.o linux-x86-low.o i387-fp.o"
+			srv_tgtobj="linux-low.o linux-x86-low.o i386-low.o i387-fp.o"
 			srv_linux_usrregs=yes # This is for i386 progs.
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes

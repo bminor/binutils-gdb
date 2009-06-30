@@ -228,6 +228,48 @@ child_delete_thread (DWORD pid, DWORD tid)
   delete_thread_info (thread);
 }
 
+/* These watchpoint related wrapper functions simply pass on the function call
+   if the low target has registered a corresponding function.  */
+
+static int
+win32_insert_point (char type, CORE_ADDR addr, int len)
+{
+  if (the_low_target.insert_point != NULL)
+    return the_low_target.insert_point (type, addr, len);
+  else
+    /* Unsupported (see target.h).  */
+    return 1;
+}
+
+static int
+win32_remove_point (char type, CORE_ADDR addr, int len)
+{
+  if (the_low_target.remove_point != NULL)
+    return the_low_target.remove_point (type, addr, len);
+  else
+    /* Unsupported (see target.h).  */
+    return 1;
+}
+
+static int
+win32_stopped_by_watchpoint (void)
+{
+  if (the_low_target.stopped_by_watchpoint != NULL)
+    return the_low_target.stopped_by_watchpoint ();
+  else
+    return 0;
+}
+
+static CORE_ADDR
+win32_stopped_data_address (void)
+{
+  if (the_low_target.stopped_data_address != NULL)
+    return the_low_target.stopped_data_address ();
+  else
+    return 0;
+}
+
+
 /* Transfer memory from/to the debugged process.  */
 static int
 child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
@@ -1697,10 +1739,10 @@ static struct target_ops win32_target_ops = {
   NULL,
   win32_request_interrupt,
   NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
+  win32_insert_point,
+  win32_remove_point,
+  win32_stopped_by_watchpoint,
+  win32_stopped_data_address,
   NULL,
   NULL,
   NULL,

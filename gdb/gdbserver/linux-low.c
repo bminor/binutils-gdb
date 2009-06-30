@@ -224,6 +224,7 @@ delete_lwp (struct lwp_info *lwp)
 {
   remove_thread (get_lwp_thread (lwp));
   remove_inferior (&all_lwps, &lwp->head);
+  free (lwp->arch_private);
   free (lwp);
 }
 
@@ -242,6 +243,9 @@ linux_add_process (int pid, int attached)
   proc = add_process (pid, attached);
   proc->private = xcalloc (1, sizeof (*proc->private));
 
+  if (the_low_target.new_process != NULL)
+    proc->private->arch_private = the_low_target.new_process ();
+
   return proc;
 }
 
@@ -251,6 +255,7 @@ linux_add_process (int pid, int attached)
 static void
 linux_remove_process (struct process_info *process)
 {
+  free (process->private->arch_private);
   free (process->private);
   remove_process (process);
 }
@@ -376,6 +381,9 @@ add_lwp (ptid_t ptid)
 
   lwp->head.id = ptid;
 
+  if (the_low_target.new_thread != NULL)
+    lwp->arch_private = the_low_target.new_thread ();
+
   add_inferior_to_list (&all_lwps, &lwp->head);
 
   return lwp;
@@ -465,7 +473,6 @@ linux_attach_lwp_1 (unsigned long lwpid, int initial)
 
   new_lwp = (struct lwp_info *) add_lwp (ptid);
   add_thread (ptid, new_lwp);
-
 
   /* We need to wait for SIGSTOP before being able to make the next
      ptrace call on this LWP.  */
@@ -1739,6 +1746,9 @@ linux_resume_one_lwp (struct lwp_info *lwp,
       free (*p_sig);
       *p_sig = NULL;
     }
+
+  if (the_low_target.prepare_to_resume != NULL)
+    the_low_target.prepare_to_resume (lwp);
 
   regcache_invalidate_one ((struct inferior_list_entry *)
 			   get_lwp_thread (lwp));

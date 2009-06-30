@@ -1,3 +1,70 @@
+2009-06-30  Doug Evans  <dje@google.com>
+	    Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Add h/w watchpoint support to x86-linux, win32-i386.
+	* Makefile.in (SFILES): Add i386-low.c
+	(i386_low_h): Define.
+	(i386-low.o): Add dependencies.
+	(linux-x86-low.o): Add i386-low.h dependency.
+	(win32-i386-low.o): Ditto.
+	* i386-low.c: New file.
+	* i386-low.h: New file.
+	* configure.srv (i[34567]86-*-cygwin*): Add i386-low.o to srv_tgtobj.
+	(i[34567]86-*-linux*, i[34567]86-*-mingw*, x86_64-*-linux*): Ditto.
+	* linux-low.c (linux_add_process): Initialize arch_private.
+	(linux_remove_process): Free arch_private.
+	(add_lwp): Initialize arch_private.
+	(delete_lwp): Free arch_private.
+	(linux_resume_one_lwp): Call the_low_target.prepare_to_resume if
+	provided.
+	* linux-low.h (process_info_private): New member arch_private.
+	(lwp_info): New member arch_private.
+	(linux_target_ops): New members new_process, new_thread,
+	prepare_to_resume.
+	(ptid_of): New macro.
+	* linux-x86-low.c: Include stddef.h, i386-low.h.
+	(arch_process_info): New struct.
+	(arch_lwp_info): New struct.
+	(x86_linux_dr_get, x86_linux_dr_set): New functions.
+	(i386_dr_low_set_addr, i386_dr_low_set_control): New functions.
+	(i386_dr_low_get_status): New function.
+	(x86_insert_point, x86_remove_point): New functions.
+	(x86_stopped_by_watchpoint): New function.
+	(x86_stopped_data_address): New function.
+	(x86_linux_new_process, x86_linux_new_thread): New functions.
+	(x86_linux_prepare_to_resume): New function.
+	(the_low_target): Add entries for insert_point, remove_point,
+	stopped_by_watchpoint, stopped_data_address, new_process, new_thread,
+	prepare_to_resume.
+	* server.c (debug_hw_points): New global.
+	(monitor_show_help): Document set debug-hw-points.
+	(handle_query): Process "set debug-hw-points".
+	* server.h (debug_hw_points): Declare.
+	(paddress): Declare.
+	* utils.c (NUMCELLS, CELLSIZE): New macros.
+	(get_sell, xsnprintf, paddress): New functions.
+	* win32-arm-low.c (the_low_target): Add entries for insert_point,
+	remove_point, stopped_by_watchpoint, stopped_data_address.
+	* win32-i386-low.c: Include i386-low.h.
+	(debug_reg_state): Replaces dr.
+	(i386_dr_low_set_addr, i386_dr_low_set_control): New functions.
+	(i386_dr_low_get_status): New function.
+	(i386_insert_point, i386_remove_point): New functions.
+	(i386_stopped_by_watchpoint): New function.
+	(i386_stopped_data_address): New function.
+	(i386_initial_stuff): Update.
+	(get_thread_context,set_thread_context,i386_thread_added): Update.
+	(the_low_target): Add entries for insert_point,
+	remove_point, stopped_by_watchpoint, stopped_data_address.
+	* win32-low.c (win32_insert_watchpoint): New function.
+	(win32_remove_watchpoint): New function.
+	(win32_stopped_by_watchpoint): New function.
+	(win32_stopped_data_address): New function.
+	(win32_target_ops): Add entries for insert_watchpoint,
+	remove_watchpoint, stopped_by_watchpoint, stopped_data_address.
+	* win32-low.h (win32_target_ops): New members insert_point,
+	remove_point, stopped_by_watchpoint, stopped_data_address.
+
 2009-06-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.c (process_serial_event): Re-return unsupported, not

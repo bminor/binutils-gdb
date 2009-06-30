@@ -271,6 +271,7 @@ extern ptid_t step_thread;
 
 extern int server_waiting;
 extern int debug_threads;
+extern int debug_hw_points;
 extern int pass_signals[];
 
 extern jmp_buf toplevel;
@@ -407,6 +408,7 @@ void perror_with_name (const char *string);
 void error (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void fatal (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void warning (const char *string,...) ATTR_FORMAT (printf, 1, 2);
+char *paddress (CORE_ADDR addr);
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */

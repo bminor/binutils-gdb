@@ -56,7 +56,12 @@ struct process_info_private
 
   /* Connection to the libthread_db library.  */
   td_thragent_t *thread_agent;
+
+  /* Arch-specific additions.  */
+  struct arch_process_info *arch_private;
 };
+
+struct lwp_info;
 
 struct linux_target_ops
 {
@@ -97,10 +102,24 @@ struct linux_target_ops
      If DIRECTION is 1, then copy from INF to NATIVE.
      If DIRECTION is 0, copy from NATIVE to INF.  */
   int (*siginfo_fixup) (struct siginfo *native, void *inf, int direction);
+
+  /* Hook to call when a new process is created or attached to.
+     If extra per-process architecture-specific data is needed,
+     allocate it here.  */
+  struct arch_process_info * (*new_process) (void);
+
+  /* Hook to call when a new thread is detected.
+     If extra per-thread architecture-specific data is needed,
+     allocate it here.  */
+  struct arch_lwp_info * (*new_thread) (void);
+
+  /* Hook to call prior to resuming a thread.  */
+  void (*prepare_to_resume) (struct lwp_info *);
 };
 
 extern struct linux_target_ops the_low_target;
 
+#define ptid_of(proc) ((proc)->head.id)
 #define pid_of(proc) ptid_get_pid ((proc)->head.id)
 #define lwpid_of(proc) ptid_get_lwp ((proc)->head.id)
 
@@ -173,6 +192,9 @@ struct lwp_info
      THREAD_KNOWN is set.  */
   td_thrhandle_t th;
 #endif
+
+  /* Arch-specific additions.  */
+  struct arch_lwp_info *arch_private;
 };
 
 extern struct inferior_list all_lwps;

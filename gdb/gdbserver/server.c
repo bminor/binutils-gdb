@@ -51,6 +51,9 @@ static char **program_argv, **wrapper_argv;
    was originally used to debug LinuxThreads support.  */
 int debug_threads;
 
+/* Enable debugging of h/w breakpoint/watchpoint support.  */
+int debug_hw_points;
+
 int pass_signals[TARGET_SIGNAL_LAST];
 
 jmp_buf toplevel;
@@ -495,6 +498,8 @@ monitor_show_help (void)
   monitor_output ("The following monitor commands are supported:\n");
   monitor_output ("  set debug <0|1>\n");
   monitor_output ("    Enable general debugging messages\n");
+  monitor_output ("  set debug-hw-points <0|1>\n");
+  monitor_output ("    Enable h/w breakpoint/watchpoint debugging messages\n");
   monitor_output ("  set remote-debug <0|1>\n");
   monitor_output ("    Enable remote protocol debugging messages\n");
   monitor_output ("  exit\n");
@@ -1215,6 +1220,16 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	{
 	  debug_threads = 0;
 	  monitor_output ("Debug output disabled.\n");
+	}
+      else if (strcmp (mon, "set debug-hw-points 1") == 0)
+	{
+	  debug_hw_points = 1;
+	  monitor_output ("H/W point debugging output enabled.\n");
+	}
+      else if (strcmp (mon, "set debug-hw-points 0") == 0)
+	{
+	  debug_hw_points = 0;
+	  monitor_output ("H/W point debugging output disabled.\n");
 	}
       else if (strcmp (mon, "set remote-debug 1") == 0)
 	{
