@@ -62,22 +62,9 @@ if { ! $no_frames } {
 	-re "arg1 = $decimal\r\n$gdb_prompt $" {
 	    pass $msg
 	}
-	-re "arg1 = <value optimized out>\r\narg1 = <value optimized out>\r\n$gdb_prompt $" {
-	    # GCC 4.4 loses location information for arg1 (like GCC
-	    # 4.3) and also generates a strange DIE tree that causes
-	    # us to display the argument twice: inlined func1 has the
-	    # abstract func1 for DW_AT_abstract_origin but its arg1
-	    # child has the out of line func1's arg1 for
-	    # DW_AT_abstract_origin, with a location list unrelated to
-	    # the inlined instance.
-	    if { [test_compiler_info "gcc-4-4-*"] || [test_compiler_info "gcc-4-5-*"] } {
-		setup_xfail *-*-* gcc/40573
-	    }
-	    fail $msg
-	}
 	-re "arg1 = <value optimized out>\r\n$gdb_prompt $" {
-	    # GCC 4.3 loses location information for arg1.  GCC 4.2 is OK.
-	    if { [test_compiler_info "gcc-4-3-*"] } {
+	    # GCC 4.3 and later lose location information for arg1.  GCC 4.2 is OK.
+	    if { [test_compiler_info "gcc-4-3-*"]  || [test_compiler_info "gcc-4-4-*"]} {
 		setup_xfail *-*-*
 	    }
 	    fail $msg
@@ -114,16 +101,9 @@ if { ! $no_frames } {
 	-re "arg1 = $decimal\r\n$gdb_prompt $" {
 	    pass $msg
 	}
-	-re "arg1 = <value optimized out>\r\narg1 = <value optimized out>\r\n$gdb_prompt $" {
-	    # See the similar GCC 4.4 XFAIL above for an explanation.
-	    if { [test_compiler_info "gcc-4-4-*"] || [test_compiler_info "gcc-4-5-*"] } {
-		setup_xfail *-*-* gcc/40573
-	    }
-	    fail $msg
-	}
 	-re "arg1 = <value optimized out>\r\n$gdb_prompt $" {
-	    # GCC 4.3 loses location information for arg1.  GCC 4.2 is OK.
-	    if { [test_compiler_info "gcc-4-3-*"] } {
+	    # GCC 4.3 and later lose location information for arg1.  GCC 4.2 is OK.
+	    if { [test_compiler_info "gcc-4-3-*"]  || [test_compiler_info "gcc-4-4-*"]} {
 		setup_xfail *-*-*
 	    }
 	    fail $msg

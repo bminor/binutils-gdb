@@ -3331,14 +3331,24 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
   child_die = die->child;
   while (child_die && child_die->tag)
     {
-      attr = dwarf2_attr (child_die, DW_AT_abstract_origin, cu);
+      /* For each CHILD_DIE, find the corresponding child of
+	 ORIGIN_DIE.  If there is more than one layer of
+	 DW_AT_abstract_origin, follow them all; there shouldn't be,
+	 but GCC versions at least through 4.4 generate this (GCC PR
+	 40573).  */
+      struct die_info *child_origin_die = child_die;
+      while (1)
+	{
+	  attr = dwarf2_attr (child_origin_die, DW_AT_abstract_origin, cu);
+	  if (attr == NULL)
+	    break;
+	  child_origin_die = follow_die_ref (child_origin_die, attr, &cu);
+	}
+
       /* According to DWARF3 3.3.8.2 #3 new entries without their abstract
 	 counterpart may exist.  */
-      if (attr)
+      if (child_origin_die != child_die)
 	{
-	  struct die_info *child_origin_die;
-
-	  child_origin_die = follow_die_ref (child_die, attr, &cu);
 	  if (child_die->tag != child_origin_die->tag
 	      && !(child_die->tag == DW_TAG_inlined_subroutine
 		   && child_origin_die->tag == DW_TAG_subprogram))
@@ -3346,7 +3356,13 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 		       _("Child DIE 0x%x and its abstract origin 0x%x have "
 			 "different tags"), child_die->offset,
 		       child_origin_die->offset);
-	  *offsets_end++ = child_origin_die->offset;
+	  if (child_origin_die->parent != origin_die)
+	    complaint (&symfile_complaints,
+		       _("Child DIE 0x%x and its abstract origin 0x%x have "
+			 "different parents"), child_die->offset,
+		       child_origin_die->offset);
+	  else
+	    *offsets_end++ = child_origin_die->offset;
 	}
       child_die = sibling_die (child_die);
     }
