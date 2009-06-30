@@ -60,7 +60,6 @@ send_gdb "set annotate 2\n"
 gdb_expect {
 	-re ".*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" \
 				{ pass "set annotate 2" }
- 	-re ".*$gdb_prompt $"	{ fail "set annotate 2" }
 	timeout			{ fail "(timeout) set annotate 2" }
     }
 
@@ -68,7 +67,6 @@ send_gdb "show annotate\n"
 gdb_expect {
 	-re ".*\032\032post-prompt.*Annotation_level is 2..*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" \
 				{ pass "show annotate (2)" }
- 	-re ".*$gdb_prompt $"	{ fail "show annotate (2)" }
 	timeout			{ fail "(timeout) show annotate (2)" }
     }
 
@@ -77,7 +75,6 @@ send_gdb "info line 1\n"
 gdb_expect {
 	-re ".*\032\032post-prompt.*Line 1 of .* is at address .* but contains no code.*:1:0:beg:0x.*\032\032pre-prompt.*$gdb_prompt .*\032\032prompt.*$" \
 				{ pass "annotation_level 2" }
-	-re ".*$gdb_prompt $"	{ fail "annotation_level 2" }
 	timeout			{ fail "(timeout) annotation_level 2" }
     }
 
