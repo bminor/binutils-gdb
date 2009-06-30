@@ -1,5 +1,14 @@
 2009-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/completion.exp (directory completion): Create the directory.
+	New variables uniquedir, escapeduniquedir, uniquesu, uniquesub,
+	escapeuniquesub.
+	(directory completion 2): Expect now ${escapeuniquesub}.
+	(Glob remaining of directory test): Remove one excessive newline.
+	Expect the real output.
+
+2009-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix `make check//%' target after `make check' has been ran.
 	* Makefile.in (TEST_TARGETS): Remove the %/.dir dependency.  Add
 	a mkdir call.

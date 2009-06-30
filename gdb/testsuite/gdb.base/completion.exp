@@ -735,25 +735,33 @@ gdb_test "cd ${fullsrcdir}" \
          "cd to \${srcdir}"
 
 
-# GDB used to fail adding / on directories, on the first try only
-send_gdb "dir ../testsu\t"
+# GDB used to fail adding / on directories, on the first try only.
+# Do not use the `completion' start here as it would conflict with the
+# testcase (complete 'file ./gdb.base/complet') expectations.
+set uniquedir ${objdir}/${subdir}/compl-uNiQuEdIr
+set escapeduniquedir [string_to_regexp ${uniquedir}]
+set uniquesu subdi
+set uniquesub ${uniquesu}r
+set escapeuniquesub [string_to_regexp ${uniquesub}]
+file mkdir ${uniquedir}/${uniquesub}
+send_gdb "dir ${uniquedir}\t"
 gdb_expect {
-	-re "../testsuite/$" {
+	-re "${escapeduniquedir}/" {
 	    pass "directory completion"
-	    send_gdb "gdb.bas\t"
+	    send_gdb "${uniquesu}\t"
 	}
-	-re "../testsuite $" {
+	-re "${escapeduniquedir} $" {
 	    fail "directory completion (old gdb bug)"
-	    send_gdb "\b/gdb.bas\t"
+	    send_gdb "\b/${uniquesu}\t"
 	}
 	default {
 	    fail "directory completion (timeout)"
-	    send_gdb "\ndir ../testsuite/gdb.bas\t"
+	    send_gdb "\ndir ${uniquedir}/${uniquesu}\t"
 	}
 }
 
 gdb_expect {
-	-re "gdb.base/$" {
+	-re "${escapeuniquesub}/$" {
 	    pass "directory completion 2"
 	}
 	timeout {
@@ -761,7 +769,8 @@ gdb_expect {
 	}
 }
 
-gdb_test "\n" "" "Glob remaining of directory test"
+# Empty COMMAND sends no newline while " " sends the newline we need.
+gdb_test " " "Source directories searched: .*" "Glob remaining of directory test"
 
 
 send_gdb "complete file ./gdb.base/compl\n"
