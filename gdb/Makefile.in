@@ -738,11 +738,9 @@ gdb_locale.h gdb_dirent.h arch-utils.h trad-frame.h gnu-nat.h \
 language.h nbsd-tdep.h wrapper.h solib-svr4.h \
 macroexp.h ui-file.h regcache.h gdb_string.h tracepoint.h i386-tdep.h \
 inf-child.h p-lang.h event-top.h gdbtypes.h scm-tags.h user-regs.h \
-regformats/regdef.h config/alpha/nm-osf3.h config/i386/nm-cygwin.h \
-config/i386/nm-linux64.h config/i386/nm-i386gnu.h \
+regformats/regdef.h config/alpha/nm-osf3.h  config/i386/nm-i386gnu.h \
 config/i386/nm-fbsd.h config/i386/nm-i386sol2.h config/i386/nm-linux.h \
-config/i386/nm-i386.h config/i386/nm-go32.h config/nm-nto.h \
-config/sparc/nm-sol2.h config/nm-linux.h config/mips/nm-irix5.h	\
+config/nm-nto.h config/sparc/nm-sol2.h config/nm-linux.h \
 config/rs6000/nm-rs6000.h top.h bsd-kvm.h gdb-stabs.h reggroups.h \
 annotate.h sim-regno.h dictionary.h dfp.h main.h frame-unwind.h	\
 remote-fileio.h i386-linux-tdep.h vax-tdep.h objc-lang.h \
