@@ -116,6 +116,24 @@ mi_cmd_stack_info_depth (char *command, char **argv, int argc)
   ui_out_field_int (uiout, "depth", i);
 }
 
+static enum print_values
+parse_print_values (char *name)
+{
+   if (strcmp (name, "0") == 0
+       || strcmp (name, mi_no_values) == 0)
+     return PRINT_NO_VALUES;
+   else if (strcmp (name, "1") == 0
+	    || strcmp (name, mi_all_values) == 0)
+     return PRINT_ALL_VALUES;
+   else if (strcmp (name, "2") == 0
+	    || strcmp (name, mi_simple_values) == 0)
+     return PRINT_SIMPLE_VALUES;
+   else
+     error (_("Unknown value for PRINT_VALUES: must be: \
+0 or \"%s\", 1 or \"%s\", 2 or \"%s\""),
+	    mi_no_values, mi_all_values, mi_simple_values);
+}
+
 /* Print a list of the locals for the current frame. With argument of
    0, print only the names, with argument of 1 print also the
    values. */
@@ -130,20 +148,7 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
 
    frame = get_selected_frame (NULL);
 
-   if (strcmp (argv[0], "0") == 0
-       || strcmp (argv[0], mi_no_values) == 0)
-     print_values = PRINT_NO_VALUES;
-   else if (strcmp (argv[0], "1") == 0
-	    || strcmp (argv[0], mi_all_values) == 0)
-     print_values = PRINT_ALL_VALUES;
-   else if (strcmp (argv[0], "2") == 0
-	    || strcmp (argv[0], mi_simple_values) == 0)
-     print_values = PRINT_SIMPLE_VALUES;
-   else
-     error (_("Unknown value for PRINT_VALUES: must be: \
-0 or \"%s\", 1 or \"%s\", 2 or \"%s\""),
-	    mi_no_values, mi_all_values, mi_simple_values);
-  list_args_or_locals (1, print_values, frame);
+   list_args_or_locals (1, parse_print_values (argv[0]), frame);
 }
 
 /* Print a list of the arguments for the current frame. With argument
@@ -157,6 +162,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
   int i;
   struct frame_info *fi;
   struct cleanup *cleanup_stack_args;
+  enum print_values print_values;
 
   if (argc < 1 || argc > 3 || argc == 2)
     error (_("mi_cmd_stack_list_args: Usage: PRINT_VALUES [FRAME_LOW FRAME_HIGH]"));
@@ -173,6 +179,8 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
       frame_low = -1;
       frame_high = -1;
     }
+
+  print_values = parse_print_values (argv[0]);
 
   /* Let's position fi on the frame at which to start the
      display. Could be the innermost frame if the whole stack needs
@@ -196,7 +204,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
       QUIT;
       cleanup_frame = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
       ui_out_field_int (uiout, "level", i);
-      list_args_or_locals (0, atoi (argv[0]), fi);
+      list_args_or_locals (0, print_values, fi);
       do_cleanups (cleanup_frame);
     }
 

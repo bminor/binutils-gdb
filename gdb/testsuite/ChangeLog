@@ -1,3 +1,8 @@
+2009-06-30  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-stack.exp: Testing symbolic options
+	to -stack-list-locals and -stack-list-arguments.
+
 2009-06-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/current-lwp-dead.exp, gdb.threads/current-lwp-dead.c: New.
