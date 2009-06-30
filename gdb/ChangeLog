@@ -1,4 +1,4 @@
- 2009-07-01  Nick Roberts  <nickrob@snap.net.nz>
+2009-07-01  Nick Roberts  <nickrob@snap.net.nz>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove entries for deleted files.
 
