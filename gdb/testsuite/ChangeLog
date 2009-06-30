@@ -1,5 +1,13 @@
 2009-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix `make check//%' target after `make check' has been ran.
+	* Makefile.in (TEST_TARGETS): Remove the %/.dir dependency.  Add
+	a mkdir call.
+	(check-gdb.base%): Remove the gdb.base%/.dir dependency.
+	(%/.dir): Remove.
+
+2009-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* lib/mi-support.exp (mi_check_thread_states): Permit any output before
 	the expected result record.
 

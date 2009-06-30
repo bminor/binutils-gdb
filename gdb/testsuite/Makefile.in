@@ -170,7 +170,8 @@ check-parallel:
 	$(SHELL) $(srcdir)/dg-extract-results.sh -L \
 	  $(addsuffix /gdb.log,$(TEST_DIRS)) > gdb.log
 
-$(filter-out check-gdb.base%,$(TEST_TARGETS)): check-gdb.%: all site.exp gdb.%/.dir
+$(filter-out check-gdb.base%,$(TEST_TARGETS)): check-gdb.%: all site.exp
+	@if test ! -d gdb.$*; then mkdir gdb.$*; fi
 	$(DO_RUNTEST) --directory=gdb.$* --outdir=gdb.$* $(RUNTESTFLAGS)
 
 # Each half (roughly) of the .exp files from gdb.base.
@@ -178,13 +179,9 @@ BASE1_FILES = $(patsubst $(srcdir)/%,%,$(wildcard $(srcdir)/gdb.base/[a-m]*.exp)
 BASE2_FILES = $(patsubst $(srcdir)/%,%,$(wildcard $(srcdir)/gdb.base/[n-z]*.exp))
 
 # Handle each half of gdb.base.
-check-gdb.base%: all site.exp gdb.base%/.dir
+check-gdb.base%: all site.exp
 	@if test ! -d gdb.base$*; then mkdir gdb.base$*; fi
 	$(DO_RUNTEST) $(BASE$*_FILES) --outdir gdb.base$* $(RUNTESTFLAGS)
-
-%/.dir:
-	@-if test ! -d $*; then mkdir $*; fi
-	@echo > $@
 
 subdir_do: force
 	@for i in $(DODIRS); do \

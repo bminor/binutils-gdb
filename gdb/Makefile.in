@@ -620,7 +620,8 @@ TARGET_FLAGS_TO_PASS = \
 	"MAKEINFO=$(MAKEINFO)" \
 	"MAKEHTML=$(MAKEHTML)" \
 	"RUNTEST=$(RUNTEST)" \
-	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
+	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
+	"FORCE_PARALLEL=$(FORCE_PARALLEL)"
 
 # All source files that go into linking GDB.
 # Links made at configuration time should not be specified here, since
@@ -885,7 +886,8 @@ check: force
 # will run 3 concurrent sessions of check, eventually testing all 10
 # combinations.  GNU make is required for the % pattern to work, as is
 # a shell that expands alternations within braces.  If GNU make is not
-# used, this rule will harmlessly fail to match.
+# used, this rule will harmlessly fail to match.  Used FORCE_PARALLEL to
+# prevent serialized checking due to the passed RUNTESTFLAGS.
 check//%: force
 	@if [ -f testsuite/config.status ]; then \
 	  rootme=`pwd`; export rootme; \
@@ -905,6 +907,7 @@ check//%: force
 	  else :; fi && cd $$testdir && \
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) \
 	    RUNTESTFLAGS="--target_board=$$variant $(RUNTESTFLAGS)" \
+	    FORCE_PARALLEL=$(if $(FORCE_PARALLEL),1,$(if $(RUNTESTFLAGS),,1)) \
 	    "$$target"; \
 	else true; fi
 

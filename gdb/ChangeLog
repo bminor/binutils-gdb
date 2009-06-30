@@ -1,3 +1,9 @@
+2009-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (TARGET_FLAGS_TO_PASS): Include also FORCE_PARALLEL.
+	(check//%): Construct FORCE_PARALLEL for the sub-make.  Extend the
+	comment for it.
+
 2009-06-30  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	gdb/10275
