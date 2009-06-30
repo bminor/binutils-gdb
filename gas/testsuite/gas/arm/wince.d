@@ -11,9 +11,9 @@
 Disassembly of section .text:
 0+000 <global_data> 00000007 	andeq	r0, r0, r7
 			0: ARM_32	global_data
-0+004 <global_sym> e1a00000 	nop			\(mov r0,r0\)
-0+008 <global_sym\+0x4> e1a00000 	nop			\(mov r0,r0\)
-0+000c <global_sym\+0x8> e1a00000 	nop			\(mov r0,r0\)
+0+004 <global_sym> e1a00000 	nop			; \(mov r0, r0\)
+0+008 <global_sym\+0x4> e1a00000 	nop			; \(mov r0, r0\)
+0+000c <global_sym\+0x8> e1a00000 	nop			; \(mov r0, r0\)
 0+010 <global_sym\+0xc> eafffffb 	b	f+ff8 <global_sym\+0xf+ff4>
 			10: ARM_26D	global_sym\+0xf+ffc
 0+018 <global_sym\+0x14> ebfffffa 	bl	f+ff4 <global_sym\+0xf+ff0>

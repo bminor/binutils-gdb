@@ -1,3 +1,13 @@
+2009-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 10288
+	* arm-dis.c (coprocessor): Print the LDC and STC versions of the
+	LFM and SFM instructions as comments,.
+	Improve consistency of formatting for instructions displayed as
+	comments and decimal values displayed with their hexadecimal
+	equivalents.
+	Formatting tidy ups.
+
 2009-06-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 10288

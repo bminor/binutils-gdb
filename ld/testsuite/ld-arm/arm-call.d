@@ -26,7 +26,7 @@ Disassembly of section .text:
 
 00008038 <t4>:
     8038:	4770      	bx	lr
-    803a:	46c0      	nop			\(mov r8, r8\)
+    803a:	46c0      	nop			; \(mov r8, r8\)
 
 0000803c <arm>:
     803c:	e12fff1e 	bx	lr
@@ -40,7 +40,7 @@ Disassembly of section .text:
 
 0000804a <t5>:
     804a:	f000 f801 	bl	8050 <local_thumb>
-    804e:	46c0      	nop			\(mov r8, r8\)
+    804e:	46c0      	nop			; \(mov r8, r8\)
 
 00008050 <local_thumb>:
     8050:	f7ff fff1 	bl	8036 <t3>

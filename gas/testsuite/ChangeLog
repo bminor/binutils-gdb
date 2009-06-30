@@ -1,3 +1,61 @@
+2009-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 10288
+	* gas/arm/adrl.d: Update expected disassembly.
+	* gas/arm/arch4t-eabi.d: Likewise.
+	* gas/arm/arch4t.d: Likewise.
+	* gas/arm/arch6zk.d: Likewise.
+	* gas/arm/archv6t2.d: Likewise.
+	* gas/arm/arm-it.d: Likewise.
+	* gas/arm/arm3.d: Likewise.
+	* gas/arm/arm7dm.d: Likewise.
+	* gas/arm/arm7t.d: Likewise.
+	* gas/arm/backslash-at.d: Likewise.
+	* gas/arm/bl-local-v4t.d: Likewise.
+	* gas/arm/blx-local.d: Likewise.
+	* gas/arm/copro.d: Likewise.
+	* gas/arm/el_segundo.d: Likewise.
+	* gas/arm/float.d: Likewise.
+	* gas/arm/fp-save.d: Likewise.
+	* gas/arm/fpa-mem.d: Likewise.
+	* gas/arm/group-reloc-alu.d: Likewise.
+	* gas/arm/group-reloc-ldr.d: Likewise.
+	* gas/arm/group-reloc-ldrs.d: Likewise.
+	* gas/arm/immed.d: Likewise.
+	* gas/arm/inst.d: Likewise.
+	* gas/arm/iwmmxt.d: Likewise.
+	* gas/arm/ldconst.d: Likewise.
+	* gas/arm/macro1.d: Likewise.
+	* gas/arm/mapmisc.d: Likewise.
+	* gas/arm/mapsecs.d: Likewise.
+	* gas/arm/mapshort-eabi.d: Likewise.
+	* gas/arm/mapshort-elf.d: Likewise.
+	* gas/arm/movw-local.d: Likewise.
+	* gas/arm/neon-ldst-rm.d: Likewise.
+	* gas/arm/offset.d: Likewise.
+	* gas/arm/reg-alias.d: Likewise.
+	* gas/arm/relax_load_align.d: Likewise.
+	* gas/arm/tcompat.d: Likewise.
+	* gas/arm/tcompat2.d: Likewise.
+	* gas/arm/thumb-eabi.d: Likewise.
+	* gas/arm/thumb.d: Likewise.
+	* gas/arm/thumb1_unified.d: Likewise.
+	* gas/arm/thumb2_add.d: Likewise.
+	* gas/arm/thumb2_it.d: Likewise.
+	* gas/arm/thumb2_it_auto.d: Likewise.
+	* gas/arm/thumb2_pool.d: Likewise.
+	* gas/arm/thumb2_relax.d: Likewise.
+	* gas/arm/thumb32.d: Likewise.
+	* gas/arm/thumbv6.d: Likewise.
+	* gas/arm/thumbv6k.d: Likewise.
+	* gas/arm/tls.d: Likewise.
+	* gas/arm/vfp1.d: Likewise.
+	* gas/arm/vfp1_t2.d: Likewise.
+	* gas/arm/vfp1xD.d: Likewise.
+	* gas/arm/wince.d: Likewise.
+	* gas/arm/wince_inst.d: Likewise.
+	* gas/arm/xscale.d: Likewise.
+
 2009-06-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 10288

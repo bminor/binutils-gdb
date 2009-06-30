@@ -1,3 +1,35 @@
+2009-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 10288
+	* ld-arm/arm-app.d: Update expcted disassembly.
+	* ld-arm/arm-be8.d: Likewise.
+	* ld-arm/arm-call.d: Likewise.
+	* ld-arm/arm-lib-plt32.d: Likewise.
+	* ld-arm/arm-lib.d: Likewise.
+	* ld-arm/arm-movwt.d: Likewise.
+	* ld-arm/arm-pic-veneer.d: Likewise.
+	* ld-arm/armthumb-lib.d: Likewise.
+	* ld-arm/armv4-bx.d: Likewise.
+	* ld-arm/cortex-a8-fix-b-rel-arm.d: Likewise.
+	* ld-arm/farcall-mixed-app-v5.d: Likewise.
+	* ld-arm/farcall-mixed-app.d: Likewise.
+	* ld-arm/farcall-mixed-lib.d: Likewise.
+	* ld-arm/farcall-thumb-arm-pic-veneer.d: Likewise.
+	* ld-arm/farcall-thumb-arm-short.d: Likewise.
+	* ld-arm/farcall-thumb-arm.d: Likewise.
+	* ld-arm/farcall-thumb-thumb-m-pic-veneer.d: Likewise.
+	* ld-arm/farcall-thumb-thumb-m.d: Likewise.
+	* ld-arm/farcall-thumb-thumb-pic-veneer.d: Likewise.
+	* ld-arm/farcall-thumb-thumb.d: Likewise.
+	* ld-arm/group-relocs.d: Likewise.
+	* ld-arm/mixed-app-v5.d: Likewise.
+	* ld-arm/mixed-app.d: Likewise.
+	* ld-arm/mixed-lib.d: Likewise.
+	* ld-arm/movw-merge.d: Likewise.
+	* ld-arm/thumb2-b-interwork.d: Likewise.
+	* ld-arm/tls-app.d: Likewise.
+	* ld-arm/tls-lib.d: Likewise.
+
 2009-06-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 10288

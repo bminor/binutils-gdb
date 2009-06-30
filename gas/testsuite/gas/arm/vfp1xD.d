@@ -249,5 +249,5 @@ Disassembly of section .text:
 0+3bc <[^>]*> eee70a10 	(vmsr|fmxr)	mvfr0, r0
 0+3c0 <[^>]*> eee60a10 	(vmsr|fmxr)	mvfr1, r0
 0+3c4 <[^>]*> eeec0a10 	(vmsr|fmxr)	<impl def 0xc>, r0
-0+3c8 <[^>]*> e1a00000 	nop			\(mov r0,r0\)
-0+3cc <[^>]*> e1a00000 	nop			\(mov r0,r0\)
+0+3c8 <[^>]*> e1a00000 	nop			; \(mov r0, r0\)
+0+3cc <[^>]*> e1a00000 	nop			; \(mov r0, r0\)

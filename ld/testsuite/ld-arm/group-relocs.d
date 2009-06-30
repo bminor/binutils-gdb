@@ -10,7 +10,7 @@ Disassembly of section .text:
     800c:	e28f08ff 	add	r0, pc, #16711680	; 0xff0000
     8010:	e2800c6e 	add	r0, r0, #28160	; 0x6e00
     8014:	e28000e4 	add	r0, r0, #228	; 0xe4
-    8018:	e2800000 	add	r0, r0, #0	; 0x0
+    8018:	e2800000 	add	r0, r0, #0
     801c:	e28f0cee 	add	r0, pc, #60928	; 0xee00
     8020:	e28000f0 	add	r0, r0, #240	; 0xf0
     8024:	e28008ff 	add	r0, r0, #16711680	; 0xff0000
@@ -53,17 +53,17 @@ Disassembly of section .text:
     80b8:	ed90003c 	ldc	0, cr0, \[r0, #240\].*
 
 000080bc <one_group_needed_alu_pc>:
-    80bc:	e3a00000 	mov	r0, #0	; 0x0
+    80bc:	e3a00000 	mov	r0, #0
 Disassembly of section zero:
 
 00000000 <one_group_needed_alu_sb>:
-   0:	e3a00000 	mov	r0, #0	; 0x0
+   0:	e3a00000 	mov	r0, #0
 Disassembly of section alpha:
 
 0000eef0 <two_groups_needed_alu_pc>:
-    eef0:	e3a00000 	mov	r0, #0	; 0x0
+    eef0:	e3a00000 	mov	r0, #0
 Disassembly of section beta:
 
 00ffeef0 <three_groups_needed_alu_pc>:
-  ffeef0:	e3a00000 	mov	r0, #0	; 0x0
+  ffeef0:	e3a00000 	mov	r0, #0
 #...

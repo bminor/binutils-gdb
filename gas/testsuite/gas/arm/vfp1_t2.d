@@ -112,12 +112,12 @@ Disassembly of section .text:
 0+198 <[^>]*> ed91 0b00 	vldr	d0, \[r1\]
 0+19c <[^>]*> ed9e 0b00 	vldr	d0, \[lr\]
 0+1a0 <[^>]*> ed90 0b00 	vldr	d0, \[r0\]
-0+1a4 <[^>]*> ed90 0bff 	vldr	d0, \[r0, #1020\]
-0+1a8 <[^>]*> ed10 0bff 	vldr	d0, \[r0, #-1020\]
+0+1a4 <[^>]*> ed90 0bff 	vldr	d0, \[r0, #1020\].*
+0+1a8 <[^>]*> ed10 0bff 	vldr	d0, \[r0, #-1020\].*
 0+1ac <[^>]*> ed90 1b00 	vldr	d1, \[r0\]
 0+1b0 <[^>]*> ed90 2b00 	vldr	d2, \[r0\]
 0+1b4 <[^>]*> ed90 fb00 	vldr	d15, \[r0\]
-0+1b8 <[^>]*> ed8c cbc9 	vstr	d12, \[ip, #804\]
+0+1b8 <[^>]*> ed8c cbc9 	vstr	d12, \[ip, #804\].*
 0+1bc <[^>]*> ec90 1b02 	vldmia	r0, {d1}
 0+1c0 <[^>]*> ec90 2b02 	vldmia	r0, {d2}
 0+1c4 <[^>]*> ec90 fb02 	vldmia	r0, {d15}

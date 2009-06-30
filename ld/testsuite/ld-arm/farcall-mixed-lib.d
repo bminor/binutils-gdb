@@ -11,16 +11,16 @@ Disassembly of section .plt:
  .*:	e08fe00e 	add	lr, pc, lr
  .*:	e5bef008 	ldr	pc, \[lr, #8\]!
  .*:	.*
- .*:	e28fc6.* 	add	ip, pc, #.*	; 0x.*
+ .*:	e28fc6.* 	add	ip, pc, #.*
  .*:	e28cca.* 	add	ip, ip, #.*	; 0x.*
  .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!.*
- .*:	e28fc6.* 	add	ip, pc, #.*	; 0x.*
+ .*:	e28fc6.* 	add	ip, pc, #.*
  .*:	e28cca.* 	add	ip, ip, #.*	; 0x.*
  .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!.*
- .*:	e28fc6.* 	add	ip, pc, #.*	; 0x.*
+ .*:	e28fc6.* 	add	ip, pc, #.*
  .*:	e28cca.* 	add	ip, ip, #.*	; 0x.*
  .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!.*
- .*:	e28fc6.* 	add	ip, pc, #.*	; 0x.*
+ .*:	e28fc6.* 	add	ip, pc, #.*
  .*:	e28cca.* 	add	ip, ip, #.*	; 0x.*
  .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!.*
 
@@ -43,13 +43,13 @@ Disassembly of section .text:
  .*:	f000 e810 	blx	100035c <__lib_func3_from_thumb>
  .*:	f000 e81a 	blx	1000374 <__lib_func4_from_thumb>
  .*:	4770      	bx	lr
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
 
 .* <__app_func_from_thumb>:
  .*:	e59fc000 	ldr	ip, \[pc, #0\]	; 1000358 <__app_func_from_thumb\+0x8>
@@ -76,9 +76,9 @@ Disassembly of section .text:
  .*:	f000 e80c 	blx	20003ac <__app_func_from_thumb>
  .*:	f000 e804 	blx	20003a0 <__app_func_weak_from_thumb>
  .*:	4770      	bx	lr
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
 
 .* <__app_func_weak_from_thumb>:
  .*:	e59fc000 	ldr	ip, \[pc, #0\]	; 20003a8 <__app_func_weak_from_thumb\+0x8>

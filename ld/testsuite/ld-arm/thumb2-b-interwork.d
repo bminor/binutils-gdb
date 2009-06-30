@@ -11,6 +11,6 @@ Disassembly of section .text:
 
 00008008 <__bar_from_thumb>:
     8008:	4778      	bx	pc
-    800a:	46c0      	nop			\(mov r8, r8\)
+    800a:	46c0      	nop			; \(mov r8, r8\)
     800c:	eafffffc 	b	8004 <bar>
 

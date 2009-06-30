@@ -112,12 +112,12 @@ Disassembly of section .text:
 0+198 <[^>]*> ed910b00 	vldr	d0, \[r1\]
 0+19c <[^>]*> ed9e0b00 	vldr	d0, \[lr\]
 0+1a0 <[^>]*> ed900b00 	vldr	d0, \[r0\]
-0+1a4 <[^>]*> ed900bff 	vldr	d0, \[r0, #1020\]
-0+1a8 <[^>]*> ed100bff 	vldr	d0, \[r0, #-1020\]
+0+1a4 <[^>]*> ed900bff 	vldr	d0, \[r0, #1020\].*
+0+1a8 <[^>]*> ed100bff 	vldr	d0, \[r0, #-1020\].*
 0+1ac <[^>]*> ed901b00 	vldr	d1, \[r0\]
 0+1b0 <[^>]*> ed902b00 	vldr	d2, \[r0\]
 0+1b4 <[^>]*> ed90fb00 	vldr	d15, \[r0\]
-0+1b8 <[^>]*> ed8ccbc9 	vstr	d12, \[ip, #804\]
+0+1b8 <[^>]*> ed8ccbc9 	vstr	d12, \[ip, #804\].*
 0+1bc <[^>]*> ec901b02 	vldmia	r0, {d1}
 0+1c0 <[^>]*> ec902b02 	vldmia	r0, {d2}
 0+1c4 <[^>]*> ec90fb02 	vldmia	r0, {d15}
@@ -188,6 +188,6 @@ Disassembly of section .text:
 0+2c8 <[^>]*> 0e1f7b10 	vmoveq\.32	r7, d15\[0\]
 0+2cc <[^>]*> 0e21fb10 	vmoveq\.32	d1\[1\], pc
 0+2d0 <[^>]*> 0e0f1b10 	vmoveq\.32	d15\[0\], r1
-0+2d4 <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
-0+2d8 <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
-0+2dc <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
+0+2d4 <[^>]*> e1a00000 ?	nop[ 	]+; \(mov r0, r0\)
+0+2d8 <[^>]*> e1a00000 ?	nop[ 	]+; \(mov r0, r0\)
+0+2dc <[^>]*> e1a00000 ?	nop[ 	]+; \(mov r0, r0\)

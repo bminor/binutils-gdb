@@ -12,10 +12,10 @@ Disassembly of section .plt:
  .*:	e08fe00e 	add	lr, pc, lr
  .*:	e5bef008 	ldr	pc, \[lr, #8\]!
  .*:	.*
- .*:	e28fc6.* 	add	ip, pc, #.*	; 0x.*
+ .*:	e28fc6.* 	add	ip, pc, #.*
  .*:	e28cca.* 	add	ip, ip, #.*	; 0x.*
  .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!.*
- .*:	e28fc6.* 	add	ip, pc, #.*	; 0x.*
+ .*:	e28fc6.* 	add	ip, pc, #.*
  .*:	e28cca.* 	add	ip, ip, #.*	; 0x.*
  .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!.*
 
@@ -29,16 +29,16 @@ Disassembly of section .text:
  .*:	ebfffff4 	bl	.* <_start-0x18>
  .*:	e89d6800 	ldm	sp, {fp, sp, lr}
  .*:	e12fff1e 	bx	lr
- .*:	e1a00000 	nop			\(mov r0,r0\)
+ .*:	e1a00000 	nop			; \(mov r0, r0\)
 
 .* <app_tfunc_close>:
  .*:	b500      	push	{lr}
  .*:	f7ff efe2 	blx	.* <_start-0x18>
  .*:	bd00      	pop	{pc}
  .*:	4770      	bx	lr
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
 
 .* <__app_func_veneer>:
  .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; .* <__app_func_veneer\+0x4>
@@ -53,14 +53,14 @@ Disassembly of section .far_arm:
  .*:	eb000007 	bl	.* <__lib_func2_veneer>
  .*:	e89d6800 	ldm	sp, {fp, sp, lr}
  .*:	e12fff1e 	bx	lr
- .*:	e1a00000 	nop			\(mov r0,r0\)
- .*:	e1a00000 	nop			\(mov r0,r0\)
+ .*:	e1a00000 	nop			; \(mov r0, r0\)
+ .*:	e1a00000 	nop			; \(mov r0, r0\)
 
 .* <app_func2>:
  .*:	e12fff1e 	bx	lr
- .*:	e1a00000 	nop			\(mov r0,r0\)
- .*:	e1a00000 	nop			\(mov r0,r0\)
- .*:	e1a00000 	nop			\(mov r0,r0\)
+ .*:	e1a00000 	nop			; \(mov r0, r0\)
+ .*:	e1a00000 	nop			; \(mov r0, r0\)
+ .*:	e1a00000 	nop			; \(mov r0, r0\)
 
 .* <__lib_func2_veneer>:
  .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; 2100034 <__lib_func2_veneer\+0x4>
@@ -76,9 +76,9 @@ Disassembly of section .far_thumb:
  .*:	f000 e806 	blx	.* <__lib_func2_from_thumb>
  .*:	bd00      	pop	{pc}
  .*:	4770      	bx	lr
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
- .*:	46c0      	nop			\(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
+ .*:	46c0      	nop			; \(mov r8, r8\)
 
 .* <__lib_func2_from_thumb>:
  .*:	e51ff004 	ldr	pc, \[pc, #-4\]	; 2200014 <__lib_func2_from_thumb\+0x4>

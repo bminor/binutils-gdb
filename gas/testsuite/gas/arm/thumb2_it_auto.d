@@ -56,7 +56,7 @@ Disassembly of section .text:
 0+080 <[^>]+> 43c8      	mvns	r0, r1
 0+082 <[^>]+> bf02      	ittt	eq
 0+084 <[^>]+> 4248      	negeq	r0, r1
-0+086 <[^>]+> f1c8 0000 	rsbeq	r0, r8, #0	; 0x0
-0+08a <[^>]+> f1d1 0000 	rsbseq	r0, r1, #0	; 0x0
-0+08e <[^>]+> f1c1 0000 	rsb	r0, r1, #0	; 0x0
+0+086 <[^>]+> f1c8 0000 	rsbeq	r0, r8, #0
+0+08a <[^>]+> f1d1 0000 	rsbseq	r0, r1, #0
+0+08e <[^>]+> f1c1 0000 	rsb	r0, r1, #0
 0+092 <[^>]+> 4248      	negs	r0, r1

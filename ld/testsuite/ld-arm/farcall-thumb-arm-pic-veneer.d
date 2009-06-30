@@ -9,7 +9,7 @@ Disassembly of section .text:
 
 00001008 <__bar_from_thumb>:
     1008:	4778      	bx	pc
-    100a:	46c0      	nop			\(mov r8, r8\)
+    100a:	46c0      	nop			; \(mov r8, r8\)
     100c:	e59fc000 	ldr	ip, \[pc, #0\]	; 1014 <__bar_from_thumb\+0xc>
     1010:	e08cf00f 	add	pc, ip, pc
     1014:	01fffffc 	.word	0x01fffffc

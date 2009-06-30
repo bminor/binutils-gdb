@@ -12,7 +12,7 @@ Disassembly of section .plt:
     .*:	e08fe00e 	add	lr, pc, lr
     .*:	e5bef008 	ldr	pc, \[lr, #8\]!
     .*:	.* 	.*
-    .*:	e28fc6.* 	add	ip, pc, #.*	; .*
+    .*:	e28fc6.* 	add	ip, pc, #.*
     .*:	e28cca.* 	add	ip, ip, #.*	; .*
     .*:	e5bcf.* 	ldr	pc, \[ip, #.*\]!.*
 Disassembly of section .text:

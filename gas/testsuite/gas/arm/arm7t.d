@@ -66,5 +66,5 @@ Disassembly of section .text:
 [		]*dc:.*fred
 0+e0 <[^>]*> 0000c0de ?	.*
 0+e4 <[^>]*> 0000dead ?	.*
-0+e8 <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
-0+ec <[^>]*> e1a00000 ?	nop[ 	]+\(mov r0,r0\)
+0+e8 <[^>]*> e1a00000 ?	nop[ 	]+; \(mov r0, r0\)
+0+ec <[^>]*> e1a00000 ?	nop[ 	]+; \(mov r0, r0\)

@@ -197,4 +197,4 @@ Disassembly of section .text:
 			178: R_ARM_LDR_SB_G1	localsym
 0[0-9a-f]+ <[^>]+> e5400fff 	strb	r0, \[r0, #-4095\].*
 			17c: R_ARM_LDR_SB_G2	localsym
-0[0-9a-f]+ <[^>]+> e3a00000 	mov	r0, #0	; 0x0
+0[0-9a-f]+ <[^>]+> e3a00000 	mov	r0, #0
