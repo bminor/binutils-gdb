@@ -1,3 +1,7 @@
+2009-07-01  Tristan Gingold  <gingold@adacore.com>
+
+	* gdb.base/bigcore.exp: Make darwin untested.
+
 2009-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/completion.exp (directory completion): Create the directory.

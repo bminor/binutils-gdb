@@ -40,6 +40,7 @@ if ![isnative] then {
 if { [istarget "*-*-*bsd*"]
      || [istarget "*-*-hpux*"]
      || [istarget "*-*-solaris*"] 
+     || [istarget "*-*-darwin*"] 
      || [istarget "*-*-cygwin*"] } {
     untested "Kernel lacks sparse corefile support (PR gdb/1551)"
     return
