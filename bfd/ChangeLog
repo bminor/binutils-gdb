@@ -1,3 +1,9 @@
+2009-07-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 10072
+	* elf32-arm.c (elf32_arm_final_link_relocate): Add code to handle
+	to R_ARM_THM_PC8 relocation.
+
 2009-06-29  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_relax_section): Allow for the
