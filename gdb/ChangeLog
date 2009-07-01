@@ -1,3 +1,9 @@
+2009-07-01  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention biarch amd64-linux gdbserver and hardware watchpoint
+	support for i386-linux, amd64-linux, and i386-win32 builds of
+	gdbserver.
+
 2009-07-01  Nick Roberts  <nickrob@snap.net.nz>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove entries for deleted files.

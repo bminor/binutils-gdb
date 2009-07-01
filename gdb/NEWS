@@ -144,6 +144,13 @@ GDB will now correctly handle all of:
   - Support for the sparc64-linux-gnu target is now included in
   gdbserver.
 
+  - The amd64-linux build of gdbserver now supports debugging both
+    32-bit and 64-bit programs.
+
+  - The i386-linux, amd64-linux, and i386-win32 builds of gdbserver
+    now support hardware watchpoints, and will use them automatically
+    as appropriate.
+
 * Python scripting
 
   GDB now has support for scripting using Python.  Whether this is
