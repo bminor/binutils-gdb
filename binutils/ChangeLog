@@ -1,3 +1,11 @@
+2009-07-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 6714
+	* rclex.c (handle_quotes): Do not complain about whitespace
+	separating quoted strings.
+	(rclex_string): Ignore whitespace when looking for a new opening
+	quote following a closing quote.
+
 2009-06-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/10321
