@@ -1,11 +1,16 @@
+2009-07-01  Nick Clifton  <nickc@redhat.com>
+
+	* elf-m10300.c: Remove trailing white space.
+	* reloc.c: Likewise.
+
 2009-07-01  Douglas B Rupp  <rupp@gnat.com>
 
-	* bfd/bfd.m4 (BFD_HAVE_TIME_TYPE_MEMBER,
+	* bfd.m4 (BFD_HAVE_TIME_TYPE_MEMBER,
 	BFD_HAVE_SYS_STAT_TYPE_MEMBER): New config functions.
-	* bfd/configure.in: Use them.
-	* bfd/configure: Regenerate.
-	* bfd/config.in: Regnerate.
-	* bfd/vmsutil.c: Include sysdep.h, remove ansidecl.h.
+	* configure.in: Use them.
+	* configure: Regenerate.
+	* config.in: Regnerate.
+	* vmsutil.c: Include sysdep.h, remove ansidecl.h.
 	#define _BSD_SOURCE. Add comments.
 	(vms_file_stats_name): Calculate creation date based on available
 	runtime data. Return 1 for version instead of 0.
