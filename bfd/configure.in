@@ -197,7 +197,7 @@ AC_SUBST(BFD_HOSTPTR_T)
 BFD_CC_FOR_BUILD
 
 AC_CHECK_HEADERS(alloca.h stddef.h string.h strings.h stdlib.h time.h unistd.h)
-AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h)
+AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h sys/stat.h)
 GCC_HEADER_STDINT(bfd_stdint.h)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
@@ -222,6 +222,17 @@ AC_CHECK_DECLS(stpcpy)
 AC_CHECK_DECLS(strstr)
 AC_CHECK_DECLS(snprintf)
 AC_CHECK_DECLS(vsnprintf)
+
+# Support for VMS timestamps via cross compile
+
+if test "$ac_cv_header_time_h" = yes; then
+  BFD_HAVE_TIME_TYPE_MEMBER(struct tm, tm_gmtoff)
+fi
+
+if test "$ac_cv_header_sys_stat_h" = yes; then
+    BFD_HAVE_SYS_STAT_TYPE_MEMBER(struct stat, st_mtim, tv_sec)
+    BFD_HAVE_SYS_STAT_TYPE_MEMBER(struct stat, st_mtim, tv_nsec)
+fi
 
 # Link in zlib if we can.  This allows us to read compressed debug sections.
 # This is used only by compress.c.

@@ -17,8 +17,13 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#include "ansidecl.h"
+#include "sysdep.h"
 #include "vmsutil.h"
+
+/* The purspose of the two alternate versions below is to have one that
+   works for native VMS and one that works on an NFS mounted filesystem
+   (Unix Server/VMS client).  The main issue being to generate the special
+   VMS file timestamps for the debug info.  */
 
 #ifdef VMS
 #define __NEW_STARLET 1
@@ -89,12 +94,16 @@ to_vms_file_spec (char *filespec)
   return vms_filespec;
 }
 
-#else
+#else /* not VMS */
+
+#define _BSD_SOURCE 1
 #include <sys/stat.h>
 #include <time.h>
-#define VMS_EPOCH_OFFSET 35067168000000000LL
-#define VMS_GRANULARITY_FACTOR 10000000
-#endif
+
+#define VMS_EPOCH_OFFSET        35067168000000000LL
+#define VMS_GRANULARITY_FACTOR  10000000
+
+#endif /* VMS */
 
 /* Return VMS file date, size, format, version given a name.  */
 
@@ -232,19 +241,50 @@ vms_file_stats_name (const char *filename,
                   (512 * (recattr.fat$w_efblkl - 1)) +
                   recattr.fat$w_ffbyte;
   if (rfo) *rfo = recattr.fat$v_rtype;
-  if (ver) *ver = strtol (strrchr (ascnamebuff, ';')+1, 0, 10);
+  if (ver) *ver = strtol (strrchr (ascnamebuff, ';') + 1, 0, 10);
+#else /* not VMS */
 
-  return 0;
-#else
   struct stat buff;
+  struct tm *ts;
+  long long gmtoff, secs, nsecs;
 
   if ((stat (filename, &buff)) != 0)
      return 1;
 
   if (cdt)
     {
-      *cdt = (long long) (buff.st_mtime * VMS_GRANULARITY_FACTOR)
-                         + VMS_EPOCH_OFFSET;
+      ts = localtime (& buff.st_mtime);
+
+#ifdef HAVE_TM_GMTOFF
+	gmtoff = ts->tm_gmtoff;
+#else
+	{
+	  extern long timezone;
+
+	  if (ts->tm_isdst == 1)
+	    gmtoff = - (timezone - 3600);
+	  else
+	    gmtoff = - timezone;
+	}
+#endif
+
+#ifdef HAVE_ST_MTIM_TV_SEC
+      secs = buff.st_mtim.tv_sec;
+#else
+      secs = buff.st_mtime;
+#endif
+
+#ifdef HAVE_ST_MTIM_TV_NSEC
+      nsecs = buff.st_mtim.tv_nsec;
+#else
+      nsecs = 0;
+#endif
+
+      /* VMS timestamps are stored in local time to 100 nsec accuracy, but by
+	 experiment I found timestamps truncated to (at least) microseconds
+	 on an NFS mounted filesystem, hence the adjustment below. DBR. */
+      *cdt = ((secs + gmtoff) * VMS_GRANULARITY_FACTOR)
+	+ (nsecs / 1000 * 10) + VMS_EPOCH_OFFSET;
     }
 
   if (siz)
@@ -253,10 +293,13 @@ vms_file_stats_name (const char *filename,
   if (rfo)
     *rfo = 2; /* Stream LF format.  */
 
+  /* Returning a file version of 0 is never correct for debug info, version 1
+     will be correct if file editing is done only on the Unix side.  If editing
+     is done on the VMS side, then its TBD.  */
   if (ver)
-    *ver = 0;
+    *ver = 1;
+#endif /* VMS */
 
   return 0;
-#endif
 }
 

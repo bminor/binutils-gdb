@@ -14119,7 +14119,8 @@ done
 
 
 
-for ac_header in fcntl.h sys/file.h sys/time.h
+
+for ac_header in fcntl.h sys/file.h sys/time.h sys/stat.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -18833,6 +18834,209 @@ _ACEOF
 fi
 
 
+
+# Support for VMS timestamps via cross compile
+
+if test "$ac_cv_header_time_h" = yes; then
+  echo "$as_me:$LINENO: checking for struct tm.tm_gmtoff in time.h" >&5
+echo $ECHO_N "checking for struct tm.tm_gmtoff in time.h... $ECHO_C" >&6
+ if test "${bfd_cv_have_time_type_member_tm_gmtoff+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#define _BSD_SOURCE 1
+#include <time.h>
+int
+main ()
+{
+struct tm avar; void* aref = (void*) &avar.tm_gmtoff
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  bfd_cv_have_time_type_member_tm_gmtoff=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+bfd_cv_have_time_type_member_tm_gmtoff=no
+
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+ if test $bfd_cv_have_time_type_member_tm_gmtoff = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_TM_GMTOFF 1
+_ACEOF
+
+ fi
+ echo "$as_me:$LINENO: result: $bfd_cv_have_time_type_member_tm_gmtoff" >&5
+echo "${ECHO_T}$bfd_cv_have_time_type_member_tm_gmtoff" >&6
+
+fi
+
+if test "$ac_cv_header_sys_stat_h" = yes; then
+    echo "$as_me:$LINENO: checking for struct stat.st_mtim.tv_sec in sys/stat.h" >&5
+echo $ECHO_N "checking for struct stat.st_mtim.tv_sec in sys/stat.h... $ECHO_C" >&6
+ if test "${bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#define _BSD_SOURCE 1
+#include <sys/stat.h>
+int
+main ()
+{
+struct stat avar; void* aref = (void*) &avar.st_mtim.tv_sec
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec=no
+
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+ if test $bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_ST_MTIM_TV_SEC 1
+_ACEOF
+
+ fi
+ echo "$as_me:$LINENO: result: $bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec" >&5
+echo "${ECHO_T}$bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec" >&6
+
+    echo "$as_me:$LINENO: checking for struct stat.st_mtim.tv_nsec in sys/stat.h" >&5
+echo $ECHO_N "checking for struct stat.st_mtim.tv_nsec in sys/stat.h... $ECHO_C" >&6
+ if test "${bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#define _BSD_SOURCE 1
+#include <sys/stat.h>
+int
+main ()
+{
+struct stat avar; void* aref = (void*) &avar.st_mtim.tv_nsec
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec=no
+
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+ if test $bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_ST_MTIM_TV_NSEC 1
+_ACEOF
+
+ fi
+ echo "$as_me:$LINENO: result: $bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec" >&5
+echo "${ECHO_T}$bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec" >&6
+
+fi
 
 # Link in zlib if we can.  This allows us to read compressed debug sections.
 # This is used only by compress.c.

@@ -1493,7 +1493,7 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 		      /* _32 relocs in executables force _COPY relocs,
 			 such that the address of the symbol ends up
 			 being local.  */
-		      && !info->executable		      
+		      && !info->executable
 		      && !SYMBOL_REFERENCES_LOCAL (info, hh)
 		      && ((input_section->flags & SEC_ALLOC) != 0
 			  /* DWARF will emit R_MN10300_32 relocations
