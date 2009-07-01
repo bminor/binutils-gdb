@@ -1,3 +1,13 @@
+2009-07-01  Paul Brook <paul@codesourcery.com>
+
+	* config/tc-arm.c (MISSING_FNSTART): Define.
+	(s_arm_unwind_fnstart): Diagnose duplicate directive.
+	(s_arm_unwind_handlerdata, s_arm_unwind_fnend, s_arm_unwind_fnend,
+	s_arm_unwind_cantunwind, s_arm_unwind_personalityindex,
+	s_arm_unwind_personality, s_arm_unwind_save, s_arm_unwind_movsp,
+	s_arm_unwind_pad, s_arm_unwind_setfp, s_arm_unwind_raw): Error if
+	not inside function unwinding region.
+
 2009-06-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c: Reformat.

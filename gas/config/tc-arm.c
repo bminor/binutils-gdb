@@ -701,6 +701,7 @@ struct asm_opcode
 #define BAD_OUT_IT 	_("thumb conditional instruction should be in IT block")
 #define BAD_IT_COND	_("incorrect condition in IT block")
 #define BAD_IT_IT 	_("IT falling in the range of a previous IT block")
+#define MISSING_FNSTART	_("missing .fnstart before unwinding directive")
 
 static struct hash_control *arm_ops_hsh;
 static struct hash_control *arm_cond_hsh;
@@ -3156,6 +3157,12 @@ static void
 s_arm_unwind_fnstart (int ignored ATTRIBUTE_UNUSED)
 {
   demand_empty_rest_of_line ();
+  if (unwind.proc_start)
+    {
+      as_bad(_("duplicate .fnstart directive"));
+      return;
+    }
+
   /* Mark the start of the function.  */
   unwind.proc_start = expr_build_dot ();
 
@@ -3179,6 +3186,9 @@ static void
 s_arm_unwind_handlerdata (int ignored ATTRIBUTE_UNUSED)
 {
   demand_empty_rest_of_line ();
+  if (!unwind.proc_start)
+    as_bad(MISSING_FNSTART);
+
   if (unwind.table_entry)
     as_bad (_("duplicate .handlerdata directive"));
 
@@ -3195,6 +3205,12 @@ s_arm_unwind_fnend (int ignored ATTRIBUTE_UNUSED)
   valueT val;
 
   demand_empty_rest_of_line ();
+
+  if (!unwind.proc_start)
+    {
+      as_bad(_(".fnend directive without .fnstart"));
+      return;
+    }
 
   /* Add eh table entry.  */
   if (unwind.table_entry == NULL)
@@ -3242,6 +3258,8 @@ s_arm_unwind_fnend (int ignored ATTRIBUTE_UNUSED)
 
   /* Restore the original section.  */
   subseg_set (unwind.saved_seg, unwind.saved_subseg);
+
+  unwind.proc_start = NULL;
 }
 
 
@@ -3251,6 +3269,9 @@ static void
 s_arm_unwind_cantunwind (int ignored ATTRIBUTE_UNUSED)
 {
   demand_empty_rest_of_line ();
+  if (!unwind.proc_start)
+    as_bad(MISSING_FNSTART);
+
   if (unwind.personality_routine || unwind.personality_index != -1)
     as_bad (_("personality routine specified for cantunwind frame"));
 
@@ -3264,6 +3285,9 @@ static void
 s_arm_unwind_personalityindex (int ignored ATTRIBUTE_UNUSED)
 {
   expressionS exp;
+
+  if (!unwind.proc_start)
+    as_bad(MISSING_FNSTART);
 
   if (unwind.personality_routine || unwind.personality_index != -1)
     as_bad (_("duplicate .personalityindex directive"));
@@ -3290,6 +3314,9 @@ static void
 s_arm_unwind_personality (int ignored ATTRIBUTE_UNUSED)
 {
   char *name, *p, c;
+
+  if (!unwind.proc_start)
+    as_bad(MISSING_FNSTART);
 
   if (unwind.personality_routine || unwind.personality_index != -1)
     as_bad (_("duplicate .personality directive"));
@@ -3727,6 +3754,9 @@ s_arm_unwind_save (int arch_v6)
   struct reg_entry *reg;
   bfd_boolean had_brace = FALSE;
 
+  if (!unwind.proc_start)
+    as_bad(MISSING_FNSTART);
+
   /* Figure out what sort of save we have.  */
   peek = input_line_pointer;
 
@@ -3784,6 +3814,9 @@ s_arm_unwind_movsp (int ignored ATTRIBUTE_UNUSED)
   valueT op;
   int offset;
 
+  if (!unwind.proc_start)
+    as_bad(MISSING_FNSTART);
+
   reg = arm_reg_parse (&input_line_pointer, REG_TYPE_RN);
   if (reg == FAIL)
     {
@@ -3829,6 +3862,9 @@ s_arm_unwind_pad (int ignored ATTRIBUTE_UNUSED)
 {
   int offset;
 
+  if (!unwind.proc_start)
+    as_bad(MISSING_FNSTART);
+
   if (immediate_for_directive (&offset) == FAIL)
     return;
 
@@ -3854,6 +3890,9 @@ s_arm_unwind_setfp (int ignored ATTRIBUTE_UNUSED)
   int sp_reg;
   int fp_reg;
   int offset;
+
+  if (!unwind.proc_start)
+    as_bad(MISSING_FNSTART);
 
   fp_reg = arm_reg_parse (&input_line_pointer, REG_TYPE_RN);
   if (skip_past_comma (&input_line_pointer) == FAIL)
@@ -3904,6 +3943,9 @@ s_arm_unwind_raw (int ignored ATTRIBUTE_UNUSED)
   /* This is an arbitrary limit.	 */
   unsigned char op[16];
   int count;
+
+  if (!unwind.proc_start)
+    as_bad(MISSING_FNSTART);
 
   expression (&exp);
   if (exp.X_op == O_constant
