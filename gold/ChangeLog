@@ -1,3 +1,8 @@
+2009-07-01  Ian Lance Taylor  <ian@airs.com>
+
+	* freebsd.h (Target_freebsd::do_adjust_elf_header): Use size
+	instead of 32.
+
 2009-06-24  Ian Lance Taylor  <iant@google.com>
 
 	PR 10156

@@ -68,15 +68,15 @@ Target_freebsd<size, big_endian>::do_adjust_elf_header(unsigned char* view,
 {
   if (this->osabi_ != elfcpp::ELFOSABI_NONE)
     {
-      gold_assert(len == elfcpp::Elf_sizes<32>::ehdr_size);
+      gold_assert(len == elfcpp::Elf_sizes<size>::ehdr_size);
 
-      elfcpp::Ehdr<32, false> ehdr(view);
+      elfcpp::Ehdr<size, false> ehdr(view);
       unsigned char e_ident[elfcpp::EI_NIDENT];
       memcpy(e_ident, ehdr.get_e_ident(), elfcpp::EI_NIDENT);
 
       e_ident[elfcpp::EI_OSABI] = this->osabi_;
 
-      elfcpp::Ehdr_write<32, false> oehdr(view);
+      elfcpp::Ehdr_write<size, false> oehdr(view);
       oehdr.put_e_ident(e_ident);
     }
 }
