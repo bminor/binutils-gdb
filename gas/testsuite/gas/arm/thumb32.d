@@ -687,7 +687,7 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> eac0 0009 	pkhbt	r0, r0, r9
 0[0-9a-f]+ <[^>]+> eac0 5000 	pkhbt	r0, r0, r0, lsl #20
 0[0-9a-f]+ <[^>]+> eac0 00c0 	pkhbt	r0, r0, r0, lsl #3
-0[0-9a-f]+ <[^>]+> eac2 0103 	pkhbt	r1, r2, r3
+0[0-9a-f]+ <[^>]+> eac3 0102 	pkhbt	r1, r3, r2
 0[0-9a-f]+ <[^>]+> eac2 4163 	pkhtb	r1, r2, r3, asr #17
 0[0-9a-f]+ <[^>]+> b401      	push	\{r0\}
 0[0-9a-f]+ <[^>]+> bc01      	pop	\{r0\}

@@ -10479,7 +10479,16 @@ static void
 do_t_pkhtb (void)
 {
   if (!inst.operands[3].present)
-    inst.instruction &= ~0x00000020;
+    {
+      unsigned Rtmp;
+
+      inst.instruction &= ~0x00000020;
+
+      /* PR 10168.  Swap the Rm and Rn registers.  */
+      Rtmp = inst.operands[1].reg;
+      inst.operands[1].reg = inst.operands[2].reg;
+      inst.operands[2].reg = Rtmp;
+    }
   do_t_pkhbt ();
 }
 
