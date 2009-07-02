@@ -1378,14 +1378,12 @@ value_string (char *ptr, int len, struct type *char_type)
 }
 
 struct value *
-value_bitstring (char *ptr, int len)
+value_bitstring (char *ptr, int len, struct type *index_type)
 {
   struct value *val;
-  struct type *domain_type = create_range_type (NULL, 
-						builtin_type_int32,
-						0, len - 1);
-  struct type *type = create_set_type ((struct type *) NULL, 
-				       domain_type);
+  struct type *domain_type
+    = create_range_type (NULL, index_type, 0, len - 1);
+  struct type *type = create_set_type (NULL, domain_type);
   TYPE_CODE (type) = TYPE_CODE_BITSTRING;
   val = allocate_value (type);
   memcpy (value_contents_raw (val), ptr, TYPE_LENGTH (type));

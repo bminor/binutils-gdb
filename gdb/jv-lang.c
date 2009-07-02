@@ -967,7 +967,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 standard:
   return evaluate_subexp_standard (expect_type, exp, pos, noside);
 nosideret:
-  return value_from_longest (builtin_type_int8, (LONGEST) 1);
+  return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
 }
 
 static char *java_demangle (const char *mangled, int options)

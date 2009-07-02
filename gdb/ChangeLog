@@ -1,5 +1,29 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (assign_component): Use platform-specific integer type
+	instead of builtin_type_int32 type.
+	(ada_evaluate_subexp) [OP_ATR_SIZE]: Likewise.
+
+	* ax-gdb.c (gen_expr) [UNOP_NEG]: Use platform-specific integer type
+	instead of builtin_type_int8 type.
+	* valarith.c (value_x_unop): Likewise.
+	* python/python-value.c (valpy_absolute): Avoid reference to
+	builtin_type_int8 type.
+
+	* eval.c (evaluate_subexp_standard): Use platform-specific integer
+	type instead of builtin_type_int8 as EVAL_SKIP return value type.
+	* ada-lang.c (ada_evaluate_subexp): Likewise.
+	* jv-lang.c (evaluate_subexp_java): Likewise.
+	* m2-lang.c (evaluate_subexp_modula2): Likewise.
+	* scm-lang.c (evaluate_exp): Likewise.
+
+	* value.h (value_bitstring): Add INDEX_TYPE argument.
+	* valops.c (value_bitstring): Add INDEX_TYPE argument, use it instead
+	of builtin_type_int32 as base range type.
+	* eval.c (evaluate_subexp_standard): Update value_bitstring call.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.c (lookup_array_range_type): Add prototype.
 	(lookup_string_range_type): Likewise.
 	* gdbtypes.c (lookup_array_range_type): New function.

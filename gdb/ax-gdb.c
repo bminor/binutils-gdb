@@ -1642,7 +1642,8 @@ gen_expr (struct expression *exp, union exp_element **pc,
     case UNOP_NEG:
       (*pc)++;
       /* -FOO is equivalent to 0 - FOO.  */
-      gen_int_literal (ax, &value1, (LONGEST) 0, builtin_type_int8);
+      gen_int_literal (ax, &value1, 0,
+		       builtin_type (exp->gdbarch)->builtin_int);
       gen_usual_unary (exp, ax, &value1);	/* shouldn't do much */
       gen_expr (exp, pc, ax, &value2);
       gen_usual_unary (exp, ax, &value2);

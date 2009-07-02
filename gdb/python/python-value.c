@@ -551,8 +551,8 @@ valpy_positive (PyObject *self)
 static PyObject *
 valpy_absolute (PyObject *self)
 {
-  if (value_less (((value_object *) self)->value,
-		  value_from_longest (builtin_type_int8, 0)))
+  struct value *value = ((value_object *) self)->value;
+  if (value_less (value, value_zero (value_type (value), not_lval)))
     return valpy_negative (self);
   else
     return valpy_positive (self);

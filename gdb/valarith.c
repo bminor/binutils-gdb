@@ -471,6 +471,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 struct value *
 value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
   struct value **argvec;
   char *ptr, *mangle_ptr;
   char tstr[13], mangle_tstr[13];
@@ -505,13 +506,13 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
       break;
     case UNOP_POSTINCREMENT:
       strcpy (ptr, "++");
-      argvec[2] = value_from_longest (builtin_type_int8, 0);
+      argvec[2] = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
       argvec[3] = 0;
       nargs ++;
       break;
     case UNOP_POSTDECREMENT:
       strcpy (ptr, "--");
-      argvec[2] = value_from_longest (builtin_type_int8, 0);
+      argvec[2] = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
       argvec[3] = 0;
       nargs ++;
       break;

@@ -7990,7 +7990,8 @@ assign_component (struct value *container, struct value *lhs, LONGEST index,
   struct value *elt;
   if (TYPE_CODE (value_type (lhs)) == TYPE_CODE_ARRAY)
     {
-      struct value *index_val = value_from_longest (builtin_type_int32, index);
+      struct type *index_type = builtin_type (exp->gdbarch)->builtin_int;
+      struct value *index_val = value_from_longest (index_type, index);
       elt = unwrap_value (ada_value_subscript (lhs, 1, &index_val));
     }
   else
@@ -9235,9 +9236,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-        return value_zero (builtin_type_int32, not_lval);
+        return value_zero (builtin_type (exp->gdbarch)->builtin_int, not_lval);
       else
-        return value_from_longest (builtin_type_int32,
+        return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
                                    TARGET_CHAR_BIT * TYPE_LENGTH (type));
 
     case OP_ATR_VAL:
@@ -9422,7 +9423,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     }
 
 nosideret:
-  return value_from_longest (builtin_type_int8, (LONGEST) 1);
+  return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
 }
 
 

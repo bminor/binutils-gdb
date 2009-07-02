@@ -805,7 +805,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	+= 3 + BYTES_TO_EXP_ELEM ((tem + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_bitstring (&exp->elts[pc + 2].string, tem);
+      return value_bitstring (&exp->elts[pc + 2].string, tem,
+			      builtin_type (exp->gdbarch)->builtin_int);
       break;
 
     case OP_ARRAY:
@@ -2515,7 +2516,7 @@ GDB does not (yet) know how to evaluate that kind of expression"));
     }
 
 nosideret:
-  return value_from_longest (builtin_type_int8, (LONGEST) 1);
+  return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
 }
 
 /* Evaluate a subexpression of EXP, at index *POS,

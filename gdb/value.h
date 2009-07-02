@@ -384,7 +384,8 @@ extern struct value *value_cstring (char *ptr, int len,
 				    struct type *char_type);
 extern struct value *value_string (char *ptr, int len,
 				   struct type *char_type);
-extern struct value *value_bitstring (char *ptr, int len);
+extern struct value *value_bitstring (char *ptr, int len,
+				      struct type *index_type);
 
 extern struct value *value_array (int lowbound, int highbound,
 				  struct value **elemvec);
