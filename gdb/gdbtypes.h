@@ -1201,9 +1201,11 @@ extern struct type *create_range_type (struct type *, struct type *, int,
 
 extern struct type *create_array_type (struct type *, struct type *,
 				       struct type *);
+extern struct type *lookup_array_range_type (struct type *, int, int);
 
 extern struct type *create_string_type (struct type *, struct type *,
 					struct type *);
+extern struct type *lookup_string_range_type (struct type *, int, int);
 
 extern struct type *create_set_type (struct type *, struct type *);
 

@@ -1498,10 +1498,8 @@ REGISTER_BYTE returns the register byte for the base register.
 static struct type *
 sh64_build_float_register_type (struct gdbarch *gdbarch, int high)
 {
-  struct type *temp;
-
-  temp = create_range_type (NULL, builtin_type_int32, 0, high);
-  return create_array_type (NULL, builtin_type (gdbarch)->builtin_float, temp);
+  return lookup_array_range_type (builtin_type (gdbarch)->builtin_float,
+				  0, high);
 }
 
 /* Return the GDB type object for the "standard" data type

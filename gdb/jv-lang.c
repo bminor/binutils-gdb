@@ -803,13 +803,10 @@ java_demangle_type_signature (char *signature)
 struct type *
 java_array_type (struct type *type, int dims)
 {
-  struct type *range_type;
-
   while (dims-- > 0)
     {
-      range_type = create_range_type (NULL, builtin_type_int32, 0, 0);
       /* FIXME  This is bogus!  Java arrays are not gdb arrays! */
-      type = create_array_type (NULL, type, range_type);
+      type = lookup_array_range_type (type, 0, 0);
     }
 
   return type;

@@ -257,11 +257,7 @@ mt_register_type (struct gdbarch *arch, int regnum)
   if (regnum >= 0 && regnum < MT_NUM_REGS + MT_NUM_PSEUDO_REGS)
     {
       if (copro_type == NULL)
-	{
-	  struct type *temp;
-	  temp = create_range_type (NULL, builtin_type_int32, 0, 1);
-	  copro_type = create_array_type (NULL, builtin_type_int16, temp);
-	}
+	copro_type = lookup_array_range_type (builtin_type_int16, 0, 1);
       switch (regnum)
 	{
 	case MT_PC_REGNUM:

@@ -1294,7 +1294,6 @@ value_array (int lowbound, int highbound, struct value **elemvec)
   int idx;
   unsigned int typelength;
   struct value *val;
-  struct type *rangetype;
   struct type *arraytype;
   CORE_ADDR addr;
 
@@ -1315,12 +1314,8 @@ value_array (int lowbound, int highbound, struct value **elemvec)
 	}
     }
 
-  rangetype = create_range_type ((struct type *) NULL, 
-				 builtin_type_int32,
-				 lowbound, highbound);
-  arraytype = create_array_type ((struct type *) NULL,
-				 value_enclosing_type (elemvec[0]), 
-				 rangetype);
+  arraytype = lookup_array_range_type (value_enclosing_type (elemvec[0]),
+				       lowbound, highbound);
 
   if (!current_language->c_style_arrays)
     {
@@ -1351,12 +1346,8 @@ value_cstring (char *ptr, int len, struct type *char_type)
   struct value *val;
   int lowbound = current_language->string_lower_bound;
   int highbound = len / TYPE_LENGTH (char_type);
-  struct type *rangetype = create_range_type ((struct type *) NULL,
-					      builtin_type_int32,
-					      lowbound, 
-					      highbound + lowbound - 1);
   struct type *stringtype
-    = create_array_type ((struct type *) NULL, char_type, rangetype);
+    = lookup_array_range_type (char_type, lowbound, highbound + lowbound - 1);
 
   val = allocate_value (stringtype);
   memcpy (value_contents_raw (val), ptr, len);
@@ -1378,12 +1369,8 @@ value_string (char *ptr, int len, struct type *char_type)
   struct value *val;
   int lowbound = current_language->string_lower_bound;
   int highbound = len / TYPE_LENGTH (char_type);
-  struct type *rangetype = create_range_type ((struct type *) NULL,
-					      builtin_type_int32,
-					      lowbound, 
-					      highbound + lowbound - 1);
   struct type *stringtype
-    = create_string_type ((struct type *) NULL, char_type, rangetype);
+    = lookup_string_range_type (char_type, lowbound, highbound + lowbound - 1);
 
   val = allocate_value (stringtype);
   memcpy (value_contents_raw (val), ptr, len);

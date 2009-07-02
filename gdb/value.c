@@ -290,13 +290,9 @@ allocate_repeat_value (struct type *type, int count)
   int low_bound = current_language->string_lower_bound;		/* ??? */
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
-  struct type *range_type
-  = create_range_type ((struct type *) NULL, builtin_type_int32,
-		       low_bound, count + low_bound - 1);
-  /* FIXME-type-allocation: need a way to free this type when we are
-     done with it.  */
-  return allocate_value (create_array_type ((struct type *) NULL,
-					    type, range_type));
+  struct type *array_type
+    = lookup_array_range_type (type, low_bound, count + low_bound - 1);
+  return allocate_value (array_type);
 }
 
 /* Needed if another module needs to maintain its on list of values.  */

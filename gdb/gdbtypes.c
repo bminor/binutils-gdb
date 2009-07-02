@@ -833,6 +833,17 @@ create_array_type (struct type *result_type,
   return result_type;
 }
 
+struct type *
+lookup_array_range_type (struct type *element_type,
+			 int low_bound, int high_bound)
+{
+  struct gdbarch *gdbarch = current_gdbarch;
+  struct type *index_type = builtin_type (gdbarch)->builtin_int;
+  struct type *range_type
+    = create_range_type (NULL, index_type, low_bound, high_bound);
+  return create_array_type (NULL, element_type, range_type);
+}
+
 /* Create a string type using either a blank type supplied in
    RESULT_TYPE, or creating a new type.  String types are similar
    enough to array of char types that we can use create_array_type to
@@ -853,6 +864,17 @@ create_string_type (struct type *result_type,
   result_type = create_array_type (result_type,
 				   string_char_type,
 				   range_type);
+  TYPE_CODE (result_type) = TYPE_CODE_STRING;
+  return result_type;
+}
+
+struct type *
+lookup_string_range_type (struct type *string_char_type,
+			  int low_bound, int high_bound)
+{
+  struct type *result_type;
+  result_type = lookup_array_range_type (string_char_type,
+					 low_bound, high_bound);
   TYPE_CODE (result_type) = TYPE_CODE_STRING;
   return result_type;
 }
@@ -947,11 +969,7 @@ struct type *
 init_vector_type (struct type *elt_type, int n)
 {
   struct type *array_type;
- 
-  array_type = create_array_type (0, elt_type,
-				  create_range_type (0, 
-						     builtin_type_int32,
-						     0, n-1));
+  array_type = lookup_array_range_type (elt_type, 0, n - 1);
   make_vector_type (array_type);
   return array_type;
 }

@@ -1257,7 +1257,6 @@ follow_types (struct type *follow_type)
   int make_volatile = 0;
   int make_addr_space = 0;
   int array_size;
-  struct type *range_type;
 
   while (!done)
     switch (pop_type ())
@@ -1323,13 +1322,9 @@ follow_types (struct type *follow_type)
 	array_size = pop_type_int ();
 	/* FIXME-type-allocation: need a way to free this type when we are
 	   done with it.  */
-	range_type =
-	  create_range_type ((struct type *) NULL,
-			     builtin_type_int32, 0,
-			     array_size >= 0 ? array_size - 1 : 0);
 	follow_type =
-	  create_array_type ((struct type *) NULL,
-			     follow_type, range_type);
+	  lookup_array_range_type (follow_type,
+				   0, array_size >= 0 ? array_size - 1 : 0);
 	if (array_size < 0)
 	  TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (follow_type) = 1;
 	break;

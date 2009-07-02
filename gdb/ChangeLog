@@ -1,5 +1,23 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.c (lookup_array_range_type): Add prototype.
+	(lookup_string_range_type): Likewise.
+	* gdbtypes.c (lookup_array_range_type): New function.
+	(lookup_string_range_type): Likewise.
+
+	* ax-gdb.c (gen_repeat): Use lookup_array_range_type.
+	* parse.c (follow_types): Likewise.
+	* jv-lang.c (java_array_type): Likewise.
+	* gnu-v3-abi.c (build_gdb_vtable_type): Likewise.
+	* mt-tdep.c (mt_register_type): Likewise.
+	* sh-tdep.c (sh_sh4_build_float_register_type): Likewise.
+	* sh64-tdep.c (sh64_build_float_register_type): Likewise.
+	* value.c (allocate_repeat_value): Likewise.
+	* valops.c (value_array, value_cstring): Likewise.
+	* valops.c (value_string): Use lookup_string_range_type.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* m2-typeprint.c (m2_print_bounds, m2_is_long_set_of_type): Remove
 	redundant check for NULL TYPE_TARGET_TYPE.
 	* m2-valprint.c (m2_print_long_set): Likewise.

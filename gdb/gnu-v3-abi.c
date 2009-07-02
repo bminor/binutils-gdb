@@ -145,9 +145,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
 
   /* ptrdiff_t vcall_and_vbase_offsets[0]; */
   FIELD_NAME (*field) = "vcall_and_vbase_offsets";
-  FIELD_TYPE (*field)
-    = create_array_type (0, ptrdiff_type,
-                         create_range_type (0, builtin_type_int32, 0, -1));
+  FIELD_TYPE (*field) = lookup_array_range_type (ptrdiff_type, 0, -1);
   FIELD_BITPOS (*field) = offset * TARGET_CHAR_BIT;
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;
@@ -168,9 +166,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
 
   /* void (*virtual_functions[0]) (); */
   FIELD_NAME (*field) = "virtual_functions";
-  FIELD_TYPE (*field)
-    = create_array_type (0, ptr_to_void_fn_type,
-                         create_range_type (0, builtin_type_int32, 0, -1));
+  FIELD_TYPE (*field) = lookup_array_range_type (ptr_to_void_fn_type, 0, -1);
   FIELD_BITPOS (*field) = offset * TARGET_CHAR_BIT;
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;
