@@ -129,7 +129,7 @@ default_frame_sniffer (const struct frame_unwind *self,
 struct value *
 frame_unwind_got_optimized (struct frame_info *frame, int regnum)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch *gdbarch = frame_unwind_arch (frame);
   struct value *reg_val;
 
   reg_val = value_zero (register_type (gdbarch, regnum), not_lval);
@@ -152,7 +152,7 @@ frame_unwind_got_register (struct frame_info *frame, int regnum, int new_regnum)
 struct value *
 frame_unwind_got_memory (struct frame_info *frame, int regnum, CORE_ADDR addr)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch *gdbarch = frame_unwind_arch (frame);
 
   return value_at_lazy (register_type (gdbarch, regnum), addr);
 }
@@ -164,7 +164,7 @@ struct value *
 frame_unwind_got_constant (struct frame_info *frame, int regnum,
 			   ULONGEST val)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch *gdbarch = frame_unwind_arch (frame);
   struct value *reg_val;
 
   reg_val = value_zero (register_type (gdbarch, regnum), not_lval);
@@ -176,7 +176,7 @@ frame_unwind_got_constant (struct frame_info *frame, int regnum,
 struct value *
 frame_unwind_got_bytes (struct frame_info *frame, int regnum, gdb_byte *buf)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch *gdbarch = frame_unwind_arch (frame);
   struct value *reg_val;
 
   reg_val = value_zero (register_type (gdbarch, regnum), not_lval);
@@ -192,7 +192,7 @@ struct value *
 frame_unwind_got_address (struct frame_info *frame, int regnum,
 			  CORE_ADDR addr)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch *gdbarch = frame_unwind_arch (frame);
   struct value *reg_val;
 
   reg_val = value_zero (register_type (gdbarch, regnum), not_lval);

@@ -203,6 +203,8 @@ enum frame_type
   /* In a signal handler, various OSs handle this in various ways.
      The main thing is that the frame may be far from normal.  */
   SIGTRAMP_FRAME,
+  /* Fake frame representing a cross-architecture call.  */
+  ARCH_FRAME,
   /* Sentinel or registers frame.  This frame obtains register values
      direct from the inferior's registers.  */
   SENTINEL_FRAME
@@ -545,8 +547,13 @@ extern int safe_frame_unwind_memory (struct frame_info *this_frame,
 				     CORE_ADDR addr, gdb_byte *buf, int len);
 
 /* Return this frame's architecture.  */
-
 extern struct gdbarch *get_frame_arch (struct frame_info *this_frame);
+
+/* Return the previous frame's architecture.  */
+extern struct gdbarch *frame_unwind_arch (struct frame_info *frame);
+
+/* Return the previous frame's architecture, skipping inline functions.  */
+extern struct gdbarch *frame_unwind_caller_arch (struct frame_info *frame);
 
 
 /* Values for the source flag to be used in print_frame_info_base().  */

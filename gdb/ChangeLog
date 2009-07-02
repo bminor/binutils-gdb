@@ -1,5 +1,33 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* frame.h (frame_unwind_arch): New.
+	(frame_unwind_caller_arch): Likewise.
+	* frame-unwind.h (frame_prev_arch_ftype): New type.
+	(struct frame_unwind): New member prev_arch.
+	* frame.c (struct frame_info): New member prev_arch.
+	(frame_unwind_arch): New function.
+	(frame_unwind_caller_arch): Likewise..
+	(get_frame_arch): Reimplement in terms of frame_unwind_arch.
+	* sentinel-frame.c (sentinel_frame_prev_arch): New function.
+	(sentinel_frame_unwinder): Install it.
+
+	* frame.c (frame_pc_unwind): Use frame_unwind_arch instead
+	of get_frame_arch.
+	(frame_unwind_register_value): Likewise.
+	(frame_unwind_register_signed): Likewise.
+	(frame_unwind_register_unsigned): Likewise.
+	* frame-unwind.c (frame_unwind_got_optimized): Likewise.
+	(frame_unwind_got_register): Likewise.
+	(frame_unwind_got_constant): Likewise.
+	(frame_unwind_got_bytes): Likewise.
+	(frame_unwind_got_address): Likewise.
+
+	* frame.h (enum frame_type): New value ARCH_FRAME.
+	* frame.c (fprint_frame_type): Handle ARCH_FRAME.
+	* stack.c (print_frame_info): Likewise.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* target.h (struct target_ops): New member to_thread_architecture.
 	(target_thread_architecture): New macro.
 	* target.c (update_current_target): Inherit to_thread_architecture.

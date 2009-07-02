@@ -76,11 +76,23 @@ sentinel_frame_this_id (struct frame_info *this_frame,
   internal_error (__FILE__, __LINE__, _("sentinel_frame_this_id called"));
 }
 
+static struct gdbarch *
+sentinel_frame_prev_arch (struct frame_info *this_frame,
+			  void **this_prologue_cache)
+{
+  struct frame_unwind_cache *cache = *this_prologue_cache;
+  return get_regcache_arch (cache->regcache);
+}
+
 const struct frame_unwind sentinel_frame_unwinder =
 {
   SENTINEL_FRAME,
   sentinel_frame_this_id,
-  sentinel_frame_prev_register
+  sentinel_frame_prev_register,
+  NULL,
+  NULL,
+  NULL,
+  sentinel_frame_prev_arch,
 };
 
 const struct frame_unwind *const sentinel_frame_unwind = &sentinel_frame_unwinder;

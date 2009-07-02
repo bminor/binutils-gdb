@@ -522,7 +522,8 @@ print_frame_info (struct frame_info *frame, int print_level,
   int location_print;
 
   if (get_frame_type (frame) == DUMMY_FRAME
-      || get_frame_type (frame) == SIGTRAMP_FRAME)
+      || get_frame_type (frame) == SIGTRAMP_FRAME
+      || get_frame_type (frame) == ARCH_FRAME)
     {
       struct cleanup *uiout_cleanup
 	= make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
@@ -555,6 +556,10 @@ print_frame_info (struct frame_info *frame, int print_level,
 	  annotate_signal_handler_caller ();
           ui_out_field_string (uiout, "func", "<signal handler called>");
         }
+      else if (get_frame_type (frame) == ARCH_FRAME)
+        {
+          ui_out_field_string (uiout, "func", "<cross-architecture call>");
+	}
       ui_out_text (uiout, "\n");
       annotate_frame_end ();
 

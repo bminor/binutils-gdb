@@ -121,6 +121,13 @@ typedef struct value * (frame_prev_register_ftype)
 typedef void (frame_dealloc_cache_ftype) (struct frame_info *self,
 					  void *this_cache);
 
+/* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
+   use THIS frame, and implicitly the NEXT frame's register unwind
+   method, return PREV frame's architecture.  */
+
+typedef struct gdbarch *(frame_prev_arch_ftype) (struct frame_info *this_frame,
+						 void **this_prologue_cache);
+
 struct frame_unwind
 {
   /* The frame's type.  Should this instead be a collection of
@@ -133,6 +140,7 @@ struct frame_unwind
   const struct frame_data *unwind_data;
   frame_sniffer_ftype *sniffer;
   frame_dealloc_cache_ftype *dealloc_cache;
+  frame_prev_arch_ftype *prev_arch;
 };
 
 /* Register a frame unwinder, _prepending_ it to the front of the
