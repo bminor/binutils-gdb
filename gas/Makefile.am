@@ -109,7 +109,8 @@ OBJ_FORMATS = \
 	coff \
 	ecoff \
 	elf \
-	evax
+	evax \
+	macho
 
 # This is an sh case which sets valid according to whether the CPU
 # type in the shell variable c and the OS type in the shell variable o
@@ -141,6 +142,10 @@ CPU_OBJ_VALID = \
 	evax) \
 	  case $$c in \
 	  alpha) valid=yes ;; \
+	  esac ;; \
+	macho) \
+	  case $$c in \
+	  i386) valid=yes ;; \
 	  esac ;; \
 	vms) \
 	  case $$c in \
@@ -368,6 +373,7 @@ OBJ_FORMAT_CFILES = \
 	config/obj-elf.c \
 	config/obj-evax.c \
 	config/obj-fdpicelf.c \
+	config/obj-macho.c \
 	config/obj-som.c
 
 OBJ_FORMAT_HFILES = \
@@ -377,6 +383,7 @@ OBJ_FORMAT_HFILES = \
 	config/obj-elf.h \
 	config/obj-evax.h \
 	config/obj-fdpicelf.h \
+	config/obj-macho.h \
 	config/obj-som.h
 
 # Emulation header files in config
@@ -594,6 +601,8 @@ obj-evax.o : $(srcdir)/config/obj-evax.c
 	$(COMPILE) -c $(srcdir)/config/obj-evax.c
 obj-fdpicelf.o : $(srcdir)/config/obj-fdpicelf.c
 	$(COMPILE) -c $(srcdir)/config/obj-fdpicelf.c
+obj-macho.o : $(srcdir)/config/obj-macho.c
+	$(COMPILE) -c $(srcdir)/config/obj-macho.c
 obj-multi.o : $(srcdir)/config/obj-multi.c
 	$(COMPILE) -c $(srcdir)/config/obj-multi.c
 obj-som.o : $(srcdir)/config/obj-som.c

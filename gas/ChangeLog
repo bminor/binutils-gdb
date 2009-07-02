@@ -1,3 +1,18 @@
+2009-07-02  Tristan Gingold  <gingold@adacore.com>
+
+	* Makefile.am (OBJ_FORMATS): Add macho.
+	(CPU_OBJ_VALID): Ditto.
+	(OBJ_FORMAT_CFILES): Add config/obj-macho.c
+	(OBJ_FORMAT_HFILES): Add config/obj-macho.h
+	(obj-macho.o): New rule.
+	* Makefile.in: Regenerated.
+	* configure.tgt (generic_target): Add i386-*-darwin*.
+	* config/tc-i386.h: Use i386_target_format for Mach-O.
+	* config/tc-i386.c (i386_target_format): Define it for Mach-O.
+	(i386_target_format): Add a case for bfd_target_mach_o_flavour.
+	* config/obj-macho.h: New file.
+	* config/obj-macho.c: New file.
+	
 2009-07-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 10168

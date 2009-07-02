@@ -7881,7 +7881,7 @@ md_show_usage (stream)
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
      || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
-     || defined (TE_PE) || defined (TE_PEP))
+     || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
 
 /* Pick the target format to use.  */
 
@@ -7960,6 +7960,10 @@ i386_target_format (void)
 	  }
 	return flag_code == CODE_64BIT ? ELF_TARGET_FORMAT64 : ELF_TARGET_FORMAT;
       }
+#endif
+#if defined (OBJ_MACH_O)
+    case bfd_target_mach_o_flavour:
+      return flag_code == CODE_64BIT ? "mach-o-x86-64" : "mach-o-i386";
 #endif
     default:
       abort ();

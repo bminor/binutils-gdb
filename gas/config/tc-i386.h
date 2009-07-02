@@ -72,7 +72,7 @@ extern unsigned long i386_mach (void);
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
      || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
-     || defined (TE_PE) || defined (TE_PEP))
+     || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
 extern const char *i386_target_format (void);
 #define TARGET_FORMAT i386_target_format ()
 #else
