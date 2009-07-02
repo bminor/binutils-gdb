@@ -133,6 +133,7 @@ scm_scmlist_print (struct type *type, LONGEST svalue,
 		   const struct value_print_options *options)
 {
 #define SCM_SIZE (TYPE_LENGTH (type))
+#define SCM_BYTE_ORDER (gdbarch_byte_order (get_type_arch (type)))
   unsigned int more = options->print_max;
   if (recurse > 6)
     {
@@ -158,6 +159,7 @@ scm_scmlist_print (struct type *type, LONGEST svalue,
       fputs_filtered (" . ", stream);
       scm_scmval_print (type, svalue, stream, recurse + 1, options);
     }
+#undef SCM_BYTE_ORDER
 #undef SCM_SIZE
 }
 
@@ -166,11 +168,13 @@ scm_ipruk (char *hdr, struct type *type, LONGEST ptr,
 	   struct ui_file *stream)
 {
 #define SCM_SIZE (TYPE_LENGTH (type))
+#define SCM_BYTE_ORDER (gdbarch_byte_order (get_type_arch (type)))
   fprintf_filtered (stream, "#<unknown-%s", hdr);
   if (SCM_CELLP (ptr))
     fprintf_filtered (stream, " (0x%lx . 0x%lx) @",
 		      (long) SCM_CAR (ptr), (long) SCM_CDR (ptr));
   fprintf_filtered (stream, " 0x%s>", phex_nz (ptr, SCM_SIZE));
+#undef SCM_BYTE_ORDER
 #undef SCM_SIZE
 }
 
@@ -182,6 +186,7 @@ scm_scmval_print (struct type *type, LONGEST svalue,
   struct gdbarch *gdbarch = get_type_arch (type);
 
 #define SCM_SIZE (TYPE_LENGTH (type))
+#define SCM_BYTE_ORDER (gdbarch_byte_order (gdbarch))
 taloop:
   switch (7 & (int) svalue)
     {
@@ -307,13 +312,14 @@ taloop:
 	    int len = SCM_LENGTH (svalue);
 	    int i;
 	    LONGEST elements = SCM_CDR (svalue);
+	    LONGEST val;
 	    fputs_filtered ("#(", stream);
 	    for (i = 0; i < len; ++i)
 	      {
 		if (i > 0)
 		  fputs_filtered (" ", stream);
-		scm_scmval_print (type, scm_get_field (elements, i, SCM_SIZE),
-				  stream, recurse + 1, options);
+		val = scm_get_field (elements, i, SCM_SIZE, SCM_BYTE_ORDER);
+		scm_scmval_print (type, val, stream, recurse + 1, options);
 	      }
 	    fputs_filtered (")", stream);
 	  }
@@ -403,6 +409,7 @@ taloop:
 	}
       break;
     }
+#undef SCM_BYTE_ORDER
 #undef SCM_SIZE
 }
 
@@ -414,7 +421,9 @@ scm_val_print (struct type *type, const gdb_byte *valaddr,
 {
   if (is_scmvalue_type (type))
     {
-      LONGEST svalue = extract_signed_integer (valaddr, TYPE_LENGTH (type));
+      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+      LONGEST svalue
+	= extract_signed_integer (valaddr, TYPE_LENGTH (type), byte_order);
 
       if (scm_inferior_print (type, svalue, stream, recurse, options) >= 0)
 	{

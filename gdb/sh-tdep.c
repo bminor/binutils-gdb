@@ -520,9 +520,11 @@ sh_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 #define IS_ADD_IMM_FP(x) 	(((x) & 0xff00) == 0x7e00)
 
 static CORE_ADDR
-sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
+sh_analyze_prologue (struct gdbarch *gdbarch,
+		     CORE_ADDR pc, CORE_ADDR current_pc,
 		     struct sh_frame_cache *cache, ULONGEST fpscr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST inst;
   CORE_ADDR opc;
   int offset;
@@ -536,7 +538,7 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
   cache->uses_fp = 0;
   for (opc = pc + (2 * 28); pc < opc; pc += 2)
     {
-      inst = read_memory_unsigned_integer (pc, 2);
+      inst = read_memory_unsigned_integer (pc, 2, byte_order);
       /* See where the registers will be saved to */
       if (IS_PUSH (inst))
 	{
@@ -580,7 +582,7 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 		  sav_reg = reg;
 		  offset = (inst & 0xff) << 1;
 		  sav_offset =
-		    read_memory_integer ((pc + 4) + offset, 2);
+		    read_memory_integer ((pc + 4) + offset, 2, byte_order);
 		}
 	    }
 	}
@@ -594,7 +596,8 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 		  sav_reg = reg;
 		  offset = (inst & 0xff) << 2;
 		  sav_offset =
-		    read_memory_integer (((pc & 0xfffffffc) + 4) + offset, 4);
+		    read_memory_integer (((pc & 0xfffffffc) + 4) + offset,
+					 4, byte_order);
 		}
 	    }
 	}
@@ -609,7 +612,8 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 		  sav_offset = GET_SOURCE_REG (inst) << 16;
 		  /* MOVI20 is a 32 bit instruction! */
 		  pc += 2;
-		  sav_offset |= read_memory_unsigned_integer (pc, 2);
+		  sav_offset
+		    |= read_memory_unsigned_integer (pc, 2, byte_order);
 		  /* Now sav_offset contains an unsigned 20 bit value.
 		     It must still get sign extended.  */
 		  if (sav_offset & 0x00080000)
@@ -648,7 +652,7 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	  pc += 2;
 	  for (opc = pc + 12; pc < opc; pc += 2)
 	    {
-	      inst = read_memory_integer (pc, 2);
+	      inst = read_memory_integer (pc, 2, byte_order);
 	      if (IS_MOV_ARG_TO_IND_R14 (inst))
 		{
 		  reg = GET_SOURCE_REG (inst);
@@ -678,7 +682,7 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	     jsr, which will be very confusing.  Most likely the next
 	     instruction is going to be IS_MOV_SP_FP in the delay slot.  If
 	     so, note that before returning the current pc. */
-	  inst = read_memory_integer (pc + 2, 2);
+	  inst = read_memory_integer (pc + 2, 2, byte_order);
 	  if (IS_MOV_SP_FP (inst))
 	    cache->uses_fp = 1;
 	  break;
@@ -741,7 +745,7 @@ sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
     return max (pc, start_pc);
 
   cache.sp_offset = -4;
-  pc = sh_analyze_prologue (start_pc, (CORE_ADDR) -1, &cache, 0);
+  pc = sh_analyze_prologue (gdbarch, start_pc, (CORE_ADDR) -1, &cache, 0);
   if (!cache.uses_fp)
     return start_pc;
 
@@ -1055,6 +1059,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 			CORE_ADDR sp, int struct_return,
 			CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int stack_offset = 0;
   int argreg = ARG0_REGNUM;
   int flt_argreg = 0;
@@ -1130,7 +1135,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 	    {
 	      /* Argument goes in a float argument register.  */
 	      reg_size = register_size (gdbarch, flt_argreg);
-	      regval = extract_unsigned_integer (val, reg_size);
+	      regval = extract_unsigned_integer (val, reg_size, byte_order);
 	      /* In little endian mode, float types taking two registers
 	         (doubles on sh4, long doubles on sh2e, sh3e and sh4) must
 		 be stored swapped in the argument registers.  The below
@@ -1145,7 +1150,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 						  regval);
 		  val += reg_size;
 		  len -= reg_size;
-		  regval = extract_unsigned_integer (val, reg_size);
+		  regval = extract_unsigned_integer (val, reg_size, byte_order);
 		}
 	      regcache_cooked_write_unsigned (regcache, flt_argreg++, regval);
 	    }
@@ -1153,7 +1158,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 	    {
 	      /* there's room in a register */
 	      reg_size = register_size (gdbarch, argreg);
-	      regval = extract_unsigned_integer (val, reg_size);
+	      regval = extract_unsigned_integer (val, reg_size, byte_order);
 	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
 	    }
 	  /* Store the value one register at a time or in one step on stack.  */
@@ -1167,7 +1172,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
       if (sh_is_renesas_calling_convention (func_type))
 	/* If the function uses the Renesas ABI, subtract another 4 bytes from
 	   the stack and store the struct return address there.  */
-	write_memory_unsigned_integer (sp -= 4, 4, struct_addr);
+	write_memory_unsigned_integer (sp -= 4, 4, byte_order, struct_addr);
       else
 	/* Using the gcc ABI, the "struct return pointer" pseudo-argument has
 	   its own dedicated register.  */
@@ -1194,6 +1199,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
 			  CORE_ADDR sp, int struct_return,
 			  CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int stack_offset = 0;
   int argreg = ARG0_REGNUM;
   int argnum;
@@ -1253,7 +1259,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
 	    {
 	      /* there's room in a register */
 	      reg_size = register_size (gdbarch, argreg);
-	      regval = extract_unsigned_integer (val, reg_size);
+	      regval = extract_unsigned_integer (val, reg_size, byte_order);
 	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
 	    }
 	  /* Store the value reg_size bytes at a time.  This means that things
@@ -1269,7 +1275,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
       if (sh_is_renesas_calling_convention (func_type))
 	/* If the function uses the Renesas ABI, subtract another 4 bytes from
 	   the stack and store the struct return address there.  */
-	write_memory_unsigned_integer (sp -= 4, 4, struct_addr);
+	write_memory_unsigned_integer (sp -= 4, 4, byte_order, struct_addr);
       else
 	/* Using the gcc ABI, the "struct return pointer" pseudo-argument has
 	   its own dedicated register.  */
@@ -1295,6 +1301,8 @@ static void
 sh_extract_return_value_nofpu (struct type *type, struct regcache *regcache,
 			       void *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
   int return_register = R0_REGNUM;
   int offset;
@@ -1304,7 +1312,7 @@ sh_extract_return_value_nofpu (struct type *type, struct regcache *regcache,
       ULONGEST c;
 
       regcache_cooked_read_unsigned (regcache, R0_REGNUM, &c);
-      store_unsigned_integer (valbuf, len, c);
+      store_unsigned_integer (valbuf, len, byte_order, c);
     }
   else if (len == 8)
     {
@@ -1345,12 +1353,14 @@ static void
 sh_store_return_value_nofpu (struct type *type, struct regcache *regcache,
 			     const void *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
   int len = TYPE_LENGTH (type);
 
   if (len <= 4)
     {
-      val = extract_unsigned_integer (valbuf, len);
+      val = extract_unsigned_integer (valbuf, len, byte_order);
       regcache_cooked_write_unsigned (regcache, R0_REGNUM, val);
     }
   else
@@ -2504,6 +2514,7 @@ sh_alloc_frame_cache (void)
 static struct sh_frame_cache *
 sh_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct sh_frame_cache *cache;
   CORE_ADDR current_pc;
   int i;
@@ -2529,7 +2540,7 @@ sh_frame_cache (struct frame_info *this_frame, void **this_cache)
     {
       ULONGEST fpscr;
       fpscr = get_frame_register_unsigned (this_frame, FPSCR_REGNUM);
-      sh_analyze_prologue (cache->pc, current_pc, cache, fpscr);
+      sh_analyze_prologue (gdbarch, cache->pc, current_pc, cache, fpscr);
     }
 
   if (!cache->uses_fp)
@@ -2542,8 +2553,7 @@ sh_frame_cache (struct frame_info *this_frame, void **this_cache)
          frame by looking at the stack pointer.  For truly "frameless"
          functions this might work too.  */
       cache->base = get_frame_register_unsigned
-		    (this_frame,
-		     gdbarch_sp_regnum (get_frame_arch (this_frame)));
+		     (this_frame, gdbarch_sp_regnum (gdbarch));
     }
 
   /* Now that we have the base address for the stack frame we can
@@ -2648,6 +2658,7 @@ static const struct frame_base sh_frame_base = {
 static int
 sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = 0, func_end = 0;
 
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
@@ -2665,7 +2676,7 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       /* First search forward until hitting an rts. */
       while (addr < func_end
-	     && !IS_RTS (read_memory_unsigned_integer (addr, 2)))
+	     && !IS_RTS (read_memory_unsigned_integer (addr, 2, byte_order)))
 	addr += 2;
       if (addr >= func_end)
 	return 0;
@@ -2673,33 +2684,35 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
       /* At this point we should find a mov.l @r15+,r14 instruction,
          either before or after the rts.  If not, then the function has
          probably no "normal" epilogue and we bail out here. */
-      inst = read_memory_unsigned_integer (addr - 2, 2);
-      if (IS_RESTORE_FP (read_memory_unsigned_integer (addr - 2, 2)))
+      inst = read_memory_unsigned_integer (addr - 2, 2, byte_order);
+      if (IS_RESTORE_FP (read_memory_unsigned_integer (addr - 2, 2,
+						       byte_order)))
 	addr -= 2;
-      else if (!IS_RESTORE_FP (read_memory_unsigned_integer (addr + 2, 2)))
+      else if (!IS_RESTORE_FP (read_memory_unsigned_integer (addr + 2, 2,
+							     byte_order)))
 	return 0;
 
-      inst = read_memory_unsigned_integer (addr - 2, 2);
+      inst = read_memory_unsigned_integer (addr - 2, 2, byte_order);
 
       /* Step over possible lds.l @r15+,macl. */
       if (IS_MACL_LDS (inst))
 	{
 	  addr -= 2;
-	  inst = read_memory_unsigned_integer (addr - 2, 2);
+	  inst = read_memory_unsigned_integer (addr - 2, 2, byte_order);
 	}
 
       /* Step over possible lds.l @r15+,pr. */
       if (IS_LDS (inst))
 	{
 	  addr -= 2;
-	  inst = read_memory_unsigned_integer (addr - 2, 2);
+	  inst = read_memory_unsigned_integer (addr - 2, 2, byte_order);
 	}
 
       /* Step over possible mov r14,r15. */
       if (IS_MOV_FP_SP (inst))
 	{
 	  addr -= 2;
-	  inst = read_memory_unsigned_integer (addr - 2, 2);
+	  inst = read_memory_unsigned_integer (addr - 2, 2, byte_order);
 	}
 
       /* Now check for FP adjustments, using add #imm,r14 or add rX, r14
@@ -2708,7 +2721,7 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	     && (IS_ADD_REG_TO_FP (inst) || IS_ADD_IMM_FP (inst)))
 	{
 	  addr -= 2;
-	  inst = read_memory_unsigned_integer (addr - 2, 2);
+	  inst = read_memory_unsigned_integer (addr - 2, 2, byte_order);
 	}
 
       /* On SH2a check if the previous instruction was perhaps a MOVI20.
@@ -2716,7 +2729,8 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
       if ((gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_sh2a
            || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_sh2a_nofpu)
           && addr > func_addr + 6
-	  && IS_MOVI20 (read_memory_unsigned_integer (addr - 4, 2)))
+	  && IS_MOVI20 (read_memory_unsigned_integer (addr - 4, 2,
+						      byte_order)))
 	addr -= 4;
 
       if (pc >= addr)

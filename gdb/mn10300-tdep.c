@@ -387,6 +387,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
                           CORE_ADDR start_pc, CORE_ADDR limit_pc,
                           struct mn10300_prologue *result)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc, next_pc;
   int rn;
   pv_t regs[MN10300_MAX_NUM_REGS];
@@ -545,7 +546,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  if (status != 0)
 	    break;
 
-	  imm8 = extract_signed_integer (buf, 1);
+	  imm8 = extract_signed_integer (buf, 1, byte_order);
 	  regs[E_SP_REGNUM] = pv_add_constant (regs[E_SP_REGNUM], imm8);
 
 	  pc += 3;
@@ -562,7 +563,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  if (status != 0)
 	    break;
 
-	  imm16 = extract_signed_integer (buf, 2);
+	  imm16 = extract_signed_integer (buf, 2, byte_order);
 	  regs[E_SP_REGNUM] = pv_add_constant (regs[E_SP_REGNUM], imm16);
 
 	  pc += 4;
@@ -580,7 +581,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	    break;
 
 
-	  imm32 = extract_signed_integer (buf, 4);
+	  imm32 = extract_signed_integer (buf, 4, byte_order);
 	  regs[E_SP_REGNUM] = pv_add_constant (regs[E_SP_REGNUM], imm32);
 
 	  pc += 6;
@@ -594,7 +595,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  LONGEST imm8;
 
 	  aN = instr[0] & 0x03;
-	  imm8 = extract_signed_integer (&instr[1], 1);
+	  imm8 = extract_signed_integer (&instr[1], 1, byte_order);
 
 	  regs[E_A0_REGNUM + aN] = pv_add_constant (regs[E_A0_REGNUM + aN],
 	                                            imm8);
@@ -615,7 +616,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	    break;
 
 
-	  imm16 = extract_signed_integer (buf, 2);
+	  imm16 = extract_signed_integer (buf, 2, byte_order);
 
 	  regs[E_A0_REGNUM + aN] = pv_add_constant (regs[E_A0_REGNUM + aN],
 	                                            imm16);
@@ -635,7 +636,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  if (status != 0)
 	    break;
 
-	  imm32 = extract_signed_integer (buf, 2);
+	  imm32 = extract_signed_integer (buf, 2, byte_order);
 
 	  regs[E_A0_REGNUM + aN] = pv_add_constant (regs[E_A0_REGNUM + aN],
 	                                            imm32);
@@ -722,7 +723,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  sM = (buf[0] & 0xf0) >> 4;
 	  rN = buf[0] & 0x0f;
 	  fsM = (Y << 4) | sM;
-	  d8 = extract_signed_integer (&buf[1], 1);
+	  d8 = extract_signed_integer (&buf[1], 1, byte_order);
 
 	  pv_area_store (stack,
 	                 pv_add_constant (regs[translate_rreg (rN)], d8),
@@ -746,7 +747,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  sM = (buf[0] & 0xf0) >> 4;
 	  rN = buf[0] & 0x0f;
 	  fsM = (Y << 4) | sM;
-	  d24 = extract_signed_integer (&buf[1], 3);
+	  d24 = extract_signed_integer (&buf[1], 3, byte_order);
 
 	  pv_area_store (stack,
 	                 pv_add_constant (regs[translate_rreg (rN)], d24),
@@ -770,7 +771,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  sM = (buf[0] & 0xf0) >> 4;
 	  rN = buf[0] & 0x0f;
 	  fsM = (Y << 4) | sM;
-	  d32 = extract_signed_integer (&buf[1], 4);
+	  d32 = extract_signed_integer (&buf[1], 4, byte_order);
 
 	  pv_area_store (stack,
 	                 pv_add_constant (regs[translate_rreg (rN)], d32),
@@ -793,7 +794,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 
 	  sM = (buf[0] & 0xf0) >> 4;
 	  fsM = (Y << 4) | sM;
-	  d8 = extract_signed_integer (&buf[1], 1);
+	  d8 = extract_signed_integer (&buf[1], 1, byte_order);
 
 	  pv_area_store (stack,
 	                 pv_add_constant (regs[E_SP_REGNUM], d8),
@@ -816,7 +817,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 
 	  sM = (buf[0] & 0xf0) >> 4;
 	  fsM = (Y << 4) | sM;
-	  d24 = extract_signed_integer (&buf[1], 3);
+	  d24 = extract_signed_integer (&buf[1], 3, byte_order);
 
 	  pv_area_store (stack,
 	                 pv_add_constant (regs[E_SP_REGNUM], d24),
@@ -839,7 +840,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 
 	  sM = (buf[0] & 0xf0) >> 4;
 	  fsM = (Y << 4) | sM;
-	  d32 = extract_signed_integer (&buf[1], 4);
+	  d32 = extract_signed_integer (&buf[1], 4, byte_order);
 
 	  pv_area_store (stack,
 	                 pv_add_constant (regs[E_SP_REGNUM], d32),
@@ -887,7 +888,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  sM = (buf[0] & 0xf0) >> 4;
 	  rN = buf[0] & 0x0f;
 	  fsM = (Y << 4) | sM;
-	  imm8 = extract_signed_integer (&buf[1], 1);
+	  imm8 = extract_signed_integer (&buf[1], 1, byte_order);
 
 	  rN_regnum = translate_rreg (rN);
 
@@ -912,7 +913,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  sM = (buf[0] & 0xf0) >> 4;
 	  rN = buf[0] & 0x0f;
 	  fsM = (Y << 4) | sM;
-	  imm24 = extract_signed_integer (&buf[1], 3);
+	  imm24 = extract_signed_integer (&buf[1], 3, byte_order);
 
 	  rN_regnum = translate_rreg (rN);
 
@@ -937,7 +938,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  sM = (buf[0] & 0xf0) >> 4;
 	  rN = buf[0] & 0x0f;
 	  fsM = (Y << 4) | sM;
-	  imm32 = extract_signed_integer (&buf[1], 4);
+	  imm32 = extract_signed_integer (&buf[1], 4, byte_order);
 
 	  rN_regnum = translate_rreg (rN);
 
@@ -952,7 +953,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  int aN = instr[0] & 0x03;
 	  LONGEST imm8;
 
-	  imm8 = extract_signed_integer (&instr[1], 1);
+	  imm8 = extract_signed_integer (&instr[1], 1, byte_order);
 
 	  regs[E_A0_REGNUM + aN] = pv_constant (imm8);
 	  pc += 2;
@@ -968,7 +969,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  if (status != 0)
 	    break;
 
-	  imm16 = extract_signed_integer (buf, 2);
+	  imm16 = extract_signed_integer (buf, 2, byte_order);
 	  regs[E_A0_REGNUM + aN] = pv_constant (imm16);
 	  pc += 3;
 	}
@@ -983,7 +984,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  if (status != 0)
 	    break;
 
-	  imm32 = extract_signed_integer (buf, 4);
+	  imm32 = extract_signed_integer (buf, 4, byte_order);
 	  regs[E_A0_REGNUM + aN] = pv_constant (imm32);
 	  pc += 6;
 	}
@@ -993,7 +994,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  int dN = instr[0] & 0x03;
 	  LONGEST imm8;
 
-	  imm8 = extract_signed_integer (&instr[1], 1);
+	  imm8 = extract_signed_integer (&instr[1], 1, byte_order);
 
 	  regs[E_D0_REGNUM + dN] = pv_constant (imm8);
 	  pc += 2;
@@ -1009,7 +1010,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  if (status != 0)
 	    break;
 
-	  imm16 = extract_signed_integer (buf, 2);
+	  imm16 = extract_signed_integer (buf, 2, byte_order);
 	  regs[E_D0_REGNUM + dN] = pv_constant (imm16);
 	  pc += 3;
 	}
@@ -1024,7 +1025,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
 	  if (status != 0)
 	    break;
 
-	  imm32 = extract_signed_integer (buf, 4);
+	  imm32 = extract_signed_integer (buf, 4, byte_order);
 	  regs[E_D0_REGNUM + dN] = pv_constant (imm32);
 	  pc += 6;
 	}
@@ -1223,6 +1224,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 			 int struct_return,
 			 CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const int push_size = register_size (gdbarch, E_PC_REGNUM);
   int regs_used;
   int len, arg_len; 
@@ -1270,7 +1272,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 	{
 	  /* Change to pointer-to-type.  */
 	  arg_len = push_size;
-	  store_unsigned_integer (valbuf, push_size, 
+	  store_unsigned_integer (valbuf, push_size, byte_order,
 				  value_address (*args));
 	  val = &valbuf[0];
 	}
@@ -1283,7 +1285,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
       while (regs_used < 2 && arg_len > 0)
 	{
 	  regcache_cooked_write_unsigned (regcache, regs_used, 
-				  extract_unsigned_integer (val, push_size));
+		  extract_unsigned_integer (val, push_size, byte_order));
 	  val += push_size;
 	  arg_len -= push_size;
 	  regs_used++;
@@ -1305,7 +1307,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 
   /* Push the return address that contains the magic breakpoint.  */
   sp -= 4;
-  write_memory_unsigned_integer (sp, push_size, bp_addr);
+  write_memory_unsigned_integer (sp, push_size, byte_order, bp_addr);
 
   /* The CPU also writes the return address always into the
      MDR register on "call".  */

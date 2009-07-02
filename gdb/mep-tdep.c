@@ -1139,6 +1139,7 @@ mep_pseudo_cr32_read (struct gdbarch *gdbarch,
                       int cookednum,
                       void *buf)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* Read the raw register into a 64-bit buffer, and then return the
      appropriate end of that buffer.  */
   int rawnum = mep_pseudo_to_raw[cookednum];
@@ -1148,7 +1149,8 @@ mep_pseudo_cr32_read (struct gdbarch *gdbarch,
   gdb_assert (TYPE_LENGTH (register_type (gdbarch, cookednum)) == 4);
   regcache_raw_read (regcache, rawnum, buf64);
   /* Slow, but legible.  */
-  store_unsigned_integer (buf, 4, extract_unsigned_integer (buf64, 8));
+  store_unsigned_integer (buf, 4, byte_order,
+			  extract_unsigned_integer (buf64, 8, byte_order));
 }
 
 
@@ -1188,6 +1190,7 @@ mep_pseudo_csr_write (struct gdbarch *gdbarch,
                       int cookednum,
                       const void *buf)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int size = register_size (gdbarch, cookednum);
   struct mep_csr_register *r
     = &mep_csr_registers[cookednum - MEP_FIRST_CSR_REGNUM];
@@ -1204,7 +1207,7 @@ mep_pseudo_csr_write (struct gdbarch *gdbarch,
       ULONGEST mixed_bits;
           
       regcache_raw_read_unsigned (regcache, r->raw, &old_bits);
-      new_bits = extract_unsigned_integer (buf, size);
+      new_bits = extract_unsigned_integer (buf, size, byte_order);
       mixed_bits = ((r->writeable_bits & new_bits)
                     | (~r->writeable_bits & old_bits));
       regcache_raw_write_unsigned (regcache, r->raw, mixed_bits);
@@ -1218,6 +1221,7 @@ mep_pseudo_cr32_write (struct gdbarch *gdbarch,
                        int cookednum,
                        const void *buf)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* Expand the 32-bit value into a 64-bit value, and write that to
      the pseudoregister.  */
   int rawnum = mep_pseudo_to_raw[cookednum];
@@ -1226,7 +1230,8 @@ mep_pseudo_cr32_write (struct gdbarch *gdbarch,
   gdb_assert (TYPE_LENGTH (register_type (gdbarch, rawnum)) == sizeof (buf64));
   gdb_assert (TYPE_LENGTH (register_type (gdbarch, cookednum)) == 4);
   /* Slow, but legible.  */
-  store_unsigned_integer (buf64, 8, extract_unsigned_integer (buf, 4));
+  store_unsigned_integer (buf64, 8, byte_order,
+			  extract_unsigned_integer (buf, 4, byte_order));
   regcache_raw_write (regcache, rawnum, buf64);
 }
 
@@ -1415,8 +1420,9 @@ mep_pc_in_vliw_section (CORE_ADDR pc)
    anyway.  */
 
 static CORE_ADDR 
-mep_get_insn (CORE_ADDR pc, long *insn)
+mep_get_insn (struct gdbarch *gdbarch, CORE_ADDR pc, long *insn)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int pc_in_vliw_section;
   int vliw_mode;
   int insn_len;
@@ -1453,7 +1459,7 @@ mep_get_insn (CORE_ADDR pc, long *insn)
     vliw_mode = 0;
 
   read_memory (pc, buf, sizeof (buf));
-  *insn = extract_unsigned_integer (buf, 2) << 16;
+  *insn = extract_unsigned_integer (buf, 2, byte_order) << 16;
 
   /* The major opcode --- the top four bits of the first 16-bit
      part --- indicates whether this instruction is 16 or 32 bits
@@ -1463,7 +1469,7 @@ mep_get_insn (CORE_ADDR pc, long *insn)
     {
       /* Fetch the second 16-bit part of the instruction.  */
       read_memory (pc + 2, buf, sizeof (buf));
-      *insn = *insn | extract_unsigned_integer (buf, 2);
+      *insn = *insn | extract_unsigned_integer (buf, 2, byte_order);
     }
 
   /* If we're in VLIW code, then the VLIW width determines the address
@@ -1700,7 +1706,7 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
       CORE_ADDR next_pc;
       pv_t pre_insn_fp, pre_insn_sp;
 
-      next_pc = mep_get_insn (pc, &insn);
+      next_pc = mep_get_insn (gdbarch, pc, &insn);
 
       /* A zero return from mep_get_insn means that either we weren't
          able to read the instruction from memory, or that we don't
@@ -2294,6 +2300,7 @@ mep_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                      int struct_return,
                      CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR *copy = (CORE_ADDR *) alloca (argc * sizeof (copy[0]));
   CORE_ADDR func_addr = find_function_addr (function, NULL);
   int i;
@@ -2334,7 +2341,8 @@ mep_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* Arguments that fit in a GPR get expanded to fill the GPR.  */
       if (arg_size <= MEP_GPR_SIZE)
         value = extract_unsigned_integer (value_contents (argv[i]),
-                                          TYPE_LENGTH (value_type (argv[i])));
+                                          TYPE_LENGTH (value_type (argv[i])),
+					  byte_order);
 
       /* Arguments too large to fit in a GPR get copied to the stack,
          and we pass a pointer to the copy.  */
@@ -2350,7 +2358,7 @@ mep_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else
         {
           char buf[MEP_GPR_SIZE];
-          store_unsigned_integer (buf, MEP_GPR_SIZE, value);
+          store_unsigned_integer (buf, MEP_GPR_SIZE, byte_order, value);
           write_memory (arg_stack, buf, MEP_GPR_SIZE);
           arg_stack += MEP_GPR_SIZE;
         }

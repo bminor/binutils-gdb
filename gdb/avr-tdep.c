@@ -72,9 +72,6 @@
 #undef XMALLOC
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
-#undef EXTRACT_INSN
-#define EXTRACT_INSN(addr) extract_unsigned_integer(addr,2)
-
 /* Constants: prefixed with AVR_ to avoid name space clashes */
 
 enum
@@ -282,17 +279,19 @@ static void
 avr_address_to_pointer (struct gdbarch *gdbarch,
 			struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
   /* Is it a code address?  */
   if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
     {
-      store_unsigned_integer (buf, TYPE_LENGTH (type),
+      store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order,
 			      avr_convert_iaddr_to_raw (addr >> 1));
     }
   else
     {
       /* Strip off any upper segment bits.  */
-      store_unsigned_integer (buf, TYPE_LENGTH (type),
+      store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order,
 			      avr_convert_saddr_to_raw (addr));
     }
 }
@@ -301,7 +300,9 @@ static CORE_ADDR
 avr_pointer_to_address (struct gdbarch *gdbarch,
 			struct type *type, const gdb_byte *buf)
 {
-  CORE_ADDR addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  CORE_ADDR addr
+    = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 
   /* Is it a code address?  */
   if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
@@ -423,9 +424,10 @@ avr_write_pc (struct regcache *regcache, CORE_ADDR val)
    types.  */
 
 static CORE_ADDR
-avr_scan_prologue (CORE_ADDR pc_beg, CORE_ADDR pc_end,
+avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 		   struct avr_unwind_cache *info)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
   unsigned short insn;
   int scan_stage = 0;
@@ -458,12 +460,12 @@ avr_scan_prologue (CORE_ADDR pc_beg, CORE_ADDR pc_end,
 	0xcd, 0xbf		/* out __SP_L__,r28 */
       };
 
-      insn = EXTRACT_INSN (&prologue[vpc]);
+      insn = extract_unsigned_integer (&prologue[vpc], 2, byte_order);
       /* ldi r28,lo8(<RAM_ADDR> - <LOCALS_SIZE>) */
       if ((insn & 0xf0f0) == 0xe0c0)
 	{
 	  locals = (insn & 0xf) | ((insn & 0x0f00) >> 4);
-	  insn = EXTRACT_INSN (&prologue[vpc + 2]);
+	  insn = extract_unsigned_integer (&prologue[vpc + 2], 2, byte_order);
 	  /* ldi r29,hi8(<RAM_ADDR> - <LOCALS_SIZE>) */
 	  if ((insn & 0xf0f0) == 0xe0d0)
 	    {
@@ -494,28 +496,28 @@ avr_scan_prologue (CORE_ADDR pc_beg, CORE_ADDR pc_end,
       if (len < 10)
 	break;
 
-      insn = EXTRACT_INSN (&prologue[vpc]);
+      insn = extract_unsigned_integer (&prologue[vpc], 2, byte_order);
       /* ldi r26,<LOCALS_SIZE> */
       if ((insn & 0xf0f0) != 0xe0a0)
 	break;
       loc_size = (insn & 0xf) | ((insn & 0x0f00) >> 4);
       pc_offset += 2;
 
-      insn = EXTRACT_INSN (&prologue[vpc + 2]);
+      insn = extract_unsigned_integer (&prologue[vpc + 2], 2, byte_order);
       /* ldi r27,<LOCALS_SIZE> / 256 */
       if ((insn & 0xf0f0) != 0xe0b0)
 	break;
       loc_size |= ((insn & 0xf) | ((insn & 0x0f00) >> 4)) << 8;
       pc_offset += 2;
 
-      insn = EXTRACT_INSN (&prologue[vpc + 4]);
+      insn = extract_unsigned_integer (&prologue[vpc + 4], 2, byte_order);
       /* ldi r30,pm_lo8(.L_foo_body) */
       if ((insn & 0xf0f0) != 0xe0e0)
 	break;
       body_addr = (insn & 0xf) | ((insn & 0x0f00) >> 4);
       pc_offset += 2;
 
-      insn = EXTRACT_INSN (&prologue[vpc + 6]);
+      insn = extract_unsigned_integer (&prologue[vpc + 6], 2, byte_order);
       /* ldi r31,pm_hi8(.L_foo_body) */
       if ((insn & 0xf0f0) != 0xe0f0)
 	break;
@@ -526,7 +528,7 @@ avr_scan_prologue (CORE_ADDR pc_beg, CORE_ADDR pc_end,
       if (!msymbol)
 	break;
 
-      insn = EXTRACT_INSN (&prologue[vpc + 8]);
+      insn = extract_unsigned_integer (&prologue[vpc + 8], 2, byte_order);
       /* rjmp __prologue_saves__+RRR */
       if ((insn & 0xf000) == 0xc000)
         {
@@ -546,7 +548,8 @@ avr_scan_prologue (CORE_ADDR pc_beg, CORE_ADDR pc_end,
         {
           /* Extract absolute PC address from JMP */
           i = (((insn & 0x1) | ((insn & 0x1f0) >> 3) << 16)
-            | (EXTRACT_INSN (&prologue[vpc + 10]) & 0xffff));
+	       | (extract_unsigned_integer (&prologue[vpc + 10], 2, byte_order)
+		  & 0xffff));
           /* Convert address to byte addressable mode */
           i *= 2;
 
@@ -630,7 +633,7 @@ avr_scan_prologue (CORE_ADDR pc_beg, CORE_ADDR pc_end,
 
   for (; vpc < len; vpc += 2)
     {
-      insn = EXTRACT_INSN (&prologue[vpc]);
+      insn = extract_unsigned_integer (&prologue[vpc], 2, byte_order);
       if ((insn & 0xfe0f) == 0x920f)	/* push rXX */
 	{
 	  /* Bits 4-9 contain a mask for registers R0-R32. */
@@ -699,14 +702,14 @@ avr_scan_prologue (CORE_ADDR pc_beg, CORE_ADDR pc_end,
 	0xcd, 0xbf		/* out 0x3d,r28 ; SPL */
       };
 
-      insn = EXTRACT_INSN (&prologue[vpc]);
+      insn = extract_unsigned_integer (&prologue[vpc], 2, byte_order);
       vpc += 2;
       if ((insn & 0xff30) == 0x9720)	/* sbiw r28,XXX */
 	locals_size = (insn & 0xf) | ((insn & 0xc0) >> 2);
       else if ((insn & 0xf0f0) == 0x50c0)	/* subi r28,lo8(XX) */
 	{
 	  locals_size = (insn & 0xf) | ((insn & 0xf00) >> 4);
-	  insn = EXTRACT_INSN (&prologue[vpc]);
+	  insn = extract_unsigned_integer (&prologue[vpc], 2, byte_order);
 	  vpc += 2;
 	  locals_size += ((insn & 0xf) | ((insn & 0xf00) >> 4) << 8);
 	}
@@ -744,7 +747,7 @@ avr_scan_prologue (CORE_ADDR pc_beg, CORE_ADDR pc_end,
 
   for (; vpc < len; vpc += 2)
     {
-      insn = EXTRACT_INSN (&prologue[vpc]);
+      insn = extract_unsigned_integer (&prologue[vpc], 2, byte_order);
       if ((insn & 0xff00) == 0x0100)	/* movw rXX, rYY */
         continue;
       else if ((insn & 0xfc00) == 0x2c00) /* mov rXX, rYY */
@@ -776,7 +779,7 @@ avr_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
          prologue and possibly skip over moving arguments passed via registers
          to other registers.  */
 
-      prologue_end = avr_scan_prologue (func_addr, func_end, &info);
+      prologue_end = avr_scan_prologue (gdbarch, func_addr, func_end, &info);
 
       if (info.prologue_type == AVR_PROLOGUE_NONE)
         return pc;
@@ -817,13 +820,15 @@ static void
 avr_extract_return_value (struct type *type, struct regcache *regcache,
                           gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST r24, r25;
   ULONGEST c;
   int len;
   if (TYPE_LENGTH (type) == 1)
     {
       regcache_cooked_read_unsigned (regcache, 24, &c);
-      store_unsigned_integer (valbuf, 1, c);
+      store_unsigned_integer (valbuf, 1, byte_order, c);
     }
   else
     {
@@ -909,7 +914,8 @@ avr_frame_unwind_cache (struct frame_info *this_frame,
   start_pc = get_frame_func (this_frame);
   current_pc = get_frame_pc (this_frame);
   if ((start_pc > 0) && (start_pc <= current_pc))
-    avr_scan_prologue (start_pc, current_pc, info);
+    avr_scan_prologue (get_frame_arch (this_frame),
+		       start_pc, current_pc, info);
 
   if ((info->prologue_type != AVR_PROLOGUE_NONE)
       && (info->prologue_type != AVR_PROLOGUE_MAIN))
@@ -1015,6 +1021,8 @@ static struct value *
 avr_frame_prev_register (struct frame_info *this_frame,
 			 void **this_prologue_cache, int regnum)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct avr_unwind_cache *info
     = avr_frame_unwind_cache (this_frame, this_prologue_cache);
 
@@ -1171,6 +1179,7 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                      int nargs, struct value **args, CORE_ADDR sp,
                      int struct_return, CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
   unsigned char buf[2];
   CORE_ADDR return_pc = avr_convert_iaddr_to_raw (bp_addr);
@@ -1209,7 +1218,7 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
           if (len & 1)
             regnum--;
 
-          val = extract_unsigned_integer (contents, len);
+          val = extract_unsigned_integer (contents, len, byte_order);
           for (j=0; j<len; j++)
             {
               regcache_cooked_write_unsigned (regcache, regnum--,

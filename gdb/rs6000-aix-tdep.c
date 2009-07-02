@@ -194,6 +194,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			int struct_return, CORE_ADDR struct_addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int ii;
   int len = 0;
   int argno;			/* current argument number */
@@ -404,7 +405,7 @@ ran_out_of_registers_for_arguments:
   regcache_raw_write_signed (regcache, gdbarch_sp_regnum (gdbarch), sp);
 
   /* Set back chain properly.  */
-  store_unsigned_integer (tmp_buffer, wordsize, saved_sp);
+  store_unsigned_integer (tmp_buffer, wordsize, byte_order, saved_sp);
   write_memory (sp, tmp_buffer, wordsize);
 
   /* Point the inferior function call's return address at the dummy's
@@ -429,6 +430,7 @@ rs6000_return_value (struct gdbarch *gdbarch, struct type *func_type,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[8];
 
   /* The calling convention this function implements assumes the
@@ -500,7 +502,8 @@ rs6000_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	  /* For reading we don't have to worry about sign extension.  */
 	  regcache_cooked_read_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
 					 &regval);
-	  store_unsigned_integer (readbuf, TYPE_LENGTH (valtype), regval);
+	  store_unsigned_integer (readbuf, TYPE_LENGTH (valtype), byte_order,
+				  regval);
 	}
       if (writebuf)
 	{
@@ -567,6 +570,8 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 				   CORE_ADDR addr,
 				   struct target_ops *targ)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct obj_section *s;
 
   s = find_pc_section (addr);
@@ -578,7 +583,7 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
   if (s && (s->the_bfd_section->flags & SEC_CODE) == 0)
     {
       CORE_ADDR pc =
-        read_memory_unsigned_integer (addr, gdbarch_tdep (gdbarch)->wordsize);
+        read_memory_unsigned_integer (addr, tdep->wordsize, byte_order);
       struct obj_section *pc_section = find_pc_section (pc);
 
       if (pc_section && (pc_section->the_bfd_section->flags & SEC_CODE))
@@ -595,7 +600,9 @@ static CORE_ADDR
 branch_dest (struct frame_info *frame, int opcode, int instr,
 	     CORE_ADDR pc, CORE_ADDR safety)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR dest;
   int immediate;
   int absolute;
@@ -635,7 +642,7 @@ branch_dest (struct frame_info *frame, int opcode, int instr,
 	  if (dest < AIX_TEXT_SEGMENT_BASE)
 	    dest = read_memory_unsigned_integer
 		     (get_frame_base (frame) + SIG_FRAME_PC_OFFSET,
-		      tdep->wordsize);
+		      tdep->wordsize, byte_order);
 	}
 
       else if (ext_op == 528)	/* br cond to count reg */
@@ -664,6 +671,7 @@ static int
 rs6000_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int ii, insn;
   CORE_ADDR loc;
   CORE_ADDR breaks[2];
@@ -671,7 +679,7 @@ rs6000_software_single_step (struct frame_info *frame)
 
   loc = get_frame_pc (frame);
 
-  insn = read_memory_integer (loc, 4);
+  insn = read_memory_integer (loc, 4, byte_order);
 
   if (ppc_deal_with_atomic_sequence (frame))
     return 1;

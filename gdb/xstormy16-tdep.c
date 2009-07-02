@@ -233,6 +233,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
 			   CORE_ADDR sp, int struct_return,
 			   CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR stack_dest = sp;
   int argreg = E_1ST_ARG_REGNUM;
   int i, j;
@@ -266,7 +267,8 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
 			extract_unsigned_integer (val + j,
 						  typelen - j ==
 						  1 ? 1 :
-						  xstormy16_reg_size));
+						  xstormy16_reg_size,
+						  byte_order));
     }
 
   /* Align SP */
@@ -289,7 +291,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
       stack_dest += typelen + slacklen;
     }
 
-  store_unsigned_integer (buf, xstormy16_pc_size, bp_addr);
+  store_unsigned_integer (buf, xstormy16_pc_size, byte_order, bp_addr);
   write_memory (stack_dest, buf, xstormy16_pc_size);
   stack_dest += xstormy16_pc_size;
 
@@ -309,10 +311,12 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
    Returns the address of the first instruction after the prologue.  */
 
 static CORE_ADDR
-xstormy16_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
+xstormy16_analyze_prologue (struct gdbarch *gdbarch,
+			    CORE_ADDR start_addr, CORE_ADDR end_addr,
 			    struct xstormy16_frame_cache *cache,
 			    struct frame_info *this_frame)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR next_addr;
   ULONGEST inst, inst2;
   LONGEST offset;
@@ -328,9 +332,10 @@ xstormy16_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   for (next_addr = start_addr;
        next_addr < end_addr; next_addr += xstormy16_inst_size)
     {
-      inst = read_memory_unsigned_integer (next_addr, xstormy16_inst_size);
+      inst = read_memory_unsigned_integer (next_addr,
+					   xstormy16_inst_size, byte_order);
       inst2 = read_memory_unsigned_integer (next_addr + xstormy16_inst_size,
-					    xstormy16_inst_size);
+					    xstormy16_inst_size, byte_order);
 
       if (inst >= 0x0082 && inst <= 0x008d)	/* push r2 .. push r13 */
 	{
@@ -419,7 +424,8 @@ xstormy16_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       memset (&cache, 0, sizeof cache);
 
       /* Don't trust line number debug info in frameless functions. */
-      plg_end = xstormy16_analyze_prologue (func_addr, func_end, &cache, NULL);
+      plg_end = xstormy16_analyze_prologue (gdbarch, func_addr, func_end,
+					    &cache, NULL);
       if (!cache.uses_fp)
         return plg_end;
 
@@ -450,6 +456,7 @@ xstormy16_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static int
 xstormy16_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = 0, func_end = 0;
 
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
@@ -463,19 +470,21 @@ xstormy16_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       /* Check if we're on a `ret' instruction.  Otherwise it's
          too dangerous to proceed. */
-      inst = read_memory_unsigned_integer (addr, xstormy16_inst_size);
+      inst = read_memory_unsigned_integer (addr,
+					   xstormy16_inst_size, byte_order);
       if (inst != 0x0003)
 	return 0;
 
       while ((addr -= xstormy16_inst_size) >= func_addr)
 	{
-	  inst = read_memory_unsigned_integer (addr, xstormy16_inst_size);
+	  inst = read_memory_unsigned_integer (addr,
+					       xstormy16_inst_size, byte_order);
 	  if (inst >= 0x009a && inst <= 0x009d)	/* pop r10...r13 */
 	    continue;
 	  if (inst == 0x305f || inst == 0x307f)	/* dec r15, #0x1/#0x3 */
 	    break;
 	  inst2 = read_memory_unsigned_integer (addr - xstormy16_inst_size,
-						xstormy16_inst_size);
+						xstormy16_inst_size, byte_order);
 	  if (inst2 == 0x314f && inst >= 0x8000)	/* add r15, neg. value */
 	    {
 	      addr -= xstormy16_inst_size;
@@ -501,8 +510,9 @@ xstormy16_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 /* Given a pointer to a jump table entry, return the address
    of the function it jumps to.  Return 0 if not found. */
 static CORE_ADDR
-xstormy16_resolve_jmp_table_entry (CORE_ADDR faddr)
+xstormy16_resolve_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct obj_section *faddr_sect = find_pc_section (faddr);
 
   if (faddr_sect)
@@ -516,9 +526,10 @@ xstormy16_resolve_jmp_table_entry (CORE_ADDR faddr)
 
       if (!target_read_memory (faddr, buf, sizeof buf))
 	{
-	  inst = extract_unsigned_integer (buf, xstormy16_inst_size);
+	  inst = extract_unsigned_integer (buf,
+					   xstormy16_inst_size, byte_order);
 	  inst2 = extract_unsigned_integer (buf + xstormy16_inst_size,
-					    xstormy16_inst_size);
+					    xstormy16_inst_size, byte_order);
 	  addr = inst2 << 8 | (inst & 0xff);
 	  return addr;
 	}
@@ -530,8 +541,9 @@ xstormy16_resolve_jmp_table_entry (CORE_ADDR faddr)
    address of the corresponding jump table entry.  Return 0 if
    not found. */
 static CORE_ADDR
-xstormy16_find_jmp_table_entry (CORE_ADDR faddr)
+xstormy16_find_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct obj_section *faddr_sect = find_pc_section (faddr);
 
   if (faddr_sect)
@@ -562,9 +574,10 @@ xstormy16_find_jmp_table_entry (CORE_ADDR faddr)
 
 	      if (target_read_memory (addr, buf, sizeof buf))
 		return 0;
-	      inst = extract_unsigned_integer (buf, xstormy16_inst_size);
+	      inst = extract_unsigned_integer (buf,
+					       xstormy16_inst_size, byte_order);
 	      inst2 = extract_unsigned_integer (buf + xstormy16_inst_size,
-						xstormy16_inst_size);
+					        xstormy16_inst_size, byte_order);
 	      faddr2 = inst2 << 8 | (inst & 0xff);
 	      if (faddr == faddr2)
 		return addr;
@@ -577,7 +590,8 @@ xstormy16_find_jmp_table_entry (CORE_ADDR faddr)
 static CORE_ADDR
 xstormy16_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
-  CORE_ADDR tmp = xstormy16_resolve_jmp_table_entry (pc);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  CORE_ADDR tmp = xstormy16_resolve_jmp_table_entry (gdbarch, pc);
 
   if (tmp && tmp != pc)
     return tmp;
@@ -595,12 +609,14 @@ static CORE_ADDR
 xstormy16_pointer_to_address (struct gdbarch *gdbarch,
 			      struct type *type, const gdb_byte *buf)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
-  CORE_ADDR addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
+  CORE_ADDR addr
+    = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 
   if (target == TYPE_CODE_FUNC || target == TYPE_CODE_METHOD)
     {
-      CORE_ADDR addr2 = xstormy16_resolve_jmp_table_entry (addr);
+      CORE_ADDR addr2 = xstormy16_resolve_jmp_table_entry (gdbarch, addr);
       if (addr2)
 	addr = addr2;
     }
@@ -612,15 +628,16 @@ static void
 xstormy16_address_to_pointer (struct gdbarch *gdbarch,
 			      struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
 
   if (target == TYPE_CODE_FUNC || target == TYPE_CODE_METHOD)
     {
-      CORE_ADDR addr2 = xstormy16_find_jmp_table_entry (addr);
+      CORE_ADDR addr2 = xstormy16_find_jmp_table_entry (gdbarch, addr);
       if (addr2)
 	addr = addr2;
     }
-  store_unsigned_integer (buf, TYPE_LENGTH (type), addr);
+  store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order, addr);
 }
 
 static struct xstormy16_frame_cache *
@@ -645,6 +662,7 @@ xstormy16_alloc_frame_cache (void)
 static struct xstormy16_frame_cache *
 xstormy16_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct xstormy16_frame_cache *cache;
   CORE_ADDR current_pc;
   int i;
@@ -662,7 +680,8 @@ xstormy16_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache->pc = get_frame_func (this_frame);
   current_pc = get_frame_pc (this_frame);
   if (cache->pc)
-    xstormy16_analyze_prologue (cache->pc, current_pc, cache, this_frame);
+    xstormy16_analyze_prologue (gdbarch, cache->pc, current_pc,
+				cache, this_frame);
 
   if (!cache->uses_fp)
     cache->base = get_frame_register_unsigned (this_frame, E_SP_REGNUM);

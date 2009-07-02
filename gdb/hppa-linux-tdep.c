@@ -87,10 +87,11 @@ static struct insn_pattern hppa_sigtramp[] = {
    When the match is successful, fill INSN[i] with what PATTERN[i]
    matched.  */
 static int
-insns_match_pattern (CORE_ADDR pc,
+insns_match_pattern (struct gdbarch *gdbarch, CORE_ADDR pc,
                      struct insn_pattern *pattern,
                      unsigned int *insn)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
   CORE_ADDR npc = pc;
 
@@ -99,7 +100,7 @@ insns_match_pattern (CORE_ADDR pc,
       char buf[4];
 
       target_read_memory (npc, buf, 4);
-      insn[i] = extract_unsigned_integer (buf, 4);
+      insn[i] = extract_unsigned_integer (buf, 4, byte_order);
       if ((insn[i] & pattern[i].mask) == pattern[i].data)
         npc += 4;
       else
@@ -130,7 +131,7 @@ insns_match_pattern (CORE_ADDR pc,
    Note that with a 2.4 64-bit kernel, the signal context is not properly
    passed back to userspace so the unwind will not work correctly.  */
 static CORE_ADDR
-hppa_linux_sigtramp_find_sigcontext (CORE_ADDR pc)
+hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   unsigned int dummy[HPPA_MAX_INSN_PATTERN_LEN];
   int offs = 0;
@@ -154,7 +155,8 @@ hppa_linux_sigtramp_find_sigcontext (CORE_ADDR pc)
 
   for (try = 0; try < ARRAY_SIZE (pcoffs); try++)
     {
-      if (insns_match_pattern (sp + pcoffs[try], hppa_sigtramp, dummy))
+      if (insns_match_pattern (gdbarch, sp + pcoffs[try],
+			       hppa_sigtramp, dummy))
 	{
           offs = sfoffs[try];
 	  break;
@@ -163,7 +165,7 @@ hppa_linux_sigtramp_find_sigcontext (CORE_ADDR pc)
 
   if (offs == 0)
     {
-      if (insns_match_pattern (pc, hppa_sigtramp, dummy))
+      if (insns_match_pattern (gdbarch, pc, hppa_sigtramp, dummy))
 	{
 	  /* sigaltstack case: we have no way of knowing which offset to 
 	     use in this case; default to new kernel handling. If this is
@@ -209,7 +211,7 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   pc = get_frame_pc (this_frame);
-  scptr = hppa_linux_sigtramp_find_sigcontext (pc);
+  scptr = hppa_linux_sigtramp_find_sigcontext (gdbarch, pc);
 
   /* structure of struct sigcontext:
    
@@ -299,9 +301,10 @@ hppa_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
 				   struct frame_info *this_frame,
 				   void **this_prologue_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);
 
-  if (hppa_linux_sigtramp_find_sigcontext (pc))
+  if (hppa_linux_sigtramp_find_sigcontext (gdbarch, pc))
     return 1;
 
   return 0;
@@ -328,6 +331,7 @@ static const struct frame_unwind hppa_linux_sigtramp_frame_unwind = {
 static CORE_ADDR
 hppa_linux_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct obj_section *faddr_sect;
   CORE_ADDR faddr;
   
@@ -343,7 +347,7 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 
       status = target_read_memory (faddr + 4, buf, sizeof (buf));
       if (status == 0)
-	return extract_unsigned_integer (buf, sizeof (buf));
+	return extract_unsigned_integer (buf, sizeof (buf), byte_order);
     }
 
   /* If the address is in the plt section, then the real function hasn't 
@@ -379,7 +383,7 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 	      status = target_read_memory (addr, buf, sizeof (buf));
 	      if (status != 0)
 		break;
-	      tag = extract_signed_integer (buf, sizeof (buf));
+	      tag = extract_signed_integer (buf, sizeof (buf), byte_order);
 
 	      if (tag == DT_PLTGOT)
 		{
@@ -388,8 +392,8 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 		  status = target_read_memory (addr + 4, buf, sizeof (buf));
 		  if (status != 0)
 		    break;
-		  global_pointer = extract_unsigned_integer (buf, sizeof (buf));
-
+		  global_pointer = extract_unsigned_integer (buf, sizeof (buf),
+							     byte_order);
 		  /* The payoff... */
 		  return global_pointer;
 		}

@@ -810,10 +810,12 @@ get_frame_register_value (struct frame_info *frame, int regnum)
 LONGEST
 frame_unwind_register_signed (struct frame_info *frame, int regnum)
 {
+  struct gdbarch *gdbarch = frame_unwind_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int size = register_size (gdbarch, regnum);
   gdb_byte buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  return extract_signed_integer (buf, register_size (frame_unwind_arch (frame),
-						     regnum));
+  return extract_signed_integer (buf, size, byte_order);
 }
 
 LONGEST
@@ -825,10 +827,12 @@ get_frame_register_signed (struct frame_info *frame, int regnum)
 ULONGEST
 frame_unwind_register_unsigned (struct frame_info *frame, int regnum)
 {
+  struct gdbarch *gdbarch = frame_unwind_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int size = register_size (gdbarch, regnum);
   gdb_byte buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  return extract_unsigned_integer (buf, register_size (frame_unwind_arch (frame),
-						       regnum));
+  return extract_unsigned_integer (buf, size, byte_order);
 }
 
 ULONGEST
@@ -1874,14 +1878,18 @@ LONGEST
 get_frame_memory_signed (struct frame_info *this_frame, CORE_ADDR addr,
 			 int len)
 {
-  return read_memory_integer (addr, len);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  return read_memory_integer (addr, len, byte_order);
 }
 
 ULONGEST
 get_frame_memory_unsigned (struct frame_info *this_frame, CORE_ADDR addr,
 			   int len)
 {
-  return read_memory_unsigned_integer (addr, len);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  return read_memory_unsigned_integer (addr, len, byte_order);
 }
 
 int

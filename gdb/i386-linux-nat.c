@@ -757,13 +757,15 @@ i386_linux_resume (struct target_ops *ops,
   if (step)
     {
       struct regcache *regcache = get_thread_regcache (pid_to_ptid (pid));
+      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       ULONGEST pc;
       gdb_byte buf[LINUX_SYSCALL_LEN];
 
       request = PTRACE_SINGLESTEP;
 
-      regcache_cooked_read_unsigned
-	(regcache, gdbarch_pc_regnum (get_regcache_arch (regcache)), &pc);
+      regcache_cooked_read_unsigned (regcache,
+				     gdbarch_pc_regnum (gdbarch), &pc);
 
       /* Returning from a signal trampoline is done by calling a
          special system call (sigreturn or rt_sigreturn, see
@@ -789,7 +791,7 @@ i386_linux_resume (struct target_ops *ops,
 
 	      regcache_cooked_read_unsigned (regcache, I386_ESP_REGNUM, &sp);
 	      if (syscall == SYS_rt_sigreturn)
-		addr = read_memory_integer (sp + 8, 4) + 20;
+		addr = read_memory_integer (sp + 8, 4, byte_order) + 20;
 	      else
 		addr = sp;
 

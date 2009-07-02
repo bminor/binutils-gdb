@@ -92,6 +92,7 @@ struct trad_frame_saved_reg *
 sparc64nbsd_sigcontext_saved_regs (CORE_ADDR sigcontext_addr,
 				   struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct trad_frame_saved_reg *saved_regs;
   CORE_ADDR addr, sp;
   int regnum, delta;
@@ -134,7 +135,7 @@ sparc64nbsd_sigcontext_saved_regs (CORE_ADDR sigcontext_addr,
 
   /* Handle StackGhost.  */
   {
-    ULONGEST wcookie = sparc_fetch_wcookie ();
+    ULONGEST wcookie = sparc_fetch_wcookie (gdbarch);
 
     if (wcookie != 0)
       {

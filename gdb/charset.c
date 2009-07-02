@@ -358,9 +358,9 @@ target_charset (void)
 }
 
 const char *
-target_wide_charset (void)
+target_wide_charset (enum bfd_endian byte_order)
 {
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (byte_order == BFD_ENDIAN_BIG)
     {
       if (target_wide_charset_be_name)
 	return target_wide_charset_be_name;

@@ -49,6 +49,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			      int struct_return, CORE_ADDR struct_addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST saved_sp;
   int argspace = 0;		/* 0 is an initial wrong guess.  */
   int write_pass;
@@ -398,13 +399,13 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		    write_memory (sp + structoffset, val, len);
 		  /* ... and then a "word" pointing to that address is
 		     passed as the parameter.  */
-		  store_unsigned_integer (word, tdep->wordsize,
+		  store_unsigned_integer (word, tdep->wordsize, byte_order,
 					  sp + structoffset);
 		  structoffset += len;
 		}
 	      else if (TYPE_CODE (type) == TYPE_CODE_INT)
 		/* Sign or zero extend the "int" into a "word".  */
-		store_unsigned_integer (word, tdep->wordsize,
+		store_unsigned_integer (word, tdep->wordsize, byte_order,
 					unpack_long (type, val));
 	      else
 		/* Always goes in the low address.  */
@@ -462,7 +463,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   regcache_cooked_write_signed (regcache, gdbarch_sp_regnum (gdbarch), sp);
 
   /* Write the backchain (it occupies WORDSIZED bytes).  */
-  write_memory_signed_integer (sp, tdep->wordsize, saved_sp);
+  write_memory_signed_integer (sp, tdep->wordsize, byte_order, saved_sp);
 
   /* Point the inferior function call's return address at the dummy's
      breakpoint.  */
@@ -556,6 +557,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 			  const gdb_byte *writebuf, int broken_gcc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_assert (tdep->wordsize == 4);
   if (TYPE_CODE (type) == TYPE_CODE_FLT
       && TYPE_LENGTH (type) <= 8
@@ -675,7 +677,8 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	  ULONGEST regval;
 	  regcache_cooked_read_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
 					 &regval);
-	  store_unsigned_integer (readbuf, TYPE_LENGTH (type), regval);
+	  store_unsigned_integer (readbuf, TYPE_LENGTH (type), byte_order,
+				  regval);
 	}
       if (writebuf)
 	{
@@ -892,6 +895,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   CORE_ADDR func_addr = find_function_addr (function, NULL);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST back_chain;
   /* See for-loop comment below.  */
   int write_pass;
@@ -1194,7 +1198,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 						    tdep->ppc_gp0_regnum +
 						    greg, word);
 		  write_memory_unsigned_integer (gparam, tdep->wordsize,
-						 word);
+						 byte_order, word);
 		}
 	      greg++;
 	      gparam = align_up (gparam + TYPE_LENGTH (type), tdep->wordsize);
@@ -1315,7 +1319,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   regcache_cooked_write_signed (regcache, gdbarch_sp_regnum (gdbarch), sp);
 
   /* Write the backchain (it occupies WORDSIZED bytes).  */
-  write_memory_signed_integer (sp, tdep->wordsize, back_chain);
+  write_memory_signed_integer (sp, tdep->wordsize, byte_order, back_chain);
 
   /* Point the inferior function call's return address at the dummy's
      breakpoint.  */
@@ -1330,7 +1334,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	/* The TOC is the second double word in the descriptor.  */
 	CORE_ADDR toc =
 	  read_memory_unsigned_integer (desc_addr + tdep->wordsize,
-					tdep->wordsize);
+					tdep->wordsize, byte_order);
 	regcache_cooked_write_unsigned (regcache,
 					tdep->ppc_gp0_regnum + 2, toc);
       }
@@ -1356,6 +1360,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
 			     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* This function exists to support a calling convention that
      requires floating-point registers.  It shouldn't be used on
@@ -1402,7 +1407,8 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	  ULONGEST regval;
 	  regcache_cooked_read_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
 					 &regval);
-	  store_unsigned_integer (readbuf, TYPE_LENGTH (valtype), regval);
+	  store_unsigned_integer (readbuf, TYPE_LENGTH (valtype), byte_order,
+				  regval);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }

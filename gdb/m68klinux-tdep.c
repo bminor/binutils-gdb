@@ -65,6 +65,8 @@
 static int
 m68k_linux_pc_in_sigtramp (struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp;
   gdb_byte buf[12];
   unsigned long insn0, insn1, insn2;
@@ -72,14 +74,14 @@ m68k_linux_pc_in_sigtramp (struct frame_info *this_frame)
 
   if (!safe_frame_unwind_memory (this_frame, pc - 4, buf, sizeof (buf)))
     return 0;
-  insn1 = extract_unsigned_integer (buf + 4, 4);
-  insn2 = extract_unsigned_integer (buf + 8, 4);
+  insn1 = extract_unsigned_integer (buf + 4, 4, byte_order);
+  insn2 = extract_unsigned_integer (buf + 8, 4, byte_order);
   if (IS_SIGTRAMP (insn1, insn2))
     return 1;
   if (IS_RT_SIGTRAMP (insn1, insn2))
     return 2;
 
-  insn0 = extract_unsigned_integer (buf, 4);
+  insn0 = extract_unsigned_integer (buf, 4, byte_order);
   if (IS_SIGTRAMP (insn0, insn1))
     return 1;
   if (IS_RT_SIGTRAMP (insn0, insn1))
@@ -222,6 +224,8 @@ m68k_linux_inferior_created (struct target_ops *objfile, int from_tty)
 static struct m68k_linux_sigtramp_info
 m68k_linux_get_sigtramp_info (struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp;
   struct m68k_linux_sigtramp_info info;
 
@@ -239,7 +243,7 @@ m68k_linux_get_sigtramp_info (struct frame_info *this_frame)
   sp = get_frame_register_unsigned (this_frame, M68K_SP_REGNUM);
 
   /* Get sigcontext address, it is the third parameter on the stack.  */
-  info.sigcontext_addr = read_memory_unsigned_integer (sp + 8, 4);
+  info.sigcontext_addr = read_memory_unsigned_integer (sp + 8, 4, byte_order);
 
   if (m68k_linux_pc_in_sigtramp (this_frame) == 2)
     info.sc_reg_offset = m68k_linux_ucontext_reg_offset;
@@ -258,7 +262,9 @@ m68k_linux_sigtramp_frame_cache (struct frame_info *this_frame,
 {
   struct frame_id this_id;
   struct trad_frame_cache *cache;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct m68k_linux_sigtramp_info info;
   gdb_byte buf[4];
   int i;
@@ -274,8 +280,8 @@ m68k_linux_sigtramp_frame_cache (struct frame_info *this_frame,
      trampoline.  */
   get_frame_register (this_frame, M68K_SP_REGNUM, buf);
   /* See the end of m68k_push_dummy_call.  */
-  this_id = frame_id_build (extract_unsigned_integer (buf, 4) - 4 + 8,
-			    get_frame_pc (this_frame));
+  this_id = frame_id_build (extract_unsigned_integer (buf, 4, byte_order)
+			    - 4 + 8, get_frame_pc (this_frame));
   trad_frame_set_id (cache, this_id);
 
   info = m68k_linux_get_sigtramp_info (this_frame);

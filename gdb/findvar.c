@@ -48,7 +48,8 @@ you lose
 #endif
 
 LONGEST
-extract_signed_integer (const gdb_byte *addr, int len)
+extract_signed_integer (const gdb_byte *addr, int len,
+			enum bfd_endian byte_order)
 {
   LONGEST retval;
   const unsigned char *p;
@@ -62,7 +63,7 @@ That operation is not available on integers of more than %d bytes."),
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (byte_order == BFD_ENDIAN_BIG)
     {
       p = startaddr;
       /* Do the sign extension once at the start.  */
@@ -82,7 +83,8 @@ That operation is not available on integers of more than %d bytes."),
 }
 
 ULONGEST
-extract_unsigned_integer (const gdb_byte *addr, int len)
+extract_unsigned_integer (const gdb_byte *addr, int len,
+			  enum bfd_endian byte_order)
 {
   ULONGEST retval;
   const unsigned char *p;
@@ -97,7 +99,7 @@ That operation is not available on integers of more than %d bytes."),
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
   retval = 0;
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (byte_order == BFD_ENDIAN_BIG)
     {
       for (p = startaddr; p < endaddr; ++p)
 	retval = (retval << 8) | *p;
@@ -117,14 +119,14 @@ That operation is not available on integers of more than %d bytes."),
 
 int
 extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
-			       LONGEST *pval)
+			       enum bfd_endian byte_order, LONGEST *pval)
 {
   const gdb_byte *p;
   const gdb_byte *first_addr;
   int len;
 
   len = orig_len;
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (byte_order == BFD_ENDIAN_BIG)
     {
       for (p = addr;
 	   len > (int) sizeof (LONGEST) && p < addr + orig_len;
@@ -154,7 +156,8 @@ extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
   if (len <= (int) sizeof (LONGEST))
     {
       *pval = (LONGEST) extract_unsigned_integer (first_addr,
-						  sizeof (LONGEST));
+						  sizeof (LONGEST),
+						  byte_order);
       return 1;
     }
 
@@ -178,7 +181,8 @@ extract_typed_address (const gdb_byte *buf, struct type *type)
 
 
 void
-store_signed_integer (gdb_byte *addr, int len, LONGEST val)
+store_signed_integer (gdb_byte *addr, int len,
+		      enum bfd_endian byte_order, LONGEST val)
 {
   gdb_byte *p;
   gdb_byte *startaddr = addr;
@@ -186,7 +190,7 @@ store_signed_integer (gdb_byte *addr, int len, LONGEST val)
 
   /* Start at the least significant end of the integer, and work towards
      the most significant.  */
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (byte_order == BFD_ENDIAN_BIG)
     {
       for (p = endaddr - 1; p >= startaddr; --p)
 	{
@@ -205,7 +209,8 @@ store_signed_integer (gdb_byte *addr, int len, LONGEST val)
 }
 
 void
-store_unsigned_integer (gdb_byte *addr, int len, ULONGEST val)
+store_unsigned_integer (gdb_byte *addr, int len,
+			enum bfd_endian byte_order, ULONGEST val)
 {
   unsigned char *p;
   unsigned char *startaddr = (unsigned char *) addr;
@@ -213,7 +218,7 @@ store_unsigned_integer (gdb_byte *addr, int len, ULONGEST val)
 
   /* Start at the least significant end of the integer, and work towards
      the most significant.  */
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (byte_order == BFD_ENDIAN_BIG)
     {
       for (p = endaddr - 1; p >= startaddr; --p)
 	{
@@ -312,14 +317,16 @@ CORE_ADDR
 unsigned_pointer_to_address (struct gdbarch *gdbarch,
 			     struct type *type, const gdb_byte *buf)
 {
-  return extract_unsigned_integer (buf, TYPE_LENGTH (type));
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  return extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 }
 
 CORE_ADDR
 signed_pointer_to_address (struct gdbarch *gdbarch,
 			   struct type *type, const gdb_byte *buf)
 {
-  return extract_signed_integer (buf, TYPE_LENGTH (type));
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  return extract_signed_integer (buf, TYPE_LENGTH (type), byte_order);
 }
 
 /* Given an address, store it as a pointer of type TYPE in target
@@ -328,14 +335,16 @@ void
 unsigned_address_to_pointer (struct gdbarch *gdbarch, struct type *type,
 			     gdb_byte *buf, CORE_ADDR addr)
 {
-  store_unsigned_integer (buf, TYPE_LENGTH (type), addr);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order, addr);
 }
 
 void
 address_to_signed_pointer (struct gdbarch *gdbarch, struct type *type,
 			   gdb_byte *buf, CORE_ADDR addr)
 {
-  store_signed_integer (buf, TYPE_LENGTH (type), addr);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  store_signed_integer (buf, TYPE_LENGTH (type), byte_order, addr);
 }
 
 /* Will calling read_var_value or locate_var_value on SYM end
@@ -415,6 +424,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
     case LOC_CONST:
       /* Put the constant back in target format.  */
       store_signed_integer (value_contents_raw (v), len,
+			    gdbarch_byte_order (get_type_arch (type)),
 			    (LONGEST) SYMBOL_VALUE (var));
       VALUE_LVAL (v) = not_lval;
       return v;

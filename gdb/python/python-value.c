@@ -573,7 +573,8 @@ valpy_nonzero (PyObject *self)
     return value_as_double (self_value->value) != 0;
   else if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
     return !decimal_is_zero (value_contents (self_value->value),
-			     TYPE_LENGTH (type));
+			     TYPE_LENGTH (type),
+			     gdbarch_byte_order (get_type_arch (type)));
   else
     {
       PyErr_SetString (PyExc_TypeError, _("Attempted truth testing on invalid "

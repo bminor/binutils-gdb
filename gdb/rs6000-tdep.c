@@ -874,6 +874,7 @@ static int
 rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   bfd_byte insn_buf[PPC_INSN_SIZE];
   CORE_ADDR scan_pc, func_start, func_end, epilogue_start, epilogue_end;
   unsigned long insn;
@@ -898,7 +899,7 @@ rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       if (!safe_frame_unwind_memory (curfrm, scan_pc, insn_buf, PPC_INSN_SIZE))
         return 0;
-      insn = extract_unsigned_integer (insn_buf, PPC_INSN_SIZE);
+      insn = extract_unsigned_integer (insn_buf, PPC_INSN_SIZE, byte_order);
       if (insn == 0x4e800020)
         break;
       /* Assume a bctr is a tail call unless it points strictly within
@@ -924,7 +925,7 @@ rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       if (!safe_frame_unwind_memory (curfrm, scan_pc, insn_buf, PPC_INSN_SIZE))
         return 0;
-      insn = extract_unsigned_integer (insn_buf, PPC_INSN_SIZE);
+      insn = extract_unsigned_integer (insn_buf, PPC_INSN_SIZE, byte_order);
       if (insn_changes_sp_or_jumps (insn))
         return 1;
     }
@@ -971,10 +972,11 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 			  CORE_ADDR from, CORE_ADDR to,
 			  struct regcache *regs)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* Since we use simple_displaced_step_copy_insn, our closure is a
      copy of the instruction.  */
   ULONGEST insn  = extract_unsigned_integer ((gdb_byte *) closure,
-					      PPC_INSN_SIZE);
+					      PPC_INSN_SIZE, byte_order);
   ULONGEST opcode = 0;
   /* Offset for non PC-relative instructions.  */
   LONGEST offset = PPC_INSN_SIZE;
@@ -1072,11 +1074,12 @@ int
 ppc_deal_with_atomic_sequence (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc = get_frame_pc (frame);
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
   CORE_ADDR closing_insn; /* Instruction that closes the atomic sequence.  */
-  int insn = read_memory_integer (loc, PPC_INSN_SIZE);
+  int insn = read_memory_integer (loc, PPC_INSN_SIZE, byte_order);
   int insn_count;
   int index;
   int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
@@ -1094,7 +1097,7 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
   for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
     {
       loc += PPC_INSN_SIZE;
-      insn = read_memory_integer (loc, PPC_INSN_SIZE);
+      insn = read_memory_integer (loc, PPC_INSN_SIZE, byte_order);
 
       /* Assume that there is at most one conditional branch in the atomic
          sequence.  If a conditional branch is found, put a breakpoint in 
@@ -1129,7 +1132,7 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
 
   closing_insn = loc;
   loc += PPC_INSN_SIZE;
-  insn = read_memory_integer (loc, PPC_INSN_SIZE);
+  insn = read_memory_integer (loc, PPC_INSN_SIZE, byte_order);
 
   /* Insert a breakpoint right after the end of the atomic sequence.  */
   breaks[0] = loc;
@@ -1240,7 +1243,7 @@ store_param_on_stack_p (unsigned long op, int framep, int *r0_contains_arg)
    they can use to access PIC data using PC-relative offsets.  */
 
 static int
-bl_to_blrl_insn_p (CORE_ADDR pc, int insn)
+bl_to_blrl_insn_p (CORE_ADDR pc, int insn, enum bfd_endian byte_order)
 {
   CORE_ADDR dest;
   int immediate;
@@ -1254,7 +1257,7 @@ bl_to_blrl_insn_p (CORE_ADDR pc, int insn)
   else
     dest = pc + immediate;
 
-  dest_insn = read_memory_integer (dest, 4);
+  dest_insn = read_memory_integer (dest, 4, byte_order);
   if ((dest_insn & 0xfc00ffff) == 0x4c000021) /* blrl */
     return 1;
 
@@ -1276,15 +1279,16 @@ bl_to_blrl_insn_p (CORE_ADDR pc, int insn)
 #define BL_DISPLACEMENT_MASK 0x03fffffc
 
 static unsigned long
-rs6000_fetch_instruction (const CORE_ADDR pc)
+rs6000_fetch_instruction (struct gdbarch *gdbarch, const CORE_ADDR pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   unsigned long op;
 
   /* Fetch the instruction and convert it to an integer.  */
   if (target_read_memory (pc, buf, 4))
     return 0;
-  op = extract_unsigned_integer (buf, 4);
+  op = extract_unsigned_integer (buf, 4, byte_order);
 
   return op;
 }
@@ -1295,10 +1299,10 @@ rs6000_fetch_instruction (const CORE_ADDR pc)
    instruction immediately past this sequence.  Otherwise, return START_PC.  */
    
 static CORE_ADDR
-rs6000_skip_stack_check (const CORE_ADDR start_pc)
+rs6000_skip_stack_check (struct gdbarch *gdbarch, const CORE_ADDR start_pc)
 {
   CORE_ADDR pc = start_pc;
-  unsigned long op = rs6000_fetch_instruction (pc);
+  unsigned long op = rs6000_fetch_instruction (gdbarch, pc);
 
   /* First possible sequence: A small number of probes.
          stw 0, -<some immediate>(1)
@@ -1310,7 +1314,7 @@ rs6000_skip_stack_check (const CORE_ADDR start_pc)
       while ((op & 0xffff0000) == 0x90010000)
         {
           pc = pc + 4;
-          op = rs6000_fetch_instruction (pc);
+          op = rs6000_fetch_instruction (gdbarch, pc);
         }
       return pc;
     }
@@ -1336,17 +1340,17 @@ rs6000_skip_stack_check (const CORE_ADDR start_pc)
 
       /* lis 0,-<some immediate> */
       pc = pc + 4;
-      op = rs6000_fetch_instruction (pc);
+      op = rs6000_fetch_instruction (gdbarch, pc);
       if ((op & 0xffff0000) != 0x3c000000)
         break;
 
       pc = pc + 4;
-      op = rs6000_fetch_instruction (pc);
+      op = rs6000_fetch_instruction (gdbarch, pc);
       /* [possibly ori 0,0,<some immediate>] */
       if ((op & 0xffff0000) == 0x60000000)
         {
           pc = pc + 4;
-          op = rs6000_fetch_instruction (pc);
+          op = rs6000_fetch_instruction (gdbarch, pc);
         }
       /* add 0,12,0 */
       if (op != 0x7c0c0214)
@@ -1354,41 +1358,41 @@ rs6000_skip_stack_check (const CORE_ADDR start_pc)
 
       /* cmpw 0,12,0 */
       pc = pc + 4;
-      op = rs6000_fetch_instruction (pc);
+      op = rs6000_fetch_instruction (gdbarch, pc);
       if (op != 0x7c0c0000)
         break;
 
       /* beq 0,<disp> */
       pc = pc + 4;
-      op = rs6000_fetch_instruction (pc);
+      op = rs6000_fetch_instruction (gdbarch, pc);
       if ((op & 0xff9f0001) != 0x41820000)
         break;
 
       /* addi 12,12,-<some immediate> */
       pc = pc + 4;
-      op = rs6000_fetch_instruction (pc);
+      op = rs6000_fetch_instruction (gdbarch, pc);
       if ((op & 0xffff0000) != 0x398c0000)
         break;
 
       /* stw 0,0(12) */
       pc = pc + 4;
-      op = rs6000_fetch_instruction (pc);
+      op = rs6000_fetch_instruction (gdbarch, pc);
       if (op != 0x900c0000)
         break;
 
       /* b <disp> */
       pc = pc + 4;
-      op = rs6000_fetch_instruction (pc);
+      op = rs6000_fetch_instruction (gdbarch, pc);
       if ((op & 0xfc000001) != 0x48000000)
         break;
 
       /* [possibly one last probe: stw 0,<some immediate>(12)] */
       pc = pc + 4;
-      op = rs6000_fetch_instruction (pc);
+      op = rs6000_fetch_instruction (gdbarch, pc);
       if ((op & 0xffff0000) == 0x900c0000)
         {
           pc = pc + 4;
-          op = rs6000_fetch_instruction (pc);
+          op = rs6000_fetch_instruction (gdbarch, pc);
         }
 
       /* We found a valid stack-check sequence, return the new PC.  */
@@ -1425,26 +1429,26 @@ rs6000_skip_stack_check (const CORE_ADDR start_pc)
 
           /* addic 0,0,-<some immediate> */
           pc = pc + 4;
-          op = rs6000_fetch_instruction (pc);
+          op = rs6000_fetch_instruction (gdbarch, pc);
           if ((op & 0xffff0000) != 0x30000000)
             break;
         }
 
       /* lis 12,<some immediate> */
       pc = pc + 4;
-      op = rs6000_fetch_instruction (pc);
+      op = rs6000_fetch_instruction (gdbarch, pc);
       if ((op & 0xffff0000) != 0x3d800000)
         break;
       
       /* lwz 12,<some immediate>(12) */
       pc = pc + 4;
-      op = rs6000_fetch_instruction (pc);
+      op = rs6000_fetch_instruction (gdbarch, pc);
       if ((op & 0xffff0000) != 0x818c0000)
         break;
 
       /* twllt 0,12 */
       pc = pc + 4;
-      op = rs6000_fetch_instruction (pc);
+      op = rs6000_fetch_instruction (gdbarch, pc);
       if ((op & 0xfffffffe) != 0x7c406008)
         break;
 
@@ -1504,6 +1508,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
   int r0_contains_arg = 0;
   const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (gdbarch);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   memset (fdata, 0, sizeof (struct rs6000_framedata));
   fdata->saved_gpr = -1;
@@ -1515,7 +1520,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
   fdata->nosavedpc = 1;
   fdata->lr_register = -1;
 
-  pc = rs6000_skip_stack_check (pc);
+  pc = rs6000_skip_stack_check (gdbarch, pc);
   if (pc >= lim_pc)
     pc = lim_pc;
 
@@ -1537,7 +1542,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
       /* Fetch the instruction and convert it to an integer.  */
       if (target_read_memory (pc, buf, 4))
 	break;
-      op = extract_unsigned_integer (buf, 4);
+      op = extract_unsigned_integer (buf, 4, byte_order);
 
       if ((op & 0xfc1fffff) == 0x7c0802a6)
 	{			/* mflr Rx */
@@ -1709,7 +1714,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
 	  /* If the return address has already been saved, we can skip
 	     calls to blrl (for PIC).  */
-          if (lr_reg != -1 && bl_to_blrl_insn_p (pc, op))
+          if (lr_reg != -1 && bl_to_blrl_insn_p (pc, op, byte_order))
 	    {
 	      fdata->used_bl = 1;
 	      continue;
@@ -1729,7 +1734,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 		break;
 	    }
 
-	  op = read_memory_integer (pc + 4, 4);
+	  op = read_memory_integer (pc + 4, 4, byte_order);
 
 	  /* At this point, make sure this is not a trampoline
 	     function (a function that simply calls another functions,
@@ -2047,7 +2052,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
   if ((op & 0xfc000001) == 0x48000001)
     {				/* bl foo, an initializer function? */
-      op = read_memory_integer (pc + 4, 4);
+      op = read_memory_integer (pc + 4, 4, byte_order);
 
       if (op == 0x4def7b82)
 	{			/* cror 0xf, 0xf, 0xf (nop) */
@@ -2112,12 +2117,13 @@ rs6000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static CORE_ADDR
 rs6000_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   unsigned long op;
 
   if (target_read_memory (pc, buf, 4))
     return pc;
-  op = extract_unsigned_integer (buf, 4);
+  op = extract_unsigned_integer (buf, 4, byte_order);
 
   if ((op & BL_MASK) == BL_INSTRUCTION)
     {
@@ -2168,7 +2174,8 @@ rs6000_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
    @FIX code.  */
 
 static int
-rs6000_in_solib_return_trampoline (CORE_ADDR pc, char *name)
+rs6000_in_solib_return_trampoline (struct gdbarch *gdbarch,
+				   CORE_ADDR pc, char *name)
 {
   return name && !strncmp (name, "@FIX", 4);
 }
@@ -2190,7 +2197,9 @@ rs6000_in_solib_return_trampoline (CORE_ADDR pc, char *name)
 static CORE_ADDR
 rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int ii, op;
   int rel;
   CORE_ADDR solib_target_pc;
@@ -2211,10 +2220,11 @@ rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   /* Check for bigtoc fixup code.  */
   msymbol = lookup_minimal_symbol_by_pc (pc);
   if (msymbol 
-      && rs6000_in_solib_return_trampoline (pc, SYMBOL_LINKAGE_NAME (msymbol)))
+      && rs6000_in_solib_return_trampoline (gdbarch, pc,
+					    SYMBOL_LINKAGE_NAME (msymbol)))
     {
       /* Double-check that the third instruction from PC is relative "b".  */
-      op = read_memory_integer (pc + 8, 4);
+      op = read_memory_integer (pc + 8, 4, byte_order);
       if ((op & 0xfc000003) == 0x48000000)
 	{
 	  /* Extract bits 6-29 as a signed 24-bit relative word address and
@@ -2231,12 +2241,12 @@ rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 
   for (ii = 0; trampoline_code[ii]; ++ii)
     {
-      op = read_memory_integer (pc + (ii * 4), 4);
+      op = read_memory_integer (pc + (ii * 4), 4, byte_order);
       if (op != trampoline_code[ii])
 	return 0;
     }
   ii = get_frame_register_unsigned (frame, 11);	/* r11 holds destination addr   */
-  pc = read_memory_unsigned_integer (ii, tdep->wordsize); /* (r11) value */
+  pc = read_memory_unsigned_integer (ii, tdep->wordsize, byte_order);
   return pc;
 }
 
@@ -3039,6 +3049,7 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct rs6000_frame_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct rs6000_framedata fdata;
   int wordsize = tdep->wordsize;
   CORE_ADDR func, pc;
@@ -3096,7 +3107,8 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   if (!fdata.frameless)
     /* Frameless really means stackless.  */
-    cache->base = read_memory_unsigned_integer (cache->base, wordsize);
+    cache->base
+      = read_memory_unsigned_integer (cache->base, wordsize, byte_order);
 
   trad_frame_set_value (cache->saved_regs,
 			gdbarch_sp_regnum (gdbarch), cache->base);

@@ -178,7 +178,8 @@ extern struct type *i387_ext_type (struct gdbarch *gdbarch);
 #define I386_MAX_INSN_LEN (16)
 
 /* Functions exported from i386-tdep.c.  */
-extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
+extern CORE_ADDR i386_pe_skip_trampoline_code (struct frame_info *frame,
+					       CORE_ADDR pc, char *name);
 extern CORE_ADDR i386_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc);
 
 /* Return whether the THIS_FRAME corresponds to a sigtramp routine.  */

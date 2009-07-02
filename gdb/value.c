@@ -1626,6 +1626,7 @@ value_as_address (struct value *val)
 LONGEST
 unpack_long (struct type *type, const gdb_byte *valaddr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   enum type_code code = TYPE_CODE (type);
   int len = TYPE_LENGTH (type);
   int nosign = TYPE_UNSIGNED (type);
@@ -1642,9 +1643,9 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_RANGE:
     case TYPE_CODE_MEMBERPTR:
       if (nosign)
-	return extract_unsigned_integer (valaddr, len);
+	return extract_unsigned_integer (valaddr, len, byte_order);
       else
-	return extract_signed_integer (valaddr, len);
+	return extract_signed_integer (valaddr, len, byte_order);
 
     case TYPE_CODE_FLT:
       return extract_typed_floating (valaddr, type);
@@ -1652,7 +1653,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_DECFLOAT:
       /* libdecnumber has a function to convert from decimal to integer, but
 	 it doesn't work when the decimal number has a fractional part.  */
-      return decimal_to_doublest (valaddr, len);
+      return decimal_to_doublest (valaddr, len, byte_order);
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
@@ -1675,6 +1676,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
 DOUBLEST
 unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   enum type_code code;
   int len;
   int nosign;
@@ -1712,7 +1714,7 @@ unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
       return extract_typed_floating (valaddr, type);
     }
   else if (code == TYPE_CODE_DECFLOAT)
-    return decimal_to_doublest (valaddr, len);
+    return decimal_to_doublest (valaddr, len, byte_order);
   else if (nosign)
     {
       /* Unsigned -- be sure we compensate for signed LONGEST.  */
@@ -1980,6 +1982,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *ty
 LONGEST
 unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   ULONGEST val;
   ULONGEST valmask;
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
@@ -1987,7 +1990,8 @@ unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
   int lsbcount;
   struct type *field_type;
 
-  val = extract_unsigned_integer (valaddr + bitpos / 8, sizeof (val));
+  val = extract_unsigned_integer (valaddr + bitpos / 8,
+				  sizeof (val), byte_order);
   field_type = TYPE_FIELD_TYPE (type, fieldno);
   CHECK_TYPEDEF (field_type);
 
@@ -2028,6 +2032,7 @@ void
 modify_field (struct type *type, gdb_byte *addr,
 	      LONGEST fieldval, int bitpos, int bitsize)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   ULONGEST oword;
   ULONGEST mask = (ULONGEST) -1 >> (8 * sizeof (ULONGEST) - bitsize);
 
@@ -2047,7 +2052,7 @@ modify_field (struct type *type, gdb_byte *addr,
       fieldval &= mask;
     }
 
-  oword = extract_unsigned_integer (addr, sizeof oword);
+  oword = extract_unsigned_integer (addr, sizeof oword, byte_order);
 
   /* Shifting for bit field depends on endianness of the target machine.  */
   if (gdbarch_bits_big_endian (get_type_arch (type)))
@@ -2056,7 +2061,7 @@ modify_field (struct type *type, gdb_byte *addr,
   oword &= ~(mask << bitpos);
   oword |= fieldval << bitpos;
 
-  store_unsigned_integer (addr, sizeof oword, oword);
+  store_unsigned_integer (addr, sizeof oword, byte_order, oword);
 }
 
 /* Pack NUM into BUF using a target format of TYPE.  */
@@ -2064,6 +2069,7 @@ modify_field (struct type *type, gdb_byte *addr,
 void
 pack_long (gdb_byte *buf, struct type *type, LONGEST num)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   int len;
 
   type = check_typedef (type);
@@ -2078,7 +2084,7 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
     case TYPE_CODE_BOOL:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_MEMBERPTR:
-      store_signed_integer (buf, len, num);
+      store_signed_integer (buf, len, byte_order, num);
       break;
 
     case TYPE_CODE_REF:

@@ -1043,18 +1043,23 @@ enum { MAX_REGISTER_SIZE = 16 };
 
 /* In findvar.c.  */
 
-extern LONGEST extract_signed_integer (const gdb_byte *, int);
+extern LONGEST extract_signed_integer (const gdb_byte *, int,
+				       enum bfd_endian);
 
-extern ULONGEST extract_unsigned_integer (const gdb_byte *, int);
+extern ULONGEST extract_unsigned_integer (const gdb_byte *, int,
+					  enum bfd_endian);
 
-extern int extract_long_unsigned_integer (const gdb_byte *, int, LONGEST *);
+extern int extract_long_unsigned_integer (const gdb_byte *, int,
+					  enum bfd_endian, LONGEST *);
 
 extern CORE_ADDR extract_typed_address (const gdb_byte *buf,
 					struct type *type);
 
-extern void store_signed_integer (gdb_byte *, int, LONGEST);
+extern void store_signed_integer (gdb_byte *, int,
+				  enum bfd_endian, LONGEST);
 
-extern void store_unsigned_integer (gdb_byte *, int, ULONGEST);
+extern void store_unsigned_integer (gdb_byte *, int,
+				    enum bfd_endian, ULONGEST);
 
 extern void store_typed_address (gdb_byte *buf, struct type *type,
 				 CORE_ADDR addr);

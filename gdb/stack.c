@@ -164,6 +164,8 @@ static void
 print_frame_nameless_args (struct frame_info *frame, long start, int num,
 			   int first, struct ui_file *stream)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
   CORE_ADDR argsaddr;
   long arg_value;
@@ -174,7 +176,8 @@ print_frame_nameless_args (struct frame_info *frame, long start, int num,
       argsaddr = get_frame_args_address (frame);
       if (!argsaddr)
 	return;
-      arg_value = read_memory_integer (argsaddr + start, sizeof (int));
+      arg_value = read_memory_integer (argsaddr + start,
+				       sizeof (int), byte_order);
       if (!first)
 	fprintf_filtered (stream, ", ");
       fprintf_filtered (stream, "%ld", arg_value);
@@ -1184,6 +1187,8 @@ frame_info (char *addr_exp, int from_tty)
 			       &realnum, NULL);
 	if (!optimized && lval == not_lval)
 	  {
+	    enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+	    int sp_size = register_size (gdbarch, gdbarch_sp_regnum (gdbarch));
 	    gdb_byte value[MAX_REGISTER_SIZE];
 	    CORE_ADDR sp;
 	    frame_register_unwind (fi, gdbarch_sp_regnum (gdbarch),
@@ -1192,9 +1197,7 @@ frame_info (char *addr_exp, int from_tty)
 	    /* NOTE: cagney/2003-05-22: This is assuming that the
                stack pointer was packed as an unsigned integer.  That
                may or may not be valid.  */
-	    sp = extract_unsigned_integer (value,
-					   register_size (gdbarch,
-					   gdbarch_sp_regnum (gdbarch)));
+	    sp = extract_unsigned_integer (value, sp_size, byte_order);
 	    printf_filtered (" Previous frame's sp is ");
 	    fputs_filtered (paddress (gdbarch, sp), gdb_stdout);
 	    printf_filtered ("\n");

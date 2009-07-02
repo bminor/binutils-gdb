@@ -1832,13 +1832,13 @@ get_target_memory (struct target_ops *ops, CORE_ADDR addr, gdb_byte *buf,
 
 ULONGEST
 get_target_memory_unsigned (struct target_ops *ops,
-			    CORE_ADDR addr, int len)
+			    CORE_ADDR addr, int len, enum bfd_endian byte_order)
 {
   gdb_byte buf[sizeof (ULONGEST)];
 
   gdb_assert (len <= sizeof (buf));
   get_target_memory (ops, addr, buf, len);
-  return extract_unsigned_integer (buf, len);
+  return extract_unsigned_integer (buf, len, byte_order);
 }
 
 static void
@@ -2796,6 +2796,7 @@ debug_print_register (const char * func,
     fprintf_unfiltered (gdb_stdlog, "(%d)", regno);
   if (regno >= 0 && regno < gdbarch_num_regs (gdbarch))
     {
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       int i, size = register_size (gdbarch, regno);
       unsigned char buf[MAX_REGISTER_SIZE];
       regcache_raw_collect (regcache, regno, buf);
@@ -2806,7 +2807,7 @@ debug_print_register (const char * func,
 	}
       if (size <= sizeof (LONGEST))
 	{
-	  ULONGEST val = extract_unsigned_integer (buf, size);
+	  ULONGEST val = extract_unsigned_integer (buf, size, byte_order);
 	  fprintf_unfiltered (gdb_stdlog, " %s %s",
 			      core_addr_to_string_nz (val), plongest (val));
 	}

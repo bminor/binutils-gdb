@@ -50,13 +50,16 @@ extern void read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
 /* Read an integer from debugged memory, given address and number of
    bytes.  */
 
-extern LONGEST read_memory_integer (CORE_ADDR memaddr, int len);
-extern int safe_read_memory_integer (CORE_ADDR memaddr, int len, LONGEST *return_value);
+extern LONGEST read_memory_integer (CORE_ADDR memaddr,
+				    int len, enum bfd_endian byte_order);
+extern int safe_read_memory_integer (CORE_ADDR memaddr, int len,
+				     enum bfd_endian byte_order, LONGEST *return_value);
 
 /* Read an unsigned integer from debugged memory, given address and
    number of bytes.  */
 
-extern ULONGEST read_memory_unsigned_integer (CORE_ADDR memaddr, int len);
+extern ULONGEST read_memory_unsigned_integer (CORE_ADDR memaddr,
+					      int len, enum bfd_endian byte_order);
 
 /* Read a null-terminated string from the debuggee's memory, given address,
  * a buffer into which to place the string, and the maximum available space */
@@ -77,10 +80,12 @@ extern void write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len);
 
 /* Store VALUE at ADDR in the inferior as a LEN-byte unsigned integer.  */
 extern void write_memory_unsigned_integer (CORE_ADDR addr, int len,
-                                           ULONGEST value);
+                                           enum bfd_endian byte_order,
+					   ULONGEST value);
 
 /* Store VALUE at ADDR in the inferior as a LEN-byte unsigned integer.  */
 extern void write_memory_signed_integer (CORE_ADDR addr, int len,
+                                         enum bfd_endian byte_order,
                                          LONGEST value);
 
 /* Hook for `exec_file_command' command to call.  */

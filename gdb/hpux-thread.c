@@ -243,6 +243,7 @@ hpux_thread_fetch_registers (struct target_ops *ops,
 			     struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   cma__t_int_tcb tcb, *tcb_ptr;
   struct cleanup *old_chain;
   int i;
@@ -291,7 +292,7 @@ hpux_thread_fetch_registers (struct target_ops *ops,
 	    /* Flags must be 0 to avoid bogus value for SS_INSYSCALL */
 	    memset (buf, '\000', register_size (gdbarch, regno));
 	  else if (regno == HPPA_SP_REGNUM)
-	    store_unsigned_integer (buf, sizeof sp, sp);
+	    store_unsigned_integer (buf, sizeof sp, byte_order, sp);
 	  else if (regno == HPPA_PCOQ_HEAD_REGNUM)
 	    read_memory (sp - 20, buf, register_size (gdbarch, regno));
 	  else

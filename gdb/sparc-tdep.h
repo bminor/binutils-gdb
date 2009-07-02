@@ -157,7 +157,7 @@ struct sparc_frame_cache
 extern unsigned long sparc_fetch_instruction (CORE_ADDR pc);
 
 /* Fetch StackGhost Per-Process XOR cookie.  */
-extern ULONGEST sparc_fetch_wcookie (void);
+extern ULONGEST sparc_fetch_wcookie (struct gdbarch *gdbarch);
 
 extern CORE_ADDR sparc_analyze_prologue (struct gdbarch *gdbarch,
 					 CORE_ADDR pc, CORE_ADDR current_pc,

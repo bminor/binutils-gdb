@@ -294,15 +294,17 @@ static void
 sparc64obsd_supply_uthread (struct regcache *regcache,
 			    int regnum, CORE_ADDR addr)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR fp, fp_addr = addr + SPARC64OBSD_UTHREAD_FP_OFFSET;
   gdb_byte buf[8];
 
   gdb_assert (regnum >= -1);
 
-  fp = read_memory_unsigned_integer (fp_addr, 8);
+  fp = read_memory_unsigned_integer (fp_addr, 8, byte_order);
   if (regnum == SPARC_SP_REGNUM || regnum == -1)
     {
-      store_unsigned_integer (buf, 8, fp);
+      store_unsigned_integer (buf, 8, byte_order, fp);
       regcache_raw_supply (regcache, SPARC_SP_REGNUM, buf);
 
       if (regnum == SPARC_SP_REGNUM)
@@ -314,15 +316,15 @@ sparc64obsd_supply_uthread (struct regcache *regcache,
     {
       CORE_ADDR i7, i7_addr = addr + SPARC64OBSD_UTHREAD_PC_OFFSET;
 
-      i7 = read_memory_unsigned_integer (i7_addr, 8);
+      i7 = read_memory_unsigned_integer (i7_addr, 8, byte_order);
       if (regnum == SPARC64_PC_REGNUM || regnum == -1)
 	{
-	  store_unsigned_integer (buf, 8, i7 + 8);
+	  store_unsigned_integer (buf, 8, byte_order, i7 + 8);
 	  regcache_raw_supply (regcache, SPARC64_PC_REGNUM, buf);
 	}
       if (regnum == SPARC64_NPC_REGNUM || regnum == -1)
 	{
-	  store_unsigned_integer (buf, 8, i7 + 12);
+	  store_unsigned_integer (buf, 8, byte_order, i7 + 12);
 	  regcache_raw_supply (regcache, SPARC64_NPC_REGNUM, buf);
 	}
 
@@ -337,6 +339,8 @@ static void
 sparc64obsd_collect_uthread(const struct regcache *regcache,
 			    int regnum, CORE_ADDR addr)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp;
   gdb_byte buf[8];
 
@@ -355,15 +359,15 @@ sparc64obsd_collect_uthread(const struct regcache *regcache,
       CORE_ADDR i7, i7_addr = addr + SPARC64OBSD_UTHREAD_PC_OFFSET;
 
       regcache_raw_collect (regcache, SPARC64_PC_REGNUM, buf);
-      i7 = extract_unsigned_integer (buf, 8) - 8;
-      write_memory_unsigned_integer (i7_addr, 8, i7);
+      i7 = extract_unsigned_integer (buf, 8, byte_order) - 8;
+      write_memory_unsigned_integer (i7_addr, 8, byte_order, i7);
 
       if (regnum == SPARC64_PC_REGNUM)
 	return;
     }
 
   regcache_raw_collect (regcache, SPARC_SP_REGNUM, buf);
-  sp = extract_unsigned_integer (buf, 8);
+  sp = extract_unsigned_integer (buf, 8, byte_order);
   sparc_collect_rwindow (regcache, sp, regnum);
 }
 

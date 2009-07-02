@@ -107,28 +107,32 @@ const int amd64_darwin_thread_state_num_regs =
 static CORE_ADDR
 i386_darwin_sigcontext_addr (struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR bp;
   CORE_ADDR si;
   gdb_byte buf[4];
 
   get_frame_register (this_frame, I386_EBP_REGNUM, buf);
-  bp = extract_unsigned_integer (buf, 4);
+  bp = extract_unsigned_integer (buf, 4, byte_order);
 
   /* A pointer to the ucontext is passed as the fourth argument
      to the signal handler.  */
   read_memory (bp + 24, buf, 4);
-  si = extract_unsigned_integer (buf, 4);
+  si = extract_unsigned_integer (buf, 4, byte_order);
 
   /* The pointer to mcontext is at offset 28.  */
   read_memory (si + 28, buf, 4);
 
   /* First register (eax) is at offset 12.  */
-  return extract_unsigned_integer (buf, 4) + 12;
+  return extract_unsigned_integer (buf, 4, byte_order) + 12;
 }
 
 static CORE_ADDR
 amd64_darwin_sigcontext_addr (struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR rbx;
   CORE_ADDR si;
   gdb_byte buf[8];
@@ -136,13 +140,13 @@ amd64_darwin_sigcontext_addr (struct frame_info *this_frame)
   /* A pointer to the ucontext is passed as the fourth argument
      to the signal handler, which is saved in rbx.  */
   get_frame_register (this_frame, AMD64_RBX_REGNUM, buf);
-  rbx = extract_unsigned_integer (buf, 8);
+  rbx = extract_unsigned_integer (buf, 8, byte_order);
 
   /* The pointer to mcontext is at offset 48.  */
   read_memory (rbx + 48, buf, 8);
 
   /* First register (rax) is at offset 16.  */
-  return extract_unsigned_integer (buf, 8) + 16;
+  return extract_unsigned_integer (buf, 8, byte_order) + 16;
 }
 
 /* Return true if the PC of THIS_FRAME is in a signal trampoline which

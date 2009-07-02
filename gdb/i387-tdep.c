@@ -389,7 +389,9 @@ static int fsave_offset[] =
 void
 i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const gdb_byte *regs = fsave;
   int i;
 
@@ -429,7 +431,7 @@ i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
     {
       gdb_byte buf[4];
 
-      store_unsigned_integer (buf, 4, 0x1f80);
+      store_unsigned_integer (buf, 4, byte_order, 0x1f80);
       regcache_raw_supply (regcache, I387_MXCSR_REGNUM (tdep), buf);
     }
 }

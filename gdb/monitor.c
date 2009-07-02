@@ -870,6 +870,8 @@ monitor_detach (struct target_ops *ops, char *args, int from_tty)
 char *
 monitor_supply_register (struct regcache *regcache, int regno, char *valstr)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
   unsigned char regbuf[MAX_REGISTER_SIZE];
   char *p;
@@ -905,8 +907,7 @@ monitor_supply_register (struct regcache *regcache, int regno, char *valstr)
 
   /* supply register stores in target byte order, so swap here */
 
-  store_unsigned_integer (regbuf,
-			  register_size (get_regcache_arch (regcache), regno),
+  store_unsigned_integer (regbuf, register_size (gdbarch, regno), byte_order,
 			  val);
 
   regcache_raw_supply (regcache, regno, regbuf);
@@ -1409,6 +1410,7 @@ monitor_files_info (struct target_ops *ops)
 static int
 monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   unsigned int val, hostval;
   char *cmd;
   int i;
@@ -1465,7 +1467,7 @@ monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
       cmd = current_monitor->setmem.cmdb;
     }
 
-  val = extract_unsigned_integer (myaddr, len);
+  val = extract_unsigned_integer (myaddr, len, byte_order);
 
   if (len == 4)
     {
@@ -1670,6 +1672,7 @@ monitor_write_memory_block (CORE_ADDR memaddr, char *myaddr, int len)
 static int
 monitor_read_memory_single (CORE_ADDR memaddr, char *myaddr, int len)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   unsigned int val;
   char membuf[sizeof (int) * 2 + 1];
   char *p;
@@ -1786,7 +1789,7 @@ monitor_read_memory_single (CORE_ADDR memaddr, char *myaddr, int len)
 
   /* supply register stores in target byte order, so swap here */
 
-  store_unsigned_integer (myaddr, len, val);
+  store_unsigned_integer (myaddr, len, byte_order, val);
 
   return len;
 }

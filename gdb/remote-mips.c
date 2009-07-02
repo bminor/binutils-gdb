@@ -93,7 +93,7 @@ static void mips_prepare_to_store (struct regcache *regcache);
 static unsigned int mips_fetch_word (CORE_ADDR addr);
 
 static int mips_store_word (CORE_ADDR addr, unsigned int value,
-			    char *old_contents);
+			    int *old_contents);
 
 static int mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 			     int write, 
@@ -1749,26 +1749,27 @@ mips_wait (struct target_ops *ops,
     {
       struct regcache *regcache = get_current_regcache ();
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       char buf[MAX_REGISTER_SIZE];
 
-      store_unsigned_integer (buf,
-			      register_size
-			        (gdbarch, gdbarch_pc_regnum (gdbarch)), rpc);
+      store_unsigned_integer
+	(buf, register_size (gdbarch, gdbarch_pc_regnum (gdbarch)),
+	 byte_order, rpc);
       regcache_raw_supply (regcache, gdbarch_pc_regnum (gdbarch), buf);
 
       store_unsigned_integer
-	(buf, register_size (gdbarch, gdbarch_pc_regnum (gdbarch)), rfp);
+	(buf, register_size (gdbarch, gdbarch_pc_regnum (gdbarch)),
+	 byte_order, rfp);
       regcache_raw_supply (regcache, 30, buf);	/* This register they are avoiding and so it is unnamed */
 
-      store_unsigned_integer (buf, register_size (gdbarch,
-			      gdbarch_sp_regnum (gdbarch)), rsp);
+      store_unsigned_integer
+	(buf, register_size (gdbarch, gdbarch_sp_regnum (gdbarch)),
+	 byte_order, rsp);
       regcache_raw_supply (regcache, gdbarch_sp_regnum (gdbarch), buf);
 
-      store_unsigned_integer (buf,
-			      register_size (gdbarch,
-					     gdbarch_deprecated_fp_regnum
-					       (gdbarch)),
-			      0);
+      store_unsigned_integer
+	(buf, register_size (gdbarch, gdbarch_deprecated_fp_regnum (gdbarch)),
+	 byte_order, 0);
       regcache_raw_supply (regcache,
 			   gdbarch_deprecated_fp_regnum (gdbarch), buf);
 
@@ -1899,6 +1900,7 @@ mips_fetch_registers (struct target_ops *ops,
 		      struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned LONGEST val;
   int err;
 
@@ -1943,7 +1945,8 @@ mips_fetch_registers (struct target_ops *ops,
 
     /* We got the number the register holds, but gdb expects to see a
        value in the target byte ordering.  */
-    store_unsigned_integer (buf, register_size (gdbarch, regno), val);
+    store_unsigned_integer (buf, register_size (gdbarch, regno),
+			    byte_order, val);
     regcache_raw_supply (regcache, regno, buf);
   }
 }
@@ -2007,7 +2010,7 @@ mips_fetch_word (CORE_ADDR addr)
 
 /* FIXME! make sure only 32-bit quantities get stored! */
 static int
-mips_store_word (CORE_ADDR addr, unsigned int val, char *old_contents)
+mips_store_word (CORE_ADDR addr, unsigned int val, int *old_contents)
 {
   int err;
   unsigned int oldcontents;
@@ -2023,7 +2026,7 @@ mips_store_word (CORE_ADDR addr, unsigned int val, char *old_contents)
 	return errno;
     }
   if (old_contents != NULL)
-    store_unsigned_integer (old_contents, 4, oldcontents);
+    *old_contents = oldcontents;
   return 0;
 }
 
@@ -2040,6 +2043,7 @@ static int
 mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		  struct mem_attrib *attrib, struct target_ops *target)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   int i;
   CORE_ADDR addr;
   int count;
@@ -2064,14 +2068,15 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
       if (addr != memaddr || len < 4)
 	{
 	  /* Need part of initial word -- fetch it.  */
-	  store_unsigned_integer (&buffer[0], 4, mips_fetch_word (addr));
+	  store_unsigned_integer (&buffer[0], 4, byte_order,
+				  mips_fetch_word (addr));
 	}
 
       if (count > 1)
 	{
 	  /* Need part of last word -- fetch it.  FIXME: we do this even
 	     if we don't need it.  */
-	  store_unsigned_integer (&buffer[(count - 1) * 4], 4,
+	  store_unsigned_integer (&buffer[(count - 1) * 4], 4, byte_order,
 				  mips_fetch_word (addr + (count - 1) * 4));
 	}
 
@@ -2083,9 +2088,9 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 
       for (i = 0; i < count; i++, addr += 4)
 	{
-	  status = mips_store_word (addr,
-			       extract_unsigned_integer (&buffer[i * 4], 4),
-				    NULL);
+	  int word;
+	  word = extract_unsigned_integer (&buffer[i * 4], 4, byte_order);
+	  status = mips_store_word (addr, word, NULL);
 	  /* Report each kilobyte (we download 32-bit words at a time) */
 	  if (i % 256 == 255)
 	    {
@@ -2107,7 +2112,8 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
       /* Read all the longwords */
       for (i = 0; i < count; i++, addr += 4)
 	{
-	  store_unsigned_integer (&buffer[i * 4], 4, mips_fetch_word (addr));
+	  store_unsigned_integer (&buffer[i * 4], 4, byte_order,
+				  mips_fetch_word (addr));
 	  QUIT;
 	}
 

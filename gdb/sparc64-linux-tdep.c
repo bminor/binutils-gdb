@@ -109,6 +109,9 @@ sparc64_linux_step_trap (struct frame_info *frame, unsigned long insn)
 {
   if (insn == 0x91d0206d)
     {
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
       ULONGEST sp = get_frame_register_unsigned (frame, SPARC_SP_REGNUM);
       if (sp & 1)
 	sp += BIAS;
@@ -122,7 +125,8 @@ sparc64_linux_step_trap (struct frame_info *frame, unsigned long insn)
 	 register save area.  The saved PC sits at a 136 byte offset
 	 into there.  */
 
-      return read_memory_unsigned_integer (sp + 192 + 128 + 136, 8);
+      return read_memory_unsigned_integer (sp + 192 + 128 + 136,
+					   8, byte_order);
     }
 
   return 0;

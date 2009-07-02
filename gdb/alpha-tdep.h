@@ -76,7 +76,7 @@ struct gdbarch_tdep
   /* If PC is inside a dynamically-generated signal trampoline function
      (i.e. one copied onto the user stack at run-time), return how many
      bytes PC is beyond the start of that function.  Otherwise, return -1.  */
-  LONGEST (*dynamic_sigtramp_offset) (CORE_ADDR);
+  LONGEST (*dynamic_sigtramp_offset) (struct gdbarch *, CORE_ADDR);
 
   /* Translate a signal handler stack base address into the address of
      the sigcontext structure for that signal handler.  */
@@ -86,7 +86,7 @@ struct gdbarch_tdep
   /* NOTE: cagney/2004-04-30: Do not copy/clone this code.  Instead
      look at tramp-frame.h and other simplier per-architecture
      sigtramp unwinders.  */
-  int (*pc_in_sigtramp) (CORE_ADDR pc, char *name);
+  int (*pc_in_sigtramp) (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
 
   /* If TYPE will be returned in memory, return true.  */
   int (*return_in_memory) (struct type *type);
@@ -102,7 +102,7 @@ struct gdbarch_tdep
   size_t jb_elt_size;		/* And the size of each entry in the buf. */
 };
 
-extern unsigned int alpha_read_insn (CORE_ADDR pc);
+extern unsigned int alpha_read_insn (struct gdbarch *gdbarch, CORE_ADDR pc);
 extern int alpha_software_single_step (struct frame_info *frame);
 extern CORE_ADDR alpha_after_prologue (CORE_ADDR pc);
 

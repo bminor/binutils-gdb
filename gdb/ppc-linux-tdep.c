@@ -329,10 +329,11 @@ insn_ds_field (unsigned int insn)
 /* If DESC is the address of a 64-bit PowerPC GNU/Linux function
    descriptor, return the descriptor's entry point.  */
 static CORE_ADDR
-ppc64_desc_entry_point (CORE_ADDR desc)
+ppc64_desc_entry_point (struct gdbarch *gdbarch, CORE_ADDR desc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* The first word of the descriptor is the entry point.  */
-  return (CORE_ADDR) read_memory_unsigned_integer (desc, 8);
+  return (CORE_ADDR) read_memory_unsigned_integer (desc, 8, byte_order);
 }
 
 
@@ -483,7 +484,8 @@ static CORE_ADDR
 ppc64_standard_linkage1_target (struct frame_info *frame,
 				CORE_ADDR pc, unsigned int *insn)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* The address of the function descriptor this linkage function
      references.  */
@@ -494,7 +496,7 @@ ppc64_standard_linkage1_target (struct frame_info *frame,
        + insn_ds_field (insn[2]));
 
   /* The first word of the descriptor is the entry point.  Return that.  */
-  return ppc64_desc_entry_point (desc);
+  return ppc64_desc_entry_point (gdbarch, desc);
 }
 
 static struct core_regset_section ppc_linux_vsx_regset_sections[] =
@@ -525,7 +527,8 @@ static CORE_ADDR
 ppc64_standard_linkage2_target (struct frame_info *frame,
 				CORE_ADDR pc, unsigned int *insn)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* The address of the function descriptor this linkage function
      references.  */
@@ -536,14 +539,15 @@ ppc64_standard_linkage2_target (struct frame_info *frame,
        + insn_ds_field (insn[2]));
 
   /* The first word of the descriptor is the entry point.  Return that.  */
-  return ppc64_desc_entry_point (desc);
+  return ppc64_desc_entry_point (gdbarch, desc);
 }
 
 static CORE_ADDR
 ppc64_standard_linkage3_target (struct frame_info *frame,
 				CORE_ADDR pc, unsigned int *insn)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* The address of the function descriptor this linkage function
      references.  */
@@ -553,7 +557,7 @@ ppc64_standard_linkage3_target (struct frame_info *frame,
        + insn_ds_field (insn[1]));
 
   /* The first word of the descriptor is the entry point.  Return that.  */
-  return ppc64_desc_entry_point (desc);
+  return ppc64_desc_entry_point (gdbarch, desc);
 }
 
 
@@ -621,6 +625,7 @@ ppc64_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 					CORE_ADDR addr,
 					struct target_ops *targ)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct target_section *s = target_section_by_addr (targ, addr);
 
   /* Check if ADDR points to a function descriptor.  */
@@ -652,7 +657,7 @@ ppc64_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
       res = bfd_get_section_contents (s->bfd, s->the_bfd_section,
 				      &buf, addr - s->addr, 8);
       if (res != 0)
-	return extract_unsigned_integer (buf, 8)
+	return extract_unsigned_integer (buf, 8, byte_order)
 		- bfd_section_vma (s->bfd, s->the_bfd_section) + s->addr;
    }
 
@@ -847,6 +852,7 @@ ppc_linux_sigtramp_cache (struct frame_info *this_frame,
   int i;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   base = get_frame_register_unsigned (this_frame,
 				      gdbarch_sp_regnum (gdbarch));
@@ -859,7 +865,7 @@ ppc_linux_sigtramp_cache (struct frame_info *this_frame,
   regs = base + offset;
   /* Use that to find the address of the corresponding register
      buffers.  */
-  gpregs = read_memory_unsigned_integer (regs, tdep->wordsize);
+  gpregs = read_memory_unsigned_integer (regs, tdep->wordsize, byte_order);
   fpregs = gpregs + 48 * tdep->wordsize;
 
   /* General purpose.  */

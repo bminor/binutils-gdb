@@ -1030,6 +1030,8 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 void
 mi_cmd_data_write_memory (char *command, char **argv, int argc)
 {
+  struct gdbarch *gdbarch = get_current_arch ();
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR addr;
   char word_format;
   long word_size;
@@ -1087,7 +1089,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   /* Get the value into an array.  */
   buffer = xmalloc (word_size);
   old_chain = make_cleanup (xfree, buffer);
-  store_signed_integer (buffer, word_size, value);
+  store_signed_integer (buffer, word_size, byte_order, value);
   /* Write it down to memory.  */
   write_memory (addr, buffer, word_size);
   /* Free the buffer.  */

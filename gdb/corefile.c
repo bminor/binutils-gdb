@@ -246,6 +246,7 @@ struct captured_read_memory_integer_arguments
 {
   CORE_ADDR memaddr;
   int len;
+  enum bfd_endian byte_order;
   LONGEST result;
 };
 
@@ -262,8 +263,9 @@ do_captured_read_memory_integer (void *data)
   struct captured_read_memory_integer_arguments *args = (struct captured_read_memory_integer_arguments*) data;
   CORE_ADDR memaddr = args->memaddr;
   int len = args->len;
+  enum bfd_endian byte_order = args->byte_order;
 
-  args->result = read_memory_integer (memaddr, len);
+  args->result = read_memory_integer (memaddr, len, byte_order);
 
   return 1;
 }
@@ -273,12 +275,14 @@ do_captured_read_memory_integer (void *data)
    if successful.  */
 
 int
-safe_read_memory_integer (CORE_ADDR memaddr, int len, LONGEST *return_value)
+safe_read_memory_integer (CORE_ADDR memaddr, int len, enum bfd_endian byte_order,
+			  LONGEST *return_value)
 {
   int status;
   struct captured_read_memory_integer_arguments args;
   args.memaddr = memaddr;
   args.len = len;
+  args.byte_order = byte_order;
 
   status = catch_errors (do_captured_read_memory_integer, &args,
                         "", RETURN_MASK_ALL);
@@ -289,21 +293,21 @@ safe_read_memory_integer (CORE_ADDR memaddr, int len, LONGEST *return_value)
 }
 
 LONGEST
-read_memory_integer (CORE_ADDR memaddr, int len)
+read_memory_integer (CORE_ADDR memaddr, int len, enum bfd_endian byte_order)
 {
   gdb_byte buf[sizeof (LONGEST)];
 
   read_memory (memaddr, buf, len);
-  return extract_signed_integer (buf, len);
+  return extract_signed_integer (buf, len, byte_order);
 }
 
 ULONGEST
-read_memory_unsigned_integer (CORE_ADDR memaddr, int len)
+read_memory_unsigned_integer (CORE_ADDR memaddr, int len, enum bfd_endian byte_order)
 {
   gdb_byte buf[sizeof (ULONGEST)];
 
   read_memory (memaddr, buf, len);
-  return extract_unsigned_integer (buf, len);
+  return extract_unsigned_integer (buf, len, byte_order);
 }
 
 void
@@ -353,19 +357,21 @@ write_memory (CORE_ADDR memaddr, const bfd_byte *myaddr, int len)
 
 /* Store VALUE at ADDR in the inferior as a LEN-byte unsigned integer.  */
 void
-write_memory_unsigned_integer (CORE_ADDR addr, int len, ULONGEST value)
+write_memory_unsigned_integer (CORE_ADDR addr, int len, enum bfd_endian byte_order,
+			       ULONGEST value)
 {
   gdb_byte *buf = alloca (len);
-  store_unsigned_integer (buf, len, value);
+  store_unsigned_integer (buf, len, byte_order, value);
   write_memory (addr, buf, len);
 }
 
 /* Store VALUE at ADDR in the inferior as a LEN-byte signed integer.  */
 void
-write_memory_signed_integer (CORE_ADDR addr, int len, LONGEST value)
+write_memory_signed_integer (CORE_ADDR addr, int len, enum bfd_endian byte_order,
+			     LONGEST value)
 {
   gdb_byte *buf = alloca (len);
-  store_signed_integer (buf, len, value);
+  store_signed_integer (buf, len, byte_order, value);
   write_memory (addr, buf, len);
 }
 

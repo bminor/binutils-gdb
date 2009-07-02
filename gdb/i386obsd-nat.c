@@ -35,6 +35,8 @@
 static int
 i386obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct switchframe sf;
 
   /* The following is true for OpenBSD 3.6:
@@ -76,8 +78,8 @@ i386obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
     {
       /* No, the pcb must have been last updated by savectx().  */
       pcb->pcb_esp = pcb->pcb_ebp;
-      pcb->pcb_ebp = read_memory_integer(pcb->pcb_esp, 4);
-      sf.sf_eip = read_memory_integer(pcb->pcb_esp + 4, 4);
+      pcb->pcb_ebp = read_memory_integer(pcb->pcb_esp, 4, byte_order);
+      sf.sf_eip = read_memory_integer(pcb->pcb_esp + 4, 4, byte_order);
       regcache_raw_supply (regcache, I386_EIP_REGNUM, &sf.sf_eip);
     }
 

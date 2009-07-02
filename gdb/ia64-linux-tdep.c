@@ -50,14 +50,16 @@ ia64_linux_pc_in_sigtramp (CORE_ADDR pc)
    sigcontext structure. */
 
 static CORE_ADDR
-ia64_linux_sigcontext_register_address (CORE_ADDR sp, int regno)
+ia64_linux_sigcontext_register_address (struct gdbarch *gdbarch,
+					CORE_ADDR sp, int regno)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   char buf[8];
   CORE_ADDR sigcontext_addr = 0;
 
   /* The address of the sigcontext area is found at offset 16 in the sigframe.  */
   read_memory (sp + 16, buf, 8);
-  sigcontext_addr = extract_unsigned_integer (buf, 8);
+  sigcontext_addr = extract_unsigned_integer (buf, 8, byte_order);
 
   if (IA64_GR0_REGNUM <= regno && regno <= IA64_GR31_REGNUM)
     return sigcontext_addr + 200 + 8 * (regno - IA64_GR0_REGNUM);

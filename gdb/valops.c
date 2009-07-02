@@ -422,17 +422,18 @@ value_cast (struct type *type, struct value *arg2)
     return value_from_double (type, value_as_double (arg2));
   else if (code1 == TYPE_CODE_DECFLOAT && scalar)
     {
+      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
       int dec_len = TYPE_LENGTH (type);
       gdb_byte dec[16];
 
       if (code2 == TYPE_CODE_FLT)
-	decimal_from_floating (arg2, dec, dec_len);
+	decimal_from_floating (arg2, dec, dec_len, byte_order);
       else if (code2 == TYPE_CODE_DECFLOAT)
 	decimal_convert (value_contents (arg2), TYPE_LENGTH (type2),
-			 dec, dec_len);
+			 byte_order, dec, dec_len, byte_order);
       else
 	/* The only option left is an integral type.  */
-	decimal_from_integral (arg2, dec, dec_len);
+	decimal_from_integral (arg2, dec, dec_len, byte_order);
 
       return value_from_decfloat (type, dec);
     }
@@ -450,8 +451,9 @@ value_cast (struct type *type, struct value *arg2)
          sees a cast as a simple reinterpretation of the pointer's
          bits.  */
       if (code2 == TYPE_CODE_PTR)
-        longest = extract_unsigned_integer (value_contents (arg2),
-                                            TYPE_LENGTH (type2));
+        longest = extract_unsigned_integer
+		    (value_contents (arg2), TYPE_LENGTH (type2),
+		     gdbarch_byte_order (get_type_arch (type2)));
       else
         longest = value_as_long (arg2);
       return value_from_longest (type, convert_to_boolean ?
@@ -541,8 +543,9 @@ value_one (struct type *type, enum lval_type lv)
 
   if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT)
     {
+      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
       gdb_byte v[16];
-      decimal_from_string (v, TYPE_LENGTH (type), "1");
+      decimal_from_string (v, TYPE_LENGTH (type), byte_order, "1");
       val = value_from_decfloat (type, v);
     }
   else if (TYPE_CODE (type1) == TYPE_CODE_FLT)

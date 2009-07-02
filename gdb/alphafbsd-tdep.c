@@ -65,13 +65,14 @@ CORE_ADDR alphafbsd_sigtramp_start = 0x11ffff68;
 CORE_ADDR alphafbsd_sigtramp_end = 0x11ffffe0;
 
 static int
-alphafbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+alphafbsd_pc_in_sigtramp (struct gdbarch *gdbarch,
+			  CORE_ADDR pc, char *func_name)
 {
   return (pc >= alphafbsd_sigtramp_start && pc < alphafbsd_sigtramp_end);
 }
 
 static LONGEST
-alphafbsd_sigtramp_offset (CORE_ADDR pc)
+alphafbsd_sigtramp_offset (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   return pc - alphafbsd_sigtramp_start;
 }

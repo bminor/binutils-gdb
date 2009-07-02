@@ -34,7 +34,8 @@
    They are stored in host byte order.  This routine does the conversion if
    the target byte order is different.  */
 static void
-match_endianness (const gdb_byte *from, int len, gdb_byte *to)
+match_endianness (const gdb_byte *from, int len, enum bfd_endian byte_order,
+		  gdb_byte *to)
 {
   int i;
 
@@ -44,7 +45,7 @@ match_endianness (const gdb_byte *from, int len, gdb_byte *to)
 #define OPPOSITE_BYTE_ORDER BFD_ENDIAN_BIG
 #endif
 
-  if (gdbarch_byte_order (current_gdbarch) == OPPOSITE_BYTE_ORDER)
+  if (byte_order == OPPOSITE_BYTE_ORDER)
     for (i = 0; i < len; i++)
       to[i] = from[len - i - 1];
   else
@@ -141,11 +142,12 @@ decimal_to_number (const gdb_byte *from, int len, decNumber *to)
    of the decimal type, 4 bytes for decimal32, 8 bytes for decimal64 and
    16 bytes for decimal128.  */
 void
-decimal_to_string (const gdb_byte *decbytes, int len, char *s)
+decimal_to_string (const gdb_byte *decbytes, int len,
+		   enum bfd_endian byte_order, char *s)
 {
   gdb_byte dec[16];
 
-  match_endianness (decbytes, len, dec);
+  match_endianness (decbytes, len, byte_order, dec);
 
   switch (len)
     {
@@ -168,7 +170,8 @@ decimal_to_string (const gdb_byte *decbytes, int len, char *s)
    LEN is the length of the decimal type, 4 bytes for decimal32, 8 bytes for
    decimal64 and 16 bytes for decimal128.  */
 int
-decimal_from_string (gdb_byte *decbytes, int len, const char *string)
+decimal_from_string (gdb_byte *decbytes, int len, enum bfd_endian byte_order,
+		     const char *string)
 {
   decContext set;
   gdb_byte dec[16];
@@ -191,7 +194,7 @@ decimal_from_string (gdb_byte *decbytes, int len, const char *string)
 	break;
     }
 
-  match_endianness (dec, len, decbytes);
+  match_endianness (dec, len, byte_order, decbytes);
 
   /* Check for errors in the DFP operation.  */
   decimal_check_errors (&set);
@@ -202,7 +205,8 @@ decimal_from_string (gdb_byte *decbytes, int len, const char *string)
 /* Converts a value of an integral type to a decimal float of
    specified LEN bytes.  */
 void
-decimal_from_integral (struct value *from, gdb_byte *to, int len)
+decimal_from_integral (struct value *from,
+		       gdb_byte *to, int len, enum bfd_endian byte_order)
 {
   LONGEST l;
   gdb_byte dec[16];
@@ -223,7 +227,7 @@ decimal_from_integral (struct value *from, gdb_byte *to, int len)
     decNumberFromInt32 (&number, (int) l);
 
   decimal_from_number (&number, dec, len);
-  match_endianness (dec, len, to);
+  match_endianness (dec, len, byte_order, to);
 }
 
 /* Converts a value of a float type to a decimal float of
@@ -232,41 +236,46 @@ decimal_from_integral (struct value *from, gdb_byte *to, int len)
    This is an ugly way to do the conversion, but libdecnumber does
    not offer a direct way to do it.  */
 void
-decimal_from_floating (struct value *from, gdb_byte *to, int len)
+decimal_from_floating (struct value *from,
+		       gdb_byte *to, int len, enum bfd_endian byte_order)
 {
   char *buffer;
 
   buffer = xstrprintf ("%.30" DOUBLEST_PRINT_FORMAT, value_as_double (from));
 
-  decimal_from_string (to, len, buffer);
+  decimal_from_string (to, len, byte_order, buffer);
 
   xfree (buffer);
 }
 
 /* Converts a decimal float of LEN bytes to a double value.  */
 DOUBLEST
-decimal_to_doublest (const gdb_byte *from, int len)
+decimal_to_doublest (const gdb_byte *from, int len, enum bfd_endian byte_order)
 {
   char buffer[MAX_DECIMAL_STRING];
 
   /* This is an ugly way to do the conversion, but libdecnumber does
      not offer a direct way to do it.  */
-  decimal_to_string (from, len, buffer);
+  decimal_to_string (from, len, byte_order, buffer);
   return strtod (buffer, NULL);
 }
 
 /* Perform operation OP with operands X and Y with sizes LEN_X and LEN_Y
-   and store value in RESULT with size LEN_RESULT.  */
+   and byte orders BYTE_ORDER_X and BYTE_ORDER_Y, and store value in
+   RESULT with size LEN_RESULT and byte order BYTE_ORDER_RESULT.  */
 void
-decimal_binop (enum exp_opcode op, const gdb_byte *x, int len_x,
-	       const gdb_byte *y, int len_y, gdb_byte *result, int len_result)
+decimal_binop (enum exp_opcode op,
+	       const gdb_byte *x, int len_x, enum bfd_endian byte_order_x,
+	       const gdb_byte *y, int len_y, enum bfd_endian byte_order_y,
+	       gdb_byte *result, int len_result,
+	       enum bfd_endian byte_order_result)
 {
   decContext set;
   decNumber number1, number2, number3;
   gdb_byte dec1[16], dec2[16], dec3[16];
 
-  match_endianness (x, len_x, dec1);
-  match_endianness (y, len_y, dec2);
+  match_endianness (x, len_x, byte_order_x, dec1);
+  match_endianness (y, len_y, byte_order_y, dec2);
 
   decimal_to_number (dec1, len_x, &number1);
   decimal_to_number (dec2, len_y, &number2);
@@ -301,17 +310,17 @@ decimal_binop (enum exp_opcode op, const gdb_byte *x, int len_x,
 
   decimal_from_number (&number3, dec3, len_result);
 
-  match_endianness (dec3, len_result, result);
+  match_endianness (dec3, len_result, byte_order_result, result);
 }
 
 /* Returns true if X (which is LEN bytes wide) is the number zero.  */
 int
-decimal_is_zero (const gdb_byte *x, int len)
+decimal_is_zero (const gdb_byte *x, int len, enum bfd_endian byte_order)
 {
   decNumber number;
   gdb_byte dec[16];
 
-  match_endianness (x, len, dec);
+  match_endianness (x, len, byte_order, dec);
   decimal_to_number (dec, len, &number);
 
   return decNumberIsZero (&number);
@@ -321,15 +330,16 @@ decimal_is_zero (const gdb_byte *x, int len)
    will be -1.  If they are equal, then the return value will be 0.  If X is
    greater than the Y then the return value will be 1.  */
 int
-decimal_compare (const gdb_byte *x, int len_x, const gdb_byte *y, int len_y)
+decimal_compare (const gdb_byte *x, int len_x, enum bfd_endian byte_order_x,
+		 const gdb_byte *y, int len_y, enum bfd_endian byte_order_y)
 {
   decNumber number1, number2, result;
   decContext set;
   gdb_byte dec1[16], dec2[16];
   int len_result;
 
-  match_endianness (x, len_x, dec1);
-  match_endianness (y, len_y, dec2);
+  match_endianness (x, len_x, byte_order_x, dec1);
+  match_endianness (y, len_y, byte_order_y, dec2);
 
   decimal_to_number (dec1, len_x, &number1);
   decimal_to_number (dec2, len_y, &number2);
@@ -356,16 +366,17 @@ decimal_compare (const gdb_byte *x, int len_x, const gdb_byte *y, int len_y)
 /* Convert a decimal value from a decimal type with LEN_FROM bytes to a
    decimal type with LEN_TO bytes.  */
 void
-decimal_convert (const gdb_byte *from, int len_from, gdb_byte *to,
-		 int len_to)
+decimal_convert (const gdb_byte *from, int len_from,
+		 enum bfd_endian byte_order_from, gdb_byte *to, int len_to,
+		 enum bfd_endian byte_order_to)
 {
   decNumber number;
   gdb_byte dec[16];
 
-  match_endianness (from, len_from, dec);
+  match_endianness (from, len_from, byte_order_from, dec);
 
   decimal_to_number (dec, len_from, &number);
   decimal_from_number (&number, dec, len_to);
 
-  match_endianness (dec, len_to, to);
+  match_endianness (dec, len_to, byte_order_to, to);
 }

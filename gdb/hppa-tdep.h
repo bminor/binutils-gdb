@@ -93,7 +93,8 @@ struct gdbarch_tdep
      trampoline code in the ".plt", or equivalent, section.
      IN_SOLIB_CALL_TRAMPOLINE evaluates to nonzero if we are currently
      stopped in one of these.  */
-  int (*in_solib_call_trampoline) (CORE_ADDR pc, char *name);
+  int (*in_solib_call_trampoline) (struct gdbarch *gdbarch,
+				   CORE_ADDR pc, char *name);
 
   /* For targets that support multiple spaces, we may have additional stubs
      in the return path.  These stubs are internal to the ABI, and users are
@@ -241,7 +242,8 @@ extern struct minimal_symbol *
 extern struct hppa_objfile_private *
 hppa_init_objfile_priv_data (struct objfile *objfile);
 
-extern int hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name);
+extern int hppa_in_solib_call_trampoline (struct gdbarch *gdbarch,
+					  CORE_ADDR pc, char *name);
 extern CORE_ADDR hppa_skip_trampoline_code (struct frame_info *, CORE_ADDR pc);
 
 #endif  /* hppa-tdep.h */

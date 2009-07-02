@@ -97,6 +97,7 @@ struct int_elf32_fdpic_loadmap {
 static struct int_elf32_fdpic_loadmap *
 fetch_loadmap (CORE_ADDR ldmaddr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   struct ext_elf32_fdpic_loadmap ext_ldmbuf_partial;
   struct ext_elf32_fdpic_loadmap *ext_ldmbuf;
   struct int_elf32_fdpic_loadmap *int_ldmbuf;
@@ -113,7 +114,8 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 
   /* Extract the version.  */
   version = extract_unsigned_integer (ext_ldmbuf_partial.version,
-                                      sizeof ext_ldmbuf_partial.version);
+                                      sizeof ext_ldmbuf_partial.version,
+				      byte_order);
   if (version != 0)
     {
       /* We only handle version 0.  */
@@ -122,7 +124,8 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 
   /* Extract the number of segments.  */
   nsegs = extract_unsigned_integer (ext_ldmbuf_partial.nsegs,
-                                    sizeof ext_ldmbuf_partial.nsegs);
+                                    sizeof ext_ldmbuf_partial.nsegs,
+				    byte_order);
 
   if (nsegs <= 0)
     return NULL;
@@ -158,13 +161,16 @@ fetch_loadmap (CORE_ADDR ldmaddr)
     {
       int_ldmbuf->segs[seg].addr
 	= extract_unsigned_integer (ext_ldmbuf->segs[seg].addr,
-	                            sizeof (ext_ldmbuf->segs[seg].addr));
+	                            sizeof (ext_ldmbuf->segs[seg].addr),
+				    byte_order);
       int_ldmbuf->segs[seg].p_vaddr
 	= extract_unsigned_integer (ext_ldmbuf->segs[seg].p_vaddr,
-	                            sizeof (ext_ldmbuf->segs[seg].p_vaddr));
+	                            sizeof (ext_ldmbuf->segs[seg].p_vaddr),
+				    byte_order);
       int_ldmbuf->segs[seg].p_memsz
 	= extract_unsigned_integer (ext_ldmbuf->segs[seg].p_memsz,
-	                            sizeof (ext_ldmbuf->segs[seg].p_memsz));
+	                            sizeof (ext_ldmbuf->segs[seg].p_memsz),
+				    byte_order);
     }
 
   xfree (ext_ldmbuf);
@@ -359,6 +365,7 @@ static CORE_ADDR main_lm_addr = 0;
 static CORE_ADDR
 lm_base (void)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   struct minimal_symbol *got_sym;
   CORE_ADDR addr;
   gdb_byte buf[FRV_PTR_SIZE];
@@ -394,7 +401,7 @@ lm_base (void)
 
   if (target_read_memory (addr, buf, sizeof buf) != 0)
     return 0;
-  lm_base_cache = extract_unsigned_integer (buf, sizeof buf);
+  lm_base_cache = extract_unsigned_integer (buf, sizeof buf, byte_order);
 
   if (solib_frv_debug)
     fprintf_unfiltered (gdb_stdlog,
@@ -427,6 +434,7 @@ lm_base (void)
 static struct so_list *
 frv_current_sos (void)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   CORE_ADDR lm_addr, mgot;
   struct so_list *sos_head = NULL;
   struct so_list **sos_next_ptr = &sos_head;
@@ -472,7 +480,8 @@ frv_current_sos (void)
 
       got_addr
 	= extract_unsigned_integer (lm_buf.l_addr.got_value,
-				    sizeof (lm_buf.l_addr.got_value));
+				    sizeof (lm_buf.l_addr.got_value),
+				    byte_order);
       /* If the got_addr is the same as mgotr, then we're looking at the
 	 entry for the main executable.  By convention, we don't include
 	 this in the list of shared objects.  */
@@ -486,7 +495,8 @@ frv_current_sos (void)
 
 	  /* Fetch the load map address.  */
 	  addr = extract_unsigned_integer (lm_buf.l_addr.map,
-					   sizeof lm_buf.l_addr.map);
+					   sizeof lm_buf.l_addr.map,
+					   byte_order);
 	  loadmap = fetch_loadmap (addr);
 	  if (loadmap == NULL)
 	    {
@@ -501,7 +511,8 @@ frv_current_sos (void)
 	  sop->lm_info->lm_addr = lm_addr;
 	  /* Fetch the name.  */
 	  addr = extract_unsigned_integer (lm_buf.l_name,
-					   sizeof (lm_buf.l_name));
+					   sizeof (lm_buf.l_name),
+					   byte_order);
 	  target_read_string (addr, &name_buf, SO_NAME_MAX_PATH_SIZE - 1,
 			      &errcode);
 
@@ -528,7 +539,8 @@ frv_current_sos (void)
 	  main_lm_addr = lm_addr;
 	}
 
-      lm_addr = extract_unsigned_integer (lm_buf.l_next, sizeof (lm_buf.l_next));
+      lm_addr = extract_unsigned_integer (lm_buf.l_next,
+					  sizeof (lm_buf.l_next), byte_order);
     }
 
   enable_break2 ();
@@ -625,6 +637,7 @@ static int enable_break2_done = 0;
 static int
 enable_break2 (void)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   int success = 0;
   char **bkpt_namep;
   asection *interp_sect;
@@ -756,7 +769,7 @@ enable_break2 (void)
 	  warning (_("Unable to fetch contents of _dl_debug_addr (at address %s) from dynamic linker"),
 	           hex_string_custom (addr, 8));
 	}
-      addr = extract_unsigned_integer (addr_buf, sizeof addr_buf);
+      addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
 
       /* Fetch the r_brk field.  It's 8 bytes from the start of
          _dl_debug_addr.  */
@@ -768,7 +781,7 @@ enable_break2 (void)
 	  bfd_close (tmp_bfd);
 	  return 0;
 	}
-      addr = extract_unsigned_integer (addr_buf, sizeof addr_buf);
+      addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
 
       /* Now fetch the function entry point.  */
       if (target_read_memory (addr, addr_buf, sizeof addr_buf) != 0)
@@ -779,7 +792,7 @@ enable_break2 (void)
 	  bfd_close (tmp_bfd);
 	  return 0;
 	}
-      addr = extract_unsigned_integer (addr_buf, sizeof addr_buf);
+      addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
 
       /* We're done with the temporary bfd.  */
       bfd_close (tmp_bfd);
@@ -1127,6 +1140,7 @@ find_canonical_descriptor_in_load_object
   (CORE_ADDR entry_point, CORE_ADDR got_value, char *name, bfd *abfd,
    struct lm_info *lm)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   arelent *rel;
   unsigned int i;
   CORE_ADDR addr = 0;
@@ -1219,18 +1233,20 @@ find_canonical_descriptor_in_load_object
 	  /* Fetch address of candidate descriptor.  */
 	  if (target_read_memory (addr, buf, sizeof buf) != 0)
 	    continue;
-	  addr = extract_unsigned_integer (buf, sizeof buf);
+	  addr = extract_unsigned_integer (buf, sizeof buf, byte_order);
 
 	  /* Check for matching entry point.  */
 	  if (target_read_memory (addr, buf, sizeof buf) != 0)
 	    continue;
-	  if (extract_unsigned_integer (buf, sizeof buf) != entry_point)
+	  if (extract_unsigned_integer (buf, sizeof buf, byte_order)
+	      != entry_point)
 	    continue;
 
 	  /* Check for matching got value.  */
 	  if (target_read_memory (addr + 4, buf, sizeof buf) != 0)
 	    continue;
-	  if (extract_unsigned_integer (buf, sizeof buf) != got_value)
+	  if (extract_unsigned_integer (buf, sizeof buf, byte_order)
+	      != got_value)
 	    continue;
 
 	  /* Match was successful!  Exit loop.  */

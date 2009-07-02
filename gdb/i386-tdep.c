@@ -414,6 +414,8 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
                            CORE_ADDR from, CORE_ADDR to,
                            struct regcache *regs)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
   /* The offset we applied to the instruction's address.
      This could well be negative (when viewed as a signed 32-bit
      value), but ULONGEST won't reflect that, so take care when
@@ -521,9 +523,9 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
       const ULONGEST retaddr_len = 4;
 
       regcache_cooked_read_unsigned (regs, I386_ESP_REGNUM, &esp);
-      retaddr = read_memory_unsigned_integer (esp, retaddr_len);
+      retaddr = read_memory_unsigned_integer (esp, byte_order, retaddr_len);
       retaddr = (retaddr - insn_offset) & 0xffffffffUL;
-      write_memory_unsigned_integer (esp, retaddr_len, retaddr);
+      write_memory_unsigned_integer (esp, retaddr_len, byte_order, retaddr);
 
       if (debug_displaced)
         fprintf_unfiltered (gdb_stdlog,
@@ -595,8 +597,9 @@ i386_alloc_frame_cache (void)
    target.  Otherwise, return PC.  */
 
 static CORE_ADDR
-i386_follow_jump (CORE_ADDR pc)
+i386_follow_jump (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte op;
   long delta = 0;
   int data16 = 0;
@@ -605,7 +608,7 @@ i386_follow_jump (CORE_ADDR pc)
   if (op == 0x66)
     {
       data16 = 1;
-      op = read_memory_unsigned_integer (pc + 1, 1);
+      op = read_memory_unsigned_integer (pc + 1, 1, byte_order);
     }
 
   switch (op)
@@ -614,7 +617,7 @@ i386_follow_jump (CORE_ADDR pc)
       /* Relative jump: if data16 == 0, disp32, else disp16.  */
       if (data16)
 	{
-	  delta = read_memory_integer (pc + 2, 2);
+	  delta = read_memory_integer (pc + 2, 2, byte_order);
 
 	  /* Include the size of the jmp instruction (including the
              0x66 prefix).  */
@@ -622,7 +625,7 @@ i386_follow_jump (CORE_ADDR pc)
 	}
       else
 	{
-	  delta = read_memory_integer (pc + 1, 4);
+	  delta = read_memory_integer (pc + 1, 4, byte_order);
 
 	  /* Include the size of the jmp instruction.  */
 	  delta += 5;
@@ -630,7 +633,7 @@ i386_follow_jump (CORE_ADDR pc)
       break;
     case 0xeb:
       /* Relative jump, disp8 (ignore data16).  */
-      delta = read_memory_integer (pc + data16 + 1, 1);
+      delta = read_memory_integer (pc + data16 + 1, 1, byte_order);
 
       delta += data16 + 2;
       break;
@@ -1006,9 +1009,11 @@ i386_skip_noop (CORE_ADDR pc)
    whichever is smaller.  If we don't recognize the code, return PC.  */
 
 static CORE_ADDR
-i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR limit,
+i386_analyze_frame_setup (struct gdbarch *gdbarch,
+			  CORE_ADDR pc, CORE_ADDR limit,
 			  struct i386_frame_cache *cache)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct i386_insn *insn;
   gdb_byte op;
   int skip = 0;
@@ -1057,11 +1062,13 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR limit,
       switch (op)
 	{
 	case 0x8b:
-	  if (read_memory_unsigned_integer (pc + skip + 1, 1) != 0xec)
+	  if (read_memory_unsigned_integer (pc + skip + 1, 1, byte_order)
+	      != 0xec)
 	    return pc;
 	  break;
 	case 0x89:
-	  if (read_memory_unsigned_integer (pc + skip + 1, 1) != 0xe5)
+	  if (read_memory_unsigned_integer (pc + skip + 1, 1, byte_order)
+	      != 0xe5)
 	    return pc;
 	  break;
 	default:
@@ -1089,24 +1096,24 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR limit,
       if (op == 0x83)
 	{
 	  /* `subl' with 8-bit immediate.  */
-	  if (read_memory_unsigned_integer (pc + 1, 1) != 0xec)
+	  if (read_memory_unsigned_integer (pc + 1, 1, byte_order) != 0xec)
 	    /* Some instruction starting with 0x83 other than `subl'.  */
 	    return pc;
 
 	  /* `subl' with signed 8-bit immediate (though it wouldn't
 	     make sense to be negative).  */
-	  cache->locals = read_memory_integer (pc + 2, 1);
+	  cache->locals = read_memory_integer (pc + 2, 1, byte_order);
 	  return pc + 3;
 	}
       else if (op == 0x81)
 	{
 	  /* Maybe it is `subl' with a 32-bit immediate.  */
-	  if (read_memory_unsigned_integer (pc + 1, 1) != 0xec)
+	  if (read_memory_unsigned_integer (pc + 1, 1, byte_order) != 0xec)
 	    /* Some instruction starting with 0x81 other than `subl'.  */
 	    return pc;
 
 	  /* It is `subl' with a 32-bit immediate.  */
-	  cache->locals = read_memory_integer (pc + 2, 4);
+	  cache->locals = read_memory_integer (pc + 2, 4, byte_order);
 	  return pc + 6;
 	}
       else
@@ -1117,7 +1124,7 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR limit,
     }
   else if (op == 0xc8)		/* enter */
     {
-      cache->locals = read_memory_unsigned_integer (pc + 1, 2);
+      cache->locals = read_memory_unsigned_integer (pc + 1, 2, byte_order);
       return pc + 4;
     }
 
@@ -1182,15 +1189,16 @@ i386_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
    instruction will be a branch back to the start.  */
 
 static CORE_ADDR
-i386_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
+i386_analyze_prologue (struct gdbarch *gdbarch,
+		       CORE_ADDR pc, CORE_ADDR current_pc,
 		       struct i386_frame_cache *cache)
 {
   pc = i386_skip_noop (pc);
-  pc = i386_follow_jump (pc);
+  pc = i386_follow_jump (gdbarch, pc);
   pc = i386_analyze_struct_return (pc, current_pc, cache);
   pc = i386_skip_probe (pc);
   pc = i386_analyze_stack_align (pc, current_pc, cache);
-  pc = i386_analyze_frame_setup (pc, current_pc, cache);
+  pc = i386_analyze_frame_setup (gdbarch, pc, current_pc, cache);
   return i386_analyze_register_saves (pc, current_pc, cache);
 }
 
@@ -1199,6 +1207,8 @@ i386_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 static CORE_ADDR
 i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
   static gdb_byte pic_pat[6] =
   {
     0xe8, 0, 0, 0, 0,		/* call 0x0 */
@@ -1210,7 +1220,7 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   int i;
 
   cache.locals = -1;
-  pc = i386_analyze_prologue (start_pc, 0xffffffff, &cache);
+  pc = i386_analyze_prologue (gdbarch, start_pc, 0xffffffff, &cache);
   if (cache.locals < 0)
     return start_pc;
 
@@ -1243,7 +1253,7 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 
       if (op == 0x89)		/* movl %ebx, x(%ebp) */
 	{
-	  op = read_memory_unsigned_integer (pc + delta + 1, 1);
+	  op = read_memory_unsigned_integer (pc + delta + 1, 1, byte_order);
 
 	  if (op == 0x5d)	/* One byte offset from %ebp.  */
 	    delta += 3;
@@ -1257,7 +1267,8 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 
       /* addl y,%ebx */
       if (delta > 0 && op == 0x81
-	  && read_memory_unsigned_integer (pc + delta + 1, 1) == 0xc3)
+	  && read_memory_unsigned_integer (pc + delta + 1, 1, byte_order)
+	     == 0xc3)
 	{
 	  pc += delta + 6;
 	}
@@ -1266,8 +1277,8 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   /* If the function starts with a branch (to startup code at the end)
      the last instruction should bring us back to the first
      instruction of the real code.  */
-  if (i386_follow_jump (start_pc) != start_pc)
-    pc = i386_follow_jump (pc);
+  if (i386_follow_jump (gdbarch, start_pc) != start_pc)
+    pc = i386_follow_jump (gdbarch, pc);
 
   return pc;
 }
@@ -1278,6 +1289,7 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 CORE_ADDR
 i386_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte op;
 
   target_read_memory (pc, &op, 1);
@@ -1290,8 +1302,9 @@ i386_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  /* Make sure address is computed correctly as a 32bit
 	     integer even if CORE_ADDR is 64 bit wide.  */
  	  struct minimal_symbol *s;
- 	  CORE_ADDR call_dest = pc + 5 + extract_signed_integer (buf, 4);
+ 	  CORE_ADDR call_dest;
 
+	  call_dest = pc + 5 + extract_signed_integer (buf, 4, byte_order);
 	  call_dest = call_dest & 0xffffffffU;
  	  s = lookup_minimal_symbol_by_pc (call_dest);
  	  if (s != NULL
@@ -1321,6 +1334,8 @@ i386_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static struct i386_frame_cache *
 i386_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct i386_frame_cache *cache;
   gdb_byte buf[4];
   int i;
@@ -1341,7 +1356,7 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
      in progress when the signal occurred.  */
 
   get_frame_register (this_frame, I386_EBP_REGNUM, buf);
-  cache->base = extract_unsigned_integer (buf, 4);
+  cache->base = extract_unsigned_integer (buf, 4, byte_order);
   if (cache->base == 0)
     return cache;
 
@@ -1350,13 +1365,14 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   cache->pc = get_frame_func (this_frame);
   if (cache->pc != 0)
-    i386_analyze_prologue (cache->pc, get_frame_pc (this_frame), cache);
+    i386_analyze_prologue (gdbarch, cache->pc, get_frame_pc (this_frame),
+			   cache);
 
   if (cache->saved_sp_reg != -1)
     {
       /* Saved stack pointer has been saved.  */
       get_frame_register (this_frame, cache->saved_sp_reg, buf);
-      cache->saved_sp = extract_unsigned_integer(buf, 4);
+      cache->saved_sp = extract_unsigned_integer (buf, 4, byte_order);
     }
 
   if (cache->locals < 0)
@@ -1381,7 +1397,8 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
       else
 	{
 	  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
-	  cache->base = extract_unsigned_integer (buf, 4) + cache->sp_offset;
+	  cache->base = extract_unsigned_integer (buf, 4, byte_order)
+			+ cache->sp_offset;
 	}
     }
 
@@ -1477,8 +1494,10 @@ static const struct frame_unwind i386_frame_unwind =
 static struct i386_frame_cache *
 i386_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct i386_frame_cache *cache;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
   CORE_ADDR addr;
   gdb_byte buf[4];
 
@@ -1488,7 +1507,7 @@ i386_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = i386_alloc_frame_cache ();
 
   get_frame_register (this_frame, I386_ESP_REGNUM, buf);
-  cache->base = extract_unsigned_integer (buf, 4) - 4;
+  cache->base = extract_unsigned_integer (buf, 4, byte_order) - 4;
 
   addr = tdep->sigcontext_addr (this_frame);
   if (tdep->sc_reg_offset)
@@ -1612,6 +1631,7 @@ i386_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   gdb_byte buf[4];
   CORE_ADDR sp, jb_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int jb_pc_offset = gdbarch_tdep (gdbarch)->jb_pc_offset;
 
   /* If JB_PC_OFFSET is -1, we have no way to find out where the
@@ -1620,15 +1640,15 @@ i386_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
     return 0;
 
   get_frame_register (frame, I386_ESP_REGNUM, buf);
-  sp = extract_unsigned_integer (buf, 4);
+  sp = extract_unsigned_integer (buf, 4, byte_order);
   if (target_read_memory (sp + 4, buf, 4))
     return 0;
 
-  jb_addr = extract_unsigned_integer (buf, 4);
+  jb_addr = extract_unsigned_integer (buf, 4, byte_order);
   if (target_read_memory (jb_addr + jb_pc_offset, buf, 4))
     return 0;
 
-  *pc = extract_unsigned_integer (buf, 4);
+  *pc = extract_unsigned_integer (buf, 4, byte_order);
   return 1;
 }
 
@@ -1667,6 +1687,7 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct value **args, CORE_ADDR sp, int struct_return,
 		      CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   int i;
   int write_pass;
@@ -1686,7 +1707,7 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  if (write_pass)
 	    {
 	      /* Push value address.  */
-	      store_unsigned_integer (buf, 4, struct_addr);
+	      store_unsigned_integer (buf, 4, byte_order, struct_addr);
 	      write_memory (sp, buf, 4);
 	      args_space_used += 4;
 	    }
@@ -1735,11 +1756,11 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Store return address.  */
   sp -= 4;
-  store_unsigned_integer (buf, 4, bp_addr);
+  store_unsigned_integer (buf, 4, byte_order, bp_addr);
   write_memory (sp, buf, 4);
 
   /* Finally, update the stack pointer...  */
-  store_unsigned_integer (buf, 4, sp);
+  store_unsigned_integer (buf, 4, byte_order, sp);
   regcache_cooked_write (regcache, I386_ESP_REGNUM, buf);
 
   /* ...and fake a frame pointer.  */
@@ -2500,11 +2521,17 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
 /* Stuff for WIN32 PE style DLL's but is pretty generic really.  */
 
 CORE_ADDR
-i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name)
+i386_pe_skip_trampoline_code (struct frame_info *frame,
+			      CORE_ADDR pc, char *name)
 {
-  if (pc && read_memory_unsigned_integer (pc, 2) == 0x25ff) /* jmp *(dest) */
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  /* jmp *(dest) */
+  if (pc && read_memory_unsigned_integer (pc, 2, byte_order) == 0x25ff)
     {
-      unsigned long indirect = read_memory_unsigned_integer (pc + 2, 4);
+      unsigned long indirect =
+	read_memory_unsigned_integer (pc + 2, 4, byte_order);
       struct minimal_symbol *indsym =
 	indirect ? lookup_minimal_symbol_by_pc (indirect) : 0;
       char *symname = indsym ? SYMBOL_LINKAGE_NAME (indsym) : 0;
@@ -2513,7 +2540,8 @@ i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name)
 	{
 	  if (strncmp (symname, "__imp_", 6) == 0
 	      || strncmp (symname, "_imp_", 5) == 0)
-	    return name ? 1 : read_memory_unsigned_integer (indirect, 4);
+	    return name ? 1 :
+		   read_memory_unsigned_integer (indirect, 4, byte_order);
 	}
     }
   return 0;			/* Not a trampoline.  */
@@ -2581,13 +2609,15 @@ i386_svr4_sigtramp_p (struct frame_info *this_frame)
 static CORE_ADDR
 i386_svr4_sigcontext_addr (struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   CORE_ADDR sp;
 
   get_frame_register (this_frame, I386_ESP_REGNUM, buf);
-  sp = extract_unsigned_integer (buf, 4);
+  sp = extract_unsigned_integer (buf, 4, byte_order);
 
-  return read_memory_unsigned_integer (sp + 8, 4);
+  return read_memory_unsigned_integer (sp + 8, 4, byte_order);
 }
 
 
@@ -2704,8 +2734,10 @@ static CORE_ADDR
 i386_fetch_pointer_argument (struct frame_info *frame, int argi, 
 			     struct type *type)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp = get_frame_register_unsigned  (frame, I386_ESP_REGNUM);
-  return read_memory_unsigned_integer (sp + (4 * (argi + 1)), 4);
+  return read_memory_unsigned_integer (sp + (4 * (argi + 1)), 4, byte_order);
 }
 
 static void

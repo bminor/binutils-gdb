@@ -228,6 +228,8 @@ static void
 i386obsd_supply_uthread (struct regcache *regcache,
 			 int regnum, CORE_ADDR addr)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp_addr = addr + I386OBSD_UTHREAD_ESP_OFFSET;
   CORE_ADDR sp = 0;
   gdb_byte buf[4];
@@ -240,12 +242,12 @@ i386obsd_supply_uthread (struct regcache *regcache,
       int offset;
 
       /* Fetch stack pointer from thread structure.  */
-      sp = read_memory_unsigned_integer (sp_addr, 4);
+      sp = read_memory_unsigned_integer (sp_addr, 4, byte_order);
 
       /* Adjust the stack pointer such that it looks as if we just
          returned from _thread_machdep_switch.  */
       offset = i386obsd_uthread_reg_offset[I386_EIP_REGNUM] + 4;
-      store_unsigned_integer (buf, 4, sp + offset);
+      store_unsigned_integer (buf, 4, byte_order, sp + offset);
       regcache_raw_supply (regcache, I386_ESP_REGNUM, buf);
     }
 
@@ -257,7 +259,7 @@ i386obsd_supply_uthread (struct regcache *regcache,
 	  /* Fetch stack pointer from thread structure (if we didn't
              do so already).  */
 	  if (sp == 0)
-	    sp = read_memory_unsigned_integer (sp_addr, 4);
+	    sp = read_memory_unsigned_integer (sp_addr, 4, byte_order);
 
 	  /* Read the saved register from the stack frame.  */
 	  read_memory (sp + i386obsd_uthread_reg_offset[i], buf, 4);
@@ -270,6 +272,8 @@ static void
 i386obsd_collect_uthread (const struct regcache *regcache,
 			  int regnum, CORE_ADDR addr)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp_addr = addr + I386OBSD_UTHREAD_ESP_OFFSET;
   CORE_ADDR sp = 0;
   gdb_byte buf[4];
@@ -285,10 +289,10 @@ i386obsd_collect_uthread (const struct regcache *regcache,
          stored into the thread structure.  */
       offset = i386obsd_uthread_reg_offset[I386_EIP_REGNUM] + 4;
       regcache_raw_collect (regcache, I386_ESP_REGNUM, buf);
-      sp = extract_unsigned_integer (buf, 4) - offset;
+      sp = extract_unsigned_integer (buf, 4, byte_order) - offset;
 
       /* Store the stack pointer.  */
-      write_memory_unsigned_integer (sp_addr, 4, sp);
+      write_memory_unsigned_integer (sp_addr, 4, byte_order, sp);
 
       /* The stack pointer was (potentially) modified.  Make sure we
          build a proper stack frame.  */
@@ -303,7 +307,7 @@ i386obsd_collect_uthread (const struct regcache *regcache,
 	  /* Fetch stack pointer from thread structure (if we didn't
              calculate it already).  */
 	  if (sp == 0)
-	    sp = read_memory_unsigned_integer (sp_addr, 4);
+	    sp = read_memory_unsigned_integer (sp_addr, 4, byte_order);
 
 	  /* Write the register into the stack frame.  */
 	  regcache_raw_collect (regcache, i, buf);
@@ -339,6 +343,8 @@ static int i386obsd_tf_reg_offset[] =
 static struct trad_frame_cache *
 i386obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct trad_frame_cache *cache;
   CORE_ADDR func, sp, addr;
   ULONGEST cs;
@@ -366,7 +372,7 @@ i386obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
 
   /* Read %cs from trap frame.  */
   addr += i386obsd_tf_reg_offset[I386_CS_REGNUM];
-  cs = read_memory_unsigned_integer (addr, 4); 
+  cs = read_memory_unsigned_integer (addr, 4, byte_order);
   if ((cs & I386_SEL_RPL) == I386_SEL_UPL)
     {
       /* Trap from user space; terminate backtrace.  */

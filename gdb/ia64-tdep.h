@@ -196,7 +196,7 @@
 
 struct gdbarch_tdep
 {
-  CORE_ADDR (*sigcontext_register_address) (CORE_ADDR, int);
+  CORE_ADDR (*sigcontext_register_address) (struct gdbarch *, CORE_ADDR, int);
   int (*pc_in_sigtramp) (CORE_ADDR);
 
   /* ISA-specific data types.  */

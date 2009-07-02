@@ -907,6 +907,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
       if (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	  && i > 2 && name[i - 1] == ']')
 	{
+	  enum bfd_endian byte_order = gdbarch_byte_order (exp->gdbarch);
 	  CORE_ADDR address;
 	  long length, index;
 	  struct type *el_type;
@@ -927,7 +928,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	  address = value_as_address (arg1);
 	  address += get_java_object_header_size (exp->gdbarch);
 	  read_memory (address, buf4, 4);
-	  length = (long) extract_signed_integer (buf4, 4);
+	  length = (long) extract_signed_integer (buf4, 4, byte_order);
 	  index = (long) value_as_long (arg2);
 	  if (index >= length || index < 0)
 	    error (_("array index (%ld) out of bounds (length: %ld)"),

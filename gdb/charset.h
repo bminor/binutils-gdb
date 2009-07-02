@@ -34,7 +34,7 @@
    it.  */
 const char *host_charset (void);
 const char *target_charset (void);
-const char *target_wide_charset (void);
+const char *target_wide_charset (enum bfd_endian byte_order);
 
 /* These values are used to specify the type of transliteration done
    by convert_between_encodings.  */

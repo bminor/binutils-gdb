@@ -170,6 +170,8 @@ static void
 spu_pseudo_register_read_spu (struct regcache *regcache, const char *regname,
 			      gdb_byte *buf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte reg[32];
   char annex[32];
   ULONGEST id;
@@ -180,7 +182,7 @@ spu_pseudo_register_read_spu (struct regcache *regcache, const char *regname,
   target_read (&current_target, TARGET_OBJECT_SPU, annex,
 	       reg, 0, sizeof reg);
 
-  store_unsigned_integer (buf, 4, strtoulst (reg, NULL, 16));
+  store_unsigned_integer (buf, 4, byte_order, strtoulst (reg, NULL, 16));
 }
 
 static void
@@ -229,6 +231,8 @@ static void
 spu_pseudo_register_write_spu (struct regcache *regcache, const char *regname,
 			       const gdb_byte *buf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte reg[32];
   char annex[32];
   ULONGEST id;
@@ -236,7 +240,7 @@ spu_pseudo_register_write_spu (struct regcache *regcache, const char *regname,
   regcache_raw_read_unsigned (regcache, SPU_ID_REGNUM, &id);
   xsnprintf (annex, sizeof annex, "%d/%s", (int) id, regname);
   xsnprintf (reg, sizeof reg, "0x%s",
-	     phex_nz (extract_unsigned_integer (buf, 4), 4));
+	     phex_nz (extract_unsigned_integer (buf, 4, byte_order), 4));
   target_write (&current_target, TARGET_OBJECT_SPU, annex,
 		reg, 0, strlen (reg));
 }
@@ -330,7 +334,9 @@ static CORE_ADDR
 spu_pointer_to_address (struct gdbarch *gdbarch,
 			struct type *type, const gdb_byte *buf)
 {
-  ULONGEST addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  ULONGEST addr
+    = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
   ULONGEST lslr = SPU_LS_SIZE - 1; /* Hard-wired LS size.  */
 
   if (target_has_registers && target_has_stack && target_has_memory)
@@ -530,9 +536,11 @@ struct spu_prologue_data
   };
 
 static CORE_ADDR
-spu_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR end_pc,
+spu_analyze_prologue (struct gdbarch *gdbarch,
+		      CORE_ADDR start_pc, CORE_ADDR end_pc,
                       struct spu_prologue_data *data)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int found_sp = 0;
   int found_fp = 0;
   int found_lr = 0;
@@ -592,7 +600,7 @@ spu_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR end_pc,
 
       if (target_read_memory (pc, buf, 4))
 	break;
-      insn = extract_unsigned_integer (buf, 4);
+      insn = extract_unsigned_integer (buf, 4, byte_order);
 
       /* AI is the typical instruction to set up a stack frame.
          It is also used to initialize the frame pointer.  */
@@ -706,7 +714,7 @@ static CORE_ADDR
 spu_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct spu_prologue_data data;
-  return spu_analyze_prologue (pc, (CORE_ADDR)-1, &data);
+  return spu_analyze_prologue (gdbarch, pc, (CORE_ADDR)-1, &data);
 }
 
 /* Return the frame pointer in use at address PC.  */
@@ -715,7 +723,7 @@ spu_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
 			   int *reg, LONGEST *offset)
 {
   struct spu_prologue_data data;
-  spu_analyze_prologue (pc, (CORE_ADDR)-1, &data);
+  spu_analyze_prologue (gdbarch, pc, (CORE_ADDR)-1, &data);
 
   if (data.size != -1 && data.cfa_reg != -1)
     {
@@ -751,6 +759,7 @@ spu_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
 static int
 spu_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR scan_pc, func_start, func_end, epilogue_start, epilogue_end;
   bfd_byte buf[4];
   unsigned int insn;
@@ -780,7 +789,7 @@ spu_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       if (target_read_memory (scan_pc, buf, 4))
 	return 0;
-      insn = extract_unsigned_integer (buf, 4);
+      insn = extract_unsigned_integer (buf, 4, byte_order);
 
       if (is_branch (insn, &immed, &ra))
 	{
@@ -808,7 +817,7 @@ spu_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       if (target_read_memory (scan_pc, buf, 4))
 	return 0;
-      insn = extract_unsigned_integer (buf, 4);
+      insn = extract_unsigned_integer (buf, 4, byte_order);
 
       if (is_branch (insn, &immed, &ra))
 	return 0;
@@ -841,6 +850,8 @@ static struct spu_unwind_cache *
 spu_frame_unwind_cache (struct frame_info *this_frame,
 			void **this_prologue_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct spu_unwind_cache *info;
   struct spu_prologue_data data;
   gdb_byte buf[16];
@@ -863,8 +874,8 @@ spu_frame_unwind_cache (struct frame_info *this_frame,
       data.size = -1;
     }
   else
-    spu_analyze_prologue (info->func, get_frame_pc (this_frame), &data);
-
+    spu_analyze_prologue (gdbarch, info->func, get_frame_pc (this_frame),
+			  &data);
 
   /* If successful, use prologue analysis data.  */
   if (data.size != -1 && data.cfa_reg != -1)
@@ -874,7 +885,7 @@ spu_frame_unwind_cache (struct frame_info *this_frame,
 
       /* Determine CFA via unwound CFA_REG plus CFA_OFFSET.  */
       get_frame_register (this_frame, data.cfa_reg, buf);
-      cfa = extract_unsigned_integer (buf, 4) + data.cfa_offset;
+      cfa = extract_unsigned_integer (buf, 4, byte_order) + data.cfa_offset;
 
       /* Call-saved register slots.  */
       for (i = 0; i < SPU_NUM_GPRS; i++)
@@ -897,7 +908,7 @@ spu_frame_unwind_cache (struct frame_info *this_frame,
 
       /* Get the backchain.  */
       reg = get_frame_register_unsigned (this_frame, SPU_SP_REGNUM);
-      status = safe_read_memory_integer (reg, 4, &backchain);
+      status = safe_read_memory_integer (reg, 4, byte_order, &backchain);
 
       /* A zero backchain terminates the frame chain.  Also, sanity
          check against the local store size limit.  */
@@ -933,12 +944,12 @@ spu_frame_unwind_cache (struct frame_info *this_frame,
      slot 1 contains the partition number of the overlay section to
      be returned to, and slot 2 contains the return address within
      that section.  Return the latter address in that case.  */
-  if (extract_unsigned_integer (buf + 8, 4) != 0)
+  if (extract_unsigned_integer (buf + 8, 4, byte_order) != 0)
     trad_frame_set_value (info->saved_regs, SPU_PC_REGNUM,
-			  extract_unsigned_integer (buf + 8, 4));
+			  extract_unsigned_integer (buf + 8, 4, byte_order));
   else
     trad_frame_set_value (info->saved_regs, SPU_PC_REGNUM,
-			  extract_unsigned_integer (buf, 4));
+			  extract_unsigned_integer (buf, 4, byte_order));
  
   return info;
 }
@@ -1126,6 +1137,7 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp_delta;
   int i;
   int regnum = SPU_ARG1_REGNUM;
@@ -1134,7 +1146,7 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Set the return address.  */
   memset (buf, 0, sizeof buf);
-  store_unsigned_integer (buf, 4, bp_addr);
+  store_unsigned_integer (buf, 4, byte_order, bp_addr);
   regcache_cooked_write (regcache, SPU_LR_REGNUM, buf);
 
   /* If STRUCT_RETURN is true, then the struct return address (in
@@ -1143,7 +1155,7 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (struct_return)
     {
       memset (buf, 0, sizeof buf);
-      store_unsigned_integer (buf, 4, struct_addr);
+      store_unsigned_integer (buf, 4, byte_order, struct_addr);
       regcache_cooked_write (regcache, regnum++, buf);
     }
 
@@ -1207,11 +1219,11 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   target_write_memory (sp, buf, 16);
 
   /* Finally, update all slots of the SP register.  */
-  sp_delta = sp - extract_unsigned_integer (buf, 4);
+  sp_delta = sp - extract_unsigned_integer (buf, 4, byte_order);
   for (i = 0; i < 4; i++)
     {
-      CORE_ADDR sp_slot = extract_unsigned_integer (buf + 4*i, 4);
-      store_unsigned_integer (buf + 4*i, 4, sp_slot + sp_delta);
+      CORE_ADDR sp_slot = extract_unsigned_integer (buf + 4*i, 4, byte_order);
+      store_unsigned_integer (buf + 4*i, 4, byte_order, sp_slot + sp_delta);
     }
   regcache_cooked_write (regcache, SPU_RAW_SP_REGNUM, buf);
 
@@ -1289,6 +1301,7 @@ static int
 spu_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc, next_pc;
   unsigned int insn;
   int offset, reg;
@@ -1298,7 +1311,7 @@ spu_software_single_step (struct frame_info *frame)
 
   if (target_read_memory (pc, buf, 4))
     return 1;
-  insn = extract_unsigned_integer (buf, 4);
+  insn = extract_unsigned_integer (buf, 4, byte_order);
 
   /* Next sequential instruction is at PC + 4, except if the current
      instruction is a PPE-assisted call, in which case it is at PC + 8.
@@ -1319,7 +1332,7 @@ spu_software_single_step (struct frame_info *frame)
       else if (reg != -1)
 	{
 	  get_frame_register_bytes (frame, reg, 0, 4, buf);
-	  target += extract_unsigned_integer (buf, 4) & -4;
+	  target += extract_unsigned_integer (buf, 4, byte_order) & -4;
 	}
 
       target = target & (SPU_LS_SIZE - 1);
@@ -1336,16 +1349,18 @@ spu_software_single_step (struct frame_info *frame)
 static int
 spu_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   CORE_ADDR jb_addr;
 
   /* Jump buffer is pointed to by the argument register $r3.  */
   get_frame_register_bytes (frame, SPU_ARG1_REGNUM, 0, 4, buf);
-  jb_addr = extract_unsigned_integer (buf, 4);
+  jb_addr = extract_unsigned_integer (buf, 4, byte_order);
   if (target_read_memory (jb_addr, buf, 4))
     return 0;
 
-  *pc = extract_unsigned_integer (buf, 4);
+  *pc = extract_unsigned_integer (buf, 4, byte_order);
   return 1;
 }
 
@@ -1401,6 +1416,8 @@ struct spu_overlay_table
 static struct spu_overlay_table *
 spu_get_overlay_table (struct objfile *objfile)
 {
+  enum bfd_endian byte_order = bfd_big_endian (objfile->obfd)?
+		   BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
   struct minimal_symbol *ovly_table_msym, *ovly_buf_table_msym;
   CORE_ADDR ovly_table_base, ovly_buf_table_base;
   unsigned ovly_table_size, ovly_buf_table_size;
@@ -1436,10 +1453,14 @@ spu_get_overlay_table (struct objfile *objfile)
 
   for (i = 0; i < ovly_table_size / 16; i++)
     {
-      CORE_ADDR vma  = extract_unsigned_integer (ovly_table + 16*i + 0, 4);
-      CORE_ADDR size = extract_unsigned_integer (ovly_table + 16*i + 4, 4);
-      CORE_ADDR pos  = extract_unsigned_integer (ovly_table + 16*i + 8, 4);
-      CORE_ADDR buf  = extract_unsigned_integer (ovly_table + 16*i + 12, 4);
+      CORE_ADDR vma  = extract_unsigned_integer (ovly_table + 16*i + 0,
+						 4, byte_order);
+      CORE_ADDR size = extract_unsigned_integer (ovly_table + 16*i + 4,
+						 4, byte_order);
+      CORE_ADDR pos  = extract_unsigned_integer (ovly_table + 16*i + 8,
+						 4, byte_order);
+      CORE_ADDR buf  = extract_unsigned_integer (ovly_table + 16*i + 12,
+						 4, byte_order);
 
       if (buf == 0 || (buf - 1) * 4 >= ovly_buf_table_size)
 	continue;
@@ -1465,6 +1486,8 @@ spu_get_overlay_table (struct objfile *objfile)
 static void
 spu_overlay_update_osect (struct obj_section *osect)
 {
+  enum bfd_endian byte_order = bfd_big_endian (osect->objfile->obfd)?
+		   BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
   struct spu_overlay_table *ovly_table;
   CORE_ADDR val;
 
@@ -1476,7 +1499,7 @@ spu_overlay_update_osect (struct obj_section *osect)
   if (ovly_table->mapped_ptr == 0)
     return;
 
-  val = read_memory_unsigned_integer (ovly_table->mapped_ptr, 4);
+  val = read_memory_unsigned_integer (ovly_table->mapped_ptr, 4, byte_order);
   osect->ovly_mapped = (val == ovly_table->mapped_val);
 }
 
@@ -1595,6 +1618,8 @@ static void
 info_spu_signal_command (char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST signal1 = 0;
   ULONGEST signal1_type = 0;
   int signal1_pending = 0;
@@ -1607,7 +1632,7 @@ info_spu_signal_command (char *args, int from_tty)
   LONGEST len;
   int rc, id;
 
-  if (gdbarch_bfd_arch_info (get_frame_arch (frame))->arch != bfd_arch_spu)
+  if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
     error (_("\"info spu\" is only supported on the SPU architecture."));
 
   id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
@@ -1618,7 +1643,7 @@ info_spu_signal_command (char *args, int from_tty)
     error (_("Could not read signal1."));
   else if (len == 4)
     {
-      signal1 = extract_unsigned_integer (buf, 4);
+      signal1 = extract_unsigned_integer (buf, 4, byte_order);
       signal1_pending = 1;
     }
     
@@ -1636,7 +1661,7 @@ info_spu_signal_command (char *args, int from_tty)
     error (_("Could not read signal2."));
   else if (len == 4)
     {
-      signal2 = extract_unsigned_integer (buf, 4);
+      signal2 = extract_unsigned_integer (buf, 4, byte_order);
       signal2_pending = 1;
     }
     
@@ -1686,7 +1711,7 @@ info_spu_signal_command (char *args, int from_tty)
 }
 
 static void
-info_spu_mailbox_list (gdb_byte *buf, int nr,
+info_spu_mailbox_list (gdb_byte *buf, int nr, enum bfd_endian byte_order,
 		       const char *field, const char *msg)
 {
   struct cleanup *chain;
@@ -1705,7 +1730,7 @@ info_spu_mailbox_list (gdb_byte *buf, int nr,
       struct cleanup *val_chain;
       ULONGEST val;
       val_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "mbox");
-      val = extract_unsigned_integer (buf + 4*i, 4);
+      val = extract_unsigned_integer (buf + 4*i, 4, byte_order);
       ui_out_field_fmt (uiout, field, "0x%s", phex (val, 4));
       do_cleanups (val_chain);
 
@@ -1720,13 +1745,15 @@ static void
 info_spu_mailbox_command (char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct cleanup *chain;
   char annex[32];
   gdb_byte buf[1024];
   LONGEST len;
   int i, id;
 
-  if (gdbarch_bfd_arch_info (get_frame_arch (frame))->arch != bfd_arch_spu)
+  if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
     error (_("\"info spu\" is only supported on the SPU architecture."));
 
   id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
@@ -1739,7 +1766,8 @@ info_spu_mailbox_command (char *args, int from_tty)
   if (len < 0)
     error (_("Could not read mbox_info."));
 
-  info_spu_mailbox_list (buf, len / 4, "mbox", "SPU Outbound Mailbox");
+  info_spu_mailbox_list (buf, len / 4, byte_order,
+			 "mbox", "SPU Outbound Mailbox");
 
   xsnprintf (annex, sizeof annex, "%d/ibox_info", id);
   len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
@@ -1747,7 +1775,8 @@ info_spu_mailbox_command (char *args, int from_tty)
   if (len < 0)
     error (_("Could not read ibox_info."));
 
-  info_spu_mailbox_list (buf, len / 4, "ibox", "SPU Outbound Interrupt Mailbox");
+  info_spu_mailbox_list (buf, len / 4, byte_order,
+			 "ibox", "SPU Outbound Interrupt Mailbox");
 
   xsnprintf (annex, sizeof annex, "%d/wbox_info", id);
   len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
@@ -1755,7 +1784,8 @@ info_spu_mailbox_command (char *args, int from_tty)
   if (len < 0)
     error (_("Could not read wbox_info."));
 
-  info_spu_mailbox_list (buf, len / 4, "wbox", "SPU Inbound Mailbox");
+  info_spu_mailbox_list (buf, len / 4, byte_order,
+			 "wbox", "SPU Inbound Mailbox");
 
   do_cleanups (chain);
 }
@@ -1768,7 +1798,7 @@ spu_mfc_get_bitfield (ULONGEST word, int first, int last)
 }
 
 static void
-info_spu_dma_cmdlist (gdb_byte *buf, int nr)
+info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
 {
   static char *spu_mfc_opcode[256] =
     {
@@ -1825,7 +1855,8 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr)
 	  if (done & (1 << (nr - 1 - j)))
 	    continue;
 
-	  mfc_cq_dw3 = extract_unsigned_integer (buf + 32*j + 24, 8);
+	  mfc_cq_dw3
+	    = extract_unsigned_integer (buf + 32*j + 24,8, byte_order);
 	  if (!spu_mfc_get_bitfield (mfc_cq_dw3, 16, 16))
 	    continue;
 
@@ -1874,9 +1905,12 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr)
       /* Decode contents of MFC Command Queue Context Save/Restore Registers.
 	 See "Cell Broadband Engine Registers V1.3", section 3.3.2.1.  */
 
-      mfc_cq_dw0 = extract_unsigned_integer (buf + 32*seq[i], 8);
-      mfc_cq_dw1 = extract_unsigned_integer (buf + 32*seq[i] + 8, 8);
-      mfc_cq_dw2 = extract_unsigned_integer (buf + 32*seq[i] + 16, 8);
+      mfc_cq_dw0
+	= extract_unsigned_integer (buf + 32*seq[i], 8, byte_order);
+      mfc_cq_dw1
+	= extract_unsigned_integer (buf + 32*seq[i] + 8, 8, byte_order);
+      mfc_cq_dw2
+	= extract_unsigned_integer (buf + 32*seq[i] + 16, 8, byte_order);
 
       list_lsa = spu_mfc_get_bitfield (mfc_cq_dw0, 0, 14);
       list_size = spu_mfc_get_bitfield (mfc_cq_dw0, 15, 26);
@@ -1947,6 +1981,8 @@ static void
 info_spu_dma_command (char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST dma_info_type;
   ULONGEST dma_info_mask;
   ULONGEST dma_info_status;
@@ -1969,11 +2005,16 @@ info_spu_dma_command (char *args, int from_tty)
   if (len <= 0)
     error (_("Could not read dma_info."));
 
-  dma_info_type = extract_unsigned_integer (buf, 8);
-  dma_info_mask = extract_unsigned_integer (buf + 8, 8);
-  dma_info_status = extract_unsigned_integer (buf + 16, 8);
-  dma_info_stall_and_notify = extract_unsigned_integer (buf + 24, 8);
-  dma_info_atomic_command_status = extract_unsigned_integer (buf + 32, 8);
+  dma_info_type
+    = extract_unsigned_integer (buf, 8, byte_order);
+  dma_info_mask
+    = extract_unsigned_integer (buf + 8, 8, byte_order);
+  dma_info_status
+    = extract_unsigned_integer (buf + 16, 8, byte_order);
+  dma_info_stall_and_notify
+    = extract_unsigned_integer (buf + 24, 8, byte_order);
+  dma_info_atomic_command_status
+    = extract_unsigned_integer (buf + 32, 8, byte_order);
   
   chain = make_cleanup_ui_out_tuple_begin_end (uiout, "SPUInfoDMA");
 
@@ -2013,7 +2054,7 @@ info_spu_dma_command (char *args, int from_tty)
       printf_filtered ("\n");
     }
 
-  info_spu_dma_cmdlist (buf + 40, 16);
+  info_spu_dma_cmdlist (buf + 40, 16, byte_order);
   do_cleanups (chain);
 }
 
@@ -2021,6 +2062,8 @@ static void
 info_spu_proxydma_command (char *args, int from_tty)
 {
   struct frame_info *frame = get_selected_frame (NULL);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST dma_info_type;
   ULONGEST dma_info_mask;
   ULONGEST dma_info_status;
@@ -2030,7 +2073,7 @@ info_spu_proxydma_command (char *args, int from_tty)
   LONGEST len;
   int i, id;
 
-  if (gdbarch_bfd_arch_info (get_frame_arch (frame))->arch != bfd_arch_spu)
+  if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
     error (_("\"info spu\" is only supported on the SPU architecture."));
 
   id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
@@ -2041,9 +2084,9 @@ info_spu_proxydma_command (char *args, int from_tty)
   if (len <= 0)
     error (_("Could not read proxydma_info."));
 
-  dma_info_type = extract_unsigned_integer (buf, 8);
-  dma_info_mask = extract_unsigned_integer (buf + 8, 8);
-  dma_info_status = extract_unsigned_integer (buf + 16, 8);
+  dma_info_type = extract_unsigned_integer (buf, 8, byte_order);
+  dma_info_mask = extract_unsigned_integer (buf + 8, 8, byte_order);
+  dma_info_status = extract_unsigned_integer (buf + 16, 8, byte_order);
   
   chain = make_cleanup_ui_out_tuple_begin_end (uiout, "SPUInfoProxyDMA");
 
@@ -2075,7 +2118,7 @@ info_spu_proxydma_command (char *args, int from_tty)
       printf_filtered ("\n");
     }
 
-  info_spu_dma_cmdlist (buf + 24, 8);
+  info_spu_dma_cmdlist (buf + 24, 8, byte_order);
   do_cleanups (chain);
 }
 

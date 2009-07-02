@@ -7922,7 +7922,8 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
   val = allocate_value (type1);
   store_unsigned_integer (value_contents_raw (val),
-                          TYPE_LENGTH (value_type (val)), v);
+                          TYPE_LENGTH (value_type (val)),
+			  gdbarch_byte_order (get_type_arch (type1)), v);
   return val;
 }
 

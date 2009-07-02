@@ -514,6 +514,8 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 		      struct frame_info *this_frame,
                       struct frv_unwind_cache *info)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
   /* When writing out instruction bitpatterns, we use the following
      letters to label instruction fields:
      P - The parallel bit.  We don't use this.
@@ -595,7 +597,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 
       if (target_read_memory (pc, buf, sizeof buf) != 0)
 	break;
-      op = extract_signed_integer (buf, sizeof buf);
+      op = extract_signed_integer (buf, sizeof buf, byte_order);
 
       next_pc = pc + 4;
 
@@ -1007,13 +1009,14 @@ frv_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static CORE_ADDR
 frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   unsigned long op;
   CORE_ADDR orig_pc = pc;
 
   if (target_read_memory (pc, buf, 4))
     return pc;
-  op = extract_unsigned_integer (buf, 4);
+  op = extract_unsigned_integer (buf, 4, byte_order);
 
   /* In PIC code, GR15 may be loaded from some offset off of FP prior
      to the call instruction.
@@ -1041,7 +1044,7 @@ frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       pc += 4;
       if (target_read_memory (pc, buf, 4))
 	return orig_pc;
-      op = extract_unsigned_integer (buf, 4);
+      op = extract_unsigned_integer (buf, 4, byte_order);
     }
 
   /* The format of an FRV CALL instruction is as follows:
@@ -1106,21 +1109,23 @@ static void
 frv_extract_return_value (struct type *type, struct regcache *regcache,
                           gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
 
   if (len <= 4)
     {
       ULONGEST gpr8_val;
       regcache_cooked_read_unsigned (regcache, 8, &gpr8_val);
-      store_unsigned_integer (valbuf, len, gpr8_val);
+      store_unsigned_integer (valbuf, len, byte_order, gpr8_val);
     }
   else if (len == 8)
     {
       ULONGEST regval;
       regcache_cooked_read_unsigned (regcache, 8, &regval);
-      store_unsigned_integer (valbuf, 4, regval);
+      store_unsigned_integer (valbuf, 4, byte_order, regval);
       regcache_cooked_read_unsigned (regcache, 9, &regval);
-      store_unsigned_integer ((bfd_byte *) valbuf + 4, 4, regval);
+      store_unsigned_integer ((bfd_byte *) valbuf + 4, 4, byte_order, regval);
     }
   else
     internal_error (__FILE__, __LINE__, _("Illegal return value length: %d"), len);
@@ -1136,6 +1141,7 @@ frv_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 static CORE_ADDR
 find_func_descr (struct gdbarch *gdbarch, CORE_ADDR entry_point)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR descr;
   char valbuf[4];
   CORE_ADDR start_addr;
@@ -1155,9 +1161,9 @@ find_func_descr (struct gdbarch *gdbarch, CORE_ADDR entry_point)
      the stack.  */
 
   descr = value_as_long (value_allocate_space_in_inferior (8));
-  store_unsigned_integer (valbuf, 4, entry_point);
+  store_unsigned_integer (valbuf, 4, byte_order, entry_point);
   write_memory (descr, valbuf, 4);
-  store_unsigned_integer (valbuf, 4,
+  store_unsigned_integer (valbuf, 4, byte_order,
                           frv_fdpic_find_global_pointer (entry_point));
   write_memory (descr + 4, valbuf, 4);
   return descr;
@@ -1167,11 +1173,12 @@ static CORE_ADDR
 frv_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
                                 struct target_ops *targ)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR entry_point;
   CORE_ADDR got_address;
 
-  entry_point = get_target_memory_unsigned (targ, addr, 4);
-  got_address = get_target_memory_unsigned (targ, addr + 4, 4);
+  entry_point = get_target_memory_unsigned (targ, addr, 4, byte_order);
+  got_address = get_target_memory_unsigned (targ, addr + 4, 4, byte_order);
 
   if (got_address == frv_fdpic_find_global_pointer (entry_point))
     return entry_point;
@@ -1185,6 +1192,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                      int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argreg;
   int argnum;
   char *val;
@@ -1232,7 +1240,8 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       if (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
 	{
-	  store_unsigned_integer (valbuf, 4, value_address (arg));
+	  store_unsigned_integer (valbuf, 4, byte_order,
+				  value_address (arg));
 	  typecode = TYPE_CODE_PTR;
 	  len = 4;
 	  val = valbuf;
@@ -1244,11 +1253,10 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  /* The FDPIC ABI requires function descriptors to be passed instead
 	     of entry points.  */
-	  store_unsigned_integer
-	    (valbuf, 4,
-	     find_func_descr (gdbarch,
-	                      extract_unsigned_integer (value_contents (arg),
-			                                4)));
+	  CORE_ADDR addr = extract_unsigned_integer
+			     (value_contents (arg), 4, byte_order);
+	  addr = find_func_descr (gdbarch, addr);
+	  store_unsigned_integer (valbuf, 4, byte_order, addr);
 	  typecode = TYPE_CODE_PTR;
 	  len = 4;
 	  val = valbuf;
@@ -1264,7 +1272,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	  if (argreg < 14)
 	    {
-	      regval = extract_unsigned_integer (val, partial_len);
+	      regval = extract_unsigned_integer (val, partial_len, byte_order);
 #if 0
 	      printf("  Argnum %d data %x -> reg %d\n",
 		     argnum, (int) regval, argreg);

@@ -446,6 +446,7 @@ darwin_check_osabi (darwin_inferior *inf, thread_t thread)
 static int
 i386_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   static const gdb_byte darwin_syscall[] = { 0xcd, 0x80 }; /* int 0x80 */
   gdb_byte buf[sizeof (darwin_syscall)];
 
@@ -459,8 +460,10 @@ i386_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
       ULONGEST flags_addr;
       unsigned int eflags;
 
-      uctx_addr = read_memory_unsigned_integer (regs->uts.ts32.__esp + 4, 4);
-      mctx_addr = read_memory_unsigned_integer (uctx_addr + 28, 4);
+      uctx_addr = read_memory_unsigned_integer
+		    (regs->uts.ts32.__esp + 4, 4, byte_order);
+      mctx_addr = read_memory_unsigned_integer
+		    (uctx_addr + 28, 4, byte_order);
 
       flags_addr = mctx_addr + 12 + 9 * 4;
       read_memory (flags_addr, (gdb_byte *) &eflags, 4);
@@ -475,6 +478,7 @@ i386_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
 static int
 amd64_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   static const gdb_byte darwin_syscall[] = { 0x0f, 0x05 }; /* syscall */
   gdb_byte buf[sizeof (darwin_syscall)];
 
@@ -487,7 +491,8 @@ amd64_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
       ULONGEST flags_addr;
       unsigned int rflags;
 
-      mctx_addr = read_memory_unsigned_integer (regs->uts.ts64.__rdi + 48, 8);
+      mctx_addr = read_memory_unsigned_integer
+		    (regs->uts.ts64.__rdi + 48, 8, byte_order);
       flags_addr = mctx_addr + 16 + 17 * 8;
 
       /* AMD64 is little endian.  */

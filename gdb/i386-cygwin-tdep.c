@@ -122,6 +122,7 @@ static void
 core_process_module_section (bfd *abfd, asection *sect, void *obj)
 {
   struct cpms_data *data = obj;
+  enum bfd_endian byte_order = gdbarch_byte_order (data->gdbarch);
 
   char *module_name;
   size_t module_name_size;
@@ -147,10 +148,10 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   /* A DWORD (data_type) followed by struct windows_core_module_info.  */
 
   base_addr =
-    extract_unsigned_integer (buf + 4, 4);
+    extract_unsigned_integer (buf + 4, 4, byte_order);
 
   module_name_size =
-    extract_unsigned_integer (buf + 8, 4);
+    extract_unsigned_integer (buf + 8, 4, byte_order);
 
   module_name = buf + 12;
   if (module_name - buf + module_name_size > bfd_get_section_size (sect))
@@ -201,7 +202,7 @@ windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 static CORE_ADDR
 i386_cygwin_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
-  return i386_pe_skip_trampoline_code (pc, NULL);
+  return i386_pe_skip_trampoline_code (frame, pc, NULL);
 }
 
 static void

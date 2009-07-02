@@ -120,7 +120,8 @@ static char *main_name_list[] =
    Assume that the address is unsigned.  */
 
 #define SOLIB_EXTRACT_ADDRESS(MEMBER) \
-	extract_unsigned_integer (&(MEMBER), sizeof (MEMBER))
+	extract_unsigned_integer (&(MEMBER), sizeof (MEMBER), \
+				  gdbarch_byte_order (target_gdbarch))
 
 /* local data declarations */
 
@@ -140,33 +141,36 @@ static CORE_ADDR flag_addr;
 static CORE_ADDR
 LM_ADDR (struct so_list *so)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   int lm_addr_offset = offsetof (struct link_map, lm_addr);
   int lm_addr_size = fieldsize (struct link_map, lm_addr);
 
   return (CORE_ADDR) extract_signed_integer (so->lm_info->lm + lm_addr_offset, 
-					     lm_addr_size);
+					     lm_addr_size, byte_order);
 }
 
 static CORE_ADDR
 LM_NEXT (struct so_list *so)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   int lm_next_offset = offsetof (struct link_map, lm_next);
   int lm_next_size = fieldsize (struct link_map, lm_next);
 
   /* Assume that the address is unsigned.  */
   return extract_unsigned_integer (so->lm_info->lm + lm_next_offset,
-				   lm_next_size);
+				   lm_next_size, byte_order);
 }
 
 static CORE_ADDR
 LM_NAME (struct so_list *so)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   int lm_name_offset = offsetof (struct link_map, lm_name);
   int lm_name_size = fieldsize (struct link_map, lm_name);
 
   /* Assume that the address is unsigned.  */
   return extract_unsigned_integer (so->lm_info->lm + lm_name_offset,
-				   lm_name_size);
+				   lm_name_size, byte_order);
 }
 
 static CORE_ADDR debug_base;	/* Base of dynamic linker structures */

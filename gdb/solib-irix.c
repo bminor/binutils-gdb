@@ -130,9 +130,9 @@ union irix_obj_info
    appropriate type.  Calling extract_signed_integer seems simpler.  */
 
 static CORE_ADDR
-extract_mips_address (void *addr, int len)
+extract_mips_address (void *addr, int len, enum bfd_endian byte_order)
 {
-  return extract_signed_integer (addr, len);
+  return extract_signed_integer (addr, len, byte_order);
 }
 
 /* Fetch and return the link map data associated with ADDR.  Note that
@@ -142,6 +142,7 @@ extract_mips_address (void *addr, int len)
 static struct lm_info
 fetch_lm_info (CORE_ADDR addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   struct lm_info li;
   union irix_obj_info buf;
 
@@ -154,24 +155,27 @@ fetch_lm_info (CORE_ADDR addr)
      being at the end of a page or the like.)  */
   read_memory (addr, (char *) &buf, sizeof (buf.ol32));
 
-  if (extract_unsigned_integer (buf.magic.b, sizeof (buf.magic)) != 0xffffffff)
+  if (extract_unsigned_integer (buf.magic.b, sizeof (buf.magic), byte_order)
+      != 0xffffffff)
     {
       /* Use buf.ol32... */
       char obj_buf[432];
       CORE_ADDR obj_addr = extract_mips_address (&buf.ol32.data,
-						 sizeof (buf.ol32.data));
-      li.next = extract_mips_address (&buf.ol32.next, sizeof (buf.ol32.next));
+						 sizeof (buf.ol32.data),
+						 byte_order);
+      li.next = extract_mips_address (&buf.ol32.next,
+				      sizeof (buf.ol32.next), byte_order);
 
       read_memory (obj_addr, obj_buf, sizeof (obj_buf));
 
-      li.pathname_addr = extract_mips_address (&obj_buf[236], 4);
+      li.pathname_addr = extract_mips_address (&obj_buf[236], 4, byte_order);
       li.pathname_len = 0;	/* unknown */
-      li.reloc_offset = extract_mips_address (&obj_buf[196], 4)
-	- extract_mips_address (&obj_buf[248], 4);
+      li.reloc_offset = extract_mips_address (&obj_buf[196], 4, byte_order)
+	- extract_mips_address (&obj_buf[248], 4, byte_order);
 
     }
   else if (extract_unsigned_integer (buf.oi32.oi_size.b,
-				     sizeof (buf.oi32.oi_size))
+				     sizeof (buf.oi32.oi_size), byte_order)
 	   == sizeof (buf.oi32))
     {
       /* Use buf.oi32...  */
@@ -183,19 +187,22 @@ fetch_lm_info (CORE_ADDR addr)
 
       /* Fill in fields using buffer contents.  */
       li.next = extract_mips_address (&buf.oi32.oi_next,
-				      sizeof (buf.oi32.oi_next));
+				      sizeof (buf.oi32.oi_next), byte_order);
       li.reloc_offset = extract_mips_address (&buf.oi32.oi_ehdr,
-					      sizeof (buf.oi32.oi_ehdr))
+					      sizeof (buf.oi32.oi_ehdr),
+					      byte_order)
 	- extract_mips_address (&buf.oi32.oi_orig_ehdr,
-				sizeof (buf.oi32.oi_orig_ehdr));
+				sizeof (buf.oi32.oi_orig_ehdr), byte_order);
       li.pathname_addr = extract_mips_address (&buf.oi32.oi_pathname,
-					       sizeof (buf.oi32.oi_pathname));
+					       sizeof (buf.oi32.oi_pathname),
+					       byte_order);
       li.pathname_len = extract_unsigned_integer (buf.oi32.oi_pathname_len.b,
 						  sizeof (buf.oi32.
-							  oi_pathname_len));
+							  oi_pathname_len),
+						  byte_order);
     }
   else if (extract_unsigned_integer (buf.oi64.oi_size.b,
-				     sizeof (buf.oi64.oi_size))
+				     sizeof (buf.oi64.oi_size), byte_order)
 	   == sizeof (buf.oi64))
     {
       /* Use buf.oi64...  */
@@ -207,16 +214,19 @@ fetch_lm_info (CORE_ADDR addr)
 
       /* Fill in fields using buffer contents.  */
       li.next = extract_mips_address (&buf.oi64.oi_next,
-				      sizeof (buf.oi64.oi_next));
+				      sizeof (buf.oi64.oi_next), byte_order);
       li.reloc_offset = extract_mips_address (&buf.oi64.oi_ehdr,
-					      sizeof (buf.oi64.oi_ehdr))
+					      sizeof (buf.oi64.oi_ehdr),
+					      byte_order)
 	- extract_mips_address (&buf.oi64.oi_orig_ehdr,
-				sizeof (buf.oi64.oi_orig_ehdr));
+				sizeof (buf.oi64.oi_orig_ehdr), byte_order);
       li.pathname_addr = extract_mips_address (&buf.oi64.oi_pathname,
-					       sizeof (buf.oi64.oi_pathname));
+					       sizeof (buf.oi64.oi_pathname),
+					       byte_order);
       li.pathname_len = extract_unsigned_integer (buf.oi64.oi_pathname_len.b,
 						  sizeof (buf.oi64.
-							  oi_pathname_len));
+							  oi_pathname_len),
+						  byte_order);
     }
   else
     {
@@ -494,6 +504,8 @@ irix_solib_create_inferior_hook (void)
 static struct so_list *
 irix_current_sos (void)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  int addr_size = gdbarch_addr_bit (target_gdbarch) / TARGET_CHAR_BIT;
   CORE_ADDR lma;
   char addr_buf[8];
   struct so_list *head = 0;
@@ -513,12 +525,8 @@ irix_current_sos (void)
 	return 0;
     }
 
-  read_memory (debug_base,
-	       addr_buf,
-	       gdbarch_addr_bit (target_gdbarch) / TARGET_CHAR_BIT);
-  lma = extract_mips_address (addr_buf,
-			      gdbarch_addr_bit (target_gdbarch)
-				/ TARGET_CHAR_BIT);
+  read_memory (debug_base, addr_buf, addr_size);
+  lma = extract_mips_address (addr_buf, addr_size, byte_order);
 
   while (lma)
     {
@@ -603,6 +611,8 @@ irix_current_sos (void)
 static int
 irix_open_symbol_file_object (void *from_ttyp)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  int addr_size = gdbarch_addr_bit (target_gdbarch) / TARGET_CHAR_BIT;
   CORE_ADDR lma;
   char addr_buf[8];
   struct lm_info lm;
@@ -619,12 +629,8 @@ irix_open_symbol_file_object (void *from_ttyp)
     return 0;			/* failed somehow...  */
 
   /* First link map member should be the executable.  */
-  read_memory (debug_base,
-	       addr_buf,
-	       gdbarch_addr_bit (target_gdbarch) / TARGET_CHAR_BIT);
-  lma = extract_mips_address (addr_buf,
-			      gdbarch_addr_bit (target_gdbarch)
-				/ TARGET_CHAR_BIT);
+  read_memory (debug_base, addr_buf, addr_size);
+  lma = extract_mips_address (addr_buf, addr_size, byte_order);
   if (lma == 0)
     return 0;			/* failed somehow...  */
 

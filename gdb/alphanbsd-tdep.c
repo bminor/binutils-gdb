@@ -211,7 +211,7 @@ static const unsigned char sigtramp_retcode[] =
 #define RETCODE_SIZE		(RETCODE_NWORDS * 4)
 
 static LONGEST
-alphanbsd_sigtramp_offset (CORE_ADDR pc)
+alphanbsd_sigtramp_offset (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   unsigned char ret[RETCODE_SIZE], w[4];
   LONGEST off;
@@ -241,10 +241,11 @@ alphanbsd_sigtramp_offset (CORE_ADDR pc)
 }
 
 static int
-alphanbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+alphanbsd_pc_in_sigtramp (struct gdbarch *gdbarch,
+		 	  CORE_ADDR pc, char *func_name)
 {
   return (nbsd_pc_in_sigtramp (pc, func_name)
-	  || alphanbsd_sigtramp_offset (pc) >= 0);
+	  || alphanbsd_sigtramp_offset (gdbarch, pc) >= 0);
 }
 
 static CORE_ADDR

@@ -1610,58 +1610,69 @@ _initialize_objc_language (void)
 }
 
 static void 
-read_objc_method (CORE_ADDR addr, struct objc_method *method)
+read_objc_method (struct gdbarch *gdbarch, CORE_ADDR addr,
+		  struct objc_method *method)
 {
-  method->name  = read_memory_unsigned_integer (addr + 0, 4);
-  method->types = read_memory_unsigned_integer (addr + 4, 4);
-  method->imp   = read_memory_unsigned_integer (addr + 8, 4);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  method->name  = read_memory_unsigned_integer (addr + 0, 4, byte_order);
+  method->types = read_memory_unsigned_integer (addr + 4, 4, byte_order);
+  method->imp   = read_memory_unsigned_integer (addr + 8, 4, byte_order);
 }
 
-static 
-unsigned long read_objc_methlist_nmethods (CORE_ADDR addr)
+static unsigned long
+read_objc_methlist_nmethods (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
-  return read_memory_unsigned_integer (addr + 4, 4);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  return read_memory_unsigned_integer (addr + 4, 4, byte_order);
 }
 
 static void 
-read_objc_methlist_method (CORE_ADDR addr, unsigned long num, 
-			   struct objc_method *method)
+read_objc_methlist_method (struct gdbarch *gdbarch, CORE_ADDR addr,
+			   unsigned long num, struct objc_method *method)
 {
-  gdb_assert (num < read_objc_methlist_nmethods (addr));
-  read_objc_method (addr + 8 + (12 * num), method);
+  gdb_assert (num < read_objc_methlist_nmethods (gdbarch, addr));
+  read_objc_method (gdbarch, addr + 8 + (12 * num), method);
 }
   
 static void 
-read_objc_object (CORE_ADDR addr, struct objc_object *object)
+read_objc_object (struct gdbarch *gdbarch, CORE_ADDR addr,
+		  struct objc_object *object)
 {
-  object->isa = read_memory_unsigned_integer (addr, 4);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  object->isa = read_memory_unsigned_integer (addr, 4, byte_order);
 }
 
 static void 
-read_objc_super (CORE_ADDR addr, struct objc_super *super)
+read_objc_super (struct gdbarch *gdbarch, CORE_ADDR addr,
+		 struct objc_super *super)
 {
-  super->receiver = read_memory_unsigned_integer (addr, 4);
-  super->class = read_memory_unsigned_integer (addr + 4, 4);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  super->receiver = read_memory_unsigned_integer (addr, 4, byte_order);
+  super->class = read_memory_unsigned_integer (addr + 4, 4, byte_order);
 };
 
 static void 
-read_objc_class (CORE_ADDR addr, struct objc_class *class)
+read_objc_class (struct gdbarch *gdbarch, CORE_ADDR addr,
+		 struct objc_class *class)
 {
-  class->isa = read_memory_unsigned_integer (addr, 4);
-  class->super_class = read_memory_unsigned_integer (addr + 4, 4);
-  class->name = read_memory_unsigned_integer (addr + 8, 4);
-  class->version = read_memory_unsigned_integer (addr + 12, 4);
-  class->info = read_memory_unsigned_integer (addr + 16, 4);
-  class->instance_size = read_memory_unsigned_integer (addr + 18, 4);
-  class->ivars = read_memory_unsigned_integer (addr + 24, 4);
-  class->methods = read_memory_unsigned_integer (addr + 28, 4);
-  class->cache = read_memory_unsigned_integer (addr + 32, 4);
-  class->protocols = read_memory_unsigned_integer (addr + 36, 4);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  class->isa = read_memory_unsigned_integer (addr, 4, byte_order);
+  class->super_class = read_memory_unsigned_integer (addr + 4, 4, byte_order);
+  class->name = read_memory_unsigned_integer (addr + 8, 4, byte_order);
+  class->version = read_memory_unsigned_integer (addr + 12, 4, byte_order);
+  class->info = read_memory_unsigned_integer (addr + 16, 4, byte_order);
+  class->instance_size = read_memory_unsigned_integer (addr + 18, 4, byte_order);
+  class->ivars = read_memory_unsigned_integer (addr + 24, 4, byte_order);
+  class->methods = read_memory_unsigned_integer (addr + 28, 4, byte_order);
+  class->cache = read_memory_unsigned_integer (addr + 32, 4, byte_order);
+  class->protocols = read_memory_unsigned_integer (addr + 36, 4, byte_order);
 }
 
 static CORE_ADDR
-find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
+find_implementation_from_class (struct gdbarch *gdbarch,
+				CORE_ADDR class, CORE_ADDR sel)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR subclass = class;
 
   while (subclass != 0) 
@@ -1670,7 +1681,7 @@ find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
       struct objc_class class_str;
       unsigned mlistnum = 0;
 
-      read_objc_class (subclass, &class_str);
+      read_objc_class (gdbarch, subclass, &class_str);
 
       for (;;) 
 	{
@@ -1679,16 +1690,17 @@ find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
 	  unsigned long i;
       
 	  mlist = read_memory_unsigned_integer (class_str.methods + 
-						(4 * mlistnum), 4);
+						(4 * mlistnum),
+						4, byte_order);
 	  if (mlist == 0) 
 	    break;
 
-	  nmethods = read_objc_methlist_nmethods (mlist);
+	  nmethods = read_objc_methlist_nmethods (gdbarch, mlist);
 
 	  for (i = 0; i < nmethods; i++) 
 	    {
 	      struct objc_method meth_str;
-	      read_objc_methlist_method (mlist, i, &meth_str);
+	      read_objc_methlist_method (gdbarch, mlist, i, &meth_str);
 
 #if 0
 	      fprintf (stderr, 
@@ -1710,17 +1722,18 @@ find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
 }
 
 static CORE_ADDR
-find_implementation (CORE_ADDR object, CORE_ADDR sel)
+find_implementation (struct gdbarch *gdbarch,
+		     CORE_ADDR object, CORE_ADDR sel)
 {
   struct objc_object ostr;
 
   if (object == 0)
     return 0;
-  read_objc_object (object, &ostr);
+  read_objc_object (gdbarch, object, &ostr);
   if (ostr.isa == 0)
     return 0;
 
-  return find_implementation_from_class (ostr.isa, sel);
+  return find_implementation_from_class (gdbarch, ostr.isa, sel);
 }
 
 static int
@@ -1737,7 +1750,7 @@ resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc)
   object = gdbarch_fetch_pointer_argument (gdbarch, frame, 0, ptr_type);
   sel = gdbarch_fetch_pointer_argument (gdbarch, frame, 1, ptr_type);
 
-  res = find_implementation (object, sel);
+  res = find_implementation (gdbarch, object, sel);
   if (new_pc != 0)
     *new_pc = res;
   if (res == 0)
@@ -1759,7 +1772,7 @@ resolve_msgsend_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
   object = gdbarch_fetch_pointer_argument (gdbarch, frame, 1, ptr_type);
   sel = gdbarch_fetch_pointer_argument (gdbarch, frame, 2, ptr_type);
 
-  res = find_implementation (object, sel);
+  res = find_implementation (gdbarch, object, sel);
   if (new_pc != 0)
     *new_pc = res;
   if (res == 0)
@@ -1783,11 +1796,11 @@ resolve_msgsend_super (CORE_ADDR pc, CORE_ADDR *new_pc)
   super = gdbarch_fetch_pointer_argument (gdbarch, frame, 0, ptr_type);
   sel = gdbarch_fetch_pointer_argument (gdbarch, frame, 1, ptr_type);
 
-  read_objc_super (super, &sstr);
+  read_objc_super (gdbarch, super, &sstr);
   if (sstr.class == 0)
     return 0;
   
-  res = find_implementation_from_class (sstr.class, sel);
+  res = find_implementation_from_class (gdbarch, sstr.class, sel);
   if (new_pc != 0)
     *new_pc = res;
   if (res == 0)
@@ -1811,11 +1824,11 @@ resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
   super = gdbarch_fetch_pointer_argument (gdbarch, frame, 1, ptr_type);
   sel = gdbarch_fetch_pointer_argument (gdbarch, frame, 2, ptr_type);
 
-  read_objc_super (super, &sstr);
+  read_objc_super (gdbarch, super, &sstr);
   if (sstr.class == 0)
     return 0;
   
-  res = find_implementation_from_class (sstr.class, sel);
+  res = find_implementation_from_class (gdbarch, sstr.class, sel);
   if (new_pc != 0)
     *new_pc = res;
   if (res == 0)

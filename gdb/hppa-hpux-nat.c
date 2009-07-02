@@ -88,6 +88,7 @@ static void
 hppa_hpux_fetch_register (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
@@ -135,8 +136,9 @@ hppa_hpux_fetch_register (struct regcache *regcache, int regnum)
      `struct save_state', even for 64-bit code.  */
   if (regnum == HPPA_FLAGS_REGNUM && size == 8)
     {
-      ULONGEST flags = extract_unsigned_integer ((gdb_byte *)buf, 4);
-      store_unsigned_integer ((gdb_byte *)buf, 8, flags);
+      ULONGEST flags;
+      flags = extract_unsigned_integer ((gdb_byte *)buf, 4, byte_order);
+      store_unsigned_integer ((gdb_byte *)buf, 8, byte_order, flags);
     }
 
   regcache_raw_supply (regcache, regnum, buf);
@@ -161,6 +163,7 @@ static void
 hppa_hpux_store_register (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
@@ -181,8 +184,9 @@ hppa_hpux_store_register (struct regcache *regcache, int regnum)
      `struct save_state', even for 64-bit code.  */
   if (regnum == HPPA_FLAGS_REGNUM && size == 8)
     {
-      ULONGEST flags = extract_unsigned_integer ((gdb_byte *)buf, 8);
-      store_unsigned_integer ((gdb_byte *)buf, 4, flags);
+      ULONGEST flags;
+      flags = extract_unsigned_integer ((gdb_byte *)buf, 8, byte_order);
+      store_unsigned_integer ((gdb_byte *)buf, 4, byte_order, flags);
       size = 4;
     }
 

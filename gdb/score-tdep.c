@@ -324,6 +324,7 @@ static const gdb_byte *
 score_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 			  int *lenptr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[SCORE_INSTLEN] = { 0 };
   int ret;
   unsigned int raw;
@@ -333,9 +334,9 @@ score_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
       error ("Error: target_read_memory in file:%s, line:%d!",
              __FILE__, __LINE__);
     }
-  raw = extract_unsigned_integer (buf, SCORE_INSTLEN);
+  raw = extract_unsigned_integer (buf, SCORE_INSTLEN, byte_order);
 
-  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+  if (byte_order == BFD_ENDIAN_BIG)
     {
       if (!(raw & 0x80008000))
         {
@@ -476,6 +477,7 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                        int nargs, struct value **args, CORE_ADDR sp,
                        int struct_return, CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argnum;
   int argreg;
   int arglen = 0;
@@ -553,7 +555,8 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       while (arglen > 0)
         {
           int partial_len = arglen < SCORE_REGSIZE ? arglen : SCORE_REGSIZE;
-          ULONGEST regval = extract_unsigned_integer (val, partial_len);
+          ULONGEST regval = extract_unsigned_integer (val, partial_len,
+						      byte_order);
 
           /* The last part of a arg should shift left when
              gdbarch_byte_order is BFD_ENDIAN_BIG.  */
@@ -642,6 +645,7 @@ score_adjust_memblock_ptr (char **memblock, CORE_ADDR prev_pc,
 static inst_t *
 score_fetch_inst (struct gdbarch *gdbarch, CORE_ADDR addr, char *memblock)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   static inst_t inst = { 0, 0 };
   char buf[SCORE_INSTLEN] = { 0 };
   int big;
@@ -664,10 +668,10 @@ score_fetch_inst (struct gdbarch *gdbarch, CORE_ADDR addr, char *memblock)
         }
     }
 
-  inst.raw = extract_unsigned_integer (buf, SCORE_INSTLEN);
+  inst.raw = extract_unsigned_integer (buf, SCORE_INSTLEN, byte_order);
   inst.is15 = !(inst.raw & 0x80008000);
   inst.v = RM_PBITS (inst.raw);
-  big = (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG);
+  big = (byte_order == BFD_ENDIAN_BIG);
   if (inst.is15)
     {
       if (big ^ ((addr & 0x2) == 2))

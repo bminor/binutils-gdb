@@ -41,8 +41,9 @@ enum {
 };
 
 static int
-frv_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
+frv_linux_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   char buf[frv_instr_size];
   LONGEST instr;
   int retval = 0;
@@ -50,7 +51,7 @@ frv_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
   if (target_read_memory (pc, buf, sizeof buf) != 0)
     return 0;
 
-  instr = extract_unsigned_integer (buf, sizeof buf);
+  instr = extract_unsigned_integer (buf, sizeof buf, byte_order);
 
   if (instr == 0x8efc0077)	/* setlos #__NR_sigreturn, gr7 */
     retval = NORMAL_SIGTRAMP;
@@ -61,7 +62,7 @@ frv_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 
   if (target_read_memory (pc + frv_instr_size, buf, sizeof buf) != 0)
     return 0;
-  instr = extract_unsigned_integer (buf, sizeof buf);
+  instr = extract_unsigned_integer (buf, sizeof buf, byte_order);
   if (instr != 0xc0700000)	/* tira	gr0, 0 */
     return 0;
 
@@ -168,6 +169,8 @@ static LONGEST
 frv_linux_sigcontext_reg_addr (struct frame_info *this_frame, int regno,
                                CORE_ADDR *sc_addr_cache_ptr)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sc_addr;
 
   if (sc_addr_cache_ptr && *sc_addr_cache_ptr)
@@ -181,10 +184,10 @@ frv_linux_sigcontext_reg_addr (struct frame_info *this_frame, int regno,
       int tramp_type;
 
       pc = get_frame_pc (this_frame);
-      tramp_type = frv_linux_pc_in_sigtramp (pc, 0);
+      tramp_type = frv_linux_pc_in_sigtramp (gdbarch, pc, 0);
 
       get_frame_register (this_frame, sp_regnum, buf);
-      sp = extract_unsigned_integer (buf, sizeof buf);
+      sp = extract_unsigned_integer (buf, sizeof buf, byte_order);
 
       if (tramp_type == NORMAL_SIGTRAMP)
 	{
@@ -206,7 +209,7 @@ frv_linux_sigcontext_reg_addr (struct frame_info *this_frame, int regno,
 	      warning (_("Can't read realtime sigtramp frame."));
 	      return 0;
 	    }
-	  sc_addr = extract_unsigned_integer (buf, sizeof buf);
+	  sc_addr = extract_unsigned_integer (buf, sizeof buf, byte_order);
  	  sc_addr += 24;
 	}
       else
@@ -255,8 +258,10 @@ frv_linux_sigcontext_reg_addr (struct frame_info *this_frame, int regno,
 static struct trad_frame_cache *
 frv_linux_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct trad_frame_cache *cache;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
   CORE_ADDR addr;
   char buf[4];
   int regnum;
@@ -273,8 +278,8 @@ frv_linux_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache
      signal trampoline and not the current PC within that
      trampoline.  */
   get_frame_register (this_frame, sp_regnum, buf);
-  this_id = frame_id_build (extract_unsigned_integer (buf, sizeof buf),
-			    get_frame_pc (this_frame));
+  addr = extract_unsigned_integer (buf, sizeof buf, byte_order);
+  this_id = frame_id_build (addr, get_frame_pc (this_frame));
   trad_frame_set_id (cache, this_id);
 
   for (regnum = 0; regnum < frv_num_regs; regnum++)
@@ -313,11 +318,12 @@ frv_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
 				  struct frame_info *this_frame,
 				  void **this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
-  if (frv_linux_pc_in_sigtramp (pc, name))
+  if (frv_linux_pc_in_sigtramp (gdbarch, pc, name))
     return 1;
 
   return 0;

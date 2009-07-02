@@ -84,6 +84,7 @@ fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
   greg_t *regp = &(*gregsetp)[0];
   gdb_byte buf[MAX_REGISTER_SIZE];
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* Under Irix6, if GDB is built with N32 ABI and is debugging an O32
      executable, we have to sign extend the registers to 64 bits before
@@ -94,7 +95,7 @@ fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
       {
 	size = register_size (gdbarch, regi);
 	regcache_raw_collect (regcache, regi, buf);
-	*(regp + regi) = extract_signed_integer (buf, size);
+	*(regp + regi) = extract_signed_integer (buf, size, byte_order);
       }
 
   if ((regno == -1) || (regno == gdbarch_pc_regnum (gdbarch)))
@@ -102,7 +103,7 @@ fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
       regi = mips_regnum (gdbarch)->pc;
       size = register_size (gdbarch, regi);
       regcache_raw_collect (regcache, regi, buf);
-      *(regp + CTX_EPC) = extract_signed_integer (buf, size);
+      *(regp + CTX_EPC) = extract_signed_integer (buf, size, byte_order);
     }
 
   if ((regno == -1) || (regno == mips_regnum (gdbarch)->cause))
@@ -110,7 +111,7 @@ fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
       regi = mips_regnum (gdbarch)->cause;
       size = register_size (gdbarch, regi);
       regcache_raw_collect (regcache, regi, buf);
-      *(regp + CTX_CAUSE) = extract_signed_integer (buf, size);
+      *(regp + CTX_CAUSE) = extract_signed_integer (buf, size, byte_order);
     }
 
   if ((regno == -1) || (regno == mips_regnum (gdbarch)->hi))
@@ -118,7 +119,7 @@ fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
       regi = mips_regnum (gdbarch)->hi;
       size = register_size (gdbarch, regi);
       regcache_raw_collect (regcache, regi, buf);
-      *(regp + CTX_MDHI) = extract_signed_integer (buf, size);
+      *(regp + CTX_MDHI) = extract_signed_integer (buf, size, byte_order);
     }
 
   if ((regno == -1) || (regno == mips_regnum (gdbarch)->lo))
@@ -126,7 +127,7 @@ fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
       regi = mips_regnum (gdbarch)->lo;
       size = register_size (gdbarch, regi);
       regcache_raw_collect (regcache, regi, buf);
-      *(regp + CTX_MDLO) = extract_signed_integer (buf, size);
+      *(regp + CTX_MDLO) = extract_signed_integer (buf, size, byte_order);
     }
 }
 

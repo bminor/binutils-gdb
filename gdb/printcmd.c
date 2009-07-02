@@ -2282,6 +2282,7 @@ printf_command (char *arg, int from_tty)
 	      int j;
 	      struct gdbarch *gdbarch
 		= get_type_arch (value_type (val_args[i]));
+	      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 	      struct type *wctype = lookup_typename (current_language, gdbarch,
 						     "wchar_t", NULL, 0);
 	      int wcwidth = TYPE_LENGTH (wctype);
@@ -2296,7 +2297,7 @@ printf_command (char *arg, int from_tty)
 		{
 		  QUIT;
 		  read_memory (tem + j, buf, wcwidth);
-		  if (extract_unsigned_integer (buf, wcwidth) == 0)
+		  if (extract_unsigned_integer (buf, wcwidth, byte_order) == 0)
 		    break;
 		}
 
@@ -2309,7 +2310,7 @@ printf_command (char *arg, int from_tty)
 	      obstack_init (&output);
 	      inner_cleanup = make_cleanup_obstack_free (&output);
 
-	      convert_between_encodings (target_wide_charset (),
+	      convert_between_encodings (target_wide_charset (byte_order),
 					 host_charset (),
 					 str, j, wcwidth,
 					 &output, translit_char);
@@ -2323,6 +2324,7 @@ printf_command (char *arg, int from_tty)
 	    {
 	      struct gdbarch *gdbarch
 		= get_type_arch (value_type (val_args[i]));
+	      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 	      struct type *wctype = lookup_typename (current_language, gdbarch,
 						     "wchar_t", NULL, 0);
 	      struct type *valtype;
@@ -2340,7 +2342,7 @@ printf_command (char *arg, int from_tty)
 	      obstack_init (&output);
 	      inner_cleanup = make_cleanup_obstack_free (&output);
 
-	      convert_between_encodings (target_wide_charset (),
+	      convert_between_encodings (target_wide_charset (byte_order),
 					 host_charset (),
 					 bytes, TYPE_LENGTH (valtype),
 					 TYPE_LENGTH (valtype),
@@ -2431,6 +2433,7 @@ printf_command (char *arg, int from_tty)
 	      struct type *param_type = value_type (val_args[i]);
 	      unsigned int param_len = TYPE_LENGTH (param_type);
 	      struct gdbarch *gdbarch = get_type_arch (param_type);
+	      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
 	      /* DFP output data.  */
 	      struct value *dfp_value = NULL;
@@ -2490,18 +2493,19 @@ printf_command (char *arg, int from_tty)
 
 	      /* Conversion between different DFP types.  */
 	      if (TYPE_CODE (param_type) == TYPE_CODE_DECFLOAT)
-		decimal_convert (param_ptr, param_len, dec, dfp_len);
+		decimal_convert (param_ptr, param_len, byte_order,
+				 dec, dfp_len, byte_order);
 	      else
 		/* If this is a non-trivial conversion, just output 0.
 		   A correct converted value can be displayed by explicitly
 		   casting to a DFP type.  */
-		decimal_from_string (dec, dfp_len, "0");
+		decimal_from_string (dec, dfp_len, byte_order, "0");
 
 	      dfp_value = value_from_decfloat (dfp_type, dec);
 
 	      dfp_ptr = (gdb_byte *) value_contents (dfp_value);
 
-	      decimal_to_string (dfp_ptr, dfp_len, decstr);
+	      decimal_to_string (dfp_ptr, dfp_len, byte_order, decstr);
 
 	      /* Print the DFP value.  */
 	      printf_filtered (current_substring, decstr);

@@ -55,6 +55,7 @@ mips_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   char buf[gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT];
 
   jb_addr = get_frame_register_unsigned (frame, MIPS_A0_REGNUM);
@@ -65,7 +66,8 @@ mips_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
     return 0;
 
   *pc = extract_unsigned_integer (buf,
-				  gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
+				  gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT,
+				  byte_order);
 
   return 1;
 }
@@ -77,10 +79,11 @@ mips_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 static void
 supply_32bit_reg (struct regcache *regcache, int regnum, const void *addr)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[MAX_REGISTER_SIZE];
-  store_signed_integer (buf,
-			register_size (get_regcache_arch (regcache), regnum),
-                        extract_signed_integer (addr, 4));
+  store_signed_integer (buf, register_size (gdbarch, regnum), byte_order,
+                        extract_signed_integer (addr, 4, byte_order));
   regcache_raw_supply (regcache, regnum, buf);
 }
 
@@ -258,6 +261,7 @@ mips64_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   void *buf = alloca (gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
   int element_size = gdbarch_ptr_bit (gdbarch) == 32 ? 4 : 8;
 
@@ -269,7 +273,8 @@ mips64_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
     return 0;
 
   *pc = extract_unsigned_integer (buf,
-				  gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
+				  gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT,
+				  byte_order);
 
   return 1;
 }
@@ -343,6 +348,7 @@ mips64_fill_gregset (const struct regcache *regcache,
 		     mips64_elf_gregset_t *gregsetp, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int regaddr, regi;
   mips64_elf_greg_t *regp = *gregsetp;
   void *dst;
@@ -388,9 +394,10 @@ mips64_fill_gregset (const struct regcache *regcache,
       LONGEST val;
 
       regcache_raw_collect (regcache, regno, buf);
-      val = extract_signed_integer (buf, register_size (gdbarch, regno));
+      val = extract_signed_integer (buf, register_size (gdbarch, regno),
+				    byte_order);
       dst = regp + regaddr;
-      store_signed_integer (dst, 8, val);
+      store_signed_integer (dst, 8, byte_order, val);
     }
 }
 
@@ -440,6 +447,7 @@ mips64_fill_fpregset (const struct regcache *regcache,
 		      mips64_elf_fpregset_t *fpregsetp, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte *to;
 
   if ((regno >= gdbarch_fp0_regnum (gdbarch))
@@ -468,9 +476,10 @@ mips64_fill_fpregset (const struct regcache *regcache,
       LONGEST val;
 
       regcache_raw_collect (regcache, regno, buf);
-      val = extract_signed_integer (buf, register_size (gdbarch, regno));
+      val = extract_signed_integer (buf, register_size (gdbarch, regno),
+				    byte_order);
       to = (gdb_byte *) (*fpregsetp + 32);
-      store_signed_integer (to, 4, val);
+      store_signed_integer (to, 4, byte_order, val);
     }
   else if (regno == mips_regnum (gdbarch)->fp_implementation_revision)
     {
@@ -478,9 +487,10 @@ mips64_fill_fpregset (const struct regcache *regcache,
       LONGEST val;
 
       regcache_raw_collect (regcache, regno, buf);
-      val = extract_signed_integer (buf, register_size (gdbarch, regno));
+      val = extract_signed_integer (buf, register_size (gdbarch, regno),
+				    byte_order);
       to = (gdb_byte *) (*fpregsetp + 32) + 4;
-      store_signed_integer (to, 4, val);
+      store_signed_integer (to, 4, byte_order, val);
     }
   else if (regno == -1)
     {
@@ -605,6 +615,7 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc, char *name)
   unsigned char buf[28], *p;
   ULONGEST insn, insn1;
   int n64 = (mips_abi (target_gdbarch) == MIPS_ABI_N64);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
 
   read_memory (pc - 12, buf, 28);
 
@@ -622,7 +633,7 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc, char *name)
   p = buf + 12;
   while (p >= buf)
     {
-      insn = extract_unsigned_integer (p, 4);
+      insn = extract_unsigned_integer (p, 4, byte_order);
       if (insn == insn1)
 	break;
       p -= 4;
@@ -630,7 +641,7 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc, char *name)
   if (p < buf)
     return 0;
 
-  insn = extract_unsigned_integer (p + 4, 4);
+  insn = extract_unsigned_integer (p + 4, 4, byte_order);
   if (n64)
     {
       /* daddu t7,ra */
@@ -644,12 +655,12 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc, char *name)
 	return 0;
     }
 
-  insn = extract_unsigned_integer (p + 8, 4);
+  insn = extract_unsigned_integer (p + 8, 4, byte_order);
   /* jalr t9,ra */
   if (insn != 0x0320f809)
     return 0;
 
-  insn = extract_unsigned_integer (p + 12, 4);
+  insn = extract_unsigned_integer (p + 12, 4, byte_order);
   if (n64)
     {
       /* daddiu t8,zero,0 */

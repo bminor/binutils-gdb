@@ -154,9 +154,10 @@ alpha_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    floating point and 32-bit integers.  */
 
 static void
-alpha_lds (void *out, const void *in)
+alpha_lds (struct gdbarch *gdbarch, void *out, const void *in)
 {
-  ULONGEST mem     = extract_unsigned_integer (in, 4);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  ULONGEST mem     = extract_unsigned_integer (in, 4, byte_order);
   ULONGEST frac    = (mem >>  0) & 0x7fffff;
   ULONGEST sign    = (mem >> 31) & 1;
   ULONGEST exp_msb = (mem >> 30) & 1;
@@ -176,20 +177,21 @@ alpha_lds (void *out, const void *in)
     }
 
   reg = (sign << 63) | (exp << 52) | (frac << 29);
-  store_unsigned_integer (out, 8, reg);
+  store_unsigned_integer (out, 8, byte_order, reg);
 }
 
 /* Similarly, this represents exactly the conversion performed by
    the STS instruction.  */
 
 static void
-alpha_sts (void *out, const void *in)
+alpha_sts (struct gdbarch *gdbarch, void *out, const void *in)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST reg, mem;
 
-  reg = extract_unsigned_integer (in, 8);
+  reg = extract_unsigned_integer (in, 8, byte_order);
   mem = ((reg >> 32) & 0xc0000000) | ((reg >> 29) & 0x3fffffff);
-  store_unsigned_integer (out, 4, mem);
+  store_unsigned_integer (out, 4, byte_order, mem);
 }
 
 /* The alpha needs a conversion between register and memory format if the
@@ -215,7 +217,7 @@ alpha_register_to_value (struct frame_info *frame, int regnum,
   switch (TYPE_LENGTH (valtype))
     {
     case 4:
-      alpha_sts (out, in);
+      alpha_sts (get_frame_arch (frame), out, in);
       break;
     default:
       error (_("Cannot retrieve value from floating point register"));
@@ -231,7 +233,7 @@ alpha_value_to_register (struct frame_info *frame, int regnum,
   switch (TYPE_LENGTH (valtype))
     {
     case 4:
-      alpha_lds (out, in);
+      alpha_lds (get_frame_arch (frame), out, in);
       break;
     default:
       error (_("Cannot store value in floating point register"));
@@ -258,6 +260,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		       int nargs, struct value **args, CORE_ADDR sp,
 		       int struct_return, CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
   int accumulate_size = struct_return ? 8 : 0;
   struct alpha_arg
@@ -408,7 +411,8 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       write_memory (sp + offset - sizeof(arg_reg_buffer), contents, len);
     }
   if (struct_return)
-    store_unsigned_integer (arg_reg_buffer, ALPHA_REGISTER_SIZE, struct_addr);
+    store_unsigned_integer (arg_reg_buffer, ALPHA_REGISTER_SIZE,
+			    byte_order, struct_addr);
 
   /* Load the argument registers.  */
   for (i = 0; i < required_arg_regs; i++)
@@ -432,6 +436,8 @@ static void
 alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 			    gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int length = TYPE_LENGTH (valtype);
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
   ULONGEST l;
@@ -443,7 +449,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	{
 	case 4:
 	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, raw_buffer);
-	  alpha_sts (valbuf, raw_buffer);
+	  alpha_sts (gdbarch, valbuf, raw_buffer);
 	  break;
 
 	case 8:
@@ -486,7 +492,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
     default:
       /* Assume everything else degenerates to an integer.  */
       regcache_cooked_read_unsigned (regcache, ALPHA_V0_REGNUM, &l);
-      store_unsigned_integer (valbuf, length, l);
+      store_unsigned_integer (valbuf, length, byte_order, l);
       break;
     }
 }
@@ -509,7 +515,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
       switch (length)
 	{
 	case 4:
-	  alpha_lds (raw_buffer, valbuf);
+	  alpha_lds (gdbarch, raw_buffer, valbuf);
 	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM, raw_buffer);
 	  break;
 
@@ -634,15 +640,16 @@ alpha_after_prologue (CORE_ADDR pc)
 /* Read an instruction from memory at PC, looking through breakpoints.  */
 
 unsigned int
-alpha_read_insn (CORE_ADDR pc)
+alpha_read_insn (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[ALPHA_INSN_SIZE];
   int status;
 
   status = target_read_memory (pc, buf, sizeof (buf));
   if (status)
     memory_error (status, pc);
-  return extract_unsigned_integer (buf, sizeof (buf));
+  return extract_unsigned_integer (buf, sizeof (buf), byte_order);
 }
 
 /* To skip prologues, I use this predicate.  Returns either PC itself
@@ -686,7 +693,7 @@ alpha_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
      or in the gcc frame.  */
   for (offset = 0; offset < 100; offset += ALPHA_INSN_SIZE)
     {
-      inst = alpha_read_insn (pc + offset);
+      inst = alpha_read_insn (gdbarch, pc + offset);
 
       if ((inst & 0xffff0000) == 0x27bb0000)	/* ldah $gp,n($t12) */
 	continue;
@@ -721,7 +728,9 @@ alpha_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static int
 alpha_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR jb_addr;
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
 
@@ -731,7 +740,7 @@ alpha_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 			  raw_buffer, tdep->jb_elt_size))
     return 0;
 
-  *pc = extract_unsigned_integer (raw_buffer, tdep->jb_elt_size);
+  *pc = extract_unsigned_integer (raw_buffer, tdep->jb_elt_size, byte_order);
   return 1;
 }
 
@@ -810,7 +819,7 @@ alpha_sigtramp_frame_this_id (struct frame_info *this_frame,
     {
       int offset;
       code_addr = get_frame_pc (this_frame);
-      offset = tdep->dynamic_sigtramp_offset (code_addr);
+      offset = tdep->dynamic_sigtramp_offset (gdbarch, code_addr);
       if (offset >= 0)
 	code_addr -= offset;
       else
@@ -876,7 +885,7 @@ alpha_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
   /* Otherwise we should be in a signal frame.  */
   find_pc_partial_function (pc, &name, NULL, NULL);
-  if (gdbarch_tdep (gdbarch)->pc_in_sigtramp (pc, name))
+  if (gdbarch_tdep (gdbarch)->pc_in_sigtramp (gdbarch, pc, name))
     return 1;
 
   return 0;
@@ -931,7 +940,7 @@ alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
      nops, since this usually indicates padding between functions.  */
   for (pc -= ALPHA_INSN_SIZE; pc >= fence; pc -= ALPHA_INSN_SIZE)
     {
-      unsigned int insn = alpha_read_insn (pc);
+      unsigned int insn = alpha_read_insn (gdbarch, pc);
       switch (insn)
 	{
 	case 0:			/* invalid insn */
@@ -1027,7 +1036,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
 
       for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += ALPHA_INSN_SIZE)
 	{
-	  unsigned int word = alpha_read_insn (cur_pc);
+	  unsigned int word = alpha_read_insn (gdbarch, cur_pc);
 
 	  if ((word & 0xffff0000) == 0x23de0000)	/* lda $sp,n($sp) */
 	    {
@@ -1115,7 +1124,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
 	{
 	  while (cur_pc < (limit_pc + 80) && cur_pc < (start_pc + 80))
 	    {
-	      unsigned int word = alpha_read_insn (cur_pc);
+	      unsigned int word = alpha_read_insn (gdbarch, cur_pc);
 
 	      if ((word & 0xfc1f0000) == 0xb41e0000)	/* stq reg,n($sp) */
 		{
@@ -1358,13 +1367,14 @@ fp_register_sign_bit (LONGEST reg)
 static CORE_ADDR
 alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   unsigned int insn;
   unsigned int op;
   int regno;
   int offset;
   LONGEST rav;
 
-  insn = alpha_read_insn (pc);
+  insn = alpha_read_insn (gdbarch, pc);
 
   /* Opcode is top 6 bits. */
   op = (insn >> 26) & 0x3f;
@@ -1401,7 +1411,7 @@ alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
           case 0x33:              /* FBLE */
           case 0x32:              /* FBLT */
           case 0x35:              /* FBNE */
-            regno += gdbarch_fp0_regnum (get_frame_arch (frame));
+            regno += gdbarch_fp0_regnum (gdbarch);
 	}
       
       rav = get_frame_register_signed (frame, regno);

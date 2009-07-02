@@ -93,7 +93,8 @@ bsd_uthread_set_collect_uthread (struct gdbarch *gdbarch,
 static void
 bsd_uthread_check_magic (CORE_ADDR addr)
 {
-  ULONGEST magic = read_memory_unsigned_integer (addr, 4);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  ULONGEST magic = read_memory_unsigned_integer (addr, 4, byte_order);
 
   if (magic != BSD_UTHREAD_PTHREAD_MAGIC)
     error (_("Bad magic"));
@@ -136,13 +137,14 @@ bsd_uthread_lookup_address (const char *name, struct objfile *objfile)
 static int
 bsd_uthread_lookup_offset (const char *name, struct objfile *objfile)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   CORE_ADDR addr;
 
   addr = bsd_uthread_lookup_address (name, objfile);
   if (addr == 0)
     return 0;
 
-  return read_memory_unsigned_integer (addr, 4);
+  return read_memory_unsigned_integer (addr, 4, byte_order);
 }
 
 static CORE_ADDR
@@ -347,6 +349,7 @@ static ptid_t
 bsd_uthread_wait (struct target_ops *ops,
 		  ptid_t ptid, struct target_waitstatus *status, int options)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   CORE_ADDR addr;
   struct target_ops *beneath = find_target_beneath (ops);
 
@@ -372,7 +375,7 @@ bsd_uthread_wait (struct target_ops *ops,
          been read from the wrong virtual memory image.  */
       if (target_read_memory (addr, buf, 4) == 0)
 	{
-	  ULONGEST magic = extract_unsigned_integer (buf, 4);
+	  ULONGEST magic = extract_unsigned_integer (buf, 4, byte_order);
 	  if (magic == BSD_UTHREAD_PTHREAD_MAGIC)
 	    ptid = ptid_build (ptid_get_pid (ptid), 0, addr);
 	}
@@ -404,6 +407,7 @@ bsd_uthread_resume (struct target_ops *ops,
 static int
 bsd_uthread_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   struct target_ops *beneath = find_target_beneath (ops);
   CORE_ADDR addr = ptid_get_tid (inferior_ptid);
 
@@ -414,7 +418,7 @@ bsd_uthread_thread_alive (struct target_ops *ops, ptid_t ptid)
 
       bsd_uthread_check_magic (addr);
 
-      state = read_memory_unsigned_integer (addr + offset, 4);
+      state = read_memory_unsigned_integer (addr + offset, 4, byte_order);
       if (state == BSD_UTHREAD_PS_DEAD)
 	return 0;
     }
@@ -480,6 +484,7 @@ static char *bsd_uthread_state[] =
 static char *
 bsd_uthread_extra_thread_info (struct thread_info *info)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   CORE_ADDR addr = ptid_get_tid (info->ptid);
 
   if (addr != 0)
@@ -487,7 +492,7 @@ bsd_uthread_extra_thread_info (struct thread_info *info)
       int offset = bsd_uthread_thread_state_offset;
       ULONGEST state;
 
-      state = read_memory_unsigned_integer (addr + offset, 4);
+      state = read_memory_unsigned_integer (addr + offset, 4, byte_order);
       if (state < ARRAY_SIZE (bsd_uthread_state))
 	return bsd_uthread_state[state];
     }

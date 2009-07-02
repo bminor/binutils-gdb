@@ -162,6 +162,7 @@ static int
 procfs_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
                   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)
@@ -170,11 +171,11 @@ procfs_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
   if (endptr - ptr < 8 * 2)
     return -1;
 
-  *typep = extract_unsigned_integer (ptr, 4);
+  *typep = extract_unsigned_integer (ptr, 4, byte_order);
   ptr += 8;
   /* The size of data is always 64-bit.  If the application is 32-bit,
      it will be zero extended, as expected.  */
-  *valp = extract_unsigned_integer (ptr, 8);
+  *valp = extract_unsigned_integer (ptr, 8, byte_order);
   ptr += 8;
 
   *readptr = ptr;

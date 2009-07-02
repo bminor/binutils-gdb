@@ -246,6 +246,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int i = 0;	/* Number of characters printed */
   struct type *elttype;
   LONGEST val;
@@ -409,8 +410,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	}
       else
 	{
-	  val = extract_unsigned_integer (valaddr, TYPE_LENGTH (type));
-
+	  val = extract_unsigned_integer (valaddr,
+					  TYPE_LENGTH (type), byte_order);
 	  if (val == 0)
 	    fprintf_filtered (stream, ".FALSE.");
 	  else if (val == 1)

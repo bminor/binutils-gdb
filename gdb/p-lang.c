@@ -217,6 +217,7 @@ pascal_printstr (struct ui_file *stream, struct type *type,
 		 int force_ellipses,
 		 const struct value_print_options *options)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
@@ -227,7 +228,8 @@ pascal_printstr (struct ui_file *stream, struct type *type,
      the last byte of it is a null, we don't print that, in traditional C
      style.  */
   if ((!force_ellipses) && length > 0
-	&& extract_unsigned_integer (string + (length - 1) * width, width) == 0)
+	&& extract_unsigned_integer (string + (length - 1) * width, width,
+				     byte_order) == 0)
     length--;
 
   if (length == 0)
@@ -253,13 +255,14 @@ pascal_printstr (struct ui_file *stream, struct type *type,
 	  need_comma = 0;
 	}
 
-      current_char = extract_unsigned_integer (string + i * width, width);
+      current_char = extract_unsigned_integer (string + i * width, width,
+					       byte_order);
 
       rep1 = i + 1;
       reps = 1;
       while (rep1 < length 
-	     && extract_unsigned_integer (string + rep1 * width, width) 
-		== current_char)
+	     && extract_unsigned_integer (string + rep1 * width, width,
+					  byte_order) == current_char)
 	{
 	  ++rep1;
 	  ++reps;

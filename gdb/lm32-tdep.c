@@ -125,9 +125,11 @@ lm32_cannot_store_register (struct gdbarch *gdbarch, int regno)
 /* Analyze a function's prologue.  */
 
 static CORE_ADDR
-lm32_analyze_prologue (CORE_ADDR pc, CORE_ADDR limit,
+lm32_analyze_prologue (struct gdbarch *gdbarch,
+		       CORE_ADDR pc, CORE_ADDR limit,
 		       struct lm32_frame_cache *info)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned long instruction;
 
   /* Keep reading though instructions, until we come across an instruction 
@@ -137,7 +139,7 @@ lm32_analyze_prologue (CORE_ADDR pc, CORE_ADDR limit,
     {
 
       /* Read an instruction.  */
-      instruction = read_memory_integer (pc, 4);
+      instruction = read_memory_integer (pc, 4, byte_order);
 
       if ((LM32_OPCODE (instruction) == OP_SW)
 	  && (LM32_REG0 (instruction) == SIM_LM32_SP_REGNUM))
@@ -211,7 +213,7 @@ lm32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     limit_pc = pc + 100;	/* Magic.  */
 
   frame_info.saved_regs = saved_regs;
-  return lm32_analyze_prologue (pc, limit_pc, &frame_info);
+  return lm32_analyze_prologue (gdbarch, pc, limit_pc, &frame_info);
 }
 
 /* Create a breakpoint instruction.  */
@@ -235,6 +237,7 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      int nargs, struct value **args, CORE_ADDR sp,
 		      int struct_return, CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int first_arg_reg = SIM_LM32_R1_REGNUM;
   int num_arg_regs = 8;
   int i;
@@ -283,7 +286,7 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       contents = (gdb_byte *) value_contents (arg);
       len = TYPE_LENGTH (arg_type);
-      val = extract_unsigned_integer (contents, len);
+      val = extract_unsigned_integer (contents, len, byte_order);
 
       /* First num_arg_regs parameters are passed by registers, 
          and the rest are passed on the stack.  */
@@ -309,6 +312,8 @@ static void
 lm32_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int offset;
   ULONGEST l;
   CORE_ADDR return_buffer;
@@ -319,7 +324,7 @@ lm32_extract_return_value (struct type *type, struct regcache *regcache,
     {
       /* Return value is returned in a single register.  */
       regcache_cooked_read_unsigned (regcache, SIM_LM32_R1_REGNUM, &l);
-      store_unsigned_integer (valbuf, TYPE_LENGTH (type), l);
+      store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, l);
     }
   else if ((TYPE_CODE (type) == TYPE_CODE_INT) && (TYPE_LENGTH (type) == 8))
     {
@@ -345,19 +350,21 @@ static void
 lm32_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
   int len = TYPE_LENGTH (type);
 
   if (len <= 4)
     {
-      val = extract_unsigned_integer (valbuf, len);
+      val = extract_unsigned_integer (valbuf, len, byte_order);
       regcache_cooked_write_unsigned (regcache, SIM_LM32_R1_REGNUM, val);
     }
   else if (len <= 8)
     {
-      val = extract_unsigned_integer (valbuf, 4);
+      val = extract_unsigned_integer (valbuf, 4, byte_order);
       regcache_cooked_write_unsigned (regcache, SIM_LM32_R1_REGNUM, val);
-      val = extract_unsigned_integer (valbuf + 4, len - 4);
+      val = extract_unsigned_integer (valbuf + 4, len - 4, byte_order);
       regcache_cooked_write_unsigned (regcache, SIM_LM32_R2_REGNUM, val);
     }
   else
@@ -435,7 +442,8 @@ lm32_frame_cache (struct frame_info *this_frame, void **this_prologue_cache)
 
   info->pc = get_frame_func (this_frame);
   current_pc = get_frame_pc (this_frame);
-  lm32_analyze_prologue (info->pc, current_pc, info);
+  lm32_analyze_prologue (get_frame_arch (this_frame),
+			 info->pc, current_pc, info);
 
   /* Compute the frame's base, and the previous frame's SP.  */
   this_base = get_frame_register_unsigned (this_frame, SIM_LM32_SP_REGNUM);

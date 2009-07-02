@@ -453,9 +453,11 @@ v850_is_save_register (int reg)
    prologue.  */
 
 static CORE_ADDR
-v850_analyze_prologue (CORE_ADDR func_addr, CORE_ADDR pc,
+v850_analyze_prologue (struct gdbarch *gdbarch,
+		       CORE_ADDR func_addr, CORE_ADDR pc,
 		       struct v850_frame_cache *pi, ULONGEST ctbp)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR prologue_end, current_pc;
   struct pifsr pifsrs[E_NUM_REGS + 1];
   struct pifsr *pifsr, *pifsr_tmp;
@@ -488,11 +490,11 @@ v850_analyze_prologue (CORE_ADDR func_addr, CORE_ADDR pc,
       int insn;
       int insn2 = -1; /* dummy value */
 
-      insn = read_memory_integer (current_pc, 2);
+      insn = read_memory_integer (current_pc, 2, byte_order);
       current_pc += 2;
       if ((insn & 0x0780) >= 0x0600)	/* Four byte instruction? */
 	{
-	  insn2 = read_memory_integer (current_pc, 2);
+	  insn2 = read_memory_integer (current_pc, 2, byte_order);
 	  current_pc += 2;
 	}
 
@@ -520,7 +522,8 @@ v850_analyze_prologue (CORE_ADDR func_addr, CORE_ADDR pc,
 	  save_pc = current_pc;
 	  save_end = prologue_end;
 	  regsave_func_p = 1;
-	  current_pc = ctbp + (read_memory_unsigned_integer (adr, 2) & 0xffff);
+	  current_pc = ctbp + (read_memory_unsigned_integer (adr, 2, byte_order)
+			       & 0xffff);
 	  prologue_end = (current_pc
 			  + (2 * 3)	/* prepare list2,imm5,sp/imm */
 			  + 4		/* ctret */
@@ -671,6 +674,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
 		      int struct_return,
 		      CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argreg;
   int argnum;
   int len = 0;
@@ -705,7 +709,8 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
       if (!v850_type_is_scalar (value_type (*args))
 	  && TYPE_LENGTH (value_type (*args)) > E_MAX_RETTYPE_SIZE_IN_REGS)
 	{
-	  store_unsigned_integer (valbuf, 4, value_address (*args));
+	  store_unsigned_integer (valbuf, 4, byte_order,
+				  value_address (*args));
 	  len = 4;
 	  val = valbuf;
 	}
@@ -720,7 +725,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
 	  {
 	    CORE_ADDR regval;
 
-	    regval = extract_unsigned_integer (val, v850_reg_size);
+	    regval = extract_unsigned_integer (val, v850_reg_size, byte_order);
 	    regcache_cooked_write_unsigned (regcache, argreg, regval);
 
 	    len -= v850_reg_size;
@@ -751,6 +756,8 @@ static void
 v850_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
 
   if (len <= v850_reg_size)
@@ -758,7 +765,7 @@ v850_extract_return_value (struct type *type, struct regcache *regcache,
       ULONGEST val;
 
       regcache_cooked_read_unsigned (regcache, E_V0_REGNUM, &val);
-      store_unsigned_integer (valbuf, len, val);
+      store_unsigned_integer (valbuf, len, byte_order, val);
     }
   else if (len <= 2 * v850_reg_size)
     {
@@ -776,11 +783,14 @@ static void
 v850_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
 
   if (len <= v850_reg_size)
-      regcache_cooked_write_unsigned (regcache, E_V0_REGNUM,
-				      extract_unsigned_integer (valbuf, len));
+      regcache_cooked_write_unsigned
+	(regcache, E_V0_REGNUM,
+	 extract_unsigned_integer (valbuf, len, byte_order));
   else if (len <= 2 * v850_reg_size)
     {
       int i, regnum = E_V0_REGNUM;
@@ -834,6 +844,7 @@ v850_alloc_frame_cache (struct frame_info *this_frame)
 static struct v850_frame_cache *
 v850_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct v850_frame_cache *cache;
   CORE_ADDR current_pc;
   int i;
@@ -859,7 +870,7 @@ v850_frame_cache (struct frame_info *this_frame, void **this_cache)
     {
       ULONGEST ctbp;
       ctbp = get_frame_register_unsigned (this_frame, E_CTBP_REGNUM);
-      v850_analyze_prologue (cache->pc, current_pc, cache, ctbp);
+      v850_analyze_prologue (gdbarch, cache->pc, current_pc, cache, ctbp);
     }
 
   if (!cache->uses_fp)

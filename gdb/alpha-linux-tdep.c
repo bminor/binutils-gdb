@@ -44,9 +44,9 @@
 */
 
 static long
-alpha_linux_sigtramp_offset_1 (CORE_ADDR pc)
+alpha_linux_sigtramp_offset_1 (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  switch (alpha_read_insn (pc))
+  switch (alpha_read_insn (gdbarch, pc))
     {
     case 0x47de0410:		/* bis $30,$30,$16 */
     case 0x47fe0410:		/* bis $31,$30,$16 */
@@ -66,7 +66,7 @@ alpha_linux_sigtramp_offset_1 (CORE_ADDR pc)
 }
 
 static LONGEST
-alpha_linux_sigtramp_offset (CORE_ADDR pc)
+alpha_linux_sigtramp_offset (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   long i, off;
 
@@ -74,7 +74,7 @@ alpha_linux_sigtramp_offset (CORE_ADDR pc)
     return -1;
 
   /* Guess where we might be in the sequence.  */
-  off = alpha_linux_sigtramp_offset_1 (pc);
+  off = alpha_linux_sigtramp_offset_1 (gdbarch, pc);
   if (off < 0)
     return -1;
 
@@ -84,7 +84,7 @@ alpha_linux_sigtramp_offset (CORE_ADDR pc)
     {
       if (i == off)
 	continue;
-      if (alpha_linux_sigtramp_offset_1 (pc + i) != i)
+      if (alpha_linux_sigtramp_offset_1 (gdbarch, pc + i) != i)
 	return -1;
     }
 
@@ -92,14 +92,16 @@ alpha_linux_sigtramp_offset (CORE_ADDR pc)
 }
 
 static int
-alpha_linux_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+alpha_linux_pc_in_sigtramp (struct gdbarch *gdbarch,
+			    CORE_ADDR pc, char *func_name)
 {
-  return alpha_linux_sigtramp_offset (pc) >= 0;
+  return alpha_linux_sigtramp_offset (gdbarch, pc) >= 0;
 }
 
 static CORE_ADDR
 alpha_linux_sigcontext_addr (struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc;
   ULONGEST sp;
   long off;
@@ -107,7 +109,7 @@ alpha_linux_sigcontext_addr (struct frame_info *this_frame)
   pc = get_frame_pc (this_frame);
   sp = get_frame_register_unsigned (this_frame, ALPHA_SP_REGNUM);
 
-  off = alpha_linux_sigtramp_offset (pc);
+  off = alpha_linux_sigtramp_offset (gdbarch, pc);
   gdb_assert (off >= 0);
 
   /* __NR_rt_sigreturn has a couple of structures on the stack.  This is:
@@ -119,7 +121,7 @@ alpha_linux_sigcontext_addr (struct frame_info *this_frame)
 
 	offsetof (struct rt_sigframe, uc.uc_mcontext);
   */
-  if (alpha_read_insn (pc - off + 4) == 0x201f015f)
+  if (alpha_read_insn (gdbarch, pc - off + 4) == 0x201f015f)
     return sp + 176;
 
   /* __NR_sigreturn has the sigcontext structure at the top of the stack.  */

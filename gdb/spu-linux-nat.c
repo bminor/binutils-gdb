@@ -204,6 +204,7 @@ store_ppc_memory (ULONGEST memaddr, const gdb_byte *myaddr, int len)
 static int 
 parse_spufs_run (int *fd, ULONGEST *addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   gdb_byte buf[4];
   ULONGEST pc = fetch_ppc_register (32);  /* nip */
 
@@ -211,7 +212,7 @@ parse_spufs_run (int *fd, ULONGEST *addr)
   if (fetch_ppc_memory (pc-4, buf, 4) != 0)
     return 0;
   /* It should be a "sc" instruction.  */
-  if (extract_unsigned_integer (buf, 4) != INSTR_SC)
+  if (extract_unsigned_integer (buf, 4, byte_order) != INSTR_SC)
     return 0;
   /* System call number should be NR_spu_run.  */
   if (fetch_ppc_register (0) != NR_spu_run)
@@ -483,8 +484,10 @@ spu_fetch_inferior_registers (struct target_ops *ops,
   /* The ID register holds the spufs file handle.  */
   if (regno == -1 || regno == SPU_ID_REGNUM)
     {
+      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       char buf[4];
-      store_unsigned_integer (buf, 4, fd);
+      store_unsigned_integer (buf, 4, byte_order, fd);
       regcache_raw_supply (regcache, SPU_ID_REGNUM, buf);
     }
 

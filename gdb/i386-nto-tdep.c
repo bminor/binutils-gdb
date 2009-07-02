@@ -293,12 +293,14 @@ i386nto_sigtramp_p (struct frame_info *this_frame)
 static CORE_ADDR
 i386nto_sigcontext_addr (struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   char buf[4];
   CORE_ADDR ptrctx;
 
   /* We store __ucontext_t addr in EDI register.  */
   get_frame_register (this_frame, I386_EDI_REGNUM, buf);
-  ptrctx = extract_unsigned_integer (buf, 4);
+  ptrctx = extract_unsigned_integer (buf, 4, byte_order);
   ptrctx += 24 /* Context pointer is at this offset.  */;
 
   return ptrctx;

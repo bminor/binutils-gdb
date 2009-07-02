@@ -409,7 +409,7 @@ val_print_type_code_int (struct type *type, const gdb_byte *valaddr,
 
       if (TYPE_UNSIGNED (type)
 	  && extract_long_unsigned_integer (valaddr, TYPE_LENGTH (type),
-					    &val))
+					    byte_order, &val))
 	{
 	  print_longest (stream, 'u', 0, val);
 	}
@@ -605,10 +605,11 @@ void
 print_decimal_floating (const gdb_byte *valaddr, struct type *type,
 			struct ui_file *stream)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   char decstr[MAX_DECIMAL_STRING];
   unsigned len = TYPE_LENGTH (type);
 
-  decimal_to_string (valaddr, len, decstr);
+  decimal_to_string (valaddr, len, byte_order, decstr);
   fputs_filtered (decstr, stream);
   return;
 }
@@ -1268,7 +1269,7 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int *errnoptr
 
 int
 read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
-	     gdb_byte **buffer, int *bytes_read)
+	     enum bfd_endian byte_order, gdb_byte **buffer, int *bytes_read)
 {
   int found_nul;		/* Non-zero if we found the nul char.  */
   int errcode;			/* Errno returned from bad reads.  */
@@ -1340,7 +1341,7 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
 	    {
 	      unsigned long c;
 
-	      c = extract_unsigned_integer (bufptr, width);
+	      c = extract_unsigned_integer (bufptr, width, byte_order);
 	      addr += width;
 	      bufptr += width;
 	      if (c == 0)
@@ -1394,6 +1395,7 @@ val_print_string (struct type *elttype, CORE_ADDR addr, int len,
   gdb_byte *buffer = NULL;	/* Dynamically growable fetch buffer.  */
   struct cleanup *old_chain = NULL;	/* Top of the old cleanup chain.  */
   struct gdbarch *gdbarch = get_type_arch (elttype);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int width = TYPE_LENGTH (elttype);
 
   /* First we need to figure out the limit on the number of characters we are
@@ -1406,7 +1408,8 @@ val_print_string (struct type *elttype, CORE_ADDR addr, int len,
 
   fetchlimit = (len == -1 ? options->print_max : min (len, options->print_max));
 
-  errcode = read_string (addr, len, width, fetchlimit, &buffer, &bytes_read);
+  errcode = read_string (addr, len, width, fetchlimit, byte_order,
+			 &buffer, &bytes_read);
   old_chain = make_cleanup (xfree, buffer);
 
   addr += bytes_read;
@@ -1415,8 +1418,8 @@ val_print_string (struct type *elttype, CORE_ADDR addr, int len,
      terminated early due to an error or finding a null char when LEN is -1.  */
 
   /* Determine found_nul by looking at the last character read.  */
-  found_nul = extract_unsigned_integer (buffer + bytes_read - width, width) == 0;
-
+  found_nul = extract_unsigned_integer (buffer + bytes_read - width, width,
+					byte_order) == 0;
   if (len == -1 && !found_nul)
     {
       gdb_byte *peekbuf;
@@ -1428,7 +1431,7 @@ val_print_string (struct type *elttype, CORE_ADDR addr, int len,
       peekbuf = (gdb_byte *) alloca (width);
 
       if (target_read_memory (addr, peekbuf, width) == 0
-	  && extract_unsigned_integer (peekbuf, width) != 0)
+	  && extract_unsigned_integer (peekbuf, width, byte_order) != 0)
 	force_ellipsis = 1;
     }
   else if ((len >= 0 && errcode != 0) || (len > bytes_read / width))

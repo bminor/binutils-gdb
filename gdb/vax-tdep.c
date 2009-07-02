@@ -113,6 +113,8 @@ static CORE_ADDR
 vax_store_arguments (struct regcache *regcache, int nargs,
 		     struct value **args, CORE_ADDR sp)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   int count = 0;
   int i;
@@ -132,11 +134,11 @@ vax_store_arguments (struct regcache *regcache, int nargs,
 
   /* Push argument count.  */
   sp -= 4;
-  store_unsigned_integer (buf, 4, count);
+  store_unsigned_integer (buf, 4, byte_order, count);
   write_memory (sp, buf, 4);
 
   /* Update the argument pointer.  */
-  store_unsigned_integer (buf, 4, sp);
+  store_unsigned_integer (buf, 4, byte_order, sp);
   regcache_cooked_write (regcache, VAX_AP_REGNUM, buf);
 
   return sp;
@@ -148,6 +150,7 @@ vax_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     struct value **args, CORE_ADDR sp, int struct_return,
 		     CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR fp = sp;
   gdb_byte buf[4];
 
@@ -160,12 +163,12 @@ vax_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Store return address in the PC slot.  */
   sp -= 4;
-  store_unsigned_integer (buf, 4, bp_addr);
+  store_unsigned_integer (buf, 4, byte_order, bp_addr);
   write_memory (sp, buf, 4);
 
   /* Store the (fake) frame pointer in the FP slot.  */
   sp -= 4;
-  store_unsigned_integer (buf, 4, fp);
+  store_unsigned_integer (buf, 4, byte_order, fp);
   write_memory (sp, buf, 4);
 
   /* Skip the AP slot.  */
@@ -173,16 +176,16 @@ vax_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Store register save mask and control bits.  */
   sp -= 4;
-  store_unsigned_integer (buf, 4, 0);
+  store_unsigned_integer (buf, 4, byte_order, 0);
   write_memory (sp, buf, 4);
 
   /* Store condition handler.  */
   sp -= 4;
-  store_unsigned_integer (buf, 4, 0);
+  store_unsigned_integer (buf, 4, byte_order, 0);
   write_memory (sp, buf, 4);
 
   /* Update the stack pointer and frame pointer.  */
-  store_unsigned_integer (buf, 4, sp);
+  store_unsigned_integer (buf, 4, byte_order, sp);
   regcache_cooked_write (regcache, VAX_SP_REGNUM, buf);
   regcache_cooked_write (regcache, VAX_FP_REGNUM, buf);
 
@@ -269,26 +272,27 @@ vax_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
 static CORE_ADDR
 vax_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  gdb_byte op = read_memory_unsigned_integer (pc, 1);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  gdb_byte op = read_memory_unsigned_integer (pc, 1, byte_order);
 
   if (op == 0x11)
     pc += 2;			/* skip brb */
   if (op == 0x31)
     pc += 3;			/* skip brw */
   if (op == 0xC2
-      && (read_memory_unsigned_integer (pc + 2, 1)) == 0x5E)
+      && read_memory_unsigned_integer (pc + 2, 1, byte_order) == 0x5E)
     pc += 3;			/* skip subl2 */
   if (op == 0x9E
-      && (read_memory_unsigned_integer (pc + 1, 1)) == 0xAE
-      && (read_memory_unsigned_integer (pc + 3, 1)) == 0x5E)
+      && read_memory_unsigned_integer (pc + 1, 1, byte_order) == 0xAE
+      && read_memory_unsigned_integer (pc + 3, 1, byte_order) == 0x5E)
     pc += 4;			/* skip movab */
   if (op == 0x9E
-      && (read_memory_unsigned_integer (pc + 1, 1)) == 0xCE
-      && (read_memory_unsigned_integer (pc + 4, 1)) == 0x5E)
+      && read_memory_unsigned_integer (pc + 1, 1, byte_order) == 0xCE
+      && read_memory_unsigned_integer (pc + 4, 1, byte_order) == 0x5E)
     pc += 5;			/* skip movab */
   if (op == 0x9E
-      && (read_memory_unsigned_integer (pc + 1, 1)) == 0xEE
-      && (read_memory_unsigned_integer (pc + 6, 1)) == 0x5E)
+      && read_memory_unsigned_integer (pc + 1, 1, byte_order) == 0xEE
+      && read_memory_unsigned_integer (pc + 6, 1, byte_order) == 0x5E)
     pc += 7;			/* skip movab */
 
   return pc;

@@ -312,7 +312,8 @@ tryagain:
 	  if (!is_scmvalue_type (value_type (val)))
 	    error ("quoted scm form yields non-SCM value");
 	  svalue = extract_signed_integer (value_contents (val),
-					   TYPE_LENGTH (value_type (val)));
+					   TYPE_LENGTH (value_type (val)),
+					   gdbarch_byte_order (parse_gdbarch));
 	  goto handle_immediate;
 	}
       return;

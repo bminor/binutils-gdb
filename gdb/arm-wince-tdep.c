@@ -24,6 +24,7 @@
 #include "target.h"
 #include "solib.h"
 #include "solib-target.h"
+#include "frame.h"
 
 #include "gdb_string.h"
 
@@ -39,6 +40,8 @@ static const char arm_wince_thumb_le_breakpoint[] = { 0xfe, 0xdf };
 static CORE_ADDR
 arm_pe_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST indirect;
   struct minimal_symbol *indsym;
   char *symname;
@@ -50,11 +53,11 @@ arm_pe_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
        .dw __imp_<func>  */
 
   if (pc == 0
-      || read_memory_unsigned_integer (pc + 0, 4) != 0xe59fc000
-      || read_memory_unsigned_integer (pc + 4, 4) != 0xe59cf000)
+      || read_memory_unsigned_integer (pc + 0, 4, byte_order) != 0xe59fc000
+      || read_memory_unsigned_integer (pc + 4, 4, byte_order) != 0xe59cf000)
     return 0;
 
-  indirect = read_memory_unsigned_integer (pc + 8, 4);
+  indirect = read_memory_unsigned_integer (pc + 8, 4, byte_order);
   if (indirect == 0)
     return 0;
 
@@ -66,7 +69,7 @@ arm_pe_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   if (symname == NULL || strncmp (symname, "__imp_", 6) != 0)
     return 0;
 
-  next_pc = read_memory_unsigned_integer (indirect, 4);
+  next_pc = read_memory_unsigned_integer (indirect, 4, byte_order);
   if (next_pc != 0)
     return next_pc;
 

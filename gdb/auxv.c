@@ -82,6 +82,7 @@ default_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 {
   const int sizeof_auxv_field = gdbarch_ptr_bit (target_gdbarch)
 				/ TARGET_CHAR_BIT;
+  const enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)
@@ -90,9 +91,9 @@ default_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
   if (endptr - ptr < sizeof_auxv_field * 2)
     return -1;
 
-  *typep = extract_unsigned_integer (ptr, sizeof_auxv_field);
+  *typep = extract_unsigned_integer (ptr, sizeof_auxv_field, byte_order);
   ptr += sizeof_auxv_field;
-  *valp = extract_unsigned_integer (ptr, sizeof_auxv_field);
+  *valp = extract_unsigned_integer (ptr, sizeof_auxv_field, byte_order);
   ptr += sizeof_auxv_field;
 
   *readptr = ptr;

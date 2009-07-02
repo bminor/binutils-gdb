@@ -234,6 +234,7 @@ i386nbsd_sigtramp_cache_init (const struct tramp_frame *self,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, I386_ESP_REGNUM);
   CORE_ADDR base;
   int *reg_offset;
@@ -246,7 +247,7 @@ i386nbsd_sigtramp_cache_init (const struct tramp_frame *self,
       num_regs = ARRAY_SIZE (i386nbsd_sc_reg_offset);
 
       /* Read in the sigcontext address */
-      base = read_memory_unsigned_integer (sp + 8, 4);
+      base = read_memory_unsigned_integer (sp + 8, 4, byte_order);
     }
   else
     {
@@ -254,7 +255,7 @@ i386nbsd_sigtramp_cache_init (const struct tramp_frame *self,
       num_regs = ARRAY_SIZE (i386nbsd_mc_reg_offset);
 
       /* Read in the ucontext address */
-      base = read_memory_unsigned_integer (sp + 8, 4);
+      base = read_memory_unsigned_integer (sp + 8, 4, byte_order);
       /* offsetof(ucontext_t, uc_mcontext) == 36 */
       base += 36;
     }

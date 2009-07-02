@@ -320,6 +320,7 @@ sparc64_pseudo_register_read (struct gdbarch *gdbarch,
 			      struct regcache *regcache,
 			      int regnum, gdb_byte *buf)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_assert (regnum >= SPARC64_NUM_REGS);
 
   if (regnum >= SPARC64_D0_REGNUM && regnum <= SPARC64_D30_REGNUM)
@@ -370,7 +371,7 @@ sparc64_pseudo_register_read (struct gdbarch *gdbarch,
 	  state = (state >> 32) & ((1 << 8) - 1);
 	  break;
 	}
-      store_unsigned_integer (buf, 8, state);
+      store_unsigned_integer (buf, 8, byte_order, state);
     }
 }
 
@@ -379,6 +380,7 @@ sparc64_pseudo_register_write (struct gdbarch *gdbarch,
 			       struct regcache *regcache,
 			       int regnum, const gdb_byte *buf)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_assert (regnum >= SPARC64_NUM_REGS);
 
   if (regnum >= SPARC64_D0_REGNUM && regnum <= SPARC64_D30_REGNUM)
@@ -414,7 +416,7 @@ sparc64_pseudo_register_write (struct gdbarch *gdbarch,
       ULONGEST state, bits;
 
       regcache_raw_read_unsigned (regcache, SPARC64_STATE_REGNUM, &state);
-      bits = extract_unsigned_integer (buf, 8);
+      bits = extract_unsigned_integer (buf, 8, byte_order);
       switch (regnum)
 	{
 	case SPARC64_CWP_REGNUM:
@@ -486,6 +488,7 @@ static struct value *
 sparc64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 			     int regnum)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct sparc_frame_cache *cache =
     sparc64_frame_cache (this_frame, this_cache);
 
@@ -500,7 +503,7 @@ sparc64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 
   /* Handle StackGhost.  */
   {
-    ULONGEST wcookie = sparc_fetch_wcookie ();
+    ULONGEST wcookie = sparc_fetch_wcookie (gdbarch);
 
     if (wcookie != 0 && !cache->frameless_p && regnum == SPARC_I7_REGNUM)
       {
@@ -1166,7 +1169,9 @@ sparc64_supply_gregset (const struct sparc_gregset *gregset,
 			struct regcache *regcache,
 			int regnum, const void *gregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int sparc32 = (gdbarch_ptr_bit (gdbarch) == 32);
   const gdb_byte *regs = gregs;
   int i;
 
@@ -1178,10 +1183,10 @@ sparc64_supply_gregset (const struct sparc_gregset *gregset,
 	  ULONGEST tstate, psr;
 	  gdb_byte buf[4];
 
-	  tstate = extract_unsigned_integer (regs + offset, 8);
+	  tstate = extract_unsigned_integer (regs + offset, 8, byte_order);
 	  psr = ((tstate & TSTATE_CWP) | PSR_S | ((tstate & TSTATE_ICC) >> 12)
 		 | ((tstate & TSTATE_XCC) >> 20) | PSR_V8PLUS);
-	  store_unsigned_integer (buf, 4, psr);
+	  store_unsigned_integer (buf, 4, byte_order, psr);
 	  regcache_raw_supply (regcache, SPARC32_PSR_REGNUM, buf);
 	}
 
@@ -1280,7 +1285,9 @@ sparc64_collect_gregset (const struct sparc_gregset *gregset,
 			 const struct regcache *regcache,
 			 int regnum, void *gregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int sparc32 = (gdbarch_ptr_bit (gdbarch) == 32);
   gdb_byte *regs = gregs;
   int i;
 
@@ -1292,13 +1299,13 @@ sparc64_collect_gregset (const struct sparc_gregset *gregset,
 	  ULONGEST tstate, psr;
 	  gdb_byte buf[8];
 
-	  tstate = extract_unsigned_integer (regs + offset, 8);
+	  tstate = extract_unsigned_integer (regs + offset, 8, byte_order);
 	  regcache_raw_collect (regcache, SPARC32_PSR_REGNUM, buf);
-	  psr = extract_unsigned_integer (buf, 4);
+	  psr = extract_unsigned_integer (buf, 4, byte_order);
 	  tstate |= (psr & PSR_ICC) << 12;
 	  if ((psr & (PSR_VERS | PSR_IMPL)) == PSR_V8PLUS)
 	    tstate |= (psr & PSR_XCC) << 20;
-	  store_unsigned_integer (buf, 8, tstate);
+	  store_unsigned_integer (buf, 8, byte_order, tstate);
 	  memcpy (regs + offset, buf, 8);
 	}
 

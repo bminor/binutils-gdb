@@ -165,11 +165,12 @@ frame_unwind_got_constant (struct frame_info *frame, int regnum,
 			   ULONGEST val)
 {
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct value *reg_val;
 
   reg_val = value_zero (register_type (gdbarch, regnum), not_lval);
   store_unsigned_integer (value_contents_writeable (reg_val),
-			  register_size (gdbarch, regnum), val);
+			  register_size (gdbarch, regnum), byte_order, val);
   return reg_val;
 }
 

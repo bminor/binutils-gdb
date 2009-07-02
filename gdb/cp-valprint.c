@@ -564,12 +564,16 @@ void
 cp_print_class_member (const gdb_byte *valaddr, struct type *type,
 		       struct ui_file *stream, char *prefix)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+
   /* VAL is a byte offset into the structure type DOMAIN.
      Find the name of the field for that offset and
      print it.  */
   struct type *domain = TYPE_DOMAIN_TYPE (type);
-  LONGEST val = extract_signed_integer (valaddr, TYPE_LENGTH (type));
+  LONGEST val;
   unsigned int fieldno;
+
+  val = extract_signed_integer (valaddr, TYPE_LENGTH (type), byte_order);
 
   /* Pointers to data members are usually byte offsets into an object.
      Because a data member can have offset zero, and a NULL pointer to

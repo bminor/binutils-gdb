@@ -290,12 +290,14 @@ i386_linux_dwarf_signal_frame_p (struct gdbarch *gdbarch,
 static CORE_ADDR
 i386_linux_sigcontext_addr (struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc;
   CORE_ADDR sp;
   gdb_byte buf[4];
 
   get_frame_register (this_frame, I386_ESP_REGNUM, buf);
-  sp = extract_unsigned_integer (buf, 4);
+  sp = extract_unsigned_integer (buf, 4, byte_order);
 
   pc = i386_linux_sigtramp_start (this_frame);
   if (pc)
@@ -320,7 +322,7 @@ i386_linux_sigcontext_addr (struct frame_info *this_frame)
 	 pointer to the user context is passed as the third argument
 	 to the signal handler.  */
       read_memory (sp + 8, buf, 4);
-      ucontext_addr = extract_unsigned_integer (buf, 4);
+      ucontext_addr = extract_unsigned_integer (buf, 4, byte_order);
       return ucontext_addr + I386_LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
     }
 

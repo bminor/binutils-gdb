@@ -284,6 +284,8 @@ m68hc11_pseudo_register_read (struct gdbarch *gdbarch,
 			      struct regcache *regcache,
 			      int regno, gdb_byte *buf)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
   /* The PC is a pseudo reg only for 68HC12 with the memory bank
      addressing mode.  */
   if (regno == M68HC12_HARD_PC_REGNUM)
@@ -301,7 +303,7 @@ m68hc11_pseudo_register_read (struct gdbarch *gdbarch,
           pc += (page << 14);
           pc += 0x1000000;
         }
-      store_unsigned_integer (buf, regsize, pc);
+      store_unsigned_integer (buf, regsize, byte_order, pc);
       return;
     }
 
@@ -325,6 +327,8 @@ m68hc11_pseudo_register_write (struct gdbarch *gdbarch,
 			       struct regcache *regcache,
 			       int regno, const gdb_byte *buf)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
   /* The PC is a pseudo reg only for 68HC12 with the memory bank
      addressing mode.  */
   if (regno == M68HC12_HARD_PC_REGNUM)
@@ -334,7 +338,7 @@ m68hc11_pseudo_register_write (struct gdbarch *gdbarch,
       CORE_ADDR pc;
 
       memcpy (tmp, buf, regsize);
-      pc = extract_unsigned_integer (tmp, regsize);
+      pc = extract_unsigned_integer (tmp, regsize, byte_order);
       if (pc >= 0x1000000)
         {
           pc -= 0x1000000;
@@ -497,9 +501,11 @@ static struct insn_sequence m6812_prologue[] = {
    Returns a pointer to the sequence when it is recognized and
    the optional value (constant/address) associated with it.  */
 static struct insn_sequence *
-m68hc11_analyze_instruction (struct insn_sequence *seq, CORE_ADDR pc,
+m68hc11_analyze_instruction (struct gdbarch *gdbarch,
+			     struct insn_sequence *seq, CORE_ADDR pc,
                              CORE_ADDR *val)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned char buffer[MAX_CODES];
   unsigned bufsize;
   unsigned j;
@@ -515,7 +521,7 @@ m68hc11_analyze_instruction (struct insn_sequence *seq, CORE_ADDR pc,
           if (bufsize < j + 1)
             {
               buffer[bufsize] = read_memory_unsigned_integer (pc + bufsize,
-                                                              1);
+                                                              1, byte_order);
               bufsize++;
             }
           /* Continue while we match the opcode.  */
@@ -551,13 +557,13 @@ m68hc11_analyze_instruction (struct insn_sequence *seq, CORE_ADDR pc,
                 }
               else if ((buffer[j] & 0xfe) == 0xf0)
                 {
-                  v = read_memory_unsigned_integer (pc + j + 1, 1);
+                  v = read_memory_unsigned_integer (pc + j + 1, 1, byte_order);
                   if (buffer[j] & 1)
                     v |= 0xff00;
                 }
               else if (buffer[j] == 0xf2)
                 {
-                  v = read_memory_unsigned_integer (pc + j + 1, 2);
+                  v = read_memory_unsigned_integer (pc + j + 1, 2, byte_order);
                 }
               cur_val = v;
               break;
@@ -678,7 +684,7 @@ m68hc11_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
       struct insn_sequence *seq;
       CORE_ADDR val;
 
-      seq = m68hc11_analyze_instruction (seq_table, pc, &val);
+      seq = m68hc11_analyze_instruction (gdbarch, seq_table, pc, &val);
       if (seq == 0)
         break;
 
@@ -1158,6 +1164,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                          int nargs, struct value **args, CORE_ADDR sp,
                          int struct_return, CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argnum;
   int first_stack_argnum;
   struct type *type;
@@ -1180,7 +1187,8 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
         {
           ULONGEST v;
 
-          v = extract_unsigned_integer (value_contents (args[0]), len);
+          v = extract_unsigned_integer (value_contents (args[0]),
+					len, byte_order);
           first_stack_argnum = 1;
 
           regcache_cooked_write_unsigned (regcache, HARD_D_REGNUM, v);
@@ -1211,7 +1219,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Store return address.  */
   sp -= 2;
-  store_unsigned_integer (buf, 2, bp_addr);
+  store_unsigned_integer (buf, 2, byte_order, bp_addr);
   write_memory (sp, buf, 2);
 
   /* Finally, update the stack pointer...  */

@@ -514,6 +514,7 @@ gnuv3_decode_method_ptr (struct gdbarch *gdbarch,
 {
   struct type *funcptr_type = builtin_type (gdbarch)->builtin_func_ptr;
   struct type *offset_type = vtable_ptrdiff_type (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR ptr_value;
   LONGEST voffset, adjustment;
   int vbit;
@@ -525,9 +526,11 @@ gnuv3_decode_method_ptr (struct gdbarch *gdbarch,
      yet know which case we have, so we extract the value under both
      interpretations and choose the right one later on.  */
   ptr_value = extract_typed_address (contents, funcptr_type);
-  voffset = extract_signed_integer (contents, TYPE_LENGTH (funcptr_type));
+  voffset = extract_signed_integer (contents,
+				    TYPE_LENGTH (funcptr_type), byte_order);
   contents += TYPE_LENGTH (funcptr_type);
-  adjustment = extract_signed_integer (contents, TYPE_LENGTH (offset_type));
+  adjustment = extract_signed_integer (contents,
+				       TYPE_LENGTH (offset_type), byte_order);
 
   if (!gdbarch_vbit_in_delta (gdbarch))
     {
@@ -632,6 +635,7 @@ gnuv3_make_method_ptr (struct type *type, gdb_byte *contents,
   struct type *domain_type = check_typedef (TYPE_DOMAIN_TYPE (type));
   struct gdbarch *gdbarch = get_type_arch (domain_type);
   int size = TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* FIXME drow/2006-12-24: The adjustment of "this" is currently
      always zero, since the method pointer is of the correct type.
@@ -644,13 +648,13 @@ gnuv3_make_method_ptr (struct type *type, gdb_byte *contents,
 
   if (!gdbarch_vbit_in_delta (gdbarch))
     {
-      store_unsigned_integer (contents, size, value | is_virtual);
-      store_unsigned_integer (contents + size, size, 0);
+      store_unsigned_integer (contents, size, byte_order, value | is_virtual);
+      store_unsigned_integer (contents + size, size, byte_order, 0);
     }
   else
     {
-      store_unsigned_integer (contents, size, value);
-      store_unsigned_integer (contents + size, size, is_virtual);
+      store_unsigned_integer (contents, size, byte_order, value);
+      store_unsigned_integer (contents + size, size, byte_order, is_virtual);
     }
 }
 

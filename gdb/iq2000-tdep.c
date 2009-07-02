@@ -90,8 +90,10 @@ static CORE_ADDR
 iq2000_pointer_to_address (struct gdbarch *gdbarch,
 			   struct type * type, const gdb_byte * buf)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
-  CORE_ADDR addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
+  CORE_ADDR addr
+    = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 
   if (target == TYPE_CODE_FUNC
       || target == TYPE_CODE_METHOD
@@ -108,11 +110,12 @@ static void
 iq2000_address_to_pointer (struct gdbarch *gdbarch,
 			   struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
 
   if (target == TYPE_CODE_FUNC || target == TYPE_CODE_METHOD)
     addr = insn_ptr_from_addr (addr);
-  store_unsigned_integer (buf, TYPE_LENGTH (type), addr);
+  store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order, addr);
 }
 
 /* Real register methods: */
@@ -195,11 +198,13 @@ find_last_line_symbol (CORE_ADDR start, CORE_ADDR end, int notcurrent)
    Returns the address of the first instruction after the prologue.  */
 
 static CORE_ADDR
-iq2000_scan_prologue (CORE_ADDR scan_start,
+iq2000_scan_prologue (struct gdbarch *gdbarch,
+		      CORE_ADDR scan_start,
 		      CORE_ADDR scan_end,
 		      struct frame_info *fi,
 		      struct iq2000_frame_cache *cache)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct symtab_and_line sal;
   CORE_ADDR pc;
   CORE_ADDR loop_end;
@@ -234,7 +239,7 @@ iq2000_scan_prologue (CORE_ADDR scan_start,
 
   for (pc = scan_start; pc < loop_end; pc += 4)
     {
-      LONGEST insn = read_memory_unsigned_integer (pc, 4);
+      LONGEST insn = read_memory_unsigned_integer (pc, 4, byte_order);
       /* Skip any instructions writing to (sp) or decrementing the
          SP. */
       if ((insn & 0xffe00000) == 0xac200000)
@@ -351,7 +356,7 @@ iq2000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       /* No useable line symbol.  Use prologue parsing method.  */
       iq2000_init_frame_cache (&cache);
-      return iq2000_scan_prologue (func_addr, func_end, NULL, &cache);
+      return iq2000_scan_prologue (gdbarch, func_addr, func_end, NULL, &cache);
     }
 
   /* No function symbol -- just return the PC.  */
@@ -361,6 +366,7 @@ iq2000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static struct iq2000_frame_cache *
 iq2000_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct iq2000_frame_cache *cache;
   CORE_ADDR current_pc;
   int i;
@@ -379,7 +385,7 @@ iq2000_frame_cache (struct frame_info *this_frame, void **this_cache)
   current_pc = get_frame_pc (this_frame);
   find_pc_partial_function (current_pc, NULL, &cache->pc, NULL);
   if (cache->pc != 0)
-    iq2000_scan_prologue (cache->pc, current_pc, this_frame, cache);
+    iq2000_scan_prologue (gdbarch, cache->pc, current_pc, this_frame, cache);
   if (!cache->using_fp)
     cache->base = get_frame_register_unsigned (this_frame, E_SP_REGNUM);
 
@@ -531,6 +537,9 @@ static void
 iq2000_extract_return_value (struct type *type, struct regcache *regcache,
 			     void *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
   /* If the function's return value is 8 bytes or less, it is
      returned in a register, and if larger than 8 bytes, it is 
      returned in a stack location which is pointed to by the same
@@ -551,7 +560,7 @@ iq2000_extract_return_value (struct type *type, struct regcache *regcache,
 	  /* By using store_unsigned_integer we avoid having to
 	     do anything special for small big-endian values.  */
 	  regcache_cooked_read_unsigned (regcache, regno++, &tmp);
-	  store_unsigned_integer (valbuf, size, tmp);
+	  store_unsigned_integer (valbuf, size, byte_order, tmp);
 	  len -= size;
 	  valbuf = ((char *) valbuf) + size;
 	}
@@ -636,6 +645,7 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		        int nargs, struct value **args, CORE_ADDR sp,
 		        int struct_return, CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const bfd_byte *val;
   bfd_byte buf[4];
   struct type *type;
@@ -767,7 +777,7 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    regcache_cooked_write_unsigned (regcache, argreg++, struct_ptr);
 	  else
 	    {
-	      store_unsigned_integer (buf, 4, struct_ptr);
+	      store_unsigned_integer (buf, 4, byte_order, struct_ptr);
 	      write_memory (sp + stackspace, buf, 4);
 	      stackspace += 4;
 	    }

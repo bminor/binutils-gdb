@@ -305,7 +305,8 @@ extern char *target_read_stralloc (struct target_ops *ops,
 extern void get_target_memory (struct target_ops *ops, CORE_ADDR addr,
 			       gdb_byte *buf, LONGEST len);
 extern ULONGEST get_target_memory_unsigned (struct target_ops *ops,
-					    CORE_ADDR addr, int len);
+					    CORE_ADDR addr, int len,
+					    enum bfd_endian byte_order);
 
 struct thread_info;		/* fwd decl for parameter list below: */
 

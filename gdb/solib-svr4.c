@@ -465,6 +465,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
 static gdb_byte *
 read_program_header (int type, int *p_sect_size, int *p_arch_size)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   CORE_ADDR at_phdr, at_phent, at_phnum;
   int arch_size, sect_size;
   CORE_ADDR sect_addr;
@@ -501,7 +502,8 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size)
 				  (gdb_byte *)&phdr, sizeof (phdr)))
 	    return 0;
 
-	  if (extract_unsigned_integer ((gdb_byte *)phdr.p_type, 4) == type)
+	  if (extract_unsigned_integer ((gdb_byte *)phdr.p_type,
+					4, byte_order) == type)
 	    break;
 	}
 
@@ -509,8 +511,10 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size)
 	return 0;
 
       /* Retrieve address and size.  */
-      sect_addr = extract_unsigned_integer ((gdb_byte *)phdr.p_vaddr, 4);
-      sect_size = extract_unsigned_integer ((gdb_byte *)phdr.p_memsz, 4);
+      sect_addr = extract_unsigned_integer ((gdb_byte *)phdr.p_vaddr,
+					    4, byte_order);
+      sect_size = extract_unsigned_integer ((gdb_byte *)phdr.p_memsz,
+					    4, byte_order);
     }
   else
     {
@@ -524,7 +528,8 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size)
 				  (gdb_byte *)&phdr, sizeof (phdr)))
 	    return 0;
 
-	  if (extract_unsigned_integer ((gdb_byte *)phdr.p_type, 4) == type)
+	  if (extract_unsigned_integer ((gdb_byte *)phdr.p_type,
+					4, byte_order) == type)
 	    break;
 	}
 
@@ -532,8 +537,10 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size)
 	return 0;
 
       /* Retrieve address and size.  */
-      sect_addr = extract_unsigned_integer ((gdb_byte *)phdr.p_vaddr, 8);
-      sect_size = extract_unsigned_integer ((gdb_byte *)phdr.p_memsz, 8);
+      sect_addr = extract_unsigned_integer ((gdb_byte *)phdr.p_vaddr,
+					    8, byte_order);
+      sect_size = extract_unsigned_integer ((gdb_byte *)phdr.p_memsz,
+					    8, byte_order);
     }
 
   /* Read in requested program header.  */
@@ -673,6 +680,7 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
 static int
 scan_dyntag_auxv (int dyntag, CORE_ADDR *ptr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   int sect_size, arch_size, step;
   long dyn_tag;
   CORE_ADDR dyn_ptr;
@@ -693,14 +701,18 @@ scan_dyntag_auxv (int dyntag, CORE_ADDR *ptr)
     if (arch_size == 32)
       {
 	Elf32_External_Dyn *dynp = (Elf32_External_Dyn *) buf;
-	dyn_tag = extract_unsigned_integer ((gdb_byte *) dynp->d_tag, 4);
-	dyn_ptr = extract_unsigned_integer ((gdb_byte *) dynp->d_un.d_ptr, 4);
+	dyn_tag = extract_unsigned_integer ((gdb_byte *) dynp->d_tag,
+					    4, byte_order);
+	dyn_ptr = extract_unsigned_integer ((gdb_byte *) dynp->d_un.d_ptr,
+					    4, byte_order);
       }
     else
       {
 	Elf64_External_Dyn *dynp = (Elf64_External_Dyn *) buf;
-	dyn_tag = extract_unsigned_integer ((gdb_byte *) dynp->d_tag, 8);
-	dyn_ptr = extract_unsigned_integer ((gdb_byte *) dynp->d_un.d_ptr, 8);
+	dyn_tag = extract_unsigned_integer ((gdb_byte *) dynp->d_tag,
+					    8, byte_order);
+	dyn_ptr = extract_unsigned_integer ((gdb_byte *) dynp->d_un.d_ptr,
+					    8, byte_order);
       }
     if (dyn_tag == DT_NULL)
       break;
@@ -870,13 +882,14 @@ solib_svr4_r_ldsomap (struct svr4_info *info)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   ULONGEST version;
 
   /* Check version, and return zero if `struct r_debug' doesn't have
      the r_ldsomap member.  */
   version
     = read_memory_unsigned_integer (info->debug_base + lmo->r_version_offset,
-				    lmo->r_version_size);
+				    lmo->r_version_size, byte_order);
   if (version < 2 || lmo->r_ldsomap_offset == -1)
     return 0;
 

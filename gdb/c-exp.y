@@ -1181,7 +1181,8 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
 	    = parse_type->builtin_decfloat;
-	  decimal_from_string (putithere->typed_val_decfloat.val, 4, p);
+	  decimal_from_string (putithere->typed_val_decfloat.val, 4,
+			       gdbarch_byte_order (parse_gdbarch), p);
 	  p[len - 2] = 'd';
 	  return DECFLOAT;
 	}
@@ -1191,7 +1192,8 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
 	    = parse_type->builtin_decdouble;
-	  decimal_from_string (putithere->typed_val_decfloat.val, 8, p);
+	  decimal_from_string (putithere->typed_val_decfloat.val, 8,
+			       gdbarch_byte_order (parse_gdbarch), p);
 	  p[len - 2] = 'd';
 	  return DECFLOAT;
 	}
@@ -1201,7 +1203,8 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
 	    = parse_type->builtin_declong;
-	  decimal_from_string (putithere->typed_val_decfloat.val, 16, p);
+	  decimal_from_string (putithere->typed_val_decfloat.val, 16,
+			       gdbarch_byte_order (parse_gdbarch), p);
 	  p[len - 2] = 'd';
 	  return DECFLOAT;
 	}

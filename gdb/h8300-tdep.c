@@ -178,9 +178,10 @@ h8300_init_frame_cache (struct gdbarch *gdbarch,
    is used, it could be a byte, word or long move to registers r3-r5.  */
 
 static int
-h8300_is_argument_spill (CORE_ADDR pc)
+h8300_is_argument_spill (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  int w = read_memory_unsigned_integer (pc, 2);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int w = read_memory_unsigned_integer (pc, 2, byte_order);
 
   if ((IS_MOVB_RnRm (w) || IS_MOVW_RnRm (w) || IS_MOVL_RnRm (w))
       && (w & 0x70) <= 0x20	/* Rs is R0, R1 or R2 */
@@ -190,14 +191,16 @@ h8300_is_argument_spill (CORE_ADDR pc)
   if (IS_MOVB_Rn16_SP (w)
       && 8 <= (w & 0xf) && (w & 0xf) <= 10)	/* Rs is R0L, R1L, or R2L  */
     {
-      if (read_memory_integer (pc + 2, 2) < 0)	/* ... and d:16 is negative.  */
+      /* ... and d:16 is negative.  */
+      if (read_memory_integer (pc + 2, 2, byte_order) < 0)
 	return 4;
     }
   else if (IS_MOVB_EXT (w))
     {
-      if (IS_MOVB_Rn24_SP (read_memory_unsigned_integer (pc + 2, 2)))
+      if (IS_MOVB_Rn24_SP (read_memory_unsigned_integer (pc + 2,
+							 2, byte_order)))
 	{
-	  LONGEST disp = read_memory_integer (pc + 4, 4);
+	  LONGEST disp = read_memory_integer (pc + 4, 4, byte_order);
 
 	  /* ... and d:24 is negative.  */
 	  if (disp < 0 && disp > 0xffffff)
@@ -208,14 +211,15 @@ h8300_is_argument_spill (CORE_ADDR pc)
 	   && (w & 0xf) <= 2)	/* Rs is R0, R1, or R2 */
     {
       /* ... and d:16 is negative.  */
-      if (read_memory_integer (pc + 2, 2) < 0)
+      if (read_memory_integer (pc + 2, 2, byte_order) < 0)
 	return 4;
     }
   else if (IS_MOVW_EXT (w))
     {
-      if (IS_MOVW_Rn24_SP (read_memory_unsigned_integer (pc + 2, 2)))
+      if (IS_MOVW_Rn24_SP (read_memory_unsigned_integer (pc + 2,
+							 2, byte_order)))
 	{
-	  LONGEST disp = read_memory_integer (pc + 4, 4);
+	  LONGEST disp = read_memory_integer (pc + 4, 4, byte_order);
 
 	  /* ... and d:24 is negative.  */
 	  if (disp < 0 && disp > 0xffffff)
@@ -224,22 +228,22 @@ h8300_is_argument_spill (CORE_ADDR pc)
     }
   else if (IS_MOVL_PRE (w))
     {
-      int w2 = read_memory_integer (pc + 2, 2);
+      int w2 = read_memory_integer (pc + 2, 2, byte_order);
 
       if (IS_MOVL_Rn16_SP (w2)
 	  && (w2 & 0xf) <= 2)	/* Rs is ER0, ER1, or ER2 */
 	{
 	  /* ... and d:16 is negative.  */
-	  if (read_memory_integer (pc + 4, 2) < 0)
+	  if (read_memory_integer (pc + 4, 2, byte_order) < 0)
 	    return 6;
 	}
       else if (IS_MOVL_EXT (w2))
 	{
-	  int w3 = read_memory_integer (pc + 4, 2);
+	  int w3 = read_memory_integer (pc + 4, 2, byte_order);
 
-	  if (IS_MOVL_Rn24_SP (read_memory_integer (pc + 4, 2)))
+	  if (IS_MOVL_Rn24_SP (read_memory_integer (pc + 4, 2, byte_order)))
 	    {
-	      LONGEST disp = read_memory_integer (pc + 6, 4);
+	      LONGEST disp = read_memory_integer (pc + 6, 4, byte_order);
 
 	      /* ... and d:24 is negative.  */
 	      if (disp < 0 && disp > 0xffffff)
@@ -287,9 +291,11 @@ h8300_is_argument_spill (CORE_ADDR pc)
    */
 
 static CORE_ADDR
-h8300_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
+h8300_analyze_prologue (struct gdbarch *gdbarch,
+			CORE_ADDR pc, CORE_ADDR current_pc,
 			struct h8300_frame_cache *cache)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int op;
   int regno, i, spill_size;
 
@@ -298,7 +304,7 @@ h8300_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
   if (pc >= current_pc)
     return current_pc;
 
-  op = read_memory_unsigned_integer (pc, 4);
+  op = read_memory_unsigned_integer (pc, 4, byte_order);
 
   if (IS_PUSHFP_MOVESPFP (op))
     {
@@ -312,7 +318,7 @@ h8300_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
       pc += 4;
       if (pc >= current_pc)
         return current_pc;
-      op = read_memory_unsigned_integer (pc, 2);
+      op = read_memory_unsigned_integer (pc, 2, byte_order);
       if (IS_MOV_SP_FP (op))
 	{
 	  cache->uses_fp = 1;
@@ -322,7 +328,7 @@ h8300_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 
   while (pc < current_pc)
     {
-      op = read_memory_unsigned_integer (pc, 2);
+      op = read_memory_unsigned_integer (pc, 2, byte_order);
       if (IS_SUB2_SP (op))
 	{
 	  cache->sp_offset += 2;
@@ -335,12 +341,12 @@ h8300_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	}
       else if (IS_ADD_IMM_SP (op))
 	{
-	  cache->sp_offset += -read_memory_integer (pc + 2, 2);
+	  cache->sp_offset += -read_memory_integer (pc + 2, 2, byte_order);
 	  pc += 4;
 	}
       else if (IS_SUB_IMM_SP (op))
 	{
-	  cache->sp_offset += read_memory_integer (pc + 2, 2);
+	  cache->sp_offset += read_memory_integer (pc + 2, 2, byte_order);
 	  pc += 4;
 	}
       else if (IS_SUBL4_SP (op))
@@ -350,9 +356,9 @@ h8300_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	}
       else if (IS_MOV_IMM_Rn (op))
         {
-	  int offset = read_memory_integer (pc + 2, 2);
+	  int offset = read_memory_integer (pc + 2, 2, byte_order);
 	  regno = op & 0x000f;
-	  op = read_memory_unsigned_integer (pc + 4, 2);
+	  op = read_memory_unsigned_integer (pc + 4, 2, byte_order);
 	  if (IS_ADD_RnSP (op) && (op & 0x00f0) == regno)
 	    {
 	      cache->sp_offset -= offset;
@@ -375,7 +381,7 @@ h8300_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	}
       else if (op == 0x0100)
 	{
-	  op = read_memory_unsigned_integer (pc + 2, 2);
+	  op = read_memory_unsigned_integer (pc + 2, 2, byte_order);
 	  if (IS_PUSH (op))
 	    {
 	      regno = op & 0x000f;
@@ -389,7 +395,7 @@ h8300_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
       else if ((op & 0xffcf) == 0x0100)
 	{
 	  int op1;
-	  op1 = read_memory_unsigned_integer (pc + 2, 2);
+	  op1 = read_memory_unsigned_integer (pc + 2, 2, byte_order);
 	  if (IS_PUSH (op1))
 	    {
 	      /* Since the prefix is 0x01x0, this is not a simple pushm but a
@@ -413,7 +419,7 @@ h8300_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
   /* Check for spilling an argument register to the stack frame.
      This could also be an initializing store from non-prologue code,
      but I don't think there's any harm in skipping that.  */
-  while ((spill_size = h8300_is_argument_spill (pc)) > 0
+  while ((spill_size = h8300_is_argument_spill (gdbarch, pc)) > 0
          && pc + spill_size <= current_pc)
     pc += spill_size;
 
@@ -451,7 +457,7 @@ h8300_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache->pc = get_frame_func (this_frame);
   current_pc = get_frame_pc (this_frame);
   if (cache->pc != 0)
-    h8300_analyze_prologue (cache->pc, current_pc, cache);
+    h8300_analyze_prologue (gdbarch, cache->pc, current_pc, cache);
 
   if (!cache->uses_fp)
     {
@@ -558,7 +564,7 @@ h8300_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       /* No useable line symbol.  Use prologue parsing method.  */
       h8300_init_frame_cache (gdbarch, &cache);
-      return h8300_analyze_prologue (func_addr, func_end, &cache);
+      return h8300_analyze_prologue (gdbarch, func_addr, func_end, &cache);
     }
 
   /* No function symbol -- just return the PC.  */
@@ -635,6 +641,7 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		       int nargs, struct value **args, CORE_ADDR sp,
 		       int struct_return, CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int stack_alloc = 0, stack_offset = 0;
   int wordsize = BINWORD (gdbarch);
   int reg = E_ARG0_REGNUM;
@@ -698,8 +705,9 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	      for (offset = 0; offset < padded_len; offset += wordsize)
 		{
-		  ULONGEST word = extract_unsigned_integer (padded + offset,
-							    wordsize);
+		  ULONGEST word
+		    = extract_unsigned_integer (padded + offset,
+						wordsize, byte_order);
 		  regcache_cooked_write_unsigned (regcache, reg++, word);
 		}
 	    }
@@ -718,7 +726,7 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Store return address.  */
   sp -= wordsize;
-  write_memory_unsigned_integer (sp, wordsize, bp_addr);
+  write_memory_unsigned_integer (sp, wordsize, byte_order, bp_addr);
 
   /* Update stack pointer.  */
   regcache_cooked_write_unsigned (regcache, E_SP_REGNUM, sp);
@@ -736,6 +744,8 @@ static void
 h8300_extract_return_value (struct type *type, struct regcache *regcache,
 			    void *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
   ULONGEST c, addr;
 
@@ -744,20 +754,20 @@ h8300_extract_return_value (struct type *type, struct regcache *regcache,
     case 1:
     case 2:
       regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
-      store_unsigned_integer (valbuf, len, c);
+      store_unsigned_integer (valbuf, len, byte_order, c);
       break;
     case 4:			/* Needs two registers on plain H8/300 */
       regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
-      store_unsigned_integer (valbuf, 2, c);
+      store_unsigned_integer (valbuf, 2, byte_order, c);
       regcache_cooked_read_unsigned (regcache, E_RET1_REGNUM, &c);
-      store_unsigned_integer ((void *) ((char *) valbuf + 2), 2, c);
+      store_unsigned_integer ((void *)((char *) valbuf + 2), 2, byte_order, c);
       break;
     case 8:			/* long long is now 8 bytes.  */
       if (TYPE_CODE (type) == TYPE_CODE_INT)
 	{
 	  regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &addr);
-	  c = read_memory_unsigned_integer ((CORE_ADDR) addr, len);
-	  store_unsigned_integer (valbuf, len, c);
+	  c = read_memory_unsigned_integer ((CORE_ADDR) addr, len, byte_order);
+	  store_unsigned_integer (valbuf, len, byte_order, c);
 	}
       else
 	{
@@ -771,6 +781,8 @@ static void
 h8300h_extract_return_value (struct type *type, struct regcache *regcache,
 			     void *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
   ULONGEST c, addr;
 
@@ -780,15 +792,16 @@ h8300h_extract_return_value (struct type *type, struct regcache *regcache,
     case 2:
     case 4:
       regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
-      store_unsigned_integer (valbuf, len, c);
+      store_unsigned_integer (valbuf, len, byte_order, c);
       break;
     case 8:			/* long long is now 8 bytes.  */
       if (TYPE_CODE (type) == TYPE_CODE_INT)
 	{
 	  regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
-	  store_unsigned_integer (valbuf, 4, c);
+	  store_unsigned_integer (valbuf, 4, byte_order, c);
 	  regcache_cooked_read_unsigned (regcache, E_RET1_REGNUM, &c);
-	  store_unsigned_integer ((void *) ((char *) valbuf + 4), 4, c);
+	  store_unsigned_integer ((void *) ((char *) valbuf + 4), 4,
+				  byte_order, c);
 	}
       else
 	{
@@ -835,6 +848,8 @@ static void
 h8300_store_return_value (struct type *type, struct regcache *regcache,
 			  const void *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
   ULONGEST val;
 
@@ -842,11 +857,11 @@ h8300_store_return_value (struct type *type, struct regcache *regcache,
     {
     case 1:
     case 2:			/* short... */
-      val = extract_unsigned_integer (valbuf, len);
+      val = extract_unsigned_integer (valbuf, len, byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM, val);
       break;
     case 4:			/* long, float */
-      val = extract_unsigned_integer (valbuf, len);
+      val = extract_unsigned_integer (valbuf, len, byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM,
 				      (val >> 16) & 0xffff);
       regcache_cooked_write_unsigned (regcache, E_RET1_REGNUM, val & 0xffff);
@@ -862,6 +877,8 @@ static void
 h8300h_store_return_value (struct type *type, struct regcache *regcache,
 			   const void *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
   ULONGEST val;
 
@@ -870,11 +887,11 @@ h8300h_store_return_value (struct type *type, struct regcache *regcache,
     case 1:
     case 2:
     case 4:			/* long, float */
-      val = extract_unsigned_integer (valbuf, len);
+      val = extract_unsigned_integer (valbuf, len, byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM, val);
       break;
     case 8:
-      val = extract_unsigned_integer (valbuf, len);
+      val = extract_unsigned_integer (valbuf, len, byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM,
 				      (val >> 32) & 0xffffffff);
       regcache_cooked_write_unsigned (regcache, E_RET1_REGNUM,

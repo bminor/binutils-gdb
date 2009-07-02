@@ -347,7 +347,7 @@ struct gdbarch startup_gdbarch =
   0,  /* print_insn */
   0,  /* skip_trampoline_code */
   generic_skip_solib_resolver,  /* skip_solib_resolver */
-  0,  /* in_solib_return_trampoline */
+  generic_in_solib_return_trampoline,  /* in_solib_return_trampoline */
   generic_in_function_epilogue_p,  /* in_function_epilogue_p */
   0,  /* elf_make_msymbol_special */
   0,  /* coff_make_msymbol_special */
@@ -2682,7 +2682,7 @@ gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, char 
   gdb_assert (gdbarch->in_solib_return_trampoline != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_in_solib_return_trampoline called\n");
-  return gdbarch->in_solib_return_trampoline (pc, name);
+  return gdbarch->in_solib_return_trampoline (gdbarch, pc, name);
 }
 
 void

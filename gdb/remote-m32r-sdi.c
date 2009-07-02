@@ -917,6 +917,8 @@ static void
 m32r_fetch_register (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned long val, val2, regid;
 
   if (regno == -1)
@@ -947,7 +949,7 @@ m32r_fetch_register (struct target_ops *ops,
 
       /* We got the number the register holds, but gdb expects to see a
          value in the target byte ordering.  */
-      store_unsigned_integer (buffer, 4, val);
+      store_unsigned_integer (buffer, 4, byte_order, val);
       regcache_raw_supply (regcache, regno, buffer);
     }
   return;

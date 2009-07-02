@@ -294,6 +294,7 @@ static int
 mipsnbsd_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR jb_addr;
   char *buf;
 
@@ -305,8 +306,8 @@ mipsnbsd_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   			  NBSD_MIPS_JB_ELEMENT_SIZE (gdbarch)))
     return 0;
 
-  *pc = extract_unsigned_integer (buf, NBSD_MIPS_JB_ELEMENT_SIZE (gdbarch));
-
+  *pc = extract_unsigned_integer (buf, NBSD_MIPS_JB_ELEMENT_SIZE (gdbarch),
+				  byte_order);
   return 1;
 }
 

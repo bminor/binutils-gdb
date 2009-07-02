@@ -379,6 +379,7 @@ execute_cfa_program (struct dwarf2_fde *fde, gdb_byte *insn_ptr,
   CORE_ADDR pc = get_frame_pc (this_frame);
   int bytes_read;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   while (insn_ptr < insn_end && fs->pc <= pc)
     {
@@ -418,17 +419,17 @@ execute_cfa_program (struct dwarf2_fde *fde, gdb_byte *insn_ptr,
 	      break;
 
 	    case DW_CFA_advance_loc1:
-	      utmp = extract_unsigned_integer (insn_ptr, 1);
+	      utmp = extract_unsigned_integer (insn_ptr, 1, byte_order);
 	      fs->pc += utmp * fs->code_align;
 	      insn_ptr++;
 	      break;
 	    case DW_CFA_advance_loc2:
-	      utmp = extract_unsigned_integer (insn_ptr, 2);
+	      utmp = extract_unsigned_integer (insn_ptr, 2, byte_order);
 	      fs->pc += utmp * fs->code_align;
 	      insn_ptr += 2;
 	      break;
 	    case DW_CFA_advance_loc4:
-	      utmp = extract_unsigned_integer (insn_ptr, 4);
+	      utmp = extract_unsigned_integer (insn_ptr, 4, byte_order);
 	      fs->pc += utmp * fs->code_align;
 	      insn_ptr += 4;
 	      break;

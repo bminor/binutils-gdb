@@ -153,6 +153,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int i = 0;	/* Number of characters printed */
   unsigned len;
   struct type *elttype, *unresolved_elttype;
@@ -190,7 +191,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 			&& temp_len < options->print_max
 			&& extract_unsigned_integer (valaddr + embedded_offset
 						     + temp_len * eltlen,
-						     eltlen) == 0);
+						     eltlen, byte_order) == 0);
 		       ++temp_len)
 		    ;
 		  len = temp_len;

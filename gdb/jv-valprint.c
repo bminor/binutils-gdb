@@ -39,6 +39,7 @@ java_value_print (struct value *val, struct ui_file *stream,
 		  const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (value_type (val));
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct type *type;
   CORE_ADDR address;
   int i;
@@ -81,7 +82,7 @@ java_value_print (struct value *val, struct ui_file *stream,
       i = 0;
       read_memory (address + get_java_object_header_size (gdbarch), buf4, 4);
 
-      length = (long) extract_signed_integer (buf4, 4);
+      length = (long) extract_signed_integer (buf4, 4, byte_order);
       fprintf_filtered (stream, "{length: %ld", length);
 
       if (el_type == NULL)
@@ -110,7 +111,8 @@ java_value_print (struct value *val, struct ui_file *stream,
                      pulls a host sized pointer out of the target and
                      then extracts that as an address (while assuming
                      that the address is unsigned)!  */
-		  element = extract_unsigned_integer (buf, sizeof (buf));
+		  element = extract_unsigned_integer (buf, sizeof (buf),
+						      byte_order);
 		}
 
 	      for (reps = 1; i + reps < length; reps++)
@@ -121,7 +123,8 @@ java_value_print (struct value *val, struct ui_file *stream,
                      pulls a host sized pointer out of the target and
                      then extracts that as an address (while assuming
                      that the address is unsigned)!  */
-		  next_element = extract_unsigned_integer (buf, sizeof (buf));
+		  next_element = extract_unsigned_integer (buf, sizeof (buf),
+							   byte_order);
 		  if (next_element != element)
 		    break;
 		}

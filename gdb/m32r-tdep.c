@@ -248,15 +248,18 @@ static void
 m32r_store_return_value (struct type *type, struct regcache *regcache,
 			 const void *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR regval;
   int len = TYPE_LENGTH (type);
 
-  regval = extract_unsigned_integer (valbuf, len > 4 ? 4 : len);
+  regval = extract_unsigned_integer (valbuf, len > 4 ? 4 : len, byte_order);
   regcache_cooked_write_unsigned (regcache, RET1_REGNUM, regval);
 
   if (len > 4)
     {
-      regval = extract_unsigned_integer ((gdb_byte *) valbuf + 4, len - 4);
+      regval = extract_unsigned_integer ((gdb_byte *) valbuf + 4,
+					 len - 4, byte_order);
       regcache_cooked_write_unsigned (regcache, RET1_REGNUM + 1, regval);
     }
 }
@@ -265,9 +268,11 @@ m32r_store_return_value (struct type *type, struct regcache *regcache,
    should be cached because this thrashing is getting nuts.  */
 
 static int
-decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
+decode_prologue (struct gdbarch *gdbarch,
+		 CORE_ADDR start_pc, CORE_ADDR scan_limit,
 		 CORE_ADDR *pl_endptr, unsigned long *framelength)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned long framesize;
   int insn;
   int op1;
@@ -283,10 +288,10 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
   for (current_pc = start_pc; current_pc < scan_limit; current_pc += 2)
     {
       /* Check if current pc's location is readable. */
-      if (!safe_read_memory_integer (current_pc, 2, &return_value))
+      if (!safe_read_memory_integer (current_pc, 2, byte_order, &return_value))
 	return -1;
 
-      insn = read_memory_unsigned_integer (current_pc, 2);
+      insn = read_memory_unsigned_integer (current_pc, 2, byte_order);
 
       if (insn == 0x0000)
 	break;
@@ -308,25 +313,30 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 	      current_pc += 2;	/* skip the immediate data */
 
 	      /* Check if current pc's location is readable. */
-	      if (!safe_read_memory_integer (current_pc, 2, &return_value))
+	      if (!safe_read_memory_integer (current_pc, 2, byte_order,
+					     &return_value))
 		return -1;
 
 	      if (insn == 0x8faf)	/* add3 sp, sp, xxxx */
 		/* add 16 bit sign-extended offset */
 		{
 		  framesize +=
-		    -((short) read_memory_unsigned_integer (current_pc, 2));
+		    -((short) read_memory_unsigned_integer (current_pc,
+							    2, byte_order));
 		}
 	      else
 		{
 		  if (((insn >> 8) == 0xe4)	/* ld24 r4, xxxxxx; sub sp, r4 */
-		      && safe_read_memory_integer (current_pc + 2, 2,
+		      && safe_read_memory_integer (current_pc + 2,
+						   2, byte_order,
 						   &return_value)
 		      && read_memory_unsigned_integer (current_pc + 2,
-						       2) == 0x0f24)
+						       2, byte_order)
+			 == 0x0f24)
 		    /* subtract 24 bit sign-extended negative-offset */
 		    {
-		      insn = read_memory_unsigned_integer (current_pc - 2, 4);
+		      insn = read_memory_unsigned_integer (current_pc - 2,
+							   4, byte_order);
 		      if (insn & 0x00800000)	/* sign extend */
 			insn |= 0xff000000;	/* negative */
 		      else
@@ -452,6 +462,7 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 static CORE_ADDR
 m32r_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;
   LONGEST return_value;
@@ -478,11 +489,11 @@ m32r_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     func_end = pc + DEFAULT_SEARCH_LIMIT;
 
   /* If pc's location is not readable, just quit. */
-  if (!safe_read_memory_integer (pc, 4, &return_value))
+  if (!safe_read_memory_integer (pc, 4, byte_order, &return_value))
     return pc;
 
   /* Find the end of prologue.  */
-  if (decode_prologue (pc, func_end, &sal.end, NULL) < 0)
+  if (decode_prologue (gdbarch, pc, func_end, &sal.end, NULL) < 0)
     return pc;
 
   return sal.end;
@@ -669,6 +680,7 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct value **args, CORE_ADDR sp, int struct_return,
 		      CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int stack_offset, stack_alloc;
   int argreg = ARG1_REGNUM;
   int argnum;
@@ -713,7 +725,8 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (len > 8
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
-	  store_unsigned_integer (valbuf, 4, value_address (args[argnum]));
+	  store_unsigned_integer (valbuf, 4, byte_order,
+				  value_address (args[argnum]));
 	  typecode = TYPE_CODE_PTR;
 	  len = 4;
 	  val = valbuf;
@@ -741,7 +754,8 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      /* there's room in a register */
 	      regval =
 		extract_unsigned_integer (val,
-					  register_size (gdbarch, argreg));
+					  register_size (gdbarch, argreg),
+					  byte_order);
 	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
 	    }
 
@@ -767,6 +781,8 @@ static void
 m32r_extract_return_value (struct type *type, struct regcache *regcache,
 			   void *dst)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   bfd_byte *valbuf = dst;
   int len = TYPE_LENGTH (type);
   ULONGEST tmp;
@@ -774,14 +790,14 @@ m32r_extract_return_value (struct type *type, struct regcache *regcache,
   /* By using store_unsigned_integer we avoid having to do
      anything special for small big-endian values.  */
   regcache_cooked_read_unsigned (regcache, RET1_REGNUM, &tmp);
-  store_unsigned_integer (valbuf, (len > 4 ? len - 4 : len), tmp);
+  store_unsigned_integer (valbuf, (len > 4 ? len - 4 : len), byte_order, tmp);
 
   /* Ignore return values more than 8 bytes in size because the m32r
      returns anything more than 8 bytes in the stack. */
   if (len > 4)
     {
       regcache_cooked_read_unsigned (regcache, RET1_REGNUM + 1, &tmp);
-      store_unsigned_integer (valbuf + len - 4, 4, tmp);
+      store_unsigned_integer (valbuf + len - 4, 4, byte_order, tmp);
     }
 }
 

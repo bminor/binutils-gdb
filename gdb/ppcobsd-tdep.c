@@ -126,6 +126,8 @@ ppcobsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
 				struct frame_info *this_frame,
 				void **this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc = get_frame_pc (this_frame);
   CORE_ADDR start_pc = (pc & ~(ppcobsd_page_size - 1));
   const int *offset;
@@ -145,12 +147,13 @@ ppcobsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
 	continue;
 
       /* Check for "li r0,SYS_sigreturn".  */
-      insn = extract_unsigned_integer (buf, PPC_INSN_SIZE);
+      insn = extract_unsigned_integer (buf, PPC_INSN_SIZE, byte_order);
       if (insn != 0x38000067)
 	continue;
 
       /* Check for "sc".  */
-      insn = extract_unsigned_integer (buf + PPC_INSN_SIZE, PPC_INSN_SIZE);
+      insn = extract_unsigned_integer (buf + PPC_INSN_SIZE,
+				       PPC_INSN_SIZE, byte_order);
       if (insn != 0x44000002)
 	continue;
 
@@ -165,6 +168,7 @@ ppcobsd_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct trad_frame_cache *cache;
   CORE_ADDR addr, base, func;
   gdb_byte buf[PPC_INSN_SIZE];
@@ -185,7 +189,7 @@ ppcobsd_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* Calculate the offset where we can find `struct sigcontext'.  We
      base our calculation on the amount of stack space reserved by the
      first instruction of the signal trampoline.  */
-  insn = extract_unsigned_integer (buf, PPC_INSN_SIZE);
+  insn = extract_unsigned_integer (buf, PPC_INSN_SIZE, byte_order);
   sigcontext_offset = (0x10000 - (insn & 0x0000ffff)) + 8;
 
   base = get_frame_register_unsigned (this_frame, gdbarch_sp_regnum (gdbarch));

@@ -35,8 +35,8 @@
 #define SCM_LENGTH(x) (((unsigned long)SCM_CAR(x))>>8)
 #define SCM_NCONSP(x) (1 & (int)SCM_CAR(x))
 #define SCM_NECONSP(x) (SCM_NCONSP(x) && (1 != SCM_TYP3(x)))
-#define SCM_CAR(x) scm_get_field (x, 0, SCM_SIZE)
-#define SCM_CDR(x) scm_get_field (x, 1, SCM_SIZE)
+#define SCM_CAR(x) scm_get_field (x, 0, SCM_SIZE, SCM_BYTE_ORDER)
+#define SCM_CDR(x) scm_get_field (x, 1, SCM_SIZE, SCM_BYTE_ORDER)
 #define SCM_VELTS(x) ((SCM *)SCM_CDR(x))
 #define SCM_CLOSCAR(x) (SCM_CAR(x)-scm_tc3_closure)
 #define SCM_CODE(x) SCM_CAR(SCM_CLOSCAR (x))
@@ -52,7 +52,7 @@ extern int scm_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
 			  struct ui_file *, int,
 			  const struct value_print_options *);
 
-extern LONGEST scm_get_field (LONGEST, int, int);
+extern LONGEST scm_get_field (LONGEST, int, int, enum bfd_endian);
 
 extern int is_scmvalue_type (struct type *);
 

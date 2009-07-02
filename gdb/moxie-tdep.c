@@ -120,15 +120,18 @@ static void
 moxie_store_return_value (struct type *type, struct regcache *regcache,
 			 const void *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR regval;
   int len = TYPE_LENGTH (type);
 
   /* Things always get returned in RET1_REGNUM, RET2_REGNUM.  */
-  regval = extract_unsigned_integer (valbuf, len > 4 ? 4 : len);
+  regval = extract_unsigned_integer (valbuf, len > 4 ? 4 : len, byte_order);
   regcache_cooked_write_unsigned (regcache, RET1_REGNUM, regval);
   if (len > 4)
     {
-      regval = extract_unsigned_integer ((gdb_byte *) valbuf + 4, len - 4);
+      regval = extract_unsigned_integer ((gdb_byte *) valbuf + 4,
+					 len - 4, byte_order);
       regcache_cooked_write_unsigned (regcache, RET1_REGNUM + 1, regval);
     }
 }
@@ -144,6 +147,8 @@ moxie_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 		      struct moxie_frame_cache *cache,
 		      struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR next_addr;
   ULONGEST inst, inst2;
   LONGEST offset;
@@ -159,7 +164,7 @@ moxie_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 
   for (next_addr = start_addr; next_addr < end_addr; )
     {
-      inst = read_memory_unsigned_integer (next_addr, 2);
+      inst = read_memory_unsigned_integer (next_addr, 2, byte_order);
 
       /* Match "push $rN" where N is between 2 and 13 inclusive.  */
       if (inst >= 0x0614 && inst <= 0x061f)
@@ -174,8 +179,8 @@ moxie_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	 byte.  */
       else if (inst == 0x01f0)           /* ldi.l $r12, X */
 	{
-	  offset = read_memory_integer (next_addr + 2, 4);
-	  inst2 = read_memory_unsigned_integer (next_addr + 6, 2);
+	  offset = read_memory_integer (next_addr + 2, 4, byte_order);
+	  inst2 = read_memory_unsigned_integer (next_addr + 6, 2, byte_order);
 
 	  if (inst2 == 0x051f)           /* add.l $sp, $r12 */
 	    {
@@ -297,6 +302,8 @@ static void
 moxie_extract_return_value (struct type *type, struct regcache *regcache,
 			   void *dst)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   bfd_byte *valbuf = dst;
   int len = TYPE_LENGTH (type);
   ULONGEST tmp;
@@ -304,14 +311,14 @@ moxie_extract_return_value (struct type *type, struct regcache *regcache,
   /* By using store_unsigned_integer we avoid having to do
      anything special for small big-endian values.  */
   regcache_cooked_read_unsigned (regcache, RET1_REGNUM, &tmp);
-  store_unsigned_integer (valbuf, (len > 4 ? len - 4 : len), tmp);
+  store_unsigned_integer (valbuf, (len > 4 ? len - 4 : len), byte_order, tmp);
 
   /* Ignore return values more than 8 bytes in size because the moxie
      returns anything more than 8 bytes in the stack.  */
   if (len > 4)
     {
       regcache_cooked_read_unsigned (regcache, RET1_REGNUM + 1, &tmp);
-      store_unsigned_integer (valbuf + len - 4, 4, tmp);
+      store_unsigned_integer (valbuf + len - 4, 4, byte_order, tmp);
     }
 }
 

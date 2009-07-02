@@ -292,12 +292,13 @@ ada_emit_char (int c, struct type *type, struct ui_file *stream,
    or 2) of a character.  */
 
 static int
-char_at (const gdb_byte *string, int i, int type_len)
+char_at (const gdb_byte *string, int i, int type_len,
+	 enum bfd_endian byte_order)
 {
   if (type_len == 1)
     return string[i];
   else
-    return (int) extract_unsigned_integer (string + 2 * i, 2);
+    return (int) extract_unsigned_integer (string + 2 * i, 2, byte_order);
 }
 
 /* Wrapper around memcpy to make it legal argument to ui_file_put */
@@ -466,6 +467,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	  unsigned int length, int force_ellipses, int type_len,
 	  const struct value_print_options *options)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (elttype));
   unsigned int i;
   unsigned int things_printed = 0;
   int in_quotes = 0;
@@ -496,8 +498,8 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
       rep1 = i + 1;
       reps = 1;
       while (rep1 < length
-	     && char_at (string, rep1, type_len) == char_at (string, i,
-							     type_len))
+	     && char_at (string, rep1, type_len, byte_order)
+		== char_at (string, i, type_len, byte_order))
 	{
 	  rep1 += 1;
 	  reps += 1;
@@ -514,8 +516,8 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	      in_quotes = 0;
 	    }
 	  fputs_filtered ("'", stream);
-	  ada_emit_char (char_at (string, i, type_len), elttype, stream, '\'',
-			 type_len);
+	  ada_emit_char (char_at (string, i, type_len, byte_order),
+			 elttype, stream, '\'', type_len);
 	  fputs_filtered ("'", stream);
 	  fprintf_filtered (stream, _(" <repeats %u times>"), reps);
 	  i = rep1 - 1;
@@ -532,8 +534,8 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 		fputs_filtered ("\"", stream);
 	      in_quotes = 1;
 	    }
-	  ada_emit_char (char_at (string, i, type_len), elttype, stream, '"',
-			 type_len);
+	  ada_emit_char (char_at (string, i, type_len, byte_order),
+			 elttype, stream, '"', type_len);
 	  things_printed += 1;
 	}
     }
@@ -610,6 +612,7 @@ ada_val_print_array (struct type *type, const gdb_byte *valaddr,
 		     CORE_ADDR address, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   struct type *elttype = TYPE_TARGET_TYPE (type);
   unsigned int eltlen;
   unsigned int len;
@@ -641,7 +644,7 @@ ada_val_print_array (struct type *type, const gdb_byte *valaddr,
           for (temp_len = 0;
                (temp_len < len
                 && temp_len < options->print_max
-                && char_at (valaddr, temp_len, eltlen) != 0);
+                && char_at (valaddr, temp_len, eltlen, byte_order) != 0);
                temp_len += 1);
           len = temp_len;
         }

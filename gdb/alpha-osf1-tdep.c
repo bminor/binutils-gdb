@@ -27,7 +27,8 @@
 #include "alpha-tdep.h"
 
 static int
-alpha_osf1_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+alpha_osf1_pc_in_sigtramp (struct gdbarch *gdbarch,
+			   CORE_ADDR pc, char *func_name)
 {
   return (func_name != NULL && strcmp ("__sigtramp", func_name) == 0);
 }
@@ -35,13 +36,15 @@ alpha_osf1_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 static CORE_ADDR
 alpha_osf1_sigcontext_addr (struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct frame_info *next_frame = get_next_frame (this_frame);
   struct frame_id next_id = null_frame_id;
   
   if (next_frame != NULL)
     next_id = get_frame_id (next_frame);
 
-  return (read_memory_integer (next_id.stack_addr, 8));
+  return (read_memory_integer (next_id.stack_addr, 8, byte_order));
 }
 
 static void

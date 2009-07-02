@@ -68,11 +68,12 @@ is_scmvalue_type (struct type *type)
    of the 0'th one.  */
 
 LONGEST
-scm_get_field (LONGEST svalue, int index, int size)
+scm_get_field (LONGEST svalue, int index, int size,
+	       enum bfd_endian byte_order)
 {
   gdb_byte buffer[20];
   read_memory (SCM2PTR (svalue) + index * size, buffer, size);
-  return extract_signed_integer (buffer, size);
+  return extract_signed_integer (buffer, size, byte_order);
 }
 
 /* Unpack a value of type TYPE in buffer VALADDR as an integer
@@ -84,7 +85,10 @@ scm_unpack (struct type *type, const gdb_byte *valaddr, enum type_code context)
 {
   if (is_scmvalue_type (type))
     {
-      LONGEST svalue = extract_signed_integer (valaddr, TYPE_LENGTH (type));
+      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+      LONGEST svalue
+	= extract_signed_integer (valaddr, TYPE_LENGTH (type), byte_order);
+
       if (context == TYPE_CODE_BOOL)
 	{
 	  if (svalue == SCM_BOOL_F)

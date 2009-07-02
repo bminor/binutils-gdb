@@ -481,8 +481,10 @@ after_prologue (CORE_ADDR pc)
 }
 
 static CORE_ADDR 
-look_for_args_moves (CORE_ADDR start_pc, int media_mode)
+look_for_args_moves (struct gdbarch *gdbarch,
+		     CORE_ADDR start_pc, int media_mode)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR here, end;
   int w;
   int insn_size = (media_mode ? 4 : 2);
@@ -491,7 +493,8 @@ look_for_args_moves (CORE_ADDR start_pc, int media_mode)
     {
       if (media_mode)
 	{
-	  w = read_memory_integer (UNMAKE_ISA32_ADDR (here), insn_size);
+	  w = read_memory_integer (UNMAKE_ISA32_ADDR (here),
+				   insn_size, byte_order);
 	  here += insn_size;
 	  if (IS_MEDIA_IND_ARG_MOV (w))
 	    {
@@ -500,7 +503,7 @@ look_for_args_moves (CORE_ADDR start_pc, int media_mode)
 		 the SP has been saved, unfortunately.  */
 	 
 	      int next_insn = read_memory_integer (UNMAKE_ISA32_ADDR (here),
-						   insn_size);
+						   insn_size, byte_order);
 	      here += insn_size;
 	      if (IS_MEDIA_MOV_TO_R14 (next_insn))
 		start_pc = here;	  
@@ -515,7 +518,7 @@ look_for_args_moves (CORE_ADDR start_pc, int media_mode)
 	}
       else
 	{
-	  w = read_memory_integer (here, insn_size);
+	  w = read_memory_integer (here, insn_size, byte_order);
 	  w = w & 0xffff;
 	  here += insn_size;
 	  if (IS_COMPACT_IND_ARG_MOV (w))
@@ -524,7 +527,8 @@ look_for_args_moves (CORE_ADDR start_pc, int media_mode)
 		 is where the debug info says it is. This can happen after
 		 the SP has been saved, unfortunately.  */
 	 
-	      int next_insn = 0xffff & read_memory_integer (here, insn_size);
+	      int next_insn = 0xffff & read_memory_integer (here, insn_size,
+							    byte_order);
 	      here += insn_size;
 	      if (IS_COMPACT_MOV_TO_R14 (next_insn))
 		start_pc = here;
@@ -557,11 +561,13 @@ look_for_args_moves (CORE_ADDR start_pc, int media_mode)
 	      /* This must be followed by a JSR @r0 instruction and by
                  a NOP instruction. After these, the prologue is over!  */
 	 
-	      int next_insn = 0xffff & read_memory_integer (here, insn_size);
+	      int next_insn = 0xffff & read_memory_integer (here, insn_size,
+							    byte_order);
 	      here += insn_size;
 	      if (IS_JSR_R0 (next_insn))
 		{
-		  next_insn = 0xffff & read_memory_integer (here, insn_size);
+		  next_insn = 0xffff & read_memory_integer (here, insn_size,
+							    byte_order);
 		  here += insn_size;
 
 		  if (IS_NOP (next_insn))
@@ -577,8 +583,9 @@ look_for_args_moves (CORE_ADDR start_pc, int media_mode)
 }
 
 static CORE_ADDR
-sh64_skip_prologue_hard_way (CORE_ADDR start_pc)
+sh64_skip_prologue_hard_way (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR here, end;
   int updated_fp = 0;
   int insn_size = 4;
@@ -598,7 +605,8 @@ sh64_skip_prologue_hard_way (CORE_ADDR start_pc)
 
       if (media_mode)
 	{
-	  int w = read_memory_integer (UNMAKE_ISA32_ADDR (here), insn_size);
+	  int w = read_memory_integer (UNMAKE_ISA32_ADDR (here),
+				       insn_size, byte_order);
 	  here += insn_size;
 	  if (IS_STQ_R18_R14 (w) || IS_STQ_R18_R15 (w) || IS_STQ_R14_R15 (w)
 	      || IS_STL_R14_R15 (w) || IS_STL_R18_R15 (w)
@@ -617,13 +625,14 @@ sh64_skip_prologue_hard_way (CORE_ADDR start_pc)
 		/* Don't bail out yet, we may have arguments stored in
 		   registers here, according to the debug info, so that
 		   gdb can print the frames correctly.  */
-		start_pc = look_for_args_moves (here - insn_size, media_mode);
+		start_pc = look_for_args_moves (gdbarch,
+						here - insn_size, media_mode);
 		break;
 	      }
 	}
       else
 	{
-	  int w = 0xffff & read_memory_integer (here, insn_size);
+	  int w = 0xffff & read_memory_integer (here, insn_size, byte_order);
 	  here += insn_size;
 
 	  if (IS_STS_R0 (w) || IS_STS_PR (w)
@@ -643,7 +652,8 @@ sh64_skip_prologue_hard_way (CORE_ADDR start_pc)
 		/* Don't bail out yet, we may have arguments stored in
 		   registers here, according to the debug info, so that
 		   gdb can print the frames correctly.  */
-		start_pc = look_for_args_moves (here - insn_size, media_mode);
+		start_pc = look_for_args_moves (gdbarch,
+						here - insn_size, media_mode);
 		break;
 	      }
 	}
@@ -667,7 +677,7 @@ sh64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (post_prologue_pc != 0)
     return max (pc, post_prologue_pc);
   else
-    return sh64_skip_prologue_hard_way (pc);
+    return sh64_skip_prologue_hard_way (gdbarch, pc);
 }
 
 /* Should call_function allocate stack space for a struct return?  */
@@ -845,6 +855,7 @@ sh64_analyze_prologue (struct gdbarch *gdbarch,
   int gdb_register_number;
   int register_number;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   
   cache->sp_offset = 0;
 
@@ -866,13 +877,14 @@ sh64_analyze_prologue (struct gdbarch *gdbarch,
     {
       insn = read_memory_integer (cache->media_mode ? UNMAKE_ISA32_ADDR (pc)
 						    : pc,
-				  insn_size);
+				  insn_size, byte_order);
 
       if (!cache->media_mode)
 	{
 	  if (IS_STS_PR (insn))
 	    {
-	      int next_insn = read_memory_integer (pc + insn_size, insn_size);
+	      int next_insn = read_memory_integer (pc + insn_size,
+						   insn_size, byte_order);
 	      if (IS_MOV_TO_R15 (next_insn))
 		{
 		  cache->saved_regs[PR_REGNUM] =
@@ -1029,6 +1041,7 @@ sh64_push_dummy_call (struct gdbarch *gdbarch,
 		      CORE_ADDR sp, int struct_return,
 		      CORE_ADDR struct_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int stack_offset, stack_alloc;
   int int_argreg;
   int float_argreg;
@@ -1109,7 +1122,8 @@ sh64_push_dummy_call (struct gdbarch *gdbarch,
 	      if (int_argreg <= ARGLAST_REGNUM)
 		{			
 		  /* there's room in a register */
-		  regval = extract_unsigned_integer (val, argreg_size);
+		  regval = extract_unsigned_integer (val, argreg_size,
+						     byte_order);
 		  regcache_cooked_write_unsigned (regcache, int_argreg, regval);
 		}
 	      /* Store the value 8 bytes at a time.  This means that
@@ -1197,6 +1211,7 @@ sh64_extract_return_value (struct type *type, struct regcache *regcache,
 			   void *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -1587,6 +1602,7 @@ static void
 sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int reg_nr, gdb_byte *buffer)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int base_regnum;
   int portion;
   int offset = 0;
@@ -1726,17 +1742,17 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Get FPSCR into a local buffer */
       regcache_raw_read (regcache, fpscr_base_regnum, temp_buffer);
       /* Get value as an int.  */
-      fpscr_value = extract_unsigned_integer (temp_buffer, 4);
+      fpscr_value = extract_unsigned_integer (temp_buffer, 4, byte_order);
       /* Get SR into a local buffer */
       regcache_raw_read (regcache, sr_base_regnum, temp_buffer);
       /* Get value as an int.  */
-      sr_value = extract_unsigned_integer (temp_buffer, 4);
+      sr_value = extract_unsigned_integer (temp_buffer, 4, byte_order);
       /* Build the new value.  */
       fpscr_c_part1_value = fpscr_value & 0x3fffd;
       fpscr_c_part2_value = (sr_value & 0x7000) << 6;
       fpscr_c_value = fpscr_c_part1_value | fpscr_c_part2_value;
       /* Store that in out buffer!!! */
-      store_unsigned_integer (buffer, 4, fpscr_c_value);
+      store_unsigned_integer (buffer, 4, byte_order, fpscr_c_value);
       /* FIXME There is surely an endianness gotcha here.  */
     }
 
@@ -1754,6 +1770,7 @@ static void
 sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int reg_nr, const gdb_byte *buffer)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int base_regnum, portion;
   int offset;
   char temp_buffer[MAX_REGISTER_SIZE];
@@ -1892,7 +1909,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
        */
       /* *INDENT-ON* */
       /* Get value as an int.  */
-      fpscr_c_value = extract_unsigned_integer (buffer, 4);
+      fpscr_c_value = extract_unsigned_integer (buffer, 4, byte_order);
 
       /* Build the new values.  */
       fpscr_mask = 0x0003fffd;
@@ -1902,17 +1919,17 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       sr_value = (fpscr_value & sr_mask) >> 6;
       
       regcache_raw_read (regcache, fpscr_base_regnum, temp_buffer);
-      old_fpscr_value = extract_unsigned_integer (temp_buffer, 4);
+      old_fpscr_value = extract_unsigned_integer (temp_buffer, 4, byte_order);
       old_fpscr_value &= 0xfffc0002;
       fpscr_value |= old_fpscr_value;
-      store_unsigned_integer (temp_buffer, 4, fpscr_value);
+      store_unsigned_integer (temp_buffer, 4, byte_order, fpscr_value);
       regcache_raw_write (regcache, fpscr_base_regnum, temp_buffer);
       
       regcache_raw_read (regcache, sr_base_regnum, temp_buffer);
-      old_sr_value = extract_unsigned_integer (temp_buffer, 4);
+      old_sr_value = extract_unsigned_integer (temp_buffer, 4, byte_order);
       old_sr_value &= 0xffff8fff;
       sr_value |= old_sr_value;
-      store_unsigned_integer (temp_buffer, 4, sr_value);
+      store_unsigned_integer (temp_buffer, 4, byte_order, sr_value);
       regcache_raw_write (regcache, sr_base_regnum, temp_buffer);
     }
 
@@ -2321,6 +2338,7 @@ sh64_frame_prev_register (struct frame_info *this_frame,
 {
   struct sh64_frame_cache *cache = sh64_frame_cache (this_frame, this_cache);
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   gdb_assert (regnum >= 0);
 
@@ -2339,7 +2357,8 @@ sh64_frame_prev_register (struct frame_info *this_frame,
           && (regnum == MEDIA_FP_REGNUM || regnum == PR_REGNUM))
         {
 	  CORE_ADDR val;
-	  val = read_memory_unsigned_integer (cache->saved_regs[regnum], 4);
+	  val = read_memory_unsigned_integer (cache->saved_regs[regnum],
+					      4, byte_order);
 	  return frame_unwind_got_constant (this_frame, regnum, val);
         }
 
