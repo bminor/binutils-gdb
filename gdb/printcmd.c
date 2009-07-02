@@ -344,9 +344,10 @@ print_scalar_formatted (const void *valaddr, struct type *type,
 			const struct value_print_options *options,
 			int size, struct ui_file *stream)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
   LONGEST val_long = 0;
   unsigned int len = TYPE_LENGTH (type);
-  enum bfd_endian byte_order = gdbarch_byte_order (current_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* If we get here with a string format, try again without it.  Go
      all the way back to the language printers, which may call us
@@ -395,7 +396,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
      same, then at this point, the value's length (in target bytes) is
      gdbarch_addr_bit/TARGET_CHAR_BIT, not TYPE_LENGTH (type).  */
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    len = gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT;
+    len = gdbarch_addr_bit (gdbarch) / TARGET_CHAR_BIT;
 
   /* If we are printing it as unsigned, truncate it in case it is actually
      a negative signed value (e.g. "print/u (short)-1" should print 65535
@@ -454,13 +455,13 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       {
 	struct value_print_options opts = *options;
 	opts.format = 0;
+
 	if (TYPE_UNSIGNED (type))
-	  value_print (value_from_longest (builtin_type_true_unsigned_char,
-					   val_long),
-		       stream, &opts);
-	else
-	  value_print (value_from_longest (builtin_type_true_char, val_long),
-		       stream, &opts);
+	  type = builtin_type (gdbarch)->builtin_true_unsigned_char;
+ 	else
+	  type = builtin_type (gdbarch)->builtin_true_char;
+
+	value_print (value_from_longest (type, val_long), stream, &opts);
       }
       break;
 

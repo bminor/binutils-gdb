@@ -1,5 +1,22 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (builtin_type_true_char): Remove.
+	(builtin_type_true_unsigned_char): Likewise.
+	(struct builtin_type): Add builtin_true_char and
+	builtin_true_unsigned_char members.
+	* gdbtypes.c (builtin_type_true_char): Remove.
+	(builtin_type_true_unsigned_char): Likewise.
+	(_initialize_gdbtypes): Do not initialize them.
+	(gdbtypes_post_init): Initialize builtin_true_char and
+	builtin_true_unsigned_char members of builtin_type.
+
+	* printcmd.c (print_scalar_formatted): Use builtin_type
+	members instead of builtin_type_true_char and
+	builtin_type_true_unsigned_char.
+	* ada-valprint.c (ada_val_print_1): Likewise.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (builtin_type_void): Remove.
 	* gdbtypes.c (builtin_type_void): Remove.
 	(_initialize_gdbtypes): Do not initialize it.

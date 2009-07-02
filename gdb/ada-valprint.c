@@ -746,9 +746,10 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	  struct value *func = ada_vax_float_print_function (type);
 	  if (func != 0)
 	    {
+	      struct gdbarch *gdbarch = current_gdbarch;
 	      CORE_ADDR addr;
 	      addr = value_as_address (call_function_by_hand (func, 1, &val));
-	      val_print_string (builtin_type_true_char,
+	      val_print_string (builtin_type (gdbarch)->builtin_true_char,
 				addr, -1, stream, options);
 	      return 0;
 	    }

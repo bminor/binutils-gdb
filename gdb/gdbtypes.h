@@ -983,6 +983,13 @@ struct builtin_type
   struct type *builtin_decdouble;
   struct type *builtin_declong;
 
+  /* "True" character types.
+      We use these for the '/c' print format, because c_char is just a
+      one-byte integral type, which languages less laid back than C
+      will print as ... well, a one-byte integral type.  */
+  struct type *builtin_true_char;
+  struct type *builtin_true_unsigned_char;
+
 
   /* Pointer types.  */
 
@@ -1084,14 +1091,6 @@ extern struct type *builtin_type_m68881_ext;
 extern struct type *builtin_type_arm_ext;
 extern struct type *builtin_type_ia64_spill;
 extern struct type *builtin_type_ia64_quad;
-
-
-/* Platform-neutral character types.
-   We use these for the '/c' print format, because c_char is just a
-   one-byte integral type, which languages less laid back than C
-   will print as ... well, a one-byte integral type.  */
-extern struct type *builtin_type_true_char;
-extern struct type *builtin_type_true_unsigned_char;
 
 
 /* Maximum and minimum values of built-in types */

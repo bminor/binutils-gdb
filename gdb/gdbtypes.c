@@ -108,11 +108,6 @@ struct type *builtin_type_arm_ext;
 struct type *builtin_type_ia64_spill;
 struct type *builtin_type_ia64_quad;
 
-/* Platform-neutral character types.  */
-struct type *builtin_type_true_char;
-struct type *builtin_type_true_unsigned_char;
-
-
 int opaque_type_resolution = 1;
 static void
 show_opaque_type_resolution (struct ui_file *file, int from_tty,
@@ -3191,6 +3186,16 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 	       0,
 	       "_Decimal128", (struct objfile *) NULL);
 
+  /* "True" character types.  */
+  builtin_type->builtin_true_char =
+    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "true character", (struct objfile *) NULL);
+  builtin_type->builtin_true_unsigned_char =
+    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "true character", (struct objfile *) NULL);
+
   /* Default data/code pointer types.  */
   builtin_type->builtin_data_ptr =
     make_pointer_type (builtin_type->builtin_void, NULL);
@@ -3429,15 +3434,6 @@ _initialize_gdbtypes (void)
     build_flt (-1, "builtin_type_ia64_spill", floatformats_ia64_spill);
   builtin_type_ia64_quad =
     build_flt (-1, "builtin_type_ia64_quad", floatformats_ia64_quad);
-
-  builtin_type_true_char =
-    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "true character", (struct objfile *) NULL);
-  builtin_type_true_unsigned_char =
-    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "true character", (struct objfile *) NULL);
 
   add_setshow_zinteger_cmd ("overload", no_class, &overload_debug, _("\
 Set debugging of C++ overloading."), _("\
