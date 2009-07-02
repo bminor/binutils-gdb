@@ -1,5 +1,20 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* printcmd.c (next_gdbarch): New static variable.
+	(set_next_address, do_examine, x_command): Set it.
+	(decode_format): Use 'a' size to indicate width of an address.
+	(do_examine): Add GDBARCH argument.  Handle 'a' size.
+	(x_command): Pass architecture to do_examine.
+	Error if called without argument the first time.  
+	(do_one_display): Pass architecture to do_examine.
+
+	(examine_i_type, examine_b_type, examine_h_type, examine_w_type,
+	examine_g_type): Remove.
+	(_initialize_printcmd): Do not initialize them.
+	(do_examine): Use builin_type_int... instead of examine_..._type.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (struct builtin_type): Add internal_fn member.
 	* gdbtypes.c (gdbtypes_post_init): Initialize it.
 	* value.c (internal_fn_type): Remove.

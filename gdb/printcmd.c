@@ -82,8 +82,9 @@ static char last_format = 0;
 
 static char last_size = 'w';
 
-/* Default address to examine next.  */
+/* Default address to examine next, and associated architecture.  */
 
+static struct gdbarch *next_gdbarch;
 static CORE_ADDR next_address;
 
 /* Number of delay instructions following current disassembled insn.  */
@@ -231,18 +232,10 @@ decode_format (char **string_ptr, int oformat, int osize)
     switch (val.format)
       {
       case 'a':
-      case 's':
-	/* Pick the appropriate size for an address.  */
-	if (gdbarch_ptr_bit (current_gdbarch) == 64)
-	  val.size = osize ? 'g' : osize;
-	else if (gdbarch_ptr_bit (current_gdbarch) == 32)
-	  val.size = osize ? 'w' : osize;
-	else if (gdbarch_ptr_bit (current_gdbarch) == 16)
-	  val.size = osize ? 'h' : osize;
-	else
-	  /* Bad value for gdbarch_ptr_bit.  */
-	  internal_error (__FILE__, __LINE__,
-			  _("failed internal consistency check"));
+	/* Pick the appropriate size for an address.  This is deferred
+	   until do_examine when we know the actual architecture to use.
+	   A special size value of 'a' is used to indicate this case.  */
+	val.size = osize ? 'a' : osize;
 	break;
       case 'f':
 	/* Floating point has to be word or giantword.  */
@@ -540,6 +533,7 @@ set_next_address (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
+  next_gdbarch = gdbarch;
   next_address = addr;
 
   /* Make address available to the user as $_.  */
@@ -745,21 +739,11 @@ print_address_demangle (CORE_ADDR addr, struct ui_file *stream,
 }
 
 
-/* These are the types that $__ will get after an examine command of one
-   of these sizes.  */
-
-static struct type *examine_i_type;
-
-static struct type *examine_b_type;
-static struct type *examine_h_type;
-static struct type *examine_w_type;
-static struct type *examine_g_type;
-
 /* Examine data at address ADDR in format FMT.
    Fetch it from memory and print on gdb_stdout.  */
 
 static void
-do_examine (struct format_data fmt, CORE_ADDR addr)
+do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   char format = 0;
   char size;
@@ -772,6 +756,7 @@ do_examine (struct format_data fmt, CORE_ADDR addr)
   format = fmt.format;
   size = fmt.size;
   count = fmt.count;
+  next_gdbarch = gdbarch;
   next_address = addr;
 
   /* String or instruction format implies fetch single bytes
@@ -779,16 +764,29 @@ do_examine (struct format_data fmt, CORE_ADDR addr)
   if (format == 's' || format == 'i')
     size = 'b';
 
-  if (format == 'i')
-    val_type = examine_i_type;
-  else if (size == 'b')
-    val_type = examine_b_type;
+  if (size == 'a')
+    {
+      /* Pick the appropriate size for an address.  */
+      if (gdbarch_ptr_bit (next_gdbarch) == 64)
+	size = 'g';
+      else if (gdbarch_ptr_bit (next_gdbarch) == 32)
+	size = 'w';
+      else if (gdbarch_ptr_bit (next_gdbarch) == 16)
+	size = 'h';
+      else
+	/* Bad value for gdbarch_ptr_bit.  */
+	internal_error (__FILE__, __LINE__,
+			_("failed internal consistency check"));
+    }
+
+  if (size == 'b')
+    val_type = builtin_type_int8;
   else if (size == 'h')
-    val_type = examine_h_type;
+    val_type = builtin_type_int16;
   else if (size == 'w')
-    val_type = examine_w_type;
+    val_type = builtin_type_int32;
   else if (size == 'g')
-    val_type = examine_g_type;
+    val_type = builtin_type_int64;
 
   maxelts = 8;
   if (size == 'w')
@@ -1356,10 +1354,15 @@ x_command (char *exp, int from_tty)
 	next_address = value_address (val);
       else
 	next_address = value_as_address (val);
+
+      next_gdbarch = expr->gdbarch;
       do_cleanups (old_chain);
     }
 
-  do_examine (fmt, next_address);
+  if (!next_gdbarch)
+    error_no_arg (_("starting display address"));
+
+  do_examine (fmt, next_gdbarch, next_address);
 
   /* If the examine succeeds, we remember its size and format for next
      time.  */
@@ -1620,7 +1623,7 @@ do_one_display (struct display *d)
 
       annotate_display_value ();
 
-      do_examine (d->format, addr);
+      do_examine (d->format, d->exp->gdbarch, addr);
     }
   else
     {
@@ -2733,15 +2736,4 @@ Show printing of source filename and line number with <symbol>."), NULL,
 			   NULL,
 			   show_print_symbol_filename,
 			   &setprintlist, &showprintlist);
-
-  /* For examine/instruction a single byte quantity is specified as
-     the data.  This avoids problems with value_at_lazy() requiring a
-     valid data type (and rejecting VOID). */
-  examine_i_type = init_type (TYPE_CODE_INT, 1, 0, "examine_i_type", NULL);
-
-  examine_b_type = init_type (TYPE_CODE_INT, 1, 0, "examine_b_type", NULL);
-  examine_h_type = init_type (TYPE_CODE_INT, 2, 0, "examine_h_type", NULL);
-  examine_w_type = init_type (TYPE_CODE_INT, 4, 0, "examine_w_type", NULL);
-  examine_g_type = init_type (TYPE_CODE_INT, 8, 0, "examine_g_type", NULL);
-
 }

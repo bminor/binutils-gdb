@@ -798,17 +798,6 @@ gdb_test "whatis" "The history is empty." "whatis"
 #test where
 gdb_test "where" "No stack." "where"
 #test x
-#The case in which it prints a number is for vxgdb.
-send_gdb "x\n"
-gdb_expect {
-    -re "0x0:.*Cannot access memory at address 0x0..*$gdb_prompt $" {
-        pass "x"
-    }
-    -re "0x0:.*Error accessing memory address 0x0:.*$gdb_prompt $" {
-        pass "x"
-    }
-    -re ".*$gdb_prompt $" { fail "x" }
-    timeout { fail "(timeout) x" }
-}
+gdb_test "x" "Argument required .starting display address.*" "x"
 
 gdb_exit
