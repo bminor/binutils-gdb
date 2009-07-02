@@ -354,8 +354,8 @@ evaluate_struct_tuple (struct value *struct_val,
 	    bitpos += TYPE_FIELD_BITPOS (substruct_type, subfieldno);
 	  addr = value_contents_writeable (struct_val) + bitpos / 8;
 	  if (bitsize)
-	    modify_field (addr, value_as_long (val),
-			  bitpos % 8, bitsize);
+	    modify_field (struct_type, addr,
+			  value_as_long (val), bitpos % 8, bitsize);
 	  else
 	    memcpy (addr, value_contents (val),
 		    TYPE_LENGTH (value_type (val)));

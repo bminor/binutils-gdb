@@ -45,21 +45,6 @@ gnuv3_is_operator_name (const char *name)
 }
 
 
-/* Determine architecture of class DOMAIN.  This architecture is used
-   to query C++ ABI details (types, method pointer layout, etc.).
-
-   Note that we assume DOMAIN must have been allocated with an OBJFILE;
-   GDB does not provide any built-in class types.  Thus we use the
-   architecture of that OBJFILE to define the C++ ABI.  */
-
-static struct gdbarch *
-get_class_arch (struct type *domain)
-{
-  gdb_assert (TYPE_CODE (domain) == TYPE_CODE_CLASS);
-  gdb_assert (TYPE_OBJFILE (domain) != NULL);
-  return get_objfile_arch (TYPE_OBJFILE (domain));
-}
-
 /* To help us find the components of a vtable, we build ourselves a
    GDB type object representing the vtable structure.  Following the
    V3 ABI, it goes something like this:
@@ -227,14 +212,8 @@ gnuv3_rtti_type (struct value *value,
   if (TYPE_CODE (values_type) != TYPE_CODE_CLASS)
     return NULL;
 
-  /* This routine may be called for Java types that do not have
-     a proper objfile.  Just return NULL for those.  */
-  if (!TYPE_OBJFILE (values_type)
-      || !TYPE_OBJFILE (values_type)->obfd)
-    return NULL;
-
   /* Determine architecture.  */
-  gdbarch = get_class_arch (values_type);
+  gdbarch = get_type_arch (values_type);
   vtable_type = gdbarch_data (gdbarch, vtable_type_gdbarch_data);
 
   /* If we can't find the virtual table pointer for values_type, we
@@ -386,7 +365,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
     error (_("Only classes can have virtual functions."));
 
   /* Determine architecture.  */
-  gdbarch = get_class_arch (values_type);
+  gdbarch = get_type_arch (values_type);
 
   /* Cast our value to the base class which defines this virtual
      function.  This takes care of any necessary `this'
@@ -420,7 +399,7 @@ gnuv3_baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
   int vbasetype_vptr_fieldno;
 
   /* Determine architecture.  */
-  gdbarch = get_class_arch (type);
+  gdbarch = get_type_arch (type);
   vtable_type = gdbarch_data (gdbarch, vtable_type_gdbarch_data);
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
@@ -574,7 +553,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 			struct ui_file *stream)
 {
   struct type *domain = TYPE_DOMAIN_TYPE (type);
-  struct gdbarch *gdbarch = get_class_arch (domain);
+  struct gdbarch *gdbarch = get_type_arch (domain);
   CORE_ADDR ptr_value;
   LONGEST adjustment;
   int vbit;
@@ -640,7 +619,7 @@ static int
 gnuv3_method_ptr_size (struct type *type)
 {
   struct type *domain_type = check_typedef (TYPE_DOMAIN_TYPE (type));
-  struct gdbarch *gdbarch = get_class_arch (domain_type);
+  struct gdbarch *gdbarch = get_type_arch (domain_type);
   return 2 * TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
 }
 
@@ -651,7 +630,7 @@ gnuv3_make_method_ptr (struct type *type, gdb_byte *contents,
 		       CORE_ADDR value, int is_virtual)
 {
   struct type *domain_type = check_typedef (TYPE_DOMAIN_TYPE (type));
-  struct gdbarch *gdbarch = get_class_arch (domain_type);
+  struct gdbarch *gdbarch = get_type_arch (domain_type);
   int size = TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
 
   /* FIXME drow/2006-12-24: The adjustment of "this" is currently
@@ -693,7 +672,7 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
   method_type = TYPE_TARGET_TYPE (check_typedef (value_type (method_ptr)));
 
   /* Extract the pointer to member.  */
-  gdbarch = get_class_arch (domain_type);
+  gdbarch = get_type_arch (domain_type);
   vbit = gnuv3_decode_method_ptr (gdbarch, contents, &ptr_value, &adjustment);
 
   /* First convert THIS to match the containing type of the pointer to

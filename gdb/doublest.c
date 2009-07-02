@@ -761,27 +761,27 @@ floatformat_from_doublest (const struct floatformat *fmt,
    but not passed on by GDB.  This should be fixed.  */
 
 static const struct floatformat *
-floatformat_from_length (int len)
+floatformat_from_length (struct gdbarch *gdbarch, int len)
 {
   const struct floatformat *format;
-  if (len * TARGET_CHAR_BIT == gdbarch_float_bit (current_gdbarch))
-    format = gdbarch_float_format (current_gdbarch)
-	       [gdbarch_byte_order (current_gdbarch)];
-  else if (len * TARGET_CHAR_BIT == gdbarch_double_bit (current_gdbarch))
-    format = gdbarch_double_format (current_gdbarch)
-	       [gdbarch_byte_order (current_gdbarch)];
-  else if (len * TARGET_CHAR_BIT == gdbarch_long_double_bit (current_gdbarch))
-    format = gdbarch_long_double_format (current_gdbarch)
-	       [gdbarch_byte_order (current_gdbarch)];
+  if (len * TARGET_CHAR_BIT == gdbarch_float_bit (gdbarch))
+    format = gdbarch_float_format (gdbarch)
+	       [gdbarch_byte_order (gdbarch)];
+  else if (len * TARGET_CHAR_BIT == gdbarch_double_bit (gdbarch))
+    format = gdbarch_double_format (gdbarch)
+	       [gdbarch_byte_order (gdbarch)];
+  else if (len * TARGET_CHAR_BIT == gdbarch_long_double_bit (gdbarch))
+    format = gdbarch_long_double_format (gdbarch)
+	       [gdbarch_byte_order (gdbarch)];
   /* On i386 the 'long double' type takes 96 bits,
      while the real number of used bits is only 80,
      both in processor and in memory.  
      The code below accepts the real bit size.  */ 
-  else if ((gdbarch_long_double_format (current_gdbarch) != NULL) 
+  else if ((gdbarch_long_double_format (gdbarch) != NULL)
 	   && (len * TARGET_CHAR_BIT ==
-               gdbarch_long_double_format (current_gdbarch)[0]->totalsize))
-    format = gdbarch_long_double_format (current_gdbarch)
-	       [gdbarch_byte_order (current_gdbarch)];
+               gdbarch_long_double_format (gdbarch)[0]->totalsize))
+    format = gdbarch_long_double_format (gdbarch)
+	       [gdbarch_byte_order (gdbarch)];
   else
     format = NULL;
   if (format == NULL)
@@ -793,11 +793,12 @@ floatformat_from_length (int len)
 const struct floatformat *
 floatformat_from_type (const struct type *type)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
   if (TYPE_FLOATFORMAT (type) != NULL)
-    return TYPE_FLOATFORMAT (type)[gdbarch_byte_order (current_gdbarch)];
+    return TYPE_FLOATFORMAT (type)[gdbarch_byte_order (gdbarch)];
   else
-    return floatformat_from_length (TYPE_LENGTH (type));
+    return floatformat_from_length (gdbarch, TYPE_LENGTH (type));
 }
 
 /* Extract a floating-point number of type TYPE from a target-order

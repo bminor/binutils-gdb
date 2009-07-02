@@ -231,6 +231,7 @@ CORE_ADDR
 find_function_addr (struct value *function, struct type **retval_type)
 {
   struct type *ftype = check_typedef (value_type (function));
+  struct gdbarch *gdbarch = get_type_arch (ftype);
   enum type_code code = TYPE_CODE (ftype);
   struct type *value_type = NULL;
   CORE_ADDR funaddr;
@@ -251,8 +252,7 @@ find_function_addr (struct value *function, struct type **retval_type)
       if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
 	  || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
 	{
-	  funaddr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
-							funaddr,
+	  funaddr = gdbarch_convert_from_func_ptr_addr (gdbarch, funaddr,
 							&current_target);
 	  value_type = TYPE_TARGET_TYPE (ftype);
 	}
@@ -273,8 +273,7 @@ find_function_addr (struct value *function, struct type **retval_type)
 	      CORE_ADDR nfunaddr;
 	      funaddr = value_as_address (value_addr (function));
 	      nfunaddr = funaddr;
-	      funaddr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
-							    funaddr,
+	      funaddr = gdbarch_convert_from_func_ptr_addr (gdbarch, funaddr,
 							    &current_target);
 	      if (funaddr != nfunaddr)
 		found_descriptor = 1;
@@ -289,7 +288,7 @@ find_function_addr (struct value *function, struct type **retval_type)
 
   if (retval_type != NULL)
     *retval_type = value_type;
-  return funaddr + gdbarch_deprecated_function_start_offset (current_gdbarch);
+  return funaddr + gdbarch_deprecated_function_start_offset (gdbarch);
 }
 
 /* For CALL_DUMMY_ON_STACK, push a breakpoint sequence that the called

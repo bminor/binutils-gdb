@@ -1162,7 +1162,7 @@ set_internalvar_component (struct internalvar *var, int offset, int bitpos,
       addr = value_contents_writeable (var->u.value);
 
       if (bitsize)
-	modify_field (addr + offset,
+	modify_field (value_type (var->u.value), addr + offset,
 		      value_as_long (newval), bitpos, bitsize);
       else
 	memcpy (addr + offset, value_contents (newval),
@@ -1505,13 +1505,15 @@ value_as_double (struct value *val)
 CORE_ADDR
 value_as_address (struct value *val)
 {
+  struct gdbarch *gdbarch = get_type_arch (value_type (val));
+
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
 #if 0
   /* gdbarch_addr_bits_remove is wrong if we are being called for a
      non-address (e.g. argument to "signal", "info break", etc.), or
      for pointers to char, in which the low bits *are* significant.  */
-  return gdbarch_addr_bits_remove (current_gdbarch, value_as_long (val));
+  return gdbarch_addr_bits_remove (gdbarch, value_as_long (val));
 #else
 
   /* There are several targets (IA-64, PowerPC, and others) which
@@ -1596,8 +1598,8 @@ value_as_address (struct value *val)
 
   if (TYPE_CODE (value_type (val)) != TYPE_CODE_PTR
       && TYPE_CODE (value_type (val)) != TYPE_CODE_REF
-      && gdbarch_integer_to_address_p (current_gdbarch))
-    return gdbarch_integer_to_address (current_gdbarch, value_type (val),
+      && gdbarch_integer_to_address_p (gdbarch))
+    return gdbarch_integer_to_address (gdbarch, value_type (val),
 				       value_contents (val));
 
   return unpack_long (value_type (val), value_contents (val));
@@ -1988,7 +1990,7 @@ unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
 
   /* Extract bits.  See comment above. */
 
-  if (gdbarch_bits_big_endian (current_gdbarch))
+  if (gdbarch_bits_big_endian (get_type_arch (type)))
     lsbcount = (sizeof val * 8 - bitpos % 8 - bitsize);
   else
     lsbcount = (bitpos % 8);
@@ -2020,7 +2022,8 @@ unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
    0 <= BITPOS, where lbits is the size of a LONGEST in bits.  */
 
 void
-modify_field (gdb_byte *addr, LONGEST fieldval, int bitpos, int bitsize)
+modify_field (struct type *type, gdb_byte *addr,
+	      LONGEST fieldval, int bitpos, int bitsize)
 {
   ULONGEST oword;
   ULONGEST mask = (ULONGEST) -1 >> (8 * sizeof (ULONGEST) - bitsize);
@@ -2044,7 +2047,7 @@ modify_field (gdb_byte *addr, LONGEST fieldval, int bitpos, int bitsize)
   oword = extract_unsigned_integer (addr, sizeof oword);
 
   /* Shifting for bit field depends on endianness of the target machine.  */
-  if (gdbarch_bits_big_endian (current_gdbarch))
+  if (gdbarch_bits_big_endian (get_type_arch (type)))
     bitpos = sizeof (oword) * 8 - bitpos - bitsize;
 
   oword &= ~(mask << bitpos);

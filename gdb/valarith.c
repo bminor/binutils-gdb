@@ -233,7 +233,7 @@ value_bitstring_subscript (struct type *type,
   byte = *((char *) value_contents (bitstring) + offset);
 
   bit_index = index % TARGET_CHAR_BIT;
-  byte >>= (gdbarch_bits_big_endian (current_gdbarch) ?
+  byte >>= (gdbarch_bits_big_endian (get_type_arch (bitstring_type)) ?
 	    TARGET_CHAR_BIT - 1 - bit_index : bit_index);
 
   v = value_from_longest (type, byte & 1);
@@ -471,7 +471,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 struct value *
 value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct gdbarch *gdbarch = get_type_arch (value_type (arg1));
   struct value **argvec;
   char *ptr, *mangle_ptr;
   char tstr[13], mangle_tstr[13];
@@ -1479,7 +1479,7 @@ value_neg (struct value *arg1)
 
       memcpy (decbytes, value_contents (arg1), len);
 
-      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
+      if (gdbarch_byte_order (get_type_arch (type)) == BFD_ENDIAN_LITTLE)
 	decbytes[len-1] = decbytes[len - 1] | 0x80;
       else
 	decbytes[0] = decbytes[0] | 0x80;
@@ -1521,6 +1521,7 @@ value_complement (struct value *arg1)
 int
 value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
   LONGEST low_bound, high_bound;
   LONGEST word;
   unsigned rel_index;
@@ -1532,7 +1533,7 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
   rel_index = index - low_bound;
   word = extract_unsigned_integer (valaddr + (rel_index / TARGET_CHAR_BIT), 1);
   rel_index %= TARGET_CHAR_BIT;
-  if (gdbarch_bits_big_endian (current_gdbarch))
+  if (gdbarch_bits_big_endian (gdbarch))
     rel_index = TARGET_CHAR_BIT - 1 - rel_index;
   return (word >> rel_index) & 1;
 }

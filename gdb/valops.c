@@ -471,7 +471,7 @@ value_cast (struct type *type, struct value *arg2)
 	 otherwise occur when dealing with a target having two byte
 	 pointers and four byte addresses.  */
 
-      int addr_bit = gdbarch_addr_bit (current_gdbarch);
+      int addr_bit = gdbarch_addr_bit (get_type_arch (type2));
 
       LONGEST longest = value_as_long (arg2);
       if (addr_bit < sizeof (LONGEST) * HOST_CHAR_BIT)
@@ -808,7 +808,7 @@ value_assign (struct value *toval, struct value *fromval)
 		     (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
 	    read_memory (value_address (toval), buffer, changed_len);
-	    modify_field (buffer, value_as_long (fromval),
+	    modify_field (type, buffer, value_as_long (fromval),
 			  value_bitpos (toval), value_bitsize (toval));
 	    changed_addr = value_address (toval);
 	    dest_buffer = buffer;
@@ -869,9 +869,8 @@ value_assign (struct value *toval, struct value *fromval)
 					  value_offset (toval),
 					  changed_len, buffer);
 
-		modify_field (buffer, value_as_long (fromval),
-			      value_bitpos (toval), 
-			      value_bitsize (toval));
+		modify_field (type, buffer, value_as_long (fromval),
+			      value_bitpos (toval), value_bitsize (toval));
 
 		put_frame_register_bytes (frame, value_reg,
 					  value_offset (toval),
@@ -2947,7 +2946,7 @@ value_slice (struct value *array, int lowbound, int length)
 	  else if (element > 0)
 	    {
 	      int j = i % TARGET_CHAR_BIT;
-	      if (gdbarch_bits_big_endian (current_gdbarch))
+	      if (gdbarch_bits_big_endian (get_type_arch (array_type)))
 		j = TARGET_CHAR_BIT - 1 - j;
 	      value_contents_raw (slice)[i / TARGET_CHAR_BIT] |= (1 << j);
 	    }

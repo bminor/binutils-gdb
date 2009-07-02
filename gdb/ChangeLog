@@ -1,5 +1,81 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.c (make_pointer_type, make_reference_type,
+	smash_to_memberptr_type, lookup_array_range_type, check_stub_method):
+	Use type architecture instead of current_gdbarch.
+
+	* gdbtypes.h (address_space_name_to_int, address_space_int_to_name):
+	Add GDBARCH paramter.
+	* gdbtypes.c (address_space_name_to_int, address_space_int_to_name):
+	Add GDBARCH parameter.   Use it instead of current_gdbarch.
+	* c-typeprint.c (c_type_print_modifier): Update call.
+	* parse.c (push_type_address_space): Likewise.
+
+	* findvar.c (extract_typed_address, store_typed_address): Use type
+	architecture instead of current_gdbarch.
+
+	* value.c (value_as_address, unpack_field_as_long): Use type architecture
+	instead of current_gdbarch.
+
+	* doublest.c (floatformat_from_length): Add GDBARCH argument.  Use it
+	instead of current_gdbarch.
+	(floatformat_from_type): Pass type architecture.
+
+	* infcall.c (find_function_addr): Use type architecture instead
+	of current_gdbarch.
+
+	* valarith.c (value_bitstring_subscript, value_x_binop, value_neg,
+	value_bit_index): Use type architecture instead of current_gdbarch.
+	* valops.c (value_cast, value_slice): Likewise.
+
+	* value.h (modify_field): Add TYPE argument.
+	* value.c (modify_field): Add TYPE argument.  Use type architecture
+	instead of current_gdbarch.
+	(set_internalvar_component): Likewise.
+	* eval.c (evaluate_struct_tuple): Update call.
+	* valops.c (value_assign): Likewise.
+	* ada-lang.c (modify_general_field): Likewise.  Add TYPE argument.
+	(make_array_descriptor): Update calls.
+	(move_bits): Add BITS_BIG_ENDIAN_P argument.  Use it instead of
+	current_gdbarch.
+	(ada_value_assign, value_assign_to_component): Update calls.
+	(decode_packed_array, ada_value_primitive_packed_val, ada_value_assign,
+	value_assign_to_component): Use type arch instead of current_gdbarch.
+
+	* printcmd.c (float_type_from_length): Remove GDBARCH argument,
+	use type architecture instead.
+	(print_scalar_formatted, printf_command): Update calls.  Use type
+	architecture instead of current_gdbarch.
+	* valprint.c (val_print_type_code_int): Use type architecture
+	instead of current_gdbarch.
+	* varobj.c (value_get_print_value): Likewise.
+	* python/python-prettyprint.c (print_string_repr): Add GDBARCH
+	argument.  Use it instead of current_gdbarch.
+	(apply_val_pretty_printer): Update call.
+
+	* ada-valprint.c (ada_val_print_1): Use type architecture instead
+	of current_gdbarch.
+	* c-valprint.c (print_function_pointer_address): Add GDBARCH argument.
+	Use it instead of current_gdbarch.
+	(c_val_print): Update calls passing type architecture.
+	* f-valprint.c (f_val_print): Use type architecture instead of
+	current_gdbarch.
+	* jv-valprint (java_value_print): Likewise.
+	* m2-valprint.c (print_function_pointer_address): Add GDBARCH argument.
+	Use it instead of current_gdbarch.
+	(print_unpacked_pointer): Update calls passing type architecture.
+	* scm-valprint.c (scm_scmval_print): Use type architecture instead of
+	current_gdbarch.
+
+	* gnu-v3-abi.c (get_class_arch): Remove.
+	(gnuv3_rtti_type): Use get_type_arch instead of get_class_arch.  Remove
+	special-case check for Java classes.
+	(gnuv3_virtual_fn_field, gnuv3_baseclass_offset, gnuv3_print_method_ptr,
+	gnuv3_method_ptr_size, gnuv3_make_method_ptr, gnuv3_method_ptr_to_value):
+	Use get_type_arch instead of get_class_arch.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (TYPE_OBJFILE_OWNED, TYPE_OWNER): New macros.
 	(TYPE_OBJFILE, TYPE_ALLOC, TYPE_ZALLOC): Reimplement.
 	(alloc_type_arch): Add prototype.

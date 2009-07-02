@@ -401,7 +401,7 @@ void
 val_print_type_code_int (struct type *type, const gdb_byte *valaddr,
 			 struct ui_file *stream)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (current_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
 
   if (TYPE_LENGTH (type) > sizeof (LONGEST))
     {

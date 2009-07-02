@@ -67,7 +67,7 @@
 
 static void extract_string (CORE_ADDR addr, char *buf);
 
-static void modify_general_field (char *, LONGEST, int, int);
+static void modify_general_field (struct type *, char *, LONGEST, int, int);
 
 static struct type *desc_base_type (struct type *);
 
@@ -182,7 +182,7 @@ static struct value *decode_packed_array (struct value *);
 static struct value *value_subscript_packed (struct value *, int,
                                              struct value **);
 
-static void move_bits (gdb_byte *, int, const gdb_byte *, int, int);
+static void move_bits (gdb_byte *, int, const gdb_byte *, int, int, int);
 
 static struct value *coerce_unspec_val_to_type (struct value *,
                                                 struct type *);
@@ -1214,9 +1214,10 @@ static char *bound_name[] = {
 /* Like modify_field, but allows bitpos > wordlength.  */
 
 static void
-modify_general_field (char *addr, LONGEST fieldval, int bitpos, int bitsize)
+modify_general_field (struct type *type, char *addr,
+		      LONGEST fieldval, int bitpos, int bitsize)
 {
-  modify_field (addr + bitpos / 8, fieldval, bitpos % 8, bitsize);
+  modify_field (type, addr + bitpos / 8, fieldval, bitpos % 8, bitsize);
 }
 
 
@@ -1832,7 +1833,7 @@ decode_packed_array (struct value *arr)
       return NULL;
     }
 
-  if (gdbarch_bits_big_endian (current_gdbarch)
+  if (gdbarch_bits_big_endian (get_type_arch (value_type (arr)))
       && ada_is_modular_type (value_type (arr)))
     {
        /* This is a (right-justified) modular type representing a packed
@@ -1956,7 +1957,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   int len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
   /* Transmit bytes from least to most significant; delta is the direction
      the indices move.  */
-  int delta = gdbarch_bits_big_endian (current_gdbarch) ? -1 : 1;
+  int delta = gdbarch_bits_big_endian (get_type_arch (type)) ? -1 : 1;
 
   type = ada_check_typedef (type);
 
@@ -2005,7 +2006,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       memset (unpacked, 0, TYPE_LENGTH (type));
       return v;
     }
-  else if (gdbarch_bits_big_endian (current_gdbarch))
+  else if (gdbarch_bits_big_endian (get_type_arch (type)))
     {
       src = len - 1;
       if (has_negatives (type)
@@ -2091,7 +2092,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
    not overlap.  */
 static void
 move_bits (gdb_byte *target, int targ_offset, const gdb_byte *source,
-	   int src_offset, int n)
+	   int src_offset, int n, int bits_big_endian_p)
 {
   unsigned int accum, mask;
   int accum_bits, chunk_size;
@@ -2100,7 +2101,7 @@ move_bits (gdb_byte *target, int targ_offset, const gdb_byte *source,
   targ_offset %= HOST_CHAR_BIT;
   source += src_offset / HOST_CHAR_BIT;
   src_offset %= HOST_CHAR_BIT;
-  if (gdbarch_bits_big_endian (current_gdbarch))
+  if (bits_big_endian_p)
     {
       accum = (unsigned char) *source;
       source += 1;
@@ -2192,12 +2193,12 @@ ada_value_assign (struct value *toval, struct value *fromval)
       from_size = value_bitsize (fromval);
       if (from_size == 0)
 	from_size = TYPE_LENGTH (value_type (fromval)) * TARGET_CHAR_BIT;
-      if (gdbarch_bits_big_endian (current_gdbarch))
+      if (gdbarch_bits_big_endian (get_type_arch (type)))
         move_bits (buffer, value_bitpos (toval),
-		   value_contents (fromval), from_size - bits, bits);
+		   value_contents (fromval), from_size - bits, bits, 1);
       else
-        move_bits (buffer, value_bitpos (toval), value_contents (fromval),
-                   0, bits);
+        move_bits (buffer, value_bitpos (toval),
+		   value_contents (fromval), 0, bits, 0);
       write_memory (to_addr, buffer, len);
       if (deprecated_memory_changed_hook)
 	deprecated_memory_changed_hook (to_addr, len);
@@ -2236,16 +2237,16 @@ value_assign_to_component (struct value *container, struct value *component,
   else
     bits = value_bitsize (component);
 
-  if (gdbarch_bits_big_endian (current_gdbarch))
+  if (gdbarch_bits_big_endian (get_type_arch (value_type (container))))
     move_bits (value_contents_writeable (container) + offset_in_container, 
 	       value_bitpos (container) + bit_offset_in_container,
 	       value_contents (val),
 	       TYPE_LENGTH (value_type (component)) * TARGET_CHAR_BIT - bits,
-	       bits);
+	       bits, 1);
   else
     move_bits (value_contents_writeable (container) + offset_in_container, 
 	       value_bitpos (container) + bit_offset_in_container,
-	       value_contents (val), 0, bits);
+	       value_contents (val), 0, bits, 0);
 }	       
 			
 /* The value of the element of array ARR at the ARITY indices given in IND.
@@ -3834,11 +3835,13 @@ make_array_descriptor (struct type *type, struct value *arr,
 
   for (i = ada_array_arity (ada_check_typedef (value_type (arr))); i > 0; i -= 1)
     {
-      modify_general_field (value_contents_writeable (bounds),
+      modify_general_field (value_type (bounds),
+			    value_contents_writeable (bounds),
                             ada_array_bound (arr, i, 0),
                             desc_bound_bitpos (bounds_type, i, 0),
                             desc_bound_bitsize (bounds_type, i, 0));
-      modify_general_field (value_contents_writeable (bounds),
+      modify_general_field (value_type (bounds),
+			    value_contents_writeable (bounds),
                             ada_array_bound (arr, i, 1),
                             desc_bound_bitpos (bounds_type, i, 1),
                             desc_bound_bitsize (bounds_type, i, 1));
@@ -3846,12 +3849,14 @@ make_array_descriptor (struct type *type, struct value *arr,
 
   bounds = ensure_lval (bounds, gdbarch, sp);
 
-  modify_general_field (value_contents_writeable (descriptor),
+  modify_general_field (value_type (descriptor),
+			value_contents_writeable (descriptor),
                         value_address (ensure_lval (arr, gdbarch, sp)),
                         fat_pntr_data_bitpos (desc_type),
                         fat_pntr_data_bitsize (desc_type));
 
-  modify_general_field (value_contents_writeable (descriptor),
+  modify_general_field (value_type (descriptor),
+			value_contents_writeable (descriptor),
                         value_address (bounds),
                         fat_pntr_bounds_bitpos (desc_type),
                         fat_pntr_bounds_bitsize (desc_type));

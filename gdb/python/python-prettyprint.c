@@ -181,7 +181,8 @@ static void
 print_string_repr (PyObject *printer, const char *hint,
 		   struct ui_file *stream, int recurse,
 		   const struct value_print_options *options,
-		   const struct language_defn *language)
+		   const struct language_defn *language,
+		   struct gdbarch *gdbarch)
 {
   char *output;
   struct value *replacement = NULL;
@@ -190,7 +191,7 @@ print_string_repr (PyObject *printer, const char *hint,
   if (output)
     {
       if (hint && !strcmp (hint, "string"))
-	LA_PRINT_STRING (stream, builtin_type (current_gdbarch)->builtin_char,
+	LA_PRINT_STRING (stream, builtin_type (gdbarch)->builtin_char,
 			 (gdb_byte *) output, strlen (output),
 			 0, options);
       else
@@ -466,6 +467,7 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
 			  const struct value_print_options *options,
 			  const struct language_defn *language)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
   PyObject *printer = NULL;
   PyObject *val_obj = NULL;
   struct value *value;
@@ -498,7 +500,8 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
   make_cleanup (free_current_contents, &hint);
 
   /* Print the section */
-  print_string_repr (printer, hint, stream, recurse, options, language);
+  print_string_repr (printer, hint, stream, recurse, options, language,
+		     gdbarch);
   print_children (printer, hint, stream, recurse, options, language);
   result = 1;
 

@@ -2263,8 +2263,9 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
   opts.raw = 1;
   if (thevalue)
     {
+      struct gdbarch *gdbarch = get_type_arch (value_type (value));
       make_cleanup (xfree, thevalue);
-      LA_PRINT_STRING (stb, builtin_type (current_gdbarch)->builtin_char,
+      LA_PRINT_STRING (stb, builtin_type (gdbarch)->builtin_char,
 		       (gdb_byte *) thevalue, strlen (thevalue),
 		       0, &opts);
     }

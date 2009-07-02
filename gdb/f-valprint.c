@@ -245,6 +245,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     CORE_ADDR address, struct ui_file *stream, int recurse,
 	     const struct value_print_options *options)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
   unsigned int i = 0;	/* Number of characters printed */
   struct type *elttype;
   LONGEST val;
@@ -256,7 +257,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     {
     case TYPE_CODE_STRING:
       f77_get_dynamic_length_of_aggregate (type);
-      LA_PRINT_STRING (stream, builtin_type (current_gdbarch)->builtin_char,
+      LA_PRINT_STRING (stream, builtin_type (gdbarch)->builtin_char,
 		       valaddr, TYPE_LENGTH (type), 0, options);
       break;
 

@@ -317,8 +317,9 @@ print_formatted (struct value *val, int size,
 /* Return builtin floating point type of same length as TYPE.
    If no such type is found, return TYPE itself.  */
 static struct type *
-float_type_from_length (struct gdbarch *gdbarch, struct type *type)
+float_type_from_length (struct type *type)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
   const struct builtin_type *builtin = builtin_type (gdbarch);
   unsigned int len = TYPE_LENGTH (type);
 
@@ -344,7 +345,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
 			const struct value_print_options *options,
 			int size, struct ui_file *stream)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct gdbarch *gdbarch = get_type_arch (type);
   LONGEST val_long = 0;
   unsigned int len = TYPE_LENGTH (type);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -466,7 +467,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       break;
 
     case 'f':
-      type = float_type_from_length (current_gdbarch, type);
+      type = float_type_from_length (type);
       print_floating (valaddr, type, stream);
       break;
 
@@ -2275,8 +2276,9 @@ printf_command (char *arg, int from_tty)
 	      gdb_byte *str;
 	      CORE_ADDR tem;
 	      int j;
-	      struct type *wctype = lookup_typename (current_language,
-						     current_gdbarch,
+	      struct gdbarch *gdbarch
+		= get_type_arch (value_type (val_args[i]));
+	      struct type *wctype = lookup_typename (current_language, gdbarch,
 						     "wchar_t", NULL, 0);
 	      int wcwidth = TYPE_LENGTH (wctype);
 	      gdb_byte *buf = alloca (wcwidth);
@@ -2315,8 +2317,9 @@ printf_command (char *arg, int from_tty)
 	    break;
 	  case wide_char_arg:
 	    {
-	      struct type *wctype = lookup_typename (current_language,
-						     current_gdbarch,
+	      struct gdbarch *gdbarch
+		= get_type_arch (value_type (val_args[i]));
+	      struct type *wctype = lookup_typename (current_language, gdbarch,
 						     "wchar_t", NULL, 0);
 	      struct type *valtype;
 	      struct obstack output;
@@ -2352,7 +2355,7 @@ printf_command (char *arg, int from_tty)
 
 	      /* If format string wants a float, unchecked-convert the value
 		 to floating point of the same size.  */
-	      type = float_type_from_length (current_gdbarch, type);
+	      type = float_type_from_length (type);
 	      val = unpack_double (type, value_contents (val_args[i]), &inv);
 	      if (inv)
 		error (_("Invalid floating value found in program."));
@@ -2369,7 +2372,7 @@ printf_command (char *arg, int from_tty)
 
 	      /* If format string wants a float, unchecked-convert the value
 		 to floating point of the same size.  */
-	      type = float_type_from_length (current_gdbarch, type);
+	      type = float_type_from_length (type);
 	      val = unpack_double (type, value_contents (val_args[i]), &inv);
 	      if (inv)
 		error (_("Invalid floating value found in program."));
@@ -2423,6 +2426,7 @@ printf_command (char *arg, int from_tty)
 	      /* Parameter data.  */
 	      struct type *param_type = value_type (val_args[i]);
 	      unsigned int param_len = TYPE_LENGTH (param_type);
+	      struct gdbarch *gdbarch = get_type_arch (param_type);
 
 	      /* DFP output data.  */
 	      struct value *dfp_value = NULL;
@@ -2451,18 +2455,18 @@ printf_command (char *arg, int from_tty)
 		  if (*sos == 'H')
 		    {
 		      dfp_len = 4;
-		      dfp_type = builtin_type (current_gdbarch)->builtin_decfloat;
+		      dfp_type = builtin_type (gdbarch)->builtin_decfloat;
 		    }
 		  else if (*sos == 'D' && *(sos - 1) == 'D')
 		    {
 		      dfp_len = 16;
-		      dfp_type = builtin_type (current_gdbarch)->builtin_declong;
+		      dfp_type = builtin_type (gdbarch)->builtin_declong;
 		      sos--;
 		    }
 		  else
 		    {
 		      dfp_len = 8;
-		      dfp_type = builtin_type (current_gdbarch)->builtin_decdouble;
+		      dfp_type = builtin_type (gdbarch)->builtin_decdouble;
 		    }
 		}
 

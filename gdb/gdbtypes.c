@@ -291,8 +291,8 @@ make_pointer_type (struct type *type, struct type **typeptr)
   /* FIXME!  Assume the machine has only one representation for
      pointers!  */
 
-  TYPE_LENGTH (ntype) = 
-    gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT;
+  TYPE_LENGTH (ntype)
+    = gdbarch_ptr_bit (get_type_arch (type)) / TARGET_CHAR_BIT;
   TYPE_CODE (ntype) = TYPE_CODE_PTR;
 
   /* Mark pointers as unsigned.  The target converts between pointers
@@ -369,7 +369,8 @@ make_reference_type (struct type *type, struct type **typeptr)
      references, and that it matches the (only) representation for
      pointers!  */
 
-  TYPE_LENGTH (ntype) = gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT;
+  TYPE_LENGTH (ntype) =
+    gdbarch_ptr_bit (get_type_arch (type)) / TARGET_CHAR_BIT;
   TYPE_CODE (ntype) = TYPE_CODE_REF;
 
   if (!TYPE_REFERENCE_TYPE (type))	/* Remember it, if don't have one.  */
@@ -438,9 +439,8 @@ lookup_function_type (struct type *type)
 /* Identify address space identifier by name --
    return the integer flag defined in gdbtypes.h.  */
 extern int
-address_space_name_to_int (char *space_identifier)
+address_space_name_to_int (struct gdbarch *gdbarch, char *space_identifier)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
   int type_flags;
   /* Check for known address space delimiters.  */
   if (!strcmp (space_identifier, "code"))
@@ -460,9 +460,8 @@ address_space_name_to_int (char *space_identifier)
    gdbtypes.h -- return the string version of the adress space name.  */
 
 const char *
-address_space_int_to_name (int space_flag)
+address_space_int_to_name (struct gdbarch *gdbarch, int space_flag)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
   if (space_flag & TYPE_INSTANCE_FLAG_CODE_SPACE)
     return "code";
   else if (space_flag & TYPE_INSTANCE_FLAG_DATA_SPACE)
@@ -855,7 +854,7 @@ struct type *
 lookup_array_range_type (struct type *element_type,
 			 int low_bound, int high_bound)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct gdbarch *gdbarch = get_type_arch (element_type);
   struct type *index_type = builtin_type (gdbarch)->builtin_int;
   struct type *range_type
     = create_range_type (NULL, index_type, low_bound, high_bound);
@@ -978,7 +977,8 @@ smash_to_memberptr_type (struct type *type, struct type *domain,
   TYPE_DOMAIN_TYPE (type) = domain;
   /* Assume that a data member pointer is the same size as a normal
      pointer.  */
-  TYPE_LENGTH (type) = gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT;
+  TYPE_LENGTH (type)
+    = gdbarch_ptr_bit (get_type_arch (to_type)) / TARGET_CHAR_BIT;
   TYPE_CODE (type) = TYPE_CODE_MEMBERPTR;
 }
 
@@ -1535,7 +1535,7 @@ safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
 static void
 check_stub_method (struct type *type, int method_id, int signature_id)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct gdbarch *gdbarch = get_type_arch (type);
   struct fn_field *f;
   char *mangled_name = gdb_mangle_name (type, method_id, signature_id);
   char *demangled_name = cplus_demangle (mangled_name,

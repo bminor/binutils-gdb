@@ -179,6 +179,8 @@ scm_scmval_print (struct type *type, LONGEST svalue,
 		  struct ui_file *stream, int recurse,
 		  const struct value_print_options *options)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
+
 #define SCM_SIZE (TYPE_LENGTH (type))
 taloop:
   switch (7 & (int) svalue)
@@ -193,7 +195,7 @@ taloop:
       if (SCM_ICHRP (svalue))
 	{
 	  svalue = SCM_ICHR (svalue);
-	  scm_printchar (svalue, builtin_type (current_gdbarch)->builtin_char,
+	  scm_printchar (svalue, builtin_type (gdbarch)->builtin_char,
 			 stream);
 	  break;
 	}

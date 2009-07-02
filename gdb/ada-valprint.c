@@ -746,7 +746,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	  struct value *func = ada_vax_float_print_function (type);
 	  if (func != 0)
 	    {
-	      struct gdbarch *gdbarch = current_gdbarch;
+	      struct gdbarch *gdbarch = get_type_arch (type);
 	      CORE_ADDR addr;
 	      addr = value_as_address (call_function_by_hand (func, 1, &val));
 	      val_print_string (builtin_type (gdbarch)->builtin_true_char,
@@ -785,20 +785,15 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	      opts.format = format;
 	      print_scalar_formatted (valaddr, type, &opts, 0, stream);
 	    }
-          else if (ada_is_system_address_type (type)
-		   && TYPE_OBJFILE (type) != NULL)
+          else if (ada_is_system_address_type (type))
             {
               /* FIXME: We want to print System.Address variables using
                  the same format as for any access type.  But for some
                  reason GNAT encodes the System.Address type as an int,
                  so we have to work-around this deficiency by handling
-                 System.Address values as a special case.
+                 System.Address values as a special case.  */
 
-		 We do this only for System.Address types defined in an
-		 objfile.  For the built-in version of System.Address we
-		 have installed the proper type to begin with.  */
-
-	      struct gdbarch *gdbarch = get_objfile_arch (TYPE_OBJFILE (type));
+	      struct gdbarch *gdbarch = get_type_arch (type);
 	      struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
               fprintf_filtered (stream, "(");

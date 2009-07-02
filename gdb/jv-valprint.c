@@ -38,7 +38,7 @@ int
 java_value_print (struct value *val, struct ui_file *stream, 
 		  const struct value_print_options *options)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct gdbarch *gdbarch = get_type_arch (value_type (val));
   struct type *type;
   CORE_ADDR address;
   int i;

@@ -46,11 +46,10 @@ m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
    stream STREAM.  */
 
 static void
-print_function_pointer_address (CORE_ADDR address, struct ui_file *stream,
-				int addressprint)
+print_function_pointer_address (struct gdbarch *gdbarch, CORE_ADDR address,
+				struct ui_file *stream, int addressprint)
 {
-  CORE_ADDR func_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
-							    address,
+  CORE_ADDR func_addr = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
 							    &current_target);
 
   /* If the function pointer is represented by a description, print the
@@ -213,12 +212,14 @@ print_unpacked_pointer (struct type *type,
 			const struct value_print_options *options,
 			struct ui_file *stream)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
   struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
 
   if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
     {
       /* Try to print what function it points to.  */
-      print_function_pointer_address (addr, stream, options->addressprint);
+      print_function_pointer_address (gdbarch, addr, stream,
+				      options->addressprint);
       /* Return value is irrelevant except for string pointers.  */
       return 0;
     }

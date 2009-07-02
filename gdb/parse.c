@@ -1227,7 +1227,7 @@ push_type_int (int n)
 void
 push_type_address_space (char *string)
 {
-  push_type_int (address_space_name_to_int (string));
+  push_type_int (address_space_name_to_int (parse_gdbarch, string));
 }
 
 enum type_pieces

@@ -1187,9 +1187,9 @@ extern struct type *make_cv_type (int, int, struct type *, struct type **);
 
 extern void replace_type (struct type *, struct type *);
 
-extern int address_space_name_to_int (char *);
+extern int address_space_name_to_int (struct gdbarch *, char *);
 
-extern const char *address_space_int_to_name (int);
+extern const char *address_space_int_to_name (struct gdbarch *, int);
 
 extern struct type *make_type_with_address_space (struct type *type, 
 						  int space_identifier);

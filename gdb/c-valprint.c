@@ -36,11 +36,10 @@
    stream STREAM.  */
 
 static void
-print_function_pointer_address (CORE_ADDR address, struct ui_file *stream,
-				int addressprint)
+print_function_pointer_address (struct gdbarch *gdbarch, CORE_ADDR address,
+				struct ui_file *stream, int addressprint)
 {
-  CORE_ADDR func_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
-							    address,
+  CORE_ADDR func_addr = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
 							    &current_target);
 
   /* If the function pointer is represented by a description, print the
@@ -153,6 +152,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     CORE_ADDR address, struct ui_file *stream, int recurse,
 	     const struct value_print_options *options)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
   unsigned int i = 0;	/* Number of characters printed */
   unsigned len;
   struct type *elttype, *unresolved_elttype;
@@ -252,7 +252,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.) */
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
-	  print_function_pointer_address (addr, stream, options->addressprint);
+	  print_function_pointer_address (gdbarch, addr, stream,
+					  options->addressprint);
 	  break;
 	}
       unresolved_elttype = TYPE_TARGET_TYPE (type);
@@ -264,7 +265,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
 	      /* Try to print what function it points to.  */
-	      print_function_pointer_address (addr, stream,
+	      print_function_pointer_address (gdbarch, addr, stream,
 					      options->addressprint);
 	      /* Return value is irrelevant except for string pointers.  */
 	      return (0);
@@ -382,7 +383,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + offset, field_type);
 
-	  print_function_pointer_address (addr, stream, options->addressprint);
+	  print_function_pointer_address (gdbarch, addr, stream,
+					  options->addressprint);
 	}
       else
 	cp_print_value_fields (type, type, valaddr, embedded_offset, address, stream,
