@@ -41,6 +41,10 @@ extern struct cmd_list_element *deletelist;
 
 extern struct cmd_list_element *detachlist;
 
+/* Chain containing all defined kill subcommands.  */
+
+extern struct cmd_list_element *killlist;
+
 /* Chain containing all defined toggle subcommands. */
 
 extern struct cmd_list_element *togglelist;

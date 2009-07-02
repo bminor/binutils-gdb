@@ -20,13 +20,11 @@
 struct fork_info;
 extern struct fork_info *add_fork (pid_t);
 extern struct fork_info *find_fork_pid (pid_t);
-extern void fork_save_infrun_state (struct fork_info *, int);
 extern void linux_fork_killall (void);
 extern void linux_fork_mourn_inferior (void);
 extern void linux_fork_detach (char *, int);
-extern int  forks_exist_p (void);
-
-struct fork_info *fork_list;
+extern int forks_exist_p (void);
+extern int linux_fork_checkpointing_p (int);
 
 extern int detach_fork;
 

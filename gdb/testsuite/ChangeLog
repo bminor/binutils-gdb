@@ -1,3 +1,13 @@
+2009-07-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/multi-forks.exp: Only run detach-on-fork tests on
+	linux.  Adjust to use "inferior", "info inferiors", "detach
+	inferior" and "kill inferior" instead of "restart", "info fork",
+	"detach fork" and "delete fork".
+	* gdb.base/ending-run.exp: Spell out "info".
+	* gdb.base/help.exp: Adjust to use test_prefix_command_help for
+	the "kill" command.
+
 2009-07-02  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.threads/tls-shared.exp: Update to locexpr_describe_location

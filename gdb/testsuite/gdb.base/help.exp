@@ -300,7 +300,9 @@ gdb_test "help inspect" "Same as \"print\" command, except that if you are runni
 # test help jump
 gdb_test "help jump" "Continue program being debugged at specified line or address\.\[\r\n\]+Give as argument either LINENUM or \[*\]+ADDR, where ADDR is an expression\[\r\n\]+for an address to start at\." "help jump"
 # test help kill
-gdb_test "help kill" "Kill execution of program being debugged\." "help kill"
+test_prefix_command_help "kill" {
+    "Kill execution of program being debugged\.\[\r\n\]+"
+}
 # test help list "l" abbreviation
 gdb_test "help l" "List specified function or line\.\[\r\n\]+With no argument, lists ten more lines after or around previous listing\.\[\r\n\]+\"list -\" lists the ten lines before a previous ten-line listing\.\[\r\n\]+One argument specifies a line, and ten lines are listed around that line\.\[\r\n\]+Two arguments with comma between specify starting and ending lines to list\.\[\r\n\]+Lines can be specified in these ways:\[\r\n\]+  LINENUM, to list around that line in current file,\[\r\n\]+  FILE:LINENUM, to list around that line in that file,\[\r\n\]+  FUNCTION, to list around beginning of that function,\[\r\n\]+  FILE:FUNCTION, to distinguish among like-named static functions\.\[\r\n\]+  \[*\]ADDRESS, to list around the line containing that address\.\[\r\n\]+With two args if one is empty it stands for ten lines away from the other arg\." "help list \"l\" abbreviation"
 # test help list

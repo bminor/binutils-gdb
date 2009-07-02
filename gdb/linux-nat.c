@@ -338,6 +338,12 @@ static int stop_callback (struct lwp_info *lp, void *data);
 
 static void block_child_signals (sigset_t *prev_mask);
 static void restore_child_signals_mask (sigset_t *prev_mask);
+
+struct lwp_info;
+static struct lwp_info *add_lwp (ptid_t ptid);
+static void purge_lwp_list (int pid);
+static struct lwp_info *find_lwp_pid (ptid_t ptid);
+
 
 /* Trivial list manipulation functions to keep track of a list of
    new stopped processes.  */
@@ -587,6 +593,9 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
     parent_pid = ptid_get_pid (inferior_ptid);
   child_pid = PIDGET (inferior_thread ()->pending_follow.value.related_pid);
 
+  if (!detach_fork)
+    linux_enable_event_reporting (pid_to_ptid (child_pid));
+
   if (! follow_child)
     {
       /* We're already attached to the parent, by default. */
@@ -617,8 +626,9 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 	}
       else
 	{
-	  struct fork_info *fp;
 	  struct inferior *parent_inf, *child_inf;
+	  struct lwp_info *lp;
+	  struct cleanup *old_chain;
 
 	  /* Add process to GDB's tables.  */
 	  child_inf = add_inferior (child_pid);
@@ -627,11 +637,16 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 	  child_inf->attach_flag = parent_inf->attach_flag;
 	  copy_terminal_info (child_inf, parent_inf);
 
-	  /* Retain child fork in ptrace (stopped) state.  */
-	  fp = find_fork_pid (child_pid);
-	  if (!fp)
-	    fp = add_fork (child_pid);
-	  fork_save_infrun_state (fp, 0);
+	  old_chain = save_inferior_ptid ();
+
+	  inferior_ptid = ptid_build (child_pid, child_pid, 0);
+	  add_thread (inferior_ptid);
+	  lp = add_lwp (inferior_ptid);
+	  lp->stopped = 1;
+
+	  check_for_thread_db ();
+
+	  do_cleanups (old_chain);
 	}
 
       if (has_vforked)
@@ -692,6 +707,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
     {
       struct thread_info *tp;
       struct inferior *parent_inf, *child_inf;
+      struct lwp_info *lp;
 
       /* Before detaching from the parent, remove all breakpoints from it. */
       remove_breakpoints ();
@@ -733,30 +749,33 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 
       if (has_vforked)
 	{
-	  linux_parent_pid = parent_pid;
-	  detach_inferior (parent_pid);
-	}
-      else if (!detach_fork)
-	{
-	  struct fork_info *fp;
-	  /* Retain parent fork in ptrace (stopped) state.  */
-	  fp = find_fork_pid (parent_pid);
-	  if (!fp)
-	    fp = add_fork (parent_pid);
-	  fork_save_infrun_state (fp, 0);
+	  struct lwp_info *parent_lwp;
 
-	  /* Also add an entry for the child fork.  */
-	  fp = find_fork_pid (child_pid);
-	  if (!fp)
-	    fp = add_fork (child_pid);
-	  fork_save_infrun_state (fp, 0);
+	  linux_parent_pid = parent_pid;
+
+	  /* Get rid of the inferior on the core side as well.  */
+	  inferior_ptid = null_ptid;
+	  detach_inferior (parent_pid);
+
+	  /* Also get rid of all its lwps.  We will detach from this
+	     inferior soon-ish, but, we will still get an exit event
+	     reported through waitpid when it exits.  If we didn't get
+	     rid of the lwps from our list, we would end up reporting
+	     the inferior exit to the core, which would then try to
+	     mourn a non-existing (from the core's perspective)
+	     inferior.  */
+	  parent_lwp = find_lwp_pid (pid_to_ptid (parent_pid));
+	  purge_lwp_list (GET_PID (parent_lwp->ptid));
+	  linux_parent_pid = parent_pid;
 	}
-      else
+      else if (detach_fork)
 	target_detach (NULL, 0);
 
       inferior_ptid = ptid_build (child_pid, child_pid, 0);
+      add_thread (inferior_ptid);
+      lp = add_lwp (inferior_ptid);
+      lp->stopped = 1;
 
-      linux_nat_switch_fork (inferior_ptid);
       check_for_thread_db ();
     }
 
@@ -1073,22 +1092,30 @@ iterate_over_lwps (ptid_t filter,
   return NULL;
 }
 
-/* Update our internal state when changing from one fork (checkpoint,
-   et cetera) to another indicated by NEW_PTID.  We can only switch
-   single-threaded applications, so we only create one new LWP, and
-   the previous list is discarded.  */
+/* Update our internal state when changing from one checkpoint to
+   another indicated by NEW_PTID.  We can only switch single-threaded
+   applications, so we only create one new LWP, and the previous list
+   is discarded.  */
 
 void
 linux_nat_switch_fork (ptid_t new_ptid)
 {
   struct lwp_info *lp;
 
-  init_lwp_list ();
+  purge_lwp_list (GET_PID (inferior_ptid));
+
   lp = add_lwp (new_ptid);
   lp->stopped = 1;
 
-  init_thread_list ();
-  add_thread_silent (new_ptid);
+  /* This changes the thread's ptid while preserving the gdb thread
+     num.  Also changes the inferior pid, while preserving the
+     inferior num.  */
+  thread_change_ptid (inferior_ptid, new_ptid);
+
+  /* We've just told GDB core that the thread changed target id, but,
+     in fact, it really is a different thread, with different register
+     contents.  */
+  registers_changed ();
 }
 
 /* Handle the exit of a single thread LP.  */
@@ -1814,6 +1841,34 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	}
 
       ourstatus->value.related_pid = ptid_build (new_pid, new_pid, 0);
+
+      if (event == PTRACE_EVENT_FORK
+	  && linux_fork_checkpointing_p (GET_PID (lp->ptid)))
+	{
+	  struct fork_info *fp;
+
+	  /* Handle checkpointing by linux-fork.c here as a special
+	     case.  We don't want the follow-fork-mode or 'catch fork'
+	     to interfere with this.  */
+
+	  /* This won't actually modify the breakpoint list, but will
+	     physically remove the breakpoints from the child.  */
+	  detach_breakpoints (new_pid);
+
+	  /* Retain child fork in ptrace (stopped) state.  */
+	  fp = find_fork_pid (new_pid);
+	  if (!fp)
+	    fp = add_fork (new_pid);
+
+	  /* Report as spurious, so that infrun doesn't want to follow
+	     this fork.  We're actually doing an infcall in
+	     linux-fork.c.  */
+	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  linux_enable_event_reporting (pid_to_ptid (new_pid));
+
+	  /* Report the stop to the core.  */
+	  return 0;
+	}
 
       if (event == PTRACE_EVENT_FORK)
 	ourstatus->kind = TARGET_WAITKIND_FORKED;
@@ -4295,7 +4350,7 @@ linux_nat_supports_non_stop (void)
 /* True if we want to support multi-process.  To be removed when GDB
    supports multi-exec.  */
 
-int linux_multi_process = 0;
+int linux_multi_process = 1;
 
 static int
 linux_nat_supports_multi_process (void)

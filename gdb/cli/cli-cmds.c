@@ -125,6 +125,10 @@ struct cmd_list_element *deletelist;
 
 struct cmd_list_element *detachlist;
 
+/* Chain containing all defined kill subcommands. */
+
+struct cmd_list_element *killlist;
+
 /* Chain containing all defined "enable breakpoint" subcommands. */
 
 struct cmd_list_element *enablebreaklist;

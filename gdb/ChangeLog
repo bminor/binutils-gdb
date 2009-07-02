@@ -1,3 +1,67 @@
+2009-07-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_child_follow_fork): If we're staying attached
+	to the child process, enable event reporting on it.  Don't handle
+	checkpoints here.  Instead, add the child fork to the lwp thread
+	and inferior lists without clobbering the previous inferior.  Let
+	the thread_db layer learn about a new child process, even if
+	following the parent.
+	(linux_nat_switch_fork): Delete lwps of the current inferior only,
+	instead of clearing the whole list.  Use thread_change_ptid to
+	give the core the illusion the new checkpoint is still the same
+	inferior.  Clear the register cache.
+	(linux_handle_extended_wait): Handle checkpoints here.
+	(linux_multi_process): Turn on.
+	* linux-fork.c (struct fork_info) <pc>: Remove field.
+	(init_fork_list): Do not delete the checkpoint from the inferior
+	list (it is not there).
+	(fork_load_infrun_state): Don't switch inferior_ptid here.  Pass
+	the new checkpoint's ptid to linux_nat_switch_fork.
+	(fork_save_infrun_state): Make static.  Don't stop the pc field of
+	fork_info, it's gone.
+	(linux_fork_mourn_inferior): Don't delete the checkpoint from the
+	inferior list, it's not there.
+	(linux_fork_detach): Ditto.
+	(delete_fork_command): Replace mention of fork/checkpoint by
+	checkpoint only.
+	(detach_fork_command): Likewise.  Don't delete the checkpoint from
+	the inferior list.
+	(info_forks_command): Adjust.
+	(restore_detach_fork): Delete.
+	(checkpointing_pid): New.
+	(linux_fork_checkpointing_p): New.
+	(save_detach_fork): Delete.
+	(checkpoint_command): Delete temp_detach_fork.  Don't remove
+	breakpoints, that's a nop.  Store the pid of the process we're
+	checkpointing, and use make_cleanup_restore_integer to restore it.
+	Don't reinsert breakpoints here.
+	(process_command, fork_command): Delete.
+	(restart_command): Update comments to only mention checkpoints,
+	not forks.
+	(_initialize_linux_fork): Delete "fork", "process", "info forks"
+	commands.
+	* linux-fork.h (fork_save_infrun_state, fork_list): Delete
+	declarations.
+	(linux_fork_checkpointing_p): Declare.
+	* cli/cli-cmds.c (killlist): New.
+	* cli/cli-cmds.h (killlist): Declare.
+	* gdbcmd.h (killlist): Declare.
+	* inferior.c: Include "gdbthread.h".
+	(detach_inferior_command, kill_inferior_command)
+	(inferior_command): New.
+	(info_inferiors_command): Allow specifying a specific inferior id.
+	(_initialize_inferiors): Register "inferior", "kill inferior" and
+	"detach inferior" commands.
+	* infcmd.c (_initialize_infcmd): Make "kill" a prefix command.
+	* gdbthread.h (any_thread_of_process): Declare.
+	* thread.c (any_thread_of_process): New.
+
+	* NEWS: Mention multi-inferior debugging.  Mention 'info
+	inferiors', 'inferior', 'detach inferior' and 'kill inferior' as
+	new commands.
+	(Removed commands): New section, mentioning that 'info forks',
+	'fork', 'process', 'delete fork' and 'detach fork' are now gone.
+
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbarch.sh (current_gdbarch): Remove global variable.

@@ -1,3 +1,12 @@
+2009-07-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Debugging multiple inferiors): Document the
+	"inferior", "detach inferior" and "kill inferior" commands.
+	(Debugging Programs with Multiple Processes): Adjust to mention
+	generic "inferior" commands.  Delete mention of "detach fork" and
+	"delete fork".  Cross reference to "Debugging multiple inferiors"
+	section.
+
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbint.texinfo (Item Output Functions): Update signature

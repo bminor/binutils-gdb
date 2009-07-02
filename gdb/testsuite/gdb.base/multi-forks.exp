@@ -140,6 +140,19 @@ gdb_test "print pids\[0\]==0 || pids\[1\]==0 || pids\[2\]==0 || pids\[3\]==0" \
 # Now test with detach-on-fork off.
 #
 
+# detach-on-fork isn't implemented on hpux.
+#
+if {![istarget "*-*-linux*"]} then {
+    continue
+}
+
+# Start with a fresh gdb
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
 runto_main
 gdb_breakpoint $exit_bp_loc
 
@@ -152,60 +165,59 @@ gdb_test "set detach off" "" "set detach off"
 
 #
 # We will now run every fork up to the exit bp, 
-# eventually winding up with 16 forks.
+# eventually winding up with 16 inferiors.
 #
 
 for {set i 1} {$i <= 15} {incr i} {
   gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit $i"
-  gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork $i"
-  gdb_test "restart $i" "(_dl_sysinfo_int80|fork|__kernel_(v|)syscall).*" \
-      "restart $i"
+  gdb_test "info inferior" " 5 .* 4 .* 3 .* 2 .*" "info inferior $i"
+  gdb_test "inferior $i + 1" "(_dl_sysinfo_int80|fork|__kernel_(v|)syscall).*" \
+      "inferior $i"
 }
 
 gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 16"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 16"
-gdb_test "restart 0" " main .*" "restart final"
+gdb_test "info inferiors" " 5 .* 4 .* 3 .* 2 .*" "info inferior 16"
+gdb_test "inferior 2" " main .*" "restart final"
 
 #
 # Now we should examine all the pids.
 #
 
 # 
-# Test detach fork
+# Test detach inferior
 # 
 
-# [assumes we're at #0]
-gdb_test "detach fork 1" "Detached .*" "Detach 1"
-gdb_test "detach fork 2" "Detached .*" "Detach 2"
-gdb_test "detach fork 3" "Detached .*" "Detach 3"
-gdb_test "detach fork 4" "Detached .*" "Detach 4"
+# [assumes we're at #1]
+gdb_test "detach inferior 2" "Detaching .*" "Detach 2"
+gdb_test "detach inferior 3" "Detaching .*" "Detach 3"
+gdb_test "detach inferior 4" "Detaching .*" "Detach 4"
+gdb_test "detach inferior 5" "Detaching .*" "Detach 5"
 
 # 
-# Test delete fork
-# 
+# Test kill inferior
+#
 
-gdb_test "delete fork 5" "" "Delete 5"
-gdb_test "info fork 5"   "No fork number 5." "Did delete 5"
-gdb_test "delete fork 6" "" "Delete 6"
-gdb_test "info fork 6"   "No fork number 6." "Did delete 6"
-gdb_test "delete fork 7" "" "Delete 7"
-gdb_test "info fork 7"   "No fork number 7." "Did delete 7"
-gdb_test "delete fork 8" "" "Delete 8"
-gdb_test "info fork 8"   "No fork number 8." "Did delete 8"
-gdb_test "delete fork 9" "" "Delete 9"
-gdb_test "info fork 9"   "No fork number 9." "Did delete 9"
-gdb_test "delete fork 10" "" "Delete 10"
-gdb_test "info fork 10"   "No fork number 10." "Did delete 10"
-gdb_test "delete fork 11" "" "Delete 11"
-gdb_test "info fork 11"   "No fork number 11." "Did delete 11"
-gdb_test "delete fork 12" "" "Delete 12"
-gdb_test "info fork 12"   "No fork number 12." "Did delete 12"
-gdb_test "delete fork 13" "" "Delete 13"
-gdb_test "info fork 13"   "No fork number 13." "Did delete 13"
-gdb_test "delete fork 14" "" "Delete 14"
-gdb_test "info fork 14"   "No fork number 14." "Did delete 14"
-gdb_test "delete fork 15" "" "Delete 15"
-gdb_test "info fork 15"   "No fork number 15." "Did delete 15"
+gdb_test "kill inferior 6" "" "Kill 6"
+gdb_test "info inferior 6" "Inferior ID 6 not known." "Did kill 6"
+gdb_test "kill inferior 7" "" "Kill 7"
+gdb_test "info inferior 7" "Inferior ID 7 not known." "Did kill 7"
+gdb_test "kill inferior 8" "" "Kill 8"
+gdb_test "info inferior 8" "Inferior ID 8 not known." "Did kill 8"
+gdb_test "kill inferior 9" "" "Kill 9"
+gdb_test "info inferior 9" "Inferior ID 9 not known." "Did kill 9"
+gdb_test "kill inferior 10" "" "Kill 10"
+gdb_test "info inferior 10" "Inferior ID 10 not known." "Did kill 10"
+gdb_test "kill inferior 11" "" "Kill 11"
+gdb_test "info inferior 11" "Inferior ID 11 not known." "Did kill 11"
+gdb_test "kill inferior 12" "" "Kill 12"
+gdb_test "info inferior 12" "Inferior ID 12 not known." "Did kill 12"
+gdb_test "kill inferior 13" "" "Kill 13"
+gdb_test "info inferior 13" "Inferior ID 13 not known." "Did kill 13"
+gdb_test "kill inferior 14" "" "Kill 14"
+gdb_test "info inferior 14" "Inferior ID 14 not known." "Did kill 14"
+gdb_test "kill inferior 15" "" "Kill 15"
+gdb_test "info inferior 15" "Inferior ID 15 not known." "Did kill 15"
+gdb_test "kill inferior 16" "" "Kill 16"
+gdb_test "info inferior 16" "Inferior ID 16 not known." "Did kill 16"
 
 return 0
-

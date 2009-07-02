@@ -428,6 +428,18 @@ first_thread_of_process (int pid)
   return ret;
 }
 
+struct thread_info *
+any_thread_of_process (int pid)
+{
+  struct thread_info *tp;
+
+  for (tp = thread_list; tp; tp = tp->next)
+    if (ptid_get_pid (tp->ptid) == pid)
+      return tp;
+
+  return NULL;
+}
+
 /* Print a list of thread ids currently known, and the total number of
    threads. To be used from within catch_errors. */
 static int

@@ -2374,7 +2374,39 @@ To find out what inferiors exist at any moment, use @code{info inferiors}:
 @kindex info inferiors
 @item info inferiors
 Print a list of all inferiors currently being managed by @value{GDBN}.
+@end table
 
+To switch focus between inferiors, use the @code{inferior} command:
+
+@table @code
+@kindex inferior @var{inferior-id}
+@item inferior @var{inferior-id}
+Make inferior number @var{inferior-id} the current inferior.  The
+argument @var{inferior-id} is the internal inferior number assigned by
+@value{GDBN}, as shown in the first field of the @samp{info inferiors}
+display.
+@end table
+
+To quit debugging one of the inferiors, you can either detach from it
+by using the @w{@code{detach inferior}} command (allowing it to run
+independently), or kill it using the @w{@code{kill inferior}} command:
+
+@table @code
+@kindex detach inferior @var{inferior-id}
+@item detach inferior @var{inferior-id}
+Detach from the inferior identified by @value{GDBN} inferior number
+@var{inferior-id}, and remove it from the inferior list.
+
+@kindex kill inferior @var{inferior-id}
+@item kill inferior @var{inferior-id}
+Kill the inferior identified by @value{GDBN} inferior number
+@var{inferior-id}, and remove it from the inferior list.
+@end table
+
+To be notified when inferiors are started or exit under @value{GDBN}'s
+control use @w{@code{set print inferior-events}}:
+
+@table @code
 @kindex set print inferior-events
 @cindex print messages on inferior start and exit
 @item set print inferior-events
@@ -2758,51 +2790,17 @@ is held suspended.
 Show whether detach-on-fork mode is on/off.
 @end table
 
-If you choose to set @samp{detach-on-fork} mode off, then
-@value{GDBN} will retain control of all forked processes (including
-nested forks).  You can list the forked processes under the control of
-@value{GDBN} by using the @w{@code{info forks}} command, and switch
-from one fork to another by using the @w{@code{fork}} command.
-
-@table @code
-@kindex info forks
-@item info forks
-Print a list of all forked processes under the control of @value{GDBN}.
-The listing will include a fork id, a process id, and the current 
-position (program counter) of the process.
-
-@kindex fork @var{fork-id}
-@item fork @var{fork-id}
-Make fork number @var{fork-id} the current process.  The argument
-@var{fork-id} is the internal fork number assigned by @value{GDBN},
-as shown in the first field of the @samp{info forks} display.
-
-@kindex process @var{process-id}
-@item process @var{process-id}
-Make process number @var{process-id} the current process.  The
-argument @var{process-id} must be one that is listed in the output of
-@samp{info forks}.
-
-@end table
+If you choose to set @samp{detach-on-fork} mode off, then @value{GDBN}
+will retain control of all forked processes (including nested forks).
+You can list the forked processes under the control of @value{GDBN} by
+using the @w{@code{info inferiors}} command, and switch from one fork
+to another by using the @code{inferior} command (@pxref{Inferiors,
+,Debugging Multiple Inferiors}).
 
 To quit debugging one of the forked processes, you can either detach
-from it by using the @w{@code{detach fork}} command (allowing it to
-run independently), or delete (and kill) it using the
-@w{@code{delete fork}} command.
-
-@table @code
-@kindex detach fork @var{fork-id}
-@item detach fork @var{fork-id}
-Detach from the process identified by @value{GDBN} fork number
-@var{fork-id}, and remove it from the fork list.  The process will be
-allowed to run independently.
-
-@kindex delete fork @var{fork-id}
-@item delete fork @var{fork-id}
-Kill the process identified by @value{GDBN} fork number @var{fork-id},
-and remove it from the fork list.
-
-@end table
+from it by using the @w{@code{detach inferior}} command (allowing it
+to run independently), or kill it using the @w{@code{kill inferior}}
+command.  @xref{Inferiors, ,Debugging Multiple Inferiors}.
 
 If you ask to debug a child process and a @code{vfork} is followed by an
 @code{exec}, @value{GDBN} executes the new target up to the first
@@ -2810,8 +2808,8 @@ breakpoint in the new target.  If you have a breakpoint set on
 @code{main} in your original program, the breakpoint will also be set on
 the child process's @code{main}.
 
-When a child process is spawned by @code{vfork}, you cannot debug the
-child or parent until an @code{exec} call completes.
+On some systems, when a child process is spawned by @code{vfork}, you
+cannot debug the child or parent until an @code{exec} call completes.
 
 If you issue a @code{run} command to @value{GDBN} after an @code{exec}
 call executes, the new target restarts.  To restart the parent process,

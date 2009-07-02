@@ -243,6 +243,9 @@ struct thread_info *find_thread_id (int num);
    returns the first thread in the list.  */
 struct thread_info *first_thread_of_process (int pid);
 
+/* Returns any thread of process PID.  */
+extern struct thread_info *any_thread_of_process (int pid);
+
 /* Change the ptid of thread OLD_PTID to NEW_PTID.  */
 void thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid);
 

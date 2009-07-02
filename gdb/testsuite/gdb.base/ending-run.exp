@@ -71,7 +71,7 @@ gdb_test "b ending-run.c:14" ".*Note.*also.*Breakpoint.*5.*" "b ending-run.c:14,
 gdb_test "cle ending-run.c:14" \
 	".*Deleted breakpoint 5.*" "Cleared 2 by line"
 
-send_gdb "inf line ending-run.c:14\n"
+send_gdb "info line ending-run.c:14\n"
 gdb_expect {
     -re ".*address (0x\[0-9a-fA-F]*).*$gdb_prompt $" {
         set line_nine $expect_out(1,string)

@@ -175,6 +175,16 @@ GDB will now correctly handle all of:
 * Support for user-defined prefixed commands.  The "define" command can
 add new commands to existing prefixes, e.g. "target".
 
+* Multi-inferior, multi-process debugging.
+
+  GDB now has generalized support for multi-inferior debugging.  See
+  "Debugging Multiple Inferiors" in the manual for more information.
+  Although availability still depends on target support, the command
+  set is more uniform now.  The GNU/Linux specific multi-forks support
+  has been migrated to this new framework.  This implied some user
+  visible changes; see "New commands" and also "Removed commands"
+  below.
+
 * New commands (for set/show, see "New options" below)
 
 find [/size-char] [/max-count] start-address, end-address|+search-space-size,
@@ -196,6 +206,18 @@ macro undef
 
 info os processes
   Show operating system information about processes.
+
+info inferiors
+  List the inferiors currently under GDB's control.
+
+inferior NUM
+  Switch focus to inferior number NUM.
+
+detach inferior NUM
+  Detach from inferior number NUM.
+
+kill inferior NUM
+  Kill inferior number NUM.
 
 * New options
 
@@ -319,6 +341,36 @@ set schedule-multiple (on|off)
 show schedule-multiple
   Allow GDB to resume all threads of all processes or only threads of
   the current process.
+
+* Removed commands
+
+info forks
+  For program forks, this is replaced by the new more generic `info
+  inferiors' command.  To list checkpoints, you can still use the
+  `info checkpoints' command, which was an alias for the `info forks'
+  command.
+
+fork NUM
+  Replaced by the new `inferior' command.  To switch between
+  checkpoints, you can still use the `restart' command, which was an
+  alias for the `fork' command.
+
+process PID
+  This is removed, since some targets don't have a notion of
+  processes.  To switch between processes, you can still use the
+  `inferior' command using GDB's own inferior number.
+
+delete fork NUM
+  For program forks, this is replaced by the new more generic `kill
+  inferior' command.  To delete a checkpoint, you can still use the
+  `delete checkpoint' command, which was an alias for the `delete
+  fork' command.
+
+detach fork NUM
+  For program forks, this is replaced by the new more generic `detach
+  inferior' command.  To detach a checkpoint, you can still use the
+  `detach checkpoint' command, which was an alias for the `detach
+  fork' command.
 
 * New native configurations
 

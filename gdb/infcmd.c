@@ -2698,8 +2698,9 @@ fully linked executable files and separately compiled object files as needed."),
 	       &showlist);
   set_cmd_completer (c, noop_completer);
 
-  add_com ("kill", class_run, kill_command,
-	   _("Kill execution of program being debugged."));
+  add_prefix_cmd ("kill", class_run, kill_command,
+		  _("Kill execution of program being debugged."),
+		  &killlist, "kill ", 0, &cmdlist);
 
   add_com ("attach", class_run, attach_command, _("\
 Attach to a process or file outside of GDB.\n\
