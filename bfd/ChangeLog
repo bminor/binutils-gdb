@@ -1,3 +1,8 @@
+2009-07-02  Tom Tromey  <tromey@redhat.com>
+
+	* aoutx.h (aout_get_external_symbols): Declare 'amt' locally.
+	* bfdwin.c (bfd_free_window): Cast to unsigned long.
+
 2009-07-01  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c: Remove trailing white space.

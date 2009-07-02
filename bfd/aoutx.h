@@ -1,6 +1,6 @@
 /* BFD semi-generic back-end for a.out binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1294,7 +1294,6 @@ aout_get_external_symbols (bfd *abfd)
     {
       bfd_size_type count;
       struct external_nlist *syms;
-      bfd_size_type amt;
 
       count = exec_hdr (abfd)->a_syms / EXTERNAL_NLIST_SIZE;
       if (count == 0)
@@ -1314,13 +1313,16 @@ aout_get_external_symbols (bfd *abfd)
       if (syms == NULL)
 	return FALSE;
 
-      amt = exec_hdr (abfd)->a_syms;
-      if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-	  || bfd_bread (syms, amt, abfd) != amt)
-	{
-	  free (syms);
-	  return FALSE;
-	}
+      {
+	bfd_size_type amt;
+	amt = exec_hdr (abfd)->a_syms;
+	if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
+	    || bfd_bread (syms, amt, abfd) != amt)
+	  {
+	    free (syms);
+	    return FALSE;
+	  }
+      }
 #endif
 
       obj_aout_external_syms (abfd) = syms;
