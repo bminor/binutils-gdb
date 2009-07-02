@@ -349,7 +349,7 @@ sparc32_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == SPARC32_FSR_REGNUM)
     return sparc_fsr_type;
 
-  return builtin_type_int32;
+  return builtin_type (gdbarch)->builtin_int32;
 }
 
 static void
@@ -406,6 +406,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
 			 struct value **args, CORE_ADDR sp,
 			 int struct_return, CORE_ADDR struct_addr)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   /* Number of words in the "parameter array".  */
   int num_elements = 0;
   int element = 0;
@@ -442,7 +443,8 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
 	  gdb_assert (sparc_integral_or_pointer_p (type));
 
 	  if (len < 4)
-	    args[i] = value_cast (builtin_type_int32, args[i]);
+	    args[i] = value_cast (builtin_type (gdbarch)->builtin_int32,
+				  args[i]);
 	  num_elements += ((len + 3) / 4);
 	}
     }

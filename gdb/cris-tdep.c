@@ -1657,14 +1657,14 @@ cris_register_type (struct gdbarch *gdbarch, int regno)
   else if ((regno >= 0 && regno < gdbarch_sp_regnum (gdbarch))
 	   || (regno >= MOF_REGNUM && regno <= USP_REGNUM))
     /* Note: R8 taken care of previous clause.  */
-    return builtin_type_uint32;
+    return builtin_type (gdbarch)->builtin_uint32;
   else if (regno >= P4_REGNUM && regno <= CCR_REGNUM)
-      return builtin_type_uint16;
+      return builtin_type (gdbarch)->builtin_uint16;
   else if (regno >= P0_REGNUM && regno <= VR_REGNUM)
-      return builtin_type_uint8;
+      return builtin_type (gdbarch)->builtin_uint8;
   else
       /* Invalid (unimplemented) register.  */
-      return builtin_type_int0;
+      return builtin_type (gdbarch)->builtin_int0;
 }
 
 static struct type *
@@ -1680,17 +1680,17 @@ crisv32_register_type (struct gdbarch *gdbarch, int regno)
 	   || (regno == PID_REGNUM)
 	   || (regno >= S0_REGNUM && regno <= S15_REGNUM))
     /* Note: R8 and SP taken care of by previous clause.  */
-    return builtin_type_uint32;
+    return builtin_type (gdbarch)->builtin_uint32;
   else if (regno == WZ_REGNUM)
-      return builtin_type_uint16;
+      return builtin_type (gdbarch)->builtin_uint16;
   else if (regno == BZ_REGNUM || regno == VR_REGNUM || regno == SRS_REGNUM)
-      return builtin_type_uint8;
+      return builtin_type (gdbarch)->builtin_uint8;
   else
     {
       /* Invalid (unimplemented) register.  Should not happen as there are
 	 no unimplemented CRISv32 registers.  */
       warning (_("crisv32_register_type: unknown regno %d"), regno);
-      return builtin_type_int0;
+      return builtin_type (gdbarch)->builtin_int0;
     }
 }
 

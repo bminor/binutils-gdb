@@ -90,21 +90,21 @@ struct type *
 amd64_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= AMD64_RAX_REGNUM && regnum <= AMD64_RDI_REGNUM)
-    return builtin_type_int64;
+    return builtin_type (gdbarch)->builtin_int64;
   if (regnum == AMD64_RBP_REGNUM || regnum == AMD64_RSP_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
   if (regnum >= AMD64_R8_REGNUM && regnum <= AMD64_R15_REGNUM)
-    return builtin_type_int64;
+    return builtin_type (gdbarch)->builtin_int64;
   if (regnum == AMD64_RIP_REGNUM)
     return builtin_type (gdbarch)->builtin_func_ptr;
   if (regnum == AMD64_EFLAGS_REGNUM)
     return i386_eflags_type;
   if (regnum >= AMD64_CS_REGNUM && regnum <= AMD64_GS_REGNUM)
-    return builtin_type_int32;
+    return builtin_type (gdbarch)->builtin_int32;
   if (regnum >= AMD64_ST0_REGNUM && regnum <= AMD64_ST0_REGNUM + 7)
     return builtin_type_i387_ext;
   if (regnum >= AMD64_FCTRL_REGNUM && regnum <= AMD64_FCTRL_REGNUM + 7)
-    return builtin_type_int32;
+    return builtin_type (gdbarch)->builtin_int32;
   if (regnum >= AMD64_XMM0_REGNUM && regnum <= AMD64_XMM0_REGNUM + 15)
     return i386_sse_type (gdbarch);
   if (regnum == AMD64_MXCSR_REGNUM)

@@ -214,33 +214,27 @@ xtensa_register_name (struct gdbarch *gdbarch, int regnum)
 
 /* Return the type of a register.  Create a new type, if necessary.  */
 
-static struct ctype_cache
-{
-  struct ctype_cache *next;
-  int size;
-  struct type *virtual_type;
-} *type_entries = NULL;
-
 static struct type *
 xtensa_register_type (struct gdbarch *gdbarch, int regnum)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   /* Return signed integer for ARx and Ax registers.  */
-  if ((regnum >= gdbarch_tdep (gdbarch)->ar_base
-      && regnum < gdbarch_tdep (gdbarch)->ar_base
-		    + gdbarch_tdep (gdbarch)->num_aregs)
-      || (regnum >= gdbarch_tdep (gdbarch)->a0_base
-      && regnum < gdbarch_tdep (gdbarch)->a0_base + 16))
+  if ((regnum >= tdep->ar_base
+       && regnum < tdep->ar_base + tdep->num_aregs)
+      || (regnum >= tdep->a0_base
+	  && regnum < tdep->a0_base + 16))
     return builtin_type (gdbarch)->builtin_int;
 
   if (regnum == gdbarch_pc_regnum (gdbarch)
-      || regnum == gdbarch_tdep (gdbarch)->a0_base + 1)
+      || regnum == tdep->a0_base + 1)
     return builtin_type (gdbarch)->builtin_data_ptr;
 
   /* Return the stored type for all other registers.  */
   else if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch)
 				   + gdbarch_num_pseudo_regs (gdbarch))
     {
-      xtensa_register_t* reg = &gdbarch_tdep (gdbarch)->regmap[regnum];
+      xtensa_register_t* reg = &tdep->regmap[regnum];
 
       /* Set ctype for this register (only the first time).  */
 
@@ -254,27 +248,27 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
 	  switch (size)
 	    {
 	    case 1:
-	      reg->ctype = builtin_type_uint8;
+	      reg->ctype = builtin_type (gdbarch)->builtin_uint8;
 	      break;
 
 	    case 2:
-	      reg->ctype = builtin_type_uint16;
+	      reg->ctype = builtin_type (gdbarch)->builtin_uint16;
 	      break;
 
 	    case 4:
-	      reg->ctype = builtin_type_uint32;
+	      reg->ctype = builtin_type (gdbarch)->builtin_uint32;
 	      break;
 
 	    case 8:
-	      reg->ctype = builtin_type_uint64;
+	      reg->ctype = builtin_type (gdbarch)->builtin_uint64;
 	      break;
 
 	    case 16:
-	      reg->ctype = builtin_type_uint128;
+	      reg->ctype = builtin_type (gdbarch)->builtin_uint128;
 	      break;
 
 	    default:
-	      for (tp = type_entries; tp != NULL; tp = tp->next)
+	      for (tp = tdep->type_entries; tp != NULL; tp = tp->next)
 		if (tp->size == size)
 		  break;
 
@@ -282,8 +276,8 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
 		{
 		  char *name = xmalloc (16);
 		  tp = xmalloc (sizeof (struct ctype_cache));
-		  tp->next = type_entries;
-		  type_entries = tp;
+		  tp->next = tdep->type_entries;
+		  tdep->type_entries = tp;
 		  tp->size = size;
 
 		  sprintf (name, "int%d", size * 8);

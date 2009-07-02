@@ -218,7 +218,7 @@ static struct type *
 amd64_linux_register_type (struct gdbarch *gdbarch, int reg)
 {
   if (reg == AMD64_LINUX_ORIG_RAX_REGNUM)
-    return builtin_type_int64;
+    return builtin_type (gdbarch)->builtin_int64;
 
   return amd64_register_type (gdbarch, reg);
 }

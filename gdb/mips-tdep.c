@@ -679,9 +679,9 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
       /* The raw or ISA registers.  These are all sized according to
 	 the ISA regsize.  */
       if (mips_isa_regsize (gdbarch) == 4)
-	return builtin_type_int32;
+	return builtin_type (gdbarch)->builtin_int32;
       else
-	return builtin_type_int64;
+	return builtin_type (gdbarch)->builtin_int64;
     }
   else
     {
@@ -692,19 +692,19 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
 	  && regnum <= gdbarch_num_regs (gdbarch) + MIPS_LAST_EMBED_REGNUM)
 	/* The pseudo/cooked view of the embedded registers is always
 	   32-bit.  The raw view is handled below.  */
-	return builtin_type_int32;
+	return builtin_type (gdbarch)->builtin_int32;
       else if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p)
 	/* The target, while possibly using a 64-bit register buffer,
 	   is only transfering 32-bits of each integer register.
 	   Reflect this in the cooked/pseudo (ABI) register value.  */
-	return builtin_type_int32;
+	return builtin_type (gdbarch)->builtin_int32;
       else if (mips_abi_regsize (gdbarch) == 4)
 	/* The ABI is restricted to 32-bit registers (the ISA could be
 	   32- or 64-bit).  */
-	return builtin_type_int32;
+	return builtin_type (gdbarch)->builtin_int32;
       else
 	/* 64-bit ABI.  */
-	return builtin_type_int64;
+	return builtin_type (gdbarch)->builtin_int64;
     }
 }
 
@@ -741,7 +741,7 @@ mips_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 	 the necessary 32 bits, but older versions of GDB expected 64,
 	 so allow the target to provide 64 bits without interfering
 	 with the displayed type.  */
-      return builtin_type_int32;
+      return builtin_type (gdbarch)->builtin_int32;
     }
 
   /* Use pointer types for registers if we can.  For n32 we can not,
@@ -757,7 +757,7 @@ mips_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 
   if (mips_abi_regsize (gdbarch) == 4 && TYPE_LENGTH (rawtype) == 8
       && rawnum >= MIPS_ZERO_REGNUM && rawnum <= MIPS_EMBED_PC_REGNUM)
-    return builtin_type_int32;
+    return builtin_type (gdbarch)->builtin_int32;
 
   /* For all other registers, pass through the hardware type.  */
   return rawtype;
@@ -4396,8 +4396,9 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
       flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
 
       get_formatted_print_options (&opts, 'x');
-      print_scalar_formatted (raw_buffer, builtin_type_uint32, &opts, 'w',
-			      file);
+      print_scalar_formatted (raw_buffer,
+			      builtin_type (gdbarch)->builtin_uint32,
+			      &opts, 'w', file);
 
       fprintf_filtered (file, " flt: ");
       if (inv1)
@@ -4430,8 +4431,9 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
       doub = unpack_double (mips_double_register_type (), raw_buffer, &inv2);
 
       get_formatted_print_options (&opts, 'x');
-      print_scalar_formatted (raw_buffer, builtin_type_uint64, &opts, 'g',
-			      file);
+      print_scalar_formatted (raw_buffer,
+			      builtin_type (gdbarch)->builtin_uint64,
+			      &opts, 'g', file);
 
       fprintf_filtered (file, " flt: ");
       if (inv1)

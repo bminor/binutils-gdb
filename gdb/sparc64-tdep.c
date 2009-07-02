@@ -249,7 +249,7 @@ sparc64_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == SPARC_SP_REGNUM || regnum == SPARC_FP_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
   if (regnum >= SPARC_G0_REGNUM && regnum <= SPARC_I7_REGNUM)
-    return builtin_type_int64;
+    return builtin_type (gdbarch)->builtin_int64;
   if (regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
     return builtin_type (gdbarch)->builtin_float;
   if (regnum >= SPARC64_F32_REGNUM && regnum <= SPARC64_F62_REGNUM)
@@ -259,7 +259,7 @@ sparc64_register_type (struct gdbarch *gdbarch, int regnum)
   /* This raw register contains the contents of %cwp, %pstate, %asi
      and %ccr as laid out in a %tstate register.  */
   if (regnum == SPARC64_STATE_REGNUM)
-    return builtin_type_int64;
+    return builtin_type (gdbarch)->builtin_int64;
   if (regnum == SPARC64_FSR_REGNUM)
     return sparc64_fsr_type;
   if (regnum == SPARC64_FPRS_REGNUM)
@@ -267,18 +267,18 @@ sparc64_register_type (struct gdbarch *gdbarch, int regnum)
   /* "Although Y is a 64-bit register, its high-order 32 bits are
      reserved and always read as 0."  */
   if (regnum == SPARC64_Y_REGNUM)
-    return builtin_type_int64;
+    return builtin_type (gdbarch)->builtin_int64;
 
   /* Pseudo registers.  */
 
   if (regnum == SPARC64_CWP_REGNUM)
-    return builtin_type_int64;
+    return builtin_type (gdbarch)->builtin_int64;
   if (regnum == SPARC64_PSTATE_REGNUM)
     return sparc64_pstate_type;
   if (regnum == SPARC64_ASI_REGNUM)
-    return builtin_type_int64;
+    return builtin_type (gdbarch)->builtin_int64;
   if (regnum == SPARC64_CCR_REGNUM)
-    return builtin_type_int64;
+    return builtin_type (gdbarch)->builtin_int64;
   if (regnum >= SPARC64_D0_REGNUM && regnum <= SPARC64_D62_REGNUM)
     return builtin_type (gdbarch)->builtin_double;
   if (regnum >= SPARC64_Q0_REGNUM && regnum <= SPARC64_Q60_REGNUM)
@@ -687,6 +687,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 			 struct value **args, CORE_ADDR sp,
 			 int struct_return, CORE_ADDR struct_addr)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   /* Number of extended words in the "parameter array".  */
   int num_elements = 0;
   int element = 0;
@@ -768,7 +769,8 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 	     caller to an extended word according to the signed-ness
 	     of the argument type."  */
 	  if (len < 8)
-	    args[i] = value_cast (builtin_type_int64, args[i]);
+	    args[i] = value_cast (builtin_type (gdbarch)->builtin_int64,
+				  args[i]);
 	  num_elements++;
 	}
     }

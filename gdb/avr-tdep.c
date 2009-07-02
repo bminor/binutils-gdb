@@ -212,11 +212,11 @@ static struct type *
 avr_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == AVR_PC_REGNUM)
-    return builtin_type_uint32;
+    return builtin_type (gdbarch)->builtin_uint32;
   if (reg_nr == AVR_SP_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
   else
-    return builtin_type_uint8;
+    return builtin_type (gdbarch)->builtin_uint8;
 }
 
 /* Instruction address checks and convertions. */

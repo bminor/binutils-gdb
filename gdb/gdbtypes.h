@@ -990,6 +990,21 @@ struct builtin_type
   struct type *builtin_true_char;
   struct type *builtin_true_unsigned_char;
 
+  /* Explicit sizes - see C9X <intypes.h> for naming scheme.  The "int0"
+     is for when an architecture needs to describe a register that has
+     no size.  */
+  struct type *builtin_int0;
+  struct type *builtin_int8;
+  struct type *builtin_uint8;
+  struct type *builtin_int16;
+  struct type *builtin_uint16;
+  struct type *builtin_int32;
+  struct type *builtin_uint32;
+  struct type *builtin_int64;
+  struct type *builtin_uint64;
+  struct type *builtin_int128;
+  struct type *builtin_uint128;
+
 
   /* Pointer types.  */
 
@@ -1056,21 +1071,6 @@ struct objfile_type
 extern const struct objfile_type *objfile_type (struct objfile *objfile);
 
  
-/* Explicit sizes - see C9X <intypes.h> for naming scheme.  The "int0"
-   is for when an architecture needs to describe a register that has
-   no size.  */
-extern struct type *builtin_type_int0;
-extern struct type *builtin_type_int8;
-extern struct type *builtin_type_uint8;
-extern struct type *builtin_type_int16;
-extern struct type *builtin_type_uint16;
-extern struct type *builtin_type_int32;
-extern struct type *builtin_type_uint32;
-extern struct type *builtin_type_int64;
-extern struct type *builtin_type_uint64;
-extern struct type *builtin_type_int128;
-extern struct type *builtin_type_uint128;
-
 /* Explicit floating-point formats.  See "floatformat.h".  */
 extern const struct floatformat *floatformats_ieee_single[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ieee_double[BFD_ENDIAN_UNKNOWN];

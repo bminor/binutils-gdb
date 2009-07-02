@@ -235,7 +235,7 @@ m32r_register_type (struct gdbarch *gdbarch, int reg_nr)
   else if (reg_nr == M32R_SP_REGNUM || reg_nr == M32R_FP_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
   else
-    return builtin_type_int32;
+    return builtin_type (gdbarch)->builtin_int32;
 }
 
 

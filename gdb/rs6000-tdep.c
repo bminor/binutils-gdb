@@ -2248,6 +2248,8 @@ rs6000_builtin_type_vec64 (struct gdbarch *gdbarch)
 
   if (!tdep->ppc_builtin_type_vec64)
     {
+      const struct builtin_type *bt = builtin_type (gdbarch);
+
       /* The type we're building is this: */
 #if 0
       union __gdb_builtin_type_vec64
@@ -2263,16 +2265,15 @@ rs6000_builtin_type_vec64 (struct gdbarch *gdbarch)
       struct type *t;
 
       t = init_composite_type ("__ppc_builtin_type_vec64", TYPE_CODE_UNION);
-      append_composite_type_field (t, "uint64", builtin_type_int64);
+      append_composite_type_field (t, "uint64", bt->builtin_int64);
       append_composite_type_field (t, "v2_float",
-				   init_vector_type (builtin_type (gdbarch)
-						     ->builtin_float, 2));
+				   init_vector_type (bt->builtin_float, 2));
       append_composite_type_field (t, "v2_int32",
-				   init_vector_type (builtin_type_int32, 2));
+				   init_vector_type (bt->builtin_int32, 2));
       append_composite_type_field (t, "v4_int16",
-				   init_vector_type (builtin_type_int16, 4));
+				   init_vector_type (bt->builtin_int16, 4));
       append_composite_type_field (t, "v8_int8",
-				   init_vector_type (builtin_type_int8, 8));
+				   init_vector_type (bt->builtin_int8, 8));
 
       TYPE_VECTOR (t) = 1;
       TYPE_NAME (t) = "ppc_builtin_type_vec64";
@@ -2291,6 +2292,8 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
 
   if (!tdep->ppc_builtin_type_vec128)
     {
+      const struct builtin_type *bt = builtin_type (gdbarch);
+
       /* The type we're building is this
 
 	 type = union __ppc_builtin_type_vec128 {
@@ -2305,15 +2308,15 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
       struct type *t;
 
       t = init_composite_type ("__ppc_builtin_type_vec128", TYPE_CODE_UNION);
-      append_composite_type_field (t, "uint128", builtin_type_uint128);
+      append_composite_type_field (t, "uint128", bt->builtin_uint128);
       append_composite_type_field (t, "v4_float",
-				   init_vector_type (builtin_type (gdbarch)->builtin_float, 4));
+				   init_vector_type (bt->builtin_float, 4));
       append_composite_type_field (t, "v4_int32",
-				   init_vector_type (builtin_type_int32, 4));
+				   init_vector_type (bt->builtin_int32, 4));
       append_composite_type_field (t, "v8_int16",
-				   init_vector_type (builtin_type_int16, 8));
+				   init_vector_type (bt->builtin_int16, 8));
       append_composite_type_field (t, "v16_int8",
-				   init_vector_type (builtin_type_int8, 16));
+				   init_vector_type (bt->builtin_int8, 16));
 
       TYPE_VECTOR (t) = 1;
       TYPE_NAME (t) = "ppc_builtin_type_vec128";

@@ -828,6 +828,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 void
 mi_cmd_data_read_memory (char *command, char **argv, int argc)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   CORE_ADDR addr;
   long total_bytes;
@@ -884,23 +885,23 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   switch (word_size)
     {
     case 1:
-      word_type = builtin_type_int8;
+      word_type = builtin_type (gdbarch)->builtin_int8;
       word_asize = 'b';
       break;
     case 2:
-      word_type = builtin_type_int16;
+      word_type = builtin_type (gdbarch)->builtin_int16;
       word_asize = 'h';
       break;
     case 4:
-      word_type = builtin_type_int32;
+      word_type = builtin_type (gdbarch)->builtin_int32;
       word_asize = 'w';
       break;
     case 8:
-      word_type = builtin_type_int64;
+      word_type = builtin_type (gdbarch)->builtin_int64;
       word_asize = 'g';
       break;
     default:
-      word_type = builtin_type_int8;
+      word_type = builtin_type (gdbarch)->builtin_int8;
       word_asize = 'b';
     }
   /* The number of rows.  */

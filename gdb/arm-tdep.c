@@ -1608,9 +1608,9 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
   else if (regnum >= ARRAY_SIZE (arm_register_names))
     /* These registers are only supported on targets which supply
        an XML description.  */
-    return builtin_type_int0;
+    return builtin_type (gdbarch)->builtin_int0;
   else
-    return builtin_type_uint32;
+    return builtin_type (gdbarch)->builtin_uint32;
 }
 
 /* Map a DWARF register REGNUM onto the appropriate GDB register

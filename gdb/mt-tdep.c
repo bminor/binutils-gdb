@@ -139,6 +139,14 @@ enum mt_gdb_regnums
 			    * MT_COPRO_PSEUDOREG_DIM_2)
 };
 
+/* The tdep structure.  */
+struct gdbarch_tdep
+{
+  /* ISA-specific types.  */
+  struct type *copro_type;
+};
+
+
 /* Return name of register number specified by REGNUM.  */
 
 static const char *
@@ -213,7 +221,7 @@ mt_copro_register_type (struct gdbarch *arch, int regnum)
     case MT_QCHANNEL_REGNUM:
     case MT_ISCRAMB_REGNUM:
     case MT_QSCRAMB_REGNUM:
-      return builtin_type_int32;
+      return builtin_type (arch)->builtin_int32;
     case MT_BYPA_REGNUM:
     case MT_BYPB_REGNUM:
     case MT_BYPC_REGNUM:
@@ -222,27 +230,27 @@ mt_copro_register_type (struct gdbarch *arch, int regnum)
     case MT_OUT_REGNUM:
     case MT_ZI2_REGNUM:
     case MT_ZQ2_REGNUM:
-      return builtin_type_int16;
+      return builtin_type (arch)->builtin_int16;
     case MT_EXMAC_REGNUM:
     case MT_MAC_REGNUM:
-      return builtin_type_uint32;
+      return builtin_type (arch)->builtin_uint32;
     case MT_CONTEXT_REGNUM:
       return builtin_type (arch)->builtin_long_long;
     case MT_FLAG_REGNUM:
       return builtin_type (arch)->builtin_unsigned_char;
     default:
       if (regnum >= MT_CPR0_REGNUM && regnum <= MT_CPR15_REGNUM)
-	return builtin_type_int16;
+	return builtin_type (arch)->builtin_int16;
       else if (regnum == MT_CPR0_REGNUM + MT_COPRO_PSEUDOREG_MAC_REGNUM)
 	{
 	  if (gdbarch_bfd_arch_info (arch)->mach == bfd_mach_mrisc2
 	      || gdbarch_bfd_arch_info (arch)->mach == bfd_mach_ms2)
-	    return builtin_type_uint64;
+	    return builtin_type (arch)->builtin_uint64;
 	  else
-	    return builtin_type_uint32;
+	    return builtin_type (arch)->builtin_uint32;
 	}
       else
-	return builtin_type_uint32;
+	return builtin_type (arch)->builtin_uint32;
     }
 }
 
@@ -252,12 +260,10 @@ mt_copro_register_type (struct gdbarch *arch, int regnum)
 static struct type *
 mt_register_type (struct gdbarch *arch, int regnum)
 {
-  static struct type *copro_type = NULL;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
 
   if (regnum >= 0 && regnum < MT_NUM_REGS + MT_NUM_PSEUDO_REGS)
     {
-      if (copro_type == NULL)
-	copro_type = lookup_array_range_type (builtin_type_int16, 0, 1);
       switch (regnum)
 	{
 	case MT_PC_REGNUM:
@@ -269,14 +275,19 @@ mt_register_type (struct gdbarch *arch, int regnum)
 	  return builtin_type (arch)->builtin_data_ptr;
 	case MT_COPRO_REGNUM:
 	case MT_COPRO_PSEUDOREG_REGNUM:
-	  return copro_type;
+	  if (tdep->copro_type == NULL)
+	    {
+	      struct type *elt = builtin_type (arch)->builtin_int16;
+	      tdep->copro_type = lookup_array_range_type (elt, 0, 1);
+	    }
+	  return tdep->copro_type;
 	case MT_MAC_PSEUDOREG_REGNUM:
 	  return mt_copro_register_type (arch,
 					 MT_CPR0_REGNUM
 					 + MT_COPRO_PSEUDOREG_MAC_REGNUM);
 	default:
 	  if (regnum >= MT_R0_REGNUM && regnum <= MT_R15_REGNUM)
-	    return builtin_type_int32;
+	    return builtin_type (arch)->builtin_int32;
 	  else if (regnum < MT_COPRO_PSEUDOREG_ARRAY)
 	    return mt_copro_register_type (arch, regnum);
 	  else
@@ -1098,6 +1109,7 @@ static struct gdbarch *
 mt_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
+  struct gdbarch_tdep *tdep;
 
   /* Find a candidate among the list of pre-declared architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -1106,7 +1118,8 @@ mt_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  gdbarch = gdbarch_alloc (&info, NULL);
+  tdep = XCALLOC (1, struct gdbarch_tdep);
+  gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
   set_gdbarch_double_format (gdbarch, floatformats_ieee_double);

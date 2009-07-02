@@ -795,12 +795,12 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 	}
 
   /* If the type is bigger than a 32-bit signed integer can be, implicitly
-     promote to long.  Java does not do this, so mark it as builtin_type_uint64
-     rather than parse_java_type->builtin_long.  0x80000000 will become
-     -0x80000000 instead of 0x80000000L, because we don't know the sign
-     at this point.  */
+     promote to long.  Java does not do this, so mark it as
+     parse_type->builtin_uint64 rather than parse_java_type->builtin_long.
+     0x80000000 will become -0x80000000 instead of 0x80000000L, because we
+     don't know the sign at this point.  */
   if (type == parse_java_type->builtin_int && n > (ULONGEST)0x80000000)
-    type = builtin_type_uint64;
+    type = parse_type->builtin_uint64;
 
   putithere->typed_val_int.val = n;
   putithere->typed_val_int.type = type;

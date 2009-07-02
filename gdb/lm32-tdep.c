@@ -111,7 +111,7 @@ lm32_register_name (struct gdbarch *gdbarch, int reg_nr)
 static struct type *
 lm32_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
-  return builtin_type_int32;
+  return builtin_type (gdbarch)->builtin_int32;
 }
 
 /* Return non-zero if a register can't be written.  */
@@ -273,7 +273,7 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	case TYPE_CODE_ENUM:
 	  if (TYPE_LENGTH (arg_type) < 4)
 	    {
-	      arg_type = builtin_type_int32;
+	      arg_type = builtin_type (gdbarch)->builtin_int32;
 	      arg = value_cast (arg_type, arg);
 	    }
 	  break;

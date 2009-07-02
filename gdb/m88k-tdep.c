@@ -81,7 +81,7 @@ m88k_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == M88K_R30_REGNUM || regnum == M88K_R31_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
 
-  return builtin_type_int32;
+  return builtin_type (gdbarch)->builtin_int32;
 }
 
 
@@ -258,6 +258,7 @@ static CORE_ADDR
 m88k_store_arguments (struct regcache *regcache, int nargs,
 		      struct value **args, CORE_ADDR sp)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int num_register_words = 0;
   int num_stack_words = 0;
   int i;
@@ -269,7 +270,8 @@ m88k_store_arguments (struct regcache *regcache, int nargs,
 
       if (m88k_integral_or_pointer_p (type) && len < 4)
 	{
-	  args[i] = value_cast (builtin_type_int32, args[i]);
+	  args[i] = value_cast (builtin_type (gdbarch)->builtin_int32,
+				args[i]);
 	  type = value_type (args[i]);
 	  len = TYPE_LENGTH (type);
 	}

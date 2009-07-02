@@ -33,7 +33,7 @@
 
 static void execute_stack_op (struct dwarf_expr_context *,
 			      gdb_byte *, gdb_byte *);
-static struct type *unsigned_address_type (int);
+static struct type *unsigned_address_type (struct gdbarch *, int);
 
 /* Create a new context for the expression evaluator.  */
 
@@ -225,7 +225,7 @@ dwarf2_read_address (struct gdbarch *gdbarch, gdb_byte *buf,
 
   if (gdbarch_integer_to_address_p (gdbarch))
     return gdbarch_integer_to_address
-	     (gdbarch, unsigned_address_type (addr_size), buf);
+	     (gdbarch, unsigned_address_type (gdbarch, addr_size), buf);
 
   return extract_unsigned_integer (buf, addr_size);
 }
@@ -234,16 +234,16 @@ dwarf2_read_address (struct gdbarch *gdbarch, gdb_byte *buf,
    for unsigned arithmetic.  */
 
 static struct type *
-unsigned_address_type (int addr_size)
+unsigned_address_type (struct gdbarch *gdbarch, int addr_size)
 {
   switch (addr_size)
     {
     case 2:
-      return builtin_type_uint16;
+      return builtin_type (gdbarch)->builtin_uint16;
     case 4:
-      return builtin_type_uint32;
+      return builtin_type (gdbarch)->builtin_uint32;
     case 8:
-      return builtin_type_uint64;
+      return builtin_type (gdbarch)->builtin_uint64;
     default:
       internal_error (__FILE__, __LINE__,
 		      _("Unsupported address size.\n"));
@@ -254,16 +254,16 @@ unsigned_address_type (int addr_size)
    for signed arithmetic.  */
 
 static struct type *
-signed_address_type (int addr_size)
+signed_address_type (struct gdbarch *gdbarch, int addr_size)
 {
   switch (addr_size)
     {
     case 2:
-      return builtin_type_int16;
+      return builtin_type (gdbarch)->builtin_int16;
     case 4:
-      return builtin_type_int32;
+      return builtin_type (gdbarch)->builtin_int32;
     case 8:
-      return builtin_type_int64;
+      return builtin_type (gdbarch)->builtin_int64;
     default:
       internal_error (__FILE__, __LINE__,
 		      _("Unsupported address size.\n"));
@@ -622,6 +622,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    CORE_ADDR first, second;
 	    enum exp_opcode binop;
 	    struct value *val1, *val2;
+	    struct type *stype, *utype;
 
 	    second = dwarf_expr_fetch (ctx, 0);
 	    dwarf_expr_pop (ctx);
@@ -629,10 +630,10 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    first = dwarf_expr_fetch (ctx, 0);
 	    dwarf_expr_pop (ctx);
 
-	    val1 = value_from_longest
-		     (unsigned_address_type (ctx->addr_size), first);
-	    val2 = value_from_longest
-		     (unsigned_address_type (ctx->addr_size), second);
+	    utype = unsigned_address_type (ctx->gdbarch, ctx->addr_size);
+	    stype = signed_address_type (ctx->gdbarch, ctx->addr_size);
+	    val1 = value_from_longest (utype, first);
+	    val2 = value_from_longest (utype, second);
 
 	    switch (op)
 	      {
@@ -665,8 +666,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
                 break;
 	      case DW_OP_shra:
 		binop = BINOP_RSH;
-		val1 = value_from_longest
-			 (signed_address_type (ctx->addr_size), first);
+		val1 = value_from_longest (stype, first);
 		break;
 	      case DW_OP_xor:
 		binop = BINOP_BITWISE_XOR;

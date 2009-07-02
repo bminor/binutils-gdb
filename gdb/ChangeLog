@@ -1,5 +1,78 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (builtin_type_int0, builtin_type_int8, builtin_type_uint8,
+	builtin_type_int16, builtin_type_uint16, builtin_type_int32,
+	builtin_type_uint32, builtin_type_int64, builtin_type_uint64,
+	builtin_type_int128, builtin_type_uint128): Remove.
+	(struct builtin_type): New members builtin_int0, builtin_int8,
+	builtin_uint8, builtin_int16, builtin_uint16, builtin_int32,
+	builtin_uint32, builtin_int64, builtin_uint64, builtin_int128,
+	and builtin_uint128.
+	* gdbtypes.c (builtin_type_int0, builtin_type_int8, builtin_type_uint8,
+	builtin_type_int16, builtin_type_uint16, builtin_type_int32,
+	builtin_type_uint32, builtin_type_int64, builtin_type_uint64,
+	builtin_type_int128, builtin_type_uint128): Remove.
+	(_initialize_gdbtypes): Do not initialize them.
+	(gdbtypes_post_init): Initialize fixed-size integer types.
+
+	* dwarf2expr.c (unsigned_address_type, signed_address_type): Add
+	GDBARCH argument.  Return platform-specific type.
+	(dwarf2_read_address, execute_stack_op): Update calls.
+
+	* target-descriptions.c (tdesc_gdb_type): Use platform-specific types
+	instead of global builtin_int_... variables.
+	* mi/mi-main.c (mi_cmd_data_read_memory): Likewise.
+	* printcmd.c (do_examine): Likewise.
+	* jv-exp.y (parse_number): Likewise.
+
+	* alpha-tdep.c (alpha_register_type, alpha_push_dummy_call,
+	alpha_store_return_value): Likewise.
+	* amd64-linux-tdep.c (amd64_linux_register_type): Likewise.
+	* amd64-tdep.c (amd64_register_type): Likewise.
+	* arm-tdep.c (arm_register_type): Likewise.
+	* avr-tdep.c (avr_register_type): Likewise.
+	* cris-tdep.c (cris_register_type, crisv32_register_type): Likewise.
+	* frv-tdep.c (frv_register_type): Likewise.
+	* h8300-tdep.c h8300_register_type): Likewise.
+	* hppa-tdep.c (hppa64_push_dummy_call, hppa32_register_type,
+	hppa64_register_type): Likewise.
+	* i386-tdep.c (i386_mmx_type, i386_sse_type): Likewise.
+	* iq2000-tdep.c (iq2000_register_type): Likewise.
+	* lm32-tdep.c (lm32_register_type, lm32_push_dummy_call): Likewise.
+	* m32r-tdep.c (m32r_register_type): Likewise.
+	* m68hc11-tdep.c (m68hc11_register_type, m68hc11_pseudo_register_read,
+	m68hc11_pseudo_register_write): Likewise.
+	* m68k-tdep.c (m68k_register_type): Likewise.
+	* m88k-tdep.c (m88k_register_type, m88k_store_arguments): Likewise.
+	* mep-tdep.c (mep_register_type): Likewise.
+	* mips-tdep.c (mips_register_type, mips_pseudo_register_type,
+	mips_print_fp_register): Likewise.
+	* moxie-tdep.c (moxie_register_type): Likewise.
+	* mt-tdep.c (mt_copro_register_type, mt_register_type): Likewise.
+	* rs6000-tdep.c (rs6000_builtin_type_vec64,
+	rs6000_builtin_type_vec128): Likewise.
+	* score-tdep.c (score_register_type): Likewise.
+	* sparc-tdep.c (sparc32_register_type, sparc32_store_arguments):
+	Likewise.
+	* sparc64-tdep.c (sparc64_register_type, sparc64_store_arguments):
+	Likewise.
+	* spu-tdep.c (spu_builtin_type_vec128, spu_register_type): Likewise.
+	* v850-tdep.c (v850_register_type): Likewise.
+	* xstormy16-tdep.c (xstormy16_register_type): Likewise.
+	* xtensa-tdep.c (xtensa_register_type): Likewise.
+
+	* mt-tdep.c (struct gdbarch_tdep): New data structure.
+	(mt_gdbarch_init): Alloc TDEP structures.
+	(mt_register_type): Cache coprocessor type in TDEP instead of
+	static global variable.
+
+	* xtensa-tdep.h (struct gdbarch_tdep): Add type_entries member.
+	* xtensa-tdep.c (type_entries): Remove.
+	(xtensa_register_type): Cache fixed-size types in TDEP instead
+	of in global variable.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (builtin_type_true_char): Remove.
 	(builtin_type_true_unsigned_char): Likewise.
 	(struct builtin_type): Add builtin_true_char and

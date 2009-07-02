@@ -1119,13 +1119,13 @@ h8300_register_type (struct gdbarch *gdbarch, int regno)
 	  return builtin_type (gdbarch)->builtin_data_ptr;
 	default:
 	  if (regno == E_PSEUDO_CCR_REGNUM (gdbarch))
-	    return builtin_type_uint8;
+	    return builtin_type (gdbarch)->builtin_uint8;
 	  else if (regno == E_PSEUDO_EXR_REGNUM (gdbarch))
-	    return builtin_type_uint8;
+	    return builtin_type (gdbarch)->builtin_uint8;
 	  else if (is_h8300hmode (gdbarch))
-	    return builtin_type_int32;
+	    return builtin_type (gdbarch)->builtin_int32;
 	  else
-	    return builtin_type_int16;
+	    return builtin_type (gdbarch)->builtin_int16;
 	}
     }
 }

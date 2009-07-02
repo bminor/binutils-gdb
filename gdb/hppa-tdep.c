@@ -975,7 +975,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
              safely sign-extend them.  */
 	  if (len < 8)
 	    {
-	      arg = value_cast (builtin_type_int64, arg);
+	      arg = value_cast (builtin_type (gdbarch)->builtin_int64, arg);
 	      len = 8;
 	    }
 	}
@@ -2610,7 +2610,7 @@ static struct type *
 hppa32_register_type (struct gdbarch *gdbarch, int regnum)
 {
    if (regnum < HPPA_FP4_REGNUM)
-     return builtin_type_uint32;
+     return builtin_type (gdbarch)->builtin_uint32;
    else
      return builtin_type_ieee_single;
 }
@@ -2619,7 +2619,7 @@ static struct type *
 hppa64_register_type (struct gdbarch *gdbarch, int regnum)
 {
    if (regnum < HPPA64_FP4_REGNUM)
-     return builtin_type_uint64;
+     return builtin_type (gdbarch)->builtin_uint64;
    else
      return builtin_type_ieee_double;
 }

@@ -124,12 +124,12 @@ m68k_register_type (struct gdbarch *gdbarch, int regnum)
 	return builtin_type (gdbarch)->builtin_func_ptr;
 
       if (regnum == M68K_FPC_REGNUM || regnum == M68K_FPS_REGNUM)
-	return builtin_type_int32;
+	return builtin_type (gdbarch)->builtin_int32;
     }
   else
     {
       if (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FPI_REGNUM)
-	return builtin_type_int0;
+	return builtin_type (gdbarch)->builtin_int0;
     }
 
   if (regnum == gdbarch_pc_regnum (gdbarch))
@@ -141,7 +141,7 @@ m68k_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == M68K_PS_REGNUM)
     return m68k_ps_type;
 
-  return builtin_type_int32;
+  return builtin_type (gdbarch)->builtin_int32;
 }
 
 static const char *m68k_register_names[] = {

@@ -289,7 +289,7 @@ m68hc11_pseudo_register_read (struct gdbarch *gdbarch,
   if (regno == M68HC12_HARD_PC_REGNUM)
     {
       ULONGEST pc;
-      const int regsize = TYPE_LENGTH (builtin_type_uint32);
+      const int regsize = 4;
 
       regcache_cooked_read_unsigned (regcache, HARD_PC_REGNUM, &pc);
       if (pc >= 0x8000 && pc < 0xc000)
@@ -329,7 +329,7 @@ m68hc11_pseudo_register_write (struct gdbarch *gdbarch,
      addressing mode.  */
   if (regno == M68HC12_HARD_PC_REGNUM)
     {
-      const int regsize = TYPE_LENGTH (builtin_type_uint32);
+      const int regsize = 4;
       char *tmp = alloca (regsize);
       CORE_ADDR pc;
 
@@ -1239,13 +1239,13 @@ m68hc11_register_type (struct gdbarch *gdbarch, int reg_nr)
     case HARD_A_REGNUM:
     case HARD_B_REGNUM:
     case HARD_CCR_REGNUM:
-      return builtin_type_uint8;
+      return builtin_type (gdbarch)->builtin_uint8;
 
     case M68HC12_HARD_PC_REGNUM:
-      return builtin_type_uint32;
+      return builtin_type (gdbarch)->builtin_uint32;
 
     default:
-      return builtin_type_uint16;
+      return builtin_type (gdbarch)->builtin_uint16;
     }
 }
 

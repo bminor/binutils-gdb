@@ -104,7 +104,7 @@ alpha_register_type (struct gdbarch *gdbarch, int regno)
   if (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31)
     return builtin_type_ieee_double;
 
-  return builtin_type_int64;
+  return builtin_type (gdbarch)->builtin_int64;
 }
 
 /* Is REGNUM a member of REGGROUP?  */
@@ -298,12 +298,12 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      /* 32-bit values must be sign-extended to 64 bits
 		 even if the base data type is unsigned.  */
-	      arg_type = builtin_type_int32;
+	      arg_type = builtin_type (gdbarch)->builtin_int32;
 	      arg = value_cast (arg_type, arg);
 	    }
 	  if (TYPE_LENGTH (arg_type) < ALPHA_REGISTER_SIZE)
 	    {
-	      arg_type = builtin_type_int64;
+	      arg_type = builtin_type (gdbarch)->builtin_int64;
 	      arg = value_cast (arg_type, arg);
 	    }
 	  break;
@@ -498,6 +498,7 @@ static void
 alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 			  const gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int length = TYPE_LENGTH (valtype);
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
   ULONGEST l;
@@ -556,7 +557,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
       /* 32-bit values must be sign-extended to 64 bits
 	 even if the base data type is unsigned.  */
       if (length == 4)
-	valtype = builtin_type_int32;
+	valtype = builtin_type (gdbarch)->builtin_int32;
       l = unpack_long (valtype, valbuf);
       regcache_cooked_write_unsigned (regcache, ALPHA_V0_REGNUM, l);
       break;

@@ -125,9 +125,9 @@ static struct type *
 xstormy16_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum == E_PC_REGNUM)
-    return builtin_type_uint32;
+    return builtin_type (gdbarch)->builtin_uint32;
   else
-    return builtin_type_uint16;
+    return builtin_type (gdbarch)->builtin_uint16;
 }
 
 /* Function: xstormy16_type_is_scalar

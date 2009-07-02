@@ -268,7 +268,7 @@ static struct type *
 score_register_type (struct gdbarch *gdbarch, int regnum)
 {
   gdb_assert (regnum >= 0 && regnum < SCORE_NUM_REGS);
-  return builtin_type_uint32;
+  return builtin_type (gdbarch)->builtin_uint32;
 }
 
 static CORE_ADDR

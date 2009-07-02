@@ -2052,6 +2052,8 @@ i386_mmx_type (struct gdbarch *gdbarch)
 
   if (!tdep->i386_mmx_type)
     {
+      const struct builtin_type *bt = builtin_type (gdbarch);
+
       /* The type we're building is this: */
 #if 0
       union __gdb_builtin_type_vec64i
@@ -2066,13 +2068,14 @@ i386_mmx_type (struct gdbarch *gdbarch)
       struct type *t;
 
       t = init_composite_type ("__gdb_builtin_type_vec64i", TYPE_CODE_UNION);
-      append_composite_type_field (t, "uint64", builtin_type_int64);
+
+      append_composite_type_field (t, "uint64", bt->builtin_int64);
       append_composite_type_field (t, "v2_int32",
-				   init_vector_type (builtin_type_int32, 2));
+				   init_vector_type (bt->builtin_int32, 2));
       append_composite_type_field (t, "v4_int16",
-				   init_vector_type (builtin_type_int16, 4));
+				   init_vector_type (bt->builtin_int16, 4));
       append_composite_type_field (t, "v8_int8",
-				   init_vector_type (builtin_type_int8, 8));
+				   init_vector_type (bt->builtin_int8, 8));
 
       TYPE_VECTOR (t) = 1;
       TYPE_NAME (t) = "builtin_type_vec64i";
@@ -2089,6 +2092,8 @@ i386_sse_type (struct gdbarch *gdbarch)
 
   if (!tdep->i386_sse_type)
     {
+      const struct builtin_type *bt = builtin_type (gdbarch);
+
       /* The type we're building is this: */
 #if 0
       union __gdb_builtin_type_vec128i
@@ -2107,20 +2112,18 @@ i386_sse_type (struct gdbarch *gdbarch)
 
       t = init_composite_type ("__gdb_builtin_type_vec128i", TYPE_CODE_UNION);
       append_composite_type_field (t, "v4_float",
-				   init_vector_type (builtin_type (gdbarch)
-						     ->builtin_float, 4));
+				   init_vector_type (bt->builtin_float, 4));
       append_composite_type_field (t, "v2_double",
-				   init_vector_type (builtin_type (gdbarch)
-						     ->builtin_double, 2));
+				   init_vector_type (bt->builtin_double, 2));
       append_composite_type_field (t, "v16_int8",
-				   init_vector_type (builtin_type_int8, 16));
+				   init_vector_type (bt->builtin_int8, 16));
       append_composite_type_field (t, "v8_int16",
-				   init_vector_type (builtin_type_int16, 8));
+				   init_vector_type (bt->builtin_int16, 8));
       append_composite_type_field (t, "v4_int32",
-				   init_vector_type (builtin_type_int32, 4));
+				   init_vector_type (bt->builtin_int32, 4));
       append_composite_type_field (t, "v2_int64",
-				   init_vector_type (builtin_type_int64, 2));
-      append_composite_type_field (t, "uint128", builtin_type_int128);
+				   init_vector_type (bt->builtin_int64, 2));
+      append_composite_type_field (t, "uint128", bt->builtin_int128);
 
       TYPE_VECTOR (t) = 1;
       TYPE_NAME (t) = "builtin_type_vec128i";

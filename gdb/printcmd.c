@@ -781,13 +781,13 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
     }
 
   if (size == 'b')
-    val_type = builtin_type_int8;
+    val_type = builtin_type (next_gdbarch)->builtin_int8;
   else if (size == 'h')
-    val_type = builtin_type_int16;
+    val_type = builtin_type (next_gdbarch)->builtin_int16;
   else if (size == 'w')
-    val_type = builtin_type_int32;
+    val_type = builtin_type (next_gdbarch)->builtin_int32;
   else if (size == 'g')
-    val_type = builtin_type_int64;
+    val_type = builtin_type (next_gdbarch)->builtin_int64;
 
   maxelts = 8;
   if (size == 'w')

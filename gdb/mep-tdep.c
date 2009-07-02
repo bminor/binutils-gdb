@@ -1084,7 +1084,7 @@ mep_register_type (struct gdbarch *gdbarch, int reg_nr)
      keep the 'g' packet format fixed), and the pseudoregisters vary
      in length.  */
   if (IS_RAW_CR_REGNUM (reg_nr))
-    return builtin_type_uint64;
+    return builtin_type (gdbarch)->builtin_uint64;
 
   /* Since GDB doesn't allow registers to change type, we have two
      banks of pseudoregisters for the coprocessor general-purpose
@@ -1099,14 +1099,14 @@ mep_register_type (struct gdbarch *gdbarch, int reg_nr)
           if (mep_pseudo_cr_is_float (reg_nr))
             return builtin_type (gdbarch)->builtin_float;
           else
-            return builtin_type_uint32;
+            return builtin_type (gdbarch)->builtin_uint32;
         }
       else if (size == 64)
         {
           if (mep_pseudo_cr_is_float (reg_nr))
             return builtin_type (gdbarch)->builtin_double;
           else
-            return builtin_type_uint64;
+            return builtin_type (gdbarch)->builtin_uint64;
         }
       else
         gdb_assert (0);
@@ -1114,7 +1114,7 @@ mep_register_type (struct gdbarch *gdbarch, int reg_nr)
 
   /* All other registers are 32 bits long.  */
   else
-    return builtin_type_uint32;
+    return builtin_type (gdbarch)->builtin_uint32;
 }
 
 

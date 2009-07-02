@@ -587,7 +587,7 @@ iq2000_return_value (struct gdbarch *gdbarch, struct type *func_type,
 static struct type *
 iq2000_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  return builtin_type_int32;
+  return builtin_type (gdbarch)->builtin_int32;
 }
 
 static CORE_ADDR
