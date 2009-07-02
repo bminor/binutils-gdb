@@ -258,7 +258,7 @@ static char *my_value_of_variable (struct varobj *var,
 
 static char *value_get_print_value (struct value *value,
 				    enum varobj_display_formats format,
-				    PyObject *value_formatter);
+				    struct varobj *var);
 
 static int varobj_value_is_changeable_p (struct varobj *var);
 
@@ -445,6 +445,17 @@ is_root_p (struct varobj *var)
 {
   return (var->root->rootvar == var);
 }
+
+#ifdef HAVE_PYTHON
+/* Helper function to install a Python environment suitable for
+   use during operations on VAR.  */
+struct cleanup *
+varobj_ensure_python_env (struct varobj *var)
+{
+  return ensure_python_env (var->root->exp->gdbarch,
+			    var->root->exp->language_defn);
+}
+#endif
 
 /* Creates a varobj (not its children) */
 
@@ -765,8 +776,7 @@ varobj_set_display_format (struct varobj *var,
       && var->value && !value_lazy (var->value))
     {
       xfree (var->print_value);
-      var->print_value = value_get_print_value (var->value, var->format,
-						var->pretty_printer);
+      var->print_value = value_get_print_value (var->value, var->format, var);
     }
 
   return var->format;
@@ -784,10 +794,12 @@ varobj_get_display_hint (struct varobj *var)
   char *result = NULL;
 
 #if HAVE_PYTHON
-  PyGILState_STATE state = PyGILState_Ensure ();
+  struct cleanup *back_to = varobj_ensure_python_env (var);
+
   if (var->pretty_printer)
     result = gdbpy_get_display_hint (var->pretty_printer);
-  PyGILState_Release (state);
+
+  do_cleanups (back_to);
 #endif
 
   return result;
@@ -842,10 +854,8 @@ update_dynamic_varobj_children (struct varobj *var,
   int i;
   int children_changed = 0;
   PyObject *printer = var->pretty_printer;
-  PyGILState_STATE state;
 
-  state = PyGILState_Ensure ();
-  back_to = make_cleanup_py_restore_gil (&state);
+  back_to = varobj_ensure_python_env (var);
 
   *cchanged = 0;
   if (!PyObject_HasAttr (printer, gdbpy_children_cst))
@@ -1282,8 +1292,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
      lazy -- if it is, the code above has decided that the value
      should not be fetched.  */
   if (value && !value_lazy (value))
-    print_value = value_get_print_value (value, var->format, 
-					 var->pretty_printer);
+    print_value = value_get_print_value (value, var->format, var);
 
   /* If the type is changeable, compare the old and the new values.
      If this is the initial assignment, we don't have any old value
@@ -1386,11 +1395,9 @@ install_default_visualizer (struct varobj *var)
 {
 #if HAVE_PYTHON
   struct cleanup *cleanup;
-  PyGILState_STATE state;
   PyObject *pretty_printer = NULL;
 
-  state = PyGILState_Ensure ();
-  cleanup = make_cleanup_py_restore_gil (&state);
+  cleanup = varobj_ensure_python_env (var);
 
   if (var->value)
     {
@@ -1421,11 +1428,8 @@ varobj_set_visualizer (struct varobj *var, const char *visualizer)
 #if HAVE_PYTHON
   PyObject *mainmod, *globals, *pretty_printer, *constructor;
   struct cleanup *back_to, *value;
-  PyGILState_STATE state;
 
-
-  state = PyGILState_Ensure ();
-  back_to = make_cleanup_py_restore_gil (&state);
+  back_to = varobj_ensure_python_env (var);
 
   mainmod = PyImport_AddModule ("__main__");
   globals = PyModule_GetDict (mainmod);
@@ -1921,6 +1925,15 @@ new_root_variable (void)
 static void
 free_variable (struct varobj *var)
 {
+#if HAVE_PYTHON
+  if (var->pretty_printer)
+    {
+      struct cleanup *cleanup = varobj_ensure_python_env (var);
+      Py_DECREF (var->pretty_printer);
+      do_cleanups (cleanup);
+    }
+#endif
+
   value_free (var->value);
 
   /* Free the expression if this is a root variable. */
@@ -1929,14 +1942,6 @@ free_variable (struct varobj *var)
       xfree (var->root->exp);
       xfree (var->root);
     }
-
-#if HAVE_PYTHON
-  {
-    PyGILState_STATE state = PyGILState_Ensure ();
-    Py_XDECREF (var->pretty_printer);
-    PyGILState_Release (state);
-  }
-#endif
 
   xfree (var->name);
   xfree (var->obj_name);
@@ -2212,7 +2217,7 @@ my_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 
 static char *
 value_get_print_value (struct value *value, enum varobj_display_formats format,
-		       PyObject *value_formatter)
+		       struct varobj *var)
 {
   long dummy;
   struct ui_file *stb;
@@ -2225,7 +2230,9 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 
 #if HAVE_PYTHON
   {
-    PyGILState_STATE state = PyGILState_Ensure ();
+    struct cleanup *back_to = varobj_ensure_python_env (var);
+    PyObject *value_formatter = var->pretty_printer;
+
     if (value_formatter && PyObject_HasAttr (value_formatter,
 					     gdbpy_to_string_cst))
       {
@@ -2245,13 +2252,13 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 						&replacement);
 	if (thevalue && !string_print)
 	  {
-	    PyGILState_Release (state);
+	    do_cleanups (back_to);
 	    return thevalue;
 	  }
 	if (replacement)
 	  value = replacement;
       }
-    PyGILState_Release (state);
+    do_cleanups (back_to);
   }
 #endif
 
@@ -2774,8 +2781,7 @@ c_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 	    if (format == var->format)
 	      return xstrdup (var->print_value);
 	    else
-	      return value_get_print_value (var->value, format, 
-					    var->pretty_printer);
+	      return value_get_print_value (var->value, format, var);
 	  }
       }
     }

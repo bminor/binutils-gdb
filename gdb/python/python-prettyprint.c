@@ -474,10 +474,8 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
   char *hint = NULL;
   struct cleanup *cleanups;
   int result = 0;
-  PyGILState_STATE state;
 
-  state = PyGILState_Ensure ();
-  cleanups = make_cleanup_py_restore_gil (&state);
+  cleanups = ensure_python_env (gdbarch, language);
 
   /* Instantiate the printer.  */
   if (valaddr)
@@ -526,13 +524,11 @@ apply_varobj_pretty_printer (PyObject *printer_obj,
 			     struct value **replacement)
 {
   char *result;
-  PyGILState_STATE state = PyGILState_Ensure ();
 
   *replacement = NULL;
   result = pretty_print_one_value (printer_obj, replacement);
   if (result == NULL);
     gdbpy_print_stack ();
-  PyGILState_Release (state);
 
   return result;
 }

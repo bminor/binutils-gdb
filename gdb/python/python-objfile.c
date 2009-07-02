@@ -21,6 +21,7 @@
 #include "python-internal.h"
 #include "charset.h"
 #include "objfiles.h"
+#include "language.h"
 
 typedef struct
 {
@@ -119,13 +120,13 @@ objfpy_set_printers (PyObject *o, PyObject *value, void *ignore)
 static void
 clean_up_objfile (struct objfile *objfile, void *datum)
 {
-  PyGILState_STATE state;
+  struct cleanup *cleanup;
   objfile_object *object = datum;
 
-  state = PyGILState_Ensure ();
+  cleanup = ensure_python_env (get_objfile_arch (objfile), current_language);
   object->objfile = NULL;
   Py_DECREF ((PyObject *) object);
-  PyGILState_Release (state);
+  do_cleanups (cleanup);
 }
 
 /* Return a borrowed reference to the Python object of type Objfile

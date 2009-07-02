@@ -674,7 +674,9 @@ extern struct value *value_subscripted_rvalue (struct value *array,
 
 /* User function handler.  */
 
-typedef struct value *(*internal_function_fn) (void *cookie,
+typedef struct value *(*internal_function_fn) (struct gdbarch *gdbarch,
+					       const struct language_defn *language,
+					       void *cookie,
 					       int argc,
 					       struct value **argv);
 
@@ -682,7 +684,9 @@ void add_internal_function (const char *name, const char *doc,
 			    internal_function_fn handler,
 			    void *cookie);
 
-struct value *call_internal_function (struct value *function,
+struct value *call_internal_function (struct gdbarch *gdbarch,
+				      const struct language_defn *language,
+				      struct value *function,
 				      int argc, struct value **argv);
 
 char *value_internal_function_name (struct value *);

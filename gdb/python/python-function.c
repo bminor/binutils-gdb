@@ -27,6 +27,7 @@
 #include "cli/cli-decode.h"
 #include "completer.h"
 #include "expression.h"
+#include "language.h"
 
 static PyTypeObject fnpy_object_type;
 
@@ -53,16 +54,15 @@ convert_values_to_python (int argc, struct value **argv)
 /* Call a Python function object's invoke method.  */
 
 static struct value *
-fnpy_call (void *cookie, int argc, struct value **argv)
+fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
+	   void *cookie, int argc, struct value **argv)
 {
   int i;
   struct value *value = NULL;
   PyObject *result, *callable, *args;
   struct cleanup *cleanup;
-  PyGILState_STATE state;
 
-  state = PyGILState_Ensure ();
-  cleanup = make_cleanup_py_restore_gil (&state);
+  cleanup = ensure_python_env (gdbarch, language);
 
   args = convert_values_to_python (argc, argv);
 

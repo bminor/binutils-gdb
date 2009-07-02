@@ -18,12 +18,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "command.h"
 #include "ui-out.h"
 #include "cli/cli-script.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "observer.h"
+#include "value.h"
+#include "language.h"
 
 #include <ctype.h>
 
@@ -57,6 +60,52 @@ PyObject *gdbpy_to_string_cst;
 PyObject *gdbpy_children_cst;
 PyObject *gdbpy_display_hint_cst;
 PyObject *gdbpy_doc_cst;
+
+
+/* Architecture and language to be used in callbacks from
+   the Python interpreter.  */
+struct gdbarch *python_gdbarch;
+const struct language_defn *python_language;
+
+/* Restore global language and architecture and Python GIL state
+   when leaving the Python interpreter.  */
+
+struct python_env
+{
+  PyGILState_STATE state;
+  struct gdbarch *gdbarch;
+  const struct language_defn *language;
+};
+
+static void
+restore_python_env (void *p)
+{
+  struct python_env *env = (struct python_env *)p;
+  PyGILState_Release (env->state);
+  python_gdbarch = env->gdbarch;
+  python_language = env->language;
+  xfree (env);
+}
+
+/* Called before entering the Python interpreter to install the
+   current language and architecture to be used for Python values.  */
+
+struct cleanup *
+ensure_python_env (struct gdbarch *gdbarch,
+                   const struct language_defn *language)
+{
+  struct python_env *env = xmalloc (sizeof *env);
+
+  env->state = PyGILState_Ensure ();
+  env->gdbarch = python_gdbarch;
+  env->language = python_language;
+
+  python_gdbarch = gdbarch;
+  python_language = language;
+
+  return make_cleanup (restore_python_env, env);
+}
+
 
 /* Given a command_line, return a command string suitable for passing
    to Python.  Lines in the string are separated by newlines.  The
@@ -96,13 +145,11 @@ eval_python_from_control_command (struct command_line *cmd)
   int ret;
   char *script;
   struct cleanup *cleanup;
-  PyGILState_STATE state;
 
   if (cmd->body_count != 1)
     error (_("Invalid \"python\" block structure."));
 
-  state = PyGILState_Ensure ();
-  cleanup = make_cleanup_py_restore_gil (&state);
+  cleanup = ensure_python_env (get_current_arch (), current_language);
 
   script = compute_python_string (cmd->body_list[0]);
   ret = PyRun_SimpleString (script);
@@ -122,10 +169,7 @@ static void
 python_command (char *arg, int from_tty)
 {
   struct cleanup *cleanup;
-  PyGILState_STATE state;
-
-  state = PyGILState_Ensure ();
-  cleanup = make_cleanup_py_restore_gil (&state);
+  cleanup = ensure_python_env (get_current_arch (), current_language);
 
   while (arg && *arg && isspace (*arg))
     ++arg;
@@ -330,13 +374,12 @@ gdbpy_new_objfile (struct objfile *objfile)
   char *filename, *debugfile;
   int len;
   FILE *input;
-  PyGILState_STATE state;
   struct cleanup *cleanups;
 
   if (!gdbpy_auto_load || !objfile || !objfile->name)
     return;
 
-  state = PyGILState_Ensure ();
+  cleanups = ensure_python_env (get_objfile_arch (objfile), current_language);
 
   gdbpy_current_objfile = objfile;
 
@@ -349,7 +392,7 @@ gdbpy_new_objfile (struct objfile *objfile)
   input = fopen (filename, "r");
   debugfile = filename;
 
-  cleanups = make_cleanup (xfree, filename);
+  make_cleanup (xfree, filename);
   make_cleanup (xfree, realname);
 
   if (!input && debug_file_directory)
@@ -391,8 +434,6 @@ gdbpy_new_objfile (struct objfile *objfile)
 
   do_cleanups (cleanups);
   gdbpy_current_objfile = NULL;
-
-  PyGILState_Release (state);
 }
 
 /* Return the current Objfile, or None if there isn't one.  */

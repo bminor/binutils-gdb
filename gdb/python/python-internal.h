@@ -62,6 +62,7 @@ typedef int Py_ssize_t;
 #endif
 
 struct value;
+struct language_defn;
 
 extern PyObject *gdb_module;
 extern PyTypeObject value_object_type;
@@ -89,7 +90,12 @@ void gdbpy_initialize_functions (void);
 void gdbpy_initialize_objfile (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
-struct cleanup *make_cleanup_py_restore_gil (PyGILState_STATE *state);
+
+struct cleanup *ensure_python_env (struct gdbarch *gdbarch,
+				   const struct language_defn *language);
+
+extern struct gdbarch *python_gdbarch;
+extern const struct language_defn *python_language;
 
 /* Use this after a TRY_EXCEPT to throw the appropriate Python
    exception.  */

@@ -1326,7 +1326,9 @@ value_internal_function_name (struct value *val)
 }
 
 struct value *
-call_internal_function (struct value *func, int argc, struct value **argv)
+call_internal_function (struct gdbarch *gdbarch,
+			const struct language_defn *language,
+			struct value *func, int argc, struct value **argv)
 {
   struct internal_function *ifn;
   int result;
@@ -1335,7 +1337,7 @@ call_internal_function (struct value *func, int argc, struct value **argv)
   result = get_internalvar_function (VALUE_INTERNALVAR (func), &ifn);
   gdb_assert (result);
 
-  return (*ifn->handler) (ifn->cookie, argc, argv);
+  return (*ifn->handler) (gdbarch, language, ifn->cookie, argc, argv);
 }
 
 /* The 'function' command.  This does nothing -- it is just a

@@ -44,19 +44,19 @@ struct value *values_in_python = NULL;
    GDB (which uses target arithmetic).  */
 
 /* Python's integer type corresponds to C's long type.  */
-#define builtin_type_pyint builtin_type (current_gdbarch)->builtin_long
+#define builtin_type_pyint builtin_type (python_gdbarch)->builtin_long
 
 /* Python's float type corresponds to C's double type.  */
-#define builtin_type_pyfloat builtin_type (current_gdbarch)->builtin_double
+#define builtin_type_pyfloat builtin_type (python_gdbarch)->builtin_double
 
 /* Python's long type corresponds to C's long long type.  */
-#define builtin_type_pylong builtin_type (current_gdbarch)->builtin_long_long
+#define builtin_type_pylong builtin_type (python_gdbarch)->builtin_long_long
 
 #define builtin_type_pybool \
-  language_bool_type (current_language, current_gdbarch)
+  language_bool_type (python_language, python_gdbarch)
 
 #define builtin_type_pychar \
-  language_string_char_type (current_language, current_gdbarch)
+  language_string_char_type (python_language, python_gdbarch)
 
 typedef struct {
   PyObject_HEAD
@@ -333,7 +333,7 @@ valpy_str (PyObject *self)
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
       common_val_print (((value_object *) self)->value, stb, 0,
-			&opts, current_language);
+			&opts, python_language);
       s = ui_file_xstrdup (stb, &dummy);
     }
   GDB_PY_HANDLE_EXCEPTION (except);

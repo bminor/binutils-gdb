@@ -1,5 +1,51 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* python/python-internal.h (struct language_defn): Declare.
+	(python_gdbarch, python_language): Likewise.
+	(ensure_python_env): Add prototype.
+	(make_cleanup_py_restore_gil): Remove prototype.
+
+	* python/python.c: Include "arch-utils.h", "value.h" and "language.h".
+	(python_gdbarch, python_language): New global variables.
+	(struct python_env): New data type.
+	(ensure_python_env, restore_python_env): New functions.
+	(eval_python_from_control_command): Call ensure_python_env to
+	install current architecture and language.
+	(python_command, gdbpy_new_objfile): Likewise.
+	* python/python-cmd.c: Include "arch-utils.h" and "language.h".
+	(cmdpy_destroyer, cmdpy_function, cmdpy_completer): Call
+	ensure_python_env.
+	* python/python-type.c (clean_up_objfile_types): Likewise.
+	* python/python-objfile.c: Include "language.h".
+	(clean_up_objfile): Call ensure_python_env.
+	* python/python-prettyprint.c (apply_val_pretty_printer): Likewise.
+	(apply_varobj_pretty_printer): Do not call PyGILState_Ensure.
+	* varobj.c (varobj_ensure_python_env): New helper function.
+	(varobj_get_display_hint, update_dynamic_varobj_children,
+	install_default_visualizer, varobj_set_visualizer, free_variable,
+	value_get_print_value): Call it.
+	(value_get_print_value): Add varobj argument instead of pretty
+	printer argument.  Update all callers.
+
+	* python/python-utils.c (py_gil_restore, make_cleanup_py_restore_gil):
+	Remove.
+
+	* value.h (internal_function_fn): Add GDBARCH and LANGUAGE argument.
+	(call_internal_function): Likewise.
+	* value.c (call_internal_function): Likewise.  Pass to handler.
+	* eval.c (evaluate_subexp_standard): Update call.
+	* python/python-function.c: Include "language.h".
+	(fnpy_call): Add GDBARCH and LANGAUAGE arguments and call
+	make_cleanup_python_env.
+
+	* python/python-value.c (builtin_type_pyint, builtin_type_pyfloat,
+	builtin_type_pylong, builtin_type_pybool, builtin_type_pychar,
+	valpy_str): Use python_gdbarch and python_language instead of
+	current_gdbarch and current_language.
+	* python/python-type.c (typy_lookup_typename): Likewise.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* arch-utils.c (selected_byte_order): Return target_byte_order_user.
 	(show_endian): Use target_byte_order_user if specified; otherwise
 	use get_current_arch () instead of current_gdbarch.
