@@ -1994,54 +1994,70 @@ i386_return_value (struct gdbarch *gdbarch, struct type *func_type,
 }
 
 
-/* Type for %eflags.  */
-struct type *i386_eflags_type;
-
-/* Type for %mxcsr.  */
-struct type *i386_mxcsr_type;
-
 /* Construct types for ISA-specific registers.  */
-static void
-i386_init_types (void)
+struct type *
+i386_eflags_type (struct gdbarch *gdbarch)
 {
-  struct type *type;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  type = init_flags_type ("builtin_type_i386_eflags", 4);
-  append_flags_type_flag (type, 0, "CF");
-  append_flags_type_flag (type, 1, NULL);
-  append_flags_type_flag (type, 2, "PF");
-  append_flags_type_flag (type, 4, "AF");
-  append_flags_type_flag (type, 6, "ZF");
-  append_flags_type_flag (type, 7, "SF");
-  append_flags_type_flag (type, 8, "TF");
-  append_flags_type_flag (type, 9, "IF");
-  append_flags_type_flag (type, 10, "DF");
-  append_flags_type_flag (type, 11, "OF");
-  append_flags_type_flag (type, 14, "NT");
-  append_flags_type_flag (type, 16, "RF");
-  append_flags_type_flag (type, 17, "VM");
-  append_flags_type_flag (type, 18, "AC");
-  append_flags_type_flag (type, 19, "VIF");
-  append_flags_type_flag (type, 20, "VIP");
-  append_flags_type_flag (type, 21, "ID");
-  i386_eflags_type = type;
+  if (!tdep->i386_eflags_type)
+    {
+      struct type *type;
 
-  type = init_flags_type ("builtin_type_i386_mxcsr", 4);
-  append_flags_type_flag (type, 0, "IE");
-  append_flags_type_flag (type, 1, "DE");
-  append_flags_type_flag (type, 2, "ZE");
-  append_flags_type_flag (type, 3, "OE");
-  append_flags_type_flag (type, 4, "UE");
-  append_flags_type_flag (type, 5, "PE");
-  append_flags_type_flag (type, 6, "DAZ");
-  append_flags_type_flag (type, 7, "IM");
-  append_flags_type_flag (type, 8, "DM");
-  append_flags_type_flag (type, 9, "ZM");
-  append_flags_type_flag (type, 10, "OM");
-  append_flags_type_flag (type, 11, "UM");
-  append_flags_type_flag (type, 12, "PM");
-  append_flags_type_flag (type, 15, "FZ");
-  i386_mxcsr_type = type;
+      type = init_flags_type ("builtin_type_i386_eflags", 4);
+      append_flags_type_flag (type, 0, "CF");
+      append_flags_type_flag (type, 1, NULL);
+      append_flags_type_flag (type, 2, "PF");
+      append_flags_type_flag (type, 4, "AF");
+      append_flags_type_flag (type, 6, "ZF");
+      append_flags_type_flag (type, 7, "SF");
+      append_flags_type_flag (type, 8, "TF");
+      append_flags_type_flag (type, 9, "IF");
+      append_flags_type_flag (type, 10, "DF");
+      append_flags_type_flag (type, 11, "OF");
+      append_flags_type_flag (type, 14, "NT");
+      append_flags_type_flag (type, 16, "RF");
+      append_flags_type_flag (type, 17, "VM");
+      append_flags_type_flag (type, 18, "AC");
+      append_flags_type_flag (type, 19, "VIF");
+      append_flags_type_flag (type, 20, "VIP");
+      append_flags_type_flag (type, 21, "ID");
+
+      tdep->i386_eflags_type = type;
+    }
+
+  return tdep->i386_eflags_type;
+}
+
+struct type *
+i386_mxcsr_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->i386_mxcsr_type)
+    {
+      struct type *type;
+
+      type = init_flags_type ("builtin_type_i386_mxcsr", 4);
+      append_flags_type_flag (type, 0, "IE");
+      append_flags_type_flag (type, 1, "DE");
+      append_flags_type_flag (type, 2, "ZE");
+      append_flags_type_flag (type, 3, "OE");
+      append_flags_type_flag (type, 4, "UE");
+      append_flags_type_flag (type, 5, "PE");
+      append_flags_type_flag (type, 6, "DAZ");
+      append_flags_type_flag (type, 7, "IM");
+      append_flags_type_flag (type, 8, "DM");
+      append_flags_type_flag (type, 9, "ZM");
+      append_flags_type_flag (type, 10, "OM");
+      append_flags_type_flag (type, 11, "UM");
+      append_flags_type_flag (type, 12, "PM");
+      append_flags_type_flag (type, 15, "FZ");
+
+      tdep->i386_mxcsr_type = type;
+    }
+
+  return tdep->i386_mxcsr_type;
 }
 
 struct type *
@@ -2157,7 +2173,7 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
     return builtin_type (gdbarch)->builtin_func_ptr;
 
   if (regnum == I386_EFLAGS_REGNUM)
-    return i386_eflags_type;
+    return i386_eflags_type (gdbarch);
 
   if (regnum == I386_EBP_REGNUM || regnum == I386_ESP_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
@@ -2172,7 +2188,7 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
     return i386_sse_type (gdbarch);
 
   if (regnum == I387_MXCSR_REGNUM (gdbarch_tdep (gdbarch)))
-    return i386_mxcsr_type;
+    return i386_mxcsr_type (gdbarch);
 
   return builtin_type (gdbarch)->builtin_int;
 }
@@ -5352,7 +5368,6 @@ is \"default\"."),
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_GO32,
 			  i386_go32_init_abi);
 
-  /* Initialize the i386-specific register groups & types.  */
+  /* Initialize the i386-specific register groups.  */
   i386_init_reggroups ();
-  i386_init_types();
 }

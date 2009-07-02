@@ -1,5 +1,39 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* i386-tdep.h (struct gdbarch_tdep): Add i386_eflags_type and
+	i386_mxcsr_type members.
+	(i386_eflags_type): Make into function.
+	(i386_mxcsr_type): Likewise.
+	* i386-tdep.c (i386_eflags_type): Make into function.
+	(i386_mxcsr_type): Likewise.
+	(i386_register_type): Update uses.
+	(i386_init_types): Remove.
+	(_initialize_i386_tdep): Do not call it.
+	* amd64-tdep.c (amd64_register_type): Update uses.
+
+	* m68k-tdep.h (struct gdbarch_tdep): Add m68k_ps_type member.
+	* m68k-tdep.c (m68k_ps_type): Make into function.
+	(m68k_register_type): Update use.
+	(m68k_init_types): Remove.
+	(_initialize_m68k_tdep): Do not call it.
+
+	* sparc-tdep.h (struct gdbarch_tdep): Add sparc_psr_type,
+	sparc_fsr_type, sparc64_pstate_type, sparc64_fsr_type, and
+	sparc64_fprs_type members.
+	* sparc-tdep.c (sparc_psr_type): Make into function.
+	(sparc_fsr_type): Likewise.
+	(sparc32_register_type): Update uses.
+	(sparc_init_types): Remove.
+	(_initialize_sparc_tdep): Do not call it.
+	* sparc64-tdep.c (sparc64_pstate_type): Make into function.
+	(sparc64_fsr_type): Likewise.
+	(sparc64_fprs_type): Likewise.
+	(sparc64_register_type): Update uses.
+	(sparc64_init_types): Remove.
+	(_initialize_sparc64_tdep): Likewise.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (builtin_type_ieee_single, builtin_type_ieee_double,
 	builtin_type_i387_ext, builtin_type_m68881_ext, builtin_type_arm_ext,
 	builtin_type_ia64_spill, builtin_type_ia64_quad): Remove.

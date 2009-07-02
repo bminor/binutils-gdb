@@ -104,6 +104,8 @@ struct gdbarch_tdep
   int sc_sp_offset;
 
   /* ISA-specific data types.  */
+  struct type *i386_eflags_type;
+  struct type *i386_mxcsr_type;
   struct type *i386_mmx_type;
   struct type *i386_sse_type;
   struct type *i387_ext_type;
@@ -160,9 +162,8 @@ enum i386_regnum
 #define I386_MAX_REGISTER_SIZE	16
 
 /* Types for i386-specific registers.  */
-extern struct type *i386_eflags_type;
-extern struct type *i386_mxcsr_type;
-
+extern struct type *i386_eflags_type (struct gdbarch *gdbarch);
+extern struct type *i386_mxcsr_type (struct gdbarch *gdbarch);
 extern struct type *i386_mmx_type (struct gdbarch *gdbarch);
 extern struct type *i386_sse_type (struct gdbarch *gdbarch);
 extern struct type *i387_ext_type (struct gdbarch *gdbarch);

@@ -71,29 +71,34 @@ m68k_local_breakpoint_from_pc (struct gdbarch *gdbarch,
 }
 
 
-/* Type for %ps.  */
-struct type *m68k_ps_type;
-
 /* Construct types for ISA-specific registers.  */
-static void
-m68k_init_types (void)
+static struct type *
+m68k_ps_type (struct gdbarch *gdbarch)
 {
-  struct type *type;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  type = init_flags_type ("builtin_type_m68k_ps", 4);
-  append_flags_type_flag (type, 0, "C");
-  append_flags_type_flag (type, 1, "V");
-  append_flags_type_flag (type, 2, "Z");
-  append_flags_type_flag (type, 3, "N");
-  append_flags_type_flag (type, 4, "X");
-  append_flags_type_flag (type, 8, "I0");
-  append_flags_type_flag (type, 9, "I1");
-  append_flags_type_flag (type, 10, "I2");
-  append_flags_type_flag (type, 12, "M");
-  append_flags_type_flag (type, 13, "S");
-  append_flags_type_flag (type, 14, "T0");
-  append_flags_type_flag (type, 15, "T1");
-  m68k_ps_type = type;
+  if (!tdep->m68k_ps_type)
+    {
+      struct type *type;
+
+      type = init_flags_type ("builtin_type_m68k_ps", 4);
+      append_flags_type_flag (type, 0, "C");
+      append_flags_type_flag (type, 1, "V");
+      append_flags_type_flag (type, 2, "Z");
+      append_flags_type_flag (type, 3, "N");
+      append_flags_type_flag (type, 4, "X");
+      append_flags_type_flag (type, 8, "I0");
+      append_flags_type_flag (type, 9, "I1");
+      append_flags_type_flag (type, 10, "I2");
+      append_flags_type_flag (type, 12, "M");
+      append_flags_type_flag (type, 13, "S");
+      append_flags_type_flag (type, 14, "T0");
+      append_flags_type_flag (type, 15, "T1");
+
+      tdep->m68k_ps_type = type;
+    }
+
+  return tdep->m68k_ps_type;
 }
 
 static struct type *
@@ -152,7 +157,7 @@ m68k_register_type (struct gdbarch *gdbarch, int regnum)
     return builtin_type (gdbarch)->builtin_data_ptr;
 
   if (regnum == M68K_PS_REGNUM)
-    return m68k_ps_type;
+    return m68k_ps_type (gdbarch);
 
   return builtin_type (gdbarch)->builtin_int32;
 }
@@ -1257,7 +1262,4 @@ void
 _initialize_m68k_tdep (void)
 {
   gdbarch_register (bfd_arch_m68k, m68k_gdbarch_init, m68k_dump_tdep);
-
-  /* Initialize the m68k-specific register types.  */
-  m68k_init_types ();
 }

@@ -98,7 +98,7 @@ amd64_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == AMD64_RIP_REGNUM)
     return builtin_type (gdbarch)->builtin_func_ptr;
   if (regnum == AMD64_EFLAGS_REGNUM)
-    return i386_eflags_type;
+    return i386_eflags_type (gdbarch);
   if (regnum >= AMD64_CS_REGNUM && regnum <= AMD64_GS_REGNUM)
     return builtin_type (gdbarch)->builtin_int32;
   if (regnum >= AMD64_ST0_REGNUM && regnum <= AMD64_ST0_REGNUM + 7)
@@ -108,7 +108,7 @@ amd64_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum >= AMD64_XMM0_REGNUM && regnum <= AMD64_XMM0_REGNUM + 15)
     return i386_sse_type (gdbarch);
   if (regnum == AMD64_MXCSR_REGNUM)
-    return i386_mxcsr_type;
+    return i386_mxcsr_type (gdbarch);
 
   internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }

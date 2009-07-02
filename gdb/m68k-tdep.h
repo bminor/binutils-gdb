@@ -94,6 +94,7 @@ struct gdbarch_tdep
   int fpregs_present;
 
    /* ISA-specific data types.  */
+  struct type *m68k_ps_type;
   struct type *m68881_ext_type;
 };
 

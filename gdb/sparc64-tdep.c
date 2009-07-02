@@ -121,60 +121,88 @@ sparc64_structure_or_union_p (const struct type *type)
 }
 
 
-/* Type for %pstate.  */
-struct type *sparc64_pstate_type;
-
-/* Type for %fsr.  */
-struct type *sparc64_fsr_type;
-
-/* Type for %fprs.  */
-struct type *sparc64_fprs_type;
-
 /* Construct types for ISA-specific registers.  */
 
-static void
-sparc64_init_types (void)
+static struct type *
+sparc64_pstate_type (struct gdbarch *gdbarch)
 {
-  struct type *type;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  type = init_flags_type ("builtin_type_sparc64_pstate", 8);
-  append_flags_type_flag (type, 0, "AG");
-  append_flags_type_flag (type, 1, "IE");
-  append_flags_type_flag (type, 2, "PRIV");
-  append_flags_type_flag (type, 3, "AM");
-  append_flags_type_flag (type, 4, "PEF");
-  append_flags_type_flag (type, 5, "RED");
-  append_flags_type_flag (type, 8, "TLE");
-  append_flags_type_flag (type, 9, "CLE");
-  append_flags_type_flag (type, 10, "PID0");
-  append_flags_type_flag (type, 11, "PID1");
-  sparc64_pstate_type = type;
+  if (!tdep->sparc64_pstate_type)
+    {
+      struct type *type;
 
-  type = init_flags_type ("builtin_type_sparc64_fsr", 8);
-  append_flags_type_flag (type, 0, "NXA");
-  append_flags_type_flag (type, 1, "DZA");
-  append_flags_type_flag (type, 2, "UFA");
-  append_flags_type_flag (type, 3, "OFA");
-  append_flags_type_flag (type, 4, "NVA");
-  append_flags_type_flag (type, 5, "NXC");
-  append_flags_type_flag (type, 6, "DZC");
-  append_flags_type_flag (type, 7, "UFC");
-  append_flags_type_flag (type, 8, "OFC");
-  append_flags_type_flag (type, 9, "NVC");
-  append_flags_type_flag (type, 22, "NS");
-  append_flags_type_flag (type, 23, "NXM");
-  append_flags_type_flag (type, 24, "DZM");
-  append_flags_type_flag (type, 25, "UFM");
-  append_flags_type_flag (type, 26, "OFM");
-  append_flags_type_flag (type, 27, "NVM");
-  sparc64_fsr_type = type;
+      type = init_flags_type ("builtin_type_sparc64_pstate", 8);
+      append_flags_type_flag (type, 0, "AG");
+      append_flags_type_flag (type, 1, "IE");
+      append_flags_type_flag (type, 2, "PRIV");
+      append_flags_type_flag (type, 3, "AM");
+      append_flags_type_flag (type, 4, "PEF");
+      append_flags_type_flag (type, 5, "RED");
+      append_flags_type_flag (type, 8, "TLE");
+      append_flags_type_flag (type, 9, "CLE");
+      append_flags_type_flag (type, 10, "PID0");
+      append_flags_type_flag (type, 11, "PID1");
 
-  type = init_flags_type ("builtin_type_sparc64_fprs", 8);
-  append_flags_type_flag (type, 0, "DL");
-  append_flags_type_flag (type, 1, "DU");
-  append_flags_type_flag (type, 2, "FEF");
-  sparc64_fprs_type = type;
+      tdep->sparc64_pstate_type = type;
+    }
+
+  return tdep->sparc64_pstate_type;
 }
+
+static struct type *
+sparc64_fsr_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->sparc64_fsr_type)
+    {
+      struct type *type;
+
+      type = init_flags_type ("builtin_type_sparc64_fsr", 8);
+      append_flags_type_flag (type, 0, "NXA");
+      append_flags_type_flag (type, 1, "DZA");
+      append_flags_type_flag (type, 2, "UFA");
+      append_flags_type_flag (type, 3, "OFA");
+      append_flags_type_flag (type, 4, "NVA");
+      append_flags_type_flag (type, 5, "NXC");
+      append_flags_type_flag (type, 6, "DZC");
+      append_flags_type_flag (type, 7, "UFC");
+      append_flags_type_flag (type, 8, "OFC");
+      append_flags_type_flag (type, 9, "NVC");
+      append_flags_type_flag (type, 22, "NS");
+      append_flags_type_flag (type, 23, "NXM");
+      append_flags_type_flag (type, 24, "DZM");
+      append_flags_type_flag (type, 25, "UFM");
+      append_flags_type_flag (type, 26, "OFM");
+      append_flags_type_flag (type, 27, "NVM");
+
+      tdep->sparc64_fsr_type = type;
+    }
+
+  return tdep->sparc64_fsr_type;
+}
+
+static struct type *
+sparc64_fprs_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->sparc64_fprs_type)
+    {
+      struct type *type;
+
+      type = init_flags_type ("builtin_type_sparc64_fprs", 8);
+      append_flags_type_flag (type, 0, "DL");
+      append_flags_type_flag (type, 1, "DU");
+      append_flags_type_flag (type, 2, "FEF");
+
+      tdep->sparc64_fprs_type = type;
+    }
+
+  return tdep->sparc64_fprs_type;
+}
+
 
 /* Register information.  */
 
@@ -261,9 +289,9 @@ sparc64_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == SPARC64_STATE_REGNUM)
     return builtin_type (gdbarch)->builtin_int64;
   if (regnum == SPARC64_FSR_REGNUM)
-    return sparc64_fsr_type;
+    return sparc64_fsr_type (gdbarch);
   if (regnum == SPARC64_FPRS_REGNUM)
-    return sparc64_fprs_type;
+    return sparc64_fprs_type (gdbarch);
   /* "Although Y is a 64-bit register, its high-order 32 bits are
      reserved and always read as 0."  */
   if (regnum == SPARC64_Y_REGNUM)
@@ -274,7 +302,7 @@ sparc64_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == SPARC64_CWP_REGNUM)
     return builtin_type (gdbarch)->builtin_int64;
   if (regnum == SPARC64_PSTATE_REGNUM)
-    return sparc64_pstate_type;
+    return sparc64_pstate_type (gdbarch);
   if (regnum == SPARC64_ASI_REGNUM)
     return builtin_type (gdbarch)->builtin_int64;
   if (regnum == SPARC64_CCR_REGNUM)
@@ -1425,13 +1453,3 @@ sparc64_collect_fpregset (const struct regcache *regcache,
     }
 }
 
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc64_tdep (void);
-
-void
-_initialize_sparc64_tdep (void)
-{
-  /* Initialize the UltraSPARC-specific register types.  */
-  sparc64_init_types();
-}

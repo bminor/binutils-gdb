@@ -283,46 +283,61 @@ sparc32_register_name (struct gdbarch *gdbarch, int regnum)
   return NULL;
 }
 
-
-/* Type for %psr.  */
-struct type *sparc_psr_type;
-
-/* Type for %fsr.  */
-struct type *sparc_fsr_type;
-
 /* Construct types for ISA-specific registers.  */
 
-static void
-sparc_init_types (void)
+static struct type *
+sparc_psr_type (struct gdbarch *gdbarch)
 {
-  struct type *type;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  type = init_flags_type ("builtin_type_sparc_psr", 4);
-  append_flags_type_flag (type, 5, "ET");
-  append_flags_type_flag (type, 6, "PS");
-  append_flags_type_flag (type, 7, "S");
-  append_flags_type_flag (type, 12, "EF");
-  append_flags_type_flag (type, 13, "EC");
-  sparc_psr_type = type;
+  if (!tdep->sparc_psr_type)
+    {
+      struct type *type;
 
-  type = init_flags_type ("builtin_type_sparc_fsr", 4);
-  append_flags_type_flag (type, 0, "NXA");
-  append_flags_type_flag (type, 1, "DZA");
-  append_flags_type_flag (type, 2, "UFA");
-  append_flags_type_flag (type, 3, "OFA");
-  append_flags_type_flag (type, 4, "NVA");
-  append_flags_type_flag (type, 5, "NXC");
-  append_flags_type_flag (type, 6, "DZC");
-  append_flags_type_flag (type, 7, "UFC");
-  append_flags_type_flag (type, 8, "OFC");
-  append_flags_type_flag (type, 9, "NVC");
-  append_flags_type_flag (type, 22, "NS");
-  append_flags_type_flag (type, 23, "NXM");
-  append_flags_type_flag (type, 24, "DZM");
-  append_flags_type_flag (type, 25, "UFM");
-  append_flags_type_flag (type, 26, "OFM");
-  append_flags_type_flag (type, 27, "NVM");
-  sparc_fsr_type = type;
+      type = init_flags_type ("builtin_type_sparc_psr", 4);
+      append_flags_type_flag (type, 5, "ET");
+      append_flags_type_flag (type, 6, "PS");
+      append_flags_type_flag (type, 7, "S");
+      append_flags_type_flag (type, 12, "EF");
+      append_flags_type_flag (type, 13, "EC");
+
+      tdep->sparc_psr_type = type;
+    }
+
+  return tdep->sparc_psr_type;
+}
+
+static struct type *
+sparc_fsr_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->sparc_fsr_type)
+    {
+      struct type *type;
+
+      type = init_flags_type ("builtin_type_sparc_fsr", 4);
+      append_flags_type_flag (type, 0, "NXA");
+      append_flags_type_flag (type, 1, "DZA");
+      append_flags_type_flag (type, 2, "UFA");
+      append_flags_type_flag (type, 3, "OFA");
+      append_flags_type_flag (type, 4, "NVA");
+      append_flags_type_flag (type, 5, "NXC");
+      append_flags_type_flag (type, 6, "DZC");
+      append_flags_type_flag (type, 7, "UFC");
+      append_flags_type_flag (type, 8, "OFC");
+      append_flags_type_flag (type, 9, "NVC");
+      append_flags_type_flag (type, 22, "NS");
+      append_flags_type_flag (type, 23, "NXM");
+      append_flags_type_flag (type, 24, "DZM");
+      append_flags_type_flag (type, 25, "UFM");
+      append_flags_type_flag (type, 26, "OFM");
+      append_flags_type_flag (type, 27, "NVM");
+
+      tdep->sparc_fsr_type = type;
+    }
+
+  return tdep->sparc_fsr_type;
 }
 
 /* Return the GDB type object for the "standard" data type of data in
@@ -344,10 +359,10 @@ sparc32_register_type (struct gdbarch *gdbarch, int regnum)
     return builtin_type (gdbarch)->builtin_func_ptr;
 
   if (regnum == SPARC32_PSR_REGNUM)
-    return sparc_psr_type;
+    return sparc_psr_type (gdbarch);
 
   if (regnum == SPARC32_FSR_REGNUM)
-    return sparc_fsr_type;
+    return sparc_fsr_type (gdbarch);
 
   return builtin_type (gdbarch)->builtin_int32;
 }
@@ -1740,7 +1755,4 @@ void
 _initialize_sparc_tdep (void)
 {
   register_gdbarch_init (bfd_arch_sparc, sparc32_gdbarch_init);
-
-  /* Initialize the SPARC-specific register types.  */
-  sparc_init_types();
 }

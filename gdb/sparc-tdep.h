@@ -67,6 +67,13 @@ struct gdbarch_tdep
 
   /* Alternative location for trap return.  Used for single-stepping.  */
   CORE_ADDR (*step_trap) (struct frame_info *frame, unsigned long insn);
+
+  /* ISA-specific data types.  */
+  struct type *sparc_psr_type;
+  struct type *sparc_fsr_type;
+  struct type *sparc64_pstate_type;
+  struct type *sparc64_fsr_type;
+  struct type *sparc64_fprs_type;
 };
 
 /* Register numbers of various important registers.  */
