@@ -1,5 +1,33 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* target.h (struct target_ops): New member to_thread_architecture.
+	(target_thread_architecture): New macro.
+	* target.c (update_current_target): Inherit to_thread_architecture.
+	(default_thread_architecture): New function.
+	(debug_to_thread_architecture): New function.
+	(setup_target_debug): Handle to_thread_architecture.
+
+	* regcache.h (get_thread_arch_regcache): New.
+	* regcache.c (struct regcache_list): New data type.
+	(current_regcache): Hold regcache list instead of single regcache.
+	(current_thread_ptid, current_thread_arch): New static variables.
+	(get_thread_arch_regcache): New function.
+	(get_thread_regcache): Use it.  Call target_thread_architecture.
+	(regcache_thread_ptid_changed): Update to current_regcache changes.
+	(registers_changed): Likewise.  Reset current_thread_arch and
+	current_thread_ptid.
+
+	* remote.c (remote_wait): Access target registers in target_gdbarch.
+	* linux-nat.c (linux_nat_do_thread_registers): Likewise.
+	* proc-service.c (ps_lgetregs, ps_lsetregs): Likewise.
+	(ps_lgetfpregs, ps_lsetfpregs): Likewise.
+	* sol-thread.c (ps_lgetregs, ps_lsetregs): Likewise.
+	(ps_lgetfpregs, ps_lsetfpregs): Likewise.
+	* solib-svr4.c (enable_break): Likewise.
+	(svr4_relocate_main_executable): Likewise.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* python/python-internal.h (struct language_defn): Declare.
 	(python_gdbarch, python_language): Likewise.
 	(ensure_python_env): Add prototype.

@@ -410,36 +410,60 @@ regcache_invalidate (struct regcache *regcache, int regnum)
 
 
 /* Global structure containing the current regcache.  */
-/* FIXME: cagney/2002-05-11: The two global arrays registers[] and
-   deprecated_register_valid[] currently point into this structure.  */
-static struct regcache *current_regcache;
 
 /* NOTE: this is a write-through cache.  There is no "dirty" bit for
    recording if the register values have been changed (eg. by the
    user).  Therefore all registers must be written back to the
    target when appropriate.  */
 
-struct regcache *get_thread_regcache (ptid_t ptid)
+struct regcache_list
 {
-  /* NOTE: uweigand/2007-05-05:  We need to detect the thread's
-     current architecture at this point.  */
-  struct gdbarch *thread_gdbarch = current_gdbarch;
+  struct regcache *regcache;
+  struct regcache_list *next;
+};
 
-  if (current_regcache && ptid_equal (current_regcache->ptid, ptid)
-      && get_regcache_arch (current_regcache) == thread_gdbarch)
-    return current_regcache;
+static struct regcache_list *current_regcache;
 
-  if (current_regcache)
-    regcache_xfree (current_regcache);
+struct regcache *
+get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
+{
+  struct regcache_list *list;
+  struct regcache *new_regcache;
 
-  current_regcache = regcache_xmalloc (thread_gdbarch);
-  current_regcache->readonly_p = 0;
-  current_regcache->ptid = ptid;
+  for (list = current_regcache; list; list = list->next)
+    if (ptid_equal (list->regcache->ptid, ptid)
+	&& get_regcache_arch (list->regcache) == gdbarch)
+      return list->regcache;
 
-  return current_regcache;
+  new_regcache = regcache_xmalloc (gdbarch);
+  new_regcache->readonly_p = 0;
+  new_regcache->ptid = ptid;
+
+  list = xmalloc (sizeof (struct regcache_list));
+  list->regcache = new_regcache;
+  list->next = current_regcache;
+  current_regcache = list;
+
+  return new_regcache;
 }
 
-struct regcache *get_current_regcache (void)
+static ptid_t current_thread_ptid;
+static struct gdbarch *current_thread_arch;
+
+struct regcache *
+get_thread_regcache (ptid_t ptid)
+{
+  if (!current_thread_arch || !ptid_equal (current_thread_ptid, ptid))
+    {
+      current_thread_ptid = ptid;
+      current_thread_arch = target_thread_architecture (ptid);
+    }
+
+  return get_thread_arch_regcache (ptid, current_thread_arch);
+}
+
+struct regcache *
+get_current_regcache (void)
 {
   return get_thread_regcache (inferior_ptid);
 }
@@ -458,9 +482,11 @@ regcache_observer_target_changed (struct target_ops *target)
 static void
 regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 {
-  if (current_regcache != NULL
-      && ptid_equal (current_regcache->ptid, old_ptid))
-    current_regcache->ptid = new_ptid;
+  struct regcache_list *list;
+
+  for (list = current_regcache; list; list = list->next)
+    if (ptid_equal (list->regcache->ptid, old_ptid))
+      list->regcache->ptid = new_ptid;
 }
 
 /* Low level examining and depositing of registers.
@@ -477,10 +503,19 @@ regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 void
 registers_changed (void)
 {
-  int i;
+  struct regcache_list *list, *next;
 
-  regcache_xfree (current_regcache);
+  for (list = current_regcache; list; list = next)
+    {
+      next = list->next;
+      regcache_xfree (list->regcache);
+      xfree (list);
+    }
+
   current_regcache = NULL;
+
+  current_thread_ptid = null_ptid;
+  current_thread_arch = NULL;
 
   /* Need to forget about any frames we have cached, too. */
   reinit_frame_cache ();

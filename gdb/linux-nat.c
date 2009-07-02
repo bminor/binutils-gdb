@@ -3495,8 +3495,8 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
   gdb_gregset_t gregs;
   gdb_fpregset_t fpregs;
   unsigned long lwp = ptid_get_lwp (ptid);
-  struct regcache *regcache = get_thread_regcache (ptid);
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch *gdbarch = target_gdbarch;
+  struct regcache *regcache = get_thread_arch_regcache (ptid, gdbarch);
   const struct regset *regset;
   int core_regset_p;
   struct cleanup *old_chain;

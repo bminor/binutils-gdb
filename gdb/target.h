@@ -542,6 +542,9 @@ struct target_ops
        simultaneously?  */
     int (*to_supports_multi_process) (void);
 
+    /* Determine current architecture of thread PTID.  */
+    struct gdbarch *(*to_thread_architecture) (struct target_ops *, ptid_t);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1038,6 +1041,11 @@ extern char *normal_pid_to_str (ptid_t ptid);
 
 #define target_pid_to_exec_file(pid) \
      (current_target.to_pid_to_exec_file) (pid)
+
+/* Determine current architecture of thread PTID.  */
+
+#define target_thread_architecture(ptid) \
+     (current_target.to_thread_architecture (&current_target, ptid))
 
 /*
  * Iterator function for target memory regions.

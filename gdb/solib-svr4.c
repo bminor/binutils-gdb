@@ -1380,7 +1380,8 @@ enable_break (struct svr4_info *info)
          most cases.  */
       if (!load_addr_found)
 	{
-	  struct regcache *regcache = get_thread_regcache (inferior_ptid);
+	  struct regcache *regcache
+	    = get_thread_arch_regcache (inferior_ptid, target_gdbarch);
 	  load_addr = (regcache_read_pc (regcache)
 		       - exec_entry_point (tmp_bfd, tmp_bfd_target));
 	}
@@ -1517,7 +1518,8 @@ static void
 svr4_relocate_main_executable (void)
 {
   asection *interp_sect;
-  struct regcache *regcache = get_thread_regcache (inferior_ptid);
+  struct regcache *regcache
+    = get_thread_arch_regcache (inferior_ptid, target_gdbarch);
   CORE_ADDR pc = regcache_read_pc (regcache);
 
   /* Decide if the objfile needs to be relocated.  As indicated above,

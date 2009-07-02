@@ -93,6 +93,9 @@ static LONGEST target_xfer_partial (struct target_ops *ops,
 				    void *readbuf, const void *writebuf,
 				    ULONGEST offset, LONGEST len);
 
+static struct gdbarch *default_thread_architecture (struct target_ops *ops,
+						    ptid_t ptid);
+
 static void init_dummy_target (void);
 
 static struct target_ops debug_target;
@@ -630,6 +633,7 @@ update_current_target (void)
       INHERIT (to_make_corefile_notes, t);
       /* Do not inherit to_get_thread_local_address.  */
       INHERIT (to_can_execute_reverse, t);
+      INHERIT (to_thread_architecture, t);
       /* Do not inherit to_read_description.  */
       INHERIT (to_get_ada_task_ptid, t);
       /* Do not inherit to_search_memory.  */
@@ -770,6 +774,8 @@ update_current_target (void)
   de_fault (to_async_mask,
 	    (int (*) (int))
 	    return_one);
+  de_fault (to_thread_architecture,
+	    default_thread_architecture);
   current_target.to_read_description = NULL;
   de_fault (to_get_ada_task_ptid,
             (ptid_t (*) (long, long))
@@ -2448,6 +2454,12 @@ default_watchpoint_addr_within_range (struct target_ops *target,
   return addr >= start && addr < start + length;
 }
 
+static struct gdbarch *
+default_thread_architecture (struct target_ops *ops, ptid_t ptid)
+{
+  return target_gdbarch;
+}
+
 static int
 return_zero (void)
 {
@@ -3236,6 +3248,19 @@ debug_to_notice_signals (ptid_t ptid)
                       PIDGET (ptid));
 }
 
+static struct gdbarch *
+debug_to_thread_architecture (struct target_ops *ops, ptid_t ptid)
+{
+  struct gdbarch *retval;
+
+  retval = debug_target.to_thread_architecture (ops, ptid);
+
+  fprintf_unfiltered (gdb_stdlog, "target_thread_architecture (%s) = %p [%s]\n",
+		      target_pid_to_str (ptid), retval,
+		      gdbarch_bfd_arch_info (retval)->printable_name);
+  return retval;
+}
+
 static void
 debug_to_stop (ptid_t ptid)
 {
@@ -3309,6 +3334,7 @@ setup_target_debug (void)
   current_target.to_stop = debug_to_stop;
   current_target.to_rcmd = debug_to_rcmd;
   current_target.to_pid_to_exec_file = debug_to_pid_to_exec_file;
+  current_target.to_thread_architecture = debug_to_thread_architecture;
 }
 
 
