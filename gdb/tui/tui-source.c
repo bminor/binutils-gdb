@@ -27,6 +27,7 @@
 #include "breakpoint.h"
 #include "source.h"
 #include "symtab.h"
+#include "objfiles.h"
 
 #include "tui/tui.h"
 #include "tui/tui-data.h"
@@ -106,6 +107,7 @@ tui_set_source_content (struct symtab *s,
 		  stream = fdopen (desc, FOPEN_RT);
 		  clearerr (stream);
 		  cur_line = 0;
+		  src->gdbarch = get_objfile_arch (s->objfile);
 		  src->start_line_or_addr.loa = LOA_LINE;
 		  cur_line_no = src->start_line_or_addr.u.line_no = line_no;
 		  if (offset > 0)
@@ -311,12 +313,12 @@ tui_set_source_content_nil (struct tui_win_info *win_info,
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
-tui_show_symtab_source (struct symtab *s, 
+tui_show_symtab_source (struct gdbarch *gdbarch, struct symtab *s,
 			struct tui_line_or_address line, 
 			int noerror)
 {
   TUI_SRC_WIN->detail.source_info.horizontal_offset = 0;
-  tui_update_source_window_as_is (TUI_SRC_WIN, s, line, noerror);
+  tui_update_source_window_as_is (TUI_SRC_WIN, gdbarch, s, line, noerror);
 }
 
 

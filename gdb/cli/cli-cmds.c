@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "readline/readline.h"
 #include "readline/tilde.h"
 #include "completer.h"
@@ -892,7 +893,8 @@ list_command (char *arg, int from_tty)
    MIXED is non-zero to print source with the assembler.  */
 
 static void
-print_disassembly (const char *name, CORE_ADDR low, CORE_ADDR high, int mixed)
+print_disassembly (struct gdbarch *gdbarch, const char *name,
+		   CORE_ADDR low, CORE_ADDR high, int mixed)
 {
 #if defined(TUI)
   if (!tui_is_window_visible (DISASSEM_WIN))
@@ -905,7 +907,7 @@ print_disassembly (const char *name, CORE_ADDR low, CORE_ADDR high, int mixed)
         printf_filtered ("from %s to %s:\n", paddress (low), paddress (high));
 
       /* Dump the specified range.  */
-      gdb_disassembly (uiout, 0, mixed, -1, low, high);
+      gdb_disassembly (gdbarch, uiout, 0, mixed, -1, low, high);
 
       printf_filtered ("End of assembler dump.\n");
       gdb_flush (gdb_stdout);
@@ -913,7 +915,7 @@ print_disassembly (const char *name, CORE_ADDR low, CORE_ADDR high, int mixed)
 #if defined(TUI)
   else
     {
-      tui_show_assembly (low);
+      tui_show_assembly (gdbarch, low);
     }
 #endif
 }
@@ -925,10 +927,14 @@ print_disassembly (const char *name, CORE_ADDR low, CORE_ADDR high, int mixed)
 static void
 disassemble_current_function (int mixed)
 {
+  struct frame_info *frame;
+  struct gdbarch *gdbarch;
   CORE_ADDR low, high, pc;
   char *name;
 
-  pc = get_frame_pc (get_selected_frame (_("No frame selected.")));
+  frame = get_selected_frame (_("No frame selected."));
+  gdbarch = get_frame_arch (frame);
+  pc = get_frame_pc (frame);
   if (find_pc_partial_function (pc, &name, &low, &high) == 0)
     error (_("No function contains program counter for selected frame."));
 #if defined(TUI)
@@ -936,11 +942,11 @@ disassemble_current_function (int mixed)
      `tui_version'.  */
   if (tui_active)
     /* FIXME: cagney/2004-02-07: This should be an observer.  */
-    low = tui_get_low_disassembly_address (low, pc);
+    low = tui_get_low_disassembly_address (gdbarch, low, pc);
 #endif
-  low += gdbarch_deprecated_function_start_offset (current_gdbarch);
+  low += gdbarch_deprecated_function_start_offset (gdbarch);
 
-  print_disassembly (name, low, high, mixed);
+  print_disassembly (gdbarch, name, low, high, mixed);
 }
 
 /* Dump a specified section of assembly code.
@@ -958,6 +964,7 @@ disassemble_current_function (int mixed)
 static void
 disassemble_command (char *arg, int from_tty)
 {
+  struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR low, high;
   char *name;
   CORE_ADDR pc, pc_masked;
@@ -1010,9 +1017,9 @@ disassemble_command (char *arg, int from_tty)
 	 `tui_version'.  */
       if (tui_active)
 	/* FIXME: cagney/2004-02-07: This should be an observer.  */
-	low = tui_get_low_disassembly_address (low, pc);
+	low = tui_get_low_disassembly_address (gdbarch, low, pc);
 #endif
-      low += gdbarch_deprecated_function_start_offset (current_gdbarch);
+      low += gdbarch_deprecated_function_start_offset (gdbarch);
     }
   else
     {
@@ -1022,7 +1029,7 @@ disassemble_command (char *arg, int from_tty)
       high = parse_and_eval_address (space_index + 1);
     }
 
-  print_disassembly (name, low, high, mixed_source_and_assembly);
+  print_disassembly (gdbarch, name, low, high, mixed_source_and_assembly);
 }
 
 static void

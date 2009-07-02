@@ -535,10 +535,10 @@ tui_show_source (const char *file, int line)
 }
 
 void
-tui_show_assembly (CORE_ADDR addr)
+tui_show_assembly (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   tui_add_win_to_layout (DISASSEM_WIN);
-  tui_update_source_windows_with_addr (addr);
+  tui_update_source_windows_with_addr (gdbarch, addr);
 }
 
 int

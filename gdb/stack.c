@@ -468,6 +468,7 @@ Debugger's willingness to use disassemble-next-line is %s.\n"),
 
 struct gdb_disassembly_stub_args
 {
+  struct gdbarch *gdbarch;
   int how_many;
   CORE_ADDR low;
   CORE_ADDR high;
@@ -477,18 +478,20 @@ static void
 gdb_disassembly_stub (void *args)
 {
   struct gdb_disassembly_stub_args *p = args;
-  gdb_disassembly (uiout, 0, 0, p->how_many, p->low, p->high);
+  gdb_disassembly (p->gdbarch, uiout, 0, 0, p->how_many, p->low, p->high);
 }
 
 /* Use TRY_CATCH to catch the exception from the gdb_disassembly
    because it will be broken by filter sometime.  */
 
 static void
-do_gdb_disassembly (int how_many, CORE_ADDR low, CORE_ADDR high)
+do_gdb_disassembly (struct gdbarch *gdbarch,
+		    int how_many, CORE_ADDR low, CORE_ADDR high)
 {
   volatile struct gdb_exception exception;
   struct gdb_disassembly_stub_args args;
 
+  args.gdbarch = gdbarch;
   args.how_many = how_many;
   args.low = low;
   args.high = high;
@@ -589,7 +592,8 @@ print_frame_info (struct frame_info *frame, int print_level,
   if ((disassemble_next_line == AUTO_BOOLEAN_AUTO
        || disassemble_next_line == AUTO_BOOLEAN_TRUE)
       && source_print && !sal.symtab)
-    do_gdb_disassembly (1, get_frame_pc (frame), get_frame_pc (frame) + 1);
+    do_gdb_disassembly (get_frame_arch (frame), 1,
+			get_frame_pc (frame), get_frame_pc (frame) + 1);
 
   if (source_print && sal.symtab)
     {
@@ -631,7 +635,8 @@ print_frame_info (struct frame_info *frame, int print_level,
       /* If disassemble-next-line is set to on and there is line debug
          messages, output assembly codes for next line.  */
       if (disassemble_next_line == AUTO_BOOLEAN_TRUE)
-	do_gdb_disassembly (-1, get_frame_pc (frame), sal.end);
+	do_gdb_disassembly (get_frame_arch (frame), -1,
+			    get_frame_pc (frame), sal.end);
     }
 
   if (print_what != LOCATION)

@@ -27,6 +27,7 @@
 #include "breakpoint.h"
 #include "value.h"
 #include "source.h"
+#include "objfiles.h"
 
 #include "tui/tui.h"
 #include "tui/tui-data.h"
@@ -47,14 +48,15 @@ tui_display_main (void)
 {
   if ((tui_source_windows ())->count > 0)
     {
+      struct gdbarch *gdbarch;
       CORE_ADDR addr;
 
-      addr = tui_get_begin_asm_address ();
+      tui_get_begin_asm_address (&gdbarch, &addr);
       if (addr != (CORE_ADDR) 0)
 	{
 	  struct symtab_and_line sal;
 
-	  tui_update_source_windows_with_addr (addr);
+	  tui_update_source_windows_with_addr (gdbarch, addr);
 	  sal = find_pc_line (addr, 0);
           if (sal.symtab)
              tui_update_locator_filename (sal.symtab->filename);
@@ -70,12 +72,13 @@ tui_display_main (void)
    initializes the horizontal scroll to 0.  */
 void
 tui_update_source_window (struct tui_win_info *win_info,
+			  struct gdbarch *gdbarch,
 			  struct symtab *s,
 			  struct tui_line_or_address line_or_addr,
 			  int noerror)
 {
   win_info->detail.source_info.horizontal_offset = 0;
-  tui_update_source_window_as_is (win_info, s, line_or_addr, noerror);
+  tui_update_source_window_as_is (win_info, gdbarch, s, line_or_addr, noerror);
 
   return;
 }
@@ -85,6 +88,7 @@ tui_update_source_window (struct tui_win_info *win_info,
    shows the source as specified by the horizontal offset.  */
 void
 tui_update_source_window_as_is (struct tui_win_info *win_info, 
+				struct gdbarch *gdbarch,
 				struct symtab *s,
 				struct tui_line_or_address line_or_addr, 
 				int noerror)
@@ -94,7 +98,7 @@ tui_update_source_window_as_is (struct tui_win_info *win_info,
   if (win_info->generic.type == SRC_WIN)
     ret = tui_set_source_content (s, line_or_addr.u.line_no, noerror);
   else
-    ret = tui_set_disassem_content (line_or_addr.u.addr);
+    ret = tui_set_disassem_content (gdbarch, line_or_addr.u.addr);
 
   if (ret == TUI_FAILURE)
     {
@@ -130,7 +134,7 @@ tui_update_source_window_as_is (struct tui_win_info *win_info,
 /* Function to ensure that the source and/or disassemly windows
    reflect the input address.  */
 void
-tui_update_source_windows_with_addr (CORE_ADDR addr)
+tui_update_source_windows_with_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   if (addr != 0)
     {
@@ -141,16 +145,16 @@ tui_update_source_windows_with_addr (CORE_ADDR addr)
 	{
 	case DISASSEM_COMMAND:
 	case DISASSEM_DATA_COMMAND:
-	  tui_show_disassem (addr);
+	  tui_show_disassem (gdbarch, addr);
 	  break;
 	case SRC_DISASSEM_COMMAND:
-	  tui_show_disassem_and_update_source (addr);
+	  tui_show_disassem_and_update_source (gdbarch, addr);
 	  break;
 	default:
 	  sal = find_pc_line (addr, 0);
 	  l.loa = LOA_LINE;
 	  l.u.line_no = sal.line;
-	  tui_show_symtab_source (sal.symtab, l, FALSE);
+	  tui_show_symtab_source (gdbarch, sal.symtab, l, FALSE);
 	  break;
 	}
     }
@@ -173,24 +177,30 @@ tui_update_source_windows_with_addr (CORE_ADDR addr)
 void
 tui_update_source_windows_with_line (struct symtab *s, int line)
 {
+  struct gdbarch *gdbarch;
   CORE_ADDR pc;
   struct tui_line_or_address l;
-  
+
+  if (!s)
+    return;
+
+  gdbarch = get_objfile_arch (s->objfile);
+
   switch (tui_current_layout ())
     {
     case DISASSEM_COMMAND:
     case DISASSEM_DATA_COMMAND:
       find_line_pc (s, line, &pc);
-      tui_update_source_windows_with_addr (pc);
+      tui_update_source_windows_with_addr (gdbarch, pc);
       break;
     default:
       l.loa = LOA_LINE;
       l.u.line_no = line;
-      tui_show_symtab_source (s, l, FALSE);
+      tui_show_symtab_source (gdbarch, s, l, FALSE);
       if (tui_current_layout () == SRC_DISASSEM_COMMAND)
 	{
 	  find_line_pc (s, line, &pc);
-	  tui_show_disassem (pc);
+	  tui_show_disassem (gdbarch, pc);
 	}
       break;
     }
@@ -311,6 +321,7 @@ tui_horizontal_source_scroll (struct tui_win_info *win_info,
 {
   if (win_info->generic.content != NULL)
     {
+      struct gdbarch *gdbarch = win_info->detail.source_info.gdbarch;
       int offset;
       struct symtab *s = NULL;
 
@@ -332,7 +343,7 @@ tui_horizontal_source_scroll (struct tui_win_info *win_info,
 	    offset = 0;
 	}
       win_info->detail.source_info.horizontal_offset = offset;
-      tui_update_source_window_as_is (win_info, s,
+      tui_update_source_window_as_is (win_info, gdbarch, s,
 				      ((struct tui_win_element *)
 				       win_info->generic.content[0])->which_element.source.line_or_addr,
 				      FALSE);

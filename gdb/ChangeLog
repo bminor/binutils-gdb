@@ -1,5 +1,113 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* disasm.h (gdb_disassembly): Add GDBARCH parameter.
+	(gdb_print_insn): Likewise.
+	* disasm.c (dump_insns): Add GDBARCH parameter.  Use it instead
+	of current_gdbarch.
+	(do_mixed_source_and_assembly): Add GDBARCH parameter.  Pass to
+	dump_insns.
+	(do_assembly_only): Likewise.
+	(gdb_disassembly): Add GDBARCH parameter.  Use it instead of
+	current_gdbarch.  Pass to subroutines.
+	(gdb_print_insn): Add GDBARCH parameter.  Use it instead of
+	current_gdbarch.
+
+	* stack.c (struct gdb_disassembly_stub_args): Add GDBARCH member.
+	(gdb_disassembly_stub): Pass architecture to gdb_disassembly.
+	(do_gdb_disassembly): Add GDBARCH argument.  Store into args.
+	(print_frame_info): Pass architecture to do_gdb_disassembly.
+
+	* printcmd.c (print_formatted): Pass architecture to gdb_print_insn.
+
+	* mi/mi-cmd-disas.c: Include "arch-utils.h"
+	(mi_cmd_disassemble): Pass architecture to gdb_disassembly.
+
+	* cli/cli-cmds.c: Include "arch-utils.h".
+	(print_disassembly): Add GDBARCH parameter.  Pass to gdb_disassembly
+	and tui_show_assembly.
+	(disassemble_current_function): Pass architecture to
+	tui_get_low_disassembly_address and print_disassembly.
+	(disassemble_command): Pass architecture to
+	tui_get_low_disassembly_address and print_disassembly.
+
+	* tui/tui.c (tui_show_assembly): Add GDBARCH parameter.  Pass to
+	tui_update_source_windows_with_addr.
+
+	* tui/tui-data.h (struct tui_locator_element): Add GDBARCH member.
+	(struct tui_source_info): Likewise.
+	* tui/tui-data.c (tui_clear_win_detail): Clear source_info.gdbarch.
+
+	* tui/tui-disasm.c (tui_disassemble): Add GDBARCH parameter.
+	Pass to gdb_print_insn.
+	(tui_find_disassembly_address): Add GDBARCH parameter.  Pass to
+	tui_disassemble.
+	(tui_set_disassem_content): Add GDBARCH parameter.  Install into
+	source_info.gdbarch.  Pass to tui_disassemble.
+	(tui_show_disassem): Add GDBARCH parameter.  Pass to 
+	tui_update_source_window.
+	(tui_show_disassem_and_update_source): Add GDBARCH parameter.  Pass to
+	tui_show_disassem and tui_update_source_window.
+
+	(tui_get_begin_asm_address): Return locator architecture in addition
+	to locator PC value.
+
+	(tui_get_low_disassembly_address): Add GDBARCH parameter.   Pass to
+	tui_get_low_disassembly_address.
+
+	(tui_vertical_disassem_scroll): Pass architecture to subroutines.
+
+	* tui/tui-disasm.h (tui_set_disassem_content): Add GDBARCH parameter.
+	(tui_show_disassem): Likewise.
+	(tui_show_disassem_and_update_source): Likewise.
+	(tui_get_begin_asm_address): Return architecture and PC value.
+
+	* tui/tui.h (tui_get_low_disassembly_address): Add GDBARCH parameter.
+	(tui_show_assembly): Add GDBARCH parameter.
+
+	* tui/tui-layout.c (extract_display_start_addr): Return current window
+	architecture in addition to current PC value.
+
+	(tui_set_layout): Update calls to tui_get_low_disassembly_address and
+	extract_display_start_addr.  Pass architecture to
+	tui_update_source_windows_with_addr.
+
+	* tui/tui-source.c: Include "objfiles.h".
+	(tui_set_source_content): Initialize window architecture.
+	(tui_show_symtab_source): Add GDBARCH parameter.  Pass to
+	tui_update_source_window_as_is
+
+	* tui/tui-source.h (tui_show_symtab_source): Add GDBARCH parameter.
+
+	* tui/tui-stack.c (tui_set_locator_info): Add GDBARCH parameter.
+	Install locator architecture.
+	(tui_set_locator_filename): Update call.
+	(tui_show_frame_info): Pass architecture to tui_set_locator_info
+	and subroutines.
+
+	* tui/tui-win.c (make_visible_with_new_height): Pass architecture
+	to tui_update_source_window.
+
+	* tui/tui-winsource.c: Include "objfiles.h".
+	(tui_display_main): Update call to tui_get_begin_asm_address.
+	Pass architecture to tui_update_source_windows_with_addr.
+	(tui_update_source_window): Add GDBARCH parameter.  Pass to
+	tui_update_source_window_as_is.
+	(tui_update_source_window_as_is): Add GDBARCH parameter.
+	Pass to tui_set_disassem_content.
+	(tui_update_source_windows_with_addr): Add GDBARCH parameter.
+	Pass to subroutines.
+	(tui_update_source_windows_with_line): Pass objfile architecture
+	to subroutines.
+	(tui_horizontal_source_scroll): Pass architecture to 
+	tui_update_source_window_as_is.
+	
+	* tui/tui-winsource.h (tui_update_source_window): Add GDBARCH
+	parameter.
+	(tui_update_source_window_as_is): Likewise.
+	(tui_update_source_windows_with_addr): Likewise.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* breakpoint.h (struct breakpoint): New member GDBARCH.
 	* breakpoint.c: Include "arch-utils.h".
 	(set_raw_breakpoint_without_location): Add GDBARCH parameter.

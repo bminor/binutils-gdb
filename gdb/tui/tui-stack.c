@@ -48,7 +48,8 @@ static char *tui_get_function_from_frame (struct frame_info *fi);
 static void tui_set_locator_filename (const char *filename);
 
 /* Update the locator, with the provided arguments.  */
-static void tui_set_locator_info (const char *filename,
+static void tui_set_locator_info (struct gdbarch *gdbarch,
+				  const char *filename,
 				  const char *procname,
                                   int lineno, CORE_ADDR addr);
 
@@ -274,7 +275,7 @@ tui_set_locator_filename (const char *filename)
 
   if (locator->content[0] == NULL)
     {
-      tui_set_locator_info (filename, NULL, 0, 0);
+      tui_set_locator_info (NULL, filename, NULL, 0, 0);
       return;
     }
 
@@ -285,7 +286,8 @@ tui_set_locator_filename (const char *filename)
 
 /* Update the locator, with the provided arguments.  */
 static void
-tui_set_locator_info (const char *filename, 
+tui_set_locator_info (struct gdbarch *gdbarch,
+		      const char *filename,
 		      const char *procname, 
 		      int lineno,
                       CORE_ADDR addr)
@@ -305,6 +307,7 @@ tui_set_locator_info (const char *filename,
   strcat_to_buf (element->proc_name, MAX_LOCATOR_ELEMENT_LEN, procname);
   element->line_no = lineno;
   element->addr = addr;
+  element->gdbarch = gdbarch;
   tui_set_locator_filename (filename);
 }
 
@@ -335,7 +338,8 @@ tui_show_frame_info (struct frame_info *fi)
 
       source_already_displayed = sal.symtab != 0
         && tui_source_is_displayed (sal.symtab->filename);
-      tui_set_locator_info (sal.symtab == 0 ? "??" : sal.symtab->filename,
+      tui_set_locator_info (get_frame_arch (fi),
+			    sal.symtab == 0 ? "??" : sal.symtab->filename,
                             tui_get_function_from_frame (fi),
                             sal.line,
                             get_frame_pc (fi));
@@ -360,7 +364,8 @@ tui_show_frame_info (struct frame_info *fi)
 					    &low, (CORE_ADDR) 0) == 0)
 		error (_("No function contains program counter for selected frame."));
 	      else
-		low = tui_get_low_disassembly_address (low, get_frame_pc (fi));
+		low = tui_get_low_disassembly_address (get_frame_arch (fi),
+						       low, get_frame_pc (fi));
 	    }
 
 	  if (win_info == TUI_SRC_WIN)
@@ -370,7 +375,8 @@ tui_show_frame_info (struct frame_info *fi)
 	      l.u.line_no = start_line;
 	      if (!(source_already_displayed
 		    && tui_line_is_displayed (item->locator.line_no, win_info, TRUE)))
-		tui_update_source_window (win_info, sal.symtab, l, TRUE);
+		tui_update_source_window (win_info, get_frame_arch (fi),
+					  sal.symtab, l, TRUE);
 	      else
 		{
 		  l.u.line_no = item->locator.line_no;
@@ -385,7 +391,8 @@ tui_show_frame_info (struct frame_info *fi)
 		  a.loa = LOA_ADDRESS;
 		  a.u.addr = low;
 		  if (!tui_addr_is_displayed (item->locator.addr, win_info, TRUE))
-		    tui_update_source_window (win_info, sal.symtab, a, TRUE);
+		    tui_update_source_window (win_info, get_frame_arch (fi),
+					      sal.symtab, a, TRUE);
 		  else
 		    {
 		      a.u.addr = item->locator.addr;
@@ -398,7 +405,7 @@ tui_show_frame_info (struct frame_info *fi)
     }
   else
     {
-      tui_set_locator_info (NULL, NULL, 0, (CORE_ADDR) 0);
+      tui_set_locator_info (NULL, NULL, NULL, 0, (CORE_ADDR) 0);
       tui_show_locator_content ();
       for (i = 0; i < (tui_source_windows ())->count; i++)
 	{

@@ -67,7 +67,7 @@ static enum tui_layout_type prev_layout (void);
 static void tui_layout_command (char *, int);
 static void tui_toggle_layout_command (char *, int);
 static void tui_toggle_split_layout_command (char *, int);
-static CORE_ADDR extract_display_start_addr (void);
+static void extract_display_start_addr (struct gdbarch **, CORE_ADDR *);
 static void tui_handle_xdb_layout (struct tui_layout_def *);
 
 
@@ -143,10 +143,12 @@ tui_set_layout (enum tui_layout_type layout_type,
       enum tui_layout_type cur_layout = tui_current_layout (),
 	new_layout = UNDEFINED_LAYOUT;
       int regs_populate = FALSE;
-      CORE_ADDR addr = extract_display_start_addr ();
+      struct gdbarch *gdbarch;
+      CORE_ADDR addr;
       struct tui_win_info *win_with_focus = tui_win_with_focus ();
       struct tui_layout_def *layout_def = tui_layout_def ();
 
+      extract_display_start_addr (&gdbarch, &addr);
 
       if (layout_type == UNDEFINED_LAYOUT
 	  && regs_display_type != TUI_UNDEFINED_REGS)
@@ -192,7 +194,7 @@ tui_set_layout (enum tui_layout_type layout_type,
 		         2. if target was compiled without -g
 		         We still want to show the assembly though!  */
 
-		      addr = tui_get_begin_asm_address ();
+		      tui_get_begin_asm_address (&gdbarch, &addr);
 		      tui_set_win_focus_to (TUI_DISASM_WIN);
 		      layout_def->display_mode = DISASSEM_WIN;
 		      layout_def->split = FALSE;
@@ -206,7 +208,7 @@ tui_set_layout (enum tui_layout_type layout_type,
 		         2. if target was compiled without -g
 		         We still want to show the assembly though!  */
 
-		      addr = tui_get_begin_asm_address ();
+		      tui_get_begin_asm_address (&gdbarch, &addr);
 		      if (win_with_focus == TUI_SRC_WIN)
 			tui_set_win_focus_to (TUI_SRC_WIN);
 		      else
@@ -230,7 +232,7 @@ tui_set_layout (enum tui_layout_type layout_type,
 		         2. if target was compiled without -g
 		         We still want to show the assembly though!  */
 
-		      addr = tui_get_begin_asm_address ();
+		      tui_get_begin_asm_address (&gdbarch, &addr);
 		      if (win_with_focus != TUI_DATA_WIN)
 			tui_set_win_focus_to (TUI_DISASM_WIN);
 		      else
@@ -250,7 +252,7 @@ tui_set_layout (enum tui_layout_type layout_type,
 		      || new_layout == DISASSEM_DATA_COMMAND))
 		tui_display_all_data ();
 
-	      tui_update_source_windows_with_addr (addr);
+	      tui_update_source_windows_with_addr (gdbarch, addr);
 	    }
 	  if (regs_populate)
 	    {
@@ -516,10 +518,11 @@ tui_set_layout_for_display_command (const char *layout_name)
 }
 
 
-static CORE_ADDR
-extract_display_start_addr (void)
+static void
+extract_display_start_addr (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 {
   enum tui_layout_type cur_layout = tui_current_layout ();
+  struct gdbarch *gdbarch = NULL;
   CORE_ADDR addr;
   CORE_ADDR pc;
   struct symtab_and_line cursal = get_current_source_symtab_and_line ();
@@ -528,6 +531,7 @@ extract_display_start_addr (void)
     {
     case SRC_COMMAND:
     case SRC_DATA_COMMAND:
+      gdbarch = TUI_SRC_WIN->detail.source_info.gdbarch;
       find_line_pc (cursal.symtab,
 		    TUI_SRC_WIN->detail.source_info.start_line_or_addr.u.line_no,
 		    &pc);
@@ -536,6 +540,7 @@ extract_display_start_addr (void)
     case DISASSEM_COMMAND:
     case SRC_DISASSEM_COMMAND:
     case DISASSEM_DATA_COMMAND:
+      gdbarch = TUI_DISASM_WIN->detail.source_info.gdbarch;
       addr = TUI_DISASM_WIN->detail.source_info.start_line_or_addr.u.addr;
       break;
     default:
@@ -543,7 +548,8 @@ extract_display_start_addr (void)
       break;
     }
 
-  return addr;
+  *gdbarch_p = gdbarch;
+  *addr_p = addr;
 }
 
 

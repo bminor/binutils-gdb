@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "target.h"
 #include "value.h"
 #include "mi-cmds.h"
@@ -50,6 +51,7 @@
 void
 mi_cmd_disassemble (char *command, char **argv, int argc)
 {
+  struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR start;
 
   int mixed_source_and_assembly;
@@ -152,7 +154,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	error (_("mi_cmd_disassemble: No function contains specified address"));
     }
 
-  gdb_disassembly (uiout,
+  gdb_disassembly (gdbarch, uiout,
   		   file_string,
 		   mixed_source_and_assembly, how_many, low, high);
 

@@ -293,7 +293,8 @@ print_formatted (struct value *val, int size,
 	  /* We often wrap here if there are long symbolic names.  */
 	  wrap_here ("    ");
 	  next_address = (value_address (val)
-			  + gdb_print_insn (value_address (val), stream,
+			  + gdb_print_insn (get_type_arch (type),
+					    value_address (val), stream,
 					    &branch_delay_insns));
 	  return;
 	}

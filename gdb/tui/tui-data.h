@@ -208,6 +208,8 @@ struct tui_locator_element
   char proc_name[MAX_LOCATOR_ELEMENT_LEN];
   int line_no;
   CORE_ADDR addr;
+  /* Architecture associated with code at this location.  */
+  struct gdbarch *gdbarch;
 };
 
 /* Flags to tell what kind of breakpoint is at current line.  */
@@ -270,6 +272,8 @@ struct tui_source_info
   int horizontal_offset;	/* Used for horizontal scroll.  */
   struct tui_line_or_address start_line_or_addr;
   char *filename;
+  /* Architecture associated with code at this location.  */
+  struct gdbarch *gdbarch;
 };
 
 

@@ -1360,19 +1360,22 @@ make_visible_with_new_height (struct tui_win_info *win_info)
       tui_make_visible (win_info->detail.source_info.execution_info);
       if (win_info->generic.content != NULL)
 	{
+	  struct gdbarch *gdbarch = win_info->detail.source_info.gdbarch;
 	  struct tui_line_or_address line_or_addr;
 	  struct symtab_and_line cursal
 	    = get_current_source_symtab_and_line ();
 
 	  line_or_addr = win_info->detail.source_info.start_line_or_addr;
 	  tui_free_win_content (&win_info->generic);
-	  tui_update_source_window (win_info, cursal.symtab, line_or_addr, TRUE);
+	  tui_update_source_window (win_info, gdbarch,
+				    cursal.symtab, line_or_addr, TRUE);
 	}
       else if (deprecated_safe_get_selected_frame () != NULL)
 	{
 	  struct tui_line_or_address line;
 	  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 	  struct frame_info *frame = deprecated_safe_get_selected_frame ();
+	  struct gdbarch *gdbarch = get_frame_arch (frame);
 
 	  s = find_pc_symtab (get_frame_pc (frame));
 	  if (win_info->generic.type == SRC_WIN)
@@ -1385,7 +1388,7 @@ make_visible_with_new_height (struct tui_win_info *win_info)
 	      line.loa = LOA_ADDRESS;
 	      find_line_pc (s, cursal.line, &line.u.addr);
 	    }
-	  tui_update_source_window (win_info, s, line, TRUE);
+	  tui_update_source_window (win_info, gdbarch, s, line, TRUE);
 	}
       if (tui_win_has_locator (win_info))
 	{

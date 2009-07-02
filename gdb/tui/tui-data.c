@@ -211,6 +211,7 @@ tui_clear_win_detail (struct tui_win_info *win_info)
 	{
 	case SRC_WIN:
 	case DISASSEM_WIN:
+	  win_info->detail.source_info.gdbarch = NULL;
 	  win_info->detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
 	  win_info->detail.source_info.start_line_or_addr.u.addr = 0;
 	  win_info->detail.source_info.horizontal_offset = 0;
@@ -545,6 +546,7 @@ init_win_info (struct tui_win_info *win_info)
       win_info->detail.source_info.execution_info = (struct tui_gen_win_info *) NULL;
       win_info->detail.source_info.has_locator = FALSE;
       win_info->detail.source_info.horizontal_offset = 0;
+      win_info->detail.source_info.gdbarch = NULL;
       win_info->detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
       win_info->detail.source_info.start_line_or_addr.u.addr = 0;
       win_info->detail.source_info.filename = 0;

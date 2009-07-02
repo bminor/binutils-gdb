@@ -84,7 +84,8 @@ compare_lines (const void *mle1p, const void *mle2p)
 }
 
 static int
-dump_insns (struct ui_out *uiout, struct disassemble_info * di,
+dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
+	    struct disassemble_info * di,
 	    CORE_ADDR low, CORE_ADDR high,
 	    int how_many, struct ui_stream *stb)
 {
@@ -133,7 +134,7 @@ dump_insns (struct ui_out *uiout, struct disassemble_info * di,
 	xfree (name);
 
       ui_file_rewind (stb->stream);
-      pc += gdbarch_print_insn (current_gdbarch, pc, di);
+      pc += gdbarch_print_insn (gdbarch, pc, di);
       ui_out_field_stream (uiout, "inst", stb);
       ui_file_rewind (stb->stream);
       do_cleanups (ui_out_chain);
@@ -147,7 +148,7 @@ dump_insns (struct ui_out *uiout, struct disassemble_info * di,
    in source order, with (possibly) out of order assembly
    immediately following.  */
 static void
-do_mixed_source_and_assembly (struct ui_out *uiout,
+do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 			      struct disassemble_info *di, int nlines,
 			      struct linetable_entry *le,
 			      CORE_ADDR low, CORE_ADDR high,
@@ -274,7 +275,8 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
 	}
 
-      num_displayed += dump_insns (uiout, di, mle[i].start_pc, mle[i].end_pc,
+      num_displayed += dump_insns (gdbarch, uiout, di,
+				   mle[i].start_pc, mle[i].end_pc,
 				   how_many, stb);
 
       /* When we've reached the end of the mle array, or we've seen the last
@@ -295,7 +297,8 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 
 
 static void
-do_assembly_only (struct ui_out *uiout, struct disassemble_info * di,
+do_assembly_only (struct gdbarch *gdbarch, struct ui_out *uiout,
+		  struct disassemble_info * di,
 		  CORE_ADDR low, CORE_ADDR high,
 		  int how_many, struct ui_stream *stb)
 {
@@ -304,7 +307,7 @@ do_assembly_only (struct ui_out *uiout, struct disassemble_info * di,
 
   ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
 
-  num_displayed = dump_insns (uiout, di, low, high, how_many, stb);
+  num_displayed = dump_insns (gdbarch, uiout, di, low, high, how_many, stb);
 
   do_cleanups (ui_out_chain);
 }
@@ -349,14 +352,14 @@ gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
 }
 
 void
-gdb_disassembly (struct ui_out *uiout,
+gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		char *file_string,
 		int mixed_source_and_assembly,
 		int how_many, CORE_ADDR low, CORE_ADDR high)
 {
   struct ui_stream *stb = ui_out_stream_new (uiout);
   struct cleanup *cleanups = make_cleanup_ui_out_stream_delete (stb);
-  struct disassemble_info di = gdb_disassemble_info (current_gdbarch, stb->stream);
+  struct disassemble_info di = gdb_disassemble_info (gdbarch, stb->stream);
   /* To collect the instruction outputted from opcodes. */
   struct symtab *symtab = NULL;
   struct linetable_entry *le = NULL;
@@ -374,10 +377,10 @@ gdb_disassembly (struct ui_out *uiout,
 
   if (!mixed_source_and_assembly || nlines <= 0
       || symtab == NULL || symtab->linetable == NULL)
-    do_assembly_only (uiout, &di, low, high, how_many, stb);
+    do_assembly_only (gdbarch, uiout, &di, low, high, how_many, stb);
 
   else if (mixed_source_and_assembly)
-    do_mixed_source_and_assembly (uiout, &di, nlines, le, low,
+    do_mixed_source_and_assembly (gdbarch, uiout, &di, nlines, le, low,
 				  high, symtab, how_many, stb);
 
   do_cleanups (cleanups);
@@ -389,14 +392,14 @@ gdb_disassembly (struct ui_out *uiout,
    and, if requested, the number of branch delay slot instructions.  */
 
 int
-gdb_print_insn (CORE_ADDR memaddr, struct ui_file *stream,
-		int *branch_delay_insns)
+gdb_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
+		struct ui_file *stream, int *branch_delay_insns)
 {
   struct disassemble_info di;
   int length;
 
-  di = gdb_disassemble_info (current_gdbarch, stream);
-  length = gdbarch_print_insn (current_gdbarch, memaddr, &di);
+  di = gdb_disassemble_info (gdbarch, stream);
+  length = gdbarch_print_insn (gdbarch, memaddr, &di);
   if (branch_delay_insns)
     {
       if (di.insn_info_valid)
