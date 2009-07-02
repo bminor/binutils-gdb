@@ -128,9 +128,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
 
   /* ARCH can't give us the true ptrdiff_t type, so we guess.  */
   struct type *ptrdiff_type
-    = init_type (TYPE_CODE_INT,
-		 gdbarch_ptr_bit (arch) / TARGET_CHAR_BIT, 0,
-                 "ptrdiff_t", 0);
+    = arch_integer_type (arch, gdbarch_ptr_bit (arch), 0, "ptrdiff_t");
 
   /* We assume no padding is necessary, since GDB doesn't know
      anything about alignment at the moment.  If this assumption bites
@@ -174,10 +172,11 @@ build_gdb_vtable_type (struct gdbarch *arch)
   /* We assumed in the allocation above that there were four fields.  */
   gdb_assert (field == (field_list + 4));
 
-  t = init_type (TYPE_CODE_STRUCT, offset, 0, 0, 0);
+  t = arch_type (arch, TYPE_CODE_STRUCT, offset, NULL);
   TYPE_NFIELDS (t) = field - field_list;
   TYPE_FIELDS (t) = field_list;
   TYPE_TAG_NAME (t) = "gdb_gnu_v3_abi_vtable";
+  INIT_CPLUS_SPECIFIC (t);
 
   return t;
 }

@@ -1,5 +1,100 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (TYPE_OBJFILE_OWNED, TYPE_OWNER): New macros.
+	(TYPE_OBJFILE, TYPE_ALLOC, TYPE_ZALLOC): Reimplement.
+	(alloc_type_arch): Add prototype.
+	(alloc_type_copy): Likewise.
+	(get_type_arch): Likewise.
+	(arch_type): Likewise.
+	(arch_integer_type): Likewise.
+	(arch_character_type): Likewise.
+	(arch_boolean_type): Likewise.
+	(init_float_type): Remove, replace by ...
+	(arch_float_type): ... this.
+	(init_complex_type): Remove, replace by ...
+	(arch_complex_type): ... this.
+	(init_flags_type): Remove, replace by ...
+	(arch_flags_type): ... this.
+	(init_composite_type): Remove, replace by ...
+	(arch_composite_type): ... this.
+
+	* gdbtypes.c (alloc_type): No longer support NULL objfile.
+	(init_type): Likewise.
+	(alloc_type_arch): New function.
+	(alloc_type_copy): New function.
+	(get_type_arch): New function.
+
+	(smash_type): Preserve type ownership information.
+	(make_pointer_type, make_reference_type, make_function_type,
+	smash_to_memberptr_type, smash_to_method_type): No longer
+	preserve OBJFILE across smash_type calls.
+	(make_pointer_type, make_reference_type, make_function_type,
+	lookup_memberptr_type, lookup_methodptr_type, allocate_stub_method,
+	create_range_type, create_array_type, create_set_type, copy_type):
+	Use alloc_type_copy when allocating types.
+	(check_typedef): Use alloc_type_arch.
+	(copy_type_recursive): Likewise.  Preserve type ownership data
+	after copying type.
+	(recursive_dump_type): Dump type ownership data.
+	(alloc_type_instance): Update type ownership check.
+	(copy_type, copy_type_recursive): Likewise.
+
+	(arch_type): New function.
+	(arch_integer_type): Likewise.
+	(arch_character_type): Likewise.
+	(arch_boolean_type): Likewise.
+	(init_float_type): Remove, replace by ...
+	(arch_float_type): ... this.
+	(init_complex_type): Remove, replace by ...
+	(arch_complex_type): ... this.
+	(init_flags_type): Remove, replace by ...
+	(arch_flags_type): ... this.
+	(append_flags_type_flag): Move down.
+	(init_composite_type): Remove, replace by ...
+	(arch_composite_type): ... this.
+	(append_composite_type_field_aligned,
+	append_composite_type_field): Move down.
+
+	* gdbarch.c (gdbtypes_post_init): Allocate all types
+	using per-architecture routines.
+	* ada-lang.c (ada_language_arch_info): Likewise.
+	* f-lang.c (build_fortran_types): Likewise.
+	* jv-lang.c (build_java_types): Likewise.
+	* m2-lang.c (build_m2_types): Likewise.
+	* scm-lang.c (build_scm_types): Likewise.
+
+	* ada-lang.c (ada_type_of_array): Use alloc_type_copy.
+	(packed_array_type): Likewise.
+	(ada_template_to_fixed_record_type_1): Likewise.
+	(template_to_static_fixed_type): Likewise.
+	(to_record_with_fixed_variant_part): Likewise.
+	(to_fixed_variant_branch_type): Likewise.
+	(to_fixed_array_type): Likewise.
+	(to_fixed_range_type): Likewise.
+	(empty_record): Use type instead of objfile argument.
+	Use alloc_type_copy.
+	(to_fixed_variant_branch_type): Update call to empty_record.
+	* jv-lang.c (type_from_class): Use alloc_type_arch.
+
+	* arm-tdep.c (arm_ext_type): Allocate per-architecture type.
+	* i386-tdep.c (i386_eflags_type, i386_mxcsr_type, i387_ext_type,
+	i386_mmx_type, i386_sse_type): Likewise.
+	* ia64-tdep.c (ia64_ext_type): Likewise.
+	* m32c-tdep.c (make_types): Likewise.
+	* m68k-tdep.c (m68k_ps_type, m68881_ext_type): Likewise.
+	* rs6000-tdep.c (rs6000_builtin_type_vec64,
+	rs6000_builtin_type_vec128): Likewise.
+	* sparc-tdep.c (sparc_psr_type, sparc_fsr_type): Likewise.
+	* sparc64-tdep.c (sparc64_pstate_type, sparc64_fsr_type,
+	sparc64_fprs_type): Likewise.
+	* spu-tdep.c (spu_builtin_type_vec128): Likewise.
+	* xtensa-tdep.c (xtensa_register_type): Likewise.
+	* linux-tdep.c (linux_get_siginfo_type): Likewise.
+	* target-descriptions.c (tdesc_gdb_type): Likewise.
+	* gnu-v3-abi.c (build_gdb_vtable_type): Likewise.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* i386-tdep.h (struct gdbarch_tdep): Add i386_eflags_type and
 	i386_mxcsr_type members.
 	(i386_eflags_type): Make into function.

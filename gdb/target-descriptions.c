@@ -488,15 +488,15 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
       return builtin_type (gdbarch)->builtin_data_ptr;
 
     case TDESC_TYPE_IEEE_SINGLE:
-      return init_float_type (-1, "builtin_type_ieee_single",
+      return arch_float_type (gdbarch, -1, "builtin_type_ieee_single",
 			      floatformats_ieee_single);
 
     case TDESC_TYPE_IEEE_DOUBLE:
-      return init_float_type (-1, "builtin_type_ieee_double",
+      return arch_float_type (gdbarch, -1, "builtin_type_ieee_double",
 			      floatformats_ieee_double);
 
     case TDESC_TYPE_ARM_FPA_EXT:
-      return init_float_type (-1, "builtin_type_arm_ext",
+      return arch_float_type (gdbarch, -1, "builtin_type_arm_ext",
 			      floatformats_arm_ext);
 
     /* Types defined by a target feature.  */
@@ -517,7 +517,7 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 	struct tdesc_type_field *f;
 	int ix;
 
-	type = init_composite_type (NULL, TYPE_CODE_UNION);
+	type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
 	TYPE_NAME (type) = xstrdup (tdesc_type->name);
 
 	for (ix = 0;

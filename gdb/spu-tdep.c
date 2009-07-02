@@ -64,7 +64,8 @@ spu_builtin_type_vec128 (struct gdbarch *gdbarch)
       const struct builtin_type *bt = builtin_type (gdbarch);
       struct type *t;
 
-      t = init_composite_type ("__spu_builtin_type_vec128", TYPE_CODE_UNION);
+      t = arch_composite_type (gdbarch,
+			       "__spu_builtin_type_vec128", TYPE_CODE_UNION);
       append_composite_type_field (t, "uint128", bt->builtin_int128);
       append_composite_type_field (t, "v2_int64",
 				   init_vector_type (bt->builtin_int64, 2));

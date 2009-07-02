@@ -132,7 +132,7 @@ sparc64_pstate_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = init_flags_type ("builtin_type_sparc64_pstate", 8);
+      type = arch_flags_type (gdbarch, "builtin_type_sparc64_pstate", 8);
       append_flags_type_flag (type, 0, "AG");
       append_flags_type_flag (type, 1, "IE");
       append_flags_type_flag (type, 2, "PRIV");
@@ -159,7 +159,7 @@ sparc64_fsr_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = init_flags_type ("builtin_type_sparc64_fsr", 8);
+      type = arch_flags_type (gdbarch, "builtin_type_sparc64_fsr", 8);
       append_flags_type_flag (type, 0, "NXA");
       append_flags_type_flag (type, 1, "DZA");
       append_flags_type_flag (type, 2, "UFA");
@@ -192,7 +192,7 @@ sparc64_fprs_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = init_flags_type ("builtin_type_sparc64_fprs", 8);
+      type = arch_flags_type (gdbarch, "builtin_type_sparc64_fprs", 8);
       append_flags_type_flag (type, 0, "DL");
       append_flags_type_flag (type, 1, "DU");
       append_flags_type_flag (type, 2, "FEF");

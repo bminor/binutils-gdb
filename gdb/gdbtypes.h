@@ -270,6 +270,14 @@ enum type_instance_flag_value
 
 #define TYPE_NOTTEXT(t)		(TYPE_MAIN_TYPE (t)->flag_nottext)
 
+/* Type owner.  If TYPE_OBJFILE_OWNED is true, the type is owned by
+   the objfile retrieved as TYPE_OBJFILE.  Otherweise, the type is
+   owned by an architecture; TYPE_OBJFILE is NULL in this case.  */
+
+#define TYPE_OBJFILE_OWNED(t) (TYPE_MAIN_TYPE (t)->flag_objfile_owned)
+#define TYPE_OWNER(t) TYPE_MAIN_TYPE(t)->owner
+#define TYPE_OBJFILE(t) (TYPE_OBJFILE_OWNED(t)? TYPE_OWNER(t).objfile : NULL)
+
 /* Constant type.  If this is set, the corresponding type has a
  * const modifier.
  */
@@ -356,6 +364,7 @@ struct main_type
   unsigned int flag_stub_supported : 1;
   unsigned int flag_nottext : 1;
   unsigned int flag_fixed_instance : 1;
+  unsigned int flag_objfile_owned : 1;
 
   /* Number of fields described for this type.  This field appears at
      this location because it packs nicely here.  */
@@ -407,7 +416,11 @@ struct main_type
      major overhaul of the internal type system, it can't be avoided
      for now. */
 
-  struct objfile *objfile;
+  union type_owner
+    {
+      struct objfile *objfile;
+      struct gdbarch *gdbarch;
+    } owner;
 
   /* For a pointer type, describes the type of object pointed to.
      For an array type, describes the type of the elements.
@@ -804,7 +817,6 @@ extern void allocate_cplus_struct_type (struct type *);
    so you only have to call check_typedef once.  Since allocate_value
    calls check_typedef, TYPE_LENGTH (VALUE_TYPE (X)) is safe.  */
 #define TYPE_LENGTH(thistype) (thistype)->length
-#define TYPE_OBJFILE(thistype) TYPE_MAIN_TYPE(thistype)->objfile
 /* Note that TYPE_CODE can be TYPE_CODE_TYPEDEF, so if you want the real
    type, you need to do TYPE_CODE (check_type (this_type)). */
 #define TYPE_CODE(thistype) TYPE_MAIN_TYPE(thistype)->code
@@ -1105,28 +1117,51 @@ extern const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN
    the same as for the type structure. */
 
 #define TYPE_ALLOC(t,size)  \
-   (TYPE_OBJFILE (t) != NULL  \
+   (TYPE_OBJFILE_OWNED (t) \
     ? obstack_alloc (&TYPE_OBJFILE (t) -> objfile_obstack, size) \
     : xmalloc (size))
 
 #define TYPE_ZALLOC(t,size)  \
-   (TYPE_OBJFILE (t) != NULL  \
+   (TYPE_OBJFILE_OWNED (t) \
     ? memset (obstack_alloc (&TYPE_OBJFILE (t)->objfile_obstack, size),  \
 	      0, size)  \
     : xzalloc (size))
 
+/* Use alloc_type to allocate a type owned by an objfile.
+   Use alloc_type_arch to allocate a type owned by an architecture.
+   Use alloc_type_copy to allocate a type with the same owner as a
+   pre-existing template type, no matter whether objfile or gdbarch.  */
 extern struct type *alloc_type (struct objfile *);
+extern struct type *alloc_type_arch (struct gdbarch *);
+extern struct type *alloc_type_copy (const struct type *);
 
+/* Return the type's architecture.  For types owned by an architecture,
+   that architecture is returned.  For types owned by an objfile, that
+   objfile's architecture is returned.  */
+extern struct gdbarch *get_type_arch (const struct type *);
+
+/* Helper function to construct objfile-owned types.  */
 extern struct type *init_type (enum type_code, int, int, char *,
 			       struct objfile *);
 
+/* Helper functions to construct architecture-owned types.  */
+extern struct type *arch_type (struct gdbarch *, enum type_code, int, char *);
+extern struct type *arch_integer_type (struct gdbarch *, int, int, char *);
+extern struct type *arch_character_type (struct gdbarch *, int, int, char *);
+extern struct type *arch_boolean_type (struct gdbarch *, int, int, char *);
+extern struct type *arch_float_type (struct gdbarch *, int, char *,
+				     const struct floatformat **);
+extern struct type *arch_complex_type (struct gdbarch *, char *,
+				       struct type *);
+
 /* Helper functions to construct a struct or record type.  An
-   initially empty type is created using init_composite_type().
+   initially empty type is created using arch_composite_type().
    Fields are then added using append_struct_type_field().  A union
    type has its size set to the largest field.  A struct type has each
    field packed against the previous.  */
 
-extern struct type *init_composite_type (char *name, enum type_code code);
+extern struct type *arch_composite_type (struct gdbarch *gdbarch,
+					 char *name, enum type_code code);
 extern void append_composite_type_field (struct type *t, char *name,
 					 struct type *field);
 extern void append_composite_type_field_aligned (struct type *t,
@@ -1135,17 +1170,14 @@ extern void append_composite_type_field_aligned (struct type *t,
 						 int alignment);
 
 /* Helper functions to construct a bit flags type.  An initially empty
-   type is created using init_flag_type().  Flags are then added using
+   type is created using arch_flag_type().  Flags are then added using
    append_flag_type_flag().  */
-extern struct type *init_flags_type (char *name, int length);
+extern struct type *arch_flags_type (struct gdbarch *gdbarch,
+				     char *name, int length);
 extern void append_flags_type_flag (struct type *type, int bitpos, char *name);
 
 extern void make_vector_type (struct type *array_type);
 extern struct type *init_vector_type (struct type *elt_type, int n);
-
-extern struct type *init_float_type (int bit, char *name,
-				     const struct floatformat **floatformats);
-extern struct type *init_complex_type (char *name, struct type *target_type);
 
 extern struct type *lookup_reference_type (struct type *);
 

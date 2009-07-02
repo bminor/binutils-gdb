@@ -278,10 +278,8 @@ build_scm_types (struct gdbarch *gdbarch)
   struct builtin_scm_type *builtin_scm_type
     = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_scm_type);
 
-  builtin_scm_type->builtin_scm =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0, "SCM", (struct objfile *) NULL);
+  builtin_scm_type->builtin_scm
+    = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch), 0, "SCM");
 
   return builtin_scm_type;
 }

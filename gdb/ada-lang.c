@@ -1608,7 +1608,6 @@ ada_type_of_array (struct value *arr, int bounds)
       struct type *elt_type;
       int arity;
       struct value *descriptor;
-      struct objfile *objf = TYPE_OBJFILE (value_type (arr));
 
       elt_type = ada_array_element_type (value_type (arr), -1);
       arity = ada_array_arity (value_type (arr));
@@ -1621,8 +1620,8 @@ ada_type_of_array (struct value *arr, int bounds)
         return NULL;
       while (arity > 0)
         {
-          struct type *range_type = alloc_type (objf);
-          struct type *array_type = alloc_type (objf);
+          struct type *range_type = alloc_type_copy (value_type (arr));
+          struct type *array_type = alloc_type_copy (value_type (arr));
           struct value *low = desc_one_bound (descriptor, arity, 0);
           struct value *high = desc_one_bound (descriptor, arity, 1);
           arity -= 1;
@@ -1729,7 +1728,7 @@ packed_array_type (struct type *type, long *elt_bits)
   if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
     return type;
 
-  new_type = alloc_type (TYPE_OBJFILE (type));
+  new_type = alloc_type_copy (type);
   new_elt_type = packed_array_type (ada_check_typedef (TYPE_TARGET_TYPE (type)),
                                     elt_bits);
   create_array_type (new_type, new_elt_type, TYPE_INDEX_TYPE (type));
@@ -6665,9 +6664,9 @@ variant_field_index (struct type *type)
 /* A record type with no fields.  */
 
 static struct type *
-empty_record (struct objfile *objfile)
+empty_record (struct type *template)
 {
-  struct type *type = alloc_type (objfile);
+  struct type *type = alloc_type_copy (template);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   TYPE_NFIELDS (type) = 0;
   TYPE_FIELDS (type) = NULL;
@@ -6724,7 +6723,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
         nfields++;
     }
 
-  rtype = alloc_type (TYPE_OBJFILE (type));
+  rtype = alloc_type_copy (type);
   TYPE_CODE (rtype) = TYPE_CODE_STRUCT;
   INIT_CPLUS_SPECIFIC (rtype);
   TYPE_NFIELDS (rtype) = nfields;
@@ -6934,7 +6933,7 @@ template_to_static_fixed_type (struct type *type0)
         new_type = static_unwrap_type (field_type);
       if (type == type0 && new_type != field_type)
         {
-          TYPE_TARGET_TYPE (type0) = type = alloc_type (TYPE_OBJFILE (type0));
+          TYPE_TARGET_TYPE (type0) = type = alloc_type_copy (type0);
           TYPE_CODE (type) = TYPE_CODE (type0);
           INIT_CPLUS_SPECIFIC (type);
           TYPE_NFIELDS (type) = nfields;
@@ -6979,7 +6978,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   else
     dval = dval0;
 
-  rtype = alloc_type (TYPE_OBJFILE (type));
+  rtype = alloc_type_copy (type);
   TYPE_CODE (rtype) = TYPE_CODE_STRUCT;
   INIT_CPLUS_SPECIFIC (rtype);
   TYPE_NFIELDS (rtype) = nfields;
@@ -7099,7 +7098,7 @@ to_fixed_variant_branch_type (struct type *var_type0, const gdb_byte *valaddr,
                                value_type (dval), value_contents (dval));
 
   if (which < 0)
-    return empty_record (TYPE_OBJFILE (var_type));
+    return empty_record (var_type);
   else if (is_dynamic_field (var_type, which))
     return to_fixed_record_type
       (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (var_type, which)),
@@ -7158,7 +7157,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
       if (elt_type0 == elt_type && !packed_array_p)
         result = type0;
       else
-        result = create_array_type (alloc_type (TYPE_OBJFILE (type0)),
+        result = create_array_type (alloc_type_copy (type0),
                                     elt_type, TYPE_INDEX_TYPE (type0));
     }
   else
@@ -7190,7 +7189,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
           struct type *range_type =
             to_fixed_range_type (TYPE_FIELD_NAME (index_type_desc, i),
                                  dval, TYPE_INDEX_TYPE (elt_type0));
-          result = create_array_type (alloc_type (TYPE_OBJFILE (elt_type0)),
+          result = create_array_type (alloc_type_copy (elt_type0),
                                       result, range_type);
 	  elt_type0 = TYPE_TARGET_TYPE (elt_type0);
         }
@@ -9710,8 +9709,7 @@ to_fixed_range_type (char *name, struct value *dval, struct type *orig_type)
       if (L < INT_MIN || U > INT_MAX)
 	return raw_type;
       else
-	return create_range_type (alloc_type (TYPE_OBJFILE (orig_type)),
-				  raw_type,
+	return create_range_type (alloc_type_copy (orig_type), raw_type,
 				  discrete_type_low_bound (raw_type),
 				  discrete_type_high_bound (raw_type));
     }
@@ -9774,8 +9772,7 @@ to_fixed_range_type (char *name, struct value *dval, struct type *orig_type)
             }
         }
 
-      type = create_range_type (alloc_type (TYPE_OBJFILE (orig_type)),
-				base_type, L, U);
+      type = create_range_type (alloc_type_copy (orig_type), base_type, L, U);
       TYPE_NAME (type) = name;
       return type;
     }
@@ -11160,48 +11157,42 @@ ada_language_arch_info (struct gdbarch *gdbarch,
   lai->primitive_type_vector
     = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_ada_primitive_types + 1,
 			      struct type *);
-  lai->primitive_type_vector [ada_primitive_type_int] =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0, "integer", (struct objfile *) NULL);
-  lai->primitive_type_vector [ada_primitive_type_long] =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0, "long_integer", (struct objfile *) NULL);
-  lai->primitive_type_vector [ada_primitive_type_short] =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_short_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0, "short_integer", (struct objfile *) NULL);
-  lai->string_char_type = 
-    lai->primitive_type_vector [ada_primitive_type_char] =
-    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-               0, "character", (struct objfile *) NULL);
-  lai->primitive_type_vector [ada_primitive_type_float] =
-    init_float_type (gdbarch_float_bit (gdbarch),
-		     "float", NULL);
-  lai->primitive_type_vector [ada_primitive_type_double] =
-    init_float_type (gdbarch_double_bit (gdbarch),
-		     "long_float", NULL);
-  lai->primitive_type_vector [ada_primitive_type_long_long] =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_long_long_bit (gdbarch) / TARGET_CHAR_BIT,
-               0, "long_long_integer", (struct objfile *) NULL);
-  lai->primitive_type_vector [ada_primitive_type_long_double] =
-    init_float_type (gdbarch_double_bit (gdbarch),
-		     "long_long_float", NULL);
-  lai->primitive_type_vector [ada_primitive_type_natural] =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0, "natural", (struct objfile *) NULL);
-  lai->primitive_type_vector [ada_primitive_type_positive] =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0, "positive", (struct objfile *) NULL);
-  lai->primitive_type_vector [ada_primitive_type_void] = builtin->builtin_void;
 
-  lai->primitive_type_vector [ada_primitive_type_system_address] =
-    lookup_pointer_type (init_type (TYPE_CODE_VOID, 1, 0, "void",
-                                    (struct objfile *) NULL));
+  lai->primitive_type_vector [ada_primitive_type_int]
+    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+			 0, "integer");
+  lai->primitive_type_vector [ada_primitive_type_long]
+    = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch),
+			 0, "long_integer");
+  lai->primitive_type_vector [ada_primitive_type_short]
+    = arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch),
+			 0, "short_integer");
+  lai->string_char_type
+    = lai->primitive_type_vector [ada_primitive_type_char]
+    = arch_integer_type (gdbarch, TARGET_CHAR_BIT, 0, "character");
+  lai->primitive_type_vector [ada_primitive_type_float]
+    = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
+		       "float", NULL);
+  lai->primitive_type_vector [ada_primitive_type_double]
+    = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
+		       "long_float", NULL);
+  lai->primitive_type_vector [ada_primitive_type_long_long]
+    = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch),
+			 0, "long_long_integer");
+  lai->primitive_type_vector [ada_primitive_type_long_double]
+    = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
+		       "long_long_float", NULL);
+  lai->primitive_type_vector [ada_primitive_type_natural]
+    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+			 0, "natural");
+  lai->primitive_type_vector [ada_primitive_type_positive]
+    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+			 0, "positive");
+  lai->primitive_type_vector [ada_primitive_type_void]
+    = builtin->builtin_void;
+
+  lai->primitive_type_vector [ada_primitive_type_system_address]
+    = lookup_pointer_type (arch_type (gdbarch, TYPE_CODE_VOID, 1, "void"));
   TYPE_NAME (lai->primitive_type_vector [ada_primitive_type_system_address])
     = "system__address";
 

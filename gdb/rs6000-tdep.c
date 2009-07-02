@@ -2264,7 +2264,8 @@ rs6000_builtin_type_vec64 (struct gdbarch *gdbarch)
 
       struct type *t;
 
-      t = init_composite_type ("__ppc_builtin_type_vec64", TYPE_CODE_UNION);
+      t = arch_composite_type (gdbarch,
+			       "__ppc_builtin_type_vec64", TYPE_CODE_UNION);
       append_composite_type_field (t, "uint64", bt->builtin_int64);
       append_composite_type_field (t, "v2_float",
 				   init_vector_type (bt->builtin_float, 2));
@@ -2307,7 +2308,8 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
 
       struct type *t;
 
-      t = init_composite_type ("__ppc_builtin_type_vec128", TYPE_CODE_UNION);
+      t = arch_composite_type (gdbarch,
+			       "__ppc_builtin_type_vec128", TYPE_CODE_UNION);
       append_composite_type_field (t, "uint128", bt->builtin_uint128);
       append_composite_type_field (t, "v4_float",
 				   init_vector_type (bt->builtin_float, 4));

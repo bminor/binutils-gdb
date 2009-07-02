@@ -296,7 +296,7 @@ type_from_class (struct gdbarch *gdbarch, struct value *clas)
   /* Do not use the "fake" dynamics objfile to own dynamically generated
      types, as it does not provide an architecture, and it would not help
      manage the lifetime of these types anyway.  */
-  type = alloc_type (NULL);
+  type = alloc_type_arch (gdbarch);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   INIT_CPLUS_SPECIFIC (type);
 
@@ -1170,23 +1170,23 @@ build_java_types (struct gdbarch *gdbarch)
     = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_java_type);
 
   builtin_java_type->builtin_int
-    = init_type (TYPE_CODE_INT, 4, 0, "int", NULL);
+    = arch_integer_type (gdbarch, 32, 0, "int");
   builtin_java_type->builtin_short
-    = init_type (TYPE_CODE_INT, 2, 0, "short", NULL);
+    = arch_integer_type (gdbarch, 16, 0, "short");
   builtin_java_type->builtin_long
-    = init_type (TYPE_CODE_INT, 8, 0, "long", NULL);
+    = arch_integer_type (gdbarch, 64, 0, "long");
   builtin_java_type->builtin_byte
-    = init_type (TYPE_CODE_INT, 1, 0, "byte", NULL);
+    = arch_integer_type (gdbarch, 8, 0, "byte");
   builtin_java_type->builtin_boolean
-    = init_type (TYPE_CODE_BOOL, 1, 0, "boolean", NULL);
+    = arch_boolean_type (gdbarch, 8, 0, "boolean");
   builtin_java_type->builtin_char
-    = init_type (TYPE_CODE_CHAR, 2, TYPE_FLAG_UNSIGNED, "char", NULL);
+    = arch_character_type (gdbarch, 16, 1, "char");
   builtin_java_type->builtin_float
-    = init_float_type (32, "float", NULL);
+    = arch_float_type (gdbarch, 32, "float", NULL);
   builtin_java_type->builtin_double
-    = init_float_type (64, "double", NULL);
+    = arch_float_type (gdbarch, 64, "double", NULL);
   builtin_java_type->builtin_void
-    = init_type (TYPE_CODE_VOID, 1, 0, "void", NULL);
+    = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
 
   return builtin_java_type;
 }

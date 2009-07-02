@@ -303,7 +303,7 @@ ia64_ext_type (struct gdbarch *gdbarch)
 
   if (!tdep->ia64_ext_type)
     tdep->ia64_ext_type
-      = init_float_type (128, "builtin_type_ia64_ext",
+      = arch_float_type (gdbarch, 128, "builtin_type_ia64_ext",
 			 floatformats_ia64_ext);
 
   return tdep->ia64_ext_type;

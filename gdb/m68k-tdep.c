@@ -81,7 +81,7 @@ m68k_ps_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = init_flags_type ("builtin_type_m68k_ps", 4);
+      type = arch_flags_type (gdbarch, "builtin_type_m68k_ps", 4);
       append_flags_type_flag (type, 0, "C");
       append_flags_type_flag (type, 1, "V");
       append_flags_type_flag (type, 2, "Z");
@@ -108,7 +108,7 @@ m68881_ext_type (struct gdbarch *gdbarch)
 
   if (!tdep->m68881_ext_type)
     tdep->m68881_ext_type
-      = init_float_type (-1, "builtin_type_m68881_ext",
+      = arch_float_type (gdbarch, -1, "builtin_type_m68881_ext",
 			 floatformats_m68881_ext);
 
   return tdep->m68881_ext_type;

@@ -192,34 +192,33 @@ make_types (struct gdbarch *arch)
 
   /* The builtin_type_mumble variables are sometimes uninitialized when
      this is called, so we avoid using them.  */
-  tdep->voyd = init_type (TYPE_CODE_VOID, 1, 0, "void", NULL);
-  tdep->ptr_voyd = init_type (TYPE_CODE_PTR, gdbarch_ptr_bit (arch) / 8,
-			      TYPE_FLAG_UNSIGNED, NULL, NULL);
+  tdep->voyd = arch_type (arch, TYPE_CODE_VOID, 1, "void");
+  tdep->ptr_voyd
+    = arch_type (arch, TYPE_CODE_PTR, gdbarch_ptr_bit (arch), NULL);
   TYPE_TARGET_TYPE (tdep->ptr_voyd) = tdep->voyd;
+  TYPE_UNSIGNED (tdep->ptr_voyd) = 1;
   tdep->func_voyd = lookup_function_type (tdep->voyd);
 
   sprintf (type_name, "%s_data_addr_t",
 	   gdbarch_bfd_arch_info (arch)->printable_name);
   tdep->data_addr_reg_type
-    = init_type (TYPE_CODE_PTR, data_addr_reg_bits / 8,
-		 TYPE_FLAG_UNSIGNED, xstrdup (type_name), NULL);
+    = arch_type (arch, TYPE_CODE_PTR, data_addr_reg_bits, xstrdup (type_name));
   TYPE_TARGET_TYPE (tdep->data_addr_reg_type) = tdep->voyd;
+  TYPE_UNSIGNED (tdep->data_addr_reg_type) = 1;
 
   sprintf (type_name, "%s_code_addr_t",
 	   gdbarch_bfd_arch_info (arch)->printable_name);
   tdep->code_addr_reg_type
-    = init_type (TYPE_CODE_PTR, code_addr_reg_bits / 8,
-		 TYPE_FLAG_UNSIGNED, xstrdup (type_name), NULL);
+    = arch_type (arch, TYPE_CODE_PTR, code_addr_reg_bits, xstrdup (type_name));
   TYPE_TARGET_TYPE (tdep->code_addr_reg_type) = tdep->func_voyd;
+  TYPE_UNSIGNED (tdep->code_addr_reg_type) = 1;
 
-  tdep->uint8  = init_type (TYPE_CODE_INT, 1, TYPE_FLAG_UNSIGNED,
-			    "uint8_t", NULL);
-  tdep->uint16 = init_type (TYPE_CODE_INT, 2, TYPE_FLAG_UNSIGNED,
-			    "uint16_t", NULL);
-  tdep->int8   = init_type (TYPE_CODE_INT, 1, 0, "int8_t", NULL);
-  tdep->int16  = init_type (TYPE_CODE_INT, 2, 0, "int16_t", NULL);
-  tdep->int32  = init_type (TYPE_CODE_INT, 4, 0, "int32_t", NULL);
-  tdep->int64  = init_type (TYPE_CODE_INT, 8, 0, "int64_t", NULL);
+  tdep->uint8  = arch_integer_type (arch,  8, 1, "uint8_t");
+  tdep->uint16 = arch_integer_type (arch, 16, 1, "uint16_t");
+  tdep->int8   = arch_integer_type (arch,  8, 0, "int8_t");
+  tdep->int16  = arch_integer_type (arch, 16, 0, "int16_t");
+  tdep->int32  = arch_integer_type (arch, 32, 0, "int32_t");
+  tdep->int64  = arch_integer_type (arch, 64, 0, "int64_t");
 }
 
 

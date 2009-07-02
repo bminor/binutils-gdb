@@ -406,26 +406,16 @@ build_m2_types (struct gdbarch *gdbarch)
     = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_m2_type);
 
   /* Modula-2 "pervasive" types.  NOTE:  these can be redefined!!! */
-  builtin_m2_type->builtin_int =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0, "INTEGER", (struct objfile *) NULL);
-  builtin_m2_type->builtin_card =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "CARDINAL", (struct objfile *) NULL);
-  builtin_m2_type->builtin_real =
-    init_float_type (gdbarch_float_bit (gdbarch), "REAL", NULL);
-  builtin_m2_type->builtin_char =
-    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "CHAR", (struct objfile *) NULL);
-  builtin_m2_type->builtin_bool =
-    init_type (TYPE_CODE_BOOL, 
-	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "BOOLEAN", (struct objfile *) NULL);
+  builtin_m2_type->builtin_int
+    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch), 0, "INTEGER");
+  builtin_m2_type->builtin_card
+    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch), 1, "CARDINAL");
+  builtin_m2_type->builtin_real
+    = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch), "REAL", NULL);
+  builtin_m2_type->builtin_char
+    = arch_character_type (gdbarch, TARGET_CHAR_BIT, 1, "CHAR");
+  builtin_m2_type->builtin_bool
+    = arch_boolean_type (gdbarch, gdbarch_int_bit (gdbarch), 1, "BOOLEAN");
 
   return builtin_m2_type;
 }

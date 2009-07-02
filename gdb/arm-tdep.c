@@ -1601,7 +1601,7 @@ arm_ext_type (struct gdbarch *gdbarch)
 
   if (!tdep->arm_ext_type)
     tdep->arm_ext_type
-      = init_float_type (-1, "builtin_type_arm_ext",
+      = arch_float_type (gdbarch, -1, "builtin_type_arm_ext",
 			 floatformats_arm_ext);
 
   return tdep->arm_ext_type;

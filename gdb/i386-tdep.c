@@ -2004,7 +2004,7 @@ i386_eflags_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = init_flags_type ("builtin_type_i386_eflags", 4);
+      type = arch_flags_type (gdbarch, "builtin_type_i386_eflags", 4);
       append_flags_type_flag (type, 0, "CF");
       append_flags_type_flag (type, 1, NULL);
       append_flags_type_flag (type, 2, "PF");
@@ -2038,7 +2038,7 @@ i386_mxcsr_type (struct gdbarch *gdbarch)
     {
       struct type *type;
 
-      type = init_flags_type ("builtin_type_i386_mxcsr", 4);
+      type = arch_flags_type (gdbarch, "builtin_type_i386_mxcsr", 4);
       append_flags_type_flag (type, 0, "IE");
       append_flags_type_flag (type, 1, "DE");
       append_flags_type_flag (type, 2, "ZE");
@@ -2067,7 +2067,7 @@ i387_ext_type (struct gdbarch *gdbarch)
 
   if (!tdep->i387_ext_type)
     tdep->i387_ext_type
-      = init_float_type (-1, "builtin_type_i387_ext",
+      = arch_float_type (gdbarch, -1, "builtin_type_i387_ext",
 			 floatformats_i387_ext);
 
   return tdep->i387_ext_type;
@@ -2096,7 +2096,8 @@ i386_mmx_type (struct gdbarch *gdbarch)
 
       struct type *t;
 
-      t = init_composite_type ("__gdb_builtin_type_vec64i", TYPE_CODE_UNION);
+      t = arch_composite_type (gdbarch,
+			       "__gdb_builtin_type_vec64i", TYPE_CODE_UNION);
 
       append_composite_type_field (t, "uint64", bt->builtin_int64);
       append_composite_type_field (t, "v2_int32",
@@ -2139,7 +2140,8 @@ i386_sse_type (struct gdbarch *gdbarch)
 
       struct type *t;
 
-      t = init_composite_type ("__gdb_builtin_type_vec128i", TYPE_CODE_UNION);
+      t = arch_composite_type (gdbarch,
+			       "__gdb_builtin_type_vec128i", TYPE_CODE_UNION);
       append_composite_type_field (t, "v4_float",
 				   init_vector_type (bt->builtin_float, 4));
       append_composite_type_field (t, "v2_double",

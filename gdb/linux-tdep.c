@@ -33,43 +33,40 @@ linux_get_siginfo_type (struct gdbarch *gdbarch)
   struct type *siginfo_type, *sifields_type;
   struct type *type;
 
-  int_type = init_type (TYPE_CODE_INT,
-			gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT,
-			0, "int", NULL);
-  uint_type = init_type (TYPE_CODE_INT,
-			 gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT,
-			 0, "unsigned int", NULL);
-  long_type = init_type (TYPE_CODE_INT,
-			 gdbarch_long_bit (gdbarch) / HOST_CHAR_BIT,
-			 0, "long", NULL);
+  int_type = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+			 	0, "int");
+  uint_type = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+				 1, "unsigned int");
+  long_type = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch),
+				 0, "long");
   void_ptr_type = lookup_pointer_type (builtin_type (gdbarch)->builtin_void);
 
   /* sival_t */
-  sigval_type = init_composite_type (NULL, TYPE_CODE_UNION);
+  sigval_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
   TYPE_NAME (sigval_type) = xstrdup ("sigval_t");
   append_composite_type_field (sigval_type, "sival_int", int_type);
   append_composite_type_field (sigval_type, "sival_ptr", void_ptr_type);
 
   /* __pid_t */
-  pid_type = init_type (TYPE_CODE_TYPEDEF, TYPE_LENGTH (int_type),
-			TYPE_FLAG_TARGET_STUB, NULL, NULL);
-  TYPE_NAME (pid_type) = xstrdup ("__pid_t");
+  pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF, TYPE_LENGTH (int_type),
+			xstrdup ("__pid_t"));
   TYPE_TARGET_TYPE (pid_type) = int_type;
+  TYPE_TARGET_STUB (pid_type) = 1;
 
   /* __uid_t */
-  uid_type = init_type (TYPE_CODE_TYPEDEF, TYPE_LENGTH (uint_type),
-			TYPE_FLAG_TARGET_STUB, NULL, NULL);
-  TYPE_NAME (uid_type) = xstrdup ("__uid_t");
+  uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF, TYPE_LENGTH (uint_type),
+			xstrdup ("__uid_t"));
   TYPE_TARGET_TYPE (uid_type) = uint_type;
+  TYPE_TARGET_STUB (uid_type) = 1;
 
   /* __clock_t */
-  clock_type = init_type (TYPE_CODE_TYPEDEF, TYPE_LENGTH (long_type),
-			  TYPE_FLAG_TARGET_STUB, NULL, NULL);
-  TYPE_NAME (clock_type) = xstrdup ("__clock_t");
+  clock_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF, TYPE_LENGTH (long_type),
+			  xstrdup ("__clock_t"));
   TYPE_TARGET_TYPE (clock_type) = long_type;
+  TYPE_TARGET_STUB (clock_type) = 1;
 
   /* _sifields */
-  sifields_type = init_composite_type (NULL, TYPE_CODE_UNION);
+  sifields_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
 
   {
     const int si_max_size = 128;
@@ -86,27 +83,27 @@ linux_get_siginfo_type (struct gdbarch *gdbarch)
   }
 
   /* _kill */
-  type = init_composite_type (NULL, TYPE_CODE_STRUCT);
+  type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
   append_composite_type_field (type, "si_pid", pid_type);
   append_composite_type_field (type, "si_uid", uid_type);
   append_composite_type_field (sifields_type, "_kill", type);
 
   /* _timer */
-  type = init_composite_type (NULL, TYPE_CODE_STRUCT);
+  type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
   append_composite_type_field (type, "si_tid", int_type);
   append_composite_type_field (type, "si_overrun", int_type);
   append_composite_type_field (type, "si_sigval", sigval_type);
   append_composite_type_field (sifields_type, "_timer", type);
 
   /* _rt */
-  type = init_composite_type (NULL, TYPE_CODE_STRUCT);
+  type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
   append_composite_type_field (type, "si_pid", pid_type);
   append_composite_type_field (type, "si_uid", uid_type);
   append_composite_type_field (type, "si_sigval", sigval_type);
   append_composite_type_field (sifields_type, "_rt", type);
 
   /* _sigchld */
-  type = init_composite_type (NULL, TYPE_CODE_STRUCT);
+  type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
   append_composite_type_field (type, "si_pid", pid_type);
   append_composite_type_field (type, "si_uid", uid_type);
   append_composite_type_field (type, "si_status", int_type);
@@ -115,18 +112,18 @@ linux_get_siginfo_type (struct gdbarch *gdbarch)
   append_composite_type_field (sifields_type, "_sigchld", type);
 
   /* _sigfault */
-  type = init_composite_type (NULL, TYPE_CODE_STRUCT);
+  type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
   append_composite_type_field (type, "si_addr", void_ptr_type);
   append_composite_type_field (sifields_type, "_sigfault", type);
 
   /* _sigpoll */
-  type = init_composite_type (NULL, TYPE_CODE_STRUCT);
+  type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
   append_composite_type_field (type, "si_band", long_type);
   append_composite_type_field (type, "si_fd", int_type);
   append_composite_type_field (sifields_type, "_sigpoll", type);
 
   /* struct siginfo */
-  siginfo_type = init_composite_type (NULL, TYPE_CODE_STRUCT);
+  siginfo_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
   TYPE_NAME (siginfo_type) = xstrdup ("siginfo");
   append_composite_type_field (siginfo_type, "si_signo", int_type);
   append_composite_type_field (siginfo_type, "si_errno", int_type);

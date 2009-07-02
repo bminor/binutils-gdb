@@ -281,9 +281,8 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
 		  tp->size = size;
 
 		  sprintf (name, "int%d", size * 8);
-		  tp->virtual_type = init_type (TYPE_CODE_INT, size,
-						TYPE_FLAG_UNSIGNED, name,
-						NULL);
+		  tp->virtual_type
+		    = arch_integer_type (gdbarch, size * 8, 1, xstrdup (name));
 		}
 
 	      reg->ctype = tp->virtual_type;
