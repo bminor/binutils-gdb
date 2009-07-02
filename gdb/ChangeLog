@@ -1,5 +1,18 @@
 2009-07-02  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-fork.c (forks_exist_p): Drop unnecessary extern.
+	(add_fork, linux_fork_killall, linux_fork_mourn_inferior)
+	(linux_fork_detach): Ditto.
+	(delete_fork_command): Rename to ...
+	(delete_checkpoint_command): ... this.
+	(detach_fork_command): Rename to ...
+	(detach_checkpoint_command): ... this.
+	(info_forks_command): Rename to ...
+	(info_checkpoints_command): ... this.
+	(_initialize_linux_fork): Remove stale comments.  Adjust.
+
+2009-07-02  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.c (linux_child_follow_fork): If we're staying attached
 	to the child process, enable event reporting on it.  Don't handle
 	checkpoints here.  Instead, add the child fork to the lwp thread

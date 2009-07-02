@@ -50,7 +50,7 @@ struct fork_info
   struct fork_info *next;
   ptid_t ptid;
   int num;			/* Convenient handle (GDB fork id) */
-  struct regcache *savedregs;	/* Convenient for info fork, saves 
+  struct regcache *savedregs;	/* Convenient for info fork, saves
 				   having to actually switch contexts.  */
   int clobber_regs;		/* True if we should restore saved regs.  */
   off_t *filepos;		/* Set of open file descriptors' offsets.  */
@@ -59,16 +59,15 @@ struct fork_info
 
 /* Fork list methods:  */
 
-extern int
+int
 forks_exist_p (void)
 {
   return (fork_list != NULL);
 }
 
-/* Add a fork to internal fork list.
-   Called from linux child_follow_fork.  */
+/* Add a fork to the internal fork list.  */
 
-extern struct fork_info *
+struct fork_info *
 add_fork (pid_t pid)
 {
   struct fork_info *fp;
@@ -137,7 +136,7 @@ delete_fork (ptid_t ptid)
 
   free_fork (fp);
 
-  /* Special case: if there is now only one process in the list, 
+  /* Special case: if there is now only one process in the list,
      and if it is (hopefully!) the current inferior_ptid, then
      remove it, leaving the list empty -- we're now down to the
      default case of debugging a single process.  */
@@ -218,7 +217,7 @@ init_fork_list (void)
 
 /* Fork list <-> gdb interface.  */
 
-/* Utility function for fork_load/fork_save.  
+/* Utility function for fork_load/fork_save.
    Calls lseek in the (current) inferior process.  */
 
 static off_t
@@ -297,7 +296,7 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
 		fp->maxfd = tmp;
 	    }
 	  /* Allocate array of file positions.  */
-	  fp->filepos = xrealloc (fp->filepos, 
+	  fp->filepos = xrealloc (fp->filepos,
 				  (fp->maxfd + 1) * sizeof (*fp->filepos));
 
 	  /* Initialize to -1 (invalid).  */
@@ -319,7 +318,7 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
 
 /* Kill 'em all, let God sort 'em out...  */
 
-extern void
+void
 linux_fork_killall (void)
 {
   /* Walk list and kill every pid.  No need to treat the
@@ -351,7 +350,7 @@ linux_fork_killall (void)
    forks to debug.  Delete the exiting one and context-switch to the
    first available.  */
 
-extern void
+void
 linux_fork_mourn_inferior (void)
 {
   /* Wait just one more time to collect the inferior's exit status.
@@ -385,7 +384,7 @@ linux_fork_mourn_inferior (void)
    viable forks to debug.  Detach and delete it and context-switch to
    the first available.  */
 
-extern void
+void
 linux_fork_detach (char *args, int from_tty)
 {
   /* OK, inferior_ptid is the one we are detaching from.  We need to
@@ -416,7 +415,7 @@ linux_fork_detach (char *args, int from_tty)
 /* Fork list <-> user interface.  */
 
 static void
-delete_fork_command (char *args, int from_tty)
+delete_checkpoint_command (char *args, int from_tty)
 {
   ptid_t ptid;
 
@@ -428,7 +427,8 @@ delete_fork_command (char *args, int from_tty)
     error (_("No such checkpoint id, %s"), args);
 
   if (ptid_equal (ptid, inferior_ptid))
-    error (_("Please switch to another checkpoint before deleting the current one"));
+    error (_("\
+Please switch to another checkpoint before deleting the current one"));
 
   if (ptrace (PTRACE_KILL, PIDGET (ptid), 0, 0))
     error (_("Unable to kill pid %s"), target_pid_to_str (ptid));
@@ -440,7 +440,7 @@ delete_fork_command (char *args, int from_tty)
 }
 
 static void
-detach_fork_command (char *args, int from_tty)
+detach_checkpoint_command (char *args, int from_tty)
 {
   ptid_t ptid;
 
@@ -464,10 +464,10 @@ Please switch to another checkpoint before detaching the current one"));
   delete_fork (ptid);
 }
 
-/* Print information about currently known forks.  */
+/* Print information about currently known checkpoints.  */
 
 static void
-info_forks_command (char *arg, int from_tty)
+info_checkpoints_command (char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   struct frame_info *cur_frame;
@@ -586,14 +586,14 @@ checkpoint_command (char *args, int from_tty)
     {
       int parent_pid;
 
-      printf_filtered (_("checkpoint: fork returned pid %ld.\n"), 
+      printf_filtered (_("checkpoint: fork returned pid %ld.\n"),
 		       (long) retpid);
       if (info_verbose)
 	{
 	  parent_pid = ptid_get_lwp (last_target_ptid);
 	  if (parent_pid == 0)
 	    parent_pid = ptid_get_pid (last_target_ptid);
-	  printf_filtered (_("   gdb says parent = %ld.\n"), 
+	  printf_filtered (_("   gdb says parent = %ld.\n"),
 			   (long) parent_pid);
 	}
     }
@@ -622,7 +622,7 @@ linux_fork_context (struct fork_info *newfp, int from_tty)
   fork_load_infrun_state (newfp);
   insert_breakpoints ();
 
-  printf_filtered (_("Switching to %s\n"), 
+  printf_filtered (_("Switching to %s\n"),
 		   target_pid_to_str (inferior_ptid));
 
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
@@ -653,15 +653,8 @@ _initialize_linux_fork (void)
   add_setshow_boolean_cmd ("detach-on-fork", class_obscure, &detach_fork, _("\
 Set whether gdb will detach the child of a fork."), _("\
 Show whether gdb will detach the child of a fork."), _("\
-Tells gdb whether to detach the child of a fork."), 
+Tells gdb whether to detach the child of a fork."),
 			   NULL, NULL, &setlist, &showlist);
-
-  /* Set/show restart-auto-finish: user-settable count.  Causes the
-     first "restart" of a fork to do some number of "finish" commands
-     before returning to user.
-
-     Useful because otherwise the virgin fork process will be stopped
-     somewhere in the un-interesting fork system call.  */
 
   /* Checkpoint command: create a fork of the inferior process
      and set it aside for later debugging.  */
@@ -677,22 +670,22 @@ restart <n>: restore program context from a checkpoint.\n\
 Argument 'n' is checkpoint ID, as displayed by 'info checkpoints'."));
 
   /* Delete checkpoint command: kill the process and remove it from
-     fork list.  */
+     the fork list.  */
 
-  add_cmd ("checkpoint", class_obscure, delete_fork_command, _("\
+  add_cmd ("checkpoint", class_obscure, delete_checkpoint_command, _("\
 Delete a checkpoint (experimental)."),
 	   &deletelist);
 
-  /* Detach checkpoint command: release the process to run independently, 
+  /* Detach checkpoint command: release the process to run independently,
      and remove it from the fork list.  */
 
-  add_cmd ("checkpoint", class_obscure, detach_fork_command, _("\
+  add_cmd ("checkpoint", class_obscure, detach_checkpoint_command, _("\
 Detach from a checkpoint (experimental)."),
 	   &detachlist);
 
-  /* Info checkpoints command: list all forks/checkpoints 
+  /* Info checkpoints command: list all forks/checkpoints
      currently under gdb's control.  */
 
-  add_info ("checkpoints", info_forks_command,
+  add_info ("checkpoints", info_checkpoints_command,
 	    _("IDs of currently known checkpoints."));
 }
