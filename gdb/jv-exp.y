@@ -50,6 +50,7 @@
 #include "block.h"
 
 #define parse_type builtin_type (parse_gdbarch)
+#define parse_java_type builtin_java_type (parse_gdbarch)
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
@@ -249,7 +250,7 @@ Literal:
 		  write_exp_elt_opcode (OP_DOUBLE); }
 |	BOOLEAN_LITERAL
 		{ write_exp_elt_opcode (OP_LONG);
-		  write_exp_elt_type (java_boolean_type);
+		  write_exp_elt_type (parse_java_type->builtin_boolean);
 		  write_exp_elt_longcst ((LONGEST)$1);
 		  write_exp_elt_opcode (OP_LONG); }
 |	StringLiteral
@@ -265,7 +266,7 @@ Type:
 PrimitiveType:
 	NumericType
 |	BOOLEAN
-		{ $$ = java_boolean_type; }
+		{ $$ = parse_java_type->builtin_boolean; }
 ;
 
 NumericType:
@@ -275,22 +276,22 @@ NumericType:
 
 IntegralType:
 	BYTE
-		{ $$ = java_byte_type; }
+		{ $$ = parse_java_type->builtin_byte; }
 |	SHORT
-		{ $$ = java_short_type; }
+		{ $$ = parse_java_type->builtin_short; }
 |	INT
-		{ $$ = java_int_type; }
+		{ $$ = parse_java_type->builtin_int; }
 |	LONG
-		{ $$ = java_long_type; }
+		{ $$ = parse_java_type->builtin_long; }
 |	CHAR
-		{ $$ = java_char_type; }
+		{ $$ = parse_java_type->builtin_char; }
 ;
 
 FloatingPointType:
 	FLOAT
-		{ $$ = java_float_type; }
+		{ $$ = parse_java_type->builtin_float; }
 |	DOUBLE
-		{ $$ = java_double_type; }
+		{ $$ = parse_java_type->builtin_double; }
 ;
 
 /* UNUSED:
@@ -765,12 +766,12 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
   limit = ((limit << 16) << 16) | limit;
   if (c == 'l' || c == 'L')
     {
-      type = java_long_type;
+      type = parse_java_type->builtin_long;
       len--;
     }
   else
     {
-      type = java_int_type;
+      type = parse_java_type->builtin_int;
     }
   limit_div_base = limit / (ULONGEST) base;
 
@@ -795,10 +796,10 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 
   /* If the type is bigger than a 32-bit signed integer can be, implicitly
      promote to long.  Java does not do this, so mark it as builtin_type_uint64
-     rather than java_long_type.  0x80000000 will become -0x80000000 instead
-     of 0x80000000L, because we don't know the sign at this point.
-  */
-  if (type == java_int_type && n > (ULONGEST)0x80000000)
+     rather than parse_java_type->builtin_long.  0x80000000 will become
+     -0x80000000 instead of 0x80000000L, because we don't know the sign
+     at this point.  */
+  if (type == parse_java_type->builtin_int && n > (ULONGEST)0x80000000)
     type = builtin_type_uint64;
 
   putithere->typed_val_int.val = n;
@@ -902,7 +903,7 @@ yylex (void)
 	error (_("Empty character constant"));
 
       yylval.typed_val_int.val = c;
-      yylval.typed_val_int.type = java_char_type;
+      yylval.typed_val_int.type = parse_java_type->builtin_char;
 
       c = *lexptr++;
       if (c != '\'')

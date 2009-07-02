@@ -58,7 +58,7 @@ java_value_print (struct value *val, struct ui_file *stream,
 
       if (obj_addr != 0)
 	{
-	  type = type_from_class (java_class_from_object (val));
+	  type = type_from_class (gdbarch, java_class_from_object (val));
 	  type = lookup_pointer_type (type);
 
 	  val = value_at (type, address);
@@ -76,7 +76,8 @@ java_value_print (struct value *val, struct ui_file *stream,
       long length;
       unsigned int things_printed = 0;
       int reps;
-      struct type *el_type = java_primitive_type_from_name (name, i - 2);
+      struct type *el_type
+	= java_primitive_type_from_name (gdbarch, name, i - 2);
       i = 0;
       read_memory (address + get_java_object_header_size (gdbarch), buf4, 4);
 
@@ -211,6 +212,7 @@ java_value_print (struct value *val, struct ui_file *stream,
       && address != 0
       && value_as_address (val) != 0)
     {
+      struct type *char_type;
       struct value *data_val;
       CORE_ADDR data;
       struct value *boffset_val;
@@ -232,7 +234,8 @@ java_value_print (struct value *val, struct ui_file *stream,
 
       value_free_to_mark (mark);	/* Release unnecessary values */
 
-      val_print_string (java_char_type, data + boffset, count, stream, options);
+      char_type = builtin_java_type (gdbarch)->builtin_char;
+      val_print_string (char_type, data + boffset, count, stream, options);
 
       return 0;
     }

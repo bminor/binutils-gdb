@@ -1,3 +1,44 @@
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* jv-lang.h (java_int_type, java_byte_type, java_short_type,
+	java_long_type, java_boolean_type, java_char_type, java_float_type,
+	java_double_type, java_void_type): Remove.
+	(struct builtin_java_type): New data type.
+	(builtin_java_type): Add prototype.
+	(java_primitive_type): Add GDBARCH argument.
+	(java_primitive_type_from_name): Likewise.
+	(type_from_class): Likewise.
+
+	* jv-lang.c (java_int_type, java_byte_type, java_short_type,
+	java_long_type, java_boolean_type, java_char_type, java_float_type,
+	java_double_type, java_void_type): Remove.
+
+	(build_java_types, builtin_java_type): New functions.
+	(java_type_data): New static variable.
+	(_initialize_java_language): Initialize it.  No longer initialize
+	global types.
+	(java_language_arch_info): Use per-architecture types.
+
+	(java_primitive_type): Add GDBARCH argument.  Return per-architecture
+	type instead of refering to global variable.
+	(java_primitive_type_from_name): Add GDBARCH argument.
+	(java_primitive_type_name): New function.
+	(java_demangled_signature_length): Use it instead of
+	java_primitive_type_from_name.
+	(java_demangled_signature_copy): Likewise.
+
+	(type_from_class): Add GDBARCH argument.  Pass to java_link_class_type,
+	java_primitive_type, and recursive type_from_class call.
+	(java_link_class_type): Add GDBARCH argument.  Pass to type_from_class
+	calls.  Use per-architecture types instead of global types.
+
+	* jv-exp.y (parse_java_type): New define.
+	Use per-architecture types instead of global types througout.
+
+	* jv-valprint.c (java_value_print): Pass architecture to
+	type_from_class and java_primitive_type_from_name.  Use per-
+	architecture types instead of global types.
+
 2009-07-01  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention biarch amd64-linux gdbserver and hardware watchpoint
