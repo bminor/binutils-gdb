@@ -102,7 +102,7 @@ amd64_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum >= AMD64_CS_REGNUM && regnum <= AMD64_GS_REGNUM)
     return builtin_type (gdbarch)->builtin_int32;
   if (regnum >= AMD64_ST0_REGNUM && regnum <= AMD64_ST0_REGNUM + 7)
-    return builtin_type_i387_ext;
+    return i387_ext_type (gdbarch);
   if (regnum >= AMD64_FCTRL_REGNUM && regnum <= AMD64_FCTRL_REGNUM + 7)
     return builtin_type (gdbarch)->builtin_int32;
   if (regnum >= AMD64_XMM0_REGNUM && regnum <= AMD64_XMM0_REGNUM + 15)

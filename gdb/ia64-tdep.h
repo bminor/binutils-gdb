@@ -198,6 +198,9 @@ struct gdbarch_tdep
 {
   CORE_ADDR (*sigcontext_register_address) (CORE_ADDR, int);
   int (*pc_in_sigtramp) (CORE_ADDR);
+
+  /* ISA-specific data types.  */
+  struct type *ia64_ext_type;
 };
 
 extern void ia64_write_pc (struct regcache *, CORE_ADDR);

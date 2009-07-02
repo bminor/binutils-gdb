@@ -1182,9 +1182,9 @@ build_java_types (struct gdbarch *gdbarch)
   builtin_java_type->builtin_char
     = init_type (TYPE_CODE_CHAR, 2, TYPE_FLAG_UNSIGNED, "char", NULL);
   builtin_java_type->builtin_float
-    = init_type (TYPE_CODE_FLT, 4, 0, "float", NULL);
+    = init_float_type (32, "float", NULL);
   builtin_java_type->builtin_double
-    = init_type (TYPE_CODE_FLT, 8, 0, "double", NULL);
+    = init_float_type (64, "double", NULL);
   builtin_java_type->builtin_void
     = init_type (TYPE_CODE_VOID, 1, 0, "void", NULL);
 

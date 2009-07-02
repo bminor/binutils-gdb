@@ -488,13 +488,16 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
       return builtin_type (gdbarch)->builtin_data_ptr;
 
     case TDESC_TYPE_IEEE_SINGLE:
-      return builtin_type_ieee_single;
+      return init_float_type (-1, "builtin_type_ieee_single",
+			      floatformats_ieee_single);
 
     case TDESC_TYPE_IEEE_DOUBLE:
-      return builtin_type_ieee_double;
+      return init_float_type (-1, "builtin_type_ieee_double",
+			      floatformats_ieee_double);
 
     case TDESC_TYPE_ARM_FPA_EXT:
-      return builtin_type_arm_ext;
+      return init_float_type (-1, "builtin_type_arm_ext",
+			      floatformats_arm_ext);
 
     /* Types defined by a target feature.  */
     case TDESC_TYPE_VECTOR:

@@ -106,6 +106,7 @@ struct gdbarch_tdep
   /* ISA-specific data types.  */
   struct type *i386_mmx_type;
   struct type *i386_sse_type;
+  struct type *i387_ext_type;
 
   /* Process record/replay target.  */
   /* Parse intx80 args.  */
@@ -164,6 +165,7 @@ extern struct type *i386_mxcsr_type;
 
 extern struct type *i386_mmx_type (struct gdbarch *gdbarch);
 extern struct type *i386_sse_type (struct gdbarch *gdbarch);
+extern struct type *i387_ext_type (struct gdbarch *gdbarch);
 
 /* Segment selectors.  */
 #define I386_SEL_RPL	0x0003  /* Requester's Privilege Level mask.  */

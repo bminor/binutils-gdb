@@ -2612,7 +2612,7 @@ hppa32_register_type (struct gdbarch *gdbarch, int regnum)
    if (regnum < HPPA_FP4_REGNUM)
      return builtin_type (gdbarch)->builtin_uint32;
    else
-     return builtin_type_ieee_single;
+     return builtin_type (gdbarch)->builtin_float;
 }
 
 static struct type *
@@ -2621,7 +2621,7 @@ hppa64_register_type (struct gdbarch *gdbarch, int regnum)
    if (regnum < HPPA64_FP4_REGNUM)
      return builtin_type (gdbarch)->builtin_uint64;
    else
-     return builtin_type_ieee_double;
+     return builtin_type (gdbarch)->builtin_double;
 }
 
 /* Return non-zero if REGNUM is not a register available to the user

@@ -1593,6 +1593,20 @@ arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   print_fpu_flags (status);
 }
 
+/* Construct the ARM extended floating point type.  */
+static struct type *
+arm_ext_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->arm_ext_type)
+    tdep->arm_ext_type
+      = init_float_type (-1, "builtin_type_arm_ext",
+			 floatformats_arm_ext);
+
+  return tdep->arm_ext_type;
+}
+
 /* Return the GDB type object for the "standard" data type of data in
    register N.  */
 
@@ -1600,7 +1614,7 @@ static struct type *
 arm_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= ARM_F0_REGNUM && regnum < ARM_F0_REGNUM + NUM_FREGS)
-    return builtin_type_arm_ext;
+    return arm_ext_type (gdbarch);
   else if (regnum == ARM_SP_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
   else if (regnum == ARM_PC_REGNUM)

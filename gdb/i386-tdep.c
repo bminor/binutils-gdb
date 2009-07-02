@@ -1787,7 +1787,7 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 	 exactly how it would happen on the target itself, but it is
 	 the best we can do.  */
       regcache_raw_read (regcache, I386_ST0_REGNUM, buf);
-      convert_typed_floating (buf, builtin_type_i387_ext, valbuf, type);
+      convert_typed_floating (buf, i387_ext_type (gdbarch), valbuf, type);
     }
   else
     {
@@ -1841,7 +1841,7 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 	 floating-point format used by the FPU.  This is probably
 	 not exactly how it would happen on the target itself, but
 	 it is the best we can do.  */
-      convert_typed_floating (valbuf, type, buf, builtin_type_i387_ext);
+      convert_typed_floating (valbuf, type, buf, i387_ext_type (gdbarch));
       regcache_raw_write (regcache, I386_ST0_REGNUM, buf);
 
       /* Set the top of the floating-point register stack to 7.  The
@@ -2044,6 +2044,19 @@ i386_init_types (void)
   i386_mxcsr_type = type;
 }
 
+struct type *
+i387_ext_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->i387_ext_type)
+    tdep->i387_ext_type
+      = init_float_type (-1, "builtin_type_i387_ext",
+			 floatformats_i387_ext);
+
+  return tdep->i387_ext_type;
+}
+
 /* Construct vector type for MMX registers.  */
 struct type *
 i386_mmx_type (struct gdbarch *gdbarch)
@@ -2150,7 +2163,7 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
     return builtin_type (gdbarch)->builtin_data_ptr;
 
   if (i386_fp_regnum_p (gdbarch, regnum))
-    return builtin_type_i387_ext;
+    return i387_ext_type (gdbarch);
 
   if (i386_mmx_regnum_p (gdbarch, regnum))
     return i386_mmx_type (gdbarch);

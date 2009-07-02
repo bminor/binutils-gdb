@@ -1084,14 +1084,6 @@ extern const struct floatformat *floatformats_vax_f[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_vax_d[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN];
 
-extern struct type *builtin_type_ieee_single;
-extern struct type *builtin_type_ieee_double;
-extern struct type *builtin_type_i387_ext;
-extern struct type *builtin_type_m68881_ext;
-extern struct type *builtin_type_arm_ext;
-extern struct type *builtin_type_ia64_spill;
-extern struct type *builtin_type_ia64_quad;
-
 
 /* Maximum and minimum values of built-in types */
 
@@ -1150,6 +1142,10 @@ extern void append_flags_type_flag (struct type *type, int bitpos, char *name);
 
 extern void make_vector_type (struct type *array_type);
 extern struct type *init_vector_type (struct type *elt_type, int n);
+
+extern struct type *init_float_type (int bit, char *name,
+				     const struct floatformat **floatformats);
+extern struct type *init_complex_type (char *name, struct type *target_type);
 
 extern struct type *lookup_reference_type (struct type *);
 

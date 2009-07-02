@@ -102,7 +102,7 @@ alpha_register_type (struct gdbarch *gdbarch, int regno)
   /* Don't need to worry about little vs big endian until 
      some jerk tries to port to alpha-unicosmk.  */
   if (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31)
-    return builtin_type_ieee_double;
+    return builtin_type (gdbarch)->builtin_double;
 
   return builtin_type (gdbarch)->builtin_int64;
 }
@@ -314,7 +314,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  if (accumulate_size < sizeof (arg_reg_buffer)
 	      && TYPE_LENGTH (arg_type) == 4)
 	    {
-	      arg_type = builtin_type_ieee_double;
+	      arg_type = builtin_type (gdbarch)->builtin_double;
 	      arg = value_cast (arg_type, arg);
 	    }
 	  /* Tru64 5.1 has a 128-bit long double, and passes this by

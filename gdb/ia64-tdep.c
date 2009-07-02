@@ -125,8 +125,6 @@ static gdbarch_skip_prologue_ftype ia64_skip_prologue;
 static struct type *is_float_or_hfa_type (struct type *t);
 static CORE_ADDR ia64_find_global_pointer (CORE_ADDR faddr);
 
-static struct type *builtin_type_ia64_ext;
-
 #define NUM_IA64_RAW_REGS 462
 
 static int sp_regnum = IA64_GR12_REGNUM;
@@ -281,6 +279,37 @@ struct ia64_frame_cache
 };
 
 static int
+floatformat_valid (const struct floatformat *fmt, const void *from)
+{
+  return 1;
+}
+
+static const struct floatformat floatformat_ia64_ext =
+{
+  floatformat_little, 82, 0, 1, 17, 65535, 0x1ffff, 18, 64,
+  floatformat_intbit_yes, "floatformat_ia64_ext", floatformat_valid, NULL
+};
+
+static const struct floatformat *floatformats_ia64_ext[2] =
+{
+  &floatformat_ia64_ext,
+  &floatformat_ia64_ext
+};
+
+static struct type *
+ia64_ext_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->ia64_ext_type)
+    tdep->ia64_ext_type
+      = init_float_type (128, "builtin_type_ia64_ext",
+			 floatformats_ia64_ext);
+
+  return tdep->ia64_ext_type;
+}
+
+static int
 ia64_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			  struct reggroup *group)
 {
@@ -313,7 +342,7 @@ struct type *
 ia64_register_type (struct gdbarch *arch, int reg)
 {
   if (reg >= IA64_FR0_REGNUM && reg <= IA64_FR127_REGNUM)
-    return builtin_type_ia64_ext;
+    return ia64_ext_type (arch);
   else
     return builtin_type (arch)->builtin_long;
 }
@@ -325,24 +354,6 @@ ia64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
     return V32_REGNUM + (reg - IA64_GR32_REGNUM);
   return reg;
 }
-
-static int
-floatformat_valid (const struct floatformat *fmt, const void *from)
-{
-  return 1;
-}
-
-const struct floatformat floatformat_ia64_ext =
-{
-  floatformat_little, 82, 0, 1, 17, 65535, 0x1ffff, 18, 64,
-  floatformat_intbit_yes, "floatformat_ia64_ext", floatformat_valid, NULL
-};
-
-const struct floatformat *floatformats_ia64_ext[2] =
-{
-  &floatformat_ia64_ext,
-  &floatformat_ia64_ext
-};
 
 
 /* Extract ``len'' bits from an instruction bundle starting at
@@ -1048,24 +1059,26 @@ static int
 ia64_convert_register_p (struct gdbarch *gdbarch, int regno, struct type *type)
 {
   return (regno >= IA64_FR0_REGNUM && regno <= IA64_FR127_REGNUM
-	  && type != builtin_type_ia64_ext);
+	  && type != ia64_ext_type (gdbarch));
 }
 
 static void
 ia64_register_to_value (struct frame_info *frame, int regnum,
                          struct type *valtype, gdb_byte *out)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   char in[MAX_REGISTER_SIZE];
   frame_register_read (frame, regnum, in);
-  convert_typed_floating (in, builtin_type_ia64_ext, out, valtype);
+  convert_typed_floating (in, ia64_ext_type (gdbarch), out, valtype);
 }
 
 static void
 ia64_value_to_register (struct frame_info *frame, int regnum,
                          struct type *valtype, const gdb_byte *in)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   char out[MAX_REGISTER_SIZE];
-  convert_typed_floating (in, valtype, out, builtin_type_ia64_ext);
+  convert_typed_floating (in, valtype, out, ia64_ext_type (gdbarch));
   put_frame_register (frame, regnum, out);
 }
 
@@ -2985,6 +2998,7 @@ static void
 ia64_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct type *float_elt_type;
 
   float_elt_type = is_float_or_hfa_type (type);
@@ -2998,7 +3012,7 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
       while (n-- > 0)
 	{
 	  regcache_cooked_read (regcache, regnum, from);
-	  convert_typed_floating (from, builtin_type_ia64_ext,
+	  convert_typed_floating (from, ia64_ext_type (gdbarch),
 				  (char *)valbuf + offset, float_elt_type);	  
 	  offset += TYPE_LENGTH (float_elt_type);
 	  regnum++;
@@ -3009,8 +3023,7 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
       ULONGEST val;
       int offset = 0;
       int regnum = IA64_GR8_REGNUM;
-      int reglen = TYPE_LENGTH (register_type (get_regcache_arch (regcache),
-					       IA64_GR8_REGNUM));
+      int reglen = TYPE_LENGTH (register_type (gdbarch, IA64_GR8_REGNUM));
       int n = TYPE_LENGTH (type) / reglen;
       int m = TYPE_LENGTH (type) % reglen;
 
@@ -3035,6 +3048,7 @@ static void
 ia64_store_return_value (struct type *type, struct regcache *regcache, 
 			 const gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct type *float_elt_type;
 
   float_elt_type = is_float_or_hfa_type (type);
@@ -3048,7 +3062,7 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
       while (n-- > 0)
 	{
 	  convert_typed_floating ((char *)valbuf + offset, float_elt_type,
-				  to, builtin_type_ia64_ext);
+				  to, ia64_ext_type (gdbarch));
 	  regcache_cooked_write (regcache, regnum, to);
 	  offset += TYPE_LENGTH (float_elt_type);
 	  regnum++;
@@ -3059,8 +3073,7 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
       ULONGEST val;
       int offset = 0;
       int regnum = IA64_GR8_REGNUM;
-      int reglen = TYPE_LENGTH (register_type (get_regcache_arch (regcache),
-					       IA64_GR8_REGNUM));
+      int reglen = TYPE_LENGTH (register_type (gdbarch, IA64_GR8_REGNUM));
       int n = TYPE_LENGTH (type) / reglen;
       int m = TYPE_LENGTH (type) % reglen;
 
@@ -3520,7 +3533,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      char to[MAX_REGISTER_SIZE];
 	      convert_typed_floating (value_contents (arg) + argoffset, float_elt_type,
-				      to, builtin_type_ia64_ext);
+				      to, ia64_ext_type (gdbarch));
 	      regcache_cooked_write (regcache, floatreg, (void *)to);
 	      floatreg++;
 	      argoffset += TYPE_LENGTH (float_elt_type);
@@ -3691,11 +3704,5 @@ extern initialize_file_ftype _initialize_ia64_tdep; /* -Wmissing-prototypes */
 void
 _initialize_ia64_tdep (void)
 {
-  /* Define the ia64 floating-point format to gdb.  */
-  builtin_type_ia64_ext =
-    init_type (TYPE_CODE_FLT, 128 / 8,
-               0, "builtin_type_ia64_ext", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ia64_ext) = floatformats_ia64_ext;
-
   gdbarch_register (bfd_arch_ia64, ia64_gdbarch_init, NULL);
 }

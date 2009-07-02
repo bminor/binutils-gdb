@@ -364,9 +364,6 @@ static CORE_ADDR heuristic_proc_start (struct gdbarch *, CORE_ADDR);
 
 static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
 
-static struct type *mips_float_register_type (void);
-static struct type *mips_double_register_type (void);
-
 /* The list of available "set mips " and "show mips " commands */
 
 static struct cmd_list_element *setmipscmdlist = NULL;
@@ -670,9 +667,9 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
       /* The floating-point registers raw, or cooked, always match
          mips_isa_regsize(), and also map 1:1, byte for byte.  */
       if (mips_isa_regsize (gdbarch) == 4)
-	return builtin_type_ieee_single;
+	return builtin_type (gdbarch)->builtin_float;
       else
-	return builtin_type_ieee_double;
+	return builtin_type (gdbarch)->builtin_double;
     }
   else if (regnum < gdbarch_num_regs (gdbarch))
     {
@@ -4282,18 +4279,6 @@ mips_o64_return_value (struct gdbarch *gdbarch, struct type *func_type,
    regs could be 32 bits wide in one frame and 64 on the frame above
    and below).  */
 
-static struct type *
-mips_float_register_type (void)
-{
-  return builtin_type_ieee_single;
-}
-
-static struct type *
-mips_double_register_type (void)
-{
-  return builtin_type_ieee_double;
-}
-
 /* Copy a 32-bit single-precision value from the current frame
    into rare_buffer.  */
 
@@ -4393,7 +4378,7 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
       /* 4-byte registers: Print hex and floating.  Also print even
          numbered registers as doubles.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
-      flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
+      flt1 = unpack_double (builtin_type (gdbarch)->builtin_float, raw_buffer, &inv1);
 
       get_formatted_print_options (&opts, 'x');
       print_scalar_formatted (raw_buffer,
@@ -4409,8 +4394,8 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
       if ((regnum - gdbarch_num_regs (gdbarch)) % 2 == 0)
 	{
 	  mips_read_fp_register_double (frame, regnum, raw_buffer);
-	  doub = unpack_double (mips_double_register_type (), raw_buffer,
-				&inv2);
+	  doub = unpack_double (builtin_type (gdbarch)->builtin_double,
+				raw_buffer, &inv2);
 
 	  fprintf_filtered (file, " dbl: ");
 	  if (inv2)
@@ -4425,10 +4410,12 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
 
       /* Eight byte registers: print each one as hex, float and double.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
-      flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
+      flt1 = unpack_double (builtin_type (gdbarch)->builtin_float,
+			    raw_buffer, &inv1);
 
       mips_read_fp_register_double (frame, regnum, raw_buffer);
-      doub = unpack_double (mips_double_register_type (), raw_buffer, &inv2);
+      doub = unpack_double (builtin_type (gdbarch)->builtin_double,
+			    raw_buffer, &inv2);
 
       get_formatted_print_options (&opts, 'x');
       print_scalar_formatted (raw_buffer,

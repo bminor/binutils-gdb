@@ -1,5 +1,76 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (builtin_type_ieee_single, builtin_type_ieee_double,
+	builtin_type_i387_ext, builtin_type_m68881_ext, builtin_type_arm_ext,
+	builtin_type_ia64_spill, builtin_type_ia64_quad): Remove.
+	(init_float_type, init_complex_type): Add prototypes.
+	* gdbtypes.c (builtin_type_ieee_single, builtin_type_ieee_double,
+	builtin_type_i387_ext, builtin_type_m68881_ext, builtin_type_arm_ext,
+	builtin_type_ia64_spill, builtin_type_ia64_quad): Remove.
+	(_initialize_gdbtypes): Do not initialize them.
+	(build_flt): Rename to ...
+	(init_float_type): ... this.  Make global.
+	(build_complex): Rename to ...
+	(init_complex_type): ... this.  Make global.  Remove BIT argument.
+	(gdbtypes_post_init): Update calls.
+
+	* ada-lang.c (ada_language_arch_info): Use init_float_type.
+	* jv-lang.c (build_java_types): Likewise.
+	* m2-lang.c (build_m2_types): Likewise.
+	* f-lang.c (build_fortran_types): Use init_float_type and
+	init_complex_type.
+
+	* target-descriptions.c (tdesc_gdb_type): Call init_float_type instead
+	of using builtin_type_ieee_single, builtin_type_ieee_double, or
+	builtin_type_arm_ext.
+
+	* ia64-tdep.h (struct gdbarch_tdep): Add ia64_ext_type member.
+	* ia64-tdep.c (builtin_type_ia64_ext): Remove.
+	(_initialize_ia64_tdep): Do not initialize it.
+	(floatformat_valid, floatformat_ia64_ext, floatformats_ia64_ext):
+	Move up.
+	(ia64_ext_type): New function.
+	(ia64_register_reggroup_p, ia64_convert_register_p,
+	ia64_register_to_value, ia64_value_to_register,
+	ia64_extract_return_value, ia64_store_return_value): Use ia64_ext_type
+	instead of builtin_type_ia64_ext.
+
+	* i386-tdep.h (struct gdbarch_tdep): Add i387_ext_type member.
+	(i387_ext_type): Add prototype.
+	* i386-tdep.c (i387_ext_type): New function.
+	(i386_extract_return_value, i386_store_return_value,
+	i386_register_type): Use it instead of builtin_type_i387_ext.
+	* amd64-tdep.c (amd64_register_type): Likewise.
+	* i387-tdep.c (print_i387_value, i387_register_to_value,
+	i387_value_to_register): Likewise.
+	(print_i387_value, print_i387_ext): Add GDBARCH argument.
+	(print_i387_ext, i387_print_float_info): Pass to subroutines.
+
+	* m68k-tdep.h (struct gdbarch_tdep): Add m68881_ext_type member.
+	* m68k-tdep.c (m68881_ext_type): New function.
+	(m68k_register_type, m68k_convert_register_p): Use it instead
+	of builtin_type_m68881_ext.
+
+	* arm-tdep.h (struct gdbarch_tdep): Add arm_ext_type member.
+	* arm-tdep.c (arm_ext_type): New function.
+	(arm_register_type): Use it instead of builtin_type_arm_ext.
+
+	* alpha-tdep.c (alpha_register_type): Use builtin types
+	instead of builtin_type_ieee_double.
+
+	* mips-tdep.c (mips_float_register_type, mips_double_register_type):
+	Remove.
+	(mips_register_type): Use builtin types instead of
+	builtin_type_ieee_single and builtin_type_ieee_double.
+	(mips_print_fp_register): Use builtin types instead of
+	mips_float_register_type and mips_double_register_type.
+
+	* hppa-tdep.c (hppa32_register_type, hppa64_register_type):
+	Use builtin types instead of builtin_type_ieee_single and
+	builtin_type_ieee_double.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (builtin_type_int0, builtin_type_int8, builtin_type_uint8,
 	builtin_type_int16, builtin_type_uint16, builtin_type_int32,
 	builtin_type_uint32, builtin_type_int64, builtin_type_uint64,

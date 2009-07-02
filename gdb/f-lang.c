@@ -391,49 +391,24 @@ build_fortran_types (struct gdbarch *gdbarch)
 	       TYPE_FLAG_UNSIGNED, "logical*4", (struct objfile *) NULL);
 
   builtin_f_type->builtin_real =
-    init_type (TYPE_CODE_FLT,
-	       gdbarch_float_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0,
-	       "real", (struct objfile *) NULL);
-
+    init_float_type (gdbarch_float_bit (gdbarch),
+		     "real", NULL);
   builtin_f_type->builtin_real_s8 =
-    init_type (TYPE_CODE_FLT,
-	       gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0,
-	       "real*8", (struct objfile *) NULL);
-
+    init_float_type (gdbarch_double_bit (gdbarch),
+		     "real*8", NULL);
   builtin_f_type->builtin_real_s16 =
-    init_type (TYPE_CODE_FLT,
-	       gdbarch_long_double_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0,
-	       "real*16", (struct objfile *) NULL);
+    init_float_type (gdbarch_long_double_bit (gdbarch),
+		     "real*16", NULL);
 
   builtin_f_type->builtin_complex_s8 =
-    init_type (TYPE_CODE_COMPLEX,
-	       2 * gdbarch_float_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0,
-	       "complex*8", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (builtin_f_type->builtin_complex_s8)
-    = builtin_f_type->builtin_real;
-
+    init_complex_type ("complex*8",
+		       builtin_f_type->builtin_real);
   builtin_f_type->builtin_complex_s16 =
-    init_type (TYPE_CODE_COMPLEX,
-	       2 * gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0,
-	       "complex*16", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (builtin_f_type->builtin_complex_s16)
-    = builtin_f_type->builtin_real_s8;
-
-  /* We have a new size == 4 double floats for the
-     complex*32 data type */
-
+    init_complex_type ("complex*16",
+		       builtin_f_type->builtin_real_s8);
   builtin_f_type->builtin_complex_s32 =
-    init_type (TYPE_CODE_COMPLEX,
-	       2 * gdbarch_long_double_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0,
-	       "complex*32", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (builtin_f_type->builtin_complex_s32)
-    = builtin_f_type->builtin_real_s16;
+    init_complex_type ("complex*32",
+		       builtin_f_type->builtin_real_s16);
 
   return builtin_f_type;
 }

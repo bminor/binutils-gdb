@@ -92,6 +92,9 @@ struct gdbarch_tdep
   /* Flag set if the floating point registers are present, or assumed
      to be present.  */
   int fpregs_present;
+
+   /* ISA-specific data types.  */
+  struct type *m68881_ext_type;
 };
 
 /* Initialize a SVR4 architecture variant.  */

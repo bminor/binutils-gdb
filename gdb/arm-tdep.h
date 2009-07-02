@@ -170,6 +170,9 @@ struct gdbarch_tdep
 
   /* Cached core file helpers.  */
   struct regset *gregset, *fpregset;
+
+  /* ISA-specific data types.  */
+  struct type *arm_ext_type;
 };
 
 

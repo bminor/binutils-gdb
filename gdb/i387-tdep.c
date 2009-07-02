@@ -37,7 +37,8 @@
 /* Print the floating point number specified by RAW.  */
 
 static void
-print_i387_value (const gdb_byte *raw, struct ui_file *file)
+print_i387_value (struct gdbarch *gdbarch,
+		  const gdb_byte *raw, struct ui_file *file)
 {
   DOUBLEST value;
 
@@ -45,7 +46,7 @@ print_i387_value (const gdb_byte *raw, struct ui_file *file)
      of certain numbers such as NaNs, even if GDB is running natively.
      This is fine since our caller already detects such special
      numbers and we print the hexadecimal representation anyway.  */
-  value = extract_typed_floating (raw, builtin_type_i387_ext);
+  value = extract_typed_floating (raw, i387_ext_type (gdbarch));
 
   /* We try to print 19 digits.  The last digit may or may not contain
      garbage, but we'd better print one too many.  We need enough room
@@ -61,7 +62,8 @@ print_i387_value (const gdb_byte *raw, struct ui_file *file)
 /* Print the classification for the register contents RAW.  */
 
 static void
-print_i387_ext (const gdb_byte *raw, struct ui_file *file)
+print_i387_ext (struct gdbarch *gdbarch,
+		const gdb_byte *raw, struct ui_file *file)
 {
   int sign;
   int integer;
@@ -92,11 +94,11 @@ print_i387_ext (const gdb_byte *raw, struct ui_file *file)
     }
   else if (exponent < 0x7fff && exponent > 0x0000 && integer)
     /* Normal.  */
-    print_i387_value (raw, file);
+    print_i387_value (gdbarch, raw, file);
   else if (exponent == 0x0000)
     {
       /* Denormal or zero.  */
-      print_i387_value (raw, file);
+      print_i387_value (gdbarch, raw, file);
       
       if (integer)
 	/* Pseudo-denormal.  */
@@ -258,7 +260,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 	fprintf_filtered (file, "%02x", raw[i]);
 
       if (tag != 3)
-	print_i387_ext (raw, file);
+	print_i387_ext (gdbarch, raw, file);
 
       fputs_filtered ("\n", file);
     }
@@ -290,7 +292,7 @@ i387_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
     {
       /* Floating point registers must be converted unless we are
 	 accessing them in their hardware type.  */
-      if (type == builtin_type_i387_ext)
+      if (type == i387_ext_type (gdbarch))
 	return 0;
       else
 	return 1;
@@ -306,9 +308,10 @@ void
 i387_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, gdb_byte *to)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte from[I386_MAX_REGISTER_SIZE];
 
-  gdb_assert (i386_fp_regnum_p (get_frame_arch (frame), regnum));
+  gdb_assert (i386_fp_regnum_p (gdbarch, regnum));
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -320,7 +323,7 @@ i387_register_to_value (struct frame_info *frame, int regnum,
 
   /* Convert to TYPE.  */
   get_frame_register (frame, regnum, from);
-  convert_typed_floating (from, builtin_type_i387_ext, to, type);
+  convert_typed_floating (from, i387_ext_type (gdbarch), to, type);
 }
 
 /* Write the contents FROM of a value of type TYPE into register
@@ -330,9 +333,10 @@ void
 i387_value_to_register (struct frame_info *frame, int regnum,
 			struct type *type, const gdb_byte *from)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte to[I386_MAX_REGISTER_SIZE];
 
-  gdb_assert (i386_fp_regnum_p (get_frame_arch (frame), regnum));
+  gdb_assert (i386_fp_regnum_p (gdbarch, regnum));
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -343,7 +347,7 @@ i387_value_to_register (struct frame_info *frame, int regnum,
     }
 
   /* Convert from TYPE.  */
-  convert_typed_floating (from, type, to, builtin_type_i387_ext);
+  convert_typed_floating (from, type, to, i387_ext_type (gdbarch));
   put_frame_register (frame, regnum, to);
 }
 

@@ -86,13 +86,6 @@ const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_ibm_long_double
 };
 
-struct type *builtin_type_ieee_single;
-struct type *builtin_type_ieee_double;
-struct type *builtin_type_i387_ext;
-struct type *builtin_type_m68881_ext;
-struct type *builtin_type_arm_ext;
-struct type *builtin_type_ia64_spill;
-struct type *builtin_type_ia64_quad;
 
 int opaque_type_resolution = 1;
 static void
@@ -3036,8 +3029,8 @@ copy_type (const struct type *type)
   return new_type;
 }
 
-static struct type *
-build_flt (int bit, char *name, const struct floatformat **floatformats)
+struct type *
+init_float_type (int bit, char *name, const struct floatformat **floatformats)
 {
   struct type *t;
 
@@ -3054,23 +3047,22 @@ build_flt (int bit, char *name, const struct floatformat **floatformats)
   return t;
 }
 
+struct type *
+init_complex_type (char *name, struct type *target_type)
+{
+  struct type *t;
+  t = init_type (TYPE_CODE_COMPLEX, 2 * TYPE_LENGTH (target_type),
+		 0, name, (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (t) = target_type;
+  return t;
+}
+
 static struct gdbarch_data *gdbtypes_data;
 
 const struct builtin_type *
 builtin_type (struct gdbarch *gdbarch)
 {
   return gdbarch_data (gdbarch, gdbtypes_data);
-}
-
-
-static struct type *
-build_complex (int bit, char *name, struct type *target_type)
-{
-  struct type *t;
-  t = init_type (TYPE_CODE_COMPLEX, 2 * bit / TARGET_CHAR_BIT,
-		 0, name, (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (t) = target_type;
-  return t;
 }
 
 static void *
@@ -3134,20 +3126,18 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 	       TYPE_FLAG_UNSIGNED, "unsigned long long", 
 	       (struct objfile *) NULL);
   builtin_type->builtin_float
-    = build_flt (gdbarch_float_bit (gdbarch), "float",
-		 gdbarch_float_format (gdbarch));
+    = init_float_type (gdbarch_float_bit (gdbarch),
+		       "float", gdbarch_float_format (gdbarch));
   builtin_type->builtin_double
-    = build_flt (gdbarch_double_bit (gdbarch), "double",
-		 gdbarch_double_format (gdbarch));
+    = init_float_type (gdbarch_double_bit (gdbarch),
+		       "double", gdbarch_double_format (gdbarch));
   builtin_type->builtin_long_double
-    = build_flt (gdbarch_long_double_bit (gdbarch), "long double",
-		 gdbarch_long_double_format (gdbarch));
+    = init_float_type (gdbarch_long_double_bit (gdbarch),
+		       "long double", gdbarch_long_double_format (gdbarch));
   builtin_type->builtin_complex
-    = build_complex (gdbarch_float_bit (gdbarch), "complex",
-		     builtin_type->builtin_float);
+    = init_complex_type ("complex", builtin_type->builtin_float);
   builtin_type->builtin_double_complex
-    = build_complex (gdbarch_double_bit (gdbarch), "double complex",
-		     builtin_type->builtin_double);
+    = init_complex_type ("double complex", builtin_type->builtin_double);
   builtin_type->builtin_string =
     init_type (TYPE_CODE_STRING, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
@@ -3401,26 +3391,6 @@ _initialize_gdbtypes (void)
 {
   gdbtypes_data = gdbarch_data_register_post_init (gdbtypes_post_init);
   objfile_type_data = register_objfile_data ();
-
-  /* FIXME: The following types are architecture-neutral.  However,
-     they contain pointer_type and reference_type fields potentially
-     caching pointer or reference types that *are* architecture
-     dependent.  */
-
-  builtin_type_ieee_single =
-    build_flt (-1, "builtin_type_ieee_single", floatformats_ieee_single);
-  builtin_type_ieee_double =
-    build_flt (-1, "builtin_type_ieee_double", floatformats_ieee_double);
-  builtin_type_i387_ext =
-    build_flt (-1, "builtin_type_i387_ext", floatformats_i387_ext);
-  builtin_type_m68881_ext =
-    build_flt (-1, "builtin_type_m68881_ext", floatformats_m68881_ext);
-  builtin_type_arm_ext =
-    build_flt (-1, "builtin_type_arm_ext", floatformats_arm_ext);
-  builtin_type_ia64_spill =
-    build_flt (-1, "builtin_type_ia64_spill", floatformats_ia64_spill);
-  builtin_type_ia64_quad =
-    build_flt (-1, "builtin_type_ia64_quad", floatformats_ia64_quad);
 
   add_setshow_zinteger_cmd ("overload", no_class, &overload_debug, _("\
 Set debugging of C++ overloading."), _("\

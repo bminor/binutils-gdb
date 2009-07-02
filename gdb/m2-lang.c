@@ -416,10 +416,7 @@ build_m2_types (struct gdbarch *gdbarch)
 	       TYPE_FLAG_UNSIGNED,
 	       "CARDINAL", (struct objfile *) NULL);
   builtin_m2_type->builtin_real =
-    init_type (TYPE_CODE_FLT,
-	       gdbarch_float_bit (gdbarch) / TARGET_CHAR_BIT,
-	       0,
-	       "REAL", (struct objfile *) NULL);
+    init_float_type (gdbarch_float_bit (gdbarch), "REAL", NULL);
   builtin_m2_type->builtin_char =
     init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,

@@ -96,6 +96,19 @@ m68k_init_types (void)
   m68k_ps_type = type;
 }
 
+static struct type *
+m68881_ext_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->m68881_ext_type)
+    tdep->m68881_ext_type
+      = init_float_type (-1, "builtin_type_m68881_ext",
+			 floatformats_m68881_ext);
+
+  return tdep->m68881_ext_type;
+}
+
 /* Return the GDB type object for the "standard" data type of data in
    register N.  This should be int for D0-D7, SR, FPCONTROL and
    FPSTATUS, long double for FP0-FP7, and void pointer for all others
@@ -117,7 +130,7 @@ m68k_register_type (struct gdbarch *gdbarch, int regnum)
 	  if (tdep->flavour == m68k_coldfire_flavour)
 	    return builtin_type (gdbarch)->builtin_double;
 	  else
-	    return builtin_type_m68881_ext;
+	    return m68881_ext_type (gdbarch);
 	}
 
       if (regnum == M68K_FPI_REGNUM)
@@ -174,7 +187,7 @@ m68k_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
   if (!gdbarch_tdep (gdbarch)->fpregs_present)
     return 0;
   return (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FP0_REGNUM + 7
-	  && type != builtin_type_m68881_ext);
+	  && type != m68881_ext_type (gdbarch));
 }
 
 /* Read a value of type TYPE from register REGNUM in frame FRAME, and
