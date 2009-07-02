@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "tui/tui.h"
 #include "tui/tui-data.h"
 #include "symtab.h"
@@ -558,14 +559,16 @@ tui_display_register (struct tui_data_element *data,
 static void
 tui_reg_next_command (char *arg, int from_tty)
 {
+  struct gdbarch *gdbarch = get_current_arch ();
+
   if (TUI_DATA_WIN != 0)
     {
       struct reggroup *group
         = TUI_DATA_WIN->detail.data_display_info.current_group;
 
-      group = reggroup_next (current_gdbarch, group);
+      group = reggroup_next (gdbarch, group);
       if (group == 0)
-        group = reggroup_next (current_gdbarch, 0);
+        group = reggroup_next (gdbarch, 0);
 
       if (group)
         tui_show_registers (group);

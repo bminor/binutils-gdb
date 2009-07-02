@@ -22,6 +22,7 @@
 
 
 #include "defs.h"
+#include "arch-utils.h"
 #include <ctype.h>
 #include <signal.h>
 #include "command.h"
@@ -411,8 +412,10 @@ maintenance_print_statistics (char *args, int from_tty)
 static void
 maintenance_print_architecture (char *args, int from_tty)
 {
+  struct gdbarch *gdbarch = get_current_arch ();
+
   if (args == NULL)
-    gdbarch_dump (current_gdbarch, gdb_stdout);
+    gdbarch_dump (gdbarch, gdb_stdout);
   else
     {
       struct cleanup *cleanups;
@@ -420,7 +423,7 @@ maintenance_print_architecture (char *args, int from_tty)
       if (file == NULL)
 	perror_with_name (_("maintenance print architecture"));
       cleanups = make_cleanup_ui_file_delete (file);
-      gdbarch_dump (current_gdbarch, file);    
+      gdbarch_dump (gdbarch, file);
       do_cleanups (cleanups);
     }
 }

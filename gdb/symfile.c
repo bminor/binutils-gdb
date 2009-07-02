@@ -22,6 +22,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "bfdlink.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -3643,8 +3644,10 @@ overlay_off_command (char *args, int from_tty)
 static void
 overlay_load_command (char *args, int from_tty)
 {
-  if (gdbarch_overlay_update_p (current_gdbarch))
-    gdbarch_overlay_update (current_gdbarch, NULL);
+  struct gdbarch *gdbarch = get_current_arch ();
+
+  if (gdbarch_overlay_update_p (gdbarch))
+    gdbarch_overlay_update (gdbarch, NULL);
   else
     error (_("This target does not know how to read its overlay state."));
 }

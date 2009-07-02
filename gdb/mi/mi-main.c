@@ -23,6 +23,7 @@
 /* Work in progress.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "target.h"
 #include "inferior.h"
 #include "gdb_string.h"
@@ -828,7 +829,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 void
 mi_cmd_data_read_memory (char *command, char **argv, int argc)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct gdbarch *gdbarch = get_current_arch ();
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   CORE_ADDR addr;
   long total_bytes;

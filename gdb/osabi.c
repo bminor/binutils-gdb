@@ -596,7 +596,7 @@ show_osabi (struct ui_file *file, int from_tty, struct cmd_list_element *c,
   if (user_osabi_state == osabi_auto)
     fprintf_filtered (file,
 		      _("The current OS ABI is \"auto\" (currently \"%s\").\n"),
-		      gdbarch_osabi_name (gdbarch_osabi (current_gdbarch)));
+		      gdbarch_osabi_name (gdbarch_osabi (get_current_arch ())));
   else
     fprintf_filtered (file, _("The current OS ABI is \"%s\".\n"),
 		      gdbarch_osabi_name (user_selected_osabi));

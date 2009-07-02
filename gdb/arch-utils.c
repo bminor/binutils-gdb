@@ -260,10 +260,7 @@ static const char *set_endian_string;
 enum bfd_endian
 selected_byte_order (void)
 {
-  if (target_byte_order_user != BFD_ENDIAN_UNKNOWN)
-    return gdbarch_byte_order (current_gdbarch);
-  else
-    return BFD_ENDIAN_UNKNOWN;
+  return target_byte_order_user;
 }
 
 /* Called by ``show endian''.  */
@@ -273,14 +270,14 @@ show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 	     const char *value)
 {
   if (target_byte_order_user == BFD_ENDIAN_UNKNOWN)
-    if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+    if (gdbarch_byte_order (get_current_arch ()) == BFD_ENDIAN_BIG)
       fprintf_unfiltered (file, _("The target endianness is set automatically "
 				  "(currently big endian)\n"));
     else
       fprintf_unfiltered (file, _("The target endianness is set automatically "
 			   "(currently little endian)\n"));
   else
-    if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+    if (target_byte_order_user == BFD_ENDIAN_BIG)
       fprintf_unfiltered (file,
 			  _("The target is assumed to be big endian\n"));
     else
@@ -418,14 +415,13 @@ static void
 show_architecture (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  const char *arch;
-  arch = gdbarch_bfd_arch_info (current_gdbarch)->printable_name;
   if (target_architecture_user == NULL)
     fprintf_filtered (file, _("\
-The target architecture is set automatically (currently %s)\n"), arch);
+The target architecture is set automatically (currently %s)\n"),
+		gdbarch_bfd_arch_info (get_current_arch ())->printable_name);
   else
     fprintf_filtered (file, _("\
-The target architecture is assumed to be %s\n"), arch);
+The target architecture is assumed to be %s\n"), set_architecture_string);
 }
 
 
@@ -718,6 +714,21 @@ gdbarch_info_fill (struct gdbarch_info *info)
 
   /* Must have at least filled in the architecture.  */
   gdb_assert (info->bfd_arch_info != NULL);
+}
+
+/* Return "current" architecture.  If the target is running, this is the
+   architecture of the selected frame.  Otherwise, the "current" architecture
+   defaults to the target architecture.
+
+   This function should normally be called solely by the command interpreter
+   routines to determine the architecture to execute a command in.  */
+struct gdbarch *
+get_current_arch (void)
+{
+  if (has_stack_frames ())
+    return get_frame_arch (get_selected_frame (NULL));
+  else
+    return target_gdbarch;
 }
 
 /* */

@@ -139,4 +139,12 @@ extern void gdbarch_info_fill (struct gdbarch_info *info);
 
 extern struct gdbarch *gdbarch_from_bfd (bfd *abfd);
 
+/* Return "current" architecture.  If the target is running, this is the
+   architecture of the selected frame.  Otherwise, the "current" architecture
+   defaults to the target architecture.
+
+   This function should normally be called solely by the command interpreter
+   routines to determine the architecture to execute a command in.  */
+extern struct gdbarch *get_current_arch (void);
+
 #endif

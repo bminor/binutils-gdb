@@ -34,6 +34,7 @@
 #include <ctype.h>
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "gdb_string.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -1086,7 +1087,7 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
   expout = (struct expression *)
     xmalloc (sizeof (struct expression) + EXP_ELEM_TO_BYTES (expout_size));
   expout->language_defn = current_language;
-  expout->gdbarch = current_gdbarch;
+  expout->gdbarch = get_current_arch ();
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {

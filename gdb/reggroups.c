@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "reggroups.h"
 #include "gdbtypes.h"
 #include "gdb_assert.h"
@@ -230,8 +231,10 @@ reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
 static void
 maintenance_print_reggroups (char *args, int from_tty)
 {
+  struct gdbarch *gdbarch = get_current_arch ();
+
   if (args == NULL)
-    reggroups_dump (current_gdbarch, gdb_stdout);
+    reggroups_dump (gdbarch, gdb_stdout);
   else
     {
       struct cleanup *cleanups;
@@ -239,7 +242,7 @@ maintenance_print_reggroups (char *args, int from_tty)
       if (file == NULL)
 	perror_with_name (_("maintenance print reggroups"));
       cleanups = make_cleanup_ui_file_delete (file);
-      reggroups_dump (current_gdbarch, file);    
+      reggroups_dump (gdbarch, file);
       do_cleanups (cleanups);
     }
 }

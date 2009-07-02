@@ -1,5 +1,52 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* arch-utils.c (selected_byte_order): Return target_byte_order_user.
+	(show_endian): Use target_byte_order_user if specified; otherwise
+	use get_current_arch () instead of current_gdbarch.
+	(show_architecture): Use set_architecture_string if specified;
+	otherwise use get_current_arch () instead of current_gdbarch.
+	(get_current_arch): New function.
+	* arch-utils.h (get_current_arch): Add prototype.
+
+	* osabi.c (show_osabi): Use get_current_arch () instead of
+	current_gdbarch.
+
+	* findcmd.c: Include "arch-utils.h".
+	(parse_find_args): Add BIG_P argument.  Use it instead of byte order
+	of current_gdbarch.
+	(find_command): Use get_current_arch () instead of current_gdbarch.
+	Pass byte order to parse_find_args.
+
+	* maint.c: Include "arch-utils.h".
+	(maintenance_print_architecture): Use get_current_arch () instead
+	of current_gdbarch.
+
+	* reggroups.c: Include "arch-utils.h".
+	(maintenance_print_reggroups): Use get_current_arch () instead
+	of current_gdbarch.
+
+	* symfile.c: Include "arch-utils.h".
+	(overlay_load_command): Use get_current_arch () instead of
+	current_gdbarch.
+
+	* value.c: Include "arch-utils.h".
+	(show_convenience): Use get_current_arch () instead of
+	current_gdbarch.
+
+	* tui/tui-regs.c: Include "arch-utils.h".
+	(tui_reg_next_command): Use get_current_arch () instead of
+	current_gdbarch.
+
+	* mi/mi-main.c: Include "arch-utils.h".
+	(mi_cmd_data_read_memory): Use get_current_arch () instead of
+	current_gdbarch.
+
+	* parse.c: Include "arch-utils.h".
+	(parse_exp_in_context): Use get_current_arch () instead of
+	current_gdbarch.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.c (make_pointer_type, make_reference_type,
 	smash_to_memberptr_type, lookup_array_range_type, check_stub_method):
 	Use type architecture instead of current_gdbarch.

@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "gdb_string.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -1448,7 +1449,7 @@ preserve_values (struct objfile *objfile)
 static void
 show_convenience (char *ignore, int from_tty)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct gdbarch *gdbarch = get_current_arch ();
   struct internalvar *var;
   int varseen = 0;
   struct value_print_options opts;
