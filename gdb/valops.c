@@ -511,7 +511,7 @@ value_cast (struct type *type, struct value *arg2)
     return value_at_lazy (type, value_address (arg2));
   else if (code1 == TYPE_CODE_VOID)
     {
-      return value_zero (builtin_type_void, not_lval);
+      return value_zero (type, not_lval);
     }
   else
     {

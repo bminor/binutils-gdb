@@ -108,9 +108,6 @@ struct type *builtin_type_arm_ext;
 struct type *builtin_type_ia64_spill;
 struct type *builtin_type_ia64_quad;
 
-/* Platform-neutral void type.  */
-struct type *builtin_type_void;
-
 /* Platform-neutral character types.  */
 struct type *builtin_type_true_char;
 struct type *builtin_type_true_unsigned_char;
@@ -1525,10 +1522,10 @@ check_typedef (struct type *type)
 }
 
 /* Parse a type expression in the string [P..P+LENGTH).  If an error
-   occurs, silently return builtin_type_void.  */
+   occurs, silently return a void type.  */
 
 static struct type *
-safe_parse_type (char *p, int length)
+safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
 {
   struct ui_file *saved_gdb_stderr;
   struct type *type;
@@ -1539,7 +1536,7 @@ safe_parse_type (char *p, int length)
 
   /* Call parse_and_eval_type() without fear of longjmp()s.  */
   if (!gdb_parse_and_eval_type (p, length, &type))
-    type = builtin_type_void;
+    type = builtin_type (gdbarch)->builtin_void;
 
   /* Stop suppressing error messages.  */
   ui_file_delete (gdb_stderr);
@@ -1561,6 +1558,7 @@ safe_parse_type (char *p, int length)
 static void
 check_stub_method (struct type *type, int method_id, int signature_id)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
   struct fn_field *f;
   char *mangled_name = gdb_mangle_name (type, method_id, signature_id);
   char *demangled_name = cplus_demangle (mangled_name,
@@ -1634,7 +1632,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
 		  && strncmp (argtypetext, "void", p - argtypetext) != 0)
 		{
 		  argtypes[argcount].type =
-		    safe_parse_type (argtypetext, p - argtypetext);
+		    safe_parse_type (gdbarch, argtypetext, p - argtypetext);
 		  argcount += 1;
 		}
 	      argtypetext = p + 1;
@@ -3432,10 +3430,6 @@ _initialize_gdbtypes (void)
   builtin_type_ia64_quad =
     build_flt (-1, "builtin_type_ia64_quad", floatformats_ia64_quad);
 
-  builtin_type_void =
-    init_type (TYPE_CODE_VOID, 1,
-	       0,
-	       "void", (struct objfile *) NULL);
   builtin_type_true_char =
     init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,

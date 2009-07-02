@@ -1085,10 +1085,6 @@ extern struct type *builtin_type_arm_ext;
 extern struct type *builtin_type_ia64_spill;
 extern struct type *builtin_type_ia64_quad;
 
-/* Platform-neutral void type.  Never attempt to construct a pointer
-   or reference type to this, because those cannot be platform-neutral.
-   You must use builtin_type (...)->builtin_void in those cases.  */
-extern struct type *builtin_type_void;
 
 /* Platform-neutral character types.
    We use these for the '/c' print format, because c_char is just a

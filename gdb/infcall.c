@@ -562,7 +562,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
       /* Tell the target specific argument pushing routine not to
 	 expect a value.  */
-      target_values_type = builtin_type_void;
+      target_values_type = builtin_type (gdbarch)->builtin_void;
     }
   else
     {
