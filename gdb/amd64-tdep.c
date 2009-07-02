@@ -1075,9 +1075,9 @@ fixup_riprel (struct gdbarch *gdbarch, struct displaced_step_closure *dsc,
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: %%rip-relative addressing used.\n"
-			"displaced: using temp reg %d, old value 0x%s, new value 0x%s\n",
-			dsc->tmp_regno, paddr_nz (dsc->tmp_save),
-			paddr_nz (rip_base));
+			"displaced: using temp reg %d, old value %s, new value %s\n",
+			dsc->tmp_regno, paddress (gdbarch, dsc->tmp_save),
+			paddress (gdbarch, rip_base));
 }
 
 static void
@@ -1144,8 +1144,8 @@ amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   if (debug_displaced)
     {
-      fprintf_unfiltered (gdb_stdlog, "displaced: copy 0x%s->0x%s: ",
-			  paddr_nz (from), paddr_nz (to));
+      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
+			  paddress (gdbarch, from), paddress (gdbarch, to));
       displaced_step_dump_bytes (gdb_stdlog, buf, len);
     }
 
@@ -1258,17 +1258,18 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog,
-			"displaced: fixup (0x%s, 0x%s), "
+			"displaced: fixup (%s, %s), "
 			"insn = 0x%02x 0x%02x ...\n",
-			paddr_nz (from), paddr_nz (to), insn[0], insn[1]);
+			paddress (gdbarch, from), paddress (gdbarch, to),
+			insn[0], insn[1]);
 
   /* If we used a tmp reg, restore it.	*/
 
   if (dsc->tmp_used)
     {
       if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog, "displaced: restoring reg %d to 0x%s\n",
-			    dsc->tmp_regno, paddr_nz (dsc->tmp_save));
+	fprintf_unfiltered (gdb_stdlog, "displaced: restoring reg %d to %s\n",
+			    dsc->tmp_regno, paddress (gdbarch, dsc->tmp_save));
       regcache_cooked_write_unsigned (regs, dsc->tmp_regno, dsc->tmp_save);
     }
 
@@ -1332,8 +1333,9 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 	  if (debug_displaced)
 	    fprintf_unfiltered (gdb_stdlog,
 				"displaced: "
-				"relocated %%rip from 0x%s to 0x%s\n",
-				paddr_nz (orig_rip), paddr_nz (rip));
+				"relocated %%rip from %s to %s\n",
+				paddress (gdbarch, orig_rip),
+				paddress (gdbarch, rip));
 	}
     }
 
@@ -1358,10 +1360,10 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 
       if (debug_displaced)
 	fprintf_unfiltered (gdb_stdlog,
-			    "displaced: relocated return addr at 0x%s "
-			    "to 0x%s\n",
-			    paddr_nz (rsp),
-			    paddr_nz (retaddr));
+			    "displaced: relocated return addr at %s "
+			    "to %s\n",
+			    paddress (gdbarch, rsp),
+			    paddress (gdbarch, retaddr));
     }
 }
 

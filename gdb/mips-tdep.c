@@ -2548,8 +2548,8 @@ heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  {
 	    static int blurb_printed = 0;
 
-	    warning (_("GDB can't find the start of the function at 0x%s."),
-		     paddr_nz (pc));
+	    warning (_("GDB can't find the start of the function at %s."),
+		     paddress (gdbarch, pc));
 
 	    if (!blurb_printed)
 	      {
@@ -2560,16 +2560,17 @@ heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
 		   in that situation enough information to
 		   determine that it's no big deal.  */
 		printf_filtered ("\n\
-    GDB is unable to find the start of the function at 0x%s\n\
+    GDB is unable to find the start of the function at %s\n\
 and thus can't determine the size of that function's stack frame.\n\
 This means that GDB may be unable to access that stack frame, or\n\
 the frames below it.\n\
     This problem is most likely caused by an invalid program counter or\n\
 stack pointer.\n\
     However, if you think GDB should simply search farther back\n\
-from 0x%s for code which looks like the beginning of a\n\
+from %s for code which looks like the beginning of a\n\
 function, you can increase the range of the search using the `set\n\
-heuristic-fence-post' command.\n", paddr_nz (pc), paddr_nz (pc));
+heuristic-fence-post' command.\n",
+			paddress (gdbarch, pc), paddress (gdbarch, pc));
 		blurb_printed = 1;
 	      }
 	  }
@@ -2725,8 +2726,8 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog,
-			"mips_eabi_push_dummy_call: sp=0x%s allocated %ld\n",
-			paddr_nz (sp), (long) align_up (len, 16));
+			"mips_eabi_push_dummy_call: sp=%s allocated %ld\n",
+			paddress (gdbarch, sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = MIPS_A0_REGNUM;
@@ -2737,8 +2738,8 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_eabi_push_dummy_call: struct_return reg=%d 0x%s\n",
-			    argreg, paddr_nz (struct_addr));
+			    "mips_eabi_push_dummy_call: struct_return reg=%d %s\n",
+			    argreg, paddress (gdbarch, struct_addr));
       regcache_cooked_write_unsigned (regcache, argreg++, struct_addr);
     }
 
@@ -2887,10 +2888,10 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		  if (mips_debug)
 		    {
-		      fprintf_unfiltered (gdb_stdlog, " - stack_offset=0x%s",
-					  paddr_nz (stack_offset));
-		      fprintf_unfiltered (gdb_stdlog, " longword_offset=0x%s",
-					  paddr_nz (longword_offset));
+		      fprintf_unfiltered (gdb_stdlog, " - stack_offset=%s",
+					  paddress (gdbarch, stack_offset));
+		      fprintf_unfiltered (gdb_stdlog, " longword_offset=%s",
+					  paddress (gdbarch, longword_offset));
 		    }
 
 		  addr = sp + stack_offset + longword_offset;
@@ -2898,8 +2899,8 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  if (mips_debug)
 		    {
 		      int i;
-		      fprintf_unfiltered (gdb_stdlog, " @0x%s ",
-					  paddr_nz (addr));
+		      fprintf_unfiltered (gdb_stdlog, " @%s ",
+					  paddress (gdbarch, addr));
 		      for (i = 0; i < partial_len; i++)
 			{
 			  fprintf_unfiltered (gdb_stdlog, "%02x",
@@ -3109,8 +3110,8 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog,
-			"mips_n32n64_push_dummy_call: sp=0x%s allocated %ld\n",
-			paddr_nz (sp), (long) align_up (len, 16));
+			"mips_n32n64_push_dummy_call: sp=%s allocated %ld\n",
+			paddress (gdbarch, sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = MIPS_A0_REGNUM;
@@ -3121,8 +3122,8 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_n32n64_push_dummy_call: struct_return reg=%d 0x%s\n",
-			    argreg, paddr_nz (struct_addr));
+			    "mips_n32n64_push_dummy_call: struct_return reg=%d %s\n",
+			    argreg, paddress (gdbarch, struct_addr));
       regcache_cooked_write_unsigned (regcache, argreg++, struct_addr);
     }
 
@@ -3234,10 +3235,10 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		  if (mips_debug)
 		    {
-		      fprintf_unfiltered (gdb_stdlog, " - stack_offset=0x%s",
-					  paddr_nz (stack_offset));
-		      fprintf_unfiltered (gdb_stdlog, " longword_offset=0x%s",
-					  paddr_nz (longword_offset));
+		      fprintf_unfiltered (gdb_stdlog, " - stack_offset=%s",
+					  paddress (gdbarch, stack_offset));
+		      fprintf_unfiltered (gdb_stdlog, " longword_offset=%s",
+					  paddress (gdbarch, longword_offset));
 		    }
 
 		  addr = sp + stack_offset + longword_offset;
@@ -3245,8 +3246,8 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  if (mips_debug)
 		    {
 		      int i;
-		      fprintf_unfiltered (gdb_stdlog, " @0x%s ",
-					  paddr_nz (addr));
+		      fprintf_unfiltered (gdb_stdlog, " @%s ",
+					  paddress (gdbarch, addr));
 		      for (i = 0; i < partial_len; i++)
 			{
 			  fprintf_unfiltered (gdb_stdlog, "%02x",
@@ -3556,8 +3557,8 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog,
-			"mips_o32_push_dummy_call: sp=0x%s allocated %ld\n",
-			paddr_nz (sp), (long) align_up (len, 16));
+			"mips_o32_push_dummy_call: sp=%s allocated %ld\n",
+			paddress (gdbarch, sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = MIPS_A0_REGNUM;
@@ -3568,8 +3569,8 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_o32_push_dummy_call: struct_return reg=%d 0x%s\n",
-			    argreg, paddr_nz (struct_addr));
+			    "mips_o32_push_dummy_call: struct_return reg=%d %s\n",
+			    argreg, paddress (gdbarch, struct_addr));
       regcache_cooked_write_unsigned (regcache, argreg++, struct_addr);
       stack_offset += MIPS32_REGSIZE;
     }
@@ -3711,10 +3712,10 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		  if (mips_debug)
 		    {
-		      fprintf_unfiltered (gdb_stdlog, " - stack_offset=0x%s",
-					  paddr_nz (stack_offset));
-		      fprintf_unfiltered (gdb_stdlog, " longword_offset=0x%s",
-					  paddr_nz (longword_offset));
+		      fprintf_unfiltered (gdb_stdlog, " - stack_offset=%s",
+					  paddress (gdbarch, stack_offset));
+		      fprintf_unfiltered (gdb_stdlog, " longword_offset=%s",
+					  paddress (gdbarch, longword_offset));
 		    }
 
 		  addr = sp + stack_offset + longword_offset;
@@ -3722,8 +3723,8 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  if (mips_debug)
 		    {
 		      int i;
-		      fprintf_unfiltered (gdb_stdlog, " @0x%s ",
-					  paddr_nz (addr));
+		      fprintf_unfiltered (gdb_stdlog, " @%s ",
+					  paddress (gdbarch, addr));
 		      for (i = 0; i < partial_len; i++)
 			{
 			  fprintf_unfiltered (gdb_stdlog, "%02x",
@@ -4013,8 +4014,8 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog,
-			"mips_o64_push_dummy_call: sp=0x%s allocated %ld\n",
-			paddr_nz (sp), (long) align_up (len, 16));
+			"mips_o64_push_dummy_call: sp=%s allocated %ld\n",
+			paddress (gdbarch, sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = MIPS_A0_REGNUM;
@@ -4025,8 +4026,8 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_o64_push_dummy_call: struct_return reg=%d 0x%s\n",
-			    argreg, paddr_nz (struct_addr));
+			    "mips_o64_push_dummy_call: struct_return reg=%d %s\n",
+			    argreg, paddress (gdbarch, struct_addr));
       regcache_cooked_write_unsigned (regcache, argreg++, struct_addr);
       stack_offset += MIPS64_REGSIZE;
     }
@@ -4116,10 +4117,10 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		  if (mips_debug)
 		    {
-		      fprintf_unfiltered (gdb_stdlog, " - stack_offset=0x%s",
-					  paddr_nz (stack_offset));
-		      fprintf_unfiltered (gdb_stdlog, " longword_offset=0x%s",
-					  paddr_nz (longword_offset));
+		      fprintf_unfiltered (gdb_stdlog, " - stack_offset=%s",
+					  paddress (gdbarch, stack_offset));
+		      fprintf_unfiltered (gdb_stdlog, " longword_offset=%s",
+					  paddress (gdbarch, longword_offset));
 		    }
 
 		  addr = sp + stack_offset + longword_offset;
@@ -4127,8 +4128,8 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  if (mips_debug)
 		    {
 		      int i;
-		      fprintf_unfiltered (gdb_stdlog, " @0x%s ",
-					  paddr_nz (addr));
+		      fprintf_unfiltered (gdb_stdlog, " @%s ",
+					  paddress (gdbarch, addr));
 		      for (i = 0; i < partial_len; i++)
 			{
 			  fprintf_unfiltered (gdb_stdlog, "%02x",

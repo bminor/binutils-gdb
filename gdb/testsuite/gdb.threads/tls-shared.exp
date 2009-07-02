@@ -93,7 +93,7 @@ gdb_test "print i_tls" "2" "print thread local storage variable"
 gdb_test "ptype i_tls" "int" "ptype of thread local storage variable"
 
 gdb_test "info address i_tls" \
-	"Symbol \\\"i_tls\\\" is a thread-local variable at offset 0 in the thread-local storage for .*tls-main.." \
+	"Symbol \\\"i_tls\\\" is a thread-local variable at offset 0x0 in the thread-local storage for .*tls-main.." \
 	"print storage info for thread local storage variable"
 
 set line_number [gdb_get_line_number "break here to check result"]

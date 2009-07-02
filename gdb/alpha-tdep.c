@@ -959,10 +959,10 @@ alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       if (fence == tdep->vm_min_address)
 	warning (_("Hit beginning of text section without finding \
-enclosing function for address 0x%s"), paddr_nz (orig_pc));
+enclosing function for address %s"), paddress (gdbarch, orig_pc));
       else
 	warning (_("Hit heuristic-fence-post without finding \
-enclosing function for address 0x%s"), paddr_nz (orig_pc));
+enclosing function for address %s"), paddress (gdbarch, orig_pc));
 
       if (!blurb_printed)
 	{

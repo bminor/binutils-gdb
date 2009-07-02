@@ -2079,8 +2079,8 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
 	   will cause a core dump), but maybe we can successfully
 	   continue, so let's not.  */
 	warning (_("\
-(Internal error: pc 0x%s in read in psymtab, but not in symtab.)\n"),
-		 paddr_nz (pc));
+(Internal error: pc %s in read in psymtab, but not in symtab.)\n"),
+		 paddress (get_objfile_arch (ps->objfile), pc));
       s = PSYMTAB_TO_SYMTAB (ps);
     }
   return (s);

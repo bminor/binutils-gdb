@@ -795,13 +795,12 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 
 	      struct gdbarch *gdbarch = get_type_arch (type);
 	      struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
+	      CORE_ADDR addr = extract_typed_address (valaddr, ptr_type);
 
               fprintf_filtered (stream, "(");
               type_print (type, "", stream, -1);
               fprintf_filtered (stream, ") ");
-	      fputs_filtered (paddress (extract_typed_address
-					(valaddr, ptr_type)),
-			      stream);
+	      fputs_filtered (paddress (gdbarch, addr), stream);
             }
 	  else
 	    {

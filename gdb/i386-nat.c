@@ -217,6 +217,7 @@ static void
 i386_show_dr (const char *func, CORE_ADDR addr,
 	      int len, enum target_hw_bp_type type)
 {
+  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
   int i;
 
   puts_unfiltered (func);
@@ -240,8 +241,8 @@ i386_show_dr (const char *func, CORE_ADDR addr,
     {
       printf_unfiltered ("\
 \tDR%d: addr=0x%s, ref.count=%d  DR%d: addr=0x%s, ref.count=%d\n",
-			 i, paddr(dr_mirror[i]), dr_ref_count[i],
-			 i+1, paddr(dr_mirror[i+1]), dr_ref_count[i+1]);
+		 i, phex (dr_mirror[i], addr_size), dr_ref_count[i],
+		 i+1, phex (dr_mirror[i+1], addr_size), dr_ref_count[i+1]);
       i++;
     }
 }

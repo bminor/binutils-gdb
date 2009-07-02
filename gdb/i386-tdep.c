@@ -428,9 +428,10 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog,
-                        "displaced: fixup (0x%s, 0x%s), "
+                        "displaced: fixup (%s, %s), "
                         "insn = 0x%02x 0x%02x ...\n",
-                        paddr_nz (from), paddr_nz (to), insn[0], insn[1]);
+                        paddress (gdbarch, from), paddress (gdbarch, to),
+			insn[0], insn[1]);
 
   /* The list of issues to contend with here is taken from
      resume_execution in arch/i386/kernel/kprobes.c, Linux 2.6.20.
@@ -499,8 +500,9 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
           if (debug_displaced)
             fprintf_unfiltered (gdb_stdlog,
                                 "displaced: "
-                                "relocated %%eip from 0x%s to 0x%s\n",
-                                paddr_nz (orig_eip), paddr_nz (eip));
+                                "relocated %%eip from %s to %s\n",
+                                paddress (gdbarch, orig_eip),
+				paddress (gdbarch, eip));
         }
     }
 
@@ -525,10 +527,9 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
 
       if (debug_displaced)
         fprintf_unfiltered (gdb_stdlog,
-                            "displaced: relocated return addr at 0x%s "
-                            "to 0x%s\n",
-                            paddr_nz (esp),
-                            paddr_nz (retaddr));
+                            "displaced: relocated return addr at %s to %s\n",
+                            paddress (gdbarch, esp),
+                            paddress (gdbarch, retaddr));
     }
 }
 
@@ -2764,12 +2765,14 @@ struct i386_record_s
 static int
 i386_record_modrm (struct i386_record_s *irp)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (irp->regcache);
+
   if (target_read_memory (irp->addr, &irp->modrm, 1))
     {
       if (record_debug)
 	printf_unfiltered (_("Process record: error reading memory at "
-			     "addr 0x%s len = 1.\n"),
-			   paddr_nz (irp->addr));
+			     "addr %s len = 1.\n"),
+			   paddress (gdbarch, irp->addr));
       return -1;
     }
   irp->addr++;
@@ -2787,6 +2790,7 @@ i386_record_modrm (struct i386_record_s *irp)
 static int
 i386_record_lea_modrm_addr (struct i386_record_s *irp, uint32_t * addr)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (irp->regcache);
   uint8_t tmpu8;
   uint16_t tmpu16;
   uint32_t tmpu32;
@@ -2807,8 +2811,8 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint32_t * addr)
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
-				     "at addr 0x%s len = 1.\n"),
-				   paddr_nz (irp->addr));
+				     "at addr %s len = 1.\n"),
+				   paddress (gdbarch, irp->addr));
 	      return -1;
 	    }
 	  irp->addr++;
@@ -2827,8 +2831,8 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint32_t * addr)
 		{
 		  if (record_debug)
 		    printf_unfiltered (_("Process record: error reading "
-				         "memory at addr 0x%s len = 4.\n"),
-				       paddr_nz (irp->addr));
+				         "memory at addr %s len = 4.\n"),
+				       paddress (gdbarch, irp->addr));
 		  return -1;
 		}
 	      irp->addr += 4;
@@ -2843,8 +2847,8 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint32_t * addr)
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
-				     "at addr 0x%s len = 1.\n"),
-				   paddr_nz (irp->addr));
+				     "at addr %s len = 1.\n"),
+				   paddress (gdbarch, irp->addr));
 	      return -1;
 	    }
 	  irp->addr++;
@@ -2855,8 +2859,8 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint32_t * addr)
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
-				     "at addr 0x%s len = 4.\n"),
-				   paddr_nz (irp->addr));
+				     "at addr %s len = 4.\n"),
+				   paddress (gdbarch, irp->addr));
 	      return -1;
 	    }
 	  irp->addr += 4;
@@ -2889,8 +2893,8 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint32_t * addr)
 		{
 		  if (record_debug)
 		    printf_unfiltered (_("Process record: error reading "
-					 "memory at addr 0x%s len = 2.\n"),
-				       paddr_nz (irp->addr));
+					 "memory at addr %s len = 2.\n"),
+				       paddress (gdbarch, irp->addr));
 		  return -1;
 		}
 	      irp->addr += 2;
@@ -2908,8 +2912,8 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint32_t * addr)
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
-				     "at addr 0x%s len = 1.\n"),
-				   paddr_nz (irp->addr));
+				     "at addr %s len = 1.\n"),
+				   paddress (gdbarch, irp->addr));
 	      return -1;
 	    }
 	  irp->addr++;
@@ -2920,8 +2924,8 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint32_t * addr)
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
-				     "at addr 0x%s len = 2.\n"),
-				   paddr_nz (irp->addr));
+				     "at addr %s len = 2.\n"),
+				   paddress (gdbarch, irp->addr));
 	      return -1;
 	    }
 	  irp->addr += 2;
@@ -2998,15 +3002,16 @@ no_rm:
 static int
 i386_record_lea_modrm (struct i386_record_s *irp)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (irp->regcache);
   uint32_t addr;
 
   if (irp->override)
     {
       if (record_debug)
 	printf_unfiltered (_("Process record ignores the memory change "
-			     "of instruction at address 0x%s because it "
+			     "of instruction at address %s because it "
 			     "can't get the value of the segment register.\n"),
-			   paddr_nz (irp->addr));
+			   paddress (gdbarch, irp->addr));
       return 0;
     }
 
@@ -3042,8 +3047,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
   if (record_debug > 1)
     fprintf_unfiltered (gdb_stdlog, "Process record: i386_process_record "
-			            "addr = 0x%s\n",
-			paddr_nz (ir.addr));
+			            "addr = %s\n",
+			paddress (gdbarch, ir.addr));
 
   /* prefixes */
   while (1)
@@ -3052,8 +3057,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	{
 	  if (record_debug)
 	    printf_unfiltered (_("Process record: error reading memory at "
-				 "addr 0x%s len = 1.\n"),
-			       paddr_nz (ir.addr));
+				 "addr %s len = 1.\n"),
+			       paddress (gdbarch, ir.addr));
 	  return -1;
 	}
       ir.addr++;
@@ -3113,8 +3118,8 @@ reswitch:
 	{
 	  if (record_debug)
 	    printf_unfiltered (_("Process record: error reading memory at "
-				 "addr 0x%s len = 1.\n"),
-			       paddr_nz (ir.addr));
+				 "addr %s len = 1.\n"),
+			       paddress (gdbarch, ir.addr));
 	  return -1;
 	}
       ir.addr++;
@@ -3852,10 +3857,10 @@ reswitch:
 	  {
 	    if (record_debug)
 	      printf_unfiltered (_("Process record ignores the memory change "
-				   "of instruction at address 0x%s because "
+				   "of instruction at address %s because "
 				   "it can't get the value of the segment "
 				   "register.\n"),
-				 paddr_nz (ir.addr));
+				 paddress (gdbarch, ir.addr));
 	  }
 	else
 	  {
@@ -3870,8 +3875,8 @@ reswitch:
 		  {
 		    if (record_debug)
 		      printf_unfiltered (_("Process record: error reading "
-					   "memory at addr 0x%s len = 4.\n"),
-					 paddr_nz (ir.addr));
+					   "memory at addr %s len = 4.\n"),
+					 paddress (gdbarch, ir.addr));
 		    return -1;
 		  }
 		ir.addr += 4;
@@ -3883,8 +3888,8 @@ reswitch:
 		  {
 		    if (record_debug)
 		      printf_unfiltered (_("Process record: error reading "
-					   "memory at addr 0x%s len = 4.\n"),
-					 paddr_nz (ir.addr));
+					   "memory at addr %s len = 4.\n"),
+					 paddress (gdbarch, ir.addr));
 		    return -1;
 		  }
 		ir.addr += 2;
@@ -4272,10 +4277,10 @@ reswitch:
 	    /* addr += ((uint32_t)read_register (I386_ES_REGNUM)) << 4; */
 	    if (record_debug)
 	      printf_unfiltered (_("Process record ignores the memory change "
-				   "of instruction at address 0x%s because "
+				   "of instruction at address %s because "
 				   "it can't get the value of the segment "
 				   "register.\n"),
-				 paddr_nz (ir.addr));
+				 paddress (gdbarch, ir.addr));
 	  }
 
 	if (prefixes & (PREFIX_REPZ | PREFIX_REPNZ))
@@ -4681,8 +4686,8 @@ reswitch:
 	  {
 	    if (record_debug)
 	      printf_unfiltered (_("Process record: error reading memory "
-				   "at addr 0x%s len = 1.\n"),
-				 paddr_nz (ir.addr));
+				   "at addr %s len = 1.\n"),
+				 paddress (gdbarch, ir.addr));
 	    return -1;
 	  }
 	ir.addr++;
@@ -4889,10 +4894,10 @@ reswitch:
 		if (record_debug)
 		  printf_unfiltered (_("Process record ignores the memory "
 				       "change of instruction at "
-				       "address 0x%s because it can't get "
+				       "address %s because it can't get "
 				       "the value of the segment "
 				       "register.\n"),
-				     paddr_nz (ir.addr));
+				     paddress (gdbarch, ir.addr));
 	      }
 	    else
 	      {
@@ -4934,10 +4939,10 @@ reswitch:
 		  if (record_debug)
 		    printf_unfiltered (_("Process record ignores the memory "
 					 "change of instruction at "
-					 "address 0x%s because it can't get "
+					 "address %s because it can't get "
 					 "the value of the segment "
 					 "register.\n"),
-				       paddr_nz (ir.addr));
+				       paddress (gdbarch, ir.addr));
 		}
 	      else
 		{
@@ -5122,8 +5127,8 @@ reswitch:
 
 no_support:
   printf_unfiltered (_("Process record doesn't support instruction 0x%02x "
-		       "at address 0x%s.\n"),
-		     (unsigned int) (opcode), paddr_nz (ir.addr));
+		       "at address %s.\n"),
+		     (unsigned int) (opcode), paddress (gdbarch, ir.addr));
   return -1;
 }
 

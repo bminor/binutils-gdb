@@ -672,17 +672,22 @@ edit_command (char *arg, int from_tty)
          of all known source files, not that user failed to give a filename.  */
       if (*arg == '*')
         {
+	  struct gdbarch *gdbarch;
           if (sal.symtab == 0)
 	    /* FIXME-32x64--assumes sal.pc fits in long.  */
 	    error (_("No source file for address %s."),
 		   hex_string ((unsigned long) sal.pc));
+
+	  gdbarch = get_objfile_arch (sal.symtab->objfile);
           sym = find_pc_function (sal.pc);
           if (sym)
-	    printf_filtered ("%s is in %s (%s:%d).\n", paddress (sal.pc),
-			     SYMBOL_PRINT_NAME (sym), sal.symtab->filename,
-			     sal.line);
+	    printf_filtered ("%s is in %s (%s:%d).\n",
+			     paddress (gdbarch, sal.pc),
+			     SYMBOL_PRINT_NAME (sym),
+			     sal.symtab->filename, sal.line);
           else
-	    printf_filtered ("%s is at %s:%d.\n", paddress (sal.pc),
+	    printf_filtered ("%s is at %s:%d.\n",
+			     paddress (gdbarch, sal.pc),
 			     sal.symtab->filename, sal.line);
         }
 
@@ -832,17 +837,22 @@ list_command (char *arg, int from_tty)
      of all known source files, not that user failed to give a filename.  */
   if (*arg == '*')
     {
+      struct gdbarch *gdbarch;
       if (sal.symtab == 0)
 	/* FIXME-32x64--assumes sal.pc fits in long.  */
 	error (_("No source file for address %s."),
 	       hex_string ((unsigned long) sal.pc));
+
+      gdbarch = get_objfile_arch (sal.symtab->objfile);
       sym = find_pc_function (sal.pc);
       if (sym)
 	printf_filtered ("%s is in %s (%s:%d).\n",
-			 paddress (sal.pc), SYMBOL_PRINT_NAME (sym),
+			 paddress (gdbarch, sal.pc),
+			 SYMBOL_PRINT_NAME (sym),
 			 sal.symtab->filename, sal.line);
       else
-	printf_filtered ("%s is at %s:%d.\n", paddress (sal.pc),
+	printf_filtered ("%s is at %s:%d.\n",
+			 paddress (gdbarch, sal.pc),
 			 sal.symtab->filename, sal.line);
     }
 
@@ -904,7 +914,8 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
       if (name != NULL)
         printf_filtered ("for function %s:\n", name);
       else
-        printf_filtered ("from %s to %s:\n", paddress (low), paddress (high));
+        printf_filtered ("from %s to %s:\n",
+			 paddress (gdbarch, low), paddress (gdbarch, high));
 
       /* Dump the specified range.  */
       gdb_disassembly (gdbarch, uiout, 0, mixed, -1, low, high);

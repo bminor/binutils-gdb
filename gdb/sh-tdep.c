@@ -1418,9 +1418,9 @@ sh_generic_show_regs (struct frame_info *frame)
 {
   printf_filtered
     ("      PC %s       SR %08lx       PR %08lx     MACH %08lx\n",
-     paddr (get_frame_register_unsigned (frame,
-					 gdbarch_pc_regnum
-					   (get_frame_arch (frame)))),
+     phex (get_frame_register_unsigned (frame,
+					gdbarch_pc_regnum
+					   (get_frame_arch (frame))), 4),
      (long) get_frame_register_unsigned (frame, SR_REGNUM),
      (long) get_frame_register_unsigned (frame, PR_REGNUM),
      (long) get_frame_register_unsigned (frame, MACH_REGNUM));
@@ -1458,9 +1458,9 @@ sh3_show_regs (struct frame_info *frame)
 {
   printf_filtered
     ("      PC %s       SR %08lx       PR %08lx     MACH %08lx\n",
-     paddr (get_frame_register_unsigned (frame,
-					 gdbarch_pc_regnum
-					   (get_frame_arch (frame)))),
+     phex (get_frame_register_unsigned (frame,
+					gdbarch_pc_regnum
+					  (get_frame_arch (frame))), 4),
      (long) get_frame_register_unsigned (frame, SR_REGNUM),
      (long) get_frame_register_unsigned (frame, PR_REGNUM),
      (long) get_frame_register_unsigned (frame, MACH_REGNUM));
@@ -1503,8 +1503,8 @@ sh2e_show_regs (struct frame_info *frame)
   struct gdbarch *gdbarch = get_frame_arch (frame);
   printf_filtered
     ("      PC %s       SR %08lx       PR %08lx     MACH %08lx\n",
-     paddr (get_frame_register_unsigned (frame,
-					 gdbarch_pc_regnum (gdbarch))),
+     phex (get_frame_register_unsigned (frame,
+					gdbarch_pc_regnum (gdbarch)), 4),
      (long) get_frame_register_unsigned (frame, SR_REGNUM),
      (long) get_frame_register_unsigned (frame, PR_REGNUM),
      (long) get_frame_register_unsigned (frame, MACH_REGNUM));
@@ -1588,8 +1588,8 @@ sh2a_show_regs (struct frame_info *frame)
 
   printf_filtered
     ("      PC %s       SR %08lx       PR %08lx     MACH %08lx\n",
-     paddr (get_frame_register_unsigned (frame,
-					 gdbarch_pc_regnum (gdbarch))),
+     phex (get_frame_register_unsigned (frame,
+					gdbarch_pc_regnum (gdbarch)), 4),
      (long) get_frame_register_unsigned (frame, SR_REGNUM),
      (long) get_frame_register_unsigned (frame, PR_REGNUM),
      (long) get_frame_register_unsigned (frame, MACH_REGNUM));
@@ -1703,9 +1703,9 @@ sh2a_nofpu_show_regs (struct frame_info *frame)
 
   printf_filtered
     ("      PC %s       SR %08lx       PR %08lx     MACH %08lx\n",
-     paddr (get_frame_register_unsigned (frame,
-					 gdbarch_pc_regnum
-					   (get_frame_arch (frame)))),
+     phex (get_frame_register_unsigned (frame,
+					gdbarch_pc_regnum
+					  (get_frame_arch (frame))), 4),
      (long) get_frame_register_unsigned (frame, SR_REGNUM),
      (long) get_frame_register_unsigned (frame, PR_REGNUM),
      (long) get_frame_register_unsigned (frame, MACH_REGNUM));
@@ -1780,8 +1780,8 @@ sh3e_show_regs (struct frame_info *frame)
   struct gdbarch *gdbarch = get_frame_arch (frame);
   printf_filtered
     ("      PC %s       SR %08lx       PR %08lx     MACH %08lx\n",
-     paddr (get_frame_register_unsigned (frame,
-					 gdbarch_pc_regnum (gdbarch))),
+     phex (get_frame_register_unsigned (frame,
+					gdbarch_pc_regnum (gdbarch)), 4),
      (long) get_frame_register_unsigned (frame, SR_REGNUM),
      (long) get_frame_register_unsigned (frame, PR_REGNUM),
      (long) get_frame_register_unsigned (frame, MACH_REGNUM));
@@ -1862,9 +1862,9 @@ sh3_dsp_show_regs (struct frame_info *frame)
 {
   printf_filtered
     ("      PC %s       SR %08lx       PR %08lx     MACH %08lx\n",
-     paddr (get_frame_register_unsigned (frame,
-					 gdbarch_pc_regnum
-					   (get_frame_arch (frame)))),
+     phex (get_frame_register_unsigned (frame,
+					gdbarch_pc_regnum
+					  (get_frame_arch (frame))), 4),
      (long) get_frame_register_unsigned (frame, SR_REGNUM),
      (long) get_frame_register_unsigned (frame, PR_REGNUM),
      (long) get_frame_register_unsigned (frame, MACH_REGNUM));
@@ -1929,8 +1929,8 @@ sh4_show_regs (struct frame_info *frame)
 
   printf_filtered
     ("      PC %s       SR %08lx       PR %08lx     MACH %08lx\n",
-     paddr (get_frame_register_unsigned (frame,
-					 gdbarch_pc_regnum (gdbarch))),
+     phex (get_frame_register_unsigned (frame,
+					gdbarch_pc_regnum (gdbarch)), 4),
      (long) get_frame_register_unsigned (frame, SR_REGNUM),
      (long) get_frame_register_unsigned (frame, PR_REGNUM),
      (long) get_frame_register_unsigned (frame, MACH_REGNUM));
@@ -2013,9 +2013,9 @@ sh4_nofpu_show_regs (struct frame_info *frame)
 {
   printf_filtered
     ("      PC %s       SR %08lx       PR %08lx     MACH %08lx\n",
-     paddr (get_frame_register_unsigned (frame,
-					 gdbarch_pc_regnum
-					   (get_frame_arch (frame)))),
+     phex (get_frame_register_unsigned (frame,
+					gdbarch_pc_regnum
+					  (get_frame_arch (frame))), 4),
      (long) get_frame_register_unsigned (frame, SR_REGNUM),
      (long) get_frame_register_unsigned (frame, PR_REGNUM),
      (long) get_frame_register_unsigned (frame, MACH_REGNUM));
@@ -2059,9 +2059,9 @@ sh_dsp_show_regs (struct frame_info *frame)
 {
   printf_filtered
     ("      PC %s       SR %08lx       PR %08lx     MACH %08lx\n",
-     paddr (get_frame_register_unsigned (frame,
-					 gdbarch_pc_regnum
-					   (get_frame_arch (frame)))),
+     phex (get_frame_register_unsigned (frame,
+					gdbarch_pc_regnum
+					  (get_frame_arch (frame))), 4),
      (long) get_frame_register_unsigned (frame, SR_REGNUM),
      (long) get_frame_register_unsigned (frame, PR_REGNUM),
      (long) get_frame_register_unsigned (frame, MACH_REGNUM));

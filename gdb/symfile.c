@@ -1800,9 +1800,9 @@ load_progress (ULONGEST bytes, void *untyped_arg)
     {
       /* The write is just starting.  Let the user know we've started
 	 this section.  */
-      ui_out_message (uiout, 0, "Loading section %s, size 0x%s lma 0x%s\n",
-		      args->section_name, paddr_nz (args->section_size),
-		      paddr_nz (args->lma));
+      ui_out_message (uiout, 0, "Loading section %s, size %s lma %s\n",
+		      args->section_name, hex_string (args->section_size),
+		      paddress (target_gdbarch, args->lma));
       return;
     }
 
@@ -1819,11 +1819,11 @@ load_progress (ULONGEST bytes, void *untyped_arg)
       struct cleanup *verify_cleanups = make_cleanup (xfree, check);
 
       if (target_read_memory (args->lma, check, bytes) != 0)
-	error (_("Download verify read failed at 0x%s"),
-	       paddr (args->lma));
+	error (_("Download verify read failed at %s"),
+	       paddress (target_gdbarch, args->lma));
       if (memcmp (args->buffer, check, bytes) != 0)
-	error (_("Download verify compare failed at 0x%s"),
-	       paddr (args->lma));
+	error (_("Download verify compare failed at %s"),
+	       paddress (target_gdbarch, args->lma));
       do_cleanups (verify_cleanups);
     }
   totals->data_count += bytes;
@@ -1979,7 +1979,7 @@ generic_load (char *args, int from_tty)
 
   entry = bfd_get_start_address (loadfile_bfd);
   ui_out_text (uiout, "Start address ");
-  ui_out_field_fmt (uiout, "address", "0x%s", paddr_nz (entry));
+  ui_out_field_fmt (uiout, "address", "%s", paddress (target_gdbarch, entry));
   ui_out_text (uiout, ", load size ");
   ui_out_field_fmt (uiout, "load-size", "%lu", total_progress.data_count);
   ui_out_text (uiout, "\n");
@@ -2081,6 +2081,7 @@ print_transfer_performance (struct ui_file *stream,
 static void
 add_symbol_file_command (char *args, int from_tty)
 {
+  struct gdbarch *gdbarch = get_current_arch ();
   char *filename = NULL;
   int flags = OBJF_USERLOADED;
   char *arg;
@@ -2211,7 +2212,8 @@ add_symbol_file_command (char *args, int from_tty)
          entered on the command line. */
       section_addrs->other[sec_num].name = sec;
       section_addrs->other[sec_num].addr = addr;
-      printf_unfiltered ("\t%s_addr = %s\n", sec, paddress (addr));
+      printf_unfiltered ("\t%s_addr = %s\n", sec,
+			 paddress (gdbarch, addr));
       sec_num++;
 
       /* The object's sections are initialized when a
@@ -3503,6 +3505,7 @@ list_overlays_command (char *args, int from_tty)
     ALL_OBJSECTIONS (objfile, osect)
       if (section_is_mapped (osect))
       {
+	struct gdbarch *gdbarch = get_objfile_arch (objfile);
 	const char *name;
 	bfd_vma lma, vma;
 	int size;
@@ -3513,13 +3516,13 @@ list_overlays_command (char *args, int from_tty)
 	name = bfd_section_name (objfile->obfd, osect->the_bfd_section);
 
 	printf_filtered ("Section %s, loaded at ", name);
-	fputs_filtered (paddress (lma), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, lma), gdb_stdout);
 	puts_filtered (" - ");
-	fputs_filtered (paddress (lma + size), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, lma + size), gdb_stdout);
 	printf_filtered (", mapped at ");
-	fputs_filtered (paddress (vma), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, vma), gdb_stdout);
 	puts_filtered (" - ");
-	fputs_filtered (paddress (vma + size), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, vma + size), gdb_stdout);
 	puts_filtered ("\n");
 
 	nmapped++;

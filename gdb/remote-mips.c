@@ -1187,6 +1187,7 @@ mips_request (int cmd,
 	      int timeout,
 	      char *buff)
 {
+  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
   char myBuff[DATA_MAXLEN + 1];
   int len;
   int rpid;
@@ -1202,7 +1203,8 @@ mips_request (int cmd,
       if (mips_need_reply)
 	internal_error (__FILE__, __LINE__,
 			_("mips_request: Trying to send command before reply"));
-      sprintf (buff, "0x0 %c 0x%s 0x%s", cmd, paddr_nz (addr), paddr_nz (data));
+      sprintf (buff, "0x0 %c 0x%s 0x%s", cmd,
+	       phex_nz (addr, addr_size), phex_nz (data, addr_size));
       mips_send_packet (buff, 1);
       mips_need_reply = 1;
     }
@@ -1993,8 +1995,8 @@ mips_fetch_word (CORE_ADDR addr)
       val = mips_request ('i', addr, 0, &err,
 			  mips_receive_wait, NULL);
       if (err)
-	mips_error ("Can't read address 0x%s: %s",
-		    paddr_nz (addr), safe_strerror (errno));
+	mips_error ("Can't read address %s: %s",
+		    paddress (target_gdbarch, addr), safe_strerror (errno));
     }
   return val;
 }
@@ -2341,7 +2343,7 @@ static int
 mips_check_lsi_error (CORE_ADDR addr, int rerrflg)
 {
   struct lsi_error *err;
-  char *saddr = paddr_nz (addr);	/* printable address string */
+  char *saddr = paddress (target_gdbarch, addr);
 
   if (rerrflg == 0)		/* no error */
     return 0;
@@ -2358,14 +2360,14 @@ mips_check_lsi_error (CORE_ADDR addr, int rerrflg)
 		{
 		  found = 1;
 		  fprintf_unfiltered (gdb_stderr, "\
-mips_common_breakpoint (0x%s): Warning: %s\n",
+mips_common_breakpoint (%s): Warning: %s\n",
 				      saddr,
 				      err->string);
 		}
 	    }
 	  if (!found)
 	    fprintf_unfiltered (gdb_stderr, "\
-mips_common_breakpoint (0x%s): Unknown warning: 0x%x\n",
+mips_common_breakpoint (%s): Unknown warning: 0x%x\n",
 				saddr,
 				rerrflg);
 	}
@@ -2378,14 +2380,14 @@ mips_common_breakpoint (0x%s): Unknown warning: 0x%x\n",
       if ((err->code & rerrflg) == err->code)
 	{
 	  fprintf_unfiltered (gdb_stderr, "\
-mips_common_breakpoint (0x%s): Error: %s\n",
+mips_common_breakpoint (%s): Error: %s\n",
 			      saddr,
 			      err->string);
 	  return 1;
 	}
     }
   fprintf_unfiltered (gdb_stderr, "\
-mips_common_breakpoint (0x%s): Unknown error: 0x%x\n",
+mips_common_breakpoint (%s): Unknown error: 0x%x\n",
 		      saddr,
 		      rerrflg);
   return 1;
@@ -2408,6 +2410,7 @@ mips_common_breakpoint (0x%s): Unknown error: 0x%x\n",
 static int
 mips_common_breakpoint (int set, CORE_ADDR addr, int len, enum break_type type)
 {
+  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
   char buf[DATA_MAXLEN + 1];
   char cmd, rcmd;
   int rpid, rerrflg, rresponse, rlen;
@@ -2441,7 +2444,7 @@ mips_common_breakpoint (int set, CORE_ADDR addr, int len, enum break_type type)
 	    {
 	      warning ("\
 mips_common_breakpoint: Attempt to clear bogus breakpoint at %s\n",
-		       paddr_nz (addr));
+		       paddress (target_gdbarch, addr));
 	      return 1;
 	    }
 
@@ -2490,15 +2493,16 @@ mips_common_breakpoint: Bad response from remote board: %s",
 	  if (type == BREAK_FETCH)	/* instruction breakpoint */
 	    {
 	      cmd = 'B';
-	      sprintf (buf, "0x0 B 0x%s 0x0", paddr_nz (addr));
+	      sprintf (buf, "0x0 B 0x%s 0x0", phex_nz (addr, addr_size));
 	    }
 	  else
 	    /* watchpoint */
 	    {
 	      cmd = 'A';
-	      sprintf (buf, "0x0 A 0x%s 0x%x 0x%s", paddr_nz (addr),
-		     type == BREAK_READ ? 1 : (type == BREAK_WRITE ? 2 : 3),
-		       paddr_nz (addr + len - 1));
+	      sprintf (buf, "0x0 A 0x%s 0x%x 0x%s",
+		       phex_nz (addr, addr_size),
+		       type == BREAK_READ ? 1 : (type == BREAK_WRITE ? 2 : 3),
+		       phex_nz (addr + len - 1, addr_size));
 	    }
 	  mips_send_packet (buf, 1);
 
@@ -2559,13 +2563,13 @@ mips_common_breakpoint: Bad response from remote board: %s",
 	    }
 
 	  cmd = 'B';
-	  sprintf (buf, "0x0 B 0x%s 0x%s %s", paddr_nz (addr),
-		   paddr_nz (mask), flags);
+	  sprintf (buf, "0x0 B 0x%s 0x%s %s", phex_nz (addr, addr_size),
+		   phex_nz (mask, addr_size), flags);
 	}
       else
 	{
 	  cmd = 'b';
-	  sprintf (buf, "0x0 b 0x%s", paddr_nz (addr));
+	  sprintf (buf, "0x0 b 0x%s", phex_nz (addr, addr_size));
 	}
 
       mips_send_packet (buf, 1);
@@ -2589,8 +2593,8 @@ mips_common_breakpoint: Bad response from remote board: %s",
 	    rresponse = rerrflg;
 	  if (rresponse != 22)	/* invalid argument */
 	    fprintf_unfiltered (gdb_stderr, "\
-mips_common_breakpoint (0x%s):  Got error: 0x%x\n",
-				paddr_nz (addr), rresponse);
+mips_common_breakpoint (%s):  Got error: 0x%x\n",
+				paddress (target_gdbarch, addr), rresponse);
 	  return 1;
 	}
     }
@@ -2616,7 +2620,8 @@ send_srec (char *srec, int len, CORE_ADDR addr)
 	case 0x6:		/* ACK */
 	  return;
 	case 0x15:		/* NACK */
-	  fprintf_unfiltered (gdb_stderr, "Download got a NACK at byte 0x%s!  Retrying.\n", paddr_nz (addr));
+	  fprintf_unfiltered (gdb_stderr, "Download got a NACK at byte %s!  Retrying.\n",
+			      paddress (target_gdbarch, addr));
 	  continue;
 	default:
 	  error ("Download got unexpected ack char: 0x%x, retrying.\n", ch);

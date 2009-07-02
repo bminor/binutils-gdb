@@ -169,7 +169,7 @@ static void
 fprint_field (struct ui_file *file, const char *name, int p, CORE_ADDR addr)
 {
   if (p)
-    fprintf_unfiltered (file, "%s=0x%s", name, paddr_nz (addr));
+    fprintf_unfiltered (file, "%s=%s", name, hex_string (addr));
   else
     fprintf_unfiltered (file, "!%s", name);
 }
@@ -242,7 +242,7 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
   fprintf_unfiltered (file, ",");
   fprintf_unfiltered (file, "pc=");
   if (fi->next != NULL && fi->next->prev_pc.p)
-    fprintf_unfiltered (file, "0x%s", paddr_nz (fi->next->prev_pc.value));
+    fprintf_unfiltered (file, "%s", hex_string (fi->next->prev_pc.value));
   else
     fprintf_unfiltered (file, "<unknown>");
   fprintf_unfiltered (file, ",");
@@ -254,7 +254,7 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
   fprintf_unfiltered (file, ",");
   fprintf_unfiltered (file, "func=");
   if (fi->next != NULL && fi->next->prev_func.p)
-    fprintf_unfiltered (file, "0x%s", paddr_nz (fi->next->prev_func.addr));
+    fprintf_unfiltered (file, "%s", hex_string (fi->next->prev_func.addr));
   else
     fprintf_unfiltered (file, "<unknown>");
   fprintf_unfiltered (file, "}");
@@ -573,7 +573,7 @@ frame_unwind_pc (struct frame_info *this_frame)
 	fprintf_unfiltered (gdb_stdlog,
 			    "{ frame_unwind_caller_pc (this_frame=%d) -> 0x%s }\n",
 			    this_frame->level,
-			    paddr_nz (this_frame->prev_pc.value));
+			    hex_string (this_frame->prev_pc.value));
     }
   return this_frame->prev_pc.value;
 }
@@ -598,9 +598,9 @@ get_frame_func (struct frame_info *this_frame)
       next_frame->prev_func.addr = get_pc_function_start (addr_in_block);
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "{ get_frame_func (this_frame=%d) -> 0x%s }\n",
+			    "{ get_frame_func (this_frame=%d) -> %s }\n",
 			    this_frame->level,
-			    paddr_nz (next_frame->prev_func.addr));
+			    hex_string (next_frame->prev_func.addr));
     }
   return next_frame->prev_func.addr;
 }
@@ -774,8 +774,9 @@ frame_unwind_register_value (struct frame_info *frame, int regnum)
 	    fprintf_unfiltered (gdb_stdlog, " register=%d",
 				VALUE_REGNUM (value));
 	  else if (VALUE_LVAL (value) == lval_memory)
-	    fprintf_unfiltered (gdb_stdlog, " address=0x%s",
-				paddr_nz (value_address (value)));
+	    fprintf_unfiltered (gdb_stdlog, " address=%s",
+				paddress (gdbarch,
+					  value_address (value)));
 	  else
 	    fprintf_unfiltered (gdb_stdlog, " computed");
 
@@ -1202,8 +1203,8 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   if (frame_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "{ create_new_frame (addr=0x%s, pc=0x%s) ",
-			  paddr_nz (addr), paddr_nz (pc));
+			  "{ create_new_frame (addr=%s, pc=%s) ",
+			  hex_string (addr), hex_string (pc));
     }
 
   fi = FRAME_OBSTACK_ZALLOC (struct frame_info);

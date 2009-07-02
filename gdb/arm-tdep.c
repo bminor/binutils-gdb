@@ -1423,9 +1423,9 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (struct_return)
     {
       if (arm_debug)
-	fprintf_unfiltered (gdb_stdlog, "struct return in %s = 0x%s\n",
+	fprintf_unfiltered (gdb_stdlog, "struct return in %s = %s\n",
 			    gdbarch_register_name (gdbarch, argreg),
-			    paddr (struct_addr));
+			    paddress (gdbarch, struct_addr));
       regcache_cooked_write_unsigned (regcache, argreg, struct_addr);
       argreg++;
     }

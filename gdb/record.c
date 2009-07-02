@@ -261,9 +261,9 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
 
   if (record_debug > 1)
     fprintf_unfiltered (gdb_stdlog,
-			"Process record: add mem addr = 0x%s len = %d to "
+			"Process record: add mem addr = %s len = %d to "
 			"record list.\n",
-			paddr_nz (addr), len);
+			paddress (target_gdbarch, addr), len);
 
   if (!addr)
     return 0;
@@ -281,8 +281,8 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
       if (record_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "Process record: error reading memory at "
-			    "addr = 0x%s len = %d.\n",
-			    paddr_nz (addr), len);
+			    "addr = %s len = %d.\n",
+			    paddress (target_gdbarch, addr), len);
       xfree (rec->u.mem.val);
       xfree (rec);
       return -1;
@@ -649,6 +649,7 @@ record_wait (struct target_ops *ops,
   else
     {
       struct regcache *regcache = get_current_regcache ();
+      struct gdbarch *gdbarch = get_regcache_arch (regcache);
       int continue_flag = 1;
       int first_record_end = 1;
       struct cleanup *old_cleanups = make_cleanup (record_wait_cleanups, 0);
@@ -664,14 +665,13 @@ record_wait (struct target_ops *ops,
 	    {
 	      if (record_debug)
 		fprintf_unfiltered (gdb_stdlog,
-				    "Process record: break at 0x%s.\n",
-				    paddr_nz (tmp_pc));
-	      if (gdbarch_decr_pc_after_break (get_regcache_arch (regcache))
+				    "Process record: break at %s.\n",
+				    paddress (gdbarch, tmp_pc));
+	      if (gdbarch_decr_pc_after_break (gdbarch)
 		  && !record_resume_step)
 		regcache_write_pc (regcache,
 				   tmp_pc +
-				   gdbarch_decr_pc_after_break
-				   (get_regcache_arch (regcache)));
+				   gdbarch_decr_pc_after_break (gdbarch));
 	      goto replay_out;
 	    }
 	}
@@ -731,16 +731,16 @@ record_wait (struct target_ops *ops,
 	      if (record_debug > 1)
 		fprintf_unfiltered (gdb_stdlog,
 				    "Process record: record_mem %s to "
-				    "inferior addr = 0x%s len = %d.\n",
+				    "inferior addr = %s len = %d.\n",
 				    host_address_to_string (record_list),
-				    paddr_nz (record_list->u.mem.addr),
+				    paddress (gdbarch, record_list->u.mem.addr),
 				    record_list->u.mem.len);
 
 	      if (target_read_memory
 		  (record_list->u.mem.addr, mem, record_list->u.mem.len))
 		error (_("Process record: error reading memory at "
-			 "addr = 0x%s len = %d."),
-		       paddr_nz (record_list->u.mem.addr),
+			 "addr = %s len = %d."),
+		       paddress (gdbarch, record_list->u.mem.addr),
 		       record_list->u.mem.len);
 
 	      if (target_write_memory
@@ -748,8 +748,8 @@ record_wait (struct target_ops *ops,
 		   record_list->u.mem.len))
 		error (_
 		       ("Process record: error writing memory at "
-			"addr = 0x%s len = %d."),
-		       paddr_nz (record_list->u.mem.addr),
+			"addr = %s len = %d."),
+		       paddress (gdbarch, record_list->u.mem.addr),
 		       record_list->u.mem.len);
 
 	      memcpy (record_list->u.mem.val, mem, record_list->u.mem.len);
@@ -790,15 +790,14 @@ record_wait (struct target_ops *ops,
 		      if (record_debug)
 			fprintf_unfiltered (gdb_stdlog,
 					    "Process record: break "
-					    "at 0x%s.\n",
-					    paddr_nz (tmp_pc));
-		      if (gdbarch_decr_pc_after_break (get_regcache_arch (regcache))
+					    "at %s.\n",
+					    paddress (gdbarch, tmp_pc));
+		      if (gdbarch_decr_pc_after_break (gdbarch)
 			  && execution_direction == EXEC_FORWARD
 			  && !record_resume_step)
 			regcache_write_pc (regcache,
 					   tmp_pc +
-					   gdbarch_decr_pc_after_break
-					   (get_regcache_arch (regcache)));
+					   gdbarch_decr_pc_after_break (gdbarch));
 		      continue_flag = 0;
 		    }
 		}
@@ -996,8 +995,8 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 	  /* Let user choose if he wants to write memory or not.  */
 	  if (!nquery (_("Because GDB is in replay mode, writing to memory "
 		         "will make the execution log unusable from this "
-		         "point onward.  Write memory at address 0x%s?"),
-		       paddr_nz (offset)))
+		         "point onward.  Write memory at address %s?"),
+		       paddress (target_gdbarch, offset)))
 	    return -1;
 
 	  /* Destroy the record from here forward.  */

@@ -97,10 +97,10 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
            In the below, GDB's is used so that the address is
            consistent with the rest of GDB.  BFD's printf_vma() could
            have also been used. cagney 1999-09-01 */
-	printf_filtered ("%s\t: 0x%s .. 0x%s  ",
+	printf_filtered ("%s\t: %s .. %s  ",
 			 section_name,
-			 paddr (addr),
-			 paddr (addr + size));
+			 paddress (target_gdbarch, addr),
+			 paddress (target_gdbarch, addr + size));
 	gdb_flush (gdb_stdout);
 
 	data_count += size;
@@ -252,8 +252,8 @@ make_srec (char *srec, CORE_ADDR targ_addr, bfd *abfd, asection *sect,
     addr_size = 4;
   else
     internal_error (__FILE__, __LINE__,
-		    _("make_srec:  Bad address (0x%s), or bad flags (0x%x)."),
-		    paddr (targ_addr), flags);
+		    _("make_srec:  Bad address (%s), or bad flags (0x%x)."),
+		    paddress (target_gdbarch, targ_addr), flags);
 
   /* Now that we know the address size, we can figure out how much
      data this record can hold.  */

@@ -19,6 +19,7 @@
 #include "defs.h"
 #include "mi-cmds.h"
 #include "symtab.h"
+#include "objfiles.h"
 #include "ui-out.h"
 
 /* SYMBOL-LIST-LINES:
@@ -30,6 +31,7 @@
 void
 mi_cmd_symbol_list_lines (char *command, char **argv, int argc)
 {
+  struct gdbarch *gdbarch;
   char *filename;
   struct symtab *s;
   int i;
@@ -48,13 +50,14 @@ mi_cmd_symbol_list_lines (char *command, char **argv, int argc)
      sorted by increasing values in the symbol table, so no need to
      perform any other sorting. */
 
+  gdbarch = get_objfile_arch (s->objfile);
   cleanup_stack = make_cleanup_ui_out_list_begin_end (uiout, "lines");
 
   if (LINETABLE (s) != NULL && LINETABLE (s)->nitems > 0)
     for (i = 0; i < LINETABLE (s)->nitems; i++)
     {
       cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-      ui_out_field_core_addr (uiout, "pc", LINETABLE (s)->item[i].pc);
+      ui_out_field_core_addr (uiout, "pc", gdbarch, LINETABLE (s)->item[i].pc);
       ui_out_field_int (uiout, "line", LINETABLE (s)->item[i].line);
       do_cleanups (cleanup_tuple);
     }

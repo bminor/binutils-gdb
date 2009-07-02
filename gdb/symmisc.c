@@ -67,13 +67,15 @@ static void dump_objfile (struct objfile *);
 
 static int block_depth (struct block *);
 
-static void print_partial_symbols (struct partial_symbol **, int,
+static void print_partial_symbols (struct gdbarch *,
+				   struct partial_symbol **, int,
 				   char *, struct ui_file *);
 
 void _initialize_symmisc (void);
 
 struct print_symbol_args
   {
+    struct gdbarch *gdbarch;
     struct symbol *symbol;
     int depth;
     struct ui_file *outfile;
@@ -261,6 +263,7 @@ dump_objfile (struct objfile *objfile)
 static void
 dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct minimal_symbol *msymbol;
   int index;
   char ms_type;
@@ -310,7 +313,8 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	  break;
 	}
       fprintf_filtered (outfile, "[%2d] %c ", index, ms_type);
-      fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (msymbol)), outfile);
+      fputs_filtered (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (msymbol)),
+		      outfile);
       fprintf_filtered (outfile, " %s", SYMBOL_LINKAGE_NAME (msymbol));
       if (section)
 	fprintf_filtered (outfile, " section %s",
@@ -337,6 +341,7 @@ static void
 dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
 	      struct ui_file *outfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   int i;
 
   fprintf_filtered (outfile, "\nPartial symtab for source file %s ",
@@ -365,15 +370,16 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
       if (i != 0)
 	fprintf_filtered (outfile, ", ");
       wrap_here ("    ");
-      fputs_filtered (paddress (ANOFFSET (psymtab->section_offsets, i)),
+      fputs_filtered (paddress (gdbarch,
+				ANOFFSET (psymtab->section_offsets, i)),
 		      outfile);
     }
   fprintf_filtered (outfile, "\n");
 
   fprintf_filtered (outfile, "  Symbols cover text addresses ");
-  fputs_filtered (paddress (psymtab->textlow), outfile);
+  fputs_filtered (paddress (gdbarch, psymtab->textlow), outfile);
   fprintf_filtered (outfile, "-");
-  fputs_filtered (paddress (psymtab->texthigh), outfile);
+  fputs_filtered (paddress (gdbarch, psymtab->texthigh), outfile);
   fprintf_filtered (outfile, "\n");
   fprintf_filtered (outfile, "  Depends on %d other partial symtabs.\n",
 		    psymtab->number_of_dependencies);
@@ -386,13 +392,15 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
     }
   if (psymtab->n_global_syms > 0)
     {
-      print_partial_symbols (objfile->global_psymbols.list
+      print_partial_symbols (gdbarch,
+			     objfile->global_psymbols.list
 			     + psymtab->globals_offset,
 			     psymtab->n_global_syms, "Global", outfile);
     }
   if (psymtab->n_static_syms > 0)
     {
-      print_partial_symbols (objfile->static_psymbols.list
+      print_partial_symbols (gdbarch,
+			     objfile->static_psymbols.list
 			     + psymtab->statics_offset,
 			     psymtab->n_static_syms, "Static", outfile);
     }
@@ -403,6 +411,7 @@ static void
 dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 	       struct ui_file *outfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   int i;
   struct dict_iterator iter;
   int len, blen;
@@ -430,7 +439,7 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
       for (i = 0; i < len; i++)
 	{
 	  fprintf_filtered (outfile, " line %d at ", l->item[i].line);
-	  fputs_filtered (paddress (l->item[i].pc), outfile);
+	  fputs_filtered (paddress (gdbarch, l->item[i].pc), outfile);
 	  fprintf_filtered (outfile, "\n");
 	}
     }
@@ -458,9 +467,9 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 	     wants it.  */
 	  fprintf_filtered (outfile, ", %d syms/buckets in ",
 			    dict_size (BLOCK_DICT (b)));
-	  fputs_filtered (paddress (BLOCK_START (b)), outfile);
+	  fputs_filtered (paddress (gdbarch, BLOCK_START (b)), outfile);
 	  fprintf_filtered (outfile, "..");
-	  fputs_filtered (paddress (BLOCK_END (b)), outfile);
+	  fputs_filtered (paddress (gdbarch, BLOCK_END (b)), outfile);
 	  if (BLOCK_FUNCTION (b))
 	    {
 	      fprintf_filtered (outfile, ", function %s",
@@ -477,6 +486,7 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    {
 	      struct print_symbol_args s;
+	      s.gdbarch = gdbarch;
 	      s.symbol = sym;
 	      s.depth = depth + 1;
 	      s.outfile = outfile;
@@ -570,6 +580,7 @@ Arguments missing: an output file name and an optional symbol file name"));
 static int
 print_symbol (void *args)
 {
+  struct gdbarch *gdbarch = ((struct print_symbol_args *) args)->gdbarch;
   struct symbol *symbol = ((struct print_symbol_args *) args)->symbol;
   int depth = ((struct print_symbol_args *) args)->depth;
   struct ui_file *outfile = ((struct print_symbol_args *) args)->outfile;
@@ -579,7 +590,8 @@ print_symbol (void *args)
   if (SYMBOL_DOMAIN (symbol) == LABEL_DOMAIN)
     {
       fprintf_filtered (outfile, "label %s at ", SYMBOL_PRINT_NAME (symbol));
-      fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (symbol)), outfile);
+      fputs_filtered (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (symbol)),
+		      outfile);
       if (section)
 	fprintf_filtered (outfile, " section %s\n",
 			  bfd_section_name (section->the_bfd_section->owner,
@@ -644,7 +656,8 @@ print_symbol (void *args)
 
 	case LOC_STATIC:
 	  fprintf_filtered (outfile, "static at ");
-	  fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (symbol)), outfile);
+	  fputs_filtered (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (symbol)),
+			  outfile);
 	  if (section)
 	    fprintf_filtered (outfile, " section %s",
 			      bfd_section_name (section->the_bfd_section->owner,
@@ -682,7 +695,8 @@ print_symbol (void *args)
 
 	case LOC_LABEL:
 	  fprintf_filtered (outfile, "label at ");
-	  fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (symbol)), outfile);
+	  fputs_filtered (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (symbol)),
+			  outfile);
 	  if (section)
 	    fprintf_filtered (outfile, " section %s",
 			      bfd_section_name (section->the_bfd_section->owner,
@@ -693,10 +707,12 @@ print_symbol (void *args)
 	  fprintf_filtered (outfile, "block object ");
 	  gdb_print_host_address (SYMBOL_BLOCK_VALUE (symbol), outfile);
 	  fprintf_filtered (outfile, ", ");
-	  fputs_filtered (paddress (BLOCK_START (SYMBOL_BLOCK_VALUE (symbol))),
+	  fputs_filtered (paddress (gdbarch,
+				    BLOCK_START (SYMBOL_BLOCK_VALUE (symbol))),
 			  outfile);
 	  fprintf_filtered (outfile, "..");
-	  fputs_filtered (paddress (BLOCK_END (SYMBOL_BLOCK_VALUE (symbol))),
+	  fputs_filtered (paddress (gdbarch,
+				    BLOCK_END (SYMBOL_BLOCK_VALUE (symbol))),
 			  outfile);
 	  if (section)
 	    fprintf_filtered (outfile, " section %s",
@@ -773,7 +789,8 @@ maintenance_print_psymbols (char *args, int from_tty)
 }
 
 static void
-print_partial_symbols (struct partial_symbol **p, int count, char *what,
+print_partial_symbols (struct gdbarch *gdbarch,
+		       struct partial_symbol **p, int count, char *what,
 		       struct ui_file *outfile)
 {
   fprintf_filtered (outfile, "  %s partial symbols:\n", what);
@@ -855,7 +872,7 @@ print_partial_symbols (struct partial_symbol **p, int count, char *what,
 	  break;
 	}
       fputs_filtered (", ", outfile);
-      fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (*p)), outfile);
+      fputs_filtered (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (*p)), outfile);
       fprintf_filtered (outfile, "\n");
       p++;
     }
@@ -995,6 +1012,7 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
 
   ALL_OBJFILES (objfile)
     {
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
       struct partial_symtab *psymtab;
 
       /* We don't want to print anything for this objfile until we
@@ -1027,9 +1045,11 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
 	      printf_filtered ("    fullname %s\n",
 			       psymtab->fullname ? psymtab->fullname : "(null)");
 	      printf_filtered ("    text addresses ");
-	      fputs_filtered (paddress (psymtab->textlow), gdb_stdout);
+	      fputs_filtered (paddress (gdbarch, psymtab->textlow),
+			      gdb_stdout);
 	      printf_filtered (" -- ");
-	      fputs_filtered (paddress (psymtab->texthigh), gdb_stdout);
+	      fputs_filtered (paddress (gdbarch, psymtab->texthigh),
+			      gdb_stdout);
 	      printf_filtered ("\n");
 	      printf_filtered ("    globals ");
 	      if (psymtab->n_global_syms)
@@ -1097,6 +1117,7 @@ maintenance_check_symtabs (char *ignore, int from_tty)
 
   ALL_PSYMTABS (objfile, ps)
   {
+    struct gdbarch *gdbarch = get_objfile_arch (objfile);
     s = PSYMTAB_TO_SYMTAB (ps);
     if (s == NULL)
       continue;
@@ -1140,9 +1161,9 @@ maintenance_check_symtabs (char *ignore, int from_tty)
 	printf_filtered ("Psymtab ");
 	puts_filtered (ps->filename);
 	printf_filtered (" covers bad range ");
-	fputs_filtered (paddress (ps->textlow), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->textlow), gdb_stdout);
 	printf_filtered (" - ");
-	fputs_filtered (paddress (ps->texthigh), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->texthigh), gdb_stdout);
 	printf_filtered ("\n");
 	continue;
       }
@@ -1153,13 +1174,13 @@ maintenance_check_symtabs (char *ignore, int from_tty)
 	printf_filtered ("Psymtab ");
 	puts_filtered (ps->filename);
 	printf_filtered (" covers ");
-	fputs_filtered (paddress (ps->textlow), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->textlow), gdb_stdout);
 	printf_filtered (" - ");
-	fputs_filtered (paddress (ps->texthigh), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, ps->texthigh), gdb_stdout);
 	printf_filtered (" but symtab covers only ");
-	fputs_filtered (paddress (BLOCK_START (b)), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, BLOCK_START (b)), gdb_stdout);
 	printf_filtered (" - ");
-	fputs_filtered (paddress (BLOCK_END (b)), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, BLOCK_END (b)), gdb_stdout);
 	printf_filtered ("\n");
       }
   }

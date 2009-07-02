@@ -134,7 +134,7 @@ java_value_print (struct value *val, struct ui_file *stream,
 	      if (element == 0)
 		fprintf_filtered (stream, "null");
 	      else
-		fprintf_filtered (stream, "@%s", paddr_nz (element));
+		fprintf_filtered (stream, "@%s", paddress (gdbarch, element));
 
 	      things_printed++;
 	      i += reps;
@@ -461,6 +461,7 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 		struct ui_file *stream, int recurse,
 		const struct value_print_options *options)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
   unsigned int i = 0;	/* Number of characters printed */
   struct type *target_type;
   CORE_ADDR addr;
@@ -481,7 +482,8 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 	  /* Print vtable entry - we only get here if we ARE using
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.) */
 	  /* Extract an address, assume that it is unsigned.  */
-	  print_address_demangle (extract_unsigned_integer (valaddr, TYPE_LENGTH (type)),
+	  print_address_demangle (gdbarch,
+				  extract_unsigned_integer (valaddr, TYPE_LENGTH (type)),
 				  stream, demangle);
 	  break;
 	}
@@ -497,7 +499,7 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
       if (TYPE_CODE (target_type) == TYPE_CODE_FUNC)
 	{
 	  /* Try to print what function it points to.  */
-	  print_address_demangle (addr, stream, demangle);
+	  print_address_demangle (gdbarch, addr, stream, demangle);
 	  /* Return value is irrelevant except for string pointers.  */
 	  return (0);
 	}

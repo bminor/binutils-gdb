@@ -276,7 +276,7 @@ find_command (char *args, int from_tty)
       if (found <= 0)
 	break;
 
-      print_address (found_addr, gdb_stdout);
+      print_address (gdbarch, found_addr, gdb_stdout);
       printf_filtered ("\n");
       ++found_count;
       last_found_addr = found_addr;

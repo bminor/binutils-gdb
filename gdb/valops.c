@@ -702,8 +702,9 @@ value_fetch_lazy (struct value *val)
 		fprintf_unfiltered (gdb_stdlog, " register=%d",
 				    VALUE_REGNUM (new_val));
 	      else if (VALUE_LVAL (new_val) == lval_memory)
-		fprintf_unfiltered (gdb_stdlog, " address=0x%s",
-				    paddr_nz (value_address (new_val)));
+		fprintf_unfiltered (gdb_stdlog, " address=%s",
+				    paddress (gdbarch,
+					      value_address (new_val)));
 	      else
 		fprintf_unfiltered (gdb_stdlog, " computed");
 

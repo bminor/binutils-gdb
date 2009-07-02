@@ -196,8 +196,8 @@ try using the \"file\" command first."));
 	}
       args.bfd = bfd;
       args.sysinfo_ehdr = sysinfo_ehdr;
-      args.name = xstrprintf ("system-supplied DSO at 0x%s",
-		 paddr_nz (sysinfo_ehdr));
+      args.name = xstrprintf ("system-supplied DSO at %s",
+			      paddress (target_gdbarch, sysinfo_ehdr));
       /* Pass zero for FROM_TTY, because the action of loading the
 	 vsyscall DSO was not triggered by the user, even if the user
 	 typed "run" at the TTY.  */

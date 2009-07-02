@@ -219,11 +219,11 @@ memory_error (int status, CORE_ADDR memaddr)
        bounds.  */
     throw_error (MEMORY_ERROR,
 		 _("Cannot access memory at address %s"),
-		 paddress (memaddr));
+		 paddress (target_gdbarch, memaddr));
   else
     throw_error (MEMORY_ERROR,
 		 _("Error accessing memory address %s: %s."),
-		 paddress (memaddr),
+		 paddress (target_gdbarch, memaddr),
 		 safe_strerror (status));
 }
 

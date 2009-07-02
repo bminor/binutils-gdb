@@ -19,8 +19,10 @@
 #define WINDOWS_TDEP_H
 
 struct obstack;
+struct gdbarch;
 
 extern void windows_xfer_shared_library (const char* so_name,
 					 CORE_ADDR load_addr,
+					 struct gdbarch *gdbarch,
 					 struct obstack *obstack);
 #endif

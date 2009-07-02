@@ -569,7 +569,7 @@ dcache_info (char *exp, int tty)
 	{
 	  int j;
 	  printf_filtered (_("Line at %s, referenced %d times\n"),
-			   paddr (p->addr), p->refs);
+			   paddress (target_gdbarch, p->addr), p->refs);
 
 	  for (j = 0; j < LINE_SIZE; j++)
 	    printf_filtered ("%02x", p->data[j] & 0xFF);

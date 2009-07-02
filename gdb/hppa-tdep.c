@@ -461,8 +461,8 @@ find_unwind_entry (CORE_ADDR pc)
   struct hppa_objfile_private *priv;
 
   if (hppa_debug)
-    fprintf_unfiltered (gdb_stdlog, "{ find_unwind_entry 0x%s -> ",
-		        paddr_nz (pc));
+    fprintf_unfiltered (gdb_stdlog, "{ find_unwind_entry %s -> ",
+		        hex_string (pc));
 
   /* A function at address 0?  Not in HP-UX! */
   if (pc == (CORE_ADDR) 0)
@@ -496,8 +496,8 @@ find_unwind_entry (CORE_ADDR pc)
 	&& pc <= ui->cache->region_end)
       {
 	if (hppa_debug)
-	  fprintf_unfiltered (gdb_stdlog, "0x%s (cached) }\n",
-            paddr_nz ((uintptr_t) ui->cache));
+	  fprintf_unfiltered (gdb_stdlog, "%s (cached) }\n",
+            hex_string ((uintptr_t) ui->cache));
         return ui->cache;
       }
 
@@ -514,8 +514,8 @@ find_unwind_entry (CORE_ADDR pc)
 	  {
 	    ui->cache = &ui->table[middle];
 	    if (hppa_debug)
-	      fprintf_unfiltered (gdb_stdlog, "0x%s }\n",
-                paddr_nz ((uintptr_t) ui->cache));
+	      fprintf_unfiltered (gdb_stdlog, "%s }\n",
+                hex_string ((uintptr_t) ui->cache));
 	    return &ui->table[middle];
 	  }
 
@@ -1833,8 +1833,8 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
   if ((*this_cache) != NULL)
     {
       if (hppa_debug)
-        fprintf_unfiltered (gdb_stdlog, "base=0x%s (cached) }", 
-          paddr_nz (((struct hppa_frame_cache *)*this_cache)->base));
+        fprintf_unfiltered (gdb_stdlog, "base=%s (cached) }",
+          paddress (gdbarch, ((struct hppa_frame_cache *)*this_cache)->base));
       return (*this_cache);
     }
   cache = FRAME_OBSTACK_ZALLOC (struct hppa_frame_cache);
@@ -1935,7 +1935,8 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 
 	if (!safe_frame_unwind_memory (this_frame, pc, buf4, sizeof buf4)) 
 	  {
-	    error (_("Cannot read instruction at 0x%s."), paddr_nz (pc));
+	    error (_("Cannot read instruction at %s."),
+		   paddress (gdbarch, pc));
 	    return (*this_cache);
 	  }
 
@@ -2064,11 +2065,11 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
     CORE_ADDR fp;
 
     if (hppa_debug)
-      fprintf_unfiltered (gdb_stdlog, " (this_sp=0x%s, pc=0x%s, "
-		          "prologue_end=0x%s) ",
-		          paddr_nz (this_sp),
-			  paddr_nz (get_frame_pc (this_frame)),
-			  paddr_nz (prologue_end));
+      fprintf_unfiltered (gdb_stdlog, " (this_sp=%s, pc=%s, "
+		          "prologue_end=%s) ",
+		          paddress (gdbarch, this_sp),
+			  paddress (gdbarch, get_frame_pc (this_frame)),
+			  paddress (gdbarch, prologue_end));
 
      /* Check to see if a frame pointer is available, and use it for
         frame unwinding if it is.
@@ -2099,8 +2100,8 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
  	cache->base = fp;
  
  	if (hppa_debug)
-	  fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [frame pointer]",
- 	    paddr_nz (cache->base));
+	  fprintf_unfiltered (gdb_stdlog, " (base=%s) [frame pointer]",
+			      paddress (gdbarch, cache->base));
       }
      else if (u->Save_SP 
 	      && trad_frame_addr_p (cache->saved_regs, HPPA_SP_REGNUM))
@@ -2112,8 +2113,8 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 			    (this_sp, gdbarch_ptr_bit (gdbarch) / 8);
 
 	    if (hppa_debug)
-	      fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [saved]",
-			          paddr_nz (cache->base));
+	      fprintf_unfiltered (gdb_stdlog, " (base=%s) [saved]",
+			          paddress (gdbarch, cache->base));
       }
     else
       {
@@ -2121,8 +2122,8 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	   the SP back.  */
         cache->base = this_sp - frame_size;
 	if (hppa_debug)
-	  fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [unwind adjust]",
-			      paddr_nz (cache->base));
+	  fprintf_unfiltered (gdb_stdlog, " (base=%s) [unwind adjust]",
+			      paddress (gdbarch, cache->base));
 
       }
     trad_frame_set_value (cache->saved_regs, HPPA_SP_REGNUM, cache->base);
@@ -2206,8 +2207,8 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
   }
 
   if (hppa_debug)
-    fprintf_unfiltered (gdb_stdlog, "base=0x%s }", 
-      paddr_nz (((struct hppa_frame_cache *)*this_cache)->base));
+    fprintf_unfiltered (gdb_stdlog, "base=%s }",
+      paddress (gdbarch, ((struct hppa_frame_cache *)*this_cache)->base));
   return (*this_cache);
 }
 
@@ -2533,12 +2534,10 @@ unwind_command (char *exp, int from_tty)
 
   printf_unfiltered ("unwind_table_entry (0x%lx):\n", (unsigned long)u);
 
-  printf_unfiltered ("\tregion_start = ");
-  print_address (u->region_start, gdb_stdout);
+  printf_unfiltered ("\tregion_start = %s\n", hex_string (u->region_start));
   gdb_flush (gdb_stdout);
 
-  printf_unfiltered ("\n\tregion_end = ");
-  print_address (u->region_end, gdb_stdout);
+  printf_unfiltered ("\tregion_end = %s\n", hex_string (u->region_end));
   gdb_flush (gdb_stdout);
 
 #define pif(FLD) if (u->FLD) printf_unfiltered (" "#FLD);
@@ -2943,7 +2942,8 @@ hppa_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	  /* Sanity check: are we pointing to the PLT stub?  */
   	  if (!hppa_match_insns (pc, hppa_plt_stub, insn))
 	    {
-	      warning (_("Cannot resolve PLT stub at 0x%s."), paddr_nz (pc));
+	      warning (_("Cannot resolve PLT stub at %s."),
+		       paddress (gdbarch, pc));
 	      return 0;
 	    }
 

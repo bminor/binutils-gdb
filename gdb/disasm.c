@@ -63,7 +63,8 @@ dis_asm_memory_error (int status, bfd_vma memaddr,
 static void
 dis_asm_print_address (bfd_vma addr, struct disassemble_info *info)
 {
-  print_address (addr, info->stream);
+  struct gdbarch *gdbarch = info->application_data;
+  print_address (gdbarch, addr, info->stream);
 }
 
 static int
@@ -112,7 +113,7 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 	    num_displayed++;
 	}
       ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-      ui_out_field_core_addr (uiout, "address", pc);
+      ui_out_field_core_addr (uiout, "address", gdbarch, pc);
 
       if (!build_address_symbolic (pc, 0, &name, &offset, &filename,
 				   &line, &unmapped))
@@ -347,6 +348,7 @@ gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
   di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   di.endian = gdbarch_byte_order (gdbarch);
   di.endian_code = gdbarch_byte_order_for_code (gdbarch);
+  di.application_data = gdbarch;
   disassemble_init_for_target (&di);
   return di;
 }

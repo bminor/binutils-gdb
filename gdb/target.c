@@ -1464,7 +1464,7 @@ target_flash_erase (ULONGEST address, LONGEST length)
 	{
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog, "target_flash_erase (%s, %s)\n",
-                                paddr (address), phex (length, 0));
+                                hex_string (address), phex (length, 0));
 	  t->to_flash_erase (t, address, length);
 	  return;
 	}
@@ -2871,8 +2871,8 @@ deprecated_debug_xfer_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len,
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_xfer_memory (%s, xxx, %d, %s, xxx) = %d",
-		      paddress (memaddr), len, write ? "write" : "read",
-                      retval);
+		      paddress (target_gdbarch, memaddr), len,
+		      write ? "write" : "read", retval);
 
   if (retval > 0)
     {

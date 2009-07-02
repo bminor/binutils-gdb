@@ -96,6 +96,7 @@ int
 record_linux_system_call (int num, struct regcache *regcache,
 			  struct linux_record_tdep *tdep)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   uint32_t tmpu32;
 
   switch (num)
@@ -547,8 +548,8 @@ record_linux_system_call (int num, struct regcache *regcache,
 		if (record_debug)
 		  fprintf_unfiltered (gdb_stdlog,
 				      "Process record: error reading memory "
-				      "at addr = 0x%s len = %lu.\n",
-				      paddr_nz (tmpu32),
+				      "at addr = %s len = %lu.\n",
+				      paddress (gdbarch, tmpu32),
 				      (unsigned long)sizeof (sel));
 		return -1;
 	      }
@@ -624,10 +625,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 	target_terminal_ours ();
 	q =
 	  yquery (_("The next instruction is syscall munmap.  "
-		    "It will free the memory addr = 0x%s len = %u.  "
+		    "It will free the memory addr = %s len = %u.  "
 		    "It will make record target get error.  "
 		    "Do you want to stop the program?"),
-		  paddr_nz (tmpu32), (int)len);
+		  paddress (gdbarch, tmpu32), (int)len);
 	target_terminal_inferior ();
 	if (q)
 	  return 1;
@@ -687,8 +688,8 @@ record_linux_system_call (int num, struct regcache *regcache,
 		    if (record_debug)
 		      fprintf_unfiltered (gdb_stdlog,
 					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %lu.\n",
-					  paddr_nz (tmpu32),
+					  "memory at addr = %s len = %lu.\n",
+					  paddress (gdbarch, tmpu32),
 					  (unsigned long)sizeof (a));
 		    return -1;
 		  }
@@ -712,8 +713,8 @@ record_linux_system_call (int num, struct regcache *regcache,
 		    if (record_debug)
 		      fprintf_unfiltered (gdb_stdlog,
 					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %lu.\n",
-					  paddr_nz (tmpu32),
+					  "memory at addr = %s len = %lu.\n",
+					  paddress (gdbarch, tmpu32),
 				          (unsigned long)sizeof (a));
 		    return -1;
 		  }
@@ -737,8 +738,8 @@ record_linux_system_call (int num, struct regcache *regcache,
 		    if (record_debug)
 		      fprintf_unfiltered (gdb_stdlog,
 					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %lu.\n",
-					  paddr_nz (tmpu32),
+					  "memory at addr = %s len = %lu.\n",
+					  paddress (gdbarch, tmpu32),
 					  (unsigned long)sizeof (a));
 		    return -1;
 		  }
@@ -750,9 +751,9 @@ record_linux_system_call (int num, struct regcache *regcache,
 			if (record_debug)
 			  fprintf_unfiltered (gdb_stdlog,
 					      "Process record: error reading "
-					      "memory at addr = 0x%s "
+					      "memory at addr = %s "
 					      "len = %lu.\n",
-					      paddr_nz (a[2]),
+					      paddress (gdbarch, a[2]),
 					      (unsigned long)sizeof (a[2]));
 			return -1;
 		      }
@@ -774,8 +775,8 @@ record_linux_system_call (int num, struct regcache *regcache,
 		    if (record_debug)
 		      fprintf_unfiltered (gdb_stdlog,
 					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %lu.\n",
-					  paddr_nz (tmpu32),
+					  "memory at addr = %s len = %lu.\n",
+					  paddress (gdbarch, tmpu32),
 					  (unsigned long)sizeof (a));
 		    return -1;
 		  }
@@ -787,9 +788,9 @@ record_linux_system_call (int num, struct regcache *regcache,
 			if (record_debug)
 			  fprintf_unfiltered (gdb_stdlog,
 					      "Process record: error reading "
-					      "memory at addr = 0x%s "
+					      "memory at addr = %s "
 					      "len = %lu.\n",
-					      paddr_nz (a[2]),
+					      paddress (gdbarch, a[2]),
 					      (unsigned long)sizeof (a[2]));
 			return -1;
 		      }
@@ -820,8 +821,8 @@ record_linux_system_call (int num, struct regcache *regcache,
 		    if (record_debug)
 		      fprintf_unfiltered (gdb_stdlog,
 					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %lu.\n",
-					  paddr_nz (tmpu32),
+					  "memory at addr = %s len = %lu.\n",
+					  paddress (gdbarch, tmpu32),
 					  (unsigned long)sizeof (a));
 		    return -1;
 		  }
@@ -833,9 +834,9 @@ record_linux_system_call (int num, struct regcache *regcache,
 			if (record_debug)
 			  fprintf_unfiltered (gdb_stdlog,
 					      "Process record: error reading "
-					      "memory at addr = 0x%s "
+					      "memory at addr = %s "
 					      "len = %lu.\n",
-					      paddr_nz (a[4]),
+					      paddress (gdbarch, a[4]),
 					      (unsigned long)sizeof (av));
 			return -1;
 		      }
@@ -877,8 +878,8 @@ record_linux_system_call (int num, struct regcache *regcache,
 		    if (record_debug)
 		      fprintf_unfiltered (gdb_stdlog,
 					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %lu.\n",
-					  paddr_nz (tmpu32),
+					  "memory at addr = %s len = %lu.\n",
+					  paddress (gdbarch, tmpu32),
 					  (unsigned long)sizeof (a));
 		    return -1;
 		  }
@@ -892,9 +893,9 @@ record_linux_system_call (int num, struct regcache *regcache,
 			if (record_debug)
 			  fprintf_unfiltered (gdb_stdlog,
 					      "Process record: error reading "
-					      "memory at addr = 0x%s "
+					      "memory at addr = %s "
 					      "len = %lu.\n",
-					      paddr_nz (a[1]),
+					      paddress (gdbarch, a[1]),
 					      (unsigned long)sizeof (rec));
 			return -1;
 		      }
@@ -916,10 +917,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 				  fprintf_unfiltered (gdb_stdlog,
 						      "Process record: error "
 						      "reading memory at "
-						      "addr = 0x%s "
+						      "addr = %s "
 						      "len = %lu.\n",
-						      paddr_nz (rec.
-								msg_iov),
+						      paddress (gdbarch,
+								rec.msg_iov),
 						      (unsigned long)sizeof (iov));
 				return -1;
 			      }
@@ -1234,8 +1235,8 @@ record_linux_system_call (int num, struct regcache *regcache,
 		    if (record_debug)
 		      fprintf_unfiltered (gdb_stdlog,
 					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %lu.\n",
-					  paddr_nz (vec),
+					  "memory at addr = %s len = %lu.\n",
+					  paddress (gdbarch, vec),
 					  (unsigned long)sizeof (struct record_iovec));
 		    return -1;
 		  }
@@ -1783,8 +1784,8 @@ record_linux_system_call (int num, struct regcache *regcache,
 	      if (record_debug)
 		fprintf_unfiltered (gdb_stdlog,
 				    "Process record: error reading memory "
-				    "at addr = 0x%s len = %u.\n",
-				    paddr_nz (tmpu32),
+				    "at addr = %s len = %u.\n",
+				    paddress (gdbarch, tmpu32),
 				    (int)(nr * tdep->size_int));
 	      return -1;
 	    }

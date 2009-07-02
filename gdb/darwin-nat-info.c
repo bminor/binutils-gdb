@@ -576,8 +576,8 @@ darwin_debug_regions (task_t task, mach_vm_address_t address, int max)
       if (print)
         {
           printf_filtered (_("%s-%s %s/%s  %s %s %s"),
-                           paddr(prev_address),
-                           paddr(prev_address + prev_size),
+                           paddress (target_gdbarch, prev_address),
+                           paddress (target_gdbarch, prev_address + prev_size),
                            unparse_protection (prev_info.protection),
                            unparse_protection (prev_info.max_protection),
                            unparse_inheritance (prev_info.inheritance),
@@ -661,8 +661,8 @@ darwin_debug_regions_recurse (task_t task)
 	break;
       row_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "regions-row");
 
-      ui_out_field_core_addr (uiout, "start", r_start);
-      ui_out_field_core_addr (uiout, "end", r_start + r_size);
+      ui_out_field_core_addr (uiout, "start", target_gdbarch, r_start);
+      ui_out_field_core_addr (uiout, "end", target_gdbarch, r_start + r_size);
       ui_out_field_string (uiout, "min-prot", 
 			   unparse_protection (r_info.protection));
       ui_out_field_string (uiout, "max-prot", 

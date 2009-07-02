@@ -2877,6 +2877,7 @@ remote_check_symbols (struct objfile *objfile)
 	xsnprintf (msg, get_remote_packet_size (), "qSymbol::%s", &reply[8]);
       else
 	{
+	  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
 	  CORE_ADDR sym_addr = SYMBOL_VALUE_ADDRESS (sym);
 
 	  /* If this is a function address, return the start of code
@@ -2886,7 +2887,7 @@ remote_check_symbols (struct objfile *objfile)
 							 &current_target);
 
 	  xsnprintf (msg, get_remote_packet_size (), "qSymbol:%s:%s",
-		     paddr_nz (sym_addr), &reply[8]);
+		     phex_nz (sym_addr, addr_size), &reply[8]);
 	}
   
       putpkt (msg);
@@ -5818,6 +5819,7 @@ static void
 remote_flash_erase (struct target_ops *ops,
                     ULONGEST address, LONGEST length)
 {
+  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
   int saved_remote_timeout = remote_timeout;
   enum packet_result ret;
 
@@ -5826,7 +5828,7 @@ remote_flash_erase (struct target_ops *ops,
   remote_timeout = remote_flash_timeout;
 
   ret = remote_send_printf ("vFlashErase:%s,%s",
-			    paddr (address),
+			    phex (address, addr_size),
 			    phex (length, 4));
   switch (ret)
     {
@@ -7169,16 +7171,18 @@ compare_sections_command (char *args, int from_tty)
 
       getpkt (&rs->buf, &rs->buf_size, 0);
       if (rs->buf[0] == 'E')
-	error (_("target memory fault, section %s, range 0x%s -- 0x%s"),
-	       sectname, paddr (lma), paddr (lma + size));
+	error (_("target memory fault, section %s, range %s -- %s"), sectname,
+	       paddress (target_gdbarch, lma),
+	       paddress (target_gdbarch, lma + size));
       if (rs->buf[0] != 'C')
 	error (_("remote target does not support this operation"));
 
       for (target_crc = 0, tmp = &rs->buf[1]; *tmp; tmp++)
 	target_crc = target_crc * 16 + fromhex (*tmp);
 
-      printf_filtered ("Section %s, range 0x%s -- 0x%s: ",
-		       sectname, paddr (lma), paddr (lma + size));
+      printf_filtered ("Section %s, range %s -- %s: ", sectname,
+		       paddress (target_gdbarch, lma),
+		       paddress (target_gdbarch, lma + size));
       if (host_crc == target_crc)
 	printf_filtered ("matched.\n");
       else
@@ -7498,6 +7502,7 @@ remote_search_memory (struct target_ops* ops,
 		      const gdb_byte *pattern, ULONGEST pattern_len,
 		      CORE_ADDR *found_addrp)
 {
+  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
   struct remote_state *rs = get_remote_state ();
   int max_size = get_memory_write_packet_size ();
   struct packet_config *packet =
@@ -7536,7 +7541,7 @@ remote_search_memory (struct target_ops* ops,
   /* Insert header.  */
   i = snprintf (rs->buf, max_size, 
 		"qSearch:memory:%s;%s;",
-		paddr_nz (start_addr),
+		phex_nz (start_addr, addr_size),
 		phex_nz (search_space_len, sizeof (search_space_len)));
   max_size -= (i + 1);
 

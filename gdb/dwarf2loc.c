@@ -508,7 +508,7 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
 	fprintf_filtered (stream, 
 			  "a thread-local variable at offset %s in the "
 			  "thread-local storage for `%s'",
-			  paddr_nz (offset), objfile->name);
+			  paddress (gdbarch, offset), objfile->name);
 	return 1;
       }
   

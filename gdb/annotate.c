@@ -410,7 +410,8 @@ annotate_arg_end (void)
 }
 
 void
-annotate_source (char *filename, int line, int character, int mid, CORE_ADDR pc)
+annotate_source (char *filename, int line, int character, int mid,
+		 struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   if (annotation_level > 1)
     printf_filtered (("\n\032\032source "));
@@ -418,14 +419,15 @@ annotate_source (char *filename, int line, int character, int mid, CORE_ADDR pc)
     printf_filtered (("\032\032"));
 
   printf_filtered (("%s:%d:%d:%s:%s\n"), filename, line, character,
-		   mid ? "middle" : "beg", paddress (pc));
+		   mid ? "middle" : "beg", paddress (gdbarch, pc));
 }
 
 void
-annotate_frame_begin (int level, CORE_ADDR pc)
+annotate_frame_begin (int level, struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   if (annotation_level > 1)
-    printf_filtered (("\n\032\032frame-begin %d %s\n"), level, paddress (pc));
+    printf_filtered (("\n\032\032frame-begin %d %s\n"),
+		     level, paddress (gdbarch, pc));
 }
 
 void

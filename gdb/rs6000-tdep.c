@@ -983,8 +983,8 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog,
-			"displaced: (ppc) fixup (0x%s, 0x%s)\n",
-			paddr_nz (from), paddr_nz (to));
+			"displaced: (ppc) fixup (%s, %s)\n",
+			paddress (gdbarch, from), paddress (gdbarch, to));
 
 
   /* Handle PC-relative branch instructions.  */
@@ -1009,10 +1009,10 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 	      if (debug_displaced)
 		fprintf_unfiltered
 		  (gdb_stdlog,
-		   "displaced: (ppc) branch instruction: 0x%s\n"
-		   "displaced: (ppc) adjusted PC from 0x%s to 0x%s\n",
-		   paddr_nz (insn), paddr_nz (current_pc),
-		   paddr_nz (from + offset));
+		   "displaced: (ppc) branch instruction: %s\n"
+		   "displaced: (ppc) adjusted PC from %s to %s\n",
+		   paddress (gdbarch, insn), paddress (gdbarch, current_pc),
+		   paddress (gdbarch, from + offset));
 
 	      regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
 					      from + offset);
@@ -1040,8 +1040,8 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 					  from + PPC_INSN_SIZE);
 	  if (debug_displaced)
 		fprintf_unfiltered (gdb_stdlog,
-				    "displaced: (ppc) adjusted LR to 0x%s\n",
-				    paddr_nz (from + PPC_INSN_SIZE));
+				    "displaced: (ppc) adjusted LR to %s\n",
+				    paddress (gdbarch, from + PPC_INSN_SIZE));
 
 	}
     }

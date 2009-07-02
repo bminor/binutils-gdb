@@ -1250,7 +1250,8 @@ info_cb (const td_thrhandle_t *th, void *s)
 	    printf_filtered ("   startfunc: %s\n",
 			     SYMBOL_PRINT_NAME (msym));
 	  else
-	    printf_filtered ("   startfunc: 0x%s\n", paddr (ti.ti_startfunc));
+	    printf_filtered ("   startfunc: %s\n",
+			     paddress (target_gdbarch, ti.ti_startfunc));
 	}
 
       /* If thread is asleep, print function that went to sleep.  */
@@ -1262,7 +1263,8 @@ info_cb (const td_thrhandle_t *th, void *s)
 	    printf_filtered (" - Sleep func: %s\n",
 			     SYMBOL_PRINT_NAME (msym));
 	  else
-	    printf_filtered (" - Sleep func: 0x%s\n", paddr (ti.ti_startfunc));
+	    printf_filtered (" - Sleep func: %s\n",
+			     paddress (target_gdbarch, ti.ti_startfunc));
 	}
 
       /* Wrap up line, if necessary.  */

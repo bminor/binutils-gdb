@@ -306,11 +306,10 @@ print_bfd_flags (flagword flags)
 static void
 maint_print_section_info (const char *name, flagword flags, 
 			  CORE_ADDR addr, CORE_ADDR endaddr, 
-			  unsigned long filepos)
+			  unsigned long filepos, int addr_size)
 {
-  /* FIXME-32x64: Need paddress with field width.  */
-  printf_filtered ("    0x%s", paddr (addr));
-  printf_filtered ("->0x%s", paddr (endaddr));
+  printf_filtered ("    %s", hex_string_custom (addr, addr_size));
+  printf_filtered ("->%s", hex_string_custom (endaddr, addr_size));
   printf_filtered (" at %s",
 		   hex_string_custom ((unsigned long) filepos, 8));
   printf_filtered (": %s", name);
@@ -330,11 +329,14 @@ print_bfd_section_info (bfd *abfd,
       || match_substring ((char *) arg, name)
       || match_bfd_flags ((char *) arg, flags))
     {
+      struct gdbarch *gdbarch = gdbarch_from_bfd (abfd);
+      int addr_size = gdbarch_addr_bit (gdbarch) / 8;
       CORE_ADDR addr, endaddr;
 
       addr = bfd_section_vma (abfd, asect);
       endaddr = addr + bfd_section_size (abfd, asect);
-      maint_print_section_info (name, flags, addr, endaddr, asect->filepos);
+      maint_print_section_info (name, flags, addr, endaddr,
+				asect->filepos, addr_size);
     }
 }
 
@@ -350,10 +352,13 @@ print_objfile_section_info (bfd *abfd,
       || match_substring (string, name)
       || match_bfd_flags (string, flags))
     {
+      struct gdbarch *gdbarch = gdbarch_from_bfd (abfd);
+      int addr_size = gdbarch_addr_bit (gdbarch) / 8;
       maint_print_section_info (name, flags,
 				obj_section_addr (asect),
 				obj_section_endaddr (asect),
-				asect->the_bfd_section->filepos);
+				asect->the_bfd_section->filepos,
+				addr_size);
     }
 }
 
@@ -515,10 +520,10 @@ maintenance_translate_address (char *arg, int from_tty)
 	printf_filtered (_("%s + %s\n"), symbol_name, symbol_offset);
     }
   else if (sect)
-    printf_filtered (_("no symbol at %s:0x%s\n"),
-		     sect->the_bfd_section->name, paddr (address));
+    printf_filtered (_("no symbol at %s:%s\n"),
+		     sect->the_bfd_section->name, hex_string (address));
   else
-    printf_filtered (_("no symbol at 0x%s\n"), paddr (address));
+    printf_filtered (_("no symbol at %s\n"), hex_string (address));
 
   return;
 }

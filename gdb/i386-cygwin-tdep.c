@@ -113,6 +113,7 @@ i386_windows_regset_from_core_section (struct gdbarch *gdbarch,
 
 struct cpms_data
 {
+  struct gdbarch *gdbarch;
   struct obstack *obstack;
   int module_count;
 };
@@ -157,7 +158,8 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
 
   /* The first module is the .exe itself.  */
   if (data->module_count != 0)
-    windows_xfer_shared_library (module_name, base_addr, data->obstack);
+    windows_xfer_shared_library (module_name, base_addr,
+				 data->gdbarch, data->obstack);
   data->module_count++;
 
 out:
@@ -174,7 +176,7 @@ windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
   struct obstack obstack;
   const char *buf;
   LONGEST len_avail;
-  struct cpms_data data = { &obstack, 0 };
+  struct cpms_data data = { gdbarch, &obstack, 0 };
 
   obstack_init (&obstack);
   obstack_grow_str (&obstack, "<library-list>\n");

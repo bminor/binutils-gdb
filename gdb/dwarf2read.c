@@ -9534,7 +9534,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_ref_addr:
 	case DW_FORM_addr:
 	  fprintf_unfiltered (f, "address: ");
-	  fputs_filtered (paddress (DW_ADDR (&die->attrs[i])), f);
+	  fputs_filtered (hex_string (DW_ADDR (&die->attrs[i])), f);
 	  break;
 	case DW_FORM_block2:
 	case DW_FORM_block4:

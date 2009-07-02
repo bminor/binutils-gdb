@@ -488,10 +488,11 @@ ui_out_field_fmt_int (struct ui_out *uiout,
 void
 ui_out_field_core_addr (struct ui_out *uiout,
 			const char *fldname,
+			struct gdbarch *gdbarch,
 			CORE_ADDR address)
 {
   char addstr[20];
-  int addr_bit = gdbarch_addr_bit (current_gdbarch);
+  int addr_bit = gdbarch_addr_bit (gdbarch);
 
   if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
     address &= ((CORE_ADDR) 1 << addr_bit) - 1;

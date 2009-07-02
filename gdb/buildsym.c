@@ -235,6 +235,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      CORE_ADDR start, CORE_ADDR end,
 	      struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct pending *next, *next1;
   struct block *block;
   struct pending_block *pblock;
@@ -331,8 +332,9 @@ finish_block (struct symbol *symbol, struct pending **listhead,
       else
 	{
 	  complaint (&symfile_complaints,
-		     _("block end address 0x%s less than block start address 0x%s (patched it)"),
-		     paddr_nz (BLOCK_END (block)), paddr_nz (BLOCK_START (block)));
+		     _("block end address %s less than block start address %s (patched it)"),
+		     paddress (gdbarch, BLOCK_END (block)),
+		     paddress (gdbarch, BLOCK_START (block)));
 	}
       /* Better than nothing */
       BLOCK_END (block) = BLOCK_START (block);
@@ -368,11 +370,11 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      else
 		{
 		  complaint (&symfile_complaints,
-			     _("inner block (0x%s-0x%s) not inside outer block (0x%s-0x%s)"),
-			     paddr_nz (BLOCK_START (pblock->block)),
-			     paddr_nz (BLOCK_END (pblock->block)),
-			     paddr_nz (BLOCK_START (block)),
-			     paddr_nz (BLOCK_END (block)));
+			     _("inner block (%s-%s) not inside outer block (%s-%s)"),
+			     paddress (gdbarch, BLOCK_START (pblock->block)),
+			     paddress (gdbarch, BLOCK_END (pblock->block)),
+			     paddress (gdbarch, BLOCK_START (block)),
+			     paddress (gdbarch, BLOCK_END (block)));
 		}
 	      if (BLOCK_START (pblock->block) < BLOCK_START (block))
 		BLOCK_START (pblock->block) = BLOCK_START (block);

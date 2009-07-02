@@ -515,14 +515,9 @@ extern void gdb_print_host_address (const void *addr, struct ui_file *stream);
 
 extern const char *host_address_to_string (const void *addr);
 
-/* Convert a CORE_ADDR into a HEX string.  paddr() is like %08lx.
-   paddr_nz() is like %lx.  */
-extern int strlen_paddr (void);
-extern char *paddr (CORE_ADDR addr);
-extern char *paddr_nz (CORE_ADDR addr);
-
-/* Like 0x%lx.  */
-extern const char *paddress (CORE_ADDR addr);
+/* Convert CORE_ADDR to string in platform-specific manner.
+   This is usually formatted similar to 0x%lx.  */
+extern const char *paddress (struct gdbarch *gdbarch, CORE_ADDR addr);
 
 /* %d for LONGEST */
 extern char *plongest (LONGEST l);
@@ -533,8 +528,8 @@ extern char *phex (ULONGEST l, int sizeof_l);
 extern char *phex_nz (ULONGEST l, int sizeof_l);
 extern char *int_string (LONGEST, int, int, int, int);
 
-/* Like paddr() only print/scan raw CORE_ADDR.  The output from
-   core_addr_to_string() can be passed direct to
+/* Convert a CORE_ADDR into a HEX string with leading zeros.
+   The output from core_addr_to_string() can be passed direct to
    string_to_core_addr().  */
 extern const char *core_addr_to_string (const CORE_ADDR addr);
 extern const char *core_addr_to_string_nz (const CORE_ADDR addr);
@@ -612,7 +607,7 @@ extern int build_address_symbolic (CORE_ADDR addr,
 				   int *line, 	
 				   int *unmapped);
 
-extern void print_address (CORE_ADDR, struct ui_file *);
+extern void print_address (struct gdbarch *, CORE_ADDR, struct ui_file *);
 
 /* From source.c */
 

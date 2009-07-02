@@ -115,7 +115,7 @@ extern void ui_out_field_fmt_int (struct ui_out *uiout, int width,
 		 		  int value);
 
 extern void ui_out_field_core_addr (struct ui_out *uiout, const char *fldname,
-				    CORE_ADDR address);
+				    struct gdbarch *gdbarch, CORE_ADDR address);
 
 extern void ui_out_field_string (struct ui_out * uiout, const char *fldname,
 				 const char *string);

@@ -10301,7 +10301,7 @@ print_one_exception (enum exception_catchpoint_kind ex,
   if (opts.addressprint)
     {
       annotate_field (4);
-      ui_out_field_core_addr (uiout, "addr", b->loc->address);
+      ui_out_field_core_addr (uiout, "addr", b->loc->gdbarch, b->loc->address);
     }
 
   annotate_field (5);

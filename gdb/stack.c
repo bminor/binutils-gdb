@@ -520,6 +520,7 @@ void
 print_frame_info (struct frame_info *frame, int print_level,
 		  enum print_what print_what, int print_args)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   struct symtab_and_line sal;
   int source_print;
   int location_print;
@@ -532,7 +533,7 @@ print_frame_info (struct frame_info *frame, int print_level,
 	= make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
 
       annotate_frame_begin (print_level ? frame_relative_level (frame) : 0,
-			    get_frame_pc (frame));
+			    gdbarch, get_frame_pc (frame));
 
       /* Do this regardless of SOURCE because we don't have any source
          to list for this frame.  */
@@ -545,7 +546,8 @@ print_frame_info (struct frame_info *frame, int print_level,
       if (ui_out_is_mi_like_p (uiout))
         {
           annotate_frame_address ();
-          ui_out_field_core_addr (uiout, "addr", get_frame_pc (frame));
+          ui_out_field_core_addr (uiout, "addr",
+				  gdbarch, get_frame_pc (frame));
           annotate_frame_address_end ();
         }
 
@@ -624,7 +626,8 @@ print_frame_info (struct frame_info *frame, int print_level,
 		 ability to decide for themselves if it is desired.  */
 	      if (opts.addressprint && mid_statement)
 		{
-		  ui_out_field_core_addr (uiout, "addr", get_frame_pc (frame));
+		  ui_out_field_core_addr (uiout, "addr",
+					  gdbarch, get_frame_pc (frame));
 		  ui_out_text (uiout, "\t");
 		}
 
@@ -735,6 +738,7 @@ print_frame (struct frame_info *frame, int print_level,
 	     enum print_what print_what, int print_args,
 	     struct symtab_and_line sal)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   char *funname = NULL;
   enum language funlang = language_unknown;
   struct ui_stream *stb;
@@ -747,7 +751,7 @@ print_frame (struct frame_info *frame, int print_level,
   find_frame_funname (frame, &funname, &funlang);
 
   annotate_frame_begin (print_level ? frame_relative_level (frame) : 0,
-			get_frame_pc (frame));
+			gdbarch, get_frame_pc (frame));
 
   list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
 
@@ -763,7 +767,7 @@ print_frame (struct frame_info *frame, int print_level,
 	|| print_what == LOC_AND_ADDRESS)
       {
 	annotate_frame_address ();
-	ui_out_field_core_addr (uiout, "addr", get_frame_pc (frame));
+	ui_out_field_core_addr (uiout, "addr", gdbarch, get_frame_pc (frame));
 	annotate_frame_address_end ();
 	ui_out_text (uiout, " in ");
       }
@@ -1052,10 +1056,10 @@ frame_info (char *addr_exp, int from_tty)
     {
       printf_filtered (_("Stack frame at "));
     }
-  fputs_filtered (paddress (get_frame_base (fi)), gdb_stdout);
+  fputs_filtered (paddress (gdbarch, get_frame_base (fi)), gdb_stdout);
   printf_filtered (":\n");
   printf_filtered (" %s = ", pc_regname);
-  fputs_filtered (paddress (get_frame_pc (fi)), gdb_stdout);
+  fputs_filtered (paddress (gdbarch, get_frame_pc (fi)), gdb_stdout);
 
   wrap_here ("   ");
   if (funname)
@@ -1070,7 +1074,7 @@ frame_info (char *addr_exp, int from_tty)
   puts_filtered ("; ");
   wrap_here ("    ");
   printf_filtered ("saved %s ", pc_regname);
-  fputs_filtered (paddress (frame_unwind_caller_pc (fi)), gdb_stdout);
+  fputs_filtered (paddress (gdbarch, frame_unwind_caller_pc (fi)), gdb_stdout);
   printf_filtered ("\n");
 
   if (calling_frame_info == NULL)
@@ -1088,7 +1092,7 @@ frame_info (char *addr_exp, int from_tty)
   else
     {
       printf_filtered (" called by frame at ");
-      fputs_filtered (paddress (get_frame_base (calling_frame_info)),
+      fputs_filtered (paddress (gdbarch, get_frame_base (calling_frame_info)),
 		      gdb_stdout);
     }
   if (get_next_frame (fi) && calling_frame_info)
@@ -1097,7 +1101,7 @@ frame_info (char *addr_exp, int from_tty)
   if (get_next_frame (fi))
     {
       printf_filtered (" caller of frame at ");
-      fputs_filtered (paddress (get_frame_base (get_next_frame (fi))),
+      fputs_filtered (paddress (gdbarch, get_frame_base (get_next_frame (fi))),
 		      gdb_stdout);
     }
   if (get_next_frame (fi) || calling_frame_info)
@@ -1118,7 +1122,7 @@ frame_info (char *addr_exp, int from_tty)
     else
       {
 	printf_filtered (" Arglist at ");
-	fputs_filtered (paddress (arg_list), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, arg_list), gdb_stdout);
 	printf_filtered (",");
 
 	if (!gdbarch_frame_num_args_p (gdbarch))
@@ -1150,7 +1154,7 @@ frame_info (char *addr_exp, int from_tty)
     else
       {
 	printf_filtered (" Locals at ");
-	fputs_filtered (paddress (arg_list), gdb_stdout);
+	fputs_filtered (paddress (gdbarch, arg_list), gdb_stdout);
 	printf_filtered (",");
       }
   }
@@ -1192,14 +1196,14 @@ frame_info (char *addr_exp, int from_tty)
 					   register_size (gdbarch,
 					   gdbarch_sp_regnum (gdbarch)));
 	    printf_filtered (" Previous frame's sp is ");
-	    fputs_filtered (paddress (sp), gdb_stdout);
+	    fputs_filtered (paddress (gdbarch, sp), gdb_stdout);
 	    printf_filtered ("\n");
 	    need_nl = 0;
 	  }
 	else if (!optimized && lval == lval_memory)
 	  {
 	    printf_filtered (" Previous frame's sp at ");
-	    fputs_filtered (paddress (addr), gdb_stdout);
+	    fputs_filtered (paddress (gdbarch, addr), gdb_stdout);
 	    printf_filtered ("\n");
 	    need_nl = 0;
 	  }
@@ -1234,7 +1238,7 @@ frame_info (char *addr_exp, int from_tty)
 	      wrap_here (" ");
 	      printf_filtered (" %s at ",
 			       gdbarch_register_name (gdbarch, i));
-	      fputs_filtered (paddress (addr), gdb_stdout);
+	      fputs_filtered (paddress (gdbarch, addr), gdb_stdout);
 	      count++;
 	    }
 	}
@@ -1485,8 +1489,8 @@ print_block_frame_locals (struct block *b, struct frame_info *frame,
 /* Same, but print labels.  */
 
 static int
-print_block_frame_labels (struct block *b, int *have_default,
-			  struct ui_file *stream)
+print_block_frame_labels (struct gdbarch *gdbarch, struct block *b,
+			  int *have_default, struct ui_file *stream)
 {
   struct dict_iterator iter;
   struct symbol *sym;
@@ -1511,7 +1515,8 @@ print_block_frame_labels (struct block *b, int *have_default,
 	  if (opts.addressprint)
 	    {
 	      fprintf_filtered (stream, " ");
-	      fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (sym)), stream);
+	      fputs_filtered (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (sym)),
+			      stream);
 	    }
 	  fprintf_filtered (stream, " in file %s, line %d\n",
 			    sal.symtab->filename, sal.line);
@@ -1568,6 +1573,7 @@ print_frame_label_vars (struct frame_info *frame, int this_level_only,
 #else
   struct blockvector *bl;
   struct block *block = get_frame_block (frame, 0);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   int values_printed = 0;
   int index, have_default = 0;
   char *blocks_printed;
@@ -1605,7 +1611,8 @@ print_frame_label_vars (struct frame_info *frame, int this_level_only,
 	{
 	  if (blocks_printed[index] == 0)
 	    {
-	      if (print_block_frame_labels (BLOCKVECTOR_BLOCK (bl, index),
+	      if (print_block_frame_labels (gdbarch,
+					    BLOCKVECTOR_BLOCK (bl, index),
 					    &have_default, stream))
 		values_printed = 1;
 	      blocks_printed[index] = 1;

@@ -2492,7 +2492,8 @@ gnu_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
   else
     {
       inf_debug (gnu_current_inf, "%s %s[%d] %s %s",
-		 write ? "writing" : "reading", paddr (memaddr), len,
+		 write ? "writing" : "reading",
+		 paddress (target_gdbarch, memaddr), len,
 		 write ? "<--" : "-->", host_address_to_string (myaddr));
       if (write)
 	return gnu_write_inferior (task, memaddr, myaddr, len);

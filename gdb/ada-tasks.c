@@ -752,7 +752,8 @@ info_task (char *taskno_str, int from_tty)
   task_info = VEC_index (ada_task_info_s, task_list, taskno - 1);
 
   /* Print the Ada task ID.  */
-  printf_filtered (_("Ada Task: %s\n"), paddr_nz (task_info->task_id));
+  printf_filtered (_("Ada Task: %s\n"),
+		   paddress (target_gdbarch, task_info->task_id));
 
   /* Print the name of the task.  */
   if (task_info->name[0] != '\0')

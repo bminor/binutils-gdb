@@ -604,7 +604,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
       print_longest (stream, 'd', 1, ptr_value);
     }
   else
-    print_address_demangle (ptr_value, stream, demangle);
+    print_address_demangle (gdbarch, ptr_value, stream, demangle);
 
   if (adjustment)
     {

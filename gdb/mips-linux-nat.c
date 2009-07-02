@@ -595,7 +595,8 @@ mips_show_dr (const char *func, CORE_ADDR addr,
 
   puts_unfiltered (func);
   if (addr || len)
-    printf_unfiltered (" (addr=0x%s, len=%d, type=%s)", paddr (addr), len,
+    printf_unfiltered (" (addr=%s, len=%d, type=%s)",
+		       paddress (target_gdbarch, addr), len,
 		       type == hw_write ? "data-write"
 		       : (type == hw_read ? "data-read"
 			  : (type == hw_access ? "data-read/write"
@@ -604,9 +605,11 @@ mips_show_dr (const char *func, CORE_ADDR addr,
   puts_unfiltered (":\n");
 
   for (i = 0; i < MAX_DEBUG_REGISTER; i++)
-    printf_unfiltered ("\tDR%d: lo=0x%s, hi=0x%s\n",
-		       i, paddr (get_watchlo (&watch_mirror, i)),
-		       paddr (get_watchhi (&watch_mirror, i)));
+    printf_unfiltered ("\tDR%d: lo=%s, hi=%s\n", i,
+		       paddress (target_gdbarch,
+				 get_watchlo (&watch_mirror, i)),
+		       paddress (target_gdbarch,
+				 get_watchhi (&watch_mirror, i)));
 }
 
 /* Return 1 if watch registers are usable.  Cached information is used

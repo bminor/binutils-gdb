@@ -170,7 +170,7 @@ scm_ipruk (char *hdr, struct type *type, LONGEST ptr,
   if (SCM_CELLP (ptr))
     fprintf_filtered (stream, " (0x%lx . 0x%lx) @",
 		      (long) SCM_CAR (ptr), (long) SCM_CDR (ptr));
-  fprintf_filtered (stream, " 0x%s>", paddr_nz (ptr));
+  fprintf_filtered (stream, " 0x%s>", phex_nz (ptr, SCM_SIZE));
 #undef SCM_SIZE
 }
 
@@ -245,7 +245,7 @@ taloop:
 			     (sizet) LENGTH (name),
 			   port);
 #endif
-	      fprintf_filtered (stream, " #X%s>", paddr_nz (svalue));
+	      fprintf_filtered (stream, " #X%s>", phex_nz (svalue, SCM_SIZE));
 	      break;
 	    }
 	case scm_tcs_cons_imcar:

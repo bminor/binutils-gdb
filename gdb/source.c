@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "symtab.h"
 #include "expression.h"
 #include "language.h"
@@ -1295,7 +1296,7 @@ identify_source_line (struct symtab *s, int line, int mid_statement,
     /* Don't index off the end of the line_charpos array.  */
     return 0;
   annotate_source (s->fullname, line, s->line_charpos[line - 1],
-		   mid_statement, pc);
+		   mid_statement, get_objfile_arch (s->objfile), pc);
 
   current_source_line = line;
   first_line_listed = line;
@@ -1474,6 +1475,8 @@ line_info (char *arg, int from_tty)
 
       if (sal.symtab == 0)
 	{
+	  struct gdbarch *gdbarch = get_current_arch ();
+
 	  printf_filtered (_("No line number information available"));
 	  if (sal.pc != 0)
 	    {
@@ -1482,7 +1485,7 @@ line_info (char *arg, int from_tty)
 	         address.  */
 	      printf_filtered (" for address ");
 	      wrap_here ("  ");
-	      print_address (sal.pc, gdb_stdout);
+	      print_address (gdbarch, sal.pc, gdb_stdout);
 	    }
 	  else
 	    printf_filtered (".");
@@ -1491,13 +1494,15 @@ line_info (char *arg, int from_tty)
       else if (sal.line > 0
 	       && find_line_pc_range (sal, &start_pc, &end_pc))
 	{
+	  struct gdbarch *gdbarch = get_objfile_arch (sal.symtab->objfile);
+
 	  if (start_pc == end_pc)
 	    {
 	      printf_filtered ("Line %d of \"%s\"",
 			       sal.line, sal.symtab->filename);
 	      wrap_here ("  ");
 	      printf_filtered (" is at address ");
-	      print_address (start_pc, gdb_stdout);
+	      print_address (gdbarch, start_pc, gdb_stdout);
 	      wrap_here ("  ");
 	      printf_filtered (" but contains no code.\n");
 	    }
@@ -1507,15 +1512,15 @@ line_info (char *arg, int from_tty)
 			       sal.line, sal.symtab->filename);
 	      wrap_here ("  ");
 	      printf_filtered (" starts at address ");
-	      print_address (start_pc, gdb_stdout);
+	      print_address (gdbarch, start_pc, gdb_stdout);
 	      wrap_here ("  ");
 	      printf_filtered (" and ends at ");
-	      print_address (end_pc, gdb_stdout);
+	      print_address (gdbarch, end_pc, gdb_stdout);
 	      printf_filtered (".\n");
 	    }
 
 	  /* x/i should display this line's code.  */
-	  set_next_address (get_objfile_arch (sal.symtab->objfile), start_pc);
+	  set_next_address (gdbarch, start_pc);
 
 	  /* Repeating "info line" should do the following line.  */
 	  last_line_listed = sal.line + 1;

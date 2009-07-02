@@ -237,14 +237,14 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 	  fprintf_filtered (file, "%s\n", plongest (val));
 	  break;
 	case hex:
-	  fprintf_filtered (file, "0x%s\n", paddr_nz (val));
+	  fprintf_filtered (file, "%s\n", paddress (target_gdbarch, val));
 	  break;
 	case str:
 	  {
 	    struct value_print_options opts;
 	    get_user_print_options (&opts);
 	    if (opts.addressprint)
-	      fprintf_filtered (file, "0x%s", paddr_nz (val));
+	      fprintf_filtered (file, "%s", paddress (target_gdbarch, val));
 	    val_print_string (builtin_type (target_gdbarch)->builtin_char,
 			      val, -1, file, &opts);
 	    fprintf_filtered (file, "\n");

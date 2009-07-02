@@ -449,7 +449,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
     case 'a':
       {
 	CORE_ADDR addr = unpack_pointer (type, valaddr);
-	print_address (addr, stream);
+	print_address (gdbarch, addr, stream);
       }
       break;
 
@@ -709,9 +709,10 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
    <SYMBOL + OFFSET> after the number.  */
 
 void
-print_address (CORE_ADDR addr, struct ui_file *stream)
+print_address (struct gdbarch *gdbarch,
+	       CORE_ADDR addr, struct ui_file *stream)
 {
-  fputs_filtered (paddress (addr), stream);
+  fputs_filtered (paddress (gdbarch, addr), stream);
   print_address_symbolic (addr, stream, asm_demangle, " ");
 }
 
@@ -721,8 +722,8 @@ print_address (CORE_ADDR addr, struct ui_file *stream)
    or not.  */
 
 void
-print_address_demangle (CORE_ADDR addr, struct ui_file *stream,
-			int do_demangle)
+print_address_demangle (struct gdbarch *gdbarch, CORE_ADDR addr,
+			struct ui_file *stream, int do_demangle)
 {
   struct value_print_options opts;
   get_user_print_options (&opts);
@@ -732,7 +733,7 @@ print_address_demangle (CORE_ADDR addr, struct ui_file *stream,
     }
   else if (opts.addressprint)
     {
-      fputs_filtered (paddress (addr), stream);
+      fputs_filtered (paddress (gdbarch, addr), stream);
       print_address_symbolic (addr, stream, do_demangle, " ");
     }
   else
@@ -807,7 +808,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
   while (count > 0)
     {
       QUIT;
-      print_address (next_address, gdb_stdout);
+      print_address (next_gdbarch, next_address, gdb_stdout);
       printf_filtered (":");
       for (i = maxelts;
 	   i > 0 && count > 0;
@@ -1140,20 +1141,21 @@ address_info (char *exp, int from_tty)
 
       if (msymbol != NULL)
 	{
+	  gdbarch = get_objfile_arch (msymbol_objfile (msymbol));
 	  load_addr = SYMBOL_VALUE_ADDRESS (msymbol);
 
 	  printf_filtered ("Symbol \"");
 	  fprintf_symbol_filtered (gdb_stdout, exp,
 				   current_language->la_language, DMGL_ANSI);
 	  printf_filtered ("\" is at ");
-	  fputs_filtered (paddress (load_addr), gdb_stdout);
+	  fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
 	  printf_filtered (" in a file compiled without debugging");
 	  section = SYMBOL_OBJ_SECTION (msymbol);
 	  if (section_is_overlay (section))
 	    {
 	      load_addr = overlay_unmapped_address (load_addr, section);
 	      printf_filtered (",\n -- loaded at ");
-	      fputs_filtered (paddress (load_addr), gdb_stdout);
+	      fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
 	      printf_filtered (" in overlay section %s",
 			       section->the_bfd_section->name);
 	    }
@@ -1181,13 +1183,13 @@ address_info (char *exp, int from_tty)
 
     case LOC_LABEL:
       printf_filtered ("a label at address ");
-      fputs_filtered (paddress (load_addr = SYMBOL_VALUE_ADDRESS (sym)),
-		      gdb_stdout);
+      load_addr = SYMBOL_VALUE_ADDRESS (sym);
+      fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
 	  printf_filtered (",\n -- loaded at ");
-	  fputs_filtered (paddress (load_addr), gdb_stdout);
+	  fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
 	  printf_filtered (" in overlay section %s",
 			   section->the_bfd_section->name);
 	}
@@ -1221,13 +1223,13 @@ address_info (char *exp, int from_tty)
 
     case LOC_STATIC:
       printf_filtered (_("static storage at address "));
-     fputs_filtered (paddress (load_addr = SYMBOL_VALUE_ADDRESS (sym)),
-		     gdb_stdout);
+      load_addr = SYMBOL_VALUE_ADDRESS (sym);
+      fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
 	  printf_filtered (_(",\n -- loaded at "));
-	  fputs_filtered (paddress (load_addr), gdb_stdout);
+	  fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
 	  printf_filtered (_(" in overlay section %s"),
 			   section->the_bfd_section->name);
 	}
@@ -1259,12 +1261,12 @@ address_info (char *exp, int from_tty)
     case LOC_BLOCK:
       printf_filtered (_("a function at address "));
       load_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-      fputs_filtered (paddress (load_addr), gdb_stdout);
+      fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
 	  printf_filtered (_(",\n -- loaded at "));
-	  fputs_filtered (paddress (load_addr), gdb_stdout);
+	  fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
 	  printf_filtered (_(" in overlay section %s"),
 			   section->the_bfd_section->name);
 	}
@@ -1286,16 +1288,17 @@ address_info (char *exp, int from_tty)
 		&& (section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
 	      printf_filtered (_("a thread-local variable at offset %s "
 				 "in the thread-local storage for `%s'"),
-			       paddr_nz (load_addr), section->objfile->name);
+			       paddress (gdbarch, load_addr),
+			       section->objfile->name);
 	    else
 	      {
 		printf_filtered (_("static storage at address "));
-		fputs_filtered (paddress (load_addr), gdb_stdout);
+		fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
 		if (section_is_overlay (section))
 		  {
 		    load_addr = overlay_unmapped_address (load_addr, section);
 		    printf_filtered (_(",\n -- loaded at "));
-		    fputs_filtered (paddress (load_addr), gdb_stdout);
+		    fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
 		    printf_filtered (_(" in overlay section %s"),
 				     section->the_bfd_section->name);
 		  }

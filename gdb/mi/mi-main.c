@@ -935,13 +935,15 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
     error ("Unable to read memory.");
 
   /* Output the header information.  */
-  ui_out_field_core_addr (uiout, "addr", addr);
+  ui_out_field_core_addr (uiout, "addr", gdbarch, addr);
   ui_out_field_int (uiout, "nr-bytes", nr_bytes);
   ui_out_field_int (uiout, "total-bytes", total_bytes);
-  ui_out_field_core_addr (uiout, "next-row", addr + word_size * nr_cols);
-  ui_out_field_core_addr (uiout, "prev-row", addr - word_size * nr_cols);
-  ui_out_field_core_addr (uiout, "next-page", addr + total_bytes);
-  ui_out_field_core_addr (uiout, "prev-page", addr - total_bytes);
+  ui_out_field_core_addr (uiout, "next-row",
+			  gdbarch, addr + word_size * nr_cols);
+  ui_out_field_core_addr (uiout, "prev-row",
+			  gdbarch, addr - word_size * nr_cols);
+  ui_out_field_core_addr (uiout, "next-page", gdbarch, addr + total_bytes);
+  ui_out_field_core_addr (uiout, "prev-page", gdbarch, addr - total_bytes);
 
   /* Build the result as a two dimentional table.  */
   {
@@ -961,7 +963,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	struct value_print_options opts;
 
 	cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-	ui_out_field_core_addr (uiout, "addr", addr + row_byte);
+	ui_out_field_core_addr (uiout, "addr", gdbarch, addr + row_byte);
 	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr + row_byte); */
 	cleanup_list_data = make_cleanup_ui_out_list_begin_end (uiout, "data");
 	get_formatted_print_options (&opts, word_format);

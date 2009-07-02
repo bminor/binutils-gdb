@@ -639,28 +639,28 @@ som_current_sos (void)
 	    lmi->tsd_start_addr = extract_unsigned_integer (tsdbuf, 4);
 
 #ifdef SOLIB_SOM_DBG
-	    printf ("\n+ library \"%s\" is described at 0x%s\n", new->so_name, 
-	    	    paddr_nz (lm));
+	    printf ("\n+ library \"%s\" is described at %s\n", new->so_name,
+	    	    paddress (target_gdbarch, lm));
 	    printf ("  'version' is %d\n", new->lm_info->struct_version);
 	    printf ("  'bind_mode' is %d\n", new->lm_info->bind_mode);
 	    printf ("  'library_version' is %d\n", 
 	    	    new->lm_info->library_version);
-	    printf ("  'text_addr' is 0x%s\n", 
-	    	    paddr_nz (new->lm_info->text_addr));
-	    printf ("  'text_link_addr' is 0x%s\n", 
-	    	    paddr_nz (new->lm_info->text_link_addr));
-	    printf ("  'text_end' is 0x%s\n", 
-	    	    paddr_nz (new->lm_info->text_end));
-	    printf ("  'data_start' is 0x%s\n", 
-	    	    paddr_nz (new->lm_info->data_start));
-	    printf ("  'bss_start' is 0x%s\n", 
-	    	    paddr_nz (new->lm_info->bss_start));
-	    printf ("  'data_end' is 0x%s\n", 
-	    	    paddr_nz (new->lm_info->data_end));
-	    printf ("  'got_value' is %s\n", 
-	    	    paddr_nz (new->lm_info->got_value));
-	    printf ("  'tsd_start_addr' is 0x%s\n", 
-	    	    paddr_nz (new->lm_info->tsd_start_addr));
+	    printf ("  'text_addr' is %s\n",
+	    	    paddress (target_gdbarch, new->lm_info->text_addr));
+	    printf ("  'text_link_addr' is %s\n",
+	    	    paddress (target_gdbarch, new->lm_info->text_link_addr));
+	    printf ("  'text_end' is %s\n",
+	    	    paddress (target_gdbarch, new->lm_info->text_end));
+	    printf ("  'data_start' is %s\n",
+	    	    paddress (target_gdbarch, new->lm_info->data_start));
+	    printf ("  'bss_start' is %s\n",
+	    	    paddress (target_gdbarch, new->lm_info->bss_start));
+	    printf ("  'data_end' is %s\n",
+	    	    paddress (target_gdbarch, new->lm_info->data_end));
+	    printf ("  'got_value' is %s\n",
+	    	    paddress (target_gdbarch, new->lm_info->got_value));
+	    printf ("  'tsd_start_addr' is %s\n",
+	    	    paddress (target_gdbarch, new->lm_info->tsd_start_addr));
 #endif
 
 	    new->addr_low = lmi->text_addr;

@@ -3445,8 +3445,8 @@ linux_nat_find_memory_regions (int (*func) (CORE_ADDR,
       if (info_verbose)
 	{
 	  fprintf_filtered (gdb_stdout,
-			    "Save segment, %lld bytes at 0x%s (%c%c%c)",
-			    size, paddr_nz (addr),
+			    "Save segment, %lld bytes at %s (%c%c%c)",
+			    size, paddress (target_gdbarch, addr),
 			    read ? 'r' : ' ',
 			    write ? 'w' : ' ', exec ? 'x' : ' ');
 	  if (filename[0])

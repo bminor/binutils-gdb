@@ -1400,8 +1400,8 @@ This function outputs a value of an @code{int} variable.  It differs from
 the name of the field.
 @end deftypefun
 
-@deftypefun void ui_out_field_core_addr (struct ui_out *@var{uiout}, const char *@var{fldname}, CORE_ADDR @var{address})
-This function outputs an address.
+@deftypefun void ui_out_field_core_addr (struct ui_out *@var{uiout}, const char *@var{fldname}, struct gdbarch *@var{gdbarch}, CORE_ADDR @var{address})
+This function outputs an address as appropriate for @var{gdbarch}.
 @end deftypefun
 
 @deftypefun void ui_out_field_string (struct ui_out *@var{uiout}, const char *@var{fldname}, const char *@var{string})

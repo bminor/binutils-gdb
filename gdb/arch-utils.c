@@ -51,8 +51,8 @@ simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   if (debug_displaced)
     {
-      fprintf_unfiltered (gdb_stdlog, "displaced: copy 0x%s->0x%s: ",
-                          paddr_nz (from), paddr_nz (to));
+      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
+                          paddress (gdbarch, from), paddress (gdbarch, to));
       displaced_step_dump_bytes (gdb_stdlog, buf, len);
     }
 

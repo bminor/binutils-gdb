@@ -214,9 +214,13 @@ monitor_error (char *function, char *message,
   monitor_printable_string (safe_string, string, real_len);
 
   if (final_char)
-    error (_("%s (0x%s): %s: %s%c"), function, paddr_nz (memaddr), message, safe_string, final_char);
+    error (_("%s (%s): %s: %s%c"),
+	   function, paddress (target_gdbarch, memaddr),
+	   message, safe_string, final_char);
   else
-    error (_("%s (0x%s): %s: %s"), function, paddr_nz (memaddr), message, safe_string);
+    error (_("%s (%s): %s: %s"),
+	   function, paddress (target_gdbarch, memaddr),
+	   message, safe_string);
 }
 
 /* Convert hex digit A to a number.  */
@@ -251,6 +255,7 @@ fromhex (int a)
 static void
 monitor_vsprintf (char *sndbuf, char *pattern, va_list args)
 {
+  int addr_bit = gdbarch_addr_bit (target_gdbarch);
   char format[10];
   char fmt;
   char *p;
@@ -279,7 +284,7 @@ monitor_vsprintf (char *sndbuf, char *pattern, va_list args)
 	      break;
 	    case 'A':
 	      arg_addr = va_arg (args, CORE_ADDR);
-	      strcpy (sndbuf, paddr_nz (arg_addr));
+	      strcpy (sndbuf, phex_nz (arg_addr, addr_bit / 8));
 	      break;
 	    case 's':
 	      arg_string = va_arg (args, char *);
@@ -1314,6 +1319,7 @@ monitor_fetch_registers (struct target_ops *ops,
 static void
 monitor_store_register (struct regcache *regcache, int regno)
 {
+  int reg_size = register_size (get_regcache_arch (regcache), regno);
   const char *name;
   ULONGEST val;
   
@@ -1329,9 +1335,7 @@ monitor_store_register (struct regcache *regcache, int regno)
     }
 
   regcache_cooked_read_unsigned (regcache, regno, &val);
-  monitor_debug ("MON storeg %d %s\n", regno,
-		 phex (val,
-		       register_size (get_regcache_arch (regcache), regno)));
+  monitor_debug ("MON storeg %d %s\n", regno, phex (val, reg_size));
 
   /* send the register deposit command */
 
@@ -1347,14 +1351,14 @@ monitor_store_register (struct regcache *regcache, int regno)
       monitor_debug ("EXP setreg.resp_delim\n");
       monitor_expect_regexp (&setreg_resp_delim_pattern, NULL, 0);
       if (current_monitor->flags & MO_SETREG_INTERACTIVE)
-	monitor_printf ("%s\r", paddr_nz (val));
+	monitor_printf ("%s\r", phex_nz (val, reg_size));
     }
   if (current_monitor->setreg.term)
     {
       monitor_debug ("EXP setreg.term\n");
       monitor_expect (current_monitor->setreg.term, NULL, 0);
       if (current_monitor->flags & MO_SETREG_INTERACTIVE)
-	monitor_printf ("%s\r", paddr_nz (val));
+	monitor_printf ("%s\r", phex_nz (val, reg_size));
       monitor_expect_prompt (NULL, 0);
     }
   else
@@ -1409,7 +1413,7 @@ monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
   char *cmd;
   int i;
 
-  monitor_debug ("MON write %d %s\n", len, paddr (memaddr));
+  monitor_debug ("MON write %d %s\n", len, paddress (target_gdbarch, memaddr));
 
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
     memaddr = gdbarch_addr_bits_remove (target_gdbarch, memaddr);
@@ -1808,7 +1812,7 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
     }
 
   monitor_debug ("MON read block ta(%s) ha(%lx) %d\n",
-		 paddr_nz (memaddr), (long) myaddr, len);
+		 paddress (target_gdbarch, memaddr), (long) myaddr, len);
 
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
     memaddr = gdbarch_addr_bits_remove (target_gdbarch, memaddr);
@@ -2034,7 +2038,7 @@ monitor_insert_breakpoint (struct gdbarch *gdbarch,
   int i;
   int bplen;
 
-  monitor_debug ("MON inst bkpt %s\n", paddr (addr));
+  monitor_debug ("MON inst bkpt %s\n", paddress (gdbarch, addr));
   if (current_monitor->set_break == NULL)
     error (_("No set_break defined for this monitor"));
 
@@ -2069,7 +2073,7 @@ monitor_remove_breakpoint (struct gdbarch *gdbarch,
   CORE_ADDR addr = bp_tgt->placed_address;
   int i;
 
-  monitor_debug ("MON rmbkpt %s\n", paddr (addr));
+  monitor_debug ("MON rmbkpt %s\n", paddress (gdbarch, addr));
   if (current_monitor->clr_break == NULL)
     error (_("No clr_break defined for this monitor"));
 
@@ -2090,8 +2094,8 @@ monitor_remove_breakpoint (struct gdbarch *gdbarch,
 	}
     }
   fprintf_unfiltered (gdb_stderr,
-		      "Can't find breakpoint associated with 0x%s\n",
-		      paddr_nz (addr));
+		      "Can't find breakpoint associated with %s\n",
+		      paddress (gdbarch, addr));
   return 1;
 }
 

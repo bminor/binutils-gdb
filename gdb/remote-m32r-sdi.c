@@ -1050,10 +1050,10 @@ m32r_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
     {
       if (write)
 	fprintf_unfiltered (gdb_stdlog, "m32r_xfer_memory(%s,%d,write)\n",
-			    paddr (memaddr), len);
+			    paddress (target_gdbarch, memaddr), len);
       else
 	fprintf_unfiltered (gdb_stdlog, "m32r_xfer_memory(%s,%d,read)\n",
-			    paddr (memaddr), len);
+			    paddress (target_gdbarch, memaddr), len);
     }
 
   if (write)
@@ -1150,7 +1150,7 @@ m32r_insert_breakpoint (struct gdbarch *gdbarch,
 
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_insert_breakpoint(%s,...)\n",
-			paddr (addr));
+			paddress (gdbarch, addr));
 
   if (use_ib_breakpoints)
     ib_breakpoints = max_ib_breakpoints;
@@ -1192,7 +1192,7 @@ m32r_remove_breakpoint (struct gdbarch *gdbarch,
 
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_remove_breakpoint(%s)\n",
-			paddr (addr));
+			paddress (gdbarch, addr));
 
   for (i = 0; i < MAX_BREAKPOINTS; i++)
     {
@@ -1419,7 +1419,7 @@ m32r_insert_watchpoint (CORE_ADDR addr, int len, int type)
 
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_insert_watchpoint(%s,%d,%d)\n",
-			paddr (addr), len, type);
+			paddress (target_gdbarch, addr), len, type);
 
   for (i = 0; i < MAX_ACCESS_BREAKS; i++)
     {
@@ -1443,7 +1443,7 @@ m32r_remove_watchpoint (CORE_ADDR addr, int len, int type)
 
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_remove_watchpoint(%s,%d,%d)\n",
-			paddr (addr), len, type);
+			paddress (target_gdbarch, addr), len, type);
 
   for (i = 0; i < MAX_ACCESS_BREAKS; i++)
     {

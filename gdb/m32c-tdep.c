@@ -2421,7 +2421,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
       if (! func_msym)
         error ("Cannot convert code address %s to function pointer:\n"
                "couldn't find a symbol at that address, to find trampoline.",
-               paddr_nz (addr));
+               paddress (gdbarch, addr));
 
       func_name = SYMBOL_LINKAGE_NAME (func_msym);
       tramp_name = xmalloc (strlen (func_name) + 5);
@@ -2438,7 +2438,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
       if (! tramp_msym)
         error ("Cannot convert code address %s to function pointer:\n"
                "couldn't find trampoline named '%s.plt'.",
-               paddr_nz (addr), func_name);
+               paddress (gdbarch, addr), func_name);
 
       /* The trampoline's address is our pointer.  */
       addr = SYMBOL_VALUE_ADDRESS (tramp_msym);

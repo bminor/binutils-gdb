@@ -647,16 +647,17 @@ exec_xfer_partial (struct target_ops *ops, enum target_object object,
 void
 print_section_info (struct target_section_table *t, bfd *abfd)
 {
+  struct gdbarch *gdbarch = gdbarch_from_bfd (abfd);
   struct target_section *p;
   /* FIXME: 16 is not wide enough when gdbarch_addr_bit > 64.  */
-  int wid = gdbarch_addr_bit (gdbarch_from_bfd (abfd)) <= 32 ? 8 : 16;
+  int wid = gdbarch_addr_bit (gdbarch) <= 32 ? 8 : 16;
 
   printf_filtered ("\t`%s', ", bfd_get_filename (abfd));
   wrap_here ("        ");
   printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
   if (abfd == exec_bfd)
     printf_filtered (_("\tEntry point: %s\n"),
-                     paddress (bfd_get_start_address (abfd)));
+                     paddress (gdbarch, bfd_get_start_address (abfd)));
   for (p = t->sections; p < t->sections_end; p++)
     {
       printf_filtered ("\t%s", hex_string_custom (p->addr, wid));
@@ -685,23 +686,24 @@ exec_files_info (struct target_ops *t)
 
   if (vmap)
     {
+      int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
       struct vmap *vp;
 
       printf_unfiltered (_("\tMapping info for file `%s'.\n"), vmap->name);
       printf_unfiltered ("\t  %*s   %*s   %*s   %*s %8.8s %s\n",
-			 strlen_paddr (), "tstart",
-			 strlen_paddr (), "tend",
-			 strlen_paddr (), "dstart",
-			 strlen_paddr (), "dend",
+			 addr_size * 2, "tstart",
+			 addr_size * 2, "tend",
+			 addr_size * 2, "dstart",
+			 addr_size * 2, "dend",
 			 "section",
 			 "file(member)");
 
       for (vp = vmap; vp; vp = vp->nxt)
 	printf_unfiltered ("\t0x%s 0x%s 0x%s 0x%s %s%s%s%s\n",
-			   paddr (vp->tstart),
-			   paddr (vp->tend),
-			   paddr (vp->dstart),
-			   paddr (vp->dend),
+			   phex (vp->tstart, addr_size),
+			   phex (vp->tend, addr_size),
+			   phex (vp->dstart, addr_size),
+			   phex (vp->dend, addr_size),
 			   vp->name,
 			   *vp->member ? "(" : "", vp->member,
 			   *vp->member ? ")" : "");

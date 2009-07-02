@@ -117,7 +117,8 @@ static CORE_ADDR adjust_breakpoint_address (struct gdbarch *gdbarch,
 					    CORE_ADDR bpaddr,
                                             enum bptype bptype);
 
-static void describe_other_breakpoints (CORE_ADDR, struct obj_section *, int);
+static void describe_other_breakpoints (struct gdbarch *, CORE_ADDR,
+					struct obj_section *, int);
 
 static void breakpoints_info (char *, int);
 
@@ -1140,7 +1141,7 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 	      else if (bpt->loc_type == bp_loc_software_breakpoint
 		       && mr->attrib.mode != MEM_RW)	    
 		warning (_("cannot set software breakpoint at readonly address %s"),
-			 paddr (bpt->address));
+			 paddress (bpt->gdbarch, bpt->address));
 	    }
 	}
         
@@ -1240,7 +1241,8 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 				      bpt->owner->number);
 		  fprintf_filtered (tmp_error_stream, 
 				    "Error accessing memory address ");
-		  fputs_filtered (paddress (bpt->address), tmp_error_stream);
+		  fputs_filtered (paddress (bpt->gdbarch, bpt->address),
+				  tmp_error_stream);
 		  fprintf_filtered (tmp_error_stream, ": %s.\n",
 				    safe_strerror (val));
 		}
@@ -3726,7 +3728,8 @@ print_one_breakpoint_location (struct breakpoint *b,
 	    else if (b->loc == NULL || loc->shlib_disabled)
 	      ui_out_field_string (uiout, "addr", "<PENDING>");
 	    else
-	      ui_out_field_core_addr (uiout, "addr", loc->address);
+	      ui_out_field_core_addr (uiout, "addr",
+				      loc->gdbarch, loc->address);
 	  }
 	annotate_field (5);
 	if (!header_of_multiple)
@@ -3760,7 +3763,8 @@ print_one_breakpoint_location (struct breakpoint *b,
       ui_out_text (uiout, "\tstop only in stack frame at ");
       /* FIXME: cagney/2002-12-01: Shouldn't be poeking around inside
          the frame ID.  */
-      ui_out_field_core_addr (uiout, "frame", b->frame_id.stack_addr);
+      ui_out_field_core_addr (uiout, "frame",
+			      b->gdbarch, b->frame_id.stack_addr);
       ui_out_text (uiout, "\n");
     }
   
@@ -4110,8 +4114,8 @@ breakpoint_has_pc (struct breakpoint *b,
 /* Print a message describing any breakpoints set at PC.  */
 
 static void
-describe_other_breakpoints (CORE_ADDR pc, struct obj_section *section,
-			    int thread)
+describe_other_breakpoints (struct gdbarch *gdbarch, CORE_ADDR pc,
+			    struct obj_section *section, int thread)
 {
   int others = 0;
   struct breakpoint *b;
@@ -4144,7 +4148,7 @@ describe_other_breakpoints (CORE_ADDR pc, struct obj_section *section,
 			     : ((others == 1) ? " and" : ""));
 	  }
       printf_filtered (_("also set at pc "));
-      fputs_filtered (paddress (pc), gdb_stdout);
+      fputs_filtered (paddress (gdbarch, pc), gdb_stdout);
       printf_filtered (".\n");
     }
 }
@@ -4606,7 +4610,8 @@ create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
   
   b->enable_state = bp_enabled;
   /* addr_string has to be used or breakpoint_re_set will delete me.  */
-  b->addr_string = xstrprintf ("*0x%s", paddr (b->loc->address));
+  b->addr_string
+    = xstrprintf ("*%s", paddress (b->loc->gdbarch, b->loc->address));
 
   update_global_location_list_nothrow (1);
 
@@ -5289,7 +5294,8 @@ mention (struct breakpoint *b)
 	  if (opts.addressprint || b->source_file == NULL)
 	    {
 	      printf_filtered (" at ");
-	      fputs_filtered (paddress (b->loc->address), gdb_stdout);
+	      fputs_filtered (paddress (b->loc->gdbarch, b->loc->address),
+			      gdb_stdout);
 	    }
 	  if (b->source_file)
 	    printf_filtered (": file %s, line %d.",
@@ -5408,7 +5414,14 @@ create_breakpoint (struct gdbarch *gdbarch,
       struct bp_location *loc;
 
       if (from_tty)
-	describe_other_breakpoints (sal.pc, sal.section, thread);
+	{
+	  struct gdbarch *loc_gdbarch = get_sal_arch (sal);
+	  if (!loc_gdbarch)
+	    loc_gdbarch = gdbarch;
+
+	  describe_other_breakpoints (loc_gdbarch,
+				      sal.pc, sal.section, thread);
+	}
 
       if (i == 0)
 	{
@@ -5447,7 +5460,8 @@ create_breakpoint (struct gdbarch *gdbarch,
   else
     /* addr_string has to be used or breakpoint_re_set will delete
        me.  */
-    b->addr_string = xstrprintf ("*0x%s", paddr (b->loc->address));
+    b->addr_string
+      = xstrprintf ("*%s", paddress (b->loc->gdbarch, b->loc->address));
 
   b->ops = ops;
   mention (b);
@@ -6859,7 +6873,8 @@ print_one_exception_catchpoint (struct breakpoint *b, struct bp_location **last_
       if (b->loc == NULL || b->loc->shlib_disabled)
 	ui_out_field_string (uiout, "addr", "<PENDING>");
       else
-	ui_out_field_core_addr (uiout, "addr", b->loc->address);
+	ui_out_field_core_addr (uiout, "addr",
+				b->loc->gdbarch, b->loc->address);
     }
   annotate_field (5);
   if (b->loc)
@@ -6980,7 +6995,11 @@ create_ada_exception_breakpoint (struct gdbarch *gdbarch,
 
   if (from_tty)
     {
-      describe_other_breakpoints (sal.pc, sal.section, -1);
+      struct gdbarch *loc_gdbarch = get_sal_arch (sal);
+      if (!loc_gdbarch)
+	loc_gdbarch = gdbarch;
+
+      describe_other_breakpoints (loc_gdbarch, sal.pc, sal.section, -1);
       /* FIXME: brobecker/2006-12-28: Actually, re-implement a special
          version for exception catchpoints, because two catchpoints
          used for different exception names will use the same address.
@@ -8386,8 +8405,8 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch, CORE_ADDR next_pc)
 
   *bpt_p = deprecated_insert_raw_breakpoint (gdbarch, next_pc);
   if (*bpt_p == NULL)
-    error (_("Could not insert single-step breakpoint at 0x%s"),
-	     paddr_nz (next_pc));
+    error (_("Could not insert single-step breakpoint at %s"),
+	     paddress (gdbarch, next_pc));
 }
 
 /* Remove and delete any breakpoints used for software single step.  */

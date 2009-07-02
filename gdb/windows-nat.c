@@ -2082,7 +2082,7 @@ windows_xfer_shared_libraries (struct target_ops *ops,
   obstack_grow_str (&obstack, "<library-list>\n");
   for (so = solib_start.next; so; so = so->next)
     windows_xfer_shared_library (so->so_name, (CORE_ADDR) (uintptr_t) so->lm_info->load_addr,
-				 &obstack);
+				 target_gdbarch, &obstack);
   obstack_grow_str0 (&obstack, "</library-list>\n");
 
   buf = obstack_finish (&obstack);

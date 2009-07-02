@@ -1,5 +1,224 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* defs.h (strlen_paddr, paddr, paddr_nz): Remove.
+	(paddress): Add GDBARCH parameter.
+	* utils.c (strlen_paddr, paddr, paddr_nz): Remove.
+	(paddress): Add GDBARCH parameter, use it instead of current_gdbarch.
+	* ui-out.h (ui_out_field_core_addr): Add GDBARCH parameter.
+	* ui-out.c (ui_out_field_core_addr): Add GDBARCH parameter,
+	use it instead of current_gdbarch.
+
+	Update calls to ui_out_field_core_addr to pass architecture:
+	* ada-lang.c (print_one_exception): Update.
+	* breakpoint.c (print_one_breakpoint_location,
+	print_one_exception_catchpoint): Update.
+	* disasm.c (dump_insns): Update.
+	* darwin-nat-info.c (darwin_debug_regions_recurse): Update.
+	* mi/mi-main.c (mi_cmd_data_read_memory): Update.
+	* mi/mi-symbol-cmds.c: Include "objfiles.h".
+	(mi_cmd_symbol_list_lines): Update.
+	* stack.c (print_frame_info, print_frame): Update.
+
+	Update callers of paddress to pass architecture:
+	* ada-tasks.c (info_task): Update.
+	* ada-valprint.c (ada_val_print_1): Update.
+	* annotate.c (annotate_source, annotate_frame_begin): Update.
+	* breakpoint.c (insert_bp_location, describe_other_breakpoints,
+	mention): Update.
+	* cli/cli-cmds.c (edit_command, list_command, print_disassembly):
+	Update.
+	* corefile.c (memory_error): Update.
+	* c-valprint.c (print_function_pointer_address, c_val_print): Update.
+	* disasm.c (dis_asm_print_address): Update.
+	* exec.c (print_section_info): Update.
+	* f-valprint.c (f_val_print): Update.
+	* infcmd.c: Include "arch-utils.h".
+	(jump_command, program_info): Update.
+	* linux-fork.c: Include "arch-utils.h".
+	(info_forks_command): Update.
+	* m2-valprint.c (print_function_pointer_address,
+	print_unpacked_pointer, print_variable_at_address,
+	m2_val_print): Update.
+	* m32r-rom.c (m32r_load_section, m32r_load, m32r_upload_command):
+	Update.
+	* printcmd.c (print_address, print_address_demangle, address_info):
+	Update.
+	* p-valprint.c (pascal_val_print): Update.
+	* source.c: Include "arch-utils.h".
+	(line_info): Update.
+	* stack.c (frame_info, print_block_frame_labels): Update.
+	* symfile.c (add_symbol_file_command, list_overlays_command): Update.
+	* symmisc.c (dump_msymbols, dump_psymtab, dump_symtab_1,
+	print_symbol, print_partial_symbols, maintenance_info_psymtabs,
+	maintenance_check_symtabs): Update.
+	* symtab.c (find_pc_sect_symtab): Update.
+	* target.c (deprecated_debug_xfer_memory): Update.
+	* tracepoint.c (scope_info): Update.
+	* tui/tui-stack.c (tui_make_status_line): Update.
+	* valprint.c (val_print_string): Update.
+
+	Update callers of paddr_nz to use paddress instead (keeping
+	user-visible output identical):
+	* alpha-tdep.c (alpha_heuristic_proc_start): Update.
+	* amd64-tdep.c (fixup_riprel, amd64_displaced_step_copy_insn,
+	amd64_displaced_step_fixup): Update.
+	* arch-utils.c (simple_displaced_step_copy_insn): Update.
+	* auxv.c (fprint_target_auxv): Update.
+	* breakpoint.c (insert_single_step_breakpoint): Update.
+	* buildsym.c (finish_block): Update.
+	* cli/cli-dump.c (restore_section_callback): Update.
+	* fbsd-nat.c (fbsd_find_memory_regions): Update.
+	* frame.c (frame_unwind_register_value): Update.
+	* gcore.c (gcore_create_callback): Update.
+	* hppa-tdep.c (hppa_frame_cache, hppa_skip_trampoline_code): Update.
+	* i386-tdep.c (i386_displaced_step_fixup, i386_record_modrm,
+	i386_record_lea_modrm_addr, i386_record_lea_modrm,
+	i386_process_record): Update.
+	* ia64-tdep.c (ia64_frame_this_id, ia64_sigtramp_frame_this_id,
+	ia64_libunwind_frame_this_id, ia64_libunwind_sigtramp_frame_this_id,
+	ia64_dummy_id, ia64_access_reg, ia64_access_rse_reg): Update.
+	* infrun.c (displaced_step_prepare, displaced_step_fixup,
+	handle_inferior_event, insert_step_resume_breakpoint_at_sal,
+	insert_longjmp_resume_breakpoint): Update.
+	* linux-nat.c (linux_nat_find_memory_regions): Update.
+	* linux-record.c (record_linux_system_call): Update.
+	* mips-tdep.c (heuristic_proc_start, mips_eabi_push_dummy_call,
+	mips_n32n64_push_dummy_call, mips_o32_push_dummy_call,
+	mips_o64_push_dummy_call): Update.
+	* monitor.c (monitor_error, monitor_remove_breakpoint): Update.
+	* record.c (record_arch_list_add_mem, record_wait,
+	record_xfer_partial): Update.
+	* remote-mips.c (mips_fetch_word, mips_check_lsi_error,
+	mips_common_breakpoint): Update.
+	* remote-sim.c (gdbsim_xfer_inferior_memory): Update.
+	* rs6000-tdep.c (ppc_displaced_step_fixup): Update.
+	* solib-som.c (som_current_sos): Update.
+	* symfile.c (load_progress, generic_load): Update.
+	* symfile-mem.c (add_vsyscall_page): Update.
+	* valops.c (value_fetch_lazy): Update.
+	* windows-tdep.c (windows_xfer_shared_library): Update.
+
+	Update callers of paddr_nz to use paddress instead (changing
+	user-visible output to make it more correct):
+	* dwarf2loc.c (locexpr_describe_location): Update.
+	* ia64-tdep.c (ia64_memory_insert_breakpoint,
+	ia64_memory_remove_breakpoint): Update.
+	* jv-valprint.c (java_value_print): Update.
+	* m32c-tdep.c (m32c_m16c_address_to_pointer): Update.
+	* monitor.c (monitor_read_memory): Update.
+
+	Update callers of paddr to use paddress instead (changing
+	user-visible output to make it more correct):
+	* arm-tdep.c (arm_push_dummy_call): Update.
+	* breakpoint.c (insert_bp_location, create_thread_event_breakpoint,
+	create_breakpoint): Update.
+	* darwin-nat-info.c (darwin_debug_regions): Update.
+	* dcache.c (dcache_info): Update.
+	* dsrec.c (load_srec, make_srec): Update.
+	* dwarf2-frame.c (dwarf2_restore_rule, execute_cfa_program,
+	dwarf2_frame_cache): Update.
+	* gcore.c (gcore_copy_callback): Update.
+	* gnu-nat.c (gnu_xfer_memory): Update.
+	* mips-linux-nat.c (mips_show_dr): Update.
+	* monitor.c (monitor_write_memory, monitor_insert_breakpoint,
+	monitor_remove_breakpoint): Update.
+	* remote.c (compare_sections_command): Update.
+	* remote-m32r-sdi.c (m32r_xfer_memory, m32r_insert_breakpoint,
+	m32r_remove_breakpoint, m32r_insert_watchpoint,
+	m32r_remove_watchpoint): Update.
+	* sol-thread.c (info_cb): Update.
+	* symfile.c (load_progress): Update.
+
+	Update callers of paddress or paddr_nz to use hex_string instead
+	(changes output of internal/error/debug messages only):
+	* dwarf2read.c (dump_die_shallow): Update.
+	* frame.c (fprint_field, fprint_frame, frame_pc_unwind,
+	get_frame_func, create_new_frame): Update.
+	* hppa-tdep.c (find_unwind_entry, unwind_command): Update.
+	* ia64-tdep.c (get_kernel_table, ia64_find_proc_info_x,
+	ia64_get_dyn_info_list): Update.
+	* maint.c (maintenance_translate_address): Update.
+	* mi/mi-cmd-var.c (mi_cmd_var_create): Update.
+	* target.c (target_flash_erase): Update.
+
+	Update callers of paddr/paddr_nz to use phex/phex_nz instead,
+	using an appropriate address size.  Remove use of strlen_paddr.
+	* exec.c (exec_files_info): Update.
+	* i386-nat.c (i386_show_dr): Update.
+	* remote.c (remote_flash_erase): Update.
+	* m32r-rom.c (m32r_load_section): Update.
+	* monitor.c (monitor_vsprintf, monitor_store_register): Update.
+	* remote.c (remote_check_symbols, remote_search_memory): Update.
+	* remote-mips.c (mips_request, mips_common_breakpoint): Update.
+	* scm-valprint.c (scm_ipruk, scm_scmval_print): Update.
+	* sh64-tdep.c (sh64_show_media_regs, sh64_show_compact_regs): Update.
+	* sh-tdep.c (sh_generic_show_regs, sh3_show_regs, sh2e_show_regs,
+	sh2a_show_regs, sh2a_nofpu_show_regs, sh3e_show_regs,
+	sh3_dsp_show_regs, sh4_show_regs, sh4_nofpu_show_regs,
+	sh_dsp_show_regs): Update.
+	* xcoffsolib.c (sharedlibrary_command): Update.
+
+
+	* maint.c (maint_print_section_info): Add ADDR_SIZE parameter.
+	Use hex_string_custom instead of paddr.
+	(print_bfd_section_info): Pass address size.
+	(print_objfile_section_info): Likewise.
+
+	* annotate.h (annotate_source): Add GDBARCH parameter.
+	(annotate_frame_begin): Likewise.
+	* annotate.c (annotate_source): Add GDBARCH parameter.
+	(annotate_frame_begin): Likewise.
+	* source.c (identify_source_line): Update call to annotate_source.
+	* stack.c (print_frame_info, print_frame): Update call to
+	annotate_frame_begin.
+
+	* breakpoint.c (describe_other_breakpoints): Add GDBARCH parameter.
+	(create_breakpoint, create_ada_exception_breakpoint): Update call.
+
+	* stack.c (print_block_frame_labels): Add GDBARCH parameter.
+	(print_frame_label_vars): Update call.
+
+	* symmisc.c (print_partial_symbols): Add GDBARCH parameter.
+	(dump_psymtab): Update call to print_partial_symbols.
+	(struct print_symbol_args): Add GDBARCH member.
+	(dump_symtab_1): Set print_symbol_args architecture member.
+	(print_symbol): Use it.
+
+	* windows-tdep.h (windows_xfer_shared_library): Add GDBARCH
+	parameter.
+	* windows-tdep.c (windows_xfer_shared_library): Likewise.
+	* i386-cygwin-tdep.c (struct cpms_data): Add GDBARCH member.
+	(core_process_module_section): Pass architecture from cpms_data to
+	windows_xfer_shared_library.
+	(windows_core_xfer_shared_libraries): Initialize cmps_data 
+	architecture member.
+	* windows-nat.c (windows_xfer_shared_libraries): Pass architecture
+	to windows_xfer_shared_library.
+
+	* defs.h (print_address): Add GDBARCH parameter.
+	* printcmd.c (print_address): Add GDBARCH parameter.
+	(print_scalar_formatted, do_examine): Update call.
+	* findcmd.c (find_command): Update call.
+	* tracepoint.c: Include "arch-utils.h".
+	(trace_find_line_command): Update call.
+	* tui/tui-disasm.c (tui_disassemble): Update call.
+
+	* value.h (print_address_demangle): Add GDBARCH parameter.
+	* printcmd.c (print_address_demangle): Add GDBARCH parameter.
+	* c-valprint.c (print_function_pointer_address, c_val_print):
+	Update call.
+	* f-valprint.c (f_val_print): Update call.
+	* gnu-v3-abi.c (gnuv3_print_method_ptr): Update call.
+	* jv-valprint.c (java_val_print): Update call.
+	* m2-valprint.c (print_function_pointer_address, m2_val_print):
+	Update call.
+	* p-valprint.c (pascal_val_print): Update call.
+
+	* disasm.c (gdb_disassemble_info): Install architecture into
+	di.application_data field.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* disasm.h (gdb_disassembly): Add GDBARCH parameter.
 	(gdb_print_insn): Likewise.
 	* disasm.c (dump_insns): Add GDBARCH parameter.  Use it instead

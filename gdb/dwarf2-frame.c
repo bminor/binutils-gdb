@@ -334,11 +334,11 @@ dwarf2_restore_rule (struct gdbarch *gdbarch, ULONGEST reg_num,
   if (fs->regs.reg[reg].how == DWARF2_FRAME_REG_UNSPECIFIED)
     complaint (&symfile_complaints, _("\
 incomplete CFI data; DW_CFA_restore unspecified\n\
-register %s (#%d) at 0x%s"),
+register %s (#%d) at %s"),
 		       gdbarch_register_name
 		       (gdbarch, gdbarch_dwarf2_reg_to_regnum (gdbarch, reg)),
 		       gdbarch_dwarf2_reg_to_regnum (gdbarch, reg),
-		       paddr (fs->pc));
+		       paddress (gdbarch, fs->pc));
 }
 
 static CORE_ADDR
@@ -490,7 +490,8 @@ execute_cfa_program (struct dwarf2_fde *fde, gdb_byte *insn_ptr,
 		if (old_rs == NULL)
 		  {
 		    complaint (&symfile_complaints, _("\
-bad CFI data; mismatched DW_CFA_restore_state at 0x%s"), paddr (fs->pc));
+bad CFI data; mismatched DW_CFA_restore_state at %s"),
+			       paddress (gdbarch, fs->pc));
 		  }
 		else
 		  {
@@ -997,9 +998,9 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 	  {
 	    if (cache->reg[regnum].how == DWARF2_FRAME_REG_UNSPECIFIED)
 	      complaint (&symfile_complaints, _("\
-incomplete CFI data; unspecified registers (e.g., %s) at 0x%s"),
+incomplete CFI data; unspecified registers (e.g., %s) at %s"),
 			 gdbarch_register_name (gdbarch, regnum),
-			 paddr_nz (fs->pc));
+			 paddress (gdbarch, fs->pc));
 	  }
 	else
 	  cache->reg[regnum] = fs->regs.reg[column];

@@ -318,7 +318,8 @@ extern struct value *coerce_array (struct value *value);
 struct frame_info;
 struct fn_field;
 
-extern void print_address_demangle (CORE_ADDR, struct ui_file *, int);
+extern void print_address_demangle (struct gdbarch *, CORE_ADDR,
+				    struct ui_file *, int);
 
 extern LONGEST value_as_long (struct value *val);
 extern DOUBLEST value_as_double (struct value *val);

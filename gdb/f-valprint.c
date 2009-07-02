@@ -281,13 +281,13 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
 	      /* Try to print what function it points to.  */
-	      print_address_demangle (addr, stream, demangle);
+	      print_address_demangle (gdbarch, addr, stream, demangle);
 	      /* Return value is irrelevant except for string pointers.  */
 	      return 0;
 	    }
 
 	  if (options->addressprint && options->format != 's')
-	    fputs_filtered (paddress (addr), stream);
+	    fputs_filtered (paddress (gdbarch, addr), stream);
 
 	  /* For a pointer to char or unsigned char, also print the string
 	     pointed to, unless pointer is null.  */
@@ -312,7 +312,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
 	  fprintf_filtered (stream, "@");
-	  fputs_filtered (paddress (addr), stream);
+	  fputs_filtered (paddress (gdbarch, addr), stream);
 	  if (options->deref_ref)
 	    fputs_filtered (": ", stream);
 	}
@@ -345,7 +345,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       type_print (type, "", stream, -1);
       fprintf_filtered (stream, "} ");
       /* Try to print what function it points to, and its address.  */
-      print_address_demangle (address, stream, demangle);
+      print_address_demangle (gdbarch, address, stream, demangle);
       break;
 
     case TYPE_CODE_INT:

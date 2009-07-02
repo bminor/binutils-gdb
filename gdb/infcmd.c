@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include <signal.h>
 #include "gdb_string.h"
 #include "symtab.h"
@@ -1029,6 +1030,7 @@ which has no line number information.\n"), name);
 static void
 jump_command (char *arg, int from_tty)
 {
+  struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR addr;
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -1098,7 +1100,7 @@ jump_command (char *arg, int from_tty)
   if (from_tty)
     {
       printf_filtered (_("Continuing at "));
-      fputs_filtered (paddress (addr), gdb_stdout);
+      fputs_filtered (paddress (gdbarch, addr), gdb_stdout);
       printf_filtered (".\n");
     }
 
@@ -1655,7 +1657,8 @@ program_info (char *args, int from_tty)
   stat = bpstat_num (&bs, &num);
 
   target_files_info ();
-  printf_filtered (_("Program stopped at %s.\n"), paddress (stop_pc));
+  printf_filtered (_("Program stopped at %s.\n"),
+		   paddress (target_gdbarch, stop_pc));
   if (tp->stop_step)
     printf_filtered (_("It stopped after being stepped.\n"));
   else if (stat != 0)

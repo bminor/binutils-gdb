@@ -1393,6 +1393,7 @@ val_print_string (struct type *elttype, CORE_ADDR addr, int len,
   int bytes_read;
   gdb_byte *buffer = NULL;	/* Dynamically growable fetch buffer.  */
   struct cleanup *old_chain = NULL;	/* Top of the old cleanup chain.  */
+  struct gdbarch *gdbarch = get_type_arch (elttype);
   int width = TYPE_LENGTH (elttype);
 
   /* First we need to figure out the limit on the number of characters we are
@@ -1455,13 +1456,13 @@ val_print_string (struct type *elttype, CORE_ADDR addr, int len,
       if (errcode == EIO)
 	{
 	  fprintf_filtered (stream, " <Address ");
-	  fputs_filtered (paddress (addr), stream);
+	  fputs_filtered (paddress (gdbarch, addr), stream);
 	  fprintf_filtered (stream, " out of bounds>");
 	}
       else
 	{
 	  fprintf_filtered (stream, " <Error reading address ");
-	  fputs_filtered (paddress (addr), stream);
+	  fputs_filtered (paddress (gdbarch, addr), stream);
 	  fprintf_filtered (stream, ": %s>", safe_strerror (errcode));
 	}
     }

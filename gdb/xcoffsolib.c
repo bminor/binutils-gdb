@@ -62,6 +62,7 @@ static void sharedlibrary_command (char *pattern, int from_tty);
 static void
 solib_info (char *args, int from_tty)
 {
+  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
   struct vmap *vp = vmap;
 
   /* Check for new shared libraries loaded with load ().  */
@@ -83,8 +84,10 @@ Text Range		Data Range		Syms	Shared Object Library\n");
   for (; vp != NULL; vp = vp->nxt)
     {
       printf_unfiltered ("0x%s-0x%s	0x%s-0x%s	%s	%s%s%s%s\n",
-			 paddr (vp->tstart),paddr (vp->tend),
-			 paddr (vp->dstart), paddr (vp->dend),
+			 phex (vp->tstart, addr_size),
+			 phex (vp->tend, addr_size),
+			 phex (vp->dstart, addr_size),
+			 phex (vp->dend, addr_size),
 			 vp->loaded ? "Yes" : "No ",
 			 vp->name,
 			 *vp->member ? "(" : "",

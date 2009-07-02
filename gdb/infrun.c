@@ -866,8 +866,8 @@ displaced_step_prepare (ptid_t ptid)
   read_memory (copy, displaced_step_saved_copy, len);
   if (debug_displaced)
     {
-      fprintf_unfiltered (gdb_stdlog, "displaced: saved 0x%s: ",
-			  paddr_nz (copy));
+      fprintf_unfiltered (gdb_stdlog, "displaced: saved %s: ",
+			  paddress (gdbarch, copy));
       displaced_step_dump_bytes (gdb_stdlog, displaced_step_saved_copy, len);
     };
 
@@ -895,8 +895,8 @@ displaced_step_prepare (ptid_t ptid)
   do_cleanups (old_cleanups);
 
   if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog, "displaced: displaced pc to 0x%s\n",
-			paddr_nz (copy));
+    fprintf_unfiltered (gdb_stdlog, "displaced: displaced pc to %s\n",
+			paddress (gdbarch, copy));
 
   return 1;
 }
@@ -928,8 +928,9 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
     write_memory_ptid (displaced_step_ptid, displaced_step_copy,
 		       displaced_step_saved_copy, len);
     if (debug_displaced)
-      fprintf_unfiltered (gdb_stdlog, "displaced: restored 0x%s\n",
-                          paddr_nz (displaced_step_copy));
+      fprintf_unfiltered (gdb_stdlog, "displaced: restored %s\n",
+                          paddress (displaced_step_gdbarch,
+				    displaced_step_copy));
   }
 
   /* Did the instruction complete successfully?  */
@@ -962,6 +963,7 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
     {
       struct displaced_step_request *head;
       ptid_t ptid;
+      struct regcache *regcache;
       CORE_ADDR actual_pc;
 
       head = displaced_step_request_queue;
@@ -971,7 +973,8 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 
       context_switch (ptid);
 
-      actual_pc = regcache_read_pc (get_thread_regcache (ptid));
+      regcache = get_thread_regcache (ptid);
+      actual_pc = regcache_read_pc (regcache);
 
       if (breakpoint_here_p (actual_pc))
 	{
@@ -984,10 +987,11 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 
 	  if (debug_displaced)
 	    {
+	      struct gdbarch *gdbarch = get_regcache_arch (regcache);
 	      gdb_byte buf[4];
 
-	      fprintf_unfiltered (gdb_stdlog, "displaced: run 0x%s: ",
-				  paddr_nz (actual_pc));
+	      fprintf_unfiltered (gdb_stdlog, "displaced: run %s: ",
+				  paddress (gdbarch, actual_pc));
 	      read_memory (actual_pc, buf, sizeof (buf));
 	      displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
 	    }
@@ -1278,11 +1282,12 @@ a command like `return' or `jump' to continue execution."));
           && tp->trap_expected)
         {
 	  struct regcache *resume_regcache = get_thread_regcache (resume_ptid);
+	  struct gdbarch *resume_gdbarch = get_regcache_arch (resume_regcache);
           CORE_ADDR actual_pc = regcache_read_pc (resume_regcache);
           gdb_byte buf[4];
 
-          fprintf_unfiltered (gdb_stdlog, "displaced: run 0x%s: ",
-                              paddr_nz (actual_pc));
+          fprintf_unfiltered (gdb_stdlog, "displaced: run %s: ",
+                              paddress (resume_gdbarch, actual_pc));
           read_memory (actual_pc, buf, sizeof (buf));
           displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
         }
@@ -1507,8 +1512,8 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
-			"infrun: proceed (addr=0x%s, signal=%d, step=%d)\n",
-			paddr_nz (addr), siggnal, step);
+			"infrun: proceed (addr=%s, signal=%d, step=%d)\n",
+			paddress (gdbarch, addr), siggnal, step);
 
   if (non_stop)
     /* In non-stop, each thread is handled individually.  The context
@@ -2774,8 +2779,11 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 
   if (debug_infrun)
     {
-      fprintf_unfiltered (gdb_stdlog, "infrun: stop_pc = 0x%s\n",
-                          paddr_nz (stop_pc));
+      struct regcache *regcache = get_thread_regcache (ecs->ptid);
+      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+      fprintf_unfiltered (gdb_stdlog, "infrun: stop_pc = %s\n",
+                          paddress (gdbarch, stop_pc));
       if (target_stopped_by_watchpoint ())
 	{
           CORE_ADDR addr;
@@ -2783,8 +2791,8 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 
           if (target_stopped_data_address (&current_target, &addr))
             fprintf_unfiltered (gdb_stdlog,
-                                "infrun: stopped data address = 0x%s\n",
-                                paddr_nz (addr));
+                                "infrun: stopped data address = %s\n",
+                                paddress (gdbarch, addr));
           else
             fprintf_unfiltered (gdb_stdlog,
                                 "infrun: (no data address available)\n");
@@ -3680,9 +3688,10 @@ infrun: not switching back to stepped thread, it has vanished\n");
 			  ecs->event_thread->step_frame_id)))
     {
       if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "infrun: stepping inside range [0x%s-0x%s]\n",
-			    paddr_nz (ecs->event_thread->step_range_start),
-			    paddr_nz (ecs->event_thread->step_range_end));
+	fprintf_unfiltered
+	  (gdb_stdlog, "infrun: stepping inside range [%s-%s]\n",
+	   paddress (gdbarch, ecs->event_thread->step_range_start),
+	   paddress (gdbarch, ecs->event_thread->step_range_end));
 
       /* When stepping backward, stop at beginning of line range
 	 (unless it's the function entry point, in which case
@@ -4279,8 +4288,8 @@ insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
-			"infrun: inserting step-resume breakpoint at 0x%s\n",
-			paddr_nz (sr_sal.pc));
+			"infrun: inserting step-resume breakpoint at %s\n",
+			paddress (gdbarch, sr_sal.pc));
 
   inferior_thread ()->step_resume_breakpoint
     = set_momentary_breakpoint (gdbarch, sr_sal, sr_id, bp_step_resume);
@@ -4361,8 +4370,8 @@ insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
-			"infrun: inserting longjmp-resume breakpoint at 0x%s\n",
-			paddr_nz (pc));
+			"infrun: inserting longjmp-resume breakpoint at %s\n",
+			paddress (gdbarch, pc));
 
   inferior_thread ()->step_resume_breakpoint =
     set_momentary_breakpoint_at_pc (gdbarch, pc, bp_longjmp_resume);

@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "symtab.h"
 #include "frame.h"
 #include "gdbtypes.h"
@@ -1668,6 +1669,8 @@ trace_find_line_command (char *args, int from_tty)
       old_chain = make_cleanup (xfree, sals.sals);
       if (sal.symtab == 0)
 	{
+	  struct gdbarch *gdbarch = get_current_arch ();
+
 	  printf_filtered ("TFIND: No line number information available");
 	  if (sal.pc != 0)
 	    {
@@ -1676,7 +1679,7 @@ trace_find_line_command (char *args, int from_tty)
 	         have the symbolic address.  */
 	      printf_filtered (" for address ");
 	      wrap_here ("  ");
-	      print_address (sal.pc, gdb_stdout);
+	      print_address (gdbarch, sal.pc, gdb_stdout);
 	      printf_filtered (";\n -- will attempt to find by PC. \n");
 	    }
 	  else
@@ -1688,13 +1691,15 @@ trace_find_line_command (char *args, int from_tty)
       else if (sal.line > 0
 	       && find_line_pc_range (sal, &start_pc, &end_pc))
 	{
+	  struct gdbarch *gdbarch = get_objfile_arch (sal.symtab->objfile);
+
 	  if (start_pc == end_pc)
 	    {
 	      printf_filtered ("Line %d of \"%s\"",
 			       sal.line, sal.symtab->filename);
 	      wrap_here ("  ");
 	      printf_filtered (" is at address ");
-	      print_address (start_pc, gdb_stdout);
+	      print_address (gdbarch, start_pc, gdb_stdout);
 	      wrap_here ("  ");
 	      printf_filtered (" but contains no code.\n");
 	      sal = find_pc_line (start_pc, 0);
@@ -1873,7 +1878,8 @@ scope_info (char *args, int from_tty)
 	      break;
 	    case LOC_STATIC:
 	      printf_filtered ("in static storage at address ");
-	      printf_filtered ("%s", paddress (SYMBOL_VALUE_ADDRESS (sym)));
+	      printf_filtered ("%s", paddress (gdbarch,
+					       SYMBOL_VALUE_ADDRESS (sym)));
 	      break;
 	    case LOC_REGISTER:
 	      /* GDBARCH is the architecture associated with the objfile
@@ -1915,11 +1921,13 @@ scope_info (char *args, int from_tty)
 	      continue;
 	    case LOC_LABEL:
 	      printf_filtered ("a label at address ");
-	      printf_filtered ("%s", paddress (SYMBOL_VALUE_ADDRESS (sym)));
+	      printf_filtered ("%s", paddress (gdbarch,
+					       SYMBOL_VALUE_ADDRESS (sym)));
 	      break;
 	    case LOC_BLOCK:
 	      printf_filtered ("a function at address ");
-	      printf_filtered ("%s", paddress (BLOCK_START (SYMBOL_BLOCK_VALUE (sym))));
+	      printf_filtered ("%s",
+		paddress (gdbarch, BLOCK_START (SYMBOL_BLOCK_VALUE (sym))));
 	      break;
 	    case LOC_UNRESOLVED:
 	      msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym),
@@ -1929,7 +1937,8 @@ scope_info (char *args, int from_tty)
 	      else
 		{
 		  printf_filtered ("static storage at address ");
-		  printf_filtered ("%s", paddress (SYMBOL_VALUE_ADDRESS (msym)));
+		  printf_filtered ("%s",
+		    paddress (gdbarch, SYMBOL_VALUE_ADDRESS (msym)));
 		}
 	      break;
 	    case LOC_OPTIMIZED_OUT:

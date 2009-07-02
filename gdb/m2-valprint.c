@@ -57,10 +57,10 @@ print_function_pointer_address (struct gdbarch *gdbarch, CORE_ADDR address,
   if (addressprint && func_addr != address)
     {
       fputs_filtered ("@", stream);
-      fputs_filtered (paddress (address), stream);
+      fputs_filtered (paddress (gdbarch, address), stream);
       fputs_filtered (": ", stream);
     }
-  print_address_demangle (func_addr, stream, demangle);
+  print_address_demangle (gdbarch, func_addr, stream, demangle);
 }
 
 /* get_long_set_bounds - assigns the bounds of the long set to low and
@@ -225,7 +225,7 @@ print_unpacked_pointer (struct type *type,
     }
 
   if (options->addressprint && options->format != 's')
-    fputs_filtered (paddress (address), stream);
+    fputs_filtered (paddress (gdbarch, address), stream);
 
   /* For a pointer to char or unsigned char, also print the string
      pointed to, unless pointer is null.  */
@@ -247,11 +247,12 @@ print_variable_at_address (struct type *type,
 			   int recurse,
 			   const struct value_print_options *options)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
   CORE_ADDR addr = unpack_pointer (type, valaddr);
   struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
 
   fprintf_filtered (stream, "[");
-  fputs_filtered (paddress (addr), stream);
+  fputs_filtered (paddress (gdbarch, addr), stream);
   fprintf_filtered (stream, "] : ");
   
   if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
@@ -316,6 +317,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      CORE_ADDR address, struct ui_file *stream, int recurse,
 	      const struct value_print_options *options)
 {
+  struct gdbarch *gdbarch = get_type_arch (type);
   unsigned int i = 0;	/* Number of characters printed */
   unsigned len;
   struct type *elttype;
@@ -396,7 +398,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
 	  fprintf_filtered (stream, "@");
-	  fputs_filtered (paddress (addr), stream);
+	  fputs_filtered (paddress (gdbarch, addr), stream);
 	  if (options->deref_ref)
 	    fputs_filtered (": ", stream);
 	}
@@ -476,7 +478,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       type_print (type, "", stream, -1);
       fprintf_filtered (stream, "} ");
       /* Try to print what function it points to, and its address.  */
-      print_address_demangle (address, stream, demangle);
+      print_address_demangle (gdbarch, address, stream, demangle);
       break;
 
     case TYPE_CODE_BOOL:

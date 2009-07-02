@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "inferior.h"
 #include "regcache.h"
 #include "gdbcmd.h"
@@ -480,6 +481,7 @@ detach_fork_command (char *args, int from_tty)
 static void
 info_forks_command (char *arg, int from_tty)
 {
+  struct gdbarch *gdbarch = get_current_arch ();
   struct frame_info *cur_frame;
   struct symtab_and_line sal;
   struct symtab *cur_symtab;
@@ -512,7 +514,7 @@ info_forks_command (char *arg, int from_tty)
       if (fp->num == 0)
 	printf_filtered (_(" (main process)"));
       printf_filtered (_(" at "));
-      fputs_filtered (paddress (pc), gdb_stdout);
+      fputs_filtered (paddress (gdbarch, pc), gdb_stdout);
 
       sal = find_pc_line (pc, 0);
       if (sal.symtab)

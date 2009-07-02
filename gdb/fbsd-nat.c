@@ -127,8 +127,8 @@ fbsd_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
       if (info_verbose)
 	{
 	  fprintf_filtered (gdb_stdout, 
-			    "Save segment, %ld bytes at 0x%s (%c%c%c)\n", 
-			    size, paddr_nz (start),
+			    "Save segment, %ld bytes at %s (%c%c%c)\n",
+			    size, paddress (target_gdbarch, start),
 			    read ? 'r' : '-',
 			    write ? 'w' : '-',
 			    exec ? 'x' : '-');
