@@ -307,9 +307,6 @@ m2_print_bounds (struct type *type,
 {
   struct type *target = TYPE_TARGET_TYPE (type);
 
-  if (target == NULL)
-    target = builtin_type_int32;
-
   if (TYPE_NFIELDS(type) == 0)
     return;
 
@@ -414,8 +411,6 @@ m2_is_long_set_of_type (struct type *type, struct type **of_type)
 	return 0;
       range = TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, i));
       target = TYPE_TARGET_TYPE (range);
-      if (target == NULL)
-	target = builtin_type_int32;
 
       l1 = TYPE_LOW_BOUND (TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, i)));
       h1 = TYPE_HIGH_BOUND (TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, len-1)));

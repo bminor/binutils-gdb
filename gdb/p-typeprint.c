@@ -768,8 +768,6 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
     case TYPE_CODE_RANGE:
       {
 	struct type *target = TYPE_TARGET_TYPE (type);
-	if (target == NULL)
-	  target = builtin_type_int32;
 	print_type_scalar (target, TYPE_LOW_BOUND (type), stream);
 	fputs_filtered ("..", stream);
 	print_type_scalar (target, TYPE_HIGH_BOUND (type), stream);
