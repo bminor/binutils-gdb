@@ -3181,6 +3181,11 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->builtin_func_ptr =
     lookup_pointer_type (lookup_function_type (builtin_type->builtin_void));
 
+  /* This type represents a GDB internal function.  */
+  builtin_type->internal_fn =
+    init_type (TYPE_CODE_INTERNAL_FUNCTION, 0, 0,
+	       "<internal function>", NULL);
+
   return builtin_type;
 }
 

@@ -222,9 +222,6 @@ static struct value_history_chunk *value_history_chain;
 
 static int value_history_count;	/* Abs number of last entry stored */
 
-/* The type of internal functions.  */
-
-static struct type *internal_fn_type;
 
 /* List of all value objects currently allocated
    (except for those released by calls to release_value)
@@ -882,25 +879,67 @@ struct internalvar
 {
   struct internalvar *next;
   char *name;
-  struct type *type;
 
-  /* True if this internalvar is the canonical name for a convenience
-     function.  */
-  int canonical;
+  /* We support various different kinds of content of an internal variable.
+     enum internalvar_kind specifies the kind, and union internalvar_data
+     provides the data associated with this particular kind.  */
 
-  /* If this function is non-NULL, it is used to compute a fresh value
-     on every access to the internalvar.  */
-  internalvar_make_value make_value;
+  enum internalvar_kind
+    {
+      /* The internal variable is empty.  */
+      INTERNALVAR_VOID,
 
-  /* To reduce dependencies on target properties (like byte order) that
-     may change during the lifetime of an internal variable, we store
-     simple scalar values as host objects.  */
+      /* The value of the internal variable is provided directly as
+	 a GDB value object.  */
+      INTERNALVAR_VALUE,
+
+      /* A fresh value is computed via a call-back routine on every
+	 access to the internal variable.  */
+      INTERNALVAR_MAKE_VALUE,
+
+      /* The internal variable holds a GDB internal convenience function.  */
+      INTERNALVAR_FUNCTION,
+
+      /* The variable holds a simple scalar value.  */
+      INTERNALVAR_SCALAR,
+
+      /* The variable holds a GDB-provided string.  */
+      INTERNALVAR_STRING,
+
+    } kind;
+
   union internalvar_data
     {
-      struct value *v;
-      struct internal_function *f;
-      LONGEST l;
-      CORE_ADDR a;
+      /* A value object used with INTERNALVAR_VALUE.  */
+      struct value *value;
+
+      /* The call-back routine used with INTERNALVAR_MAKE_VALUE.  */
+      internalvar_make_value make_value;
+
+      /* The internal function used with INTERNALVAR_FUNCTION.  */
+      struct
+	{
+	  struct internal_function *function;
+	  /* True if this is the canonical name for the function.  */
+	  int canonical;
+	} fn;
+
+      /* A scalar value used with INTERNALVAR_SCALAR.  */
+      struct
+        {
+	  /* If type is non-NULL, it will be used as the type to generate
+	     a value for this internal variable.  If type is NULL, a default
+	     integer type for the architecture is used.  */
+	  struct type *type;
+	  union
+	    {
+	      LONGEST l;    /* Used with TYPE_CODE_INT and NULL types.  */
+	      CORE_ADDR a;  /* Used with TYPE_CODE_PTR types.  */
+	    } val;
+        } scalar;
+
+      /* A string value used with INTERNALVAR_STRING.  */
+      char *string;
     } u;
 };
 
@@ -932,7 +971,7 @@ init_if_undefined_command (char* args, int from_tty)
 
   /* Only evaluate the expression if the lvalue is void.
      This may still fail if the expresssion is invalid.  */
-  if (TYPE_CODE (intvar->type) == TYPE_CODE_VOID)
+  if (intvar->kind == INTERNALVAR_VOID)
     evaluate_expression (expr);
 
   do_cleanups (old_chain);
@@ -967,9 +1006,7 @@ create_internalvar (const char *name)
   struct internalvar *var;
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
   var->name = concat (name, (char *)NULL);
-  var->type = builtin_type_void;
-  var->make_value = NULL;
-  var->canonical = 0;
+  var->kind = INTERNALVAR_VOID;
   var->next = internalvars;
   internalvars = var;
   return var;
@@ -984,7 +1021,8 @@ struct internalvar *
 create_internalvar_type_lazy (char *name, internalvar_make_value fun)
 {
   struct internalvar *var = create_internalvar (name);
-  var->make_value = fun;
+  var->kind = INTERNALVAR_MAKE_VALUE;
+  var->u.make_value = fun;
   return var;
 }
 
@@ -1006,53 +1044,77 @@ lookup_internalvar (const char *name)
   return create_internalvar (name);
 }
 
+/* Return current value of internal variable VAR.  For variables that
+   are not inherently typed, use a value type appropriate for GDBARCH.  */
+
 struct value *
-value_of_internalvar (struct internalvar *var)
+value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
 {
   struct value *val;
 
-  if (var->make_value != NULL)
-    val = (*var->make_value) (var);
-  else
+  switch (var->kind)
     {
-      switch (TYPE_CODE (var->type))
-	{
-	case TYPE_CODE_VOID:
-	case TYPE_CODE_INTERNAL_FUNCTION:
-	  val = allocate_value (var->type);
-	  break;
+    case INTERNALVAR_VOID:
+      val = allocate_value (builtin_type (gdbarch)->builtin_void);
+      break;
 
-	case TYPE_CODE_INT:
-	  val = value_from_longest (var->type, var->u.l);
-	  break;
+    case INTERNALVAR_FUNCTION:
+      val = allocate_value (builtin_type (gdbarch)->internal_fn);
+      break;
 
-	case TYPE_CODE_PTR:
-	  val = value_from_pointer (var->type, var->u.a);
-	  break;
+    case INTERNALVAR_SCALAR:
+      if (!var->u.scalar.type)
+	val = value_from_longest (builtin_type (gdbarch)->builtin_int,
+				  var->u.scalar.val.l);
+      else if (TYPE_CODE (var->u.scalar.type) == TYPE_CODE_INT)
+	val = value_from_longest (var->u.scalar.type, var->u.scalar.val.l);
+      else if (TYPE_CODE (var->u.scalar.type) == TYPE_CODE_PTR)
+	val = value_from_pointer (var->u.scalar.type, var->u.scalar.val.a);
+      else
+        internal_error (__FILE__, __LINE__, "bad type");
+      break;
 
-	default:
-	  val = value_copy (var->u.v);
-	  break;
-	}
+    case INTERNALVAR_STRING:
+      val = value_cstring (var->u.string, strlen (var->u.string),
+			   builtin_type (gdbarch)->builtin_char);
+      break;
 
+    case INTERNALVAR_VALUE:
+      val = value_copy (var->u.value);
       if (value_lazy (val))
 	value_fetch_lazy (val);
+      break;
 
-      /* If the variable's value is a computed lvalue, we want
-	 references to it to produce another computed lvalue, where
-	 referencces and assignments actually operate through the
-	 computed value's functions.
+    case INTERNALVAR_MAKE_VALUE:
+      val = (*var->u.make_value) (gdbarch, var);
+      break;
 
-	 This means that internal variables with computed values
-	 behave a little differently from other internal variables:
-	 assignments to them don't just replace the previous value
-	 altogether.  At the moment, this seems like the behavior we
-	 want.  */
-      if (val->lval != lval_computed)
-	{
-	  VALUE_LVAL (val) = lval_internalvar;
-	  VALUE_INTERNALVAR (val) = var;
-	}
+    default:
+      internal_error (__FILE__, __LINE__, "bad kind");
+    }
+
+  /* Change the VALUE_LVAL to lval_internalvar so that future operations
+     on this value go back to affect the original internal variable.
+
+     Do not do this for INTERNALVAR_MAKE_VALUE variables, as those have
+     no underlying modifyable state in the internal variable.
+
+     Likewise, if the variable's value is a computed lvalue, we want
+     references to it to produce another computed lvalue, where
+     references and assignments actually operate through the
+     computed value's functions.
+
+     This means that internal variables with computed values
+     behave a little differently from other internal variables:
+     assignments to them don't just replace the previous value
+     altogether.  At the moment, this seems like the behavior we
+     want.  */
+
+  if (var->kind != INTERNALVAR_MAKE_VALUE
+      && val->lval != lval_computed)
+    {
+      VALUE_LVAL (val) = lval_internalvar;
+      VALUE_INTERNALVAR (val) = var;
     }
 
   return val;
@@ -1061,11 +1123,16 @@ value_of_internalvar (struct internalvar *var)
 int
 get_internalvar_integer (struct internalvar *var, LONGEST *result)
 {
-  switch (TYPE_CODE (var->type))
+  switch (var->kind)
     {
-    case TYPE_CODE_INT:
-      *result = var->u.l;
-      return 1;
+    case INTERNALVAR_SCALAR:
+      if (var->u.scalar.type == NULL
+	  || TYPE_CODE (var->u.scalar.type) == TYPE_CODE_INT)
+	{
+	  *result = var->u.scalar.val.l;
+	  return 1;
+	}
+      /* Fall through.  */
 
     default:
       return 0;
@@ -1076,10 +1143,10 @@ static int
 get_internalvar_function (struct internalvar *var,
 			  struct internal_function **result)
 {
-  switch (TYPE_CODE (var->type))
+  switch (var->kind)
     {
-    case TYPE_CODE_INTERNAL_FUNCTION:
-      *result = var->u.f;
+    case INTERNALVAR_FUNCTION:
+      *result = var->u.fn.function;
       return 1;
 
     default:
@@ -1093,17 +1160,10 @@ set_internalvar_component (struct internalvar *var, int offset, int bitpos,
 {
   gdb_byte *addr;
 
-  switch (TYPE_CODE (var->type))
+  switch (var->kind)
     {
-    case TYPE_CODE_VOID:
-    case TYPE_CODE_INTERNAL_FUNCTION:
-    case TYPE_CODE_INT:
-    case TYPE_CODE_PTR:
-      /* We can never get a component of a basic type.  */
-      internal_error (__FILE__, __LINE__, "set_internalvar_component");
-
-    default:
-      addr = value_contents_writeable (var->u.v);
+    case INTERNALVAR_VALUE:
+      addr = value_contents_writeable (var->u.value);
 
       if (bitsize)
 	modify_field (addr + offset,
@@ -1112,52 +1172,65 @@ set_internalvar_component (struct internalvar *var, int offset, int bitpos,
 	memcpy (addr + offset, value_contents (newval),
 		TYPE_LENGTH (value_type (newval)));
       break;
+
+    default:
+      /* We can never get a component of any other kind.  */
+      internal_error (__FILE__, __LINE__, "set_internalvar_component");
     }
 }
 
 void
 set_internalvar (struct internalvar *var, struct value *val)
 {
-  struct type *new_type = check_typedef (value_type (val));
+  enum internalvar_kind new_kind;
   union internalvar_data new_data = { 0 };
 
-  if (var->canonical)
+  if (var->kind == INTERNALVAR_FUNCTION && var->u.fn.canonical)
     error (_("Cannot overwrite convenience function %s"), var->name);
 
   /* Prepare new contents.  */
-  switch (TYPE_CODE (new_type))
+  switch (TYPE_CODE (check_typedef (value_type (val))))
     {
     case TYPE_CODE_VOID:
+      new_kind = INTERNALVAR_VOID;
       break;
 
     case TYPE_CODE_INTERNAL_FUNCTION:
       gdb_assert (VALUE_LVAL (val) == lval_internalvar);
-      get_internalvar_function (VALUE_INTERNALVAR (val), &new_data.f);
+      new_kind = INTERNALVAR_FUNCTION;
+      get_internalvar_function (VALUE_INTERNALVAR (val),
+				&new_data.fn.function);
+      /* Copies created here are never canonical.  */
       break;
 
     case TYPE_CODE_INT:
-      new_data.l = value_as_long (val);
+      new_kind = INTERNALVAR_SCALAR;
+      new_data.scalar.type = value_type (val);
+      new_data.scalar.val.l = value_as_long (val);
       break;
 
     case TYPE_CODE_PTR:
-      new_data.a = value_as_address (val);
+      new_kind = INTERNALVAR_SCALAR;
+      new_data.scalar.type = value_type (val);
+      new_data.scalar.val.a = value_as_address (val);
       break;
 
     default:
-      new_data.v = value_copy (val);
-      new_data.v->modifiable = 1;
+      new_kind = INTERNALVAR_VALUE;
+      new_data.value = value_copy (val);
+      new_data.value->modifiable = 1;
 
       /* Force the value to be fetched from the target now, to avoid problems
 	 later when this internalvar is referenced and the target is gone or
 	 has changed.  */
-      if (value_lazy (new_data.v))
-       value_fetch_lazy (new_data.v);
+      if (value_lazy (new_data.value))
+       value_fetch_lazy (new_data.value);
 
       /* Release the value from the value chain to prevent it from being
 	 deleted by free_all_values.  From here on this function should not
 	 call error () until new_data is installed into the var->u to avoid
 	 leaking memory.  */
-      release_value (new_data.v);
+      release_value (new_data.value);
       break;
     }
 
@@ -1165,7 +1238,7 @@ set_internalvar (struct internalvar *var, struct value *val)
   clear_internalvar (var);
 
   /* Switch over.  */
-  var->type = new_type;
+  var->kind = new_kind;
   var->u = new_data;
   /* End code which must not call error().  */
 }
@@ -1176,9 +1249,19 @@ set_internalvar_integer (struct internalvar *var, LONGEST l)
   /* Clean up old contents.  */
   clear_internalvar (var);
 
-  /* Use a platform-independent 32-bit integer type.  */
-  var->type = builtin_type_int32;
-  var->u.l = l;
+  var->kind = INTERNALVAR_SCALAR;
+  var->u.scalar.type = NULL;
+  var->u.scalar.val.l = l;
+}
+
+void
+set_internalvar_string (struct internalvar *var, const char *string)
+{
+  /* Clean up old contents.  */
+  clear_internalvar (var);
+
+  var->kind = INTERNALVAR_STRING;
+  var->u.string = xstrdup (string);
 }
 
 static void
@@ -1187,29 +1270,32 @@ set_internalvar_function (struct internalvar *var, struct internal_function *f)
   /* Clean up old contents.  */
   clear_internalvar (var);
 
-  var->type = internal_fn_type;
-  var->u.f = f;
+  var->kind = INTERNALVAR_FUNCTION;
+  var->u.fn.function = f;
+  var->u.fn.canonical = 1;
+  /* Variables installed here are always the canonical version.  */
 }
 
 void
 clear_internalvar (struct internalvar *var)
 {
   /* Clean up old contents.  */
-  switch (TYPE_CODE (var->type))
+  switch (var->kind)
     {
-    case TYPE_CODE_VOID:
-    case TYPE_CODE_INTERNAL_FUNCTION:
-    case TYPE_CODE_INT:
-    case TYPE_CODE_PTR:
+    case INTERNALVAR_VALUE:
+      value_free (var->u.value);
+      break;
+
+    case INTERNALVAR_STRING:
+      xfree (var->u.string);
       break;
 
     default:
-      value_free (var->u.v);
       break;
     }
 
-  /* Set to void type.  */
-  var->type = builtin_type_void;
+  /* Reset to void kind.  */
+  var->kind = INTERNALVAR_VOID;
 }
 
 char *
@@ -1288,7 +1374,6 @@ add_internal_function (const char *name, const char *doc,
 
   ifn = create_internal_function (name, handler, cookie);
   set_internalvar_function (var, ifn);
-  var->canonical = 1;
 
   cmd = add_cmd (xstrdup (name), no_class, function_command, (char *) doc,
 		 &functionlist);
@@ -1309,6 +1394,26 @@ preserve_one_value (struct value *value, struct objfile *objfile,
     value->enclosing_type = copy_type_recursive (objfile,
 						 value->enclosing_type,
 						 copied_types);
+}
+
+/* Likewise for internal variable VAR.  */
+
+static void
+preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
+			  htab_t copied_types)
+{
+  switch (var->kind)
+    {
+    case INTERNALVAR_SCALAR:
+      if (var->u.scalar.type && TYPE_OBJFILE (var->u.scalar.type) == objfile)
+	var->u.scalar.type
+	  = copy_type_recursive (objfile, var->u.scalar.type, copied_types);
+      break;
+
+    case INTERNALVAR_VALUE:
+      preserve_one_value (var->u.value, objfile, copied_types);
+      break;
+    }
 }
 
 /* Update the internal variables and value history when OBJFILE is
@@ -1336,23 +1441,7 @@ preserve_values (struct objfile *objfile)
 	preserve_one_value (cur->values[i], objfile, copied_types);
 
   for (var = internalvars; var; var = var->next)
-    {
-      if (TYPE_OBJFILE (var->type) == objfile)
-	var->type = copy_type_recursive (objfile, var->type, copied_types);
-
-      switch (TYPE_CODE (var->type))
-	{
-	case TYPE_CODE_VOID:
-	case TYPE_CODE_INTERNAL_FUNCTION:
-	case TYPE_CODE_INT:
-	case TYPE_CODE_PTR:
-	  break;
-
-	default:
-	  preserve_one_value (var->u.v, objfile, copied_types);
-	  break;
-	}
-    }
+    preserve_one_internalvar (var, objfile, copied_types);
 
   for (val = values_in_python; val; val = val->next)
     preserve_one_value (val, objfile, copied_types);
@@ -1363,6 +1452,7 @@ preserve_values (struct objfile *objfile)
 static void
 show_convenience (char *ignore, int from_tty)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
   struct internalvar *var;
   int varseen = 0;
   struct value_print_options opts;
@@ -1375,7 +1465,7 @@ show_convenience (char *ignore, int from_tty)
 	  varseen = 1;
 	}
       printf_filtered (("$%s = "), var->name);
-      value_print (value_of_internalvar (var), gdb_stdout,
+      value_print (value_of_internalvar (gdbarch, var), gdb_stdout,
 		   &opts);
       printf_filtered (("\n"));
     }
@@ -2172,8 +2262,4 @@ VARIABLE is already initialized."));
   add_prefix_cmd ("function", no_class, function_command, _("\
 Placeholder command for showing help on convenience functions."),
 		  &functionlist, "function ", 0, &cmdlist);
-
-  internal_fn_type = alloc_type (NULL);
-  TYPE_CODE (internal_fn_type) = TYPE_CODE_INTERNAL_FUNCTION;
-  TYPE_NAME (internal_fn_type) = "<internal function>";
 }

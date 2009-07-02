@@ -228,12 +228,6 @@ set_traceframe_context (struct frame_info *trace_frame)
 {
   CORE_ADDR trace_pc;
 
-  static struct type *func_string, *file_string;
-  static struct type *func_range, *file_range;
-  struct value *func_val;
-  struct value *file_val;
-  int len;
-
   if (trace_frame == NULL)		/* Cease debugging any trace buffers.  */
     {
       traceframe_fun = 0;
@@ -261,20 +255,8 @@ set_traceframe_context (struct frame_info *trace_frame)
       || SYMBOL_LINKAGE_NAME (traceframe_fun) == NULL)
     clear_internalvar (lookup_internalvar ("trace_func"));
   else
-    {
-      len = strlen (SYMBOL_LINKAGE_NAME (traceframe_fun));
-      func_range = create_range_type (func_range,
-				      builtin_type_int32, 0, len - 1);
-      func_string = create_array_type (func_string,
-				       builtin_type_true_char, func_range);
-      func_val = allocate_value (func_string);
-      deprecated_set_value_type (func_val, func_string);
-      memcpy (value_contents_raw (func_val),
-	      SYMBOL_LINKAGE_NAME (traceframe_fun),
-	      len);
-      deprecated_set_value_modifiable (func_val, 0);
-      set_internalvar (lookup_internalvar ("trace_func"), func_val);
-    }
+    set_internalvar_string (lookup_internalvar ("trace_func"),
+			    SYMBOL_LINKAGE_NAME (traceframe_fun));
 
   /* Save file name as "$trace_file", a debugger variable visible to
      users.  */
@@ -282,20 +264,8 @@ set_traceframe_context (struct frame_info *trace_frame)
       || traceframe_sal.symtab->filename == NULL)
     clear_internalvar (lookup_internalvar ("trace_file"));
   else
-    {
-      len = strlen (traceframe_sal.symtab->filename);
-      file_range = create_range_type (file_range,
-				      builtin_type_int32, 0, len - 1);
-      file_string = create_array_type (file_string,
-				       builtin_type_true_char, file_range);
-      file_val = allocate_value (file_string);
-      deprecated_set_value_type (file_val, file_string);
-      memcpy (value_contents_raw (file_val),
-	      traceframe_sal.symtab->filename,
-	      len);
-      deprecated_set_value_modifiable (file_val, 0);
-      set_internalvar (lookup_internalvar ("trace_file"), file_val);
-    }
+    set_internalvar_string (lookup_internalvar ("trace_file"),
+			    traceframe_sal.symtab->filename);
 }
 
 /* ACTIONS functions: */

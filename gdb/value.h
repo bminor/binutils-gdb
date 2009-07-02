@@ -522,13 +522,17 @@ extern void binop_promote (const struct language_defn *language,
 
 extern struct value *access_value_history (int num);
 
-extern struct value *value_of_internalvar (struct internalvar *var);
+extern struct value *value_of_internalvar (struct gdbarch *gdbarch,
+					   struct internalvar *var);
 
 extern int get_internalvar_integer (struct internalvar *var, LONGEST *l);
 
 extern void set_internalvar (struct internalvar *var, struct value *val);
 
 extern void set_internalvar_integer (struct internalvar *var, LONGEST l);
+
+extern void set_internalvar_string (struct internalvar *var,
+				    const char *string);
 
 extern void clear_internalvar (struct internalvar *var);
 
@@ -541,8 +545,8 @@ extern struct internalvar *lookup_only_internalvar (const char *name);
 
 extern struct internalvar *create_internalvar (const char *name);
 
-typedef struct value * (*internalvar_make_value) (struct internalvar *);
-
+typedef struct value * (*internalvar_make_value) (struct gdbarch *,
+						  struct internalvar *);
 extern struct internalvar *
   create_internalvar_type_lazy (char *name, internalvar_make_value fun);
 

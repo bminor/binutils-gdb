@@ -5263,29 +5263,21 @@ static struct lval_funcs siginfo_value_funcs =
   };
 
 /* Return a new value with the correct type for the siginfo object of
-   the current thread.  Return a void value if there's no object
-   available.  */
+   the current thread using architecture GDBARCH.  Return a void value
+   if there's no object available.  */
 
 static struct value *
-siginfo_make_value (struct internalvar *var)
+siginfo_make_value (struct gdbarch *gdbarch, struct internalvar *var)
 {
-  struct type *type;
-  struct gdbarch *gdbarch;
-
   if (target_has_stack
-      && !ptid_equal (inferior_ptid, null_ptid))
+      && !ptid_equal (inferior_ptid, null_ptid)
+      && gdbarch_get_siginfo_type_p (gdbarch))
     {
-      gdbarch = get_frame_arch (get_current_frame ());
-
-      if (gdbarch_get_siginfo_type_p (gdbarch))
-	{
-	  type = gdbarch_get_siginfo_type (gdbarch);
-
-	  return allocate_computed_value (type, &siginfo_value_funcs, NULL);
-	}
+      struct type *type = gdbarch_get_siginfo_type (gdbarch);
+      return allocate_computed_value (type, &siginfo_value_funcs, NULL);
     }
 
-  return allocate_value (builtin_type_void);
+  return allocate_value (builtin_type (gdbarch)->builtin_void);
 }
 
 

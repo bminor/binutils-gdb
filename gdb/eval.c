@@ -779,7 +779,8 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case OP_INTERNALVAR:
       (*pos) += 2;
-      return value_of_internalvar (exp->elts[pc + 1].internalvar);
+      return value_of_internalvar (exp->gdbarch,
+				   exp->elts[pc + 1].internalvar);
 
     case OP_STRING:
       tem = longest_to_int (exp->elts[pc + 1].longconst);

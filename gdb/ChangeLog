@@ -1,5 +1,44 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (struct builtin_type): Add internal_fn member.
+	* gdbtypes.c (gdbtypes_post_init): Initialize it.
+	* value.c (internal_fn_type): Remove.
+	(_initialize_values): Do not initialize it.
+
+	* value.c (struct internalvar): Add enum internalvar_kind type and
+	kind member.  Restructure union internalvar_data type.  Remove type,
+	canonical, and make_value members.
+	(init_if_undefined_command): Update for data structure changes.
+	(create_internalvar): Likewise.
+	(create_internalvar_type_lazy): Likewise.
+	(get_internalvar_integer): Likewise.
+	(get_internalvar_function): Likewise.
+	(set_internalvar_component): Likewise.
+	(set_internalvar): Likewise.
+	(set_internalvar_integer): Likewise.
+	(set_internalvar_function): Likewise.
+	(clear_internalvar): Likewise.
+	(add_internal_function): Likewise.
+	(preserve_one_internalvar): New function.
+	(preserve_values): Call it.
+
+	* value.h (value_of_internalvar): Add GDBARCH parameter.
+	(internalvar_make_value): Likewise.
+	* value.c (value_of_internalvar): Add GDBARCH parameter.  Pass it to
+	make_value callback.  Use it to generate per-architecture result value
+	types for internal variables with no pre-defined type.  Update for data
+	structure changes.
+	(show_convenience): Pass architecture to value_of_internalvar.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* infrun.c (siginfo_make_value): Add GDBARCH parameter.  Use it
+	instead of current frame architecture.  Return per-architecture type.
+
+	* value.h (set_internalvar_string): Add prototype.
+	* value.c (set_internalvar_string): New function.
+	* tracepoint.c (set_traceframe_context): Use it.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* jv-lang.h (java_int_type, java_byte_type, java_short_type,
 	java_long_type, java_boolean_type, java_char_type, java_float_type,
 	java_double_type, java_void_type): Remove.

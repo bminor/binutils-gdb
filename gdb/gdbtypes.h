@@ -999,6 +999,12 @@ struct builtin_type
      However, all function pointer types are interconvertible, so void
      (*) () can server as a generic function pointer.  */
   struct type *builtin_func_ptr;
+
+
+  /* Special-purpose types.  */
+
+  /* This type is used to represent a GDB internal function.  */
+  struct type *internal_fn;
 };
 
 /* Return the type table for the specified architecture.  */
