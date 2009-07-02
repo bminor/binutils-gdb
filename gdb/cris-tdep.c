@@ -2120,6 +2120,7 @@ find_step_target (struct frame_info *frame, inst_env_type *inst_env)
 static int
 cris_software_single_step (struct frame_info *frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   inst_env_type inst_env;
 
   /* Analyse the present instruction environment and insert 
@@ -2135,15 +2136,15 @@ cris_software_single_step (struct frame_info *frame)
     {
       /* Insert at most two breakpoints.  One for the next PC content
          and possibly another one for a branch, jump, etc.  */
-      CORE_ADDR next_pc =
-	(CORE_ADDR) inst_env.reg[gdbarch_pc_regnum (get_frame_arch (frame))];
-      insert_single_step_breakpoint (next_pc);
+      CORE_ADDR next_pc
+	= (CORE_ADDR) inst_env.reg[gdbarch_pc_regnum (gdbarch)];
+      insert_single_step_breakpoint (gdbarch, next_pc);
       if (inst_env.branch_found 
 	  && (CORE_ADDR) inst_env.branch_break_address != next_pc)
 	{
 	  CORE_ADDR branch_target_address
 		= (CORE_ADDR) inst_env.branch_break_address;
-	  insert_single_step_breakpoint (branch_target_address);
+	  insert_single_step_breakpoint (gdbarch, branch_target_address);
 	}
     }
 

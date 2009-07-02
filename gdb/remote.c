@@ -6792,7 +6792,8 @@ extended_remote_create_inferior (struct target_ops *ops,
    which don't, we insert a traditional memory breakpoint.  */
 
 static int
-remote_insert_breakpoint (struct bp_target_info *bp_tgt)
+remote_insert_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
 {
   /* Try the "Z" s/w breakpoint packet if it is not already disabled.
      If it succeeds, then set the support to PACKET_ENABLE.  If it
@@ -6806,7 +6807,7 @@ remote_insert_breakpoint (struct bp_target_info *bp_tgt)
       char *p;
       int bpsize;
 
-      gdbarch_breakpoint_from_pc (target_gdbarch, &addr, &bpsize);
+      gdbarch_breakpoint_from_pc (gdbarch, &addr, &bpsize);
 
       rs = get_remote_state ();
       p = rs->buf;
@@ -6834,11 +6835,12 @@ remote_insert_breakpoint (struct bp_target_info *bp_tgt)
 	}
     }
 
-  return memory_insert_breakpoint (bp_tgt);
+  return memory_insert_breakpoint (gdbarch, bp_tgt);
 }
 
 static int
-remote_remove_breakpoint (struct bp_target_info *bp_tgt)
+remote_remove_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   struct remote_state *rs = get_remote_state ();
@@ -6862,7 +6864,7 @@ remote_remove_breakpoint (struct bp_target_info *bp_tgt)
       return (rs->buf[0] == 'E');
     }
 
-  return memory_remove_breakpoint (bp_tgt);
+  return memory_remove_breakpoint (gdbarch, bp_tgt);
 }
 
 static int
@@ -6998,7 +7000,8 @@ remote_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 
 
 static int
-remote_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
+remote_insert_hw_breakpoint (struct gdbarch *gdbarch,
+			     struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr;
   struct remote_state *rs;
@@ -7008,7 +7011,7 @@ remote_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
      instruction, even though we aren't inserting one ourselves.  */
 
   gdbarch_breakpoint_from_pc
-    (target_gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
+    (gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
 
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
     return -1;
@@ -7041,7 +7044,8 @@ remote_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
 
 
 static int
-remote_remove_hw_breakpoint (struct bp_target_info *bp_tgt)
+remote_remove_hw_breakpoint (struct gdbarch *gdbarch,
+			     struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr;
   struct remote_state *rs = get_remote_state ();

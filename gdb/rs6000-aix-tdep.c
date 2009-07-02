@@ -663,6 +663,7 @@ branch_dest (struct frame_info *frame, int opcode, int instr,
 static int
 rs6000_software_single_step (struct frame_info *frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   int ii, insn;
   CORE_ADDR loc;
   CORE_ADDR breaks[2];
@@ -688,7 +689,7 @@ rs6000_software_single_step (struct frame_info *frame)
       /* ignore invalid breakpoint. */
       if (breaks[ii] == -1)
 	continue;
-      insert_single_step_breakpoint (breaks[ii]);
+      insert_single_step_breakpoint (gdbarch, breaks[ii]);
     }
 
   errno = 0;			/* FIXME, don't ignore errors! */

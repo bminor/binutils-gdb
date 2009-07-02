@@ -1,5 +1,203 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* breakpoint.h (struct breakpoint): New member GDBARCH.
+	* breakpoint.c: Include "arch-utils.h".
+	(set_raw_breakpoint_without_location): Add GDBARCH parameter.
+	Use it to set breakpoint architecture.
+	(set_raw_breakpoint): Add GDBARCH parameter.
+	(create_internal_breakpoint): Likewise.
+	(create_catchpoint): Likewise.
+	(create_fork_vfork_event_catchpoint): Likewise.
+	(create_breakpoint): Likewise.
+	(create_breakpoints): Likewise.
+	(break_command_really): Likewise.
+	(create_ada_exception_breakpoint): Likewise.
+	Update local callers to pass architecture:
+	(create_internal_breakpoint): Update.
+	(create_overlay_event_breakpoint): Update.
+	(create_longjmp_master_breakpoint): Update.
+	(create_thread_event_breakpoint): Update.
+	(create_solib_event_breakpoint): Update.
+	(create_catchpoint): Update.
+	(create_fork_vfork_event_catchpoint): Update.
+	(set_momentary_breakpoint): Update.
+	(clone_momentary_breakpoint): Update.
+	(create_breakpoint): Update.
+	(create_breakpoints): Update.
+	(break_command_really): Update.
+	(break_command_1): Update.
+	(set_breakpoint): Update.
+	(watch_command_1): Update.
+	(catch_fork_command_1): Update.
+	(catch_exec_commnd_1): Update.
+	(handle_gnu_v3_exceptions): Update.
+	(create_ada_exception_breakpoint): Update.
+	(catch_ada_exception_command): Update.
+	(catch_assert_command): Update.
+	(trace_command): Update.
+
+	* breakpoint.h (struct bp_location): New member GDBARCH.
+	* breakpoint.c (get_sal_arch): New function.
+	(set_raw_breakpoint): Set location architecture.
+	(add_location_to_breakpoint): Likewise.
+	(clone_momentary_breakpoint): Likewise.
+	(watch_command_1): Likewise.
+	(update_watchpoint): Likewise.
+	(bp_loc_is_permanent): Use location architecture instead of
+	current_gdbarch.
+	(adjust_breakpoint_address): Add GDBARCH parameter; use it
+	instead of current_gdbarch.
+	Update callers of adjust_breakpoint_address to pass
+	breakpoint location architecture:
+	(set_raw_breakpoint): Update.
+	(watch_command_1): Update.
+
+	* tracepoint.c: (collect_symbol): Add GDBARCH parameter, use instead
+	of current_gdbarch.
+	(add_local_symbols): Add GDBARCH parameter.  Pass to collect_symbol.
+	(encode_actions): Pass tracepoint architecture to add_local_symbols
+	(encode_actions): Use tracepoint architecture instead of
+	current_gdbarch.  Pass it to add_local_symbols and collect_symbol.
+
+	* breakpoint.h (struct breakpoint_ops): Replace last_addr parameter
+	of print_one callback with last_loc.
+	* breakpoint.c (print_one_breakpoint_location): Replace last_addr
+	parameter with last_loc.
+	(print_one_breakpoint): Likewise.
+	(do_captured_breakpoint_query): Update call.
+	(breakpoint_1): Pass last_loc instead of last_addr to
+	print_one_breakpoint.  Pass last location architecture instead of
+	current_gdbarch to set_next_address.
+	Update all implementations of the print_one callback:
+	* breakpoint.c (print_one_catch_fork): Update.
+	(print_one_catch_vfork): Update.
+	(print_one_catch_exec): Update.
+	(print_one_exception_catchpoint): Update.
+	* ada-lang.c (print_one_exception): Update.
+	(print_one_catch_exception): Update.
+	(print_one_catch_exception_unhandled): Update.
+	(print_one_catch_assert): Update.
+
+	* breakpoint.c (print_one_breakpoint_location): Add PRINT_ADDRESS_BITS
+	parameter.  Use it instead of gdbarch_addr_bit (current_gdbarch).
+	(print_one_breakpoint): Add PRINT_ADDRESS_BITS parameter and pass it
+	to print_one_breakpoint_location.
+	(breakpoint_address_bits): New function.
+	(do_captured_breakpoint_query): Compute number of address bits to print
+	and pass it to print_one_breakpoint.
+	(breakpoint_1): Likewise.  Use it instead of current_gdbarch.
+
+	* breakpoint.h (create_thread_event_breakpoint): Add GDBARCH.
+	* breakpoint.c (create_thread_event_breakpoint): Likewise.
+	Update callers to create_thread_event_breakpoint:
+	* aix-thread.c (pd_enable): Update.
+	* linux-thread-db.c (enable_thread_event): Update.
+
+	* breakpoint.h (create_solib_event_breakpoint): Add GDBARCH.
+	* breakpoint.c (create_solib_event_breakpoint): Likewise.
+	Update callers to create_solib_event_breakpoint:
+	* solib-frv.c (enable_break, enable_break2): Update.
+	* solib-pa64.c (pa64_solib_create_inferior_hook): Update.
+	* solib-som.c (som_solib_create_inferior_hook): Update.
+	* solib-darwin.c (darwin_solib_create_inferior_hook): Update.
+	* solib-svr4.c (enable_break): Update.
+
+	* breakpoint.h (insert_single_step_breakpoint): Add GDBARCH.
+	* breakpoint.c (insert_single_step_breakpoint): Likewise.
+	Update callers to insert_single_step_breakpoint:
+	* alpha-tdep.c (alpha_software_single_step): Update.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Update.
+	* arm-tdep.c (arm_software_single_step): Update.
+	* cris-tdep.c (cris_software_single_step): Update.
+	* rs6000-aix-tdep.c (rs6000_software_single_step): Update.
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Update.
+	* sparc-tdep.c (sparc_software_single_step): Update.
+	* spu-tdep.c (spu_software_single_step): Update.
+	* mips-tdep.c (deal_with_atomic_sequence): Add GDBARCH parameter.
+	Pass it to insert_single_step_breakpoint.
+	(mips_software_single_step): Pass architecture to
+	deal_with_atomic_sequence and insert_single_step_breakpoint.
+
+	* breakpoint.h (deprecated_insert_raw_breakpoint): Add GDBARCH.
+	(deprecated_remove_raw_breakpoint): Likewise.
+	* breakpoint.c (deprecated_insert_raw_breakpoint): Add GDBARCH.
+	(deprecated_remove_raw_breakpoint): Likewise.
+	Update callers to deprecated_insert_raw_breakpoint and
+	deprecated_remove_raw_breakpoint:
+	* breakpoint.c (single_step_gdbarch): New static variable.
+	(insert_single_step_breakpoint): Pass GDBARCH parameter to
+	deprecated_insert_raw_breakpoint.  Store it in single_step_gdbarch.
+	(remove_single_step_breakpoints): Pass architecture stored in
+	single_step_gdbarch to deprecated_remove_raw_breakpoint.
+	* rs6000-nat.c (exec_one_dummy_insn): Update.
+	* solib-irix.c (enable_break, disable_break): Update.
+	* procfs.c (procfs_mourn_inferior): Update.
+	(remove_dbx_link_breakpoint): Update.
+
+	* breakpoint.h (set_breakpoint): Add GDBARCH parameter.
+	(set_momentary_breakpoint, set_momentary_breakpoint_at_pc): Likewise.
+	* breakpoint.c (set_breakpoint): Add GDBARCH parameter.
+	(set_momentary_breakpoint, set_momentary_breakpoint_at_pc): Likewise.
+	Update callers to set_breakpoint, set_momentary_breakpoint and
+	set_momentary_breakpoint_at_pc:
+	* breakpoint.c (set_momentary_breakpoint_at_pc): Update.
+	(until_break_command): Update.
+	* infcall.c (call_function_by_hand): Update.
+	* infcmd.c (finish_backward, finish_forward): Update.
+	* infrun.c (insert_step_resume_breakpoint_at_sal): Add GDBARCH
+	parameter.  Pass it to set_momentary_breakpoint.
+	(insert_longjmp_resume_breakpoint): Add GDBARCH parameter.
+	Pass it to set_momentary_breakpoint_at_pc.
+	(handle_inferior_event): Update.
+	(insert_step_resume_breakpoint_at_frame): Update.
+	(insert_step_resume_breakpoint_at_caller): Update..
+	* mi/mi-cmd-break.c: Include "arch-utils.h".
+	(mi_cmd_break_insert): Update.
+
+	* target.h (struct target_ops): Add GDBARCH parameter to
+	to_insert_breakpoint, to_remove_breakpoint, to_insert_hw_breakpoint,
+	and to_remove_hw_breakpoint members.
+	(target_insert_breakpoint, target_remove_breakpoint,
+	target_insert_hw_breakpoint, target_remove_hw_breakpoint): Add GDBARCH
+	parameter, pass to target routine.
+	(memory_remove_breakpoint, memory_insert_breakpoint): Add GDBARCH
+	parameter.
+	* target.c (debug_to_insert_breakpoint, debug_to_remove_breakpoint,
+	debug_to_insert_hw_breakpoint, debug_to_remove_hw_breakpoint): Add
+	GDBARCH parameter, pass to target routine.
+	(update_current_target): Update function signature.
+	* breakpoint.c (insert_bp_location, remove_breakpoint,
+	deprecated_insert_raw_breakpoint, deprecated_remove_raw_breakpoint):
+	Pass architecture to target_ routines.
+	Update all implementations of the target breakpoint routines to take
+	GDBARCH parameter and use it instead of GDBARCH as appropriate:
+	* corelow.c (ignore): Update.
+	* exec.c (ignore): Update.
+	* mem-break.c (memory_insert_breakpoint): Update.
+	(memory_remove_breakpoint): Update.
+	* monitor.c (monitor_insert_breakpoint): Update.
+	(monitor_remove_breakpoint): Update.
+	* record.c (record_insert_breakpoint): Update.
+	(record_beneath_to_insert_breakpoint): Update.
+	(record_remove_breakpoint): Update.
+	(record_beneath_to_remove_breakpoint): Update.
+	* remote.c (remote_insert_breakpoint): Update.
+	(remote_remove_breakpoint): Update.
+	(remote_insert_hw_breakpoint): Update.
+	(remote_remove_hw_breakpoint): Update.
+	* remote-m32r-sdi.c (m32r_insert_breakpoint): Update.
+	(m32r_remove_breakpoint): Update.
+	* remote-mips.c (mips_insert_breakpoint): Update.
+	(mips_remove_breakpoint): Update.
+	* i386-nat.c (i386_insert_hw_breakpoint): Update.
+	(i386_remove_hw_breakpoint): Update.
+	* nto-procfs.c (procfs_insert_breakpoint):  Update.
+	(procfs_remove_breakpoint): Update.
+	(procfs_insert_hw_breakpoint): Update.
+	(procfs_remove_hw_breakpoint): Update.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* frame.h (frame_unwind_arch): New.
 	(frame_unwind_caller_arch): Likewise.
 	* frame-unwind.h (frame_prev_arch_ftype): New type.

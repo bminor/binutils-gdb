@@ -10293,7 +10293,7 @@ print_it_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
 
 static void
 print_one_exception (enum exception_catchpoint_kind ex,
-                     struct breakpoint *b, CORE_ADDR *last_addr)
+                     struct breakpoint *b, struct bp_location **last_loc)
 { 
   struct value_print_options opts;
 
@@ -10305,7 +10305,7 @@ print_one_exception (enum exception_catchpoint_kind ex,
     }
 
   annotate_field (5);
-  *last_addr = b->loc->address;
+  *last_loc = b->loc;
   switch (ex)
     {
       case ex_catch_exception:
@@ -10377,9 +10377,9 @@ print_it_catch_exception (struct breakpoint *b)
 }
 
 static void
-print_one_catch_exception (struct breakpoint *b, CORE_ADDR *last_addr)
+print_one_catch_exception (struct breakpoint *b, struct bp_location **last_loc)
 {
-  print_one_exception (ex_catch_exception, b, last_addr);
+  print_one_exception (ex_catch_exception, b, last_loc);
 }
 
 static void
@@ -10407,9 +10407,10 @@ print_it_catch_exception_unhandled (struct breakpoint *b)
 }
 
 static void
-print_one_catch_exception_unhandled (struct breakpoint *b, CORE_ADDR *last_addr)
+print_one_catch_exception_unhandled (struct breakpoint *b,
+				     struct bp_location **last_loc)
 {
-  print_one_exception (ex_catch_exception_unhandled, b, last_addr);
+  print_one_exception (ex_catch_exception_unhandled, b, last_loc);
 }
 
 static void
@@ -10436,9 +10437,9 @@ print_it_catch_assert (struct breakpoint *b)
 }
 
 static void
-print_one_catch_assert (struct breakpoint *b, CORE_ADDR *last_addr)
+print_one_catch_assert (struct breakpoint *b, struct bp_location **last_loc)
 {
-  print_one_exception (ex_catch_assert, b, last_addr);
+  print_one_exception (ex_catch_assert, b, last_loc);
 }
 
 static void

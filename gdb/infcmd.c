@@ -1461,10 +1461,13 @@ finish_backward (struct symbol *function)
 
   if (sal.pc != pc)
     {
+      struct frame_info *frame = get_selected_frame (NULL);
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+
       /* Set breakpoint and continue.  */
       breakpoint =
-	set_momentary_breakpoint (sal,
-				  get_stack_frame_id (get_selected_frame (NULL)),
+	set_momentary_breakpoint (gdbarch, sal,
+				  get_stack_frame_id (frame),
 				  bp_breakpoint);
       /* Tell the breakpoint to keep quiet.  We won't be done
          until we've done another reverse single-step.  */
@@ -1493,6 +1496,7 @@ finish_backward (struct symbol *function)
 static void
 finish_forward (struct symbol *function, struct frame_info *frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   struct symtab_and_line sal;
   struct thread_info *tp = inferior_thread ();
   struct breakpoint *breakpoint;
@@ -1502,7 +1506,8 @@ finish_forward (struct symbol *function, struct frame_info *frame)
   sal = find_pc_line (get_frame_pc (frame), 0);
   sal.pc = get_frame_pc (frame);
 
-  breakpoint = set_momentary_breakpoint (sal, get_stack_frame_id (frame),
+  breakpoint = set_momentary_breakpoint (gdbarch, sal,
+					 get_stack_frame_id (frame),
                                          bp_finish);
 
   old_chain = make_cleanup_delete_breakpoint (breakpoint);

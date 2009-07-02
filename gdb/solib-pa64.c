@@ -428,7 +428,7 @@ pa64_solib_create_inferior_hook (void)
       /* Create the shared library breakpoint.  */
       {
 	struct breakpoint *b
-	  = create_solib_event_breakpoint (sym_addr);
+	  = create_solib_event_breakpoint (target_gdbarch, sym_addr);
 
 	/* The breakpoint is actually hard-coded into the dynamic linker,
 	   so we don't need to actually insert a breakpoint instruction

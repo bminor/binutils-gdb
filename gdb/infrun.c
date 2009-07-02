@@ -1759,9 +1759,10 @@ static void handle_step_into_function_backward (struct gdbarch *gdbarch,
 						struct execution_control_state *ecs);
 static void insert_step_resume_breakpoint_at_frame (struct frame_info *step_frame);
 static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
-static void insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
+static void insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
+						  struct symtab_and_line sr_sal,
 						  struct frame_id sr_id);
-static void insert_longjmp_resume_breakpoint (CORE_ADDR);
+static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 
 static void stop_stepping (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
@@ -3411,7 +3412,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	delete_step_resume_breakpoint (ecs->event_thread);
 
 	/* Insert a breakpoint at resume address.  */
-	insert_longjmp_resume_breakpoint (jmp_buf_pc);
+	insert_longjmp_resume_breakpoint (gdbarch, jmp_buf_pc);
 
 	keep_going (ecs);
 	return;
@@ -3732,7 +3733,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	  init_sal (&sr_sal);
 	  sr_sal.pc = pc_after_resolver;
 
-	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	  insert_step_resume_breakpoint_at_sal (gdbarch,
+						sr_sal, null_frame_id);
 	}
 
       keep_going (ecs);
@@ -3828,7 +3830,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	      /* Normal function call return (static or dynamic).  */
 	      init_sal (&sr_sal);
 	      sr_sal.pc = ecs->stop_func_start;
-	      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+		  insert_step_resume_breakpoint_at_sal (gdbarch,
+							sr_sal, null_frame_id);
 	    }
 	  else
 	    insert_step_resume_breakpoint_at_caller (frame);
@@ -3854,7 +3857,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	  init_sal (&sr_sal);
 	  sr_sal.pc = ecs->stop_func_start;
 
-	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	  insert_step_resume_breakpoint_at_sal (gdbarch,
+						sr_sal, null_frame_id);
 	  keep_going (ecs);
 	  return;
 	}
@@ -3898,7 +3902,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	  struct symtab_and_line sr_sal;
 	  init_sal (&sr_sal);
 	  sr_sal.pc = ecs->stop_func_start;
-	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	  insert_step_resume_breakpoint_at_sal (gdbarch,
+						sr_sal, null_frame_id);
 	}
       else
 	/* Set a breakpoint at callee's return address (the address
@@ -3934,7 +3939,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	  /* Do not specify what the fp should be when we stop since
 	     on some machines the prologue is where the new fp value
 	     is established.  */
-	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	  insert_step_resume_breakpoint_at_sal (gdbarch,
+						sr_sal, null_frame_id);
 
 	  /* Restart without fiddling with the step ranges or
 	     other state.  */
@@ -4212,7 +4218,7 @@ handle_step_into_function (struct gdbarch *gdbarch,
       /* Do not specify what the fp should be when we stop since on
          some machines the prologue is where the new fp value is
          established.  */
-      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+      insert_step_resume_breakpoint_at_sal (gdbarch, sr_sal, null_frame_id);
 
       /* And make sure stepping stops right away then.  */
       ecs->event_thread->step_range_end = ecs->event_thread->step_range_start;
@@ -4262,7 +4268,8 @@ handle_step_into_function_backward (struct gdbarch *gdbarch,
    This is used to both functions and to skip over code.  */
 
 static void
-insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
+insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
+				      struct symtab_and_line sr_sal,
 				      struct frame_id sr_id)
 {
   /* There should never be more than one step-resume or longjmp-resume
@@ -4276,7 +4283,7 @@ insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
 			paddr_nz (sr_sal.pc));
 
   inferior_thread ()->step_resume_breakpoint
-    = set_momentary_breakpoint (sr_sal, sr_id, bp_step_resume);
+    = set_momentary_breakpoint (gdbarch, sr_sal, sr_id, bp_step_resume);
 }
 
 /* Insert a "step-resume breakpoint" at RETURN_FRAME.pc.  This is used
@@ -4289,16 +4296,18 @@ insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
 static void
 insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (return_frame);
   struct symtab_and_line sr_sal;
+  struct gdbarch *gdbarch;
 
   gdb_assert (return_frame != NULL);
   init_sal (&sr_sal);		/* initialize to zeros */
 
+  gdbarch = get_frame_arch (return_frame);
   sr_sal.pc = gdbarch_addr_bits_remove (gdbarch, get_frame_pc (return_frame));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
-  insert_step_resume_breakpoint_at_sal (sr_sal, get_stack_frame_id (return_frame));
+  insert_step_resume_breakpoint_at_sal (gdbarch, sr_sal,
+					get_stack_frame_id (return_frame));
 }
 
 /* Similar to insert_step_resume_breakpoint_at_frame, except
@@ -4319,8 +4328,8 @@ insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
 static void
 insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct symtab_and_line sr_sal;
+  struct gdbarch *gdbarch;
 
   /* We shouldn't have gotten here if we don't know where the call site
      is.  */
@@ -4328,11 +4337,12 @@ insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
 
   init_sal (&sr_sal);		/* initialize to zeros */
 
+  gdbarch = frame_unwind_caller_arch (next_frame);
   sr_sal.pc = gdbarch_addr_bits_remove (gdbarch,
 					frame_unwind_caller_pc (next_frame));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
-  insert_step_resume_breakpoint_at_sal (sr_sal,
+  insert_step_resume_breakpoint_at_sal (gdbarch, sr_sal,
 					frame_unwind_caller_id (next_frame));
 }
 
@@ -4342,7 +4352,7 @@ insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
    "step-resume" breakpoints.  */
 
 static void
-insert_longjmp_resume_breakpoint (CORE_ADDR pc)
+insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   /* There should never be more than one step-resume or longjmp-resume
      breakpoint per thread, so we should never be setting a new
@@ -4355,7 +4365,7 @@ insert_longjmp_resume_breakpoint (CORE_ADDR pc)
 			paddr_nz (pc));
 
   inferior_thread ()->step_resume_breakpoint =
-    set_momentary_breakpoint_at_pc (pc, bp_longjmp_resume);
+    set_momentary_breakpoint_at_pc (gdbarch, pc, bp_longjmp_resume);
 }
 
 static void

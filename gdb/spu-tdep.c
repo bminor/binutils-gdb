@@ -1288,6 +1288,7 @@ spu_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR * pcptr, int *lenptr)
 static int
 spu_software_single_step (struct frame_info *frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR pc, next_pc;
   unsigned int insn;
   int offset, reg;
@@ -1307,7 +1308,7 @@ spu_software_single_step (struct frame_info *frame)
   else
     next_pc = (pc + 4) & (SPU_LS_SIZE - 1);
 
-  insert_single_step_breakpoint (next_pc);
+  insert_single_step_breakpoint (gdbarch, next_pc);
 
   if (is_branch (insn, &offset, &reg))
     {
@@ -1323,7 +1324,7 @@ spu_software_single_step (struct frame_info *frame)
 
       target = target & (SPU_LS_SIZE - 1);
       if (target != next_pc)
-	insert_single_step_breakpoint (target);
+	insert_single_step_breakpoint (gdbarch, target);
     }
 
   return 1;

@@ -788,7 +788,7 @@ enable_break2 (void)
       xfree (ldm);
 
       /* Now (finally!) create the solib breakpoint.  */
-      create_solib_event_breakpoint (addr);
+      create_solib_event_breakpoint (target_gdbarch, addr);
 
       return 1;
     }
@@ -817,7 +817,8 @@ enable_break (void)
   if (interp_sect)
     {
       enable_break1_done = 1;
-      create_solib_event_breakpoint (symfile_objfile->ei.entry_point);
+      create_solib_event_breakpoint (target_gdbarch,
+				     symfile_objfile->ei.entry_point);
 
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,

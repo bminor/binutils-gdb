@@ -1,3 +1,8 @@
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbint.texi (Examples of Use of @code{ui_out} functions):
+	Update example code extrated from breakpoint.c.
+
 2009-06-28  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	
 	* gdb.texinfo (GDB/MI Program Context): @ignore unimplemented

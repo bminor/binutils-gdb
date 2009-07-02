@@ -575,6 +575,7 @@ arm_linux_regset_from_core_section (struct gdbarch *gdbarch,
 static int
 arm_linux_software_single_step (struct frame_info *frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR next_pc = arm_get_next_pc (frame, get_frame_pc (frame));
 
   /* The Linux kernel offers some user-mode helpers in a high page.  We can
@@ -585,7 +586,7 @@ arm_linux_software_single_step (struct frame_info *frame)
   if (next_pc > 0xffff0000)
     next_pc = get_frame_register_unsigned (frame, ARM_LR_REGNUM);
 
-  insert_single_step_breakpoint (next_pc);
+  insert_single_step_breakpoint (gdbarch, next_pc);
 
   return 1;
 }

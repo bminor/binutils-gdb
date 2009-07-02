@@ -2377,7 +2377,7 @@ mips_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
    the sequence.  */
 
 static int
-deal_with_atomic_sequence (CORE_ADDR pc)
+deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
@@ -2465,7 +2465,7 @@ deal_with_atomic_sequence (CORE_ADDR pc)
 
   /* Effectively inserts the breakpoints.  */
   for (index = 0; index <= last_breakpoint; index++)
-      insert_single_step_breakpoint (breaks[index]);
+      insert_single_step_breakpoint (gdbarch, breaks[index]);
 
   return 1;
 }
@@ -2478,15 +2478,16 @@ deal_with_atomic_sequence (CORE_ADDR pc)
 int
 mips_software_single_step (struct frame_info *frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR pc, next_pc;
 
   pc = get_frame_pc (frame);
-  if (deal_with_atomic_sequence (pc))
+  if (deal_with_atomic_sequence (gdbarch, pc))
     return 1;
 
   next_pc = mips_next_pc (frame, pc);
 
-  insert_single_step_breakpoint (next_pc);
+  insert_single_step_breakpoint (gdbarch, next_pc);
   return 1;
 }
 

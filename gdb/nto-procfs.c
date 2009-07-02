@@ -824,26 +824,30 @@ procfs_breakpoint (CORE_ADDR addr, int type, int size)
 }
 
 static int
-procfs_insert_breakpoint (struct bp_target_info *bp_tgt)
+procfs_insert_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
 {
   return procfs_breakpoint (bp_tgt->placed_address, _DEBUG_BREAK_EXEC, 0);
 }
 
 static int
-procfs_remove_breakpoint (struct bp_target_info *bp_tgt)
+procfs_remove_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
 {
   return procfs_breakpoint (bp_tgt->placed_address, _DEBUG_BREAK_EXEC, -1);
 }
 
 static int
-procfs_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
+procfs_insert_hw_breakpoint (struct gdbarch *gdbarch,
+			     struct bp_target_info *bp_tgt)
 {
   return procfs_breakpoint (bp_tgt->placed_address,
 			    _DEBUG_BREAK_EXEC | _DEBUG_BREAK_HW, 0);
 }
 
 static int
-procfs_remove_hw_breakpoint (struct bp_target_info *bp_tgt)
+procfs_remove_hw_breakpoint (struct gdbarch *gdbarch,
+			     struct bp_target_info *bp_tgt)
 {
   return procfs_breakpoint (bp_tgt->placed_address,
 			    _DEBUG_BREAK_EXEC | _DEBUG_BREAK_HW, -1);

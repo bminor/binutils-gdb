@@ -1140,7 +1140,8 @@ m32r_mourn_inferior (struct target_ops *ops)
 }
 
 static int
-m32r_insert_breakpoint (struct bp_target_info *bp_tgt)
+m32r_insert_breakpoint (struct gdbarch *gdbarch,
+			struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   int ib_breakpoints;
@@ -1183,7 +1184,8 @@ m32r_insert_breakpoint (struct bp_target_info *bp_tgt)
 }
 
 static int
-m32r_remove_breakpoint (struct bp_target_info *bp_tgt)
+m32r_remove_breakpoint (struct gdbarch *gdbarch,
+			struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   int i;

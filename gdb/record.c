@@ -112,8 +112,10 @@ static LONGEST (*record_beneath_to_xfer_partial) (struct target_ops *ops,
 						  const gdb_byte *writebuf,
 						  ULONGEST offset,
 						  LONGEST len);
-static int (*record_beneath_to_insert_breakpoint) (struct bp_target_info *);
-static int (*record_beneath_to_remove_breakpoint) (struct bp_target_info *);
+static int (*record_beneath_to_insert_breakpoint) (struct gdbarch *,
+						   struct bp_target_info *);
+static int (*record_beneath_to_remove_breakpoint) (struct gdbarch *,
+						   struct bp_target_info *);
 
 static void
 record_list_release (struct record_entry *rec)
@@ -1046,12 +1048,13 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
    nor when recording.  */
 
 static int
-record_insert_breakpoint (struct bp_target_info *bp_tgt)
+record_insert_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
 {
   if (!RECORD_IS_REPLAY)
     {
       struct cleanup *old_cleanups = record_gdb_operation_disable_set ();
-      int ret = record_beneath_to_insert_breakpoint (bp_tgt);
+      int ret = record_beneath_to_insert_breakpoint (gdbarch, bp_tgt);
 
       do_cleanups (old_cleanups);
 
@@ -1062,12 +1065,13 @@ record_insert_breakpoint (struct bp_target_info *bp_tgt)
 }
 
 static int
-record_remove_breakpoint (struct bp_target_info *bp_tgt)
+record_remove_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
 {
   if (!RECORD_IS_REPLAY)
     {
       struct cleanup *old_cleanups = record_gdb_operation_disable_set ();
-      int ret = record_beneath_to_remove_breakpoint (bp_tgt);
+      int ret = record_beneath_to_remove_breakpoint (gdbarch, bp_tgt);
 
       do_cleanups (old_cleanups);
 

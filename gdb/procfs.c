@@ -4803,7 +4803,7 @@ procfs_mourn_inferior (struct target_ops *ops)
 
   if (dbx_link_bpt != NULL)
     {
-      deprecated_remove_raw_breakpoint (dbx_link_bpt);
+      deprecated_remove_raw_breakpoint (target_gdbarch, dbx_link_bpt);
       dbx_link_bpt_addr = 0;
       dbx_link_bpt = NULL;
     }
@@ -5592,7 +5592,7 @@ remove_dbx_link_breakpoint (void)
   if (dbx_link_bpt_addr == 0)
     return;
 
-  if (deprecated_remove_raw_breakpoint (dbx_link_bpt) != 0)
+  if (deprecated_remove_raw_breakpoint (target_gdbarch, dbx_link_bpt) != 0)
     warning (_("Unable to remove __dbx_link breakpoint."));
 
   dbx_link_bpt_addr = 0;
@@ -5664,7 +5664,8 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
     {
       /* Insert the breakpoint.  */
       dbx_link_bpt_addr = sym_addr;
-      dbx_link_bpt = deprecated_insert_raw_breakpoint (sym_addr);
+      dbx_link_bpt = deprecated_insert_raw_breakpoint (target_gdbarch,
+						       sym_addr);
       if (dbx_link_bpt == NULL)
         {
           warning (_("Failed to insert dbx_link breakpoint."));

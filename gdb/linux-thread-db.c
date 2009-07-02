@@ -515,7 +515,7 @@ enable_thread_event (int event, CORE_ADDR *bp)
 	     ? (CORE_ADDR) (intptr_t) notify.u.bptaddr
 	     : (CORE_ADDR) (uintptr_t) notify.u.bptaddr),
 	    &current_target));
-  create_thread_event_breakpoint ((*bp));
+  create_thread_event_breakpoint (target_gdbarch, *bp);
 
   return TD_OK;
 }

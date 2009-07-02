@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "mi-cmds.h"
 #include "ui-out.h"
 #include "mi-out.h"
@@ -153,13 +154,13 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
       switch (type)
 	{
 	case REG_BP:
-	  set_breakpoint (address, condition,
+	  set_breakpoint (get_current_arch (), address, condition,
 			  0 /*hardwareflag */ , temp_p,
 			  thread, ignore_count,
 			  pending, enabled);
 	  break;
 	case HW_BP:
-	  set_breakpoint (address, condition,
+	  set_breakpoint (get_current_arch (), address, condition,
 			  1 /*hardwareflag */ , temp_p,
 			  thread, ignore_count,
 			  pending, enabled);

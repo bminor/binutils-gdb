@@ -901,7 +901,7 @@ pd_enable (void)
   if (!(ms = lookup_minimal_symbol (stub_name, NULL, NULL)))
     return;
   pd_brk_addr = SYMBOL_VALUE_ADDRESS (ms);
-  if (!create_thread_event_breakpoint (pd_brk_addr))
+  if (!create_thread_event_breakpoint (target_gdbarch, pd_brk_addr))
     return;
 
   /* Prepare for thread debugging.  */

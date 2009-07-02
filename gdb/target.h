@@ -367,11 +367,11 @@ struct target_ops
 				   struct target_ops *target);
 
     void (*to_files_info) (struct target_ops *);
-    int (*to_insert_breakpoint) (struct bp_target_info *);
-    int (*to_remove_breakpoint) (struct bp_target_info *);
+    int (*to_insert_breakpoint) (struct gdbarch *, struct bp_target_info *);
+    int (*to_remove_breakpoint) (struct gdbarch *, struct bp_target_info *);
     int (*to_can_use_hw_breakpoint) (int, int, int);
-    int (*to_insert_hw_breakpoint) (struct bp_target_info *);
-    int (*to_remove_hw_breakpoint) (struct bp_target_info *);
+    int (*to_insert_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
+    int (*to_remove_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
     int (*to_remove_watchpoint) (CORE_ADDR, int, int);
     int (*to_insert_watchpoint) (CORE_ADDR, int, int);
     int (*to_stopped_by_watchpoint) (void);
@@ -739,14 +739,14 @@ extern int inferior_has_execd (ptid_t pid, char **execd_pathname);
 /* Insert a breakpoint at address BP_TGT->placed_address in the target
    machine.  Result is 0 for success, or an errno value.  */
 
-#define	target_insert_breakpoint(bp_tgt)	\
-     (*current_target.to_insert_breakpoint) (bp_tgt)
+#define	target_insert_breakpoint(gdbarch, bp_tgt)	\
+     (*current_target.to_insert_breakpoint) (gdbarch, bp_tgt)
 
 /* Remove a breakpoint at address BP_TGT->placed_address in the target
    machine.  Result is 0 for success, or an errno value.  */
 
-#define	target_remove_breakpoint(bp_tgt)	\
-     (*current_target.to_remove_breakpoint) (bp_tgt)
+#define	target_remove_breakpoint(gdbarch, bp_tgt)	\
+     (*current_target.to_remove_breakpoint) (gdbarch, bp_tgt)
 
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
@@ -1109,11 +1109,11 @@ extern char *normal_pid_to_str (ptid_t ptid);
 #define	target_remove_watchpoint(addr, len, type)	\
      (*current_target.to_remove_watchpoint) (addr, len, type)
 
-#define target_insert_hw_breakpoint(bp_tgt) \
-     (*current_target.to_insert_hw_breakpoint) (bp_tgt)
+#define target_insert_hw_breakpoint(gdbarch, bp_tgt) \
+     (*current_target.to_insert_hw_breakpoint) (gdbarch, bp_tgt)
 
-#define target_remove_hw_breakpoint(bp_tgt) \
-     (*current_target.to_remove_hw_breakpoint) (bp_tgt)
+#define target_remove_hw_breakpoint(gdbarch, bp_tgt) \
+     (*current_target.to_remove_hw_breakpoint) (gdbarch, bp_tgt)
 
 #define target_stopped_data_address(target, x) \
     (*target.to_stopped_data_address) (target, x)
@@ -1229,9 +1229,9 @@ extern struct target_section_table *target_get_section_table
 
 /* From mem-break.c */
 
-extern int memory_remove_breakpoint (struct bp_target_info *);
+extern int memory_remove_breakpoint (struct gdbarch *, struct bp_target_info *);
 
-extern int memory_insert_breakpoint (struct bp_target_info *);
+extern int memory_insert_breakpoint (struct gdbarch *, struct bp_target_info *);
 
 extern int default_memory_remove_breakpoint (struct gdbarch *, struct bp_target_info *);
 

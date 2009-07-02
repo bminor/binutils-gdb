@@ -320,7 +320,7 @@ disable_break (void)
   /* Note that breakpoint address and original contents are in our address
      space, so we just need to write the original contents back. */
 
-  if (deprecated_remove_raw_breakpoint (base_breakpoint) != 0)
+  if (deprecated_remove_raw_breakpoint (target_gdbarch, base_breakpoint) != 0)
     {
       status = 0;
     }
@@ -358,7 +358,8 @@ enable_break (void)
   if (symfile_objfile != NULL)
     {
       base_breakpoint
-	= deprecated_insert_raw_breakpoint (entry_point_address ());
+	= deprecated_insert_raw_breakpoint (target_gdbarch,
+					    entry_point_address ());
 
       if (base_breakpoint != NULL)
 	return 1;

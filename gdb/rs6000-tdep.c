@@ -1071,6 +1071,7 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 int 
 ppc_deal_with_atomic_sequence (struct frame_info *frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR pc = get_frame_pc (frame);
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
@@ -1143,7 +1144,7 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
 
   /* Effectively inserts the breakpoints.  */
   for (index = 0; index <= last_breakpoint; index++)
-    insert_single_step_breakpoint (breaks[index]);
+    insert_single_step_breakpoint (gdbarch, breaks[index]);
 
   return 1;
 }

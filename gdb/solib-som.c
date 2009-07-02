@@ -290,7 +290,8 @@ Suggest linking with /opt/langtools/lib/end.o.\n\
 GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
-  create_solib_event_breakpoint (SYMBOL_VALUE_ADDRESS (msymbol));
+  create_solib_event_breakpoint (target_gdbarch,
+				 SYMBOL_VALUE_ADDRESS (msymbol));
 
   /* We have all the support usually found in end.o, so we can track
      shl_load and shl_unload calls.  */
@@ -353,7 +354,7 @@ keep_going:
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
 
   /* Make the breakpoint at "_start" a shared library event breakpoint.  */
-  create_solib_event_breakpoint (anaddr);
+  create_solib_event_breakpoint (target_gdbarch, anaddr);
 
   clear_symtab_users ();
 }

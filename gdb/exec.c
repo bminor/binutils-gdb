@@ -776,7 +776,7 @@ exec_set_section_address (const char *filename, int index, CORE_ADDR address)
    breakpoint_init_inferior).  */
 
 static int
-ignore (struct bp_target_info *bp_tgt)
+ignore (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt)
 {
   return 0;
 }

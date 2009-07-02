@@ -1589,7 +1589,7 @@ Here's the new version:
     @{
      if (nr_printable_breakpoints > 0)
        annotate_field (4);
-     if (gdbarch_addr_bit (current_gdbarch) <= 32)
+     if (print_address_bits <= 32)
        ui_out_table_header (uiout, 10, ui_left, "addr", "Address");/* 5 */
      else
        ui_out_table_header (uiout, 18, ui_left, "addr", "Address");/* 5 */

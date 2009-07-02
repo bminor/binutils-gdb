@@ -601,7 +601,8 @@ i386_stopped_by_hwbp (void)
 /* Insert a hardware-assisted breakpoint at BP_TGT->placed_address.
    Return 0 on success, EBUSY on failure.  */
 static int
-i386_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
+i386_insert_hw_breakpoint (struct gdbarch *gdbarch,
+			   struct bp_target_info *bp_tgt)
 {
   unsigned len_rw = i386_length_and_rw_bits (1, hw_execute);
   CORE_ADDR addr = bp_tgt->placed_address;
@@ -617,7 +618,8 @@ i386_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
    Return 0 on success, -1 on failure.  */
 
 static int
-i386_remove_hw_breakpoint (struct bp_target_info *bp_tgt)
+i386_remove_hw_breakpoint (struct gdbarch *gdbarch,
+			   struct bp_target_info *bp_tgt)
 {
   unsigned len_rw = i386_length_and_rw_bits (1, hw_execute);
   CORE_ADDR addr = bp_tgt->placed_address;

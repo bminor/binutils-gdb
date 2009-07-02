@@ -2027,7 +2027,8 @@ monitor_mourn_inferior (struct target_ops *ops)
 /* Tell the monitor to add a breakpoint.  */
 
 static int
-monitor_insert_breakpoint (struct bp_target_info *bp_tgt)
+monitor_insert_breakpoint (struct gdbarch *gdbarch,
+			   struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   int i;
@@ -2038,10 +2039,10 @@ monitor_insert_breakpoint (struct bp_target_info *bp_tgt)
     error (_("No set_break defined for this monitor"));
 
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
-    addr = gdbarch_addr_bits_remove (current_gdbarch, addr);
+    addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
   /* Determine appropriate breakpoint size for this address.  */
-  gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &bplen);
+  gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
   bp_tgt->placed_address = addr;
   bp_tgt->placed_size = bplen;
 
@@ -2062,7 +2063,8 @@ monitor_insert_breakpoint (struct bp_target_info *bp_tgt)
 /* Tell the monitor to remove a breakpoint.  */
 
 static int
-monitor_remove_breakpoint (struct bp_target_info *bp_tgt)
+monitor_remove_breakpoint (struct gdbarch *gdbarch,
+			   struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   int i;

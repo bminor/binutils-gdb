@@ -738,7 +738,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     /* Sanity.  The exact same SP value is returned by
        PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
        dummy_id to form the frame ID's stack address.  */
-    bpt = set_momentary_breakpoint (sal, dummy_id, bp_call_dummy);
+    bpt = set_momentary_breakpoint (gdbarch, sal, dummy_id, bp_call_dummy);
     bpt->disposition = disp_del;
   }
 
@@ -760,7 +760,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 							   NULL, NULL);
        if (tm != NULL)
 	   terminate_bp = set_momentary_breakpoint_at_pc
-	     (SYMBOL_VALUE_ADDRESS (tm),  bp_breakpoint);
+	     (gdbarch, SYMBOL_VALUE_ADDRESS (tm),  bp_breakpoint);
      }
 
   /* Everything's ready, push all the info needed to restore the

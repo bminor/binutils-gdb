@@ -360,7 +360,7 @@ darwin_solib_create_inferior_hook (void)
   darwin_load_image_infos ();
 
   if (dyld_all_image.version == DYLD_VERSION)
-    create_solib_event_breakpoint (dyld_all_image.notifier);
+    create_solib_event_breakpoint (target_gdbarch, dyld_all_image.notifier);
 }
 
 static void

@@ -1314,10 +1314,10 @@ sparc_software_single_step (struct frame_info *frame)
   /* Analyze the instruction at PC.  */
   nnpc = sparc_analyze_control_transfer (frame, pc, &npc);
   if (npc != 0)
-    insert_single_step_breakpoint (npc);
+    insert_single_step_breakpoint (arch, npc);
 
   if (nnpc != 0)
-    insert_single_step_breakpoint (nnpc);
+    insert_single_step_breakpoint (arch, nnpc);
 
   /* Assert that we have set at least one breakpoint, and that
      they're not set at the same spot - unless we're going

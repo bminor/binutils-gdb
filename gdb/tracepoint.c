@@ -722,6 +722,7 @@ add_memrange (struct collection_list *memranges,
 static void
 collect_symbol (struct collection_list *collect, 
 		struct symbol *sym,
+		struct gdbarch *gdbarch,
 		long frame_regno, long frame_offset)
 {
   unsigned long len;
@@ -754,7 +755,7 @@ collect_symbol (struct collection_list *collect,
       add_memrange (collect, memrange_absolute, offset, len);
       break;
     case LOC_REGISTER:
-      reg = SYMBOL_REGISTER_OPS (sym)->register_number (sym, current_gdbarch);
+      reg = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
       if (info_verbose)
 	printf_filtered ("LOC_REG[parm] %s: ", 
 			 SYMBOL_PRINT_NAME (sym));
@@ -762,7 +763,7 @@ collect_symbol (struct collection_list *collect,
       /* Check for doubles stored in two registers.  */
       /* FIXME: how about larger types stored in 3 or more regs?  */
       if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FLT &&
-	  len > register_size (current_gdbarch, reg))
+	  len > register_size (gdbarch, reg))
 	add_register (collect, reg + 1);
       break;
     case LOC_REF_ARG:
@@ -819,7 +820,8 @@ collect_symbol (struct collection_list *collect,
 
 /* Add all locals (or args) symbols to collection list */
 static void
-add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
+add_local_symbols (struct collection_list *collect,
+		   struct gdbarch *gdbarch, CORE_ADDR pc,
 		   long frame_regno, long frame_offset, int type)
 {
   struct symbol *sym;
@@ -838,8 +840,8 @@ add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
 	      : type == 'L')	/* collecting Locals */
 	    {
 	      count++;
-	      collect_symbol (collect, sym, frame_regno, 
-			      frame_offset);
+	      collect_symbol (collect, sym, gdbarch,
+			      frame_regno, frame_offset);
 	    }
 	}
       if (BLOCK_FUNCTION (block))
@@ -1025,7 +1027,7 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
   *tdp_actions = NULL;
   *stepping_actions = NULL;
 
-  gdbarch_virtual_frame_pointer (current_gdbarch, 
+  gdbarch_virtual_frame_pointer (t->gdbarch,
 				 t->loc->address, &frame_reg, &frame_offset);
 
   for (action = t->actions; action; action = action->next)
@@ -1052,13 +1054,14 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 
 	      if (0 == strncasecmp ("$reg", action_exp, 4))
 		{
-		  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+		  for (i = 0; i < gdbarch_num_regs (t->gdbarch); i++)
 		    add_register (collect, i);
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else if (0 == strncasecmp ("$arg", action_exp, 4))
 		{
 		  add_local_symbols (collect,
+				     t->gdbarch,
 				     t->loc->address,
 				     frame_reg,
 				     frame_offset,
@@ -1068,6 +1071,7 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 	      else if (0 == strncasecmp ("$loc", action_exp, 4))
 		{
 		  add_local_symbols (collect,
+				     t->gdbarch,
 				     t->loc->address,
 				     frame_reg,
 				     frame_offset,
@@ -1091,7 +1095,7 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 		      {
 			const char *name = &exp->elts[2].string;
 
-			i = user_reg_map_name_to_regnum (current_gdbarch,
+			i = user_reg_map_name_to_regnum (t->gdbarch,
 							 name, strlen (name));
 			if (i == -1)
 			  internal_error (__FILE__, __LINE__,
@@ -1114,6 +1118,7 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 		    case OP_VAR_VALUE:
 		      collect_symbol (collect,
 				      exp->elts[2].symbol,
+				      t->gdbarch,
 				      frame_reg,
 				      frame_offset);
 		      break;

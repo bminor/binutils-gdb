@@ -1478,12 +1478,13 @@ alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
 int
 alpha_software_single_step (struct frame_info *frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR pc, next_pc;
 
   pc = get_frame_pc (frame);
   next_pc = alpha_next_pc (frame, pc);
 
-  insert_single_step_breakpoint (next_pc);
+  insert_single_step_breakpoint (gdbarch, next_pc);
   return 1;
 }
 
