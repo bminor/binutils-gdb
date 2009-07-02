@@ -386,7 +386,6 @@ struct gdbarch startup_gdbarch =
   /* startup_gdbarch() */
 };
 
-struct gdbarch *current_gdbarch = &startup_gdbarch;
 struct gdbarch *target_gdbarch = &startup_gdbarch;
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -3660,18 +3659,13 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
 
 
 /* Find an architecture that matches the specified INFO.  Create a new
-   architecture if needed.  Return that new architecture.  Assumes
-   that there is no current architecture.  */
+   architecture if needed.  Return that new architecture.  */
 
-static struct gdbarch *
-find_arch_by_info (struct gdbarch_info info)
+struct gdbarch *
+gdbarch_find_by_info (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
   struct gdbarch_registration *rego;
-
-  /* The existing architecture has been swapped out - all this code
-     works from a clean slate.  */
-  gdb_assert (current_gdbarch == NULL);
 
   /* Fill in missing parts of the INFO struct using a number of
      sources: "set ..."; INFOabfd supplied; and the global
@@ -3684,24 +3678,24 @@ find_arch_by_info (struct gdbarch_info info)
   if (gdbarch_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "find_arch_by_info: info.bfd_arch_info %s\n",
+			  "gdbarch_find_by_info: info.bfd_arch_info %s\n",
 			  (info.bfd_arch_info != NULL
 			   ? info.bfd_arch_info->printable_name
 			   : "(null)"));
       fprintf_unfiltered (gdb_stdlog,
-			  "find_arch_by_info: info.byte_order %d (%s)\n",
+			  "gdbarch_find_by_info: info.byte_order %d (%s)\n",
 			  info.byte_order,
 			  (info.byte_order == BFD_ENDIAN_BIG ? "big"
 			   : info.byte_order == BFD_ENDIAN_LITTLE ? "little"
 			   : "default"));
       fprintf_unfiltered (gdb_stdlog,
-			  "find_arch_by_info: info.osabi %d (%s)\n",
+			  "gdbarch_find_by_info: info.osabi %d (%s)\n",
 			  info.osabi, gdbarch_osabi_name (info.osabi));
       fprintf_unfiltered (gdb_stdlog,
-			  "find_arch_by_info: info.abfd %s\n",
+			  "gdbarch_find_by_info: info.abfd %s\n",
 			  host_address_to_string (info.abfd));
       fprintf_unfiltered (gdb_stdlog,
-			  "find_arch_by_info: info.tdep_info %s\n",
+			  "gdbarch_find_by_info: info.tdep_info %s\n",
 			  host_address_to_string (info.tdep_info));
     }
 
@@ -3714,7 +3708,7 @@ find_arch_by_info (struct gdbarch_info info)
   if (rego == NULL)
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "find_arch_by_info: "
+	fprintf_unfiltered (gdb_stdlog, "gdbarch_find_by_info: "
 			    "No matching architecture\n");
       return 0;
     }
@@ -3727,7 +3721,7 @@ find_arch_by_info (struct gdbarch_info info)
   if (new_gdbarch == NULL)
     {
       if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "find_arch_by_info: "
+	fprintf_unfiltered (gdb_stdlog, "gdbarch_find_by_info: "
 			    "Target rejected architecture\n");
       return NULL;
     }
@@ -3740,7 +3734,7 @@ find_arch_by_info (struct gdbarch_info info)
       struct gdbarch_list **list;
       struct gdbarch_list *this;
       if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "find_arch_by_info: "
+	fprintf_unfiltered (gdb_stdlog, "gdbarch_find_by_info: "
 			    "Previous architecture %s (%s) selected\n",
 			    host_address_to_string (new_gdbarch),
 			    new_gdbarch->bfd_arch_info->printable_name);
@@ -3762,7 +3756,7 @@ find_arch_by_info (struct gdbarch_info info)
 
   /* It's a new architecture.  */
   if (gdbarch_debug)
-    fprintf_unfiltered (gdb_stdlog, "find_arch_by_info: "
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_find_by_info: "
 			"New architecture %s (%s) selected\n",
 			host_address_to_string (new_gdbarch),
 			new_gdbarch->bfd_arch_info->printable_name);
@@ -3788,39 +3782,13 @@ find_arch_by_info (struct gdbarch_info info)
   return new_gdbarch;
 }
 
-struct gdbarch *
-gdbarch_find_by_info (struct gdbarch_info info)
-{
-  struct gdbarch *new_gdbarch;
-
-  /* Save the previously selected architecture, setting the global to
-     NULL.  This stops things like gdbarch->init() trying to use the
-     previous architecture's configuration.  The previous architecture
-     may not even be of the same architecture family.  The most recent
-     architecture of the same family is found at the head of the
-     rego->arches list.  */
-  struct gdbarch *old_gdbarch = current_gdbarch;
-  current_gdbarch = NULL;
-
-  /* Find the specified architecture.  */
-  new_gdbarch = find_arch_by_info (info);
-
-  /* Restore the existing architecture.  */
-  gdb_assert (current_gdbarch == NULL);
-  current_gdbarch = old_gdbarch;
-
-  return new_gdbarch;
-}
-
 /* Make the specified architecture current.  */
 
 void
-deprecated_current_gdbarch_select_hack (struct gdbarch *new_gdbarch)
+deprecated_target_gdbarch_select_hack (struct gdbarch *new_gdbarch)
 {
   gdb_assert (new_gdbarch != NULL);
-  gdb_assert (current_gdbarch != NULL);
   gdb_assert (new_gdbarch->initialized_p);
-  current_gdbarch = new_gdbarch;
   target_gdbarch = new_gdbarch;
   observer_notify_architecture_changed (new_gdbarch);
   registers_changed ();

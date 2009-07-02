@@ -504,7 +504,7 @@ gdbarch_update_p (struct gdbarch_info info)
 			"New architecture %s (%s) selected\n",
 			host_address_to_string (new_gdbarch),
 			gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
-  deprecated_current_gdbarch_select_hack (new_gdbarch);
+  deprecated_target_gdbarch_select_hack (new_gdbarch);
 
   return 1;
 }
@@ -537,7 +537,7 @@ set_gdbarch_from_file (bfd *abfd)
 
   if (gdbarch == NULL)
     error (_("Architecture of file not recognized."));
-  deprecated_current_gdbarch_select_hack (gdbarch);
+  deprecated_target_gdbarch_select_hack (gdbarch);
 }
 
 /* Initialize the current architecture.  Update the ``set

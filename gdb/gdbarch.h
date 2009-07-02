@@ -53,8 +53,6 @@ struct target_desc;
 struct displaced_step_closure;
 struct core_regset_section;
 
-extern struct gdbarch *current_gdbarch;
-
 /* The architecture associated with the connection to the target.
  
    The architecture vector provides some information that is really
@@ -919,8 +917,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
    of all the previously created architures for this architecture
    family.  The (possibly NULL) ARCHES->gdbarch can used to access
    values from the previously selected architecture for this
-   architecture family.  The global ``current_gdbarch'' shall not be
-   used.
+   architecture family.
 
    The INIT function shall return any of: NULL - indicating that it
    doesn't recognize the selected architecture; an existing ``struct
@@ -1029,12 +1026,12 @@ extern int gdbarch_update_p (struct gdbarch_info info);
    set, and then finished using gdbarch_info_fill.
 
    Returns the corresponding architecture, or NULL if no matching
-   architecture was found.  "current_gdbarch" is not updated.  */
+   architecture was found.  */
 
 extern struct gdbarch *gdbarch_find_by_info (struct gdbarch_info info);
 
 
-/* Helper function.  Set the global "current_gdbarch" to "gdbarch".
+/* Helper function.  Set the global "target_gdbarch" to "gdbarch".
 
    FIXME: kettenis/20031124: Of the functions that follow, only
    gdbarch_from_bfd is supposed to survive.  The others will
@@ -1042,7 +1039,7 @@ extern struct gdbarch *gdbarch_find_by_info (struct gdbarch_info info);
    multi-arch.  However, for now we're still stuck with the concept of
    a single active architecture.  */
 
-extern void deprecated_current_gdbarch_select_hack (struct gdbarch *gdbarch);
+extern void deprecated_target_gdbarch_select_hack (struct gdbarch *gdbarch);
 
 
 /* Register per-architecture data-pointer.

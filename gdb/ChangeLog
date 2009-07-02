@@ -1,5 +1,18 @@
 2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (current_gdbarch): Remove global variable.
+	(find_arch_by_info): Remove, inline into ...
+	(gdbarch_find_by_info): ... this.  Remove current_gdbarch swapping.
+	(deprecated_current_gdbarch_select_hack): Rename to ...
+	(deprecated_target_gdbarch_select_hack): ... this.  Do not set
+	or access current_gdbarch.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* arch-utils.c (gdbarch_update_p): Update call.
+	(set_gdbarch_from_file): Likewise.
+
+2009-07-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* defs.h (extract_signed_integer, extract_unsigned_integer,
 	extract_long_unsigned_integer, store_signed_integer,
 	store_unsigned_integer): Add BYTE_ORDER parameter.
