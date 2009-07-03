@@ -1405,6 +1405,10 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		  line_ptr += bytes_read;
 		  table->num_files++;
 		  break;
+		case DW_LNE_set_discriminator:
+		  (void) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+		  line_ptr += bytes_read;
+		  break;
 		default:
 		  (*_bfd_error_handler) (_("Dwarf Error: mangled line number section."));
 		  bfd_set_error (bfd_error_bad_value);
