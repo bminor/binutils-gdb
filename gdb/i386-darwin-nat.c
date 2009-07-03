@@ -30,7 +30,6 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "i386-tdep.h"
-#include "amd64-nat.h"
 #include "i387-tdep.h"
 #include "gdbarch.h"
 #include "arch-utils.h"
@@ -38,6 +37,11 @@
 
 #include "darwin-nat.h"
 #include "i386-darwin-tdep.h"
+
+#ifdef BFD64
+#include "amd64-nat.h"
+#include "amd64-darwin-tdep.h"
+#endif
 
 /* Read register values from the inferior process.
    If REGNO is -1, do this for all registers.
@@ -50,6 +54,7 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
   int fetched = 0;
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
+#ifdef BFD64
   if (gdbarch_ptr_bit (gdbarch) == 64)
     {
       if (regno == -1 || amd64_native_gregset_supplies_p (gdbarch, regno))
@@ -89,6 +94,7 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
         }
     }
   else
+#endif
     {
       if (regno == -1 || regno < I386_NUM_GREGS)
         {
@@ -151,6 +157,7 @@ i386_darwin_store_inferior_registers (struct target_ops *ops,
   thread_t current_thread = ptid_get_tid (inferior_ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
+#ifdef BFD64
   if (gdbarch_ptr_bit (gdbarch) == 64)
     {
       if (regno == -1 || amd64_native_gregset_supplies_p (gdbarch, regno))
@@ -196,6 +203,7 @@ i386_darwin_store_inferior_registers (struct target_ops *ops,
         }
     }
   else
+#endif
     {
       if (regno == -1 || regno < I386_NUM_GREGS)
         {
@@ -475,6 +483,7 @@ i386_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
   return 0;
 }
 
+#ifdef BFD64
 static int
 amd64_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
 {
@@ -504,6 +513,7 @@ amd64_darwin_sstep_at_sigreturn (x86_thread_state_t *regs)
     }
   return 0;
 }
+#endif
 
 void
 darwin_set_sstep (thread_t thread, int enable)
@@ -537,6 +547,7 @@ darwin_set_sstep (thread_t thread, int enable)
 	MACH_CHECK_ERROR (kret);
       }
       break;
+#ifdef BFD64
     case x86_THREAD_STATE64:
       {
 	__uint64_t bit = enable ? X86_EFLAGS_T : 0;
@@ -551,6 +562,7 @@ darwin_set_sstep (thread_t thread, int enable)
 	MACH_CHECK_ERROR (kret);
       }
       break;
+#endif
     default:
       error (_("darwin_set_sstep: unknown flavour: %d\n"), regs.tsh.flavor);
     }
@@ -559,10 +571,12 @@ darwin_set_sstep (thread_t thread, int enable)
 void
 darwin_complete_target (struct target_ops *target)
 {
+#ifdef BFD64
   amd64_native_gregset64_reg_offset = amd64_darwin_thread_state_reg_offset;
   amd64_native_gregset64_num_regs = amd64_darwin_thread_state_num_regs;
   amd64_native_gregset32_reg_offset = i386_darwin_thread_state_reg_offset;
   amd64_native_gregset32_num_regs = i386_darwin_thread_state_num_regs;
+#endif
 
   target->to_fetch_registers = i386_darwin_fetch_inferior_registers;
   target->to_store_registers = i386_darwin_store_inferior_registers;

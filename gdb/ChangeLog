@@ -1,3 +1,31 @@
+2009-06-29  Tristan Gingold  <gingold@adacore.com>
+
+	* i386-darwin-tdep.c (amd64_darwin_thread_state_reg_offset)
+	(amd64_darwin_thread_state_num_regs)
+	(amd64_darwin_sigcontext_addr, x86_darwin_init_abi_64): Moved to
+	amd64-darwin-tdep.c
+	(_initialize_i386_darwin_tdep): Remove 64 bits parts.
+	(darwin_dwarf_signal_frame_p): Make public.
+	* amd64-darwin-tdep.c: New file with most chunks from
+	i386-darwin-tdep.c	
+	* i386-darwin-tdep.h: Add a prototype for darwin_dwarf_signal_frame_p.
+	(amd64_darwin_thread_state_reg_offset)
+	(amd64_darwin_thread_state_num_regs): Moved to amd64-darwin-tdep.h
+	* amd64-darwin-tdep.h: New file.
+	* i386-darwin-nat.c: Only includes amd64-nat.h and amd64-darwin-tdep.h
+	if BFD64 is defined.
+	(i386_darwin_fetch_inferior_registers): Add #ifdef BFD64/#endif around
+	64 bits parts.
+	(i386_darwin_store_inferior_registers): Ditto.
+	(darwin_set_sstep): Ditto.
+	(darwin_complete_target): Ditto.
+	(amd64_darwin_sstep_at_sigreturn): Ditto.
+	* configure.tgt: Create a separate entry for x86_64-*-darwin.
+	Add 64 bits support for i386-*-darwin if --enable-64-bit-bfd.
+	* Makefile.in (ALLDEPFILES): Add amd64-darwin-tdep.c, darwin-nat.c,
+	i386-darwin-tdep.c i386-darwin-nat.c
+	(ALL_64_TARGET_OBS): Add amd64-darwin-tdep.o
+	
 2009-07-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-fork.c (forks_exist_p): Drop unnecessary extern.
