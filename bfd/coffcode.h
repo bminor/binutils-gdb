@@ -646,12 +646,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
   /* FIXME: There is no gas syntax to specify the debug section flag.  */
   if (CONST_STRNEQ (sec_name, DOT_DEBUG)
       || CONST_STRNEQ (sec_name, GNU_LINKONCE_WI))
-    sec_flags = SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_DEBUGGING | SEC_READONLY;
-  else if (CONST_STRNEQ (sec_name, DOT_RELOC))
-    {
-      sec_flags = SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
-      styp_flags |= IMAGE_SCN_MEM_DISCARDABLE;
-    }
+    sec_flags = SEC_DEBUGGING | SEC_READONLY;
 
   /* skip LOAD */
   /* READONLY later */
