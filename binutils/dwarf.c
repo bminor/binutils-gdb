@@ -1014,6 +1014,19 @@ decode_location_expression (unsigned char * data,
 	  data += bytes_read;
 	  break;
 
+	  /* DWARF 4 extensions.  */
+	case DW_OP_stack_value:
+	  printf ("DW_OP_stack_value");
+	  break;
+
+	case DW_OP_implicit_value:
+	  printf ("DW_OP_implicit_value");
+	  uvalue = read_leb128 (data, &bytes_read, 0);
+	  data += bytes_read;
+	  display_block (data, uvalue);
+	  data += uvalue;
+	  break;
+
 	  /* GNU extensions.  */
 	case DW_OP_GNU_push_tls_address:
 	  printf ("DW_OP_GNU_push_tls_address or DW_OP_HP_unknown");
