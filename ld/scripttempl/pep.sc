@@ -103,12 +103,16 @@ SECTIONS
   .rdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
     ${R_RDATA}
-    ${RELOCATING+ *(.eh_frame)}
     ${RELOCATING+___RUNTIME_PSEUDO_RELOC_LIST__ = .;}
     ${RELOCATING+__RUNTIME_PSEUDO_RELOC_LIST__ = .;}
     *(.rdata_runtime_pseudo_reloc)
     ${RELOCATING+___RUNTIME_PSEUDO_RELOC_LIST_END__ = .;}
     ${RELOCATING+__RUNTIME_PSEUDO_RELOC_LIST_END__ = .;}
+  }
+
+  .eh_frame ${RELOCATING+BLOCK(__section_alignment__)} :
+  {
+    *(.eh_frame)
   }
 
   .pdata ${RELOCATING+BLOCK(__section_alignment__)} :
