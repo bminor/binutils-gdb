@@ -1,3 +1,9 @@
+2009-07-04  Chris Genly  <chris@genly.us>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Document child definition
+	in -var-list-children.  Fix example according to what the code
+	does.
+
 2009-07-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Debugging multiple inferiors): Document the
