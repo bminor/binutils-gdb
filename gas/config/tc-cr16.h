@@ -1,5 +1,5 @@
 /* tc-cr16.h -- Header file for tc-cr16.c, the CR16 GAS port.
-   Copyright 2007 Free Software Foundation, Inc.
+   Copyright 2007, 2009 Free Software Foundation, Inc.
 
    Contributed by M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
@@ -49,8 +49,9 @@ extern const struct relax_type md_relax_table[];
 #define TC_FORCE_RELOCATION(FIXP) cr16_force_relocation (FIXP)
 extern int cr16_force_relocation (struct fix *);
 
-/* Fixup debug sections since we will never relax them.  */
-#define TC_LINKRELAX_FIXUP(seg) (seg->flags & SEC_ALLOC)
+/* Fixup non-code sections since we will never relax them.  */
+#define TC_LINKRELAX_FIXUP(seg) \
+  ((seg->flags & (SEC_ALLOC | SEC_CODE)) == (SEC_ALLOC | SEC_CODE))
 
 /* CR16 instructions, with operands included, are a multiple
    of two bytes long.  */
