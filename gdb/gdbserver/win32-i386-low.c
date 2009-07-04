@@ -129,13 +129,28 @@ i386_initial_stuff (void)
 static void
 i386_get_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
 {
-  th->context.ContextFlags = \
-    CONTEXT_FULL | \
-    CONTEXT_FLOATING_POINT | \
-    CONTEXT_EXTENDED_REGISTERS | \
-    CONTEXT_DEBUG_REGISTERS;
+  /* Requesting the CONTEXT_EXTENDED_REGISTERS register set fails if
+     the system doesn't support extended registers.  */
+  static DWORD extended_registers = CONTEXT_EXTENDED_REGISTERS;
 
-  GetThreadContext (th->h, &th->context);
+ again:
+  th->context.ContextFlags = (CONTEXT_FULL
+			      | CONTEXT_FLOATING_POINT
+			      | CONTEXT_DEBUG_REGISTERS
+			      | extended_registers);
+
+  if (!GetThreadContext (th->h, &th->context))
+    {
+      DWORD e = GetLastError ();
+
+      if (extended_registers && e == ERROR_INVALID_PARAMETER)
+	{
+	  extended_registers = 0;
+	  goto again;
+	}
+
+      error ("GetThreadContext failure %ld\n", (long) e);
+    }
 
   debug_registers_changed = 0;
 
@@ -283,6 +298,9 @@ i386_store_inferior_register (win32_thread_info *th, int r)
   collect_register (r, context_offset);
 }
 
+static const unsigned char i386_win32_breakpoint = 0xcc;
+#define i386_win32_breakpoint_len 1
+
 struct win32_target_ops the_low_target = {
   init_registers_i386,
   sizeof (mappings) / sizeof (mappings[0]),
@@ -293,8 +311,8 @@ struct win32_target_ops the_low_target = {
   i386_fetch_inferior_register,
   i386_store_inferior_register,
   i386_single_step,
-  NULL, /* breakpoint */
-  0, /* breakpoint_len */
+  &i386_win32_breakpoint,
+  i386_win32_breakpoint_len,
   i386_insert_point,
   i386_remove_point,
   i386_stopped_by_watchpoint,

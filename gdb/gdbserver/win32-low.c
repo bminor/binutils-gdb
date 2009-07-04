@@ -1407,7 +1407,22 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 	 interruption, but high enough so gdbserver doesn't become a
 	 bottleneck.  */
       if (!WaitForDebugEvent (&current_event, 250))
-	return 0;
+        {
+	  DWORD e  = GetLastError();
+
+	  if (e == ERROR_PIPE_NOT_CONNECTED)
+	    {
+	      /* This will happen if the loader fails to succesfully
+		 load the application, e.g., if the main executable
+		 tries to pull in a non-existing export from a
+		 DLL.  */
+	      ourstatus->kind = TARGET_WAITKIND_EXITED;
+	      ourstatus->value.integer = 1;
+	      return 1;
+	    }
+
+	  return 0;
+        }
     }
 
  gotevent:
