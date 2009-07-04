@@ -23327,7 +23327,7 @@ Returns the number of children of a variable object @var{name}:
 @smallexample
  -var-list-children [@var{print-values}] @var{name}
 @end smallexample
-@anchor{-var-list-children} 
+@anchor{-var-list-children}
 
 Return a list of the children of the specified variable object and
 create variable objects for them, if they do not already exist.  With
@@ -23338,16 +23338,49 @@ values; and if it is 2 or @code{--simple-values} print the name and
 value for simple data types and just the name for arrays, structures
 and unions.
 
+For each child the following results are returned:
+
+@table @var
+
+@item name
+Name of the variable object created for this child.
+
+@item exp
+The expression to be shown to the user by the front end to designate this child.
+For example this may be the name of a structure member.
+
+For C/C@t{++} structures there are several pseudo children returned to
+designate access qualifiers.  For these pseudo children @var{exp} is
+@samp{public}, @samp{private}, or @samp{protected}.  In this case the
+type and value are not present.
+
+@item numchild
+Number of children this child has.
+
+@item type
+The type of the child.
+
+@item value
+If values were requested, this is the value.
+
+@item thread-id
+If this variable object is associated with a thread, this is the thread id.  
+Otherwise this result is not present.
+
+@item frozen
+If the variable object is frozen, this variable will be present with a value of 1.
+@end table
+
 @subsubheading Example
 
 @smallexample
 (gdb)
  -var-list-children n
- ^done,numchild=@var{n},children=[@{name=@var{name},
+ ^done,numchild=@var{n},children=[child=@{name=@var{name},exp=@var{exp},
  numchild=@var{n},type=@var{type}@},@r{(repeats N times)}]
 (gdb)
  -var-list-children --all-values n
- ^done,numchild=@var{n},children=[@{name=@var{name},
+ ^done,numchild=@var{n},children=[child=@{name=@var{name},exp=@var{exp},
  numchild=@var{n},value=@var{value},type=@var{type}@},@r{(repeats N times)}]
 @end smallexample
 
