@@ -1,3 +1,8 @@
+2009-07-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/long_long.exp: arm-mingw32ce defaults to natural-endian
+	VFP format.
+
 2009-07-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/multi-forks.exp: Only run detach-on-fork tests on

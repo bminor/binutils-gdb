@@ -190,6 +190,7 @@ if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
 	  [istarget "xscale*-*-*"] || \
 	  [istarget "strongarm*-*-*"]) \
 	 && !([istarget "*-*-*eabi"] || \
+	      [istarget "*-*-mingw32ce*"] || \
 	      [istarget "*-*-openbsd*"] || \
 	      [istarget "*-*-symbianelf"]) } then {
 	# assume the long long represents a floating point double in ARM format
