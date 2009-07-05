@@ -1,3 +1,9 @@
+2009-07-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* arm-wince-tdep.c (arm_wince_skip_main_prologue): New.
+	(arm_wince_init_abi): Register it as gdbarch_skip_main_prologue
+	callback.
+
 2009-06-29  Tristan Gingold  <gingold@adacore.com>
 
 	* i386-darwin-tdep.c (amd64_darwin_thread_state_reg_offset)
