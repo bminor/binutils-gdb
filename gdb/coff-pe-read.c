@@ -207,15 +207,18 @@ read_pe_exported_syms (struct objfile *objfile)
 
   char const *target = bfd_get_target (objfile->obfd);
 
-  is_pe64 = ((strcmp (target, "pe-x86-64") == 0)
-             || (strcmp (target, "pei-x86-64") == 0));
-  is_pe32 = ((strcmp (target, "pe-i386") == 0)
-             || (strcmp (target, "pei-i386") == 0));
+  is_pe64 = (strcmp (target, "pe-x86-64") == 0
+	     || strcmp (target, "pei-x86-64") == 0);
+  is_pe32 = (strcmp (target, "pe-i386") == 0
+	     || strcmp (target, "pei-i386") == 0
+	     || strcmp (target, "pe-arm-wince-little") == 0
+	     || strcmp (target, "pei-arm-wince-little") == 0);
+
   if (!is_pe32 && !is_pe64)
     {
-      /* This is not an i386 format file. Abort now, because the code
-         is untested on anything else. *FIXME* test on further
-         architectures and loosen or remove this test. */
+      /* This is not a recognized PE format file.  Abort now, because
+	 the code is untested on anything else.  *FIXME* test on
+	 further architectures and loosen or remove this test. */
       return;
     }
 
