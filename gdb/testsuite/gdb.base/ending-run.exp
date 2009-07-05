@@ -148,6 +148,10 @@ gdb_expect {
 	# This is what happens on Cygwin.
 	pass "step out of main"
     }
+    -re ".*WinMain.*$gdb_prompt $" {
+	# This is what happens on mingw32ce.
+	pass "step out of main"
+    }
     -re ".*Program exited normally.*$gdb_prompt $" {
 	# This is what happens on Linux i86 (and I would expect others)
 	set program_exited 1

@@ -1,5 +1,10 @@
 2009-07-05  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.base/ending-run.exp: Add "step out of main" pattern for
+	mingw32ce.
+
+2009-07-05  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.base/long_long.exp: arm-mingw32ce defaults to natural-endian
 	VFP format.
 
