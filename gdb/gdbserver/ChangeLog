@@ -1,4 +1,9 @@
 2009-07-04  Danny Backx  <dannybackx@users.sourceforge.net>
+
+	* configure.srv (i[34567]86-*-mingw32ce*): Add i386-low.o to
+	srv_tgtobj.
+
+2009-07-04  Danny Backx  <dannybackx@users.sourceforge.net>
 	    Pedro Alves  <pedro@codesourcery.com>
 
 	* win32-i386-low.c (i386_get_thread_context): Handle systems that

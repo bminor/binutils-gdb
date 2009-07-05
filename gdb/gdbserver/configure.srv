@@ -63,7 +63,7 @@ case "${target}" in
 			;;
   i[34567]86-*-mingw32ce*)
 			srv_regobj=reg-i386.o
-			srv_tgtobj="win32-low.o win32-i386-low.o"
+			srv_tgtobj="i386-low.o win32-low.o win32-i386-low.o"
 			srv_tgtobj="${srv_tgtobj} wincecompat.o"
 			# hostio_last_error implementation is in win32-low.c
 			srv_hostio_err_objs=""
