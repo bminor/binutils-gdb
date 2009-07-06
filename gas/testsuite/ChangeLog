@@ -1,3 +1,11 @@
+2009-07-06  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+
+	* gas/i386/i386.exp: Add FMA4 tests.
+	* gas/i386/x86-64-fma4.d: Ditto.
+	* gas/i386/fma4.d: Ditto.
+	* gas/i386/x86-64-fma4.s: Ditto.
+	* gas/i386/fma4.s: Ditto.	
+	
 2009-07-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 10168

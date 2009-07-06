@@ -86,8 +86,10 @@
 #define CpuPCLMUL	(CpuAES + 1)
 /* FMA support required */
 #define CpuFMA		(CpuPCLMUL + 1)
+/* FMA4 support required */
+#define CpuFMA4 	(CpuFMA + 1)
 /* MOVBE Instuction support required */
-#define CpuMovbe	(CpuFMA + 1)
+#define CpuMovbe	(CpuFMA4 + 1)
 /* EPT Instructions required */
 #define CpuEPT		(CpuMovbe + 1)
 /* RDTSCP Instuction support required */
@@ -144,6 +146,7 @@ typedef union i386_cpu_flags
       unsigned int cpuaes:1;
       unsigned int cpupclmul:1;
       unsigned int cpufma:1;
+      unsigned int cpufma4:1;
       unsigned int cpumovbe:1;
       unsigned int cpuept:1;
       unsigned int cpurdtscp:1;

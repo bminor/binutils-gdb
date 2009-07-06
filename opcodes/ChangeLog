@@ -1,3 +1,29 @@
+2009-07-06  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+
+	* i386-opc.h (CpuFMA4): Add CpuFMA4.
+	(i386_cpu_flags): New.
+	* i386-gen.c: Add CPU_FMA4_FLAGS.
+	* i386-opc.tbl: Add FMA4 instructions.
+	* i386-tbl.h: Regenerate.
+	* i386-init.h: Regenerate.
+	* i386-dis.c (OP_VEX_FMA): New. Handle FMA4.
+	(OP_XMM_VexW): Ditto.
+	(OP_EX_VexW): Ditto.
+	(VEXI4_Fixup): Ditto.
+	(VexI4, VexFMA, Vex128FMA, EXVexW, EXdVexW, XMVexW): New Macros.
+	(PREFIX_VEX_3A5C, PREFIX_VEX_3A5D, PREFIX_VEX_3A5E): New.
+	(PREFIX_VEX_3A5F, PREFIX_VEX_3A60): New.
+	(PREFIX_VEX_3A68, PREFIX_VEX_3A69, PREFIX_VEX_3A6A): New.
+	(PREFIX_VEX_3A6B, PREFIX_VEX_3A6C, PREFIX_VEX_3A6D): New.
+	(PREFIX_VEX_3A6E, PREFIX_VEX_3A6F, PREFIX_VEX_3A7A): New.
+	(PREFIX_VEX_3A7B, PREFIX_VEX_3A7C, PREFIX_VEX_3A7D): New.
+	(PREFIX_VEX_3A7E, PREFIX_VEX_3A7F): New.
+	(VEX_LEN_3A6A_P_2,VEX_LEN_3A6B_P_2, VEX_LEN_3A6E_P_2): New.
+	(VEX_LEN_3A6F_P_2,VEX_LEN_3A7A_P_2, VEX_LEN_3A7B_P_2): New.
+	(VEX_LEN_3A7E_P_2,VEX_LEN_3A7F_P_2): New.
+	(get_vex_imm8): New. handle FMA4.
+	(OP_EX_VexReg): Ditto.
+	
 2009-06-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 10288

@@ -623,6 +623,8 @@ static const arch_entry cpu_arch[] =
     CPU_PCLMUL_FLAGS },
   { ".fma", PROCESSOR_UNKNOWN,
     CPU_FMA_FLAGS },
+  { ".fma4", PROCESSOR_UNKNOWN,
+    CPU_FMA4_FLAGS },
   { ".movbe", PROCESSOR_UNKNOWN,
     CPU_MOVBE_FLAGS },
   { ".ept", PROCESSOR_UNKNOWN,
@@ -4757,31 +4759,25 @@ build_modrm_byte (void)
     {
       unsigned int nds, reg;
 
+      if (i.tm.opcode_modifier.veximmext
+	  && i.tm.opcode_modifier.immext)
+	{
+	  dest = i.operands - 2;
+	  gas_assert (dest == 3);
+	}
+      else
       dest = i.operands - 1;
       nds = dest - 1;
-      source = 1;
-      reg = 0;
 
-      /* This instruction must have 4 operands: 4 register operands
-	 or 3 register operands plus 1 memory operand.  It must have
-	 VexNDS and VexImmExt.  */
-      gas_assert (i.operands == 4
-		  && (i.reg_operands == 4
+      /* This instruction must have 4 register operands 
+	 or 3 register operands plus 1 memory operand.  
+	 It must have VexNDS and VexImmExt.  */
+      gas_assert ((i.reg_operands == 4
 		      || (i.reg_operands == 3 && i.mem_operands == 1))
 		  && i.tm.opcode_modifier.vexnds
 		  && i.tm.opcode_modifier.veximmext
-		  && (operand_type_equal (&i.tm.operand_types[dest],
-					  &regxmm)
-		      || operand_type_equal (&i.tm.operand_types[dest],
-					     &regymm))
-		  && (operand_type_equal (&i.tm.operand_types[nds],
-					  &regxmm)
-		      || operand_type_equal (&i.tm.operand_types[nds],
-					     &regymm))
-		  && (operand_type_equal (&i.tm.operand_types[reg],
-					  &regxmm)
-		      || operand_type_equal (&i.tm.operand_types[reg],
-					     &regymm)));
+	    && (operand_type_equal (&i.tm.operand_types[dest], &regxmm)
+		|| operand_type_equal (&i.tm.operand_types[dest], &regymm)));
 
       /* Generate an 8bit immediate operand to encode the register
 	 operand.  */
@@ -4789,11 +4785,36 @@ build_modrm_byte (void)
       i.op[i.operands].imms = exp;
       i.types[i.operands] = imm8;
       i.operands++;
+      /* If VexW1 is set, the first operand is the source and
+	 the second operand is encoded in the immediate operand.  */
+      if (i.tm.opcode_modifier.vexw1)
+	{
+	  source = 0;
+	  reg = 1;
+	}
+      else
+	{
+	  source = 1;
+	  reg = 0;
+	}      
+      /* FMA4 swaps REG and NDS.  */
+      if (i.tm.cpu_flags.bitfield.cpufma4)
+	{
+	  unsigned int tmp;
+	  tmp = reg;
+	  reg = nds;
+	  nds = tmp;
+	}      
+      gas_assert ((operand_type_equal (&i.tm.operand_types[reg], &regxmm)
+		   || operand_type_equal (&i.tm.operand_types[reg],
+					  &regymm)) 
+		  && (operand_type_equal (&i.tm.operand_types[nds], &regxmm)
+		      || operand_type_equal (&i.tm.operand_types[nds], 
+					     &regymm)));
       exp->X_op = O_constant;
       exp->X_add_number
-	= ((i.op[0].regs->reg_num
-	    + ((i.op[0].regs->reg_flags & RegRex) ? 8 : 0)) << 4);
-
+	= ((i.op[reg].regs->reg_num
+	    + ((i.op[reg].regs->reg_flags & RegRex) ? 8 : 0)) << 4);      
       i.vex.register_specifier = i.op[nds].regs;
     }
   else
@@ -4931,7 +4952,6 @@ build_modrm_byte (void)
 	  for (op = 0; op < i.operands; op++)
 	    if (operand_type_check (i.types[op], anymem))
 	      break;
-
 	  gas_assert (op < i.operands);
 
 	  default_seg = &ds;
@@ -7855,7 +7875,7 @@ md_show_usage (stream)
                            mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, sse4,\n\
                            avx, vmx, smx, xsave, movbe, ept, aes, pclmul, fma,\n\
                            clflush, syscall, rdtscp, 3dnow, 3dnowa, sse4a,\n\
-                           svme, abm, padlock\n"));
+                           svme, abm, padlock, fma4\n"));
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\
