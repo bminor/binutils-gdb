@@ -1,3 +1,14 @@
+2009-07-06  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	Adding Neutrino gdbserver.
+	* configure: Regenerated.
+	* configure.ac: Add case for srv_qnx and set LIBS accordingly.
+	* configure.srv (i[34567]86-*-nto*): New target.
+	* nto-low.c, nto-low.h, nto-x86-low.c: New files.
+	* remote-utils.c [__QNX__]: Include sys/iomgr.h
+	(nto_comctrl) [__QNX__]: New function.
+	(enable_async_io, disable_async_io) [__QNX__]: Call nto_comctrl.
+
 2009-07-05  Danny Backx  <dannybackx@users.sourceforge.net>
 
 	* configure.srv (i[34567]86-*-mingw32ce*): Add i386-low.o to
