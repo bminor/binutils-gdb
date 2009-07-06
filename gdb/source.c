@@ -922,11 +922,9 @@ rewrite_source_path (const char *path)
 }
 
 /* This function is capable of finding the absolute path to a
-   source file, and opening it, provided you give it an 
-   OBJFILE and FILENAME. Both the DIRNAME and FULLNAME are only
-   added suggestions on where to find the file. 
+   source file, and opening it, provided you give it a FILENAME. Both the
+   DIRNAME and FULLNAME are only added suggestions on where to find the file. 
 
-   OBJFILE should be the objfile associated with a psymtab or symtab. 
    FILENAME should be the filename to open.
    DIRNAME is the compilation directory of a particular source file.
            Only some debug formats provide this info.
@@ -944,8 +942,7 @@ rewrite_source_path (const char *path)
      FULLNAME is set to NULL.  */
 
 static int
-find_and_open_source (struct objfile *objfile,
-		      const char *filename,
+find_and_open_source (const char *filename,
 		      const char *dirname,
 		      char **fullname)
 {
@@ -1044,8 +1041,7 @@ open_source_file (struct symtab *s)
   if (!s)
     return -1;
 
-  return find_and_open_source (s->objfile, s->filename, s->dirname, 
-			       &s->fullname);
+  return find_and_open_source (s->filename, s->dirname, &s->fullname);
 }
 
 /* Finds the fullname that a symtab represents.
@@ -1065,8 +1061,7 @@ symtab_to_fullname (struct symtab *s)
 
   /* Don't check s->fullname here, the file could have been 
      deleted/moved/..., look for it again */
-  r = find_and_open_source (s->objfile, s->filename, s->dirname,
-			    &s->fullname);
+  r = find_and_open_source (s->filename, s->dirname, &s->fullname);
 
   if (r >= 0)
     {
@@ -1094,8 +1089,7 @@ psymtab_to_fullname (struct partial_symtab *ps)
 
   /* Don't check ps->fullname here, the file could have been
      deleted/moved/..., look for it again */
-  r = find_and_open_source (ps->objfile, ps->filename, ps->dirname,
-			    &ps->fullname);
+  r = find_and_open_source (ps->filename, ps->dirname, &ps->fullname);
 
   if (r >= 0)
     {

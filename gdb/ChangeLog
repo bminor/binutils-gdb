@@ -1,3 +1,10 @@
+2009-07-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* source.c (find_and_open_source): Remove the `objfile' parameter.
+	Update the function comment.
+	(open_source_file, symtab_to_fullname, psymtab_to_fullname): Update the
+	find_and_open_source callers.
+
 2009-07-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* coff-pe-read.c (read_pe_exported_syms): Recognize
