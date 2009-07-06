@@ -209,26 +209,39 @@ proc gdbserver_start { options arguments } {
 
     set gdbserver [find_gdbserver]
 
-    # Export the host:port pair.
-    set gdbport $debughost$portnum
+    # Loop till we find a free port.
+    while 1 {
+	# Export the host:port pair.
+	set gdbport $debughost$portnum
 
-    # Fire off the debug agent.
-    set gdbserver_command "$gdbserver"
-    if { $options != "" } {
-	append gdbserver_command " $options"
-    }
-    append gdbserver_command " :$portnum"
-    if { $arguments != "" } {
-	append gdbserver_command " $arguments"
-    }
+	# Fire off the debug agent.
+	set gdbserver_command "$gdbserver"
+	if { $options != "" } {
+	    append gdbserver_command " $options"
+	}
+	append gdbserver_command " :$portnum"
+	if { $arguments != "" } {
+	    append gdbserver_command " $arguments"
+	}
 
-    set server_spawn_id [remote_spawn target $gdbserver_command]
+	set server_spawn_id [remote_spawn target $gdbserver_command]
 
-    # Wait for the server to open its TCP socket, so that GDB can connect.
-    expect {
-	-i $server_spawn_id
-	-notransfer
-	-re "Listening on" { }
+	# Wait for the server to open its TCP socket, so that GDB can connect.
+	expect {
+	    -i $server_spawn_id
+	    -notransfer
+	    -re "Listening on" { }
+	    -re "Can't bind address: Address already in use\\.\r\n" {
+		verbose -log "Port $portnum is already in use."
+		if ![target_info exists gdb,socketport] {
+		    # Bump the port number to avoid the conflict.
+		    wait -i $expect_out(spawn_id)
+		    incr portnum
+		    continue
+		}
+	    }
+	}
+	break
     }
 
     # We can't just call close, because if gdbserver is local then that means
