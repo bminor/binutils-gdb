@@ -636,7 +636,7 @@ function to call.
 Add the archive or object file specified by @var{namespec} to the
 list of files to link.  This option may be used any number of times.
 If @var{namespec} is of the form @file{:@var{filename}}, @command{ld}
-will search the library path for a file called @var{filename}, otherise it
+will search the library path for a file called @var{filename}, otherwise it
 will search the library path for a file called @file{lib@var{namespec}.a}.
 
 On systems which support shared libraries, @command{ld} may also search for

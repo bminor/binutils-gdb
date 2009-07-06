@@ -1,3 +1,7 @@
+2009-07-06  Matthias Klose <doko@ubuntu.com>
+
+        * ld.texinfo: Fix typo.
+
 2009-07-03  Tristan Gingold  <gingold@adacore.com>
 
 	* scripttempl/pep.sc: Put .eh_frame in its own section.
