@@ -1420,7 +1420,10 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
       // Like new Read_symbols(...) above, we rely on close.inputs()
       // getting leaked by closure.
       Script_info* info = new Script_info(closure.inputs());
-      layout->incremental_inputs()->report_script(input_argument, info);
+      layout->incremental_inputs()->report_script(
+          input_argument,
+          input_file->file().get_mtime(),
+          info);
     }
   *used_next_blocker = true;
 

@@ -1,3 +1,34 @@
+2009-07-06  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* fileread.cc (File_read::get_mtime): New method.
+	* fileread.h (Timespec): New structure.
+	(File_read::get_mtime): New method.
+	* incremental.cc (Incremental_inputs_entry_data::timestamp_usec):
+	Renamed from timestamp_nsec.
+	(Incremental_inputs_entry_write::timestamp_sec): Fix argument to
+	Elf_Xword.
+	(Incremental_inputs_entry_write::timestamp_usec): Renamed from 
+	timestamp_nsec.
+	(Incremental_inputs::report_archive): Save mtime; style fix. 
+	(Incremental_inputs::report_obejct): Save mtime; style fix.
+	(Incremental_inputs::report_script): Save mtime; style fix.
+	(Incremental_inputs::finalize_inputs): Style fix.
+	(Incremental_inputs::finalize): Style fix.
+	(Incremental_inputs::create_input_section_data): Store inputs
+	mtime.
+	* incremental.h (Incremental_inputs::report_script): Add mtime
+	argument.
+	(Incremental_inputs::Input_info::Input_info): Intialize only one
+	union member.
+	(Incremental_inputs::Input_info::archive): Move to nameless
+	union.
+	(Incremental_inputs::Input_info::obejct): Move to nameless union.
+	(Incremental_inputs::Input_info::script): Move to nameless union.
+	(Incremental_inputs::mtime): New field.
+	* script.cc (read_input_script): Pass file mtime to
+	Incremental_input.
+	* script.h (Script_info::inputs): Style fix.
+
 2009-07-01  Ian Lance Taylor  <ian@airs.com>
 
 	* freebsd.h (Target_freebsd::do_adjust_elf_header): Use size

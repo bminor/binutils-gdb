@@ -768,6 +768,23 @@ Input_file::will_search_for() const
 	      || this->input_argument_->extra_search_path() != NULL));
 }
 
+// Return the file last modification time.  Calls gold_fatal if the stat
+// system call failed.
+
+Timespec
+File_read::get_mtime()
+{
+  struct stat file_stat;
+  this->reopen_descriptor();
+  
+  if (fstat(this->descriptor_, &file_stat) < 0)
+    gold_fatal(_("%s: stat failed: %s"), this->name_.c_str(),
+	       strerror(errno));
+  // TODO: do a configure check if st_mtim is present and get the
+  // nanoseconds part if it is.
+  return Timespec(file_stat.st_mtime, 0);
+}
+
 // Open the file.
 
 // If the filename is not absolute, we assume it is in the current

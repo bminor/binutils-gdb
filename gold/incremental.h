@@ -28,6 +28,7 @@
 
 #include "stringpool.h"
 #include "workqueue.h"
+#include "fileread.h"
 
 namespace gold
 {
@@ -79,7 +80,8 @@ class Incremental_inputs
 
   // Record that the input argument INPUT is to an script SCRIPT.
   void
-  report_script(const Input_argument* input, Script_info* script);
+  report_script(const Input_argument* input, Timespec mtime,
+                Script_info* script);
 
   // Prepare for layout.  Called from Layout::finalize.
   void
@@ -114,28 +116,34 @@ class Incremental_inputs
   struct Input_info
   {
     Input_info()
-      : type(INCREMENTAL_INPUT_INVALID), archive(NULL), object(NULL),
-        script(NULL), filename_key(0), index(0)
+      : type(INCREMENTAL_INPUT_INVALID), archive(NULL), filename_key(0),
+        index(0)
     { }
 
     // Type of the file pointed by this argument.
     Incremental_input_type type;
 
-    // Present if type == INCREMENTAL_INPUT_ARCHIVE.
-    Archive* archive;
-
-    // Present if type == INCREMENTAL_INPUT_OBJECT or
-    // INCREMENTAL_INPUT_SHARED_LIBRARY.
-    Object* object;
-
-    // Present if type == INCREMENTAL_INPUT_SCRIPT.
-    Script_info* script;
+    union
+    {
+      // Present if type == INCREMENTAL_INPUT_ARCHIVE.
+      Archive* archive;
+  
+      // Present if type == INCREMENTAL_INPUT_OBJECT or
+      // INCREMENTAL_INPUT_SHARED_LIBRARY.
+      Object* object;
+  
+      // Present if type == INCREMENTAL_INPUT_SCRIPT.
+      Script_info* script;
+    };
 
     // Key of the filename string in the section stringtable.
     Stringpool::Key filename_key;
 
     // Position of the entry information in the output section.
     unsigned int index;
+    
+    // Last modification time of the file.
+    Timespec mtime;
   };
 
   typedef std::map<const Input_argument*, Input_info> Inputs_info_map;

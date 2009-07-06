@@ -24,6 +24,7 @@
 #include "elfcpp.h"
 #include "output.h"
 #include "incremental.h"
+#include "archive.h"
 
 using elfcpp::Convert;
 
@@ -65,7 +66,7 @@ struct Incremental_inputs_entry_data
   elfcpp::Elf_Xword timestamp_sec;
 
   // Nano-second part of timestamp (if supported).
-  elfcpp::Elf_Word timestamp_usec;
+  elfcpp::Elf_Word timestamp_nsec;
 
   // Type of the input entry.
   elfcpp::Elf_Half input_type;
@@ -129,12 +130,12 @@ class Incremental_inputs_entry_write
   { this->p_->data_offset = Convert<32, big_endian>::convert_host(v); }
 
   void
-  put_timestamp_sec(elfcpp::Elf_Word v)
-  { this->p_->timestamp_sec = Convert<32, big_endian>::convert_host(v); }
+  put_timestamp_sec(elfcpp::Elf_Xword v)
+  { this->p_->timestamp_sec = Convert<64, big_endian>::convert_host(v); }
 
   void
-  put_timestamp_usec(elfcpp::Elf_Word v)
-  { this->p_->timestamp_usec = Convert<32, big_endian>::convert_host(v); }
+  put_timestamp_nsec(elfcpp::Elf_Word v)
+  { this->p_->timestamp_nsec = Convert<32, big_endian>::convert_host(v); }
 
   void
   put_input_type(elfcpp::Elf_Word v)
@@ -197,7 +198,8 @@ Incremental_inputs::report_archive(const Input_argument* input,
   Input_info info;
   info.type = INCREMENTAL_INPUT_ARCHIVE;
   info.archive = archive;
-  inputs_map_.insert(std::make_pair(input, info));
+  info.mtime = archive->file().get_mtime();
+  this->inputs_map_.insert(std::make_pair(input, info));
 }
 
 // Record that the input argument INPUT is an object OBJ.  This is
@@ -214,7 +216,8 @@ Incremental_inputs::report_object(const Input_argument* input,
 	       ? INCREMENTAL_INPUT_SHARED_LIBRARY
 	       : INCREMENTAL_INPUT_OBJECT);
   info.object = obj;
-  inputs_map_.insert(std::make_pair(input, info));
+  info.mtime = obj->input_file()->file().get_mtime();
+  this->inputs_map_.insert(std::make_pair(input, info));
 }
 
 // Record that the input argument INPUT is an script SCRIPT.  This is
@@ -223,6 +226,7 @@ Incremental_inputs::report_object(const Input_argument* input,
 
 void
 Incremental_inputs::report_script(const Input_argument* input,
+                                  Timespec mtime,
                                   Script_info* script)
 {
   Hold_lock hl(*this->lock_);
@@ -230,7 +234,8 @@ Incremental_inputs::report_script(const Input_argument* input,
   Input_info info;
   info.type = INCREMENTAL_INPUT_SCRIPT;
   info.script = script;
-  inputs_map_.insert(std::make_pair(input, info));
+  info.mtime = mtime;
+  this->inputs_map_.insert(std::make_pair(input, info));
 }
 
 // Compute indexes in the order in which the inputs should appear in
@@ -255,9 +260,9 @@ Incremental_inputs::finalize_inputs(
           continue;
         }
 
-      Inputs_info_map::iterator it = inputs_map_.find(&(*p));
+      Inputs_info_map::iterator it = this->inputs_map_.find(&(*p));
       // TODO: turn it into an assert when the code will be more stable.
-      if (it == inputs_map_.end())
+      if (it == this->inputs_map_.end())
         {
           gold_error("internal error: %s: incremental build info not provided",
 		     (p->is_file() ? p->file().name() : "[group]"));
@@ -286,8 +291,8 @@ Incremental_inputs::finalize()
   finalize_inputs(this->inputs_->begin(), this->inputs_->end(), &index);
 
   // Sanity check.
-  for (Inputs_info_map::const_iterator p = inputs_map_.begin();
-       p != inputs_map_.end();
+  for (Inputs_info_map::const_iterator p = this->inputs_map_.begin();
+       p != this->inputs_map_.end();
        ++p)
     {
       gold_assert(p->second.filename_key != 0);
@@ -364,8 +369,8 @@ Incremental_inputs::sized_create_inputs_section_data()
       // an out-of-bounds offset for future version of gold to reject
       // such an incremental_inputs section.
       entry.put_data_offset(0xffffffff);
-      entry.put_timestamp_sec(0);
-      entry.put_timestamp_usec(0);
+      entry.put_timestamp_sec(it->second.mtime.seconds);
+      entry.put_timestamp_nsec(it->second.mtime.nanoseconds);
       entry.put_input_type(it->second.type);
       entry.put_reserved(0);
     }

@@ -397,7 +397,7 @@ class Script_info
   // Returns the input files included because of this script.
   Input_arguments*
   inputs()
-  { return inputs_; }
+  { return this->inputs_; }
 
  private:
   Input_arguments* inputs_;

@@ -35,6 +35,23 @@
 namespace gold
 {
 
+// Since not all system supports stat.st_mtim and struct timespec,
+// we define our own structure and fill the nanoseconds if we can.
+
+struct Timespec
+{
+  Timespec()
+    : seconds(0), nanoseconds(0)
+  { }
+
+  Timespec(time_t a_seconds, int a_nanoseconds)
+    : seconds(a_seconds), nanoseconds(a_nanoseconds)
+  { }
+
+  time_t seconds;
+  int nanoseconds;
+};
+
 class Position_dependent_options;
 class Input_file_argument;
 class Dirsearch;
@@ -190,6 +207,11 @@ class File_read
     this->reopen_descriptor();
     return this->descriptor_;
   }
+  
+  // Return the file last modification time.  Calls gold_fatal if the stat
+  // system call failed.
+  Timespec
+  get_mtime();
 
  private:
   // This class may not be copied.
