@@ -1,3 +1,10 @@
+2009-07-06  Tristan Gingold  <gingold@adacore.com>
+
+	* objdump.c (dump_dwarf_section): Handle .eh_frame like other dwarf
+	sections.
+	* dwarf.h (struct dwarf_section_display): Remove eh_frame field.
+	* dwarf.c (debug_displays): Adjust for removed field.
+
 2009-07-03  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf.c (decode_location_expression): Handle DW_OP_stack_value

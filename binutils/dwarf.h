@@ -51,7 +51,6 @@ struct dwarf_section_display
   int (*display) (struct dwarf_section *, void *);
   int *enabled;
   unsigned int relocate : 1;
-  unsigned int eh_frame : 1;
 };
 
 enum dwarf_section_display_enum {

@@ -2236,21 +2236,18 @@ dump_dwarf_section (bfd *abfd, asection *section,
 	&& debug_displays [i].enabled != NULL
 	&& *debug_displays [i].enabled)
       {
-	if (!debug_displays [i].eh_frame)
+	struct dwarf_section *sec = &debug_displays [i].section;
+
+	if (strcmp (sec->uncompressed_name, match) == 0)
+	  sec->name = sec->uncompressed_name;
+	else
+	  sec->name = sec->compressed_name;
+	if (load_specific_debug_section (i, section, abfd))
 	  {
-	    struct dwarf_section *sec = &debug_displays [i].section;
-
-	    if (strcmp (sec->uncompressed_name, match) == 0)
-	      sec->name = sec->uncompressed_name;
-	    else
-	      sec->name = sec->compressed_name;
-	    if (load_specific_debug_section (i, section, abfd))
-	      {
-		debug_displays [i].display (sec, abfd);
-
-		if (i != info && i != abbrev)
-		  free_debug_section (i);
-	      }
+	    debug_displays [i].display (sec, abfd);
+	    
+	    if (i != info && i != abbrev)
+	      free_debug_section (i);
 	  }
 	break;
       }
