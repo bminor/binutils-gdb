@@ -45,7 +45,7 @@ proc java_init { args } {
 	if [info exists TOOL_EXECUTABLE] {
 	    set GCJ_UNDER_TEST $TOOL_EXECUTABLE;
 	} else {
-	    if [info exists env(GCJ)] {
+	    if { [info exists env(GCJ)] && $env(GCJ) != "" } {
 		set GCJ_UNDER_TEST $env(GCJ)
 	    } else {
 		global tool_root_dir

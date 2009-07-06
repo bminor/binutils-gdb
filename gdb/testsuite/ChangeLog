@@ -1,3 +1,7 @@
+2009-07-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* lib/java.exp (java_init): Ignore $GCJ if it is empty.
+
 2009-07-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/gdbserver-support.exp (gdbserver_start): Loop spawning
