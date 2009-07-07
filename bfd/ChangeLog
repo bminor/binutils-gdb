@@ -1,3 +1,8 @@
+2009-07-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_auto_overlay): Take into account section
+	alignment when packing sections into overlays.
+
 2009-07-03  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf2.c (decode_line_info): Ignore DW_LNE_set_discriminator.

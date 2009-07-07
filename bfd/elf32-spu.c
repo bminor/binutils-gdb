@@ -4364,12 +4364,12 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
   ovlynum = 0;
   while (base < count)
     {
-      unsigned int size = 0;
+      unsigned int size = 0, rosize = 0, roalign = 0;
 
       for (i = base; i < count; i++)
 	{
-	  asection *sec;
-	  unsigned int tmp;
+	  asection *sec, *rosec;
+	  unsigned int tmp, rotmp;
 	  unsigned int num_stubs;
 	  struct call_info *call, *pasty;
 	  struct _spu_elf_section_data *sec_data;
@@ -4379,10 +4379,16 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  /* See whether we can add this section to the current
 	     overlay without overflowing our overlay buffer.  */
 	  sec = ovly_sections[2 * i];
-	  tmp = size + sec->size;
-	  if (ovly_sections[2 * i + 1])
-	    tmp += ovly_sections[2 * i + 1]->size;
-	  if (tmp > overlay_size)
+	  tmp = align_power (size, sec->alignment_power) + sec->size;
+	  rotmp = rosize;
+	  rosec = ovly_sections[2 * i + 1];
+	  if (rosec != NULL)
+	    {
+	      rotmp = align_power (rotmp, rosec->alignment_power) + rosec->size;
+	      if (roalign < rosec->alignment_power)
+		roalign = rosec->alignment_power;
+	    }
+	  if (align_power (tmp, roalign) + rotmp > overlay_size)
 	    break;
 	  if (sec->segment_mark)
 	    {
@@ -4392,15 +4398,22 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	      while (pasty != NULL)
 		{
 		  struct function_info *call_fun = pasty->fun;
-		  tmp += call_fun->sec->size;
+		  tmp = (align_power (tmp, call_fun->sec->alignment_power)
+			 + call_fun->sec->size);
 		  if (call_fun->rodata)
-		    tmp += call_fun->rodata->size;
+		    {
+		      rotmp = (align_power (rotmp,
+					    call_fun->rodata->alignment_power)
+			       + call_fun->rodata->size);
+		      if (roalign < rosec->alignment_power)
+			roalign = rosec->alignment_power;
+		    }
 		  for (pasty = call_fun->call_list; pasty; pasty = pasty->next)
 		    if (pasty->is_pasted)
 		      break;
 		}
 	    }
-	  if (tmp > overlay_size)
+	  if (align_power (tmp, roalign) + rotmp > overlay_size)
 	    break;
 
 	  /* If we add this section, we might need new overlay call
@@ -4457,10 +4470,11 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  if (htab->params->ovly_flavour == ovly_soft_icache
 	      && num_stubs > htab->params->max_branch)
 	    break;
-	  if (tmp + num_stubs * ovl_stub_size (htab->params)
-	      > overlay_size)
+	  if (align_power (tmp, roalign) + rotmp
+	      + num_stubs * ovl_stub_size (htab->params) > overlay_size)
 	    break;
 	  size = tmp;
+	  rosize = rotmp;
 	}
 
       if (i == base)
