@@ -34,7 +34,6 @@
 #include "vec.h"
 #include "gdbthread.h"
 #include "inferior.h"
-#include "typeprint.h"
 
 #if HAVE_PYTHON
 #include "python/python.h"
