@@ -74,7 +74,7 @@ proc check_set { t l r new add } {
 	"${prefix}; print incremented l, expecting ${add}"
 }
 
-check_set "charest" "-1 .*" "-2 .*" "4 ..4." "2 ..2."
+check_set "charest" "-1 .*" "-2 .*" "4 ..004." "2 ..002."
 check_set "short" "-1" "-2" "4" "2"
 check_set "int" "-1" "-2" "4" "2"
 check_set "long" "-1" "-2" "4" "2"
@@ -102,7 +102,7 @@ proc up_set { t l r new } {
 	"${prefix}; print new l, expecting ${new}"
 }
 
-up_set "charest" "-1 .*" "-2 .*" "4 ..4."
+up_set "charest" "-1 .*" "-2 .*" "4 ..004."
 up_set "short" "-1" "-2" "4"
 up_set "int" "-1" "-2" "4"
 up_set "long" "-1" "-2" "4"

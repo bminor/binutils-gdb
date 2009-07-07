@@ -284,7 +284,7 @@ gdb_expect {
 
 send_gdb "print UC\n"
 gdb_expect {
-    -re ".\[0-9\]* = 21 '\.25'\.*$gdb_prompt $" {
+    -re ".\[0-9\]* = 21 '\.025'\.*$gdb_prompt $" {
         pass "print value of UC"
       }
     -re ".*$gdb_prompt $" { fail "print value of UC" }
@@ -557,7 +557,7 @@ gdb_expect {
 
 send_gdb "print rUC\n"
 gdb_expect {
-    -re ".\[0-9\]* = \\(unsigned char &\\) @$hex: 21 \'.25\'.*$gdb_prompt $" {
+    -re ".\[0-9\]* = \\(unsigned char &\\) @$hex: 21 \'.025\'.*$gdb_prompt $" {
         pass "print value of rUC"
       }
     -re ".*$gdb_prompt $" { fail "print value of rUC" }

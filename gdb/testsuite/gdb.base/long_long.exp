@@ -211,7 +211,7 @@ gdb_test_char "p/o *(char *)c" "01"
 gdb_test_char "p/t *(char *)c" "1"
 gdb_test_char "p/a *(char *)c" "0x1( <.*>)?"
 gdb_test_char "p/f *(char *)c" "1"
-gdb_test_char "p/c *(char *)c" "1 '.1'"
+gdb_test_char "p/c *(char *)c" "1 '.001'"
 
 gdb_test_short "p/x *(short *)s" "" "0x123" ""
 gdb_test_short "p/d *(short *)s" "" "291" ""
@@ -258,7 +258,7 @@ gdb_test "x/u w" "19088743"
 gdb_test "x/o w" "0110642547"
 gdb_test "x/t w" "00000001001000110100010101100111"
 gdb_test_xptr "x/a" { b "" } { h "" } { w "0x1234567" } { g "0x123456789abcdef" }
-gdb_test "x/c b" "1 '.1'"
+gdb_test "x/c b" "1 '.001'"
 if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
     gdb_test "x/f &val.oct" "-5.9822653797615723e-120"
 } else {
@@ -274,7 +274,7 @@ gdb_test "x/2u g" "81985529216486895.*12046818088235383159"
 gdb_test "x/2o g" "04432126361152746757.*01234567123456701234567"
 gdb_test "x/2t g" "0000000100100011010001010110011110001001101010111100110111101111.*1010011100101110111001010011100101110111000001010011100101110111"
 gdb_test_xptr "x/2a" { b "" } { h "" } { w "0x1234567.*0xa72ee539" } { g "0x123456789abcdef.*0xa72ee53977053977" }
-gdb_test "x/2c b" "1 '.1'.*-89 '.\[0-9\]*'"
+gdb_test "x/2c b" "1 '.001'.*-89 '.\[0-9\]*'"
 if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
     gdb_test "x/2f &val.oct" "-5.9822653797615723e-120.*-5.9041889495880968e-100"
 } else {
@@ -289,7 +289,7 @@ gdb_test "x/2bu b" "1.*167"
 gdb_test "x/2bo b" "01.*0247"
 gdb_test "x/2bt b" "00000001.*10100111"
 gdb_test_ptr "x/2ba b" "" "" "0x1.*0xffffffa7" "0x1.*0xffffffffffffffa7"
-gdb_test "x/2bc b" "1 '.1'.*-89 '.\[0-9\]*'"
+gdb_test "x/2bc b" "1 '.001'.*-89 '.\[0-9\]*'"
 gdb_test "x/2bf b" "1.*-89"
 
 gdb_test "x/2hx h" "0x0123.*0xa72e"

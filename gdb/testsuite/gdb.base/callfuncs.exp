@@ -439,7 +439,7 @@ gdb_test "print t_small_values(1,3,5,7,9,11,13,15,17,19)" \
 	"The program being debugged stopped while.*" \
 	"stop at nested call level 4"
 gdb_test "backtrace" \
-	"\#0  t_small_values \\(arg1=1 '.1', arg2=3, arg3=5, arg4=7 '.a', arg5=9, arg6=11 '.v', arg7=13, arg8=15, arg9=17, arg10=19\\).*\#2  sum10 \\(i0=2, i1=4, i2=6, i3=8, i4=10, i5=12, i6=14, i7=16, i8=18, i9=20\\).*\#3  <function called from gdb>.*\#4  add \\(a=4, b=5\\).*\#5  <function called from gdb>.*\#6  add \\(a=2, b=3\\).*\#7  <function called from gdb>.*\#8  main.*" \
+	"\#0  t_small_values \\(arg1=1 '.001', arg2=3, arg3=5, arg4=7 '.a', arg5=9, arg6=11 '.v', arg7=13, arg8=15, arg9=17, arg10=19\\).*\#2  sum10 \\(i0=2, i1=4, i2=6, i3=8, i4=10, i5=12, i6=14, i7=16, i8=18, i9=20\\).*\#3  <function called from gdb>.*\#4  add \\(a=4, b=5\\).*\#5  <function called from gdb>.*\#6  add \\(a=2, b=3\\).*\#7  <function called from gdb>.*\#8  main.*" \
 	"backtrace at nested call level 4"
 gdb_test "finish" "Value returned is .* = 100" \
 	"Finish from nested call level 4"

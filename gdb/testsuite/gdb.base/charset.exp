@@ -409,7 +409,7 @@ foreach target_charset $charset_subset {
     # gdb_test that requires us to use gdb_expect here.
     send_gdb "print $L'\\0'\n"
     gdb_expect {
-        -re "\\\$${decimal} = 0 $L'\\\\0'\[\r\n\]+$gdb_prompt $" {
+        -re "\\\$${decimal} = 0 $L'\\\\000'\[\r\n\]+$gdb_prompt $" {
             pass "print the null character in ${target_charset}"
         }
         -re "$gdb_prompt $" {
@@ -552,6 +552,9 @@ gdb_test "print '\\x'" "\\\\x escape without a following hex digit."
 gdb_test "print '\\u'" "\\\\u escape without a following hex digit."
 gdb_test "print '\\9'" " = \[0-9\]+ '9'"
 
+# An octal escape can only be 3 digits.
+gdb_test "print \"\\1011\"" " = \"A1\""
+
 # Tests for wide- or unicode- strings.  L is the prefix letter to use,
 # either "L" (for wide strings), "u" (for UCS-2), or "U" (for UCS-4).
 # NAME is used in the test names and should be related to the prefix
@@ -563,7 +566,7 @@ proc test_wide_or_unicode {L name} {
       "narrow and $name string concatenation"
     gdb_test "print \"ab\" $L\"c\"" " = $L\"abc\"" \
       "$name and narrow string concatenation"
-    gdb_test "print $L\"\\xe\" $L\"c\"" " = $L\"\\\\16c\"" \
+    gdb_test "print $L\"\\xe\" $L\"c\"" " = $L\"\\\\016c\"" \
       "$name string concatenation with escape"
     gdb_test "print $L\"\" \"abcdef\" \"g\"" \
       "$L\"abcdefg\"" \

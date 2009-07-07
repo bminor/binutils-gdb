@@ -186,7 +186,7 @@ if {![gdb_skip_float_test "print print_two_floats(*f3)"] && \
 
 if ![gdb_skip_stdio_test "print print_bit_flags_char(*cflags)"] {
     print_struct_call "print_bit_flags_char(*cflags)" \
-            ".*alpha\[ \r\n\]+gamma\[ \r\n\]+epsilon\[ \r\n\]+.\[0-9\]+ = \\{alpha = 1 '\\\\1', beta = 0 '\\\\0', gamma = 1 '\\\\1', delta = 0 '\\\\0', epsilon = 1 '\\\\1', omega = 0 '\\\\0'\\}"
+            ".*alpha\[ \r\n\]+gamma\[ \r\n\]+epsilon\[ \r\n\]+.\[0-9\]+ = \\{alpha = 1 '\\\\001', beta = 0 '\\\\000', gamma = 1 '\\\\001', delta = 0 '\\\\000', epsilon = 1 '\\\\001', omega = 0 '\\\\000'\\}"
 }
 
 if ![gdb_skip_stdio_test "print print_bit_flags_short(*sflags)"] {

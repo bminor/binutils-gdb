@@ -801,7 +801,7 @@ mi_list_varobj_children {struct_declarations.long_array --all-values} {
 mi_list_varobj_children {struct_declarations --simple-values} \
     [list \
          {struct_declarations.integer integer 0 int 123} \
-         {struct_declarations.character character 0 char {0 '\\\\0'}} \
+         {struct_declarations.character character 0 char {0 '\\\\000'}} \
          [list struct_declarations.char_ptr char_ptr 1 "char \\*" "$hex \\\\\"hello\\\\\""] \
          {struct_declarations.long_int long_int 0 "long int" 0} \
          [list struct_declarations.int_ptr_ptr int_ptr_ptr 1 "int \\*\\*" "$hex"] \

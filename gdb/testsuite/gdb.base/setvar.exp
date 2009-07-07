@@ -120,8 +120,8 @@ proc test_set { args } {
 # range of values that are common to both (0-127).
 #    
 
-test_set "set variable v_char=0" "print v_char" ".\[0-9\]* = 0 \'.0\'"        "set variable char=0" 
-test_set "set variable v_char=1" "print v_char" ".\[0-9\]* = 1 \'.1\'"        "set variable char=1" 
+test_set "set variable v_char=0" "print v_char" ".\[0-9\]* = 0 \'.000\'"        "set variable char=0" 
+test_set "set variable v_char=1" "print v_char" ".\[0-9\]* = 1 \'.001\'"        "set variable char=1" 
 test_set "set variable v_char=7" "print v_char" ".\[0-9\]* = 7 \'.a\'"        "set variable char=7 (Bel)" 
 test_set "set variable v_char=32" "print v_char" ".\[0-9\]* = 32 \' \'"        "set variable char=32 (SPC)" 
 test_set "set variable v_char=65" "print v_char" ".\[0-9\]* = 65 \'A\'"        "set variable char=65 ('A')" 
@@ -131,8 +131,8 @@ test_set "set variable v_char=127" "print v_char" ".\[0-9\]* = 127 \'.177\'"    
 #
 # test "set variable" for type "signed char"
 #    
-test_set "set variable v_char=0" "print v_signed_char" ".\[0-9\]* = 0 \'.0\'"                 "set variable signed char=0" 
-test_set "set variable v_signed_char=1" "print v_signed_char" ".\[0-9\]* = 1 \'.1\'"        "set variable signed char=1" 
+test_set "set variable v_char=0" "print v_signed_char" ".\[0-9\]* = 0 \'.000\'"                 "set variable signed char=0" 
+test_set "set variable v_signed_char=1" "print v_signed_char" ".\[0-9\]* = 1 \'.001\'"        "set variable signed char=1" 
 test_set "set variable v_signed_char=7" "print v_signed_char" ".\[0-9\]* = 7 \'.a\'"        "set variable signed char=7 (Bel)" 
 test_set "set variable v_signed_char=32" "print v_signed_char" ".\[0-9\]* = 32 \' \'"        "set variable signed char=32 (SPC)" 
 test_set "set variable v_signed_char=65" "print v_signed_char" ".\[0-9\]* = 65 \'A\'"        "set variable signed char=65 ('A')" 
@@ -150,8 +150,8 @@ gdb_test "print v_signed_char" ".\[0-9\]* = -1 \'.377\'" \
 #
 # test "set variable" for type "unsigned char"
 #
-test_set "set variable v_unsigned_char=0" "print v_unsigned_char" ".\[0-9\]* = 0 \'.0\'"        "set variable unsigned char=0" 
-test_set "set variable v_unsigned_char=1" "print v_unsigned_char" ".\[0-9\]* = 1 \'.1\'"        "set variable unsigned char=1" 
+test_set "set variable v_unsigned_char=0" "print v_unsigned_char" ".\[0-9\]* = 0 \'.000\'"        "set variable unsigned char=0" 
+test_set "set variable v_unsigned_char=1" "print v_unsigned_char" ".\[0-9\]* = 1 \'.001\'"        "set variable unsigned char=1" 
 test_set "set variable v_unsigned_char=7" "print v_unsigned_char" ".\[0-9\]* = 7 \'.a\'"        "set variable unsigned char=7 (Bel)" 
 test_set "set variable v_unsigned_char=32" "print v_unsigned_char" ".\[0-9\]* = 32 \' \'"        "set variable unsigned char=32 (SPC)" 
 test_set "set variable v_unsigned_char=65" "print v_unsigned_char" ".\[0-9\]* = 65 \'A\'"        "set variable unsigned char=65 ('A')" 

@@ -258,7 +258,7 @@ mi_gdb_test "-var-set-format weird.integer natural" \
 	"set format variable weird.integer"
 
 mi_gdb_test "-var-set-format weird.character natural" \
-	"\\^done,format=\"natural\",value=\"0 '\\\\\\\\0'\"" \
+	"\\^done,format=\"natural\",value=\"0 '\\\\\\\\000'\"" \
 	"set format variable weird.character"
 
 mi_gdb_test "-var-set-format weird.char_ptr natural" \

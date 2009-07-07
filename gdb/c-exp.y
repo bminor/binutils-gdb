@@ -1440,14 +1440,19 @@ c_parse_escape (char **ptr, struct obstack *output)
     case '5':
     case '6':
     case '7':
-      if (output)
-	obstack_grow_str (output, "\\");
-      while (isdigit (*tokptr) && *tokptr != '8' && *tokptr != '9')
-	{
-	  if (output)
-	    obstack_1grow (output, *tokptr);
-	  ++tokptr;
-	}
+      {
+	int i;
+	if (output)
+	  obstack_grow_str (output, "\\");
+	for (i = 0;
+	     i < 3 && isdigit (*tokptr) && *tokptr != '8' && *tokptr != '9';
+	     ++i)
+	  {
+	    if (output)
+	      obstack_1grow (output, *tokptr);
+	    ++tokptr;
+	  }
+      }
       break;
 
       /* We handle UCNs later.  We could handle them here, but that

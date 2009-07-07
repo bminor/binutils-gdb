@@ -1,3 +1,10 @@
+2009-07-07  Tom Tromey  <tromey@redhat.com>
+
+	* c-lang.c (convert_octal): Only allow 3 octal digits.
+	(print_wchar): Prefer 3-digit octal form.  Fall back to hex if
+	needed.
+	* c-exp.y (c_parse_escape): Only allow 3 octal digits.
+
 2009-07-07  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* python/python-value.c (valpy_getitem): Remove incorrect assert.

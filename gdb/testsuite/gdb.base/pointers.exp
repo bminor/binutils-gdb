@@ -389,7 +389,7 @@ gdb_expect {
 
 send_gdb "print *pUC\n"
 gdb_expect {
-    -re ".\[0-9\]* = 21 \'.25\'.*$gdb_prompt $" {
+    -re ".\[0-9\]* = 21 \'.025\'.*$gdb_prompt $" {
         pass "print value of *pUC"
       }
     -re ".*$gdb_prompt $" { fail "print value of *pUC" }

@@ -225,7 +225,12 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig, int orig_len,
 		char octal[30];
 		ULONGEST value;
 		value = extract_unsigned_integer (&orig[i], width, byte_order);
-		sprintf (octal, "\\%lo", (long) value);
+		/* If the value fits in 3 octal digits, print it that
+		   way.  Otherwise, print it as a hex escape.  */
+		if (value <= 0777)
+		  sprintf (octal, "\\%.3o", (int) (value & 0777));
+		else
+		  sprintf (octal, "\\x%lx", (long) value);
 		append_string_as_wide (octal, output);
 	      }
 	    /* If we somehow have extra bytes, print them now.  */
@@ -770,9 +775,12 @@ emit_numeric_character (struct type *type, unsigned long value,
 static char *
 convert_octal (struct type *type, char *p, char *limit, struct obstack *output)
 {
+  int i;
   unsigned long value = 0;
 
-  while (p < limit && isdigit (*p) && *p != '8' && *p != '9')
+  for (i = 0;
+       i < 3 && p < limit && isdigit (*p) && *p != '8' && *p != '9';
+       ++i)
     {
       value = 8 * value + host_hex_value (*p);
       ++p;

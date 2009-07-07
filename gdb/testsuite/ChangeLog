@@ -1,3 +1,21 @@
+2009-07-07  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/call-rt-st.exp: Update for change to escape output.
+	* gdb.base/callfuncs.exp: Likewise.
+	* gdb.base/charset.exp: Likewise.
+	* gdb.base/constvars.exp: Likewise.
+	* gdb.base/long_long.exp: Likewise.
+	* gdb.base/pointers.exp: Likewise.
+	* gdb.base/printcmds.exp: Likewise.
+	* gdb.base/setvar.exp: Likewise.
+	* gdb.base/store.exp: Likewise.
+	* gdb.cp/ref-types.exp: Likewise.
+	* gdb.mi/mi-var-child.exp: Likewise.
+	* gdb.mi/mi-var-display.exp: Likewise.
+	* gdb.mi/mi2-var-display.exp: Likewise.
+	* gdb.base/charset.exp: Test octal escape sequence length.
+	Update for change to escape output.
+
 2009-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.mi/mi2-var-cmd.exp (floating varobj invalidation): New test.

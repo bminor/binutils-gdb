@@ -161,7 +161,7 @@ proc do_constvar_tests {} {
     gdb_test "print laconic" " = 65 'A'"
     local_compiler_xfail_check
     gdb_test "ptype laconic" "type = const char"
-    gdb_test "print laggard" " = 1 '.1'"
+    gdb_test "print laggard" " = 1 '.001'"
     local_compiler_xfail_check
     gdb_test "ptype laggard" "type = const unsigned char"
     gdb_test "print lagoon" " = 2"
@@ -209,7 +209,7 @@ proc do_constvar_tests {} {
     gdb_test "print *lewd" " = 65 'A'"
     local_compiler_xfail_check
     gdb_test "ptype lewd" "type = const char \\* const"
-    gdb_test "print *lexicographer" " = 1 '.1'"
+    gdb_test "print *lexicographer" " = 1 '.001'"
     local_compiler_xfail_check
     gdb_test "ptype lexicographer" "type = const unsigned char \\* const"
     gdb_test "print *lexicon" " = 2"
@@ -233,7 +233,7 @@ proc do_constvar_tests {} {
     gdb_test "print *languish" " = 65 'A'"
     local_compiler_xfail_check
     gdb_test "ptype languish" "type = const char \\*"
-    gdb_test "print *languor" " = 1 '.1'"
+    gdb_test "print *languor" " = 1 '.001'"
     local_compiler_xfail_check
     gdb_test "ptype languor" "type = const unsigned char \\*"
     gdb_test "print *lank" " = 2"
