@@ -1,7 +1,12 @@
+2009-07-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/fma4.d: Append "#pass".
+	* gas/i386/x86-64-fma4.d: Likewise.
+
 2009-07-07  Tristan Gingold  <gingold@adacore.com>
 
-	* gas/i386/jump.d: Adjust to be relocated offset for jump to external
-	symbol.
+	* gas/i386/jump.d: Adjust to be relocated offset for jump to
+	external symbol.
 
 2009-07-06  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 

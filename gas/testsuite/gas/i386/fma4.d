@@ -90,3 +90,4 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e3 c9 7e fc 20    	vfnmsubss %xmm4,%xmm6,%xmm2,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 c9 7e 39 20    	vfnmsubss \(%ecx\),%xmm6,%xmm2,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 7e 39 20    	vfnmsubss %xmm4,\(%ecx\),%xmm2,%xmm7
+#pass
