@@ -1,3 +1,8 @@
+2009-07-07  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-mep.c (md_begin): Don't reset the coprocessor options
+	when enabling other options without a specific configuration.
+
 2009-07-07  Chung-Lin Tang  <cltang@pllab.cs.nthu.edu.tw>
 
 	* config/tc-arm.c (insns): Fix encoding for torvsc.

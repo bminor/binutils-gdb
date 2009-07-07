@@ -176,6 +176,23 @@ struct option md_longopts[] = {
   { NULL, 0, NULL, 0 } };
 size_t md_longopts_size = sizeof (md_longopts);
 
+/* Options which default to on/off together.  See the comment where
+   this is used for details.  Note that CP and CP64 are not in this
+   list because disabling those overrides the -mivc2 option.  */
+#define OPTION_MASK \
+	( (1 << CGEN_INSN_OPTIONAL_BIT_INSN) \
+	| (1 << CGEN_INSN_OPTIONAL_MUL_INSN) \
+	| (1 << CGEN_INSN_OPTIONAL_DIV_INSN) \
+	| (1 << CGEN_INSN_OPTIONAL_DEBUG_INSN) \
+	| (1 << CGEN_INSN_OPTIONAL_LDZ_INSN) \
+	| (1 << CGEN_INSN_OPTIONAL_ABS_INSN) \
+	| (1 << CGEN_INSN_OPTIONAL_AVE_INSN) \
+	| (1 << CGEN_INSN_OPTIONAL_MINMAX_INSN) \
+	| (1 << CGEN_INSN_OPTIONAL_CLIP_INSN) \
+	| (1 << CGEN_INSN_OPTIONAL_SAT_INSN) \
+	| (1 << CGEN_INSN_OPTIONAL_UCI_INSN) \
+	| (1 << CGEN_INSN_OPTIONAL_DSP_INSN) )
+
 const char * md_shortopts = "";
 static int optbits = 0;
 static int optbitset = 0;
@@ -462,7 +479,10 @@ md_begin ()
      specified.  If the user specifies options and a config, the
      options modify the config.  */
   if (optbits && mep_config_index == 0)
-    MEP_OMASK = optbits;
+    {
+      MEP_OMASK &= ~OPTION_MASK;
+      MEP_OMASK |= optbits;
+    }
   else
     MEP_OMASK = (MEP_OMASK & ~optbitset) | optbits;
 
