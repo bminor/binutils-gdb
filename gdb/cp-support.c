@@ -716,10 +716,10 @@ make_symbol_overload_list_using (const char *func_name,
        current != NULL;
        current = current->next)
     {
-      if (strcmp (namespace, current->outer) == 0)
+      if (strcmp (namespace, current->import_dest) == 0)
 	{
 	  make_symbol_overload_list_using (func_name,
-					   current->inner);
+					   current->import_src);
 	}
     }
 

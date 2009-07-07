@@ -1,3 +1,18 @@
+2009-07-07  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* cp-support.h (struct using_direct): Rename members inner and
+	outer to import_src, and import_dest respectively.
+	* cp-namespace.c (cp_add_using_directive): Update.
+	(cp_add_using): Update.
+	(cp_copy_usings): Update.
+	(cp_lookup_symbol_namespace): Update.
+	(cp_scan_for_anonymous_namespaces): Update.
+	* cp-support.c (make_symbol_overload_list_using): Update.
+	* cp-support.h (cp_add_using_directive, cp_add_using): Rename
+	arguments from inner and outer to src and dest respectively.
+	* cp-namespace.c (cp_add_using_directive): Ditto.
+	(cp_add_using): Ditto.
+
 2009-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* mi/mi-cmd-var.c (mi_cmd_var_update): Replace a while loop by for loop.

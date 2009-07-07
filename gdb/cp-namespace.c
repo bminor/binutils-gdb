@@ -103,23 +103,23 @@ cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
 			  "(anonymous namespace)",
 			  ANONYMOUS_NAMESPACE_LEN) == 0)
 	    {
-	      int outer_len = (previous_component == 0 ? 0 : previous_component - 2);
-	      int inner_len = next_component;
+	      int dest_len = (previous_component == 0 ? 0 : previous_component - 2);
+	      int src_len = next_component;
 
-	      char *outer = alloca (outer_len + 1);
-	      char *inner = alloca (inner_len + 1);
+	      char *dest = alloca (dest_len + 1);
+	      char *src = alloca (src_len + 1);
 
-	      memcpy (outer, name, outer_len);
-	      memcpy (inner, name, inner_len);
+	      memcpy (dest, name, dest_len);
+	      memcpy (src, name, src_len);
 
-	      outer[outer_len] = '\0';
-	      inner[inner_len] = '\0';
+	      dest[dest_len] = '\0';
+	      src[src_len] = '\0';
 
 	      /* We've found a component of the name that's an
 		 anonymous namespace.  So add symbols in it to the
 		 namespace given by the previous component if there is
 		 one, or to the global namespace if there isn't.  */
-	      cp_add_using_directive (outer, inner);
+	      cp_add_using_directive (dest, src);
 	    }
 	  /* The "+ 2" is for the "::".  */
 	  previous_component = next_component + 2;
@@ -134,7 +134,7 @@ cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
    has already been added, don't add it twice.  */
 
 void
-cp_add_using_directive (const char *outer, const char *inner)
+cp_add_using_directive (const char *dest, const char *src)
 {
   struct using_direct *current;
   struct using_direct *new;
@@ -143,12 +143,12 @@ cp_add_using_directive (const char *outer, const char *inner)
 
   for (current = using_directives; current != NULL; current = current->next)
     {
-      if (strcmp (current->inner, inner) == 0
-          && strcmp (current->outer, outer) == 0)
+      if (strcmp (current->import_src, src) == 0
+          && strcmp (current->import_dest, dest) == 0)
 	return;
     }
 
-  using_directives = cp_add_using (outer, inner, using_directives);
+  using_directives = cp_add_using (dest, src, using_directives);
 
 }
 
@@ -200,22 +200,22 @@ cp_is_anonymous (const char *namespace)
 	  != NULL);
 }
 
-/* Create a new struct using direct whose inner namespace is INNER
-   and whose outer namespace is OUTER.
+/* Create a new struct using direct which imports the namespace SRC
+   into the scope DEST.
    Set its next member in the linked list to NEXT; allocate all memory
    using xmalloc.  It copies the strings, so NAME can be a temporary
    string.  */
 
 struct using_direct *
-cp_add_using (const char *outer,
-              const char *inner,
+cp_add_using (const char *dest,
+              const char *src,
 	      struct using_direct *next)
 {
   struct using_direct *retval;
 
   retval = xmalloc (sizeof (struct using_direct));
-  retval->inner = savestring (inner, strlen(inner));
-  retval->outer = savestring (outer, strlen(outer));
+  retval->import_src = savestring (src, strlen(src));
+  retval->import_dest = savestring (dest, strlen(dest));
   retval->next = next;
 
   return retval;
@@ -237,14 +237,14 @@ cp_copy_usings (struct using_direct *using,
     {
       struct using_direct *retval
 	= obstack_alloc (obstack, sizeof (struct using_direct));
-      retval->inner = obsavestring (using->inner, strlen (using->inner),
+      retval->import_src = obsavestring (using->import_src, strlen (using->import_src),
 				    obstack);
-      retval->outer = obsavestring (using->outer, strlen (using->outer),
+      retval->import_dest = obsavestring (using->import_dest, strlen (using->import_dest),
 				    obstack);
       retval->next = cp_copy_usings (using->next, obstack);
 
-      xfree (using->inner);
-      xfree (using->outer);
+      xfree (using->import_src);
+      xfree (using->import_dest);
       xfree (using);
 
       return retval;
@@ -346,9 +346,9 @@ cp_lookup_symbol_namespace (const char *namespace,
        current != NULL;
        current = current->next)
     {
-      if (strcmp (namespace, current->outer) == 0)
+      if (strcmp (namespace, current->import_dest) == 0)
 	{
-	  sym = cp_lookup_symbol_namespace (current->inner,
+	  sym = cp_lookup_symbol_namespace (current->import_src,
 					    name,
 					    linkage_name,
 					    block,

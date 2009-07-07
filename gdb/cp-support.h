@@ -37,15 +37,15 @@ struct type;
 struct demangle_component;
 
 /* This struct is designed to store data from using directives.  It
-   says that names from namespace INNER should be visible within
-   namespace OUTER.  OUTER should always be a strict initial substring
-   of INNER.  These form a linked list; NEXT is the next element of
-   the list.  */
+   says that names from namespace IMPORT_SRC should be visible within
+   namespace IMPORT_DEST. IMPORT_DEST should always be a strict initial
+   substring of IMPORT_SRC. These form a linked list; NEXT is the next element
+   of the list.  */
 
 struct using_direct
 {
-  char *inner;
-  char *outer;
+  char *import_src;
+  char *import_dest;
   struct using_direct *next;
 };
 
@@ -76,11 +76,11 @@ extern struct type *cp_lookup_rtti_type (const char *name,
 
 extern int cp_is_anonymous (const char *namespace);
 
-extern void cp_add_using_directive (const char *outer,
-                                    const char *inner);
+extern void cp_add_using_directive (const char *dest,
+                                    const char *src);
 
-extern struct using_direct *cp_add_using (const char *outer,
-                                          const char *inner,
+extern struct using_direct *cp_add_using (const char *dest,
+                                          const char *src,
 					  struct using_direct *next);
 
 extern void cp_initialize_namespace (void);
