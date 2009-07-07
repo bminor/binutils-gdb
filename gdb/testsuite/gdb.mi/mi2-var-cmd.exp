@@ -523,5 +523,9 @@ mi_gdb_test "-var-update selected_a" \
 	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",type_changed=\"true\",new_type=\"int\",new_num_children=\"0\"\}\\\]" \
 	"update selected_a in do_special_tests"
 
+mi_gdb_test "-file-exec-and-symbols ${binfile}" "\\^done" \
+	    "floating varobj invalidation"
+
+
 mi_gdb_exit
 return 0

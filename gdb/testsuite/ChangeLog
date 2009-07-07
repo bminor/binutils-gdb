@@ -1,3 +1,7 @@
+2009-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.mi/mi2-var-cmd.exp (floating varobj invalidation): New test.
+
 2009-07-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* lib/java.exp (java_init): Ignore $GCJ if it is empty.
