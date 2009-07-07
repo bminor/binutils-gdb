@@ -105,7 +105,8 @@ static void break_command_1 (char *, int, int);
 
 static void mention (struct breakpoint *);
 
-static struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
+/* This function is used in gdbtk sources and thus can not be made static.  */
+struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
 					      struct symtab_and_line,
 					      enum bptype);
 
@@ -4396,6 +4397,7 @@ static void free_bp_location (struct bp_location *loc)
 
 /* Helper to set_raw_breakpoint below.  Creates a breakpoint
    that has type BPTYPE and has no locations as yet.  */
+/* This function is used in gdbtk sources and thus can not be made static.  */
 
 static struct breakpoint *
 set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
@@ -4480,7 +4482,7 @@ get_sal_arch (struct symtab_and_line sal)
    prior to completing the initialization of the breakpoint.  If this
    should happen, a bogus breakpoint will be left on the chain.  */
 
-static struct breakpoint *
+struct breakpoint *
 set_raw_breakpoint (struct gdbarch *gdbarch,
 		    struct symtab_and_line sal, enum bptype bptype)
 {

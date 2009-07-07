@@ -1,3 +1,7 @@
+2009-07-07  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* breakpoint.c (set_raw_breakpoint): Remove static modifier.
+
 2009-07-07  Tom Tromey  <tromey@redhat.com>
 
 	* c-lang.c (convert_octal): Only allow 3 octal digits.
