@@ -1,3 +1,10 @@
+2009-07-06  DJ Delorie  <dj@redhat.com>
+
+	* mep-desc.c: Regenerate.
+	* mep-desc.h: Regenerate.
+	* mep-opc.c: Regenerate.
+	* mep-opc.h: Regenerate.
+
 2009-07-06  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 
 	* i386-opc.h (CpuFMA4): Add CpuFMA4.

@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2007 Free Software Foundation, Inc.
+Copyright 1996-2009 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
@@ -145,12 +145,6 @@ mep_cgen_insn_supported (CGEN_CPU_DESC cd, const CGEN_INSN *insn)
   int ok1;
   int ok2;
   int ok3;
- 
-  /* If we're assembling VLIW packets, ignore the 12-bit BSR as we
-     can't relax that.  The 24-bit BSR is matched instead.  */
-  if (insn->base->num == MEP_INSN_BSR12
-      && cgen_bitset_contains (cd->isas, ISA_EXT_COP1_64))
-    return 0;
 
   /* If the insn has an option bit set that we don't want,
      reject it.  */
