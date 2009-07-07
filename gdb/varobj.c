@@ -3225,16 +3225,13 @@ varobj_invalidate (void)
 
   if (varobj_list (&all_rootvarobj) > 0)
     {
-      varp = all_rootvarobj;
-      while (*varp != NULL)
+      for (varp = all_rootvarobj; *varp != NULL; varp++)
 	{
 	  /* Floating varobjs are reparsed on each stop, so we don't care if
 	     the presently parsed expression refers to something that's gone.
 	     */
-	  if ((*varp)->root->floating) {
-	    varp++;
+	  if ((*varp)->root->floating)
 	    continue;
-	  }
 
 	  /* global var must be re-evaluated.  */     
 	  if ((*varp)->root->valid_block == NULL)
@@ -3256,8 +3253,6 @@ varobj_invalidate (void)
 	    }
 	  else /* locals must be invalidated.  */
 	    (*varp)->root->is_valid = 0;
-
-	  varp++;
 	}
     }
   xfree (all_rootvarobj);

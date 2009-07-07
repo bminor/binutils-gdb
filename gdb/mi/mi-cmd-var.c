@@ -606,8 +606,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
 	  do_cleanups (cleanup);
 	  return;
 	}
-      cr = rootlist;
-      while (*cr != NULL)
+      for (cr = rootlist; *cr != NULL; cr++)
 	{
 	  int thread_id = varobj_get_thread_id (*cr);
 	  int thread_stopped = 0;
@@ -624,7 +623,6 @@ mi_cmd_var_update (char *command, char **argv, int argc)
 	  if (thread_stopped)
 	    if (*name == '*' || varobj_floating_p (*cr))
 	      varobj_update_one (*cr, print_values, 0 /* implicit */);
-	  cr++;
 	}
       do_cleanups (cleanup);
     }
