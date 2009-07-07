@@ -17,7 +17,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 ff 2d 00 00 00 00 	ljmpw  \*0x0	29: (R_386_)?(dir)?32	xxx
 [ 	]*[a-f0-9]+:	ea 00 00 00 00 34 12 	ljmp   \$0x1234,\$0x0	2e: (R_386_)?(dir)?32	xxx
 [ 	]*[a-f0-9]+:	e8 c7 ff ff ff       	call   (0x0|0 <.text>)
-[ 	]*[a-f0-9]+:	e8 ((fc|d1) ff ff ff|00 00 00 00)       	call   (0x)?(0|3a|3e)( <.text(\+0x3e)?>)?	3a: (R_386_PC)?(DISP)?32	xxx
+[ 	]*[a-f0-9]+:	e8 ((fc|c2) ff ff ff|00 00 00 00)       	call   (0x)?(0|3a|3e)( <.text(\+0x3e)?>)?	3a: (R_386_PC)?(DISP)?32	xxx
 [ 	]*[a-f0-9]+:	ff 15 00 00 00 00    	call   \*0x0	40: (R_386_)?(dir)?32	xxx
 [ 	]*[a-f0-9]+:	ff d7                	call   \*%edi
 [ 	]*[a-f0-9]+:	ff 17                	call   \*\(%edi\)
