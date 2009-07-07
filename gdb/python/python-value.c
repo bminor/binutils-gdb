@@ -294,17 +294,10 @@ valpy_getitem (PyObject *self, PyObject *key)
 	}
     }
 
-  if (res_val == NULL)
-    {
-      gdb_assert (field == NULL);
-      return NULL;
-    }
-
-  if (field)
-    xfree (field);
+  xfree (field);
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  return value_to_value_object (res_val);
+  return res_val ? value_to_value_object (res_val) : NULL;
 }
 
 static int
