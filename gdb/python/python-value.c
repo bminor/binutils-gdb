@@ -267,8 +267,7 @@ valpy_getitem (PyObject *self, PyObject *key)
 {
   value_object *self_value = (value_object *) self;
   char *field = NULL;
-  struct value *idx = NULL;
-  struct value *res_val = NULL;	  /* Initialize to appease gcc warning.  */
+  struct value *res_val = NULL;
   volatile struct gdb_exception except;
 
   if (gdbpy_is_string (key))
@@ -290,12 +289,17 @@ valpy_getitem (PyObject *self, PyObject *key)
 	     value code throw an exception if the index has an invalid
 	     type.  */
 	  struct value *idx = convert_value_from_python (key);
-	  if (idx == NULL)
-	    return NULL;
-
-	  res_val = value_subscript (tmp, value_as_long (idx));
+	  if (idx != NULL)
+	    res_val = value_subscript (tmp, value_as_long (idx));
 	}
     }
+
+  if (res_val == NULL)
+    {
+      gdb_assert (field == NULL);
+      return NULL;
+    }
+
   if (field)
     xfree (field);
   GDB_PY_HANDLE_EXCEPTION (except);

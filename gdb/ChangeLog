@@ -1,3 +1,7 @@
+2009-07-07  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* python/python-value.c (valpy_getitem): Don't return from TRY_CATCH.
+
 2009-07-07  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* cp-support.h (struct using_direct): Rename members inner and
