@@ -3231,8 +3231,10 @@ varobj_invalidate (void)
 	  /* Floating varobjs are reparsed on each stop, so we don't care if
 	     the presently parsed expression refers to something that's gone.
 	     */
-	  if ((*varp)->root->floating)
+	  if ((*varp)->root->floating) {
+	    varp++;
 	    continue;
+	  }
 
 	  /* global var must be re-evaluated.  */     
 	  if ((*varp)->root->valid_block == NULL)
