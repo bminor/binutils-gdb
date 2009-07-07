@@ -1003,7 +1003,8 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V1, 0x04000000, 0x0e100000, "str%22'b%t%c\t%12-15r, %a"},
   {ARM_EXT_V1, 0x06000000, 0x0e100ff0, "str%22'b%t%c\t%12-15r, %a"},
   {ARM_EXT_V1, 0x04000000, 0x0c100010, "str%22'b%t%c\t%12-15r, %a"},
-  {ARM_EXT_V1, 0x04400000, 0x0c500000, "strb%c\t%12-15r, %a"},
+  {ARM_EXT_V1, 0x04400000, 0x0e500000, "strb%c\t%12-15r, %a"},
+  {ARM_EXT_V1, 0x06400000, 0x0e500010, "strb%c\t%12-15r, %a"},
   {ARM_EXT_V1, 0x000000b0, 0x0e1000f0, "strh%c\t%12-15r, %s"},
   {ARM_EXT_V1, 0x00100090, 0x0e100090, "ldr%6's%5?hb%c\t%12-15r, %s"},
   {ARM_EXT_V1, 0x00000000, 0x0de00000, "and%20's%c\t%12-15r, %16-19r, %o"},
@@ -1599,7 +1600,7 @@ arm_decode_bitfield (const char *ptr,
 
 static void
 arm_decode_shift (long given, fprintf_ftype func, void *stream,
-		  int print_shift)
+		  bfd_boolean print_shift)
 {
   func (stream, "%s", arm_regnames[given & 0xf]);
 
@@ -2241,7 +2242,7 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 	      func (stream, ", %s",
 		    (((given & 0x00800000) == 0)
 		     ? "-" : ""));
-	      arm_decode_shift (given, func, stream, 1);
+	      arm_decode_shift (given, func, stream, TRUE);
 	    }
 
 	  func (stream, "]%s",
@@ -2264,7 +2265,7 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 	      func (stream, "], %s",
 		    (((given & 0x00800000) == 0)
 		     ? "-" : ""));
-	      arm_decode_shift (given, func, stream, 1);
+	      arm_decode_shift (given, func, stream, TRUE);
 	    }
 	}
     }
@@ -2887,7 +2888,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 		      break;
 
 		    case 'q':
-		      arm_decode_shift (given, func, stream, 0);
+		      arm_decode_shift (given, func, stream, FALSE);
 		      break;
 
 		    case 'o':
@@ -2902,7 +2903,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  value_in_comment = immed;
 			}
 		      else
-			arm_decode_shift (given, func, stream, 1);
+			arm_decode_shift (given, func, stream, TRUE);
 		      break;
 
 		    case 'p':
