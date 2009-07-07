@@ -17442,9 +17442,9 @@ static const struct asm_opcode insns[] =
 
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_cext_iwmmxt2 /* Intel Wireless MMX technology, version 2.  */
- cCE(torvscb,   e13f190, 1, (RR),		    iwmmxt_tandorc),
- cCE(torvsch,   e53f190, 1, (RR),		    iwmmxt_tandorc),
- cCE(torvscw,   e93f190, 1, (RR),		    iwmmxt_tandorc),
+ cCE(torvscb,   e12f190, 1, (RR),		    iwmmxt_tandorc),
+ cCE(torvsch,   e52f190, 1, (RR),		    iwmmxt_tandorc),
+ cCE(torvscw,   e92f190, 1, (RR),		    iwmmxt_tandorc),
  cCE(wabsb,     e2001c0, 2, (RIWR, RIWR),           rd_rn),
  cCE(wabsh,     e6001c0, 2, (RIWR, RIWR),           rd_rn),
  cCE(wabsw,     ea001c0, 2, (RIWR, RIWR),           rd_rn),

@@ -1,3 +1,7 @@
+2009-07-07  Chung-Lin Tang  <cltang@pllab.cs.nthu.edu.tw>
+
+	* arm-dis.c (coprocessor_opcodes): Fix mask for waddbhus.
+
 2009-07-07  Nick Clifton  <nickc@redhat.com>
 
 	PR 10288
