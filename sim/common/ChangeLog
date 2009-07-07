@@ -1,3 +1,12 @@
+2009-07-06  Doug Evans  <dje@sebabeach.org>
+
+	* Make-common.in (CGEN_CPU_EXTR,CGEN_CPU_READ): Pass canonical
+	identifiers for file types rather than encoding internal
+	implementation details of cgen.sh.
+	(CGEN_CPU_WRITE,CGEN_CPU_SEM,CGEN_CPU_SEMSW): Ditto.
+	* cgen.sh: Add support for parallel makes.
+	Rewrite cpu/decode handling to avoid generating "extrafiles" twice.
+
 2009-05-18  Jon Beniston <jon@beniston.com>
 
         * gennltvals.sh: Add lm32 target.

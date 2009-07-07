@@ -701,11 +701,12 @@ CGEN_DECODE_SCM = $(CGENDIR)/sim-decode.scm
 CGEN_DESC_SCM = $(CGENDIR)/desc.scm $(CGENDIR)/desc-cpu.scm
 
 # Various choices for which cpu specific files to generate.
-CGEN_CPU_EXTR = -E tmp-ext.c1
-CGEN_CPU_READ = -R tmp-read.c1
-CGEN_CPU_WRITE = -W tmp-write.c1
-CGEN_CPU_SEM = -S tmp-sem.c1
-CGEN_CPU_SEMSW = -X tmp-semsw.c1
+# These are passed to cgen.sh in the "extrafiles" argument.
+CGEN_CPU_EXTR = /extr/
+CGEN_CPU_READ = /read/
+CGEN_CPU_WRITE = /write/
+CGEN_CPU_SEM = /sem/
+CGEN_CPU_SEMSW = /semsw/
 
 CGEN_FLAGS_TO_PASS = \
 	CGEN='$(CGEN)' \
