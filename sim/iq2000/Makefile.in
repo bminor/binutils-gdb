@@ -94,6 +94,7 @@ CGEN_MAINT = ; @true
 
 stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CGEN_CPU_DIR)/iq2000.cpu Makefile
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=iq2000 \
+	  archfile=$(CGEN_CPU_DIR)/iq2000.cpu \
 	  FLAGS="with-scache with-profile=fn"
 	touch stamp-arch
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
@@ -101,7 +102,10 @@ arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 
 stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DIR)/iq2000.cpu Makefile
 	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
-	  cpu=iq2000bf mach=iq2000 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
+	  cpu=iq2000bf mach=iq2000 \
+	  archfile=$(CGEN_CPU_DIR)/iq2000.cpu \
+	  FLAGS="with-scache with-profile=fn" \
+	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
 	touch stamp-cpu
 cpu.h sem.c sem-switch.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu
 	@true
