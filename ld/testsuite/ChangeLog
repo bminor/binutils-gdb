@@ -1,3 +1,8 @@
+2009-07-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-selective/selective.exp: Remove check that $CC contains the
+	string "gcc".  Do -dumpversion for $CXX.
+
 2009-06-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 10288
