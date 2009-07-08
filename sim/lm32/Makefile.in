@@ -17,7 +17,7 @@ SIM_OBJS = \
         sim-if.o arch.o \
         cpu.o decode.o sem.o model.o mloop.o \
         lm32.o traps.o user.o 
-        
+
 # List of extra dependencies.
 # Generally this consists of simulator specific files included by sim-main.h.
 SIM_EXTRA_DEPS = $(CGEN_INCLUDE_DEPS) $(srcdir)/../../opcodes/lm32-desc.h
@@ -38,6 +38,8 @@ NL_TARGET = -DNL_TARGET_lm32
 arch = lm32 
 
 arch.o: arch.c $(SIM_MAIN_DEPS)
+
+traps.o: traps.c targ-vals.h $(SIM_MAIN_DEPS)
 
 sim-if.o: sim-if.c $(SIM_MAIN_DEPS) $(srcdir)/../common/sim-core.h
 
