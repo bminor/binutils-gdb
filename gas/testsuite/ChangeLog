@@ -1,3 +1,14 @@
+2009-07-09  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* gas/arm/inst-po.d: New testcase.
+	* gas/arm/inst-po.s: New file.
+	* gas/arm/inst-po-2.d: New testcase.
+	* gas/arm/inst-po-2.s: New file.
+	* gas/arm/inst-po-2.l: New file.
+	* gas/arm/inst-po-3.d: New testcase.
+	* gas/arm/inst-po-3.s: New file.
+	* gas/arm/inst-po-be.d: New testcase.
+
 2009-07-07  2009-07-04  Chung-Lin Tang  <cltang@pllab.cs.nthu.edu.tw>
 
 	* gas/arm/iwmmxt2.d: Fix insn pattern for torvsc,

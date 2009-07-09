@@ -1,4 +1,6 @@
 -*- text -*-
+* ARM assembler now supports .inst[.nw] pseudo-ops to insert opcodes specified
+  in binary rather than text.
 
 * Add support for common symbol alignment to PE formats.
 

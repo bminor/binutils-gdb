@@ -569,6 +569,15 @@ Must be preceded by a @code{.personality} or @code{.personalityindex}
 directive.
 
 @c IIIIIIIIIIIIIIIIIIIIIIIIII
+
+@cindex @code{.inst} directive, ARM
+@item .inst @var{opcode} [ , @dots{} ]
+@item .inst.n @var{opcode} [ , @dots{} ]
+@item .inst.w @var{opcode} [ , @dots{} ]
+Generates the instruction corresponding to the numerical value @var{opcode}.
+@code{.inst.n} and @code{.inst.w} allow the Thumb instruction size to be
+specified explicitly, overriding the normal encoding rules.
+
 @c JJJJJJJJJJJJJJJJJJJJJJJJJJ
 @c KKKKKKKKKKKKKKKKKKKKKKKKKK
 @c LLLLLLLLLLLLLLLLLLLLLLLLLL
