@@ -30,6 +30,7 @@
 #include <ctype.h>
 #include "target.h"
 #include "readline/readline.h"
+#include "gdbcore.h"
 
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
@@ -246,7 +247,7 @@ dump_memory_to_file (char *cmd, char *mode, char *file_format)
      value.  */
   buf = xmalloc (count);
   make_cleanup (xfree, buf);
-  target_read_memory (lo, buf, count);
+  read_memory (lo, buf, count);
   
   /* Have everything.  Open/write the data.  */
   if (file_format == NULL || strcmp (file_format, "binary") == 0)
