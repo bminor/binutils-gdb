@@ -2785,6 +2785,7 @@ mark_functions_via_relocs (asection *sec,
 	return FALSE;
       callee->is_tail = !is_call;
       callee->is_pasted = FALSE;
+      callee->broken_cycle = FALSE;
       callee->priority = priority;
       callee->count = 1;
       if (callee->fun->last_caller != sec)
@@ -2878,6 +2879,8 @@ pasted_function (asection *sec)
 	      callee->fun = fun;
 	      callee->is_tail = TRUE;
 	      callee->is_pasted = TRUE;
+	      callee->broken_cycle = FALSE;
+	      callee->priority = 0;
 	      callee->count = 1;
 	      if (!insert_callee (fun_start, callee))
 		free (callee);
