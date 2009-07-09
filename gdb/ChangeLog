@@ -1,3 +1,8 @@
+2009-07-09  Doug Evans  <dje@google.com>
+
+	* i386-tdep.c (i386_displaced_step_fixup): Fix order of arguments
+	to read_memory_unsigned_integer.
+
 2009-07-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Report error on inaccessible memory.

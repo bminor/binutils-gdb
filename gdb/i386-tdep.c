@@ -523,7 +523,7 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
       const ULONGEST retaddr_len = 4;
 
       regcache_cooked_read_unsigned (regs, I386_ESP_REGNUM, &esp);
-      retaddr = read_memory_unsigned_integer (esp, byte_order, retaddr_len);
+      retaddr = read_memory_unsigned_integer (esp, retaddr_len, byte_order);
       retaddr = (retaddr - insn_offset) & 0xffffffffUL;
       write_memory_unsigned_integer (esp, retaddr_len, byte_order, retaddr);
 
