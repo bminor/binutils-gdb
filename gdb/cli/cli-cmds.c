@@ -1341,6 +1341,7 @@ Without an argument, history expansion is enabled."),
 Generic command for showing things about the program being debugged."),
 		  &infolist, "info ", 0, &cmdlist);
   add_com_alias ("i", "info", class_info, 1);
+  add_com_alias ("inf", "info", class_info, 1);
 
   add_com ("complete", class_obscure, complete_command,
 	   _("List the completions for the rest of the line as a command."));

@@ -1,3 +1,7 @@
+2009-07-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* cli/cli-cmds.c (init_cli_cmds): Add "inf" alias for "info" command.
+
 2009-07-07  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* tui/tui-stack.c (tui_make_status_line): Display PC as ?? if unknown.
