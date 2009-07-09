@@ -543,7 +543,16 @@ struct target_ops
        simultaneously?  */
     int (*to_supports_multi_process) (void);
 
-    /* Determine current architecture of thread PTID.  */
+    /* Determine current architecture of thread PTID.
+
+       The target is supposed to determine the architecture of the code where
+       the target is currently stopped at (on Cell, if a target is in spu_run,
+       to_thread_architecture would return SPU, otherwise PPC32 or PPC64).
+       This is architecture used to perform decr_pc_after_break adjustment,
+       and also determines the frame architecture of the innermost frame.
+       ptrace operations need to operate according to target_gdbarch.
+
+       The default implementation always returns target_gdbarch.  */
     struct gdbarch *(*to_thread_architecture) (struct target_ops *, ptid_t);
 
     int to_magic;
@@ -1043,7 +1052,7 @@ extern char *normal_pid_to_str (ptid_t ptid);
 #define target_pid_to_exec_file(pid) \
      (current_target.to_pid_to_exec_file) (pid)
 
-/* Determine current architecture of thread PTID.  */
+/* See the to_thread_architecture description in struct target_ops.  */
 
 #define target_thread_architecture(ptid) \
      (current_target.to_thread_architecture (&current_target, ptid))

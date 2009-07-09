@@ -1,3 +1,9 @@
+2009-07-09  Ulrich Weigand  <uweigand@de.ibm.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* target.h (struct target_ops <to_thread_architecture>): Describe it.
+	(target_thread_architecture): Refer to to_thread_architecture.
+
 2009-07-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* cli/cli-cmds.c (init_cli_cmds): Add "inf" alias for "info" command.
