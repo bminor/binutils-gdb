@@ -289,6 +289,7 @@ solib_bfd_open (char *pathname)
   char *found_pathname;
   int found_file;
   bfd *abfd;
+  const struct bfd_arch_info *b;
 
   /* Use target-specific override if present.  */
   if (ops->bfd_open)
@@ -310,6 +311,13 @@ solib_bfd_open (char *pathname)
       error (_("`%s': not in executable format: %s"),
 	     found_pathname, bfd_errmsg (bfd_get_error ()));
     }
+
+  /* Check bfd arch.  */
+  b = gdbarch_bfd_arch_info (target_gdbarch);
+  if (b->compatible (b, bfd_get_arch_info (abfd)) != b)
+    warning (_("`%s': Shared library architecture %s is not compatible "
+               "with target architecture %s."), found_pathname,
+             bfd_get_arch_info (abfd)->printable_name, b->printable_name);
 
   return abfd;
 }

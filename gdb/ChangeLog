@@ -1,3 +1,8 @@
+2009-07-09  Hui Zhu  <teawater@gmail.com>
+
+	* solib.c (solib_bfd_open): Output a warning if solib's
+	architecture is not compatible with inferior's architecture.
+
 2009-07-09  Ulrich Weigand  <uweigand@de.ibm.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
