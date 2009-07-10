@@ -1955,7 +1955,7 @@ print_insn_coprocessor (bfd_vma pc,
 			break;
 
 		      case 'x':
-			func (stream, "0x%lx", value);
+			func (stream, "0x%lx", (value & 0xffffffffUL));
 			break;
 
 		      case '`':
@@ -2167,7 +2167,7 @@ print_insn_coprocessor (bfd_vma pc,
 	}
 
       if (value_in_comment > 32 || value_in_comment < -16)
-	func (stream, "\t; 0x%lx", value_in_comment);
+	func (stream, "\t; 0x%lx", (value_in_comment & 0xffffffffUL));
 
       return TRUE;
     }
@@ -3107,7 +3107,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 	    }
 
 	  if (value_in_comment > 32 || value_in_comment < -16)
-	    func (stream, "\t; 0x%lx", value_in_comment);
+	    func (stream, "\t; 0x%lx", (value_in_comment & 0xffffffffUL));
 	  return;
 	}
     }

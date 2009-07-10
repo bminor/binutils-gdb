@@ -1,3 +1,9 @@
+2009-07-10  Doug Kwan  <dougkwan@google.com>
+
+	* arm-disc.c (print_insn_coprocessor, print_insn_arm):  Print only
+	lower 32 bits of long types to make hexadecimal output consistent
+	on both 32-bit and 64-bit hosts.
+
 2009-07-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* fr30-desc.c, * fr30-desc.h, * fr30-opc.c, * fr30-opc.h,
