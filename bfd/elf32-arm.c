@@ -3549,6 +3549,9 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 	     branch.  */
 	  points_to = sym_value;
 
+	/* There may be unintended consequences if this is not true.  */
+	BFD_ASSERT (stub_entry->h == NULL);
+
 	/* Note: _bfd_final_link_relocate doesn't handle these relocations
 	   properly.  We should probably use this function unconditionally,
 	   rather than only for certain relocations listed in the enclosing
@@ -3557,7 +3560,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 	    (template[stub_reloc_idx[i]].r_type),
 	  stub_bfd, info->output_bfd, stub_sec, stub_sec->contents, &rel,
 	  points_to, info, stub_entry->target_section, "", sym_flags,
-	  (struct elf_link_hash_entry *) stub_entry, &unresolved_reloc,
+	  (struct elf_link_hash_entry *) stub_entry->h, &unresolved_reloc,
 	  &error_message);
       }
     else
