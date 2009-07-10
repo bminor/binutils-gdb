@@ -35,7 +35,7 @@
 #include "libiberty.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 
 /* The data in the .debug_line statement prologue looks like this.  */
 

@@ -22,7 +22,7 @@
 
 #include "defs.h"
 #include "dwarf2expr.h"
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"

@@ -31,7 +31,7 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "objfiles.h"
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 #include "buildsym.h"
 #include "demangle.h"
 #include "expression.h"

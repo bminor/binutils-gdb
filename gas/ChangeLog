@@ -1,3 +1,39 @@
+2009-07-10  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.am (DEPTC_alpha_ecoff): Refer to dwarf2.h, not
+	elf/dwarf2.h.
+	(DEPTC_alpha_elf): Likewise.
+	(DEPTC_alpha_evax): Likewise.
+	(DEPTC_arm_elf): Likewise.
+	(DEPTC_hppa_elf): Likewise.
+	(DEPTC_i386_aout): Likewise.
+	(DEPTC_i386_coff): Likewise.
+	(DEPTC_i386_elf): Likewise.
+	(DEPTC_m68k_aout): Likewise.
+	(DEPTC_m68k_coff): Likewise.
+	(DEPTC_m68k_elf): Likewise.
+	(DEPTC_mips_coff): Likewise.
+	(DEPTC_mips_ecoff): Likewise.
+	(DEPTC_mips_elf): Likewise.
+	(DEPTC_ppc_coff): Likewise.
+	(DEPTC_ppc_elf): Likewise.
+	(DEPTC_s390_elf): Likewise.
+	(DEPTC_sh_coff): Likewise.
+	(DEPTC_sh_elf): Likewise.
+	(DEPTC_sh64_elf): Likewise.
+	(DEPTC_sparc_aout): Likewise.
+	(DEPTC_sparc_coff): Likewise.
+	(DEPTC_sparc_elf): Likewise.
+	(as.o): Likewise.
+	(dwarf2dbg.o): Likewise.
+	(dw2gencfi.o): Likewise.
+	(ehopt.o): Likewise.
+	(read.o): Likewise.
+	* Makefile.in: Rebuild.
+	* dw2gencfi.h: Include dwarf2.h, not elf/dwarf2.h.
+	* dwarf2dbg.c: Likewise.
+	* ehopt.c: Likewise.
+
 2009-07-09  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* config/tc-arm.c (it_fsm_post_encode): New forward declaration.

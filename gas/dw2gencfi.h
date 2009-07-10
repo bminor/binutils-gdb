@@ -22,7 +22,7 @@
 #ifndef DW2GENCFI_H
 #define DW2GENCFI_H
 
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 
 struct symbol;
 

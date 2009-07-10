@@ -33,7 +33,7 @@
 #include "exceptions.h"
 #include "block.h"
 
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
 

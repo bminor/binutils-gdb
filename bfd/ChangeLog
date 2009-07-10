@@ -1,3 +1,17 @@
+2009-07-10  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.am (dwarf2.lo): Use dwarf2.h, not elf/dwarf2.h.
+	(elf-eh-frame.lo): Likewise.
+	(elf32-bfin.lo): Likewise.
+	(elf32-frv.lo): Likewise.
+	(elf32-xc16x.lo): Likewise.
+	* Makefile.in: Rebuild.
+	* dwarf2.c: Included dwarf.h, not elf/dwarf2.h.
+	* elf-eh-frame.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-xc16x.c: Likewise.
+
 2009-07-10  Julian Brown  <julian@codesourcery.com>
 
 	* elf32-arm.c (arm_build_one_stub): Use the hash entry of the

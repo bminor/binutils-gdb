@@ -1094,7 +1094,7 @@ DEPTC_alpha_ecoff = \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/sym.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/alpha.h \
   $(INCDIR)/safe-ctype.h \
@@ -1114,7 +1114,7 @@ DEPTC_alpha_elf = \
   $(INCDIR)/coff/sym.h \
   $(INCDIR)/elf/alpha.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -1132,7 +1132,7 @@ DEPTC_alpha_elf = \
 DEPTC_alpha_evax = \
   $(BFDDIR)/vms.h \
   $(INCDIR)/alloca-conf.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/alpha.h \
   $(INCDIR)/safe-ctype.h \
@@ -1193,7 +1193,7 @@ DEPTC_arm_elf = \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/arm.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -1407,7 +1407,7 @@ DEPTC_hppa_elf = \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/hppa.h \
   $(INCDIR)/elf/internal.h \
@@ -1441,7 +1441,7 @@ DEPTC_i386_aout = \
   $(BFDDIR)/libaout.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/elf/x86-64.h \
   $(INCDIR)/obstack.h \
@@ -1462,7 +1462,7 @@ DEPTC_i386_coff = \
   $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/elf/x86-64.h \
   $(INCDIR)/obstack.h \
@@ -1481,7 +1481,7 @@ DEPTC_i386_elf = \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -1660,7 +1660,7 @@ DEPTC_m68k_aout = \
   $(BFDDIR)/libaout.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/m68k.h \
   $(INCDIR)/safe-ctype.h \
@@ -1677,7 +1677,7 @@ DEPTC_m68k_coff = \
   $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/m68k.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/m68k.h \
   $(INCDIR)/safe-ctype.h \
@@ -1692,7 +1692,7 @@ DEPTC_m68k_elf = \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/m68k.h \
@@ -1783,7 +1783,7 @@ DEPTC_mips_coff = \
   $(INCDIR)/coff/mipspe.h \
   $(INCDIR)/coff/sym.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/mips.h \
@@ -1806,7 +1806,7 @@ DEPTC_mips_ecoff = \
   $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/sym.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/mips.h \
@@ -1829,7 +1829,7 @@ DEPTC_mips_elf = \
   $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/sym.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/mips.h \
@@ -2012,7 +2012,7 @@ DEPTC_ppc_coff = \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/rs6000.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/ppc.h \
   $(INCDIR)/safe-ctype.h \
@@ -2025,7 +2025,7 @@ DEPTC_ppc_elf = \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/ppc.h \
@@ -2043,7 +2043,7 @@ DEPTC_s390_elf = \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -2082,7 +2082,7 @@ DEPTC_sh_coff = \
   $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sh.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/../opcodes/sh-opc.h \
@@ -2097,7 +2097,7 @@ DEPTC_sh_elf = \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -2117,7 +2117,7 @@ DEPTC_sh64_elf = \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -2138,7 +2138,7 @@ DEPTC_sparc_aout = \
   $(BFDDIR)/libaout.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/sparc.h \
   $(INCDIR)/safe-ctype.h \
@@ -2153,7 +2153,7 @@ DEPTC_sparc_coff = \
   $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sparc.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/sparc.h \
   $(INCDIR)/safe-ctype.h \
@@ -2166,7 +2166,7 @@ DEPTC_sparc_elf = \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -4296,7 +4296,7 @@ app.o: \
 as.o: \
   as.c \
   $(INCDIR)/alloca-conf.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   ../bfd/bfdver.h \
   dw2gencfi.h \
@@ -4321,7 +4321,7 @@ depend.o: \
 dwarf2dbg.o: \
   dwarf2dbg.c \
   $(INCDIR)/alloca-conf.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/filenames.h \
   $(INCDIR)/obstack.h \
   $(INCDIR)/safe-ctype.h \
@@ -4330,7 +4330,7 @@ dwarf2dbg.o: \
 dw2gencfi.o: \
   dw2gencfi.c \
   $(INCDIR)/alloca-conf.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   dw2gencfi.h \
   subsegs.h
@@ -4341,7 +4341,7 @@ ecoff.o: \
 ehopt.o: \
   ehopt.c \
   $(INCDIR)/alloca-conf.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   struc-symbol.h \
   subsegs.h
@@ -4406,7 +4406,7 @@ output-file.o: \
 read.o: \
   read.c \
   $(INCDIR)/alloca-conf.h \
-  $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/obstack.h \
   $(INCDIR)/safe-ctype.h \
   dw2gencfi.h \

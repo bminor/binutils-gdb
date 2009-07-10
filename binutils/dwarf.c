@@ -24,7 +24,7 @@
 #include "bfd.h"
 #include "bucomm.h"
 #include "elf/common.h"
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 #include "dwarf.h"
 
 static int have_frame_base;

@@ -25,7 +25,7 @@
 #include "gdbtypes.h"
 #include "value.h"
 #include "gdbcore.h"
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 #include "dwarf2expr.h"
 #include "gdb_assert.h"
 

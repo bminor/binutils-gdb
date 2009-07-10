@@ -51,7 +51,7 @@
 
 /* sh flags */
 #include "elf/sh.h"
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 /* registers numbers shared with the simulator */
 #include "gdb/sim-sh.h"
 

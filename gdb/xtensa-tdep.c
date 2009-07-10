@@ -35,7 +35,7 @@
 #include "regset.h"
 
 #include "dummy-frame.h"
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 #include "dwarf2-frame.h"
 #include "dwarf2loc.h"
 #include "frame.h"

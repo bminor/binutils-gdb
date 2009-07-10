@@ -23,7 +23,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/bfin.h"
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 #include "hashtab.h"
 
 /* FUNCTION : bfin_pltpc_reloc

@@ -24,7 +24,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 
 #define EH_FRAME_HDR_SIZE 8
 

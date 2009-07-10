@@ -24,7 +24,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/xc16x.h"
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 #include "libiberty.h"
 
 static reloc_howto_type xc16x_elf_howto_table [] =

@@ -28,7 +28,7 @@
    ELF, since the exception frame information is always in a format
    derived from DWARF.  */
 
-#include "elf/dwarf2.h"
+#include "dwarf2.h"
 
 /* Try to optimize gcc 2.8 exception frame information.
 

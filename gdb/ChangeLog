@@ -1,3 +1,12 @@
+2009-07-10  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2-frame.c: Include dwarf2.h, not elf/dwarf2.h.
+	* dwarf2expr.c: Likewise.
+	* dwarf2loc.c: Likewise.
+	* dwarf2read.c: Likewise.
+	* sh-tdep.c: Likewise.
+	* xtensa-tdep.c: Likewise.
+
 2009-07-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Tidy up the code.
