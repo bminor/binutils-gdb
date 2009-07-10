@@ -1,5 +1,10 @@
 2009-07-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/ppc32elf.em (ppc_before_allocation): Turn on
+	linker relaxation if it might be necessary.
+
+2009-07-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* emulparams/elf32ppc.sh (GOTPLT, PLT): Handle .iplt.
 
 2009-07-06  Matthias Klose <doko@ubuntu.com>
