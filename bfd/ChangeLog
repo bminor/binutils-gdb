@@ -1,3 +1,8 @@
+2009-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (_bfd_elf_get_synthetic_symtab): Remove leading zeros
+	when reporting  addends.
+
 2009-07-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_size_stubs): Do set up soft-icache manager

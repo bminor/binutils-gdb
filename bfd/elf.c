@@ -8965,10 +8965,16 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
       names += len;
       if (p->addend != 0)
 	{
+	  char buf[30], *a;
+	  int len;
 	  memcpy (names, "+0x", sizeof ("+0x") - 1);
 	  names += sizeof ("+0x") - 1;
-	  bfd_sprintf_vma (abfd, names, p->addend);
-	  names += strlen (names);
+	  bfd_sprintf_vma (abfd, buf, p->addend);
+	  for (a = buf; *a == '0'; ++a)
+	    ;
+	  len = strlen (a);
+	  memcpy (names, a, len);
+	  names += len;
 	}
       memcpy (names, "@plt", sizeof ("@plt"));
       names += sizeof ("@plt");
