@@ -1,5 +1,9 @@
 2009-07-09  Tom Tromey  <tromey@redhat.com>
 
+	* gdbint.texinfo (Testsuite): Document parallel make check.
+
+2009-07-09  Tom Tromey  <tromey@redhat.com>
+
 	* gdbint.texinfo (Testsuite): Document test transcripts.
 
 2009-07-10  Phil Muldoon  <pmuldoon@redhat.com>

@@ -7519,6 +7519,16 @@ make check RUNTESTFLAGS='@var{tests}'
 where @var{tests} is a list of test script file names, separated by
 spaces.
 
+If you use GNU make, you can use its @option{-j} option to run the
+testsuite in parallel.  This can greatly reduce the amount of time it
+takes for the testsuite to run.  In this case, if you set
+@code{RUNTESTFLAGS} then, by default, the tests will be run serially
+even under @option{-j}.  You can override this and force a parallel run
+by setting the @code{make} variable @code{FORCE_PARALLEL} to any
+non-empty value.  Note that the parallel @kbd{make check} assumes
+that you want to run the entire testsuite, so it is not compatible
+with some dejagnu options, like @option{--directory}.
+
 The ideal test run consists of expected passes only; however, reality
 conspires to keep us from this ideal.  Unexpected failures indicate
 real problems, whether in @value{GDBN} or in the testsuite.  Expected
