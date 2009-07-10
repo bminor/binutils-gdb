@@ -2716,6 +2716,8 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
       eh->stub_offset = 0;
       eh->target_value = 0;
       eh->target_section = NULL;
+      eh->target_addend = 0;
+      eh->orig_insn = 0;
       eh->stub_type = arm_stub_none;
       eh->stub_size = 0;
       eh->stub_template = NULL;
