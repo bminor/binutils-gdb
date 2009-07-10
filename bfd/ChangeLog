@@ -1,5 +1,58 @@
 2009-07-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_howto_raw): Add R_PPC_IRELATIVE.
+	(ppc_elf_get_synthetic_symtab): Report addend.
+	(PLT_IFUNC): Define.
+	(struct ppc_elf_link_hash_table): Add iplt and reliplt.
+	(ppc_elf_create_glink): New function.
+	(ppc_elf_create_dynamic_sections): Use it.
+	(ppc_elf_add_symbol_hook): Set has_ifunc_symbols.
+	(update_local_sym_info): Allocate space for local_plt array.
+	Don't bump local_got_refcounts for PLT_IFUNC.  Return local_plt
+	entry pointer.
+	(is_branch_reloc): New function.
+	(ppc_elf_check_relocs): Handle STT_GNU_IFUNC symbols.
+	(ppc_elf_gc_sweep_hook): Likewise.
+	(ppc_elf_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(ppc_elf_size_dynamic_sections): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	(branch_reloc_hash_match): Use is_branch_reloc.
+	(ppc_elf_tls_optimize): Adjust for local_plt.
+	(write_glink_stub): New function, extracted from..
+	(ppc_elf_finish_dynamic_symbol): ..here.  Handle STT_GNU_IFUNC.
+	(ppc_elf_finish_dynamic_sections): Only write plt resolver and
+	branch table when dynamic.
+	(elf_backend_post_process_headers): Define.
+	* elf64-ppc.c (elf_backend_post_process_headers): Define.
+	(ppc64_elf_howto_raw): Add R_PPC64_IRELATIVE.
+	(ppc64_elf_get_synthetic_symtab): Report addend.
+	(struct ppc_stub_hash_entry): Add plt_ent.
+	(PLT_IFUNC): Define.
+	(struct ppc_link_hash_table): Add iplt and reliplt.
+	(create_linkage_sections): Make .iplt and .rela.iplt sections.
+	(ppc64_elf_add_symbol_hook): Set has_ifunc_symbols.
+	(update_local_sym_info): Allocate space for local_plt array.
+	Don't bump local_got_ents for PLT_IFUNC.  Return local_plt
+	entry pointer.
+	(update_plt_info): Pass pointer to plt_entry rather than sym hash,
+	and don't change hash flags here.
+	(is_branch_reloc): New function.
+	(ppc64_elf_check_relocs): Handle STT_GNU_IFUNC.
+	(ppc64_elf_gc_sweep_hook): Likewise.
+	(ppc64_elf_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(ppc64_elf_size_dynamic_sections): Likewise.
+	(ppc_build_one_stub, ppc_size_one_stub): Likewise.
+	(ppc64_elf_size_stubs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	(get_sym_h): Adjust for local_plt.
+	(branch_reloc_hash_match): Use is_branch_reloc.
+	(ppc_type_of_stub): Pass plt_entry pointer and handle ifunc.
+	(ppc64_elf_toc): Ignore SEC_EXCLUDE sections.
+
+2009-07-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf.c (_bfd_elf_get_synthetic_symtab): Report addends.
 
 2009-07-10  Alan Modra  <amodra@bigpond.net.au>

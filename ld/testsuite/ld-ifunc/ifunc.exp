@@ -23,11 +23,15 @@
 # Written by Nick Clifton <nickc@redhat.com>
 
 
-# IFUNC support has only been implemented for the x86_64 and ix86 so far.
-if {! (  [istarget "x86_64-*-elf*"]
-      || [istarget "x86_64-*-linux*"]
-      || [istarget "i?86-*-elf*"]
-      || [istarget "i?86-*-linux*"]) } {
+# IFUNC support has only been implemented for the ix86, x86_64 and powerpc
+# so far.
+if {!(([istarget "i?86-*-*"]
+       || [istarget "x86_64-*-*"]
+       || [istarget "powerpc*-*-*"])
+      && ([istarget "*-*-elf*"]
+	  || ([istarget "*-*-linux*"]
+	      && ![istarget "*-*-*aout*"]
+	      && ![istarget "*-*-*oldld*"]))) } {
     verbose "IFUNC tests not run - target does not support IFUNC"
     return
 }
@@ -195,11 +199,15 @@ if ![default_ld_link $ld "tmpdir/dynamic_prog" "-Ltmpdir tmpdir/shared_prog.o -B
     fail "Could not link a dynamic executable"
     set fails [expr $fails + 1]
 }
-if ![default_ld_link $ld "tmpdir/static_prog" "-Ltmpdir tmpdir/static_prog.o -lifunc"] {
+if ![default_ld_link $ld "tmpdir/local_prog" "-Ltmpdir tmpdir/static_prog.o -lifunc"] {
+    fail "Could not link a dynamic executable using local ifunc"
+    set fails [expr $fails + 1]
+}
+if ![default_ld_link $ld "tmpdir/static_prog" "-static -Ltmpdir tmpdir/static_prog.o -lifunc"] {
     fail "Could not link a static executable"
     set fails [expr $fails + 1]
 }
-if ![default_ld_link $ld "tmpdir/static_nonifunc_prog" "-Ltmpdir tmpdir/static_prog.o tmpdir/static_noifunc.o"] {
+if ![default_ld_link $ld "tmpdir/static_nonifunc_prog" "-static -Ltmpdir tmpdir/static_prog.o tmpdir/static_noifunc.o"] {
     fail "Could not link a non-ifunc using static executable"
     set fails [expr $fails + 1]
 }
@@ -219,6 +227,10 @@ if { $fails == 0 } {
 
 if {! [check_osabi tmpdir/libshared_ifunc.so {UNIX - Linux}]} {
     fail "Shared libraries containing ifunc does not have an OS/ABI field of LINUX"
+    set fails [expr $fails + 1]
+}
+if {! [check_osabi tmpdir/local_prog {UNIX - Linux}]} {
+    fail "Local ifunc-using executable does not have an OS/ABI field of LINUX"
     set fails [expr $fails + 1]
 }
 if {! [check_osabi tmpdir/static_prog {UNIX - Linux}]} {
@@ -242,6 +254,10 @@ if {[contains_ifunc_symbol tmpdir/libshared_ifunc.so] != 1} {
     fail "Shared libraries containing ifunc does not contain an IFUNC symbol"
     set fails [expr $fails + 1]
 }
+if {[contains_ifunc_symbol tmpdir/local_prog] != 1} {
+    fail "Local ifunc-using executable does not contain an IFUNC symbol"
+    set fails [expr $fails + 1]
+}
 if {[contains_ifunc_symbol tmpdir/static_prog] != 1} {
     fail "Static ifunc-using executable does not contain an IFUNC symbol"
     set fails [expr $fails + 1]
@@ -262,6 +278,10 @@ if {[contains_ifunc_symbol tmpdir/static_nonifunc_prog] != 0} {
 
 if {[contains_irelative_reloc tmpdir/libshared_ifunc.so] != 1} {
     fail "ifunc-using shared library does not contain R_*_IRELATIVE relocation"
+    set fails [expr $fails + 1]
+}
+if {[contains_irelative_reloc tmpdir/local_prog] != 1} {
+    fail "Local ifunc-using executable does not contain R_*_IRELATIVE relocation"
     set fails [expr $fails + 1]
 }
 if {[contains_irelative_reloc tmpdir/static_prog] != 1} {
@@ -291,6 +311,7 @@ if { $verbose < 1 } {
     remote_file host delete "tmpdir/libshared_ifunc.so"
     remote_file host delete "tmpdir/libifunc.a"
     remote_file host delete "tmpdir/dynamic_prog"
+    remote_file host delete "tmpdir/local_prog"
     remote_file host delete "tmpdir/static_prog"
     remote_file host delete "tmpdir/static_nonifunc_prog"
 }
