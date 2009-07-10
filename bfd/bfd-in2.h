@@ -463,7 +463,6 @@ extern int bfd_seek (bfd *, file_ptr, int);
 extern file_ptr bfd_tell (bfd *);
 extern int bfd_flush (bfd *);
 extern int bfd_stat (bfd *, struct stat *);
-extern void *bfd_mmap (bfd *, void *, bfd_size_type, int, int, file_ptr);
 
 /* Deprecated old routines.  */
 #if __GNUC__
@@ -1122,6 +1121,9 @@ bfd_boolean bfd_fill_in_gnu_debuglink_section
 long bfd_get_mtime (bfd *abfd);
 
 file_ptr bfd_get_size (bfd *abfd);
+
+void *bfd_mmap (bfd *abfd, void *addr, bfd_size_type len,
+    int prot, int flags, file_ptr offset);
 
 /* Extracted from bfdwin.c.  */
 /* Extracted from section.c.  */

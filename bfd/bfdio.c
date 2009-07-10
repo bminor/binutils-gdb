@@ -158,7 +158,8 @@ DESCRIPTION
 .  int (*bclose) (struct bfd *abfd);
 .  int (*bflush) (struct bfd *abfd);
 .  int (*bstat) (struct bfd *abfd, struct stat *sb);
-.  void* (*bmmap) (struct bfd *abfd, void *addr, bfd_size_type len,
+.  {* Just like mmap: (void*)-1 on failure, mmapped address on success.  *}
+.  void *(*bmmap) (struct bfd *abfd, void *addr, bfd_size_type len,
 .                  int prot, int flags, file_ptr offset);
 .};
 
