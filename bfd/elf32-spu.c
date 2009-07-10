@@ -1627,7 +1627,7 @@ process_stubs (struct bfd_link_info *info, bfd_boolean build)
 }
 
 /* Allocate space for overlay call and return stubs.
-   Return 0 on error, 1 if no stubs, 2 otherwise.  */
+   Return 0 on error, 1 if no overlays, 2 otherwise.  */
 
 int
 spu_elf_size_stubs (struct bfd_link_info *info)
@@ -1647,39 +1647,39 @@ spu_elf_size_stubs (struct bfd_link_info *info)
   if (htab->stub_err)
     return 0;
 
-  if (htab->stub_count == NULL)
-    return 1;
-
   ibfd = info->input_bfds;
-  amt = (htab->num_overlays + 1) * sizeof (*htab->stub_sec);
-  htab->stub_sec = bfd_zmalloc (amt);
-  if (htab->stub_sec == NULL)
-    return 0;
-
-  flags = (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY
-	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY);
-  stub = bfd_make_section_anyway_with_flags (ibfd, ".stub", flags);
-  htab->stub_sec[0] = stub;
-  if (stub == NULL
-      || !bfd_set_section_alignment (ibfd, stub,
-				     ovl_stub_size_log2 (htab->params)))
-    return 0;
-  stub->size = htab->stub_count[0] * ovl_stub_size (htab->params);
-  if (htab->params->ovly_flavour == ovly_soft_icache)
-    /* Extra space for linked list entries.  */
-    stub->size += htab->stub_count[0] * 16;
-
-  for (i = 0; i < htab->num_overlays; ++i)
+  if (htab->stub_count != NULL)
     {
-      asection *osec = htab->ovl_sec[i];
-      unsigned int ovl = spu_elf_section_data (osec)->u.o.ovl_index;
+      amt = (htab->num_overlays + 1) * sizeof (*htab->stub_sec);
+      htab->stub_sec = bfd_zmalloc (amt);
+      if (htab->stub_sec == NULL)
+	return 0;
+
+      flags = (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY
+	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY);
       stub = bfd_make_section_anyway_with_flags (ibfd, ".stub", flags);
-      htab->stub_sec[ovl] = stub;
+      htab->stub_sec[0] = stub;
       if (stub == NULL
 	  || !bfd_set_section_alignment (ibfd, stub,
 					 ovl_stub_size_log2 (htab->params)))
 	return 0;
-      stub->size = htab->stub_count[ovl] * ovl_stub_size (htab->params);
+      stub->size = htab->stub_count[0] * ovl_stub_size (htab->params);
+      if (htab->params->ovly_flavour == ovly_soft_icache)
+	/* Extra space for linked list entries.  */
+	stub->size += htab->stub_count[0] * 16;
+
+      for (i = 0; i < htab->num_overlays; ++i)
+	{
+	  asection *osec = htab->ovl_sec[i];
+	  unsigned int ovl = spu_elf_section_data (osec)->u.o.ovl_index;
+	  stub = bfd_make_section_anyway_with_flags (ibfd, ".stub", flags);
+	  htab->stub_sec[ovl] = stub;
+	  if (stub == NULL
+	      || !bfd_set_section_alignment (ibfd, stub,
+					     ovl_stub_size_log2 (htab->params)))
+	    return 0;
+	  stub->size = htab->stub_count[ovl] * ovl_stub_size (htab->params);
+	}
     }
 
   if (htab->params->ovly_flavour == ovly_soft_icache)
@@ -1707,6 +1707,8 @@ spu_elf_size_stubs (struct bfd_link_info *info)
 
       htab->init->size = 16;
     }
+  else if (htab->stub_count == NULL)
+    return 1;
   else
     {
       /* htab->ovtab consists of two arrays.
@@ -1750,29 +1752,32 @@ spu_elf_place_overlay_data (struct bfd_link_info *info)
 {
   struct spu_link_hash_table *htab = spu_hash_table (info);
   unsigned int i;
-  const char *ovout;
 
-  if (htab->stub_count == NULL)
-    return;
-
-  (*htab->params->place_spu_section) (htab->stub_sec[0], NULL, ".text");
-
-  for (i = 0; i < htab->num_overlays; ++i)
+  if (htab->stub_sec != NULL)
     {
-      asection *osec = htab->ovl_sec[i];
-      unsigned int ovl = spu_elf_section_data (osec)->u.o.ovl_index;
-      (*htab->params->place_spu_section) (htab->stub_sec[ovl], osec, NULL);
+      (*htab->params->place_spu_section) (htab->stub_sec[0], NULL, ".text");
+
+      for (i = 0; i < htab->num_overlays; ++i)
+	{
+	  asection *osec = htab->ovl_sec[i];
+	  unsigned int ovl = spu_elf_section_data (osec)->u.o.ovl_index;
+	  (*htab->params->place_spu_section) (htab->stub_sec[ovl], osec, NULL);
+	}
     }
 
   if (htab->params->ovly_flavour == ovly_soft_icache)
     (*htab->params->place_spu_section) (htab->init, NULL, ".ovl.init");
 
-  ovout = ".data";
-  if (htab->params->ovly_flavour == ovly_soft_icache)
-    ovout = ".bss";
-  (*htab->params->place_spu_section) (htab->ovtab, NULL, ovout);
+  if (htab->ovtab != NULL)
+    {
+      const char *ovout = ".data";
+      if (htab->params->ovly_flavour == ovly_soft_icache)
+	ovout = ".bss";
+      (*htab->params->place_spu_section) (htab->ovtab, NULL, ovout);
+    }
 
-  (*htab->params->place_spu_section) (htab->toe, NULL, ".toe");
+  if (htab->toe != NULL)
+    (*htab->params->place_spu_section) (htab->toe, NULL, ".toe");
 }
 
 /* Functions to handle embedded spu_ovl.o object.  */
@@ -1883,63 +1888,63 @@ spu_elf_build_stubs (struct bfd_link_info *info)
   bfd *obfd;
   unsigned int i;
 
-  if (htab->stub_count == NULL)
-    return TRUE;
-
-  for (i = 0; i <= htab->num_overlays; i++)
-    if (htab->stub_sec[i]->size != 0)
-      {
-	htab->stub_sec[i]->contents = bfd_zalloc (htab->stub_sec[i]->owner,
-						  htab->stub_sec[i]->size);
-	if (htab->stub_sec[i]->contents == NULL)
-	  return FALSE;
-	htab->stub_sec[i]->rawsize = htab->stub_sec[i]->size;
-	htab->stub_sec[i]->size = 0;
-      }
-
-  for (i = 0; i < 2; i++)
+  if (htab->num_overlays != 0)
     {
-      h = htab->ovly_entry[i];
-      BFD_ASSERT (h != NULL);
-
-      if ((h->root.type == bfd_link_hash_defined
-	   || h->root.type == bfd_link_hash_defweak)
-	  && h->def_regular)
+      for (i = 0; i < 2; i++)
 	{
-	  s = h->root.u.def.section->output_section;
-	  if (spu_elf_section_data (s)->u.o.ovl_index)
+	  h = htab->ovly_entry[i];
+	  if (h != NULL
+	      && (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
+	      && h->def_regular)
 	    {
-	      (*_bfd_error_handler) (_("%s in overlay section"),
-				     h->root.root.string);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
+	      s = h->root.u.def.section->output_section;
+	      if (spu_elf_section_data (s)->u.o.ovl_index)
+		{
+		  (*_bfd_error_handler) (_("%s in overlay section"),
+					 h->root.root.string);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
 	    }
 	}
-      else
-	BFD_ASSERT (0);
     }
 
-  /* Fill in all the stubs.  */
-  process_stubs (info, TRUE);
-  if (!htab->stub_err)
-    elf_link_hash_traverse (&htab->elf, build_spuear_stubs, info);
-
-  if (htab->stub_err)
+  if (htab->stub_sec != NULL)
     {
-      (*_bfd_error_handler) (_("overlay stub relocation overflow"));
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
+      for (i = 0; i <= htab->num_overlays; i++)
+	if (htab->stub_sec[i]->size != 0)
+	  {
+	    htab->stub_sec[i]->contents = bfd_zalloc (htab->stub_sec[i]->owner,
+						      htab->stub_sec[i]->size);
+	    if (htab->stub_sec[i]->contents == NULL)
+	      return FALSE;
+	    htab->stub_sec[i]->rawsize = htab->stub_sec[i]->size;
+	    htab->stub_sec[i]->size = 0;
+	  }
 
-  for (i = 0; i <= htab->num_overlays; i++)
-    {
-      if (htab->stub_sec[i]->size != htab->stub_sec[i]->rawsize)
+      /* Fill in all the stubs.  */
+      process_stubs (info, TRUE);
+      if (!htab->stub_err)
+	elf_link_hash_traverse (&htab->elf, build_spuear_stubs, info);
+
+      if (htab->stub_err)
 	{
-	  (*_bfd_error_handler)  (_("stubs don't match calculated size"));
+	  (*_bfd_error_handler) (_("overlay stub relocation overflow"));
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
-      htab->stub_sec[i]->rawsize = 0;
+
+      for (i = 0; i <= htab->num_overlays; i++)
+	{
+	  if (htab->stub_sec[i]->size != htab->stub_sec[i]->rawsize)
+	    {
+	      (*_bfd_error_handler)  (_("stubs don't match calculated size"));
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	  htab->stub_sec[i]->rawsize = 0;
+	}
     }
 
   if (htab->ovtab == NULL || htab->ovtab->size == 0)

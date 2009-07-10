@@ -1,5 +1,11 @@
 2009-07-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-spu.c (spu_elf_size_stubs): Do set up soft-icache manager
+	data even when no stubs.
+	(spu_elf_place_overlay_data, spu_elf_build_stubs): Adjust.
+
+2009-07-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (ppc_elf_howto_raw): Add R_PPC_IRELATIVE.
 	(ppc_elf_get_synthetic_symtab): Report addend.
 	(PLT_IFUNC): Define.
