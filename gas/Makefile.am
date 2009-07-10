@@ -1112,9 +1112,9 @@ DEPTC_alpha_elf = \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/sym.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/alpha.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -1191,9 +1191,9 @@ DEPTC_arm_elf = \
   $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/arm.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -1406,8 +1406,8 @@ DEPTC_hppa_elf = \
   $(BFDDIR)/libhppa.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/hppa.h \
   $(INCDIR)/elf/internal.h \
@@ -1480,8 +1480,8 @@ DEPTC_i386_elf = \
   $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -1492,6 +1492,22 @@ DEPTC_i386_elf = \
   $(srcdir)/../opcodes/i386-init.h \
   $(srcdir)/../opcodes/i386-opc.h \
   $(srcdir)/config/obj-elf.h \
+  $(srcdir)/config/tc-i386-intel.c \
+  $(srcdir)/config/tc-i386.h \
+  dw2gencfi.h \
+  dwarf2dbg.h \
+  subsegs.h
+DEPTC_i386_macho = \
+  $(INCDIR)/alloca-conf.h \
+  $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/reloc-macros.h \
+  $(INCDIR)/elf/x86-64.h \
+  $(INCDIR)/obstack.h \
+  $(INCDIR)/opcode/i386.h \
+  $(INCDIR)/safe-ctype.h \
+  $(srcdir)/../opcodes/i386-init.h \
+  $(srcdir)/../opcodes/i386-opc.h \
+  $(srcdir)/config/obj-macho.h \
   $(srcdir)/config/tc-i386-intel.c \
   $(srcdir)/config/tc-i386.h \
   dw2gencfi.h \
@@ -1691,8 +1707,8 @@ DEPTC_m68k_elf = \
   $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/m68k.h \
@@ -1782,8 +1798,8 @@ DEPTC_mips_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/mipspe.h \
   $(INCDIR)/coff/sym.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/mips.h \
@@ -1805,8 +1821,8 @@ DEPTC_mips_ecoff = \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/sym.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/mips.h \
@@ -1828,8 +1844,8 @@ DEPTC_mips_elf = \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/coff/sym.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/mips.h \
@@ -2024,8 +2040,8 @@ DEPTC_ppc_elf = \
   $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/ppc.h \
@@ -2042,8 +2058,8 @@ DEPTC_s390_elf = \
   $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -2096,8 +2112,8 @@ DEPTC_sh_elf = \
   $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -2116,8 +2132,8 @@ DEPTC_sh64_elf = \
   $(BFDDIR)/elf32-sh64.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -2165,8 +2181,8 @@ DEPTC_sparc_elf = \
   $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/alloca-conf.h \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -2722,6 +2738,13 @@ DEPOBJ_i386_elf = \
   dwarf2dbg.h \
   struc-symbol.h \
   subsegs.h
+DEPOBJ_i386_macho = \
+  $(BFDDIR)/mach-o.h \
+  $(INCDIR)/alloca-conf.h \
+  $(INCDIR)/opcode/i386.h \
+  $(srcdir)/../opcodes/i386-opc.h \
+  $(srcdir)/config/obj-macho.h \
+  $(srcdir)/config/tc-i386.h
 DEPOBJ_i860_elf = \
   $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/alloca-conf.h \
@@ -3716,6 +3739,11 @@ DEP_i386_elf = \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-i386.h \
   dwarf2dbg.h
+DEP_i386_macho = \
+  $(INCDIR)/opcode/i386.h \
+  $(srcdir)/../opcodes/i386-opc.h \
+  $(srcdir)/config/obj-macho.h \
+  $(srcdir)/config/tc-i386.h
 DEP_i860_elf = \
   $(BFDDIR)/elf-bfd.h \
   $(BFDDIR)/libcoff.h \

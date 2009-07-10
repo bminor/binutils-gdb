@@ -1204,8 +1204,8 @@ merge.lo: \
 dwarf2.lo: \
   dwarf2.c \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/filenames.h \
@@ -2041,8 +2041,8 @@ elf-attrs.lo: \
 elf-eh-frame.lo: \
   elf-eh-frame.c \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/filenames.h \
@@ -2172,9 +2172,9 @@ elf32-avr.lo: \
 elf32-bfin.lo: \
   elf32-bfin.c \
   $(INCDIR)/bfdlink.h \
+  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/bfin.h \
   $(INCDIR)/elf/common.h \
-  $(INCDIR)/dwarf2.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -2282,8 +2282,8 @@ elf32-fr30.lo: \
 elf32-frv.lo: \
   elf32-frv.c \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/frv.h \
   $(INCDIR)/elf/internal.h \
@@ -2776,8 +2776,8 @@ elf32-vax.lo: \
 elf32-xc16x.lo: \
   elf32-xc16x.c \
   $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/common.h \
   $(INCDIR)/dwarf2.h \
+  $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/reloc-macros.h \
@@ -3592,6 +3592,7 @@ vms.lo: \
   vms.h
 vmsutil.lo: \
   vmsutil.c \
+  $(INCDIR)/filenames.h \
   vmsutil.h
 xcofflink.lo: \
   xcofflink.c \
