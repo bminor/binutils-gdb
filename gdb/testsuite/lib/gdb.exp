@@ -2983,3 +2983,49 @@ proc get_sizeof { type default } {
     return [get_integer_valueof "sizeof (${type})" $default]
 }
 
+# Log gdb command line and script if requested.
+if {[info exists TRANSCRIPT]} {
+  rename send_gdb real_send_gdb
+  rename remote_spawn real_remote_spawn
+  rename remote_close real_remote_close
+
+  global gdb_transcript
+  set gdb_transcript ""
+
+  global gdb_trans_count
+  set gdb_trans_count 1
+
+  proc remote_spawn {args} {
+    global gdb_transcript gdb_trans_count outdir
+
+    if {$gdb_transcript != ""} {
+      close $gdb_transcript
+    }
+    set gdb_transcript [open [file join $outdir transcript.$gdb_trans_count] w]
+    puts $gdb_transcript [lindex $args 1]
+    incr gdb_trans_count
+
+    return [uplevel real_remote_spawn $args]
+  }
+
+  proc remote_close {args} {
+    global gdb_transcript
+
+    if {$gdb_transcript != ""} {
+      close $gdb_transcript
+      set gdb_transcript ""
+    }
+
+    return [uplevel real_remote_close $args]
+  }
+
+  proc send_gdb {args} {
+    global gdb_transcript
+
+    if {$gdb_transcript != ""} {
+      puts -nonewline $gdb_transcript [lindex $args 0]
+    }
+
+    return [uplevel real_send_gdb $args]
+  }
+}

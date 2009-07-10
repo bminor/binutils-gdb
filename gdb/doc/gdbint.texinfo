@@ -7560,6 +7560,27 @@ will give a result of ``UNRESOLVED'', like this:
 UNRESOLVED: gdb.base/example.exp: This test script does not work on a remote host.
 @end smallexample
 
+Sometimes it is convenient to get a transcript of the commands which
+the testsuite sends to @value{GDBN}.  For example, if @value{GDBN}
+crashes during testing, a transcript can be used to more easily
+reconstruct the failure when running @value{GDBN} under @value{GDBN}.
+
+You can instruct the @value{GDBN} testsuite to write transcripts by
+setting the DejaGNU variable @code{TRANSCRIPT} (to any value)
+before invoking @code{runtest} or @kbd{make check}.  The transcripts
+will be written into DejaGNU's output directory.  One transcript will
+be made for each invocation of @value{GDBN}; they will be named
+@file{transcript.@var{n}}, where @var{n} is an integer.  The first
+line of the transcript file will show how @value{GDBN} was invoked;
+each subsequent line is a command sent as input to @value{GDBN}.
+
+@smallexample
+make check RUNTESTFLAGS=TRANSCRIPT=y
+@end smallexample
+
+Note that the transcript is not always complete.  In particular, tests
+of completion can yield partial command lines.
+
 @section Testsuite Organization
 
 @cindex test suite organization
