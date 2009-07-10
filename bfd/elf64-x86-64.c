@@ -1150,6 +1150,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    {
 	      /* It is referenced by a non-shared object. */
 	      h->ref_regular = 1;
+	      h->needs_plt = 1;
  
 	      /* STT_GNU_IFUNC symbol must go through PLT.  */
 	      h->plt.refcount += 1;

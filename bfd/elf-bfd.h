@@ -138,7 +138,8 @@ struct elf_link_hash_entry
   /* Symbol st_other value, symbol visibility.  */
   unsigned int other : 8;
 
-  /* Symbol is referenced by a non-shared object.  */
+  /* Symbol is referenced by a non-shared object (other than the object
+     in which it is defined).  */
   unsigned int ref_regular : 1;
   /* Symbol is defined by a non-shared object.  */
   unsigned int def_regular : 1;
@@ -146,7 +147,8 @@ struct elf_link_hash_entry
   unsigned int ref_dynamic : 1;
   /* Symbol is defined by a shared object.  */
   unsigned int def_dynamic : 1;
-  /* Symbol has a non-weak reference from a non-shared object.  */
+  /* Symbol has a non-weak reference from a non-shared object (other than
+     the object in which it is defined).  */
   unsigned int ref_regular_nonweak : 1;
   /* Dynamic symbol has been adjustd.  */
   unsigned int dynamic_adjusted : 1;

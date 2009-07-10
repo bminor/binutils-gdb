@@ -1,3 +1,13 @@
+2009-07-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_link_hash_entry): Clarify ref_regular
+	and ref_regular_nonweak comment.
+	* elflink.c (elf_link_output_extsym): Special case ifunc syms
+	when def_regular, not ref_regular.
+	(elf_link_add_object_symbols): Don't set needs_plt on ifunc syms,..
+	* elf32-i386.c (elf_i386_check_relocs): ..set it here instead..
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): ..and here.
+
 2009-07-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (mark_functions_via_relocs): Init broken_cycle field

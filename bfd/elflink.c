@@ -4290,10 +4290,6 @@ error_free_dyn:
 	      h->type = ELF_ST_TYPE (isym->st_info);
 	    }
 
-	  /* STT_GNU_IFUNC symbol must go through PLT.  */
-	  if (h->type == STT_GNU_IFUNC)
-	    h->needs_plt = 1;
-
 	  /* Merge st_other field.  */
 	  elf_merge_st_other (abfd, h, isym, definition, dynamic);
 
@@ -8657,7 +8653,7 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
      forced local syms when non-shared is due to a historical quirk.
      STT_GNU_IFUNC symbol must go through PLT.  */
   if ((h->type == STT_GNU_IFUNC
-       && h->ref_regular
+       && h->def_regular
        && !finfo->info->relocatable)
       || ((h->dynindx != -1
 	   || h->forced_local)
