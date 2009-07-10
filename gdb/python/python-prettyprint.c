@@ -121,34 +121,35 @@ find_pretty_printer (PyObject *value)
   
   return function;
 }
-
-/* Pretty-print a single value, via the printer object PRINTER.  If
-   the function returns a string, an xmalloc()d copy is returned.
-   Otherwise, if the function returns a value, a *OUT_VALUE is set to
-   the value, and NULL is returned.  On error, *OUT_VALUE is set to
-   NULL and NULL is returned.  */
-static char *
+/* Pretty-print a single value, via the printer object PRINTER.
+   If the function returns a string, a PyObject containing the string
+   is returned.  Otherwise, if the function returns a value,
+   *OUT_VALUE is set to the value, and NULL is returned.  On error,
+   *OUT_VALUE is set to NULL, and NULL is returned.  */
+static PyObject *
 pretty_print_one_value (PyObject *printer, struct value **out_value)
 {
-  char *output = NULL;
   volatile struct gdb_exception except;
+  PyObject *result = NULL;
 
+  *out_value = NULL;
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      PyObject *result;
-
       result = PyObject_CallMethodObjArgs (printer, gdbpy_to_string_cst, NULL);
       if (result)
 	{
-	  if (gdbpy_is_string (result))
-	    output = python_string_to_host_string (result);
-	  else
-	    *out_value = convert_value_from_python (result);
-	  Py_DECREF (result);
+	  if (! gdbpy_is_string (result))
+	    {
+	      *out_value = convert_value_from_python (result);
+	      if (PyErr_Occurred ())
+		*out_value = NULL;
+	      Py_DECREF (result);
+	      result = NULL;
+	    }
 	}
     }
 
-  return output;
+  return result;
 }
 
 /* Return the display hint for the object printer, PRINTER.  Return
@@ -184,19 +185,28 @@ print_string_repr (PyObject *printer, const char *hint,
 		   const struct language_defn *language,
 		   struct gdbarch *gdbarch)
 {
-  char *output;
   struct value *replacement = NULL;
+  PyObject *py_str = NULL;
 
-  output = pretty_print_one_value (printer, &replacement);
-  if (output)
+  py_str = pretty_print_one_value (printer, &replacement);
+  if (py_str)
     {
-      if (hint && !strcmp (hint, "string"))
-	LA_PRINT_STRING (stream, builtin_type (gdbarch)->builtin_char,
-			 (gdb_byte *) output, strlen (output),
-			 0, options);
+      PyObject *string = python_string_to_target_python_string (py_str);
+      if (string)
+	{
+	  gdb_byte *output = PyString_AsString (string);
+	  int len = PyString_Size (string);
+	  
+	  if (hint && !strcmp (hint, "string"))
+	    LA_PRINT_STRING (stream, builtin_type (gdbarch)->builtin_char,
+			     output, len, 0, options);
+	  else
+	    fputs_filtered (output, stream);
+	  Py_DECREF (string);
+	}
       else
-	fputs_filtered (output, stream);
-      xfree (output);
+	gdbpy_print_stack ();
+      Py_DECREF (py_str);
     }
   else if (replacement)
     common_val_print (replacement, stream, recurse, options, language);
@@ -511,26 +521,30 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
   return result;
 }
 
+
 /* Apply a pretty-printer for the varobj code.  PRINTER_OBJ is the
    print object.  It must have a 'to_string' method (but this is
    checked by varobj, not here) which takes no arguments and
-   returns a string.  This function returns an xmalloc()d string if
-   the printer returns a string.  The printer may return a replacement
-   value instead; in this case *REPLACEMENT is set to the replacement
-   value, and this function returns NULL.  On error, *REPLACEMENT is
-   set to NULL and this function also returns NULL.  */
-char *
+   returns a string.  The printer will return a value and in the case
+   of a Python string being returned, this function will return a
+   PyObject containing the string.  For any other type, *REPLACEMENT is
+   set to the replacement value and this function returns NULL.  On
+   error, *REPLACEMENT is set to NULL and this function also returns
+   NULL.  */
+PyObject *
 apply_varobj_pretty_printer (PyObject *printer_obj,
 			     struct value **replacement)
 {
-  char *result;
+  int size = 0;
+  PyObject *py_str = NULL;
 
   *replacement = NULL;
-  result = pretty_print_one_value (printer_obj, replacement);
-  if (result == NULL);
+  py_str = pretty_print_one_value (printer_obj, replacement);
+
+  if (*replacement == NULL && py_str == NULL)
     gdbpy_print_stack ();
 
-  return result;
+  return py_str;
 }
 
 /* Find a pretty-printer object for the varobj module.  Returns a new

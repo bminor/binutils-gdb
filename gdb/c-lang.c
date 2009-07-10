@@ -604,18 +604,17 @@ c_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
 }
 
 /* Obtain a C string from the inferior storing it in a newly allocated
-   buffer in BUFFER, which should be freed by the caller.  The string is
-   read until a null character is found. If VALUE is an array with known
-   length, the function will not read past the end of the array.  LENGTH
-   will contain the size of the string in bytes (not counting the null
-   character).
-
-   Assumes strings are terminated by a null character.  The size of a character
-   is determined by the length of the target type of the pointer or array.
-   This means that a null byte present in a multi-byte character will not
-   terminate the string unless the whole character is null.
-
-   CHARSET is always set to the target charset.  */
+   buffer in BUFFER, which should be freed by the caller.   If the
+   in- and out-parameter *LENGTH is specified at -1, the string is read
+   until a null character of the appropriate width is found, otherwise
+   the string is read to the length of characters specified.
+   The size of a character is determined by the length of the target
+   type of the pointer or  array.  If VALUE is an array with a known
+   length, the function will  not read past the end of the array.
+   On completion, *LENGTH will be set to the size of the string read in
+   characters.  (If a length of -1 is specified, the length returned
+   will not include the null character).  CHARSET is always set to the
+   target charset.  */
 
 void
 c_get_string (struct value *value, gdb_byte **buffer, int *length,
@@ -625,6 +624,7 @@ c_get_string (struct value *value, gdb_byte **buffer, int *length,
   unsigned int fetchlimit;
   struct type *type = check_typedef (value_type (value));
   struct type *element_type = TYPE_TARGET_TYPE (type);
+  int req_length = *length;
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
 
   if (element_type == NULL)
@@ -661,7 +661,7 @@ c_get_string (struct value *value, gdb_byte **buffer, int *length,
 
   width = TYPE_LENGTH (element_type);
 
-  /* If the string lives in GDB's memory intead of the inferior's, then we
+  /* If the string lives in GDB's memory instead of the inferior's, then we
      just need to copy it to BUFFER.  Also, since such strings are arrays
      with known size, FETCHLIMIT will hold the size of the array.  */
   if ((VALUE_LVAL (value) == not_lval
@@ -671,13 +671,18 @@ c_get_string (struct value *value, gdb_byte **buffer, int *length,
       int i;
       const gdb_byte *contents = value_contents (value);
 
-      /* Look for a null character.  */
-      for (i = 0; i < fetchlimit; i++)
-	if (extract_unsigned_integer (contents + i * width, width,
-				      byte_order) == 0)
-	  break;
-
-      /* I is now either the number of non-null characters, or FETCHLIMIT.  */
+      /* If a length is specified, use that.  */
+      if (*length >= 0)
+	i  = *length;
+      else
+ 	/* Otherwise, look for a null character.  */
+ 	for (i = 0; i < fetchlimit; i++)
+	  if (extract_unsigned_integer (contents + i * width, width,
+					byte_order) == 0)
+ 	    break;
+  
+      /* I is now either a user-defined length, the number of non-null
+ 	 characters, or FETCHLIMIT.  */
       *length = i * width;
       *buffer = xmalloc (*length);
       memcpy (*buffer, contents, *length);
@@ -685,8 +690,8 @@ c_get_string (struct value *value, gdb_byte **buffer, int *length,
     }
   else
     {
-      err = read_string (value_as_address (value), -1, width, fetchlimit,
-			 byte_order, buffer, length);
+      err = read_string (value_as_address (value), *length, width, fetchlimit,
+  			 byte_order, buffer, length);
       if (err)
 	{
 	  xfree (*buffer);
@@ -695,11 +700,22 @@ c_get_string (struct value *value, gdb_byte **buffer, int *length,
 	}
     }
 
-  /* If the last character is null, subtract it from LENGTH.  */
-  if (*length > 0
-      && extract_unsigned_integer (*buffer + *length - width, width,
-				   byte_order) == 0)
-    *length -= width;
+  /* If the LENGTH is specified at -1, we want to return the string
+     length up to the terminating null character.  If an actual length
+     was specified, we want to return the length of exactly what was
+     read.  */
+  if (req_length == -1)
+    /* If the last character is null, subtract it from LENGTH.  */
+    if (*length > 0
+ 	&& extract_unsigned_integer (*buffer + *length - width, width,
+				     byte_order) == 0)
+      *length -= width;
+  
+  /* The read_string function will return the number of bytes read.
+     If length returned from read_string was > 0, return the number of
+     characters read by dividing the number of bytes by width.  */
+  if (*length != 0)
+     *length = *length / width;
 
   *charset = target_charset ();
 

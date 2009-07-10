@@ -1,3 +1,14 @@
+2009-07-10 Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/python-prettyprint.c: Add counted null string
+	structure.
+	* gdb.python/python-prettyprint.exp: Print null string. Test for
+	embedded nulls.
+	* gdb.python/python-prettyprint.py (pp_ns): New Function.
+	* gdb.python/python-value.exp (test_value_in_inferior): Add
+	variable length string fetch tests.
+	* gdb.python/python-value.c (main): Add strings for string fetch tests.
+
 2009-07-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/dump.exp (inaccessible memory is reported): New test.

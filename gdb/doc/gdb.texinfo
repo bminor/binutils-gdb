@@ -18894,7 +18894,7 @@ The result @code{bar} will be a @code{gdb.Value} object holding the
 value pointed to by @code{foo}.
 @end defmethod
 
-@defmethod Value string @r{[}encoding@r{]} @r{[}errors@r{]}
+@defmethod Value string @r{[}encoding@r{]} @r{[}errors@r{]} @r{[}length@r{]}
 If this @code{gdb.Value} represents a string, then this method
 converts the contents to a Python string.  Otherwise, this method will
 throw an exception.
@@ -18905,7 +18905,9 @@ language.
 
 For C-like languages, a value is a string if it is a pointer to or an
 array of characters or ints.  The string is assumed to be terminated
-by a zero of the appropriate width.
+by a zero of the appropriate width.  However if the optional length
+argument is given, the string will be converted to that given length,
+ignoring any embedded zeros that the string may contain.
 
 If the optional @var{encoding} argument is given, it must be a string
 naming the encoding of the string in the @code{gdb.Value}, such as
@@ -18919,6 +18921,9 @@ will be used, if the current language is able to supply one.
 
 The optional @var{errors} argument is the same as the corresponding
 argument to Python's @code{string.decode} method.
+
+If the optional @var{length} argument is given, the string will be
+fetched and converted to the given length.
 @end defmethod
 @end table
 

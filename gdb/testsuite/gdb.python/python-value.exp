@@ -234,6 +234,25 @@ proc test_value_in_inferior {} {
 
   # Test address attribute
   gdb_test "python print 'result =', arg0.address" "= 0x\[\[:xdigit:\]\]+" "Test address attribute"
+
+  # Test string fetches,  both partial and whole.
+  gdb_test "print st" "\"divide et impera\""
+  gdb_py_test_silent_cmd "python st = gdb.history (0)" "get value from history" 1
+  gdb_test "python print st.string ()"  "divide et impera"  "Test string with no length"
+  gdb_test "python print st.string (length = -1)" "divide et impera" "Test string (length = -1) is all of the string"
+  gdb_test "python print st.string (length = 6)" "divide"
+  gdb_test "python print \"---\"+st.string (length = 0)+\"---\"" "------" "Test string (length = 0) is empty"
+  gdb_test "python print len(st.string (length = 0))" "0" "Test length is 0"
+
+
+  # Fetch a string that has embedded nulls.
+  gdb_test "print nullst" "\"divide\\\\000et\\\\000impera\".*"
+  gdb_py_test_silent_cmd "python nullst = gdb.history (0)" "get value from history" 1
+  gdb_test "python print nullst.string ()" "divide" "Test string to first null"
+  # Python cannot print strings that contain the null (\0) character.
+  # For the purposes of this test, use repr()
+  gdb_py_test_silent_cmd "python nullst = nullst.string (length = 9)" "get string beyond null" 1
+  gdb_test "python print repr(nullst)" "u'divide\\\\x00et'"
 }
 
 # A few objfile tests.

@@ -44,6 +44,8 @@ main (int argc, char *argv[])
   struct s s;
   union u u;
   PTR x = &s;
+  char st[17] = "divide et impera";
+  char nullst[17] = "divide\0et\0impera";
 
   s.a = 3;
   s.b = 5;

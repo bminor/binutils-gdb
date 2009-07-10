@@ -104,6 +104,23 @@ unicode_to_encoded_string (PyObject *unicode_str, const char *charset)
   return result;
 }
 
+/* Returns a PyObject with the contents of the given unicode string
+   object converted to a named charset.  If an error occurs during
+   the conversion, NULL will be returned and a python exception will
+   be set.  */
+static PyObject *
+unicode_to_encoded_python_string (PyObject *unicode_str, const char *charset)
+{
+  PyObject *string;
+
+  /* Translate string to named charset.  */
+  string = PyUnicode_AsEncodedString (unicode_str, charset, NULL);
+  if (string == NULL)
+    return NULL;
+
+  return string;
+}
+
 /* Returns a newly allocated string with the contents of the given unicode
    string object converted to the target's charset.  If an error occurs during
    the conversion, NULL will be returned and a python exception will be set.
@@ -113,6 +130,16 @@ char *
 unicode_to_target_string (PyObject *unicode_str)
 {
   return unicode_to_encoded_string (unicode_str, target_charset ());
+}
+
+/* Returns a PyObject with the contents of the given unicode string
+   object converted to the target's charset.  If an error occurs
+   during the conversion, NULL will be returned and a python exception
+   will be set.  */
+PyObject *
+unicode_to_target_python_string (PyObject *unicode_str)
+{
+  return unicode_to_encoded_python_string (unicode_str, target_charset ());
 }
 
 /* Converts a python string (8-bit or unicode) to a target string in
@@ -130,6 +157,24 @@ python_string_to_target_string (PyObject *obj)
     return NULL;
 
   result = unicode_to_target_string (str);
+  Py_DECREF (str);
+  return result;
+}
+
+/* Converts a python string (8-bit or unicode) to a target string in the
+   target's charset.  Returns NULL on error, with a python exception
+   set.  */
+PyObject *
+python_string_to_target_python_string (PyObject *obj)
+{
+  PyObject *str;
+  PyObject *result;
+
+  str = python_string_to_unicode (obj);
+  if (str == NULL)
+    return NULL;
+
+  result = unicode_to_target_python_string (str);
   Py_DECREF (str);
   return result;
 }

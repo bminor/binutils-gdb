@@ -27,6 +27,11 @@ struct ss
   struct s b;
 };
 
+struct ns {
+  const char *null_str;
+  int length;
+};
+
 #ifdef __cplusplus
 struct S : public s {
   int zs;
@@ -155,6 +160,10 @@ main ()
   init_ss(&ss, 1, 2);
   init_ss(ssa+0, 3, 4);
   init_ss(ssa+1, 5, 6);
+
+  struct ns  ns;
+  ns.null_str = "embedded\0null\0string";
+  ns.length = 20;
 
 #ifdef __cplusplus
   S cps;

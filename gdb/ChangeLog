@@ -1,3 +1,23 @@
+2009-07-10 Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/python-internal.h (apply_varobj_pretty_printer): Update
+	definition.
+	(python_string_to_target_python_string): Add definition.
+	* python/python-utils.c (unicode_to_encoded_python_string)
+	(unicode_to_target_python_string)
+	(python_string_to_target_python_string): New Functions.
+	* python/python-prettyprint.c (pretty_print_one_value): Likewise.
+	(print_string_repr): Refactor to logic to account for PyObject
+	returned strings.
+	(apply_varobj_pretty_printer): Likewise.
+	* python/python-value.c (valpy_string): Parse length keyword. Use
+	length keyword in LA_GET_STRING.
+	* varobj.c (value_get_print_value): Refactor logic to account for
+	PyObject returned strings.
+	* c-lang.c (c_get_string): If the length parameter is specified,
+	use that. Return value in characters. Update comments.
+	* language.h: Update c_get_string prototype comments.
+
 2009-07-09  Doug Evans  <dje@google.com>
 
 	* i386-tdep.c (i386_displaced_step_fixup): Fix order of arguments

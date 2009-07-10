@@ -189,13 +189,16 @@ valpy_get_type (PyObject *self, void *closure)
   return obj->type;
 }
 
-/* Implementation of gdb.Value.string ([encoding] [, errors]) -> string
-   Return Unicode string with value contents.  If ENCODING is not given,
-   the string is assumed to be encoded in the target's charset.  */
+/* Implementation of gdb.Value.string ([encoding] [, errors]
+   [, length]) -> string.  Return Unicode string with value contents.
+   If ENCODING is not given, the string is assumed to be encoded in
+   the target's charset.  If LENGTH is provided, only fetch string to
+   the length provided.  */
+
 static PyObject *
 valpy_string (PyObject *self, PyObject *args, PyObject *kw)
 {
-  int length, ret = 0;
+  int length = -1, ret = 0;
   gdb_byte *buffer;
   struct value *value = ((value_object *) self)->value;
   volatile struct gdb_exception except;
@@ -204,10 +207,10 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
   const char *errors = NULL;
   const char *user_encoding = NULL;
   const char *la_encoding = NULL;
-  static char *keywords[] = { "encoding", "errors" };
+  static char *keywords[] = { "encoding", "errors", "length" };
 
-  if (!PyArg_ParseTupleAndKeywords (args, kw, "|ss", keywords,
-				    &user_encoding, &errors))
+  if (!PyArg_ParseTupleAndKeywords (args, kw, "|ssi", keywords,
+				    &user_encoding, &errors, &length))
     return NULL;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
@@ -937,7 +940,7 @@ static PyMethodDef value_object_methods[] = {
   { "cast", valpy_cast, METH_VARARGS, "Cast the value to the supplied type." },
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
   { "string", (PyCFunction) valpy_string, METH_VARARGS | METH_KEYWORDS,
-    "string ([encoding] [, errors]) -> string\n\
+    "string ([encoding] [, errors] [, length]) -> string\n\
 Return Unicode string representation of the value." },
   {NULL}  /* Sentinel */
 };
