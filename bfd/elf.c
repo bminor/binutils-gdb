@@ -8922,7 +8922,17 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
   size = count * sizeof (asymbol);
   p = relplt->relocation;
   for (i = 0; i < count; i++, p += bed->s->int_rels_per_ext_rel)
-    size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+    {
+      size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+      if (p->addend != 0)
+	{
+#ifdef BFD64
+	  size += sizeof ("+0x") - 1 + 8 + 8 * (bed->s->elfclass == ELFCLASS64);
+#else
+	  size += sizeof ("+0x") - 1 + 8;
+#endif
+	}
+    }
 
   s = *ret = bfd_malloc (size);
   if (s == NULL)
@@ -8953,6 +8963,13 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
       len = strlen ((*p->sym_ptr_ptr)->name);
       memcpy (names, (*p->sym_ptr_ptr)->name, len);
       names += len;
+      if (p->addend != 0)
+	{
+	  memcpy (names, "+0x", sizeof ("+0x") - 1);
+	  names += sizeof ("+0x") - 1;
+	  bfd_sprintf_vma (abfd, names, p->addend);
+	  names += strlen (names);
+	}
       memcpy (names, "@plt", sizeof ("@plt"));
       names += sizeof ("@plt");
       ++s, ++n;

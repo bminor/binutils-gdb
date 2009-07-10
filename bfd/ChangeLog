@@ -1,5 +1,9 @@
 2009-07-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf.c (_bfd_elf_get_synthetic_symtab): Report addends.
+
+2009-07-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (struct elf_link_hash_entry): Clarify ref_regular
 	and ref_regular_nonweak comment.
 	* elflink.c (elf_link_output_extsym): Special case ifunc syms
