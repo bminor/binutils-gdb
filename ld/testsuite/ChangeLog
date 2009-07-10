@@ -1,10 +1,16 @@
 2009-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-ifunc/ifunc-1-local-x86.d: Updated.
-	* ld-ifunc/ifunc-1-x86.d: Likewise.Likewise.
-	* ld-ifunc/ifunc-2-local-x86-64.d: Likewise.Likewise.
+	* ld-ifunc/ifunc-1-x86.d: Likewise.
+	* ld-ifunc/ifunc-3a-x86.d: Likewise.
+
+2009-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc-1-local-x86.d: Updated.
+	* ld-ifunc/ifunc-1-x86.d: Likewise.
+	* ld-ifunc/ifunc-2-local-x86-64.d: Likewise.
 	* ld-ifunc/ifunc-2-x86-64.d: Likewise.
-	* ld-ifunc/ifunc-3a-x86.d: Likewise.Likewise.
+	* ld-ifunc/ifunc-3a-x86.d: Likewise.
 
 2009-07-10  Alan Modra  <amodra@bigpond.net.au>
 
