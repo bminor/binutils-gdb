@@ -1,3 +1,18 @@
+2009-07-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* fr30-desc.c, * fr30-desc.h, * fr30-opc.c, * fr30-opc.h,
+	* frv-desc.c, * frv-desc.h, * frv-opc.c, * frv-opc.h,
+	* ip2k-desc.c, * ip2k-desc.h, * ip2k-opc.c, * ip2k-opc.h,
+	* iq2000-desc.c, * iq2000-desc.h, * iq2000-opc.c, * iq2000-opc.h,
+	* lm32-desc.c, * lm32-desc.h, * lm32-opc.c, * lm32-opc.h,
+	* lm32-opinst.c, * m32c-desc.c, * m32c-desc.h, * m32c-opc.c,
+	* m32c-opc.h, * m32r-desc.c, * m32r-desc.h, * m32r-opc.c,
+	* m32r-opc.h, * m32r-opinst.c, * mt-desc.c, * mt-desc.h,
+	* mt-opc.c, * mt-opc.h, * openrisc-desc.c, * openrisc-desc.h,
+	* openrisc-opc.c, * openrisc-opc.h, * xc16x-desc.c, * xc16x-desc.h,
+	* xc16x-opc.c, * xc16x-opc.h, * xstormy16-desc.c, * xstormy16-desc.h, 
+	* xstormy16-opc.c, * xstormy16-opc.h: Regenerate.
+
 2009-07-07  Chung-Lin Tang  <cltang@pllab.cs.nthu.edu.tw>
 
 	* arm-dis.c (coprocessor_opcodes): Fix mask for waddbhus.
