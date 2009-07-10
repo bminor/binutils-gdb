@@ -1,3 +1,12 @@
+2009-07-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Tidy up the code.
+	* mi/mi-cmd-var.c (mi_cmd_var_update): Remove variable nv.  Move
+	variables var, rootlist and cr to their local sub-block.  Move the
+	make_cleanup_ui_out_tuple_begin_end, make_cleanup_ui_out_list_begin_end
+	and do_cleanups calls to the common base block.  Remove the zero NV
+	check.
+
 2009-07-10 Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/python-internal.h (apply_varobj_pretty_printer): Update

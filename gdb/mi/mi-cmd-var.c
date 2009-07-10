@@ -569,12 +569,8 @@ mi_cmd_var_assign (char *command, char **argv, int argc)
 void
 mi_cmd_var_update (char *command, char **argv, int argc)
 {
-  struct varobj *var;
-  struct varobj **rootlist;
-  struct varobj **cr;
   struct cleanup *cleanup;
   char *name;
-  int nv;
   enum print_values print_values;
 
   if (argc != 1 && argc != 2)
@@ -590,54 +586,51 @@ mi_cmd_var_update (char *command, char **argv, int argc)
   else
     print_values = PRINT_NO_VALUES;
 
+  if (mi_version (uiout) <= 1)
+    cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, "changelist");
+  else
+    cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changelist");
+
   /* Check if the parameter is a "*" which means that we want
      to update all variables */
 
   if ((*name == '*' || *name == '@') && (*(name + 1) == '\0'))
     {
-      nv = varobj_list (&rootlist);
-      cleanup = make_cleanup (xfree, rootlist);
-      if (mi_version (uiout) <= 1)
-        make_cleanup_ui_out_tuple_begin_end (uiout, "changelist");
-      else
-        make_cleanup_ui_out_list_begin_end (uiout, "changelist");
-      if (nv <= 0)
-	{
-	  do_cleanups (cleanup);
-	  return;
-	}
+      struct varobj **rootlist, **cr;
+
+      varobj_list (&rootlist);
+      make_cleanup (xfree, rootlist);
+
       for (cr = rootlist; *cr != NULL; cr++)
 	{
 	  int thread_id = varobj_get_thread_id (*cr);
 	  int thread_stopped = 0;
+
 	  if (thread_id == -1 && is_stopped (inferior_ptid))
 	    thread_stopped = 1;
 	  else
-	    {	      
+	    {
 	      struct thread_info *tp = find_thread_id (thread_id);
 	      if (tp)
 		thread_stopped = is_stopped (tp->ptid);
 	      else
 		thread_stopped = 1;
 	    }
+
 	  if (thread_stopped)
 	    if (*name == '*' || varobj_floating_p (*cr))
 	      varobj_update_one (*cr, print_values, 0 /* implicit */);
 	}
-      do_cleanups (cleanup);
     }
   else
     {
       /* Get varobj handle, if a valid var obj name was specified */
-      var = varobj_get_handle (name);
+      struct varobj *var = varobj_get_handle (name);
 
-      if (mi_version (uiout) <= 1)
-        cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, "changelist");
-      else
-        cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changelist");
       varobj_update_one (var, print_values, 1 /* explicit */);
-      do_cleanups (cleanup);
     }
+
+  do_cleanups (cleanup);
 }
 
 /* Helper for mi_cmd_var_update().  */
