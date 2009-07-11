@@ -3,6 +3,9 @@
 
 *** Changes since GDB 6.8
 
+* "disassemble" command with a /r modifier, print the raw instructions
+in hex as well as in symbolic form."
+
 * Process record and replay
 
   In a architecture environment that supports ``process record and

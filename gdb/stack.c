@@ -481,7 +481,9 @@ static void
 gdb_disassembly_stub (void *args)
 {
   struct gdb_disassembly_stub_args *p = args;
-  gdb_disassembly (p->gdbarch, uiout, 0, 0, p->how_many, p->low, p->high);
+  gdb_disassembly (p->gdbarch, uiout, 0,
+                   DISASSEMBLY_SOURCE | DISASSEMBLY_RAW_INSN, p->how_many,
+                   p->low, p->high);
 }
 
 /* Use TRY_CATCH to catch the exception from the gdb_disassembly

@@ -1,3 +1,27 @@
+2009-07-11  Hui Zhu  <teawater@gmail.com>
+
+	* cli/cli-cmds.c (disassemble_command): Add a new modifier /r
+	to "disassemble" command to print the raw instructions in hex as
+	well as in symbolic form.
+	(init_cli_cmds): Ditto.
+	(print_disassembly): Change "mixed" to "flags" to translate
+	the behavior of disassemble.
+	(disassemble_current_function): Ditto.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Ditto.
+	* stack.c (gdb_disassembly_stub): Ditto.
+	* disasm.c (do_mixed_source_and_assembly): Ditto.
+	(do_mixed_source_and_assembly): Ditto.
+	(do_assembly_only): Ditto.
+	(gdb_disassembly): Ditto.
+	(dump_insns): print the raw instructions in hex as well as in
+	symbolic form if DISASSEMBLY_RAW_INSN and flags is true.
+	* disasm.h (DISASSEMBLY_SOURCE): Include source code with the
+	assembly if it and flags is true.
+	(DISASSEMBLY_RAW_INSN): Include the raw instructions in hex with
+	the assembly if it and flags is true.
+	(gdb_disassembly): Update extern.
+	* NEWS: Document disassemble/r support.
+
 2009-07-10  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2-frame.c: Include dwarf2.h, not elf/dwarf2.h.

@@ -88,7 +88,7 @@ static int
 dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 	    struct disassemble_info * di,
 	    CORE_ADDR low, CORE_ADDR high,
-	    int how_many, struct ui_stream *stb)
+	    int how_many, int flags, struct ui_stream *stb)
 {
   int num_displayed = 0;
   CORE_ADDR pc;
@@ -135,7 +135,23 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 	xfree (name);
 
       ui_file_rewind (stb->stream);
-      pc += gdbarch_print_insn (gdbarch, pc, di);
+      if (flags & DISASSEMBLY_RAW_INSN)
+        {
+          CORE_ADDR old_pc = pc;
+          bfd_byte data;
+          int status;
+          pc += gdbarch_print_insn (gdbarch, pc, di);
+          for (;old_pc < pc; old_pc++)
+            {
+              status = (*di->read_memory_func) (old_pc, &data, 1, di);
+              if (status != 0)
+                (*di->memory_error_func) (status, old_pc, di);
+              ui_out_message (uiout, 0, " %02x", (unsigned)data);
+            }
+          ui_out_text (uiout, "\t");
+        }
+      else
+        pc += gdbarch_print_insn (gdbarch, pc, di);
       ui_out_field_stream (uiout, "inst", stb);
       ui_file_rewind (stb->stream);
       do_cleanups (ui_out_chain);
@@ -154,7 +170,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 			      struct linetable_entry *le,
 			      CORE_ADDR low, CORE_ADDR high,
 			      struct symtab *symtab,
-			      int how_many, struct ui_stream *stb)
+			      int how_many, int flags, struct ui_stream *stb)
 {
   int newlines = 0;
   struct dis_line_entry *mle;
@@ -278,7 +294,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 
       num_displayed += dump_insns (gdbarch, uiout, di,
 				   mle[i].start_pc, mle[i].end_pc,
-				   how_many, stb);
+				   how_many, flags, stb);
 
       /* When we've reached the end of the mle array, or we've seen the last
          assembly range for this source line, close out the list/tuple.  */
@@ -301,14 +317,15 @@ static void
 do_assembly_only (struct gdbarch *gdbarch, struct ui_out *uiout,
 		  struct disassemble_info * di,
 		  CORE_ADDR low, CORE_ADDR high,
-		  int how_many, struct ui_stream *stb)
+		  int how_many, int flags, struct ui_stream *stb)
 {
   int num_displayed = 0;
   struct cleanup *ui_out_chain;
 
   ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
 
-  num_displayed = dump_insns (gdbarch, uiout, di, low, high, how_many, stb);
+  num_displayed = dump_insns (gdbarch, uiout, di, low, high, how_many,
+                              flags, stb);
 
   do_cleanups (ui_out_chain);
 }
@@ -356,7 +373,7 @@ gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
 void
 gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		char *file_string,
-		int mixed_source_and_assembly,
+		int flags,
 		int how_many, CORE_ADDR low, CORE_ADDR high)
 {
   struct ui_stream *stb = ui_out_stream_new (uiout);
@@ -377,13 +394,13 @@ gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
       nlines = symtab->linetable->nitems;
     }
 
-  if (!mixed_source_and_assembly || nlines <= 0
+  if (!(flags & DISASSEMBLY_SOURCE) || nlines <= 0
       || symtab == NULL || symtab->linetable == NULL)
-    do_assembly_only (gdbarch, uiout, &di, low, high, how_many, stb);
+    do_assembly_only (gdbarch, uiout, &di, low, high, how_many, flags, stb);
 
-  else if (mixed_source_and_assembly)
+  else if (flags & DISASSEMBLY_SOURCE)
     do_mixed_source_and_assembly (gdbarch, uiout, &di, nlines, le, low,
-				  high, symtab, how_many, stb);
+				  high, symtab, how_many, flags, stb);
 
   do_cleanups (cleanups);
   gdb_flush (gdb_stdout);

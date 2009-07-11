@@ -19,6 +19,9 @@
 #ifndef DISASM_H
 #define DISASM_H
 
+#define DISASSEMBLY_SOURCE	(0x1 << 0)
+#define DISASSEMBLY_RAW_INSN	(0x1 << 1)
+
 struct ui_out;
 struct ui_file;
 

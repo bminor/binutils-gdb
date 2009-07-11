@@ -908,7 +908,7 @@ list_command (char *arg, int from_tty)
 
 static void
 print_disassembly (struct gdbarch *gdbarch, const char *name,
-		   CORE_ADDR low, CORE_ADDR high, int mixed)
+		   CORE_ADDR low, CORE_ADDR high, int flags)
 {
 #if defined(TUI)
   if (!tui_is_window_visible (DISASSEM_WIN))
@@ -922,7 +922,7 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
 			 paddress (gdbarch, low), paddress (gdbarch, high));
 
       /* Dump the specified range.  */
-      gdb_disassembly (gdbarch, uiout, 0, mixed, -1, low, high);
+      gdb_disassembly (gdbarch, uiout, 0, flags, -1, low, high);
 
       printf_filtered ("End of assembler dump.\n");
       gdb_flush (gdb_stdout);
@@ -940,7 +940,7 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
    MIXED is non-zero to print source with the assembler.  */
 
 static void
-disassemble_current_function (int mixed)
+disassemble_current_function (int flags)
 {
   struct frame_info *frame;
   struct gdbarch *gdbarch;
@@ -961,20 +961,21 @@ disassemble_current_function (int mixed)
 #endif
   low += gdbarch_deprecated_function_start_offset (gdbarch);
 
-  print_disassembly (gdbarch, name, low, high, mixed);
+  print_disassembly (gdbarch, name, low, high, flags);
 }
 
 /* Dump a specified section of assembly code.
 
    Usage:
-     disassemble [/m]
+     disassemble [/mr]
        - dump the assembly code for the function of the current pc
-     disassemble [/m] addr
+     disassemble [/mr] addr
        - dump the assembly code for the function at ADDR
-     disassemble [/m] low high
+     disassemble [/mr] low high
        - dump the assembly code in the range [LOW,HIGH)
 
-   A /m modifier will include source code with the assembly.  */
+   A /m modifier will include source code with the assembly.
+   A /r modifier will include raw instructions in hex with the assembly.  */
 
 static void
 disassemble_command (char *arg, int from_tty)
@@ -984,10 +985,10 @@ disassemble_command (char *arg, int from_tty)
   char *name;
   CORE_ADDR pc, pc_masked;
   char *space_index;
-  int mixed_source_and_assembly;
+  int flags;
 
   name = NULL;
-  mixed_source_and_assembly = 0;
+  flags = 0;
 
   if (arg && *arg == '/')
     {
@@ -1001,7 +1002,10 @@ disassemble_command (char *arg, int from_tty)
 	  switch (*arg++)
 	    {
 	    case 'm':
-	      mixed_source_and_assembly = 1;
+	      flags |= DISASSEMBLY_SOURCE;
+	      break;
+	    case 'r':
+	      flags |= DISASSEMBLY_RAW_INSN;
 	      break;
 	    default:
 	      error (_("Invalid disassembly modifier."));
@@ -1014,7 +1018,7 @@ disassemble_command (char *arg, int from_tty)
 
   if (! arg || ! *arg)
     {
-      disassemble_current_function (mixed_source_and_assembly);
+      disassemble_current_function (flags);
       return;
     }
 
@@ -1044,7 +1048,7 @@ disassemble_command (char *arg, int from_tty)
       high = parse_and_eval_address (space_index + 1);
     }
 
-  print_disassembly (gdbarch, name, low, high, mixed_source_and_assembly);
+  print_disassembly (gdbarch, name, low, high, flags);
 }
 
 static void
@@ -1454,6 +1458,7 @@ With two args if one is empty it stands for ten lines away from the other arg.")
 Disassemble a specified section of memory.\n\
 Default is the function surrounding the pc of the selected frame.\n\
 With a /m modifier, source lines are included (if available).\n\
+With a /r modifier, raw instructions in hex are included.\n\
 With a single argument, the function surrounding that address is dumped.\n\
 Two arguments are taken as a range of memory to dump."));
   set_cmd_completer (c, location_completer);
