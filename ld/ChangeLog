@@ -1,3 +1,8 @@
+2009-07-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (insert_os_after): Don't tie assignments to non-alloc
+	output sections.
+
 2009-07-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc32elf.em (ppc_before_allocation): Turn on

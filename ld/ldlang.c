@@ -1615,10 +1615,12 @@ output_prev_sec_find (lang_output_section_statement_type *os)
    idea is to skip over anything that might be inside a SECTIONS {}
    statement in a script, before we find another output section
    statement.  Assignments to "dot" before an output section statement
-   are assumed to belong to it.  An exception to this rule is made for
-   the first assignment to dot, otherwise we might put an orphan
-   before . = . + SIZEOF_HEADERS or similar assignments that set the
-   initial address.  */
+   are assumed to belong to it, except in two cases;  The first
+   assignment to dot, and assignments before non-alloc sections.
+   Otherwise we might put an orphan before . = . + SIZEOF_HEADERS or
+   similar assignments that set the initial address, or we might
+   insert non-alloc note sections among assignments setting end of
+   image symbols.  */
 
 static lang_statement_union_type **
 insert_os_after (lang_output_section_statement_type *after)
@@ -1662,7 +1664,12 @@ insert_os_after (lang_output_section_statement_type *after)
 	  continue;
 	case lang_output_section_statement_enum:
 	  if (assign != NULL)
-	    where = assign;
+	    {
+	      asection *s = (*where)->output_section_statement.bfd_section;
+
+	      if (s == NULL || (s->flags & SEC_ALLOC) != 0)
+		where = assign;
+	    }
 	  break;
 	case lang_input_statement_enum:
 	case lang_address_statement_enum:
