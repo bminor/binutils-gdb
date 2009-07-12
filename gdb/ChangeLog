@@ -1,3 +1,13 @@
+2009-07-12  Michael Snyder  <msnyder@vmware.com>
+
+	* i386-tdep.c: Add a frame unwinder for function epilogues.
+	(i386_in_function_epilogue_p): New function.
+	(i386_epilogue_frame_sniffer): New function.
+	(i386_epilogue_frame_cache): New function.
+	(i386_epilogue_frame_this_id): New function.
+	(i386_epilogue_frame_unwind): New struct frame_unwind.
+	(i386_gdbarch_init): Hook the new unwinder.
+
 2009-07-11  Hui Zhu  <teawater@gmail.com>
 
 	* cli/cli-cmds.c (disassemble_command): Add a new modifier /r
