@@ -694,6 +694,9 @@ CGEN = "`if [ -f ../../guile/libguile/guile ]; then echo ../../guile/libguile/gu
 CGENFLAGS = -v
 CGEN_CPU_DIR = $(CGENDIR)/cpu
 
+# Most ports use the files here instead of cgen/cpu.
+CPU_DIR = $(srcroot)/cpu
+
 CGEN_READ_SCM = $(CGENDIR)/sim.scm
 CGEN_ARCH_SCM = $(CGENDIR)/sim-arch.scm
 CGEN_CPU_SCM = $(CGENDIR)/sim-cpu.scm $(CGENDIR)/sim-model.scm

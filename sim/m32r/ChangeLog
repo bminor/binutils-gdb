@@ -1,3 +1,8 @@
+2009-07-12  Doug Evans  <dje@sebabeach.org>
+
+	* Makefile.in (stamp-arch): Use $(CPU_DIR) instead of $(CGEN_CPU_DIR).
+	(stamp-cpu, stamp-xcpu, stamp-2cpu): Ditto.
+
 2009-06-20  Doug Evans  <dje@sebabeach.org>
 
 	* mloop.in: Add missing # comment marker.
