@@ -157,24 +157,28 @@ proc contains_ifunc_reloc { binary_file } {
 set fails 0
 
 # Create the object files, libraries and executables.
-if ![ld_compile "$CC -c -shared -fPIC" "$srcdir/$subdir/prog.c" "tmpdir/shared_prog.o"] {
-    fail "Could not create a shared object file"
+if ![ld_compile "$CC -c -fPIC" "$srcdir/$subdir/prog.c" "tmpdir/shared_prog.o"] {
+    fail "Could not create a PIC object file"
     set fails [expr $fails + 1]
 }
-if ![ld_compile "$CC -c -static" "$srcdir/$subdir/prog.c" "tmpdir/static_prog.o"] {
-    fail "Could not create a static object file"
+if ![ld_compile "$CC -c" "$srcdir/$subdir/prog.c" "tmpdir/static_prog.o"] {
+    fail "Could not create a non-PIC object file"
     set fails [expr $fails + 1]
 }
-if ![ld_compile "$CC -c -shared -fPIC -DWITH_IFUNC" "$srcdir/$subdir/lib.c" "tmpdir/shared_ifunc.o"] {
-    fail "Could not create an object file containing an IFUNC symbol"
+if ![ld_compile "$CC -c -fPIC -DWITH_IFUNC" "$srcdir/$subdir/lib.c" "tmpdir/shared_ifunc.o"] {
+    fail "Could not create a PIC object file containing an IFUNC symbol"
     set fails [expr $fails + 1]
 }
-if ![ld_compile "$CC -c -static -DWITH_IFUNC" "$srcdir/$subdir/lib.c" "tmpdir/static_ifunc.o"] {
-    fail "Could not create a static object file containing an IFUNC symbol"
+if ![ld_compile "$CC -c -DWITH_IFUNC" "$srcdir/$subdir/lib.c" "tmpdir/static_ifunc.o"] {
+    fail "Could not create a non-PIC object file containing an IFUNC symbol"
     set fails [expr $fails + 1]
 }
-if ![ld_compile "$CC -c -static -DWITHOUT_IFUNC" "$srcdir/$subdir/lib.c" "tmpdir/static_noifunc.o"] {
-    fail "Could not create an ordinary static object file"
+if ![ld_compile "$CC -c -DWITHOUT_IFUNC" "$srcdir/$subdir/lib.c" "tmpdir/static_noifunc.o"] {
+    fail "Could not create an ordinary non-PIC object file"
+    set fails [expr $fails + 1]
+}
+if ![ld_assemble $as "$srcdir/ld-elf/empty.s" "tmpdir/empty.o"] {
+    fail "Could not create an empty object file"
     set fails [expr $fails + 1]
 }
 
@@ -207,7 +211,7 @@ if ![default_ld_link $ld "tmpdir/static_prog" "-static -Ltmpdir tmpdir/static_pr
     fail "Could not link a static executable"
     set fails [expr $fails + 1]
 }
-if ![default_ld_link $ld "tmpdir/static_nonifunc_prog" "-static -Ltmpdir tmpdir/static_prog.o tmpdir/static_noifunc.o"] {
+if ![ld_simple_link $ld "tmpdir/static_nonifunc_prog" "-static tmpdir/empty.o"] {
     fail "Could not link a non-ifunc using static executable"
     set fails [expr $fails + 1]
 }
@@ -241,11 +245,10 @@ if {! [check_osabi tmpdir/dynamic_prog {UNIX - Linux}]} {
     fail "Dynamic ifunc-using executable does not have an OS/ABI field of LINUX"
     set fails [expr $fails + 1]
 }
-# FIXME: This test will fail if libc.a has ifunc functons.
-#if {! [check_osabi tmpdir/static_nonifunc_prog {UNIX - System V}]} {
-#    fail "Static non-ifunc-using executable does not have an OS/ABI field of System V"
-#    set fails [expr $fails + 1]
-#}
+if {! [check_osabi tmpdir/static_nonifunc_prog {UNIX - System V}]} {
+    fail "Static non-ifunc-using executable does not have an OS/ABI field of System V"
+    set fails [expr $fails + 1]
+}
 
 # The linked ifunc using executables and the shared library containing
 # ifunc should contain an IFUNC symbol.  The non-ifunc using executable

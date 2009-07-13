@@ -1,3 +1,9 @@
+2009-07-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc.exp: Don't use -shared/-static to build object
+	files.  Use ld_simple_link to build static non-ifunc-using
+	executable.  Re-enable static non-ifunc-using executable check.
+
 2009-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-ifunc/ifunc.exp: Don't chck static non-ifunc-using
