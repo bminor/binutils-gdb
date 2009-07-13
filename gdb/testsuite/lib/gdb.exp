@@ -1172,6 +1172,19 @@ proc default_gdb_start { } {
 
     set env(LC_CTYPE) C
 
+    # Don't let a .inputrc file or an existing setting of INPUTRC mess up
+    # the test results.  Even if /dev/null doesn't exist on the particular
+    # platform, the readline library will use the default setting just by
+    # failing to open the file.  OTOH, opening /dev/null successfully will
+    # also result in the default settings being used since nothing will be
+    # read from this file.
+    set env(INPUTRC) "/dev/null"
+
+    # The gdb.base/readline.exp arrow key test relies on the standard VT100
+    # bindings, so make sure that an appropriate terminal is selected.
+    # The same bug doesn't show up if we use ^P / ^N instead.
+    set env(TERM) "vt100"
+
     verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 
     if [info exists gdb_spawn_id] {

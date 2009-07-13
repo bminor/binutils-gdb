@@ -85,18 +85,6 @@ if [get_compiler_info ${binfile}] {
 
 gdb_exit
 
-# Don't let a .inputrc file or an existing setting of INPUTRC mess up
-# the test results.  Even if /dev/null doesn't exist on the particular
-# platform, the readline library will use the default setting just by
-# failing to open the file.  OTOH, opening /dev/null successfully will
-# also result in the default settings being used since nothing will be
-# read from this file.
-global env
-if [info exists env(INPUTRC)] {
-    set old_inputrc $env(INPUTRC)
-}
-set env(INPUTRC) "/dev/null"
-
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
@@ -863,11 +851,6 @@ gdb_expect  {
         }
 
 # Restore globals modified in this test...
-if [info exists old_inputrc] {
-    set env(INPUTRC) $old_inputrc
-} else {
-    unset env(INPUTRC)
-}
 set timeout $oldtimeout1
 
 return 0

@@ -146,26 +146,6 @@ if $tracelevel {
   strace $tracelevel
 }
 
-# Don't let a .inputrc file or an existing setting of INPUTRC mess up
-# the test results.  Even if /dev/null doesn't exist on the particular
-# platform, the readline library will use the default setting just by
-# failing to open the file.  OTOH, opening /dev/null successfully will
-# also result in the default settings being used since nothing will be
-# read from this file.
-global env
-if [info exists env(INPUTRC)] {
-    set old_inputrc $env(INPUTRC)
-}
-set env(INPUTRC) "/dev/null"
-
-# The arrow key test relies on the standard VT100 bindings, so make
-# sure that an appropriate terminal is selected.  The same bug
-# doesn't show up if we use ^P / ^N instead.
-if [info exists env(TERM)] {
-    set old_term $env(TERM)
-}
-set env(TERM) "vt100"
-
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
@@ -221,11 +201,6 @@ operate_and_get_next "Simple operate-and-get-next" \
 
 
 # Restore globals modified in this test...
-if [info exists old_inputrc] {
-    set env(INPUTRC) $old_inputrc
-} else {
-    unset env(INPUTRC)
-}
 if [info exists old_gdbhistfile] {
     set env(GDBHISTFILE) $old_gdbhistfile
 } else {
