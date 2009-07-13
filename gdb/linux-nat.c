@@ -4260,6 +4260,20 @@ linux_xfer_partial (struct target_ops *ops, enum target_object object,
     return linux_nat_xfer_osdata (ops, object, annex, readbuf, writebuf,
                                offset, len);
 
+  /* GDB calculates all the addresses in possibly larget width of the address.
+     Address width needs to be masked before its final use - either by
+     linux_proc_xfer_partial or inf_ptrace_xfer_partial.
+
+     Compare ADDR_BIT first to avoid a compiler warning on shift overflow.  */
+
+  if (object == TARGET_OBJECT_MEMORY)
+    {
+      int addr_bit = gdbarch_addr_bit (target_gdbarch);
+
+      if (addr_bit < (sizeof (ULONGEST) * HOST_CHAR_BIT))
+	offset &= ((ULONGEST) 1 << addr_bit) - 1;
+    }
+
   xfer = linux_proc_xfer_partial (ops, object, annex, readbuf, writebuf,
 				  offset, len);
   if (xfer != 0)

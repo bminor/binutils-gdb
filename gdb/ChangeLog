@@ -1,3 +1,9 @@
+2009-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix memory access from signed 32bit inferior registers on 64bit GDB.
+	* linux-nat.c (linux_xfer_partial <TARGET_OBJECT_MEMORY>): New variable
+	addr_bit.  Mask OFFSET by the ADDR_BIT width.
+
 2009-07-13  Anthony Green  <green@moxielogic.com>
 
 	* moxie-tdep.c (moxie_gdbarch_init): Call

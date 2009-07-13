@@ -1,5 +1,9 @@
 2009-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.arch/amd64-i386-address.exp, gdb.arch/amd64-i386-address.S: New.
+
+2009-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix gdb.base/macscp.exp when using custom inputrc.
 	* gdb.base/completion.exp: Remove env(INPUTRC) set and restore.
 	* gdb.base/readline.exp: Remove env(INPUTRC) set and restore.  Remove
