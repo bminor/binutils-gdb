@@ -19,30 +19,10 @@ if $tracelevel then {
     strace $tracelevel
 }
 
-set testfile "break"
-set srcfile ${testfile}.c
-set srcfile1 ${testfile}1.c
-set binfile ${objdir}/${subdir}/${testfile}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug nowarnings}] != "" } {
-     untested until.exp
-     return -1
+set srcfile break.c
+if { [prepare_for_testing until.exp "until" {break.c break1.c} {debug nowarnings}] } {
+    return -1
 }
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug nowarnings}] != "" } {
-     untested until.exp
-     return -1
-}
-
-if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug nowarnings}] != "" } {
-     untested until.exp
-     return -1
-}
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 set bp_location19 [gdb_get_line_number "set breakpoint 19 here"]

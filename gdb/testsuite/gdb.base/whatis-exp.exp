@@ -35,20 +35,9 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set testfile "int-type"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
-     untested whatis-exp.exp
-     return -1
-    }
-
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-
+if { [prepare_for_testing whatis-exp.exp whatis-exp int-type.c {debug nowarnings}] } {
+    return -1
+}
 
 #
 # set it up at a breakpoint so we can play with the variable values

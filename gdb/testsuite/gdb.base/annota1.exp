@@ -491,11 +491,10 @@ if [ regexp "core not found" $exec_output]  {
 }
 
 proc thread_test {} {
-    global objdir subdir srcdir
+    global objdir subdir srcdir testfile
     global gdb_prompt old_gdb_prompt
-    set testfile "watch_thread_num"
-    set srcfile ${testfile}.c
-    set binfile ${objdir}/${subdir}/${testfile}
+    set srcfile watch_thread_num.c
+    set binfile ${objdir}/${subdir}/${testfile}-watch_thread_num
     set gdb_prompt $old_gdb_prompt
 
     if { ![get_compiler_info ${binfile}] && [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] == "" } {

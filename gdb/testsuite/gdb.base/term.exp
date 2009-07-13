@@ -38,19 +38,9 @@ gdb_start
 set prms_id 0
 set bug_id 0
 
-set testfile "run"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested term.exp
-     return -1
+if { [prepare_for_testing term.exp term run.c] } {
+    return -1
 }
-
-gdb_exit
-gdb_start
-delete_breakpoints
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 gdb_test "set print sevenbit-strings" "" "test set print sevenbit-strings"
 gdb_test "set print address off" "" "test set print address off"

@@ -23,12 +23,8 @@ set prms_id 0
 set bug_id 0
 
 # re-use the program from the "return2" test.
-set testfile "return2"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested finish.exp
-     return -1
+if { [prepare_for_testing finish.exp finish return2.c] } {
+    return -1
 }
 
 proc finish_1 { type } {
@@ -127,13 +123,6 @@ proc finish_tests { } {
     finish_1 "double"
     finish_abbreviation "fin"
 }
-
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 set timeout 30
 finish_tests

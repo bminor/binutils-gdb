@@ -31,18 +31,10 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set testfile "run"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested a2-run.exp
+set testfile a2-run
+if { [prepare_for_testing ${testfile}.exp $testfile run.c] } {
     return -1
 }
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 # Run with no arguments.
 # On VxWorks this justs make sure the program was run.

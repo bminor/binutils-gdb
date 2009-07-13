@@ -1,3 +1,22 @@
+2009-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix racy clashing of output files for gdb.base{1,2}/ parallel run.
+	* gdb.base/annota1.exp (thread_test): Import global $testfile.
+	Change the compilation target to match the testcase name.
+	* gdb.base/sect-cmd.exp: Change the compilation target to match the
+	testcase name.
+	* a2-run.exp: Use for setup prepare_for_testing.  Change the
+	compilation target to match the testcase name.
+	* gdb.base/commands.exp: Likewise.
+	* gdb.base/finish.exp: Likewise.
+	* gdb.base/float.exp: Likewise.
+	* gdb.base/info-target.exp: Likewise.
+	* gdb.base/relational.exp: Likewise.
+	* gdb.base/term.exp: Likewise.
+	* gdb.base/until.exp: Likewise.
+	* gdb.base/volatile.exp: Likewise.
+	* gdb.base/whatis-exp.exp: Likewise.
+
 2009-07-11  Hui Zhu  <teawater@gmail.com>
 
 	* gdb.base/help.exp (disassemble): Update expected help text.

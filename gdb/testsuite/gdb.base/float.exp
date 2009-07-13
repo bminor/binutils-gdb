@@ -29,18 +29,9 @@ if $tracelevel {
 set prms_id 0
 set bug_id 0
 
-set testfile "run"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested float.exp
+if { [prepare_for_testing float.exp float run.c] } {
     return -1
 }
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 # Set it up at a breakpoint so we have its registers.
 
