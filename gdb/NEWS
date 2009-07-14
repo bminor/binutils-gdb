@@ -3,6 +3,12 @@
 
 *** Changes since GDB 6.8
 
+* Tracepoints may now be conditional.  The syntax is as for
+breakpoints; either an "if" clause appended to the "trace" command,
+or the "condition" command is available.  GDB sends the condition to
+the target for evaluation using the same bytecode format as is used
+for tracepoint actions.
+
 * "disassemble" command with a /r modifier, print the raw instructions
 in hex as well as in symbolic form."
 

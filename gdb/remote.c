@@ -294,6 +294,9 @@ struct remote_state
 
   /* True if the stub reports support for vCont;t.  */
   int support_vCont_t;
+
+  /* True if the stub reports support for conditional tracepoints.  */
+  int cond_tracepoints;
 };
 
 /* Returns true if the multi-process extensions are in effect.  */
@@ -993,6 +996,7 @@ enum {
   PACKET_qXfer_siginfo_read,
   PACKET_qXfer_siginfo_write,
   PACKET_qAttached,
+  PACKET_ConditionalTracepoints,
   PACKET_MAX
 };
 
@@ -3015,6 +3019,15 @@ remote_non_stop_feature (const struct protocol_feature *feature,
   rs->non_stop_aware = (support == PACKET_ENABLE);
 }
 
+static void
+remote_cond_tracepoint_feature (const struct protocol_feature *feature,
+				       enum packet_support support,
+				       const char *value)
+{
+  struct remote_state *rs = get_remote_state ();
+  rs->cond_tracepoints = (support == PACKET_ENABLE);
+}
+
 static struct protocol_feature remote_protocol_features[] = {
   { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
   { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
@@ -3041,6 +3054,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_siginfo_read },
   { "qXfer:siginfo:write", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_siginfo_write },
+  { "ConditionalTracepoints", PACKET_DISABLE, remote_cond_tracepoint_feature,
+    PACKET_ConditionalTracepoints },
 };
 
 static void
@@ -8740,6 +8755,13 @@ remote_supports_multi_process (void)
   return remote_multi_process_p (rs);
 }
 
+int
+remote_supports_cond_tracepoints (void)
+{
+  struct remote_state *rs = get_remote_state ();
+  return rs->cond_tracepoints;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -9182,6 +9204,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qAttached],
 			 "qAttached", "query-attached", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_ConditionalTracepoints],
+			 "ConditionalTracepoints", "conditional-tracepoints", 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

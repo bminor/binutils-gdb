@@ -8932,6 +8932,7 @@ conditions and actions.
 * Create and Delete Tracepoints::
 * Enable and Disable Tracepoints::
 * Tracepoint Passcounts::
+* Tracepoint Conditions::
 * Tracepoint Actions::
 * Listing Tracepoints::
 * Starting and Stopping Trace Experiments::
@@ -8970,6 +8971,13 @@ Here are some examples of using the @code{trace} command:
 
 @noindent
 You can abbreviate @code{trace} as @code{tr}.
+
+@item trace @var{location} if @var{cond}
+Set a tracepoint with condition @var{cond}; evaluate the expression
+@var{cond} each time the tracepoint is reached, and collect data only
+if the value is nonzero---that is, if @var{cond} evaluates as true.
+@xref{Tracepoint Conditions, ,Tracepoint Conditions}, for more
+information on tracepoint conditions.
 
 @vindex $tpnum
 @cindex last tracepoint number
@@ -9052,6 +9060,44 @@ Examples:
 @exdent @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @code{// OR when baz has been executed 1 time.}
 @end smallexample
 @end table
+
+@node Tracepoint Conditions
+@subsection Tracepoint Conditions
+@cindex conditional tracepoints
+@cindex tracepoint conditions
+
+The simplest sort of tracepoint collects data every time your program
+reaches a specified place.  You can also specify a @dfn{condition} for
+a tracepoint.  A condition is just a Boolean expression in your
+programming language (@pxref{Expressions, ,Expressions}).  A
+tracepoint with a condition evaluates the expression each time your
+program reaches it, and data collection happens only if the condition
+is true.
+
+Tracepoint conditions can be specified when a tracepoint is set, by
+using @samp{if} in the arguments to the @code{trace} command.
+@xref{Create and Delete Tracepoints, ,Setting Tracepoints}.  They can
+also be set or changed at any time with the @code{condition} command,
+just as with breakpoints.
+
+Unlike breakpoint conditions, @value{GDBN} does not actually evaluate
+the conditional expression itself.  Instead, @value{GDBN} encodes the
+expression into an agent expression (@pxref{Agent Expressions}
+suitable for execution on the target, independently of @value{GDBN}.
+Global variables become raw memory locations, locals become stack
+accesses, and so forth.
+
+For instance, suppose you have a function that is usually called
+frequently, but should not be called after an error has occurred.  You
+could use the following tracepoint command to collect data about calls
+of that function that happen while the error code is propagating
+through the program; an unconditional tracepoint could end up
+collecting thousands of useless trace frames that you would have to
+search through.
+
+@smallexample
+(@value{GDBP}) @kbd{trace normal_operation if errcode > 0}
+@end smallexample
 
 @node Tracepoint Actions
 @subsection Tracepoint Action Lists
@@ -26534,10 +26580,19 @@ messages, see @ref{Debugging Output}.)
 
 @table @code
 @kindex maint agent
+@kindex maint agent-eval
 @item maint agent @var{expression}
+@itemx maint agent-eval @var{expression}
 Translate the given @var{expression} into remote agent bytecodes.
 This command is useful for debugging the Agent Expression mechanism
-(@pxref{Agent Expressions}).
+(@pxref{Agent Expressions}).  The @samp{agent} version produces an
+expression useful for data collection, such as by tracepoints, while
+@samp{maint agent-eval} produces an expression that evaluates directly
+to a result.  For instance, a collection expression for @code{globa +
+globb} will include bytecodes to record four bytes of memory at each
+of the addresses of @code{globa} and @code{globb}, while discarding
+the result of the addition, while an evaluation expression will do the
+addition and return the sum.
 
 @kindex maint info breakpoints
 @item @anchor{maint info breakpoints}maint info breakpoints
@@ -28415,6 +28470,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{ConditionalTracepoints}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -28491,6 +28551,10 @@ indicated it supports them in its @samp{qSupported} request.
 @item qXfer:osdata:read
 The remote stub understands the @samp{qXfer:osdata:read} packet
 ((@pxref{qXfer osdata read}).
+
+@item ConditionalTracepoints
+The remote stub accepts and implements conditional expressions defined
+for tracepoints (@pxref{Tracepoint Conditions}).
 
 @end table
 
@@ -28804,11 +28868,14 @@ tracepoints (@pxref{Tracepoints}).
 
 @table @samp
 
-@item QTDP:@var{n}:@var{addr}:@var{ena}:@var{step}:@var{pass}@r{[}-@r{]}
+@item QTDP:@var{n}:@var{addr}:@var{ena}:@var{step}:@var{pass}[:X@var{len},@var{bytes}]@r{[}-@r{]}
 Create a new tracepoint, number @var{n}, at @var{addr}.  If @var{ena}
 is @samp{E}, then the tracepoint is enabled; if it is @samp{D}, then
 the tracepoint is disabled.  @var{step} is the tracepoint's step
-count, and @var{pass} is its pass count.  If the trailing @samp{-} is
+count, and @var{pass} is its pass count.  If an @samp{X} is present,
+it introduces a tracepoint condition, which consists of a hexadecimal
+length, followed by a comma and hex-encoded bytes, in a manner similar
+to action encodings as described below.  If the trailing @samp{-} is
 present, further @samp{QTDP} packets will follow to specify this
 tracepoint's actions.
 

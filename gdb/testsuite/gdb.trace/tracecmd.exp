@@ -153,7 +153,12 @@ gdb_test "trace" "No default breakpoint address now." \
 # deferred to limits test module
 
 # 1.11 tracepoint conditions
-# conditions on tracepoints not implemented
+gdb_delete_tracepoints
+gdb_test "trace gdb_recursion_test if q1 > 0" \
+	"Tracepoint $decimal at $hex: file.*$srcfile, line $testline1." \
+	"1.11a: conditional tracepoint"
+gdb_test "info trace" "in gdb_recursion_test.*$srcfile:$testline1.*trace only if q1 > 0" \
+	"1.11b: verify conditional tracepoint"
 
 # 1.12 set tracepoint in prologue
 # [see tfind.exp]

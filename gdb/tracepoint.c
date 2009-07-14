@@ -33,6 +33,7 @@
 #include "breakpoint.h"
 #include "tracepoint.h"
 #include "remote.h"
+extern int remote_supports_cond_tracepoints (void);
 #include "linespec.h"
 #include "regcache.h"
 #include "completer.h"
@@ -1311,12 +1312,31 @@ download_tracepoint (struct breakpoint *t)
   char **stepping_actions;
   int ndx;
   struct cleanup *old_chain = NULL;
+  struct agent_expr *aexpr;
+  struct cleanup *aexpr_chain = NULL;
 
   sprintf_vma (tmp, (t->loc ? t->loc->address : 0));
   sprintf (buf, "QTDP:%x:%s:%c:%lx:%x", t->number, 
 	   tmp, /* address */
 	   (t->enable_state == bp_enabled ? 'E' : 'D'),
 	   t->step_count, t->pass_count);
+  /* If the tracepoint has a conditional, make it into an agent
+     expression and append to the definition.  */
+  if (t->loc->cond)
+    {
+      /* Only test support at download time, we may not know target
+	 capabilities at definition time.  */
+      if (remote_supports_cond_tracepoints ())
+	{
+	  aexpr = gen_eval_for_expr (t->loc->address, t->loc->cond);
+	  aexpr_chain = make_cleanup_free_agent_expr (aexpr);
+	  sprintf (buf + strlen (buf), ":X%x,", aexpr->len);
+	  mem2hex (aexpr->buf, buf + strlen (buf), aexpr->len);
+	  do_cleanups (aexpr_chain);
+	}
+      else
+	warning (_("Target does not support conditional tracepoints, ignoring tp %d cond"), t->number);
+    }
 
   if (t->actions)
     strcat (buf, "-");

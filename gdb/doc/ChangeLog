@@ -1,3 +1,11 @@
+2009-07-14  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.texinfo (Tracepoint Conditions): New section.
+	(General Query Packets): Describe ConditionalTracepoints.
+	(Tracepoint Packets): Describe condition field.
+	(Maintenance Commands): Describe maint agent-eval.
+	* agentexpr.texi (Using Agent Expressions): Mention eval usage.
+
 2009-07-11  Hui Zhu  <teawater@gmail.com>
 
 	* gdb.texinfo (disassemble): Add a new modifier /r

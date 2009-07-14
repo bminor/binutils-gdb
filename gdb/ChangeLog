@@ -1,3 +1,21 @@
+2009-07-14  Stan Shebs  <stan@codesourcery.com>
+
+	Conditional tracepoints.
+	* ax-gdb.h (gen_eval_for_expr): Declare.
+	* ax-gdb.c (gen_expr): Generate bytecodes for BINOP_EQUAL
+	and other comparisons.
+	(gen_eval_for_expr): New function.
+	(agent_eval_command): New maintenance command.
+	(_initialize_ax_gdb): Define the command.
+	* remote.c (struct remote_state): New field cond_tracepoints.
+	(PACKET_ConditionalTracepoints): New packet config type.
+	(remote_cond_tracepoint_feature): New function.
+	(remote_protocol_features): Add ConditionalTracepoints.
+	(remote_supports_cond_tracepoints): New function.
+	(_initialize_remote): Add ConditionalTracepoints.
+	* tracepoint.c (download_tracepoint): Add conditional.
+	* NEWS: Mention conditional tracepoints.
+
 2009-07-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* objfiles.c (objfile_relocate): Do not relocate the same
