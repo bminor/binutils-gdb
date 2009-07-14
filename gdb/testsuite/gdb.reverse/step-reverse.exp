@@ -104,6 +104,10 @@ gdb_test_multiple "stepi" "$test_message" {
 	send_gdb "stepi\n"
 	exp_continue
     }
+    -re "STEPI TEST.*$gdb_prompt $" {
+	send_gdb "stepi\n"
+	exp_continue
+    }
 }
 
 # stepi thru return of a function call
@@ -168,7 +172,7 @@ gdb_test_multiple "stepi" "$test_message" {
 
 # stepi backward out of a function call
 
-set stepi_location  [gdb_get_line_number "FINISH TEST" "$srcfile"]
+set stepi_location  [gdb_get_line_number "STEPI TEST" "$srcfile"]
 set test_message "reverse stepi from a function call"
 gdb_test_multiple "stepi" "$test_message" {
     -re "ARRIVED IN CALLEE.*$gdb_prompt $" {
@@ -178,7 +182,7 @@ gdb_test_multiple "stepi" "$test_message" {
 	send_gdb "stepi\n" 
 	exp_continue
     }
-    -re "${hex}\[ \t\]*$stepi_location.*STEPI TEST.*$gdb_prompt $" {
+    -re "${hex} in main .*:$stepi_location.*STEPI TEST.*$gdb_prompt $" {
 	send_gdb "stepi\n"
 	exp_continue
     }
