@@ -193,7 +193,8 @@ void arm_copy_symbol_attributes (symbolS *, symbolS *);
 
 #define TC_CONS_FIX_NEW cons_fix_new_arm
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE 31
+#define MAX_MEM_ALIGNMENT_BYTES    6
+#define MAX_MEM_FOR_RS_ALIGN_CODE ((1 << MAX_MEM_ALIGNMENT_BYTES) - 1)
 
 /* For frags in code sections we need to record whether they contain
    ARM code or THUMB code.  This is that if they have to be aligned,

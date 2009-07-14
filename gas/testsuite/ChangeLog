@@ -1,5 +1,10 @@
 2009-07-14  Daniel Gutson  <dgutson@codesourcery.com>
 
+	* gas/arm/align64.s: New test case.
+	* gas/arm/align64.d: Expected disassembly.
+
+2009-07-14  Daniel Gutson  <dgutson@codesourcery.com>
+
 	* gas/arm/thumb-w-bad.d: New test case.
 	* gas/arm/thumb-w-bad.l: New file.
 	* gas/arm/thumb-w-bad.s: New file.

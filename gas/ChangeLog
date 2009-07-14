@@ -1,3 +1,11 @@
+2009-07-14  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* config/tc-arm.h (MAX_MEM_ALIGNMENT_BYTES): Define.
+	(MAX_MEM_FOR_RS_ALIGN_CODE): Define in terms of
+	MAX_MEM_ALIGNMENT_BYTES.
+	* config/tc-arm.c (arm_frag_align_code): Replace hard coded
+	constant with MAX_MEM_FOR_RS_ALIGN_CODE.
+
 2009-07-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 10387
