@@ -1,5 +1,9 @@
 2009-07-14  Stan Shebs  <stan@codesourcery.com>
 
+	* MAINTAINERS (Global Maintainers): Add Doug Evans.
+
+2009-07-14  Stan Shebs  <stan@codesourcery.com>
+
 	Conditional tracepoints.
 	* ax-gdb.h (gen_eval_for_expr): Declare.
 	* ax-gdb.c (gen_expr): Generate bytecodes for BINOP_EQUAL
