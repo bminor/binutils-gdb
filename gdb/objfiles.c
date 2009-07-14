@@ -570,6 +570,10 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 	continue;
 
       bv = BLOCKVECTOR (s);
+      if (BLOCKVECTOR_MAP (bv))
+	addrmap_relocate (BLOCKVECTOR_MAP (bv),
+			  ANOFFSET (delta, s->block_line_section));
+
       for (i = 0; i < BLOCKVECTOR_NBLOCKS (bv); ++i)
 	{
 	  struct block *b;
@@ -579,9 +583,6 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 	  b = BLOCKVECTOR_BLOCK (bv, i);
 	  BLOCK_START (b) += ANOFFSET (delta, s->block_line_section);
 	  BLOCK_END (b) += ANOFFSET (delta, s->block_line_section);
-          if (BLOCKVECTOR_MAP (bv))
-            addrmap_relocate (BLOCKVECTOR_MAP (bv),
-                              ANOFFSET (delta, s->block_line_section));
 
 	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    {
