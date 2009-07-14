@@ -96,6 +96,7 @@
 #include "subsegs.h"
 #include "bfdver.h"
 #include <time.h>
+#include <stdarg.h>
 
 #ifndef NO_LISTING
 
@@ -213,12 +214,10 @@ static char *data_buffer;
 static void listing_message (const char *, const char *);
 static file_info_type *file_info (const char *);
 static void new_frag (void);
-static char *buffer_line (file_info_type *, char *, unsigned int);
 static void listing_page (list_info_type *);
 static unsigned int calc_hex (list_info_type *);
 static void print_lines (list_info_type *, unsigned int, char *, unsigned int);
 static void list_symbol_table (void);
-static void print_source (file_info_type *, list_info_type *, char *, unsigned int);
 static int debugging_pseudo (list_info_type *, const char *);
 static void listing_listing (char *);
 
@@ -453,14 +452,13 @@ listing_prev_line (void)
 
 /* This function returns the next source line from the file supplied,
    truncated to size.  It appends a fake line to the end of each input
-   file to make.  */
+   file to make using the returned buffer simpler.  */
 
 static char *
 buffer_line (file_info_type *file, char *line, unsigned int size)
 {
   unsigned int count = 0;
   int c;
-
   char *p = line;
 
   /* If we couldn't open the file, return an empty line.  */
@@ -491,10 +489,10 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
 	fseek (last_open_file, file->pos, SEEK_SET);
     }
 
-  c = fgetc (last_open_file);
-
   /* Leave room for null.  */
   size -= 1;
+
+  c = fgetc (last_open_file);
 
   while (c != EOF && c != '\n' && c != '\r')
     {
@@ -503,7 +501,6 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
       count++;
 
       c = fgetc (last_open_file);
-
     }
 
   /* If '\r' is followed by '\n', swallow that.  Likewise, if '\n'
@@ -511,6 +508,7 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
   if (c == '\r' || c == '\n')
     {
       int next = fgetc (last_open_file);
+
       if ((c == '\r' && next != '\n')
 	  || (c == '\n' && next != '\r'))
 	ungetc (next, last_open_file);
@@ -529,6 +527,117 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
   file->linenum++;
   *p++ = 0;
   return line;
+}
+
+
+/* This function rewinds the requested file back to the line requested,
+   reads it in again into the buffer provided and then restores the file
+   back to its original location.  */
+
+static char *
+rebuffer_line (file_info_type *  file,
+	       unsigned int      linenum,
+	       char *            buffer,
+	       unsigned int      size)
+{
+  unsigned int count = 0;
+  unsigned int current_line = 1;
+  char * p = buffer;
+  long pos;
+  int c;
+
+  /* Sanity checks.  */
+  if (file == NULL || buffer == NULL || size == 0 || file->linenum <= linenum)
+    return "";
+
+  /* Check the cache and see if we last used this file.  */
+  if (last_open_file_info == NULL || file != last_open_file_info)
+    {
+      if (last_open_file)
+	{
+	  last_open_file_info->pos = ftell (last_open_file);
+	  fclose (last_open_file);
+	}
+
+      /* Open the file in the binary mode so that ftell above can
+	 return a reliable value that we can feed to fseek below.  */
+      last_open_file_info = file;
+      last_open_file = fopen (file->filename, FOPEN_RB);
+      if (last_open_file == NULL)
+	{
+	  file->at_end = 1;
+	  return "";
+	}
+
+      /* Seek to where we were last time this file was open.  */
+      if (file->pos)
+	fseek (last_open_file, file->pos, SEEK_SET);
+    }
+
+  /* Remember where we are in the current file.  */
+  pos = ftell (last_open_file);
+
+  /* Go back to the beginning.  */
+  fseek (last_open_file, 0, SEEK_SET);
+
+  /* Skip lines prior to the one we are interested in.  */
+  while (current_line < linenum)
+    {
+      /* fgets only stops on newlines and has a size limit,
+	 so we read one character at a time instead.  */
+      do
+	{
+	  c = fgetc (last_open_file);
+	}
+      while (c != EOF && c != '\n' && c != '\r');
+
+      ++ current_line;
+
+      if (c == '\r' || c == '\n')
+	{
+	  int next = fgetc (last_open_file);
+
+	  /* If '\r' is followed by '\n', swallow that.  Likewise, if '\n'
+	     is followed by '\r', swallow that as well.  */
+	  if ((c == '\r' && next != '\n')
+	      || (c == '\n' && next != '\r'))
+	    ungetc (next, last_open_file);
+	}
+    }
+
+  /* Leave room for the nul at the end of the buffer.  */
+  size -= 1;
+
+  /* Read in the line.  */
+  c = fgetc (last_open_file);
+
+  while (c != EOF && c != '\n' && c != '\r')
+    {
+      if (count < size)
+	*p++ = c;
+      count++;
+
+      c = fgetc (last_open_file);
+    }
+
+  /* If '\r' is followed by '\n', swallow that.  Likewise, if '\n'
+     is followed by '\r', swallow that as well.  */
+  if (c == '\r' || c == '\n')
+    {
+      int next = fgetc (last_open_file);
+
+      if ((c == '\r' && next != '\n')
+	  || (c == '\n' && next != '\r'))
+	ungetc (next, last_open_file);
+    }
+
+  /* Terminate the line.  */
+  *p++ = 0;
+
+  /* Reset the file position.  */
+  fseek (last_open_file, pos, SEEK_SET);
+
+  return buffer;
 }
 
 static const char *fn;
@@ -580,6 +689,23 @@ listing_page (list_info_type *list)
       on_page = 3;
       eject = 0;
     }
+}
+
+/* Print a line into the list_file.  Update the line count
+   and if necessary start a new page.  */
+
+static void
+emit_line (list_info_type * list, const char * format, ...)
+{
+  va_list args;
+
+  va_start (args, format);
+
+  vfprintf (list_file, format, args);
+  on_page++;
+  listing_page (list);
+
+  va_end (args);
 }
 
 static unsigned int
@@ -672,12 +798,7 @@ print_lines (list_info_type *list, unsigned int lineno,
       for (idx = 0; idx < nchars; idx++)
 	fprintf (list_file, " ");
 
-      fprintf (list_file, "\t%s\n", string ? string : "");
-
-      on_page++;
-
-      listing_page (0);
-
+      emit_line (NULL, "\t%s\n", string ? string : "");
       return;
     }
 
@@ -710,16 +831,10 @@ print_lines (list_info_type *list, unsigned int lineno,
   for (; idx < nchars; idx++)
     fprintf (list_file, " ");
 
-  fprintf (list_file, "\t%s\n", string ? string : "");
-  on_page++;
-  listing_page (list);
+  emit_line (list, "\t%s\n", string ? string : "");
 
   if (list->message)
-    {
-      fprintf (list_file, "****  %s\n", list->message);
-      listing_page (list);
-      on_page++;
-    }
+    emit_line (list, "****  %s\n", list->message);
 
   for (lines = 0;
        lines < (unsigned int) listing_lhs_cont_lines
@@ -749,9 +864,7 @@ print_lines (list_info_type *list, unsigned int lineno,
 	    }
 	}
 
-      fprintf (list_file, "\n");
-      on_page++;
-      listing_page (list);
+      emit_line (list, "\n");
     }
 }
 
@@ -763,7 +876,7 @@ list_symbol_table (void)
 
   symbolS *ptr;
   eject = 1;
-  listing_page (0);
+  listing_page (NULL);
 
   for (ptr = symbol_rootP; ptr != (symbolS *) NULL; ptr = symbol_next (ptr))
     {
@@ -819,7 +932,7 @@ list_symbol_table (void)
 		}
 
 	      on_page++;
-	      listing_page (0);
+	      listing_page (NULL);
 	    }
 	}
 
@@ -829,9 +942,7 @@ list_symbol_table (void)
       fprintf (list_file, "NO DEFINED SYMBOLS\n");
       on_page++;
     }
-  fprintf (list_file, "\n");
-  on_page++;
-  listing_page (0);
+  emit_line (NULL, "\n");
 
   got_some = 0;
 
@@ -844,39 +955,111 @@ list_symbol_table (void)
 	      if (!got_some)
 		{
 		  got_some = 1;
-		  fprintf (list_file, "UNDEFINED SYMBOLS\n");
-		  on_page++;
-		  listing_page (0);
+
+		  emit_line (NULL, "UNDEFINED SYMBOLS\n");
 		}
-	      fprintf (list_file, "%s\n", S_GET_NAME (ptr));
-	      on_page++;
-	      listing_page (0);
+
+	      emit_line (NULL, "%s\n", S_GET_NAME (ptr));
 	    }
 	}
     }
+
   if (!got_some)
-    {
-      fprintf (list_file, "NO UNDEFINED SYMBOLS\n");
-      on_page++;
-      listing_page (0);
-    }
+    emit_line (NULL, "NO UNDEFINED SYMBOLS\n");
 }
 
-static void
-print_source (file_info_type *current_file, list_info_type *list,
-	      char *buffer, unsigned int width)
+typedef struct cached_line
 {
+  file_info_type * file;
+  unsigned int     line;
+  char             buffer [LISTING_RHS_WIDTH];
+} cached_line;
+
+static void
+print_source (file_info_type *  current_file,
+	      list_info_type *  list,
+	      unsigned int      width)
+{
+#define NUM_CACHE_LINES  3
+  static cached_line cached_lines[NUM_CACHE_LINES];
+  static int next_free_line = 0;
+  cached_line * cache;
+
+  if (current_file->linenum > list->hll_line
+      && list->hll_line > 0)
+    {
+      /* This can happen with modern optimizing compilers.  The source
+	 lines from the high level language input program are split up
+	 and interleaved, meaning the line number we want to display
+	 (list->hll_line) can have already been displayed.  We have
+	 three choices:
+
+	   a. Do nothing, since we have already displayed the source
+	      line.  This was the old behaviour.
+
+	   b. Display the particular line requested again, but only
+	      that line.  This is the new behaviour.
+
+	   c. Display the particular line requested again and reset
+	      the current_file->line_num value so that we redisplay
+	      all the following lines as well the next time we
+	      encounter a larger line number.  */
+      int i;
+
+      /* Check the cache, maybe we already have the line saved.  */
+      for (i = 0; i < NUM_CACHE_LINES; i++)
+	if (cached_lines[i].file == current_file
+	    && cached_lines[i].line == list->hll_line)
+	  {
+	    cache = cached_lines + i;
+	    break;
+	  }
+
+      if (i == NUM_CACHE_LINES)
+	{
+	  cache = cached_lines + next_free_line;
+	  next_free_line ++;
+	  if (next_free_line == NUM_CACHE_LINES)
+	    next_free_line = 0;
+
+	  cache->file = current_file;
+	  cache->line = list->hll_line;
+	  cache->buffer[0] = 0;
+	  rebuffer_line (current_file, cache->line, cache->buffer, width);
+	}
+
+      emit_line (list, "%4u:%-13s **** %s\n",
+		 cache->line, cache->file->filename, cache->buffer);
+      return;
+    }
+
   if (!current_file->at_end)
     {
+      int num_lines_shown = 0;
+
       while (current_file->linenum < list->hll_line
 	     && !current_file->at_end)
 	{
-	  char *p = buffer_line (current_file, buffer, width);
+	  cached_line * cache = cached_lines + next_free_line;
+	  char *p;
 
-	  fprintf (list_file, "%4u:%-13s **** %s\n", current_file->linenum,
-		   current_file->filename, p);
-	  on_page++;
-	  listing_page (list);
+	  cache->file = current_file;
+	  cache->line = current_file->linenum;
+	  cache->buffer[0] = 0;
+	  p = buffer_line (current_file, cache->buffer, width);
+
+	  /* Cache optimization:  If printing a group of lines
+	     cache the first and last lines in the group.  */
+	  if (num_lines_shown == 0)
+	    {
+	      next_free_line ++;
+	      if (next_free_line == NUM_CACHE_LINES)
+		next_free_line = 0;
+	    }
+
+	  emit_line (list, "%4u:%-13s **** %s\n",
+		     cache->line, cache->file->filename, p);
+	  num_lines_shown ++;
 	}
     }
 }
@@ -1029,7 +1212,7 @@ listing_listing (char *name ATTRIBUTE_UNUSED)
 	    current_hll_file = list->hll_file;
 
 	  if (current_hll_file && list->hll_line && (listing & LISTING_HLL))
-	    print_source (current_hll_file, list, buffer, width);
+	    print_source (current_hll_file, list, width);
 
 	  if (list->line_contents)
 	    {
@@ -1150,7 +1333,7 @@ listing_general_info (char ** argv)
 {
   /* Print the stuff on the first line.  */
   eject = 1;
-  listing_page (0);
+  listing_page (NULL);
 
   fprintf (list_file,
            _(" GNU assembler version %s (%s)\n\t using BFD version %s."),

@@ -15372,14 +15372,25 @@ md_assemble (char *str)
 	  return;
 	}
 
-      if (!ARM_CPU_HAS_FEATURE (variant, arm_ext_v6t2) && !inst.size_req)
+      if (!ARM_CPU_HAS_FEATURE (variant, arm_ext_v6t2))
 	{
-	  /* Implicit require narrow instructions on Thumb-1.  This avoids
-	     relaxation accidentally introducing Thumb-2 instructions.  */
 	  if (opcode->tencode != do_t_blx && opcode->tencode != do_t_branch23
-	      && !(ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_msr)
-		   || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_barrier)))
-	    inst.size_req = 2;
+	      && !(ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_msr)
+		   || ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_barrier)))
+	    {
+	      /* Two things are addressed here.
+		 1) Implicit require narrow instructions on Thumb-1.
+		    This avoids relaxation accidentally introducing Thumb-2
+		     instructions.
+		 2) Reject wide instructions in non Thumb-2 cores.  */
+	      if (inst.size_req == 0)
+		inst.size_req = 2;
+	      else if (inst.size_req == 4)
+		{
+		  as_bad (_("selected processor does not support `%s'"), str);
+		  return;
+		}
+	    }
 	}
 
       mapping_state (MAP_THUMB);
