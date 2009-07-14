@@ -128,24 +128,26 @@ bfd_boolean arm_is_eabi (void);
 
 /* For ELF objects THUMB_IS_FUNC is inferred from
    ARM_IS_THUMB and the function type.  */
-#define THUMB_IS_FUNC(s) \
-  ((arm_is_eabi () \
-    && (ARM_IS_THUMB (s)) \
-    && (symbol_get_bfdsym (s)->flags & BSF_FUNCTION)) \
-   || (ARM_GET_FLAG (s) & THUMB_FLAG_FUNC))
+#define THUMB_IS_FUNC(s)					\
+  ((s) != NULL							\
+   && ((arm_is_eabi ()						\
+	&& (ARM_IS_THUMB (s))					\
+	&& (symbol_get_bfdsym (s)->flags & BSF_FUNCTION))	\
+       || (ARM_GET_FLAG (s) & THUMB_FLAG_FUNC)))
 
-#define ARM_IS_FUNC(s) \
-  ((arm_is_eabi () \
-    && !(ARM_IS_THUMB (s)) \
-    /* && !(THUMB_FLAG_FUNC & ARM_GET_FLAG (s)) \ */ \
+#define ARM_IS_FUNC(s)					\
+  (((s) != NULL						\
+    && arm_is_eabi ()					\
+    && !(ARM_IS_THUMB (s))				\
+    /* && !(THUMB_FLAG_FUNC & ARM_GET_FLAG (s)) \ */	\
     && (symbol_get_bfdsym (s)->flags & BSF_FUNCTION)))
 
 
 #else
 
-#define THUMB_IS_FUNC(s)	(ARM_GET_FLAG (s) & THUMB_FLAG_FUNC)
+#define THUMB_IS_FUNC(s)	((s) && ARM_GET_FLAG (s) & THUMB_FLAG_FUNC)
 #define ARM_IS_FUNC(s)          (!THUMB_IS_FUNC (s) \
-                                && (symbol_get_bfdsym (s)->flags & BSF_FUNCTION))
+				 && (s) && (symbol_get_bfdsym (s)->flags & BSF_FUNCTION))
 #endif
 
 #define ARM_SET_THUMB(s,t)      ((t) ? ARM_SET_FLAG (s, ARM_FLAG_THUMB)     : ARM_RESET_FLAG (s, ARM_FLAG_THUMB))
