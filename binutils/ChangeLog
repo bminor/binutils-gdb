@@ -1,3 +1,13 @@
+2009-07-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Support unordered .debug_info references to .debug_ranges.
+	* dwarf.c (struct range_entry, range_entry_compar): New.
+	(display_debug_ranges): Remove variables last_offset, first, j,
+	seen_first_offset, use_debug_info and next.  New variables
+	range_entries and range_entry_fill.  Create the sorted copy
+	range_entries.  Remove the FIXME error on detected unordered references.
+	* dwarf.h (debug_info <range_lists>): New comment.
+
 2009-07-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 10380

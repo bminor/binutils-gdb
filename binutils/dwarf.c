@@ -3457,6 +3457,31 @@ display_debug_aranges (struct dwarf_section *section,
   return 1;
 }
 
+/* Each debug_information[x].range_lists[y] gets this representation for
+   sorting purposes.  */
+
+struct range_entry
+  {
+    /* The debug_information[x].range_lists[y] value.  */
+    unsigned long ranges_offset;
+
+    /* Original debug_information to find parameters of the data.  */
+    debug_info *debug_info_p;
+  };
+
+/* Sort struct range_entry in ascending order of its RANGES_OFFSET.  */
+
+static int
+range_entry_compar (const void *ap, const void *bp)
+{
+  const struct range_entry *a_re = ap;
+  const struct range_entry *b_re = bp;
+  const unsigned long a = a_re->ranges_offset;
+  const unsigned long b = b_re->ranges_offset;
+
+  return (a > b) - (b > a);
+}
+
 static int
 display_debug_ranges (struct dwarf_section *section,
 		      void *file ATTRIBUTE_UNUSED)
@@ -3465,14 +3490,8 @@ display_debug_ranges (struct dwarf_section *section,
   unsigned char *section_end;
   unsigned long bytes;
   unsigned char *section_begin = start;
-  unsigned int num_range_list = 0;
-  unsigned long last_offset = 0;
-  unsigned int first = 0;
-  unsigned int i;
-  unsigned int j;
-  int seen_first_offset = 0;
-  int use_debug_info = 1;
-  unsigned char *next;
+  unsigned int num_range_list, i;
+  struct range_entry *range_entries, *range_entry_fill;
 
   bytes = section->size;
   section_end = start + bytes;
@@ -3490,135 +3509,117 @@ display_debug_ranges (struct dwarf_section *section,
       return 0;
     }
 
-  /* Check the order of range list in .debug_info section. If
-     offsets of range lists are in the ascending order, we can
-     use `debug_information' directly.  */
+  num_range_list = 0;
+  for (i = 0; i < num_debug_info_entries; i++)
+    num_range_list += debug_information [i].num_range_lists;
+
+  if (num_range_list == 0)
+    error (_("No range lists in .debug_info section!\n"));
+
+  range_entries = xmalloc (sizeof (*range_entries) * num_range_list);
+  range_entry_fill = range_entries;
+
   for (i = 0; i < num_debug_info_entries; i++)
     {
-      unsigned int num;
+      debug_info *debug_info_p = &debug_information[i];
+      unsigned int j;
 
-      num = debug_information [i].num_range_lists;
-      num_range_list += num;
-
-      /* Check if we can use `debug_information' directly.  */
-      if (use_debug_info && num != 0)
+      for (j = 0; j < debug_info_p->num_range_lists; j++)
 	{
-	  if (!seen_first_offset)
-	    {
-	      /* This is the first range list.  */
-	      last_offset = debug_information [i].range_lists [0];
-	      first = i;
-	      seen_first_offset = 1;
-	      j = 1;
-	    }
-	  else
-	    j = 0;
-
-	  for (; j < num; j++)
-	    {
-	      if (last_offset >
-		  debug_information [i].range_lists [j])
-		{
-		  use_debug_info = 0;
-		  break;
-		}
-	      last_offset = debug_information [i].range_lists [j];
-	    }
+	  range_entry_fill->ranges_offset = debug_info_p->range_lists[j];
+	  range_entry_fill->debug_info_p = debug_info_p;
+	  range_entry_fill++;
 	}
     }
 
-  if (!use_debug_info)
-    /* FIXME: Should we handle this case?  */
-    error (_("Range lists in .debug_info section aren't in ascending order!\n"));
-
-  if (!seen_first_offset)
-    error (_("No range lists in .debug_info section!\n"));
+  qsort (range_entries, num_range_list, sizeof (*range_entries),
+	 range_entry_compar);
 
   /* DWARF sections under Mach-O have non-zero addresses.  */
-  if (debug_information [first].num_range_lists > 0
-      && debug_information [first].range_lists [0] != section->address)
+  if (range_entries[0].ranges_offset != section->address)
     warn (_("Range lists in %s section start at 0x%lx\n"),
-	  section->name, debug_information [first].range_lists [0]);
+	  section->name, range_entries[0].ranges_offset);
 
   printf (_("Contents of the %s section:\n\n"), section->name);
   printf (_("    Offset   Begin    End\n"));
 
-  seen_first_offset = 0;
-  for (i = first; i < num_debug_info_entries; i++)
+  for (i = 0; i < num_range_list; i++)
     {
-      dwarf_vma begin;
-      dwarf_vma end;
-      unsigned long offset;
+      struct range_entry *range_entry = &range_entries[i];
+      debug_info *debug_info_p = range_entry->debug_info_p;
       unsigned int pointer_size;
+      unsigned long offset;
+      unsigned char *next;
       unsigned long base_address;
 
-      pointer_size = debug_information [i].pointer_size;
+      pointer_size = debug_info_p->pointer_size;
 
-      for (j = 0; j < debug_information [i].num_range_lists; j++)
+      /* DWARF sections under Mach-O have non-zero addresses.  */
+      offset = range_entry->ranges_offset - section->address;
+      next = section_begin + offset;
+      base_address = debug_info_p->base_address;
+
+      if (i > 0)
 	{
-	  /* DWARF sections under Mach-O have non-zero addresses.  */
-	  offset = debug_information [i].range_lists [j] - section->address;
-	  next = section_begin + offset;
-	  base_address = debug_information [i].base_address;
+	  if (start < next)
+	    warn (_("There is a hole [0x%lx - 0x%lx] in %s section.\n"),
+		  (unsigned long) (start - section_begin),
+		  (unsigned long) (next - section_begin), section->name);
+	  else if (start > next)
+	    warn (_("There is an overlap [0x%lx - 0x%lx] in %s section.\n"),
+		  (unsigned long) (start - section_begin),
+		  (unsigned long) (next - section_begin), section->name);
+	}
+      start = next;
 
-	  if (!seen_first_offset)
-	    seen_first_offset = 1;
-	  else
+      while (1)
+	{
+	  dwarf_vma begin;
+	  dwarf_vma end;
+
+	  /* Note: we use sign extension here in order to be sure that
+	     we can detect the -1 escape value.  Sign extension into the
+	     top 32 bits of a 32-bit address will not affect the values
+	     that we display since we always show hex values, and always
+	     the bottom 32-bits.  */
+	  begin = byte_get_signed (start, pointer_size);
+	  start += pointer_size;
+	  end = byte_get_signed (start, pointer_size);
+	  start += pointer_size;
+
+	  printf ("    %8.8lx ", offset);
+
+	  if (begin == 0 && end == 0)
 	    {
-	      if (start < next)
-		warn (_("There is a hole [0x%lx - 0x%lx] in %s section.\n"),
-		      (unsigned long) (start - section_begin),
-		      (unsigned long) (next - section_begin), section->name);
-	      else if (start > next)
-		warn (_("There is an overlap [0x%lx - 0x%lx] in %s section.\n"),
-		      (unsigned long) (start - section_begin),
-		      (unsigned long) (next - section_begin), section->name);
+	      printf (_("<End of list>\n"));
+	      break;
 	    }
-	  start = next;
 
-	  while (1)
+	  /* Check base address specifiers.  */
+	  if (begin == (dwarf_vma) -1 && end != (dwarf_vma) -1)
 	    {
-	      /* Note: we use sign extension here in order to be sure that
-		 we can detect the -1 escape value.  Sign extension into the
-		 top 32 bits of a 32-bit address will not affect the values
-		 that we display since we always show hex values, and always
-		 the bottom 32-bits.  */
-	      begin = byte_get_signed (start, pointer_size);
-	      start += pointer_size;
-	      end = byte_get_signed (start, pointer_size);
-	      start += pointer_size;
-
-	      printf ("    %8.8lx ", offset);
-
-	      if (begin == 0 && end == 0)
-		{
-		  printf (_("<End of list>\n"));
-		  break;
-		}
-
-	      /* Check base address specifiers.  */
-	      if (begin == (dwarf_vma) -1 && end != (dwarf_vma) -1)
-		{
-		  base_address = end;
-		  print_dwarf_vma (begin, pointer_size);
-		  print_dwarf_vma (end, pointer_size);
-		  printf ("(base address)\n");
-		  continue;
-		}
-
-	      print_dwarf_vma (begin + base_address, pointer_size);
-	      print_dwarf_vma (end + base_address, pointer_size);
-
-	      if (begin == end)
-		fputs (_("(start == end)"), stdout);
-	      else if (begin > end)
-		fputs (_("(start > end)"), stdout);
-
-	      putchar ('\n');
+	      base_address = end;
+	      print_dwarf_vma (begin, pointer_size);
+	      print_dwarf_vma (end, pointer_size);
+	      printf ("(base address)\n");
+	      continue;
 	    }
+
+	  print_dwarf_vma (begin + base_address, pointer_size);
+	  print_dwarf_vma (end + base_address, pointer_size);
+
+	  if (begin == end)
+	    fputs (_("(start == end)"), stdout);
+	  else if (begin > end)
+	    fputs (_("(start > end)"), stdout);
+
+	  putchar ('\n');
 	}
     }
   putchar ('\n');
+
+  free (range_entries);
+
   return 1;
 }
 

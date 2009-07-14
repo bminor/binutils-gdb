@@ -87,6 +87,7 @@ typedef struct
   int		*have_frame_base;
   unsigned int   num_loc_offsets;
   unsigned int   max_loc_offsets;
+  /* List of .debug_ranges offsets seen in this .debug_info.  */
   unsigned long *range_lists;
   unsigned int   num_range_lists;
   unsigned int   max_range_lists;
