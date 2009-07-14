@@ -4591,14 +4591,15 @@ process_stop_reply (struct stop_reply *stop_reply,
       /* Expedited registers.  */
       if (stop_reply->regcache)
 	{
+	  struct regcache *regcache
+	    = get_thread_arch_regcache (ptid, target_gdbarch);
 	  cached_reg_t *reg;
 	  int ix;
 
 	  for (ix = 0;
 	       VEC_iterate(cached_reg_t, stop_reply->regcache, ix, reg);
 	       ix++)
-	    regcache_raw_supply (get_thread_regcache (ptid),
-				 reg->num, reg->data);
+	    regcache_raw_supply (regcache, reg->num, reg->data);
 	  VEC_free (cached_reg_t, stop_reply->regcache);
 	}
 

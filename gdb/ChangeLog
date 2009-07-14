@@ -1,3 +1,8 @@
+2009-07-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* remote.c (process_stop_reply): Access expedited target registers
+	in target_gdbarch.
+
 2009-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix memory access from signed 32bit inferior registers on 64bit GDB.
