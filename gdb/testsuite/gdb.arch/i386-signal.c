@@ -37,6 +37,10 @@ main (void)
    The default CIE created by gas suffices to unwind from an empty
    function.  */
 
+/* Note: to make sure that the Dwarf unwinder gets to handle
+   the frame, we add an extra 'nop' after the label.  Otherwise,
+   the epilogue unwinder will see the 'ret' and grab the frame.  */
+
 asm(".text\n"
     "    .align 8\n"
     "    .globl setup\n"
@@ -49,5 +53,6 @@ asm(".text\n"
     "    nop\n"
     "    .globl sigframe\n"
     "sigframe:\n"
+    "    nop\n"
     "    ret\n"
     "    .cfi_endproc");

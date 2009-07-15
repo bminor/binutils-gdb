@@ -1,3 +1,8 @@
+2009-07-14  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.arch/i386-signal.c (sigframe): Add a nop to avoid
+	confusing the i386 epilogue unwinder.
+
 2009-07-14  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.trace/tracecmd.exp: Add basic test of tracepoint conditions.
