@@ -27,34 +27,6 @@ if { [prepare_for_testing $testfile.exp "$testfile" $srcfile] } {
     return -1
 }
 
-proc test_start_of_line { line_text test_msg } {
-    global gdb_prompt
-    global decimal
-    global hex
-
-    send_gdb "info line\n"
-    gdb_expect {
-	-re "Line $decimal of .* starts at address ($hex) .*$gdb_prompt $" {
-	    set line_begin $expect_out(1,string)
-	}
-	default {
-	    fail "Get line address in test_start_of_line"
-	}
-    }
-    send_gdb "info reg pc\n"
-    gdb_expect {
-	-re ".*: ($hex)\r\n*$gdb_prompt $" {
-	    set stop_pc $expect_out(1,string)
-	}
-	default {
-	    fail"Get stop pc in test_start_of_line"
-	}
-    }
-    gdb_test "print $line_begin == $stop_pc" \
-	" = 1\[\r\n\]*" \
-	"test_start_of_line, $test_msg"
-}
-
 runto main
 
 if [target_info exists gdb,use_precord] {
@@ -193,7 +165,7 @@ gdb_continue_to_breakpoint "long_long_func" ".*/$srcfile:$breakloc.*"
 set test_msg "reverse finish from long_long_func"
 gdb_test_multiple "finish" "$test_msg" {
     -re ".* long_checkpoint.*$gdb_prompt $" {
-	test_start_of_line "long_checkpoint" "$test_msg"
+	pass "$test_msg"
     }
 }
 
@@ -205,7 +177,7 @@ gdb_continue_to_breakpoint "long_func" ".*/$srcfile:$breakloc.*"
 set test_msg "reverse finish from long_func"
 gdb_test_multiple "finish" "$test_msg" {
     -re ".* int_checkpoint.*$gdb_prompt $" {
-	test_start_of_line "int_checkpoint" "$test_msg"
+	pass "$test_msg"
     }
 }
 
@@ -217,7 +189,7 @@ gdb_continue_to_breakpoint "int_func" ".*/$srcfile:$breakloc.*"
 set test_msg "reverse finish from int_func"
 gdb_test_multiple "finish" "$test_msg" {
     -re ".* short_checkpoint.*$gdb_prompt $" {
-	test_start_of_line "short_checkpoint" "$test_msg"
+	pass "$test_msg"
     }
 }
 
@@ -229,7 +201,7 @@ gdb_continue_to_breakpoint "short_func" ".*/$srcfile:$breakloc.*"
 set test_msg "reverse finish from short_func"
 gdb_test_multiple "finish" "$test_msg" {
     -re ".* char_checkpoint.*$gdb_prompt $" {
-	test_start_of_line "char_checkpoint" "$test_msg"
+	pass "$test_msg"
     }
 }
 
@@ -241,7 +213,7 @@ gdb_continue_to_breakpoint "char_func" ".*/$srcfile:$breakloc.*"
 set test_msg "reverse finish from char_func"
 gdb_test_multiple "finish" "$test_msg" {
     -re ".* void_checkpoint.*$gdb_prompt $" {
-	test_start_of_line "void_checkpoint" "$test_msg"
+	pass "$test_msg"
     }
 }
 
@@ -253,7 +225,7 @@ gdb_continue_to_breakpoint "void_func" ".*/$srcfile:$breakloc.*"
 set test_msg "reverse finish from void_func"
 gdb_test_multiple "finish" "$test_msg" {
     -re ".* call to void_func.*$gdb_prompt $" {
-	test_start_of_line "call to void_func" "$test_msg"
+	pass "$test_msg"
     }
 }
 

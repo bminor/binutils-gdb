@@ -1,5 +1,8 @@
 2009-07-14  Michael Snyder  <msnyder@vmware.com>
 
+	* gdb.reverse/finish-reverse.exp: Do not expect reverse-finish
+	to bring gdb to the beginning of the calling line.
+
 	* gdb.arch/i386-signal.c (sigframe): Add a nop to avoid
 	confusing the i386 epilogue unwinder.
 
