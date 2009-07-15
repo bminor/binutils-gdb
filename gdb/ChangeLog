@@ -1,3 +1,31 @@
+2009-07-15  Doug Evans  <dje@google.com>
+
+	Code reorg in preparation for adding comdat types support.
+	* dwarf2read.c (struct die_reader_specs): New struct.
+	(locate_pdi_sibling): New arg buffer.  All callers updated.
+	(load_partial_dies, read_partial_die): Ditto.
+	(read_8_bytes): Change return type to ULONGEST.
+	(read_comp_unit): Delete arg abfd.  All callers updated.
+	(read_die_and_children_1): Delete args abfd, cu.  New arg reader.
+	All callers updated.
+	(read_die_and_children, read_die_and_siblings): Ditto.
+	(read_full_die): Ditto.  Move closer to callers.
+	(skip_one_die): New arg buffer.  All callers updated.
+	(load_full_comp_unit): Change return type to void.  All callers
+	updated.
+	(partial_read_comp_unit_head): New args buffer, buffer_size.
+	All callers updated.
+	(process_psymtab_comp_unit): New function, split out from
+	dwarf2_build_psymtabs_hard.
+	(dwarf2_build_psymtabs_hard): Call it.
+	(load_partial_comp_unit): Renamed from load_comp_unit.
+	All callers updated.
+	(skip_children): New arg buffer.  All callers updated.
+	(init_cu_die_reader): New function.
+	(is_ref_attr): New function.
+	(dwarf2_get_ref_die_offset): Call it.
+	(alloc_one_comp_unit): New function.
+
 2009-07-14  Stan Shebs  <stan@codesourcery.com>
 
 	* MAINTAINERS (Global Maintainers): Add Doug Evans.
