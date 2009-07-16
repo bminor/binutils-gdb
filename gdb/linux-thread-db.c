@@ -588,6 +588,25 @@ enable_thread_event_reporting (void)
     }
 }
 
+/* Same as thread_db_find_new_threads_1, but silently ignore errors.  */
+
+static void
+thread_db_find_new_threads_silently (ptid_t ptid)
+{
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      thread_db_find_new_threads_1 (ptid);
+    }
+
+  if (except.reason < 0 && info_verbose)
+  {
+    exception_fprintf (gdb_stderr, except,
+                       "Warning: thread_db_find_new_threads_silently: ");
+  }
+}
+
 /* Lookup a library in which given symbol resides.
    Note: this is looking in GDB process, not in the inferior.
    Returns library name, or NULL.  */
@@ -705,7 +724,13 @@ try_thread_db_load_1 (struct thread_db_info *info)
     push_target (&thread_db_ops);
 
   enable_thread_event_reporting ();
-  thread_db_find_new_threads_1 (inferior_ptid);
+
+  /* There appears to be a bug glibc-2.3.6: call to td_thr_get_info fails
+     with TD_ERR for statically linked executables if td_thr_get_info is
+     called before glibc has initialized itself.  Silently ignore such
+     errors.  */
+
+  thread_db_find_new_threads_silently (inferior_ptid);
   return 1;
 }
 
