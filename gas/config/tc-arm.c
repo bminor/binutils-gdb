@@ -20014,9 +20014,16 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_GOT32:
     case BFD_RELOC_ARM_GOTOFF:
-    case BFD_RELOC_ARM_TARGET2:
       if (fixP->fx_done || !seg->use_rela_p)
 	md_number_to_chars (buf, 0, 4);
+      break;
+      
+    case BFD_RELOC_ARM_TARGET2:
+      /* TARGET2 is not partial-inplace, so we need to write the
+         addend here for REL targets, because it won't be written out
+         during reloc processing later.  */
+      if (fixP->fx_done || !seg->use_rela_p)
+	md_number_to_chars (buf, fixP->fx_offset, 4);
       break;
 #endif
 
