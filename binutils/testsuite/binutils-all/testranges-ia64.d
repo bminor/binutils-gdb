@@ -1,8 +1,8 @@
 #PROG: objcopy
-#source: testranges.s
+#source: testranges-ia64.s
 #readelf: -wR --wide
 #name: unordered .debug_info references to .debug_ranges
-#not-target: ia64-*-*
+#target: ia64-*-*
 
 Contents of the .debug_ranges section:
 

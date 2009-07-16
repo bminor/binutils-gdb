@@ -1,3 +1,12 @@
+2009-07-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/objcopy.exp; Run testranges-ia64.
+
+	* binutils-all/testranges.d: Don't run for ia64.
+
+	* binutils-all/testranges-ia64.d: New.
+	* binutils-all/testranges-ia64.s: Likewise.
+
 2009-07-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* binutils-all/objcopy.exp (testranges): New test.
