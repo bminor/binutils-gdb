@@ -1,3 +1,7 @@
+2009-07-15  Kai Tietz  <kai.tietz@onevision.com>
+
+	* listing.c (print_source): Initialize cache by NULL.
+
 2009-07-15  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* doc/c-arm.texi (mauto-it): Removed old option.

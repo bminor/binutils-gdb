@@ -983,7 +983,7 @@ print_source (file_info_type *  current_file,
 #define NUM_CACHE_LINES  3
   static cached_line cached_lines[NUM_CACHE_LINES];
   static int next_free_line = 0;
-  cached_line * cache;
+  cached_line * cache = NULL;
 
   if (current_file->linenum > list->hll_line
       && list->hll_line > 0)
