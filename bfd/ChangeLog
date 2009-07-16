@@ -1,3 +1,9 @@
+2009-07-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Don't get local
+	STT_GNU_IFUNC symbol for relocatable link.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+
 2009-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfdio.c (bfd_iovec): Add comments for bmmap.

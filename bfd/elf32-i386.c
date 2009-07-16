@@ -2891,7 +2891,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  break;
 		}
 	    }
-	  else if (ELF32_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+	  else if (!info->relocatable
+		   && ELF32_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 	    {
 	      /* Relocate against local STT_GNU_IFUNC symbol.  */
 	      h = elf_i386_get_local_sym_hash (htab, input_bfd,

@@ -2612,7 +2612,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 						&sec, rel);
 
 	  /* Relocate against local STT_GNU_IFUNC symbol.  */
-	  if (ELF64_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+	  if (!info->relocatable
+	      && ELF64_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 	    {
 	      h = elf64_x86_64_get_local_sym_hash (htab, input_bfd,
 						   rel, FALSE);
