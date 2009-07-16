@@ -1,9 +1,13 @@
+2009-07-16  Doug Evans  <dje@google.com>
+
+	* linux-thread.db.c (try_thread_db_load_1): Tweak comment.
+
 2007-07-16  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* linux-thread-db.c (thread_db_find_new_threads_silently):
 	New function.
 	(try_thread_db_load_1): Call it.
-	
+
 2009-07-15  Doug Evans  <dje@google.com>
 
 	Code reorg in preparation for adding comdat types support.

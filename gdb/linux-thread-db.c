@@ -725,12 +725,12 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   enable_thread_event_reporting ();
 
-  /* There appears to be a bug glibc-2.3.6: call to td_thr_get_info fails
+  /* There appears to be a bug in glibc-2.3.6: calls to td_thr_get_info fail
      with TD_ERR for statically linked executables if td_thr_get_info is
      called before glibc has initialized itself.  Silently ignore such
-     errors.  */
-
+     errors, and let gdb enumerate threads again later.  */
   thread_db_find_new_threads_silently (inferior_ptid);
+
   return 1;
 }
 
