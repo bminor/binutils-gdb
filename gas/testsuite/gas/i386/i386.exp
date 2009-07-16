@@ -183,6 +183,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_dump_test "intel-regs"
 	run_list_test "inval-equ-1" "-al"
 	run_list_test "inval-equ-2" "-al"
+	run_dump_test "ifunc"
     }
 
     # This is a PE specific test.
@@ -338,6 +339,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 	run_dump_test "reloc64"
 	run_list_test "reloc64" "--defsym _bad_=1"
 	run_dump_test "mixed-mode-reloc64"
+	run_dump_test "x86-64-ifunc"
     }
 
     set ASFLAGS "$old_ASFLAGS"

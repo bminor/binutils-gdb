@@ -2821,7 +2821,7 @@ md_assemble (char *line)
   if (i.types[0].bitfield.imm1)
     i.imm_operands = 0;	/* kludge for shift insns.  */
 
-  for (j = 0; j < 3; j++)
+  for (j = 0; j < i.operands; j++)
     if (i.types[j].bitfield.inoutportreg
 	|| i.types[j].bitfield.shiftcount
 	|| i.types[j].bitfield.acc
@@ -6975,7 +6975,9 @@ md_estimate_size_before_relax (fragP, segment)
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       || (IS_ELF
 	  && (S_IS_EXTERNAL (fragP->fr_symbol)
-	      || S_IS_WEAK (fragP->fr_symbol)))
+	      || S_IS_WEAK (fragP->fr_symbol)
+	      || ((symbol_get_bfdsym (fragP->fr_symbol)->flags
+		   & BSF_GNU_INDIRECT_FUNCTION))))
 #endif
 #if defined (OBJ_COFF) && defined (TE_PE)
       || (OUTPUT_FLAVOR == bfd_target_coff_flavour
