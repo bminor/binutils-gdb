@@ -1,3 +1,37 @@
+2009-07-16  Ian Lance Taylor  <iant@google.com>
+
+	PR 10400
+	* layout.h: #include <map>.
+	(class Kept_section): Change from struct to class.  Add accessors
+	and setters.  Add section size to Comdat_group mapping.  Change
+	Comdat_group to std::map.  Add is_comdat_ field.  Add
+	linkonce_size field in union.
+	(class Layout): Update declaration of find_or_add_kept_section.
+	Don't declare find_kept_object.
+	* layout.cc (Layout::find_or_add_kept_section): Remove candidate
+	parameter.  Add object, shndx, is_comdat, and is_group_name
+	parameters.  Change all callers.  Adjust for new Kept_section.
+	(Layout::find_kept_object): Remove.
+	* object.cc (Sized_relobj::include_section_group): Update use of
+	Kept_section.  Rename secnum to shndx.  Only record
+	Kept_comdat_section if sections are the same size.
+	(Sized_relobj::include_linkonce_section): Update use of
+	Kept_section.  Only record Kept_comdat_section if sections are the
+	same size.  Set size of linkonce section.
+	(Sized_relobj::map_to_kept_section): Update call to
+	get_kept_comdat_section.
+	* object.h (class Sized_relobj): Rename fields in
+	Kept_comdat_section to drop trailing underscores; change object
+	field to Relobj*.  Change Kept_comdat_section_table to store
+	struct rather than pointer.
+	(Sized_relobj::set_kept_comdat_section): Remove kept parameter.
+	Add kept_object and kept_shndx parameters.  Change all callers.
+	(Sized_relobj::get_kept_comdat_section): Change return type to
+	bool.  Add kept_object and kept_shndx parameters.  Change all
+	callers.
+	* plugin.cc (Pluginobj::include_comdat_group): Update call to
+	Layout::find_or_add_kept_section.
+
 2009-07-09  Ian Lance Taylor  <iant@google.com>
 
 	* merge.cc (Object_merge_map::initialize_input_to_output_map):

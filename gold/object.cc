@@ -686,24 +686,20 @@ Sized_relobj<size, big_endian>::include_section_group(
   // Record this section group in the layout, and see whether we've already
   // seen one with the same signature.
   bool include_group;
-  Sized_relobj<size, big_endian>* kept_object = NULL;
-  Kept_section::Comdat_group* kept_group = NULL;
+  bool is_comdat;
+  Kept_section* kept_section = NULL;
 
   if ((flags & elfcpp::GRP_COMDAT) == 0)
-    include_group = true;
+    {
+      include_group = true;
+      is_comdat = false;
+    }
   else
     {
-      Kept_section this_group(this, index, true);
-      Kept_section *kept_section_group;
       include_group = layout->find_or_add_kept_section(signature,
-                                                       &this_group,
-                                                       &kept_section_group);
-      if (include_group)
-        kept_section_group->group_sections = new Kept_section::Comdat_group;
-
-      kept_group = kept_section_group->group_sections;
-      kept_object = (static_cast<Sized_relobj<size, big_endian>*>
-		     (kept_section_group->object));
+						       this, index, true,
+						       true, &kept_section);
+      is_comdat = true;
     }
 
   size_t count = shdr.get_sh_size() / sizeof(elfcpp::Elf_Word);
@@ -715,27 +711,27 @@ Sized_relobj<size, big_endian>::include_section_group(
 
   for (size_t i = 1; i < count; ++i)
     {
-      elfcpp::Elf_Word secnum =
+      elfcpp::Elf_Word shndx =
 	this->adjust_shndx(elfcpp::Swap<32, big_endian>::readval(pword + i));
 
       if (relocate_group)
-	shndxes.push_back(secnum);
+	shndxes.push_back(shndx);
 
-      if (secnum >= this->shnum())
+      if (shndx >= this->shnum())
 	{
 	  this->error(_("section %u in section group %u out of range"),
-		      secnum, index);
+		      shndx, index);
 	  continue;
 	}
 
       // Check for an earlier section number, since we're going to get
       // it wrong--we may have already decided to include the section.
-      if (secnum < index)
+      if (shndx < index)
         this->error(_("invalid section group %u refers to earlier section %u"),
-                    index, secnum);
+                    index, shndx);
 
       // Get the name of the member section.
-      typename This::Shdr member_shdr(shdrs + secnum * This::shdr_size);
+      typename This::Shdr member_shdr(shdrs + shndx * This::shdr_size);
       if (member_shdr.get_sh_name() >= section_names_size)
         {
           // This is an error, but it will be diagnosed eventually
@@ -745,28 +741,52 @@ Sized_relobj<size, big_endian>::include_section_group(
         }
       std::string mname(section_names + member_shdr.get_sh_name());
 
-      if (!include_group)
+      if (include_group)
+	{
+	  if (is_comdat)
+	    kept_section->add_comdat_section(mname, shndx,
+					     member_shdr.get_sh_size());
+	}
+      else
         {
-          (*omit)[secnum] = true;
-          if (kept_group != NULL)
+          (*omit)[shndx] = true;
+
+	  if (is_comdat)
             {
-              // Find the corresponding kept section, and store that info
-              // in the discarded section table.
-              Kept_section::Comdat_group::const_iterator p =
-                kept_group->find(mname);
-              if (p != kept_group->end())
-                {
-                  Kept_comdat_section* kept =
-                    new Kept_comdat_section(kept_object, p->second);
-                  this->set_kept_comdat_section(secnum, kept);
-                }
+	      Relobj* kept_object = kept_section->object();
+	      if (kept_section->is_comdat())
+		{
+		  // Find the corresponding kept section, and store
+		  // that info in the discarded section table.
+		  unsigned int kept_shndx;
+		  uint64_t kept_size;
+		  if (kept_section->find_comdat_section(mname, &kept_shndx,
+							&kept_size))
+		    {
+		      // We don't keep a mapping for this section if
+		      // it has a different size.  The mapping is only
+		      // used for relocation processing, and we don't
+		      // want to treat the sections as similar if the
+		      // sizes are different.  Checking the section
+		      // size is the approach used by the GNU linker.
+		      if (kept_size == member_shdr.get_sh_size())
+			this->set_kept_comdat_section(shndx, kept_object,
+						      kept_shndx);
+		    }
+		}
+	      else
+		{
+		  // The existing section is a linkonce section.  Add
+		  // a mapping if there is exactly one section in the
+		  // group (which is true when COUNT == 2) and if it
+		  // is the same size.
+		  if (count == 2
+		      && (kept_section->linkonce_size()
+			  == member_shdr.get_sh_size()))
+		    this->set_kept_comdat_section(shndx, kept_object,
+						  kept_section->shndx());
+		}
             }
-        }
-      else if (flags & elfcpp::GRP_COMDAT)
-        {
-          // Add the section to the kept group table.
-          gold_assert(kept_group != NULL);
-          kept_group->insert(std::make_pair(mname, secnum));
         }
     }
 
@@ -798,8 +818,9 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
     Layout* layout,
     unsigned int index,
     const char* name,
-    const elfcpp::Shdr<size, big_endian>&)
+    const elfcpp::Shdr<size, big_endian>& shdr)
 {
+  typename elfcpp::Elf_types<size>::Elf_WXword sh_size = shdr.get_sh_size();
   // In general the symbol name we want will be the string following
   // the last '.'.  However, we have to handle the case of
   // .gnu.linkonce.t.__i686.get_pc_thunk.bx, which was generated by
@@ -816,29 +837,24 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
     symname = strrchr(name, '.') + 1;
   std::string sig1(symname);
   std::string sig2(name);
-  Kept_section candidate1(this, index, false);
-  Kept_section candidate2(this, index, true);
   Kept_section* kept1;
   Kept_section* kept2;
-  bool include1 = layout->find_or_add_kept_section(sig1, &candidate1, &kept1);
-  bool include2 = layout->find_or_add_kept_section(sig2, &candidate2, &kept2);
+  bool include1 = layout->find_or_add_kept_section(sig1, this, index, false,
+						   false, &kept1);
+  bool include2 = layout->find_or_add_kept_section(sig2, this, index, false,
+						   true, &kept2);
 
   if (!include2)
     {
-      // The section is being discarded on the basis of its section
-      // name (i.e., the kept section was also a linkonce section).
-      // In this case, the section index stored with the layout object
-      // is the linkonce section that was kept.
-      unsigned int kept_group_index = kept2->shndx;
-      Relobj* kept_relobj = kept2->object;
-      if (kept_relobj != NULL)
-        {
-          Sized_relobj<size, big_endian>* kept_object =
-	    static_cast<Sized_relobj<size, big_endian>*>(kept_relobj);
-          Kept_comdat_section* kept =
-            new Kept_comdat_section(kept_object, kept_group_index);
-          this->set_kept_comdat_section(index, kept);
-        }
+      // We are not including this section because we already saw the
+      // name of the section as a signature.  This normally implies
+      // that the kept section is another linkonce section.  If it is
+      // the same size, record it as the section which corresponds to
+      // this one.
+      if (kept2->object() != NULL
+	  && !kept2->is_comdat()
+	  && kept2->linkonce_size() == sh_size)
+	this->set_kept_comdat_section(index, kept2->object(), kept2->shndx());
     }
   else if (!include1)
     {
@@ -849,22 +865,18 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
       // this linkonce section.  We'll handle the simple case where
       // the group has only one member section.  Otherwise, it's not
       // worth the effort.
-      Relobj* kept_relobj = kept1->object;
-      if (kept_relobj != NULL)
-        {
-          Sized_relobj<size, big_endian>* kept_object =
-	    static_cast<Sized_relobj<size, big_endian>*>(kept_relobj);
-          Kept_section::Comdat_group* kept_group = kept1->group_sections;
-          if (kept_group != NULL && kept_group->size() == 1)
-            {
-              Kept_section::Comdat_group::const_iterator p =
-		kept_group->begin();
-              gold_assert(p != kept_group->end());
-              Kept_comdat_section* kept =
-                new Kept_comdat_section(kept_object, p->second);
-              this->set_kept_comdat_section(index, kept);
-            }
-        }
+      unsigned int kept_shndx;
+      uint64_t kept_size;
+      if (kept1->object() != NULL
+	  && kept1->is_comdat()
+	  && kept1->find_single_comdat_section(&kept_shndx, &kept_size)
+	  && kept_size == sh_size)
+	this->set_kept_comdat_section(index, kept1->object(), kept_shndx);
+    }
+  else
+    {
+      kept1->set_linkonce_size(sh_size);
+      kept2->set_linkonce_size(sh_size);
     }
 
   return include1 && include2;
@@ -1216,7 +1228,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
           out_sections[i] = reinterpret_cast<Output_section*>(2);
           out_section_offsets[i] = invalid_address;
           continue;
-              }
+	}
       // During gc_pass_two if a section that was previously deferred is
       // found, do not layout the section as layout_deferred_sections will
       // do it later from gold.cc.
@@ -1915,15 +1927,19 @@ Sized_relobj<size, big_endian>::map_to_kept_section(
     unsigned int shndx,
     bool* found) const
 {
-  Kept_comdat_section *kept = this->get_kept_comdat_section(shndx);
-  if (kept != NULL)
+  Relobj* kept_object;
+  unsigned int kept_shndx;
+  if (this->get_kept_comdat_section(shndx, &kept_object, &kept_shndx))
     {
-      gold_assert(kept->object_ != NULL);
-      *found = true;
-      Output_section* os = kept->object_->output_section(kept->shndx_);
-      Address offset = kept->object_->get_output_section_offset(kept->shndx_);
+      Sized_relobj<size, big_endian>* kept_relobj =
+	static_cast<Sized_relobj<size, big_endian>*>(kept_object);
+      Output_section* os = kept_relobj->output_section(kept_shndx);
+      Address offset = kept_relobj->get_output_section_offset(kept_shndx);
       if (os != NULL && offset != invalid_address)
-        return os->address() + offset;
+	{
+	  *found = true;
+	  return os->address() + offset;
+	}
     }
   *found = false;
   return 0;

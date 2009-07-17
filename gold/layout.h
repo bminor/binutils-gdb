@@ -25,6 +25,7 @@
 
 #include <cstring>
 #include <list>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -90,35 +91,192 @@ class Layout_task_runner : public Task_function_runner
   Mapfile* mapfile_;
 };
 
-// This struct holds information about the comdat or .gnu.linkonce
-// that will be kept.
+// This class holds information about the comdat group or
+// .gnu.linkonce section that will be kept for a given signature.
 
-struct Kept_section
+class Kept_section
 {
+ private:
+  // For a comdat group, we build a mapping from the name of each
+  // section in the group to the section index and the size in object.
+  // When we discard a group in some other object file, we use this
+  // map to figure out which kept section the discarded section is
+  // associated with.  We then use that mapping when processing relocs
+  // against discarded sections.
+  struct Comdat_section_info
+  {
+    // The section index.
+    unsigned int shndx;
+    // The section size.
+    uint64_t size;
+
+    Comdat_section_info(unsigned int a_shndx, uint64_t a_size)
+      : shndx(a_shndx), size(a_size)
+    { }
+  };
+
+  // Most comdat groups have only one or two sections, so we use a
+  // std::map rather than an Unordered_map to optimize for that case
+  // without paying too heavily for groups with more sections.
+  typedef std::map<std::string, Comdat_section_info> Comdat_group;
+
+ public:
   Kept_section()
-    : object(NULL), shndx(0), is_group(false), group_sections(NULL)
-  { }
-  Kept_section(Relobj* a_object, unsigned int a_shndx, bool a_is_group)
-    : object(a_object), shndx(a_shndx), is_group(a_is_group),
-      group_sections(NULL)
-  { }
+    : object_(NULL), shndx_(0), is_comdat_(false), is_group_name_(false)
+  { this->u_.linkonce_size = 0; }
 
-  typedef Unordered_map<std::string, unsigned int> Comdat_group;
+  // We need to support copies for the signature map in the Layout
+  // object, but we should never copy an object after it has been
+  // marked as a comdat section.
+  Kept_section(const Kept_section& k)
+    : object_(k.object_), shndx_(k.shndx_), is_comdat_(false),
+      is_group_name_(k.is_group_name_)
+  {
+    gold_assert(!k.is_comdat_);
+    this->u_.linkonce_size = 0;
+  }
 
-  // The object containing the comdat or .gnu.linkonce.
-  Relobj* object;
-  // Index to the group section for comdats and the section itself for
+  ~Kept_section()
+  {
+    if (this->is_comdat_)
+      delete this->u_.group_sections;
+  }
+
+  // The object where this section lives.
+  Relobj*
+  object() const
+  { return this->object_; }
+
+  // Set the object.
+  void
+  set_object(Relobj* object)
+  {
+    gold_assert(this->object_ == NULL);
+    this->object_ = object;
+  }
+
+  // The section index.
+  unsigned int
+  shndx() const
+  { return this->shndx_; }
+
+  // Set the section index.
+  void
+  set_shndx(unsigned int shndx)
+  {
+    gold_assert(this->shndx_ == 0);
+    this->shndx_ = shndx;
+  }
+
+  // Whether this is a comdat group.
+  bool
+  is_comdat() const
+  { return this->is_comdat_; }
+
+  // Set that this is a comdat group.
+  void
+  set_is_comdat()
+  {
+    gold_assert(!this->is_comdat_);
+    this->is_comdat_ = true;
+    this->u_.group_sections = new Comdat_group();
+  }
+
+  // Whether this is associated with the name of a group or section
+  // rather than the symbol name derived from a linkonce section.
+  bool
+  is_group_name() const
+  { return this->is_group_name_; }
+
+  // Note that this represents a comdat group rather than a single
+  // linkonce section.
+  void
+  set_is_group_name()
+  { this->is_group_name_ = true; }
+
+  // Add a section to the group list.
+  void
+  add_comdat_section(const std::string& name, unsigned int shndx,
+		     uint64_t size)
+  {
+    gold_assert(this->is_comdat_);
+    Comdat_section_info sinfo(shndx, size);
+    this->u_.group_sections->insert(std::make_pair(name, sinfo));
+  }
+
+  // Look for a section name in the group list, and return whether it
+  // was found.  If found, returns the section index and size.
+  bool
+  find_comdat_section(const std::string& name, unsigned int *pshndx,
+		      uint64_t *psize) const
+  {
+    gold_assert(this->is_comdat_);
+    Comdat_group::const_iterator p = this->u_.group_sections->find(name);
+    if (p == this->u_.group_sections->end())
+      return false;
+    *pshndx = p->second.shndx;
+    *psize = p->second.size;
+    return true;
+  }
+
+  // If there is only one section in the group list, return true, and
+  // return the section index and size.
+  bool
+  find_single_comdat_section(unsigned int *pshndx, uint64_t *psize) const
+  {
+    gold_assert(this->is_comdat_);
+    if (this->u_.group_sections->size() != 1)
+      return false;
+    Comdat_group::const_iterator p = this->u_.group_sections->begin();
+    *pshndx = p->second.shndx;
+    *psize = p->second.size;
+    return true;
+  }
+
+  // Return the size of a linkonce section.
+  uint64_t
+  linkonce_size() const
+  {
+    gold_assert(!this->is_comdat_);
+    return this->u_.linkonce_size;
+  }
+
+  // Set the size of a linkonce section.
+  void
+  set_linkonce_size(uint64_t size)
+  {
+    gold_assert(!this->is_comdat_);
+    this->u_.linkonce_size = size;
+  }
+
+ private:
+  // No assignment.
+  Kept_section& operator=(const Kept_section&);
+
+  // The object containing the comdat group or .gnu.linkonce section.
+  Relobj* object_;
+  // Index of the group section for comdats and the section itself for
   // .gnu.linkonce.
-  unsigned int shndx;
+  unsigned int shndx_;
+  // True if this is for a comdat group rather than a .gnu.linkonce
+  // section.
+  bool is_comdat_;
   // The Kept_sections are values of a mapping, that maps names to
   // them.  This field is true if this struct is associated with the
   // name of a comdat or .gnu.linkonce, false if it is associated with
   // the name of a symbol obtained from the .gnu.linkonce.* name
   // through some heuristics.
-  bool is_group;
-  // For comdats, a map from names of the sections in the group to
-  // indexes in OBJECT_.  NULL for .gnu.linkonce.
-  Comdat_group* group_sections;
+  bool is_group_name_;
+  union
+  {
+    // If the is_comdat_ field is true, this holds a map from names of
+    // the sections in the group to section indexes in object_ and to
+    // section sizes.
+    Comdat_group* group_sections;
+    // If the is_comdat_ field is false, this holds the size of the
+    // single section.
+    uint64_t linkonce_size;
+  } u_;
 };
 
 // This class handles the details of laying out input sections.
@@ -270,20 +428,14 @@ class Layout
   // Check if a comdat group or .gnu.linkonce section with the given
   // NAME is selected for the link.  If there is already a section,
   // *KEPT_SECTION is set to point to the signature and the function
-  // returns false.  Otherwise, the CANDIDATE signature is recorded
-  // for this NAME in the layout object, *KEPT_SECTION is set to the
-  // internal copy and the function return false.  In some cases, with
-  // CANDIDATE->GROUP_ being false, KEPT_SECTION can point back to
-  // CANDIDATE.
+  // returns false.  Otherwise, OBJECT, SHNDX,IS_COMDAT, and
+  // IS_GROUP_NAME are recorded for this NAME in the layout object,
+  // *KEPT_SECTION is set to the internal copy and the function return
+  // false.
   bool
-  find_or_add_kept_section(const std::string& name,
-                           Kept_section* candidate,
-                           Kept_section** kept_section);
-
-  // Find the given comdat signature, and return the object and section
-  // index of the kept group.
-  Relobj*
-  find_kept_object(const std::string&, unsigned int*) const;
+  find_or_add_kept_section(const std::string& name, Relobj* object, 
+			   unsigned int shndx, bool is_comdat,
+			   bool is_group_name, Kept_section** kept_section);
 
   // Finalize the layout after all the input sections have been added.
   off_t

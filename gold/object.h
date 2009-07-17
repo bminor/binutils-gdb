@@ -1590,14 +1590,13 @@ class Sized_relobj : public Relobj
   // kept section.
   struct Kept_comdat_section
   {
-    Kept_comdat_section(Sized_relobj<size, big_endian>* object,
-                        unsigned int shndx)
-      : object_(object), shndx_(shndx)
+    Kept_comdat_section(Relobj* a_object, unsigned int a_shndx)
+      : object(a_object), shndx(a_shndx)
     { }
-    Sized_relobj<size, big_endian>* object_;
-    unsigned int shndx_;
+    Relobj* object;
+    unsigned int shndx;
   };
-  typedef std::map<unsigned int, Kept_comdat_section*>
+  typedef std::map<unsigned int, Kept_comdat_section>
       Kept_comdat_section_table;
 
   // Adjust a section index if necessary.
@@ -1729,20 +1728,26 @@ class Sized_relobj : public Relobj
   // Record a mapping from discarded section SHNDX to the corresponding
   // kept section.
   void
-  set_kept_comdat_section(unsigned int shndx, Kept_comdat_section* kept)
+  set_kept_comdat_section(unsigned int shndx, Relobj* kept_object,
+			  unsigned int kept_shndx)
   {
-    this->kept_comdat_sections_[shndx] = kept;
+    Kept_comdat_section kept(kept_object, kept_shndx);
+    this->kept_comdat_sections_.insert(std::make_pair(shndx, kept));
   }
 
-  // Find the kept section corresponding to the discarded section SHNDX.
-  Kept_comdat_section*
-  get_kept_comdat_section(unsigned int shndx) const
+  // Find the kept section corresponding to the discarded section
+  // SHNDX.  Return true if found.
+  bool
+  get_kept_comdat_section(unsigned int shndx, Relobj** kept_object,
+			  unsigned int* kept_shndx) const
   {
     typename Kept_comdat_section_table::const_iterator p =
       this->kept_comdat_sections_.find(shndx);
     if (p == this->kept_comdat_sections_.end())
-      return NULL;
-    return p->second;
+      return false;
+    *kept_object = p->second.object;
+    *kept_shndx = p->second.shndx;
+    return true;
   }
 
   // The GOT offsets of local symbols. This map also stores GOT offsets

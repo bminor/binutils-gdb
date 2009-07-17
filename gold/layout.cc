@@ -3045,16 +3045,18 @@ Layout::output_section_name(const char* name, size_t* plen)
 
 // Check if a comdat group or .gnu.linkonce section with the given
 // NAME is selected for the link.  If there is already a section,
-// *KEPT_SECTION is set to point to the signature and the function
-// returns false.  Otherwise, the CANDIDATE signature is recorded for
-// this NAME in the layout object, *KEPT_SECTION is set to the
-// internal copy and the function return false.  In some cases, with
-// CANDIDATE->GROUP_ being false, KEPT_SECTION can point back to
-// CANDIDATE.
+// *KEPT_SECTION is set to point to the existing section and the
+// function returns false.  Otherwise, OBJECT, SHNDX, IS_COMDAT, and
+// IS_GROUP_NAME are recorded for this NAME in the layout object,
+// *KEPT_SECTION is set to the internal copy and the function returns
+// true.
 
 bool
 Layout::find_or_add_kept_section(const std::string& name,
-                                 Kept_section* candidate,
+				 Relobj* object,
+				 unsigned int shndx,
+				 bool is_comdat,
+				 bool is_group_name,
                                  Kept_section** kept_section)
 {
   // It's normal to see a couple of entries here, for the x86 thunk
@@ -3068,36 +3070,46 @@ Layout::find_or_add_kept_section(const std::string& name,
       this->resized_signatures_ = true;
     }
 
-  std::pair<Signatures::iterator, bool> ins(
-    this->signatures_.insert(std::make_pair(name, *candidate)));
+  Kept_section candidate;
+  std::pair<Signatures::iterator, bool> ins =
+    this->signatures_.insert(std::make_pair(name, candidate));
 
-  if (kept_section)
+  if (kept_section != NULL)
     *kept_section = &ins.first->second;
   if (ins.second)
     {
       // This is the first time we've seen this signature.
+      ins.first->second.set_object(object);
+      ins.first->second.set_shndx(shndx);
+      if (is_comdat)
+	ins.first->second.set_is_comdat();
+      if (is_group_name)
+	ins.first->second.set_is_group_name();
       return true;
     }
 
-  if (ins.first->second.is_group)
+  // We have already seen this signature.
+
+  if (ins.first->second.is_group_name())
     {
       // We've already seen a real section group with this signature.
-      // If the kept group is from a plugin object, and we're in
-      // the replacement phase, accept the new one as a replacement.
-      if (ins.first->second.object == NULL
+      // If the kept group is from a plugin object, and we're in the
+      // replacement phase, accept the new one as a replacement.
+      if (ins.first->second.object() == NULL
           && parameters->options().plugins()->in_replacement_phase())
         {
-          ins.first->second = *candidate;
+	  ins.first->second.set_object(object);
+	  ins.first->second.set_shndx(shndx);
           return true;
         }
       return false;
     }
-  else if (candidate->is_group)
+  else if (is_group_name)
     {
       // This is a real section group, and we've already seen a
       // linkonce section with this signature.  Record that we've seen
       // a section group, and don't include this section group.
-      ins.first->second.is_group = true;
+      ins.first->second.set_is_group_name();
       return false;
     }
   else
@@ -3105,23 +3117,8 @@ Layout::find_or_add_kept_section(const std::string& name,
       // We've already seen a linkonce section and this is a linkonce
       // section.  These don't block each other--this may be the same
       // symbol name with different section types.
-      *kept_section = candidate;
       return true;
     }
-}
-
-// Find the given comdat signature, and return the object and section
-// index of the kept group.
-Relobj*
-Layout::find_kept_object(const std::string& signature,
-                         unsigned int* pshndx) const
-{
-  Signatures::const_iterator p = this->signatures_.find(signature);
-  if (p == this->signatures_.end())
-    return NULL;
-  if (pshndx != NULL)
-    *pshndx = p->second.shndx;
-  return p->second.object;
 }
 
 // Store the allocated sections into the section list.
