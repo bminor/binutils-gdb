@@ -1,3 +1,8 @@
+2009-07-17  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (display_debug_lines): If do_debug_lines has not been
+	set then default to displaying raw .debug_line section contents.
+
 2009-07-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Support unordered .debug_info references to .debug_ranges.

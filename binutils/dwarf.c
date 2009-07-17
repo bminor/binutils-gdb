@@ -2813,6 +2813,9 @@ display_debug_lines (struct dwarf_section *section, void *file)
       return 0;
     }
 
+  if (do_debug_lines == 0)
+    do_debug_lines |= FLAG_DEBUG_LINES_RAW;
+
   if (do_debug_lines & FLAG_DEBUG_LINES_RAW)
     retValRaw = display_debug_lines_raw (section, data, end);
 
