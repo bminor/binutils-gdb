@@ -1,5 +1,12 @@
 2009-07-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (md_assemble): Update operand types.
+	(update_imm): Updated.
+	(finalize_imm): Update the first 2 immediate operands only
+	for instructions with 2 operands or more.
+
+2009-07-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (md_assemble): Check implicit registers
 	only for instructions with 3 operands or less.
 

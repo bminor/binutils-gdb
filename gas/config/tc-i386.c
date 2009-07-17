@@ -2813,6 +2813,10 @@ md_assemble (char *line)
   if (!process_suffix ())
     return;
 
+  /* Update operand types.  */
+  for (j = 0; j < i.operands; j++)
+    i.types[j] = operand_type_and (i.types[j], i.tm.operand_types[j]);
+
   /* Make still unresolved immediate matches conform to size of immediate
      given in i.suffix.  */
   if (!finalize_imm ())
@@ -4434,9 +4438,7 @@ check_word_reg (void)
 static int
 update_imm (unsigned int j)
 {
-  i386_operand_type overlap;
-
-  overlap = operand_type_and (i.types[j], i.tm.operand_types[j]);
+  i386_operand_type overlap = i.types[j];
   if ((overlap.bitfield.imm8
        || overlap.bitfield.imm8s
        || overlap.bitfield.imm16
@@ -4500,14 +4502,19 @@ update_imm (unsigned int j)
 static int
 finalize_imm (void)
 {
-  unsigned int j;
+  unsigned int j, n;
 
-  for (j = 0; j < 2; j++)
-    if (update_imm (j) == 0)
-      return 0;
+  /* Update the first 2 immediate operands.  */
+  n = i.operands > 2 ? 2 : i.operands;
+  if (n)
+    {
+      for (j = 0; j < n; j++)
+	if (update_imm (j) == 0)
+	  return 0;
 
-  i.types[2] = operand_type_and (i.types[2], i.tm.operand_types[2]);
-  gas_assert (operand_type_check (i.types[2], imm) == 0);
+      /* The 3rd operand can't be immediate operand.  */
+      gas_assert (operand_type_check (i.types[2], imm) == 0);
+    }
 
   return 1;
 }
