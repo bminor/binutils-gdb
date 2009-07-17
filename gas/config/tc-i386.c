@@ -2821,12 +2821,15 @@ md_assemble (char *line)
   if (i.types[0].bitfield.imm1)
     i.imm_operands = 0;	/* kludge for shift insns.  */
 
-  for (j = 0; j < i.operands; j++)
-    if (i.types[j].bitfield.inoutportreg
-	|| i.types[j].bitfield.shiftcount
-	|| i.types[j].bitfield.acc
-	|| i.types[j].bitfield.floatacc)
-      i.reg_operands--;
+  /* We only need to check those implicit registers for instructions
+     with 3 operands or less.  */
+  if (i.operands <= 3)
+    for (j = 0; j < i.operands; j++)
+      if (i.types[j].bitfield.inoutportreg
+	  || i.types[j].bitfield.shiftcount
+	  || i.types[j].bitfield.acc
+	  || i.types[j].bitfield.floatacc)
+	i.reg_operands--;
 
   /* ImmExt should be processed after SSE2AVX.  */
   if (!i.tm.opcode_modifier.sse2avx
