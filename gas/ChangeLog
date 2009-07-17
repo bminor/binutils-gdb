@@ -1,3 +1,8 @@
+2009-07-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-avr.c (md_apply_fix): Cast fixup reloc type to avoid
+	compile time warning.
+
 2009-07-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_assemble): Only check i.operands for AX.

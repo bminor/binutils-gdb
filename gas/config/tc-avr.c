@@ -1244,7 +1244,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
     }
   else
     {
-      switch (fixP->fx_r_type)
+      switch ((int) fixP->fx_r_type)
 	{
 	case -BFD_RELOC_AVR_HI8_LDI_NEG:
 	case -BFD_RELOC_AVR_HI8_LDI:
