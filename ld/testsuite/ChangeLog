@@ -1,3 +1,10 @@
+2009-07-17  Chao-ying Fu  <fu@mips.com>
+
+	* ld-mips-elf/pic-and-nonpic-3b.dd: Updated to use new PLT
+	entries.
+	* ld-mips-elf/pic-and-nonpic-5b.dd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-o32.dd: Likewise.
+
 2009-07-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-ifunc/ifunc-5r-local-i386.d: New.

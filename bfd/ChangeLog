@@ -1,3 +1,11 @@
+2009-07-17  Chao-ying Fu  <fu@mips.com>
+
+	* elfxx-mips.c (LOAD_INTERLOCKS_P): New define.
+	(_bfd_mips_elf_size_dynamic_sections): For CPUs without load
+	interlocking, the last PLT entry needs a nop in the branch delay slot.
+	(_bfd_mips_elf_finish_dynamic_symbol): For CPUs with load itnerlocking,
+	output the last two PLT entries in reverse order.
+
 2009-07-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Don't get local
