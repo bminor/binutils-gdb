@@ -1300,6 +1300,7 @@ _initialize_frv_solib (void)
   frv_so_ops.current_sos = frv_current_sos;
   frv_so_ops.open_symbol_file_object = open_symbol_file_object;
   frv_so_ops.in_dynsym_resolve_code = frv_in_dynsym_resolve_code;
+  frv_so_ops.bfd_open = solib_bfd_open;
 
   /* Debug this file's internals.  */
   add_setshow_zinteger_cmd ("solib-frv", class_maintenance,

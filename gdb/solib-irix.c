@@ -740,4 +740,5 @@ _initialize_irix_solib (void)
   irix_so_ops.current_sos = irix_current_sos;
   irix_so_ops.open_symbol_file_object = irix_open_symbol_file_object;
   irix_so_ops.in_dynsym_resolve_code = irix_in_dynsym_resolve_code;
+  irix_so_ops.bfd_open = solib_bfd_open;
 }

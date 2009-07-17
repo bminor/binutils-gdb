@@ -492,4 +492,5 @@ _initialize_solib_target (void)
     = solib_target_open_symbol_file_object;
   solib_target_so_ops.in_dynsym_resolve_code
     = solib_target_in_dynsym_resolve_code;
+  solib_target_so_ops.bfd_open = solib_bfd_open;
 }

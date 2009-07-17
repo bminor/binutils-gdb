@@ -840,6 +840,7 @@ _initialize_sunos_solib (void)
   sunos_so_ops.current_sos = sunos_current_sos;
   sunos_so_ops.open_symbol_file_object = open_symbol_file_object;
   sunos_so_ops.in_dynsym_resolve_code = sunos_in_dynsym_resolve_code;
+  sunos_so_ops.bfd_open = solib_bfd_open;
 
   /* FIXME: Don't do this here.  *_gdbarch_init() should set so_ops. */
   current_target_so_ops = &sunos_so_ops;

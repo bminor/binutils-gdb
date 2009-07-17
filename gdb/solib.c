@@ -285,15 +285,10 @@ solib_bfd_fopen (char *pathname, int fd)
 bfd *
 solib_bfd_open (char *pathname)
 {
-  struct target_so_ops *ops = solib_ops (target_gdbarch);
   char *found_pathname;
   int found_file;
   bfd *abfd;
   const struct bfd_arch_info *b;
-
-  /* Use target-specific override if present.  */
-  if (ops->bfd_open)
-    return ops->bfd_open (pathname);
 
   /* Search for shared library file.  */
   found_pathname = solib_find (pathname, &found_file);
@@ -354,6 +349,7 @@ static int
 solib_map_sections (void *arg)
 {
   struct so_list *so = (struct so_list *) arg;	/* catch_errors bogon */
+  struct target_so_ops *ops = solib_ops (target_gdbarch);
   char *filename;
   struct target_section *p;
   struct cleanup *old_chain;
@@ -361,7 +357,7 @@ solib_map_sections (void *arg)
 
   filename = tilde_expand (so->so_name);
   old_chain = make_cleanup (xfree, filename);
-  abfd = solib_bfd_open (filename);
+  abfd = ops->bfd_open (filename);
   do_cleanups (old_chain);
 
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
@@ -381,8 +377,6 @@ solib_map_sections (void *arg)
 
   for (p = so->sections; p < so->sections_end; p++)
     {
-      struct target_so_ops *ops = solib_ops (target_gdbarch);
-
       /* Relocate the section binding addresses as recorded in the shared
          object's file by the base address to which the object was actually
          mapped. */

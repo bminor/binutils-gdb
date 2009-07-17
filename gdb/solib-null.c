@@ -81,6 +81,7 @@ _initialize_null_solib (void)
   null_so_ops.current_sos = null_current_sos;
   null_so_ops.open_symbol_file_object = null_open_symbol_file_object;
   null_so_ops.in_dynsym_resolve_code = null_in_dynsym_resolve_code;
+  null_so_ops.bfd_open = solib_bfd_open;
 
   /* Set current_target_so_ops to null_so_ops if not already set.  */
   if (current_target_so_ops == 0)
