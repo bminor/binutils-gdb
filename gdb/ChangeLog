@@ -1,3 +1,7 @@
+2009-07-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Respect mixed_mode flag.
+
 2009-07-16  Doug Evans  <dje@google.com>
 
 	* linux-thread.db.c (try_thread_db_load_1): Tweak comment.
