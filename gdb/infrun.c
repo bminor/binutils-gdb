@@ -3776,9 +3776,8 @@ infrun: not switching back to stepped thread, it has vanished\n");
      previous frame must have valid frame IDs.  */
   if (!frame_id_eq (get_stack_frame_id (frame),
 		    ecs->event_thread->step_stack_frame_id)
-      && (frame_id_eq (frame_unwind_caller_id (frame),
-		       ecs->event_thread->step_stack_frame_id)
-	  || execution_direction == EXEC_REVERSE))
+      && frame_id_eq (frame_unwind_caller_id (frame),
+		      ecs->event_thread->step_stack_frame_id))
     {
       CORE_ADDR real_stop_pc;
 
@@ -3806,6 +3805,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
       /* Reverse stepping through solib trampolines.  */
 
       if (execution_direction == EXEC_REVERSE
+	  && ecs->event_thread->step_over_calls != STEP_OVER_NONE
 	  && (gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc)
 	      || (ecs->stop_func_start == 0
 		  && in_solib_dynsym_resolve_code (stop_pc))))
@@ -3921,6 +3921,38 @@ infrun: not switching back to stepped thread, it has vanished\n");
 
       keep_going (ecs);
       return;
+    }
+
+  /* Reverse stepping through solib trampolines.  */
+
+  if (execution_direction == EXEC_REVERSE
+      && ecs->event_thread->step_over_calls != STEP_OVER_NONE)
+    {
+      if (gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc)
+	  || (ecs->stop_func_start == 0
+	      && in_solib_dynsym_resolve_code (stop_pc)))
+	{
+	  /* Any solib trampoline code can be handled in reverse
+	     by simply continuing to single-step.  We have already
+	     executed the solib function (backwards), and a few 
+	     steps will take us back through the trampoline to the
+	     caller.  */
+	  keep_going (ecs);
+	  return;
+	}
+      else if (in_solib_dynsym_resolve_code (stop_pc))
+	{
+	  /* Stepped backward into the solib dynsym resolver.
+	     Set a breakpoint at its start and continue, then
+	     one more step will take us out.  */
+	  struct symtab_and_line sr_sal;
+	  init_sal (&sr_sal);
+	  sr_sal.pc = ecs->stop_func_start;
+	  insert_step_resume_breakpoint_at_sal (gdbarch, 
+						sr_sal, null_frame_id);
+	  keep_going (ecs);
+	  return;
+	}
     }
 
   /* If we're in the return path from a shared library trampoline,
