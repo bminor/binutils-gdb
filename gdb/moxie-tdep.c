@@ -145,10 +145,9 @@ moxie_store_return_value (struct type *type, struct regcache *regcache,
 
 static CORE_ADDR
 moxie_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
-		      struct moxie_frame_cache *cache,
-		      struct frame_info *this_frame)
+			struct moxie_frame_cache *cache,
+			struct gdbarch *gdbarch)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR next_addr;
   ULONGEST inst, inst2;
@@ -226,7 +225,7 @@ moxie_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  memset (&cache, 0, sizeof cache);
 	  
 	  plg_end = moxie_analyze_prologue (func_addr, 
-					    func_end, &cache, NULL);
+					    func_end, &cache, gdbarch);
 	  /* Found a function.  */
 	  sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL);
 	  /* Don't use line number debug info for assembly source
@@ -384,7 +383,10 @@ moxie_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache->pc = get_frame_func (this_frame);
   current_pc = get_frame_pc (this_frame);
   if (cache->pc)
-    moxie_analyze_prologue (cache->pc, current_pc, cache, this_frame);
+    {
+      struct gdbarch *gdbarch = get_frame_arch (this_frame);
+      moxie_analyze_prologue (cache->pc, current_pc, cache, gdbarch);
+    }
 
   cache->saved_sp = cache->base - cache->framesize;
 

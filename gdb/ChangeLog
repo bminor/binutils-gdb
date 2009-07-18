@@ -1,3 +1,10 @@
+2009-07-18  Anthony Green  <green@moxielogic.com>
+
+	* moxie-tdep.c (moxie_analyze_prologue): Take gdbarch as last
+	parameter instead of frame_info.
+	(moxie_frame_cache): Call moxie_analyze_prologue with different
+	args.
+
 2009-07-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* solib.c (solib_bfd_open): Do not call ops->bfd_open.
