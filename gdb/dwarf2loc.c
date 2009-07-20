@@ -70,21 +70,27 @@ find_location_expression (struct dwarf2_loclist_baton *baton,
 
   while (1)
     {
-      low = dwarf2_read_address (gdbarch, loc_ptr, buf_end, addr_size);
+      if (buf_end - loc_ptr < 2 * addr_size)
+	error (_("find_location_expression: Corrupted DWARF expression."));
+
+      low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
       loc_ptr += addr_size;
-      high = dwarf2_read_address (gdbarch, loc_ptr, buf_end, addr_size);
+
+      /* A base-address-selection entry.  */
+      if (low == base_mask)
+	{
+	  base_address = dwarf2_read_address (gdbarch,
+					      loc_ptr, buf_end, addr_size);
+	  loc_ptr += addr_size;
+	  continue;
+	}
+
+      high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
       loc_ptr += addr_size;
 
       /* An end-of-list entry.  */
       if (low == 0 && high == 0)
 	return NULL;
-
-      /* A base-address-selection entry.  */
-      if ((low & base_mask) == base_mask)
-	{
-	  base_address = high;
-	  continue;
-	}
 
       /* Otherwise, a location expression entry.  */
       low += base_address;
