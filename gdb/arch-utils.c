@@ -717,8 +717,10 @@ gdbarch_info_fill (struct gdbarch_info *info)
   if (info->osabi == GDB_OSABI_UNKNOWN && info->target_desc != NULL)
     info->osabi = tdesc_osabi (info->target_desc);
   /* From the configured default.  */
+#ifdef GDB_OSABI_DEFAULT
   if (info->osabi == GDB_OSABI_UNKNOWN)
     info->osabi = GDB_OSABI_DEFAULT;
+#endif
 
   /* Must have at least filled in the architecture.  */
   gdb_assert (info->bfd_arch_info != NULL);
