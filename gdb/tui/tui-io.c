@@ -113,7 +113,9 @@ key_is_command_char (int ch)
    #undef TUI_USE_PIPE_FOR_READLINE.  */
 
 /* For gdb 5.3, prefer to continue the pipe hack as a backup wheel.  */
+#ifdef HAVE_PIPE
 #define TUI_USE_PIPE_FOR_READLINE
+#endif
 /* #undef TUI_USE_PIPE_FOR_READLINE */
 
 /* TUI output files.  */

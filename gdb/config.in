@@ -279,6 +279,9 @@
 /* Define if you support the personality syscall. */
 #undef HAVE_PERSONALITY
 
+/* Define to 1 if you have the `pipe' function. */
+#undef HAVE_PIPE
+
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
 

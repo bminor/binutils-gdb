@@ -1,3 +1,9 @@
+2009-07-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CHECK_FUNCS): Check for pipe.
+	* config.in, configure: Regenerate.
+	* tui/tui-io.c (TUI_USE_PIPE_FOR_READLINE): Define if HAVE_PIPE.
+
 2009-07-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* gnu-nat.c: Include "inf-child.h".
