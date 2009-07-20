@@ -1,3 +1,58 @@
+2009-07-20  Doug Evans  <dje@google.com>
+
+	Add support for "comdat types" from DWARF4.
+	* dwarf2read.c (dwarf2_per_objfile): New member types,
+	signatured_types.
+	(TYPES_SECTION): New macro.
+	(dwarf2_per_cu_data): Change size of length field from 30 bits
+	to 29 bits.  New member from_debug_types.
+	(signatured_type): New struct.
+	(struct attribute): New union member signatured_type.
+	(DW_SIGNATURED_TYPE): New macro.
+	(dwarf2_attr_no_follow): New function.
+	(read_type_unit_scope): New function.
+	(follow_die_ref_or_sig, follow_die_sig): New functions.
+	(dwarf2_locate_sectoins): Handle .debug_types.
+	(dwarf2_build_psymtabs): Read .debug_types.
+	(read_type_comp_unit_head): New function.
+	(hash_type_signature, eq_type_signature): New functions.
+	(create_debug_types_hash_table): New function.
+	(lookup_signatured_type): New function.
+	(process_psymtab_comp_unit): Handle type units too.
+	(process_type_comp_unit, build_type_psymtabs): New functions.
+	(dwarf2_build_psymtabs_hard): Call build_type_psymtabs.
+	(load_partial_comp_unit): Assert not called for a type unit.
+	(skip_one_die): Handle DW_FORM_sig8.
+	(queue_comp_unit): Don't call load_full_comp_unit here, or
+	update read_in_chain.
+	(psymtab_to_symtab_1): Call read_signatured_type_at_offset for
+	type units, or load_full_comp_unit for comp units after
+	queue_comp_unit returns.
+	(load_full_comp_unit): Assert not called for type units.
+	(load_full_comp_unit): Update read_in_chain here.
+	(process_die): Handle DW_TAG_type_unit.
+	(read_structure_type): Look for signatured types.
+	(read_enumeration_type): Ditto.
+	(init_cu_die_reader): Handle .debug_types.
+	(read_comp_unit): Assert hash not computed yet.
+	(read_die_and_children): Expand debugging printf to handle .debug_types.
+	(read_partial_die): Handle DW_TAG_type_unit:
+	(find_patial_die): Handle .debug_types.
+	(read_attribute_value): Handle DW_FORM_sig8.
+	(die_type): Call follow_die_ref_or_sig instead of follow_die_ref.
+	(die_containing_type): Ditto.
+	(dwarf_tag_name): Handle DW_TAG_type_unit.
+	(dwarf_attr_name): Handle DW_AT_signature.
+	(dwarf_form_name): Handle DW_FORM_sec_offset, DW_FORM_exprloc,
+	DW_FORM_flag_present, DW_FORM_sig8.
+	(dump_die_shallow): Handlel DW_FORM_sig8.
+	(maybe_queue_comp_unit): Change return type to int from void.
+	All callers updated.
+	(follow_die_ref): Handle .debug_types.
+	(lookup_signatured_type_at_offset): New function.
+	(read_signatured_type_at_offset): New function.
+	(read_signatured_type): New function.
+
 2009-07-20  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* arch-utils.c (gdbarch_info_fill): Only reference GDB_OSABI_DEFAULT
