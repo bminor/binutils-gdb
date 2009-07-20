@@ -1,3 +1,25 @@
+2009-07-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* gnu-nat.c: Include "inf-child.h".
+	(gnu_mourn_inferior): Use the passed in target_ops
+	instead of the gnu_ops global.
+	(gnu_create_inferior): Inline `attach_to_child', use the passed in
+	target_ops instead of the gnu_ops global.
+	(gnu_can_run): Delete.
+	(gnu_attach): Use the passed in target_ops instead of the gnu_ops
+	global.
+	(gnu_detach): Ditto.
+	(gnu_prepare_to_store, gnu_open): Delete.
+	(gnu_store_registers, gnu_fetch_registers): Delete declarations.
+	(gnu_ops): Delete.
+	(init_gnu_ops): Delete.
+	(gnu_target): New.
+	(_initialize_gnu_nat): Don't call init_gnu_ops or add_target here.
+	* gnu-nat.h (gnu_target): Declare.
+	* i386gnu-nat.c (gnu_fetch_registers, gnu_store_registers): Make
+	static.
+	(_initialize_i386gnu_nat): New.
+
 2009-07-20  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dwarf2loc.c (find_location_expression): Retrieve beginning and

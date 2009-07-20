@@ -66,6 +66,7 @@
 #include "gdb_obstack.h"
 
 #include "gnu-nat.h"
+#include "inf-child.h"
 
 #include "exc_request_S.h"
 #include "notify_S.h"
@@ -86,8 +87,6 @@ int proc_waits_pending = 0;
 int gnu_debug_flag = 0;
 
 /* Forward decls */
-
-extern struct target_ops gnu_ops;
 
 struct inf *make_inf ();
 void inf_clear_wait (struct inf *inf);
@@ -2049,7 +2048,7 @@ gnu_mourn_inferior (struct target_ops *ops)
 {
   inf_debug (gnu_current_inf, "rip");
   inf_detach (gnu_current_inf);
-  unpush_target (&gnu_ops);
+  unpush_target (ops);
   generic_mourn_inferior ();
 }
 
@@ -2082,6 +2081,7 @@ gnu_create_inferior (struct target_ops *ops,
 		     int from_tty)
 {
   struct inf *inf = cur_inf ();
+  int pid;
 
   void trace_me ()
   {
@@ -2090,34 +2090,31 @@ gnu_create_inferior (struct target_ops *ops,
     if (ptrace (PTRACE_TRACEME) != 0)
       error (_("ptrace (PTRACE_TRACEME) failed!"));
   }
-  void attach_to_child (int pid)
-  {
-    /* Attach to the now stopped child, which is actually a shell...  */
-    inf_debug (inf, "attaching to child: %d", pid);
-
-    inf_attach (inf, pid);
-
-    push_target (&gnu_ops);
-
-    inf->pending_execs = 2;
-    inf->nomsg = 1;
-    inf->traced = 1;
-
-    /* Now let the child run again, knowing that it will stop immediately
-       because of the ptrace. */
-    inf_resume (inf);
-
-    /* We now have thread info.  */
-    thread_change_ptid (inferior_ptid,
-			ptid_build (inf->pid, 0, inf_pick_first_thread ()));
-
-    startup_inferior (inf->pending_execs);
-  }
 
   inf_debug (inf, "creating inferior");
 
-  fork_inferior (exec_file, allargs, env, trace_me, attach_to_child,
-		 NULL, NULL);
+  pid = fork_inferior (exec_file, allargs, env, trace_me, NULL, NULL, NULL);
+
+  /* Attach to the now stopped child, which is actually a shell...  */
+  inf_debug (inf, "attaching to child: %d", pid);
+
+  inf_attach (inf, pid);
+
+  push_target (ops);
+
+  inf->pending_execs = 2;
+  inf->nomsg = 1;
+  inf->traced = 1;
+
+  /* Now let the child run again, knowing that it will stop
+     immediately because of the ptrace. */
+  inf_resume (inf);
+
+  /* We now have thread info.  */
+  thread_change_ptid (inferior_ptid,
+		      ptid_build (inf->pid, 0, inf_pick_first_thread ()));
+
+  startup_inferior (inf->pending_execs);
 
   inf_validate_procinfo (inf);
   inf_update_signal_thread (inf);
@@ -2129,14 +2126,6 @@ gnu_create_inferior (struct target_ops *ops,
     inf_steal_exc_ports (inf);
   else
     inf_restore_exc_ports (inf);
-}
-
-/* Mark our target-struct as eligible for stray "run" and "attach"
-   commands.  */
-static int
-gnu_can_run (void)
-{
-  return 1;
 }
 
 
@@ -2175,7 +2164,7 @@ gnu_attach (struct target_ops *ops, char *args, int from_tty)
 
   inf_attach (inf, pid);
 
-  push_target (&gnu_ops);
+  push_target (ops);
 
   inferior = add_inferior (pid);
   inferior->attach_flag = 1;
@@ -2231,7 +2220,7 @@ gnu_detach (struct target_ops *ops, char *args, int from_tty)
   inferior_ptid = null_ptid;
   detach_inferior (pid);
 
-  unpush_target (&gnu_ops);	/* Pop out of handling an inferior */
+  unpush_target (ops);	/* Pop out of handling an inferior */
 }
 
 static void
@@ -2239,22 +2228,6 @@ gnu_terminal_init_inferior (void)
 {
   gdb_assert (gnu_current_inf);
   terminal_init_inferior_with_pgrp (gnu_current_inf->pid);
-}
-
-/* Get ready to modify the registers array.  On machines which store
-   individual registers, this doesn't need to do anything.  On machines
-   which store all the registers in one fell swoop, this makes sure
-   that registers contains all the registers from the program being
-   debugged.  */
-static void
-gnu_prepare_to_store (struct regcache *regcache)
-{
-}
-
-static void
-gnu_open (char *arg, int from_tty)
-{
-  error (_("Use the \"run\" command to start a Unix child process."));
 }
 
 static void
@@ -2615,53 +2588,35 @@ gnu_pid_to_str (struct target_ops *ops, ptid_t ptid)
 }
 
 
-extern void gnu_store_registers (struct target_ops *ops,
-				 struct regcache *regcache, int regno);
-extern void gnu_fetch_registers (struct target_ops *ops,
-				 struct regcache *regcache, int regno);
+/* Create a prototype generic GNU/Hurd target.  The client can
+   override it with local methods.  */
 
-struct target_ops gnu_ops;
-
-static void
-init_gnu_ops (void)
+struct target_ops *
+gnu_target (void)
 {
-  gnu_ops.to_shortname = "GNU";		/* to_shortname */
-  gnu_ops.to_longname = "GNU Hurd process"; /* to_longname */
-  gnu_ops.to_doc = "GNU Hurd process";	/* to_doc */
-  gnu_ops.to_open = gnu_open;		/* to_open */
-  gnu_ops.to_attach = gnu_attach;	/* to_attach */
-  gnu_ops.to_attach_no_wait = 1;	/* to_attach_no_wait */
-  gnu_ops.to_detach = gnu_detach;	/* to_detach */
-  gnu_ops.to_resume = gnu_resume;	/* to_resume */
-  gnu_ops.to_wait = gnu_wait;		/* to_wait */
-  gnu_ops.to_fetch_registers = gnu_fetch_registers;    /* to_fetch_registers */
-  gnu_ops.to_store_registers = gnu_store_registers;    /* to_store_registers */
-  gnu_ops.to_prepare_to_store = gnu_prepare_to_store; /* to_prepare_to_store */
-  gnu_ops.deprecated_xfer_memory = gnu_xfer_memory;
-  gnu_ops.to_find_memory_regions = gnu_find_memory_regions;
-  gnu_ops.to_insert_breakpoint = memory_insert_breakpoint;
-  gnu_ops.to_remove_breakpoint = memory_remove_breakpoint;
-  gnu_ops.to_terminal_init = gnu_terminal_init_inferior;
-  gnu_ops.to_terminal_inferior = terminal_inferior;
-  gnu_ops.to_terminal_ours_for_output = terminal_ours_for_output;
-  gnu_ops.to_terminal_save_ours = terminal_save_ours;
-  gnu_ops.to_terminal_ours = terminal_ours;
-  gnu_ops.to_terminal_info = child_terminal_info;
-  gnu_ops.to_kill = gnu_kill_inferior;	/* to_kill */
-  gnu_ops.to_create_inferior = gnu_create_inferior; /* to_create_inferior */
-  gnu_ops.to_mourn_inferior = gnu_mourn_inferior;	/* to_mourn_inferior */
-  gnu_ops.to_can_run = gnu_can_run;	/* to_can_run */
-  gnu_ops.to_thread_alive = gnu_thread_alive;	/* to_thread_alive */
-  gnu_ops.to_pid_to_str = gnu_pid_to_str;   /* to_pid_to_str */
-  gnu_ops.to_stop = gnu_stop;	/* to_stop */
-  gnu_ops.to_stratum = process_stratum;		/* to_stratum */
-  gnu_ops.to_has_all_memory = default_child_has_all_memory;
-  gnu_ops.to_has_memory = default_child_has_memory;
-  gnu_ops.to_has_stack = default_child_has_stack;
-  gnu_ops.to_has_registers = default_child_has_registers;
-  gnu_ops.to_has_execution = default_child_has_execution;
-  gnu_ops.to_magic = OPS_MAGIC;		/* to_magic */
-}				/* init_gnu_ops */
+  struct target_ops *t = inf_child_target ();
+
+  t->to_shortname = "GNU";
+  t->to_longname = "GNU Hurd process";
+  t->to_doc = "GNU Hurd process";
+
+  t->to_attach = gnu_attach;
+  t->to_attach_no_wait = 1;
+  t->to_detach = gnu_detach;
+  t->to_resume = gnu_resume;
+  t->to_wait = gnu_wait;
+  t->deprecated_xfer_memory = gnu_xfer_memory;
+  t->to_find_memory_regions = gnu_find_memory_regions;
+  t->to_terminal_init = gnu_terminal_init_inferior;
+  t->to_kill = gnu_kill_inferior;
+  t->to_create_inferior = gnu_create_inferior;
+  t->to_mourn_inferior = gnu_mourn_inferior;
+  t->to_thread_alive = gnu_thread_alive;
+  t->to_pid_to_str = gnu_pid_to_str;
+  t->to_stop = gnu_stop;
+
+  return t;
+}
 
 
 /* User task commands.  */
@@ -3405,9 +3360,6 @@ void
 _initialize_gnu_nat (void)
 {
   proc_server = getproc ();
-  
-  init_gnu_ops ();
-  add_target (&gnu_ops);
 
   add_task_commands ();
   add_thread_commands ();
