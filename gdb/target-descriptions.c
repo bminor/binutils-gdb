@@ -165,6 +165,10 @@ struct target_desc
   /* The architecture reported by the target, if any.  */
   const struct bfd_arch_info *arch;
 
+  /* The osabi reported by the target, if any; GDB_OSABI_UNKNOWN
+     otherwise.  */
+  enum gdb_osabi osabi;
+
   /* Any architecture-specific properties specified by the target.  */
   VEC(property_s) *properties;
 
@@ -351,6 +355,16 @@ tdesc_architecture (const struct target_desc *target_desc)
 {
   return target_desc->arch;
 }
+
+/* Return the OSABI associated with this target description, or
+   GDB_OSABI_UNKNOWN if no osabi was specified.  */
+
+enum gdb_osabi
+tdesc_osabi (const struct target_desc *target_desc)
+{
+  return target_desc->osabi;
+}
+
 
 
 /* Return 1 if this target description includes any registers.  */
@@ -1160,6 +1174,12 @@ set_tdesc_architecture (struct target_desc *target_desc,
 			const struct bfd_arch_info *arch)
 {
   target_desc->arch = arch;
+}
+
+void
+set_tdesc_osabi (struct target_desc *target_desc, enum gdb_osabi osabi)
+{
+  target_desc->osabi = osabi;
 }
 
 

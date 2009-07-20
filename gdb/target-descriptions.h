@@ -123,6 +123,11 @@ int tdesc_numbered_register_choices (const struct tdesc_feature *feature,
 const struct bfd_arch_info *tdesc_architecture
   (const struct target_desc *);
 
+/* Return the OSABI associated with this target description, or
+   GDB_OSABI_UNKNOWN if no osabi was specified.  */
+
+enum gdb_osabi tdesc_osabi (const struct target_desc *);
+
 /* Return the string value of a property named KEY, or NULL if the
    property was not specified.  */
 
@@ -167,6 +172,7 @@ struct target_desc *allocate_target_description (void);
 struct cleanup *make_cleanup_free_target_description (struct target_desc *);
 void set_tdesc_architecture (struct target_desc *,
 			     const struct bfd_arch_info *);
+void set_tdesc_osabi (struct target_desc *, enum gdb_osabi osabi);
 void set_tdesc_property (struct target_desc *,
 			 const char *key, const char *value);
 

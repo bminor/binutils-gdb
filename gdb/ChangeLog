@@ -1,3 +1,36 @@
+2009-07-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* features/gdb-target.dtd (target): Accept an optional 'osabi'
+	element.
+	(osabi): Define element.
+	* features/mips-linux.xml (target): Add an osabi subelement set to
+	GNU/Linux.
+	* regformats/regdat.sh (xmlarch, xmlosabi): New variables.  Don't
+	write the architecture into $xmltarget.  Store it in $xmlarch.
+	Handle the 'osabi' type.  Handle outputting the osabi element of
+	the target description.
+	* regformats/reg-x86-64-linux.dat (osabi): Set to GNU/Linux.
+	* regformats/reg-i386-linux.dat (osabi): Set to GNU/Linux.
+
+	* target-descriptions.h (tdesc_osabi, set_tdesc_osabi): Declare.
+	* target-descriptions.c (struct target_desc) <osabi>: New field.
+	(tdesc_osabi): New function.
+	(set_tdesc_osabi): New function.
+	* xml-tdesc.c: Include osabi.h.
+	(tdesc_end_osabi): New.
+	(target_children): Parse "osabi" elements.
+	* arch-utils.c (gdbarch_info_fill): Try to get the osabi from the
+	target description if the user didn't override it or it is not
+	extractable from the bfd.  If that still fails, fallback to the
+	configured in default.
+	* osabi.h (osabi_from_tdesc_string): Declare.
+	* osabi.c (osabi_from_tdesc_string): New.
+	(gdbarch_lookup_osabi): Return GDB_OSABI_UNKNOWN instead of
+	GDB_OSABI_DEFAULT.
+
+	* NEWS: Mention that target descriptions can now describe the
+	target OS ABI.
+
 2009-07-20  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (AC_CHECK_FUNCS): Check for pipe.

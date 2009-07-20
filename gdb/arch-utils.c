@@ -710,8 +710,15 @@ gdbarch_info_fill (struct gdbarch_info *info)
   info->byte_order_for_code = info->byte_order;
 
   /* "(gdb) set osabi ...".  Handled by gdbarch_lookup_osabi.  */
+  /* From the manual override, or from file.  */
   if (info->osabi == GDB_OSABI_UNINITIALIZED)
     info->osabi = gdbarch_lookup_osabi (info->abfd);
+  /* From the target.  */
+  if (info->osabi == GDB_OSABI_UNKNOWN && info->target_desc != NULL)
+    info->osabi = tdesc_osabi (info->target_desc);
+  /* From the configured default.  */
+  if (info->osabi == GDB_OSABI_UNKNOWN)
+    info->osabi = GDB_OSABI_DEFAULT;
 
   /* Must have at least filled in the architecture.  */
   gdb_assert (info->bfd_arch_info != NULL);

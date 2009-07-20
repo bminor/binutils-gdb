@@ -1,5 +1,6 @@
 name:i386_linux
 xmlarch:i386
+osabi:GNU/Linux
 expedite:ebp,esp,eip
 32:eax
 32:ecx

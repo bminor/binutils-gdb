@@ -24,6 +24,7 @@
 #include "target-descriptions.h"
 #include "xml-support.h"
 #include "xml-tdesc.h"
+#include "osabi.h"
 
 #include "filenames.h"
 
@@ -103,6 +104,24 @@ tdesc_end_arch (struct gdb_xml_parser *parser,
     gdb_xml_error (parser, _("Target description specified unknown "
 			     "architecture \"%s\""), body_text);
   set_tdesc_architecture (data->tdesc, arch);
+}
+
+/* Handle the end of an <osabi> element and its value.  */
+
+static void
+tdesc_end_osabi (struct gdb_xml_parser *parser,
+		 const struct gdb_xml_element *element,
+		 void *user_data, const char *body_text)
+{
+  struct tdesc_parsing_data *data = user_data;
+  enum gdb_osabi osabi;
+
+  osabi = osabi_from_tdesc_string (body_text);
+  if (osabi == GDB_OSABI_UNKNOWN)
+    warning (_("Target description specified unknown osabi \"%s\""),
+	     body_text);
+  else
+    set_tdesc_osabi (data->tdesc, osabi);
 }
 
 /* Handle the start of a <target> element.  */
@@ -313,6 +332,8 @@ static const struct gdb_xml_attribute target_attributes[] = {
 static const struct gdb_xml_element target_children[] = {
   { "architecture", NULL, NULL, GDB_XML_EF_OPTIONAL,
     NULL, tdesc_end_arch },
+  { "osabi", NULL, NULL, GDB_XML_EF_OPTIONAL,
+    NULL, tdesc_end_osabi },
   { "feature", feature_attributes, feature_children,
     GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
     tdesc_start_feature, NULL },

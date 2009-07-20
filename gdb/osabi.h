@@ -40,6 +40,10 @@ void gdbarch_register_osabi (enum bfd_architecture, unsigned long,
 /* Lookup the OS ABI corresponding to the specified BFD.  */
 enum gdb_osabi gdbarch_lookup_osabi (bfd *);
 
+/* Lookup the OS ABI corresponding to the specified target description
+   string.  */
+enum gdb_osabi osabi_from_tdesc_string (const char *text);
+
 /* Initialize the gdbarch for the specified OS ABI variant.  */
 void gdbarch_init_osabi (struct gdbarch_info, struct gdbarch *);
 

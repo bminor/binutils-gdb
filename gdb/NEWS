@@ -194,6 +194,10 @@ add new commands to existing prefixes, e.g. "target".
   visible changes; see "New commands" and also "Removed commands"
   below.
 
+* Target descriptions can now describe the target OS ABI.  See the
+"Target Description Format" section in the user manual for more
+information.
+
 * New commands (for set/show, see "New options" below)
 
 find [/size-char] [/max-count] start-address, end-address|+search-space-size,

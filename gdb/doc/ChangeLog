@@ -1,3 +1,9 @@
+2009-07-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Target Description Format): Mention the new <osabi>
+	optional element.
+	(subsection OS ABI): New subsection.
+
 2009-07-14  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Tracepoint Conditions): New section.

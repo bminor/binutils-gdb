@@ -30781,7 +30781,8 @@ their targets, we also describe the grammar here.
 
 Target descriptions can identify the architecture of the remote target
 and (for some architectures) provide information about custom register
-sets.  @value{GDBN} can use this information to autoconfigure for your
+sets.  They can also identify the OS ABI of the remote target.
+@value{GDBN} can use this information to autoconfigure for your
 target, or to warn you if you connect to an unsupported target.
 
 Here is a simple target description:
@@ -30805,6 +30806,7 @@ are explained further below.
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
 <target version="1.0">
   @r{[}@var{architecture}@r{]}
+  @r{[}@var{osabi}@r{]}
   @r{[}@var{feature}@dots{}@r{]}
 </target>
 @end smallexample
@@ -30859,6 +30861,21 @@ An @samp{<architecture>} element has this form:
 @var{arch} is an architecture name from the same selection
 accepted by @code{set architecture} (@pxref{Targets, ,Specifying a
 Debugging Target}).
+
+@subsection OS ABI
+@cindex @code{<osabi>}
+
+This optional field was introduced in @value{GDBN} version 7.0.
+Previous versions of @value{GDBN} ignore it.
+
+An @samp{<osabi>} element has this form:
+
+@smallexample
+  <osabi>@var{abi-name}</osabi>
+@end smallexample
+
+@var{abi-name} is an OS ABI name from the same selection accepted by
+@w{@code{set osabi}} (@pxref{ABI, ,Configuring the Current ABI}).
 
 @subsection Features
 @cindex <feature>

@@ -6,11 +6,16 @@
 
 <!-- The root element of a GDB target description is <target>.  -->
 
-<!ELEMENT target	(architecture?, feature*)>
+<!-- The osabi element was added post GDB 6.8.  The version wasn't
+     bumped, since older GDBs silently ignore unknown elements.  -->
+
+<!ELEMENT target	(architecture?, osabi?, feature*)>
 <!ATTLIST target
 	version		CDATA	#FIXED "1.0">
 
 <!ELEMENT architecture	(#PCDATA)>
+
+<!ELEMENT osabi	(#PCDATA)>
 
 <!ELEMENT feature	((vector | union)*, reg*)>
 <!ATTLIST feature

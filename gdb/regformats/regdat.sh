@@ -128,6 +128,8 @@ offset=0
 i=0
 name=x
 xmltarget=x
+xmlarch=x
+xmlosabi=x
 expedite=x
 exec < $1
 while do_read
@@ -140,7 +142,10 @@ do
     xmltarget="${entry}"
     continue
   elif test "${type}" = "xmlarch"; then
-    xmltarget="@<target><architecture>${entry}</architecture></target>"
+    xmlarch="${entry}"
+    continue
+  elif test "${type}" = "osabi"; then
+    xmlosabi="${entry}"
     continue
   elif test "${type}" = "expedite"; then
     expedite="${entry}"
@@ -159,7 +164,18 @@ echo "};"
 echo
 echo "const char *expedite_regs_${name}[] = { \"`echo ${expedite} | sed 's/,/", "/g'`\", 0 };"
 if test "${xmltarget}" = x; then
-  echo "const char *xmltarget_${name} = 0;"
+  if test "${xmlarch}" = x && test "${xmlosabi}" = x; then
+    echo "const char *xmltarget_${name} = 0;"
+  else
+    echo "const char *xmltarget_${name} = \"@<target>\\"
+    if test "${xmlarch}" != x; then
+      echo "<architecture>${xmlarch}</architecture>\\"
+    fi
+    if test "${xmlosabi}" != x; then
+      echo "<osabi>${xmlosabi}</osabi>\\"
+    fi
+    echo "</target>\";"
+  fi
 else
   echo "const char *xmltarget_${name} = \"${xmltarget}\";"
 fi
