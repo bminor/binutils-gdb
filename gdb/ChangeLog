@@ -1,3 +1,8 @@
+2009-07-20  Thomas Schwinge  <tschwinge@gnu.org>
+
+	* i386gnu-nat.c (gnu_fetch_registers, gnu_store_registers): Adjust to
+	2009-02-23 target_ops changes.
+
 2009-07-18  Michael Snyder  <msnyder@vmware.com>
 
 	* infrun.c (handle_inferior_event): Remove an execution_direction
