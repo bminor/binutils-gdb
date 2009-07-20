@@ -104,6 +104,7 @@ static bfd_boolean disassemble_all;	/* -D */
 static int disassemble_zeroes;		/* --disassemble-zeroes */
 static bfd_boolean formats_info;	/* -i */
 static int wide_output;			/* -w */
+static int insn_width;			/* --insn-width */
 static bfd_vma start_address = (bfd_vma) -1; /* --start-address */
 static bfd_vma stop_address = (bfd_vma) -1;  /* --stop-address */
 static int dump_debugging;		/* --debugging */
@@ -235,6 +236,7 @@ usage (FILE *stream, int status)
       --stop-address=ADDR        Only process data whose address is <= ADDR\n\
       --prefix-addresses         Print complete address alongside disassembly\n\
       --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n\
+      --insn-width=WIDTH         Display WIDTH bytes on a signle line for -d\n\
       --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n\
       --special-syms             Include special symbols in symbol dumps\n\
       --prefix=PREFIX            Add PREFIX to absolute paths for -S\n\
@@ -259,6 +261,7 @@ enum option_values
     OPTION_DWARF,
     OPTION_PREFIX,
     OPTION_PREFIX_STRIP,
+    OPTION_INSN_WIDTH,
     OPTION_ADJUST_VMA
   };
 
@@ -306,6 +309,7 @@ static struct option long_options[]=
   {"wide", no_argument, NULL, 'w'},
   {"prefix", required_argument, NULL, OPTION_PREFIX},
   {"prefix-strip", required_argument, NULL, OPTION_PREFIX_STRIP},
+  {"insn-width", required_argument, NULL, OPTION_INSN_WIDTH},
   {0, no_argument, 0, 0}
 };
 
@@ -1415,7 +1419,9 @@ disassemble_bytes (struct disassemble_info * info,
   sfile.buffer = xmalloc (sfile.alloc);
   sfile.pos = 0;
   
-  if (insns)
+  if (insn_width)
+    octets_per_line = insn_width;
+  else if (insns)
     octets_per_line = 4;
   else
     octets_per_line = 16;
@@ -1566,7 +1572,7 @@ disassemble_bytes (struct disassemble_info * info,
 	      octets = (*disassemble_fn) (section->vma + addr_offset, info);
 	      info->fprintf_func = (fprintf_ftype) fprintf;
 	      info->stream = stdout;
-	      if (info->bytes_per_line != 0)
+	      if (insn_width == 0 && info->bytes_per_line != 0)
 		octets_per_line = info->bytes_per_line;
 	      if (octets < 0)
 		{
@@ -3250,6 +3256,11 @@ main (int argc, char **argv)
 	  prefix_strip = atoi (optarg);
 	  if (prefix_strip < 0)
 	    fatal (_("error: prefix strip must be non-negative"));
+	  break;
+	case OPTION_INSN_WIDTH:
+	  insn_width = strtoul (optarg, NULL, 0);
+	  if (insn_width <= 0)
+	    fatal (_("error: instruction width must be positive"));
 	  break;
 	case 'E':
 	  if (strcmp (optarg, "B") == 0)

@@ -1,3 +1,16 @@
+2009-07-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention --insn-width.
+
+	* objdump.c (insn_width): New.
+	(usage): Display --insn-width.
+	(option_values): Add OPTION_INSN_WIDTH.
+	(long_options): Add --insn-width.
+	(disassemble_bytes): Handle insn_width.
+	(main): Handle OPTION_INSN_WIDTH.
+
+	* doc/binutils.texi: Document --insn-width.
+
 2009-07-17  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (display_debug_lines): If do_debug_lines has not been

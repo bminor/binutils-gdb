@@ -1703,6 +1703,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--special-syms}]
         [@option{--prefix=}@var{prefix}]
         [@option{--prefix-strip=}@var{level}]
+        [@option{--insn-width=}@var{width}]
         [@option{-V}|@option{--version}]
         [@option{-H}|@option{--help}]
         @var{objfile}@dots{}
@@ -2054,6 +2055,11 @@ in symbolic form.  This is the default except when
 @item --no-show-raw-insn
 When disassembling instructions, do not print the instruction bytes.
 This is the default when @option{--prefix-addresses} is used.
+
+@item --insn-width=@var{width}
+@cindex Instruction width 
+Display @var{width} bytes on a single line when disassembling
+instructions.
 
 @item -W[lLiaprmfFsoR]
 @itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]
