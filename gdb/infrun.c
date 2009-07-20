@@ -1756,7 +1756,7 @@ struct execution_control_state
 
 static void init_execution_control_state (struct execution_control_state *ecs);
 
-void handle_inferior_event (struct execution_control_state *ecs);
+static void handle_inferior_event (struct execution_control_state *ecs);
 
 static void handle_step_into_function (struct gdbarch *gdbarch,
 				       struct execution_control_state *ecs);
@@ -1993,22 +1993,21 @@ wait_for_inferior (int treat_exec_as_sigtrap)
   ecs = &ecss;
   memset (ecs, 0, sizeof (*ecs));
 
-  overlay_cache_invalid = 1;
-
   /* We'll update this if & when we switch to a new thread.  */
   previous_inferior_ptid = inferior_ptid;
-
-  /* We have to invalidate the registers BEFORE calling target_wait
-     because they can be loaded from the target while in target_wait.
-     This makes remote debugging a bit more efficient for those
-     targets that provide critical registers as part of their normal
-     status mechanism. */
-
-  registers_changed ();
 
   while (1)
     {
       struct cleanup *old_chain;
+
+      /* We have to invalidate the registers BEFORE calling target_wait
+	 because they can be loaded from the target while in target_wait.
+	 This makes remote debugging a bit more efficient for those
+	 targets that provide critical registers as part of their normal
+	 status mechanism. */
+
+      overlay_cache_invalid = 1;
+      registers_changed ();
 
       if (deprecated_target_wait_hook)
 	ecs->ptid = deprecated_target_wait_hook (waiton_ptid, &ecs->ws, 0);
@@ -2063,14 +2062,8 @@ fetch_inferior_event (void *client_data)
 
   memset (ecs, 0, sizeof (*ecs));
 
-  overlay_cache_invalid = 1;
-
-  /* We can only rely on wait_for_more being correct before handling
-     the event in all-stop, but previous_inferior_ptid isn't used in
-     non-stop.  */
-  if (!ecs->wait_some_more)
-    /* We'll update this if & when we switch to a new thread.  */
-    previous_inferior_ptid = inferior_ptid;
+  /* We'll update this if & when we switch to a new thread.  */
+  previous_inferior_ptid = inferior_ptid;
 
   if (non_stop)
     /* In non-stop mode, the user/frontend should not notice a thread
@@ -2085,6 +2078,7 @@ fetch_inferior_event (void *client_data)
      targets that provide critical registers as part of their normal
      status mechanism. */
 
+  overlay_cache_invalid = 1;
   registers_changed ();
 
   if (deprecated_target_wait_hook)
@@ -2375,7 +2369,7 @@ stepped_in_from (struct frame_info *frame, struct frame_id step_frame_id)
    by an event from the inferior, figure out what it means and take
    appropriate action.  */
 
-void
+static void
 handle_inferior_event (struct execution_control_state *ecs)
 {
   struct frame_info *frame;
@@ -2444,8 +2438,6 @@ handle_inferior_event (struct execution_control_state *ecs)
     case infwait_thread_hop_state:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: infwait_thread_hop_state\n");
-      /* Cancel the waiton_ptid. */
-      waiton_ptid = pid_to_ptid (-1);
       break;
 
     case infwait_normal_state:
@@ -2476,7 +2468,9 @@ handle_inferior_event (struct execution_control_state *ecs)
     default:
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
+
   infwait_state = infwait_normal_state;
+  waiton_ptid = pid_to_ptid (-1);
 
   switch (ecs->ws.kind)
     {
@@ -3003,7 +2997,6 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 
 	      ecs->event_thread->stepping_over_breakpoint = 1;
 	      keep_going (ecs);
-	      registers_changed ();
 	      return;
 	    }
 	}
@@ -3078,7 +3071,6 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	/* Single step */
       hw_step = maybe_software_singlestep (gdbarch, stop_pc);
       target_resume (ecs->ptid, hw_step, TARGET_SIGNAL_0);
-      registers_changed ();
       waiton_ptid = ecs->ptid;
       if (target_have_steppable_watchpoint)
 	infwait_state = infwait_step_watch_state;
@@ -4516,19 +4508,7 @@ prepare_to_wait (struct execution_control_state *ecs)
 {
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog, "infrun: prepare_to_wait\n");
-  if (infwait_state == infwait_normal_state)
-    {
-      overlay_cache_invalid = 1;
 
-      /* We have to invalidate the registers BEFORE calling
-         target_wait because they can be loaded from the target while
-         in target_wait.  This makes remote debugging a bit more
-         efficient for those targets that provide critical registers
-         as part of their normal status mechanism. */
-
-      registers_changed ();
-      waiton_ptid = pid_to_ptid (-1);
-    }
   /* This is the old end of the while loop.  Let everybody know we
      want to wait for the inferior some more and get called again
      soon.  */
