@@ -1,3 +1,9 @@
+2009-07-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 10288
+	* arm-dis.c (arm_opcodes): Catch non-zero bits 8-11 in register
+	offset or indexed based addressing mode 3.
+
 2009-07-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 10288

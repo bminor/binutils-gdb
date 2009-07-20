@@ -1005,8 +1005,10 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V1, 0x04000000, 0x0c100010, "str%22'b%t%c\t%12-15r, %a"},
   {ARM_EXT_V1, 0x04400000, 0x0e500000, "strb%c\t%12-15r, %a"},
   {ARM_EXT_V1, 0x06400000, 0x0e500010, "strb%c\t%12-15r, %a"},
-  {ARM_EXT_V1, 0x000000b0, 0x0e1000f0, "strh%c\t%12-15r, %s"},
-  {ARM_EXT_V1, 0x00100090, 0x0e100090, "ldr%6's%5?hb%c\t%12-15r, %s"},
+  {ARM_EXT_V1, 0x004000b0, 0x0e5000f0, "strh%c\t%12-15r, %s"},
+  {ARM_EXT_V1, 0x000000b0, 0x0e500ff0, "strh%c\t%12-15r, %s"},
+  {ARM_EXT_V1, 0x00500090, 0x0e500090, "ldr%6's%5?hb%c\t%12-15r, %s"},
+  {ARM_EXT_V1, 0x00100090, 0x0e500f90, "ldr%6's%5?hb%c\t%12-15r, %s"},
 
   {ARM_EXT_V1, 0x02000000, 0x0fe00000, "and%20's%c\t%12-15r, %16-19r, %o"},
   {ARM_EXT_V1, 0x00000000, 0x0fe00010, "and%20's%c\t%12-15r, %16-19r, %o"},
