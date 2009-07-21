@@ -1,3 +1,7 @@
+2009-07-21  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* util.c (internal_vproblem): Always print failure message.
+
 2009-07-21  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Vladimir Prus <vladimir@codesourcery.com>
 
