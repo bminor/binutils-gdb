@@ -4279,15 +4279,24 @@ error_free_dyn:
 	  if (ELF_ST_TYPE (isym->st_info) != STT_NOTYPE
 	      && (definition || h->type == STT_NOTYPE))
 	    {
-	      if (h->type != STT_NOTYPE
-		  && h->type != ELF_ST_TYPE (isym->st_info)
-		  && ! type_change_ok)
-		(*_bfd_error_handler)
-		  (_("Warning: type of symbol `%s' changed"
-		     " from %d to %d in %B"),
-		   abfd, name, h->type, ELF_ST_TYPE (isym->st_info));
+	      unsigned int type = ELF_ST_TYPE (isym->st_info);
 
-	      h->type = ELF_ST_TYPE (isym->st_info);
+	      /* Turn an IFUNC symbol from a DSO into a normal FUNC
+		 symbol.  */
+	      if (type == STT_GNU_IFUNC
+		  && (abfd->flags & DYNAMIC) != 0)
+		type = STT_FUNC;
+
+	      if (h->type != type)
+		{
+		  if (h->type != STT_NOTYPE && ! type_change_ok)
+		    (*_bfd_error_handler)
+		      (_("Warning: type of symbol `%s' changed"
+			 " from %d to %d in %B"),
+		       abfd, name, h->type, type);
+
+		  h->type = type;
+		}
 	    }
 
 	  /* Merge st_other field.  */
@@ -8683,12 +8692,17 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 	  || ELF_ST_BIND (sym.st_info) == STB_WEAK))
     {
       int bindtype;
+      unsigned int type = ELF_ST_TYPE (sym.st_info);
+
+      /* Turn an undefined IFUNC symbol into a normal FUNC symbol. */
+      if (type == STT_GNU_IFUNC)
+	type = STT_FUNC;
 
       if (h->ref_regular_nonweak)
 	bindtype = STB_GLOBAL;
       else
 	bindtype = STB_WEAK;
-      sym.st_info = ELF_ST_INFO (bindtype, ELF_ST_TYPE (sym.st_info));
+      sym.st_info = ELF_ST_INFO (bindtype, type);
     }
 
   /* If this is a symbol defined in a dynamic library, don't use the

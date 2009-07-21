@@ -181,6 +181,14 @@ if ![ld_assemble $as "$srcdir/ld-elf/empty.s" "tmpdir/empty.o"] {
     fail "Could not create an empty object file"
     set fails [expr $fails + 1]
 }
+if ![ld_compile "$CC -c" "$srcdir/$subdir/test-1.c" "tmpdir/test-1.o"] {
+    fail "Could not create test-1.o"
+    set fails [expr $fails + 1]
+}
+if ![ld_compile "$CC -fPIC -c" "$srcdir/$subdir/test-2.c" "tmpdir/test-2.o"] {
+    fail "Could not create test-2.o"
+    set fails [expr $fails + 1]
+}
 
 if { $fails != 0 } {
     return
@@ -213,6 +221,14 @@ if ![default_ld_link $ld "tmpdir/static_prog" "-static -Ltmpdir tmpdir/static_pr
 }
 if ![ld_simple_link $ld "tmpdir/static_nonifunc_prog" "-static tmpdir/empty.o"] {
     fail "Could not link a non-ifunc using static executable"
+    set fails [expr $fails + 1]
+}
+if ![default_ld_link $ld "tmpdir/test-1" "tmpdir/test-1.o tmpdir/libshared_ifunc.so"] {
+    fail "Could not link test-1"
+    set fails [expr $fails + 1]
+}
+if ![ld_simple_link $ld "tmpdir/libtest-2.so" "-shared tmpdir/test-2.o"] {
+    fail "Could not link libtest-2.so"
     set fails [expr $fails + 1]
 }
 
@@ -266,12 +282,20 @@ if {[contains_ifunc_symbol tmpdir/static_prog] != 1} {
     fail "Static ifunc-using executable does not contain an IFUNC symbol"
     set fails [expr $fails + 1]
 }
-if {[contains_ifunc_symbol tmpdir/dynamic_prog] != 1} {
-    fail "Dynamic ifunc-using executable does not contain an IFUNC symbol"
+if {[contains_ifunc_symbol tmpdir/dynamic_prog] != 0} {
+    fail "Dynamic ifunc-using executable contains an IFUNC symbol"
     set fails [expr $fails + 1]
 }
 if {[contains_ifunc_symbol tmpdir/static_nonifunc_prog] != 0} {
     fail "Static non-ifunc-using executable contains an IFUNC symbol"
+    set fails [expr $fails + 1]
+}
+if {[contains_ifunc_symbol tmpdir/test-1] != 0} {
+    fail "test-1 contains IFUNC symbols"
+    set fails [expr $fails + 1]
+}
+if {[contains_ifunc_symbol tmpdir/libtest-2.so] != 0} {
+    fail "libtest-2.so contains IFUNC symbols"
     set fails [expr $fails + 1]
 }
 
@@ -292,8 +316,8 @@ if {[contains_irelative_reloc tmpdir/static_prog] != 1} {
     fail "Static ifunc-using executable does not contain R_*_IRELATIVE relocation"
     set fails [expr $fails + 1]
 }
-if {[contains_ifunc_reloc tmpdir/dynamic_prog] != 1} {
-    fail "Dynamic ifunc-using executable does not contain a reloc against an IFUNC symbol"
+if {[contains_ifunc_reloc tmpdir/dynamic_prog] != 0} {
+    fail "Dynamic ifunc-using executable contains a reloc against an IFUNC symbol"
     set fails [expr $fails + 1]
 }
 if {[contains_ifunc_reloc tmpdir/static_nonifunc_prog] == 1} {
