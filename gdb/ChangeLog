@@ -1,3 +1,11 @@
+2009-07-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* value.c (struct value): Add reference_count field.
+	(allocate_value_lazy): Initialize reference_count.
+	(value_incref): New function.
+	(value_free): Check the reference count.
+	* value.h (value_incref): New prototype.
+
 2009-07-20  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* utils.c (defaulted_query): Update comment and remove dead code.

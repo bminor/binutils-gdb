@@ -194,6 +194,13 @@ struct value
   /* Actual contents of the value.  Target byte-order.  NULL or not
      valid if lazy is nonzero.  */
   gdb_byte *contents;
+
+  /* The number of references to this value.  When a value is created,
+     the value chain holds a reference, so REFERENCE_COUNT is 1.  If
+     release_value is called, this value is removed from the chain but
+     the caller of release_value now has a reference to this value.
+     The caller must arrange for a call to value_free later.  */
+  int reference_count;
 };
 
 /* Prototypes for local functions. */
@@ -259,6 +266,10 @@ allocate_value_lazy (struct type *type)
   val->pointed_to_offset = 0;
   val->modifiable = 1;
   val->initialized = 1;  /* Default to initialized.  */
+
+  /* Values start out on the all_values chain.  */
+  val->reference_count = 1;
+
   return val;
 }
 
@@ -583,11 +594,29 @@ value_mark (void)
   return all_values;
 }
 
+/* Take a reference to VAL.  VAL will not be deallocated until all
+   references are released.  */
+
+void
+value_incref (struct value *val)
+{
+  val->reference_count++;
+}
+
+/* Release a reference to VAL, which was acquired with value_incref.
+   This function is also called to deallocate values from the value
+   chain.  */
+
 void
 value_free (struct value *val)
 {
   if (val)
     {
+      gdb_assert (val->reference_count > 0);
+      val->reference_count--;
+      if (val->reference_count > 0)
+	return;
+
       if (VALUE_LVAL (val) == lval_computed)
 	{
 	  struct lval_funcs *funcs = val->location.computed.funcs;
