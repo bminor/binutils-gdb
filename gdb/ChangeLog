@@ -1,3 +1,10 @@
+2009-06-26 Michael Eager <eager@eagercon.com>
+
+	* features/rs6000/powerpc-405.xml: New.
+	* rs6000-tdep.c: Add include & initialize for
+	powerpc-405.c, add 405 to variants.
+	* features/rs6000/powerpc-405.c: Generate.
+
 2009-07-21  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* utils.c (internal_vproblem): Always print failure message.
