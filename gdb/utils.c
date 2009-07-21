@@ -1433,7 +1433,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
     return def_value;
 
   /* If input isn't coming from the user directly, just say what
-     question we're asking, and then answer "yes" automatically.  This
+     question we're asking, and then answer the default automatically.  This
      way, important error messages don't get lost when talking to GDB
      over a pipe.  */
   if (! input_from_terminal_p ())
@@ -1447,11 +1447,6 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 
       return def_value;
     }
-
-  /* Automatically answer the default value if input is not from the user
-     directly, or if the user did not want prompts.  */
-  if (!input_from_terminal_p () || !caution)
-    return def_value;
 
   if (deprecated_query_hook)
     {
