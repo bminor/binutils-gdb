@@ -632,7 +632,25 @@ value_fetch_lazy (struct value *val)
 {
   gdb_assert (value_lazy (val));
   allocate_value_contents (val);
-  if (VALUE_LVAL (val) == lval_memory)
+  if (value_bitsize (val))
+    {
+      /* To read a lazy bitfield, read the entire enclosing value.  This
+	 prevents reading the same block of (possibly volatile) memory once
+         per bitfield.  It would be even better to read only the containing
+         word, but we have no way to record that just specific bits of a
+         value have been fetched.  */
+      struct type *type = check_typedef (value_type (val));
+      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+      struct value *parent = value_parent (val);
+      LONGEST offset = value_offset (val);
+      LONGEST num = unpack_bits_as_long (value_type (val),
+					 value_contents (parent) + offset,
+					 value_bitpos (val),
+					 value_bitsize (val));
+      int length = TYPE_LENGTH (type);
+      store_signed_integer (value_contents_raw (val), length, byte_order, num);
+    }
+  else if (VALUE_LVAL (val) == lval_memory)
     {
       CORE_ADDR addr = value_address (val);
       int length = TYPE_LENGTH (check_typedef (value_enclosing_type (val)));
@@ -800,12 +818,19 @@ value_assign (struct value *toval, struct value *fromval)
 
 	if (value_bitsize (toval))
 	  {
-	    /* We assume that the argument to read_memory is in units
-	       of host chars.  FIXME: Is that correct?  */
 	    changed_len = (value_bitpos (toval)
 			   + value_bitsize (toval)
 			   + HOST_CHAR_BIT - 1)
 	      / HOST_CHAR_BIT;
+
+	    /* If we can read-modify-write exactly the size of the
+	       containing type (e.g. short or int) then do so.  This
+	       is safer for volatile bitfields mapped to hardware
+	       registers.  */
+	    if (changed_len < TYPE_LENGTH (type)
+		&& TYPE_LENGTH (type) <= (int) sizeof (LONGEST)
+		&& ((LONGEST) value_address (toval) % TYPE_LENGTH (type)) == 0)
+	      changed_len = TYPE_LENGTH (type);
 
 	    if (changed_len > (int) sizeof (LONGEST))
 	      error (_("Can't handle bitfields which don't fit in a %d bit word."),

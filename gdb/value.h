@@ -76,6 +76,12 @@ extern void set_value_bitsize (struct value *, int bit);
 extern int value_bitpos (struct value *);
 extern void set_value_bitpos (struct value *, int bit);
 
+/* Only used for bitfields; the containing value.  This allows a
+   single read from the target when displaying multiple
+   bitfields.  */
+
+struct value *value_parent (struct value *);
+
 /* Describes offset of a value within lval of a structure in bytes.
    If lval == lval_memory, this is an offset to the address.  If lval
    == lval_register, this is a further offset from location.address
@@ -329,6 +335,8 @@ extern LONGEST unpack_long (struct type *type, const gdb_byte *valaddr);
 extern DOUBLEST unpack_double (struct type *type, const gdb_byte *valaddr,
 			       int *invp);
 extern CORE_ADDR unpack_pointer (struct type *type, const gdb_byte *valaddr);
+LONGEST unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
+			     int bitpos, int bitsize);
 extern LONGEST unpack_field_as_long (struct type *type,
 				     const gdb_byte *valaddr,
 				     int fieldno);
