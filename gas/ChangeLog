@@ -1,3 +1,11 @@
+2009-07-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10420
+	* config/tc-i386.c (i386_align_code): Tune for 32bit nops in
+	64bit.
+	(i386_target_format): Set cpu_arch_isa_flags.bitfield.cpulm
+	for 64bit.
+
 2009-07-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_assemble): Update operand types.

@@ -1042,8 +1042,16 @@ i386_align_code (fragS *fragP, int count)
 	{
 	  /* If the padding is less than 15 bytes, we use the normal
 	     ones.  Otherwise, we use a jump instruction and adjust
-	     its offset.  */
-	  if (count < 15)
+	     its offset.   */
+	  int limit;
+	  
+	  /* For 64bit, the limit is 3 bytes.  */
+	  if (flag_code == CODE_64BIT
+	      && fragP->tc_frag_data.isa_flags.bitfield.cpulm)
+	    limit = 3;
+	  else
+	    limit = 15;
+	  if (count < limit)
 	    memcpy (fragP->fr_literal + fragP->fr_fix,
 		    patt[count - 1], count);
 	  else
@@ -7935,6 +7943,7 @@ i386_target_format (void)
 	  cpu_arch_isa_flags.bitfield.cpummx= 1;
 	  cpu_arch_isa_flags.bitfield.cpusse = 1;
 	  cpu_arch_isa_flags.bitfield.cpusse2 = 1;
+	  cpu_arch_isa_flags.bitfield.cpulm = 1;
 	}
       if (cpu_flags_all_zero (&cpu_arch_tune_flags))
 	{
