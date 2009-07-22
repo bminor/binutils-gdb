@@ -68,7 +68,7 @@ struct objfile *rt_common_objfile;	/* For runtime common symbols */
 /* Records whether any objfiles appeared or disappeared since we last updated
    address to obj section map.  */
 
-static int objfiles_updated_p;
+static int objfiles_changed_p;
 
 /* Locate all mappable sections of a BFD file. 
    objfile_p_char is a char * to get it through
@@ -234,6 +234,8 @@ allocate_objfile (bfd *abfd, int flags)
 
   /* Save passed in flag bits. */
   objfile->flags |= flags;
+
+  objfiles_changed_p = 1;  /* Rebuild section map next time we need it.  */
 
   return (objfile);
 }
@@ -501,6 +503,7 @@ free_objfile (struct objfile *objfile)
   obstack_free (&objfile->objfile_obstack, 0);
   xfree (objfile);
   objfile = NULL;
+  objfiles_changed_p = 1;  /* Rebuild section map next time we need it.  */
 }
 
 static void
@@ -682,6 +685,7 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 
   /* Relocate breakpoints as necessary, after things are relocated. */
   breakpoint_re_set ();
+  objfiles_changed_p = 1;  /* Rebuild section map next time we need it.  */
 }
 
 /* Many places in gdb want to test just to see if we have any partial
@@ -798,7 +802,7 @@ update_section_map (struct obj_section ***pmap, int *pmap_size)
   struct obj_section *s, **map;
   struct objfile *objfile;
 
-  gdb_assert (objfiles_updated_p != 0);
+  gdb_assert (objfiles_changed_p != 0);
 
   map = *pmap;
   xfree (map);
@@ -857,13 +861,13 @@ find_pc_section (CORE_ADDR pc)
   if (s)
     return s;
 
-  if (objfiles_updated_p != 0)
+  if (objfiles_changed_p != 0)
     {
       update_section_map (&sections, &num_sections);
 
       /* Don't need updates to section map until objfiles are added
          or removed.  */
-      objfiles_updated_p = 0;
+      objfiles_changed_p = 0;
     }
 
   sp = (struct obj_section **) bsearch (&pc, sections, num_sections,
@@ -989,28 +993,11 @@ objfile_data (struct objfile *objfile, const struct objfile_data *data)
   return objfile->data[data->index];
 }
 
-/* Set objfiles_updated_p so section map will be rebuilt next time it
-   is used.  Called by executable_changed observer.  */
-
-static void
-set_objfiles_updated_on_exe_change (void)
-{
-  objfiles_updated_p = 1;  /* Rebuild section map next time we need it.  */
-}
-
-/* Set objfiles_updated_p so section map will be rebuilt next time it
-   is used.  Called by solib_loaded/unloaded observer.  */
-
-static void
-set_objfiles_updated_on_solib_activity (struct so_list *so_list)
-{
-  objfiles_updated_p = 1;  /* Rebuild section map next time we need it.  */
-}
+/* Set objfiles_changed_p so section map will be rebuilt next time it
+   is used.  Called by reread_symbols.  */
 
 void
-_initialize_objfiles (void)
+objfiles_changed (void)
 {
-  observer_attach_executable_changed (set_objfiles_updated_on_exe_change);
-  observer_attach_solib_loaded (set_objfiles_updated_on_solib_activity);
-  observer_attach_solib_unloaded (set_objfiles_updated_on_solib_activity);
+  objfiles_changed_p = 1;  /* Rebuild section map next time we need it.  */
 }

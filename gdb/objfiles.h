@@ -482,6 +482,8 @@ extern int have_partial_symbols (void);
 
 extern int have_full_symbols (void);
 
+extern void objfiles_changed (void);
+
 /* This operation deletes all objfile entries that represent solibs that
    weren't explicitly loaded by the user, via e.g., the add-symbol-file
    command.

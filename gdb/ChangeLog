@@ -1,3 +1,16 @@
+2009-07-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* objfiles.h (objfiles_changed): New prototype.
+	* objfiles.c (objfiles_updated_p): Rename to objfiles_changed_p.
+	(allocate_objfile, free_objfile): Must rebuild section map.
+	(objfile_relocate): Likewise.
+	(update_section_map, find_pc_section): Adjust.
+	(set_objfiles_updated_on_exe_change): Remove.
+	(set_objfiles_updated_on_solib_activity): Remove.
+	(_initialize_objfiles): Remove.
+	(objfiles_changed): New function.
+	* symfile.c (reread_symbols): Call objfiles_changed.	
+	
 2009-07-22  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_xfer_partial): Call error When nquery
