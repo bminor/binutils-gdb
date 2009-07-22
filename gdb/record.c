@@ -997,7 +997,7 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 		         "will make the execution log unusable from this "
 		         "point onward.  Write memory at address %s?"),
 		       paddress (target_gdbarch, offset)))
-	    return -1;
+	    error (_("Process record canceled the operation."));
 
 	  /* Destroy the record from here forward.  */
 	  record_list_release_next ();

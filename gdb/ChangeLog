@@ -1,3 +1,8 @@
+2009-07-22  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_xfer_partial): Call error When nquery
+	return "n".
+
 2009-07-21  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	
 	* objfiles.c (objfiles_updated_p): New variable.
