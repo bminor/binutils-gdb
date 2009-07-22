@@ -8660,9 +8660,10 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
      and also to finish up anything that needs to be done for this
      symbol.  FIXME: Not calling elf_backend_finish_dynamic_symbol for
      forced local syms when non-shared is due to a historical quirk.
-     STT_GNU_IFUNC symbol must go through PLT.  */
+     STT_GNU_IFUNC symbol must go through PLT only if it is ever
+     referenced.  */
   if ((h->type == STT_GNU_IFUNC
-       && h->def_regular
+       && h->ref_regular
        && !finfo->info->relocatable)
       || ((h->dynindx != -1
 	   || h->forced_local)
