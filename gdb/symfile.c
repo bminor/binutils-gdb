@@ -1080,7 +1080,10 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
   do_cleanups (my_cleanups);
 
   if (objfile->sf == NULL)
-    return objfile;	/* No symbols. */
+    {
+      observer_notify_new_objfile (objfile);
+      return objfile;	/* No symbols. */
+    }
 
   new_symfile_objfile (objfile, add_flags);
 

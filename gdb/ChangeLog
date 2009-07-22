@@ -1,5 +1,9 @@
 2009-07-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Call observer.
+	
+2009-07-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
 	* objfiles.h (objfiles_changed): New prototype.
 	* objfiles.c (objfiles_updated_p): Rename to objfiles_changed_p.
 	(allocate_objfile, free_objfile): Must rebuild section map.
