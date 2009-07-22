@@ -1,5 +1,9 @@
 2009-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	 * elflink.c (elf_link_output_extsym): Revert the last change.
+
+2009-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	 PR ld/10433
 	 * elflink.c (elf_link_output_extsym): Special case ifunc syms
 	 when ref_regular, not def_regular.
