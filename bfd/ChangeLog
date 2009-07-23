@@ -1,3 +1,24 @@
+2009-07-23  Ulrich Drepper  <drepper@redhat.com>
+
+	* elf-bfd.h (struct elf_link_hash_entry): Add unique_global field.
+	* elf.c (swap_out_syms): Set binding to STB_GNU_UNIQUE for symbols
+	with the BSF_GNU_UNIQUE flag bit set.
+	* elfcode.h (elf_slurp_symbol_table): Set the BSF_GNU_UNIQUE flag
+	for symbols with STB_GNU_UNIQUE binding.
+	* elflink.c (_bfd_elf_merge_symbol): Set unique_global for symbols
+	with the STB_GNU_UNIQUE binding.
+	(elf_link_add_object_symbols): Set the BSF_GNU_UNIQUE flag for
+	symbols with STB_GNU_UNIQUE binding.  Set STB_GNU_UNIQUE for
+	symbols with the unique_global field set.
+	(elf_link_output_extsym): Set unique_global field for symbols with
+	the STB_GNU_UNIQUE binding.
+	* syms.c (struct bfd_symbol): Define BSF_GNU_UNIQUE flag bit.
+	(bfd_print_symbol_vandf): Print a 'u' character for BSF_GNU_UNIQUE
+	symbols.
+	(bfd_decode_symclass): Return a 'u' character for BSF_GNU_UNIQUE
+	symbols.
+	* bfd-in2.h: Regenerate.
+
 2009-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	 * elflink.c (elf_link_output_extsym): Revert the last change.

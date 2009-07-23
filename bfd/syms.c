@@ -302,6 +302,10 @@ CODE_FRAGMENT
 .     calling the function that it points to.  BSF_FUNCTION must
 .     also be also set.  *}
 .#define BSF_GNU_INDIRECT_FUNCTION (1 << 22)
+.  {* This symbol is a globally unique data object.  The dynamic linker
+.     will make sure that in the entire process there is just one symbol
+.     with this name and type in use.  BSF_OBJECT must also be set.  *}
+.#define BSF_GNU_UNIQUE		(1 << 23)
 .
 .  flagword flags;
 .
@@ -485,7 +489,8 @@ bfd_print_symbol_vandf (bfd *abfd, void *arg, asymbol *symbol)
   fprintf (file, " %c%c%c%c%c%c%c",
 	   ((type & BSF_LOCAL)
 	    ? (type & BSF_GLOBAL) ? '!' : 'l'
-	    : (type & BSF_GLOBAL) ? 'g' : ' '),
+	    : (type & BSF_GLOBAL) ? 'g'
+	    : (type & BSF_GNU_UNIQUE) ? 'u' : ' '),
 	   (type & BSF_WEAK) ? 'w' : ' ',
 	   (type & BSF_CONSTRUCTOR) ? 'C' : ' ',
 	   (type & BSF_WARNING) ? 'W' : ' ',
@@ -686,6 +691,8 @@ bfd_decode_symclass (asymbol *symbol)
       else
 	return 'W';
     }
+  if (symbol->flags & BSF_GNU_UNIQUE)
+    return 'u';
   if (!(symbol->flags & (BSF_GLOBAL | BSF_LOCAL)))
     return '?';
 

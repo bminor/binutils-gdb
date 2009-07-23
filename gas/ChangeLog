@@ -1,3 +1,10 @@
+2009-07-23  Ulrich Drepper  <drepper@redhat.com>
+
+	* config/obj-elf.c (obj_elf_type): Add code to support a type of
+	gnu_unique_object.
+	* doc/as.texinfo: Document new feature of .type directive.
+	* NEWS: Mention support for gnu_unique_object symbol type.
+
 2009-07-23  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/10379

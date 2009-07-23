@@ -178,6 +178,8 @@ struct elf_link_hash_entry
   /* Symbol is referenced with a relocation where C/C++ pointer equality
      matters.  */
   unsigned int pointer_equality_needed : 1;
+  /* Symbol is a unique global symbol.  */
+  unsigned int unique_global : 1;
 
   /* String table index in .dynstr if this is a dynamic symbol.  */
   unsigned long dynstr_index;

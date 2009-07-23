@@ -4639,6 +4639,10 @@ typedef struct bfd_symbol
      calling the function that it points to.  BSF_FUNCTION must
      also be also set.  */
 #define BSF_GNU_INDIRECT_FUNCTION (1 << 22)
+  /* This symbol is a globally unique data object.  The dynamic linker
+     will make sure that in the entire process there is just one symbol
+     with this name and type in use.  BSF_OBJECT must also be set.  */
+#define BSF_GNU_UNIQUE         (1 << 23)
 
   flagword flags;
 

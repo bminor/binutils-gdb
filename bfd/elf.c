@@ -6446,6 +6446,8 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 
 	  if (flags & BSF_LOCAL)
 	    bind = STB_LOCAL;
+	  else if (flags & BSF_GNU_UNIQUE)
+	    bind = STB_GNU_UNIQUE;
 	  else if (flags & BSF_WEAK)
 	    bind = STB_WEAK;
 	  else if (flags & BSF_GLOBAL)

@@ -745,7 +745,13 @@ object file formats permit more efficient access to small data objects,
 such as a global int variable as opposed to a large global array.
 
 @item i
-The symbol is in a section specific to the implementation of DLLs.
+For PE format files this indicates that the symbol is in a section
+specific to the implementation of DLLs.  For ELF format files this
+indicates that the symbol is an indirect function.  This is a GNU
+extension to the standard set of ELF symbol types.  It indicates a
+symbol which if referenced by a relocation does not evaluate to its
+address, but instead must be invoked at runtime.  The runtime
+execution will then return the value to be used in the relocation.
 
 @item N
 The symbol is a debugging symbol.
@@ -767,6 +773,12 @@ The symbol is in the text (code) section.
 
 @item U
 The symbol is undefined.
+
+@item u
+The symbol is a unique global symbol.  This is a GNU extension to the
+standard set of ELF symbol bindings.  For such a symbol the dynamic linker
+will make sure that in the entire process there is just one symbol with
+this name and type in use.
 
 @item V
 @itemx v
@@ -2142,11 +2154,16 @@ The flag characters are divided into 7 groups as follows:
 @table @code
 @item l
 @itemx g
+@itemx u
 @itemx !
-The symbol is local (l), global (g), neither (a space) or both (!).  A
+The symbol is a local (l), global (g), unique global (u), neither
+global nor local (a space) or both global and local (!).  A
 symbol can be neither local or global for a variety of reasons, e.g.,
 because it is used for debugging, but it is probably an indication of
-a bug if it is ever both local and global.
+a bug if it is ever both local and global.  Unique global symbols are
+a GNU extension to the standard set of ELF symbol bindings.  For such
+a symbol the dynamic linker will make sure that in the entire process
+there is just one symbol with this name and type in use.
 
 @item w
 The symbol is weak (w) or strong (a space).

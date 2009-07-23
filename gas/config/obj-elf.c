@@ -1665,8 +1665,8 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
 	}
     }
   else if (strcmp (typename, "gnu_indirect_function") == 0
-      || strcmp (typename, "10") == 0
-      || strcmp (typename, "STT_GNU_IFUNC") == 0)
+	   || strcmp (typename, "10") == 0
+	   || strcmp (typename, "STT_GNU_IFUNC") == 0)
     {
       const struct elf_backend_data *bed;
 
@@ -1677,6 +1677,18 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
 	as_bad (_("symbol type \"%s\" is supported only by GNU targets"),
 		typename);
       type = BSF_FUNCTION | BSF_GNU_INDIRECT_FUNCTION;
+    }
+  else if (strcmp (typename, "gnu_unique_object") == 0)
+    {
+      const struct elf_backend_data *bed;
+
+      bed = get_elf_backend_data (stdoutput);
+      if (!(bed->elf_osabi == ELFOSABI_LINUX
+	    /* GNU/Linux is still using the default value 0.  */
+	    || bed->elf_osabi == ELFOSABI_NONE))
+	as_bad (_("symbol type \"%s\" is supported only by GNU targets"),
+		typename);
+      type = BSF_OBJECT | BSF_GNU_UNIQUE;
     }
 #ifdef md_elf_symbol_type
   else if ((type = md_elf_symbol_type (typename, sym, elfsym)) != -1)

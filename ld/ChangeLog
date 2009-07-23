@@ -1,3 +1,8 @@
+2009-07-23  Ulrich Drepper  <drepper@redhat.com>
+
+	* NEWS: Mention the linker's support for symbols with a binding of
+	STB_GNU_UNIQUE.
+
 2009-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10429

@@ -6360,6 +6360,11 @@ Mark the symbol as being a common data object.
 @itemx notype
 Does not mark the symbol in any way.  It is supported just for completeness.
 
+@item gnu_unique_object
+Marks the symbol as being a globally unique data object.  The dynamic linker
+will make sure that in the entire process there is just one symbol with this
+name and type in use.  (This is only supported on Linux targeted assemblers).
+
 @end table
 
 Note: Some targets support extra types in addition to those listed above.

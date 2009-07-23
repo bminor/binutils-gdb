@@ -1248,6 +1248,9 @@ _bfd_elf_merge_symbol (bfd *abfd,
   oldweak = (h->root.type == bfd_link_hash_defweak
 	     || h->root.type == bfd_link_hash_undefweak);
 
+  if (bind == STB_GNU_UNIQUE)
+    h->unique_global = 1;
+
   /* If a new weak symbol definition comes from a regular file and the
      old symbol comes from a dynamic library, we treat the new one as
      strong.  Similarly, an old weak symbol definition from a regular
@@ -3871,24 +3874,31 @@ error_free_dyn:
       common = bed->common_definition (isym);
 
       bind = ELF_ST_BIND (isym->st_info);
-      if (bind == STB_LOCAL)
+      switch (bind)
 	{
+	case STB_LOCAL:
 	  /* This should be impossible, since ELF requires that all
 	     global symbols follow all local symbols, and that sh_info
 	     point to the first global symbol.  Unfortunately, Irix 5
 	     screws this up.  */
 	  continue;
-	}
-      else if (bind == STB_GLOBAL)
-	{
+
+	case STB_GLOBAL:
 	  if (isym->st_shndx != SHN_UNDEF && !common)
 	    flags = BSF_GLOBAL;
-	}
-      else if (bind == STB_WEAK)
-	flags = BSF_WEAK;
-      else
-	{
+	  break;
+
+	case STB_WEAK:
+	  flags = BSF_WEAK;
+	  break;
+
+	case STB_GNU_UNIQUE:
+	  flags = BSF_GNU_UNIQUE;
+	  break;
+
+	default:
 	  /* Leave it up to the processor backend.  */
+	  break;
 	}
 
       if (isym->st_shndx == SHN_UNDEF)
@@ -4140,7 +4150,9 @@ error_free_dyn:
       while (h->root.type == bfd_link_hash_indirect
 	     || h->root.type == bfd_link_hash_warning)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
       *sym_hash = h;
+      h->unique_global = (flags & BSF_GNU_UNIQUE) != 0;
 
       new_weakdef = FALSE;
       if (dynamic
@@ -8571,6 +8583,8 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
   sym.st_other = h->other;
   if (h->forced_local)
     sym.st_info = ELF_ST_INFO (STB_LOCAL, h->type);
+  else if (h->unique_global)
+    sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, h->type);
   else if (h->root.type == bfd_link_hash_undefweak
 	   || h->root.type == bfd_link_hash_defweak)
     sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);

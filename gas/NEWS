@@ -1,4 +1,8 @@
 -*- text -*-
+* GNU/Linux targets now supports "gnu_unique_object" as a value in the .type
+  pseudo op.  It marks the symbol as being globally unique in the entire
+  process.
+
 * ARM assembler now supports .inst[.nw] pseudo-ops to insert opcodes specified
   in binary rather than text.
 

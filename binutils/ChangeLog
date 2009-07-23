@@ -1,3 +1,10 @@
+2009-07-23  Ulrich Drepper  <drepper@redhat.com>
+
+	* readelf.c (get_symbol_binding): For Linux targeted files return
+	UNIQUE for symbols with the STB_GNU_UNIQUE binding.
+	* doc/binutils.texi: Document the meaning of the 'u' symbol
+	binding in the output of nm and objdump --syms.
+
 2009-07-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention --insn-width.

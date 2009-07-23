@@ -6902,7 +6902,14 @@ get_symbol_binding (unsigned int binding)
 	snprintf (buff, sizeof (buff), _("<processor specific>: %d"),
 		  binding);
       else if (binding >= STB_LOOS && binding <= STB_HIOS)
-	snprintf (buff, sizeof (buff), _("<OS specific>: %d"), binding);
+	{
+	  if (binding == STB_GNU_UNIQUE
+	      && (elf_header.e_ident[EI_OSABI] == ELFOSABI_LINUX
+		  /* GNU/Linux is still using the default value 0.  */
+		  || elf_header.e_ident[EI_OSABI] == ELFOSABI_NONE))
+	    return "UNIQUE";
+	  snprintf (buff, sizeof (buff), _("<OS specific>: %d"), binding);
+	}
       else
 	snprintf (buff, sizeof (buff), _("<unknown>: %d"), binding);
       return buff;

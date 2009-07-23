@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
@@ -1281,6 +1281,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	      break;
 	    case STB_WEAK:
 	      sym->symbol.flags |= BSF_WEAK;
+	      break;
+	    case STB_GNU_UNIQUE:
+	      sym->symbol.flags |= BSF_GNU_UNIQUE;
 	      break;
 	    }
 
