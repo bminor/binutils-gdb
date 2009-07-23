@@ -1,3 +1,9 @@
+2009-07-23  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/10379
+	* doc/c-mips.texi (MIPS insn): Document the special behaviour of
+	the .global directive for MIPS ports.
+
 2009-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/10420

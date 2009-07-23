@@ -527,6 +527,32 @@ when loading the address of a label which precedes instructions,
 @code{@value{AS}} automatically adds 1 to the value, so that jumping to
 the loaded address will do the right thing.
 
+@kindex @code{.global}
+The @code{.global} and @code{.globl} directives supported by
+@code{@value{AS}} will by default mark the symbol as pointing to a
+region of data not code.  This means that, for example, any
+instructions following such a symbol will not be disassembled by
+@code{@value{objdump}} as it will regard them as data.  To change this
+behaviour an optional section name can be placed after the symbol name
+in the @code{.global} directive.  If this section exists and is known
+to be a code section, then the symbol will be marked as poiting at
+code not data.  Ie the syntax for the directive is:
+
+  @code{.global @var{symbol}[ @var{section}][, @var{symbol}[ @var{section}]] ...},
+
+Here is a short example:
+
+@example
+        .global foo .text, bar, baz .data
+foo:
+        nop
+bar:
+        .word 0x0
+baz:
+        .word 0x1
+        
+@end example
+
 @node MIPS option stack
 @section Directives to save and restore options
 
