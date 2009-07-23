@@ -1,3 +1,11 @@
+2009-07-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10434
+	* ld-x86-64/tlsle1.d: New.
+	* ld-x86-64/tlsle1.s: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run tlsle1.
+
 2009-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10426

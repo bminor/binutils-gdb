@@ -1231,7 +1231,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  goto create_got;
 
 	case R_X86_64_TPOFF32:
-	  if (info->shared)
+	  if (!info->executable)
 	    {
 	      if (h)
 		name = h->root.root.string;
@@ -3639,7 +3639,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  break;
 
 	case R_X86_64_TPOFF32:
-	  BFD_ASSERT (! info->shared);
+	  BFD_ASSERT (info->executable);
 	  relocation = elf64_x86_64_tpoff (info, relocation);
 	  break;
 

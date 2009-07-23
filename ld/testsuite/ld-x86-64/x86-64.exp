@@ -92,4 +92,4 @@ run_dump_test "hidden3"
 run_dump_test "protected1"
 run_dump_test "protected2"
 run_dump_test "protected3"
-
+run_dump_test "tlsle1"

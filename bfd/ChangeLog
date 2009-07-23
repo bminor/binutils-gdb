@@ -1,3 +1,10 @@
+2009-07-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10434
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Check executable
+	instead of shared for R_X86_64_TPOFF32.
+	(elf64_x86_64_relocate_section): Likewise.
+
 2009-07-23  Ulrich Drepper  <drepper@redhat.com>
 
 	* elf-bfd.h (struct elf_link_hash_entry): Add unique_global field.
