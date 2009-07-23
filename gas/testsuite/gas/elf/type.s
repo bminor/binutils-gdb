@@ -26,10 +26,12 @@ tls_object:
         .size   notype,1
 notype:
 	.byte	0x0
-	.comm	common, 1
-	.type   common,STT_COMMON
 
 	.type	unique_global,%gnu_unique_object
 unique_global:
 	.byte	0x0
 	.size	unique_global,1
+
+	.comm	common, 1
+	.type   common,STT_COMMON
+	
