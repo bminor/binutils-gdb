@@ -1667,7 +1667,9 @@ insert_os_after (lang_output_section_statement_type *after)
 	    {
 	      asection *s = (*where)->output_section_statement.bfd_section;
 
-	      if (s == NULL || (s->flags & SEC_ALLOC) != 0)
+	      if (s == NULL
+		  || s->map_head.s == NULL
+		  || (s->flags & SEC_ALLOC) != 0)
 		where = assign;
 	    }
 	  break;

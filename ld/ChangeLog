@@ -1,3 +1,9 @@
+2009-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10429
+	* ldlang.c (insert_os_after): Tie assignments to non-alloc
+	output sections if there is no-input section.
+
 2009-07-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (insert_os_after): Don't tie assignments to non-alloc
@@ -14,7 +20,7 @@
 
 2009-07-06  Matthias Klose <doko@ubuntu.com>
 
-        * ld.texinfo: Fix typo.
+	* ld.texinfo: Fix typo.
 
 2009-07-03  Tristan Gingold  <gingold@adacore.com>
 
@@ -457,7 +463,7 @@
 	* configure.tgt: Extend AIX 5 behavior to AIX 6 and above.
 
 2009-03-14  Dave Korn  <dave.korn.cygwin@gmail.com>
-            Danny Smith  <dannysmith@users.sourceforge.net>
+	    Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* emultmpl/pe.em (pe_dll_characteristics): New variable.
 	(OPTION_DYNAMIC_BASE, OPTION_FORCE_INTEGRITY, OPTION_NX_COMPAT,
