@@ -1612,7 +1612,7 @@ forward_search_command (char *regex, int from_tty)
       if (re_exec (buf) > 0)
 	{
 	  /* Match! */
-	  fclose (stream);
+	  do_cleanups (cleanups);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar_integer (lookup_internalvar ("_"), line);
 	  current_source_line = max (line - lines_to_list / 2, 1);
@@ -1690,7 +1690,7 @@ reverse_search_command (char *regex, int from_tty)
       if (re_exec (buf) > 0)
 	{
 	  /* Match! */
-	  fclose (stream);
+	  do_cleanups (cleanups);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar_integer (lookup_internalvar ("_"), line);
 	  current_source_line = max (line - lines_to_list / 2, 1);
@@ -1699,7 +1699,7 @@ reverse_search_command (char *regex, int from_tty)
       line--;
       if (fseek (stream, current_source_symtab->line_charpos[line - 1], 0) < 0)
 	{
-	  fclose (stream);
+	  do_cleanups (cleanups);
 	  perror_with_name (current_source_symtab->filename);
 	}
     }

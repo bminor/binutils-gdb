@@ -1,3 +1,9 @@
+2009-07-23  Keith Seitz  <keiths@redhat.com>
+
+	* source.c (forward_search_command): Don't fclose the stream,
+	just run the cleanups.
+	(reverse_search_command): Likewise.
+
 2009-07-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* symtab.c (search_symbols): Add QUIT.
