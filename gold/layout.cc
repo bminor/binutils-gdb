@@ -748,12 +748,11 @@ Layout::section_flags_to_segment(elfcpp::Elf_Xword flags)
 // Sometimes we compress sections.  This is typically done for
 // sections that are not part of normal program execution (such as
 // .debug_* sections), and where the readers of these sections know
-// how to deal with compressed sections.  (To make it easier for them,
-// we will rename the ouput section in such cases from .foo to
-// .foo.zlib.nnnn, where nnnn is the uncompressed size.)  This routine
-// doesn't say for certain whether we'll compress -- it depends on
-// commandline options as well -- just whether this section is a
-// candidate for compression.
+// how to deal with compressed sections.  This routine doesn't say for
+// certain whether we'll compress -- it depends on commandline options
+// as well -- just whether this section is a candidate for compression.
+// (The Output_compressed_section class decides whether to compress
+// a given section, and picks the name of the compressed section.)
 
 static bool
 is_compressible_debug_section(const char* secname)
