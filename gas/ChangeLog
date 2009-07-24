@@ -1,4 +1,5 @@
 2009-07-24  Roland McGrath  <roland@redhat.com>
+	    Mark Wielaard  <mjw@redhat.com>
 
 	* config/obj-elf.c (obj_elf_ident): Set SEC_MERGE | SEC_STRINGS
 	flags on .comment section.
