@@ -2545,6 +2545,7 @@ relocation types already defined.  */
   BFD_RELOC_SPU_HI16,
   BFD_RELOC_SPU_PPU32,
   BFD_RELOC_SPU_PPU64,
+  BFD_RELOC_SPU_ADD_PIC,
 
 /* Alpha ECOFF and ELF relocations.  Some of these treat the symbol or
 "addend" in some special way.

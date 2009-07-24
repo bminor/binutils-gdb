@@ -1,3 +1,10 @@
+2009-07-24  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/pic.d: New.
+	* ld-spu/pic.s: New.
+	* ld-spu/picdef.s: New.
+
 2009-07-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10434

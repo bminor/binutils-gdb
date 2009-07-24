@@ -1,3 +1,10 @@
+2009-07-24  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-spu.c (md_apply_fix): Handle SPU_ADD_PIC.
+	* config/tc-spu.h (tc_fix_adjustable): Don't adjust for SPU_ADD_PIC.
+	(TC_FORCE_RELOCATION): Emit relocs for SPU_ADD_PIC.
+
 2009-07-24  Jan Beulich  <jbeulich@novell.com>
 
 	* tc-i386.c (cpu_arch): Add .8087, .287, .387, .no87, .nommx,

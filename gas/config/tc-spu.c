@@ -989,7 +989,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   fixP->fx_addnumber = val;
 
   if (fixP->fx_r_type == BFD_RELOC_SPU_PPU32
-      || fixP->fx_r_type == BFD_RELOC_SPU_PPU64)
+      || fixP->fx_r_type == BFD_RELOC_SPU_PPU64
+      || fixP->fx_r_type == BFD_RELOC_SPU_ADD_PIC)
     return;
 
   if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)

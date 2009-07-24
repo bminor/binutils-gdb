@@ -88,6 +88,9 @@ static reloc_howto_type elf_howto_table[] = {
   HOWTO (R_SPU_PPU64,      0, 4, 64, FALSE,  0, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_PPU64",
 	 FALSE, 0, -1, FALSE),
+  HOWTO (R_SPU_ADD_PIC,      0, 0, 0, FALSE,  0, complain_overflow_dont,
+	 bfd_elf_generic_reloc, "SPU_ADD_PIC",
+	 FALSE, 0, 0x00000000, FALSE),
 };
 
 static struct bfd_elf_special_section const spu_elf_special_sections[] = {
@@ -135,6 +138,8 @@ spu_elf_bfd_to_reloc_type (bfd_reloc_code_real_type code)
       return R_SPU_PPU32;
     case BFD_RELOC_SPU_PPU64:
       return R_SPU_PPU64;
+    case BFD_RELOC_SPU_ADD_PIC:
+      return R_SPU_ADD_PIC;
     }
 }
 
@@ -4840,6 +4845,16 @@ spu_elf_relocate_section (bfd *output_bfd,
 
       if (info->relocatable)
 	continue;
+
+      /* Change "a rt,ra,rb" to "ai rt,ra,0". */
+      if (r_type == R_SPU_ADD_PIC && h != NULL
+	  && (h->def_regular || ELF_COMMON_DEF_P (h)))
+	{
+	  bfd_byte *loc = contents + rel->r_offset;
+	  loc[0] = 0x1c; 
+	  loc[1] = 0x00; 
+	  loc[2] &= 0x3f;
+	}
 
       is_ea_sym = (ea != NULL
 		   && sec != NULL

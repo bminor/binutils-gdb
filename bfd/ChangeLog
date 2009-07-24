@@ -1,3 +1,13 @@
+2009-07-24  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* reloc.c (BFD_RELOC_SPU_ADD_PIC): Define.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf32-spu.c (elf_howto_table): Add entries SPU_ADD_PIC.
+	(spu_elf_bfd_to_reloc_type): Handle SPU_ADD_PIC.
+	(spu_elf_relocate_section): Patch instructions marked by SPU_ADD_PIC.
+
 2009-07-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10434
