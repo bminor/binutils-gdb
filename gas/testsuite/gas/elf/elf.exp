@@ -126,7 +126,7 @@ if { ([istarget "*-*-*elf*"]
 	    run_elf_list_test "type-noifunc" "" "" "-s" "| grep \"1 \\\[FONTC\\\]\""
     } else {
     	    run_dump_test ifunc-1
-	    run_elf_list_test "type" "" "" "-s" "| grep \"1 \\\[FIONTC\\\]\""
+	    run_elf_list_test "type" "" "" "-s" "| grep \"1 \\\[FIONTCU\\\]\""
     }
 
     run_dump_test "section6" 
