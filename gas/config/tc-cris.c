@@ -1,5 +1,5 @@
 /* tc-cris.c -- Assembler code for the CRIS CPU core.
-   Copyright 2000, 2001, 2002, 2003, 2004, 2006, 2007
+   Copyright 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2009
    Free Software Foundation, Inc.
 
    Contributed by Axis Communications AB, Lund, Sweden.
@@ -1828,7 +1828,7 @@ cris_process_instruction (char *insn_text, struct cris_instruction *out_insnp,
 		     pseudo yet, so some of this is just unused
 		     framework.  */
 		  if (out_insnp->spec_reg->warning)
-		    as_warn (out_insnp->spec_reg->warning);
+		    as_warn ("%s", out_insnp->spec_reg->warning);
 		  else if (out_insnp->spec_reg->applicable_version
 			   == cris_ver_warning)
 		    /* Others have a generic warning.  */

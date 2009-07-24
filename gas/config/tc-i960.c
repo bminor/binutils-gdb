@@ -1,6 +1,6 @@
 /* tc-i960.c - All the i80960-specific stuff
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007
+   1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2009
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -1667,14 +1667,14 @@ md_assemble (char *textP)
 	  break;
 	case REG:
 	  if (branch_predict)
-	    as_warn (bp_error_msg);
+	    as_warn ("%s", bp_error_msg);
 	  reg_fmt (args, oP);
 	  break;
 	case MEM1:
 	  if (args[0][0] == 'c' && args[0][1] == 'a')
 	    {
 	      if (branch_predict)
-		as_warn (bp_error_msg);
+		as_warn ("%s", bp_error_msg);
 	      mem_fmt (args, oP, 1);
 	      break;
 	    }
@@ -1684,12 +1684,12 @@ md_assemble (char *textP)
 	case MEM12:
 	case MEM16:
 	  if (branch_predict)
-	    as_warn (bp_error_msg);
+	    as_warn ("%s", bp_error_msg);
 	  mem_fmt (args, oP, 0);
 	  break;
 	case CALLJ:
 	  if (branch_predict)
-	    as_warn (bp_error_msg);
+	    as_warn ("%s", bp_error_msg);
 	  /* Output opcode & set up "fixup" (relocation); flag
 	     relocation as 'callj' type.  */
 	  know (oP->num_ops == 1);
@@ -2638,7 +2638,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
   if (reloc->howto == NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
-		    "internal error: can't export reloc type %d (`%s')",
+		    _("internal error: can't export reloc type %d (`%s')"),
 		    fixP->fx_r_type,
 		    bfd_get_reloc_code_name (fixP->fx_r_type));
       return NULL;

@@ -97,7 +97,7 @@ parse_register_operand (char **ptr)
 
   if (*s != '$')
     {
-      as_bad ("expecting register");
+      as_bad (_("expecting register"));
       ignore_rest_of_line ();
       return -1;
     }
@@ -116,7 +116,7 @@ parse_register_operand (char **ptr)
       reg = s[2] - '0';
       if ((reg < 0) || (reg > 9))
 	{
-	  as_bad ("illegal register number");
+	  as_bad (_("illegal register number"));
 	  ignore_rest_of_line ();
 	  return -1;
 	}
@@ -132,7 +132,7 @@ parse_register_operand (char **ptr)
     }
   else
     {
-      as_bad ("illegal register number");
+      as_bad (_("illegal register number"));
       ignore_rest_of_line ();
       return -1;
     }
@@ -199,7 +199,7 @@ md_assemble (char *str)
 	reg = parse_register_operand (&op_end);
 	iword += (reg << 8);
 	if (*op_end != ',')
-	  as_warn ("expecting comma delimeted register operands");
+	  as_warn (_("expecting comma delimeted register operands"));
 	op_end++;
 	op_end = parse_exp_save_ilp (op_end, &arg);
 	fix_new_exp (frag_now,
@@ -218,14 +218,14 @@ md_assemble (char *str)
 	int dest, src;
 	dest = parse_register_operand (&op_end);
 	if (*op_end != ',')
-	  as_warn ("expecting comma delimeted register operands");
+	  as_warn (_("expecting comma delimeted register operands"0);
 	op_end++;
 	src  = parse_register_operand (&op_end);
 	iword += (dest << 4) + src;
 	while (ISSPACE (*op_end))
 	  op_end++;
 	if (*op_end != 0)
-	  as_warn ("extra stuff on line ignored");
+	  as_warn (_("extra stuff on line ignored"));
       }
       break;
     case MOXIE_F1_A4:
@@ -245,7 +245,7 @@ md_assemble (char *str)
 
 	if (*op_end != ',')
 	  {
-	    as_bad ("expecting comma delimited operands");
+	    as_bad (_("expecting comma delimited operands"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -285,7 +285,7 @@ md_assemble (char *str)
       while (ISSPACE (*op_end))
 	op_end++;
       if (*op_end != 0)
-	as_warn ("extra stuff on line ignored");
+	as_warn (_("extra stuff on line ignored"));
       break;
     case MOXIE_F1_A:
       iword = opcode->opcode << 8;
@@ -297,7 +297,7 @@ md_assemble (char *str)
 	while (ISSPACE (*op_end))
 	  op_end++;
 	if (*op_end != 0)
-	  as_warn ("extra stuff on line ignored");
+	  as_warn (_("extra stuff on line ignored"));
 	iword += (reg << 4);
       }
       break;
@@ -309,11 +309,11 @@ md_assemble (char *str)
 	int a, b;
 	a = parse_register_operand (&op_end);
 	if (*op_end != ',')
-	  as_warn ("expecting comma delimeted register operands");
+	  as_warn (_("expecting comma delimeted register operands"));
 	op_end++;
 	if (*op_end != '(')
 	  {
-	    as_bad ("expecting indirect register `($rA)'");
+	    as_bad (_("expecting indirect register `($rA)'"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -321,7 +321,7 @@ md_assemble (char *str)
 	b = parse_register_operand (&op_end);
 	if (*op_end != ')')
 	  {
-	    as_bad ("missing closing parenthesis");
+	    as_bad (_("missing closing parenthesis"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -330,7 +330,7 @@ md_assemble (char *str)
 	while (ISSPACE (*op_end))
 	  op_end++;
 	if (*op_end != 0)
-	  as_warn ("extra stuff on line ignored");
+	  as_warn (_("extra stuff on line ignored"));
       }
       break;
     case MOXIE_F1_AiB:
@@ -341,7 +341,7 @@ md_assemble (char *str)
 	int a, b;
 	if (*op_end != '(')
 	  {
-	    as_bad ("expecting indirect register `($rA)'");
+	    as_bad (_("expecting indirect register `($rA)'"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -349,20 +349,20 @@ md_assemble (char *str)
 	a = parse_register_operand (&op_end);
 	if (*op_end != ')')
 	  {
-	    as_bad ("missing closing parenthesis");
+	    as_bad (_("missing closing parenthesis"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
 	op_end++;
 	if (*op_end != ',')
-	  as_warn ("expecting comma delimeted register operands");
+	  as_warn (_("expecting comma delimeted register operands"));
 	op_end++;
 	b = parse_register_operand (&op_end);
 	iword += (a << 4) + b;
 	while (ISSPACE (*op_end))
 	  op_end++;
 	if (*op_end != 0)
-	  as_warn ("extra stuff on line ignored");
+	  as_warn (_("extra stuff on line ignored"));
       }
       break;
     case MOXIE_F1_4A:
@@ -385,7 +385,7 @@ md_assemble (char *str)
 
 	if (*op_end != ',')
 	  {
-	    as_bad ("expecting comma delimited operands");
+	    as_bad (_("expecting comma delimited operands"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -395,7 +395,7 @@ md_assemble (char *str)
 	while (ISSPACE (*op_end))
 	  op_end++;
 	if (*op_end != 0)
-	  as_warn ("extra stuff on line ignored");
+	  as_warn (_("extra stuff on line ignored"));
 
 	iword += (a << 4);
       }
@@ -415,7 +415,7 @@ md_assemble (char *str)
 
 	if (*op_end != ',')
 	  {
-	    as_bad ("expecting comma delimited operands");
+	    as_bad (_("expecting comma delimited operands"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -432,7 +432,7 @@ md_assemble (char *str)
 
 	if (*op_end != '(')
 	  {
-	    as_bad ("expecting indirect register `($rX)'");
+	    as_bad (_("expecting indirect register `($rX)'"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -440,7 +440,7 @@ md_assemble (char *str)
 	b = parse_register_operand (&op_end);
 	if (*op_end != ')')
 	  {
-	    as_bad ("missing closing parenthesis");
+	    as_bad (_("missing closing parenthesis"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -449,7 +449,7 @@ md_assemble (char *str)
 	while (ISSPACE (*op_end))
 	  op_end++;
 	if (*op_end != 0)
-	  as_warn ("extra stuff on line ignored");
+	  as_warn (_("extra stuff on line ignored"));
 
 	iword += (a << 4) + b;
       }
@@ -474,7 +474,7 @@ md_assemble (char *str)
 
 	if (*op_end != '(')
 	  {
-	    as_bad ("expecting indirect register `($rX)'");
+	    as_bad (_("expecting indirect register `($rX)'"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -482,7 +482,7 @@ md_assemble (char *str)
 	a = parse_register_operand (&op_end);
 	if (*op_end != ')')
 	  {
-	    as_bad ("missing closing parenthesis");
+	    as_bad (_("missing closing parenthesis"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -490,7 +490,7 @@ md_assemble (char *str)
 
 	if (*op_end != ',')
 	  {
-	    as_bad ("expecting comma delimited operands");
+	    as_bad (_("expecting comma delimited operands"));
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -503,7 +503,7 @@ md_assemble (char *str)
 	while (ISSPACE (*op_end))
 	  op_end++;
 	if (*op_end != 0)
-	  as_warn ("extra stuff on line ignored");
+	  as_warn (_("extra stuff on line ignored"));
 
 	iword += (a << 4) + b;
       }
@@ -513,7 +513,7 @@ md_assemble (char *str)
       while (ISSPACE (*op_end))
 	op_end++;
       if (*op_end != 0)
-	as_warn ("extra stuff on line ignored");
+	as_warn (_("extra stuff on line ignored"));
       break;
     case MOXIE_F3_PCREL:
       iword = (3<<14) | (opcode->opcode << 10);
@@ -532,7 +532,7 @@ md_assemble (char *str)
       }
       break;
     default:
-      abort();
+      abort ();
     }
 
   md_number_to_chars (p, iword, 2);
@@ -541,10 +541,10 @@ md_assemble (char *str)
     op_end++;
 
   if (*op_end != 0)
-    as_warn ("extra stuff on line ignored");
+    as_warn (_("extra stuff on line ignored"));
 
   if (pending_reloc)
-    as_bad ("Something forgot to clean up\n");
+    as_bad (_("Something forgot to clean up\n"));
 }
 
 /* Turn a string in input_line_pointer into a floating point constant

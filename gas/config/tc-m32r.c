@@ -1,6 +1,6 @@
 /* tc-m32r.c -- Assembler for the Renesas M32R.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007 Free Software Foundation, Inc.
+   2006, 2007, 2009 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -920,7 +920,7 @@ assemble_two_insns (char *str1, char *str2, int parallel_p)
   if (! (first.insn = m32r_cgen_assemble_insn
 	 (gas_cgen_cpu_desc, str1, & first.fields, first.buffer, & errmsg)))
     {
-      as_bad (errmsg);
+      as_bad ("%s", errmsg);
       return;
     }
 
@@ -1034,7 +1034,7 @@ assemble_two_insns (char *str1, char *str2, int parallel_p)
   if (! (second.insn = m32r_cgen_assemble_insn
 	 (gas_cgen_cpu_desc, str1, & second.fields, second.buffer, & errmsg)))
     {
-      as_bad (errmsg);
+      as_bad ("%s", errmsg);
       return;
     }
 
@@ -1225,7 +1225,7 @@ md_assemble (char *str)
 
   if (!insn.insn)
     {
-      as_bad (errmsg);
+      as_bad ("%s", errmsg);
       return;
     }
 

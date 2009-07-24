@@ -2678,7 +2678,7 @@ shmedia_build_Mytes (shmedia_opcode_info *opcode,
 	    /* Don't allow complex expressions here.  */
 	    if (opjp->immediate.X_op_symbol != NULL)
 	      {
-		as_bad(_("invalid operand: expression in PT target"));
+		as_bad (_("invalid operand: expression in PT target"));
 		return 0;
 	      }
 
@@ -2718,7 +2718,7 @@ shmedia_build_Mytes (shmedia_opcode_info *opcode,
 	    /* Don't allow complex expressions here.  */
 	    if (opjp->immediate.X_op_symbol != NULL)
 	      {
-		as_bad(_("invalid operand: expression in PT target"));
+		as_bad (_("invalid operand: expression in PT target"));
 		return 0;
 	      }
 

@@ -285,7 +285,7 @@ md_assemble (char *str)
 	    op_end++;
 
 	  if (*op_end == 0)
-	    as_bad ("expected expresssion");
+	    as_bad (_("expected expresssion"));
 
 	  op_end = parse_exp_save_ilp (op_end, &arg);
 
@@ -304,13 +304,12 @@ md_assemble (char *str)
 	op_end++;
 
       if (*op_end != 0)
-	as_warn ("extra stuff on line ignored");
+	as_warn (_("extra stuff on line ignored"));
 
     }
 
   if (pending_reloc)
-    as_bad ("Something forgot to clean up\n");
-
+    as_bad (_("Something forgot to clean up\n"));
 }
 
 char *

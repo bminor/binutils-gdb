@@ -1,6 +1,7 @@
 /* tc-alpha.c - Processor-specific code for the DEC Alpha AXP CPU.
    Copyright 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
+   Free Software Foundation, Inc.
    Contributed by Carnegie Mellon University, 1993.
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
@@ -593,7 +594,7 @@ get_alpha_reloc_tag (long sequence)
       strcpy (info->string, buffer);
       errmsg = hash_insert (alpha_literal_hash, info->string, (void *) info);
       if (errmsg)
-	as_fatal (errmsg);
+	as_fatal ("%s", errmsg);
 #ifdef OBJ_EVAX
       info->sym = 0;
       info->psym = 0;
@@ -1985,7 +1986,7 @@ insert_operand (unsigned insn,
 
       insn = (*operand->insert) (insn, val, &errmsg);
       if (errmsg)
-	as_warn (errmsg);
+	as_warn ("%s", errmsg);
     }
   else
     insn |= ((val & ((1 << operand->bits) - 1)) << operand->shift);
@@ -3602,7 +3603,7 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
   if (S_GET_VALUE (symbolP))
     {
       if (S_GET_VALUE (symbolP) != (valueT) size)
-        as_bad ("Length of .comm \"%s\" is already %ld. Not changed to %ld.",
+        as_bad (_("Length of .comm \"%s\" is already %ld. Not changed to %ld."),
                 S_GET_NAME (symbolP),
                 (long) S_GET_VALUE (symbolP),
                 (long) size);
@@ -5120,7 +5121,7 @@ s_alpha_arch (int ignored ATTRIBUTE_UNUSED)
 	alpha_target_name = p->name, alpha_target = p->flags;
 	goto found;
       }
-  as_warn ("Unknown CPU identifier `%s'", name);
+  as_warn (_("Unknown CPU identifier `%s'"), name);
 
 found:
   *input_line_pointer = ch;

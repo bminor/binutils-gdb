@@ -1,6 +1,6 @@
 /* tc-s390.c -- Assemble for the S390
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
+   2009  Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -324,7 +324,7 @@ init_default_arch (void)
 	s390_arch_size = 64;
     }
   else
-    as_fatal ("Invalid default architecture, broken assembler.");
+    as_fatal (_("Invalid default architecture, broken assembler."));
 
   if (current_mode_mask == 0)
     {
@@ -420,7 +420,7 @@ md_parse_option (int c, char *arg)
       else if (arg != NULL && strcmp (arg, "esame") == 0)
 	current_cpu = S390_OPCODE_Z900;
       else
-	as_bad ("invalid architecture -A%s", arg);
+	as_bad (_("invalid architecture -A%s"), arg);
       break;
 
       /* -V: SVR4 argument to print version ID.  */
@@ -469,7 +469,7 @@ md_begin (void)
 
   /* Give a warning if the combination -m64-bit and -Aesa is used.  */
   if (s390_arch_size == 64 && current_cpu < S390_OPCODE_Z900)
-    as_warn ("The 64 bit file format is used without esame instructions.");
+    as_warn (_("The 64 bit file format is used without esame instructions."));
 
   s390_cie_data_alignment = -s390_arch_size / 8;
 
@@ -559,7 +559,7 @@ s390_insert_operand (unsigned char *insn,
       if (val < min || val > max)
 	{
 	  const char *err =
-	    "operand out of range (%s not between %ld and %ld)";
+	    _("operand out of range (%s not between %ld and %ld)");
 	  char buf[100];
 
 	  if (operand->flags & S390_OPERAND_PCREL)
@@ -1226,11 +1226,11 @@ md_gather_operands (char *str,
 	      if ((operand->flags & S390_OPERAND_INDEX)
 		  && ex.X_add_number == 0
 		  && warn_areg_zero)
-		as_warn ("index register specified but zero");
+		as_warn (_("index register specified but zero"));
 	      if ((operand->flags & S390_OPERAND_BASE)
 		  && ex.X_add_number == 0
 		  && warn_areg_zero)
-		as_warn ("base register specified but zero");
+		as_warn (_("base register specified but zero"));
 	      s390_insert_operand (insn, operand, ex.X_add_number, NULL, 0);
 	    }
 	}
@@ -1546,7 +1546,7 @@ md_assemble (char *str)
     }
   else if (!(opcode->modes & current_mode_mask))
     {
-      as_bad ("Opcode %s not available in this mode", str);
+      as_bad (_("Opcode %s not available in this mode"), str);
       return;
     }
   memcpy (insn, opcode->opcode, sizeof (insn));
@@ -1935,7 +1935,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
   if (fixP->fx_subsy != NULL)
     as_bad_where (fixP->fx_file, fixP->fx_line,
-		  "cannot emit relocation %s against subsy symbol %s",
+		  _("cannot emit relocation %s against subsy symbol %s"),
 		  bfd_get_reloc_code_name (fixP->fx_r_type),
 		  S_GET_NAME (fixP->fx_subsy));
 
@@ -2070,7 +2070,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	case BFD_RELOC_16_GOTOFF:
 	  if (fixP->fx_pcrel)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  "cannot emit PC relative %s relocation%s%s",
+			  _("cannot emit PC relative %s relocation%s%s"),
 			  bfd_get_reloc_code_name (fixP->fx_r_type),
 			  fixP->fx_addsy != NULL ? " against " : "",
 			  (fixP->fx_addsy != NULL
@@ -2195,11 +2195,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	    const char *reloc_name = bfd_get_reloc_code_name (fixP->fx_r_type);
 
 	    if (reloc_name != NULL)
-	      fprintf (stderr, "Gas failure, reloc type %s\n", reloc_name);
+	      as_fatal (_("Gas failure, reloc type %s\n"), reloc_name);
 	    else
-	      fprintf (stderr, "Gas failure, reloc type #%i\n", fixP->fx_r_type);
-	    fflush (stderr);
-	    abort ();
+	      as_fatal (_("Gas failure, reloc type #%i\n"), fixP->fx_r_type);
 	  }
 	}
 

@@ -1,6 +1,6 @@
 /* tc-v850.c -- Assembler code for the NEC V850
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007  Free Software Foundation, Inc.
+   2006, 2007, 2009  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -477,16 +477,16 @@ v850_longcode (int type)
   if (! v850_relax)
     {
       if (type == 1)
-	as_warn (".longcall pseudo-op seen when not relaxing");
+	as_warn (_(".longcall pseudo-op seen when not relaxing"));
       else
-	as_warn (".longjump pseudo-op seen when not relaxing");
+	as_warn (_(".longjump pseudo-op seen when not relaxing"));
     }
 
   expression (&ex);
 
   if (ex.X_op != O_symbol || ex.X_add_number != 0)
     {
-      as_bad ("bad .longcall format");
+      as_bad (_("bad .longcall format"));
       ignore_rest_of_line ();
 
       return;
@@ -1505,9 +1505,9 @@ v850_insert_operand (unsigned long insn,
 	  else
 	    {
 	      if (file == (char *) NULL)
-		as_warn (message);
+		as_warn ("%s", message);
 	      else
-		as_warn_where (file, line, message);
+		as_warn_where (file, line, "%s", message);
 	    }
 	}
     }

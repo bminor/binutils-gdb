@@ -1,6 +1,6 @@
 /* tc-arc.c -- Assembler for the ARC
    Copyright 1994, 1995, 1997, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007  Free Software Foundation, Inc.
+   2006, 2007, 2009  Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -299,7 +299,7 @@ arc_insert_operand (arc_insn insn,
       errmsg = NULL;
       insn = (*operand->insert) (insn, operand, mods, reg, (long) val, &errmsg);
       if (errmsg != (const char *) NULL)
-	as_warn (errmsg);
+	as_warn ("%s", errmsg);
     }
   else
     insn |= (((long) val & ((1 << operand->bits) - 1))
@@ -1504,11 +1504,11 @@ md_assemble (char *str)
 		      last_errmsg = errmsg;
 		      if (operand->flags & ARC_OPERAND_ERROR)
 			{
-			  as_bad (errmsg);
+			  as_bad ("%s", errmsg);
 			  return;
 			}
 		      else if (operand->flags & ARC_OPERAND_WARN)
-			as_warn (errmsg);
+			as_warn ("%s", errmsg);
 		      break;
 		    }
 		  if (limm_reloc_p
@@ -1721,11 +1721,11 @@ md_assemble (char *str)
 		      last_errmsg = errmsg;
 		      if (operand->flags & ARC_OPERAND_ERROR)
 			{
-			  as_bad (errmsg);
+			  as_bad ("%s", errmsg);
 			  return;
 			}
 		      else if (operand->flags & ARC_OPERAND_WARN)
-			as_warn (errmsg);
+			as_warn ("%s", errmsg);
 		      break;
 		    }
 		}
@@ -1889,5 +1889,5 @@ md_assemble (char *str)
   if (NULL == last_errmsg)
     as_bad (_("bad instruction `%s'"), start);
   else
-    as_bad (last_errmsg);
+    as_bad ("%s", last_errmsg);
 }

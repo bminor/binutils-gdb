@@ -1369,7 +1369,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
   if (! reloc->howto)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-                    "Cannot represent %s relocation in object file",
+                    _("Cannot represent %s relocation in object file"),
                     bfd_get_reloc_code_name (fixp->fx_r_type));
       abort ();
     }

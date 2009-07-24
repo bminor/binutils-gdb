@@ -1,6 +1,6 @@
 /* coff object file format
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2009
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -1434,7 +1434,7 @@ coff_frob_symbol (symbolS *symp, int *punt)
   if (next_set_end != NULL)
     {
       if (set_end != NULL)
-	as_warn ("Warning: internal error: forgetting to set endndx of %s",
+	as_warn (_("Warning: internal error: forgetting to set endndx of %s"),
 		 S_GET_NAME (set_end));
       set_end = next_set_end;
     }

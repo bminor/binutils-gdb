@@ -1,3 +1,44 @@
+2009-07-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 10437
+	* config/tc-alpha.c: Fix up uses of gas printf like functions so
+	that the format string is a constant string.  Add translation
+	support to message strings.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-cris.c: Likewise.
+	* config/tc-fr30.c: Likewise.
+	* config/tc-frv.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-mep.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-moxie.c: Likewise.
+	* config/tc-msp430.c: Likewise.
+	* config/tc-openrisc.c: Likewise.
+	* config/tc-pdp11.c: Likewise.
+	* config/tc-pj.c: Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sh64.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-spu.c: Likewise.
+	* config/tc-tic30.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-v850.c: Likewise.
+	* config/tc-xc16x.c: Likewise.
+	* config/tc-xstormy16.c: Likewise.
+	* config/tc-z80.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+	* config/atof-ieee.c: Add translation support to as_warn
+	messages.
+	* config/obj-coff.c: Likewise.
+
 2009-07-23  Ulrich Drepper  <drepper@redhat.com>
 
 	* config/obj-elf.c (obj_elf_type): Add code to support a type of

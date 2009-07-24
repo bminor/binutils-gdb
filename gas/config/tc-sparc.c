@@ -3772,9 +3772,9 @@ s_reserve (int ignore ATTRIBUTE_UNUSED)
     }
   else
     {
-      as_warn ("Ignoring attempt to re-define symbol %s",
+      as_warn (_("Ignoring attempt to re-define symbol %s"),
 	       S_GET_NAME (symbolP));
-    }				/* if not redefining.  */
+    }
 
   demand_empty_rest_of_line ();
 }

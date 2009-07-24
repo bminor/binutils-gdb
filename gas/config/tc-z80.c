@@ -412,7 +412,7 @@ static char err_flag;
 static void
 error (const char * message)
 {
-  as_bad (message);
+  as_bad ("%s", message);
   err_flag = 1;
 }
 
@@ -687,7 +687,7 @@ emit_byte (expressionS * val, bfd_reloc_code_real_type r_type)
   *p = val->X_add_number;
   if ((r_type == BFD_RELOC_8_PCREL) && (val->X_op == O_constant))
     {
-      as_bad(_("cannot make a relative jump to an absolute location"));
+      as_bad (_("cannot make a relative jump to an absolute location"));
     }
   else if (val->X_op == O_constant)
     {
@@ -2028,4 +2028,3 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED , fixS *fixp)
 
   return reloc;
 }
-

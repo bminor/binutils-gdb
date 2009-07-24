@@ -1,5 +1,5 @@
 /* tc-xc16x.c -- Assembler for the Infineon XC16X.
-   Copyright 2006, 2007 Free Software Foundation, Inc.
+   Copyright 2006, 2007, 2009  Free Software Foundation, Inc.
    Contributed by KPIT Cummins Infosystems 
 
    This file is part of GAS, the GNU Assembler.
@@ -133,7 +133,7 @@ md_assemble (char *str)
 
   if (!insn.insn)
     {
-      as_bad (errmsg);
+      as_bad ("%s", errmsg);
       return;
     }
 

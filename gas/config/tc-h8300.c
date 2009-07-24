@@ -1,6 +1,6 @@
 /* tc-h8300.c -- Assemble code for the Renesas H8/300
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -623,7 +623,7 @@ get_operand (char **ptr, struct h8_op *op, int direction)
 	      op->mode = (op->mode & ~SIZE) | L_8;
 	      break;
 	    default:
-	      as_warn ("invalid suffix after register.");
+	      as_warn (_("invalid suffix after register."));
 	      break;
 	    }
 	  src += 2;

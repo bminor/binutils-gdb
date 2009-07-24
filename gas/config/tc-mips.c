@@ -1784,7 +1784,7 @@ reg_lookup (char **s, unsigned int types, unsigned int *regnop)
   if (reg >= 0)
     *s = e;
   else if (types & RWARN)
-    as_warn ("Unrecognized register name `%s'", *s);
+    as_warn (_("Unrecognized register name `%s'"), *s);
 
   *e = save_c;
   if (regnop)
@@ -8683,7 +8683,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       /* If we did not find a '.', then we can quit now.  */
       if (*s != '.')
 	{
-	  insn_error = "unrecognized opcode";
+	  insn_error = _("unrecognized opcode");
 	  return;
 	}
 
@@ -8691,7 +8691,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       *s++ = '\0';
       if ((insn = (struct mips_opcode *) hash_find (op_hash, str)) == NULL)
 	{
-	  insn_error = "unrecognized opcode";
+	  insn_error = _("unrecognized opcode");
 	  return;
 	}
     }
@@ -9552,7 +9552,7 @@ do_msbd:
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_ALN)
-		as_warn ("Improper align amount (%ld), using low bits",
+		as_warn (_("Improper align amount (%ld), using low bits"),
 			 (long) imm_expr.X_add_number);
 	      INSERT_OPERAND (ALN, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
@@ -9643,15 +9643,15 @@ do_msbd:
 			  check_absolute_expr (ip, &imm_expr);
 			  s = expr_end;
 			  if (imm_expr.X_add_number > max_el)
-			    as_bad(_("Bad element selector %ld"),
-				   (long) imm_expr.X_add_number);
+			    as_bad (_("Bad element selector %ld"),
+				    (long) imm_expr.X_add_number);
 			  imm_expr.X_add_number &= max_el;
 			  ip->insn_opcode |= (imm_expr.X_add_number
 					      << (OP_SH_VSEL +
 						  (is_qh ? 2 : 1)));
 			  imm_expr.X_op = O_absent;
 			  if (*s != ']')
-			    as_warn(_("Expecting ']' found '%s'"), s);
+			    as_warn (_("Expecting ']' found '%s'"), s);
 			  else
 			    s++;
 			}
@@ -9999,13 +9999,13 @@ do_msbd:
 		   || strcmp(str + strlen(str) - 5, "any2f") == 0
 		   || strcmp(str + strlen(str) - 5, "any2t") == 0)
 		  && (regno & 1) != 0)
-		as_warn(_("Condition code register should be even for %s, was %d"),
-			str, regno);
+		as_warn (_("Condition code register should be even for %s, was %d"),
+			 str, regno);
 	      if ((strcmp(str + strlen(str) - 5, "any4f") == 0
 		   || strcmp(str + strlen(str) - 5, "any4t") == 0)
 		  && (regno & 3) != 0)
-		as_warn(_("Condition code register should be 0 or 4 for %s, was %d"),
-			str, regno);
+		as_warn (_("Condition code register should be 0 or 4 for %s, was %d"),
+			 str, regno);
 	      if (*args == 'N')
 		INSERT_OPERAND (BCC, *ip, regno);
 	      else
@@ -11032,7 +11032,7 @@ parse_relocation (char **str, bfd_reloc_code_real_type *reloc)
 	   If not, issue an error and fall back on something safe.  */
 	if (!bfd_reloc_type_lookup (stdoutput, percent_op[i].reloc))
 	  {
-	    as_bad ("relocation %s isn't supported by the current ABI",
+	    as_bad (_("relocation %s isn't supported by the current ABI"),
 		    percent_op[i].str);
 	    *reloc = BFD_RELOC_UNUSED;
 	  }
@@ -11088,7 +11088,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
       crux_depth--;
 
   if (crux_depth > 0)
-    as_bad ("unclosed '('");
+    as_bad (_("unclosed '('"));
 
   expr_end = str;
 
@@ -11853,7 +11853,7 @@ mips_after_parse_args (void)
     arch_info = mips_parse_cpu ("default CPU", MIPS_CPU_STRING_DEFAULT);
 
   if (ABI_NEEDS_64BIT_REGS (mips_abi) && !ISA_HAS_64BIT_REGS (arch_info->isa))
-    as_bad ("-march=%s is not compatible with the selected ABI",
+    as_bad (_("-march=%s is not compatible with the selected ABI"),
 	    arch_info->name);
 
   mips_set_architecture (arch_info);
@@ -11956,14 +11956,14 @@ mips_after_parse_args (void)
   if (mips_opts.ase_smartmips == -1)
     mips_opts.ase_smartmips = (arch_info->flags & MIPS_CPU_ASE_SMARTMIPS) ? 1 : 0;
   if (mips_opts.ase_smartmips && !ISA_SUPPORTS_SMARTMIPS)
-      as_warn ("%s ISA does not support SmartMIPS", 
-	       mips_cpu_info_from_isa (mips_opts.isa)->name);
+    as_warn (_("%s ISA does not support SmartMIPS"), 
+	     mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   if (mips_opts.ase_dsp == -1)
     mips_opts.ase_dsp = (arch_info->flags & MIPS_CPU_ASE_DSP) ? 1 : 0;
   if (mips_opts.ase_dsp && !ISA_SUPPORTS_DSP_ASE)
-      as_warn ("%s ISA does not support DSP ASE", 
-	       mips_cpu_info_from_isa (mips_opts.isa)->name);
+    as_warn (_("%s ISA does not support DSP ASE"), 
+	     mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   if (mips_opts.ase_dspr2 == -1)
     {
@@ -11971,14 +11971,14 @@ mips_after_parse_args (void)
       mips_opts.ase_dsp = (arch_info->flags & MIPS_CPU_ASE_DSP) ? 1 : 0;
     }
   if (mips_opts.ase_dspr2 && !ISA_SUPPORTS_DSPR2_ASE)
-      as_warn ("%s ISA does not support DSP R2 ASE",
-	       mips_cpu_info_from_isa (mips_opts.isa)->name);
+    as_warn (_("%s ISA does not support DSP R2 ASE"),
+	     mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   if (mips_opts.ase_mt == -1)
     mips_opts.ase_mt = (arch_info->flags & MIPS_CPU_ASE_MT) ? 1 : 0;
   if (mips_opts.ase_mt && !ISA_SUPPORTS_MT_ASE)
-      as_warn ("%s ISA does not support MT ASE",
-	       mips_cpu_info_from_isa (mips_opts.isa)->name);
+    as_warn (_("%s ISA does not support MT ASE"),
+	     mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   file_mips_isa = mips_opts.isa;
   file_ase_mips16 = mips_opts.mips16;
@@ -12858,7 +12858,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
   else if (strcmp (name, "gp=64") == 0)
     {
       if (!ISA_HAS_64BIT_REGS (mips_opts.isa))
-	as_warn ("%s isa does not support 64-bit registers",
+	as_warn (_("%s isa does not support 64-bit registers"),
 		 mips_cpu_info_from_isa (mips_opts.isa)->name);
       mips_opts.gp32 = 0;
     }
@@ -12869,7 +12869,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
   else if (strcmp (name, "fp=64") == 0)
     {
       if (!ISA_HAS_64BIT_FPRS (mips_opts.isa))
-	as_warn ("%s isa does not support 64-bit floating point registers",
+	as_warn (_("%s isa does not support 64-bit floating point registers"),
 		 mips_cpu_info_from_isa (mips_opts.isa)->name);
       mips_opts.fp32 = 0;
     }
@@ -12890,7 +12890,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
   else if (strcmp (name, "smartmips") == 0)
     {
       if (!ISA_SUPPORTS_SMARTMIPS)
-	as_warn ("%s ISA does not support SmartMIPS ASE", 
+	as_warn (_("%s ISA does not support SmartMIPS ASE"), 
 		 mips_cpu_info_from_isa (mips_opts.isa)->name);
       mips_opts.ase_smartmips = 1;
     }
@@ -12907,7 +12907,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
   else if (strcmp (name, "dsp") == 0)
     {
       if (!ISA_SUPPORTS_DSP_ASE)
-	as_warn ("%s ISA does not support DSP ASE", 
+	as_warn (_("%s ISA does not support DSP ASE"), 
 		 mips_cpu_info_from_isa (mips_opts.isa)->name);
       mips_opts.ase_dsp = 1;
       mips_opts.ase_dspr2 = 0;
@@ -12920,7 +12920,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
   else if (strcmp (name, "dspr2") == 0)
     {
       if (!ISA_SUPPORTS_DSPR2_ASE)
-	as_warn ("%s ISA does not support DSP R2 ASE",
+	as_warn (_("%s ISA does not support DSP R2 ASE"),
 		 mips_cpu_info_from_isa (mips_opts.isa)->name);
       mips_opts.ase_dspr2 = 1;
       mips_opts.ase_dsp = 1;
@@ -12933,7 +12933,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
   else if (strcmp (name, "mt") == 0)
     {
       if (!ISA_SUPPORTS_MT_ASE)
-	as_warn ("%s ISA does not support MT ASE", 
+	as_warn (_("%s ISA does not support MT ASE"), 
 		 mips_cpu_info_from_isa (mips_opts.isa)->name);
       mips_opts.ase_mt = 1;
     }
@@ -13576,7 +13576,7 @@ s_mips_weakext (int ignore ATTRIBUTE_UNUSED)
     {
       if (S_IS_DEFINED (symbolP))
 	{
-	  as_bad ("ignoring attempt to redefine symbol %s",
+	  as_bad (_("ignoring attempt to redefine symbol %s"),
 		  S_GET_NAME (symbolP));
 	  ignore_rest_of_line ();
 	  return;
@@ -13591,7 +13591,7 @@ s_mips_weakext (int ignore ATTRIBUTE_UNUSED)
       expression (&exp);
       if (exp.X_op != O_symbol)
 	{
-	  as_bad ("bad .weakext directive");
+	  as_bad (_("bad .weakext directive"));
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -15379,7 +15379,7 @@ mips_parse_cpu (const char *option, const char *cpu_string)
     if (mips_matching_cpu_name_p (p->name, cpu_string))
       return p;
 
-  as_bad ("Bad value (%s) for %s", cpu_string, option);
+  as_bad (_("Bad value (%s) for %s"), cpu_string, option);
   return 0;
 }
 

@@ -3213,7 +3213,7 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 	    }
 	  
 	  if (!preset_target_arch)
-	    as_bad ("Invalid argument to --isa option: %s", arg);
+	    as_bad (_("Invalid argument to --isa option: %s"), arg);
 	}
       break;
 
@@ -3234,7 +3234,7 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 	  sh64_abi = sh64_abi_64;
 	}
       else
-	as_bad ("Invalid argument to --abi option: %s", arg);
+	as_bad (_("Invalid argument to --abi option: %s"), arg);
       break;
 
     case OPTION_NO_MIX:

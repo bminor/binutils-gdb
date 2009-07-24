@@ -409,19 +409,19 @@ mep_check_for_disabled_registers (mep_insn *insn)
 	case 7: /* $hi */
 	case 8: /* $lo */
 	  if (!has_mul_div)
-	    as_bad ("$hi and $lo are disabled when MUL and DIV are off");
+	    as_bad (_("$hi and $lo are disabled when MUL and DIV are off"));
 	  break;
 	case 12: /* $mb0 */
 	case 13: /* $me0 */
 	case 14: /* $mb1 */
 	case 15: /* $me1 */
 	  if (!has_cop)
-	    as_bad ("$mb0, $me0, $mb1, and $me1 are disabled when COP is off");
+	    as_bad (_("$mb0, $me0, $mb1, and $me1 are disabled when COP is off"));
 	  break;
 	case 24: /* $dbg */
 	case 25: /* $depc */
 	  if (!has_debug)
-	    as_bad ("$dbg and $depc are disabled when DEBUG is off");
+	    as_bad (_("$dbg and $depc are disabled when DEBUG is off"));
 	  break;
 	}
     }
@@ -612,10 +612,10 @@ mep_check_parallel32_scheduling (void)
 	  if (insn0length + insn1length == 32)
 	    return;
           else
-	    as_bad ("core and copro insn lengths must total 32 bits.");
+	    as_bad (_("core and copro insn lengths must total 32 bits."));
 	}
       else
-        as_bad ("vliw group must consist of 1 core and 1 copro insn."); 
+        as_bad (_("vliw group must consist of 1 core and 1 copro insn.")); 
     }
   else
     {
@@ -749,10 +749,10 @@ mep_check_parallel64_scheduling (void)
 	  if (insn0length + insn1length == 64)
             return;
 	  else
-            as_bad ("core and copro insn lengths must total 64 bits.");
+            as_bad (_("core and copro insn lengths must total 64 bits."));
 	}
       else
-        as_bad ("vliw group must consist of 1 core and 1 copro insn.");
+        as_bad (_("vliw group must consist of 1 core and 1 copro insn."));
     }
   else
     {
@@ -981,7 +981,7 @@ mep_check_ivc2_scheduling (void)
 	  else if (slot_ok (1, SLOTS_P0S))
 	    slots[SLOTS_P0S] = 1;
 	  else
-	    as_bad ("cannot pack %s with a 16-bit insn",
+	    as_bad (_("cannot pack %s with a 16-bit insn"),
 		    CGEN_INSN_NAME (saved_insns[1].insn));
 	  break;
 
@@ -999,13 +999,13 @@ mep_check_ivc2_scheduling (void)
 	      slots[SLOTS_P0S] = 2;
 	    }
 	  else
-	    as_bad ("cannot pack %s and %s together with a 16-bit insn",
+	    as_bad (_("cannot pack %s and %s together with a 16-bit insn"),
 		    CGEN_INSN_NAME (saved_insns[1].insn),
 		    CGEN_INSN_NAME (saved_insns[2].insn));
 	  break;
 
 	default:
-	  as_bad ("too many IVC2 insns to pack with a 16-bit core insn");
+	  as_bad (_("too many IVC2 insns to pack with a 16-bit core insn"));
 	  break;
 	}
     }
@@ -1020,13 +1020,13 @@ mep_check_ivc2_scheduling (void)
 	case 2:
 	  /* The other insn must allow P1.  */
 	  if (!slot_ok (1, SLOTS_P1))
-	    as_bad ("cannot pack %s into slot P1",
+	    as_bad (_("cannot pack %s into slot P1"),
 		    CGEN_INSN_NAME (saved_insns[1].insn));
 	  else
 	    slots[SLOTS_P1] = 1;
 	  break;
 	default:
-	  as_bad ("too many IVC2 insns to pack with a 32-bit core insn");
+	  as_bad (_("too many IVC2 insns to pack with a 32-bit core insn"));
 	  break;
 	}
     }
@@ -1044,7 +1044,7 @@ mep_check_ivc2_scheduling (void)
 	  else if (slot_ok (0, SLOTS_P0S))
 	    slots[SLOTS_P0S] = 0;
 	  else
-	    as_bad ("unable to pack %s by itself?",
+	    as_bad (_("unable to pack %s by itself?"),
 		    CGEN_INSN_NAME (saved_insns[0].insn));
 	  break;
 
@@ -1074,13 +1074,13 @@ mep_check_ivc2_scheduling (void)
 	      slots[SLOTS_P0S] = 1;
 	    }
 	  else
-	    as_bad ("cannot pack %s and %s together",
+	    as_bad (_("cannot pack %s and %s together"),
 		    CGEN_INSN_NAME (saved_insns[0].insn),
 		    CGEN_INSN_NAME (saved_insns[1].insn));
 	  break;
 
 	default:
-	  as_bad ("too many IVC2 insns to pack together");
+	  as_bad (_("too many IVC2 insns to pack together"));
 	  break;
 	}
     }

@@ -1003,7 +1003,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  int lo = arg_encode[fixP->tc_fix_data.arg_format].lo;
 	  if (hi > lo && ((offsetT) val < lo || (offsetT) val > hi))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  "Relocation doesn't fit. (relocation value = 0x%lx)",
+			  _("Relocation doesn't fit. (relocation value = 0x%lx)"),
 			  (long) val);
 	}
 

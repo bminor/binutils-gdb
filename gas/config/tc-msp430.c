@@ -1010,7 +1010,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	      if (bin == 0x1200)
 		{
 		  /* Remove warning as confusing.
-		     as_warn(_("Hardware push bug workaround")); */
+		     as_warn (_("Hardware push bug workaround")); */
 		}
 	      else
 #endif
@@ -1027,7 +1027,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	      if (bin == 0x1200)
 		{
 		  /* Remove warning as confusing.
-		     as_warn(_("Hardware push bug workaround")); */
+		     as_warn (_("Hardware push bug workaround")); */
 		}
 	      else
 #endif
@@ -1713,7 +1713,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
     case 4:	/* Extended jumps.  */
       if (!msp430_enable_polys)
 	{
-	  as_bad(_("polymorphs are not enabled. Use -mP option to enable."));
+	  as_bad (_("polymorphs are not enabled. Use -mP option to enable."));
 	  break;
 	}
 	
@@ -1755,7 +1755,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
     case 5:	/* Emulated extended branches.  */
       if (!msp430_enable_polys)
 	{
-	  as_bad(_("polymorphs are not enabled. Use -mP option to enable."));
+	  as_bad (_("polymorphs are not enabled. Use -mP option to enable."));
 	  break;
 	}
       line = extract_operand (line, l1, sizeof (l1));

@@ -3247,7 +3247,7 @@ pa_ip (char *str)
   /* Look up the opcode in the hash table.  */
   if ((insn = (struct pa_opcode *) hash_find (op_hash, str)) == NULL)
     {
-      as_bad ("Unknown opcode: `%s'", str);
+      as_bad (_("Unknown opcode: `%s'"), str);
       return;
     }
 
