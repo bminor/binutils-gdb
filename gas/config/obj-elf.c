@@ -496,7 +496,7 @@ get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 {
   const char *gname = inf;
   const char *group_name = elf_group_name (sec);
-  
+
   return (group_name == gname
 	  || (group_name != NULL
 	      && gname != NULL
@@ -1723,7 +1723,9 @@ obj_elf_ident (int ignore ATTRIBUTE_UNUSED)
       char *p;
       comment_section = subseg_new (".comment", 0);
       bfd_set_section_flags (stdoutput, comment_section,
-			     SEC_READONLY | SEC_HAS_CONTENTS);
+			     SEC_READONLY | SEC_HAS_CONTENTS
+			     | SEC_MERGE | SEC_STRINGS);
+      comment_section->entsize = 1;
       p = frag_more (1);
       *p = 0;
     }
