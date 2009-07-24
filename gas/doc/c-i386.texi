@@ -114,7 +114,12 @@ In addition to the basic instruction set, the assembler can be told to
 accept various extension mnemonics.  For example,
 @code{-march=i686+sse4+vmx} extends @var{i686} with @var{sse4} and
 @var{vmx}.  The following extensions are currently supported:
+@code{8087},
+@code{287},
+@code{387},
+@code{no87},
 @code{mmx},
+@code{nommx},
 @code{sse},
 @code{sse2},
 @code{sse3},
@@ -122,7 +127,9 @@ accept various extension mnemonics.  For example,
 @code{sse4.1},
 @code{sse4.2},
 @code{sse4},
+@code{nosse},
 @code{avx},
+@code{noavx},
 @code{vmx},
 @code{smx},
 @code{xsave},
@@ -141,6 +148,8 @@ accept various extension mnemonics.  For example,
 @code{svme},
 @code{abm} and
 @code{padlock}.
+Note that rather than extending a basic instruction set, the extension
+mnemonics starting with @code{no} revoke the respective functionality.
 
 When the @code{.arch} directive is used with @option{-march}, the
 @code{.arch} directive will take precedent.

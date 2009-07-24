@@ -10080,8 +10080,8 @@ static char *fgrps[][8] = {
 
   /* db_4  6 */
   {
-    "feni(287 only)","fdisi(287 only)","fNclex","fNinit",
-    "fNsetpm(287 only)","(bad)","(bad)","(bad)",
+    "fNeni(8087 only)","fNdisi(8087 only)","fNclex","fNinit",
+    "fNsetpm(287 only)","frstpm(287 only)","(bad)","(bad)",
   },
 
   /* de_3  7 */

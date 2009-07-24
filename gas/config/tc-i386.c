@@ -591,8 +591,18 @@ static const arch_entry cpu_arch[] =
     CPU_K8_FLAGS },
   { "amdfam10", PROCESSOR_AMDFAM10,
     CPU_AMDFAM10_FLAGS },
+  { ".8087", PROCESSOR_UNKNOWN,
+    CPU_8087_FLAGS },
+  { ".287", PROCESSOR_UNKNOWN,
+    CPU_287_FLAGS },
+  { ".387", PROCESSOR_UNKNOWN,
+    CPU_387_FLAGS },
+  { ".no87", PROCESSOR_UNKNOWN,
+    CPU_ANY87_FLAGS },
   { ".mmx", PROCESSOR_UNKNOWN,
     CPU_MMX_FLAGS },
+  { ".nommx", PROCESSOR_UNKNOWN,
+    CPU_3DNOWA_FLAGS },
   { ".sse", PROCESSOR_UNKNOWN,
     CPU_SSE_FLAGS },
   { ".sse2", PROCESSOR_UNKNOWN,
@@ -607,8 +617,12 @@ static const arch_entry cpu_arch[] =
     CPU_SSE4_2_FLAGS },
   { ".sse4", PROCESSOR_UNKNOWN,
     CPU_SSE4_2_FLAGS },
+  { ".nosse", PROCESSOR_UNKNOWN,
+    CPU_ANY_SSE_FLAGS },
   { ".avx", PROCESSOR_UNKNOWN,
     CPU_AVX_FLAGS },
+  { ".noavx", PROCESSOR_UNKNOWN,
+    CPU_ANY_AVX_FLAGS },
   { ".vmx", PROCESSOR_UNKNOWN,
     CPU_VMX_FLAGS },
   { ".smx", PROCESSOR_UNKNOWN,
@@ -1229,6 +1243,24 @@ cpu_flags_or (i386_cpu_flags x, i386_cpu_flags y)
       x.array [1] |= y.array [1];
     case 1:
       x.array [0] |= y.array [0];
+      break;
+    default:
+      abort ();
+    }
+  return x;
+}
+
+static INLINE i386_cpu_flags
+cpu_flags_and_not (i386_cpu_flags x, i386_cpu_flags y)
+{
+  switch (ARRAY_SIZE (x.array))
+    {
+    case 3:
+      x.array [2] &= ~y.array [2];
+    case 2:
+      x.array [1] &= ~y.array [1];
+    case 1:
+      x.array [0] &= ~y.array [0];
       break;
     default:
       abort ();
@@ -1964,8 +1996,12 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		  break;
 		}
 
-	      flags = cpu_flags_or (cpu_arch_flags,
-				    cpu_arch[i].flags);
+	      if (strncmp (string + 1, "no", 2))
+		flags = cpu_flags_or (cpu_arch_flags,
+				      cpu_arch[i].flags);
+	      else
+		flags = cpu_flags_and_not (cpu_arch_flags,
+					   cpu_arch[i].flags);
 	      if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		{
 		  if (cpu_sub_arch_name)
@@ -7484,6 +7520,12 @@ parse_real_register (char *reg_string, char **end_op)
       && !cpu_arch_flags.bitfield.cpui386)
     return (const reg_entry *) NULL;
 
+  if (r->reg_type.bitfield.floatreg
+      && !cpu_arch_flags.bitfield.cpu8087
+      && !cpu_arch_flags.bitfield.cpu287
+      && !cpu_arch_flags.bitfield.cpu387)
+    return (const reg_entry *) NULL;
+
   if (r->reg_type.bitfield.regmmx && !cpu_arch_flags.bitfield.cpummx)
     return (const reg_entry *) NULL;
 
@@ -7759,8 +7801,13 @@ md_parse_option (int c, char *arg)
 		{
 		  /* ISA entension.  */
 		  i386_cpu_flags flags;
-		  flags = cpu_flags_or (cpu_arch_flags,
-					cpu_arch[i].flags);
+
+		  if (strncmp (arch, "no", 2))
+		    flags = cpu_flags_or (cpu_arch_flags,
+					  cpu_arch[i].flags);
+		  else
+		    flags = cpu_flags_and_not (cpu_arch_flags,
+					       cpu_arch[i].flags);
 		  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		    {
 		      if (cpu_sub_arch_name)
@@ -7892,8 +7939,9 @@ md_show_usage (stream)
                            core, core2, corei7, k6, k6_2, athlon, k8, amdfam10,\n\
                            generic32, generic64\n\
                           EXTENSION is combination of:\n\
-                           mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, sse4,\n\
-                           avx, vmx, smx, xsave, movbe, ept, aes, pclmul, fma,\n\
+                           8087, 287, 387, no87, mmx, nommx, sse, sse2, sse3,\n\
+                           ssse3, sse4.1, sse4.2, sse4, nosse, avx, noavx,\n\
+                           vmx, smx, xsave, movbe, ept, aes, pclmul, fma,\n\
                            clflush, syscall, rdtscp, 3dnow, 3dnowa, sse4a,\n\
                            svme, abm, padlock, fma4\n"));
   fprintf (stream, _("\

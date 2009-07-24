@@ -1,3 +1,16 @@
+2009-07-24  Jan Beulich  <jbeulich@novell.com>
+
+	* tc-i386.c (cpu_arch): Add .8087, .287, .387, .no87, .nommx,
+	.nosse, and .noavx.
+	(cpu_flags_and_not): New.
+	(set_cpu_arch): Check whether sub-architecture specified is a
+	feature disable.
+	(md_parse_option): Likewise.
+	(parse_real_register): Don't return floating point register
+	when x87 functionality is disabled.
+	(md_show_usage): Add new sub-options.
+	* doc/c-i386.texi: Update with new command line sub-options.
+
 2009-07-24  Nick Clifton  <nickc@redhat.com>
 
 	PR 10437

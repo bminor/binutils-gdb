@@ -47,7 +47,7 @@ static initializer cpu_flag_init[] =
   { "CPU_GENERIC32_FLAGS",
     "Cpu186|Cpu286|Cpu386" },
   { "CPU_GENERIC64_FLAGS", 
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|Cpu387|Cpu687|CpuMMX|CpuSSE|CpuSSE2|CpuLM" },
   { "CPU_NONE_FLAGS",
    "0" },
   { "CPU_I186_FLAGS",
@@ -59,33 +59,41 @@ static initializer cpu_flag_init[] =
   { "CPU_I486_FLAGS",
     "Cpu186|Cpu286|Cpu386|Cpu486" },
   { "CPU_I586_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu387" },
   { "CPU_I686_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|Cpu387|Cpu687" },
   { "CPU_P2_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|Cpu387|Cpu687|CpuMMX" },
   { "CPU_P3_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuMMX|CpuSSE" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|Cpu387|Cpu687|CpuMMX|CpuSSE" },
   { "CPU_P4_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|Cpu387|Cpu687|CpuMMX|CpuSSE|CpuSSE2" },
   { "CPU_NOCONA_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|Cpu387|Cpu687|CpuFISTTP|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuLM" },
   { "CPU_CORE_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|Cpu387|Cpu687|CpuFISTTP|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3" },
   { "CPU_CORE2_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|Cpu387|Cpu687|CpuFISTTP|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuLM" },
   { "CPU_COREI7_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuRdtscp|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuClflush|Cpu387|Cpu687|CpuFISTTP|CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuRdtscp|CpuLM" },
   { "CPU_K6_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuSYSCALL|CpuMMX" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuSYSCALL|Cpu387|CpuMMX" },
   { "CPU_K6_2_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuSYSCALL|CpuMMX|Cpu3dnow" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuSYSCALL|Cpu387|CpuMMX|Cpu3dnow" },
   { "CPU_ATHLON_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSYSCALL|CpuMMX|Cpu3dnow|Cpu3dnowA" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSYSCALL|Cpu387|Cpu687|CpuMMX|Cpu3dnow|Cpu3dnowA" },
   { "CPU_K8_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSYSCALL|CpuRdtscp|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSYSCALL|CpuRdtscp|Cpu387|Cpu687|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuLM" },
   { "CPU_AMDFAM10_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSYSCALL|CpuRdtscp|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSYSCALL|CpuRdtscp|Cpu387|Cpu687|CpuFISTTP|CpuMMX|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuLM" },
+  { "CPU_8087_FLAGS",
+    "Cpu8087" },
+  { "CPU_287_FLAGS",
+    "Cpu287" },
+  { "CPU_387_FLAGS",
+    "Cpu387" },
+  { "CPU_ANY87_FLAGS",
+    "Cpu8087|Cpu287|Cpu387|Cpu687|CpuFISTTP" },
   { "CPU_CLFLUSH_FLAGS",
     "CpuClflush" },
   { "CPU_SYSCALL_FLAGS",
@@ -104,6 +112,8 @@ static initializer cpu_flag_init[] =
     "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1" },
   { "CPU_SSE4_2_FLAGS",
     "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2" },
+  { "CPU_ANY_SSE_FLAGS",
+    "CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuSSE4a|CpuAVX" },
   { "CPU_VMX_FLAGS",
     "CpuVMX" },
   { "CPU_SMX_FLAGS",
@@ -138,6 +148,8 @@ static initializer cpu_flag_init[] =
     "CpuABM" },
   { "CPU_AVX_FLAGS",
     "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuAVX" },
+  { "CPU_ANY_AVX_FLAGS",
+    "CpuAVX" },
 };
 
 static initializer operand_type_init[] =
@@ -255,6 +267,11 @@ static bitfield cpu_flags[] =
   BITFIELD (Cpu686),
   BITFIELD (CpuClflush),
   BITFIELD (CpuSYSCALL),
+  BITFIELD (Cpu8087),
+  BITFIELD (Cpu287),
+  BITFIELD (Cpu387),
+  BITFIELD (Cpu687),
+  BITFIELD (CpuFISTTP),
   BITFIELD (CpuMMX),
   BITFIELD (CpuSSE),
   BITFIELD (CpuSSE2),
@@ -501,7 +518,13 @@ set_bitfield (const char *f, bitfield *array, unsigned int size, int lineno)
 {
   unsigned int i;
 
-  if (strcmp (f, "Mmword") == 0)
+  if (strcmp (f, "CpuFP") == 0)
+    {
+      set_bitfield("Cpu387", array, size, lineno);
+      set_bitfield("Cpu287", array, size, lineno);
+      f = "Cpu8087";
+    }
+  else if (strcmp (f, "Mmword") == 0)
     f= "Qword";
   else if (strcmp (f, "Oword") == 0)
     f= "Xmmword";
