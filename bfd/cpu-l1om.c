@@ -41,8 +41,8 @@ static const bfd_arch_info_type bfd_l1om_arch_intel_syntax =
 
 const bfd_arch_info_type bfd_l1om_arch =
 {
-  64, /* 32 bits in a word */
-  64, /* 32 bits in an address */
+  64, /* 64 bits in a word */
+  64, /* 64 bits in an address */
   8,  /* 8 bits in a byte */
   bfd_arch_l1om,
   bfd_mach_l1om,

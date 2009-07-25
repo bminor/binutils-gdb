@@ -73,8 +73,8 @@ static const bfd_arch_info_type i8086_arch =
 
 static const bfd_arch_info_type bfd_x86_64_arch =
 {
-  64, /* 32 bits in a word */
-  64, /* 32 bits in an address */
+  64, /* 64 bits in a word */
+  64, /* 64 bits in an address */
   8,  /* 8 bits in a byte */
   bfd_arch_i386,
   bfd_mach_x86_64,
