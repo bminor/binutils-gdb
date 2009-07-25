@@ -413,6 +413,8 @@ ALL_64_EMULATIONS = \
 	eshlelf64_nbsd.o \
 	eelf_x86_64.o \
 	eelf_x86_64_fbsd.o \
+	eelf_l1om.o \
+	eelf_l1om_fbsd.o \
 	eelf64_s390.o \
 	eelf64_sparc.o \
 	eelf64_sparc_fbsd.o \
@@ -1034,6 +1036,13 @@ eelf_x86_64_fbsd.c: $(srcdir)/emulparams/elf_x86_64_fbsd.sh \
   $(srcdir)/emulparams/elf_x86_64.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_x86_64_fbsd "$(tdir_elf_x86_64_fbsd)"
+eelf_l1om.c: $(srcdir)/emulparams/elf_l1om.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf_l1om "$(tdir_elf_l1om)"
+eelf_l1om_fbsd.c: $(srcdir)/emulparams/elf_l1om_fbsd.sh \
+  $(srcdir)/emulparams/elf_l1om.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf_l1om_fbsd "$(tdir_elf_l1om_fbsd)"
 eelf_i386_be.c: $(srcdir)/emulparams/elf_i386_be.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_be "$(tdir_elf_i386_be)"

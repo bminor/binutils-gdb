@@ -1,3 +1,34 @@
+2009-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* archures.c (bfd_architecture): Add bfd_arch_l1om.
+	(bfd_l1om_arch): New.
+	(bfd_archures_list): Add &bfd_l1om_arch.
+	* bfd-in2.h: Regenerated.
+
+	* config.bfd (targ64_selvecs): Add bfd_elf64_l1om_vec if
+	bfd_elf64_x86_64_vec is supported.  Add bfd_elf64_l1om_freebsd_vec
+	if bfd_elf64_x86_64_freebsd_vec is supported.
+	(targ_selvecs): Likewise.
+
+	* configure.in: Support bfd_elf64_l1om_vec and
+	bfd_elf64_l1om_freebsd_vec.
+	* configure: Regenerated.
+
+	* cpu-l1om.c: New.
+
+	* elf64-x86-64.c (elf64_l1om_elf_object_p): New.
+	(bfd_elf64_l1om_vec): Likewise.
+	(bfd_elf64_l1om_freebsd_vec): Likewise.
+
+	* Makefile.am (ALL_MACHINES): Add cpu-l1om.lo.
+	(ALL_MACHINES_CFILES): Add cpu-l1om.c.
+	* Makefile.in: Regenerated.
+
+	* targets.c (bfd_elf64_l1om_vec): New.
+	(bfd_elf64_l1om_freebsd_vec): Likewise.
+	(_bfd_target_vector): Add bfd_elf64_l1om_vec and
+	bfd_elf64_l1om_freebsd_vec.
+
 2009-07-24  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 

@@ -1,3 +1,17 @@
+2009-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (guess_is_rela): Handle EM_L1OM.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+	(get_section_type_name): Likewise.
+	(get_elf_section_flags): Likewise.
+	(get_symbol_index_type): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(is_32bit_pcrel_reloc): Likewise.
+	(is_64bit_abs_reloc): Likewise.
+	(is_64bit_pcrel_reloc): Likewise.
+	(is_none_reloc): Likewise.
+
 2009-07-23  Ulrich Drepper  <drepper@redhat.com>
 
 	* readelf.c (get_symbol_binding): For Linux targeted files return

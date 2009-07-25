@@ -88,8 +88,10 @@
 #define CpuSSE4_2	(CpuSSE4_1 + 1)
 /* AVX support required */
 #define CpuAVX		(CpuSSE4_2 + 1)
+/* Intel L1OM support required */
+#define CpuL1OM		(CpuAVX + 1)
 /* Xsave/xrstor New Instuctions support required */
-#define CpuXsave	(CpuAVX + 1)
+#define CpuXsave	(CpuL1OM + 1)
 /* AES support required */
 #define CpuAES		(CpuXsave + 1)
 /* PCLMUL support required */
@@ -157,6 +159,7 @@ typedef union i386_cpu_flags
       unsigned int cpusse4_1:1;
       unsigned int cpusse4_2:1;
       unsigned int cpuavx:1;
+      unsigned int cpul1om:1;
       unsigned int cpuxsave:1;
       unsigned int cpuaes:1;
       unsigned int cpupclmul:1;

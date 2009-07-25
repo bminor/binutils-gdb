@@ -43,7 +43,7 @@ typedef struct initializer
 static initializer cpu_flag_init[] =
 {
   { "CPU_UNKNOWN_FLAGS",
-    "unknown" },
+    "~CpuL1OM" },
   { "CPU_GENERIC32_FLAGS",
     "Cpu186|Cpu286|Cpu386" },
   { "CPU_GENERIC64_FLAGS", 
@@ -150,6 +150,8 @@ static initializer cpu_flag_init[] =
     "CpuMMX|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuAVX" },
   { "CPU_ANY_AVX_FLAGS",
     "CpuAVX" },
+  { "CPU_L1OM_FLAGS",
+    "unknown" },
 };
 
 static initializer operand_type_init[] =
@@ -280,6 +282,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuSSE4_1),
   BITFIELD (CpuSSE4_2),
   BITFIELD (CpuAVX),
+  BITFIELD (CpuL1OM),
   BITFIELD (CpuSSE4a),
   BITFIELD (Cpu3dnow),
   BITFIELD (Cpu3dnowA),
@@ -514,14 +517,15 @@ next_field (char *str, char sep, char **next, char *last)
 }
 
 static void
-set_bitfield (const char *f, bitfield *array, unsigned int size, int lineno)
+set_bitfield (const char *f, bitfield *array, int value,
+	      unsigned int size, int lineno)
 {
   unsigned int i;
 
   if (strcmp (f, "CpuFP") == 0)
     {
-      set_bitfield("Cpu387", array, size, lineno);
-      set_bitfield("Cpu287", array, size, lineno);
+      set_bitfield("Cpu387", array, value, size, lineno);
+      set_bitfield("Cpu287", array, value, size, lineno);
       f = "Cpu8087";
     }
   else if (strcmp (f, "Mmword") == 0)
@@ -532,7 +536,7 @@ set_bitfield (const char *f, bitfield *array, unsigned int size, int lineno)
   for (i = 0; i < size; i++)
     if (strcasecmp (array[i].name, f) == 0)
       {
-	array[i].value = 1;
+	array[i].value = value;
 	return;
       }
 
@@ -572,6 +576,7 @@ process_i386_cpu_flag (FILE *table, char *flag, int macro,
 		       int lineno)
 {
   char *str, *next, *last;
+  unsigned int i;
   bitfield flags [ARRAY_SIZE (cpu_flags)];
 
   /* Copy the default cpu flags.  */
@@ -579,22 +584,50 @@ process_i386_cpu_flag (FILE *table, char *flag, int macro,
 
   if (strcasecmp (flag, "unknown") == 0)
     {
-      unsigned int i;
-
       /* We turn on everything except for cpu64 in case of
-	 CPU_UNKNOWN_FLAGS. */
+	 CPU_UNKNOWN_FLAGS.  */
       for (i = 0; i < ARRAY_SIZE (flags); i++)
 	if (flags[i].position != Cpu64)
 	  flags[i].value = 1;
     }
+  else if (flag[0] == '~')
+    {
+      last = flag + strlen (flag);
+
+      if (flag[1] == '(')
+	{
+	  last -= 1;
+	  next = flag + 2;
+	  if (*last != ')')
+	    fail (_("%s: %d: Missing `)' in bitfield: %s\n"), filename,
+		  lineno, flag);
+	  *last = '\0';
+	}
+      else
+	next = flag + 1;
+
+      /* First we turn on everything except for cpu64.  */
+      for (i = 0; i < ARRAY_SIZE (flags); i++)
+	if (flags[i].position != Cpu64)
+	  flags[i].value = 1;
+
+      /* Turn off selective bits.  */
+      for (; next && next < last; )
+	{
+	  str = next_field (next, '|', &next, last);
+	  if (str)
+	    set_bitfield (str, flags, 0, ARRAY_SIZE (flags), lineno);
+	}
+    }
   else if (strcmp (flag, "0"))
     {
+      /* Turn on selective bits.  */
       last = flag + strlen (flag);
       for (next = flag; next && next < last; )
 	{
 	  str = next_field (next, '|', &next, last);
 	  if (str)
-	    set_bitfield (str, flags, ARRAY_SIZE (flags), lineno);
+	    set_bitfield (str, flags, 1, ARRAY_SIZE (flags), lineno);
 	}
     }
 
@@ -635,7 +668,8 @@ process_i386_opcode_modifier (FILE *table, char *mod, int lineno)
 	{
 	  str = next_field (next, '|', &next, last);
 	  if (str)
-	    set_bitfield (str, modifiers, ARRAY_SIZE (modifiers), lineno);
+	    set_bitfield (str, modifiers, 1, ARRAY_SIZE (modifiers),
+			  lineno);
 	}
     }
   output_opcode_modifier (table, modifiers, ARRAY_SIZE (modifiers));
@@ -682,7 +716,7 @@ process_i386_operand_type (FILE *table, char *op, int macro,
 	{
 	  str = next_field (next, '|', &next, last);
 	  if (str)
-	    set_bitfield (str, types, ARRAY_SIZE (types), lineno);
+	    set_bitfield (str, types, 1, ARRAY_SIZE (types), lineno);
 	}
     }
   output_operand_type (table, types, ARRAY_SIZE (types), macro,

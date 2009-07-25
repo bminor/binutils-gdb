@@ -80,6 +80,7 @@ set x86_64tests {
 run_ld_link_tests $x86_64tests
 
 run_dump_test "abs"
+run_dump_test "abs-l1om"
 run_dump_test "pcrel8"
 run_dump_test "pcrel16"
 run_dump_test "tlsgd2"
@@ -91,5 +92,7 @@ run_dump_test "hidden2"
 run_dump_test "hidden3"
 run_dump_test "protected1"
 run_dump_test "protected2"
+run_dump_test "protected2-l1om"
 run_dump_test "protected3"
+run_dump_test "protected3-l1om"
 run_dump_test "tlsle1"

@@ -4483,3 +4483,53 @@ static const struct bfd_elf_special_section
 #define elf64_bed elf64_x86_64_fbsd_bed
 
 #include "elf64-target.h"
+
+/* Intel L1OM support.  */
+
+static bfd_boolean
+elf64_l1om_elf_object_p (bfd *abfd)
+{
+  /* Set the right machine number for an L1OM elf64 file.  */
+  bfd_default_set_arch_mach (abfd, bfd_arch_l1om, bfd_mach_l1om);
+  return TRUE;
+}
+
+#undef  TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM		    bfd_elf64_l1om_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		    "elf64-l1om"
+#undef ELF_ARCH
+#define ELF_ARCH			    bfd_arch_l1om
+
+#undef	ELF_MACHINE_CODE
+#define ELF_MACHINE_CODE		    EM_L1OM
+
+#undef	ELF_OSABI
+
+#undef  elf64_bed
+#define elf64_bed elf64_l1om_bed
+
+#undef elf_backend_object_p
+#define elf_backend_object_p		    elf64_l1om_elf_object_p
+
+#undef  elf_backend_post_process_headers
+
+#include "elf64-target.h"
+
+/* FreeBSD L1OM support.  */
+
+#undef  TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM		    bfd_elf64_l1om_freebsd_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		    "elf64-l1om-freebsd"
+
+#undef	ELF_OSABI
+#define	ELF_OSABI			    ELFOSABI_FREEBSD
+
+#undef  elf64_bed
+#define elf64_bed elf64_l1om_fbsd_bed
+
+#undef  elf_backend_post_process_headers
+#define elf_backend_post_process_headers  _bfd_elf_set_osabi
+
+#include "elf64-target.h"

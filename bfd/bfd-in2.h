@@ -1835,6 +1835,9 @@ enum bfd_architecture
 #define bfd_mach_i386_i386_intel_syntax 3
 #define bfd_mach_x86_64 64
 #define bfd_mach_x86_64_intel_syntax 65
+  bfd_arch_l1om,   /* Intel L1OM */
+#define bfd_mach_l1om 66
+#define bfd_mach_l1om_intel_syntax 67
   bfd_arch_we32k,     /* AT&T WE32xxx */
   bfd_arch_tahoe,     /* CCI/Harris Tahoe */
   bfd_arch_i860,      /* Intel 860 */

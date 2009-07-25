@@ -610,6 +610,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_CYGNUS_V850:
     case EM_VAX:
     case EM_X86_64:
+    case EM_L1OM:
     case EM_XSTORMY16:
     case EM_XTENSA:
     case EM_XTENSA_OLD:
@@ -1128,6 +1129,7 @@ dump_relocations (FILE * file,
 	  break;
 
 	case EM_X86_64:
+	case EM_L1OM:
 	  rtype = elf_x86_64_reloc_type (type);
 	  break;
 
@@ -1292,7 +1294,8 @@ dump_relocations (FILE * file,
 		      else if (elf_header.e_machine == EM_MIPS
 			       && psym->st_shndx == SHN_MIPS_SUNDEFINED)
 			sec_name = "SUNDEF";
-		      else if (elf_header.e_machine == EM_X86_64
+		      else if ((elf_header.e_machine == EM_X86_64
+				|| elf_header.e_machine == EM_L1OM)
 			       && psym->st_shndx == SHN_X86_64_LCOMMON)
 			sec_name = "LARGE_COMMON";
 		      else if (elf_header.e_machine == EM_IA_64
@@ -1837,6 +1840,7 @@ get_machine_name (unsigned e_machine)
     case EM_HUANY:		return "Harvard Universitys's machine-independent object format";
     case EM_PRISM:		return "Vitesse Prism";
     case EM_X86_64:		return "Advanced Micro Devices X86-64";
+    case EM_L1OM:		return "Intel L1OM";
     case EM_S390_OLD:
     case EM_S390:		return "IBM S/390";
     case EM_SCORE:		return "SUNPLUS S+Core";
@@ -2776,6 +2780,7 @@ get_section_type_name (unsigned int sh_type)
 	      result = get_ia64_section_type_name (sh_type);
 	      break;
 	    case EM_X86_64:
+	    case EM_L1OM:
 	      result = get_x86_64_section_type_name (sh_type);
 	      break;
 	    case EM_ARM:
@@ -3967,7 +3972,8 @@ get_elf_section_flags (bfd_vma sh_flags)
 	    case SHF_TLS:		*p = 'T'; break;
 
 	    default:
-	      if (elf_header.e_machine == EM_X86_64
+	      if ((elf_header.e_machine == EM_X86_64
+		   || elf_header.e_machine == EM_L1OM)
 		  && flag == SHF_X86_64_LARGE)
 		*p = 'l';
 	      else if (flag & SHF_MASKOS)
@@ -7035,7 +7041,8 @@ get_symbol_index_type (unsigned int type)
 	  && elf_header.e_machine == EM_IA_64
 	  && elf_header.e_ident[EI_OSABI] == ELFOSABI_HPUX)
 	return "ANSI_COM";
-      else if (elf_header.e_machine == EM_X86_64
+      else if ((elf_header.e_machine == EM_X86_64
+		|| elf_header.e_machine == EM_L1OM)
 	       && type == SHN_X86_64_LCOMMON)
 	return "LARGE_COM";
       else if (type == SHN_MIPS_SCOMMON
@@ -7953,6 +7960,7 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_VAX:
       return reloc_type == 1; /* R_VAX_32.  */
     case EM_X86_64:
+    case EM_L1OM:
       return reloc_type == 10; /* R_X86_64_32.  */
     case EM_XSTORMY16:
       return reloc_type == 1; /* R_XSTROMY16_32.  */
@@ -8002,6 +8010,7 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
     case EM_SPU:
       return reloc_type == 13; /* R_SPU_REL32.  */
     case EM_X86_64:
+    case EM_L1OM:
       return reloc_type == 2;  /* R_X86_64_PC32.  */
     case EM_XTENSA_OLD:
     case EM_XTENSA:
@@ -8037,6 +8046,7 @@ is_64bit_abs_reloc (unsigned int reloc_type)
     case EM_SPARC:
       return reloc_type == 54; /* R_SPARC_UA64.  */
     case EM_X86_64:
+    case EM_L1OM:
       return reloc_type == 1; /* R_X86_64_64.  */
     case EM_S390_OLD:
     case EM_S390:
@@ -8069,6 +8079,7 @@ is_64bit_pcrel_reloc (unsigned int reloc_type)
     case EM_SPARC:
       return reloc_type == 46; /* R_SPARC_DISP64 */
     case EM_X86_64:
+    case EM_L1OM:
       return reloc_type == 24; /* R_X86_64_PC64 */
     case EM_S390_OLD:
     case EM_S390:
@@ -8138,6 +8149,7 @@ is_none_reloc (unsigned int reloc_type)
     case EM_S390:    /* R_390_NONE.  */
     case EM_CRIS:    /* R_CRIS_NONE.  */
     case EM_X86_64:  /* R_X86_64_NONE.  */
+    case EM_L1OM:    /* R_X86_64_NONE.  */
     case EM_MN10300: /* R_MN10300_NONE.  */
     case EM_M32R:    /* R_M32R_NONE.  */
       return reloc_type == 0;

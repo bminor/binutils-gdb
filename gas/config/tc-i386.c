@@ -577,6 +577,8 @@ static const arch_entry cpu_arch[] =
     CPU_CORE2_FLAGS },
   { "corei7", PROCESSOR_COREI7,
     CPU_COREI7_FLAGS },
+  { "l1om", PROCESSOR_GENERIC64,
+    CPU_L1OM_FLAGS },
   { "k6", PROCESSOR_K6,
     CPU_K6_FLAGS },
   { "k6_2", PROCESSOR_K6,
@@ -1956,6 +1958,35 @@ set_sse_check (int dummy ATTRIBUTE_UNUSED)
 }
 
 static void
+check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
+			   i386_cpu_flags new ATTRIBUTE_UNUSED)
+{
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  static const char *arch;
+
+  /* Intel LIOM is only supported on ELF.  */
+  if (!IS_ELF)
+    return;
+
+  if (!arch)
+    {
+      /* Use cpu_arch_name if it is set in md_parse_option.  Otherwise
+	 use default_arch.  */
+      arch = cpu_arch_name;
+      if (!arch)
+	arch = default_arch;
+    }
+
+  /* If we are targeting Intel L1OM, wm must enable it.  */
+  if (get_elf_backend_data (stdoutput)->elf_machine_code != EM_L1OM
+      || new.bitfield.cpul1om)
+    return;
+  
+  as_bad (_("`%s' is not supported on `%s'"), name, arch);
+#endif
+}
+
+static void
 set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 {
   SKIP_WHITESPACE ();
@@ -1971,6 +2002,8 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	{
 	  if (strcmp (string, cpu_arch[i].name) == 0)
 	    {
+	      check_cpu_arch_compatible (string, cpu_arch[i].flags);
+
 	      if (*string != '.')
 		{
 		  cpu_arch_name = cpu_arch[i].name;
@@ -2049,11 +2082,34 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+enum bfd_architecture
+i386_arch (void)
+{
+  if (cpu_arch_isa_flags.bitfield.cpul1om)
+    {
+      if (OUTPUT_FLAVOR != bfd_target_elf_flavour
+	  || flag_code != CODE_64BIT)
+	as_fatal (_("Intel L1OM is 64bit ELF only"));
+      return bfd_arch_l1om;
+    }
+  else
+    return bfd_arch_i386;
+}
+
 unsigned long
 i386_mach ()
 {
   if (!strcmp (default_arch, "x86_64"))
-    return bfd_mach_x86_64;
+    {
+      if (cpu_arch_isa_flags.bitfield.cpul1om)
+	{
+	  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+	    as_fatal (_("Intel L1OM is 64bit ELF only"));
+	  return bfd_mach_l1om;
+	}
+      else
+	return bfd_mach_x86_64;
+    }
   else if (!strcmp (default_arch, "i386"))
     return bfd_mach_i386_i386;
   else
@@ -7936,8 +7992,8 @@ md_show_usage (stream)
                           generate code for CPU and EXTENSION, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\
                            pentiumii, pentiumiii, pentium4, prescott, nocona,\n\
-                           core, core2, corei7, k6, k6_2, athlon, k8, amdfam10,\n\
-                           generic32, generic64\n\
+                           core, core2, corei7, l1om, k6, k6_2, athlon, k8,\n\
+                           amdfam10, generic32, generic64\n\
                           EXTENSION is combination of:\n\
                            8087, 287, 387, no87, mmx, nommx, sse, sse2, sse3,\n\
                            ssse3, sse4.1, sse4.2, sse4, nosse, avx, noavx,\n\
@@ -7948,8 +8004,8 @@ md_show_usage (stream)
   -mtune=CPU              optimize for CPU, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\
                            pentiumii, pentiumiii, pentium4, prescott, nocona,\n\
-                           core, core2, corei7, k6, k6_2, athlon, k8, amdfam10,\n\
-                           generic32, generic64\n"));
+                           core, core2, corei7, l1om, k6, k6_2, athlon, k8,\n\
+                           amdfam10, generic32, generic64\n"));
   fprintf (stream, _("\
   -msse2avx               encode SSE instructions with VEX prefix\n"));
   fprintf (stream, _("\
@@ -8047,7 +8103,15 @@ i386_target_format (void)
 	    object_64bit = 1;
 	    use_rela_relocations = 1;
 	  }
-	return flag_code == CODE_64BIT ? ELF_TARGET_FORMAT64 : ELF_TARGET_FORMAT;
+	if (cpu_arch_isa_flags.bitfield.cpul1om)
+	  {
+	    if (flag_code != CODE_64BIT)
+	      as_fatal (_("Intel L1OM is 64bit only"));
+	    return ELF_TARGET_L1OM_FORMAT;
+	  }
+	else
+	  return (flag_code == CODE_64BIT
+		  ? ELF_TARGET_FORMAT64 : ELF_TARGET_FORMAT);
       }
 #endif
 #if defined (OBJ_MACH_O)

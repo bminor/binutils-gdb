@@ -9415,19 +9415,24 @@ print_insn (bfd_vma pc, disassemble_info *info)
   char *prefix_obufp;
 
   if (info->mach == bfd_mach_x86_64_intel_syntax
-      || info->mach == bfd_mach_x86_64)
+      || info->mach == bfd_mach_x86_64
+      || info->mach == bfd_mach_l1om
+      || info->mach == bfd_mach_l1om_intel_syntax)
     address_mode = mode_64bit;
   else
     address_mode = mode_32bit;
 
   if (intel_syntax == (char) -1)
     intel_syntax = (info->mach == bfd_mach_i386_i386_intel_syntax
-		    || info->mach == bfd_mach_x86_64_intel_syntax);
+		    || info->mach == bfd_mach_x86_64_intel_syntax
+		    || info->mach == bfd_mach_l1om_intel_syntax);
 
   if (info->mach == bfd_mach_i386_i386
       || info->mach == bfd_mach_x86_64
+      || info->mach == bfd_mach_l1om
       || info->mach == bfd_mach_i386_i386_intel_syntax
-      || info->mach == bfd_mach_x86_64_intel_syntax)
+      || info->mach == bfd_mach_x86_64_intel_syntax
+      || info->mach == bfd_mach_l1om_intel_syntax)
     priv.orig_sizeflag = AFLAG | DFLAG;
   else if (info->mach == bfd_mach_i386_i8086)
     priv.orig_sizeflag = 0;
@@ -9529,8 +9534,13 @@ print_insn (bfd_vma pc, disassemble_info *info)
     }
 
   /* The output looks better if we put 7 bytes on a line, since that
-     puts most long word instructions on a single line.  */
-  info->bytes_per_line = 7;
+     puts most long word instructions on a single line.  Use 8 bytes
+     for Intel L1OM.  */
+  if (info->mach == bfd_mach_l1om
+      || info->mach == bfd_mach_l1om_intel_syntax)
+    info->bytes_per_line = 8;
+  else
+    info->bytes_per_line = 7;
 
   info->private_data = &priv;
   priv.max_fetched = priv.the_buffer;

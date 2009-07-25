@@ -29,8 +29,9 @@ struct fix;
 
 #define TARGET_BYTES_BIG_ENDIAN	0
 
-#define TARGET_ARCH		bfd_arch_i386
+#define TARGET_ARCH		(i386_arch ())
 #define TARGET_MACH		(i386_mach ())
+extern enum bfd_architecture i386_arch (void);
 extern unsigned long i386_mach (void);
 
 #ifdef TE_FreeBSD
@@ -68,6 +69,10 @@ extern unsigned long i386_mach (void);
 
 #ifndef ELF_TARGET_FORMAT64
 #define ELF_TARGET_FORMAT64	"elf64-x86-64"
+#endif
+
+#ifndef ELF_TARGET_L1OM_FORMAT
+#define ELF_TARGET_L1OM_FORMAT	"elf64-l1om"
 #endif
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \

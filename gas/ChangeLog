@@ -1,3 +1,20 @@
+2009-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add l1om.
+	(check_cpu_arch_compatible): New.
+	(set_cpu_arch): Use it.
+	(i386_arch): New.
+	(i386_mach): Return bfd_mach_l1om for Intel L1OM.
+	(md_show_usage): Display l1om.
+	(i386_target_format): Return ELF_TARGET_L1OM_FORMAT if
+	cpu_arch_isa_flags.bitfield.cpul1om is set.
+
+	* config/tc-i386.h (TARGET_ARCH): Use (i386_arch ()).
+	(i386_arch): New.
+	(ELF_TARGET_L1OM_FORMAT): Likewise.
+
+	* doc/c-i386.texi: Document l1om.
+
 2009-07-24  Roland McGrath  <roland@redhat.com>
 	    Mark Wielaard  <mjw@redhat.com>
 

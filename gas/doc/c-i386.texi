@@ -101,6 +101,7 @@ processor names are recognized:
 @code{core},
 @code{core2},
 @code{corei7},
+@code{l1om},
 @code{k6},
 @code{k6_2},
 @code{athlon},
@@ -885,7 +886,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{i486} @tab @samp{i586} @tab @samp{i686} @tab @samp{pentium}
 @item @samp{pentiumpro} @tab @samp{pentiumii} @tab @samp{pentiumiii} @tab @samp{pentium4}
 @item @samp{prescott} @tab @samp{nocona} @tab @samp{core} @tab @samp{core2}
-@item @samp{corei7}
+@item @samp{corei7} @tab @samp{l1om}
 @item @samp{k6} @tab @samp{k6_2} @tab @samp{athlon} @tab @samp{k8}
 @item @samp{amdfam10}
 @item @samp{generic32} @tab @samp{generic64}

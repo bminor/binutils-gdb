@@ -186,6 +186,9 @@ DESCRIPTION
 .#define bfd_mach_i386_i386_intel_syntax 3
 .#define bfd_mach_x86_64 64
 .#define bfd_mach_x86_64_intel_syntax 65
+.  bfd_arch_l1om,   {* Intel L1OM *}
+.#define bfd_mach_l1om 66
+.#define bfd_mach_l1om_intel_syntax 67
 .  bfd_arch_we32k,     {* AT&T WE32xxx *}
 .  bfd_arch_tahoe,     {* CCI/Harris Tahoe *}
 .  bfd_arch_i860,      {* Intel 860 *}
@@ -476,6 +479,7 @@ extern const bfd_arch_info_type bfd_h8500_arch;
 extern const bfd_arch_info_type bfd_hppa_arch;
 extern const bfd_arch_info_type bfd_i370_arch;
 extern const bfd_arch_info_type bfd_i386_arch;
+extern const bfd_arch_info_type bfd_l1om_arch;
 extern const bfd_arch_info_type bfd_i860_arch;
 extern const bfd_arch_info_type bfd_i960_arch;
 extern const bfd_arch_info_type bfd_ia64_arch;
@@ -550,6 +554,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_hppa_arch,
     &bfd_i370_arch,
     &bfd_i386_arch,
+    &bfd_l1om_arch,
     &bfd_i860_arch,
     &bfd_i960_arch,
     &bfd_ia64_arch,
