@@ -1,3 +1,8 @@
+2009-07-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* stack.c (backtrace_command_1): Remove dead check of NULL current
+	frame.
+
 2009-07-23  Keith Seitz  <keiths@redhat.com>
 
 	* source.c (forward_search_command): Don't fclose the stream,
