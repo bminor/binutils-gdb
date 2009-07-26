@@ -555,6 +555,18 @@ struct target_ops
        The default implementation always returns target_gdbarch.  */
     struct gdbarch *(*to_thread_architecture) (struct target_ops *, ptid_t);
 
+    /* Set a checkpoint.  */
+    void (*to_set_checkpoint) (char *, int);
+
+    /* Unset a checkpoint.  */
+    void (*to_unset_checkpoint) (char *, int);
+
+    /* Restore a checkpoint.  */
+    void (*to_restore_checkpoint) (char *, int);
+
+    /* List checkpoints.  */
+    void (*to_info_checkpoints) (char *, int);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1140,6 +1152,18 @@ extern const struct target_desc *target_read_description (struct target_ops *);
 
 #define target_get_ada_task_ptid(lwp, tid) \
      (*current_target.to_get_ada_task_ptid) (lwp,tid)
+
+/* Set a checkpoint.  */
+#define target_set_checkpoint (current_target.to_set_checkpoint)
+
+/* Unset a checkpoint.  */
+#define target_unset_checkpoint (current_target.to_unset_checkpoint)
+
+/* Restore a checkpoint.  */
+#define target_restore_checkpoint (current_target.to_restore_checkpoint)
+
+/* List checkpoints.  */
+#define target_info_checkpoints (current_target.to_info_checkpoints)
 
 /* Utility implementation of searching memory.  */
 extern int simple_search_memory (struct target_ops* ops,

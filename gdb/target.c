@@ -637,6 +637,10 @@ update_current_target (void)
       INHERIT (to_make_corefile_notes, t);
       /* Do not inherit to_get_thread_local_address.  */
       INHERIT (to_can_execute_reverse, t);
+      INHERIT (to_set_checkpoint, t);
+      INHERIT (to_unset_checkpoint, t);
+      INHERIT (to_restore_checkpoint, t);
+      INHERIT (to_info_checkpoints, t);
       INHERIT (to_thread_architecture, t);
       /* Do not inherit to_read_description.  */
       INHERIT (to_get_ada_task_ptid, t);
