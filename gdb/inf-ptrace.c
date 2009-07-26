@@ -606,26 +606,30 @@ inf_ptrace_pid_to_str (struct target_ops *ops, ptid_t ptid)
 struct target_ops *
 inf_ptrace_target (void)
 {
-  struct target_ops *t = inf_child_target ();
+  static struct target_ops *t;
 
-  t->to_attach = inf_ptrace_attach;
-  t->to_detach = inf_ptrace_detach;
-  t->to_resume = inf_ptrace_resume;
-  t->to_wait = inf_ptrace_wait;
-  t->to_files_info = inf_ptrace_files_info;
-  t->to_kill = inf_ptrace_kill;
-  t->to_create_inferior = inf_ptrace_create_inferior;
+  if (t == NULL)	/* Actually init only once.  */
+    {
+      t = inf_child_target ();
+
+      t->to_attach = inf_ptrace_attach;
+      t->to_detach = inf_ptrace_detach;
+      t->to_resume = inf_ptrace_resume;
+      t->to_wait = inf_ptrace_wait;
+      t->to_files_info = inf_ptrace_files_info;
+      t->to_kill = inf_ptrace_kill;
+      t->to_create_inferior = inf_ptrace_create_inferior;
 #ifdef PT_GET_PROCESS_STATE
-  t->to_follow_fork = inf_ptrace_follow_fork;
-  t->to_post_startup_inferior = inf_ptrace_post_startup_inferior;
-  t->to_post_attach = inf_ptrace_post_attach;
+      t->to_follow_fork = inf_ptrace_follow_fork;
+      t->to_post_startup_inferior = inf_ptrace_post_startup_inferior;
+      t->to_post_attach = inf_ptrace_post_attach;
 #endif
-  t->to_mourn_inferior = inf_ptrace_mourn_inferior;
-  t->to_thread_alive = inf_ptrace_thread_alive;
-  t->to_pid_to_str = inf_ptrace_pid_to_str;
-  t->to_stop = inf_ptrace_stop;
-  t->to_xfer_partial = inf_ptrace_xfer_partial;
-
+      t->to_mourn_inferior = inf_ptrace_mourn_inferior;
+      t->to_thread_alive = inf_ptrace_thread_alive;
+      t->to_pid_to_str = inf_ptrace_pid_to_str;
+      t->to_stop = inf_ptrace_stop;
+      t->to_xfer_partial = inf_ptrace_xfer_partial;
+    }
   return t;
 }
 
@@ -759,14 +763,17 @@ inf_ptrace_store_registers (struct target_ops *ops,
 
 struct target_ops *
 inf_ptrace_trad_target (CORE_ADDR (*register_u_offset)
-					(struct gdbarch *, int, int))
+			(struct gdbarch *, int, int))
 {
-  struct target_ops *t = inf_ptrace_target();
+  static struct target_ops *t;
 
-  gdb_assert (register_u_offset);
-  inf_ptrace_register_u_offset = register_u_offset;
-  t->to_fetch_registers = inf_ptrace_fetch_registers;
-  t->to_store_registers = inf_ptrace_store_registers;
-
+  if (t == NULL)
+    {
+      t = inf_ptrace_target();
+      gdb_assert (register_u_offset);
+      inf_ptrace_register_u_offset = register_u_offset;
+      t->to_fetch_registers = inf_ptrace_fetch_registers;
+      t->to_store_registers = inf_ptrace_store_registers;
+    }
   return t;
 }

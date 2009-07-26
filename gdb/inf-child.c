@@ -164,40 +164,46 @@ inf_child_pid_to_exec_file (int pid)
 struct target_ops *
 inf_child_target (void)
 {
-  struct target_ops *t = XZALLOC (struct target_ops);
-  t->to_shortname = "child";
-  t->to_longname = "Unix child process";
-  t->to_doc = "Unix child process (started by the \"run\" command).";
-  t->to_open = inf_child_open;
-  t->to_post_attach = inf_child_post_attach;
-  t->to_fetch_registers = inf_child_fetch_inferior_registers;
-  t->to_store_registers = inf_child_store_inferior_registers;
-  t->to_prepare_to_store = inf_child_prepare_to_store;
-  t->to_insert_breakpoint = memory_insert_breakpoint;
-  t->to_remove_breakpoint = memory_remove_breakpoint;
-  t->to_terminal_init = terminal_init_inferior;
-  t->to_terminal_inferior = terminal_inferior;
-  t->to_terminal_ours_for_output = terminal_ours_for_output;
-  t->to_terminal_save_ours = terminal_save_ours;
-  t->to_terminal_ours = terminal_ours;
-  t->to_terminal_info = child_terminal_info;
-  t->to_post_startup_inferior = inf_child_post_startup_inferior;
-  t->to_acknowledge_created_inferior = inf_child_acknowledge_created_inferior;
-  t->to_insert_fork_catchpoint = inf_child_insert_fork_catchpoint;
-  t->to_remove_fork_catchpoint = inf_child_remove_fork_catchpoint;
-  t->to_insert_vfork_catchpoint = inf_child_insert_vfork_catchpoint;
-  t->to_remove_vfork_catchpoint = inf_child_remove_vfork_catchpoint;
-  t->to_follow_fork = inf_child_follow_fork;
-  t->to_insert_exec_catchpoint = inf_child_insert_exec_catchpoint;
-  t->to_remove_exec_catchpoint = inf_child_remove_exec_catchpoint;
-  t->to_can_run = inf_child_can_run;
-  t->to_pid_to_exec_file = inf_child_pid_to_exec_file;
-  t->to_stratum = process_stratum;
-  t->to_has_all_memory = default_child_has_all_memory;
-  t->to_has_memory = default_child_has_memory;
-  t->to_has_stack = default_child_has_stack;
-  t->to_has_registers = default_child_has_registers;
-  t->to_has_execution = default_child_has_execution;
-  t->to_magic = OPS_MAGIC;
+  static struct target_ops *t;
+
+  if (t == NULL)	/* Actually init only once.  */
+    {
+      t = XZALLOC (struct target_ops);
+      t->to_shortname = "child";
+      t->to_longname = "Unix child process";
+      t->to_doc = "Unix child process (started by the \"run\" command).";
+      t->to_open = inf_child_open;
+      t->to_post_attach = inf_child_post_attach;
+      t->to_fetch_registers = inf_child_fetch_inferior_registers;
+      t->to_store_registers = inf_child_store_inferior_registers;
+      t->to_prepare_to_store = inf_child_prepare_to_store;
+      t->to_insert_breakpoint = memory_insert_breakpoint;
+      t->to_remove_breakpoint = memory_remove_breakpoint;
+      t->to_terminal_init = terminal_init_inferior;
+      t->to_terminal_inferior = terminal_inferior;
+      t->to_terminal_ours_for_output = terminal_ours_for_output;
+      t->to_terminal_save_ours = terminal_save_ours;
+      t->to_terminal_ours = terminal_ours;
+      t->to_terminal_info = child_terminal_info;
+      t->to_post_startup_inferior = inf_child_post_startup_inferior;
+      t->to_acknowledge_created_inferior 
+	= inf_child_acknowledge_created_inferior;
+      t->to_insert_fork_catchpoint = inf_child_insert_fork_catchpoint;
+      t->to_remove_fork_catchpoint = inf_child_remove_fork_catchpoint;
+      t->to_insert_vfork_catchpoint = inf_child_insert_vfork_catchpoint;
+      t->to_remove_vfork_catchpoint = inf_child_remove_vfork_catchpoint;
+      t->to_follow_fork = inf_child_follow_fork;
+      t->to_insert_exec_catchpoint = inf_child_insert_exec_catchpoint;
+      t->to_remove_exec_catchpoint = inf_child_remove_exec_catchpoint;
+      t->to_can_run = inf_child_can_run;
+      t->to_pid_to_exec_file = inf_child_pid_to_exec_file;
+      t->to_stratum = process_stratum;
+      t->to_has_all_memory = default_child_has_all_memory;
+      t->to_has_memory = default_child_has_memory;
+      t->to_has_stack = default_child_has_stack;
+      t->to_has_registers = default_child_has_registers;
+      t->to_has_execution = default_child_has_execution;
+      t->to_magic = OPS_MAGIC;
+    }
   return t;
 }

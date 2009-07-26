@@ -4306,22 +4306,26 @@ linux_target_install_ops (struct target_ops *t)
 struct target_ops *
 linux_target (void)
 {
-  struct target_ops *t;
+  static struct target_ops *t;
 
-  t = inf_ptrace_target ();
-  linux_target_install_ops (t);
-
+  if (t == NULL)
+    {
+      t = inf_ptrace_target ();
+      linux_target_install_ops (t);
+    }
   return t;
 }
 
 struct target_ops *
 linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int))
 {
-  struct target_ops *t;
+  static struct target_ops *t;
 
-  t = inf_ptrace_trad_target (register_u_offset);
-  linux_target_install_ops (t);
-
+  if (t == NULL)
+    {
+      t = inf_ptrace_trad_target (register_u_offset);
+      linux_target_install_ops (t);
+    }
   return t;
 }
 

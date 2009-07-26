@@ -28,6 +28,7 @@
 #include "gdb_string.h"
 #include "linux-fork.h"
 #include "linux-nat.h"
+#include "checkpoint.h"
 
 #include <sys/ptrace.h>
 #include "gdb_wait.h"
@@ -334,8 +335,10 @@ linux_fork_killall (void)
     {
       pid = PIDGET (fp->ptid);
       do {
-	/* Use SIGKILL instead of PTRACE_KILL because the former works even
-	   if the thread is running, while the later doesn't.  */
+	/* Use SIGKILL instead of PTRACE_KILL because the former works
+	   even if the thread is running, while the later doesn't.  */
+	if (info_verbose)
+	  printf_filtered (_("Killing checkpoint/fork %d.\n"), pid);
 	kill (pid, SIGKILL);
 	ret = waitpid (pid, &status, 0);
 	/* We might get a SIGCHLD instead of an exit status.  This is
@@ -414,6 +417,9 @@ linux_fork_detach (char *args, int from_tty)
 
 /* Fork list <-> user interface.  */
 
+/* Delete checkpoint command: kill the process and remove it from
+   the fork list.  */
+
 static void
 delete_checkpoint_command (char *args, int from_tty)
 {
@@ -464,7 +470,8 @@ Please switch to another checkpoint before detaching the current one"));
   delete_fork (ptid);
 }
 
-/* Print information about currently known checkpoints.  */
+/* Info checkpoints command: list all forks/checkpoints
+   currently under gdb's control.  */
 
 static void
 info_checkpoints_command (char *arg, int from_tty)
@@ -544,6 +551,9 @@ linux_fork_checkpointing_p (int pid)
 {
   return (checkpointing_pid == pid);
 }
+
+/* checkpoint_command: create a fork of the inferior process
+   and set it aside for later debugging.  */
 
 static void
 checkpoint_command (char *args, int from_tty)
@@ -629,6 +639,7 @@ linux_fork_context (struct fork_info *newfp, int from_tty)
 }
 
 /* Switch inferior process (checkpoint) context, by checkpoint id.  */
+
 static void
 restart_command (char *args, int from_tty)
 {
@@ -646,6 +657,8 @@ restart_command (char *args, int from_tty)
 void
 _initialize_linux_fork (void)
 {
+  struct target_ops *t;
+
   init_fork_list ();
 
   /* Set/show detach-on-fork: user-settable mode.  */
@@ -656,26 +669,6 @@ Show whether gdb will detach the child of a fork."), _("\
 Tells gdb whether to detach the child of a fork."),
 			   NULL, NULL, &setlist, &showlist);
 
-  /* Checkpoint command: create a fork of the inferior process
-     and set it aside for later debugging.  */
-
-  add_com ("checkpoint", class_obscure, checkpoint_command, _("\
-Fork a duplicate process (experimental)."));
-
-  /* Restart command: restore the context of a specified checkpoint
-     process.  */
-
-  add_com ("restart", class_obscure, restart_command, _("\
-restart <n>: restore program context from a checkpoint.\n\
-Argument 'n' is checkpoint ID, as displayed by 'info checkpoints'."));
-
-  /* Delete checkpoint command: kill the process and remove it from
-     the fork list.  */
-
-  add_cmd ("checkpoint", class_obscure, delete_checkpoint_command, _("\
-Delete a checkpoint (experimental)."),
-	   &deletelist);
-
   /* Detach checkpoint command: release the process to run independently,
      and remove it from the fork list.  */
 
@@ -683,9 +676,28 @@ Delete a checkpoint (experimental)."),
 Detach from a checkpoint (experimental)."),
 	   &detachlist);
 
-  /* Info checkpoints command: list all forks/checkpoints
-     currently under gdb's control.  */
+  /* Get the linux target vector.  */
+  t = linux_target ();
+  /* Add checkpoint target methods.  */
+  t->to_set_checkpoint = checkpoint_command;
+  t->to_unset_checkpoint = delete_checkpoint_command;
+  t->to_restore_checkpoint = restart_command;
+  t->to_info_checkpoints = info_checkpoints_command;
 
-  add_info ("checkpoints", info_checkpoints_command,
-	    _("IDs of currently known checkpoints."));
+  /* Activate the checkpoint module.  */
+  checkpoint_init ();
+
+  /* XXX mvs call linux_target and add checkpoint methods.  
+         to_set_checkpoint
+         to_unset_checkpoint
+	 to_info_checkpoints (maybe this could be common?  Maybe not?
+	 to_detach_checkpoint (esoteric?)
+	 to_restore_checkpoint.
+
+     Make a new module called checkpoint.c, include it always, but
+     don't make it auto-initialize like most modules.  Instead, 
+     give it a global entry point checkpoint_init, which has to be
+     called explicitly by targets that want to activate the 
+     checkpoint commands.
+  */
 }
