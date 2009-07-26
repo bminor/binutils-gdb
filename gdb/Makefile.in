@@ -667,7 +667,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	stabsread.c stack.c std-regs.c symfile.c symfile-mem.c symmisc.c \
 	symtab.c \
 	target.c target-descriptions.c target-memory.c \
-	thread.c top.c tracepoint.c \
+	thread.c top.c tracepoint.c checkpoint.c \
 	trad-frame.c \
 	tramp-frame.c \
 	typeprint.c \
@@ -736,7 +736,7 @@ coff-pe-read.h parser-defs.h gdb_ptrace.h mips-linux-tdep.h \
 m68k-tdep.h spu-tdep.h jv-lang.h environ.h solib-irix.h amd64-tdep.h \
 doublest.h regset.h hppa-tdep.h ppc-linux-tdep.h rs6000-tdep.h \
 gdb_locale.h gdb_dirent.h arch-utils.h trad-frame.h gnu-nat.h \
-language.h nbsd-tdep.h wrapper.h solib-svr4.h \
+language.h nbsd-tdep.h wrapper.h solib-svr4.h checkpoint.h \
 macroexp.h ui-file.h regcache.h gdb_string.h tracepoint.h i386-tdep.h \
 inf-child.h p-lang.h event-top.h gdbtypes.h scm-tags.h user-regs.h \
 regformats/regdef.h config/alpha/nm-osf3.h  config/i386/nm-i386gnu.h \
@@ -786,6 +786,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	block.o symtab.o symfile.o symmisc.o linespec.o dictionary.o \
 	infcall.o \
 	infcmd.o infrun.o \
+	checkpoint.o \
 	expprint.o environ.o stack.o thread.o \
 	exceptions.o \
 	inf-child.o \

@@ -1,5 +1,11 @@
 2009-07-25  Michael Snyder  <msnyder@vmware.com>
 
+	* checkpoint.c: New file, target-agnostic checkpoints.
+	* checkpoint.h: New file, interface.
+	* Makefile.in (SFILES): Add checkpoint.c.
+
+2009-07-25  Michael Snyder  <msnyder@vmware.com>
+
 	* target.h (struct target_ops): New methods to_set_checkpoint,
 	to_unset_checkpoint, to_restore_checkpoint, to_info_checkpoints.
 	* target.c (update_current_target): Inherit the above methods.
